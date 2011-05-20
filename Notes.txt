@@ -1,0 +1,199 @@
+Large tips: 960µl max
+Small tips: 45µl max
+
+?? Why are most carriers cooled?  When do we want to cool a plate and when not?
+
+CompleteYeastTransformation
+ PCR Dispense
+  REQUIRE: "template" cooled (full 96 plate) [change to "DNA template"]
+  REQUIRE: plate A cooled
+  wash 25 + 4ml fast
+  wash 4 + 1ml
+  ?? Why the two different washes?  How can this be specified in a manner independent of robot setup?
+  pipette 3µl "ligation mix" to plate A, decontaminate before each aspirate and after completion
+  ?? why decontaminate between pipetting? is something already in the wells of plate A?
+ Competent Yeast Dispension
+  REQUIRE: "plasmid DNA" cooled (single 20 well)
+  REQUIRE: "competent cells" cooled (single 8 well)
+  ?? Is the long carrier cooled differently than the 20-well carrier?
+  REQUIRE: "ssDNA" cooled (single 20 well)
+  REQUIRE: "LiAcMix" cooled (single 8 well)
+  ?? How was the choice made about which plate/well to put the supplies on?
+  wash 25 + 4ml fast
+  wash 4 + 1ml
+  ?? Is a wash necessary after a prior decontamination?  before a pending decontamination?
+  A: done when the outside of the tips is expected to be very dirty, and we don't want to contaminate the decontamination wash
+  pipette 2µl "plasmid DNA" to plate A, decontaminate before first aspirate and after completion
+  pipette 30µl "competent cells" to plate A, decontaminate before each aspirate and after completion
+  pipette 5µl "ssDNA" to plate A, wash 4+3ml before each aspirate and after completion
+  ?? Why 4+3ml wash?  How can this be specified in a manner independent of robot setup?
+  pipette 90µl "LiAcMix" to plate A, wash 4+3ml before each aspirate and after completion
+  mix 90µl plate A, decontaminate before each mix
+  ?? Why decontaminate when each well should essentially the same mixture?
+
+	Heat Shock
+		repeat 4 times:
+			?? might a plate NOT be on a cooled carried upon entry to this subroutine?
+			A: need to be flexible; bacteria should be incubated at 4deg, yeast at 30deg
+			wait (IncubationTime / 4 - 60)
+			shake plate A (…parameters…)
+			move plate A to cooled carrier
+		?? What's happening during incubation?
+		?? How critical is the incubation time?
+		A: for bacteria, highly; for yeast, not.
+		?? Is the difference in time of mix completion among the wells significant?
+		?? At this point, the PCR lid is opened and the tips are sterilized.  Why?  Is this part of the timing?
+		//open lid
+		wash 25+4ml fast
+		wash 4+1ml
+		decontaminate
+		?? Why wash AND decontaminate?  If we wash after decontamination, are the tips contaminated again?
+		pcr plate A for HeatShockTime then return to cooled carrier
+		?? How does TRobot1 know when to start cycling?  Why does the lid stay open during the process?  Or does it?
+		A: It should be turned on to 42deg at the start -- currently done manually
+		//transfer plate A to cooled carrier
+		//close lid
+	Yeast Cell Filtration
+		REQUIRE: Plate B is a filter plate
+		REQUIRE: "RecoveryMedia" cooled (single 8 well)
+		pipette 140µl from plate A to plate B, wash fast 3+4ml before each aspirate and after completion
+		?? Why 3+4ml wash?
+		vacuum_separate plate B
+			ApplyVacuumRear(300)
+			wait 900s
+			VentRear()
+			?? What does VentRear() mean?
+		?? Does everyone have a vacuum? Or is the separation performed in various ways?
+		A: "centrifugation". In our case, if we want to go above 300ml, then we'll use the centrifuge instead, because the vacuum would take too long.
+		A: For large volumes we usually say "Harvest", and for smaller volumes "separate" or "resuspend"
+		pipette 230µl "RecoveryMedia" to plate B, decontaminate before, between, after
+		transfer plate B to different non-cooled carrier
+		NOTE: the transfer was done because the z-values for the vacuum weren't setup yet
+		?? Would it be permissible to mix on the vacuum carrier if we wanted to?
+		A: yes, once the z values are configured
+		mix 90µl plate A, decontaminate before and after, wash fast 3+4ml between
+		transfer plate B back to vacuum carrier
+		?? Why?
+	Plating
+		REQUITE: Plate C for plating cells
+		wash fast 25+4ml
+		wash 4+1ml
+		transport plate C to shaker, remove its lid
+		shaker start (with proper parameters)
+		?? What parameters can be used for the shaker for cross-lab generality?
+		A: need to specify the RPMs
+		plate 50µl from plate B to plate C, 5 drops per well, decontaminate before, between, after
+
+
+MINIMAL
+-------
+	Initial supplies: A, B, C
+	intermediate tubes: D, E, F
+	
+	decontaminateTips
+	pipette 1 A to D
+	pipette 2 B to D
+	mix D
+	pcr D
+	pipette 1 C to D
+	pipette all D to E
+	vacuum E
+	pipette_while_shaking all E to F 5-drops-per-well
+	seal F
+	read F
+	peel F
+------------
+	decontaminate
+	pipette {
+		source = A,
+		target = D,
+		volume = 1,
+		cleanPolicy = wash
+	}
+	pipette {
+		source = B,
+		target = D,
+		volume = 2,
+		cleanPolicy = decontaminate
+	}
+	mix D
+	pcr D
+	pipette {
+		source = C,
+		target = D,
+		volume = 1,
+		cleanPolicy = clean
+	}
+	pipette {
+		source = D,
+		target = E,
+		volume = all
+	}
+	vacuum E
+	pipette_while_shaking all E to F 5-drops-per-well
+	seal F
+	read F
+	peel F
+
+
+==========
+AST Processing levels:
+1) maximally abstract commands, lab-independent
+2) more concrete commands for the given system (implementations of abstract methods)
+3) more concrete commands for the given robot (various choices made depending on robot setup and capabilities)
+4a) generation of parameter set for the protocol, including fixed, preferred, suggested, and undetermined parameters
+4b) more concrete commands given a parameter set (each value set might change the other parameters)
+5) fully parameterized commands
+6) EvoWare script output
+
+For now we'll combine levels 2 and 3.
+
+Examples of commands at different levels
+	aspirate/dispense/wash/move -- evoware with all parameters fixed
+	pipette/transport -- low-level roboliq without requiring fixed parameters
+	pcrDispense/heatShock -- high-level roboliq with automatic input from previous stage
+
+	pipette will be translated into wash/move/aspirate/dispense sequences
+
+Names:
+	for the whole library: roboliq or liquor
+	level 1: an abstract interface defining the high-level Roboliq functions
+	level 2/3: the Roboliq implementations generate abstract tokens
+	level 5: these are the "concrete" tokensab
+-------------
+Level 1 example:
+pcrDispense(volume = 3µl)
+competentYeastDispension(plasmid = 2µl, competentCell = 30µl, ssDNA = 5µl, liAcMix = 90µl)
+heatShock()
+yeastCellFiltration()
+plate()
+
+-------------
+Level 3 example for pcrDispense:
+pcrDispense(source: Plate, volume: Volume): Plate = {
+	// ensure source is on a cooled carrier, if possible
+	// choose an empty dest plate that's compatible with the source plate
+	// assert that the dest plate is empty
+	// ensure that dest plate in on a cooled carrier, if possible
+	pipette(template, dest, volume, cleanPolicy=...);
+}
+
+
+-------------
+
+val templatePlate = new Plate
+val plasmidDna = new Well
+val competentCells = new Well
+val ssDNA = new Well
+val liAcMix = new Well
+
+val A = 
+
+PcrDispense(source: Plate, volume: Volume): Plate = {
+	// ensure source is on a cooled carrier, if possible
+	// choose an empty dest plate that's compatible with the source plate
+	// assert that the dest plate is empty
+	// ensure that dest plate in on a cooled carrier, if possible
+	pipette(template, dest, volume, cleanPolicy=...);
+}
+

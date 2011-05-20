@@ -16,20 +16,20 @@ private class EvowareTranslator(settings: EvowareSettings) {
 	}
 	
 	private def evowareCmd(cmd: Token): List[String] = cmd match {
-		case c @ Aspirate(_, _, _, _) => aspirate(c) :: Nil
-		case c @ Dispense(_, _, _, _) => dispense(c) :: Nil
+		case c @ Aspirate(_, _, _, _, _) => aspirate(c) :: Nil
+		case c @ Dispense(_, _, _, _, _) => dispense(c) :: Nil
 		case _ => Nil
 	}
 
 	private def aspirate(cmd: Aspirate): String = {
-		spirate("Aspirate", cmd.volumes, cmd.plate, cmd.pattern, cmd.rule);
+		spirate("Aspirate", cmd.volumes, cmd.plate, cmd.loc, cmd.wells, cmd.rule);
 	}
 	
 	private def dispense(cmd: Dispense): String = {
-		spirate("Dispense", cmd.volumes, cmd.plate, cmd.pattern, cmd.rule);
+		spirate("Dispense", cmd.volumes, cmd.plate, cmd.loc, cmd.wells, cmd.rule);
 	}
 	
-	private def spirate(sFunc: String, volumes: Array[Double], plate: Plate, pattern: Set[Int], rule: PipettingRule): String = {
+	private def spirate(sFunc: String, volumes: Array[Double], plate: Plate, iLoc: Int, wells: Set[Int], rule: PipettingRule): String = {
 		assert(volumes.size <= 12)
 		
 		// Indexes of tips we want to use
@@ -47,16 +47,16 @@ private class EvowareTranslator(settings: EvowareSettings) {
 		val nWellMaskChars = math.ceil(plate.rows * plate.cols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		//val acWellMask = ("0" * nWellMaskChars).toArray
-		for (iTip <- tips) {
-			val iChar = iTip / 7;
-			val iTip1 = iTip % 7;
-			amWells(iChar) += 1 << iTip1
+		for (iWell <- wells) {
+			val iChar = iWell / 7;
+			val iWell1 = iWell % 7;
+			amWells(iChar) += 1 << iWell1
 		}
 		//acWellMask.mkString
 		val sWellMask = amWells.map(encode).mkString
 		val sPlateMask = Array('0', hex(plate.cols), '0', hex(plate.rows)).mkString + sWellMask
 		
-		val loc = settings.locations(plate.loc)
+		val loc = settings.locations(iLoc)
 		
 		(
 			sFunc+"("+
