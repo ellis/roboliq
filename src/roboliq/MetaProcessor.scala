@@ -1,5 +1,5 @@
 package roboliq
-
+/*
 import meta._
 
 
@@ -22,7 +22,7 @@ class MetaProcessor {
 				/* Attributes needed on plates:
 				 * location, rows, cols
 				 */
-				need(t.source, meta.AttributeKind.Parent, iStep) 
+				need(t.source, meta.AttributeKind.Parent, iStep)
 				need(t.source, meta.AttributeKind.Rows, iStep)
 				need(t.source, meta.AttributeKind.Cols, iStep)
 				
@@ -40,8 +40,12 @@ class MetaProcessor {
 	}
 	
 	def tr(tok: meta.MetaToken, iStep: Int): List[concrete.Token] = {
+		def at(obj: MetaObject, kind: AttributeKind.Value): meta.Val = obj.getAttribute(kind, iStep).get
+		
 		tok match {
 			case t @ meta.CopyPlate(_, _, _, _, _) =>
+				at(t.source, meta.AttributeKind.Parent)
+				
 				/* Need to know whether tips will be clean between aspirations.  This involves knowing:
 				 * - How clean does the source well need to remain?
 				 * - How contaminated are the tips before the first aspiration?
@@ -52,6 +56,8 @@ class MetaProcessor {
 				 */
 				
 				// Decide on pipetting pattern, clean between aspirations
+				List()
 		}
 	}
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package meta
 
 import scala.collection.mutable
@@ -18,23 +19,26 @@ object ValSource extends Enumeration {
 	val Undetermined, Settings, User, Computer = Value
 }
 
+/*class XX[T](value: )
+	var source = ValSource.Undetermined
+}
+*/
 class Val {
 	var source = ValSource.Undetermined
-	var n = 0.0
 }
+
+case class DoubleVal(n: Double) extends Val
+case class ObjectVal(obj: MetaObject) extends Val
 
 object Val {
 	def apply(source: ValSource.Value, n: Double): Val = {
-		val v = new Val
-		v.source = source
-		v.n = n
-		v
+		DoubleVal(n)
 	}
 }
 
 object AttributeKind extends Enumeration {
 	type AttributeKind = Value
-	val Parent, Index, Rows, Cols, Volume, Cooled = Value
+	val Parent, Index, Rows, Cols, Volume, IsPipettable, IsCooled, RequiresCooling = Value
 }
 
 class Attribute(val kind: AttributeKind.Value) {
@@ -80,8 +84,15 @@ class MetaObject {
 	
 	def getAttribute(kind: AttributeKind.Value, iStep: Int): Option[Val] = {
 		map.get(kind) match {
-			case None => None
 			case Some(attr) => attr.get(iStep)
+			case None => parent.get(iStep) match {
+				case Some(v) =>
+					v match {
+						case ObjectVal(obj) => 
+					}
+					par.obj.getAttribute(kind, iStep)
+				case None => None
+			}
 		}
 	}
 }
@@ -90,3 +101,4 @@ class Plate extends MetaObject {
 	val rows = createAttribute(AttributeKind.Rows)
 	val cols = createAttribute(AttributeKind.Cols)
 }
+*/

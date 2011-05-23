@@ -3,6 +3,7 @@ package roboliq
 import meta._
 
 class MetaTester {
+	/*
 	def run() {
 		val carrier1, carrier2 = new MetaObject
 		
@@ -14,4 +15,5 @@ class MetaTester {
 		
 		
 	}
+	*/
 }
