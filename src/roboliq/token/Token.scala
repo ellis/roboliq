@@ -1,8 +1,7 @@
-package concrete
+package roboliq.token
 
-sealed class Plate(val rows: Int, val cols: Int)
-sealed class AspirateStrategy(val sName: String)
-sealed class DispenseStrategy(val sName: String, val bEnter: Boolean)
+import roboliq.part._
+
 
 sealed class Token
 case class Aspirate(volumes: Array[Double], plate: Plate, loc: Int, wells: Set[Int], rule: AspirateStrategy) extends Token
