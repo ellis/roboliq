@@ -61,18 +61,19 @@ private class EvowareTranslator(settings: EvowareSettings, state: RobotState) {
 		val sWellMask = amWells.map(encode).mkString
 		val sPlateMask = Array('0', hex(holder.nCols), '0', hex(holder.nRows)).mkString + sWellMask
 		
-		// Find a parent of 'holder' which has an Evoware location
-		def findLoc(part: Part): Option[Loc] = {
-			settings.locations.get(part) match {
-				case opt @ Some(loc) => opt
-				case None =>
-					state.getSite(part) match {
-						case None => None
-						case Some(site) => findLoc(site.parent)
+		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
+		def findLoc(part: Part): Option[Tuple2[Int, Int]] = {
+			val site_? = state.getSite(part)
+			site_? match {
+				case None => None
+				case Some(site) =>
+					settings.grids.get(site.parent) match {
+						case Some(iGrid) => Some(iGrid, site.index)
+						case None => findLoc(site.parent)
 					}
 			}
 		}
-		val loc = findLoc(holder).get
+		val (iGrid, iSite) = findLoc(holder).get
 		
 		(
 			sFunc+"("+
@@ -85,7 +86,7 @@ private class EvowareTranslator(settings: EvowareSettings, state: RobotState) {
 		).format(
 			mTips, sPipettingName,
 			sVolumes,
-			loc.iGrid, loc.iSite,
+			iGrid, iSite,
 			sPlateMask
 		);
 	}

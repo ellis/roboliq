@@ -1,5 +1,7 @@
 package roboliq
 
+import roboliq.parts._
+
 
 case class DispenseSubunit(val tip: Tip, val dest: Well, val nVolume: Double)
 case class DispenseUnit(val subunits: Seq[DispenseSubunit])

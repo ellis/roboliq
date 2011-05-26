@@ -16,10 +16,16 @@ class Part {
 sealed class Site(val parent: Part, val index: Int)
 
 trait WellHolder extends Part {
-	val index: Int
 	val nRows: Int
 	val nCols: Int
+	val nWells: Int
 	val wells: Array[Well]
+	val index = WellHolder.nextIndex
+	
+	WellHolder.nextIndex += 1
+}
+object WellHolder {
+	var nextIndex = 0
 }
 
 class Well(val holder: WellHolder, val index: Int) extends Part {
@@ -40,7 +46,7 @@ class WellState(val well: Well) {
 	var nVolume = 0.0
 }
 
-class Plate(val index: Int, val nRows: Int, val nCols: Int) extends Part with WellHolder {
+class Plate(val nRows: Int, val nCols: Int) extends Part with WellHolder {
 	val nWells = nRows * nCols
 	val wells: Array[Well] = {
 		(0 until nWells).map(i => new Well(this, i)).toArray

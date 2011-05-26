@@ -5,43 +5,58 @@ import roboliq.tokens._
 import roboliq.commands._
 import evoware.EvowareSettings
 import evoware.EvowareTranslator
+import evoware.Loc
 
 
 object Main {
 	def main(args: Array[String]): Unit = {
 		testConcrete()
-		testFixed()
+		//testFixed()
 	}
 
 	def testConcrete() {
+		val tips = Array(
+			new Tip(0, 0, 960), new Tip(1, 0, 960), new Tip(2, 0, 960), new Tip(3, 0, 960), 
+			new Tip(4, 0, 45), new Tip(5, 0, 45), new Tip(6, 0, 45), new Tip(7, 0, 45) 
+		)
 		val rule1 = new AspirateStrategy(">> Water free dispense <<")
 		val rule2 = new DispenseStrategy("Water free dispense", false)
-		val carrier1 = new Carrier
-		val carrier2 = new Carrier
-		val plate_template = new Plate(rows = 8, cols = 12)
-		val plate_empty = new Plate(rows = 8, cols = 12)
+		val carrier = new Carrier
+		val plate1 = new Plate(nRows = 8, nCols = 12)
+		val plate2 = new Plate(nRows = 8, nCols = 12)
+		
+		val evowareSettings = new EvowareSettings(Map(
+				carrier -> 15
+		))
 		
 		val cmds = List[Token](
-			Aspirate(
-				volumes = Array(288, 288, 288, 288, 0, 0, 0, 0),
-				plate = template,
-				loc = 15,
-				wells = Set(0, 1, 2, 3),
-				rule1
+			Aspirate(Array(
+					new TipWellVolume(tips(0), plate1.wells(0), 288),
+					new TipWellVolume(tips(1), plate1.wells(1), 288),
+					new TipWellVolume(tips(2), plate1.wells(2), 288),
+					new TipWellVolume(tips(3), plate1.wells(3), 288)
+					),
+					rule1
 			),
-			Dispense(
-				volumes = Array(288, 288, 288, 288, 0, 0, 0, 0),
-				plate = empty,
-				loc = 16,
-				wells = Set(0, 1, 2, 3),
-				rule2
+			Dispense(Array(
+					new TipWellVolume(tips(0), plate2.wells(0), 3),
+					new TipWellVolume(tips(1), plate2.wells(1), 3),
+					new TipWellVolume(tips(2), plate2.wells(2), 3),
+					new TipWellVolume(tips(3), plate2.wells(3), 3)
+					),
+					rule2
 			)
 		)
 		
-		val settings = new EvowareSettings
-		println(EvowareTranslator.translate(cmds, settings))
+		val builder = new RobotStateBuilder(None)
+		builder.sites += (plate1 -> new Site(carrier, 0))
+		builder.sites += (plate2 -> new Site(carrier, 1))
+		val state = builder.toState
+		
+		println(EvowareTranslator.translate(cmds, evowareSettings, state))
 	}
 	
+	/*
 	def testFixed() {
 		import meta.fixed._
 		
@@ -71,4 +86,5 @@ object Main {
 				new AspirateStrategy(">> Water free dispense <<"),
 				new DispenseStrategy("Water free dispense", false))
 	}
+	*/
 }
