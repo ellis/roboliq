@@ -1,10 +1,6 @@
 package evoware
 
-sealed class EvowareSettings {
-	sealed case class Loc(iGrid: Int, iSite: Int)
-	
-	val locations = Map[Int, Loc](
-		15 -> Loc(17, 0),
-		16 -> Loc(17, 1)
-	)
-}
+import roboliq.parts.Part
+
+sealed case class Loc(iGrid: Int, iSite: Int)
+sealed class EvowareSettings(val locations: Map[Part, Loc])

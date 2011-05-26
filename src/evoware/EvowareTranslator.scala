@@ -1,62 +1,78 @@
 package evoware
 
-import concrete._
+import roboliq.parts._
+import roboliq.tokens._
 
 
 object EvowareTranslator {
-	def translate(cmds: List[Token], settings: EvowareSettings): String = {
-		val tr = new EvowareTranslator(settings)
+	def translate(cmds: List[Token], settings: EvowareSettings, state: RobotState): String = {
+		val tr = new EvowareTranslator(settings, state)
 		tr.translate(cmds)
 	}
 }
 
-private class EvowareTranslator(settings: EvowareSettings) {
+private class EvowareTranslator(settings: EvowareSettings, state: RobotState) {
 	def translate(cmds: List[Token]): String = {
 		cmds.map(evowareCmd).flatten.mkString("\n")
 	}
 	
-	private def evowareCmd(cmd: Token): List[String] = cmd match {
-		case c @ Aspirate(_, _, _, _, _) => aspirate(c) :: Nil
-		case c @ Dispense(_, _, _, _, _) => dispense(c) :: Nil
+	private def evowareCmd(tok: Token): List[String] = tok match {
+		case t @ Aspirate(_, _) => aspirate(t) :: Nil
+		case t @ Dispense(_, _) => dispense(t) :: Nil
 		case _ => Nil
 	}
 
-	private def aspirate(cmd: Aspirate): String = {
-		spirate("Aspirate", cmd.volumes, cmd.plate, cmd.loc, cmd.wells, cmd.rule);
+	private def aspirate(tok: Aspirate): String = {
+		spirate("Aspirate", tok.twvs, tok.rule.sName);
 	}
 	
-	private def dispense(cmd: Dispense): String = {
-		spirate("Dispense", cmd.volumes, cmd.plate, cmd.loc, cmd.wells, cmd.rule);
+	private def dispense(tok: Dispense): String = {
+		spirate("Dispense", tok.twvs, tok.rule.sName);
 	}
 	
-	private def spirate(sFunc: String, volumes: Array[Double], plate: Plate, iLoc: Int, wells: Set[Int], rule: PipettingRule): String = {
-		assert(volumes.size <= 12)
+	private def spirate(sFunc: String, _twvs: Seq[TipWellVolume], sPipettingName: String): String = {
+		assert(!_twvs.isEmpty)
+		assert(_twvs.size <= 12)
+		val holder = _twvs.head.well.holder
+		assert(_twvs.forall(_.well.holder == holder))
+		
+		val twvs = _twvs.sortWith(_.tip.index < _.tip.index)
 		
 		// Indexes of tips we want to use
-		val tips = volumes.zipWithIndex.filter(_._1 > 0).map(_._2)
+		val aiTips = twvs.map(_.tip.index)
 		// Create mask for all tips being used
-		val mTips = tips.foldLeft(0) { (sum, i) => sum + (1 << i) }
+		val mTips = aiTips.foldLeft(0) { (sum, i) => sum + (1 << i) }
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
-		val anVolumes0 = volumes.filter(_ > 0).toArray
+		val anVolumes0 = twvs.map(_.nVolume).toArray
 		val anVolumes = new Array[Double](12)
 		Array.copy(anVolumes0, 0, anVolumes, 0, anVolumes0.size)
 		val formatVolume = new java.text.DecimalFormat("#.##")
 		val sVolumes = anVolumes.map(formatVolume.format).mkString(",")
 		
-		val nWellMaskChars = math.ceil(plate.rows * plate.cols / 7.0).asInstanceOf[Int]
+		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
-		//val acWellMask = ("0" * nWellMaskChars).toArray
-		for (iWell <- wells) {
+		for (twv <- twvs) {
+			val iWell = twv.well.index
 			val iChar = iWell / 7;
 			val iWell1 = iWell % 7;
 			amWells(iChar) += 1 << iWell1
 		}
-		//acWellMask.mkString
 		val sWellMask = amWells.map(encode).mkString
-		val sPlateMask = Array('0', hex(plate.cols), '0', hex(plate.rows)).mkString + sWellMask
+		val sPlateMask = Array('0', hex(holder.nCols), '0', hex(holder.nRows)).mkString + sWellMask
 		
-		val loc = settings.locations(iLoc)
+		// Find a parent of 'holder' which has an Evoware location
+		def findLoc(part: Part): Option[Loc] = {
+			settings.locations.get(part) match {
+				case opt @ Some(loc) => opt
+				case None =>
+					state.getSite(part) match {
+						case None => None
+						case Some(site) => findLoc(site.parent)
+					}
+			}
+		}
+		val loc = findLoc(holder).get
 		
 		(
 			sFunc+"("+
@@ -67,7 +83,7 @@ private class EvowareTranslator(settings: EvowareSettings) {
 			"\"%s\","+
 			"0,0);"
 		).format(
-			mTips, rule.name,
+			mTips, sPipettingName,
 			sVolumes,
 			loc.iGrid, loc.iSite,
 			sPlateMask

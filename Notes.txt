@@ -178,6 +178,15 @@ pcrDispense(source: Plate, volume: Volume): Plate = {
 	pipette(template, dest, volume, cleanPolicy=...);
 }
 
+Roboliq package hierarchy:
+	1:
+		parts [parts, config, robot interface]
+	2:
+		tokens (parts)
+	3:
+		commands (parts, tokens) [commands, part state, robot state]
+		robot implementation (parts, tokens) [can guide command decisions, token translator]
+
 
 -------------
 

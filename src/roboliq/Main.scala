@@ -1,25 +1,25 @@
 package roboliq;
 
-import concrete._
+import roboliq.parts._
+import roboliq.tokens._
+import roboliq.commands._
 import evoware.EvowareSettings
 import evoware.EvowareTranslator
 
 
 object Main {
-	sealed class PlateProperty
-	case class Plate_Rows(val n: Int)
-	case class Plate_Cols(val n: Int)
-	
 	def main(args: Array[String]): Unit = {
 		testConcrete()
 		testFixed()
 	}
 
 	def testConcrete() {
-		val rule1 = new PipettingRule(">> Water free dispense <<")
-		val rule2 = new PipettingRule("Water free dispense")
-		val template = new Plate(rows = 8, cols = 12)
-		val empty = new Plate(rows = 8, cols = 12)
+		val rule1 = new AspirateStrategy(">> Water free dispense <<")
+		val rule2 = new DispenseStrategy("Water free dispense", false)
+		val carrier1 = new Carrier
+		val carrier2 = new Carrier
+		val plate_template = new Plate(rows = 8, cols = 12)
+		val plate_empty = new Plate(rows = 8, cols = 12)
 		
 		val cmds = List[Token](
 			Aspirate(

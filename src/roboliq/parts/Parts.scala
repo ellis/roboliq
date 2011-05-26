@@ -1,4 +1,4 @@
-package roboliq.part
+package roboliq.parts
 
 sealed class AspirateStrategy(val sName: String)
 sealed class DispenseStrategy(val sName: String, val bEnter: Boolean)
@@ -10,18 +10,19 @@ object Liquid {
 	val empty = new Liquid(null, false)
 }
 
-class Thing {
-	var parent: Option[Thing] = None
+class Part {
 }
 
-trait WellHolder {
+sealed class Site(val parent: Part, val index: Int)
+
+trait WellHolder extends Part {
 	val index: Int
 	val nRows: Int
 	val nCols: Int
 	val wells: Array[Well]
 }
 
-class Well(val holder: WellHolder, val index: Int) extends Thing {
+class Well(val holder: WellHolder, val index: Int) extends Part {
 	var liquid: Liquid = null
 	var nVolume = 0.0
 }
@@ -39,9 +40,11 @@ class WellState(val well: Well) {
 	var nVolume = 0.0
 }
 
-class Plate(val index: Int, val nRows: Int, val nCols: Int) extends Thing with WellHolder {
+class Plate(val index: Int, val nRows: Int, val nCols: Int) extends Part with WellHolder {
 	val nWells = nRows * nCols
 	val wells: Array[Well] = {
 		(0 until nWells).map(i => new Well(this, i)).toArray
 	}
 }
+
+class Carrier extends Part

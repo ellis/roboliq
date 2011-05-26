@@ -1,15 +1,13 @@
-package roboliq
+package roboliq.commands
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-import concrete._
+import roboliq.parts._
+import roboliq.tokens._
 
 
-
-class Settings(val tips: Array[Tip], val tipGroups: Array[Array[Int]], val liquids: Array[Liquid])
-
-class PipetteLiquid(settings: Settings) {
+class PipetteLiquid(settings: RobotConfig) {
 	class TipState(tip: Tip) {
 		var bFree = true
 		var bContaminated = true

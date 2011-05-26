@@ -1,4 +1,4 @@
-package roboliq
+package roboliq.parts
 
 abstract class RobotConfig(
 		val tips: Array[Tip],
