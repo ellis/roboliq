@@ -1,4 +1,4 @@
-package roboliq.parts
+package roboliq.robot
 
 import scala.collection.Map
 import scala.collection.immutable

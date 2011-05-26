@@ -1,13 +1,17 @@
-package roboliq.parts
+package roboliq.robot
 
-abstract class RobotConfig(
-		val tips: Array[Tip],
-		val tipGroups: Array[Array[Int]]
-)
+import roboliq.parts._
+import roboliq.tokens._
 
-/*
-class Robot {
-	def createDispenseTokens(units: Seq[DispenseUnit]): List[concrete.Token] = {
+
+trait Robot {
+	val state0 = new RobotState(None, Map())
+	val config: RobotConfig
+	def state: RobotState
+	//def createDispenseTokens(dispenses: Seq[DispenseUnit]): List[concrete.Token]
+	def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well]
+	def score(tokens: Seq[Token]): Int
+	/*def createDispenseTokens(units: Seq[DispenseUnit]): List[concrete.Token] = {
 		//case class Aspirate(volumes: Array[Double], plate: Plate, loc: Int, wells: Set[Int], rule: AspirateStrategy) extends Token
 		//case class Dispense(volumes: Array[Double], plate: Plate, loc: Int, wells: Set[Int], rule: DispenseStrategy) extends Token
 		val tokens = new ArrayBuffer[concrete.Token]
@@ -23,6 +27,5 @@ class Robot {
 			}
 		}
 		tokens.toList
-	}
+	}*/
 }
-*/

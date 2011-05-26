@@ -3,6 +3,8 @@ package roboliq;
 import roboliq.parts._
 import roboliq.tokens._
 import roboliq.commands._
+import roboliq.robot._
+import evoware.EvowareRobot
 import evoware.EvowareSettings
 import evoware.EvowareTranslator
 import evoware.Loc
@@ -10,8 +12,8 @@ import evoware.Loc
 
 object Main {
 	def main(args: Array[String]): Unit = {
-		testConcrete()
-		//testFixed()
+		//testConcrete()
+		test2()
 	}
 
 	def testConcrete() {
@@ -24,10 +26,6 @@ object Main {
 		val carrier = new Carrier
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
-		
-		val evowareSettings = new EvowareSettings(Map(
-				carrier -> 15
-		))
 		
 		val cmds = List[Token](
 			Aspirate(Array(
@@ -48,12 +46,52 @@ object Main {
 			)
 		)
 		
+		val evowareSettings = new EvowareSettings(Map(
+				carrier -> 15
+		))
+
 		val builder = new RobotStateBuilder(None)
 		builder.sites += (plate1 -> new Site(carrier, 0))
 		builder.sites += (plate2 -> new Site(carrier, 1))
 		val state = builder.toState
 		
 		println(EvowareTranslator.translate(cmds, evowareSettings, state))
+	}
+	
+	def test2() {
+		val tips = Array(
+			new Tip(0, 0, 960), new Tip(1, 0, 960), new Tip(2, 0, 960), new Tip(3, 0, 960), 
+			new Tip(4, 0, 45), new Tip(5, 0, 45), new Tip(6, 0, 45), new Tip(7, 0, 45) 
+		)
+		val tipGroups = Array(Array(0, 1, 2, 3), Array(4, 5, 6, 7), Array(0, 1, 2, 3, 4, 5, 6, 7))
+		val rule1 = new AspirateStrategy(">> Water free dispense <<")
+		val rule2 = new DispenseStrategy("Water free dispense", false)
+		val carrier = new Carrier
+		val plate1 = new Plate(nRows = 8, nCols = 12)
+		val plate2 = new Plate(nRows = 8, nCols = 12)
+		
+		val robotConfig = new RobotConfig(tips, tipGroups)
+		val robot = new EvowareRobot(robotConfig)
+		
+		val p = new PipetteLiquid(
+				settings = robotConfig,
+				robot = robot,
+				srcs = plate1.wells.take(4),
+				dests = plate2.wells.take(4),
+				volumes = Array(3, 3, 3, 3),
+				aspirateStrategy = rule1,
+				dispenseStrategy = rule2)
+		
+		val evowareSettings = new EvowareSettings(Map(
+				carrier -> 15
+		))
+
+		val builder = new RobotStateBuilder(None)
+		builder.sites += (plate1 -> new Site(carrier, 0))
+		builder.sites += (plate2 -> new Site(carrier, 1))
+		val state = builder.toState
+		
+		println(EvowareTranslator.translate(p.tokens, evowareSettings, state))
 	}
 	
 	/*

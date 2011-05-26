@@ -2,17 +2,18 @@ package evoware
 
 import roboliq.parts._
 import roboliq.tokens._
+import roboliq.robot._
 
 
 object EvowareTranslator {
-	def translate(cmds: List[Token], settings: EvowareSettings, state: RobotState): String = {
+	def translate(cmds: Seq[Token], settings: EvowareSettings, state: RobotState): String = {
 		val tr = new EvowareTranslator(settings, state)
 		tr.translate(cmds)
 	}
 }
 
 private class EvowareTranslator(settings: EvowareSettings, state: RobotState) {
-	def translate(cmds: List[Token]): String = {
+	def translate(cmds: Seq[Token]): String = {
 		cmds.map(evowareCmd).flatten.mkString("\n")
 	}
 	
