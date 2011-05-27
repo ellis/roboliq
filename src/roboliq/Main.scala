@@ -13,7 +13,8 @@ import evoware.Loc
 object Main {
 	def main(args: Array[String]): Unit = {
 		//testConcrete()
-		test2()
+		//test2()
+		Tests.a()
 	}
 
 	def testConcrete() {

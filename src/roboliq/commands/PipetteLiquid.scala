@@ -42,10 +42,10 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 	// aspirate does not contaminate, dispense doesn't contaminate: no washing required
 	
 	private def doesWellContaminate(well: Well): Boolean = state.getLiquid(well).bContaminates
-	val bDestContaminates = dests.exists(doesWellContaminate)
+	//val bDestContaminates = dests.exists(doesWellContaminate)
 	
 	val bAspirateContaminates = liquid.bContaminates
-	val bDispenseContaminates = dispenseStrategy.bEnter && bDestContaminates
+	val bDispenseContaminates = dispenseStrategy.bEnter && dests.exists(doesWellContaminate)
 	
 	val destsSorted = {
 		def sortDests(well1: Well, well2: Well): Boolean = {
@@ -149,7 +149,7 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 						val tip = tipsFree(i)
 						tip.nVolume += nVolume
 						// If dispense contaminates the tip, then don't let this tip be reused
-						if (bDestContaminates)
+						if (bDispenseContaminates)
 							tip.bFree = false
 						twvs += new TipWellVolume(tip.tip, dest, nVolume)
 						destsRemaining -= dest
@@ -180,6 +180,10 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 	private def newCycle(cycles: ArrayBuffer[CycleState], tips: Array[TipState]): CycleState = {
 		val cycle = new CycleState(tips)
 		cycles += cycle
+		for (tip <- tips) {
+			tip.nVolume = 0
+			tip.bFree = true
+		}
 		cycle
 	}
 	
@@ -212,18 +216,21 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 			var iSrc = 0
 			while (iTip < tips.size && iSrc < srcs3.size) {
 				val tip = tips(iTip)
-				val src = srcs3(iSrc)
 				val nVolume = tip.nVolume
-				val liquid = state.getLiquid(src)
-				
-				twvs += new TipWellVolume(tip.tip, src, nVolume)
-				state.removeLiquid(src, nVolume)
-				tip.bContaminated |= liquid.bContaminates
+				if (nVolume > 0) {
+					val src = srcs3(iSrc)
+					val liquid = state.getLiquid(src)
+					
+					twvs += new TipWellVolume(tip.tip, src, nVolume)
+					state.removeLiquid(src, nVolume)
+					tip.bContaminated |= liquid.bContaminates
+				}
 
 				iTip += 1
 				iSrc += 1
 			}
-			cycle.aspirates += new Aspirate(twvs, aspirateStrategy)
+			if (twvs.size > 0)
+				cycle.aspirates += new Aspirate(twvs, aspirateStrategy)
 		}
 	}
 
