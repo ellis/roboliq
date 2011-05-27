@@ -50,10 +50,10 @@ object Main {
 				carrier -> 15
 		))
 
-		val builder = new RobotStateBuilder(None)
+		val builder = new RobotStateBuilder(RobotState.empty)
 		builder.sites += (plate1 -> new Site(carrier, 0))
 		builder.sites += (plate2 -> new Site(carrier, 1))
-		val state = builder.toState
+		val state = builder.toImmutable
 		
 		println(EvowareTranslator.translate(cmds, evowareSettings, state))
 	}
@@ -69,14 +69,20 @@ object Main {
 		val carrier = new Carrier
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
+		val liquid1 = new Liquid("template", true)
 		
 		val robotConfig = new RobotConfig(tips, tipGroups)
 		val robot = new EvowareRobot(robotConfig)
+
+		val builder = new RobotStateBuilder(RobotState.empty)
+		builder.sites += (plate1 -> new Site(carrier, 0))
+		builder.sites += (plate2 -> new Site(carrier, 1))
+		builder.fillWells(plate1.wells, liquid1, 50)
+		robot.state = builder.toImmutable
 		
 		val p = new PipetteLiquid(
-				settings = robotConfig,
 				robot = robot,
-				srcs = plate1.wells.take(4),
+				srcs = plate1.wells.take(1),
 				dests = plate2.wells.take(4),
 				volumes = Array(3, 3, 3, 3),
 				aspirateStrategy = rule1,
@@ -85,44 +91,7 @@ object Main {
 		val evowareSettings = new EvowareSettings(Map(
 				carrier -> 15
 		))
-
-		val builder = new RobotStateBuilder(None)
-		builder.sites += (plate1 -> new Site(carrier, 0))
-		builder.sites += (plate2 -> new Site(carrier, 1))
-		val state = builder.toState
 		
-		println(EvowareTranslator.translate(p.tokens, evowareSettings, state))
+		println(EvowareTranslator.translate(p.tokens, evowareSettings, robot.state))
 	}
-	
-	/*
-	def testFixed() {
-		import meta.fixed._
-		
-		val liquidEmpty = new Liquid(null, false)
-		val liquidCells = new Liquid("cells", true)
-		
-		val settings = new Settings(
-			tips = Array(
-				new Tip(0, 0, 960), new Tip(1, 0, 960), new Tip(2, 0, 960), new Tip(3, 0, 960), 
-				new Tip(4, 0, 45), new Tip(5, 0, 45), new Tip(6, 0, 45), new Tip(7, 0, 45) 
-			),
-			tipGroups = Array(Array(0, 1, 2, 3), Array(4, 5, 6, 7), Array(0, 1, 2, 3, 4, 5, 6, 7)),
-			liquids = Array(
-				liquidEmpty,
-				liquidCells
-			)
-		)
-		
-		val o = new OneOverConcrete(settings)
-		
-		val srcs = Array(Well(0, liquidCells, 100))
-		val plate = Plate.create(0, 8, 1)
-		//val dests = Array(Well(0), Well(1), Well(2), Well(3), Well(4), Well(5), Well(6), Well(7))
-		val volumes = Array[Double](20, 20, 20, 20, 20, 20, 20, 20)
-		
-		o.pipetteLiquid(srcs, plate.wells, volumes,
-				new AspirateStrategy(">> Water free dispense <<"),
-				new DispenseStrategy("Water free dispense", false))
-	}
-	*/
 }

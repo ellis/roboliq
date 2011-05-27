@@ -5,7 +5,6 @@ import roboliq.tokens._
 
 
 trait Robot {
-	val state0 = new RobotState(None, Map())
 	val config: RobotConfig
 	def state: RobotState
 	//def createDispenseTokens(dispenses: Seq[DispenseUnit]): List[concrete.Token]

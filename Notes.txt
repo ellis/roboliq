@@ -180,10 +180,12 @@ pcrDispense(source: Plate, volume: Volume): Plate = {
 
 Roboliq package hierarchy:
 	1:
-		parts [parts, config, robot interface]
+		parts [parts, config]
 	2:
 		tokens (parts)
 	3:
+		robot [robot interface, robot state]
+	4:
 		commands (parts, tokens) [commands, part state, robot state]
 		robot implementation (parts, tokens) [can guide command decisions, token translator]
 

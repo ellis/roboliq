@@ -6,13 +6,13 @@ import roboliq.robot._
 
 
 object EvowareTranslator {
-	def translate(cmds: Seq[Token], settings: EvowareSettings, state: RobotState): String = {
+	def translate(cmds: Seq[Token], settings: EvowareSettings, state: IRobotState): String = {
 		val tr = new EvowareTranslator(settings, state)
 		tr.translate(cmds)
 	}
 }
 
-private class EvowareTranslator(settings: EvowareSettings, state: RobotState) {
+private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	def translate(cmds: Seq[Token]): String = {
 		cmds.map(evowareCmd).flatten.mkString("\n")
 	}

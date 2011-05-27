@@ -8,7 +8,7 @@ import roboliq.robot._
 
 
 class EvowareRobot(val config: RobotConfig) extends Robot {
-	var state = state0
+	var state: RobotState = RobotState.empty
 	
 	def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well] = {
 		val chosen = new ArrayBuffer[Well]
