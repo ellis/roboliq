@@ -57,46 +57,104 @@ object Tests {
 		// most common cases for no contamination:
 		//  dest 1x1 src 1x1 volume 1µl (only use the small tips)
 		//  dest 1x1 src 1x1 volume 100µl (only use the large tips)
-		//  dest 8x12 src 1x1 volume 1µl (only use the small tips)
-		//  dest 8x12 src 1x1 volume 3µl (use all 8 tips)
-		//  dest 8x12 src 1x1 volume 48µl (4 large tips fill all 96 wells)
-		//  dest 8x12 src 1x1 volume 90µl (fill with two cycles)
-		//  dest 8x12 src 1x1 volume 180µl (fill with four cycles)
-val spec1 = Specs(1, 1, 1, 1, 1.0, Contamination.NoContamination, Some(
+		//  dest 8x4 src 1x1 volume 1µl (only use the small tips)
+		//  dest 8x6 src 1x1 volume 3µl (use all 8 tips)
+		//  dest 8x4 src 1x1 volume 48µl (4 large tips fill all 96 wells)
+		//  dest 8x4 src 1x1 volume 90µl (fill with two cycles)
+		//  dest 8x4 src 1x1 volume 180µl (fill with four cycles)
+		val specs = List(
+Specs(1, 1, 1, 1, 1.0, Contamination.NoContamination, Some(
+"""Aspirate(16,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(16,"Dispense Hover",1,0,0,0,0,0,0,0,0,0,0,0,17,1,1,"0C0810000000000000",0,0);""")),
+Specs(1, 1, 1, 1, 100.0, Contamination.NoContamination, Some(
 """Aspirate(1,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Dispense(1,"Dispense Hover",1,0,0,0,0,0,0,0,0,0,0,0,17,1,1,"0C0810000000000000",0,0);"""))
-val spec2 = Specs(1, 1, 1, 1, 100.0, Contamination.NoContamination, Some(
-"""Aspirate(1,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Dispense(1,"Dispense Hover",1,0,0,0,0,0,0,0,0,0,0,0,17,1,1,"0C0810000000000000",0,0);"""))
-		x(spec1)
-		x(spec2)
-		/*
-		x(false, false, false, 1, 1, 2, 1, 1, 
-"""Aspirate(1,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Dispense(1,"Dispense Hover",1,0,0,0,0,0,0,0,0,0,0,0,17,1,1,"0C0810000000000000",0,0);"""
+Dispense(1,"Dispense Hover",1,0,0,0,0,0,0,0,0,0,0,0,17,1,1,"0C0810000000000000",0,0);""")),
+Specs(8, 4, 1, 1, 1.0, Contamination.NoContamination, Some(
+"""Aspirate(16,"AspirateStrategy1",8,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(32,"AspirateStrategy1",8,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(64,"AspirateStrategy1",8,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(128,"AspirateStrategy1",8,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C080N000000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C0800l00000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C08000¬0000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C08Ê1000000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C080?300000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C0800p70000000000",0,0);
+Dispense(240,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C080000?000000000",0,0);""")),
+Specs(8, 6, 1, 1, 3.0, Contamination.NoContamination, Some(
+"""Aspirate(1,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(16,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(32,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(64,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(128,"AspirateStrategy1",18,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(255,"Dispense Hover",3,3,3,3,3,3,3,3,0,0,0,0,17,1,1,"0C08ø1000000000000",0,0);
+Dispense(255,"Dispense Hover",3,3,3,3,3,3,3,3,0,0,0,0,17,1,1,"0C080¨300000000000",0,0);
+Dispense(255,"Dispense Hover",3,3,3,3,3,3,3,3,0,0,0,0,17,1,1,"0C0800Â70000000000",0,0);
+Dispense(255,"Dispense Hover",3,3,3,3,3,3,3,3,0,0,0,0,17,1,1,"0C08000¬?000000000",0,0);
+Dispense(255,"Dispense Hover",3,3,3,3,3,3,3,3,0,0,0,0,17,1,1,"0C080000ÊO00000000",0,0);
+Dispense(255,"Dispense Hover",3,3,3,3,3,3,3,3,0,0,0,0,17,1,1,"0C0800000?o0000000",0,0);""")),
+Specs(8, 4, 1, 1, 48.0, Contamination.NoContamination, Some(
+"""Aspirate(1,"AspirateStrategy1",384,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",384,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",384,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",384,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C080N000000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C0800l00000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C08000¬0000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C08Ê1000000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C080?300000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C0800p70000000000",0,0);
+Dispense(15,"Dispense Hover",48,48,48,48,0,0,0,0,0,0,0,0,17,1,1,"0C080000?000000000",0,0);""")),
+Specs(8, 4, 1, 1, 240.0, Contamination.NoContamination, Some(
+"""Aspirate(1,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C080N000000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C0800l00000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C08000¬0000000000",0,0);
+Aspirate(1,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C08Ê1000000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C080?300000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C0800p70000000000",0,0);
+Dispense(15,"Dispense Hover",240,240,240,240,0,0,0,0,0,0,0,0,17,1,1,"0C080000?000000000",0,0);""")),
+Specs(8, 4, 1, 1, 480.0, Contamination.NoContamination, Some(
+"""Aspirate(1,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C080N000000000000",0,0);
+Aspirate(1,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C08Ê1000000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C080?300000000000",0,0);
+Aspirate(1,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C0800l00000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C08000¬0000000000",0,0);
+Aspirate(1,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(2,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(4,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C0800p70000000000",0,0);
+Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C080000?000000000",0,0);"""))
 		)
-		
-		x(false, false, false, 1, 1, 4, 1, 1, 
-"""Aspirate(1,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Aspirate(2,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Aspirate(4,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Aspirate(8,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Dispense(15,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",0,0);"""
-		)
-		
-		x(false, false, false, 2, 1, 2, 1, 1, 
-"""Aspirate(1,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Dispense(1,"Dispense Hover",1,0,0,0,0,0,0,0,0,0,0,0,17,1,1,"0C0810000000000000",0,0);"""
-		)
-		
-		x(false, false, false, 1, 1, 96, 96, 1, 
-"""Aspirate(1,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Aspirate(2,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Aspirate(4,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Aspirate(8,"AspirateStrategy1",1,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000000",0,0);
-Dispense(15,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",0,0);"""
-		)
-		*/
+		//x(specs(2))
+		for (spec <- specs) x(spec)
 	}
 	
 	def x(spec: Specs) {
@@ -126,7 +184,7 @@ Dispense(15,"Dispense Hover",1,1,1,1,0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000"
 				aspirateStrategy = rule1,
 				dispenseStrategy = if (spec.contamination == Contamination.DispenseContaminates) dispenseEnter else dispenseHover)
 		val s = EvowareTranslator.translate(p.tokens, evowareSettings, robot.state)
-		println(spec)
+		println(spec.nSrcRows+"x"+spec.nSrcCols+" -> "+spec.nDestRows+"x"+spec.nDestCols+" "+spec.nVolume+"µl")
 		println(s)
 		println()
 		//assert(s == sExpected)
