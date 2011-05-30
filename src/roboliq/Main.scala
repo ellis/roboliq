@@ -14,6 +14,7 @@ object Main {
 	def main(args: Array[String]): Unit = {
 		//testConcrete()
 		//test2()
+		//EvowareTranslator.test()
 		Tests.a()
 	}
 

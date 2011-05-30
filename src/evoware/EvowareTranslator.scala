@@ -1,5 +1,8 @@
 package evoware
 
+import java.io.File
+import java.io.BufferedWriter
+import java.io.FileWriter
 import roboliq.parts._
 import roboliq.tokens._
 import roboliq.robot._
@@ -10,6 +13,208 @@ object EvowareTranslator {
 		val tr = new EvowareTranslator(settings, state)
 		tr.translate(cmds)
 	}
+	
+	def translateAndSave(cmds: Seq[Token], settings: EvowareSettings, state: IRobotState, sFilename: String): String = {
+		val tr = new EvowareTranslator(settings, state)
+		val s = tr.translate(cmds)
+		val file = new File(sFilename);
+		val output = new BufferedWriter(new FileWriter(file));
+		/*output.write(getHeader())
+		output.newLine()
+		output.write(s)
+		output.newLine()*/
+		writeLines(output, getHeader())
+		writeLines(output, s);
+		output.close();
+		s
+	}
+	
+	def writeLines(output: BufferedWriter, s: String) {
+		val as = s.split("\r?\n")
+		for (s <- as if !s.isEmpty) {
+			output.write(s)
+			output.write("\r\n")
+		}
+	}
+	
+	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
+	private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
+	
+	def encodeWells(holder: WellHolder, aiWells: Traversable[Int]): String = {
+		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
+		val amWells = new Array[Int](nWellMaskChars)
+		for (iWell <- aiWells) {
+			val iChar = iWell / 7;
+			val iWell1 = iWell % 7;
+			amWells(iChar) += 1 << iWell1
+		}
+		val sWellMask = amWells.map(encode).mkString
+		val sPlateMask = Array('0', hex(holder.nCols), '0', hex(holder.nRows)).mkString + sWellMask
+		sPlateMask
+	}
+	
+	def test() {
+		val holder = new Plate(8, 12)
+		def t(aiWells: Array[Int], sExpect: String) {
+			println(aiWells.mkString(","))
+			println(sExpect)
+			val sActual = encodeWells(holder, aiWells)
+			println(sActual)
+			assert(sExpect == sActual)
+			
+		}
+		t(Array( 0,  1,  2,  3), "0C08?0000000000000")
+		t(Array( 4,  5,  6,  7), "0C08\2401000000000000")
+		t(Array( 8,  9, 10, 11), "0C080N000000000000")
+	}
+	
+	def getHeader(): String =
+"""302F0FE9
+20110530_155010 No log in       
+                                                                                                                                
+No user logged in                                                                                                               
+--{ RES }--
+V;200
+--{ CFG }--
+999;219;32;
+14;-1;239;240;130;241;-1;-1;52;-1;242;249;-1;-1;-1;-1;-1;250;243;-1;-1;-1;-1;-1;-1;244;-1;-1;-1;-1;-1;-1;-1;-1;35;-1;-1;-1;-1;-1;-1;234;-1;-1;-1;-1;-1;-1;235;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;246;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;
+998;0;
+998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;
+998;;;;
+998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;
+998;;;;
+998;3;Trough 100ml;Trough 100ml;Trough 100ml;
+998;Labware7;Labware8;Decon;
+998;2;Reagent Cooled 8*15ml;Reagent Cooled 8*50ml;
+998;Labware5;Labware6;
+998;0;
+998;0;
+998;1;Trough 1000ml;
+998;Labware10;
+998;0;
+998;1;;
+998;;
+998;2;;;
+998;;;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;1;;
+998;;
+998;2;D-BSSE 96 Well PCR Plate;D-BSSE 96 Well PCR Plate;
+998;Labware14;Labware15;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;3;;;;
+998;;;;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;9;;;;;;;MTP Waste;;;
+998;;;;;;;Waste;;;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;1;D-BSSE 96 Well PCR Plate;
+998;Labware12;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;1;D-BSSE 96 Well PCR Plate;
+998;Labware13;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;1;;
+998;;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;5;
+998;245;11;
+998;93;55;
+998;252;54;
+998;251;59;
+998;253;64;
+998;7;
+998;4;0;System;
+998;0;1;Centrifuge;
+998;0;0;Shelf 32Pos Microplate;
+998;0;5;Hotel 5Pos SPE;
+998;0;2;Hotel 3Pos DWP;
+998;0;3;Hotel 4Pos DWP 1;
+998;0;4;Hotel 4Pos DWP 2;
+998;0;
+998;1;
+998;54;
+998;11;
+998;55;
+998;54;
+998;59;
+998;64;
+996;0;0;
+--{ RPG }--"""
 }
 
 private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
@@ -45,22 +250,15 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 		val mTips = aiTips.foldLeft(0) { (sum, i) => sum + (1 << i) }
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
-		val anVolumes0 = twvs.map(_.nVolume).toArray
-		val anVolumes = new Array[Double](12)
-		Array.copy(anVolumes0, 0, anVolumes, 0, anVolumes0.size)
-		val formatVolume = new java.text.DecimalFormat("#.##")
-		val sVolumes = anVolumes.map(formatVolume.format).mkString(",")
-		
-		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
-		val amWells = new Array[Int](nWellMaskChars)
+		val asVolumes = Array.fill(12)("0")
+		val fmt = new java.text.DecimalFormat("#.##")
 		for (twv <- twvs) {
-			val iWell = twv.well.index
-			val iChar = iWell / 7;
-			val iWell1 = iWell % 7;
-			amWells(iChar) += 1 << iWell1
+			val iTip = twv.tip.index
+			asVolumes(iTip) = "\""+fmt.format(twv.nVolume)+'"'
 		}
-		val sWellMask = amWells.map(encode).mkString
-		val sPlateMask = Array('0', hex(holder.nCols), '0', hex(holder.nRows)).mkString + sWellMask
+		val sVolumes = asVolumes.mkString(",")
+		
+		val sPlateMask = EvowareTranslator.encodeWells(holder, twvs.map(_.well.index))
 		
 		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
 		def findLoc(part: Part): Option[Tuple2[Int, Int]] = {
@@ -91,9 +289,6 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 			sPlateMask
 		);
 	}
-	
-	private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
-	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
 	
 	/*
 	private def spirate(String sFunc, int mTipsMask, int iGrid, int iSite, int iWell0, String sLiquidClass, double nVolume) {

@@ -10,13 +10,13 @@ import evoware._
 object Tests {
 	class Setup {
 		val tips = Array(
-			new Tip(0, 2, 960), new Tip(1, 2, 960), new Tip(2, 2, 960), new Tip(3, 2, 960), 
+			new Tip(0, 2, 950), new Tip(1, 2, 950), new Tip(2, 2, 950), new Tip(3, 2, 950), 
 			new Tip(4, 0, 45), new Tip(5, 0, 45), new Tip(6, 0, 45), new Tip(7, 0, 45) 
 		)
 		val tipGroups = Array(Array(0, 1, 2, 3), Array(4, 5, 6, 7), Array(0, 1, 2, 3, 4, 5, 6, 7))
-		val rule1 = new AspirateStrategy("AspirateStrategy1")
-		val dispenseEnter = new DispenseStrategy("Dispense Enter", bEnter = true)
-		val dispenseHover = new DispenseStrategy("Dispense Hover", bEnter = false)
+		val rule1 = new AspirateStrategy("D-BSSE Te-PS Wet Contact")
+		val dispenseEnter = new DispenseStrategy("D-BSSE Te-PS Wet Contact", bEnter = true)
+		val dispenseHover = new DispenseStrategy("D-BSSE Te-PS Dry Contact", bEnter = false)
 		val carrier = new Carrier
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
@@ -183,8 +183,14 @@ Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C080000?00
 				volumes = Array.fill(dests.size) { nVolume },
 				aspirateStrategy = rule1,
 				dispenseStrategy = if (spec.contamination == Contamination.DispenseContaminates) dispenseEnter else dispenseHover)
-		val s = EvowareTranslator.translate(p.tokens, evowareSettings, robot.state)
-		println(spec.nSrcRows+"x"+spec.nSrcCols+" -> "+spec.nDestRows+"x"+spec.nDestCols+" "+spec.nVolume+"µl")
+		
+		val sSrc = spec.nSrcRows+"x"+spec.nSrcCols
+		val sDest = spec.nDestRows+"x"+spec.nDestCols
+		val fmt = new java.text.DecimalFormat("#.##")
+		val sVolume = fmt.format(spec.nVolume)
+		val sFilename = "test_"+sSrc+"_"+sDest+"_"+sVolume+".esc"
+		val s = EvowareTranslator.translateAndSave(p.tokens, evowareSettings, robot.state, sFilename)
+		println(sSrc+" -> "+sDest+" "+sVolume+"µl")
 		println(s)
 		println()
 		//assert(s == sExpected)
