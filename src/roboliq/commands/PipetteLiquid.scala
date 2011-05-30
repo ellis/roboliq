@@ -1,5 +1,6 @@
 package roboliq.commands
 
+import scala.collection.immutable.SortedSet
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -54,7 +55,8 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 		dests.sortWith(sortDests)
 	}
 	
-	val mapDestToVolume = Map() ++ (dests zip volumes)
+	val mapDestToVolume = (dests zip volumes).toMap
+	val mapTipStates = robot.config.tips.map(tip => tip -> new TipState(tip)).toMap
 	
 	val tokens: Seq[Token] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
@@ -63,14 +65,16 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 		var winner: Seq[Token] = null
 		var nWinnerScore = Int.MaxValue
 		for (tipGroup <- robot.config.tipGroups) {
-			val tips = tipGroup.map(t => new TipState(robot.config.tips(t)))
+			val tips = tipGroup.map(iTip => mapTipStates(robot.config.tips(iTip)))
 	
 			val cycles = pipetteLiquid(tips)
-			val tokens = cycles.flatMap(_.toTokenSeq)
-			val nScore = robot.score(tokens)
-			if (nScore < nWinnerScore) {
-				winner = tokens
-				nWinnerScore = nScore
+			if (!cycles.isEmpty) {
+				val tokens = cycles.flatMap(_.toTokenSeq)
+				val nScore = robot.score(tokens)
+				if (nScore < nWinnerScore) {
+					winner = tokens
+					nWinnerScore = nScore
+				}
 			}
 		}
 		winner
@@ -114,69 +118,79 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
-		var cycle: CycleState = null
-		cycle = newCycle(cycles, tips)
 		
 		val destsRemaining = new ArrayBuffer[Well]
-		destsRemaining ++= dests
-		
-		var wellPrev_? : Option[Well] = None
-		while (!destsRemaining.isEmpty) {
-			var bNewCycle = false
-			val tipsFree = tips.filter(_.bFree)
-			if (tipsFree.isEmpty) {
-				bNewCycle = true
+		destsRemaining ++= destsSorted
+
+		var bOk = true
+		while (!destsRemaining.isEmpty && bOk) {
+			val dispenses = new ArrayBuffer[Dispense]
+			def dispense(wellPrev_? : Option[Well]) {
+				val twvs = pipetteLiquid_dispenseOnce(tips, destsRemaining, wellPrev_?)
+				twvs match {
+					case Nil =>
+					case _ =>
+						dispenses += new Dispense(twvs, dispenseStrategy)
+						for (twv <- twvs) {
+							val tipState = mapTipStates(twv.tip)
+							tipState.nVolume += twv.nVolume
+							// If dispense contaminates the tip, then don't let this tip be reused
+							if (bDispenseContaminates)
+								tipState.bFree = false
+							destsRemaining -= twv.well
+						}
+						dispense(Some(twvs.head.well))
+				}
+			}
+			dispense(None)
+			if (dispenses.isEmpty) {
+				bOk = false
 			}
 			else {
-				val destsNext = getNextDestBatch(tipsFree, destsRemaining, wellPrev_?)
-				assert(!destsNext.isEmpty)
-	
-				val destsNextWithIndex = destsNext.zipWithIndex
-				
-				// Check whether the free tips all have enough free volume for their respective destinations
-				val bOk = destsNextWithIndex.forall(pair => {
-					val (dest, i) = pair
-					val nVolume = mapDestToVolume(dest)
-					val tip = tipsFree(i)
-					tipIsFreeAndHasVolume(nVolume)(tip)
-				})
-				
-				if (bOk) {
-					// Indicate that tip should dispense the given volume to dest
-					val twvs = new ArrayBuffer[TipWellVolume]
-					for ((dest, i) <- destsNextWithIndex) {
-						val nVolume = mapDestToVolume(dest)
-						val tip = tipsFree(i)
-						tip.nVolume += nVolume
-						// If dispense contaminates the tip, then don't let this tip be reused
-						if (bDispenseContaminates)
-							tip.bFree = false
-						twvs += new TipWellVolume(tip.tip, dest, nVolume)
-						destsRemaining -= dest
-					}
-					cycle.dispenses += new Dispense(twvs, dispenseStrategy)
-					wellPrev_? = Some(destsNext.head)
-				}
-				else {
-					bNewCycle = true
-				}
-			}
-			
-			if (bNewCycle) {
+				val cycle = new CycleState(tips)
+				cycle.dispenses ++= dispenses
 				aspirate(cycle, tips)
-				cycle = newCycle(cycles, tips)
-				assert(tips.exists(_.bFree))
+				cycles += cycle
 			}
 		}
 		
-		aspirate(cycle, tips)
-		
 		cycles
+	}
+	
+	private def pipetteLiquid_dispenseOnce(tips: Seq[TipState], destsRemaining: Seq[Well], wellPrev_? : Option[Well]): List[TipWellVolume] = {
+		// Get a list of wells to dispense into
+		val destsNext = getNextDestBatch(tips, destsRemaining, wellPrev_?)
+		//assert(!destsNext.isEmpty)
+		// Check whether the tips all have enough free volume for their respective destinations
+		val tipsAndDests = tips zip destsRemaining
+		val bTipsHaveSpace = tipsAndDests.forall(pair => {
+			val nVolume = mapDestToVolume(pair._2)
+			tipIsFreeAndHasVolume(nVolume)(pair._1)
+		})
+		// If they do:
+		if (bTipsHaveSpace) {
+			// Indicate that tip should dispense the given volume to dest
+			val twvs = for ((tip, dest) <- tipsAndDests) yield {
+				val nVolume = mapDestToVolume(dest)
+				new TipWellVolume(tip.tip, dest, nVolume)
+			}
+			twvs.toList
+		}
+		else {
+			Nil
+		}
 	}
 
 	private def tipIsFreeAndHasVolume(nVolume: Double)(tip: TipState): Boolean =
-		(tip.bFree && nVolume + tip.nVolume >= tip.nVolumeMin && nVolume + tip.nVolume <= tip.nVolumeMax)
+		(tip.bFree && nVolume >= tip.nVolumeMin && nVolume + tip.nVolume <= tip.nVolumeMax)
 	
+	private def resetTips() {
+		for ((_, tipState) <- mapTipStates) {
+			tipState.nVolume = 0
+			tipState.bFree = true
+		}
+	}
+	/*	
 	private def newCycle(cycles: ArrayBuffer[CycleState], tips: Array[TipState]): CycleState = {
 		val cycle = new CycleState(tips)
 		cycles += cycle
@@ -186,7 +200,7 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 		}
 		cycle
 	}
-	
+	*/
 	private def aspirate(cycle: CycleState, tips: Array[TipState]) {
 		// Cases:
 		// Case 1: tips size == srcs size:
@@ -234,14 +248,16 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 		}
 	}
 
-	private def getNextDestBatch(tips: Seq[TipState], wellsAvailable: Seq[Well], wellPrev_? : Option[Well]): Seq[Well] = {
+	private def getNextDestBatch(tips: Traversable[TipState], wellsAvailable: Seq[Well], wellPrev_? : Option[Well]): Seq[Well] = {
+		if (tips.isEmpty || wellsAvailable.isEmpty)
+			Nil
 		// If the previous well is defined but is on a different holder, then ignore it
-		if (wellPrev_?.isDefined && !wellsAvailable.exists(_.holder == wellPrev_?.get.holder))
+		else if (wellPrev_?.isDefined && !wellsAvailable.exists(_.holder == wellPrev_?.get.holder))
 			getNextDestBatch(tips, wellsAvailable, None)
 		else {
 			val _well = wellPrev_? match {
 				case Some(well) => well
-				case None => wellsAvailable(0)
+				case None => wellsAvailable.head
 			}
 			val holder = _well.holder
 			val iCol = wellPrev_? match {
@@ -249,13 +265,13 @@ class PipetteLiquid(robot: Robot, srcs: Array[Well], dests: Array[Well], volumes
 				case None => 0
 			}
 			val wellsOnHolder = wellsAvailable.filter(_.holder == holder)
-			getNextDestBatch(tips, holder, wellsOnHolder, iCol)
+			getNextDestBatch2(tips, holder, wellsOnHolder, iCol)
 		}
 	}
 	
 	// Pick the top-most destination wells available in the given column
 	// If none found, loop through columns until wells are found
-	private def getNextDestBatch(tips: Seq[TipState], holder: WellHolder, wellsOnHolder: Seq[Well], iCol0: Int): Seq[Well] = {
+	private def getNextDestBatch2(tips: Traversable[TipState], holder: WellHolder, wellsOnHolder: Seq[Well], iCol0: Int): Seq[Well] = {
 		val nRows = holder.nRows
 		val nCols = holder.nCols
 		var iCol = iCol0
