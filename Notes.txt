@@ -1,7 +1,18 @@
+Questions for Fabian:
+	What are the criteria for picking a "liquid class" for the aspirate and dispense commands?
+
+Testing:
+	test_1x1_8x6_3: error: tip 5 : 6µl too much in diluter
+
+Todo:
+	Organize Evoware robot setup better so that it generates more of the setup information
+	Figure out liquid classes
+	Figure out washing
+	create functions for decontaminate, pcrDispense, etc
+	start working on next higher level of abstraction
+
 Large tips: 960µl max
 Small tips: 45µl max
-
-?? Why are most carriers cooled?  When do we want to cool a plate and when not?
 
 CompleteYeastTransformation
  PCR Dispense

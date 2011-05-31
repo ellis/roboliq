@@ -211,53 +211,11 @@ Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C080000?00
 		//assert(s == sExpected)
 	}
 	
-	def x(bSrcContaminates: Boolean, bDestContaminates: Boolean, bDispenseEnters: Boolean, nSrcRows: Int, nSrcCols: Int, nDestRows: Int, nDestCols: Int, nVolume: Double, sExpected: String) {
-		val setup = new Setup
-		import setup._
-		
-		val liquidSrc = if (bSrcContaminates) liquidDirty1 else liquidWater1
-		val liquidDest = if (bDestContaminates) liquidDirty2 else liquidWater2
-		
-		val srcs = getWells(plate1, nSrcRows, nSrcCols)
-		val dests = getWells(plate2, nDestRows, nDestCols)
-		
-		val builder = new RobotStateBuilder(RobotState.empty)
-		builder.sites += (plate1 -> new Site(carrier, 0))
-		builder.sites += (plate2 -> new Site(carrier, 1))
-		builder.fillWells(plate1.wells, liquidSrc, 50)
-		builder.fillWells(plate2.wells, liquidDest, 50)
-		robot.state = builder.toImmutable
-		
-		val p = new PipetteLiquid(
-				robot = robot,
-				srcs = srcs,
-				dests = dests,
-				volumes = Array.fill(dests.size) { nVolume },
-				aspirateStrategy = rule1,
-				dispenseStrategy = if (bDispenseEnters) dispenseEnter else dispenseHover)
-		val s = EvowareTranslator.translate(p.tokens, evowareSettings, robot.state)
-		println(s)
-		println()
-		//assert(s == sExpected)
-	}
-	
 	private def getWells(plate: Plate, nRows: Int, nCols: Int): Array[Well] = {
 		val indexes = (0 until nCols).flatMap(iCol => {
 			val iCol0 = iCol * plate.nRows
 			(iCol0 until iCol0 + nRows)
 		}).toSet
 		plate.wells.filter(well => indexes.contains(well.index)).toArray
-	}
-	
-	private def pipetteLiquid(setup: Setup, nSrcs: Int, nDests: Int, nVolume: Double, dispenseStrategy: DispenseStrategy): String = {
-		import setup._
-		val p = new PipetteLiquid(
-				robot = robot,
-				srcs = plate1.wells.take(nSrcs),
-				dests = plate2.wells.take(nDests),
-				volumes = Array.fill(nDests) { nVolume },
-				aspirateStrategy = rule1,
-				dispenseStrategy = dispenseStrategy)
-		EvowareTranslator.translate(p.tokens, evowareSettings, robot.state)
 	}
 }

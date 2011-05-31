@@ -228,7 +228,7 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	private def evowareCmd(tok: Token): List[String] = tok match {
 		case t @ Aspirate(_, _) => aspirate(t)
 		case t @ Dispense(_, _) => dispense(t)
-		case _ => Nil
+		case t @ Clean(specs) => clean(specs)
 	}
 
 	private def aspirate(tok: Aspirate): List[String] = {
@@ -392,4 +392,7 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	}
 	*/
 
+	private def clean(specs: Traversable[TipCleanSpec]): List[String] = {
+		Nil
+	}
 }
