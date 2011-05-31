@@ -251,16 +251,22 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 		}
 	}
 	
-	private def partitionTipKinds(twvs: List[TipWellVolume]): List[List[TipWellVolume]] = {
-		twvs match {
+	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {
+		list match {
 			case Nil => Nil
-			case twv :: tail =>
-				val tip0 = twv.tip
-				val tipKind = settings.mapTipIndexToKind(tip0.index)
-				def belongs(twv: TipWellVolume) = (settings.mapTipIndexToKind(twv.tip.index) == tipKind)
-				val (twvs2, rest) = twvs.partition(belongs)
-				twvs2 :: partitionTipKinds(rest)
+			case x :: xs =>
+				val (sublist, rest) = list.partition(y => fn(x, y))
+				sublist :: partitionBy(rest, fn)
 		}
+	}
+	
+	private def partitionTipKinds(twvs: List[TipWellVolume]): List[List[TipWellVolume]] = {
+		def sameTipKind(a: TipWellVolume, b: TipWellVolume): Boolean = {
+			val ka = settings.mapTipIndexToKind(a.tip.index)
+			val kb = settings.mapTipIndexToKind(b.tip.index)
+			ka == kb
+		}
+		partitionBy(twvs, sameTipKind)
 	}
 	
 	private def spirate(sFunc: String, twvs: Seq[TipWellVolume], sPipettingName: String): List[String] = {
@@ -393,6 +399,15 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	*/
 
 	private def clean(specs: Traversable[TipCleanSpec]): List[String] = {
+		def sameTipKind(a: TipCleanSpec, b: TipCleanSpec): Boolean = {
+			val ka = settings.mapTipIndexToKind(a.tip.index)
+			val kb = settings.mapTipIndexToKind(b.tip.index)
+			ka == kb
+		}
+		val specss = partitionBy(specs.toList, sameTipKind)
+		for (specs <- specss) {
+			
+		}
 		Nil
 	}
 }
