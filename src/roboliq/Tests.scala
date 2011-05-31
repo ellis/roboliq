@@ -14,9 +14,9 @@ object Tests {
 			new Tip(4, 0, 45), new Tip(5, 0, 45), new Tip(6, 0, 45), new Tip(7, 0, 45) 
 		)
 		val tipGroups = Array(Array(0, 1, 2, 3), Array(4, 5, 6, 7), Array(0, 1, 2, 3, 4, 5, 6, 7))
-		val rule1 = new AspirateStrategy("D-BSSE Te-PS Wet Contact")
-		val dispenseEnter = new DispenseStrategy("D-BSSE Te-PS Wet Contact", bEnter = true)
-		val dispenseHover = new DispenseStrategy("D-BSSE Te-PS Dry Contact", bEnter = false)
+		val rule1 = new AspirateStrategy("Aspirate")
+		val dispenseEnter = new DispenseStrategy("Dispense Enter", bEnter = true)
+		val dispenseHover = new DispenseStrategy("Dispense Hover", bEnter = false)
 		val carrier = new Carrier
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
@@ -27,10 +27,25 @@ object Tests {
 		
 		val robotConfig = new RobotConfig(tips, tipGroups)
 		val robot = new EvowareRobot(robotConfig)
+		
+		val tipKindL = new EvowareTipKind(0, Map(
+				"Aspirate" -> "Water free dispense",
+				"Dispense Enter" -> "Water wet contact",
+				"Dispense Hover" -> "Water free dispense"))
+		val tipKindS = new EvowareTipKind(1, Map(
+				"Aspirate" -> "D-BSSE Te-PS Wet Contact",
+				"Dispense Enter" -> "D-BSSE Te-PS Wet Contact",
+				"Dispense Hover" -> "D-BSSE Te-PS Dry Contact"))
 
-		val evowareSettings = new EvowareSettings(Map(
+		val evowareSettings = new EvowareSettings(
+			grids = Map(
 				carrier -> 17
-		))
+			),
+			mapTipIndexToKind = Map(
+				0 -> tipKindL, 1 -> tipKindL, 2 -> tipKindL, 3 -> tipKindL,
+				4 -> tipKindS, 5 -> tipKindS, 6 -> tipKindS, 7 -> tipKindS
+			)
+		)
 	}
 	
 	object Contamination extends Enumeration {
@@ -153,7 +168,7 @@ Aspirate(8,"AspirateStrategy1",960,0,0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0810000000000
 Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C0800p70000000000",0,0);
 Dispense(15,"Dispense Hover",480,480,480,480,0,0,0,0,0,0,0,0,17,1,1,"0C080000?000000000",0,0);"""))
 		)
-		//x(specs(2))
+		x(specs(3))
 		for (spec <- specs) x(spec)
 	}
 	
