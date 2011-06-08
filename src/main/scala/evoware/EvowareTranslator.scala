@@ -17,23 +17,27 @@ object EvowareTranslator {
 	def translateAndSave(cmds: Seq[Token], settings: EvowareSettings, state: IRobotState, sFilename: String): String = {
 		val tr = new EvowareTranslator(settings, state)
 		val s = tr.translate(cmds)
-		val file = new File(sFilename);
-		val output = new BufferedWriter(new FileWriter(file));
+		//val file = new File(sFilename)
+		//val output = new BufferedWriter(new FileWriter(file));
+		val fos = new java.io.FileOutputStream(sFilename)
 		/*output.write(getHeader())
 		output.newLine()
 		output.write(s)
 		output.newLine()*/
-		writeLines(output, getHeader())
-		writeLines(output, s);
-		output.close();
+		//fos.write(Array('\220'.asInstanceOf[Byte]), 0, 1)
+		//fos.write("\220".map(_.asInstanceOf[Byte]).toArray)
+		writeLines(fos, getHeader())
+		writeLines(fos, s);
+		fos.close();
 		s
 	}
 	
-	def writeLines(output: BufferedWriter, s: String) {
+	def writeLines(output: java.io.FileOutputStream, s: String) {
 		val as = s.split("\r?\n")
-		for (s <- as if !s.isEmpty) {
-			output.write(s)
-			output.write("\r\n")
+		for (sLine <- as if !s.isEmpty) {
+			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
+			output.write(bytes)
+			output.write("\r\n".getBytes())
 		}
 	}
 	
@@ -66,6 +70,7 @@ object EvowareTranslator {
 		t(Array( 0,  1,  2,  3), "0C08?0000000000000")
 		t(Array( 4,  5,  6,  7), "0C08\2401000000000000")
 		t(Array( 8,  9, 10, 11), "0C080N000000000000")
+		t(Array(12, 13, 14, 15), "0C080\220300000000000")
 	}
 	
 	def getHeader(): String =
@@ -197,17 +202,15 @@ V;200
 998;252;54;
 998;251;59;
 998;253;64;
-998;7;
+998;6;
 998;4;0;System;
-998;0;1;Centrifuge;
 998;0;0;Shelf 32Pos Microplate;
-998;0;5;Hotel 5Pos SPE;
-998;0;2;Hotel 3Pos DWP;
-998;0;3;Hotel 4Pos DWP 1;
-998;0;4;Hotel 4Pos DWP 2;
+998;0;4;Hotel 5Pos SPE;
+998;0;1;Hotel 3Pos DWP;
+998;0;2;Hotel 4Pos DWP 1;
+998;0;3;Hotel 4Pos DWP 2;
 998;0;
 998;1;
-998;54;
 998;11;
 998;55;
 998;54;
@@ -223,37 +226,70 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	}
 	
 	private def evowareCmd(tok: Token): List[String] = tok match {
-		case t @ Aspirate(_, _) => aspirate(t) :: Nil
-		case t @ Dispense(_, _) => dispense(t) :: Nil
-		case _ => Nil
+		case t @ Aspirate(_, _) => aspirate(t)
+		case t @ Dispense(_, _) => dispense(t)
+		case t @ Clean(specs) => clean(specs)
 	}
 
-	private def aspirate(tok: Aspirate): String = {
-		spirate("Aspirate", tok.twvs, tok.rule.sName);
+	private def aspirate(tok: Aspirate): List[String] = {
+		spirates("Aspirate", tok.twvs, tok.rule.sName);
 	}
 	
-	private def dispense(tok: Dispense): String = {
-		spirate("Dispense", tok.twvs, tok.rule.sName);
+	private def dispense(tok: Dispense): List[String] = {
+		spirates("Dispense", tok.twvs, tok.rule.sName);
 	}
 	
-	private def spirate(sFunc: String, _twvs: Seq[TipWellVolume], sPipettingName: String): String = {
-		assert(!_twvs.isEmpty)
-		assert(_twvs.size <= 12)
-		val holder = _twvs.head.well.holder
-		assert(_twvs.forall(_.well.holder == holder))
-		
-		val twvs = _twvs.sortWith(_.tip.index < _.tip.index)
+	private def spirates(sFunc: String, twvs: Seq[TipWellVolume], sPipettingName: String): List[String] = {
+		if (twvs.isEmpty)
+			Nil
+		else {
+			val holder = twvs.head.well.holder
+			assert(twvs.forall(_.well.holder == holder))
+			val twvsSorted = twvs.sortWith(_.tip.index < _.tip.index).toList
+			val twvss = partitionTipKinds(twvsSorted)
+			twvss.flatMap(twvs => spirate(sFunc, twvs, sPipettingName))
+		}
+	}
+	
+	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {
+		list match {
+			case Nil => Nil
+			case x :: xs =>
+				val (sublist, rest) = list.partition(y => fn(x, y))
+				sublist :: partitionBy(rest, fn)
+		}
+	}
+	
+	private def partitionTipKinds(twvs: List[TipWellVolume]): List[List[TipWellVolume]] = {
+		def sameTipKind(a: TipWellVolume, b: TipWellVolume): Boolean = {
+			val ka = settings.mapTipIndexToKind(a.tip.index)
+			val kb = settings.mapTipIndexToKind(b.tip.index)
+			ka == kb
+		}
+		partitionBy(twvs, sameTipKind)
+	}
+	
+	private def spirate(sFunc: String, twvs: Seq[TipWellVolume], sPipettingName: String): List[String] = {
+		if (twvs.isEmpty)
+			return Nil
+
+		val twv0 = twvs.head 
+		val tipKind = settings.mapTipIndexToKind(twv0.tip.index)
+		val holder = twv0.well.holder
 		
 		// Indexes of tips we want to use
 		val aiTips = twvs.map(_.tip.index)
 		// Create mask for all tips being used
 		val mTips = aiTips.foldLeft(0) { (sum, i) => sum + (1 << i) }
 		
+		val sLiquidClass = tipKind.mapLiquidClasses(sPipettingName)
+		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
 		val asVolumes = Array.fill(12)("0")
 		val fmt = new java.text.DecimalFormat("#.##")
 		for (twv <- twvs) {
 			val iTip = twv.tip.index
+			assert(iTip >= 0 && iTip < 12)
 			asVolumes(iTip) = "\""+fmt.format(twv.nVolume)+'"'
 		}
 		val sVolumes = asVolumes.mkString(",")
@@ -283,11 +319,11 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 			"\"%s\","+
 			"0,0);"
 		).format(
-			mTips, sPipettingName,
+			mTips, sLiquidClass,
 			sVolumes,
 			iGrid, iSite,
 			sPlateMask
-		);
+		) :: Nil;
 	}
 	
 	/*
@@ -362,4 +398,16 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	}
 	*/
 
+	private def clean(specs: Traversable[TipCleanSpec]): List[String] = {
+		def sameTipKind(a: TipCleanSpec, b: TipCleanSpec): Boolean = {
+			val ka = settings.mapTipIndexToKind(a.tip.index)
+			val kb = settings.mapTipIndexToKind(b.tip.index)
+			ka == kb
+		}
+		val specss = partitionBy(specs.toList, sameTipKind)
+		for (specs <- specss) {
+			
+		}
+		Nil
+	}
 }

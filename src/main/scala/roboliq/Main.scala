@@ -6,8 +6,8 @@ import roboliq.commands._
 import roboliq.robot._
 import evoware.EvowareRobot
 import evoware.EvowareSettings
+import evoware.EvowareTipKind
 import evoware.EvowareTranslator
-import evoware.Loc
 
 
 object Main {
@@ -48,9 +48,24 @@ object Main {
 			)
 		)
 		
-		val evowareSettings = new EvowareSettings(Map(
-				carrier -> 15
-		))
+		val tipKindL = new EvowareTipKind(0, Map(
+				"Aspirate" -> "Water free dispense",
+				"Dispense Enter" -> "Water wet contact",
+				"Dispense Hover" -> "Water free dispense"))
+		val tipKindS = new EvowareTipKind(1, Map(
+				"Aspirate" -> "D-BSSE Te-PS Wet Contact",
+				"Dispense Enter" -> "D-BSSE Te-PS Wet Contact",
+				"Dispense Hover" -> "D-BSSE Te-PS Dry Contact"))
+
+		val evowareSettings = new EvowareSettings(
+			grids = Map(
+				carrier -> 17
+			),
+			mapTipIndexToKind = Map(
+				0 -> tipKindL, 1 -> tipKindL, 2 -> tipKindL, 3 -> tipKindL,
+				4 -> tipKindS, 5 -> tipKindS, 6 -> tipKindS, 7 -> tipKindS
+			)
+		)
 
 		val builder = new RobotStateBuilder(RobotState.empty)
 		builder.sites += (plate1 -> new Site(carrier, 0))
@@ -90,9 +105,24 @@ object Main {
 				aspirateStrategy = rule1,
 				dispenseStrategy = rule2)
 		
-		val evowareSettings = new EvowareSettings(Map(
-				carrier -> 15
-		))
+		val tipKindL = new EvowareTipKind(0, Map(
+				"Aspirate" -> "Water free dispense",
+				"Dispense Enter" -> "Water wet contact",
+				"Dispense Hover" -> "Water free dispense"))
+		val tipKindS = new EvowareTipKind(1, Map(
+				"Aspirate" -> "D-BSSE Te-PS Wet Contact",
+				"Dispense Enter" -> "D-BSSE Te-PS Wet Contact",
+				"Dispense Hover" -> "D-BSSE Te-PS Dry Contact"))
+
+		val evowareSettings = new EvowareSettings(
+			grids = Map(
+				carrier -> 17
+			),
+			mapTipIndexToKind = Map(
+				0 -> tipKindL, 1 -> tipKindL, 2 -> tipKindL, 3 -> tipKindL,
+				4 -> tipKindS, 5 -> tipKindS, 6 -> tipKindS, 7 -> tipKindS
+			)
+		)
 		
 		println(EvowareTranslator.translate(p.tokens, evowareSettings, robot.state))
 	}
