@@ -4,7 +4,6 @@ import roboliq.parts._
 
 
 sealed class TipWellVolume(val tip: Tip, val well: Well, val nVolume: Double)
-sealed class TipContamination(val tip: Tip, val part: TipPart.Value, val contam: ContaminationDegree.Value, val nExtent: Double)
 
 object ContaminationSeverity extends Enumeration {
 	val None, Minor, Medium, Major = Value

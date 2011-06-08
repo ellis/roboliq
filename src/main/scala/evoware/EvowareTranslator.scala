@@ -398,16 +398,32 @@ private class EvowareTranslator(settings: EvowareSettings, state: IRobotState) {
 	}
 	*/
 
-	private def clean(specs: Traversable[TipCleanSpec]): List[String] = {
+	private def clean(specs0: Traversable[TipCleanSpec]): List[String] = {
 		def sameTipKind(a: TipCleanSpec, b: TipCleanSpec): Boolean = {
 			val ka = settings.mapTipIndexToKind(a.tip.index)
 			val kb = settings.mapTipIndexToKind(b.tip.index)
 			ka == kb
 		}
-		val specss = partitionBy(specs.toList, sameTipKind)
-		for (specs <- specss) {
+		val specss = partitionBy(specs0.toList, sameTipKind)
+		for (specs <- specss) yield {
+			// Indexes of tips we want to use
+			val aiTips = specs.map(_.tip.index)
+			// Create mask for all tips being used
+			val mTips = aiTips.foldLeft(0) { (sum, i) => sum + (1 << i) }
 			
-		}
-		Nil
+			Array(
+				mTips,
+				iWasteGrid, iWasteSite,
+				iCleanerGrid, iCleanerSite,
+				'"'+sWasteVolume+'"',
+				nWasteDelay,
+				'"'+sCleanerVolume+'"',
+				nCleanerDelay,
+				nAirgapVolume,
+				nAirgapSpeed,
+				nRetractSpeed,
+				(if (bFastWash) 1 else 0),
+				0,1000,0).mkString("Wash(", ",", ")")
+		}.toList
 	}
 }
