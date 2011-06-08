@@ -1,4 +1,5 @@
 *~
-bin
-.scala_dependencies
-test-*.esc
+test*.esc
+target/
+project/boot/
+
