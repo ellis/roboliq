@@ -1,0 +1,12 @@
+Evoware commands:
+x	asperate
+x	dispense
+	mix
+	wash
+	transfer
+	trash
+Peripheral commands:
+	seal
+	peel
+	pcr
+	...
