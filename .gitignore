@@ -1,8 +1,4 @@
 *~
-bin
-.scala_dependencies
 test*.esc
 target/
-lib_managed/
-src_managed/
 project/boot/
