@@ -3,8 +3,34 @@ Script generation errors:
 	
 Fabian: Why do we have two wash stations at grids 1 and 2?  Let's go through each line of Decontamination_WashBigTips.esc
 
-Large tips: 960µl max
+Large tips: 950µl max; but only 900ul if we need to use the decontamination wash
 Small tips: 45µl max
+
+Liquid class depends:
+	tips
+	liquid sucked up (viscosity, conductivity, live cells?)
+	volume already in target well
+	
+Suggested liquid classes:
+	Large tips:
+		Water free dispense (use for water, buffers, ethenol)
+		Water wet contact
+		Water dry contact High density plate (goes down really slow for 1536 (32x48) plates in order to avoid hurting the tips if they hit sometime) (use this for any dry contact dispense, not just high density plates)
+		DMSO free dispense
+		Comp cells free dispense
+		System Liquid free dispense (System Liquid is in principle "water", but we can use the system's liquid)
+		D-BSSE Decon (in principle, water wet contact with mixing: just for the the decontamination script)
+	Small tips:
+		D-BSSE Te-PS Dry Contact
+		D-BSSE Te-PS Wet Contact
+		D-BSSE Decon
+		
+	When accuracy doesn't matter, can use free dispense
+	Contact for low dispense volumes
+	Dry contact: only with empty plate
+	cells: always Comp cells free dispense
+	
+NOTE: critical thing in a transformation is speed, though the speed of aspirate and dispense has to be slow in order not to kill the cells
 
 CompleteYeastTransformation
 	PCR Dispense

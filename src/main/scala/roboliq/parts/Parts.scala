@@ -3,15 +3,17 @@ package roboliq.parts
 sealed class AspirateStrategy(val sName: String)
 sealed class DispenseStrategy(val sName: String, val bEnter: Boolean)
 
-class Tip(val index: Int, val nVolumeMin: Double, val nVolumeMax: Double)
+class Tip(val index: Int)
 
-class Liquid(val sName: String, val bContaminates: Boolean) {
+class Liquid(val sName: String, val bWaterFreeDispense: Boolean, val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) {
+	def contaminates = bCells || bDna || bOtherContaminant
+	
 	def +(other: Liquid): Liquid = {
-		if (this == other)
+		if (this eq other)
 			this
-		else if (this == Liquid.empty)
+		else if (this eq Liquid.empty)
 			other
-		else if (other == Liquid.empty)
+		else if (other eq Liquid.empty)
 			this
 		else {
 			assert(sName != other.sName)
