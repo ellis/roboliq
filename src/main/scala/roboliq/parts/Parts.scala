@@ -5,7 +5,21 @@ sealed class DispenseStrategy(val sName: String, val bEnter: Boolean)
 
 class Tip(val index: Int)
 
-class Liquid(val sName: String, val bWaterFreeDispense: Boolean, val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) {
+class Contamination(val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) {
+	def +(other: Contamination): Contamination = {
+		new Contamination(
+			bCells | other.bCells,
+			bDna | other.bDna,
+			bOtherContaminant | other.bOtherContaminant)
+	}
+}
+object Contamination {
+	val empty = new Contamination(false, false, false)
+}
+
+class Liquid(val sName: String, val bWaterFreeDispense: Boolean, bCells: Boolean, bDna: Boolean, bOtherContaminant: Boolean)
+	extends Contamination(bCells, bDna, bOtherContaminant)
+{
 	def contaminates = bCells || bDna || bOtherContaminant
 	
 	def +(other: Liquid): Liquid = {
@@ -18,13 +32,18 @@ class Liquid(val sName: String, val bWaterFreeDispense: Boolean, val bCells: Boo
 		else {
 			assert(sName != other.sName)
 			val sName3 = sName+":"+other.sName
-			val bContaminates3 = bContaminates | other.bContaminates
-			new Liquid(sName3, bContaminates3)
+			new Liquid(
+				sName3,
+				bWaterFreeDispense | other.bWaterFreeDispense,
+				bCells | other.bCells,
+				bDna | other.bDna,
+				bOtherContaminant | other.bOtherContaminant
+			)
 		}
 	}
 }
 object Liquid {
-	val empty = new Liquid(null, false)
+	val empty = new Liquid(null, false, false, false, false)
 }
 
 class Part {
@@ -48,10 +67,6 @@ object WellHolder {
 class Well(val holder: WellHolder, val index: Int) extends Part {
 }
 
-class WellState(val well: Well, val liquid: Liquid, val nVolume: Double) {
-	def add(liquid2: Liquid, nVolume2: Double) = new WellState(well, liquid + liquid2, nVolume + nVolume2)
-	def remove(nVolume2: Double) = new WellState(well, liquid, nVolume - nVolume2)
-}
 /*object WellState {
 	def fill(wells: Seq[Well], liquid: Liquid, nVolume: Double) {
 		for (well <- wells) {

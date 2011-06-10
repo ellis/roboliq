@@ -1,6 +1,6 @@
 package evoware
 
-import roboliq.parts.Part
+import roboliq.parts._
 
 /*sealed class EvowareTipWashSpec(
 	val iWasteGrid: Int, val iWasteSite: Int, val nWasteDelay: Int,
@@ -11,33 +11,37 @@ import roboliq.parts.Part
 	val bFastWash: Boolean
 )*/
 
+/*
 sealed class EvowareSetupFixed(
-	val tipKinds: Traversable[EvowareTipKind]
-)
-
-sealed class EvowareSetupVariable(
-	val 
-)
-
-sealed class EvowareSettings(
-	val grids: Map[Part, Int],
 	val tipKinds: Traversable[EvowareTipKind],
-	/** For each tip, select its kind */
-	val kindOfTips: Seq[EvowareTipKind],
-	val insideWashSpecs: Tuple3[EvowareTipWashSpec, EvowareTipWashSpec, EvowareTipWashSpec],
-	val outsideWashSpecs: Tuple3[EvowareTipWashSpec, EvowareTipWashSpec, EvowareTipWashSpec]
-) {
-	//val nTips = 
+	val nTips: Int
+	///** Lists of indexes of tips which can be operated in parallel */
+	//val aaiTipBatches: List[List[Int]]
+)
+
+sealed class EvowareSetupState(
+	val tipTipKinds: IndexedSeq[EvowareTipKind],
+	val grids: Map[Part, Int]
+)
+*/
+
+/*
+sealed class EvwareSetup(val fixed: EvowareSetupFixed, state0: EvowareSetupState) {
+	var state = state0
 }
-object EvowareSettings {
-	def load(): EvowareSettings = {
+object EvowareSetup {
+	def load(): EvowareSetup = {
+		val fixed = new EvowareSetupFixed(
+			tipKinds = Vector()
+		)
 		val config = {
-		val nTips = settings.kindOfTips.size
-		val tips = (0 until nTips).map(new Tip(_))
-		val tipKindsPowerset = powerSet(settings.tipKinds.toSet).filter(!_.isEmpty)
-		val kindOfTipsIndexed = settings.kindOfTips.zipWithIndex
-		val tipGroups = tipKindsPowerset.map(kinds => kindOfTipsIndexed.filter((kind, iTip) => kinds.contains(kind)).map(_.2).toArray).toArray
-		new RobotConfig(tips, tipGroups)
+			val tips = (0 until fixed.nTips).map(new Tip(_))
+			val tipKindsPowerset = powerSet(settings.tipKinds.toSet).filter(!_.isEmpty)
+			val tipTipKindsIndexed = state.tipTipKinds.zipWithIndex
+			val tipGroups = tipKindsPowerset.map(kinds => tipTipKindsIndexed.filter((kind, iTip) => kinds.contains(kind)).map(_.2).toArray).toArray
+			new RobotConfig(tips, tipGroups)
+		}
 	}
 
 }
+*/

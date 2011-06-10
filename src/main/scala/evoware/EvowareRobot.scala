@@ -7,7 +7,8 @@ import roboliq.tokens._
 import roboliq.robot._
 
 
-abstract class EvowareRobot(val settings: EvowareSettings) extends Robot {
+abstract class EvowareRobot extends Robot {
+	/*
 	def powerSet[A](s: Set[A]) = s.foldLeft(Set(Set.empty[A])) {
 		(set, element) =>
 			set union (set map (_ + element))
@@ -18,9 +19,10 @@ abstract class EvowareRobot(val settings: EvowareSettings) extends Robot {
 		val tips = (0 until nTips).map(new Tip(_))
 		val tipKindsPowerset = powerSet(settings.tipKinds.toSet).filter(!_.isEmpty)
 		val kindOfTipsIndexed = settings.kindOfTips.zipWithIndex
-		val tipGroups = tipKindsPowerset.map(kinds => kindOfTipsIndexed.filter((kind, iTip) => kinds.contains(kind)).map(_.2).toArray).toArray
+		val tipGroups = tipKindsPowerset.map(kinds => kindOfTipsIndexed.filter((kind, iTip) => kinds.contains(kind)).map(_._2).toArray).toArray
 		new RobotConfig(tips, tipGroups)
 	}
+	*/
 	var state: RobotState = RobotState.empty
 	
 	def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well] = {
@@ -29,7 +31,12 @@ abstract class EvowareRobot(val settings: EvowareSettings) extends Robot {
 		chosen
 	}
 	
-	def score(tokens: Seq[Token]): Int = {
+	def score(tokens: Seq[T2_Token]): Int = {
 		tokens.size
 	}
+
+	def getTipKind(tip: Tip): EvowareTipKind
+	def getAspirateClass(tip: Tip, well: Well): Option[String]
+	def getDispenseClass(tip: Tip, well: Well, nVolume: Double): Option[String]
+	
 }

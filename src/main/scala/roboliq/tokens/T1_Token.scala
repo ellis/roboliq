@@ -12,7 +12,7 @@ sealed class TipCleanSpec(val tip: Tip,
 		val nInsideVolume: Double, val insideSeverity: ContaminationSeverity.Value,
 		val nOutsideVolume: Double, val outsideSeverity: ContaminationSeverity.Value)
 
-sealed abstract class Token
-case class Aspirate(twvs: Seq[TipWellVolume], rule: AspirateStrategy) extends Token
-case class Dispense(twvs: Seq[TipWellVolume], rule: DispenseStrategy) extends Token
-case class Clean(specs: Traversable[TipCleanSpec]) extends Token
+sealed abstract class T1_Token
+case class T1_Aspirate(twvs: Seq[TipWellVolume]) extends T1_Token
+case class T1_Dispense(twvs: Seq[TipWellVolume]) extends T1_Token
+case class T1_Clean(specs: Traversable[TipCleanSpec]) extends T1_Token

@@ -18,5 +18,5 @@ trait Robot {
 	/** Choose dispense method */
 	def getDispenseKind(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): DispenseKind.Value
 	def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well]
-	def score(tokens: Seq[Token]): Int
+	def score(tokens: Seq[T1_Token]): Int
 }

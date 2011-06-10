@@ -12,3 +12,18 @@ Peripheral commands:
 	peel
 	pcr
 	...
+
+Evoware interaction:
+	load evoware configuration
+	send scripts to evoware
+	get data from evoware and peripherals
+
+Code:
+	Continue at: EvowareTranslator, line 242
+	have robot decide on Aspiration/Dispense strategy for T1 tokens
+	between all tokens is a robot state
+	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
+	each T2 token produces a sequence of T1 tokens
+	robot tells which tips can be used in batch for a particular token
+	setup unit tests for sbt
+	
