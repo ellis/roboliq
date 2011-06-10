@@ -18,12 +18,12 @@ sealed class EvowareSetupFixed(
 	///** Lists of indexes of tips which can be operated in parallel */
 	//val aaiTipBatches: List[List[Int]]
 )
+*/
 
 sealed class EvowareSetupState(
-	val tipTipKinds: IndexedSeq[EvowareTipKind],
+	//val tipTipKinds: IndexedSeq[EvowareTipKind],
 	val grids: Map[Part, Int]
 )
-*/
 
 /*
 sealed class EvwareSetup(val fixed: EvowareSetupFixed, state0: EvowareSetupState) {

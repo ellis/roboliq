@@ -229,33 +229,92 @@ private class EvowareTranslator(robot: EvowareRobot) {
 	}
 	
 	private def evowareCmd(tok: T1_Token): List[String] = tok match {
-		case t @ T1_Aspirate(_) => aspirate(t)
-		case t @ T1_Dispense(_) => dispense(t)
-		case t @ T1_Clean(specs) => clean(specs)
-	}
-
-	private def aspirate(tok: T1_Aspirate): List[String] = {
-		tok.twvs.map(twv => (twv -> robot.getAspirateClass(twv.tip, twv.well))).toMap
-		spirates("Aspirate", tok.twvs);
+		case t @ T1_Aspirate(_) => spirate(t.twvs, "Aspirate", robot.getAspirateClass).toString :: Nil
+		case t @ T1_Dispense(_) => spirate(t.twvs, "Dispense", robot.getDispenseClass).toString :: Nil
+		case t @ T1_Clean(degree) => robot.clean(degree)
 	}
 	
-	private def dispense(tok: T1_Dispense): List[String] = {
-		spirates("Dispense", tok.twvs);
-	}
-	
-	private def spirates(sFunc: String, twvs: Seq[TipWellVolume]): List[String] = {
-		if (twvs.isEmpty)
-			Nil
-		else {
-			val holder = twvs.head.well.holder
-			assert(twvs.forall(_.well.holder == holder))
-			val twvsSorted = twvs.sortWith(_.tip.index < _.tip.index).toList
-			val twvssByType = partitionTipKinds(twvsSorted)
-			val twvss = twvssByType.flatMap(partitiontwvsByType)
-			twvss.flatMap(twvs => spirate(sFunc, twvs))
+	private def spirate(twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: (TipWellVolume => Option[String])): T0_Token = {
+		twvs match {
+			case Nil => T0_Error("Empty Tip-Well-Volume list")
+			case twv0 :: rest =>
+				// Get the liquid class
+				val sLiquidClass_? = robot.getAspirateClass(twv0)
+				assert(sLiquidClass_?.isDefined)
+				val sLiquidClass = sLiquidClass_?.get
+				// Assert that there is only one liquid class
+				assert(rest.forall(twv => robot.getAspirateClass(twv) == sLiquidClass))
+				
+				val tipKind = robot.getTipKind(twv0.tip)
+				val holder = twv0.well.holder
+				
+				// Assert that all tips are of the same kind and that all wells are on the same holder
+				assert(twvs.forall(twv => (robot.getTipKind(twv.tip) eq tipKind) && (twv.well.holder eq holder)))
+				
+				// Assert that tips are spaced at equal distances to each other as the wells are to each other
+				def equidistant2(a: TipWellVolume, b: TipWellVolume): Boolean =
+					(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
+				// Test all adjacent items for equidistance
+				def equidistant(twvs: Seq[TipWellVolume]): Boolean = twvs match {
+					case Nil => true
+					case _ :: Nil => true
+					case a :: b :: rest =>
+						equidistant2(a, b) match {
+							case false => false
+							case true => equidistant(b :: rest)
+						}
+				}
+				assert(equidistant(twvs))
+				
+				spirateChecked(twvs, sFunc, sLiquidClass);
 		}
 	}
+
+	private def spirateChecked(twvs: Seq[TipWellVolume], sFunc: String, sLiquidClass: String): T0_Token = {
+		val twv0 = twvs.head
+		val tipKind = robot.getTipKind(twv0.tip)
+		val holder = twv0.well.holder
+		val mTips = getTipMask(twvs)
+		
+		// Create a list of volumes for each used tip, leaving the remaining values at 0
+		val asVolumes = Array.fill(12)("0")
+		val fmt = new java.text.DecimalFormat("#.##")
+		for (twv <- twvs) {
+			val iTip = twv.tip.index
+			assert(iTip >= 0 && iTip < 12)
+			asVolumes(iTip) = "\""+fmt.format(twv.nVolume)+'"'
+		}
+		//val sVolumes = asVolumes.mkString(",")
+		
+		val sPlateMask = EvowareTranslator.encodeWells(holder, twvs.map(_.well.index))
+		
+		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
+		def findLoc(part: Part): Option[Tuple2[Int, Int]] = {
+			val site_? = state.getSite(part)
+			site_? match {
+				case None => None
+				case Some(site) =>
+					robot.getGridIndex(site.parent) match {
+						case Some(iGrid) => Some(iGrid, site.index)
+						case None => findLoc(site.parent)
+					}
+			}
+		}
+		val (iGrid, iSite) = findLoc(holder).get
+		
+		T0_Spirate(
+			sFunc, 
+			mTips, sLiquidClass,
+			asVolumes,
+			iGrid, iSite,
+			sPlateMask
+		)
+	}
 	
+	private def getTipMask(list: Iterable[HasTip]): Int =
+		list.foldLeft(0) { (sum, x) => sum + (1 << x.tip.index) }
+	
+	/*
 	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {
 		list match {
 			case Nil => Nil
@@ -272,65 +331,8 @@ private class EvowareTranslator(robot: EvowareRobot) {
 			ka == kb
 		}
 		partitionBy(twvs, sameTipKind)
-	}
-	
-	private def spirate(sFunc: String, twvs: Seq[TipWellVolume]): List[String] = {
-		if (twvs.isEmpty)
-			return Nil
+	}*/
 
-		val twv0 = twvs.head 
-		val tipKind = robot.getTipKind(twv0.tip)
-		val holder = twv0.well.holder
-		
-		// Indexes of tips we want to use
-		val aiTips = twvs.map(_.tip.index)
-		// Create mask for all tips being used
-		val mTips = aiTips.foldLeft(0) { (sum, i) => sum + (1 << i) }
-		
-		val sLiquidClass = robot.getLiquidClass(twv0)
-		
-		// Create a list of volumes for each used tip, leaving the remaining values at 0
-		val asVolumes = Array.fill(12)("0")
-		val fmt = new java.text.DecimalFormat("#.##")
-		for (twv <- twvs) {
-			val iTip = twv.tip.index
-			assert(iTip >= 0 && iTip < 12)
-			asVolumes(iTip) = "\""+fmt.format(twv.nVolume)+'"'
-		}
-		val sVolumes = asVolumes.mkString(",")
-		
-		val sPlateMask = EvowareTranslator.encodeWells(holder, twvs.map(_.well.index))
-		
-		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
-		def findLoc(part: Part): Option[Tuple2[Int, Int]] = {
-			val site_? = state.getSite(part)
-			site_? match {
-				case None => None
-				case Some(site) =>
-					settings.grids.get(site.parent) match {
-						case Some(iGrid) => Some(iGrid, site.index)
-						case None => findLoc(site.parent)
-					}
-			}
-		}
-		val (iGrid, iSite) = findLoc(holder).get
-		
-		(
-			sFunc+"("+
-			"%d,\"%s\","+
-			"%s,"+
-			"%d,%d,"+
-			"1,"+
-			"\"%s\","+
-			"0,0);"
-		).format(
-			mTips, sLiquidClass,
-			sVolumes,
-			iGrid, iSite,
-			sPlateMask
-		) :: Nil;
-	}
-	
 	/*
 	private def spirate(String sFunc, int mTipsMask, int iGrid, int iSite, int iWell0, String sLiquidClass, double nVolume) {
 		// Put nVolume into each position of anVolumes where mTipsMask has a bit set
@@ -402,33 +404,4 @@ private class EvowareTranslator(robot: EvowareRobot) {
 		System.out.println(s);
 	}
 	*/
-
-	private def clean(specs0: Traversable[TipCleanSpec]): List[String] = {
-		def sameTipKind(a: TipCleanSpec, b: TipCleanSpec): Boolean = {
-			val ka = robot.getTipKind(a.tip)
-			val kb = robot.getTipKind(b.tip)
-			ka == kb
-		}
-		val specss = partitionBy(specs0.toList, sameTipKind)
-		for (specs <- specss) yield {
-			// Indexes of tips we want to use
-			val aiTips = specs.map(_.tip.index)
-			// Create mask for all tips being used
-			val mTips = aiTips.foldLeft(0) { (sum, i) => sum + (1 << i) }
-			
-			Array(
-				mTips,
-				iWasteGrid, iWasteSite,
-				iCleanerGrid, iCleanerSite,
-				'"'+sWasteVolume+'"',
-				nWasteDelay,
-				'"'+sCleanerVolume+'"',
-				nCleanerDelay,
-				nAirgapVolume,
-				nAirgapSpeed,
-				nRetractSpeed,
-				(if (bFastWash) 1 else 0),
-				0,1000,0).mkString("Wash(", ",", ")")
-		}.toList
-	}
 }
