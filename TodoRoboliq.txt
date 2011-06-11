@@ -3,20 +3,59 @@ http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structur
 Evoware commands:
 x	asperate
 x	dispense
-	mix
-	wash
+1a	wash
+3a	mix
+4a	wait
+5a	shake
 	transfer
 	trash
-Peripheral commands:
+Evoware peripheral commands:
 	seal
 	peel
 	pcr
+	filter
+	centrifuge
 	...
-
+T1 commands:
+x	aspirate
+x	dispense
+1b	clean
+3b	mix
+4b	wait
+5b	shake
+	transfer
+T2 commands:
+1c	pipette liquid
+	clean
+2a	pipette(List[SrcDestVolume])
+2b	copy plate
+3c	mix
+4c	wait
+5c	shake
+	transfer
+	PCR
+	filter/centrifuge
+	plate (put drops on a larger plate)
+T3 commands:
+	pipette liquid (this is like T2, but allows for unset values, and doesn't continue to T1 until all values have been set)
+	...
+RoboEase commands:
+	start implementing these to see what problems I run into
+2c	copy plate
 Evoware interaction:
 	load evoware configuration
-	send scripts to evoware
+4b	create program to monitor overall script progress
+4c	send scripts to evoware
+4d	recognize when evoware script is done
+4e	run some command when evoware script is done
+4f	T2_Wait: continue script after specified wait
+	T2_
 	get data from evoware and peripherals
+	user interaction (such as when doing a PCR and don't have a connected PCR machine)
+User interface:
+	Show user which decisions need/can be made
+	Let user specify stuff
+
 
 Code:
 	Continue at: BsseRobot.clean
@@ -26,4 +65,12 @@ Code:
 	each T2 token produces a sequence of T1 tokens
 	robot tells which tips can be used in batch for a particular token
 	setup unit tests for sbt
-	
+	Clean:
+		distinguish between 1) clean if dirty and 2) forced preparatory clean
+		only clean the tips we'll need
+		the pre-clean instruction at the beginning of a pipetting action should clean all tips which will be used during the procedure
+		the between-clean instruction should clean all tips which were previously used
+		optimize clean instructions so that cleaning of a tip kind also cleans the tips of any clean instructions for that tip kind which come later, but only for clean instruction of the same degree
+		optimize clean instructions which are right next to each other so that only one of them is performed
+		At the T1 level: tips and degree should already be specified, meaning we need to get the degree information from the BsseRobot
+	T0 tokens can have estimated times associated with them

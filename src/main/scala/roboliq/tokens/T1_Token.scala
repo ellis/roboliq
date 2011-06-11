@@ -17,7 +17,7 @@ sealed class TipCleanInfo(val tip: Tip,
 		val nOutsideVolume: Double, val outsideSeverity: ContaminationSeverity.Value) extends HasTip
 */
 object CleanDegree extends Enumeration {
-	val Light, Thorough, Decontaminate = Value
+	val None, Light, Thorough, Decontaminate = Value
 }
 
 sealed abstract class T1_Token

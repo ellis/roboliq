@@ -44,6 +44,11 @@ object EvowareTranslator {
 	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
 	private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
 	
+	def encodeTips(list: Iterable[HasTip]): Int =
+		list.foldLeft(0) { (sum, x) => sum | (1 << x.tip.index) }
+	def encodeTips(list: Iterable[Tip]): Int =
+		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
+
 	def encodeWells(holder: WellHolder, aiWells: Traversable[Int]): String = {
 		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
@@ -274,7 +279,7 @@ private class EvowareTranslator(robot: EvowareRobot) {
 		val twv0 = twvs.head
 		val tipKind = robot.getTipKind(twv0.tip)
 		val holder = twv0.well.holder
-		val mTips = getTipMask(twvs)
+		val mTips = encodeTips(twvs)
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
 		val asVolumes = Array.fill(12)("0")
@@ -310,9 +315,6 @@ private class EvowareTranslator(robot: EvowareRobot) {
 			sPlateMask
 		)
 	}
-	
-	private def getTipMask(list: Iterable[HasTip]): Int =
-		list.foldLeft(0) { (sum, x) => sum + (1 << x.tip.index) }
 	
 	/*
 	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {

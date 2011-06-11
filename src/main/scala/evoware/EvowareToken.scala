@@ -14,19 +14,45 @@ case class T0_Spirate(
 	val sPlateMask: String
 ) extends T0_Token {
 	def toString = {
-		(
-			sFunc+"("+
-			"%d,\"%s\","+
-			"%s,"+
-			"%d,%d,"+
-			"1,"+
-			"\"%s\","+
-			"0,0);"
-		).format(
-			mTips, sLiquidClass,
+		Array(
+			mTips,
+			'"'+sLiquidClass+'"',
 			asVolumes.mkString(","),
 			iGrid, iSite,
-			sPlateMask
-		)
+			1,
+			'"'+sPlateMask+'"',
+			0, 0
+		).mkString(sFunc+"(", ",", ")")
+	}
+}
+
+case class T0_Wash(
+	mTips: Int,
+	iWasteGrid: Int, iWasteSite: Int,
+	iCleanerGrid: Int, iCleanerSite: Int,
+	sWasteVolume: String, // TODO: Change this to Double, but format it nicely below -- ellis, 2011-06-11
+	nWasteDelay: Int,
+	sCleanerVolume: String, // TODO: Change this to Double, but format it nicely below -- ellis, 2011-06-11
+	nCleanerDelay: Int,
+	nAirgapVolume: Int,
+	nAirgapSpeed: Int,
+	nRetractSpeed: Int,
+	bFastWash: Boolean
+) extends T0_Token {
+	def toString = {
+		Array(
+			mTips,
+			iWasteGrid, iWasteSite,
+			iCleanerGrid, iCleanerSite,
+			'"'+sWasteVolume+'"',
+			nWasteDelay,
+			'"'+sCleanerVolume+'"',
+			nCleanerDelay,
+			nAirgapVolume,
+			nAirgapSpeed,
+			nRetractSpeed,
+			(if (bFastWash) 1 else 0),
+			0,1000,0
+		).mkString("Wash(", ",", ")")
 	}
 }

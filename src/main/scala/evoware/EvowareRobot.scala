@@ -44,6 +44,6 @@ abstract class EvowareRobot(val evowareState: EvowareSetupState) extends Robot {
 	
 	def getGridIndex(part: Part): Option[Int] = evowareState.grids.get(part)
 	
-	/* Get T0 tokens for cleaning */
+	/** Get T0 tokens for cleaning */
 	def clean(degree: CleanDegree): List[T0_Token]
 }

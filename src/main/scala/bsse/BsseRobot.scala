@@ -136,9 +136,15 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 		}
 	}
 	
-	def clean(degreeMin: CleanDegree): List[T0_Token] = {
+	private def sameTipKind(a: Tip, b: Tip): Boolean = getTipKind(a) eq getTipKind(b)
+	
+	// REFACTOR: This really doesn't belong here: put it in BsseTranslator -- ellis, 2011-06-11
+	def clean(degreeMin: CleanDegree.Value): List[T0_Token] = {
 		// Partition tips into groups according to tip kind
+		val tipss = partitionBy(tips, sameTipKind)
 		// determine cleaning degree for each group based upon type of contamination
+		// create appropriate wash/spirate/dispose instructions for the given cleaning degree
+		//  determine volumes and wells
 		def sameTipKind(a: TipCleanSpec, b: TipCleanInfo): Boolean = {
 			val ka = robot.getTipKind(a.tip)
 			val kb = robot.getTipKind(b.tip)
@@ -166,30 +172,65 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 				0,1000,0).mkString("Wash(", ",", ")")
 		}.toList
 	}
-
-	private def batchesForClean(tcis: Seq[TipCleanInfo]): Seq[Seq[TipCleanInfo]] = {
-		def getLiquidClass(twv: TipWellVolume) = getDispenseClass(twv.tip, twv.well, twv.nVolume)
-		// Group by tip type and liquid dispense class
-		def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {
-			val tipKind0 = getTipKind(twv0.tip)
-			val tipKind1 = getTipKind(twv1.tip)
-			if (tipKind0 ne tipKind1) {
-				false
-			}
-			else {
-				val sClass0 = getLiquidClass(twv0).get
-				val sClass1 = getLiquidClass(twv1).get
-				sClass0 == sClass1
-			}
+	
+	private def cleanGroup(tips: Seq[Tip], degreeMin: CleanDegree.Value): List[T0_Token] = {
+		val tipStates = tips.map(tip => state.getTipState(tip))
+		// Calculate an overall tip state for maximum contamination
+		val tipStateAcc = tipState.foldRight(TipState(tips.head)) { (tipState, acc) =>
+				acc.aspirate(tipState.liquid, tipState.nContamInsideVolume)
+				   .dispense(tipState.nContamInsideVolume)
+		}
+		val bRequireDecontam = tipStateAcc.contamInside.contaminated || tipStateAcc.contamOutside.contaminated
+		val degree = {
+			if (bRequireDecontam) CleanDegree.Decontaminate
+			else degreeMin
 		}
 		
-		val bAllHaveClass = twvs.forall(twv => getLiquidClass(twv).isDefined)
-		if (!bAllHaveClass) {
-			Nil
+		degreeMin match {
+			case None => Nil
+			case Light => cleanGroupLight(tips)
+			case Thorough => cleanGroupLight(tips)
+			case Decontaminate => cleanGroupLight(tips)
 		}
-		else {
-			def matcher(twv0: TipWellVolume, twv1: TipWellVolume) = canBatch(twv0, twv1, getLiquidClass)
-			partitionBy(twvs.toList, matcher)
-		}
+	}
+	
+	private def cleanGroupLight(tips: Seq[Tip], nContamInsideVolume: Double): List[T0_Token] = {
+		val tipKind = getTipKind(tips.head)
+		val mTips = EvowareTranslator.encodeTips(tips)
+		// TODO: Set these values depending on the tip kind
+		val nWasteDelay = 10
+		val nCleanerVolume = 10.0
+		val nCleanerDelay = 10
+		val nAirgapVolume = 10
+		val nAirgapSpeed = 10
+		val nRetractSpeed = 10
+		List(
+			T0_Wash(
+				mTips,
+				/*iWasteGrid*/ 2, /*iWasteSite*/ 1,
+				/*iCleanerGrid*/ 2, /*iCleanerSite*/ 2,
+				nContamInsideVolume + tipKind.nDecontaminateVolumeExtra,
+				nWasteDelay,
+				nCleanerVolume,
+				nCleanerDelay,
+				nAirgapVolume,
+				nAirgapSpeed,
+				nRetractSpeed,
+				/*bFastWash*/ true
+			),
+			T0_Wash(
+				mTips,
+				/*iWasteGrid*/ 1, /*iWasteSite*/ 1,
+				/*iCleanerGrid*/ 1, /*iCleanerSite*/ 2,
+				nContamInsideVolume + tipKind.nDecontaminateVolumeExtra, // ???
+				nWasteDelay,
+				nCleanerVolume,
+				nCleanerDelay,
+				nAirgapVolume,
+				nAirgapSpeed,
+				nRetractSpeed,
+				/*bFastWash*/ true
+			)
+		)
 	}
 }
