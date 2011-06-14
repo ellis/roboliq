@@ -1,28 +1,80 @@
 \enableregime [utf-8]
 \mainlanguage [en]
 \setupbodyfontenvironment[default][em=italic]
+\setupwhitespace[medium]
 
 \starttext
-\title Design of library for controlling a liquid handling robot
+\title{Design of library for controlling a liquid handling robot}
 
-\section Levels of abstraction
-The library distinguishes between 5 different levels of command abstraction.
-Abstract syntax tree
-Translating among levels
+\section{Components}
+These following components act together to generate a concrete sequence of robot instructions:
+\startitemize
+\item {\em Generic Software Module}: a library of routines for processing all aspects of our robotics language except for those functions which are robot-specific.
+\item {\em Robot Plugin Module}: a plugin for the Generic Software Module that has been tuned to the particularities of a specific robot.
+\item {\em Robot Configuration}: information about robot's parts and capabilities.
+\item {\em Generic Protocol}: a generic protocol to be performed.  It should be described in such general terms that it can be translated into a concrete series of instructions for any number of liquid handling robots.
+\item {\em User Parameters}: parameters the user must set in order to generate a concrete sequence of instructions from the above two components.
+\item {\em User Overrides}: optional overrides of default choices made by the program.
+\stopitemize
 
-\subsection Level 0
-We currently implement this level for Tecan's Evoware software by generating Evoware scripts (.esc files).
-The commands available on this level are therefore those provided by Evoware.
+\section{Levels of parsing}
+Protocol commands are parsed to create an Abstract Syntax Tree (AST), which is subsequently transformed into a series of increasingly concrete ASTs, until the final AST can be translated directly into a sequence of instructions for the target robot.  We will progress through 5 phases of AST concretization, from Level 4 down to Level 0, which differentiate themselves as follows:
 
-\subsection Level 1
-At level 1 define low-level commands (e.g. aspirate, dispense, mix, transfer, etc.) whose parameters are generic enough to abstract way from the concrete commands available for a particular liquid handling robot.
-At the moment, the commands I'm working on are.
+\startitemize
+\item Level 4 AST: encapsulates the abstract protocol and the robot configuration, but it may be incomplete due to missing parameters.
+\item Level 3 AST: incorporates the user parameters, and is therefore sufficient as a basis for ultimately creating concrete output.
+\item Level 2 AST: incorporates optional overrides of default values.  All variables have now been fixed.
+\item Level 1 AST: contains only a small, basic instruction set, appropriate for translation into the language of the target robot.
+\item Level 0 AST: instructions in the language of the target robot.
+\stopitemize
 
-\subsection Level 2
+The steps of translation are described here:
 
-\subsection Level 3
+\startitemize[n]
+\item
+ {\em Input}: generic protocol, robot configuration
 
-\subsection Level 4
+ {\em Output}: Level 4 AST, list of required parameters for the user to set
+
+\item
+ {\em Input}: Level 4 AST, user parameters
+
+ {\em Output}: Level 3 AST, list of optional user overrides
+
+\item
+ {\em Input}: Level 3 AST, user overrides
+
+ {\em Output}: Level 2 AST, an updated list of optional user overrides
+
+\item
+ {\em Input}: Level 2 AST
+
+ {\em Processing}: expansion of high-level commands into our basic command set, with optimization.
+
+ {\em Output}: Level 1 AST
+
+\item
+ {\em Input}: Level 1 AST
+
+ {\em Processing}: the basic commands are translated into a program for the target robot.
+
+ {\em Output}: Level 0 AST
+
+\item
+ {\em Input}: Level 0 AST
+
+ {\em Output}: output for the target robot (e.g. an .esc script for Tecan robots)
+\stopitemize
+
+
+\section{Levels of command abstraction}
+
+We distinguish between two types of commands: 1) the {\em Basic Command Set} is a small finite set of commands which the Robot Plugin will need to translate into its own format, and 2) an extensible higher-level set of commands which can make use of both basic commands as well as other commands from the higher-level set.
+
+\subsubsection{Basic command set}
+The generic software modules provides a small set of basic instructions, such as "aspirate", "dispense", "mix", and "transfer".
+
+[TODO: add full list of basic commands once I've defined them -- ellis, 2011-06-14]
 
 \stoptext
 
