@@ -1,0 +1,28 @@
+\enableregime [utf-8]
+\mainlanguage [en]
+\setupbodyfontenvironment[default][em=italic]
+
+\starttext
+\title Design of library for controlling a liquid handling robot
+
+\section Levels of abstraction
+The library distinguishes between 5 different levels of command abstraction.
+Abstract syntax tree
+Translating among levels
+
+\subsection Level 0
+We currently implement this level for Tecan's Evoware software by generating Evoware scripts (.esc files).
+The commands available on this level are therefore those provided by Evoware.
+
+\subsection Level 1
+At level 1 define low-level commands (e.g. aspirate, dispense, mix, transfer, etc.) whose parameters are generic enough to abstract way from the concrete commands available for a particular liquid handling robot.
+At the moment, the commands I'm working on are.
+
+\subsection Level 2
+
+\subsection Level 3
+
+\subsection Level 4
+
+\stoptext
+
