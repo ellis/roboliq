@@ -21,10 +21,10 @@ These following components act together to generate a concrete sequence of robot
 Protocol commands are parsed to create an Abstract Syntax Tree (AST), which is subsequently transformed into a series of increasingly concrete ASTs, until the final AST can be translated directly into a sequence of instructions for the target robot.  We will progress through 5 phases of AST concretization, from Level 4 down to Level 0, which differentiate themselves as follows:
 
 \startitemize
-\item Level 4 AST: encapsulates the abstract protocol and the robot configuration, but it may be incomplete due to missing parameters.
+\item Level 4 AST: represents the abstract protocol and the robot configuration, but it may be incomplete due to missing parameters.
 \item Level 3 AST: incorporates the user parameters, and is therefore sufficient as a basis for ultimately creating concrete output.
 \item Level 2 AST: incorporates optional overrides of default values.  All variables have now been fixed.
-\item Level 1 AST: contains only a small, basic instruction set, appropriate for translation into the language of the target robot.
+\item Level 1 AST: composed of only a small, basic instruction set, appropriate for translation into the language of the target robot.
 \item Level 0 AST: instructions in the language of the target robot.
 \stopitemize
 
@@ -69,12 +69,17 @@ The steps of translation are described here:
 
 \section{Levels of command abstraction}
 
-We distinguish between two types of commands: 1) the {\em Basic Command Set} is a small finite set of commands which the Robot Plugin will need to translate into its own format, and 2) an extensible higher-level set of commands which can make use of both basic commands as well as other commands from the higher-level set.
+We distinguish between two types of commands: 1) the {\em Basic Command Set} is a small set of commands which the Robot Plugin will need to translate into its own format, and 2) an extensible higher-level set of commands which can make use of both basic commands as well as other commands from the higher-level set.  By the time our parsing precedure has reached the Level 1 AST, all higher-level commands have been translated into a sequence of basic commands.
 
 \subsubsection{Basic command set}
 The generic software modules provides a small set of basic instructions, such as "aspirate", "dispense", "mix", and "transfer".
 
 [TODO: add full list of basic commands once I've defined them -- ellis, 2011-06-14]
+
+\subsubsection{Higher-level commands}
+These commands ease the task of programming by removing the need for the user to make detailed choices.  For example, the pipetting commands choose which tips to use and how to avoid contamination.
+
+[TODO: add list of existing higher-level commands and describe which abstractions they provide]
 
 \stoptext
 
