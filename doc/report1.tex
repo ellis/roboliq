@@ -6,6 +6,15 @@
 \starttext
 \title{Design of library for controlling a liquid handling robot}
 
+\section{Informal notes regarding RoboEase}
+\startitemize
+\item My current focus is on creating a good programming library rather than an entire scripting language.  This allows us to leverage the work already put into existing frameworks.
+\item The library is currently written in Scala (a modern, mature, java-compatible language).
+\item Existing RoboEase scripts will be parsed and handled by the library.
+\item The library approach allows for a greater degree of abstraction and modularity than we could achieve by further developing our own scripting language (due to the amount of time that would need to be invested in the new language to achieve such qualities).
+\item In terms of RoboEase's level of abstraction, it fits between what will be described below as the level 1 and level 2 ASTs.
+\stopitemize
+
 \section{Components}
 These following components act together to generate a concrete sequence of robot instructions:
 \startitemize

@@ -43,7 +43,4 @@ abstract class EvowareRobot(val evowareState: EvowareSetupState) extends Robot {
 	def getDispenseClass(twv: TipWellVolume): Option[String] = getDispenseClass(twv.tip, twv.well, twv.nVolume)
 	
 	def getGridIndex(part: Part): Option[Int] = evowareState.grids.get(part)
-	
-	/** Get T0 tokens for cleaning */
-	def clean(degree: CleanDegree): List[T0_Token]
 }

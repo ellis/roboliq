@@ -229,14 +229,14 @@ private class EvowareTranslator(robot: EvowareRobot) {
 	//settings: EvowareSettings, state: IRobotState
 	val state = robot.state
 	
-	def translate(cmds: Seq[T1_Token]): String = {
-		cmds.map(evowareCmd).flatten.mkString("\n")
+	def translateToStrings(cmds: Seq[T1_Token]): String = {
+		cmds.flatMap(translate).map(toString).mkString("\n")
 	}
 	
-	private def evowareCmd(tok: T1_Token): List[String] = tok match {
+	def translate(tok: T1_Token): List[T0_Token] = tok match {
 		case t @ T1_Aspirate(_) => spirate(t.twvs, "Aspirate", robot.getAspirateClass).toString :: Nil
 		case t @ T1_Dispense(_) => spirate(t.twvs, "Dispense", robot.getDispenseClass).toString :: Nil
-		case t @ T1_Clean(degree) => robot.clean(degree)
+		case t @ T1_Clean(degree) => clean(t)
 	}
 	
 	private def spirate(twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: (TipWellVolume => Option[String])): T0_Token = {
@@ -315,6 +315,9 @@ private class EvowareTranslator(robot: EvowareRobot) {
 			sPlateMask
 		)
 	}
+	
+	/** Get T0 tokens for cleaning */
+	def clean(tok: T1_Clean): List[T0_Token]
 	
 	/*
 	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {

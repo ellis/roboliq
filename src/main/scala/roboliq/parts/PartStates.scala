@@ -2,6 +2,10 @@
 
 package roboliq.parts
 
+object CleanDegree extends Enumeration {
+	val None, Light, Thorough, Decontaminate = Value
+}
+
 class WellState(val well: Well, val liquid: Liquid, val nVolume: Double) {
 	def add(liquid2: Liquid, nVolume2: Double) = new WellState(well, liquid + liquid2, nVolume + nVolume2)
 	def remove(nVolume2: Double) = new WellState(well, liquid, nVolume - nVolume2)
@@ -32,5 +36,5 @@ class TipState(
 	def clean() = this.copy(cleanDegree = CleanDegree.None)
 }
 object TipState {
-	def apply(tip: Tip) = new TipState(tip, Liquid.empty, 0, Contamination.empty, 0, Contamination.empty)
+	def apply(tip: Tip) = new TipState(tip, Liquid.empty, 0, Contamination.empty, 0, Contamination.empty, CleanDegree.None)
 }
