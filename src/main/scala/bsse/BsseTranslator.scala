@@ -30,7 +30,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 			case None => Nil
 			case Light => cleanGroupLight(tips, nContamInsideVolume)
 			case Thorough => cleanGroupLight(tips, nContamInsideVolume)
-			case Decontaminate => cleanGroupLight(tips, nContamInsideVolume)
+			case Decontaminate => cleanGroupDecontam(tips, nContamInsideVolume)
 		}
 	}
 	
@@ -114,14 +114,14 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 		assert(tipKind.nDecontaminateVolumeExtra >= 0)
 
 		val nVolume = nContamInsideVolume + tipKind.nDecontaminateVolumeExtra
-		val twvs = tips.map(tip => new TipWellVolume(tip, robot.wells(2)
-		val aspirate = T1_Aspirate(
+		val twvsAspirate = tips.map(tip => new TipWellVolume(tip, robot.plateDecon.wells(1), nVolume))
+		val twvsDispense = tips.map(tip => new TipWellVolume(tip, robot.plateDecon.wells(2), nVolume))
 		
 		T0_Wash(
 			mTips,
 			iWasteGrid = 2, iWasteSite = 1,
 			iCleanerGrid = 2, iCleanerSite = 2,
-			nWastVolume = nContamInsideVolume + tipKind.nDecontaminateVolumeExtra,
+			nWastVolume = 15, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 			nWasteDelay = nWasteDelay,
 			nCleanerVolume = 3, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 			nCleanerDelay = nCleanerDelay,
@@ -129,21 +129,32 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 			nAirgapSpeed = nAirgapSpeed,
 			nRetractSpeed = nRetractSpeed,
 			bFastWash = true
+		) :: translate(T1_Aspirate(twvsAspirate)) ::: translate(T1_Aspirate(twvsDispense)) :::
+		T0_Wash(
+			mTips,
+			iWasteGrid = 2, iWasteSite = 1,
+			iCleanerGrid = 2, iCleanerSite = 2,
+			nWastVolume = 2, // FIXME: how should this be calculated? -- ellis, 2011-06-16
+			nWasteDelay = nWasteDelay,
+			nCleanerVolume = 5, // FIXME: how should this be calculated? -- ellis, 2011-06-16
+			nCleanerDelay = nCleanerDelay,
+			nAirgapVolume = nAirgapVolume,
+			nAirgapSpeed = nAirgapSpeed,
+			nRetractSpeed = nRetractSpeed,
+			bFastWash = true
 		) ::
-		
-			T0_Wash(
-				mTips,
-				iWasteGrid = 1, iWasteSite = 1,
-				iCleanerGrid = 1, iCleanerSite = 2,
-				nWastVolume = 4, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nWasteDelay = nWasteDelay,
-				nCleanerVolume = 1, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nCleanerDelay = nCleanerDelay,
-				nAirgapVolume = nAirgapVolume,
-				nAirgapSpeed = nAirgapSpeed,
-				nRetractSpeed = nRetractSpeed,
-				bFastWash = false
-			)
-		)
+		T0_Wash(
+			mTips,
+			iWasteGrid = 1, iWasteSite = 1,
+			iCleanerGrid = 1, iCleanerSite = 2,
+			nWastVolume = 2, // FIXME: how should this be calculated? -- ellis, 2011-06-16
+			nWasteDelay = nWasteDelay,
+			nCleanerVolume = 5, // FIXME: how should this be calculated? -- ellis, 2011-06-16
+			nCleanerDelay = nCleanerDelay,
+			nAirgapVolume = nAirgapVolume,
+			nAirgapSpeed = nAirgapSpeed,
+			nRetractSpeed = nRetractSpeed,
+			bFastWash = true
+		) :: Nil
 	}
 }
