@@ -30,9 +30,9 @@ case class T0_Wash(
 	mTips: Int,
 	iWasteGrid: Int, iWasteSite: Int,
 	iCleanerGrid: Int, iCleanerSite: Int,
-	sWasteVolume: String, // TODO: Change this to Double, but format it nicely below -- ellis, 2011-06-11
+	nWasteVolume: Double,
 	nWasteDelay: Int,
-	sCleanerVolume: String, // TODO: Change this to Double, but format it nicely below -- ellis, 2011-06-11
+	nCleanerVolume: Double,
 	nCleanerDelay: Int,
 	nAirgapVolume: Int,
 	nAirgapSpeed: Int,
@@ -40,13 +40,14 @@ case class T0_Wash(
 	bFastWash: Boolean
 ) extends T0_Token {
 	override def toString = {
+		val fmt = new java.text.DecimalFormat("#.##")
 		Array(
 			mTips,
 			iWasteGrid, iWasteSite,
 			iCleanerGrid, iCleanerSite,
-			'"'+sWasteVolume+'"',
+			'"'+fmt.format(nWasteVolume)+'"',
 			nWasteDelay,
-			'"'+sCleanerVolume+'"',
+			'"'+fmt.format(nCleanerVolume)+'"',
 			nCleanerDelay,
 			nAirgapVolume,
 			nAirgapSpeed,

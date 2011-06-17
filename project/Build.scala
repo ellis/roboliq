@@ -5,6 +5,6 @@ object MyBuild extends Build {
 
 	lazy val projEvoware = Project("evoware", file("evoware")) dependsOn(projCommon)
 
-	lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projEvoware)
+	lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projCommon) dependsOn(projEvoware)
 }
 

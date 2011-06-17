@@ -40,7 +40,7 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
 	private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
 	
-	protected def encodeTips(list: Iterable[HasTip]): Int =
+	protected def encodeHasTips(list: Iterable[HasTip]): Int =
 		list.foldLeft(0) { (sum, x) => sum | (1 << x.tip.index) }
 	protected def encodeTips(list: Iterable[Tip]): Int =
 		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
@@ -117,7 +117,7 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		val twv0 = twvs.head
 		val tipKind = robot.getTipKind(twv0.tip)
 		val holder = twv0.well.holder
-		val mTips = encodeTips(twvs)
+		val mTips = encodeHasTips(twvs)
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
 		val asVolumes = Array.fill(12)("0")
@@ -156,7 +156,7 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	
 	/** Get T0 tokens for cleaning */
 	def clean(tok: T1_Clean): List[T0_Token]
-	
+
 	/*
 	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {
 		list match {
