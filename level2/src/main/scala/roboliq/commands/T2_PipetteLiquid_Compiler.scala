@@ -7,6 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 import roboliq.parts._
 import roboliq.tokens._
 import roboliq.robot._
+import roboliq.level2.tokens._
 
 
 class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
@@ -28,9 +29,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		def toTokenSeq: Seq[Token] = aspirates ++ dispenses
 	}
 	
-
-	assert(dests.size == volumes.size)
-	
+	val	srcs = token.srcs
 	val liquid = robot.state.getLiquid(srcs(0))
 	// Make sure that all the source wells contain the same liquid
 	assert(srcs.forall(well => robot.state.getLiquid(well) == liquid))
@@ -48,14 +47,14 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 	val bAspirateContaminates = liquid.bContaminates
 	val bDispenseContaminates = dispenseStrategy.bEnter && dests.exists(doesWellContaminate)
 	
-	val destsSorted = {
+	val dests = {
 		def sortDests(well1: Well, well2: Well): Boolean = {
 			(well1.holder.index < well2.holder.index || well1.index < well2.index)
 		}
-		dests.sortWith(sortDests)
+		token.mapDestAndVolume.keys.sortWith(sortDests)
 	}
 	
-	val mapDestToVolume = (dests zip volumes).toMap
+	val mapDestToVolume = token.mapDestAndVolume
 	val mapTipStates = robot.config.tips.map(tip => tip -> new TipState(tip)).toMap
 	
 	val tokens: Seq[T1_Token] = {

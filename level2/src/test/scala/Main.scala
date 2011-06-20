@@ -1,5 +1,3 @@
-package roboliq;
-
 import roboliq.parts._
 import roboliq.tokens._
 import roboliq.commands._
