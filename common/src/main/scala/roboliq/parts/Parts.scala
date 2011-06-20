@@ -43,7 +43,7 @@ class Liquid(val sName: String, val bWaterFreeDispense: Boolean, bCells: Boolean
 	}
 }
 object Liquid {
-	val empty = new Liquid(null, false, false, false, false)
+	val empty = new Liquid("", false, false, false, false)
 }
 
 class Part {

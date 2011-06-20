@@ -79,14 +79,16 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 
 	private def spirate(twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: (TipWellVolume => Option[String])): T0_Token = {
 		twvs match {
-			case Nil => T0_Error("Empty Tip-Well-Volume list")
-			case twv0 :: rest =>
+			case Seq() => T0_Error("Empty Tip-Well-Volume list")
+			case Seq(twv0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass_? = robot.getAspirateClass(twv0)
+				val sLiquidClass_? = getLiquidClass(twv0)
 				assert(sLiquidClass_?.isDefined)
 				val sLiquidClass = sLiquidClass_?.get
+				//println("sLiquidClass = "+sLiquidClass)
+				//for (twv <- rest) println(robot.getAspirateClass(twv))
 				// Assert that there is only one liquid class
-				assert(rest.forall(twv => robot.getAspirateClass(twv) == sLiquidClass))
+				assert(rest.forall(twv => getLiquidClass(twv) == sLiquidClass_?))
 				
 				val tipKind = robot.getTipKind(twv0.tip)
 				val holder = twv0.well.holder
@@ -99,12 +101,12 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 					(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
 				// Test all adjacent items for equidistance
 				def equidistant(twvs: Seq[TipWellVolume]): Boolean = twvs match {
-					case Nil => true
-					case _ :: Nil => true
-					case a :: b :: rest =>
+					case Seq() => true
+					case Seq(_) => true
+					case Seq(a, b, rest @ _*) =>
 						equidistant2(a, b) match {
 							case false => false
-							case true => equidistant(b :: rest)
+							case true => equidistant(Seq(b) ++ rest)
 						}
 				}
 				assert(equidistant(twvs))

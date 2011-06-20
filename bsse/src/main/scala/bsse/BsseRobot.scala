@@ -51,7 +51,9 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 		val tipKind = getTipKind(tip)
 		val wellState = state.getWellState(well)
 		val liquid = wellState.liquid
-		
+		// Can't aspirate from an empty well
+		assert(liquid ne Liquid.empty)
+
 		val bLarge = (tipKind.sName == "large")
 		//val tipState = state.getTipState(tip)
 		//val tipLiquid = tipState.liquid
