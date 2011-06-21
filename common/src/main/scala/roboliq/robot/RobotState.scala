@@ -73,24 +73,46 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 	val sites = new mutable.HashMap[Part, Site]
 	val tipStates = new mutable.HashMap[Tip, TipState]
 	val wellStates = new mutable.HashMap[Well, WellState]
-	
-	def aspirate(tip: Tip, liquid: Liquid, nVolume: Double) {
+
+	// Aspirate liquid into the tip -- prefer aspirate()
+	def addLiquid0(tip: Tip, liquid: Liquid, nVolume: Double) {
 		tipStates(tip) = getTipState(tip).aspirate(liquid, nVolume)
 	}
 
-	def dispense(tip: Tip, nVolume: Double) {
-		tipStates(tip) = getTipState(tip).dispense(nVolume)
+	// Remove liquid from well and put it in tip
+	def aspirate(tip: Tip, well: Well, nVolume: Double) {
+		val liquid = getWellState(well).liquid
+		addLiquid0(tip, liquid, nVolume)
+		removeLiquid0(well, nVolume)
 	}
-	
-	def addLiquid(well: Well, liquid: Liquid, nVolume: Double) {
+
+	// Remove liquid from tip -- prefer dispense()
+	def removeLiquid0(tip: Tip, nVolume: Double) {
+		tipStates(tip) = getTipState(tip).dispenseFree(nVolume)
+	}
+
+	// Remove liquid from tip and put it in well
+	def dispense(tip: Tip, well: Well, nVolume: Double, dispenseKind: DispenseKind.Value) {
+		val tipState = getTipState(tip)
+		val wellState = getWellState(well)
+		tipStates(tip) = dispenseKind match {
+			case DispenseKind.WetContact => tipState.dispenseIn(wellState.liquid, nVolume)
+			case _ => tipState.dispenseFree(nVolume)
+		}
+		addLiquid0(well, tipState.liquid, nVolume)
+	}
+
+
+	def addLiquid0(well: Well, liquid: Liquid, nVolume: Double) {
 		wellStates(well) = getWellState(well).add(liquid, nVolume)
 	}
-	def removeLiquid(well: Well, nVolume: Double) {
+	def removeLiquid0(well: Well, nVolume: Double) {
 		wellStates(well) = getWellState(well).remove(nVolume)
 	}
+
 	def fillWells(wells: Traversable[Well], liquid: Liquid, nVolume: Double) {
 		for (well <- wells)
-			addLiquid(well, liquid, nVolume)
+			addLiquid0(well, liquid, nVolume)
 	}
 	
 	def toImmutable = new RobotState(prev_?, sites.toMap, tipStates.toMap, wellStates.toMap)

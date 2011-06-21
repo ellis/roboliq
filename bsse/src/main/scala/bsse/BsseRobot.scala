@@ -96,7 +96,7 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 			if (bLarge) Some("Water wet contact") else Some("D-BSSE Te-PS Wet Contact")
 	}
 	
-	def batchesForAsperate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]] = {
+	def batchesForAspirate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]] = {
 		def getLiquidClass(twv: TipWellVolume) = getAspirateClass(twv.tip, twv.well)
 		batches(twvs, getLiquidClass)
 	}

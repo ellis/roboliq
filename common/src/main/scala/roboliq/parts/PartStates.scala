@@ -32,7 +32,10 @@ case class TipState(
 			CleanDegree.None
 		)
 	}
-	def dispense(nVolume2: Double) = new TipState(tip, liquid, nVolume - nVolume2, contamInside, nContamInsideVolume, contamOutside, CleanDegree.None)
+	def dispenseFree(nVolume2: Double): TipState =
+		this.copy(nVolume = nVolume - nVolume2, cleanDegree = CleanDegree.None)
+	def dispenseIn(liquid2: Liquid, nVolume2: Double): TipState =
+		this.copy(nVolume = nVolume - nVolume2, contamOutside = contamOutside + liquid2, cleanDegree = CleanDegree.None)
 	def clean() = this.copy(cleanDegree = CleanDegree.None)
 }
 object TipState {

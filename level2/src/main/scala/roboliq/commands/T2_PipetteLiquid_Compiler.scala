@@ -11,26 +11,23 @@ import roboliq.level2.tokens._
 
 
 class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
+	// REFACTOR: Use roboliq.parts.TipState instead -- ellis, 2011-06-21
 	class TipState(val tip: Tip) {
 		var bFree = true
 		var bContaminated = true
 		var nVolume = 0.0
-		
-		//def index = tip.index
-		def nVolumeMin = tip.nVolumeMin
-		def nVolumeMax = tip.nVolumeMax
 	}
 	
 	class CycleState(val tips: Array[TipState]) {
-		val aspirates = new ArrayBuffer[Aspirate]
-		val dispenses = new ArrayBuffer[Dispense]
+		val aspirates = new ArrayBuffer[T1_Aspirate]
+		val dispenses = new ArrayBuffer[T1_Dispense]
 		
 		def score(): Int = aspirates.size + dispenses.size
-		def toTokenSeq: Seq[Token] = aspirates ++ dispenses
+		def toTokenSeq: Seq[T1_Token] = aspirates ++ dispenses
 	}
 	
 	val	srcs = token.srcs
-	val liquid = robot.state.getLiquid(srcs(0))
+	val liquid = robot.state.getLiquid(srcs.head)
 	// Make sure that all the source wells contain the same liquid
 	assert(srcs.forall(well => robot.state.getLiquid(well) == liquid))
 	
@@ -41,19 +38,19 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 	// aspirate contaminates, dispense does not: wash before each subsequent aspirate
 	// aspirate does not contaminate, dispense doesn't contaminate: no washing required
 	
-	private def doesWellContaminate(well: Well): Boolean = state.getLiquid(well).bContaminates
+	private def doesWellContaminate(well: Well): Boolean = state.getLiquid(well).contaminates
 	//val bDestContaminates = dests.exists(doesWellContaminate)
 	
-	val bAspirateContaminates = liquid.bContaminates
-	val bDispenseContaminates = dispenseStrategy.bEnter && dests.exists(doesWellContaminate)
+	//val bAspirateContaminates = liquid.bContaminates
+	//val bDispenseContaminates = dispenseStrategy.bEnter && dests.exists(doesWellContaminate)
 	
 	val dests = {
 		def sortDests(well1: Well, well2: Well): Boolean = {
 			(well1.holder.index < well2.holder.index || well1.index < well2.index)
 		}
-		token.mapDestAndVolume.keys.sortWith(sortDests)
+		token.mapDestAndVolume.keys.toList.sortWith(sortDests)
 	}
-	
+
 	val mapDestToVolume = token.mapDestAndVolume
 	val mapTipStates = robot.config.tips.map(tip => tip -> new TipState(tip)).toMap
 	
@@ -61,7 +58,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
-		var winner: Seq[Token] = null
+		var winner: Seq[T1_Token] = null
 		var nWinnerScore = Int.MaxValue
 		for (tipGroup <- robot.config.tipGroups) {
 			val tips = tipGroup.map(iTip => mapTipStates(robot.config.tips(iTip)))
@@ -85,11 +82,11 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		val cycles = new ArrayBuffer[CycleState]
 		
 		val destsRemaining = new ArrayBuffer[Well]
-		destsRemaining ++= destsSorted
+		destsRemaining ++= dests
 
 		var bOk = true
 		while (!destsRemaining.isEmpty && bOk) {
-			val dispenses = new ArrayBuffer[Dispense]
+			val dispenses = new ArrayBuffer[T1_Dispense]
 			def dispense(wellPrev_? : Option[Well]) {
 				val twvss = pipetteLiquid_dispenseBatchOnce(tips, destsRemaining, wellPrev_?)
 				if (!twvss.isEmpty) {
@@ -104,7 +101,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 								tipState.bFree = false
 							destsRemaining -= twv.well
 						}
-						dispense(Some(twvs.head.head.well))
+						dispense(Some(twvs.head.well))
 					}
 				}
 			}
@@ -127,15 +124,17 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 	private def pipetteLiquid_dispenseBatchOnce(tips: Seq[TipState], destsRemaining: Seq[Well], wellPrev_? : Option[Well]): Seq[Seq[TipWellVolume]] = {
 		// Get a list of wells to dispense into
 		val destsNext = getNextDestBatch(tips, destsRemaining, wellPrev_?)
-		//assert(!destsNext.isEmpty)
 		// Check whether the tips all have enough free volume for their respective destinations
 		val tipsAndDests = tips zip destsNext
-		val bTipsHaveSpace = tipsAndDests.forall(pair => {
-			val nVolume = mapDestToVolume(pair._2)
-			tipIsFreeAndHasVolume(nVolume)(pair._1)
+		val bOk = tipsAndDests.forall(pair => {
+			val (tip, dest) = pair
+			val nMin = robot.getTipAspirateVolumeMin(tip.tip, liquid)
+			val nMax = robot.getTipHoldVolumeMax(tip.tip, liquid)
+			val nVolume = mapDestToVolume(dest)
+			(tip.bFree && nVolume >= nMin && nVolume + tip.nVolume <= nMax)
 		})
 		// If they do:
-		if (bTipsHaveSpace) {
+		if (bOk) {
 			// Indicate that tip should dispense the given volume to dest
 			val twvs = for ((tip, dest) <- tipsAndDests) yield {
 				val nVolume = mapDestToVolume(dest)
@@ -148,9 +147,6 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		}
 	}
 
-	private def tipIsFreeAndHasVolume(nVolume: Double)(tip: TipState): Boolean =
-		(tip.bFree && nVolume >= tip.nVolumeMin && nVolume + tip.nVolume <= tip.nVolumeMax)
-	
 	private def resetTips() {
 		for ((_, tipState) <- mapTipStates) {
 			tipState.nVolume = 0
@@ -189,7 +185,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 				(a.nVolume > b.nVolume) || (a.nVolume == b.nVolume && well1.index < well2.index) 
 			}
 			// keep the top tips.size() entries ordered by index
-			val srcs2 = srcs.sortWith(order).take(tips.size)
+			val srcs2 = srcs.toSeq.sortWith(order).take(tips.size)
 			val srcs3 = robot.chooseWellsForTips(tips0, srcs2).sortWith(_.index < _.index)
 			assert(!srcs3.isEmpty)
 			
@@ -204,15 +200,15 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 					
 					twvsAll += new TipWellVolume(tip.tip, src, nVolume)
 					state.removeLiquid(src, nVolume)
-					tip.bContaminated |= liquid.bContaminates
+					tip.bContaminated |= liquid.contaminates
 				}
 
 				iTip += 1
 				iSrc += 1
 			}
 			if (twvsAll.size > 0) {
-				val twvss = robot.batchesForAspirate(twvs)
-				cycle.aspirates ++= twvss.map(twvs => new Aspirate(twvs))
+				val twvss = robot.batchesForAspirate(twvsAll)
+				cycle.aspirates ++= twvss.map(twvs => new T1_Aspirate(twvs))
 			}
 		}
 	}
