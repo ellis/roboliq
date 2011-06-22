@@ -17,7 +17,7 @@ trait Robot {
 	def getTipHoldVolumeMax(tip: Tip, liquid: Liquid): Double
 	/** Choose dispense method */
 	def getDispenseKind(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): DispenseKind.Value
-	def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well]
+	//def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well]
 	def batchesForAspirate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]]
 	def batchesForDispense(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]]
 	def score(tokens: Seq[T1_Token]): Int

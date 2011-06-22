@@ -25,11 +25,11 @@ abstract class EvowareRobot(val evowareState: EvowareSetupState) extends Robot {
 	*/
 	var state: RobotState = RobotState.empty
 	
-	def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well] = {
+	/*def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well] = {
 		val chosen = new ArrayBuffer[Well]
 		chosen ++= wells.take(tips.size)
 		chosen
-	}
+	}*/
 	
 	def score(tokens: Seq[T1_Token]): Int = {
 		tokens.size
