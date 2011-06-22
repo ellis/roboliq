@@ -1,9 +1,10 @@
 package roboliq.robot
 
+import scala.collection.immutable.SortedSet
 import roboliq.parts._
 
 
 class RobotConfig(
-		val tips: Array[Tip],
+		val tips: SortedSet[Tip],
 		val tipGroups: Array[Array[Int]]
 )

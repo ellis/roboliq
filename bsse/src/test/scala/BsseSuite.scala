@@ -36,7 +36,7 @@ class BsseSuite extends FunSuite {
 		}
 
 		robot.state = builder.toImmutable
-		val tips = robot.tips
+		val tips = robot.tips.toArray
 
 		val cmds = List[T1_Token](
 			T1_Aspirate(Array(

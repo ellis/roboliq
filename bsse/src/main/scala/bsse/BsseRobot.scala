@@ -1,5 +1,7 @@
 package bsse
 
+import scala.collection.immutable.SortedSet
+
 import roboliq.parts._
 import roboliq.robot._
 import roboliq.tokens._
@@ -13,10 +15,10 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 	val nFreeDispenseVolumeThreshold = 10
 	val tipKind1000 = new EvowareTipKind("large", 2, 950, 50)
 	val tipKind50 = new EvowareTipKind("small", 0.01, 45, 5)
-	val tips = (0 until 8).map(new Tip(_))
+	val tips = SortedSet[Tip]() ++ (0 until 8).map(new Tip(_))
 	val tipTipKinds = (0 until 8).map(iTip => if (iTip < 4) tipKind1000 else tipKind50)
 	val plateDecon = new Plate(3, 1)
-	val config = new RobotConfig(tips.toArray, Array(Array(0,1,2,3), Array(4,5,6,7), Array(0,1,2,3,4,5,6,7)))
+	val config = new RobotConfig(tips, Array(Array(0,1,2,3), Array(4,5,6,7), Array(0,1,2,3,4,5,6,7)))
 	
 	def getTipKind(tip: Tip): EvowareTipKind = tipTipKinds(tip.index)
 	
@@ -47,16 +49,16 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 			DispenseKind.WetContact
 	}
 
-	def chooseTipWellPairs(tips: Seq[Tip], wells: Seq[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {
+	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
 		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(wells, wellPrev_?)
 		val wellsInCol = getWellsInCol(holder, wellsOnHolder, iCol, tips.size)
-		tips zip wellsInCol
+		tips.toSeq zip wellsInCol.toSeq
 	}
 
-	private def getHolderWellsCol(wells: Seq[Well], wellPrev_? : Option[Well]): Tuple3[WellHolder, Seq[Well], Int] = {
+	private def getHolderWellsCol(wells: SortedSet[Well], wellPrev_? : Option[Well]): Tuple3[WellHolder, SortedSet[Well], Int] = {
 		// If the previous well is defined but is on a different holder, then ignore it
 		val wellPrevValidated_? = wellPrev_? match {
 			case None => None
@@ -83,11 +85,11 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 
 	// Pick the top-most destination wells available in the given column
 	// If none found, loop through columns until wells are found
-	private def getWellsInCol(holder: WellHolder, wellsOnHolder: Seq[Well], iCol0: Int, nWellsMax: Int): Seq[Well] = {
+	private def getWellsInCol(holder: WellHolder, wellsOnHolder: SortedSet[Well], iCol0: Int, nWellsMax: Int): SortedSet[Well] = {
 		val nRows = holder.nRows
 		val nCols = holder.nCols
 		var iCol = iCol0
-		var wellsInCol: Seq[Well] = null
+		var wellsInCol: SortedSet[Well] = null
 		do {
 			wellsInCol = wellsOnHolder.filter(_.index / nRows == iCol).take(nWellsMax)
 			if (wellsInCol.isEmpty) {
