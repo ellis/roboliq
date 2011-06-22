@@ -1,4 +1,4 @@
-package roboliq.commands
+package roboliq.level2.commands
 
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
@@ -56,7 +56,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
-		var winner: Seq[T1_Token] = null
+		var winner = Seq[T1_Token]()
 		var nWinnerScore = Int.MaxValue
 		for (tipGroup <- robot.config.tipGroups) {
 			val tips = tipGroup.map(iTip => robot.config.tips(iTip))

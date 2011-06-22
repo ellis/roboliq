@@ -32,7 +32,7 @@ class BsseSuite extends FunSuite {
 			bDna = false,
 			bOtherContaminant = false)
 		for (well <- plate1.wells) {
-			builder.addLiquid(well, water, 1000)
+			builder.addLiquid0(well, water, 1000)
 		}
 
 		robot.state = builder.toImmutable
@@ -47,10 +47,10 @@ class BsseSuite extends FunSuite {
 				)
 			),
 			T1_Dispense(Array(
-				new TipWellVolume(tips(0), plate2.wells(0), 3),
-				new TipWellVolume(tips(1), plate2.wells(1), 3),
-				new TipWellVolume(tips(2), plate2.wells(2), 3),
-				new TipWellVolume(tips(3), plate2.wells(3), 3)
+				new TipWellVolumeDispense(tips(0), plate2.wells(0), 30, DispenseKind.Free),
+				new TipWellVolumeDispense(tips(1), plate2.wells(1), 30, DispenseKind.Free),
+				new TipWellVolumeDispense(tips(2), plate2.wells(2), 30, DispenseKind.Free),
+				new TipWellVolumeDispense(tips(3), plate2.wells(3), 30, DispenseKind.Free)
 				)
 			)
 		)

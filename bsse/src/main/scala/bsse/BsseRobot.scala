@@ -46,7 +46,58 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 		else
 			DispenseKind.WetContact
 	}
-	
+
+	def chooseTipWellPairs(tips: Seq[Tip], wells: Seq[Well], wellPrev_? : Option[Well]): Seq[Seq[Tuple2[Tip, Well]]] = {
+		if (tips.isEmpty || wells.isEmpty)
+			return Nil
+
+		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(wells, wellPrev_?)
+		val wellsInCol = getWellsInCol(holder, wellsOnHolder, iCol, tips.size)
+		tips zip WellsInCol
+	}
+
+	private def getHolderWellsCol(wells: Seq[Well], wellPrev_? : Option[Well]): Tuple3[Holder, Seq[Well], Int] = {
+		// If the previous well is defined but is on a different holder, then ignore it
+		val wellPrevValidated_? = wellPrev_? match {
+			case None => None
+			case Some(wellPrev) =>
+				if (wells.exists(_.holder == wellPrev.holder))
+					wellPrev_?
+				else
+					None
+		}
+
+		// Choose first well
+		val well0 = wellPrevValidated_? match {
+			case Some(well) => well
+			case None => wellsAvailable.head
+		}
+		val holder = well0.holder
+		val iCol = wellPrevValidated_? match {
+			case Some(well) => well.index / holder.nRows + 1
+			case None => 0
+		}
+		val wellsOnHolder = wellsAvailable.filter(_.holder == holder)
+		(holder, wellsOnHolder, iCol)
+	}
+
+	// Pick the top-most destination wells available in the given column
+	// If none found, loop through columns until wells are found
+	private def getWellsInCol(holder: WellHolder, wellsOnHolder: Seq[Well], iCol0: Int, nWellsMax: Int): Seq[Well] = {
+		val nRows = holder.nRows
+		val nCols = holder.nCols
+		var iCol = iCol0
+		var wellsInCol: Seq[Well] = null
+		do {
+			wellsInCol = wellsOnHolder.filter(_.index / nRows == iCol).take(nWellsMax)
+			if (wellsInCol.isEmpty) {
+				iCol = (iCol + 1) % nCols
+				assert(iCol != iCol0)
+			}
+		} while (wellsInCol.isEmpty)
+		wellsInCol
+	}
+
 	def getAspirateClass(tip: Tip, well: Well): Option[String] = {
 		val tipKind = getTipKind(tip)
 		val wellState = state.getWellState(well)
@@ -89,7 +140,7 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 			Some("D-BSSE Decon")
 		// If our volume is high enough that we don't need to worry about accuracy
 		else if (nVolume >= nFreeDispenseVolumeThreshold)
-			if (bLarge) Some("Comp cells free dispense") else None
+			if (bLarge) Some("Water free dispense") else None
 		else if (wellState.nVolume == 0)
 			if (bLarge) Some("Water dry contact") else Some("D-BSSE Te-PS Dry Contact")
 		else
@@ -181,6 +232,15 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 				(a :: as) :: partitionBy(bs, fn)
 		}
 	}
-	
+
+	private def partitionSeqBy[T](list: Seq[T], fn: (T, T) => Boolean): Seq[Seq[T]] = {
+		list match {
+			case Seq() => Nil
+			case Seq(a, rest @ _*) =>
+				val (as, bs) = rest.partition(x => fn(a, x))
+				Seq(a) ++ as ++ partitionSeqBy(bs, fn)
+		}
+	}
+
 	private def sameTipKind(a: Tip, b: Tip): Boolean = getTipKind(a) eq getTipKind(b)
 }
