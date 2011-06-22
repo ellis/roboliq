@@ -47,16 +47,16 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 			DispenseKind.WetContact
 	}
 
-	def chooseTipWellPairs(tips: Seq[Tip], wells: Seq[Well], wellPrev_? : Option[Well]): Seq[Seq[Tuple2[Tip, Well]]] = {
+	def chooseTipWellPairs(tips: Seq[Tip], wells: Seq[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
 		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(wells, wellPrev_?)
 		val wellsInCol = getWellsInCol(holder, wellsOnHolder, iCol, tips.size)
-		tips zip WellsInCol
+		tips zip wellsInCol
 	}
 
-	private def getHolderWellsCol(wells: Seq[Well], wellPrev_? : Option[Well]): Tuple3[Holder, Seq[Well], Int] = {
+	private def getHolderWellsCol(wells: Seq[Well], wellPrev_? : Option[Well]): Tuple3[WellHolder, Seq[Well], Int] = {
 		// If the previous well is defined but is on a different holder, then ignore it
 		val wellPrevValidated_? = wellPrev_? match {
 			case None => None
@@ -70,14 +70,14 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 		// Choose first well
 		val well0 = wellPrevValidated_? match {
 			case Some(well) => well
-			case None => wellsAvailable.head
+			case None => wells.head
 		}
 		val holder = well0.holder
 		val iCol = wellPrevValidated_? match {
 			case Some(well) => well.index / holder.nRows + 1
 			case None => 0
 		}
-		val wellsOnHolder = wellsAvailable.filter(_.holder == holder)
+		val wellsOnHolder = wells.filter(_.holder == holder)
 		(holder, wellsOnHolder, iCol)
 	}
 
@@ -146,7 +146,21 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 		else
 			if (bLarge) Some("Water wet contact") else Some("D-BSSE Te-PS Wet Contact")
 	}
-	
+
+	// Group by tip type and liquid dispense class
+	def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {
+		val tipKind0 = getTipKind(twv0.tip)
+		val tipKind1 = getTipKind(twv1.tip)
+		if (tipKind0 ne tipKind1) {
+			false
+		}
+		else {
+			val sClass0 = getLiquidClass(twv0).get
+			val sClass1 = getLiquidClass(twv1).get
+			sClass0 == sClass1
+		}
+	}
+
 	def batchesForAspirate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]] = {
 		def getLiquidClass(twv: TipWellVolume) = getAspirateClass(twv.tip, twv.well)
 		// Group by tip type and liquid dispense class
@@ -175,19 +189,6 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 	
 	def batchesForDispense(twvs: Seq[TipWellVolumeDispense]): Seq[Seq[TipWellVolumeDispense]] = {
 		def getLiquidClass(twv: TipWellVolume) = getDispenseClass(twv.tip, twv.well, twv.nVolume)
-		// Group by tip type and liquid dispense class
-		def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {
-			val tipKind0 = getTipKind(twv0.tip)
-			val tipKind1 = getTipKind(twv1.tip)
-			if (tipKind0 ne tipKind1) {
-				false
-			}
-			else {
-				val sClass0 = getLiquidClass(twv0).get
-				val sClass1 = getLiquidClass(twv1).get
-				sClass0 == sClass1
-			}
-		}
 
 		val bAllHaveClass = twvs.forall(twv => getLiquidClass(twv).isDefined)
 		if (!bAllHaveClass) {
@@ -238,7 +239,7 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 			case Seq() => Nil
 			case Seq(a, rest @ _*) =>
 				val (as, bs) = rest.partition(x => fn(a, x))
-				Seq(a) ++ as ++ partitionSeqBy(bs, fn)
+				Seq(Seq(a) ++ as) ++ partitionSeqBy(bs, fn)
 		}
 	}
 

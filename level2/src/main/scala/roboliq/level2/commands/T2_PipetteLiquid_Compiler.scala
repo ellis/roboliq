@@ -121,9 +121,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 
 	private def pipetteLiquid_dispenseBatchOnce(cycle: CycleState, destsRemaining: Seq[Well], wellPrev_? : Option[Well]): Seq[Seq[TipWellVolumeDispense]] = {
 		// Get a list of wells to dispense into
-		val destsNext = getWellsForTips(cycle.tipsAvailable, destsRemaining, wellPrev_?)
-		val tipsAndDests = cycle.tipsAvailable zip destsNext
-
+		val tipsAndDests = robot.chooseTipWellPairs(cycle.tipsAvailable, destsRemaining, wellPrev_?)
 		if (tipsAndDests.isEmpty)
 			return Nil
 
@@ -203,21 +201,15 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 			}
 			// keep the top tips.size() entries ordered by index
 			val srcs2 = srcs.toSeq.sortWith(order).take(tips.size)
-			val srcs3 = getWellsForTips(tips, srcs2, None).sortWith(_.index < _.index)
-			assert(!srcs3.isEmpty)
+			val pairs = robot.chooseWellTipPairs(tips, srcs2, None).sortWith(_.index < _.index)
+			assert(!pairs.isEmpty)
 			
 			val twvsAll = new ArrayBuffer[TipWellVolume]
-			var iSrc = 0
-			while (iTip < tips.size && iSrc < srcs3.size) {
-				val tip = tips(iTip)
+			for ((tip, src) <- pairs) {
 				val nVolume = cycle.mapTipToVolume(tip)
 				if (nVolume > 0) {
-					val src = srcs3(iSrc)
 					twvsAll += new TipWellVolume(tip, src, nVolume)
 				}
-
-				iTip += 1
-				iSrc += 1
 			}
 			if (twvsAll.size > 0) {
 				val twvss = robot.batchesForAspirate(twvsAll)
@@ -236,42 +228,5 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 				state.dispense(twvd)
 		}
 	}
-
-	private def getWellsForTips(tips: Seq[Tip], wellsAvailable: Seq[Well], wellPrev_? : Option[Well]): Seq[Well] = {
-		if (tips.isEmpty || wellsAvailable.isEmpty)
-			Nil
-		// If the previous well is defined but is on a different holder, then ignore it
-		else if (wellPrev_?.isDefined && !wellsAvailable.exists(_.holder == wellPrev_?.get.holder))
-			getWellsForTips(tips, wellsAvailable, None)
-		else {
-			val _well = wellPrev_? match {
-				case Some(well) => well
-				case None => wellsAvailable.head
-			}
-			val holder = _well.holder
-			val iCol = wellPrev_? match {
-				case Some(well) => well.index / holder.nRows + 1
-				case None => 0
-			}
-			val wellsOnHolder = wellsAvailable.filter(_.holder == holder)
-			getWellsAlignedWithTips(tips, holder, wellsOnHolder, iCol)
-		}
-	}
-	
-	// Pick the top-most destination wells available in the given column
-	// If none found, loop through columns until wells are found
-	private def getWellsAlignedWithTips(tips: Seq[Tip], holder: WellHolder, wellsOnHolder: Seq[Well], iCol0: Int): Seq[Well] = {
-		val nRows = holder.nRows
-		val nCols = holder.nCols
-		var iCol = iCol0
-		var wellsInCol: Seq[Well] = null
-		do {
-			wellsInCol = wellsOnHolder.filter(_.index / nRows == iCol).take(tips.size)
-			if (wellsInCol.isEmpty) {
-				iCol = (iCol + 1) % nCols
-				assert(iCol != iCol0)
-			}
-		} while (wellsInCol.isEmpty)
-		wellsInCol
-	}
 }
+
