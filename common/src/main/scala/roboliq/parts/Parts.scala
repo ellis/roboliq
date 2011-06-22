@@ -3,7 +3,9 @@ package roboliq.parts
 sealed class AspirateStrategy(val sName: String)
 sealed class DispenseStrategy(val sName: String, val bEnter: Boolean)
 
-class Tip(val index: Int)
+class Tip(val index: Int) extends Ordered[Tip] {
+	override def compare(that: Tip): Int = this.index - that.index
+}
 
 class Contamination(val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) {
 	def +(other: Contamination): Contamination = {
@@ -64,7 +66,12 @@ object WellHolder {
 	var nextIndex = 0
 }
 
-class Well(val holder: WellHolder, val index: Int) extends Part {
+class Well(val holder: WellHolder, val index: Int) extends Part with Ordered[Well] {
+	override def compare(that: Well): Int = {
+		val d1 = holder.index - that.holder.index
+		if (d1 == 0) index - that.index
+		else d1
+	}
 }
 
 /*object WellState {
