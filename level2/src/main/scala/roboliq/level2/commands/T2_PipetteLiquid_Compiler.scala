@@ -10,6 +10,90 @@ import roboliq.robot._
 import roboliq.level2.tokens._
 
 
+class PipetteHelper(robot: Robot) {
+	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], twvsPrev: Seq[TipWellVolume]): Seq[Tuple2[Tip, Well]] = {
+		if (tips.isEmpty || wells.isEmpty)
+			return Nil
+
+		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(wells, twvsPrev)
+		val well0 = getFirstWell(holder, wellsOnHolder, iCol)
+
+		val tip0 = tips.head
+		val iRowTip0 = tip0.index
+		val iColTip0 = 0
+		val iRowWell0 = well0.index % holder.nRows
+		val iColWell0 = well0.index / holder.nRows
+
+		val pairs = new ArrayBuffer[Tuple2[Tip, Well]]
+		pairs += (tip0 -> well0)
+		for (tip <- tips.tail) {
+			val dRowTip = tip.index - tip0.index
+			val iRowWell = iRowWell0 + dRowTip
+			val iColWell = iColWell0
+			val well_? = wellsOnHolder.find(well => {
+				val iRow = well.index % holder.nRows
+				val iCol = well.index / holder.nRows
+				(iRow == iRowWell && iCol == iColWell)
+			})
+			well_? match {
+				case None =>
+				case Some(well) => pairs += (tip -> well)
+			}
+		}
+		pairs.toSeq
+	}
+
+	private def getHolderWellsCol(wells: SortedSet[Well], twvsPrev: Seq[TipWellVolume]): Tuple3[WellHolder, SortedSet[Well], Int] = {
+		// Pick a "reference" well if twvsPrev isn't empty
+		val wellRef_? = {
+			if (twvsPrev.isEmpty)
+				None
+			else {
+				val wellRef = twvsPrev.last.well
+				val holderRef = wellRef
+				if (wells.exists(_.holder == holderRef))
+					Some(wellRef)
+				else
+					None
+			}
+		}
+
+		// Get the holder of interest
+		val holder = wellRef_? match {
+			case None => wells.head.holder
+			case Some(wellRef) => wellRef.holder
+		}
+
+		// Either choose the first column or the column after the reference well
+		val iCol = wellRef_? match {
+			case None => 0
+			case Some(wellRef) => wellRef.index / holder.nRows + 1
+		}
+
+		val wellsOnHolder = wells.filter(_.holder == holder)
+		(holder, wellsOnHolder, iCol)
+	}
+
+	// Get the upper-most well in iCol.
+	// If none found, loop through columns until wells are found
+	private def getFirstWell(holder: WellHolder, wellsOnHolder: SortedSet[Well], iCol0: Int): Well = {
+		assert(!wellsOnHolder.isEmpty)
+
+		val nRows = holder.nRows
+		val nCols = holder.nCols
+
+		def checkCol(iCol: Int): Well = {
+			val well_? = wellsOnHolder.find(_.index / nRows == iCol)
+			well_? match {
+				case Some(well) => well
+				case None => checkCol((iCol + 1) % nCols)
+			}
+		}
+
+		checkCol(iCol0)
+	}
+}
+
 class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 	class CycleState(val tips: SortedSet[Tip]) {
 		// Tips available for dispense.  Once a tip has dispensed with wet contact into a contaminating liquid, it should be removed from this list.
@@ -79,6 +163,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		var bOk = true
 		while (!destsRemaining.isEmpty && bOk) {
 			val cycle = new CycleState(tips)
+			// Dispense as many times as the tip group can accommodate
 			def dispense(wellPrev_? : Option[Well]) {
 				val twvss = pipetteLiquid_dispenseBatchOnce(cycle, destsRemaining, wellPrev_?)
 				if (!twvss.isEmpty) {
