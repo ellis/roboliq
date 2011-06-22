@@ -111,6 +111,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 			}
 			else {
 				aspirate(cycle)
+				updateState(cycle)
 				cycles += cycle
 			}
 		}
@@ -118,7 +119,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		cycles
 	}
 
-	private def pipetteLiquid_dispenseBatchOnce(cycle: CycleState, destsRemaining: Seq[Well], wellPrev_? : Option[Well]): Seq[Seq[TipWellVolume]] = {
+	private def pipetteLiquid_dispenseBatchOnce(cycle: CycleState, destsRemaining: Seq[Well], wellPrev_? : Option[Well]): Seq[Seq[TipWellVolumeDispense]] = {
 		// Get a list of wells to dispense into
 		val destsNext = getWellsForTips(cycle.tipsAvailable, destsRemaining, wellPrev_?)
 		val tipsAndDests = cycle.tipsAvailable zip destsNext
@@ -139,8 +140,6 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 			val nMax = robot.getTipHoldVolumeMax(tip, liquid)
 			val nTipVolume = cycle.mapTipToVolume(tip) // Volume already in the tip
 			val nVolume = mapDestToVolume(well) // Volume to dispense; also volume to add to amount which the tip will need to aspirate
-			//val wellState = state.getWellState(well)
-			//val dispenseKind = robot.getDispenseKind(tip, liquid, nVolume, wellState)
 			val bOk = (
 				nVolume >= nMin &&
 				nVolume + nTipVolume <= nMax //&&
@@ -153,7 +152,9 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 			// Indicate that tip should dispense the given volume to dest
 			val twvs = for ((tip, well) <- tipsAndDests) yield {
 				val nVolume = mapDestToVolume(well)
-				new TipWellVolume(tip, well, nVolume)
+				val wellState = state.getWellState(well)
+				val dispenseKind = robot.getDispenseKind(tip, liquid, nVolume, wellState)
+				new TipWellVolumeDispense(tip, well, nVolume, dispenseKind)
 			}
 			robot.batchesForDispense(twvs)
 		}
@@ -212,8 +213,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 				val nVolume = cycle.mapTipToVolume(tip)
 				if (nVolume > 0) {
 					val src = srcs3(iSrc)
-					twvsAll += new TipWellVolume(tip.tip, src, nVolume)
-					state.aspirate(tip, src, nVolume)
+					twvsAll += new TipWellVolume(tip, src, nVolume)
 				}
 
 				iTip += 1
@@ -229,11 +229,11 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 	private def updateState(cycle: CycleState) {
 		for (tok <- cycle.aspirates) {
 			for (twv <- tok.twvs)
-				state.aspirate(twv.tip, twv.well, twv.nVolume)
+				state.aspirate(twv)
 		}
 		for (tok <- cycle.dispenses) {
-			for (twv <- tok.twvs)
-				state.dispense(twv.tip, twv.well, twv.nVolume)
+			for (twvd <- tok.twvs)
+				state.dispense(twvd)
 		}
 	}
 

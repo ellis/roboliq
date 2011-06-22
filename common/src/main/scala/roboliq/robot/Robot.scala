@@ -4,10 +4,6 @@ import roboliq.parts._
 import roboliq.tokens._
 
 
-object DispenseKind extends Enumeration {
-	val Free, WetContact, DryContact = Value
-}
-
 trait Robot {
 	val config: RobotConfig
 	def state: RobotState
@@ -19,6 +15,6 @@ trait Robot {
 	def getDispenseKind(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): DispenseKind.Value
 	//def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well]
 	def batchesForAspirate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]]
-	def batchesForDispense(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]]
+	def batchesForDispense(twvs: Seq[TipWellVolumeDispense]): Seq[Seq[TipWellVolumeDispense]]
 	def score(tokens: Seq[T1_Token]): Int
 }

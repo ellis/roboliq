@@ -5,6 +5,7 @@ import scala.collection.immutable
 import scala.collection.mutable
 
 import roboliq.parts._
+import roboliq.tokens._
 
 
 object RobotState {
@@ -80,7 +81,8 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 	}
 
 	// Remove liquid from well and put it in tip
-	def aspirate(tip: Tip, well: Well, nVolume: Double) {
+	def aspirate(twv: TipWellVolume) {
+		import twv._
 		val liquid = getWellState(well).liquid
 		addLiquid0(tip, liquid, nVolume)
 		removeLiquid0(well, nVolume)
@@ -92,7 +94,8 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 	}
 
 	// Remove liquid from tip and put it in well
-	def dispense(tip: Tip, well: Well, nVolume: Double, dispenseKind: DispenseKind.Value) {
+	def dispense(twvd: TipWellVolumeDispense) {
+		import twvd._
 		val tipState = getTipState(tip)
 		val wellState = getWellState(well)
 		tipStates(tip) = dispenseKind match {
