@@ -24,7 +24,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 		// Calculate an overall tip state for maximum contamination
 		val tipStateAcc = tipStates.foldRight(TipState(tips.head)) { (tipState, acc) =>
 				acc.aspirate(tipState.liquid, tipState.nContamInsideVolume)
-				   .dispense(tipState.nContamInsideVolume)
+				   .dispenseFree(tipState.nContamInsideVolume)
 		}
 		val nContamInsideVolume = tipStateAcc.nContamInsideVolume
 
