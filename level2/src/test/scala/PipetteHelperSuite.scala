@@ -46,7 +46,6 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 	}
 
 	feature("Pairing 8 tips to 96 wells for pipetting without replacement") {
-		info("These cycles are without replacement of previously paired wells")
 		var twvs: Seq[TipWellVolume] = Nil
 		var wells = wellsAll
 		scenario("each cycle should match the next column of wells") {
@@ -60,6 +59,29 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 		scenario("13th cycle should match no wells") {
 			twvs = testPairs(tips, wells, Nil, twvs)
 		}
+	}
 
+	feature("Pairing 4 tips to 96 wells for pipetting without replacement") {
+		var twvs: Seq[TipWellVolume] = Nil
+		var wells = wellsAll
+		scenario("First 12 cycles should match the next column of the top 4 wells") {
+			for (iCycle <- (0 to 11)) {
+				wells.size should be === 96 - iCycle * 4
+				val iWell0 = iCycle * 8
+				twvs = testPairs(tipsA, wells, (iWell0 to iWell0 + 3), twvs)
+				wells --= twvs.map(_.well)
+			}
+		}
+		scenario("Last 12 cycles should match the next column of the bottom 4 wells") {
+			for (iCycle <- (0 to 11)) {
+				wells.size should be === 48 - iCycle * 4
+				val iWell0 = iCycle * 8 + 4
+				twvs = testPairs(tipsA, wells, (iWell0 to iWell0 + 3), twvs)
+				wells --= twvs.map(_.well)
+			}
+		}
+		scenario("Any subsequent cycle should match no wells") {
+			twvs = testPairs(tipsA, wells, Nil, twvs)
+		}
 	}
 }
