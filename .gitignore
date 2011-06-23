@@ -1,5 +1,8 @@
 *~
 test*.esc
+# sbt
 target/
 project/boot/
-
+.history
+# Eclipse
+.scala_dependencies

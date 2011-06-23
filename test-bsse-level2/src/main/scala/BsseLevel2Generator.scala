@@ -1,4 +1,4 @@
-//import org.scalatest.FunSuite
+import scala.collection.immutable.SortedSet
 
 import roboliq.parts._
 import roboliq.robot._
@@ -91,7 +91,7 @@ class BsseLevel2Generator {
 			Specs(8, 4, 1, 1, 240.0, liquidDna1, Liquid.empty),
 			Specs(8, 4, 1, 1, 480.0, liquidDna1, Liquid.empty)
 		)
-		x(specs(5))
+		//x(specs(5))
 		for (spec <- specs) x(spec)
 	}
 
@@ -131,12 +131,12 @@ class BsseLevel2Generator {
 		//assert(s == sExpected)
 	}
 
-	private def getWells(plate: Plate, nRows: Int, nCols: Int): Array[Well] = {
+	private def getWells(plate: Plate, nRows: Int, nCols: Int): SortedSet[Well] = {
 		val indexes = (0 until nCols).flatMap(iCol => {
 			val iCol0 = iCol * plate.nRows
 			(iCol0 until iCol0 + nRows)
 		}).toSet
-		plate.wells.filter(well => indexes.contains(well.index)).toArray
+		SortedSet[Well]() ++ plate.wells.filter(well => indexes.contains(well.index))
 	}
 
 }

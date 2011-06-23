@@ -26,3 +26,4 @@ test-bsse-level2/src/main/scala/BsseLevel2Generator.scala
 test-bsse-level2/src/test/scala/BsseLevel2Suite.scala
 test-bsse-level2/src/test/scala/Tests.scala
 TodoRoboliq.txt
+test-bsse-level2/src/main/scala/Main.scala
