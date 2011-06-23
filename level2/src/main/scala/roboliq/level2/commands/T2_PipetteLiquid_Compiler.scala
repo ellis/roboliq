@@ -46,7 +46,7 @@ class PipetteHelper {
 				None
 			else {
 				val wellRef = twvsPrev.last.well
-				val holderRef = wellRef
+				val holderRef = wellRef.holder
 				if (wells.exists(_.holder == holderRef))
 					Some(wellRef)
 				else
@@ -63,7 +63,7 @@ class PipetteHelper {
 		// Either choose the first column or the column after the reference well
 		val iCol = wellRef_? match {
 			case None => 0
-			case Some(wellRef) => wellRef.index / holder.nRows + 1
+			case Some(wellRef) => (wellRef.index / holder.nRows + 1) % holder.nCols
 		}
 
 		val wellsOnHolder = wells.filter(_.holder == holder)
@@ -74,6 +74,7 @@ class PipetteHelper {
 	// If none found, loop through columns until wells are found
 	private def getFirstWell(holder: WellHolder, wellsOnHolder: SortedSet[Well], iCol0: Int): Well = {
 		assert(!wellsOnHolder.isEmpty)
+		assert(iCol0 >= 0 && iCol0 < holder.nCols)
 
 		val nRows = holder.nRows
 		val nCols = holder.nCols
