@@ -10,11 +10,15 @@ object DispenseKind extends Enumeration {
 	val Free, WetContact, DryContact = Value
 }
 
-sealed class TipWellVolume(val tip: Tip, val well: Well, val nVolume: Double) extends HasTip
+sealed class TipWell(val tip: Tip, val well: Well) extends HasTip
+sealed class TipWellVolume(
+		tip: Tip, well: Well,
+		val nVolume: Double
+	) extends TipWell(tip, well)
 sealed class TipWellVolumeDispense(
-	tip: Tip, well: Well, nVolume: Double,
-	val dispenseKind: DispenseKind.Value)
-	extends TipWellVolume(tip, well, nVolume)
+		tip: Tip, well: Well, nVolume: Double,
+		val dispenseKind: DispenseKind.Value
+	) extends TipWellVolume(tip, well, nVolume)
 
 object ContaminationSeverity extends Enumeration {
 	val None, Minor, Medium, Major = Value

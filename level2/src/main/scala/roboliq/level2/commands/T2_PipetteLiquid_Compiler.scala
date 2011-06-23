@@ -11,11 +11,11 @@ import roboliq.level2.tokens._
 
 
 class PipetteHelper {
-	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], twvsPrev: Seq[TipWellVolume]): Seq[Tuple2[Tip, Well]] = {
+	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Seq[TipWell] = {
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
-		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(wells, twvsPrev)
+		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(wells, twsPrev)
 		val well0 = getFirstWell(holder, wellsOnHolder, iCol)
 
 		val tip0 = tips.head
@@ -24,8 +24,8 @@ class PipetteHelper {
 		val iRowWell0 = well0.index % holder.nRows
 		val iColWell0 = well0.index / holder.nRows
 
-		val pairs = new ArrayBuffer[Tuple2[Tip, Well]]
-		pairs += (tip0 -> well0)
+		val pairs = new ArrayBuffer[TipWell]
+		pairs += new TipWell(tip0, well0)
 		for (tip <- tips.tail) {
 			val dRowTip = tip.index - tip0.index
 			val iRowWell = iRowWell0 + dRowTip
@@ -33,19 +33,19 @@ class PipetteHelper {
 			val iWell = iColWell * holder.nRows + iRowWell
 			wellsOnHolder.find(_.index == iWell) match {
 				case None =>
-				case Some(well) => pairs += (tip -> well)
+				case Some(well) => pairs += new TipWell(tip, well)
 			}
 		}
 		pairs.toSeq
 	}
 
-	private def getHolderWellsCol(wells: SortedSet[Well], twvsPrev: Seq[TipWellVolume]): Tuple3[WellHolder, SortedSet[Well], Int] = {
-		// Pick a "reference" well if twvsPrev isn't empty
+	private def getHolderWellsCol(wells: SortedSet[Well], twsPrev: Seq[TipWell]): Tuple3[WellHolder, SortedSet[Well], Int] = {
+		// Pick a "reference" well if twsPrev isn't empty
 		val wellRef_? = {
-			if (twvsPrev.isEmpty)
+			if (twsPrev.isEmpty)
 				None
 			else {
-				val wellRef = twvsPrev.last.well
+				val wellRef = twsPrev.last.well
 				val holderRef = wellRef.holder
 				if (wells.exists(_.holder == holderRef))
 					Some(wellRef)

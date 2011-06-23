@@ -17,16 +17,16 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 	val wellsAll = SortedSet[Well](plate.wells : _*)
 	val helper = new PipetteHelper
 
-	def testPairs(tips: SortedSet[Tip], wells: SortedSet[Well], ai: Seq[Int], twvs: Seq[TipWellVolume]): Seq[TipWellVolume] = {
-		val pairs = helper.chooseTipWellPairs(tips, wells, twvs)
-		val aiWells = pairs.map(_._2.index)
+	def testPairs(tips: SortedSet[Tip], wells: SortedSet[Well], ai: Seq[Int], tws: Seq[TipWell]): Seq[TipWell] = {
+		val pairs = helper.chooseTipWellPairs(tips, wells, tws)
+		val aiWells = pairs.map(_.well.index)
 		aiWells should be === ai
-		pairs.map(pair => new TipWellVolume(pair._1, pair._2, 0))
+		pairs
 	}
 
 	feature("Pairing 8 tips to 96 wells for pipetting") {
 
-		var twvs: Seq[TipWellVolume] = Nil
+		var twvs: Seq[TipWell] = Nil
 		info("These cycles are *with replacement* of previously paired wells")
 		scenario("first cycle should match wells 0-7") {
 			twvs = testPairs(tips, wellsAll, (0 to 7), twvs)
@@ -46,7 +46,7 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 	}
 
 	feature("Pairing 8 tips to 96 wells for pipetting without replacement") {
-		var twvs: Seq[TipWellVolume] = Nil
+		var twvs: Seq[TipWell] = Nil
 		var wells = wellsAll
 		scenario("each cycle should match the next column of wells") {
 			for (iCycle <- (0 to 11)) {
@@ -62,7 +62,7 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 	}
 
 	feature("Pairing 4 tips to 96 wells for pipetting without replacement") {
-		var twvs: Seq[TipWellVolume] = Nil
+		var twvs: Seq[TipWell] = Nil
 		var wells = wellsAll
 		scenario("First 12 cycles should match the next column of the top 4 wells") {
 			for (iCycle <- (0 to 11)) {
