@@ -91,7 +91,7 @@ class BsseLevel2Generator {
 			Specs(8, 4, 1, 1, 240.0, liquidDna1, Liquid.empty),
 			Specs(8, 4, 1, 1, 480.0, liquidDna1, Liquid.empty)
 		)
-		//x(specs(5))
+		x(specs(5))
 		for (spec <- specs) x(spec)
 	}
 

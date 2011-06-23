@@ -184,7 +184,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 				}
 			}
 			dispense(Nil)
-			if (!destsRemaining.isEmpty) {
+			if (cycle.dispenses.isEmpty) {
 				bOk = false
 			}
 			else {
