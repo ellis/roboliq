@@ -10,7 +10,7 @@ import roboliq.robot._
 import roboliq.level2.tokens._
 
 
-class PipetteHelper(robot: Robot) {
+class PipetteHelper {
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], twvsPrev: Seq[TipWellVolume]): Seq[Tuple2[Tip, Well]] = {
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
@@ -30,12 +30,8 @@ class PipetteHelper(robot: Robot) {
 			val dRowTip = tip.index - tip0.index
 			val iRowWell = iRowWell0 + dRowTip
 			val iColWell = iColWell0
-			val well_? = wellsOnHolder.find(well => {
-				val iRow = well.index % holder.nRows
-				val iCol = well.index / holder.nRows
-				(iRow == iRowWell && iCol == iColWell)
-			})
-			well_? match {
+			val iWell = iColWell * holder.nRows + iRowWell
+			wellsOnHolder.find(_.index == iWell) match {
 				case None =>
 				case Some(well) => pairs += (tip -> well)
 			}
