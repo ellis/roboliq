@@ -267,10 +267,10 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		// - sort the sources by volume descending (secondary sort key is index order)
 		// - keep the top tips.size() entries
 		// Repeat the sorting each time all sources have been used (e.g. when there are more tips than sources)
-		//val tips = cycle.tips
-		val tips = cycle.tips
-		var iTip = 0
-		while (iTip < tips.size) {
+
+		// Get list of tips which require aspiration	
+		var tips = cycle.tips.filter(tip => cycle.mapTipToVolume(tip) > 0)
+		while (!tips.isEmpty) {
 			// sort the sources by volume descending (secondary sort key is index order)
 			def order(well1: Well, well2: Well): Boolean = {
 				val a = state.getWellState(well1)
@@ -279,20 +279,18 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 			}
 			// keep the top tips.size() entries ordered by index
 			val srcs2 = SortedSet[Well](srcs.toSeq.sortWith(order).take(tips.size) : _*)
-			val pairs = robot.chooseTipWellPairs(tips, srcs2, None)
-			assert(!pairs.isEmpty)
+			val tws = helper.chooseTipWellPairs(tips, srcs2, Nil)
+			assert(!tws.isEmpty)
 			
-			val twvsAll = new ArrayBuffer[TipWellVolume]
-			for ((tip, src) <- pairs) {
-				val nVolume = cycle.mapTipToVolume(tip)
-				if (nVolume > 0) {
-					twvsAll += new TipWellVolume(tip, src, nVolume)
-				}
-			}
-			if (twvsAll.size > 0) {
+			val twvsAll = tws.map(tw => {
+				val nVolume = cycle.mapTipToVolume(tw.tip)
+				new TipWellVolume(tw.tip, tw.well, nVolume)
+			})
+			if (!twvsAll.isEmpty) {
 				val twvss = robot.batchesForAspirate(twvsAll)
 				cycle.aspirates ++= twvss.map(twvs => new T1_Aspirate(twvs))
 			}
+			tips --= tws.map(_.tip)
 		}
 	}
 
