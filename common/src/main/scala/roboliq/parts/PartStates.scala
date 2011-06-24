@@ -17,7 +17,7 @@ case class TipState(
 	val nVolume: Double, 
 	val contamInside: Contamination, 
 	val nContamInsideVolume: Double,
-	val contamOutside: Contamination,
+	val destsEntered: List[Liquid],
 	val cleanDegree: CleanDegree.Value
 ) {
 	def aspirate(liquid2: Liquid, nVolume2: Double): TipState = {
@@ -28,16 +28,17 @@ case class TipState(
 			nVolumeNew,
 			contamInside + liquid2,
 			math.max(nContamInsideVolume, nVolumeNew),
-			contamOutside + liquid2,
+			destsEntered,
 			CleanDegree.None
 		)
 	}
 	def dispenseFree(nVolume2: Double): TipState =
 		this.copy(nVolume = nVolume - nVolume2, cleanDegree = CleanDegree.None)
 	def dispenseIn(liquid2: Liquid, nVolume2: Double): TipState =
-		this.copy(nVolume = nVolume - nVolume2, contamOutside = contamOutside + liquid2, cleanDegree = CleanDegree.None)
-	def clean() = this.copy(cleanDegree = CleanDegree.None)
+		this.copy(nVolume = nVolume - nVolume2, destsEntered = liquid2 :: destsEntered, cleanDegree = CleanDegree.None)
+	def clean(cleanDegree: CleanDegree.Value) = TipState(tip).copy(cleanDegree = cleanDegree)
 }
+
 object TipState {
-	def apply(tip: Tip) = new TipState(tip, Liquid.empty, 0, Contamination.empty, 0, Contamination.empty, CleanDegree.None)
+	def apply(tip: Tip) = new TipState(tip, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
 }

@@ -18,5 +18,6 @@ trait Robot {
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]]
 	def batchesForDispense(twvs: Seq[TipWellVolumeDispense]): Seq[Seq[TipWellVolumeDispense]]
+	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[T1_Clean]
 	def score(tokens: Seq[T1_Token]): Int
 }

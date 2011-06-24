@@ -19,8 +19,15 @@ object Contamination {
 	val empty = new Contamination(false, false, false)
 }
 
-class Liquid(val sName: String, val bWaterFreeDispense: Boolean, bCells: Boolean, bDna: Boolean, bOtherContaminant: Boolean)
-	extends Contamination(bCells, bDna, bOtherContaminant)
+class Liquid(
+	val sName: String,
+	val bWaterFreeDispense: Boolean,
+	val bRequireDecontamBeforeAspirate: Boolean,
+	bCells: Boolean,
+	bDna: Boolean,
+	bOtherContaminant: Boolean
+)
+extends Contamination(bCells, bDna, bOtherContaminant)
 {
 	def contaminates = bCells || bDna || bOtherContaminant
 	
@@ -37,6 +44,7 @@ class Liquid(val sName: String, val bWaterFreeDispense: Boolean, bCells: Boolean
 			new Liquid(
 				sName3,
 				bWaterFreeDispense | other.bWaterFreeDispense,
+				bRequireDecontamBeforeAspirate | other.bRequireDecontamBeforeAspirate,
 				bCells | other.bCells,
 				bDna | other.bDna,
 				bOtherContaminant | other.bOtherContaminant
@@ -45,7 +53,7 @@ class Liquid(val sName: String, val bWaterFreeDispense: Boolean, bCells: Boolean
 	}
 }
 object Liquid {
-	val empty = new Liquid("", false, false, false, false)
+	val empty = new Liquid("", false, false, false, false, false)
 }
 
 class Part {
@@ -73,15 +81,6 @@ class Well(val holder: WellHolder, val index: Int) extends Part with Ordered[Wel
 		else d1
 	}
 }
-
-/*object WellState {
-	def fill(wells: Seq[Well], liquid: Liquid, nVolume: Double) {
-		for (well <- wells) {
-			well.liquid = liquid
-			well.nVolume = nVolume
-		}
-	}
-}*/
 
 class Plate(val nRows: Int, val nCols: Int) extends Part with WellHolder {
 	val nWells = nRows * nCols

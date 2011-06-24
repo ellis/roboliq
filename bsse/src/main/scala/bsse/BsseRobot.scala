@@ -1,6 +1,7 @@
 package bsse
 
 import scala.collection.immutable.SortedSet
+import scala.collection.mutable.ArrayBuffer
 
 import roboliq.parts._
 import roboliq.robot._
@@ -202,6 +203,18 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 		}
 	}
 
+	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[T1_Clean] = {
+		val cs = new ArrayBuffer[T1_Clean]
+		val tcss = tcs.groupBy(pair => getTipKind(pair._1))
+		for ((_, tcs) <- tcss if !tcs.isEmpty) {
+			val tips = tcs.map(_._1)
+			val cleanDegree = tcs.foldLeft(CleanDegree.None)((cd, pair) => {
+				if (pair._2 > cd) pair._2 else cd
+			})
+			cs += new T1_Clean(tips, cleanDegree)
+		}
+		cs.toSeq
+	}
 	/*private def batches(twvs: Seq[TipWellVolume], getLiquidClass: (TipWellVolume => Option[String])): Seq[Seq[TipWellVolume]] = {
 		// Group by tip type and liquid dispense class
 		def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {

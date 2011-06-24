@@ -59,13 +59,20 @@ User interface:
 
 Code:
 	Continue at: BsseRobot.clean
-	have robot decide on Aspiration/Dispense strategy for T1 tokens
+	BsseRobot.batch*spirate() needs to batch on volume too
+x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 	between all tokens is a robot state
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
-	each T2 token produces a sequence of T1 tokens
-	robot tells which tips can be used in batch for a particular token
-	setup unit tests for sbt
+x	each T2 token produces a sequence of T1 tokens
+x	robot tells which tips can be used in batch for a particular token
+x	setup unit tests for sbt
 	Clean:
+		cleaning is flagged when tip enters the destination liquid
+		cleaning is flagged when the tip will aspirate from a new liquid
+		cleanBetween is normally CleanDegree.Rinse
+		it will be CleanDegree.Decontaminate, however, if either the source or dest liquids require decontamination
+		user can optionally override the cleanDegree
+
 		distinguish between 1) clean if dirty and 2) forced preparatory clean
 		only clean the tips we'll need
 		the pre-clean instruction at the beginning of a pipetting action should clean all tips which will be used during the procedure
