@@ -117,7 +117,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 
 		val nVolume = nContamInsideVolume + tipKind.nWashVolumeExtra
 		val twvsAspirate = tips.map(tip => new TipWellVolume(tip, robot.plateDecon.wells(1), nVolume))
-		val twvsDispense = tips.map(tip => new TipWellVolume(tip, robot.plateDecon.wells(2), nVolume))
+		val twvdsDispense = tips.map(tip => new TipWellVolumeDispense(tip, robot.plateDecon.wells(2), nVolume, DispenseKind.Free))
 		
 		Seq(T0_Wash(
 			mTips,
@@ -131,7 +131,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 			nAirgapSpeed = nAirgapSpeed,
 			nRetractSpeed = nRetractSpeed,
 			bFastWash = true
-		)) ++ translate(T1_Aspirate(twvsAspirate)) ++ translate(T1_Aspirate(twvsDispense)) ++
+		)) ++ translate(T1_Aspirate(twvsAspirate)) ++ translate(T1_Dispense(twvdsDispense)) ++
 		Seq(T0_Wash(
 			mTips,
 			iWasteGrid = 2, iWasteSite = 1,

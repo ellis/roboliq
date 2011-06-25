@@ -398,8 +398,6 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		val srcs2 = SortedSet[Well](srcs.toSeq.sortWith(order).take(tips.size) : _*)
 	
 		val twss0 = helper.chooseTipSrcPairs(tips, srcs2, state)
-		assert(!twss0.isEmpty)
-		
 		for (tws <- twss0) {
 			val twvs = tws.map(tw => {
 				val nVolume = cycle.mapTipToVolume(tw.tip)

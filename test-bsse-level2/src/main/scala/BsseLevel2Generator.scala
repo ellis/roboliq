@@ -11,12 +11,16 @@ import bsse._
 
 class BsseLevel2Generator {
 	class Setup {
+		val carrierClean1 = new Carrier
+		val carrierClean2 = new Carrier
 		val carrier = new Carrier
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
 
 		val evowareSetupState = new EvowareSetupState(
 			grids = Map(
+				carrierClean1 -> 1,
+				carrierClean2 -> 2,
 				carrier -> 17
 			)
 		)
@@ -24,8 +28,11 @@ class BsseLevel2Generator {
 		val robot = new BsseRobot(evowareSetupState)
 
 		val builder = new RobotStateBuilder(robot.state)
-		builder.sites += (plate1 -> new Site(carrier, 0))
-		builder.sites += (plate2 -> new Site(carrier, 1))
+		builder.sites ++= List(
+			robot.plateDecon -> new Site(carrierClean2, 0),
+			plate1 -> new Site(carrier, 0),
+			plate2 -> new Site(carrier, 1)
+		)
 
 		robot.state = builder.toImmutable
 		val tips = robot.tips
@@ -89,7 +96,7 @@ class BsseLevel2Generator {
 			Specs(8, 4, 1, 1, 240.0, liquidDna1, Liquid.empty),
 			Specs(8, 4, 1, 1, 480.0, liquidDna1, Liquid.empty)
 		)
-		x(specs(5))
+		x(specs(6))
 		for (spec <- specs) x(spec)
 	}
 
@@ -108,6 +115,7 @@ class BsseLevel2Generator {
 		builder.fillWells(plate1.wells, liquidSrc, 50)
 		if (liquidDest ne Liquid.empty)
 			builder.fillWells(plate2.wells, liquidDest, 50)
+		builder.fillWells(robot.plateDecon.wells, liquidWater, 10000)
 		robot.state = builder.toImmutable
 
 		val tok = new T2_PipetteLiquid(

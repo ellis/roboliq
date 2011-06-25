@@ -109,7 +109,8 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 							case true => equidistant(Seq(b) ++ rest)
 						}
 				}
-				assert(equidistant(twvs))
+				// All tip/well pairs are equidistant or all tips are going to the same well
+				assert(equidistant(twvs) || twvs.forall(_.well eq twv0.well))
 				
 				spirateChecked(twvs, sFunc, sLiquidClass);
 		}
