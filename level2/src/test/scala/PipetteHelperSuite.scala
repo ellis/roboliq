@@ -18,7 +18,7 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 	val helper = new PipetteHelper
 
 	def testPairs(tips: SortedSet[Tip], wells: SortedSet[Well], ai: Seq[Int], tws: Seq[TipWell]): Seq[TipWell] = {
-		val pairs = helper.chooseTipWellPairs(tips, wells, tws)
+		val pairs = helper.chooseTipWellPairsNext(tips, wells, tws)
 		val aiWells = pairs.map(_.well.index)
 		aiWells should be === ai
 		pairs

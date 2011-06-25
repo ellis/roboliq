@@ -33,6 +33,7 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 		val water = new Liquid(
 			sName = "water",
 			bWaterFreeDispense = true,
+			bRequireDecontamBeforeAspirate = false,
 			bCells = false,
 			bDna = false,
 			bOtherContaminant = false)
@@ -62,10 +63,6 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 		val carrier = new Carrier
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
-		val liquidDirty1 = new Liquid("dirty1", true, true, false, false)
-		val liquidDirty2 = new Liquid("dirty2", true, true, false, false)
-		val liquidWater1 = new Liquid("water1", true, false, false, false)
-		val liquidWater2 = new Liquid("water2", true, false, false, false)
 
 		val evowareSetupState = new EvowareSetupState(
 			grids = Map(

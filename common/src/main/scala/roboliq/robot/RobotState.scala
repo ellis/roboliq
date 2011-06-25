@@ -118,5 +118,9 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 			addLiquid0(well, liquid, nVolume)
 	}
 	
+	def cleanTip(tip: Tip, cleanDegree: CleanDegree.Value) {
+		tipStates(tip) = getTipState(tip).clean(cleanDegree)
+	}
+	
 	def toImmutable = new RobotState(prev_?, sites.toMap, tipStates.toMap, wellStates.toMap)
 }

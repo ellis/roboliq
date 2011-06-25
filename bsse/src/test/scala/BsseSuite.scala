@@ -28,6 +28,7 @@ class BsseSuite extends FunSuite {
 		val water = new Liquid(
 			sName = "water",
 			bWaterFreeDispense = true,
+			bRequireDecontamBeforeAspirate = false,
 			bCells = false,
 			bDna = false,
 			bOtherContaminant = false)
