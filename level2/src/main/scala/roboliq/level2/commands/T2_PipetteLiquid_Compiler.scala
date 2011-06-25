@@ -125,19 +125,9 @@ class PipetteHelper {
 		// - keep the top tips.size() entries
 		// Repeat the sorting each time all sources have been used (e.g. when there are more tips than sources)
 
-		// sort the sources by volume descending (secondary sort key is index order)
-		def order(well1: Well, well2: Well): Boolean = {
-			val a = state.getWellState(well1)
-			val b = state.getWellState(well2)
-			(a.nVolume > b.nVolume) || (a.nVolume == b.nVolume && well1 < well2)
-		}
-		// keep the top tips.size() entries ordered by index
-		var srcs2 = SortedSet[Well](srcs.toSeq.sortWith(order).take(tips.size) : _*)
-
 		def processStep(tips0: Iterable[Tip]): Tuple2[Iterable[Tip], Seq[TipWell]] = {
 			val tips = tips0.asInstanceOf[SortedSet[Tip]]
-			val tws = chooseTipWellPairsNext(tips, srcs2, Nil)
-			srcs2 --= tws.map(_.well)
+			val tws = chooseTipWellPairsNext(tips, srcs, Nil)
 			val tipsRemaining = tips -- tws.map(_.tip)
 			(tipsRemaining, tws)
 		}
@@ -294,7 +284,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 			dispense(cycle, state, tws0)
 			
 			// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
-			val twssRest = twss.dropWhile(tws => {
+			val twssRest = twss.tail.dropWhile(tws => {
 				if (checkVols(cycle, state, tws) && checkNoCleanRequired(cycle, state, tws)) {
 					dispense(cycle, state, tws)
 					true

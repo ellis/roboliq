@@ -58,7 +58,7 @@ User interface:
 
 
 Code:
-	Continue at: BsseRobot.clean
+	Add Comment()s to evoware output
 	BsseRobot.batch*spirate() needs to batch on volume too
 x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 	between all tokens is a robot state
@@ -67,6 +67,14 @@ x	each T2 token produces a sequence of T1 tokens
 x	robot tells which tips can be used in batch for a particular token
 x	setup unit tests for sbt
 	Clean:
+		Clean overrides:
+			before start
+			before each aspirate
+			before each aspirate of a new liquid
+			between dispenses
+			after entering dest liquid
+			after last dispense
+
 		cleaning is flagged when tip enters the destination liquid
 		cleaning is flagged when the tip will aspirate from a new liquid
 		cleanBetween is normally CleanDegree.Rinse
