@@ -13,37 +13,26 @@ import bsse._
 
 
 class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers with MustMatchers {
-	feature("batchesForDispense") {
-		val carrier = new Carrier
-		val plate1 = new Plate(nRows = 8, nCols = 12)
-		val plate2 = new Plate(nRows = 8, nCols = 12)
-
-		val evowareSetupState = new EvowareSetupState(
-			grids = Map(
-				carrier -> 17
-			)
-		)
-
-		val robot = new BsseRobot(evowareSetupState)
-
+	val robot = BsseRobot.createRobotMockup()
+	val plate1 = new Plate(nRows = 8, nCols = 12)
+	val plate2 = new Plate(nRows = 8, nCols = 12)
+	val state0 = {
 		val builder = new RobotStateBuilder(robot.state)
-		builder.sites += (plate1 -> new Site(carrier, 0))
-		builder.sites += (plate2 -> new Site(carrier, 1))
+		val carrier = robot.state.mapPartToChildren(robot.partTop)(17)
+		builder.movePartTo(plate1, carrier, 0)
+		builder.movePartTo(plate2, carrier, 1)
 
-		val water = new Liquid(
-			sName = "water",
-			bWaterFreeDispense = true,
-			bRequireDecontamBeforeAspirate = false,
-			bCells = false,
-			bDna = false,
-			bOtherContaminant = false)
 		for (well <- plate1.wells) {
-			builder.addLiquid0(well, water, 1000)
+			builder.addLiquid0(well, robot.liquidWater, 1000)
 		}
-
-		robot.state = builder.toImmutable
-		val tips = robot.tips.toArray
-
+		builder.toImmutable
+	}
+	
+	val tips = robot.tips.toArray
+	
+	feature("batchesForDispense") {
+		robot.state = state0 
+			
 		scenario("4 large tips, 48ul") {
 			val twvds = (0 to 3).map(i => new TipWellVolumeDispense(tips(i), plate2.wells(i), 48, DispenseKind.Free))
 			val twvdss = robot.batchesForDispense(twvds)
@@ -60,25 +49,7 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 	}
 	
 	feature("ANother") {
-		val carrier = new Carrier
-		val plate1 = new Plate(nRows = 8, nCols = 12)
-		val plate2 = new Plate(nRows = 8, nCols = 12)
-
-		val evowareSetupState = new EvowareSetupState(
-			grids = Map(
-				carrier -> 17
-			)
-		)
-
-		val robot = new BsseRobot(evowareSetupState)
-
-		val builder = new RobotStateBuilder(robot.state)
-		builder.sites += (plate1 -> new Site(carrier, 0))
-		builder.sites += (plate2 -> new Site(carrier, 1))
-
-		robot.state = builder.toImmutable
-		val tips = robot.tips.toArray
-		
+		robot.state = state0
 		scenario("4 large tips, 240ul") {
 			val twvds = (0 to 3).map(i => new TipWellVolumeDispense(tips(i), plate2.wells(i), 240, DispenseKind.Free))
 			val twvdss = robot.batchesForDispense(twvds)

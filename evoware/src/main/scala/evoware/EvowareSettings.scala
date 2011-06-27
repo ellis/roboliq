@@ -20,6 +20,7 @@ sealed class EvowareSetupFixed(
 )
 */
 
+/*
 sealed class EvowareSetupState(
 	//val tipTipKinds: IndexedSeq[EvowareTipKind],
 	val mapPartToGrid: Map[Part, Int]
@@ -27,6 +28,7 @@ sealed class EvowareSetupState(
 	val mapGridToPart = mapPartToGrid.map(pair => pair._2 -> pair._1)
 	def getPartAt(iGrid: Int): Option[Part] = mapGridToPart.get(iGrid) 
 }
+*/
 
 /*
 sealed class EvwareSetup(val fixed: EvowareSetupFixed, state0: EvowareSetupState) {

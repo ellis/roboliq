@@ -12,15 +12,29 @@ import evoware._
 
 //sealed class BsseTip(val roboTip: Tip)
 
-class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareState) {
+class BsseRobot extends EvowareRobot {
 	val nFreeDispenseVolumeThreshold = 10
+	
+	// Tips
 	val tipKind1000 = new EvowareTipKind("large", 2, 950, 50)
 	val tipKind50 = new EvowareTipKind("small", 0.01, 45, 5)
 	val tips = SortedSet[Tip]() ++ (0 until 8).map(new Tip(_))
 	val tipTipKinds = (0 until 8).map(iTip => if (iTip < 4) tipKind1000 else tipKind50)
+
+	// Fixed plates
 	val plateDecon1 = new Plate(8, 1)
 	val plateDecon2 = new Plate(8, 1)
 	val plateDecon3 = new Plate(8, 1)
+	
+	// Standard liquids
+	val liquidWater = new Liquid(
+		sName = "water",
+		bWaterFreeDispense = true,
+		bRequireDecontamBeforeAspirate = false,
+		bCells = false,
+		bDna = false,
+		bOtherContaminant = false)
+	
 	/*val plateWash1a = new Plate(8, 1)
 	val plateWash1b = new Plate(8, 1)
 	val plateWash1c = new Plate(8, 1)
@@ -295,21 +309,25 @@ object BsseRobot {
 		val carrierGridPairs = carrierGrids.map(new Carrier() -> _)
 		val mapGridToCarrier = carrierGridPairs.map(pair => pair._2 -> pair._1).toMap
 
-		val evowareSetupState = new EvowareSetupState(
-			mapPartToGrid = carrierGridPairs.toMap
-		)
-
-		val robot = new BsseRobot(evowareSetupState)
+		val robot = new BsseRobot
 
 		val carrierWash1 = mapGridToCarrier(1)
 		val carrierWash2 = mapGridToCarrier(2)
 		val carrierDecon = mapGridToCarrier(3)
+		
 		val builder = new RobotStateBuilder(robot.state)
-		builder.sites ++= List(
-			robot.plateDecon1 -> new Site(carrierDecon, 0),
-			robot.plateDecon2 -> new Site(carrierDecon, 1),
-			robot.plateDecon3 -> new Site(carrierDecon, 2)
+		for ((carrier, iGrid) <- carrierGridPairs) {
+			builder.movePartTo(carrier, robot.partTop, iGrid)
+		}
+		val list = List(
+			(robot.plateDecon1, carrierDecon, 0),
+			(robot.plateDecon2, carrierDecon, 1),
+			(robot.plateDecon3, carrierDecon, 2)
 		)
+		for ((part, parent, i) <- list) {
+			builder.movePartTo(part, parent, i)
+		}
+		
 		robot.state = builder.toImmutable
 		
 		robot

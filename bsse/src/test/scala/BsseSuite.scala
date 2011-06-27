@@ -9,34 +9,22 @@ import bsse._
 
 class BsseSuite extends FunSuite {
 	test("example") {
-		val carrier = new Carrier
+		val robot = BsseRobot.createRobotMockup()
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
-
-		val evowareSetupState = new EvowareSetupState(
-			grids = Map(
-				carrier -> 17
-			)
-		)
-
-		val robot = new BsseRobot(evowareSetupState)
-
-		val builder = new RobotStateBuilder(robot.state)
-		builder.sites += (plate1 -> new Site(carrier, 0))
-		builder.sites += (plate2 -> new Site(carrier, 1))
-
-		val water = new Liquid(
-			sName = "water",
-			bWaterFreeDispense = true,
-			bRequireDecontamBeforeAspirate = false,
-			bCells = false,
-			bDna = false,
-			bOtherContaminant = false)
-		for (well <- plate1.wells) {
-			builder.addLiquid0(well, water, 1000)
+		val state0 = {
+			val builder = new RobotStateBuilder(robot.state)
+			val carrier = robot.state.mapPartToChildren(robot.partTop)(17)
+			builder.movePartTo(plate1, carrier, 0)
+			builder.movePartTo(plate2, carrier, 1)
+	
+			for (well <- plate1.wells) {
+				builder.addLiquid0(well, robot.liquidWater, 1000)
+			}
+			builder.toImmutable
 		}
-
-		robot.state = builder.toImmutable
+		robot.state = state0
+		
 		val tips = robot.tips.toArray
 
 		val cmds = List[T1_Token](

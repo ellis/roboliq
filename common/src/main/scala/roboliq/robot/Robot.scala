@@ -7,6 +7,8 @@ import roboliq.tokens._
 
 
 trait Robot {
+	val partTop = new Part
+
 	val config: RobotConfig
 	def state: RobotState
 	/** Minimum volume which can be aspirated */

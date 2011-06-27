@@ -6,6 +6,8 @@ object CleanDegree extends Enumeration {
 	val None, Light, Thorough, Decontaminate = Value
 }
 
+case class Site(val parent: Part, val index: Int)
+
 class WellState(val well: Well, val liquid: Liquid, val nVolume: Double) {
 	def add(liquid2: Liquid, nVolume2: Double) = new WellState(well, liquid + liquid2, nVolume + nVolume2)
 	def remove(nVolume2: Double) = new WellState(well, liquid, nVolume - nVolume2)

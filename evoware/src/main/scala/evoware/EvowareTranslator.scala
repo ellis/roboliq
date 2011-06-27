@@ -135,18 +135,10 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		val sPlateMask = encodeWells(holder, twvs.map(_.well.index))
 		
 		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
-		def findLoc(part: Part): Option[Tuple2[Int, Int]] = {
-			val site_? = state.getSite(part)
-			site_? match {
-				case None => None
-				case Some(site) =>
-					robot.getGridIndex(site.parent) match {
-						case Some(iGrid) => Some(iGrid, site.index)
-						case None => findLoc(site.parent)
-					}
-			}
-		}
-		val (iGrid, iSite) = findLoc(holder).get
+		val siteList = robot.state.getSiteList(holder).reverse.take(2).toArray
+		assert(siteList.size == 2)
+		val iGrid = siteList(0).index
+		val iSite = siteList(1).index
 		
 		T0_Spirate(
 			sFunc, 

@@ -59,8 +59,6 @@ object Liquid {
 class Part {
 }
 
-sealed class Site(val parent: Part, val index: Int)
-
 trait WellHolder extends Part {
 	val nRows: Int
 	val nCols: Int
