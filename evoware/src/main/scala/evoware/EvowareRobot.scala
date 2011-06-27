@@ -7,7 +7,7 @@ import roboliq.tokens._
 import roboliq.robot._
 
 
-abstract class EvowareRobot(val evowareState: EvowareSetupState) extends Robot {
+abstract class EvowareRobot(val evowareSetup: EvowareSetupState) extends Robot {
 	/*
 	def powerSet[A](s: Set[A]) = s.foldLeft(Set(Set.empty[A])) {
 		(set, element) =>
@@ -42,5 +42,5 @@ abstract class EvowareRobot(val evowareState: EvowareSetupState) extends Robot {
 	def getAspirateClass(twv: TipWellVolume): Option[String] = getAspirateClass(twv.tip, twv.well)
 	def getDispenseClass(twv: TipWellVolume): Option[String] = getDispenseClass(twv.tip, twv.well, twv.nVolume)
 	
-	def getGridIndex(part: Part): Option[Int] = evowareState.grids.get(part)
+	def getGridIndex(part: Part): Option[Int] = evowareSetup.mapPartToGrid.get(part)
 }

@@ -114,10 +114,16 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 		val nRetractSpeed = 30
 		
 		assert(tipKind.nWashVolumeExtra >= 0)
-
+		assert(tips.size <= robot.plateDecon2.wells.size)
+		
 		val nVolume = nContamInsideVolume + tipKind.nWashVolumeExtra
-		val twvsAspirate = tips.map(tip => new TipWellVolume(tip, robot.plateDecon.wells(1), nVolume))
-		val twvdsDispense = tips.map(tip => new TipWellVolumeDispense(tip, robot.plateDecon.wells(2), nVolume, DispenseKind.Free))
+		val iWell0 = (robot.plateDecon2.wells.size - tips.size) / 2
+		val wells2 = robot.plateDecon2.wells.drop(iWell0)
+		val wells3 = robot.plateDecon3.wells.drop(iWell0)
+		val tws2 = tips zip wells2
+		val tws3 = tips zip wells3
+		val twvsAspirate = tws2.map{case (tip, well) => new TipWellVolume(tip, well, nVolume)}
+		val twvdsDispense = tws3.map{case (tip, well) => new TipWellVolumeDispense(tip, well, nVolume, DispenseKind.Free)}
 		
 		Seq(T0_Wash(
 			mTips,

@@ -18,7 +18,15 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 	val tipKind50 = new EvowareTipKind("small", 0.01, 45, 5)
 	val tips = SortedSet[Tip]() ++ (0 until 8).map(new Tip(_))
 	val tipTipKinds = (0 until 8).map(iTip => if (iTip < 4) tipKind1000 else tipKind50)
-	val plateDecon = new Plate(3, 1)
+	val plateDecon1 = new Plate(8, 1)
+	val plateDecon2 = new Plate(8, 1)
+	val plateDecon3 = new Plate(8, 1)
+	/*val plateWash1a = new Plate(8, 1)
+	val plateWash1b = new Plate(8, 1)
+	val plateWash1c = new Plate(8, 1)
+	val plateWash2a = new Plate(8, 1)
+	val plateWash2b = new Plate(8, 1)
+	val plateWash2c = new Plate(8, 1)*/
 	val config = new RobotConfig(tips, Array(Array(0,1,2,3), Array(4,5,6,7), Array(0,1,2,3,4,5,6,7)))
 	
 	def getTipKind(tip: Tip): EvowareTipKind = tipTipKinds(tip.index)
@@ -259,4 +267,51 @@ class BsseRobot(evowareState: EvowareSetupState) extends EvowareRobot(evowareSta
 	}
 
 	private def sameTipKind(a: Tip, b: Tip): Boolean = getTipKind(a) eq getTipKind(b)
+}
+
+object BsseRobot {
+	def createRobotMockup(): BsseRobot = {
+		val carrierGrids = Array(
+				// Wash 1
+				1,
+				// Wash 2
+				2,
+				// Cooled carrier
+				3,
+				// Trough
+				4,
+				// Downholder
+				9,
+				// cover holder and shaker
+				10,
+				// Reagents 4x5
+				16,
+				// Two 96 well plates
+				17,
+				// Three plates?
+				24
+				//...
+				)
+		val carrierGridPairs = carrierGrids.map(new Carrier() -> _)
+		val mapGridToCarrier = carrierGridPairs.map(pair => pair._2 -> pair._1).toMap
+
+		val evowareSetupState = new EvowareSetupState(
+			mapPartToGrid = carrierGridPairs.toMap
+		)
+
+		val robot = new BsseRobot(evowareSetupState)
+
+		val carrierWash1 = mapGridToCarrier(1)
+		val carrierWash2 = mapGridToCarrier(2)
+		val carrierDecon = mapGridToCarrier(3)
+		val builder = new RobotStateBuilder(robot.state)
+		builder.sites ++= List(
+			robot.plateDecon1 -> new Site(carrierDecon, 0),
+			robot.plateDecon2 -> new Site(carrierDecon, 1),
+			robot.plateDecon3 -> new Site(carrierDecon, 2)
+		)
+		robot.state = builder.toImmutable
+		
+		robot
+	}
 }
