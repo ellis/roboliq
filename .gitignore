@@ -1,4 +1,5 @@
 *~
+*.swp
 test*.esc
 # sbt
 target/
