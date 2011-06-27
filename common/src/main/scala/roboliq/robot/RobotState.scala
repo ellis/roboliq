@@ -122,5 +122,14 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 		tipStates(tip) = getTipState(tip).clean(cleanDegree)
 	}
 	
+	def placePlateOnCarrier(plate: Plate, carrier: Carrier, iSite: Int) {
+		sites(plate) = new Site(carrier, iSite)
+	}
+
+	/*def placePlateAt(plate: Plate, iGrid: Int, iSite: Int) {
+		val carrier = 
+		sites(plate) = new Site(carrier, iSite)
+	}*/
+
 	def toImmutable = new RobotState(prev_?, sites.toMap, tipStates.toMap, wellStates.toMap)
 }
