@@ -199,7 +199,7 @@ class T2_Pipette_Compiler(token: T2_Pipette, robot: Robot) {
 
 		val stdvs = stdvs0.sortBy(_.tip)
 		val twvs = stdvs.map(stdv => new TipWellVolume(stdv.tip, stdv.src, stdv.nVolume))
-		val twvss = robot.batchesForAspirate(twvs)
+		val twvss = robot.batchesForAspirate(state, twvs)
 		cycle.aspirates ++= twvss.map(twvs => new T1_Aspirate(twvs))
 		twvs.foreach(state.aspirate)
 	}
@@ -213,7 +213,7 @@ class T2_Pipette_Compiler(token: T2_Pipette, robot: Robot) {
 			val dispenseKind = robot.getDispenseKind(stdv.tip, wellStateSrc.liquid, stdv.nVolume, wellStateDest)
 			new TipWellVolumeDispense(stdv.tip, stdv.dest, stdv.nVolume, dispenseKind)
 		})
-		val twvdss = robot.batchesForDispense(twvds)
+		val twvdss = robot.batchesForDispense(state, twvds)
 		// Create dispense tokens
 		cycle.dispenses ++= twvdss.map(twvds => new T1_Dispense(twvds))
 		// Add volume to required aspirate volume for this cycle

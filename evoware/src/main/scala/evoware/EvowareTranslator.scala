@@ -9,17 +9,17 @@ import roboliq.robot._
 
 
 abstract class EvowareTranslator(robot: EvowareRobot) {
-	def translate(tok: T1_Token): Seq[T0_Token] = tok match {
-		case t @ T1_Aspirate(_) => spirate(t.twvs, "Aspirate", robot.getAspirateClass) :: Nil
-		case t @ T1_Dispense(_) => spirate(t.twvs, "Dispense", robot.getDispenseClass) :: Nil
+	def translate(st: Tuple2[RobotState, T1_Token]): Seq[Tuple2[T0_Token, RobotState]] = st._2 match {
+		case t @ T1_Aspirate(_) => aspirate(st._1, t)
+		case t @ T1_Dispense(_) => dispense(st._1, t)
 		case t @ T1_Clean(_, _) => clean(t)
 	}
 
-	def translate(toks: Seq[T1_Token]): Seq[T0_Token] = toks.flatMap(translate)
+	def translate(toks: Seq[Tuple2[RobotState, T1_Token]]): Seq[Tuple2[T0_Token, RobotState]] = toks.flatMap(translate)
 
-	def translateToString(toks: Seq[T1_Token]): String = translate(toks).mkString("\n")
+	def translateToString(toks: Seq[Tuple2[RobotState, T1_Token]]): String = translate(toks).map(_._1).mkString("\n")
 
-	def translateAndSave(cmds: Seq[T1_Token], sFilename: String): String = {
+	def translateAndSave(cmds: Seq[Tuple2[RobotState, T1_Token]], sFilename: String): String = {
 		val s = translateToString(cmds)
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, EvowareTranslatorHeader.getHeader())
@@ -74,21 +74,47 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		t(Array(12, 13, 14, 15), "0C080\220300000000000")
 	}
 	//settings: EvowareSettings, state: IRobotState
-	val state = robot.state
+	//val state = robot.state
 	
 
-	private def spirate(twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: (TipWellVolume => Option[String])): T0_Token = {
+	private def aspirate(state0: RobotState, tok: T1_Aspirate): Seq[Tuple2[T0_Token, RobotState]] = {
+		val tok0 = spirate(state0, tok.twvs, "Aspirate", robot.getAspirateClass)
+		val state = tok0 match {
+			case T0_Spirate(_, _, _, _, _, _, _) =>
+				val builder = new RobotStateBuilder(state0)
+				tok.twvs.foreach(builder.aspirate)
+				builder.toImmutable
+			case _ =>
+				state0
+		}
+		(tok0, state) :: Nil
+	}
+	
+	private def dispense(state0: RobotState, tok: T1_Dispense): Seq[Tuple2[T0_Token, RobotState]] = {
+		val tok0 = spirate(state0, tok.twvs, "Aspirate", robot.getDispenseClass)
+		val state = tok0 match {
+			case T0_Spirate(_, _, _, _, _, _, _) =>
+				val builder = new RobotStateBuilder(state0)
+				tok.twvs.foreach(builder.aspirate)
+				builder.toImmutable
+			case _ =>
+				state0
+		}
+		(tok0, state) :: Nil
+	}
+	
+	private def spirate(state0: RobotState, twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): T0_Token = {
 		twvs match {
 			case Seq() => T0_Error("Empty Tip-Well-Volume list")
 			case Seq(twv0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass_? = getLiquidClass(twv0)
+				val sLiquidClass_? = getLiquidClass(state0, twv0)
 				assert(sLiquidClass_?.isDefined)
 				val sLiquidClass = sLiquidClass_?.get
 				//println("sLiquidClass = "+sLiquidClass)
 				//for (twv <- rest) println(robot.getAspirateClass(twv))
 				// Assert that there is only one liquid class
-				assert(rest.forall(twv => getLiquidClass(twv) == sLiquidClass_?))
+				assert(rest.forall(twv => getLiquidClass(state0, twv) == sLiquidClass_?))
 				
 				val tipKind = robot.getTipKind(twv0.tip)
 				val holder = twv0.well.holder
@@ -112,11 +138,11 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 				// All tip/well pairs are equidistant or all tips are going to the same well
 				assert(equidistant(twvs) || twvs.forall(_.well eq twv0.well))
 				
-				spirateChecked(twvs, sFunc, sLiquidClass);
+				spirateChecked(state0, twvs, sFunc, sLiquidClass)
 		}
 	}
 
-	private def spirateChecked(twvs: Seq[TipWellVolume], sFunc: String, sLiquidClass: String): T0_Token = {
+	private def spirateChecked(state0: RobotState, twvs: Seq[TipWellVolume], sFunc: String, sLiquidClass: String): T0_Token = {
 		val twv0 = twvs.head
 		val tipKind = robot.getTipKind(twv0.tip)
 		val holder = twv0.well.holder
@@ -150,96 +176,47 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	}
 	
 	/** Get T0 tokens for cleaning */
-	def clean(tok: T1_Clean): List[T0_Token]
+	def clean(tok: T1_Clean): List[Tuple2[T0_Token, RobotState]]
 
-	/*
-	private def partitionBy[T](list: List[T], fn: (T, T) => Boolean): List[List[T]] = {
-		list match {
-			case Nil => Nil
-			case x :: xs =>
-				val (sublist, rest) = list.partition(y => fn(x, y))
-				sublist :: partitionBy(rest, fn)
-		}
-	}
+	// Cursor:
+	//  1,1+1: 010810, 0011 0001 0011 0000
+	//  1,2+1: 010820, 0011 0010
+	//  1,3+1: 010840, 0011 0100
+	//  1,4+1: 010880, 0011 1000
+
+	//  1,5+1: 0108@0, 0100 0000
+	//  1,6+1: 0108P0, 0101 0000
+	//  1,7+1: 0108p0, 0111 0000
+	//  1,8+1: 010801, 0011 0000 0011 0001
+
+	//  1,1+3: 010830,     0011 0011
+	//  1,4+3: 0108H0,     0100 1000
+	//  1,5+3: 0108`0,     0110 0000
+	//  1,6+3: 0108{144}0, 1001 0000
+	//  1,7+3: 0108p1,     0111 0000 0011 0001
 	
-	private def partitionTipKinds(twvs: List[TipWellVolume]): List[List[TipWellVolume]] = {
-		def sameTipKind(a: TipWellVolume, b: TipWellVolume): Boolean = {
-			val ka = robot.getTipKind(a.tip)
-			val kb = robot.getTipKind(b.tip)
-			ka == kb
-		}
-		partitionBy(twvs, sameTipKind)
-	}*/
+	//  1,1+7: 010870,     0011 0111
+	//  1,2+7: 0108>0,     0011 1110
+	//  1,3+7: 0108L0,     0100 1100
+	//  1,4+7: 0108h0,     0110 1000
+	//  1,5+7: 0108{160}0, 1010 0000
+	
+	//  1,1+f: 0108?0,     0011 1111
+	//  1,2+f: 0108N0,     0100 1110
+	//	1,3+f: 0108l0,     0110 1100
+	//  1,4+f: 0108{168}0, 1010 1000
+	//  1,5+f: 0108{160}1, 1010 0000 0011 0001
 
-	/*
-	private def spirate(String sFunc, int mTipsMask, int iGrid, int iSite, int iWell0, String sLiquidClass, double nVolume) {
-		// Put nVolume into each position of anVolumes where mTipsMask has a bit set
-		final double[] anVolumes = new double[8];
-		for (int i = 0; i < 8; i++) {
-			final int mask = 1 << i;
-			if ((mTipsMask & mask) != 0)
-				anVolumes[i] = nVolume;
-		}
-		
-		final int mWellMask = mTipsMask << iWell0;
-		final char cCode4 = (char) ('0' + (mWellMask & 0x7f)); // Add the bits for wells 1-7 to byte 4 ('0' = 0011 0000)
-		final char cCode5 = (char) ('0' + (mWellMask >> 7)); // Add the bit for well 8 to byte 5
-		final String sCode = "0108" + cCode4 + cCode5;
-		
-		final String s = String.format(sFunc+"("+
-				"%d,\"%s\","+
-				"%f,%f,%f,%f,%f,%f,%f,%f,0,0,0,0,"+
-				"%d,%d,"+
-				"1,"+
-				"\"%s\","+
-				"0,0);",
-				mTipsMask, sLiquidClass,
-				anVolumes[0], anVolumes[1], anVolumes[2], anVolumes[3], anVolumes[4], anVolumes[5], anVolumes[6], anVolumes[7],
-				iGrid, iSite,
-				sCode
-				);
-		// Cursor:
-		//  1,1+1: 010810, 0011 0001 0011 0000
-		//  1,2+1: 010820, 0011 0010
-		//  1,3+1: 010840, 0011 0100
-		//  1,4+1: 010880, 0011 1000
+	//  1,1+1f: 0108O0,     0100 1111
 
-		//  1,5+1: 0108@0, 0100 0000
-		//  1,6+1: 0108P0, 0101 0000
-		//  1,7+1: 0108p0, 0111 0000
-		//  1,8+1: 010801, 0011 0000 0011 0001
-
-		//  1,1+3: 010830,     0011 0011
-		//  1,4+3: 0108H0,     0100 1000
-		//  1,5+3: 0108`0,     0110 0000
-		//  1,6+3: 0108{144}0, 1001 0000
-		//  1,7+3: 0108p1,     0111 0000 0011 0001
-		
-		//  1,1+7: 010870,     0011 0111
-		//  1,2+7: 0108>0,     0011 1110
-		//  1,3+7: 0108L0,     0100 1100
-		//  1,4+7: 0108h0,     0110 1000
-		//  1,5+7: 0108{160}0, 1010 0000
-		
-		//  1,1+f: 0108?0,     0011 1111
-		//  1,2+f: 0108N0,     0100 1110
-		//	1,3+f: 0108l0,     0110 1100
-		//  1,4+f: 0108{168}0, 1010 1000
-		//  1,5+f: 0108{160}1, 1010 0000 0011 0001
-
-		//  1,1+1f: 0108O0,     0100 1111
-
-		//  1,1+ff: 0108{175}0
-		
-		// So the meaning of the upper 4 bits is:
-		// 0011: wells 5-7 are empty
-		// 0100: well 5 is filled
-		// 0101: well 6 is filled
-		// 0110: wells 5 & 6 are filled
-		// 0111: well 7 is filled
-		// 1001: wells 6 and 7 are filled
-		// 1010: wells 5, 6, 7 are filled
-		System.out.println(s);
-	}
-	*/
+	//  1,1+ff: 0108{175}0
+	
+	// So the meaning of the upper 4 bits is:
+	// 0011: wells 5-7 are empty
+	// 0100: well 5 is filled
+	// 0101: well 6 is filled
+	// 0110: wells 5 & 6 are filled
+	// 0111: well 7 is filled
+	// 1001: wells 6 and 7 are filled
+	// 1010: wells 5, 6, 7 are filled
 }

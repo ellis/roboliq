@@ -36,11 +36,11 @@ abstract class EvowareRobot extends Robot {
 	}
 
 	def getTipKind(tip: Tip): EvowareTipKind // TODO: EvowareSetupState
-	def getAspirateClass(tip: Tip, well: Well): Option[String]
-	def getDispenseClass(tip: Tip, well: Well, nVolume: Double): Option[String]
+	def getAspirateClass(tipState: TipState, wellState: WellState): Option[String]
+	def getDispenseClass(tipState: TipState, wellState: WellState, nVolume: Double): Option[String]
 	
-	def getAspirateClass(twv: TipWellVolume): Option[String] = getAspirateClass(twv.tip, twv.well)
-	def getDispenseClass(twv: TipWellVolume): Option[String] = getDispenseClass(twv.tip, twv.well, twv.nVolume)
+	def getAspirateClass(state: IRobotState, twv: TipWellVolume): Option[String] = getAspirateClass(state.getTipState(twv.tip), state.getWellState(twv.well))
+	def getDispenseClass(state: IRobotState, twv: TipWellVolume): Option[String] = getDispenseClass(state.getTipState(twv.tip), state.getWellState(twv.well), twv.nVolume)
 	
 	//def getGridIndex(part: Part): Option[Int] = evowareSetup.mapPartToGrid.get(part)
 }

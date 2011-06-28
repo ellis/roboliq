@@ -123,16 +123,13 @@ class BsseRobot extends EvowareRobot {
 		wellsInCol
 	}
 
-	def getAspirateClass(tip: Tip, well: Well): Option[String] = {
-		val tipKind = getTipKind(tip)
-		val wellState = state.getWellState(well)
+	def getAspirateClass(tipState: TipState, wellState: WellState): Option[String] = {
+		val tipKind = getTipKind(tipState.tip)
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
 		assert(liquid ne Liquid.empty)
 
 		val bLarge = (tipKind.sName == "large")
-		//val tipState = state.getTipState(tip)
-		//val tipLiquid = tipState.liquid
 		// If our volume is high enough that we don't need to worry about accuracy,
 		// or if we're pipetting competent cells,
 		// then perform a free dispense.
@@ -146,15 +143,11 @@ class BsseRobot extends EvowareRobot {
 			if (bLarge) Some("Water wet contact") else Some("D-BSSE Te-PS Wet Contact")
 	}
 	
-	def getDispenseClass(tip: Tip, well: Well, nVolume: Double): Option[String] = {
-		val tipKind = getTipKind(tip)
-		val tipState = state.getTipState(tip)
-		val wellState = state.getWellState(well)
+	def getDispenseClass(tipState: TipState, wellState: WellState, nVolume: Double): Option[String] = {
+		val tipKind = getTipKind(tipState.tip)
 		val liquid = tipState.liquid
 		
 		val bLarge = (tipKind.sName == "large")
-		//val tipState = state.getTipState(tip)
-		//val tipLiquid = tipState.liquid
 		// If our volume is high enough that we don't need to worry about accuracy,
 		// or if we're pipetting competent cells,
 		// then perform a free dispense.
@@ -187,8 +180,8 @@ class BsseRobot extends EvowareRobot {
 		}
 	}
 
-	def batchesForAspirate(twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]] = {
-		def getLiquidClass(twv: TipWellVolume) = getAspirateClass(twv.tip, twv.well)
+	def batchesForAspirate(state: IRobotState, twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]] = {
+		def getLiquidClass(twv: TipWellVolume) = getAspirateClass(state, twv)
 		// Group by tip type and liquid dispense class
 		def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {
 			val tipKind0 = getTipKind(twv0.tip)
@@ -213,8 +206,8 @@ class BsseRobot extends EvowareRobot {
 		}
 	}
 	
-	def batchesForDispense(twvs: Seq[TipWellVolumeDispense]): Seq[Seq[TipWellVolumeDispense]] = {
-		def getLiquidClass(twv: TipWellVolume) = getDispenseClass(twv.tip, twv.well, twv.nVolume)
+	def batchesForDispense(state: IRobotState, twvs: Seq[TipWellVolumeDispense]): Seq[Seq[TipWellVolumeDispense]] = {
+		def getLiquidClass(twv: TipWellVolume) = getDispenseClass(state, twv)
 
 		val bAllHaveClass = twvs.forall(twv => getLiquidClass(twv).isDefined)
 		if (!bAllHaveClass) {

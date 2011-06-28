@@ -10,7 +10,7 @@ import evoware._
 //sealed class BsseTip(val roboTip: Tip)
 
 class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
-	def clean(tok: T1_Clean): List[T0_Token] = {
+	def clean(state: IRobotState, tok: T1_Clean): List[T0_Token] = {
 		val tips = tok.tips
 		val degree = tok.degree
 		if (tips.isEmpty || degree == CleanDegree.None)
