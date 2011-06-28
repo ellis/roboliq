@@ -3,7 +3,7 @@ http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structur
 Evoware commands:
 x	asperate
 x	dispense
-1a	wash
+1a?	wash
 3a	mix
 4a	wait
 5a	shake
@@ -19,15 +19,15 @@ Evoware peripheral commands:
 T1 commands:
 x	aspirate
 x	dispense
-1b	clean
+1b?	clean
 3b	mix
 4b	wait
 5b	shake
 	transfer
 T2 commands:
-1c	pipette liquid
+1c?	pipette liquid
 	clean
-2a	pipette(List[SrcDestVolume])
+2a?	pipette(List[SrcDestVolume])
 2b	copy plate
 3c	mix
 4c	wait
