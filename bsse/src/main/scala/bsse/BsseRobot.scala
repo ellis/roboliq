@@ -148,8 +148,9 @@ class BsseRobot extends EvowareRobot {
 	
 	def getDispenseClass(tip: Tip, well: Well, nVolume: Double): Option[String] = {
 		val tipKind = getTipKind(tip)
+		val tipState = state.getTipState(tip)
 		val wellState = state.getWellState(well)
-		val liquid = wellState.liquid
+		val liquid = tipState.liquid
 		
 		val bLarge = (tipKind.sName == "large")
 		//val tipState = state.getTipState(tip)
