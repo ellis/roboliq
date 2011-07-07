@@ -37,7 +37,6 @@ sealed class TipCleanInfo(val tip: Tip,
 		val nOutsideVolume: Double, val outsideSeverity: ContaminationSeverity.Value) extends HasTip
 */
  
-sealed abstract class T1_Token
-case class T1_Aspirate(twvs: Seq[TipWellVolume]) extends T1_Token
-case class T1_Dispense(twvs: Seq[TipWellVolumeDispense]) extends T1_Token
-case class T1_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends T1_Token
+case class T1_Aspirate(twvs: Seq[TipWellVolume]) extends T1_Token("aspirate")
+case class T1_Dispense(twvs: Seq[TipWellVolumeDispense]) extends T1_Token("dispense")
+case class T1_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends T1_Token("clean")

@@ -15,9 +15,9 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		case t @ T1_Clean(_, _) => clean(t)
 	}
 
-	def translate(toks: Seq[Tuple2[RobotState, T1_Token]]): Seq[Tuple2[T0_Token, RobotState]] = toks.flatMap(translate)
+	def translate(state0: RobotState, toks: Seq[Tuple2[RobotState, T1_Token]]): Seq[Tuple2[T0_Token, RobotState]] = toks.flatMap(translate)
 
-	def translateToString(toks: Seq[Tuple2[RobotState, T1_Token]]): String = translate(toks).map(_._1).mkString("\n")
+	def translateToString(state0: RobotState, toks: Seq[T1_Token]): String = translate(toks).map(_._1).mkString("\n")
 
 	def translateAndSave(cmds: Seq[Tuple2[RobotState, T1_Token]], sFilename: String): String = {
 		val s = translateToString(cmds)
@@ -161,7 +161,7 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		val sPlateMask = encodeWells(holder, twvs.map(_.well.index))
 		
 		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
-		val siteList = robot.state.getSiteList(holder).reverse.take(2).toArray
+		val siteList = state0.getSiteList(holder).reverse.take(2).toArray
 		assert(siteList.size == 2)
 		val iGrid = siteList(0).index
 		val iSite = siteList(1).index
@@ -177,46 +177,4 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	
 	/** Get T0 tokens for cleaning */
 	def clean(tok: T1_Clean): List[Tuple2[T0_Token, RobotState]]
-
-	// Cursor:
-	//  1,1+1: 010810, 0011 0001 0011 0000
-	//  1,2+1: 010820, 0011 0010
-	//  1,3+1: 010840, 0011 0100
-	//  1,4+1: 010880, 0011 1000
-
-	//  1,5+1: 0108@0, 0100 0000
-	//  1,6+1: 0108P0, 0101 0000
-	//  1,7+1: 0108p0, 0111 0000
-	//  1,8+1: 010801, 0011 0000 0011 0001
-
-	//  1,1+3: 010830,     0011 0011
-	//  1,4+3: 0108H0,     0100 1000
-	//  1,5+3: 0108`0,     0110 0000
-	//  1,6+3: 0108{144}0, 1001 0000
-	//  1,7+3: 0108p1,     0111 0000 0011 0001
-	
-	//  1,1+7: 010870,     0011 0111
-	//  1,2+7: 0108>0,     0011 1110
-	//  1,3+7: 0108L0,     0100 1100
-	//  1,4+7: 0108h0,     0110 1000
-	//  1,5+7: 0108{160}0, 1010 0000
-	
-	//  1,1+f: 0108?0,     0011 1111
-	//  1,2+f: 0108N0,     0100 1110
-	//	1,3+f: 0108l0,     0110 1100
-	//  1,4+f: 0108{168}0, 1010 1000
-	//  1,5+f: 0108{160}1, 1010 0000 0011 0001
-
-	//  1,1+1f: 0108O0,     0100 1111
-
-	//  1,1+ff: 0108{175}0
-	
-	// So the meaning of the upper 4 bits is:
-	// 0011: wells 5-7 are empty
-	// 0100: well 5 is filled
-	// 0101: well 6 is filled
-	// 0110: wells 5 & 6 are filled
-	// 0111: well 7 is filled
-	// 1001: wells 6 and 7 are filled
-	// 1010: wells 5, 6, 7 are filled
 }

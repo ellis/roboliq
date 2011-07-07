@@ -23,7 +23,7 @@ abstract class EvowareRobot extends Robot {
 		new RobotConfig(tips, tipGroups)
 	}
 	*/
-	var state: RobotState = RobotState.empty
+	//var state: RobotState = RobotState.empty
 	
 	/*def chooseWellsForTips(tips: Seq[Tip], wells: Seq[Well]): Seq[Well] = {
 		val chosen = new ArrayBuffer[Well]

@@ -10,7 +10,7 @@ trait Robot {
 	val partTop = new Part
 
 	val config: RobotConfig
-	def state: RobotState
+	//def state: RobotState
 	/** Minimum volume which can be aspirated */
 	def getTipAspirateVolumeMin(tip: Tip, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */
