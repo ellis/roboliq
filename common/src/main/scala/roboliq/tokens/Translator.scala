@@ -7,8 +7,8 @@ import roboliq.tokens._
 
 
 class Translator() {
-	var robot: Robot = _
-	var state: RobotState = _
+	//var robot: Robot = _
+	//var state: RobotState = _
 	val mapTokenHandlers = new HashMap[String, List[TokenHandler]]
 	
 	def register(handler: TokenHandler) {
@@ -20,7 +20,7 @@ class Translator() {
 		}
 	}
 	
-	def translate2(state0: RobotState, tok: T2_Token): Seq[T1_TokenState] = {
+	def translate2(robot: Robot, state0: RobotState, tok: T2_Token): Seq[T1_TokenState] = {
 		mapTokenHandlers.get(tok.name) match {
 			case None => List(new T1_TokenState(new T1_TokenError("no handler for "+tok.name), RobotState.empty))
 			case Some(Nil) => List(new T1_TokenState(new T1_TokenError("no handler for "+tok.name), RobotState.empty))

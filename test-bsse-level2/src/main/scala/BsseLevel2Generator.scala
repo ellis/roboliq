@@ -3,6 +3,7 @@ import scala.collection.immutable.SortedSet
 import roboliq.parts._
 import roboliq.robot._
 import roboliq.tokens._
+import roboliq.devices._
 import roboliq.level2.commands._
 import roboliq.level2.tokens._
 import evoware._
@@ -11,19 +12,18 @@ import bsse._
 
 class BsseLevel2Generator {
 	class Setup {
-		val robot = BsseRobot.createRobotMockup()
+		val (robot, state00) = BsseRobot.createRobotMockup()
 		val plate1 = new Plate(nRows = 8, nCols = 12)
 		val plate2 = new Plate(nRows = 8, nCols = 12)
 		val state0 = {
-			val builder = new RobotStateBuilder(robot.state)
-			val carrier = robot.state.mapPartToChildren(robot.partTop)(17)
+			val builder = new RobotStateBuilder(state00)
+			val carrier = state00.mapPartToChildren(robot.partTop)(17)
 			builder.movePartTo(plate1, carrier, 0)
 			builder.movePartTo(plate2, carrier, 1)
 			builder.toImmutable
 		}
 		
 		val tips = robot.tips.toArray
-		robot.state = state0
 
 		val translator = new BsseTranslator(robot)
 	}
@@ -104,21 +104,25 @@ class BsseLevel2Generator {
 		builder.fillWells(robot.plateDecon1.wells, liquidWater, 10000)
 		builder.fillWells(robot.plateDecon2.wells, liquidWater, 10000)
 		builder.fillWells(robot.plateDecon3.wells, liquidWater, 10000)
-		robot.state = builder.toImmutable
+		val state = builder.toImmutable
 
+		val device = new PipetteDevice
+		val tr = new Translator
+		tr.register(device)
+		
 		val tok = new T2_PipetteLiquid(
 				srcs = srcs,
 				mapDestAndVolume = dests.map(_ -> nVolume).toMap
 		)
 
-		val compiler = new T2_PipetteLiquid_Compiler(tok, robot)
+		val txs = tr.translate2(robot, state, tok)
 
 		val sSrc = spec.nSrcRows+"x"+spec.nSrcCols
 		val sDest = spec.nDestRows+"x"+spec.nDestCols
 		val fmt = new java.text.DecimalFormat("#.##")
 		val sVolume = fmt.format(spec.nVolume)
 		val sFilename = "test_"+sSrc+"_"+sDest+"_"+sVolume+".esc"
-		val s = translator.translateAndSave(compiler.tokens, sFilename)
+		val s = translator.translateAndSave(state, txs, sFilename)
 		println(sSrc+" -> "+sDest+" "+sVolume+"µl")
 		println(s)
 		println()
