@@ -9,18 +9,25 @@ import roboliq.robot._
 
 
 abstract class EvowareTranslator(robot: EvowareRobot) {
-	def translate(st: Tuple2[RobotState, T1_Token]): Seq[Tuple2[T0_Token, RobotState]] = st._2 match {
-		case t @ T1_Aspirate(_) => aspirate(st._1, t)
-		case t @ T1_Dispense(_) => dispense(st._1, t)
-		case t @ T1_Clean(_, _) => clean(t)
+	def translate(state0: RobotState, token: T1_Token): Seq[T0_Token] = token match {
+		case t @ T1_Aspirate(_) => aspirate(state0, t)
+		case t @ T1_Dispense(_) => dispense(state0, t)
+		case t @ T1_Clean(_, _) => clean(state0, t)
 	}
 
-	def translate(state0: RobotState, toks: Seq[Tuple2[RobotState, T1_Token]]): Seq[Tuple2[T0_Token, RobotState]] = toks.flatMap(translate)
+	def translate(state0: RobotState, txs: Seq[T1_TokenState]): Seq[T0_Token] = {
+		var state = state0
+		txs.flatMap(tx => {
+			val t0s = translate(state, tx.tok)
+			state = tx.state
+			t0s
+		})
+	}
 
-	def translateToString(state0: RobotState, toks: Seq[T1_Token]): String = translate(toks).map(_._1).mkString("\n")
+	def translateToString(state0: RobotState, txs: Seq[T1_TokenState]): String = translate(state0, txs).mkString("\n")
 
-	def translateAndSave(cmds: Seq[Tuple2[RobotState, T1_Token]], sFilename: String): String = {
-		val s = translateToString(cmds)
+	def translateAndSave(state0: RobotState, txs: Seq[T1_TokenState], sFilename: String): String = {
+		val s = translateToString(state0, txs)
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, EvowareTranslatorHeader.getHeader())
 		writeLines(fos, s);
@@ -77,35 +84,19 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	//val state = robot.state
 	
 
-	private def aspirate(state0: RobotState, tok: T1_Aspirate): Seq[Tuple2[T0_Token, RobotState]] = {
-		val tok0 = spirate(state0, tok.twvs, "Aspirate", robot.getAspirateClass)
-		val state = tok0 match {
-			case T0_Spirate(_, _, _, _, _, _, _) =>
-				val builder = new RobotStateBuilder(state0)
-				tok.twvs.foreach(builder.aspirate)
-				builder.toImmutable
-			case _ =>
-				state0
-		}
-		(tok0, state) :: Nil
+	private def aspirate(state0: RobotState, tok: T1_Aspirate): Seq[T0_Token] = {
+		val t0 = spirate(state0, tok.twvs, "Aspirate", robot.getAspirateClass)
+		t0 :: Nil
 	}
 	
-	private def dispense(state0: RobotState, tok: T1_Dispense): Seq[Tuple2[T0_Token, RobotState]] = {
-		val tok0 = spirate(state0, tok.twvs, "Aspirate", robot.getDispenseClass)
-		val state = tok0 match {
-			case T0_Spirate(_, _, _, _, _, _, _) =>
-				val builder = new RobotStateBuilder(state0)
-				tok.twvs.foreach(builder.aspirate)
-				builder.toImmutable
-			case _ =>
-				state0
-		}
-		(tok0, state) :: Nil
+	private def dispense(state0: RobotState, tok: T1_Dispense): Seq[T0_Token] = {
+		val t0 = spirate(state0, tok.twvs, "Aspirate", robot.getDispenseClass)
+		t0 :: Nil
 	}
 	
 	private def spirate(state0: RobotState, twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): T0_Token = {
 		twvs match {
-			case Seq() => T0_Error("Empty Tip-Well-Volume list")
+			case Seq() => T0_TokenError("Empty Tip-Well-Volume list")
 			case Seq(twv0, rest @ _*) =>
 				// Get the liquid class
 				val sLiquidClass_? = getLiquidClass(state0, twv0)
@@ -176,5 +167,5 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	}
 	
 	/** Get T0 tokens for cleaning */
-	def clean(tok: T1_Clean): List[Tuple2[T0_Token, RobotState]]
+	def clean(state0: RobotState, tok: T1_Clean): List[T0_Token]
 }

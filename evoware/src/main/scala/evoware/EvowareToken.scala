@@ -1,8 +1,7 @@
 package evoware
 
-sealed abstract class T0_Token
+import roboliq.tokens._
 
-case class T0_Error(val sMessage: String) extends T0_Token
 
 case class T0_Spirate(
 	val sFunc: String,
@@ -12,7 +11,7 @@ case class T0_Spirate(
 	val iGrid: Int,
 	val iSite: Int,
 	val sPlateMask: String
-) extends T0_Token {
+) extends T0_Token("spirate") {
 	override def toString = {
 		Array(
 			mTips,
@@ -38,7 +37,7 @@ case class T0_Wash(
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
 	bFastWash: Boolean
-) extends T0_Token {
+) extends T0_Token("wash") {
 	override def toString = {
 		val fmt = new java.text.DecimalFormat("#.##")
 		Array(

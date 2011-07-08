@@ -8,9 +8,10 @@ import roboliq.parts._
 import roboliq.tokens._
 import roboliq.robot._
 import roboliq.level2.tokens._
+import roboliq.devices.PipetteDeviceUtil
 
 
-class T2_Pipette_Compiler(token: T2_Pipette, robot: Robot) {
+class T2_Pipette_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette) {
 	case class SrcTipDestVolume(src: Well, tip: Tip, dest: Well, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[Tip]) {
@@ -50,7 +51,7 @@ class T2_Pipette_Compiler(token: T2_Pipette, robot: Robot) {
 
 	//val mapDestToVolume = token.mapDestAndVolume
 	
-	val tokens: Seq[T1_Token] = {
+	val tokens: Seq[T1_TokenState] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
@@ -69,7 +70,7 @@ class T2_Pipette_Compiler(token: T2_Pipette, robot: Robot) {
 				}
 			}
 		}
-		winner
+		PipetteDeviceUtil.getTokenStates(state0, winner)
 	}
 	
 	// - Get all tip/dest pairs
@@ -78,7 +79,7 @@ class T2_Pipette_Compiler(token: T2_Pipette, robot: Robot) {
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
-		val state = new RobotStateBuilder(robot.state)
+		val state = new RobotStateBuilder(state0)
 		
 		// Pair up all tips and wells
 		val twss0 = helper.chooseTipWellPairsAll(tips, dests)

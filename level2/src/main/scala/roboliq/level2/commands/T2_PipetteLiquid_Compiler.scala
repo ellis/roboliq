@@ -8,9 +8,10 @@ import roboliq.parts._
 import roboliq.tokens._
 import roboliq.robot._
 import roboliq.level2.tokens._
+import roboliq.devices.PipetteDeviceUtil
 
 
-class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
+class T2_PipetteLiquid_Compiler(robot: Robot, state0: RobotState, token: T2_PipetteLiquid) {
 	class CycleState(val tips: SortedSet[Tip]) {
 		// Tips available for dispense.  Once a tip has dispensed with wet contact into a contaminating liquid, it should be removed from this list.
 		var tipsAvailable = tips
@@ -26,9 +27,9 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 	}
 	
 	val	srcs = token.srcs
-	val liquid = robot.state.getLiquid(srcs.head)
+	val liquid = state0.getLiquid(srcs.head)
 	// Make sure that all the source wells contain the same liquid
-	assert(srcs.forall(well => robot.state.getLiquid(well) == liquid))
+	assert(srcs.forall(well => state0.getLiquid(well) == liquid))
 	
 	val helper = new PipetteHelper
 
@@ -47,7 +48,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 
 	val mapDestToVolume = token.mapDestAndVolume
 	
-	val tokens: Seq[T1_Token] = {
+	val tokens: Seq[T1_TokenState] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
@@ -66,7 +67,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 				}
 			}
 		}
-		winner
+		PipetteDeviceUtil.getTokenStates(state0, winner)
 	}
 	
 	// - Get all tip/dest pairs
@@ -75,7 +76,7 @@ class T2_PipetteLiquid_Compiler(token: T2_PipetteLiquid, robot: Robot) {
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
-		val state = new RobotStateBuilder(robot.state)
+		val state = new RobotStateBuilder(state0)
 		
 		// Pair up all tips and wells
 		val twss0 = helper.chooseTipWellPairsAll(tips, dests)

@@ -278,7 +278,7 @@ class BsseRobot extends EvowareRobot {
 }
 
 object BsseRobot {
-	def createRobotMockup(): BsseRobot = {
+	def createRobotMockup(): Tuple2[BsseRobot, RobotState] = {
 		val carrierGrids = Array(
 				// Wash 1
 				1,
@@ -309,7 +309,7 @@ object BsseRobot {
 		val carrierWash2 = mapGridToCarrier(2)
 		val carrierDecon = mapGridToCarrier(3)
 		
-		val builder = new RobotStateBuilder(robot.state)
+		val builder = new RobotStateBuilder(RobotState.empty)
 		for ((carrier, iGrid) <- carrierGridPairs) {
 			builder.movePartTo(carrier, robot.partTop, iGrid)
 		}
@@ -322,8 +322,6 @@ object BsseRobot {
 			builder.movePartTo(part, parent, i)
 		}
 		
-		robot.state = builder.toImmutable
-		
-		robot
+		(robot, builder.toImmutable)
 	}
 }

@@ -10,7 +10,7 @@ import evoware._
 //sealed class BsseTip(val roboTip: Tip)
 
 class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
-	def clean(state: IRobotState, tok: T1_Clean): List[T0_Token] = {
+	def clean(state0: RobotState, tok: T1_Clean): List[T0_Token] = {
 		val tips = tok.tips
 		val degree = tok.degree
 		if (tips.isEmpty || degree == CleanDegree.None)
@@ -20,7 +20,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 		val tipKind = robot.getTipKind(tips.head)
 		assert(tips.forall(tip => robot.getTipKind(tip) == tipKind))
 		
-		val tipStates = tips.map(tip => state.getTipState(tip))
+		val tipStates = tips.map(tip => state0.getTipState(tip))
 		// Calculate an overall tip state for maximum contamination
 		val tipStateAcc = tipStates.foldRight(TipState(tips.head)) { (tipState, acc) =>
 				acc.aspirate(tipState.liquid, tipState.nContamInsideVolume)
@@ -30,9 +30,9 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 
 		degree match {
 			case CleanDegree.None => Nil
-			case CleanDegree.Light => cleanGroupLight(tips, nContamInsideVolume)
-			case CleanDegree.Thorough => cleanGroupLight(tips, nContamInsideVolume)
-			case CleanDegree.Decontaminate => cleanGroupDecontam(tips, nContamInsideVolume).toList
+			case CleanDegree.Light => cleanGroupLight(state0, tips, nContamInsideVolume)
+			case CleanDegree.Thorough => cleanGroupLight(state0, tips, nContamInsideVolume)
+			case CleanDegree.Decontaminate => cleanGroupDecontam(state0, tips, nContamInsideVolume).toList
 		}
 	}
 	
@@ -59,7 +59,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 	}
 	*/
 	
-	private def cleanGroupLight(tips: Seq[Tip], nContamInsideVolume: Double): List[T0_Token] = {
+	private def cleanGroupLight(state0: RobotState, tips: Seq[Tip], nContamInsideVolume: Double): List[T0_Token] = {
 		val tipKind = robot.getTipKind(tips.head)
 		val mTips = encodeTips(tips)
 		// TODO: Set these values depending on the tip kind
@@ -102,7 +102,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 		)
 	}
 	
-	private def cleanGroupDecontam(tips: Seq[Tip], nContamInsideVolume: Double): Seq[T0_Token] = {
+	private def cleanGroupDecontam(state0: RobotState, tips: Seq[Tip], nContamInsideVolume: Double): Seq[T0_Token] = {
 		val tipKind = robot.getTipKind(tips.head)
 		val mTips = encodeTips(tips)
 		// TODO: Set these values depending on the tip kind
@@ -137,7 +137,8 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 			nAirgapSpeed = nAirgapSpeed,
 			nRetractSpeed = nRetractSpeed,
 			bFastWash = true
-		)) ++ translate(T1_Aspirate(twvsAspirate)) ++ translate(T1_Dispense(twvdsDispense)) ++
+		)) ++ translate(state0, T1_Aspirate(twvsAspirate)) ++
+		translate(state0, T1_Dispense(twvdsDispense)) ++
 		Seq(T0_Wash(
 			mTips,
 			iWasteGrid = 2, iWasteSite = 1,
