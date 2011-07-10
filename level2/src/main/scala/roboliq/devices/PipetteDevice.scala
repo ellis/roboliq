@@ -9,7 +9,7 @@ import roboliq.level2.commands._
 
 
 class PipetteDevice extends TokenHandler {
-	val asTokens = Array("pipette", "pipetteLiquid").toSeq
+	val asTokens = Array("pipette", "pipetteLiquid", "pipettePlate").toSeq
 	
 	def translate2(robot: Robot, state0: RobotState, tok: T2_Token): Seq[T1_TokenState] = {
 		tok match {
