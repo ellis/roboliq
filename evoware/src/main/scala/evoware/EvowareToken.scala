@@ -56,3 +56,24 @@ case class T0_Wash(
 		).mkString("Wash(", ",", ")")
 	}
 }
+
+case class T0_Mix(
+	val mTips: Int,
+	val sLiquidClass: String,
+	val asVolumes: Seq[String],
+	val iGrid: Int,
+	val iSite: Int,
+	val sPlateMask: String
+) extends T0_Token("spirate") {
+	override def toString = {
+		Array(
+			mTips,
+			'"'+sLiquidClass+'"',
+			asVolumes.mkString(","),
+			iGrid, iSite,
+			1,
+			'"'+sPlateMask+'"',
+			0, 0
+		).mkString("Mix(", ",", ")")
+	}
+}

@@ -170,7 +170,12 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	/** Get T0 tokens for cleaning */
 	def clean(state0: RobotState, tok: T1_Clean): List[T0_Token]
 	
-	private def mix(state0: RobotState, twvs: Seq[TipWellVolume], sFunc: String, getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): T0_Token = {
+	private def mix(state0: RobotState, tok: T1_Mix): Seq[T0_Token] = {
+		val t0 = mix2(state0, tok.twvs, robot.getDispenseClass)
+		t0 :: Nil
+	}
+	
+	private def mix2(state0: RobotState, twvs: Seq[TipWellVolume], getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): T0_Token = {
 		twvs match {
 			case Seq() => T0_TokenError("Empty Tip-Well-Volume list")
 			case Seq(twv0, rest @ _*) =>
@@ -205,11 +210,11 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 				// All tip/well pairs are equidistant or all tips are going to the same well
 				assert(equidistant(twvs) || twvs.forall(_.well eq twv0.well))
 				
-				mixChecked(state0, twvs, sFunc, sLiquidClass)
+				mixChecked(state0, twvs, sLiquidClass)
 		}
 	}
 
-	private def mixChecked(state0: RobotState, twvs: Seq[TipWellVolume], sFunc: String, sLiquidClass: String): T0_Token = {
+	private def mixChecked(state0: RobotState, twvs: Seq[TipWellVolume], sLiquidClass: String): T0_Token = {
 		val twv0 = twvs.head
 		val tipKind = robot.getTipKind(twv0.tip)
 		val holder = twv0.well.holder
@@ -233,8 +238,7 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		val iGrid = siteList(0).index
 		val iSite = siteList(1).index
 		
-		T0_Spirate(
-			sFunc, 
+		T0_Mix(
 			mTips, sLiquidClass,
 			asVolumes,
 			iGrid, iSite,
