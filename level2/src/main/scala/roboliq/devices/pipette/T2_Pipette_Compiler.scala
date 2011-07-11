@@ -153,20 +153,20 @@ class T2_Pipette_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette) {
 		// Repeat the sorting each time all sources have been used (e.g. when there are more tips than sources)
 
 		val stdvs = stdvs0.sortBy(_.tip)
-		val twvs = stdvs.map(stdv => new TipWellVolume(stdv.tip, stdv.src, stdv.nVolume))
-		val twvss = robot.batchesForAspirate(state, twvs)
-		cycle.aspirates ++= twvss.map(twvs => new T1_Aspirate(twvs))
-		twvs.foreach(state.aspirate)
+		val twvps = stdvs.map(stdv => new TipWellVolumePolicy(stdv.tip, stdv.src, stdv.nVolume, PipettePolicy(PipettePosition.WetContact)))
+		val twvpss = robot.batchesForAspirate(state, twvps)
+		cycle.aspirates ++= twvpss.map(twvs => new T1_Aspirate(twvps))
+		twvps.foreach(state.aspirate)
 	}
 
 	private def dispense(cycle: CycleState, state: RobotStateBuilder, stdvs0: Seq[SrcTipDestVolume]) {
 		val stdvs = stdvs0.sortBy(_.tip)
-		// Map tip/dest pairs to TipWellVolumeDispense objects
+		// Map tip/dest pairs to TipWellVolumePolicy objects
 		val twvds = stdvs.map(stdv => {
 			val wellStateSrc = state.getWellState(stdv.src)
 			val wellStateDest = state.getWellState(stdv.dest)
-			val dispenseKind = robot.getDispenseKind(stdv.tip, wellStateSrc.liquid, stdv.nVolume, wellStateDest)
-			new TipWellVolumeDispense(stdv.tip, stdv.dest, stdv.nVolume, dispenseKind)
+			val policy = robot.getPipettePolicy(stdv.tip, wellStateSrc.liquid, stdv.nVolume, wellStateDest)
+			new TipWellVolumePolicy(stdv.tip, stdv.dest, stdv.nVolume, policy)
 		})
 		val twvdss = robot.batchesForDispense(state, twvds)
 		// Create dispense tokens

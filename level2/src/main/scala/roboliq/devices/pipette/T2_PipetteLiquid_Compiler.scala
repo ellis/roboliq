@@ -177,20 +177,20 @@ class T2_PipetteLiquid_Compiler(robot: Robot, state0: RobotState, token: T2_Pipe
 	}
 
 	private def dispense(cycle: CycleState, state: RobotStateBuilder, tws: Seq[TipWell]) {
-		// Map tip/dest pairs to TipWellVolumeDispense objects
-		val twvds = tws.map(tw => {
+		// Map tip/dest pairs to TipWellVolumePolicy objects
+		val twvps = tws.map(tw => {
 			val nVolume = mapDestToVolume(tw.well)
 			val wellState = state.getWellState(tw.well)
-			val dispenseKind = robot.getDispenseKind(tw.tip, liquid, nVolume, wellState)
-			new TipWellVolumeDispense(tw.tip, tw.well, nVolume, dispenseKind)
+			val policy = robot.getPipettePolicy(tw.tip, liquid, nVolume, wellState)
+			new TipWellVolumePolicy(tw.tip, tw.well, nVolume, policy)
 		})
-		val twvdss = robot.batchesForDispense(state, twvds)
+		val twvpss = robot.batchesForDispense(state, twvps)
 		// Create dispense tokens
-		cycle.dispenses ++= twvdss.map(twvds => new T1_Dispense(twvds))
+		cycle.dispenses ++= twvpss.map(twvds => new T1_Dispense(twvds))
 		// Add volume to required aspirate volume for this cycle
-		for (twvd <- twvds) {
-			cycle.mapTipToVolume(twvd.tip) += twvd.nVolume
-			state.dispense(twvd)
+		for (twvp <- twvps) {
+			cycle.mapTipToVolume(twvp.tip) += twvp.nVolume
+			state.dispense(twvp)
 		}
 	}
 
@@ -219,13 +219,13 @@ class T2_PipetteLiquid_Compiler(robot: Robot, state0: RobotState, token: T2_Pipe
 	
 		val twss0 = helper.chooseTipSrcPairs(tips, srcs2, state)
 		for (tws <- twss0) {
-			val twvs = tws.map(tw => {
+			val twvps = tws.map(tw => {
 				val nVolume = cycle.mapTipToVolume(tw.tip)
-				new TipWellVolume(tw.tip, tw.well, nVolume)
+				new TipWellVolumePolicy(tw.tip, tw.well, nVolume, PipettePolicy(PipettePosition.WetContact))
 			})
-			val twvss = robot.batchesForAspirate(state, twvs)
-			cycle.aspirates ++= twvss.map(twvs => new T1_Aspirate(twvs))
-			twvs.foreach(state.aspirate)
+			val twvpss = robot.batchesForAspirate(state, twvps)
+			cycle.aspirates ++= twvpss.map(twvps => new T1_Aspirate(twvps))
+			twvps.foreach(state.aspirate)
 		}
 	}
 }

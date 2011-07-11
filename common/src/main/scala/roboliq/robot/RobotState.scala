@@ -150,12 +150,12 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 	}
 
 	// Remove liquid from tip and put it in well
-	def dispense(twvd: TipWellVolumeDispense) {
-		import twvd._
+	def dispense(twvp: TipWellVolumePolicy) {
+		import twvp._
 		val tipState = getTipState(tip)
 		val wellState = getWellState(well)
-		tipStates(tip) = dispenseKind match {
-			case DispenseKind.WetContact => tipState.dispenseIn(wellState.liquid, nVolume)
+		tipStates(tip) = policy match {
+			case PipettePolicy(PipettePosition.WetContact) => tipState.dispenseIn(wellState.liquid, nVolume)
 			case _ => tipState.dispenseFree(nVolume)
 		}
 		addLiquid0(well, tipState.liquid, nVolume)
@@ -163,7 +163,7 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 	
 	def mix(twv: TipWellVolume) {
 		aspirate(twv)
-		val twvd = new TipWellVolumeDispense(twv.tip, twv.well, twv.nVolume, DispenseKind.WetContact)
+		val twvd = new TipWellVolumePolicy(twv.tip, twv.well, twv.nVolume, PipettePolicy(PipettePosition.WetContact))
 		dispense(twvd)
 	}
 

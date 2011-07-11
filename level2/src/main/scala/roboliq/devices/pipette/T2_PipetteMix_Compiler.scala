@@ -85,14 +85,14 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 			val tws0 = twss.head
 			
 			// Src/tip/dest/volume combinations
-			val twvs = tws0.map(tw => new TipWellVolume(tw.tip, tw.well, token.nVolume))
+			val twvps = tws0.map(tw => new TipWellVolumePolicy(tw.tip, tw.well, token.nVolume, PipettePolicy(PipettePosition.WetContact)))
 			
 			// If we can't accommodate the required volume, abort:
-			if (!checkVols(cycle, state, twvs))
+			if (!checkVols(cycle, state, twvps))
 				return false
 
 			// Tuples of tip to clean degree required by source liquid
-			val tcs = twvs.map(twv => {
+			val tcs = twvps.map(twv => {
 				val tipState = state.getTipState(twv.tip)
 				val wellState = state.getWellState(twv.well)
 				val liquid = wellState.liquid
@@ -101,7 +101,7 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 			})
 
 			clean(cycle, state, tcs)
-			mix(cycle, state, twvs)
+			mix(cycle, state, twvps)
 			
 			cycles += cycle
 			
@@ -156,13 +156,11 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 		}
 	}
 
-	private def mix(cycle: CycleState, state: RobotStateBuilder, twvs: Seq[TipWellVolume]) {
-		val twvss = robot.batchesForAspirate(state, twvs)
+	private def mix(cycle: CycleState, state: RobotStateBuilder, twvps: Seq[TipWellVolumePolicy]) {
+		val twvpss = robot.batchesForAspirate(state, twvps)
 		// Create dispense tokens
-		cycle.mixes ++= twvss.map(twvs => new T1_Mix(twvs))
+		cycle.mixes ++= twvpss.map(twvps => new T1_Mix(twvps))
 		// Update tip state
-		for (twv <- twvs) {
-			state.mix(twv)
-		}
+		twvps.foreach(state.mix)
 	}
 }

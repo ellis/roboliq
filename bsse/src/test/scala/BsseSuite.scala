@@ -34,10 +34,10 @@ class BsseSuite extends FunSuite {
 				)
 			)
 		val dispense = T1_Dispense(Array(
-				new TipWellVolumeDispense(tips(0), plate2.wells(0), 30, DispenseKind.Free),
-				new TipWellVolumeDispense(tips(1), plate2.wells(1), 30, DispenseKind.Free),
-				new TipWellVolumeDispense(tips(2), plate2.wells(2), 30, DispenseKind.Free),
-				new TipWellVolumeDispense(tips(3), plate2.wells(3), 30, DispenseKind.Free)
+				new TipWellVolumePolicy(tips(0), plate2.wells(0), 30, DispenseKind.Free),
+				new TipWellVolumePolicy(tips(1), plate2.wells(1), 30, DispenseKind.Free),
+				new TipWellVolumePolicy(tips(2), plate2.wells(2), 30, DispenseKind.Free),
+				new TipWellVolumePolicy(tips(3), plate2.wells(3), 30, DispenseKind.Free)
 				)
 			)
 

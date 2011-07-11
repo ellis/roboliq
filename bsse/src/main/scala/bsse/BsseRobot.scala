@@ -206,7 +206,7 @@ class BsseRobot extends EvowareRobot {
 		}
 	}
 	
-	def batchesForDispense(state: IRobotState, twvs: Seq[TipWellVolumeDispense]): Seq[Seq[TipWellVolumeDispense]] = {
+	def batchesForDispense(state: IRobotState, twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = {
 		def getLiquidClass(twv: TipWellVolume) = getDispenseClass(state, twv)
 
 		val bAllHaveClass = twvs.forall(twv => getLiquidClass(twv).isDefined)

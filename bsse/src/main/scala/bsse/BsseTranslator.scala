@@ -123,7 +123,7 @@ class BsseTranslator(robot: BsseRobot) extends EvowareTranslator(robot) {
 		val tws2 = tips zip wells2
 		val tws3 = tips zip wells3
 		val twvsAspirate = tws2.map{case (tip, well) => new TipWellVolume(tip, well, nVolume)}
-		val twvdsDispense = tws3.map{case (tip, well) => new TipWellVolumeDispense(tip, well, nVolume, DispenseKind.Free)}
+		val twvdsDispense = tws3.map{case (tip, well) => new TipWellVolumePolicy(tip, well, nVolume, DispenseKind.Free)}
 		
 		Seq(T0_Wash(
 			mTips,
