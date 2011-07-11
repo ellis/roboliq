@@ -20,7 +20,7 @@ T1 commands:
 x	aspirate
 x	dispense
 1b?	clean
-3b	mix
+3b?	mix
 4b	wait
 5b	shake
 	transfer
@@ -28,8 +28,8 @@ T2 commands:
 1c?	pipette liquid
 	clean
 2a?	pipette(List[SrcDestVolume])
-2b	copy plate
-3c	mix
+2b?	copy plate
+3c?	mix
 4c	wait
 5c	shake
 	transfer
