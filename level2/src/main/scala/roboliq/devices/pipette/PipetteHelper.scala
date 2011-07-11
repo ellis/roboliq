@@ -1,4 +1,4 @@
-package roboliq.level2.commands
+package roboliq.devices.pipette
 
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable

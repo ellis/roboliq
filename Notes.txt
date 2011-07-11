@@ -1,7 +1,7 @@
 Script generation errors:
 	test_1x1_8x6_3: try to asperate 18ul, but error: tip 5: 6ul too much in diluter
 	
-Fabian: Why do we have two wash stations at grids 1 and 2?  Let's go through each line of Decontamination_WashBigTips.esc
+Fabian: why does Mix() use "Water free dispense"?
 
 Large tips: 950µl max; but only 900ul if we need to use the decontamination wash
 Small tips: 45µl max

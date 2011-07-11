@@ -5,11 +5,11 @@ import roboliq.tokens._
 
 import roboliq.level2._
 import roboliq.level2.tokens._
-import roboliq.level2.commands._
+import roboliq.devices.pipette._
 
 
 class PipetteDevice extends TokenHandler {
-	val asTokens = Array("pipette", "pipetteLiquid", "pipettePlate").toSeq
+	val asTokens = Array("pipette", "pipetteLiquid", "pipettePlate", "pipetteMix").toSeq
 	
 	def translate2(robot: Robot, state0: RobotState, tok: T2_Token): Seq[T1_TokenState] = {
 		tok match {
@@ -18,6 +18,12 @@ class PipetteDevice extends TokenHandler {
 				comp.tokens
 			case t2 @ T2_PipetteLiquid(_, _) =>
 				val comp = new T2_PipetteLiquid_Compiler(robot, state0, t2)
+				comp.tokens
+			case t2 @ T2_PipettePlate(_, _, _) =>
+				val comp = new T2_PipettePlate_Compiler(robot, state0, t2)
+				comp.tokens
+			case t2 @ T2_PipetteMix(_, _) =>
+				val comp = new T2_PipetteMix_Compiler(robot, state0, t2)
 				comp.tokens
 		}
 	}

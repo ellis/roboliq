@@ -11,39 +11,21 @@ import roboliq.level2.tokens._
 import roboliq.devices.PipetteDeviceUtil
 
 
-class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_PipetteMix) {
-	class CycleState(val tips: SortedSet[Tip]) {
-		// Tips available for dispense.  Once a tip has dispensed with wet contact into a contaminating liquid, it should be removed from this list.
-		var tipsAvailable = tips
-		// The volume which needs to be aspirated into the given tip
-		val mapTipToVolume = new mutable.HashMap[Tip, Double] ++ tips.map(_ -> 0.0)
-
-		val cleans = new ArrayBuffer[T1_Clean]
-		val mixes = new ArrayBuffer[T1_Mix]
-
-		//def score(): Int = aspirates.size + dispenses.size
-		def toTokenSeq: Seq[T1_Token] = cleans ++ mixes
-	}
+class T2_Pipette_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette) {
+	case class SrcTipDestVolume(src: Well, tip: Tip, dest: Well, nVolume: Double)
 	
-	//val srcs = token.wells
-	//val liquid = state0.getLiquid(srcs.head)
-	// Make sure that all the source wells contain the same liquid
-	//assert(srcs.forall(well => state0.getLiquid(well) == liquid))
+	class CycleState(val tips: SortedSet[Tip]) {
+		val cleans = new ArrayBuffer[T1_Clean]
+		val aspirates = new ArrayBuffer[T1_Aspirate]
+		val dispenses = new ArrayBuffer[T1_Dispense]
+
+		def toTokenSeq: Seq[T1_Token] = cleans ++ aspirates ++ dispenses
+	}
 	
 	val helper = new PipetteHelper
 
-	// Contamination scenarios:
-	// dispense contaminates: wash after each dispense
-	// aspirate contaminates, dispense does not: wash before each subsequent aspirate
-	// aspirate does not contaminate, dispense doesn't contaminate: no washing required
-	
-	//private def doesWellContaminate(well: Well): Boolean = state.getLiquid(well).contaminates
-	//val bDestContaminates = dests.exists(doesWellContaminate)
-	
-	//val bAspirateContaminates = liquid.bContaminates
-	//val bDispenseContaminates = dispenseStrategy.bEnter && dests.exists(doesWellContaminate)
-	
-	val dests = SortedSet[Well]() ++ token.wells
+	val dests = SortedSet[Well]() ++ token.list.map(_._2)
+	val mapDestToTuple = token.list.map(t => t._2 -> t).toMap
 
 	val tokens: Seq[T1_TokenState] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
@@ -85,23 +67,27 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 			val tws0 = twss.head
 			
 			// Src/tip/dest/volume combinations
-			val twvs = tws0.map(tw => new TipWellVolume(tw.tip, tw.well, token.nVolume))
+			val stdvs = tws0.map(tw => {
+				val (src, dest, nVolume) = mapDestToTuple(tw.well)
+				new SrcTipDestVolume(src, tw.tip, dest, nVolume)
+			})
 			
 			// If we can't accommodate the required volume, abort:
-			if (!checkVols(cycle, state, twvs))
+			if (!checkVols(cycle, state, stdvs))
 				return false
 
 			// Tuples of tip to clean degree required by source liquid
-			val tcs = twvs.map(twv => {
-				val tipState = state.getTipState(twv.tip)
-				val wellState = state.getWellState(twv.well)
+			val tcs = stdvs.map(stdv => {
+				val tipState = state.getTipState(stdv.tip)
+				val wellState = state.getWellState(stdv.src)
 				val liquid = wellState.liquid
 				val cleanDegree = helper.getCleanDegreeAspirate(tipState, liquid)
-				(twv.tip, cleanDegree)
+				(stdv.tip, cleanDegree)
 			})
 
 			clean(cycle, state, tcs)
-			mix(cycle, state, twvs)
+			aspirate(cycle, state, stdvs)
+			dispense(cycle, state, stdvs)
 			
 			cycles += cycle
 			
@@ -116,24 +102,23 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 	}
 
 	// Check for appropriate volumes
-	private def checkVols(cycle: CycleState, state: RobotStateBuilder, tws: Seq[TipWell]): Boolean = {
-		assert(!tws.isEmpty)
+	private def checkVols(cycle: CycleState, state: RobotStateBuilder, stdvs: Seq[SrcTipDestVolume]): Boolean = {
+		assert(!stdvs.isEmpty)
 		
-		def isVolOk(tipWell: TipWell): Boolean = {
-			val (tip, well) = (tipWell.tip, tipWell.well)
-			val liquid = state.getWellState(well).liquid
+		def isVolOk(stdv: SrcTipDestVolume): Boolean = {
+			val tip = stdv.tip
+			val liquid = state.getWellState(stdv.src).liquid
 			val nMin = robot.getTipAspirateVolumeMin(tip, liquid)
 			val nMax = robot.getTipHoldVolumeMax(tip, liquid)
-			val nTipVolume = cycle.mapTipToVolume(tip) // Volume already in the tip
-			val nVolume = token.nVolume // Volume to mix
+			val nTipVolume = 0 // Volume already in the tip
 			val bOk = (
-				nVolume >= nMin &&
-				nVolume + nTipVolume <= nMax
+				stdv.nVolume >= nMin &&
+				stdv.nVolume + nTipVolume <= nMax
 			)
 			bOk
 		}
 
-		tws.forall(isVolOk)
+		stdvs.forall(isVolOk)
 	}
 	
 	private def checkNoCleanRequired(cycle: CycleState, state: RobotStateBuilder, tws: Seq[TipWell]): Boolean = {
@@ -156,13 +141,40 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 		}
 	}
 
-	private def mix(cycle: CycleState, state: RobotStateBuilder, twvs: Seq[TipWellVolume]) {
+	private def aspirate(cycle: CycleState, state: RobotStateBuilder, stdvs0: Seq[SrcTipDestVolume]) {
+		// Cases:
+		// Case 1: tips size == srcs size:
+		// Case 2: tips size < srcs size:
+		// Case 3: tips size > srcs size:
+		// -----
+		// The sources should be chosen according to this algorithm:
+		// - sort the sources by volume descending (secondary sort key is index order)
+		// - keep the top tips.size() entries
+		// Repeat the sorting each time all sources have been used (e.g. when there are more tips than sources)
+
+		val stdvs = stdvs0.sortBy(_.tip)
+		val twvs = stdvs.map(stdv => new TipWellVolume(stdv.tip, stdv.src, stdv.nVolume))
 		val twvss = robot.batchesForAspirate(state, twvs)
+		cycle.aspirates ++= twvss.map(twvs => new T1_Aspirate(twvs))
+		twvs.foreach(state.aspirate)
+	}
+
+	private def dispense(cycle: CycleState, state: RobotStateBuilder, stdvs0: Seq[SrcTipDestVolume]) {
+		val stdvs = stdvs0.sortBy(_.tip)
+		// Map tip/dest pairs to TipWellVolumeDispense objects
+		val twvds = stdvs.map(stdv => {
+			val wellStateSrc = state.getWellState(stdv.src)
+			val wellStateDest = state.getWellState(stdv.dest)
+			val dispenseKind = robot.getDispenseKind(stdv.tip, wellStateSrc.liquid, stdv.nVolume, wellStateDest)
+			new TipWellVolumeDispense(stdv.tip, stdv.dest, stdv.nVolume, dispenseKind)
+		})
+		val twvdss = robot.batchesForDispense(state, twvds)
 		// Create dispense tokens
-		cycle.mixes ++= twvss.map(twvs => new T1_Mix(twvs))
-		// Update tip state
-		for (twv <- twvs) {
-			state.mix(twv)
+		cycle.dispenses ++= twvdss.map(twvds => new T1_Dispense(twvds))
+		// Add volume to required aspirate volume for this cycle
+		for (twvd <- twvds) {
+			//cycle.mapTipToVolume(twvd.tip) += twvd.nVolume
+			state.dispense(twvd)
 		}
 	}
 }

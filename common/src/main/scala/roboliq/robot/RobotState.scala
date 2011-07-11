@@ -160,7 +160,12 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 		}
 		addLiquid0(well, tipState.liquid, nVolume)
 	}
-
+	
+	def mix(twv: TipWellVolume) {
+		aspirate(twv)
+		val twvd = new TipWellVolumeDispense(twv.tip, twv.well, twv.nVolume, DispenseKind.WetContact)
+		dispense(twvd)
+	}
 
 	def addLiquid0(well: Well, liquid: Liquid, nVolume: Double) {
 		wellStates(well) = getWellState(well).add(liquid, nVolume)
