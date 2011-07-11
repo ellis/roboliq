@@ -7,7 +7,7 @@ import scala.collection.immutable.SortedSet
 import roboliq.parts._
 import roboliq.robot._
 import roboliq.tokens._
-import roboliq.level2.commands._
+import roboliq.devices.pipette._
 
 
 class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers {
