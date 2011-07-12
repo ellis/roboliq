@@ -159,7 +159,7 @@ class T2_PipetteMix_Compiler(robot: Robot, state0: RobotState, token: T2_Pipette
 	private def mix(cycle: CycleState, state: RobotStateBuilder, twvps: Seq[TipWellVolumePolicy]) {
 		val twvpss = robot.batchesForAspirate(state, twvps)
 		// Create dispense tokens
-		cycle.mixes ++= twvpss.map(twvps => new T1_Mix(twvps))
+		cycle.mixes ++= twvpss.map(twvps => new T1_Mix(twvps, PipettePolicy(PipettePosition.WetContact), token.nVolume, token.nCount))
 		// Update tip state
 		twvps.foreach(state.mix)
 	}

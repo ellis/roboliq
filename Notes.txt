@@ -219,7 +219,22 @@ Roboliq package hierarchy:
 
 
 -------------
+Example of processing levels:
 
+level 4: pipette 30ul water to plate A
+questions:
+	which well(s) is the water in?
+	where are the water wells?
+	where is plate A?
+	what is the dimension of the plate?
+	how much water is initially in the water wells?
+	is there liquid already in plate A?  How much?
+how do we discover which questions need to be answered?
+how do we represent those questions?
+each command will "register" its objects in the "knowledge database" along with what it knows, needs to know, or defaults to; we should somehow be able to trace back to the location in the source code where the registration took place 
+
+
+-------------
 val templatePlate = new Plate
 val plasmidDna = new Well
 val competentCells = new Well
