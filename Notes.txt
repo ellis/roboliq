@@ -221,17 +221,46 @@ Roboliq package hierarchy:
 -------------
 Example of processing levels:
 
-level 4: pipette 30ul water to plate A
-questions:
-	which well(s) is the water in?
-	where are the water wells?
-	where is plate A?
-	what is the dimension of the plate?
-	how much water is initially in the water wells?
-	is there liquid already in plate A?  How much?
+level 4: pipette 30ul water to each well of plate A
+knowledgebase:
+	round 1:
+		Q: what is the dimension of the plate?
+	round 2:
+		known: liquid required = dest well count * 30ul
+		which well(s) is the water in?
+		where are the water wells?
+		where is plate A?
+		how much water is initially in the water wells?
+		is there liquid already in plate A?  How much?
 how do we discover which questions need to be answered?
 how do we represent those questions?
 each command will "register" its objects in the "knowledge database" along with what it knows, needs to know, or defaults to; we should somehow be able to trace back to the location in the source code where the registration took place 
+
+KnowledgeBase:
+	each device can maintain a knowledge base
+	two layers:
+		fixed values
+		variable values -- these might have a default; if not, then the user is required to provide a value
+	most KB items are related to initial setup
+	other items deal with changing values (e.g. plate location)
+
+	items:
+		objects
+		locations
+		initial liquids and volumes
+		plate dimensions
+		selection of device when multiple devices are available
+		selection of parameters (bool, int, double, string)
+	
+	challenges:
+		some of the variables cannot be assigned default values until after everything else has finished processing (such as required liquid levels)
+		so we need to run some iterative processing over the KnowledgeBase in order to set as many defaults as possible
+
+in order to create T2 tokens, we need to know:
+	- the initial location of all parts
+	- the wells for all fluids
+	- the initial fluid levels in wells
+	- the destination locations for plate transfers
 
 
 -------------
