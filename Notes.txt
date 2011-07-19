@@ -255,12 +255,21 @@ KnowledgeBase:
 	challenges:
 		some of the variables cannot be assigned default values until after everything else has finished processing (such as required liquid levels)
 		so we need to run some iterative processing over the KnowledgeBase in order to set as many defaults as possible
+		how to keep track of non-initial values, such as changing plate locations?
 
 in order to create T2 tokens, we need to know:
-	- the initial location of all parts
-	- the wells for all fluids
+	- part locations
+	- fluid wells
+	- plate dimensions
 	- the initial fluid levels in wells
 	- the destination locations for plate transfers
+	- other selections
+
+processing order:
+	- find amount of fluid required for each liquid (if not initially given) (if supply is not infinite)
+	- based on whether the liquid should be cooled and on required volume, choose wells
+	- user must specify plate dimension? However, the default should be specified in the Robot definition
+	- for plate transfers with multiple possible destinations, we need to give the knowledge base item some form of label so that the user can identify which command the transfer is for
 
 
 -------------

@@ -21,6 +21,7 @@ These following components act together to generate a concrete sequence of robot
 \item {\em Generic Software Module}: a library of routines for processing all aspects of our robotics language except for those functions which are robot-specific.
 \item {\em Robot Plugin Module}: a plugin for the Generic Software Module that has been tuned to the particularities of a specific robot.
 \item {\em Robot Configuration}: information about robot's parts and capabilities.
+\item {\em Peripheral Plugin Modules}: interfaces for controlling robot peripherals.
 \item {\em Generic Protocol}: a generic protocol to be performed.  It should be described in such general terms that it can be translated into a concrete series of instructions for any number of liquid handling robots.
 \item {\em User Parameters}: parameters the user must set in order to generate a concrete sequence of instructions from the generic protocol.
 \item {\em User Overrides}: optional overrides of default choices made by the program.
@@ -78,17 +79,45 @@ The steps of translation are described here:
 
 \section{Levels of command abstraction}
 
-We distinguish between two types of commands: 1) the {\em Basic Command Set} is a small set of commands which the Robot Plugin will need to translate into its own format, and 2) an extensible higher-level set of commands which can make use of both basic commands as well as other commands from the higher-level set.  By the time our parsing precedure has reached the Level 1 AST, all higher-level commands have been translated into a sequence of basic commands.
+We distinguish between three types of commands, as described below.
+2)
+2) an extensible higher-level set of commands which can make use of both basic commands as well as other commands from the higher-level set.  
+By the time our parsing precedure has reached the Level 1 AST, all higher-level commands have been translated into a sequence of basic commands.
 
 \subsubsection{Basic command set}
-The generic software modules provides a small set of basic instructions, such as "aspirate", "dispense", "mix", and "transfer".
+The {\em basic command set} is a small set of core commands which every robot is expected to support.  
+The Robot Plugin will need to translate these commands into its own format.  Currently these command are:
+\startitemize
+\item {\em Aspirate}: aspirate a liquid into a tip
+\item {\em Dispense}: dispense a liquid from a tip into a destination well
+\item {\em Clean}: clean the tips; depending on the robot, this might mean disposal or washing
+\item {\em Mix}: use a tip to mix the liquid in a well by aspirating and re-dispensing 
+\item {\em Wait}: wait for a given duration before proceeding with further commands
+\item {\em Transfer}: move a plate from one location to another
+\stopitemize
 
-[TODO: add full list of basic commands once I've defined them -- ellis, 2011-06-14]
+\subsubsection{Peripheral command set}
+The {\em peripheral command set} is an extensible set of commands which are made available by Peripheral Plugin Modules.
+The peripheral plugin modules provide both low-level and high-level commands for their peripheral of interest.  Here are several examples of peripherals which I am currently working on:
+\startitemize
+\item {\em Shake}: place a plate on a shaker
+\item {\em Seal}: seal a plate
+\item {\em Peel}: peel a sealed plate
+\item {\em PCR}: perform PCR
+\item {\em Centrifuge}: centrifuge a plate or tube
+\stopitemize
 
 \subsubsection{Higher-level commands}
-These commands ease the task of programming by removing the need for the user to make detailed choices.  For example, the pipetting commands choose which tips to use and how to avoid contamination.
+These commands ease the task of programming by removing the need for the user to make detailed choices.  For example, the pipetting commands automatically choose which tips to use and can decide how to avoid contamination.
+Here are a few examples:
 
-[TODO: add list of existing higher-level commands and describe which abstractions they provide]
+\startitemize
+\item {\em Pipette}: transfer a certain volume from a source well to a destination well; avoid contamination by performing cleaning operations at the appropriate times.  This command uses the low-level {\em Clean}, {\em Aspirate}, and {\em Dispense} commands.
+\item {\em Copy plate}: transfer a certain amount of liquid from each well on one plate to the corresponding well on another plate.  This uses the {\em Pipette} command.
+\item {\em Plate}: put several drops of a liquid onto a larger surface.
+\stopitemize
+
+[TODO: expand list of higher-level commands and describe which abstractions they provide]
 
 \stoptext
 
