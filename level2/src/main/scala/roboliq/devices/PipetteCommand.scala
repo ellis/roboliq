@@ -1,31 +1,6 @@
 package roboliq.devices
 
-import roboliq.parts._
-
-class KnowledgeBase {
-	val userObjects = new scala.collection.mutable.HashSet[Object]
-	
-	val liquidsNeedingLoc = new scala.collection.mutable.HashSet[Liquid]
-	val wellsNeedingLoc = new scala.collection.mutable.HashSet[Well]
-	val wellsNeedingLiquid = new scala.collection.mutable.HashSet[Well]
-	
-	private val m_mapLiquidToWells = new scala.collection.mutable.HashMap[Liquid, List[Well]]
-	
-	def getLiquidWells(liquid: Liquid): List[Well] = m_mapLiquidToWells.getOrElse(liquid, Nil)
-	
-	def addLiquid(liquid: Liquid) {
-		userObjects += liquid
-		if (!m_mapLiquidToWells.contains(liquid))
-			m_mapLiquidToWells(liquid) = Nil
-		if (m_mapLiquidToWells(liquid).isEmpty)
-			liquidsNeedingLoc += liquid
-	}
-	
-	def addWell(well: Well) {
-		userObject += well
-		well.holder
-	}
-}
+import roboliq.builder.parts._
 
 class TipSpec()
 class MixSpec(val nVolume: Double, val nCount: Int)
@@ -52,8 +27,8 @@ class PipetteCommand {
 			val src0 = srcs.head
 			for (src <- srcs) {
 				if (src.isInstanceOf[Liquid]) {
-					val liquid = src.asInstanceOf[Liquid]
-					val wells = kb.getLiquidWells(liquid)
+					val liq = src.asInstanceOf[Liquid]
+					val wells = kb.getLiqWells(liq)
 					if (wells.isEmpty)
 						kb.liquidsNeedingLoc += liquid
 				}
