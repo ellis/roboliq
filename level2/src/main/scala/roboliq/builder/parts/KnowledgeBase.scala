@@ -14,14 +14,34 @@ class WellKnowledge {
 
 class KnowledgeBase {
 	val liqs = new HashSet[Liquid]
-	val wells = new HashSet[Well]
-	val plates = new HashSet[Plate]
+	private val m_wells = new HashSet[Well]
+	private val m_plates = new HashSet[Plate]
+	
+	val mapPartToLoc = new HashMap[Part, String]
 	
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	val wellKnowledge = new HashMap[Well, WellKnowledge]
 	
+	def addWell(well: Well, bSrc: Boolean) {
+		m_wells += well
+		if (!wellKnowledge.contains(well)) {
+			val wk = new WellKnowledge
+			wk.bRequiresIntialLiq_? = Some(bSrc)
+			wellKnowledge(well) = wk
+		}
+	}
+	
+	def addPlate(plate: Plate, bSrc: Boolean) {
+		m_plates += plate
+		plate.wells_? match {
+			case None =>
+			case Some(wells) =>
+				wells.foreach(well => addWell(well, bSrc))
+		}
+	}
+	
 	def getLiqWells(liq: Liquid): Set[Well] = {
-		wells.filter(well => {
+		m_wells.filter(well => {
 			wellKnowledge.get(well) match {
 				case None => false
 				case Some(wk) =>
@@ -31,6 +51,13 @@ class KnowledgeBase {
 					}
 			}
 		}).toSet
+	}
+	
+	def doesWellRequireInitialLiq(well: Well): Boolean = {
+		wellKnowledge(well).bRequiresIntialLiq_? match {
+			case None => false
+			case Some(b) => b
+		}
 	}
 	
 	//val liquidsNeedingLoc = new scala.collection.mutable.HashSet[Liquid]
