@@ -22,7 +22,7 @@ class PipetteDevice extends TokenHandler {
 			case t2 @ T2_PipettePlate(_, _, _) =>
 				val comp = new T2_PipettePlate_Compiler(robot, state0, t2)
 				comp.tokens
-			case t2 @ T2_PipetteMix(_, _) =>
+			case t2 @ T2_PipetteMix(_, _, _) =>
 				val comp = new T2_PipetteMix_Compiler(robot, state0, t2)
 				comp.tokens
 		}

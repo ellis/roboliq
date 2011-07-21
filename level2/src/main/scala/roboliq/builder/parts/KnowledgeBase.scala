@@ -22,9 +22,20 @@ class KnowledgeBase {
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	val wellKnowledge = new HashMap[Well, WellKnowledge]
 	
+	private var m_idNext = 1;
+	
+	private def setId(o: Part) {
+		o.id_? = Some(m_idNext)
+		m_idNext += 1
+	}
+	
 	def addWell(well: Well, bSrc: Boolean) {
-		m_wells += well
-		if (!wellKnowledge.contains(well)) {
+		if (!m_wells.contains(well)) {
+			assert(!wellKnowledge.contains(well))
+			
+			setId(well)
+			m_wells += well
+			
 			val wk = new WellKnowledge
 			wk.bRequiresIntialLiq_? = Some(bSrc)
 			wellKnowledge(well) = wk
@@ -32,11 +43,14 @@ class KnowledgeBase {
 	}
 	
 	def addPlate(plate: Plate, bSrc: Boolean) {
-		m_plates += plate
-		plate.wells_? match {
-			case None =>
-			case Some(wells) =>
-				wells.foreach(well => addWell(well, bSrc))
+		if (!m_plates.contains(plate)) {
+			setId(plate)
+			m_plates += plate
+			plate.wells_? match {
+				case None =>
+				case Some(wells) =>
+					wells.foreach(well => addWell(well, bSrc))
+			}
 		}
 	}
 	
@@ -58,6 +72,40 @@ class KnowledgeBase {
 			case None => false
 			case Some(b) => b
 		}
+	}
+	
+	def printKnown() {
+		println("Liquids:")
+		liqs.foreach(println)
+		println()
+		
+		println("Plates:")
+		m_plates.foreach(println)
+		println()
+		
+		println("Wells:")
+		m_wells.foreach(println)
+		println()
+	}
+	
+	def printUnknown() {
+		val plates1 = m_plates.filter(_.nCols_?.isEmpty)
+		if (!plates1.isEmpty) {
+			println("Plates without dimensions:")
+			for (plate <- plates1) {
+				if (plate.nCols_?.isEmpty)
+					println(plate)
+			}
+			println()
+		}
+		
+		println("Liquids:")
+		liqs.foreach(println)
+		println()
+		
+		println("Wells:")
+		m_wells.foreach(println)
+		println()
 	}
 	
 	//val liquidsNeedingLoc = new scala.collection.mutable.HashSet[Liquid]
