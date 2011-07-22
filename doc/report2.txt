@@ -1,0 +1,17 @@
+Extensions to RoboEase:
+	- more tip handling options (our tips aren't discardable -- lots of different ways to clean them)
+	- cooled plates
+	- pluggable devices
+	- portable protocols
+	- tip handling information somehow encoded in the liquid definitions
+	- user-defined functions
+	- potential optimization
+
+How commands and plugins work together:
+	- plugins register to handle level 2 & 3 commands
+	- if multiple plugins register for the same command, the last one which registered will be chosen
+
+Questions:
+	- how to deal with feedback?
+
+
