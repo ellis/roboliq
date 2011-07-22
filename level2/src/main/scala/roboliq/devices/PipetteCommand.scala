@@ -3,12 +3,23 @@ package roboliq.devices
 import scala.collection.mutable.HashSet
 import roboliq.builder.parts._
 
+sealed trait WellOrPlate
+case class WP_Well(well: Well) extends WellOrPlate
+case class WP_Plate(plate: Plate) extends WellOrPlate
+
+sealed trait WellOrPlateOrLiquid
+case class WPL_Well(well: Well) extends WellOrPlateOrLiquid
+case class WPL_Plate(plate: Plate) extends WellOrPlateOrLiquid
+case class WPL_Liquid(liquid: Liquid) extends WellOrPlateOrLiquid
+
+class Command
+case class PipetteCommand(items: Seq[PipetteItem]) extends Command
 
 class TipSpec()
 class MixSpec(val nVolume: Double, val nCount: Int)
 sealed class PipetteItem(
-		val src: Object,
-		val dest: Object,
+		val src: WellOrPlateOrLiquid,
+		val dest: WellOrPlate,
 		val nVolume: Double,
 		val tipSpec_? : Option[TipSpec] = None,
 		val mixSpec_? : Option[MixSpec] = None)
@@ -31,78 +42,60 @@ case class PipetteItem2(
 	val mixSpecs: Map[Object, MixSpec]
 )*/
 
-class PipetteCommand {
+class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
+	val items = cmd.items
+	
 	// Return a new KnowledgeBase, a list of errors, and a set of T2 tokens
-	def pipette(kb: KnowledgeBase, items: Seq[PipetteItem]): Seq[CommandError] = {
+	def exec(): Seq[CommandError] = {
 		val srcs = Set() ++ items.map(_.src)
 		if (srcs.size == 0)
 			return CommandError("must have one or more sources") :: Nil
-		else {
-			// Add sources to KB
-			for (src <- srcs) {
-				if (src.isInstanceOf[Liquid]) {
-					val liq = src.asInstanceOf[Liquid]
-					kb.liqs += liq
-				}
-				else if (src.isInstanceOf[Well])
-					kb.addWell(src.asInstanceOf[Well], true)
-				else if (src.isInstanceOf[Plate])
-					kb.addPlate(src.asInstanceOf[Plate], true)
-				else
-					return CommandError("unknown source object") :: Nil
-			}
-		}
+		// Add sources to KB
+		srcs.foreach(_ match {
+			case WPL_Well(o) => kb.addWell(o, true)
+			case WPL_Plate(o) => kb.addPlate(o, true)
+			case WPL_Liquid(o) => kb.liqs += o
+		})
 
 		val dests = Set() ++ items.map(_.dest)
 		if (dests.size == 0)
-			return CommandError("must have one or more sources") :: Nil
-		else {
-			//val src0 = srcs.head
-			// Add destinations to KB
-			for (dest <- dests) {
-				if (dest.isInstanceOf[Well])
-					kb.addWell(dest.asInstanceOf[Well], false)
-				else if (dest.isInstanceOf[Plate])
-					kb.addPlate(dest.asInstanceOf[Plate], false)
-				else
-					return CommandError("unknown destination object") :: Nil
-			}
-		}
+			return CommandError("must have one or more destinations") :: Nil
+		// Add destinations to KB
+		dests.foreach(_ match {
+			case WP_Well(o) => kb.addWell(o, false)
+			case WP_Plate(o) => kb.addPlate(o, false)
+		})
 		
 		// Check validity of source/dest pairs
-		def getWells(o: Object): Set[Well] = {
-			if (o.isInstanceOf[Liquid])
-				kb.getLiqWells(o.asInstanceOf[Liquid])
-			else if (o.isInstanceOf[Well])
-				Set(o.asInstanceOf[Well])
-			else if (o.isInstanceOf[Plate]) {
-				o.asInstanceOf[Plate].wells_? match {
-					case None => Set()
-					case Some(wells) => wells.toSet
-				}
-			}
-			else
-				Set()
-		}
 		val dests2 = new HashSet[Object]
 		for (item <- items) {
 			val destWells = getWells(item.dest)
-			if (dests2.contains(item.dest) || destWells.exists(dests2.contains))
+			val o = item.dest match {
+				case WP_Well(o) => o 
+				case WP_Plate(o) => o
+			}
+			if (dests2.contains(o) || destWells.exists(dests2.contains))
 				return CommandError("a destination is not allowed to occur multiple times") :: Nil
-			dests2 += item.dest
+			dests2 += o
 			dests2 ++= destWells
 			// If the source is a plate, the destination must be too
-			if (item.src.isInstanceOf[Plate]) {
-				if (!item.dest.isInstanceOf[Plate]) {
-					return CommandError("when source is a plate, destination must also be a plate") :: Nil
-				}
-				val (plate1, plate2) = (item.src.asInstanceOf[Plate], item.dest.asInstanceOf[Plate])
-				val (wells1, wells2) = (plate1.wells_?, plate2.wells_?)
-				if (wells1.isDefined && wells2.isDefined) {
-					if (wells1.get.size != wells2.get.size)
-						return CommandError("source and destination plates must have the same number of wells") :: Nil
-				}
+			item.src match {
+				case WPL_Plate(plate1) =>
+					item.dest match {
+						case WP_Plate(plate2) =>
+							val (wells1, wells2) = (plate1.wells_?, plate2.wells_?)
+							if (wells1.isDefined && wells2.isDefined) {
+								if (wells1.get.size != wells2.get.size)
+									return CommandError("source and destination plates must have the same number of wells") :: Nil
+							}
+						case _ =>
+							return CommandError("when source is a plate, destination must also be a plate") :: Nil
+					}
+				case _ =>
 			}
+			
+			if (item.nVolume <= 0)
+				return CommandError("volume must be > 0") :: Nil
 		}
 		
 		// check whether we have all the information we need
@@ -140,17 +133,18 @@ class PipetteCommand {
 		}
 		
 		val b = items.forall(item => {
-			val src = item.src
 			val dest = item.dest
 			
-			if (src.isInstanceOf[Liquid])
-				checkLiquid(src.asInstanceOf[Liquid])
-			else if (src.isInstanceOf[Well])
-				checkWell(src.asInstanceOf[Well])
-			else if (src.isInstanceOf[Plate])
-				checkPlate(src.asInstanceOf[Plate])
-			else
-				false
+			item.src match {
+				case WPL_Well(o) => checkWell(o)
+				case WPL_Plate(o) => checkPlate(o)
+				case WPL_Liquid(o) => checkLiquid(o)
+			}
+			
+			item.dest match {
+				case WP_Well(o) => checkWell(o)
+				case WP_Plate(o) => checkPlate(o)
+			}
 		})
 		
 		if (!b)
@@ -168,4 +162,20 @@ class PipetteCommand {
 		
 		Nil
 	}
+	
+	private def getWells(well: Well): Set[Well] = Set(well)
+	private def getWells(plate: Plate): Set[Well] = plate.wells_? match {
+		case None => Set()
+		case Some(wells) => wells.toSet
+	}
+	private def getWells(liquid: Liquid): Set[Well] = kb.getLiqWells(liquid)
+	private def getWells(wpl: WellOrPlateOrLiquid): Set[Well] = wpl match {
+		case WPL_Well(o) => getWells(o)
+		case WPL_Plate(o) => getWells(o)
+		case WPL_Liquid(o) => getWells(o)
+	}			
+	private def getWells(wp: WellOrPlate): Set[Well] = wp match {
+		case WP_Well(o) => getWells(o)
+		case WP_Plate(o) => getWells(o)
+	}			
 }
