@@ -1,3 +1,9 @@
+Overarching goals:
+	- a language tailored to liquid handling robots
+	- portable across robots
+	- portable across labs
+	- pluggable peripheral devices
+
 Extensions to RoboEase:
 	- more tip handling options (our tips aren't discardable -- lots of different ways to clean them)
 	- cooled plates
@@ -6,12 +12,52 @@ Extensions to RoboEase:
 	- tip handling information somehow encoded in the liquid definitions
 	- user-defined functions
 	- potential optimization
+	- the supplied liquid policies may be too limited in RoboEase -- also need to let speeds be specified, and other parameters; want a portable way to deal with this
+	- dynamic interaction with robot
+
+Design tradeoffs:
+	- new language vs library
+	- level of modularity: modular vs explicit
+	- level of pluggability: flexibility vs clear responsibilities
+
+New language vs API:
+	- DSL: Domain Specific Language
+	Advantages of new language:
+		- can tailor the syntax precisely to your domain of interest
+	Advantages of writing a library for an existing language:
+		- can leverage existing and mature compilers and development tools
+	Why scala:
+		- Using Scala DSL capabilities, we can get within about 80% of an ideal syntax, which is good enough
+		- IDE support
+	- existing RoboEase scripts can still be processed via a separate, fairly small parser
+
+Processing concepts:
+	- commands are repesented by a unique ID and any relevant parameter values (type-safe)
+	- 4 levels of commands:
+		- level 0: command format of the target robot
+		- level 1: low-level commands, but portable between robots (aspirate, mix, move, ect.)
+		- level 2: high-level commands with all parameters specified
+		- level 3: high-level commands corresponding exactly with the level 2 commands, but which handle incomplete specification of parameters
+
+Examples:
+	Code:
+		
+	IDE:
+		code completion
+		help text
+		sbt interactive console
 
 How commands and plugins work together:
 	- plugins register to handle level 2 & 3 commands
 	- if multiple plugins register for the same command, the last one which registered will be chosen
 
+Possible ways to interact with Tecan robot:
+	- currently, we create a script and then load that script with Tecan's control software (Evoware)
+	- that won't work for interactive protocols
+	- create a RoboEase GUI and hook into the Evoware API to send commands and monitor measurements/feedback
+
 Questions:
-	- how to deal with feedback?
-
-
+	- how to deal with feedback from robot and peripherals?
+	- how to deal with conditional responses depending on feedback?
+	- how to deal with unknown initial quantities, whose values are obtained dynamically during protocol execution?
+		- run prior simulations with upper and lower bounds and maximum number of repetitions
