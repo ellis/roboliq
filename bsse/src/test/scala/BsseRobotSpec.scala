@@ -32,14 +32,14 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 	
 	feature("batchesForDispense") {
 		scenario("4 large tips, 48ul") {
-			val twvds = (0 to 3).map(i => new TipWellVolumePolicy(tips(i), plate2.wells(i), 48, DispenseKind.Free))
+			val twvds = (0 to 3).map(i => new TipWellVolumePolicy(tips(i), plate2.wells(i), 48, PipettePolicy(PipettePosition.Free)))
 			val twvdss = robot.batchesForDispense(state0, twvds)
 			twvdss.size must be === 1
 			twvdss.head.size should be === 4
 		}
 
 		scenario("4 large tips, 240ul") {
-			val twvds = (0 to 3).map(i => new TipWellVolumePolicy(tips(i), plate2.wells(i), 240, DispenseKind.Free))
+			val twvds = (0 to 3).map(i => new TipWellVolumePolicy(tips(i), plate2.wells(i), 240, PipettePolicy(PipettePosition.Free)))
 			val twvdss = robot.batchesForDispense(state0, twvds)
 			twvdss.size must be === 1
 			twvdss.head.size should be === 4
@@ -48,7 +48,7 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 	
 	feature("ANother") {
 		scenario("4 large tips, 240ul") {
-			val twvds = (0 to 3).map(i => new TipWellVolumePolicy(tips(i), plate2.wells(i), 240, DispenseKind.Free))
+			val twvds = (0 to 3).map(i => new TipWellVolumePolicy(tips(i), plate2.wells(i), 240, PipettePolicy(PipettePosition.Free)))
 			val twvdss = robot.batchesForDispense(state0, twvds)
 			twvdss.size must be === 1
 			twvdss.head.size should be === 4

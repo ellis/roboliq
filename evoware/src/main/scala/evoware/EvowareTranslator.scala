@@ -13,7 +13,7 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 		case t @ T1_Aspirate(_) => aspirate(state0, t)
 		case t @ T1_Dispense(_) => dispense(state0, t)
 		case t @ T1_Clean(_, _) => clean(state0, t)
-		case t @ T1_Mix(_) => mix(state0, t)
+		case t @ T1_Mix(_, _, _, _) => mix(state0, t)
 	}
 
 	def translate(state0: RobotState, txs: Seq[T1_TokenState]): Seq[T0_Token] = {
@@ -171,34 +171,34 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 	def clean(state0: RobotState, tok: T1_Clean): List[T0_Token]
 	
 	private def mix(state0: RobotState, tok: T1_Mix): Seq[T0_Token] = {
-		val t0 = mix2(state0, tok.twvs, robot.getDispenseClass)
+		val t0 = mix2(state0, tok, robot.getDispenseClass)
 		t0 :: Nil
 	}
 	
-	private def mix2(state0: RobotState, twvs: Seq[TipWellVolume], getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): T0_Token = {
-		twvs match {
+	private def mix2(state0: RobotState, tok: T1_Mix, getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): T0_Token = {
+		tok.tws match {
 			case Seq() => T0_TokenError("Empty Tip-Well-Volume list")
-			case Seq(twv0, rest @ _*) =>
+			case Seq(tw0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass_? = getLiquidClass(state0, twv0)
+				val sLiquidClass_? = getLiquidClass(state0, new TipWellVolume(tw0.tip, tw0.well, tok.nVolume))
 				assert(sLiquidClass_?.isDefined)
 				val sLiquidClass = sLiquidClass_?.get
 				//println("sLiquidClass = "+sLiquidClass)
 				//for (twv <- rest) println(robot.getAspirateClass(twv))
 				// Assert that there is only one liquid class
-				assert(rest.forall(twv => getLiquidClass(state0, twv) == sLiquidClass_?))
+				assert(rest.forall(tw => getLiquidClass(state0, new TipWellVolume(tw.tip, tw.well, tok.nVolume)) == sLiquidClass_?))
 				
-				val tipKind = robot.getTipKind(twv0.tip)
-				val holder = twv0.well.holder
+				val tipKind = robot.getTipKind(tw0.tip)
+				val holder = tw0.well.holder
 				
 				// Assert that all tips are of the same kind and that all wells are on the same holder
-				assert(twvs.forall(twv => (robot.getTipKind(twv.tip) eq tipKind) && (twv.well.holder eq holder)))
+				assert(tok.tws.forall(twv => (robot.getTipKind(twv.tip) eq tipKind) && (twv.well.holder eq holder)))
 				
 				// Assert that tips are spaced at equal distances to each other as the wells are to each other
-				def equidistant2(a: TipWellVolume, b: TipWellVolume): Boolean =
+				def equidistant2(a: TipWell, b: TipWell): Boolean =
 					(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
 				// Test all adjacent items for equidistance
-				def equidistant(twvs: Seq[TipWellVolume]): Boolean = twvs match {
+				def equidistant(tws: Seq[TipWell]): Boolean = tws match {
 					case Seq() => true
 					case Seq(_) => true
 					case Seq(a, b, rest @ _*) =>
@@ -208,29 +208,29 @@ abstract class EvowareTranslator(robot: EvowareRobot) {
 						}
 				}
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				assert(equidistant(twvs) || twvs.forall(_.well eq twv0.well))
+				assert(equidistant(tok.tws) || tok.tws.forall(_.well eq tw0.well))
 				
-				mixChecked(state0, twvs, sLiquidClass)
+				mixChecked(state0, tok, sLiquidClass)
 		}
 	}
 
-	private def mixChecked(state0: RobotState, twvs: Seq[TipWellVolume], sLiquidClass: String): T0_Token = {
-		val twv0 = twvs.head
+	private def mixChecked(state0: RobotState, tok: T1_Mix, sLiquidClass: String): T0_Token = {
+		val twv0 = tok.tws.head
 		val tipKind = robot.getTipKind(twv0.tip)
 		val holder = twv0.well.holder
-		val mTips = encodeHasTips(twvs)
+		val mTips = encodeHasTips(tok.tws)
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
 		val asVolumes = Array.fill(12)("0")
 		val fmt = new java.text.DecimalFormat("#.##")
-		for (twv <- twvs) {
+		for (twv <- tok.tws) {
 			val iTip = twv.tip.index
 			assert(iTip >= 0 && iTip < 12)
-			asVolumes(iTip) = "\""+fmt.format(twv.nVolume)+'"'
+			asVolumes(iTip) = "\""+fmt.format(tok.nVolume)+'"'
 		}
 		//val sVolumes = asVolumes.mkString(",")
 		
-		val sPlateMask = encodeWells(holder, twvs.map(_.well.index))
+		val sPlateMask = encodeWells(holder, tok.tws.map(_.well.index))
 		
 		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
 		val siteList = state0.getSiteList(holder).reverse.take(2).toArray

@@ -60,7 +60,7 @@ class BsseRobot extends EvowareRobot {
 		tipKind.nHoldVolumeMax - nReduce
 	}
 	
-	def getDispenseKind(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): DispenseKind.Value = {
+	/*def getDispenseKind(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): DispenseKind.Value = {
 		// If our volume is high enough that we don't need to worry about accuracy,
 		// or if we're pipetting competent cells,
 		// then perform a free dispense.
@@ -70,7 +70,7 @@ class BsseRobot extends EvowareRobot {
 			DispenseKind.DryContact
 		else
 			DispenseKind.WetContact
-	}
+	}*/
 
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {
 		if (tips.isEmpty || wells.isEmpty)
@@ -180,7 +180,7 @@ class BsseRobot extends EvowareRobot {
 		}
 	}
 
-	def batchesForAspirate(state: IRobotState, twvs: Seq[TipWellVolume]): Seq[Seq[TipWellVolume]] = {
+	def batchesForAspirate(state: IRobotState, twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = {
 		def getLiquidClass(twv: TipWellVolume) = getAspirateClass(state, twv)
 		// Group by tip type and liquid dispense class
 		def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {

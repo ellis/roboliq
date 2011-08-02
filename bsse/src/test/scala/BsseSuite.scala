@@ -27,17 +27,17 @@ class BsseSuite extends FunSuite {
 		val tips = robot.tips.toArray
 
 		val aspirate = T1_Aspirate(Array(
-				new TipWellVolume(tips(0), plate1.wells(0), 288),
-				new TipWellVolume(tips(1), plate1.wells(1), 288),
-				new TipWellVolume(tips(2), plate1.wells(2), 288),
-				new TipWellVolume(tips(3), plate1.wells(3), 288)
+				new TipWellVolumePolicy(tips(0), plate1.wells(0), 288, PipettePolicy(PipettePosition.Free)),
+				new TipWellVolumePolicy(tips(1), plate1.wells(1), 288, PipettePolicy(PipettePosition.Free)),
+				new TipWellVolumePolicy(tips(2), plate1.wells(2), 288, PipettePolicy(PipettePosition.Free)),
+				new TipWellVolumePolicy(tips(3), plate1.wells(3), 288, PipettePolicy(PipettePosition.Free))
 				)
 			)
 		val dispense = T1_Dispense(Array(
-				new TipWellVolumePolicy(tips(0), plate2.wells(0), 30, DispenseKind.Free),
-				new TipWellVolumePolicy(tips(1), plate2.wells(1), 30, DispenseKind.Free),
-				new TipWellVolumePolicy(tips(2), plate2.wells(2), 30, DispenseKind.Free),
-				new TipWellVolumePolicy(tips(3), plate2.wells(3), 30, DispenseKind.Free)
+				new TipWellVolumePolicy(tips(0), plate2.wells(0), 30, PipettePolicy(PipettePosition.Free)),
+				new TipWellVolumePolicy(tips(1), plate2.wells(1), 30, PipettePolicy(PipettePosition.Free)),
+				new TipWellVolumePolicy(tips(2), plate2.wells(2), 30, PipettePolicy(PipettePosition.Free)),
+				new TipWellVolumePolicy(tips(3), plate2.wells(3), 30, PipettePolicy(PipettePosition.Free))
 				)
 			)
 

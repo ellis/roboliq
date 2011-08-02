@@ -35,11 +35,16 @@ class Tester extends Roboliq {
 	val water = new Liquid
 	val plate = new Plate
 	
-	pipette(water, plate, 30 ul)
-	//pipette(water -> plate, 30 ul)
-	//pipette water -> plate volume 30
-	//pipette(source = water, dest = plate, volume = 30 ul)
-	//pipette water to plate volume 30
+	protocol {
+		pipette(water, plate, 30 ul)
+	}
+	
+	customize {
+		val p2 = new Plate(nRows = 8, nCols = 1, location = "P2")
+		p2.well(1).liquid = water
+		plate.labLocation = "P1"
+		water.labClass = "water"
+	}
 }
 
 class Tester2 extends Roboliq {

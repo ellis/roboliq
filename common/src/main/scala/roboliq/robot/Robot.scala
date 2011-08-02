@@ -16,7 +16,7 @@ trait Robot {
 	/** Maximum volume of the given liquid which this tip can hold */
 	def getTipHoldVolumeMax(tip: Tip, liquid: Liquid): Double
 	/** Choose dispense method */
-	def getPipettePolicy(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): PipettePolicy
+	//def getPipettePolicy(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): PipettePolicy
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(state: IRobotState, twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
 	def batchesForDispense(state: IRobotState, twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]

@@ -41,4 +41,4 @@ object ContaminationSeverity extends Enumeration {
 case class T1_Aspirate(twvs: Seq[TipWellVolumePolicy]) extends T1_Token("aspirate")
 case class T1_Dispense(twvs: Seq[TipWellVolumePolicy]) extends T1_Token("dispense")
 case class T1_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends T1_Token("clean")
-case class T1_Mix(twvs: Seq[TipWell], policy: PipettePolicy, nVolume: Double, nCount: Int) extends T1_Token("mix")
+case class T1_Mix(tws: Seq[TipWell], policy: PipettePolicy, nVolume: Double, nCount: Int) extends T1_Token("mix")
