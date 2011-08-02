@@ -15,7 +15,13 @@ case class WPL_Liquid(liquid: Liquid) extends WellOrPlateOrLiquid
 class Command
 case class PipetteCommand(items: Seq[PipetteItem]) extends Command
 
-class TipSpec()
+/*
+ * TipSpec:
+ * - type
+ * - what to do with tips before aspirate (e.g., discard, clean, nothing...)
+ */
+class TipSpec(kind: String = null)
+// In addition, we need pipette policy
 class MixSpec(val nVolume: Double, val nCount: Int)
 sealed class PipetteItem(
 		val src: WellOrPlateOrLiquid,
