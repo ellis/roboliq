@@ -10,6 +10,20 @@ class Volume(n: Double) {
 trait Roboliq {
 	val kb = new KnowledgeBase
 	val cmds = new ArrayBuffer[Command]
+	var m_protocol: Option[() => Unit] = None
+	var m_customize: Option[() => Unit] = None
+	
+	def protocol(fn: => Unit) {
+		m_protocol = Some(fn _)
+	}
+	
+	def customize(fn: => Unit) {
+		m_customize = Some(fn _)
+	}
+	
+	def setLiquidClasses(pairs: Tuple2[Liquid, String]*) {
+		pairs.foreach(pair => pair._1)
+	}
 	
 	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double) {
 		val item = new PipetteItem(source, dest, volume)
@@ -29,6 +43,10 @@ trait Roboliq {
 	implicit def plateToWP(o: Plate): WellOrPlate = WP_Plate(o)
 	
 	implicit def intToVolume(n: Int): Volume = new Volume(n)
+	
+	implicit def liquidToProxy(o: Liquid): LiquidProxy = new LiquidProxy(kb, o)
+	implicit def partToProxy(o: Part): PartProxy = new PartProxy(kb, o)
+	implicit def plateToProxy(o: Plate): PlateProxy = new PlateProxy(kb, o)
 }
 
 class Tester extends Roboliq {
@@ -40,10 +58,17 @@ class Tester extends Roboliq {
 	}
 	
 	customize {
-		val p2 = new Plate(nRows = 8, nCols = 1, location = "P2")
-		p2.well(1).liquid = water
-		plate.labLocation = "P1"
-		water.labClass = "water"
+		val p2 = Plate(rows = 8, cols = 1, location = "P2")
+
+		water.liquidClass = "water"
+		
+		plate.location = "P1"
+		
+		p2.location = "P2"
+		
+		/*setInitialLiquids(
+			water -> p2.well(1)
+		)*/
 	}
 }
 

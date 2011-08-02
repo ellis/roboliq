@@ -16,6 +16,9 @@ class KnowledgeBase {
 	val liqs = new HashSet[Liquid]
 	private val m_wells = new HashSet[Well]
 	private val m_plates = new HashSet[Plate]
+	private val m_liquidData = new HashMap[Liquid, LiquidData]
+	private val m_partData = new HashMap[Part, PartData]
+	private val m_plateData = new HashMap[Plate, PlateData]
 	
 	val mapPartToLoc = new HashMap[Part, String]
 	
@@ -65,6 +68,24 @@ class KnowledgeBase {
 					}
 			}
 		}).toSet
+	}
+	
+	def getLiquidData(o: Liquid): LiquidData = {
+		if (!m_liquidData.contains(o))
+			m_liquidData(o) = new LiquidData
+		m_liquidData(o)
+	}
+	
+	def getPartData(o: Part): PartData = {
+		if (!m_partData.contains(o))
+			m_partData(o) = new PartData
+		m_partData(o)
+	}
+	
+	def getPlateData(o: Plate): PlateData = {
+		if (!m_plateData.contains(o))
+			m_plateData(o) = new PlateData
+		m_plateData(o)
 	}
 	
 	def doesWellRequireInitialLiq(well: Well): Boolean = {
