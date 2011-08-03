@@ -72,7 +72,7 @@ x	setup unit tests for sbt
 			before each aspirate
 			before each aspirate of a new liquid
 			between dispenses
-			after entering dest liquid
+			after having entered dest liquid
 			after last dispense
 
 		cleaning is flagged when tip enters the destination liquid

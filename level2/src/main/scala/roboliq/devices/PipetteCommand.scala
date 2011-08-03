@@ -13,7 +13,7 @@ case class WPL_Plate(plate: Plate) extends WellOrPlateOrLiquid
 case class WPL_Liquid(liquid: Liquid) extends WellOrPlateOrLiquid
 
 class Command
-case class PipetteCommand(items: Seq[PipetteItem]) extends Command
+case class PipetteCommand(items: Seq[PipetteItem], mixSpec_? : Option[MixSpec] = None) extends Command
 
 /*
  * TipSpec:
@@ -22,13 +22,11 @@ case class PipetteCommand(items: Seq[PipetteItem]) extends Command
  */
 class TipSpec(kind: String = null)
 // In addition, we need pipette policy
-class MixSpec(val nVolume: Double, val nCount: Int)
+case class MixSpec(val nVolume: Double, val nCount: Int)
 sealed class PipetteItem(
 		val src: WellOrPlateOrLiquid,
 		val dest: WellOrPlate,
-		val nVolume: Double,
-		val tipSpec_? : Option[TipSpec] = None,
-		val mixSpec_? : Option[MixSpec] = None)
+		val nVolume: Double)
 //case class PipetteItemLP(src: Liquid, dest: Plate)
 
 case class CommandError(val message: String, val obj_? : Option[Object] = None)
@@ -37,8 +35,10 @@ case class PipetteItem2(
 		val srcs: Set[Well],
 		val dest: Well,
 		val nVolume: Double,
-		val tipSpec_? : Option[TipSpec] = None,
-		val mixSpec_? : Option[MixSpec] = None
+		val mixSpec_? : Option[MixSpec] = None,
+		val sAspirateClass_? : Option[String] = None,
+		val sDispenseClass_? : Option[String] = None,
+		val sMixClass_? : Option[String] = None
 		)
 
 /*class PipetteArgs(
@@ -160,7 +160,7 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 			val srcWells = getWells(item.src)
 			val destWells = getWells(item.dest)
 			for (dest <- destWells) yield {
-				PipetteItem2(srcWells, dest, item.nVolume, item.tipSpec_?, item.mixSpec_?)
+				PipetteItem2(srcWells, dest, item.nVolume, mixSpec_? = cmd.mixSpec_?)
 			}
 		})
 		

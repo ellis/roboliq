@@ -10,6 +10,7 @@ Liquid class depends:
 	tips
 	liquid sucked up (viscosity, conductivity, live cells?)
 	volume already in target well
+	plate type (1536 well plates should be approached slowly)
 	
 Suggested liquid classes:
 	Large tips:
