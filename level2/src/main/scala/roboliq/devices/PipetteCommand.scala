@@ -2,6 +2,7 @@ package roboliq.devices
 
 import scala.collection.mutable.HashSet
 import roboliq.builder.parts._
+import roboliq.devices.pipette.L2_PipetteItem
 
 sealed trait WellOrPlate
 case class WP_Well(well: Well) extends WellOrPlate
@@ -30,16 +31,6 @@ sealed class PipetteItem(
 //case class PipetteItemLP(src: Liquid, dest: Plate)
 
 case class CommandError(val message: String, val obj_? : Option[Object] = None)
-
-case class PipetteItem2(
-		val srcs: Set[Well],
-		val dest: Well,
-		val nVolume: Double,
-		val mixSpec_? : Option[MixSpec] = None,
-		val sAspirateClass_? : Option[String] = None,
-		val sDispenseClass_? : Option[String] = None,
-		val sMixClass_? : Option[String] = None
-		)
 
 /*class PipetteArgs(
 	val srcs: Seq[Object],
@@ -156,11 +147,11 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 		if (!b)
 			return Nil
 		
-		val items2: Seq[PipetteItem2] = items.flatMap(item => {
+		val items2: Seq[L2_PipetteItem] = items.flatMap(item => {
 			val srcWells = getWells(item.src)
 			val destWells = getWells(item.dest)
 			for (dest <- destWells) yield {
-				PipetteItem2(srcWells, dest, item.nVolume, mixSpec_? = cmd.mixSpec_?)
+				L2_PipetteItem(srcWells, dest, item.nVolume, mixSpec_? = cmd.mixSpec_?)
 			}
 		})
 		

@@ -14,7 +14,7 @@ object PipetteSpeed extends Enumeration {
 	val Normal, Slow, Fast = Value
 }
 
-// TODO: add various speeds, such as entry, pump, exid
+// TODO: add various speeds, such as entry, pump, exit
 case class PipettePolicy(val pos: PipettePosition.Value)
 
 sealed class TipWell(val tip: Tip, val well: Well) extends HasTip {

@@ -58,6 +58,8 @@ User interface:
 
 
 Code:
+	create L3 package
+	create some common Parts for levels 3, 2, and 1
 	Add Comment()s to evoware output
 	BsseRobot.batch*spirate() needs to batch on volume too
 x	have robot decide on Aspiration/Dispense strategy for T1 tokens
