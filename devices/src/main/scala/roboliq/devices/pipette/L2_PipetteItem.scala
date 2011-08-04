@@ -1,6 +1,6 @@
 package roboliq.devices.pipette
 
-import roboliq.builder.parts._
+import roboliq.parts._
 import roboliq.devices.MixSpec
 
 

@@ -1,4 +1,4 @@
-package roboliq.builder.parts
+package roboliq.level3
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -24,6 +24,8 @@ class KnowledgeBase {
 	
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	val wellKnowledge = new HashMap[Well, WellKnowledge]
+	
+	val map31 = new HashMap[Part, roboliq.parts.Part]
 	
 	private var m_idNext = 1;
 	
@@ -127,6 +129,66 @@ class KnowledgeBase {
 		println("Wells:")
 		m_wells.foreach(println)
 		println()
+	}
+	
+	def concretize() {
+		val kb = this
+		
+		// check whether we have all the information we need
+		def checkPart(part: Part): Boolean = {
+			// Do we know its location?
+			kb.mapPartToLoc.contains(part) || 
+				(
+					part.parent_?.isDefined && 
+					part.index_?.isDefined &&
+					checkPart(part.parent_?.get)
+				)
+		}
+		def checkWell(well: Well): Boolean = {
+			if (!checkPart(well))
+				return false
+			val wk = kb.wellKnowledge(well) 
+			if (wk.bRequiresIntialLiq_?.isEmpty)
+				return false
+			if (wk.bRequiresIntialLiq_?.get == true) {
+				if (wk.bRequiresIntialLiq_?.isEmpty)
+					return false
+			}
+			return true
+		}
+		def checkPlate(plate: Plate): Boolean = {
+			if (!checkPart(plate))
+				return false
+			if (!plate.nRows_?.isDefined || !plate.nCols_?.isDefined || !plate.wells_?.isDefined)
+				return false
+			if (!plate.wells_?.get.forall(checkWell))
+				return false
+			return true
+		}
+		def checkLiquid(liquid: Liquid): Boolean = {
+			val wells = kb.getLiqWells(liquid)
+			if (wells.isEmpty)
+				false
+			else
+				wells.forall(checkWell)
+		}
+		
+		val b =
+			liqs.foldLeft(true) { (b, o) => b && checkLiquid(o) } &&
+			m_wells.foldLeft(true) { (b, o) => b && checkWell(o) } &&
+			m_plates.foldLeft(true) { (b, o) => b && checkPlate(o) }
+		
+		if (b) {
+			val ps = new HashMap[Plate, roboliq.parts.Plate]
+			val ws = new HashMap[Well, roboliq.parts.Well]
+			m_plates.foreach(plate => {
+				val p1 = new roboliq.parts.Plate(plate.nRows_?.get, plate.nCols_?.get)
+				ps(plate) = p1
+				plate.wells_?.get.foreach(well => {
+					ws(well)
+				})
+			})
+		}
 	}
 	
 	//val liquidsNeedingLoc = new scala.collection.mutable.HashSet[Liquid]

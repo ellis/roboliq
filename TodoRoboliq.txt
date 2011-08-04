@@ -57,6 +57,10 @@ User interface:
 	Let user specify stuff
 
 
+Tuval/Yair:
+	configuration files for their robots
+	send them my code
+	send them list of implemented RoboEase commands
 Code:
 	create L3 package
 	create some common Parts for levels 3, 2, and 1
