@@ -3,14 +3,6 @@ package roboliq.level3
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
-class WellKnowledge {
-	var bRequiresIntialLiq_? : Option[Boolean] = None
-	/** Initial liquid */
-	var liq_? : Option[Liquid] = None
-	/** Initial volume of liquid */
-	var nVol_? : Option[Double] = None
-}
-
 
 class KnowledgeBase {
 	val liqs = new HashSet[Liquid]
@@ -18,32 +10,35 @@ class KnowledgeBase {
 	private val m_plates = new HashSet[Plate]
 	private val m_liquidData = new HashMap[Liquid, LiquidData]
 	private val m_partData = new HashMap[Part, PartData]
+	private val m_wellData = new HashMap[Well, WellData]
 	private val m_plateData = new HashMap[Plate, PlateData]
 	
 	val mapPartToLoc = new HashMap[Part, String]
 	
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
-	val wellKnowledge = new HashMap[Well, WellKnowledge]
 	
 	val map31 = new HashMap[Part, roboliq.parts.Part]
 	
 	private var m_idNext = 1;
 	
+	def liquidData(o: Liquid) = m_liquidData.getOrElseUpdate(o, new LiquidData)
+	def partData(o: Part) = m_partData.getOrElseUpdate(o, new PartData)
+	def wellData(o: Well) = m_wellData.getOrElseUpdate(o, new WellData)
+	def plateData(o: Plate) = m_plateData.getOrElseUpdate(o, new PlateData)
+	
 	private def setId(o: Part) {
-		o.id_? = Some(m_idNext)
+		val d = m_partData.getOrElseUpdate(o, new PartData)
+		d.id.user_? = Some(m_idNext)
 		m_idNext += 1
 	}
 	
 	def addWell(well: Well, bSrc: Boolean) {
 		if (!m_wells.contains(well)) {
-			assert(!wellKnowledge.contains(well))
-			
 			setId(well)
 			m_wells += well
-			
-			val wk = new WellKnowledge
-			wk.bRequiresIntialLiq_? = Some(bSrc)
-			wellKnowledge(well) = wk
+
+			val d = m_wellData.getOrElseUpdate(well, new WellData)
+			d.bRequiresIntialLiq_? = Some(bSrc)
 		}
 	}
 	
@@ -51,23 +46,19 @@ class KnowledgeBase {
 		if (!m_plates.contains(plate)) {
 			setId(plate)
 			m_plates += plate
-			plate.wells_? match {
-				case None =>
-				case Some(wells) =>
-					wells.foreach(well => addWell(well, bSrc))
-			}
+		}
+		val d = m_plateData.getOrElseUpdate(plate, new PlateData)
+		if (d.wells.isDefined) {
+			d.wells.get.foreach(well => addWell(well, bSrc))
 		}
 	}
 	
 	def getLiqWells(liq: Liquid): Set[Well] = {
 		m_wells.filter(well => {
-			wellKnowledge.get(well) match {
+			val d = m_wellData(well)
+			d.liq_? match {
 				case None => false
-				case Some(wk) =>
-					wk.liq_? match {
-						case None => false
-						case Some(liq2) => (liq eq liq2)
-					}
+				case Some(liq2) => (liq eq liq2)
 			}
 		}).toSet
 	}
@@ -91,7 +82,7 @@ class KnowledgeBase {
 	}
 	
 	def doesWellRequireInitialLiq(well: Well): Boolean = {
-		wellKnowledge(well).bRequiresIntialLiq_? match {
+		m_wellData(well).bRequiresIntialLiq_? match {
 			case None => false
 			case Some(b) => b
 		}
@@ -112,12 +103,11 @@ class KnowledgeBase {
 	}
 	
 	def printUnknown() {
-		val plates1 = m_plates.filter(_.nCols_?.isEmpty)
+		val plates1 = m_plateData.filter(pair => pair._2.nCols.isEmpty)
 		if (!plates1.isEmpty) {
 			println("Plates without dimensions:")
-			for (plate <- plates1) {
-				if (plate.nCols_?.isEmpty)
-					println(plate)
+			for ((plate, d) <- plates1) {
+				println(plate)
 			}
 			println()
 		}

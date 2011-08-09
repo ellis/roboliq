@@ -1,3 +1,5 @@
+import java.io.FileReader
+
 import scala.util.parsing.combinator._
 import scala.collection.mutable.HashMap
 
@@ -50,33 +52,62 @@ object Main extends App {
 	//val p = new Arith
 	//println(p.parseAll(p.expr, args(0)))
 	
-	val p = new Parser
-	val lines = List(
-			"OPTION A",
-			"OPTION B 23",
-			"REAGENT PCR_Mix_X5 T10 1 PIE_AUTBOT 2",
-			"WET_MIX_VOL = 150",
-			"CE_SEQ_DIL_VOL = 28.5"
-			)
+	test2()
 	
-	def findFirstMatch(s: String, cmds: List[p.Parser[Any]]): Boolean = cmds match {
-		case Nil => false
-		case cmd :: rest => val r = p.parseAll(cmd, s)
-			if (r.successful)
-				true
-			else
-				findFirstMatch(s, rest)
-	}
-	
-	for (s <- lines) {
-		val b = findFirstMatch(s, p.cmds)
-		if (!b) {
-			println("Unrecognized command:")
-			println(s)
+	def test1() {
+		val p = new Parser
+		val lines = List(
+				"OPTION A",
+				"OPTION B 23",
+				"REAGENT PCR_Mix_X5 T10 1 PIE_AUTBOT 2",
+				"WET_MIX_VOL = 150",
+				"CE_SEQ_DIL_VOL = 28.5"
+				)
+		
+		def findFirstMatch(s: String, cmds: List[p.Parser[Any]]): Boolean = cmds match {
+			case Nil => false
+			case cmd :: rest => val r = p.parseAll(cmd, s)
+				if (r.successful)
+					true
+				else
+					findFirstMatch(s, rest)
 		}
+		
+		for (s <- lines) {
+			val b = findFirstMatch(s, p.cmds)
+			if (!b) {
+				println("Unrecognized command:")
+				println(s)
+			}
+		}
+		
+		println(p.mapOptions)
+		println(p.mapVars)
+		println(p.mapReagents)
 	}
 	
-	println(p.mapOptions)
-	println(p.mapVars)
-	println(p.mapReagents)
+	def test2() {
+		val p = new roboliq.roboease.Parser
+		val sSource = """
+OPTION A
+OPTION B 23
+REAGENT PCR_Mix_X5 T10 1 PIE_AUTBOT 2
+WET_MIX_VOL = 150
+CE_SEQ_DIL_VOL = 28.5
+LIST DDW_LIST
+300
+400
+500
+ENDLIST
+"""
+		//p.parse(sSource)
+		val sSource2 = scala.io.Source.fromFile("/home/ellisw/src/TelAviv/scripts/Rotem_Script01.conf").mkString
+		p.parse(sSource2)
+		
+		println(p.mapOptions)
+		println(p.mapVars)
+		println(p.mapReagents)
+		println(p.mapLists)
+		println(p.mapLabware)
+	}
 }

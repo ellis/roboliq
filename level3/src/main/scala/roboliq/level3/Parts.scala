@@ -19,7 +19,15 @@ sealed class Setting[T] {
 			o
 	}
 	
+	def get_? : Option[T] = user_? match {
+		case None =>
+			default_?
+		case Some(o) =>
+			user_?
+	} 
+	
 	def isDefined: Boolean = { user_?.isDefined || default_?.isDefined }
+	def isEmpty: Boolean = !isDefined
 }
 
 class PartData {
@@ -57,6 +65,14 @@ class LiquidProxy(kb: KnowledgeBase, o: Liquid) {
 	def liquidClass_=(s: String) { data.liquidClass.user_? = Some(s) }
 }
 
+class WellData {
+	var bRequiresIntialLiq_? : Option[Boolean] = None
+	/** Initial liquid */
+	var liq_? : Option[Liquid] = None
+	/** Initial volume of liquid */
+	var nVol_? : Option[Double] = None
+}
+
 object WellProxy {
 	def apply(kb: KnowledgeBase, parent: Part, index: Int): Well = {
 		val o = new Well
@@ -66,7 +82,6 @@ object WellProxy {
 		o
 	}
 }
-
 
 class PlateData {
 	val nRows = new Setting[Int]
