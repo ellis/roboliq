@@ -88,6 +88,13 @@ object Main extends App {
 	
 	def test2() {
 		val p = new roboliq.roboease.Parser
+		
+		val plate4, plate5, plate6 = new roboliq.level3.Plate
+		p.plates ++= List("P4" -> plate4, "P5" -> plate5, "P6" -> plate6)
+		new roboliq.level3.PlateProxy(p.kb, plate4).setDimension(8, 12)
+		new roboliq.level3.PlateProxy(p.kb, plate5).setDimension(8, 12)
+		new roboliq.level3.PlateProxy(p.kb, plate6).setDimension(8, 12)
+		
 		val sSource = """
 OPTION A
 OPTION B 23

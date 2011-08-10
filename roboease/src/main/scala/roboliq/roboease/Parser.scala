@@ -3,6 +3,7 @@ package roboliq.roboease
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.util.parsing.combinator._
+import roboliq.level3._
 
 
 /*object Tok extends Enumeration {
@@ -31,16 +32,75 @@ case class Rack(name: String, nRows: Int, nCols: Int)
 
 class Parser extends JavaTokenParsers {
 	//val ident: Parser[String] = """[a-zA-Z_]\w*""".r
-	val word: Parser[String] = """\w+""".r
+	val word: Parser[String] = """[^\s]+""".r
 	val integer: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
-	def plateWells2_sub0: Parser[Any] = "[A-Z]"~integer~"+"~integer
-	def plateWells2_sub1: Parser[Any] = rep1sep(plateWells2_sub0, ",")
-	def plateWells2_sub2: Parser[Any] = ident~":"~plateWells2_sub1
-	val plateWells2: Parser[Any] = rep1sep(plateWells2_sub2, ";")
+	
+	/** Return list of row/column tuples */
+	def plateWells2_sub0: Parser[Tuple3[Char, Int, Int]] = "[A-Z]".r~integer~"+"~integer ^^
+		{ case sRow~n0~"+"~n1 => (sRow.charAt(0), n0, n1) }
+	def plateWells2_sub1: Parser[List[Tuple3[Char, Int, Int]]] = rep1sep(plateWells2_sub0, ",")
+	def plateWells2_sub2: Parser[List[Tuple2[Plate, Int]]] = ident~":"~plateWells2_sub1 ^^
+		{ case sPlate ~ ":" ~ wellsByRowCol =>
+			if (!plates.contains(sPlate)) {
+				m_sError = "Unknown plate: "+sPlate
+				Nil
+			}
+			else {
+				val p = plates(sPlate)
+				val pd = kb.getPlateData(p)
+				if (pd.nRows.isEmpty || pd.nCols.isEmpty) {
+					m_sError = ("Unknown plate dimensions: "+sPlate)
+					Nil
+				}
+				else {
+					wellsByRowCol.flatMap(pair => {
+						val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
+						val (iRow, iCol, nWells) = (pair._1 - 'A', pair._2 - 1, pair._3)
+						if (iRow < 0 || iRow >= nRows) {
+							m_sError = ("Invalid row: "+pair._1)
+							Nil
+						}
+						else if (iCol < 0 || iCol >= nCols) {
+							m_sError = ("Invalid column: "+pair._2)
+							Nil
+						}
+						else {
+							val i0 = iRow + iCol * nRows
+							val i1 = i0 + nWells - 1
+							if (i1 >= nRows * nCols) {
+								m_sError = ("Exceeds plate dimension: "+pair._1+pair._2+"+"+pair._3)
+								Nil
+							}
+							else {
+								(i0 to i1).map(p -> _)
+							}
+						}
+					})
+				}
+			}
+		}
+	def plateWells2: Parser[List[Tuple2[Plate, Int]]] = rep1sep(plateWells2_sub2, ";") ^^
+		{ ll => ll.flatMap(l => l) }
+	
+	def volume_ident: Parser[List[Double]] = ident ^^
+		{ s =>
+			if (mapVars.contains(s))
+				List(mapVars(s).toDouble)
+			else if (m_mapLists.contains(s))
+				m_mapLists(s).map(_.toDouble)
+			else {
+				err("Unknown value: "+s)
+				Nil
+			}
+		}
+	def volume_numeric: Parser[List[Double]] = floatingPointNumber ^^
+		{ s => List(s.toDouble) }
+	def volume: Parser[List[Double]] = volume_ident | volume_numeric
 	
 	var mapRacks: Map[String, Rack] = Map()
 	
-	val plates = new ArrayBuffer[]
+	val kb = new KnowledgeBase
+	val plates = new HashMap[String, Plate]
 	
 	val mapVars = new HashMap[String, String]
 	val mapOptions = new HashMap[String, String]
@@ -53,11 +113,19 @@ class Parser extends JavaTokenParsers {
 	
 	def doReagent(reagent: String, rack: String, iWell: Int, lc: String, nWells_? : Option[Int]) {
 		mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
+		val liq = new Liquid
+		liq.sLabel = reagent
+		if (!plates.contains(rack)) {
+			m_sError = "Unknown location: "+rack
+		}
 	}
 
 	def doLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
 	
-	def do_DIST_REAGENT2(reagent: String, )
+	def do_DIST_REAGENT2(reagent: String, wells: List[Tuple2[Plate, Int]], volumes: List[Double], sLiquidClass: String, opts_? : Option[String]) {
+		println(reagent)
+		println(wells)
+	}
 	
 	
 	val cmd0List: Parser[String] = "LIST"~>ident 
@@ -73,8 +141,8 @@ class Parser extends JavaTokenParsers {
 			)
 	
 	val cmds2 = Map[String, Parser[Unit]](
-			("DIST_REAGENT2", ident~plateWells2~ident~ident~opt(word) ^^
-				{ case reagent ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2() })
+			("DIST_REAGENT2", ident~plateWells2~volume~ident~opt(word) ^^
+				{ case reagent ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(reagent, wells, vol, lc, opts_?) })
 			)
 	private var m_section = 0
 	private var m_asDoc: List[String] = Nil
@@ -154,7 +222,7 @@ class Parser extends JavaTokenParsers {
 							bFound = true
 				}
 			}
-			if (!bFound) {
+			else {
 				m_sError = "Unrecognized line: " + sLine
 			}
 		}
@@ -178,11 +246,29 @@ class Parser extends JavaTokenParsers {
 			m_asList += s
 	}
 	
-	def handleScript(s: String) {
-		if (s == "ENDSCRIPT")
+	def handleScript(sLine: String) {
+		if (sLine == "ENDSCRIPT")
 			m_section = 0
 		else {
-			
+			var bFound = false
+			val rCmd = parse(word, sLine)
+			if (rCmd.successful) {
+				val sCmd: String = rCmd.get
+				println("sCmd = "+sCmd)
+				cmds2.get(sCmd) match {
+					case None =>
+						m_sError = "Unrecognized command: " + sCmd
+					case Some(p) =>
+						val r = parseAll(p, rCmd.next)
+						if (!r.successful)
+							m_sError = r.toString
+						else
+							bFound = true
+				}
+			}
+			else {
+				m_sError = "Unrecognized line: " + sLine
+			}
 		}
 	}
 	

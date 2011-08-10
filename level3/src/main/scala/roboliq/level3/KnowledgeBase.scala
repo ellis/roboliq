@@ -76,11 +76,7 @@ class KnowledgeBase {
 		m_partData(o)
 	}
 	
-	def getPlateData(o: Plate): PlateData = {
-		if (!m_plateData.contains(o))
-			m_plateData(o) = new PlateData
-		m_plateData(o)
-	}
+	def getPlateData(o: Plate): PlateData = m_plateData.getOrElseUpdate(o, new PlateData)
 	
 	def doesWellRequireInitialLiq(well: Well): Boolean = {
 		m_wellData(well).bRequiresIntialLiq_? match {

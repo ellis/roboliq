@@ -1,8 +1,12 @@
 package roboliq.level3
 
 
-class Part
-class Liquid
+class Part {
+	var sLabel: String = "<none>"
+}
+class Liquid {
+	var sLabel: String = "<none>"
+} 
 class Well extends Part
 class Plate extends Part
 
@@ -100,7 +104,7 @@ class PlateProxy(kb: KnowledgeBase, o: Plate) {
 
 	def setDimension(nRows: Int, nCols: Int) {
 		val data = kb.getPlateData(o)
-		require(data.nRows.isDefined && data.nCols.isDefined && data.wells.isDefined, "setDimension() can only be called on a plate whose dimension has not been previously defined.")
+		require(data.nRows.isEmpty && data.nCols.isEmpty && data.wells.isEmpty, "setDimension() can only be called on a plate whose dimension has not been previously defined.")
 		require(nRows > 0, "nRows must be > 0")
 		require(nCols > 0, "nCols must be > 0")
 		val nWells = nRows * nCols
