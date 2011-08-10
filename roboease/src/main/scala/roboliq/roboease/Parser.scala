@@ -120,17 +120,18 @@ class Parser extends JavaTokenParsers {
 		}
 	}*/
 	
-	/*def idLiquid: Parser[Liquid] = Parser[Liquid] { in =>
+	def idLiquid: Parser[Liquid] = Parser[Liquid] { in =>
 		val res1 = ident.apply(in)
 		res1 match {
 			case Success(sLiq, _) =>
+				for (kb.li)
 				getPlateAtLoc(sLoc, in) match {
 					case Right(plate) => Success(plate, res1.next)
 					case Left(res) => res
 				}
 			case ns: NoSuccess => ns
 		}
-	}*/
+	}
 	
 	/** Return list of row/column tuples */
 	def plateWells2_sub0: Parser[Tuple3[Char, Int, Int]] = "[A-Z]".r~integer~"+"~integer ^^
@@ -199,6 +200,7 @@ class Parser extends JavaTokenParsers {
 	val carriers = new HashMap[String, Carrier]
 	val mapLocToPlate = new HashMap[String, Plate]
 	
+	val mapLiquids = new HashMap[String, Liquid]
 	val mapVars = new HashMap[String, String]
 	val mapOptions = new HashMap[String, String]
 	//val mapReagents = new HashMap[String, Reagent]
@@ -285,7 +287,11 @@ class Parser extends JavaTokenParsers {
 		// Add liquid to wells
 		val pd = kb.getPlateData(plate)
 		val wells = pd.wells.get
-		
+		for (well <- wells) {
+			kb.wellData(well).liq_? = Some(liq)
+		}
+			
+		mapLiquids(reagent) = liq
 	}
 
 	def doLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
@@ -314,8 +320,8 @@ class Parser extends JavaTokenParsers {
 			)
 	
 	val cmds2 = Map[String, Parser[Unit]](
-			("DIST_REAGENT2", ident~plateWells2~volume~ident~opt(word) ^^
-				{ case reagent ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(reagent, wells, vol, lc, opts_?) }),
+			("DIST_REAGENT2", idLiquid~plateWells2~volume~ident~opt(word) ^^
+				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
 			("MIX_WELLS", ident~plateWells2~volume~ident~opt(word) ^^
 				{ case reagent ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(reagent, wells, vol, lc, opts_?) })
 			)
