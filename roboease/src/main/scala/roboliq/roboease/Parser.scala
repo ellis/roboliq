@@ -28,57 +28,87 @@ object X {
 }*/
 case class Reagent(name: String, rack: String, iWell: Int, nWells: Int, sLiquidClass: String)
 
-case class Rack(name: String, nRows: Int, nCols: Int)
+case class Carrier(
+		name: String,
+		nRows: Int,
+		nCols: Int,
+		grid: Int, site: Int, nVolumeMax: Double, carrierType: String
+)
+//case class Rack(name: String, nRows: Int, nCols: Int)
 
 class Parser extends JavaTokenParsers {
 	//val ident: Parser[String] = """[a-zA-Z_]\w*""".r
 	val word: Parser[String] = """[^\s]+""".r
 	val integer: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
 	
+	def idPlate: Parser[Plate] = Parser[Plate] { in =>
+		val res1 = ident.apply(in)
+		res1 match {
+			case Success(sLoc, _) =>
+				getPlateAtLoc(sLoc, in) match {
+					case Right(plate) => Success(plate, res1.next)
+					case Left(res) => res
+				}
+			case ns: NoSuccess => ns
+		}
+	}
+	
+	/*def idLiquid: Parser[Liquid] = Parser[Liquid] { in =>
+		val res1 = ident.apply(in)
+		res1 match {
+			case Success(sLiq, _) =>
+				getPlateAtLoc(sLoc, in) match {
+					case Right(plate) => Success(plate, res1.next)
+					case Left(res) => res
+				}
+			case ns: NoSuccess => ns
+		}
+	}*/
+	
 	/** Return list of row/column tuples */
 	def plateWells2_sub0: Parser[Tuple3[Char, Int, Int]] = "[A-Z]".r~integer~"+"~integer ^^
 		{ case sRow~n0~"+"~n1 => (sRow.charAt(0), n0, n1) }
 	def plateWells2_sub1: Parser[List[Tuple3[Char, Int, Int]]] = rep1sep(plateWells2_sub0, ",")
-	def plateWells2_sub2: Parser[List[Tuple2[Plate, Int]]] = ident~":"~plateWells2_sub1 ^^
-		{ case sPlate ~ ":" ~ wellsByRowCol =>
-			if (!plates.contains(sPlate)) {
-				m_sError = "Unknown plate: "+sPlate
-				Nil
-			}
-			else {
-				val p = plates(sPlate)
-				val pd = kb.getPlateData(p)
-				if (pd.nRows.isEmpty || pd.nCols.isEmpty) {
-					m_sError = ("Unknown plate dimensions: "+sPlate)
-					Nil
-				}
-				else {
-					wellsByRowCol.flatMap(pair => {
-						val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
-						val (iRow, iCol, nWells) = (pair._1 - 'A', pair._2 - 1, pair._3)
-						if (iRow < 0 || iRow >= nRows) {
-							m_sError = ("Invalid row: "+pair._1)
-							Nil
-						}
-						else if (iCol < 0 || iCol >= nCols) {
-							m_sError = ("Invalid column: "+pair._2)
+	def plateWells2_sub2: Parser[List[Tuple2[Plate, Int]]] = Parser[List[Tuple2[Plate, Int]]] { input =>
+		//val p: Parser[Parser.this.~[Parser.this.~[roboliq.level3.Plate,String],List[(Char, Int, Int)]]] = (idPlate~":"~plateWells2_sub1)
+		val res1 = (idPlate~":"~plateWells2_sub1).apply(input)
+		//val res1 = p.apply(input)
+		res1 match {
+			case Success(plate ~ ":" ~ wellsByRowCol, _) =>
+				val pd = kb.getPlateData(plate)
+				var sError: String = null
+				val list = wellsByRowCol.flatMap(pair => {
+					val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
+					val (iRow, iCol, nWells) = (pair._1 - 'A', pair._2 - 1, pair._3)
+					if (iRow < 0 || iRow >= nRows) {
+						sError = ("Invalid row: "+pair._1)
+						Nil
+					}
+					else if (iCol < 0 || iCol >= nCols) {
+						sError = ("Invalid column: "+pair._2)
+						Nil
+					}
+					else {
+						val i0 = iRow + iCol * nRows
+						val i1 = i0 + nWells - 1
+						if (i1 >= nRows * nCols) {
+							sError = ("Exceeds plate dimension: "+pair._1+pair._2+"+"+pair._3)
 							Nil
 						}
 						else {
-							val i0 = iRow + iCol * nRows
-							val i1 = i0 + nWells - 1
-							if (i1 >= nRows * nCols) {
-								m_sError = ("Exceeds plate dimension: "+pair._1+pair._2+"+"+pair._3)
-								Nil
-							}
-							else {
-								(i0 to i1).map(p -> _)
-							}
+							(i0 to i1).map(plate -> _)
 						}
-					})
+					}
+				})
+				if (sError == null) {
+					Success(list, res1.next)
 				}
-			}
+				else {
+					Error(sError, res1.next)
+				}
+			case ns: NoSuccess => ns
 		}
+	}
 	def plateWells2: Parser[List[Tuple2[Plate, Int]]] = rep1sep(plateWells2_sub2, ";") ^^
 		{ ll => ll.flatMap(l => l) }
 	
@@ -89,7 +119,7 @@ class Parser extends JavaTokenParsers {
 			else if (m_mapLists.contains(s))
 				m_mapLists(s).map(_.toDouble)
 			else {
-				err("Unknown value: "+s)
+				m_sError = ("Unknown value: "+s)
 				Nil
 			}
 		}
@@ -97,15 +127,32 @@ class Parser extends JavaTokenParsers {
 		{ s => List(s.toDouble) }
 	def volume: Parser[List[Double]] = volume_ident | volume_numeric
 	
-	var mapRacks: Map[String, Rack] = Map()
-	
 	val kb = new KnowledgeBase
-	val plates = new HashMap[String, Plate]
+	/** Plate locations */
+	val carriers = new HashMap[String, Carrier]
+	val mapLocToPlate = new HashMap[String, Plate]
 	
 	val mapVars = new HashMap[String, String]
 	val mapOptions = new HashMap[String, String]
 	val mapReagents = new HashMap[String, Reagent]
 	val mapLabware = new HashMap[String, Tuple2[String, String]]
+	
+	def getPlateAtLoc(sLoc: String, input: Input): Either[ParseResult[Nothing], Plate] = {
+		if (mapLocToPlate.contains(sLoc))
+			Right(mapLocToPlate(sLoc))
+		else {
+			carriers.get(sLoc) match {
+				case Some(carrier) =>
+					val plate = new Plate
+					val pp = new PlateProxy(kb, plate)
+					pp.setDimension(carrier.nCols, carrier.nRows)
+					mapLocToPlate(sLoc) = plate
+					Right(plate)
+				case None =>
+					Left(Error("Undefined location: "+sLoc, input))
+			}
+		}
+	}
 	
 	def doAssign(id: String, s: String) { mapVars(id) = s }
 	
@@ -115,7 +162,7 @@ class Parser extends JavaTokenParsers {
 		mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
 		val liq = new Liquid
 		liq.sLabel = reagent
-		if (!plates.contains(rack)) {
+		if (!carriers.contains(rack)) {
 			m_sError = "Unknown location: "+rack
 		}
 	}
@@ -142,6 +189,8 @@ class Parser extends JavaTokenParsers {
 	
 	val cmds2 = Map[String, Parser[Unit]](
 			("DIST_REAGENT2", ident~plateWells2~volume~ident~opt(word) ^^
+				{ case reagent ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(reagent, wells, vol, lc, opts_?) }),
+			("MIX_WELLS", ident~plateWells2~volume~ident~opt(word) ^^
 				{ case reagent ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(reagent, wells, vol, lc, opts_?) })
 			)
 	private var m_section = 0
@@ -323,4 +372,11 @@ class Parser extends JavaTokenParsers {
 		return null
 	}
 	*/
+	
+	def DefineRack(name: String, grid: Int, site: Int, xsize: Int, ysize: Int, nVolumeMax: Double, carrierType: String = "") {
+		val carrier = Carrier(
+				name, xsize, ysize, grid, site, nVolumeMax, carrierType
+				)
+		carriers(name) = carrier
+	}
 }
