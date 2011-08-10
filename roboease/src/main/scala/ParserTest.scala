@@ -205,7 +205,7 @@ ENDLIST
 		
 		println(p.mapOptions)
 		println(p.mapVars)
-		println(p.mapReagents)
+		//println(p.mapReagents)
 		println(p.mapLists)
 		println(p.mapLabware)
 	}

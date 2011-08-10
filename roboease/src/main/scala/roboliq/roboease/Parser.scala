@@ -26,7 +26,7 @@ object X {
 			Function("TABLE", List(Tok.Word))
 			)
 }*/
-case class Reagent(name: String, rack: String, iWell: Int, nWells: Int, sLiquidClass: String)
+//case class Reagent(name: String, rack: String, iWell: Int, nWells: Int, sLiquidClass: String)
 
 case class Carrier(
 		name: String,
@@ -41,7 +41,21 @@ class Parser extends JavaTokenParsers {
 	val word: Parser[String] = """[^\s]+""".r
 	val integer: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
 	
-	def idPlate: Parser[Plate] = Parser[Plate] { in =>
+	private var m_contextPlate: Option[Plate] = None
+	
+	/*def idCarrier: Parser[Carrier] = Parser[Carrier] { in =>
+		val res1 = ident.apply(in)
+		res1 match {
+			case Success(sLoc, _) =>
+				carriers.get(sLoc) match {
+					case Some(carrier) => Success(carrier, res1.next)
+					case None => Failure("Unknown location: "+sLoc, in)
+				}
+			case ns: NoSuccess => ns
+		}
+	}*/
+	
+	def idPlate = Parser[Plate] { in =>
 		val res1 = ident.apply(in)
 		res1 match {
 			case Success(sLoc, _) =>
@@ -52,6 +66,59 @@ class Parser extends JavaTokenParsers {
 			case ns: NoSuccess => ns
 		}
 	}
+	
+	def idWell = Parser[Well] { input =>
+		val res1 = integer.apply(input)
+		res1 match {
+			case Success(n, _) =>
+				m_contextPlate match {
+					case None => Failure("Unknown parent plate", input)
+					case Some(plate) =>
+						getWell_?(plate, n) match {
+							case Some(well) => Success(well, res1.next)
+							case None => Error("Invalid well index: "+n, input)
+						}
+				}
+			case ns: NoSuccess => ns
+		}
+	}
+	
+	def idWell_rowCol = Parser[Well] { input =>
+		val res1 = ("[A-Z]".r~integer).apply(input)
+		res1 match {
+			case Success(sRow ~ nCol, _) =>
+				m_contextPlate match {
+					case None => Failure("Unknown parent plate", input)
+					case Some(plate) =>
+						val iRow = sRow.charAt(0) - 'A'
+						val iCol = nCol - 1
+						getWell(plate, iRow, iCol, input) match {
+							case Right(well) => Success(well, res1.next)
+							case Left(e) => e
+						}
+				}
+			case ns: NoSuccess => ns
+		}
+	}
+	
+	/*def idWells = Parser[List[Well]] { input =>
+		val p1 = ("[A-Z]".r~integer~"+"~integer)
+		val p2 = ("[A-Z]".r~integer~"-"~"[A-Z]".r~integer)
+		val p3 = ("[A-Z]".r~integer)
+		val res1 = integer.apply(input)
+		res1 match {
+			case Success(n, _) =>
+				m_contextPlate match {
+					case None => Failure("Unknown parent plate", input)
+					case Some(plate) =>
+						getWell_?(plate, n) match {
+							case Some(well) => Success(well, res1.next)
+							case None => Failure("Invalid well index: "+n, input)
+						}
+				}
+			case ns: NoSuccess => ns
+		}
+	}*/
 	
 	/*def idLiquid: Parser[Liquid] = Parser[Liquid] { in =>
 		val res1 = ident.apply(in)
@@ -134,23 +201,72 @@ class Parser extends JavaTokenParsers {
 	
 	val mapVars = new HashMap[String, String]
 	val mapOptions = new HashMap[String, String]
-	val mapReagents = new HashMap[String, Reagent]
+	//val mapReagents = new HashMap[String, Reagent]
 	val mapLabware = new HashMap[String, Tuple2[String, String]]
 	
 	def getPlateAtLoc(sLoc: String, input: Input): Either[ParseResult[Nothing], Plate] = {
-		if (mapLocToPlate.contains(sLoc))
-			Right(mapLocToPlate(sLoc))
-		else {
+		// Do we already have a plate at the given location?
+		if (!mapLocToPlate.contains(sLoc)) {
+			// Try to create a new plate:
 			carriers.get(sLoc) match {
 				case Some(carrier) =>
 					val plate = new Plate
 					val pp = new PlateProxy(kb, plate)
 					pp.setDimension(carrier.nCols, carrier.nRows)
 					mapLocToPlate(sLoc) = plate
-					Right(plate)
 				case None =>
-					Left(Error("Undefined location: "+sLoc, input))
 			}
+		}
+		
+		mapLocToPlate.get(sLoc) match {
+			case Some(plate) =>
+				m_contextPlate = Some(plate)
+				Right(plate)
+			case None =>
+				Left(Error("Undefined location: "+sLoc, input))
+		}
+	}
+	
+	def getWell_?(plate: Plate, iWell: Int): Option[Well] = {
+		val pd = kb.getPlateData(plate)
+		if (pd.wells.isEmpty || iWell < 0 || iWell >= pd.wells.get.size)
+			None
+		else
+			Some(pd.wells.get.apply(iWell))
+	}
+	
+	def getWell(plate: Plate, iRow: Int, iCol: Int, input: Input): Either[ParseResult[Nothing], Well] = {
+		val pd = kb.getPlateData(plate)
+		val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
+		if (iRow < 0 || iRow >= nRows) {
+			Left(Error("Invalid row", input))
+		}
+		else if (iCol < 0 || iCol >= nCols) {
+			Left(Error("Invalid column", input))
+		}
+		else {
+			val iWell = iRow + iCol * nRows
+			val well = pd.wells.get.apply(iWell)
+			Right(well)
+		}
+	}
+	
+	def getWells(plate: Plate, iRow: Int, iCol: Int, nWells: Int, input: Input): Either[ParseResult[Nothing], List[Well]] = {
+		getWell(plate, iRow, iCol, input) match {
+			case Left(e) => Left(e)
+			case Right(well) =>
+				val pd = kb.getPlateData(plate)
+				val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
+				val d = kb.getPartData(well)
+				val i0 = d.index.get
+				val i1 = i0 + nWells - 1
+				if (i1 >= nRows * nCols) {
+					Left(Error("Plate dimension exceeded", input))
+				}
+				else {
+					val l = (i0 to i1).map(i => pd.wells.get.apply(i)).toList
+					Right(l)
+				}
 		}
 	}
 	
@@ -158,19 +274,29 @@ class Parser extends JavaTokenParsers {
 	
 	def doOption(id: String, value: Option[String]) { mapOptions(id) = value.getOrElse(null) }
 	
-	def doReagent(reagent: String, rack: String, iWell: Int, lc: String, nWells_? : Option[Int]) {
-		mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
+	def doReagent(reagent: String, plate: Plate, iWell: Int, lc: String, nWells_? : Option[Int]) {
+		//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
+		
+		// Create liquid with given name
 		val liq = new Liquid
 		liq.sLabel = reagent
-		if (!carriers.contains(rack)) {
-			m_sError = "Unknown location: "+rack
-		}
+		kb.liqs += liq
+		
+		// Add liquid to wells
+		val pd = kb.getPlateData(plate)
+		val wells = pd.wells.get
+		
 	}
 
 	def doLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
 	
 	def do_DIST_REAGENT2(reagent: String, wells: List[Tuple2[Plate, Int]], volumes: List[Double], sLiquidClass: String, opts_? : Option[String]) {
 		println(reagent)
+		println(wells)
+	}
+	
+	def do_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, nVolume: Double, sLiquidClass: String, opts_? : Option[String]) {
+		println(plate)
 		println(wells)
 	}
 	
@@ -181,8 +307,8 @@ class Parser extends JavaTokenParsers {
 	val cmds0 = Map[String, Parser[Unit]](
 			("OPTION", ident~opt(word) ^^
 				{ case id ~ value => doOption(id, value) }),
-			("REAGENT", ident~ident~integer~ident~opt(integer) ^^
-				{ case reagent ~ rack ~ iWell ~ lc ~ nWells_? => doReagent(reagent, rack, iWell, lc, nWells_?) }),
+			("REAGENT", ident~idPlate~integer~ident~opt(integer) ^^
+				{ case reagent ~ plate ~ iWell ~ lc ~ nWells_? => doReagent(reagent, plate, iWell, lc, nWells_?) }),
 			("LABWARE", ident~ident~stringLiteral ^^
 				{ case id ~ rack ~ name => doLabware(id, rack, name) })
 			)
