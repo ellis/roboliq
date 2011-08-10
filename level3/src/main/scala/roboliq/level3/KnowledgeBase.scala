@@ -13,10 +13,11 @@ class KnowledgeBase {
 	private val m_wellData = new HashMap[Well, WellData]
 	private val m_plateData = new HashMap[Plate, PlateData]
 	
-	val mapPartToLoc = new HashMap[Part, String]
+	//val mapPartToLoc = new HashMap[Part, String]
 	
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	
+	/** Map level 3 parts to level 1 parts */
 	val map31 = new HashMap[Part, roboliq.parts.Part]
 	
 	private var m_idNext = 1;
@@ -126,22 +127,22 @@ class KnowledgeBase {
 		
 		// check whether we have all the information we need
 		def checkPart(part: Part): Boolean = {
+			val d = m_partData(part)
 			// Do we know its location?
-			kb.mapPartToLoc.contains(part) || 
-				(
-					part.parent_?.isDefined && 
-					part.index_?.isDefined &&
-					checkPart(part.parent_?.get)
-				)
+			(
+				d.parent.isDefined && 
+				d.index.isDefined &&
+				checkPart(d.parent.get)
+			)
 		}
 		def checkWell(well: Well): Boolean = {
 			if (!checkPart(well))
 				return false
-			val wk = kb.wellKnowledge(well) 
-			if (wk.bRequiresIntialLiq_?.isEmpty)
+			val d = m_wellData(well)
+			if (d.bRequiresIntialLiq_?.isEmpty)
 				return false
-			if (wk.bRequiresIntialLiq_?.get == true) {
-				if (wk.bRequiresIntialLiq_?.isEmpty)
+			if (d.bRequiresIntialLiq_?.get == true) {
+				if (d.bRequiresIntialLiq_?.isEmpty)
 					return false
 			}
 			return true
@@ -149,9 +150,10 @@ class KnowledgeBase {
 		def checkPlate(plate: Plate): Boolean = {
 			if (!checkPart(plate))
 				return false
-			if (!plate.nRows_?.isDefined || !plate.nCols_?.isDefined || !plate.wells_?.isDefined)
+			val d = m_plateData(plate)
+			if (!d.nRows.isDefined || !d.nCols.isDefined || !d.wells.isDefined)
 				return false
-			if (!plate.wells_?.get.forall(checkWell))
+			if (!d.wells.get.forall(checkWell))
 				return false
 			return true
 		}
@@ -172,43 +174,17 @@ class KnowledgeBase {
 			val ps = new HashMap[Plate, roboliq.parts.Plate]
 			val ws = new HashMap[Well, roboliq.parts.Well]
 			m_plates.foreach(plate => {
-				val p1 = new roboliq.parts.Plate(plate.nRows_?.get, plate.nCols_?.get)
+				val d = m_plateData(plate)
+				val p1 = new roboliq.parts.Plate(d.nRows.get, d.nCols.get)
 				ps(plate) = p1
-				plate.wells_?.get.foreach(well => {
-					ws(well)
+				map31(plate) = p1
+				d.wells.get.foreach(well => {
+					val wd = m_partData(well)
+					val w1 = new roboliq.parts.Well(p1, wd.index.get)
+					ws(well) = w1
+					map31(well) = w1
 				})
 			})
 		}
 	}
-	
-	//val liquidsNeedingLoc = new scala.collection.mutable.HashSet[Liquid]
-	//val wellsNeedingLoc = new scala.collection.mutable.HashSet[Well]
-	//val wellsNeedingLiquid = new scala.collection.mutable.HashSet[Well]
-	
-	//private val m_mapLiquidToWells = new scala.collection.mutable.HashMap[Liquid, List[Well]]
-	
-	//def getLiquidWells(liquid: Liquid): List[Well] = m_mapLiquidToWells.getOrElse(liquid, Nil)
-
-	/*
-	def addUserPart(o: Part) {
-		partsUser += o
-	}
-	
-	def addUserLiquid(o: Liquid) {
-		liquids += o
-	}
-	
-	def addLiquid(liquid: Liquid) {
-		userObjects += liquid
-		if (!m_mapLiquidToWells.contains(liquid))
-			m_mapLiquidToWells(liquid) = Nil
-		if (m_mapLiquidToWells(liquid).isEmpty)
-			liquidsNeedingLoc += liquid
-	}
-	
-	def addWell(well: Well) {
-		userObject += well
-		well.holder
-	}
-	*/
 }
