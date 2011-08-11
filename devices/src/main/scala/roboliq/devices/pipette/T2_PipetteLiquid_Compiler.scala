@@ -86,6 +86,7 @@ class T2_PipetteLiquid_Compiler(robot: Robot, state0: RobotState, token: T2_Pipe
 				return true
 				
 			val cycle = new CycleState(tips)
+			// First tip/dest pairs for dispense
 			val tws0 = twss.head
 			
 			// If we can't accommodate the required volume, abort:

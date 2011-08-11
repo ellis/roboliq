@@ -3,16 +3,19 @@ package roboliq.devices.pipette
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 
 //import roboliq.parts._
 import roboliq.tokens._
 import roboliq.robot._
+import roboliq.parts._
 //import roboliq.level2.tokens._
 import roboliq.devices.PipetteDeviceUtil
-import roboliq.builder.parts._
 
 
 class T2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteCommand) {
+	val args = cmd.args
+	
 	case class SrcTipDestVolume(src: Well, tip: Tip, dest: Well, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[Tip]) {
@@ -25,8 +28,8 @@ class T2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 	
 	val helper = new PipetteHelper
 
-	val dests = SortedSet[Well]() ++ cmd.items.map(_.dest)
-	val mapDestToTuple = cmd.items.map(t => t.dest -> t).toMap
+	val dests = SortedSet[Well]() ++ args.items.map(_.dest)
+	val mapDestToItem = args.items.map(t => t.dest -> t).toMap
 
 	val tokens: Seq[T1_TokenState] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
@@ -62,15 +65,24 @@ class T2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 		def createCycles(twss: List[Seq[TipWell]]): Boolean = {
 			if (twss.isEmpty)
 				return true
-				
+			
 			val cycle = new CycleState(tips)
 			// First tip/dest pairs for dispense
 			val tws0 = twss.head
 			
+			// Start with assumption that tips are clean
+			val tipStates = new HashMap[Tip, TipState] ++ tips.toSeq.map(tip => tip -> TipState(tip))
+			// Associate source liquid with tip
+			tws0.foreach(tws => {
+				val item = mapDestToItem(tws.well)
+				val wellState = state.getWellState(item.srcs.head)
+				tipStates(tws.tip) = tipStates(tws.tip).aspirate(wellState.liquid, 0)
+			})
+				
 			// Src/tip/dest/volume combinations
 			val stdvs = tws0.map(tw => {
-				val (src, dest, nVolume) = mapDestToTuple(tw.well)
-				new SrcTipDestVolume(src, tw.tip, dest, nVolume)
+				val item = mapDestToItem(tw.well)
+				new SrcTipDestVolume(src, tw.tip, item.dest, item.nVolume)
 			})
 			
 			// If we can't accommodate the required volume, abort:
@@ -96,8 +108,10 @@ class T2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 		}
 
 		val bOk = createCycles(twss0.toList)
-		if (bOk)
+		if (bOk) {
+			// TODO: optimize aspiration
 			cycles
+		}
 		else
 			Nil
 	}
@@ -120,14 +134,6 @@ class T2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 		}
 
 		stdvs.forall(isVolOk)
-	}
-	
-	private def checkNoCleanRequired(cycle: CycleState, state: RobotStateBuilder, tws: Seq[TipWell]): Boolean = {
-		def step(tipWell: TipWell): Boolean = {
-			val tipState = state.getTipState(tipWell.tip)
-			helper.getCleanDegreeDispense(tipState) == CleanDegree.None
-		}
-		tws.forall(step)
 	}
 	
 	private def clean(cycle: CycleState, state: RobotStateBuilder, tcs: Seq[Tuple2[Tip, CleanDegree.Value]]) {
@@ -177,5 +183,41 @@ class T2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 			//cycle.mapTipToVolume(twvd.tip) += twvd.nVolume
 			state.dispense(twvd)
 		}
+	}
+	
+	private def combine(cycle1: CycleState, cycle2: CycleState): Option[CycleState] = {
+		if (cycle1.aspirates.size < cycle2.aspirates.size)
+			return None
+		
+		val aspirates = new ArrayBuffer[T1_Aspirate]
+		
+		def getLiquid(well: Well): Liquid = state0.getWellState(well).liquid 
+		val twvs1 = cycle1.aspirates.flatMap(_.twvs)
+		val twvs2 = cycle2.aspirates.flatMap(_.twvs)
+		if (twvs1.size < twvs2.size)
+			return None
+		
+		val twvsPairs = twvs1 zip twvs2
+		
+		// List of liquids aspirated in cycle1 and cycle2
+		val liqs = twvsPairs.map(pair => (getLiquid(pair._1.well), getLiquid(pair._2.well)))
+		// Are the liquids the same?
+		if (liqs.forall(pair => pair._1 eq pair._2)) {
+			val vols = twvsPairs.map(pair => pair._1.nVolume + pair._2.nVolume)
+			aspirates ++= twvs1
+			None
+		}
+		else {
+			None
+		}
+	}
+
+	/** Would a cleaning be required before a subsequent dispense from the same tip? */
+	private def checkNoCleanRequired(cycle: CycleState, state: RobotStateBuilder, tws: Seq[TipWell]): Boolean = {
+		def step(tipWell: TipWell): Boolean = {
+			val tipState = state.getTipState(tipWell.tip)
+			helper.getCleanDegreeDispense(tipState) == CleanDegree.None
+		}
+		tws.forall(step)
 	}
 }

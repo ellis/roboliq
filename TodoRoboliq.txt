@@ -66,13 +66,28 @@ Code:
 	create some common Parts for levels 3, 2, and 1
 	Add Comment()s to evoware output
 	BsseRobot.batch*spirate() needs to batch on volume too
-	try using parboiled as a replacement for scala's parser combinator
+	try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
+	create Syringe object and decouple it from the Tip object, so that tips can be exchanged
 x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 	between all tokens is a robot state
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
 x	each T2 token produces a sequence of T1 tokens
 x	robot tells which tips can be used in batch for a particular token
 x	setup unit tests for sbt
+	Pipetting:
+		state should only be updated by the underlying robot/device implementation based on L1 commands
+		createCycles can try dispensing until an invalid state is reached, then revert to the previous state and start the next cycle
+		cycles:
+			start with assumption that tips are clean
+			get first tip/dest set and associate source liquid with tip
+			get pipetting policy and liquid class for each dispense
+			create L1 dispense command
+			update tip liquid attributes for it's post-dispense state
+			add volume dispensed to amount required for tip
+			peek at next tip/dest set, and check whether:
+				each tip can still access the same set of source wells
+				each tip can accommodate the additional volume
+				dispense does not require cleaning
 	Clean:
 		Clean overrides:
 			before start

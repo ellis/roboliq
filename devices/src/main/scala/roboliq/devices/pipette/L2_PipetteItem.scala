@@ -2,6 +2,7 @@ package roboliq.devices.pipette
 
 import roboliq.parts._
 import roboliq.devices.MixSpec
+import roboliq.level3.Command
 
 class L2_PipetteItem(
 		val srcs: Set[Well],
@@ -19,4 +20,4 @@ class L2_PipetteArgs(
 		val fnClean_? : Option[Unit => Unit] = None
 		)
 
-case class L2_PipetteCommand(args: L2_PipetteArgs)
+case class L2_PipetteCommand(args: L2_PipetteArgs) extends Command
