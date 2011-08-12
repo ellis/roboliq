@@ -6,17 +6,6 @@ trait HasTip {
 	val tip: Tip
 }
 
-object PipettePosition extends Enumeration {
-	val Free, WetContact, DryContact = Value
-}
-
-object PipetteSpeed extends Enumeration {
-	val Normal, Slow, Fast = Value
-}
-
-// TODO: add various speeds, such as entry, pump, exit
-case class PipettePolicy(val pos: PipettePosition.Value)
-
 sealed class TipWell(val tip: Tip, val well: Well) extends HasTip {
 	override def toString = "TipWell("+tip.index+","+well.holder.index+":"+well.index+")" 
 }

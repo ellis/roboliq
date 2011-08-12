@@ -154,18 +154,18 @@ class RobotStateBuilder(val prev : RobotState) extends IRobotState {
 		import twvp._
 		val tipState = getTipState(tip)
 		val wellState = getWellState(well)
-		tipStates(tip) = policy match {
-			case PipettePolicy(PipettePosition.WetContact) => tipState.dispenseIn(wellState.liquid, nVolume)
+		tipStates(tip) = policy.pos match {
+			case PipettePosition.WetContact => tipState.dispenseIn(nVolume, wellState.liquid)
 			case _ => tipState.dispenseFree(nVolume)
 		}
 		addLiquid0(well, tipState.liquid, nVolume)
 	}
 	
-	def mix(twv: TipWellVolume) {
+	/*def mix(twv: TipWellVolume) {
 		aspirate(twv)
 		val twvd = new TipWellVolumePolicy(twv.tip, twv.well, twv.nVolume, PipettePolicy(PipettePosition.WetContact))
 		dispense(twvd)
-	}
+	}*/
 
 	def addLiquid0(well: Well, liquid: Liquid, nVolume: Double) {
 		wellStates(well) = getWellState(well).add(liquid, nVolume)

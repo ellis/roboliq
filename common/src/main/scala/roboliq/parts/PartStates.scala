@@ -34,9 +34,15 @@ case class TipState(
 			CleanDegree.None
 		)
 	}
+	def dispense(nVolumeDisp: Double, liquidDest: Liquid, pos: PipettePosition.Value): TipState = {
+		pos match {
+			case PipettePosition.WetContact => dispenseIn(nVolumeDisp, liquidDest)
+			case _ => dispenseFree(nVolumeDisp)
+		}
+	}
 	def dispenseFree(nVolume2: Double): TipState =
 		this.copy(nVolume = nVolume - nVolume2, cleanDegree = CleanDegree.None)
-	def dispenseIn(liquid2: Liquid, nVolume2: Double): TipState =
+	def dispenseIn(nVolume2: Double, liquid2: Liquid): TipState =
 		this.copy(nVolume = nVolume - nVolume2, destsEntered = liquid2 :: destsEntered, cleanDegree = CleanDegree.None)
 	def clean(cleanDegree: CleanDegree.Value) = TipState(tip).copy(cleanDegree = cleanDegree)
 }

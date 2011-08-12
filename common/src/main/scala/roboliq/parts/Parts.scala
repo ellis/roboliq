@@ -19,6 +19,14 @@ object Contamination {
 	val empty = new Contamination(false, false, false)
 }
 
+object PipettePosition extends Enumeration {
+	val Free, WetContact, DryContact = Value
+}
+
+// TODO: add various speeds, such as entry, pump, exit
+//case class PipettePolicy(val pos: PipettePosition.Value) // FIXME: remove this
+case class PipettePolicy(sName: String, pos: PipettePosition.Value)
+
 class Liquid(
 	val sName: String,
 	val bWaterFreeDispense: Boolean,

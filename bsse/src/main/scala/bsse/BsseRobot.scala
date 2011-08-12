@@ -180,43 +180,18 @@ class BsseRobot extends EvowareRobot {
 		}
 	}
 
-	def batchesForAspirate(state: IRobotState, twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = {
-		def getLiquidClass(twv: TipWellVolume) = getAspirateClass(state, twv)
+	def batchesForAspirate(twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = {
 		// Group by tip type and liquid dispense class
-		def canBatch(twv0: TipWellVolume, twv1: TipWellVolume, getLiquidClass: (TipWellVolume => Option[String])): Boolean = {
-			val tipKind0 = getTipKind(twv0.tip)
-			val tipKind1 = getTipKind(twv1.tip)
-			if (tipKind0 ne tipKind1) {
-				false
-			}
-			else {
-				val sClass0 = getLiquidClass(twv0).get
-				val sClass1 = getLiquidClass(twv1).get
-				sClass0 == sClass1
-			}
+		def canBatch(twvp0: TipWellVolumePolicy, twvp1: TipWellVolumePolicy): Boolean = {
+			val tipKind0 = getTipKind(twvp0.tip)
+			val tipKind1 = getTipKind(twvp1.tip)
+			twvp0.policy.sName == twvp1.policy.sName && tipKind0 eq tipKind1 
 		}
-
-		val bAllHaveClass = twvs.forall(twv => getLiquidClass(twv).isDefined)
-		if (!bAllHaveClass) {
-			Nil
-		}
-		else {
-			def matcher(twv0: TipWellVolume, twv1: TipWellVolume) = canBatch(twv0, twv1, getLiquidClass)
-			partitionBy(twvs.toList, matcher)
-		}
+		partitionBy(twvs.toList, canBatch)
 	}
 	
-	def batchesForDispense(state: IRobotState, twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = {
-		def getLiquidClass(twv: TipWellVolume) = getDispenseClass(state, twv)
-
-		val bAllHaveClass = twvs.forall(twv => getLiquidClass(twv).isDefined)
-		if (!bAllHaveClass) {
-			Nil
-		}
-		else {
-			def matcher(twv0: TipWellVolume, twv1: TipWellVolume) = canBatch(twv0, twv1, getLiquidClass)
-			partitionBy(twvs.toList, matcher)
-		}
+	def batchesForDispense(twvs: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = {
+		batchesForAspirate(twvs)
 	}
 
 	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[T1_Clean] = {

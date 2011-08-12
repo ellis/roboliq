@@ -114,7 +114,7 @@ class PipetteHelper {
 		}
 	}
 
-	def chooseTipSrcPairs(tips: SortedSet[Tip], srcs: SortedSet[Well], state: IRobotState): Seq[Seq[TipWell]] = {
+	def chooseTipSrcPairs(tips: SortedSet[Tip], srcs: SortedSet[Well]): Seq[Seq[TipWell]] = {
 		// Cases:
 		// Case 1: tips size == srcs size:
 		// Case 2: tips size < srcs size:
