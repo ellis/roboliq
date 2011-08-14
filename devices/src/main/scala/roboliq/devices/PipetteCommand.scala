@@ -3,6 +3,8 @@ package roboliq.devices
 import scala.collection.mutable.HashSet
 import roboliq.level3._
 import roboliq.devices.pipette.L2_PipetteItem
+import roboliq.devices.pipette.L2_PipetteArgs
+import roboliq.devices.pipette.L2_PipetteCommand
 
 case class PipetteCommand(items: Seq[PipetteItem], mixSpec_? : Option[MixSpec] = None) extends Command
 
@@ -32,6 +34,11 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 			case WPL_Plate(o) => kb.addPlate(o, true)
 			case WPL_Liquid(o) => kb.liqs += o
 		})
+		// Add destinations to KB
+		items.foreach(_.dest match {
+			case WP_Well(o) => kb.addWell(o, false)
+			case WP_Plate(o) => kb.addPlate(o, false)
+		})
 	}
 	
 	def checkParams(): Seq[CommandError] = {
@@ -42,11 +49,6 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 		val dests = Set() ++ items.map(_.dest)
 		if (dests.size == 0)
 			return CommandError("must have one or more destinations") :: Nil
-		// Add destinations to KB
-		dests.foreach(_ match {
-			case WP_Well(o) => kb.addWell(o, false)
-			case WP_Plate(o) => kb.addPlate(o, false)
-		})
 		
 		// Check validity of source/dest pairs
 		val dests2 = new HashSet[Object]
@@ -145,17 +147,35 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 			return Nil
 		*/
 		
+		var bAllOk = true
 		val items2: Seq[L2_PipetteItem] = items.flatMap(item => {
 			val srcWells1 = getWells1(getWells(item.src))
 			val destWells1 = getWells1(getWells(item.dest))
-			for (dest1 <- destWells1) yield {
-				new L2_PipetteItem(srcWells1, dest1, item.nVolume)
+			if (srcWells1.isEmpty || destWells1.isEmpty) {
+				bAllOk = false
+				Nil
+			}
+			else {
+				destWells1.map(dest1 => new L2_PipetteItem(srcWells1, dest1, item.nVolume))
 			}
 		})
 		
 		println(items2)
 		
-		Nil
+		if (bAllOk) {
+			val args = new L2_PipetteArgs(
+					items2,
+					cmd.mixSpec_?,
+					sAspirateClass_? = None,
+					sDispenseClass_? = None,
+					sMixClass_? = None,
+					sTipKind_? = None,
+					fnClean_? = None)
+			L2_PipetteCommand(args) :: Nil
+		}
+		else {
+			Nil
+		}
 	}
 	
 	private def getWells(well: Well): Set[Well] = Set(well)

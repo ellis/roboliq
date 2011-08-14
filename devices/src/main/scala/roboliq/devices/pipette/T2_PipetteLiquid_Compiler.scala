@@ -1,4 +1,4 @@
-package roboliq.devices.pipette
+/*package roboliq.devices.pipette
 
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
@@ -230,3 +230,4 @@ class T2_PipetteLiquid_Compiler(robot: Robot, state0: RobotState, token: T2_Pipe
 		}
 	}
 }
+*/

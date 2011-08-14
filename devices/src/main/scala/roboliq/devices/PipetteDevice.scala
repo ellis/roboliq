@@ -25,51 +25,6 @@ class PipetteDevice {
 		}
 	}
 	*/
-	def getDispensePolicy(tipState: TipState, wellState: WellState, nVolume: Double): Option[Tuple2[PipettePolicy, String]] = {
-		val tipKind = getTipKind(tipState.tip)
-		val liquid = tipState.liquid
-		
-		val bLarge = (tipKind.sName == "large")
-		// If our volume is high enough that we don't need to worry about accuracy,
-		// or if we're pipetting competent cells,
-		// then perform a free dispense.
-		if (liquid.bCells)
-			if (bLarge) Some("Comp cells free dispense") else None
-		else if (liquid.sName.contains("DMSO"))
-			if (bLarge) Some("DMSO free dispense") else None
-		else if (liquid.sName.contains("D-BSSE Decon"))
-			Some("D-BSSE Decon")
-		// If our volume is high enough that we don't need to worry about accuracy
-		else if (nVolume >= nFreeDispenseVolumeThreshold)
-			if (bLarge) Some("Water free dispense") else None
-		else if (wellState.nVolume == 0)
-			if (bLarge) Some("Water dry contact") else Some("D-BSSE Te-PS Dry Contact")
-		else
-			if (bLarge) Some("Water wet contact") else Some("D-BSSE Te-PS Wet Contact")
-	}
-
-	def getDispenseClass(tipState: TipState, wellState: WellState, nVolume: Double): Option[String] = {
-		val tipKind = getTipKind(tipState.tip)
-		val liquid = tipState.liquid
-		
-		val bLarge = (tipKind.sName == "large")
-		// If our volume is high enough that we don't need to worry about accuracy,
-		// or if we're pipetting competent cells,
-		// then perform a free dispense.
-		if (liquid.bCells)
-			if (bLarge) Some("Comp cells free dispense") else None
-		else if (liquid.sName.contains("DMSO"))
-			if (bLarge) Some("DMSO free dispense") else None
-		else if (liquid.sName.contains("D-BSSE Decon"))
-			Some("D-BSSE Decon")
-		// If our volume is high enough that we don't need to worry about accuracy
-		else if (nVolume >= nFreeDispenseVolumeThreshold)
-			if (bLarge) Some("Water free dispense") else None
-		else if (wellState.nVolume == 0)
-			if (bLarge) Some("Water dry contact") else Some("D-BSSE Te-PS Dry Contact")
-		else
-			if (bLarge) Some("Water wet contact") else Some("D-BSSE Te-PS Wet Contact")
-	}
 }
 
 object PipetteDeviceUtil {

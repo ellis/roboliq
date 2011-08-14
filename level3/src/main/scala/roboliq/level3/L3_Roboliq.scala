@@ -40,5 +40,6 @@ trait L3_Roboliq {
 	
 	implicit def liquidToProxy(o: Liquid): LiquidProxy = new LiquidProxy(kb, o)
 	implicit def partToProxy(o: Part): PartProxy = new PartProxy(kb, o)
+	implicit def wellToProxy(o: Well): WellProxy = new WellProxy(kb, o)
 	implicit def plateToProxy(o: Plate): PlateProxy = new PlateProxy(kb, o)
 }

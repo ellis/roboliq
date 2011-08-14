@@ -77,6 +77,18 @@ class WellData {
 	var nVol_? : Option[Double] = None
 }
 
+class WellProxy(kb: KnowledgeBase, o: Well) {
+	val data = kb.wellData(o)
+	
+	def liquid = data.liq_?.get
+	//def liquid_=(liq: Liquid) { data.liq_? = Some(liq) }
+	
+	def fill(liquid: Liquid, nVolume: Double) {
+		data.liq_? = Some(liquid)
+		data.nVol_? = Some(nVolume)
+	}
+}
+
 object WellProxy {
 	def apply(kb: KnowledgeBase, parent: Part, index: Int): Well = {
 		val o = new Well
@@ -101,6 +113,8 @@ class PlateProxy(kb: KnowledgeBase, o: Plate) {
 
 	def cols = data.nCols.get
 	def cols_=(n: Int) { data.nCols.user_? = Some(n) }
+	
+	def wells = if (data.wells.isDefined) data.wells.get else Nil
 
 	def setDimension(nRows: Int, nCols: Int) {
 		val data = kb.getPlateData(o)

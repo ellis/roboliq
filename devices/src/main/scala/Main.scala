@@ -20,14 +20,18 @@ class Tester extends Roboliq {
 	}
 	
 	customize {
-		val p2 = Plate(rows = 8, cols = 1, location = "P2")
-
+		val p2 = new Plate
+		
 		water.liquidClass = "water"
 		
 		plate.location = "P1"
+		plate.setDimension(8, 12)
 		
 		p2.location = "P2"
+		p2.setDimension(8, 1)
+		p2.wells.foreach(_.fill(water, 1000))
 		
+		kb.addPlate(p2, true)
 		/*setInitialLiquids(
 			water -> p2.well(1)
 		)*/
@@ -72,8 +76,24 @@ class Tester2 extends Roboliq {
 
 object Main extends App {
 	val tester = new Tester
+	tester.m_protocol.get()
+	tester.m_customize.get()
+	
 	val handler = new PipetteCommandHandler(tester.kb, tester.cmds.head.asInstanceOf[PipetteCommand])
-	val res = handler.exec()
-	println(res)
-	tester.kb.printUnknown()
+	handler.addKnowledge()
+	val missing = tester.kb.concretize()
+	if (missing.isEmpty) {
+		val errs = handler.checkParams()
+		if (errs.isEmpty) {
+			val res = handler.compile()
+			println(res)
+		}
+		else {
+			println(errs)
+		}
+	}
+	else {
+		println(missing)
+	}
+	//tester.kb.printUnknown()
 }

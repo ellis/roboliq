@@ -1,8 +1,8 @@
 package roboliq.level3
 
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-
 
 class KnowledgeBase {
 	val liqs = new HashSet[Liquid]
@@ -48,7 +48,9 @@ class KnowledgeBase {
 			setId(plate)
 			m_plates += plate
 		}
-		val d = m_plateData.getOrElseUpdate(plate, new PlateData)
+		val d = getPlateData(plate)
+		//println("plate: "+plate)
+		//println(d.wells)
 		if (d.wells.isDefined) {
 			d.wells.get.foreach(well => addWell(well, bSrc))
 		}
@@ -118,45 +120,58 @@ class KnowledgeBase {
 		println()
 	}
 	
-	def concretize() {
+	def concretize(): Seq[Tuple2[Object, String]] = {
 		val kb = this
+		
+		val missing = new ArrayBuffer[Tuple2[Object, String]]
 		
 		// check whether we have all the information we need
 		def checkPart(part: Part): Boolean = {
 			val d = m_partData(part)
 			// Do we know its location?
-			(
-				d.parent.isDefined && 
-				d.index.isDefined &&
-				checkPart(d.parent.get)
-			)
+			val b = d.location.isDefined ||
+				(
+					d.parent.isDefined && 
+					d.index.isDefined &&
+					checkPart(d.parent.get)
+				)
+			if (!b)
+				missing += part -> "location"
+			b
 		}
 		def checkWell(well: Well): Boolean = {
-			if (!checkPart(well))
-				return false
+			var b = true
+			b &= checkPart(well)
 			val d = m_wellData(well)
-			if (d.bRequiresIntialLiq_?.isEmpty)
-				return false
-			if (d.bRequiresIntialLiq_?.get == true) {
-				if (d.bRequiresIntialLiq_?.isEmpty)
-					return false
+			//if (d.bRequiresIntialLiq_?.isEmpty)
+			//	return false
+			if (d.bRequiresIntialLiq_?.isDefined && d.bRequiresIntialLiq_?.get == true) {
+				if (d.liq_?.isEmpty) {
+					missing += well -> "liquid" 
+					b = false
+				}
 			}
-			return true
+			b
 		}
 		def checkPlate(plate: Plate): Boolean = {
-			if (!checkPart(plate))
-				return false
+			var b = true
+			b &= checkPart(plate)
 			val d = m_plateData(plate)
-			if (!d.nRows.isDefined || !d.nCols.isDefined || !d.wells.isDefined)
-				return false
-			if (!d.wells.get.forall(checkWell))
-				return false
-			return true
+			if (!d.nRows.isDefined || !d.nCols.isDefined || !d.wells.isDefined) {
+				missing += plate -> "setDimension"
+				b = false
+			}
+			else {
+				b &= d.wells.get.forall(checkWell)
+			}
+			b
 		}
 		def checkLiquid(liquid: Liquid): Boolean = {
 			val wells = kb.getLiqWells(liquid)
-			if (wells.isEmpty)
+			if (wells.isEmpty) {
+				missing += liquid -> "wells"
 				false
+			}
 			else
 				wells.forall(checkWell)
 		}
@@ -182,5 +197,7 @@ class KnowledgeBase {
 				})
 			})
 		}
+		
+		missing
 	}
 }

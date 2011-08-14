@@ -1,4 +1,4 @@
-package roboliq.devices.pipette
+/*package roboliq.devices.pipette
 
 import roboliq.parts._
 import roboliq.robot._
@@ -15,3 +15,4 @@ class T2_PipettePlate_Compiler(robot: Robot, state0: RobotState, tok: T2_Pipette
 		comp.tokens
 	}
 }
+*/
