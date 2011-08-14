@@ -7,7 +7,6 @@ import scala.collection.mutable.ArrayBuffer
 import roboliq.parts._
 import roboliq.tokens._
 import roboliq.robot._
-import roboliq.level2.tokens._
 
 
 class PipetteHelper {

@@ -251,11 +251,12 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 		}
 		// keep the top tips.size() entries ordered by index
 		val srcs2 = SortedSet[Well](srcs.toSeq.sortWith(order).take(tips.size) : _*)
+		val pairs = srcs2.toSeq zip tips.toSeq
 	
 		val twss0 = helper.chooseTipSrcPairs(tips, srcs2)
 		var sError_? : Option[String] = None
 		twss0.forall(tws => {
-			aspirate_createTwvps(tipStates, srcs2 zip tips) match {
+			aspirate_createTwvps(tipStates, tws) match {
 				case Left(sError) => sError_? = Some(sError); false
 				case Right(twvps) =>
 					val twvpss = robot.batchesForAspirate(twvps)
@@ -269,8 +270,8 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 
 	private def aspirateDirect(cycle: CycleState, tipStates: collection.Map[Tip, TipState], srcs: collection.Map[Tip, Set[Well]]): Option[String] = {
 		val tips = tipStates.keys.toSeq.sortBy(tip => tip)
-		val srcs2 = tips.map(tip => srcs(tip).head)
-		aspirate_createTwvps(tipStates, srcs2 zip tips) match {
+		val tws = tips.map(tip => new TipWell(tip, srcs(tip).head))
+		aspirate_createTwvps(tipStates, tws) match {
 			case Left(sError) => Some(sError)
 			case Right(twvps) =>
 				val twvpss = robot.batchesForAspirate(twvps)
@@ -279,19 +280,18 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 		}
 	}
 	
-	private def aspirate_createTwvps(tipStates: collection.Map[Tip, TipState], sts: Seq[Tuple2[Well, Tip]]): Either[String, Seq[TipWellVolumePolicy]] = {
+	private def aspirate_createTwvps(tipStates: collection.Map[Tip, TipState], tws: Seq[TipWell]): Either[String, Seq[TipWellVolumePolicy]] = {
 		// get pipetting policy for each dispense
-		val policies_? = sts.map(st => {
-			val (src, tip) = st
-			val tipState = tipStates(tip)
-			val wellState = state0.getWellState(src)
-			robot.getAspiratePolicy(tipState, wellState)
+		val policies_? = tws.map(tw => {
+			val tipState = tipStates(tw.tip)
+			val srcState = state0.getWellState(tw.well)
+			robot.getAspiratePolicy(tipState, srcState)
 		})
 		if (policies_?.forall(_.isDefined)) {
-			val twvps = (sts zip policies_?.map(_.get)).map(pair => {
-				val ((src, tip), policy) = pair
-				val tipState = tipStates(tip)
-				new TipWellVolumePolicy(tip, src, -tipState.nVolume, policy)
+			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
+				val (tw, policy) = pair
+				val tipState = tipStates(tw.tip)
+				new TipWellVolumePolicy(tw.tip, tw.well, -tipState.nVolume, policy)
 			})
 			Right(twvps)
 		}

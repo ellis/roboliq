@@ -25,16 +25,19 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 	val items = cmd.items
 	
 	// Return a new KnowledgeBase, a list of errors, and a set of T2 tokens
-	def exec(): Seq[CommandError] = {
-		val srcs = Set() ++ items.map(_.src)
-		if (srcs.size == 0)
-			return CommandError("must have one or more sources") :: Nil
+	def addKnowledge() {
 		// Add sources to KB
-		srcs.foreach(_ match {
+		items.foreach(_.src match {
 			case WPL_Well(o) => kb.addWell(o, true)
 			case WPL_Plate(o) => kb.addPlate(o, true)
 			case WPL_Liquid(o) => kb.liqs += o
 		})
+	}
+	
+	def checkParams(): Seq[CommandError] = {
+		val srcs = Set() ++ items.map(_.src)
+		if (srcs.size == 0)
+			return CommandError("must have one or more sources") :: Nil
 
 		val dests = Set() ++ items.map(_.dest)
 		if (dests.size == 0)
@@ -62,7 +65,9 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 				case WPL_Plate(plate1) =>
 					item.dest match {
 						case WP_Plate(plate2) =>
-							val (wells1, wells2) = (plate1.wells_?, plate2.wells_?)
+							val pd1 = kb.getPlateData(plate1)
+							val pd2 = kb.getPlateData(plate1)
+							val (wells1, wells2) = (pd1.wells, pd2.wells)
 							if (wells1.isDefined && wells2.isDefined) {
 								if (wells1.get.size != wells2.get.size)
 									return CommandError("source and destination plates must have the same number of wells") :: Nil
@@ -77,6 +82,11 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 				return CommandError("volume must be > 0") :: Nil
 		}
 		
+		Nil
+	}
+	
+	def compile(): Seq[Command] = {
+		/*
 		// check whether we have all the information we need
 		def checkPart(part: Part): Boolean = {
 			// Do we know its location?
@@ -133,12 +143,13 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 		
 		if (!b)
 			return Nil
+		*/
 		
 		val items2: Seq[L2_PipetteItem] = items.flatMap(item => {
-			val srcWells = getWells(item.src)
-			val destWells = getWells(item.dest)
-			for (dest <- destWells) yield {
-				L2_PipetteItem(srcWells, dest, item.nVolume, mixSpec_? = cmd.mixSpec_?)
+			val srcWells1 = getWells1(getWells(item.src))
+			val destWells1 = getWells1(getWells(item.dest))
+			for (dest1 <- destWells1) yield {
+				new L2_PipetteItem(srcWells1, dest1, item.nVolume)
 			}
 		})
 		
@@ -148,7 +159,7 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 	}
 	
 	private def getWells(well: Well): Set[Well] = Set(well)
-	private def getWells(plate: Plate): Set[Well] = plate.wells_? match {
+	private def getWells(plate: Plate): Set[Well] = kb.getPlateData(plate).wells.get_? match {
 		case None => Set()
 		case Some(wells) => wells.toSet
 	}
@@ -161,5 +172,14 @@ class PipetteCommandHandler(kb: KnowledgeBase, cmd: PipetteCommand) {
 	private def getWells(wp: WellOrPlate): Set[Well] = wp match {
 		case WP_Well(o) => getWells(o)
 		case WP_Plate(o) => getWells(o)
-	}			
+	}
+	
+	private def getWells1(wells3: Set[Well]): Set[roboliq.parts.Well] = {
+		if (wells3.forall(kb.map31.contains)) {
+			wells3.map(well3 => kb.map31(well3).asInstanceOf[roboliq.parts.Well])
+		}
+		else {
+			Set()
+		}
+	}
 }
