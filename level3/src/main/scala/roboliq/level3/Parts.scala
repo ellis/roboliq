@@ -1,10 +1,12 @@
 package roboliq.level3
 
 
-class Part {
+class ObjectL3
+
+class Part extends ObjectL3 {
 	var sLabel: String = "<none>"
 }
-class Liquid {
+class Liquid extends ObjectL3 {
 	var sLabel: String = "<none>"
 } 
 class Well extends Part

@@ -1,6 +1,7 @@
 package roboliq.devices
 
 import scala.collection.mutable.HashSet
+import roboliq.compiler._
 import roboliq.level3._
 import roboliq.devices.pipette.L2_PipetteItem
 import roboliq.devices.pipette.L2_PipetteArgs

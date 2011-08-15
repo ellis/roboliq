@@ -2,12 +2,18 @@ package roboliq.devices
 
 import roboliq.parts._
 import roboliq.robot._
-import roboliq.tokens._
+import roboliq.compiler._
 
 import roboliq.devices.pipette._
 
 
-class PipetteDevice {
+class PipetteDevice extends CommandHandler {
+	def compile(cmd: Command): Option[CompileResult] = {
+		cmd match {
+			case c @ PipetteCommand(_, _) =>
+				
+		}
+	}
 	/*def translate2(robot: Robot, state0: RobotState, tok: T2_Token): Seq[T1_TokenState] = {
 		tok match {
 			case t2 @ T2_Pipette(_) =>

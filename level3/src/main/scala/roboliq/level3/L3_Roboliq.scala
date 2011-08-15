@@ -2,6 +2,8 @@ package roboliq.level3
 
 import scala.collection.mutable.ArrayBuffer
 
+import roboliq.compiler.Command
+
 
 class Volume(n: Double) {
 	def ul = n

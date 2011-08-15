@@ -75,6 +75,20 @@ x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 x	each T2 token produces a sequence of T1 tokens
 x	robot tells which tips can be used in batch for a particular token
 x	setup unit tests for sbt
+	Compiling:
+		L3 -> L2: knowledgebase
+		L2 -> L1: initial robot state
+		L1 -> L0: nothing?
+		given a set of L3 commands:
+			find new defaults to add to kb
+			concretize existing kb
+			for each command in top list
+				add knowledge
+				compile
+				abort on error
+				process each translated item in the same way
+			if knowledge has been updated
+				repeat process
 	Pipetting:
 		state should only be updated by the underlying robot/device implementation based on L1 commands
 		createCycles can try dispensing until an invalid state is reached, then revert to the previous state and start the next cycle

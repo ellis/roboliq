@@ -1,8 +1,8 @@
 package roboliq.devices.pipette
 
+import roboliq.compiler.Command
 import roboliq.parts._
 import roboliq.devices.MixSpec
-import roboliq.level3.Command
 
 class L2_PipetteItem(
 		val srcs: Set[Well],
