@@ -18,7 +18,7 @@ class KnowledgeBase {
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	
 	/** Map level 3 parts to level 1 parts */
-	val map31 = new HashMap[Part, roboliq.parts.Part]
+	val map31 = new HashMap[ObjectL3, roboliq.parts.ObjectL1]
 	
 	private var m_idNext = 1;
 	
@@ -181,6 +181,7 @@ class KnowledgeBase {
 			m_wells.foldLeft(true) { (b, o) => b && checkWell(o) } &&
 			m_plates.foldLeft(true) { (b, o) => b && checkPlate(o) }
 		
+		map31.clear()
 		if (b) {
 			val ps = new HashMap[Plate, roboliq.parts.Plate]
 			val ws = new HashMap[Well, roboliq.parts.Well]

@@ -5,25 +5,29 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
+import roboliq.compiler._
 //import roboliq.parts._
-import roboliq.tokens._
+//import roboliq.tokens._
 import roboliq.robot._
 import roboliq.parts._
 //import roboliq.level2.tokens._
+import roboliq.level3.Compiler
 import roboliq.devices.PipetteDeviceUtil
 
 
-class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteCommand) {
+class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0: RobotState, cmd: L2_PipetteCommand) {
 	val args = cmd.args
 	
 	case class SrcTipDestVolume(src: Well, tip: Tip, dest: Well, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[Tip], val state0: RobotState) {
-		val cleans = new ArrayBuffer[T1_Clean]
-		val aspirates = new ArrayBuffer[T1_Aspirate]
-		val dispenses = new ArrayBuffer[T1_Dispense]
+		val cleans = new ArrayBuffer[L1_Clean]
+		val aspirates = new ArrayBuffer[L1_Aspirate]
+		val dispenses = new ArrayBuffer[L1_Dispense]
+		
+		var ress: Seq[CompileFinal] = Nil
 
-		def toTokenSeq: Seq[T1_Token] = cleans ++ aspirates ++ dispenses
+		def toTokenSeq: Seq[Command] = cleans ++ aspirates ++ dispenses
 	}
 	
 	val helper = new PipetteHelper
@@ -31,26 +35,32 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 	val dests = SortedSet[Well]() ++ args.items.map(_.dest)
 	val mapDestToItem = args.items.map(t => t.dest -> t).toMap
 
-	val tokens: Seq[T1_TokenState] = {
+	val translation: Seq[Command] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
-		var winner = Seq[T1_Token]()
+		var winner = Seq[Command]()
 		var nWinnerScore = Int.MaxValue
 		for (tipGroup <- robot.config.tipGroups) {
 			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index))
 	
 			val cycles = pipette(tips)
 			if (!cycles.isEmpty) {
-				val tokens = cycles.flatMap(_.toTokenSeq)
-				val nScore = robot.score(tokens)
-				if (nScore < nWinnerScore) {
-					winner = tokens
-					nWinnerScore = nScore
+				val cmds1 = cycles.flatMap(_.toTokenSeq)
+				val x = compiler.compileL1(state0, cmds1)
+				if (!x.isEmpty) {
+					compiler.score(state0, x) match {
+						case Some(nScore) =>
+							if (nScore < nWinnerScore) {
+								winner = cmds1
+								nWinnerScore = nScore
+							}
+						case _ =>
+					}
 				}
 			}
 		}
-		PipetteDeviceUtil.getTokenStates(state0, winner)
+		winner
 	}
 	
 	private def pipette(tips: SortedSet[Tip]): Seq[CycleState] = {
@@ -213,7 +223,7 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 		val twvps = twvps0.sortBy(_.tip)
 		val twvpss = robot.batchesForDispense(twvps)
 		// Create dispense tokens
-		cycle.dispenses ++= twvpss.map(twvps => new T1_Dispense(twvps))
+		cycle.dispenses ++= twvpss.map(twvps => new L1_Dispense(twvps))
 	}
 	
 	private def dispense_updateTipStates(twvps: Seq[TipWellVolumePolicy], tipStates: HashMap[Tip, TipState]) {
@@ -260,7 +270,7 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 				case Left(sError) => sError_? = Some(sError); false
 				case Right(twvps) =>
 					val twvpss = robot.batchesForAspirate(twvps)
-					cycle.aspirates ++= twvpss.map(twvs => new T1_Aspirate(twvps))
+					cycle.aspirates ++= twvpss.map(twvs => new L1_Aspirate(twvps))
 					true
 			}
 		})
@@ -275,7 +285,7 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 			case Left(sError) => Some(sError)
 			case Right(twvps) =>
 				val twvpss = robot.batchesForAspirate(twvps)
-				cycle.aspirates ++= twvpss.map(twvs => new T1_Aspirate(twvps))
+				cycle.aspirates ++= twvpss.map(twvs => new L1_Aspirate(twvps))
 				None
 		}
 	}
@@ -301,21 +311,8 @@ class L2_Pipette_Compiler(robot: Robot, state0: RobotState, cmd: L2_PipetteComma
 	}
 	
 	private def getUpdatedState(cycle: CycleState): RobotState = {
-		val state = new RobotStateBuilder(cycle.state0)
-		
-		// Clean
-		for (c <- cycle.cleans) {
-			for (tip <- c.tips) {
-				state.cleanTip(tip, c.degree)
-			}
-		}
-		
-		// Aspirate
-		cycle.aspirates.foreach(_.twvs.foreach(state.aspirate))
-		
-		// Dispense
-		cycle.dispenses.foreach(_.twvs.foreach(state.dispense))
-		
-		state.toImmutable
+		val cmds1 = cycle.toTokenSeq
+		cycle.ress = compiler.compileL1(state0, cmds1)
+		cycle.ress.last.state1
 	}
 }

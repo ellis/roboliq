@@ -75,6 +75,47 @@ x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 x	each T2 token produces a sequence of T1 tokens
 x	robot tells which tips can be used in batch for a particular token
 x	setup unit tests for sbt
+	Device and compilation concepts:
+		Compiler
+		CommandCompiler
+		Device
+		DeviceState
+		DeviceKnowledge
+		RobotState
+		RobotKnowledge
+		CompilerContext
+
+		The compiler is given CompileHandlers which handle compilation of commands
+
+		RobotState:
+			RobotState contains a map of Device -> DeviceState
+
+		RobotKnowledge:
+		
+		When compiling a command, we may need the following context information:
+			Compiler (if we need to compile additional commands and score the results)
+			Devices
+			DeviceStates/DeviceKnowledge
+			locations of parts
+
+		Construction of Compiler object:
+			create devices we want
+			create RobotState object
+			add initial device states for all devices to RobotState
+			--
+			create CommandCompilers
+			create Compiler
+			register CommandCompilers with Compiler
+			--
+			create initial device knowledge for all devices
+
+	Knowledge Base:
+		parts carry almost no data (at most a string label and a numeric id)
+		two forms of data:
+			partially specified
+			fully specified
+		the data object for a given part is created by a factory function in order to allow the user to add new parts; or alternatively, handlers can be registered
+		the conversion from partially specified info to fully specified is also taken care of by the handlers
 	Compiling:
 		L3 -> L2: knowledgebase
 		L2 -> L1: initial robot state
@@ -82,13 +123,18 @@ x	setup unit tests for sbt
 		given a set of L3 commands:
 			find new defaults to add to kb
 			concretize existing kb
+			add knowledge from all nodes in tree
 			for each command in top list
-				add knowledge
 				compile
 				abort on error
+				otherwise add knowledge from all new nodes
 				process each translated item in the same way
 			if knowledge has been updated
 				repeat process
+		CompileNode
+			cmd
+			result
+			children
 	Pipetting:
 		state should only be updated by the underlying robot/device implementation based on L1 commands
 		createCycles can try dispensing until an invalid state is reached, then revert to the previous state and start the next cycle
