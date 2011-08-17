@@ -91,6 +91,17 @@ x	setup unit tests for sbt
 			RobotState contains a map of Device -> DeviceState
 
 		RobotKnowledge:
+
+		Objects:
+			Obj -- simple placeholder
+			ObjConfigL3 -- mutable configuration data for an object
+			ObjStateL3 -- state data about an object on the L3 level of abstraction
+			ObjConfigL1 -- immutable L1 data about an object
+			ObjStateL1 -- variables which may change over time
+		Devices:
+			Device
+			DeviceStateL3
+			DeviceStateL1
 		
 		When compiling a command, we may need the following context information:
 			Compiler (if we need to compile additional commands and score the results)
