@@ -5,20 +5,23 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
-import roboliq.compiler._
+import roboliq.common._
 //import roboliq.parts._
 //import roboliq.tokens._
-import roboliq.robot._
-import roboliq.parts._
+//import roboliq.robot._
+//import roboliq.parts._
 //import roboliq.level2.tokens._
-import roboliq.level3.Compiler
-import roboliq.devices.PipetteDeviceUtil
+import roboliq.level3._
 
 
-class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0: RobotState, cmd: L2_PipetteCommand) {
+class Compiler_PipetteCommandL2(robot: PipetteDevice) extends CommandCompilerL2 {
+	
+}
+
+private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, robot: PipetteDevice, state0: RobotState, cmd: L2_PipetteCommand) {
 	val args = cmd.args
 	
-	case class SrcTipDestVolume(src: Well, tip: Tip, dest: Well, nVolume: Double)
+	case class SrcTipDestVolume(src: WellConfigL1, tip: Tip, dest: WellConfigL1, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[Tip], val state0: RobotState) {
 		val cleans = new ArrayBuffer[L1_Clean]
@@ -32,7 +35,7 @@ class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0
 	
 	val helper = new PipetteHelper
 
-	val dests = SortedSet[Well]() ++ args.items.map(_.dest)
+	val dests = SortedSet[WellConfigL1]() ++ args.items.map(_.dest)
 	val mapDestToItem = args.items.map(t => t.dest -> t).toMap
 
 	val translation: Seq[Command] = {
@@ -148,7 +151,7 @@ class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0
 			Nil
 	}
 	
-	private def dispense(cycle: CycleState, tipStates: HashMap[Tip, TipState], srcs: Map[Tip, Set[Well]], tws: Seq[TipWell]): Option[String] = {
+	private def dispense(cycle: CycleState, tipStates: HashMap[Tip, TipState], srcs: Map[Tip, Set[WellConfigL1]], tws: Seq[TipWell]): Option[String] = {
 		dispense_checkVols(tipStates, srcs, tws) match {
 			case None =>
 			case e @ Some(sError) => return e
@@ -168,7 +171,7 @@ class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0
 	}
 	
 	// Check for appropriate volumes
-	private def dispense_checkVols(tipStates: HashMap[Tip, TipState], srcs: Map[Tip, Set[Well]], tws: Seq[TipWell]): Option[String] = {
+	private def dispense_checkVols(tipStates: HashMap[Tip, TipState], srcs: Map[Tip, Set[WellConfigL1]], tws: Seq[TipWell]): Option[String] = {
 		assert(!tws.isEmpty)
 		var sError_? : Option[String] = None
 		
@@ -249,18 +252,18 @@ class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0
 		cycle.cleans ++= robot.batchesForClean(tcs)
 	}
 
-	private def aspirateLiquid(cycle: CycleState, tipStates: collection.Map[Tip, TipState], srcs: Set[Well]): Option[String] = {
+	private def aspirateLiquid(cycle: CycleState, tipStates: collection.Map[Tip, TipState], srcs: Set[WellConfigL1]): Option[String] = {
 		// Get list of tips which require aspiration	
 		var tips = SortedSet[Tip]() ++ tipStates.keys
 
 		// sort the sources by volume descending (secondary sort key is index order)
-		def order(well1: Well, well2: Well): Boolean = {
+		def order(well1: WellConfigL1, well2: WellConfigL1): Boolean = {
 			val a = cycle.state0.getWellState(well1)
 			val b = cycle.state0.getWellState(well2)
 			(a.nVolume > b.nVolume) || (a.nVolume == b.nVolume && well1.index < well2.index)
 		}
 		// keep the top tips.size() entries ordered by index
-		val srcs2 = SortedSet[Well](srcs.toSeq.sortWith(order).take(tips.size) : _*)
+		val srcs2 = SortedSet[WellConfigL1](srcs.toSeq.sortWith(order).take(tips.size) : _*)
 		val pairs = srcs2.toSeq zip tips.toSeq
 	
 		val twss0 = helper.chooseTipSrcPairs(tips, srcs2)
@@ -278,7 +281,7 @@ class Compiler_PipetteCommandL2(compiler: Compiler, robot: PipetteDevice, state0
 		sError_?
 	}
 
-	private def aspirateDirect(cycle: CycleState, tipStates: collection.Map[Tip, TipState], srcs: collection.Map[Tip, Set[Well]]): Option[String] = {
+	private def aspirateDirect(cycle: CycleState, tipStates: collection.Map[Tip, TipState], srcs: collection.Map[Tip, Set[WellConfigL1]]): Option[String] = {
 		val tips = tipStates.keys.toSeq.sortBy(tip => tip)
 		val tws = tips.map(tip => new TipWell(tip, srcs(tip).head))
 		aspirate_createTwvps(tipStates, tws) match {

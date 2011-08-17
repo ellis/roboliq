@@ -1,12 +1,12 @@
 package roboliq.devices.pipette
 
-import roboliq.compiler.Command
-import roboliq.parts._
+import roboliq.common._
 import roboliq.devices.MixSpec
 
+
 class L2_PipetteItem(
-		val srcs: Set[Well],
-		val dest: Well,
+		val srcs: Set[WellConfigL1],
+		val dest: WellConfigL1,
 		val nVolume: Double
 		)
 

@@ -1,6 +1,6 @@
 package roboliq.level3
 
-import roboliq.compiler.Command
+import roboliq.common._
 
 
 class CommandNode(val cmd: Command) {

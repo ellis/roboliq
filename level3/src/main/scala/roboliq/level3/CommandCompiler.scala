@@ -1,7 +1,8 @@
 package roboliq.level3
 
-import roboliq.compiler._
+import roboliq.common._
 import roboliq.robot._
+
 
 trait CommandCompiler
 
@@ -17,6 +18,7 @@ class CompilerContextL2(
 class CompilerContextL3(
 		val compiler: Compiler,
 		val kb: KnowledgeBase,
+		val map31: ObjMapper,
 		val state0_? : Option[RobotState]
 		)
 
@@ -30,6 +32,6 @@ trait CommandCompilerL2 extends CommandCompiler {
 }
 
 trait CommandCompilerL3 extends CommandCompiler {
-	def addKnowledge(kb: KnowledgeBase, cmd: Command): Boolean
+	def addKnowledge(kb: KnowledgeBase, cmd: Command)
 	def compileL3(ctx: CompilerContextL3, cmd: Command): CompileResult
 }

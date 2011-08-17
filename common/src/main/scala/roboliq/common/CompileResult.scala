@@ -1,4 +1,4 @@
-package roboliq.compiler
+package roboliq.common
 
 import roboliq.robot.RobotState
 

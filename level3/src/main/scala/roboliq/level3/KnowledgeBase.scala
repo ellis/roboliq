@@ -13,9 +13,9 @@ class KnowledgeBase {
 	private val m_wells = new HashSet[Well]
 	private val m_plates = new HashSet[Plate]
 	//private val m_configL1 = new HashMap[Obj, Any]
-	private val m_configL3 = new HashMap[Obj, Any]
+	private val m_configL3 = new HashMap[Obj, AbstractConfigL3]
 	//private val m_state0L1 = new HashMap[Obj, Any]
-	private val m_state0L3 = new HashMap[Obj, Any]
+	private val m_state0L3 = new HashMap[Obj, AbstractStateL3]
 	/*private val m_liquidData = new HashMap[Liquid, LiquidData]
 	private val m_partData = new HashMap[Part, PartData]
 	private val m_wellData = new HashMap[Well, WellData]
@@ -27,9 +27,13 @@ class KnowledgeBase {
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	
 	//val configL1: scala.collection.Map[Obj, Any] = m_configL1
-	val configL3: scala.collection.Map[Obj, Any] = m_configL3
+	val configL3: scala.collection.Map[Obj, AbstractConfigL3] = m_configL3
 	//val state0L1: scala.collection.Map[Obj, Any] = m_state0L1
-	val state0L3: scala.collection.Map[Obj, Any] = m_state0L3
+	val state0L3: scala.collection.Map[Obj, AbstractStateL3] = m_state0L3
+	
+	def addLiquid(o: Liquid) {
+		m_liqs += o
+	}
 	
 	private def addObject(o: Obj) {
 		if (!m_objs.contains(o)) {
@@ -44,18 +48,24 @@ class KnowledgeBase {
 		m_wells += o
 	}
 	
-	/*def addWell(well: Well, bSrc: Boolean) {
-		addWell(well)
-		if (well.getState0L3(state0L3).get.bRequiresIntialLiq_?.isEmpty)
-			well.getState0L3(state0L3).get.bRequiresIntialLiq_? = Some(bSrc)
-	}*/
+	def addWell(o: Well, bSrc: Boolean) {
+		addWell(o)
+		if (o.getState0L3(state0L3).get.bRequiresIntialLiq_?.isEmpty)
+			o.getState0L3(state0L3).get.bRequiresIntialLiq_? = Some(bSrc)
+	}
 	
 	def addPlate(o: Plate) {
 		addObject(o)
 		m_plates += o
 	}
 	
-	private def getObjData[T](o: Obj, map: HashMap[Obj, Any]): T =
+	def addPlate(o: Plate, bSrc: Boolean) {
+		addPlate(o)
+		if (o.getConfigL3(configL3).get.dim_?.isDefined)
+			o.getConfigL3(configL3).get.dim_?.get.wells.foreach(well => addWell(well, bSrc))
+	}
+	
+	private def getObjData[T](o: Obj, map: HashMap[Obj, _ <: Any]): T =
 		map(o).asInstanceOf[T]
 	
 	def getWellConfigL3(o: Well): WellConfigL3 = {

@@ -3,7 +3,7 @@ package roboliq.devices.pipette
 import scala.collection.immutable.SortedSet
 
 import roboliq.common._
-import roboliq.parts._
+//import roboliq.parts._
 //import roboliq.tokens._
 
 
@@ -14,9 +14,9 @@ trait PipetteDevice {
 	/** Maximum volume of the given liquid which this tip can hold */
 	def getTipHoldVolumeMax(tip: Tip, liquid: Liquid): Double
 	/** Choose aspirate method */
-	def getAspiratePolicy(tipState: TipState, wellState: WellState): Option[PipettePolicy]
+	def getAspiratePolicy(tipState: TipState, wellState: WellStateL1): Option[PipettePolicy]
 	/** Choose dispense method */
-	def getDispensePolicy(tipState: TipState, wellState: WellState, nVolume: Double): Option[PipettePolicy]
+	def getDispensePolicy(tipState: TipState, wellState: WellStateL1, nVolume: Double): Option[PipettePolicy]
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]

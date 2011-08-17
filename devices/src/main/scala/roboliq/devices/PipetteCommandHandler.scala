@@ -1,4 +1,4 @@
-package roboliq.devices
+/*package roboliq.devices
 
 import roboliq.parts._
 import roboliq.robot._
@@ -88,3 +88,4 @@ object PipetteDeviceUtil {
 		}
 	}
 }
+*/

@@ -5,34 +5,18 @@ import scala.collection.immutable
 import scala.collection.mutable
 import scala.collection.mutable.HashMap
 
-import roboliq.parts._
-import roboliq.tokens._
+import roboliq.common._
+//import roboliq.parts._
+//import roboliq.tokens._
 
 
 class SiteNode(val part: Part, site: Site, children: Map[Int, SiteNode])
 
-trait IRobotState {
-	val prev_? : Option[IRobotState]
-	val mapPartToSite: collection.Map[Part, Option[Site]]
-	//val mapSiteToPart: collection.Map[Site, Part]
-	val mapPartToChildren: collection.Map[Part, immutable.Map[Int, Part]]
-	val tipStates: collection.Map[Tip, TipState]
-	val wellStates: collection.Map[Well, WellState]
-	
-	def toImmutable: RobotState
-	
-	def getSite(part: Part): Option[Site] = RobotState.getSite(this, part)
-	def getSiteList(part: Part): List[Site] = RobotState.getSiteList(this, part)
-	def getTipState(tip: Tip): TipState = RobotState.getTipState(this, tip)
-	def getWellState(well: Well): WellState = RobotState.getWellState(this, well)
-	
-	def getLiquid(well: Well): Liquid = getWellState(well).liquid
-}
 
-case class PipetteState(
-		val mapPartToSite: immutable.Map[Part, Site],
-		val tipStates: immutable.Map[Tip, TipState],
-		val wellStates: immutable.Map[Well, WellState]
+case class PipetteStateL1(
+		val mapPartToSite: Map[Part, Site],
+		val tipStates: Map[Tip, TipState],
+		val wellStates: Map[Well, WellState]
 ) {
 	def getSite(part: Part): Option[Site] = mapPartToSite.get(part)
 	
@@ -44,10 +28,6 @@ case class PipetteState(
 		}
 	}
 	
-	def getTipState(state: IRobotState, tip: Tip) = tipStates.get(tip)
-
-	def getWellState(state: IRobotState, well: Well) = wellStates.get(well)
-
 	val mapPartToChildren: immutable.Map[Part, immutable.Map[Int, Part]] = {
 		val map = new HashMap[Part, immutable.Map[Int, Part]]
 		for ((part, site) <- mapPartToSite) {
@@ -57,18 +37,15 @@ case class PipetteState(
 		}
 		map.toMap
 	}
-	
-	def addLiquid0(tip: Tip, liquid: Liquid, nVolume: Double) =
-		this.copy(tipStates = tipStates + (tip -> tipStates(tip).aspirate(liquid, nVolume)))
 }
 
 // REFACTOR: Why aren't these in IRobotState? -- ellis, 2011-06-27
-object RobotState {
-	val empty = new RobotState(None, immutable.Map(), immutable.Map(), immutable.Map())
+object PipetteState {
+	val empty = new PipetteState(Map(), Map(), Map())
 	
 }
 
-class RobotStateBuilder(val prev : RobotState) extends IRobotState {
+class PipetteStateBuilder(val prev : RobotState) extends IRobotState {
 	val prev_? = Some(prev)
 	val mapPartToSite = new mutable.HashMap[Part, Option[Site]]
 	val mapPartToChildren = new mutable.HashMap[Part, immutable.Map[Int, Part]]

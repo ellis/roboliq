@@ -4,7 +4,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
-import roboliq.compiler._
 import roboliq.robot._
 
 class CompileNode(cmd: Command, res: CompileResult, translation: Seq[Command], children: Seq[CompileNode])
@@ -16,7 +15,7 @@ class Compiler {
 	private var m_handlers: List[CommandCompiler] = Nil
 	//private var m_handlers2: List[CommandCompilerL2] = Nil
 	//private var m_handlers3: List[CommandCompilerL3] = Nil
-	var kb: KnowledgeBase = null
+	//var kb: KnowledgeBase = null
 	//var state0: RobotState = null
 	
 	def register(handler: CommandCompiler) {
@@ -68,7 +67,7 @@ class Compiler {
 	}
 	
 	private def compileCommand(kb: KnowledgeBase, map31: ObjMapper, state0_? : Option[RobotState], cmd: Command): Tuple2[CompileNode, Option[RobotState]] = {
-		val res = compile(state0_?, cmd)
+		val res = compile(kb, map31, state0_?, cmd)
 		res match {
 			case CompileFinal(_, state1) =>
 				(new CompileNode(cmd, res, Nil, Nil), Some(state1))
@@ -92,14 +91,14 @@ class Compiler {
 		cmds.foreach(cmd => addKnowledge(kb, cmd))
 	}
 	
-	private def compile(state0_? : Option[RobotState], cmd: Command): CompileResult = {
+	private def compile(kb: KnowledgeBase, map31: ObjMapper, state0_? : Option[RobotState], cmd: Command): CompileResult = {
 		def x(handlers: List[CommandCompiler]): CompileResult =  handlers match {
 			case Nil =>
 				new CompileError(
 						cmd = cmd,
 						errors = List("Unhandled command: "+cmd.getClass().getCanonicalName()))
 			case handler :: rest =>
-				callHandlerCompile(handler, state0_?, cmd) match {
+				callHandlerCompile(kb, map31, state0_?, handler, cmd) match {
 					case Some(res) => res
 					case None => x(rest)
 				}
@@ -107,9 +106,9 @@ class Compiler {
 		x(m_handlers)
 	}
 	
-	private def callHandlerCompile(handler: CommandCompiler, state0_? : Option[RobotState], cmd: Command): Option[CompileResult] = {
+	private def callHandlerCompile(kb: KnowledgeBase, map31: ObjMapper, state0_? : Option[RobotState], handler: CommandCompiler, cmd: Command): Option[CompileResult] = {
 		if (handler.isInstanceOf[CommandCompilerL3]) {
-			val ctx = new CompilerContextL3(this, kb, state0_?)
+			val ctx = new CompilerContextL3(this, kb, map31, state0_?)
 			val res = handler.asInstanceOf[CommandCompilerL3].compileL3(ctx, cmd)
 			return Some(res)
 		}

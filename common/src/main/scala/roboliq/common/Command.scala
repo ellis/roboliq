@@ -1,4 +1,4 @@
-package roboliq.compiler
+package roboliq.common
 
 trait Command
 /*abstract class CommandL1 extends Command

@@ -1,28 +1,27 @@
 package roboliq.devices.pipette
 
-import roboliq.compiler.Command
-import roboliq.parts._
+import roboliq.common._
 
 
 trait HasTip {
 	val tip: Tip
 }
 
-sealed class TipWell(val tip: Tip, val well: Well) extends HasTip {
-	override def toString = "TipWell("+tip.index+","+well.holder.index+":"+well.index+")" 
+sealed class TipWell(val tip: Tip, val well: WellConfigL1) extends HasTip {
+	override def toString = "TipWell("+tip.index+","+well.holder.hashCode()+":"+well.index+")" 
 }
 
 sealed class TipWellVolume(
-		tip: Tip, well: Well,
+		tip: Tip, well: WellConfigL1,
 		val nVolume: Double
 	) extends TipWell(tip, well) {
-	override def toString = "TipWellVolume("+tip.index+","+well.holder.index+":"+well.index+","+nVolume+")" 
+	override def toString = "TipWellVolume("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+")" 
 }
 
-sealed class TipWellVolumePolicy(tip: Tip, well: Well, nVolume: Double,
+sealed class TipWellVolumePolicy(tip: Tip, well: WellConfigL1, nVolume: Double,
 		val policy: PipettePolicy
 	) extends TipWellVolume(tip, well, nVolume) {
-	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.index+":"+well.index+","+nVolume+","+policy+")" 
+	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+")" 
 }
 
 object ContaminationSeverity extends Enumeration {
