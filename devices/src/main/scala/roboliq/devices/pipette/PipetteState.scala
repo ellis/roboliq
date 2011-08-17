@@ -1,4 +1,4 @@
-package roboliq.robot
+package roboliq.devices.pipette
 
 import scala.collection
 import scala.collection.immutable
@@ -29,74 +29,43 @@ trait IRobotState {
 	def getLiquid(well: Well): Liquid = getWellState(well).liquid
 }
 
-class RobotState(
-		val prev_? : Option[RobotState],
-		val mapPartToSite: immutable.Map[Part, Option[Site]],
+case class PipetteState(
+		val mapPartToSite: immutable.Map[Part, Site],
 		val tipStates: immutable.Map[Tip, TipState],
 		val wellStates: immutable.Map[Well, WellState]
-) extends IRobotState {
-	//val mapSiteToPart: immutable.Map[Site, Part] = mapPartToSite.map(pair => pair._2 -> pair._1)
+) {
+	def getSite(part: Part): Option[Site] = mapPartToSite.get(part)
+	
+	def getSiteList(part: Part): List[Site] = {
+		getSite(part) match {
+			case None => Nil
+			case Some(site) =>
+				site :: (if (site.parent == null) Nil else getSiteList(site.parent))
+		}
+	}
+	
+	def getTipState(state: IRobotState, tip: Tip) = tipStates.get(tip)
+
+	def getWellState(state: IRobotState, well: Well) = wellStates.get(well)
+
 	val mapPartToChildren: immutable.Map[Part, immutable.Map[Int, Part]] = {
 		val map = new HashMap[Part, immutable.Map[Int, Part]]
-		for ((part, site_?) <- mapPartToSite) {
-			site_? match {
-				case None =>
-				case Some(site) =>
-					val parent = site.parent
-					val mapChildren = map.getOrElse(parent, Map())
-					map(parent) = mapChildren + (site.index -> part)
-			}
+		for ((part, site) <- mapPartToSite) {
+			val parent = site.parent
+			val mapChildren = map.getOrElse(parent, Map())
+			map(parent) = mapChildren + (site.index -> part)
 		}
 		map.toMap
 	}
-	def toImmutable: RobotState = this
+	
+	def addLiquid0(tip: Tip, liquid: Liquid, nVolume: Double) =
+		this.copy(tipStates = tipStates + (tip -> tipStates(tip).aspirate(liquid, nVolume)))
 }
 
 // REFACTOR: Why aren't these in IRobotState? -- ellis, 2011-06-27
 object RobotState {
 	val empty = new RobotState(None, immutable.Map(), immutable.Map(), immutable.Map())
 	
-	def getSite(state: IRobotState, part: Part): Option[Site] = {
-		state.mapPartToSite.get(part) match {
-			case Some(None) => None
-			case Some(opt @ Some(site)) => opt
-			case None =>
-				state.prev_? match {
-					case None => None
-					case Some(prev) => getSite(prev, part)
-				}
-		}
-	}
-	
-	def getSiteList(state: IRobotState, part: Part): List[Site] = {
-		getSite(state, part) match {
-			case None => Nil
-			case Some(site) =>
-				site :: (if (site.parent == null) Nil else getSiteList(state, site.parent))
-		}
-	}
-	
-	def getTipState(state: IRobotState, tip: Tip): TipState = {
-		state.tipStates.get(tip) match {
-			case Some(tipState) => tipState
-			case None =>
-				state.prev_? match {
-					case None => TipState(tip)
-					case Some(prev) => getTipState(prev, tip)
-				}
-		}
-	}
-
-	def getWellState(state: IRobotState, well: Well): WellState = {
-		state.wellStates.get(well) match {
-			case Some(wellState) => wellState
-			case None =>
-				state.prev_? match {
-					case None => new WellState(well, Liquid.empty, 0)
-					case Some(prev) => getWellState(prev, well)
-				}
-		}
-	}
 }
 
 class RobotStateBuilder(val prev : RobotState) extends IRobotState {

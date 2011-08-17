@@ -1,3 +1,4 @@
+/*
 package roboliq.level3
 
 
@@ -111,7 +112,6 @@ class PlateProxy(kb: KnowledgeBase, o: Plate) {
 	val data = kb.getPlateData(o)
 	
 	def rows = data.nRows.get
-	def rows_=(n: Int) { data.nRows.user_? = Some(n) }
 
 	def cols = data.nCols.get
 	def cols_=(n: Int) { data.nCols.user_? = Some(n) }
@@ -125,7 +125,7 @@ class PlateProxy(kb: KnowledgeBase, o: Plate) {
 		require(nCols > 0, "nCols must be > 0")
 		val nWells = nRows * nCols
 		val wells = (0 to nWells).map(index => WellProxy(kb, o, index))
-		rows = nRows
+		data.nRows.user_? = Some(nRows)
 		cols = nCols
 		data.wells.user_? = Some(wells)
 	}
@@ -151,3 +151,4 @@ object Plate {
 		o
 	}
 }
+*/

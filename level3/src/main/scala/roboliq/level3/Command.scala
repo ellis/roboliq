@@ -1,5 +1,8 @@
 package roboliq.level3
 
+import roboliq.common._
+
+
 sealed trait WellOrPlate
 case class WP_Well(well: Well) extends WellOrPlate
 case class WP_Plate(plate: Plate) extends WellOrPlate
