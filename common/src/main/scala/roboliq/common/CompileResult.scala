@@ -1,7 +1,5 @@
 package roboliq.common
 
-import roboliq.robot.RobotState
-
 
 sealed abstract class CompileResult//(warnings: Seq[String], errors: Seq[String], cmds: Seq[Command])
 

@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
-import roboliq.robot._
+
 
 class CompileNode(cmd: Command, res: CompileResult, translation: Seq[Command], children: Seq[CompileNode])
 

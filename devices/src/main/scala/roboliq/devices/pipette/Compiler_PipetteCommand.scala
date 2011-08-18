@@ -63,8 +63,8 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 						case WP_Plate(plate2) =>
 							val pc1 = kb.getPlateConfigL3(plate1)
 							val pc2 = kb.getPlateConfigL3(plate1)
-							if (pc1.c1_?.isDefined && pc2.c1_?.isDefined) {
-								val (wells1, wells2) = (pc1.c1_?.get.wells, pc2.c1_?.get.wells)
+							if (pc1.dim_?.isDefined && pc2.dim_?.isDefined) {
+								val (wells1, wells2) = (pc1.dim_?.get.wells, pc2.dim_?.get.wells)
 								if (wells1.size != wells2.size)
 									return ("source and destination plates must have the same number of wells") :: Nil
 							}
@@ -139,9 +139,9 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 		}
 	}
 	*/
-	private def getWells(kb: KnowledgeBase, plate: Plate): Set[Well] = kb.getPlateConfigL3(plate).c1_? match {
+	private def getWells(kb: KnowledgeBase, plate: Plate): Set[Well] = kb.getPlateConfigL3(plate).dim_? match {
 		case None => Set()
-		case Some(c1) => c1.wells.toSet
+		case Some(dim) => dim.wells.toSet
 	}
 	
 	private def getWells1(map31: ObjMapper, wpl: WellOrPlateOrLiquid): Set[WellConfigL1] = wpl match {

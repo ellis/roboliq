@@ -132,7 +132,7 @@ class PipetteHelper {
 		process(tips, Nil, processStep)
 	}
 	
-	def getCleanDegreeAspirate(tipState: TipState, liquid: Liquid): CleanDegree.Value = {
+	def getCleanDegreeAspirate(tipState: TipStateL1, liquid: Liquid): CleanDegree.Value = {
 		var bRinse = false
 		var bThorough = false
 		var bDecontam = false
@@ -162,7 +162,7 @@ class PipetteHelper {
 
 	}
 
-	def getCleanDegreeDispense(tipState: TipState): CleanDegree.Value = {
+	def getCleanDegreeDispense(tipState: TipStateL1): CleanDegree.Value = {
 		var bRinse = false
 		var bThorough = false
 		var bDecontam = false

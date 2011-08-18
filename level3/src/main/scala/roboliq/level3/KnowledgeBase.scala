@@ -129,7 +129,7 @@ class KnowledgeBase {
 			}
 		}
 		val state0L1 = for ((o, _) <- m_state0L3) yield {
-			o.createState0L1(m_configL3) match {
+			o.createState0L1(m_state0L3) match {
 				case Left(ls) => Left(o -> ls)
 				case Right(st) => Right(o -> st)
 			}
