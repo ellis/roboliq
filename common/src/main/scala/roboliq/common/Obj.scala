@@ -85,9 +85,9 @@ class Well extends Obj { thisObj =>
 		import c3._
 		val errors = new ArrayBuffer[String]
 		if (holder_?.isEmpty)
-			errors += "index not set"
-		if (index_?.isEmpty)
 			errors += "holder not set"
+		if (index_?.isEmpty)
+			errors += "index not set"
 		if (!errors.isEmpty)
 			return Left(errors)
 			
@@ -100,8 +100,19 @@ class Well extends Obj { thisObj =>
 	def createConfigL3() = new ConfigL3
 	
 	def createState0L1(state3: StateL3): Either[Seq[String], StateL1] = {
-		import state3._
 		val errors = new ArrayBuffer[String]
+		var liquid_? : Option[Liquid] = None
+		var nVolume_? : Option[Double] = None
+		
+		if (state3.bRequiresIntialLiq_?.isEmpty || state3.bRequiresIntialLiq_?.get == false) {
+			liquid_? = Some(Liquid.empty)
+			nVolume_? = Some(0)
+		}
+		if (state3.liquid_?.isDefined)
+			liquid_? = state3.liquid_?
+		if (state3.nVolume_?.isDefined)
+			nVolume_? = state3.nVolume_?
+			
 		if (liquid_?.isEmpty)
 			errors += "liquid not set"
 		if (nVolume_?.isEmpty)
@@ -184,6 +195,7 @@ class Plate extends Obj {
 				Left(Seq("dimension not set"))
 			case Some(dim) =>
 				Right(new PlateConfigL1(
+						obj = this,
 						nRows = dim.nRows,
 						nCols = dim.nCols,
 						nWells = dim.nRows * dim.nCols,
@@ -220,6 +232,7 @@ class Plate extends Obj {
 }
 
 class PlateConfigL1(
+	val obj: Plate,
 	val nRows: Int,
 	val nCols: Int,
 	val nWells: Int,

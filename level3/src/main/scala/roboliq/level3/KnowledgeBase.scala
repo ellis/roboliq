@@ -35,7 +35,7 @@ class KnowledgeBase {
 		m_liqs += o
 	}
 	
-	private def addObject(o: Obj) {
+	def addObject(o: Obj) {
 		if (!m_objs.contains(o)) {
 			m_objs += o
 			m_configL3(o) = o.createConfigL3()
@@ -122,6 +122,17 @@ class KnowledgeBase {
 	type Errors = Seq[Tuple2[Obj, Seq[String]]]
 	
 	def concretize(): Either[Errors, ObjMapper] = {
+		for (plate <- m_plates) {
+			val pc = getPlateConfigL3(plate)
+			if (pc.dim_?.isDefined) {
+				for ((well, i) <- pc.dim_?.get.wells.zipWithIndex) {
+					val wc = getWellConfigL3(well)
+					wc.holder_? = Some(plate)
+					wc.index_? = Some(i)
+				}
+			}
+		}
+		
 		val configL1 = for ((o, _) <- m_configL3) yield {
 			o.createConfigL1(m_configL3) match {
 				case Left(ls) => Left(o -> ls)
@@ -146,7 +157,7 @@ class KnowledgeBase {
 			Right(map31)
 		}
 		else {
-			val errors = configL1.map(_.left.get) ++ state0L1.map(_.left.get)
+			val errors = configL1.filter(_.isLeft).map(_.left.get) ++ state0L1.filter(_.isLeft).map(_.left.get)
 			Left(errors.toSeq)
 		}
 	}

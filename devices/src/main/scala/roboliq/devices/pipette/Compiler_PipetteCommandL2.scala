@@ -322,7 +322,9 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 	
 	private def getUpdatedState(cycle: CycleState): RobotState = {
 		val cmds1 = cycle.toTokenSeq
+		println("cmds1: "+cmds1)
 		cycle.ress = compiler.compileL1(state0, cmds1)
+		println("cycle.ress: "+cycle.ress)
 		cycle.ress.last.state1
 	}
 }

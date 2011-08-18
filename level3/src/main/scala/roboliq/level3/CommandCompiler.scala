@@ -49,7 +49,7 @@ abstract class CommandCompilerL2 extends CommandCompiler {
 		if (!_cmd.getClass().eq(cmdType))
 			sys.error("Wrong command type")
 		val cmd = _cmd.asInstanceOf[CmdType]
-		compileL2(ctx, cmd)
+		compile(ctx, cmd)
 	}
 	
 	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult

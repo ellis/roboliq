@@ -27,7 +27,7 @@ class Tester extends Roboliq {
 		//water.liquidClass = "water"
 		
 		plate.location = "P1"
-		plate.setDimension(8, 12)
+		plate.setDimension(4, 1)
 		
 		p2.location = "P2"
 		p2.setDimension(8, 1)
@@ -86,9 +86,11 @@ object Main extends App {
 	val tester = new Tester
 	tester.m_protocol.get()
 	tester.m_customize.get()
+	val kb = tester.kb
 	
 	def createCompiler(): Compiler = {
 		val pipetter = new PipetteDeviceGeneric()
+		pipetter.config.tips.foreach(kb.addObject)
 		
 		val compiler = new Compiler
 		compiler.register(new Compiler_PipetteCommand)

@@ -10,6 +10,9 @@ import roboliq.robot._
 
 class PipetteHelper {
 	def chooseTipWellPairsNext(map31: ObjMapper, tips: SortedSet[Tip], wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Seq[TipWell] = {
+		//println("chooseTipWellPairsNext()")
+		//println("tips: "+tips)
+		//println("wells: "+wells)
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
@@ -51,12 +54,14 @@ class PipetteHelper {
 					None
 			}
 		}
+		//println("wellRef_?: "+wellRef_?)
 
 		// Get the holder of interest
 		val holder = wellRef_? match {
 			case None => wells.head.holder.getConfigL1(map31).get
 			case Some(wellRef) => wellRef.holder.getConfigL1(map31).get
 		}
+		//println("holder: "+holder)
 
 		// Either choose the first column or the column after the reference well
 		val iCol = wellRef_? match {
@@ -64,13 +69,15 @@ class PipetteHelper {
 			case Some(wellRef) => (wellRef.index / holder.nRows + 1) % holder.nCols
 		}
 
-		val wellsOnHolder = wells.filter(_.holder == holder)
+		val wellsOnHolder = wells.filter(_.holder eq holder.obj)
 		(holder, wellsOnHolder, iCol)
 	}
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
 	private def getFirstWell(map31: ObjMapper, holder: PlateConfigL1, wellsOnHolder: SortedSet[WellConfigL1], iCol0: Int): WellConfigL1 = {
+		//println("getFirstWell()")
+		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
 		assert(iCol0 >= 0 && iCol0 < holder.nCols)
 
@@ -89,6 +96,9 @@ class PipetteHelper {
 	}
 
 	def chooseTipWellPairsAll(map31: ObjMapper, tips: SortedSet[Tip], dests: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
+		//println("chooseTipWellPairsAll()")
+		//println("tips: "+tips)
+		//println("dests: "+dests)
 		val twss = new ArrayBuffer[Seq[TipWell]]
 		var destsRemaining = dests
 		var twsPrev = Nil
