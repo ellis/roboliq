@@ -24,7 +24,10 @@ trait PipetteDevice {
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
-	//val config = new PipetteDeviceConfig
+	val config = new PipetteDeviceConfig(
+		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
+		tipGroups = Array(Array(0,1,2,3), Array(4,5,6,7))
+	)
 	def getTipAspirateVolumeMin(tip: Tip, liquid: Liquid): Double = 0
 	def getTipHoldVolumeMax(tip: Tip, liquid: Liquid): Double = 1000
 	//def getAspiratePolicy(tipState: TipState, wellState: WellState): Option[PipettePolicy]
@@ -32,5 +35,5 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	//def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
-	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1_Clean]
+	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1_Clean] = Seq(new L1_Clean(tcs.map(_._1), tcs.head._2))
 }
