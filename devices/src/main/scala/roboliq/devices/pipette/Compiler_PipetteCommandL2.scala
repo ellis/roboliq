@@ -15,7 +15,13 @@ import roboliq.level3._
 
 
 class Compiler_PipetteCommandL2(robot: PipetteDevice) extends CommandCompilerL2 {
-	
+	type CmdType = L2_PipetteCommand
+	val cmdType = classOf[L2_PipetteCommand]
+
+	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult = {
+		val x = new Compiler_PipetteCommandL2_Sub(ctx.compiler, ctx.map31, robot, ctx.state0, cmd)
+		CompileTranslation(cmd, x.translation)
+	}
 }
 
 private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper, robot: PipetteDevice, state0: RobotState, cmd: L2_PipetteCommand) {

@@ -1,7 +1,9 @@
 import scala.collection.mutable.ArrayBuffer
 
+import roboliq.common._
 import roboliq.level3._
 import roboliq.devices._
+import roboliq.devices.pipette._
 
 trait Roboliq extends L3_Roboliq {
 	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double) {
@@ -12,7 +14,7 @@ trait Roboliq extends L3_Roboliq {
 }
 
 class Tester extends Roboliq {
-	val water = new Liquid
+	val water = new Liquid("water", true, false, false, false, false)
 	val plate = new Plate
 	
 	protocol {
@@ -22,14 +24,18 @@ class Tester extends Roboliq {
 	customize {
 		val p2 = new Plate
 		
-		water.liquidClass = "water"
+		//water.liquidClass = "water"
 		
 		plate.location = "P1"
 		plate.setDimension(8, 12)
 		
 		p2.location = "P2"
 		p2.setDimension(8, 1)
-		p2.wells.foreach(_.fill(water, 1000))
+		for (well <- p2.wells) {
+			val st = kb.getWellState0L3(well)
+			st.liquid_? = Some(water)
+			st.nVolume_? = Some(1000)
+		}
 		
 		kb.addPlate(p2, true)
 		/*setInitialLiquids(
@@ -38,6 +44,7 @@ class Tester extends Roboliq {
 	}
 }
 
+/*
 class Tester2 extends Roboliq {
 	val water = new Liquid
 	val liquid_plasmidDna = new Liquid
@@ -73,13 +80,33 @@ class Tester2 extends Roboliq {
 	pcrDispense(3)
 	competentYeastDispense()
 } 
+*/
 
 object Main extends App {
 	val tester = new Tester
 	tester.m_protocol.get()
 	tester.m_customize.get()
 	
-	val handler = new PipetteCommandHandler(tester.kb, tester.cmds.head.asInstanceOf[PipetteCommand])
+	def createCompiler(): Compiler = {
+		val pipetter = new PipetteDeviceGeneric()
+		
+		val compiler = new Compiler
+		compiler.register(new Compiler_PipetteCommand)
+		compiler.register(new Compiler_PipetteCommandL2(pipetter))
+		compiler.register(new Compiler_AspirateL1)
+		compiler.register(new Compiler_DispenseL1)
+		compiler
+	}
+
+	val compiler = createCompiler()
+	tester.kb.concretize() match {
+		case Right(map31) =>
+			val state0 = new RobotState(map31.state0L1)//.toInstanceOf
+			compiler.compileL3(tester.kb, map31, state0, tester.cmds)
+		case Left(errors) =>
+			println(errors)
+	}
+	/*val handler = new PipetteCommandHandler(tester.kb, tester.cmds.head.asInstanceOf[PipetteCommand])
 	handler.addKnowledge()
 	val missing = tester.kb.concretize()
 	if (missing.isEmpty) {
@@ -95,5 +122,5 @@ object Main extends App {
 	else {
 		println(missing)
 	}
-	//tester.kb.printUnknown()
+	//tester.kb.printUnknown()*/
 }

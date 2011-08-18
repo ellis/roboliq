@@ -2,15 +2,19 @@ package roboliq.level3
 
 import roboliq.common._
 
+abstract class CommandCompiler {
+	type CmdType <: Command
+	
+	val cmdType: java.lang.Class[_]
+}
 
-trait CommandCompiler
-
-class CompilerContextL1(
-		val state0: RobotState
-		)
+/*class CompilerContextL1(
+		val builder: StateBuilder
+		)*/
 
 class CompilerContextL2(
 		val compiler: Compiler,
+		val map31: ObjMapper,
 		val state0: RobotState
 		)
 
@@ -21,16 +25,37 @@ class CompilerContextL3(
 		val state0_? : Option[RobotState]
 		)
 
-trait CommandCompilerL1 extends CommandCompiler {
-	def updateState(ctx: CompilerContextL1, cmd: Command): RobotState
-	def score(state0: RobotState, res: CompileFinal): Int
+abstract class CommandCompilerL1 extends CommandCompiler {
+	def updateStateL1(builder: StateBuilder, _cmd: Command) {
+		if (!_cmd.getClass().eq(cmdType))
+			sys.error("Wrong command type")
+		val cmd = _cmd.asInstanceOf[CmdType]
+		updateState(builder, cmd)
+	}
+	
+	def scoreL1(state0: RobotState, state1: RobotState, _cmd: Command): Int = {
+		if (!_cmd.getClass().eq(cmdType))
+			sys.error("Wrong command type")
+		val cmd = _cmd.asInstanceOf[CmdType]
+		score(state0, state1, cmd)
+	}
+
+	def updateState(builder: StateBuilder, cmd: CmdType)
+	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int
 }
 
-trait CommandCompilerL2 extends CommandCompiler {
-	def compileL2(ctx: CompilerContextL2, cmd: Command): CompileResult
+abstract class CommandCompilerL2 extends CommandCompiler {
+	def compileL2(ctx: CompilerContextL2, _cmd: Command): CompileResult = {
+		if (!_cmd.getClass().eq(cmdType))
+			sys.error("Wrong command type")
+		val cmd = _cmd.asInstanceOf[CmdType]
+		compileL2(ctx, cmd)
+	}
+	
+	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult
 }
 
-trait CommandCompilerL3 extends CommandCompiler {
+abstract class CommandCompilerL3 extends CommandCompiler {
 	def addKnowledge(kb: KnowledgeBase, cmd: Command)
 	def compileL3(ctx: CompilerContextL3, cmd: Command): CompileResult
 }

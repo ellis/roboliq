@@ -46,14 +46,9 @@ abstract class Obj {
 	def getState0L1(map: scala.collection.Map[Obj, AbstractStateL1]): Option[StateL1] = getFromMap(map)
 	def getState0L3(map: scala.collection.Map[Obj, AbstractStateL3]): Option[StateL3] = getFromMap(map)
 	
-	private def getFromMap[T](map: scala.collection.Map[Obj, Object]): Option[T] = map.get(this) match {
-		case Some(o) =>
-			if (o.isInstanceOf[T])
-				Some(o.asInstanceOf[T])
-			else
-				None
-		case _ =>
-			None
+	private def getFromMap[T: Manifest](map: scala.collection.Map[Obj, Object]): Option[T] = map.get(this) match {
+		case Some(o) => Some(o.asInstanceOf[T])
+		case _ => None
 	}
 }
 
@@ -232,7 +227,7 @@ class PlateConfigL1(
 ) extends AbstractConfigL1
 
 class PlateConfigL3 extends AbstractConfigL3 {
-	val dim_? : Option[PlateConfigDimensionL3] = None
+	var dim_? : Option[PlateConfigDimensionL3] = None
 }
 
 class PlateConfigDimensionL3(
@@ -248,4 +243,17 @@ case class PlateStateL1(
 
 class PlateStateL3 extends AbstractStateL3 {
 	var location_? : Option[String] = None
+}
+
+class PlateProxy(conf: PlateConfigL3, st: PlateStateL3) {
+	def setDimension(rows: Int, cols: Int) {
+		val nWells = rows * cols
+		val dim = new PlateConfigDimensionL3(rows, cols, (0 until nWells).map(_ => new Well).toSeq)
+		conf.dim_? = Some(dim)
+	}
+	
+	def location = st.location_?.get
+	def location_=(s: String) { st.location_? = Some(s) }
+	
+	def wells = conf.dim_?.get.wells
 }

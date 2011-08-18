@@ -9,6 +9,9 @@ import roboliq.devices._
 
 
 class Compiler_PipetteCommand extends CommandCompilerL3 {
+	type CmdType = PipetteCommand
+	val cmdType = classOf[CmdType]
+	
 	def addKnowledge(kb: KnowledgeBase, _cmd: Command) {
 		val cmd = _cmd.asInstanceOf[PipetteCommand]
 		// Add sources to KB

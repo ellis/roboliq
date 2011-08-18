@@ -44,4 +44,5 @@ trait L3_Roboliq {
 	implicit def partToProxy(o: Part): PartProxy = new PartProxy(kb, o)
 	implicit def wellToProxy(o: Well): WellProxy = new WellProxy(kb, o)
 	implicit def plateToProxy(o: Plate): PlateProxy = new PlateProxy(kb, o)*/
+	implicit def plateToProxy(o: Plate): PlateProxy = new PlateProxy(kb.getPlateConfigL3(o), kb.getPlateState0L3(o))
 }
