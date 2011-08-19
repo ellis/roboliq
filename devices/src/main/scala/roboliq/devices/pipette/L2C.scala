@@ -1,17 +1,16 @@
 package roboliq.devices.pipette
 
 import roboliq.common._
-import roboliq.devices.MixSpec
 
 
-class L2_PipetteItem(
+class L2A_PipetteItem(
 		val srcs: Set[WellConfigL1],
 		val dest: WellConfigL1,
 		val nVolume: Double
 		)
 
-class L2_PipetteArgs(
-		val items: Seq[L2_PipetteItem],
+class L2A_PipetteArgs(
+		val items: Seq[L2A_PipetteItem],
 		val mixSpec_? : Option[MixSpec] = None,
 		val sAspirateClass_? : Option[String] = None,
 		val sDispenseClass_? : Option[String] = None,
@@ -20,4 +19,4 @@ class L2_PipetteArgs(
 		val fnClean_? : Option[Unit => Unit] = None
 		)
 
-case class L2_PipetteCommand(args: L2_PipetteArgs) extends Command
+case class L2C_Pipette(args: L2A_PipetteArgs) extends Command

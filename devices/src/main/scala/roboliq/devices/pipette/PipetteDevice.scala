@@ -20,7 +20,7 @@ trait PipetteDevice {
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
-	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1_SetTipStateClean]
+	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1C_SetTipStateClean]
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
@@ -76,5 +76,5 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
-	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1_SetTipStateClean] = Seq(new L1_SetTipStateClean(tcs.map(_._1), tcs.head._2))
+	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1C_SetTipStateClean] = Seq(new L1C_SetTipStateClean(tcs.map(_._1), tcs.head._2))
 }

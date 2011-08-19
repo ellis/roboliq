@@ -34,7 +34,7 @@ object ContaminationSeverity extends Enumeration {
 	val None, Minor, Medium, Major = Value
 }
 
-case class L1_Aspirate(twvs: Seq[TipWellVolumePolicy]) extends Command
-case class L1_Dispense(twvs: Seq[TipWellVolumePolicy]) extends Command
-case class L1_Mix(twvpcs: Seq[TipWellVolumePolicyCount]) extends Command
-case class L1_SetTipStateClean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command
+case class L1C_Aspirate(twvs: Seq[TipWellVolumePolicy]) extends Command
+case class L1C_Dispense(twvs: Seq[TipWellVolumePolicy]) extends Command
+case class L1C_Mix(twvpcs: Seq[TipWellVolumePolicyCount]) extends Command
+case class L1C_SetTipStateClean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command

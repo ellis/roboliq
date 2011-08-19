@@ -1,11 +1,11 @@
-package roboliq.devices
+package roboliq.devices.pipette
 
 import roboliq.common._
 import roboliq.level3._
 
-case class PipetteCommand(items: Seq[PipetteItem], mixSpec_? : Option[MixSpec] = None) extends Command
+case class L3C_Pipette(items: Seq[L3A_PipetteItem], mixSpec_? : Option[MixSpec] = None) extends Command
 
-sealed class PipetteItem(
+sealed class L3A_PipetteItem(
 		val src: WellOrPlateOrLiquid,
 		val dest: WellOrPlate,
 		val nVolume: Double)

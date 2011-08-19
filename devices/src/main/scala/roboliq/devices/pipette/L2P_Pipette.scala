@@ -6,20 +6,15 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
-//import roboliq.parts._
-//import roboliq.tokens._
-//import roboliq.robot._
-//import roboliq.parts._
-//import roboliq.level2.tokens._
 import roboliq.level3._
 
 
-class Compiler_PipetteCommandL2(robot: PipetteDevice) extends CommandCompilerL2 {
-	type CmdType = L2_PipetteCommand
-	val cmdType = classOf[L2_PipetteCommand]
+class L2P_Pipette(robot: PipetteDevice) extends CommandCompilerL2 {
+	type CmdType = L2C_Pipette
+	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult = {
-		val x = new Compiler_PipetteCommandL2_Sub(ctx.compiler, ctx.map31, robot, ctx.state0, cmd)
+		val x = new L2P_Pipette_Sub(ctx.compiler, ctx.map31, robot, ctx.state0, cmd)
 		x.translation match {
 			case Right(translation) =>
 				CompileTranslation(cmd, translation)
@@ -30,15 +25,15 @@ class Compiler_PipetteCommandL2(robot: PipetteDevice) extends CommandCompilerL2 
 	}
 }
 
-private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper, robot: PipetteDevice, state0: RobotState, cmd: L2_PipetteCommand) {
+private class L2P_Pipette_Sub(compiler: Compiler, map31: ObjMapper, robot: PipetteDevice, state0: RobotState, cmd: L2C_Pipette) {
 	val args = cmd.args
 	
 	case class SrcTipDestVolume(src: WellConfigL1, tip: Tip, dest: WellConfigL1, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[Tip], val state0: RobotState) {
-		val cleans = new ArrayBuffer[L1_SetTipStateClean]
-		val aspirates = new ArrayBuffer[L1_Aspirate]
-		val dispenses = new ArrayBuffer[L1_Dispense]
+		val cleans = new ArrayBuffer[L1C_SetTipStateClean]
+		val aspirates = new ArrayBuffer[L1C_Aspirate]
+		val dispenses = new ArrayBuffer[L1C_Dispense]
 		
 		var ress: Seq[CompileFinal] = Nil
 
@@ -249,7 +244,7 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 		val twvps = twvps0.sortBy(_.tip)
 		val twvpss = robot.batchesForDispense(twvps)
 		// Create dispense tokens
-		cycle.dispenses ++= twvpss.map(twvps => new L1_Dispense(twvps))
+		cycle.dispenses ++= twvpss.map(twvps => new L1C_Dispense(twvps))
 	}
 	
 	private def dispense_updateTipStates(twvps: Seq[TipWellVolumePolicy], tipStates: HashMap[Tip, TipStateL1]) {
@@ -296,7 +291,7 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 				case Left(sError) => sError_? = Some(sError); false
 				case Right(twvps) =>
 					val twvpss = robot.batchesForAspirate(twvps)
-					cycle.aspirates ++= twvpss.map(twvs => new L1_Aspirate(twvps))
+					cycle.aspirates ++= twvpss.map(twvs => new L1C_Aspirate(twvps))
 					true
 			}
 		})
@@ -311,7 +306,7 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 			case Left(sError) => Some(sError)
 			case Right(twvps) =>
 				val twvpss = robot.batchesForAspirate(twvps)
-				cycle.aspirates ++= twvpss.map(twvs => new L1_Aspirate(twvps))
+				cycle.aspirates ++= twvpss.map(twvs => new L1C_Aspirate(twvps))
 				None
 		}
 	}

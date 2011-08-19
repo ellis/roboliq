@@ -7,8 +7,8 @@ import roboliq.devices.pipette._
 
 trait Roboliq extends L3_Roboliq {
 	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double) {
-		val item = new PipetteItem(source, dest, volume)
-		val cmd = PipetteCommand(Seq(item))
+		val item = new L3A_PipetteItem(source, dest, volume)
+		val cmd = L3C_Pipette(Seq(item))
 		cmds += cmd
 	}
 }
@@ -93,11 +93,11 @@ object Main extends App {
 		pipetter.config.tips.foreach(kb.addObject)
 		
 		val compiler = new Compiler
-		compiler.register(new Compiler_PipetteCommand)
-		compiler.register(new Compiler_PipetteCommandL2(pipetter))
-		compiler.register(new Compiler_AspirateL1)
-		compiler.register(new Compiler_DispenseL1)
-		compiler.register(new Compiler_SetTipStateCleanL1)
+		compiler.register(new L3P_Pipette)
+		compiler.register(new L2P_Pipette(pipetter))
+		compiler.register(new L1P_Aspirate)
+		compiler.register(new L1P_Dispense)
+		compiler.register(new L1P_SetTipStateClean)
 		compiler
 	}
 	

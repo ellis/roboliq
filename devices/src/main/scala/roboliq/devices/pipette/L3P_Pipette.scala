@@ -8,12 +8,12 @@ import roboliq.level3._
 import roboliq.devices._
 
 
-class Compiler_PipetteCommand extends CommandCompilerL3 {
-	type CmdType = PipetteCommand
+class L3P_Pipette extends CommandCompilerL3 {
+	type CmdType = L3C_Pipette
 	val cmdType = classOf[CmdType]
 	
 	def addKnowledge(kb: KnowledgeBase, _cmd: Command) {
-		val cmd = _cmd.asInstanceOf[PipetteCommand]
+		val cmd = _cmd.asInstanceOf[L3C_Pipette]
 		// Add sources to KB
 		cmd.items.foreach(_.src match {
 			case WPL_Well(o) => kb.addWell(o, true)
@@ -28,7 +28,7 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 	}
 	
 	def compileL3(ctx: CompilerContextL3, _cmd: Command): CompileResult = {
-		val cmd = _cmd.asInstanceOf[PipetteCommand]
+		val cmd = _cmd.asInstanceOf[CmdType]
 		val errors = checkParams(ctx.kb, cmd)
 		if (!errors.isEmpty)
 			return CompileError(cmd, errors)
@@ -39,7 +39,7 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 		}
 	}
 	
-	private def checkParams(kb: KnowledgeBase, cmd: PipetteCommand): Seq[String] = {
+	private def checkParams(kb: KnowledgeBase, cmd: CmdType): Seq[String] = {
 		val items = cmd.items
 		val srcs = Set() ++ items.map(_.src)
 		if (srcs.size == 0)
@@ -84,8 +84,8 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 		Nil
 	}
 	
-	def translate(map31: ObjMapper, cmd: PipetteCommand): Either[String, Command] = {
-		val items2 = new ArrayBuffer[L2_PipetteItem]
+	def translate(map31: ObjMapper, cmd: CmdType): Either[String, Command] = {
+		val items2 = new ArrayBuffer[L2A_PipetteItem]
 		val bAllOk = cmd.items.forall(item => {
 			val srcWells1 = getWells1(map31, item.src)
 			val destWells1 = getWells1(map31, item.dest)
@@ -93,7 +93,7 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 				false
 			}
 			else {
-				items2 ++= destWells1.map(dest1 => new L2_PipetteItem(srcWells1, dest1, item.nVolume))
+				items2 ++= destWells1.map(dest1 => new L2A_PipetteItem(srcWells1, dest1, item.nVolume))
 				true
 			}
 		})
@@ -101,7 +101,7 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 		println(items2)
 		
 		if (bAllOk) {
-			val args = new L2_PipetteArgs(
+			val args = new L2A_PipetteArgs(
 					items2,
 					cmd.mixSpec_?,
 					sAspirateClass_? = None,
@@ -109,7 +109,7 @@ class Compiler_PipetteCommand extends CommandCompilerL3 {
 					sMixClass_? = None,
 					sTipKind_? = None,
 					fnClean_? = None)
-			Right(L2_PipetteCommand(args))
+			Right(L2C_Pipette(args))
 		}
 		else {
 			Left("missing well")
