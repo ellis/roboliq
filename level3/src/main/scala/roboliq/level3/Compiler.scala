@@ -6,7 +6,15 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 
 
-class CompileNode(cmd: Command, res: CompileResult, translation: Seq[Command], children: Seq[CompileNode])
+class CompileNode(cmd: Command, res: CompileResult, translation: Seq[Command], children: Seq[CompileNode]) {
+	def collectFinal(): Seq[CompileFinal] = {
+		res match {
+			case c @ CompileFinal(_, _) => Seq(c)
+			case c @ CompileTranslation(_, _) => children.flatMap(_.collectFinal())
+			case _ => Seq()
+		}
+	}
+}
 
 
 class Compiler {
