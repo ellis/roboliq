@@ -116,21 +116,4 @@ object Main extends App {
 		case Left(errors) =>
 			println(errors)
 	}
-	/*val handler = new PipetteCommandHandler(tester.kb, tester.cmds.head.asInstanceOf[PipetteCommand])
-	handler.addKnowledge()
-	val missing = tester.kb.concretize()
-	if (missing.isEmpty) {
-		val errs = handler.checkParams()
-		if (errs.isEmpty) {
-			val res = handler.compile()
-			println(res)
-		}
-		else {
-			println(errs)
-		}
-	}
-	else {
-		println(missing)
-	}
-	//tester.kb.printUnknown()*/
 }

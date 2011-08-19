@@ -63,11 +63,15 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	create L3 package
-	create some common Parts for levels 3, 2, and 1
+	split devices project into commands and devices
+	L1C_Wash
+	create evoware translator for existing L1 commands
+	figure out how to clean BSSE tips
+	figure out how to clean Weizmann tips
+	MIX
 	Add Comment()s to evoware output
 	BsseRobot.batch*spirate() needs to batch on volume too
-	try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
+	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	create Syringe object and decouple it from the Tip object, so that tips can be exchanged
 x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 	between all tokens is a robot state
