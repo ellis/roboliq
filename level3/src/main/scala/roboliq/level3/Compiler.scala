@@ -35,26 +35,29 @@ class Compiler {
 		rs
 	}
 	
-	def compileL1(state0: RobotState, cmd: Command): Option[CompileFinal] = {
+	def compileL1(state0: RobotState, cmd: Command): Either[CompileError, CompileFinal] = {
 		m_handlers.get(cmd.getClass()) match {
 			case Some(handler1 : CommandCompilerL1) =>
 				val builder = new StateBuilder(state0)
 				handler1.updateStateL1(builder, cmd)
-				Some(CompileFinal(cmd, builder.toImmutable))
-			case _ => None
+				Right(CompileFinal(cmd, builder.toImmutable))
+			case Some(_) =>
+				Left(CompileError(cmd, Seq("command compiler must be of type CommandCompilerL1")))
+			case None =>
+				Left(CompileError(cmd, Seq("no handler for command "+cmd.getClass().getCanonicalName())))
 		}
 	}
 	
-	def compileL1(state0: RobotState, cmds: Seq[Command]): Seq[CompileFinal] = {
+	def compileL1(state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileFinal]] = {
 		var ress = new ArrayBuffer[CompileFinal]
 		var state = state0
 		for (cmd <- cmds) {
 			compileL1(state, cmd) match {
-				case Some(res) => ress += res
-				case None => return Nil
+				case Right(res) => ress += res
+				case Left(sError) => return Left(sError)
 			}
 		}
-		ress
+		Right(ress)
 	}
 	
 	private def compileCommands(kb: KnowledgeBase, map31: ObjMapper, state0_? : Option[RobotState], cmds: Seq[Command]): Tuple2[Seq[CompileNode], Option[RobotState]] = {

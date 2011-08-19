@@ -30,4 +30,4 @@ object ContaminationSeverity extends Enumeration {
 
 case class L1_Aspirate(twvs: Seq[TipWellVolumePolicy]) extends Command
 case class L1_Dispense(twvs: Seq[TipWellVolumePolicy]) extends Command
-case class L1_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command
+case class L1_SetTipStateClean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command

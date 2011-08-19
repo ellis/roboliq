@@ -97,6 +97,7 @@ object Main extends App {
 		compiler.register(new Compiler_PipetteCommandL2(pipetter))
 		compiler.register(new Compiler_AspirateL1)
 		compiler.register(new Compiler_DispenseL1)
+		compiler.register(new Compiler_SetTipStateCleanL1)
 		compiler
 	}
 

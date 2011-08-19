@@ -35,3 +35,15 @@ class Compiler_DispenseL1 extends CommandCompilerL1 {
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 1
 }
 
+class Compiler_SetTipStateCleanL1 extends CommandCompilerL1 {
+	type CmdType = L1_SetTipStateClean
+	val cmdType = classOf[CmdType]
+	
+	def updateState(builder: StateBuilder, cmd: CmdType) {
+		for (tip <- cmd.tips) {
+			tip.stateWriter(builder).clean(cmd.degree)
+		}
+	}
+	
+	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 10
+}

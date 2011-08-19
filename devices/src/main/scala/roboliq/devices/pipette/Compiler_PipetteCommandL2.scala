@@ -20,7 +20,13 @@ class Compiler_PipetteCommandL2(robot: PipetteDevice) extends CommandCompilerL2 
 
 	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult = {
 		val x = new Compiler_PipetteCommandL2_Sub(ctx.compiler, ctx.map31, robot, ctx.state0, cmd)
-		CompileTranslation(cmd, x.translation)
+		x.translation match {
+			case Right(translation) =>
+				CompileTranslation(cmd, translation)
+			case Left(e) =>
+				println("e: "+e)
+				e
+		}
 	}
 }
 
@@ -30,7 +36,7 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 	case class SrcTipDestVolume(src: WellConfigL1, tip: Tip, dest: WellConfigL1, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[Tip], val state0: RobotState) {
-		val cleans = new ArrayBuffer[L1_Clean]
+		val cleans = new ArrayBuffer[L1_SetTipStateClean]
 		val aspirates = new ArrayBuffer[L1_Aspirate]
 		val dispenses = new ArrayBuffer[L1_Dispense]
 		
@@ -44,35 +50,45 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 	val dests = SortedSet[WellConfigL1]() ++ args.items.map(_.dest)
 	val mapDestToItem = args.items.map(t => t.dest -> t).toMap
 
-	val translation: Seq[Command] = {
+	val translation: Either[CompileError, Seq[Command]] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
 		var winner = Seq[Command]()
 		var nWinnerScore = Int.MaxValue
+		var lsErrors = new ArrayBuffer[String]
 		for (tipGroup <- robot.config.tipGroups) {
 			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index))
 	
-			val cycles = pipette(tips)
-			if (!cycles.isEmpty) {
-				val cmds1 = cycles.flatMap(_.toTokenSeq)
-				val x = compiler.compileL1(state0, cmds1)
-				if (!x.isEmpty) {
-					compiler.score(state0, x) match {
-						case Some(nScore) =>
-							if (nScore < nWinnerScore) {
-								winner = cmds1
-								nWinnerScore = nScore
+			pipette(tips) match {
+				case Left(lsErrors2) =>
+					lsErrors ++= lsErrors2
+				case Right(Seq()) =>
+				case Right(cycles) =>
+					val cmds1 = cycles.flatMap(_.toTokenSeq)
+					compiler.compileL1(state0, cmds1) match {
+						case Right(ress) =>
+							compiler.score(state0, ress) match {
+								case Some(nScore) =>
+									if (nScore < nWinnerScore) {
+										winner = cmds1
+										nWinnerScore = nScore
+									}
+								case _ =>
 							}
 						case _ =>
 					}
 				}
-			}
 		}
-		winner
+		if (nWinnerScore < Int.MaxValue)
+			Right(winner)
+		else
+			Left(CompileError(cmd, lsErrors))
 	}
 	
-	private def pipette(tips: SortedSet[Tip]): Seq[CycleState] = {
+	type Errors = Seq[String]
+	
+	private def pipette(tips: SortedSet[Tip]): Either[Errors, Seq[CycleState]] = {
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
@@ -81,9 +97,9 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 		// Pair up all tips and wells
 		val twss0 = helper.chooseTipWellPairsAll(map31, tips, dests)
 
-		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Boolean = {
+		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
 			if (twss.isEmpty)
-				return true
+				return Right()
 			
 			val cycle = new CycleState(tips, stateCycle0)
 			// First tip/dest pairs for dispense
@@ -105,8 +121,7 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 			//
 			val sError_? = dispense(cycle, tipStates, srcs0, tws0)
 			if (sError_?.isDefined) {
-				println("ERROR: "+sError_?.get)
-				return false
+				return Left(Seq(sError_?.get))
 			}
 			
 			// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
@@ -138,24 +153,25 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 					aspirateDirect(cycle, tipStates, srcs0)
 			}
 			if (sError2_?.isDefined) {
-				println("ERROR: "+sError_?.get)
-				return false
+				return Left(Seq(sError_?.get))
 			}
 
-			val stateNext = getUpdatedState(cycle)
-			
-			cycles += cycle
-			
-			createCycles(twssRest, stateNext)
+			getUpdatedState(cycle) match {
+				case Right(stateNext) => 
+					cycles += cycle
+					createCycles(twssRest, stateNext)
+				case Left(lsErrors) =>
+					Left(lsErrors)
+			}			
 		}
 
-		val bOk = createCycles(twss0.toList, state0)
-		if (bOk) {
-			// TODO: optimize aspiration
-			cycles
+		createCycles(twss0.toList, state0) match {
+			case Left(e) =>
+				Left(e)
+			case Right(()) =>
+				// TODO: optimize aspiration
+				Right(cycles)
 		}
-		else
-			Nil
 	}
 	
 	private def dispense(cycle: CycleState, tipStates: HashMap[Tip, TipStateL1], srcs: Map[Tip, Set[WellConfigL1]], tws: Seq[TipWell]): Option[String] = {
@@ -320,11 +336,18 @@ private class Compiler_PipetteCommandL2_Sub(compiler: Compiler, map31: ObjMapper
 		}
 	}
 	
-	private def getUpdatedState(cycle: CycleState): RobotState = {
+	private def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
 		println("cmds1: "+cmds1)
-		cycle.ress = compiler.compileL1(state0, cmds1)
-		println("cycle.ress: "+cycle.ress)
-		cycle.ress.last.state1
+		compiler.compileL1(state0, cmds1) match {
+			case Right(Seq()) =>
+				Left(Seq("compileL1 failed"))
+			case Right(ress) =>
+				cycle.ress = ress
+				println("cycle.ress: "+cycle.ress)
+				Right(cycle.ress.last.state1)
+			case Left(e) =>
+				Left(e.errors)
+		}
 	}
 }
