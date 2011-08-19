@@ -4,12 +4,11 @@ import org.scalatest.matchers.ShouldMatchers
 
 import scala.collection.immutable.SortedSet
 
-import roboliq.parts._
-import roboliq.robot._
-import roboliq.tokens._
+import roboliq.common._
+import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
-
+/*
 class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers {
 	val tips = SortedSet[Tip]((0 to 7).map(new Tip(_)) : _*)
 	val (tipsA, tipsB) = tips.splitAt(4)
@@ -85,3 +84,4 @@ class PipetteHelperSpec extends FeatureSpec with GivenWhenThen with ShouldMatche
 		}
 	}
 }
+*/

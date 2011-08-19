@@ -4,8 +4,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashSet
 
 import roboliq.common._
-import roboliq.level3._
-import roboliq.devices._
+import roboliq.commands.pipette._
+import roboliq.compiler._
 
 
 class L3P_Pipette extends CommandCompilerL3 {

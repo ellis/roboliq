@@ -6,7 +6,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
-import roboliq.level3._
+import roboliq.commands.pipette._
+import roboliq.compiler._
 
 
 class L2P_Pipette(robot: PipetteDevice) extends CommandCompilerL2 {

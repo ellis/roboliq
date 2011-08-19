@@ -3,7 +3,11 @@ package roboliq.roboease
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.util.parsing.combinator._
-import roboliq.level3._
+
+import roboliq.common._
+import roboliq.compiler._
+import roboliq.commands.pipette._
+import roboliq.devices.pipette._
 
 
 /*object Tok extends Enumeration {

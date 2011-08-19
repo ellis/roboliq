@@ -3,8 +3,8 @@ package roboliq.devices.pipette
 import scala.collection.immutable.SortedSet
 
 import roboliq.common._
-//import roboliq.parts._
-//import roboliq.tokens._
+import roboliq.commands.pipette._
+import roboliq.compiler._
 
 
 trait PipetteDevice {

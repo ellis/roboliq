@@ -1,7 +1,8 @@
 package roboliq.devices.pipette
 
 import scala.collection.immutable.SortedSet
-import roboliq.parts._
+
+import roboliq.commands.pipette._
 
 
 class PipetteDeviceConfig(

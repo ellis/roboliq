@@ -1,8 +1,8 @@
 import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
-import roboliq.level3._
-import roboliq.devices._
+import roboliq.commands.pipette._
+import roboliq.compiler._
 import roboliq.devices.pipette._
 
 trait Roboliq extends L3_Roboliq {

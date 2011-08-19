@@ -5,6 +5,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
+import roboliq.commands.pipette._
 import roboliq.robot._
 
 

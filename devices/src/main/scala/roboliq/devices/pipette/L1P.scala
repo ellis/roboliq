@@ -1,7 +1,8 @@
 package roboliq.devices.pipette
 
 import roboliq.common._
-import roboliq.level3._
+import roboliq.commands.pipette._
+import roboliq.compiler._
 
 
 class L1P_Aspirate extends CommandCompilerL1 {
