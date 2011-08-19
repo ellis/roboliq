@@ -84,6 +84,11 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 			val st = state
 			map(thisObj) = st.copy(destsEntered = Nil, cleanDegree = cleanDegree)
 		}
+		
+		def mix(liquid2: Liquid, nVolume2: Double) {
+			aspirate(liquid2, nVolume2)
+			dispenseIn(nVolume2, liquid2)
+		}
 	}
 	
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
