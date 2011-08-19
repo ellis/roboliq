@@ -258,10 +258,20 @@ class PlateStateL3 extends AbstractStateL3 {
 	var location_? : Option[String] = None
 }
 
-class PlateProxy(conf: PlateConfigL3, st: PlateStateL3) {
+class PlateProxy(kb: KnowledgeBase, obj: Plate) {
+	val conf = kb.getPlateConfigL3(obj)
+	val st = kb.getPlateState0L3(obj)
 	def setDimension(rows: Int, cols: Int) {
 		val nWells = rows * cols
-		val dim = new PlateConfigDimensionL3(rows, cols, (0 until nWells).map(_ => new Well).toSeq)
+		val wells = (0 until nWells).map(i => {
+			val well = new Well
+			kb.addWell(well)
+			val wc = kb.getWellConfigL3(well)
+			wc.index_? = Some(i)
+			wc.holder_? = Some(obj)
+			well
+		})
+		val dim = new PlateConfigDimensionL3(rows, cols, wells.toSeq)
 		conf.dim_? = Some(dim)
 	}
 	

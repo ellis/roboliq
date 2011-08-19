@@ -202,10 +202,11 @@ class Parser extends JavaTokenParsers {
 		//val res1 = p.apply(input)
 		res1 match {
 			case Success(plate ~ ":" ~ wellsByRowCol, _) =>
-				val pd = kb.getPlateData(plate)
+				val pc = kb.getPlateConfigL3(plate)
 				var sError: String = null
 				val list = wellsByRowCol.flatMap(pair => {
-					val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
+					val dim = pc.dim_?.get
+					val (nRows, nCols) = (dim.nRows, dim.nCols)
 					val (iRow, iCol, nWells) = (pair._1 - 'A', pair._2 - 1, pair._3)
 					if (iRow < 0 || iRow >= nRows) {
 						sError = ("Invalid row: "+pair._1)
@@ -278,6 +279,7 @@ class Parser extends JavaTokenParsers {
 					val plate = new Plate
 					val pp = new PlateProxy(kb, plate)
 					pp.setDimension(carrier.nCols, carrier.nRows)
+					pp.location = sLoc
 					mapLocToPlate(sLoc) = plate
 				case None =>
 			}
@@ -293,16 +295,21 @@ class Parser extends JavaTokenParsers {
 	}
 	
 	def getWell_?(plate: Plate, iWell: Int): Option[Well] = {
-		val pd = kb.getPlateData(plate)
-		if (pd.wells.isEmpty || iWell < 0 || iWell >= pd.wells.get.size)
-			None
-		else
-			Some(pd.wells.get.apply(iWell))
+		kb.getPlateConfigL3(plate).dim_? match {
+			case Some(dim) =>
+				if (iWell < 0 || iWell >= dim.wells.size)
+					return Some(dim.wells(iWell))
+				else
+					None
+			case None =>
+				None
+		}
 	}
 	
 	def getWell(plate: Plate, iRow: Int, iCol: Int, input: Input): Either[ParseResult[Nothing], Well] = {
-		val pd = kb.getPlateData(plate)
-		val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
+		val pc = kb.getPlateConfigL3(plate)
+		val dim = pc.dim_?.get
+		val (nRows, nCols) = (dim.nRows, dim.nCols)
 		if (iRow < 0 || iRow >= nRows) {
 			Left(Error("Invalid row: plate has "+nRows+" rows, but row"+(iRow+1)+"was requested", input))
 		}
@@ -311,7 +318,7 @@ class Parser extends JavaTokenParsers {
 		}
 		else {
 			val iWell = iRow + iCol * nRows
-			val well = pd.wells.get.apply(iWell)
+			val well = dim.wells(iWell)
 			Right(well)
 		}
 	}
@@ -336,57 +343,96 @@ class Parser extends JavaTokenParsers {
 	}*/
 	
 	def getWells(plate: Plate, well0: Well, nWells: Int, input: Input): Either[ParseResult[Nothing], List[Well]] = {
-		val pd = kb.getPlateData(plate)
-		val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
-		val d = kb.getPartData(well0)
-		val i0 = d.index.get
+		val pc = kb.getPlateConfigL3(plate)
+		val dim = pc.dim_?.get
+		val (nRows, nCols) = (dim.nRows, dim.nCols)
+		val wc = kb.getWellConfigL3(well0)
+		val i0 = wc.index_?.get
 		val i1 = i0 + nWells - 1
 		if (i1 >= nRows * nCols) {
 			Left(Error("Plate dimension exceeded", input))
 		}
 		else {
-			val l = (i0 to i1).map(i => pd.wells.get.apply(i)).toList
+			val l = (i0 to i1).map(i => dim.wells.apply(i)).toList
 			Right(l)
 		}
 	}
 	
 	def getWells(plate: Plate, well0: Well, well1: Well): List[Well] = {
-		val i0 = kb.partData(well0).index.get
-		val i1 = kb.partData(well1).index.get
-		val pd = kb.getPlateData(plate)
-		(i0 to i1).map(pd.wells.get.apply).toList
+		val i0 = kb.getWellConfigL3(well0).index_?.get
+		val i1 = kb.getWellConfigL3(well1).index_?.get
+		val pc = kb.getPlateConfigL3(plate)
+		(i0 to i1).map(pc.dim_?.get.wells.apply).toList
 	}
 	
-	def doAssign(id: String, s: String) { mapVars(id) = s }
+	def setVar(id: String, s: String) { mapVars(id) = s }
 	
-	def doOption(id: String, value: Option[String]) { mapOptions(id) = value.getOrElse(null) }
+	def setOption(id: String, value: Option[String]) { mapOptions(id) = value.getOrElse(null) }
 	
-	def doReagent(reagent: String, plate: Plate, iWell: Int, lc: String, nWells_? : Option[Int]) {
+	def setReagent(reagent: String, plate: Plate, iWell: Int, lc: String, nWells_? : Option[Int]) {
 		//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
 		
 		// Create liquid with given name
-		val liq = new Liquid
-		liq.sLabel = reagent
-		kb.liqs += liq
+		val liq = new Liquid(reagent, true, false, false, false, false)
+		kb.addLiquid(liq)
 		
 		// Add liquid to wells
-		val pd = kb.getPlateData(plate)
-		val wells = pd.wells.get
+		val pc = kb.getPlateConfigL3(plate)
+		val wells = pc.dim_?.get.wells
 		for (well <- wells) {
-			kb.wellData(well).liq_? = Some(liq)
+			kb.getWellState0L3(well).liquid_? = Some(liq)
 		}
 			
 		mapLiquids(reagent) = liq
 	}
 
-	def doLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
+	def setLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
 	
-	def do_DIST_REAGENT2(liq: Liquid, wells: List[Tuple2[Plate, Int]], volumes: List[Double], sLiquidClass: String, opts_? : Option[String]) {
-		println(liq.sLabel)
-		println(wells)
+	def addRunError(s: String) {
+		m_lsScriptErrors += (m_sScriptLine -> s)
+		println(s)
 	}
 	
-	def do_MIX_WELLS(plate: Plate, wells: List[Well], lnCount: List[Int], lnVolume: List[Double], sLiquidClass: String, opts_? : Option[String]) {
+	def addRunCommand(cmd: Command) {
+		m_scriptCommands += cmd
+		println(cmd)
+	}
+	
+	def run_DIST_REAGENT2(liq: Liquid, wells: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
+		if (wells.isEmpty) {
+			addRunError("list of destination wells must be non-empty")
+			return
+		}
+		if (volumes.isEmpty) {
+			addRunError("list of volumes must be non-empty")
+			return
+		}
+		if (volumes.size > 1 && wells.size != volumes.size) {
+			addRunError("lists of wells and volumes must have the same dimensions")
+			return
+		}
+		
+		val wells2 = wells.map(pair => {
+			val (plate, iWell) = pair
+			val dim = kb.getPlateConfigL3(plate).dim_?.get
+			dim.wells(iWell)
+		})
+		val wvs = {
+			if (volumes.size > 1)
+				wells2 zip volumes
+			else
+				wells2.map(_ -> volumes.head)
+		}
+		
+		val items = wvs.map(pair => {
+			val (well, nVolume) = pair
+			new L3A_PipetteItem(WPL_Liquid(liq), WP_Well(well), nVolume)
+		})
+		val cmd = L3C_Pipette(items)
+		addRunCommand(cmd)
+	}
+	
+	def run_MIX_WELLS(plate: Plate, wells: List[Well], lnCount: List[Int], lnVolume: List[Double], sLiquidClass: String, opts_? : Option[String]) {
 		println(plate)
 		println(wells)
 		println(lnVolume)
@@ -395,55 +441,77 @@ class Parser extends JavaTokenParsers {
 	
 	val cmd0List: Parser[String] = "LIST"~>ident 
 	val cmd0Assign: Parser[Unit] = ident ~"="~ floatingPointNumber ^^
-				{ case id ~"="~ s => doAssign(id, s) }
+				{ case id ~"="~ s => setVar(id, s) }
 	val cmds0 = Map[String, Parser[Unit]](
 			("OPTION", ident~opt(word) ^^
-				{ case id ~ value => doOption(id, value) }),
+				{ case id ~ value => setOption(id, value) }),
 			("REAGENT", ident~idPlate~integer~ident~opt(integer) ^^
-				{ case reagent ~ plate ~ iWell ~ lc ~ nWells_? => doReagent(reagent, plate, iWell, lc, nWells_?) }),
+				{ case reagent ~ plate ~ iWell ~ lc ~ nWells_? => setReagent(reagent, plate, iWell, lc, nWells_?) }),
 			("LABWARE", ident~ident~stringLiteral ^^
-				{ case id ~ rack ~ name => doLabware(id, rack, name) })
+				{ case id ~ rack ~ name => setLabware(id, rack, name) })
 			)
 	
 	val cmds2 = Map[String, Parser[Unit]](
 			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
-				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => do_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
+				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
 			("MIX_WELLS", idPlate~idWells~valInts~valVolumes~ident~opt(word) ^^
-				{ case plate ~ wells ~ lnCount ~ lnVolume ~ lc ~ opts_? => do_MIX_WELLS(plate, wells, lnCount, lnVolume, lc, opts_?) })
+				{ case plate ~ wells ~ lnCount ~ lnVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, lnCount, lnVolume, lc, opts_?) })
 			)
-	private var m_section = 0
+			
+	//----------------------------------------------
+	
+	object Section extends Enumeration {
+		val Config, ConfigList, Doc, Script = Value
+	}
+
+	private var m_section = Section.Config
 	private var m_asDoc: List[String] = Nil
 	private var m_asList = new ArrayBuffer[String]
 	private var m_sListName: String = null
 	private var m_sError: String = null
 	//private val m_mapVars = new HashMap[String, String]
 	private val m_mapLists = new HashMap[String, List[String]]
+	private var m_map31: ObjMapper = null
+	private var m_sScriptLine: String = null
+	private val m_lsScriptErrors = new ArrayBuffer[Tuple2[String, String]]()
+	private val m_scriptCommands = new ArrayBuffer[Command]()
 	
 	def mapLists = m_mapLists.asInstanceOf[scala.collection.Map[String, List[String]]]
 	
-	// "DIST_REAGENT"
 	
 	def parse(sSource: String) {
 		// Clear variables
-		m_section = 0
+		m_section = Section.Config
 		m_asDoc = Nil
 		m_asList.clear
 		m_sError = null
 		m_mapLists.clear
+		m_lsScriptErrors.clear()
+		m_scriptCommands.clear()
 		
 		for (sLine <- sSource.lines) {
 			val s = sLine.replaceAll("#.*", "").trim
 			println(s)
 			s match {
 				case "" =>
-				case "DOC" => m_section = 1
-				case "SCRIPT" => m_section = 2
+				case "DOC" =>
+					m_section = Section.Doc
+				case "SCRIPT" =>
+					kb.concretize() match {
+						case Left(errors) =>
+							println("Errors:")
+							errors.foreach(println)
+							return
+						case Right(map31) =>
+							m_map31 = map31
+					}
+					m_section = Section.Script
 				case _ =>
 					m_section match {
-						case 0 => handleConfig(s)
-						case 1 => handleDoc(s)
-						case 2 => handleScript(s)
-						case 3 => handleConfigList(s)
+						case Section.Doc => handleDoc(s)
+						case Section.Config => handleConfig(s)
+						case Section.ConfigList => handleConfigList(s)
+						case Section.Script => handleScript(s)
 					}
 			}
 			if (m_sError != null) {
@@ -453,16 +521,16 @@ class Parser extends JavaTokenParsers {
 		}
 	}
 	
-	def handleDoc(s: String) {
+	private def handleDoc(s: String) {
 		if (s == "ENDDOC") {
 			m_asDoc = m_asDoc.reverse
-			m_section = 0
+			m_section = Section.Config
 		}
 		else
 			m_asDoc = s :: m_asDoc
 	}
 	
-	def handleConfig(sLine: String) {
+	private def handleConfig(sLine: String) {
 		val rAssign = parseAll(cmd0Assign, sLine)
 		val rList = parseAll(cmd0List, sLine)
 		if (rAssign.successful) {
@@ -471,7 +539,7 @@ class Parser extends JavaTokenParsers {
 		else if (rList.successful) {
 			m_asList.clear
 			m_sListName = rList.get
-			m_section = 3
+			m_section = Section.ConfigList
 		}
 		else {
 			var bFound = false
@@ -504,19 +572,20 @@ class Parser extends JavaTokenParsers {
 				findFirstMatch(s, rest)
 	}*/
 
-	def handleConfigList(s: String) {
+	private def handleConfigList(s: String) {
 		if (s == "ENDLIST") {
 			m_mapLists(m_sListName) = m_asList.toList
-			m_section = 0
+			m_section = Section.Config
 		}
 		else
 			m_asList += s
 	}
 	
-	def handleScript(sLine: String) {
+	private def handleScript(sLine: String) {
 		if (sLine == "ENDSCRIPT")
-			m_section = 0
+			m_section = Section.Config
 		else {
+			m_sScriptLine = sLine
 			var bFound = false
 			val rCmd = parse(word, sLine)
 			if (rCmd.successful) {
@@ -538,58 +607,6 @@ class Parser extends JavaTokenParsers {
 			}
 		}
 	}
-	
-	/*
-	private def tokenize(s: String, fs: List[Function]): List[String] = {
-		// Remove comments and extra spaces
-		val s1 = s.replaceAll("#.*", "").trim
-		if (s1.isEmpty)
-			return Nil
-		val as = s1.split(" +")
-		val sName = as.head
-		val args = as.tail
-		val fs1 = fs.filter(_.sName == sName)
-		if (fs1.isEmpty) {
-			m_sError = "Unrecognized command: " + sName
-			return Nil
-		}
-		val asErrors = new ArrayBuffer[String]
-		Nil
-	}
-
-	private def matcheArgs(f: Function, args: Array[String]): String = {
-		val nArgsMin = f.args.size
-		val nArgsMax = nArgsMin + f.opts.size 
-		if (args.size < nArgsMin || args.size > nArgsMax)
-			return "Wrong number of arguments"
-		
-		var iarg = 0
-		for (tok <- f.args) {
-			val sArg = args(iarg)
-			iarg += 1
-			
-			tok match {
-				case Tok.Ident =>
-				case Tok.Int =>
-				case Tok.Word =>
-				case Tok.Double =>
-					
-				case Tok.Id =>
-				case Tok.IdNew =>
-				case Tok.Rack =>
-				case Tok.Source =>
-				case Tok.Plate =>
-				case Tok.Wells =>
-				case Tok.Location =>
-				case Tok.Volume =>
-				case Tok.LiquidClass =>
-				case Tok.Params =>					
-			}
-		}
-		
-		return null
-	}
-	*/
 	
 	def DefineRack(name: String, grid: Int, site: Int, xsize: Int, ysize: Int, nVolumeMax: Double, carrierType: String = "") {
 		val carrier = Carrier(

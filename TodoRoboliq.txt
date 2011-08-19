@@ -63,12 +63,12 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	split devices project into commands and devices
+x	split devices project into commands and devices
 	L1C_Wash
 	create evoware translator for existing L1 commands
 	figure out how to clean BSSE tips
 	figure out how to clean Weizmann tips
-	MIX
+	L*C_Mix
 	Add Comment()s to evoware output
 	BsseRobot.batch*spirate() needs to batch on volume too
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)

@@ -88,7 +88,7 @@ object Main extends App {
 	
 	def test2() {
 		import roboliq.roboease._
-		import roboliq.level3._
+		import roboliq.compiler._
 		
 		val p = new Parser
 		
@@ -200,7 +200,7 @@ LIST DDW_LIST
 ENDLIST
 """
 		//p.parse(sSource)
-		val sSource2 = scala.io.Source.fromFile("/home/ellisw/src/TelAviv/scripts/Rotem_Script01.conf").mkString
+		val sSource2 = scala.io.Source.fromFile("/home/ellis/src/TelAviv/scripts/Rotem_Script01.conf").mkString
 		p.parse(sSource2)
 		
 		println(p.mapOptions)
