@@ -36,5 +36,40 @@ object ContaminationSeverity extends Enumeration {
 
 case class L1C_Aspirate(twvs: Seq[TipWellVolumePolicy]) extends Command
 case class L1C_Dispense(twvs: Seq[TipWellVolumePolicy]) extends Command
+//case class L1C_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command
 case class L1C_Mix(twvpcs: Seq[TipWellVolumePolicyCount]) extends Command
+/*case class L1C_Wash
+case class T0_Wash(
+	mTips: Int,
+	iWasteGrid: Int, iWasteSite: Int,
+	iCleanerGrid: Int, iCleanerSite: Int,
+	nWasteVolume: Double,
+	nWasteDelay: Int,
+	nCleanerVolume: Double,
+	nCleanerDelay: Int,
+	nAirgapVolume: Int,
+	nAirgapSpeed: Int,
+	nRetractSpeed: Int,
+	bFastWash: Boolean
+) extends T0_Token("wash") {
+	override def toString = {
+		val fmt = new java.text.DecimalFormat("#.##")
+		Array(
+			mTips,
+			iWasteGrid, iWasteSite,
+			iCleanerGrid, iCleanerSite,
+			'"'+fmt.format(nWasteVolume)+'"',
+			nWasteDelay,
+			'"'+fmt.format(nCleanerVolume)+'"',
+			nCleanerDelay,
+			nAirgapVolume,
+			nAirgapSpeed,
+			nRetractSpeed,
+			(if (bFastWash) 1 else 0),
+			0,1000,0
+		).mkString("Wash(", ",", ")")
+	}
+}
+*/
+
 case class L1C_SetTipStateClean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command

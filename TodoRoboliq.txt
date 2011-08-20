@@ -164,6 +164,11 @@ x	setup unit tests for sbt
 				each tip can still access the same set of source wells
 				each tip can accommodate the additional volume
 				dispense does not require cleaning
+	tip handling in Wash vs Dispose:
+		fixed tips:
+			do nothing, rinse, thorough wash, decontaminate, decontaminate with pre-rinse
+		disposable tips:
+			do nothing, replace (drop tip, wash syringe, get new tip)
 	Clean:
 		Clean overrides:
 			before start
