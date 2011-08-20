@@ -10,9 +10,9 @@ import roboliq.compiler._
 trait PipetteDevice {
 	val config: PipetteDeviceConfig
 	/** Minimum volume which can be aspirated */
-	def getTipAspirateVolumeMin(tip: Tip, liquid: Liquid): Double
+	def getTipAspirateVolumeMin(tip: TipConfigL1, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */
-	def getTipHoldVolumeMax(tip: Tip, liquid: Liquid): Double
+	def getTipHoldVolumeMax(tip: TipConfigL1, liquid: Liquid): Double
 	/** Choose aspirate method */
 	def getAspiratePolicy(tipState: TipStateL1, wellState: WellStateL1): Option[PipettePolicy]
 	/** Choose dispense method */
@@ -20,7 +20,7 @@ trait PipetteDevice {
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
-	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1C_SetTipStateClean]
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL1, CleanDegree.Value]]]
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
@@ -28,8 +28,8 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		tips = SortedSet((0 to 1).map(i => new Tip(i)) : _*),
 		tipGroups = Array(Array(0,1))
 	)
-	def getTipAspirateVolumeMin(tip: Tip, liquid: Liquid): Double = 0
-	def getTipHoldVolumeMax(tip: Tip, liquid: Liquid): Double = 1000
+	def getTipAspirateVolumeMin(tip: TipConfigL1, liquid: Liquid): Double = 0
+	def getTipHoldVolumeMax(tip: TipConfigL1, liquid: Liquid): Double = 1000
 	def getAspiratePolicy(tipState: TipStateL1, wellState: WellStateL1): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
@@ -76,5 +76,5 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
-	def batchesForClean(tcs: Seq[Tuple2[Tip, CleanDegree.Value]]): Seq[L1C_SetTipStateClean] = Seq(new L1C_SetTipStateClean(tcs.map(_._1), tcs.head._2))
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL1, CleanDegree.Value]]] = Seq(tcs)
 }

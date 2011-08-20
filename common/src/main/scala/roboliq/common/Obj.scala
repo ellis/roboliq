@@ -103,7 +103,7 @@ class Well extends Obj { thisObj =>
 		Right(conf, state)
 	}
 
-	class StateWriter(map: HashMap[Obj, ObjState]) {
+	class StateWriter(conf: Config, map: HashMap[ObjConfig, ObjState]) {
 		def state = map(thisObj).asInstanceOf[State]
 		
 		def liquid = state.liquid

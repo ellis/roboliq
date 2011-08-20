@@ -20,3 +20,5 @@ class L2A_PipetteArgs(
 		)
 
 case class L2C_Pipette(args: L2A_PipetteArgs) extends Command
+
+case class L2C_Clean(tips: Set[TipConfigL1], degree: CleanDegree.Value) extends Command

@@ -90,19 +90,19 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 
-	// For use in Compiler_PipetteCommand
-	def createConfigAndState0(): Tuple2[Config, State] = {
-		val conf = new TipConfigL1(this, index)
-		val state = new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
-		(conf, state)
+	// For use in L2P_Pipette
+	def createState0(conf: Config): State = {
+		new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
 	}
-	def stateWriter(map: HashMap[Tip, TipStateL1]) = new StateWriter(map.asInstanceOf[HashMap[Obj, ObjState]])
+	def stateWriter(map: HashMap[Config, State]) = new StateWriter(map.map(pair => pair._1.obj -> pair._2.asInstanceOf[ObjState]))
 }
 
 class TipConfigL1(
 	val obj: Tip,
 	val index: Int
-) extends ObjConfig
+) extends ObjConfig with Ordered[TipConfigL1] {
+	override def compare(that: TipConfigL1): Int = this.index - that.index
+}
 
 case class TipStateL1(
 	val conf: TipConfigL1,

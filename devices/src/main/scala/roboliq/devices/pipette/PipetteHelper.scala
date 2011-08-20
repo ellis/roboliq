@@ -10,7 +10,7 @@ import roboliq.robot._
 
 
 class PipetteHelper {
-	def chooseTipWellPairsNext(map31: ObjMapper, tips: SortedSet[Tip], wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Seq[TipWell] = {
+	def chooseTipWellPairsNext(map31: ObjMapper, tips: SortedSet[TipConfigL1], wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Seq[TipWell] = {
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
 		//println("wells: "+wells)
@@ -96,7 +96,7 @@ class PipetteHelper {
 		checkCol(iCol0)
 	}
 
-	def chooseTipWellPairsAll(map31: ObjMapper, tips: SortedSet[Tip], dests: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
+	def chooseTipWellPairsAll(map31: ObjMapper, tips: SortedSet[TipConfigL1], dests: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
 		//println("chooseTipWellPairsAll()")
 		//println("tips: "+tips)
 		//println("dests: "+dests)
@@ -123,7 +123,7 @@ class PipetteHelper {
 		}
 	}
 
-	def chooseTipSrcPairs(map31: ObjMapper, tips: SortedSet[Tip], srcs: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
+	def chooseTipSrcPairs(map31: ObjMapper, tips: SortedSet[TipConfigL1], srcs: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
 		// Cases:
 		// Case 1: tips size == srcs size:
 		// Case 2: tips size < srcs size:
@@ -134,11 +134,11 @@ class PipetteHelper {
 		// - keep the top tips.size() entries
 		// Repeat the sorting each time all sources have been used (e.g. when there are more tips than sources)
 
-		def processStep(tips0: Iterable[Tip]): Tuple2[Iterable[Tip], Seq[TipWell]] = {
-			val tips = tips0.asInstanceOf[SortedSet[Tip]]
+		def processStep(tips0: Iterable[TipConfigL1]): Tuple2[Iterable[TipConfigL1], Seq[TipWell]] = {
+			val tips = SortedSet[TipConfigL1](tips0.toSeq : _*)
 			val tws = chooseTipWellPairsNext(map31, tips, srcs, Nil)
 			val tipsRemaining = tips -- tws.map(_.tip)
-			(tipsRemaining, tws)
+			(tipsRemaining.toSeq, tws)
 		}
 		process(tips, Nil, processStep)
 	}

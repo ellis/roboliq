@@ -64,7 +64,8 @@ Tuval/Yair:
 	get date for coming to Weizmann
 Code:
 x	split devices project into commands and devices
-	L1C_Wash
+x	L1C_Wash
+	L2C_Clean
 	create evoware translator for existing L1 commands
 	figure out how to clean BSSE tips
 	figure out how to clean Weizmann tips
@@ -150,6 +151,50 @@ x	setup unit tests for sbt
 			cmd
 			result
 			children
+	Alternative compiling levels:
+		NEED TO SPLIT CONFIG AND STATE FOR OBJSETUP AGAIN IN ORDER TO KEEP TRACK OF STATE IN HIGHER LEVEL COMMANDS?  Maybe not, since commands which need state could possibly delay translation until L1 state is available...?
+		compilation cycles:
+			each compilation run produces a linear list of commands rather than a tree
+			L3 command can either replace itself with a list of other L3 commands or translate L2 commands
+				NOTE: this might be too restrictive.  How about letting L2 commands translate to a list of both L2 and L1 commands?
+			steps:
+				optionally replace L3 commands with other L3 commands
+				add knowledge from L3 commands
+				abort if knowledge is not complete
+				translate each L3 command to L2 commands (use ObjConfig parameters instead of Obj) then to L1 commands, abort on first error
+				
+		processor hierarchy:
+			L4P: 
+				inp: kb, Obj, ObjSetup, ObjConfig, RobotState
+				mod: kb, ObjSetup
+				out: L3C with ObjConfig parameters
+			L3P:
+				inp: ObjConfig, RobotState
+				mod: nothing
+				out: L2C with ObjConfig parameters
+			L2P:
+				inp: ObjConfig, RobotState
+				mod: RobotState
+				out: L1C with ObjState parameters
+			L1P:
+				inp: ObjState
+				mod: nothing
+				out: native format
+		command hierarchy:
+			A: need only object references
+			 : processed by L3 compiler
+			B: need object configs
+			 : processed by L2 compiler
+			 : processed by L1 compiler
+			C: need object states
+				NOTE: interesting thought, but note that such commands are not in a position to update state
+		compile with (incomplete) knowledgebase:
+			L3: update knowledgebase and ObjSetup, output possible additional L3 commands and L3 state
+		compile with config:
+			L3: output Pending or L3/L2 translations
+		compile with state:
+			L3: output L3/L2 translations
+		once knowledgebase is complete, translate to equivalent commands using ObjConfig parameters
 	Pipetting:
 		state should only be updated by the underlying robot/device implementation based on L1 commands
 		createCycles can try dispensing until an invalid state is reached, then revert to the previous state and start the next cycle
