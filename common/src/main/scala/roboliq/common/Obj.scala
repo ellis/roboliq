@@ -6,50 +6,30 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 
-trait AbstractConfigL1
-trait AbstractConfigL3
-trait AbstractStateL1
-trait AbstractStateL3
+trait ObjSetup
+trait ObjConfig
+trait ObjState
+
+trait ObjConfigImpl[T <: Obj] extends ObjConfig {
+	val obj: T
+}
+
+trait ObjStateImpl[T <: ObjConfig] extends ObjState {
+	val conf: T
+}
 
 abstract class Obj {
-	type ConfigL1 <: AbstractConfigL1
-	type ConfigL3 <: AbstractConfigL3
-	type StateL1 <: AbstractStateL1
-	type StateL3 <: AbstractStateL3
+	type Setup <: ObjSetup
+	type Config <: ObjConfig
+	type State <: ObjState
 	
-	def createConfigL1(configL3: ConfigL3): Either[Seq[String], ConfigL1]
-	def createConfigL3(): ConfigL3
-	def createState0L1(state3: StateL3): Either[Seq[String], StateL1]
-	def createState0L3(): StateL3
-
-	def createConfigL1(map3: collection.Map[Obj, AbstractConfigL3]): Either[Seq[String], ConfigL1] = {
-		getConfigL3(map3) match {
-			case Some(c3) => createConfigL1(c3)
-			case _ => Left(List("object's level 3 config not found"))
-		}
-	}
+	def createSetup(): Setup
+	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]]
 	
-	def createState0L1(map: scala.collection.Map[Obj, AbstractStateL3]): Either[Seq[String], StateL1] = {
-		getState0L3(map) match {
-			case Some(st3) => createState0L1(st3)
-			case _ => Left(List("object's level 3 config not found"))
-		}
-	}
-	
-	def getConfigL1(map31: ObjMapper): Option[ConfigL1] = getConfigL1(map31.configL1)
-	def getConfigL3(map31: ObjMapper): Option[ConfigL3] = getConfigL3(map31.configL3)
-	def getState0L1(map31: ObjMapper): Option[StateL1] = getState0L1(map31.state0L1)
-	def getState0L3(map31: ObjMapper): Option[StateL3] = getState0L3(map31.state0L3)
-	
-	def getConfigL1(map: scala.collection.Map[Obj, AbstractConfigL1]): Option[ConfigL1] = getFromMap(map)
-	def getConfigL3(map: scala.collection.Map[Obj, AbstractConfigL3]): Option[ConfigL3] = getFromMap(map)
-	def getState0L1(map: scala.collection.Map[Obj, AbstractStateL1]): Option[StateL1] = getFromMap(map)
-	def getState0L3(map: scala.collection.Map[Obj, AbstractStateL3]): Option[StateL3] = getFromMap(map)
-	
-	private def getFromMap[T: Manifest](map: scala.collection.Map[Obj, Object]): Option[T] = map.get(this) match {
-		case Some(o) => Some(o.asInstanceOf[T])
-		case _ => None
-	}
+	def getConfigL1(map31: ObjMapper): Option[Config] = map31.configL1(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
+	def getConfigL3(map31: ObjMapper): Option[Setup] = map31.configL3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
+	def getState0L1(map31: ObjMapper): Option[State] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
+	def getState0L3(map31: ObjMapper): Option[Setup] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 }
 
 sealed class Setting[T] {
@@ -76,60 +56,55 @@ sealed class Setting[T] {
 }
 
 class Well extends Obj { thisObj =>
-	type ConfigL1 = WellConfigL1
-	type ConfigL3 = WellConfigL3
-	type StateL1 = WellStateL1
-	type StateL3 = WellStateL3
+	type Setup = WellSetup
+	type Config = WellConfigL1
+	type State = WellStateL1
 	
-	def createConfigL1(c3: ConfigL3): Either[Seq[String], ConfigL1] = {
-		import c3._
+	def createSetup() = new Setup
+	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
-		if (holder_?.isEmpty)
+		
+		// Check Config vars
+		if (setup.holder_?.isEmpty)
 			errors += "holder not set"
-		if (index_?.isEmpty)
+		if (setup.index_?.isEmpty)
 			errors += "index not set"
-		if (!errors.isEmpty)
-			return Left(errors)
 			
-		Right(new WellConfigL1(
-				obj = this,
-				holder = holder_?.get,
-				index = index_?.get))
-	}
-
-	def createConfigL3() = new ConfigL3
-	
-	def createState0L1(state3: StateL3): Either[Seq[String], StateL1] = {
-		val errors = new ArrayBuffer[String]
+		// Check state0 vars
 		var liquid_? : Option[Liquid] = None
 		var nVolume_? : Option[Double] = None
 		
-		if (state3.bRequiresIntialLiq_?.isEmpty || state3.bRequiresIntialLiq_?.get == false) {
+		if (setup.bRequiresIntialLiq_?.isEmpty || setup.bRequiresIntialLiq_?.get == false) {
 			liquid_? = Some(Liquid.empty)
 			nVolume_? = Some(0)
 		}
-		if (state3.liquid_?.isDefined)
-			liquid_? = state3.liquid_?
-		if (state3.nVolume_?.isDefined)
-			nVolume_? = state3.nVolume_?
+		if (setup.liquid_?.isDefined)
+			liquid_? = setup.liquid_?
+		if (setup.nVolume_?.isDefined)
+			nVolume_? = setup.nVolume_?
 			
 		if (liquid_?.isEmpty)
 			errors += "liquid not set"
 		if (nVolume_?.isEmpty)
 			errors += "volume not set"
+		
 		if (!errors.isEmpty)
 			return Left(errors)
 			
-		Right(new WellStateL1(
-				well = this,
+		val conf = new WellConfigL1(
+				obj = this,
+				holder = setup.holder_?.get,
+				index = setup.index_?.get)
+		val state = new WellStateL1(
+				conf = conf,
 				liquid = liquid_?.get,
-				nVolume = nVolume_?.get))
+				nVolume = nVolume_?.get)
+		
+		Right(conf, state)
 	}
-	
-	def createState0L3() = new StateL3
-	
-	class StateWriter(map: HashMap[Obj, Any]) {
-		def state = map(thisObj).asInstanceOf[StateL1]
+
+	class StateWriter(map: HashMap[Obj, ObjState]) {
+		def state = map(thisObj).asInstanceOf[State]
 		
 		def liquid = state.liquid
 		//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
@@ -149,15 +124,15 @@ class Well extends Obj { thisObj =>
 	}
 	//def stateWriter(map: HashMap[ThisObj, StateL1]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): StateL1 = state.map(this).asInstanceOf[StateL1]
-	def state(state: RobotState): StateL1 = state.map(this).asInstanceOf[StateL1]
+	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
+	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 }
 
 class WellConfigL1(
 	val obj: Well,
 	val holder: Plate,
 	val index: Int
-) extends AbstractConfigL1 with Ordered[WellConfigL1] {
+) extends ObjConfig with Ordered[WellConfigL1] {
 	override def compare(that: WellConfigL1): Int = {
 		val d1 = holder.hashCode() - that.holder.hashCode()
 		if (d1 == 0) index - that.index
@@ -165,18 +140,15 @@ class WellConfigL1(
 	}
 }
 
-class WellConfigL3 extends AbstractConfigL3 {
-	var holder_? : Option[Plate] = None
-	var index_? : Option[Int] = None
-}
-
 case class WellStateL1(
-	val well: Well,
+	val conf: WellConfigL1,
 	val liquid: Liquid,
 	val nVolume: Double
-) extends AbstractStateL1
+) extends ObjState
 
-class WellStateL3 extends AbstractStateL3 {
+class WellSetup extends ObjSetup {
+	var holder_? : Option[Plate] = None
+	var index_? : Option[Int] = None
 	var bRequiresIntialLiq_? : Option[Boolean] = None
 	var liquid_? : Option[Liquid] = None
 	var nVolume_? : Option[Double] = None
@@ -184,51 +156,46 @@ class WellStateL3 extends AbstractStateL3 {
 
 class Plate extends Obj {
 	thisObj =>
-	type ConfigL1 = PlateConfigL1
-	type ConfigL3 = PlateConfigL3
-	type StateL1 = PlateStateL1
-	type StateL3 = PlateStateL3
+	type Setup = PlateSetup
+	type Config = PlateConfigL1
+	type State = PlateStateL1
 	
-	def createConfigL1(c3: ConfigL3): Either[Seq[String], ConfigL1] = {
-		c3.dim_? match {
-			case None =>
-				Left(Seq("dimension not set"))
-			case Some(dim) =>
-				Right(new PlateConfigL1(
-						obj = this,
-						nRows = dim.nRows,
-						nCols = dim.nCols,
-						nWells = dim.nRows * dim.nCols,
-						wells = dim.wells))
-		}
-	}
-
-	def createConfigL3() = new ConfigL3
+	def createSetup() = new Setup
 	
-	def createState0L1(state3: StateL3): Either[Seq[String], StateL1] = {
-		import state3._
+	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
-		if (location_?.isEmpty)
+
+		if (setup.dim_?.isEmpty)
+			errors += "dimension not set"
+		if (setup.location_?.isEmpty)
 			errors += "location not set"
 		if (!errors.isEmpty)
 			return Left(errors)
-			
-		Right(new PlateStateL1(
-				plate = this,
-				location = location_?.get))
+
+		val dim = setup.dim_?.get
+		
+		val conf = new PlateConfigL1(
+			obj = this,
+			nRows = dim.nRows,
+			nCols = dim.nCols,
+			nWells = dim.nRows * dim.nCols,
+			wells = dim.wells)
+		val state = new PlateStateL1(
+			conf = conf,
+			location = setup.location_?.get)
+
+		Right(conf, state)
 	}
-	
-	def createState0L3() = new StateL3
-	
-	class StateWriter(map: HashMap[Obj, Any]) {
-		def state = map(thisObj).asInstanceOf[StateL1]
+
+	class StateWriter(map: HashMap[Obj, ObjState]) {
+		def state = map(thisObj).asInstanceOf[State]
 		
 		def location = state.location
 		def location_=(location: String) { map(thisObj) = state.copy(location = location) }
 	}
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): StateL1 = state.map(this).asInstanceOf[StateL1]
-	def state(state: RobotState): StateL1 = state.map(this).asInstanceOf[StateL1]
+	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
+	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 }
 
 class PlateConfigL1(
@@ -237,11 +204,13 @@ class PlateConfigL1(
 	val nCols: Int,
 	val nWells: Int,
 	val wells: Seq[Well]
-) extends AbstractConfigL1
+) extends ObjConfig
 
-class PlateConfigL3 extends AbstractConfigL3 {
-	var dim_? : Option[PlateConfigDimensionL3] = None
-}
+case class PlateStateL1(
+	val conf: PlateConfigL1,
+	val location: String
+) extends ObjState
+
 
 class PlateConfigDimensionL3(
 	val nRows: Int,
@@ -249,34 +218,29 @@ class PlateConfigDimensionL3(
 	val wells: Seq[Well]
 )
 
-case class PlateStateL1(
-	val plate: Plate,
-	val location: String
-) extends AbstractStateL1
-
-class PlateStateL3 extends AbstractStateL3 {
+class PlateSetup extends ObjSetup {
+	var dim_? : Option[PlateConfigDimensionL3] = None
 	var location_? : Option[String] = None
 }
 
 class PlateProxy(kb: KnowledgeBase, obj: Plate) {
-	val conf = kb.getPlateConfigL3(obj)
-	val st = kb.getPlateState0L3(obj)
+	val setup = kb.getPlateSetup(obj)
 	def setDimension(rows: Int, cols: Int) {
 		val nWells = rows * cols
 		val wells = (0 until nWells).map(i => {
 			val well = new Well
 			kb.addWell(well)
-			val wc = kb.getWellConfigL3(well)
-			wc.index_? = Some(i)
-			wc.holder_? = Some(obj)
+			val wellSetup = kb.getWellSetup(well)
+			wellSetup.index_? = Some(i)
+			wellSetup.holder_? = Some(obj)
 			well
 		})
 		val dim = new PlateConfigDimensionL3(rows, cols, wells.toSeq)
-		conf.dim_? = Some(dim)
+		setup.dim_? = Some(dim)
 	}
 	
-	def location = st.location_?.get
-	def location_=(s: String) { st.location_? = Some(s) }
+	def location = setup.location_?.get
+	def location_=(s: String) { setup.location_? = Some(s) }
 	
-	def wells = conf.dim_?.get.wells
+	def wells = setup.dim_?.get.wells
 }

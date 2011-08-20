@@ -12,16 +12,12 @@ class KnowledgeBase {
 	private val m_objs = new HashSet[Obj]
 	private val m_wells = new HashSet[Well]
 	private val m_plates = new HashSet[Plate]
-	private val m_configL3 = new HashMap[Obj, AbstractConfigL3]
-	private val m_state0L3 = new HashMap[Obj, AbstractStateL3]
+	private val m_setups = new HashMap[Obj, ObjSetup]
 
 	// Move this to Pipette device's knowledgebase
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	
-	//val configL1: scala.collection.Map[Obj, Any] = m_configL1
-	val configL3: scala.collection.Map[Obj, AbstractConfigL3] = m_configL3
-	//val state0L1: scala.collection.Map[Obj, Any] = m_state0L1
-	val state0L3: scala.collection.Map[Obj, AbstractStateL3] = m_state0L3
+	val setups: scala.collection.Map[Obj, ObjSetup] = m_setups
 	
 	def addLiquid(o: Liquid) {
 		m_liqs += o
@@ -30,8 +26,7 @@ class KnowledgeBase {
 	def addObject(o: Obj) {
 		if (!m_objs.contains(o)) {
 			m_objs += o
-			m_configL3(o) = o.createConfigL3()
-			m_state0L3(o) = o.createState0L3()
+			m_setups(o) = o.createSetup()
 		}
 	}
 	
@@ -41,9 +36,9 @@ class KnowledgeBase {
 	}
 	
 	def addWell(o: Well, bSrc: Boolean) {
-		addWell(o)
-		if (o.getState0L3(state0L3).get.bRequiresIntialLiq_?.isEmpty)
-			o.getState0L3(state0L3).get.bRequiresIntialLiq_? = Some(bSrc)
+		val setup = getWellSetup(o)
+		if (setup.bRequiresIntialLiq_?.isEmpty)
+			setup.bRequiresIntialLiq_? = Some(bSrc)
 	}
 	
 	def addPlate(o: Plate) {
@@ -52,38 +47,28 @@ class KnowledgeBase {
 	}
 	
 	def addPlate(o: Plate, bSrc: Boolean) {
-		addPlate(o)
-		if (o.getConfigL3(configL3).get.dim_?.isDefined)
-			o.getConfigL3(configL3).get.dim_?.get.wells.foreach(well => addWell(well, bSrc))
+		val setup = getPlateSetup(o)
+		if (setup.dim_?.isDefined)
+			setup.dim_?.get.wells.foreach(well => addWell(well, bSrc))
 	}
 	
-	private def getObjData[T](o: Obj, map: HashMap[Obj, _ <: Any]): T =
-		map(o).asInstanceOf[T]
+	private def getObjData[T](o: Obj): T =
+		m_setups(o).asInstanceOf[T]
 	
-	def getWellConfigL3(o: Well): WellConfigL3 = {
+	def getWellSetup(o: Well): WellSetup = {
 		addWell(o)
-		getObjData(o, m_configL3)
+		getObjData(o)
 	}
 	
-	def getWellState0L3(o: Well): WellStateL3 = {
-		addWell(o)
-		getObjData(o, m_state0L3)
-	}
-	
-	def getPlateConfigL3(o: Plate): PlateConfigL3 = {
+	def getPlateSetup(o: Plate): PlateSetup = {
 		addPlate(o)
-		getObjData(o, m_configL3)
-	}
-	
-	def getPlateState0L3(o: Plate): PlateStateL3 = {
-		addPlate(o)
-		getObjData(o, m_state0L3)
+		getObjData(o)
 	}
 	
 	def getLiqWells(liq: Liquid): Set[Well] = {
 		m_wells.filter(well => {
-			val st = m_state0L3(well).asInstanceOf[WellStateL3]
-			st.liquid_? match {
+			val wellSetup = getWellSetup(well)
+			wellSetup.liquid_? match {
 				case None => false
 				case Some(liq2) => (liq eq liq2)
 			}
@@ -91,7 +76,7 @@ class KnowledgeBase {
 	}
 	
 	def doesWellRequireInitialLiq(well: Well): Boolean = {
-		getWellState0L3(well).bRequiresIntialLiq_? match {
+		getWellSetup(well).bRequiresIntialLiq_? match {
 			case None => false
 			case Some(b) => b
 		}
@@ -115,41 +100,33 @@ class KnowledgeBase {
 	
 	def concretize(): Either[Errors, ObjMapper] = {
 		for (plate <- m_plates) {
-			val pc = getPlateConfigL3(plate)
+			val pc = getPlateSetup(plate)
 			if (pc.dim_?.isDefined) {
 				for ((well, i) <- pc.dim_?.get.wells.zipWithIndex) {
-					val wc = getWellConfigL3(well)
+					val wc = getWellSetup(well)
 					wc.holder_? = Some(plate)
 					wc.index_? = Some(i)
 				}
 			}
 		}
 		
-		val configL1 = for ((o, _) <- m_configL3) yield {
-			o.createConfigL1(m_configL3) match {
-				case Left(ls) => Left(o -> ls)
-				case Right(c) => Right(o -> c)
+		val l = m_setups.map(pair => {
+			val (obj, setup) = pair
+			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
+				case Left(ls) => Left(obj -> ls)
+				case Right((conf, state)) => Right((obj, setup, conf, state))
 			}
-		}
-		val state0L1 = for ((o, _) <- m_state0L3) yield {
-			o.createState0L1(m_state0L3) match {
-				case Left(ls) => Left(o -> ls)
-				case Right(st) => Right(o -> st)
-			}
-		}
-		val st1 = m_state0L3.map(pair => pair._1.createState0L1(m_state0L3))
+		})
 		
-		if (configL1.forall(_.isRight) && state0L1.forall(_.isRight)) {
-			val map31 = new ObjMapper(
-					configL1 = configL1.map(_.right.get).toMap,
-					configL3 = m_configL3.toMap,
-					state0L1 = state0L1.map(_.right.get).toMap,
-					state0L3 = m_state0L3.toMap
-			)
+		if (l.forall(_.isRight)) {
+			val map = l.map(_.right.get match {
+				case (obj, setup, conf, state) => obj -> new SetupConfigState(setup, conf, state)
+			}).toMap
+			val map31 = new ObjMapper(map)
 			Right(map31)
 		}
 		else {
-			val errors = configL1.filter(_.isLeft).map(_.left.get) ++ state0L1.filter(_.isLeft).map(_.left.get)
+			val errors = l.filter(_.isLeft).map(_.left.get)
 			Left(errors.toSeq)
 		}
 	}

@@ -108,7 +108,7 @@ private class L2P_Pipette_Sub(compiler: Compiler, map31: ObjMapper, robot: Pipet
 			tws0.foreach(tw => {
 				val item = mapDestToItem(tw.well)
 				val srcState = item.srcs.head.obj.state(stateCycle0)
-				val tipState = tw.tip.createState0L1(null).right.get.copy(liquid = srcState.liquid)
+				val (_, tipState) = tw.tip.createConfigAndState0()
 				tipStates(tw.tip) = tipState
 			})
 

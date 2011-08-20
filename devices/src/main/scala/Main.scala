@@ -32,9 +32,9 @@ class Tester extends Roboliq {
 		p2.location = "P2"
 		p2.setDimension(8, 1)
 		for (well <- p2.wells) {
-			val st = kb.getWellState0L3(well)
-			st.liquid_? = Some(water)
-			st.nVolume_? = Some(1000)
+			val setup = kb.getWellSetup(well)
+			setup.liquid_? = Some(water)
+			setup.nVolume_? = Some(1000)
 		}
 		
 		kb.addPlate(p2, true)
@@ -108,7 +108,7 @@ object Main extends App {
 	val compiler = createCompiler()
 	tester.kb.concretize() match {
 		case Right(map31) =>
-			val state0 = new RobotState(map31.state0L1)//.toInstanceOf
+			val state0 = map31.createRobotState()
 			val nodes = compiler.compileL3(tester.kb, map31, state0, tester.cmds)
 			println("Output:")
 			val finals = nodes.flatMap(_.collectFinal())

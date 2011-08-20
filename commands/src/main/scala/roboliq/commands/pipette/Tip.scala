@@ -27,33 +27,28 @@ object TipState {
 
 class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	thisObj =>
-	type ConfigL1 = TipConfigL1
-	type ConfigL3 = TipConfigL3
-	type StateL1 = TipStateL1
-	type StateL3 = TipStateL3
+	type Setup = TipSetup
+	type Config = TipConfigL1
+	type State = TipStateL1
 	
 	override def compare(that: Tip): Int = this.index - that.index
 	
-	def createConfigL1(c3: ConfigL3): Either[Seq[String], ConfigL1] = {
-		Right(new TipConfigL1(index))
-	}
-
-	def createConfigL3() = new ConfigL3
+	def createSetup() = new Setup
 	
-	def createState0L1(state3: StateL3): Either[Seq[String], StateL1] = {
-		Right(new TipStateL1(this, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None))
+	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+		val conf = new TipConfigL1(this, index)
+		val state = new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+		Right(conf, state)
 	}
 	
-	def createState0L3() = new StateL3
-	
-	class StateWriter(map: HashMap[Obj, Any]) {
-		def state = map(thisObj).asInstanceOf[StateL1]
+	class StateWriter(map: HashMap[Obj, ObjState]) {
+		def state = map(thisObj).asInstanceOf[State]
 		
 		def aspirate(liquid2: Liquid, nVolume2: Double) {
 			val st = state
 			val nVolumeNew = st.nVolume + nVolume2
 			map(thisObj) = new TipStateL1(
-				st.obj,
+				st.conf,
 				st.liquid + liquid2,
 				nVolumeNew,
 				st.contamInside + liquid2,
@@ -92,27 +87,31 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	}
 	
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): StateL1 = state.map(this).asInstanceOf[StateL1]
-	def state(state: RobotState): StateL1 = state.map(this).asInstanceOf[StateL1]
+	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
+	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 
 	// For use in Compiler_PipetteCommand
-	def stateWriter(map: HashMap[Tip, TipStateL1]) = new StateWriter(map.asInstanceOf[HashMap[Obj, Any]])
+	def createConfigAndState0(): Tuple2[Config, State] = {
+		val conf = new TipConfigL1(this, index)
+		val state = new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+		(conf, state)
+	}
+	def stateWriter(map: HashMap[Tip, TipStateL1]) = new StateWriter(map.asInstanceOf[HashMap[Obj, ObjState]])
 }
 
 class TipConfigL1(
+	val obj: Tip,
 	val index: Int
-) extends AbstractConfigL1
-
-class TipConfigL3 extends AbstractConfigL3
+) extends ObjConfig
 
 case class TipStateL1(
-	val obj: Tip,
+	val conf: TipConfigL1,
 	val liquid: Liquid, 
 	val nVolume: Double, 
 	val contamInside: Contamination, 
 	val nContamInsideVolume: Double,
 	val destsEntered: List[Liquid],
 	val cleanDegree: CleanDegree.Value
-) extends AbstractStateL1
+) extends ObjState
 
-class TipStateL3 extends AbstractStateL3
+class TipSetup extends ObjSetup

@@ -64,12 +64,11 @@ class L3P_Pipette extends CommandCompilerL3 {
 				case WPL_Plate(plate1) =>
 					item.dest match {
 						case WP_Plate(plate2) =>
-							val pc1 = kb.getPlateConfigL3(plate1)
-							val pc2 = kb.getPlateConfigL3(plate1)
-							if (pc1.dim_?.isDefined && pc2.dim_?.isDefined) {
-								val (wells1, wells2) = (pc1.dim_?.get.wells, pc2.dim_?.get.wells)
-								if (wells1.size != wells2.size)
-									return ("source and destination plates must have the same number of wells") :: Nil
+							(kb.getPlateSetup(plate1).dim_?, kb.getPlateSetup(plate2).dim_?) match {
+								case (Some(dim1), Some(dim2)) =>
+									if (dim1.wells.size != dim2.wells.size)
+										return ("source and destination plates must have the same number of wells") :: Nil
+								case _ =>
 							}
 						case _ =>
 							return ("when source is a plate, destination must also be a plate") :: Nil
@@ -142,7 +141,7 @@ class L3P_Pipette extends CommandCompilerL3 {
 		}
 	}
 	*/
-	private def getWells(kb: KnowledgeBase, plate: Plate): Set[Well] = kb.getPlateConfigL3(plate).dim_? match {
+	private def getWells(kb: KnowledgeBase, plate: Plate): Set[Well] = kb.getPlateSetup(plate).dim_? match {
 		case None => Set()
 		case Some(dim) => dim.wells.toSet
 	}
@@ -175,13 +174,14 @@ class L3P_Pipette extends CommandCompilerL3 {
 	}
 	
 	private def getWells1(map31: ObjMapper, liquid: Liquid): Set[WellConfigL1] = {
-		var l: List[WellConfigL1] = Nil
-		for ((_, _c) <- map31.configL1) {
-			if (_c.isInstanceOf[WellConfigL1]) {
-				val c = _c.asInstanceOf[WellConfigL1]
-				l = c :: l
+		// Only keep wells with the given initial liquid
+		val l1 = map31.map.filter(pair => {
+			val sts = pair._2
+			sts.state0 match {
+				case state0: WellStateL1 => (state0.liquid eq liquid)
+				case _ => false
 			}
-		}
-		Set(l : _*)
+		})
+		l1.map(_._2.config.asInstanceOf[WellConfigL1]).toSet
 	}
 }
