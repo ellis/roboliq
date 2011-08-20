@@ -202,7 +202,7 @@ class Parser extends JavaTokenParsers {
 		//val res1 = p.apply(input)
 		res1 match {
 			case Success(plate ~ ":" ~ wellsByRowCol, _) =>
-				val pc = kb.getPlateConfigL3(plate)
+				val pc = kb.getPlateSetup(plate)
 				var sError: String = null
 				val list = wellsByRowCol.flatMap(pair => {
 					val dim = pc.dim_?.get
@@ -295,7 +295,7 @@ class Parser extends JavaTokenParsers {
 	}
 	
 	def getWell_?(plate: Plate, iWell: Int): Option[Well] = {
-		kb.getPlateConfigL3(plate).dim_? match {
+		kb.getPlateSetup(plate).dim_? match {
 			case Some(dim) =>
 				if (iWell < 0 || iWell >= dim.wells.size)
 					return Some(dim.wells(iWell))
@@ -307,7 +307,7 @@ class Parser extends JavaTokenParsers {
 	}
 	
 	def getWell(plate: Plate, iRow: Int, iCol: Int, input: Input): Either[ParseResult[Nothing], Well] = {
-		val pc = kb.getPlateConfigL3(plate)
+		val pc = kb.getPlateSetup(plate)
 		val dim = pc.dim_?.get
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
 		if (iRow < 0 || iRow >= nRows) {
@@ -343,10 +343,10 @@ class Parser extends JavaTokenParsers {
 	}*/
 	
 	def getWells(plate: Plate, well0: Well, nWells: Int, input: Input): Either[ParseResult[Nothing], List[Well]] = {
-		val pc = kb.getPlateConfigL3(plate)
+		val pc = kb.getPlateSetup(plate)
 		val dim = pc.dim_?.get
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
-		val wc = kb.getWellConfigL3(well0)
+		val wc = kb.getWellSetup(well0)
 		val i0 = wc.index_?.get
 		val i1 = i0 + nWells - 1
 		if (i1 >= nRows * nCols) {
@@ -359,9 +359,9 @@ class Parser extends JavaTokenParsers {
 	}
 	
 	def getWells(plate: Plate, well0: Well, well1: Well): List[Well] = {
-		val i0 = kb.getWellConfigL3(well0).index_?.get
-		val i1 = kb.getWellConfigL3(well1).index_?.get
-		val pc = kb.getPlateConfigL3(plate)
+		val i0 = kb.getWellSetup(well0).index_?.get
+		val i1 = kb.getWellSetup(well1).index_?.get
+		val pc = kb.getPlateSetup(plate)
 		(i0 to i1).map(pc.dim_?.get.wells.apply).toList
 	}
 	
@@ -377,10 +377,10 @@ class Parser extends JavaTokenParsers {
 		kb.addLiquid(liq)
 		
 		// Add liquid to wells
-		val pc = kb.getPlateConfigL3(plate)
+		val pc = kb.getPlateSetup(plate)
 		val wells = pc.dim_?.get.wells
 		for (well <- wells) {
-			kb.getWellState0L3(well).liquid_? = Some(liq)
+			kb.getWellSetup(well).liquid_? = Some(liq)
 		}
 			
 		mapLiquids(reagent) = liq
@@ -414,7 +414,7 @@ class Parser extends JavaTokenParsers {
 		
 		val wells2 = wells.map(pair => {
 			val (plate, iWell) = pair
-			val dim = kb.getPlateConfigL3(plate).dim_?.get
+			val dim = kb.getPlateSetup(plate).dim_?.get
 			dim.wells(iWell)
 		})
 		val wvs = {
