@@ -278,6 +278,7 @@ class Parser extends JavaTokenParsers {
 				case Some(carrier) =>
 					val plate = new Plate
 					val pp = new PlateProxy(kb, plate)
+					pp.label = sLoc
 					pp.setDimension(carrier.nCols, carrier.nRows)
 					pp.location = sLoc
 					mapLocToPlate(sLoc) = plate

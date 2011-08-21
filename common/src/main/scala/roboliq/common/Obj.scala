@@ -167,6 +167,8 @@ class Plate extends Obj {
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
+		if (setup.sLabel_?.isEmpty)
+			errors += "label not set"
 		if (setup.dim_?.isEmpty)
 			errors += "dimension not set"
 		if (setup.location_?.isEmpty)
@@ -178,6 +180,7 @@ class Plate extends Obj {
 		
 		val conf = new PlateConfigL1(
 			obj = this,
+			sLabel = setup.sLabel_?.get,
 			nRows = dim.nRows,
 			nCols = dim.nCols,
 			nWells = dim.nRows * dim.nCols,
@@ -192,6 +195,7 @@ class Plate extends Obj {
 
 class PlateConfigL1(
 	val obj: Plate,
+	val sLabel: String,
 	val nRows: Int,
 	val nCols: Int,
 	val nWells: Int,
@@ -208,6 +212,8 @@ class PlateConfigL1(
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
+	
+	override def toString = sLabel
 }
 
 case class PlateStateL1(
@@ -223,12 +229,17 @@ class PlateConfigDimensionL3(
 )
 
 class PlateSetup extends ObjSetup {
+	var sLabel_? : Option[String] = None
 	var dim_? : Option[PlateConfigDimensionL3] = None
 	var location_? : Option[String] = None
 }
 
 class PlateProxy(kb: KnowledgeBase, obj: Plate) {
 	val setup = kb.getPlateSetup(obj)
+	
+	def label = setup.sLabel_?.get
+	def label_=(s: String) { setup.sLabel_? = Some(s) }
+	
 	def setDimension(rows: Int, cols: Int) {
 		val nWells = rows * cols
 		val wells = (0 until nWells).map(i => {
