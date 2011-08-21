@@ -167,6 +167,27 @@ x	setup unit tests for sbt
 				translate each L3 command to L2 commands (use ObjConfig parameters instead of Obj) then to L1 commands, abort on first error
 				
 		processor hierarchy:
+			Pa: add to knowledgebase
+			Pa: concretize knowledgebase to create ObjConfig and ObjState0
+			Ta: translate to commands taking ObjConfig params
+				inp:
+			Tb: use compiler object to choose among various possible translations (via scoring)
+				inp+: compiler
+			Tc: 
+				inp-: compiler
+			-
+				goal: translate to new command params: ObjConfig
+				inp-: kb
+				inp+: ObjConfig, ObjState0
+			-
+				goal: 
+
+
+
+			2:	inp: ObjConfig, RobotState
+			1:	inp: ObjState
+				mod: nothing
+				out: native format
 			L4P: 
 				inp: kb, Obj, ObjSetup, ObjConfig, RobotState
 				mod: kb, ObjSetup
