@@ -40,14 +40,23 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		val state = new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
 		Right(conf, state)
 	}
+}
+
+class TipConfigL1(
+	val obj: Tip,
+	val index: Int
+) extends ObjConfig with Ordered[TipConfigL1] { thisConf =>
+	type State = TipStateL1
+
+	override def compare(that: TipConfigL1): Int = this.index - that.index
 	
-	class StateWriter(map: HashMap[Obj, ObjState]) {
-		def state = map(thisObj).asInstanceOf[State]
+	class StateWriter(map: HashMap[ObjConfig, ObjState]) {
+		def state = map(thisConf).asInstanceOf[State]
 		
 		def aspirate(liquid2: Liquid, nVolume2: Double) {
 			val st = state
 			val nVolumeNew = st.nVolume + nVolume2
-			map(thisObj) = new TipStateL1(
+			map(thisConf) = new TipStateL1(
 				st.conf,
 				st.liquid + liquid2,
 				nVolumeNew,
@@ -67,17 +76,17 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		
 		def dispenseFree(nVolume2: Double) {
 			val st = state
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2, cleanDegree = CleanDegree.None)
+			map(thisConf) = st.copy(nVolume = st.nVolume - nVolume2, cleanDegree = CleanDegree.None)
 		}
 		
 		def dispenseIn(nVolume2: Double, liquid2: Liquid) {
 			val st = state
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2, destsEntered = liquid2 :: st.destsEntered, cleanDegree = CleanDegree.None)
+			map(thisConf) = st.copy(nVolume = st.nVolume - nVolume2, destsEntered = liquid2 :: st.destsEntered, cleanDegree = CleanDegree.None)
 		}
 		
 		def clean(cleanDegree: CleanDegree.Value) {
 			val st = state
-			map(thisObj) = st.copy(destsEntered = Nil, cleanDegree = cleanDegree)
+			map(thisConf) = st.copy(destsEntered = Nil, cleanDegree = cleanDegree)
 		}
 		
 		def mix(liquid2: Liquid, nVolume2: Double) {
@@ -91,17 +100,10 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 
 	// For use in L2P_Pipette
-	def createState0(conf: Config): State = {
-		new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+	def createState0(): State = {
+		new TipStateL1(this, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
 	}
-	def stateWriter(map: HashMap[Config, State]) = new StateWriter(map.map(pair => pair._1.obj -> pair._2.asInstanceOf[ObjState]))
-}
-
-class TipConfigL1(
-	val obj: Tip,
-	val index: Int
-) extends ObjConfig with Ordered[TipConfigL1] {
-	override def compare(that: TipConfigL1): Int = this.index - that.index
+	def stateWriter(map: HashMap[TipConfigL1, State]) = new StateWriter(map.asInstanceOf[HashMap[ObjConfig, ObjState]])
 }
 
 case class TipStateL1(

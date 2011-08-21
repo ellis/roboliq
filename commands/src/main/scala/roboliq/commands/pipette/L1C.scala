@@ -74,4 +74,4 @@ case class L1C_TipsGet(tips: Set[Tip]) // FIXME: add tip kind
 }
 */
 
-case class L1C_SetTipStateClean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command
+case class L1C_SetTipStateClean(tips: Seq[TipConfigL1], degree: CleanDegree.Value) extends Command

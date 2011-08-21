@@ -23,7 +23,7 @@ class ObjMapper(
 	}
 	
 	def createRobotState(): RobotState = {
-		val mapStates = map.mapValues(scs => scs.state0)
+		val mapStates = map.map(pair => pair._2.config -> pair._2.state0).toMap
 		new RobotState(mapStates)
 	}
 }

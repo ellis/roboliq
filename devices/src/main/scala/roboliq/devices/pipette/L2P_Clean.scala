@@ -24,13 +24,13 @@ class L2P_Clean(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispe
 					case (Some(pcA: PlateConfigL1), Some(pcD: PlateConfigL1)) =>
 						val nVolume = 600
 						val twvpsAD = cmd.tips.toSeq.map(tip => {
-							val tipState = tip.obj.state(ctx.state0)
+							val tipState = tip.state(ctx.state0)
 							val wellA = pcA.wells(tip.index % pcA.nWells)
 							val wellD = pcD.wells(tip.index % pcA.nWells)
 							val wellConfA = wellA.getConfigL1(ctx.map31).get
 							val wellConfD = wellD.getConfigL1(ctx.map31).get
-							val wellStateA = wellA.state(ctx.state0)
-							val wellStateD = wellD.state(ctx.state0)
+							val wellStateA = wellConfA.state(ctx.state0)
+							val wellStateD = wellConfD.state(ctx.state0)
 							val policyA_? = robot.getAspiratePolicy(tipState, wellStateA)
 							val policyD_? = robot.getDispensePolicy(tipState, wellStateD, nVolume)
 							(policyA_?, policyD_?) match {

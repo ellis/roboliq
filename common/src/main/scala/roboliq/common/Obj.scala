@@ -102,9 +102,23 @@ class Well extends Obj { thisObj =>
 		
 		Right(conf, state)
 	}
+}
 
-	class StateWriter(conf: Config, map: HashMap[ObjConfig, ObjState]) {
-		def state = map(thisObj).asInstanceOf[State]
+class WellConfigL1(
+	val obj: Well,
+	val holder: Plate,
+	val index: Int
+) extends ObjConfig with Ordered[WellConfigL1] { thisConf =>
+	type State = WellStateL1
+
+	override def compare(that: WellConfigL1): Int = {
+		val d1 = holder.hashCode() - that.holder.hashCode()
+		if (d1 == 0) index - that.index
+		else d1
+	}
+
+	class StateWriter(map: HashMap[ObjConfig, ObjState]) {
+		def state = map(thisConf).asInstanceOf[State]
 		
 		def liquid = state.liquid
 		//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
@@ -114,30 +128,18 @@ class Well extends Obj { thisObj =>
 
 		def add(liquid2: Liquid, nVolume2: Double) {
 			val st = state
-			map(thisObj) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
+			map(thisConf) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
 		}
 		
 		def remove(nVolume2: Double) {
 			val st = state
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2)
+			map(thisConf) = st.copy(nVolume = st.nVolume - nVolume2)
 		}
 	}
 	//def stateWriter(map: HashMap[ThisObj, StateL1]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
-}
-
-class WellConfigL1(
-	val obj: Well,
-	val holder: Plate,
-	val index: Int
-) extends ObjConfig with Ordered[WellConfigL1] {
-	override def compare(that: WellConfigL1): Int = {
-		val d1 = holder.hashCode() - that.holder.hashCode()
-		if (d1 == 0) index - that.index
-		else d1
-	}
 }
 
 case class WellStateL1(
@@ -186,16 +188,6 @@ class Plate extends Obj {
 
 		Right(conf, state)
 	}
-
-	class StateWriter(map: HashMap[Obj, ObjState]) {
-		def state = map(thisObj).asInstanceOf[State]
-		
-		def location = state.location
-		def location_=(location: String) { map(thisObj) = state.copy(location = location) }
-	}
-	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
-	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 }
 
 class PlateConfigL1(
@@ -204,7 +196,19 @@ class PlateConfigL1(
 	val nCols: Int,
 	val nWells: Int,
 	val wells: Seq[Well]
-) extends ObjConfig
+) extends ObjConfig { thisConf =>
+	type State = PlateStateL1
+
+	class StateWriter(map: HashMap[ObjConfig, ObjState]) {
+		def state = map(thisConf).asInstanceOf[State]
+		
+		def location = state.location
+		def location_=(location: String) { map(thisConf) = state.copy(location = location) }
+	}
+	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
+	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
+}
 
 case class PlateStateL1(
 	val conf: PlateConfigL1,
