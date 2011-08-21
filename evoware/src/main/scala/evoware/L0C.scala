@@ -1,9 +1,9 @@
 package evoware
 
-import roboliq.tokens._
+import roboliq.common._
 
 
-case class T0_Spirate(
+case class L0C_Spirate(
 	val sFunc: String,
 	val mTips: Int,
 	val sLiquidClass: String,
@@ -11,7 +11,7 @@ case class T0_Spirate(
 	val iGrid: Int,
 	val iSite: Int,
 	val sPlateMask: String
-) extends T0_Token("spirate") {
+) extends Command {
 	override def toString = {
 		Array(
 			mTips,
@@ -25,7 +25,7 @@ case class T0_Spirate(
 	}
 }
 
-case class T0_Wash(
+case class L0C_Wash(
 	mTips: Int,
 	iWasteGrid: Int, iWasteSite: Int,
 	iCleanerGrid: Int, iCleanerSite: Int,
@@ -37,7 +37,7 @@ case class T0_Wash(
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
 	bFastWash: Boolean
-) extends T0_Token("wash") {
+) extends Command {
 	override def toString = {
 		val fmt = new java.text.DecimalFormat("#.##")
 		Array(
@@ -57,14 +57,14 @@ case class T0_Wash(
 	}
 }
 
-case class T0_Mix(
+case class L0C_Mix(
 	val mTips: Int,
 	val sLiquidClass: String,
 	val asVolumes: Seq[String],
 	val iGrid: Int,
 	val iSite: Int,
 	val sPlateMask: String
-) extends T0_Token("spirate") {
+) extends Command {
 	override def toString = {
 		Array(
 			mTips,

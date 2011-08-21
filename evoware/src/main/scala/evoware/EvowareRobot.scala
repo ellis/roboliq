@@ -2,9 +2,7 @@ package evoware
 
 import scala.collection.mutable.ArrayBuffer
 
-import roboliq.parts._
-import roboliq.tokens._
-import roboliq.robot._
+import roboliq.common._
 
 
 abstract class EvowareRobot extends Robot {

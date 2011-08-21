@@ -70,12 +70,16 @@ x	L2C_Clean
 	create evoware translator for existing L1 commands
 	figure out how to clean BSSE tips
 	figure out how to clean Weizmann tips
+	roboease: accumulate commands and send them though the compiler
+	roboease: LABWARE
+	roboease: MIX
+	roboease: TRANSFER
 	create Syringe object and decouple it from the Tip object, so that tips can be exchanged
 	Add Comment()s to evoware output
-	BsseRobot.batch*spirate() needs to batch on volume too?
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
-x	have robot decide on Aspiration/Dispense strategy for T1 tokens
+	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
+x	have robot decide on Aspiration/Dispense strategy for T1 tokens
 x	each T2 token produces a sequence of T1 tokens
 x	robot tells which tips can be used in batch for a particular token
 x	setup unit tests for sbt

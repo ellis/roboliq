@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="../../../.ivy2/cache/org.scalatest/scalatest_2.9.0/jars/scalatest_2.9.0-1.6.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-bsse"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-evoware"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-B-evoware"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-level2"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
