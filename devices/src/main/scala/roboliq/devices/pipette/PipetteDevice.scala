@@ -21,6 +21,7 @@ trait PipetteDevice {
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]]
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL1, CleanDegree.Value]]]
+	def batchesForMix(twvpcs: Seq[TipWellVolumePolicyCount]): Seq[Seq[TipWellVolumePolicyCount]]
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
@@ -77,4 +78,5 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	def batchesForAspirate(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
 	def batchesForDispense(twvps: Seq[TipWellVolumePolicy]): Seq[Seq[TipWellVolumePolicy]] = Seq(twvps)
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL1, CleanDegree.Value]]] = Seq(tcs)
+	def batchesForMix(twvpcs: Seq[TipWellVolumePolicyCount]): Seq[Seq[TipWellVolumePolicyCount]] = Seq(twvpcs)
 }

@@ -87,12 +87,16 @@ class Well extends Obj { thisObj =>
 			errors += "liquid not set"
 		if (nVolume_?.isEmpty)
 			errors += "volume not set"
+				
+		if (errors.isEmpty && setup.sLabel_?.isEmpty)
+			errors += "label not set"
 		
 		if (!errors.isEmpty)
 			return Left(errors)
 			
 		val conf = new WellConfigL1(
 				obj = this,
+				sLabel = setup.sLabel_?.get,
 				holder = setup.holder_?.get,
 				index = setup.index_?.get)
 		val state = new WellStateL1(
@@ -106,6 +110,7 @@ class Well extends Obj { thisObj =>
 
 class WellConfigL1(
 	val obj: Well,
+	val sLabel: String,
 	val holder: Plate,
 	val index: Int
 ) extends ObjConfig with Ordered[WellConfigL1] { thisConf =>
@@ -140,6 +145,8 @@ class WellConfigL1(
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
+	
+	override def toString = sLabel
 }
 
 case class WellStateL1(
@@ -149,6 +156,7 @@ case class WellStateL1(
 ) extends ObjState
 
 class WellSetup extends ObjSetup {
+	var sLabel_? : Option[String] = None
 	var holder_? : Option[Plate] = None
 	var index_? : Option[Int] = None
 	var bRequiresIntialLiq_? : Option[Boolean] = None

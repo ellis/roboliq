@@ -282,6 +282,10 @@ class Parser extends JavaTokenParsers {
 					pp.setDimension(carrier.nCols, carrier.nRows)
 					pp.location = sLoc
 					mapLocToPlate(sLoc) = plate
+					pp.wells.foreach(well => {
+						val setup = kb.getWellSetup(well)
+						setup.sLabel_? = Some(sLoc+":"+(setup.index_?.get+1))
+					})
 				case None =>
 			}
 		}
@@ -389,14 +393,16 @@ class Parser extends JavaTokenParsers {
 
 	def setLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
 	
-	def addRunError(s: String) {
-		m_lsScriptErrors += (m_sScriptLine -> s)
-		println(s)
+	def logError(sTopic: String, sError: String) {
+		m_lsErrors += (m_sLine -> sError)
+		println("LOG: "+sTopic+": "+sError)
 	}
+	
+	def addRunError(s: String) { logError("script", s) }
 	
 	def addRunCommand(cmd: Command) {
 		m_scriptCommands += cmd
-		println(cmd)
+		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
 	}
 	
 	def run_DIST_REAGENT2(liq: Liquid, wells: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
@@ -435,7 +441,7 @@ class Parser extends JavaTokenParsers {
 	
 	def run_MIX_WELLS(plate: Plate, wells: List[Well], lnCount: List[Int], lnVolume: List[Double], sLiquidClass: String, opts_? : Option[String]) {
 		println(plate)
-		println(wells)
+		println(wells.map(toLabel))
 		println(lnVolume)
 	}
 	
@@ -473,8 +479,8 @@ class Parser extends JavaTokenParsers {
 	//private val m_mapVars = new HashMap[String, String]
 	private val m_mapLists = new HashMap[String, List[String]]
 	private var m_map31: ObjMapper = null
-	private var m_sScriptLine: String = null
-	private val m_lsScriptErrors = new ArrayBuffer[Tuple2[String, String]]()
+	private var m_sLine: String = null
+	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]()
 	private val m_scriptCommands = new ArrayBuffer[Command]()
 	
 	def mapLists = m_mapLists.asInstanceOf[scala.collection.Map[String, List[String]]]
@@ -487,12 +493,16 @@ class Parser extends JavaTokenParsers {
 		m_asList.clear
 		m_sError = null
 		m_mapLists.clear
-		m_lsScriptErrors.clear()
+		m_map31 = null
+		m_lsErrors.clear()
+		m_sLine = null
 		m_scriptCommands.clear()
 		
 		for (sLine <- sSource.lines) {
 			val s = sLine.replaceAll("#.*", "").trim
-			println(s)
+			m_sLine = s
+			if (!s.isEmpty())
+				println("LOG: sLine: "+s)
 			s match {
 				case "" =>
 				case "DOC" =>
@@ -500,8 +510,11 @@ class Parser extends JavaTokenParsers {
 				case "SCRIPT" =>
 					kb.concretize() match {
 						case Left(errors) =>
+							println()
 							println("Errors:")
 							errors.foreach(println)
+							println()
+							m_map31 = null
 							return
 						case Right(map31) =>
 							m_map31 = map31
@@ -549,7 +562,7 @@ class Parser extends JavaTokenParsers {
 				val sCmd: String = rCmd.get
 				cmds0.get(sCmd) match {
 					case None =>
-						m_sError = "Unrecognized command: " + sCmd
+						m_sError = "LOG: unrecognized command: " + sCmd
 					case Some(p) =>
 						val r = parseAll(p, rCmd.next)
 						if (!r.successful)
@@ -585,16 +598,16 @@ class Parser extends JavaTokenParsers {
 	private def handleScript(sLine: String) {
 		if (sLine == "ENDSCRIPT")
 			m_section = Section.Config
-		else {
-			m_sScriptLine = sLine
+		else if (m_map31 != null) {
+			//m_sScriptLine = sLine
 			var bFound = false
 			val rCmd = parse(word, sLine)
 			if (rCmd.successful) {
 				val sCmd: String = rCmd.get
-				println("sCmd = "+sCmd)
+				//println("sCmd = "+sCmd)
 				cmds2.get(sCmd) match {
 					case None =>
-						m_sError = "Unrecognized command: " + sCmd
+						m_sError = "LOG: handleScript: unrecognized command: " + sCmd
 					case Some(p) =>
 						val r = parseAll(p, rCmd.next)
 						if (!r.successful)
@@ -607,6 +620,10 @@ class Parser extends JavaTokenParsers {
 				m_sError = "Unrecognized line: " + sLine
 			}
 		}
+	}
+	
+	private def toLabel(well: Well): String = {
+		kb.getWellSetup(well).sLabel_?.get
 	}
 	
 	def DefineRack(name: String, grid: Int, site: Int, xsize: Int, ysize: Int, nVolumeMax: Double, carrierType: String = "") {

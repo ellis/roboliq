@@ -8,20 +8,14 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 
 
-class L3P_Pipette extends CommandCompilerL3 {
-	type CmdType = L3C_Pipette
+class L3P_Mix extends CommandCompilerL3 {
+	type CmdType = L3C_Mix
 	val cmdType = classOf[CmdType]
 	
 	def addKnowledge(kb: KnowledgeBase, _cmd: Command) {
 		val cmd = _cmd.asInstanceOf[CmdType]
-		// Add sources to KB
-		cmd.items.foreach(_.src match {
-			case WPL_Well(o) => kb.addWell(o, true)
-			case WPL_Plate(o) => kb.addPlate(o, true)
-			case WPL_Liquid(o) => kb.addLiquid(o)
-		})
 		// Add destinations to KB
-		cmd.items.foreach(_.dest match {
+		cmd.dests.foreach(_ match {
 			case WP_Well(o) => kb.addWell(o, false)
 			case WP_Plate(o) => kb.addPlate(o, false)
 		})
@@ -40,59 +34,39 @@ class L3P_Pipette extends CommandCompilerL3 {
 	}
 	
 	private def checkParams(kb: KnowledgeBase, cmd: CmdType): Seq[String] = {
-		val items = cmd.items
-		val srcs = Set() ++ items.map(_.src)
-		if (srcs.size == 0)
-			return ("must have one or more sources") :: Nil
-
-		val dests = Set() ++ items.map(_.dest)
+		val dests = Set(cmd.dests : _*)
 		if (dests.size == 0)
 			return ("must have one or more destinations") :: Nil
 		
 		// Check validity of source/dest pairs
 		val destsAlready = new HashSet[Obj]
-		for (item <- items) {
-			val destObjs = item.dest match {
+		for (dest <- cmd.dests) {
+			val destObjs = dest match {
 				case WP_Well(well) => Seq(well) 
 				case WP_Plate(plate) => Seq(plate) ++ getWells(kb, plate)
 			}
 			if (destObjs.exists(destsAlready.contains))
 				return ("each destination may only be used once") :: Nil
 			destsAlready ++= destObjs
-			// If the source is a plate, the destination must be too
-			item.src match {
-				case WPL_Plate(plate1) =>
-					item.dest match {
-						case WP_Plate(plate2) =>
-							(kb.getPlateSetup(plate1).dim_?, kb.getPlateSetup(plate2).dim_?) match {
-								case (Some(dim1), Some(dim2)) =>
-									if (dim1.wells.size != dim2.wells.size)
-										return ("source and destination plates must have the same number of wells") :: Nil
-								case _ =>
-							}
-						case _ =>
-							return ("when source is a plate, destination must also be a plate") :: Nil
-					}
-				case _ =>
-			}
-			
-			if (item.nVolume <= 0)
-				return ("volume must be > 0") :: Nil
 		}
+		
+		if (cmd.mixSpec.nVolume <= 0)
+			return ("volume must be > 0") :: Nil
+		if (cmd.mixSpec.nCount <= 0)
+			return ("count must be > 0") :: Nil
 		
 		Nil
 	}
 	
 	def translate(map31: ObjMapper, cmd: CmdType): Either[String, Command] = {
-		val items2 = new ArrayBuffer[L2A_PipetteItem]
-		val bAllOk = cmd.items.forall(item => {
-			val srcWells1 = getWells1(map31, item.src)
-			val destWells1 = getWells1(map31, item.dest)
-			if (srcWells1.isEmpty || destWells1.isEmpty) {
+		val destConfs = new ArrayBuffer[WellConfigL1]
+		val bAllOk = cmd.dests.forall(dest => {
+			val confs = getWells1(map31, dest)
+			if (confs.isEmpty) {
 				false
 			}
 			else {
-				items2 ++= destWells1.map(dest1 => new L2A_PipetteItem(srcWells1, dest1, item.nVolume))
+				destConfs ++= confs
 				true
 			}
 		})
@@ -100,15 +74,7 @@ class L3P_Pipette extends CommandCompilerL3 {
 		//println(items2)
 		
 		if (bAllOk) {
-			val args = new L2A_PipetteArgs(
-					items2,
-					cmd.mixSpec_?,
-					sAspirateClass_? = None,
-					sDispenseClass_? = None,
-					sMixClass_? = None,
-					sTipKind_? = None,
-					fnClean_? = None)
-			Right(L2C_Pipette(args))
+			Right(L2C_Mix(new L2A_MixArgs(destConfs.toSet, cmd.mixSpec)))
 		}
 		else {
 			Left("missing well")

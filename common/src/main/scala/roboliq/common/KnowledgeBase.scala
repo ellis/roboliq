@@ -101,9 +101,10 @@ class KnowledgeBase {
 	def concretize(): Either[Errors, ObjMapper] = {
 		for (plate <- m_plates) {
 			val pc = getPlateSetup(plate)
-			if (pc.dim_?.isDefined) {
+			if (pc.dim_?.isDefined && pc.sLabel_?.isDefined) {
 				for ((well, i) <- pc.dim_?.get.wells.zipWithIndex) {
 					val wc = getWellSetup(well)
+					wc.sLabel_? = Some(pc.sLabel_?.get + ":" + (i+1))
 					wc.holder_? = Some(plate)
 					wc.index_? = Some(i)
 				}

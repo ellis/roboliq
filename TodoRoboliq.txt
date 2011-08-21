@@ -65,17 +65,16 @@ Tuval/Yair:
 Code:
 x	split devices project into commands and devices
 x	L1C_Wash
-	L2C_Clean
+x	L*C_Mix
+x	L2C_Clean
 	create evoware translator for existing L1 commands
 	figure out how to clean BSSE tips
 	figure out how to clean Weizmann tips
-	L*C_Mix
-	Add Comment()s to evoware output
-	BsseRobot.batch*spirate() needs to batch on volume too
-	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	create Syringe object and decouple it from the Tip object, so that tips can be exchanged
+	Add Comment()s to evoware output
+	BsseRobot.batch*spirate() needs to batch on volume too?
+	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 x	have robot decide on Aspiration/Dispense strategy for T1 tokens
-	between all tokens is a robot state
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
 x	each T2 token produces a sequence of T1 tokens
 x	robot tells which tips can be used in batch for a particular token
