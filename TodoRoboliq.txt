@@ -183,57 +183,35 @@ x	setup unit tests for sbt
 				ObjConfig
 				ObjState
 				Map[Obj->ObjConfig]
-				Map[ObjConfig->ObjState]
+				Map[Obj->ObjState]
 				HashMap[Obj->ObjState]
 			command parameter limitations:
 				a: Obj parameters
 				b: ObjState parameters
+				c: ObjConfig parameters
 
 
-			Pa: add to knowledgebase
+			P3: add to knowledgebase
 				inp: Obj commands, kb, compiler
 				mod: kb, ObjSetup
-			Pa: concretize knowledgebase to create ObjConfig and ObjState0
+			P3: concretize knowledgebase to create ObjConfig and ObjState0
 				inp: kb, ObjSetup
 				out: ObjConfig, ObjState0
-			Ta: translate to commands taking ObjState params
+			T3: translate to other L3 commands or to commands taking ObjConfig params
 				inp-: kb
 				inp+: Map[Obj->ObjState]
 				inp: compiler, Obj command, Map[Obj->ObjState]
-				out: commands with ObjState
-			Tb: use compiler object to choose among various possible translations (via scoring)
-				inp+: compiler
-			Tc: translate without compiler
-				inp-: compiler
-			-
-				goal: translate to new command params: ObjConfig
-				inp-: kb
-				inp+: ObjConfig, ObjState0
-			-
-				goal: 
-
-
-
-			2:	inp: ObjConfig, RobotState
-			1:	inp: ObjState
-				mod: nothing
-				out: native format
-			L4P: 
-				inp: kb, Obj, ObjSetup, ObjConfig, RobotState
-				mod: kb, ObjSetup
-				out: L3C with ObjConfig parameters
-			L3P:
-				inp: ObjConfig, RobotState
-				mod: nothing
-				out: L2C with ObjConfig parameters
-			L2P:
-				inp: ObjConfig, RobotState
-				mod: RobotState
-				out: L1C with ObjState parameters
-			L1P:
-				inp: ObjState
-				mod: nothing
-				out: native format
+				out: commands with Obj or ObjConfig params
+			T2: translate to L2/L1 commands
+				can use compiler object to choose among various possible translations (via scoring)
+				inp: compiler, ObjConfig command, Map[Obj->ObjState]
+				out: commands with ObjConfig params
+			P1: update RobotState
+				inp: ObjConfig command, HashMap[Obj->ObjState]
+				out: update RobotState
+			T1: translate to L1/L0 commands
+				inp-: compiler, Map[Obj->ObjState]
+				inp: ObjConfig command
 		command hierarchy:
 			A: need only object references
 			 : processed by L3 compiler
