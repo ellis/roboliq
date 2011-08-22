@@ -3,41 +3,44 @@ package roboliq.commands.pipette
 import roboliq.common._
 
 
+
 trait HasTip {
 	val tip: TipConfigL1
 }
 
-sealed class TipWell(val tip: TipConfigL1, val well: WellConfigL1) extends HasTip {
-	override def toString = "TipWell("+tip.index+","+well.holder.hashCode()+":"+well.index+")" 
+sealed class TipWell(val tip: TipConfigL1, val well: WellL1) extends HasTip {
+	override def toString = "TipWell("+tip.index+","+well.holder.sLabel+":"+well.index+")" 
 }
 
 sealed class TipWellVolume(
-		tip: TipConfigL1, well: WellConfigL1,
+		tip: TipConfigL1, well: WellL1,
 		val nVolume: Double
 	) extends TipWell(tip, well) {
 	override def toString = "TipWellVolume("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+")" 
 }
 
-sealed class TipWellVolumePolicy(tip: TipConfigL1, well: WellConfigL1, nVolume: Double,
+sealed class TipWellVolumePolicy(tip: TipConfigL1, well: WellL1, nVolume: Double,
+		val liquid: Liquid,
 		val policy: PipettePolicy
 	) extends TipWellVolume(tip, well, nVolume) {
 	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+")" 
 }
 
-sealed class TipWellVolumePolicyCount(tip: TipConfigL1, well: WellConfigL1, nVolume: Double, policy: PipettePolicy,
+sealed class TipWellVolumePolicyCount(tip: TipConfigL1, well: WellL1, nVolume: Double, liquid: Liquid, policy: PipettePolicy,
 		val nCount: Int
-	) extends TipWellVolumePolicy(tip, well, nVolume, policy) {
+	) extends TipWellVolumePolicy(tip, well, nVolume, liquid, policy) {
 	override def toString = "TipWellVolumePolicyCount("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+","+nCount+")" 
 }
 
-object ContaminationSeverity extends Enumeration {
-	val None, Minor, Medium, Major = Value
-}
+sealed class AspirateItem(val tip: TipConfigL1, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val policy: PipettePolicy)
+sealed class DispenseItem(val tip: TipConfigL1, val liquidTip: Liquid, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val policy: PipettePolicy)
+sealed class MixItem(val tip: TipConfigL1, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val nCount: Int, val policy: PipettePolicy)
 
-case class L1C_Aspirate(twvs: Seq[TipWellVolumePolicy]) extends Command
-case class L1C_Dispense(twvs: Seq[TipWellVolumePolicy]) extends Command
+
+case class L1C_Aspirate(items: Seq[AspirateItem]) extends Command
+case class L1C_Dispense(items: Seq[DispenseItem]) extends Command
 //case class L1C_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command
-case class L1C_Mix(twvpcs: Seq[TipWellVolumePolicyCount]) extends Command
+case class L1C_Mix(items: Seq[MixItem]) extends Command
 case class L1C_Wash(tips: Set[TipConfigL1], degree: CleanDegree.Value, iWashProgram: Int) extends Command
 case class L1C_TipsDrop(tips: Set[Tip])
 case class L1C_TipsGet(tips: Set[Tip]) // FIXME: add tip kind

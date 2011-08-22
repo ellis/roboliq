@@ -10,10 +10,9 @@ class L1P_Aspirate extends CommandCompilerL1 {
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
-		for (twv <- cmd.twvs) {
-			val liquid = twv.well.state(builder).liquid
-			twv.tip.stateWriter(builder).aspirate(liquid, twv.nVolume)
-			twv.well.stateWriter(builder).remove(twv.nVolume)
+		for (item <- cmd.items) {
+			item.tip.obj.stateWriter(builder).aspirate(item.liquidWell, item.nVolume)
+			item.well.obj.stateWriter(builder).remove(item.nVolume)
 		}
 	}
 	
@@ -25,11 +24,9 @@ class L1P_Dispense extends CommandCompilerL1 {
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
-		for (twv <- cmd.twvs) {
-			val tipState = twv.tip.state(builder)
-			val wellState = twv.well.state(builder)
-			twv.tip.stateWriter(builder).dispense(twv.nVolume, wellState.liquid, twv.policy.pos)
-			twv.well.stateWriter(builder).add(tipState.liquid, twv.nVolume)
+		for (twv <- cmd.items) {
+			twv.tip.obj.stateWriter(builder).dispense(twv.nVolume, twv.liquidWell, twv.policy.pos)
+			twv.well.obj.stateWriter(builder).add(twv.liquidTip, twv.nVolume)
 		}
 	}
 	
@@ -41,9 +38,8 @@ class L1P_Mix extends CommandCompilerL1 {
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
-		for (twvpc <- cmd.twvpcs) {
-			val wellState = twvpc.well.state(builder)
-			twvpc.tip.stateWriter(builder).mix(wellState.liquid, twvpc.nVolume)
+		for (item <- cmd.items) {
+			item.tip.obj.stateWriter(builder).mix(item.liquidWell, item.nVolume)
 		}
 	}
 	
@@ -56,7 +52,7 @@ class L1P_Wash extends CommandCompilerL1 {
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
 		for (tip <- cmd.tips) {
-			tip.stateWriter(builder).clean(cmd.degree)
+			tip.obj.stateWriter(builder).clean(cmd.degree)
 		}
 	}
 	
@@ -69,7 +65,7 @@ class L1P_SetTipStateClean extends CommandCompilerL1 {
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
 		for (tip <- cmd.tips) {
-			tip.stateWriter(builder).clean(cmd.degree)
+			tip.obj.stateWriter(builder).clean(cmd.degree)
 		}
 	}
 	

@@ -30,6 +30,8 @@ abstract class Obj {
 	def getConfigL3(map31: ObjMapper): Option[Setup] = map31.configL3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 	def getState0L1(map31: ObjMapper): Option[State] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
 	def getState0L3(map31: ObjMapper): Option[Setup] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
+	
+	def state(states: RobotState): State = states(this).asInstanceOf[State]
 }
 
 sealed class Setting[T] {
@@ -106,6 +108,43 @@ class Well extends Obj { thisObj =>
 		
 		Right(conf, state)
 	}
+
+	class StateWriter(map: HashMap[Obj, ObjState]) {
+		def state = map(thisObj).asInstanceOf[State]
+		
+		def liquid = state.liquid
+		//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
+		
+		def nVolume = state.nVolume
+		//def nVolume_=(nVolume: Double) { map(thisObj) = state.copy(nVolume = nVolume) }
+
+		def add(liquid2: Liquid, nVolume2: Double) {
+			val st = state
+			map(thisObj) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
+		}
+		
+		def remove(nVolume2: Double) {
+			val st = state
+			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2)
+		}
+	}
+	//def stateWriter(map: HashMap[ThisObj, StateL1]) = new StateWriter(this, map)
+	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
+}
+
+class WellL2(val state: WellStateL1, val holder: PlateStateL1) {
+	def conf: WellConfigL1 = state.conf
+	def sLabel = conf.sLabel
+	def index = conf.index
+	def liquid = state.liquid
+	def nVolume = state.nVolume
+}
+
+class WellL1(val conf: WellConfigL1, val holder: PlateConfigL1) {
+	def obj = conf.obj
+	def sLabel = conf.sLabel
+	def index = conf.index
 }
 
 class WellConfigL1(
@@ -121,30 +160,6 @@ class WellConfigL1(
 		if (d1 == 0) index - that.index
 		else d1
 	}
-
-	class StateWriter(map: HashMap[ObjConfig, ObjState]) {
-		def state = map(thisConf).asInstanceOf[State]
-		
-		def liquid = state.liquid
-		//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
-		
-		def nVolume = state.nVolume
-		//def nVolume_=(nVolume: Double) { map(thisObj) = state.copy(nVolume = nVolume) }
-
-		def add(liquid2: Liquid, nVolume2: Double) {
-			val st = state
-			map(thisConf) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
-		}
-		
-		def remove(nVolume2: Double) {
-			val st = state
-			map(thisConf) = st.copy(nVolume = st.nVolume - nVolume2)
-		}
-	}
-	//def stateWriter(map: HashMap[ThisObj, StateL1]) = new StateWriter(this, map)
-	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
-	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
 	
 	override def toString = sLabel
 }
@@ -199,6 +214,15 @@ class Plate extends Obj {
 
 		Right(conf, state)
 	}
+
+	class StateWriter(map: HashMap[Obj, ObjState]) {
+		def state = map(thisObj).asInstanceOf[State]
+		
+		def location = state.location
+		def location_=(location: String) { map(thisObj) = state.copy(location = location) }
+	}
+	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
 class PlateConfigL1(
@@ -208,19 +232,7 @@ class PlateConfigL1(
 	val nCols: Int,
 	val nWells: Int,
 	val wells: Seq[Well]
-) extends ObjConfig { thisConf =>
-	type State = PlateStateL1
-
-	class StateWriter(map: HashMap[ObjConfig, ObjState]) {
-		def state = map(thisConf).asInstanceOf[State]
-		
-		def location = state.location
-		def location_=(location: String) { map(thisConf) = state.copy(location = location) }
-	}
-	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
-	def state(state: RobotState): State = state.map(this).asInstanceOf[State]
-	
+) extends ObjConfig {
 	override def toString = sLabel
 }
 

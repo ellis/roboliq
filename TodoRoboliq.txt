@@ -167,13 +167,43 @@ x	setup unit tests for sbt
 				translate each L3 command to L2 commands (use ObjConfig parameters instead of Obj) then to L1 commands, abort on first error
 				
 		processor hierarchy:
+			challenges:
+				I'd like to be able to compile the commands in a preliminary way without a specific robot implementation
+				this might mean that we need two types of state objects: ObjState and RobotState
+				we also want to run through a protocol to see how much liquid is aspirated from a source well in order to know what the initial volume
+				this means that we need two runs, and only the second run produces errors when well volume goes below 0
+				we could pass ObjState params instead of ObjConfig, but then we'd need to compile every command before adding a new one
+			inputs available at some point in the cycle:
+				knowledgebase
+				Obj
+				-
+				ObjSetup
+				-
+				Compiler
+				ObjConfig
+				ObjState
+				Map[Obj->ObjConfig]
+				Map[ObjConfig->ObjState]
+				HashMap[Obj->ObjState]
+			command parameter limitations:
+				a: Obj parameters
+				b: ObjState parameters
+
+
 			Pa: add to knowledgebase
+				inp: Obj commands, kb, compiler
+				mod: kb, ObjSetup
 			Pa: concretize knowledgebase to create ObjConfig and ObjState0
-			Ta: translate to commands taking ObjConfig params
-				inp:
+				inp: kb, ObjSetup
+				out: ObjConfig, ObjState0
+			Ta: translate to commands taking ObjState params
+				inp-: kb
+				inp+: Map[Obj->ObjState]
+				inp: compiler, Obj command, Map[Obj->ObjState]
+				out: commands with ObjState
 			Tb: use compiler object to choose among various possible translations (via scoring)
 				inp+: compiler
-			Tc: 
+			Tc: translate without compiler
 				inp-: compiler
 			-
 				goal: translate to new command params: ObjConfig

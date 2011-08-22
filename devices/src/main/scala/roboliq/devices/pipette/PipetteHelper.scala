@@ -6,19 +6,19 @@ import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
 import roboliq.commands.pipette._
-import roboliq.robot._
+//import roboliq.robot._
 
 
 class PipetteHelper {
-	def chooseTipWellPairsNext(map31: ObjMapper, tips: SortedSet[TipConfigL1], wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Seq[TipWell] = {
+	def chooseTipWellPairsNext(states: RobotState, tips: SortedSet[TipConfigL1], wells: SortedSet[WellL2], twsPrev: Seq[TipWell]): Seq[TipWell] = {
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
 		//println("wells: "+wells)
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
-		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(map31, wells, twsPrev)
-		val well0 = getFirstWell(map31, holder, wellsOnHolder, iCol)
+		val (holder, wellsOnHolder, iCol) = getHolderWellsCol(states, wells, twsPrev)
+		val well0 = getFirstWell(states, holder, wellsOnHolder, iCol)
 
 		val tip0 = tips.head
 		val iRowTip0 = tip0.index
@@ -41,7 +41,7 @@ class PipetteHelper {
 		pairs.toSeq
 	}
 
-	private def getHolderWellsCol(map31: ObjMapper, wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Tuple3[PlateConfigL1, SortedSet[WellConfigL1], Int] = {
+	private def getHolderWellsCol(states: RobotState, wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Tuple3[PlateConfigL1, SortedSet[WellConfigL1], Int] = {
 		// Pick a "reference" well if twsPrev isn't empty
 		val wellRef_? = {
 			if (twsPrev.isEmpty)
@@ -59,8 +59,8 @@ class PipetteHelper {
 
 		// Get the holder of interest
 		val holder = wellRef_? match {
-			case None => wells.head.holder.getConfigL1(map31).get
-			case Some(wellRef) => wellRef.holder.getConfigL1(map31).get
+			case None => wells.head.holder.getConfigL1(states).get
+			case Some(wellRef) => wellRef.holder.getConfigL1(states).get
 		}
 		//println("holder: "+holder)
 
@@ -76,7 +76,7 @@ class PipetteHelper {
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(map31: ObjMapper, holder: PlateConfigL1, wellsOnHolder: SortedSet[WellConfigL1], iCol0: Int): WellConfigL1 = {
+	private def getFirstWell(states: RobotState, holder: PlateConfigL1, wellsOnHolder: SortedSet[WellConfigL1], iCol0: Int): WellConfigL1 = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
@@ -96,7 +96,7 @@ class PipetteHelper {
 		checkCol(iCol0)
 	}
 
-	def chooseTipWellPairsAll(map31: ObjMapper, tips: SortedSet[TipConfigL1], dests: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
+	def chooseTipWellPairsAll(states: RobotState, tips: SortedSet[TipConfigL1], dests: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
 		//println("chooseTipWellPairsAll()")
 		//println("tips: "+tips)
 		//println("dests: "+dests)
@@ -104,7 +104,7 @@ class PipetteHelper {
 		var destsRemaining = dests
 		var twsPrev = Nil
 		while (!destsRemaining.isEmpty) {
-			val tws = chooseTipWellPairsNext(map31, tips, destsRemaining, twsPrev)
+			val tws = chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev)
 			twss += tws
 			destsRemaining --= tws.map(_.well)
 		}
@@ -123,7 +123,7 @@ class PipetteHelper {
 		}
 	}
 
-	def chooseTipSrcPairs(map31: ObjMapper, tips: SortedSet[TipConfigL1], srcs: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
+	def chooseTipSrcPairs(states: RobotState, tips: SortedSet[TipConfigL1], srcs: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
 		// Cases:
 		// Case 1: tips size == srcs size:
 		// Case 2: tips size < srcs size:
@@ -136,7 +136,7 @@ class PipetteHelper {
 
 		def processStep(tips0: Iterable[TipConfigL1]): Tuple2[Iterable[TipConfigL1], Seq[TipWell]] = {
 			val tips = SortedSet[TipConfigL1](tips0.toSeq : _*)
-			val tws = chooseTipWellPairsNext(map31, tips, srcs, Nil)
+			val tws = chooseTipWellPairsNext(states, tips, srcs, Nil)
 			val tipsRemaining = tips -- tws.map(_.tip)
 			(tipsRemaining.toSeq, tws)
 		}

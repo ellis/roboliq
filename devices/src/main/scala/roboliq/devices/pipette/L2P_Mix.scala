@@ -15,7 +15,7 @@ class L2P_Mix(robot: PipetteDevice) extends CommandCompilerL2 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult = {
-		val x = new L2P_Mix_Sub(ctx.compiler, ctx.map31, robot, ctx.state0, cmd)
+		val x = new L2P_Mix_Sub(robot, ctx, cmd)
 		x.translation match {
 			case Right(translation) =>
 				CompileTranslation(cmd, translation)
@@ -26,7 +26,8 @@ class L2P_Mix(robot: PipetteDevice) extends CommandCompilerL2 {
 	}
 }
 
-private class L2P_Mix_Sub(compiler: Compiler, map31: ObjMapper, robot: PipetteDevice, state0: RobotState, cmd: L2C_Mix) {
+private class L2P_Mix_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C_Mix) {
+	//val state0 = ctx.states 
 	val args = cmd.args
 	
 	case class SrcTipDestVolume(src: WellConfigL1, tip: TipConfigL1, dest: WellConfigL1, nVolume: Double)

@@ -15,7 +15,7 @@ class L2P_Pipette(robot: PipetteDevice) extends CommandCompilerL2 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL2, cmd: CmdType): CompileResult = {
-		val x = new L2P_Pipette_Sub(ctx.compiler, ctx.map31, robot, ctx.state0, cmd)
+		val x = new L2P_Pipette_Sub(robot, ctx, cmd)
 		x.translation match {
 			case Right(translation) =>
 				CompileTranslation(cmd, translation)
@@ -26,7 +26,8 @@ class L2P_Pipette(robot: PipetteDevice) extends CommandCompilerL2 {
 	}
 }
 
-private class L2P_Pipette_Sub(compiler: Compiler, map31: ObjMapper, robot: PipetteDevice, state0: RobotState, cmd: L2C_Pipette) {
+private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C_Pipette) {
+	val states = ctx.states
 	val args = cmd.args
 	
 	case class SrcTipDestVolume(src: WellConfigL1, tip: TipConfigL1, dest: WellConfigL1, nVolume: Double)
@@ -54,7 +55,7 @@ private class L2P_Pipette_Sub(compiler: Compiler, map31: ObjMapper, robot: Pipet
 		var nWinnerScore = Int.MaxValue
 		var lsErrors = new ArrayBuffer[String]
 		for (tipGroup <- robot.config.tipGroups) {
-			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.getConfigL1(map31).get)
+			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.getConfigL1(states).get)
 	
 			pipette(tips) match {
 				case Left(lsErrors2) =>
