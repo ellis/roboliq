@@ -10,18 +10,18 @@ import roboliq.compiler._
 trait PipetteDevice {
 	val config: PipetteDeviceConfig
 	/** Minimum volume which can be aspirated */
-	def getTipAspirateVolumeMin(tip: TipConfigL1, liquid: Liquid): Double
+	def getTipAspirateVolumeMin(tip: TipConfigL2, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */
-	def getTipHoldVolumeMax(tip: TipConfigL1, liquid: Liquid): Double
+	def getTipHoldVolumeMax(tip: TipConfigL2, liquid: Liquid): Double
 	/** Choose aspirate method */
-	def getAspiratePolicy(tipState: TipStateL1, wellState: WellStateL1): Option[PipettePolicy]
+	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy]
 	/** Choose dispense method */
-	def getDispensePolicy(tipState: TipStateL1, wellState: WellStateL1, nVolume: Double): Option[PipettePolicy]
+	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy]
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
-	def batchesForAspirate(twvps: Seq[L1A_AspirateItem]): Seq[Seq[L1A_AspirateItem]]
-	def batchesForDispense(twvps: Seq[L1A_DispenseItem]): Seq[Seq[L1A_DispenseItem]]
-	def batchesForClean(tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL1, CleanDegree.Value]]]
-	def batchesForMix(twvpcs: Seq[L1A_MixItem]): Seq[Seq[L1A_MixItem]]
+	def batchesForAspirate(twvps: Seq[L2A_AspirateItem]): Seq[Seq[L2A_AspirateItem]]
+	def batchesForDispense(twvps: Seq[L2A_DispenseItem]): Seq[Seq[L2A_DispenseItem]]
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanDegree.Value]]]
+	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]]
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
@@ -29,9 +29,9 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		tips = SortedSet((0 to 1).map(i => new Tip(i)) : _*),
 		tipGroups = Array(Array(0,1))
 	)
-	def getTipAspirateVolumeMin(tip: TipConfigL1, liquid: Liquid): Double = 0
-	def getTipHoldVolumeMax(tip: TipConfigL1, liquid: Liquid): Double = 1000
-	def getAspiratePolicy(tipState: TipStateL1, wellState: WellStateL1): Option[PipettePolicy] = {
+	def getTipAspirateVolumeMin(tip: TipConfigL2, liquid: Liquid): Double = 0
+	def getTipHoldVolumeMax(tip: TipConfigL2, liquid: Liquid): Double = 1000
+	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
 		assert(liquid ne Liquid.empty)
@@ -48,7 +48,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	
 	val nFreeDispenseVolumeThreshold = 20
 	
-	def getDispensePolicy(tipState: TipStateL1, wellState: WellStateL1, nVolume: Double): Option[PipettePolicy] = {
+	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy] = {
 		val liquid = tipState.liquid
 		
 		if (liquid.bCells)
@@ -75,8 +75,8 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		}
 	}
 	
-	def batchesForAspirate(twvps: Seq[L1A_AspirateItem]): Seq[Seq[L1A_AspirateItem]] = Seq(twvps)
-	def batchesForDispense(twvps: Seq[L1A_DispenseItem]): Seq[Seq[L1A_DispenseItem]] = Seq(twvps)
-	def batchesForClean(tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL1, CleanDegree.Value]]] = Seq(tcs)
-	def batchesForMix(twvpcs: Seq[L1A_MixItem]): Seq[Seq[L1A_MixItem]] = Seq(twvpcs)
+	def batchesForAspirate(twvps: Seq[L2A_AspirateItem]): Seq[Seq[L2A_AspirateItem]] = Seq(twvps)
+	def batchesForDispense(twvps: Seq[L2A_DispenseItem]): Seq[Seq[L2A_DispenseItem]] = Seq(twvps)
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanDegree.Value]]] = Seq(tcs)
+	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = Seq(twvpcs)
 }

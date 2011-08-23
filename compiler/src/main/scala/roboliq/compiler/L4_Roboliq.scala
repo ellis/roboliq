@@ -10,7 +10,7 @@ class Volume(n: Double) {
 	def ul = n
 }
 
-trait L3_Roboliq {
+trait L4_Roboliq {
 	val kb = new KnowledgeBase
 	val cmds = new ArrayBuffer[Command]
 	var m_protocol: Option[() => Unit] = None

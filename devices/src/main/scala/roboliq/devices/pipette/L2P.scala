@@ -5,8 +5,8 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 
 
-class L1P_Aspirate extends CommandCompilerL1 {
-	type CmdType = L1C_Aspirate
+class L2P_Aspirate extends CommandCompilerL2 {
+	type CmdType = L2C_Aspirate
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
@@ -19,8 +19,8 @@ class L1P_Aspirate extends CommandCompilerL1 {
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 1
 }
 
-class L1P_Dispense extends CommandCompilerL1 {
-	type CmdType = L1C_Dispense
+class L2P_Dispense extends CommandCompilerL2 {
+	type CmdType = L2C_Dispense
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
@@ -33,8 +33,8 @@ class L1P_Dispense extends CommandCompilerL1 {
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 1
 }
 
-class L1P_Mix extends CommandCompilerL1 {
-	type CmdType = L1C_Mix
+class L2P_Mix extends CommandCompilerL2 {
+	type CmdType = L2C_Mix
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
@@ -46,8 +46,8 @@ class L1P_Mix extends CommandCompilerL1 {
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 1
 }
 
-class L1P_Wash extends CommandCompilerL1 {
-	type CmdType = L1C_Wash
+class L2P_Wash extends CommandCompilerL2 {
+	type CmdType = L2C_Wash
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
@@ -59,8 +59,8 @@ class L1P_Wash extends CommandCompilerL1 {
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 5
 }
 
-class L1P_SetTipStateClean extends CommandCompilerL1 {
-	type CmdType = L1C_SetTipStateClean
+class L2P_SetTipStateClean extends CommandCompilerL2 {
+	type CmdType = L2C_SetTipStateClean
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {

@@ -2,8 +2,8 @@
 package roboliq.level1
 
 class RoboliqObject
-class RoboliqObjectDataL3
-class RoboliqObjectDataL1
+class RoboliqObjectDataL4
+class RoboliqObjectDataL2
 
 class Part extends RoboliqObject {
 	var sLabel: String = "<none>"
@@ -38,14 +38,14 @@ sealed class Setting[T] {
 	def isEmpty: Boolean = !isDefined
 }
 
-class PartDataL1(
+class PartDataL2(
 	val id: Int,
-	val parent: PartDataL1,
+	val parent: PartDataL2,
 	val index: Int,
 	val location: String
-) extends RoboliqObjectDataL1
+) extends RoboliqObjectDataL2
 
-class PartDataL3 extends RoboliqObjectDataL3 {
+class PartDataL4 extends RoboliqObjectDataL4 {
 	val id = new Setting[Int]
 	val parent = new Setting[Part]
 	val index = new Setting[Int]

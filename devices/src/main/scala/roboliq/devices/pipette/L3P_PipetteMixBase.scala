@@ -10,22 +10,22 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 
 
-private trait L2P_PipetteMixBase {
+private trait L3P_PipetteMixBase {
 	type CmdType <: Command
-	type L2A_ItemType
+	type L3A_ItemType
 	
 	type Errors = Seq[String]
 
 	val robot: PipetteDevice
-	val ctx: CompilerContextL2
+	val ctx: CompilerContextL3
 	val cmd: CmdType
 
 	trait CycleState {
-		val tips: SortedSet[TipConfigL1]
+		val tips: SortedSet[TipConfigL2]
 		val state0: RobotState
 		
-		val cleans: ArrayBuffer[L2C_Clean]
-		val mixes: ArrayBuffer[L1C_Mix]
+		val cleans: ArrayBuffer[L3C_Clean]
+		val mixes: ArrayBuffer[L2C_Mix]
 		
 		var ress: Seq[CompileFinal] = Nil
 
@@ -34,7 +34,7 @@ private trait L2P_PipetteMixBase {
 	
 	val helper = new PipetteHelper
 
-	val dests: SortedSet[WellConfigL1]
+	val dests: SortedSet[WellConfigL2]
 
 	val translation: Either[CompileError, Seq[Command]] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
@@ -52,7 +52,7 @@ private trait L2P_PipetteMixBase {
 				case Right(Seq()) =>
 				case Right(cycles) =>
 					val cmds1 = cycles.flatMap(_.toTokenSeq)
-					ctx.compiler.compileL1(ctx.states, cmds1) match {
+					ctx.compiler.compileL2(ctx.states, cmds1) match {
 						case Right(ress) =>
 							ctx.compiler.score(ctx.states, ress) match {
 								case Some(nScore) =>
@@ -72,9 +72,9 @@ private trait L2P_PipetteMixBase {
 			Left(CompileError(cmd, lsErrors))
 	}
 	
-	protected def translateCommand(tips: SortedSet[TipConfigL1]): Either[Errors, Seq[CycleState]]
+	protected def translateCommand(tips: SortedSet[TipConfigL2]): Either[Errors, Seq[CycleState]]
 	
-	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L1A_DispenseItem], tipStates: HashMap[Tip, TipStateL1]) {
+	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L2A_DispenseItem], tipStates: HashMap[Tip, TipStateL2]) {
 		// Add volumes to amount required in tips
 		for (twvp <- twvps) {
 			val wellState = twvp.well.obj.state(cycle.state0)
@@ -83,7 +83,7 @@ private trait L2P_PipetteMixBase {
 		}
 	}
 	
-	protected def mix_updateTipStates(cycle: CycleState, twvps: Seq[L1A_MixItem], tipStates: HashMap[Tip, TipStateL1]) {
+	protected def mix_updateTipStates(cycle: CycleState, twvps: Seq[L2A_MixItem], tipStates: HashMap[Tip, TipStateL2]) {
 		// Add volumes to amount required in tips
 		for (twvp <- twvps) {
 			val wellState = twvp.well.obj.state(cycle.state0)
@@ -93,7 +93,7 @@ private trait L2P_PipetteMixBase {
 	}
 	
 	/** Would a cleaning be required before a subsequent dispense from the same tip? */
-	protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL1], tws: Seq[TipWell]): Boolean = {
+	protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Boolean = {
 		def step(tipWell: TipWell): Boolean = {
 			val tipState = tipStates(tipWell.tip.obj)
 			helper.getCleanDegreeDispense(tipState) == CleanDegree.None
@@ -101,21 +101,21 @@ private trait L2P_PipetteMixBase {
 		tws.forall(step)
 	}
 	
-	protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]]) {
+	protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]) {
 		// Add tokens
 		val tcss = robot.batchesForClean(tcs)
 		for (tcs <- tcss) {
 			val tips = tcs.map(_._1).toSet
-			cycle.cleans += L2C_Clean(tips, tcs.head._2)
+			cycle.cleans += L3C_Clean(tips, tcs.head._2)
 		}
 	}
 	
 	protected def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
 		println("cmds1: "+cmds1)
-		ctx.compiler.compileL1(cycle.state0, cmds1) match {
+		ctx.compiler.compileL2(cycle.state0, cmds1) match {
 			case Right(Seq()) =>
-				Left(Seq("compileL1 failed"))
+				Left(Seq("compileL2 failed"))
 			case Right(ress) =>
 				cycle.ress = ress
 				println("cycle.ress: "+cycle.ress)

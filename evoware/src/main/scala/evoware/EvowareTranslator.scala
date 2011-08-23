@@ -12,10 +12,10 @@ import roboliq.devices.pipette._
 
 abstract class EvowareTranslator(mapper: EvowareMapper) {
 	def translate(cmd: Command): Either[Seq[String], Seq[Command]] = cmd match {
-		case t @ L1C_Aspirate(_) => aspirate(t)
-		case t @ L1C_Dispense(_) => dispense(t)
-		case t @ L1C_Mix(_) => mix(t)
-		case t @ L1C_Wash(_, _, _) => clean(t)
+		case t @ L2C_Aspirate(_) => aspirate(t)
+		case t @ L2C_Dispense(_) => dispense(t)
+		case t @ L2C_Mix(_) => mix(t)
+		case t @ L2C_Wash(_, _, _) => clean(t)
 	}
 
 	def translate(rs: Seq[CompileFinal]): Seq[Command] = {
@@ -55,7 +55,7 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 	protected def encodeTips(list: Iterable[Tip]): Int =
 		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
 
-	protected def encodeWells(holder: PlateConfigL1, aiWells: Traversable[Int]): String = {
+	protected def encodeWells(holder: PlateConfigL2, aiWells: Traversable[Int]): String = {
 		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		for (iWell <- aiWells) {
@@ -87,11 +87,11 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 	*/
 	
 
-	private def aspirate(cmd: L1C_Aspirate): Either[Seq[String], Command] = {
+	private def aspirate(cmd: L2C_Aspirate): Either[Seq[String], Command] = {
 		spirate(cmd.items, "Aspirate")
 	}
 	
-	private def dispense(cmd: L1C_Dispense): Either[Seq[String], Command] = {
+	private def dispense(cmd: L2C_Dispense): Either[Seq[String], Command] = {
 		spirate(cmd.items, "Dispense")
 	}
 	
@@ -164,14 +164,14 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 	}
 	
 	/** Get T0 tokens for cleaning */
-	def clean(cmd: L1C_Clean): List[Command]
+	def clean(cmd: L2C_Clean): List[Command]
 	
-	private def mix(cmd: L1C_Mix): Seq[Command] = {
+	private def mix(cmd: L2C_Mix): Seq[Command] = {
 		val t0 = mix2(cmd, robot.getDispenseClass)
 		t0 :: Nil
 	}
 	
-	private def mix2(cmd: L1C_Mix, getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): Command = {
+	private def mix2(cmd: L2C_Mix, getLiquidClass: ((RobotState, TipWellVolume) => Option[String])): Command = {
 		cmd.tws match {
 			case Seq() => CommandError("Empty Tip-Well-Volume list")
 			case Seq(tw0, rest @ _*) =>
@@ -210,7 +210,7 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 		}
 	}
 
-	private def mixChecked(cmd: L1C_Mix, sLiquidClass: String): Command = {
+	private def mixChecked(cmd: L2C_Mix, sLiquidClass: String): Command = {
 		val twv0 = cmd.tws.head
 		val tipKind = robot.getTipKind(twv0.tip)
 		val holder = twv0.well.holder

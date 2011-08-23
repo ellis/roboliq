@@ -22,47 +22,47 @@ class Compiler {
 	//var state: RobotState = _
 	private var m_handlers = new HashMap[java.lang.Class[_], CommandCompiler]
 	//private var m_handlers: List[CommandCompiler] = Nil
-	//private var m_handlers2: List[CommandCompilerL2] = Nil
-	//private var m_handlers3: List[CommandCompilerL3] = Nil
+	//private var m_handlers2: List[CommandCompilerL3] = Nil
+	//private var m_handlers3: List[CommandCompilerL4] = Nil
 	//var kb: KnowledgeBase = null
 	//var state0: RobotState = null
 	
 	def register(handler: CommandCompiler) {
 		m_handlers(handler.cmdType) = handler
 		//m_handlers = handler :: m_handlers
-		/*if (handler.isInstanceOf[CommandCompilerL1])
-			m_handlers1 = handler.asInstanceOf[CommandCompilerL1] :: m_handlers1
-		if (handler.isInstanceOf[CommandCompilerL2])
-			m_handlers2 = handler.asInstanceOf[CommandCompilerL2] :: m_handlers2
+		/*if (handler.isInstanceOf[CommandCompilerL2])
+			m_handlers1 = handler.asInstanceOf[CommandCompilerL2] :: m_handlers1
 		if (handler.isInstanceOf[CommandCompilerL3])
-			m_handlers3 = handler.asInstanceOf[CommandCompilerL3] :: m_handlers3*/
+			m_handlers2 = handler.asInstanceOf[CommandCompilerL3] :: m_handlers2
+		if (handler.isInstanceOf[CommandCompilerL4])
+			m_handlers3 = handler.asInstanceOf[CommandCompilerL4] :: m_handlers3*/
 	}
 	
-	def compileL3(kb: KnowledgeBase, map31: ObjMapper, state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
+	def compileL4(kb: KnowledgeBase, map31: ObjMapper, state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
 		compileCommands(state0, cmds) match {
 			case Left(err) => Left(err)
 			case Right((nodes, state1)) => Right(nodes)
 		}
 	}
 	
-	def compileL1(state0: RobotState, cmd: Command): Either[CompileError, CompileFinal] = {
+	def compileL2(state0: RobotState, cmd: Command): Either[CompileError, CompileFinal] = {
 		m_handlers.get(cmd.getClass()) match {
-			case Some(handler1 : CommandCompilerL1) =>
+			case Some(handler1 : CommandCompilerL2) =>
 				val builder = new StateBuilder(state0)
-				handler1.updateStateL1(builder, cmd)
+				handler1.updateStateL2(builder, cmd)
 				Right(CompileFinal(cmd, builder.toImmutable))
 			case Some(_) =>
-				Left(CompileError(cmd, Seq("command compiler must be of type CommandCompilerL1")))
+				Left(CompileError(cmd, Seq("command compiler must be of type CommandCompilerL2")))
 			case None =>
 				Left(CompileError(cmd, Seq("no handler for command "+cmd.getClass().getCanonicalName())))
 		}
 	}
 	
-	def compileL1(state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileFinal]] = {
+	def compileL2(state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileFinal]] = {
 		var ress = new ArrayBuffer[CompileFinal]
 		var state = state0
 		for (cmd <- cmds) {
-			compileL1(state, cmd) match {
+			compileL2(state, cmd) match {
 				case Right(res) => ress += res
 				case Left(sError) => return Left(sError)
 			}
@@ -103,8 +103,8 @@ class Compiler {
 
 	private def addKnowledge(kb: KnowledgeBase, cmd: Command) {
 		for (handler <- m_handlers) {
-			if (handler.isInstanceOf[CommandCompilerL3]) {
-				handler.asInstanceOf[CommandCompilerL3].addKnowledge(kb, cmd)
+			if (handler.isInstanceOf[CommandCompilerL4]) {
+				handler.asInstanceOf[CommandCompilerL4].addKnowledge(kb, cmd)
 			}
 		}
 	}
@@ -127,23 +127,23 @@ class Compiler {
 	
 	private def callHandlerCompile(state0: RobotState, handler: CommandCompiler, cmd: Command): CompileResult = {
 		handler match {
-			case handler1 : CommandCompilerL1 =>
+			case handler1 : CommandCompilerL2 =>
 				val builder = new StateBuilder(state0)
-				handler1.updateStateL1(builder, cmd)
+				handler1.updateStateL2(builder, cmd)
 				return CompileFinal(cmd, builder.toImmutable)
-			case handler2 : CommandCompilerL2 =>
-				val ctx = new CompilerContextL2(this, state0)
-				handler2.compileL2(ctx, cmd)
-			case handler3 : CommandCompilerL3 =>
+			case handler2 : CommandCompilerL3 =>
 				val ctx = new CompilerContextL3(this, state0)
-				handler3.compileL3(ctx, cmd)
+				handler2.compileL3(ctx, cmd)
+			case handler3 : CommandCompilerL4 =>
+				val ctx = new CompilerContextL4(this, state0)
+				handler3.compileL4(ctx, cmd)
 		}
 	}
 	
 	def score(state0: RobotState, res: CompileFinal): Option[Int] = {
 		m_handlers.get(res.cmd.getClass()) match {
-			case Some(handler1 : CommandCompilerL1) =>
-				val n = handler1.scoreL1(state0, res.state1, res.cmd)
+			case Some(handler1 : CommandCompilerL2) =>
+				val n = handler1.scoreL2(state0, res.state1, res.cmd)
 				Some(n)
 			case _ =>
 				None

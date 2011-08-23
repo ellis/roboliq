@@ -1,6 +1,6 @@
 package roboliq.parts
 
-class ObjectL1
+class ObjectL2
 
 sealed class AspirateStrategy(val sName: String)
 sealed class DispenseStrategy(val sName: String, val bEnter: Boolean)
@@ -9,7 +9,7 @@ class Tip(val index: Int) extends Ordered[Tip] {
 	override def compare(that: Tip): Int = this.index - that.index
 }
 
-class Contamination(val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) extends ObjectL1 {
+class Contamination(val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) extends ObjectL2 {
 	def +(other: Contamination): Contamination = {
 		new Contamination(
 			bCells | other.bCells,
@@ -66,7 +66,7 @@ object Liquid {
 	val empty = new Liquid("", false, false, false, false, false)
 }
 
-class Part extends ObjectL1
+class Part extends ObjectL2
 
 trait WellHolder extends Part {
 	val nRows: Int

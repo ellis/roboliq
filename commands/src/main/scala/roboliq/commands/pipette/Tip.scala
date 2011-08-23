@@ -28,16 +28,16 @@ object TipState {
 class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	thisObj =>
 	type Setup = TipSetup
-	type Config = TipConfigL1
-	type State = TipStateL1
+	type Config = TipConfigL2
+	type State = TipStateL2
 	
 	override def compare(that: Tip): Int = this.index - that.index
 	
 	def createSetup() = new Setup
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
-		val conf = new TipConfigL1(this, index)
-		val state = new TipStateL1(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+		val conf = new TipConfigL2(this, index)
+		val state = new TipStateL2(conf, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
 		Right(conf, state)
 	}
 	
@@ -47,7 +47,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		def aspirate(liquid2: Liquid, nVolume2: Double) {
 			val st = state
 			val nVolumeNew = st.nVolume + nVolume2
-			map(thisObj) = new TipStateL1(
+			map(thisObj) = new TipStateL2(
 				st.conf,
 				st.liquid + liquid2,
 				nVolumeNew,
@@ -89,32 +89,32 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 
-	// For use in L2P_Pipette
+	// For use in L3P_Pipette
 	def stateWriter(map: HashMap[_ <: Obj, _ <: ObjState]) = new StateWriter(map.asInstanceOf[HashMap[Obj, ObjState]])
 }
 
-class TipConfigL1(
+class TipConfigL2(
 	val obj: Tip,
 	val index: Int
-) extends ObjConfig with Ordered[TipConfigL1] {
-	// For use in L2P_Pipette
-	def createState0(): TipStateL1 = {
-		new TipStateL1(this, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+) extends ObjConfig with Ordered[TipConfigL2] {
+	// For use in L3P_Pipette
+	def createState0(): TipStateL2 = {
+		new TipStateL2(this, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
 	}
 
-	override def compare(that: TipConfigL1): Int = this.index - that.index
+	override def compare(that: TipConfigL2): Int = this.index - that.index
 }
 
-case class TipStateL1(
-	val conf: TipConfigL1,
+case class TipStateL2(
+	val conf: TipConfigL2,
 	val liquid: Liquid, 
 	val nVolume: Double, 
 	val contamInside: Contamination, 
 	val nContamInsideVolume: Double,
 	val destsEntered: List[Liquid],
 	val cleanDegree: CleanDegree.Value
-) extends ObjState with Ordered[TipStateL1] {
-	override def compare(that: TipStateL1): Int = conf.obj.compare(that.conf.obj)
+) extends ObjState with Ordered[TipStateL2] {
+	override def compare(that: TipStateL2): Int = conf.obj.compare(that.conf.obj)
 }
 
 class TipSetup extends ObjSetup

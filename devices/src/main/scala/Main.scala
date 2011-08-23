@@ -5,10 +5,10 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
 
-trait Roboliq extends L3_Roboliq {
+trait Roboliq extends L4_Roboliq {
 	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double) {
-		val item = new L3A_PipetteItem(source, dest, volume)
-		val cmd = L3C_Pipette(Seq(item))
+		val item = new L4A_PipetteItem(source, dest, volume)
+		val cmd = L4C_Pipette(Seq(item))
 		cmds += cmd
 	}
 }
@@ -93,11 +93,11 @@ object Main extends App {
 		pipetter.config.tips.foreach(kb.addObject)
 		
 		val compiler = new Compiler
-		compiler.register(new L3P_Pipette)
-		compiler.register(new L2P_Pipette(pipetter))
-		compiler.register(new L1P_Aspirate)
-		compiler.register(new L1P_Dispense)
-		compiler.register(new L1P_SetTipStateClean)
+		compiler.register(new L4P_Pipette)
+		compiler.register(new L3P_Pipette(pipetter))
+		compiler.register(new L2P_Aspirate)
+		compiler.register(new L2P_Dispense)
+		compiler.register(new L2P_SetTipStateClean)
 		compiler
 	}
 	
@@ -109,7 +109,7 @@ object Main extends App {
 	tester.kb.concretize() match {
 		case Right(map31) =>
 			val state0 = map31.createRobotState()
-			compiler.compileL3(tester.kb, map31, state0, tester.cmds) match {
+			compiler.compileL4(tester.kb, map31, state0, tester.cmds) match {
 				case Left(err) =>
 					println("Compilation errors:")
 					err.errors.foreach(println)

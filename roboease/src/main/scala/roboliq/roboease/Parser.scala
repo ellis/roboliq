@@ -433,9 +433,9 @@ class Parser extends JavaTokenParsers {
 		
 		val items = wvs.map(pair => {
 			val (well, nVolume) = pair
-			new L3A_PipetteItem(WPL_Liquid(liq), WP_Well(well), nVolume)
+			new L4A_PipetteItem(WPL_Liquid(liq), WP_Well(well), nVolume)
 		})
-		val cmd = L3C_Pipette(items)
+		val cmd = L4C_Pipette(items)
 		addRunCommand(cmd)
 	}
 	

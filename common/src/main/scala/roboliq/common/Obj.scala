@@ -26,9 +26,9 @@ abstract class Obj {
 	def createSetup(): Setup
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]]
 	
-	def getSetup(map31: ObjMapper): Option[Setup] = map31.configL3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
-	def getConfigL1(map31: ObjMapper): Option[Config] = map31.configL1(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
-	def getState0L1(map31: ObjMapper): Option[State] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
+	def getSetup(map31: ObjMapper): Option[Setup] = map31.configL4(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
+	def getConfigL2(map31: ObjMapper): Option[Config] = map31.configL2(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
+	def getState0L2(map31: ObjMapper): Option[State] = map31.state0L4(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
 	
 	def state(states: RobotState): State = states(this).asInstanceOf[State]
 }
@@ -58,8 +58,8 @@ sealed class Setting[T] {
 
 class Well extends Obj { thisObj =>
 	type Setup = WellSetup
-	type Config = WellConfigL1
-	type State = WellStateL1
+	type Config = WellConfigL2
+	type State = WellStateL2
 	
 	def createSetup() = new Setup
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
@@ -105,13 +105,13 @@ class Well extends Obj { thisObj =>
 		if (!errors.isEmpty)
 			return Left(errors)
 
-		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL1]
-		val conf = new WellConfigL1(
+		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL2]
+		val conf = new WellConfigL2(
 				obj = this,
 				sLabel = setup.sLabel_?.get,
 				holder = holderState.conf,
 				index = setup.index_?.get)
-		val state = new WellStateL1(
+		val state = new WellStateL2(
 				conf = conf,
 				plateState = holderState,
 				liquid = liquid_?.get,
@@ -139,45 +139,45 @@ class Well extends Obj { thisObj =>
 			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2)
 		}
 	}
-	//def stateWriter(map: HashMap[ThisObj, StateL1]) = new StateWriter(this, map)
+	//def stateWriter(map: HashMap[ThisObj, StateL2]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
 /*
-class WellL2(val state: WellStateL1, val holder: PlateStateL1) extends Ordered[WellL2] {
-	def conf: WellConfigL1 = state.conf
+class WellL3(val state: WellStateL2, val holder: PlateStateL2) extends Ordered[WellL3] {
+	def conf: WellConfigL2 = state.conf
 	def sLabel = conf.sLabel
 	def index = conf.index
 	def liquid = state.liquid
 	def nVolume = state.nVolume
 	
-	override def compare(that: WellL2): Int = conf.compare(that.conf)
+	override def compare(that: WellL3): Int = conf.compare(that.conf)
 }
 
-class WellL1(val conf: WellConfigL1, val holder: PlateConfigL1) extends Ordered[WellL1] {
+class WellL2(val conf: WellConfigL2, val holder: PlateConfigL2) extends Ordered[WellL2] {
 	def obj = conf.obj
 	def sLabel = conf.sLabel
 	def index = conf.index
 	
-	override def compare(that: WellL1): Int = conf.compare(that.conf)
+	override def compare(that: WellL2): Int = conf.compare(that.conf)
 }
 
-object WellL1 {
-	def apply(well: WellConfigL1, states: RobotState) = new WellL1(well, well.holder.state(states).conf)
-	def apply(well: WellL2) = new WellL1(well.conf, well.holder.conf)
+object WellL2 {
+	def apply(well: WellConfigL2, states: RobotState) = new WellL2(well, well.holder.state(states).conf)
+	def apply(well: WellL3) = new WellL2(well.conf, well.holder.conf)
 }
 */
 
-class WellConfigL1(
+class WellConfigL2(
 	val obj: Well,
 	val sLabel: String,
-	val holder: PlateConfigL1,
+	val holder: PlateConfigL2,
 	val index: Int
-) extends ObjConfig with Ordered[WellConfigL1] { thisConf =>
-	type State = WellStateL1
+) extends ObjConfig with Ordered[WellConfigL2] { thisConf =>
+	type State = WellStateL2
 
-	override def compare(that: WellConfigL1): Int = {
+	override def compare(that: WellConfigL2): Int = {
 		val d1 = holder.hashCode() - that.holder.hashCode()
 		if (d1 == 0) index - that.index
 		else d1
@@ -186,9 +186,9 @@ class WellConfigL1(
 	override def toString = sLabel
 }
 
-case class WellStateL1(
-	val conf: WellConfigL1,
-	val plateState: PlateStateL1,
+case class WellStateL2(
+	val conf: WellConfigL2,
+	val plateState: PlateStateL2,
 	val liquid: Liquid,
 	val nVolume: Double
 ) extends ObjState
@@ -205,8 +205,8 @@ class WellSetup extends ObjSetup {
 class Plate extends Obj {
 	thisObj =>
 	type Setup = PlateSetup
-	type Config = PlateConfigL1
-	type State = PlateStateL1
+	type Config = PlateConfigL2
+	type State = PlateStateL2
 	
 	def createSetup() = new Setup
 	
@@ -224,14 +224,14 @@ class Plate extends Obj {
 
 		val dim = setup.dim_?.get
 		
-		val conf = new PlateConfigL1(
+		val conf = new PlateConfigL2(
 			obj = this,
 			sLabel = setup.sLabel_?.get,
 			nRows = dim.nRows,
 			nCols = dim.nCols,
 			nWells = dim.nRows * dim.nCols,
 			wells = dim.wells)
-		val state = new PlateStateL1(
+		val state = new PlateStateL2(
 			conf = conf,
 			location = setup.location_?.get)
 
@@ -248,7 +248,7 @@ class Plate extends Obj {
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
-class PlateConfigL1(
+class PlateConfigL2(
 	val obj: Plate,
 	val sLabel: String,
 	val nRows: Int,
@@ -259,13 +259,13 @@ class PlateConfigL1(
 	override def toString = sLabel
 }
 
-case class PlateStateL1(
-	val conf: PlateConfigL1,
+case class PlateStateL2(
+	val conf: PlateConfigL2,
 	val location: String
 ) extends ObjState
 
 
-class PlateConfigDimensionL3(
+class PlateConfigDimensionL4(
 	val nRows: Int,
 	val nCols: Int,
 	val wells: Seq[Well]
@@ -273,7 +273,7 @@ class PlateConfigDimensionL3(
 
 class PlateSetup extends ObjSetup {
 	var sLabel_? : Option[String] = None
-	var dim_? : Option[PlateConfigDimensionL3] = None
+	var dim_? : Option[PlateConfigDimensionL4] = None
 	var location_? : Option[String] = None
 }
 
@@ -293,7 +293,7 @@ class PlateProxy(kb: KnowledgeBase, obj: Plate) {
 			wellSetup.holder_? = Some(obj)
 			well
 		})
-		val dim = new PlateConfigDimensionL3(rows, cols, wells.toSeq)
+		val dim = new PlateConfigDimensionL4(rows, cols, wells.toSeq)
 		setup.dim_? = Some(dim)
 	}
 	
