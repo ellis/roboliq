@@ -135,6 +135,16 @@ x	setup unit tests for sbt
 			fully specified
 		the data object for a given part is created by a factory function in order to allow the user to add new parts; or alternatively, handlers can be registered
 		the conversion from partially specified info to fully specified is also taken care of by the handlers
+	Compiling 2011-08-23:
+		L4 preprocessing: Knowledgebase
+			purpose: fill in unknown parameter values
+		L4 -> L3: ObjSetup, compiler
+			purpose: translate from unfixed to fixed commands
+		L3 -> L2: ObjConfig, RobotState, compile
+			purpose: break down into simpler commands
+		L2 -> L1: ObjConfig, RobotState
+			purpose: update state and create state-ignorant commands
+		L1 -> L0: ObjConfig
 	Compiling:
 		L3 -> L2: knowledgebase
 		L2 -> L1: initial robot state
