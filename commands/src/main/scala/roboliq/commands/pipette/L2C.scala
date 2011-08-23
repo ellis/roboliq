@@ -4,13 +4,13 @@ import roboliq.common._
 
 case class L2C_Pipette(args: L2A_PipetteArgs) extends Command
 
-case class L2C_Clean(tips: Set[TipStateL1], degree: CleanDegree.Value) extends Command
+case class L2C_Clean(tips: Set[TipConfigL1], degree: CleanDegree.Value) extends Command
 
 case class L2C_Mix(args: L2A_MixArgs) extends Command
 
 class L2A_PipetteItem(
-		val srcs: Set[WellL2],
-		val dest: WellL2,
+		val srcs: Set[WellConfigL1],
+		val dest: WellConfigL1,
 		val nVolume: Double
 		)
 
@@ -25,6 +25,6 @@ class L2A_PipetteArgs(
 		)
 
 class L2A_MixArgs(
-		val wells: Set[WellL2],
+		val wells: Set[WellConfigL1],
 		val mixSpec: MixSpec
 		)

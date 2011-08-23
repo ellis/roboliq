@@ -63,11 +63,21 @@ class Well extends Obj { thisObj =>
 	
 	def createSetup() = new Setup
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+		Left(Seq("well configs must be created separately"))
+	}
+	
+	def createConfigAndState0(setup: Setup, states: scala.collection.Map[Obj, ObjState]): Either[Seq[String], Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 		
 		// Check Config vars
-		if (setup.holder_?.isEmpty)
-			errors += "holder not set"
+		setup.holder_? match {
+			case None => errors += "holder not set"
+			case Some(holder) =>
+				states.get(holder) match {
+					case None => errors += "well's holder is not listed in state map"
+					case Some(holderState) =>
+				}
+		}
 		if (setup.index_?.isEmpty)
 			errors += "index not set"
 			
@@ -94,14 +104,16 @@ class Well extends Obj { thisObj =>
 		
 		if (!errors.isEmpty)
 			return Left(errors)
-			
+
+		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL1]
 		val conf = new WellConfigL1(
 				obj = this,
 				sLabel = setup.sLabel_?.get,
-				holder = setup.holder_?.get,
+				holder = holderState.conf,
 				index = setup.index_?.get)
 		val state = new WellStateL1(
 				conf = conf,
+				plateState = holderState,
 				liquid = liquid_?.get,
 				nVolume = nVolume_?.get)
 		
@@ -132,6 +144,7 @@ class Well extends Obj { thisObj =>
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
+/*
 class WellL2(val state: WellStateL1, val holder: PlateStateL1) extends Ordered[WellL2] {
 	def conf: WellConfigL1 = state.conf
 	def sLabel = conf.sLabel
@@ -154,11 +167,12 @@ object WellL1 {
 	def apply(well: WellConfigL1, states: RobotState) = new WellL1(well, well.holder.state(states).conf)
 	def apply(well: WellL2) = new WellL1(well.conf, well.holder.conf)
 }
+*/
 
 class WellConfigL1(
 	val obj: Well,
 	val sLabel: String,
-	val holder: Plate,
+	val holder: PlateConfigL1,
 	val index: Int
 ) extends ObjConfig with Ordered[WellConfigL1] { thisConf =>
 	type State = WellStateL1
@@ -174,6 +188,7 @@ class WellConfigL1(
 
 case class WellStateL1(
 	val conf: WellConfigL1,
+	val plateState: PlateStateL1,
 	val liquid: Liquid,
 	val nVolume: Double
 ) extends ObjState

@@ -23,17 +23,17 @@ class L3P_Mix extends CommandCompilerL3 {
 	
 	def compileL3(ctx: CompilerContextL3, _cmd: Command): CompileResult = {
 		val cmd = _cmd.asInstanceOf[CmdType]
-		val errors = checkParams(ctx.kb, cmd)
+		val errors = checkParams(ctx.states, cmd)
 		if (!errors.isEmpty)
 			return CompileError(cmd, errors)
 		
-		translate(ctx.map31, cmd) match {
+		translate(ctx.states, cmd) match {
 			case Right(translation) => CompileTranslation(cmd, Seq(translation))
 			case Left(errors) => CompileError(cmd, Seq(errors))
 		}
 	}
 	
-	private def checkParams(kb: KnowledgeBase, cmd: CmdType): Seq[String] = {
+	private def checkParams(states: RobotState, cmd: CmdType): Seq[String] = {
 		val dests = Set(cmd.dests : _*)
 		if (dests.size == 0)
 			return ("must have one or more destinations") :: Nil
@@ -43,7 +43,7 @@ class L3P_Mix extends CommandCompilerL3 {
 		for (dest <- cmd.dests) {
 			val destObjs = dest match {
 				case WP_Well(well) => Seq(well) 
-				case WP_Plate(plate) => Seq(plate) ++ getWells(kb, plate)
+				case WP_Plate(plate) => Seq(plate) ++ plate.state(states).conf.wells
 			}
 			if (destObjs.exists(destsAlready.contains))
 				return ("each destination may only be used once") :: Nil
@@ -58,10 +58,10 @@ class L3P_Mix extends CommandCompilerL3 {
 		Nil
 	}
 	
-	def translate(map31: ObjMapper, cmd: CmdType): Either[String, Command] = {
+	def translate(states: RobotState, cmd: CmdType): Either[String, Command] = {
 		val destConfs = new ArrayBuffer[WellConfigL1]
 		val bAllOk = cmd.dests.forall(dest => {
-			val confs = getWells1(map31, dest)
+			val confs = getWells1(states, dest)
 			if (confs.isEmpty) {
 				false
 			}
@@ -98,56 +98,39 @@ class L3P_Mix extends CommandCompilerL3 {
 		case WP_Plate(o) => getWells(o)
 	}
 	
-	private def getWells1(map31: ObjMapper, wells3: Set[Well]): Set[WellConfigL1] = {
-		if (wells3.forall(kb.map31.contains)) {
-			wells3.map(well3 => kb.map31(well3).asInstanceOf[roboliq.parts.Well])
+	private def getWells1(states: ObjMapper, wells3: Set[Well]): Set[WellConfigL1] = {
+		if (wells3.forall(kb.states.contains)) {
+			wells3.map(well3 => kb.states(well3).asInstanceOf[roboliq.parts.Well])
 		}
 		else {
 			Set()
 		}
 	}
 	*/
-	private def getWells(kb: KnowledgeBase, plate: Plate): Set[Well] = kb.getPlateSetup(plate).dim_? match {
+	/*private def getWells(states: RobotState, plate: Plate): Set[Well] = kb.getPlateSetup(plate).dim_? match {
 		case None => Set()
 		case Some(dim) => dim.wells.toSet
-	}
+	}*/
 	
-	private def getWells1(map31: ObjMapper, wpl: WellOrPlateOrLiquid): Set[WellConfigL1] = wpl match {
-		case WPL_Well(o) => getWells1(map31, o)
-		case WPL_Plate(o) => getWells1(map31, o)
-		case WPL_Liquid(o) => getWells1(map31, o)
+	private def getWells1(states: RobotState, wpl: WellOrPlateOrLiquid): Set[WellConfigL1] = wpl match {
+		case WPL_Well(o) => getWells1(states, o)
+		case WPL_Plate(o) => getWells1(states, o)
+		case WPL_Liquid(o) => getWells1(states, o)
 	}			
 
-	private def getWells1(map31: ObjMapper, wpl: WellOrPlate): Set[WellConfigL1] = wpl match {
-		case WP_Well(o) => getWells1(map31, o)
-		case WP_Plate(o) => getWells1(map31, o)
+	private def getWells1(states: RobotState, wpl: WellOrPlate): Set[WellConfigL1] = wpl match {
+		case WP_Well(o) => getWells1(states, o)
+		case WP_Plate(o) => getWells1(states, o)
 	}			
 
-	private def getWells1(map31: ObjMapper, well: Well): Set[WellConfigL1] = well.getConfigL1(map31) match {
-		case Some(c) => Set(c)
-		case None => Set()
-	}
+	private def getWells1(states: RobotState, well: Well): Set[WellConfigL1] = Set(well.state(states).conf)
 
-	private def getWells1(map31: ObjMapper, plate: Plate): Set[WellConfigL1] = plate.getConfigL1(map31) match {
-		case Some(c) =>
-			val wells_? = c.wells.map(_.getConfigL1(map31))
-			if (wells_?.forall(_.isDefined))
-				wells_?.map(_.get).toSet
-			else
-				Set()
-		case None =>
-			Set()
+	private def getWells1(states: RobotState, plate: Plate): Set[WellConfigL1] = {
+		plate.state(states).conf.wells.map(well => well.state(states).conf).toSet
 	}
 	
-	private def getWells1(map31: ObjMapper, liquid: Liquid): Set[WellConfigL1] = {
+	private def getWells1(states: RobotState, liquid: Liquid): Set[WellConfigL1] = {
 		// Only keep wells with the given initial liquid
-		val l1 = map31.map.filter(pair => {
-			val sts = pair._2
-			sts.state0 match {
-				case state0: WellStateL1 => (state0.liquid eq liquid)
-				case _ => false
-			}
-		})
-		l1.map(_._2.config.asInstanceOf[WellConfigL1]).toSet
+		states.filterByValueType[WellStateL1].values.filter(_.liquid eq liquid).map(_.conf).toSet
 	}
 }

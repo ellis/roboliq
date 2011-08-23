@@ -111,24 +111,52 @@ class KnowledgeBase {
 			}
 		}
 		
-		val l = m_setups.map(pair => {
-			val (obj, setup) = pair
-			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
-				case Left(ls) => Left(obj -> ls)
-				case Right((conf, state)) => Right((obj, setup, conf, state))
-			}
-		})
+		val mapConfs = new HashMap[Obj, ObjConfig]
+		val mapStates = new HashMap[Obj, ObjState]
+		val errors = new ArrayBuffer[Tuple2[Obj, Seq[String]]]
 		
-		if (l.forall(_.isRight)) {
-			val map = l.map(_.right.get match {
-				case (obj, setup, conf, state) => obj -> new SetupConfigState(setup, conf, state)
+		def constructConfStateTuples(setups: scala.collection.Map[Obj, ObjSetup]) {
+			for ((obj, setup) <- setups) {
+				if (!mapStates.contains(obj)) {
+					obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
+						case Left(ls) => errors += (obj -> ls)
+						case Right((conf, state)) =>
+							mapConfs(obj) = conf
+							mapStates(obj) = state
+					}
+				}
+			}
+		}
+			
+		// Plates
+		val plateSetups = m_setups.filter(_._2.isInstanceOf[PlateSetup])
+		constructConfStateTuples(plateSetups)
+
+		// Wells
+		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair.asInstanceOf[WellSetup])
+		for ((obj, setup) <- wellSetups) {
+			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], mapStates) match {
+				case Left(ls) => errors += (obj -> ls)
+				case Right((conf, state)) =>
+					mapConfs(obj) = conf
+					mapStates(obj) = state
+			}
+		}
+		
+		// Everything else
+		constructConfStateTuples(m_setups)
+
+		if (errors.isEmpty) {
+			val map2 = mapStates.map(pair => {
+				val (obj, state) = pair
+				val conf = mapConfs(obj)
+				obj -> new SetupConfigState(m_setups(obj), conf, state)
 			}).toMap
-			val map31 = new ObjMapper(map)
+			val map31 = new ObjMapper(map2)
 			Right(map31)
 		}
 		else {
-			val errors = l.filter(_.isLeft).map(_.left.get)
-			Left(errors.toSeq)
+			Left(errors)
 		}
 	}
 }

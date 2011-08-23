@@ -27,7 +27,7 @@ class L2P_Mix(robot: PipetteDevice) extends CommandCompilerL2 {
 }
 
 private class L2P_Mix_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C_Mix) {
-	//val state0 = ctx.states 
+	val compiler = ctx.compiler
 	val args = cmd.args
 	
 	case class SrcTipDestVolume(src: WellConfigL1, tip: TipConfigL1, dest: WellConfigL1, nVolume: Double)
@@ -200,7 +200,7 @@ private class L2P_Mix_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C
 		sError_?
 	}
 
-	private def dispense_createTwvpcs(tws: Seq[TipWell], tipStates: collection.Map[TipConfigL1, TipStateL1]): Either[String, Seq[TipWellVolumePolicyCount]] = {
+	private def dispense_createTwvpcs(tws: Seq[TipWell], tipStates: collection.Map[TipConfigL1, TipStateL1]): Either[String, Seq[L1A_MixItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
 			val tipState = tipStates(tw.tip)
@@ -210,7 +210,7 @@ private class L2P_Mix_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C
 		if (policies_?.forall(_.isDefined)) {
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
 				val (tw, policy) = pair
-				new TipWellVolumePolicyCount(tw.tip, tw.well, args.mixSpec.nVolume, policy, args.mixSpec.nCount)
+				new L1A_MixItem(tw.tip, tw.well, args.mixSpec.nVolume, policy, args.mixSpec.nCount)
 			})
 			Right(twvps)
 		}
@@ -219,14 +219,14 @@ private class L2P_Mix_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C
 		}
 	}
 
-	private def dispense_addCommands(cycle: CycleState, twvpcs0: Seq[TipWellVolumePolicyCount]) {
+	private def dispense_addCommands(cycle: CycleState, twvpcs0: Seq[L1A_MixItem]) {
 		val twvpcs = twvpcs0.sortBy(_.tip)
 		val twvpcss = robot.batchesForMix(twvpcs)
 		// Create dispense tokens
 		cycle.mixes ++= twvpcss.map(twvpcs => L1C_Mix(twvpcs))
 	}
 	
-	private def dispense_updateTipStates(twvps: Seq[TipWellVolumePolicyCount], tipStates: HashMap[TipConfigL1, TipStateL1]) {
+	private def dispense_updateTipStates(twvps: Seq[L1A_MixItem], tipStates: HashMap[TipConfigL1, TipStateL1]) {
 		// Add volumes to amount required in tips
 		for (twvp <- twvps) {
 			val wellState = twvp.well.state(state0)
@@ -256,7 +256,7 @@ private class L2P_Mix_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C
 	private def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
 		println("cmds1: "+cmds1)
-		compiler.compileL1(state0, cmds1) match {
+		compiler.compileL1(cycle.state0, cmds1) match {
 			case Right(Seq()) =>
 				Left(Seq("compileL1 failed"))
 			case Right(ress) =>

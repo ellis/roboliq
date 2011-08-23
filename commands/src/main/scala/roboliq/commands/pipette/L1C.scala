@@ -8,36 +8,38 @@ trait HasTip {
 	val tip: TipConfigL1
 }
 
-sealed class TipWell(val tip: TipConfigL1, val well: WellL1) extends HasTip {
+sealed class TipWell(val tip: TipConfigL1, val well: WellConfigL1) extends HasTip {
 	override def toString = "TipWell("+tip.index+","+well.holder.sLabel+":"+well.index+")" 
 }
 
 sealed class TipWellVolume(
-		tip: TipConfigL1, well: WellL1,
+		tip: TipConfigL1, well: WellConfigL1,
 		val nVolume: Double
 	) extends TipWell(tip, well) {
 	override def toString = "TipWellVolume("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+")" 
 }
 
-sealed class TipWellVolumePolicy(tip: TipConfigL1, well: WellL1, nVolume: Double,
+sealed class TipWellVolumePolicy(tip: TipConfigL1, well: WellConfigL1, nVolume: Double,
 		val policy: PipettePolicy
 	) extends TipWellVolume(tip, well, nVolume) {
 	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+")" 
 }
 
-sealed class TipWellVolumePolicyCount(tip: TipConfigL1, well: WellL1, nVolume: Double, liquid: Liquid, policy: PipettePolicy,
+sealed class TipWellVolumePolicyCount(tip: TipConfigL1, well: WellConfigL1, nVolume: Double, liquid: Liquid, policy: PipettePolicy,
 		val nCount: Int
 	) extends L1A_AspirateItem(tip, well, liquid, nVolume, policy) {
 	override def toString = "TipWellVolumePolicyCount("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+","+nCount+")" 
 }
 
 sealed class L1A_AspirateItem(
-		tip: TipConfigL1, well: WellL1, val liquidWell: Liquid, nVolume: Double, policy: PipettePolicy
+		tip: TipConfigL1, well: WellConfigL1, val liquidWell: Liquid, nVolume: Double, policy: PipettePolicy
 	) extends TipWellVolumePolicy(tip, well, nVolume, policy)
 sealed class L1A_DispenseItem(
-		tip: TipConfigL1, val liquidTip: Liquid, well: WellL1, val liquidWell: Liquid, nVolume: Double, policy: PipettePolicy
+		tip: TipConfigL1, val liquidTip: Liquid, well: WellConfigL1, val liquidWell: Liquid, nVolume: Double, policy: PipettePolicy
 	) extends TipWellVolumePolicy(tip, well, nVolume, policy)
-sealed class L1A_MixItem(val tip: TipConfigL1, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val nCount: Int, val policy: PipettePolicy)
+sealed class L1A_MixItem(
+		tip: TipConfigL1, well: WellConfigL1, liquidWell: Liquid, nVolume: Double, val nCount: Int, policy: PipettePolicy
+	) extends L1A_AspirateItem(tip, well, liquidWell, nVolume, policy)
 
 
 case class L1C_Aspirate(items: Seq[L1A_AspirateItem]) extends Command

@@ -10,7 +10,7 @@ import roboliq.commands.pipette._
 
 
 class PipetteHelper {
-	def chooseTipWellPairsNext(states: RobotState, tips: SortedSet[TipConfigL1], wells: SortedSet[WellL1], twsPrev: Seq[TipWell]): Seq[TipWell] = {
+	def chooseTipWellPairsNext(states: RobotState, tips: SortedSet[TipConfigL1], wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Seq[TipWell] = {
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
 		//println("wells: "+wells)
@@ -41,7 +41,7 @@ class PipetteHelper {
 		pairs.toSeq
 	}
 
-	private def getHolderWellsCol(states: RobotState, wells: SortedSet[WellL1], twsPrev: Seq[TipWell]): Tuple3[PlateConfigL1, SortedSet[WellL1], Int] = {
+	private def getHolderWellsCol(states: RobotState, wells: SortedSet[WellConfigL1], twsPrev: Seq[TipWell]): Tuple3[PlateConfigL1, SortedSet[WellConfigL1], Int] = {
 		// Pick a "reference" well if twsPrev isn't empty
 		val wellRef_? = {
 			if (twsPrev.isEmpty)
@@ -76,7 +76,7 @@ class PipetteHelper {
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(states: RobotState, holder: PlateConfigL1, wellsOnHolder: SortedSet[WellL1], iCol0: Int): WellL1 = {
+	private def getFirstWell(states: RobotState, holder: PlateConfigL1, wellsOnHolder: SortedSet[WellConfigL1], iCol0: Int): WellConfigL1 = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
@@ -85,7 +85,7 @@ class PipetteHelper {
 		val nRows = holder.nRows
 		val nCols = holder.nCols
 
-		def checkCol(iCol: Int): WellL1 = {
+		def checkCol(iCol: Int): WellConfigL1 = {
 			val well_? = wellsOnHolder.find(_.index / nRows == iCol)
 			well_? match {
 				case Some(well) => well
@@ -96,7 +96,7 @@ class PipetteHelper {
 		checkCol(iCol0)
 	}
 
-	def chooseTipWellPairsAll(states: RobotState, tips: SortedSet[TipConfigL1], dests: SortedSet[WellL1]): Seq[Seq[TipWell]] = {
+	def chooseTipWellPairsAll(states: RobotState, tips: SortedSet[TipConfigL1], dests: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
 		//println("chooseTipWellPairsAll()")
 		//println("tips: "+tips)
 		//println("dests: "+dests)
@@ -123,7 +123,7 @@ class PipetteHelper {
 		}
 	}
 
-	def chooseTipSrcPairs(states: RobotState, tips: SortedSet[TipConfigL1], srcs: SortedSet[WellL1]): Seq[Seq[TipWell]] = {
+	def chooseTipSrcPairs(states: RobotState, tips: SortedSet[TipConfigL1], srcs: SortedSet[WellConfigL1]): Seq[Seq[TipWell]] = {
 		// Cases:
 		// Case 1: tips size == srcs size:
 		// Case 2: tips size < srcs size:
