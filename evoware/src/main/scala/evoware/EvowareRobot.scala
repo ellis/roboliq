@@ -29,6 +29,7 @@ abstract class EvowareRobot extends Robot {
 		chosen
 	}*/
 	
+	
 	def score(tokens: Seq[T1_Token]): Int = {
 		tokens.size
 	}

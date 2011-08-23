@@ -133,7 +133,7 @@ class KnowledgeBase {
 		constructConfStateTuples(plateSetups)
 
 		// Wells
-		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair.asInstanceOf[WellSetup])
+		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair._2.asInstanceOf[WellSetup])
 		for ((obj, setup) <- wellSetups) {
 			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], mapStates) match {
 				case Left(ls) => errors += (obj -> ls)
