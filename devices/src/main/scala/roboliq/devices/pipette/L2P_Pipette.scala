@@ -27,10 +27,10 @@ class L2P_Pipette(robot: PipetteDevice) extends CommandCompilerL2 {
 }
 
 private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd: L2C_Pipette) {
-	val states = ctx.states
+	val compiler = ctx.compiler
 	val args = cmd.args
 	
-	case class SrcTipDestVolume(src: WellConfigL1, tip: TipConfigL1, dest: WellConfigL1, nVolume: Double)
+	case class SrcTipDestVolume(src: WellL2, tip: TipStateL1, dest: WellL2, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[TipConfigL1], val state0: RobotState) {
 		val cleans = new ArrayBuffer[L2C_Clean]
@@ -44,8 +44,8 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 	
 	val helper = new PipetteHelper
 
-	val dests = SortedSet[WellConfigL1]() ++ args.items.map(_.dest)
-	val mapDestToItem = args.items.map(t => t.dest -> t).toMap
+	val dests = SortedSet[WellL1](args.items.map(item => WellL1(item.dest)) : _*)
+	val mapDestToItem: Map[WellConfigL1, L2A_PipetteItem] = args.items.map(t => t.dest.conf -> t).toMap
 
 	val translation: Either[CompileError, Seq[Command]] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
@@ -55,7 +55,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		var nWinnerScore = Int.MaxValue
 		var lsErrors = new ArrayBuffer[String]
 		for (tipGroup <- robot.config.tipGroups) {
-			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.getConfigL1(states).get)
+			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.state(ctx.states).conf)
 	
 			pipette(tips) match {
 				case Left(lsErrors2) =>
@@ -63,9 +63,9 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 				case Right(Seq()) =>
 				case Right(cycles) =>
 					val cmds1 = cycles.flatMap(_.toTokenSeq)
-					compiler.compileL1(state0, cmds1) match {
+					compiler.compileL1(ctx.states, cmds1) match {
 						case Right(ress) =>
-							compiler.score(state0, ress) match {
+							compiler.score(ctx.states, ress) match {
 								case Some(nScore) =>
 									if (nScore < nWinnerScore) {
 										winner = cmds1
@@ -92,7 +92,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		//val state = new RobotStateBuilder(state0)
 		
 		// Pair up all tips and wells
-		val twss0 = helper.chooseTipWellPairsAll(map31, tips, dests)
+		val twss0 = helper.chooseTipWellPairsAll(ctx.states, tips, dests)
 
 		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
 			if (twss.isEmpty)
@@ -102,15 +102,15 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 			// First tip/dest pairs for dispense
 			val tws0 = twss.head
 			
-			val srcs0 = tws0.map(tw => tw.tip -> mapDestToItem(tw.well).srcs).toMap
+			val srcs0 = tws0.map(tw => tw.tip -> mapDestToItem(tw.well.conf).srcs).toMap
 			
 			// Associate source liquid with tip
-			val tipStates = new HashMap[TipConfigL1, TipStateL1]
+			val tipStates = new HashMap[Tip, TipStateL1]
 			tws0.foreach(tw => {
-				val item = mapDestToItem(tw.well)
-				val srcState = item.srcs.head.state(stateCycle0)
+				val item = mapDestToItem(tw.well.conf)
+				val srcState = item.srcs.head.conf.obj.state(stateCycle0)
 				val tipState = tw.tip.createState0()
-				tipStates(tw.tip) = tipState
+				tipStates(tw.tip.obj) = tipState
 			})
 
 			//
@@ -133,7 +133,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 			// Tuples of tip to clean degree required by source liquid
 			val tcs: Seq[Tuple2[TipConfigL1, CleanDegree.Value]] = srcs0.map(pair => {
 				val (tip, srcs) = pair
-				val tipState = tip.state(stateCycle0)
+				val tipState = tip.obj.state(stateCycle0)
 				val srcState = srcs.head.state(stateCycle0)
 				val srcLiquid = srcState.liquid
 				val cleanDegree = helper.getCleanDegreeAspirate(tipState, srcLiquid)
@@ -171,7 +171,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		}
 	}
 	
-	private def dispense(cycle: CycleState, tipStates: HashMap[TipConfigL1, TipStateL1], srcs: Map[TipConfigL1, Set[WellConfigL1]], tws: Seq[TipWell]): Option[String] = {
+	private def dispense(cycle: CycleState, tipStates: HashMap[Tip, TipStateL1], srcs: Map[TipStateL1, Set[WellL1]], tws: Seq[TipWell]): Option[String] = {
 		dispense_checkVols(tipStates, srcs, tws) match {
 			case None =>
 			case e @ Some(sError) => return e
@@ -191,7 +191,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 	}
 	
 	// Check for appropriate volumes
-	private def dispense_checkVols(tipStates: HashMap[TipConfigL1, TipStateL1], srcs: Map[TipConfigL1, Set[WellConfigL1]], tws: Seq[TipWell]): Option[String] = {
+	private def dispense_checkVols(tipStates: HashMap[Tip, TipStateL1], srcs: Map[TipConfigL1, Set[WellL1]], tws: Seq[TipWell]): Option[String] = {
 		assert(!tws.isEmpty)
 		var sError_? : Option[String] = None
 		
@@ -221,7 +221,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		sError_?
 	}
 
-	private def dispense_createTwvps(tws: Seq[TipWell], tipStates: collection.Map[TipConfigL1, TipStateL1]): Either[String, Seq[TipWellVolumePolicy]] = {
+	private def dispense_createTwvps(tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL1]): Either[String, Seq[TipWellVolumePolicy]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
 			val item = mapDestToItem(tw.well)
@@ -249,7 +249,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		cycle.dispenses ++= twvpss.map(twvps => new L1C_Dispense(twvps))
 	}
 	
-	private def dispense_updateTipStates(twvps: Seq[TipWellVolumePolicy], tipStates: HashMap[TipConfigL1, TipStateL1]) {
+	private def dispense_updateTipStates(twvps: Seq[TipWellVolumePolicy], tipStates: HashMap[Tip, TipStateL1]) {
 		// Add volumes to amount required in tips
 		for (twvp <- twvps) {
 			val wellState = twvp.well.state(state0)
@@ -259,7 +259,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 	}
 	
 	/** Would a cleaning be required before a subsequent dispense from the same tip? */
-	private def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[TipConfigL1, TipStateL1], tws: Seq[TipWell]): Boolean = {
+	private def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL1], tws: Seq[TipWell]): Boolean = {
 		def step(tipWell: TipWell): Boolean = {
 			val tipState = tipStates(tipWell.tip)
 			helper.getCleanDegreeDispense(tipState) == CleanDegree.None
@@ -276,18 +276,18 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		}
 	}
 
-	private def aspirateLiquid(cycle: CycleState, tipStates: collection.Map[TipConfigL1, TipStateL1], srcs: Set[WellConfigL1]): Option[String] = {
+	private def aspirateLiquid(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL1], srcs: Set[WellL2]): Option[String] = {
 		// Get list of tips which require aspiration	
 		var tips = SortedSet[TipConfigL1]() ++ tipStates.values.map(_.conf)
 
 		// sort the sources by volume descending (secondary sort key is index order)
-		def order(well1: WellConfigL1, well2: WellConfigL1): Boolean = {
+		def order(well1: WellL2, well2: WellL2): Boolean = {
 			val a = well1.state(state0)
 			val b = well2.state(state0)
 			(a.nVolume > b.nVolume) || (a.nVolume == b.nVolume && well1.index < well2.index)
 		}
 		// keep the top tips.size() entries ordered by index
-		val srcs2 = SortedSet[WellConfigL1](srcs.toSeq.sortWith(order).take(tips.size) : _*)
+		val srcs2 = SortedSet[WellL2](srcs.toSeq.sortWith(order).take(tips.size) : _*)
 		val pairs = srcs2.toSeq zip tips.toSeq
 	
 		val twss0 = helper.chooseTipSrcPairs(map31, tips, srcs2)
@@ -305,10 +305,10 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		sError_?
 	}
 
-	private def aspirateDirect(cycle: CycleState, tipStates: collection.Map[TipConfigL1, TipStateL1], srcs: collection.Map[TipConfigL1, Set[WellConfigL1]]): Option[String] = {
+	private def aspirateDirect(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL1], srcs: collection.Map[TipConfigL1, Set[WellL2]]): Option[String] = {
 		val tips = tipStates.values.map(_.conf).toSeq.sortBy(tip => tip)
-		val tws = tips.map(tip => new TipWell(tip, srcs(tip).head))
-		aspirate_createTwvps(tipStates, tws) match {
+		val tws = tips.map(tip => new TipWell(tip, WellL1(srcs(tip).head.conf, cycle.state0)))
+		aspirate_createTwvps(cycle, tipStates, tws) match {
 			case Left(sError) => Some(sError)
 			case Right(twvps) =>
 				val twvpss = robot.batchesForAspirate(twvps)
@@ -317,18 +317,19 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 		}
 	}
 	
-	private def aspirate_createTwvps(tipStates: collection.Map[TipConfigL1, TipStateL1], tws: Seq[TipWell]): Either[String, Seq[TipWellVolumePolicy]] = {
+	private def aspirate_createTwvps(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL1], tws: Seq[TipWell]): Either[String, Seq[L1A_AspirateItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
-			val tipState = tipStates(tw.tip)
-			val srcState = tw.well.state(state0)
+			val tipState = tipStates(tw.tip.obj)
+			val srcState = tw.well.obj.state(cycle.state0)
 			robot.getAspiratePolicy(tipState, srcState)
 		})
 		if (policies_?.forall(_.isDefined)) {
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
 				val (tw, policy) = pair
-				val tipState = tipStates(tw.tip)
-				new TipWellVolumePolicy(tw.tip, tw.well, -tipState.nVolume, policy)
+				val tipState = tipStates(tw.tip.obj)
+				val srcState = tw.well.obj.state(cycle.state0)
+				new L1A_AspirateItem(tw.tip, tw.well, srcState.liquid, -tipState.nVolume, policy)
 			})
 			Right(twvps)
 		}
@@ -340,7 +341,7 @@ private class L2P_Pipette_Sub(robot: PipetteDevice, ctx: CompilerContextL2, cmd:
 	private def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
 		println("cmds1: "+cmds1)
-		compiler.compileL1(state0, cmds1) match {
+		compiler.compileL1(cycle.state0, cmds1) match {
 			case Right(Seq()) =>
 				Left(Seq("compileL1 failed"))
 			case Right(ress) =>

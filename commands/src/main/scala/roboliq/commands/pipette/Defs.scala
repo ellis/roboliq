@@ -17,3 +17,7 @@ case class MixSpec(
 		val nCount: Int,
 		val policy_? : Option[PipettePolicy] = None
 		)
+
+//class TipWellL2(val tip: TipStateL1, val well: WellL2) {
+	//override def toString = "TipWell("+tip.conf.index+","+well.holder.conf.sLabel+":"+well.conf.index+")" 
+//}

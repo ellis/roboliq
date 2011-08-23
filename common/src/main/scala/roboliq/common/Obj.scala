@@ -26,10 +26,9 @@ abstract class Obj {
 	def createSetup(): Setup
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]]
 	
+	def getSetup(map31: ObjMapper): Option[Setup] = map31.configL3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 	def getConfigL1(map31: ObjMapper): Option[Config] = map31.configL1(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
-	def getConfigL3(map31: ObjMapper): Option[Setup] = map31.configL3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 	def getState0L1(map31: ObjMapper): Option[State] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
-	def getState0L3(map31: ObjMapper): Option[Setup] = map31.state0L3(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 	
 	def state(states: RobotState): State = states(this).asInstanceOf[State]
 }
@@ -133,18 +132,27 @@ class Well extends Obj { thisObj =>
 	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
-class WellL2(val state: WellStateL1, val holder: PlateStateL1) {
+class WellL2(val state: WellStateL1, val holder: PlateStateL1) extends Ordered[WellL2] {
 	def conf: WellConfigL1 = state.conf
 	def sLabel = conf.sLabel
 	def index = conf.index
 	def liquid = state.liquid
 	def nVolume = state.nVolume
+	
+	override def compare(that: WellL2): Int = conf.compare(that.conf)
 }
 
-class WellL1(val conf: WellConfigL1, val holder: PlateConfigL1) {
+class WellL1(val conf: WellConfigL1, val holder: PlateConfigL1) extends Ordered[WellL1] {
 	def obj = conf.obj
 	def sLabel = conf.sLabel
 	def index = conf.index
+	
+	override def compare(that: WellL1): Int = conf.compare(that.conf)
+}
+
+object WellL1 {
+	def apply(well: WellConfigL1, states: RobotState) = new WellL1(well, well.holder.state(states).conf)
+	def apply(well: WellL2) = new WellL1(well.conf, well.holder.conf)
 }
 
 class WellConfigL1(

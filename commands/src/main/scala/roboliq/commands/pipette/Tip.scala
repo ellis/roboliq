@@ -113,6 +113,8 @@ case class TipStateL1(
 	val nContamInsideVolume: Double,
 	val destsEntered: List[Liquid],
 	val cleanDegree: CleanDegree.Value
-) extends ObjState
+) extends ObjState with Ordered[TipStateL1] {
+	override def compare(that: TipStateL1): Int = conf.obj.compare(that.conf.obj)
+}
 
 class TipSetup extends ObjSetup

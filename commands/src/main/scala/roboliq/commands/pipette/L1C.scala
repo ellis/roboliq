@@ -20,7 +20,6 @@ sealed class TipWellVolume(
 }
 
 sealed class TipWellVolumePolicy(tip: TipConfigL1, well: WellL1, nVolume: Double,
-		val liquid: Liquid,
 		val policy: PipettePolicy
 	) extends TipWellVolume(tip, well, nVolume) {
 	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+")" 
@@ -28,19 +27,23 @@ sealed class TipWellVolumePolicy(tip: TipConfigL1, well: WellL1, nVolume: Double
 
 sealed class TipWellVolumePolicyCount(tip: TipConfigL1, well: WellL1, nVolume: Double, liquid: Liquid, policy: PipettePolicy,
 		val nCount: Int
-	) extends TipWellVolumePolicy(tip, well, nVolume, liquid, policy) {
+	) extends L1A_AspirateItem(tip, well, liquid, nVolume, policy) {
 	override def toString = "TipWellVolumePolicyCount("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+","+nCount+")" 
 }
 
-sealed class AspirateItem(val tip: TipConfigL1, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val policy: PipettePolicy)
-sealed class DispenseItem(val tip: TipConfigL1, val liquidTip: Liquid, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val policy: PipettePolicy)
-sealed class MixItem(val tip: TipConfigL1, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val nCount: Int, val policy: PipettePolicy)
+sealed class L1A_AspirateItem(
+		tip: TipConfigL1, well: WellL1, val liquidWell: Liquid, nVolume: Double, policy: PipettePolicy
+	) extends TipWellVolumePolicy(tip, well, nVolume, policy)
+sealed class L1A_DispenseItem(
+		tip: TipConfigL1, val liquidTip: Liquid, well: WellL1, val liquidWell: Liquid, nVolume: Double, policy: PipettePolicy
+	) extends TipWellVolumePolicy(tip, well, nVolume, policy)
+sealed class L1A_MixItem(val tip: TipConfigL1, val well: WellL1, val liquidWell: Liquid, val nVolume: Double, val nCount: Int, val policy: PipettePolicy)
 
 
-case class L1C_Aspirate(items: Seq[AspirateItem]) extends Command
-case class L1C_Dispense(items: Seq[DispenseItem]) extends Command
+case class L1C_Aspirate(items: Seq[L1A_AspirateItem]) extends Command
+case class L1C_Dispense(items: Seq[L1A_DispenseItem]) extends Command
 //case class L1C_Clean(tips: Seq[Tip], degree: CleanDegree.Value) extends Command
-case class L1C_Mix(items: Seq[MixItem]) extends Command
+case class L1C_Mix(items: Seq[L1A_MixItem]) extends Command
 case class L1C_Wash(tips: Set[TipConfigL1], degree: CleanDegree.Value, iWashProgram: Int) extends Command
 case class L1C_TipsDrop(tips: Set[Tip])
 case class L1C_TipsGet(tips: Set[Tip]) // FIXME: add tip kind

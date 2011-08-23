@@ -36,8 +36,8 @@ class L2P_Clean(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispe
 							val well1D = new WellL1(wellStateD.conf, pcD.conf)
 							(policyA_?, policyD_?) match {
 								case (Some(policyA), Some(policyD)) =>
-									val twvpA = new AspirateItem(tip.conf, well1A, wellStateA.liquid, nVolume, policyA)
-									val twvpD = new DispenseItem(tip.conf, tipState.liquid, well1D, wellStateD.liquid, nVolume, policyD)
+									val twvpA = new L1A_AspirateItem(tip.conf, well1A, wellStateA.liquid, nVolume, policyA)
+									val twvpD = new L1A_DispenseItem(tip.conf, tipState.liquid, well1D, wellStateD.liquid, nVolume, policyD)
 									(twvpA, twvpD)
 								case _ =>
 									return CompileError(cmd, Seq("unable to find pipetting policy for decon wells"))
