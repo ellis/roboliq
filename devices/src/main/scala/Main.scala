@@ -109,11 +109,17 @@ object Main extends App {
 	tester.kb.concretize() match {
 		case Right(map31) =>
 			val state0 = map31.createRobotState()
-			val nodes = compiler.compileL3(tester.kb, map31, state0, tester.cmds)
-			println("Output:")
-			val finals = nodes.flatMap(_.collectFinal())
-			finals.map(_.cmd).foreach(println)
+			compiler.compileL3(tester.kb, map31, state0, tester.cmds) match {
+				case Left(err) =>
+					println("Compilation errors:")
+					err.errors.foreach(println)
+				case Right(nodes) =>
+					val finals = nodes.flatMap(_.collectFinal())
+					println("Output:")
+					finals.map(_.cmd).foreach(println)
+			}
 		case Left(errors) =>
+			println("Missing information:")
 			println(errors)
 	}
 }
