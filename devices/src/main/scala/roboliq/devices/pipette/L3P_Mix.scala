@@ -174,8 +174,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	}
 	
 	private def mix_createItem(cycle: CycleState, tw: TipWell, policy: PipettePolicy): L2A_MixItem = {
-		val wellState = tw.well.obj.state(cycle.state0)
-		new L2A_MixItem(tw.tip, tw.well, wellState.liquid, cmd.args.mixSpec.nVolume, args.mixSpec.nCount, policy)
+		new L2A_MixItem(tw.tip, tw.well, cmd.args.mixSpec.nVolume, args.mixSpec.nCount, policy)
 	}
 
 	private def mix_addCommands(cycle: CycleState, twvpcs0: Seq[L2A_MixItem]) {

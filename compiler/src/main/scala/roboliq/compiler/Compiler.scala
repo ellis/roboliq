@@ -38,13 +38,21 @@ class Compiler {
 			m_handlers3 = handler.asInstanceOf[CommandCompilerL4] :: m_handlers3*/
 	}
 	
-	def compileL4(kb: KnowledgeBase, map31: ObjMapper, state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
-		compileCommands(state0, cmds) match {
+	def compile(states: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
+		compileCommands(states, cmds) match {
 			case Left(err) => Left(err)
 			case Right((nodes, state1)) => Right(nodes)
 		}
 	}
 	
+	def compileToL2(states: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
+		compileCommandsToL2(states, cmds) match {
+			case Left(err) => Left(err)
+			case Right((nodes, state1)) => Right(nodes)
+		}
+	}
+	
+	/*
 	def compileL2(state0: RobotState, cmd: Command): Either[CompileError, CompileFinal] = {
 		m_handlers.get(cmd.getClass()) match {
 			case Some(handler1 : CommandCompilerL2) =>
@@ -68,7 +76,7 @@ class Compiler {
 			}
 		}
 		Right(ress)
-	}
+	}*/
 	
 	private def compileCommands(state0: RobotState, cmds: Seq[Command]): Either[CompileError, Tuple2[Seq[CompileNode], RobotState]] = {
 		var state = state0
@@ -101,27 +109,38 @@ class Compiler {
 		}
 	}
 
-	private def addKnowledge(kb: KnowledgeBase, cmd: Command) {
+	/*private def addKnowledge(kb: KnowledgeBase, cmd: CommandL4) {
 		for (handler <- m_handlers) {
 			if (handler.isInstanceOf[CommandCompilerL4]) {
 				handler.asInstanceOf[CommandCompilerL4].addKnowledge(kb, cmd)
 			}
 		}
-	}
+	}*/
 	
 	private def addKnowledge(kb: KnowledgeBase, cmds: Seq[Command]) {
-		cmds.foreach(cmd => addKnowledge(kb, cmd))
+		cmds.foreach(_ match {
+			case cmd4: CommandL4 => cmd4.addKnowledge(kb)
+			case _ =>
+		})
 	}
 	
-	private def compile(state0: RobotState, cmd: Command): CompileResult = {
+	private def compile(states: RobotState, cmd: Command): CompileResult = {
 		m_handlers.get(cmd.getClass()) match {
 			case Some(handler) =>
 				val handler = m_handlers(cmd.getClass())
-				callHandlerCompile(state0, handler, cmd)
+				callHandlerCompile(states, handler, cmd)
 			case None =>
-				new CompileError(
-						cmd = cmd,
-						errors = List("Unhandled command: "+cmd.getClass().getCanonicalName()))
+				cmd match {
+					case cmd4: CommandL4 =>
+						cmd4.toL3(states) match {
+							case Left(lsErrors) => CompileError(cmd, lsErrors)
+							case Right(cmd3) => CompileTranslation(cmd, Seq(cmd3))
+						}
+					case _ =>
+						new CompileError(
+								cmd = cmd,
+								errors = List("Unhandled command: "+cmd.getClass().getCanonicalName()))
+				}
 		}
 	}
 	

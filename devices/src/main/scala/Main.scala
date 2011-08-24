@@ -8,7 +8,7 @@ import roboliq.devices.pipette._
 trait Roboliq extends L4_Roboliq {
 	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double) {
 		val item = new L4A_PipetteItem(source, dest, volume)
-		val cmd = L4C_Pipette(Seq(item))
+		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item)))
 		cmds += cmd
 	}
 }
@@ -26,9 +26,11 @@ class Tester extends Roboliq {
 		
 		//water.liquidClass = "water"
 		
+		plate.label = "P1"
 		plate.location = "P1"
 		plate.setDimension(4, 1)
 		
+		p2.label = "P2"
 		p2.location = "P2"
 		p2.setDimension(8, 1)
 		for (well <- p2.wells) {
@@ -92,8 +94,23 @@ object Main extends App {
 		val pipetter = new PipetteDeviceGeneric()
 		pipetter.config.tips.foreach(kb.addObject)
 		
+		val plateDeconAspirate, plateDeconDispense = new Plate
+		new PlateProxy(kb, plateDeconAspirate) match {
+			case pp =>
+				pp.label = "DA"
+				pp.location = "DA"
+				pp.setDimension(8, 1)
+		}
+		new PlateProxy(kb, plateDeconDispense) match {
+			case pp =>
+				pp.label = "DD"
+				pp.location = "DD"
+				pp.setDimension(8, 1)
+		}
+		
 		val compiler = new Compiler
-		compiler.register(new L4P_Pipette)
+		//compiler.register(new L4P_Pipette)
+		compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
 		compiler.register(new L3P_Pipette(pipetter))
 		compiler.register(new L2P_Aspirate)
 		compiler.register(new L2P_Dispense)
@@ -109,7 +126,7 @@ object Main extends App {
 	tester.kb.concretize() match {
 		case Right(map31) =>
 			val state0 = map31.createRobotState()
-			compiler.compileL4(tester.kb, map31, state0, tester.cmds) match {
+			compiler.compile(state0, tester.cmds) match {
 				case Left(err) =>
 					println("Compilation errors:")
 					err.errors.foreach(println)

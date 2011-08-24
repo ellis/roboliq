@@ -8,7 +8,9 @@ trait Device // FIXME: This doesn't belong here -- ellis, 2011-08-18
 class RobotState(val map: Map[Obj, ObjState]) {
 	def apply(obj: Obj) = map(obj)
 	
-	def filterByValueType[State <: ObjState]: Map[Obj, State] = map.filter(pair => pair._2.isInstanceOf[State]).mapValues(_.asInstanceOf[State])
+	def filterByValueType[State <: ObjState](implicit m: Manifest[State]): Map[Obj, State] = {
+		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
+	}
 }
 
 class StateBuilder(states: RobotState) {

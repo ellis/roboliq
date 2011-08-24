@@ -36,7 +36,7 @@ private trait L3P_PipetteMixBase {
 
 	val dests: SortedSet[WellConfigL2]
 
-	val translation: Either[CompileError, Seq[Command]] = {
+	def translation: Either[CompileError, Seq[Command]] = {
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score
@@ -52,7 +52,7 @@ private trait L3P_PipetteMixBase {
 				case Right(Seq()) =>
 				case Right(cycles) =>
 					val cmds1 = cycles.flatMap(_.toTokenSeq)
-					ctx.compiler.compileL2(ctx.states, cmds1) match {
+					ctx.compiler.compile(ctx.states, cmds1) match {
 						case Right(ress) =>
 							ctx.compiler.score(ctx.states, ress) match {
 								case Some(nScore) =>
@@ -112,7 +112,7 @@ private trait L3P_PipetteMixBase {
 	
 	protected def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
-		println("cmds1: "+cmds1)
+		//println("cmds1: "+cmds1)
 		ctx.compiler.compileL2(cycle.state0, cmds1) match {
 			case Right(Seq()) =>
 				Left(Seq("compileL2 failed"))

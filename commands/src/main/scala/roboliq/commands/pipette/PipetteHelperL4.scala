@@ -1,4 +1,4 @@
-package roboliq.devices.pipette
+package roboliq.commands.pipette
 
 import roboliq.common._
 import roboliq.commands.pipette._

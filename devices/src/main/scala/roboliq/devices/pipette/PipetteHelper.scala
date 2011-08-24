@@ -70,7 +70,7 @@ class PipetteHelper {
 			case Some(wellRef) => (wellRef.index / holder.nRows + 1) % holder.nCols
 		}
 
-		val wellsOnHolder = wells.filter(_.holder eq holder.obj)
+		val wellsOnHolder = wells.filter(_.holder eq holder)
 		(holder, wellsOnHolder, iCol)
 	}
 

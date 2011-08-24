@@ -191,9 +191,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
 				val (tw, policy) = pair
 				val item = mapDestToItem(tw.well)
-				val tipState = tipStates(tw.tip.obj)
-				val wellState = tw.well.obj.state(cycle.state0)
-				new L2A_DispenseItem(tw.tip, tipState.liquid, item.dest, wellState.liquid, item.nVolume, policy)
+				new L2A_DispenseItem(tw.tip, item.dest, item.nVolume, policy)
 			})
 			Right(twvps)
 		}
@@ -261,8 +259,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
 				val (tw, policy) = pair
 				val tipState = tipStates(tw.tip.obj)
-				val srcState = tw.well.obj.state(cycle.state0)
-				new L2A_AspirateItem(tw.tip, tw.well, srcState.liquid, -tipState.nVolume, policy)
+				new L2A_AspirateItem(tw.tip, tw.well, -tipState.nVolume, policy)
 			})
 			Right(twvps)
 		}

@@ -11,7 +11,8 @@ class L2P_Aspirate extends CommandCompilerL2 {
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
 		for (item <- cmd.items) {
-			item.tip.obj.stateWriter(builder).aspirate(item.liquidWell, item.nVolume)
+			val wellState = item.well.obj.state(builder)
+			item.tip.obj.stateWriter(builder).aspirate(wellState.liquid, item.nVolume)
 			item.well.obj.stateWriter(builder).remove(item.nVolume)
 		}
 	}
@@ -24,9 +25,11 @@ class L2P_Dispense extends CommandCompilerL2 {
 	val cmdType = classOf[CmdType]
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
-		for (twv <- cmd.items) {
-			twv.tip.obj.stateWriter(builder).dispense(twv.nVolume, twv.liquidWell, twv.policy.pos)
-			twv.well.obj.stateWriter(builder).add(twv.liquidTip, twv.nVolume)
+		for (item <- cmd.items) {
+			val tipState = item.tip.obj.state(builder)
+			val wellState = item.well.obj.state(builder)
+			item.tip.obj.stateWriter(builder).dispense(item.nVolume, wellState.liquid, item.policy.pos)
+			item.well.obj.stateWriter(builder).add(tipState.liquid, item.nVolume)
 		}
 	}
 	
@@ -39,7 +42,8 @@ class L2P_Mix extends CommandCompilerL2 {
 	
 	def updateState(builder: StateBuilder, cmd: CmdType) {
 		for (item <- cmd.items) {
-			item.tip.obj.stateWriter(builder).mix(item.liquidWell, item.nVolume)
+			val wellState = item.well.obj.state(builder)
+			item.tip.obj.stateWriter(builder).mix(wellState.liquid, item.nVolume)
 		}
 	}
 	

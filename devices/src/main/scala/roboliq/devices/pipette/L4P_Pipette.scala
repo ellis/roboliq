@@ -1,3 +1,4 @@
+/*
 package roboliq.devices.pipette
 
 import scala.collection.mutable.ArrayBuffer
@@ -15,13 +16,13 @@ class L4P_Pipette extends CommandCompilerL4 {
 	def addKnowledge(kb: KnowledgeBase, _cmd: Command) {
 		val cmd = _cmd.asInstanceOf[CmdType]
 		// Add sources to KB
-		cmd.items.foreach(_.src match {
+		cmd.args.items.foreach(_.src match {
 			case WPL_Well(o) => kb.addWell(o, true)
 			case WPL_Plate(o) => kb.addPlate(o, true)
 			case WPL_Liquid(o) => kb.addLiquid(o)
 		})
 		// Add destinations to KB
-		cmd.items.foreach(_.dest match {
+		cmd.args.items.foreach(_.dest match {
 			case WP_Well(o) => kb.addWell(o, false)
 			case WP_Plate(o) => kb.addPlate(o, false)
 		})
@@ -33,14 +34,14 @@ class L4P_Pipette extends CommandCompilerL4 {
 		if (!errors.isEmpty)
 			return CompileError(cmd, errors)
 		
-		translate(ctx.states, cmd) match {
+		translate(ctx.states, cmd.args) match {
 			case Right(translation) => CompileTranslation(cmd, Seq(translation))
 			case Left(errors) => CompileError(cmd, Seq(errors))
 		}
 	}
 	
 	private def checkParams(states: RobotState, cmd: CmdType): Seq[String] = {
-		val items = cmd.items
+		val items = cmd.args.items
 		val srcs = Set() ++ items.map(_.src)
 		if (srcs.size == 0)
 			return ("must have one or more sources") :: Nil
@@ -81,9 +82,9 @@ class L4P_Pipette extends CommandCompilerL4 {
 		Nil
 	}
 	
-	def translate(states: RobotState, cmd: CmdType): Either[String, Command] = {
+	def translate(states: RobotState, args: L4A_PipetteArgs): Either[String, Command] = {
 		val items2 = new ArrayBuffer[L3A_PipetteItem]
-		val bAllOk = cmd.items.forall(item => {
+		val bAllOk = args.items.forall(item => {
 			val srcWells1 = PipetteHelperL4.getWells1(states, item.src)
 			val destWells1 = PipetteHelperL4.getWells1(states, item.dest)
 			if (srcWells1.isEmpty || destWells1.isEmpty) {
@@ -98,18 +99,19 @@ class L4P_Pipette extends CommandCompilerL4 {
 		//println(items2)
 		
 		if (bAllOk) {
-			val args = new L3A_PipetteArgs(
+			val args3 = new L3A_PipetteArgs(
 					items2,
-					cmd.mixSpec_?,
-					sAspirateClass_? = None,
-					sDispenseClass_? = None,
-					sMixClass_? = None,
-					sTipKind_? = None,
-					fnClean_? = None)
-			Right(L3C_Pipette(args))
+					mixSpec_? = args.mixSpec_?,
+					sAspirateClass_? = args.sAspirateClass_?,
+					sDispenseClass_? = args.sDispenseClass_?,
+					sMixClass_? = args.sMixClass_?,
+					sTipKind_? = args.sTipKind_?,
+					fnClean_? = args.fnClean_?)
+			Right(L3C_Pipette(args3))
 		}
 		else {
 			Left("missing well")
 		}
 	}
 }
+*/

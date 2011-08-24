@@ -138,13 +138,19 @@ x	setup unit tests for sbt
 	Compiling 2011-08-23:
 		L4 preprocessing: Knowledgebase
 			purpose: fill in unknown parameter values
-		L4 -> L3: ObjSetup, compiler
+		L4 -> L3: Obj, RobotState
 			purpose: translate from unfixed to fixed commands
 		L3 -> L2: ObjConfig, RobotState, compile
 			purpose: break down into simpler commands
 		L2 -> L1: ObjConfig, RobotState
 			purpose: update state and create state-ignorant commands
 		L1 -> L0: ObjConfig
+
+		L4/L3: same commands, except L4 uses Obj parameters, and L3 uses ObjConfig parameters
+		L3: high-level commands (with all parameters)
+		L2: commands which update state; these could also be the commands that are used for scoring
+		L2/L1: same commands, except that all useful state information is added to the L1 command
+		L1: commands used for native translation (do not rely on state)
 	Compiling:
 		L3 -> L2: knowledgebase
 		L2 -> L1: initial robot state
