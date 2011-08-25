@@ -6,7 +6,7 @@ import roboliq.common._
 // Aspirate
 //-------------------------------
 
-case class L2C_Aspirate(items: Seq[L2A_AspirateItem]) extends CommandL2 {
+case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	type L1Type = L1C_Aspirate
 	
 	def updateState(builder: StateBuilder) {
@@ -22,29 +22,34 @@ case class L2C_Aspirate(items: Seq[L2A_AspirateItem]) extends CommandL2 {
 	}
 }
 
-case class L1C_Aspirate(items: Seq[L1A_AspirateItem]) extends CommandL1
+case class L1C_Aspirate(items: Seq[L1A_SpirateItem]) extends CommandL1
 
-sealed class L2A_AspirateItem(
+sealed class L2A_SpirateItem(
 	val tip: TipConfigL2,
 	val well: WellConfigL2,
 	val nVolume: Double,
 	val policy: PipettePolicy
 ) extends HasTipWellVolumePolicy {
 	def toL1(states: RobotState) = {
-		new L1A_AspirateItem(this, well.holder.obj.state(states).location)
+		new L1A_SpirateItem(this, well.holder.obj.state(states).location)
 	}
 }
 
-sealed class L1A_AspirateItem(
-	val itemL2: L2A_AspirateItem,
+sealed class L1A_SpirateItem(
+	val itemL2: L2A_SpirateItem,
 	val location: String
-)
+) {
+	def tip = itemL2.tip
+	def well = itemL2.well
+	def nVolume = itemL2.nVolume
+	def policy = itemL2.policy
+}
 
 //-------------------------------
 // Dispense
 //-------------------------------
 
-case class L2C_Dispense(items: Seq[L2A_DispenseItem]) extends CommandL2 {
+case class L2C_Dispense(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	type L1Type = L1C_Dispense
 	
 	def updateState(builder: StateBuilder) {
@@ -61,23 +66,7 @@ case class L2C_Dispense(items: Seq[L2A_DispenseItem]) extends CommandL2 {
 	}
 }
 
-case class L1C_Dispense(items: Seq[L1A_DispenseItem]) extends CommandL1
-
-sealed class L2A_DispenseItem(
-	val tip: TipConfigL2,
-	val well: WellConfigL2,
-	val nVolume: Double,
-	val policy: PipettePolicy
-) extends HasTipWellVolumePolicy {
-	def toL1(states: RobotState) = {
-		new L1A_DispenseItem(this, well.holder.obj.state(states).location)
-	}
-}
-
-sealed class L1A_DispenseItem(
-	val itemL2: L2A_DispenseItem,
-	val location: String
-)
+case class L1C_Dispense(items: Seq[L1A_SpirateItem]) extends CommandL1
 
 //-------------------------------
 // Mix
@@ -115,7 +104,13 @@ sealed class L2A_MixItem(
 sealed class L1A_MixItem(
 	val itemL2: L2A_MixItem,
 	val location: String
-)
+) {
+	def tip = itemL2.tip
+	def well = itemL2.well
+	def nVolume = itemL2.nVolume
+	def nCount = itemL2.nCount
+	def policy = itemL2.policy
+}
 
 //-------------------------------
 // Wash

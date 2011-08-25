@@ -74,7 +74,7 @@ private trait L3P_PipetteMixBase {
 	
 	protected def translateCommand(tips: SortedSet[TipConfigL2]): Either[Errors, Seq[CycleState]]
 	
-	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L2A_DispenseItem], tipStates: HashMap[Tip, TipStateL2]) {
+	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L2A_SpirateItem], tipStates: HashMap[Tip, TipStateL2]) {
 		// Add volumes to amount required in tips
 		for (twvp <- twvps) {
 			val wellState = twvp.well.obj.state(cycle.state0)

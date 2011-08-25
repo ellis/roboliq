@@ -1,4 +1,4 @@
-package evoware
+/*package evoware
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -43,3 +43,4 @@ abstract class EvowareRobot extends Robot {
 	
 	//def getGridIndex(part: Part): Option[Int] = evowareSetup.mapPartToGrid.get(part)
 }
+*/

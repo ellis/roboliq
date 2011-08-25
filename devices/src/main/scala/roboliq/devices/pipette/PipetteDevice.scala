@@ -18,8 +18,8 @@ trait PipetteDevice {
 	/** Choose dispense method */
 	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy]
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
-	def batchesForAspirate(twvps: Seq[L2A_AspirateItem]): Seq[Seq[L2A_AspirateItem]]
-	def batchesForDispense(twvps: Seq[L2A_DispenseItem]): Seq[Seq[L2A_DispenseItem]]
+	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
+	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanDegree.Value]]]
 	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]]
 }
@@ -75,8 +75,8 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		}
 	}
 	
-	def batchesForAspirate(twvps: Seq[L2A_AspirateItem]): Seq[Seq[L2A_AspirateItem]] = Seq(twvps)
-	def batchesForDispense(twvps: Seq[L2A_DispenseItem]): Seq[Seq[L2A_DispenseItem]] = Seq(twvps)
+	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = Seq(twvps)
+	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = Seq(twvps)
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanDegree.Value]]] = Seq(tcs)
 	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = Seq(twvpcs)
 }

@@ -179,7 +179,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		sError_?
 	}
 
-	private def dispense_createTwvps(cycle: CycleState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_DispenseItem]] = {
+	private def dispense_createTwvps(cycle: CycleState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_SpirateItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
 			val item = mapDestToItem(tw.well)
@@ -191,7 +191,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
 				val (tw, policy) = pair
 				val item = mapDestToItem(tw.well)
-				new L2A_DispenseItem(tw.tip, item.dest, item.nVolume, policy)
+				new L2A_SpirateItem(tw.tip, item.dest, item.nVolume, policy)
 			})
 			Right(twvps)
 		}
@@ -200,7 +200,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		}
 	}
 
-	private def dispense_addCommands(cycle: CycleState, twvps0: Seq[L2A_DispenseItem]) {
+	private def dispense_addCommands(cycle: CycleState, twvps0: Seq[L2A_SpirateItem]) {
 		val twvps = twvps0.sortBy(_.tip)
 		val twvpss = robot.batchesForDispense(twvps)
 		// Create dispense tokens
@@ -248,7 +248,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		}
 	}
 	
-	private def aspirate_createTwvps(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Either[String, Seq[L2A_AspirateItem]] = {
+	private def aspirate_createTwvps(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Either[String, Seq[L2A_SpirateItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
 			val tipState = tipStates(tw.tip.obj)
@@ -259,7 +259,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
 				val (tw, policy) = pair
 				val tipState = tipStates(tw.tip.obj)
-				new L2A_AspirateItem(tw.tip, tw.well, -tipState.nVolume, policy)
+				new L2A_SpirateItem(tw.tip, tw.well, -tipState.nVolume, policy)
 			})
 			Right(twvps)
 		}
