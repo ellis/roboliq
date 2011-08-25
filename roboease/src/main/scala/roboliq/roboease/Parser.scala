@@ -39,9 +39,19 @@ case class Carrier(
 		grid: Int, site: Int, nVolumeMax: Double, carrierType: String
 )
 //case class Rack(name: String, nRows: Int, nCols: Int)
+case class ParseResult(
+	val kb: KnowledgeBase,
+	val cmds: Seq[Command]
+)
+
+case class ParseError(
+	val kbErrors: Seq[Tuple2[Obj, Seq[String]]]
+)
 
 class Parser extends JavaTokenParsers {
 	val kb = new KnowledgeBase
+	
+	val cmds = new ArrayBuffer[Command]
 	/** Plate locations */
 	val carriers = new HashMap[String, Carrier]
 	val mapLocToPlate = new HashMap[String, Plate]
@@ -49,7 +59,6 @@ class Parser extends JavaTokenParsers {
 	val mapLiquids = new HashMap[String, Liquid]
 	val mapVars = new HashMap[String, String]
 	val mapOptions = new HashMap[String, String]
-	//val mapReagents = new HashMap[String, Reagent]
 	val mapLabware = new HashMap[String, Tuple2[String, String]]
 	
 	private var m_contextPlate: Option[Plate] = None
@@ -391,7 +400,9 @@ class Parser extends JavaTokenParsers {
 		mapLiquids(reagent) = liq
 	}
 
-	def setLabware(id: String, rack: String, name: String) { mapLabware(id) = (rack, name) }
+	def setLabware(id: String, rack: String, name: String) {
+		mapLabware(id) = (rack, name)
+	}
 	
 	def logError(sTopic: String, sError: String) {
 		m_lsErrors += (m_sLine -> sError)
@@ -401,7 +412,7 @@ class Parser extends JavaTokenParsers {
 	def addRunError(s: String) { logError("script", s) }
 	
 	def addRunCommand(cmd: Command) {
-		m_scriptCommands += cmd
+		cmds += cmd
 		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
 	}
 	
@@ -472,7 +483,10 @@ class Parser extends JavaTokenParsers {
 				{ case plate ~ wells ~ lnCount ~ lnVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, lnCount, lnVolume, lc, opts_?) })
 			)
 			
-	//----------------------------------------------
+	//-----------------------------------------------------------------
+	//-----------------------------------------------------------------
+	//-----------------------------------------------------------------
+	//-----------------------------------------------------------------
 	
 	object Section extends Enumeration {
 		val Config, ConfigList, Doc, Script = Value
@@ -487,13 +501,12 @@ class Parser extends JavaTokenParsers {
 	private val m_mapLists = new HashMap[String, List[String]]
 	private var m_map31: ObjMapper = null
 	private var m_sLine: String = null
-	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]()
-	private val m_scriptCommands = new ArrayBuffer[Command]()
+	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]
 	
 	def mapLists = m_mapLists.asInstanceOf[scala.collection.Map[String, List[String]]]
 	
 	
-	def parse(sSource: String) {
+	def parse(sSource: String): Either[ParseError, roboliq.roboease.ParseResult] = {
 		// Clear variables
 		m_section = Section.Config
 		m_asDoc = Nil
@@ -503,7 +516,7 @@ class Parser extends JavaTokenParsers {
 		m_map31 = null
 		m_lsErrors.clear()
 		m_sLine = null
-		m_scriptCommands.clear()
+		cmds.clear()
 		
 		for (sLine <- sSource.lines) {
 			val s = sLine.replaceAll("#.*", "").trim
@@ -522,7 +535,7 @@ class Parser extends JavaTokenParsers {
 							errors.foreach(println)
 							println()
 							m_map31 = null
-							return
+							return Left(ParseError(errors))
 						case Right(map31) =>
 							m_map31 = map31
 					}
@@ -539,6 +552,19 @@ class Parser extends JavaTokenParsers {
 				println(m_sError)
 				m_sError = null
 			}
+		}
+		
+		if (m_lsErrors.isEmpty){
+			println()
+			println("Roboliq Commands:")
+			cmds.foreach(println)
+			Right(roboliq.roboease.ParseResult(kb, cmds))
+		}
+		else {
+			println()
+			println("Errors:")
+			m_lsErrors.foreach(println)
+			Right(ParseError(null, ))
 		}
 	}
 	
