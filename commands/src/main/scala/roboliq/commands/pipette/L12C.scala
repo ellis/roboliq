@@ -2,7 +2,27 @@ package roboliq.commands.pipette
 
 import roboliq.common._
 
+//-------------------------------
+// Aspirate
+//-------------------------------
 
+case class L2C_Aspirate(items: Seq[L2A_AspirateItem]) extends CommandL2 {
+	type L1Type = L1C_Aspirate
+	
+	def updateState(builder: StateBuilder) {
+		for (item <- items) {
+			val wellState = item.well.obj.state(builder)
+			item.tip.obj.stateWriter(builder).aspirate(wellState.liquid, item.nVolume)
+			item.well.obj.stateWriter(builder).remove(item.nVolume)
+		}
+	}
+	
+	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+		Right(L1C_Aspirate(items.map(_.toL1(states))))
+	}
+}
+
+case class L1C_Aspirate(items: Seq[L1A_AspirateItem]) extends CommandL1
 
 sealed class L2A_AspirateItem(
 	val tip: TipConfigL2,
@@ -20,6 +40,29 @@ sealed class L1A_AspirateItem(
 	val location: String
 )
 
+//-------------------------------
+// Dispense
+//-------------------------------
+
+case class L2C_Dispense(items: Seq[L2A_DispenseItem]) extends CommandL2 {
+	type L1Type = L1C_Dispense
+	
+	def updateState(builder: StateBuilder) {
+		for (item <- items) {
+			val tipState = item.tip.obj.state(builder)
+			val wellState = item.well.obj.state(builder)
+			item.tip.obj.stateWriter(builder).dispense(item.nVolume, wellState.liquid, item.policy.pos)
+			item.well.obj.stateWriter(builder).add(tipState.liquid, item.nVolume)
+		}
+	}
+	
+	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+		Right(L1C_Dispense(items.map(_.toL1(states))))
+	}
+}
+
+case class L1C_Dispense(items: Seq[L1A_DispenseItem]) extends CommandL1
+
 sealed class L2A_DispenseItem(
 	val tip: TipConfigL2,
 	val well: WellConfigL2,
@@ -35,7 +78,28 @@ sealed class L1A_DispenseItem(
 	val itemL2: L2A_DispenseItem,
 	val location: String
 )
+
+//-------------------------------
+// Mix
+//-------------------------------
+
+case class L2C_Mix(items: Seq[L2A_MixItem]) extends CommandL2 {
+	type L1Type = L1C_Mix
 	
+	def updateState(builder: StateBuilder) {
+		for (item <- items) {
+			val wellState = item.well.obj.state(builder)
+			item.tip.obj.stateWriter(builder).mix(wellState.liquid, item.nVolume)
+		}
+	}
+	
+	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+		Right(L1C_Mix(items.map(_.toL1(states))))
+	}
+}
+
+case class L1C_Mix(items: Seq[L1A_MixItem]) extends CommandL1
+
 sealed class L2A_MixItem(
 	val tip: TipConfigL2,
 	val well: WellConfigL2,
@@ -53,31 +117,40 @@ sealed class L1A_MixItem(
 	val location: String
 )
 
-case class L2C_Aspirate(items: Seq[L2A_AspirateItem]) extends CommandL2 {
-	type L1Type = L1C_Aspirate
+//-------------------------------
+// Wash
+//-------------------------------
+
+case class L2C_Wash(args: L2A_WashArgs) extends CommandL2 {
+	type L1Type = L1C_Wash
+	
+	def updateState(builder: StateBuilder) {
+		for (tip <- args.tips) {
+			tip.obj.stateWriter(builder).clean(args.degree)
+		}
+	}
+	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Aspirate(items.map(_.toL1(states))))
+		Right(L1C_Wash(args))
 	}
 }
-case class L1C_Aspirate(items: Seq[L1A_AspirateItem]) extends Command
 
-case class L2C_Dispense(items: Seq[L2A_DispenseItem]) extends CommandL2 {
-	type L1Type = L1C_Dispense
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Dispense(items.map(_.toL1(states))))
-	}
-}
-case class L1C_Dispense(items: Seq[L1A_DispenseItem]) extends Command
+case class L1C_Wash(args: L2A_WashArgs) extends CommandL1
 
-case class L2C_Mix(items: Seq[L2A_MixItem]) extends CommandL2 {
-	type L1Type = L1C_Mix
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Mix(items.map(_.toL1(states))))
-	}
-}
-case class L1C_Mix(items: Seq[L1A_MixItem]) extends Command
+sealed class L2A_WashArgs(
+	val tips: Set[TipConfigL2],
+	val degree: CleanDegree.Value,
+	val iWashProgram: Int)
 
-case class L2C_Wash(tips: Set[TipConfigL2], degree: CleanDegree.Value, iWashProgram: Int) extends Command
+/*sealed class L1A_WashArgs(
+	val tips: Set[TipConfigL2],
+	val degree: CleanDegree.Value,
+	val iWashProgram: Int)*/
+
+//-------------------------------
+// 
+//-------------------------------
+
 case class L2C_TipsDrop(tips: Set[Tip])
 case class L2C_TipsGet(tips: Set[Tip]) // FIXME: add tip kind
 /*case class T0_Wash(

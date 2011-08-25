@@ -1,3 +1,4 @@
+/*
 package roboliq.devices.pipette
 
 import roboliq.common._
@@ -75,3 +76,4 @@ class L2P_SetTipStateClean extends CommandCompilerL2 {
 	
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int = 10
 }
+*/

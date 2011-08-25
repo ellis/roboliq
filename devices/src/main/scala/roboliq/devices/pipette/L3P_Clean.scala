@@ -14,10 +14,10 @@ class L3P_Clean(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispe
 			case CleanDegree.None =>
 				CompileTranslation(cmd, Seq())
 			case CleanDegree.Light =>
-				val l1c = L2C_Wash(cmd.tips, cmd.degree, 0)
+				val l1c = L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 0))
 				CompileTranslation(cmd, Seq(l1c))
 			case CleanDegree.Thorough =>
-				val l1c = L2C_Wash(cmd.tips, cmd.degree, 1)
+				val l1c = L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 1))
 				CompileTranslation(cmd, Seq(l1c))
 			case CleanDegree.Decontaminate =>
 				(ctx.states.map.get(plateDeconAspirate), ctx.states.map.get(plateDeconDispense)) match {
@@ -45,11 +45,11 @@ class L3P_Clean(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispe
 						val twvpsA = twvpsAD.map(_._1)
 						val twvpsD = twvpsAD.map(_._2)
 						CompileTranslation(cmd, Seq(
-								L2C_Wash(cmd.tips, cmd.degree, 3),
+								L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 3)),
 								L2C_Aspirate(twvpsA),
 								L2C_Dispense(twvpsD),
-								L2C_Wash(cmd.tips, cmd.degree, 4),
-								L2C_Wash(cmd.tips, cmd.degree, 5)
+								L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 4)),
+								L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 5))
 								))
 					case _ =>
 						CompileError(cmd, Seq("level 1 config for decon plates not defined"))

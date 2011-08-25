@@ -53,14 +53,14 @@ private trait L3P_PipetteMixBase {
 				case Right(cycles) =>
 					val cmds1 = cycles.flatMap(_.toTokenSeq)
 					ctx.compiler.compile(ctx.states, cmds1) match {
-						case Right(ress) =>
-							ctx.compiler.score(ctx.states, ress) match {
-								case Some(nScore) =>
+						case Right(nodes) =>
+							ctx.compiler.scoreNodes(ctx.states, nodes) match {
+								case Right(nScore) =>
 									if (nScore < nWinnerScore) {
 										winner = cmds1
 										nWinnerScore = nScore
 									}
-								case _ =>
+								case Left(err) => lsErrors ++= err.errors
 							}
 						case _ =>
 					}
@@ -113,15 +113,13 @@ private trait L3P_PipetteMixBase {
 	protected def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
 		//println("cmds1: "+cmds1)
-		ctx.compiler.compileL2(cycle.state0, cmds1) match {
-			case Right(Seq()) =>
-				Left(Seq("compileL2 failed"))
-			case Right(ress) =>
-				cycle.ress = ress
-				println("cycle.ress: "+cycle.ress)
-				Right(cycle.ress.last.state1)
+		ctx.compiler.compile(cycle.state0, cmds1) match {
 			case Left(e) =>
 				Left(e.errors)
+			case Right(nodes) =>
+				cycle.ress = nodes.flatMap(_.collectFinal())
+				println("cycle.ress: "+cycle.ress)
+				Right(cycle.ress.last.state1)
 		}
 	}
 }

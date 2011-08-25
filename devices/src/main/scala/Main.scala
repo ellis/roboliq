@@ -112,9 +112,9 @@ object Main extends App {
 		//compiler.register(new L4P_Pipette)
 		compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
 		compiler.register(new L3P_Pipette(pipetter))
-		compiler.register(new L2P_Aspirate)
-		compiler.register(new L2P_Dispense)
-		compiler.register(new L2P_SetTipStateClean)
+		//compiler.register(new L2P_Aspirate)
+		//compiler.register(new L2P_Dispense)
+		//compiler.register(new L2P_SetTipStateClean)
 		compiler
 	}
 	

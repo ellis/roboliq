@@ -6,12 +6,19 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 
 
-class CompileNode(cmd: Command, res: CompileResult, translation: Seq[Command], children: Seq[CompileNode]) {
+class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq[Command], val children: Seq[CompileNode]) {
 	def collectFinal(): Seq[CompileFinal] = {
 		res match {
-			case c @ CompileFinal(_, _) => Seq(c)
+			case c @ CompileFinal(_, _, _) => Seq(c)
 			case c @ CompileTranslation(_, _) => children.flatMap(_.collectFinal())
 			case _ => Seq()
+		}
+	}
+
+	def collectL2(): Seq[CommandL2] = {
+		cmd match {
+			case cmd2: CommandL2 => Seq(cmd2)
+			case _ => children.flatMap(_.collectL2())
 		}
 	}
 }
@@ -45,12 +52,13 @@ class Compiler {
 		}
 	}
 	
-	def compileToL2(states: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
-		compileCommandsToL2(states, cmds) match {
+	/*def score(states: RobotState, cmds: Seq[CompileFinal]): Either[CompileError, Int] = {
+		compile(states, cmds) match {
 			case Left(err) => Left(err)
-			case Right((nodes, state1)) => Right(nodes)
+			case Right(nodes) =>
+				val cmds2 = nodes.flatMap(_.collectL2())
 		}
-	}
+	}*/
 	
 	/*
 	def compileL2(state0: RobotState, cmd: Command): Either[CompileError, CompileFinal] = {
@@ -95,7 +103,7 @@ class Compiler {
 	private def compileCommand(state0: RobotState, cmd: Command): Either[CompileError, Tuple2[CompileNode, RobotState]] = {
 		val res = compile(state0, cmd)
 		res match {
-			case CompileFinal(_, state1) =>
+			case CompileFinal(_, _, state1) =>
 				Right(new CompileNode(cmd, res, Nil, Nil) -> state1)
 			case CompileTranslation(_, translation) =>
 				compileCommands(state0, translation) match {
@@ -136,6 +144,14 @@ class Compiler {
 							case Left(lsErrors) => CompileError(cmd, lsErrors)
 							case Right(cmd3) => CompileTranslation(cmd, Seq(cmd3))
 						}
+					case cmd2: CommandL2 =>
+						cmd2.toL1(states) match {
+							case Left(lsErrors) => CompileError(cmd, lsErrors)
+							case Right(cmd1) =>
+								val builder = new StateBuilder(states)
+								cmd2.updateState(builder)
+								CompileFinal(cmd2, cmd1, builder.toImmutable)
+						}
 					case _ =>
 						new CompileError(
 								cmd = cmd,
@@ -149,7 +165,11 @@ class Compiler {
 			case handler1 : CommandCompilerL2 =>
 				val builder = new StateBuilder(state0)
 				handler1.updateStateL2(builder, cmd)
-				return CompileFinal(cmd, builder.toImmutable)
+				val cmd2 = cmd.asInstanceOf[CommandL2]
+				cmd2.toL1(state0) match {
+					case Left(lsErrors) => CompileError(cmd, lsErrors)
+					case Right(cmd1) => CompileFinal(cmd2, cmd1, builder.toImmutable)
+				}
 			case handler2 : CommandCompilerL3 =>
 				val ctx = new CompilerContextL3(this, state0)
 				handler2.compileL3(ctx, cmd)
@@ -159,16 +179,36 @@ class Compiler {
 		}
 	}
 	
-	def score(state0: RobotState, res: CompileFinal): Option[Int] = {
+	def scoreNodes(states0: RobotState, nodes: Seq[CompileNode]): Either[CompileError, Int] = {
+		val ress = nodes.flatMap(_.collectFinal())
+		scoreFinals(states0, ress)
+	}
+
+	def scoreFinals(states0: RobotState, ress: Seq[CompileFinal]): Either[CompileError, Int] = {
+		var n = 0
+		var states = states0
+		for (res <- ress) {
+			scoreFinal(states, res) match {
+				case Left(err) => Left(err)
+				case Right(n2) => n += n2
+			}
+			states = res.state1
+		}
+		Right(n)
+	}
+
+	def scoreFinal(states: RobotState, res: CompileFinal): Either[CompileError, Int] = {
 		m_handlers.get(res.cmd.getClass()) match {
-			case Some(handler1 : CommandCompilerL2) =>
-				val n = handler1.scoreL2(state0, res.state1, res.cmd)
-				Some(n)
+			case Some(handler2: CommandCompilerL2) =>
+				val n = handler2.scoreL2(states, res.state1, res.cmd)
+				Right(n)
 			case _ =>
-				None
+				Right(1)
+				//Left(CompileError(res.cmd, Seq("INTERNAL: no registered scorer for command "+res.cmd.getClass().getName())))
 		}
 	}
 
+	/*
 	def score(state0: RobotState, ress: Seq[CompileFinal]): Option[Int] = {
 		var n = 0
 		var state = state0
@@ -180,4 +220,5 @@ class Compiler {
 		}
 		Some(n)
 	}
+	*/
 }
