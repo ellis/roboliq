@@ -431,11 +431,18 @@ class Parser extends JavaTokenParsers {
 				wells2.map(_ -> volumes.head)
 		}
 		
+		val sLiquidClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
+		
 		val items = wvs.map(pair => {
 			val (well, nVolume) = pair
 			new L4A_PipetteItem(WPL_Liquid(liq), WP_Well(well), nVolume)
 		})
-		val cmd = L4C_Pipette(items)
+		val args = new L4A_PipetteArgs(
+			items,
+			sAspirateClass_? = sLiquidClass_?,
+			sDispenseClass_? = sLiquidClass_?
+			)
+		val cmd = L4C_Pipette(args)
 		addRunCommand(cmd)
 	}
 	

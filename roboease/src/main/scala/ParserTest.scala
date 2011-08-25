@@ -200,7 +200,7 @@ LIST DDW_LIST
 ENDLIST
 """
 		//p.parse(sSource)
-		val sSource2 = scala.io.Source.fromFile("/home/ellis/src/TelAviv/scripts/Rotem_Script01.conf").mkString
+		val sSource2 = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf").mkString
 		p.parse(sSource2)
 		
 		println(p.mapOptions)
