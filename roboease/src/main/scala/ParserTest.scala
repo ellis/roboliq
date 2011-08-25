@@ -3,94 +3,20 @@ import java.io.FileReader
 import scala.util.parsing.combinator._
 import scala.collection.mutable.HashMap
 
-class Arith extends JavaTokenParsers {
-	def expr: Parser[Any] = term~rep("+"~term | "-"~term)
-	def term: Parser[Any] = factor~rep("*"~factor | "/"~factor)
-	def factor: Parser[Any] = floatingPointNumber | "("~expr~")"
-}
+import roboliq.common._
+import roboliq.compiler._
+import roboliq.devices.pipette._
+import roboliq.roboease._
 
-case class Reagent(name: String, rack: String, iWell: Int, nWells: Int, sLiquidClass: String)
-
-class Parser1 extends JavaTokenParsers {
-	//val ident: Parser[String] = """[a-zA-Z_]\w*""".r
-	val word: Parser[String] = """\w+""".r
-	val integer: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
-	
-	val mapVars = new HashMap[String, String]
-	val mapOptions = new HashMap[String, String]
-	val mapReagents = new HashMap[String, Reagent]
-	
-	def doAssign(id: String, s: String) { mapVars(id) = s }
-	
-	def doOption(args: ~[String, Option[String]]) = args match {
-		case id ~ value =>
-			mapOptions(id) = value.getOrElse(null)
-	}
-	
-	def doReagent(reagent: String, rack: String, iWell: Int, lc: String, nWells_? : Option[Int]) {
-		mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
-	}
-	
-	val cmds = List[Parser[Any]](
-			ident ~"="~ floatingPointNumber ^^
-				{ case id ~"="~ s => doAssign(id, s) },
-			"OPTION"~> ident~opt(word) ^^ doOption,
-			"REAGENT"~> ident~ident~integer~ident~opt(integer) ^^
-				{ case reagent ~ rack ~ iWell ~ lc ~ nWells_? => doReagent(reagent, rack, iWell, lc, nWells_?) } 
-			)
-
-	
-	val cmds0: Parser[Any] =
-			("OPTION"~> ident~opt(word) ^^
-				{ case id ~ value => println(id, value) }) |
-			("REAGENT"~> ident~ident~integer~ident~opt(integer) ^^
-				{ case reagent ~ rack ~ iWell ~ lc ~ nWells_? => println(reagent, rack, iWell, lc, nWells_?) }) 
-			
-}
 
 object Main extends App {
-	//val p = new Arith
-	//println(p.parseAll(p.expr, args(0)))
-	
 	test2()
-	
-	def test1() {
-		val p = new Parser1
-		val lines = List(
-				"OPTION A",
-				"OPTION B 23",
-				"REAGENT PCR_Mix_X5 T10 1 PIE_AUTBOT 2",
-				"WET_MIX_VOL = 150",
-				"CE_SEQ_DIL_VOL = 28.5"
-				)
-		
-		def findFirstMatch(s: String, cmds: List[p.Parser[Any]]): Boolean = cmds match {
-			case Nil => false
-			case cmd :: rest => val r = p.parseAll(cmd, s)
-				if (r.successful)
-					true
-				else
-					findFirstMatch(s, rest)
-		}
-		
-		for (s <- lines) {
-			val b = findFirstMatch(s, p.cmds)
-			if (!b) {
-				println("Unrecognized command:")
-				println(s)
-			}
-		}
-		
-		println(p.mapOptions)
-		println(p.mapVars)
-		println(p.mapReagents)
-	}
 	
 	def test2() {
 		import roboliq.roboease._
 		import roboliq.compiler._
 		
-		val p = new Parser
+		val p = new ParserFile
 		
 		//p.DefineRack($DITI_WASTE,1,6,8,12, 0) ;
 		p.DefineRack("CSL",2,0,1,8, 5000000,"Carousel MTP") ;
@@ -201,12 +127,72 @@ ENDLIST
 """
 		//p.parse(sSource)
 		val sSource2 = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf").mkString
-		p.parse(sSource2)
+		p.parse(sSource2) match {
+			case Left(err) =>
+				err.kbErrors.foreach(println)
+				err.errors.foreach(println)
+			case Right(res) =>
+		}
 		
-		println(p.mapOptions)
+		/*println(p.mapOptions)
 		println(p.mapVars)
 		//println(p.mapReagents)
 		println(p.mapLists)
-		println(p.mapLabware)
+		println(p.mapLabware)*/
+	}
+	
+	def compile(res: RoboeaseResult) {
+		val cmds = res.cmds.map(_.cmd)
+		println("Input:")
+		res.cmds.foreach(println)
+		println()
+	
+		val compiler = createCompiler(res)
+		res.kb.concretize() match {
+			case Right(map31) =>
+				val state0 = map31.createRobotState()
+				compiler.compile(state0, cmds) match {
+					case Left(err) =>
+						println("Compilation errors:")
+						err.errors.foreach(println)
+					case Right(nodes) =>
+						val finals = nodes.flatMap(_.collectFinal())
+						println("Output:")
+						finals.map(_.cmd).foreach(println)
+				}
+			case Left(errors) =>
+				println("Missing information:")
+				println(errors)
+		}
+	}
+
+	def createCompiler(res: RoboeaseResult): Compiler = {
+		val kb = res.kb
+		
+		val pipetter = new PipetteDeviceGeneric()
+		pipetter.config.tips.foreach(kb.addObject)
+		
+		val plateDeconAspirate, plateDeconDispense = new Plate
+		new PlateProxy(kb, plateDeconAspirate) match {
+			case pp =>
+				pp.label = "DA"
+				pp.location = "DA"
+				pp.setDimension(8, 1)
+		}
+		new PlateProxy(kb, plateDeconDispense) match {
+			case pp =>
+				pp.label = "DD"
+				pp.location = "DD"
+				pp.setDimension(8, 1)
+		}
+		
+		val compiler = new Compiler
+		//compiler.register(new L4P_Pipette)
+		compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
+		compiler.register(new L3P_Pipette(pipetter))
+		//compiler.register(new L2P_Aspirate)
+		//compiler.register(new L2P_Dispense)
+		//compiler.register(new L2P_SetTipStateClean)
+		compiler
 	}
 }

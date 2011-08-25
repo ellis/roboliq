@@ -1,4 +1,4 @@
-package roboliq.roboease
+/*package roboliq.roboease
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
@@ -32,22 +32,7 @@ object X {
 }*/
 //case class Reagent(name: String, rack: String, iWell: Int, nWells: Int, sLiquidClass: String)
 
-case class Carrier(
-		name: String,
-		nRows: Int,
-		nCols: Int,
-		grid: Int, site: Int, nVolumeMax: Double, carrierType: String
-)
 //case class Rack(name: String, nRows: Int, nCols: Int)
-case class ParseResult(
-	val kb: KnowledgeBase,
-	val cmds: Seq[Command]
-)
-
-case class ParseError(
-	val kbErrors: Seq[Tuple2[Obj, Seq[String]]]
-)
-
 class Parser extends JavaTokenParsers {
 	val kb = new KnowledgeBase
 	
@@ -666,3 +651,4 @@ class Parser extends JavaTokenParsers {
 		carriers(name) = carrier
 	}
 }
+*/
