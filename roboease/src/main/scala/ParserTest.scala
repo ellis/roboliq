@@ -161,7 +161,7 @@ ENDLIST
 					case Right(nodes) =>
 						val finals = nodes.flatMap(_.collectFinal())
 						println("Output:")
-						finals.map(_.cmd).foreach(println)
+						finals.map(_.cmd1).foreach(println)
 				}
 			case Left(errors) =>
 				println("Missing information:")

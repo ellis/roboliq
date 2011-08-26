@@ -118,7 +118,7 @@ private trait L3P_PipetteMixBase {
 				Left(e.errors)
 			case Right(nodes) =>
 				cycle.ress = nodes.flatMap(_.collectFinal())
-				println("cycle.ress: "+cycle.ress)
+				//println("cycle.ress: "+cycle.ress)
 				Right(cycle.ress.last.state1)
 		}
 	}
