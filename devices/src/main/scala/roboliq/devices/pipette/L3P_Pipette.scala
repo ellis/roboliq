@@ -70,7 +70,8 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			tws0.foreach(tw => {
 				val item = mapDestToItem(tw.well)
 				val srcState = item.srcs.head.obj.state(stateCycle0)
-				val tipState = tw.tip.createState0()
+				val tipState0 = tw.tip.obj.state(stateCycle0)
+				val tipState = tw.tip.createState0(tipState0.sType_?)
 				tipStates(tw.tip.obj) = tipState
 			})
 
@@ -159,8 +160,9 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val item = mapDestToItem(dest)
 			val src = srcs(tip).head
 			val liquidSrc = src.obj.state(cycle.state0).liquid
-			val nMin = robot.getTipAspirateVolumeMin(tip, liquidSrc)
-			val nMax = robot.getTipHoldVolumeMax(tip, liquidSrc)
+			val tipState = tip.obj.state(cycle.state0)
+			val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
+			val nMax = robot.getTipHoldVolumeMax(tipState, liquidSrc)
 			val nTipVolume = -tipStates(tip.obj).nVolume
 			sError_? = {
 				if (item.nVolume < nMin)

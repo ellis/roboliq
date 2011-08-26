@@ -77,3 +77,32 @@ case class L0C_Mix(
 		).mkString("Mix(", ",", ")")
 	}
 }
+
+case class L0C_GetDITI2(
+	val mTips: Int,
+	val sType: String
+) extends Command {
+	override def toString = {
+		Array(
+			mTips,
+			'"'+sType+'"',
+			1, 0, 0, 0
+		).mkString("GetDITI2(", ",", ")")
+	}
+	
+}
+
+case class L0C_DropDITI(
+	val mTips: Int,
+	val iGrid: Int,
+	val iSite: Int
+) extends Command {
+	override def toString = {
+		Array(
+			mTips,
+			iGrid,
+			iSite,
+			10, 70
+		).mkString("DropDITI(", ",", ")")
+	}	
+}

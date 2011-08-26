@@ -173,7 +173,7 @@ ENDLIST
 		val kb = res.kb
 		
 		val pipetter = new PipetteDeviceGeneric()
-		pipetter.config.tips.foreach(kb.addObject)
+		pipetter.addKnowledge(kb)
 		
 		val plateDeconAspirate, plateDeconDispense = new Plate
 		new PlateProxy(kb, plateDeconAspirate) match {

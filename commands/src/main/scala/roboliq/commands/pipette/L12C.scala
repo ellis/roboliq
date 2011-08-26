@@ -143,11 +143,52 @@ sealed class L2A_WashArgs(
 	val iWashProgram: Int)*/
 
 //-------------------------------
-// 
+// TipsGet
 //-------------------------------
 
-case class L2C_TipsDrop(tips: Set[Tip])
-case class L2C_TipsGet(tips: Set[Tip]) // FIXME: add tip kind
+case class L2C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL2 {
+	type L1Type = L1C_TipsGet
+	
+	def updateState(builder: StateBuilder) {
+		for (tip <- tips) {
+			tip.obj.stateWriter(builder).drop()
+		}
+	}
+	
+	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+		for (tip <- tips) {
+			val tipState = tip.obj.state(states)
+			tipState.sType_? match {
+				case Some(sType) => return Left(Seq("tip "+tip.index+" must be dropped before getting a new one"))
+				case _ =>
+			}
+		}
+		Right(L1C_TipsGet(tips, sType))
+	}
+}
+
+case class L1C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL1
+
+//-------------------------------
+// TipsDrop
+//-------------------------------
+
+case class L2C_TipsDrop(tips: Set[TipConfigL2], location: String) extends CommandL2 {
+	type L1Type = L1C_TipsDrop
+	
+	def updateState(builder: StateBuilder) {
+		for (tip <- tips) {
+			tip.obj.stateWriter(builder).drop()
+		}
+	}
+	
+	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+		Right(L1C_TipsDrop(tips, location))
+	}
+}
+
+case class L1C_TipsDrop(tips: Set[TipConfigL2], location: String) extends CommandL1
+
 /*case class T0_Wash(
 	mTips: Int,
 	iWasteGrid: Int, iWasteSite: Int,

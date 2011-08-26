@@ -16,6 +16,8 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 		case t @ L1C_Dispense(_) => dispense(t)
 		case t @ L1C_Mix(_) => mix(t.items)
 		case t @ L1C_Wash(_) => wash(t)
+		case c: L1C_TipsGet => tipsGet(c)
+		case c: L1C_TipsDrop => tipsDrop(c)
 	}
 
 	def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
@@ -227,6 +229,20 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 					iGrid, iSite,
 					sPlateMask
 				)))
+		}
+	}
+	
+	private def tipsGet(c: L1C_TipsGet): Either[Seq[String], Seq[Command]] = {
+		val mTips = encodeTips(c.tips.map(_.obj))
+		Right(Seq(L0C_GetDITI2(mTips, c.sType)))
+	}
+	
+	private def tipsDrop(c: L1C_TipsDrop): Either[Seq[String], Seq[Command]] = {
+		val mTips = encodeTips(c.tips.map(_.obj))
+		mapper.mapSites.get(c.location) match {
+			case None => return Left(Seq("INTERNAL: missing evoware site for location "+c.location))
+			case Some(Site(iGrid, iSite)) =>
+				Right(Seq(L0C_DropDITI(mTips, iGrid, iSite)))
 		}
 	}
 }

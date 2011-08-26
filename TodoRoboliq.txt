@@ -70,20 +70,26 @@ x	L2C_Clean
 x	create evoware translator for existing L1 commands
 x	figure out how to clean BSSE tips
 	devices: add bTipPermanent to Tip or TipConfig
-	devices: add sTipType to TipState
-	devices: PipetteDevice: return tip size based on tip type
+.	devices: add sTipType to TipState
+.	devices: PipetteDevice: return aspirate/dispense volumes based on tip type
 	devices: set initial tip state in BSSE pipette device
-	devices: sed tip state in DROP and GET commands
-	devices: L3P_Clean_Discard for cleaning Weizmann tips
+.	devices: set tip state in DROP and GET commands
+.	devices: L*_GetTip/L*_DropTip
+5	devices: L3P_Clean_Discardable for cleaning Weizmann tips
+6	devices: L3P_Pipette: update to accommodate tip disposal
+x	evoware: L*_GetTip/L*_DropTip
 x	roboease: accumulate commands and send them though the compiler
 x	roboease: LABWARE
 x	roboease: MIX
+	roboease: test liquid class, tip options, mix options
+	roboease: create PipetteDevice subclass for Weizmann roboease scripts
 	roboease: TRANSFER
 	roboease: TABLE
 	roboease: add comments about tip usage to output
-	roboease-evoware: create project
+7	roboease-evoware: create project
 	roboease-evoware: translate final commands to Evoware output
 	roboease-evoware: print out appropriate header
+	roboease-evoware: copy and update test program from roboease project
 	create Syringe object and decouple it from the Tip object, so that tips can be exchanged
 	Add Comment()s to evoware output
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)

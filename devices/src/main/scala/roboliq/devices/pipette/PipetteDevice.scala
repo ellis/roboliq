@@ -9,10 +9,12 @@ import roboliq.compiler._
 
 trait PipetteDevice {
 	val config: PipetteDeviceConfig
+	
+	def addKnowledge(kb: KnowledgeBase)
 	/** Minimum volume which can be aspirated */
-	def getTipAspirateVolumeMin(tip: TipConfigL2, liquid: Liquid): Double
+	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */
-	def getTipHoldVolumeMax(tip: TipConfigL2, liquid: Liquid): Double
+	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double
 	/** Choose aspirate method */
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy]
 	/** Choose dispense method */
@@ -29,8 +31,11 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		tips = SortedSet((0 to 1).map(i => new Tip(i)) : _*),
 		tipGroups = Array(Array(0,1))
 	)
-	def getTipAspirateVolumeMin(tip: TipConfigL2, liquid: Liquid): Double = 0
-	def getTipHoldVolumeMax(tip: TipConfigL2, liquid: Liquid): Double = 1000
+	def addKnowledge(kb: KnowledgeBase) = {
+		config.tips.foreach(kb.addObject)
+	}
+	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = 0
+	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => s.toDouble }
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
