@@ -77,6 +77,7 @@ x	figure out how to clean BSSE tips
 .	devices: L*_GetTip/L*_DropTip
 5	devices: L3P_Clean_Discardable for cleaning Weizmann tips
 6	devices: L3P_Pipette: update to accommodate tip disposal
+	devices: implement mixing option in L3P_Pipette
 x	evoware: L*_GetTip/L*_DropTip
 x	roboease: accumulate commands and send them though the compiler
 x	roboease: LABWARE
@@ -205,60 +206,6 @@ x	setup unit tests for sbt
 				we also want to run through a protocol to see how much liquid is aspirated from a source well in order to know what the initial volume
 				this means that we need two runs, and only the second run produces errors when well volume goes below 0
 				we could pass ObjState params instead of ObjConfig, but then we'd need to compile every command before adding a new one
-			inputs available at some point in the cycle:
-				knowledgebase
-				Obj
-				-
-				ObjSetup
-				-
-				Compiler
-				ObjConfig
-				ObjState
-				Map[Obj->ObjConfig]
-				Map[Obj->ObjState]
-				HashMap[Obj->ObjState]
-			command parameter limitations:
-				a: Obj parameters
-				b: ObjState parameters
-				c: ObjConfig parameters
-
-
-			P3: add to knowledgebase
-				inp: Obj commands, kb, compiler
-				mod: kb, ObjSetup
-			P3: concretize knowledgebase to create ObjConfig and ObjState0
-				inp: kb, ObjSetup
-				out: ObjConfig, ObjState0
-			T3: translate to other L3 commands or to commands taking ObjConfig params
-				inp-: kb
-				inp+: Map[Obj->ObjState]
-				inp: compiler, Obj command, Map[Obj->ObjState]
-				out: commands with Obj or ObjConfig params
-			T2: translate to L2/L1 commands
-				can use compiler object to choose among various possible translations (via scoring)
-				inp: compiler, ObjConfig command, Map[Obj->ObjState]
-				out: commands with ObjConfig params
-			P1: update RobotState
-				inp: ObjConfig command, HashMap[Obj->ObjState]
-				out: update RobotState
-			T1: translate to L1/L0 commands
-				inp-: compiler, Map[Obj->ObjState]
-				inp: ObjConfig command
-		command hierarchy:
-			A: need only object references
-			 : processed by L3 compiler
-			B: need object configs
-			 : processed by L2 compiler
-			 : processed by L1 compiler
-			C: need object states
-				NOTE: interesting thought, but note that such commands are not in a position to update state
-		compile with (incomplete) knowledgebase:
-			L3: update knowledgebase and ObjSetup, output possible additional L3 commands and L3 state
-		compile with config:
-			L3: output Pending or L3/L2 translations
-		compile with state:
-			L3: output L3/L2 translations
-		once knowledgebase is complete, translate to equivalent commands using ObjConfig parameters
 	Pipetting:
 		state should only be updated by the underlying robot/device implementation based on L1 commands
 		createCycles can try dispensing until an invalid state is reached, then revert to the previous state and start the next cycle
@@ -277,15 +224,43 @@ x	setup unit tests for sbt
 		fixed tips:
 			do nothing, rinse, thorough wash, decontaminate, decontaminate with pre-rinse
 		disposable tips:
-			do nothing, replace (drop tip, wash syringe, get new tip)
+			do nothing, replace (drop tip, wash syringe, get new tip), drop only
+	L3C_Aspirate:
+		parameters:
+			tips, wells, volumes, policies
+			clean degrees
+			tip handling (tip type, action: none/new/force-replace)
+		for disposable tips:
+			if tip already present:
+				if require different tip type || action == force-replace, force replacement
+			else force-replacement
+	Tip handling overrides:
+		tip replacement action for each clean point
+		tip wash action for each clean point
+	Tip wash actions:
+		cell | dna | other
+		contamination levels: none, minor, major
+		what about distinction between inside and outside?
+		how to define a liquid so that we know what default tip handling actions to take for both disposable and permanent tips?
+		contamination should be a map over an enumeration value so that additional contamination types can be easily added
+
+	Tip handling defaults:
 	Clean:
 		Clean overrides:
-			before start
+			//before first aspirate
 			before each aspirate
-			before each aspirate of a new liquid
-			between dispenses
-			after having entered dest liquid
+			//before each aspirate of a new liquid
+			//between dispenses
+			after wet-contact dispense
 			after last dispense
+
+		Tip handling:
+			none
+			get new (drop if necessary,wash,get) [need type to get]
+			drop only
+
+		Clean & Tip handling:
+			
 
 		cleaning is flagged when tip enters the destination liquid
 		cleaning is flagged when the tip will aspirate from a new liquid
