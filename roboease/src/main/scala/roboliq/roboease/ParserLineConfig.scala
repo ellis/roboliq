@@ -18,7 +18,7 @@ class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
 			("OPTION", ident~opt(word) ^^
 				{ case id ~ value => setOption(id, value) }),
 			("REAGENT", ident~idPlate~integer~ident~opt(integer) ^^
-				{ case reagent ~ plate ~ iWell ~ lc ~ nWells_? => setReagent(reagent, plate, iWell, lc, nWells_?) }),
+				{ case id ~ plate ~ iWell ~ lc ~ nWells_? => setReagent(id, plate, iWell, lc, nWells_?) }),
 			("LABWARE", ident~ident~stringLiteral ^^
 				{ case id ~ sRack ~ sType => setLabware(id, sRack, sType) })
 			)
@@ -31,21 +31,25 @@ class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
 	
 	private def setOption(id: String, value: Option[String]) { mapOptions(id) = value.getOrElse(null) }
 	
-	private def setReagent(reagent: String, plate: Plate, iWell: Int, lc: String, nWells_? : Option[Int]) {
+	private def setReagent(id: String, plate: Plate, iWell: Int, lc: String, nWells_? : Option[Int]) {
 		//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
 		
 		// Create liquid with given name
-		val liq = new Liquid(reagent, true, false, false, false, false)
+		val liq = new Liquid(id, true, false, false, false, false)
 		kb.addLiquid(liq)
+		//println("setReagent(): liq = "+liq)
 		
 		// Add liquid to wells
 		val pc = kb.getPlateSetup(plate)
-		val wells = pc.dim_?.get.wells
-		for (well <- wells) {
+		val iWellEnd = iWell + (nWells_? match { case Some(n) => n; case None => 1 })
+		val wells = pc.dim_?.get.wells.toIndexedSeq
+		for (iWell <- (iWell until iWellEnd)) {
+			val well = wells(iWell)
 			kb.getWellSetup(well).liquid_? = Some(liq)
+			//println(kb.getWellSetup(well))
 		}
 			
-		mapLiquids(reagent) = liq
+		mapLiquids(id) = liq
 	}
 
 	private def setLabware(id: String, sRack: String, sType: String) {

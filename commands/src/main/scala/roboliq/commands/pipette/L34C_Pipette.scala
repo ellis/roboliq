@@ -40,9 +40,10 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 		}
 	}
 }
-case class L3C_Pipette(args: L3A_PipetteArgs) extends Command
 
-class L4A_PipetteArgs(
+case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3
+
+case class L4A_PipetteArgs(
 	val items: Seq[L4A_PipetteItem],
 	val mixSpec_? : Option[MixSpec] = None,
 	val sAspirateClass_? : Option[String] = None,
@@ -81,13 +82,16 @@ class L3A_PipetteArgs(
 	val fnClean_? : Option[Unit => Unit] = None
 )
 
-sealed class L4A_PipetteItem(
+case class L4A_PipetteItem(
 	val src: WellOrPlateOrLiquid,
 	val dest: WellOrPlate,
 	val nVolume: Double
 ) {
 	def toL3(states: RobotState): Either[Seq[String], Seq[L3A_PipetteItem]] = {
 		val srcs3 = PipetteHelperL4.getWells1(states, src)
+		if (srcs3.isEmpty) {
+			return Left(Seq("INTERNAL: no config found for pipette source "+src))
+		}
 		val dests3 = PipetteHelperL4.getWells1(states, dest)
 		//println("dests3: "+dests3)
 		def createItemsL3() = Right(dests3.map(dest3 => new L3A_PipetteItem(srcs3, dest3, nVolume)).toSeq)

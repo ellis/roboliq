@@ -204,6 +204,19 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		{ s => List(s.toDouble) }
 	def valVolumes: Parser[List[Double]] = valVolumes_var | valVolumes_numeric
 	
+	def valInt_var: Parser[Int] = ident ^^
+		{ s =>
+			if (shared.mapVars.contains(s))
+				shared.mapVars(s).toInt
+			else {
+				shared.addError("Undefined variable: "+s)
+				0
+			}
+		}
+	def valInt_numeric: Parser[Int] = integer ^^
+		{ s => s.toInt }
+	def valInt: Parser[Int] = valInt_var | valInt_numeric
+	
 	def valInts_var: Parser[List[Int]] = ident ^^
 		{ s =>
 			if (shared.mapVars.contains(s))

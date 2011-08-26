@@ -132,6 +132,7 @@ ENDLIST
 				err.kbErrors.foreach(println)
 				err.errors.foreach(println)
 			case Right(res) =>
+				compile(res)
 		}
 		
 		/*println(p.mapOptions)
@@ -141,7 +142,7 @@ ENDLIST
 		println(p.mapLabware)*/
 	}
 	
-	def compile(res: RoboeaseResult) {
+	private def compile(res: RoboeaseResult) {
 		val cmds = res.cmds.map(_.cmd)
 		println("Input:")
 		res.cmds.foreach(println)
@@ -151,6 +152,8 @@ ENDLIST
 		res.kb.concretize() match {
 			case Right(map31) =>
 				val state0 = map31.createRobotState()
+				//state0.map.filter(_._1.isInstanceOf[Well]).map(_._2.asInstanceOf[WellStateL2]).foreach(println)
+				//map31.map.filter(_._1.isInstanceOf[Well]).map(_._2.setup).foreach(println)
 				compiler.compile(state0, cmds) match {
 					case Left(err) =>
 						println("Compilation errors:")
@@ -166,7 +169,7 @@ ENDLIST
 		}
 	}
 
-	def createCompiler(res: RoboeaseResult): Compiler = {
+	private def createCompiler(res: RoboeaseResult): Compiler = {
 		val kb = res.kb
 		
 		val pipetter = new PipetteDeviceGeneric()
@@ -190,6 +193,7 @@ ENDLIST
 		//compiler.register(new L4P_Pipette)
 		compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
 		compiler.register(new L3P_Pipette(pipetter))
+		compiler.register(new L3P_Mix(pipetter))
 		//compiler.register(new L2P_Aspirate)
 		//compiler.register(new L2P_Dispense)
 		//compiler.register(new L2P_SetTipStateClean)

@@ -41,7 +41,8 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		override def toTokenSeq: Seq[Command] = cleans ++ mixes
 	}
 	
-	val dests = SortedSet[WellConfigL2](args.wells.toSeq : _*)
+	val dests = SortedSet[WellConfigL2](args.items.map(_.well).toSeq : _*)
+	val mapDestToItem: Map[WellConfigL2, L3A_MixItem] = args.items.map(t => t.well -> t).toMap
 
 	protected override def translateCommand(tips: SortedSet[TipConfigL2]): Either[Errors, Seq[CycleState]] = {
 		// For each dispense, pick the top-most destination wells available in the next column
@@ -135,12 +136,13 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		def isVolOk(tw: TipWell): Boolean = {
 			val tip = tw.tip
 			val dest = tw.well
+			val item = mapDestToItem(dest)
 			val liquid = dest.obj.state(cycle.state0).liquid
 			val nMin = robot.getTipAspirateVolumeMin(tip, liquid)
 			val nMax = robot.getTipHoldVolumeMax(tip, liquid)
 			val nTipVolume = -tipStates(tip.obj).nVolume
 			sError_? = {
-				val nVolume = args.mixSpec.nVolume
+				val nVolume = item.nVolume
 				if (nVolume < nMin)
 					Some("Cannot aspirate "+nVolume+"ul into tip "+(tip.index+1)+": require >= "+nMin+"ul")
 				else if (nVolume + nTipVolume > nMax)
@@ -162,7 +164,8 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		val policies_? = tws.map(tw => {
 			val tipState = tipStates(tw.tip.obj)
 			val wellState = tw.well.obj.state(cycle.state0)
-			robot.getDispensePolicy(tipState, wellState, args.mixSpec.nVolume)
+			val item = mapDestToItem(tw.well)
+			robot.getDispensePolicy(tipState, wellState, item.nVolume)
 		})
 		if (policies_?.forall(_.isDefined)) {
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => mix_createItem(cycle, pair._1, pair._2))
@@ -174,7 +177,8 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	}
 	
 	private def mix_createItem(cycle: CycleState, tw: TipWell, policy: PipettePolicy): L2A_MixItem = {
-		new L2A_MixItem(tw.tip, tw.well, cmd.args.mixSpec.nVolume, args.mixSpec.nCount, policy)
+		val item = mapDestToItem(tw.well)
+		new L2A_MixItem(tw.tip, tw.well, item.nVolume, cmd.args.nCount, policy)
 	}
 
 	private def mix_addCommands(cycle: CycleState, twvpcs0: Seq[L2A_MixItem]) {

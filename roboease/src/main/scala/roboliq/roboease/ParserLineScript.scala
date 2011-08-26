@@ -10,8 +10,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	val cmds2 = Map[String, Parser[Unit]](
 			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
 				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
-			("MIX_WELLS", idPlate~idWells~valInts~valVolumes~ident~opt(word) ^^
-				{ case plate ~ wells ~ lnCount ~ lnVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, lnCount, lnVolume, lc, opts_?) }),
+			("MIX_WELLS", idPlate~idWells~valInt~valVolumes~ident~opt(word) ^^
+				{ case plate ~ wells ~ nCount ~ lnVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, nCount, lnVolume, lc, opts_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) })
 			)
@@ -64,15 +64,40 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		addRunCommand(cmd)
 	}
 	
-	def run_MIX_WELLS(plate: Plate, wells: List[Well], lnCount: List[Int], lnVolume: List[Double], sLiquidClass: String, opts_? : Option[String]) {
-		println(plate)
-		println(wells.map(toLabel))
-		println(lnVolume)
+	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, lnVolume: List[Double], sLiquidClass: String, opts_? : Option[String]) {
+		if (wells.isEmpty) {
+			shared.addError("list of destination wells must be non-empty")
+			return
+		}
+		if (lnVolume.isEmpty) {
+			shared.addError("list of volumes must be non-empty")
+			return
+		}
+		if (lnVolume.size > 1 && wells.size != lnVolume.size) {
+			shared.addError("lists of wells and volumes must have the same dimensions")
+			return
+		}
 		
-		L4A_MixArgs(
-				dest = WPL_Plate(plate),
-		val mixSpec: MixSpec
-		)
+		val wvs = {
+			if (lnVolume.size > 1)
+				wells zip lnVolume
+			else
+				wells.map(_ -> lnVolume.head)
+		}
+		
+		val sLiquidClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
+		
+		val items = wvs.map(pair => {
+			val (well, nVolume) = pair
+			new L4A_MixItem(WPL_Well(well), nVolume)
+		})
+		val args = new L4A_MixArgs(
+			items,
+			nCount = nCount,
+			sMixClass_? = sLiquidClass_?
+			)
+		val cmd = L4C_Mix(args)
+		addRunCommand(cmd)
 	}
 	
 	def run_PROMPT(s: String) {

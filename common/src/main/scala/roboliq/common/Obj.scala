@@ -200,6 +200,8 @@ class WellSetup extends ObjSetup {
 	var bRequiresIntialLiq_? : Option[Boolean] = None
 	var liquid_? : Option[Liquid] = None
 	var nVolume_? : Option[Double] = None
+	
+	override def toString = sLabel_?.toString + " " + liquid_?
 }
 
 class Plate extends Obj {
