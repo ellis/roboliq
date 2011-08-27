@@ -31,6 +31,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 
 	val compiler = ctx.compiler
 	val args = cmd.args
+	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
 	
 	//case class SrcTipDestVolume(src: WellConfigL2, tip: TipStateL2, dest: WellConfigL2, nVolume: Double)
 	
@@ -65,16 +66,62 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			
 			val srcs0 = tws0.map(tw => tw.tip -> mapDestToItem(tw.well).srcs).toMap
 			
-			// Associate source liquid with tip
+			// Create temporary tip state objects and associate them with the source liquid
 			val tipStates = new HashMap[Tip, TipStateL2]
 			tws0.foreach(tw => {
-				val item = mapDestToItem(tw.well)
-				val srcState = item.srcs.head.obj.state(stateCycle0)
+				// Create clean tip state from stateCycle0
 				val tipState0 = tw.tip.obj.state(stateCycle0)
 				val tipState = tw.tip.createState0(tipState0.sType_?)
 				tipStates(tw.tip.obj) = tipState
+				/*// Associate liquid by "aspirating" 0 ul of it
+				val item = mapDestToItem(tw.well)
+				val srcState = item.srcs.head.obj.state(stateCycle0)
+				tw.tip.obj.stateWriter(tipStates).aspirate(srcState.liquid, 0)*/
 			})
 
+			val mapTipToReplacement = new HashMap[TipConfigL2, TipReplacementAction.Value]
+			val mapTipToWash = new HashMap[TipConfigL2, WashSpec]
+			if (robot.areTipsDisposable) {
+				for ((tip, srcs) <- srcs0) {
+					val tipState = tip.obj.state(stateCycle0)
+					val srcState = srcs.head.obj.state(stateCycle0)
+					val srcLiquid = srcState.liquid
+					val replacement = PipetteHelper.choosePreAsperateReplacement(tipOverrides.replacement_?, srcLiquid, tipState)
+					mapTipToReplacement(tip) = replacement
+				}
+				for (tw <- tws0) {
+					val tipState = tw.tip.obj.state(stateCycle0)
+					val destState = tw.well.obj.state(stateCycle0)
+					val destLiquid = destState.liquid
+					val replacement = PipetteHelper.choosePreDispenseReplacement(tipOverrides.replacement_?, srcLiquid, tipState)
+					if (replacement > mapTipToReplacement(tw.tip))
+						mapTipToReplacement(tw.tip) = replacement
+				}
+			}
+			else {
+				val washIntensityDefault = if (cycles.isEmpty) WashIntensity.Thorough else WashIntensity.Light
+				for ((tip, srcs) <- srcs0) {
+					val tipState = tip.obj.state(stateCycle0)
+					val srcState = srcs.head.obj.state(stateCycle0)
+					val srcLiquid = srcState.liquid
+					val wash = PipetteHelper.choosePreAsperateWash(tipOverrides, washIntensityDefault, srcLiquid, tipState)
+					mapTipToWash(tip) = wash
+				}
+				for (tw <- tws0) {
+					val tipState = tw.tip.obj.state(stateCycle0)
+					val destState = tw.well.obj.state(stateCycle0)
+					val destLiquid = destState.liquid
+					val wash1 = PipetteHelper.choosePreAsperateWash(tipOverrides, washIntensityDefault, srcLiquid, tipState)
+					val wash0 = mapTipToWash(tw.tip)
+					val washIntensity = if (wash0.washIntensity >= wash1.washIntensity) wash0.washIntensity else wash1.washIntensity
+					mapTipToWash(tw.tip) = new WashSpec(
+						washIntensity,
+						wash0.contamInside ++ wash1.contamInside,
+						wash0.contamOutside ++ wash1.contamOutside
+					)
+				}
+			}
+			
 			//
 			// First dispense
 			//
@@ -89,19 +136,13 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				tws.forall(tw => mapDestToItem(tw.well).srcs == srcs0(tw.tip)) &&
 				// dispense does not require cleaning
 				checkNoCleanRequired(cycle, tipStates, tws) &&
+				// dispense was possible without error
 				dispense(cycle, tipStates, srcs0, tws).isEmpty
 			})
 
-			// Tuples of tip to clean degree required by source liquid
-			val tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]] = srcs0.map(pair => {
-				val (tip, srcs) = pair
-				val tipState = tip.obj.state(stateCycle0)
-				val srcState = srcs.head.obj.state(stateCycle0)
-				val srcLiquid = srcState.liquid
-				val cleanDegree = helper.getCleanDegreeAspirate(tipState, srcLiquid)
-				(tip, cleanDegree)
-			}).toSeq
-			clean(cycle, tcs)
+			if (robot.areTipsDisposable) {
+				
+			}
 
 			val src00 = srcs0.head._2
 			val bAllSameSrcs = srcs0.values.forall(_ == src00)

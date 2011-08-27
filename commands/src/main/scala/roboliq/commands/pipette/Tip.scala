@@ -4,26 +4,6 @@ import scala.collection.mutable.HashMap
 
 import roboliq.common._
 
-object CleanDegree extends Enumeration {
-	val None, Light, Thorough, Decontaminate = Value
-}
-
-object PipettePosition extends Enumeration {
-	val Free, WetContact, DryContact = Value
-}
-
-case class PipettePolicy(sName: String, pos: PipettePosition.Value)
-
-/*
-case class Site(val parent: Obj, val index: Int)
-
-// TODO: add various speeds, such as entry, pump, exit
-//case class PipettePolicy(val pos: PipettePosition.Value) // FIXME: remove this
-
-object TipState {
-	def apply(tip: Tip) = new TipState(tip, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
-}
-*/
 
 class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	thisObj =>
@@ -37,7 +17,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val conf = new TipConfigL2(this, index)
-		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Set(), 0, Set(), Nil, WashIntensity.None)
 		Right(conf, state)
 	}
 	
@@ -46,7 +26,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		
 		def drop() {
 			val st = state
-			map(thisObj) = st.copy(sType_? = None)
+			map(thisObj) = state.conf.createState0(None)
 		}
 		
 		def get(sType: String) {
@@ -62,10 +42,11 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 				st.sType_?,
 				st.liquid + liquid2,
 				nVolumeNew,
-				st.contamInside + liquid2,
+				st.contamInside ++ liquid2.contaminants,
 				math.max(st.nContamInsideVolume, nVolumeNew),
+				st.contamOutside ++ liquid2.contaminants,
 				st.destsEntered,
-				CleanDegree.None
+				WashIntensity.None
 			)
 		}
 		
@@ -78,15 +59,20 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		
 		def dispenseFree(nVolume2: Double) {
 			val st = state
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2, cleanDegree = CleanDegree.None)
+			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2, cleanDegree = WashIntensity.None)
 		}
 		
 		def dispenseIn(nVolume2: Double, liquid2: Liquid) {
 			val st = state
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2, destsEntered = liquid2 :: st.destsEntered, cleanDegree = CleanDegree.None)
+			map(thisObj) = st.copy(
+				nVolume = st.nVolume - nVolume2,
+				contamOutside = st.contamOutside ++ liquid2.contaminants,
+				destsEntered = liquid2 :: st.destsEntered,
+				cleanDegree = WashIntensity.None
+			)
 		}
 		
-		def clean(cleanDegree: CleanDegree.Value) {
+		def clean(cleanDegree: WashIntensity.Value) {
 			val st = state
 			map(thisObj) = st.copy(destsEntered = Nil, cleanDegree = cleanDegree)
 		}
@@ -110,7 +96,7 @@ class TipConfigL2(
 ) extends ObjConfig with Ordered[TipConfigL2] {
 	// For use in L3P_Pipette
 	def createState0(sType_? : Option[String]): TipStateL2 = {
-		new TipStateL2(this, sType_?, Liquid.empty, 0, Contamination.empty, 0, Nil, CleanDegree.None)
+		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Nil, WashIntensity.None)
 	}
 
 	override def compare(that: TipConfigL2): Int = this.index - that.index
@@ -121,10 +107,11 @@ case class TipStateL2(
 	val sType_? : Option[String],
 	val liquid: Liquid, 
 	val nVolume: Double, 
-	val contamInside: Contamination, 
+	val contamInside: Set[Contaminant.Value], 
 	val nContamInsideVolume: Double,
+	val contamOutside: Set[Contaminant.Value],
 	val destsEntered: List[Liquid],
-	val cleanDegree: CleanDegree.Value
+	val cleanDegree: WashIntensity.Value
 ) extends ObjState with Ordered[TipStateL2] {
 	override def compare(that: TipStateL2): Int = conf.obj.compare(that.conf.obj)
 }

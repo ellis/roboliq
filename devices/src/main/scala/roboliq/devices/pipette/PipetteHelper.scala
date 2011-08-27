@@ -143,7 +143,7 @@ class PipetteHelper {
 		process(tips, Nil, processStep)
 	}
 	
-	def getCleanDegreeAspirate(tipState: TipStateL2, liquid: Liquid): CleanDegree.Value = {
+	def getCleanDegreeAspirate(tipState: TipStateL2, liquid: Liquid): WashIntensity.Value = {
 		var bRinse = false
 		var bThorough = false
 		var bDecontam = false
@@ -155,7 +155,7 @@ class PipetteHelper {
 		// If the tip was previously empty (haven't aspirated previously):
 		if (tipState.liquid eq Liquid.empty) {
 			bThorough = true
-			bDecontam = liquid.bRequireDecontamBeforeAspirate && tipState.cleanDegree < CleanDegree.Decontaminate
+			bDecontam = liquid.bRequireDecontamBeforeAspirate && tipState.cleanDegree < WashIntensity.Decontaminate
 		}
 		// Else if we're aspirating the same liquid as before:
 		else if (tipState.liquid eq liquid) {
@@ -166,14 +166,14 @@ class PipetteHelper {
 			bDecontam = true
 		}
 		
-		if (bDecontam) CleanDegree.Decontaminate
-		else if (bThorough) CleanDegree.Thorough
-		else if (bRinse) CleanDegree.Light
-		else CleanDegree.None
+		if (bDecontam) WashIntensity.Decontaminate
+		else if (bThorough) WashIntensity.Thorough
+		else if (bRinse) WashIntensity.Light
+		else WashIntensity.None
 
 	}
 
-	def getCleanDegreeDispense(tipState: TipStateL2): CleanDegree.Value = {
+	def getCleanDegreeDispense(tipState: TipStateL2): WashIntensity.Value = {
 		var bRinse = false
 		var bThorough = false
 		var bDecontam = false
@@ -181,11 +181,62 @@ class PipetteHelper {
 		// Was a destination previously entered?
 		val bDestEnteredPrev = !tipState.destsEntered.isEmpty
 		bRinse |= bDestEnteredPrev
-		bDecontam |= tipState.destsEntered.exists(_.contaminates)
+		bDecontam |= tipState.destsEntered.exists(!_.contaminants.isEmpty)
 
-		if (bDecontam) CleanDegree.Decontaminate
-		else if (bThorough) CleanDegree.Thorough
-		else if (bRinse) CleanDegree.Light
-		else CleanDegree.None
+		if (bDecontam) WashIntensity.Decontaminate
+		else if (bThorough) WashIntensity.Thorough
+		else if (bRinse) WashIntensity.Light
+		else WashIntensity.None
 	}
+
+	def choosePreAsperateReplacement(replacement_? : Option[TipReplacementAction.Value], liquidInWell: Liquid, tipState: TipStateL2): TipReplacementAction.Value = {
+		// If there is no tip, then we'll need to get a new one
+		if (tipState.sType_?.isEmpty) {
+			TipReplacementAction.Replace
+		}
+		else {
+			replacement_? match {
+				case Some(action) =>
+					action
+				case None =>
+					val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
+					val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+					if (!bInsideOk || !bOutsideOk)
+						TipReplacementAction.Replace
+					else
+						TipReplacementAction.None
+			}
+		}
+	}
+	
+	def choosePreDispenseTipHandlingAction(replacement_? : Option[TipReplacementAction.Value], liquidInWell: Liquid, tipState: TipStateL2): TipReplacementAction.Value = {
+		replacement_? match {
+			case Some(action) =>
+				action
+			case None =>
+				val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+				if (!bOutsideOk)
+					TipReplacementAction.Replace
+				else
+					TipReplacementAction.None
+		}
+	}
+	
+	def choosePreAsperateWash(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): WashSpec = {
+		val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
+		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+		val washIntensity = tipOverrides.washIntensity_? match {
+			case Some(v) => v
+			case None =>
+				if (bInsideOk && bOutsideOk)
+					WashIntensity.None
+				else
+					washIntensityDefault
+		}
+		
+		val contamInside = tipOverrides.contamInside_? match { case Some(v) => v; case None => tipState.contamInside }
+		val contamOutside = tipOverrides.contamOutside_? match { case Some(v) => v; case None => tipState.contamOutside }
+		new WashSpec(washIntensity, contamInside, contamOutside)
+	}
+	
 }

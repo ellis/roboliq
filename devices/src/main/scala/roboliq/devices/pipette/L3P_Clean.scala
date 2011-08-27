@@ -1,4 +1,4 @@
-package roboliq.devices.pipette
+/*package roboliq.devices.pipette
 
 import roboliq.common._
 import roboliq.compiler._
@@ -11,15 +11,15 @@ class L3P_Clean(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispe
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
 		cmd.degree match {
-			case CleanDegree.None =>
+			case WashIntensity.None =>
 				CompileTranslation(cmd, Seq())
-			case CleanDegree.Light =>
+			case WashIntensity.Light =>
 				val l1c = L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 0))
 				CompileTranslation(cmd, Seq(l1c))
-			case CleanDegree.Thorough =>
+			case WashIntensity.Thorough =>
 				val l1c = L2C_Wash(new L2A_WashArgs(cmd.tips, cmd.degree, 1))
 				CompileTranslation(cmd, Seq(l1c))
-			case CleanDegree.Decontaminate =>
+			case WashIntensity.Decontaminate =>
 				(ctx.states.map.get(plateDeconAspirate), ctx.states.map.get(plateDeconDispense)) match {
 					case (Some(pcA: PlateStateL2), Some(pcD: PlateStateL2)) =>
 						val nVolume = 600
@@ -57,3 +57,4 @@ class L3P_Clean(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispe
 		}
 	}
 }
+*/

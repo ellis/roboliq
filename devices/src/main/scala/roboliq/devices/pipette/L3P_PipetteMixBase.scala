@@ -96,12 +96,12 @@ private trait L3P_PipetteMixBase {
 	protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Boolean = {
 		def step(tipWell: TipWell): Boolean = {
 			val tipState = tipStates(tipWell.tip.obj)
-			helper.getCleanDegreeDispense(tipState) == CleanDegree.None
+			helper.getCleanDegreeDispense(tipState) == WashIntensity.None
 		}
 		tws.forall(step)
 	}
 	
-	protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]) {
+	protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]) {
 		// Add tokens
 		val tcss = robot.batchesForClean(tcs)
 		for (tcs <- tcss) {

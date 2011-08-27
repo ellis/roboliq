@@ -1,4 +1,4 @@
-package roboliq.devices.pipette
+/*package roboliq.devices.pipette
 
 import roboliq.common._
 import roboliq.compiler._
@@ -63,3 +63,4 @@ class L3P_Clean_Discardable(robot: PipetteDevice, locationDrop: String) extends 
 		}
 	}
 }
+*/

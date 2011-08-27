@@ -50,3 +50,42 @@ sealed class TipWellVolumePolicyCount(tip: TipConfigL2, well: WellConfigL2, nVol
 	override def toString = "TipWellVolumePolicyCount("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+","+nCount+")" 
 }
 */
+
+object PipettePosition extends Enumeration {
+	val Free, WetContact, DryContact = Value
+}
+
+case class PipettePolicy(sName: String, pos: PipettePosition.Value)
+
+object TipReplacementAction extends Enumeration {
+	val None, Drop, Replace = Value
+}
+
+object WashIntensity extends Enumeration {
+	val None, Light, Thorough, Decontaminate = Value
+}
+
+class TipHandlingOverrides(
+	val replacement_? : Option[TipReplacementAction.Value],
+	//val washProgram_? : Option[Int],
+	val washIntensity_? : Option[WashIntensity.Value],
+	val contamInside_? : Option[Set[Contaminant.Value]],
+	val contamOutside_? : Option[Set[Contaminant.Value]]
+)
+
+object TipHandlingOverrides {
+	def apply() = new TipHandlingOverrides(None, None, None, None)
+}
+
+class WashSpec(
+	val washIntensity: WashIntensity.Value,
+	val contamInside: Set[Contaminant.Value],
+	val contamOutside: Set[Contaminant.Value]
+)
+
+class CleanSpec(
+	val replacement: Option[TipReplacementAction.Value],
+	val washIntensity: WashIntensity.Value,
+	val contamInside: Set[Contaminant.Value],
+	val contamOutside: Set[Contaminant.Value]
+)

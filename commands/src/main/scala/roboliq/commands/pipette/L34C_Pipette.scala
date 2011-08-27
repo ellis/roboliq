@@ -46,6 +46,7 @@ case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3
 case class L4A_PipetteArgs(
 	val items: Seq[L4A_PipetteItem],
 	val mixSpec_? : Option[MixSpec] = None,
+	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val sAspirateClass_? : Option[String] = None,
 	val sDispenseClass_? : Option[String] = None,
 	val sMixClass_? : Option[String] = None,
@@ -63,6 +64,7 @@ case class L4A_PipetteArgs(
 		Right(new L3A_PipetteArgs(
 			items3,
 			mixSpec_? = mixSpec_?,
+			tipOverrides_? = tipOverrides_?,
 			sAspirateClass_? = sAspirateClass_?,
 			sDispenseClass_? = sDispenseClass_?,
 			sMixClass_? = sMixClass_?,
@@ -75,6 +77,7 @@ case class L4A_PipetteArgs(
 class L3A_PipetteArgs(
 	val items: Seq[L3A_PipetteItem],
 	val mixSpec_? : Option[MixSpec] = None,
+	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val sAspirateClass_? : Option[String] = None,
 	val sDispenseClass_? : Option[String] = None,
 	val sMixClass_? : Option[String] = None,

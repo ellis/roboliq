@@ -11,6 +11,7 @@ trait PipetteDevice {
 	val config: PipetteDeviceConfig
 	
 	def addKnowledge(kb: KnowledgeBase)
+	def areTipsDisposable: Boolean
 	/** Minimum volume which can be aspirated */
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */
@@ -22,7 +23,7 @@ trait PipetteDevice {
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
-	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanDegree.Value]]]
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]]
 	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]]
 }
 
@@ -31,6 +32,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		tips = SortedSet((0 to 1).map(i => new Tip(i)) : _*),
 		tipGroups = Array(Array(0,1))
 	)
+	def areTipsDisposable: Boolean = false
 	def addKnowledge(kb: KnowledgeBase) = {
 		config.tips.foreach(kb.addObject)
 	}
@@ -41,7 +43,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		// Can't aspirate from an empty well
 		assert(liquid ne Liquid.empty)
 
-		if (liquid.bCells)
+		if (liquid.contaminants.contains(Contaminant.Cell))
 			Some(PipettePolicy("Comp cells free dispense", PipettePosition.Free))
 		else if (liquid.sName.contains("DMSO"))
 			Some(PipettePolicy("DMSO free dispense", PipettePosition.Free))
@@ -56,7 +58,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy] = {
 		val liquid = tipState.liquid
 		
-		if (liquid.bCells)
+		if (liquid.contaminants.contains(Contaminant.Cell))
 			Some(PipettePolicy("Comp cells free dispense", PipettePosition.Free))
 		else if (liquid.sName.contains("DMSO"))
 			Some(PipettePolicy("DMSO free dispense", PipettePosition.Free))
@@ -82,6 +84,6 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	
 	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = Seq(twvps)
 	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = Seq(twvps)
-	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanDegree.Value]]] = Seq(tcs)
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]] = Seq(tcs)
 	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = Seq(twvpcs)
 }

@@ -1,81 +1,52 @@
 package roboliq.common
 
 object Contaminant extends Enumeration {
-	val Cell, Dna, Other = Value
+	val Cell, DNA, DSMO, Decon, Other = Value
+	//type ContaminantLevels = Map[Contaminant.Value, ContaminationLevel.Value]
 }
 
-object ContaminationLevel extends Enumeration {
+//import Contaminant.ContaminantLevels
+
+/*object ContaminationLevel extends Enumeration {
 	val None, Minor, Major = Value
 }
 
-object TipReplacementAction extends Enumeration {
-	val None, Drop, Replace = Value
-}
-
-class ContaminationMap(map: Map[Contaminant.Value, ContaminationLevel.Value]) {
-	
-}
-
-class TipHandlingOverrides(
-	val replacement_? : Option[TipReplacementAction.Value],
-	val contaminantLevels: Map[Contaminant.Value, ContaminationLevel.Value]
-)
-
-class X() {
-	def chooseDispenseTipHandlingAction(overrides: TipHandlingOverrides, /*policy: PipettePolicy,*/ liquidInWell: Liquid2, contaminantsOnTip: Map[Contaminant.Value, ContaminationLevel.Value]): TipReplacementAction.Value = {
-		overrides.replacement_? match {
-			case Some(action) =>
-				action
-			case None =>
-				if (liquidInWell.bWaterFreeDispense) // FIXME: use 'policy' instead?
-					TipReplacementAction.None
-				else if (liquidInWell.bRequireDecontamBeforeAspirate)
-					TipReplacementAction.Replace
-				else if (contaminantsOnTip.keys.exists(liquidInWell.prohibitedTipContaminants.contains))
-					TipReplacementAction.Replace
-				else
-					TipReplacementAction.None
-		}
+class ContaminantLevels(val map: Map[Contaminant.Value, ContaminationLevel.Value]) {
+	def +(other: ContaminantLevels): ContaminantLevels = {
+		val keys = map.keys ++ other.map.keys
+		val mapNew = keys.map(key => {
+			val v = (map.get(key), other.map.get(key)) match {
+				case Tuple2(Some(l1), Some(l2)) => if (l1 >= l2) l1 else l2
+				case Tuple2(Some(l1), None) => l1
+				case Tuple2(None, Some(l2)) => l2
+				case _ => ContaminationLevel.None // This case will never occur, but it's here to avoid a compiler warning
+			}
+			key -> v
+		}).toMap
+		new ContaminantLevels(mapNew)
 	}
 	
-	def chooseDispenseWashAction(overrides: TipHandlingOverrides, /*policy: PipettePolicy,*/ liquidInWell: Liquid2, contaminantsOnTip: Map[Contaminant.Value, ContaminationLevel.Value]): TipReplacementAction.Value = {
-		
-	}
+	/*def replaceWith(other: ContaminantLevels): ContaminantLevels = {
+		new ContaminantLevels(map ++ other.map)
+	}*/
 }
 
-class Liquid2(
-	val sName: String,
-	val bWaterFreeDispense: Boolean,
-	val bRequireDecontamBeforeAspirate: Boolean,
-	/** Contaminants in this liquid */
-	val contaminantLevels: Map[Contaminant.Value, ContaminationLevel.Value],
-	/** Contaminants which must be cleaned from tips before entering this liquid */
-	val prohibitedTipContaminants: Seq[Contaminant.Value]
-)
-
-class Contamination(val bCells: Boolean, val bDna: Boolean, val bOtherContaminant: Boolean) {
-	def +(other: Contamination): Contamination = {
-		new Contamination(
-			bCells | other.bCells,
-			bDna | other.bDna,
-			bOtherContaminant | other.bOtherContaminant)
-	}
+object ContaminantLevels {
+	def apply() = new ContaminantLevels(Map())
 }
-object Contamination {
-	val empty = new Contamination(false, false, false)
-}
+*/
 
 class Liquid(
 	val sName: String,
 	val bWaterFreeDispense: Boolean,
 	val bRequireDecontamBeforeAspirate: Boolean,
-	bCells: Boolean,
-	bDna: Boolean,
-	bOtherContaminant: Boolean
-)
-extends Contamination(bCells, bDna, bOtherContaminant)
-{
-	def contaminates = bCells || bDna || bOtherContaminant
+	/** Contaminants in this liquid */
+	//val contaminantLevels: ContaminantLevels
+	val contaminants: Set[Contaminant.Value]
+	///** Contaminants which must be cleaned from tips before entering this liquid */
+	//val prohibitedTipContaminants: Set[Contaminant.Value]
+) {
+	//def contaminates: Boolean = contaminantLevels.map.exists(_._2 != ContaminationLevel.None)
 	
 	def +(other: Liquid): Liquid = {
 		if (this eq other)
@@ -91,14 +62,14 @@ extends Contamination(bCells, bDna, bOtherContaminant)
 				sName3,
 				bWaterFreeDispense | other.bWaterFreeDispense,
 				bRequireDecontamBeforeAspirate | other.bRequireDecontamBeforeAspirate,
-				bCells | other.bCells,
-				bDna | other.bDna,
-				bOtherContaminant | other.bOtherContaminant
+				contaminants ++ other.contaminants
+				//contaminantLevels + other.contaminantLevels
+				//prohibitedTipContaminants ++ other.prohibitedTipContaminants
 			)
 		}
 	}
 }
 
 object Liquid {
-	val empty = new Liquid("", false, false, false, false, false)
+	val empty = new Liquid("", false, false, Set())
 }

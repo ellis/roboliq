@@ -121,21 +121,31 @@ case class L2C_Wash(args: L2A_WashArgs) extends CommandL2 {
 	
 	def updateState(builder: StateBuilder) {
 		for (tip <- args.tips) {
-			tip.obj.stateWriter(builder).clean(args.degree)
+			tip.obj.stateWriter(builder).clean(args.intensity)
 		}
 	}
 	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Wash(args))
+		val args1 = new L1A_WashArgs(args.tips, args.iWashProgram, args.nVolumeInside)
+		Right(L1C_Wash(args1))
 	}
 }
 
-case class L1C_Wash(args: L2A_WashArgs) extends CommandL1
+case class L1C_Wash(args: L1A_WashArgs) extends CommandL1
 
-sealed class L2A_WashArgs(
+class L2A_WashArgs(
 	val tips: Set[TipConfigL2],
-	val degree: CleanDegree.Value,
-	val iWashProgram: Int)
+	val iWashProgram: Int,
+	val intensity: WashIntensity.Value,
+	val nVolumeInside: Double
+)
+
+sealed class L1A_WashArgs(
+	val tips: Set[TipConfigL2],
+	val iWashProgram: Int,
+	val nVolumeInside: Double
+)
+
 
 /*sealed class L1A_WashArgs(
 	val tips: Set[TipConfigL2],
@@ -222,4 +232,4 @@ case class L1C_TipsDrop(tips: Set[TipConfigL2], location: String) extends Comman
 }
 */
 
-case class L2C_SetTipStateClean(tips: Seq[TipConfigL2], degree: CleanDegree.Value) extends Command
+case class L2C_SetTipStateClean(tips: Seq[TipConfigL2], degree: WashIntensity.Value) extends Command

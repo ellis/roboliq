@@ -86,7 +86,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 			})
 			
 			// Tuples of tip to clean degree required by dest liquid
-			val tcs: Seq[Tuple2[TipConfigL2, CleanDegree.Value]] = tws0.map(tw => {
+			val tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]] = tws0.map(tw => {
 				val tipState = tw.tip.obj.state(stateCycle0)
 				val srcState = tw.well.obj.state(stateCycle0)
 				val srcLiquid = srcState.liquid
