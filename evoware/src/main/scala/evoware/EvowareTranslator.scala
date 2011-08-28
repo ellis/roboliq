@@ -15,7 +15,7 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 		case t @ L1C_Aspirate(_) => aspirate(t)
 		case t @ L1C_Dispense(_) => dispense(t)
 		case t @ L1C_Mix(_) => mix(t.items)
-		case t @ L1C_Wash(_) => wash(t)
+		case c: L1C_Wash => wash(c)
 		case c: L1C_TipsGet => tipsGet(c)
 		case c: L1C_TipsDrop => tipsDrop(c)
 	}
