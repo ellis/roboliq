@@ -14,7 +14,7 @@ trait Roboliq extends L4_Roboliq {
 }
 
 class Tester extends Roboliq {
-	val water = new Liquid("water", true, false, false, false, false)
+	val water = new Liquid("water", true, false, Set())
 	val plate = new Plate
 	
 	protocol {
@@ -110,7 +110,9 @@ object Main extends App {
 		
 		val compiler = new Compiler
 		//compiler.register(new L4P_Pipette)
-		compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
+		//compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
+		compiler.register(new L3P_TipsGet)
+		compiler.register(new L3P_TipsDrop("waste"))
 		compiler.register(new L3P_Pipette(pipetter))
 		//compiler.register(new L2P_Aspirate)
 		//compiler.register(new L2P_Dispense)

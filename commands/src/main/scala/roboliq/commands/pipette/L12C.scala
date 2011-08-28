@@ -116,33 +116,30 @@ sealed class L1A_MixItem(
 // Wash
 //-------------------------------
 
-case class L2C_Wash(args: L2A_WashArgs) extends CommandL2 {
+case class L2C_Wash(items: Seq[L2A_WashItem], iWashProgram: Int, intensity: WashIntensity.Value) extends CommandL2 {
 	type L1Type = L1C_Wash
 	
 	def updateState(builder: StateBuilder) {
-		for (tip <- args.tips) {
-			tip.obj.stateWriter(builder).clean(args.intensity)
+		for (item <- items) {
+			item.tip.obj.stateWriter(builder).clean(intensity)
 		}
 	}
 	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		val args1 = new L1A_WashArgs(args.tips, args.iWashProgram, args.nVolumeInside)
-		Right(L1C_Wash(args1))
+		val items1 = items.map(item => new L1A_WashItem(item.tip, item.nVolumeInside))
+		Right(L1C_Wash(items1, iWashProgram))
 	}
 }
 
-case class L1C_Wash(args: L1A_WashArgs) extends CommandL1
+case class L1C_Wash(items: Seq[L1A_WashItem], iWashProgram: Int) extends CommandL1
 
-class L2A_WashArgs(
-	val tips: Set[TipConfigL2],
-	val iWashProgram: Int,
-	val intensity: WashIntensity.Value,
+class L2A_WashItem(
+	val tip: TipConfigL2,
 	val nVolumeInside: Double
 )
 
-sealed class L1A_WashArgs(
-	val tips: Set[TipConfigL2],
-	val iWashProgram: Int,
+sealed class L1A_WashItem(
+	val tip: TipConfigL2,
 	val nVolumeInside: Double
 )
 

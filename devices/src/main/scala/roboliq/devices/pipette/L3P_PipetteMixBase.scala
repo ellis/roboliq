@@ -24,16 +24,16 @@ private trait L3P_PipetteMixBase {
 		val tips: SortedSet[TipConfigL2]
 		val state0: RobotState
 		
-		val cleans: ArrayBuffer[L3C_Clean]
-		val mixes: ArrayBuffer[L2C_Mix]
+		val gets = new ArrayBuffer[L3C_TipsGet]
+		val washs = new ArrayBuffer[L3C_TipsWash]
+		val mixes = new ArrayBuffer[L2C_Mix]
+		val drops = new ArrayBuffer[L3C_TipsGet]
 		
 		var ress: Seq[CompileFinal] = Nil
 
 		def toTokenSeq: Seq[Command]
 	}
 	
-	val helper = new PipetteHelper
-
 	val dests: SortedSet[WellConfigL2]
 
 	def translation: Either[CompileError, Seq[Command]] = {
@@ -43,10 +43,13 @@ private trait L3P_PipetteMixBase {
 		var winner = Seq[Command]()
 		var nWinnerScore = Int.MaxValue
 		var lsErrors = new ArrayBuffer[String]
+		val mapIndexToTip = robot.config.tips.map(tip => tip.index -> tip).toMap
 		for (tipGroup <- robot.config.tipGroups) {
-			val tips = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.state(ctx.states).conf)
+			val mapTipToType = tipGroup.map(pair => mapIndexToTip(pair._1).state(ctx.states).conf -> pair._2.sName).toMap
+			val tips = SortedSet(mapTipToType.keys.toSeq : _*)
+			//val tipAndSpecs = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.state(ctx.states).conf)
 	
-			translateCommand(tips) match {
+			translateCommand(tips, mapTipToType) match {
 				case Left(lsErrors2) =>
 					lsErrors ++= lsErrors2
 				case Right(Seq()) =>
@@ -72,7 +75,7 @@ private trait L3P_PipetteMixBase {
 			Left(CompileError(cmd, lsErrors))
 	}
 	
-	protected def translateCommand(tips: SortedSet[TipConfigL2]): Either[Errors, Seq[CycleState]]
+	protected def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]]
 	
 	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L2A_SpirateItem], tipStates: HashMap[Tip, TipStateL2]) {
 		// Add volumes to amount required in tips
@@ -96,17 +99,76 @@ private trait L3P_PipetteMixBase {
 	protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Boolean = {
 		def step(tipWell: TipWell): Boolean = {
 			val tipState = tipStates(tipWell.tip.obj)
-			helper.getCleanDegreeDispense(tipState) == WashIntensity.None
+			PipetteHelper.getCleanDegreeDispense(tipState) == WashIntensity.None
 		}
 		tws.forall(step)
 	}
 	
-	protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]) {
+	/*protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]) {
 		// Add tokens
 		val tcss = robot.batchesForClean(tcs)
 		for (tcs <- tcss) {
 			val tips = tcs.map(_._1).toSet
 			cycle.cleans += L3C_Clean(tips, tcs.head._2)
+		}
+	}*/
+	
+	protected def clean(cycle: CycleState, mapTipToType: Map[TipConfigL2, String], overrides: TipHandlingOverrides, bFirst: Boolean, twsA: Seq[TipWell], twsD: Seq[TipWell]) {
+		if (robot.areTipsDisposable) {
+			val mapTipToReplacement = new HashMap[TipConfigL2, TipReplacementAction.Value]
+			// Replacement requires by aspirate
+			for (tw <- twsA) {
+				val tipState = tw.tip.obj.state(cycle.state0)
+				val srcState = tw.well.obj.state(cycle.state0)
+				val srcLiquid = srcState.liquid
+				val replacement = PipetteHelper.choosePreAsperateReplacement(overrides.replacement_?, srcLiquid, tipState)
+				mapTipToReplacement(tw.tip) = replacement
+			}
+			// Replacement that would be required by dispense, were we to dispense immediately without 
+			for (tw <- twsD) {
+				val tipState = tw.tip.obj.state(cycle.state0)
+				val destState = tw.well.obj.state(cycle.state0)
+				val destLiquid = destState.liquid
+				val replacement = PipetteHelper.choosePreDispenseReplacement(overrides.replacement_?, destLiquid, tipState)
+				if (replacement > mapTipToReplacement(tw.tip))
+					mapTipToReplacement(tw.tip) = replacement
+			}
+			val getItems = mapTipToReplacement
+					.filter(_._2 == TipReplacementAction.Replace)
+					.map(pair => new L3A_TipsGetItem(pair._1, mapTipToType(pair._1)))
+			if (!getItems.isEmpty)
+				cycle.gets += new L3C_TipsGet(getItems.toSeq) 
+		}
+		else {
+			val mapTipToWash = new HashMap[TipConfigL2, WashSpec]
+			val washIntensityDefault = if (bFirst) WashIntensity.Thorough else WashIntensity.Light
+			for (tw <- twsA) {
+				val tipState = tw.tip.obj.state(cycle.state0)
+				val srcState = tw.well.obj.state(cycle.state0)
+				val srcLiquid = srcState.liquid
+				val wash = PipetteHelper.choosePreAsperateWashSpec(overrides, washIntensityDefault, srcLiquid, tipState)
+				mapTipToWash(tw.tip) = wash
+			}
+			for (tw <- twsD) {
+				val tipState = tw.tip.obj.state(cycle.state0)
+				val destState = tw.well.obj.state(cycle.state0)
+				val destLiquid = destState.liquid
+				val wash1 = PipetteHelper.choosePreAsperateWashSpec(overrides, washIntensityDefault, destLiquid, tipState)
+				val wash0 = mapTipToWash(tw.tip)
+				val washIntensity = if (wash0.washIntensity >= wash1.washIntensity) wash0.washIntensity else wash1.washIntensity
+				mapTipToWash(tw.tip) = new WashSpec(
+					washIntensity,
+					wash0.contamInside ++ wash1.contamInside,
+					wash0.contamOutside ++ wash1.contamOutside
+				)
+			}
+			
+			val washItems = mapTipToWash
+					.filter(_._2 != WashIntensity.None)
+					.map(pair => new L3A_TipsWashItem(pair._1, pair._2.contamInside, pair._2.contamOutside))
+			val intensity = mapTipToWash.values.foldLeft(WashIntensity.None) { (acc, wash) => if (wash.washIntensity > acc) wash.washIntensity else acc }
+			if (!washItems.isEmpty)
+				cycle.washs += new L3C_TipsWash(washItems.toSeq, intensity)
 		}
 	}
 	

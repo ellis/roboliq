@@ -9,7 +9,7 @@ import roboliq.commands.pipette._
 //import roboliq.robot._
 
 
-class PipetteHelper {
+object PipetteHelper {
 	def chooseTipWellPairsNext(states: RobotState, tips: SortedSet[TipConfigL2], wells: SortedSet[WellConfigL2], twsPrev: Seq[TipWell]): Seq[TipWell] = {
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
@@ -196,6 +196,7 @@ class PipetteHelper {
 		}
 		else {
 			replacement_? match {
+				// If the user has provided an override value, use it:
 				case Some(action) =>
 					action
 				case None =>
@@ -209,7 +210,7 @@ class PipetteHelper {
 		}
 	}
 	
-	def choosePreDispenseTipHandlingAction(replacement_? : Option[TipReplacementAction.Value], liquidInWell: Liquid, tipState: TipStateL2): TipReplacementAction.Value = {
+	def choosePreDispenseReplacement(replacement_? : Option[TipReplacementAction.Value], liquidInWell: Liquid, tipState: TipStateL2): TipReplacementAction.Value = {
 		replacement_? match {
 			case Some(action) =>
 				action
@@ -222,7 +223,7 @@ class PipetteHelper {
 		}
 	}
 	
-	def choosePreAsperateWash(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): WashSpec = {
+	def choosePreAsperateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): WashSpec = {
 		val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
 		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
 		val washIntensity = tipOverrides.washIntensity_? match {

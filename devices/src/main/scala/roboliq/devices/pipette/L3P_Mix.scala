@@ -31,27 +31,25 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	
 	val compiler = ctx.compiler
 	val args = cmd.args
+	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
 	
 	case class SrcTipDestVolume(src: WellConfigL2, tip: TipConfigL2, dest: WellConfigL2, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[TipConfigL2], val state0: RobotState) extends super.CycleState {
-		val cleans = new ArrayBuffer[L3C_Clean]
-		val mixes = new ArrayBuffer[L2C_Mix]
-
-		override def toTokenSeq: Seq[Command] = cleans ++ mixes
+		override def toTokenSeq: Seq[Command] = gets ++ washs ++ mixes ++ drops
 	}
 	
 	val dests = SortedSet[WellConfigL2](args.items.map(_.well).toSeq : _*)
 	val mapDestToItem: Map[WellConfigL2, L3A_MixItem] = args.items.map(t => t.well -> t).toMap
 
-	protected override def translateCommand(tips: SortedSet[TipConfigL2]): Either[Errors, Seq[CycleState]] = {
+	protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = {
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
 		//val state = new RobotStateBuilder(state0)
 		
 		// Pair up all tips and wells
-		val twss0 = helper.chooseTipWellPairsAll(ctx.states, tips, dests)
+		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
 
 		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
 			if (twss.isEmpty)
@@ -69,9 +67,11 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 				val tipState = tw.tip.createState0(tipState0.sType_?)
 				tipStates(tw.tip.obj) = tipState
 			})
+			
+			clean(cycle, mapTipToType, tipOverrides, cycles.isEmpty, tws0, Seq())
 
 			//
-			// First dispense
+			// First mix
 			//
 			val sError_? = mix(cycle, tipStates, tws0)
 			if (sError_?.isDefined) {
@@ -85,16 +85,6 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 				mix(cycle, tipStates, tws).isEmpty
 			})
 			
-			// Tuples of tip to clean degree required by dest liquid
-			val tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]] = tws0.map(tw => {
-				val tipState = tw.tip.obj.state(stateCycle0)
-				val srcState = tw.well.obj.state(stateCycle0)
-				val srcLiquid = srcState.liquid
-				val cleanDegree = helper.getCleanDegreeAspirate(tipState, srcLiquid)
-				(tw.tip, cleanDegree)
-			}).toSeq
-			clean(cycle, tcs)
-
 			getUpdatedState(cycle) match {
 				case Right(stateNext) => 
 					cycles += cycle

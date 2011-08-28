@@ -243,7 +243,16 @@ x	setup unit tests for sbt
 		what about distinction between inside and outside?
 		how to define a liquid so that we know what default tip handling actions to take for both disposable and permanent tips?
 		contamination should be a map over an enumeration value so that additional contamination types can be easily added
+	Wash programs:
+		Later in development, I'd like for wash programs to target specific contaminants
+		One challenge then would be how to keep new contaminants in sync with existing wash programs
+		Maybe by having new contaminants subclass existing ones when appropriate
 
+		decide on wash program based on the desired wash intensity and the contamination of the tips
+
+		L3: must be implemented for a specific lab -- though I'd like to have a generic implementation based on our BSSE setup
+		L2: same as for L1
+		L1: wash program refers to a set of parameters for Evoware WASH
 	Tip handling defaults:
 	Clean:
 		Clean overrides:

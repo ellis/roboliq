@@ -36,25 +36,23 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	//case class SrcTipDestVolume(src: WellConfigL2, tip: TipStateL2, dest: WellConfigL2, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[TipConfigL2], val state0: RobotState) extends super.CycleState {
-		val cleans = new ArrayBuffer[L3C_Clean]
 		val aspirates = new ArrayBuffer[L2C_Aspirate]
 		val dispenses = new ArrayBuffer[L2C_Dispense]
-		val mixes = new ArrayBuffer[L2C_Mix]
 		
-		def toTokenSeq: Seq[Command] = cleans ++ aspirates ++ dispenses ++ mixes
+		def toTokenSeq: Seq[Command] = gets ++ washs ++ aspirates ++ dispenses ++ mixes
 	}
 	
 	val dests = SortedSet[WellConfigL2](args.items.map(_.dest) : _*)
 	val mapDestToItem: Map[WellConfigL2, L3A_PipetteItem] = args.items.map(t => t.dest -> t).toMap
 
-	protected override def translateCommand(tips: SortedSet[TipConfigL2]): Either[Errors, Seq[CycleState]] = {
+	protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = {
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
 		//val state = new RobotStateBuilder(state0)
 		
 		// Pair up all tips and wells
-		val twss0 = helper.chooseTipWellPairsAll(ctx.states, tips, dests)
+		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
 
 		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
 			if (twss.isEmpty)
@@ -66,6 +64,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			
 			val srcs0 = tws0.map(tw => tw.tip -> mapDestToItem(tw.well).srcs).toMap
 			
+			// Clean
+			val twsA = srcs0.map(pair => new TipWell(pair._1, pair._2.head)).toSeq
+			clean(cycle, mapTipToType, tipOverrides, cycles.isEmpty, twsA, tws0)
+			
 			// Create temporary tip state objects and associate them with the source liquid
 			val tipStates = new HashMap[Tip, TipStateL2]
 			tws0.foreach(tw => {
@@ -73,55 +75,17 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				val tipState0 = tw.tip.obj.state(stateCycle0)
 				val tipState = tw.tip.createState0(tipState0.sType_?)
 				tipStates(tw.tip.obj) = tipState
-				/*// Associate liquid by "aspirating" 0 ul of it
+				
+				val tipWriter = tw.tip.obj.stateWriter(tipStates)
+				// Get proper tip
+				if (robot.areTipsDisposable)
+					tipWriter.get(mapTipToType(tw.tip))
+				// Associate liquid by "aspirating" 0 ul of it
 				val item = mapDestToItem(tw.well)
 				val srcState = item.srcs.head.obj.state(stateCycle0)
-				tw.tip.obj.stateWriter(tipStates).aspirate(srcState.liquid, 0)*/
+				tipWriter.aspirate(srcState.liquid, 0)
 			})
 
-			val mapTipToReplacement = new HashMap[TipConfigL2, TipReplacementAction.Value]
-			val mapTipToWash = new HashMap[TipConfigL2, WashSpec]
-			if (robot.areTipsDisposable) {
-				for ((tip, srcs) <- srcs0) {
-					val tipState = tip.obj.state(stateCycle0)
-					val srcState = srcs.head.obj.state(stateCycle0)
-					val srcLiquid = srcState.liquid
-					val replacement = PipetteHelper.choosePreAsperateReplacement(tipOverrides.replacement_?, srcLiquid, tipState)
-					mapTipToReplacement(tip) = replacement
-				}
-				for (tw <- tws0) {
-					val tipState = tw.tip.obj.state(stateCycle0)
-					val destState = tw.well.obj.state(stateCycle0)
-					val destLiquid = destState.liquid
-					val replacement = PipetteHelper.choosePreDispenseReplacement(tipOverrides.replacement_?, srcLiquid, tipState)
-					if (replacement > mapTipToReplacement(tw.tip))
-						mapTipToReplacement(tw.tip) = replacement
-				}
-			}
-			else {
-				val washIntensityDefault = if (cycles.isEmpty) WashIntensity.Thorough else WashIntensity.Light
-				for ((tip, srcs) <- srcs0) {
-					val tipState = tip.obj.state(stateCycle0)
-					val srcState = srcs.head.obj.state(stateCycle0)
-					val srcLiquid = srcState.liquid
-					val wash = PipetteHelper.choosePreAsperateWash(tipOverrides, washIntensityDefault, srcLiquid, tipState)
-					mapTipToWash(tip) = wash
-				}
-				for (tw <- tws0) {
-					val tipState = tw.tip.obj.state(stateCycle0)
-					val destState = tw.well.obj.state(stateCycle0)
-					val destLiquid = destState.liquid
-					val wash1 = PipetteHelper.choosePreAsperateWash(tipOverrides, washIntensityDefault, srcLiquid, tipState)
-					val wash0 = mapTipToWash(tw.tip)
-					val washIntensity = if (wash0.washIntensity >= wash1.washIntensity) wash0.washIntensity else wash1.washIntensity
-					mapTipToWash(tw.tip) = new WashSpec(
-						washIntensity,
-						wash0.contamInside ++ wash1.contamInside,
-						wash0.contamOutside ++ wash1.contamOutside
-					)
-				}
-			}
-			
 			//
 			// First dispense
 			//
@@ -141,7 +105,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			})
 
 			if (robot.areTipsDisposable) {
-				
+				// TODO: drop tips
 			}
 
 			val src00 = srcs0.head._2
@@ -201,10 +165,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val item = mapDestToItem(dest)
 			val src = srcs(tip).head
 			val liquidSrc = src.obj.state(cycle.state0).liquid
-			val tipState = tip.obj.state(cycle.state0)
+			val tipState = tipStates(tip.obj)
 			val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
 			val nMax = robot.getTipHoldVolumeMax(tipState, liquidSrc)
-			val nTipVolume = -tipStates(tip.obj).nVolume
+			val nTipVolume = -tipState.nVolume
 			sError_? = {
 				if (item.nVolume < nMin)
 					Some("Cannot aspirate "+item.nVolume+"ul into tip "+(tip.index+1)+": require >= "+nMin+"ul")
@@ -264,7 +228,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		val srcs2 = SortedSet[WellConfigL2](srcs.toSeq.sortWith(order).take(tips.size) : _*)
 		val pairs = srcs2.toSeq zip tips.toSeq
 	
-		val twss0 = helper.chooseTipSrcPairs(cycle.state0, tips, srcs2)
+		val twss0 = PipetteHelper.chooseTipSrcPairs(cycle.state0, tips, srcs2)
 		var sError_? : Option[String] = None
 		twss0.forall(tws => {
 			aspirate_createTwvps(cycle, tipStates, tws) match {

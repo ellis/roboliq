@@ -21,6 +21,7 @@ trait PipetteDevice {
 	/** Choose dispense method */
 	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy]
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
+	//def chooseWashPrograms(tip: TipConfigL2, intensity: WashIntensity.Value): Seq[Int]
 	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]]
@@ -28,11 +29,17 @@ trait PipetteDevice {
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
+	private val tipSpec50 = new TipSpec("50", 50)
+	private val tipSpec1000 = new TipSpec("1000", 1000)
 	val config = new PipetteDeviceConfig(
+		tipSpecs = Seq(tipSpec50, tipSpec1000),
 		tips = SortedSet((0 to 1).map(i => new Tip(i)) : _*),
-		tipGroups = Array(Array(0,1))
+		tipGroups = Seq(
+				Seq(0 -> tipSpec50, 1 -> tipSpec50),
+				Seq(0 -> tipSpec1000, 1 -> tipSpec1000)
+				)
 	)
-	def areTipsDisposable: Boolean = false
+	def areTipsDisposable: Boolean = true
 	def addKnowledge(kb: KnowledgeBase) = {
 		config.tips.foreach(kb.addObject)
 	}

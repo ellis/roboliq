@@ -1,4 +1,4 @@
-package roboliq.commands.pipette
+/*package roboliq.commands.pipette
 
 import roboliq.common._
 
@@ -11,3 +11,4 @@ class L3A_CleanItem(
 	val contaminantsToWash: Set[Contaminant.Value],
 	val washDegree: WashIntensity.Value
 )
+*/

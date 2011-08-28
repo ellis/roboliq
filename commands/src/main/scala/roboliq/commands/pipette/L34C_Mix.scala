@@ -30,6 +30,7 @@ case class L3C_Mix(args: L3A_MixArgs) extends CommandL3
 class L4A_MixArgs(
 	val items: Seq[L4A_MixItem],
 	val nCount: Int,
+	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val sMixClass_? : Option[String] = None,
 	val sTipKind_? : Option[String] = None,
 	val fnClean_? : Option[Unit => Unit] = None
@@ -45,6 +46,7 @@ class L4A_MixArgs(
 		Right(new L3A_MixArgs(
 			items3,
 			nCount = nCount,
+			tipOverrides_? = tipOverrides_?,
 			sMixClass_? = sMixClass_?,
 			sTipKind_? = sTipKind_?,
 			fnClean_? = fnClean_?
@@ -55,6 +57,7 @@ class L4A_MixArgs(
 class L3A_MixArgs(
 	val items: Seq[L3A_MixItem],
 	val nCount: Int,
+	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val sMixClass_? : Option[String] = None,
 	val sTipKind_? : Option[String] = None,
 	val fnClean_? : Option[Unit => Unit] = None
