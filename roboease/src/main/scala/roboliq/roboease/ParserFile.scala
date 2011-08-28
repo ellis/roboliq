@@ -153,4 +153,6 @@ class ParserFile {//extends JavaTokenParsers {
 				)
 		mapRacks(name) = rack
 	}
+	
+	def racks = shared.mapRacks.values
 }

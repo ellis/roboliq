@@ -10,8 +10,8 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-abstract class EvowareTranslator(mapper: EvowareMapper) {
-	def translate(cmd: Command): Either[Seq[String], Seq[Command]] = cmd match {
+class EvowareTranslator(mapper: EvowareMapper) {
+	def translate(cmd: CommandL1): Either[Seq[String], Seq[Command]] = cmd match {
 		case t @ L1C_Aspirate(_) => aspirate(t)
 		case t @ L1C_Dispense(_) => dispense(t)
 		case t @ L1C_Mix(_) => mix(t.items)
@@ -20,19 +20,29 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 		case c: L1C_TipsDrop => tipsDrop(c)
 	}
 
-	def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
+	def translate(cmds: Seq[CommandL1]): Either[Seq[String], Seq[Command]] = {
+		Right(cmds.flatMap(cmd => {
+			translate(cmd) match {
+				case Left(err) => return Left(err)
+				case Right(cmds0) => cmds0
+			}
+		}))
+	}
+
+	/*def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
 		Right(rs.flatMap(r => {
 			translate(r.cmd) match {
 				case Left(err) => return Left(err)
 				case Right(cmds) => cmds
 			}
 		}))
-	}
+	}*/
 
-	def translateToString(txs: Seq[CompileFinal]): String = translate(txs).right.get.mkString("\n")
+	//def translateToString(txs: Seq[CompileFinal]): String = translate(txs).right.get.mkString("\n")
+	def translateToString(cmds: Seq[CommandL1]): String = translate(cmds).right.get.mkString("\n")
 
-	def translateAndSave(txs: Seq[CompileFinal], sFilename: String): String = {
-		val s = translateToString(txs)
+	def translateAndSave(cmds: Seq[CommandL1], sFilename: String): String = {
+		val s = translateToString(cmds)
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, EvowareTranslatorHeader.getHeader())
 		writeLines(fos, s);
@@ -165,7 +175,22 @@ abstract class EvowareTranslator(mapper: EvowareMapper) {
 		}
 	}
 	
-	def wash(cmd: L1C_Wash): Either[Seq[String], Seq[Command]]
+	def wash(cmd: L1C_Wash): Either[Seq[String], Seq[Command]] = {
+		val nWasteVolume = cmd.items.foldLeft(0.0) { (acc, item) => math.max(acc, item.nVolumeInside) }
+		Right(Seq(L0C_Wash(
+			mTips = encodeTips(cmd.items.map(_.tip.obj)),
+			iWasteGrid = 1, iWasteSite = 1,
+			iCleanerGrid = 1, iCleanerSite = 0,
+			nWasteVolume = nWasteVolume,
+			nWasteDelay = 500,
+			nCleanerVolume = 5.0,
+			nCleanerDelay = 500,
+			nAirgapVolume = 10,
+			nAirgapSpeed = 70,
+			nRetractSpeed = 10,
+			bFastWash = false
+			)))
+	}
 	
 	private def mix(items: Seq[L1A_MixItem]): Either[Seq[String], Seq[Command]] = {
 		items match {

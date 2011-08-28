@@ -77,8 +77,8 @@ x	devices: set tip state in DROP and GET commands
 x	devices: L*_GetTip/L*_DropTip
 x	devices: L3P_Clean_Discardable for cleaning Weizmann tips
 x	devices: L3P_Pipette: update to accommodate tip disposal
-	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
-	devices: set tip type in TipState for fixed tips
+4	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
+	devices: set initial tip type in TipState for fixed tips
 	devices: implement mixing option in L3P_Pipette
 x	evoware: L*_GetTip/L*_DropTip
 x	roboease: accumulate commands and send them though the compiler
@@ -89,12 +89,10 @@ x	roboease: MIX
 	roboease: TRANSFER
 	roboease: TABLE
 	roboease: add comments about tip usage to output
-7	roboease-evoware: create project
-	roboease-evoware: translate final commands to Evoware output
-	roboease-evoware: print out appropriate header
-	roboease-evoware: copy and update test program from roboease project
-	create Syringe object and decouple it from the Tip object, so that tips can be exchanged
-	Add Comment()s to evoware output
+x	roboease-evoware: create project
+1	roboease-evoware: translate final commands to Evoware output
+2	roboease-evoware: copy and update test program from roboease project
+3	roboease-evoware: print out appropriate header
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from

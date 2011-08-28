@@ -294,7 +294,7 @@ PcrDispense(source: Plate, volume: Volume): Plate = {
 ---------------------------------------------------
 
 Wash parameters used in scripts:
-grid	site	grid	site	washV	washDel	clnV	vlnDel	airV	airSpd	retract	fast
+grid	site	grid	site	washV	washDel	clnV	clnDel	airV	airSpd	retract	fast
 1       1       1       0       "0.25"  500     ".1"    500     10      70      30      0
 1       1       1       0       ".2"    500     ".1"    500     5       70      10      0
 1       1       1       0       "25"    500     "0.1"   500     10      70      30      1

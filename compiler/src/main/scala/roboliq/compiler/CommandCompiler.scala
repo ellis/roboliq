@@ -53,6 +53,7 @@ abstract class CommandCompilerL2 extends CommandCompiler {
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int
 }
 
+/*
 abstract class CommandTranslatorL2 extends CommandCompiler {
 	def updateStateL2(builder: StateBuilder, _cmd: Command) {
 		if (!_cmd.getClass().eq(cmdType))
@@ -71,3 +72,4 @@ abstract class CommandTranslatorL2 extends CommandCompiler {
 	def updateState(builder: StateBuilder, cmd: CmdType)
 	def score(state0: RobotState, state1: RobotState, cmd: CmdType): Int
 }
+*/
