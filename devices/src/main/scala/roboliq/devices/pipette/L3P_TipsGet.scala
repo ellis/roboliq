@@ -21,6 +21,7 @@ class L3P_TipsGet extends CommandCompilerL3 {
 					new L2C_Wash(tips.toSeq.map(tip => new L2A_WashItem(tip, 0)), 0, WashIntensity.Decontaminate),
 					new L2C_TipsGet(tips, sType)
 					)
+			//println("Tips_Get: "+tips.map(tip => tip.index -> tip.obj.state(ctx.states).sType_?))
 			val tipsToDrop = tips.filter(tip => tip.obj.state(ctx.states).sType_?.isDefined)
 			if (!tipsToDrop.isEmpty)
 				Seq(new L3C_TipsDrop(tipsToDrop)) ++ get

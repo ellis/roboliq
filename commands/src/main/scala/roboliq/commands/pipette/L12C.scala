@@ -158,8 +158,13 @@ case class L2C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL2 
 	
 	def updateState(builder: StateBuilder) {
 		for (tip <- tips) {
-			tip.obj.stateWriter(builder).drop()
+			tip.obj.stateWriter(builder).get(sType)
 		}
+		/*val tip0 = tips.head
+		println("after1: "+builder.map(tip0.obj))
+		println("after2: "+builder.map.toMap.apply(tip0.obj))
+		println("after3: "+builder.toImmutable.map(tip0.obj))
+		println("after4: "+new RobotState(builder.map.toMap).apply(tip0.obj))*/
 	}
 	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {

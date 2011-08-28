@@ -95,15 +95,19 @@ class Compiler {
 				
 			val (node, state1) = either.right.get
 			state = state1
+			//println("cmd: "+cmd.getClass().getName())
+			//println("state: "+state.map.filter(!_._1.isInstanceOf[Well]))
 			node
 		})
 		Right(ress, state)
 	}
 	
 	private def compileCommand(state0: RobotState, cmd: Command): Either[CompileError, Tuple2[CompileNode, RobotState]] = {
-		val res = compile(state0, cmd)
+		val res = compileToResult(state0, cmd)
 		res match {
 			case CompileFinal(_, _, state1) =>
+				//println("cmd: "+cmd.getClass().getName())
+				//println("final: "+state1.map.filter(!_._1.isInstanceOf[Well]))
 				Right(new CompileNode(cmd, res, Nil, Nil) -> state1)
 			case CompileTranslation(_, translation) =>
 				compileCommands(state0, translation) match {
@@ -116,23 +120,8 @@ class Compiler {
 				Left(err)
 		}
 	}
-
-	/*private def addKnowledge(kb: KnowledgeBase, cmd: CommandL4) {
-		for (handler <- m_handlers) {
-			if (handler.isInstanceOf[CommandCompilerL4]) {
-				handler.asInstanceOf[CommandCompilerL4].addKnowledge(kb, cmd)
-			}
-		}
-	}*/
 	
-	private def addKnowledge(kb: KnowledgeBase, cmds: Seq[Command]) {
-		cmds.foreach(_ match {
-			case cmd4: CommandL4 => cmd4.addKnowledge(kb)
-			case _ =>
-		})
-	}
-	
-	private def compile(states: RobotState, cmd: Command): CompileResult = {
+	private def compileToResult(states: RobotState, cmd: Command): CompileResult = {
 		m_handlers.get(cmd.getClass()) match {
 			case Some(handler) =>
 				val handler = m_handlers(cmd.getClass())
@@ -150,6 +139,8 @@ class Compiler {
 							case Right(cmd1) =>
 								val builder = new StateBuilder(states)
 								cmd2.updateState(builder)
+								//println("cmd: "+cmd2.getClass().getName())
+								//println("result: "+builder.toImmutable.map.filter(!_._1.isInstanceOf[Well]))
 								CompileFinal(cmd2, cmd1, builder.toImmutable)
 						}
 					case _ =>
@@ -159,6 +150,13 @@ class Compiler {
 				}
 		}
 	}
+	
+	/*private def addKnowledge(kb: KnowledgeBase, cmds: Seq[Command]) {
+		cmds.foreach(_ match {
+			case cmd4: CommandL4 => cmd4.addKnowledge(kb)
+			case _ =>
+		})
+	}*/
 	
 	private def callHandlerCompile(state0: RobotState, handler: CommandCompiler, cmd: Command): CompileResult = {
 		handler match {

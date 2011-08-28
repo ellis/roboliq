@@ -29,7 +29,6 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, val cmd: L3C_Pipette) extends L3P_PipetteMixBase {
 	type CmdType = L3C_Pipette
 
-	val compiler = ctx.compiler
 	val args = cmd.args
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
 	

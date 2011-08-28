@@ -20,6 +20,7 @@ object Main extends App {
 		val p = new ParserFile
 		
 		//p.DefineRack($DITI_WASTE,1,6,8,12, 0) ;
+		p.DefineRack("WASTE",1,6,8,12,0) ;
 		p.DefineRack("CSL",2,0,1,8, 5000000,"Carousel MTP") ;
 		p.DefineRack("TS4",15,0,1,16, 5000000) ;
 		p.DefineRack("TS5",16,0,1,16, 5000000) ;
@@ -164,7 +165,7 @@ object Main extends App {
 	}
 
 	private def createCompiler(kb: KnowledgeBase): Compiler = {
-		val pipetter = new PipetteDeviceGeneric()
+		val pipetter = new WeizmannPipetteDevice()
 		pipetter.addKnowledge(kb)
 		
 		val plateDeconAspirate, plateDeconDispense = new Plate
@@ -200,6 +201,7 @@ object Main extends App {
 		val evowareTranslator = new EvowareTranslator(evowareMapper)
 		evowareTranslator.translate(cmds1) match {
 			case Left(errs) =>
+				println(errs)
 			case Right(cmds0) => cmds0.foreach(println)
 		}
 	}

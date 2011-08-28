@@ -27,11 +27,13 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		def drop() {
 			val st = state
 			map(thisObj) = state.conf.createState0(None)
+			//println("DROP tip "+thisObj.index+": sType = "+state.sType_?)
 		}
 		
 		def get(sType: String) {
 			val st = state
 			map(thisObj) = st.copy(sType_? = Some(sType))
+			//println("tip "+thisObj.index+": sType = "+state.sType_?)
 		}
 		
 		def aspirate(liquid2: Liquid, nVolume2: Double) {

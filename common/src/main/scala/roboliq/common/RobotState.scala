@@ -16,5 +16,5 @@ class RobotState(val map: Map[Obj, ObjState]) {
 class StateBuilder(states: RobotState) {
 	val map = HashMap[Obj, ObjState](states.map.toSeq : _*)
 	
-	val toImmutable = new RobotState(Map(map.toSeq : _*))
+	def toImmutable: RobotState = new RobotState(map.toMap)
 }
