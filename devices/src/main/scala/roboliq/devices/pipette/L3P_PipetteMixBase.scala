@@ -76,6 +76,30 @@ private trait L3P_PipetteMixBase {
 	}
 	
 	protected def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]]
+
+	/** Create temporary tip state objects and associate them with the source liquid */
+	protected def createTemporaryTipStates(stateCycle0: RobotState, mapTipToType: Map[TipConfigL2, String], mapTipToSrcLiquid: Map[TipConfigL2, Liquid], tws0: Seq[TipWell]): HashMap[Tip, TipStateL2] = {
+		// Create temporary tip state objects and associate them with the source liquid
+		val tipStates = new HashMap[Tip, TipStateL2]
+		tws0.foreach(tw => {
+			// Create clean tip state from stateCycle0
+			val tipState0 = tw.tip.obj.state(stateCycle0)
+			val tipState = tw.tip.createState0(tipState0.sType_?)
+			tipStates(tw.tip.obj) = tipState
+			
+			val tipWriter = tw.tip.obj.stateWriter(tipStates)
+			// Get proper tip
+			if (robot.areTipsDisposable)
+				tipWriter.get(mapTipToType(tw.tip))
+			// Associate liquid by "aspirating" 0 ul of it
+			mapTipToSrcLiquid.get(tw.tip) match {
+				case Some(liquid) => tipWriter.aspirate(liquid, 0)
+				case _ =>
+			}
+		})
+		tipStates
+	}
+	
 	
 	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L2A_SpirateItem], tipStates: HashMap[Tip, TipStateL2]) {
 		// Add volumes to amount required in tips

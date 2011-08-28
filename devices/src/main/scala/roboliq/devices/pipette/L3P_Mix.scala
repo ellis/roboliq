@@ -59,17 +59,11 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 			// First tip/dest pairs for dispense
 			val tws0 = twss.head
 			
-			// Associate source liquid with tip
-			val tipStates = new HashMap[Tip, TipStateL2]
-			tws0.foreach(tw => {
-				val srcState = tw.well.obj.state(stateCycle0)
-				val tipState0 = tw.tip.obj.state(stateCycle0)
-				val tipState = tw.tip.createState0(tipState0.sType_?)
-				tipStates(tw.tip.obj) = tipState
-			})
-			
 			clean(cycle, mapTipToType, tipOverrides, cycles.isEmpty, tws0, Seq())
 
+			// Create temporary tip state objects and associate them with the source liquid
+			val tipStates: HashMap[Tip, TipStateL2] = createTemporaryTipStates(stateCycle0, mapTipToType, Map(), tws0)
+			
 			//
 			// First mix
 			//
@@ -129,7 +123,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 			val dest = tw.well
 			val item = mapDestToItem(dest)
 			val liquid = dest.obj.state(cycle.state0).liquid
-			val tipState = tip.obj.state(cycle.state0)
+			val tipState = tipStates(tip.obj)
 			val nMin = robot.getTipAspirateVolumeMin(tipState, liquid)
 			val nMax = robot.getTipHoldVolumeMax(tipState, liquid)
 			val nTipVolume = -tipStates(tip.obj).nVolume

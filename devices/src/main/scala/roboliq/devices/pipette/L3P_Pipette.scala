@@ -67,24 +67,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			// Clean
 			val twsA = srcs0.map(pair => new TipWell(pair._1, pair._2.head)).toSeq
 			clean(cycle, mapTipToType, tipOverrides, cycles.isEmpty, twsA, tws0)
-			
+
 			// Create temporary tip state objects and associate them with the source liquid
-			val tipStates = new HashMap[Tip, TipStateL2]
-			tws0.foreach(tw => {
-				// Create clean tip state from stateCycle0
-				val tipState0 = tw.tip.obj.state(stateCycle0)
-				val tipState = tw.tip.createState0(tipState0.sType_?)
-				tipStates(tw.tip.obj) = tipState
-				
-				val tipWriter = tw.tip.obj.stateWriter(tipStates)
-				// Get proper tip
-				if (robot.areTipsDisposable)
-					tipWriter.get(mapTipToType(tw.tip))
-				// Associate liquid by "aspirating" 0 ul of it
-				val item = mapDestToItem(tw.well)
-				val srcState = item.srcs.head.obj.state(stateCycle0)
-				tipWriter.aspirate(srcState.liquid, 0)
-			})
+			val mapTipToSrcLiquid = tws0.map(tw => tw.tip -> mapDestToItem(tw.well).srcs.head.obj.state(stateCycle0).liquid).toMap
+			val tipStates: HashMap[Tip, TipStateL2] = createTemporaryTipStates(stateCycle0, mapTipToType, mapTipToSrcLiquid, tws0)
 
 			//
 			// First dispense
@@ -97,7 +83,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
 			val twssRest = twss.tail.dropWhile(tws => {
 				// each tip still has the same set of source wells
-				tws.forall(tw => mapDestToItem(tw.well).srcs == srcs0(tw.tip)) &&
+				tws.forall(tw => mapDestToItem(tw.well).srcs == srcs0.getOrElse(tw.tip, Set())) &&
 				// dispense does not require cleaning
 				checkNoCleanRequired(cycle, tipStates, tws) &&
 				// dispense was possible without error

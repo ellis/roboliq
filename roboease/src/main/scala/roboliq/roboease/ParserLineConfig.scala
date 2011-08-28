@@ -35,7 +35,7 @@ class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
 		//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
 		
 		// Create liquid with given name
-		val liq = new Liquid(id, true, false, false, false, false)
+		val liq = new Liquid(id, true, false, Set())
 		kb.addLiquid(liq)
 		//println("setReagent(): liq = "+liq)
 		

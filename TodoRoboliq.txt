@@ -70,13 +70,15 @@ x	L2C_Clean
 x	create evoware translator for existing L1 commands
 x	figure out how to clean BSSE tips
 	devices: add bTipPermanent to Tip or TipConfig
-.	devices: add sTipType to TipState
+x	devices: add sTipType to TipState
 .	devices: PipetteDevice: return aspirate/dispense volumes based on tip type
 	devices: set initial tip state in BSSE pipette device
-.	devices: set tip state in DROP and GET commands
-.	devices: L*_GetTip/L*_DropTip
-5	devices: L3P_Clean_Discardable for cleaning Weizmann tips
-6	devices: L3P_Pipette: update to accommodate tip disposal
+x	devices: set tip state in DROP and GET commands
+x	devices: L*_GetTip/L*_DropTip
+x	devices: L3P_Clean_Discardable for cleaning Weizmann tips
+x	devices: L3P_Pipette: update to accommodate tip disposal
+	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
+	devices: set tip type in TipState for fixed tips
 	devices: implement mixing option in L3P_Pipette
 x	evoware: L*_GetTip/L*_DropTip
 x	roboease: accumulate commands and send them though the compiler
