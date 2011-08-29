@@ -10,10 +10,25 @@ import roboliq.commands.pipette._
 
 
 object PipetteHelper {
+	def chooseTipWellPairsAll(states: RobotState, tips: SortedSet[TipConfigL2], dests: SortedSet[WellConfigL2]): Seq[Seq[TipWell]] = {
+		println("chooseTipWellPairsAll()")
+		println("tips: "+tips)
+		println("dests: "+dests)
+		val twss = new ArrayBuffer[Seq[TipWell]]
+		var destsRemaining = dests
+		var twsPrev = Nil
+		while (!destsRemaining.isEmpty) {
+			val tws = chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev)
+			twss += tws
+			destsRemaining --= tws.map(_.well)
+		}
+		twss
+	}
+
 	def chooseTipWellPairsNext(states: RobotState, tips: SortedSet[TipConfigL2], wells: SortedSet[WellConfigL2], twsPrev: Seq[TipWell]): Seq[TipWell] = {
-		//println("chooseTipWellPairsNext()")
-		//println("tips: "+tips)
-		//println("wells: "+wells)
+		println("chooseTipWellPairsNext()")
+		println("tips: "+tips)
+		println("wells: "+wells)
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
@@ -25,17 +40,25 @@ object PipetteHelper {
 		val iColTip0 = 0
 		val iRowWell0 = well0.index % holder.nRows
 		val iColWell0 = well0.index / holder.nRows
+		
+		// FIXME: For debug only
+		val b1 = (holder.sLabel == "Rotem_STK3")
+		if (b1)
+			holder.toString
+		// ENDFIX
 
 		val pairs = new ArrayBuffer[TipWell]
 		pairs += new TipWell(tip0, well0)
+		println(well0.index+" START")
 		for (tip <- tips.tail) {
 			val dRowTip = tip.index - tip0.index
-			val iRowWell = iRowWell0 + dRowTip
-			val iColWell = iColWell0
-			val iWell = iColWell * holder.nRows + iRowWell
-			wellsOnHolder.find(_.index == iWell) match {
-				case None =>
-				case Some(well) => pairs += new TipWell(tip, well)
+			val iWell = well0.index + dRowTip
+			val iColWell = iWell / holder.nRows
+			if (iColWell == iColWell0) {
+				wellsOnHolder.find(_.index == iWell) match {
+					case None => if (b1) println(iWell+" N")
+					case Some(well) => pairs += new TipWell(tip, well); if (b1) println(iWell+" Y")
+				}
 			}
 		}
 		pairs.toSeq
@@ -96,21 +119,6 @@ object PipetteHelper {
 		checkCol(iCol0)
 	}
 
-	def chooseTipWellPairsAll(states: RobotState, tips: SortedSet[TipConfigL2], dests: SortedSet[WellConfigL2]): Seq[Seq[TipWell]] = {
-		//println("chooseTipWellPairsAll()")
-		//println("tips: "+tips)
-		//println("dests: "+dests)
-		val twss = new ArrayBuffer[Seq[TipWell]]
-		var destsRemaining = dests
-		var twsPrev = Nil
-		while (!destsRemaining.isEmpty) {
-			val tws = chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev)
-			twss += tws
-			destsRemaining --= tws.map(_.well)
-		}
-		twss
-	}
-
 	def process[T, T2](items: Iterable[T], acc: Seq[Seq[T2]], fn: Iterable[T] => Tuple2[Iterable[T], Seq[T2]]): Seq[Seq[T2]] = {
 		if (items.isEmpty)
 			acc
@@ -123,6 +131,87 @@ object PipetteHelper {
 		}
 	}
 
+	def chooseAdjacentWellsByVolume(states: RobotState, wells: Set[WellConfigL2], nCount: Int): SortedSet[WellConfigL2] = {
+		if (nCount <= 0 || wells.isEmpty)
+			return SortedSet()
+		
+		// sort the sources by volume descending (secondary sort key is index order)
+		// TRUE means that well1 should be placed before well2
+		def compare(well1: WellConfigL2, well2: WellConfigL2): Boolean = {
+			val a = well1.obj.state(states)
+			val b = well2.obj.state(states)
+			if (a.nVolume == b.nVolume)
+				well1.index < well2.index
+			else
+				a.nVolume > b.nVolume
+		}
+		val order = wells.toSeq.sortWith(compare)
+		
+		println("step0: "+nCount+","+wells)
+		chooseAdjacentWellsByVolume_Step1(order, nCount)
+	}
+	
+	private def chooseAdjacentWellsByVolume_Step1(order: Seq[WellConfigL2], nCount: Int): SortedSet[WellConfigL2] = {
+		val wellsAll = chooseAdjacentWellsByVolume_Step2(order, nCount) match {
+			case Seq() =>
+				Set()
+			case wells =>
+				val order1 = order.filter(well => !wells.contains(well))
+				val nCount1 = nCount - wells.size
+				if (nCount1 > 0 && !order1.isEmpty) {
+					wells ++ chooseAdjacentWellsByVolume_Step2(order1, nCount1)
+				}
+				else
+					wells
+		}
+		println("step1: "+SortedSet(wellsAll.toSeq : _*))
+		SortedSet(wellsAll.toSeq : _*)
+	}
+
+	private def chooseAdjacentWellsByVolume_Step2(order: Seq[WellConfigL2], nCount: Int): Set[WellConfigL2] = {
+		if (nCount <= 0 || order.isEmpty)
+			return Set()
+
+		val well0 = order.head
+		if (nCount == 1) {
+			println("step2: "+well0)
+			return Set(well0)
+		}
+		
+		val holder0 = well0.holder
+		val iCol0 = well0.index / holder0.nRows
+		var iRowTop = well0.index % holder0.nRows
+		var iRowBot = iRowTop
+		def isAboveOrBelow(well: WellConfigL2): Boolean = {
+			if (well.holder ne holder0)
+				return false
+			val iCol = well.index / holder0.nRows
+			if (iCol != iCol0)
+				return false
+			val iRow = well.index % holder0.nRows
+			(iRow == iRowTop - 1 || iRow == iRowBot + 1)
+		}
+		
+		val wells = new ArrayBuffer[WellConfigL2]
+		wells += well0
+		var wellsInCol = order.filter(well => well.ne(well0) && well.iCol == iCol0)
+		def step() {
+			wellsInCol.find(isAboveOrBelow) match {
+				case None =>
+				case Some(well) =>
+					wells += well
+					wellsInCol = wellsInCol.filter(_ ne well)
+					iRowTop = math.min(iRowTop, well.index)
+					iRowBot = math.max(iRowBot, well.index)
+					if (wells.size < nCount)
+						step()
+			}
+		}
+		step()
+		println("step2: "+wells.sortBy(_.index))
+		SortedSet(wells : _*)
+	}
+	
 	def chooseTipSrcPairs(states: RobotState, tips: SortedSet[TipConfigL2], srcs: SortedSet[WellConfigL2]): Seq[Seq[TipWell]] = {
 		// Cases:
 		// Case 1: tips size == srcs size:

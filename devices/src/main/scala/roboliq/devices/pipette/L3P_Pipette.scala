@@ -174,10 +174,18 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	private def dispense_createTwvps(cycle: CycleState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_SpirateItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
-			val item = mapDestToItem(tw.well)
-			val tipState = tipStates(tw.tip.obj)
-			val wellState = tw.well.obj.state(cycle.state0)
-			robot.getDispensePolicy(tipState, wellState, item.nVolume)
+			cmd.args.sDispenseClass_? match {
+				case None =>
+					val item = mapDestToItem(tw.well)
+					val tipState = tipStates(tw.tip.obj)
+					val wellState = tw.well.obj.state(cycle.state0)
+					robot.getDispensePolicy(tipState, wellState, item.nVolume)
+				case Some(sLiquidClass) =>
+					robot.getPipetteSpec(sLiquidClass) match {
+						case None => None
+						case Some(spec) => Some(new PipettePolicy(spec.sName, spec.dispense))
+					}
+			}
 		})
 		if (policies_?.forall(_.isDefined)) {
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {
@@ -201,17 +209,8 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	
 	private def aspirateLiquid(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], srcs: Set[WellConfigL2]): Option[String] = {
 		// Get list of tips which require aspiration	
-		var tips = SortedSet[TipConfigL2]() ++ tipStates.values.map(_.conf)
-
-		// sort the sources by volume descending (secondary sort key is index order)
-		def order(well1: WellConfigL2, well2: WellConfigL2): Boolean = {
-			val a = well1.obj.state(cycle.state0)
-			val b = well2.obj.state(cycle.state0)
-			(a.nVolume > b.nVolume) || (a.nVolume == b.nVolume && well1.index < well2.index)
-		}
-		// keep the top tips.size() entries ordered by index
-		val srcs2 = SortedSet[WellConfigL2](srcs.toSeq.sortWith(order).take(tips.size) : _*)
-		val pairs = srcs2.toSeq zip tips.toSeq
+		val tips = SortedSet(tipStates.values.map(_.conf).toSeq : _*)
+		val srcs2 = PipetteHelper.chooseAdjacentWellsByVolume(cycle.state0, srcs, tips.size)
 	
 		val twss0 = PipetteHelper.chooseTipSrcPairs(cycle.state0, tips, srcs2)
 		var sError_? : Option[String] = None
@@ -243,9 +242,17 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	private def aspirate_createTwvps(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Either[String, Seq[L2A_SpirateItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
-			val tipState = tipStates(tw.tip.obj)
-			val srcState = tw.well.obj.state(cycle.state0)
-			robot.getAspiratePolicy(tipState, srcState)
+			cmd.args.sAspirateClass_? match {
+				case None =>
+					val tipState = tipStates(tw.tip.obj)
+					val srcState = tw.well.obj.state(cycle.state0)
+					robot.getAspiratePolicy(tipState, srcState)
+				case Some(sLiquidClass) =>
+					robot.getPipetteSpec(sLiquidClass) match {
+						case None => None
+						case Some(spec) => Some(new PipettePolicy(spec.sName, spec.aspirate))
+					}
+			}
 		})
 		if (policies_?.forall(_.isDefined)) {
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => {

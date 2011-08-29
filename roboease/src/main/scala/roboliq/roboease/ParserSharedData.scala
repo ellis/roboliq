@@ -10,6 +10,7 @@ class ParserSharedData {
 	val kb = new KnowledgeBase
 	val mapRacks = new HashMap[String, Rack]
 	val mapLiquids = new HashMap[String, Liquid]
+	val mapDefaultLiquidClass = new HashMap[Liquid, String]
 	val mapVars = new HashMap[String, String]
 	val mapLists = new HashMap[String, List[String]]
 	val mapOptions = new HashMap[String, String]

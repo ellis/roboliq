@@ -154,8 +154,8 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 					val wellState = tw.well.obj.state(cycle.state0)
 					val item = mapDestToItem(tw.well)
 					robot.getDispensePolicy(tipState, wellState, item.nVolume)
-				case Some(sMixClass) =>
-					robot.getPipetteSpec(sMixClass) match {
+				case Some(sLiquidClass) =>
+					robot.getPipetteSpec(sLiquidClass) match {
 						case None => None
 						case Some(spec) => Some(new PipettePolicy(spec.sName, spec.mix))
 					}

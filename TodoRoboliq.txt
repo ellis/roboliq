@@ -63,54 +63,24 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-x	split devices project into commands and devices
-x	L1C_Wash
-x	L*C_Mix
-x	L2C_Clean
-x	create evoware translator for existing L1 commands
-x	figure out how to clean BSSE tips
 	devices: add bTipPermanent to Tip or TipConfig
-x	devices: add sTipType to TipState
-.	devices: PipetteDevice: return aspirate/dispense volumes based on tip type
 	devices: set initial tip state in BSSE pipette device
-x	devices: set tip state in DROP and GET commands
-x	devices: L*_GetTip/L*_DropTip
-x	devices: L3P_Clean_Discardable for cleaning Weizmann tips
-x	devices: L3P_Pipette: update to accommodate tip disposal
-x	devices: L3P_Pipette/L*_TipsGet: drop all used tips if we won't need then anymore, even if the next aspirate only uses some tips
-	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
+x	devices: L3P_Pipette: use liquid class overrides
+2	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
+3	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 	devices: set initial tip type in TipState for fixed tips
-	devices: implement mixing option in L3P_Pipette
-x	evoware: L*_GetTip/L*_DropTip
-x	roboease: accumulate commands and send them though the compiler
-x	roboease: LABWARE
-x	roboease: MIX
+	devices: L3P_Pipette: implement mixing option
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts
 	roboease: TRANSFER
 	roboease: TABLE
 	roboease: add comments about tip usage to output
 	roboease: somehow add default liquid class to a liquid (for example, add a Map[Liquid, String] to WeizmannPipetteDevice)
-x	roboease-evoware: create project
-x	roboease-evoware: translate final commands to Evoware output
-x	roboease-evoware: copy and update test program from roboease project
-x	roboease-evoware: WeizmannPipetteDevice: use proper tip names, e.g. "DiTi 200ul"
-x	roboease-evoware: Wash: why is wash volume always "0" in Mix section?
-x	roboease-evoware: Wash: get other parameter values from evolab scripts
-x	roboease-evoware: Wash: add an emulation mode in order to output same string as roboease
-x	roboease-evoware: check whether 200ul tips automatically get chosen when pipetting 150ul in Rotem_Script01.esc
-x	roboease-evoware: Mix: use liquid class from MIX_WELLS
-x	roboease-evoware: Mix: second to last parameter should be 15 instead of 0?
-7	roboease-evoware: pipette: default tip policy of always discarding
-8	roboease-evoware: pipette: not dispensing to proper wells in Rotem_Script01.esc
+	roboease-evoware: pipette: default tip policy of always discarding
 	roboease-evoware: print out appropriate header
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
-x	have robot decide on Aspiration/Dispense strategy for T1 tokens
-x	each T2 token produces a sequence of T1 tokens
-x	robot tells which tips can be used in batch for a particular token
-x	setup unit tests for sbt
 	Device and compilation concepts:
 		Compiler
 		CommandCompiler

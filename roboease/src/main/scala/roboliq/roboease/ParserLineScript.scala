@@ -49,7 +49,12 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				wells2.map(_ -> volumes.head)
 		}
 		
-		val sLiquidClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
+		val sLiquidClass_? = {
+			if (sLiquidClass == "DEFAULT")
+				shared.mapDefaultLiquidClass.get(liq)
+			else
+				Some(sLiquidClass)
+		}
 		
 		val items = wvs.map(pair => {
 			val (well, nVolume) = pair
@@ -97,7 +102,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			sMixClass_? = sLiquidClass_?
 			)
 		val cmd = L4C_Mix(args)
-		addRunCommand(cmd)
+		//addRunCommand(cmd)
 	}
 	
 	def run_PROMPT(s: String) {

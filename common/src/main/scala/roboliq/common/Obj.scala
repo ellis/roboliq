@@ -176,11 +176,15 @@ class WellConfigL2(
 	val index: Int
 ) extends ObjConfig with Ordered[WellConfigL2] { thisConf =>
 	type State = WellStateL2
+	
+	def iCol = index / holder.nRows
+	def iRow = index % holder.nRows
 
 	override def compare(that: WellConfigL2): Int = {
-		val d1 = holder.hashCode() - that.holder.hashCode()
-		if (d1 == 0) index - that.index
-		else d1
+		holder.compare(that.holder) match {
+			case 0 => index - that.index
+			case n => n
+		}
 	}
 	
 	override def toString = sLabel
@@ -257,7 +261,8 @@ class PlateConfigL2(
 	val nCols: Int,
 	val nWells: Int,
 	val wells: Seq[Well]
-) extends ObjConfig {
+) extends ObjConfig with Ordered[PlateConfigL2] {
+	override def compare(that: PlateConfigL2) = sLabel.compare(that.sLabel)
 	override def toString = sLabel
 }
 
