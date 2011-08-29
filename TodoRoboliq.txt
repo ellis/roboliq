@@ -77,7 +77,7 @@ x	devices: set tip state in DROP and GET commands
 x	devices: L*_GetTip/L*_DropTip
 x	devices: L3P_Clean_Discardable for cleaning Weizmann tips
 x	devices: L3P_Pipette: update to accommodate tip disposal
-	devices: L3P_Pipette/L*_TipsGet: drop all used tips if we won't need then anymore, even if the next aspirate only uses some tips
+x	devices: L3P_Pipette/L*_TipsGet: drop all used tips if we won't need then anymore, even if the next aspirate only uses some tips
 	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 	devices: set initial tip type in TipState for fixed tips
 	devices: implement mixing option in L3P_Pipette

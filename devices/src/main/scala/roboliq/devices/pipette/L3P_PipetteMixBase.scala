@@ -24,10 +24,9 @@ private trait L3P_PipetteMixBase {
 		val tips: SortedSet[TipConfigL2]
 		val state0: RobotState
 		
-		val gets = new ArrayBuffer[L3C_TipsGet]
+		val gets = new ArrayBuffer[L3C_TipsReplace]
 		val washs = new ArrayBuffer[L3C_TipsWash]
 		val mixes = new ArrayBuffer[L2C_Mix]
-		val drops = new ArrayBuffer[L3C_TipsGet]
 		
 		var ress: Seq[CompileFinal] = Nil
 
@@ -54,7 +53,7 @@ private trait L3P_PipetteMixBase {
 					lsErrors ++= lsErrors2
 				case Right(Seq()) =>
 				case Right(cycles) =>
-					val cmds1 = cycles.flatMap(_.toTokenSeq)
+					val cmds1 = cycles.flatMap(_.toTokenSeq) ++ dropSeq(tips)
 					ctx.compiler.compile(ctx.states, cmds1) match {
 						case Right(nodes) =>
 							ctx.compiler.scoreNodes(ctx.states, nodes) match {
@@ -157,11 +156,12 @@ private trait L3P_PipetteMixBase {
 				if (replacement > mapTipToReplacement(tw.tip))
 					mapTipToReplacement(tw.tip) = replacement
 			}
-			val getItems = mapTipToReplacement
-					.filter(_._2 == TipReplacementAction.Replace)
-					.map(pair => new L3A_TipsGetItem(pair._1, mapTipToType(pair._1)))
-			if (!getItems.isEmpty)
-				cycle.gets += new L3C_TipsGet(getItems.toSeq) 
+			val getItems = cycle.tips.map(tip => {
+				val replacement = mapTipToReplacement.getOrElse(tip, TipReplacementAction.None)
+				val sType_? = if (replacement == TipReplacementAction.Replace) mapTipToType.get(tip) else None
+				new L3A_TipsReplaceItem(tip, sType_?)
+			})
+			cycle.gets += new L3C_TipsReplace(getItems.toSeq) 
 		}
 		else {
 			val mapTipToWash = new HashMap[TipConfigL2, WashSpec]
@@ -194,6 +194,13 @@ private trait L3P_PipetteMixBase {
 			if (!washItems.isEmpty)
 				cycle.washs += new L3C_TipsWash(washItems.toSeq, intensity)
 		}
+	}
+	
+	private def dropSeq(tips: SortedSet[TipConfigL2]): Seq[L3C_TipsDrop] = {
+		if (robot.areTipsDisposable)
+			Seq(L3C_TipsDrop(tips))
+		else
+			Seq()
 	}
 	
 	protected def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {

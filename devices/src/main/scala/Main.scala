@@ -111,7 +111,7 @@ object Main extends App {
 		val compiler = new Compiler
 		//compiler.register(new L4P_Pipette)
 		//compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
-		compiler.register(new L3P_TipsGet)
+		compiler.register(new L3P_TipsReplace)
 		compiler.register(new L3P_TipsDrop("waste"))
 		compiler.register(new L3P_Pipette(pipetter))
 		//compiler.register(new L2P_Aspirate)

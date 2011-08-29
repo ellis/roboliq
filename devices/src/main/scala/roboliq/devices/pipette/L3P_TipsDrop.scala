@@ -14,6 +14,6 @@ class L3P_TipsDrop(location: String) extends CommandCompilerL3 {
 		if (tips.isEmpty)
 			CompileTranslation(cmd, Seq())
 		else
-			CompileTranslation(cmd, Seq(new L2C_TipsDrop(cmd.tips, location)))
+			CompileTranslation(cmd, Seq(new L2C_TipsDrop(tips, location)))
 	}
 }

@@ -36,7 +36,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	case class SrcTipDestVolume(src: WellConfigL2, tip: TipConfigL2, dest: WellConfigL2, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[TipConfigL2], val state0: RobotState) extends super.CycleState {
-		override def toTokenSeq: Seq[Command] = gets ++ washs ++ mixes ++ drops
+		override def toTokenSeq: Seq[Command] = gets ++ washs ++ mixes
 	}
 	
 	val dests = SortedSet[WellConfigL2](args.items.map(_.well).toSeq : _*)
