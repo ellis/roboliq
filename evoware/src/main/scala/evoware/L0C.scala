@@ -37,25 +37,28 @@ case class L0C_Wash(
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
 	bFastWash: Boolean,
-	bUNKNOWN1: Boolean
+	bUNKNOWN1: Boolean,
+	bEmulateEvolab: Boolean = false
 ) extends Command {
 	override def toString = {
-		val fmt = new java.text.DecimalFormat("#.##")
-		Array(
+		val fmtWaste = new java.text.DecimalFormat("#.##")
+		val fmtCleaner = if (bEmulateEvolab) new java.text.DecimalFormat("#.0") else fmtWaste
+		val l = Seq(
 			mTips,
 			iWasteGrid, iWasteSite,
 			iCleanerGrid, iCleanerSite,
-			'"'+fmt.format(nWasteVolume)+'"',
+			'"'+fmtWaste.format(nWasteVolume)+'"',
 			nWasteDelay,
-			'"'+fmt.format(nCleanerVolume)+'"',
+			'"'+fmtCleaner.format(nCleanerVolume)+'"',
 			nCleanerDelay,
 			nAirgapVolume,
 			nAirgapSpeed,
 			nRetractSpeed,
 			(if (bFastWash) 1 else 0),
 			(if (bUNKNOWN1) 1 else 0),
-			1000,0
-		).mkString("Wash(", ",", ");")
+			1000
+		) ++ (if (bEmulateEvolab) Seq() else Seq(0))
+		l.mkString("Wash(", ",", ");")
 	}
 }
 
