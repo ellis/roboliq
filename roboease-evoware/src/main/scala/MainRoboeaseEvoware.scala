@@ -196,8 +196,7 @@ object Main extends App {
 	}
 	
 	private def translate(p: ParserFile, cmds1: Seq[CommandL1]) {
-		val mapSites = p.racks.map(rack => rack.name -> Site(rack.grid, rack.site)).toMap
-		val evowareMapper = new EvowareMapper(mapSites)
+		val evowareMapper = WeizmannEvowareMapper(p.racks)
 		val evowareTranslator = new EvowareTranslator(evowareMapper)
 		evowareTranslator.translate(cmds1) match {
 			case Left(errs) =>

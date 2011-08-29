@@ -5,6 +5,8 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
 
+import _root_.evoware._
+
 
 class WeizmannPipetteDevice extends PipetteDevice {
 	private val tipSpec10 = new TipSpec("DiTi 10ul", 10, 0, 9)

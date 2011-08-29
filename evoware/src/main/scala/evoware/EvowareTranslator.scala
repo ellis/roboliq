@@ -176,20 +176,25 @@ class EvowareTranslator(mapper: EvowareMapper) {
 	}
 	
 	def wash(cmd: L1C_Wash): Either[Seq[String], Seq[Command]] = {
-		val nWasteVolume = cmd.items.foldLeft(0.0) { (acc, item) => math.max(acc, item.nVolumeInside) }
-		Right(Seq(L0C_Wash(
-			mTips = encodeTips(cmd.items.map(_.tip.obj)),
-			iWasteGrid = 1, iWasteSite = 1,
-			iCleanerGrid = 1, iCleanerSite = 0,
-			nWasteVolume = nWasteVolume,
-			nWasteDelay = 500,
-			nCleanerVolume = 5.0,
-			nCleanerDelay = 500,
-			nAirgapVolume = 10,
-			nAirgapSpeed = 70,
-			nRetractSpeed = 10,
-			bFastWash = false
-			)))
+		mapper.mapWashProgramArgs.get(cmd.iWashProgram) match {
+			case None =>
+				Left(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
+			case Some(args) =>
+				val nWasteVolume = cmd.items.foldLeft(0.0) { (acc, item) => math.max(acc, item.nVolumeInside) }
+				Right(Seq(L0C_Wash(
+					mTips = encodeTips(cmd.items.map(_.tip.obj)),
+					iWasteGrid = args.iWasteGrid, iWasteSite = args.iWasteSite,
+					iCleanerGrid = args.iCleanerGrid, iCleanerSite = args.iCleanerSite,
+					nWasteVolume = args.nWasteVolume_?.getOrElse(nWasteVolume),
+					nWasteDelay = args.nWasteDelay,
+					nCleanerVolume = args.nCleanerVolume,
+					nCleanerDelay = args.nCleanerDelay,
+					nAirgapVolume = args.nAirgapVolume,
+					nAirgapSpeed = args.nAirgapSpeed,
+					nRetractSpeed = args.nRetractSpeed,
+					bFastWash = args.bFastWash
+					)))
+		}
 	}
 	
 	private def mix(items: Seq[L1A_MixItem]): Either[Seq[String], Seq[Command]] = {
