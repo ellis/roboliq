@@ -201,11 +201,14 @@ class EvowareTranslator(mapper: EvowareMapper) {
 	private def mix(items: Seq[L1A_MixItem]): Either[Seq[String], Seq[Command]] = {
 		items match {
 			case Seq() => Left(Seq("Empty Tip-Well-Volume list"))
-			case Seq(tw0, rest @ _*) =>
+			case Seq(item0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass = tw0.policy.sName
+				val sLiquidClass = item0.policy.sName
 				// Assert that there is only one liquid class
-				assert(rest.forall(_.policy.sName == sLiquidClass))
+				if (rest.exists(_.policy.sName != sLiquidClass))
+					return Left(Seq("INTERNAL: Liquid class must be the same for all mix items"))
+				if (rest.exists(_.nCount != item0.nCount))
+					return Left(Seq("INTERNAL: Mix count must be the same for all mix items"))
 				
 				// Assert that all tips are of the same kind and that all wells are on the same holder
 				// TODO: re-add this check
@@ -227,7 +230,7 @@ class EvowareTranslator(mapper: EvowareMapper) {
 						}
 				}
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				assert(equidistant(items) || items.forall(_.well eq tw0.well))
+				assert(equidistant(items) || items.forall(_.well eq item0.well))
 				
 				mixChecked(items, sLiquidClass)
 		}
@@ -258,7 +261,8 @@ class EvowareTranslator(mapper: EvowareMapper) {
 					mTips, sLiquidClass,
 					asVolumes,
 					iGrid, iSite,
-					sPlateMask
+					sPlateMask,
+					item0.nCount
 				)))
 		}
 	}

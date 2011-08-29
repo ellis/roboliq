@@ -97,9 +97,10 @@ x	roboease-evoware: copy and update test program from roboease project
 x	roboease-evoware: WeizmannPipetteDevice: use proper tip names, e.g. "DiTi 200ul"
 x	roboease-evoware: Wash: why is wash volume always "0" in Mix section?
 x	roboease-evoware: Wash: get other parameter values from evolab scripts
+6	roboease-evoware: Wash: add an emulation mode in order to output same string as roboease
 x	roboease-evoware: check whether 200ul tips automatically get chosen when pipetting 150ul in Rotem_Script01.esc
 x	roboease-evoware: Mix: use liquid class from MIX_WELLS
-6	roboease-evoware: Mix: second to last parameter should be 15 instead of 0?
+x	roboease-evoware: Mix: second to last parameter should be 15 instead of 0?
 7	roboease-evoware: pipette: default tip policy of always discarding
 8	roboease-evoware: pipette: not dispensing to proper wells in Rotem_Script01.esc
 	roboease-evoware: print out appropriate header

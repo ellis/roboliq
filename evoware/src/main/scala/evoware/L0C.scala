@@ -65,7 +65,8 @@ case class L0C_Mix(
 	val asVolumes: Seq[String],
 	val iGrid: Int,
 	val iSite: Int,
-	val sPlateMask: String
+	val sPlateMask: String,
+	val nCount: Int
 ) extends Command {
 	override def toString = {
 		Array(
@@ -73,9 +74,9 @@ case class L0C_Mix(
 			'"'+sLiquidClass+'"',
 			asVolumes.mkString(","),
 			iGrid, iSite,
-			1,
+			1, // TODO: Spacing
 			'"'+sPlateMask+'"',
-			0, 0
+			nCount, 0
 		).mkString("Mix(", ",", ");")
 	}
 }
