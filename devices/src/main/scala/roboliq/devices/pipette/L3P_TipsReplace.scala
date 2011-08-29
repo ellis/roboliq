@@ -12,21 +12,20 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
-		val tipsWash = cmd.items.map(_.tip).toSet
-		val cmdWash = new L2C_Wash(tipsWash.toSeq.map(tip => new L2A_WashItem(tip, 0)), 0, WashIntensity.Decontaminate)
+		val tips = cmd.items.map(_.tip)
 		
-		val tipsDrop = tipsWash.filter(tip => tip.obj.state(ctx.states).sType_?.isDefined)
+		val tipsWash = tips.filter(tip => tip.obj.state(ctx.states).cleanDegree == WashIntensity.None)
+		val cmdWash = new L2C_Wash(tipsWash.map(tip => new L2A_WashItem(tip, 0)), 0, WashIntensity.Decontaminate)
+		
+		val tipsDrop = tips.filter(tip => tip.obj.state(ctx.states).sType_?.isDefined).toSet
 		val cmdDrop = L3C_TipsDrop(tipsDrop)
 
-		val itemss = cmd.items.groupBy(_.sType_?)
+		val itemsGet = cmd.items.filter(_.sType_?.isDefined)
+		val itemss = itemsGet.groupBy(_.sType_?.get)
 		val cmdsGet2 = itemss.toSeq.flatMap(pair => {
-			val (sType_?, items) = pair
-			sType_? match {
-				case None => Seq()
-				case Some(sType) =>
-					val tips= items.map(_.tip).toSet
-					Seq(L2C_TipsGet(tips, sType))
-			}
+			val (sType, items) = pair
+			val tips = items.map(_.tip).toSet
+			Seq(L2C_TipsGet(tips, sType))
 		})
 		
 		val cmds2 = {
