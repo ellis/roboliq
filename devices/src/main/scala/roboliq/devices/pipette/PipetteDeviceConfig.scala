@@ -4,7 +4,7 @@ import scala.collection.immutable.SortedSet
 
 import roboliq.commands.pipette._
 
-class TipSpec(val sName: String, val nVolume: Double)
+class TipSpec(val sName: String, val nVolume: Double, val nVolumeAspirateMin: Double, val nVolumeHoldMax: Double)
 
 class PipetteDeviceConfig(
 	val tipSpecs: Seq[TipSpec],

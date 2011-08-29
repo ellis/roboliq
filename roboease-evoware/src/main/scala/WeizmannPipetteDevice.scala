@@ -7,22 +7,25 @@ import roboliq.devices.pipette._
 
 
 class WeizmannPipetteDevice extends PipetteDevice {
-	private val tipSpec50 = new TipSpec("50", 50)
-	private val tipSpec1000 = new TipSpec("1000", 1000)
+	private val tipSpec10 = new TipSpec("DiTi 10ul", 10, 0, 9)
+	private val tipSpec20 = new TipSpec("DiTi 20ul", 20, 0, 18)
+	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 1, 45)
+	private val tipSpec200 = new TipSpec("DiTi 200ul", 200, 2, 190)
+	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 960)
+	private val tipSpecs = Seq(tipSpec10, tipSpec20, tipSpec50, tipSpec200, tipSpec1000)
 	val config = new PipetteDeviceConfig(
-		tipSpecs = Seq(tipSpec50, tipSpec1000),
+		tipSpecs = tipSpecs,
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
-		tipGroups = Seq(
-				(0 to 7).map(i => i -> tipSpec50),
-				(0 to 7).map(i => i -> tipSpec1000)
-				)
+		tipGroups = tipSpecs.map(spec => (0 to 7).map(i => i -> spec))
 	)
+	private val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
+
 	def areTipsDisposable: Boolean = true
 	def addKnowledge(kb: KnowledgeBase) = {
 		config.tips.foreach(kb.addObject)
 	}
-	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = 0
-	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => s.toDouble }
+	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeAspirateMin }
+	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeHoldMax }
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well

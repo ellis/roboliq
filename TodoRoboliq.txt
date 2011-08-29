@@ -77,7 +77,7 @@ x	devices: set tip state in DROP and GET commands
 x	devices: L*_GetTip/L*_DropTip
 x	devices: L3P_Clean_Discardable for cleaning Weizmann tips
 x	devices: L3P_Pipette: update to accommodate tip disposal
-4	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
+	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 	devices: set initial tip type in TipState for fixed tips
 	devices: implement mixing option in L3P_Pipette
 x	evoware: L*_GetTip/L*_DropTip
@@ -93,14 +93,14 @@ x	roboease: MIX
 x	roboease-evoware: create project
 x	roboease-evoware: translate final commands to Evoware output
 x	roboease-evoware: copy and update test program from roboease project
-	roboease-evoware: WeizmannPipetteDevice: use proper tip names, e.g. "DiTi 200ul"
-	roboease-evoware: Wash: why is wash volume always "0" in Mix section?
-	roboease-evoware: Wash: get other parameter values from evolab scripts
-	roboease-evoware: check whether 200ul tips automatically get chosen when pipetting 150ul in Rotem_Script01.esc
-	roboease-evoware: Mix: use liquid class from MIX_WELLS
-	roboease-evoware: Mix: second to last parameter should be 15 instead of 0?
-	roboease-evoware: pipette: default tip policy of always discarding
-	roboease-evoware: pipette: not dispensing to proper wells in Rotem_Script01.esc
+x	roboease-evoware: WeizmannPipetteDevice: use proper tip names, e.g. "DiTi 200ul"
+2	roboease-evoware: Wash: why is wash volume always "0" in Mix section?
+3	roboease-evoware: Wash: get other parameter values from evolab scripts
+4	roboease-evoware: check whether 200ul tips automatically get chosen when pipetting 150ul in Rotem_Script01.esc
+5	roboease-evoware: Mix: use liquid class from MIX_WELLS
+6	roboease-evoware: Mix: second to last parameter should be 15 instead of 0?
+7	roboease-evoware: pipette: default tip policy of always discarding
+8	roboease-evoware: pipette: not dispensing to proper wells in Rotem_Script01.esc
 	roboease-evoware: print out appropriate header
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
