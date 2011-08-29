@@ -16,6 +16,7 @@ trait PipetteDevice {
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */
 	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double
+	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec]
 	/** Choose aspirate method */
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy]
 	/** Choose dispense method */
@@ -45,6 +46,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	}
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = 0
 	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => s.toDouble }
+	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = None
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well

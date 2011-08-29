@@ -148,17 +148,25 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	private def mix_createItems(cycle: CycleState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_MixItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
-			val tipState = tipStates(tw.tip.obj)
-			val wellState = tw.well.obj.state(cycle.state0)
-			val item = mapDestToItem(tw.well)
-			robot.getDispensePolicy(tipState, wellState, item.nVolume)
+			cmd.args.sMixClass_? match {
+				case None =>
+					val tipState = tipStates(tw.tip.obj)
+					val wellState = tw.well.obj.state(cycle.state0)
+					val item = mapDestToItem(tw.well)
+					robot.getDispensePolicy(tipState, wellState, item.nVolume)
+				case Some(sMixClass) =>
+					robot.getPipetteSpec(sMixClass) match {
+						case None => None
+						case Some(spec) => Some(new PipettePolicy(spec.sName, spec.mix))
+					}
+			}
 		})
 		if (policies_?.forall(_.isDefined)) {
 			val twvps = (tws zip policies_?.map(_.get)).map(pair => mix_createItem(cycle, pair._1, pair._2))
 			Right(twvps)
 		}
 		else {
-			Left("No appropriate dispense policy available")
+			Left("INTERNAL: No appropriate mix policy available")
 		}
 	}
 	

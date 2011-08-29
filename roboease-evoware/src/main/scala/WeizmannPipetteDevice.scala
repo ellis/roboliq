@@ -21,6 +21,11 @@ class WeizmannPipetteDevice extends PipetteDevice {
 		tipGroups = tipSpecs.map(spec => (0 to 7).map(i => i -> spec))
 	)
 	private val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
+	private val mapPipetteSpecs = Seq(
+			PipetteSpec("PIE_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
+			PipetteSpec("PIE_TROUGH_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
+			PipetteSpec("PIE_MIX_AUT", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact)
+			).map(spec => spec.sName -> spec).toMap
 
 	def areTipsDisposable: Boolean = true
 	def addKnowledge(kb: KnowledgeBase) = {
@@ -28,6 +33,7 @@ class WeizmannPipetteDevice extends PipetteDevice {
 	}
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeAspirateMin }
 	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeHoldMax }
+	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well

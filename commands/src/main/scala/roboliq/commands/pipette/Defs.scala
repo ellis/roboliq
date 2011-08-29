@@ -55,6 +55,8 @@ object PipettePosition extends Enumeration {
 	val Free, WetContact, DryContact = Value
 }
 
+case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense: PipettePosition.Value, mix: PipettePosition.Value)
+
 case class PipettePolicy(sName: String, pos: PipettePosition.Value)
 
 object TipReplacementAction extends Enumeration { // FIXME: Replace this with TipReplacementPolicy following Roboease

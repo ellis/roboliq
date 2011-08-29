@@ -192,7 +192,8 @@ class EvowareTranslator(mapper: EvowareMapper) {
 					nAirgapVolume = args.nAirgapVolume,
 					nAirgapSpeed = args.nAirgapSpeed,
 					nRetractSpeed = args.nRetractSpeed,
-					bFastWash = args.bFastWash
+					bFastWash = args.bFastWash,
+					bUNKNOWN1 = args.bUNKNOWN1
 					)))
 		}
 	}

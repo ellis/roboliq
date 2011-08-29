@@ -77,6 +77,7 @@ x	devices: set tip state in DROP and GET commands
 x	devices: L*_GetTip/L*_DropTip
 x	devices: L3P_Clean_Discardable for cleaning Weizmann tips
 x	devices: L3P_Pipette: update to accommodate tip disposal
+	devices: L3P_Pipette/L*_TipsGet: drop all used tips if we won't need then anymore, even if the next aspirate only uses some tips
 	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 	devices: set initial tip type in TipState for fixed tips
 	devices: implement mixing option in L3P_Pipette
@@ -97,7 +98,7 @@ x	roboease-evoware: WeizmannPipetteDevice: use proper tip names, e.g. "DiTi 200u
 x	roboease-evoware: Wash: why is wash volume always "0" in Mix section?
 x	roboease-evoware: Wash: get other parameter values from evolab scripts
 x	roboease-evoware: check whether 200ul tips automatically get chosen when pipetting 150ul in Rotem_Script01.esc
-5	roboease-evoware: Mix: use liquid class from MIX_WELLS
+x	roboease-evoware: Mix: use liquid class from MIX_WELLS
 6	roboease-evoware: Mix: second to last parameter should be 15 instead of 0?
 7	roboease-evoware: pipette: default tip policy of always discarding
 8	roboease-evoware: pipette: not dispensing to proper wells in Rotem_Script01.esc

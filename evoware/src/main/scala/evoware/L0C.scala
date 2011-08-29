@@ -21,7 +21,7 @@ case class L0C_Spirate(
 			1,
 			'"'+sPlateMask+'"',
 			0, 0
-		).mkString(sFunc+"(", ",", ")")
+		).mkString(sFunc+"(", ",", ");")
 	}
 }
 
@@ -36,7 +36,8 @@ case class L0C_Wash(
 	nAirgapVolume: Int,
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
-	bFastWash: Boolean
+	bFastWash: Boolean,
+	bUNKNOWN1: Boolean
 ) extends Command {
 	override def toString = {
 		val fmt = new java.text.DecimalFormat("#.##")
@@ -52,8 +53,9 @@ case class L0C_Wash(
 			nAirgapSpeed,
 			nRetractSpeed,
 			(if (bFastWash) 1 else 0),
-			0,1000,0
-		).mkString("Wash(", ",", ")")
+			(if (bUNKNOWN1) 1 else 0),
+			1000,0
+		).mkString("Wash(", ",", ");")
 	}
 }
 
@@ -74,7 +76,7 @@ case class L0C_Mix(
 			1,
 			'"'+sPlateMask+'"',
 			0, 0
-		).mkString("Mix(", ",", ")")
+		).mkString("Mix(", ",", ");")
 	}
 }
 
@@ -87,7 +89,7 @@ case class L0C_GetDITI2(
 			mTips,
 			'"'+sType+'"',
 			1, 0, 0, 0
-		).mkString("GetDITI2(", ",", ")")
+		).mkString("GetDITI2(", ",", ");")
 	}
 	
 }
@@ -103,6 +105,6 @@ case class L0C_DropDITI(
 			iGrid,
 			iSite,
 			10, 70
-		).mkString("DropDITI(", ",", ")")
+		).mkString("DropDITI(", ",", ");")
 	}	
 }

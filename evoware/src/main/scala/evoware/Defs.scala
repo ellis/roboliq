@@ -12,5 +12,6 @@ case class WashProgramArgs(
 	nAirgapVolume: Int,
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
-	bFastWash: Boolean
+	bFastWash: Boolean,
+	bUNKNOWN1: Boolean
 )
