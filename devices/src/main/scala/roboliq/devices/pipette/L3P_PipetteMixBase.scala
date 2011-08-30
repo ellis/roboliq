@@ -145,8 +145,10 @@ private trait L3P_PipetteMixBase {
 				val srcState = tw.well.obj.state(cycle.state0)
 				val srcLiquid = srcState.liquid
 				val replacement = PipetteHelper.choosePreAsperateReplacement(overrides.replacement_?, srcLiquid, tipState)
+				println("X", tw, tipState, srcState, srcLiquid)
 				mapTipToReplacement(tw.tip) = replacement
 			}
+			println("A", mapTipToReplacement)
 			// Replacement that would be required by dispense, were we to dispense immediately without 
 			for (tw <- twsD) {
 				val tipState = tw.tip.obj.state(cycle.state0)
@@ -156,9 +158,12 @@ private trait L3P_PipetteMixBase {
 				if (replacement > mapTipToReplacement(tw.tip))
 					mapTipToReplacement(tw.tip) = replacement
 			}
-			val getItems = cycle.tips.map(tip => {
+			println("B", mapTipToReplacement)
+			val tipsToReplace = cycle.tips.filter(tip => mapTipToReplacement.getOrElse(tip, TipReplacementAction.Drop) != TipReplacementAction.None)
+			val getItems = tipsToReplace.map(tip => {
 				val replacement = mapTipToReplacement.getOrElse(tip, TipReplacementAction.None)
 				val sType_? = if (replacement == TipReplacementAction.Replace) mapTipToType.get(tip) else None
+				println("getItems: ", tip, replacement, mapTipToType.get(tip), sType_?)
 				new L3A_TipsReplaceItem(tip, sType_?)
 			})
 			cycle.gets += new L3C_TipsReplace(getItems.toSeq) 

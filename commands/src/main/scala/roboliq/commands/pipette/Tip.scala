@@ -103,7 +103,7 @@ class TipConfigL2(
 
 	override def compare(that: TipConfigL2): Int = this.index - that.index
 	
-	override def toString = "Tip"+index
+	override def toString = "Tip"+(index+1)
 }
 
 case class TipStateL2(

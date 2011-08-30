@@ -20,6 +20,20 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
 		Right(L1C_Aspirate(items.map(_.toL1(states))))
 	}
+	
+	override def toDebugString = {
+		val (tip0, tip1) = (items.head.tip, items.last.tip)
+		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
+		val volumes = items.groupBy(_.nVolume)
+		val policies = items.groupBy(_.policy.sName)
+		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
+			val wells = items.map(_.well)
+			getClass().getSimpleName() + "("+tip0+"-"+tip1+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
+		}
+		else {
+			toString
+		}
+	}
 }
 
 case class L1C_Aspirate(items: Seq[L1A_SpirateItem]) extends CommandL1
@@ -63,6 +77,20 @@ case class L2C_Dispense(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
 		Right(L1C_Dispense(items.map(_.toL1(states))))
+	}
+	
+	override def toDebugString = {
+		val (tip0, tip1) = (items.head.tip, items.last.tip)
+		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
+		val volumes = items.groupBy(_.nVolume)
+		val policies = items.groupBy(_.policy.sName)
+		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
+			val wells = items.map(_.well)
+			getClass().getSimpleName() + "("+tip0+"-"+tip1+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
+		}
+		else {
+			toString
+		}
 	}
 }
 

@@ -28,7 +28,7 @@ case class MixSpec(
 
 
 sealed class TipWell(val tip: TipConfigL2, val well: WellConfigL2) extends HasTip {
-	override def toString = "TipWell("+tip.index+","+well.holder.sLabel+":"+well.index+")" 
+	override def toString = "TipWell("+(tip.index+1)+","+well+")" 
 }
 
 sealed class TipWellVolume(
