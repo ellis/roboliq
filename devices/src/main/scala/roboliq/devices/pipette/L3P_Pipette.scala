@@ -58,12 +58,22 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		var states = ctx.states
 		var builder = new StateBuilder(states)
 		var bFirst = true
+		val mapTipToLiquid = new HashMap[Tip, Liquid]
+		val mapTipToVolume = new HashMap[Tip, Double]
 		val actions2 = actions1.flatMap { case dispense @ Dispense(tws) => {
+			val aspirate: Option[Action] = {
+				tws.
+				val destState = tw.well
+			}
+			
 			val cleans: Seq[Action] = {
 				if (robot.areTipsDisposable) {
-					def needToReplace(tw: TipWell): Boolean = PipetteHelper.choosePreDispenseReplacement(tw.tip.obj.state(builder))
+					def needToReplace(tw: TipWell): Boolean = {
+						val tipState = tw.tip.obj.state(builder)
+						tipState.sType_?.isEmpty || PipetteHelper.choosePreDispenseReplacement(tipState)
+					}
 					val tipsToReplace = tws.filter(needToReplace).map(_.tip).toSet
-					Seq(Clean(tipsToReplace))
+					if (tipsToReplace.isEmpty) Seq() else Seq(Clean(tipsToReplace))
 				}
 				else {
 					val washIntensityDefault = if (bFirst) WashIntensity.Thorough else WashIntensity.Light
@@ -76,7 +86,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 							case Some(wash) => Seq(tw.tip)
 						}
 					})
-					Seq(Clean(tipsToWash.toSet))
+					if (tipsToWash.isEmpty) Seq() else Seq(Clean(tipsToWash.toSet))
 				}
 			}
 			

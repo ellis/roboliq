@@ -291,6 +291,7 @@ object PipetteHelper {
 	}
 	
 	def choosePreDispenseReplacement(tipState: TipStateL2): Boolean = {
+		assert(tipState.sType_?.isDefined)
 		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
 		if (!bOutsideOk)
 			true
