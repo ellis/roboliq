@@ -28,7 +28,8 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 		val policies = items.groupBy(_.policy.sName)
 		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
 			val wells = items.map(_.well)
-			getClass().getSimpleName() + "("+tip0+"-"+tip1+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
+			val sTips = TipSet.toDebugString(items.map(_.tip))
+			getClass().getSimpleName() + "("+sTips+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
 		}
 		else {
 			toString
@@ -86,7 +87,8 @@ case class L2C_Dispense(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 		val policies = items.groupBy(_.policy.sName)
 		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
 			val wells = items.map(_.well)
-			getClass().getSimpleName() + "("+tip0+"-"+tip1+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
+			val sTips = TipSet.toDebugString(items.map(_.tip))
+			getClass().getSimpleName() + "("+sTips+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
 		}
 		else {
 			toString
@@ -205,6 +207,11 @@ case class L2C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL2 
 		}
 		Right(L1C_TipsGet(tips, sType))
 	}
+
+	override def toDebugString = {
+		val sTips = TipSet.toDebugString(tips)
+		getClass().getSimpleName() + List(sTips, sType).mkString("(", ", ", ")") 
+	}
 }
 
 case class L1C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL1
@@ -224,6 +231,11 @@ case class L2C_TipsDrop(tips: Set[TipConfigL2], location: String) extends Comman
 	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
 		Right(L1C_TipsDrop(tips, location))
+	}
+
+	override def toDebugString = {
+		val sTips = TipSet.toDebugString(tips)
+		getClass().getSimpleName() + List(sTips, location).mkString("(", ", ", ")") 
 	}
 }
 

@@ -11,9 +11,9 @@ import roboliq.commands.pipette._
 
 object PipetteHelper {
 	def chooseTipWellPairsAll(states: RobotState, tips: SortedSet[TipConfigL2], dests: SortedSet[WellConfigL2]): Seq[Seq[TipWell]] = {
-		println("chooseTipWellPairsAll()")
-		println("tips: "+tips)
-		println("dests: "+dests)
+		//println("chooseTipWellPairsAll()")
+		//println("tips: "+tips)
+		//println("dests: "+dests)
 		val twss = new ArrayBuffer[Seq[TipWell]]
 		var destsRemaining = dests
 		var twsPrev = Nil
@@ -26,9 +26,9 @@ object PipetteHelper {
 	}
 
 	def chooseTipWellPairsNext(states: RobotState, tips: SortedSet[TipConfigL2], wells: SortedSet[WellConfigL2], twsPrev: Seq[TipWell]): Seq[TipWell] = {
-		println("chooseTipWellPairsNext()")
-		println("tips: "+tips)
-		println("wells: "+wells)
+		//println("chooseTipWellPairsNext()")
+		//println("tips: "+tips)
+		//println("wells: "+wells)
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
 
@@ -41,23 +41,17 @@ object PipetteHelper {
 		val iRowWell0 = well0.index % holder.nRows
 		val iColWell0 = well0.index / holder.nRows
 		
-		// FIXME: For debug only
-		val b1 = (holder.sLabel == "Rotem_STK3")
-		if (b1)
-			holder.toString
-		// ENDFIX
-
 		val pairs = new ArrayBuffer[TipWell]
 		pairs += new TipWell(tip0, well0)
-		println(well0.index+" START")
+		//println(well0.index+" START")
 		for (tip <- tips.tail) {
 			val dRowTip = tip.index - tip0.index
 			val iWell = well0.index + dRowTip
 			val iColWell = iWell / holder.nRows
 			if (iColWell == iColWell0) {
 				wellsOnHolder.find(_.index == iWell) match {
-					case None => if (b1) println(iWell+" N")
-					case Some(well) => pairs += new TipWell(tip, well); if (b1) println(iWell+" Y")
+					case None =>
+					case Some(well) => pairs += new TipWell(tip, well)
 				}
 			}
 		}
@@ -147,7 +141,7 @@ object PipetteHelper {
 		}
 		val order = wells.toSeq.sortWith(compare)
 		
-		println("step0: "+nCount+","+wells)
+		//println("step0: "+nCount+","+wells)
 		chooseAdjacentWellsByVolume_Step1(order, nCount)
 	}
 	
@@ -166,7 +160,7 @@ object PipetteHelper {
 					wells
 			}
 		}
-		println("step1: "+SortedSet(wellsAll.toSeq : _*))
+		//println("step1: "+SortedSet(wellsAll.toSeq : _*))
 		SortedSet(wellsAll.toSeq : _*)
 	}
 
@@ -176,7 +170,7 @@ object PipetteHelper {
 
 		val well0 = order.head
 		if (nCount == 1) {
-			println("step2: "+well0)
+			//println("step2: "+well0)
 			return Set(well0)
 		}
 		
@@ -210,7 +204,7 @@ object PipetteHelper {
 			}
 		}
 		step()
-		println("step2: "+wells.sortBy(_.index))
+		//println("step2: "+wells.sortBy(_.index))
 		SortedSet(wells : _*)
 	}
 	

@@ -123,3 +123,31 @@ case class TipStateL2(
 class TipSetup extends ObjSetup {
 	var sPermanentType_? : Option[String] = None
 }
+
+object TipSet {
+	def toDebugString(set: Set[TipConfigL2]): String = toDebugString(collection.immutable.SortedSet(set.toSeq : _*))
+	def toDebugString(seq: Seq[TipConfigL2]): String = toDebugString(collection.immutable.SortedSet(seq.toSeq : _*))
+	def toDebugString(set: collection.immutable.SortedSet[TipConfigL2]): String = {
+		if (set.isEmpty)
+			"NoTips"
+		else {
+			var indexPrev = -1
+			var indexLast = -1
+			val l = set.foldLeft(Nil: List[Tuple2[Int, Int]]) { (acc, tip) => {
+				acc match {
+					case Nil => List((tip.index, tip.index))
+					case first :: rest =>
+						if (tip.index == first._2 + 1)
+							(first._1, tip.index) :: rest
+						else
+							(tip.index, tip.index) :: acc
+				}
+			}}
+			val ls = l.map(pair => {
+				if (pair._1 == pair._2) (pair._1 + 1).toString
+				else (pair._1 + 1) + "-" + (pair._2 + 1)
+			})
+			ls.mkString("Tip", ",", "")
+		}
+	}
+}

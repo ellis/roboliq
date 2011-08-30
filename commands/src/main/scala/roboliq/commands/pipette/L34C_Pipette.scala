@@ -41,9 +41,33 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 	}
 }
 
-case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3
+case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3 {
+	override def toDebugString = {
+		val srcs = args.items.groupBy(_.srcs).keys
+		if (srcs.size == 1) {
+			val sSrcs = getWellsDebugString(srcs.head)
+			val sDests = getWellsDebugString(args.items.map(_.dest))
+			val volumes = args.items.groupBy(_.nVolume)
+			getClass().getSimpleName() + List(sSrcs, sDests, volumes.keys).mkString("(", ", ", ")")
+		}
+		else
+			toString
+		/*val (tip0, tip1) = (items.head.tip, items.last.tip)
+		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
+		val volumes = items.groupBy(_.nVolume)
+		val policies = items.groupBy(_.policy.sName)
+		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
+			val wells = items.map(_.well)
+			val sTips = TipSet.toDebugString(items.map(_.tip))
+			getClass().getSimpleName() + "("+sTips+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
+		}
+		else {
+			toString
+		}*/
+	}
+}
 
-case class L4A_PipetteArgs(
+class L4A_PipetteArgs(
 	val items: Seq[L4A_PipetteItem],
 	val mixSpec_? : Option[MixSpec] = None,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,

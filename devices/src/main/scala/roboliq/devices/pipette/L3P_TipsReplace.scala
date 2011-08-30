@@ -24,7 +24,7 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 		
 		val tipsDrop = tips.filter(tip => tip.obj.state(ctx.states).sType_?.isDefined).toSet
 		val cmdsDrop = {
-			if (tipsWash.isEmpty) Seq()
+			if (tipsDrop.isEmpty) Seq()
 			else Seq(L3C_TipsDrop(tipsDrop))
 		}
 
