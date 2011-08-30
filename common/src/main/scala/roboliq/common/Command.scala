@@ -14,6 +14,18 @@ trait Command {
 		}
 		lsPlates.mkString(";")
 	}
+	
+	def getSeqDebugString[T](seq: Seq[T]): String = {
+		seq match {
+			case Seq(a, rest @ _*) =>
+				if (rest.forall(_ == a))
+					a.toString
+				else
+					seq.toString
+			case _ =>
+				"Nil"
+		}
+	}
 }
 
 object Command {

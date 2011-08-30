@@ -166,7 +166,8 @@ private trait L3P_PipetteMixBase {
 				//println("getItems: ", tip, replacement, mapTipToType.get(tip), sType_?)
 				new L3A_TipsReplaceItem(tip, sType_?)
 			})
-			cycle.gets += new L3C_TipsReplace(getItems.toSeq) 
+			if (!getItems.isEmpty)
+				cycle.gets += new L3C_TipsReplace(getItems.toSeq) 
 		}
 		else {
 			val mapTipToWash = new HashMap[TipConfigL2, WashSpec]

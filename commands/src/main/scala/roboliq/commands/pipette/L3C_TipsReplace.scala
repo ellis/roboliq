@@ -5,7 +5,9 @@ import roboliq.common._
 
 case class L3C_TipsReplace(items: Seq[L3A_TipsReplaceItem]) extends CommandL3 {
 	override def toDebugString = {
-		getClass().getSimpleName() + items.sortBy(_.tip.index).map(item => (item.tip.index+1) + "->" + item.sType_?.getOrElse("None")).mkString("(", ", ", ")") 
+		val sTips = TipSet.toDebugString(items.map(_.tip))
+		val sTypes = getSeqDebugString(items.map(_.sType_?.getOrElse("None")))
+		getClass().getSimpleName() + List(sTips, sTypes).mkString("(", ", ", ")") 
 	}
 }
 
