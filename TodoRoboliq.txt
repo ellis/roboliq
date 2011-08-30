@@ -66,8 +66,8 @@ Code:
 	devices: add bTipPermanent to Tip or TipConfig
 	devices: set initial tip state in BSSE pipette device
 x	devices: L3P_Pipette: use liquid class overrides
-1	devices: L3P_Pipette: GetDITI2(124,"DiTi 1000ul",1,0,0,0); should have mask 127!
-2	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
+x	devices: L3P_Pipette: GetDITI2(124,"DiTi 1000ul",1,0,0,0); should have mask 127!
+x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 3	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 	devices: set initial tip type in TipState for fixed tips
 	devices: L3P_Pipette: implement mixing option

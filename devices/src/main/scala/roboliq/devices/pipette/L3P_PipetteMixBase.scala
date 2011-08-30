@@ -159,7 +159,7 @@ private trait L3P_PipetteMixBase {
 					mapTipToReplacement(tw.tip) = replacement
 			}
 			//println("B", mapTipToReplacement)
-			val tipsToReplace = cycle.tips.filter(tip => mapTipToReplacement.getOrElse(tip, TipReplacementAction.Drop) != TipReplacementAction.None)
+			val tipsToReplace = cycle.tips.filter(tip => mapTipToReplacement.getOrElse(tip, TipReplacementAction.Drop) == TipReplacementAction.Replace)
 			val getItems = tipsToReplace.map(tip => {
 				val replacement = mapTipToReplacement.getOrElse(tip, TipReplacementAction.None)
 				val sType_? = if (replacement == TipReplacementAction.Replace) mapTipToType.get(tip) else None

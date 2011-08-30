@@ -52,6 +52,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		
 		// Pair up all tips and wells
 		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
+		
+		val disenses = twss0.map(tws => {
+			
+		})
 
 		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
 			if (twss.isEmpty)
@@ -123,13 +127,44 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		}
 	}
 	
+	/*private def dispense_createCommand(builder: StateBuilder, tipStates: HashMap[Tip, TipStateL2], srcs: Map[TipConfigL2, Set[WellConfigL2]], tws: Seq[TipWell]): Either[Seq[String], Command] = {
+		// get pipetting policy for each dispense
+		val policies_? = tws.map(tw => {
+			cmd.args.sDispenseClass_? match {
+				case None =>
+					val item = mapDestToItem(tw.well)
+					val tipState = tipStates(tw.tip.obj)
+					val wellState = tw.well.obj.state(builder)
+					robot.getDispensePolicy(tipState, wellState, item.nVolume)
+				case Some(sLiquidClass) =>
+					robot.getPipetteSpec(sLiquidClass) match {
+						case None => None
+						case Some(spec) => Some(new PipettePolicy(spec.sName, spec.dispense))
+					}
+			}
+		})
+		if (policies_?.forall(_.isDefined)) {
+			val items = (tws zip policies_?.map(_.get)).map(pair => {
+				val (tw, policy) = pair
+				val item = mapDestToItem(tw.well)
+				tw.well.obj.stateWriter(builder).add()
+				new L2A_SpirateItem(tw.tip, item.dest, item.nVolume, policy)
+			})
+			Right(L2C_Dispense(items))
+		}
+		else {
+			Left(Seq("No appropriate dispense policy available"))
+		}
+		
+	}*/
+	
 	private def dispense(cycle: CycleState, tipStates: HashMap[Tip, TipStateL2], srcs: Map[TipConfigL2, Set[WellConfigL2]], tws: Seq[TipWell]): Option[String] = {
 		dispense_checkVols(cycle, tipStates, srcs, tws) match {
 			case None =>
 			case e @ Some(sError) => return e
 		}
 		
-		dispense_createTwvps(cycle, tws, tipStates) match {
+		dispense_createTwvps(cycle.state0, tws, tipStates) match {
 			case Left(sError) => Some(sError)
 			case Right(twvps) =>
 				// Create L2 dispense commands
@@ -171,14 +206,14 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		sError_?
 	}
 
-	private def dispense_createTwvps(cycle: CycleState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_SpirateItem]] = {
+	private def dispense_createTwvps(states: RobotState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_SpirateItem]] = {
 		// get pipetting policy for each dispense
 		val policies_? = tws.map(tw => {
 			cmd.args.sDispenseClass_? match {
 				case None =>
 					val item = mapDestToItem(tw.well)
 					val tipState = tipStates(tw.tip.obj)
-					val wellState = tw.well.obj.state(cycle.state0)
+					val wellState = tw.well.obj.state(states)
 					robot.getDispensePolicy(tipState, wellState, item.nVolume)
 				case Some(sLiquidClass) =>
 					robot.getPipetteSpec(sLiquidClass) match {
