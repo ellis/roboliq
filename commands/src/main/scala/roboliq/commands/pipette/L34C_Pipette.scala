@@ -73,7 +73,6 @@ class L4A_PipetteArgs(
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val sAspirateClass_? : Option[String] = None,
 	val sDispenseClass_? : Option[String] = None,
-	val sMixClass_? : Option[String] = None,
 	val sTipKind_? : Option[String] = None,
 	val fnClean_? : Option[Unit => Unit] = None
 ) {
@@ -91,7 +90,6 @@ class L4A_PipetteArgs(
 			tipOverrides_? = tipOverrides_?,
 			sAspirateClass_? = sAspirateClass_?,
 			sDispenseClass_? = sDispenseClass_?,
-			sMixClass_? = sMixClass_?,
 			sTipKind_? = sTipKind_?,
 			fnClean_? = fnClean_?
 		))
@@ -104,7 +102,6 @@ class L3A_PipetteArgs(
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val sAspirateClass_? : Option[String] = None,
 	val sDispenseClass_? : Option[String] = None,
-	val sMixClass_? : Option[String] = None,
 	val sTipKind_? : Option[String] = None,
 	val fnClean_? : Option[Unit => Unit] = None
 )

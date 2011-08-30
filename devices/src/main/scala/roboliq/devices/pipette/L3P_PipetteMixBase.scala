@@ -16,6 +16,12 @@ private trait L3P_PipetteMixBase {
 	
 	type Errors = Seq[String]
 
+	trait Action
+	case class Aspirate(tws: Seq[TipWell]) extends Action
+	case class Dispense(tws: Seq[TipWell]) extends Action
+	case class Mix(tws: Seq[TipWell]) extends Action
+	case class Clean(tips: Set[TipConfigL2]) extends Action
+
 	val robot: PipetteDevice
 	val ctx: CompilerContextL3
 	val cmd: CmdType
@@ -119,6 +125,7 @@ private trait L3P_PipetteMixBase {
 	}
 	
 	/** Would a cleaning be required before a subsequent dispense from the same tip? */
+	// REFACTOR: Remove this method -- ellis, 2011-08-30
 	protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Boolean = {
 		def step(tipWell: TipWell): Boolean = {
 			val tipState = tipStates(tipWell.tip.obj)
@@ -157,10 +164,8 @@ private trait L3P_PipetteMixBase {
 			// Replacement that would be required by dispense, were we to dispense immediately without 
 			for (tw <- twsD) {
 				val tipState = tw.tip.obj.state(cycle.state0)
-				val destState = tw.well.obj.state(cycle.state0)
-				val destLiquid = destState.liquid
 				val bReplace = overrides.replacement_? match {
-					case None => PipetteHelper.choosePreDispenseReplacement(destLiquid, tipState)
+					case None => PipetteHelper.choosePreDispenseReplacement(tipState)
 					case Some(TipReplacementPolicy.ReplaceAlways) => true
 					case Some(TipReplacementPolicy.KeepBetween) => bFirst
 					case Some(TipReplacementPolicy.KeepAlways) => false
@@ -182,21 +187,26 @@ private trait L3P_PipetteMixBase {
 				val tipState = tw.tip.obj.state(cycle.state0)
 				val srcState = tw.well.obj.state(cycle.state0)
 				val srcLiquid = srcState.liquid
-				val wash = PipetteHelper.choosePreAsperateWashSpec(overrides, washIntensityDefault, srcLiquid, tipState)
-				mapTipToWash(tw.tip) = wash
+				PipetteHelper.choosePreAsperateWashSpec(overrides, washIntensityDefault, srcLiquid, tipState) match {
+					case Some(wash) => mapTipToWash(tw.tip) = wash
+					case None =>
+				}
 			}
 			for (tw <- twsD) {
 				val tipState = tw.tip.obj.state(cycle.state0)
 				val destState = tw.well.obj.state(cycle.state0)
 				val destLiquid = destState.liquid
-				val wash1 = PipetteHelper.choosePreAsperateWashSpec(overrides, washIntensityDefault, destLiquid, tipState)
-				val wash0 = mapTipToWash(tw.tip)
-				val washIntensity = if (wash0.washIntensity >= wash1.washIntensity) wash0.washIntensity else wash1.washIntensity
-				mapTipToWash(tw.tip) = new WashSpec(
-					washIntensity,
-					wash0.contamInside ++ wash1.contamInside,
-					wash0.contamOutside ++ wash1.contamOutside
-				)
+				PipetteHelper.choosePreDispenseWashSpec(overrides, washIntensityDefault, destLiquid, tipState) match {
+					case None =>
+					case Some(wash1) =>
+						val wash0 = mapTipToWash.getOrElse(tw.tip, wash1)
+						val washIntensity = if (wash0.washIntensity >= wash1.washIntensity) wash0.washIntensity else wash1.washIntensity
+						mapTipToWash(tw.tip) = new WashSpec(
+							washIntensity,
+							wash0.contamInside ++ wash1.contamInside,
+							wash0.contamOutside ++ wash1.contamOutside
+						)
+				}
 			}
 			
 			val washItems = mapTipToWash

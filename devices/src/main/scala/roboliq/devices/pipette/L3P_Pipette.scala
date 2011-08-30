@@ -53,9 +53,40 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		// Pair up all tips and wells
 		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
 		
-		val disenses = twss0.map(tws => {
+		val actions1 = twss0.map(tws => new Dispense(tws))
+		
+		var states = ctx.states
+		var builder = new StateBuilder(states)
+		var bFirst = true
+		val actions2 = actions1.flatMap { case dispense @ Dispense(tws) => {
+			val cleans: Seq[Action] = {
+				if (robot.areTipsDisposable) {
+					def needToReplace(tw: TipWell): Boolean = PipetteHelper.choosePreDispenseReplacement(tw.tip.obj.state(builder))
+					val tipsToReplace = tws.filter(needToReplace).map(_.tip).toSet
+					Seq(Clean(tipsToReplace))
+				}
+				else {
+					val washIntensityDefault = if (bFirst) WashIntensity.Thorough else WashIntensity.Light
+					val tipsToWash = tws.flatMap(tw => {
+						val tipState = tw.tip.obj.state(builder)
+						val destState = tw.well.obj.state(builder)
+						val destLiquid = destState.liquid
+						PipetteHelper.choosePreDispenseWashSpec(tipOverrides, washIntensityDefault, destLiquid, tipState) match {
+							case None => Seq()
+							case Some(wash) => Seq(tw.tip)
+						}
+					})
+					Seq(Clean(tipsToWash.toSet))
+				}
+			}
 			
-		})
+			bFirst = false
+			cleans ++ Seq(dispense)
+		}}
+		println()
+		println("actions2:")
+		actions2.foreach(println)
+		println()
 
 		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
 			if (twss.isEmpty)

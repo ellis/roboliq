@@ -228,7 +228,7 @@ object PipetteHelper {
 		process(tips, Nil, processStep)
 	}
 	
-	def getCleanDegreeAspirate(tipState: TipStateL2, liquid: Liquid): WashIntensity.Value = {
+	/*def getCleanDegreeAspirate(tipState: TipStateL2, liquid: Liquid): WashIntensity.Value = {
 		var bRinse = false
 		var bThorough = false
 		var bDecontam = false
@@ -256,8 +256,9 @@ object PipetteHelper {
 		else if (bRinse) WashIntensity.Light
 		else WashIntensity.None
 
-	}
+	}*/
 
+	// REFACTOR: Remove this method -- ellis, 2011-08-30
 	def getCleanDegreeDispense(tipState: TipStateL2): WashIntensity.Value = {
 		var bRinse = false
 		var bThorough = false
@@ -289,7 +290,7 @@ object PipetteHelper {
 		}
 	}
 	
-	def choosePreDispenseReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
+	def choosePreDispenseReplacement(tipState: TipStateL2): Boolean = {
 		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
 		if (!bOutsideOk)
 			true
@@ -297,7 +298,7 @@ object PipetteHelper {
 			false
 	}
 	
-	def choosePreAsperateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): WashSpec = {
+	def choosePreAsperateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
 		val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
 		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
 		val washIntensity = tipOverrides.washIntensity_? match {
@@ -309,9 +310,30 @@ object PipetteHelper {
 					washIntensityDefault
 		}
 		
+		if (washIntensity == WashIntensity.None)
+			return None
+			
 		val contamInside = tipOverrides.contamInside_? match { case Some(v) => v; case None => tipState.contamInside }
 		val contamOutside = tipOverrides.contamOutside_? match { case Some(v) => v; case None => tipState.contamOutside }
-		new WashSpec(washIntensity, contamInside, contamOutside)
+		Some(new WashSpec(washIntensity, contamInside, contamOutside))
 	}
 	
+	def choosePreDispenseWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
+		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+		val washIntensity = tipOverrides.washIntensity_? match {
+			case Some(v) => v
+			case None =>
+				if (bOutsideOk)
+					WashIntensity.None
+				else
+					washIntensityDefault
+		}
+		
+		if (washIntensity == WashIntensity.None)
+			return None
+			
+		val contamInside = tipOverrides.contamInside_? match { case Some(v) => v; case None => tipState.contamInside }
+		val contamOutside = tipOverrides.contamOutside_? match { case Some(v) => v; case None => tipState.contamOutside }
+		Some(new WashSpec(washIntensity, contamInside, contamOutside))
+	}
 }

@@ -23,7 +23,7 @@ case class WPL_Liquid(liquid: Liquid) extends WellOrPlateOrLiquid
 case class MixSpec(
 		val nVolume: Double,
 		val nCount: Int,
-		val policy_? : Option[PipettePolicy] = None
+		val sMixClass_? : Option[String] = None
 		)
 
 
