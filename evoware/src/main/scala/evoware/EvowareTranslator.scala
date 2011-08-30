@@ -118,10 +118,13 @@ class EvowareTranslator(mapper: EvowareMapper) {
 				
 				val holder = twvp0.well.holder
 				
-				// Assert that all tips are of the same kind and that all wells are on the same holder
-				// TODO: Readd this error check -- ellis, 2011-08-25
+				// Assert that all tips are of the same kind
+				// TODO: Readd this error check somehow? -- ellis, 2011-08-25
 				//val tipKind = mapper.getTipKind(twvp0.tip)
-				//assert(items.forall(twvp => (robot.getTipKind(twvp.tip) eq tipKind) && (twvp.well.holder eq holder)))
+				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
+				
+				if (!items.forall(_.well.holder eq holder))
+					return Left(Seq("INTERNAL: all wells must be on the same plate"))
 				
 				// Assert that tips are spaced at equal distances to each other as the wells are to each other
 				def equidistant2(a: L1A_SpirateItem, b: L1A_SpirateItem): Boolean =

@@ -138,15 +138,20 @@ private trait L3P_PipetteMixBase {
 	
 	protected def clean(cycle: CycleState, mapTipToType: Map[TipConfigL2, String], overrides: TipHandlingOverrides, bFirst: Boolean, twsA: Seq[TipWell], twsD: Seq[TipWell]) {
 		if (robot.areTipsDisposable) {
-			val mapTipToReplacement = new HashMap[TipConfigL2, TipReplacementAction.Value]
+			val tipsToReplace = collection.mutable.Set[TipConfigL2]()
 			// Replacement requires by aspirate
 			for (tw <- twsA) {
 				val tipState = tw.tip.obj.state(cycle.state0)
 				val srcState = tw.well.obj.state(cycle.state0)
 				val srcLiquid = srcState.liquid
-				val replacement = PipetteHelper.choosePreAsperateReplacement(overrides.replacement_?, srcLiquid, tipState)
-				//println("X", tw, tipState, srcState, srcLiquid)
-				mapTipToReplacement(tw.tip) = replacement
+				val bReplace = overrides.replacement_? match {
+					case None => PipetteHelper.choosePreAsperateReplacement(srcLiquid, tipState)
+					case Some(TipReplacementPolicy.ReplaceAlways) => true
+					case Some(TipReplacementPolicy.KeepBetween) => bFirst
+					case Some(TipReplacementPolicy.KeepAlways) => false
+				}
+				if (bReplace)
+					tipsToReplace += tw.tip
 			}
 			//println("A", mapTipToReplacement)
 			// Replacement that would be required by dispense, were we to dispense immediately without 
@@ -154,17 +159,18 @@ private trait L3P_PipetteMixBase {
 				val tipState = tw.tip.obj.state(cycle.state0)
 				val destState = tw.well.obj.state(cycle.state0)
 				val destLiquid = destState.liquid
-				val replacement = PipetteHelper.choosePreDispenseReplacement(overrides.replacement_?, destLiquid, tipState)
-				if (replacement > mapTipToReplacement(tw.tip))
-					mapTipToReplacement(tw.tip) = replacement
+				val bReplace = overrides.replacement_? match {
+					case None => PipetteHelper.choosePreDispenseReplacement(destLiquid, tipState)
+					case Some(TipReplacementPolicy.ReplaceAlways) => true
+					case Some(TipReplacementPolicy.KeepBetween) => bFirst
+					case Some(TipReplacementPolicy.KeepAlways) => false
+				}
+				if (bReplace)
+					tipsToReplace += tw.tip
 			}
 			//println("B", mapTipToReplacement)
-			val tipsToReplace = cycle.tips.filter(tip => mapTipToReplacement.getOrElse(tip, TipReplacementAction.Drop) == TipReplacementAction.Replace)
 			val getItems = tipsToReplace.map(tip => {
-				val replacement = mapTipToReplacement.getOrElse(tip, TipReplacementAction.None)
-				val sType_? = if (replacement == TipReplacementAction.Replace) mapTipToType.get(tip) else None
-				//println("getItems: ", tip, replacement, mapTipToType.get(tip), sType_?)
-				new L3A_TipsReplaceItem(tip, sType_?)
+				new L3A_TipsReplaceItem(tip, mapTipToType.get(tip))
 			})
 			if (!getItems.isEmpty)
 				cycle.gets += new L3C_TipsReplace(getItems.toSeq) 

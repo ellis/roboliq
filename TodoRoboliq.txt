@@ -79,6 +79,8 @@ x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 	roboease: somehow add default liquid class to a liquid (for example, add a Map[Liquid, String] to WeizmannPipetteDevice)
 	roboease-evoware: pipette: default tip policy of always discarding
 	roboease-evoware: print out appropriate header
+	roboease translation errors:
+		Rotem_Script02.conf: need to implement mixing in L3C_Pipette
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from

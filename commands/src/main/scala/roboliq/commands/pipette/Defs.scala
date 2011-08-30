@@ -59,8 +59,8 @@ case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense:
 
 case class PipettePolicy(sName: String, pos: PipettePosition.Value)
 
-object TipReplacementAction extends Enumeration { // FIXME: Replace this with TipReplacementPolicy following Roboease
-	val None, Drop, Replace = Value
+object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with TipReplacementPolicy following Roboease
+	val ReplaceAlways, KeepBetween, KeepAlways = Value
 	// val AfterWetContact, AtStart, Never
 }
 
@@ -69,7 +69,7 @@ object WashIntensity extends Enumeration {
 }
 
 class TipHandlingOverrides(
-	val replacement_? : Option[TipReplacementAction.Value],
+	val replacement_? : Option[TipReplacementPolicy.Value],
 	//val washProgram_? : Option[Int],
 	val washIntensity_? : Option[WashIntensity.Value],
 	val contamInside_? : Option[Set[Contaminant.Value]],
@@ -87,7 +87,7 @@ class WashSpec(
 )
 
 class CleanSpec(
-	val replacement: Option[TipReplacementAction.Value],
+	val replacement: Option[TipReplacementPolicy.Value],
 	val washIntensity: WashIntensity.Value,
 	val contamInside: Set[Contaminant.Value],
 	val contamOutside: Set[Contaminant.Value]

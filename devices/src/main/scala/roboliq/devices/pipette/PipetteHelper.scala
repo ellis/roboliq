@@ -274,38 +274,27 @@ object PipetteHelper {
 		else WashIntensity.None
 	}
 
-	def choosePreAsperateReplacement(replacement_? : Option[TipReplacementAction.Value], liquidInWell: Liquid, tipState: TipStateL2): TipReplacementAction.Value = {
+	def choosePreAsperateReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
 		// If there is no tip, then we'll need to get a new one
 		if (tipState.sType_?.isEmpty) {
-			TipReplacementAction.Replace
+			true
 		}
 		else {
-			replacement_? match {
-				// If the user has provided an override value, use it:
-				case Some(action) =>
-					action
-				case None =>
-					val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
-					val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
-					if (!bInsideOk || !bOutsideOk)
-						TipReplacementAction.Replace
-					else
-						TipReplacementAction.None
-			}
+			val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
+			val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+			if (!bInsideOk || !bOutsideOk)
+				true
+			else
+				false
 		}
 	}
 	
-	def choosePreDispenseReplacement(replacement_? : Option[TipReplacementAction.Value], liquidInWell: Liquid, tipState: TipStateL2): TipReplacementAction.Value = {
-		replacement_? match {
-			case Some(action) =>
-				action
-			case None =>
-				val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
-				if (!bOutsideOk)
-					TipReplacementAction.Replace
-				else
-					TipReplacementAction.None
-		}
+	def choosePreDispenseReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
+		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+		if (!bOutsideOk)
+			true
+		else
+			false
 	}
 	
 	def choosePreAsperateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): WashSpec = {

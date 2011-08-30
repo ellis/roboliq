@@ -254,7 +254,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				case Left(sError) => sError_? = Some(sError); false
 				case Right(twvps) =>
 					val twvpss = robot.batchesForAspirate(twvps)
-					cycle.aspirates ++= twvpss.map(twvs => new L2C_Aspirate(twvps))
+					cycle.aspirates ++= twvpss.map(twvs => new L2C_Aspirate(twvs))
 					true
 			}
 		})
@@ -269,7 +269,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			case Left(sError) => Some(sError)
 			case Right(twvps) =>
 				val twvpss = robot.batchesForAspirate(twvps)
-				cycle.aspirates ++= twvpss.map(twvs => new L2C_Aspirate(twvps))
+				cycle.aspirates ++= twvpss.map(twvs => new L2C_Aspirate(twvs))
 				None
 		}
 	}
