@@ -204,6 +204,9 @@ x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 				each tip can still access the same set of source wells
 				each tip can accommodate the additional volume
 				dispense does not require cleaning
+	Pipetting, new algorithm:
+		create list of dispenses to perform
+
 	tip handling in Wash vs Dispose:
 		fixed tips:
 			do nothing, rinse, thorough wash, decontaminate, decontaminate with pre-rinse
