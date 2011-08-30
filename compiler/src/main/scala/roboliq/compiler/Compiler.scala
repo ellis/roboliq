@@ -24,25 +24,19 @@ class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq
 }
 
 
-class Compiler {
-	//var robot: Robot = _
-	//var state: RobotState = _
+class Compiler(val nDepth: Int = 0) {
+	var bDebug = false
+	private var nIndent = nDepth
 	private var m_handlers = new HashMap[java.lang.Class[_], CommandCompiler]
-	//private var m_handlers: List[CommandCompiler] = Nil
-	//private var m_handlers2: List[CommandCompilerL3] = Nil
-	//private var m_handlers3: List[CommandCompilerL4] = Nil
-	//var kb: KnowledgeBase = null
-	//var state0: RobotState = null
 	
 	def register(handler: CommandCompiler) {
 		m_handlers(handler.cmdType) = handler
-		//m_handlers = handler :: m_handlers
-		/*if (handler.isInstanceOf[CommandCompilerL2])
-			m_handlers1 = handler.asInstanceOf[CommandCompilerL2] :: m_handlers1
-		if (handler.isInstanceOf[CommandCompilerL3])
-			m_handlers2 = handler.asInstanceOf[CommandCompilerL3] :: m_handlers2
-		if (handler.isInstanceOf[CommandCompilerL4])
-			m_handlers3 = handler.asInstanceOf[CommandCompilerL4] :: m_handlers3*/
+	}
+	
+	def createSubCompiler(): Compiler = {
+		val sub = new Compiler(nDepth + 1)
+		m_handlers.foreach(pair => sub.register(pair._2))
+		sub
 	}
 	
 	def compile(states: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
@@ -51,40 +45,6 @@ class Compiler {
 			case Right((nodes, state1)) => Right(nodes)
 		}
 	}
-	
-	/*def score(states: RobotState, cmds: Seq[CompileFinal]): Either[CompileError, Int] = {
-		compile(states, cmds) match {
-			case Left(err) => Left(err)
-			case Right(nodes) =>
-				val cmds2 = nodes.flatMap(_.collectL2())
-		}
-	}*/
-	
-	/*
-	def compileL2(state0: RobotState, cmd: Command): Either[CompileError, CompileFinal] = {
-		m_handlers.get(cmd.getClass()) match {
-			case Some(handler1 : CommandCompilerL2) =>
-				val builder = new StateBuilder(state0)
-				handler1.updateStateL2(builder, cmd)
-				Right(CompileFinal(cmd, builder.toImmutable))
-			case Some(_) =>
-				Left(CompileError(cmd, Seq("command compiler must be of type CommandCompilerL2")))
-			case None =>
-				Left(CompileError(cmd, Seq("no handler for command "+cmd.getClass().getCanonicalName())))
-		}
-	}
-	
-	def compileL2(state0: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileFinal]] = {
-		var ress = new ArrayBuffer[CompileFinal]
-		var state = state0
-		for (cmd <- cmds) {
-			compileL2(state, cmd) match {
-				case Right(res) => ress += res
-				case Left(sError) => return Left(sError)
-			}
-		}
-		Right(ress)
-	}*/
 	
 	private def compileCommands(state0: RobotState, cmds: Seq[Command]): Either[CompileError, Tuple2[Seq[CompileNode], RobotState]] = {
 		var state = state0
@@ -103,8 +63,14 @@ class Compiler {
 	}
 	
 	private def compileCommand(state0: RobotState, cmd: Command): Either[CompileError, Tuple2[CompileNode, RobotState]] = {
+		if (bDebug) {
+			print("* ")
+			print("  " * nIndent)
+			println(cmd.toDebugString)
+		}
+		nIndent += 1
 		val res = compileToResult(state0, cmd)
-		res match {
+		val node = res match {
 			case CompileFinal(_, _, state1) =>
 				//println("cmd: "+cmd.getClass().getName())
 				//println("final: "+state1.map.filter(!_._1.isInstanceOf[Well]))
@@ -119,6 +85,8 @@ class Compiler {
 			case err @ CompileError(_, _) =>
 				Left(err)
 		}
+		nIndent -= 1
+		node
 	}
 	
 	private def compileToResult(states: RobotState, cmd: Command): CompileResult = {
@@ -150,13 +118,6 @@ class Compiler {
 				}
 		}
 	}
-	
-	/*private def addKnowledge(kb: KnowledgeBase, cmds: Seq[Command]) {
-		cmds.foreach(_ match {
-			case cmd4: CommandL4 => cmd4.addKnowledge(kb)
-			case _ =>
-		})
-	}*/
 	
 	private def callHandlerCompile(state0: RobotState, handler: CommandCompiler, cmd: Command): CompileResult = {
 		handler match {
@@ -205,18 +166,4 @@ class Compiler {
 				//Left(CompileError(res.cmd, Seq("INTERNAL: no registered scorer for command "+res.cmd.getClass().getName())))
 		}
 	}
-
-	/*
-	def score(state0: RobotState, ress: Seq[CompileFinal]): Option[Int] = {
-		var n = 0
-		var state = state0
-		for (res <- ress) {
-			score(state, res) match {
-				case Some(n2) => n += n2
-				case None => return None
-			}
-		}
-		Some(n)
-	}
-	*/
 }

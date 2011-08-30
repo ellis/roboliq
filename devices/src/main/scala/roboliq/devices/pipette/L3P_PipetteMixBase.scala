@@ -54,9 +54,9 @@ private trait L3P_PipetteMixBase {
 				case Right(Seq()) =>
 				case Right(cycles) =>
 					val cmds1 = cycles.flatMap(_.toTokenSeq) ++ dropSeq(tips)
-					ctx.compiler.compile(ctx.states, cmds1) match {
+					ctx.subCompiler.compile(ctx.states, cmds1) match {
 						case Right(nodes) =>
-							ctx.compiler.scoreNodes(ctx.states, nodes) match {
+							ctx.subCompiler.scoreNodes(ctx.states, nodes) match {
 								case Right(nScore) =>
 									if (nScore < nWinnerScore) {
 										winner = cmds1
@@ -206,7 +206,7 @@ private trait L3P_PipetteMixBase {
 	protected def getUpdatedState(cycle: CycleState): Either[Seq[String], RobotState] = {
 		val cmds1 = cycle.toTokenSeq
 		//println("cmds1: "+cmds1)
-		ctx.compiler.compile(cycle.state0, cmds1) match {
+		ctx.subCompiler.compile(cycle.state0, cmds1) match {
 			case Left(e) =>
 				Left(e.errors)
 			case Right(nodes) =>

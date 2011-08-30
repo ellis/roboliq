@@ -152,10 +152,11 @@ object PipetteHelper {
 	}
 	
 	private def chooseAdjacentWellsByVolume_Step1(order: Seq[WellConfigL2], nCount: Int): SortedSet[WellConfigL2] = {
-		val wellsAll = chooseAdjacentWellsByVolume_Step2(order, nCount) match {
-			case Seq() =>
+		val wells = chooseAdjacentWellsByVolume_Step2(order, nCount)
+		val wellsAll = {
+			if (wells.isEmpty)
 				Set()
-			case wells =>
+			else {
 				val order1 = order.filter(well => !wells.contains(well))
 				val nCount1 = nCount - wells.size
 				if (nCount1 > 0 && !order1.isEmpty) {
@@ -163,6 +164,7 @@ object PipetteHelper {
 				}
 				else
 					wells
+			}
 		}
 		println("step1: "+SortedSet(wellsAll.toSeq : _*))
 		SortedSet(wellsAll.toSeq : _*)

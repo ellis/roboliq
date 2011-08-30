@@ -1,6 +1,8 @@
 package roboliq.common
 
-trait Command
+trait Command {
+	def toDebugString = toString
+}
 trait CommandL4 extends Command {
 	type L3Type <: CommandL3
 	def addKnowledge(kb: KnowledgeBase)

@@ -13,6 +13,8 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
 		val tips = cmd.items.map(_.tip)
+		if (ctx.nCompilerDepth == 0)
+			println("L3P_TipsReplace: tips: "+cmd.items.toSeq.sortBy(_.tip.index).map(item => item.tip -> item.sType_?))
 		
 		val tipsWash = tips.filter(tip => tip.obj.state(ctx.states).cleanDegree == WashIntensity.None)
 		val cmdWash = new L2C_Wash(tipsWash.map(tip => new L2A_WashItem(tip, 0)), 0, WashIntensity.Decontaminate)

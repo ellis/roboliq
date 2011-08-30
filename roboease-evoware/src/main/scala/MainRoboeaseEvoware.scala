@@ -184,6 +184,7 @@ object Main extends App {
 		}
 		
 		val compiler = new Compiler
+		compiler.bDebug = true
 		//compiler.register(new L4P_Pipette)
 		compiler.register(new L3P_TipsReplace)
 		compiler.register(new L3P_TipsDrop("WASTE"))

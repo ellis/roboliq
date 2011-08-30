@@ -9,9 +9,12 @@ abstract class CommandCompiler {
 }
 
 class CompilerContextL4(
-		val compiler: Compiler,
-		val states: RobotState
-		)
+	compiler0: roboliq.compiler.Compiler,
+	val states: RobotState
+) {
+	val nCompilerDepth = compiler0.nDepth
+	lazy val subCompiler = compiler0.createSubCompiler()
+}
 
 abstract class CommandCompilerL4 extends CommandCompiler {
 	def addKnowledge(kb: KnowledgeBase, cmd: Command)
@@ -19,9 +22,12 @@ abstract class CommandCompilerL4 extends CommandCompiler {
 }
 
 class CompilerContextL3(
-		val compiler: Compiler,
-		val states: RobotState
-		)
+	compiler0: roboliq.compiler.Compiler,
+	val states: RobotState
+) {
+	val nCompilerDepth = compiler0.nDepth
+	lazy val subCompiler = compiler0.createSubCompiler()
+}
 
 abstract class CommandCompilerL3 extends CommandCompiler {
 	def compileL3(ctx: CompilerContextL3, _cmd: Command): CompileResult = {
