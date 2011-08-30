@@ -205,8 +205,25 @@ x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 				each tip can accommodate the additional volume
 				dispense does not require cleaning
 	Pipetting, new algorithm:
-		create list of dispenses to perform
+		create list of dispenses and mixes to perform
+		prepend Placeholder to list
 
+		get list of all tips used in dispenses
+		if tips are disposable:
+			get new tips, unless tipOverride says not to
+		else
+			wash all used tips with intensity Thorough, unless overridden
+
+
+		for each dispense/mix:
+			push state
+			update state
+
+			bPreDispenseClean = ...
+			bTipsFull = if tips don't have enough space to accommodate additional aspirate
+			bPreAspirateClean = ...
+			check whether aspirate is required:
+				either there 
 	tip handling in Wash vs Dispose:
 		fixed tips:
 			do nothing, rinse, thorough wash, decontaminate, decontaminate with pre-rinse

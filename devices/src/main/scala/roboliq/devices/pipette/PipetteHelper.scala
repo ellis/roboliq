@@ -319,12 +319,14 @@ object PipetteHelper {
 		Some(new WashSpec(washIntensity, contamInside, contamOutside))
 	}
 	
-	def choosePreDispenseWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
+	def choosePreDispenseWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2, pos: PipettePosition.Value): Option[WashSpec] = {
 		val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
 		val washIntensity = tipOverrides.washIntensity_? match {
 			case Some(v) => v
 			case None =>
-				if (bOutsideOk)
+				if (pos == PipettePosition.Free || pos == PipettePosition.DryContact)
+					WashIntensity.None
+				else if (bOutsideOk)
 					WashIntensity.None
 				else
 					washIntensityDefault
