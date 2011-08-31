@@ -178,6 +178,8 @@ class WellConfigL2(
 	
 	def iCol = index / holder.nRows
 	def iRow = index % holder.nRows
+	
+	def state(states: StateMap) = obj.state(states)
 
 	override def compare(that: WellConfigL2): Int = {
 		holder.compare(that.holder) match {
@@ -260,6 +262,7 @@ class PlateConfigL2(
 	val nWells: Int,
 	val wells: Seq[Well]
 ) extends ObjConfig with Ordered[PlateConfigL2] {
+	def state(states: StateMap) = obj.state(states)
 	override def compare(that: PlateConfigL2) = sLabel.compare(that.sLabel)
 	override def toString = sLabel
 }

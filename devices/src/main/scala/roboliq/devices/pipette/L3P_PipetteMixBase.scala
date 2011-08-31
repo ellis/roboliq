@@ -16,14 +16,14 @@ private trait L3P_PipetteMixBase {
 	
 	type Errors = Seq[String]
 
-	trait Action
+	sealed abstract class Action
 	case class Aspirate(items: Seq[L2A_SpirateItem]) extends Action
 	case class Dispense(items: Seq[L2A_SpirateItem]) extends Action
-	case class Mix(tws: Seq[TipWell]) extends Action
-	case class Clean(tips: Set[TipConfigL2]) extends Action
+	case class Mix(items: Seq[L2A_MixItem]) extends Action
+	case class Clean(map: Map[TipConfigL2, CleanSpec2]) extends Action
 	
 	sealed abstract class CleanSpec2 { val tip: TipConfigL2 }
-	case class ReplaceSpec2(tip: TipConfigL2) extends CleanSpec2
+	case class ReplaceSpec2(tip: TipConfigL2, sType: String) extends CleanSpec2
 	case class WashSpec2(tip: TipConfigL2, spec: WashSpec) extends CleanSpec2
 
 	val robot: PipetteDevice
@@ -154,7 +154,7 @@ private trait L3P_PipetteMixBase {
 				case Some(TipReplacementPolicy.KeepAlways) => false
 			}
 			if (bReplace)
-				Some(ReplaceSpec2(item.tip))
+				Some(ReplaceSpec2(item.tip, mapTipToType(item.tip)))
 			else
 				None
 		}
@@ -189,10 +189,10 @@ private trait L3P_PipetteMixBase {
 					if (pos == PipettePosition.Free || pos == PipettePosition.DryContact)
 						false
 					else
-						PipetteHelper.choosePreDispenseReplacement(tipState)
+						PipetteHelper.choosePreDispenseReplacement(tipState, dest.state(states).liquid)
 			}
 			if (bReplace)
-				Some(ReplaceSpec2(tip))
+				Some(ReplaceSpec2(tip, mapTipToType(tip)))
 			else
 				None
 		}

@@ -96,6 +96,7 @@ class TipConfigL2(
 	val obj: Tip,
 	val index: Int
 ) extends ObjConfig with Ordered[TipConfigL2] {
+	def state(states: StateMap) = obj.state(states)
 	// For use in L3P_Pipette
 	def createState0(sType_? : Option[String]): TipStateL2 = {
 		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Nil, WashIntensity.None)
