@@ -118,13 +118,13 @@ private trait L3P_PipetteMixBase {
 	
 	/** Would a cleaning be required before a subsequent dispense from the same tip? */
 	// REFACTOR: Remove this method -- ellis, 2011-08-30
-	protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Boolean = {
+	/*protected def checkNoCleanRequired(cycle: CycleState, tipStates: collection.Map[Tip, TipStateL2], tws: Seq[TipWell]): Boolean = {
 		def step(tipWell: TipWell): Boolean = {
 			val tipState = tipStates(tipWell.tip.obj)
 			PipetteHelper.getCleanDegreeDispense(tipState) == WashIntensity.None
 		}
 		tws.forall(step)
-	}
+	}*/
 	
 	/*protected def clean(cycle: CycleState, tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]) {
 		// Add tokens

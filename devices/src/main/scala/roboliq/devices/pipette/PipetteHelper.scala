@@ -259,7 +259,7 @@ object PipetteHelper {
 	}*/
 
 	// REFACTOR: Remove this method -- ellis, 2011-08-30
-	def getCleanDegreeDispense(tipState: TipStateL2): WashIntensity.Value = {
+	/*def getCleanDegreeDispense(tipState: TipStateL2): WashIntensity.Value = {
 		var bRinse = false
 		var bThorough = false
 		var bDecontam = false
@@ -273,7 +273,7 @@ object PipetteHelper {
 		else if (bThorough) WashIntensity.Thorough
 		else if (bRinse) WashIntensity.Light
 		else WashIntensity.None
-	}
+	}*/
 
 	def choosePreAspirateReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
 		// If there is no tip, then we'll need to get a new one
@@ -282,7 +282,7 @@ object PipetteHelper {
 		}
 		else {
 			val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
-			val bOutsideOk = tipState.destsEntered.filter(_ ne Liquid.empty).isEmpty
+			val bOutsideOk = tipState.destsEntered.forall(_ eq Liquid.empty) && tipState.srcsEntered.forall(_ eq Liquid.empty)
 			if (!bInsideOk || !bOutsideOk)
 				true
 			else

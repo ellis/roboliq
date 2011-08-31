@@ -116,8 +116,8 @@ object Main extends App {
 		p.DefineRack("RCH",9,0,12,8, 200,"ROCHE") ;
 		p.DefineRack("READER",48,0,12,8, 200,"PLATE_READER") ;
 
-		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf").mkString
-		val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
+		val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf").mkString
+		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
 		p.parse(sSource) match {
 			case Left(err) =>
 				err.kbErrors.foreach(println)
