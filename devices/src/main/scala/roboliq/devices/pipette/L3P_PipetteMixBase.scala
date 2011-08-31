@@ -90,8 +90,10 @@ private trait L3P_PipetteMixBase {
 		for ((tip, sType) <- mapTipToType) {
 			val tipWriter = tip.obj.stateWriter(builder)
 			// Get proper tip
-			if (robot.areTipsDisposable)
+			if (robot.areTipsDisposable) {
+				tipWriter.drop()
 				tipWriter.get(sType)
+			}
 			tipWriter.clean(WashIntensity.Decontaminate)
 		}
 	}

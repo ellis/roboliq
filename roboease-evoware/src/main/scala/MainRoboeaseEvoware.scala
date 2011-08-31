@@ -160,7 +160,7 @@ object Main extends App {
 				}
 			case Left(errors) =>
 				println("Missing information:")
-				println(errors)
+				res.kb.printErrors(errors)
 				println()
 		}
 	}

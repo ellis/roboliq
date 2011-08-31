@@ -159,4 +159,19 @@ class KnowledgeBase {
 			Left(errors)
 		}
 	}
+	
+	def printErrors(errors: Errors) {
+		val grouped: Map[Obj, Errors] = errors.groupBy(_._1)
+		val errors2 = grouped.map(pair => pair._1 -> pair._2.flatMap(_._2))
+		val sorted = errors2.toSeq.sortBy(pair => m_setups(pair._1).getLabel(this))
+		sorted.foreach(printError)
+	}
+	
+	def printError(pair: Tuple2[Obj, Seq[String]]) {
+		val (obj, ls) = pair
+		println(m_setups(obj).getLabel(this))
+		for (s <- ls) {
+			println("\t"+s)
+		}
+	}
 }

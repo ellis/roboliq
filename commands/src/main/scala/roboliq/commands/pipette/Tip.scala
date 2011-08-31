@@ -13,7 +13,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	
 	override def compare(that: Tip): Int = this.index - that.index
 	
-	def createSetup() = new Setup
+	def createSetup() = new Setup(this)
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val conf = new TipConfigL2(this, index)
@@ -90,6 +90,8 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 
 	// For use in L3P_Pipette
 	def stateWriter(map: HashMap[_ <: Obj, _ <: ObjState]) = new StateWriter(map.asInstanceOf[HashMap[Obj, ObjState]])
+	
+	override def toString = "Tip"+(index+1)
 }
 
 class TipConfigL2(
@@ -121,8 +123,10 @@ case class TipStateL2(
 	override def compare(that: TipStateL2): Int = conf.obj.compare(that.conf.obj)
 }
 
-class TipSetup extends ObjSetup {
+class TipSetup(val obj: Tip) extends ObjSetup {
 	var sPermanentType_? : Option[String] = None
+
+	override def getLabel(kb: KnowledgeBase): String = obj.toString
 }
 
 object TipSet {

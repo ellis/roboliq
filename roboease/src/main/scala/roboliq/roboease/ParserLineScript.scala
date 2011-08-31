@@ -85,6 +85,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					val sLiquid = plateSetup.sLabel_?.get + "#" + wellSetup.index_?.get
 					val liquid = new Liquid(sLiquid, false, true, Set())
 					wellSetup.liquid_? = Some(liquid)
+					wellSetup.nVolume_? = Some(0)
 			}
 		}
 		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)

@@ -6,7 +6,9 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 
-trait ObjSetup
+trait ObjSetup {
+	def getLabel(kb: KnowledgeBase): String
+}
 trait ObjConfig
 trait ObjState
 
@@ -61,7 +63,7 @@ class Well extends Obj { thisObj =>
 	type Config = WellConfigL2
 	type State = WellStateL2
 	
-	def createSetup() = new Setup
+	def createSetup() = new Setup(this)
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		Left(Seq("well configs must be created separately"))
 	}
@@ -198,7 +200,7 @@ case class WellStateL2(
 	val nVolume: Double
 ) extends ObjState
 
-class WellSetup extends ObjSetup {
+class WellSetup(val obj: Well) extends ObjSetup {
 	var sLabel_? : Option[String] = None
 	var holder_? : Option[Plate] = None
 	var index_? : Option[Int] = None
@@ -206,6 +208,22 @@ class WellSetup extends ObjSetup {
 	var liquid_? : Option[Liquid] = None
 	var nVolume_? : Option[Double] = None
 	
+	override def getLabel(kb: KnowledgeBase): String = {
+		sLabel_? match {
+			case Some(s) => s
+			case None => toString
+		}
+		/*
+		val sPlateLabel_? = holder_? match {
+			case None => None
+			case Some(holder) =>
+				kb.getPlateSetup(holder).sLabel_?
+		}
+		(sPlateLabel_?, sLabel_?) match {
+			case (Some(sPlate), Some(sWell)) =>
+				sPlate + ":" + sLabel_?
+		}*/
+	}
 	override def toString = sLabel_?.toString + " " + liquid_?
 }
 
@@ -215,7 +233,7 @@ class Plate extends Obj {
 	type Config = PlateConfigL2
 	type State = PlateStateL2
 	
-	def createSetup() = new Setup
+	def createSetup() = new Setup(this)
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
@@ -279,10 +297,17 @@ class PlateConfigDimensionL4(
 	val wells: Seq[Well]
 )
 
-class PlateSetup extends ObjSetup {
+class PlateSetup(val obj: Plate) extends ObjSetup {
 	var sLabel_? : Option[String] = None
 	var dim_? : Option[PlateConfigDimensionL4] = None
 	var location_? : Option[String] = None
+	
+	override def getLabel(kb: KnowledgeBase): String = {
+		sLabel_? match {
+			case Some(s) => s
+			case None => toString
+		}
+	}
 }
 
 class PlateProxy(kb: KnowledgeBase, obj: Plate) {

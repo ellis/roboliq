@@ -175,7 +175,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val actions = new ArrayBuffer[Action]
 			actions ++= actionsA
 			actions ++= actionsDM
-			var bFirst = true
+			var bFirst = cycles.isEmpty
 			for (action <- actions) {
 				val specs_? = action match {
 					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item))
@@ -211,8 +211,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 							}
 					}
 				}
+				bFirst = false
 			}
 			// Prepend the clean action
+			//println(mapTipToCleanSpec.toMap)
 			actions.insert(0, Clean(mapTipToCleanSpec.toMap))
 			
 			val cmds = createCommands(actions, cmd.args.mixSpec_?)
@@ -336,7 +338,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				println("TIPS:", tips)
 				cmd.args.items.foreach(item => println(item.dest, item.srcs.head))
 				// ENDFIX*/
-				aspirate_chooseTipWellPairs_direct(states, tips, mapTipToSrcs)
+				aspirate_chooseTipWellPairs_direct(states, mapTipToSrcs)
 			}
 		}
 		val actions = for (tws <- twss) yield {
@@ -481,9 +483,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		PipetteHelper.chooseTipSrcPairs(states, tips, srcs2)
 	}
 
-	private def aspirate_chooseTipWellPairs_direct(states: StateMap, tips: SortedSet[TipConfigL2], srcs: collection.Map[TipConfigL2, Set[WellConfigL2]]): Seq[Seq[TipWell]] = {
+	private def aspirate_chooseTipWellPairs_direct(states: StateMap, srcs: collection.Map[TipConfigL2, Set[WellConfigL2]]): Seq[Seq[TipWell]] = {
 		//println("srcs: "+srcs)
-		Seq(tips.toSeq.map(tip => new TipWell(tip, srcs(tip).head)))
+		val seq: Seq[TipWell] = srcs.toSeq.sortBy(_._1).map(pair => new TipWell(pair._1, pair._2.head))
+		Seq(seq)
 	}
 	
 	/*private def aspirate_createCommands(states: RobotState, twss: Seq[Seq[TipWell]]): Either[String, Seq[L2C_Aspirate]] = {
