@@ -157,6 +157,12 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			// aspirate
 			val mapTipToVolume = tips.toSeq.map(tip => tip -> -tip.state(builder).nVolume).toMap
 			val mapTipToSrcs = actionsD.flatMap(_.items.map(item => item.tip -> mapDestToItem(item.well).srcs)).toMap
+			/*// FIXME: for debug only
+			if (Set(mapTipToSrcs.values.toSeq : _*).size != 1) {
+				println("Tips to dests:")
+				actionsD.foreach(_.items.foreach(item => println(item.tip -> item.well)))
+			}
+			// ENDFIX*/
 			val actionsA: Seq[Aspirate] = aspirate(stateCycle0, tips, mapTipToSrcs, mapTipToVolume) match {
 				case Left(lsErrors) => return Left(lsErrors)
 				case Right(acts) => acts
@@ -325,8 +331,13 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		val twss = {
 			if (bAllSameSrcs)
 				aspirate_chooseTipWellPairs_liquid(states, tips, setSrcs.head)
-			else
+			else {
+				/*// FIXME: for debug only
+				println("TIPS:", tips)
+				cmd.args.items.foreach(item => println(item.dest, item.srcs.head))
+				// ENDFIX*/
 				aspirate_chooseTipWellPairs_direct(states, tips, mapTipToSrcs)
+			}
 		}
 		val actions = for (tws <- twss) yield {
 			aspirate_createItems(states, mapTipToVolume, tws) match {
@@ -471,6 +482,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	}
 
 	private def aspirate_chooseTipWellPairs_direct(states: StateMap, tips: SortedSet[TipConfigL2], srcs: collection.Map[TipConfigL2, Set[WellConfigL2]]): Seq[Seq[TipWell]] = {
+		//println("srcs: "+srcs)
 		Seq(tips.toSeq.map(tip => new TipWell(tip, srcs(tip).head)))
 	}
 	

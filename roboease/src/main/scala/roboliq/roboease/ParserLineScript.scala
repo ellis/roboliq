@@ -74,6 +74,19 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			shared.addError("lists of souces and destinations have the same dimensions")
 			return
 		}
+		// If source well is empty, create a new liquid for the well
+		for (pi <- srcs) {
+			val well = getWell(pi)
+			val plateSetup = kb.getPlateSetup(pi._1)
+			val wellSetup = kb.getWellSetup(well)
+			wellSetup.liquid_? match {
+				case Some(_) =>
+				case None =>
+					val sLiquid = plateSetup.sLabel_?.get + "#" + wellSetup.index_?.get
+					val liquid = new Liquid(sLiquid, false, true, Set())
+					wellSetup.liquid_? = Some(liquid)
+			}
+		}
 		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
 	}
 	
@@ -104,6 +117,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			else
 				wells2.map(_ -> volumes.head)
 		}
+		wells2.foreach(well => kb.addWell(well, false)) // Indicate that these wells are destinations
 		
 		val sLiquidClass_? = {
 			if (sLiquidClass == "DEFAULT")
@@ -160,6 +174,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				(srcs zip wvs).map(pair => {
 					val (pi, (dest, nVolume)) = pair
 					val src = getWell(pi)
+					kb.addWell(src, true) // Indicate that this well is a source
 					new L4A_PipetteItem(WPL_Well(src), WP_Well(dest), nVolume)
 				})
 			case Some(liq) =>

@@ -46,6 +46,7 @@ class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
 		val wells = pc.dim_?.get.wells.toIndexedSeq
 		for (iWell <- (iWell until iWellEnd)) {
 			val well = wells(iWell)
+			kb.addWell(well, true) // Indicate that it's a source
 			kb.getWellSetup(well).liquid_? = Some(liq)
 			//println(kb.getWellSetup(well))
 		}

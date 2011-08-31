@@ -1,5 +1,7 @@
 package roboliq.commands.pipette
 
+import scala.collection.immutable.SortedSet
+
 import roboliq.common._
 
 
@@ -47,11 +49,22 @@ case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3 {
 		if (srcs.size == 1) {
 			val sSrcs = getWellsDebugString(srcs.head)
 			val sDests = getWellsDebugString(args.items.map(_.dest))
-			val volumes = args.items.groupBy(_.nVolume)
-			getClass().getSimpleName() + List(sSrcs, sDests, volumes.keys).mkString("(", ", ", ")")
+			val sVolumes = getSeqDebugString(args.items.map(_.nVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
-		else
-			toString
+		else if (args.items.forall(_.srcs.size == 1)) {
+			val sSrcs = getWellsDebugString(args.items.map(_.srcs.head))
+			val sDests = getWellsDebugString(args.items.map(_.dest))
+			val sVolumes = getSeqDebugString(args.items.map(_.nVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+		else {
+			val lsSrcs = args.items.map(item => getWellsDebugString(item.srcs))
+			val sSrcs = getSeqDebugString(lsSrcs)
+			val sDests = getWellsDebugString(args.items.map(_.dest))
+			val sVolumes = getSeqDebugString(args.items.map(_.nVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
 		/*val (tip0, tip1) = (items.head.tip, items.last.tip)
 		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
 		val volumes = items.groupBy(_.nVolume)
@@ -131,7 +144,7 @@ case class L4A_PipetteItem(
 						if (plate1.state(states).conf.nWells != plate1.state(states).conf.nWells)
 							Left(Seq("source and destination plates must have the same number of wells"))
 						else {
-							val items = (srcs3.toSeq zip dests3.toSeq).map(pair => new L3A_PipetteItem(Set(pair._1), pair._2, nVolume))
+							val items = (srcs3.toSeq zip dests3.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, nVolume))
 							Right(items)
 						}
 				}
@@ -142,7 +155,7 @@ case class L4A_PipetteItem(
 }
 
 case class L3A_PipetteItem(
-		val srcs: Set[WellConfigL2],
+		val srcs: SortedSet[WellConfigL2],
 		val dest: WellConfigL2,
 		val nVolume: Double
 		)
