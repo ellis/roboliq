@@ -120,7 +120,8 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 
 			// First dispense
 			dispense(builder.toImmutable, mapTipToSrcLiquid.toMap, mapTipToCleanSpec.toMap, mapTipToType, tws0) match {
-				case Left(lsErrors) => Left(lsErrors)
+				case Left(lsErrors) =>
+					return Left(lsErrors)
 				case Right(res) =>
 					builder.map ++= res.states.map
 					mapTipToSrcLiquid ++= res.mapTipToSrcLiquid
@@ -130,7 +131,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			
 			// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
 			val twssRest = twss.tail.dropWhile(tws => {
-				dispense(builder.toImmutable, mapTipToSrcLiquid.toMap, mapTipToCleanSpec.toMap, mapTipToType, tws0) match {
+				dispense(builder.toImmutable, mapTipToSrcLiquid.toMap, mapTipToCleanSpec.toMap, mapTipToType, tws) match {
 					case Left(lsErrors) =>
 						false
 					case Right(res) =>
@@ -150,8 +151,8 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				// TODO: drop tips
 			}
 
-			val src00 = srcs0.head._2
-			val bAllSameSrcs = srcs0.values.forall(_ == src00)
+			val liquid0 = mapTipToSrcLiquid.head._2
+			val bAllSameSrcs = mapTipToSrcLiquid.values.forall(_ == liquid0)
 			val sError2_? = {
 				if (bAllSameSrcs)
 					aspirateLiquid(cycle, tipStates, src00)
@@ -194,26 +195,32 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		mapTipToType: Map[TipConfigL2, String],
 		tws: Seq[TipWell]
 	): Either[Seq[String], DispenseResult] = {
-		val builder = new StateBuilder(states0)
-		
+		val builder = new StateBuilder(states0)		
 		val mapTipToSrcLiquid = HashMap(mapTipToSrcLiquid0.toSeq : _*)
 		val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
+		
 		// each tip still has the same set of source wells (or it's a tip which hasn't been used yet)
 		val bLiquidSame = tws.forall(tw => {
 			val liquid = mapDestToItem(tw.well).srcs.head.obj.state(builder).liquid
-			// FIXME: map should only be updated if the entire method succeeds
 			val liquidPrev = mapTipToSrcLiquid.getOrElseUpdate(tw.tip, liquid)
+			hmm... get rid of mapTipToSrcLiquid and use tipState instead?
 			liquid eq liquidPrev
 		})
 		if (!bLiquidSame)
 			return Left(Seq("INTERNAL: Error code dispense 1"))
 		
 		dispense_createItems(builder, tws) match {
-			case Left(sError) => return Left(Seq(sError))
+			case Left(sError) =>
+				return Left(Seq(sError))
 			case Right(items) =>
 				items.foreach(item => {
+					// Update state
+					item.tip.obj.stateWriter(builder).dispense(mapTipToSrcLiquid(item.tip), item.nVolume)
+					item.well.obj.stateWriter(builder).add(mapTipToSrcLiquid(item.tip), item.nVolume)
+					// Check whether this dispense would require a cleaning
 					getDispenseCleanSpec(builder, mapTipToType, tipOverrides, item) match {
-						case spec: ReplaceSpec2 =>
+						case None =>
+						case Some(spec: ReplaceSpec2) =>
 							mapTipToCleanSpec.get(item.tip) match {
 								case Some(specPrev) =>
 									return Left(Seq("INTERNAL: Error code dispense 2"))
@@ -286,6 +293,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		
 	}*/
 	
+	/*
 	private def dispense(cycle: CycleState, builder: StateBuilder, srcs: collection.Map[TipConfigL2, Liquid], tws: Seq[TipWell]): Option[String] = {
 		dispense_checkVols(cycle, builder, srcs, tws) match {
 			case None =>
@@ -301,9 +309,10 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				None
 		}
 	}
+	*/
 	
 	// Check for appropriate volumes
-	private def dispense_checkVols(cycle: CycleState, builder: StateBuilder, srcs: collection.Map[TipConfigL2, Liquid], tws: Seq[TipWell]): Option[String] = {
+	private def dispense_checkVols(builder: StateBuilder, srcs: collection.Map[TipConfigL2, Liquid], tws: Seq[TipWell]): Option[String] = {
 		assert(!tws.isEmpty)
 		var sError_? : Option[String] = None
 		
