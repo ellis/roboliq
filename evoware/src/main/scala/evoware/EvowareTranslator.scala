@@ -140,7 +140,10 @@ class EvowareTranslator(mapper: EvowareMapper) {
 						}
 				}
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				assert(equidistant(items) || items.forall(_.well eq twvp0.well))
+				val bEquidistant = equidistant(items)
+				val bSameWell = items.forall(_.well eq twvp0.well)
+				if (!bEquidistant && !bSameWell)
+					return Left(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Command.getWellsDebugString(items.map(_.well))))
 				
 				spirateChecked(items, sFunc, sLiquidClass)
 		}

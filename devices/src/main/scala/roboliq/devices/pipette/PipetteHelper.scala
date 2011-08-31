@@ -275,7 +275,7 @@ object PipetteHelper {
 		else WashIntensity.None
 	}
 
-	def choosePreAsperateReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
+	def choosePreAspirateReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
 		// If there is no tip, then we'll need to get a new one
 		if (tipState.sType_?.isEmpty) {
 			true
@@ -299,7 +299,7 @@ object PipetteHelper {
 			false
 	}
 	
-	def choosePreAsperateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
+	def choosePreAspirateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
 		val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
 		val bOutsideOk = tipState.destsEntered.forall(liq => liq.eq(Liquid.empty) || liq.eq(liquidInWell))
 		val washIntensity = tipOverrides.washIntensity_? match {

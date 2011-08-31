@@ -35,13 +35,14 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	case class SrcTipDestVolume(src: WellConfigL2, tip: TipConfigL2, dest: WellConfigL2, nVolume: Double)
 	
 	class CycleState(val tips: SortedSet[TipConfigL2], val state0: RobotState) extends super.CycleState {
-		override def toTokenSeq: Seq[Command] = gets ++ washs ++ mixes
+		//override def toTokenSeq: Seq[Command] = gets ++ washs ++ mixes
 	}
 	
 	val dests = SortedSet[WellConfigL2](args.items.map(_.well).toSeq : _*)
 	val mapDestToItem: Map[WellConfigL2, L3A_MixItem] = args.items.map(t => t.well -> t).toMap
 
-	protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = {
+	protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = Left(Seq("NnNNOOOO"))
+	/*protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = {
 		// For each dispense, pick the top-most destination wells available in the next column
 		// Break off dispense batch if any tips cannot fully dispense volume
 		val cycles = new ArrayBuffer[CycleState]
@@ -94,7 +95,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 				// TODO: optimize aspiration
 				Right(cycles)
 		}
-	}
+	}*/
 	
 	private def mix(cycle: CycleState, tipStates: HashMap[Tip, TipStateL2], tws: Seq[TipWell]): Option[String] = {
 		mix_checkVols(cycle, tipStates, tws) match {

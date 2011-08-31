@@ -5,15 +5,7 @@ import scala.collection.immutable.SortedSet
 trait Command {
 	def toDebugString = toString
 	
-	def getWellsDebugString(wells: Iterable[WellConfigL2]): String = {
-		val sorted = wells.toSeq.sortBy(identity)
-		val mapPlateToWell = sorted.groupBy(_.holder)
-		val lsPlates = for ((plate, wells) <- mapPlateToWell) yield {
-			val lsWells = Command.getWellStrings(wells.toList)
-			plate.sLabel + ":" + lsWells.mkString(",")
-		}
-		lsPlates.mkString(";")
-	}
+	def getWellsDebugString(wells: Iterable[WellConfigL2]): String = Command.getWellsDebugString(wells)
 	
 	def getSeqDebugString[T](seq: Seq[T]): String = {
 		seq match {
@@ -29,6 +21,16 @@ trait Command {
 }
 
 object Command {
+	def getWellsDebugString(wells: Iterable[WellConfigL2]): String = {
+		val sorted = wells.toSeq//.sortBy(identity)
+		val mapPlateToWell = sorted.groupBy(_.holder)
+		val lsPlates = for ((plate, wells) <- mapPlateToWell) yield {
+			val lsWells = Command.getWellStrings(wells.toList)
+			plate.sLabel + ":" + lsWells.mkString(",")
+		}
+		lsPlates.mkString(";")
+	}
+	
 	private def getWellStrings(wells: List[WellConfigL2]): List[String] = {
 		wells match {
 			case Nil => Nil

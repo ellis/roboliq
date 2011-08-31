@@ -23,13 +23,12 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	
 	override def toDebugString = {
 		val (tip0, tip1) = (items.head.tip, items.last.tip)
-		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
-		val volumes = items.groupBy(_.nVolume)
 		val policies = items.groupBy(_.policy.sName)
-		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
+		if (policies.size == 1) {
 			val wells = items.map(_.well)
 			val sTips = TipSet.toDebugString(items.map(_.tip))
-			getClass().getSimpleName() + "("+sTips+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
+			val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
+			getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
 		}
 		else {
 			toString

@@ -112,7 +112,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			//val mapTipToSrcLiquid = HashMap(tws0.map(tw => tw.tip -> mapDestToItem(tw.well).srcs.head.obj.state(stateCycle0).liquid) : _*)
 			val mapTipToCleanSpec = new HashMap[TipConfigL2, CleanSpec2]
 			//val actions = new ArrayBuffer[Action]
-			val actionsA = new ArrayBuffer[Aspirate]
+			//val actionsA = new ArrayBuffer[Aspirate]
 			val actionsD = new ArrayBuffer[Dispense]
 			//mapTipToSrcs ++= tws0.map(tw => tw.tip -> mapDestToItem(tw.well).srcs)
 			
@@ -154,11 +154,12 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					
 			}
 			
-			// TODO: aspirate
+			// aspirate
+			val mapTipToVolume = tips.toSeq.map(tip => tip -> -tip.state(builder).nVolume).toMap
 			val mapTipToSrcs = actionsD.flatMap(_.items.map(item => item.tip -> mapDestToItem(item.well).srcs)).toMap
-			aspirate(stateCycle0, tips, mapTipToSrcs) match {
+			val actionsA: Seq[Aspirate] = aspirate(stateCycle0, tips, mapTipToSrcs, mapTipToVolume) match {
 				case Left(lsErrors) => return Left(lsErrors)
-				case Right(acts) => actionsA ++= acts
+				case Right(acts) => acts
 			}
 
 			// Now we know all the dispenses and mixes we'll perform,
@@ -168,29 +169,31 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			val actions = new ArrayBuffer[Action]
 			actions ++= actionsA
 			actions ++= actionsDM
+			var bFirst = true
 			for (action <- actions) {
-				val items = action.asInstanceOf[Dispense].items
-				for (item <- items) {
-					FIXME: handle aspirates and mixes too
-					
-					val pos = args.mixSpec_? match {
-						case None => item.policy.pos
-						case _ => PipettePosition.WetContact
-					}
-					// Check whether this dispense would require a cleaning
-					getDispenseCleanSpec(stateCycle0, mapTipToType, tipOverrides, item.tip, item.well, pos) match {
-						case None =>
-						case Some(spec: ReplaceSpec2) =>
-							mapTipToCleanSpec(item.tip) = spec
-						case Some(spec: WashSpec2) =>
-							mapTipToCleanSpec.get(item.tip) match {
+				val specs_? = action match {
+					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item))
+					case Dispense(items) => items.map(item => getDispenseCleanSpec(stateCycle0, mapTipToType, tipOverrides, item.tip, item.well, item.policy.pos))
+					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item.tip, item.well))
+				}
+				val specs = specs_?.flatMap(_ match {
+					case None => Seq()
+					case Some(spec) => Seq(spec)
+				})
+				for (cleanSpec <- specs) {
+					val tip = cleanSpec.tip
+					cleanSpec match {
+						case spec: ReplaceSpec2 =>
+							mapTipToCleanSpec(tip) = spec
+						case spec: WashSpec2 =>
+							mapTipToCleanSpec.get(tip) match {
 								case None =>
-									mapTipToCleanSpec(item.tip) = spec
+									mapTipToCleanSpec(tip) = spec
 								case Some(specPrev: WashSpec2) =>
 									val wash = spec.spec
 									val washPrev = specPrev.spec
-									mapTipToCleanSpec(item.tip) = new WashSpec2(
-										item.tip,
+									mapTipToCleanSpec(tip) = new WashSpec2(
+										tip,
 										new WashSpec(
 											if (wash.washIntensity >= washPrev.washIntensity) wash.washIntensity else washPrev.washIntensity,
 											washPrev.contamInside ++ wash.contamInside,
@@ -206,9 +209,9 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			// Prepend the clean action
 			actions.insert(0, Clean(mapTipToCleanSpec.toMap))
 			
-			createCommands(actions, cmd.args.mixSpec_?)
+			val cmds = createCommands(actions, cmd.args.mixSpec_?)
 			
-			getUpdatedState(cycle) match {
+			getUpdatedState(cycle, cmds) match {
 				case Right(stateNext) => 
 					cycles += cycle
 					createCycles(twssRest, stateNext)
@@ -314,7 +317,8 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	private def aspirate(
 		states: StateMap,
 		tips: SortedSet[TipConfigL2],
-		mapTipToSrcs: Map[TipConfigL2, Set[WellConfigL2]]
+		mapTipToSrcs: Map[TipConfigL2, Set[WellConfigL2]],
+		mapTipToVolume: Map[TipConfigL2, Double]
 	): Either[Seq[String], Seq[Aspirate]] = {
 		val setSrcs = Set(mapTipToSrcs.values.toSeq : _*)
 		val bAllSameSrcs = (setSrcs.size == 1)
@@ -325,7 +329,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				aspirate_chooseTipWellPairs_direct(states, tips, mapTipToSrcs)
 		}
 		val actions = for (tws <- twss) yield {
-			aspirate_createItems(states, tws) match {
+			aspirate_createItems(states, mapTipToVolume, tws) match {
 				case Left(sError) =>
 					return Left(Seq(sError))
 				case Right(items) =>
@@ -482,13 +486,12 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		Right(cmds)
 	}*/
 	
-	private def aspirate_createItems(states: StateMap, tws: Seq[TipWell]): Either[String, Seq[L2A_SpirateItem]] = {
+	private def aspirate_createItems(states: StateMap, mapTipToVolume: Map[TipConfigL2, Double], tws: Seq[TipWell]): Either[String, Seq[L2A_SpirateItem]] = {
 		val items = tws.map(tw => {
 			getAspiratePolicy(states, tw) match {
 				case Left(sError) => return Left(sError)
 				case Right(policy) =>
-					val tipState = tw.tip.obj.state(states)
-					new L2A_SpirateItem(tw.tip, tw.well, -tipState.nVolume, policy)
+					new L2A_SpirateItem(tw.tip, tw.well, mapTipToVolume(tw.tip), policy)
 			}
 		})
 		Right(items)
