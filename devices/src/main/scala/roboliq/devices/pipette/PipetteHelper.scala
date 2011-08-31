@@ -292,7 +292,7 @@ object PipetteHelper {
 	
 	def choosePreDispenseReplacement(tipState: TipStateL2, liquidInWell: Liquid): Boolean = {
 		assert(tipState.sType_?.isDefined)
-		val bOutsideOk = tipState.destsEntered.forall(liq => liq.eq(Liquid.empty) || liq.eq(liquidInWell))
+		val bOutsideOk = tipState.destsEntered.forall(liq => liq.eq(Liquid.empty) || liq.eq(liquidInWell)) && tipState.srcsEntered.isEmpty
 		if (!bOutsideOk)
 			true
 		else
@@ -301,7 +301,7 @@ object PipetteHelper {
 	
 	def choosePreAspirateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
 		val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
-		val bOutsideOk = tipState.destsEntered.forall(liq => liq.eq(Liquid.empty) || liq.eq(liquidInWell))
+		val bOutsideOk = tipState.destsEntered.forall(_ eq Liquid.empty) && tipState.srcsEntered.forall(_ eq Liquid.empty)
 		val washIntensity = tipOverrides.washIntensity_? match {
 			case Some(v) => v
 			case None =>
@@ -320,7 +320,7 @@ object PipetteHelper {
 	}
 	
 	def choosePreDispenseWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2, pos: PipettePosition.Value): Option[WashSpec] = {
-		val bOutsideOk = tipState.destsEntered.forall(liq => liq.eq(Liquid.empty) || liq.eq(liquidInWell))
+		val bOutsideOk = tipState.destsEntered.forall(liq => liq.eq(Liquid.empty) || liq.eq(liquidInWell)) && tipState.srcsEntered.isEmpty
 		val washIntensity = tipOverrides.washIntensity_? match {
 			case Some(v) => v
 			case None =>

@@ -127,7 +127,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				Some(sLiquidClass)
 		}
 		
-		var sMixClass_? : Option[String] = None
+		var mixSpec_? : Option[MixSpec] = None
 		var sTipKind_? : Option[String] = None
 		var tipOverrides_? : Option[TipHandlingOverrides] = None
 		opts_? match {
@@ -141,11 +141,17 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					sOptName match {
 						case "MIX" =>
 							args match {
-								case Seq(lc, spec) =>
-									sMixClass_? = Some(lc)
+								case Seq(lc, sVolAndCount) =>
+									sVolAndCount.split("x") match {
+										case Array(sCount, sVol) =>
+											mixSpec_? = Some(MixSpec(sVol.toDouble, sCount.toInt, Some(lc)))
+										case _ =>
+											shared.addError("unrecognized MIX parameter \""+sVolAndCount+"\"")
+											return
+									}
 									// TODO: handle spec
 								case Seq(lc) =>
-									sMixClass_? = Some(lc)
+									//sMixClass_? = Some(lc)
 								case _ => 
 									shared.addError("unknown MIX parameters \""+args.mkString(":")+"\"")
 									return
@@ -186,6 +192,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		}
 		val args = new L4A_PipetteArgs(
 			items,
+			mixSpec_? = mixSpec_?,
 			tipOverrides_? = tipOverrides_?,
 			sAspirateClass_? = sLiquidClass_?,
 			sDispenseClass_? = sLiquidClass_?,

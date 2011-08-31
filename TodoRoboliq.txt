@@ -80,8 +80,10 @@ x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 	roboease-evoware: pipette: default tip policy of always discarding
 	roboease-evoware: print out appropriate header
 	roboease translation errors:
-		Rotem_Script02.conf: need to implement mixing in L3C_Pipette
-		Rotem_Script02.conf: tips aren't replaced before each aspirate
+x		Rotem_Script02.conf: need to implement mixing in L3C_Pipette
+x		Rotem_Script02.conf: tips aren't replaced before each aspirate
+		Rotem_Script02.conf: aspirate is done differently; see if that's ok
+		Rotem_Script02.conf: our mix volume is 3 instead of 45
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
