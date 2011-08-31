@@ -17,7 +17,7 @@ private trait L3P_PipetteMixBase {
 	type Errors = Seq[String]
 
 	trait Action
-	case class Aspirate(tws: Seq[TipWell]) extends Action
+	case class Aspirate(items: Seq[L2A_SpirateItem]) extends Action
 	case class Dispense(items: Seq[L2A_SpirateItem]) extends Action
 	case class Mix(tws: Seq[TipWell]) extends Action
 	case class Clean(tips: Set[TipConfigL2]) extends Action
@@ -87,28 +87,15 @@ private trait L3P_PipetteMixBase {
 	protected def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]]
 
 	/** Create temporary tip state objects and associate them with the source liquid */
-	protected def createTemporaryTipStates(stateCycle0: RobotState, mapTipToType: Map[TipConfigL2, String], mapTipToSrcLiquid: collection.Map[TipConfigL2, Liquid], tws0: Seq[TipWell]): HashMap[Tip, TipStateL2] = {
-		// Create temporary tip state objects and associate them with the source liquid
-		val tipStates = new HashMap[Tip, TipStateL2]
-		tws0.foreach(tw => {
-			// Create clean tip state from stateCycle0
-			val tipState0 = tw.tip.obj.state(stateCycle0)
-			val tipState = tw.tip.createState0(tipState0.sType_?)
-			tipStates(tw.tip.obj) = tipState
-			
-			val tipWriter = tw.tip.obj.stateWriter(tipStates)
+	protected def cleanTipStates(builder: StateBuilder, mapTipToType: Map[TipConfigL2, String]) {
+		for ((tip, sType) <- mapTipToType) {
+			val tipWriter = tip.obj.stateWriter(builder)
 			// Get proper tip
 			if (robot.areTipsDisposable)
-				tipWriter.get(mapTipToType(tw.tip))
-			// Associate liquid by "aspirating" 0 ul of it
-			mapTipToSrcLiquid.get(tw.tip) match {
-				case Some(liquid) => tipWriter.aspirate(liquid, 0)
-				case _ =>
-			}
-		})
-		tipStates
+				tipWriter.get(sType)
+			tipWriter.clean(WashIntensity.Decontaminate)
+		}
 	}
-	
 	
 	protected def dispense_updateTipStates(cycle: CycleState, twvps: Seq[L2A_SpirateItem], builder: StateBuilder) {
 		// Add volumes to amount required in tips
@@ -185,37 +172,39 @@ private trait L3P_PipetteMixBase {
 	}
 	
 	protected def getDispenseCleanSpec(
-		builder: StateBuilder,
+		states: StateMap,
 		mapTipToType: Map[TipConfigL2, String],
 		overrides: TipHandlingOverrides,
-		item: L2A_SpirateItem
+		tip: TipConfigL2,
+		dest: WellConfigL2,
+		pos: PipettePosition.Value
 	): Option[CleanSpec2] = {
 		if (robot.areTipsDisposable) {
-			val tipState = item.tip.obj.state(builder)
+			val tipState = tip.obj.state(states)
 			val bReplace = overrides.replacement_? match {
 				case Some(TipReplacementPolicy.ReplaceAlways) => true
 				case Some(TipReplacementPolicy.KeepBetween) => false
 				case Some(TipReplacementPolicy.KeepAlways) => false
 				case None =>
-					if (item.policy.pos == PipettePosition.Free || item.policy.pos == PipettePosition.DryContact)
+					if (pos == PipettePosition.Free || pos == PipettePosition.DryContact)
 						false
 					else
 						PipetteHelper.choosePreDispenseReplacement(tipState)
 			}
 			if (bReplace)
-				Some(ReplaceSpec2(item.tip))
+				Some(ReplaceSpec2(tip))
 			else
 				None
 		}
 		else {
 			val washIntensityDefault = WashIntensity.Light
-			val tipState = item.tip.obj.state(builder)
-			val destState = item.well.obj.state(builder)
+			val tipState = tip.obj.state(states)
+			val destState = dest.obj.state(states)
 			val destLiquid = destState.liquid
-			PipetteHelper.choosePreDispenseWashSpec(overrides, washIntensityDefault, destLiquid, tipState, item.policy.pos) match {
+			PipetteHelper.choosePreDispenseWashSpec(overrides, washIntensityDefault, destLiquid, tipState, pos) match {
 				case None => None
 				case Some(wash) =>
-					Some(WashSpec2(item.tip, wash))
+					Some(WashSpec2(tip, wash))
 			}
 		}
 	}

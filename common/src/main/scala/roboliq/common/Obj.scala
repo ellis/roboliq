@@ -30,7 +30,7 @@ abstract class Obj {
 	def getConfigL2(map31: ObjMapper): Option[Config] = map31.configL2(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
 	def getState0L2(map31: ObjMapper): Option[State] = map31.state0L4(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
 	
-	def state(states: RobotState): State = states(this).asInstanceOf[State]
+	def state(states: StateMap): State = states(this).asInstanceOf[State]
 }
 
 sealed class Setting[T] {
@@ -141,7 +141,6 @@ class Well extends Obj { thisObj =>
 	}
 	//def stateWriter(map: HashMap[ThisObj, StateL2]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
 /*
@@ -251,7 +250,6 @@ class Plate extends Obj {
 		def location_=(location: String) { map(thisObj) = state.copy(location = location) }
 	}
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	def state(state: StateBuilder): State = state.map(this).asInstanceOf[State]
 }
 
 class PlateConfigL2(
