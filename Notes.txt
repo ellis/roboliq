@@ -104,7 +104,7 @@ CompleteYeastTransformation
 		transfer plate B back to vacuum carrier
 		?? Why?
 	Plating
-		REQUITE: Plate C for plating cells
+		REQUIRE: Plate C for plating cells
 		wash fast 25+4ml
 		wash 4+1ml
 		transport plate C to shaker, remove its lid
@@ -113,56 +113,6 @@ CompleteYeastTransformation
 		A: need to specify the RPMs
 		plate 50µl from plate B to plate C, 5 drops per well, decontaminate before, between, after
 
-
-MINIMAL
--------
-	Initial supplies: A, B, C
-	intermediate tubes: D, E, F
-	
-	decontaminateTips
-	pipette 1 A to D
-	pipette 2 B to D
-	mix D
-	pcr D
-	pipette 1 C to D
-	pipette all D to E
-	vacuum E
-	pipette_while_shaking all E to F 5-drops-per-well
-	seal F
-	read F
-	peel F
-------------
-	decontaminate
-	pipette {
-		source = A,
-		target = D,
-		volume = 1,
-		cleanPolicy = wash
-	}
-	pipette {
-		source = B,
-		target = D,
-		volume = 2,
-		cleanPolicy = decontaminate
-	}
-	mix D
-	pcr D
-	pipette {
-		source = C,
-		target = D,
-		volume = 1,
-		cleanPolicy = clean
-	}
-	pipette {
-		source = D,
-		target = E,
-		volume = all
-	}
-	vacuum E
-	pipette_while_shaking all E to F 5-drops-per-well
-	seal F
-	read F
-	peel F
 
 
 ==========
