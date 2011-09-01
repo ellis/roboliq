@@ -70,9 +70,10 @@ x	devices: L3P_Pipette: use liquid class overrides
 x	devices: L3P_Pipette: GetDITI2(124,"DiTi 1000ul",1,0,0,0); should have mask 127!
 x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 ?	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
-	devices: set initial tip type in TipState for fixed tips
+2	devices: set initial tip type in TipState for fixed tips
 x	devices: L3P_Pipette: implement mixing option
-	devices: L3P_Mix: get it working again
+	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
+1	devices: L3P_Mix: get it working again
 	devices: create tests for PipetteHelperL3
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts
