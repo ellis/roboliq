@@ -10,19 +10,19 @@ import roboliq.devices.pipette._
 import _root_.evoware._
 
 
-class WeizmannPipetteDevice extends PipetteDevice {
-	private val tipSpec10 = new TipSpec("DiTi 10ul", 10, 0, 9)
-	private val tipSpec20 = new TipSpec("DiTi 20ul", 20, 0, 18)
-	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 1, 45)
-	private val tipSpec200 = new TipSpec("DiTi 200ul", 200, 2, 190)
-	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 960)
-	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 0, 960)
-	//private val tipSpecs = Seq(tipSpec10, tipSpec20, tipSpec50, tipSpec200, tipSpec1000)
-	private val tipSpecs = Seq(tipSpec1000)
+class BssePipetteDevice extends PipetteDevice {
+	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 0.01, 45)
+	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 2, 950)
+	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 0, 950)
+	private val tipSpecs = Seq(tipSpec50, tipSpec1000)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = tipSpecs,
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
-		tipGroups = tipSpecs.map(spec => (0 to 7).map(i => i -> spec))
+		tipGroups = {
+			val g1000 = (0 to 3).map(i => i -> tipSpec1000).toSeq
+			val g50 = (4 to 7).map(i => i -> tipSpec50).toSeq
+			Seq(g1000, g50, g1000 ++ g50)
+		}
 	)
 	private val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
 	private val mapPipetteSpecs = Seq(
@@ -34,7 +34,7 @@ class WeizmannPipetteDevice extends PipetteDevice {
 			PipetteSpec("PIE_MIX_AUT", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact)
 			).map(spec => spec.sName -> spec).toMap
 
-	def areTipsDisposable: Boolean = true
+	def areTipsDisposable: Boolean = false
 	def addKnowledge(kb: KnowledgeBase) = {
 		config.tips.foreach(kb.addObject)
 	}
@@ -85,10 +85,17 @@ class WeizmannPipetteDevice extends PipetteDevice {
 		}
 	}
 	
-	def batchesForAspirate(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {
-		items.groupBy(_.well.holder).values.toSeq
+	private case class KeySpirate(plate: PlateConfigL2, iTipType: Int) {
+		def this(item: L2A_SpirateItem) = this(item.well.holder, item.tip.index / 4)
 	}
-	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = Seq(twvps)
+	def batchesForAspirate(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {
+		items.groupBy(item => new KeySpirate(item)).values.toSeq
+	}
+	def batchesForDispense(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {
+		items.groupBy(item => new KeySpirate(item)).values.toSeq
+	}
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]] = Seq(tcs)
-	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = Seq(twvpcs)
+	def batchesForMix(items: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = {
+		items.groupBy(item => KeySpirate(item.well.holder, item.tip.index / 4)).values.toSeq
+	}
 }

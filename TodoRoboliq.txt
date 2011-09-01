@@ -49,17 +49,15 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
+	figure out how to compile external scripts conveniently
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
 	devices: add bTipPermanent to Tip or TipConfig
 	devices: set initial tip state in BSSE pipette device
-x	devices: L3P_Pipette: use liquid class overrides
-x	devices: L3P_Pipette: GetDITI2(124,"DiTi 1000ul",1,0,0,0); should have mask 127!
-x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
-x	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 1	devices: run BSSE test scripts again, and get them to work
 2	devices: set initial tip type in TipState for fixed tips
-3	devices: implement shaker
-x	devices: L3P_Pipette: implement mixing option
+3	devices: implement wait
+4	devices: implement shaker
+	devices: L3P_Wash: use extra wash volume
 	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
 	devices: L3P_Pipette: don't match tips to dests at the beginning: delay the pairing until tip state is known in order to prefer tips with less volume
 		From our translation of Rotem_Script01.conf:
@@ -67,7 +65,6 @@ x	devices: L3P_Pipette: implement mixing option
 		Dispense(7,"PIE_AUTAIR","300","300","300",0,0,0,0,0,0,0,0,0,29,1,1,"0C080000 000000000",0,0);
 		Dispense(3,"PIE_AUTAIR","300","300",0,0,0,0,0,0,0,0,0,0,29,2,1,"0C080000000000000",0,0);
 		Dispense(127,"PIE_AUTAIR","300","300","300","300","300","300","300",0,0,0,0,0,29,2,1,"0C0800000000¯00000",0,0);
-x	devices: L3P_Mix: get it working again
 	devices: create tests for PipetteHelperL3
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts
@@ -78,10 +75,6 @@ x	devices: L3P_Mix: get it working again
 	roboease-evoware: pipette: default tip policy of always discarding
 	roboease-evoware: print out appropriate header
 	roboease translation errors:
-x		Rotem_Script02.conf: need to implement mixing in L3C_Pipette
-x		Rotem_Script02.conf: tips aren't replaced before each aspirate
-x		Rotem_Script02.conf: our mix volume is 3 instead of 45
-x		Rotem_Script02.conf: bad aspirate: L2C_Aspirate(Tip4-8, 5.0, PIE_AUTAIR_LowVol, Rotem_STK3:G7+5)
 		Rotem_Script03.conf: need to be able to pipette volumes which are larger than tips used
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
