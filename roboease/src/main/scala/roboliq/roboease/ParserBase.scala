@@ -142,8 +142,11 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	}
 	
 	/** Return list of row/column tuples */
-	def plateWells2_sub0: Parser[Tuple3[Char, Int, Int]] = "[A-Z]".r~integer~"+"~integer ^^
+	def plateWells2_sub0A: Parser[Tuple3[Char, Int, Int]] = "[A-Z]".r~integer~"+"~integer ^^
 		{ case sRow~n0~"+"~n1 => (sRow.charAt(0), n0, n1) }
+	def plateWells2_sub0B: Parser[Tuple3[Char, Int, Int]] = "[A-Z]".r~integer ^^
+		{ case sRow~n0 => (sRow.charAt(0), n0, 1) }
+	def plateWells2_sub0: Parser[Tuple3[Char, Int, Int]] = plateWells2_sub0A | plateWells2_sub0B
 	def plateWells2_sub1: Parser[List[Tuple3[Char, Int, Int]]] = rep1sep(plateWells2_sub0, ",")
 	def plateWells2_sub2: Parser[List[Tuple2[Plate, Int]]] = Parser[List[Tuple2[Plate, Int]]] { input =>
 		//val p: Parser[Parser.this.~[Parser.this.~[roboliq.level3.Plate,String],List[(Char, Int, Int)]]] = (idPlate~":"~plateWells2_sub1)

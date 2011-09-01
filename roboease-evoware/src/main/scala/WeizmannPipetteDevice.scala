@@ -13,7 +13,8 @@ class WeizmannPipetteDevice extends PipetteDevice {
 	private val tipSpec20 = new TipSpec("DiTi 20ul", 20, 0, 18)
 	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 1, 45)
 	private val tipSpec200 = new TipSpec("DiTi 200ul", 200, 2, 190)
-	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 960)
+	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 960)
+	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 0, 960)
 	//private val tipSpecs = Seq(tipSpec10, tipSpec20, tipSpec50, tipSpec200, tipSpec1000)
 	private val tipSpecs = Seq(tipSpec1000)
 	val config = new PipetteDeviceConfig(
@@ -25,6 +26,7 @@ class WeizmannPipetteDevice extends PipetteDevice {
 	private val mapPipetteSpecs = Seq(
 			PipetteSpec("PIE_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
 			PipetteSpec("PIE_AUTAIR_LowVol", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
+			PipetteSpec("PIE_AUTBOT", PipettePosition.WetContact, PipettePosition.WetContact, PipettePosition.WetContact),
 			PipetteSpec("PIE_TROUGH_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
 			PipetteSpec("PIE_MIX", PipettePosition.WetContact, PipettePosition.WetContact, PipettePosition.WetContact),
 			PipetteSpec("PIE_MIX_AUT", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact)

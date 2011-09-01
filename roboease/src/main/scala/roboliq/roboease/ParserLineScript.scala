@@ -15,7 +15,9 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
-				{ case srcs ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_LOCATIONS(srcs, dests, vol, lc, opts_?) })
+				{ case srcs ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_LOCATIONS(srcs, dests, vol, lc, opts_?) }),
+			("%", restOfLine ^^
+				{ case s => run_ChecklistComment(s) })
 			)
 
 	val cmds = new ArrayBuffer[RoboeaseCommand]
@@ -82,6 +84,10 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			}
 		}
 		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
+	}
+	
+	def run_ChecklistComment(s: String) {
+		println("WARNING: % command not yet implemented")
 	}
 	
 	private def getWell(pi: Tuple2[Plate, Int]): Well = {

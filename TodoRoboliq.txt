@@ -3,10 +3,10 @@ http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structur
 Evoware commands:
 x	asperate
 x	dispense
-1a?	wash
-3a	mix
-4a	wait
-5a	shake
+x	wash
+x	mix
+	wait
+	shake
 	transfer
 	trash
 Evoware peripheral commands:
@@ -16,32 +16,18 @@ Evoware peripheral commands:
 	filter
 	centrifuge
 	...
-T1 commands:
-x	aspirate
-x	dispense
-1b?	clean
-3b?	mix
-4b	wait
-5b	shake
-	transfer
-T2 commands:
-1c?	pipette liquid
-	clean
-2a?	pipette(List[SrcDestVolume])
-2b?	copy plate
-3c?	mix
-4c	wait
-5c	shake
+Roboliq commands:
+x	pipette liquid
+x	clean
+	pipette(List[SrcDestVolume])
+	copy plate
+	mix
+	wait
+	shake
 	transfer
 	PCR
 	filter/centrifuge
 	plate (put drops on a larger plate)
-T3 commands:
-	pipette liquid (this is like T2, but allows for unset values, and doesn't continue to T1 until all values have been set)
-	...
-RoboEase commands:
-	start implementing these to see what problems I run into
-2c	copy plate
 Evoware interaction:
 	load evoware configuration
 4b	create program to monitor overall script progress
@@ -69,8 +55,10 @@ Code:
 x	devices: L3P_Pipette: use liquid class overrides
 x	devices: L3P_Pipette: GetDITI2(124,"DiTi 1000ul",1,0,0,0); should have mask 127!
 x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
-?	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
+x	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
+1	devices: run BSSE test scripts again, and get them to work
 2	devices: set initial tip type in TipState for fixed tips
+3	devices: implement shaker
 x	devices: L3P_Pipette: implement mixing option
 	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
 	devices: L3P_Pipette: don't match tips to dests at the beginning: delay the pairing until tip state is known in order to prefer tips with less volume
@@ -94,6 +82,7 @@ x		Rotem_Script02.conf: need to implement mixing in L3C_Pipette
 x		Rotem_Script02.conf: tips aren't replaced before each aspirate
 x		Rotem_Script02.conf: our mix volume is 3 instead of 45
 x		Rotem_Script02.conf: bad aspirate: L2C_Aspirate(Tip4-8, 5.0, PIE_AUTAIR_LowVol, Rotem_STK3:G7+5)
+		Rotem_Script03.conf: need to be able to pipette volumes which are larger than tips used
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
@@ -398,3 +387,8 @@ x	DIST_REAGENT2
 	MULTINAPLATE
 	RCHPLATE
 	SEQPLATE
+	%
+
+Questions for Weizmann:
+	What happens with the % (ChecklistComment) commands?
+
