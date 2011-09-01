@@ -189,6 +189,19 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	def plateWells2: Parser[List[Tuple2[Plate, Int]]] = rep1sep(plateWells2_sub2, ";") ^^
 		{ ll => ll.flatMap(l => l) }
 	
+	def valVolume_var: Parser[Double] = ident ^^
+		{ s =>
+			if (shared.mapVars.contains(s))
+				shared.mapVars(s).toDouble
+			else {
+				shared.addError("Undefined variable: "+s)
+				0
+			}
+		}
+	def valVolume_numeric: Parser[Double] = floatingPointNumber ^^
+		{ s => s.toDouble }
+	def valVolume: Parser[Double] = valVolume_var | valVolume_numeric
+	
 	def valVolumes_var: Parser[List[Double]] = ident ^^
 		{ s =>
 			if (shared.mapVars.contains(s))

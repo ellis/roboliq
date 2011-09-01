@@ -30,73 +30,83 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	type CmdType = L3C_Mix
 	
 	val args = cmd.args
+	val dests = args.wells
+	val mixSpec_? = Some(args.mixSpec)
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
+	val bMixOnly = true
 	
-	case class SrcTipDestVolume(src: WellConfigL2, tip: TipConfigL2, dest: WellConfigL2, nVolume: Double)
 	
-	class CycleState(val tips: SortedSet[TipConfigL2], val state0: RobotState) extends super.CycleState {
-		//override def toTokenSeq: Seq[Command] = gets ++ washs ++ mixes
+	override protected def mix(
+		states0: RobotState,
+		mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
+		mapTipToType: Map[TipConfigL2, String],
+		tws: Seq[TipWell]
+	): Either[Seq[String], MixResult] = {
+		mix_createItems(states0, tws) match {
+			case Left(sError) =>
+				return Left(Seq(sError))
+			case Right(items) =>
+				val builder = new StateBuilder(states0)		
+				val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
+				items.foreach(item => {
+					val tip = item.tip
+					val target = item.well
+					val tipWriter = tip.obj.stateWriter(builder)
+					val targetWriter = target.obj.stateWriter(builder)
+					val liquidTip0 = tipWriter.state.liquid
+					val liquid = targetWriter.state.liquid
+					
+					// Check liquid
+					// If the tip hasn't been used for aspiration yet, associate the source liquid with it
+					if (liquidTip0 eq Liquid.empty) {
+						tipWriter.aspirate(liquid, 0)
+					}
+					// If we would need to aspirate a new liquid, abort
+					else if (liquid ne liquidTip0) {
+						return Left(Seq("INTERNAL: Error code dispense 1"))
+					}
+					
+					// TODO: check for valid volume, i.e., not too much
+					/*dispense_checkVol(builder, tip, dest) match {
+						case Some(sError) => return Left(Seq(sError))
+						case _ =>
+					}*/
+
+					// Check whether this dispense would require a cleaning
+					val bFirst = false // NOTE: just set to false, because this will be recalculated later anyway
+					getMixCleanSpec(builder, mapTipToType, tipOverrides, bFirst, item.tip, item.well) match {
+						case None =>
+						case Some(spec) =>
+							mapTipToCleanSpec.get(item.tip) match {
+								case Some(_) =>
+									return Left(Seq("INTERNAL: Error code dispense 2"))
+								case None =>
+									mapTipToCleanSpec(item.tip) = spec
+							}
+					}
+					
+					// Update tip state
+					tipWriter.mix(liquid, item.nVolume)
+				})
+				val actions = Seq(Mix(items))
+				Right(new MixResult(builder.toImmutable, mapTipToCleanSpec.toMap, actions))
+		}
 	}
 	
-	val dests = SortedSet[WellConfigL2](args.items.map(_.well).toSeq : _*)
-	val mapDestToItem: Map[WellConfigL2, L3A_MixItem] = args.items.map(t => t.well -> t).toMap
-
-	protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = Left(Seq("NnNNOOOO"))
-	/*protected override def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[CycleState]] = {
-		// For each dispense, pick the top-most destination wells available in the next column
-		// Break off dispense batch if any tips cannot fully dispense volume
-		val cycles = new ArrayBuffer[CycleState]
-		//val state = new RobotStateBuilder(state0)
-		
-		// Pair up all tips and wells
-		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
-
-		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
-			if (twss.isEmpty)
-				return Right()
-			
-			val cycle = new CycleState(tips, stateCycle0)
-			// First tip/dest pairs for dispense
-			val tws0 = twss.head
-			
-			clean(cycle, mapTipToType, tipOverrides, cycles.isEmpty, tws0, Seq())
-
-			// Create temporary tip state objects and associate them with the source liquid
-			val tipStates: HashMap[Tip, TipStateL2] = createTemporaryTipStates(stateCycle0, mapTipToType, Map(), tws0)
-			
-			//
-			// First mix
-			//
-			val sError_? = mix(cycle, tipStates, tws0)
-			if (sError_?.isDefined) {
-				return Left(Seq(sError_?.get))
+	private def mix_createItems(states: RobotState, tws: Seq[TipWell]): Either[String, Seq[L2A_MixItem]] = {
+		val items = tws.map(tw => {
+			getMixPolicy(states, tw) match {
+				case Left(sError) => return Left(sError)
+				case Right(policy) =>
+					new L2A_MixItem(tw.tip, tw.well, args.mixSpec.nVolume, args.mixSpec.nCount, policy)
 			}
-			
-			// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
-			val twssRest = twss.tail.dropWhile(tws => {
-				// dispense does not require cleaning
-				checkNoCleanRequired(cycle, tipStates, tws) &&
-				mix(cycle, tipStates, tws).isEmpty
-			})
-			
-			getUpdatedState(cycle) match {
-				case Right(stateNext) => 
-					cycles += cycle
-					createCycles(twssRest, stateNext)
-				case Left(lsErrors) =>
-					Left(lsErrors)
-			}			
-		}
+		})
+		Right(items)
+	}
 
-		createCycles(twss0.toList, ctx.states) match {
-			case Left(e) =>
-				Left(e)
-			case Right(()) =>
-				// TODO: optimize aspiration
-				Right(cycles)
-		}
-	}*/
-	
+	//val mapDestToItem: Map[WellConfigL2, L3A_MixItem] = args.items.map(t => t.well -> t).toMap
+
+	/*
 	private def mix(cycle: CycleState, tipStates: HashMap[Tip, TipStateL2], tws: Seq[TipWell]): Option[String] = {
 		mix_checkVols(cycle, tipStates, tws) match {
 			case None =>
@@ -181,4 +191,5 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		// Create dispense tokens
 		cycle.mixes ++= twvpcss.map(twvpcs => L2C_Mix(twvpcs))
 	}
+	*/
 }

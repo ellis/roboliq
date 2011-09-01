@@ -73,7 +73,13 @@ x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 2	devices: set initial tip type in TipState for fixed tips
 x	devices: L3P_Pipette: implement mixing option
 	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
-1	devices: L3P_Mix: get it working again
+	devices: L3P_Pipette: don't match tips to dests at the beginning: delay the pairing until tip state is known in order to prefer tips with less volume
+		From our translation of Rotem_Script01.conf:
+		Aspirate(127,"PIE_AUT","900","900","600","300","300","300","300",0,0,0,0,0,41,2,1,"0608¯000000",0,0);
+		Dispense(7,"PIE_AUTAIR","300","300","300",0,0,0,0,0,0,0,0,0,29,1,1,"0C080000 000000000",0,0);
+		Dispense(3,"PIE_AUTAIR","300","300",0,0,0,0,0,0,0,0,0,0,29,2,1,"0C080000000000000",0,0);
+		Dispense(127,"PIE_AUTAIR","300","300","300","300","300","300","300",0,0,0,0,0,29,2,1,"0C0800000000¯00000",0,0);
+x	devices: L3P_Mix: get it working again
 	devices: create tests for PipetteHelperL3
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts

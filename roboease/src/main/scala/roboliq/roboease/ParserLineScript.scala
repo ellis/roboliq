@@ -10,8 +10,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	val cmds2 = Map[String, Parser[Unit]](
 			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
 				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
-			("MIX_WELLS", idPlate~idWells~valInt~valVolumes~ident~opt(word) ^^
-				{ case plate ~ wells ~ nCount ~ lnVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, nCount, lnVolume, lc, opts_?) }),
+			("MIX_WELLS", idPlate~idWells~valInt~valVolume~ident~opt(word) ^^
+				{ case plate ~ wells ~ nCount ~ nVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, nCount, nVolume, lc, opts_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
@@ -29,40 +29,33 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		sub_pipette(Some(liq), Nil, wells, volumes, sLiquidClass, opts_?)
 	}
 	
-	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, lnVolume: List[Double], sLiquidClass: String, opts_? : Option[String]) {
+	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, nVolume: Double, sLiquidClass: String, opts_? : Option[String]) {
 		if (wells.isEmpty) {
 			shared.addError("list of destination wells must be non-empty")
 			return
 		}
-		if (lnVolume.isEmpty) {
-			shared.addError("list of volumes must be non-empty")
-			return
-		}
-		if (lnVolume.size > 1 && wells.size != lnVolume.size) {
-			shared.addError("lists of wells and volumes must have the same dimensions")
-			return
-		}
 		
-		val wvs = {
-			if (lnVolume.size > 1)
-				wells zip lnVolume
-			else
-				wells.map(_ -> lnVolume.head)
+		val sMixClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
+		
+		val mapOpts = getMapOpts(opts_?) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(map) => map
 		}
-		
-		val sLiquidClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
-		
-		val items = wvs.map(pair => {
-			val (well, nVolume) = pair
-			new L4A_MixItem(WPL_Well(well), nVolume)
-		})
+		var tipOverrides_? = getOptTipOverrides(mapOpts) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(opt) => opt
+		}
+		var sTipKind_? = getOptTipKind(mapOpts)
+
+		val mixSpec = new MixSpec(nVolume, nCount, sMixClass_?)
 		val args = new L4A_MixArgs(
-			items,
-			nCount = nCount,
-			sMixClass_? = sLiquidClass_?
+			wells.map(well => WPL_Well(well)),
+			mixSpec,
+			tipOverrides_?,
+			sTipKind_?
 			)
 		val cmd = L4C_Mix(args)
-		//addRunCommand(cmd)
+		addRunCommand(cmd)
 	}
 	
 	def run_PROMPT(s: String) {
@@ -127,54 +120,19 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				Some(sLiquidClass)
 		}
 		
-		var mixSpec_? : Option[MixSpec] = None
-		var sTipKind_? : Option[String] = None
-		var tipOverrides_? : Option[TipHandlingOverrides] = None
-		opts_? match {
-			case None =>
-			case Some(opts) =>
-				val lsOpts = opts.split(",")
-				for (sOpt <- lsOpts) {
-					val lsParts = sOpt.split(":").toList
-					val sOptName = lsParts.head
-					val args = lsParts.tail.toSeq
-					sOptName match {
-						case "MIX" =>
-							args match {
-								case Seq(lc, sVolAndCount) =>
-									sVolAndCount.split("x") match {
-										case Array(sCount, sVol) =>
-											mixSpec_? = Some(MixSpec(sVol.toDouble, sCount.toInt, Some(lc)))
-										case _ =>
-											shared.addError("unrecognized MIX parameter \""+sVolAndCount+"\"")
-											return
-									}
-									// TODO: handle spec
-								case Seq(lc) =>
-									//sMixClass_? = Some(lc)
-								case _ => 
-									shared.addError("unknown MIX parameters \""+args.mkString(":")+"\"")
-									return
-							}
-						case "TIPMODE" =>
-							lsParts(1) match {
-								case "KEEPTIP" =>
-									tipOverrides_? = Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None))
-								// This is apparently like the default behavior in roboliq
-								case "MULTIPIP" =>
-									tipOverrides_? = None
-								case _ =>
-									shared.addError("unknown TIPMODE \""+lsParts(1)+"\"")
-									return
-							}
-						case "TIPTYPE" =>
-							sTipKind_? = Some("DiTi "+lsParts(1)+"ul")
-						case _ =>
-							shared.addError("unknown option \""+lsParts(0)+"\"")
-							return
-					}
-				}
+		val mapOpts = getMapOpts(opts_?) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(map) => map
 		}
+		var mixSpec_? = getOptMixSpec(mapOpts) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(opt) => opt
+		}
+		var tipOverrides_? = getOptTipOverrides(mapOpts) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(opt) => opt
+		}
+		var sTipKind_? = getOptTipKind(mapOpts)
 		
 		val items = liq_? match {
 			case None =>
@@ -200,6 +158,75 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			)
 		val cmd = L4C_Pipette(args)
 		addRunCommand(cmd)
+	}
+
+	private val lsOptNames = Set("MIX", "TIPMODE", "TIPTYPE")
+	
+	private def getMapOpts(opts_? : Option[String]): Either[String, Map[String, Seq[String]]] = {
+		opts_? match {
+			case None => Right(Map())
+			case Some(opts) =>
+				val lsOpts = opts.split(",")
+				val map = lsOpts.map(sOpt => {
+					val lsParts = sOpt.split(":").toList
+					val sOptName = lsParts.head
+					val args = lsParts.tail.toSeq
+					if (!lsOptNames.contains(sOptName))
+						return Left("unknown option \""+sOptName+"\"")
+					sOptName -> args.toSeq
+				}).toMap
+				Right(map)
+		}
+	}
+	
+	private def getOptMixSpec(mapOpts: Map[String, Seq[String]]): Either[String, Option[MixSpec]] = {
+		mapOpts.get("MIX") match {
+			case None => Right(None)
+			case Some(args) =>
+				args match {
+					case Seq(lc, sCountAndVol) =>
+						sCountAndVol.split("x") match {
+							case Array(sCount, sVol) =>
+								Right(Some(MixSpec(sVol.toDouble, sCount.toInt, Some(lc))))
+							case _ =>
+								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
+						}
+					case Seq(sCountAndVol) =>
+						sCountAndVol.split("x") match {
+							case Array(sCount, sVol) =>
+								Right(Some(MixSpec(sVol.toDouble, sCount.toInt, None)))
+							case _ =>
+								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
+						}
+					case _ => 
+						Left("unknown MIX parameters \""+args.mkString(":")+"\"")
+				}
+		}
+	}
+	
+	private def getOptTipOverrides(mapOpts: Map[String, Seq[String]]): Either[String, Option[TipHandlingOverrides]] = {
+		mapOpts.get("TIPMODE") match {
+			case None => Right(None)
+			case Some(Seq(arg)) =>
+				arg match {
+					case "KEEPTIP" =>
+						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
+					// This is apparently like the default behavior in roboliq
+					case "MULTIPIP" =>
+						Right(None)
+					case _ =>
+						Left("unknown TIPMODE \""+arg+"\"")
+				}
+			case Some(args) =>
+				Left("unknown TIPMODE \""+args.mkString(":")+"\"")
+		}
+	}
+	
+	private def getOptTipKind(mapOpts: Map[String, Seq[String]]): Option[String] = {
+		mapOpts.get("TIPTYPE") match {
+			case None => None
+			case Some(args) => Some("DiTi "+args(0)+"ul")
+		}
 	}
 	
 	private def toLabel(well: Well): String = {
