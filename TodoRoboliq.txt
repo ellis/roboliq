@@ -63,6 +63,7 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
+	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
 	devices: add bTipPermanent to Tip or TipConfig
 	devices: set initial tip state in BSSE pipette device
 x	devices: L3P_Pipette: use liquid class overrides
@@ -71,6 +72,8 @@ x	devices: L3P_Pipette: not dispensing to proper wells in Rotem_Script01.esc
 ?	devices: L3P_Pipette: update to use Roboease TipPolicies and dispose tips when finished
 	devices: set initial tip type in TipState for fixed tips
 x	devices: L3P_Pipette: implement mixing option
+	devices: L3P_Mix: get it working again
+	devices: create tests for PipetteHelperL3
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts
 	roboease: TRANSFER
@@ -83,7 +86,7 @@ x	devices: L3P_Pipette: implement mixing option
 x		Rotem_Script02.conf: need to implement mixing in L3C_Pipette
 x		Rotem_Script02.conf: tips aren't replaced before each aspirate
 x		Rotem_Script02.conf: our mix volume is 3 instead of 45
-		Rotem_Script02.conf: bad aspirate: L2C_Aspirate(Tip4-8, 5.0, PIE_AUTAIR_LowVol, Rotem_STK3:G7+5)
+x		Rotem_Script02.conf: bad aspirate: L2C_Aspirate(Tip4-8, 5.0, PIE_AUTAIR_LowVol, Rotem_STK3:G7+5)
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
@@ -292,97 +295,99 @@ x		Rotem_Script02.conf: our mix volume is 3 instead of 45
 		optimize clean instructions which are right next to each other so that only one of them is performed
 		At the T1 level: tips and degree should already be specified, meaning we need to get the degree information from the BsseRobot
 	T0 tokens can have estimated times associated with them
-TRANSFER_LOCATIONS
-TRANSFER_SAMPLES
-TRANSFER_WELLS
-DIST_REAGENT
-DIST_REAGENT2
-UNITE_AND_TRANSFER
-RUN
-LOOP
-ENDLOOP
-DIST_WELL
-PREPARE_MIX
-PREPARE_LIST
-MPDIST
-MPCHECKER
-MPREPLICATE
-MPREPLICATE384
-DILUTE_AND_REPLICATE384
-DILPROG
-PREPARE_MATRIX
-DIST_COL2ROW
-EQUAL_CONC
-SERIAL_DILUTION
-PLANNED_DILUTION
-ELUTE_SAMPLES
-SEQ_PURE
-ADD_AND_TRANSFER
-PCR_PURE
-MP_MINIPREP
-PG_PREPARE_STD
-PG_PREPARE_SAMPLE
-PLATE_TO_PCR
-PCR_SCHEDULE
-VACUUM
-VACUUM_ON
-VACUUM_OFF
-MIX_WELLS
-WAIT
-PROMPT
-GET_TIPS
-DROP_TIPS
-ROCHE_OPEN
-ROCHE_CLOSE
-ROCHE_RUN
-RUN_PCR
-PCR_RUN
-PCR_OPEN
-PCR_CLOSE
-PCR_COVER
-PCR_UNCOVER
-RUN_PCR_OPEN
-PCR_RUN_OPEN
-PR_OPEN
-PR_CLOSE
-PR_WAIT
-PR_RUN
-PR_MEASURE
-REMOTE
-EXECUTE
-READER_OPEN
-READER_CLOSE
-READER_MEASURE_OD
-READER_MEASURE_GFP
-READER_MEASURE
-READER_SET_TEMP
-INC_CLOSE
-INC_STOP
-INC_SHAKE
-INC_TEMP
-LINKER_POS
-START_SCRIPT
-EVOSUB
-CSLGET
-CSLPUT
-CSLLOOP
-CFGRUN
-TRANSFER_OBJECT
-SMS
-SHAKER_START
-SHAKE
-SHAKER_STOP
-MOVE_OBJECT
-START_TIMER
-WAIT_TIMER
-MOVE_PLATE
-EMAIL
-SMS
-LOGMIX
-LOGLIST
-LOGPLATE
-CEPLATE
-BIOPLATE
-MULTINAPLATE
-RCHPLATE
-SEQPLATE
+
+
+x	TRANSFER_LOCATIONS
+	TRANSFER_SAMPLES
+	TRANSFER_WELLS
+	DIST_REAGENT
+x	DIST_REAGENT2
+	UNITE_AND_TRANSFER
+	RUN
+	LOOP
+	ENDLOOP
+	DIST_WELL
+	PREPARE_MIX
+	PREPARE_LIST
+	MPDIST
+	MPCHECKER
+	MPREPLICATE
+	MPREPLICATE384
+	DILUTE_AND_REPLICATE384
+	DILPROG
+	PREPARE_MATRIX
+	DIST_COL2ROW
+	EQUAL_CONC
+	SERIAL_DILUTION
+	PLANNED_DILUTION
+	ELUTE_SAMPLES
+	SEQ_PURE
+	ADD_AND_TRANSFER
+	PCR_PURE
+	MP_MINIPREP
+	PG_PREPARE_STD
+	PG_PREPARE_SAMPLE
+	PLATE_TO_PCR
+	PCR_SCHEDULE
+	VACUUM
+	VACUUM_ON
+	VACUUM_OFF
+	MIX_WELLS
+	WAIT
+	PROMPT
+	GET_TIPS
+	DROP_TIPS
+	ROCHE_OPEN
+	ROCHE_CLOSE
+	ROCHE_RUN
+	RUN_PCR
+	PCR_RUN
+	PCR_OPEN
+	PCR_CLOSE
+	PCR_COVER
+	PCR_UNCOVER
+	RUN_PCR_OPEN
+	PCR_RUN_OPEN
+	PR_OPEN
+	PR_CLOSE
+	PR_WAIT
+	PR_RUN
+	PR_MEASURE
+	REMOTE
+	EXECUTE
+	READER_OPEN
+	READER_CLOSE
+	READER_MEASURE_OD
+	READER_MEASURE_GFP
+	READER_MEASURE
+	READER_SET_TEMP
+	INC_CLOSE
+	INC_STOP
+	INC_SHAKE
+	INC_TEMP
+	LINKER_POS
+	START_SCRIPT
+	EVOSUB
+	CSLGET
+	CSLPUT
+	CSLLOOP
+	CFGRUN
+	TRANSFER_OBJECT
+	SMS
+	SHAKER_START
+	SHAKE
+	SHAKER_STOP
+	MOVE_OBJECT
+	START_TIMER
+	WAIT_TIMER
+	MOVE_PLATE
+	EMAIL
+	SMS
+	LOGMIX
+	LOGLIST
+	LOGPLATE
+	CEPLATE
+	BIOPLATE
+	MULTINAPLATE
+	RCHPLATE
+	SEQPLATE

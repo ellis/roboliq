@@ -485,8 +485,9 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 
 	private def aspirate_chooseTipWellPairs_direct(states: StateMap, srcs: collection.Map[TipConfigL2, Set[WellConfigL2]]): Seq[Seq[TipWell]] = {
 		//println("srcs: "+srcs)
-		val seq: Seq[TipWell] = srcs.toSeq.sortBy(_._1).map(pair => new TipWell(pair._1, pair._2.head))
-		Seq(seq)
+		val tws: Seq[TipWell] = srcs.toSeq.sortBy(_._1).map(pair => new TipWell(pair._1, pair._2.head))
+		val twss = PipetteHelper.splitTipWellPairs(tws)
+		twss
 	}
 	
 	/*private def aspirate_createCommands(states: RobotState, twss: Seq[Seq[TipWell]]): Either[String, Seq[L2C_Aspirate]] = {

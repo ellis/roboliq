@@ -125,6 +125,16 @@ object PipetteHelper {
 		}
 	}
 
+	/**
+	 * Choose sources (all containing same liquid) according to the following algorithm:
+	 * - sort wells by volume (greatest first) and plate/index
+	 * - pick the well with the highest volume and put it in our set
+	 * - while size of well set < nCount:
+	 *   - look at the wells adjacent (and in the same column) to the wells in the well set
+	 *   - if there are 0 wells, stop
+	 *   - if there is 1 well, add it
+	 *   - if there are 2 wells, add the one which occurs first in the sorted order
+	 */
 	def chooseAdjacentWellsByVolume(states: StateMap, wells: Set[WellConfigL2], nCount: Int): SortedSet[WellConfigL2] = {
 		if (nCount <= 0 || wells.isEmpty)
 			return SortedSet()
@@ -135,7 +145,7 @@ object PipetteHelper {
 			val a = well1.obj.state(states)
 			val b = well2.obj.state(states)
 			if (a.nVolume == b.nVolume)
-				well1.index < well2.index
+				well1.compare(well2) <= 0
 			else
 				a.nVolume > b.nVolume
 		}
@@ -209,16 +219,6 @@ object PipetteHelper {
 	}
 	
 	def chooseTipSrcPairs(states: StateMap, tips: SortedSet[TipConfigL2], srcs: SortedSet[WellConfigL2]): Seq[Seq[TipWell]] = {
-		// Cases:
-		// Case 1: tips size == srcs size:
-		// Case 2: tips size < srcs size:
-		// Case 3: tips size > srcs size:
-		// -----
-		// The sources should be chosen according to this algorithm:
-		// - sort the sources by volume descending (secondary sort key is index order)
-		// - keep the top tips.size() entries
-		// Repeat the sorting each time all sources have been used (e.g. when there are more tips than sources)
-
 		def processStep(tips0: Iterable[TipConfigL2]): Tuple2[Iterable[TipConfigL2], Seq[TipWell]] = {
 			val tips = SortedSet[TipConfigL2](tips0.toSeq : _*)
 			val tws = chooseTipWellPairsNext(states, tips, srcs, Nil)
@@ -228,53 +228,36 @@ object PipetteHelper {
 		process(tips, Nil, processStep)
 	}
 	
-	/*def getCleanDegreeAspirate(tipState: TipStateL2, liquid: Liquid): WashIntensity.Value = {
-		var bRinse = false
-		var bThorough = false
-		var bDecontam = false
-		
-		// Was a destination previously entered?
-		val bDestEnteredPrev = !tipState.destsEntered.isEmpty
-		bRinse |= bDestEnteredPrev
+	def splitTipWellPairs(tws: Seq[TipWell]): Seq[Seq[TipWell]] = {
+		val map = tws.map(tw => tw.well -> tw).toMap
+		val gws: Iterable[WellGroup] = WellGroup(tws.map(_.well)).splitByCol()
+		val twss1: Iterable[Seq[TipWell]] = gws.map(_.set.toSeq.map(well => map(well)))
+		val twss2: Iterable[Seq[TipWell]] = twss1.flatMap(splitTipWellPairs2)
+		twss2.toSeq
+	}
+	
+	private def splitTipWellPairs2(tws: Seq[TipWell]): Seq[Seq[TipWell]] = {
+		if (tws.isEmpty)
+			return Seq()
 
-		// If the tip was previously empty (haven't aspirated previously):
-		if (tipState.liquid eq Liquid.empty) {
-			bThorough = true
-			bDecontam = liquid.bRequireDecontamBeforeAspirate && tipState.cleanDegree < WashIntensity.Decontaminate
+		val twss = new ArrayBuffer[Seq[TipWell]]
+		var rest = tws
+		while (!rest.isEmpty) {
+			val tw0 = tws.head
+			var iTip = tw0.tip.index
+			var iWell = tw0.well.index
+			val keep = tws.takeWhile(tw => {
+				val b = (tw.tip.index == iTip && tw.well.index == iWell)
+				iTip += 1
+				iWell += 1
+				b
+			})
+			twss += keep
+			rest = rest.drop(keep.size)
 		}
-		// Else if we're aspirating the same liquid as before:
-		else if (tipState.liquid eq liquid) {
-			bDecontam = liquid.bRequireDecontamBeforeAspirate && bDestEnteredPrev
-		}
-		// Else if we need to aspirate a new liquid:
-		else {
-			bDecontam = true
-		}
-		
-		if (bDecontam) WashIntensity.Decontaminate
-		else if (bThorough) WashIntensity.Thorough
-		else if (bRinse) WashIntensity.Light
-		else WashIntensity.None
-
-	}*/
-
-	// REFACTOR: Remove this method -- ellis, 2011-08-30
-	/*def getCleanDegreeDispense(tipState: TipStateL2): WashIntensity.Value = {
-		var bRinse = false
-		var bThorough = false
-		var bDecontam = false
-		
-		// Was a destination previously entered?
-		val bDestEnteredPrev = !tipState.destsEntered.isEmpty
-		bRinse |= bDestEnteredPrev
-		bDecontam |= tipState.destsEntered.exists(!_.contaminants.isEmpty)
-
-		if (bDecontam) WashIntensity.Decontaminate
-		else if (bThorough) WashIntensity.Thorough
-		else if (bRinse) WashIntensity.Light
-		else WashIntensity.None
-	}*/
-
+		twss.toSeq
+	}
+	
 	def choosePreAspirateReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {
 		// If there is no tip, then we'll need to get a new one
 		if (tipState.sType_?.isEmpty) {

@@ -101,16 +101,12 @@ class Well extends Obj { thisObj =>
 		if (nVolume_?.isEmpty)
 			errors += "volume not set"
 				
-		if (errors.isEmpty && setup.sLabel_?.isEmpty)
-			errors += "label not set"
-		
 		if (!errors.isEmpty)
 			return Left(errors)
 
 		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL2]
 		val conf = new WellConfigL2(
 				obj = this,
-				sLabel = setup.sLabel_?.get,
 				holder = holderState.conf,
 				index = setup.index_?.get)
 		val state = new WellStateL2(
@@ -172,7 +168,6 @@ object WellL2 {
 
 class WellConfigL2(
 	val obj: Well,
-	val sLabel: String,
 	val holder: PlateConfigL2,
 	val index: Int
 ) extends ObjConfig with Ordered[WellConfigL2] { thisConf =>
@@ -190,7 +185,7 @@ class WellConfigL2(
 		}
 	}
 	
-	override def toString = sLabel
+	override def toString = holder.sLabel + ":" + (iCol+'A').asInstanceOf[Char] + (iRow+1)
 }
 
 case class WellStateL2(
