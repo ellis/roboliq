@@ -169,7 +169,7 @@ object Main extends App {
 		val pipetter = new WeizmannPipetteDevice()
 		pipetter.addKnowledge(kb)
 		
-		val plateDeconAspirate, plateDeconDispense = new Plate
+		/*val plateDeconAspirate, plateDeconDispense = new Plate
 		new PlateProxy(kb, plateDeconAspirate) match {
 			case pp =>
 				pp.label = "DA"
@@ -181,14 +181,14 @@ object Main extends App {
 				pp.label = "DD"
 				pp.location = "DD"
 				pp.setDimension(8, 1)
-		}
+		}*/
 		
 		val compiler = new Compiler
 		compiler.bDebug = true
 		//compiler.register(new L4P_Pipette)
 		compiler.register(new L3P_TipsReplace)
 		compiler.register(new L3P_TipsDrop("WASTE"))
-		compiler.register(new L3P_TipsWash_BSSE(pipetter, plateDeconAspirate, plateDeconDispense))
+		//compiler.register(new L3P_TipsWash_BSSE(pipetter, plateDeconAspirate, plateDeconDispense))
 		compiler.register(new L3P_Pipette(pipetter))
 		compiler.register(new L3P_Mix(pipetter))
 		//compiler.register(new L2P_Aspirate)

@@ -46,14 +46,27 @@ class BssePipetteDevice extends PipetteDevice {
 		// Can't aspirate from an empty well
 		assert(liquid ne Liquid.empty)
 
-		if (liquid.contaminants.contains(Contaminant.Cell))
-			Some(PipettePolicy("PIE_AUTAIR_SLOW", PipettePosition.Free))
-		else if (liquid.sName.contains("DMSO"))
-			Some(PipettePolicy("PIE_AUTAIR", PipettePosition.Free))
-		else if (liquid.sName.contains("D-BSSE Decon"))
-			Some(PipettePolicy("PIE_DECON", PipettePosition.WetContact))
-		else
-			Some(PipettePolicy("PIE_AUT", PipettePosition.WetContact))
+		val bLarge = (tipState.conf.obj.index < 4)
+
+		val res: Option[String] = {
+			import PipettePosition._
+			if (liquid.contaminants.contains(Contaminant.Cell))
+				if (bLarge) Some("Cells") else None
+			else if (liquid.contaminants.contains(Contaminant.DSMO))
+				if (bLarge) Some("DMSO") else None
+			else if (liquid.contaminants.contains(Contaminant.Decon))
+				Some("Decon")
+			else
+				Some("Water")
+		}
+		res match {
+			case None => None
+			case Some(sClass) =>
+				val sPos = "Top"
+				val sTip = if (bLarge) "1000" else "0050"
+				val sName = "Roboliq_"+sClass+"_"+sPos+"_"+sTip
+				Some(PipettePolicy(sName, PipettePosition.WetContact))
+		}
 	}
 	
 	val nFreeDispenseVolumeThreshold = 20
@@ -61,19 +74,39 @@ class BssePipetteDevice extends PipetteDevice {
 	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy] = {
 		val liquid = tipState.liquid
 		
-		if (liquid.contaminants.contains(Contaminant.Cell))
-			Some(PipettePolicy("PIE_", PipettePosition.Free))
-		else if (liquid.sName.contains("DMSO"))
-			Some(PipettePolicy("PIE_AUTAIR", PipettePosition.Free))
-		else if (liquid.sName.contains("D-BSSE Decon"))
-			Some(PipettePolicy("PIE_DECON", PipettePosition.Free))
-		// If our volume is high enough that we don't need to worry about accuracy
-		else if (nVolume >= nFreeDispenseVolumeThreshold)
-			Some(PipettePolicy("PIE_AUTAIR", PipettePosition.Free))
-		else if (wellState.nVolume == 0)
-			Some(PipettePolicy("PIE_AUTBOT", PipettePosition.Free))
-		else
-			Some(PipettePolicy("PIE_AUT", PipettePosition.Free))
+		val bLarge = (tipState.conf.obj.index < 4)
+		
+		val res: Option[Tuple2[String, PipettePosition.Value]] = {
+			import PipettePosition._
+			if (liquid.contaminants.contains(Contaminant.Cell))
+				if (bLarge) Some("Cells" -> Free) else None
+			else if (liquid.contaminants.contains(Contaminant.DSMO))
+				if (bLarge) Some("DMSO" -> Free) else None
+			else if (liquid.contaminants.contains(Contaminant.Decon))
+				Some("Decon" -> Free)
+			else {
+				val sClass = "Water"
+				// If our volume is high enough that we don't need to worry about accuracy
+				if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
+					Some(sClass -> Free)
+				else if (wellState.nVolume == 0)
+					Some(sClass -> DryContact)
+				else
+					Some(sClass -> WetContact)
+			}
+		}
+		res match {
+			case None => None
+			case Some((sClass, pos)) =>
+				val sPos = pos match {
+					case PipettePosition.Free => "Air"
+					case PipettePosition.DryContact => "Dry"
+					case PipettePosition.WetContact => "Top"
+				}
+				val sTip = if (bLarge) "1000" else "0050"
+				val sName = "Roboliq_"+sClass+"_"+sPos+"_"+sTip
+				Some(PipettePolicy(sName, pos))
+		}
 	}
 	
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {

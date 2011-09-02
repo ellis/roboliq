@@ -1,13 +1,16 @@
-package roboliq.compiler
+package roboliq.common
 
 import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
-import roboliq.commands.pipette._
 
 
 class Volume(n: Double) {
 	def ul = n
+}
+
+trait RoboliqCommands {
+	val cmds: ArrayBuffer[Command]
 }
 
 trait L4_Roboliq {
@@ -23,21 +26,6 @@ trait L4_Roboliq {
 	def customize(fn: => Unit) {
 		m_customize = Some(fn _)
 	}
-	
-	def setLiquidClasses(pairs: Tuple2[Liquid, String]*) {
-		pairs.foreach(pair => pair._1)
-	}
-	
-	def mix(dest: WellOrPlate, volume: Double, count: Int) {
-		
-	}
-	
-	implicit def wellToWPL(o: Well): WellOrPlateOrLiquid = WPL_Well(o)
-	implicit def plateToWPL(o: Plate): WellOrPlateOrLiquid = WPL_Plate(o)
-	implicit def liquidToWPL(o: Liquid): WellOrPlateOrLiquid = WPL_Liquid(o)
-	
-	implicit def wellToWP(o: Well): WellOrPlate = WP_Well(o)
-	implicit def plateToWP(o: Plate): WellOrPlate = WP_Plate(o)
 	
 	implicit def intToVolume(n: Int): Volume = new Volume(n)
 	

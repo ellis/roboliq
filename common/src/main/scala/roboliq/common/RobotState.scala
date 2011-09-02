@@ -3,8 +3,6 @@ package roboliq.common
 import scala.collection.mutable.HashMap
 
 
-trait Device // FIXME: This doesn't belong here -- ellis, 2011-08-18
-
 trait StateMap {
 	val map: collection.Map[Obj, ObjState]
 	def apply(obj: Obj) = map(obj)

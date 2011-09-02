@@ -1,8 +1,9 @@
-package roboliq.devices.pipette
+package bsse
 
 import roboliq.common._
 import roboliq.compiler._
 import roboliq.commands.pipette._
+import roboliq.devices.pipette._
 
 
 class L3P_TipsWash_BSSE(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispense: Plate) extends CommandCompilerL3 {
@@ -14,16 +15,19 @@ class L3P_TipsWash_BSSE(robot: PipetteDevice, plateDeconAspirate: Plate, plateDe
 				case WashIntensity.None =>
 				CompileTranslation(cmd, Seq())
 			case WashIntensity.Light =>
-				val iWashProgram = 1
-				CompileTranslation(cmd, Seq(createWash2(ctx.states, cmd, iWashProgram)))
+				CompileTranslation(cmd, Seq(
+					createWash2(ctx.states, cmd, 1),
+					createWash2(ctx.states, cmd, 2)))
 			case WashIntensity.Thorough =>
-				val iWashProgram = 2
-				CompileTranslation(cmd, Seq(createWash2(ctx.states, cmd, iWashProgram)))
+				CompileTranslation(cmd, Seq(
+					createWash2(ctx.states, cmd, 1),
+					createWash2(ctx.states, cmd, 2)))
 			case WashIntensity.Decontaminate =>
 				(ctx.states.map.get(plateDeconAspirate), ctx.states.map.get(plateDeconDispense)) match {
 					case (Some(pcA: PlateStateL2), Some(pcD: PlateStateL2)) =>
 						val nVolume = 600
-						val twvpsAD = cmd.items.map(item => {
+						// Create aspirate and dispense lists for the DECON wash
+						val itemsAD = cmd.items.map(item => {
 							val tip = item.tip
 							val tipState = tip.obj.state(ctx.states)
 							val wellA = pcA.conf.wells(tip.index % pcA.conf.nWells)
@@ -43,14 +47,14 @@ class L3P_TipsWash_BSSE(robot: PipetteDevice, plateDeconAspirate: Plate, plateDe
 									return CompileError(cmd, Seq("unable to find pipetting policy for decon wells"))
 							}
 						})
-						val twvpsA = twvpsAD.map(_._1)
-						val twvpsD = twvpsAD.map(_._2)
+						val twvpsA = itemsAD.map(_._1)
+						val twvpsD = itemsAD.map(_._2)
 						CompileTranslation(cmd, Seq(
-								createWash2(ctx.states, cmd, 3),
+								createWash2(ctx.states, cmd, 5),
 								L2C_Aspirate(twvpsA),
 								L2C_Dispense(twvpsD),
-								createWash2(ctx.states, cmd, 4),
-								createWash2(ctx.states, cmd, 5)
+								createWash2(ctx.states, cmd, 6),
+								createWash2(ctx.states, cmd, 7)
 								))
 					case _ =>
 						CompileError(cmd, Seq("level 1 config for decon plates not defined"))

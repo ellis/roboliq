@@ -13,6 +13,6 @@ case class WashProgramArgs(
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
 	bFastWash: Boolean,
-	bUNKNOWN1: Boolean,
+	bUNKNOWN1: Boolean = false,
 	bEmulateEvolab: Boolean = false
 )

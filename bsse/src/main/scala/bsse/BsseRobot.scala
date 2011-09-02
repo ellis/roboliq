@@ -1,5 +1,33 @@
 package bsse
 
+import roboliq.common._
+import roboliq.compiler._
+import roboliq.devices.pipette._
+
+
+class BsseRobot(
+	devices: Seq[Device],
+	processors: Seq[CommandCompiler]
+) extends Robot(devices, processors)
+
+object BsseRobot {
+	def apply() = {
+		val pipetter = new BssePipetteDevice
+		val devices = Seq(
+			pipetter
+			)
+		val processors = Seq(
+			new L3P_TipsReplace,
+			new L3P_TipsDrop("WASTE"),
+			new L3P_TipsWash_BSSE(pipetter, plateDeconAspirate, plateDeconDispense),
+			new L3P_Pipette(pipetter),
+			new L3P_Mix(pipetter)
+			)
+
+	}
+}
+/*package bsse
+
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable.ArrayBuffer
 
@@ -60,18 +88,6 @@ class BsseRobot extends EvowareRobot {
 		tipKind.nHoldVolumeMax - nReduce
 	}
 	
-	/*def getDispenseKind(tip: Tip, liquid: Liquid, nVolume: Double, wellState: WellState): DispenseKind.Value = {
-		// If our volume is high enough that we don't need to worry about accuracy,
-		// or if we're pipetting competent cells,
-		// then perform a free dispense.
-		if (nVolume >= nFreeDispenseVolumeThreshold || liquid.bCells)
-			DispenseKind.Free
-		else if (wellState.nVolume == 0)
-			DispenseKind.DryContact
-		else
-			DispenseKind.WetContact
-	}*/
-
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {
 		if (tips.isEmpty || wells.isEmpty)
 			return Nil
@@ -300,3 +316,4 @@ object BsseRobot {
 		(robot, builder.toImmutable)
 	}
 }
+*/

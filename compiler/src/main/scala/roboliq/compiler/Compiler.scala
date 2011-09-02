@@ -24,19 +24,13 @@ class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq
 }
 
 
-class Compiler(val nDepth: Int = 0) {
+class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	var bDebug = false
 	private var nIndent = nDepth
-	private var m_handlers = new HashMap[java.lang.Class[_], CommandCompiler]
-	
-	def register(handler: CommandCompiler) {
-		m_handlers(handler.cmdType) = handler
-	}
+	private var m_handlers: Map[java.lang.Class[_], CommandCompiler] = processors.map(p => p.cmdType -> p).toMap
 	
 	def createSubCompiler(): Compiler = {
-		val sub = new Compiler(nDepth + 1)
-		m_handlers.foreach(pair => sub.register(pair._2))
-		sub
+		new Compiler(processors, nDepth + 1)
 	}
 	
 	def compile(states: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
@@ -164,6 +158,110 @@ class Compiler(val nDepth: Int = 0) {
 			case _ =>
 				Right(1)
 				//Left(CompileError(res.cmd, Seq("INTERNAL: no registered scorer for command "+res.cmd.getClass().getName())))
+		}
+	}
+}
+
+object Compiler {
+	def compile(robot: Robot, translator: Translator, protocol: L4_Roboliq) {
+		val kb = protocol.kb
+
+		protocol.m_protocol.get()
+		protocol.m_customize.get()
+		robot.devices.foreach(_.addKnowledge(kb))
+		
+		kb.concretize() match {
+			case Left(errors) =>
+				println("Missing information:")
+				kb.printErrors(errors)
+				println()
+			case Right(map31) =>
+				val state0 = map31.createRobotState()
+				
+				val compiler = new Compiler(robot.processors)
+				
+				compiler.compile(state0, protocol.cmds) match {
+					case Left(err) =>
+						println("Compilation errors:")
+						err.errors.foreach(println)
+						println()
+					case Right(nodes) =>
+						val finals = nodes.flatMap(_.collectFinal())
+						val cmds1 = finals.map(_.cmd1)
+						println("Output:")
+						cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
+						println()
+						
+						translator.translate(cmds1) match {
+							case Left(errs) =>
+								println(errs)
+							case Right(cmds0) => cmds0.foreach(println)
+						}
+				}
+		}
+	}
+	
+	def compile(robot: Robot, protocol: L4_Roboliq) {
+		val kb = protocol.kb
+
+		protocol.m_protocol.get()
+		protocol.m_customize.get()
+		robot.devices.foreach(_.addKnowledge(kb))
+		
+		kb.concretize() match {
+			case Left(errors) =>
+				println("Missing information:")
+				kb.printErrors(errors)
+				println()
+			case Right(map31) =>
+				val state0 = map31.createRobotState()
+				
+				val compiler = new Compiler(robot.processors)
+				
+				compiler.compile(state0, protocol.cmds) match {
+					case Left(err) =>
+						println("Compilation errors:")
+						err.errors.foreach(println)
+						println()
+					case Right(nodes) =>
+						val finals = nodes.flatMap(_.collectFinal())
+						val cmds1 = finals.map(_.cmd1)
+						println("Output:")
+						cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
+						println()
+				}
+		}
+	}
+	
+	def compile(robot: Robot, compiler: Compiler, translator: Translator, kb: KnowledgeBase, cmds: Seq[Command]) {
+		robot.devices.foreach(_.addKnowledge(kb))
+		
+		kb.concretize() match {
+			case Left(errors) =>
+				println("Missing information:")
+				kb.printErrors(errors)
+				println()
+			case Right(map31) =>
+				val state0 = map31.createRobotState()
+				
+				compiler.compile(state0, cmds) match {
+					case Left(err) =>
+						println("Compilation errors:")
+						err.errors.foreach(println)
+						println()
+					case Right(nodes) =>
+						val finals = nodes.flatMap(_.collectFinal())
+						val cmds1 = finals.map(_.cmd1)
+						println("Output:")
+						cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
+						println()
+						
+						translator.translate(cmds1) match {
+							case Left(errs) =>
+								println(errs)
+							case Right(cmds0) => cmds0.foreach(println)
+						}
+				}
 		}
 	}
 }

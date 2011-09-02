@@ -7,7 +7,7 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 
 
-trait PipetteDevice {
+trait PipetteDevice extends Device {
 	val config: PipetteDeviceConfig
 	
 	def addKnowledge(kb: KnowledgeBase)

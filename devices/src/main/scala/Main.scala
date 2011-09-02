@@ -5,15 +5,8 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
 
-trait Roboliq extends L4_Roboliq {
-	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double) {
-		val item = new L4A_PipetteItem(source, dest, volume)
-		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item)))
-		cmds += cmd
-	}
-}
 
-class Tester extends Roboliq {
+class Tester extends L4_Roboliq with PipetteCommands {
 	val water = new Liquid("water", true, false, Set())
 	val plate = new Plate
 	
@@ -84,61 +77,46 @@ class Tester2 extends Roboliq {
 } 
 */
 
-object Main extends App {
-	val tester = new Tester
-	tester.m_protocol.get()
-	tester.m_customize.get()
-	val kb = tester.kb
-	
-	def createCompiler(): Compiler = {
-		val pipetter = new PipetteDeviceGeneric()
-		pipetter.config.tips.foreach(kb.addObject)
-		
-		val plateDeconAspirate, plateDeconDispense = new Plate
-		new PlateProxy(kb, plateDeconAspirate) match {
-			case pp =>
-				pp.label = "DA"
-				pp.location = "DA"
-				pp.setDimension(8, 1)
-		}
-		new PlateProxy(kb, plateDeconDispense) match {
-			case pp =>
-				pp.label = "DD"
-				pp.location = "DD"
-				pp.setDimension(8, 1)
-		}
-		
-		val compiler = new Compiler
-		//compiler.register(new L4P_Pipette)
-		//compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
-		compiler.register(new L3P_TipsReplace)
-		compiler.register(new L3P_TipsDrop("waste"))
-		compiler.register(new L3P_Pipette(pipetter))
-		//compiler.register(new L2P_Aspirate)
-		//compiler.register(new L2P_Dispense)
-		//compiler.register(new L2P_SetTipStateClean)
-		compiler
-	}
-	
-	println("Input:")
-	tester.cmds.foreach(println)
-	println()
-
-	val compiler = createCompiler()
-	tester.kb.concretize() match {
-		case Right(map31) =>
-			val state0 = map31.createRobotState()
-			compiler.compile(state0, tester.cmds) match {
-				case Left(err) =>
-					println("Compilation errors:")
-					err.errors.foreach(println)
-				case Right(nodes) =>
-					val finals = nodes.flatMap(_.collectFinal())
-					println("Output:")
-					finals.map(_.cmd).foreach(println)
+object TestRobot {
+	def apply(): Robot = {
+		val pipetter = new PipetteDeviceGeneric {
+			override def addKnowledge(kb: KnowledgeBase) {
+				super.addKnowledge(kb)
+				val plateDeconAspirate, plateDeconDispense = new Plate
+				new PlateProxy(kb, plateDeconAspirate) match {
+					case pp =>
+						pp.label = "DA"
+						pp.location = "DA"
+						pp.setDimension(8, 1)
+				}
+				new PlateProxy(kb, plateDeconDispense) match {
+					case pp =>
+						pp.label = "DD"
+						pp.location = "DD"
+						pp.setDimension(8, 1)
+				}
 			}
-		case Left(errors) =>
-			println("Missing information:")
-			println(errors)
+		}
+		
+		val devices = Seq(
+			pipetter
+			)
+
+		val processors = Seq(
+			new L3P_TipsReplace,
+			new L3P_TipsDrop("WASTE"),
+			//new L3P_TipsWash_BSSE(pipetter, plateDeconAspirate, plateDeconDispense),
+			new L3P_Pipette(pipetter),
+			new L3P_Mix(pipetter)
+			)
+		
+		new Robot(devices, processors)
 	}
+}
+
+object Main extends App {
+	val robot = TestRobot()
+	
+	val tester = new Tester
+	Compiler.compile(robot, tester)
 }

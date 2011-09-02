@@ -10,7 +10,7 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-class EvowareTranslator(mapper: EvowareMapper) {
+class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 	def translate(cmd: CommandL1): Either[Seq[String], Seq[Command]] = cmd match {
 		case t @ L1C_Aspirate(_) => aspirate(t)
 		case t @ L1C_Dispense(_) => dispense(t)

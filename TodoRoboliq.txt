@@ -41,8 +41,12 @@ Evoware interaction:
 User interface:
 	Show user which decisions need/can be made
 	Let user specify stuff
-
-
+Get documentation from Tecan:
+	carrier.cfg
+	evoware.opt
+	evoware.inf
+		how can we tell whether the tips are fixed or disposable?
+	*.esc: table layout format
 Tuval/Yair:
 	configuration files for their robots
 	send them my code
@@ -57,6 +61,13 @@ Code:
 2	devices: set initial tip type in TipState for fixed tips
 3	devices: implement wait
 4	devices: implement shaker
+	devices: PipettePolicy: rework this concept
+		have a string to identify the general liquid class and a DispensePosition
+		the liquid class can either be explicitly specified with the liquid, or it's extracted from the contaminants
+		really need to make liquid into an Obj with Setup, Config and State:
+			let user setup the explicit liquid class
+			let the explicit liquid class be changed by the user during program execution
+		PipettePolicy well also need to know the tip type; then EvowareMapper can decide on it's liquid class based on the parameters of PipettePolicy
 	devices: L3P_Wash: use extra wash volume
 	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
 	devices: L3P_Pipette: don't match tips to dests at the beginning: delay the pairing until tip state is known in order to prefer tips with less volume
@@ -283,6 +294,31 @@ Code:
 		optimize clean instructions so that cleaning of a tip kind also cleans the tips of any clean instructions for that tip kind which come later, but only for clean instruction of the same degree
 		optimize clean instructions which are right next to each other so that only one of them is performed
 		At the T1 level: tips and degree should already be specified, meaning we need to get the degree information from the BsseRobot
+	Pipetting policies:
+		prefix:
+			Roboliq
+		naming for dispense position:
+			Air - free dispense
+			Top - dispense near top surface of liquid
+			Mid?? dispense below top of liquid
+			Bot?? dispense near bottom of well
+			Dry - dispense at bottom of dry well
+			Mix?? for mixing
+		speeds:
+			Fast
+			Slow
+			Norm
+		example names:
+			Roboliq_Cells_Air_1000
+			Roboliq_Water_Air_1000
+			Roboliq_Water_Air_0050
+			Roboliq_Water_Dry_1000
+			Roboliq_Water_Dry_0050
+			Roboliq_Water_Wet_1000
+			Roboliq_Water_Wet_0050
+			Roboliq_DMSO_Air_1000
+			Roboliq_Decon_???
+
 	T0 tokens can have estimated times associated with them
 
 
