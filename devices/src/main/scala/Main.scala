@@ -85,14 +85,14 @@ object TestRobot {
 				val plateDeconAspirate, plateDeconDispense = new Plate
 				new PlateProxy(kb, plateDeconAspirate) match {
 					case pp =>
-						pp.label = "DA"
-						pp.location = "DA"
+						pp.label = "DeconA"
+						pp.location = "DeconA"
 						pp.setDimension(8, 1)
 				}
 				new PlateProxy(kb, plateDeconDispense) match {
 					case pp =>
-						pp.label = "DD"
-						pp.location = "DD"
+						pp.label = "DeconD"
+						pp.location = "DeconD"
 						pp.setDimension(8, 1)
 				}
 			}

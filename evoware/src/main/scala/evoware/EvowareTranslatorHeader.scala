@@ -1,12 +1,5 @@
 package evoware
 
-import java.io.File
-import java.io.BufferedWriter
-import java.io.FileWriter
-import roboliq.parts._
-import roboliq.tokens._
-import roboliq.robot._
-
 
 object EvowareTranslatorHeader {
 	def getHeader(): String =

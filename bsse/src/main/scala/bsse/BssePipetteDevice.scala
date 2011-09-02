@@ -34,10 +34,31 @@ class BssePipetteDevice extends PipetteDevice {
 			PipetteSpec("PIE_MIX_AUT", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact)
 			).map(spec => spec.sName -> spec).toMap
 
-	def areTipsDisposable: Boolean = false
+	val plateDeconAspirate, plateDeconDispense = new Plate
+			
 	def addKnowledge(kb: KnowledgeBase) = {
-		config.tips.foreach(kb.addObject)
+		config.tips.foreach(tip => {
+			kb.addObject(tip)
+			
+			val tipSpec = if (tip.index < 4) tipSpec1000 else tipSpec50
+			val tipSetup = kb.getObjSetup[TipSetup](tip)
+			tipSetup.sPermanentType_? = Some(tipSpec.sName)
+		})
+		new PlateProxy(kb, plateDeconAspirate) match {
+			case pp =>
+				pp.label = "DA"
+				pp.location = "DA"
+				pp.setDimension(8, 1)
+		}
+		new PlateProxy(kb, plateDeconDispense) match {
+			case pp =>
+				pp.label = "DD"
+				pp.location = "DD"
+				pp.setDimension(8, 1)
+		}
 	}
+
+	def areTipsDisposable: Boolean = false
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeAspirateMin }
 	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeHoldMax }
 	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)

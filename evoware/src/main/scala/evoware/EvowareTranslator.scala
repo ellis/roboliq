@@ -11,22 +11,17 @@ import roboliq.devices.pipette._
 
 
 class EvowareTranslator(mapper: EvowareMapper) extends Translator {
-	def translate(cmd: CommandL1): Either[Seq[String], Seq[Command]] = cmd match {
+	override def addKnowledge(kb: KnowledgeBase) {
+		// Do nothing
+	}
+	
+	override def translate(cmd: CommandL1): Either[Seq[String], Seq[Command]] = cmd match {
 		case t @ L1C_Aspirate(_) => aspirate(t)
 		case t @ L1C_Dispense(_) => dispense(t)
 		case t @ L1C_Mix(_) => mix(t.items)
 		case c: L1C_Wash => wash(c)
 		case c: L1C_TipsGet => tipsGet(c)
 		case c: L1C_TipsDrop => tipsDrop(c)
-	}
-
-	def translate(cmds: Seq[CommandL1]): Either[Seq[String], Seq[Command]] = {
-		Right(cmds.flatMap(cmd => {
-			translate(cmd) match {
-				case Left(err) => return Left(err)
-				case Right(cmds0) => cmds0
-			}
-		}))
 	}
 
 	/*def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
@@ -41,7 +36,7 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 	//def translateToString(txs: Seq[CompileFinal]): String = translate(txs).right.get.mkString("\n")
 	def translateToString(cmds: Seq[CommandL1]): String = translate(cmds).right.get.mkString("\n")
 
-	def translateAndSave(cmds: Seq[CommandL1], sFilename: String): String = {
+	override def translateAndSave(cmds: Seq[CommandL1], sFilename: String): String = {
 		val s = translateToString(cmds)
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, EvowareTranslatorHeader.getHeader())

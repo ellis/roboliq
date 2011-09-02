@@ -52,17 +52,17 @@ class KnowledgeBase {
 			setup.dim_?.get.wells.foreach(well => addWell(well, bSrc))
 	}
 	
-	private def getObjData[T](o: Obj): T =
+	def getObjSetup[T](o: Obj): T =
 		m_setups(o).asInstanceOf[T]
 	
 	def getWellSetup(o: Well): WellSetup = {
 		addWell(o)
-		getObjData(o)
+		getObjSetup(o)
 	}
 	
 	def getPlateSetup(o: Plate): PlateSetup = {
 		addPlate(o)
-		getObjData(o)
+		getObjSetup(o)
 	}
 	
 	def getLiqWells(liq: Liquid): Set[Well] = {

@@ -10,7 +10,9 @@ object BsseEvowareMapper {
 	def apply(): EvowareMapper = {
 		val mapSites = Map(
 				"DeconA" -> Site(3, 1),
-				"DeconD" -> Site(3, 2)
+				"DeconD" -> Site(3, 2),
+				"P1" -> Site(16, 0), // This is just made up
+				"P2" -> Site(16, 1) // This is just made up
 				)
 		
 		// TODO: Set these values depending on the tip kind

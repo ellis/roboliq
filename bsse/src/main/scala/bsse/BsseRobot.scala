@@ -5,13 +5,10 @@ import roboliq.compiler._
 import roboliq.devices.pipette._
 
 
-class BsseRobot(
-	devices: Seq[Device],
-	processors: Seq[CommandCompiler]
-) extends Robot(devices, processors)
-
 object BsseRobot {
-	def apply() = {
+	def apply(): Robot = {
+		val plateDeconAspirate, plateDeconDispense = new Plate
+			
 		val pipetter = new BssePipetteDevice
 		val devices = Seq(
 			pipetter
@@ -19,11 +16,12 @@ object BsseRobot {
 		val processors = Seq(
 			new L3P_TipsReplace,
 			new L3P_TipsDrop("WASTE"),
-			new L3P_TipsWash_BSSE(pipetter, plateDeconAspirate, plateDeconDispense),
+			new L3P_TipsWash_BSSE(pipetter, pipetter.plateDeconAspirate, pipetter.plateDeconDispense),
 			new L3P_Pipette(pipetter),
 			new L3P_Mix(pipetter)
 			)
-
+			
+		new Robot(devices, processors)
 	}
 }
 /*package bsse

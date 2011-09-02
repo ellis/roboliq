@@ -81,66 +81,11 @@ class Tester2 extends Roboliq {
 
 
 object Main extends App {
-	val robot = new BsseRobot
+	val robot = BsseRobot()
 	
 	val evowareMapper = BsseEvowareMapper()
 	val translator = new EvowareTranslator(evowareMapper)
 
 	val tester = new Tester
 	Compiler.compile(robot, translator, tester)
-	tester.m_protocol.get()
-	tester.m_customize.get()
-	val kb = tester.kb
-	
-	def createCompiler(): Compiler = {
-		val pipetter = new PipetteDeviceGeneric()
-		pipetter.config.tips.foreach(kb.addObject)
-		
-		val plateDeconAspirate, plateDeconDispense = new Plate
-		new PlateProxy(kb, plateDeconAspirate) match {
-			case pp =>
-				pp.label = "DA"
-				pp.location = "DA"
-				pp.setDimension(8, 1)
-		}
-		new PlateProxy(kb, plateDeconDispense) match {
-			case pp =>
-				pp.label = "DD"
-				pp.location = "DD"
-				pp.setDimension(8, 1)
-		}
-		
-		val compiler = new Compiler
-		//compiler.register(new L4P_Pipette)
-		//compiler.register(new L3P_Clean(pipetter, plateDeconAspirate, plateDeconDispense))
-		compiler.register(new L3P_TipsReplace)
-		compiler.register(new L3P_TipsDrop("waste"))
-		compiler.register(new L3P_Pipette(pipetter))
-		//compiler.register(new L2P_Aspirate)
-		//compiler.register(new L2P_Dispense)
-		//compiler.register(new L2P_SetTipStateClean)
-		compiler
-	}
-	
-	println("Input:")
-	tester.cmds.foreach(println)
-	println()
-
-	val compiler = createCompiler()
-	tester.kb.concretize() match {
-		case Right(map31) =>
-			val state0 = map31.createRobotState()
-			compiler.compile(state0, tester.cmds) match {
-				case Left(err) =>
-					println("Compilation errors:")
-					err.errors.foreach(println)
-				case Right(nodes) =>
-					val finals = nodes.flatMap(_.collectFinal())
-					println("Output:")
-					finals.map(_.cmd).foreach(println)
-			}
-		case Left(errors) =>
-			println("Missing information:")
-			println(errors)
-	}
 }
