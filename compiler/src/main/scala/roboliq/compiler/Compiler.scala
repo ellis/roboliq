@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
+import roboliq.protocol.CommonProtocol
 
 
 class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq[Command], val children: Seq[CompileNode]) {
@@ -163,7 +164,7 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 }
 
 object Compiler {
-	def compile(robot: Robot, translator: Translator, protocol: L4_Roboliq) {
+	def compile(robot: Robot, translator: Translator, protocol: CommonProtocol) {
 		val kb = protocol.kb
 
 		protocol.m_protocol.get()
@@ -201,7 +202,7 @@ object Compiler {
 		}
 	}
 	
-	def compile(robot: Robot, protocol: L4_Roboliq) {
+	def compile(robot: Robot, protocol: CommonProtocol) {
 		val kb = protocol.kb
 
 		protocol.m_protocol.get()

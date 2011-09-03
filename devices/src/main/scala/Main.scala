@@ -1,12 +1,14 @@
+/*
 import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._
+import roboliq.protocol._
 import roboliq.devices.pipette._
 
 
-class Tester extends L4_Roboliq with PipetteCommands {
+class Tester extends CommonProtocol with PipetteCommands {
 	val water = new Liquid("water", true, false, Set())
 	val plate = new Plate
 	
@@ -120,3 +122,4 @@ object Main extends App {
 	val tester = new Tester
 	Compiler.compile(robot, tester)
 }
+*/

@@ -1,3 +1,4 @@
+
 package bsse
 
 import scala.collection.mutable.ArrayBuffer
@@ -9,8 +10,8 @@ import roboliq.devices.pipette._
 
 import evoware._
 
-
-class Tester extends Roboliq {
+/*
+class Tester extends Protocol {
 	val water = new Liquid("water", true, false, Set())
 	val plate = new Plate
 	
@@ -43,7 +44,7 @@ class Tester extends Roboliq {
 	}
 }
 
-class Tester2 extends Roboliq {
+class Tester2 extends Protocol {
 	val water = new Liquid("water", false, false, Set())
 	val liquid_plasmidDna = new Liquid("plasmid", false, false, Set(Contaminant.DNA))
 	val liquid_competentCells = new Liquid("cells", false, false, Set(Contaminant.Cell))
@@ -78,7 +79,7 @@ class Tester2 extends Roboliq {
 	pcrDispense(3)
 	competentYeastDispense()
 } 
-
+*/
 
 object Main extends App {
 	val robot = BsseRobot()
@@ -86,6 +87,6 @@ object Main extends App {
 	val evowareMapper = BsseEvowareMapper()
 	val translator = new EvowareTranslator(evowareMapper)
 
-	val tester = new Tester
+	val tester = new examples.Example01
 	Compiler.compile(robot, translator, tester)
 }
