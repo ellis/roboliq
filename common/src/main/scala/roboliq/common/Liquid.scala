@@ -37,7 +37,7 @@ object ContaminantLevels {
 */
 
 class Liquid(
-	val sName: String,
+	var sName: String,
 	val bWaterFreeDispense: Boolean,
 	val bRequireDecontamBeforeAspirate: Boolean,
 	/** Contaminants in this liquid */
@@ -68,6 +68,8 @@ class Liquid(
 			)
 		}
 	}
+	
+	def getName() = if (sName == null) "<unnamed>" else sName
 }
 
 object Liquid {

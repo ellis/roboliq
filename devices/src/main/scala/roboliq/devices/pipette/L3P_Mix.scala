@@ -45,50 +45,54 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		mix_createItems(states0, tws) match {
 			case Left(sError) =>
 				return Left(Seq(sError))
-			case Right(items) =>
+			case Right(items0) =>
 				val builder = new StateBuilder(states0)		
 				val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
-				items.foreach(item => {
-					val tip = item.tip
-					val target = item.well
-					val tipWriter = tip.obj.stateWriter(builder)
-					val targetWriter = target.obj.stateWriter(builder)
-					val liquidTip0 = tipWriter.state.liquid
-					val liquid = targetWriter.state.liquid
-					
-					// Check liquid
-					// If the tip hasn't been used for aspiration yet, associate the source liquid with it
-					if (liquidTip0 eq Liquid.empty) {
-						tipWriter.aspirate(liquid, 0)
-					}
-					// If we would need to aspirate a new liquid, abort
-					else if (liquid ne liquidTip0) {
-						return Left(Seq("INTERNAL: Error code dispense 1"))
-					}
-					
-					// TODO: check for valid volume, i.e., not too much
-					/*dispense_checkVol(builder, tip, dest) match {
-						case Some(sError) => return Left(Seq(sError))
-						case _ =>
-					}*/
-
-					// Check whether this dispense would require a cleaning
-					val bFirst = false // NOTE: just set to false, because this will be recalculated later anyway
-					getMixCleanSpec(builder, mapTipToType, tipOverrides, bFirst, item.tip, item.well) match {
-						case None =>
-						case Some(spec) =>
-							mapTipToCleanSpec.get(item.tip) match {
-								case Some(_) =>
-									return Left(Seq("INTERNAL: Error code dispense 2"))
-								case None =>
-									mapTipToCleanSpec(item.tip) = spec
-							}
-					}
-					
-					// Update tip state
-					tipWriter.mix(liquid, item.nVolume)
-				})
-				val actions = Seq(Mix(items))
+				val itemss = robot.batchesForMix(items0)
+				var actions = Seq[Mix]()
+				for (items <- itemss) {
+					items.foreach(item => {
+						val tip = item.tip
+						val target = item.well
+						val tipWriter = tip.obj.stateWriter(builder)
+						val targetWriter = target.obj.stateWriter(builder)
+						val liquidTip0 = tipWriter.state.liquid
+						val liquid = targetWriter.state.liquid
+						
+						// Check liquid
+						// If the tip hasn't been used for aspiration yet, associate the source liquid with it
+						if (liquidTip0 eq Liquid.empty) {
+							tipWriter.aspirate(liquid, 0)
+						}
+						// If we would need to aspirate a new liquid, abort
+						else if (liquid ne liquidTip0) {
+							return Left(Seq("INTERNAL: Error code dispense 1"))
+						}
+						
+						// TODO: check for valid volume, i.e., not too much
+						/*dispense_checkVol(builder, tip, dest) match {
+							case Some(sError) => return Left(Seq(sError))
+							case _ =>
+						}*/
+	
+						// Check whether this dispense would require a cleaning
+						val bFirst = false // NOTE: just set to false, because this will be recalculated later anyway
+						getMixCleanSpec(builder, mapTipToType, tipOverrides, bFirst, item.tip, item.well) match {
+							case None =>
+							case Some(spec) =>
+								mapTipToCleanSpec.get(item.tip) match {
+									case Some(_) =>
+										return Left(Seq("INTERNAL: Error code dispense 2"))
+									case None =>
+										mapTipToCleanSpec(item.tip) = spec
+								}
+						}
+						
+						// Update tip state
+						tipWriter.mix(liquid, item.nVolume)
+					})
+					actions = actions ++ Seq(Mix(items))
+				}
 				Right(new MixResult(builder.toImmutable, mapTipToCleanSpec.toMap, actions))
 		}
 	}

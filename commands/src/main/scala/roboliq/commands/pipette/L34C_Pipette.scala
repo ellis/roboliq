@@ -127,7 +127,10 @@ case class L4A_PipetteItem(
 	def toL3(states: RobotState): Either[Seq[String], Seq[L3A_PipetteItem]] = {
 		val srcs3 = PipetteHelperL4.getWells1(states, src)
 		if (srcs3.isEmpty) {
-			return Left(Seq("INTERNAL: no config found for pipette source "+src))
+			src match {
+				case WPL_Liquid(liquid) => return Left(Seq("Liquid \""+liquid.getName()+"\" must be assigned to one or more wells"))
+				case _ => return Left(Seq("INTERNAL: no config found for pipette source "+src))
+			}
 		}
 		val dests3 = PipetteHelperL4.getWells1(states, dest)
 		//println("dests3: "+dests3)

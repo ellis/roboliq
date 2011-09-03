@@ -167,8 +167,9 @@ object Compiler {
 	def compile(robot: Robot, translator: Translator, protocol: CommonProtocol) {
 		val kb = protocol.kb
 
-		protocol.m_protocol.get()
-		protocol.m_customize.get()
+		if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
+		protocol.__findPlateLabels()
+		if (protocol.m_customize.isDefined) protocol.m_customize.get()
 		robot.devices.foreach(_.addKnowledge(kb))
 		
 		kb.concretize() match {
@@ -180,6 +181,7 @@ object Compiler {
 				val state0 = map31.createRobotState()
 				
 				val compiler = new Compiler(robot.processors)
+				compiler.bDebug = true
 				
 				compiler.compile(state0, protocol.cmds) match {
 					case Left(err) =>

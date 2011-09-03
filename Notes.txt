@@ -116,6 +116,31 @@ CompleteYeastTransformation
 
 
 ==========
+Terminology:
+	Obj
+	ObjSetup
+	ObjConfig
+	ObjState
+	-
+	protocol objects, like Plate and Liquid
+	Spec
+	Info
+	Data
+	Type
+	Kind
+	Category
+	Brand
+	Product
+	Model: used for part types of which there can be many different copies (e.g. plates, tips, and tubes of a kind)
+	Family
+	Configuration
+	
+	things we need terms for:
+		liquid pipetting category (based on liquid properties, many liquids can be grouped together as far as pipetting is concerned)
+		type of plate (96 well, 96 well deep square, 12 well, etc, with certain volumes and shapes)
+		type of tip
+		type of tube (various epindorphs)
+==========
 AST Processing levels:
 1) maximally abstract commands, lab-independent
 2) more concrete commands for the given system (implementations of abstract methods)

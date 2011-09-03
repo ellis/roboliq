@@ -10,11 +10,18 @@ class Example01 extends Protocol with ExampleTable {
 	val ddw = new Liquid(LiquidFamily.Water)
 	val plate1 = new Plate(PlateFamily.Standard)
 	
-	pipette(ddw, plate1, 300 ul)
+	pipette(ddw, plate1, 30 ul)
 	mix(plate1, 30 ul, 5)
 
+	val table = new {
+		val BUF12 = new Plate(PlateFamily.Standard)
+		BUF12.label = "BUF12"
+		BUF12.location = "BUF12"
+		BUF12.setDimension(8, 1)
+	}
+	
 	customize {
-		//ddw set (table.BUF12(A1+8))
+		ddw.fill(table.BUF12)
 		plate1.set(PlateModel.Standard96, Location.P4)
 	}
 }

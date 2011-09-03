@@ -53,7 +53,7 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	figure out how to compile external scripts conveniently
+	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
 	devices: add bTipPermanent to Tip or TipConfig
 	devices: set initial tip state in BSSE pipette device

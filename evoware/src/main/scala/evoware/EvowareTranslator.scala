@@ -207,8 +207,10 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 				// Get the liquid class
 				val sLiquidClass = item0.policy.sName
 				// Assert that there is only one liquid class
-				if (rest.exists(_.policy.sName != sLiquidClass))
+				if (rest.exists(_.policy.sName != sLiquidClass)) {
+					items.foreach(item => println(item.policy))
 					return Left(Seq("INTERNAL: Liquid class must be the same for all mix items"))
+				}
 				if (rest.exists(_.nCount != item0.nCount))
 					return Left(Seq("INTERNAL: Mix count must be the same for all mix items"))
 				
