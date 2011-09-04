@@ -21,6 +21,8 @@ class Example01 extends Protocol with ExampleTable {
 	}
 	
 	customize {
+		//reagent(ddw, "BUF12", 1, 8)
+		//labware(plate1, Location.P4, )
 		ddw.fill(table.BUF12)
 		plate1.set(PlateModel.Standard96, Location.P4)
 	}

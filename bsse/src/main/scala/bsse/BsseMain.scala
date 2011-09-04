@@ -87,6 +87,16 @@ object Main extends App {
 	val evowareMapper = BsseEvowareMapper()
 	val translator = new EvowareTranslator(evowareMapper)
 
-	val tester = new examples.Example01
-	Compiler.compile(robot, translator, tester)
+	val protocol = new examples.Example01
+	if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
+	protocol.__findPlateLabels()
+	if (protocol.m_customize.isDefined) protocol.m_customize.get()
+	robot.devices.foreach(_.addKnowledge(protocol.kb))
+	
+	val compiler = new Compiler(robot.processors)
+
+	Compiler.compile(protocol.kb, Some(compiler), Some(translator), protocol.cmds) match {
+		case Left(err) => err.print()
+		case Right(succ) => succ.print()
+	}
 }

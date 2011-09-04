@@ -2,7 +2,7 @@ package evoware
 
 
 object EvowareTranslatorHeader {
-	def getHeader(): String =
+	private val sDefault =
 """302F0FE9
 20110530_155010 No log in       
                                                                                                                                 
@@ -147,4 +147,27 @@ V;200
 998;64;
 996;0;0;
 --{ RPG }--"""
+	def getHeader(): String = sDefault
+	
+	def getHeader(map: Map[Tuple2[Int, Int], String]): String = {
+		val lsLines = sDefault.split("\r?\n")
+		val b = new StringBuilder
+		var iGrid = 1
+		for (sLine <- lsLines) {
+			val sLine2 = {
+				if (sLine.startsWith("998;")) {
+					val fields = sLine.split(";").tail.zipWithIndex
+					val fieldsNew = for ((sField, iSite) <- fields) yield { map.getOrElse((iGrid, iSite), sField) }
+					b.append("998;")
+					b.append(fieldsNew.mkString(";"))
+				}
+				else {
+					sLine
+				}
+			}
+			b.append(sLine2)
+			b.append('\n')
+		}
+		b.toString()
+	}
 }

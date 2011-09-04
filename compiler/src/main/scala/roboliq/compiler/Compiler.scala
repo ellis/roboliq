@@ -6,7 +6,6 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 import roboliq.protocol.CommonProtocol
 
-
 class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq[Command], val children: Seq[CompileNode]) {
 	def collectFinal(): Seq[CompileFinal] = {
 		res match {
@@ -24,6 +23,15 @@ class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq
 	}
 }
 
+case class CompilerStageSuccess(nodes: Seq[CompileNode], log: Log = Log.empty) extends CompileStageResult {
+	def print() {
+		val finals = nodes.flatMap(_.collectFinal())
+		val cmds1 = finals.map(_.cmd1)
+		println("Output:")
+		cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
+		println()
+	}
+}
 
 class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	var bDebug = false
@@ -32,6 +40,29 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	
 	def createSubCompiler(): Compiler = {
 		new Compiler(processors, nDepth + 1)
+	}
+	
+	/*
+	def apply(in: Either[CompileStageError, _ <: CompileStageResult]): Either[CompileStageError, CompilerStageSuccess] = {
+		in match {
+			case Left(err) => Left(err)
+			case Right(succ) => apply(succ) 
+		}
+	}
+	*/
+	
+	def compile(in: CompileStageResult, cmds: Seq[Command]): Either[CompileStageError, CompilerStageSuccess] = {
+		in match {
+			case succ: KnowledgeStageSuccess =>
+				compile(succ.states0, cmds) match {
+					case Left(err) =>
+						val item = new LogItem(err.cmd, err.errors)
+						Left(CompileStageError(new Log(Seq(item), Seq(), Seq())))
+					case Right(nodes) =>
+						Right(CompilerStageSuccess(nodes))
+				}
+			case _ => Left(CompileStageError(Log("unrecognized CompileStageResult input")))
+		}
 	}
 	
 	def compile(states: RobotState, cmds: Seq[Command]): Either[CompileError, Seq[CompileNode]] = {
@@ -164,50 +195,41 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 }
 
 object Compiler {
-	def compile(robot: Robot, translator: Translator, protocol: CommonProtocol) {
-		val kb = protocol.kb
-
-		if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
-		protocol.__findPlateLabels()
-		if (protocol.m_customize.isDefined) protocol.m_customize.get()
-		robot.devices.foreach(_.addKnowledge(kb))
-		
+	def compile(kb: KnowledgeBase, compiler_? : Option[Compiler], translator_? : Option[Translator], cmds: Seq[Command]): Either[CompileStageError, CompileStageResult] = {
 		kb.concretize() match {
-			case Left(errors) =>
-				println("Missing information:")
-				kb.printErrors(errors)
-				println()
-			case Right(map31) =>
-				val state0 = map31.createRobotState()
-				
-				val compiler = new Compiler(robot.processors)
-				compiler.bDebug = true
-				
-				compiler.compile(state0, protocol.cmds) match {
-					case Left(err) =>
-						println("Compilation errors:")
-						err.errors.foreach(println)
-						println()
-					case Right(nodes) =>
-						val finals = nodes.flatMap(_.collectFinal())
-						val cmds1 = finals.map(_.cmd1)
-						println("Output:")
-						cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
-						println()
-						
-						translator.translate(cmds1) match {
-							case Left(errs) =>
-								println(errs)
-							case Right(cmds0) => cmds0.foreach(println)
+			case Left(errK) => Left(errK)
+			case Right(succK) =>
+				compiler_? match {
+					case None => Right(succK)
+					case Some(compiler) =>
+						compiler.compile(succK, cmds) match {
+							case Left(errC) => Left(errC)
+							case Right(succC) =>
+								translator_? match {
+									case None => Right(succC)
+									case Some(translator) =>
+										val finals = succC.nodes.flatMap(_.collectFinal())
+										val cmds1 = finals.map(_.cmd1)
+										/*println("Output:")
+										cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
+										println()*/
+										
+										translator.translate(cmds1) match {
+											case Left(errT) => Left(errT)
+											case Right(succT) => Right(succT)
+										}
+								}
 						}
 				}
 		}
 	}
-	
+
+	/*
 	def compile(robot: Robot, protocol: CommonProtocol) {
 		val kb = protocol.kb
 
 		protocol.m_protocol.get()
+		protocol.__findPlateLabels()
 		protocol.m_customize.get()
 		robot.devices.foreach(_.addKnowledge(kb))
 		
@@ -267,4 +289,5 @@ object Compiler {
 				}
 		}
 	}
+	*/
 }

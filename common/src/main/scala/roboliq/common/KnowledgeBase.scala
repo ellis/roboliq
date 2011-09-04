@@ -96,9 +96,9 @@ class KnowledgeBase {
 		println()
 	}
 	
-	type Errors = Seq[Tuple2[Obj, Seq[String]]]
+	//type Errors = Seq[Tuple2[Obj, Seq[String]]]
 	
-	def concretize(): Either[Errors, ObjMapper] = {
+	def concretize(): Either[CompileStageError, KnowledgeStageSuccess] = {
 		for (plate <- m_plates) {
 			val pc = getPlateSetup(plate)
 			if (pc.dim_?.isDefined && pc.sLabel_?.isDefined) {
@@ -113,13 +113,13 @@ class KnowledgeBase {
 		
 		val mapConfs = new HashMap[Obj, ObjConfig]
 		val mapStates = new HashMap[Obj, ObjState]
-		val errors = new ArrayBuffer[Tuple2[Obj, Seq[String]]]
+		val log = new LogBuilder
 		
 		def constructConfStateTuples(setups: scala.collection.Map[Obj, ObjSetup]) {
 			for ((obj, setup) <- setups) {
 				if (!mapStates.contains(obj)) {
 					obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
-						case Left(ls) => errors += (obj -> ls)
+						case Left(ls) => log.errors += new LogItem(obj, ls)
 						case Right((conf, state)) =>
 							mapConfs(obj) = conf
 							mapStates(obj) = state
@@ -136,7 +136,7 @@ class KnowledgeBase {
 		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair._2.asInstanceOf[WellSetup])
 		for ((obj, setup) <- wellSetups) {
 			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], mapStates) match {
-				case Left(ls) => errors += (obj -> ls)
+				case Left(ls) => log.errors += new LogItem(obj, ls)
 				case Right((conf, state)) =>
 					mapConfs(obj) = conf
 					mapStates(obj) = state
@@ -146,21 +146,21 @@ class KnowledgeBase {
 		// Everything else
 		constructConfStateTuples(m_setups)
 
-		if (errors.isEmpty) {
+		if (log.errors.isEmpty) {
 			val map2 = mapStates.map(pair => {
 				val (obj, state) = pair
 				val conf = mapConfs(obj)
 				obj -> new SetupConfigState(m_setups(obj), conf, state)
 			}).toMap
 			val map31 = new ObjMapper(map2)
-			Right(map31)
+			Right(KnowledgeStageSuccess(map31, map31.createRobotState()))
 		}
 		else {
-			Left(errors)
+			Left(CompileStageError(log.toImmutable()))
 		}
 	}
 	
-	def printErrors(errors: Errors) {
+	/*def printErrors(errors: Errors) {
 		val grouped: Map[Obj, Errors] = errors.groupBy(_._1)
 		val errors2 = grouped.map(pair => pair._1 -> pair._2.flatMap(_._2))
 		val sorted = errors2.toSeq.sortBy(pair => m_setups(pair._1).getLabel(this))
@@ -173,5 +173,5 @@ class KnowledgeBase {
 		for (s <- ls) {
 			println("\t"+s)
 		}
-	}
+	}*/
 }

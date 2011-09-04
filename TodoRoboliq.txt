@@ -1,5 +1,11 @@
 http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structures
 
+Big goals:
+	BSSE: program working script for CompleteYeastTransformation.esc
+	Weizmann: get all basic example scripts working
+	Weizmann: get commands in ALL_COMMANDS.conf working
+	Evoware: connect to Evoware's API to control operation
+
 Evoware commands:
 x	asperate
 x	dispense
@@ -55,12 +61,15 @@ Tuval/Yair:
 Code:
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
+1	EvowareTranslator: output proper header
+2	protocol: create better Table usage
+3	examples: Example01: mix shouldn't wash between mixes
 	devices: add bTipPermanent to Tip or TipConfig
-	devices: set initial tip state in BSSE pipette device
-1	devices: run BSSE test scripts again, and get them to work
-2	devices: set initial tip type in TipState for fixed tips
-3	devices: implement wait
-4	devices: implement shaker
+x	devices: set initial tip state in BSSE pipette device
+x	devices: run BSSE test scripts again, and get them to work
+x	devices: set initial tip type in TipState for fixed tips
+	devices: implement wait
+	devices: implement shaker
 	devices: PipettePolicy: rework this concept
 		have a string to identify the general liquid class and a DispensePosition
 		the liquid class can either be explicitly specified with the liquid, or it's extracted from the contaminants

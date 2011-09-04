@@ -1,4 +1,4 @@
-package evoware
+/*package evoware
 
 sealed class EvowareTipKind(
 	val sName: String,
@@ -6,3 +6,4 @@ sealed class EvowareTipKind(
 	val nHoldVolumeMax: Double,
 	val nWashVolumeExtra: Double
 )
+*/
