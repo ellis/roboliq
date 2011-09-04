@@ -1,6 +1,7 @@
 http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structures
 
 Big goals:
+	Weizmann: first fully functional translation of example evolab script
 	BSSE: program working script for CompleteYeastTransformation.esc
 	Weizmann: get all basic example scripts working
 	Weizmann: get commands in ALL_COMMANDS.conf working
@@ -331,16 +332,24 @@ x	devices: set initial tip type in TipState for fixed tips
 	T0 tokens can have estimated times associated with them
 
 
+x	DOC
+x	#
+	TABLE
+	OPTION
+x	=
+x	LIST
+x	REAGENT
+.	LABWARE
 x	TRANSFER_LOCATIONS
-	TRANSFER_SAMPLES
-	TRANSFER_WELLS
-	DIST_REAGENT
+ *	TRANSFER_SAMPLES
+ *	TRANSFER_WELLS
+ *	DIST_REAGENT
 x	DIST_REAGENT2
 	UNITE_AND_TRANSFER
 	RUN
 	LOOP
 	ENDLOOP
-	DIST_WELL
+ *	DIST_WELL
 	PREPARE_MIX
 	PREPARE_LIST
 	MPDIST
@@ -350,7 +359,7 @@ x	DIST_REAGENT2
 	DILUTE_AND_REPLICATE384
 	DILPROG
 	PREPARE_MATRIX
-	DIST_COL2ROW
+ *	DIST_COL2ROW
 	EQUAL_CONC
 	SERIAL_DILUTION
 	PLANNED_DILUTION
@@ -366,11 +375,11 @@ x	DIST_REAGENT2
 	VACUUM
 	VACUUM_ON
 	VACUUM_OFF
-	MIX_WELLS
+x	MIX_WELLS
 	WAIT
 	PROMPT
-	GET_TIPS
-	DROP_TIPS
+ *	GET_TIPS
+ *	DROP_TIPS
 	ROCHE_OPEN
 	ROCHE_CLOSE
 	ROCHE_RUN
@@ -388,7 +397,7 @@ x	DIST_REAGENT2
 	PR_RUN
 	PR_MEASURE
 	REMOTE
-	EXECUTE
+ *	EXECUTE
 	READER_OPEN
 	READER_CLOSE
 	READER_MEASURE_OD
@@ -401,7 +410,7 @@ x	DIST_REAGENT2
 	INC_TEMP
 	LINKER_POS
 	START_SCRIPT
-	EVOSUB
+ *	EVOSUB
 	CSLGET
 	CSLPUT
 	CSLLOOP
@@ -415,8 +424,8 @@ x	DIST_REAGENT2
 	START_TIMER
 	WAIT_TIMER
 	MOVE_PLATE
-	EMAIL
-	SMS
+ *	EMAIL
+ *	SMS
 	LOGMIX
 	LOGLIST
 	LOGPLATE
