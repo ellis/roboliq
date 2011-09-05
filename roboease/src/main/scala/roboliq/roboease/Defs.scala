@@ -18,7 +18,7 @@ case class RoboeaseResult(
 )
 
 case class RoboeaseError(
-	val kbErrors: Seq[Tuple2[Obj, Seq[String]]],
+	val kbErrors: CompileStageError,
 	val errors: Seq[LineError]
 )
 

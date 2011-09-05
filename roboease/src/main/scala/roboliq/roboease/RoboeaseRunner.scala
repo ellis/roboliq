@@ -1,4 +1,4 @@
-package roboliq.roboease
+/*package roboliq.roboease
 
 import roboliq.compiler._
 
@@ -11,10 +11,9 @@ class RoboeaseRunner {
 		val sSource2 = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf").mkString
 		p.parse(sSource2) match {
 			case Left(err) =>
-				err.kbErrors.foreach(println)
-				err.errors.foreach(println)
-			case Right(res) =>
-				compile(res)
+				err.print
+			case Right(succ) =>
+				compile(succ)
 		}
 	}
 	
@@ -177,4 +176,4 @@ class RoboeaseRunner {
 		p.DefineRack("RCH",9,0,12,8, 200,"ROCHE") ;
 		p.DefineRack("READER",48,0,12,8, 200,"PLATE_READER") ;
 	}
-}
+}*/

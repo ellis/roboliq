@@ -9,6 +9,8 @@ import roboliq.devices.pipette._
 import roboliq.roboease._
 import _root_.evoware._
 
+import weizmann._
+
 
 object Main extends App {
 	test2()
@@ -120,10 +122,32 @@ object Main extends App {
 		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
 		p.parse(sSource) match {
 			case Left(err) =>
-				err.kbErrors.foreach(println)
-				err.errors.foreach(println)
+				err.print()
 			case Right(res) =>
-				compile(p, res)
+				val kb = res.kb
+				val cmds = res.cmds.map(_.cmd)
+
+				val robot = WeizmannRobot()
+				robot.devices.foreach(_.addKnowledge(kb))
+				
+				val compiler = new Compiler(robot.processors)
+				
+				val evowareMapper = WeizmannEvowareMapper(p.racks)
+				val translator = new EvowareTranslator(evowareMapper)
+			
+				Compiler.compile(kb, Some(compiler), Some(translator), cmds) match {
+					case Left(errC) => errC.print()
+					case Right(succC: CompilerStageSuccess) =>
+						val finals = succC.nodes.flatMap(_.collectFinal())
+						val cmds1 = finals.map(_.cmd1)
+						translator.translate(cmds1) match {
+							case Left(errT) => errT.print()
+							case Right(succT) =>
+								val s = translator.saveWithHeader(succT.cmds, p.sHeader, p.mapLabware, sFilename)
+								println(s)
+						}
+					case Right(succ) => succ.print()
+				}
 		}
 		
 		/*println(p.mapOptions)
@@ -131,6 +155,9 @@ object Main extends App {
 		//println(p.mapReagents)
 		println(p.mapLists)
 		println(p.mapLabware)*/
+	}
+/*	
+	private def x() {
 	}
 	
 	private def compile(p: ParserFile, res: RoboeaseResult) {
@@ -206,4 +233,5 @@ object Main extends App {
 			case Right(cmds0) => cmds0.foreach(println)
 		}
 	}
+*/
 }

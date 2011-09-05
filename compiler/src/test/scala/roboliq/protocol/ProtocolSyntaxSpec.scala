@@ -16,8 +16,8 @@ class ProtocolSyntaxSpec extends FeatureSpec with GivenWhenThen with ShouldMatch
 	
 	feature("PlateWells") {
 		val protocol = new CommonProtocol {
-			val p1 = new Plate(PT.Standard)
-			val p2 = new Plate(PT.Standard)
+			val p1 = new Plate(PlateFamily.Standard)
+			val p2 = new Plate(PlateFamily.Standard)
 			
 			p1.name = "P1"
 			p2.name = "P2"

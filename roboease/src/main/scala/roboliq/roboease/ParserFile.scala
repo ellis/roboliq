@@ -29,7 +29,7 @@ class ParserFile {//extends JavaTokenParsers {
 	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]
 	
 	
-	def parse(sSource: String): Either[RoboeaseError, RoboeaseResult] = {
+	def parse(sSource: String): Either[CompileStageError, RoboeaseResult] = {
 		var iLine = 1
 		for (sLine <- sSource.lines) {
 			val s = sLine.replaceAll("#.*", "").trim
@@ -42,11 +42,11 @@ class ParserFile {//extends JavaTokenParsers {
 					m_section = Section.Doc
 				case "SCRIPT" =>
 					kb.concretize() match {
-						case Left(errors) =>
+						case Left(errK) =>
 							m_map31 = null
-							return Left(RoboeaseError(errors, shared.errors))
-						case Right(map31) =>
-							m_map31 = map31
+							return Left(errK)
+						case Right(succK) =>
+							m_map31 = succK.mapper
 					}
 					m_section = Section.Script
 				case _ =>
@@ -61,8 +61,10 @@ class ParserFile {//extends JavaTokenParsers {
 		}
 		if (shared.errors.isEmpty)
 			Right(RoboeaseResult(shared.kb, pScript.cmds))
-		else
-			Left(RoboeaseError(Nil, shared.errors))
+		else {
+			val log = Log(shared.errors.map(_.sError))
+			Left(CompileStageError(log))
+		}
 	}
 	
 	private def handleDoc(s: String) {

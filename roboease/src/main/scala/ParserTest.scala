@@ -1,3 +1,4 @@
+/*
 import java.io.FileReader
 
 import scala.util.parsing.combinator._
@@ -202,3 +203,4 @@ ENDLIST
 		compiler
 	}
 }
+*/

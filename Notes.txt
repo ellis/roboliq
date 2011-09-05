@@ -136,6 +136,11 @@ Terminology:
 	Model: used for part types of which there can be many different copies (e.g. plates, tips, and tubes of a kind)
 	Family
 	Configuration
+	-
+	simple identifiers: enums, sealed case classes, unsealed case classes (for identifiers which should be extensible by user), strings
+	how to distinguish between simple identifiers, keys, data objects, and processing objects?
+	enumeration
+
 	
 	things we need terms for:
 		liquid pipetting category (based on liquid properties, many liquids can be grouped together as far as pipetting is concerned)

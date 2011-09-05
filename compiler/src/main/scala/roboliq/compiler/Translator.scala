@@ -26,5 +26,5 @@ trait Translator {
 		Right(TranslatorStageSuccess(cmds0))
 	}
 
-	def translateAndSave(cmds: Seq[CommandL1], sFilename: String): String
+	//def translateAndSave(cmds: Seq[CommandL1], sFilename: String): String
 }

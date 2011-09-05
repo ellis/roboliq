@@ -1,3 +1,5 @@
+package weizmann
+
 import scala.collection.immutable.SortedSet
 
 import roboliq.common._

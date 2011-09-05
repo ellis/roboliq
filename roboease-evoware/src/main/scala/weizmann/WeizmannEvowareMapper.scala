@@ -1,3 +1,5 @@
+package weizmann
+
 import roboliq.common._
 import roboliq.compiler._
 import roboliq.devices.pipette._

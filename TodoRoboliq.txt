@@ -61,8 +61,12 @@ Tuval/Yair:
 	get date for coming to Weizmann
 Code:
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
+	allow for composition and chaining of protocols
+	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
+	create roboliq-C-weizmann
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
 1	EvowareTranslator: output proper header
+	evoware: create EvowareCompiler.compile()
 2	protocol: create better Table usage
 3	examples: Example01: mix shouldn't wash between mixes
 	devices: add bTipPermanent to Tip or TipConfig
@@ -87,6 +91,8 @@ x	devices: set initial tip type in TipState for fixed tips
 		Dispense(3,"PIE_AUTAIR","300","300",0,0,0,0,0,0,0,0,0,0,29,2,1,"0C080000000000000",0,0);
 		Dispense(127,"PIE_AUTAIR","300","300","300","300","300","300","300",0,0,0,0,0,29,2,1,"0C0800000000¯00000",0,0);
 	devices: create tests for PipetteHelperL3
+	translator: need to split scripts into multiple files when plate is moved
+	translator: improvement of above would be to only split scripts when a labware conflict would occur
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts
 	roboease: TRANSFER
@@ -100,6 +106,12 @@ x	devices: set initial tip type in TipState for fixed tips
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
+	Plates:
+		we have various plate models
+		we might need to have separate model objects for the roboliq and evoware layers
+		we would like to choose the appropriate plate model for new plates we use, but also let the user specify it
+		plate compatibilities should be specified for input plates
+		plate compatibilities refers to which devices it can be used with, and how
 	Device and compilation concepts:
 		Compiler
 		CommandCompiler

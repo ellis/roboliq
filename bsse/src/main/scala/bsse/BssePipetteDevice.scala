@@ -13,7 +13,7 @@ import _root_.evoware._
 class BssePipetteDevice extends PipetteDevice {
 	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 0.01, 45)
 	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 2, 950)
-	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 0, 950)
+	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 950)
 	private val tipSpecs = Seq(tipSpec50, tipSpec1000)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = tipSpecs,
@@ -21,7 +21,7 @@ class BssePipetteDevice extends PipetteDevice {
 		tipGroups = {
 			val g1000 = (0 to 3).map(i => i -> tipSpec1000).toSeq
 			val g50 = (4 to 7).map(i => i -> tipSpec50).toSeq
-			Seq(g1000, g50, g1000 ++ g50)
+			Seq(g1000, g50)
 		}
 	)
 	private val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap

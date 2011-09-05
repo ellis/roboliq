@@ -150,7 +150,10 @@ V;200
 	def getHeader(): String = sDefault
 	
 	def getHeader(map: Map[Tuple2[Int, Int], String]): String = {
-		val lsLines = sDefault.split("\r?\n")
+		getHeader(sDefault, map)
+	}
+	def getHeader(sOrig: String, map: Map[Tuple2[Int, Int], String]): String = {
+		val lsLines = sOrig.split("\r?\n")
 		val b = new StringBuilder
 		var iGrid = 1
 		for (sLine <- lsLines) {
