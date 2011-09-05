@@ -19,8 +19,9 @@ object Main extends App {
 		import roboliq.roboease._
 		import roboliq.compiler._
 		
-		val p = new ParserFile
+		val p = new ParserFile(WeizmannTables.map)
 		
+		/*
 		//p.DefineRack($DITI_WASTE,1,6,8,12, 0) ;
 		p.DefineRack("WASTE",1,6,8,12,0) ;
 		p.DefineRack("CSL",2,0,1,8, 5000000,"Carousel MTP") ;
@@ -117,8 +118,10 @@ object Main extends App {
 		p.DefineRack("HC5",66,4,12,8, 200,"HOTEL5B") ;
 		p.DefineRack("RCH",9,0,12,8, 200,"ROCHE") ;
 		p.DefineRack("READER",48,0,12,8, 200,"PLATE_READER") ;
+		*/
 
-		val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf").mkString
+		val sSourcePath = System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf"
+		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
 		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
 		p.parse(sSource) match {
 			case Left(err) =>
@@ -135,7 +138,7 @@ object Main extends App {
 				val evowareMapper = WeizmannEvowareMapper(p.racks)
 				val translator = new EvowareTranslator(evowareMapper)
 			
-				Compiler.compile(kb, Some(compiler), Some(translator), cmds) match {
+				Compiler.compile(kb, Some(compiler), None, cmds) match {
 					case Left(errC) => errC.print()
 					case Right(succC: CompilerStageSuccess) =>
 						val finals = succC.nodes.flatMap(_.collectFinal())
@@ -143,6 +146,7 @@ object Main extends App {
 						translator.translate(cmds1) match {
 							case Left(errT) => errT.print()
 							case Right(succT) =>
+								val sFilename = sSourcePath + ".esc"
 								val s = translator.saveWithHeader(succT.cmds, p.sHeader, p.mapLabware, sFilename)
 								println(s)
 						}

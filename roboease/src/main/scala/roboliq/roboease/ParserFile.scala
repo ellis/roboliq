@@ -28,6 +28,9 @@ class ParserFile(mapTables: Map[String, Table]) {
 	private var m_sLine: String = null
 	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]
 	
+	def sHeader = shared.sHeader
+	def mapLabware = shared.mapLabware.toMap
+	
 	
 	def parse(sSource: String): Either[CompileStageError, RoboeaseResult] = {
 		var iLine = 1
