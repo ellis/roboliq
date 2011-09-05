@@ -10,10 +10,10 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-class ParserFile {//extends JavaTokenParsers {
+class ParserFile(mapTables: Map[String, Table]) {
 	private val shared = new ParserSharedData
 	import shared._
-	private val pConfig = new ParserLineConfig(shared)
+	private val pConfig = new ParserLineConfig(shared, mapTables)
 	private val pScript = new ParserLineScript(shared)
 	
 	private object Section extends Enumeration {

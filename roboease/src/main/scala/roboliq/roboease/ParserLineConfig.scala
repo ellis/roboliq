@@ -6,7 +6,7 @@ import roboliq.common._
 import roboliq.commands.pipette._
 
 
-class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
+class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) extends ParserBase(shared) {
 	import shared._
 	
 	val cmd0List: Parser[String] = "LIST"~>ident 
@@ -24,7 +24,16 @@ class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
 			)
 
 	private def setTable(id: String) {
-		println("WARNING: TABLE directive not yet implemented")
+		mapTables.get(id) match {
+			case None =>
+				shared.addError("unknown rack \""+id+"\"")
+				return
+			case Some(table) =>
+				shared.sHeader = table.sHeader
+				shared.mapRacks.clear()
+				shared.mapRacks ++= table.racks.map(rack => rack.name -> rack)
+				
+		}
 	}
 			
 	private def setVar(id: String, s: String) { mapVars(id) = s }
@@ -58,6 +67,13 @@ class ParserLineConfig(shared: ParserSharedData) extends ParserBase(shared) {
 	}
 
 	private def setLabware(id: String, sRack: String, sType: String) {
-		createPlate(id, sRack)
+		shared.mapRacks.get(sRack) match {
+			case None =>
+				shared.addError("unknown rack \""+sRack+"\"")
+				return
+			case Some(rack) =>
+				shared.mapLabware((rack.grid, rack.site)) = sType
+				createPlate(id, sRack)
+		}
 	}
 }

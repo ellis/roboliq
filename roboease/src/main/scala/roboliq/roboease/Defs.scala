@@ -23,3 +23,5 @@ case class RoboeaseError(
 )
 
 case class RoboeaseCommand(iLine: Int, sLine: String, cmd: Command)
+
+class Table(val sHeader: String, val racks: Seq[Rack])
