@@ -69,11 +69,11 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 							return Left(Seq("INTERNAL: Error code dispense 1"))
 						}
 						
-						// TODO: check for valid volume, i.e., not too much
-						/*dispense_checkVol(builder, tip, dest) match {
+						// check for valid volume, i.e., not too much
+						mix_checkVol(builder, tip, target) match {
 							case Some(sError) => return Left(Seq(sError))
 							case _ =>
-						}*/
+						}
 	
 						// Check whether this dispense would require a cleaning
 						val bFirst = false // NOTE: just set to false, because this will be recalculated later anyway
@@ -108,25 +108,24 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		Right(items)
 	}
 
-	//val mapDestToItem: Map[WellConfigL2, L3A_MixItem] = args.items.map(t => t.well -> t).toMap
-
-	/*
-	private def mix(cycle: CycleState, tipStates: HashMap[Tip, TipStateL2], tws: Seq[TipWell]): Option[String] = {
-		mix_checkVols(cycle, tipStates, tws) match {
-			case None =>
-			case e @ Some(sError) => return e
-		}
+	// Check for appropriate volumes
+	private def mix_checkVol(states: StateMap, tip: TipConfigL2, dest: WellConfigL2): Option[String] = {
+		val tipState = tip.obj.state(states)
+		val liquidSrc = tipState.liquid // since we've already aspirated the source liquid
+		val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
+		val nMax = robot.getTipHoldVolumeMax(tipState, liquidSrc)
+		val nTipVolume = 0
+		val nVolume = args.mixSpec.nVolume
 		
-		mix_createItems(cycle, tws, tipStates) match {
-			case Left(sError) => Some(sError)
-			case Right(twvpcs) =>
-				// Create L2 dispense commands
-				mix_addCommands(cycle, twvpcs)
-				mix_updateTipStates(cycle, twvpcs, tipStates)
-				None
-		}
+		// TODO: make sure that target well is not over-aspirated
+		if (nVolume + nTipVolume < nMin)
+			Some("Cannot mix "+nVolume+"ul with tip "+(tip.index+1)+": require >= "+nMin+"ul")
+		else if (nVolume + nTipVolume > nMax)
+			Some("Cannot mix "+nVolume+"ul with tip "+(tip.index+1)+": require <= "+nMax+"ul")
+		else
+			None
 	}
-	
+
 	// Check for appropriate volumes
 	private def mix_checkVols(cycle: CycleState, tipStates: HashMap[Tip, TipStateL2], tws: Seq[TipWell]): Option[String] = {
 		assert(!tws.isEmpty)
@@ -135,18 +134,17 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		def isVolOk(tw: TipWell): Boolean = {
 			val tip = tw.tip
 			val dest = tw.well
-			val item = mapDestToItem(dest)
 			val liquid = dest.obj.state(cycle.state0).liquid
 			val tipState = tipStates(tip.obj)
 			val nMin = robot.getTipAspirateVolumeMin(tipState, liquid)
 			val nMax = robot.getTipHoldVolumeMax(tipState, liquid)
 			val nTipVolume = -tipStates(tip.obj).nVolume
 			sError_? = {
-				val nVolume = item.nVolume
+				val nVolume = args.mixSpec.nVolume
 				if (nVolume < nMin)
-					Some("Cannot aspirate "+nVolume+"ul into tip "+(tip.index+1)+": require >= "+nMin+"ul")
+					Some("Cannot mix "+nVolume+"ul with tip "+(tip.index+1)+": require >= "+nMin+"ul")
 				else if (nVolume + nTipVolume > nMax)
-					Some("Cannot aspirate "+nVolume+"ul into tip "+(tip.index+1)+": require <= "+nMax+"ul")
+					Some("Cannot mix "+nVolume+"ul with tip "+(tip.index+1)+": require <= "+nMax+"ul")
 				else
 					None
 			}
@@ -158,42 +156,4 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		tws.forall(isVolOk)
 		sError_?
 	}
-
-	private def mix_createItems(cycle: CycleState, tws: Seq[TipWell], tipStates: collection.Map[Tip, TipStateL2]): Either[String, Seq[L2A_MixItem]] = {
-		// get pipetting policy for each dispense
-		val policies_? = tws.map(tw => {
-			cmd.args.sMixClass_? match {
-				case None =>
-					val tipState = tipStates(tw.tip.obj)
-					val wellState = tw.well.obj.state(cycle.state0)
-					val item = mapDestToItem(tw.well)
-					robot.getDispensePolicy(tipState, wellState, item.nVolume)
-				case Some(sLiquidClass) =>
-					robot.getPipetteSpec(sLiquidClass) match {
-						case None => None
-						case Some(spec) => Some(new PipettePolicy(spec.sName, spec.mix))
-					}
-			}
-		})
-		if (policies_?.forall(_.isDefined)) {
-			val twvps = (tws zip policies_?.map(_.get)).map(pair => mix_createItem(cycle, pair._1, pair._2))
-			Right(twvps)
-		}
-		else {
-			Left("INTERNAL: No appropriate mix policy available")
-		}
-	}
-	
-	private def mix_createItem(cycle: CycleState, tw: TipWell, policy: PipettePolicy): L2A_MixItem = {
-		val item = mapDestToItem(tw.well)
-		new L2A_MixItem(tw.tip, tw.well, item.nVolume, cmd.args.nCount, policy)
-	}
-
-	private def mix_addCommands(cycle: CycleState, twvpcs0: Seq[L2A_MixItem]) {
-		val twvpcs = twvpcs0.sortBy(_.tip)
-		val twvpcss = robot.batchesForMix(twvpcs)
-		// Create dispense tokens
-		cycle.mixes ++= twvpcss.map(twvpcs => L2C_Mix(twvpcs))
-	}
-	*/
 }

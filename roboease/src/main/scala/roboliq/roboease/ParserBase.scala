@@ -18,6 +18,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	val word: Parser[String] = """[^\s]+""".r
 	val integer: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
 	val restOfLine: Parser[String] = """.*""".r
+	val string: Parser[String] = "\"" ~> """[^"]*""".r <~ '"'
 	
 	def idPlate = Parser[Plate] { in =>
 		val res1 = ident.apply(in)

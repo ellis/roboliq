@@ -10,6 +10,12 @@ case class Rack(
 		grid: Int, site: Int, nVolumeMax: Double, carrierType: String
 )
 
+case class Labware(
+	sLabel: String,
+	sType: String,
+	rack: Rack
+)
+
 case class LineError(iLine: Int, iCol_? : Option[Int], sLine: String, sError: String)
 
 case class RoboeaseResult(

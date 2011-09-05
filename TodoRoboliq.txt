@@ -65,7 +65,7 @@ Code:
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
 	create roboliq-C-weizmann
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
-1	EvowareTranslator: output proper header
+x	EvowareTranslator: output proper header
 	evoware: create EvowareCompiler.compile()
 2	protocol: create better Table usage
 3	examples: Example01: mix shouldn't wash between mixes

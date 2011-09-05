@@ -19,7 +19,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 				{ case id ~ value => setOption(id, value) }),
 			("REAGENT", ident~idPlate~integer~ident~opt(integer) ^^
 				{ case id ~ plate ~ iWell ~ lc ~ nWells_? => setReagent(id, plate, iWell, lc, nWells_?) }),
-			("LABWARE", ident~ident~stringLiteral ^^
+			("LABWARE", ident~ident~string ^^
 				{ case id ~ sRack ~ sType => setLabware(id, sRack, sType) })
 			)
 
@@ -73,7 +73,8 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 				shared.addError("unknown rack \""+sRack+"\"")
 				return
 			case Some(rack) =>
-				shared.mapLabware((rack.grid, rack.site)) = sType
+				val labware = Labware(id, sType, rack)
+				shared.mapLabware((rack.grid, rack.site)) = labware
 				createPlate(id, sRack)
 		}
 	}

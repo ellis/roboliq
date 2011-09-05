@@ -6,6 +6,7 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 import roboliq.compiler._
 import roboliq.devices.pipette._
+import roboliq.roboease
 import roboliq.roboease._
 import _root_.evoware._
 
@@ -120,7 +121,7 @@ object Main extends App {
 		p.DefineRack("READER",48,0,12,8, 200,"PLATE_READER") ;
 		*/
 
-		val sSourcePath = System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf"
+		val sSourcePath = System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf"
 		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
 		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
 		p.parse(sSource) match {
@@ -147,7 +148,12 @@ object Main extends App {
 							case Left(errT) => errT.print()
 							case Right(succT) =>
 								val sFilename = sSourcePath + ".esc"
-								val s = translator.saveWithHeader(succT.cmds, p.sHeader, p.mapLabware, sFilename)
+								case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
+								def toLabwareItem(a: roboease.Labware): _root_.evoware.LabwareItem = {
+									_root_.evoware.LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
+								}
+								val mapLabware = p.mapLabware.mapValues(toLabwareItem)
+								val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
 								println(s)
 						}
 					case Right(succ) => succ.print()

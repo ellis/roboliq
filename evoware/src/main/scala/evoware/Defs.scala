@@ -16,3 +16,5 @@ case class WashProgramArgs(
 	bUNKNOWN1: Boolean = false,
 	bEmulateEvolab: Boolean = false
 )
+
+case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)

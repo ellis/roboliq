@@ -36,16 +36,25 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 	//def translateToString(txs: Seq[CompileFinal]): String = translate(txs).right.get.mkString("\n")
 	def translateToString(cmds: Seq[CommandL1]): String = translate(cmds).right.get.cmds.mkString("\n")
 
-	def translateAndSave(cmds: Seq[CommandL1], mapLabware: Map[Tuple2[Int, Int], String], sFilename: String): String = {
+	/*def translateAndSave(
+		cmds: Seq[CommandL1],
+		mapLabware: EvowareTranslatorHeader.LabwareMap,
+		sFilename: String
+	): String = {
 		val s = translateToString(cmds)
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, EvowareTranslatorHeader.getHeader(mapLabware))
 		writeLines(fos, s);
 		fos.close();
 		s
-	}
+	}*/
 	
-	def saveWithHeader(cmds: Seq[Command], sHeader: String, mapLabware: Map[Tuple2[Int, Int], String], sFilename: String): String = {
+	def saveWithHeader(
+		cmds: Seq[Command],
+		sHeader: String,
+		mapLabware: EvowareTranslatorHeader.LabwareMap,
+		sFilename: String
+	): String = {
 		val s = cmds.mkString("\n")
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, EvowareTranslatorHeader.getHeader(sHeader, mapLabware))

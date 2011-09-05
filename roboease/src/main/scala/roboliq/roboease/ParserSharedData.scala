@@ -16,7 +16,7 @@ class ParserSharedData {
 	val mapLists = new HashMap[String, List[String]]
 	val mapOptions = new HashMap[String, String]
 	val mapLocToPlate = new HashMap[String, Plate]
-	val mapLabware = new HashMap[Tuple2[Int, Int], String]
+	val mapLabware = new HashMap[Tuple2[Int, Int], Labware]
 	//val mapLabware = new HashMap[String, Tuple2[String, String]]
 	
 	var iLineCurrent: Int = 0

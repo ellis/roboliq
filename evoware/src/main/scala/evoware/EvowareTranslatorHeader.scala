@@ -149,16 +149,18 @@ V;200
 --{ RPG }--"""
 	def getHeader(): String = sDefault
 	
-	def getHeader(map: Map[Tuple2[Int, Int], String]): String = {
+	type LabwareMap = Map[Tuple2[Int, Int], LabwareItem]
+	
+	def getHeader(map: LabwareMap): String = {
 		getHeader(sDefault, map)
 	}
-	def getHeader(sOrig: String, map: Map[Tuple2[Int, Int], String]): String = {
+	def getHeader(sOrig: String, map: LabwareMap): String = {
 		val lsLine = sOrig.split("\r?\n", -1).toList
 		val lsLineNew = processTop(lsLine, map)
 		lsLineNew.mkString("\n")
 	}
 
-	private def processTop(lsLine: List[String], map: Map[Tuple2[Int, Int], String]): List[String] = lsLine match {
+	private def processTop(lsLine: List[String], map: LabwareMap): List[String] = lsLine match {
 		case Nil => Nil
 		case sLine :: rest =>
 			if (sLine.startsWith("999;"))
@@ -172,7 +174,7 @@ V;200
 			}
 	}
 
-	private def process_14(sLine14: String, lsLine: List[String], map: Map[Tuple2[Int, Int], String]): List[String] = {
+	private def process_14(sLine14: String, lsLine: List[String], map: LabwareMap): List[String] = {
 		val ls14 = sLine14.split(";", -1).tail.init.toList
 		process_line(0, ls14, lsLine, map)
 	}
@@ -181,7 +183,7 @@ V;200
 		iGrid: Int,
 		ls14: List[String],
 		lsLine: List[String],
-		map: Map[Tuple2[Int, Int], String]
+		map: LabwareMap
 	): List[String] = (ls14, lsLine) match {
 		case (Nil, _) =>
 			lsLine
@@ -206,7 +208,7 @@ V;200
 					val key = (iGrid, iSite)
 					map.get(key) match {
 						case None => (s1, s2)
-						case Some(sType) => (sType, iGrid.toString+"_"+iSite)
+						case Some(item) => (item.sType, item.sLabel)
 					}
 				})
 				val (ls1, ls2) = ys.unzip
