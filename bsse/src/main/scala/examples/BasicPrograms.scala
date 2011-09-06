@@ -20,7 +20,7 @@ trait Program extends PipetteCommands {
 	protected def run()
 }
 
-case class ProgramStageSuccess(cmds: Seq[Command], vars: Object) extends CompileStageResult {
+case class ProgramStageSuccess(cmds: Seq[Command], vars: Object, log: Log = Log.empty) extends CompileStageResult {
 	def print() {
 		println(this.toString)
 	}
@@ -41,14 +41,14 @@ object Program02 {
 		val pipette: L4A_PipetteArgs
 	)
 	
-	class Runner(kb: KnowledgeBase, in: Input, params: Params) extends Program {
+	/*class Runner(kb: KnowledgeBase, in: Input, params: Params) extends Program {
 		val out = new Output 
 
 		import in._, out._, params._
 		
 		pipette(ddw, plate, nVolume)
 		mix(plate, nVolume, nMixCount)
-	}
+	}*/
 	
 	//def addKnowledge(kb: KnowledgeBase, in: Input, out: Output, params: Params): Option[CompileStageError] = {
 	//}
@@ -61,8 +61,8 @@ object Program02 {
 		Right(ProgramStageSuccess(cmds, vars))
 	}
 	
-	def pipette() = Seq[Command]()
-	def mix() = Seq[Command]()
+	//def pipette() = Seq[Command]()
+	//def mix() = Seq[Command]()
 	
 	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double): Tuple2[Seq[Command], L4A_PipetteArgs] = {
 		val item = new L4A_PipetteItem(source, dest, volume)

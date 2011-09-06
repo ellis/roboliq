@@ -43,7 +43,6 @@ CompleteYeastTransformation
 		wash 4 + 1ml
 		?? Why the two different washes?  How can this be specified in a manner independent of robot setup?
 		pipette 3µl "ligation mix" to plate A, decontaminate before each aspirate and after completion
-		?? why decontaminate between pipetting? is something already in the wells of plate A?
 	Competent Yeast Dispension
 		REQUIRE: "plasmid DNA" cooled (single 20 well)
 		REQUIRE: "competent cells" cooled (single 8 well)
@@ -61,7 +60,6 @@ CompleteYeastTransformation
 		?? Why 4+3ml wash?  How can this be specified in a manner independent of robot setup?
 		pipette 90µl "LiAcMix" to plate A, wash 4+3ml before each aspirate and after completion
 		mix 90µl plate A, decontaminate before each mix
-		?? Why decontaminate when each well should essentially the same mixture?
 	Heat Shock
 		repeat 4 times:
 			?? might a plate NOT be on a cooled carried upon entry to this subroutine?

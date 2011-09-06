@@ -67,6 +67,8 @@ Code:
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
 x	EvowareTranslator: output proper header
 	evoware: create EvowareCompiler.compile()
+	evoware: move to roboliq.robots.evoware package
+	bsse: move to robloiq.labs.bsse package
 2	protocol: create better Table usage
 3	examples: Example01: mix shouldn't wash between mixes
 	devices: add bTipPermanent to Tip or TipConfig
@@ -106,12 +108,18 @@ x	devices: set initial tip type in TipState for fixed tips
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
+	Tables:
+		load in the evoware table; it should create roboliq objects for locations, PlateModels, plates
 	Plates:
 		we have various plate models
 		we might need to have separate model objects for the roboliq and evoware layers
 		we would like to choose the appropriate plate model for new plates we use, but also let the user specify it
 		plate compatibilities should be specified for input plates
 		plate compatibilities refers to which devices it can be used with, and how
+		Plate
+		PlateModelId
+		PlateModel
+		EvowarePlateModel extends PlateFamily
 	Device and compilation concepts:
 		Compiler
 		CommandCompiler
