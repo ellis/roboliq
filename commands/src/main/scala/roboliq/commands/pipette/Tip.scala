@@ -17,7 +17,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val conf = new TipConfigL2(this, index)
-		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None)
+		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None)
 		Right(conf, state)
 	}
 	
@@ -49,7 +49,8 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 				st.contamOutside ++ liquid2.contaminants,
 				st.srcsEntered + liquid2,
 				st.destsEntered,
-				WashIntensity.None
+				WashIntensity.None,
+				st.cleanDegreePrev
 			)
 		}
 		
@@ -77,7 +78,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		
 		def clean(cleanDegree: WashIntensity.Value) {
 			val st = state
-			map(thisObj) = st.copy(srcsEntered = Set(), destsEntered = Set(), cleanDegree = cleanDegree)
+			map(thisObj) = st.copy(srcsEntered = Set(), destsEntered = Set(), cleanDegree = cleanDegree, cleanDegreePrev = cleanDegree)
 		}
 		
 		def mix(liquid2: Liquid, nVolume2: Double) {
@@ -102,7 +103,7 @@ class TipConfigL2(
 	def state(states: StateMap) = obj.state(states)
 	// For use in L3P_Pipette
 	def createState0(sType_? : Option[String]): TipStateL2 = {
-		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None)
+		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None)
 	}
 
 	override def compare(that: TipConfigL2): Int = this.index - that.index
@@ -120,7 +121,8 @@ case class TipStateL2(
 	val contamOutside: Set[Contaminant.Value],
 	val srcsEntered: Set[Liquid],
 	val destsEntered: Set[Liquid],
-	val cleanDegree: WashIntensity.Value
+	val cleanDegree: WashIntensity.Value,
+	val cleanDegreePrev: WashIntensity.Value
 ) extends ObjState with Ordered[TipStateL2] {
 	override def compare(that: TipStateL2): Int = conf.obj.compare(that.conf.obj)
 }

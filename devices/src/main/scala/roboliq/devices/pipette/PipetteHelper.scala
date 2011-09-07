@@ -265,7 +265,9 @@ object PipetteHelper {
 		}
 		else {
 			val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
-			val bOutsideOk = tipState.destsEntered.forall(_ eq Liquid.empty) && tipState.srcsEntered.forall(_ eq Liquid.empty)
+			val bOutsideOk1 = tipState.destsEntered.forall(liquid => liquid.eq(Liquid.empty) || liquid.eq(liquidInWell))
+			val bOutsideOk2 = tipState.srcsEntered.forall(liquid => liquid.eq(Liquid.empty) || liquid.eq(liquidInWell))
+			val bOutsideOk = bOutsideOk1 && bOutsideOk2
 			if (!bInsideOk || !bOutsideOk)
 				true
 			else
@@ -284,16 +286,20 @@ object PipetteHelper {
 	
 	def choosePreAspirateWashSpec(tipOverrides: TipHandlingOverrides, washIntensityDefault: WashIntensity.Value, liquidInWell: Liquid, tipState: TipStateL2): Option[WashSpec] = {
 		val bInsideOk = tipState.liquid.eq(liquidInWell) || tipState.contamInside.isEmpty
-		val bOutsideOk = tipState.destsEntered.forall(_ eq Liquid.empty) && tipState.srcsEntered.forall(_ eq Liquid.empty)
+		val bOutsideOk1 = tipState.destsEntered.forall(liquid => liquid.eq(Liquid.empty) || liquid.eq(liquidInWell))
+		val bOutsideOk2 = tipState.srcsEntered.forall(liquid => liquid.eq(Liquid.empty) || liquid.eq(liquidInWell))
+		val bOutsideOk = bOutsideOk1 && bOutsideOk2
 		val washIntensity = tipOverrides.washIntensity_? match {
 			case Some(v) => v
 			case None =>
-				if (bInsideOk && bOutsideOk)
+				if (tipState.cleanDegreePrev < washIntensityDefault)
+					washIntensityDefault
+				else if (bInsideOk && bOutsideOk)
 					WashIntensity.None
 				else
 					washIntensityDefault
 		}
-		
+		//println("chose:", bInsideOk, bOutsideOk1, bOutsideOk2, washIntensity)
 		if (washIntensity == WashIntensity.None)
 			return None
 			
@@ -309,6 +315,8 @@ object PipetteHelper {
 			case None =>
 				if (pos == PipettePosition.Free || pos == PipettePosition.DryContact)
 					WashIntensity.None
+				else if (tipState.cleanDegreePrev < washIntensityDefault)
+					washIntensityDefault
 				else if (bOutsideOk)
 					WashIntensity.None
 				else

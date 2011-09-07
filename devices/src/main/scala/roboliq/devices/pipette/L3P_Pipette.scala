@@ -74,7 +74,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 						case _ =>
 					}
 
-					// If we need to mix, then force wet contact when mixing
+					// If we need to mix, then force wet contact when checking for how to clean
 					val pos = args.mixSpec_? match {
 						case None => item.policy.pos
 						case _ => PipettePosition.WetContact

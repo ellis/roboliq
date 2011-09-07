@@ -77,9 +77,12 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	
 						// Check whether this dispense would require a cleaning
 						val bFirst = false // NOTE: just set to false, because this will be recalculated later anyway
+						//if (tip.index == 0)
+						//	println("mix")
 						getMixCleanSpec(builder, mapTipToType, tipOverrides, bFirst, item.tip, item.well) match {
 							case None =>
 							case Some(spec) =>
+								//println("spec:", spec)
 								mapTipToCleanSpec.get(item.tip) match {
 									case Some(_) =>
 										return Left(Seq("INTERNAL: Error code dispense 2"))

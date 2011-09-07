@@ -171,6 +171,8 @@ private trait L3P_PipetteMixBase {
 			// so we can go back and determine how to clean the tips based on the 
 			// real starting state rather than the perfectly clean state we assumed.
 			//mapTipToCleanSpec.clear()
+			//if (bMixOnly)
+			//	println("clean")
 			val mapTipToCleanSpec = new HashMap[TipConfigL2, CleanSpec2]
 			var bFirst = cycles.isEmpty
 			for (action <- actionsADM) {
@@ -327,14 +329,14 @@ private trait L3P_PipetteMixBase {
 		// we'll go back again and see exactly how clean the tips really need to be.
 		cleanTipStates(builder, mapTipToType)
 
-		//
-		// DISPENSE
-		//
+		// Mix
 		def doMix(tws: Seq[TipWell]): Either[Seq[String], Unit] = {
 			mix(builder.toImmutable, mapTipToCleanSpec.toMap, mapTipToType, tws) match {
 				case Left(lsErrors) =>
+					//println("lsErrors:", lsErrors)
 					Left(lsErrors)
 				case Right(res) =>
+					//println("res:", res)
 					builder.map ++= res.states.map
 					mapTipToCleanSpec ++= res.mapTipToCleanSpec
 					actionsM ++= res.actions
@@ -342,12 +344,14 @@ private trait L3P_PipetteMixBase {
 			}
 		}
 		
-		// First dispense
+		// First mix
+		//println("first")
 		doMix(twss.head) match {
 			case Left(lsErrors) => return Left(lsErrors)
 			case Right(res) =>
 		}
 		// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
+		//println("rest")
 		val twssRest = twss.tail.dropWhile(tws => doMix(tws).isRight)
 		
 		Right((actionsM, twssRest))
@@ -569,6 +573,8 @@ private trait L3P_PipetteMixBase {
 			val tipState = tip.state(states)
 			val destState = well.state(states)
 			val destLiquid = destState.liquid
+			if (tip.index == 0)
+				println("tipState:", tipState.destsEntered.map(_.sName))
 			PipetteHelper.choosePreAspirateWashSpec(overrides, washIntensityDefault, destLiquid, tipState) match {
 				case None => None
 				case Some(wash) =>
