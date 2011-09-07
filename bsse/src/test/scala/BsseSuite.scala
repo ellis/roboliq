@@ -1,4 +1,4 @@
-import org.scalatest.FunSuite
+/*import org.scalatest.FunSuite
 
 import roboliq.parts._
 import roboliq.robot._
@@ -53,3 +53,4 @@ class BsseSuite extends FunSuite {
 		println(s)
 	}
 }
+*/

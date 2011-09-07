@@ -7,17 +7,7 @@ import _root_.evoware._
 
 
 object BsseEvowareMapper {
-	def apply(): EvowareMapper = {
-		val mapSites = Map(
-				"DeconA" -> Site(3, 1),
-				"DeconD" -> Site(3, 2),
-				"BUF12" -> Site(4, 0), // This is just made up
-				"P1" -> Site(16, 0), // This is just made up
-				"P2" -> Site(16, 1), // This is just made up
-				"P3" -> Site(16, 2), // This is just made up
-				"P4" -> Site(20, 0) // This is just made up
-				)
-		
+	def apply(mapSites: Map[String, Site]): EvowareMapper = {
 		// TODO: Set these values depending on the tip kind
 		val nWasteDelay = 500
 		val nCleanerVolume = 10.0

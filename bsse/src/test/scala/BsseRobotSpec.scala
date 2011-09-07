@@ -1,4 +1,4 @@
-import org.scalatest.FeatureSpec
+/*import org.scalatest.FeatureSpec
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.matchers.MustMatchers
@@ -56,3 +56,4 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 		}
 	}
 }
+*/

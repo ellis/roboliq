@@ -68,8 +68,9 @@ Code:
 x	EvowareTranslator: output proper header
 	evoware: create EvowareCompiler.compile()
 	evoware: move to roboliq.robots.evoware package
+	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
-2	protocol: create better Table usage
+x	protocol: create better Table usage
 3	examples: Example01: mix shouldn't wash between mixes
 	devices: add bTipPermanent to Tip or TipConfig
 x	devices: set initial tip state in BSSE pipette device

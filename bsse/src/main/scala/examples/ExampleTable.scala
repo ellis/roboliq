@@ -1,5 +1,8 @@
 package examples
 
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
+
 import roboliq.common
 import roboliq.common._
 import evoware._
@@ -19,7 +22,47 @@ trait ExampleTable {
 	}
 }
 
-trait ExampleTable2 {
+trait EvowareTable {
+	/*private val m_carrierModels = new ArrayBuffer[CarrierModel]
+	
+	protected def CarrierModel(sName: String, nSites: Int, bCooled: Boolean): CarrierModel = {
+		val o = new CarrierModel(sName, nSites, bCooled)
+		m_carrierModels += o
+		o
+	}*/
+	private val m_sites = new ArrayBuffer[SiteObj]
+	private val m_mapSites = new HashMap[String, Site]
+	
+	def mapSites = m_mapSites.toMap
+	
+	private def addSite(site: SiteObj) {
+		m_sites += site
+		// TODO: produce an error message here instead, and propagate it back up
+		assert(!m_mapSites.contains(site.sName))
+		m_mapSites(site.sName) = new Site(site.carrier.iGrid, site.iSite)
+	}
+	
+	protected def createSites(carrier: CarrierObj, s1: String): SiteObj = {
+		val o = new SiteObj(s1, carrier, 0)
+		addSite(o)
+		o
+	}
+	protected def createSites(carrier: CarrierObj, s1: String, s2: String): Tuple2[SiteObj, SiteObj] = {
+		val o = (new SiteObj(s1, carrier, 0), new SiteObj(s2, carrier, 1))
+		addSite(o._1)
+		addSite(o._2)
+		o
+	}
+	protected def createSites(carrier: CarrierObj, s1: String, s2: String, s3: String): Tuple3[SiteObj, SiteObj, SiteObj] = {
+		val o = (new SiteObj(s1, carrier, 0), new SiteObj(s2, carrier, 1), new SiteObj(s3, carrier, 2))
+		addSite(o._1)
+		addSite(o._2)
+		addSite(o._3)
+		o
+	}
+}
+
+trait ExampleTable2 extends EvowareTable {
 	import evoware.PlateModel
 	
 	object CarrierModels {
@@ -48,17 +91,17 @@ trait ExampleTable2 {
 		val filters = new CarrierObj("filters", CarrierModels.filters, 33)
 	}
 	object Sites {
-		val (wash1a, wash1b, wash1c) = Carriers.wash1.createSites("wash1a", "wash1b", "wash1c")
-		val (wash2a, wash2b, wash2c) = Carriers.wash2.createSites("wash2a", "wash2b", "wash2c")
-		val (decon1, decon2, decon3) = Carriers.decon.createSites("decon1", "decon2", "decon3")
-		val (reagents15, reagents50) = Carriers.reagents.createSites("reagents15", "reagents50")
-		val ethanol = Carriers.ethanol.createSites("ethanol")
-		val shaker = Carriers.shaker.createSites("shaker")
-		val (holder, cover) = Carriers.holder.createSites("holder", "cover")
-		val epindorfs = Carriers.epindorfs.createSites("epindorfs")
-		val (cooled1, cooled2) = Carriers.cooled.createSites("cooled1", "cooled2")
-		val (uncooled1, uncooled2, uncooled3) = Carriers.uncooled.createSites("uncooled1", "uncooled2", "uncooled3")
-		val (filter1, filter2) = Carriers.filters.createSites("filter1", "filter2")
+		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c")
+		val (wash2a, wash2b, wash2c) = createSites(Carriers.wash2, "wash2a", "wash2b", "wash2c")
+		val (decon1, decon2, decon3) = createSites(Carriers.decon, "decon1", "decon2", "decon3")
+		val (reagents15, reagents50) = createSites(Carriers.reagents, "reagents15", "reagents50")
+		val ethanol = createSites(Carriers.ethanol, "ethanol")
+		val shaker = createSites(Carriers.shaker, "shaker")
+		val (holder, cover) = createSites(Carriers.holder, "holder", "cover")
+		val epindorfs = createSites(Carriers.epindorfs, "epindorfs")
+		val (cooled1, cooled2) = createSites(Carriers.cooled, "cooled1", "cooled2")
+		val (uncooled1, uncooled2, uncooled3) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3")
+		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2")
 	}
 	object LabwareModels {
 		val washA = new TroughModel("Wash Station Cleaner shallow", 8, 1)

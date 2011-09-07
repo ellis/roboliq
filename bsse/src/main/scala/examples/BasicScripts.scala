@@ -13,19 +13,8 @@ class Example01 extends Protocol {
 	pipette(ddw, plate1, 30 ul)
 	mix(plate1, 30 ul, 5)
 
-	/*val table = new {
-		val BUF12 = new Plate(PlateFamily.Standard)
-		BUF12.label = "BUF12"
-		BUF12.location = "BUF12"
-		BUF12.setDimension(8, 1)
-	}*/
-	
-	new EvowareLab with ExampleTable2 {
+	val lab = new EvowareLab with ExampleTable2 {
 		reagent(ddw, Labwares.reagents15, 1, 8)
 		labware(plate1, Sites.cooled1, LabwareModels.platePcr)
 	}
-	/*customize {
-		ddw.fill(table.BUF12)
-		plate1.set(PlateModel.Standard96, Location.P4)
-	}*/
 }
