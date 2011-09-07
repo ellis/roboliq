@@ -65,27 +65,21 @@ Code:
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
 	create roboliq-C-weizmann
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
-x	EvowareTranslator: output proper header
 	evoware: create EvowareCompiler.compile()
 	evoware: move to roboliq.robots.evoware package
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
-x	protocol: create better Table usage
-3	examples: Example01: mix shouldn't wash between mixes
 	devices: add bTipPermanent to Tip or TipConfig
-x	devices: set initial tip state in BSSE pipette device
-x	devices: run BSSE test scripts again, and get them to work
-x	devices: set initial tip type in TipState for fixed tips
-	devices: implement wait
-	devices: implement shaker
+*	devices: implement wait
+*	devices: implement shaker
 	devices: PipettePolicy: rework this concept
 		have a string to identify the general liquid class and a DispensePosition
 		the liquid class can either be explicitly specified with the liquid, or it's extracted from the contaminants
-		really need to make liquid into an Obj with Setup, Config and State:
+1		really need to make liquid into an Obj with Setup, Config and State:
 			let user setup the explicit liquid class
 			let the explicit liquid class be changed by the user during program execution
 		PipettePolicy well also need to know the tip type; then EvowareMapper can decide on it's liquid class based on the parameters of PipettePolicy
-	devices: L3P_Wash: use extra wash volume
+*	devices: L3P_Wash: use extra wash volume
 	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
 	devices: L3P_Pipette: don't match tips to dests at the beginning: delay the pairing until tip state is known in order to prefer tips with less volume
 		From our translation of Rotem_Script01.conf:
@@ -98,8 +92,9 @@ x	devices: set initial tip type in TipState for fixed tips
 	translator: improvement of above would be to only split scripts when a labware conflict would occur
 	roboease: test liquid class, tip options, mix options
 	roboease: create PipetteDevice subclass for Weizmann roboease scripts
+*	roboease: PROMPT
 	roboease: TRANSFER
-	roboease: TABLE
+.	roboease: TABLE
 	roboease: add comments about tip usage to output
 	roboease: somehow add default liquid class to a liquid (for example, add a Map[Liquid, String] to WeizmannPipetteDevice)
 	roboease-evoware: pipette: default tip policy of always discarding
