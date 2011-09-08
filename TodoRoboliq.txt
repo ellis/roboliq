@@ -344,6 +344,11 @@ Code:
 			Roboliq_Water_Wet_0050
 			Roboliq_DMSO_Air_1000
 			Roboliq_Decon_???
+		classes for how to do cleaning:
+			always decontaminate before aspirate
+			tip must be clean of extraneous liquids before dispense
+			normally, whenever an extraneous contaminant is on the tip, we should decontaminate before entering another well;
+				but, we could have something like a ContaminantGroupId which allows for a lesser form of cleaning
 
 	T0 tokens can have estimated times associated with them
 

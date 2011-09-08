@@ -2,18 +2,87 @@ Script generation errors:
 	test_1x1_8x6_3: try to asperate 18ul, but error: tip 5: 6ul too much in diluter
 	
 Fabian:
-	is there a term for a reagent which is only used as a source?  or for a target which we're constructing?
-	what families of plates are there?
+	cleaning rules:
+		concepts:
+			liquid
+			well
+			liquid group
+		cleaning occasions:
+			1. when beginning to handle a new liquid group
+			2. when entering different wells of the same liquid group
+			3. when done handling a liquid group
+		combinating all three cleaning occasions:
+			_ = no cleaning
+			L = light rinse
+			T = thorough wash
+			D = decontaminate
+			=====   =
+			_ * *	-
+			L * *	-
+			T _ T
+			T L T	
+			T T T	- (this is the same a not grouping)
+			T D T	-
+			D * T	?
+			D _ D	?
+			D L D	?
+			D T D	?
+			D D D
+			T * D	?
+		
+		SKIP CLEANING IF:
+			aspirating the same liquid as before and no destinations were entered since the previous aspirate
+
+		notes:
+			by default, each liquid is in its own group, so aspirating a new liquid will trigger a thorough wash
+			a free/dry dispense does not flag cleaning
+
+		before aspirate: choose greater of:
+			source: clean according to previously entered sources and destinations
+			dest: clean according to previously entered destinations and previously entered sources from different groups than the current source
+		before subsequent dispense after having entered a prior destination well:
+			clean according to previously entered destinations and previously entered sources from different groups than the current source
+		user overrides:
+			clean intensity at:
+				start
+				between aspirates
+				PolicyAfterWetDispense.{Clean,NoClean}
+				finish
+
+	for disposable tip robots, do you think it'd be ok to have a policy of replacing tips when any washing is specified, even the light wash?
+
+	cleaning: does it ever make sense to...
+		(when using a single pipetter)
+		aspirate from well A1, free dispense B1, DON'T CLEAN TIP, aspirate A2, free dispense B2?
+		aspirate A1, wet dispense B1, DON'T CLEAN TIP, wet dispense B2?
+		aspirate A1, wet dispense B1, DON'T CLEAN TIP, aspirate A2, DON'T CLEAN TIP, wet dispense B2?
+		if we decontaminate before starting a pipetting operation on a particular plate, is it ok to always decontaminate afterwards?
+		are there liquids where we wouldn't require decontamination before entering them, but afterwards?
+			
+	which contaminants should we keep track of?  we might want to track them for deciding how to wash
+	which other substances should we keep track of for other purposes?
+	see wash table at bottom of this file
+	when mixing liquids, is there a guideline to follow for automatically choosing the properties of the resultant liquid?
+		methods:
+			keep properties of original liquid
+			choose most conservative values (only for cleaning specs, not for liquid properties)
+		liquid properties family (water-like, DMSO, oil, etc)
+		cleaning specs
+
+
 
 Large tips: 950µl max; but only 900ul if we need to use the decontamination wash
 Small tips: 45µl max
 
+Liquids:
+	need to know contaminants in order to decide how to wash
+	need to know liquid properties family in order to choose an Evoware LiquidClass
+	need to know group id and washing specs for deciding when to wash and with what intensity
 Liquid class depends:
 	tips
 	liquid sucked up (viscosity, conductivity, live cells?)
 	volume already in target well
 	plate type (1536 well plates should be approached slowly)
-	
 Suggested liquid classes:
 	Large tips:
 		Water free dispense (use for water, buffers, ethenol)
@@ -46,7 +115,6 @@ CompleteYeastTransformation
 	Competent Yeast Dispension
 		REQUIRE: "plasmid DNA" cooled (single 20 well)
 		REQUIRE: "competent cells" cooled (single 8 well)
-		?? Is the long carrier cooled differently than the 20-well carrier?
 		REQUIRE: "ssDNA" cooled (single 20 well)
 		REQUIRE: "LiAcMix" cooled (single 8 well)
 		?? How was the choice made about which plate/well to put the supplies on?
@@ -56,9 +124,11 @@ CompleteYeastTransformation
 		A: done when the outside of the tips is expected to be very dirty, and we don't want to contaminate the decontamination wash
 		pipette 2µl "plasmid DNA" to plate A, decontaminate before first aspirate and after completion
 		pipette 30µl "competent cells" to plate A, decontaminate before each aspirate and after completion
-		pipette 5µl "ssDNA" to plate A, wash 4+3ml before each aspirate and after completion
+		pipette 5µl "ssDNA" to plate A, wash 4+3ml before start and after completion
 		?? Why 4+3ml wash?  How can this be specified in a manner independent of robot setup?
 		pipette 90µl "LiAcMix" to plate A, wash 4+3ml before each aspirate and after completion
+*		?? Why doesn't LiAcMix require a prior decontamination after aspirating ssDNA?
+*		?? Would it be sufficient to wash just at the beginning and end instead of before each aspirate?
 		mix 90µl plate A, decontaminate before each mix
 	Heat Shock
 		repeat 4 times:
@@ -138,11 +208,14 @@ Terminology:
 	simple identifiers: enums, sealed case classes, unsealed case classes (for identifiers which should be extensible by user), strings
 	how to distinguish between simple identifiers, keys, data objects, and processing objects?
 	enumeration
+	scale, where enumeration is somehow increasing
 	-
 	reagent
 	liquid
 	fluid
+	substance
 	solution
+	mixture
 	
 	things we need terms for:
 		liquid pipetting category (based on liquid properties, many liquids can be grouped together as far as pipetting is concerned)

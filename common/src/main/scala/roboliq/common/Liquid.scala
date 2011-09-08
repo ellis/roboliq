@@ -2,50 +2,68 @@ package roboliq.common
 
 object Contaminant extends Enumeration {
 	val Cell, DNA, DSMO, Decon, Other = Value
-	//type ContaminantLevels = Map[Contaminant.Value, ContaminationLevel.Value]
 }
 
-//import Contaminant.ContaminantLevels
+/*
+A = none?, light*, thorough?, decon (Same Group, different well)
+B = thorough*, decon (different group)
+C = thorough*, decon (before next group)
 
-/*object ContaminationLevel extends Enumeration {
-	val None, Minor, Major = Value
-}
+NoneThorough?
+NoneDecon?
+LightThorough*
+LightDecon
+-Thorough (because this would be the behavior for non-grouped liquids)
+ThoroughDecon?
+Decon
 
-class ContaminantLevels(val map: Map[Contaminant.Value, ContaminationLevel.Value]) {
-	def +(other: ContaminantLevels): ContaminantLevels = {
-		val keys = map.keys ++ other.map.keys
-		val mapNew = keys.map(key => {
-			val v = (map.get(key), other.map.get(key)) match {
-				case Tuple2(Some(l1), Some(l2)) => if (l1 >= l2) l1 else l2
-				case Tuple2(Some(l1), None) => l1
-				case Tuple2(None, Some(l2)) => l2
-				case _ => ContaminationLevel.None // This case will never occur, but it's here to avoid a compiler warning
-			}
-			key -> v
-		}).toMap
-		new ContaminantLevels(mapNew)
-	}
-	
-	/*def replaceWith(other: ContaminantLevels): ContaminantLevels = {
-		new ContaminantLevels(map ++ other.map)
-	}*/
-}
 
-object ContaminantLevels {
-	def apply() = new ContaminantLevels(Map())
-}
+Decon before entering from another group (boolean) (default is thorough)
+Decon before entering the next group (boolean) (default is thorough)
+degree when entering from another well of the same group
+
+Thorough-None-Thorough
+Thorough-Light-Thorough*
+-Thorough-Thorough-Thorough
+-Thorough-Decon-Thorough
+Decon-*-Thorough?
+Decon-None-Decon?
+Decon-Light-Decon?
+Decon-Thorough-Decon?
+Decon-Decon-Decon
+
+
 */
+
+sealed class GroupCleanPolicy(
+	val enter: WashIntensity.Value,
+	val within: WashIntensity.Value,
+	val exit: WashIntensity.Value
+)
+object GroupCleanPolicy {
+	val TNT = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
+}
+
+class LiquidGroup(
+	//val sGroupId: String,
+	val cleanPolicy: GroupCleanPolicy = GroupCleanPolicy.TNT
+)
 
 class Liquid(
 	var sName: String,
-	val bFreeDispense: Boolean,
-	val washIntensityBeforeAspirate: WashIntensity.Value,
-	val bReplaceTipsBeforeAspirate: Boolean,
+	val sFamily: String,
+	val contaminants: Set[Contaminant.Value],
+	val group: LiquidGroup
+	//val family: LiquidPropertiesFamily,
+	//val bFreeDispense: Boolean,
+	//val washIntensityBeforeAspirate: WashIntensity.Value,
+	//val bReplaceTipsBeforeAspirate: Boolean,
 	/** Contaminants in this liquid */
-	val contaminants: Set[Contaminant.Value]
 	///** Contaminants which must be cleaned from tips before entering this liquid */
 	//val prohibitedTipContaminants: Set[Contaminant.Value]
 ) {
+	//val group = group0_?.getOrElse(new LiquidGroup())
+	//val sGroupId = sGroupId0_?.getOrElse(this.hashCode().toString)
 	//def contaminates: Boolean = contaminantLevels.map.exists(_._2 != ContaminationLevel.None)
 	
 	def +(other: Liquid): Liquid = {
@@ -57,15 +75,20 @@ class Liquid(
 			this
 		else {
 			assert(sName != other.sName)
-			val sName3 = sName+":"+other.sName
+			val sName2 = sName+":"+other.sName
+			val group2 = {
+				if (group.eq(other.group)) {
+					group
+				}
+				else {
+					new LiquidGroup(group.cleanPolicy)
+				}
+			}
 			new Liquid(
-				sName3,
-				bFreeDispense & other.bFreeDispense,
-				WashIntensity.max(washIntensityBeforeAspirate, other.washIntensityBeforeAspirate),
-				bReplaceTipsBeforeAspirate | other.bReplaceTipsBeforeAspirate,
-				contaminants ++ other.contaminants
-				//contaminantLevels + other.contaminantLevels
-				//prohibitedTipContaminants ++ other.prohibitedTipContaminants
+				sName2,
+				sFamily,
+				contaminants ++ other.contaminants,
+				group2
 			)
 		}
 	}
@@ -74,5 +97,5 @@ class Liquid(
 }
 
 object Liquid {
-	val empty = new Liquid("", false, WashIntensity.None, false, Set())
+	val empty = new Liquid("", "", Set(), new LiquidGroup())
 }
