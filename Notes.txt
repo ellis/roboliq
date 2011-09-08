@@ -138,7 +138,11 @@ Terminology:
 	simple identifiers: enums, sealed case classes, unsealed case classes (for identifiers which should be extensible by user), strings
 	how to distinguish between simple identifiers, keys, data objects, and processing objects?
 	enumeration
-
+	-
+	reagent
+	liquid
+	fluid
+	solution
 	
 	things we need terms for:
 		liquid pipetting category (based on liquid properties, many liquids can be grouped together as far as pipetting is concerned)

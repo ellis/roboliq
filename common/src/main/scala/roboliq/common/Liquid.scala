@@ -38,10 +38,10 @@ object ContaminantLevels {
 
 class Liquid(
 	var sName: String,
-	val bWaterFreeDispense: Boolean,
-	val bRequireDecontamBeforeAspirate: Boolean,
+	val bFreeDispense: Boolean,
+	val washIntensityBeforeAspirate: WashIntensity.Value,
+	val bReplaceTipsBeforeAspirate: Boolean,
 	/** Contaminants in this liquid */
-	//val contaminantLevels: ContaminantLevels
 	val contaminants: Set[Contaminant.Value]
 	///** Contaminants which must be cleaned from tips before entering this liquid */
 	//val prohibitedTipContaminants: Set[Contaminant.Value]
@@ -60,8 +60,9 @@ class Liquid(
 			val sName3 = sName+":"+other.sName
 			new Liquid(
 				sName3,
-				bWaterFreeDispense | other.bWaterFreeDispense,
-				bRequireDecontamBeforeAspirate | other.bRequireDecontamBeforeAspirate,
+				bFreeDispense & other.bFreeDispense,
+				WashIntensity.max(washIntensityBeforeAspirate, other.washIntensityBeforeAspirate),
+				bReplaceTipsBeforeAspirate | other.bReplaceTipsBeforeAspirate,
 				contaminants ++ other.contaminants
 				//contaminantLevels + other.contaminantLevels
 				//prohibitedTipContaminants ++ other.prohibitedTipContaminants
@@ -73,5 +74,5 @@ class Liquid(
 }
 
 object Liquid {
-	val empty = new Liquid("", false, false, Set())
+	val empty = new Liquid("", false, WashIntensity.None, false, Set())
 }

@@ -64,10 +64,6 @@ object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with Ti
 	// val AfterWetContact, AtStart, Never
 }
 
-object WashIntensity extends Enumeration {
-	val None, Light, Thorough, Decontaminate = Value
-}
-
 class TipHandlingOverrides(
 	val replacement_? : Option[TipReplacementPolicy.Value],
 	//val washProgram_? : Option[Int],
