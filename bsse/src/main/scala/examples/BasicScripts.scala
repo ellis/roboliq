@@ -19,6 +19,27 @@ class Example01 extends Protocol {
 	}
 }
 
+object LiquidChangeScale extends Enumeration {
+	val SameLiquid, SameGroup, SameNothing = Value
+}
+
+class X1 {
+	def x(scale: LiquidChangeScale.Value, bContaminated: Boolean) {
+		scale match {
+			case LiquidChangeScale.SameLiquid =>
+				CleanIntensity.None
+			case LiquidChangeScale.SameGroup =>
+				
+			case (LiquidChangeScale.SameNothing, true) => CleanIntensity.Decontaminate
+			case (LiquidChangeScale.SameNothing, false) => 
+			case (LiquidChangeScale.SameGroup, true) => CleanIntensity.Decontaminate
+			case (LiquidChangeScale.SameGroup, false) =>
+			case (LiquidChangeScale.SameLiquid, _) => CleanIntensity.Decontaminate
+				
+		}
+	}
+}
+
 class Example02 extends Protocol {
 	val ddw = new Liquid(LiquidFamily.Water)
 	val plate1 = new Plate(PlateFamily.Standard)
