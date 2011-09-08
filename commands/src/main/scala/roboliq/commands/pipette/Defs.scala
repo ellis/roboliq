@@ -18,7 +18,7 @@ case class WP_Plate(plate: Plate) extends WellOrPlate
 sealed trait WellOrPlateOrLiquid
 case class WPL_Well(well: Well) extends WellOrPlateOrLiquid
 case class WPL_Plate(plate: Plate) extends WellOrPlateOrLiquid
-case class WPL_Liquid(liquid: Liquid) extends WellOrPlateOrLiquid
+case class WPL_Liquid(liquid: Reagent) extends WellOrPlateOrLiquid
 
 case class MixSpec(
 		val nVolume: Double,

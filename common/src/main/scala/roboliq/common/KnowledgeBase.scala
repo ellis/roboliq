@@ -8,7 +8,7 @@ import roboliq.common._
 
 
 class KnowledgeBase {
-	private val m_liqs = new HashSet[Liquid]
+	//private val m_liqs = new HashSet[Liquid]
 	private val m_objs = new HashSet[Obj]
 	private val m_wells = new HashSet[Well]
 	private val m_plates = new HashSet[Plate]
@@ -19,9 +19,9 @@ class KnowledgeBase {
 	
 	val setups: scala.collection.Map[Obj, ObjSetup] = m_setups
 	
-	def addLiquid(o: Liquid) {
+	/*def addLiquid(o: Liquid) {
 		m_liqs += o
-	}
+	}*/
 	
 	def addObject(o: Obj) {
 		if (!m_objs.contains(o)) {
@@ -65,6 +65,11 @@ class KnowledgeBase {
 		getObjSetup(o)
 	}
 	
+	def getReagentSetup(o: Reagent): ReagentSetup = {
+		addObject(o)
+		getObjSetup(o)
+	}
+	
 	def getLiqWells(liq: Liquid): Set[Well] = {
 		m_wells.filter(well => {
 			val wellSetup = getWellSetup(well)
@@ -82,7 +87,7 @@ class KnowledgeBase {
 		}
 	}
 	
-	def printKnown() {
+	/*def printKnown() {
 		println("Liquids:")
 		m_liqs.foreach(println)
 		println()
@@ -94,7 +99,7 @@ class KnowledgeBase {
 		println("Wells:")
 		m_wells.foreach(println)
 		println()
-	}
+	}*/
 	
 	//type Errors = Seq[Tuple2[Obj, Seq[String]]]
 	
