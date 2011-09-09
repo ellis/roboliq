@@ -28,7 +28,7 @@ case class ProgramStageSuccess(cmds: Seq[Command], vars: Object, log: Log = Log.
 
 object Program02 {
 	class Input(
-		val ddw: Liquid
+		val ddw: Reagent
 	)
 	class Output {
 		val plate = new Plate

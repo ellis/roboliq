@@ -5,19 +5,15 @@ class SetupConfigState(val setup: ObjSetup, val config: ObjConfig, val state0: O
 class ObjMapper(
 	val map: Map[Obj, SetupConfigState]
 ) {
-	def configL2(o: Obj) = map.get(o) match {
+	def config(o: Obj) = map.get(o) match {
 		case Some(v) => Some(v.config)
 		case None => None
 	}
-	def state0L2(o: Obj) = map.get(o) match {
+	def state0(o: Obj) = map.get(o) match {
 		case Some(v) => Some(v.state0)
 		case None => None
 	}
-	def configL4(o: Obj) = map.get(o) match {
-		case Some(v) => Some(v.setup)
-		case None => None
-	}
-	def state0L4(o: Obj) = map.get(o) match {
+	def setup(o: Obj) = map.get(o) match {
 		case Some(v) => Some(v.setup)
 		case None => None
 	}

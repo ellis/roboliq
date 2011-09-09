@@ -42,6 +42,7 @@ sealed class GroupCleanPolicy(
 )
 object GroupCleanPolicy {
 	val TNT = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
+	val DDD = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
 }
 
 class LiquidGroup(
@@ -91,6 +92,10 @@ class Liquid(
 				group2
 			)
 		}
+	}
+	
+	def setGroup(group: LiquidGroup): Liquid = {
+		new Liquid(sName, sFamily, contaminants, group)
 	}
 	
 	def getName() = if (sName == null) "<unnamed>" else sName

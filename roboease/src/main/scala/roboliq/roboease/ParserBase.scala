@@ -130,11 +130,11 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		}
 	}*/
 	
-	def idLiquid: Parser[Liquid] = Parser[Liquid] { input =>
+	def idLiquid: Parser[Reagent] = Parser[Reagent] { input =>
 		val res1 = ident.apply(input)
 		res1 match {
 			case Success(sLiq, _) =>
-				shared.mapLiquids.get(sLiq) match {
+				shared.mapReagents.get(sLiq) match {
 					case Some(liq) => Success(liq, res1.next)
 					case None => Error("Undefined reagent: "+sLiq, input)
 				}

@@ -13,7 +13,7 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 			item.src match {
 				case WPL_Well(o) => kb.addWell(o, true)
 				case WPL_Plate(o) => kb.addPlate(o, true)
-				case WPL_Liquid(o) => kb.addLiquid(o)
+				case WPL_Liquid(o) => kb.addReagent(o)
 			}
 			item.dest match {
 				case WP_Well(o) => kb.addWell(o, false)
@@ -128,7 +128,9 @@ case class L4A_PipetteItem(
 		val srcs3 = PipetteHelperL4.getWells1(states, src)
 		if (srcs3.isEmpty) {
 			src match {
-				case WPL_Liquid(liquid) => return Left(Seq("Liquid \""+liquid.getName()+"\" must be assigned to one or more wells"))
+				case WPL_Liquid(reagent) =>
+					val liquid = reagent.state(states).conf.liquid
+					return Left(Seq("Liquid \""+liquid.getName()+"\" must be assigned to one or more wells"))
 				case _ => return Left(Seq("INTERNAL: no config found for pipette source "+src))
 			}
 		}

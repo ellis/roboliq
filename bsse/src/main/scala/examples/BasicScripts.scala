@@ -7,7 +7,7 @@ package examples
 import bsse.Protocol
 
 class Example01 extends Protocol {
-	val ddw = new Liquid(LiquidFamily.Water)
+	val ddw = new Liquid("Water")
 	val plate1 = new Plate(PlateFamily.Standard)
 	
 	pipette(ddw, plate1, 30 ul)
@@ -23,25 +23,8 @@ object LiquidChangeScale extends Enumeration {
 	val SameLiquid, SameGroup, SameNothing = Value
 }
 
-class X1 {
-	def x(scale: LiquidChangeScale.Value, bContaminated: Boolean) {
-		scale match {
-			case LiquidChangeScale.SameLiquid =>
-				CleanIntensity.None
-			case LiquidChangeScale.SameGroup =>
-				
-			case (LiquidChangeScale.SameNothing, true) => CleanIntensity.Decontaminate
-			case (LiquidChangeScale.SameNothing, false) => 
-			case (LiquidChangeScale.SameGroup, true) => CleanIntensity.Decontaminate
-			case (LiquidChangeScale.SameGroup, false) =>
-			case (LiquidChangeScale.SameLiquid, _) => CleanIntensity.Decontaminate
-				
-		}
-	}
-}
-
 class Example02 extends Protocol {
-	val ddw = new Liquid(LiquidFamily.Water)
+	val ddw = new Liquid("Water")
 	val plate1 = new Plate(PlateFamily.Standard)
 	
 	pipette(ddw, plate1, 30 ul)
@@ -53,10 +36,10 @@ class Example02 extends Protocol {
 	}
 	
 	//val water = new Liquid("water", false, false, Set())
-	val liquid_plasmidDna = new Liquid("plasmid", false, false, Set(Contaminant.DNA))
-	val liquid_competentCells = new Liquid("cells", false, false, Set(Contaminant.Cell))
-	val liquid_ssDna = new Liquid("ssDNA", false, false, Set(Contaminant.DNA))
-	val liquid_liAcMix = new Liquid("LiAcMix", false, false, Set(Contaminant.Other))
+	val liquid_plasmidDna = new Liquid("plasmid", Set(Contaminant.DNA), CleanPolicy.DDD)
+	val liquid_competentCells = new Liquid("cells", Set(Contaminant.Cell), CleanPolicy.DDD)
+	val liquid_ssDna = new Liquid("ssDNA", Set(Contaminant.DNA))
+	val liquid_liAcMix = new Liquid("LiAcMix", Set(Contaminant.Other))
 	
 	val plate_template = new Plate
 	val plate_working = new Plate

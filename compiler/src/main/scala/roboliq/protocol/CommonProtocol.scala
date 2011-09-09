@@ -8,6 +8,9 @@ import roboliq.commands.pipette._
 
 
 trait CommonProtocol { thisObj =>
+	val Contaminant = roboliq.common.Contaminant
+	val CleanPolicy = roboliq.common.GroupCleanPolicy
+	
 	val kb = new KnowledgeBase
 	val cmds = new ArrayBuffer[Command]
 	var m_protocol: Option[() => Unit] = None
@@ -24,22 +27,46 @@ trait CommonProtocol { thisObj =>
 		case object Standard extends PlateFamily
 	}
 	
-	class Liquid(val family: LiquidFamily) extends roboliq.common.Liquid(null, true, false, Set()) {
-		kb.addLiquid(this)
+	class Liquid private (
+		family: String,
+		contaminants: Set[Contaminant.Value],
+		cleanPolicy_? : Option[GroupCleanPolicy]
+	) extends common.Reagent {
+		def this(family: String) = this(family, Set[Contaminant.Value](), None)
+		def this(family: String, contaminants: Set[Contaminant.Value]) = this(family, contaminants, None)
+		def this(family: String, contaminants: Set[Contaminant.Value], cleanPolicy: GroupCleanPolicy) = this(family, contaminants, Some(cleanPolicy))
+		def this(family: String, cleanPolicy: GroupCleanPolicy) = this(family, Set[Contaminant.Value](), Some(cleanPolicy))
 		
-		def fill(plate: Plate) {
+		val setup = kb.getReagentSetup(this)
+		
+		kb.addReagent(this)
+		setup.sFamily_? = Some(family)
+		setup.contaminants = contaminants
+		if (cleanPolicy_?.isDefined)
+			setup.group_? = Some(new LiquidGroup(cleanPolicy_?.get))
+		
+		/*def fill(plate: Plate) {
 			for (well <- plate.wells) {
 				val wellSetup = kb.getWellSetup(well)
 				wellSetup.liquid_? = Some(this)
 			}
-		}
+		}*/
 	}
 	
-	class Plate(val family: PlateFamily) extends roboliq.protocol.Plate {
+	class Plate private (
+		family_? : Option[PlateFamily]
+	) extends roboliq.protocol.Plate {
+		def this() = this(None)
+		def this(family: PlateFamily) = this(Some(family))
+		
 		val protocol = thisObj
 		val obj = new common.Plate
 		val setup = kb.getPlateSetup(obj)
 		val proxy = new PlateProxy(kb, obj)
+		
+		//if (family_?.isDefined) {
+		//	setup.
+		//}
 		
 		def set(model: PlateModel, location: String) {
 			setup.model_? = Some(model)
@@ -70,8 +97,8 @@ trait CommonProtocol { thisObj =>
 			else if (t == classOf[Liquid]) {
 				f.setAccessible(true)
 				val o = f.get(this).asInstanceOf[Liquid]
-				if (o.sName == null)
-					o.sName = f.getName()
+				if (o.setup.sName_? == None)
+					o.setup.sName_? = Some(f.getName())
 			}
 		}
 	}

@@ -27,8 +27,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
 	}
 	
-	def run_DIST_REAGENT2(liq: Liquid, wells: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
-		sub_pipette(Some(liq), Nil, wells, volumes, sLiquidClass, opts_?)
+	def run_DIST_REAGENT2(reagent: Reagent, wells: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
+		sub_pipette(Some(reagent), Nil, wells, volumes, sLiquidClass, opts_?)
 	}
 	
 	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, nVolume: Double, sLiquidClass: String, opts_? : Option[String]) {
@@ -66,7 +66,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	
 	def run_TRANSFER_LOCATIONS(srcs: Seq[Tuple2[Plate, Int]], dests: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
 		if (srcs.size != dests.size) {
-			shared.addError("lists of souces and destinations have the same dimensions")
+			shared.addError("souce and destination lists must have the same length")
 			return
 		}
 		// If source well is empty, create a new liquid for the well
@@ -74,13 +74,16 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			val well = getWell(pi)
 			val plateSetup = kb.getPlateSetup(pi._1)
 			val wellSetup = kb.getWellSetup(well)
-			wellSetup.liquid_? match {
+			wellSetup.reagent_? match {
 				case Some(_) =>
 				case None =>
 					val sLiquid = plateSetup.sLabel_?.get + "#" + wellSetup.index_?.get
-					val liquid = new Liquid(sLiquid, false, true, Set())
-					wellSetup.liquid_? = Some(liquid)
-					wellSetup.nVolume_? = Some(0)
+					val reagent = new Reagent
+					val reagentSetup = kb.getReagentSetup(reagent)
+					reagentSetup.sName_? = Some(sLiquid)
+					reagentSetup.sFamily_? = Some("ROBOEASE")
+					wellSetup.reagent_? = Some(reagent)
+					//wellSetup.nVolume_? = Some(0)
 			}
 		}
 		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
@@ -96,7 +99,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		dim.wells(iWell)
 	}
 	
-	private def sub_pipette(liq_? : Option[Liquid], srcs: Seq[Tuple2[Plate, Int]], dests: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
+	private def sub_pipette(reagent_? : Option[Reagent], srcs: Seq[Tuple2[Plate, Int]], dests: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
 		if (dests.isEmpty) {
 			shared.addError("list of destination wells must be non-empty")
 			return
@@ -140,7 +143,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		}
 		var sTipKind_? = getOptTipKind(mapOpts)
 		
-		val items = liq_? match {
+		val items = reagent_? match {
 			case None =>
 				(srcs zip wvs).map(pair => {
 					val (pi, (dest, nVolume)) = pair
@@ -148,10 +151,10 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					kb.addWell(src, true) // Indicate that this well is a source
 					new L4A_PipetteItem(WPL_Well(src), WP_Well(dest), nVolume)
 				})
-			case Some(liq) =>
+			case Some(reagent) =>
 				wvs.map(pair => {
 					val (dest, nVolume) = pair
-					new L4A_PipetteItem(WPL_Liquid(liq), WP_Well(dest), nVolume)
+					new L4A_PipetteItem(WPL_Liquid(reagent), WP_Well(dest), nVolume)
 				})
 		}
 		val args = new L4A_PipetteArgs(

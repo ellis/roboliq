@@ -20,7 +20,7 @@ trait PipetteCommands extends RoboliqCommands {
 	
 	implicit def wellToWPL(o: Well): WellOrPlateOrLiquid = WPL_Well(o)
 	implicit def plateToWPL(o: Plate): WellOrPlateOrLiquid = WPL_Plate(o)
-	implicit def liquidToWPL(o: Liquid): WellOrPlateOrLiquid = WPL_Liquid(o)
+	implicit def liquidToWPL(o: Reagent): WellOrPlateOrLiquid = WPL_Liquid(o)
 	
 	implicit def wellToWP(o: Well): WellOrPlate = WP_Well(o)
 	implicit def plateToWP(o: Plate): WellOrPlate = WP_Plate(o)

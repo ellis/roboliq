@@ -24,6 +24,11 @@ object PipetteHelperL4 {
 		SortedSet(plate.state(states).conf.wells.map(well => well.state(states).conf) : _*)
 	}
 	
+	def getWells1(states: RobotState, reagent: Reagent): SortedSet[WellConfigL2] = {
+		val liquid: Liquid = reagent.state(states).conf.liquid
+		getWells1(states, liquid)
+	}
+	
 	def getWells1(states: RobotState, liquid: Liquid): SortedSet[WellConfigL2] = {
 		// Only keep wells with the given initial liquid
 		SortedSet(states.filterByValueType[WellStateL2].values.filter(_.liquid eq liquid).map(_.conf).toSeq : _*)

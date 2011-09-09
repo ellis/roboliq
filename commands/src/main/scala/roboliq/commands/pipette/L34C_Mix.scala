@@ -13,7 +13,7 @@ case class L4C_Mix(args: L4A_MixArgs) extends CommandL4 {
 			target match {
 				case WPL_Well(o) => kb.addWell(o, true)
 				case WPL_Plate(o) => kb.addPlate(o, true)
-				case WPL_Liquid(o) => kb.addLiquid(o)
+				case WPL_Liquid(o) => kb.addReagent(o)
 			}
 		}
 	}

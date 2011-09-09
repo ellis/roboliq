@@ -45,26 +45,28 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
 		
 		// Create liquid with given name
-		val liq = new Liquid(id, true, false, Set())
-		kb.addLiquid(liq)
+		val reagent = new Reagent
+		val reagentSetup = kb.getReagentSetup(reagent)
+		reagentSetup.sName_? = Some(id)
+		reagentSetup.sFamily_? = Some("ROBOEASE")
 		//println("setReagent(): liq = "+liq)
 		
-		// Add liquid to wells
 		val pc = kb.getPlateSetup(plate)
 		val iWell = iWellPlus1 - 1
 		val iWellEnd = iWell + (nWells_? match { case Some(n) => n; case None => 1 })
-		val wells = pc.dim_?.get.wells.toIndexedSeq
-		for (iWell <- (iWell until iWellEnd)) {
-			val well = wells(iWell)
+		val wells = pc.dim_?.get.wells.toIndexedSeq.slice(iWell, iWellEnd)
+		
+		for (well <- wells) {
 			kb.addWell(well, true) // Indicate that it's a source
 			val wellSetup = kb.getWellSetup(well)
-			wellSetup.liquid_? = Some(liq)
-			wellSetup.nVolume_? = Some(0)
+			wellSetup.reagent_? = Some(reagent)
+			//wellSetup.nVolume_? = Some(0)
 			//println(kb.getWellSetup(well))
 		}
-			
-		mapLiquids(id) = liq
-		mapDefaultLiquidClass(liq) = lc
+		
+		shared.mapReagents(id) = reagent
+		//shared.lReagentsInWells += (reagent -> wells)
+		shared.mapDefaultLiquidClass(id) = lc
 	}
 
 	private def setLabware(id: String, sRack: String, sType: String) {

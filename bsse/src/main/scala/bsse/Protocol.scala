@@ -14,7 +14,7 @@ trait Protocol extends CommonProtocol with PipetteCommands {
 		private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
 		private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]
 		
-		def reagent(liquid: Liquid, plateE: PlateObj, iWell0: Int, nWells: Int = 1) {
+		def reagent(reagent: Reagent, plateE: PlateObj, iWell0: Int, nWells: Int = 1) {
 			val plate = getPlate(plateE)
 			val plateSetup = kb.getPlateSetup(plate)
 			val wells = plateSetup.dim_?.get.wells
@@ -22,7 +22,7 @@ trait Protocol extends CommonProtocol with PipetteCommands {
 			for (iWell <- range) {
 				val well = wells(iWell)
 				val wellSetup = kb.getWellSetup(well)
-				wellSetup.liquid_? = Some(liquid)
+				wellSetup.reagent_? = Some(reagent)
 			}
 		}
 		

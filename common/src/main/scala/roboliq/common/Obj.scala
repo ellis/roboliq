@@ -28,9 +28,9 @@ abstract class Obj {
 	def createSetup(): Setup
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]]
 	
-	def getSetup(map31: ObjMapper): Option[Setup] = map31.configL4(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
-	def getConfigL2(map31: ObjMapper): Option[Config] = map31.configL2(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
-	def getState0L2(map31: ObjMapper): Option[State] = map31.state0L4(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
+	def getSetup(map31: ObjMapper): Option[Setup] = map31.setup(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
+	def getConfig(map31: ObjMapper): Option[Config] = map31.config(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
+	def getState0(map31: ObjMapper): Option[State] = map31.state0(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
 	
 	def state(states: StateMap): State = states(this).asInstanceOf[State]
 }
@@ -68,43 +68,39 @@ class Well extends Obj { thisObj =>
 		Left(Seq("well configs must be created separately"))
 	}
 	
-	def createConfigAndState0(setup: Setup, states: scala.collection.Map[Obj, ObjState]): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup, states: StateMap): Either[Seq[String], Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 		
 		// Check Config vars
 		setup.holder_? match {
 			case None => errors += "holder not set"
 			case Some(holder) =>
-				states.get(holder) match {
+				states.map.get(holder) match {
 					case None => errors += "well's holder is not listed in state map"
-					case Some(holderState) =>
+					case _ =>
+				}
+		}
+		setup.reagent_? match {
+			case None =>
+			case Some(reagent) =>
+				states.map.get(reagent) match {
+					case None => errors += "well's reagent is not listed in state map"
+					case _ =>
 				}
 		}
 		if (setup.index_?.isEmpty)
 			errors += "index not set"
 			
-		// Check state0 vars
-		var liquid_? : Option[Liquid] = None
-		var nVolume_? : Option[Double] = None
-		
-		if (setup.bRequiresIntialLiq_?.isEmpty || setup.bRequiresIntialLiq_?.get == false) {
-			liquid_? = Some(Liquid.empty)
-			nVolume_? = Some(0)
-		}
-		if (setup.liquid_?.isDefined)
-			liquid_? = setup.liquid_?
-		if (setup.nVolume_?.isDefined)
-			nVolume_? = setup.nVolume_?
-			
-		if (liquid_?.isEmpty)
-			errors += "liquid not set"
-		if (nVolume_?.isEmpty)
-			errors += "volume not set"
-				
 		if (!errors.isEmpty)
 			return Left(errors)
-
+			
 		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL2]
+		val nVolume = setup.nVolume_?.getOrElse(0.0)
+		val liquid = setup.reagent_? match {
+			case Some(reagent) => reagent.state(states).conf.liquid
+			case None => Liquid.empty
+		}
+
 		val conf = new WellConfigL2(
 				obj = this,
 				holder = holderState.conf,
@@ -112,8 +108,8 @@ class Well extends Obj { thisObj =>
 		val state = new WellStateL2(
 				conf = conf,
 				plateState = holderState,
-				liquid = liquid_?.get,
-				nVolume = nVolume_?.get)
+				liquid = liquid,
+				nVolume = nVolume)
 		
 		Right(conf, state)
 	}
@@ -200,24 +196,33 @@ class WellSetup(val obj: Well) extends ObjSetup {
 	var holder_? : Option[Plate] = None
 	var index_? : Option[Int] = None
 	var bRequiresIntialLiq_? : Option[Boolean] = None
-	var liquid_? : Option[Liquid] = None
+	var reagent_? : Option[Reagent] = None
 	var nVolume_? : Option[Double] = None
 	
 	override def getLabel(kb: KnowledgeBase): String = {
-		sLabel_? match {
-			case Some(s) => s
-			case None => toString
-		}
-		/*
-		val sPlateLabel_? = holder_? match {
-			case None => None
+		val s = new StringBuilder
+		holder_? match {
 			case Some(holder) =>
-				kb.getPlateSetup(holder).sLabel_?
+				val holderSetup = kb.getPlateSetup(holder)
+				s.append(holderSetup.getLabel(kb))
+				s.append(':')
+				index_? match {
+					case Some(index) =>
+						holderSetup.dim_? match {
+							case None => s.append(index)
+							case Some(dim) =>
+								val iRow = index % dim.nRows
+								val iCol = index / dim.nRows
+								s.append((iCol+'A').asInstanceOf[Char])
+								s.append(iRow+1)
+						}
+					case None =>
+						s.append(toString)
+				}
+			case None =>
+				s.append(toString)
 		}
-		(sPlateLabel_?, sLabel_?) match {
-			case (Some(sPlate), Some(sWell)) =>
-				sPlate + ":" + sLabel_?
-		}*/
+		s.toString
 	}
-	override def toString = sLabel_?.toString + " " + liquid_?
+	override def toString = sLabel_?.toString + " " + reagent_?
 }

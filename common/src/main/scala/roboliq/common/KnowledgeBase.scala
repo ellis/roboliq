@@ -30,6 +30,10 @@ class KnowledgeBase {
 		}
 	}
 	
+	def addReagent(o: Reagent) {
+		addObject(o)
+	}
+	
 	def addWell(o: Well) {
 		addObject(o)
 		m_wells += o
@@ -70,13 +74,19 @@ class KnowledgeBase {
 		getObjSetup(o)
 	}
 	
-	def getLiqWells(liq: Liquid): Set[Well] = {
+	def getReagentWells(reagent: Reagent): Set[Well] = {
 		m_wells.filter(well => {
 			val wellSetup = getWellSetup(well)
-			wellSetup.liquid_? match {
+			wellSetup.reagent_? match {
 				case None => false
-				case Some(liq2) => (liq eq liq2)
+				case Some(reagent2) => (reagent eq reagent2)
 			}
+		}).toSet
+	}
+	
+	def getLiqWells(liquid: Liquid, states: StateMap): Set[Well] = {
+		m_wells.filter(well => {
+			well.state(states).liquid eq liquid
 		}).toSet
 	}
 	
@@ -116,43 +126,61 @@ class KnowledgeBase {
 			}
 		}
 		
+		val setObjTried = new HashSet[Obj]
 		val mapConfs = new HashMap[Obj, ObjConfig]
-		val mapStates = new HashMap[Obj, ObjState]
+		val builder = new StateBuilder
 		val log = new LogBuilder
 		
 		def constructConfStateTuples(setups: scala.collection.Map[Obj, ObjSetup]) {
 			for ((obj, setup) <- setups) {
-				if (!mapStates.contains(obj)) {
+				if (!setObjTried.contains(obj)) {
 					obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
 						case Left(ls) => log.errors += new LogItem(obj, ls)
 						case Right((conf, state)) =>
 							mapConfs(obj) = conf
-							mapStates(obj) = state
+							builder.map(obj) = state
 					}
+					setObjTried += obj
 				}
 			}
 		}
+		
+		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair._2.asInstanceOf[WellSetup])
+
+		// Make sure all well reagents have been registered
+		wellSetups.foreach(pair => pair._2.reagent_? match {
+			case Some(reagent) =>
+				val reagentSetup = getReagentSetup(reagent)
+				//if (reagentSetup.sName_?.isEmpty) {
+				//	reagentSetup.sName_?
+				//}
+			case _ =>
+		})
+		
+		// Reagents
+		val reagentSetups = m_setups.filter(_._2.isInstanceOf[ReagentSetup])
+		constructConfStateTuples(reagentSetups)
 			
 		// Plates
 		val plateSetups = m_setups.filter(_._2.isInstanceOf[PlateSetup])
 		constructConfStateTuples(plateSetups)
 
 		// Wells
-		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair._2.asInstanceOf[WellSetup])
 		for ((obj, setup) <- wellSetups) {
-			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], mapStates) match {
+			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], builder) match {
 				case Left(ls) => log.errors += new LogItem(obj, ls)
 				case Right((conf, state)) =>
 					mapConfs(obj) = conf
-					mapStates(obj) = state
+					builder.map(obj) = state
 			}
+			setObjTried += obj
 		}
 		
 		// Everything else
 		constructConfStateTuples(m_setups)
 
 		if (log.errors.isEmpty) {
-			val map2 = mapStates.map(pair => {
+			val map2 = builder.map.map(pair => {
 				val (obj, state) = pair
 				val conf = mapConfs(obj)
 				obj -> new SetupConfigState(m_setups(obj), conf, state)
@@ -165,6 +193,12 @@ class KnowledgeBase {
 		}
 	}
 	
+	def getLabel(obj: Obj): String = {
+		m_setups.get(obj) match {
+			case Some(setup) => setup.getLabel(this)
+			case None => obj.toString
+		}
+	}
 	/*def printErrors(errors: Errors) {
 		val grouped: Map[Obj, Errors] = errors.groupBy(_._1)
 		val errors2 = grouped.map(pair => pair._1 -> pair._2.flatMap(_._2))
