@@ -1,5 +1,7 @@
 package bsse
 
+import scala.collection.immutable.SortedSet
+
 import roboliq.common._
 import roboliq.compiler._
 import roboliq.commands.pipette._
@@ -36,7 +38,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, pla
 							val nVolumeTip = robot.mapTipSpecs(tipState.sType_?.get).nVolume
 							val nVolume = math.max(nVolumeTip, tipState.nContamInsideVolume + nVolumeTip / 10)
 							val policyA_? = robot.getAspiratePolicy(tipState, wellStateA)
-							val policyD_? = robot.getDispensePolicy(tipState.liquid, tip, nVolume, wellStateD.nVolume)
+							val policyD_? = robot.getDispensePolicy(wellStateA.liquid, tip, nVolume, wellStateD.nVolume)
 							val well1A = wellStateA.conf
 							val well1D = wellStateD.conf
 							(policyA_?, policyD_?) match {
@@ -50,6 +52,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, pla
 						})
 						val twvpsA = itemsAD.map(_._1)
 						val twvpsD = itemsAD.map(_._2)
+						
 						CompileTranslation(cmd, Seq(
 								createWash2(ctx.states, cmd, 5),
 								L2C_Aspirate(twvpsA),

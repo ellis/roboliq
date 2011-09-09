@@ -64,7 +64,7 @@ Code:
 		Example01:
 x			(tipState:,TipStateL2(Tip6,Some(DiTi 50ul),Decon,600.0,Set(),600.0,Set(),Set(Decon),Set(),None,Decontaminate),Decon)
 x			L2C_Aspirate(Tip1-4, 600.0, Roboliq_Decon_Top_1000, DA:3,2,4,1)
-			Dispense(15,"Roboliq__Air_1000","600","600","600","600",0,0,0,0,0,0,0,0,3,2,1,"0108?0",0,0);
+x			Dispense(15,"Roboliq__Air_1000","600","600","600","600",0,0,0,0,0,0,0,0,3,2,1,"0108?0",0,0);
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)

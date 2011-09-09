@@ -43,11 +43,24 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		mapTipToType: Map[TipConfigL2, String],
 		tws: Seq[TipWell]
 	): Either[Seq[String], DispenseResult] = {
-		dispense_createItems(states0, tws) match {
+		val builder = new StateBuilder(states0)
+		// Check liquid
+		// If the tip hasn't been used for aspiration yet, associate the source liquid with it
+		for (tw <- tws) {
+			val tip = tw.tip
+			val tipWriter = tip.obj.stateWriter(builder)
+			val liquidTip0 = tipWriter.state.liquid
+			if (liquidTip0 eq Liquid.empty) {
+				val dest = tw.well
+				val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
+				tipWriter.aspirate(liquidSrc, 0)
+			}
+		}
+		
+		dispense_createItems(builder.toImmutable, tws) match {
 			case Left(sError) =>
 				return Left(Seq(sError))
 			case Right(items) =>
-				val builder = new StateBuilder(states0)		
 				val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
 				items.foreach(item => {
 					val tip = item.tip
@@ -58,14 +71,9 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
 					val liquidDest = destWriter.state.liquid
 					
-					// Check liquid
-					// If the tip hasn't been used for aspiration yet, associate the source liquid with it
-					if (liquidTip0 eq Liquid.empty) {
-						tipWriter.aspirate(liquidSrc, 0)
-					}
 					// If we would need to aspirate a new liquid, abort
-					else if (liquidSrc ne liquidTip0) {
-						return Left(Seq("INTERNAL: Error code dispense 1"))
+					if (liquidSrc ne liquidTip0) {
+						return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
 					}
 					
 					// check volumes

@@ -11,7 +11,7 @@ class Example01 extends Protocol {
 	val plate1 = new Plate
 	
 	pipette(ddw, plate1, 30 ul)
-	mix(plate1, 30 ul, 5)
+	//mix(plate1, 30 ul, 5)
 
 	val lab = new EvowareLab with ExampleTable2 {
 		ddw.setup.group_? = Some(new roboliq.common.LiquidGroup(CleanPolicy.DDD))
