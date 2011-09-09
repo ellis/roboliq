@@ -24,7 +24,7 @@ class BssePipetteDevice extends PipetteDevice {
 			Seq(g1000, g50)
 		}
 	)
-	private val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
+	val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
 	private val mapPipetteSpecs = Seq(
 			PipetteSpec("PIE_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
 			PipetteSpec("PIE_AUTAIR_LowVol", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
@@ -47,13 +47,20 @@ class BssePipetteDevice extends PipetteDevice {
 		new PlateProxy(kb, plateDeconAspirate) match {
 			case pp =>
 				pp.label = "DA"
-				pp.location = "DA"
+				pp.location = "decon2"
 				pp.setDimension(8, 1)
+				val reagent = new Reagent
+				pp.wells.foreach(well => kb.getWellSetup(well).reagent_? = Some(reagent))
+				val rs = kb.getReagentSetup(reagent)
+				rs.sName_? = Some("Decon")
+				rs.sFamily_? = Some("Decon")
+				rs.group_? = Some(new LiquidGroup(GroupCleanPolicy.NNN))
 		}
+		kb.addPlate(plateDeconAspirate, true)
 		new PlateProxy(kb, plateDeconDispense) match {
 			case pp =>
 				pp.label = "DD"
-				pp.location = "DD"
+				pp.location = "decon3"
 				pp.setDimension(8, 1)
 		}
 	}
@@ -66,11 +73,13 @@ class BssePipetteDevice extends PipetteDevice {
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
-		assert(liquid ne Liquid.empty)
+		//assert(liquid ne Liquid.empty)
+		if (liquid eq Liquid.empty)
+			return None
 
 		val bLarge = (tipState.conf.obj.index < 4)
 
-		val res: Option[String] = {
+		/*val res: Option[String] = {
 			import PipettePosition._
 			if (liquid.contaminants.contains(Contaminant.Cell))
 				if (bLarge) Some("Cells") else None
@@ -83,43 +92,40 @@ class BssePipetteDevice extends PipetteDevice {
 		}
 		res match {
 			case None => None
-			case Some(sClass) =>
+			case Some(sClass) =>*/
+		val sClass = liquid.sFamily
 				val sPos = "Top"
 				val sTip = if (bLarge) "1000" else "0050"
 				val sName = "Roboliq_"+sClass+"_"+sPos+"_"+sTip
 				Some(PipettePolicy(sName, PipettePosition.WetContact))
-		}
+		//}
 	}
 	
 	val nFreeDispenseVolumeThreshold = 20
 	
-	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy] = {
-		val liquid = tipState.liquid
+	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
+		val sClass = liquid.sFamily
+		val bLarge = (tip.obj.index < 4)
 		
-		val bLarge = (tipState.conf.obj.index < 4)
-		
-		val res: Option[Tuple2[String, PipettePosition.Value]] = {
+		val res: Option[PipettePosition.Value] = {
 			import PipettePosition._
-			if (liquid.contaminants.contains(Contaminant.Cell))
-				if (bLarge) Some("Cells" -> Free) else None
-			else if (liquid.contaminants.contains(Contaminant.DSMO))
-				if (bLarge) Some("DMSO" -> Free) else None
-			else if (liquid.contaminants.contains(Contaminant.Decon))
-				Some("Decon" -> Free)
-			else {
-				val sClass = "Water"
-				// If our volume is high enough that we don't need to worry about accuracy
-				if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
-					Some(sClass -> Free)
-				else if (wellState.nVolume == 0)
-					Some(sClass -> DryContact)
-				else
-					Some(sClass -> WetContact)
+			sClass match {
+				case "Cells" => Some(Free)
+				case "DMSO" => Some(Free)
+				case "Decon" => Some(Free)
+				case _ =>
+					// If our volume is high enough that we don't need to worry about accuracy
+					if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
+						Some(Free)
+					else if (nVolumeDest == 0)
+						Some(DryContact)
+					else
+						Some(WetContact)
 			}
 		}
 		res match {
 			case None => None
-			case Some((sClass, pos)) =>
+			case Some(pos) =>
 				val sPos = pos match {
 					case PipettePosition.Free => "Air"
 					case PipettePosition.DryContact => "Dry"

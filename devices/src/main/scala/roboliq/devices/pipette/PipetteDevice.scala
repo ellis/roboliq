@@ -20,7 +20,7 @@ trait PipetteDevice extends Device {
 	/** Choose aspirate method */
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy]
 	/** Choose dispense method */
-	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy]
+	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy]
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	//def chooseWashPrograms(tip: TipConfigL2, intensity: WashIntensity.Value): Seq[Int]
 	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
@@ -64,9 +64,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	
 	val nFreeDispenseVolumeThreshold = 20
 	
-	def getDispensePolicy(tipState: TipStateL2, wellState: WellStateL2, nVolume: Double): Option[PipettePolicy] = {
-		val liquid = tipState.liquid
-		
+	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
 		if (liquid.contaminants.contains(Contaminant.Cell))
 			Some(PipettePolicy("Comp cells free dispense", PipettePosition.Free))
 		else if (liquid.sName.contains("DMSO"))
@@ -76,7 +74,7 @@ class PipetteDeviceGeneric extends PipetteDevice {
 		// If our volume is high enough that we don't need to worry about accuracy
 		else if (nVolume >= nFreeDispenseVolumeThreshold)
 			Some(PipettePolicy("Water free dispense", PipettePosition.Free))
-		else if (wellState.nVolume == 0)
+		else if (nVolumeDest == 0)
 			Some(PipettePolicy("Water dry contact", PipettePosition.Free))
 		else
 			Some(PipettePolicy("Water wet contact", PipettePosition.Free))

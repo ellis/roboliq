@@ -134,9 +134,9 @@ case class L4A_PipetteItem(
 				case _ => return Left(Seq("INTERNAL: no config found for pipette source "+src))
 			}
 		}
-		val dests3 = PipetteHelperL4.getWells1(states, dest)
+		val dests3 = PipetteHelperL4.getWells1(states, dest).toSeq
 		//println("dests3: "+dests3)
-		def createItemsL3() = Right(dests3.map(dest3 => new L3A_PipetteItem(srcs3, dest3, nVolume)).toSeq)
+		def createItemsL3() = Right(dests3.map(dest3 => new L3A_PipetteItem(srcs3, dest3, nVolume)))
 						
 		src match {
 			case WPL_Well(_) =>

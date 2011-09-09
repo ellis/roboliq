@@ -94,6 +94,7 @@ object Main extends App {
 	val translator = new EvowareTranslator(evowareMapper)
 
 	val compiler = new Compiler(robot.processors)
+	compiler.bDebug = true
 
 	Compiler.compile(protocol.kb, Some(compiler), Some(translator), protocol.cmds) match {
 		case Left(err) => err.print()

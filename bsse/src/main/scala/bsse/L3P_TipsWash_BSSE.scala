@@ -6,7 +6,7 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-class L3P_TipsWash_BSSE(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispense: Plate) extends CommandCompilerL3 {
+class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, plateDeconDispense: Plate) extends CommandCompilerL3 {
 	type CmdType = L3C_TipsWash
 	val cmdType = classOf[CmdType]
 
@@ -25,7 +25,6 @@ class L3P_TipsWash_BSSE(robot: PipetteDevice, plateDeconAspirate: Plate, plateDe
 			case WashIntensity.Decontaminate =>
 				(ctx.states.map.get(plateDeconAspirate), ctx.states.map.get(plateDeconDispense)) match {
 					case (Some(pcA: PlateStateL2), Some(pcD: PlateStateL2)) =>
-						val nVolume = 600
 						// Create aspirate and dispense lists for the DECON wash
 						val itemsAD = cmd.items.map(item => {
 							val tip = item.tip
@@ -34,8 +33,10 @@ class L3P_TipsWash_BSSE(robot: PipetteDevice, plateDeconAspirate: Plate, plateDe
 							val wellD = pcD.conf.wells(tip.index % pcD.conf.nWells)
 							val wellStateA = wellA.state(ctx.states)
 							val wellStateD = wellD.state(ctx.states)
+							val nVolumeTip = robot.mapTipSpecs(tipState.sType_?.get).nVolume
+							val nVolume = math.max(nVolumeTip, tipState.nContamInsideVolume + nVolumeTip / 10)
 							val policyA_? = robot.getAspiratePolicy(tipState, wellStateA)
-							val policyD_? = robot.getDispensePolicy(tipState, wellStateD, nVolume)
+							val policyD_? = robot.getDispensePolicy(tipState.liquid, tip, nVolume, wellStateD.nVolume)
 							val well1A = wellStateA.conf
 							val well1D = wellStateD.conf
 							(policyA_?, policyD_?) match {

@@ -199,6 +199,7 @@ object Compiler {
 		kb.concretize() match {
 			case Left(errK) => Left(errK)
 			case Right(succK) =>
+				println(succK.states0.toDebugString)
 				compiler_? match {
 					case None => Right(succK)
 					case Some(compiler) =>

@@ -206,9 +206,9 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		sDispenseClass_? match {
 			case None =>
 				val item = mapDestToItem(dest)
-				val tipState = tip.state(states)
 				val destState = dest.state(states)
-				robot.getDispensePolicy(tipState, destState, item.nVolume) match {
+				val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(states).liquid
+				robot.getDispensePolicy(liquidSrc, tip, item.nVolume, destState.nVolume) match {
 					case None => Left("no dispense policy found for "+tip+" and "+dest)
 					case Some(policy) => Right(policy)
 				}

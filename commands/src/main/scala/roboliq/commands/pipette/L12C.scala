@@ -14,6 +14,7 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 			val wellState = item.well.obj.state(builder)
 			item.tip.obj.stateWriter(builder).aspirate(wellState.liquid, item.nVolume)
 			item.well.obj.stateWriter(builder).remove(item.nVolume)
+			//println("tipState:", item.tip.obj.state(builder), item.tip.obj.state(builder).liquid.sName)
 		}
 	}
 	
@@ -22,17 +23,11 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	}
 	
 	override def toDebugString = {
-		val (tip0, tip1) = (items.head.tip, items.last.tip)
-		val policies = items.groupBy(_.policy.sName)
-		if (policies.size == 1) {
-			val wells = items.map(_.well)
-			val sTips = TipSet.toDebugString(items.map(_.tip))
-			val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
-			getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
-		}
-		else {
-			toString
-		}
+		val wells = items.map(_.well)
+		val sTips = TipSet.toDebugString(items.map(_.tip))
+		val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
+		val sPolicies = super.getSeqDebugString(items.map(_.policy.sName))
+		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
 	}
 }
 
@@ -80,18 +75,11 @@ case class L2C_Dispense(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 	}
 	
 	override def toDebugString = {
-		val (tip0, tip1) = (items.head.tip, items.last.tip)
-		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
-		val volumes = items.groupBy(_.nVolume)
-		val policies = items.groupBy(_.policy.sName)
-		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
-			val wells = items.map(_.well)
-			val sTips = TipSet.toDebugString(items.map(_.tip))
-			getClass().getSimpleName() + "("+sTips+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
-		}
-		else {
-			toString
-		}
+		val wells = items.map(_.well)
+		val sTips = TipSet.toDebugString(items.map(_.tip))
+		val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
+		val sPolicies = super.getSeqDebugString(items.map(_.policy.sName))
+		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
 	}
 }
 
@@ -113,6 +101,14 @@ case class L2C_Mix(items: Seq[L2A_MixItem]) extends CommandL2 {
 	
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
 		Right(L1C_Mix(items.map(_.toL1(states))))
+	}
+	
+	override def toDebugString = {
+		val wells = items.map(_.well)
+		val sTips = TipSet.toDebugString(items.map(_.tip))
+		val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
+		val sPolicies = super.getSeqDebugString(items.map(_.policy.sName))
+		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
 	}
 }
 
@@ -157,6 +153,12 @@ case class L2C_Wash(items: Seq[L2A_WashItem], iWashProgram: Int, intensity: Wash
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
 		val items1 = items.map(item => new L1A_WashItem(item.tip, item.nVolumeInside))
 		Right(L1C_Wash(items1, iWashProgram))
+	}
+	
+	override def toDebugString = {
+		val sTips = TipSet.toDebugString(items.map(_.tip))
+		val sVolumes = super.getSeqDebugString(items.map(_.nVolumeInside))
+		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+iWashProgram+", "+intensity+")" 
 	}
 }
 

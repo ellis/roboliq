@@ -2,6 +2,7 @@ Script generation errors:
 	test_1x1_8x6_3: try to asperate 18ul, but error: tip 5: 6ul too much in diluter
 	
 Fabian:
+	when washing and aspirating for decontamination, can we use the full tip volume?
 	cleaning rules:
 		concepts:
 			liquid

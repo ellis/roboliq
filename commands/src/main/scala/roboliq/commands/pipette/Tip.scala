@@ -63,22 +63,46 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		
 		def dispenseFree(nVolume2: Double) {
 			val st = state
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2, cleanDegree = WashIntensity.None)
+			val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
+			map(thisObj) = st.copy(
+				liquid = liquid,
+				nVolume = nVolume,
+				cleanDegree = WashIntensity.None
+			)
 		}
 		
 		def dispenseIn(nVolume2: Double, liquid2: Liquid) {
 			val st = state
+			val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
 			map(thisObj) = st.copy(
-				nVolume = st.nVolume - nVolume2,
+				liquid = liquid,
+				nVolume = nVolume,
 				contamOutside = st.contamOutside ++ liquid2.contaminants,
 				destsEntered = st.destsEntered + liquid2,
 				cleanDegree = WashIntensity.None
 			)
 		}
 		
+		private def getLiquidAndVolumeAfterDispense(nVolume2: Double): Tuple2[Liquid, Double] = {
+			val st = state
+			val nVolume3 = st.nVolume - nVolume2
+			if (math.abs(nVolume3) < 0.001) {
+				(Liquid.empty, 0.0)
+			}
+			else {
+				(st.liquid, nVolume3)
+			}
+		}
+		
 		def clean(cleanDegree: WashIntensity.Value) {
 			val st = state
-			map(thisObj) = st.copy(srcsEntered = Set(), destsEntered = Set(), cleanDegree = cleanDegree, cleanDegreePrev = cleanDegree)
+			map(thisObj) = st.copy(
+				liquid = Liquid.empty,
+				srcsEntered = Set(),
+				destsEntered = Set(),
+				cleanDegree = cleanDegree,
+				cleanDegreePrev = cleanDegree
+			)
 		}
 		
 		def mix(liquid2: Liquid, nVolume2: Double) {
@@ -135,14 +159,14 @@ class TipSetup(val obj: Tip) extends ObjSetup {
 
 object TipSet {
 	def toDebugString(set: Set[TipConfigL2]): String = toDebugString(collection.immutable.SortedSet(set.toSeq : _*))
-	def toDebugString(seq: Seq[TipConfigL2]): String = toDebugString(collection.immutable.SortedSet(seq.toSeq : _*))
-	def toDebugString(set: collection.immutable.SortedSet[TipConfigL2]): String = {
-		if (set.isEmpty)
+	def toDebugString(set: collection.immutable.SortedSet[TipConfigL2]): String = toDebugString(set.toSeq)
+	def toDebugString(seq: Seq[TipConfigL2]): String = {
+		if (seq.isEmpty)
 			"NoTips"
 		else {
 			var indexPrev = -1
 			var indexLast = -1
-			val l = set.foldLeft(Nil: List[Tuple2[Int, Int]]) { (acc, tip) => {
+			val l = seq.foldLeft(Nil: List[Tuple2[Int, Int]]) { (acc, tip) => {
 				acc match {
 					case Nil => List((tip.index, tip.index))
 					case first :: rest =>
@@ -152,7 +176,7 @@ object TipSet {
 							(tip.index, tip.index) :: acc
 				}
 			}}
-			val ls = l.map(pair => {
+			val ls = l.reverse.map(pair => {
 				if (pair._1 == pair._2) (pair._1 + 1).toString
 				else (pair._1 + 1) + "-" + (pair._2 + 1)
 			})

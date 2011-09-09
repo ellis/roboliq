@@ -90,16 +90,16 @@ class Well extends Obj { thisObj =>
 		}
 		if (setup.index_?.isEmpty)
 			errors += "index not set"
+				
+		val liquid_? = setup.reagent_?.map(_.state(states).conf.liquid)
+		if (setup.bRequiresIntialLiq_?.getOrElse(false) && liquid_?.isEmpty)
+			errors += "must specify initial liquid for source wells"
 			
 		if (!errors.isEmpty)
 			return Left(errors)
 			
 		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL2]
 		val nVolume = setup.nVolume_?.getOrElse(0.0)
-		val liquid = setup.reagent_? match {
-			case Some(reagent) => reagent.state(states).conf.liquid
-			case None => Liquid.empty
-		}
 
 		val conf = new WellConfigL2(
 				obj = this,
@@ -108,7 +108,7 @@ class Well extends Obj { thisObj =>
 		val state = new WellStateL2(
 				conf = conf,
 				plateState = holderState,
-				liquid = liquid,
+				liquid = liquid_?.getOrElse(Liquid.empty),
 				nVolume = nVolume)
 		
 		Right(conf, state)
@@ -181,7 +181,7 @@ class WellConfigL2(
 		}
 	}
 	
-	override def toString = holder.sLabel + ":" + (iCol+'A').asInstanceOf[Char] + (iRow+1)
+	override def toString = holder.sLabel + ":" + (iRow+'A').asInstanceOf[Char] + (iCol+1)
 }
 
 case class WellStateL2(
@@ -213,8 +213,8 @@ class WellSetup(val obj: Well) extends ObjSetup {
 							case Some(dim) =>
 								val iRow = index % dim.nRows
 								val iCol = index / dim.nRows
-								s.append((iCol+'A').asInstanceOf[Char])
-								s.append(iRow+1)
+								s.append((iRow+'A').asInstanceOf[Char])
+								s.append(iCol+1)
 						}
 					case None =>
 						s.append(toString)

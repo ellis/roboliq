@@ -7,6 +7,10 @@ trait Command {
 	
 	def getWellsDebugString(wells: Iterable[WellConfigL2]): String = Command.getWellsDebugString(wells)
 	
+	def getSeqDebugString[T](seq: Seq[T]): String = Command.getSeqDebugString(seq)
+}
+
+object Command {
 	def getSeqDebugString[T](seq: Seq[T]): String = {
 		seq match {
 			case Seq(a, rest @ _*) =>
@@ -18,9 +22,7 @@ trait Command {
 				"Nil"
 		}
 	}
-}
 
-object Command {
 	def getWellsDebugString(wells: Iterable[WellConfigL2]): String = {
 		val sorted = wells.toSeq//.sortBy(identity)
 		val mapPlateToWell = sorted.groupBy(_.holder)
