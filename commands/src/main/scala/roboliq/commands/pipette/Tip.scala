@@ -96,10 +96,8 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		
 		def clean(cleanDegree: WashIntensity.Value) {
 			val st = state
-			map(thisObj) = st.copy(
-				liquid = Liquid.empty,
-				srcsEntered = Set(),
-				destsEntered = Set(),
+			map(thisObj) = st.conf.createState0(None).copy(
+				sType_? = st.sType_?,
 				cleanDegree = cleanDegree,
 				cleanDegreePrev = cleanDegree
 			)

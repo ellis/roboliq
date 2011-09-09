@@ -11,10 +11,10 @@ class Example01 extends Protocol {
 	val plate1 = new Plate
 	
 	pipette(ddw, plate1, 30 ul)
-	//mix(plate1, 30 ul, 5)
+	mix(plate1, 30 ul, 5)
 
 	val lab = new EvowareLab with ExampleTable2 {
-		ddw.setup.group_? = Some(new roboliq.common.LiquidGroup(CleanPolicy.DDD))
+		//ddw.setup.group_? = Some(new roboliq.common.LiquidGroup(CleanPolicy.DDD))
 		reagent(ddw, Labwares.reagents15, 1, 8)
 		labware(plate1, Sites.cooled1, LabwareModels.platePcr)
 	}
@@ -25,17 +25,6 @@ object LiquidChangeScale extends Enumeration {
 }
 
 class Example02 extends Protocol {
-	val ddw = new Liquid("Water")
-	val plate1 = new Plate(PlateFamily.Standard)
-	
-	pipette(ddw, plate1, 30 ul)
-	mix(plate1, 30 ul, 5)
-
-	val lab = new EvowareLab with ExampleTable2 {
-		reagent(ddw, Labwares.reagents15, 1, 8)
-		labware(plate1, Sites.cooled1, LabwareModels.platePcr)
-	}
-	
 	//val water = new Liquid("water", false, false, Set())
 	val liquid_plasmidDna = new Liquid("plasmid", Set(Contaminant.DNA), CleanPolicy.DDD)
 	val liquid_competentCells = new Liquid("cells", Set(Contaminant.Cell), CleanPolicy.DDD)
@@ -44,16 +33,6 @@ class Example02 extends Protocol {
 	
 	val plate_template = new Plate
 	val plate_working = new Plate
-	
-	def decontamination_WashBigTips() {
-		
-	}
-	
-	def pcrDispense(volume: Double) {
-		decontamination_WashBigTips()
-		pipette(plate_template, plate_working, volume)
-		decontamination_WashBigTips()
-	}
 	
 	def competentYeastDispense() {
 		pipette(liquid_plasmidDna, plate_working, 2)
@@ -67,6 +46,27 @@ class Example02 extends Protocol {
 		
 	}
 	
-	pcrDispense(3)
+	pipette(plate_template, plate_working, 3)
 	competentYeastDispense()
+
+	val lab = new EvowareLab with ExampleTable2 {
+		//ddw.setup.group_? = Some(new roboliq.common.LiquidGroup(CleanPolicy.DDD))
+		reagent(liquid_plasmidDna, Labwares.epindorfs, 1)
+		reagent(liquid_ssDna, Labwares.epindorfs, 2)
+		reagent(liquid_competentCells, Labwares.reagents50, 1)
+		reagent(liquid_liAcMix, Labwares.reagents50, 2)
+		//labware(plate_template, Sites.cooled1, LabwareModels.platePcr)
+		//labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
+		labware(plate_template, Sites.cooled1, LabwareModels.test4x3)
+		labware(plate_working, Sites.cooled2, LabwareModels.test4x3)
+		new roboliq.common.PlateProxy(kb, plate_template) match { case pp =>
+			for (wellObj <- pp.wells) {
+				val wellSetup = kb.getWellSetup(wellObj)
+				val sLiquid = "template#"+wellSetup.index_?.get
+				val liquid = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+				liquid.setup.sName_? = Some(sLiquid)
+				wellSetup.reagent_? = Some(liquid)
+			}
+		}
+	}
 }

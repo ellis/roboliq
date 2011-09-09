@@ -84,7 +84,7 @@ class Tester2 extends Protocol {
 object Main extends App {
 	val robot = BsseRobot()
 	
-	val protocol = new examples.Example01
+	val protocol = new examples.Example02
 	if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
 	protocol.__findPlateLabels()
 	if (protocol.m_customize.isDefined) protocol.m_customize.get()

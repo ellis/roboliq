@@ -113,6 +113,7 @@ trait ExampleTable2 extends EvowareTable {
 		val ethanol = new TroughModel("Trough 1000ml", 8, 1)
 		val platePcr = new PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, 500) // FIXME: nVolume? 
 		val epindorfs = new PlateModel("...", 4, 5, 1500) // FIXME: nVolume?
+		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500) // FIXME: nVolume? 
 	}
 	object Labwares {
 		val wash1a = new TroughObj("wash1a", LabwareModels.washA, Sites.wash1a)

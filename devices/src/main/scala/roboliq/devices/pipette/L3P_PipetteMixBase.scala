@@ -266,7 +266,8 @@ private trait L3P_PipetteMixBase {
 		}
 		
 		// First dispense
-		doDispense(twss.head) match {
+		val tws0 = twss.head
+		doDispense(tws0) match {
 			case Left(lsErrors) => return Left(lsErrors)
 			case Right(res) =>
 		}
@@ -569,6 +570,8 @@ private trait L3P_PipetteMixBase {
 		}
 		else {
 			val spec = PipetteHelper.choosePreAspirateWashSpec(overrides, liquidTarget, tipState)
+			if (tip.index == 0)
+				println("res:", overrides, liquidTarget, tipState, spec)
 			if (spec.washIntensity > WashIntensity.None) Some(WashSpec2(tip, spec))
 			else None
 		}
