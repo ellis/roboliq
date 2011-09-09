@@ -38,7 +38,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	
 	override protected def mix(
 		states0: RobotState,
-		mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
+		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
 		mapTipToType: Map[TipConfigL2, String],
 		tws: Seq[TipWell]
 	): Either[Seq[String], MixResult] = {
@@ -47,7 +47,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 				return Left(Seq(sError))
 			case Right(items0) =>
 				val builder = new StateBuilder(states0)		
-				val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
+				//val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
 				val itemss = robot.batchesForMix(items0)
 				var actions = Seq[Mix]()
 				for (items <- itemss) {
@@ -83,12 +83,14 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 							case None =>
 							case Some(spec) =>
 								//println("spec:", spec)
+								return Left(Seq("INTERNAL: Error code dispense 2"))
+								/*
 								mapTipToCleanSpec.get(item.tip) match {
 									case Some(_) =>
 										return Left(Seq("INTERNAL: Error code dispense 2"))
 									case None =>
 										mapTipToCleanSpec(item.tip) = spec
-								}
+								}*/
 						}
 						
 						// Update tip state
@@ -96,7 +98,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 					})
 					actions = actions ++ Seq(Mix(items))
 				}
-				Right(new MixResult(builder.toImmutable, mapTipToCleanSpec.toMap, actions))
+				Right(new MixResult(builder.toImmutable, actions))
 		}
 	}
 	

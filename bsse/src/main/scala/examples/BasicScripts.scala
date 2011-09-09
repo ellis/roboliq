@@ -50,7 +50,6 @@ class Example02 extends Protocol {
 	competentYeastDispense()
 
 	val lab = new EvowareLab with ExampleTable2 {
-		//ddw.setup.group_? = Some(new roboliq.common.LiquidGroup(CleanPolicy.DDD))
 		reagent(liquid_plasmidDna, Labwares.epindorfs, 1)
 		reagent(liquid_ssDna, Labwares.epindorfs, 2)
 		reagent(liquid_competentCells, Labwares.reagents50, 1)

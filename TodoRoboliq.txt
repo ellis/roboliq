@@ -60,13 +60,6 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	Example02:
-		decontamination should happen between mixes:
-		Mix(15,"Roboliq_Water_Top_1000","90","90","90","90",0,0,0,0,0,0,0,0,17,1,1,"0C08?0000000000000",4,0);
-		Mix(15,"Roboliq_Water_Top_1000","90","90","90","90",0,0,0,0,0,0,0,0,17,1,1,"0C08 1000000000000",4,0);
-		same idea here:
-		Dispense(15,"Roboliq_ssDNA_Top_1000","5","5","5","5",0,0,0,0,0,0,0,0,17,1,1,"0C0800000000000¨00",0,0);
-		Dispense(15,"Roboliq_ssDNA_Top_1000","5","5","5","5",0,0,0,0,0,0,0,0,17,1,1,"0C08000000000000?0",0,0);
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
@@ -79,7 +72,10 @@ Code:
 	evoware: move to roboliq.robots.evoware package
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
+2	devices: Pipette/Mix: keep track of the LiquidGroup exit policy to ensure a minimum cleaning intensity at the end of pipetting
+	devices: PipetteHelper.chooseWashSpec: use the minimum cleaning intensity from the previous LiquidGroups
 	devices: PipetteDevice: return error message when we can't return a PipettePolicy
+	devices: Pipette/Mix: add L4 option to first move the target plates to new locations, in case the cannot be accessed in their current locations
 	devices: add bTipPermanent to Tip or TipConfig
 *	devices: implement wait
 *	devices: implement shaker

@@ -39,7 +39,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 
 	override protected def dispense(
 		states0: RobotState,
-		mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
+		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
 		mapTipToType: Map[TipConfigL2, String],
 		tws: Seq[TipWell]
 	): Either[Seq[String], DispenseResult] = {
@@ -61,7 +61,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			case Left(sError) =>
 				return Left(Seq(sError))
 			case Right(items) =>
-				val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
+				//val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
 				items.foreach(item => {
 					val tip = item.tip
 					val dest = item.well
@@ -92,12 +92,13 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					getDispenseCleanSpec(builder, mapTipToType, tipOverrides, item.tip, item.well, pos) match {
 						case None =>
 						case Some(spec) =>
-							mapTipToCleanSpec.get(item.tip) match {
+							return Left(Seq("INTERNAL: Error code dispense 2"))
+							/*mapTipToCleanSpec.get(item.tip) match {
 								case Some(_) =>
 									return Left(Seq("INTERNAL: Error code dispense 2"))
 								case None =>
 									mapTipToCleanSpec(item.tip) = spec
-							}
+							}*/
 					}
 					
 					// Update tip and destination states
@@ -105,7 +106,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					destWriter.add(liquidSrc, item.nVolume)
 				})
 				val actions = Seq(Dispense(items))
-				Right(new DispenseResult(builder.toImmutable, mapTipToCleanSpec.toMap, actions))
+				Right(new DispenseResult(builder.toImmutable, actions))
 		}
 	}
 	
