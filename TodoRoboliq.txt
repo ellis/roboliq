@@ -61,9 +61,15 @@ Tuval/Yair:
 	get date for coming to Weizmann
 Code:
 	Rotem_Script02.conf:
+	why doesn't Mix trigger clean?
+	force end of cycle if mix is performed
+	why are the wrong volumes aspirated?
+	-
+	Wrong tip size!:
 	GetDITI2(255,"DiTi 200ul",1,0,0,0);
 	Aspirate(255,"PIE_TROUGH_AUTAIR","770","770","770","770","715","715","715","715",0,0,0,0,41,2,1,"0608¯100000",0);
 	-
+	bad aspirates:
 	Aspirate(16,"PIE_AUTAIR_LowVol",0,0,0,0,"65",0,0,0,0,0,0,0,29,2,1,"0C080000000p000000",0);
 	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
 	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);

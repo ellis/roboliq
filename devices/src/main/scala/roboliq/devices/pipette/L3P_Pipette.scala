@@ -78,18 +78,18 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
 					val liquidDest = destWriter.state.liquid
 					
-					/*// check volumes
-					dispense_checkVol(builder, tip, dest) match {
-						case Some(sError) => return Left(Seq(sError))
-						case _ =>
-					}*/
-
 					if (!bFirstInCycle) {
 						// If we would need to aspirate a new liquid, end this cycle
 						if (liquidSrc ne liquidTip0) {
 							return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
 						}
 						
+						// check volumes
+						dispense_checkVol(builder, tip, dest) match {
+							case Some(sError) => return Left(Seq(sError))
+							case _ =>
+						}
+	
 						// If we need to mix, then force wet contact when checking for how to clean
 						val pos = args.mixSpec_? match {
 							case None => item.policy.pos
