@@ -37,6 +37,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			return
 		}
 		
+		createSrcWellLiquids(wells)
+		
 		val sMixClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
 		
 		val mapOpts = getMapOpts(opts_?) match {
@@ -69,10 +71,37 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			shared.addError("souce and destination lists must have the same length")
 			return
 		}
+		createSrcLiquids(srcs)
+		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
+	}
+	
+	def run_ChecklistComment(s: String) {
+		println("WARNING: % command not yet implemented")
+	}
+	
+	private def getWell(pi: Tuple2[Plate, Int]): Well = {
+		val (plate, iWell) = pi
+		val dim = kb.getPlateSetup(plate).dim_?.get
+		dim.wells(iWell)
+	}
+	
+	private def wellsToPlateIndexes(wells: Seq[Well]): Seq[Tuple2[Plate, Int]] = {
+		wells.map(well => {
+			val wellSetup = kb.getWellSetup(well)
+			(wellSetup.holder_?.get, wellSetup.index_?.get)
+		})
+	}
+
+	private def createSrcWellLiquids(wells: Seq[Well]) {
+		createSrcLiquids(wellsToPlateIndexes(wells))
+	}
+	
+	private def createSrcLiquids(srcs: Seq[Tuple2[Plate, Int]]) {
 		// If source well is empty, create a new liquid for the well
 		for (pi <- srcs) {
+			val plate = pi._1
 			val well = getWell(pi)
-			val plateSetup = kb.getPlateSetup(pi._1)
+			val plateSetup = kb.getPlateSetup(plate)
 			val wellSetup = kb.getWellSetup(well)
 			wellSetup.reagent_? match {
 				case Some(_) =>
@@ -86,17 +115,6 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					//wellSetup.nVolume_? = Some(0)
 			}
 		}
-		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
-	}
-	
-	def run_ChecklistComment(s: String) {
-		println("WARNING: % command not yet implemented")
-	}
-	
-	private def getWell(pi: Tuple2[Plate, Int]): Well = {
-		val (plate, iWell) = pi
-		val dim = kb.getPlateSetup(plate).dim_?.get
-		dim.wells(iWell)
 	}
 	
 	private def sub_pipette(reagent_? : Option[Reagent], srcs: Seq[Tuple2[Plate, Int]], dests: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {

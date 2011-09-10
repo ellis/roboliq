@@ -61,7 +61,7 @@ Tuval/Yair:
 	get date for coming to Weizmann
 Code:
 	Rotem_Script01.conf:
-	should use PIE_TROUGH_AUTAIR for DDW
+x	should use PIE_TROUGH_AUTAIR for DDW
 	why replace tips between dispenses to Rotem_STK2:D1+8 and Rotem_STK2:E1+3
 	why no clean between mixes?
 	remove final wash after dropping tips
@@ -121,6 +121,16 @@ x	devices: PipetteHelper.chooseWashSpec: use the minimum cleaning intensity from
 	roboease: try using parboiled as a replacement for scala's parser combinator (https://github.com/sirthias/parboiled/wiki)
 	BsseRobot.batch*spirate() needs to batch on volume too?
 	each token has a source reference so that we can ultimately find the line/col of sourcecode which a particular token came from
+	KnowledgeBase:
+		need to rework this concept
+		we have several sources of knowledge:
+			knowledge about objects specified in the protocol
+			knowledge supplied by the user's customization of the protocol
+			knowledge provided by protocol commands
+			additional routines to find good defaults where possible
+		should create an immutable KnowledgeMap in order to preserve a clear order in which the above sources are evaluated
+		the first two should be fixed before evaluating the protocol commands
+		we could then run multiple loops over the commands as long as they are still adding knowledge
 	Tables:
 		load in the evoware table; it should create roboliq objects for locations, PlateModels, plates
 	Plates:

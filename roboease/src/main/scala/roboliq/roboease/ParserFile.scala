@@ -62,8 +62,11 @@ class ParserFile(mapTables: Map[String, Table]) {
 			}
 			iLine += 1
 		}
-		if (shared.errors.isEmpty)
+		if (shared.errors.isEmpty) {
+			val cmds4 = pScript.cmds.collect { case RoboeaseCommand(_, _, cmd: CommandL4) => cmd }
+			cmds4.foreach(_.addKnowledge(kb))
 			Right(RoboeaseResult(shared.kb, pScript.cmds))
+		}
 		else {
 			val log = Log(shared.errors.map(_.sError))
 			Left(CompileStageError(log))

@@ -84,13 +84,6 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 							case Some(spec) =>
 								//println("spec:", spec)
 								return Left(Seq("INTERNAL: Error code dispense 2"))
-								/*
-								mapTipToCleanSpec.get(item.tip) match {
-									case Some(_) =>
-										return Left(Seq("INTERNAL: Error code dispense 2"))
-									case None =>
-										mapTipToCleanSpec(item.tip) = spec
-								}*/
 						}
 						
 						// Update tip state

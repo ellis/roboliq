@@ -394,4 +394,10 @@ ellis: biology labs that are interested in employing robots.
 
 
 
-
+Possible Evolab errors:
+Rotem_Script01.esc:
+	MIX_WELLS P6 G7+9 WET_MIX_TIMES WET_MIX_VOL PIE_MIX_AUT
+	gets translated as:
+	Mix(255,"PIE_MIX_AUT","150","150","150","150","150","150","150","150",0,0,0,0,29,2,1,"0C080000000�o00000",15,0);
+	Mix(1,"PIE_MIX_AUT","150",0,0,0,0,0,0,0,0,0,0,0,29,2,1,"0C0800000000p00000",15,0);
+	which is weird because that looks like it might be P6:H1+8,G8 instead... (I haven't looked into this more closely)

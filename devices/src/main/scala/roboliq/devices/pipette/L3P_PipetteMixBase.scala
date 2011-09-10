@@ -322,7 +322,6 @@ private trait L3P_PipetteMixBase {
 	): Either[Seq[String], Tuple2[Seq[Action], List[Seq[TipWell]]]] = {
 		val builder = new StateBuilder(cycle.state0)
 		
-		//val mapTipToCleanSpec = new HashMap[TipConfigL2, CleanSpec2]
 		val actionsM = new ArrayBuffer[Mix]
 		
 		// Temporarily assume that the tips are perfectly clean
@@ -337,7 +336,6 @@ private trait L3P_PipetteMixBase {
 				case Right(res) =>
 					//println("res:", res)
 					builder.map ++= res.states.map
-					//mapTipToCleanSpec ++= res.mapTipToCleanSpec
 					actionsM ++= res.actions
 					Right(())
 			}
@@ -561,6 +559,7 @@ private trait L3P_PipetteMixBase {
 				case None =>
 					PipetteHelper.choosePreAspirateWashSpec(overrides, liquidTarget, tipState).washIntensity > WashIntensity.None
 			})
+			//println("bReplace: ", bReplace, tip, tipState, tipState.sType_?, overrides.replacement_?)
 			if (bReplace)
 				Some(ReplaceSpec2(tip, mapTipToType(tip)))
 			else

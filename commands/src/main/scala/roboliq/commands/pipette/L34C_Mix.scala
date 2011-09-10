@@ -9,6 +9,7 @@ case class L4C_Mix(args: L4A_MixArgs) extends CommandL4 {
 	type L3Type = L3C_Mix
 
 	def addKnowledge(kb: KnowledgeBase) {
+		println("addKnowledge")
 		for (target <- args.targets) {
 			target match {
 				case WPL_Well(o) => kb.addWell(o, true)
