@@ -274,10 +274,10 @@ private trait L3P_PipetteMixBase {
 		
 		// aspirate
 		val mapTipToVolume = cycle.tips.toSeq.map(tip => tip -> -tip.state(builder).nVolume).toMap
-		println("mapTipToVolume:", mapTipToVolume)
+		//println("mapTipToVolume:", mapTipToVolume)
 		//val mapTipToSrcs = actionsD.flatMap(_.items.map(item => item.tip -> mapDestToItem(item.well).srcs)).toMap
 		val twsD = actionsD.flatMap(_.items.map(item => new TipWell(item.tip, item.well)))
-		println("twsD:", twsD)
+		//println("twsD:", twsD)
 		val actionsA: Seq[Aspirate] = aspirate(cycle.state0, twsD, mapTipToVolume) match {
 			case Left(lsErrors) => return Left(lsErrors)
 			case Right(acts) => acts
