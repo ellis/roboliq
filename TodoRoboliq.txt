@@ -72,20 +72,24 @@ Code:
 	evoware: move to roboliq.robots.evoware package
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
-2	devices: Pipette/Mix: keep track of the LiquidGroup exit policy to ensure a minimum cleaning intensity at the end of pipetting
-	devices: PipetteHelper.chooseWashSpec: use the minimum cleaning intensity from the previous LiquidGroups
+x	devices: Pipette/Mix: keep track of the LiquidGroup exit policy to ensure a minimum cleaning intensity at the end of pipetting
+x	devices: PipetteHelper.chooseWashSpec: use the minimum cleaning intensity from the previous LiquidGroups
+3	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
+4	devices: implement transfer
+5	devices: implement wait
+6	devices: implement shaker
+7	devices: Pipette/Mix: add L4 option to first move the target plates to new locations, in case they cannot be accessed in their current locations
+		add function to device for determining whether a given location can be accessed by the device
+		add function to device for determining whether a given plate can be used by the device, and if not, which plate to transfer the contents to
+		also, in plate setup, if plate's type hasn't been fixed yet, indicate which plate types are compatible with this device
+	devices: replace PipetteDevice.areTipsDisposable with a flag in TipConfig?
 	devices: PipetteDevice: return error message when we can't return a PipettePolicy
-	devices: Pipette/Mix: add L4 option to first move the target plates to new locations, in case the cannot be accessed in their current locations
 	devices: add bTipPermanent to Tip or TipConfig
-*	devices: implement wait
-*	devices: implement shaker
 	devices: PipettePolicy: rework this concept
-		have a string to identify the general liquid class and a DispensePosition
-		the liquid class can either be explicitly specified with the liquid, or it's extracted from the contaminants
-.		really need to make liquid into an Obj with Setup, Config and State:
-			let user setup the explicit liquid class
-			let the explicit liquid class be changed by the user during program execution
-		PipettePolicy well also need to know the tip type; then EvowareMapper can decide on it's liquid class based on the parameters of PipettePolicy
+		I don't really like the fact that we need to choose the Evoware liquid class in the L3 processor already...
+		-- is there a good way to delay this to the EvowareTranslator?
+		-- the problem is that we already need to know in L3 whether the tips will contact the destination liquid.
+		PipettePolicy will also need to know the tip type; then EvowareMapper can decide on it's liquid class based on the parameters of PipettePolicy
 *	devices: L3P_Wash: use extra wash volume
 	devices: L3P_Pipette: drop tip after last use instead of waiting until end of pipetting
 	devices: L3P_Pipette: don't match tips to dests at the beginning: delay the pairing until tip state is known in order to prefer tips with less volume

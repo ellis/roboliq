@@ -17,7 +17,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val conf = new TipConfigL2(this, index)
-		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None)
+		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
 		Right(conf, state)
 	}
 	
@@ -50,7 +50,8 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 				st.srcsEntered + liquid2,
 				st.destsEntered,
 				WashIntensity.None,
-				st.cleanDegreePrev
+				st.cleanDegreePrev,
+				WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
 			)
 		}
 		
@@ -79,7 +80,8 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 				nVolume = nVolume,
 				contamOutside = st.contamOutside ++ liquid2.contaminants,
 				destsEntered = st.destsEntered + liquid2,
-				cleanDegree = WashIntensity.None
+				cleanDegree = WashIntensity.None,
+				cleanDegreePending = WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
 			)
 		}
 		
@@ -99,7 +101,8 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 			map(thisObj) = st.conf.createState0(None).copy(
 				sType_? = st.sType_?,
 				cleanDegree = cleanDegree,
-				cleanDegreePrev = cleanDegree
+				cleanDegreePrev = cleanDegree,
+				cleanDegreePending = WashIntensity.None
 			)
 		}
 		
@@ -125,7 +128,7 @@ class TipConfigL2(
 	def state(states: StateMap) = obj.state(states)
 	// For use in L3P_Pipette
 	def createState0(sType_? : Option[String]): TipStateL2 = {
-		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None)
+		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
 	}
 
 	override def compare(that: TipConfigL2): Int = this.index - that.index
@@ -144,7 +147,9 @@ case class TipStateL2(
 	val srcsEntered: Set[Liquid],
 	val destsEntered: Set[Liquid],
 	val cleanDegree: WashIntensity.Value,
-	val cleanDegreePrev: WashIntensity.Value
+	val cleanDegreePrev: WashIntensity.Value,
+	/** Intensity of cleaning that should be performed after leaving the current liquid group */
+	val cleanDegreePending: WashIntensity.Value
 ) extends ObjState with Ordered[TipStateL2] {
 	override def compare(that: TipStateL2): Int = conf.obj.compare(that.conf.obj)
 }

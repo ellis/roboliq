@@ -343,7 +343,7 @@ object PipetteHelper {
 			val policy = group.cleanPolicy
 			if (tipState.cleanDegreePrev == WashIntensity.None) tipOverrides.washIntensity_?.getOrElse(policy.enter)
 			else if (tipOverrides.washIntensity_?.isDefined) tipOverrides.washIntensity_?.get
-			else if (bDifferentGroup) policy.enter
+			else if (bDifferentGroup) WashIntensity.max(policy.enter, tipState.cleanDegreePending)
 			else if (bDifferentLiquid) policy.within
 			else WashIntensity.None
 		}
