@@ -50,20 +50,6 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		// Make sure that we only need to take care of remains for the first dispense in a cycle
 		assert(bFirstInCycle || remains0.isEmpty)
 		
-		if (bFirstInCycle) {
-			// If the tip hasn't been used for aspiration yet, associate the source liquid with it
-			for (tw <- tws) {
-				val tip = tw.tip
-				val tipWriter = tip.obj.stateWriter(builder)
-				val liquidTip0 = tipWriter.state.liquid
-				if (liquidTip0 eq Liquid.empty) {
-					val dest = tw.well
-					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
-					tipWriter.aspirate(liquidSrc, 0)
-				}
-			}
-		}
-		
 		dispense_createItems(builder.toImmutable, tws, remains0) match {
 			case Left(sError) =>
 				return Left(Seq(sError))
@@ -78,8 +64,20 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
 					val liquidDest = destWriter.state.liquid
 					
+					// If the tip hasn't been used for aspiration yet, associate the source liquid with it
+					for (tw <- tws) {
+						val tip = tw.tip
+						val tipWriter = tip.obj.stateWriter(builder)
+						val liquidTip0 = tipWriter.state.liquid
+						if (liquidTip0 eq Liquid.empty) {
+							val dest = tw.well
+							val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
+							tipWriter.aspirate(liquidSrc, 0)
+						}
+					}
+					
 					if (!bFirstInCycle) {
-						// If we would need to aspirate a new liquid, end this cycle
+							// If we would need to aspirate a new liquid, end this cycle
 						if (liquidSrc ne liquidTip0) {
 							return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
 						}

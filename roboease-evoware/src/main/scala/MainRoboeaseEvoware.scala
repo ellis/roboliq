@@ -124,8 +124,8 @@ object Main extends App {
 		RoboeaseHack.bEmulateEvolab = true
 		
 		val sSourcePath = System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf"
-		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
-		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
+		//val sSource = scala.io.Source.fromFile(sSourcePath).mkString
+		val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
 		p.parse(sSource) match {
 			case Left(err) =>
 				err.print()

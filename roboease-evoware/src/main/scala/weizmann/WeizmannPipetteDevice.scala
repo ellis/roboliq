@@ -17,8 +17,8 @@ class WeizmannPipetteDevice extends PipetteDevice {
 	private val tipSpec200 = new TipSpec("DiTi 200ul", 200, 2, 0, 0)
 	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 960)
 	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 0, 0, 0)
-	//private val tipSpecs = Seq(tipSpec200, tipSpec10, tipSpec20, tipSpec50, tipSpec1000)
-	private val tipSpecs = Seq(tipSpec1000)
+	private val tipSpecs = Seq(tipSpec200, tipSpec10, tipSpec20, tipSpec50, tipSpec1000)
+	//private val tipSpecs = Seq(tipSpec1000)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = tipSpecs,
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),

@@ -181,7 +181,8 @@ private trait L3P_PipetteMixBase {
 				bFirst = false
 			}
 			// Prepend the clean action
-			val actions = Seq(Clean(mapTipToCleanSpec.toMap)) ++ actionsADM
+			val actionClean_? = if (mapTipToCleanSpec.isEmpty) None else Some(Clean(mapTipToCleanSpec.toMap))
+			val actions = actionClean_?.toSeq ++ actionsADM
 			actionsAll ++= actions
 			
 			val cmds = createCommands(actions)
@@ -199,6 +200,9 @@ private trait L3P_PipetteMixBase {
 			case Left(e) => return Left(e)
 			case Right(states) => states
 		}
+		
+		//println("actionsAll:")
+		//actionsAll.foreach(println)
 		
 		actionsAll ++= finalClean(statesFinal, tips)
 		

@@ -16,6 +16,7 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 		//if (ctx.nCompilerDepth == 0)
 		//	println("L3P_TipsReplace: tips: "+cmd.items.toSeq.sortBy(_.tip.index).map(item => item.tip -> item.sType_?))
 		
+		// Wash tips which haven't been washed yet
 		val tipsWash = tips.filter(tip => tip.obj.state(ctx.states).cleanDegree == WashIntensity.None)
 		val cmdsWash = {
 			if (tipsWash.isEmpty) Seq()
@@ -36,7 +37,12 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 			Seq(L2C_TipsGet(tips, sType))
 		})
 		
-		val cmds2 = cmdsDrop ++ cmdsWash ++ cmdsGet2
+		val cmds2 = {
+			if (cmdsGet2.isEmpty)
+				cmdsDrop
+			else
+				cmdsDrop ++ cmdsWash ++ cmdsGet2
+		}
 		CompileTranslation(cmd, cmds2)
 	}
 }
