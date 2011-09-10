@@ -401,3 +401,6 @@ Rotem_Script01.esc:
 	Mix(255,"PIE_MIX_AUT","150","150","150","150","150","150","150","150",0,0,0,0,29,2,1,"0C080000000�o00000",15,0);
 	Mix(1,"PIE_MIX_AUT","150",0,0,0,0,0,0,0,0,0,0,0,29,2,1,"0C0800000000p00000",15,0);
 	which is weird because that looks like it might be P6:H1+8,G8 instead... (I haven't looked into this more closely)
+Rotem_Script03.esc:
+	DIST_REAGENT2 PHOS_MIX P13:A1+69 PHOS_MIX_LIST PIE_AUTBOT TIPTYPE:200,TIPMODE:KEEPTIP
+	replaces tips every second dispense, despite KEEPTIP

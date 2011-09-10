@@ -60,7 +60,16 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	Rotem_Script01.conf:
+	Rotem_Script03.conf:
+	TIPTYPE:200 not used, instead 1000 was selected
+	-
+	L2C_Aspirate(Tip1-4, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:C5+4)
+	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
+	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
+	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
+	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
+	L2C_Dispense(Tip1-8, 2.0, PIE_AUTAIR_LowVol, Rotem_PHS1:C1+8)
+
 x	should use PIE_TROUGH_AUTAIR for DDW
 x	why replace tips between dispenses to Rotem_STK2:D1+8 and Rotem_STK2:E1+3
 x	why no clean between mixes?
