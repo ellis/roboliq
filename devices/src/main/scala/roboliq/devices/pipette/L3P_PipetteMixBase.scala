@@ -21,7 +21,10 @@ private trait L3P_PipetteMixBase {
 	case class Aspirate(items: Seq[L2A_SpirateItem]) extends Action
 	case class Dispense(items: Seq[L2A_SpirateItem]) extends Action
 	case class Mix(items: Seq[L2A_MixItem]) extends Action
-	case class Clean(map: Map[TipConfigL2, CleanSpec2]) extends Action
+	case class TipsGet(mapTipToType: Map[TipConfigL2, String]) extends Action
+	case class TipsWash(mapTipToSpec: Map[TipConfigL2, WashSpec]) extends Action
+	case class TipsDrop(tips: SortedSet[TipConfigL2]) extends Action
+	//case class Clean(map: Map[TipConfigL2, CleanSpec2]) extends Action
 	
 	sealed abstract class CleanSpec2 { val tip: TipConfigL2 }
 	case class ReplaceSpec2(tip: TipConfigL2, sType: String) extends CleanSpec2
@@ -181,8 +184,7 @@ private trait L3P_PipetteMixBase {
 				bFirst = false
 			}
 			// Prepend the clean action
-			val actionClean_? = if (mapTipToCleanSpec.isEmpty) None else Some(Clean(mapTipToCleanSpec.toMap))
-			val actions = actionClean_?.toSeq ++ actionsADM
+			val actions = getCleaningActions(mapTipToCleanSpec.values.toSeq) ++ actionsADM
 			actionsAll ++= actions
 			
 			val cmds = createCommands(actions)
@@ -574,33 +576,57 @@ private trait L3P_PipetteMixBase {
 		}
 	}
 	
+	private def getCleaningActions(specs0: Seq[CleanSpec2]): Seq[Action] = {
+		val specs = specs0.sortBy(_.tip)
+		val specsD = specs.collect { case spec: DropSpec2 => spec }
+		val specsR = specs.collect { case spec: ReplaceSpec2 => spec }
+		val specsW = specs.collect { case spec: WashSpec2 => spec }
+		val actD = if (!specsD.isEmpty) Some(TipsDrop(SortedSet(specsD.map(_.tip) : _*))) else None
+		val actR = if (!specsR.isEmpty) Seq(TipsDrop(SortedSet(specsD.map(_.tip) : _*)), TipsGet(specsR.map(spec => spec.tip -> spec.sType).toMap)) else Seq()
+		val actW = if (!specsW.isEmpty) Some(TipsWash(specsW.map(spec => spec.tip -> spec.spec).toMap)) else None
+		actD.toSeq ++ actR ++ actW.toSeq
+	}
+	
 	private def optimizeTipCleaning(actions0: Seq[Action], tips: SortedSet[TipConfigL2]): Seq[Action] = {
 		//return actions0
 		val actions0R = actions0.reverse
-		val mapTipToSpecPrev = new HashMap[TipConfigL2, CleanSpec2]
+		val mapTipToSpecPrev = new HashMap[TipConfigL2, WashSpec]
+		val setTipsToDrop = new HashSet[TipConfigL2]
 		val actions1R = for (action <- actions0R) yield {
 			action match {
 				case Aspirate(items) => mapTipToSpecPrev --= items.map(_.tip); action
 				case Dispense(items) => mapTipToSpecPrev --= items.map(_.tip); action
 				case Mix(items) => mapTipToSpecPrev --= items.map(_.tip); action
-				case Clean(mapTipToSpec) =>
+				case TipsGet(mapTipToType) =>
+					//setTipsToDrop ++= mapTipToType.collect { case (tip, None) => tip }
+					action
+				case TipsDrop(tips) =>
+					setTipsToDrop ++= tips
+					TipsDrop(SortedSet(setTipsToDrop.toSeq : _*))
+				case TipsWash(mapTipToSpec) =>
 					mapTipToSpecPrev ++= mapTipToSpec
-					Clean(mapTipToSpecPrev.toMap)
+					TipsWash(mapTipToSpecPrev.toMap)
 			}
 		}
 		val actions1 = actions1R.reverse
-		return actions1
+		//return actions1
 		
-		val tipsToClean = new HashSet[TipConfigL2]
-		val actions2 = for (action <- actions0R) yield {
+		val tipsToWash = new HashSet[TipConfigL2]
+		val tipsToDrop = new HashSet[TipConfigL2]
+		val actions2 = for (action <- actions1) yield {
 			action match {
-				case Aspirate(items) => tipsToClean ++= items.map(_.tip); action
-				case Dispense(items) => tipsToClean ++= items.map(_.tip); action
-				case Mix(items) => tipsToClean --= items.map(_.tip); action
-				case Clean(mapTipToSpec) =>
-					val mapNew = mapTipToSpec.filterKeys(tipsToClean.contains)
-					tipsToClean.clear()
-					Clean(mapNew)
+				case Aspirate(items) => val tips = items.map(_.tip); tipsToWash ++= tips; tipsToDrop ++= tips; action
+				case Dispense(items) => val tips = items.map(_.tip); tipsToWash ++= tips; tipsToDrop ++= tips; action
+				case Mix(items) => val tips = items.map(_.tip); tipsToWash ++= tips; tipsToDrop ++= tips; action
+				case TipsGet(_) => action
+				case TipsDrop(tips) =>
+					val tipsNew = tips.filter(tipsToDrop.contains)
+					tipsToDrop.clear()
+					TipsDrop(tipsNew)
+				case TipsWash(mapTipToSpec) =>
+					val mapNew = mapTipToSpec.filterKeys(tipsToWash.contains)
+					tipsToWash.clear()
+					TipsWash(mapNew)
 			}
 		}
 		actions2
@@ -612,8 +638,7 @@ private trait L3P_PipetteMixBase {
 				case Some(TipReplacementPolicy.KeepAlways) =>
 					Seq()
 				case _ =>
-					val items = tips.toSeq.map(tip => tip -> DropSpec2(tip)).toMap
-					Seq(Clean(items))
+					Seq(TipsDrop(tips))
 			}
 		}
 		else {
@@ -622,12 +647,12 @@ private trait L3P_PipetteMixBase {
 				val tipState = tip.state(states)
 				if (tipState.cleanDegreePending > WashIntensity.None) {
 					intensity = WashIntensity.max(tipState.cleanDegreePending, intensity)
-					Some(tip -> WashSpec2(tip, new WashSpec(intensity, tipState.contamInside, tipState.contamOutside)))
+					Some(tip -> new WashSpec(intensity, tipState.contamInside, tipState.contamOutside))
 				}
 				else
 					None
 			}).flatten
-			Seq(Clean(items.toMap))
+			Seq(TipsWash(items.toMap))
 		}
 	}
 
@@ -685,21 +710,17 @@ private trait L3P_PipetteMixBase {
 			case Aspirate(items) =>
 				robot.batchesForAspirate(items).map(items => L2C_Aspirate(items))
 				
-			case Clean(map) =>
-				// Replace & Drop
-				val specsR = map.values.collect({ case v: ReplaceSpec2 => v }).toSeq.sortBy(_.tip)
-				val specsD = map.values.collect({ case v: DropSpec2 => v }).toSeq.sortBy(_.tip)
-				val itemsR =
-					specsR.map(spec => new L3A_TipsReplaceItem(spec.tip, Some(spec.sType))) ++
-					specsD.map(spec => new L3A_TipsReplaceItem(spec.tip, None))
-				val cmdsR = if (itemsR.isEmpty) Seq() else Seq(L3C_TipsReplace(itemsR.toSeq))
-				// Wash
-				val specsW = map.values.collect({ case v: WashSpec2 => v }).toSeq.sortBy(_.tip)
-				val intensity = specsW.foldLeft(WashIntensity.None) { (acc, spec) => if (spec.spec.washIntensity > acc) spec.spec.washIntensity else acc }
-				val itemsW = specsW.map(spec => new L3A_TipsWashItem(spec.tip, spec.spec.contamInside, spec.spec.contamOutside))
-				val cmdsW = if (itemsW.isEmpty) Seq() else Seq(L3C_TipsWash(itemsW.toSeq, intensity))
+			case TipsDrop(tips) =>
+				Seq(L3C_TipsDrop(tips))
 				
-				cmdsR ++ cmdsW
+			case TipsGet(mapTipToType) =>
+				val items = mapTipToType.toSeq.sortBy(_._1).map(pair => new L3A_TipsReplaceItem(pair._1, Some(pair._2)))
+				Seq(L3C_TipsReplace(items))
+			
+			case TipsWash(mapTipToSpec) =>
+				val intensity = mapTipToSpec.values.foldLeft(WashIntensity.None) { (acc, spec) => WashIntensity.max(acc, spec.washIntensity) }
+				val items = mapTipToSpec.toSeq.sortBy(_._1).map(pair => new L3A_TipsWashItem(pair._1, pair._2.contamInside, pair._2.contamOutside))
+				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
 		}
 	}
 }

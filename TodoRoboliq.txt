@@ -62,9 +62,9 @@ Tuval/Yair:
 Code:
 	Rotem_Script01.conf:
 x	should use PIE_TROUGH_AUTAIR for DDW
-	why replace tips between dispenses to Rotem_STK2:D1+8 and Rotem_STK2:E1+3
-	why no clean between mixes?
-	remove final wash after dropping tips
+x	why replace tips between dispenses to Rotem_STK2:D1+8 and Rotem_STK2:E1+3
+x	why no clean between mixes?
+x	remove final wash after dropping tips
 
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
