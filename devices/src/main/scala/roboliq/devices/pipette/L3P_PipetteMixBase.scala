@@ -89,7 +89,7 @@ private trait L3P_PipetteMixBase {
 		// Pair up all tips and wells
 		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
 		
-		def createCycles(twss: List[Seq[TipWell]], stateCycle0: RobotState): Either[Errors, Unit] = {
+		def createCycles(stateCycle0: RobotState, twss: List[Seq[TipWell]], remains0: Map[TipWell, Double]): Either[Errors, Unit] = {
 			// All done.  Perform final clean.
 			if (twss.isEmpty) {
 				if (robot.areTipsDisposable && tipOverrides.replacement_? == Some(TipReplacementPolicy.KeepAlways))
@@ -110,17 +110,17 @@ private trait L3P_PipetteMixBase {
 			// First tip/dest pairs for dispense
 			val tws0 = twss.head
 			
-			val (actionsADM, twssRest) = {
+			val (actionsADM, twssRest, remains) = {
 				if (!bMixOnly) {
-					dispenseMixAspirate(cycle, mapTipToType, twss) match {
+					dispenseMixAspirate(cycle, mapTipToType, twss, remains0) match {
 						case Left(lsErrors) => return Left(lsErrors)
-						case Right(pair) => pair
+						case Right(tuple) => tuple
 					}
 				}
 				else {
 					mixOnly(cycle, mapTipToType, twss) match {
 						case Left(lsErrors) => return Left(lsErrors)
-						case Right(pair) => pair
+						case Right(pair) => (pair._1, pair._2, Map[TipWell, Double]())
 					}
 				}
 			}
@@ -177,13 +177,13 @@ private trait L3P_PipetteMixBase {
 			getUpdatedState(cycle, cmds) match {
 				case Right(stateNext) => 
 					cycles += cycle
-					createCycles(twssRest, stateNext)
+					createCycles(stateNext, twssRest, remains)
 				case Left(lsErrors) =>
 					Left(lsErrors)
 			}			
 		}
 
-		createCycles(twss0.toList, ctx.states) match {
+		createCycles(ctx.states, twss0.toList, Map()) match {
 			case Left(e) =>
 				Left(e)
 			case Right(()) =>
@@ -194,46 +194,60 @@ private trait L3P_PipetteMixBase {
 	private def dispenseMixAspirate(
 		cycle: CycleState,
 		mapTipToType: Map[TipConfigL2, String],
-		twss: List[Seq[TipWell]]
-	): Either[Seq[String], Tuple2[Seq[Action], List[Seq[TipWell]]]] = {
+		twss: List[Seq[TipWell]],
+		remains0: Map[TipWell, Double]
+	): Either[Seq[String], Tuple3[Seq[Action], List[Seq[TipWell]], Map[TipWell, Double]]] = {
 		val builder = new StateBuilder(cycle.state0)
-		
 		val actionsD = new ArrayBuffer[Dispense]
+
+		var remains = remains0 
 		
 		// Temporarily assume that the tips are perfectly clean
 		cleanTipStates(builder, mapTipToType)
 
-		def doDispense(tws: Seq[TipWell]): Either[Seq[String], Unit] = {
-			dispense(builder.toImmutable, mapTipToType, tws) match {
+		def doDispense(tws: Seq[TipWell], bFirstInCycle: Boolean): Either[Seq[String], Unit] = {
+			dispense(builder.toImmutable, mapTipToType, tws, remains0, bFirstInCycle) match {
 				case Left(lsErrors) =>
 					Left(lsErrors)
 				case Right(res) =>
 					builder.map ++= res.states.map
 					actionsD ++= res.actions
+					remains = res.remains
 					Right(())
 			}
 		}
 		
 		// First dispense
 		val tws0 = twss.head
-		doDispense(tws0) match {
+		doDispense(tws0, true) match {
 			case Left(lsErrors) => return Left(lsErrors)
 			case Right(res) =>
 		}
 		// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
-		val twssRest = twss.tail.dropWhile(tws => doDispense(tws).isRight)
+		val twssRest = {
+			if (remains.isEmpty)
+				twss.tail.dropWhile(tws => doDispense(tws, false).isRight)
+			else
+				twss
+		}
 		
 		// Mix
-		val actionsDM: Seq[Action] = mixSpec_? match {
-			case None => actionsD
-			case Some(mixSpec) =>
-				actionsD.flatMap(actionD => {
-					createMixAction(cycle.state0, actionD, mixSpec) match {
-						case Left(lsErrors) => return Left(lsErrors)
-						case Right(actionM) => Seq(actionD, actionM)
-					}
-				})
-				
+		val actionsDM: Seq[Action] = {
+			if (remains.isEmpty) {
+				mixSpec_? match {
+					case None => actionsD
+					case Some(mixSpec) =>
+						actionsD.flatMap(actionD => {
+							createMixAction(cycle.state0, actionD, mixSpec) match {
+								case Left(lsErrors) => return Left(lsErrors)
+								case Right(actionM) => Seq(actionD, actionM)
+							}
+						})
+				}
+			}
+			else {
+				actionsD
+			}
 		}
 		
 		// aspirate
@@ -246,22 +260,24 @@ private trait L3P_PipetteMixBase {
 		}
 		
 		val actions = actionsA ++ actionsDM
-		Right((actions, twssRest))
+		Right((actions, twssRest, remains))
 	}
 	
 	protected class DispenseResult(
 		val states: RobotState,
-		//val mapTipToCleanSpec: Map[TipConfigL2, CleanSpec2],
-		val actions: Seq[Dispense]
+		val actions: Seq[Dispense],
+		/** Remaining volume to pipette for the given destination if the tip is too small to hold entire volume */
+		val remains: Map[TipWell, Double]
 	)
 	
 	protected def dispense(
 		states0: RobotState,
-		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
 		mapTipToType: Map[TipConfigL2, String],
-		tws: Seq[TipWell]
+		tws: Seq[TipWell],
+		remains: Map[TipWell, Double],
+		bFirstInCycle: Boolean
 	): Either[Seq[String], DispenseResult] = {
-		Right(new DispenseResult(states0, Seq()))
+		Right(new DispenseResult(states0, Seq(), Map()))
 	}
 
 	private def mixOnly(

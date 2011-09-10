@@ -41,26 +41,30 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		states0: RobotState,
 		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
 		mapTipToType: Map[TipConfigL2, String],
-		tws: Seq[TipWell]
+		tws: Seq[TipWell],
+		remains0: Map[TipWell, Double],
+		bFirstInCycle: Boolean
 	): Either[Seq[String], DispenseResult] = {
 		val builder = new StateBuilder(states0)
-		// Check liquid
-		// If the tip hasn't been used for aspiration yet, associate the source liquid with it
-		for (tw <- tws) {
-			val tip = tw.tip
-			val tipWriter = tip.obj.stateWriter(builder)
-			val liquidTip0 = tipWriter.state.liquid
-			if (liquidTip0 eq Liquid.empty) {
-				val dest = tw.well
-				val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
-				tipWriter.aspirate(liquidSrc, 0)
+		
+		if (bFirstInCycle) {
+			// If the tip hasn't been used for aspiration yet, associate the source liquid with it
+			for (tw <- tws) {
+				val tip = tw.tip
+				val tipWriter = tip.obj.stateWriter(builder)
+				val liquidTip0 = tipWriter.state.liquid
+				if (liquidTip0 eq Liquid.empty) {
+					val dest = tw.well
+					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
+					tipWriter.aspirate(liquidSrc, 0)
+				}
 			}
 		}
-		
-		dispense_createItems(builder.toImmutable, tws) match {
+			
+		dispense_createItems(builder.toImmutable, tws, remains0) match {
 			case Left(sError) =>
 				return Left(Seq(sError))
-			case Right(items) =>
+			case Right((items, remains)) =>
 				//val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
 				items.foreach(item => {
 					val tip = item.tip
@@ -71,42 +75,38 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
 					val liquidDest = destWriter.state.liquid
 					
-					// If we would need to aspirate a new liquid, abort
+					/*// If we would need to aspirate a new liquid, abort
 					if (liquidSrc ne liquidTip0) {
 						return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
-					}
+					}*/
 					
-					// check volumes
+					/*// check volumes
 					dispense_checkVol(builder, tip, dest) match {
 						case Some(sError) => return Left(Seq(sError))
 						case _ =>
-					}
+					}*/
 
-					// If we need to mix, then force wet contact when checking for how to clean
-					val pos = args.mixSpec_? match {
-						case None => item.policy.pos
-						case _ => PipettePosition.WetContact
+					if (!bFirstInCycle) {
+						// If we need to mix, then force wet contact when checking for how to clean
+						val pos = args.mixSpec_? match {
+							case None => item.policy.pos
+							case _ => PipettePosition.WetContact
+						}
+						
+						// Check whether this dispense would require a cleaning
+						getDispenseCleanSpec(builder, mapTipToType, tipOverrides, item.tip, item.well, pos) match {
+							case None =>
+							case Some(spec) =>
+								return Left(Seq("INTERNAL: Error code dispense 2"))
+						}
 					}
-					
-					// Check whether this dispense would require a cleaning
-					getDispenseCleanSpec(builder, mapTipToType, tipOverrides, item.tip, item.well, pos) match {
-						case None =>
-						case Some(spec) =>
-							return Left(Seq("INTERNAL: Error code dispense 2"))
-							/*mapTipToCleanSpec.get(item.tip) match {
-								case Some(_) =>
-									return Left(Seq("INTERNAL: Error code dispense 2"))
-								case None =>
-									mapTipToCleanSpec(item.tip) = spec
-							}*/
-					}
-					
+						
 					// Update tip and destination states
 					tipWriter.dispense(item.nVolume, liquidDest, item.policy.pos)
 					destWriter.add(liquidSrc, item.nVolume)
 				})
 				val actions = Seq(Dispense(items))
-				Right(new DispenseResult(builder.toImmutable, actions))
+				Right(new DispenseResult(builder.toImmutable, actions, remains))
 		}
 	}
 	
@@ -159,17 +159,55 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		else
 			None
 	}
+	
+	private def dispense_getTipVolMinMax(states: StateMap, tip: TipConfigL2, dest: WellConfigL2): Tuple2[Double, Double] = {
+		val item = mapDestToItem(dest)
+		val tipState = tip.obj.state(states)
+		val liquidSrc = tipState.liquid // since we've already aspirated the source liquid
+		val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
+		val nMax = robot.getTipHoldVolumeMax(tipState, liquidSrc)
+		(nMin, nMax)
+	}
 
-	private def dispense_createItems(states: RobotState, tws: Seq[TipWell]): Either[String, Seq[L2A_SpirateItem]] = {
-		val items = tws.map(tw => {
-			val item = mapDestToItem(tw.well)
-			getDispensePolicy(states, tw, item.nVolume) match {
+	/**
+	 * on success, return tuple of spirate items and volumes remaining to be pipetted
+	 */
+	private def dispense_createItems(
+		states: RobotState,
+		tws: Seq[TipWell],
+		remains0: Map[TipWell, Double]
+	): Either[String, Tuple2[Seq[L2A_SpirateItem], Map[TipWell, Double]]] = {
+		val items = new ArrayBuffer[L2A_SpirateItem]
+		val remains = new HashMap[TipWell, Double]
+		for (tw <- tws) {
+			val (tip, dest) = (tw.tip, tw.well)
+			val item = mapDestToItem(dest)
+			val (nMin, nMax) = dispense_getTipVolMinMax(states, tip, dest)
+			
+			val tipState = tip.state(states)
+			val nVolumeInTip = -tipState.nVolume
+			val nVolume = {
+				val nVolumeRequested = remains0.getOrElse(tw, item.nVolume)
+				if (nVolumeRequested > nMax) {
+					if (nVolumeInTip > 0)
+						return Left("INTERNAL: tip must be emptied before transfering excess volumes")
+					// Use maximum value possible, leaving at least nMin for the next round.
+					val nVolume = math.min(nMax, nVolumeRequested - nMin)
+					val nVolumeRemaining = nVolumeRequested - nVolume
+					remains += (tw -> nVolumeRemaining)
+					nVolume
+				}
+				else {
+					item.nVolume
+				}
+			}
+			getDispensePolicy(states, tw, nVolume) match {
 				case Left(sError) => return Left(sError)
 				case Right(policy) =>
-					new L2A_SpirateItem(tw.tip, tw.well, item.nVolume, policy)
+					items += new L2A_SpirateItem(tip, dest, nVolume, policy)
 			}
-		})
-		Right(items)
+		}
+		Right((items.toSeq, remains.toMap))
 	}
 
 	/*

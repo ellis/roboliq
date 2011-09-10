@@ -30,8 +30,8 @@ trait PipetteDevice extends Device {
 }
 
 class PipetteDeviceGeneric extends PipetteDevice {
-	private val tipSpec50 = new TipSpec("50", 50, 0, 45)
-	private val tipSpec1000 = new TipSpec("1000", 1000, 0, 960)
+	private val tipSpec50 = new TipSpec("50", 50, 0, 5, 10)
+	private val tipSpec1000 = new TipSpec("1000", 1000, 0, 50, 100)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = Seq(tipSpec50, tipSpec1000),
 		tips = SortedSet((0 to 1).map(i => new Tip(i)) : _*),

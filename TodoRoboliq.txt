@@ -74,7 +74,7 @@ Code:
 	bsse: move to robloiq.labs.bsse package
 x	devices: Pipette/Mix: keep track of the LiquidGroup exit policy to ensure a minimum cleaning intensity at the end of pipetting
 x	devices: PipetteHelper.chooseWashSpec: use the minimum cleaning intensity from the previous LiquidGroups
-3	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
+?	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
 4	devices: implement transfer
 5	devices: implement wait
 6	devices: implement shaker

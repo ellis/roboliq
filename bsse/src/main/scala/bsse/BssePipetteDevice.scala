@@ -11,9 +11,9 @@ import _root_.evoware._
 
 
 class BssePipetteDevice extends PipetteDevice {
-	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 0.01, 45)
+	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 0.01, 5, 10)
 	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 2, 950)
-	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 950)
+	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 50, 100)
 	private val tipSpecs = Seq(tipSpec50, tipSpec1000)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = tipSpecs,
@@ -66,8 +66,28 @@ class BssePipetteDevice extends PipetteDevice {
 	}
 
 	def areTipsDisposable: Boolean = false
-	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeAspirateMin }
-	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeHoldMax }
+	
+	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = {
+		val o = for (
+			sType <- tip.sType_?;
+			tipSpec <- mapTipSpecs.get(sType)
+			) yield
+			tipSpec.nVolumeAspirateMin
+		o.getOrElse(0.0)
+	}
+	
+	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = {
+		val o =
+			for (sType <- tip.sType_?; tipSpec <- mapTipSpecs.get(sType)) yield {
+				val nExtra = WashIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
+					case WashIntensity.Decontaminate => tipSpec.nVolumeDeconExtra
+					case _ => tipSpec.nVolumeWashExtra
+				}
+				tipSpec.nVolume - nExtra
+			}
+		o.getOrElse(0.0)
+	}
+	
 	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
 	
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
