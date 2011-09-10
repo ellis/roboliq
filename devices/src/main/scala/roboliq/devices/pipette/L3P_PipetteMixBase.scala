@@ -145,16 +145,12 @@ private trait L3P_PipetteMixBase {
 			val mapTipToCleanSpec = new HashMap[TipConfigL2, CleanSpec2]
 			var bFirst = cycles.isEmpty
 			for (action <- actionsADM) {
-				val specs_? = action match {
+				val specs = (action match {
 					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item))
 					case Dispense(items) => items.map(item => getDispenseCleanSpec(stateCycle0, mapTipToType, tipOverrides, item.tip, item.well, item.policy.pos))
 					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item.tip, item.well))
-					case _ => return Left(Seq("INTERNAL: error code actions 4"))
-				}
-				val specs = specs_?.flatMap(_ match {
-					case None => Seq()
-					case Some(spec) => Seq(spec)
-				})
+					case _ => return Left(Seq("INTERNAL: error code translateCommand 1"))
+				}).flatten
 				for (cleanSpec <- specs) {
 					val tip = cleanSpec.tip
 					cleanSpec match {
@@ -170,16 +166,16 @@ private trait L3P_PipetteMixBase {
 									mapTipToCleanSpec(tip) = new WashSpec2(
 										tip,
 										new WashSpec(
-											if (wash.washIntensity >= washPrev.washIntensity) wash.washIntensity else washPrev.washIntensity,
+											WashIntensity.max(wash.washIntensity, washPrev.washIntensity),
 											washPrev.contamInside ++ wash.contamInside,
 											washPrev.contamOutside ++ wash.contamOutside
 										)
 									)
 								case Some(_) =>
-									return Left(Seq("INTERNAL: Error code dispense 3"))
+									return Left(Seq("INTERNAL: Error code translateCommand 2"))
 							}
 						case spec: DropSpec2 =>
-							return Left(Seq("INTERNAL: Error code dispense 4"))
+							return Left(Seq("INTERNAL: Error code translateCommand 3"))
 					}
 				}
 				bFirst = false

@@ -48,7 +48,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		val reagent = new Reagent
 		val reagentSetup = kb.getReagentSetup(reagent)
 		reagentSetup.sName_? = Some(id)
-		reagentSetup.sFamily_? = Some("ROBOEASE")
+		reagentSetup.sFamily_? = Some(lc)
 		//println("setReagent(): liq = "+liq)
 		
 		val pc = kb.getPlateSetup(plate)

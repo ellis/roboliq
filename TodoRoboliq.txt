@@ -60,22 +60,11 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	Rotem_Script02.conf:
-	why doesn't Mix trigger clean?
-	force end of cycle if mix is performed
-	why are the wrong volumes aspirated?
-	-
-	Wrong tip size!:
-	GetDITI2(255,"DiTi 200ul",1,0,0,0);
-	Aspirate(255,"PIE_TROUGH_AUTAIR","770","770","770","770","715","715","715","715",0,0,0,0,41,2,1,"0608¯100000",0);
-	-
-	bad aspirates:
-	Aspirate(16,"PIE_AUTAIR_LowVol",0,0,0,0,"65",0,0,0,0,0,0,0,29,2,1,"0C080000000p000000",0);
-	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
-	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
-	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
-	Dispense(255,"PIE_AUTAIR_LowVol","5","5","5","5","5","5","5","5",0,0,0,0,47,0,1,"0C08¯1000000000000",0);
-
+	Rotem_Script01.conf:
+	should use PIE_TROUGH_AUTAIR for DDW
+	why replace tips between dispenses to Rotem_STK2:D1+8 and Rotem_STK2:E1+3
+	why no clean between mixes?
+	remove final wash after dropping tips
 
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols

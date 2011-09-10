@@ -123,8 +123,12 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		wells2.foreach(well => kb.addWell(well, false)) // Indicate that these wells are destinations
 		
 		val sLiquidClass_? = {
-			if (sLiquidClass == "DEFAULT")
-				None
+			if (sLiquidClass == "DEFAULT") {
+				reagent_? match {
+					case None => None
+					case Some(reagent) => kb.getReagentSetup(reagent).sFamily_?
+				}
+			}
 			else
 				Some(sLiquidClass)
 		}
