@@ -13,8 +13,11 @@ case class WashProgramArgs(
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
 	bFastWash: Boolean,
-	bUNKNOWN1: Boolean = false,
-	bEmulateEvolab: Boolean = false
+	bUNKNOWN1: Boolean = false
 )
 
 case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
+
+object RoboeaseHack {
+	var bEmulateEvolab = false
+}

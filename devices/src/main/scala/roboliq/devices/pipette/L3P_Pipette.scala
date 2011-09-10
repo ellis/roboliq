@@ -47,6 +47,9 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	): Either[Seq[String], DispenseResult] = {
 		val builder = new StateBuilder(states0)
 		
+		// Make sure that we only need to take care of remains for the first dispense in a cycle
+		assert(bFirstInCycle || remains0.isEmpty)
+		
 		if (bFirstInCycle) {
 			// If the tip hasn't been used for aspiration yet, associate the source liquid with it
 			for (tw <- tws) {
@@ -60,7 +63,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				}
 			}
 		}
-			
+		
 		dispense_createItems(builder.toImmutable, tws, remains0) match {
 			case Left(sError) =>
 				return Left(Seq(sError))
@@ -75,11 +78,6 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(builder).liquid
 					val liquidDest = destWriter.state.liquid
 					
-					/*// If we would need to aspirate a new liquid, abort
-					if (liquidSrc ne liquidTip0) {
-						return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
-					}*/
-					
 					/*// check volumes
 					dispense_checkVol(builder, tip, dest) match {
 						case Some(sError) => return Left(Seq(sError))
@@ -87,13 +85,18 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					}*/
 
 					if (!bFirstInCycle) {
+						// If we would need to aspirate a new liquid, end this cycle
+						if (liquidSrc ne liquidTip0) {
+							return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
+						}
+						
 						// If we need to mix, then force wet contact when checking for how to clean
 						val pos = args.mixSpec_? match {
 							case None => item.policy.pos
 							case _ => PipettePosition.WetContact
 						}
 						
-						// Check whether this dispense would require a cleaning
+						// End this cycle if this dispense would require a cleaning
 						getDispenseCleanSpec(builder, mapTipToType, tipOverrides, item.tip, item.well, pos) match {
 							case None =>
 							case Some(spec) =>
@@ -177,9 +180,16 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		tws: Seq[TipWell],
 		remains0: Map[TipWell, Double]
 	): Either[String, Tuple2[Seq[L2A_SpirateItem], Map[TipWell, Double]]] = {
+		val tws2 = if (remains0.isEmpty) tws else tws.filter(remains0.contains)
 		val items = new ArrayBuffer[L2A_SpirateItem]
+		if (tws2.isEmpty) {
+			println()
+			println("createItems:")
+			tws.sortBy(_.tip).foreach(println)
+			remains0.toSeq.sortBy(_._1.tip).foreach(println)
+		}
 		val remains = new HashMap[TipWell, Double]
-		for (tw <- tws) {
+		for (tw <- tws2) {
 			val (tip, dest) = (tw.tip, tw.well)
 			val item = mapDestToItem(dest)
 			val (nMin, nMax) = dispense_getTipVolMinMax(states, tip, dest)
@@ -207,6 +217,8 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					items += new L2A_SpirateItem(tip, dest, nVolume, policy)
 			}
 		}
+		assert(!items.isEmpty)
+		//println("remains:", remains)
 		Right((items.toSeq, remains.toMap))
 	}
 
@@ -228,9 +240,11 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	}
 
 	private def aspirate_chooseTipWellPairs_direct(states: StateMap, srcs: collection.Map[TipConfigL2, Set[WellConfigL2]]): Seq[Seq[TipWell]] = {
-		//println("srcs: "+srcs)
+		println("srcs: "+srcs)
 		val tws: Seq[TipWell] = srcs.toSeq.sortBy(_._1).map(pair => new TipWell(pair._1, pair._2.head))
 		val twss = PipetteHelper.splitTipWellPairs(tws)
+		println("tws:", tws)
+		println("twss:", twss)
 		twss
 	}
 	

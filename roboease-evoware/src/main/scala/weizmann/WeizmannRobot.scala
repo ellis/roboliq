@@ -12,10 +12,11 @@ object WeizmannRobot {
 			pipetter
 			)
 		val processors = Seq(
-			new L3P_TipsReplace,
-			new L3P_TipsDrop("WASTE"),
+			new L3P_CleanPending(pipetter),
+			new L3P_Mix(pipetter),
 			new L3P_Pipette(pipetter),
-			new L3P_Mix(pipetter)
+			new L3P_TipsReplace,
+			new L3P_TipsDrop("WASTE")
 			)
 			
 		new Robot(devices, processors)

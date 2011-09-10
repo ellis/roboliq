@@ -13,15 +13,16 @@ case class L0C_Spirate(
 	val sPlateMask: String
 ) extends Command {
 	override def toString = {
-		Array(
+		val l = List(
 			mTips,
 			'"'+sLiquidClass+'"',
 			asVolumes.mkString(","),
 			iGrid, iSite,
 			1,
 			'"'+sPlateMask+'"',
-			0, 0
-		).mkString(sFunc+"(", ",", ");")
+			0
+		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
+		l.mkString(sFunc+"(", ",", ");")
 	}
 }
 
@@ -37,12 +38,11 @@ case class L0C_Wash(
 	nAirgapSpeed: Int,
 	nRetractSpeed: Int,
 	bFastWash: Boolean,
-	bUNKNOWN1: Boolean,
-	bEmulateEvolab: Boolean = false
+	bUNKNOWN1: Boolean
 ) extends Command {
 	override def toString = {
 		val fmtWaste = new java.text.DecimalFormat("#.##")
-		val fmtCleaner = if (bEmulateEvolab) new java.text.DecimalFormat("#.0") else fmtWaste
+		val fmtCleaner = if (RoboeaseHack.bEmulateEvolab) new java.text.DecimalFormat("#.0") else fmtWaste
 		val l = Seq(
 			mTips,
 			iWasteGrid, iWasteSite,
@@ -57,7 +57,7 @@ case class L0C_Wash(
 			(if (bFastWash) 1 else 0),
 			(if (bUNKNOWN1) 1 else 0),
 			1000
-		) ++ (if (bEmulateEvolab) Seq() else Seq(0))
+		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
 		l.mkString("Wash(", ",", ");")
 	}
 }

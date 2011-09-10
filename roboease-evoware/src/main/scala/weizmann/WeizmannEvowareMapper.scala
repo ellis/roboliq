@@ -22,8 +22,7 @@ object WeizmannEvowareMapper {
 			nAirgapSpeed = 70,
 			nRetractSpeed = 30,
 			bFastWash = true,
-			bUNKNOWN1 = true,
-			bEmulateEvolab = true
+			bUNKNOWN1 = true
 		)	
 		
 		new EvowareMapper(mapSites, Map(0 -> washProgramArgs0))

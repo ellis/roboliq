@@ -212,8 +212,7 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 					nAirgapSpeed = args.nAirgapSpeed,
 					nRetractSpeed = args.nRetractSpeed,
 					bFastWash = args.bFastWash,
-					bUNKNOWN1 = args.bUNKNOWN1,
-					bEmulateEvolab = args.bEmulateEvolab
+					bUNKNOWN1 = args.bUNKNOWN1
 					)))
 		}
 	}

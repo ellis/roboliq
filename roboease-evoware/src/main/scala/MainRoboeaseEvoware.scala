@@ -121,6 +121,8 @@ object Main extends App {
 		p.DefineRack("READER",48,0,12,8, 200,"PLATE_READER") ;
 		*/
 
+		RoboeaseHack.bEmulateEvolab = true
+		
 		val sSourcePath = System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf"
 		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
 		//val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
@@ -135,6 +137,7 @@ object Main extends App {
 				robot.devices.foreach(_.addKnowledge(kb))
 				
 				val compiler = new Compiler(robot.processors)
+				compiler.bDebug = true
 				
 				val evowareMapper = WeizmannEvowareMapper(p.racks)
 				val translator = new EvowareTranslator(evowareMapper)

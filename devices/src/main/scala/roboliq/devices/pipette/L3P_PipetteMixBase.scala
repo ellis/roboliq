@@ -125,6 +125,17 @@ private trait L3P_PipetteMixBase {
 				}
 			}
 			
+			// Check a couple invariants in order to make sure that we are 
+			// reducing the amount of data we need to work with on each step
+			if (remains0.isEmpty) {
+				if (remains.isEmpty)
+					assert(twssRest.size < twss.size)
+			}
+			else {
+				if (!remains.isEmpty)
+					assert(remains.forall(pair => pair._2 < remains0.getOrElse(pair._1, 0.0)))
+			}
+			
 			// Now we know all the dispenses and mixes we'll perform,
 			// so we can go back and determine how to clean the tips based on the 
 			// real starting state rather than the perfectly clean state we assumed in
@@ -200,33 +211,44 @@ private trait L3P_PipetteMixBase {
 		val builder = new StateBuilder(cycle.state0)
 		val actionsD = new ArrayBuffer[Dispense]
 
-		var remains = remains0 
-		
 		// Temporarily assume that the tips are perfectly clean
 		cleanTipStates(builder, mapTipToType)
 
-		def doDispense(tws: Seq[TipWell], bFirstInCycle: Boolean): Either[Seq[String], Unit] = {
-			dispense(builder.toImmutable, mapTipToType, tws, remains0, bFirstInCycle) match {
+		def dispenseFirst(tws: Seq[TipWell]): Either[Seq[String], Map[TipWell, Double]] = {
+			dispense(builder.toImmutable, mapTipToType, tws, remains0, true) match {
 				case Left(lsErrors) =>
 					Left(lsErrors)
 				case Right(res) =>
 					builder.map ++= res.states.map
 					actionsD ++= res.actions
-					remains = res.remains
-					Right(())
+					Right(res.remains)
+			}
+		}
+		
+		def dispenseNext(tws: Seq[TipWell]): Boolean = {
+			dispense(builder.toImmutable, mapTipToType, tws, Map(), false) match {
+				case Left(lsErrors) => false
+				case Right(res) =>
+					builder.map ++= res.states.map
+					actionsD ++= res.actions
+					true
 			}
 		}
 		
 		// First dispense
 		val tws0 = twss.head
-		doDispense(tws0, true) match {
+		val remains = dispenseFirst(tws0) match {
 			case Left(lsErrors) => return Left(lsErrors)
-			case Right(res) =>
+			case Right(res) => res
 		}
 		// Add as many tip/dest groups to this cycle as possible, and return list of remaining groups
 		val twssRest = {
-			if (remains.isEmpty)
-				twss.tail.dropWhile(tws => doDispense(tws, false).isRight)
+			if (remains.isEmpty) {
+				if (mixSpec_?.isDefined)
+					twss.tail
+				else
+					twss.tail.dropWhile(dispenseNext)
+			}
 			else
 				twss
 		}
@@ -252,12 +274,16 @@ private trait L3P_PipetteMixBase {
 		
 		// aspirate
 		val mapTipToVolume = cycle.tips.toSeq.map(tip => tip -> -tip.state(builder).nVolume).toMap
+		println("mapTipToVolume:", mapTipToVolume)
 		//val mapTipToSrcs = actionsD.flatMap(_.items.map(item => item.tip -> mapDestToItem(item.well).srcs)).toMap
 		val twsD = actionsD.flatMap(_.items.map(item => new TipWell(item.tip, item.well)))
+		println("twsD:", twsD)
 		val actionsA: Seq[Aspirate] = aspirate(cycle.state0, twsD, mapTipToVolume) match {
 			case Left(lsErrors) => return Left(lsErrors)
 			case Right(acts) => acts
 		}
+		
+		//println("stuff:", twss.size, twssRest.size, remains)
 		
 		val actions = actionsA ++ actionsDM
 		Right((actions, twssRest, remains))

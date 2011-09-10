@@ -60,10 +60,21 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
+	Rotem_Script02.conf:
+	GetDITI2(255,"DiTi 200ul",1,0,0,0);
+	Aspirate(255,"PIE_TROUGH_AUTAIR","770","770","770","770","715","715","715","715",0,0,0,0,41,2,1,"0608¯100000",0);
+	-
+	Aspirate(16,"PIE_AUTAIR_LowVol",0,0,0,0,"65",0,0,0,0,0,0,0,29,2,1,"0C080000000p000000",0);
+	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
+	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
+	Aspirate(224,"PIE_AUTAIR_LowVol",0,0,0,0,0,"65","65","65",0,0,0,0,29,2,1,"0C0800000000700000",0);
+	Dispense(255,"PIE_AUTAIR_LowVol","5","5","5","5","5","5","5","5",0,0,0,0,47,0,1,"0C08¯1000000000000",0);
+
+
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
-	create roboliq-C-weizmann
+	create roboliq-C-weizmann and move relevant files from roboease-evoware there
 	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
 	protocol: let user create wells, not just plates?
 	protocol: let user work with well groups; this is more general than wells and plates?
