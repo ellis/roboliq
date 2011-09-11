@@ -85,6 +85,8 @@ Code:
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
 x	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
+	devices: final wash in Pipette isn't happening because the tip states are set as clean, for some reason
+	devices: Example02: why are 1000ul being aspirated?
 4	devices: implement transfer
 5	devices: implement wait
 6	devices: implement shaker

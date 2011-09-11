@@ -638,9 +638,18 @@ private trait L3P_PipetteMixBase {
 					tipsToDrop.clear()
 					TipsDrop(tipsNew)
 				case TipsWash(mapTipToSpec) =>
-					val mapNew = mapTipToSpec.filterKeys(tipsToWash.contains)
-					tipsToWash.clear()
-					TipsWash(mapNew)
+					if (tipsToWash.isEmpty)
+						action
+					else {
+						//println("mapTipToSpec: "+mapTipToSpec)
+						//println("tipsToWash: "+tipsToWash)
+						val mapNew = mapTipToSpec.filter(pair => tipsToWash.contains(pair._1))
+						tipsToWash.clear()
+						//println("mapNew: "+mapNew)
+						//println()
+						TipsWash(mapNew)
+						//TipsWash(mapTipToSpec)
+					}
 			}
 		}
 		actions2
@@ -657,6 +666,7 @@ private trait L3P_PipetteMixBase {
 		}
 		else {
 			var intensity = WashIntensity.None 
+			tips.toSeq.foreach(tip => println("state: "+tip.state(states)))
 			val items = tips.toSeq.map(tip => {
 				val tipState = tip.state(states)
 				if (tipState.cleanDegreePending > WashIntensity.None) {
