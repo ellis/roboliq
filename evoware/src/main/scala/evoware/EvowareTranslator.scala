@@ -6,6 +6,7 @@ import java.io.FileWriter
 
 import roboliq.common._
 import roboliq.compiler._
+import roboliq.commands.move._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
@@ -22,6 +23,7 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 		case c: L1C_Wash => wash(c)
 		case c: L1C_TipsGet => tipsGet(c)
 		case c: L1C_TipsDrop => tipsDrop(c)
+		case c: L1C_MovePlate => movePlate(c.args)
 	}
 
 	/*def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
@@ -299,6 +301,49 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 			case None => return Left(Seq("INTERNAL: missing evoware site for location "+c.location))
 			case Some(Site(iGrid, iSite)) =>
 				Right(Seq(L0C_DropDITI(mTips, iGrid, iSite)))
+		}
+	}
+	
+	private def movePlate(c: L1A_MovePlateArgs): Either[Seq[String], Seq[Command]] = {
+		val siteSrc = getSite(c.locationSrc) match {
+			case Left(lsError) => return Left(lsError)
+			case Right(site) => site
+		}
+		val siteDest = getSite(c.locationDest) match {
+			case Left(lsError) => return Left(lsError)
+			case Right(site) => site
+		}
+		val carrierSrc = getCarrier(c.locationSrc) match {
+			case Left(lsError) => return Left(lsError)
+			case Right(carrier) => carrier
+		}
+		val carrierDest = getCarrier(c.locationDest) match {
+			case Left(lsError) => return Left(lsError)
+			case Right(carrier) => carrier
+		}
+		Right(Seq(L0C_Transfer_Rack(
+			c.iRoma,
+			c.sPlateModel,
+			siteSrc.iGrid, siteSrc.iSite, carrierSrc.model.sName,
+			siteDest.iGrid, siteDest.iSite, carrierDest.model.sName,
+			c.lidHandling,
+			iGridLid = 0,
+			iSiteLid = 0,
+			sCarrierModelLid = ""
+		)))
+	}
+	
+	private def getSite(location: String): Either[Seq[String], Site] = {
+		mapper.mapSites.get(location) match {
+			case None => Left(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
+			case Some(site) => Right(site)
+		}
+	}
+	
+	private def getCarrier(location: String): Either[Seq[String], CarrierObj] = {
+		mapper.mapLocToCarrier.get(location) match {
+			case None => Left(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
+			case Some(o) => Right(o)
 		}
 	}
 }

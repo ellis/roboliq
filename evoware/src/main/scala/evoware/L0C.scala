@@ -1,6 +1,7 @@
 package evoware
 
 import roboliq.common._
+import roboliq.commands.move.LidHandling
 
 
 case class L0C_Spirate(
@@ -111,4 +112,39 @@ case class L0C_DropDITI(
 			10, 70
 		).mkString("DropDITI(", ",", ");")
 	}	
+}
+
+case class L0C_Transfer_Rack(
+	iRoma: Int, // 0 for RoMa1, 1 for RoMa2
+	sPlateModel: String,
+	iGridSrc: Int, iSiteSrc: Int, sCarrierModelSrc: String,
+	iGridDest: Int, iSiteDest: Int, sCarrierModelDest: String,
+	lidHandling: LidHandling.Value,
+	iGridLid: Int, iSiteLid: Int, sCarrierModelLid: String
+) extends Command {
+	override def toString = {
+		import LidHandling._
+		
+		val bMoveBackToHome = false // 1 = move back to home position
+		List(
+			'"'+iGridSrc+'"',
+			'"'+iGridDest+'"',
+			if (bMoveBackToHome) 1 else 0,
+			if (lidHandling == NoLid) 0 else 1,
+			0, // speed: 0 = maximum, 1 = taught in vector dialog
+			iRoma,
+			if (lidHandling == RemoveAtSource) 1 else 0,
+			'"'+iGridLid+'"',
+			'"'+sPlateModel+'"',
+			"Narrow", // Vector: Narrow, Wide, User Defined...
+			"\"\"",
+			"\"\"",
+			'"'+sCarrierModelSrc+'"',
+			'"'+sCarrierModelLid+'"',
+			'"'+sCarrierModelDest+'"',
+			'"'+iSiteSrc+'"',
+			'"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
+			'"'+iSiteDest+'"'
+		).mkString("Transfer_Rack(", ", ", ");")
+	}
 }

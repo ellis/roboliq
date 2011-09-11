@@ -11,9 +11,9 @@ import _root_.evoware._
 
 
 class BssePipetteDevice extends PipetteDevice {
-	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 0.01, 5, 10)
-	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 2, 950)
-	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 50, 100)
+	private val tipSpec50 = new TipModel("DiTi 50ul", 50, 0.01, 5, 10)
+	//private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 2, 950)
+	private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 3, 50, 100)
 	private val tipSpecs = Seq(tipSpec50, tipSpec1000)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = tipSpecs,
@@ -24,15 +24,7 @@ class BssePipetteDevice extends PipetteDevice {
 			Seq(g1000, g50)
 		}
 	)
-	val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
-	private val mapPipetteSpecs = Seq(
-			PipetteSpec("PIE_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
-			PipetteSpec("PIE_AUTAIR_LowVol", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
-			PipetteSpec("PIE_AUTBOT", PipettePosition.WetContact, PipettePosition.WetContact, PipettePosition.WetContact),
-			PipetteSpec("PIE_TROUGH_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
-			PipetteSpec("PIE_MIX", PipettePosition.WetContact, PipettePosition.WetContact, PipettePosition.WetContact),
-			PipetteSpec("PIE_MIX_AUT", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact)
-			).map(spec => spec.sName -> spec).toMap
+	val mapTipModels = config.tipSpecs.map(spec => spec.id -> spec).toMap
 
 	val plateDeconAspirate, plateDeconDispense = new Plate
 			
@@ -42,7 +34,7 @@ class BssePipetteDevice extends PipetteDevice {
 			
 			val tipSpec = if (tip.index < 4) tipSpec1000 else tipSpec50
 			val tipSetup = kb.getObjSetup[TipSetup](tip)
-			tipSetup.sPermanentType_? = Some(tipSpec.sName)
+			tipSetup.modelPermanent_? = Some(tipSpec)
 		})
 		new PlateProxy(kb, plateDeconAspirate) match {
 			case pp =>
@@ -68,27 +60,20 @@ class BssePipetteDevice extends PipetteDevice {
 	def areTipsDisposable: Boolean = false
 	
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = {
-		val o = for (
-			sType <- tip.sType_?;
-			tipSpec <- mapTipSpecs.get(sType)
-			) yield
-			tipSpec.nVolumeAspirateMin
-		o.getOrElse(0.0)
+		tip.model_?.map(_.nVolumeAspirateMin).getOrElse(0.0)
 	}
 	
 	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = {
-		val o =
-			for (sType <- tip.sType_?; tipSpec <- mapTipSpecs.get(sType)) yield {
-				val nExtra = WashIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
-					case WashIntensity.Decontaminate => tipSpec.nVolumeDeconExtra
-					case _ => tipSpec.nVolumeWashExtra
-				}
-				tipSpec.nVolume - nExtra
+		tip.model_?.map(tipModel => {
+			val nExtra = WashIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
+				case WashIntensity.Decontaminate => tipModel.nVolumeDeconExtra
+				case _ => tipModel.nVolumeWashExtra
 			}
-		o.getOrElse(0.0)
+			tipModel.nVolume - nExtra
+		}).getOrElse(0.0)
 	}
 	
-	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
+	//def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
 	
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
