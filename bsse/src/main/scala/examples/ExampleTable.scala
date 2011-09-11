@@ -31,15 +31,16 @@ trait EvowareTable {
 		o
 	}*/
 	private val m_sites = new ArrayBuffer[SiteObj]
-	private val m_mapSites = new HashMap[String, Site]
+	private val m_mapSites = new HashMap[String, SiteObj]
 	
 	def mapSites = m_mapSites.toMap
+	def sites = m_sites.toIterable
 	
 	private def addSite(site: SiteObj) {
 		m_sites += site
 		// TODO: produce an error message here instead, and propagate it back up
 		assert(!m_mapSites.contains(site.sName))
-		m_mapSites(site.sName) = new Site(site.carrier.iGrid, site.iSite)
+		m_mapSites(site.sName) = site //new Site(site.carrier.iGrid, site.iSite)
 	}
 	
 	protected def createSites(carrier: CarrierObj, s1: String): SiteObj = {

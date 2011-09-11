@@ -11,7 +11,7 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-class EvowareTranslator(mapper: EvowareMapper) extends Translator {
+class EvowareTranslator(system: EvowareSystem) extends Translator {
 	override def addKnowledge(kb: KnowledgeBase) {
 		// Do nothing
 	}
@@ -135,7 +135,7 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 				
 				// Assert that all tips are of the same kind
 				// TODO: Readd this error check somehow? -- ellis, 2011-08-25
-				//val tipKind = mapper.getTipKind(twvp0.tip)
+				//val tipKind = system.getTipKind(twvp0.tip)
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
 				if (!items.forall(_.well.holder eq holder))
@@ -183,21 +183,21 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 		val sPlateMask = encodeWells(holder, items.map(_.well.index))
 		
 		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
-		mapper.mapSites.get(item0.location) match {
+		system.mapSites.get(item0.location) match {
 			case None => return Left(Seq("INTERNAL: missing evoware site for location "+item0.location))
-			case Some(Site(iGrid, iSite)) =>
+			case Some(site) =>
 				Right(Seq(L0C_Spirate(
 					sFunc, 
 					mTips, sLiquidClass,
 					asVolumes,
-					iGrid, iSite,
+					site.iGrid, site.iSite,
 					sPlateMask
 				)))
 		}
 	}
 	
 	def wash(cmd: L1C_Wash): Either[Seq[String], Seq[Command]] = {
-		mapper.mapWashProgramArgs.get(cmd.iWashProgram) match {
+		system.mapWashProgramArgs.get(cmd.iWashProgram) match {
 			case None =>
 				Left(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
 			case Some(args) =>
@@ -277,13 +277,13 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 		
 		val sPlateMask = encodeWells(holder, items.map(_.well.index))
 		
-		mapper.mapSites.get(item0.location) match {
+		system.mapSites.get(item0.location) match {
 			case None => return Left(Seq("INTERNAL: missing evoware site for location "+item0.location))
-			case Some(Site(iGrid, iSite)) =>
+			case Some(site) =>
 				Right(Seq(L0C_Mix(
 					mTips, sLiquidClass,
 					asVolumes,
-					iGrid, iSite,
+					site.iGrid, site.iSite,
 					sPlateMask,
 					item0.nCount
 				)))
@@ -297,10 +297,10 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 	
 	private def tipsDrop(c: L1C_TipsDrop): Either[Seq[String], Seq[Command]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
-		mapper.mapSites.get(c.location) match {
+		system.mapSites.get(c.location) match {
 			case None => return Left(Seq("INTERNAL: missing evoware site for location "+c.location))
-			case Some(Site(iGrid, iSite)) =>
-				Right(Seq(L0C_DropDITI(mTips, iGrid, iSite)))
+			case Some(site) =>
+				Right(Seq(L0C_DropDITI(mTips, site.iGrid, site.iSite)))
 		}
 	}
 	
@@ -333,17 +333,17 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 		)))
 	}
 	
-	private def getSite(location: String): Either[Seq[String], Site] = {
-		mapper.mapSites.get(location) match {
+	private def getSite(location: String): Either[Seq[String], SiteObj] = {
+		system.mapSites.get(location) match {
 			case None => Left(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
 			case Some(site) => Right(site)
 		}
 	}
 	
 	private def getCarrier(location: String): Either[Seq[String], CarrierObj] = {
-		mapper.mapLocToCarrier.get(location) match {
+		system.mapSites.get(location) match {
 			case None => Left(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
-			case Some(o) => Right(o)
+			case Some(site) => Right(site.carrier)
 		}
 	}
 }

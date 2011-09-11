@@ -11,18 +11,18 @@ import evoware._
 
 
 object Main extends App {
-	val robot = BsseRobot()
-	
 	val protocol = new examples.Example02
 	if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
 	protocol.__findPlateLabels()
-	if (protocol.m_customize.isDefined) protocol.m_customize.get()
-	robot.devices.foreach(_.addKnowledge(protocol.kb))
-	
-	val evowareMapper = BsseEvowareMapper(protocol.lab.mapSites)
-	val translator = new EvowareTranslator(evowareMapper)
 
-	val compiler = new Compiler(robot.processors)
+	val system = new BsseSystem(protocol.lab.sites)
+	system.devices.foreach(_.addKnowledge(protocol.kb))
+
+	if (protocol.m_customize.isDefined) protocol.m_customize.get()
+	
+	val translator = new EvowareTranslator(system)
+
+	val compiler = new Compiler(system.processors)
 	compiler.bDebug = true
 
 	Compiler.compile(protocol.kb, Some(compiler), Some(translator), protocol.cmds) match {
