@@ -18,6 +18,7 @@ object WeizmannRoboeaseConfig {
 		PipettePolicy("PIE_AUTAIR_LowVol", PipettePosition.Free),
 		PipettePolicy("PIE_AUTBOT", PipettePosition.WetContact),
 		PipettePolicy("PIE_AUTBOT_SLOW", PipettePosition.WetContact),
+		PipettePolicy("PIE_BOTBOT_SLOW", PipettePosition.WetContact),
 		PipettePolicy("PIE_TROUGH_AUTAIR", PipettePosition.Free),
 		PipettePolicy("PIE_MIX", PipettePosition.WetContact),
 		PipettePolicy("PIE_MIX_AUT", PipettePosition.WetContact)

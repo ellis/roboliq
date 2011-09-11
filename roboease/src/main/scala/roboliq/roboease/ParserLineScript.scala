@@ -267,6 +267,9 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				arg match {
 					case "KEEPTIP" =>
 						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
+					// NOTE: "KEEPTIP" == "KEEPTIPS"
+					case "KEEPTIPS" =>
+						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
 					// This is apparently like the default behavior in roboliq
 					case "MULTIPIP" =>
 						Right(None)

@@ -60,9 +60,6 @@ Tuval/Yair:
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
 Code:
-	Rotem_Script03.conf:
-	properly pipette volumes greater than tip volume
-
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
@@ -75,7 +72,7 @@ Code:
 	evoware: move to roboliq.robots.evoware package
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
-?	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
+x	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
 4	devices: implement transfer
 5	devices: implement wait
 6	devices: implement shaker
