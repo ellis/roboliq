@@ -230,12 +230,18 @@ object PipetteHelper {
 	
 	def splitTipWellPairs(tws: Seq[TipWell]): Seq[Seq[TipWell]] = {
 		val map = tws.map(tw => tw.well -> tw).toMap
-		val gws: Iterable[WellGroup] = WellGroup(tws.map(_.well)).splitByCol()
+		val gws: Iterable[WellGroup] = WellGroup(tws.map(_.well)).splitByAdjacent()
 		val twss1: Iterable[Seq[TipWell]] = gws.map(_.set.toSeq.map(well => map(well)))
-		val twss2: Iterable[Seq[TipWell]] = twss1.flatMap(splitTipWellPairs2)
-		twss2.toSeq
+		//val twss2: Iterable[Seq[TipWell]] = twss1.flatMap(splitTipWellPairs2)
+		/*println("map: "+map)
+		println("gsw:")
+		gws.foreach(println)
+		println("twss1: "+twss1)
+		println("twss2: "+twss2)*/
+		twss1.toSeq
 	}
 	
+	/*
 	private def splitTipWellPairs2(tws: Seq[TipWell]): Seq[Seq[TipWell]] = {
 		if (tws.isEmpty)
 			return Seq()
@@ -256,7 +262,7 @@ object PipetteHelper {
 			rest = rest.drop(keep.size)
 		}
 		twss.toSeq
-	}
+	}*/
 	
 	/*
 	def choosePreAspirateReplacement(liquidInWell: Liquid, tipState: TipStateL2): Boolean = {

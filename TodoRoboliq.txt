@@ -63,7 +63,7 @@ Code:
 	Rotem_Script03.conf:
 x	TIPTYPE:200 not used, instead 1000 was selected
 	-
-	L2C_Aspirate(Tip1-4, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:C5+4)
+x	L2C_Aspirate(Tip1-4, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:C5+4)
 	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
 	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
 	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)

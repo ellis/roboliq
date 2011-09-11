@@ -9,6 +9,9 @@ class WellGroupPlate private[common] (
 	iCol_? : Option[Int] = None,
 	bAdjacent: Boolean = false
 ) extends WellGroup(set, Some(plate), iCol_?, bAdjacent) {
+	override def toString: String = {
+		getClass().getSimpleName() + List(Command.getWellsDebugString(set), plate, iCol_?, bAdjacent).mkString("(", ", ", ")")
+	}
 }
 
 class WellGroupCol private[common] (
@@ -17,6 +20,9 @@ class WellGroupCol private[common] (
 	val iCol: Int,
 	bAdjacent: Boolean = false
 ) extends WellGroupPlate(set, plate, Some(iCol), bAdjacent) {
+	override def toString: String = {
+		getClass().getSimpleName() + List(Command.getWellsDebugString(set), plate, iCol, bAdjacent).mkString("(", ", ", ")")
+	}
 }
 
 class WellGroupAdjacent private[common] (
@@ -25,6 +31,9 @@ class WellGroupAdjacent private[common] (
 	iCol: Int
 ) extends WellGroupCol(set, plate, iCol, true) {
 	assert(bAdjacent == true)
+	override def toString: String = {
+		getClass().getSimpleName() + List(Command.getWellsDebugString(set), plate, iCol).mkString("(", ", ", ")")
+	}
 }
 
 sealed class WellGroup private[common] (

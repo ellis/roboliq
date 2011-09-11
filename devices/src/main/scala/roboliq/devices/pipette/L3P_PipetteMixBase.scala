@@ -105,6 +105,7 @@ private trait L3P_PipetteMixBase {
 		
 		// Pair up all tips and wells
 		val twss0 = PipetteHelper.chooseTipWellPairsAll(ctx.states, tips, dests)
+		println("twss0:"+twss0)
 		
 		def createCycles(stateCycle0: RobotState, twss: List[Seq[TipWell]], remains0: Map[TipWell, Double]): Either[Errors, RobotState] = {
 			// All done.  Perform final clean.
