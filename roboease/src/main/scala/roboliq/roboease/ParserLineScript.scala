@@ -31,7 +31,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		sub_pipette(Some(reagent), Nil, wells, volumes, sLiquidClass, opts_?)
 	}
 	
-	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, nVolume: Double, sLiquidClass: String, opts_? : Option[String]) {
+	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, nVolume: Double, lc: String, opts_? : Option[String]) {
 		if (wells.isEmpty) {
 			shared.addError("list of destination wells must be non-empty")
 			return
@@ -39,8 +39,10 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		
 		createSrcWellLiquids(wells)
 		
-		val sMixClass_? = if (sLiquidClass != "DEFAULT") Some(sLiquidClass) else None 
-		
+		val mixPolicy = getPolicy(lc, None) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(policy) => policy
+		}
 		val mapOpts = getMapOpts(opts_?) match {
 			case Left(sError) => shared.addError(sError); return
 			case Right(map) => map
@@ -49,14 +51,17 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			case Left(sError) => shared.addError(sError); return
 			case Right(opt) => opt
 		}
-		var sTipKind_? = getOptTipKind(mapOpts)
+		var tipModel_? = getOptTipModel(mapOpts) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(model_?) => model_?
+		}
 
-		val mixSpec = new MixSpec(nVolume, nCount, sMixClass_?)
+		val mixSpec = new MixSpec(nVolume, nCount, Some(mixPolicy))
 		val args = new L4A_MixArgs(
 			wells.map(well => WPL_Well(well)),
 			mixSpec,
 			tipOverrides_?,
-			sTipKind_?
+			tipModel_?
 			)
 		val cmd = L4C_Mix(args)
 		addRunCommand(cmd)
@@ -140,17 +145,10 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		}
 		wells2.foreach(well => kb.addWell(well, false)) // Indicate that these wells are destinations
 		
-		val sLiquidClass_? = {
-			if (sLiquidClass == "DEFAULT") {
-				reagent_? match {
-					case None => None
-					case Some(reagent) => kb.getReagentSetup(reagent).sFamily_?
-				}
-			}
-			else
-				Some(sLiquidClass)
+		val policy = getPolicy(sLiquidClass, reagent_?) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(policy) => policy
 		}
-		
 		val mapOpts = getMapOpts(opts_?) match {
 			case Left(sError) => shared.addError(sError); return
 			case Right(map) => map
@@ -163,7 +161,10 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			case Left(sError) => shared.addError(sError); return
 			case Right(opt) => opt
 		}
-		var sTipKind_? = getOptTipKind(mapOpts)
+		var tipModel_? = getOptTipModel(mapOpts) match {
+			case Left(sError) => shared.addError(sError); return
+			case Right(model_?) => model_?
+		}
 		
 		val items = reagent_? match {
 			case None =>
@@ -183,12 +184,33 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			items,
 			mixSpec_? = mixSpec_?,
 			tipOverrides_? = tipOverrides_?,
-			sAspirateClass_? = sLiquidClass_?,
-			sDispenseClass_? = sLiquidClass_?,
-			sTipKind_? = sTipKind_?
+			pipettePolicy_? = Some(policy),
+			tipModel_? = tipModel_?
 			)
 		val cmd = L4C_Pipette(args)
 		addRunCommand(cmd)
+	}
+
+	private def getPolicy(lc: String, reagent_? : Option[Reagent]): Either[String, PipettePolicy] = {
+		if (lc == "DEFAULT") {
+			reagent_? match {
+				case None =>
+					Left("Explicit liquid class required here instead of \"DEFAULT\"")
+				case Some(reagent) =>
+					shared.mapReagentToPolicy.get(reagent) match {
+						case None =>
+							Left("Explicit liquid class required here instead of \"DEFAULT\"")
+						case Some(policy) =>
+							Right(policy)
+					}
+			}
+		}
+		else {
+			shared.mapLcToPolicy.get(lc) match {
+				case None => Left("unknown liquid class \""+lc+"\"")
+				case Some(policy) => Right(policy)
+			}
+		}
 	}
 
 	private val lsOptNames = Set("MIX", "TIPMODE", "TIPTYPE")
@@ -218,7 +240,10 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					case Seq(lc, sCountAndVol) =>
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
-								Right(Some(MixSpec(sVol.toDouble, sCount.toInt, Some(lc))))
+								getPolicy(lc, None) match {
+									case Left(sError) => Left(sError)
+									case Right(policy) => Right(Some(MixSpec(sVol.toDouble, sCount.toInt, Some(policy))))
+								}
 							case _ =>
 								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
 						}
@@ -253,10 +278,16 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		}
 	}
 	
-	private def getOptTipKind(mapOpts: Map[String, Seq[String]]): Option[String] = {
+	private def getOptTipModel(mapOpts: Map[String, Seq[String]]): Either[String, Option[TipModel]] = {
 		mapOpts.get("TIPTYPE") match {
-			case None => None
-			case Some(args) => Some("DiTi "+args(0)+"ul")
+			case None => Right(None)
+			case Some(Seq(sType)) =>
+				shared.mapTipModel.get(sType) match {
+					case None => Left("unregister TIPTYPE: \""+sType+"\"")
+					case Some(model) => Right(Some(model))
+				}
+			case Some(args) =>
+				Left("unrecognized TIPTYPE arguments: "+args.mkString(":"))
 		}
 	}
 	

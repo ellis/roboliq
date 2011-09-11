@@ -17,7 +17,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	
 	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
 		val conf = new TipConfigL2(this, index)
-		val state = new TipStateL2(conf, setup.sPermanentType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
+		val state = new TipStateL2(conf, setup.modelPermanent_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
 		Right(conf, state)
 	}
 	
@@ -27,13 +27,13 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		def drop() {
 			val st = state
 			map(thisObj) = state.conf.createState0(None)
-			//println("DROP tip "+thisObj.index+": sType = "+state.sType_?)
+			//println("DROP tip "+thisObj.index+": sType = "+state.model_?)
 		}
 		
-		def get(sType: String) {
+		def get(model: TipModel) {
 			val st = state
-			map(thisObj) = st.copy(sType_? = Some(sType))
-			//println("tip "+thisObj.index+": sType = "+state.sType_?)
+			map(thisObj) = st.copy(model_? = Some(model))
+			//println("tip "+thisObj.index+": sType = "+state.model_?)
 		}
 		
 		def aspirate(liquid2: Liquid, nVolume2: Double) {
@@ -41,7 +41,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 			val nVolumeNew = st.nVolume + nVolume2
 			map(thisObj) = new TipStateL2(
 				st.conf,
-				st.sType_?,
+				st.model_?,
 				st.liquid + liquid2,
 				nVolumeNew,
 				st.contamInside ++ liquid2.contaminants,
@@ -99,7 +99,7 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 		def clean(cleanDegree: WashIntensity.Value) {
 			val st = state
 			map(thisObj) = st.conf.createState0(None).copy(
-				sType_? = st.sType_?,
+				model_? = st.model_?,
 				cleanDegree = cleanDegree,
 				cleanDegreePrev = cleanDegree,
 				cleanDegreePending = WashIntensity.None
@@ -127,8 +127,8 @@ class TipConfigL2(
 ) extends ObjConfig with Ordered[TipConfigL2] {
 	def state(states: StateMap) = obj.state(states)
 	// For use in L3P_Pipette
-	def createState0(sType_? : Option[String]): TipStateL2 = {
-		new TipStateL2(this, sType_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
+	def createState0(model_? : Option[TipModel]): TipStateL2 = {
+		new TipStateL2(this, model_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
 	}
 
 	override def compare(that: TipConfigL2): Int = this.index - that.index
@@ -138,7 +138,7 @@ class TipConfigL2(
 
 case class TipStateL2(
 	val conf: TipConfigL2,
-	val sType_? : Option[String],
+	val model_? : Option[TipModel],
 	val liquid: Liquid, 
 	val nVolume: Double, 
 	val contamInside: Set[Contaminant.Value], 
@@ -155,7 +155,7 @@ case class TipStateL2(
 }
 
 class TipSetup(val obj: Tip) extends ObjSetup {
-	var sPermanentType_? : Option[String] = None
+	var modelPermanent_? : Option[TipModel] = None
 
 	override def getLabel(kb: KnowledgeBase): String = obj.toString
 }

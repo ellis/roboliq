@@ -4,16 +4,23 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
+import roboliq.commands.pipette.PipettePolicy
+import roboliq.commands.pipette.TipModel
 
 
-class ParserSharedData {
+class ParserSharedData(
+	val mapTipModel: Map[String, TipModel],
+	/** Map liquid class name to PipettePolicy */
+	val mapLcToPolicy: Map[String, PipettePolicy]
+) {
 	val kb = new KnowledgeBase
 	var sHeader: String = null
 	val mapRacks = new HashMap[String, Rack]
 	//val lReagentsInWells = new ArrayBuffer[Tuple2[Reagent, Seq[Well]]]
 	//val mapLiquids = new HashMap[String, Liquid]
 	val mapReagents = new HashMap[String, Reagent]
-	val mapDefaultLiquidClass = new HashMap[String, String]
+	/** Default pipette policy for reagent */
+	val mapReagentToPolicy = new HashMap[Reagent, PipettePolicy]
 	val mapVars = new HashMap[String, String]
 	val mapLists = new HashMap[String, List[String]]
 	val mapOptions = new HashMap[String, String]

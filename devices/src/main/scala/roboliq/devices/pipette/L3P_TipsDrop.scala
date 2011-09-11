@@ -10,7 +10,7 @@ class L3P_TipsDrop(location: String) extends CommandCompilerL3 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
-		val tips = cmd.tips.filter(_.obj.state(ctx.states).sType_?.isDefined)
+		val tips = cmd.tips.filter(_.obj.state(ctx.states).model_?.isDefined)
 		if (tips.isEmpty)
 			CompileTranslation(cmd, Seq())
 		else

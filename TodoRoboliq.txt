@@ -70,11 +70,6 @@ Code:
 	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
 	L2C_Dispense(Tip1-8, 2.0, PIE_AUTAIR_LowVol, Rotem_PHS1:C1+8)
 
-x	should use PIE_TROUGH_AUTAIR for DDW
-x	why replace tips between dispenses to Rotem_STK2:D1+8 and Rotem_STK2:E1+3
-x	why no clean between mixes?
-x	remove final wash after dropping tips
-
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
@@ -87,8 +82,6 @@ x	remove final wash after dropping tips
 	evoware: move to roboliq.robots.evoware package
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
-x	devices: Pipette/Mix: keep track of the LiquidGroup exit policy to ensure a minimum cleaning intensity at the end of pipetting
-x	devices: PipetteHelper.chooseWashSpec: use the minimum cleaning intensity from the previous LiquidGroups
 ?	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
 4	devices: implement transfer
 5	devices: implement wait

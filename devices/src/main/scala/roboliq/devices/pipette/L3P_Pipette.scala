@@ -40,7 +40,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	override protected def dispense(
 		states0: RobotState,
 		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		tws: Seq[TipWell],
 		remains0: Map[TipWell, Double],
 		bFirstInCycle: Boolean
@@ -95,7 +95,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 						}
 						
 						// End this cycle if this dispense would require a cleaning
-						getDispenseCleanSpec(builder, mapTipToType, tipOverrides, item.tip, item.well, pos) match {
+						getDispenseCleanSpec(builder, mapTipToModel, tipOverrides, item.tip, item.well, pos) match {
 							case None =>
 							case Some(spec) =>
 								return Left(Seq("INTERNAL: Error code dispense 2"))
@@ -258,11 +258,18 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	}
 	
 	private def getDispensePolicy(states: StateMap, tw: TipWell, nVolume: Double): Either[String, PipettePolicy] = {
-		getDispensePolicy(states, tw.tip, tw.well, nVolume, cmd.args.sDispenseClass_?)
+		getDispensePolicy(states, tw.tip, tw.well, nVolume, cmd.args.pipettePolicy_?)
 	}
 	
-	private def getDispensePolicy(states: StateMap, tip: TipConfigL2, dest: WellConfigL2, nVolume: Double, sDispenseClass_? : Option[String]): Either[String, PipettePolicy] = {
-		sDispenseClass_? match {
+	private def getDispensePolicy(
+		states: StateMap,
+		tip: TipConfigL2,
+		dest: WellConfigL2,
+		nVolume: Double,
+		pipettePolicy_? : Option[PipettePolicy]
+	): Either[String, PipettePolicy] = {
+		pipettePolicy_? match {
+			case Some(policy) => Right(policy)
 			case None =>
 				val item = mapDestToItem(dest)
 				val destState = dest.state(states)
@@ -271,31 +278,27 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					case None => Left("no dispense policy found for "+tip+" and "+dest)
 					case Some(policy) => Right(policy)
 				}
-			case Some(sLiquidClass) =>
-				robot.getPipetteSpec(sLiquidClass) match {
-					case None => Left("no policy found for class "+sLiquidClass)
-					case Some(spec) => Right(new PipettePolicy(spec.sName, spec.dispense))
-				}
 		}
 	}
 	
 	private def getAspiratePolicy(states: StateMap, tw: TipWell): Either[String, PipettePolicy] = {
-		getAspiratePolicy(states, tw.tip, tw.well, cmd.args.sAspirateClass_?)
+		getAspiratePolicy(states, tw.tip, tw.well, cmd.args.pipettePolicy_?)
 	}
 	
-	private def getAspiratePolicy(states: StateMap, tip: TipConfigL2, src: WellConfigL2, sAspirateClass_? : Option[String]): Either[String, PipettePolicy] = {
-		sAspirateClass_? match {
+	private def getAspiratePolicy(
+		states: StateMap,
+		tip: TipConfigL2,
+		src: WellConfigL2,
+		pipettePolicy_? : Option[PipettePolicy]
+	): Either[String, PipettePolicy] = {
+		pipettePolicy_? match {
+			case Some(policy) => Right(policy)
 			case None =>
 				val tipState = tip.state(states)
 				val srcState = src.state(states)
 				robot.getAspiratePolicy(tipState, srcState) match {
 					case None => Left("no aspirate policy found for "+tip+" and "+src)
 					case Some(policy) => Right(policy)
-				}
-			case Some(sLiquidClass) =>
-				robot.getPipetteSpec(sLiquidClass) match {
-					case None => Left("no policy found for class "+sLiquidClass)
-					case Some(spec) => Right(new PipettePolicy(spec.sName, spec.aspirate))
 				}
 		}
 	}

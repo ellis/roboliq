@@ -125,9 +125,9 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 			case Seq() => Left(Seq("INTERNAL: items empty"))
 			case Seq(twvp0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass = twvp0.policy.sName
+				val sLiquidClass = twvp0.policy.id
 				// Assert that there is only one liquid class
-				assert(rest.forall(twvp => twvp.policy.sName.equals(sLiquidClass)))
+				assert(rest.forall(twvp => twvp.policy.id.equals(sLiquidClass)))
 				
 				val holder = twvp0.well.holder
 				
@@ -222,9 +222,9 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 			case Seq() => Left(Seq("Empty Tip-Well-Volume list"))
 			case Seq(item0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass = item0.policy.sName
+				val sLiquidClass = item0.policy.id
 				// Assert that there is only one liquid class
-				if (rest.exists(_.policy.sName != sLiquidClass)) {
+				if (rest.exists(_.policy.id != sLiquidClass)) {
 					items.foreach(item => println(item.policy))
 					return Left(Seq("INTERNAL: Liquid class must be the same for all mix items"))
 				}
@@ -290,7 +290,7 @@ class EvowareTranslator(mapper: EvowareMapper) extends Translator {
 	
 	private def tipsGet(c: L1C_TipsGet): Either[Seq[String], Seq[Command]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
-		Right(Seq(L0C_GetDITI2(mTips, c.sType)))
+		Right(Seq(L0C_GetDITI2(mTips, c.model.id)))
 	}
 	
 	private def tipsDrop(c: L1C_TipsDrop): Either[Seq[String], Seq[Command]] = {

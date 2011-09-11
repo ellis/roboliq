@@ -34,8 +34,7 @@ class L4A_MixArgs(
 	val targets: Iterable[WellOrPlateOrLiquid],
 	val mixSpec: MixSpec,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
-	val sTipKind_? : Option[String] = None,
-	val fnClean_? : Option[Unit => Unit] = None
+	val tipModel_? : Option[TipModel] = None
 ) {
 	def toL3(states: RobotState): Either[Seq[String], L3A_MixArgs] = {
 		val wells3 = targets.foldLeft(SortedSet(): SortedSet[WellConfigL2]) {(acc, target) => acc ++ PipetteHelperL4.getWells1(states, target) }
@@ -43,8 +42,7 @@ class L4A_MixArgs(
 			wells3,
 			mixSpec = mixSpec,
 			tipOverrides_? = tipOverrides_?,
-			sTipKind_? = sTipKind_?,
-			fnClean_? = fnClean_?
+			tipModel_? = tipModel_?
 		))
 	}
 }
@@ -53,8 +51,7 @@ class L3A_MixArgs(
 	val wells: SortedSet[WellConfigL2],
 	val mixSpec: MixSpec,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
-	val sTipKind_? : Option[String] = None,
-	val fnClean_? : Option[Unit => Unit] = None
+	val tipModel_? : Option[TipModel] = None
 )
 
 /*

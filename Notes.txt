@@ -193,6 +193,20 @@ Terminology:
 	ObjConfig
 	ObjState
 	-
+	LiquidFamily: a string used on L4 to identify a class of liquids having similar properties as far as pipetting is concerned
+	LiquidGroup: a group of wells which are similar enough that the tips only need to be lightly washed when performing pipetting operations among them
+	PipettePolicy(id for translator, position for dispense): evoware liquid class ID (L1) and info about where disperse takes place (air, top, wet, dry) (L3)
+	-
+	id: unique id used on the translator level
+	name: unique id used above the translator level
+	label: user-displayed label, need not be uniqu
+	description: user-displayed description
+	key: temporary grouping/sorting key
+	-
+	things which can be specified in protocol customization, but which refer to lab details:
+	TipModel
+	PipettePolicy
+	-
 	protocol objects, like Plate and Liquid
 	Spec
 	Info

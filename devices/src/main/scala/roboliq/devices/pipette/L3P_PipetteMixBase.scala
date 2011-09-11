@@ -21,13 +21,13 @@ private trait L3P_PipetteMixBase {
 	case class Aspirate(items: Seq[L2A_SpirateItem]) extends Action
 	case class Dispense(items: Seq[L2A_SpirateItem]) extends Action
 	case class Mix(items: Seq[L2A_MixItem]) extends Action
-	case class TipsGet(mapTipToType: Map[TipConfigL2, String]) extends Action
+	case class TipsGet(mapTipToModel: Map[TipConfigL2, TipModel]) extends Action
 	case class TipsWash(mapTipToSpec: Map[TipConfigL2, WashSpec]) extends Action
 	case class TipsDrop(tips: SortedSet[TipConfigL2]) extends Action
 	//case class Clean(map: Map[TipConfigL2, CleanSpec2]) extends Action
 	
 	sealed abstract class CleanSpec2 { val tip: TipConfigL2 }
-	case class ReplaceSpec2(tip: TipConfigL2, sType: String) extends CleanSpec2
+	case class ReplaceSpec2(tip: TipConfigL2, model: TipModel) extends CleanSpec2
 	case class WashSpec2(tip: TipConfigL2, spec: WashSpec) extends CleanSpec2
 	case class DropSpec2(tip: TipConfigL2) extends CleanSpec2
 
@@ -58,11 +58,11 @@ private trait L3P_PipetteMixBase {
 		var lsErrors = new ArrayBuffer[String]
 		val mapIndexToTip = robot.config.tips.map(tip => tip.index -> tip).toMap
 		for (tipGroup <- robot.config.tipGroups) {
-			val mapTipToType = tipGroup.map(pair => mapIndexToTip(pair._1).state(ctx.states).conf -> pair._2.sName).toMap
-			val tips = SortedSet(mapTipToType.keys.toSeq : _*)
+			val mapTipToModel: Map[TipConfigL2, TipModel] = tipGroup.map(pair => mapIndexToTip(pair._1).state(ctx.states).conf -> pair._2).toMap
+			val tips = SortedSet(mapTipToModel.keys.toSeq : _*)
 			//val tipAndSpecs = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.state(ctx.states).conf)
 	
-			translateCommand(tips, mapTipToType) match {
+			translateCommand(tips, mapTipToModel) match {
 				case Left(lsErrors2) =>
 					lsErrors ++= lsErrors2
 				case Right(Seq()) =>
@@ -87,7 +87,7 @@ private trait L3P_PipetteMixBase {
 			Left(CompileError(cmd, lsErrors))
 	}
 	
-	private def translateCommand(tips: SortedSet[TipConfigL2], mapTipToType: Map[TipConfigL2, String]): Either[Errors, Seq[Command]] = {
+	private def translateCommand(tips: SortedSet[TipConfigL2], mapTipToModel: Map[TipConfigL2, TipModel]): Either[Errors, Seq[Command]] = {
 		val actionsAll = new ArrayBuffer[Action]
 		val cycles = new ArrayBuffer[CycleState]
 		
@@ -117,13 +117,13 @@ private trait L3P_PipetteMixBase {
 			
 			val (actionsADM, twssRest, remains) = {
 				if (!bMixOnly) {
-					dispenseMixAspirate(cycle, mapTipToType, twss, remains0) match {
+					dispenseMixAspirate(cycle, mapTipToModel, twss, remains0) match {
 						case Left(lsErrors) => return Left(lsErrors)
 						case Right(tuple) => tuple
 					}
 				}
 				else {
-					mixOnly(cycle, mapTipToType, twss) match {
+					mixOnly(cycle, mapTipToModel, twss) match {
 						case Left(lsErrors) => return Left(lsErrors)
 						case Right(pair) => (pair._1, pair._2, Map[TipWell, Double]())
 					}
@@ -149,9 +149,9 @@ private trait L3P_PipetteMixBase {
 			var bFirst = cycles.isEmpty
 			for (action <- actionsADM) {
 				val specs = (action match {
-					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item))
-					case Dispense(items) => items.map(item => getDispenseCleanSpec(stateCycle0, mapTipToType, tipOverrides, item.tip, item.well, item.policy.pos))
-					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, mapTipToType, tipOverrides, bFirst, item.tip, item.well))
+					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, mapTipToModel, tipOverrides, bFirst, item))
+					case Dispense(items) => items.map(item => getDispenseCleanSpec(stateCycle0, mapTipToModel, tipOverrides, item.tip, item.well, item.policy.pos))
+					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, mapTipToModel, tipOverrides, bFirst, item.tip, item.well))
 					case _ => return Left(Seq("INTERNAL: error code translateCommand 1"))
 				}).flatten
 				for (cleanSpec <- specs) {
@@ -215,7 +215,7 @@ private trait L3P_PipetteMixBase {
 	
 	private def dispenseMixAspirate(
 		cycle: CycleState,
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		twss: List[Seq[TipWell]],
 		remains0: Map[TipWell, Double]
 	): Either[Seq[String], Tuple3[Seq[Action], List[Seq[TipWell]], Map[TipWell, Double]]] = {
@@ -223,10 +223,10 @@ private trait L3P_PipetteMixBase {
 		val actionsD = new ArrayBuffer[Dispense]
 
 		// Temporarily assume that the tips are perfectly clean
-		cleanTipStates(builder, mapTipToType)
+		cleanTipStates(builder, mapTipToModel)
 
 		def dispenseFirst(tws: Seq[TipWell]): Either[Seq[String], Map[TipWell, Double]] = {
-			dispense(builder.toImmutable, mapTipToType, tws, remains0, true) match {
+			dispense(builder.toImmutable, mapTipToModel, tws, remains0, true) match {
 				case Left(lsErrors) =>
 					Left(lsErrors)
 				case Right(res) =>
@@ -237,7 +237,7 @@ private trait L3P_PipetteMixBase {
 		}
 		
 		def dispenseNext(tws: Seq[TipWell]): Boolean = {
-			dispense(builder.toImmutable, mapTipToType, tws, Map(), false) match {
+			dispense(builder.toImmutable, mapTipToModel, tws, Map(), false) match {
 				case Left(lsErrors) => false
 				case Right(res) =>
 					builder.map ++= res.states.map
@@ -309,7 +309,7 @@ private trait L3P_PipetteMixBase {
 	
 	protected def dispense(
 		states0: RobotState,
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		tws: Seq[TipWell],
 		remains: Map[TipWell, Double],
 		bFirstInCycle: Boolean
@@ -319,7 +319,7 @@ private trait L3P_PipetteMixBase {
 
 	private def mixOnly(
 		cycle: CycleState,
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		twss: List[Seq[TipWell]]
 	): Either[Seq[String], Tuple2[Seq[Action], List[Seq[TipWell]]]] = {
 		val builder = new StateBuilder(cycle.state0)
@@ -327,11 +327,11 @@ private trait L3P_PipetteMixBase {
 		val actionsM = new ArrayBuffer[Mix]
 		
 		// Temporarily assume that the tips are perfectly clean
-		cleanTipStates(builder, mapTipToType)
+		cleanTipStates(builder, mapTipToModel)
 
 		// Mix
 		def doMix(tws: Seq[TipWell]): Either[Seq[String], Unit] = {
-			mix(builder.toImmutable, mapTipToType, tws) match {
+			mix(builder.toImmutable, mapTipToModel, tws) match {
 				case Left(lsErrors) =>
 					//println("lsErrors:", lsErrors)
 					Left(lsErrors)
@@ -365,7 +365,7 @@ private trait L3P_PipetteMixBase {
 	protected def mix(
 		states0: RobotState,
 		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		tws: Seq[TipWell]
 	): Either[Seq[String], MixResult] = {
 		Right(new MixResult(states0, Seq()))
@@ -380,13 +380,13 @@ private trait L3P_PipetteMixBase {
 	}
 	
 	/** Create temporary tip state objects and associate them with the source liquid */
-	private def cleanTipStates(builder: StateBuilder, mapTipToType: Map[TipConfigL2, String]) {
-		for ((tip, sType) <- mapTipToType) {
+	private def cleanTipStates(builder: StateBuilder, mapTipToModel: Map[TipConfigL2, TipModel]) {
+		for ((tip, model) <- mapTipToModel) {
 			val tipWriter = tip.obj.stateWriter(builder)
 			// Get proper tip
 			if (robot.areTipsDisposable) {
 				tipWriter.drop()
-				tipWriter.get(sType)
+				tipWriter.get(model)
 			}
 			tipWriter.clean(WashIntensity.Decontaminate)
 		}
@@ -398,7 +398,7 @@ private trait L3P_PipetteMixBase {
 		mixSpec: MixSpec
 	): Either[Seq[String], Mix] = {
 		val items = actionD.items.map(itemD => {
-			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.sMixClass_?) match {
+			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?) match {
 				case Left(sError) => return Left(Seq(sError))
 				case Right(policy) =>
 					new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy)
@@ -408,26 +408,27 @@ private trait L3P_PipetteMixBase {
 	}
 	
 	protected def getMixPolicy(states: StateMap, tw: TipWell): Either[String, PipettePolicy] = {
-		val sMixClass_? = mixSpec_? match {
+		val mixPolicy_? = mixSpec_? match {
+			case Some(spec) => spec.mixPolicy_?
 			case None => None
-			case Some(spec) => spec.sMixClass_?
 		}
-		getMixPolicy(states, tw.tip, tw.well, sMixClass_?)
+		getMixPolicy(states, tw.tip, tw.well, mixPolicy_?)
 	}
 	
-	private def getMixPolicy(states: StateMap, tip: TipConfigL2, well: WellConfigL2, sMixClass_? : Option[String]): Either[String, PipettePolicy] = {
-		sMixClass_? match {
+	private def getMixPolicy(
+		states: StateMap,
+		tip: TipConfigL2,
+		well: WellConfigL2,
+		mixPolicy_? : Option[PipettePolicy]
+	): Either[String, PipettePolicy] = {
+		mixPolicy_? match {
+			case Some(policy) => Right(policy)
 			case None =>
 				val tipState = tip.state(states)
 				val wellState = well.state(states)
 				robot.getAspiratePolicy(tipState, wellState) match {
 					case None => Left("no mix policy found for "+tip+" and "+well)
 					case Some(policy) => Right(policy)
-				}
-			case Some(sLiquidClass) =>
-				robot.getPipetteSpec(sLiquidClass) match {
-					case None => Left("no policy found for class "+sLiquidClass)
-					case Some(spec) => Right(new PipettePolicy(spec.sName, spec.aspirate))
 				}
 		}
 	}
@@ -472,7 +473,7 @@ private trait L3P_PipetteMixBase {
 	
 	protected def getAspirateCleanSpec(
 		builder: StateMap,
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		overrides: TipHandlingOverrides,
 		bFirst: Boolean,
 		item: L2A_SpirateItem
@@ -483,7 +484,7 @@ private trait L3P_PipetteMixBase {
 			val tipState = item.tip.obj.state(builder)
 			val srcState = item.well.obj.state(builder)
 			val srcLiquid = srcState.liquid
-			val bReplace = tipState.sType_?.isEmpty || (overrides.replacement_? match {
+			val bReplace = tipState.model_?.isEmpty || (overrides.replacement_? match {
 				case None =>
 					PipetteHelper.choosePreAspirateWashSpec(overrides, srcLiquid, tipState).washIntensity > WashIntensity.None
 				case Some(TipReplacementPolicy.ReplaceAlways) => true
@@ -491,7 +492,7 @@ private trait L3P_PipetteMixBase {
 				case Some(TipReplacementPolicy.KeepAlways) => false
 			})
 			if (bReplace)
-				Some(ReplaceSpec2(item.tip, mapTipToType(item.tip)))
+				Some(ReplaceSpec2(item.tip, mapTipToModel(item.tip)))
 			else
 				None
 		}
@@ -509,7 +510,7 @@ private trait L3P_PipetteMixBase {
 	
 	protected def getDispenseCleanSpec(
 		states: StateMap,
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		overrides: TipHandlingOverrides,
 		tip: TipConfigL2,
 		dest: WellConfigL2,
@@ -520,7 +521,7 @@ private trait L3P_PipetteMixBase {
 		}
 		else if (robot.areTipsDisposable) {
 			val tipState = tip.obj.state(states)
-			val bReplace = tipState.sType_?.isEmpty || (overrides.replacement_? match {
+			val bReplace = tipState.model_?.isEmpty || (overrides.replacement_? match {
 				case Some(TipReplacementPolicy.ReplaceAlways) => true
 				case Some(TipReplacementPolicy.KeepBetween) => false
 				case Some(TipReplacementPolicy.KeepAlways) => false
@@ -528,7 +529,7 @@ private trait L3P_PipetteMixBase {
 					PipetteHelper.choosePreDispenseWashSpec(overrides, tipState.liquid, dest.state(states).liquid, tipState).washIntensity > WashIntensity.None
 			})
 			if (bReplace)
-				Some(ReplaceSpec2(tip, mapTipToType(tip)))
+				Some(ReplaceSpec2(tip, mapTipToModel(tip)))
 			else
 				None
 		}
@@ -545,7 +546,7 @@ private trait L3P_PipetteMixBase {
 	
 	protected def getMixCleanSpec(
 		states: StateMap,
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		overrides: TipHandlingOverrides,
 		bFirst: Boolean,
 		tip: TipConfigL2,
@@ -554,16 +555,16 @@ private trait L3P_PipetteMixBase {
 		val tipState = tip.state(states)
 		val liquidTarget = well.state(states).liquid
 		if (robot.areTipsDisposable) {
-			val bReplace = tipState.sType_?.isEmpty || (overrides.replacement_? match {
+			val bReplace = tipState.model_?.isEmpty || (overrides.replacement_? match {
 				case Some(TipReplacementPolicy.ReplaceAlways) => true
 				case Some(TipReplacementPolicy.KeepBetween) => bFirst
 				case Some(TipReplacementPolicy.KeepAlways) => false
 				case None =>
 					PipetteHelper.choosePreAspirateWashSpec(overrides, liquidTarget, tipState).washIntensity > WashIntensity.None
 			})
-			//println("bReplace: ", bReplace, tip, tipState, tipState.sType_?, overrides.replacement_?)
+			//println("bReplace: ", bReplace, tip, tipState, tipState.model_?, overrides.replacement_?)
 			if (bReplace)
-				Some(ReplaceSpec2(tip, mapTipToType(tip)))
+				Some(ReplaceSpec2(tip, mapTipToModel(tip)))
 			else
 				None
 		}
@@ -582,7 +583,7 @@ private trait L3P_PipetteMixBase {
 		val specsR = specs.collect { case spec: ReplaceSpec2 => spec }
 		val specsW = specs.collect { case spec: WashSpec2 => spec }
 		val actD = if (!specsD.isEmpty) Some(TipsDrop(SortedSet(specsD.map(_.tip) : _*))) else None
-		val actR = if (!specsR.isEmpty) Seq(TipsDrop(SortedSet(specsD.map(_.tip) : _*)), TipsGet(specsR.map(spec => spec.tip -> spec.sType).toMap)) else Seq()
+		val actR = if (!specsR.isEmpty) Seq(TipsDrop(SortedSet(specsD.map(_.tip) : _*)), TipsGet(specsR.map(spec => spec.tip -> spec.model).toMap)) else Seq()
 		val actW = if (!specsW.isEmpty) Some(TipsWash(specsW.map(spec => spec.tip -> spec.spec).toMap)) else None
 		actD.toSeq ++ actR ++ actW.toSeq
 	}
@@ -597,8 +598,8 @@ private trait L3P_PipetteMixBase {
 				case Aspirate(items) => mapTipToSpecPrev --= items.map(_.tip); action
 				case Dispense(items) => mapTipToSpecPrev --= items.map(_.tip); action
 				case Mix(items) => mapTipToSpecPrev --= items.map(_.tip); action
-				case TipsGet(mapTipToType) =>
-					//setTipsToDrop ++= mapTipToType.collect { case (tip, None) => tip }
+				case TipsGet(mapTipToModel) =>
+					//setTipsToDrop ++= mapTipToModel.collect { case (tip, None) => tip }
 					action
 				case TipsDrop(tips) =>
 					setTipsToDrop ++= tips
@@ -713,8 +714,8 @@ private trait L3P_PipetteMixBase {
 			case TipsDrop(tips) =>
 				Seq(L3C_TipsDrop(tips))
 				
-			case TipsGet(mapTipToType) =>
-				val items = mapTipToType.toSeq.sortBy(_._1).map(pair => new L3A_TipsReplaceItem(pair._1, Some(pair._2)))
+			case TipsGet(mapTipToModel) =>
+				val items = mapTipToModel.toSeq.sortBy(_._1).map(pair => new L3A_TipsReplaceItem(pair._1, Some(pair._2)))
 				Seq(L3C_TipsReplace(items))
 			
 			case TipsWash(mapTipToSpec) =>

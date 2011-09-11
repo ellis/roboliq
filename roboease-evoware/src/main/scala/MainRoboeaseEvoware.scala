@@ -20,7 +20,11 @@ object Main extends App {
 		import roboliq.roboease._
 		import roboliq.compiler._
 		
-		val p = new ParserFile(WeizmannTables.map)
+		val p = new ParserFile(
+			WeizmannRoboeaseConfig.mapTables,
+			WeizmannRoboeaseConfig.mapTipModel,
+			WeizmannRoboeaseConfig.mapLcToPolicy
+		)
 		
 		/*
 		//p.DefineRack($DITI_WASTE,1,6,8,12, 0) ;

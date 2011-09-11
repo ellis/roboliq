@@ -42,6 +42,13 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 	private def setOption(id: String, value: Option[String]) { mapOptions(id) = value.getOrElse(null) }
 	
 	private def setReagent(id: String, plate: Plate, iWellPlus1: Int, lc: String, nWells_? : Option[Int]) {
+		val policy = shared.mapLcToPolicy.get(lc) match {
+			case None =>
+				shared.addError("Unknown liquid class \""+lc+"\"")
+				return
+			case Some(policy) => policy
+		}
+
 		//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
 		
 		// Create liquid with given name
@@ -66,7 +73,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		
 		shared.mapReagents(id) = reagent
 		//shared.lReagentsInWells += (reagent -> wells)
-		shared.mapDefaultLiquidClass(id) = lc
+		shared.mapReagentToPolicy(reagent) = policy
 	}
 
 	private def setLabware(id: String, sRack: String, sType: String) {

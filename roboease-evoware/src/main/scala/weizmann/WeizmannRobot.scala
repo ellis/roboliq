@@ -5,8 +5,14 @@ import roboliq.compiler._
 import roboliq.devices.pipette._
 
 
+class WeizmannRobot private (
+	devices: Seq[Device],
+	processors: Seq[CommandCompiler],
+	val pipetter: WeizmannPipetteDevice
+) extends Robot(devices, processors)
+
 object WeizmannRobot {
-	def apply(): Robot = {
+	def apply(): WeizmannRobot = {
 		val pipetter = new WeizmannPipetteDevice
 		val devices = Seq(
 			pipetter
@@ -19,6 +25,6 @@ object WeizmannRobot {
 			new L3P_TipsDrop("WASTE")
 			)
 			
-		new Robot(devices, processors)
+		new WeizmannRobot(devices, processors, pipetter)
 	}
 }

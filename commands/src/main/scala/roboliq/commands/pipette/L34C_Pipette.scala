@@ -65,18 +65,6 @@ case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3 {
 			val sVolumes = getSeqDebugString(args.items.map(_.nVolume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
-		/*val (tip0, tip1) = (items.head.tip, items.last.tip)
-		val bTipsContiguous = ((tip1.index - tip0.index + 1) == items.size)
-		val volumes = items.groupBy(_.nVolume)
-		val policies = items.groupBy(_.policy.sName)
-		if (bTipsContiguous && volumes.size == 1 && policies.size == 1) {
-			val wells = items.map(_.well)
-			val sTips = TipSet.toDebugString(items.map(_.tip))
-			getClass().getSimpleName() + "("+sTips+", "+volumes.keys.head+", "+policies.keys.head+", "+getWellsDebugString(wells)+")" 
-		}
-		else {
-			toString
-		}*/
 	}
 }
 
@@ -84,10 +72,8 @@ class L4A_PipetteArgs(
 	val items: Seq[L4A_PipetteItem],
 	val mixSpec_? : Option[MixSpec] = None,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
-	val sAspirateClass_? : Option[String] = None,
-	val sDispenseClass_? : Option[String] = None,
-	val sTipKind_? : Option[String] = None,
-	val fnClean_? : Option[Unit => Unit] = None
+	val pipettePolicy_? : Option[PipettePolicy] = None,
+	val tipModel_? : Option[TipModel] = None
 ) {
 	def toL3(states: RobotState): Either[Seq[String], L3A_PipetteArgs] = {
 		val items3_? = items.map(_.toL3(states))
@@ -101,10 +87,8 @@ class L4A_PipetteArgs(
 			items3,
 			mixSpec_? = mixSpec_?,
 			tipOverrides_? = tipOverrides_?,
-			sAspirateClass_? = sAspirateClass_?,
-			sDispenseClass_? = sDispenseClass_?,
-			sTipKind_? = sTipKind_?,
-			fnClean_? = fnClean_?
+			pipettePolicy_? = pipettePolicy_?,
+			tipModel_? = tipModel_?
 		))
 	}
 }
@@ -113,10 +97,8 @@ class L3A_PipetteArgs(
 	val items: Seq[L3A_PipetteItem],
 	val mixSpec_? : Option[MixSpec] = None,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
-	val sAspirateClass_? : Option[String] = None,
-	val sDispenseClass_? : Option[String] = None,
-	val sTipKind_? : Option[String] = None,
-	val fnClean_? : Option[Unit => Unit] = None
+	val pipettePolicy_? : Option[PipettePolicy] = None,
+	val tipModel_? : Option[TipModel] = None
 )
 
 case class L4A_PipetteItem(

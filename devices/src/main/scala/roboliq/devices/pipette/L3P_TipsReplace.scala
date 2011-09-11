@@ -23,14 +23,14 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 			else Seq(L2C_Wash(tipsWash.map(tip => new L2A_WashItem(tip, 0)), 0, WashIntensity.Decontaminate))
 		}
 		
-		val tipsDrop = tips.filter(tip => tip.obj.state(ctx.states).sType_?.isDefined).toSet
+		val tipsDrop = tips.filter(tip => tip.obj.state(ctx.states).model_?.isDefined).toSet
 		val cmdsDrop = {
 			if (tipsDrop.isEmpty) Seq()
 			else Seq(L3C_TipsDrop(tipsDrop))
 		}
 
-		val itemsGet = cmd.items.filter(_.sType_?.isDefined)
-		val itemss = itemsGet.groupBy(_.sType_?.get)
+		val itemsGet = cmd.items.filter(_.model_?.isDefined)
+		val itemss = itemsGet.groupBy(_.model_?.get)
 		val cmdsGet2 = itemss.toSeq.flatMap(pair => {
 			val (sType, items) = pair
 			val tips = items.map(_.tip).toSet

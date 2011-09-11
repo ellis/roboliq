@@ -21,11 +21,18 @@ case class WPL_Plate(plate: Plate) extends WellOrPlateOrLiquid
 case class WPL_Liquid(liquid: Reagent) extends WellOrPlateOrLiquid
 
 case class MixSpec(
-		val nVolume: Double,
-		val nCount: Int,
-		val sMixClass_? : Option[String] = None
-		)
+	val nVolume: Double,
+	val nCount: Int,
+	val mixPolicy_? : Option[PipettePolicy] = None
+)
 
+case class TipModel(
+	val id: String,
+	val nVolume: Double, 
+	val nVolumeAspirateMin: Double, 
+	val nVolumeWashExtra: Double,
+	val nVolumeDeconExtra: Double
+)
 
 sealed class TipWell(val tip: TipConfigL2, val well: WellConfigL2) extends HasTip {
 	override def toString = "TipWell("+(tip.index+1)+","+well+")" 
@@ -55,13 +62,12 @@ object PipettePosition extends Enumeration {
 	val Free, WetContact, DryContact = Value
 }
 
-case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense: PipettePosition.Value, mix: PipettePosition.Value)
+//case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense: PipettePosition.Value, mix: PipettePosition.Value)
 
-case class PipettePolicy(sName: String, pos: PipettePosition.Value)
+case class PipettePolicy(id: String, pos: PipettePosition.Value)
 
 object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with TipReplacementPolicy following Roboease
 	val ReplaceAlways, KeepBetween, KeepAlways = Value
-	// val AfterWetContact, AtStart, Never
 }
 
 class TipHandlingOverrides(

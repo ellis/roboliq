@@ -26,7 +26,7 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 		val wells = items.map(_.well)
 		val sTips = TipSet.toDebugString(items.map(_.tip))
 		val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
-		val sPolicies = super.getSeqDebugString(items.map(_.policy.sName))
+		val sPolicies = super.getSeqDebugString(items.map(_.policy.id))
 		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
 	}
 }
@@ -78,7 +78,7 @@ case class L2C_Dispense(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 		val wells = items.map(_.well)
 		val sTips = TipSet.toDebugString(items.map(_.tip))
 		val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
-		val sPolicies = super.getSeqDebugString(items.map(_.policy.sName))
+		val sPolicies = super.getSeqDebugString(items.map(_.policy.id))
 		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
 	}
 }
@@ -107,7 +107,7 @@ case class L2C_Mix(items: Seq[L2A_MixItem]) extends CommandL2 {
 		val wells = items.map(_.well)
 		val sTips = TipSet.toDebugString(items.map(_.tip))
 		val sVolumes = super.getSeqDebugString(items.map(_.nVolume))
-		val sPolicies = super.getSeqDebugString(items.map(_.policy.sName))
+		val sPolicies = super.getSeqDebugString(items.map(_.policy.id))
 		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
 	}
 }
@@ -184,12 +184,12 @@ sealed class L1A_WashItem(
 // TipsGet
 //-------------------------------
 
-case class L2C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL2 {
+case class L2C_TipsGet(tips: Set[TipConfigL2], model: TipModel) extends CommandL2 {
 	type L1Type = L1C_TipsGet
 	
 	def updateState(builder: StateBuilder) {
 		for (tip <- tips) {
-			tip.obj.stateWriter(builder).get(sType)
+			tip.obj.stateWriter(builder).get(model)
 		}
 		/*val tip0 = tips.head
 		println("after1: "+builder.map(tip0.obj))
@@ -201,21 +201,21 @@ case class L2C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL2 
 	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
 		for (tip <- tips) {
 			val tipState = tip.obj.state(states)
-			tipState.sType_? match {
-				case Some(sType) => return Left(Seq("tip "+tip.index+" must be dropped before getting a new one"))
+			tipState.model_? match {
+				case Some(model) => return Left(Seq("tip "+tip.index+" must be dropped before getting a new one"))
 				case _ =>
 			}
 		}
-		Right(L1C_TipsGet(tips, sType))
+		Right(L1C_TipsGet(tips, model))
 	}
 
 	override def toDebugString = {
 		val sTips = TipSet.toDebugString(tips)
-		getClass().getSimpleName() + List(sTips, sType).mkString("(", ", ", ")") 
+		getClass().getSimpleName() + List(sTips, model.id).mkString("(", ", ", ")") 
 	}
 }
 
-case class L1C_TipsGet(tips: Set[TipConfigL2], sType: String) extends CommandL1
+case class L1C_TipsGet(tips: Set[TipConfigL2], model: TipModel) extends CommandL1
 
 //-------------------------------
 // TipsDrop

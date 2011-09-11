@@ -39,7 +39,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	override protected def mix(
 		states0: RobotState,
 		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
-		mapTipToType: Map[TipConfigL2, String],
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		tws: Seq[TipWell]
 	): Either[Seq[String], MixResult] = {
 		mix_createItems(states0, tws) match {
@@ -79,7 +79,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 						val bFirst = false // NOTE: just set to false, because this will be recalculated later anyway
 						//if (tip.index == 0)
 						//	println("mix")
-						getMixCleanSpec(builder, mapTipToType, tipOverrides, bFirst, item.tip, item.well) match {
+						getMixCleanSpec(builder, mapTipToModel, tipOverrides, bFirst, item.tip, item.well) match {
 							case None =>
 							case Some(spec) =>
 								//println("spec:", spec)

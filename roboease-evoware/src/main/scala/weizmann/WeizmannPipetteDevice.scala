@@ -11,12 +11,12 @@ import _root_.evoware._
 
 
 class WeizmannPipetteDevice extends PipetteDevice {
-	private val tipSpec10 = new TipSpec("DiTi 10ul", 10, 0, 0, 0)
-	private val tipSpec20 = new TipSpec("DiTi 20ul", 20, 0, 0, 0)
-	private val tipSpec50 = new TipSpec("DiTi 50ul", 50, 1, 0, 0)
-	private val tipSpec200 = new TipSpec("DiTi 200ul", 200, 2, 0, 0)
-	//private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 3, 960)
-	private val tipSpec1000 = new TipSpec("DiTi 1000ul", 1000, 0, 0, 0)
+	val tipSpec10 = new TipModel("DiTi 10ul", 10, 0, 0, 0)
+	val tipSpec20 = new TipModel("DiTi 20ul", 20, 0, 0, 0)
+	val tipSpec50 = new TipModel("DiTi 50ul", 50, 1, 0, 0)
+	val tipSpec200 = new TipModel("DiTi 200ul", 200, 2, 0, 0)
+	//private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 3, 960)
+	val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 0, 0, 0)
 	private val tipSpecs = Seq(tipSpec200, tipSpec10, tipSpec20, tipSpec50, tipSpec1000)
 	//private val tipSpecs = Seq(tipSpec1000)
 	val config = new PipetteDeviceConfig(
@@ -24,23 +24,14 @@ class WeizmannPipetteDevice extends PipetteDevice {
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
 		tipGroups = tipSpecs.map(spec => (0 to 7).map(i => i -> spec))
 	)
-	private val mapTipSpecs = config.tipSpecs.map(spec => spec.sName -> spec).toMap
-	private val mapPipetteSpecs = Seq(
-			PipetteSpec("PIE_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
-			PipetteSpec("PIE_AUTAIR_LowVol", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
-			PipetteSpec("PIE_AUTBOT", PipettePosition.WetContact, PipettePosition.WetContact, PipettePosition.WetContact),
-			PipetteSpec("PIE_TROUGH_AUTAIR", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact),
-			PipetteSpec("PIE_MIX", PipettePosition.WetContact, PipettePosition.WetContact, PipettePosition.WetContact),
-			PipetteSpec("PIE_MIX_AUT", PipettePosition.WetContact, PipettePosition.Free, PipettePosition.WetContact)
-			).map(spec => spec.sName -> spec).toMap
-
+	//private val mapTipSpecs = config.tipSpecs.map(spec => spec.id -> spec).toMap
 	def areTipsDisposable: Boolean = true
 	def addKnowledge(kb: KnowledgeBase) = {
 		config.tips.foreach(kb.addObject)
 	}
-	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolumeAspirateMin }
-	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.sType_? match { case None => 0; case Some(s) => mapTipSpecs(s).nVolume }
-	def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
+	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = tip.model_? match { case None => 0; case Some(model) => model.nVolumeAspirateMin }
+	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = tip.model_? match { case None => 0; case Some(model) => model.nVolume }
+	//def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
@@ -59,11 +50,6 @@ class WeizmannPipetteDevice extends PipetteDevice {
 	val nFreeDispenseVolumeThreshold = 20
 	
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
-		mapPipetteSpecs.get(liquid.sFamily) match {
-			case Some(spec) => return Some(PipettePolicy(liquid.sFamily, spec.dispense))
-			case _ =>
-		}
-		
 		if (liquid.contaminants.contains(Contaminant.Cell))
 			Some(PipettePolicy("PIE_", PipettePosition.Free))
 		else if (liquid.sName.contains("DMSO"))
