@@ -20,6 +20,24 @@ object Main extends App {
 		import roboliq.roboease._
 		import roboliq.compiler._
 		
+		val lsFiles = Seq(
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf",
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf",
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf"
+			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script04.conf"
+		)
+		
+		val lsFileOverride = Seq(
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf"
+		)
+		
+		if (lsFileOverride.isEmpty)
+			lsFiles.foreach(test2)
+		else
+			test2(lsFileOverride.head)
+	}
+	
+	def test2(sSourcePath: String) {
 		val p = new ParserFile(
 			WeizmannRoboeaseConfig.mapTables,
 			WeizmannRoboeaseConfig.mapTipModel,
@@ -28,9 +46,7 @@ object Main extends App {
 
 		RoboeaseHack.bEmulateEvolab = true
 		
-		val sSourcePath = System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf"
-		//val sSource = scala.io.Source.fromFile(sSourcePath).mkString
-		val sSource = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf").mkString
+		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
 		p.parse(sSource) match {
 			case Left(err) =>
 				err.print()

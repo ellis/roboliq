@@ -182,6 +182,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	): Either[String, Tuple2[Seq[L2A_SpirateItem], Map[TipWell, Double]]] = {
 		val tws2 = if (remains0.isEmpty) tws else tws.filter(remains0.contains)
 		val items = new ArrayBuffer[L2A_SpirateItem]
+		// For debug only:
 		if (tws2.isEmpty) {
 			println()
 			println("createItems:")
@@ -208,7 +209,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					nVolume
 				}
 				else {
-					item.nVolume
+					nVolumeRequested
 				}
 			}
 			getDispensePolicy(states, tw, nVolume) match {
@@ -240,11 +241,11 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	}
 
 	private def aspirate_chooseTipWellPairs_direct(states: StateMap, srcs: collection.Map[TipConfigL2, Set[WellConfigL2]]): Seq[Seq[TipWell]] = {
-		println("srcs: "+srcs)
+		//println("srcs: "+srcs)
 		val tws: Seq[TipWell] = srcs.toSeq.sortBy(_._1).map(pair => new TipWell(pair._1, pair._2.head))
 		val twss = PipetteHelper.splitTipWellPairs(tws)
-		println("tws:", tws)
-		println("twss:", twss)
+		//println("tws:", tws)
+		//println("twss:", twss)
 		twss
 	}
 	

@@ -61,14 +61,7 @@ Tuval/Yair:
 	get date for coming to Weizmann
 Code:
 	Rotem_Script03.conf:
-x	TIPTYPE:200 not used, instead 1000 was selected
-	-
-x	L2C_Aspirate(Tip1-4, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:C5+4)
-	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
-	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
-	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
-	L2C_Aspirate(Tip5, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:D1)
-	L2C_Dispense(Tip1-8, 2.0, PIE_AUTAIR_LowVol, Rotem_PHS1:C1+8)
+	properly pipette volumes greater than tip volume
 
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
@@ -106,6 +99,16 @@ x	L2C_Aspirate(Tip1-4, 2.0, PIE_AUTAIR_LowVol, Rotem_STK1:C5+4)
 		Dispense(7,"PIE_AUTAIR","300","300","300",0,0,0,0,0,0,0,0,0,29,1,1,"0C080000 000000000",0,0);
 		Dispense(3,"PIE_AUTAIR","300","300",0,0,0,0,0,0,0,0,0,0,29,2,1,"0C080000000000000",0,0);
 		Dispense(127,"PIE_AUTAIR","300","300","300","300","300","300","300",0,0,0,0,0,29,2,1,"0C0800000000¯00000",0,0);
+	devices: L3P_Pipette:
+		From Rotem_Script03.conf: DIST_REAGENT2 DDW P14:A1+33 OLIGO_DDW_LIST DEFAULT TIPTYPE:1000,TIPMODE:KEEPTIP
+		becomes:
+		L3C_Pipette(BUF12:A1+8, Rotem_RGT2:A1+33, List(396.0, 1536.46, 1536.46, 397.5, 397.5, 397.5, 397.5, 397.5, 1683.0, 1049.4, 415.8, 1049.4, 
+		396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0, 396.0))
+		and this following translation is of interest: 
+		L2C_Aspirate(Tip1-2, ArrayBuffer(758.0, 124.40000000000009), PIE_TROUGH_AUTAIR, BUF12:E1+2)
+		L2C_Aspirate(Tip4, 124.40000000000009, PIE_TROUGH_AUTAIR, BUF12:E1)
+		L2C_Dispense(Tip1-2,4, ArrayBuffer(758.0, 124.40000000000009, 124.40000000000009), PIE_TROUGH_AUTAIR, Rotem_RGT2:A2+2,D2)
+		the aspirate could have been performed in a single step
 	devices: create tests for PipetteHelperL3
 	translator: need to split scripts into multiple files when plate is moved
 	translator: improvement of above would be to only split scripts when a labware conflict would occur
