@@ -46,6 +46,7 @@ private trait L3P_PipetteMixBase {
 	val dests: SortedSet[WellConfigL2]
 	val mixSpec_? : Option[MixSpec]
 	val tipOverrides: TipHandlingOverrides
+	val tipModel_? : Option[TipModel]
 	val bMixOnly: Boolean
 
 
@@ -57,7 +58,18 @@ private trait L3P_PipetteMixBase {
 		var nWinnerScore = Int.MaxValue
 		var lsErrors = new ArrayBuffer[String]
 		val mapIndexToTip = robot.config.tips.map(tip => tip.index -> tip).toMap
-		for (tipGroup <- robot.config.tipGroups) {
+		val tipGroups = tipModel_? match {
+			case None =>
+				if (robot.config.tipGroups.isEmpty)
+					lsErrors += "CONFIG: no tip groups defined"
+				robot.config.tipGroups
+			case Some(tipModel) =>
+				val tipGroups = robot.config.tipGroups.filter(_.forall({ case (iTip: Int, m: TipModel) => m eq tipModel }))
+				if (tipGroups.isEmpty)
+					lsErrors += "tip model \""+tipModel.id+"\" was requested, but no tip group was found which only contains tips of that type"
+				tipGroups
+		}
+		for (tipGroup <- tipGroups) {
 			val mapTipToModel: Map[TipConfigL2, TipModel] = tipGroup.map(pair => mapIndexToTip(pair._1).state(ctx.states).conf -> pair._2).toMap
 			val tips = SortedSet(mapTipToModel.keys.toSeq : _*)
 			//val tipAndSpecs = robot.config.tips.filter(tip => tipGroup.contains(tip.index)).map(tip => tip.state(ctx.states).conf)

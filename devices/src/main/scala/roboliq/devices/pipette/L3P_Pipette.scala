@@ -33,6 +33,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	val dests = SortedSet[WellConfigL2](args.items.map(_.dest) : _*)
 	val mixSpec_? : Option[MixSpec] = args.mixSpec_?
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
+	val tipModel_? = args.tipModel_?
 	val bMixOnly = false
 	
 	val mapDestToItem: Map[WellConfigL2, L3A_PipetteItem] = args.items.map(t => t.dest -> t).toMap

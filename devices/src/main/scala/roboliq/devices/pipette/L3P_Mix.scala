@@ -33,6 +33,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	val dests = args.wells
 	val mixSpec_? = Some(args.mixSpec)
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
+	val tipModel_? = args.tipModel_?
 	val bMixOnly = true
 	
 	
