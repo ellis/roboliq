@@ -58,7 +58,7 @@ object Command {
 	
 	private def getWellString(well: WellConfigL2, bShowCol: Boolean): String = {
 		if (bShowCol)
-			(well.iCol + 'A').asInstanceOf[Char].toString + (well.iRow + 1)
+			(well.iRow + 'A').asInstanceOf[Char].toString + (well.iCol + 1)
 		else
 			(well.index + 1).toString
 	}
