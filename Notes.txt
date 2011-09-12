@@ -261,7 +261,7 @@ Handling plates between different devices:
 			<normal operation occurs at this point>
 			re-cover/uncover/uncover-and-dispose-lid at the end
 			move plate to new final location (prehaps returning it to the original location)
-			conve/uncover at final location
+			cover/uncover at final location
 ==========
 AST Processing levels:
 1) maximally abstract commands, lab-independent

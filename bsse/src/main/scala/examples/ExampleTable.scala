@@ -123,7 +123,7 @@ trait ExampleTable2 extends EvowareTable {
 		val reagents50 = new PlateModel("Reagent Cooled 8*50ml", 8, 1, 50000)
 		val ethanol = new TroughModel("Trough 1000ml", 8, 1)
 		val platePcr = new PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, 500) // FIXME: nVolume? 
-		val eppendorfs = new PlateModel("Block 20Por 1.5 ml Eppendorf", 4, 5, 1500) // FIXME: nVolume?
+		val eppendorfs = new PlateModel("Block 20Pos 1.5 ml Eppendorf", 4, 5, 1500) // FIXME: nVolume?
 		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500) // FIXME: nVolume?
 		//"MTP Waste"
 	}

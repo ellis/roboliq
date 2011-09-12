@@ -1,7 +1,5 @@
 package roboliq.commands.move
 
-import scala.collection.immutable.SortedSet
-
 import roboliq.common._
 
 

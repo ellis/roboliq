@@ -11,6 +11,7 @@ import roboliq.commands.shake._
 
 
 trait CommonProtocol extends
+	CommonCommands with
 	PipetteCommands with
 	ShakeCommands
 { thisObj =>

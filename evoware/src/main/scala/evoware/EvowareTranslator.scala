@@ -6,6 +6,7 @@ import java.io.FileWriter
 
 import roboliq.common._
 import roboliq.compiler._
+import roboliq.commands._
 import roboliq.commands.move._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
@@ -25,6 +26,7 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		case c: L1C_TipsGet => tipsGet(c)
 		case c: L1C_TipsDrop => tipsDrop(c)
 		case c: L1C_MovePlate => movePlate(c.args)
+		case c: L1C_Timer => timer(c.args)
 		case c: L1C_EvowareFacts => facts(c)
 	}
 
@@ -347,6 +349,13 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 			case None => Left(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
 			case Some(site) => Right(site.carrier)
 		}
+	}
+	
+	private def timer(args: L12A_TimerArgs): Either[Seq[String], Seq[Command]] = {
+		Right(Seq(
+			L0C_StartTimer(1),
+			L0C_WaitTimer(1, args.nSeconds)
+		))
 	}
 	
 	private def facts(cmd: L1C_EvowareFacts): Either[Seq[String], Seq[Command]] = {

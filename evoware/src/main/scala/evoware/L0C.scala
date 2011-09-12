@@ -149,6 +149,28 @@ case class L0C_Transfer_Rack(
 	}
 }
 
+case class L0C_StartTimer(
+	id: Int
+) extends Command {
+	override def toString = {
+		List(
+			'"'+id.toString+'"'
+		).mkString("StartTimer(", ",", ");")
+	}
+}
+
+case class L0C_WaitTimer(
+	id: Int,
+	nSeconds: Int
+) extends Command {
+	override def toString = {
+		List(
+			'"'+id.toString+'"',
+			'"'+nSeconds.toString+'"'
+		).mkString("WaitTimer(", ",", ");")
+	}
+}
+
 case class L0C_Facts(
 	sDevice: String,
 	sVariable: String,

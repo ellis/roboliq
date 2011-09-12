@@ -43,6 +43,13 @@ class Example02 extends Protocol {
 		mix(plate_working, 90, 4)
 	}
 	
+	def incubate(restSeconds: Int, shakeSeconds: Int, count: Int) {
+		val location = 
+		for (i <- 0 until count) {
+			shake(plate_working, 4*60)
+		}
+	}
+	
 	pipette(plate_template, plate_working, 3)
 	competentYeastDispense()
 	val x1 = shake(plate_working, 4*60)

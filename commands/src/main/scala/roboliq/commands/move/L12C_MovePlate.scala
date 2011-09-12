@@ -22,7 +22,6 @@ case class L2C_MovePlate(args: L2A_MovePlateArgs) extends CommandL2 {
 		import args._
 		this.getClass().getSimpleName() + List(iRoma, plate, locationDest, lidHandling).mkString("(", ", ", ")") 
 	}
-
 }
 
 case class L2A_MovePlateArgs(
@@ -49,7 +48,13 @@ case class L2A_MovePlateArgs(
 	}
 }
 
-case class L1C_MovePlate(args: L1A_MovePlateArgs) extends CommandL1
+case class L1C_MovePlate(args: L1A_MovePlateArgs) extends CommandL1 {
+	override def toDebugString = {
+		import args._
+		this.getClass().getSimpleName() + List(iRoma, sPlateModel, locationDest, lidHandling).mkString("(", ", ", ")") 
+	}
+}
+
 case class L1A_MovePlateArgs(
 	iRoma: Int, // 0 for RoMa1, 1 for RoMa2
 	sPlateModel: String,
