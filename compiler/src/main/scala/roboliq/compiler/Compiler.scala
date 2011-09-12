@@ -38,7 +38,8 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	var bDebug = false
 	private var nIndent = nDepth
 	private val m_processorsInternal = List(
-		new L3P_SaveCurrentLocation
+		new L3P_SaveCurrentLocation,
+		new L3P_Timer
 	)
 	private val m_handlers: Map[java.lang.Class[_], CommandCompiler] =
 		(m_processorsInternal ++ processors).map(p => p.cmdType -> p).toMap
