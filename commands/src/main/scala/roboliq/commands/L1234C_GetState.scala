@@ -1,5 +1,41 @@
 package roboliq.commands
 
-class L1234C_GetState {
+import roboliq.common._
+
+
+case class L4C_SaveCurrentLocation(plate: Plate, mem: Memento[String]) extends CommandL4 {
+	type L3Type = L3C_SaveCurrentLocation
+
+	def addKnowledge(kb: KnowledgeBase) {
+		kb.addPlate(plate)
+		kb.addObject(mem)
+		println("!!!!!!!!!")
+	}
+	
+	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+		val plateState = plate.state(states)
+		val memState = mem.state(states)
+		Right(L3C_SaveCurrentLocation(plateState.conf, memState.conf))
+	}
 
 }
+
+case class L3C_SaveCurrentLocation(plate: PlateConfigL2, mem: MementoConfig[String]) extends CommandL3
+
+case class L2C_SaveCurrentLocation(plate: PlateConfigL2, mem: MementoConfig[String]) extends CommandL2 {
+	type L1Type = L1C_SaveCurrentLocation
+	
+	def updateState(builder: StateBuilder) {
+		mem.obj.stateWriter(builder).value = plate.state(builder).location
+	}
+	
+	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+		Right(L1C_SaveCurrentLocation())
+	}
+	
+	override def toDebugString = {
+		this.getClass().getSimpleName() + List(plate, mem).mkString("(", ", ", ")") 
+	}
+}
+
+case class L1C_SaveCurrentLocation() extends CommandL1

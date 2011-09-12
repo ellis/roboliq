@@ -4,16 +4,18 @@ import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common
 import roboliq.common._
+import roboliq.commands
 import roboliq.commands._
-import roboliq.commands.move._
+//import roboliq.commands.move._
 import roboliq.commands.pipette._
-import roboliq.commands.shake._
+//import roboliq.commands.shake._
 
 
 trait CommonProtocol extends
 	CommonCommands with
-	PipetteCommands with
-	ShakeCommands
+	move.MoveCommands with
+	pipette.PipetteCommands with
+	shake.ShakeCommands
 { thisObj =>
 	type Location = common.Location
 	

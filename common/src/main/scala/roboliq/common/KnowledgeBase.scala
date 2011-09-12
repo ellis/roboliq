@@ -79,6 +79,11 @@ class KnowledgeBase {
 		getObjSetup(o)
 	}
 	
+	def getMementoSetup[T](o: Memento[T]): MementoSetup[T] = {
+		addObject(o)
+		getObjSetup(o)
+	}
+	
 	def getReagentWells(reagent: Reagent): Set[Well] = {
 		m_wells.filter(well => {
 			val wellSetup = getWellSetup(well)

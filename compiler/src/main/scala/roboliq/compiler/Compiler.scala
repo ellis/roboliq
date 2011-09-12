@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
+import roboliq.commands
 import roboliq.protocol.CommonProtocol
 
 class CompileNode(val cmd: Command, val res: CompileResult, val translation: Seq[Command], val children: Seq[CompileNode]) {
@@ -36,7 +37,11 @@ case class CompilerStageSuccess(nodes: Seq[CompileNode], log: Log = Log.empty) e
 class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	var bDebug = false
 	private var nIndent = nDepth
-	private var m_handlers: Map[java.lang.Class[_], CommandCompiler] = processors.map(p => p.cmdType -> p).toMap
+	private val m_processorsInternal = List(
+		new L3P_SaveCurrentLocation
+	)
+	private val m_handlers: Map[java.lang.Class[_], CommandCompiler] =
+		(m_processorsInternal ++ processors).map(p => p.cmdType -> p).toMap
 	
 	def createSubCompiler(): Compiler = {
 		new Compiler(processors, nDepth + 1)

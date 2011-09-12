@@ -21,17 +21,22 @@ class Location extends Obj { thisObj =>
 
 		val conf = new LocationConfig(
 				obj = this,
-				location = setup.location_?.get)
+				location0 = setup.location_?.get)
 		val state = new LocationState(
-				conf = conf)
+				conf = conf,
+				location = conf.location0
+				)
 		
 		Right(conf, state)
 	}
 
-	/*class StateWriter(map: HashMap[Obj, ObjState]) {
+	class StateWriter(map: HashMap[Obj, ObjState]) {
 		def state = map(thisObj).asInstanceOf[State]
+
+		def location = state.location
+		def location_=(s: String) { map(thisObj) = state.copy(location = s) }
 	}
-	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)*/
+	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 }
 
 class LocationSetup(val obj: Location) extends ObjSetup {
@@ -44,12 +49,16 @@ class LocationSetup(val obj: Location) extends ObjSetup {
 
 class LocationConfig(
 	val obj: Location,
-	val location: String
+	val location0: String
 ) extends ObjConfig {
-	override def toString = location
+	def state(states: StateMap) = obj.state(states)
+	override def toString = location0
 }
 
-class LocationState(val conf: LocationConfig) extends ObjState
+case class LocationState(
+	val conf: LocationConfig,
+	val location: String
+) extends ObjState
 
 class LocationProxy(kb: KnowledgeBase, obj: Location) {
 	def location: String = null

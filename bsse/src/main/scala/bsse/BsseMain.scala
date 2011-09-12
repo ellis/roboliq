@@ -15,8 +15,15 @@ object Main extends App {
 	if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
 	protocol.__findPlateLabels()
 
+	// Knowledge from devices
 	val system = new BsseSystem(protocol.lab.sites)
 	system.devices.foreach(_.addKnowledge(protocol.kb))
+
+	// Knowledge from commands
+	protocol.cmds.foreach(_ match {
+		case c: CommandL4 => c.addKnowledge(protocol.kb)
+		case _ =>
+	})
 
 	if (protocol.m_customize.isDefined) protocol.m_customize.get()
 	

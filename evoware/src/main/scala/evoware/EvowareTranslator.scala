@@ -28,6 +28,7 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		case c: L1C_MovePlate => movePlate(c.args)
 		case c: L1C_Timer => timer(c.args)
 		case c: L1C_EvowareFacts => facts(c)
+		case c: L1C_SaveCurrentLocation => Right(Seq())
 	}
 
 	/*def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {

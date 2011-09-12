@@ -44,15 +44,17 @@ class Example02 extends Protocol {
 	}
 	
 	def incubate(restSeconds: Int, shakeSeconds: Int, count: Int) {
-		val location = 
+		val location = saveLocation(plate_working)
 		for (i <- 0 until count) {
-			shake(plate_working, 4*60)
+			wait(restSeconds)
+			shake(plate_working, shakeSeconds)
+			movePlate(plate_working, location)
 		}
 	}
 	
 	pipette(plate_template, plate_working, 3)
 	competentYeastDispense()
-	val x1 = shake(plate_working, 4*60)
+	incubate(3*60, 60, 4)
 
 	val lab = new EvowareLab with ExampleTable2 {
 		reagent(liquid_plasmidDna, Labwares.eppendorfs, 1)
@@ -72,8 +74,5 @@ class Example02 extends Protocol {
 				wellSetup.reagent_? = Some(liquid)
 			}
 		}
-		val l = new Location
-		x1.plate.locationNew = l
-		new common.LocationProxy(kb, l).location = Sites.shaker.sName
 	}
 }

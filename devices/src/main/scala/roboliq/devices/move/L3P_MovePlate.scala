@@ -29,7 +29,7 @@ class L3P_MovePlate(device: MoveDevice) extends CommandCompilerL3 {
 		val args2 = L2A_MovePlateArgs(
 			iRoma, // 0 for RoMa1, 1 for RoMa2
 			cmd.args.plate,
-			cmd.args.location,
+			cmd.args.location.value(ctx.states),
 			lidHandling,
 			locationLid
 		)
