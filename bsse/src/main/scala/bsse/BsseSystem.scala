@@ -2,23 +2,29 @@ package bsse
 
 import roboliq.common._
 import roboliq.compiler._
+import roboliq.devices.move._
 import roboliq.devices.pipette._
 import evoware.EvowareSystem
 import evoware.SiteObj
 import evoware.WashProgramArgs
-
+import roboliq.robots.evoware.devices._
+import roboliq.labs.bsse._
 
 class BsseSystem(val sites: Iterable[SiteObj]) extends RoboliqSystem with EvowareSystem {
+	val mover = new BsseMoveDevice
 	val pipetter = new BssePipetteDevice
 	
 	val devices = Seq(
+		mover,
 		pipetter
 	)
 	
 	val processors = Seq(
 		new L3P_CleanPending(pipetter),
 		new L3P_Mix(pipetter),
+		new L3P_MovePlate(mover),
 		new L3P_Pipette(pipetter),
+		new L3P_Shake_HPShaker("shaker"),
 		new L3P_TipsDrop("WASTE"),
 		new L3P_TipsReplace,
 		new L3P_TipsWash_BSSE(pipetter, pipetter.plateDeconAspirate, pipetter.plateDeconDispense)

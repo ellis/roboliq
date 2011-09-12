@@ -246,6 +246,23 @@ Terminology:
 		type of tip
 		type of tube (various epindorphs)
 ==========
+Handling plates between different devices:
+	Challenges:
+		- a plate may need to be moved to a device
+		- a plate may need to be moved back onto the table from a device
+		- where should the plate be moved back to?  The simplest answer would be to move it back to its original position, but what if another plate now occupies that position?
+		- the plate might not be compatible with the device
+	Solution A:
+		- each L3/L4 plate command has an option to:
+			replate (new PlateModel, volume, location), which would then discard the original plate
+			cover/uncover at origial location
+			move plate to a new location
+			cover/uncover at new location
+			<normal operation occurs at this point>
+			re-cover/uncover/uncover-and-dispose-lid at the end
+			move plate to new final location (prehaps returning it to the original location)
+			conve/uncover at final location
+==========
 AST Processing levels:
 1) maximally abstract commands, lab-independent
 2) more concrete commands for the given system (implementations of abstract methods)

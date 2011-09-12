@@ -9,6 +9,7 @@ import roboliq.compiler._
 import roboliq.commands.move._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
+import roboliq.robots.evoware.commands._
 
 
 class EvowareTranslator(system: EvowareSystem) extends Translator {
@@ -24,6 +25,7 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		case c: L1C_TipsGet => tipsGet(c)
 		case c: L1C_TipsDrop => tipsDrop(c)
 		case c: L1C_MovePlate => movePlate(c.args)
+		case c: L1C_EvowareFacts => facts(c)
 	}
 
 	/*def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
@@ -345,5 +347,13 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 			case None => Left(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
 			case Some(site) => Right(site.carrier)
 		}
+	}
+	
+	private def facts(cmd: L1C_EvowareFacts): Either[Seq[String], Seq[Command]] = {
+		Right(Seq(L0C_Facts(
+			sDevice = cmd.args.sDevice,
+			sVariable = cmd.args.sVariable,
+			sValue = cmd.args.sValue
+		)))
 	}
 }

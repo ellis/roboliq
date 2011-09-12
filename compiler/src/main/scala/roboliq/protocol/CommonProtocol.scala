@@ -14,8 +14,10 @@ trait CommonProtocol extends
 	PipetteCommands with
 	ShakeCommands
 { thisObj =>
-	val Contaminant = roboliq.common.Contaminant
-	val CleanPolicy = roboliq.common.GroupCleanPolicy
+	type Location = common.Location
+	
+	val Contaminant = common.Contaminant
+	val CleanPolicy = common.GroupCleanPolicy
 	
 	val kb = new KnowledgeBase
 	val cmds = new ArrayBuffer[Command]

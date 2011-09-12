@@ -52,6 +52,6 @@ class LocationConfig(
 class LocationState(val conf: LocationConfig) extends ObjState
 
 class LocationProxy(kb: KnowledgeBase, obj: Location) {
-	private def location: String = ""
+	def location: String = null
 	def location_=(s: String) = kb.getLocationSetup(obj).location_? = Some(s)
 }

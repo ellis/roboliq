@@ -125,27 +125,27 @@ case class L0C_Transfer_Rack(
 	override def toString = {
 		import LidHandling._
 		
-		val bMoveBackToHome = false // 1 = move back to home position
+		val bMoveBackToHome = true // 1 = move back to home position
 		List(
-			'"'+iGridSrc+'"',
-			'"'+iGridDest+'"',
+			'"'+iGridSrc.toString+'"',
+			'"'+iGridDest.toString+'"',
 			if (bMoveBackToHome) 1 else 0,
 			if (lidHandling == NoLid) 0 else 1,
 			0, // speed: 0 = maximum, 1 = taught in vector dialog
 			iRoma,
 			if (lidHandling == RemoveAtSource) 1 else 0,
-			'"'+iGridLid+'"',
+			'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
 			'"'+sPlateModel+'"',
-			"Narrow", // Vector: Narrow, Wide, User Defined...
+			"\"Narrow\"", // Vector: Narrow, Wide, User Defined...
 			"\"\"",
 			"\"\"",
 			'"'+sCarrierModelSrc+'"',
 			'"'+sCarrierModelLid+'"',
 			'"'+sCarrierModelDest+'"',
-			'"'+iSiteSrc+'"',
-			'"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
-			'"'+iSiteDest+'"'
-		).mkString("Transfer_Rack(", ", ", ");")
+			'"'+(iSiteSrc+1).toString+'"',
+			'"'+(if (lidHandling == NoLid) "(Not defined)" else (iSiteLid+1).toString)+'"',
+			'"'+(iSiteDest+1).toString+'"'
+		).mkString("Transfer_Rack(", ",", ");")
 	}
 }
 
@@ -156,11 +156,11 @@ case class L0C_Facts(
 ) extends Command {
 	override def toString = {
 		List(
-			sDevice,
-			sVariable,
-			sValue,
+			'"'+sDevice+'"',
+			'"'+sVariable+'"',
+			'"'+sValue+'"',
 			"\"0\"",
 			"\"\""
-		).mkString("FACTS(", ", ", ");")
+		).mkString("FACTS(", ",", ");")
 	}
 }

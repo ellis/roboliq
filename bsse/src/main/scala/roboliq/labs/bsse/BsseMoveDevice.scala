@@ -1,4 +1,4 @@
-package bsse
+package roboliq.labs.bsse
 
 import roboliq.devices.move._
 

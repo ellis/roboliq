@@ -4,6 +4,7 @@ package examples
 //import roboliq.commands.pipette._
 //import roboliq.compiler._
 //import roboliq.devices.pipette._
+import roboliq.common
 import bsse.Protocol
 
 class Example01 extends Protocol {
@@ -42,16 +43,13 @@ class Example02 extends Protocol {
 		mix(plate_working, 90, 4)
 	}
 	
-	def heatShock() {
-		
-	}
-	
 	pipette(plate_template, plate_working, 3)
 	competentYeastDispense()
+	val x1 = shake(plate_working, 4*60)
 
 	val lab = new EvowareLab with ExampleTable2 {
-		reagent(liquid_plasmidDna, Labwares.epindorfs, 1)
-		reagent(liquid_ssDna, Labwares.epindorfs, 2)
+		reagent(liquid_plasmidDna, Labwares.eppendorfs, 1)
+		reagent(liquid_ssDna, Labwares.eppendorfs, 2)
 		reagent(liquid_competentCells, Labwares.reagents50, 1)
 		reagent(liquid_liAcMix, Labwares.reagents50, 2)
 		//labware(plate_template, Sites.cooled1, LabwareModels.platePcr)
@@ -67,5 +65,8 @@ class Example02 extends Protocol {
 				wellSetup.reagent_? = Some(liquid)
 			}
 		}
+		val l = new Location
+		x1.plate.locationNew = l
+		new common.LocationProxy(kb, l).location = Sites.shaker.sName
 	}
 }
