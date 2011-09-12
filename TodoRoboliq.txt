@@ -76,7 +76,7 @@ Code:
 			def createTranslator()
 		BsseSystem:
 			our devices, processors, models, table vars, table, settings, evoware translator
-	compiler: make batching a part of processing L2 commands rather than performing the batching in L3
+	compiler: make batching a part of processing L2 or L1 commands rather than performing the batching in L3
 	protocol: let user create wells, not just plates?
 	protocol: let user work with well groups; this is more general than wells and plates?
 	protocol: let user specify specific wells on a plate?
@@ -84,10 +84,10 @@ Code:
 	evoware: move to roboliq.robots.evoware package
 	evoware: replace Site with SiteObj (but rename SiteObj to Site)
 	bsse: move to robloiq.labs.bsse package
-x	devices: Pipette: allow for pipetting more than the maximum tip volume by repeating the pipetting step
-	devices: final wash in Pipette isn't happening because the tip states are set as clean, for some reason
-	devices: Example02: why are 1000ul being aspirated?
+*	devices: final wash in Pipette isn't happening because the tip states are set as clean, for some reason
+*	devices: Example02: why are 1000ul being aspirated?
 4	devices: implement transfer
+		create means for user to capture plate location in the protocol and then use that position as an argument later (like to return a plate to an original position)
 5	devices: implement wait
 6	devices: implement shaker
 7	devices: Pipette/Mix: add L4 option to first move the target plates to new locations, in case they cannot be accessed in their current locations
@@ -387,6 +387,7 @@ x	devices: Pipette: allow for pipetting more than the maximum tip volume by repe
 			Roboliq_Water_Wet_0050
 			Roboliq_DMSO_Air_1000
 			Roboliq_Decon_???
+			+ glycerol 1000 and 50 (oil can also be pipetted with this class)
 		classes for how to do cleaning:
 			always decontaminate before aspirate
 			tip must be clean of extraneous liquids before dispense

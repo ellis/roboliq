@@ -74,6 +74,11 @@ class KnowledgeBase {
 		getObjSetup(o)
 	}
 	
+	def getLocationSetup(o: Location): LocationSetup = {
+		addObject(o)
+		getObjSetup(o)
+	}
+	
 	def getReagentWells(reagent: Reagent): Set[Well] = {
 		m_wells.filter(well => {
 			val wellSetup = getWellSetup(well)

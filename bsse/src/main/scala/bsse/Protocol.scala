@@ -9,7 +9,8 @@ import roboliq.protocol.CommonProtocol
 import roboliq.devices.pipette._
 import evoware._
 
-trait Protocol extends CommonProtocol with PipetteCommands {
+
+trait Protocol extends CommonProtocol {
 	class EvowareLab {
 		private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
 		private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]

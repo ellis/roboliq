@@ -148,3 +148,19 @@ case class L0C_Transfer_Rack(
 		).mkString("Transfer_Rack(", ", ", ");")
 	}
 }
+
+case class L0C_Facts(
+	sDevice: String,
+	sVariable: String,
+	sValue: String
+) extends Command {
+	override def toString = {
+		List(
+			sDevice,
+			sVariable,
+			sValue,
+			"\"0\"",
+			"\"\""
+		).mkString("FACTS(", ", ", ");")
+	}
+}

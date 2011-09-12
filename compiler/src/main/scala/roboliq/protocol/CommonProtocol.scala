@@ -4,10 +4,16 @@ import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common
 import roboliq.common._
+import roboliq.commands._
+import roboliq.commands.move._
 import roboliq.commands.pipette._
+import roboliq.commands.shake._
 
 
-trait CommonProtocol { thisObj =>
+trait CommonProtocol extends
+	PipetteCommands with
+	ShakeCommands
+{ thisObj =>
 	val Contaminant = roboliq.common.Contaminant
 	val CleanPolicy = roboliq.common.GroupCleanPolicy
 	

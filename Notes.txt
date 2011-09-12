@@ -3,6 +3,7 @@ Script generation errors:
 	
 Fabian:
 	when washing and aspirating for decontamination, can we use the full tip volume?
+	A: yes
 	cleaning rules:
 		concepts:
 			liquid
@@ -25,14 +26,15 @@ Fabian:
 			T T T	- (this is the same a not grouping)
 			T D T	-
 			D * T	?
-			D _ D	?
-			D L D	?
-			D T D	?
+			D _ D	+ 
+			D L D	+
+			D T D	-
 			D D D
 			T * D	?
 		
 		SKIP CLEANING IF:
 			aspirating the same liquid as before and no destinations were entered since the previous aspirate
+			A: even after a free dispense, if the destination contains something which can contaminate, you should probably perform a light wash
 
 		notes:
 			by default, each liquid is in its own group, so aspirating a new liquid will trigger a thorough wash
@@ -46,11 +48,14 @@ Fabian:
 		user overrides:
 			clean intensity at:
 				start
-				between aspirates
-				PolicyAfterWetDispense.{Clean,NoClean}
+				between
 				finish
 
 	for disposable tip robots, do you think it'd be ok to have a policy of replacing tips when any washing is specified, even the light wash?
+	A: yes, sort of.  We might also store disposable tips for later use, or wash them!
+
+	which contaminants on the tip should trigger a wash before decontaminating?
+	A: living cells, or expand the decontamination wash to always first wash out the outsides in the dirty wash container
 
 	cleaning: does it ever make sense to...
 		(when using a single pipetter)
@@ -62,8 +67,11 @@ Fabian:
 			
 	which contaminants should we keep track of?  we might want to track them for deciding how to wash
 	which other substances should we keep track of for other purposes?
+	A: cells, DNA, organic solvents; after DNA and cells, decontamination wash, and for organic solvents (currently only ethanol) wash more extensively;
+	A: for oil, decontam with organic solvent (but this isn't the case for our protocols at the moment)
 	see wash table at bottom of this file
 	when mixing liquids, is there a guideline to follow for automatically choosing the properties of the resultant liquid?
+		A: if water, then assume water; if cell, keep cell
 		methods:
 			keep properties of original liquid
 			choose most conservative values (only for cleaning specs, not for liquid properties)
@@ -143,7 +151,7 @@ CompleteYeastTransformation
 		A: for bacteria, highly; for yeast, not.
 		?? Is the difference in time of mix completion among the wells significant?
 		?? At this point, the PCR lid is opened and the tips are sterilized.  Why?  Is this part of the timing?
-		//open lid
+		PCR open lid
 		wash 25+4ml fast
 		wash 4+1ml
 		decontaminate
@@ -152,7 +160,7 @@ CompleteYeastTransformation
 		?? How does TRobot1 know when to start cycling?  Why does the lid stay open during the process?  Or does it?
 		A: It should be turned on to 42deg at the start -- currently done manually
 		//transfer plate A to cooled carrier
-		//close lid
+		PCR close lid
 	Yeast Cell Filtration
 		REQUIRE: Plate B is a filter plate
 		REQUIRE: "RecoveryMedia" cooled (single 8 well)
@@ -385,6 +393,10 @@ grid	site	grid	site	washV	washDel	clnV	clnDel	airV	airSpd	retract	fast
 2       1       2       2       "15"    500     "3"     500     10      70      30      1
 2       1       2       2       "2"     500     "5"     500     10      70      30      1
 2       1       2       2       "4.0"   500     "0.1"   500     10      70      30      1
+
+A:
+	airV: 10
+	retract: 30
 
 ---------------------------------------------------
 THESE WERE QUESTIONS/NOTES I WROTE DOWN NEAR THE BEGINNING OF THE PROJECT:
