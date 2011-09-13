@@ -40,8 +40,6 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 
 	override protected def dispense(
 		states0: RobotState,
-		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
-		mapTipToModel: Map[TipConfigL2, TipModel],
 		tws: Seq[TipWell],
 		remains0: Map[TipWell, Double],
 		bFirstInCycle: Boolean
@@ -97,7 +95,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 						}
 						
 						// End this cycle if this dispense would require a cleaning
-						getDispenseCleanSpec(builder, mapTipToModel, tipOverrides, item.tip, item.well, pos) match {
+						getDispenseCleanSpec(builder, tipOverrides, item.tip, item.well, pos) match {
 							case None =>
 							case Some(spec) =>
 								return Error(Seq("INTERNAL: Error code dispense 2"))
@@ -300,29 +298,4 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				}
 		}
 	}
-	
-	/*private def getMixPolicy(states: StateMap, tw: TipWell): Result[PipettePolicy] = {
-		val sMixClass_? = cmd.args.mixSpec_? match {
-			case None => None
-			case Some(spec) => spec.sMixClass_?
-		}
-		getMixPolicy(states, tw.tip, tw.well, sMixClass_?)
-	}
-	
-	private def getMixPolicy(states: StateMap, tip: TipConfigL2, well: WellConfigL2, sMixClass_? : Option[String]): Result[PipettePolicy] = {
-		sMixClass_? match {
-			case None =>
-				val tipState = tip.state(states)
-				val wellState = well.state(states)
-				robot.getAspiratePolicy(tipState, wellState) match {
-					case None => Error("no mix policy found for "+tip+" and "+well)
-					case Some(policy) => Success(policy)
-				}
-			case Some(sLiquidClass) =>
-				robot.getPipetteSpec(sLiquidClass) match {
-					case None => Error("no policy found for class "+sLiquidClass)
-					case Some(spec) => Success(new PipettePolicy(spec.sName, spec.aspirate))
-				}
-		}
-	}*/
 }

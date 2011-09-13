@@ -32,6 +32,10 @@ sealed abstract class Result[+T] {
 	def isSuccess: Boolean
 	
 	final def >>=[B](f: T => Result[B]): Result[B] = flatMap(f)
+	def foreach[B](f: T => B): Unit = {  
+		map(f)  
+		()
+	}
 }
 case class Error[T](lsError: Seq[String]) extends Result[T] {
 	def flatMap[B](f: T => Result[B]): Result[B] = Error[B](lsError)
@@ -49,6 +53,9 @@ case class Success[T](value: T) extends Result[T] {
 	def isSuccess: Boolean = true
 }
 object Result {
+	def assert(b: Boolean, sError: String): Result[Unit] =
+		if (b) Success(()) else Error(sError)
+	
 	def sequence[A](l: Seq[Result[A]]): Result[Seq[A]] = {
 		val llsError = l.collect({ case Error(lsError) => lsError })
 		if (!llsError.isEmpty)
@@ -83,5 +90,13 @@ object Result {
 			case Error(lsError) => return Error(lsError)
 			case Success(b) => b
 		}))
+	}
+	
+	def forall[A](l: Seq[A], f: A => Result[_ <: Any]): Result[Unit] = {
+		l.foreach(a => f(a) match {
+			case Error(lsError) => return Error(lsError)
+			case _ =>
+		})
+		Success(())
 	}
 }
