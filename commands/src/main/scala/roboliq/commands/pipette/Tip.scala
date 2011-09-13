@@ -15,10 +15,10 @@ class Tip(val index: Int) extends Obj with Ordered[Tip] {
 	
 	def createSetup() = new Setup(this)
 	
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		val conf = new TipConfigL2(this, index)
 		val state = new TipStateL2(conf, setup.modelPermanent_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
-		Right(conf, state)
+		Success(conf, state)
 	}
 	
 	class StateWriter(map: HashMap[Obj, ObjState]) {

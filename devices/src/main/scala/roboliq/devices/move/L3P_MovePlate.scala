@@ -16,8 +16,8 @@ class L3P_MovePlate(device: MoveDevice) extends CommandCompilerL3 {
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
 		val iRoma = device.getRomaId(cmd.args) match {
-			case Left(lsError) => return CompileError(cmd, lsError)
-			case Right(iRoma) => iRoma
+			case Error(lsError) => return CompileError(cmd, lsError)
+			case Success(iRoma) => iRoma
 		}
 		val (lidHandling, locationLid) = cmd.args.lidHandlingSpec_? match {
 			case None => (LidHandling.NoLid, "")

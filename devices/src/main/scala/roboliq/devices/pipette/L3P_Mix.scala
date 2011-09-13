@@ -17,9 +17,9 @@ class L3P_Mix(robot: PipetteDevice) extends CommandCompilerL3 {
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
 		val x = new L3P_Mix_Sub(robot, ctx, cmd)
 		x.translation match {
-			case Right(translation) =>
+			case Success(translation) =>
 				CompileTranslation(cmd, translation)
-			case Left(e) =>
+			case Error(e) =>
 				println("e: "+e)
 				e
 		}
@@ -42,11 +42,11 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		//mapTipToCleanSpec0: Map[TipConfigL2, CleanSpec2],
 		mapTipToModel: Map[TipConfigL2, TipModel],
 		tws: Seq[TipWell]
-	): Either[Seq[String], MixResult] = {
+	): Result[MixResult] = {
 		mix_createItems(states0, tws) match {
-			case Left(sError) =>
-				return Left(Seq(sError))
-			case Right(items0) =>
+			case Error(sError) =>
+				return Error(Seq(sError))
+			case Success(items0) =>
 				val builder = new StateBuilder(states0)		
 				//val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
 				val itemss = robot.batchesForMix(items0)
@@ -67,12 +67,12 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 						}
 						// If we would need to aspirate a new liquid, abort
 						else if (liquid ne liquidTip0) {
-							return Left(Seq("INTERNAL: Error code dispense 1"))
+							return Error(Seq("INTERNAL: Error code dispense 1"))
 						}
 						
 						// check for valid volume, i.e., not too much
 						mix_checkVol(builder, tip, target) match {
-							case Some(sError) => return Left(Seq(sError))
+							case Some(sError) => return Error(Seq(sError))
 							case _ =>
 						}
 	
@@ -84,7 +84,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 							case None =>
 							case Some(spec) =>
 								//println("spec:", spec)
-								return Left(Seq("INTERNAL: Error code dispense 2"))
+								return Error(Seq("INTERNAL: Error code dispense 2"))
 						}
 						
 						// Update tip state
@@ -92,19 +92,19 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 					})
 					actions = actions ++ Seq(Mix(items))
 				}
-				Right(new MixResult(builder.toImmutable, actions))
+				Success(new MixResult(builder.toImmutable, actions))
 		}
 	}
 	
 	private def mix_createItems(states: RobotState, tws: Seq[TipWell]): Either[String, Seq[L2A_MixItem]] = {
 		val items = tws.map(tw => {
 			getMixPolicy(states, tw) match {
-				case Left(sError) => return Left(sError)
-				case Right(policy) =>
+				case Error(sError) => return Error(sError)
+				case Success(policy) =>
 					new L2A_MixItem(tw.tip, tw.well, args.mixSpec.nVolume, args.mixSpec.nCount, policy)
 			}
 		})
-		Right(items)
+		Success(items)
 	}
 
 	// Check for appropriate volumes

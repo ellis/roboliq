@@ -10,14 +10,14 @@ class Memento[T] extends Obj { thisObj =>
 	type State = MementoState[T]
 	
 	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
 		if (setup.value_?.isEmpty)
 			errors += "value not set"
 				
 		if (!errors.isEmpty)
-			return Left(errors)
+			return Error(errors)
 
 		val conf = new MementoConfig(
 				obj = this,
@@ -27,7 +27,7 @@ class Memento[T] extends Obj { thisObj =>
 				value = conf.value0
 				)
 		
-		Right(conf, state)
+		Success(conf, state)
 	}
 
 	class StateWriter(map: HashMap[Obj, ObjState]) {

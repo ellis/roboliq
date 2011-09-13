@@ -35,10 +35,10 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 		}
 	}
 	
-	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+	def toL3(states: RobotState): Result[L3Type] = {
 		args.toL3(states) match {
-			case Left(lsErrors) => Left(lsErrors)
-			case Right(args3) => Right(new L3C_Pipette(args3))
+			case Error(lsErrors) => Error(lsErrors)
+			case Success(args3) => Success(new L3C_Pipette(args3))
 		}
 	}
 }
@@ -75,22 +75,16 @@ class L4A_PipetteArgs(
 	val pipettePolicy_? : Option[PipettePolicy] = None,
 	val tipModel_? : Option[TipModel] = None
 ) {
-	def toL3(states: RobotState): Either[Seq[String], L3A_PipetteArgs] = {
-		val items3_? = items.map(_.toL3(states))
-		if (items3_?.exists(_.isLeft)) {
-			val lsErrors = items3_?.filter(_.isLeft).flatMap(_.left.get)
-			return Left(lsErrors)
-		}
-		
-		val items3 = items3_?.flatMap(_.right.get)
-		Right(new L3A_PipetteArgs(
-			items3,
+	def toL3(states: RobotState): Result[L3A_PipetteArgs] = for(
+		llItem3 <- Result.sequence(items.map(_.toL3(states)))
+		) yield
+		new L3A_PipetteArgs(
+			llItem3.flatten,
 			mixSpec_? = mixSpec_?,
 			tipOverrides_? = tipOverrides_?,
 			pipettePolicy_? = pipettePolicy_?,
 			tipModel_? = tipModel_?
-		))
-	}
+		)
 }
 
 class L3A_PipetteArgs(
@@ -106,19 +100,19 @@ case class L4A_PipetteItem(
 	val dest: WellOrPlate,
 	val nVolume: Double
 ) {
-	def toL3(states: RobotState): Either[Seq[String], Seq[L3A_PipetteItem]] = {
+	def toL3(states: RobotState): Result[Seq[L3A_PipetteItem]] = {
 		val srcs3 = PipetteHelperL4.getWells1(states, src)
 		if (srcs3.isEmpty) {
 			src match {
 				case WPL_Liquid(reagent) =>
 					val liquid = reagent.state(states).conf.liquid
-					return Left(Seq("Liquid \""+liquid.getName()+"\" must be assigned to one or more wells"))
-				case _ => return Left(Seq("INTERNAL: no config found for pipette source "+src))
+					return Error(Seq("Liquid \""+liquid.getName()+"\" must be assigned to one or more wells"))
+				case _ => return Error(Seq("INTERNAL: no config found for pipette source "+src))
 			}
 		}
 		val dests3 = PipetteHelperL4.getWells1(states, dest).toSeq
 		//println("dests3: "+dests3)
-		def createItemsL3() = Right(dests3.map(dest3 => new L3A_PipetteItem(srcs3, dest3, nVolume)))
+		def createItemsL3() = Success(dests3.map(dest3 => new L3A_PipetteItem(srcs3, dest3, nVolume)))
 						
 		src match {
 			case WPL_Well(_) =>
@@ -126,13 +120,13 @@ case class L4A_PipetteItem(
 			case WPL_Plate(plate1) =>
 				dest match {
 					case WP_Well(_) =>
-						Left(Seq("when source is a plate, destination must also be a plate"))
+						Error(Seq("when source is a plate, destination must also be a plate"))
 					case WP_Plate(plate2) =>
 						if (plate1.state(states).conf.nWells != plate1.state(states).conf.nWells)
-							Left(Seq("source and destination plates must have the same number of wells"))
+							Error(Seq("source and destination plates must have the same number of wells"))
 						else {
 							val items = (srcs3.toSeq zip dests3.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, nVolume))
-							Right(items)
+							Success(items)
 						}
 				}
 			case WPL_Liquid(liquid1) =>

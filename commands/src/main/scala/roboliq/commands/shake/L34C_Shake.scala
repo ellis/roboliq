@@ -14,10 +14,10 @@ case class L4C_Shake(args: L4A_ShakeArgs) extends CommandL4 {
 		// TODO: request plate compatibility with this device
 	}
 	
-	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+	def toL3(states: RobotState): Result[L3Type] = {
 		args.toL3(states) match {
-			case Left(lsErrors) => Left(lsErrors)
-			case Right(args3) => Right(new L3C_Shake(args3))
+			case Error(lsErrors) => Error(lsErrors)
+			case Success(args3) => Success(new L3C_Shake(args3))
 		}
 	}
 }
@@ -35,12 +35,12 @@ class L4A_ShakeArgs(
 ) {
 	val setup = new L4A_ShakeSetup
 	
-	def toL3(states: RobotState): Either[Seq[String], L3A_ShakeArgs] = {
+	def toL3(states: RobotState): Result[L3A_ShakeArgs] = {
 		val setupPlate = setup.plate.toL3(states) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(o) => o
+			case Error(lsError) => return Error(lsError)
+			case Success(o) => o
 		}
-		Right(new L3A_ShakeArgs(
+		Success(new L3A_ShakeArgs(
 			plate = plate.state(states).conf,
 			nDuration = nDuration,
 			idDevice_? = idDevice_?,

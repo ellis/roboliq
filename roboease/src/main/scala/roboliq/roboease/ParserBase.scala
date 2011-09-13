@@ -25,8 +25,8 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		res1 match {
 			case Success(sLoc, _) =>
 				getPlateAtLoc(sLoc, in) match {
-					case Right(plate) => Success(plate, res1.next)
-					case Left(res) => res
+					case Success(plate) => Success(plate, res1.next)
+					case Error(res) => res
 				}
 			case ns: NoSuccess => ns
 		}
@@ -58,8 +58,8 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 						val iRow = sRow.charAt(0) - 'A'
 						val iCol = nCol - 1
 						getWell(plate, iRow, iCol, input) match {
-							case Right(well) => Success(well, res1.next)
-							case Left(e) => e
+							case Success(well) => Success(well, res1.next)
+							case Error(e) => e
 						}
 				}
 			case ns: NoSuccess => ns
@@ -94,8 +94,8 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 				res2 match {
 					case Success(nWells, _) =>
 						getWells(plate, well0, nWells, input) match {
-							case Right(wells) => Success(wells, res2.next)
-							case Left(e) => e
+							case Success(wells) => Success(wells, res2.next)
+							case Error(e) => e
 						}
 					case ns: NoSuccess =>
 						val res3 = ("-"~>idWell).apply(input2)
@@ -257,9 +257,9 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		shared.mapLocToPlate.get(sLoc) match {
 			case Some(plate) =>
 				m_contextPlate = Some(plate)
-				Right(plate)
+				Success(plate)
 			case None =>
-				Left(Error("labware must be defined for location "+sLoc, input))
+				Error(Error("labware must be defined for location "+sLoc, input))
 		}
 	}
 	
@@ -280,33 +280,33 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		val dim = pc.dim_?.get
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
 		if (iRow < 0 || iRow >= nRows) {
-			Left(Error("Invalid row: plate has "+nRows+" rows, but row"+(iRow+1)+"was requested", input))
+			Error(Error("Invalid row: plate has "+nRows+" rows, but row"+(iRow+1)+"was requested", input))
 		}
 		else if (iCol < 0 || iCol >= nCols) {
-			Left(Error("Invalid column: plate has "+nCols+" columns, but column "+(iCol+1)+"was requested", input))
+			Error(Error("Invalid column: plate has "+nCols+" columns, but column "+(iCol+1)+"was requested", input))
 		}
 		else {
 			val iWell = iRow + iCol * nRows
 			val well = dim.wells(iWell)
-			Right(well)
+			Success(well)
 		}
 	}
 	
 	/*def getWells(plate: Plate, iRow: Int, iCol: Int, nWells: Int, input: Input): Either[ParseResult[Nothing], List[Well]] = {
 		getWell(plate, iRow, iCol, input) match {
-			case Left(e) => Left(e)
-			case Right(well) =>
+			case Error(e) => Error(e)
+			case Success(well) =>
 				val pd = kb.getPlateData(plate)
 				val (nRows, nCols) = (pd.nRows.get, pd.nCols.get)
 				val d = kb.getPartData(well)
 				val i0 = d.index.get
 				val i1 = i0 + nWells - 1
 				if (i1 >= nRows * nCols) {
-					Left(Error("Plate dimension exceeded", input))
+					Error(Error("Plate dimension exceeded", input))
 				}
 				else {
 					val l = (i0 to i1).map(i => pd.wells.get.apply(i)).toList
-					Right(l)
+					Success(l)
 				}
 		}
 	}*/
@@ -319,11 +319,11 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		val i0 = wc.index_?.get
 		val i1 = i0 + nWells - 1
 		if (i1 >= nRows * nCols) {
-			Left(Error("Plate dimension exceeded", input))
+			Error(Error("Plate dimension exceeded", input))
 		}
 		else {
 			val l = (i0 to i1).map(i => dim.wells.apply(i)).toList
-			Right(l)
+			Success(l)
 		}
 	}
 	

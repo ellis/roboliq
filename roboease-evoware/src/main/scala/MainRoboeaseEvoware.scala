@@ -48,9 +48,9 @@ object Main extends App {
 		
 		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
 		p.parse(sSource) match {
-			case Left(err) =>
+			case Error(err) =>
 				err.print()
-			case Right(res) =>
+			case Success(res) =>
 				val kb = res.kb
 				val cmds = res.cmds.map(_.cmd)
 
@@ -64,13 +64,13 @@ object Main extends App {
 				val translator = new EvowareTranslator(evowareMapper)
 			
 				Compiler.compile(kb, Some(compiler), None, cmds) match {
-					case Left(errC) => errC.print()
-					case Right(succC: CompilerStageSuccess) =>
+					case Error(errC) => errC.print()
+					case Success(succC: CompilerStageSuccess) =>
 						val finals = succC.nodes.flatMap(_.collectFinal())
 						val cmds1 = finals.map(_.cmd1)
 						translator.translate(cmds1) match {
-							case Left(errT) => errT.print()
-							case Right(succT) =>
+							case Error(errT) => errT.print()
+							case Success(succT) =>
 								val sFilename = sSourcePath + ".esc"
 								case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
 								def toLabwareItem(a: roboease.Labware): _root_.evoware.LabwareItem = {
@@ -80,7 +80,7 @@ object Main extends App {
 								val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
 								println(s)
 						}
-					case Right(succ) => succ.print()
+					case Success(succ) => succ.print()
 				}
 		}
 	}

@@ -9,7 +9,7 @@ trait MoveDevice extends Device {
 		
 	}
 	
-	def getRomaId(args: L3A_MovePlateArgs): Either[Seq[String], Int] = {
-		Right(0)
+	def getRomaId(args: L3A_MovePlateArgs): Result[Int] = {
+		Success(0)
 	}
 }

@@ -121,6 +121,16 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 		node
 	}
 	
+	private def retTranslation1(cmd: Command, res: Result[Command]) = res match {
+		case Error(lsError) => CompileError(cmd, lsError)
+		case Success(cmd2) => CompileTranslation(cmd, Seq(cmd2))
+	}
+	
+	private def retTranslations(cmd: Command, res: Result[Seq[_ <: Command]]) = res match {
+		case Error(lsError) => CompileError(cmd, lsError)
+		case Success(cmds2) => CompileTranslation(cmd, cmds2)
+	}
+	
 	private def compileToResult(states: RobotState, cmd: Command): CompileResult = {
 		m_handlers.get(cmd.getClass()) match {
 			case Some(handler) =>
@@ -129,14 +139,11 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 			case None =>
 				cmd match {
 					case cmd4: CommandL4 =>
-						cmd4.toL3(states) match {
-							case Left(lsErrors) => CompileError(cmd, lsErrors)
-							case Right(cmd3) => CompileTranslation(cmd, Seq(cmd3))
-						}
+						retTranslation1(cmd, cmd4.toL3(states))
 					case cmd2: CommandL2 =>
 						cmd2.toL1(states) match {
-							case Left(lsErrors) => CompileError(cmd, lsErrors)
-							case Right(cmd1) =>
+							case Error(lsErrors) => CompileError(cmd, lsErrors)
+							case Success(cmd1) =>
 								val builder = new StateBuilder(states)
 								cmd2.updateState(builder)
 								//println("cmd: "+cmd2.getClass().getName())
@@ -158,8 +165,8 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 				handler1.updateStateL2(builder, cmd)
 				val cmd2 = cmd.asInstanceOf[CommandL2]
 				cmd2.toL1(state0) match {
-					case Left(lsErrors) => CompileError(cmd, lsErrors)
-					case Right(cmd1) => CompileFinal(cmd2, cmd1, builder.toImmutable)
+					case Error(lsErrors) => CompileError(cmd, lsErrors)
+					case Success(cmd1) => CompileFinal(cmd2, cmd1, builder.toImmutable)
 				}
 			case handler2 : CommandCompilerL3 =>
 				val ctx = new CompilerContextL3(this, state0)

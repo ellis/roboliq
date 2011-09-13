@@ -10,10 +10,10 @@ case class L4C_Timer(args: L4A_TimerArgs) extends CommandL4 {
 		// Nothing to do
 	}
 	
-	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+	def toL3(states: RobotState): Result[L3Type] = {
 		args.toL3(states) match {
-			case Left(lsErrors) => Left(lsErrors)
-			case Right(args3) => Right(new L3C_Timer(args3))
+			case Error(lsErrors) => Error(lsErrors)
+			case Success(args3) => Success(new L3C_Timer(args3))
 		}
 	}
 
@@ -24,12 +24,12 @@ case class L3C_Timer(args: L3A_TimerArgs) extends CommandL3
 class L4A_TimerArgs {
 	val setup = new L4A_TimerSetup
 	
-	def toL3(states: RobotState): Either[Seq[String], L3A_TimerArgs] = {
+	def toL3(states: RobotState): Result[L3A_TimerArgs] = {
 		val nSeconds = setup.nSeconds_? match {
-			case None => return Left(Seq("duration of timer must be set"))
+			case None => return Error(Seq("duration of timer must be set"))
 			case Some(n) => n
 		}
-		Right(new L3A_TimerArgs(
+		Success(new L3A_TimerArgs(
 			nSeconds
 		))
 	}

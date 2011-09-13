@@ -14,10 +14,10 @@ case class L4C_SaveCurrentLocation(plate: Plate, mem: Memento[String]) extends C
 		memSetup.value_? = plateSetup.location_?
 	}
 	
-	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+	def toL3(states: RobotState): Result[L3Type] = {
 		val plateState = plate.state(states)
 		val memState = mem.state(states)
-		Right(L3C_SaveCurrentLocation(plateState.conf, memState.conf))
+		Success(L3C_SaveCurrentLocation(plateState.conf, memState.conf))
 	}
 
 }
@@ -31,8 +31,8 @@ case class L2C_SaveCurrentLocation(plate: PlateConfigL2, mem: MementoConfig[Stri
 		mem.obj.stateWriter(builder).value = plate.state(builder).location
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_SaveCurrentLocation())
+	def toL1(states: RobotState): Result[L1Type] = {
+		Success(L1C_SaveCurrentLocation())
 	}
 	
 	override def toDebugString = {

@@ -18,7 +18,7 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		// Do nothing
 	}
 	
-	override def translate(cmd: CommandL1): Either[Seq[String], Seq[Command]] = cmd match {
+	override def translate(cmd: CommandL1): Result[Seq[Command]] = cmd match {
 		case t @ L1C_Aspirate(_) => aspirate(t)
 		case t @ L1C_Dispense(_) => dispense(t)
 		case t @ L1C_Mix(_) => mix(t.items)
@@ -28,14 +28,14 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		case c: L1C_MovePlate => movePlate(c.args)
 		case c: L1C_Timer => timer(c.args)
 		case c: L1C_EvowareFacts => facts(c)
-		case c: L1C_SaveCurrentLocation => Right(Seq())
+		case c: L1C_SaveCurrentLocation => Success(Seq())
 	}
 
-	/*def translate(rs: Seq[CompileFinal]): Either[Seq[String], Seq[Command]] = {
-		Right(rs.flatMap(r => {
+	/*def translate(rs: Seq[CompileFinal]): Result[Seq[Command]] = {
+		Success(rs.flatMap(r => {
 			translate(r.cmd) match {
-				case Left(err) => return Left(err)
-				case Right(cmds) => cmds
+				case Error(err) => return Error(err)
+				case Success(cmds) => cmds
 			}
 		}))
 	}*/
@@ -119,17 +119,17 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 	*/
 	
 
-	private def aspirate(cmd: L1C_Aspirate): Either[Seq[String], Seq[Command]] = {
+	private def aspirate(cmd: L1C_Aspirate): Result[Seq[Command]] = {
 		spirate(cmd.items, "Aspirate")
 	}
 	
-	private def dispense(cmd: L1C_Dispense): Either[Seq[String], Seq[Command]] = {
+	private def dispense(cmd: L1C_Dispense): Result[Seq[Command]] = {
 		spirate(cmd.items, "Dispense")
 	}
 	 
-	private def spirate(items: Seq[L1A_SpirateItem], sFunc: String): Either[Seq[String], Seq[Command]] = {
+	private def spirate(items: Seq[L1A_SpirateItem], sFunc: String): Result[Seq[Command]] = {
 		items match {
-			case Seq() => Left(Seq("INTERNAL: items empty"))
+			case Seq() => Error(Seq("INTERNAL: items empty"))
 			case Seq(twvp0, rest @ _*) =>
 				// Get the liquid class
 				val sLiquidClass = twvp0.policy.id
@@ -144,7 +144,7 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
 				if (!items.forall(_.well.holder eq holder))
-					return Left(Seq("INTERNAL: all wells must be on the same plate"))
+					return Error(Seq("INTERNAL: all wells must be on the same plate"))
 				
 				// Assert that tips are spaced at equal distances to each other as the wells are to each other
 				def equidistant2(a: L1A_SpirateItem, b: L1A_SpirateItem): Boolean =
@@ -163,13 +163,13 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 				val bEquidistant = equidistant(items)
 				val bSameWell = items.forall(_.well eq twvp0.well)
 				if (!bEquidistant && !bSameWell)
-					return Left(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Command.getWellsDebugString(items.map(_.well))))
+					return Error(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Command.getWellsDebugString(items.map(_.well))))
 				
 				spirateChecked(items, sFunc, sLiquidClass)
 		}
 	}
 
-	private def spirateChecked(items: Seq[L1A_SpirateItem], sFunc: String, sLiquidClass: String): Either[Seq[String], Seq[Command]] = {
+	private def spirateChecked(items: Seq[L1A_SpirateItem], sFunc: String, sLiquidClass: String): Result[Seq[Command]] = {
 		val item0 = items.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val holder = item0.well.holder
@@ -189,9 +189,9 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		
 		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
 		system.mapSites.get(item0.location) match {
-			case None => return Left(Seq("INTERNAL: missing evoware site for location "+item0.location))
+			case None => return Error(Seq("INTERNAL: missing evoware site for location "+item0.location))
 			case Some(site) =>
-				Right(Seq(L0C_Spirate(
+				Success(Seq(L0C_Spirate(
 					sFunc, 
 					mTips, sLiquidClass,
 					asVolumes,
@@ -201,13 +201,13 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		}
 	}
 	
-	def wash(cmd: L1C_Wash): Either[Seq[String], Seq[Command]] = {
+	def wash(cmd: L1C_Wash): Result[Seq[Command]] = {
 		system.mapWashProgramArgs.get(cmd.iWashProgram) match {
 			case None =>
-				Left(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
+				Error(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
 			case Some(args) =>
 				val nWasteVolume = cmd.items.foldLeft(0.0) { (acc, item) => math.max(acc, item.nVolumeInside) }
-				Right(Seq(L0C_Wash(
+				Success(Seq(L0C_Wash(
 					mTips = encodeTips(cmd.items.map(_.tip.obj)),
 					iWasteGrid = args.iWasteGrid, iWasteSite = args.iWasteSite,
 					iCleanerGrid = args.iCleanerGrid, iCleanerSite = args.iCleanerSite,
@@ -224,19 +224,19 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		}
 	}
 	
-	private def mix(items: Seq[L1A_MixItem]): Either[Seq[String], Seq[Command]] = {
+	private def mix(items: Seq[L1A_MixItem]): Result[Seq[Command]] = {
 		items match {
-			case Seq() => Left(Seq("Empty Tip-Well-Volume list"))
+			case Seq() => Error(Seq("Empty Tip-Well-Volume list"))
 			case Seq(item0, rest @ _*) =>
 				// Get the liquid class
 				val sLiquidClass = item0.policy.id
 				// Assert that there is only one liquid class
 				if (rest.exists(_.policy.id != sLiquidClass)) {
 					items.foreach(item => println(item.policy))
-					return Left(Seq("INTERNAL: Liquid class must be the same for all mix items"))
+					return Error(Seq("INTERNAL: Liquid class must be the same for all mix items"))
 				}
 				if (rest.exists(_.nCount != item0.nCount))
-					return Left(Seq("INTERNAL: Mix count must be the same for all mix items"))
+					return Error(Seq("INTERNAL: Mix count must be the same for all mix items"))
 				
 				// Assert that all tips are of the same kind and that all wells are on the same holder
 				// TODO: re-add this check
@@ -264,7 +264,7 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		}
 	}
 
-	private def mixChecked(items: Seq[L1A_MixItem], sLiquidClass: String): Either[Seq[String], Seq[Command]] = {
+	private def mixChecked(items: Seq[L1A_MixItem], sLiquidClass: String): Result[Seq[Command]] = {
 		val item0 = items.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val holder = item0.well.holder
@@ -283,9 +283,9 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		val sPlateMask = encodeWells(holder, items.map(_.well.index))
 		
 		system.mapSites.get(item0.location) match {
-			case None => return Left(Seq("INTERNAL: missing evoware site for location "+item0.location))
+			case None => return Error(Seq("INTERNAL: missing evoware site for location "+item0.location))
 			case Some(site) =>
-				Right(Seq(L0C_Mix(
+				Success(Seq(L0C_Mix(
 					mTips, sLiquidClass,
 					asVolumes,
 					site.iGrid, site.iSite,
@@ -295,38 +295,38 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		}
 	}
 	
-	private def tipsGet(c: L1C_TipsGet): Either[Seq[String], Seq[Command]] = {
+	private def tipsGet(c: L1C_TipsGet): Result[Seq[Command]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
-		Right(Seq(L0C_GetDITI2(mTips, c.model.id)))
+		Success(Seq(L0C_GetDITI2(mTips, c.model.id)))
 	}
 	
-	private def tipsDrop(c: L1C_TipsDrop): Either[Seq[String], Seq[Command]] = {
+	private def tipsDrop(c: L1C_TipsDrop): Result[Seq[Command]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		system.mapSites.get(c.location) match {
-			case None => return Left(Seq("INTERNAL: missing evoware site for location "+c.location))
+			case None => return Error(Seq("INTERNAL: missing evoware site for location "+c.location))
 			case Some(site) =>
-				Right(Seq(L0C_DropDITI(mTips, site.iGrid, site.iSite)))
+				Success(Seq(L0C_DropDITI(mTips, site.iGrid, site.iSite)))
 		}
 	}
 	
-	private def movePlate(c: L1A_MovePlateArgs): Either[Seq[String], Seq[Command]] = {
+	private def movePlate(c: L1A_MovePlateArgs): Result[Seq[Command]] = {
 		val siteSrc = getSite(c.locationSrc) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(site) => site
+			case Error(lsError) => return Error(lsError)
+			case Success(site) => site
 		}
 		val siteDest = getSite(c.locationDest) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(site) => site
+			case Error(lsError) => return Error(lsError)
+			case Success(site) => site
 		}
 		val carrierSrc = getCarrier(c.locationSrc) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(carrier) => carrier
+			case Error(lsError) => return Error(lsError)
+			case Success(carrier) => carrier
 		}
 		val carrierDest = getCarrier(c.locationDest) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(carrier) => carrier
+			case Error(lsError) => return Error(lsError)
+			case Success(carrier) => carrier
 		}
-		Right(Seq(L0C_Transfer_Rack(
+		Success(Seq(L0C_Transfer_Rack(
 			c.iRoma,
 			c.sPlateModel,
 			siteSrc.iGrid, siteSrc.iSite, carrierSrc.model.sName,
@@ -338,29 +338,29 @@ class EvowareTranslator(system: EvowareSystem) extends Translator {
 		)))
 	}
 	
-	private def getSite(location: String): Either[Seq[String], SiteObj] = {
+	private def getSite(location: String): Result[SiteObj] = {
 		system.mapSites.get(location) match {
-			case None => Left(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
-			case Some(site) => Right(site)
+			case None => Error(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
+			case Some(site) => Success(site)
 		}
 	}
 	
-	private def getCarrier(location: String): Either[Seq[String], CarrierObj] = {
+	private def getCarrier(location: String): Result[CarrierObj] = {
 		system.mapSites.get(location) match {
-			case None => Left(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
-			case Some(site) => Right(site.carrier)
+			case None => Error(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
+			case Some(site) => Success(site.carrier)
 		}
 	}
 	
-	private def timer(args: L12A_TimerArgs): Either[Seq[String], Seq[Command]] = {
-		Right(Seq(
+	private def timer(args: L12A_TimerArgs): Result[Seq[Command]] = {
+		Success(Seq(
 			L0C_StartTimer(1),
 			L0C_WaitTimer(1, args.nSeconds)
 		))
 	}
 	
-	private def facts(cmd: L1C_EvowareFacts): Either[Seq[String], Seq[Command]] = {
-		Right(Seq(L0C_Facts(
+	private def facts(cmd: L1C_EvowareFacts): Result[Seq[Command]] = {
+		Success(Seq(L0C_Facts(
 			sDevice = cmd.args.sDevice,
 			sVariable = cmd.args.sVariable,
 			sValue = cmd.args.sValue

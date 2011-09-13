@@ -17,9 +17,9 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
 		val x = new L3P_Pipette_Sub(robot, ctx, cmd)
 		x.translation match {
-			case Right(translation) =>
+			case Success(translation) =>
 				CompileTranslation(cmd, translation)
-			case Left(e) =>
+			case Error(e) =>
 				println("e: "+e)
 				e
 		}
@@ -45,16 +45,16 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		tws: Seq[TipWell],
 		remains0: Map[TipWell, Double],
 		bFirstInCycle: Boolean
-	): Either[Seq[String], DispenseResult] = {
+	): Result[DispenseResult] = {
 		val builder = new StateBuilder(states0)
 		
 		// Make sure that we only need to take care of remains for the first dispense in a cycle
 		assert(bFirstInCycle || remains0.isEmpty)
 		
 		dispense_createItems(builder.toImmutable, tws, remains0) match {
-			case Left(sError) =>
-				return Left(Seq(sError))
-			case Right((items, remains)) =>
+			case Error(sError) =>
+				return Error(Seq(sError))
+			case Success((items, remains)) =>
 				//val mapTipToCleanSpec = HashMap(mapTipToCleanSpec0.toSeq : _*)
 				items.foreach(item => {
 					val tip = item.tip
@@ -81,12 +81,12 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					if (!bFirstInCycle) {
 							// If we would need to aspirate a new liquid, end this cycle
 						if (liquidSrc ne liquidTip0) {
-							return Left(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
+							return Error(Seq("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName()))
 						}
 						
 						// check volumes
 						dispense_checkVol(builder, tip, dest) match {
-							case Some(sError) => return Left(Seq(sError))
+							case Some(sError) => return Error(Seq(sError))
 							case _ =>
 						}
 	
@@ -100,7 +100,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 						getDispenseCleanSpec(builder, mapTipToModel, tipOverrides, item.tip, item.well, pos) match {
 							case None =>
 							case Some(spec) =>
-								return Left(Seq("INTERNAL: Error code dispense 2"))
+								return Error(Seq("INTERNAL: Error code dispense 2"))
 						}
 					}
 						
@@ -109,7 +109,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					destWriter.add(liquidSrc, item.nVolume)
 				})
 				val actions = Seq(Dispense(items))
-				Right(new DispenseResult(builder.toImmutable, actions, remains))
+				Success(new DispenseResult(builder.toImmutable, actions, remains))
 		}
 	}
 	
@@ -117,7 +117,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		states: StateMap,
 		twsD: Seq[TipWell],
 		mapTipToVolume: Map[TipConfigL2, Double]
-	): Either[Seq[String], Seq[Aspirate]] = {
+	): Result[Seq[Aspirate]] = {
 		val tips = SortedSet(twsD.map(_.tip) : _*)
 		val mapTipToSrcs = twsD.map(tw => tw.tip -> mapDestToItem(tw.well).srcs).toMap
 		val setSrcs = Set(mapTipToSrcs.values.toSeq : _*)
@@ -135,13 +135,13 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		}
 		val actions = for (tws <- twss) yield {
 			aspirate_createItems(states, mapTipToVolume, tws) match {
-				case Left(sError) =>
-					return Left(Seq(sError))
-				case Right(items) =>
+				case Error(sError) =>
+					return Error(Seq(sError))
+				case Success(items) =>
 					Aspirate(items)
 			}
 		}
-		Right(actions)
+		Success(actions)
 	}
 	
 	// Check for appropriate volumes
@@ -201,7 +201,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				val nVolumeRequested = remains0.getOrElse(tw, item.nVolume)
 				if (nVolumeRequested > nMax) {
 					if (nVolumeInTip > 0)
-						return Left("INTERNAL: tip must be emptied before transfering excess volumes")
+						return Error("INTERNAL: tip must be emptied before transfering excess volumes")
 					// Use maximum value possible, leaving at least nMin for the next round.
 					val nVolume = math.min(nMax, nVolumeRequested - nMin)
 					val nVolumeRemaining = nVolumeRequested - nVolume
@@ -213,26 +213,26 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				}
 			}
 			getDispensePolicy(states, tw, nVolume) match {
-				case Left(sError) => return Left(sError)
-				case Right(policy) =>
+				case Error(sError) => return Error(sError)
+				case Success(policy) =>
 					items += new L2A_SpirateItem(tip, dest, nVolume, policy)
 			}
 		}
 		assert(!items.isEmpty)
 		//println("remains:", remains)
-		Right((items.toSeq, remains.toMap))
+		Success((items.toSeq, remains.toMap))
 	}
 
 	/*
 	private def mix_createItems(states: RobotState, tws: Seq[TipWell], mixSpec: MixSpec): Either[String, Seq[L2A_MixItem]] = {
 		val items = tws.map(tw => {
 			getMixPolicy(states, tw) match {
-				case Left(sError) => return Left(sError)
-				case Right(policy) =>
+				case Error(sError) => return Error(sError)
+				case Success(policy) =>
 					new L2A_MixItem(tw.tip, tw.well, mixSpec.nVolume, mixSpec.nCount, policy)
 			}
 		})
-		Right(items)
+		Success(items)
 	}*/
 
 	private def aspirate_chooseTipWellPairs_liquid(states: StateMap, tips: SortedSet[TipConfigL2], srcs: Set[WellConfigL2]): Seq[Seq[TipWell]] = {
@@ -252,12 +252,12 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	private def aspirate_createItems(states: StateMap, mapTipToVolume: Map[TipConfigL2, Double], tws: Seq[TipWell]): Either[String, Seq[L2A_SpirateItem]] = {
 		val items = tws.map(tw => {
 			getAspiratePolicy(states, tw) match {
-				case Left(sError) => return Left(sError)
-				case Right(policy) =>
+				case Error(sError) => return Error(sError)
+				case Success(policy) =>
 					new L2A_SpirateItem(tw.tip, tw.well, mapTipToVolume(tw.tip), policy)
 			}
 		})
-		Right(items)
+		Success(items)
 	}
 	
 	private def getDispensePolicy(states: StateMap, tw: TipWell, nVolume: Double): Either[String, PipettePolicy] = {
@@ -272,14 +272,14 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		pipettePolicy_? : Option[PipettePolicy]
 	): Either[String, PipettePolicy] = {
 		pipettePolicy_? match {
-			case Some(policy) => Right(policy)
+			case Some(policy) => Success(policy)
 			case None =>
 				val item = mapDestToItem(dest)
 				val destState = dest.state(states)
 				val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(states).liquid
 				robot.getDispensePolicy(liquidSrc, tip, item.nVolume, destState.nVolume) match {
-					case None => Left("no dispense policy found for "+tip+" and "+dest)
-					case Some(policy) => Right(policy)
+					case None => Error("no dispense policy found for "+tip+" and "+dest)
+					case Some(policy) => Success(policy)
 				}
 		}
 	}
@@ -295,13 +295,13 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		pipettePolicy_? : Option[PipettePolicy]
 	): Either[String, PipettePolicy] = {
 		pipettePolicy_? match {
-			case Some(policy) => Right(policy)
+			case Some(policy) => Success(policy)
 			case None =>
 				val tipState = tip.state(states)
 				val srcState = src.state(states)
 				robot.getAspiratePolicy(tipState, srcState) match {
-					case None => Left("no aspirate policy found for "+tip+" and "+src)
-					case Some(policy) => Right(policy)
+					case None => Error("no aspirate policy found for "+tip+" and "+src)
+					case Some(policy) => Success(policy)
 				}
 		}
 	}
@@ -320,13 +320,13 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 				val tipState = tip.state(states)
 				val wellState = well.state(states)
 				robot.getAspiratePolicy(tipState, wellState) match {
-					case None => Left("no mix policy found for "+tip+" and "+well)
-					case Some(policy) => Right(policy)
+					case None => Error("no mix policy found for "+tip+" and "+well)
+					case Some(policy) => Success(policy)
 				}
 			case Some(sLiquidClass) =>
 				robot.getPipetteSpec(sLiquidClass) match {
-					case None => Left("no policy found for class "+sLiquidClass)
-					case Some(spec) => Right(new PipettePolicy(spec.sName, spec.aspirate))
+					case None => Error("no policy found for class "+sLiquidClass)
+					case Some(spec) => Success(new PipettePolicy(spec.sName, spec.aspirate))
 				}
 		}
 	}*/

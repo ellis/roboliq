@@ -18,8 +18,8 @@ case class L2C_Aspirate(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 		}
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Aspirate(items.map(_.toL1(states))))
+	def toL1(states: RobotState): Result[L1Type] = {
+		Success(L1C_Aspirate(items.map(_.toL1(states))))
 	}
 	
 	override def toDebugString = {
@@ -70,8 +70,8 @@ case class L2C_Dispense(items: Seq[L2A_SpirateItem]) extends CommandL2 {
 		}
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Dispense(items.map(_.toL1(states))))
+	def toL1(states: RobotState): Result[L1Type] = {
+		Success(L1C_Dispense(items.map(_.toL1(states))))
 	}
 	
 	override def toDebugString = {
@@ -99,8 +99,8 @@ case class L2C_Mix(items: Seq[L2A_MixItem]) extends CommandL2 {
 		}
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Mix(items.map(_.toL1(states))))
+	def toL1(states: RobotState): Result[L1Type] = {
+		Success(L1C_Mix(items.map(_.toL1(states))))
 	}
 	
 	override def toDebugString = {
@@ -150,9 +150,9 @@ case class L2C_Wash(items: Seq[L2A_WashItem], iWashProgram: Int, intensity: Wash
 		}
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+	def toL1(states: RobotState): Result[L1Type] = {
 		val items1 = items.map(item => new L1A_WashItem(item.tip, item.nVolumeInside))
-		Right(L1C_Wash(items1, iWashProgram))
+		Success(L1C_Wash(items1, iWashProgram))
 	}
 	
 	override def toDebugString = {
@@ -198,15 +198,15 @@ case class L2C_TipsGet(tips: Set[TipConfigL2], model: TipModel) extends CommandL
 		println("after4: "+new RobotState(builder.map.toMap).apply(tip0.obj))*/
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+	def toL1(states: RobotState): Result[L1Type] = {
 		for (tip <- tips) {
 			val tipState = tip.obj.state(states)
 			tipState.model_? match {
-				case Some(model) => return Left(Seq("tip "+tip.index+" must be dropped before getting a new one"))
+				case Some(model) => return Error(Seq("tip "+tip.index+" must be dropped before getting a new one"))
 				case _ =>
 			}
 		}
-		Right(L1C_TipsGet(tips, model))
+		Success(L1C_TipsGet(tips, model))
 	}
 
 	override def toDebugString = {
@@ -230,8 +230,8 @@ case class L2C_TipsDrop(tips: Set[TipConfigL2], location: String) extends Comman
 		}
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_TipsDrop(tips, location))
+	def toL1(states: RobotState): Result[L1Type] = {
+		Success(L1C_TipsDrop(tips, location))
 	}
 
 	override def toDebugString = {

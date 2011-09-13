@@ -129,10 +129,10 @@ ENDLIST
 		//p.parse(sSource)
 		val sSource2 = scala.io.Source.fromFile(System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf").mkString
 		p.parse(sSource2) match {
-			case Left(err) =>
+			case Error(err) =>
 				err.kbErrors.foreach(println)
 				err.errors.foreach(println)
-			case Right(res) =>
+			case Success(res) =>
 				compile(res)
 		}
 		
@@ -151,20 +151,20 @@ ENDLIST
 	
 		val compiler = createCompiler(res)
 		res.kb.concretize() match {
-			case Right(map31) =>
+			case Success(map31) =>
 				val state0 = map31.createRobotState()
 				//state0.map.filter(_._1.isInstanceOf[Well]).map(_._2.asInstanceOf[WellStateL2]).foreach(println)
 				//map31.map.filter(_._1.isInstanceOf[Well]).map(_._2.setup).foreach(println)
 				compiler.compile(state0, cmds) match {
-					case Left(err) =>
+					case Error(err) =>
 						println("Compilation errors:")
 						err.errors.foreach(println)
-					case Right(nodes) =>
+					case Success(nodes) =>
 						val finals = nodes.flatMap(_.collectFinal())
 						println("Output:")
 						finals.map(_.cmd1).foreach(println)
 				}
-			case Left(errors) =>
+			case Error(errors) =>
 				println("Missing information:")
 				println(errors)
 		}

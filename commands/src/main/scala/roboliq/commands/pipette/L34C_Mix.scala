@@ -18,10 +18,10 @@ case class L4C_Mix(args: L4A_MixArgs) extends CommandL4 {
 		}
 	}
 	
-	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+	def toL3(states: RobotState): Result[L3Type] = {
 		args.toL3(states) match {
-			case Left(lsErrors) => Left(lsErrors)
-			case Right(args3) => Right(new L3C_Mix(args3))
+			case Error(lsErrors) => Error(lsErrors)
+			case Success(args3) => Success(new L3C_Mix(args3))
 		}
 	}
 
@@ -35,9 +35,9 @@ class L4A_MixArgs(
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val tipModel_? : Option[TipModel] = None
 ) {
-	def toL3(states: RobotState): Either[Seq[String], L3A_MixArgs] = {
+	def toL3(states: RobotState): Result[L3A_MixArgs] = {
 		val wells3 = targets.foldLeft(SortedSet(): SortedSet[WellConfigL2]) {(acc, target) => acc ++ PipetteHelperL4.getWells1(states, target) }
-		Right(new L3A_MixArgs(
+		Success(new L3A_MixArgs(
 			wells3,
 			mixSpec = mixSpec,
 			tipOverrides_? = tipOverrides_?,
@@ -57,8 +57,8 @@ class L3A_MixArgs(
 sealed class L4A_MixItem(
 	val target: WellOrPlateOrLiquid
 ) {
-	def toL3(states: RobotState): Either[Seq[String], Set[WellConfigL2]] = {
-		Right(PipetteHelperL4.getWells1(states, target))
+	def toL3(states: RobotState): Result[Set[WellConfigL2]] = {
+		Success(PipetteHelperL4.getWells1(states, target))
 	}
 }
 

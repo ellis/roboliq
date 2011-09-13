@@ -67,13 +67,13 @@ object Command {
 trait CommandL4 extends Command {
 	type L3Type <: CommandL3
 	def addKnowledge(kb: KnowledgeBase)
-	def toL3(states: RobotState): Either[Seq[String], L3Type]
+	def toL3(states: RobotState): Result[L3Type]
 }
 trait CommandL3 extends Command
 trait CommandL2 extends Command {
 	type L1Type <: CommandL1
 	def updateState(builder: StateBuilder)
-	def toL1(states: RobotState): Either[Seq[String], L1Type]
+	def toL1(states: RobotState): Result[L1Type]
 }
 trait CommandL1 extends Command
 

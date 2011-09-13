@@ -145,8 +145,8 @@ class KnowledgeBase {
 			for ((obj, setup) <- setups) {
 				if (!setObjTried.contains(obj)) {
 					obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
-						case Left(ls) => log.errors += new LogItem(obj, ls)
-						case Right((conf, state)) =>
+						case Error(ls) => log.errors += new LogItem(obj, ls)
+						case Success((conf, state)) =>
 							mapConfs(obj) = conf
 							builder.map(obj) = state
 					}
@@ -178,8 +178,8 @@ class KnowledgeBase {
 		// Wells
 		for ((obj, setup) <- wellSetups) {
 			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], builder) match {
-				case Left(ls) => log.errors += new LogItem(obj, ls)
-				case Right((conf, state)) =>
+				case Error(ls) => log.errors += new LogItem(obj, ls)
+				case Success((conf, state)) =>
 					mapConfs(obj) = conf
 					builder.map(obj) = state
 			}

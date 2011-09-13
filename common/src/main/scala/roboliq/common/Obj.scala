@@ -26,7 +26,7 @@ abstract class Obj {
 	type State <: ObjState
 	
 	def createSetup(): Setup
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]]
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]]
 	
 	def getSetup(map31: ObjMapper): Option[Setup] = map31.setup(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 	def getConfig(map31: ObjMapper): Option[Config] = map31.config(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
@@ -64,11 +64,11 @@ class Well extends Obj { thisObj =>
 	type State = WellStateL2
 	
 	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
-		Left(Seq("well configs must be created separately"))
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+		Error(Seq("well configs must be created separately"))
 	}
 	
-	def createConfigAndState0(setup: Setup, states: StateMap): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup, states: StateMap): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 		
 		// Check Config vars
@@ -96,7 +96,7 @@ class Well extends Obj { thisObj =>
 			errors += "must specify initial liquid for source wells"
 			
 		if (!errors.isEmpty)
-			return Left(errors)
+			return Error(errors)
 			
 		val holderState = states(setup.holder_?.get).asInstanceOf[PlateStateL2]
 		val nVolume = setup.nVolume_?.getOrElse(0.0)
@@ -111,7 +111,7 @@ class Well extends Obj { thisObj =>
 				liquid = liquid_?.getOrElse(Liquid.empty),
 				nVolume = nVolume)
 		
-		Right(conf, state)
+		Success(conf, state)
 	}
 
 	class StateWriter(map: HashMap[Obj, ObjState]) {

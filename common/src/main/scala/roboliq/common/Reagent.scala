@@ -10,7 +10,7 @@ class Reagent extends Obj { thisObj =>
 	type State = ReagentState
 	
 	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
 		if (setup.sName_?.isEmpty)
@@ -19,7 +19,7 @@ class Reagent extends Obj { thisObj =>
 			errors += "family not set"
 				
 		if (!errors.isEmpty)
-			return Left(errors)
+			return Error(errors)
 
 		val liquid = new Liquid(
 				setup.sName_?.get,
@@ -33,7 +33,7 @@ class Reagent extends Obj { thisObj =>
 		val state = new ReagentState(
 				conf = conf)
 		
-		Right(conf, state)
+		Success(conf, state)
 	}
 
 	class StateWriter(map: HashMap[Obj, ObjState]) {

@@ -10,8 +10,8 @@ case class L2C_Timer(args: L12A_TimerArgs) extends CommandL2 {
 		// Nothing to do
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
-		Right(L1C_Timer(args))
+	def toL1(states: RobotState): Result[L1Type] = {
+		Success(L1C_Timer(args))
 	}
 	
 	override def toDebugString = {

@@ -13,10 +13,10 @@ case class L4C_MovePlate(args: L4A_MovePlateArgs) extends CommandL4 {
 		// TODO: handle lidHandlingSpec too, e.g. location and noting that plate model needs a lid, and that plate should have a lid on initially
 	}
 	
-	def toL3(states: RobotState): Either[Seq[String], L3Type] = {
+	def toL3(states: RobotState): Result[L3Type] = {
 		args.toL3(states) match {
-			case Left(lsErrors) => Left(lsErrors)
-			case Right(args3) => Right(new L3C_MovePlate(args3))
+			case Error(lsErrors) => Error(lsErrors)
+			case Success(args3) => Success(new L3C_MovePlate(args3))
 		}
 	}
 }
@@ -28,8 +28,8 @@ class L4A_MovePlateArgs(
 	val location: Memento[String],
 	val lidHandlingSpec_? : Option[LidHandlingSpec]
 ) {
-	def toL3(states: RobotState): Either[Seq[String], L3A_MovePlateArgs] = {
-		Right(new L3A_MovePlateArgs(
+	def toL3(states: RobotState): Result[L3A_MovePlateArgs] = {
+		Success(new L3A_MovePlateArgs(
 			plate.state(states).conf,
 			ValueArg(location.state(states).value),
 			lidHandlingSpec_?

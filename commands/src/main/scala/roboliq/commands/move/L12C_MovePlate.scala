@@ -10,12 +10,12 @@ case class L2C_MovePlate(args: L2A_MovePlateArgs) extends CommandL2 {
 		args.plate.obj.stateWriter(builder).location = args.locationDest
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+	def toL1(states: RobotState): Result[L1Type] = {
 		val args1 = args.toL1(states) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(args1) => args1
+			case Error(lsError) => return Error(lsError)
+			case Success(args1) => args1
 		}
-		Right(L1C_MovePlate(args1))
+		Success(L1C_MovePlate(args1))
 	}
 	
 	override def toDebugString = {
@@ -31,13 +31,13 @@ case class L2A_MovePlateArgs(
 	lidHandling: LidHandling.Value,
 	locationLid: String
 ) {
-	def toL1(states: StateMap): Either[Seq[String], L1A_MovePlateArgs] = {
+	def toL1(states: StateMap): Result[L1A_MovePlateArgs] = {
 		val plateState = plate.state(states)
 		val sPlateModel = plate.model_? match {
-			case None => return Left(Seq("plate \""+plate.sLabel+"\" must be assigned a plate model"))
+			case None => return Error(Seq("plate \""+plate.sLabel+"\" must be assigned a plate model"))
 			case Some(model) => model.id
 		}
-		Right(L1A_MovePlateArgs(
+		Success(L1A_MovePlateArgs(
 			iRoma = iRoma,
 			sPlateModel = sPlateModel,
 			locationSrc = plateState.location,

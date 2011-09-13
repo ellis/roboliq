@@ -10,14 +10,14 @@ class Location extends Obj { thisObj =>
 	type State = LocationState
 	
 	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
 		if (setup.location_?.isEmpty)
 			errors += "location not set"
 				
 		if (!errors.isEmpty)
-			return Left(errors)
+			return Error(errors)
 
 		val conf = new LocationConfig(
 				obj = this,
@@ -27,7 +27,7 @@ class Location extends Obj { thisObj =>
 				location = conf.location0
 				)
 		
-		Right(conf, state)
+		Success(conf, state)
 	}
 
 	class StateWriter(map: HashMap[Obj, ObjState]) {

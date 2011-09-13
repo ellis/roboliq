@@ -14,7 +14,7 @@ class Plate extends Obj {
 	
 	def createSetup() = new Setup(this)
 	
-	def createConfigAndState0(setup: Setup): Either[Seq[String], Tuple2[Config, State]] = {
+	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
 		if (setup.sLabel_?.isEmpty)
@@ -24,7 +24,7 @@ class Plate extends Obj {
 		if (setup.location_?.isEmpty)
 			errors += "location not set"
 		if (!errors.isEmpty)
-			return Left(errors)
+			return Error(errors)
 
 		val dim = setup.dim_?.get
 		
@@ -40,7 +40,7 @@ class Plate extends Obj {
 			conf = conf,
 			location = setup.location_?.get)
 
-		Right(conf, state)
+		Success(conf, state)
 	}
 
 	class StateWriter(map: HashMap[Obj, ObjState]) {

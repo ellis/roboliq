@@ -10,12 +10,12 @@ case class L2C_Shake(args: L2A_ShakeArgs) extends CommandL2 {
 		// No state
 	}
 	
-	def toL1(states: RobotState): Either[Seq[String], L1Type] = {
+	def toL1(states: RobotState): Result[L1Type] = {
 		val args1 = args.toL1(states) match {
-			case Left(lsError) => return Left(lsError)
-			case Right(args1) => args1
+			case Error(lsError) => return Error(lsError)
+			case Success(args1) => args1
 		}
-		Right(L1C_Shake(args1))
+		Success(L1C_Shake(args1))
 	}
 	
 	override def toDebugString = {
@@ -29,8 +29,8 @@ case class L2A_ShakeArgs(
 	idDevice: String,
 	nDuration: Double
 ) {
-	def toL1(states: StateMap): Either[Seq[String], L1A_ShakeArgs] = {
-		Right(L1A_ShakeArgs(
+	def toL1(states: StateMap): Result[L1A_ShakeArgs] = {
+		Success(L1A_ShakeArgs(
 			idDevice = idDevice,
 			nDuration = nDuration
 		))

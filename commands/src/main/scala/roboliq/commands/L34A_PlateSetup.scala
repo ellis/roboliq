@@ -8,8 +8,8 @@ class L4A_PlateSetup {
 	var locationNew: Location = null
 	var locationFinal: Location = null
 	
-	def toL3(states: RobotState): Either[Seq[String], L3A_PlateSetup] = {
-		Right(new L3A_PlateSetup(
+	def toL3(states: RobotState): Result[L3A_PlateSetup] = {
+		Success(new L3A_PlateSetup(
 			replate_? = if (replate == null) None else Some(replate),
 			locationNew_? = if (locationNew == null) None else Some(locationNew.state(states).location),
 			locationFinal_? = if (locationFinal == null) None else Some(locationFinal.state(states).location)
