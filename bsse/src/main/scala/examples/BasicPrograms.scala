@@ -58,7 +58,7 @@ object Program02 {
 		
 		val vars = new Vars(vars1)
 		val cmds = cmds1
-		Success(ProgramStageSuccess(cmds, vars))
+		Right(ProgramStageSuccess(cmds, vars))
 	}
 	
 	//def pipette() = Seq[Command]()

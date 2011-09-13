@@ -96,7 +96,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 		
 		for {
 			// If we would need to aspirate a new liquid, abort
-			_ <- Result.assert(liquid ne tipWriter.state.liquid, "INTERNAL: Error code dispense 1");
+			_ <- Result.assert(liquid eq tipWriter.state.liquid, "INTERNAL: Error code dispense 1");
 			// check for valid volume, i.e., not too much
 			_ <- mix_checkVol(builder, tip, target);
 			// Check whether this dispense would require a cleaning

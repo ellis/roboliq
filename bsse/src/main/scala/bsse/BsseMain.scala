@@ -33,7 +33,7 @@ object Main extends App {
 	compiler.bDebug = true
 
 	Compiler.compile(protocol.kb, Some(compiler), Some(translator), protocol.cmds) match {
-		case Error(err) => err.print()
-		case Success(succ) => succ.print()
+		case Left(err) => err.print()
+		case Right(succ) => succ.print()
 	}
 }
