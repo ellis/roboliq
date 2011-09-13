@@ -400,46 +400,11 @@ private trait L3P_PipetteMixBase {
 		actionD: Dispense,
 		mixSpec: MixSpec
 	): Result[Mix] = {
-		def toL2(itemD: L2A_SpirateItem): Result[L2A_MixItem] =
+		def toL2(itemD: L2A_SpirateItem): Result[L2A_MixItem] = {
 			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?).map(
 					policy => new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy))
-		for {
-			items <- Result.map(actionD.items, toL2 _)
-		} yield {
-			Mix(items)
 		}
-		
-		
-		Result.mapOver(actionD.items) { itemD =>
-			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?).map(policy => new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy))
-		}
-		
-		val items = actionD.items.map(itemD => {
-			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?).map(policy => new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy))
-		})
-		Result.sequence(items).map(Mix(_))
-		
-		
-		Result.mapOver(actionD.items) { itemD =>
-			for { policy <- getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?) }
-			yield { new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy) }
-		}
-		actionD.items.map(itemD =>
-			for { policy <- getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?) }
-			yield { new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy) }
-		)
-		
-		
-		Error("hy")
-		/*
-		val items = actionD.items.map(itemD => {
-			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?) match {
-				case Error(sError) => return Error(sError)
-				case Success(policy) =>
-					new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy)
-			}
-		})
-		Success(Mix(items))*/
+		Result.map(actionD.items, toL2 _).map(Mix(_))
 	}
 	
 	protected def getMixPolicy(states: StateMap, tw: TipWell): Result[PipettePolicy] = {

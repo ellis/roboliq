@@ -30,6 +30,8 @@ sealed abstract class Result[+T] {
 	def map[B](f: T => B): Result[B]
 	def isError: Boolean
 	def isSuccess: Boolean
+	
+	final def >>=[B](f: T => Result[B]): Result[B] = flatMap(f)
 }
 case class Error[T](lsError: Seq[String]) extends Result[T] {
 	def flatMap[B](f: T => Result[B]): Result[B] = Error[B](lsError)
