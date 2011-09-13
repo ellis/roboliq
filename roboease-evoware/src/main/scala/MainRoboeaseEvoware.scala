@@ -8,9 +8,9 @@ import roboliq.compiler._
 import roboliq.devices.pipette._
 import roboliq.roboease
 import roboliq.roboease._
-import _root_.evoware._
-
-import weizmann._
+import roboliq.robots.evoware._
+import roboliq.labs.weizmann._
+import roboliq.labs.weizmann.station1._
 
 
 object Main extends App {
@@ -38,49 +38,32 @@ object Main extends App {
 	}
 	
 	def test2(sSourcePath: String) {
-		val p = new ParserFile(
-			WeizmannRoboeaseConfig.mapTables,
-			WeizmannRoboeaseConfig.mapTipModel,
-			WeizmannRoboeaseConfig.mapLcToPolicy
-		)
+		val p = new RoboeaseParser(new Config2Roboease)
 
 		RoboeaseHack.bEmulateEvolab = true
 		
 		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
 		p.parse(sSource) match {
-			case Error(err) =>
+			case Left(err) =>
 				err.print()
-			case Success(res) =>
+			case Right(res) =>
 				val kb = res.kb
 				val cmds = res.cmds.map(_.cmd)
-
-				val robot = WeizmannRoboeaseConfig.robot
-				robot.devices.foreach(_.addKnowledge(kb))
-				
-				val compiler = new Compiler(robot.processors)
-				compiler.bDebug = true
-				
-				val evowareMapper = WeizmannEvowareMapper(p.racks)
-				val translator = new EvowareTranslator(evowareMapper)
-			
-				Compiler.compile(kb, Some(compiler), None, cmds) match {
-					case Error(errC) => errC.print()
-					case Success(succC: CompilerStageSuccess) =>
-						val finals = succC.nodes.flatMap(_.collectFinal())
-						val cmds1 = finals.map(_.cmd1)
-						translator.translate(cmds1) match {
-							case Error(errT) => errT.print()
-							case Success(succT) =>
-								val sFilename = sSourcePath + ".esc"
-								case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
-								def toLabwareItem(a: roboease.Labware): _root_.evoware.LabwareItem = {
-									_root_.evoware.LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
-								}
-								val mapLabware = p.mapLabware.mapValues(toLabwareItem)
-								val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
-								println(s)
+				val evowareConfig = new Config3Translator()
+				val compilerConfig = new Config4Compiler()
+				val toolchain = new WeizmannToolchain(compilerConfig, evowareConfig)
+				toolchain.compile(kb, cmds) match {
+					case Left(err) => err.print()
+					case Right(succT: TranslatorStageSuccess) =>
+						val sFilename = sSourcePath + ".esc"
+						case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
+						def toLabwareItem(a: roboease.Labware): LabwareItem = {
+							LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
 						}
-					case Success(succ) => succ.print()
+						val mapLabware = p.mapLabware.mapValues(toLabwareItem)
+						val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
+						println(s)
+					case Right(succ) => succ.print()
 				}
 		}
 	}

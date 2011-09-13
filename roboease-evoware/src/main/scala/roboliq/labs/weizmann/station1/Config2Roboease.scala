@@ -1,18 +1,21 @@
-package roboliq.labs.weizmann
+package roboliq.labs.weizmann.station1
 
 import roboliq.commands.pipette._
+import roboliq.roboease.RoboeaseConfig
 
 
-object WeizmannRoboeaseConfig {
-	val robot = WeizmannSystem()
+class Config2Roboease extends RoboeaseConfig {
 	val mapTables = WeizmannTables.map
-	val mapTipModel = Map(
-		"10" -> robot.pipetter.tipSpec10,
-		"20" -> robot.pipetter.tipSpec20,
-		"50" -> robot.pipetter.tipSpec50,
-		"200" -> robot.pipetter.tipSpec200,
-		"1000" -> robot.pipetter.tipSpec1000
-	)
+	val mapTipModel = {
+		import Config1Models._
+		Map(
+			"10" -> tipSpec10,
+			"20" -> tipSpec20,
+			"50" -> tipSpec50,
+			"200" -> tipSpec200,
+			"1000" -> tipSpec1000
+		)
+	}
 	val pipettePolicies = Seq(
 		PipettePolicy("PIE_AUTAIR", PipettePosition.Free),
 		PipettePolicy("PIE_AUTAIR_LowVol", PipettePosition.Free),

@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A1-common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A4-devices"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A3-compiler"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A5-roboease"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

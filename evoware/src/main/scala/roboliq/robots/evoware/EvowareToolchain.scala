@@ -6,26 +6,34 @@ import roboliq.protocol._
 
 
 trait EvowareToolchain {
-	def getDevices: Seq[Device]
-	def getEvowareSystem: EvowareSystem
-	def getProcessors: Seq[CommandCompiler]
+	val compilerConfig: CompilerConfig
+	val evowareConfig: EvowareConfig
 	
-	def compile(protocol: CommonProtocol, bDebug: Boolean = false): Either[CompileStageError, CompileStageResult] = {
+	//import compilerConfig._
+	
+	def compileProtocol(protocol: CommonProtocol, bDebug: Boolean = false): Either[CompileStageError, CompileStageResult] = {
 		prepareProtocol(protocol)
 		
-		val system = getEvowareSystem
-		val translator = new EvowareTranslator(system)
+		val translator = compilerConfig.createTranslator
 	
-		val processors = getProcessors
-		val compiler = new Compiler(processors)
+		val compiler = new Compiler(compilerConfig.processors)
 	
 		Compiler.compile(protocol.kb, Some(compiler), Some(translator), protocol.cmds)
 	}
 	
+	def compile(kb: KnowledgeBase, cmds: Seq[Command], bDebug: Boolean = false): Either[CompileStageError, CompileStageResult] = {
+		addKnowledge(kb, compilerConfig.devices, cmds)
+		
+		val translator = compilerConfig.createTranslator
+	
+		val compiler = new Compiler(compilerConfig.processors)
+	
+		Compiler.compile(kb, Some(compiler), Some(translator), cmds)
+	}
+	
 	def prepareProtocol(protocol: CommonProtocol) {
 		runProtocol(protocol)
-		addDeviceKnowledge(protocol.kb, getDevices)
-		addCommandKnowledge(protocol.kb, protocol.cmds)
+		addKnowledge(protocol.kb, compilerConfig.devices, protocol.cmds)
 		
 		// run customization
 		if (protocol.m_customize.isDefined) protocol.m_customize.get()
@@ -34,6 +42,11 @@ trait EvowareToolchain {
 	def runProtocol(protocol: CommonProtocol) {
 		if (protocol.m_protocol.isDefined) protocol.m_protocol.get()
 		protocol.__findPlateLabels()
+	}
+	
+	def addKnowledge(kb: KnowledgeBase, devices: Seq[Device], cmds: Seq[Command]) {
+		addDeviceKnowledge(kb, devices)
+		addCommandKnowledge(kb, cmds)
 	}
 	
 	/** Knowledge from devices */

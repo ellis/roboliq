@@ -13,7 +13,7 @@ import roboliq.devices.pipette._
 import roboliq.robots.evoware.commands._
 
 
-class EvowareTranslator(system: EvowareSystem) extends Translator {
+class EvowareTranslator(system: EvowareConfig) extends Translator {
 	override def addKnowledge(kb: KnowledgeBase) {
 		// Do nothing
 	}

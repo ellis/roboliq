@@ -6,25 +6,16 @@ import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
+//import _root_.evoware._
 
-import _root_.evoware._
 
-
-class WeizmannPipetteDevice extends PipetteDevice {
-	val tipSpec10 = new TipModel("DiTi 10ul", 10, 0, 0, 0)
-	val tipSpec20 = new TipModel("DiTi 20ul", 20, 0, 0, 0)
-	val tipSpec50 = new TipModel("DiTi 50ul", 50, 1, 0, 0)
-	val tipSpec200 = new TipModel("DiTi 200ul", 200, 2, 0, 0)
-	//private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 3, 960)
-	val tipSpec1000 = new TipModel("DiTi 1000ul", 925, 0, 0, 0)
-	private val tipSpecs = Seq(tipSpec200, tipSpec10, tipSpec20, tipSpec50, tipSpec1000)
-	//private val tipSpecs = Seq(tipSpec1000)
+class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends PipetteDevice {
 	val config = new PipetteDeviceConfig(
-		tipSpecs = tipSpecs,
+		tipModels,
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
-		tipGroups = tipSpecs.map(spec => (0 to 7).map(i => i -> spec))
+		tipGroups = tipModels.map(spec => (0 to 7).map(i => i -> spec))
 	)
-	//private val mapTipSpecs = config.tipSpecs.map(spec => spec.id -> spec).toMap
+	//private val mapTipSpecs = config.tipModels.map(spec => spec.id -> spec).toMap
 	def areTipsDisposable: Boolean = true
 	def addKnowledge(kb: KnowledgeBase) = {
 		config.tips.foreach(kb.addObject)

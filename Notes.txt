@@ -369,6 +369,34 @@ processing order:
 	- user must specify plate dimension? However, the default should be specified in the Robot definition
 	- for plate transfers with multiple possible destinations, we need to give the knowledge base item some form of label so that the user can identify which command the transfer is for
 
+things we need to know for compiling and when we need to know them:
+	* we might want to load all part model data at this point, since roboease requires the tip models
+	* create roboease config
+	- roboease:
+		mapTables: possible table layouts
+		mapTipModels
+			available tip models
+		mapLcToPolicy
+	- add protocol object knowledge (if any)
+		... dunno yet ...
+	* choose devices, processors, compiler before processing the protocol -- in other words, the procotol cannot do anything to change devices and processors
+	* the table can optionally be chosen as part of the protocol class definition at this point
+	- add device knowledge
+		devices
+	* at latest now we create the chosen table; might as well create compiler and translator already
+	- add customizaton knowledge
+		customization function
+			complete data about robot/table/lab setup
+	- add protocol command knowledge
+		commands
+	- compile
+		processors
+		compiler
+		translator
+			sites (carrier models, carriers)
+			wash programs
+	- translate to native code
+		
 
 -------------
 val templatePlate = new Plate

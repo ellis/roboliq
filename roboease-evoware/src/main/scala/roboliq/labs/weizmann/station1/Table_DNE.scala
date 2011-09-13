@@ -1,4 +1,4 @@
-package roboliq.labs.weizmann
+package roboliq.labs.weizmann.station1
 
 import roboliq.roboease._
 

@@ -65,6 +65,7 @@ Code:
 			transform list of results into a result of errors or result of list of values
 				Iterable[Result[A]] => Result[Iterable[A]]
 		- transform list of results into a result of the 
+		- Seq[A] => Seq[Result[B]] => Result[Seq[B]] => Result[C]
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
