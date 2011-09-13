@@ -24,3 +24,16 @@ object WashIntensity extends Enumeration {
 		if (a >= b) a else b
 	}
 }
+
+sealed abstract class Result[T] {
+	def flatMap[B](f: T => Result[B]): Result[B]
+	def map[B](f: T => B): Result[B]
+}
+case class Error[T](lsError: Seq[String]) extends Result[T] {
+	def flatMap[B](f: T => Result[B]): Result[B] = Error[B](lsError)
+	def map[B](f: T => B): Result[B] = Error[B](lsError)
+}
+case class Success[T](value: T) extends Result[T] {
+	def flatMap[B](f: T => Result[B]): Result[B] = f(value)
+	def map[B](f: T => B): Result[B] = Success[B](f(value))
+}
