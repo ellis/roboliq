@@ -1,4 +1,4 @@
-package weizmann
+package roboliq.labs.weizmann
 
 import scala.collection.mutable.ArrayBuffer
 

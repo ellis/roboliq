@@ -1,4 +1,4 @@
-package weizmann
+package roboliq.labs.weizmann.devices
 
 import scala.collection.immutable.SortedSet
 

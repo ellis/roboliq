@@ -1,10 +1,10 @@
-package weizmann
+package roboliq.labs.weizmann
 
 import roboliq.commands.pipette._
 
 
 object WeizmannRoboeaseConfig {
-	val robot = WeizmannRobot()
+	val robot = WeizmannSystem()
 	val mapTables = WeizmannTables.map
 	val mapTipModel = Map(
 		"10" -> robot.pipetter.tipSpec10,

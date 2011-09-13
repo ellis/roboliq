@@ -1,4 +1,4 @@
-package weizmann
+package roboliq.labs.weizmann
 
 import roboliq.common._
 import roboliq.compiler._

@@ -1,4 +1,4 @@
-package evoware
+package roboliq.robots.evoware
 
 import roboliq.compiler.RoboliqSystem
 
@@ -20,5 +20,5 @@ trait EvowareSystem {
 	
 	//val mapCarrierModels = carrierModels.map(m => m.sName -> m).toMap
 	//val mapLabwareModels = labwareModels.map(m => m.sName -> m).toMap
-	val mapSites: Map[String, SiteObj] = sites.map(site => site.sName -> site).toMap
+	lazy val mapSites: Map[String, SiteObj] = sites.map(site => site.sName -> site).toMap
 }

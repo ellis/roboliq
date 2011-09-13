@@ -1,11 +1,8 @@
 package examples
 
-//import roboliq.common._
-//import roboliq.commands.pipette._
-//import roboliq.compiler._
-//import roboliq.devices.pipette._
 import roboliq.common
-import bsse.Protocol
+import roboliq.labs.bsse.Protocol
+
 
 class Example01 extends Protocol {
 	val ddw = new Liquid("Water")

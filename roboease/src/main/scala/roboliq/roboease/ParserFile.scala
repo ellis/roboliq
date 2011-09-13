@@ -45,10 +45,10 @@ class ParserFile(mapTables: Map[String, Table], mapTipModel: Map[String, TipMode
 					m_section = Section.Doc
 				case "SCRIPT" =>
 					kb.concretize() match {
-						case Error(errK) =>
+						case Left(errK) =>
 							m_map31 = null
-							return Error(errK)
-						case Success(succK) =>
+							return Left(errK)
+						case Right(succK) =>
 							m_map31 = succK.mapper
 					}
 					m_section = Section.Script
@@ -65,11 +65,11 @@ class ParserFile(mapTables: Map[String, Table], mapTipModel: Map[String, TipMode
 		if (shared.errors.isEmpty) {
 			val cmds4 = pScript.cmds.collect { case RoboeaseCommand(_, _, cmd: CommandL4) => cmd }
 			cmds4.foreach(_.addKnowledge(kb))
-			Success(RoboeaseResult(shared.kb, pScript.cmds))
+			Right(RoboeaseResult(shared.kb, pScript.cmds))
 		}
 		else {
 			val log = Log(shared.errors.map(_.sError))
-			Error(CompileStageError(log))
+			Left(CompileStageError(log))
 		}
 	}
 	

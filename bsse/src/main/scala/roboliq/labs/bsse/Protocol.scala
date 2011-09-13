@@ -1,13 +1,13 @@
-package bsse
+package roboliq.labs.bsse
 
 import scala.collection.mutable.HashMap
 
 import roboliq.common
 import roboliq.common._
-//import roboliq.commands.pipette._
 import roboliq.protocol.CommonProtocol
 import roboliq.devices.pipette._
-import evoware._
+import roboliq.robots.evoware
+import roboliq.robots.evoware._
 
 
 trait Protocol extends CommonProtocol {

@@ -1,4 +1,4 @@
-package bsse
+package roboliq.labs.bsse
 
 import scala.collection.immutable.SortedSet
 

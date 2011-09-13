@@ -1,4 +1,4 @@
-package evoware
+package roboliq.robots.evoware
 
 case class Site(val iGrid: Int, val iSite: Int)
 

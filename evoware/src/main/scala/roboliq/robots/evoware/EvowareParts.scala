@@ -1,4 +1,4 @@
-package evoware
+package roboliq.robots.evoware
 
 /*sealed class EvowareTipKind(
 	val sName: String,

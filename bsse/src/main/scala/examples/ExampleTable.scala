@@ -5,7 +5,7 @@ import scala.collection.mutable.HashMap
 
 import roboliq.common
 import roboliq.common._
-import evoware._
+import roboliq.robots.evoware._
 
 
 trait ExampleTable {
@@ -69,7 +69,7 @@ trait EvowareTable {
 }
 
 trait ExampleTable2 extends EvowareTable {
-	import evoware.PlateModel
+	import roboliq.robots.evoware.PlateModel
 	
 	object CarrierModels {
 		val wash = new CarrierModel("Wash Station Clean", 3, false)

@@ -1,12 +1,12 @@
-package bsse
+package roboliq.labs.bsse
 
 import roboliq.common._
 import roboliq.compiler._
 import roboliq.devices.move._
 import roboliq.devices.pipette._
-import evoware.EvowareSystem
-import evoware.SiteObj
-import evoware.WashProgramArgs
+import roboliq.robots.evoware.EvowareSystem
+import roboliq.robots.evoware.SiteObj
+import roboliq.robots.evoware.WashProgramArgs
 import roboliq.robots.evoware.devices._
 import roboliq.labs.bsse._
 

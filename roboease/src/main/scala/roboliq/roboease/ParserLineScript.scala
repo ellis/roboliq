@@ -40,20 +40,20 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		createSrcWellLiquids(wells)
 		
 		val mixPolicy = getPolicy(lc, None) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(policy) => policy
+			case Left(sError) => shared.addError(sError); return
+			case Right(policy) => policy
 		}
 		val mapOpts = getMapOpts(opts_?) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(map) => map
+			case Left(sError) => shared.addError(sError); return
+			case Right(map) => map
 		}
 		var tipOverrides_? = getOptTipOverrides(mapOpts) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(opt) => opt
+			case Left(sError) => shared.addError(sError); return
+			case Right(opt) => opt
 		}
 		var tipModel_? = getOptTipModel(mapOpts) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(model_?) => model_?
+			case Left(sError) => shared.addError(sError); return
+			case Right(model_?) => model_?
 		}
 
 		val mixSpec = new MixSpec(nVolume, nCount, Some(mixPolicy))
@@ -146,24 +146,24 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		wells2.foreach(well => kb.addWell(well, false)) // Indicate that these wells are destinations
 		
 		val policy = getPolicy(sLiquidClass, reagent_?) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(policy) => policy
+			case Left(sError) => shared.addError(sError); return
+			case Right(policy) => policy
 		}
 		val mapOpts = getMapOpts(opts_?) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(map) => map
+			case Left(sError) => shared.addError(sError); return
+			case Right(map) => map
 		}
 		var mixSpec_? = getOptMixSpec(mapOpts) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(opt) => opt
+			case Left(sError) => shared.addError(sError); return
+			case Right(opt) => opt
 		}
 		var tipOverrides_? = getOptTipOverrides(mapOpts) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(opt) => opt
+			case Left(sError) => shared.addError(sError); return
+			case Right(opt) => opt
 		}
 		var tipModel_? = getOptTipModel(mapOpts) match {
-			case Error(sError) => shared.addError(sError); return
-			case Success(model_?) => model_?
+			case Left(sError) => shared.addError(sError); return
+			case Right(model_?) => model_?
 		}
 		
 		val items = reagent_? match {
@@ -195,20 +195,20 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		if (lc == "DEFAULT") {
 			reagent_? match {
 				case None =>
-					Error("Explicit liquid class required here instead of \"DEFAULT\"")
+					Left("Explicit liquid class required here instead of \"DEFAULT\"")
 				case Some(reagent) =>
 					shared.mapReagentToPolicy.get(reagent) match {
 						case None =>
-							Error("Explicit liquid class required here instead of \"DEFAULT\"")
+							Left("Explicit liquid class required here instead of \"DEFAULT\"")
 						case Some(policy) =>
-							Success(policy)
+							Right(policy)
 					}
 			}
 		}
 		else {
 			shared.mapLcToPolicy.get(lc) match {
-				case None => Error("unknown liquid class \""+lc+"\"")
-				case Some(policy) => Success(policy)
+				case None => Left("unknown liquid class \""+lc+"\"")
+				case Some(policy) => Right(policy)
 			}
 		}
 	}
@@ -217,7 +217,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	
 	private def getMapOpts(opts_? : Option[String]): Either[String, Map[String, Seq[String]]] = {
 		opts_? match {
-			case None => Success(Map())
+			case None => Right(Map())
 			case Some(opts) =>
 				val lsOpts = opts.split(",")
 				val map = lsOpts.map(sOpt => {
@@ -225,72 +225,72 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					val sOptName = lsParts.head
 					val args = lsParts.tail.toSeq
 					if (!lsOptNames.contains(sOptName))
-						return Error("unknown option \""+sOptName+"\"")
+						return Left("unknown option \""+sOptName+"\"")
 					sOptName -> args.toSeq
 				}).toMap
-				Success(map)
+				Right(map)
 		}
 	}
 	
 	private def getOptMixSpec(mapOpts: Map[String, Seq[String]]): Either[String, Option[MixSpec]] = {
 		mapOpts.get("MIX") match {
-			case None => Success(None)
+			case None => Right(None)
 			case Some(args) =>
 				args match {
 					case Seq(lc, sCountAndVol) =>
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
 								getPolicy(lc, None) match {
-									case Error(sError) => Error(sError)
-									case Success(policy) => Success(Some(MixSpec(sVol.toDouble, sCount.toInt, Some(policy))))
+									case Left(sError) => Left(sError)
+									case Right(policy) => Right(Some(MixSpec(sVol.toDouble, sCount.toInt, Some(policy))))
 								}
 							case _ =>
-								Error("unrecognized MIX parameter \""+sCountAndVol+"\"")
+								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
 						}
 					case Seq(sCountAndVol) =>
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
-								Success(Some(MixSpec(sVol.toDouble, sCount.toInt, None)))
+								Right(Some(MixSpec(sVol.toDouble, sCount.toInt, None)))
 							case _ =>
-								Error("unrecognized MIX parameter \""+sCountAndVol+"\"")
+								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
 						}
 					case _ => 
-						Error("unknown MIX parameters \""+args.mkString(":")+"\"")
+						Left("unknown MIX parameters \""+args.mkString(":")+"\"")
 				}
 		}
 	}
 	
 	private def getOptTipOverrides(mapOpts: Map[String, Seq[String]]): Either[String, Option[TipHandlingOverrides]] = {
 		mapOpts.get("TIPMODE") match {
-			case None => Success(None)
+			case None => Right(None)
 			case Some(Seq(arg)) =>
 				arg match {
 					case "KEEPTIP" =>
-						Success(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
+						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
 					// NOTE: "KEEPTIP" == "KEEPTIPS"
 					case "KEEPTIPS" =>
-						Success(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
+						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
 					// This is apparently like the default behavior in roboliq
 					case "MULTIPIP" =>
-						Success(None)
+						Right(None)
 					case _ =>
-						Error("unknown TIPMODE \""+arg+"\"")
+						Left("unknown TIPMODE \""+arg+"\"")
 				}
 			case Some(args) =>
-				Error("unknown TIPMODE \""+args.mkString(":")+"\"")
+				Left("unknown TIPMODE \""+args.mkString(":")+"\"")
 		}
 	}
 	
 	private def getOptTipModel(mapOpts: Map[String, Seq[String]]): Either[String, Option[TipModel]] = {
 		mapOpts.get("TIPTYPE") match {
-			case None => Success(None)
+			case None => Right(None)
 			case Some(Seq(sType)) =>
 				shared.mapTipModel.get(sType) match {
-					case None => Error("unregister TIPTYPE: \""+sType+"\"")
-					case Some(model) => Success(Some(model))
+					case None => Left("unregister TIPTYPE: \""+sType+"\"")
+					case Some(model) => Right(Some(model))
 				}
 			case Some(args) =>
-				Error("unrecognized TIPTYPE arguments: "+args.mkString(":"))
+				Left("unrecognized TIPTYPE arguments: "+args.mkString(":"))
 		}
 	}
 	
