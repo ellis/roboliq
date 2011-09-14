@@ -21,11 +21,12 @@ object Main extends App {
 		import roboliq.compiler._
 		
 		val lsFiles = Seq(
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf",
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf",
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf",
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script04.conf"
-		)
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf",
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf",
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf",
+			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script04.conf",
+			null
+		).filter(_ != null)
 		
 		val lsFileOverride = Seq(
 			//System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf"
@@ -57,11 +58,12 @@ object Main extends App {
 					case Left(err) => err.print()
 					case Right(succT: TranslatorStageSuccess) =>
 						val sFilename = sSourcePath + ".esc"
-						case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
+						//case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
 						def toLabwareItem(a: roboease.Labware): LabwareItem = {
 							LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
 						}
-						val mapLabware = p.mapLabware.mapValues(toLabwareItem).asInstanceOf[EvowareTranslatorHeader.LabwareMap]
+						//val mapLabware = EvowareTranslatorHeader.LabwareMap(p.mapLabware.mapValues(toLabwareItem).toSeq : _*)
+						val mapLabware = p.mapLabware.mapValues(toLabwareItem)
 						val s = compilerConfig.translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
 						println(s)
 					case Right(succ) => succ.print()

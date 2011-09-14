@@ -316,13 +316,14 @@ V;200
 			})
 		
 		val sites: Seq[SiteObj] = {
-			def toSiteObj(pair: Tuple2[Int, Int]): SiteObj = {
-				val (iGrid, iSite) = pair
-				val id = "["+iGrid+","+iSite+"]"
+			def toSiteObj(rack: EvolabRack): SiteObj = {
+				import rack.{iGrid,iSite}
+				val id = rack.id
 				val carrier = mapGridToCarrier(iGrid)
 				new SiteObj(id, carrier, iSite)
 			}
-			evolabRacks.map(r => r.iGrid -> r.iSite).toSet.toSeq.map(toSiteObj)
+			//evolabRacks.map(r => r.iGrid -> r.iSite).toSet.toSeq.map(toSiteObj)
+			evolabRacks.map(toSiteObj)
 		}
 
 		/*
