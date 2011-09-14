@@ -160,9 +160,9 @@ private trait L3P_PipetteMixBase {
 			var bFirst = cycles.isEmpty
 			for (action <- actionsADM) {
 				val specs = (action match {
-					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, tipOverrides, bFirst, item))
+					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, tipOverrides, mapTipToModel, bFirst, item))
 					case Dispense(items) => items.map(item => getDispenseCleanSpec(stateCycle0, tipOverrides, item.tip, item.well, item.policy.pos))
-					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, tipOverrides, bFirst, item.tip, item.well))
+					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, tipOverrides, mapTipToModel, bFirst, item.tip, item.well))
 					case _ => return Error(Seq("INTERNAL: error code translateCommand 1"))
 				}).flatten
 				for (cleanSpec <- specs) {
@@ -468,9 +468,10 @@ private trait L3P_PipetteMixBase {
 		}
 	}*/
 	
-	protected def getAspirateCleanSpec(
+	private def getAspirateCleanSpec(
 		builder: StateMap,
 		overrides: TipHandlingOverrides,
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		bFirst: Boolean,
 		item: L2A_SpirateItem
 	): Option[CleanSpec2] = {
@@ -489,7 +490,7 @@ private trait L3P_PipetteMixBase {
 				case Some(TipReplacementPolicy.KeepAlways) => false
 			})
 			if (bReplace)
-				Some(ReplaceSpec2(tip, tipState.model_?.get))
+				Some(ReplaceSpec2(tip, mapTipToModel(tip)))
 			else
 				None
 		}
@@ -547,6 +548,17 @@ private trait L3P_PipetteMixBase {
 		tip: TipConfigL2,
 		well: WellConfigL2
 	): Option[CleanSpec2] = {
+		getMixCleanSpec(states, overrides, Map(), bFirst, tip, well)
+	}
+	
+	private def getMixCleanSpec(
+		states: StateMap,
+		overrides: TipHandlingOverrides,
+		mapTipToModel: Map[TipConfigL2, TipModel],
+		bFirst: Boolean,
+		tip: TipConfigL2,
+		well: WellConfigL2
+	): Option[CleanSpec2] = {
 		val tipState = tip.state(states)
 		val liquidTarget = well.state(states).liquid
 		if (robot.areTipsDisposable) {
@@ -559,7 +571,7 @@ private trait L3P_PipetteMixBase {
 			})
 			//println("bReplace: ", bReplace, tip, tipState, tipState.model_?, overrides.replacement_?)
 			if (bReplace)
-				Some(ReplaceSpec2(tip, tipState.model_?.get))
+				Some(ReplaceSpec2(tip, mapTipToModel.getOrElse(tip, tipState.model_?.get)))
 			else
 				None
 		}

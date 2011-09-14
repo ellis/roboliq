@@ -10,8 +10,6 @@ import roboliq.robots.evoware.roboeaseext._
 private case class EvolabRack(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String)
 
 object Table_DNE extends EvowareRoboeaseTable {
-	val roboeaseTable = new Table(sEvowareHeader, racks)
-
 	private def DefineRack(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String = null) =
 		EvolabRack(id, iGrid, iSite, nRows, nCols, nVolume, sCarrierModel)
 		
@@ -282,7 +280,7 @@ V;200
 			keys.map(key => key -> toPlateModel(key)).toMap
 		}
 		
-		val mapCarrierToRacks: Map[String, Seq[EvolabRack]] =
+		private val mapCarrierToRacks: Map[String, Seq[EvolabRack]] =
 			evolabRacks.filter(_.sCarrierModel != null).groupBy(_.sCarrierModel)
 			
 		val mapCarrierToSiteCount: Map[String, Int] =
@@ -317,7 +315,7 @@ V;200
 				})
 			})
 		
-		val sites: Iterable[SiteObj] = {
+		val sites: Seq[SiteObj] = {
 			def toSiteObj(pair: Tuple2[Int, Int]): SiteObj = {
 				val (iGrid, iSite) = pair
 				val id = "["+iGrid+","+iSite+"]"
@@ -413,4 +411,5 @@ V;200
 	}
 	
 	val evowareSites = EvowareTableMaps.sites
+	val roboeaseTable = new Table(sEvowareHeader, racks)
 }

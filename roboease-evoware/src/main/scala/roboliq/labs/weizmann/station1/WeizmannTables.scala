@@ -1,4 +1,4 @@
-package roboliq.labs.weizmann.station1
+/*package roboliq.labs.weizmann.station1
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -166,4 +166,4 @@ V;200
 996;0;0;
 --{ RPG }--"""
 */
-}
+}*/
