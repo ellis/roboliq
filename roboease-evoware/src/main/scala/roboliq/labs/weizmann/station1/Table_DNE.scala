@@ -7,7 +7,7 @@ import roboliq.roboease._
 import roboliq.robots.evoware
 import roboliq.robots.evoware.roboeaseext._
 
-private case class EvolabRack(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String)
+private case class EvolabRack(id: String, iGrid: Int, iSite: Int, nRows: Int, nCols: Int, nVolume: Double, sCarrierModel: String)
 
 object Table_DNE extends EvowareRoboeaseTable {
 	private def DefineRack(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String = null) =

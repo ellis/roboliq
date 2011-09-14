@@ -158,11 +158,13 @@ private trait L3P_PipetteMixBase {
 			// dispenseMixAspirate() and mixOnly().
 			val mapTipToCleanSpec = new HashMap[TipConfigL2, CleanSpec2]
 			var bFirst = cycles.isEmpty
+			val builder = new StateBuilder(stateCycle0)
+			TODO: need to update tip states in builder so that they have the appropriate tip type at the proper time...? 
 			for (action <- actionsADM) {
 				val specs = (action match {
-					case Aspirate(items) => items.map(item => getAspirateCleanSpec(stateCycle0, tipOverrides, mapTipToModel, bFirst, item))
-					case Dispense(items) => items.map(item => getDispenseCleanSpec(stateCycle0, tipOverrides, item.tip, item.well, item.policy.pos))
-					case Mix(items) => items.map(item => getMixCleanSpec(stateCycle0, tipOverrides, mapTipToModel, bFirst, item.tip, item.well))
+					case Aspirate(items) => items.map(item => getAspirateCleanSpec(builder, tipOverrides, mapTipToModel, bFirst, item))
+					case Dispense(items) => items.map(item => getDispenseCleanSpec(builder, tipOverrides, item.tip, item.well, item.policy.pos))
+					case Mix(items) => items.map(item => getMixCleanSpec(builder, tipOverrides, mapTipToModel, bFirst, item.tip, item.well))
 					case _ => return Error(Seq("INTERNAL: error code translateCommand 1"))
 				}).flatten
 				for (cleanSpec <- specs) {
@@ -192,6 +194,7 @@ private trait L3P_PipetteMixBase {
 							return Error(Seq("INTERNAL: Error code translateCommand 3"))
 					}
 				}
+				
 				bFirst = false
 			}
 			// Prepend the clean action

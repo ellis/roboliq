@@ -173,7 +173,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 						val i0 = iRow + iCol * nRows
 						val i1 = i0 + nWells - 1
 						if (i1 >= nRows * nCols) {
-							sError = ("Exceeds plate dimension: "+pair._1+pair._2+"+"+pair._3)
+							sError = ("Exceeds plate dimension of "+nRows+"x"+nCols+": "+pair._1+pair._2+"+"+pair._3)
 							Nil
 						}
 						else {
