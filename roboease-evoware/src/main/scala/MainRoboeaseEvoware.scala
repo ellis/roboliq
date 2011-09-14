@@ -21,9 +21,9 @@ object Main extends App {
 		import roboliq.compiler._
 		
 		val lsFiles = Seq(
-			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf",
-			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf",
-			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf",
+			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf",
+			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf",
+			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf",
 			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script04.conf",
 			null
 		).filter(_ != null)

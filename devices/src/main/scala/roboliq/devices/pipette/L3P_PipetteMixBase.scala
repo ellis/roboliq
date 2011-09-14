@@ -159,11 +159,10 @@ private trait L3P_PipetteMixBase {
 			val mapTipToCleanSpec = new HashMap[TipConfigL2, CleanSpec2]
 			var bFirst = cycles.isEmpty
 			val builder = new StateBuilder(stateCycle0)
-			TODO: need to update tip states in builder so that they have the appropriate tip type at the proper time...? 
 			for (action <- actionsADM) {
 				val specs = (action match {
 					case Aspirate(items) => items.map(item => getAspirateCleanSpec(builder, tipOverrides, mapTipToModel, bFirst, item))
-					case Dispense(items) => items.map(item => getDispenseCleanSpec(builder, tipOverrides, item.tip, item.well, item.policy.pos))
+					case Dispense(items) => items.map(item => getDispenseCleanSpec(builder, tipOverrides, mapTipToModel, item.tip, item.well, item.policy.pos))
 					case Mix(items) => items.map(item => getMixCleanSpec(builder, tipOverrides, mapTipToModel, bFirst, item.tip, item.well))
 					case _ => return Error(Seq("INTERNAL: error code translateCommand 1"))
 				}).flatten
@@ -512,6 +511,7 @@ private trait L3P_PipetteMixBase {
 	protected def getDispenseCleanSpec(
 		states: StateMap,
 		overrides: TipHandlingOverrides,
+		mapTipToModel: Map[TipConfigL2, TipModel],
 		tip: TipConfigL2,
 		dest: WellConfigL2,
 		pos: PipettePosition.Value
@@ -529,7 +529,7 @@ private trait L3P_PipetteMixBase {
 					PipetteHelper.choosePreDispenseWashSpec(overrides, tipState.liquid, dest.state(states).liquid, tipState).washIntensity > WashIntensity.None
 			})
 			if (bReplace)
-				Some(ReplaceSpec2(tip, tipState.model_?.get))
+				Some(ReplaceSpec2(tip, mapTipToModel.getOrElse(tip, tipState.model_?.get)))
 			else
 				None
 		}
@@ -544,16 +544,16 @@ private trait L3P_PipetteMixBase {
 		}
 	}
 	
-	protected def getMixCleanSpec(
+	protected def getDispenseCleanSpec(
 		states: StateMap,
 		overrides: TipHandlingOverrides,
-		bFirst: Boolean,
 		tip: TipConfigL2,
-		well: WellConfigL2
+		dest: WellConfigL2,
+		pos: PipettePosition.Value
 	): Option[CleanSpec2] = {
-		getMixCleanSpec(states, overrides, Map(), bFirst, tip, well)
+		getDispenseCleanSpec(states, overrides, Map(), tip, dest, pos)
 	}
-	
+
 	private def getMixCleanSpec(
 		states: StateMap,
 		overrides: TipHandlingOverrides,
@@ -585,6 +585,16 @@ private trait L3P_PipetteMixBase {
 			if (spec.washIntensity > WashIntensity.None) Some(WashSpec2(tip, spec))
 			else None
 		}
+	}
+	
+	protected def getMixCleanSpec(
+		states: StateMap,
+		overrides: TipHandlingOverrides,
+		bFirst: Boolean,
+		tip: TipConfigL2,
+		well: WellConfigL2
+	): Option[CleanSpec2] = {
+		getMixCleanSpec(states, overrides, Map(), bFirst, tip, well)
 	}
 	
 	private def getCleaningActions(specs0: Seq[CleanSpec2]): Seq[Action] = {
