@@ -1,11 +1,17 @@
 package roboliq.labs.weizmann.station1
 
 import roboliq.commands.pipette._
-import roboliq.roboease.RoboeaseConfig
+import roboliq.roboease._
+import roboliq.robots.evoware.roboeaseext._
 
 
 class Config2Roboease extends RoboeaseConfig {
-	val mapTables = WeizmannTables.map
+	val mapTables2 = Map[String, EvowareRoboeaseTable](
+		"TABLE_DNE" -> Table_DNE
+	)
+	
+	val mapTables = mapTables2.mapValues(_.roboeaseTable)
+	
 	val mapTipModel = {
 		import Config1Models._
 		Map(

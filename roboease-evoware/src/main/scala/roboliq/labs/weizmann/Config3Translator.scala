@@ -3,7 +3,7 @@ package roboliq.labs.weizmann
 import roboliq.robots.evoware._
 
 
-object WeizmannEvowareConfig {
+object Config3Translator {
 	val mapWashProgramArgs = Map(
 		0 -> new WashProgramArgs(
 			iWasteGrid = 1, iWasteSite = 1,

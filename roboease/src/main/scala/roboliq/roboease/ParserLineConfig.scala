@@ -29,6 +29,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 				shared.addError("unknown rack \""+id+"\"")
 				return
 			case Some(table) =>
+				shared.sTable = id
 				shared.sHeader = table.sHeader
 				shared.mapRacks.clear()
 				shared.mapRacks ++= table.racks.map(rack => rack.name -> rack)

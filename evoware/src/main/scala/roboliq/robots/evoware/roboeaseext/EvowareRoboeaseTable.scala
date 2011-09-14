@@ -1,9 +1,14 @@
-/*
 package roboliq.robots.evoware.roboeaseext
 
 import roboliq.robots.evoware
 import roboliq.roboease
 
+trait EvowareRoboeaseTable {
+	val roboeaseTable: roboease.Table
+	val sEvowareHeader: String
+	val evowareSites: Seq[evoware.SiteObj]
+}
+/*
 object Converter {
 	def convertTable(id: String, tE: evoware.EvowareTable): roboease.Table = {
 		val racksR = tE.sites.map(site => {

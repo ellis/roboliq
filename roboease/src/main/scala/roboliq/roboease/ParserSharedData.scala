@@ -14,6 +14,7 @@ class ParserSharedData(
 	val mapLcToPolicy: Map[String, PipettePolicy]
 ) {
 	val kb = new KnowledgeBase
+	var sTable: String = null
 	var sHeader: String = null
 	val mapRacks = new HashMap[String, Rack]
 	//val lReagentsInWells = new ArrayBuffer[Tuple2[Reagent, Seq[Well]]]

@@ -28,6 +28,7 @@ class ParserFile(mapTables: Map[String, Table], mapTipModel: Map[String, TipMode
 	private var m_sLine: String = null
 	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]
 	
+	def sTable = shared.sTable
 	def sHeader = shared.sHeader
 	def mapLabware = shared.mapLabware.toMap
 	

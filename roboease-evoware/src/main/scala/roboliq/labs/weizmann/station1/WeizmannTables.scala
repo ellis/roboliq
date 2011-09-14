@@ -3,20 +3,23 @@ package roboliq.labs.weizmann.station1
 import scala.collection.mutable.ArrayBuffer
 
 import roboliq.roboease._
+import roboliq.robots.evoware._
 
 
+/*
 private class X {
 	val racks = new ArrayBuffer[Rack]
 	
 	def DefineRack(name: String, grid: Int, site: Int, xsize: Int, ysize: Int, nVolumeMax: Double, carrierType: String = "") {
 		racks += Rack(name, xsize, ysize, grid, site, nVolumeMax, carrierType)
 	}
-}
+}*/
 
 object WeizmannTables {
 
 	lazy val map = Map[String, Table]("TABLE_DNE" -> Table_DNE)
 
+/*
 	val sBsseHeader =
 """302F0FE9
 20110530_155010 No log in       
@@ -162,4 +165,5 @@ V;200
 998;64;
 996;0;0;
 --{ RPG }--"""
+*/
 }

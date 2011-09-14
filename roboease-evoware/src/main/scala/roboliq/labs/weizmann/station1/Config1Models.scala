@@ -11,5 +11,4 @@ object Config1Models {
 	val tipSpec200 = new TipModel("DiTi 200ul", 200, 2, 0, 0)
 	//private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 3, 960)
 	val tipSpec1000 = new TipModel("DiTi 1000ul", 925, 0, 0, 0)
-
 }
