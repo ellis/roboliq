@@ -47,6 +47,8 @@ class KnowledgeBase {
 	
 	def addPlate(o: Plate) {
 		addObject(o)
+		if (o.setup.dim_?.isDefined)
+			o.setup.dim_?.get.wells.foreach(well => addWell(well))
 		m_plates += o
 	}
 	
