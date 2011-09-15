@@ -23,7 +23,7 @@ trait ExampleTable {
 }
 
 trait ExampleTable2 extends EvowareTable {
-	import roboliq.robots.evoware.PlateModel
+	//import roboliq.robots.evoware.PlateModel
 	
 	object CarrierModels {
 		val wash = new CarrierModel("Wash Station Clean", 3, false)

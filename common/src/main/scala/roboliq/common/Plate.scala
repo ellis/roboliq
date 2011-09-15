@@ -12,7 +12,8 @@ class Plate extends Obj {
 	type Config = PlateConfigL2
 	type State = PlateStateL2
 	
-	def createSetup() = new Setup(this)
+	val setup = new Setup(this)
+	def createSetup() = setup
 	
 	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
@@ -58,6 +59,21 @@ class PlateSetup(val obj: Plate) extends ObjSetup {
 	var dim_? : Option[PlateSetupDimensionL4] = None
 	var location_? : Option[String] = None
 	
+	def setDimension(rows: Int, cols: Int) {
+		assert(dim_?.isEmpty)
+		
+		val nWells = rows * cols
+		val wells = (0 until nWells).map(i => {
+			val well = new Well
+			val wellSetup = well.setup
+			wellSetup.index_? = Some(i)
+			wellSetup.holder_? = Some(obj)
+			well
+		})
+		val dim = new PlateSetupDimensionL4(rows, cols, wells.toSeq)
+		dim_? = Some(dim)
+	}
+
 	override def getLabel(kb: KnowledgeBase): String = {
 		sLabel_? match {
 			case Some(s) => s
@@ -99,17 +115,8 @@ class PlateProxy(kb: KnowledgeBase, obj: Plate) {
 	def label_=(s: String) { setup.sLabel_? = Some(s) }
 	
 	def setDimension(rows: Int, cols: Int) {
-		val nWells = rows * cols
-		val wells = (0 until nWells).map(i => {
-			val well = new Well
-			kb.addWell(well)
-			val wellSetup = kb.getWellSetup(well)
-			wellSetup.index_? = Some(i)
-			wellSetup.holder_? = Some(obj)
-			well
-		})
-		val dim = new PlateSetupDimensionL4(rows, cols, wells.toSeq)
-		setup.dim_? = Some(dim)
+		obj.setup.setDimension(rows, cols)
+		obj.setup.dim_?.get.wells.foreach(kb.addWell)
 	}
 	
 	def location = setup.location_?.get

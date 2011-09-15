@@ -63,7 +63,9 @@ class Well extends Obj { thisObj =>
 	type Config = WellConfigL2
 	type State = WellStateL2
 	
-	def createSetup() = new Setup(this)
+	val setup = new Setup(this)
+	def createSetup() = setup
+	
 	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
 		Error(Seq("well configs must be created separately"))
 	}

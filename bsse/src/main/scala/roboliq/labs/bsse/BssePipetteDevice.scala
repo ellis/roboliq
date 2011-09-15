@@ -6,21 +6,16 @@ import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
+import roboliq.robots.evoware._
 
-import _root_.evoware._
 
-
-class BssePipetteDevice extends PipetteDevice {
-	private val tipSpec50 = new TipModel("DiTi 50ul", 50, 0.01, 5, 10)
-	//private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 2, 950)
-	private val tipSpec1000 = new TipModel("DiTi 1000ul", 1000, 3, 50, 100)
-	private val tipSpecs = Seq(tipSpec50, tipSpec1000)
+class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends PipetteDevice {
 	val config = new PipetteDeviceConfig(
-		tipSpecs = tipSpecs,
+		tipSpecs = Seq(tipModel50, tipModel1000),
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
 		tipGroups = {
-			val g1000 = (0 to 3).map(i => i -> tipSpec1000).toSeq
-			val g50 = (4 to 7).map(i => i -> tipSpec50).toSeq
+			val g1000 = (0 to 3).map(i => i -> tipModel1000).toSeq
+			val g50 = (4 to 7).map(i => i -> tipModel50).toSeq
 			Seq(g1000, g50)
 		}
 	)
@@ -32,7 +27,7 @@ class BssePipetteDevice extends PipetteDevice {
 		config.tips.foreach(tip => {
 			kb.addObject(tip)
 			
-			val tipSpec = if (tip.index < 4) tipSpec1000 else tipSpec50
+			val tipSpec = if (tip.index < 4) tipModel1000 else tipModel50
 			val tipSetup = kb.getObjSetup[TipSetup](tip)
 			tipSetup.modelPermanent_? = Some(tipSpec)
 		})

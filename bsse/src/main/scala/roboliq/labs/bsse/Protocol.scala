@@ -13,10 +13,10 @@ import roboliq.robots.evoware._
 trait Protocol extends CommonProtocol {
 	class EvowareLab {
 		private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
-		private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]
+		//private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]
 		
 		def reagent(reagent: Reagent, plateE: PlateObj, iWell0: Int, nWells: Int = 1) {
-			val plate = getPlate(plateE)
+			val plate = plateE.commonObj
 			val plateSetup = kb.getPlateSetup(plate)
 			val wells = plateSetup.dim_?.get.wells
 			val range = (iWell0 - 1) until (iWell0 - 1 + nWells)
@@ -27,15 +27,15 @@ trait Protocol extends CommonProtocol {
 			}
 		}
 		
-		def labware(plate: common.Plate, site: SiteObj, model: evoware.PlateModel) {
+		def labware(plate: common.Plate, site: SiteObj, model: common.PlateModel) {
 			val setup = kb.getPlateSetup(plate)
 			val proxy = new PlateProxy(kb, plate)
-			setup.model_? = Some(getPlateModel(model))
+			setup.model_? = Some(model)
 			proxy.location = site.sName
 			proxy.setDimension(model.nRows, model.nCols)
 		}
 		
-		private def getPlate(e: PlateObj): common.Plate = {
+		/*private def getPlate(e: PlateObj): common.Plate = {
 			mapPlates.get(e) match {
 				case Some(plate) => plate
 				case None =>
@@ -49,10 +49,10 @@ trait Protocol extends CommonProtocol {
 					mapPlates(e) = plate
 					plate
 			}
-		}
+		}*/
 		
-		private def getPlateModel(e: evoware.PlateModel): common.PlateModel = {
+		/*private def getPlateModel(e: evoware.PlateModel): common.PlateModel = {
 			mapPlateModels.getOrElseUpdate(e, new common.PlateModel(e.sName, e.nRows, e.nCols, e.nVolume))
-		}
+		}*/
 	}
 }

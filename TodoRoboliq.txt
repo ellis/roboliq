@@ -59,6 +59,7 @@ Tuval/Yair:
 	send them my code
 	send them list of implemented RoboEase commands
 	get date for coming to Weizmann
+	ask for PCR protocols
 Code:
 	Result monad:
 		- map items to results:
@@ -488,13 +489,13 @@ x	MIX_WELLS
 	CFGRUN
 	TRANSFER_OBJECT
 	SMS
-	SHAKER_START
-	SHAKE
+ 	SHAKER_START
+ *	SHAKE
 	SHAKER_STOP
 	MOVE_OBJECT
 	START_TIMER
 	WAIT_TIMER
-	MOVE_PLATE
+ *	MOVE_PLATE
  *	EMAIL
  *	SMS
 	LOGMIX

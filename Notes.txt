@@ -370,33 +370,29 @@ processing order:
 	- for plate transfers with multiple possible destinations, we need to give the knowledge base item some form of label so that the user can identify which command the transfer is for
 
 things we need to know for compiling and when we need to know them:
-	* we might want to load all part model data at this point, since roboease requires the tip models
-	* create roboease config
-	- roboease:
+	devices (knowledge, processors)
+	processors (compiler)
+	customization:
+		plate models
+		location ids
+		device ids
+		device program ids
+		ability to create custom device programs
+		fixed plates
+	translator:
+		standard device programs
+		sites
+	roboease:
+		most of the above, except that it doesn't get decided until the TABLE has been chosen
 		mapTables: possible table layouts
 		mapTipModels
 			available tip models
 		mapLcToPolicy
-	- add protocol object knowledge (if any)
-		... dunno yet ...
-	* choose devices, processors, compiler before processing the protocol -- in other words, the procotol cannot do anything to change devices and processors
-	* the table can optionally be chosen as part of the protocol class definition at this point
-	- add device knowledge
-		devices
-	* at latest now we create the chosen table; might as well create compiler and translator already
-	- add customizaton knowledge
-		customization function
-			complete data about robot/table/lab setup
-	- add protocol command knowledge
-		commands
-	- compile
-		processors
-		compiler
-		translator
-			sites (carrier models, carriers)
-			wash programs
-	- translate to native code
-		
+	----
+	Config objects for above information:
+	StationConfig: devices, processors
+	StationLayoutConfig: tip models, plate models, fixed plates, sites, standard device programs
+	RoboeaseConfig: as listed above
 
 -------------
 val templatePlate = new Plate
