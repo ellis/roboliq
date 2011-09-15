@@ -26,7 +26,6 @@ object LiquidChangeScale extends Enumeration {
 }
 
 class Example02(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
-	//val water = new Liquid("water", false, false, Set())
 	val liquid_plasmidDna = new Liquid("plasmid", Set(Contaminant.DNA), CleanPolicy.DDD)
 	val liquid_competentCells = new Liquid("cells", Set(Contaminant.Cell), CleanPolicy.DDD)
 	val liquid_ssDna = new Liquid("ssDNA", Set(Contaminant.DNA))

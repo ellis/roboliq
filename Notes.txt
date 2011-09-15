@@ -390,8 +390,7 @@ things we need to know for compiling and when we need to know them:
 		mapLcToPolicy
 	----
 	Config objects for above information:
-	StationConfig: devices, processors
-	StationLayoutConfig: tip models, plate models, fixed plates, sites, standard device programs
+	StationConfig: devices, processors, tip models, plate models, fixed plates, sites, standard device programs
 	RoboeaseConfig: as listed above
 
 -------------
