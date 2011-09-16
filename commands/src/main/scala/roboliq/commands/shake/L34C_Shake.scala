@@ -1,13 +1,13 @@
 package roboliq.commands.shake
 
-import scala.collection.immutable.SortedSet
-
 import roboliq.common._
 import roboliq.commands._
 
 
 case class L4C_Shake(args: L4A_ShakeArgs) extends CommandL4 {
 	type L3Type = L3C_Shake
+	
+	val setup = new L4A_ShakeSetup
 
 	def addKnowledge(kb: KnowledgeBase) {
 		// TODO: note that plate will occupy the target location
@@ -15,39 +15,29 @@ case class L4C_Shake(args: L4A_ShakeArgs) extends CommandL4 {
 	}
 	
 	def toL3(states: RobotState): Result[L3Type] = {
-		args.toL3(states) match {
-			case Error(lsErrors) => Error(lsErrors)
-			case Success(args3) => Success(new L3C_Shake(args3))
-		}
+		for { setupPlate <- setup.plate.toL3(states) }
+		yield L3C_Shake(new L3A_ShakeArgs(
+			plate = args.plate.state(states).conf,
+			nDuration = args.nDuration,
+			idDevice_? = args.idDevice_?,
+			setup = setupPlate
+		))
 	}
 }
 
 case class L3C_Shake(args: L3A_ShakeArgs) extends CommandL3
 
 class L4A_ShakeSetup {
-	val plate = new L4A_PlateSetup
+	var idDevice_? : Option[String] = None
+	val idProgram_? : Option[String] = None
+	val plateHandling = new PlateHandlingSetup
 }
 
 class L4A_ShakeArgs(
 	val plate: Plate,
 	val nDuration: Int,
 	val idDevice_? : Option[String]
-) {
-	val setup = new L4A_ShakeSetup
-	
-	def toL3(states: RobotState): Result[L3A_ShakeArgs] = {
-		val setupPlate = setup.plate.toL3(states) match {
-			case Error(lsError) => return Error(lsError)
-			case Success(o) => o
-		}
-		Success(new L3A_ShakeArgs(
-			plate = plate.state(states).conf,
-			nDuration = nDuration,
-			idDevice_? = idDevice_?,
-			setup = setupPlate
-		))
-	}
-}
+)
 
 class L3A_ShakeArgs(
 	val plate: PlateConfigL2,
