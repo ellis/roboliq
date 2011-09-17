@@ -15,12 +15,12 @@ case class L4C_Shake(args: L4A_ShakeArgs) extends CommandL4 {
 	}
 	
 	def toL3(states: RobotState): Result[L3Type] = {
-		for { setupPlate <- setup.plate.toL3(states) }
+		for { setupPlate <- setup.plateHandling.toL3(states) }
 		yield L3C_Shake(new L3A_ShakeArgs(
 			plate = args.plate.state(states).conf,
 			nDuration = args.nDuration,
 			idDevice_? = args.idDevice_?,
-			setup = setupPlate
+			plateHandling = setupPlate
 		))
 	}
 }
@@ -43,5 +43,5 @@ class L3A_ShakeArgs(
 	val plate: PlateConfigL2,
 	val nDuration: Int,
 	val idDevice_? : Option[String],
-	val setup: L3A_PlateSetup
+	val plateHandling: PlateHandlingConfig
 )

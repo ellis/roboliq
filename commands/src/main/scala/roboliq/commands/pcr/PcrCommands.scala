@@ -4,57 +4,39 @@ import roboliq.common._
 import roboliq.commands._
 
 
-object PcrClose extends DeviceCommand0Family {
-	type ProgramSetup = Int
-	type ProgramConfig = Int
-	type ProgramParams = Int
+object PcrClose extends L34F {
+	type ProgramSetup = Unit
+	type ProgramConfig = Unit
 	
-	def createProgramSetup: ProgramSetup = 0
-	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(0)
-	def createProgramParams: ProgramParams = 0
+	def createProgramSetup: ProgramSetup = ()
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(())
 	
 	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
 		// TODO: record device usage
-	}
-	
-	def updateState(builder: StateBuilder, cmd2: L2C) {
-		// TODO: record the change in device state
 	}
 }
 
-object PcrOpen extends DeviceCommand0Family {
-	type ProgramSetup = Int
-	type ProgramConfig = Int
-	type ProgramParams = Int
+object PcrOpen extends L34F {
+	type ProgramSetup = Unit
+	type ProgramConfig = Unit
 	
-	def createProgramSetup: ProgramSetup = 0
-	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(0)
-	def createProgramParams: ProgramParams = 0
+	def createProgramSetup: ProgramSetup = ()
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(())
 	
 	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
 		// TODO: record device usage
-	}
-	
-	def updateState(builder: StateBuilder, cmd2: L2C) {
-		// TODO: record the change in device state
 	}
 }
 
-object PcrRun extends DeviceCommand0Family {
-	type ProgramSetup = Int
-	type ProgramConfig = Int
-	type ProgramParams = Int
+object PcrRun extends L34F {
+	type ProgramSetup = String
+	type ProgramConfig = String
 	
-	def createProgramSetup: ProgramSetup = 0
-	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(0)
-	def createProgramParams: ProgramParams = 0
+	def createProgramSetup: ProgramSetup = ""
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(setup)
 	
 	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
 		// TODO: record device usage
-	}
-	
-	def updateState(builder: StateBuilder, cmd2: L2C) {
-		// TODO: record the change in device state
 	}
 }
 

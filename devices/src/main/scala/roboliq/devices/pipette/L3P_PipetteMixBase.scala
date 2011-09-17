@@ -733,13 +733,13 @@ private trait L3P_PipetteMixBase {
 	private def createCommand(action: Action): Seq[Command] = {
 		action match {
 			case Dispense(items) =>
-				robot.batchesForDispense(items).map(items => L2C_Dispense(items))
+				Seq(L2C_Dispense(items))
 			
 			case Mix(items) =>
 				Seq(L2C_Mix(items))
 				
 			case Aspirate(items) =>
-				robot.batchesForAspirate(items).map(items => L2C_Aspirate(items))
+				Seq(L2C_Aspirate(items))
 				
 			case TipsDrop(tips) =>
 				Seq(L3C_TipsDrop(tips))

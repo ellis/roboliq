@@ -1,5 +1,5 @@
 package roboliq.common
 
-trait Device {
+abstract class Device extends Obj {
 	def addKnowledge(kb: KnowledgeBase)
 }

@@ -56,6 +56,16 @@ object Result {
 	def assert(b: Boolean, sError: String): Result[Unit] =
 		if (b) Success(()) else Error(sError)
 	
+	def get[T](opt: Option[T], sError: String): Result[T] = opt match {
+		case None => Error(sError)
+		case Some(v) => Success(v)
+	}
+	
+	def get[T](opt: Either[Seq[String], T], sError: String): Result[T] = opt match {
+		case Left(lsError) => Error(lsError)
+		case Right(v) => Success(v)
+	}
+	
 	def sequence[A](l: Seq[Result[A]]): Result[Seq[A]] = {
 		val llsError = l.collect({ case Error(lsError) => lsError })
 		if (!llsError.isEmpty)

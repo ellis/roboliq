@@ -94,7 +94,7 @@ class StationConfig extends EvowareTable {
 	}
 	
 	
-	val mover = new BsseMoveDevice
+	val mover = new EvowareMoveDevice
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
 	
 	val devices = Seq(

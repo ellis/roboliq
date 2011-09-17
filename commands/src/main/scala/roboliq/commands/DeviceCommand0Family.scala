@@ -1,4 +1,4 @@
-package roboliq.commands
+/*package roboliq.commands
 
 import roboliq.common._
 
@@ -9,12 +9,12 @@ trait DeviceCommand0Family { top =>
 	
 	def createProgramSetup: ProgramSetup
 	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig]
-	def createProgramParams: ProgramParams
+	//def createProgramParams: ProgramParams
 	
-	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
+	def addKnowledge(kb: KnowledgeBase, cmd: L4C)/* {
 		// TODO: note that plate will occupy the target location
 		// TODO: request plate compatibility with this device
-	}
+	}*/
 	
 	def toL3(states: RobotState, cmd4: L4C): Result[L3C] = {
 		for { program <- createProgramConfig(cmd4.setup.program) }
@@ -61,7 +61,7 @@ trait DeviceCommand0Family { top =>
 	)
 	
 	/** Derived class needs to define updateState() method */
-	case class L2C(args: L12A) extends CommandL2 {
+	case class L2C(args: L2A) extends CommandL2 {
 		type L1Type = top.L1C
 		
 		def updateState(builder: StateBuilder) =
@@ -81,11 +81,14 @@ trait DeviceCommand0Family { top =>
 		val idDevice: String,
 		val program: ProgramParams
 	)
+	type L2A = L12A
+	type L1A = L12A
 	
-	case class L1C(args: L12A) extends CommandL1 {
+	case class L1C(args: L1A) extends CommandL1 {
 		override def toDebugString = {
 			import args._
 			top.getClass().getSimpleName() + this.getClass().getSimpleName() + List(idDevice, program).mkString("(", ", ", ")") 
 		}
 	}
 }
+*/

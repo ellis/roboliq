@@ -7,9 +7,10 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
+import roboliq.robots.evoware.devices.EvowarePipetteDevice
 
 
-class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends PipetteDevice {
+class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends EvowarePipetteDevice {
 	val config = new PipetteDeviceConfig(
 		tipSpecs = Seq(tipModel50, tipModel1000),
 		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
@@ -23,10 +24,10 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Pi
 
 	val plateDeconAspirate, plateDeconDispense = new Plate
 			
-	def addKnowledge(kb: KnowledgeBase) = {
+	override def addKnowledge(kb: KnowledgeBase) = {
+		super.addKnowledge(kb)
+		
 		config.tips.foreach(tip => {
-			kb.addObject(tip)
-			
 			val tipSpec = if (tip.index < 4) tipModel1000 else tipModel50
 			val tipSetup = kb.getObjSetup[TipSetup](tip)
 			tipSetup.modelPermanent_? = Some(tipSpec)
@@ -53,22 +54,6 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Pi
 	}
 
 	def areTipsDisposable: Boolean = false
-	
-	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double = {
-		tip.model_?.map(_.nVolumeAspirateMin).getOrElse(0.0)
-	}
-	
-	def getTipHoldVolumeMax(tip: TipStateL2, liquid: Liquid): Double = {
-		tip.model_?.map(tipModel => {
-			val nExtra = WashIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
-				case WashIntensity.Decontaminate => tipModel.nVolumeDeconExtra
-				case _ => tipModel.nVolumeWashExtra
-			}
-			tipModel.nVolume - nExtra
-		}).getOrElse(0.0)
-	}
-	
-	//def getPipetteSpec(sLiquidClass: String): Option[PipetteSpec] = mapPipetteSpecs.get(sLiquidClass)
 	
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		val liquid = wellState.liquid
@@ -135,28 +120,5 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Pi
 				val sName = "Roboliq_"+sClass+"_"+sPos+"_"+sTip
 				Some(PipettePolicy(sName, pos))
 		}
-	}
-	
-	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]] = {
-		val tips2 = tips.toIndexedSeq
-		val wells2 = wells.toSeq.zipWithIndex
-		for ((well, i) <- wells2) yield {
-			val i2 = i % tips2.size
-			tips2(i2) -> well
-		}
-	}
-	
-	private case class KeySpirate(plate: PlateConfigL2, iTipType: Int) {
-		def this(item: L2A_SpirateItem) = this(item.well.holder, item.tip.index / 4)
-	}
-	def batchesForAspirate(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {
-		items.groupBy(item => new KeySpirate(item)).values.toSeq
-	}
-	def batchesForDispense(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {
-		items.groupBy(item => new KeySpirate(item)).values.toSeq
-	}
-	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]] = Seq(tcs)
-	def batchesForMix(items: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = {
-		items.groupBy(item => KeySpirate(item.well.holder, item.tip.index / 4)).values.toSeq
 	}
 }

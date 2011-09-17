@@ -7,7 +7,7 @@ import roboliq.commands.pipette._
 import roboliq.compiler._
 
 
-trait PipetteDevice extends Device {
+abstract class PipetteDevice extends Device {
 	val config: PipetteDeviceConfig
 	
 	def addKnowledge(kb: KnowledgeBase)
@@ -23,12 +23,13 @@ trait PipetteDevice extends Device {
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy]
 	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	//def chooseWashPrograms(tip: TipConfigL2, intensity: WashIntensity.Value): Seq[Int]
-	def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
+	/*def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]]
-	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]]
+	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]]*/
 }
 
+/*
 class PipetteDeviceGeneric extends PipetteDevice {
 	private val tipSpec1000 = new TipModel("1000", 1000, 0, 0, 0)
 	val config = new PipetteDeviceConfig(
@@ -92,3 +93,4 @@ class PipetteDeviceGeneric extends PipetteDevice {
 	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]] = Seq(tcs)
 	def batchesForMix(twvpcs: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = Seq(twvpcs)
 }
+*/
