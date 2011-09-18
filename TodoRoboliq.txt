@@ -61,6 +61,7 @@ Tuval/Yair:
 	get date for coming to Weizmann
 	ask for PCR protocols
 Code:
+	PCR protocol calculations: www.babec.org/files/pdf/Optimization_student.pdf
 	Result monad:
 		- map items to results:
 			transform list of results into a result of errors or result of list of values

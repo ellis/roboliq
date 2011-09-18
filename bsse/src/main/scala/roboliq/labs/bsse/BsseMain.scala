@@ -12,7 +12,7 @@ import station1._
 
 object Main extends App {
 	val station = new StationConfig
-	val protocol = new examples.Example02(station)
+	val protocol = new examples.Example03(station)
 	val toolchain = new BsseToolchain(station)
 	toolchain.compileProtocol(protocol, true) match {
 		case Left(err) => err.print()

@@ -62,6 +62,8 @@ trait CommonProtocol extends
 				wellSetup.liquid_? = Some(this)
 			}
 		}*/
+			
+		override def toString = setup.sName_?.getOrElse(super.toString)
 	}
 	
 	class Plate private (
@@ -96,18 +98,22 @@ trait CommonProtocol extends
 	}
 	
 	def __findPlateLabels() {
-		val c = this.getClass()
-		for (f <- this.getClass().getDeclaredFields()) {
+		__findLabels(this)
+	}
+	
+	def __findLabels(container: Object) {
+		val clazz = container.getClass()
+		for (f <- clazz.getDeclaredFields()) {
 			val t = f.getType()
 			if (t == classOf[Plate]) {
 				f.setAccessible(true)
-				val o = f.get(this).asInstanceOf[Plate]
+				val o = f.get(container).asInstanceOf[Plate]
 				if (o.setup.sLabel_?.isEmpty)
 					o.setup.sLabel_? = Some(f.getName())
 			}
 			else if (t == classOf[Liquid]) {
 				f.setAccessible(true)
-				val o = f.get(this).asInstanceOf[Liquid]
+				val o = f.get(container).asInstanceOf[Liquid]
 				if (o.setup.sName_? == None)
 					o.setup.sName_? = Some(f.getName())
 			}

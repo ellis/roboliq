@@ -151,15 +151,15 @@ CompleteYeastTransformation
 		A: for bacteria, highly; for yeast, not.
 		?? Is the difference in time of mix completion among the wells significant?
 		?? At this point, the PCR lid is opened and the tips are sterilized.  Why?  Is this part of the timing?
+		?? Would it be ok to clean first and then open the lid?
 		PCR open lid
 		wash 25+4ml fast
 		wash 4+1ml
 		decontaminate
-		?? Why wash AND decontaminate?  If we wash after decontamination, are the tips contaminated again?
 		pcr plate A for HeatShockTime then return to cooled carrier
 		?? How does TRobot1 know when to start cycling?  Why does the lid stay open during the process?  Or does it?
 		A: It should be turned on to 42deg at the start -- currently done manually
-		//transfer plate A to cooled carrier
+		transfer plate A to cooled carrier
 		PCR close lid
 	Yeast Cell Filtration
 		REQUIRE: Plate B is a filter plate

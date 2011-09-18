@@ -16,6 +16,18 @@ object PcrClose extends L34F {
 	}
 }
 
+object PcrHeatShock extends L34F_Plate {
+	type ProgramSetup = Unit
+	type ProgramConfig = Unit
+	
+	def createProgramSetup: ProgramSetup = ()
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(())
+	
+	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
+		// TODO: record device usage
+	}
+}
+
 object PcrOpen extends L34F {
 	type ProgramSetup = Unit
 	type ProgramConfig = Unit
