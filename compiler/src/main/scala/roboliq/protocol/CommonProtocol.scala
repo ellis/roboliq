@@ -13,10 +13,15 @@ import roboliq.commands.pipette._
 
 trait CommonProtocol extends
 	CommonCommands with
+	WellCoords with
+	WellPointerImplicits with
 	move.MoveCommands with
 	pipette.PipetteCommands with
 	shake.ShakeCommands
 { thisObj =>
+	//import WellCoord._
+	//import WellPointer._
+	
 	type Location = common.Location
 	
 	val Contaminant = common.Contaminant
@@ -68,14 +73,14 @@ trait CommonProtocol extends
 	
 	class Plate private (
 		family_? : Option[PlateFamily]
-	) extends roboliq.protocol.Plate {
+	) extends common.Plate {
 		def this() = this(None)
 		def this(family: PlateFamily) = this(Some(family))
 		
 		val protocol = thisObj
-		val obj = new common.Plate
-		val setup = kb.getPlateSetup(obj)
-		val proxy = new PlateProxy(kb, obj)
+		//val obj = new common.Plate
+		//val setup = kb.getPlateSetup(obj)
+		val proxy = new PlateProxy(kb, this)
 		
 		//if (family_?.isDefined) {
 		//	setup.
@@ -132,18 +137,13 @@ trait CommonProtocol extends
 		None
 	}*/
 	
-	object A1 extends WellLocA(WellCoord(0, 0))
-	object G7 extends WellLocA(WellCoord(6, 6))
-	
 	implicit def intToVolume(n: Int): Volume = new Volume(n)
 	
 	/*implicit def liquidToProxy(o: Liquid): LiquidProxy = new LiquidProxy(kb, o)
 	implicit def partToProxy(o: Part): PartProxy = new PartProxy(kb, o)
 	implicit def wellToProxy(o: Well): WellProxy = new WellProxy(kb, o)*/
-	implicit def plateToObj(o: Plate): common.Plate = o.obj
-	implicit def plateToProxy(o: Plate): PlateProxy = new PlateProxy(kb, o.obj)
-	implicit def plateToWPL(o: Plate): WellOrPlateOrLiquid = WPL_Plate(o.obj)
-	implicit def plateToWP(o: Plate): WellOrPlate = WP_Plate(o.obj)
+	//implicit def plateToObj(o: Plate): common.Plate = o.obj
+	implicit def plateToProxy(o: Plate): PlateProxy = new PlateProxy(kb, o)
 
 	//implicit def liquidToObj(o: Liquid): common.Liquid = o.obj
 }

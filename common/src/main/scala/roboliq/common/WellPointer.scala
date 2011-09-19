@@ -34,6 +34,10 @@ sealed trait WellAddressPartial {
 		}
 	}
 
+	def toWells(states: RobotState, plate: Plate): Result[Seq[WellConfigL2]] = {
+		Success(plate.state(states).conf.wells.map(_.state(states).conf))
+	}
+
 	/*
 	private def toWell(dim: PlateSetupDimensionL4, iWell: Int): Result[Well] = {
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
@@ -63,18 +67,34 @@ sealed abstract class WellAddressSingle extends WellAddress {
 
 sealed trait WellPointer extends WellAddress {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]]
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]]
+	def getPlatesL4: Result[Seq[Plate]] = Success(Seq())
+	def getReagentsL4: Result[Seq[Reagent]] = Success(Seq())
 	def +(that: WellPointer) = new WellPointerSeq(this.toSeq ++ that.toSeq)
 	protected def toSeq: Seq[WellPointer] = Seq(this)
 }
 
+class WellPointerPlateWrapper(plate: Plate) {
+	def apply(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
+}
+
+trait WellPointerImplicits {
+	implicit def wellToPointer(o: Well) = WellPointerWell(o)
+	implicit def plateToPointer(o: Plate) = WellPointerPlate(o)
+	implicit def plateToWrapper(o: Plate) = new WellPointerPlateWrapper(o)
+	implicit def reagentToPointer(o: Reagent) = WellPointerReagent(o)
+}
+
 case class WellPointerWell(well: Well) extends WellAddressSingle with WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(Seq(well))
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(Seq(well.state(states).conf))
 	def toIndex(dim: PlateSetupDimensionL4): Result[Int] = Result.get(well.setup.index_?, "well index not set")
 	override def toString = well.toString
 }
 
 case class WellPointerWells(lWell: Seq[Well]) extends WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(lWell)
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(lWell.map(_.state(states).conf))
 	override def toString = lWell.mkString(";")
 }
 
@@ -83,12 +103,21 @@ case class WellPointerPlate(plate: Plate) extends WellPointer {
 		for { dim <- Result.get(plate.setup.dim_?, "plate dimension must be defined") }
 		yield { dim.wells }
 	}
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(plate.state(states).conf.wells.map(_.state(states).conf))
+	override def getPlatesL4: Result[Seq[Plate]] = Success(Seq(plate))
 }
 
 case class WellPointerReagent(reagent: Reagent) extends WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
 		Success(kb.getReagentWells(reagent).toSeq)
 	}
+	
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
+		val lWell = states.map.toSeq.collect({ case (well: Well, wellState: WellStateL2) if well.setup.reagent_? == Some(reagent) => wellState.conf })
+		Success(lWell)
+	}
+
+	override def getReagentsL4: Result[Seq[Reagent]] = Success(Seq(reagent))
 }
 
 
@@ -135,7 +164,7 @@ case class WellCoord(iRow: Int, iCol: Int) extends WellAddressSingle with WellAd
 	override def toString = (iRow + 'A').asInstanceOf[Char].toString + (iCol + 1)
 }
 
-object WellCoord {
+trait WellCoords {
 	val A1 = WellCoord(0, 0)
 	val A2 = WellCoord(0, 1)
 	val A3 = WellCoord(0, 2)
@@ -185,6 +214,10 @@ case class WellPointerPlateAddress(plate: Plate, addrs: Seq[WellAddressPartial])
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
 		Result.flatMap(addrs) { _.toWells(kb, plate) }
 	}
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
+		Result.flatMap(addrs) { _.toWells(states, plate) }
+	}
+	override def getPlatesL4: Result[Seq[Plate]] = Success(Seq(plate))
 	override def toString = plate.toString+":"+addrs.mkString(",") 
 }
 
@@ -192,6 +225,11 @@ case class WellPointerSeq(seq: Seq[WellPointer]) extends WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
 		Result.flatMap(seq) { _.getWells(kb) }
 	}
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
+		Result.flatMap(seq) { _.getWells(states) }
+	}
 	override protected def toSeq: Seq[WellPointer] = seq
+	override def getPlatesL4: Result[Seq[Plate]] = Result.flatMap(seq) { _.getPlatesL4 }
+	override def getReagentsL4: Result[Seq[Reagent]] = Result.flatMap(seq) { _.getReagentsL4 }
 	override def toString = seq.mkString(";") 
 }

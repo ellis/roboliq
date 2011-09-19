@@ -10,11 +10,9 @@ case class L4C_Mix(args: L4A_MixArgs) extends CommandL4 {
 
 	def addKnowledge(kb: KnowledgeBase) {
 		for (target <- args.targets) {
-			target match {
-				case WPL_Well(o) => kb.addWell(o, true)
-				case WPL_Plate(o) => kb.addPlate(o, true)
-				case WPL_Liquid(o) => kb.addReagent(o)
-			}
+			target.getWells(kb).map(_.foreach(o => kb.addWell(o, true)))
+			target.getPlatesL4.map(_.foreach(o => kb.addPlate(o, true)))
+			target.getReagentsL4.map(_.foreach(o => kb.addReagent(o)))
 		}
 	}
 	
@@ -30,19 +28,19 @@ case class L4C_Mix(args: L4A_MixArgs) extends CommandL4 {
 case class L3C_Mix(args: L3A_MixArgs) extends CommandL3
 
 class L4A_MixArgs(
-	val targets: Iterable[WellOrPlateOrLiquid],
+	val targets: Seq[WellPointer],
 	val mixSpec: MixSpec,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val tipModel_? : Option[TipModel] = None
 ) {
 	def toL3(states: RobotState): Result[L3A_MixArgs] = {
-		val wells3 = targets.foldLeft(SortedSet(): SortedSet[WellConfigL2]) {(acc, target) => acc ++ PipetteHelperL4.getWells1(states, target) }
-		Success(new L3A_MixArgs(
-			wells3,
+		for { wells3 <- Result.flatMap(targets) { _.getWells(states) } }
+		yield new L3A_MixArgs(
+			SortedSet(wells3 : _*),
 			mixSpec = mixSpec,
 			tipOverrides_? = tipOverrides_?,
 			tipModel_? = tipModel_?
-		))
+		)
 	}
 }
 

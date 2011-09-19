@@ -51,6 +51,8 @@ class Plate extends Obj {
 		def location_=(location: String) { map(thisObj) = state.copy(location = location) }
 	}
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	
+	override def toString = setup.sLabel_?.getOrElse(super.toString)
 }
 
 class PlateSetup(val obj: Plate) extends ObjSetup {

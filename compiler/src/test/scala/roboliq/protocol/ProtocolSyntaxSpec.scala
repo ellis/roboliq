@@ -12,15 +12,15 @@ import roboliq.protocol._
 
 
 class ProtocolSyntaxSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers {
-	import roboliq.protocol.Plate
+	//import roboliq.common.Plate
 	
 	feature("PlateWells") {
 		val protocol = new CommonProtocol {
 			val p1 = new Plate(PlateFamily.Standard)
 			val p2 = new Plate(PlateFamily.Standard)
 			
-			p1.name = "P1"
-			p2.name = "P2"
+			p1.label = "P1"
+			p2.label = "P2"
 			
 			p1(G7).toString should be === "P1:G7"
 			p1(G7+9).toString should be === "P1:G7+9"
