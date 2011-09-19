@@ -393,6 +393,34 @@ things we need to know for compiling and when we need to know them:
 	StationConfig: devices, processors, tip models, plate models, fixed plates, sites, standard device programs
 	RoboeaseConfig: as listed above
 
+Referencing wells, plates, liquids:
+	Liquid
+	Well
+	Plate
+	Seq[Well]
+	plate + well indexes
+	plate + well coords
+	well indexes
+	well coords
+
+	abstract class WellPointer
+
+	WellPointer
+	WellPointerComplete
+	WellPointer...:
+		Well
+		Index
+		Coord
+		Plus
+		Minus
+		Colon
+	
+	Pointer
+	Address
+	Roster
+
+
+
 -------------
 val templatePlate = new Plate
 val plasmidDna = new Well

@@ -1,4 +1,4 @@
-package roboliq.protocol
+/*package roboliq.protocol
 
 //import roboliq.common
 //import roboliq.common._
@@ -28,3 +28,4 @@ case class PlateWells(seq: Seq[Tuple2[Plate, Seq[WellLoc]]]) {
 	def +(that: PlateWells) = new PlateWells(seq ++ that.seq)
 	override def toString = seq.map(pair => pair._1.toString + ":" + pair._2.mkString(",")).mkString(";") 
 }
+*/

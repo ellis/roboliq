@@ -3,6 +3,9 @@ package roboliq.common
 import scala.collection.immutable.SortedSet
 
 
+/**
+ * Wells are guaranteed to be on the same plate
+ */
 class WellGroupPlate private[common] (
 	set: SortedSet[WellConfigL2],
 	val plate: PlateConfigL2,
@@ -14,6 +17,9 @@ class WellGroupPlate private[common] (
 	}
 }
 
+/**
+ * Wells are guaranteed to be in the same column of the same plate
+ */
 class WellGroupCol private[common] (
 	set: SortedSet[WellConfigL2],
 	plate: PlateConfigL2,
@@ -25,6 +31,9 @@ class WellGroupCol private[common] (
 	}
 }
 
+/**
+ * Wells are guaranteed to be adjacent in the same column of the same plate
+ */
 class WellGroupAdjacent private[common] (
 	set: SortedSet[WellConfigL2],
 	plate: PlateConfigL2,
@@ -36,6 +45,9 @@ class WellGroupAdjacent private[common] (
 	}
 }
 
+/**
+ * Base class for grouping wells in such a way as to guarantee that some criterion is fulfilled
+ */
 sealed class WellGroup private[common] (
 	val set: SortedSet[WellConfigL2],
 	val plate_? : Option[PlateConfigL2],

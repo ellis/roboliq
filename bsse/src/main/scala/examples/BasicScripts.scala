@@ -105,27 +105,78 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	
 	val seq = Seq[Component](
 		Component(Liquids.buffer10x, 10, 1),
-		Component(Liquids.dNTP, 2.5, .2),
-		Component(Liquids.primerF, 50, 8),
-		Component(Liquids.primerB, 50, 8),
-		Component(Liquids.polymerase, 5, 1.25/50)
+		Component(Liquids.dNTP, 2, .2),
+		Component(Liquids.primerF, 50, .5),
+		Component(Liquids.primerB, 50, .5),
+		Component(Liquids.polymerase, 5, 0.25/25)
 	)
 	
-	def x(template: Template, components: Seq[Component], v1: Double) {
+	// Steps:
+	// create master mix in 15ml well
+	// distribute water to each working well
+	// distribute template DNA to each working well
+	// distribute master mix to each working well, free dispense, no wash in-between
+	
+	def x(template: Template, components: Seq[Component], well_masterMix: roboliq.commands.pipette.WellOrPlate, v1: Double) {
 		val water = Liquids.water
-		val mapLiquidToVolume = seq.map(component => {
+		
+		// Calculate desired sample volume for each component
+		val mapComponentVolumes = components.map(component => {
 			val v = component.c1 * v1 / component.c0
-			component.liquid -> v
+			component -> v
 		}).toMap
-		val vComponents = mapLiquidToVolume.values.reduce((v1, v2) => v1 + v2)
+		val vComponentsTotal = mapComponentVolumes.values.reduce(_ + _)
+		
+		// Calculate desired sample volume for each template well
+		// Calculate volume of water required for each working well in order to reach the required volume
+		val lvvTemplateWater = template.lc0.map(c0 => {
+			val vTemplate = template.c1 * v1 / c0
+			val vWater = v1 - vComponentsTotal - vTemplate
+			(vTemplate, vWater)
+		})
+		
+		val vLowerBound = 0.1
+		val vExtra = 5
+		val nSamples = template.lc0.size
+		val nMult: Int = nSamples + 1
+		def volForMix(vSample: Double): Double = { vSample * nMult }
+		
+		val vWaterMix = {
+			val lvWater2 = lvvTemplateWater.map(_._2).sortBy(identity).toSet.toSeq.take(2).toList
+			// Smallest volume of water in a sample
+			// (adjusted to ensure a minimal difference to the next lowest volume)
+			val vWaterMinSample = lvWater2 match {
+				case vMin :: Nil => vMin
+				case vMin :: vMin1 :: Nil => if (vMin > vMin1 - vLowerBound) vMin - vLowerBound else vMin
+			}
+			volForMix(vWaterMinSample)
+		}
+		
+		// create master mix in 15ml well
+		pipette(water, well_masterMix, vWaterMix * nMult)
+		for (component <- components) {
+			val vMix = mapComponentVolumes(component) * nMult
+			pipette(component.liquid, well_masterMix, vMix)
+		}
+		// TODO: indicate that liquid in master mix wells is all the same (if more than one well) and label it (eg "MasterMix")
+		
+		// distribute water to each working well
+		val lvWaterPerWell = ...
+		pipette(water, dest, lvWaterPerWell)
+		
+		// distribute template DNA to each working well
+		// distribute master mix to each working well, free dispense, no wash in-between
+		pipette(well_masterMix, )
+		
+		/*
 		components.foreach(component => println(component.liquid.toString+": "+mapLiquidToVolume(component.liquid)))
 		template.lc0.zipWithIndex.foreach(pair => {
 			val (c0, i) = pair
 			val vTemplate = template.c1 * v1 / c0
-			val vWater = v1 - vComponents - vTemplate
+			val vWater = v1 - vComponentsTotal - vTemplate
 			println(i+": "+vTemplate+" + "+vWater+" water")
 		})
-		//println(mapLiquidToVolume)
+		*/
 	}
 	
 	__findLabels(Liquids)
