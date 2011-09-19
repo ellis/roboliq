@@ -3,9 +3,7 @@ package roboliq.common
 sealed abstract class WellAddress
 
 object WellAddress {
-	def apply(well: Well): WellPointerWell = WellPointerWell(well)
 	def apply(index: Int): WellIndex = WellIndex(index)
-	def apply(plate: Plate)(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
 }
 
 sealed trait WellAddressPartial {
@@ -74,6 +72,13 @@ sealed trait WellPointer extends WellAddress {
 	protected def toSeq: Seq[WellPointer] = Seq(this)
 }
 
+object WellPointer {
+	def apply(o: Well): WellPointerWell = WellPointerWell(o)
+	//def apply(plate: Plate)(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
+	def apply(o: Plate): WellPointerPlate = WellPointerPlate(o)
+	def apply(o: Reagent): WellPointerReagent = new WellPointerReagent(o)
+}
+
 class WellPointerPlateWrapper(plate: Plate) {
 	def apply(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
 }
@@ -83,6 +88,10 @@ trait WellPointerImplicits {
 	implicit def plateToPointer(o: Plate) = WellPointerPlate(o)
 	implicit def plateToWrapper(o: Plate) = new WellPointerPlateWrapper(o)
 	implicit def reagentToPointer(o: Reagent) = WellPointerReagent(o)
+}
+
+object WellPointerImplicits extends WellPointerImplicits {
+	
 }
 
 case class WellPointerWell(well: Well) extends WellAddressSingle with WellPointer {

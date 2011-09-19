@@ -7,6 +7,8 @@ import roboliq.commands.pipette._
 
 
 class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
+	import WellPointerImplicits._
+	
 	val cmds2 = Map[String, Parser[Unit]](
 			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
 				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
@@ -58,7 +60,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 
 		val mixSpec = new MixSpec(nVolume, nCount, Some(mixPolicy))
 		val args = new L4A_MixArgs(
-			wells.map(well => WPL_Well(well)),
+			wells.map(well => WellPointer(well)),
 			mixSpec,
 			tipOverrides_?,
 			tipModel_?
@@ -172,12 +174,12 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					val (pi, (dest, nVolume)) = pair
 					val src = getWell(pi)
 					kb.addWell(src, true) // Indicate that this well is a source
-					new L4A_PipetteItem(WPL_Well(src), WP_Well(dest), nVolume)
+					new L4A_PipetteItem(WellPointer(src), WellPointer(dest), nVolume)
 				})
 			case Some(reagent) =>
 				wvs.map(pair => {
 					val (dest, nVolume) = pair
-					new L4A_PipetteItem(WPL_Liquid(reagent), WP_Well(dest), nVolume)
+					new L4A_PipetteItem(WellPointer(reagent), WellPointer(dest), nVolume)
 				})
 		}
 		val args = new L4A_PipetteArgs(

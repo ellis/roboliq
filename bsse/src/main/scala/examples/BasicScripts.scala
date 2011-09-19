@@ -117,7 +117,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	// distribute template DNA to each working well
 	// distribute master mix to each working well, free dispense, no wash in-between
 	
-	def x(template: Template, components: Seq[Component], well_masterMix: roboliq.commands.pipette.WellOrPlate, v1: Double) {
+	def x(src: WellPointer, well_masterMix: WellPointer, dest: WellPointer, template: Template, components: Seq[Component], v1: Double) {
 		val water = Liquids.water
 		
 		// Calculate desired sample volume for each component
