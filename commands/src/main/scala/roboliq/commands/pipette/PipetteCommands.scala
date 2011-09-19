@@ -13,15 +13,12 @@ trait PipetteCommands extends RoboliqCommands {
 	}
 	
 	def pipette(source: WellPointer, dest: WellPointer, volume: Double) {
-		val item = new L4A_PipetteItem(source, dest, volume)
-		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item)))
-		cmds += cmd
+		pipette(source, dest, Seq(volume))
 	}
 	
-	def pipette(srcs: Seq[WellPointer], dests: Seq[WellPointer], lnVolume: Seq[Double]) {
-		assert(srcs.size == dests.size == lnVolume.size)
-		val items = (0 until srcs.size).map(i => new L4A_PipetteItem(srcs(i), dests(i), lnVolume(i)))
-		val cmd = L4C_Pipette(new L4A_PipetteArgs(items))
+	def pipette(source: WellPointer, dest: WellPointer, lnVolume: Seq[Double]) {
+		val item = new L4A_PipetteItem(source, dest, lnVolume)
+		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item)))
 		cmds += cmd
 	}
 }

@@ -174,12 +174,12 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					val (pi, (dest, nVolume)) = pair
 					val src = getWell(pi)
 					kb.addWell(src, true) // Indicate that this well is a source
-					new L4A_PipetteItem(WellPointer(src), WellPointer(dest), nVolume)
+					new L4A_PipetteItem(WellPointer(src), WellPointer(dest), Seq(nVolume))
 				})
 			case Some(reagent) =>
 				wvs.map(pair => {
 					val (dest, nVolume) = pair
-					new L4A_PipetteItem(WellPointer(reagent), WellPointer(dest), nVolume)
+					new L4A_PipetteItem(WellPointer(reagent), WellPointer(dest), Seq(nVolume))
 				})
 		}
 		val args = new L4A_PipetteArgs(

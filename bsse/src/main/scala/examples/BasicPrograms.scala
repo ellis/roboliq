@@ -27,6 +27,8 @@ case class ProgramStageSuccess(cmds: Seq[Command], vars: Object, log: Log = Log.
 }
 
 object Program02 {
+	import WellPointerImplicits._
+	
 	class Input(
 		val ddw: Reagent
 	)
@@ -54,7 +56,7 @@ object Program02 {
 	//}
 	
 	def getCommands(in: Input, out: Output, params: Params): Either[CompileStageError, ProgramStageSuccess] = {
-		val (cmds1, vars1) = pipette(WPL_Liquid(in.ddw), WP_Plate(out.plate), params.nVolume)
+		val (cmds1, vars1) = pipette(in.ddw, out.plate, params.nVolume)
 		
 		val vars = new Vars(vars1)
 		val cmds = cmds1
@@ -64,8 +66,8 @@ object Program02 {
 	//def pipette() = Seq[Command]()
 	//def mix() = Seq[Command]()
 	
-	def pipette(source: WellOrPlateOrLiquid, dest: WellOrPlate, volume: Double): Tuple2[Seq[Command], L4A_PipetteArgs] = {
-		val item = new L4A_PipetteItem(source, dest, volume)
+	def pipette(source: WellPointer, dest: WellPointer, volume: Double): Tuple2[Seq[Command], L4A_PipetteArgs] = {
+		val item = new L4A_PipetteItem(source, dest, Seq(volume))
 		val args = new L4A_PipetteArgs(Seq(item))
 		val cmd = L4C_Pipette(args)
 		(Seq(cmd), args)

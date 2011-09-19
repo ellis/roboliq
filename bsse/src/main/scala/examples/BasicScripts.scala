@@ -87,6 +87,7 @@ class Example02(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 }
 
 class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
+	import common.WellPointer
 	
 	object Liquids {
 		val water = new Liquid("Water")
@@ -97,7 +98,8 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		val polymerase = new Liquid("Glycerol")
 	}
 	
-	val plate_template = new Plate
+	val well_template = new common.Well
+	val well_masterMix = new common.Well
 	val plate_working = new Plate
 	
 	case class Template(lc0: Seq[Double], c1: Double, vMin: Double = 0, vMax: Double = Double.MaxValue)
@@ -142,7 +144,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		def volForMix(vSample: Double): Double = { vSample * nMult }
 		
 		val vWaterMix = {
-			val lvWater2 = lvvTemplateWater.map(_._2).sortBy(identity).toSet.toSeq.take(2).toList
+			val lvWater2 = lvvTemplateWater.map(_._2).toSet[Double].toSeq.sortBy(identity).take(2)
 			// Smallest volume of water in a sample
 			// (adjusted to ensure a minimal difference to the next lowest volume)
 			val vWaterMinSample = lvWater2 match {
@@ -161,12 +163,16 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		// TODO: indicate that liquid in master mix wells is all the same (if more than one well) and label it (eg "MasterMix")
 		
 		// distribute water to each working well
-		val lvWaterPerWell = ...
+		val lvWaterPerWell = lvvTemplateWater.map(_._2 - vWaterMix)
 		pipette(water, dest, lvWaterPerWell)
 		
 		// distribute template DNA to each working well
+		val lvTemplate = lvvTemplateWater.map(_._1)
+		pipette(src, dest, lvTemplate)
+		
 		// distribute master mix to each working well, free dispense, no wash in-between
-		pipette(well_masterMix, )
+		val vMixPerWell = vComponentsTotal + vWaterMix
+		pipette(well_masterMix, dest, vMixPerWell)
 		
 		/*
 		components.foreach(component => println(component.liquid.toString+": "+mapLiquidToVolume(component.liquid)))
@@ -180,7 +186,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	}
 	
 	__findLabels(Liquids)
-	x(Template(Seq(20), 0.2), seq, 50 ul)
+	x(well_template, well_masterMix, plate_working, Template(Seq(20), 0.2), seq, 50 ul)
 
 	val lab = new EvowareLab {
 		import station._
@@ -194,7 +200,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		
 		//labware(plate_template, Sites.cooled1, LabwareModels.platePcr)
 		//labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
-		labware(plate_template, Sites.cooled1, LabwareModels.test4x3)
+		//labware(plate_template, Sites.cooled1, LabwareModels.test4x3)
 		labware(plate_working, Sites.cooled2, LabwareModels.test4x3)
 		new roboliq.common.PlateProxy(kb, plate_template) match { case pp =>
 			for (wellObj <- pp.wells) {

@@ -99,7 +99,7 @@ class L3A_PipetteArgs(
 case class L4A_PipetteItem(
 	val src: WellPointer,
 	val dest: WellPointer,
-	val nVolume: Double
+	val lnVolume: Seq[Double]
 ) {
 	def toL3(states: RobotState): Result[Seq[L3A_PipetteItem]] = {
 		for {
@@ -107,11 +107,16 @@ case class L4A_PipetteItem(
 			dests <- dest.getWells(states)
 			val lLiquid = srcs.map(_.state(states).liquid).toSet
 			_ <- Result.assert(lLiquid.size == 1 || srcs.size == dests.size, "you must specify an equal number of source and destination wells")
+			_ <- Result.assert(dests.size == 1 || dests.size == lnVolume.size, "you must specify an equal number of destinations and volumes")
 		} yield {
+			val mapDestToVolume = {
+				if (lnVolume.size == 1) dests.map(_ -> lnVolume.head).toMap
+				else (dests zip lnVolume).toMap
+			}
 			if (lLiquid.size == 1)
-				dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, nVolume))
+				dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest)))
 			else
-				(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, nVolume))
+				(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2)))
 		}
 	}
 }
