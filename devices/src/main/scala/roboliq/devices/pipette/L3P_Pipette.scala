@@ -30,6 +30,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	type CmdType = L3C_Pipette
 
 	val args = cmd.args
+	// Get all destination wells (but drop any empty volumes)
 	val dests = SortedSet[WellConfigL2](args.items.collect({ case item if item.nVolume > 0.001 => item.dest }) : _*)
 	val mixSpec_? : Option[MixSpec] = args.mixSpec_?
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
@@ -76,18 +77,18 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 						}
 					}
 					
+					// check volumes
+					dispense_checkVol(builder, tip, dest) match {
+						case Error(lsError) => return Error(lsError)
+						case _ =>
+					}
+
 					if (!bFirstInCycle) {
 							// If we would need to aspirate a new liquid, end this cycle
 						if (liquidSrc ne liquidTip0) {
 							return Error("INTERNAL: Error code dispense 1; "+liquidSrc.getName()+"; "+liquidTip0.getName())
 						}
 						
-						// check volumes
-						dispense_checkVol(builder, tip, dest) match {
-							case Error(lsError) => return Error(lsError)
-							case _ =>
-						}
-	
 						// If we need to mix, then force wet contact when checking for how to clean
 						val pos = args.mixSpec_? match {
 							case None => item.policy.pos

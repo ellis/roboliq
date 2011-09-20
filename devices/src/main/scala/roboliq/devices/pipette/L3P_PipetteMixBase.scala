@@ -22,7 +22,6 @@ private trait L3P_PipetteMixBase {
 	case class TipsGet(mapTipToModel: Map[TipConfigL2, TipModel]) extends Action
 	case class TipsWash(mapTipToSpec: Map[TipConfigL2, WashSpec]) extends Action
 	case class TipsDrop(tips: SortedSet[TipConfigL2]) extends Action
-	//case class Clean(map: Map[TipConfigL2, CleanSpec2]) extends Action
 	
 	sealed abstract class CleanSpec2 { val tip: TipConfigL2 }
 	case class ReplaceSpec2(tip: TipConfigL2, model: TipModel) extends CleanSpec2

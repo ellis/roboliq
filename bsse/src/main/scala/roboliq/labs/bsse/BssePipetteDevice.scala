@@ -23,7 +23,39 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	val mapTipModels = config.tipSpecs.map(spec => spec.id -> spec).toMap
 
 	val plateDeconAspirate, plateDeconDispense = new Plate
-			
+	
+	private val mapLcInfo = {
+		import PipettePosition._
+		Map(
+			tipModel1000 -> Map(
+				"Water" -> Map(
+					Free -> "Roboliq_Water_Air_1000",
+					WetContact -> "Roboliq_Water_Wet_1000",
+					DryContact -> "Roboliq_Water_Dry_1000"),
+				"Glycerol" -> Map(
+					Free -> "Roboliq_Glycerol_Air",
+					WetContact -> "Roboliq_Glycerol_Wet_1000"
+				),
+				"Decon" -> Map(
+					WetContact -> "Roboliq_Decon_Wet"
+				)
+			),
+			tipModel50 -> Map(
+				"Water" -> Map(
+					Free -> "Roboliq_Water_Air_0050",
+					WetContact -> "Roboliq_Water_Wet_0050",
+					DryContact -> "Roboliq_Water_Dry_0050"),
+				"Glycerol" -> Map(
+					Free -> "Roboliq_Glycerol_Air",
+					WetContact -> "Roboliq_Glycerol_Wet_0050"
+				),
+				"Decon" -> Map(
+					WetContact -> "Roboliq_Decon_Wet"
+				)
+			)
+		)
+	}
+	
 	override def addKnowledge(kb: KnowledgeBase) = {
 		super.addKnowledge(kb)
 		
@@ -56,69 +88,95 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	def areTipsDisposable: Boolean = false
 	
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
+		import PipettePosition._
+
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
 		//assert(liquid ne Liquid.empty)
 		if (liquid eq Liquid.empty)
 			return None
 
-		val bLarge = (tipState.conf.obj.index < 4)
-
-		/*val res: Option[String] = {
-			import PipettePosition._
-			if (liquid.contaminants.contains(Contaminant.Cell))
-				if (bLarge) Some("Cells") else None
-			else if (liquid.contaminants.contains(Contaminant.DSMO))
-				if (bLarge) Some("DMSO") else None
-			else if (liquid.contaminants.contains(Contaminant.Decon))
-				Some("Decon")
-			else
-				Some("Water")
+		val bLarge = (tipState.conf.obj.index < 4)		
+		
+		val sFamily = liquid.sFamily
+		val tipModel = tipState.model_?.get
+		val posDefault = WetContact
+		mapLcInfo.get(tipModel) match {
+			case None =>
+			case Some(mapFamilies) =>
+				mapFamilies.get(sFamily) match {
+					case None =>
+					case Some(mapPositions) =>
+						if (mapPositions.isEmpty)
+							return None
+						else if (mapPositions.size == 1) {
+							val (pos, lc) = mapPositions.head
+							return Some(PipettePolicy(lc, pos))
+						}
+						else {
+							mapPositions.get(posDefault) match {
+								case None => return None
+								case Some(lc) => return Some(PipettePolicy(lc, posDefault))
+							}
+						}
+				}
 		}
-		res match {
-			case None => None
-			case Some(sClass) =>*/
-		val sClass = liquid.sFamily
-				val sPos = "Top"
-				val sTip = if (bLarge) "1000" else "0050"
-				val sName = "Roboliq_"+sClass+"_"+sPos+"_"+sTip
-				Some(PipettePolicy(sName, PipettePosition.WetContact))
-		//}
+		
+		val sPos = "Wet"
+		val sTip = if (bLarge) "1000" else "0050"
+		val sName = "Roboliq_"+sFamily+"_"+sPos+"_"+sTip
+		Some(PipettePolicy(sName, posDefault))
+		
 	}
 	
 	val nFreeDispenseVolumeThreshold = 20
 	
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
-		val sClass = liquid.sFamily
+		import PipettePosition._
+
+		val sFamily = liquid.sFamily
 		val bLarge = (tip.obj.index < 4)
+		val tipModel = if (tip.obj.index < 4) tipModel1000 else tipModel50
+
+		val posDefault = {
+			// If our volume is high enough that we don't need to worry about accuracy
+			if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
+				Free
+			else if (nVolumeDest == 0)
+				DryContact
+			else
+				WetContact
+		}
+		//val lPosAlternates = Seq(WetContact, Free)
 		
-		val res: Option[PipettePosition.Value] = {
-			import PipettePosition._
-			sClass match {
-				case "Cells" => Some(Free)
-				case "DMSO" => Some(Free)
-				case "Decon" => Some(Free)
-				case _ =>
-					// If our volume is high enough that we don't need to worry about accuracy
-					if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
-						Some(Free)
-					else if (nVolumeDest == 0)
-						Some(DryContact)
-					else
-						Some(WetContact)
-			}
-		}
-		res match {
-			case None => None
-			case Some(pos) =>
-				val sPos = pos match {
-					case PipettePosition.Free => "Air"
-					case PipettePosition.DryContact => "Dry"
-					case PipettePosition.WetContact => "Top"
+		mapLcInfo.get(tipModel) match {
+			case None =>
+			case Some(mapFamilies) =>
+				mapFamilies.get(sFamily) match {
+					case None =>
+					case Some(mapPositions) =>
+						if (mapPositions.isEmpty)
+							return None
+						else if (mapPositions.size == 1) {
+							val (pos, lc) = mapPositions.head
+							return Some(PipettePolicy(lc, pos))
+						}
+						else {
+							mapPositions.get(posDefault) match {
+								case None => return None
+								case Some(lc) => return Some(PipettePolicy(lc, posDefault))
+							}
+						}
 				}
-				val sTip = if (bLarge) "1000" else "0050"
-				val sName = "Roboliq_"+sClass+"_"+sPos+"_"+sTip
-				Some(PipettePolicy(sName, pos))
 		}
+		
+		val sPos = posDefault match {
+			case PipettePosition.Free => "Air"
+			case PipettePosition.DryContact => "Dry"
+			case PipettePosition.WetContact => "Wet"
+		}
+		val sTip = if (bLarge) "1000" else "0050"
+		val sName = "Roboliq_"+sFamily+"_"+sPos+"_"+sTip
+		Some(PipettePolicy(sName, posDefault))
 	}
 }
