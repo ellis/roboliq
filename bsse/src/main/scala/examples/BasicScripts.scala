@@ -98,8 +98,8 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		val polymerase = new Liquid("Glycerol")
 	}
 	
-	val well_template = new common.Well
-	val well_masterMix = new common.Well
+	val well_template = new common.WellPointerVar
+	val well_masterMix = new common.WellPointerVar
 	val plate_working = new Plate
 	
 	case class Template(lc0: Seq[Double], c1: Double, vMin: Double = 0, vMax: Double = Double.MaxValue)
@@ -186,7 +186,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	}
 	
 	__findLabels(Liquids)
-	x(well_template, well_masterMix, plate_working, Template(Seq(20), 0.2), seq, 50 ul)
+	x(well_template, well_masterMix, plate_working(A5+12), Template(Seq(20), 0.2), seq, 50 ul)
 
 	val lab = new EvowareLab {
 		import station._
@@ -198,18 +198,19 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		reagent(Liquids.primerB, Labwares.eppendorfs, 13)
 		reagent(Liquids.polymerase, Labwares.eppendorfs, 17)
 		
+		well_template.pointer_? = Some(Labwares.eppendorfs.commonObj(B1))
+		well_masterMix.pointer_? = Some(Labwares.reagents15.commonObj(A1))
+		
 		//labware(plate_template, Sites.cooled1, LabwareModels.platePcr)
-		//labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
+		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
 		//labware(plate_template, Sites.cooled1, LabwareModels.test4x3)
-		labware(plate_working, Sites.cooled2, LabwareModels.test4x3)
-		new roboliq.common.PlateProxy(kb, plate_template) match { case pp =>
-			for (wellObj <- pp.wells) {
-				val wellSetup = kb.getWellSetup(wellObj)
-				val sLiquid = "template#"+wellSetup.index_?.get
-				val liquid = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
-				liquid.setup.sName_? = Some(sLiquid)
-				wellSetup.reagent_? = Some(liquid)
-			}
+		//labware(plate_working, Sites.cooled2, LabwareModels.test4x3)
+		for (wells <- well_template.getWells(kb); wellObj <- wells) {
+			val wellSetup = kb.getWellSetup(wellObj)
+			val sLiquid = "template#"+wellSetup.index_?.get
+			val liquid = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+			liquid.setup.sName_? = Some(sLiquid)
+			wellSetup.reagent_? = Some(liquid)
 		}
 	}
 }

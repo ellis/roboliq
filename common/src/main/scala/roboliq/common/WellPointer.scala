@@ -94,6 +94,15 @@ object WellPointerImplicits extends WellPointerImplicits {
 	
 }
 
+case class WellPointerVar extends WellPointer {
+	var pointer_? : Option[WellPointer] = None
+
+	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = pointer_?.map(_.getWells(kb)).getOrElse(Success(Seq()))
+	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = pointer_?.map(_.getWells(states)).getOrElse(Success(Seq()))
+	override def getPlatesL4: Result[Seq[Plate]] = pointer_?.map(_.getPlatesL4).getOrElse(Success(Seq()))
+	override def getReagentsL4: Result[Seq[Reagent]] = pointer_?.map(_.getReagentsL4).getOrElse(Success(Seq()))
+}
+
 case class WellPointerWell(well: Well) extends WellAddressSingle with WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(Seq(well))
 	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(Seq(well.state(states).conf))
@@ -182,6 +191,14 @@ trait WellCoords {
 	val A6 = WellCoord(0, 5)
 	val A7 = WellCoord(0, 6)
 	val A8 = WellCoord(0, 7)
+	val B1 = WellCoord(1, 0)
+	val B2 = WellCoord(1, 1)
+	val B3 = WellCoord(1, 2)
+	val B4 = WellCoord(1, 3)
+	val B5 = WellCoord(1, 4)
+	val B6 = WellCoord(1, 5)
+	val B7 = WellCoord(1, 6)
+	val B8 = WellCoord(1, 7)
 	val G7 = WellCoord(6, 6)
 }
 
