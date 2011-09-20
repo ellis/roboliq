@@ -61,6 +61,10 @@ Tuval/Yair:
 	get date for coming to Weizmann
 	ask for PCR protocols
 Code:
+	Errors running on robot:
+		how should wash volume be calculated?
+		when dispensing into the 15ml tube with the small tips, tips can't reach bottom
+		aspirating decon with small tips resulted in a run-time error
 	PCR protocol calculations: www.babec.org/files/pdf/Optimization_student.pdf
 	Result monad:
 		- map items to results:
