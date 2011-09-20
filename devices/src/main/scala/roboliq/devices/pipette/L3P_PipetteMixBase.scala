@@ -673,7 +673,7 @@ private trait L3P_PipetteMixBase {
 		}
 		else {
 			var intensity = WashIntensity.None 
-			tips.toSeq.foreach(tip => println("state: "+tip.state(states)))
+			//tips.toSeq.foreach(tip => println("state: "+tip.state(states)))
 			val items = tips.toSeq.map(tip => {
 				val tipState = tip.state(states)
 				if (tipState.cleanDegreePending > WashIntensity.None) {

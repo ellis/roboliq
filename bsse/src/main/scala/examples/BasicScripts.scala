@@ -147,7 +147,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 			val lvWater2 = lvvTemplateWater.map(_._2).toSet[Double].toSeq.sortBy(identity).take(2)
 			// Smallest volume of water in a sample
 			// (adjusted to ensure a minimal difference to the next lowest volume)
-			val vWaterMinSample = lvWater2 match {
+			val vWaterMinSample = lvWater2.toList match {
 				case vMin :: Nil => vMin
 				case vMin :: vMin1 :: Nil => if (vMin > vMin1 - vLowerBound) vMin - vLowerBound else vMin
 			}
@@ -186,7 +186,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	}
 	
 	__findLabels(Liquids)
-	x(well_template, well_masterMix, plate_working(A5+12), Template(Seq(20), 0.2), seq, 50 ul)
+	x(well_template, well_masterMix, plate_working(A5), Template(Seq(20), 0.2), seq, 50 ul)
 
 	val lab = new EvowareLab {
 		import station._

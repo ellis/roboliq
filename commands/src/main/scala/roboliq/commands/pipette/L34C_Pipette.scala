@@ -11,11 +11,11 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 	def addKnowledge(kb: KnowledgeBase) {
 		for (item <- args.items) {
 			item.src.getWells(kb).map(_.foreach(o => kb.addWell(o, true)))
-			item.src.getPlatesL4.map(_.foreach(o => kb.addPlate(o, true)))
+			item.src.getPlatesL4.map(_.foreach(o => kb.addPlate(o)))
 			item.src.getReagentsL4.map(_.foreach(o => kb.addReagent(o)))
 
 			item.dest.getWells(kb).map(_.foreach(o => kb.addWell(o, false)))
-			item.dest.getPlatesL4.map(_.foreach(o => kb.addPlate(o, false)))
+			item.dest.getPlatesL4.map(_.foreach(o => kb.addPlate(o)))
 			item.dest.getReagentsL4.map(_.foreach(o => kb.addReagent(o)))
 
 			/*
@@ -102,13 +102,16 @@ case class L4A_PipetteItem(
 	val lnVolume: Seq[Double]
 ) {
 	def toL3(states: RobotState): Result[Seq[L3A_PipetteItem]] = {
+		println("dest: "+dest)
 		for {
 			srcs <- src.getWells(states)
 			dests <- dest.getWells(states)
 			val lLiquid = srcs.map(_.state(states).liquid).toSet
-			_ <- Result.assert(lLiquid.size == 1 || srcs.size == dests.size, "you must specify an equal number of source and destination wells")
-			_ <- Result.assert(dests.size == 1 || dests.size == lnVolume.size, "you must specify an equal number of destinations and volumes")
+			_ <- Result.assert(lLiquid.size == 1 || srcs.size == dests.size, "you must specify an equal number of source and destination wells: "+srcs+" vs "+dests)
+			_ <- Result.assert(lnVolume.size == 1 || dests.size == lnVolume.size, "you must specify an equal number of destinations and volumes: "+dests+" vs "+lnVolume)
 		} yield {
+			println("srcs: "+srcs)
+			println("dests: "+dests)
 			val mapDestToVolume = {
 				if (lnVolume.size == 1) dests.map(_ -> lnVolume.head).toMap
 				else (dests zip lnVolume).toMap

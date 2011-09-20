@@ -137,6 +137,8 @@ class Well extends Obj { thisObj =>
 	}
 	//def stateWriter(map: HashMap[ThisObj, StateL2]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	
+	override def toString = setup.toString
 }
 
 /*

@@ -7,11 +7,11 @@ object WellAddress {
 }
 
 sealed trait WellAddressPartial {
-	protected def toIndexes(dim: PlateSetupDimensionL4): Result[Seq[Int]]
+	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]]
 	def toPointer(kb: KnowledgeBase, plate: Plate): Result[WellPointer] = {
 		for {
 			dim <- Result.get(plate.setup.dim_?, "plate dimension not set")
-			li <- toIndexes(dim)
+			li <- toIndexes(dim.nRows, dim.nCols)
 		} yield {
 			val lWell = li.map(iWell => dim.wells(iWell))
 			if (li.size == 1) {
@@ -26,14 +26,16 @@ sealed trait WellAddressPartial {
 	def toWells(kb: KnowledgeBase, plate: Plate): Result[Seq[Well]] = {
 		for {
 			dim <- Result.get(plate.setup.dim_?, "plate dimension not set")
-			li <- toIndexes(dim)
+			li <- toIndexes(dim.nRows, dim.nCols)
 		} yield {
 			li.map(iWell => dim.wells(iWell))
 		}
 	}
 
 	def toWells(states: RobotState, plate: Plate): Result[Seq[WellConfigL2]] = {
-		Success(plate.state(states).conf.wells.map(_.state(states).conf))
+		val conf = plate.state(states).conf
+		for { li <- toIndexes(conf.nRows, conf.nCols) }
+		yield li.map(iWell => conf.wells(iWell).state(states).conf)
 	}
 
 	/*
@@ -55,10 +57,10 @@ sealed trait WellAddressPartial {
 sealed abstract class WellAddressSingle extends WellAddress {
 	def +(n: Int): WellAddressPlus = new WellAddressPlus(this, n)
 	def -(b: WellAddressSingle): WellAddressMinus = new WellAddressMinus(this, b)
-	def toIndex(dim: PlateSetupDimensionL4): Result[Int]
+	def toIndex(nRows: Int, nCols: Int): Result[Int]
 	
-	protected def toIndexes(dim: PlateSetupDimensionL4): Result[Seq[Int]] = {
-		for { index <- toIndex(dim) }
+	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
+		for { index <- toIndex(nRows, nCols) }
 		yield { Seq(index) }
 	}
 }
@@ -94,19 +96,20 @@ object WellPointerImplicits extends WellPointerImplicits {
 	
 }
 
-case class WellPointerVar extends WellPointer {
+case class WellPointerVar() extends WellPointer {
 	var pointer_? : Option[WellPointer] = None
 
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = pointer_?.map(_.getWells(kb)).getOrElse(Success(Seq()))
 	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = pointer_?.map(_.getWells(states)).getOrElse(Success(Seq()))
 	override def getPlatesL4: Result[Seq[Plate]] = pointer_?.map(_.getPlatesL4).getOrElse(Success(Seq()))
 	override def getReagentsL4: Result[Seq[Reagent]] = pointer_?.map(_.getReagentsL4).getOrElse(Success(Seq()))
+	override def toString = pointer_?.map(_.toString).getOrElse(super.toString)
 }
 
 case class WellPointerWell(well: Well) extends WellAddressSingle with WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(Seq(well))
 	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(Seq(well.state(states).conf))
-	def toIndex(dim: PlateSetupDimensionL4): Result[Int] = Result.get(well.setup.index_?, "well index not set")
+	def toIndex(nRows: Int, nCols: Int): Result[Int] = Result.get(well.setup.index_?, "well index not set")
 	override def toString = well.toString
 }
 
@@ -164,8 +167,7 @@ case class WellPointerReagent(reagent: Reagent) extends WellPointer {
 					}
  */
 case class WellCoord(iRow: Int, iCol: Int) extends WellAddressSingle with WellAddressPartial {
-	def toIndex(dim: PlateSetupDimensionL4): Result[Int] = {
-		import dim._
+	def toIndex(nRows: Int, nCols: Int): Result[Int] = {
 		val sRow = (iRow + 'A').asInstanceOf[Char].toString
 		val sCol = (iCol + 1).toString
 		if (iRow < 0 || iRow >= nRows) {
@@ -175,7 +177,7 @@ case class WellCoord(iRow: Int, iCol: Int) extends WellAddressSingle with WellAd
 			Error("invalid column: "+sCol)
 		}
 		else {
-			val index = iRow + iCol * dim.nRows
+			val index = iRow + iCol * nRows
 			Success(index)
 		}
 	}
@@ -203,13 +205,13 @@ trait WellCoords {
 }
 
 case class WellIndex(index: Int) extends WellAddressSingle with WellAddressPartial{
-	def toIndex(dim: PlateSetupDimensionL4): Result[Int] = Success(index)
+	def toIndex(nRows: Int, nCols: Int): Result[Int] = Success(index)
 	override def toString = index.toString
 }
 
 case class WellAddressPlus(a: WellAddressSingle, n: Int) extends WellAddress with WellAddressPartial {
-	protected def toIndexes(dim: PlateSetupDimensionL4): Result[Seq[Int]] = {
-		for { i0 <- a.toIndex(dim) }
+	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
+		for { i0 <- a.toIndex(nRows, nCols) }
 		yield { (i0 until (i0 + n)).toSeq }
 	}
 	
@@ -217,10 +219,10 @@ case class WellAddressPlus(a: WellAddressSingle, n: Int) extends WellAddress wit
 }
 
 case class WellAddressMinus(a: WellAddressSingle, b: WellAddressSingle) extends WellAddress with WellAddressPartial {
-	protected def toIndexes(dim: PlateSetupDimensionL4): Result[Seq[Int]] = {
+	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
 		for {
-			i0 <- a.toIndex(dim);
-			i1 <- b.toIndex(dim);
+			i0 <- a.toIndex(nRows, nCols);
+			i1 <- b.toIndex(nRows, nCols);
 			_ <- Result.assert(i0 <= i1, "second well must have a higher index than the first")
 		}
 		yield { (i0 until i1).toSeq }
