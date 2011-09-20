@@ -6,6 +6,7 @@ import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.pipette._
+import roboliq.robots.evoware._
 
 import station1._
 
@@ -17,15 +18,10 @@ object Main extends App {
 	toolchain.compileProtocol(protocol, true) match {
 		case Left(err) => err.print()
 		case Right(succT: TranslatorStageSuccess) =>
-			//val sFilename = sSourcePath + ".esc"
 			val sFilename = "example03.esc"
-			//case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
-			def toLabwareItem(plate): roboliq.robots.evoware.LabwareItem = {
-				LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
-			}
-			//val mapLabware = EvowareTranslatorHeader.LabwareMap(p.mapLabware.mapValues(toLabwareItem).toSeq : _*)
-			val mapLabware = p.mapLabware.mapValues(toLabwareItem)
-			val s = compilerConfig.translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
+			val script = succT.internal.asInstanceOf[EvowareScriptBuilder]
+			val translator = new EvowareTranslator(toolchain.evowareConfig)
+			val s = translator.saveWithHeader(script.cmds.toSeq, station.sHeader, script.mapLocToLabware.toMap, sFilename)
 			println(s)
 		case Right(succ) => succ.print()
 	}

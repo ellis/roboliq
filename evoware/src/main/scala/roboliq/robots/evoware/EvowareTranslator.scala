@@ -18,44 +18,35 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		// Do nothing
 	}
 	
-	override def translate(cmd: CommandL1): Result[Seq[Command]] = cmd match {
-		case t @ L1C_Aspirate(_) => aspirate(t)
-		case t @ L1C_Dispense(_) => dispense(t)
-		case t @ L1C_Mix(_) => mix(t.items)
-		case c: L1C_Wash => wash(c)
-		case c: L1C_TipsGet => tipsGet(c)
-		case c: L1C_TipsDrop => tipsDrop(c)
-		case c: L1C_MovePlate => movePlate(c.args)
-		case c: L1C_Timer => timer(c.args)
-		case c: L1C_EvowareFacts => facts(c)
-		case c: L1C_SaveCurrentLocation => Success(Seq())
+	def translate(cmds: Seq[CommandL1]): Either[CompileStageError, TranslatorStageSuccess] = {
+		val builder = new EvowareScriptBuilder
+		cmds.foreach(cmd => {
+			translate(builder, cmd) match {
+				case Error(lsError) => return Left(CompileStageError(Log(lsError)))
+				case Success(cmds0) =>
+			}
+		})
+		Right(TranslatorStageSuccess(builder, Seq()))
+	}
+	
+	private def translate(builder: EvowareScriptBuilder, cmd1: CommandL1): Result[Unit] = {
+		for { cmds0 <- cmd1 match {
+			case t @ L1C_Aspirate(_) => aspirate(builder, t)
+			case t @ L1C_Dispense(_) => dispense(builder, t)
+			case t @ L1C_Mix(_) => mix(builder, t.items)
+			case c: L1C_Wash => wash(c)
+			case c: L1C_TipsGet => tipsGet(c)
+			case c: L1C_TipsDrop => tipsDrop(c)
+			case c: L1C_MovePlate => movePlate(builder, c.args)
+			case c: L1C_Timer => timer(c.args)
+			case c: L1C_EvowareFacts => facts(builder, c)
+			case c: L1C_SaveCurrentLocation => Success(Seq())
+		}} yield {
+			builder.cmds ++= cmds0
+			()
+		}
 	}
 
-	/*def translate(rs: Seq[CompileFinal]): Result[Seq[Command]] = {
-		Success(rs.flatMap(r => {
-			translate(r.cmd) match {
-				case Error(err) => return Error(err)
-				case Success(cmds) => cmds
-			}
-		}))
-	}*/
-
-	//def translateToString(txs: Seq[CompileFinal]): String = translate(txs).right.get.mkString("\n")
-	def translateToString(cmds: Seq[CommandL1]): String = translate(cmds).right.get.cmds.mkString("\n")
-
-	/*def translateAndSave(
-		cmds: Seq[CommandL1],
-		mapLabware: EvowareTranslatorHeader.LabwareMap,
-		sFilename: String
-	): String = {
-		val s = translateToString(cmds)
-		val fos = new java.io.FileOutputStream(sFilename)
-		writeLines(fos, EvowareTranslatorHeader.getHeader(mapLabware))
-		writeLines(fos, s);
-		fos.close();
-		s
-	}*/
-	
 	def saveWithHeader(
 		cmds: Seq[Command],
 		sHeader: String,
@@ -119,15 +110,15 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	*/
 	
 
-	private def aspirate(cmd: L1C_Aspirate): Result[Seq[Command]] = {
-		spirate(cmd.items, "Aspirate")
+	private def aspirate(builder: EvowareScriptBuilder, cmd: L1C_Aspirate): Result[Seq[Command]] = {
+		spirate(builder, cmd.items, "Aspirate")
 	}
 	
-	private def dispense(cmd: L1C_Dispense): Result[Seq[Command]] = {
-		spirate(cmd.items, "Dispense")
+	private def dispense(builder: EvowareScriptBuilder, cmd: L1C_Dispense): Result[Seq[Command]] = {
+		spirate(builder, cmd.items, "Dispense")
 	}
 	 
-	private def spirate(items: Seq[L1A_SpirateItem], sFunc: String): Result[Seq[Command]] = {
+	private def spirate(builder: EvowareScriptBuilder, items: Seq[L1A_SpirateItem], sFunc: String): Result[Seq[Command]] = {
 		items match {
 			case Seq() => Error(Seq("INTERNAL: items empty"))
 			case Seq(twvp0, rest @ _*) =>
@@ -165,11 +156,11 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				if (!bEquidistant && !bSameWell)
 					return Error(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Command.getWellsDebugString(items.map(_.well))))
 				
-				spirateChecked(items, sFunc, sLiquidClass)
+				spirateChecked(builder, items, sFunc, sLiquidClass)
 		}
 	}
 
-	private def spirateChecked(items: Seq[L1A_SpirateItem], sFunc: String, sLiquidClass: String): Result[Seq[Command]] = {
+	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[L1A_SpirateItem], sFunc: String, sLiquidClass: String): Result[Seq[Command]] = {
 		val item0 = items.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val holder = item0.well.holder
@@ -187,17 +178,17 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		
 		val sPlateMask = encodeWells(holder, items.map(_.well.index))
 		
-		// Find a parent of 'holder' which has an Evoware location (x-grid/y-site)
-		system.mapSites.get(item0.location) match {
-			case None => return Error(Seq("INTERNAL: missing evoware site for location "+item0.location))
-			case Some(site) =>
-				Success(Seq(L0C_Spirate(
-					sFunc, 
-					mTips, sLiquidClass,
-					asVolumes,
-					site.iGrid, site.iSite,
-					sPlateMask
-				)))
+		for {
+			site <- getSite(item0.location)
+			_ <- addLabware(builder, holder, item0.location)
+		} yield {
+			Seq(L0C_Spirate(
+				sFunc, 
+				mTips, sLiquidClass,
+				asVolumes,
+				site.iGrid, site.iSite,
+				sPlateMask
+			))
 		}
 	}
 	
@@ -224,7 +215,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		}
 	}
 	
-	private def mix(items: Seq[L1A_MixItem]): Result[Seq[Command]] = {
+	private def mix(builder: EvowareScriptBuilder, items: Seq[L1A_MixItem]): Result[Seq[Command]] = {
 		items match {
 			case Seq() => Error(Seq("Empty Tip-Well-Volume list"))
 			case Seq(item0, rest @ _*) =>
@@ -260,11 +251,11 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				// All tip/well pairs are equidistant or all tips are going to the same well
 				assert(equidistant(items) || items.forall(_.well eq item0.well))
 				
-				mixChecked(items, sLiquidClass)
+				mixChecked(builder, items, sLiquidClass)
 		}
 	}
 
-	private def mixChecked(items: Seq[L1A_MixItem], sLiquidClass: String): Result[Seq[Command]] = {
+	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[L1A_MixItem], sLiquidClass: String): Result[Seq[Command]] = {
 		val item0 = items.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val holder = item0.well.holder
@@ -285,6 +276,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		system.mapSites.get(item0.location) match {
 			case None => return Error(Seq("INTERNAL: missing evoware site for location "+item0.location))
 			case Some(site) =>
+				addLabware(builder, holder.model_?.get.id, item0.location)
 				Success(Seq(L0C_Mix(
 					mTips, sLiquidClass,
 					asVolumes,
@@ -309,7 +301,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		}
 	}
 	
-	private def movePlate(c: L1A_MovePlateArgs): Result[Seq[Command]] = {
+	private def movePlate(builder: EvowareScriptBuilder, c: L1A_MovePlateArgs): Result[Seq[Command]] = {
 		val siteSrc = getSite(c.locationSrc) match {
 			case Error(lsError) => return Error(lsError)
 			case Success(site) => site
@@ -326,6 +318,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			case Error(lsError) => return Error(lsError)
 			case Success(carrier) => carrier
 		}
+		addLabware(builder, c.sPlateModel, c.locationDest)
+		addLabware(builder, c.sPlateModel, c.locationSrc)
 		Success(Seq(L0C_Transfer_Rack(
 			c.iRoma,
 			c.sPlateModel,
@@ -335,6 +329,21 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			iGridLid = 0,
 			iSiteLid = 0,
 			sCarrierModelLid = ""
+		)))
+	}
+	
+	private def timer(args: L12A_TimerArgs): Result[Seq[Command]] = {
+		Success(Seq(
+			L0C_StartTimer(1),
+			L0C_WaitTimer(1, args.nSeconds)
+		))
+	}
+	
+	private def facts(builder: EvowareScriptBuilder, cmd: L1C_EvowareFacts): Result[Seq[Command]] = {
+		Success(Seq(L0C_Facts(
+			sDevice = cmd.args.sDevice,
+			sVariable = cmd.args.sVariable,
+			sValue = cmd.args.sValue
 		)))
 	}
 	
@@ -352,18 +361,24 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		}
 	}
 	
-	private def timer(args: L12A_TimerArgs): Result[Seq[Command]] = {
-		Success(Seq(
-			L0C_StartTimer(1),
-			L0C_WaitTimer(1, args.nSeconds)
-		))
+	private def addLabware(builder: EvowareScriptBuilder, plate: PlateConfigL2, location: String): Result[Unit] = {
+		if (plate.model_?.isEmpty)
+			//return Error("plate model must be assigned to plate \""+plate+"\"")
+			return Success(())
+		addLabware(builder, plate.model_?.get.id, location)
 	}
 	
-	private def facts(cmd: L1C_EvowareFacts): Result[Seq[Command]] = {
-		Success(Seq(L0C_Facts(
-			sDevice = cmd.args.sDevice,
-			sVariable = cmd.args.sVariable,
-			sValue = cmd.args.sValue
-		)))
+	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): Result[Unit] = {
+		val site = system.mapSites(location)
+		val coord = (site.iGrid, site.iSite)
+		builder.mapLocToLabware.get(coord) match {
+			case None =>
+				builder.mapLocToLabware(coord) = LabwareItem(location, sLabwareModel, site.iGrid, site.iSite)
+			case Some(item) if item.sLabel == location && item.sType == sLabwareModel =>
+				// Same as before, so we don't need to do anything
+			case Some(_) =>
+				// TODO: a new script needs to be started
+		}
+		Success(())
 	}
 }
