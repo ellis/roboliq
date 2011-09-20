@@ -16,6 +16,17 @@ object Main extends App {
 	val toolchain = new BsseToolchain(station)
 	toolchain.compileProtocol(protocol, true) match {
 		case Left(err) => err.print()
+		case Right(succT: TranslatorStageSuccess) =>
+			//val sFilename = sSourcePath + ".esc"
+			val sFilename = "example03.esc"
+			//case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
+			def toLabwareItem(plate): roboliq.robots.evoware.LabwareItem = {
+				LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
+			}
+			//val mapLabware = EvowareTranslatorHeader.LabwareMap(p.mapLabware.mapValues(toLabwareItem).toSeq : _*)
+			val mapLabware = p.mapLabware.mapValues(toLabwareItem)
+			val s = compilerConfig.translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
+			println(s)
 		case Right(succ) => succ.print()
 	}
 }

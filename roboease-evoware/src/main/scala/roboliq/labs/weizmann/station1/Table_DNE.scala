@@ -265,6 +265,7 @@ V;200
 	val racks = evolabRacks.map(r => Rack(r.id, r.nCols, r.nRows, r.iGrid, r.iSite, r.nVolume, r.sCarrierModel))
 
 	import roboliq.robots.evoware._
+	import roboliq.common.PlateModel
 	
 	object EvowareTableMaps {
 		type PlateModelKey = Tuple3[Int, Int, Double]

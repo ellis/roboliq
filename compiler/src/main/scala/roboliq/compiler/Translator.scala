@@ -9,6 +9,8 @@ case class TranslatorStageSuccess(cmds: Seq[Command], log: Log = Log.empty) exte
 	}
 }
 
+trait TranslationBuilder
+
 
 trait Translator {
 	def addKnowledge(kb: KnowledgeBase)
