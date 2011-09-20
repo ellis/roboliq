@@ -31,12 +31,13 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, pla
 						val itemsAD = cmd.items.map(item => {
 							val tip = item.tip
 							val tipState = tip.obj.state(ctx.states)
+							val tipModel = tipState.model_?.get
 							val wellA = pcA.conf.wells(tip.index % pcA.conf.nWells)
 							val wellD = pcD.conf.wells(tip.index % pcD.conf.nWells)
 							val wellStateA = wellA.state(ctx.states)
 							val wellStateD = wellD.state(ctx.states)
-							val nVolumeTip = tipState.model_?.get.nVolume
-							val nVolume = math.max(nVolumeTip, tipState.nContamInsideVolume + nVolumeTip / 10)
+							val nVolumeTip = tipModel.nVolume
+							val nVolume = math.min(nVolumeTip, tipState.nContamInsideVolume + nVolumeTip / 10)
 							val policyA_? = robot.getAspiratePolicy(tipState, wellStateA)
 							val policyD_? = robot.getDispensePolicy(wellStateA.liquid, tip, nVolume, wellStateD.nVolume)
 							val well1A = wellStateA.conf

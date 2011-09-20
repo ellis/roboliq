@@ -49,6 +49,9 @@ private trait L3P_PipetteMixBase {
 
 
 	def translation: Either[CompileError, Seq[Command]] = {
+		if (dests.isEmpty)
+			return Right(Seq())
+		
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
 		// Pick the strategy with the best score

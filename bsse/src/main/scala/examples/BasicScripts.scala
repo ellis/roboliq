@@ -138,21 +138,21 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		})
 		
 		val vLowerBound = 0.1
-		val vExtra = 5
+		val vExtra = 0//5
 		val nSamples = template.lc0.size
 		val nMult: Int = nSamples + 1
 		def volForMix(vSample: Double): Double = { vSample * nMult }
 		
-		val vWaterMix = {
+		val vWaterMinSample = {
 			val lvWater2 = lvvTemplateWater.map(_._2).toSet[Double].toSeq.sortBy(identity).take(2)
 			// Smallest volume of water in a sample
 			// (adjusted to ensure a minimal difference to the next lowest volume)
-			val vWaterMinSample = lvWater2.toList match {
+			lvWater2.toList match {
 				case vMin :: Nil => vMin
 				case vMin :: vMin1 :: Nil => if (vMin > vMin1 - vLowerBound) vMin - vLowerBound else vMin
 			}
-			volForMix(vWaterMinSample)
 		}
+		val vWaterMix = volForMix(vWaterMinSample)
 		
 		// create master mix in 15ml well
 		pipette(water, well_masterMix, vWaterMix * nMult)
@@ -163,7 +163,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		// TODO: indicate that liquid in master mix wells is all the same (if more than one well) and label it (eg "MasterMix")
 		
 		// distribute water to each working well
-		val lvWaterPerWell = lvvTemplateWater.map(_._2 - vWaterMix)
+		val lvWaterPerWell = lvvTemplateWater.map(_._2 - vWaterMinSample)
 		pipette(water, dest, lvWaterPerWell)
 		
 		// distribute template DNA to each working well
@@ -186,7 +186,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	}
 	
 	__findLabels(Liquids)
-	x(well_template, well_masterMix, plate_working(A5), Template(Seq(20), 0.2), seq, 50 ul)
+	x(well_template, well_masterMix, plate_working(B5+2), Template(Seq(20), 0.2), seq, 50 ul)
 
 	val lab = new EvowareLab {
 		import station._

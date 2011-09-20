@@ -13,8 +13,8 @@ import roboliq.labs.bsse._
 
 class StationConfig extends EvowareTable {
 	object TipModels {
-		val tipModel50 = new TipModel("DiTi 50ul", 50, 0.01, 5, 10)
-		val tipModel1000 = new TipModel("DiTi 1000ul", 1000, 3, 50, 100)
+		val tipModel50 = new TipModel("DiTi 50ul", 45, 0.01, 0, 0)
+		val tipModel1000 = new TipModel("DiTi 1000ul", 960, 3, 0, 0)
 	}
 	val tipModels = {
 		import TipModels._
