@@ -1,6 +1,8 @@
 package roboliq.compiler
 
 import roboliq.common._
+import roboliq.commands.PlateHandlingConfig
+
 
 abstract class CommandCompiler {
 	type CmdType <: Command

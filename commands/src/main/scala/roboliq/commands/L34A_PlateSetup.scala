@@ -1,5 +1,7 @@
 package roboliq.commands
 
+import scala.collection.mutable.ArrayBuffer
+
 import roboliq.common._
 
 
@@ -21,4 +23,29 @@ class PlateHandlingConfig(
 	val replate_? : Option[Plate],
 	val locationNew_? : Option[String],
 	val locationFinal_? : Option[String]
-)
+) {
+		
+	def getPreHandlingCommands(states: RobotState, plate: PlateConfigL2): Seq[Command] = {
+		val cmds = new ArrayBuffer[Command]
+
+		import move._
+		val plateState = plate.state(states)
+		locationNew_?.map(location => {
+			cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(location), None))
+		})
+		
+		cmds.toSeq
+	}
+		
+	def getPostHandlingCommands(states: RobotState, plate: PlateConfigL2): Seq[Command] = {
+		val cmds = new ArrayBuffer[Command]
+
+		import move._
+		val plateState = plate.state(states)
+		locationFinal_?.map(location => {
+			cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(location), None))
+		})
+		
+		cmds.toSeq
+	}
+}
