@@ -63,15 +63,11 @@ Tuval/Yair:
 Code:
 	Errors running on robot:
 		how should wash volume be calculated?
+		decontamination for small tips?
 		when dispensing into the 15ml tube with the small tips, tips can't reach bottom
 		aspirating decon with small tips resulted in a run-time error
+	move PCR calculations into its own L3/4 command
 	PCR protocol calculations: www.babec.org/files/pdf/Optimization_student.pdf
-	Result monad:
-		- map items to results:
-			transform list of results into a result of errors or result of list of values
-				Iterable[Result[A]] => Result[Iterable[A]]
-		- transform list of results into a result of the 
-		- Seq[A] => Seq[Result[B]] => Result[Seq[B]] => Result[C]
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
