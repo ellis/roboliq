@@ -1,4 +1,4 @@
-package roboliq.robots.evoware.devices.roboseal
+package roboliq.robots.evoware.devices.robopeel
 
 import roboliq.common._
 import roboliq.commands._
@@ -7,8 +7,8 @@ import roboliq.compiler._
 import roboliq.robots.evoware.commands._
 
 
-class L3P_Seal_RoboSeal(device: RoboSealDevice) extends L3P_PlateCommand(device) {
-	type CmdType = L3C_Seal
+class L3P_Peel_RoboPeel(device: RoboPeelDevice) extends L3P_PlateCommand(device) {
+	type CmdType = L3C_Peel
 	val cmdType = classOf[CmdType]
 	
 	def getPlate(cmd: CmdType): PlateConfigL2 = cmd.args.plate
@@ -21,7 +21,7 @@ class L3P_Seal_RoboSeal(device: RoboSealDevice) extends L3P_PlateCommand(device)
 	}
 	
 	def compilePlateCommand(ctx: CompilerContextL3, cmd: CmdType, dlp: PlateCommandDLP): Result[Seq[Command]] = {
-		val args2 = new L12A_EvowareFactsArgs(device.idDevice, device.idDevice+"_Seal", dlp.idProgram)
+		val args2 = new L12A_EvowareFactsArgs(device.idDevice, device.idDevice+"_Peel", dlp.idProgram)
 		Success(Seq(L2C_EvowareFacts(args2)))
 	}
 }

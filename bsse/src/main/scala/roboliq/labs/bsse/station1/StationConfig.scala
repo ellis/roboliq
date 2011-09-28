@@ -9,6 +9,7 @@ import roboliq.devices.pipette._
 import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices._
 import roboliq.robots.evoware.devices.roboseal._
+import roboliq.robots.evoware.devices.robopeel._
 import roboliq.labs.bsse._
 
 
@@ -104,6 +105,7 @@ class StationConfig extends EvowareTable {
 	val mover = new EvowareMoveDevice
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
 	val sealer = new RoboSealDevice("RoboSeal", """(program)""", "sealer")
+	val peeler = new RoboPeelDevice("RoboPeel", """(program)""", "peeler")
 	
 	val devices = Seq(
 		mover,
