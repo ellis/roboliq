@@ -8,6 +8,7 @@ import roboliq.devices.move._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices._
+import roboliq.robots.evoware.devices.roboseal._
 import roboliq.labs.bsse._
 
 
@@ -33,6 +34,8 @@ class StationConfig extends EvowareTable {
 		val uncooled = new CarrierModel("MP 3Pos Cooled 2 PCR", 3, false)
 		val filters = new CarrierModel("Te-VaCS", 2, false)
 		val pcr = new CarrierModel("TRobot", 1, false)
+		val sealer = new CarrierModel("RoboSeal", 1, false)
+		val peeler = new CarrierModel("RoboPeel", 1, false)
 	}
 	object Carriers {
 		val wash1 = new CarrierObj("Wash Station Clean", CarrierModels.wash, 1)
@@ -48,6 +51,8 @@ class StationConfig extends EvowareTable {
 		val filters = new CarrierObj("Te-VaCS", CarrierModels.filters, 33)
 		val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
 		val pcr2 = new CarrierObj("TRobot2", CarrierModels.pcr, 47)
+		val sealer = new CarrierObj("RoboSeal", CarrierModels.sealer, 1000)
+		val peeler = new CarrierObj("RoboPeel", CarrierModels.peeler, 1001)
 	}
 	object Sites {
 		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c")
@@ -63,6 +68,8 @@ class StationConfig extends EvowareTable {
 		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2")
 		val pcr1 = createSite(Carriers.pcr1, 1, "pcr1")
 		val pcr2 = createSite(Carriers.pcr2, 1, "pcr2")
+		val sealer = createSites(Carriers.sealer, "sealer")
+		val peeler = createSites(Carriers.peeler, "peeler")
 	}
 	object LabwareModels {
 		val washA = new TroughModel("Wash Station Cleaner shallow", 8, 1)
@@ -96,6 +103,7 @@ class StationConfig extends EvowareTable {
 	
 	val mover = new EvowareMoveDevice
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
+	val sealer = new RoboSealDevice("RoboSeal", """(program)""", "sealer")
 	
 	val devices = Seq(
 		mover,
@@ -110,7 +118,8 @@ class StationConfig extends EvowareTable {
 		new L3P_Shake_HPShaker("shaker"),
 		new L3P_TipsDrop("WASTE"),
 		new L3P_TipsReplace,
-		new L3P_TipsWash_BSSE(pipetter, pipetter.plateDeconAspirate, pipetter.plateDeconDispense)
+		new L3P_TipsWash_BSSE(pipetter, pipetter.plateDeconAspirate, pipetter.plateDeconDispense),
+		new L3P_Seal_RoboSeal(sealer)
 	)
 	//def addKnowledge
 

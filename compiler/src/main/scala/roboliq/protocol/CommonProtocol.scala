@@ -17,7 +17,8 @@ trait CommonProtocol extends
 	WellPointerImplicits with
 	move.MoveCommands with
 	pipette.PipetteCommands with
-	shake.ShakeCommands
+	shake.ShakeCommands with
+	seal.SealCommands
 { thisObj =>
 	//import WellCoord._
 	//import WellPointer._

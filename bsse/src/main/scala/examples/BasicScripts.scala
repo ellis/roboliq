@@ -214,3 +214,20 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		}
 	}
 }
+
+
+class Example04(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
+	import common.WellPointer
+	
+	val plate_working = new Plate
+	val plate_balance = new Plate
+	
+	seal(plate_working)
+
+	val lab = new EvowareLab {
+		import station._
+
+		labware(plate_balance, Sites.cooled1, LabwareModels.platePcr)
+		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
+	}
+}
