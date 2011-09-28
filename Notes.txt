@@ -245,6 +245,42 @@ Terminology:
 		type of plate (96 well, 96 well deep square, 12 well, etc, with certain volumes and shapes)
 		type of tip
 		type of tube (various epindorphs)
+	-
+	variable names may be composed of the following components:
+		container, type, description
+		examples:
+			sAmount
+			amountS
+			amount_s
+			plate: a PlateConfigL2 object
+			plateL: a list of plate objects
+			plates: a list of plate objects
+			mapPlates
+			mapIdToPlate
+			plateMapId
+			plate_MId
+			wellL: well list
+			lWell: well list
+			well_L
+			destLWell: list of destination wells
+			destWellL: list of destination wells
+		postfix type/container/purpose:
+			N: count
+			I: index
+			L: list
+			ID: unique identifier (type not specified)
+			Map: map
+			S: string
+			G: group/set
+		complication: types whose names are composed of multiple words (e.g. PlateCommand)
+			variable names written in all lower-case
+	-
+	when a function returns an Option[T] or Result[T], this may be indicated in the method name.
+	possible prefixes: get, peek, lookup, fetch, check, inquire, ask
+	possible suffixes: R, Result, _R, _?,
+	for a function which returns a Result:
+		chooseDeviceR (for result)
+
 ==========
 Handling plates between different devices:
 	Challenges:

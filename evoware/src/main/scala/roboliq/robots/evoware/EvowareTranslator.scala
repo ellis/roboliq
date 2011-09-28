@@ -41,7 +41,6 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			case c: L1C_Timer => timer(c.args)
 			case c: L1C_EvowareFacts => facts(builder, c)
 			case c: L1C_SaveCurrentLocation => Success(Seq())
-			case c: devices.roboseal.L12F_RoboSeal.L1C => facts(builder, c)
 		}} yield {
 			builder.cmds ++= cmds0
 			()

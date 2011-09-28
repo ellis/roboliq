@@ -12,15 +12,15 @@ import roboliq.compiler._
 import roboliq.robots.evoware.commands._
 
 
-abstract class FixedPlateDevice(val location: String) extends Device {
-	def fixedLocation_? : Option[String]
+abstract class PlateDevice(val location: String) extends Device {
+	def fixedLocation_? : Option[String] = Some(location)
 	def isPlateCompatible(plate: PlateConfigL2): Boolean
 	def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean
 	def canAccessPlate(plate: PlateStateL2)
 }
 
-class PlateCommandDe(
-	val idDevice: String,
+class PlateCommandDLP(
+	val device: PlateDevice,
 	val location: String,
 	val idProgram: String
 )
@@ -30,24 +30,26 @@ case class PlateHandlingAction_Move(location: String) extends PlateHandlingActio
 case class PlateHandlingAction_Cover extends PlateHandlingAction
 case class PlateHandlingAction_Uncover extends PlateHandlingAction
 
-class L3P_PlateCommand {
+abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
 	type CmdType = L3C_Seal
 	val cmdType = classOf[CmdType]
 	
 	def plate: PlateConfigL2
 	
-	def isPlateCompatible(plate: PlateConfigL2): Boolean
-	def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean
-	def chooseDeviceLocationProgram(ctx: CompilerContextL3, cmd: CmdType)
+	def isPlateCompatible(plate: PlateConfigL2): Boolean = device.isPlateCompatible(plate)
+	def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = device.isPlatePreMoveRequired(plateState)
+	def chooseDeviceLocationProgram(ctx: CompilerContextL3, cmd: CmdType): PlateCommandDLP
 	
-	final def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
-		val (idDevice, location, idProgram) = chooseDeviceLocationProgram(ctx, cmd)
+	override def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+		val cmds = new ArrayBuffer[Command]
+
+		val dlp = chooseDeviceLocationProgram(ctx, cmd)
 		val plateState = plate.state(ctx.states)
-		if (plateState.location != location) {
-			performPlatePreHandling(plate)
+		if (plateState.location != dlp.location) {
+			cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(dlp.location), None))
+		}
+		CompileError(cmd, Seq())
 	}
-	
-	performPlatePreHandling(plate)
 }
 
 
