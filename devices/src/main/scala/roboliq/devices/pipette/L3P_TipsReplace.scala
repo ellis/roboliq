@@ -11,7 +11,7 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 	type CmdType = L3C_TipsReplace
 	val cmdType = classOf[CmdType]
 
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		val tips = cmd.items.map(_.tip)
 		//if (ctx.nCompilerDepth == 0)
 		//	println("L3P_TipsReplace: tips: "+cmd.items.toSeq.sortBy(_.tip.index).map(item => item.tip -> item.sType_?))
@@ -43,6 +43,6 @@ class L3P_TipsReplace extends CommandCompilerL3 {
 			else
 				cmdsDrop ++ cmdsWash ++ cmdsGet2
 		}
-		CompileTranslation(cmd, cmds2)
+		Success(cmds2)
 	}
 }

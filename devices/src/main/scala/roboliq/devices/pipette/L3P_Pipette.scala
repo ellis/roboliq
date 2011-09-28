@@ -14,15 +14,10 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 	type CmdType = L3C_Pipette
 	val cmdType = classOf[CmdType]
 
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		val x = new L3P_Pipette_Sub(robot, ctx, cmd)
-		x.translation match {
-			case Right(translation) =>
-				CompileTranslation(cmd, translation)
-			case Left(e) =>
-				println("e: "+e)
-				e
-		}
+		for { translation <- x.translation }
+		yield translation
 	}
 }
 

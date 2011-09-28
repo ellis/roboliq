@@ -14,25 +14,25 @@ class L3P_MovePlate(device: MoveDevice) extends CommandCompilerL3 {
 	type CmdType = L3C_MovePlate
 	val cmdType = classOf[CmdType]
 
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
-		val iRoma = device.getRomaId(cmd.args) match {
-			case Error(lsError) => return CompileError(cmd, lsError)
-			case Success(iRoma) => iRoma
-		}
-		val (lidHandling, locationLid) = cmd.args.lidHandlingSpec_? match {
-			case None => (LidHandling.NoLid, "")
-			case Some(spec) => spec match {
-				case LidRemoveSpec(location) => (LidHandling.RemoveAtSource, location)
-				case LidCoverSpec(location) => (LidHandling.CoverAtSource, location)
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
+		for {
+			iRoma <- device.getRomaId(cmd.args)
+		} yield {
+			val (lidHandling, locationLid) = cmd.args.lidHandlingSpec_? match {
+				case None => (LidHandling.NoLid, "")
+				case Some(spec) => spec match {
+					case LidRemoveSpec(location) => (LidHandling.RemoveAtSource, location)
+					case LidCoverSpec(location) => (LidHandling.CoverAtSource, location)
+				}
 			}
+			val args2 = L2A_MovePlateArgs(
+				iRoma, // 0 for RoMa1, 1 for RoMa2
+				cmd.args.plate,
+				cmd.args.location.value(ctx.states),
+				lidHandling,
+				locationLid
+			)
+			Seq(L2C_MovePlate(args2))
 		}
-		val args2 = L2A_MovePlateArgs(
-			iRoma, // 0 for RoMa1, 1 for RoMa2
-			cmd.args.plate,
-			cmd.args.location.value(ctx.states),
-			lidHandling,
-			locationLid
-		)
-		CompileTranslation(cmd, Seq(L2C_MovePlate(args2)))
 	}
 }

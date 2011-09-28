@@ -16,7 +16,7 @@ class L3P_Shake_HPShaker(location: String) extends CommandCompilerL3 {
 	type CmdType = L3C_Shake
 	val cmdType = classOf[CmdType]
 	
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		val cmds = new ArrayBuffer[Command]
 		import cmd.args._
 		
@@ -27,6 +27,6 @@ class L3P_Shake_HPShaker(location: String) extends CommandCompilerL3 {
 
 		cmds ++= plateHandling.getPostHandlingCommands(ctx.states, plate)
 
-		CompileTranslation(cmd, cmds.toSeq)
+		Success(cmds.toSeq)
 	}
 }

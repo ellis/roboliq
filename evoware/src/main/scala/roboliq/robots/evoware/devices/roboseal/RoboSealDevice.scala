@@ -5,7 +5,7 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 
 
-class RoboSealDevice(val idDevice: String, val idProgramDefault: String) extends Device { thisObj =>
+class RoboSealDevice(val idDevice: String, val idProgramDefault: String, val location: String) extends PlateDevice { thisObj =>
 	type Setup = RoboSealDevice.Setup
 	type Config = RoboSealDevice.Config
 	type State = RoboSealDevice.State
@@ -33,6 +33,11 @@ class RoboSealDevice(val idDevice: String, val idProgramDefault: String) extends
 		}*/
 	}
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	
+	def fixedLocation_? : Option[String] = Some(location)
+	def isPlateCompatible(plate: PlateConfigL2): Boolean = true
+	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = true
+	//def canAccessPlate(plate: PlateStateL2) =
 }
 
 object RoboSealDevice {

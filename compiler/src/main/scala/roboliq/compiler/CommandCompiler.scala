@@ -20,7 +20,7 @@ class CompilerContextL4(
 
 abstract class CommandCompilerL4 extends CommandCompiler {
 	def addKnowledge(kb: KnowledgeBase, cmd: Command)
-	def compileL4(ctx: CompilerContextL4, cmd: Command): CompileResult
+	def compileL4(ctx: CompilerContextL4, cmd: Command): Result[Seq[Command]]
 }
 
 class CompilerContextL3(
@@ -32,25 +32,25 @@ class CompilerContextL3(
 }
 
 abstract class CommandCompilerL3 extends CommandCompiler {
-	def compileL3(ctx: CompilerContextL3, _cmd: Command): CompileResult = {
+	final def compileL3(ctx: CompilerContextL3, _cmd: Command): Result[Seq[Command]] = {
 		if (!_cmd.getClass().eq(cmdType))
 			sys.error("Wrong command type")
 		val cmd = _cmd.asInstanceOf[CmdType]
 		compile(ctx, cmd)
 	}
 	
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]]
 }
 
 abstract class CommandCompilerL2 extends CommandCompiler {
-	def updateStateL2(builder: StateBuilder, _cmd: Command) {
+	final def updateStateL2(builder: StateBuilder, _cmd: Command) {
 		if (!_cmd.getClass().eq(cmdType))
 			sys.error("Wrong command type")
 		val cmd = _cmd.asInstanceOf[CmdType]
 		updateState(builder, cmd)
 	}
 	
-	def scoreL2(state0: RobotState, state1: RobotState, _cmd: Command): Int = {
+	final def scoreL2(state0: RobotState, state1: RobotState, _cmd: Command): Int = {
 		if (!_cmd.getClass().eq(cmdType))
 			sys.error("Wrong command type")
 		val cmd = _cmd.asInstanceOf[CmdType]

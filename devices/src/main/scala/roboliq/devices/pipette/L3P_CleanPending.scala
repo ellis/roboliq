@@ -9,7 +9,7 @@ class L3P_CleanPending(robot: PipetteDevice) extends CommandCompilerL3 {
 	type CmdType = L3C_CleanPending
 	val cmdType = classOf[CmdType]
 
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		val cmd2_? = {
 			val states = ctx.states
 			val tips = cmd.tips
@@ -34,6 +34,6 @@ class L3P_CleanPending(robot: PipetteDevice) extends CommandCompilerL3 {
 					None
 			}
 		}
-		CompileTranslation(cmd, Seq(cmd2_?).flatten)
+		Success(Seq(cmd2_?).flatten)
 	}
 }

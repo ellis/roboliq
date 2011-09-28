@@ -47,9 +47,9 @@ private trait L3P_PipetteMixBase {
 	val bMixOnly: Boolean
 
 
-	def translation: Either[CompileError, Seq[Command]] = {
+	def translation: Result[Seq[Command]] = {
 		if (dests.isEmpty)
-			return Right(Seq())
+			return Success(Seq())
 		
 		// Need to split into tip groups (e.g. large tips, small tips, all tips)
 		// For each group, perform the pipetting and score the results
@@ -94,9 +94,9 @@ private trait L3P_PipetteMixBase {
 				}
 		}
 		if (nWinnerScore < Int.MaxValue)
-			Right(winner)
+			Success(winner)
 		else
-			Left(CompileError(cmd, lsErrors))
+			Error(lsErrors)
 	}
 	
 	private def translateCommand(tips: SortedSet[TipConfigL2], mapTipToModel: Map[TipConfigL2, TipModel]): Result[Seq[Command]] = {

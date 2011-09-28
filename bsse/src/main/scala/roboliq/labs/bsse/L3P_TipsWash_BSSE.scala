@@ -12,16 +12,16 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, pla
 	type CmdType = L3C_TipsWash
 	val cmdType = classOf[CmdType]
 
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		cmd.intensity match {
 				case WashIntensity.None =>
-				CompileTranslation(cmd, Seq())
+				Success(Seq())
 			case WashIntensity.Light =>
-				CompileTranslation(cmd, Seq(
+				Success(Seq(
 					createWash2(ctx.states, cmd, 1),
 					createWash2(ctx.states, cmd, 2)))
 			case WashIntensity.Thorough =>
-				CompileTranslation(cmd, Seq(
+				Success(Seq(
 					createWash2(ctx.states, cmd, 1),
 					createWash2(ctx.states, cmd, 2)))
 			case WashIntensity.Decontaminate =>
@@ -48,13 +48,13 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, pla
 									val twvpD = new L2A_SpirateItem(tip, well1D, nVolume, policyD)
 									(twvpA, twvpD)
 								case _ =>
-									return CompileError(cmd, Seq("unable to find pipetting policy for decon wells"))
+									return Error("unable to find pipetting policy for decon wells")
 							}
 						})
 						val twvpsA = itemsAD.map(_._1)
 						val twvpsD = itemsAD.map(_._2)
 						
-						CompileTranslation(cmd, Seq(
+						Success(Seq(
 								createWash2(ctx.states, cmd, 5),
 								L2C_Aspirate(twvpsA),
 								L2C_Dispense(twvpsD),
@@ -62,7 +62,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDeconAspirate: Plate, pla
 								createWash2(ctx.states, cmd, 7)
 								))
 					case _ =>
-						CompileError(cmd, Seq("level 1 config for decon plates not defined"))
+						Error("level 1 config for decon plates not defined")
 				}
 		}
 	}

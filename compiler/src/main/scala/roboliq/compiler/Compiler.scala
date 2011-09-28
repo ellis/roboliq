@@ -160,20 +160,26 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	
 	private def callHandlerCompile(state0: RobotState, handler: CommandCompiler, cmd: Command): CompileResult = {
 		handler match {
-			case handler1 : CommandCompilerL2 =>
+			case handler2 : CommandCompilerL2 =>
 				val builder = new StateBuilder(state0)
-				handler1.updateStateL2(builder, cmd)
+				handler2.updateStateL2(builder, cmd)
 				val cmd2 = cmd.asInstanceOf[CommandL2]
 				cmd2.toL1(state0) match {
 					case Error(lsErrors) => CompileError(cmd, lsErrors)
 					case Success(cmd1) => CompileFinal(cmd2, cmd1, builder.toImmutable)
 				}
-			case handler2 : CommandCompilerL3 =>
+			case handler3 : CommandCompilerL3 =>
 				val ctx = new CompilerContextL3(this, state0)
-				handler2.compileL3(ctx, cmd)
-			case handler3 : CommandCompilerL4 =>
+				handler3.compileL3(ctx, cmd) match {
+					case Error(lsErrors) => CompileError(cmd, lsErrors)
+					case Success(cmds2) => CompileTranslation(cmd, cmds2)
+				}
+			case handler4 : CommandCompilerL4 =>
 				val ctx = new CompilerContextL4(this, state0)
-				handler3.compileL4(ctx, cmd)
+				handler4.compileL4(ctx, cmd) match {
+					case Error(lsErrors) => CompileError(cmd, lsErrors)
+					case Success(cmds3) => CompileTranslation(cmd, cmds3)
+				}
 		}
 	}
 	

@@ -6,17 +6,18 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
+import roboliq.commands._
 import roboliq.commands.move._
 import roboliq.commands.seal._
 import roboliq.compiler._
 import roboliq.robots.evoware.commands._
 
 
-abstract class PlateDevice(val location: String) extends Device {
-	def fixedLocation_? : Option[String] = Some(location)
+abstract class PlateDevice extends Device {
+	def fixedLocation_? : Option[String]
 	def isPlateCompatible(plate: PlateConfigL2): Boolean
-	def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean
-	def canAccessPlate(plate: PlateStateL2)
+	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean
+	//def canAccessPlate(plate: PlateStateL2)
 }
 
 class PlateCommandDLP(
@@ -27,52 +28,51 @@ class PlateCommandDLP(
 
 sealed trait PlateHandlingAction
 case class PlateHandlingAction_Move(location: String) extends PlateHandlingAction
-case class PlateHandlingAction_Cover extends PlateHandlingAction
-case class PlateHandlingAction_Uncover extends PlateHandlingAction
+case class PlateHandlingAction_Cover() extends PlateHandlingAction
+case class PlateHandlingAction_Uncover() extends PlateHandlingAction
 
 abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
-	type CmdType = L3C_Seal
-	val cmdType = classOf[CmdType]
+	def getPlate(cmd: CmdType): PlateConfigL2
+	def getPlateHandling(cmd: CmdType): PlateHandlingConfig
 	
-	def plate: PlateConfigL2
+	//def isPlateCompatible(plate: PlateConfigL2): Boolean = device.isPlateCompatible(plate)
+	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = device.isPlatePreMoveRequired(plateState)
+	def chooseDeviceLocationProgram(ctx: CompilerContextL3, cmd: CmdType): Result[PlateCommandDLP]
 	
-	def isPlateCompatible(plate: PlateConfigL2): Boolean = device.isPlateCompatible(plate)
-	def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = device.isPlatePreMoveRequired(plateState)
-	def chooseDeviceLocationProgram(ctx: CompilerContextL3, cmd: CmdType): PlateCommandDLP
-	
-	override def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
+	override def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		val cmds = new ArrayBuffer[Command]
 
-		val dlp = chooseDeviceLocationProgram(ctx, cmd)
-		val plateState = plate.state(ctx.states)
-		if (plateState.location != dlp.location) {
-			cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(dlp.location), None))
+		for {
+			dlp <- chooseDeviceLocationProgram(ctx, cmd)
+			trans <- compilePlateCommand(ctx, cmd, dlp)
+		} yield {
+			val plate = getPlate(cmd)
+			val plateState = plate.state(ctx.states)
+			if (plateState.location != dlp.location) {
+				cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(dlp.location), None))
+			}
+			cmds ++= trans
+			val plateHandling = getPlateHandling(cmd)
+			cmds ++= plateHandling.getPostHandlingCommands(ctx.states, plate)
 		}
-		CompileError(cmd, Seq())
 	}
+	
+	def compilePlateCommand(ctx: CompilerContextL3, cmd: CmdType, dlp: PlateCommandDLP): Result[Seq[Command]]
 }
 
 
-class L3P_Seal_RoboSeal(device: RoboSealDevice) extends CommandCompilerL3 {
+class L3P_Seal_RoboSeal(device: RoboSealDevice) extends L3P_PlateCommand(device) {
 	type CmdType = L3C_Seal
 	val cmdType = classOf[CmdType]
 	
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
-		val cmds = new ArrayBuffer[Command]
-		import cmd.args._
-
-		if (idDevice_?.getOrElse(device.idDevice) != device.idDevice)
-			return CompileError(cmd, Seq("bad device ID \""+idDevice_?.get+"\", required \""+device.idDevice+"\""))
-		
-		cmds ++= plateHandling.getPreHandlingCommands(ctx.states, plate)
-
-		val idDevice = device.idDevice
+	def getPlate(cmd: CmdType): PlateConfigL2 = cmd.args.plate
+	def getPlateHandling(cmd: CmdType): PlateHandlingConfig = cmd.args.plateHandling
+	def chooseDeviceLocationProgram(ctx: CompilerContextL3, cmd: CmdType): Result[PlateCommandDLP] = {
 		val idProgram = cmd.args.idProgram_?.getOrElse(device.idProgramDefault)
-		val args2 = new L12A_EvowareFactsArgs(idDevice, idDevice+"_Seal", idProgram)
-		cmds += L2C_EvowareFacts(args2)
-
-		cmds ++= plateHandling.getPostHandlingCommands(ctx.states, plate)
-
-		CompileTranslation(cmd, cmds.toSeq)
+		Success(new PlateCommandDLP(device, device.location, device.idProgramDefault))
+	}
+	def compilePlateCommand(ctx: CompilerContextL3, cmd: CmdType, dlp: PlateCommandDLP): Result[Seq[Command]] = {
+		val args2 = new L12A_EvowareFactsArgs(device.idDevice, device.idDevice+"_Seal", dlp.idProgram)
+		Success(Seq(L2C_EvowareFacts(args2)))
 	}
 }
