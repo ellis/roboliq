@@ -11,6 +11,8 @@ class L3P_Peel_RoboPeel(device: RoboPeelDevice) extends L3P_PlateCommand(device)
 	type CmdType = L3C_Peel
 	val cmdType = classOf[CmdType]
 	
+	val bReturnPlateToOriginalLocation = true
+	
 	def getPlate(cmd: CmdType): PlateConfigL2 = cmd.args.plate
 	
 	def getPlateHandling(cmd: CmdType): PlateHandlingConfig = cmd.args.plateHandling

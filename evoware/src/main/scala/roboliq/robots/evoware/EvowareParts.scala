@@ -20,16 +20,16 @@ class LabwareModel(sName: String) extends PartModel(sName)
 //class TubeModel(sName: String, val nVolume: Double) extends LabwareModel(sName)
 
 // REFACTOR: choose a better name, perhaps Location, LocationSpec, SiteSpec
-class SiteObj(val sName: String, val carrier: CarrierObj, val iSite: Int) {
+class SiteObj(val sName: String, val carrier: CarrierObj, val iSite: Int, val liRoma: Seq[Int]) {
 	def iGrid = carrier.iGrid
 }
 
 sealed abstract class EvowarePart
 
 class CarrierObj(val sLabel: String, val model: CarrierModel, val iGrid: Int) extends EvowarePart {
-	def createSites(s1: String) = new SiteObj(s1, this, 0)
-	def createSites(s1: String, s2: String) = (new SiteObj(s1, this, 0), new SiteObj(s2, this, 1))
-	def createSites(s1: String, s2: String, s3: String) = (new SiteObj(s1, this, 0), new SiteObj(s2, this, 1), new SiteObj(s3, this, 2))
+	def createSites(s1: String, liRoma: Seq[Int]) = new SiteObj(s1, this, 0, liRoma)
+	def createSites(s1: String, s2: String, liRoma: Seq[Int]) = (new SiteObj(s1, this, 0, liRoma), new SiteObj(s2, this, 1, liRoma))
+	def createSites(s1: String, s2: String, s3: String, liRoma: Seq[Int]) = (new SiteObj(s1, this, 0, liRoma), new SiteObj(s2, this, 1, liRoma), new SiteObj(s3, this, 2, liRoma))
 }
 class RackObj(val sLabel: String, val model: RackModel, val site: SiteObj) extends EvowarePart
 class TroughObj(val sLabel: String, val model: TroughModel, val site: SiteObj) extends EvowarePart

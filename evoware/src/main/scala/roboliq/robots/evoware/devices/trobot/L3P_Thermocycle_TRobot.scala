@@ -58,13 +58,4 @@ class L3P_Thermocycle_TRobot(device: TRobotDevice) extends CommandCompilerL3 {
 		val args = new PcrRun.L3A(Some(dlp.device), dlp.idProgram)
 		PcrRun.L3C(args)
 	}
-	
-	def compilePlateCommand(ctx: CompilerContextL3, cmd: CmdType, dlp: PlateCommandDLP): Result[Seq[Command]] = {
-		val cmds = new ArrayBuffer[Command]
-		cmds += getClose(dlp)
-		cmds += getRun(dlp)
-		cmds += getOpen(dlp)
-		Success(cmds.toSeq)
-	}
-	
 }

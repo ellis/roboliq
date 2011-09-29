@@ -61,6 +61,7 @@ Tuval/Yair:
 	get date for coming to Weizmann
 	ask for PCR protocols
 Code:
+	Add evoware ROMA command (L2/L1)
 	Errors running on robot:
 		how should wash volume be calculated?
 		decontamination for small tips?

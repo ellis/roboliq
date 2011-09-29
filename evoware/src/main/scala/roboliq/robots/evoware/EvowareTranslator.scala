@@ -302,34 +302,31 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	}
 	
 	private def movePlate(builder: EvowareScriptBuilder, c: L1A_MovePlateArgs): Result[Seq[Command]] = {
-		val siteSrc = getSite(c.locationSrc) match {
-			case Error(lsError) => return Error(lsError)
-			case Success(site) => site
+		for {
+			siteSrc <- getSite(c.locationSrc)
+			siteDest <- getSite(c.locationDest)
+			carrierSrc <- getCarrier(c.locationSrc)
+			carrierDest <- getCarrier(c.locationDest)
+		} yield {
+			addLabware(builder, c.sPlateModel, c.locationDest)
+			addLabware(builder, c.sPlateModel, c.locationSrc)
+			
+			println("X: ", siteSrc.liRoma, siteDest.liRoma, siteSrc.liRoma.filter(siteDest.liRoma.contains))
+			if (siteSrc.liRoma.filter(siteDest.liRoma.contains).isEmpty)
+				return Error("no common RoMa: "+siteSrc.sName+" and "+siteDest.sName)
+			val iRoma = siteSrc.liRoma.filter(siteDest.liRoma.contains).head
+			
+			Seq(L0C_Transfer_Rack(
+				iRoma,
+				c.sPlateModel,
+				siteSrc.iGrid, siteSrc.iSite, carrierSrc.model.sName,
+				siteDest.iGrid, siteDest.iSite, carrierDest.model.sName,
+				c.lidHandling,
+				iGridLid = 0,
+				iSiteLid = 0,
+				sCarrierModelLid = ""
+			))
 		}
-		val siteDest = getSite(c.locationDest) match {
-			case Error(lsError) => return Error(lsError)
-			case Success(site) => site
-		}
-		val carrierSrc = getCarrier(c.locationSrc) match {
-			case Error(lsError) => return Error(lsError)
-			case Success(carrier) => carrier
-		}
-		val carrierDest = getCarrier(c.locationDest) match {
-			case Error(lsError) => return Error(lsError)
-			case Success(carrier) => carrier
-		}
-		addLabware(builder, c.sPlateModel, c.locationDest)
-		addLabware(builder, c.sPlateModel, c.locationSrc)
-		Success(Seq(L0C_Transfer_Rack(
-			c.iRoma,
-			c.sPlateModel,
-			siteSrc.iGrid, siteSrc.iSite, carrierSrc.model.sName,
-			siteDest.iGrid, siteDest.iSite, carrierDest.model.sName,
-			c.lidHandling,
-			iGridLid = 0,
-			iSiteLid = 0,
-			sCarrierModelLid = ""
-		)))
 	}
 	
 	private def timer(args: L12A_TimerArgs): Result[Seq[Command]] = {

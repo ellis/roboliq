@@ -60,22 +60,22 @@ class StationConfig extends EvowareTable {
 		val centrifuge = new CarrierObj("Centrifuge", CarrierModels.centrifuge, 54)
 	}
 	object Sites {
-		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c")
-		val (wash2a, wash2b, wash2c) = createSites(Carriers.wash2, "wash2a", "wash2b", "wash2c")
-		val (decon1, decon2, decon3) = createSites(Carriers.decon, "decon1", "decon2", "decon3")
-		val (reagents15, reagents50) = createSites(Carriers.reagents, "reagents15", "reagents50")
-		val ethanol = createSites(Carriers.ethanol, "ethanol")
-		val holder = createSites(Carriers.holder, "holder")
-		val (cover, shaker) = createSites(Carriers.shaker, "cover", "shaker")
-		val eppendorfs = createSites(Carriers.eppendorfs, "eppendorfs")
-		val (cooled1, cooled2) = createSites(Carriers.cooled, "cooled1", "cooled2")
-		val (uncooled1, uncooled2, uncooled3) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3")
-		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2")
-		val pcr1 = createSite(Carriers.pcr1, 1, "pcr1")
-		val pcr2 = createSite(Carriers.pcr2, 1, "pcr2")
-		val sealer = createSites(Carriers.sealer, "sealer")
-		val peeler = createSites(Carriers.peeler, "peeler")
-		val centrifuge = createSites(Carriers.centrifuge, "centrifuge")
+		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c", Seq())
+		val (wash2a, wash2b, wash2c) = createSites(Carriers.wash2, "wash2a", "wash2b", "wash2c", Seq())
+		val (decon1, decon2, decon3) = createSites(Carriers.decon, "decon1", "decon2", "decon3", Seq())
+		val (reagents15, reagents50) = createSites(Carriers.reagents, "reagents15", "reagents50", Seq())
+		val ethanol = createSites(Carriers.ethanol, "ethanol", Seq())
+		val holder = createSites(Carriers.holder, "holder", Seq(1))
+		val (cover, shaker) = createSites(Carriers.shaker, "cover", "shaker", Seq(0, 1))
+		val eppendorfs = createSites(Carriers.eppendorfs, "eppendorfs", Seq())
+		val (cooled1, cooled2) = createSites(Carriers.cooled, "cooled1", "cooled2", Seq(0, 1))
+		val (uncooled1, uncooled2, uncooled3) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3", Seq(0, 1))
+		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
+		val pcr1 = createSite(Carriers.pcr1, 1, "pcr1", Seq(0, 1))
+		val pcr2 = createSite(Carriers.pcr2, 1, "pcr2", Seq(0, 1))
+		val sealer = createSites(Carriers.sealer, "sealer", Seq(1))
+		val peeler = createSites(Carriers.peeler, "peeler", Seq(1))
+		val centrifuge = createSites(Carriers.centrifuge, "centrifuge", Seq(0))
 	}
 	object LabwareModels {
 		val washA = new TroughModel("Wash Station Cleaner shallow", 8, 1)
@@ -110,7 +110,7 @@ class StationConfig extends EvowareTable {
 	val mover = new EvowareMoveDevice
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
 	val sealer = new RoboSealDevice("RoboSeal", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf""", "sealer")
-	val peeler = new RoboPeelDevice("RoboPeel", """(program)""", "peeler")
+	val peeler = new RoboPeelDevice("RoboPeel", """C:\Programme\HJBioanalytikGmbH\RoboPeel3\RoboPeel_PlateParameters\4titude_PCR_blau.bcf""", "peeler")
 	val trobot1 = new TRobotDevice("TRobot1", "pcr1")
 	val centrifuge = new CentrifugeDevice("Centrifuge", "centrifuge", 4)
 	
@@ -134,6 +134,7 @@ class StationConfig extends EvowareTable {
 		
 		new L3P_Shake_HPShaker("shaker"),
 		new L3P_Seal_RoboSeal(sealer),
+		new L3P_Peel_RoboPeel(peeler),
 		new L3P_Thermocycle_TRobot(trobot1),
 		new L3P_PcrClose(trobot1),
 		new L3P_PcrOpen(trobot1),

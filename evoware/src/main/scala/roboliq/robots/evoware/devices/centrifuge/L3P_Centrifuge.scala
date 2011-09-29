@@ -22,9 +22,9 @@ class L3P_Centrifuge(device: CentrifugeDevice) extends CommandCompilerL3 {
 		def close() { cmds += CentrifugeClose.L3C(new CentrifugeClose.L3A(Some(device), ())) }
 		def moveTo(iPosition: Int) { cmds += CentrifugeMoveTo.L3C(new CentrifugeMoveTo.L3A(Some(device), iPosition)) }
 		def movePlate(plate: PlateConfigL2) { cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(device.location), None)) }
+		def removePlate(plate: PlateConfigL2) { cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(plate.state(ctx.states).location), None)) }
 		
-		val plates = cmd.args.plates
-		val nPlates = plates.size
+		val nPlates = cmd.args.plates.size
 		val states = ctx.states
 		for {
 			_ <- Result.assert(device.nSlots > 0, "centrifuge must have a positive number of slots")
@@ -40,27 +40,42 @@ class L3P_Centrifuge(device: CentrifugeDevice) extends CommandCompilerL3 {
 				moveTo(1)
 				open()
 			}*/
+			
+			val plates2 = cmd.args.plates ++ {
+				if ((nPlates % 2) != 0) {
+					if (device.setup.plate_balance == null)
+						return Error("must set balance plate for centrifuge")
+					val plate_balance = device.setup.plate_balance.state(states).conf
+					Seq(plate_balance)
+				}
+				else {
+					Seq()
+				}
+			}
+			val nPlates2 = plates2.size
 
+			// Put the plates in
 			val nSlots = device.nSlots
 			val liPos = Seq(0, nSlots / 2, nSlots / 4, nSlots - nSlots / 4)
-			for (iPlate <- 0 until nPlates) {
-				val iPos = liPos(iPlate)
-				moveTo(iPos)
-				movePlate(plates(0))
-			}
-			
-			if ((nPlates % 2) != 0) {
-				if (device.setup.plate_balance == null)
-					return Error("must set balance plate for centrifuge")
-				val plate_balance = device.setup.plate_balance.state(states).conf
-				val i = liPos(nPlates)
-				moveTo(i)
-				movePlate(plate_balance)
+			for (iPlate <- 0 until nPlates2) {
+				moveTo(liPos(iPlate))
+				movePlate(plates2(iPlate))
 			}
 			
 			close()
 			
 			cmds += CentrifugeRun.L3C(new CentrifugeRun.L3A(Some(device), program))
+			
+			open()
+			
+			// Take the plates out
+			for (iPlate <- 0 until nPlates2) {
+				moveTo(liPos(iPlate))
+				removePlate(plates2(iPlate))
+			}
+			
+			moveTo(0)
+			close()
 			
 			cmds.toSeq
 		}

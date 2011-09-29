@@ -23,6 +23,8 @@ case class PlateHandlingAction_Cover() extends PlateHandlingAction
 case class PlateHandlingAction_Uncover() extends PlateHandlingAction*/
 
 abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
+	val bReturnPlateToOriginalLocation: Boolean
+	
 	def getPlate(cmd: CmdType): PlateConfigL2
 	def getPlateHandling(cmd: CmdType): PlateHandlingConfig
 	
@@ -46,6 +48,9 @@ abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
 				cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(dlp.location), None))
 			}
 			cmds ++= trans
+			if (bReturnPlateToOriginalLocation) {
+				cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(plateState.location), None))
+			}
 			val plateHandling = getPlateHandling(cmd)
 			cmds ++= plateHandling.getPostHandlingCommands(ctx.states, plate)
 			cmds ++= post

@@ -18,24 +18,24 @@ trait EvowareTable {
 		m_mapSites(site.sName) = site //new Site(site.carrier.iGrid, site.iSite)
 	}
 	
-	protected def createSite(carrier: CarrierObj, iSite: Int, s1: String): SiteObj = {
-		val o = new SiteObj(s1, carrier, iSite)
+	protected def createSite(carrier: CarrierObj, iSite: Int, s1: String, liRoma: Seq[Int]): SiteObj = {
+		val o = new SiteObj(s1, carrier, iSite, liRoma)
 		addSite(o)
 		o
 	}
-	protected def createSites(carrier: CarrierObj, s1: String): SiteObj = {
-		val o = new SiteObj(s1, carrier, 0)
+	protected def createSites(carrier: CarrierObj, s1: String, liRoma: Seq[Int]): SiteObj = {
+		val o = new SiteObj(s1, carrier, 0, liRoma)
 		addSite(o)
 		o
 	}
-	protected def createSites(carrier: CarrierObj, s1: String, s2: String): Tuple2[SiteObj, SiteObj] = {
-		val o = (new SiteObj(s1, carrier, 0), new SiteObj(s2, carrier, 1))
+	protected def createSites(carrier: CarrierObj, s1: String, s2: String, liRoma: Seq[Int]): Tuple2[SiteObj, SiteObj] = {
+		val o = (new SiteObj(s1, carrier, 0, liRoma), new SiteObj(s2, carrier, 1, liRoma))
 		addSite(o._1)
 		addSite(o._2)
 		o
 	}
-	protected def createSites(carrier: CarrierObj, s1: String, s2: String, s3: String): Tuple3[SiteObj, SiteObj, SiteObj] = {
-		val o = (new SiteObj(s1, carrier, 0), new SiteObj(s2, carrier, 1), new SiteObj(s3, carrier, 2))
+	protected def createSites(carrier: CarrierObj, s1: String, s2: String, s3: String, liRoma: Seq[Int]): Tuple3[SiteObj, SiteObj, SiteObj] = {
+		val o = (new SiteObj(s1, carrier, 0, liRoma), new SiteObj(s2, carrier, 1, liRoma), new SiteObj(s3, carrier, 2, liRoma))
 		addSite(o._1)
 		addSite(o._2)
 		addSite(o._3)
