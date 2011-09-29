@@ -5,7 +5,7 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 
 
-class CentrifugeDevice(val idDevice: String, val idProgramDefault: String, val location: String, val nSlots: Int) extends PlateDevice { thisObj =>
+class CentrifugeDevice(val idDevice: String, val location: String, val nSlots: Int) extends PlateDevice { thisObj =>
 	type Setup = CentrifugeDevice.Setup
 	type Config = CentrifugeDevice.Config
 	type State = CentrifugeDevice.State

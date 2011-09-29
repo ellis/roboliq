@@ -30,8 +30,8 @@ class L3P_Centrifuge(device: CentrifugeDevice) extends CommandCompilerL3 {
 			_ <- Result.assert(device.nSlots > 0, "centrifuge must have a positive number of slots")
 			_ <- Result.assert((device.nSlots % 2) == 0, "centrifuge must have an even number of slots")
 			_ <- Result.assert(nPlates <= device.nSlots, "INTERNAL: cannot centrifuge more plates than there are slots available")
-			_ <- Result.assert(nPlates > 4, "INTERNAL: not yet able to handle centrifugation of more than 4 plates")
-			_ <- Result.assert(true, "")
+			_ <- Result.assert(nPlates <= 4, "INTERNAL: not yet able to handle centrifugation of more than 4 plates")
+			program <- Result.get(cmd.args.idProgram_?, "must set centrifuge program")
 		} yield {
 			open()
 			
@@ -40,39 +40,27 @@ class L3P_Centrifuge(device: CentrifugeDevice) extends CommandCompilerL3 {
 				moveTo(1)
 				open()
 			}*/
-			
-			if (nPlates >= 1) {
-				moveTo(0)
+
+			val nSlots = device.nSlots
+			val liPos = Seq(0, nSlots / 2, nSlots / 4, nSlots - nSlots / 4)
+			for (iPlate <- 0 until nPlates) {
+				val iPos = liPos(iPlate)
+				moveTo(iPos)
 				movePlate(plates(0))
-			}
-			if (nPlates >= 2) {
-				val i = device.nSlots / 2
-				moveTo(i)
-				movePlate(plates(1))
-			}
-			if (nPlates >= 3) {
-				val i = device.nSlots / 4
-				moveTo(i)
-				movePlate(plates(2))
-			}
-			if (nPlates >= 4) {
-				val i = device.nSlots - (device.nSlots / 4)
-				moveTo(i)
-				movePlate(plates(3))
 			}
 			
 			if ((nPlates % 2) != 0) {
 				if (device.setup.plate_balance == null)
 					return Error("must set balance plate for centrifuge")
 				val plate_balance = device.setup.plate_balance.state(states).conf
-				val i = device.nSlots / 2 + 1
+				val i = liPos(nPlates)
 				moveTo(i)
 				movePlate(plate_balance)
 			}
 			
 			close()
 			
-			cmds += CentrifugeRun.L3C(new CentrifugeRun.L3A(Some(device), "(program)"))
+			cmds += CentrifugeRun.L3C(new CentrifugeRun.L3A(Some(device), program))
 			
 			cmds.toSeq
 		}

@@ -19,7 +19,8 @@ trait CommonProtocol extends
 	pipette.PipetteCommands with
 	shake.ShakeCommands with
 	seal.SealCommands with
-	pcr.PcrCommands
+	pcr.PcrCommands with
+	centrifuge.CentrifugeCommands
 { thisObj =>
 	//import WellCoord._
 	//import WellPointer._

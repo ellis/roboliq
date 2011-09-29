@@ -52,13 +52,17 @@ object CentrifugeOpen extends L34F {
 }
 
 object CentrifugeRun extends L34F {
-	type ProgramSetup = String
+	class ProgramSetup {
+		var program: String = null
+	}
 	type ProgramConfig = String
 	case class L4C() extends IL4C
 	case class L3C(args: L3A) extends IL3C(args)
 	
-	def createProgramSetup: ProgramSetup = ""
-	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(setup)
+	def createProgramSetup: ProgramSetup = new ProgramSetup
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] =
+		for { _ <- Result.assert(setup.program != null, "must set centrifuge program") }
+		yield { setup.program }
 	def createL3C(args: L3A): L3C = L3C(args)
 	
 	def addKnowledge(kb: KnowledgeBase, cmd: IL4C) {

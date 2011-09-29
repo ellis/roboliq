@@ -8,6 +8,7 @@ import roboliq.devices.move._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices._
+import roboliq.robots.evoware.devices.centrifuge._
 import roboliq.robots.evoware.devices.roboseal._
 import roboliq.robots.evoware.devices.robopeel._
 import roboliq.robots.evoware.devices.trobot._
@@ -38,6 +39,7 @@ class StationConfig extends EvowareTable {
 		val pcr = new CarrierModel("TRobot", 1, false)
 		val sealer = new CarrierModel("RoboSeal", 1, false)
 		val peeler = new CarrierModel("RoboPeel", 1, false)
+		val centrifuge = new CarrierModel("Cenfrifuge", 1, false)
 	}
 	object Carriers {
 		val wash1 = new CarrierObj("Wash Station Clean", CarrierModels.wash, 1)
@@ -55,6 +57,7 @@ class StationConfig extends EvowareTable {
 		val sealer = new CarrierObj("RoboSeal", CarrierModels.sealer, 35)
 		val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
 		val pcr2 = new CarrierObj("TRobot2", CarrierModels.pcr, 47)
+		val centrifuge = new CarrierObj("Centrifuge", CarrierModels.centrifuge, 54)
 	}
 	object Sites {
 		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c")
@@ -72,6 +75,7 @@ class StationConfig extends EvowareTable {
 		val pcr2 = createSite(Carriers.pcr2, 1, "pcr2")
 		val sealer = createSites(Carriers.sealer, "sealer")
 		val peeler = createSites(Carriers.peeler, "peeler")
+		val centrifuge = createSites(Carriers.centrifuge, "centrifuge")
 	}
 	object LabwareModels {
 		val washA = new TroughModel("Wash Station Cleaner shallow", 8, 1)
@@ -108,10 +112,15 @@ class StationConfig extends EvowareTable {
 	val sealer = new RoboSealDevice("RoboSeal", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf""", "sealer")
 	val peeler = new RoboPeelDevice("RoboPeel", """(program)""", "peeler")
 	val trobot1 = new TRobotDevice("TRobot1", "pcr1")
+	val centrifuge = new CentrifugeDevice("Centrifuge", "centrifuge", 4)
 	
 	val devices = Seq(
 		mover,
-		pipetter
+		pipetter,
+		sealer,
+		peeler,
+		trobot1,
+		centrifuge
 	)
 	
 	val processors = Seq(
@@ -128,7 +137,12 @@ class StationConfig extends EvowareTable {
 		new L3P_Thermocycle_TRobot(trobot1),
 		new L3P_PcrClose(trobot1),
 		new L3P_PcrOpen(trobot1),
-		new L3P_PcrRun(trobot1)
+		new L3P_PcrRun(trobot1),
+		new L3P_Centrifuge(centrifuge),
+		new L3P_CentrifugeClose(centrifuge),
+		new L3P_CentrifugeMoveTo(centrifuge),
+		new L3P_CentrifugeOpen(centrifuge),
+		new L3P_CentrifugeRun(centrifuge)
 	)
 	//def addKnowledge
 
