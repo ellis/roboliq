@@ -5,19 +5,22 @@ import roboliq.common._
 trait L34F_Plate { top =>
 	type ProgramSetup
 	type ProgramConfig
+	type L4C <: IL4C
+	type L3C <: IL3C
 	
 	def createProgramSetup: ProgramSetup
 	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig]
+	def createL3C(args: L3A): L3C
 	
-	def addKnowledge(kb: KnowledgeBase, cmd: L4C)/* {
+	def addKnowledge(kb: KnowledgeBase, cmd: IL4C)/* {
 		// TODO: note device usage
 	}*/
 	
-	def toL3(states: RobotState, cmd4: L4C): Result[L3C] = {
+	def toL3(states: RobotState, cmd4: IL4C): Result[L3C] = {
 		for {
 			program <- createProgramConfig(cmd4.setup.program)
 			plateHandling <- cmd4.setup.plateHandling.toL3(states)
-		} yield L3C(new L3A(
+		} yield createL3C(new L3A(
 			cmd4.setup.device_?,
 			program,
 			cmd4.args.plate.state(states).conf,
@@ -25,7 +28,7 @@ trait L34F_Plate { top =>
 		))
 	}
 
-	case class L4C(args: L4A) extends CommandL4 {
+	abstract class IL4C(val args: L4A) extends CommandL4 {
 		type L3Type = top.L3C
 		
 		val setup = new Setup
@@ -52,7 +55,7 @@ trait L34F_Plate { top =>
 		val plateHandling = new PlateHandlingSetup
 	}
 	
-	case class L3C(args: L3A) extends CommandL3 {
+	abstract class IL3C(args: L3A) extends CommandL3 {
 		override def toDebugString = {
 			import args._
 			top.getClass().getSimpleName() + this.getClass().getSimpleName() + List(device_?, program).mkString("(", ", ", ")") 

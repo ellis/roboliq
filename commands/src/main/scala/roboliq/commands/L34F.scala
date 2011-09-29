@@ -10,14 +10,15 @@ trait L34F { top =>
 	
 	def createProgramSetup: ProgramSetup
 	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig]
+	def createL3C(args: L3A): L3C
 	
-	def addKnowledge(kb: KnowledgeBase, cmd: L4C)/* {
+	def addKnowledge(kb: KnowledgeBase, cmd: IL4C)/* {
 		// TODO: note device usage
 	}*/
 	
-	def toL3(states: RobotState, cmd4: L4C): Result[L3C] = {
+	def toL3(states: RobotState, cmd4: IL4C): Result[L3C] = {
 		for { program <- createProgramConfig(cmd4.setup.program) }
-		yield L3C(new L3A(
+		yield createL3C(new L3A(
 			cmd4.setup.device_?,
 			program
 		))
@@ -40,7 +41,7 @@ trait L34F { top =>
 		}
 	}
 	
-	case class Setup {
+	class Setup {
 		var device_? : Option[Device] = None
 		val program: ProgramSetup = createProgramSetup
 	}
