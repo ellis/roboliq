@@ -14,11 +14,14 @@ trait L34F_Plate { top =>
 	}*/
 	
 	def toL3(states: RobotState, cmd4: L4C): Result[L3C] = {
-		for { program <- createProgramConfig(cmd4.setup.program) }
-		yield L3C(new L3A(
+		for {
+			program <- createProgramConfig(cmd4.setup.program)
+			plateHandling <- cmd4.setup.plateHandling.toL3(states)
+		} yield L3C(new L3A(
 			cmd4.setup.device_?,
 			program,
-			cmd4.args.plate.state(states).conf
+			cmd4.args.plate.state(states).conf,
+			plateHandling
 		))
 	}
 
@@ -46,6 +49,7 @@ trait L34F_Plate { top =>
 	class Setup {
 		var device_? : Option[Device] = None
 		val program: ProgramSetup = createProgramSetup
+		val plateHandling = new PlateHandlingSetup
 	}
 	
 	case class L3C(args: L3A) extends CommandL3 {
@@ -58,6 +62,7 @@ trait L34F_Plate { top =>
 	class L3A(
 		val device_? : Option[Device],
 		val program: ProgramConfig,
-		val plate: PlateConfigL2
+		val plate: PlateConfigL2,
+		val plateHandling: PlateHandlingConfig
 	)
 }

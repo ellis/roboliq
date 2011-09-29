@@ -153,7 +153,7 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 					case _ =>
 						new CompileError(
 								cmd = cmd,
-								errors = List("Unhandled command: "+cmd.getClass().getCanonicalName()))
+								errors = List("Unhandled command: "+cmd.toDebugString))
 				}
 		}
 	}

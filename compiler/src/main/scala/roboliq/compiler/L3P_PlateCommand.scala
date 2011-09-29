@@ -35,8 +35,11 @@ abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
 
 		for {
 			dlp <- chooseDeviceLocationProgram(ctx, cmd)
+			pre <- compilePreCommand(dlp)
 			trans <- compilePlateCommand(ctx, cmd, dlp)
+			post <- compilePostCommand(dlp)
 		} yield {
+			cmds ++= pre
 			val plate = getPlate(cmd)
 			val plateState = plate.state(ctx.states)
 			if (plateState.location != dlp.location) {
@@ -45,8 +48,11 @@ abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
 			cmds ++= trans
 			val plateHandling = getPlateHandling(cmd)
 			cmds ++= plateHandling.getPostHandlingCommands(ctx.states, plate)
+			cmds ++= post
 		}
 	}
 	
+	def compilePreCommand(dlp: PlateCommandDLP): Result[Seq[Command]] = Success(Seq())
+	def compilePostCommand(dlp: PlateCommandDLP): Result[Seq[Command]] = Success(Seq())
 	def compilePlateCommand(ctx: CompilerContextL3, cmd: CmdType, dlp: PlateCommandDLP): Result[Seq[Command]]
 }

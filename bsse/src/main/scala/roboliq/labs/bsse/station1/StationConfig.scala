@@ -46,14 +46,14 @@ class StationConfig extends EvowareTable {
 		val ethanol = new CarrierObj("Trough 1000ml", CarrierModels.ethanol, 7)
 		val holder = new CarrierObj("Downholder", CarrierModels.holder, 9)
 		val shaker = new CarrierObj("MP 2Pos H+P Shake", CarrierModels.shaker, 10)
+		val peeler = new CarrierObj("RoboPeel", CarrierModels.peeler, 12)
 		val eppendorfs = new CarrierObj("Block 20Pos", CarrierModels.eppendorfs, 16)
 		val cooled = new CarrierObj("MP 3Pos Cooled 1 PCR", CarrierModels.cooled, 17)
 		val uncooled = new CarrierObj("MP 3Pos Cooled 2 PCR", CarrierModels.uncooled, 24)
 		val filters = new CarrierObj("Te-VaCS", CarrierModels.filters, 33)
+		val sealer = new CarrierObj("RoboSeal", CarrierModels.sealer, 35)
 		val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
 		val pcr2 = new CarrierObj("TRobot2", CarrierModels.pcr, 47)
-		val sealer = new CarrierObj("RoboSeal", CarrierModels.sealer, 1000)
-		val peeler = new CarrierObj("RoboPeel", CarrierModels.peeler, 1001)
 	}
 	object Sites {
 		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c")
@@ -104,7 +104,7 @@ class StationConfig extends EvowareTable {
 	
 	val mover = new EvowareMoveDevice
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
-	val sealer = new RoboSealDevice("RoboSeal", """(program)""", "sealer")
+	val sealer = new RoboSealDevice("RoboSeal", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf""", "sealer")
 	val peeler = new RoboPeelDevice("RoboPeel", """(program)""", "peeler")
 	
 	val devices = Seq(

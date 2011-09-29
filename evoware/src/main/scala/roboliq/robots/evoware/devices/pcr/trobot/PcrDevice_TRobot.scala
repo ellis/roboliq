@@ -5,7 +5,7 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 
 
-class PcrDevice_TRobot extends Device { thisObj =>
+class PcrDevice_TRobot(val idDevice: String, val location: String) extends PlateDevice { thisObj =>
 	type Setup = PcrDevice_TRobot.Setup
 	type Config = PcrDevice_TRobot.Config
 	type State = PcrDevice_TRobot.State

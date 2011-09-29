@@ -18,7 +18,8 @@ trait CommonProtocol extends
 	move.MoveCommands with
 	pipette.PipetteCommands with
 	shake.ShakeCommands with
-	seal.SealCommands
+	seal.SealCommands with
+	pcr.PcrCommands
 { thisObj =>
 	//import WellCoord._
 	//import WellPointer._

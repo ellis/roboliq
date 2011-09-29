@@ -223,6 +223,8 @@ class Example04(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	val plate_balance = new Plate
 	
 	seal(plate_working)
+	thermocycle(plate_working)
+	//centrifuge(plate_working)
 
 	val lab = new EvowareLab {
 		import station._
