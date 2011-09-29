@@ -10,6 +10,7 @@ import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices._
 import roboliq.robots.evoware.devices.roboseal._
 import roboliq.robots.evoware.devices.robopeel._
+import roboliq.robots.evoware.devices.trobot._
 import roboliq.labs.bsse._
 
 
@@ -106,6 +107,7 @@ class StationConfig extends EvowareTable {
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
 	val sealer = new RoboSealDevice("RoboSeal", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf""", "sealer")
 	val peeler = new RoboPeelDevice("RoboPeel", """(program)""", "peeler")
+	val trobot1 = new TRobotDevice("TRobot1", "pcr1")
 	
 	val devices = Seq(
 		mover,
@@ -117,11 +119,16 @@ class StationConfig extends EvowareTable {
 		new L3P_Mix(pipetter),
 		new L3P_MovePlate(mover),
 		new L3P_Pipette(pipetter),
-		new L3P_Shake_HPShaker("shaker"),
 		new L3P_TipsDrop("WASTE"),
 		new L3P_TipsReplace,
 		new L3P_TipsWash_BSSE(pipetter, pipetter.plateDeconAspirate, pipetter.plateDeconDispense),
-		new L3P_Seal_RoboSeal(sealer)
+		
+		new L3P_Shake_HPShaker("shaker"),
+		new L3P_Seal_RoboSeal(sealer),
+		new L3P_Thermocycle_TRobot(trobot1),
+		new L3P_PcrClose(trobot1),
+		new L3P_PcrOpen(trobot1),
+		new L3P_PcrRun(trobot1)
 	)
 	//def addKnowledge
 

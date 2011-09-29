@@ -134,6 +134,8 @@ class Compiler(val processors: Seq[CommandCompiler], val nDepth: Int = 0) {
 	private def compileToResult(states: RobotState, cmd: Command): CompileResult = {
 		m_handlers.get(cmd.getClass()) match {
 			case Some(handler) =>
+				println("cmd.getClass(): "+cmd.getClass())
+				println("cmd.getClass().getSimpleName(): "+cmd.getClass().getSimpleName())
 				val handler = m_handlers(cmd.getClass())
 				callHandlerCompile(states, handler, cmd)
 			case None =>

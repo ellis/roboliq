@@ -1,14 +1,14 @@
-package roboliq.robots.evoware.devices.pcr.trobot
+package roboliq.robots.evoware.devices.trobot
 
 import scala.collection.mutable.HashMap
 
 import roboliq.common._
 
 
-class PcrDevice_TRobot(val idDevice: String, val location: String) extends PlateDevice { thisObj =>
-	type Setup = PcrDevice_TRobot.Setup
-	type Config = PcrDevice_TRobot.Config
-	type State = PcrDevice_TRobot.State
+class TRobotDevice(val idDevice: String, val location: String) extends PlateDevice { thisObj =>
+	type Setup = TRobotDevice.Setup
+	type Config = TRobotDevice.Config
+	type State = TRobotDevice.State
 	
 	val setup = new Setup
 	
@@ -48,9 +48,12 @@ class PcrDevice_TRobot(val idDevice: String, val location: String) extends Plate
 	}
 	//def stateWriter(map: HashMap[ThisObj, StateL2]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+
+	def fixedLocation_? : Option[String] = Some(location)
+	def isPlateCompatible(plate: PlateConfigL2): Boolean = true
 }
 
-object PcrDevice_TRobot {
+object TRobotDevice {
 	class Setup extends ObjSetup {
 		var sLabel_? : Option[String] = Some("TRobot")
 		var bUsed = false
@@ -58,13 +61,13 @@ object PcrDevice_TRobot {
 	}
 	
 	class Config(
-		val obj: PcrDevice_TRobot,
+		val obj: TRobotDevice,
 		val sLabel: String,
 		val bUsed: Boolean
 	) extends ObjConfig
 	
 	case class State(
-		val obj: PcrDevice_TRobot,
+		val obj: TRobotDevice,
 		val bInitialized: Boolean,
 		val bOpen: Boolean,
 		val bRunning: Boolean

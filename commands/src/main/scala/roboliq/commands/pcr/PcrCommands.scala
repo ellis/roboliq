@@ -17,14 +17,18 @@ object PcrClose extends L34F {
 }
 
 object PcrThermocycle extends L34F_Plate {
-	type ProgramSetup = String
+	type ProgramSetup = ThermocycleSetup
 	type ProgramConfig = String
 	
-	def createProgramSetup: ProgramSetup = null
-	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = if (setup == null) Error("thermo program ID must be set") else Success(setup)
+	def createProgramSetup: ProgramSetup = new ProgramSetup
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = if (setup.program == null) Error("thermo program ID must be set") else Success(setup.program)
 	
 	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
 		// TODO: record device usage
+	}
+	
+	class ThermocycleSetup {
+		var program: String = null
 	}
 }
 
@@ -41,14 +45,18 @@ object PcrOpen extends L34F {
 }
 
 object PcrRun extends L34F {
-	type ProgramSetup = String
+	type ProgramSetup = RunSetup
 	type ProgramConfig = String
 	
-	def createProgramSetup: ProgramSetup = ""
-	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = Success(setup)
+	def createProgramSetup: ProgramSetup = new ProgramSetup
+	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig] = if (setup.program == null) Error("thermo program ID must be set") else Success(setup.program)
 	
 	def addKnowledge(kb: KnowledgeBase, cmd: L4C) {
 		// TODO: record device usage
+	}
+	
+	class RunSetup {
+		var program: String = null
 	}
 }
 

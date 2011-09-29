@@ -11,6 +11,7 @@ case class LogItem(val obj_? : Option[Object], val lsError: Seq[String]) {
 	
 	def getString: String = {
 		obj_? match {
+			case Some(cmd: Command) => cmd.toDebugString+":\n"+lsError.mkString("\n")
 			case Some(obj) => obj+":\n"+lsError.mkString("\n")
 			case None => lsError.mkString("\n")
 		}

@@ -5,6 +5,8 @@ import roboliq.common._
 trait L34F { top =>
 	type ProgramSetup
 	type ProgramConfig
+	type L4C <: IL4C
+	type L3C <: IL3C
 	
 	def createProgramSetup: ProgramSetup
 	def createProgramConfig(setup: ProgramSetup): Result[ProgramConfig]
@@ -21,7 +23,7 @@ trait L34F { top =>
 		))
 	}
 
-	case class L4C() extends CommandL4 {
+	abstract class IL4C extends CommandL4 {
 		type L3Type = top.L3C
 		
 		val setup = new Setup
@@ -38,19 +40,19 @@ trait L34F { top =>
 		}
 	}
 	
-	class Setup {
+	case class Setup {
 		var device_? : Option[Device] = None
 		val program: ProgramSetup = createProgramSetup
 	}
 	
-	case class L3C(args: L3A) extends CommandL3 {
+	abstract class IL3C(args: L3A) extends CommandL3 {
 		override def toDebugString = {
 			import args._
 			top.getClass().getSimpleName() + this.getClass().getSimpleName() + List(device_?, program).mkString("(", ", ", ")") 
 		}
 	}
 	
-	class L3A(
+	case class L3A(
 		val device_? : Option[Device],
 		var program: ProgramConfig
 	)

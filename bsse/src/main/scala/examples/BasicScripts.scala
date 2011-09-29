@@ -223,7 +223,7 @@ class Example04(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	val plate_balance = new Plate
 	
 	seal(plate_working)
-	thermocycle(plate_working)
+	val setup_thermocycle = thermocycle(plate_working)
 	//centrifuge(plate_working)
 
 	val lab = new EvowareLab {
@@ -231,5 +231,7 @@ class Example04(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 
 		labware(plate_balance, Sites.cooled1, LabwareModels.platePcr)
 		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
+		
+		setup_thermocycle.program.program = "0,2"
 	}
 }

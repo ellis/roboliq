@@ -1,4 +1,4 @@
-package roboliq.robots.evoware.devices.pcr.trobot
+package roboliq.robots.evoware.devices.trobot
 
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
@@ -12,7 +12,7 @@ import roboliq.compiler._
 import roboliq.robots.evoware.commands._
 
 
-class L3P_Thermocycle_TRobot(device: PcrDevice_TRobot) extends L3P_PlateCommand(device) {
+class L3P_Thermocycle_TRobot(device: TRobotDevice) extends L3P_PlateCommand(device) {
 	type CmdType = PcrThermocycle.L3C
 	val cmdType = classOf[CmdType]
 	
@@ -34,15 +34,21 @@ class L3P_Thermocycle_TRobot(device: PcrDevice_TRobot) extends L3P_PlateCommand(
 		PcrClose.L3C(args)
 	}
 	
+	private def getRun(dlp: PlateCommandDLP): Command = {
+		println("dlp.idProgram: "+dlp.idProgram)
+		val args = new PcrRun.L3A(Some(dlp.device), dlp.idProgram)
+		println("args: "+args)
+		PcrRun.L3C(args)
+	}
+	
 	override def compilePreCommand(dlp: PlateCommandDLP): Result[Seq[Command]] = Success(Seq(getOpen(dlp)))
 	override def compilePostCommand(dlp: PlateCommandDLP): Result[Seq[Command]] = Success(Seq(getClose(dlp)))
 
 	def compilePlateCommand(ctx: CompilerContextL3, cmd: CmdType, dlp: PlateCommandDLP): Result[Seq[Command]] = {
 		val cmds = new ArrayBuffer[Command]
-		cmds += getOpen(dlp)
-		val args2 = new L12A_EvowareFactsArgs(device.idDevice, device.idDevice+"_RunProgram", dlp.idProgram)
-		cmds += L2C_EvowareFacts(args2)
 		cmds += getClose(dlp)
+		cmds += getRun(dlp)
+		cmds += getOpen(dlp)
 		Success(Seq())
 	}
 }
