@@ -18,13 +18,13 @@ case class L4C_PcrMix(args: L4A_PcrMixArgs) extends CommandL4 {
 			items3 <- Result.sequence(args.items.map(_.toL3(states)))
 			dests3 <- args.dest.getWells(states)
 			plateHandling <- setup.plateHandling.toL3(states)
-			well_masterMix_? <- if (setup.well_masterMix != null) Some(setup.well_masterMix) else None,
+			masterMixWells <- if (setup.well_masterMix != null) setup.well_masterMix.getWells(states) else Success(Seq())
 		} yield {
 			L3C_PcrMix(new L3A_PcrMixArgs(
 				items = items3,
 				dests = dests3,
 				v1 = args.v1,
-				well_masterMix_? = if (setup.well_masterMix != null) Some(setup.well_masterMix) else None,
+				masterMixWells = masterMixWells,
 				plateHandling = plateHandling
 			))
 		}
@@ -48,6 +48,6 @@ class L3A_PcrMixArgs(
 	val items: Seq[MixItemL3],
 	val dests: Seq[WellConfigL2],
 	val v1: Double,
-	val well_masterMix_? : Option[Seq[WellConfigL2]],
+	val masterMixWells: Seq[WellConfigL2],
 	val plateHandling: PlateHandlingConfig
 )

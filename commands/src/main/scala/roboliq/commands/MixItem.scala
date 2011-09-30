@@ -4,7 +4,7 @@ import roboliq.common._
 
 
 sealed trait MixItemL4 {
-	def toL3(states: RobotState): Result[MixItemTemplateL3]
+	def toL3(states: RobotState): Result[MixItemL3]
 }
 case class MixItemTemplateL4(src: WellPointer, lc0: Seq[Double], c1: Double, vMin: Double = 0, vMax: Double = Double.MaxValue) extends MixItemL4 {
 	def toL3(states: RobotState): Result[MixItemTemplateL3] = {
