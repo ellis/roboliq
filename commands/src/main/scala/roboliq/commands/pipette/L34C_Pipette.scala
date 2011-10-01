@@ -37,10 +37,8 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 	}
 	
 	def toL3(states: RobotState): Result[L3Type] = {
-		args.toL3(states) match {
-			case Error(lsErrors) => Error(lsErrors)
-			case Success(args3) => Success(new L3C_Pipette(args3))
-		}
+		for { args3 <- args.toL3(states) }
+		yield L3C_Pipette(args3)
 	}
 }
 
