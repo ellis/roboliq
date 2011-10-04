@@ -18,28 +18,10 @@ class L3P_PcrMix extends CommandCompilerL3 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
-		for {
-			iRoma <- device.getRomaId(cmd.args)
-		} yield {
-			val (lidHandling, locationLid) = cmd.args.lidHandlingSpec_? match {
-				case None => (LidHandling.NoLid, "")
-				case Some(spec) => spec match {
-					case LidRemoveSpec(location) => (LidHandling.RemoveAtSource, location)
-					case LidCoverSpec(location) => (LidHandling.CoverAtSource, location)
-				}
-			}
-			val args2 = L2A_MovePlateArgs(
-				iRoma, // 0 for RoMa1, 1 for RoMa2
-				cmd.args.plate,
-				cmd.args.location.value(ctx.states),
-				lidHandling,
-				locationLid
-			)
-			Seq(L2C_MovePlate(args2))
-		}
+		x(ctx.states, cmd.args)
 	}
 
-	def x(args: L3A_PcrMixArgs) {
+	def x(states: RobotState, args: L3A_PcrMixArgs): Result[Seq[Command]] = {
 		import args._
 		//src: WellPointer, well_masterMix: WellPointer, dest: WellPointer, template: Template, components: Seq[MixItemL3], v1: Double) {
 		// Calculate desired sample volume for each component
@@ -67,36 +49,40 @@ class L3P_PcrMix extends CommandCompilerL3 {
 		def volForMix(vSample: Double): Double = { vSample * nMult }
 		
 		val vWaterMinSample = {
-			val lvWater2 = lvvTemplateWater.map(_._2).toSet[Double].toSeq.sortBy(identity).take(2)
+			val lvWater2 = lvvTemplateWater.map(_._2).toSet[Double].toSeq.sortBy(identity)
 			// Smallest volume of water in a sample
 			// (adjusted to ensure a minimal difference to the next lowest volume)
 			lvWater2.toList match {
+				case Nil => return Error("INTERNAL: PcrMix error 1")
 				case vMin :: Nil => vMin
-				case vMin :: vMin1 :: Nil => if (vMin > vMin1 - vLowerBound) vMin - vLowerBound else vMin
+				case vMin :: vMin1 :: _ => if (vMin > vMin1 - vLowerBound) vMin - vLowerBound else vMin
 			}
 		}
+
 		val vWaterMix = volForMix(vWaterMinSample)
-		
-		// create master mix in 15ml well
-		pipette(water, masterMixWells, vWaterMix * nMult)
-		for (component <- components) {
-			val vMix = mapComponentVolumes(component) * nMult
-			pipette(component.srcs, masterMixWells, vMix)
-		}
-		// TODO: indicate that liquid in master mix wells is all the same (if more than one well) and label it (eg "MasterMix")
-		
 		// distribute water to each working well
 		val lvWaterPerWell = lvvTemplateWater.map(_._2 - vWaterMinSample)
-		pipette(water, dests, lvWaterPerWell)
-		
 		// distribute template DNA to each working well
 		val lvTemplate = lvvTemplateWater.map(_._1)
-		pipette(template.srcs, dests, lvTemplate)
-		
 		// distribute master mix to each working well, free dispense, no wash in-between
 		val vMixPerWell = vComponentsTotal + vWaterMix
-		pipette(masterMixWells, dests, vMixPerWell)
+
+		for {
+			// create master mix
+			cmd1 <- PipetteCommandsL3.pipette(states, water, masterMixWells, vWaterMix * nMult)
+			cmds2 <- Result.mapOver(components)(component => {
+				val vMix = mapComponentVolumes(component) * nMult
+				PipetteCommandsL3.pipette(states, component.srcs, masterMixWells, vMix)
+			})
+			// TODO: indicate that liquid in master mix wells is all the same (if more than one well) and label it (eg "MasterMix")
+			cmd3 <- PipetteCommandsL3.pipette(states, water, dests, lvWaterPerWell)
+			cmd4 <- PipetteCommandsL3.pipette(states, template.srcs, dests, lvTemplate)
+			cmd5 <- PipetteCommandsL3.pipette(states, masterMixWells, dests, vMixPerWell)
+		} yield {
+			Seq(cmd1) ++ cmds2 ++ Seq(cmd3, cmd4, cmd5)
+		}
 		
+			
 		/*
 		components.foreach(component => println(component.liquid.toString+": "+mapLiquidToVolume(component.liquid)))
 		template.lc0.zipWithIndex.foreach(pair => {
@@ -107,11 +93,4 @@ class L3P_PcrMix extends CommandCompilerL3 {
 		})
 		*/
 	}
-	
-	def pipette(srcs: Seq[WellConfigL2], dests: Seq[WellConfigL2], lnVolume: Seq[Double]): Seq[Command] = {
-		val item = new L4A_PipetteItem(source, dest, lnVolume)
-		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item)))
-	}
-
-	def pipette(source: WellPointer, dest: WellPointer, volume: Double) = pipette(source, dest, Seq(volume))
 }

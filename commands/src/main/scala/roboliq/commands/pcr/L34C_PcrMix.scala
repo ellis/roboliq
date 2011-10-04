@@ -11,6 +11,14 @@ case class L4C_PcrMix(args: L4A_PcrMixArgs) extends CommandL4 {
 	def addKnowledge(kb: KnowledgeBase) {
 		// TODO: note that plate will occupy the target location
 		// TODO: request plate compatibility with this device
+		args.items.foreach(_ match {
+			case item: MixItemReagentL4 => kb.addWellPointer(item.reagent)
+			case item: MixItemTemplateL4 => kb.addWellPointer(item.src)
+		})
+		kb.addWellPointer(args.dest, false)
+		kb.addWellPointer(args.water)
+		if (setup.well_masterMix != null)
+			kb.addWellPointer(setup.well_masterMix)
 	}
 	
 	def toL3(states: RobotState): Result[L3Type] = {

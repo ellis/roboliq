@@ -217,6 +217,72 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 
 
 class Example04(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
+	//import common.WellPointer
+	import roboliq.commands.MixItemL4
+	import roboliq.commands.MixItemReagentL4
+	import roboliq.commands.MixItemTemplateL4
+	
+	object Liquids {
+		val water = new Liquid("Water", CleanPolicy.DDD)
+		val buffer10x = new Liquid("Water", CleanPolicy.DDD)
+		val dNTP = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+		val primerB = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+		val polymerase = new Liquid("Glycerol", Set(Contaminant.DNA), CleanPolicy.DDD)
+	}
+	
+	val well_template = new common.WellPointerVar
+	val well_masterMix = new common.WellPointerVar
+	val plate_working = new Plate
+	
+	val mixItems = Seq[MixItemL4](
+		MixItemReagentL4(Liquids.buffer10x, 10, 1),
+		MixItemReagentL4(Liquids.dNTP, 2, .2),
+		MixItemReagentL4(Liquids.primerF, 50, .5),
+		MixItemReagentL4(Liquids.primerB, 50, .5),
+		MixItemReagentL4(Liquids.polymerase, 5, 0.25/25),
+		MixItemTemplateL4(well_template, Seq(20), 0.2)
+	)
+	
+	pcrMix(plate_working(B5+2), mixItems, Liquids.water, 50 ul, well_masterMix)
+	__findLabels(Liquids)
+
+	val lab = new EvowareLab {
+		import station._
+
+		/*kb.addReagent(Liquids.water)
+		kb.addReagent(Liquids.buffer10x)
+		kb.addReagent(Liquids.dNTP)
+		kb.addReagent(Liquids.primerF)
+		kb.addReagent(Liquids.primerB)
+		kb.addReagent(Liquids.polymerase)*/
+		
+		reagent(Liquids.water, Labwares.reagents50, 1, 8)
+		reagent(Liquids.buffer10x, Labwares.eppendorfs, 1)
+		reagent(Liquids.dNTP, Labwares.eppendorfs, 5)
+		reagent(Liquids.primerF, Labwares.eppendorfs, 9)
+		reagent(Liquids.primerB, Labwares.eppendorfs, 13)
+		reagent(Liquids.polymerase, Labwares.eppendorfs, 17)
+		
+		well_template.pointer_? = Some(Labwares.eppendorfs.commonObj(B1))
+		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(B2))
+		
+		//labware(plate_template, Sites.cooled1, LabwareModels.platePcr)
+		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
+		//labware(plate_template, Sites.cooled1, LabwareModels.test4x3)
+		//labware(plate_working, Sites.cooled2, LabwareModels.test4x3)
+		for (wells <- well_template.getWells(kb); wellObj <- wells) {
+			val wellSetup = kb.getWellSetup(wellObj)
+			val sLiquid = "template#"+wellSetup.index_?.get
+			val liquid = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+			liquid.setup.sName_? = Some(sLiquid)
+			wellSetup.reagent_? = Some(liquid)
+		}
+	}
+}
+
+
+class Example05(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
 	import common.WellPointer
 	
 	val plate_working = new Plate

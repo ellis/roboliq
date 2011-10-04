@@ -92,8 +92,21 @@ trait PcrCommands extends RoboliqCommands {
 	}
 	
 	def thermocycle(plate: Plate): PcrThermocycle.Setup = {
-		var args = new PcrThermocycle.L4A(plate)
+		val args = new PcrThermocycle.L4A(plate)
 		val cmd = PcrThermocycle.L4C(args)
+		cmds += cmd
+		cmd.setup
+	}
+	
+	def pcrMix(dest: WellPointer, items: Seq[MixItemL4], water: WellPointer, v1: Double, well_masterMix: WellPointer = null): L4A_PcrMixSetup = {
+		val args = new L4A_PcrMixArgs(
+			items,
+			dest,
+			water,
+			v1
+		)
+		val cmd = L4C_PcrMix(args)
+		cmd.setup.well_masterMix = well_masterMix
 		cmds += cmd
 		cmd.setup
 	}

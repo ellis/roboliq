@@ -57,6 +57,21 @@ class KnowledgeBase {
 		if (setup.dim_?.isDefined)
 			setup.dim_?.get.wells.foreach(well => addWell(well, bSrc))
 	}
+
+	def addWellPointer(o: WellPointer): Unit = o match {
+		case p: WellPointerVar => p.pointer_?.foreach(addWellPointer)
+		case WellPointerWell(well) => addWell(well)
+		case WellPointerWells(lWell) => lWell.foreach(addWell)
+		case WellPointerPlate(plate) => addPlate(plate)
+		case WellPointerReagent(reagent) => addReagent(reagent)
+		case WellPointerPlateAddress(plate, _) => addPlate(plate)
+		case WellPointerSeq(seq) => seq.foreach(addWellPointer)
+	}
+	
+	def addWellPointer(o: WellPointer, bSrc: Boolean) {
+		addWellPointer(o)
+		o.getWells(this).foreach(_.foreach(well => addWell(well, bSrc)))
+	}
 	
 	def getObjSetup[T](o: Obj): T =
 		m_setups(o).asInstanceOf[T]

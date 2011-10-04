@@ -5,6 +5,7 @@ import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._
 import roboliq.devices.move._
+import roboliq.devices.pcr._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices._
@@ -127,6 +128,7 @@ class StationConfig extends EvowareTable {
 		new L3P_CleanPending(pipetter),
 		new L3P_Mix(pipetter),
 		new L3P_MovePlate(mover),
+		new L3P_PcrMix,
 		new L3P_Pipette(pipetter),
 		new L3P_TipsDrop("WASTE"),
 		new L3P_TipsReplace,
@@ -160,7 +162,7 @@ class StationConfig extends EvowareTable {
 			1 -> new WashProgramArgs(
 				iWasteGrid = 2, iWasteSite = 1,
 				iCleanerGrid = 2, iCleanerSite = 2,
-				nWasteVolume_? = None,
+				nWasteVolume_? = Some(25),
 				nWasteDelay = nWasteDelay,
 				nCleanerVolume = 4, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 				nCleanerDelay = nCleanerDelay,
@@ -172,7 +174,7 @@ class StationConfig extends EvowareTable {
 			2 -> new WashProgramArgs(
 				iWasteGrid = 1, iWasteSite = 1,
 				iCleanerGrid = 1, iCleanerSite = 2,
-				nWasteVolume_? = None,
+				nWasteVolume_? = Some(0.5),
 				nWasteDelay = nWasteDelay,
 				nCleanerVolume = 1, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 				nCleanerDelay = nCleanerDelay,
@@ -184,7 +186,7 @@ class StationConfig extends EvowareTable {
 			5 -> new WashProgramArgs(
 				iWasteGrid = 2, iWasteSite = 1,
 				iCleanerGrid = 2, iCleanerSite = 2,
-				nWasteVolume_? = None,
+				nWasteVolume_? = Some(25),
 				nWasteDelay = nWasteDelay,
 				nCleanerVolume = 3, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 				nCleanerDelay = nCleanerDelay,
@@ -195,7 +197,7 @@ class StationConfig extends EvowareTable {
 			6 -> new WashProgramArgs(
 				iWasteGrid = 2, iWasteSite = 1,
 				iCleanerGrid = 2, iCleanerSite = 2,
-				nWasteVolume_? = None,
+				nWasteVolume_? = Some(25),
 				nWasteDelay = nWasteDelay,
 				nCleanerVolume = 5, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 				nCleanerDelay = nCleanerDelay,
@@ -206,7 +208,7 @@ class StationConfig extends EvowareTable {
 			7 -> new WashProgramArgs(
 				iWasteGrid = 1, iWasteSite = 1,
 				iCleanerGrid = 1, iCleanerSite = 2,
-				nWasteVolume_? = None,
+				nWasteVolume_? = Some(25),
 				nWasteDelay = nWasteDelay,
 				nCleanerVolume = 5, // FIXME: how should this be calculated? -- ellis, 2011-06-16
 				nCleanerDelay = nCleanerDelay,
