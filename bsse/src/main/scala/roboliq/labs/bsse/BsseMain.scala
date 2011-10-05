@@ -13,12 +13,12 @@ import station1._
 
 object Main extends App {
 	val station = new StationConfig
-	val protocol = new examples.Example04(station)
+	val protocol = new examples.Example05(station)
 	val toolchain = new BsseToolchain(station)
 	toolchain.compileProtocol(protocol, true) match {
 		case Left(err) => err.print()
 		case Right(succT: TranslatorStageSuccess) =>
-			val sFilename = "example03.esc"
+			val sFilename = "example05.esc"
 			val script = succT.internal.asInstanceOf[EvowareScriptBuilder]
 			val translator = new EvowareTranslator(toolchain.evowareConfig)
 			val s = translator.saveWithHeader(script.cmds.toSeq, station.sHeader, script.mapLocToLabware.toMap, sFilename)
