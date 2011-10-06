@@ -263,7 +263,24 @@ class Protocol06 extends Protocol {
 	}
 	
 	object Wells {
+	}
+	
+	class PcrPreparationProgram {
+		val water = new Liquid("Water", CleanPolicy.DDD)
+		val buffer = new Liquid("Water", CleanPolicy.DDD)
+		val dNTP = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+		val primerB = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+		val polymerase = new Liquid("Glycerol", Set(Contaminant.DNA), CleanPolicy.DDD)
+
+		var bufferConc: Tuple2[Double, Double] = null
+		var dNTPConc: Tuple2[Double, Double] = null
+		var primerFConc: Tuple2[Double, Double] = null
+		var primerBConc: Tuple2[Double, Double] = null
+		var polymeraseConc: Tuple2[Double, Double] = null
 		
+		val templateWells = new common.WellPointerVar
+		val masterMixWells = new common.WellPointerVar
 	}
 	
 	val well_template = new common.WellPointerVar
@@ -278,13 +295,14 @@ class Protocol06 extends Protocol {
 		MixItemTemplateL4(well_template, Seq(20), 0.2)
 	)
 	
-	pcrMix(plate_working(B5+2), mixItems, Liquids.water, 50 ul, well_masterMix)
-	seal(plate_working)
-	val setup_thermocycle = thermocycle(plate_working)
-	val setup_centrifuge = centrifuge(plate_working)
-	peel(plate_working)
+	pcrMix(Plates.working(B5+2), mixItems, Liquids.water, 50 ul, well_masterMix)
+	seal(Plates.working)
+	val setup_thermocycle = thermocycle(Plates.working)
+	val setup_centrifuge = centrifuge(Plates.working)
+	peel(Plates.working)
 
 	__findLabels(Liquids)
+	__findLabels(Plates)
 }
 
 
