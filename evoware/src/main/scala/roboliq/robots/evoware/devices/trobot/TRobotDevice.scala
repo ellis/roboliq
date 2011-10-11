@@ -11,6 +11,7 @@ class TRobotDevice(val idDevice: String, val location: String) extends PlateDevi
 	type State = TRobotDevice.State
 	
 	val setup = new Setup
+	setup.sLabel_? = Some(idDevice)
 	
 	def createSetup(): Setup = setup
 	

@@ -37,10 +37,10 @@ class StationConfig extends EvowareTable {
 		val cooled = new CarrierModel("MP 3Pos Cooled 1 PCR", 2, true)
 		val uncooled = new CarrierModel("MP 3Pos Cooled 2 PCR", 3, false)
 		val filters = new CarrierModel("Te-VaCS", 2, false)
-		val pcr = new CarrierModel("TRobot", 1, false)
+		val pcr = new CarrierModel("TRobot1", 1, false)
 		val sealer = new CarrierModel("RoboSeal", 1, false)
 		val peeler = new CarrierModel("RoboPeel", 1, false)
-		val centrifuge = new CarrierModel("Cenfrifuge", 1, false)
+		val centrifuge = new CarrierModel("Centrifuge", 1, false)
 	}
 	object Carriers {
 		val wash1 = new CarrierObj("Wash Station Clean", CarrierModels.wash, 1)
@@ -72,8 +72,8 @@ class StationConfig extends EvowareTable {
 		val (cooled1, cooled2) = createSites(Carriers.cooled, "cooled1", "cooled2", Seq(0, 1))
 		val (uncooled1, uncooled2, uncooled3) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3", Seq(0, 1))
 		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
-		val pcr1 = createSite(Carriers.pcr1, 1, "pcr1", Seq(0, 1))
-		val pcr2 = createSite(Carriers.pcr2, 1, "pcr2", Seq(0, 1))
+		val pcr1 = createSite(Carriers.pcr1, 0, "pcr1", Seq(0, 1))
+		val pcr2 = createSite(Carriers.pcr2, 0, "pcr2", Seq(0, 1))
 		val sealer = createSites(Carriers.sealer, "sealer", Seq(1))
 		val peeler = createSites(Carriers.peeler, "peeler", Seq(1))
 		val centrifuge = createSites(Carriers.centrifuge, "centrifuge", Seq(0))
@@ -132,7 +132,7 @@ class StationConfig extends EvowareTable {
 		new L3P_Pipette(pipetter),
 		new L3P_TipsDrop("WASTE"),
 		new L3P_TipsReplace,
-		new L3P_TipsWash_BSSE(pipetter, pipetter.plateDeconAspirate, pipetter.plateDeconDispense),
+		new L3P_TipsWash_BSSE(pipetter, pipetter.plateDecon),
 		
 		new L3P_Shake_HPShaker("shaker"),
 		new L3P_Seal_RoboSeal(sealer),
@@ -234,8 +234,8 @@ V;200
 998;;;;
 998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;
 998;;;;
-998;3;Trough 100ml;Trough 100ml;Trough 100ml;
-998;Labware7;Labware8;Decon;
+998;3;;;Trough 25ml;
+998;;;Decon;
 998;2;Reagent Cooled 8*15ml;Reagent Cooled 8*50ml;
 998;Labware5;Labware6;
 998;0;

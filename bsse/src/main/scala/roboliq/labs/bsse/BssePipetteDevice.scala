@@ -22,7 +22,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	)
 	val mapTipModels = config.tipSpecs.map(spec => spec.id -> spec).toMap
 
-	val plateDeconAspirate, plateDeconDispense = new Plate
+	val plateDecon = new Plate
 	
 	private val mapLcInfo = {
 		import PipettePosition._
@@ -64,10 +64,10 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 			val tipSetup = kb.getObjSetup[TipSetup](tip)
 			tipSetup.modelPermanent_? = Some(tipSpec)
 		})
-		new PlateProxy(kb, plateDeconAspirate) match {
+		new PlateProxy(kb, plateDecon) match {
 			case pp =>
-				pp.label = "DA"
-				pp.location = "decon2"
+				pp.label = "Decon"
+				pp.location = "decon3"
 				pp.setDimension(8, 1)
 				val reagent = new Reagent
 				pp.wells.foreach(well => kb.getWellSetup(well).reagent_? = Some(reagent))
@@ -76,13 +76,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 				rs.sFamily_? = Some("Decon")
 				rs.group_? = Some(new LiquidGroup(GroupCleanPolicy.NNN))
 		}
-		kb.addPlate(plateDeconAspirate, true)
-		new PlateProxy(kb, plateDeconDispense) match {
-			case pp =>
-				pp.label = "DD"
-				pp.location = "decon3"
-				pp.setDimension(8, 1)
-		}
+		kb.addPlate(plateDecon, true)
 	}
 
 	def areTipsDisposable: Boolean = false
