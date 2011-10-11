@@ -1,0 +1,15 @@
+States:
+destination well: Seq of (SrcLiquid,Volume)
+source well: volume
+tip: liquid, volume, contamination, pending cleaning degree
+
+Actions:
+aspirate
+dispense
+clean
+replace tips
+
+selection of actions:
+pick left-most top-most destination wells; we will create sets of the first one, the first two, the first three, etc.
+for each destination set, find all tip configurations which could access them
+for each tip configuration, find the best source wells
