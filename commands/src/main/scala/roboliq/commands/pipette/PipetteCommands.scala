@@ -26,6 +26,17 @@ trait PipetteCommands extends RoboliqCommands {
 }
 
 object PipetteCommandsL3 {
+	def mix(states: RobotState, targets: Seq[WellConfigL2], volume: Double, count: Int): Result[L3C_Mix] = {
+		val mixSpec = new MixSpec(volume, count)
+		val args3 = new L3A_MixArgs(
+			SortedSet(targets : _*),
+			mixSpec = mixSpec,
+			tipOverrides_? = None,
+			tipModel_? = None
+		)
+		Success(L3C_Mix(args3))
+	}
+	
 	def pipette(states: RobotState, srcs: Seq[WellConfigL2], dests: Seq[WellConfigL2], lnVolume: Seq[Double]): Result[L3C_Pipette] = {
 		val lLiquid = srcs.map(_.state(states).liquid).toSet
 		for {

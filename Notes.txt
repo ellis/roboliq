@@ -278,8 +278,9 @@ Terminology:
 			variable names written in all lower-case
 	-
 	when a function returns an Option[T] or Result[T], this may be indicated in the method name.
-	possible prefixes: get, peek, lookup, fetch, check, inquire, ask
-	possible suffixes: R, Result, _R, _?,
+	possible prefixes: get, peek, lookup, fetch, check, inquire, ask, query, q
+	possible Option suffixes: Q, _Q, _?, Opt
+	possible Result suffixes: R, Res, Result, _R, _?,
 	for a function which returns a Result:
 		chooseDeviceR (for result)
 

@@ -61,11 +61,14 @@ Tuval/Yair:
 	get date for coming to Weizmann
 	ask for PCR protocols
 Code:
-	always wash/decon right after pipetting is done in order to prevent drying
+?	always wash/decon right after pipetting is done in order to prevent drying
+?	extra wash before decon in case of cells
 	evoware: if the next command is not a pipetting command, move the LiHa back home
 	evoware: if the next command is not a RoMa command, move the RoMa back home
-	Example05: need to mix reagents
+?	Example05: need to mix reagents (4 times, 75% of well volume)
 	pipetting mix command: efficient use of multiple sources going to one destination
+	figure out how to add labware to the external devices
+
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)

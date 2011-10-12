@@ -110,9 +110,9 @@ private trait L3P_PipetteMixBase {
 		def createCycles(stateCycle0: RobotState, twss: List[Seq[TipWell]], remains0: Map[TipWell, Double]): Result[RobotState] = {
 			// All done.  Perform final clean.
 			if (twss.isEmpty) {
-				if (robot.areTipsDisposable && tipOverrides.replacement_? == Some(TipReplacementPolicy.KeepAlways))
+				//if (robot.areTipsDisposable && tipOverrides.replacement_? == Some(TipReplacementPolicy.KeepAlways))
 					return Success(stateCycle0)
-				val cycle = new CycleState(tips, stateCycle0)
+				/*val cycle = new CycleState(tips, stateCycle0)
 				val cmds = Seq(L3C_CleanPending(tips))
 				val res = getUpdatedState(cycle, cmds) match {
 					case Success(stateNext) => 
@@ -121,7 +121,7 @@ private trait L3P_PipetteMixBase {
 					case Error(lsErrors) =>
 						Error(lsErrors)
 				}
-				return res
+				return res*/
 			}
 			
 			val cycle = new CycleState(tips, stateCycle0)
@@ -206,6 +206,7 @@ private trait L3P_PipetteMixBase {
 			
 			getUpdatedState(cycle, cmds) match {
 				case Success(stateNext) => 
+					//println("tip.head,stateNext: "+tips.head.state(stateNext))
 					cycles += cycle
 					createCycles(stateNext, twssRest, remains)
 				case Error(lsErrors) =>
@@ -221,6 +222,7 @@ private trait L3P_PipetteMixBase {
 		//println("actionsAll:")
 		//actionsAll.foreach(println)
 		
+		//println("tip.head,stateFinal: "+tips.head.state(statesFinal))
 		actionsAll ++= finalClean(statesFinal, tips)
 		
 		val actionsOptimized = optimizeTipCleaning(actionsAll, tips)
@@ -611,6 +613,8 @@ private trait L3P_PipetteMixBase {
 	}
 	
 	private def optimizeTipCleaning(actions0: Seq[Action], tips: SortedSet[TipConfigL2]): Seq[Action] = {
+		//println("opt:")
+		//actions0.foreach(println)
 		//return actions0
 		val actions0R = actions0.reverse
 		val mapTipToSpecPrev = new HashMap[TipConfigL2, WashSpec]
@@ -674,19 +678,18 @@ private trait L3P_PipetteMixBase {
 			}
 		}
 		else {
-			var intensity = WashIntensity.None 
-			//tips.toSeq.foreach(tip => println("state: "+tip.state(states)))
-			val items = tips.toSeq.map(tip => {
-				val tipState = tip.state(states)
-				if (tipState.cleanDegreePending > WashIntensity.None) {
-					intensity = WashIntensity.max(tipState.cleanDegreePending, intensity)
-					Some(tip -> new WashSpec(intensity, tipState.contamInside, tipState.contamOutside))
-				}
-				else
-					None
-			}).flatten
+			//println("finalClean:")
+			//tips.toSeq.foreach(tip => println("state: "+tip.state(states)+", pending: "+tip.state(states).cleanDegreePending))
+			val intensity = tips.foldLeft(WashIntensity.None)((acc, tip) => WashIntensity.max(acc, tip.state(states).cleanDegreePending))
+			val items = tips.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity))
+			//println("items: "+items)
 			Seq(TipsWash(items.toMap))
 		}
+	}
+	
+	private def createWashSpec(states: StateMap, tip: TipConfigL2, intensity: WashIntensity.Value): WashSpec = {
+		val tipState = tip.state(states)
+		new WashSpec(intensity, tipState.contamInside, tipState.contamOutside)
 	}
 
 	/*
@@ -720,10 +723,15 @@ private trait L3P_PipetteMixBase {
 				Error(e.errors)
 			case Right(nodes) =>
 				cycle.ress = nodes.flatMap(_.collectFinal())
-				//println("cycle.ress: "+cycle.ress)
 				cycle.ress match {
 					case Seq() => Success(cycle.state0)
-					case _ => Success(cycle.ress.last.state1)
+					case _ =>
+						/*if (cycle.tips.exists(_.index == 0)) {
+							println("getUpdatedState:")
+							val tip = cycle.tips.find(_.index == 0).get
+							cycle.ress.foreach(res => println(res.cmd.getClass().getSimpleName()+": "+tip.state(res.state1)))
+						}*/
+						Success(cycle.ress.last.state1)
 				}
 		}
 	}

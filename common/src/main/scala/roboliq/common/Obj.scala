@@ -33,6 +33,8 @@ abstract class Obj {
 	def getState0(map31: ObjMapper): Option[State] = map31.state0(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
 	
 	def state(states: StateMap): State = states(this).asInstanceOf[State]
+	def stateOpt(states: StateMap): Option[State] = states.map.get(this).map(_.asInstanceOf[State])
+	def stateRes(states: StateMap): Result[State] = Result.get(stateOpt(states), "missing state for object \""+toString+"\"")
 }
 
 sealed class Setting[T] {

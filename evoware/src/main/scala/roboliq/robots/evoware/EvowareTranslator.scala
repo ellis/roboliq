@@ -311,7 +311,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			addLabware(builder, c.sPlateModel, c.locationDest)
 			addLabware(builder, c.sPlateModel, c.locationSrc)
 			
-			println("X: ", siteSrc.liRoma, siteDest.liRoma, siteSrc.liRoma.filter(siteDest.liRoma.contains))
+			//println("X: ", siteSrc.liRoma, siteDest.liRoma, siteSrc.liRoma.filter(siteDest.liRoma.contains))
 			if (siteSrc.liRoma.filter(siteDest.liRoma.contains).isEmpty)
 				return Error("no common RoMa: "+siteSrc.sName+" and "+siteDest.sName)
 			val iRoma = siteSrc.liRoma.filter(siteDest.liRoma.contains).head

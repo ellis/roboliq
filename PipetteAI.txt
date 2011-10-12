@@ -1,7 +1,9 @@
 States:
-destination well: Seq of (SrcLiquid,Volume)
-source well: volume
-tip: liquid, volume, contamination, pending cleaning degree
+	destination well: Seq of (SrcLiquid,Volume)
+	source well: volume
+	tip: liquid, volume, contamination, pending cleaning degree
+	----
+	a simplified state could just consist of the number of completed destination wells and a map of wells requiring more volume due to tips not being able to hold full volume required
 
 Actions:
 aspirate
@@ -13,3 +15,10 @@ selection of actions:
 pick left-most top-most destination wells; we will create sets of the first one, the first two, the first three, etc.
 for each destination set, find all tip configurations which could access them
 for each tip configuration, find the best source wells
+
+
+
+Possible approach #1:
+	order the destination wells in the order in which they must be processed
+	if destinations occur multiple times, the ordering is repeated, taking a new source each time
+

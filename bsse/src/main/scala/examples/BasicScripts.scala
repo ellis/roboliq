@@ -244,6 +244,33 @@ class Example05(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 }
 
 
+class Example05b(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
+	object Liquids {
+		val water = new Liquid("Water", CleanPolicy.TNT)
+		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
+	}
+	
+	val well_masterMix = new common.WellPointerVar
+	val plate_working = new Plate
+
+	pipette(Liquids.water, well_masterMix, 150 ul)
+	pipette(Liquids.primerF, well_masterMix, 2 ul)
+
+	__findLabels(Liquids)
+
+	val lab = new EvowareLab {
+		import station._
+
+		reagent(Liquids.water, Labwares.reagents50, 1, 8)
+		reagent(Liquids.primerF, Labwares.eppendorfs, 9)
+		
+		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(B2))
+		
+		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
+	}
+}
+
+
 class Protocol06 extends Protocol {
 	import roboliq.commands.MixItemL4
 	import roboliq.commands.MixItemReagentL4

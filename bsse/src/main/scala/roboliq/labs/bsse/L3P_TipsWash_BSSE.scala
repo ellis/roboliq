@@ -14,7 +14,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDecon: Plate) extends Com
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
 		cmd.intensity match {
-				case WashIntensity.None =>
+			case WashIntensity.None =>
 				Success(Seq())
 			case WashIntensity.Light =>
 				Success(Seq(
@@ -26,8 +26,8 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDecon: Plate) extends Com
 					createWash2(ctx.states, cmd, 2)))
 			case WashIntensity.Decontaminate =>
 				for {
-					pc <- Result.get(ctx.states.map.get(plateDecon), "level 1 config for decon plates not defined")
-					itemsADW <- Result.mapOver(cmd.items) { item => decon(ctx, item) }
+					plateDeconState <- plateDecon.stateRes(ctx.states)
+					itemsADW <- Result.mapOver(cmd.items) { item => decon(ctx, plateDeconState.conf, item) }
 				} yield {
 					val twvpsA = itemsADW.map(_._1)
 					val twvpsD = itemsADW.map(_._2)
@@ -35,6 +35,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDecon: Plate) extends Com
 
 					val cmdsPrewash = {
 						if (bPrewash) {
+							// Light rinse
 							Seq(
 								createWash2(ctx.states, cmd, 1),
 								createWash2(ctx.states, cmd, 2))
@@ -51,7 +52,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDecon: Plate) extends Com
 						createWash2(ctx.states, cmd, 7)
 					)
 					
-					Success(cmdsDecon)
+					cmdsPrewash ++ cmdsDecon
 				}
 		}
 	}
@@ -64,11 +65,11 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDecon: Plate) extends Com
 		L2C_Wash(items2, iWashProgram, cmd.intensity)
 	}
 	
-	private def decon(ctx: CompilerContextL3, item: L3A_TipsWashItem): Result[Tuple3[L2A_SpirateItem, L2A_SpirateItem, Boolean]] = {
+	private def decon(ctx: CompilerContextL3, plateDecon: PlateConfigL2, item: L3A_TipsWashItem): Result[Tuple3[L2A_SpirateItem, L2A_SpirateItem, Boolean]] = {
 		val tip = item.tip
 		val tipState = tip.obj.state(ctx.states)
 		val tipModel = tipState.model_?.get
-		val well = pc.conf.wells(tip.index % pc.conf.nWells)
+		val well = plateDecon.wells(tip.index % plateDecon.nWells)
 		val wellState = well.state(ctx.states)
 		val nVolumeTip = tipModel.nVolume
 		val nVolume = math.min(nVolumeTip, tipState.nContamInsideVolume + nVolumeTip / 10)
@@ -79,7 +80,7 @@ class L3P_TipsWash_BSSE(robot: BssePipetteDevice, plateDecon: Plate) extends Com
 			case (Some(policyA), Some(policyD)) =>
 				val twvpA = new L2A_SpirateItem(tip, well1, nVolume, policyA)
 				val twvpD = new L2A_SpirateItem(tip, well1, nVolume, policyD)
-				val bPrewash = (tipState.contamInside ++ tipState.contamOutside).contains(Contaminant.DNA)
+				val bPrewash = (tipState.contamInside ++ tipState.contamOutside).contains(Contaminant.Cell)
 				return Success((twvpA, twvpD, bPrewash))
 			case _ =>
 				return Error("unable to find pipetting policy for decon wells")
