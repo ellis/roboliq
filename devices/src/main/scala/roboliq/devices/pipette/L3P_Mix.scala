@@ -23,28 +23,39 @@ class L3P_Mix(robot: PipetteDevice) extends CommandCompilerL3 {
 
 private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, val cmd: L3C_Mix) extends L3P_PipetteMixBase {
 	type CmdType = L3C_Mix
+	type L3A_ItemType = L3A_MixItem
 	
 	val args = cmd.args
-	val dests = args.wells
-	val mixSpec_? = Some(args.mixSpec)
+	//val dests = args.wells
+	val mixSpecDispense_? = None
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
 	val tipModel_? = args.tipModel_?
 	val bMixOnly = true
 	
 	
+	protected def getDestToItemMaps(): Seq[Map[WellConfigL2, L3A_ItemType]] = {
+		Seq(args.items.map(item => item.well -> item).toMap)
+	}
+	
 	override protected def mix(
+		mapDestToItem: Map[WellConfigL2, L3A_ItemType],
 		states0: RobotState,
 		tws: Seq[TipWell]
 	): Result[MixResult] = {
-		mix_createItems(states0, tws) >>= mixItems(states0)
+		mix_createItems(mapDestToItem, states0, tws) >>= mixItems(states0)
 	}
 	
-	private def mix_createItems(states: RobotState, tws: Seq[TipWell]): Result[Seq[L2A_MixItem]] = {
+	private def mix_createItems(
+		mapDestToItem: Map[WellConfigL2, L3A_MixItem],
+		states: RobotState,
+		tws: Seq[TipWell]
+	): Result[Seq[L2A_MixItem]] = {
 		val items = tws.map(tw => {
-			getMixPolicy(states, tw) match {
+			val item = mapDestToItem(tw.well)
+			getMixPolicy(states, tw.tip, tw.well, item.mixSpec.mixPolicy_?) match {
 				case Error(sError) => return Error(sError)
 				case Success(policy) =>
-					new L2A_MixItem(tw.tip, tw.well, args.mixSpec.nVolume, args.mixSpec.nCount, policy)
+					new L2A_MixItem(tw.tip, tw.well, item.mixSpec.nVolume, item.mixSpec.nCount, policy)
 			}
 		})
 		Success(items)
@@ -93,7 +104,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 			// If we would need to aspirate a new liquid, abort
 			_ <- Result.assert(liquid eq tipWriter.state.liquid, "INTERNAL: Error code dispense 1");
 			// check for valid volume, i.e., not too much
-			_ <- mix_checkVol(builder, tip, target);
+			_ <- mix_checkVol(builder, tip, item.nVolume);
 			// Check whether this dispense would require a cleaning
 			_ <- Result.assert(cleanSpec_?.isEmpty, "INTERNAL: Error code dispense 2")
 		} yield {
@@ -103,13 +114,16 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 	}
 	
 	/** Check for permissible volumes */
-	private def mix_checkVol(states: StateMap, tip: TipConfigL2, dest: WellConfigL2): Result[Unit] = {
+	private def mix_checkVol(
+		states: StateMap,
+		tip: TipConfigL2,
+		nVolume: Double
+	): Result[Unit] = {
 		val tipState = tip.obj.state(states)
 		val liquidSrc = tipState.liquid // since we've already aspirated the source liquid
 		val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
 		val nMax = robot.getTipHoldVolumeMax(tipState, liquidSrc)
 		val nTipVolume = 0
-		val nVolume = args.mixSpec.nVolume
 		
 		// TODO: make sure that target well is not over-aspirated
 		if (nVolume + nTipVolume < nMin)

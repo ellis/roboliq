@@ -23,18 +23,41 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 
 private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, val cmd: L3C_Pipette) extends L3P_PipetteMixBase {
 	type CmdType = L3C_Pipette
+	type L3A_ItemType = L3A_PipetteItem
 
 	val args = cmd.args
 	// Get all destination wells (but drop any empty volumes)
-	val dests = SortedSet[WellConfigL2](args.items.collect({ case item if item.nVolume > 0.001 => item.dest }) : _*)
-	val mixSpec_? : Option[MixSpec] = args.mixSpec_?
+	//val dests = SortedSet[WellConfigL2](args.items.collect({ case item if item.nVolume > 0.001 => item.dest }) : _*)
+	val mixSpecDispense_? : Option[MixSpec] = args.mixSpec_?
 	val tipOverrides = args.tipOverrides_? match { case Some(o) => o; case None => TipHandlingOverrides() }
 	val tipModel_? = args.tipModel_?
 	val bMixOnly = false
 	
-	val mapDestToItem: Map[WellConfigL2, L3A_PipetteItem] = args.items.map(t => t.dest -> t).toMap
+	//val mapDestToItem: Map[WellConfigL2, L3A_PipetteItem] = args.items.map(t => t.dest -> t).toMap
 
+	protected def getDestToItemMaps(): Seq[Map[WellConfigL2, L3A_ItemType]] = {
+		val items: Seq[L3A_PipetteItem] = args.items.filter(_.nVolume > 0.001)
+		val mapAll = HashMap(items.groupBy(_.dest).toSeq : _*)
+		val seq = new ArrayBuffer[Map[WellConfigL2, L3A_ItemType]]
+		while (!mapAll.isEmpty) {
+			println(mapAll)
+			val map = mapAll.map(pair => pair._1 -> pair._2.head)
+			seq += map.toMap
+			
+			// Remove all added items from mapAll
+			for ((dest, item) <- map) {
+				val rest = mapAll(dest).tail
+				if (rest.isEmpty)
+					mapAll.remove(dest)
+				else
+					mapAll(dest) = rest
+			}
+		}
+		seq.toSeq
+	}
+	
 	override protected def dispense(
+		mapDestToItem: Map[WellConfigL2, L3A_ItemType],
 		states0: RobotState,
 		tws: Seq[TipWell],
 		remains0: Map[TipWell, Double],
@@ -45,7 +68,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		// Make sure that we only need to take care of remains for the first dispense in a cycle
 		assert(bFirstInCycle || remains0.isEmpty)
 		
-		dispense_createItems(builder.toImmutable, tws, remains0) match {
+		dispense_createItems(mapDestToItem, builder.toImmutable, tws, remains0) match {
 			case Error(lsError) =>
 				return Error(lsError)
 			case Success((items, remains)) =>
@@ -73,7 +96,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					}
 					
 					// check volumes
-					dispense_checkVol(builder, tip, dest) match {
+					dispense_checkVol(builder, tip, mapDestToItem(dest)) match {
 						case Error(lsError) => return Error(lsError)
 						case _ =>
 					}
@@ -108,6 +131,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	}
 	
 	override protected def aspirate(
+		mapDestToItem: Map[WellConfigL2, L3A_ItemType],
 		states: StateMap,
 		twsD: Seq[TipWell],
 		mapTipToVolume: Map[TipConfigL2, Double]
@@ -134,8 +158,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	}
 	
 	// Check for appropriate volumes
-	private def dispense_checkVol(states: StateMap, tip: TipConfigL2, dest: WellConfigL2): Result[Unit] = {
-		val item = mapDestToItem(dest)
+	private def dispense_checkVol(states: StateMap, tip: TipConfigL2, item: L3A_PipetteItem): Result[Unit] = {
 		val tipState = tip.obj.state(states)
 		val liquidSrc = tipState.liquid // since we've already aspirated the source liquid
 		val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
@@ -152,8 +175,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 			Success(())
 	}
 	
-	private def dispense_getTipVolMinMax(states: StateMap, tip: TipConfigL2, dest: WellConfigL2): Tuple2[Double, Double] = {
-		val item = mapDestToItem(dest)
+	private def dispense_getTipVolMinMax(states: StateMap, tip: TipConfigL2): Tuple2[Double, Double] = {
 		val tipState = tip.obj.state(states)
 		val liquidSrc = tipState.liquid // since we've already aspirated the source liquid
 		val nMin = robot.getTipAspirateVolumeMin(tipState, liquidSrc)
@@ -165,6 +187,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 	 * on success, return tuple of spirate items and volumes remaining to be pipetted
 	 */
 	private def dispense_createItems(
+		mapDestToItem: Map[WellConfigL2, L3A_ItemType],
 		states: RobotState,
 		tws: Seq[TipWell],
 		remains0: Map[TipWell, Double]
@@ -182,7 +205,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		for (tw <- tws2) {
 			val (tip, dest) = (tw.tip, tw.well)
 			val item = mapDestToItem(dest)
-			val (nMin, nMax) = dispense_getTipVolMinMax(states, tip, dest)
+			val (nMin, nMax) = dispense_getTipVolMinMax(states, tip)
 			
 			val tipState = tip.state(states)
 			val nVolumeInTip = -tipState.nVolume
@@ -201,7 +224,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 					nVolumeRequested
 				}
 			}
-			getDispensePolicy(states, tw, nVolume) match {
+			getDispensePolicy(states, tip, item, nVolume) match {
 				case Error(sError) => return Error(sError)
 				case Success(policy) =>
 					items += new L2A_SpirateItem(tip, dest, nVolume, policy)
@@ -249,23 +272,28 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		Success(items)
 	}
 	
-	private def getDispensePolicy(states: StateMap, tw: TipWell, nVolume: Double): Result[PipettePolicy] = {
-		getDispensePolicy(states, tw.tip, tw.well, nVolume, cmd.args.pipettePolicy_?)
+	private def getDispensePolicy(
+		states: StateMap,
+		tip: TipConfigL2,
+		item: L3A_PipetteItem,
+		nVolume: Double
+	): Result[PipettePolicy] = {
+		getDispensePolicy(states, tip, item, nVolume, cmd.args.pipettePolicy_?)
 	}
 	
 	private def getDispensePolicy(
 		states: StateMap,
 		tip: TipConfigL2,
-		dest: WellConfigL2,
+		item: L3A_PipetteItem,
 		nVolume: Double,
 		pipettePolicy_? : Option[PipettePolicy]
 	): Result[PipettePolicy] = {
 		pipettePolicy_? match {
 			case Some(policy) => Success(policy)
 			case None =>
-				val item = mapDestToItem(dest)
+				val dest = item.dest
 				val destState = dest.state(states)
-				val liquidSrc = mapDestToItem(dest).srcs.head.obj.state(states).liquid
+				val liquidSrc = item.srcs.head.obj.state(states).liquid
 				robot.getDispensePolicy(liquidSrc, tip, item.nVolume, destState.nVolume) match {
 					case None => Error("no dispense policy found for "+tip+" and "+dest)
 					case Some(policy) => Success(policy)

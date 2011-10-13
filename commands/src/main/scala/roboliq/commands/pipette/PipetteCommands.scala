@@ -29,8 +29,7 @@ object PipetteCommandsL3 {
 	def mix(states: RobotState, targets: Seq[WellConfigL2], volume: Double, count: Int): Result[L3C_Mix] = {
 		val mixSpec = new MixSpec(volume, count)
 		val args3 = new L3A_MixArgs(
-			SortedSet(targets : _*),
-			mixSpec = mixSpec,
+			targets.map(well => new L3A_MixItem(well, mixSpec)),
 			tipOverrides_? = None,
 			tipModel_? = None
 		)

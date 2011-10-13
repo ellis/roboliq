@@ -36,8 +36,7 @@ class L4A_MixArgs(
 	def toL3(states: RobotState): Result[L3A_MixArgs] = {
 		for { wells3 <- Result.flatMap(targets) { _.getWells(states) } }
 		yield new L3A_MixArgs(
-			SortedSet(wells3 : _*),
-			mixSpec = mixSpec,
+			items = wells3.map(well => new L3A_MixItem(well, mixSpec)),
 			tipOverrides_? = tipOverrides_?,
 			tipModel_? = tipModel_?
 		)
@@ -45,8 +44,7 @@ class L4A_MixArgs(
 }
 
 class L3A_MixArgs(
-	val wells: SortedSet[WellConfigL2],
-	val mixSpec: MixSpec,
+	val items: Seq[L3A_MixItem],
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val tipModel_? : Option[TipModel] = None
 )
@@ -59,9 +57,9 @@ sealed class L4A_MixItem(
 		Success(PipetteHelperL4.getWells1(states, target))
 	}
 }
+*/
 
 case class L3A_MixItem(
 	val well: WellConfigL2,
-	val nVolume: Double
+	val mixSpec: MixSpec
 )
-*/
