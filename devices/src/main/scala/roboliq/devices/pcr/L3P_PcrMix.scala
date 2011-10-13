@@ -63,6 +63,7 @@ class L3P_PcrMix extends CommandCompilerL3 {
 		val vWaterMix = volForMix(vWaterMinSample)
 		val lvWaterPerWell = lvvTemplateWater.map(_._2 - vWaterMinSample)
 
+		/*
 		for {
 			// distribute water to each working well
 			cmd1 <- PipetteCommandsL3.pipette(states, water, masterMixWells, vWaterMix * nMult)
@@ -89,6 +90,34 @@ class L3P_PcrMix extends CommandCompilerL3 {
 			println("vWaterMix: "+vWaterMix)
 			println("lvWaterPerWell: "+lvWaterPerWell)
 			Seq(cmd1) ++ cmds2 ++ Seq(cmd3, cmd4, cmd5, cmd6)
+		}
+		*/
+		for {
+			// distribute water to each working well
+			cmd1 <- PipetteCommandsL3.pipette(states, water, masterMixWells, vWaterMix * nMult)
+			// create master mix
+			items2 <- Result.flatMap(components)(component => {
+				val vMix = mapComponentVolumes(component) * nMult
+				PipetteCommandsL3.pipetteItems(states, component.srcs, masterMixWells, vMix)
+			})
+			// TODO: indicate that liquid in master mix wells is all the same (if more than one well) and label it (eg "MasterMix")
+			cmd3 <- PipetteCommandsL3.pipette(states, water, dests, lvWaterPerWell)
+			// distribute template DNA to each working well
+			val lvTemplate = lvvTemplateWater.map(_._1)
+			cmd4 <- PipetteCommandsL3.pipette(states, template.srcs, dests, lvTemplate)
+			// Mix the master mix before distributing it
+			val vMasterMixWell = (vComponentsTotal + vWaterMinSample) * nMult
+			cmd5 <- PipetteCommandsL3.mix(states, masterMixWells, vMasterMixWell * 0.75, 4)
+			// distribute master mix to each working well, free dispense, no wash in-between
+			val vMixPerWell = vComponentsTotal + vWaterMinSample
+			cmd6 <- PipetteCommandsL3.pipette(states, masterMixWells, dests, vMixPerWell)
+		} yield {
+			println("lvComponent: "+lvComponent)
+			println("vComponentsTotal: "+vComponentsTotal)
+			println("vWaterMinSample: "+vWaterMinSample)
+			println("vWaterMix: "+vWaterMix)
+			println("lvWaterPerWell: "+lvWaterPerWell)
+			Seq(cmd1, L3C_Pipette(new L3A_PipetteArgs(items2)), cmd3, cmd4, cmd5, cmd6)
 		}
 		
 			

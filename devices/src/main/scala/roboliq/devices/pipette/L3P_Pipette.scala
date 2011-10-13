@@ -40,7 +40,7 @@ private class L3P_Pipette_Sub(val robot: PipetteDevice, val ctx: CompilerContext
 		val mapAll = HashMap(items.groupBy(_.dest).toSeq : _*)
 		val seq = new ArrayBuffer[Map[WellConfigL2, L3A_ItemType]]
 		while (!mapAll.isEmpty) {
-			println(mapAll)
+			//println(mapAll)
 			val map = mapAll.map(pair => pair._1 -> pair._2.head)
 			seq += map.toMap
 			
