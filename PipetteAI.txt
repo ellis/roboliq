@@ -21,4 +21,68 @@ for each tip configuration, find the best source wells
 Possible approach #1:
 	order the destination wells in the order in which they must be processed
 	if destinations occur multiple times, the ordering is repeated, taking a new source each time
+	place pipetting items in order of dispense
+	somehow use smaller tips when necessary
+	let every cycle intelligently switch tips:
+		
+Possible approach #2:
+	map all items to (src, dest, vol, tipTypesAllowed)
+	for each tip group
+		get next (src, dest, vol) list that this group can handle
+		keep track of commands and score
 
+Possible approach #3:
+	set it up as a dynamic programming problem
+	for each tip group, order the items
+	find the unique orderings and associate the correct tip groups with each ordering
+	now we have n states, where n is the number of items
+	for each ordering:
+		frontier = {0}
+		while !frontier.isEmpty:
+			iDestStart = frontier.pop
+			for each tip group:
+				get next items that this group can handle
+				skip if items list is empty
+				create actions for the items
+				iDestEnd = iDestStart + items.size
+				costStep = cost of actions
+				cost = costs(iDestStart) + costStep
+				if (costs(iDestEnd) > cost) {
+					actionsCheapest(iDestStart) = actons
+					cost(iDestEnd) = cost
+					frontier += iDestEnd
+				}
+			frontier -= iDestStart
+
+
+
+	For each source, determine the allowable and prefered tip types, or alternatively the distinct required tip types
+	getNextItems() should get as many columns of tips as can be simultaneously pipetted
+
+
+
+Notes:
+	choosing tip type per source:
+		sometimes a particular tip type may be required by some items and allowed by all, so use that tip type
+		sometimes distinct tip types may be required by different items: so choose on a case-by-case basis
+		otherwise list all allowable tips
+	map all items to (src, dest, vol, tipTypesAllowed)
+	find range of t
+
+PROBLEM:
+	need to pick tip type for each source
+
+New information for pipette items:
+	a special item to signify a new layer
+	within a layer, destination order can be rearranged
+	but items cannot be moved between layers
+	also, each layer decides anew about tip types per source
+
+Possible approach #4:
+	if there are one or more tip types which can be used by all items in layer:
+		choose the preferred one
+		map items to selected type
+	otherwise:
+		for each tip type:
+			pick liquid tip type closest to selected type
+			

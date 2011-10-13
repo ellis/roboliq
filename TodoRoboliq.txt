@@ -68,6 +68,7 @@ Code:
 ?	Example05: need to mix reagents (4 times, 75% of well volume)
 	pipetting mix command: efficient use of multiple sources going to one destination
 	figure out how to add labware to the external devices
+	try to get documentation on the PCR machine in order to control it directly
 
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
