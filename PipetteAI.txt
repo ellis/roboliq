@@ -79,10 +79,68 @@ New information for pipette items:
 	also, each layer decides anew about tip types per source
 
 Possible approach #4:
-	if there are one or more tip types which can be used by all items in layer:
-		choose the preferred one
-		map items to selected type
-	otherwise:
-		for each tip type:
-			pick liquid tip type closest to selected type
-			
+	if force pre wash:
+		set simulated tip states to clean
+	else
+		set simulated tip states to actual tip states
+
+	for each layer:
+		if there are one or more tip types which can be used by all items in layer:
+			choose the preferred one
+			map items to selected type
+		otherwise:
+			ERROR, for now, because I'm not sure what to do
+			do:
+				find most frequently allowed tip type and assign it to all allowable items
+			loop while (there are still unassigned items)
+
+			// NOTE: what is done now could vary by robot.
+			// For our robot, we'll pipette on tip type at a time
+			do:
+				get next tip type among waiting items
+				get all items using that tip type
+				pipette those items
+			loop while (there are unfinished items)
+	
+	if force post wash
+		wash all tips
+
+	def pipette(tip type, items) {
+		get next tip which can be used with this item/tiptype
+		if no tips can be used with this item
+			if there are dirty tips
+				clean the tips according to their cleaning degree they need
+				try again
+			else
+				ERROR
+
+		while 
+	}
+
+	def pipetteBatch(batch, tip type, item): Result[Option[Batch]] = {
+		get next tip which can be used with this item/tiptype
+		if no tips can be used with this item
+			if there are dirty tips
+				clean the tips according to their cleaning degree they need
+				try again
+			else
+				ERROR
+		
+	}
+
+	item
+	(item, tiptype)
+	(asp item, tiptype) + (disp item, tiptype)
+
+	
+	pipetteBatch(batch, item, tiptype)
+		if batch is empty
+			assume all tips are clean
+			add item to batch
+		else if (item's aspriate plate and dispense plate are both different than the batch's)
+			return DONE
+		else {
+			get next tip which can be used with this item/tiptype
+			if no tips can be used with this item
+
+		}
