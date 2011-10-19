@@ -128,9 +128,46 @@ Possible approach #4:
 		
 	}
 
+Possible approach #5: (dynamic programming again)
 	item
 	(item, tiptype)
-	(asp item, tiptype) + (disp item, tiptype)
+
+	createBatches: possible breaking conditions:
+		tip group change
+		plate change
+		column change
+		contiguous well change
+		tip type change?
+
+	for iItem = 0 until item.size:
+		get current tip states for this item
+		nItemsA = getMaxNumberOfItems(using current tip states)
+		nItemsB = getMaxNumberOfItems(using clean tip states)
+	
+	processItems([(item, tiptype)], tipStates, iItem) {
+		nItems = getMaxNumberOfItems(tipStates)
+		for (n <- 0 until nItems) {
+			createBatch(items, tipStates, iItem, nItems).foreach(batch => addToList(batch))
+		}
+	}
+	
+	addToList(iItem0, batch) {
+		iItem1 = iItem0 + batch.size
+		nCostPrev = list.get(iItem1).map(_.nCost).getOrElse(Double.MAX)
+		if (batch.nCost < nCostPrev) {
+			list[iItem1] = batch
+			add iItem1 to waiting queue
+		}
+	}
+
+	createBatch(tipStates, iItem0, items, nItems) {
+		get next tip which can be used with this item/tiptype
+		if no tips can be used with this item
+			return None
+		
+	}
+
+	(batch, item, tiptype, tip)
 
 	
 	pipetteBatch(batch, item, tiptype)
@@ -144,3 +181,83 @@ Possible approach #4:
 			if no tips can be used with this item
 
 		}
+
+Figuring out tip assignment for [(item, tiptype)]: 
+	D#_i = destination well# for dispense i
+	L#_i = source liquid# for dispense i
+	V_i = volume for dispense i
+	T_i = tip for dispense i
+	
+	T#_i = use tip# for dispense i
+	T#L# = tip# used for liquid#
+	T#_i => T#L(# <- L#_i)
+
+	L0 = water (doesn't trigger need to clean)
+
+	Statements for distributing L1 to wells 0-3
+	D0_0
+	D1_1
+	D2_2
+	D3_3
+	L1_0
+	L1_1
+	L1_2
+	L1_3
+
+	Prevent tip from holding multiple liquids (assume we have 2 liquids, even though we only used one above):
+	For all t in tips:
+	TtL1 => !TtL2
+	TtL2 => !TtL1
+	
+	Assume 2 tips and each item can use either tip:
+	T0_0 | T1_0
+	T0_1 | T1_1
+	T0_2 | T1_2
+	T0_3 | T1_3
+
+	When tip is assigned to item, assign liquid to tip
+	T0_0 => T0L1
+	Tt_i => TtL[liquid for item]
+
+	
+Consider the following scenario:
+	Assume we have two tips
+	L1->D1
+	L1->D2
+	L2->D1
+	L2->D2
+
+	T0_0 | T1_0
+	T0_0 => T0L1
+	T1_0 => T1L1
+	T0L1 | T1L1 => OK_1
+
+	T0_1 | T1_1
+	T0_1 => T0L1
+	T1_1 => T1L1
+	OK_1 & (T0_1 | T1_1) => OK_2
+
+	T0_2 | T1_2
+	T0_2 => T0L2
+	T1_2 => T1L2
+
+	T0_3 | T1_3
+	T0_3 => T0L2
+	T1_3 => T1L2
+
+	T0L1 => !T0L2
+	T0L2 => !T0L1
+	T1L1 => !T1L2
+	T1L2 => !T1L1
+
+
+
+	two tips
+	two liquids
+	two destination wells
+	each destination well should get liquid #1 then liquid #2
+
+	We want to achieve the following:
+		tip#1 takes liquid#1
+		tip#2 takes liquid#2
+
