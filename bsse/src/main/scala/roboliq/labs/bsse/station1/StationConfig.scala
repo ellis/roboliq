@@ -70,7 +70,7 @@ class StationConfig extends EvowareTable {
 		val (cover, shaker) = createSites(Carriers.shaker, "cover", "shaker", Seq(0, 1))
 		val eppendorfs = createSites(Carriers.eppendorfs, "eppendorfs", Seq())
 		val (cooled1, cooled2) = createSites(Carriers.cooled, "cooled1", "cooled2", Seq(0, 1))
-		val (uncooled1, uncooled2, uncooled3) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3", Seq(0, 1))
+		val (cooled3, cooled4, cooled5) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3", Seq(0, 1))
 		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
 		val pcr1 = createSite(Carriers.pcr1, 0, "pcr1", Seq(0, 1))
 		val pcr2 = createSite(Carriers.pcr2, 0, "pcr2", Seq(0, 1))

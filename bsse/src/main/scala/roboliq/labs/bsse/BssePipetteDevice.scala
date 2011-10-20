@@ -123,7 +123,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		
 	}
 	
-	val nFreeDispenseVolumeThreshold = 20
+	val nFreeDispenseVolumeThreshold = 5
 	
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
 		import PipettePosition._
