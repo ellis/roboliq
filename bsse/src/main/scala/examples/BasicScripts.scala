@@ -217,7 +217,7 @@ class Example05(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	val lab = new EvowareLab {
 		import station._
 
-		reagent(Liquids.water, Labwares.reagents50, 1, 8)
+		reagent(Liquids.water, Labwares.reagents50, 1)
 		reagent(Liquids.buffer10x, Labwares.eppendorfs, 1)
 		reagent(Liquids.dNTP, Labwares.eppendorfs, 5)
 		reagent(Liquids.primerF, Labwares.eppendorfs, 9)

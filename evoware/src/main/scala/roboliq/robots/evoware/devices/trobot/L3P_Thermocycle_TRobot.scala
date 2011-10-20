@@ -24,7 +24,7 @@ class L3P_Thermocycle_TRobot(device: TRobotDevice) extends CommandCompilerL3 {
 			val plate = getPlate(cmd)
 			val plateState0 = plate.state(ctx.states)
 
-			Seq(
+			val cmds = Seq(
 				getOpen(dlp),
 				L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(dlp.location), None)),
 				getClose(dlp),
@@ -33,6 +33,7 @@ class L3P_Thermocycle_TRobot(device: TRobotDevice) extends CommandCompilerL3 {
 				L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(plateState0.location), None)),
 				getClose(dlp)
 			)
+			if (dlp.idProgram != "<NONE>") cmds else cmds.take(3) ++ cmds.drop(4)
 		}
 	}
 	

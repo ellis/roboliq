@@ -411,6 +411,13 @@ Code:
 		check for plate compatibility; if replating is required, the user must specify this in the setup somehow
 		for higher-level commands, device should take multiple plates and can either process them sequentially or simultaneously
 
+echo '<table border="1">'
+cat table0.txt | \
+ sed -e 's#^x.\(.*\)#<tr><td>\1</td><td align="right">100%</td><td>2011-08-31</td></tr>#' \
+  -e 's#^\..\(.*\)#<tr><td>\1</td><td align="right">90%</td><td>2011-08-31</td></tr>#' \
+  -e 's#^ \*.\(.*\)#<tr><td>\1</td><td>50%</td></tr>#' \
+  -e 's#^[^<]\(.*\)#<tr><td>\1</td></tr>#' \
+  >> table1.html
 
 x	DOC
 x	#
@@ -497,7 +504,7 @@ x	MIX_WELLS
 	CFGRUN
 	TRANSFER_OBJECT
 	SMS
- 	SHAKER_START
+	SHAKER_START
  *	SHAKE
 	SHAKER_STOP
 	MOVE_OBJECT
