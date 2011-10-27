@@ -21,11 +21,11 @@ class ExampleOpenhouse(station: roboliq.labs.bsse.station1.StationConfig) extend
 	
 	val nWellVolume = 50.0;
 	cmds += L4C_Pipette(new L4A_PipetteArgs(for (i <- 0 until 96) yield {
-		val nVolume = 5 + (nWellVolume - 5) * (95.0 - i) / 95.0;
+		val nVolume = 5 + (nWellVolume - 10) * (95.0 - i) / 95.0;
 		new L4A_PipetteItem(Liquids.water, plate1(WellIndex(i)), Seq(nVolume))
 	}))
 	cmds += L4C_Pipette(new L4A_PipetteArgs(for (i <- 0 until 96) yield {
-		val nVolume = 5 + (nWellVolume - 5) * i / 95.0;
+		val nVolume = 5 + (nWellVolume - 10) * i / 95.0;
 		new L4A_PipetteItem(Liquids.color, plate1(WellIndex(i)), Seq(nVolume))
 	}))
 	pipette(Liquids.water, plate2, nWellVolume)

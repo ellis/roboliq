@@ -11,7 +11,9 @@ abstract class PipetteDevice extends Device {
 	val config: PipetteDeviceConfig
 	
 	def addKnowledge(kb: KnowledgeBase)
+	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 	def areTipsDisposable: Boolean
+	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: Double, nVolumeDest: Double): Seq[TipModel]
 	/** Minimum volume which can be aspirated */
 	def getTipAspirateVolumeMin(tip: TipStateL2, liquid: Liquid): Double
 	/** Maximum volume of the given liquid which this tip can hold */

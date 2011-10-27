@@ -78,6 +78,16 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		}
 		kb.addPlate(plateDecon, true)
 	}
+	
+	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean] = {
+		val b = tipModelCounts.forall(pair => {
+			val (tipModel, nTips) = pair
+			if (tipModel != tipModel50 && tipModel != tipModel1000)
+				return Error("Unknown tip model: "+tipModel)
+			(nTips <= 4)
+		})
+		Success(b)
+	}
 
 	def areTipsDisposable: Boolean = false
 	
@@ -123,7 +133,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		
 	}
 	
-	val nFreeDispenseVolumeThreshold = 20
+	val nFreeDispenseVolumeThreshold = 5
 	
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
 		import PipettePosition._

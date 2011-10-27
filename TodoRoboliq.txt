@@ -70,6 +70,8 @@ Code:
 	figure out how to add labware to the external devices
 	try to get documentation on the PCR machine in order to control it directly
 
+	bug: if I set nFreeDispenseVolumeThreshold = 20 and run ExampleWorkshop, tips SHOULD be washed after WET dispense of colored fluid
+
 	figure out how to compile external scripts conveniently (http://www.familie-kneissl.org/Members/martin/blog/reflection-from-scala-heaven-and-hell)
 	allow for composition and chaining of protocols
 	create a few interfaces: RobotModel (i.e. Evoware, Hamilton), Lab (has a RobotModel, a compiler, ...)
