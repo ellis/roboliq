@@ -19,7 +19,7 @@ import roboliq.labs.bsse._
 class StationConfig extends EvowareTable {
 	object TipModels {
 		val tipModel50 = new TipModel("DiTi 50ul", 45, 0.01, 0, 0)
-		val tipModel1000 = new TipModel("DiTi 1000ul", 960, 3, 0, 0)
+		val tipModel1000 = new TipModel("DiTi 1000ul", 950, 3, 0, 0)
 	}
 	val tipModels = {
 		import TipModels._
@@ -87,6 +87,7 @@ class StationConfig extends EvowareTable {
 		val reagents50 = new PlateModel("Reagent Cooled 8*50ml", 8, 1, 50000)
 		val ethanol = new TroughModel("Trough 1000ml", 8, 1)
 		val platePcr = new PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, 500) // FIXME: nVolume? 
+		val plateCostar = new PlateModel("D-BSSE 96 Well Costar Plate", 8, 12, 500) // FIXME: nVolume? 
 		val eppendorfs = new PlateModel("Block 20Pos 1.5 ml Eppendorf", 4, 5, 1500) // FIXME: nVolume?
 		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500) // FIXME: nVolume?
 		//"MTP Waste"

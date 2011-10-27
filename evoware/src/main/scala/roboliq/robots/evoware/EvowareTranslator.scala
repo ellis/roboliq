@@ -125,6 +125,12 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				// Get the liquid class
 				val sLiquidClass = twvp0.policy.id
 				// Assert that there is only one liquid class
+				// FIXME: for debug only:
+				if (!rest.forall(twvp => twvp.policy.id.equals(sLiquidClass))) {
+					println("sLiquidClass: " + sLiquidClass)
+					rest.foreach(twvp => println(twvp.tip, twvp.policy.id))
+				}
+				// ENDFIX
 				assert(rest.forall(twvp => twvp.policy.id.equals(sLiquidClass)))
 				
 				val holder = twvp0.well.holder
