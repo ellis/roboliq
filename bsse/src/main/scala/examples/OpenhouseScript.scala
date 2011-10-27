@@ -31,21 +31,16 @@ class ExampleOpenhouse(station: roboliq.labs.bsse.station1.StationConfig) extend
 	pipette(Liquids.water, plate_balance, nWellVolume)
 	seal(plate_balance)
 	
-	def proc1(plate: Plate): Tuple2[roboliq.commands.pcr.PcrThermocycle.Setup, roboliq.commands.centrifuge.L4A_CentrifugeSetup] = {
-		cmds += L4C_Pipette(new L4A_PipetteArgs(for (i <- 0 until 96) yield {
-			val nVolume = 5 + (nWellVolume - 5) * (95.0 - i) / 95.0;
-			new L4A_PipetteItem(Liquids.water, plate(WellIndex(i)), Seq(nVolume))
-		}))
-		cmds += L4C_Pipette(new L4A_PipetteArgs(for (i <- 0 until 96) yield {
-			val nVolume = 5 + (nWellVolume - 5) * i / 95.0;
-			new L4A_PipetteItem(Liquids.color, plate(WellIndex(i)), Seq(nVolume))
-		}))
-		
-		seal(plate)
-		val setup_thermocycle = thermocycle(plate)
-		val setup_centrifuge = centrifuge(plate, plate_balance)
-		(setup_thermocycle, setup_centrifuge)
-	}
+	val nWellVolume = 50.0;
+	cmds += L4C_Pipette(new L4A_PipetteArgs(for (i <- 0 until 96) yield {
+		val nVolume = 5 + (nWellVolume - 10) * (95.0 - i) / 95.0;
+		new L4A_PipetteItem(Liquids.water, plate1(WellIndex(i)), Seq(nVolume))
+	}))
+	cmds += L4C_Pipette(new L4A_PipetteArgs(for (i <- 0 until 96) yield {
+		val nVolume = 5 + (nWellVolume - 10) * i / 95.0;
+		new L4A_PipetteItem(Liquids.color, plate1(WellIndex(i)), Seq(nVolume))
+	}))
+	pipette(Liquids.water, plate2, nWellVolume)
 	
 	val (t1, c1) = proc1(plate1)
 

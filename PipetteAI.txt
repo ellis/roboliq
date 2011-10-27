@@ -95,7 +95,7 @@ Possible approach #4:
 			loop while (there are still unassigned items)
 
 			// NOTE: what is done now could vary by robot.
-			// For our robot, we'll pipette on tip type at a time
+			// For our robot, we'll pipette one tip type at a time
 			do:
 				get next tip type among waiting items
 				get all items using that tip type
@@ -182,7 +182,7 @@ Possible approach #5: (dynamic programming again)
 
 		}
 
-Figuring out tip assignment for [(item, tiptype)]: 
+Figuring out tip assignment for [(item, tiptype)] using propositional logic: 
 	D#_i = destination well# for dispense i
 	L#_i = source liquid# for dispense i
 	V_i = volume for dispense i
@@ -260,4 +260,33 @@ Consider the following scenario:
 	We want to achieve the following:
 		tip#1 takes liquid#1
 		tip#2 takes liquid#2
+		tip#1 dispenses in D1 then D2
+		tip#2 dispenses in D1 then D2
+	Instead of:
+		tip#1 takes liquid#1
+		tip#2 takes liquid#1
+		tip#1+2 dipense in D1 and D2
+		then repeat for liquid#2
 
+Easy method for checking whether items can be accommodated by our tips:
+	number of tips per tip type
+	for each liquid:
+		see how many tips of the given tip type would be required for the given items
+	check whether our tips can accommodate the requires number of tips per tip type
+
+How to assign tips to items:
+	for each liquid:
+		reserve minimum number of required tip of assigned tip type
+		find maximum number of adjacent destination wells for this liquid
+	for each tip type:
+		while any extra tips of that type are available:
+			create map per liquid of adjecent wells - number of tips assigned
+			get liquid type with maximum number of adjacent wells
+			if that number is <= 0, stop
+			increment number of tips assigned to liquid
+			decrement entry in map for liquid
+			decrement number of free tips of this type
+	for each liquid:
+		assign chosen number of tips of required type to this liquid
+	for each item:
+		...
