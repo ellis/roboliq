@@ -58,14 +58,16 @@ class PipettePlanner(
 		}
 	}
 	
-	def toItemData(layers: Seq[Seq[L3A_PipetteItem]]): Seq[ItemData] = {
+	/** For each item, find the source liquid and choose a tip model */
+	def toItemData1(layers: Seq[Seq[L3A_PipetteItem]]): Seq[ItemData] = {
 		layers.flatMap(items => {
 			val mapLiquidToTipModel = chooseTipModels(items)
-			toItemData(items)
+			toItemData2(items)
 		})
 	}
 	
-	def toItemData(items: Seq[L3A_PipetteItem]): Seq[ItemData] = {
+	/** For each item, find the source liquid and choose a tip model */
+	def toItemData2(items: Seq[L3A_PipetteItem]): Seq[ItemData] = {
 		val mapLiquidToTipModel = chooseTipModels(items)
 		items.map(item => {
 			val liquid = item.srcs.head.state(ctx.states).liquid
@@ -74,23 +76,47 @@ class PipettePlanner(
 		})
 	}
 	
+	/** Assign tips to items */
 	def x1(layers: Seq[Seq[L3A_PipetteItem]]): Unit = {
 		val tipStates = (for {
 			tipObj <- device.config.tips.toSeq
 			val tip = tipObj.state(ctx.states).conf
 		} yield { tip -> new TipState(tip) }).toMap
 
-		val lData = toItemData(layers)
+		// For each item, choose a tip model
+		val lData = toItemData1(layers)
 		
-		val lGroup = x2(lData, tipStates)
+		for {
+			lGroup <- getNextGroup(lData, tipStates)
+		} yield {
+			
+		}
 	}
 	
-	case class State3LiquidInfo(
+	/** Iterate through lData one item at a time */
+	def x1(lData: List[ItemData]): Unit = {
+		getNextGroup(lData)
+	}
+	
+	/** Create pipette cycle for the given group */
+	def createCommands(lData: List[ItemData], tipStates0: Map[TipConfigL2, TipState]): Result[Seq[Command]] = {
+		chooseTips(lData, tipStates0)
+		if tips couldn't be chosen, wash then and try again
+		chooseSources()
+		create PipetteItems
+	}
+	
+	def addCommandsToTable() {
+		calculate cost of those commands
+		if prior path cost + commands cost less than what's already in table for the appropriate entry, add it to the table
+	}
+	
+	/*case class State3LiquidInfo(
 		val liquid: Liquid,
 		val tipModel: TipModel,
 		val nTips: Int,
 		val lData: List[ItemData]
-	)
+	)*/
 	
 	case class State3(
 		val lrData: List[ItemData],
@@ -102,14 +128,26 @@ class PipettePlanner(
 	//class Cycle(items: Seq[L3A_PipetteItem], mapLiquidToTipModel: Map[Liquid, TipModel], )
 	
 	//def x2(group0: Seq[Step2], items: Seq[Step2], tipStates: Map[TipConfigL2, TipState]): Seq[Step2] = {
-	def x2(lStep2: Seq[ItemData], tipStates: Map[TipConfigL2, TipState]): Seq[ItemData] = {
-		if (lStep2.isEmpty)
-			return Nil
-		
-		Nil
+	/** Get the longest possible list of items from the head of lData which can be pipetted at once */ 
+	def getNextGroup(lDataAll: Seq[ItemData]): Result[Seq[ItemData]] = {
+		if (lDataAll.isEmpty)
+			return Success(Seq())
+			
+		val state0 = new State3(Nil, Map())
+		var state = state0
+		Success(lDataAll.takeWhile(data => {
+			addItem(state, data) match {
+				case Error(lsError) => return Error(lsError)
+				case Success(None) => false
+				case Success(Some(state1)) =>
+					state = state1
+					true
+			}
+		}))
 	}
 	
-	def addStep(state0: State3, data: ItemData): Result[Option[State3]] = {
+	/** Add item to state0.  If successful, return a new state object */
+	def addItem(state0: State3, data: ItemData): Result[Option[State3]] = {
 		val lt = (data.liquid -> data.tipModel)
 		val items = data.item :: state0.map.getOrElse(lt, Nil)
 		val state = State3(
@@ -120,6 +158,7 @@ class PipettePlanner(
 		yield { if (bCanAdd) Some(state) else None } 
 	}
 	
+	/** Check whether the robot has enough tips to accommodate the given list of liquid+tipModel+items */
 	def checkTips(map: Map[Tuple2[Liquid, TipModel], List[L3A_PipetteItem]]): Result[Boolean] = {
 		val map0 = Map[TipModel, Int]()
 		val tipModelCounts = map.foldLeft(map0)((acc, entry) => {
@@ -131,6 +170,7 @@ class PipettePlanner(
 		device.supportTipModelCounts(tipModelCounts)
 	}
 	
+	/** Count the number of tips required to pipette the given liquid to the given list of wells */
 	def countTips(tipModel: TipModel, liquid: Liquid, items: List[L3A_PipetteItem]): Int = {
 		// Fill up tips of the given model to see how many we need
 		val acc0 = (0.0, 0) // (currently tip, 0 tips already filled)
@@ -163,4 +203,8 @@ class PipettePlanner(
 		val nStates = liItem.size
 		val frontier = new Queue[Int] 
 	}*/
+
+	def chooseTips(lData: List[ItemData], tipStates0: Map[TipConfigL2, TipState]): Result[Map[ItemData, Tip]] = {
+		
+	}
 }
