@@ -5,7 +5,7 @@ import roboliq.roboease._
 import roboliq.robots.evoware.roboeaseext._
 
 
-class Config2Roboease extends RoboeaseConfig {
+class Config2Roboease(stationConfig: StationConfig) extends RoboeaseConfig {
 	val mapTables2 = Map[String, EvowareRoboeaseTable](
 		"TABLE_DNE" -> Table_DNE
 	)
@@ -13,13 +13,13 @@ class Config2Roboease extends RoboeaseConfig {
 	val mapTables = mapTables2.mapValues(_.roboeaseTable)
 	
 	val mapTipModel = {
-		import Config1Models._
+		import stationConfig.TipModels._
 		Map(
-			"10" -> tipSpec10,
-			"20" -> tipSpec20,
-			"50" -> tipSpec50,
-			"200" -> tipSpec200,
-			"1000" -> tipSpec1000
+			"10" -> tipModel10,
+			"20" -> tipModel20,
+			"50" -> tipModel50,
+			"200" -> tipModel200,
+			"1000" -> tipModel1000
 		)
 	}
 	val pipettePolicies = Seq(

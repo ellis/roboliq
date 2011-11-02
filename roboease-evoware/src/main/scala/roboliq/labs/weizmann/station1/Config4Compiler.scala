@@ -16,7 +16,7 @@ class Config4Compiler(evoware: EvowareConfig) extends CompilerConfig {
 		//Seq(tipSpec1000)
 	}
 
-	val mover = new WeizmannMoveDevice
+	val mover = new EvowareMoveDevice
 	val pipetter = new WeizmannPipetteDevice(tipModels)
 	
 	val devices = Seq(

@@ -321,95 +321,11 @@ V;200
 				import rack.{iGrid,iSite}
 				val id = rack.id
 				val carrier = mapGridToCarrier(iGrid)
-				new SiteObj(id, carrier, iSite)
+				new SiteObj(id, carrier, iSite, Seq(0, 1))
 			}
 			//evolabRacks.map(r => r.iGrid -> r.iSite).toSet.toSeq.map(toSiteObj)
 			evolabRacks.map(toSiteObj)
 		}
-
-		/*
-		val mapGridToCarrier: Map[Int, CarrierObj] = {
-			// Count how many times each carrier model is used
-			val mapModelToInstanceCount = new HashMap[CarrierModel, Int]().withDefaultValue(0)
-			def countInstances(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String) {
-				if (sCarrierModel == null)
-					return
-				val model = mapCarrierModels(sCarrierModel)
-				mapModelToInstanceCount(model) = mapModelToInstanceCount(model) + 1
-			}
-			stuff(countInstances)
-			
-			val mapModelToInstanceCount2 = new HashMap[CarrierModel, Int]().withDefaultValue(0)
-			val carriers = new HashMap[Int, CarrierObj]
-			def createCarriers(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String) {
-				if (!carriers.contains(iGrid)) {
-					val (model, id) = {
-						if (sCarrierModel == null) {
-							new CarrierModel(iGrid.toString, 1, false) -> ("Carrier at grid "+iGrid)
-						}
-						else {
-							val model = mapCarrierModels(sCarrierModel)
-							mapModelToInstanceCount(model) match {
-								case 1 => sCarrierModel
-								case n =>
-									mapModelToInstanceCount2(model) = mapModelToInstanceCount2(model) + 1
-							}
-						}
-					}
-					val carrier = new CarrierObj()
-				}
-				if (sCarrierModel == null)
-					return
-				sites.get(sCarrierModel) match {
-					case None => sites(sCarrierModel) = iSite + 1
-					case Some(nSites) =>
-						if (iSite + 1 > nSites)
-							sites(sCarrierModel) = iSite +1
-				}
-			}
-			stuff(handleSiteCounter)
-			
-			def toCarrierModel(pair: Tuple2[String, Int]): CarrierModel = {
-				val (id, nSites) = pair
-				new CarrierModel(id, nSites, false)
-			}
-			sites.map(pair => pair._1 -> toCarrierModel(pair)).toMap
-		}
-
-		val sites: Iterable[SiteObj] = {
-			val keys = new HashSet[Tuple2[Int, Int]]
-			def handleSites(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String) {
-				keys += ((iGrid, iSite))
-			}
-			stuff(handleSites)
-
-			def toSiteObj(pair: Tuple2[Int, Int]): SiteObj = {
-				new SiteObj()
-			}
-			val sites = new HashMap[Tuple2[Int, Int], SiteObj]
-			def handleSites(id: String, iGrid: Int, iSite: Int, nCols: Int, nRows: Int, nVolume: Double, sCarrierModel: String) {
-				val key = (iGrid, iSite)
-				if (!sites.contains(key)) {
-					val carrier = new CarrierObj()
-				}
-				if (sCarrierModel == null)
-					return
-				sites.get(sCarrierModel) match {
-					case None => sites(sCarrierModel) = iSite + 1
-					case Some(nSites) =>
-						if (iSite + 1 > nSites)
-							sites(sCarrierModel) = iSite +1
-				}
-			}
-			stuff(handleSiteCounter)
-			
-			def toCarrierModel(pair: Tuple2[String, Int]): CarrierModel = {
-				val (id, nSites) = pair
-				new CarrierModel(id, nSites, false)
-			}
-			sites.map(pair => pair._1 -> toCarrierModel(pair)).toMap
-		}
-	*/
 	}
 	
 	val evowareSites = EvowareTableMaps.sites
