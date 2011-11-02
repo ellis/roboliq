@@ -321,7 +321,7 @@ V;200
 				import rack.{iGrid,iSite}
 				val id = rack.id
 				val carrier = mapGridToCarrier(iGrid)
-				new SiteObj(id, carrier, iSite)
+				new SiteObj(id, carrier, iSite, Seq(0, 1))
 			}
 			//evolabRacks.map(r => r.iGrid -> r.iSite).toSet.toSeq.map(toSiteObj)
 			evolabRacks.map(toSiteObj)

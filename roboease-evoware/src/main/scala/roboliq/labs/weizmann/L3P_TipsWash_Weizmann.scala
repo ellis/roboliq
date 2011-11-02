@@ -6,17 +6,15 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-class L3P_TipsWash_Weizmann(robot: PipetteDevice, plateDeconAspirate: Plate, plateDeconDispense: Plate) extends CommandCompilerL3 {
+class L3P_TipsWash_Weizmann extends CommandCompilerL3 {
 	type CmdType = L3C_TipsWash
 	val cmdType = classOf[CmdType]
 
-	def compile(ctx: CompilerContextL3, cmd: CmdType): CompileResult = {
-		cmd.intensity match {
-			case WashIntensity.None =>
-				CompileTranslation(cmd, Seq())
-			case _ =>
-				CompileTranslation(cmd, Seq(createWash2(ctx.states, cmd, 0)))
-		}
+	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
+		Success(cmd.intensity match {
+			case WashIntensity.None => Seq()
+			case _ => Seq(createWash2(ctx.states, cmd, 0))
+		})
 	}
 	
 	private def createWash2(states: RobotState, cmd: CmdType, iWashProgram: Int): L2C_Wash = {

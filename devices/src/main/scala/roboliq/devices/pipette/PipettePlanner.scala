@@ -1,4 +1,4 @@
-package roboliq.devices.pipette
+/*package roboliq.devices.pipette
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -208,3 +208,4 @@ class PipettePlanner(
 		
 	}
 }
+*/
