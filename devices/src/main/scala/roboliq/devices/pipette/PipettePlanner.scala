@@ -1,5 +1,6 @@
 package roboliq.devices.pipette
 
+import scala.collection.immutable.SortedSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.Queue
@@ -19,7 +20,99 @@ class PipettePlanner(
 		var nVolume: Double = 0
 	}
 	
-	case class ItemData(item: L3A_PipetteItem, liquid: Liquid, tipModel: TipModel)
+	type Item = L3A_PipetteItem
+	case class LM(liquid: Liquid, tipModel: TipModel)
+	case class LMData(nTips: Int, nVolumeTotal: Double, nVolumeCurrent: Double)
+	case class ItemB(item: L3A_PipetteItem, lm: LM)
+	case class ItemC(tipModel: TipModel, nTipsMin: Int, srcs: SortedSet[WellConfigL2], lItem: Seq[L3A_PipetteItem])
+	case class ItemD(tip: TipConfigL2, src: WellConfigL2, lItem: Seq[L3A_PipetteItem])
+	case class GroupC(lItemC: Seq[ItemC])
+	case class GroupD(lItemD: Seq[ItemD])
+	case class GroupA(
+		lItem: Seq[L3A_PipetteItem],
+		mLMData: Map[LM, LMData],
+		bClean: Boolean,
+		tipBindings0: Map[TipConfigL2, LM],
+		cmds: Seq[Command],
+		nScore: Double
+	)
+	
+	def tr(items: Seq[L3A_PipetteItem]): Result[Map[L3A_PipetteItem, LM]]
+	def tr(item: L3A_PipetteItem, mLM: Map[L3A_PipetteItem, LM]): Result[GroupA] = {
+		val group0 = GroupA(Nil, Map(), false, Map(), Nil, Double.MaxValue)
+		val lItem = group0.lItem ++ Seq(item)
+		val lm = mLM(item)
+		val mLMData = addItem(Map(), lm, item)
+		val dummy = {
+			if (group0.bClean) true
+			else {
+				
+			}
+		}
+		//val tipCounts = Map(lm -> countTips(lm.tipModel, lm.liquid, List(item)))
+		
+	}
+	def tr(groupA: GroupA, item: L3A_PipetteItem, mLM: Map[L3A_PipetteItem, LM]): Result[Option[GroupA]]
+	
+	/** Add the item's volume to mLMData to keep track of how many tips are needed for each LM */
+	def addItem(mLMData: Map[LM, LMData], lm: LM, item: L3A_PipetteItem): Result[Map[LM, LMData]] = {
+		for {
+			_ <- Result.assert(item.nVolume <= lm.tipModel.nVolume, "pipette volume exceeds volume of tip: "+item)
+		} yield {
+			val data = mLMData.get(lm) match {
+				case None =>
+					LMData(1, item.nVolume, item.nVolume)
+				case Some(data) =>
+					val nVolumeCurrent = data.nVolumeCurrent + item.nVolume
+					val nVolumeTotal = data.nVolumeTotal + item.nVolume
+					if (data.nVolumeCurrent == 0)
+						LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
+					else if (nVolumeCurrent <= lm.tipModel.nVolume)
+						LMData(data.nTips, nVolumeTotal, nVolumeCurrent)
+					else
+						LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
+			}
+			mLMData.updated(lm, data)
+		}
+	}
+	
+	def chooseTips(lItem: Seq[Item], mLM: Map[Item, LM], tipBindings0: Map[TipConfigL2, LM]) {
+		
+		// Consider:
+		// number of items
+		// number of LMs
+		// which tips already have a given liquid assigned to them
+		// Decide:
+		// which tips and tip types to use for each item
+
+		// reserve minimum number of tips for each LM
+		// distribute remaining tips among the LM
+		
+		// ADVANCED: if we have one source and 4 destinations, prefer using min tips
+		//  for each LM: find max number of simultaneous wells for aspirate/dispense, and don't use more tips than that
+		
+		var tipBindings = tipBindings0
+		// Simple algorithm: for each item, choose first available tip
+		for (item <- lItem) {
+			val lm = mLM(item)
+			val tips = device.config.tipSpecs
+		}
+	}
+	/*case class ItemC(item: L3A_PipetteItem, tip: TipConfigL2)
+		val srcs: SortedSet[WellConfigL2],
+		val dest: WellConfigL2,
+		val nVolume: Double,
+		val liquid: Liquid,
+		val tip: TipConfigL2
+	)
+	
+	case class TipSrcDestVol(
+		val tip: TipConfigL2,
+		val src: WellConfigL2,
+		val dest: WellConfigL2,
+		val nVolume: Double
+	)*/
+	
 	
 	def chooseTipModels(items: Seq[L3A_PipetteItem]): Map[Liquid, TipModel] = {
 		val mapLiquidToModels = new HashMap[Liquid, Seq[TipModel]]
@@ -59,20 +152,20 @@ class PipettePlanner(
 	}
 	
 	/** For each item, find the source liquid and choose a tip model */
-	def toItemData1(layers: Seq[Seq[L3A_PipetteItem]]): Seq[ItemData] = {
+	def transformLayers(layers: Seq[Seq[L3A_PipetteItem]]): Seq[ItemB] = {
 		layers.flatMap(items => {
 			val mapLiquidToTipModel = chooseTipModels(items)
-			toItemData2(items)
+			transformItems(items)
 		})
 	}
 	
 	/** For each item, find the source liquid and choose a tip model */
-	def toItemData2(items: Seq[L3A_PipetteItem]): Seq[ItemData] = {
+	def transformItems(items: Seq[L3A_PipetteItem]): Seq[ItemB] = {
 		val mapLiquidToTipModel = chooseTipModels(items)
 		items.map(item => {
 			val liquid = item.srcs.head.state(ctx.states).liquid
 			val tipModel = mapLiquidToTipModel(liquid)
-			ItemData(item, liquid, tipModel)
+			ItemB(item, liquid, tipModel)
 		})
 	}
 	
@@ -94,7 +187,11 @@ class PipettePlanner(
 	}
 	
 	/** Iterate through lData one item at a time */
-	def x1(lData: List[ItemData]): Unit = {
+	def x1(lData: List[ItemB], lScore: ): Unit = {
+		lData match {
+			case data :: rest =>
+				create 
+		}
 		getNextGroup(lData)
 	}
 	
@@ -118,14 +215,33 @@ class PipettePlanner(
 		val lData: List[ItemData]
 	)*/
 	
-	case class State3(
+	case class GroupState(
 		val lrData: List[ItemData],
-		val map: Map[Tuple2[Liquid, TipModel], List[L3A_PipetteItem]]
+		val map: Map[Tuple2[Liquid, TipModel], List[L3A_PipetteItem]],
+		val tipModelCounts: Map[TipModel, Int]
 		//val liquids: Map[Liquid, State3LiquidInfo],
 		//val tipModelCounts: Map[TipModel, Int]
 	)
 	
+	case class Group(
+		val lData: List[ItemData]
+	)
+	
 	//class Cycle(items: Seq[L3A_PipetteItem], mapLiquidToTipModel: Map[Liquid, TipModel], )
+	
+	def createGroup(data: ItemData): Result[Group] = {
+		
+	}
+	
+	def createGroup(group0: Group, data: ItemData): Result[Option[Group]] = {
+		addItem(group0, data) match {
+			case Error(lsError) => return Error(lsError)
+			case Success(None) => false
+			case Success(Some(state1)) =>
+				state = state1
+				true
+		}
+	}
 	
 	//def x2(group0: Seq[Step2], items: Seq[Step2], tipStates: Map[TipConfigL2, TipState]): Seq[Step2] = {
 	/** Get the longest possible list of items from the head of lData which can be pipetted at once */ 
@@ -133,7 +249,7 @@ class PipettePlanner(
 		if (lDataAll.isEmpty)
 			return Success(Seq())
 			
-		val state0 = new State3(Nil, Map())
+		val state0 = new State3(Nil, Map(), Map())
 		var state = state0
 		Success(lDataAll.takeWhile(data => {
 			addItem(state, data) match {
@@ -150,16 +266,25 @@ class PipettePlanner(
 	def addItem(state0: State3, data: ItemData): Result[Option[State3]] = {
 		val lt = (data.liquid -> data.tipModel)
 		val items = data.item :: state0.map.getOrElse(lt, Nil)
-		val state = State3(
-			lrData = data :: state0.lrData,
-			map = state0.map.updated(lt, items))
+		val map = state0.map.updated(lt, items)
 			
-		for { bCanAdd <- checkTips(state.map) }
-		yield { if (bCanAdd) Some(state) else None } 
+		for {
+			tipModelCounts <- checkTips(map)
+		} yield {
+			if (tipModelCounts.isEmpty)
+				None
+			else {
+				val state = State3(
+					lrData = data :: state0.lrData,
+					map = map,
+					tipModelCounts)
+				Some(state)
+			}
+		} 
 	}
 	
 	/** Check whether the robot has enough tips to accommodate the given list of liquid+tipModel+items */
-	def checkTips(map: Map[Tuple2[Liquid, TipModel], List[L3A_PipetteItem]]): Result[Boolean] = {
+	def checkTips(map: Map[Tuple2[Liquid, TipModel], List[L3A_PipetteItem]]): Result[Map[TipModel, Int]] = {
 		val map0 = Map[TipModel, Int]()
 		val tipModelCounts = map.foldLeft(map0)((acc, entry) => {
 			val ((liquid, tipModel), items) = entry
@@ -167,7 +292,8 @@ class PipettePlanner(
 			val nTipsTotal = nTips + acc.getOrElse(tipModel, 0)
 			acc.updated(tipModel, nTipsTotal)
 		})
-		device.supportTipModelCounts(tipModelCounts)
+		for { b <- device.supportTipModelCounts(tipModelCounts) }
+		yield { if (b) tipModelCounts else Map() }
 	}
 	
 	/** Count the number of tips required to pipette the given liquid to the given list of wells */
@@ -204,7 +330,8 @@ class PipettePlanner(
 		val frontier = new Queue[Int] 
 	}*/
 
-	def chooseTips(lData: List[ItemData], tipStates0: Map[TipConfigL2, TipState]): Result[Map[ItemData, Tip]] = {
+	def chooseTips(cycle: State3, tipStates0: Map[TipConfigL2, TipState]): Result[Map[ItemData, Tip]] = {
 		
+		Error("")
 	}
 }
