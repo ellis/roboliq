@@ -38,13 +38,33 @@ class StationConfig extends EvowareTable {
 		val holder = new CarrierModel("Downholder", 2, true)
 		val shaker = new CarrierModel("MP 2Pos H+P Shake", 1, false)
 		val eppendorfs = new CarrierModel("Block 20Pos", 1, true)
-		val cooled = new CarrierModel("MP 3Pos Cooled 1 PCR", 2, true)
-		val uncooled = new CarrierModel("MP 3Pos Cooled 2 PCR", 3, false)
+		val cooled2 = new CarrierModel("MP 3Pos Cooled 1 PCR", 2, true)
+		val cooled3 = new CarrierModel("MP 3Pos Cooled 2 PCR", 3, false)
 		val filters = new CarrierModel("Te-VaCS", 2, false)
 		val pcr = new CarrierModel("TRobot1", 1, false)
 		val sealer = new CarrierModel("RoboSeal", 1, false)
 		val peeler = new CarrierModel("RoboPeel", 1, false)
 		val centrifuge = new CarrierModel("Centrifuge", 1, false)
+		
+		val mp3pos = new CarrierModel("MP 3Pos Fixed", 3, false)
+		val mp3posPcr = new CarrierModel("MP 3Pos Fixed PCR", 3, false)
+		val mp3pos2clips = new CarrierModel("MP 3Pos Fixed 2+clips", 3, false)
+		
+		val hotel5a = new CarrierModel("HOTEL5A", 5, false)
+		val hotel5b = new CarrierModel("HOTEL5B", 5, false)
+		val roche = new CarrierModel("ROCHE", 1, false)
+		val plateReader = new CarrierModel("PLATE_READER", 1, false)
+		/*
+		DefineRack("CSL",2,0,1,8, 5000000,"Carousel MTP"),
+		DefineRack("LNK",65,0,12,8, 200,"Te-Link"),
+		DefineRack("S1",53,0,12,8, 200,"Te-Shake 2Pos"),
+		DefineRack("S2",53,1,12,8, 1200,"Te-Shake 2Pos"),
+		DefineRack("MS1",53,0,24,16, 200,"Te-Shake 2Pos"),
+		DefineRack("MS2",53,1,24,16, 1200,"Te-Shake 2Pos"),
+		DefineRack("TP1",59,0,12,8, 200,"Torrey pines"),
+		DefineRack("TP2",59,1,12,8, 1200,"Torrey pines"),
+		*/
+
 	}
 	object Carriers {
 		val wash1 = new CarrierObj("Wash Station Clean", CarrierModels.wash, 1)
@@ -56,8 +76,8 @@ class StationConfig extends EvowareTable {
 		val shaker = new CarrierObj("MP 2Pos H+P Shake", CarrierModels.shaker, 10)
 		val peeler = new CarrierObj("RoboPeel", CarrierModels.peeler, 12)
 		val eppendorfs = new CarrierObj("Block 20Pos", CarrierModels.eppendorfs, 16)
-		val cooled = new CarrierObj("MP 3Pos Cooled 1 PCR", CarrierModels.cooled, 17)
-		val uncooled = new CarrierObj("MP 3Pos Cooled 2 PCR", CarrierModels.uncooled, 24)
+		val cooled = new CarrierObj("MP 3Pos Cooled 1 PCR", CarrierModels.cooled2, 17)
+		val uncooled = new CarrierObj("MP 3Pos Cooled 2 PCR", CarrierModels.cooled3, 24)
 		val filters = new CarrierObj("Te-VaCS", CarrierModels.filters, 33)
 		val sealer = new CarrierObj("RoboSeal", CarrierModels.sealer, 35)
 		val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
@@ -154,114 +174,45 @@ class StationConfig extends EvowareTable {
 	)
 	//def addKnowledge
 
-	val mapWashProgramArgs: Map[Int, WashProgramArgs] = {
-		// TODO: Set these values depending on the tip kind
-		val nWasteDelay = 500
-		val nCleanerVolume = 10.0
-		val nCleanerDelay = 500
-		val nAirgapVolume = 10
-		val nAirgapSpeed = 70
-		val nRetractSpeed = 30
-		Map(
-			// Light wash, part 1
-			1 -> new WashProgramArgs(
-				iWasteGrid = 2, iWasteSite = 1,
-				iCleanerGrid = 2, iCleanerSite = 2,
-				nWasteVolume_? = Some(25),
-				nWasteDelay = nWasteDelay,
-				nCleanerVolume = 4, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nCleanerDelay = nCleanerDelay,
-				nAirgapVolume = nAirgapVolume,
-				nAirgapSpeed = nAirgapSpeed,
-				nRetractSpeed = nRetractSpeed,
-				bFastWash = true),
-			// Light wash, part 2
-			2 -> new WashProgramArgs(
-				iWasteGrid = 1, iWasteSite = 1,
-				iCleanerGrid = 1, iCleanerSite = 2,
-				nWasteVolume_? = Some(0.5),
-				nWasteDelay = nWasteDelay,
-				nCleanerVolume = 1, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nCleanerDelay = nCleanerDelay,
-				nAirgapVolume = nAirgapVolume,
-				nAirgapSpeed = nAirgapSpeed,
-				nRetractSpeed = nRetractSpeed,
-				bFastWash = false),
-			// Decontamination, part 1
-			5 -> new WashProgramArgs(
-				iWasteGrid = 2, iWasteSite = 1,
-				iCleanerGrid = 2, iCleanerSite = 2,
-				nWasteVolume_? = Some(25),
-				nWasteDelay = nWasteDelay,
-				nCleanerVolume = 3, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nCleanerDelay = nCleanerDelay,
-				nAirgapVolume = nAirgapVolume,
-				nAirgapSpeed = nAirgapSpeed,
-				nRetractSpeed = nRetractSpeed,
-				bFastWash = true),
-			6 -> new WashProgramArgs(
-				iWasteGrid = 2, iWasteSite = 1,
-				iCleanerGrid = 2, iCleanerSite = 2,
-				nWasteVolume_? = Some(25),
-				nWasteDelay = nWasteDelay,
-				nCleanerVolume = 5, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nCleanerDelay = nCleanerDelay,
-				nAirgapVolume = nAirgapVolume,
-				nAirgapSpeed = nAirgapSpeed,
-				nRetractSpeed = nRetractSpeed,
-				bFastWash = true),
-			7 -> new WashProgramArgs(
-				iWasteGrid = 1, iWasteSite = 1,
-				iCleanerGrid = 1, iCleanerSite = 2,
-				nWasteVolume_? = Some(25),
-				nWasteDelay = nWasteDelay,
-				nCleanerVolume = 5, // FIXME: how should this be calculated? -- ellis, 2011-06-16
-				nCleanerDelay = nCleanerDelay,
-				nAirgapVolume = nAirgapVolume,
-				nAirgapSpeed = nAirgapSpeed,
-				nRetractSpeed = nRetractSpeed,
-				bFastWash = true)
-		)
-	}
+	val mapWashProgramArgs: Map[Int, WashProgramArgs] = Map()
 
 	val sHeader =
-"""00000000
-20110101_000000 No log in       
+""""3A748C70
+20100328_144238 apiuser         
                                                                                                                                 
-No user logged in                                                                                                               
+                                                                                                                                
 --{ RES }--
 V;200
 --{ CFG }--
-999;219;32;
-14;-1;239;240;130;241;-1;-1;52;-1;242;249;-1;-1;-1;-1;-1;250;243;-1;-1;-1;-1;-1;-1;244;-1;-1;-1;-1;-1;-1;-1;-1;35;-1;-1;-1;-1;-1;-1;234;-1;-1;-1;-1;-1;-1;235;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;246;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;
+999;218;32;
+14;-1;104;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;34;-1;-1;-1;-1;-1;34;-1;-1;-1;-1;-1;34;-1;-1;-1;-1;-1;221;-1;-1;-1;-1;-1;222;-1;-1;-1;-1;-1;34;-1;-1;-1;-1;-1;44;-1;-1;-1;-1;-1;216;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;
 998;0;
-998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;
-998;;;;
-998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;
-998;;;;
-998;3;;;Trough 25ml;
-998;;;Decon;
-998;2;Reagent Cooled 8*15ml;Reagent Cooled 8*50ml;
-998;Labware5;Labware6;
-998;0;
-998;0;
-998;1;Trough 1000ml;
-998;Labware10;
-998;0;
-998;1;;
-998;;
-998;2;;;
-998;;;
+998;8;Washstation 2Grid Cleaner short;Washstation 2Grid Waste;;;;;Washstation 2Grid DiTi Waste;;
+998;;;;;;;;;
 998;0;
 998;0;
 998;0;
 998;0;
 998;0;
-998;1;;
-998;;
-998;2;D-BSSE 96 Well PCR Plate;D-BSSE 96 Well PCR Plate;
-998;Labware14;Labware15;
 998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;3;DiTi 1000ul;DiTi 200ul;DiTi 50ul;
+998;1000;200;50;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;3;DiTi 20ul;;;
+998;20;;;
 998;0;
 998;0;
 998;0;
@@ -274,32 +225,36 @@ V;200
 998;0;
 998;0;
 998;0;
+998;3;;;;
+998;;;;
 998;0;
 998;0;
 998;0;
-998;9;;;;;;;MTP Waste;;;
-998;;;;;;;Waste;;;
 998;0;
 998;0;
+998;3;Block Eppendorf 24 Pos;;6 pos DeepWell trough;
+998;T10;;BUF12;
 998;0;
 998;0;
 998;0;
 998;0;
-998;1;D-BSSE 96 Well PCR Plate;
-998;Labware12;
 998;0;
+998;3;;;;
+998;;;;
 998;0;
 998;0;
 998;0;
 998;0;
 998;0;
-998;1;D-BSSE 96 Well PCR Plate;
-998;Labware13;
+998;2;;;
+998;;;
 998;0;
 998;0;
 998;0;
 998;0;
 998;0;
+998;2;;;
+998;;;
 998;0;
 998;0;
 998;0;
@@ -308,8 +263,6 @@ V;200
 998;0;
 998;0;
 998;0;
-998;1;;
-998;;
 998;0;
 998;0;
 998;0;
@@ -341,32 +294,37 @@ V;200
 998;0;
 998;0;
 998;0;
-998;0;
-998;0;
-998;0;
-998;0;
-998;0;
-998;0;
-998;5;
-998;245;11;
-998;93;55;
-998;252;54;
-998;251;59;
-998;253;64;
-998;6;
-998;4;0;System;
-998;0;0;Shelf 32Pos Microplate;
-998;0;4;Hotel 5Pos SPE;
-998;0;1;Hotel 3Pos DWP;
-998;0;2;Hotel 4Pos DWP 1;
-998;0;3;Hotel 4Pos DWP 2;
-998;0;
-998;1;
+998;4;
+998;93;4;
+998;93;50;
+998;85;66;
+998;225;48;
 998;11;
-998;55;
-998;54;
-998;59;
-998;64;
+998;4;0;System;
+998;0;7;Te-Shake 2Pos;
+998;0;3;Carousel MTP;
+998;0;4;Carousel DiTi 200;
+998;0;5;Carousel DiTi 1000;
+998;0;8;Carousel DiTi 10;
+998;0;6;Te-Link;
+998;0;0;Hotel 5Pos SPE;
+998;0;1;Hotel 5Pos SPE;
+998;0;2;Hotel 5Pos DeepWell;
+998;4;1;Reader;
+998;1;
+998;215;96_Well_Microplate;
+998;1;
+998;53;
+998;2;
+998;4;
+998;5;
+998;3;
+998;65;
+998;4;
+998;50;
+998;66;
+998;48;
 996;0;0;
---{ RPG }--"""
+--{ RPG }--
+"""
 }

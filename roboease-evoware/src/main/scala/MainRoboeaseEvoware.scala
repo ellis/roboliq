@@ -39,6 +39,7 @@ object Main extends App {
 	}
 	
 	def test2(sSourcePath: String) {
+		val stationConfig = new StationConfig
 		val roboeaseConfig = new Config2Roboease
 		val p = new RoboeaseParser(roboeaseConfig)
 
