@@ -25,7 +25,7 @@ class PipettePlanner(
 	case class LMData(nTips: Int, nVolumeTotal: Double, nVolumeCurrent: Double)
 	case class GroupZ(
 		lItem: Seq[Item],
-		mLM: Map[L3A_PipetteItem, LM],
+		mLM: Map[Item, LM],
 		mLMToItems: Map[LM, Seq[Item]],
 		mLMData: Map[LM, LMData],
 		mLMTipCounts: Map[LM, Int],
@@ -34,11 +34,14 @@ class PipettePlanner(
 		bClean: Boolean,
 		tipBindings0: Map[TipConfigL2, LM]
 	)
-	case class GroupA(
-		lItem: Seq[L3A_PipetteItem],
-		mLMData: Map[LM, LMData],
+	case class GroupB(
+		lItem: Seq[Item],
 		bClean: Boolean,
-		tipBindings0: Map[TipConfigL2, LM],
+		aspirates: Map[TipConfigL2, TipWellVolume], 
+		dispenses: Map[TipConfigL2, TipWellVolume] 
+	)
+	case class GroupC(
+		nItems: Int,
 		cmds: Seq[Command],
 		nScore: Double
 	)
@@ -307,6 +310,28 @@ class PipettePlanner(
 			(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
 		}).toMap)
 	}
+	
+	/*
+	def tr_groupB(
+		groupZ: GroupZ
+	): Result[GroupB] = {
+		val dispenses = groupZ.lItem.map(item => {
+			val policy = getDispensePolicy(states, tip, item, nVolume) match {
+				case Error(sError) => return Error(sError)
+				case Success(policy) =>
+					items += new L2A_SpirateItem(tip, dest, nVolume, policy)
+			}
+		})
+		val groupB = GroupB(
+			groupZ.lItem,
+			groupZ.bClean,
+			aspirates,
+			dispenses
+		)
+		Success(groupB)
+	}
+	*/
+	
 	/*
 	/*case class ItemC(item: L3A_PipetteItem, tip: TipConfigL2)
 		val srcs: SortedSet[WellConfigL2],
