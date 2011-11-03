@@ -12,6 +12,7 @@ abstract class PipetteDevice extends Device {
 	
 	def addKnowledge(kb: KnowledgeBase)
 	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
+	def assignTips(tipsFree: SortedSet[Tip], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[Tip]]]
 	def areTipsDisposable: Boolean
 	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: Double, nVolumeDest: Double): Seq[TipModel]
 	/** Minimum volume which can be aspirated */
@@ -23,7 +24,7 @@ abstract class PipetteDevice extends Device {
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy]
 	/** Choose dispense method */
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy]
-	def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
+	//def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	//def chooseWashPrograms(tip: TipConfigL2, intensity: WashIntensity.Value): Seq[Int]
 	/*def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
 	def batchesForDispense(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]
