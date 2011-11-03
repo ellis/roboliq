@@ -24,21 +24,27 @@ class PipettePlanner(
 	case class LM(liquid: Liquid, tipModel: TipModel)
 	case class LMData(nTips: Int, nVolumeTotal: Double, nVolumeCurrent: Double)
 	case class GroupZ(
+		states0: RobotState,
 		lItem: Seq[Item],
 		mLM: Map[Item, LM],
 		mLMToItems: Map[LM, Seq[Item]],
 		mLMData: Map[LM, LMData],
 		mLMTipCounts: Map[LM, Int],
 		mLMToTips: Map[LM, SortedSet[Tip]],
-		mItemToTip: Map[Item, TipConfigL2],
+		mDestToTip: Map[Item, TipConfigL2],
+		mTipToVolume: Map[TipConfigL2, Double],
+		lSrcToTip: Seq[TipWellVolume],
 		bClean: Boolean,
 		tipBindings0: Map[TipConfigL2, LM]
+		// FIXME: need to keep track of well contents too, in case we dispense more than once to a given well
 	)
 	case class GroupB(
 		lItem: Seq[Item],
 		bClean: Boolean,
-		aspirates: Map[TipConfigL2, TipWellVolume], 
-		dispenses: Map[TipConfigL2, TipWellVolume] 
+		premixes: Seq[TipWellVolume], 
+		aspirates: Seq[TipWellVolume], 
+		dispenses: Seq[TipWellVolume], 
+		postmixes: Seq[TipWellVolume]
 	)
 	case class GroupC(
 		nItems: Int,
@@ -101,6 +107,40 @@ class PipettePlanner(
 		}).toMap
 		Success(mLM)
 	}
+	
+	// Return:
+	// - Error
+	// - Can't continue
+	// - Continue with new field
+	
+	sealed abstract class GroupResult {
+		def flatMap(f: GroupZ => GroupResult): GroupResult
+		def map(f: GroupZ => GroupZ): GroupResult
+		def isError: Boolean = false
+		def isSuccess: Boolean = false
+		def isStop: Boolean = false
+		
+		final def >>=(f: GroupZ => GroupResult): GroupResult = flatMap(f)
+		def foreach(f: GroupZ => GroupZ): Unit = {  
+			map(f)  
+			()
+		}
+	}
+	case class GroupError(groupZ: GroupZ, lsError: Seq[String]) extends GroupResult {
+		def flatMap(f: GroupZ => GroupResult): GroupResult = this
+		def map(f: GroupZ => GroupZ): GroupResult = this
+		def isError: Boolean = true
+	}
+	case class GroupSuccess(groupZ: GroupZ) extends GroupResult {
+		def flatMap(f: GroupZ => GroupResult): GroupResult = f(groupZ)
+		def map(f: GroupZ => GroupZ): GroupResult = GroupSuccess(f(groupZ))
+		def isSuccess: Boolean = true
+	}
+	case class GroupStop(groupZ: GroupZ) extends GroupResult {
+		def flatMap(f: GroupZ => GroupResult): GroupResult = this
+		def map(f: GroupZ => GroupZ): GroupResult = this
+		def isStop: Boolean = true
+	}
 
 	/*def tr(
 		items: Seq[Item],
@@ -110,11 +150,12 @@ class PipettePlanner(
 	}*/
 
 	def tr_groupZ(
+		states0: RobotState,
 		item: Item,
 		mLM: Map[Item, LM]
 	): Result[GroupZ] = {
 		//val groupA0 = GroupA(Nil, Map(), false, Map(), Nil, Double.MaxValue)
-		val groupZ0 = GroupZ(Nil, Map(), Map(), Map(), Map(), Map(), Map(), false, Map())
+		val groupZ0 = GroupZ(states0, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, false, Map())
 		for {
 			groupZ_? <- tr_groupZ(groupZ0, item, mLM)
 			_ <- Result.assert(groupZ_?.isDefined, "Couldn't create pipette group for item "+item)
@@ -156,17 +197,21 @@ class PipettePlanner(
 		val tipBindings = if (bClean) Map[TipConfigL2, LM]() else groupZ0.tipBindings0
 		for {
 			mLMToTips <- tr4_mLMToTips(lItem, mLM, mLMToItems, mLMTipCounts, tipBindings)
-			mItemToTip <- tr5_mItemToTip(lItem, mLM, mLMToItems, mLMToTips)
+			mDestToTip <- tr5_mDestToTip(lItem, mLM, mLMToItems, mLMToTips)
+			mTipToVolume <- tr6_mTipToVolume(lItem, mLM, mLMToItems, mLMToTips, mDestToTip)
 		} yield {
-			val tipBindings1: Map[TipConfigL2, LM] = mLMToTips.flatMap(pair => pair._2.toSeq.map(_.state(ctx.states).conf -> pair._1)) 
+			val tipBindings1: Map[TipConfigL2, LM] = mLMToTips.flatMap(pair => pair._2.toSeq.map(_.state(groupZ0.states0).conf -> pair._1)) 
 			Some(GroupZ(
+				groupZ0.states0,
 				lItem,
 				mLM,
 				mLMToItems,
 				mLMData,
 				mLMTipCounts,
 				mLMToTips,
-				mItemToTip,
+				mDestToTip,
+				mTipToVolume,
+				Nil,
 				bClean,
 				tipBindings1))
 		}
@@ -295,13 +340,13 @@ class PipettePlanner(
 		}
 	}
 	
-	def tr5_mItemToTip(
+	def tr5_mDestToTip(
 		lItem: Seq[Item],
 		mLM: Map[Item, LM],
 		mLMToItems: Map[LM, Seq[Item]],
 		mLMToTips: Map[LM, SortedSet[Tip]]
 	): Result[Map[Item, TipConfigL2]] = {
-		val mItemToTip = new HashMap[Item, TipConfigL2]
+		val mDestToTip = new HashMap[Item, TipConfigL2]
 		Success(mLMToItems.flatMap(pair => {
 			val (lm, lItem) = pair
 			val lTip = mLMToTips(lm).map(_.state(ctx.states).conf)
@@ -311,26 +356,60 @@ class PipettePlanner(
 		}).toMap)
 	}
 	
-	/*
+	def tr6_mTipToVolume(
+		lItem: Seq[Item],
+		mLM: Map[Item, LM],
+		mLMToItems: Map[LM, Seq[Item]],
+		mLMToTips: Map[LM, SortedSet[Tip]],
+		mDestToTip: Map[Item, TipConfigL2]
+	): Result[Map[TipConfigL2, Double]] = {
+		Success(mDestToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap)
+	}
+	
 	def tr_groupB(
-		groupZ: GroupZ
+		groupZ: GroupZ,
+		pipettePolicy_? : Option[PipettePolicy]
 	): Result[GroupB] = {
 		val dispenses = groupZ.lItem.map(item => {
-			val policy = getDispensePolicy(states, tip, item, nVolume) match {
+			val tip = groupZ.mDestToTip(item)
+			val nVolume = item.nVolume
+			getDispensePolicy(ctx.states, tip, item, nVolume, pipettePolicy_?) match {
 				case Error(sError) => return Error(sError)
 				case Success(policy) =>
-					items += new L2A_SpirateItem(tip, dest, nVolume, policy)
+					new L2A_SpirateItem(tip, item.dest, nVolume, policy)
 			}
 		})
+		val aspirates = 
 		val groupB = GroupB(
 			groupZ.lItem,
 			groupZ.bClean,
+			Nil,
 			aspirates,
-			dispenses
+			dispenses,
+			Nil
 		)
 		Success(groupB)
 	}
-	*/
+
+	private def getDispensePolicy(
+		states: StateMap,
+		tip: TipConfigL2,
+		item: L3A_PipetteItem,
+		nVolume: Double,
+		pipettePolicy_? : Option[PipettePolicy]
+	): Result[PipettePolicy] = {
+		pipettePolicy_? match {
+			case Some(policy) => Success(policy)
+			case None =>
+				val dest = item.dest
+				val destState = dest.state(states)
+				val liquidSrc = item.srcs.head.obj.state(states).liquid
+				robot.getDispensePolicy(liquidSrc, tip, item.nVolume, destState.nVolume) match {
+					case None => Error("no dispense policy found for "+tip+" and "+dest)
+					case Some(policy) => Success(policy)
+				}
+		}
+	}
 	
 	/*
 	/*case class ItemC(item: L3A_PipetteItem, tip: TipConfigL2)
