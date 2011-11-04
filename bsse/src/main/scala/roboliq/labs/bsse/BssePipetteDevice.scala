@@ -97,15 +97,14 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	
 	def assignTips(tipsFree: SortedSet[Tip], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[Tip]]] = {
 		val tips = HashSet(tipsFree.toSeq : _*)
-		var tips1000 = tipsFree.filter(_.index < 4).toSeq
-		var tips50 = tipsFree.filter(_.index >= 4).toSeq
 		val llTip = tipModelCounts.map(pair => {
 			val (tipModel, nTips) = pair
 			val tipsForModel = tips.intersect(mapModelToTips(tipModel))
-			if (nTips <= tips1000.size)
-				return Error("INTERNAL ERROR: assignTips: not enough tips")
-			tips --= tipsForModel
-			SortedSet(tipsForModel.toSeq : _*)
+			if (nTips > tipsForModel.size)
+				return Error("INTERNAL ERROR: assignTips: not enough tips"+(tipsFree, tipModelCounts))
+			val tips1 = tipsForModel.toSeq.take(nTips)
+			tips --= tips1
+			SortedSet(tips1 : _*)
 		})
 		Success(llTip)
 	}

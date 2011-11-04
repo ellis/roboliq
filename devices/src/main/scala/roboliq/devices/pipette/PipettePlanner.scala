@@ -48,7 +48,12 @@ class PipettePlanner(
 		override def toString: String = {
 			List(
 				"mLMToItems:\n"+mLMToItems.toSeq.map(pair => pair._1.toString + " -> " + L3A_PipetteItem.toDebugString(pair._2)).mkString("    ", "\n    ", ""),
-				lItem.mkString("lItem:\n    ", "\n    ", "")
+				lItem.mkString("lItem:\n    ", "\n    ", ""),
+				lLM.map(lm => lm.toString + " -> " + mLMData(lm)).mkString("mLMData:\n    ", "\n    ", ""),
+				lLM.map(lm => lm.toString + " -> " + mLMTipCounts(lm)).mkString("mLMCounts:\n    ", "\n    ", ""),
+				lLM.map(lm => lm.toString + " -> " + mLMToTips(lm)).mkString("mLMToTips:\n    ", "\n    ", ""),
+				lDispense.mkString("lDispense:\n    ", "\n    ", ""),
+				lAspirate.mkString("lAspirate:\n    ", "\n    ", "")
 			).mkString("GroupZ(\n  ", "\n  ", ")\n")
 		}
 	}
@@ -331,10 +336,14 @@ class PipettePlanner(
 		val lM = g0.lLM.map(_.tipModel).distinct
 		val lMToCount = lM.map(m => m -> mMToCount(m))
 		
+		println("lM: " + lM)
+		println("lMToCount: " + lMToCount)
+		
 		val llTip = device.assignTips(device.config.tips, lMToCount) match {
 			case Error(lsError) => return GroupError(g0, lsError)
 			case Success(x) => x.map(_.map(_.state(g0.states0).conf))
 		}
+		println("llTip: " + llTip)
 		
 		val mLMToTips = (g0.lLM zip llTip).toMap
 		val mTipToLM = mLMToTips.flatMap(pair => pair._2.toSeq.map(_.state(g0.states0).conf -> pair._1)) 
@@ -347,8 +356,8 @@ class PipettePlanner(
 	def updateGroupZ5_mDestToTip(g0: GroupZ): GroupResult = {
 		//val mDestToTip = new HashMap[Item, TipConfigL2]
 		GroupSuccess(g0.copy(
-			mDestToTip = g0.mLMToItems.flatMap(pair => {
-				val (lm, lItem) = pair
+			mDestToTip = g0.lLM.flatMap(lm => {
+				val lItem = g0.mLMToItems(lm)
 				val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
 				val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
 				val ltw = PipetteHelper.chooseTipWellPairsAll(ctx.states, lTip, lDest).flatten
@@ -390,6 +399,9 @@ class PipettePlanner(
 			val srcs = SortedSet(lItem.flatMap(_.srcs) : _*)
 			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
 			val ltw = lltw.flatMap(identity)
+			println("srcs: " + srcs)
+			println("ltw: " + ltw)
+			println("g0: " + g0)
 			ltw.map(tw => {
 				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0))
 				if (policy_?.isEmpty)
