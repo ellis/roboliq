@@ -120,7 +120,32 @@ case class L4A_PipetteItem(
 }
 
 case class L3A_PipetteItem(
-		val srcs: SortedSet[WellConfigL2],
-		val dest: WellConfigL2,
-		val nVolume: Double
-		)
+	val srcs: SortedSet[WellConfigL2],
+	val dest: WellConfigL2,
+	val nVolume: Double
+)
+
+object L3A_PipetteItem {
+	def toDebugString(items: Seq[L3A_PipetteItem]) = {
+		val srcs = items.groupBy(_.srcs).keys
+		if (srcs.size == 1) {
+			val sSrcs = Command.getWellsDebugString(srcs.head)
+			val sDests = Command.getWellsDebugString(items.map(_.dest))
+			val sVolumes = Command.getSeqDebugString(items.map(_.nVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+		else if (items.forall(_.srcs.size == 1)) {
+			val sSrcs = Command.getWellsDebugString(items.map(_.srcs.head))
+			val sDests = Command.getWellsDebugString(items.map(_.dest))
+			val sVolumes = Command.getSeqDebugString(items.map(_.nVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+		else {
+			val lsSrcs = items.map(item => Command.getWellsDebugString(item.srcs))
+			val sSrcs = Command.getSeqDebugString(lsSrcs)
+			val sDests = Command.getWellsDebugString(items.map(_.dest))
+			val sVolumes = Command.getSeqDebugString(items.map(_.nVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+	}
+}

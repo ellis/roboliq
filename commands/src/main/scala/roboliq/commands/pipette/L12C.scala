@@ -44,6 +44,16 @@ sealed class L2A_SpirateItem(
 	}
 }
 
+object L2A_SpirateItem {
+	def toDebugString(items: Seq[L2A_SpirateItem]) = {
+		val wells = items.map(_.well)
+		val sTips = TipSet.toDebugString(items.map(_.tip))
+		val sVolumes = Command.getSeqDebugString(items.map(_.nVolume))
+		val sPolicies = Command.getSeqDebugString(items.map(_.policy.id))
+		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+Command.getWellsDebugString(wells)+")" 
+	}
+}
+
 sealed class L1A_SpirateItem(
 	val itemL2: L2A_SpirateItem,
 	val location: String

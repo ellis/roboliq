@@ -21,29 +21,43 @@ class PipettePlanner(
 	}
 	
 	type Item = L3A_PipetteItem
-	case class LM(liquid: Liquid, tipModel: TipModel)
+	case class LM(liquid: Liquid, tipModel: TipModel) {
+		override def toString: String = {
+			"LM("+liquid.getName()+", "+tipModel.id+")"
+		}
+	}
 	case class LMData(nTips: Int, nVolumeTotal: Double, nVolumeCurrent: Double)
 	case class GroupZ(
-		states0: RobotState,
-		lItem: Seq[Item],
 		mLM: Map[Item, LM],
 		mLMToItems: Map[LM, Seq[Item]],
+		states0: RobotState,
+		tipBindings0: Map[TipConfigL2, LM],
+		lItem: Seq[Item],
+		lLM: Seq[LM],
 		mLMData: Map[LM, LMData],
 		mLMTipCounts: Map[LM, Int],
-		mLMToTips: Map[LM, SortedSet[Tip]],
+		mLMToTips: Map[LM, SortedSet[TipConfigL2]],
+		mTipToLM: Map[TipConfigL2, LM],
 		mDestToTip: Map[Item, TipConfigL2],
 		mTipToVolume: Map[TipConfigL2, Double],
-		lSrcToTip: Seq[TipWellVolume],
-		bClean: Boolean,
-		tipBindings0: Map[TipConfigL2, LM]
+		lDispense: Seq[TipWellVolumePolicy],
+		lAspirate: Seq[TipWellVolumePolicy],
+		bClean: Boolean
 		// FIXME: need to keep track of well contents too, in case we dispense more than once to a given well
-	)
+	) {
+		override def toString: String = {
+			List(
+				"mLMToItems:\n"+mLMToItems.toSeq.map(pair => pair._1.toString + " -> " + L3A_PipetteItem.toDebugString(pair._2)).mkString("    ", "\n    ", ""),
+				lItem.mkString("lItem:\n    ", "\n    ", "")
+			).mkString("GroupZ(\n  ", "\n  ", ")\n")
+		}
+	}
 	case class GroupB(
 		lItem: Seq[Item],
 		bClean: Boolean,
 		premixes: Seq[TipWellVolume], 
-		aspirates: Seq[TipWellVolume], 
-		dispenses: Seq[TipWellVolume], 
+		lAspirate: Seq[L2C_Aspirate], 
+		lDispense: Seq[L2C_Dispense], 
 		postmixes: Seq[TipWellVolume]
 	)
 	case class GroupC(
@@ -90,7 +104,7 @@ class PipettePlanner(
 	}
 	
 	/** For each item, find the source liquid and choose a tip model */
-	def tr1Layers(layers: Seq[Seq[L3A_PipetteItem]]): Result[Map[Item, LM]] = {
+	def tr1Layers(layers: Seq[Seq[Item]]): Result[Map[Item, LM]] = {
 		Result.flatMap(layers)(items => {
 			val mapLiquidToTipModel = chooseTipModels(items)
 			tr1Items(items).map(_.toSeq)
@@ -98,7 +112,7 @@ class PipettePlanner(
 	}
 	
 	/** For each item, find the source liquid and choose a tip model */
-	def tr1Items(items: Seq[L3A_PipetteItem]): Result[Map[Item, LM]] = {
+	def tr1Items(items: Seq[Item]): Result[Map[Item, LM]] = {
 		val mapLiquidToTipModel = chooseTipModels(items)
 		val mLM = items.map(item => {
 			val liquid = item.srcs.head.state(ctx.states).liquid
@@ -129,17 +143,17 @@ class PipettePlanner(
 	case class GroupError(groupZ: GroupZ, lsError: Seq[String]) extends GroupResult {
 		def flatMap(f: GroupZ => GroupResult): GroupResult = this
 		def map(f: GroupZ => GroupZ): GroupResult = this
-		def isError: Boolean = true
+		override def isError: Boolean = true
 	}
 	case class GroupSuccess(groupZ: GroupZ) extends GroupResult {
 		def flatMap(f: GroupZ => GroupResult): GroupResult = f(groupZ)
 		def map(f: GroupZ => GroupZ): GroupResult = GroupSuccess(f(groupZ))
-		def isSuccess: Boolean = true
+		override def isSuccess: Boolean = true
 	}
 	case class GroupStop(groupZ: GroupZ) extends GroupResult {
 		def flatMap(f: GroupZ => GroupResult): GroupResult = this
 		def map(f: GroupZ => GroupZ): GroupResult = this
-		def isStop: Boolean = true
+		override def isStop: Boolean = true
 	}
 
 	/*def tr(
@@ -149,105 +163,94 @@ class PipettePlanner(
 		items(i)
 	}*/
 
-	def tr_groupZ(
+	
+/*
+	case class GroupZ(
 		states0: RobotState,
-		item: Item,
-		mLM: Map[Item, LM]
-	): Result[GroupZ] = {
-		//val groupA0 = GroupA(Nil, Map(), false, Map(), Nil, Double.MaxValue)
-		val groupZ0 = GroupZ(states0, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, false, Map())
-		for {
-			groupZ_? <- tr_groupZ(groupZ0, item, mLM)
-			_ <- Result.assert(groupZ_?.isDefined, "Couldn't create pipette group for item "+item)
-		}
-		yield  groupZ_?.get
-	}
-	
-	def tr_groupZ(
-		groupZ0: GroupZ,
-		item: L3A_PipetteItem,
-		mLM: Map[L3A_PipetteItem, LM]
-	): Result[Option[GroupZ]] = {
-		val lItem = groupZ0.lItem ++ Seq(item)
-		val lm = mLM(item)
-		// Find items for each LM
-		val mLMToItems: Map[LM, Seq[Item]] = lItem.groupBy(item => mLM(item))
-		
-		for {
-			mLMData <- tr2_mLMData(groupZ0.mLMData, lm, item)
-			x1 <- tr3_mLMTipCounts(lItem, mLM, mLMToItems, mLMData, groupZ0.tipBindings0, groupZ0.bClean)
-			groupZ_? <- tr_groupZ(groupZ0, lItem, mLM, mLMToItems, mLMData, x1)
-		} yield {
-			groupZ_?
-		}
-	}
-
-	def tr_groupZ(
-		groupZ0: GroupZ,
-		lItem: Seq[Item],
-		mLM: Map[L3A_PipetteItem, LM],
-		mLMToItems: Map[LM, Seq[Item]],
-		mLMData: Map[LM, LMData],
-		x1: Option[Tuple2[Map[LM, Int], Boolean]]
-	): Result[Option[GroupZ]] = {
-		if (x1.isEmpty)
-			return Success(None)
-		
-		val (mLMTipCounts, bClean) = x1.get
-		val tipBindings = if (bClean) Map[TipConfigL2, LM]() else groupZ0.tipBindings0
-		for {
-			mLMToTips <- tr4_mLMToTips(lItem, mLM, mLMToItems, mLMTipCounts, tipBindings)
-			mDestToTip <- tr5_mDestToTip(lItem, mLM, mLMToItems, mLMToTips)
-			mTipToVolume <- tr6_mTipToVolume(lItem, mLM, mLMToItems, mLMToTips, mDestToTip)
-		} yield {
-			val tipBindings1: Map[TipConfigL2, LM] = mLMToTips.flatMap(pair => pair._2.toSeq.map(_.state(groupZ0.states0).conf -> pair._1)) 
-			Some(GroupZ(
-				groupZ0.states0,
-				lItem,
-				mLM,
-				mLMToItems,
-				mLMData,
-				mLMTipCounts,
-				mLMToTips,
-				mDestToTip,
-				mTipToVolume,
-				Nil,
-				bClean,
-				tipBindings1))
-		}
-	}
-	
-	/** Add the item's volume to mLMData to keep track of how many tips are needed for each LM */
-	def tr2_mLMData(mLMData: Map[LM, LMData], lm: LM, item: Item): Result[Map[LM, LMData]] = {
-		for {
-			_ <- Result.assert(item.nVolume <= lm.tipModel.nVolume, "pipette volume exceeds volume of tip: "+item)
-		} yield {
-			val data = mLMData.get(lm) match {
-				case None =>
-					LMData(1, item.nVolume, item.nVolume)
-				case Some(data) =>
-					val nVolumeCurrent = data.nVolumeCurrent + item.nVolume
-					val nVolumeTotal = data.nVolumeTotal + item.nVolume
-					if (data.nVolumeCurrent == 0)
-						LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
-					else if (nVolumeCurrent <= lm.tipModel.nVolume)
-						LMData(data.nTips, nVolumeTotal, nVolumeCurrent)
-					else
-						LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
-			}
-			mLMData.updated(lm, data)
-		}
-	}
-	
-	// Choose number of tips per LM, and indicate whether we need to clean the tips first 
-	def tr3_mLMTipCounts(
 		lItem: Seq[Item],
 		mLM: Map[Item, LM],
 		mLMToItems: Map[LM, Seq[Item]],
 		mLMData: Map[LM, LMData],
-		tipBindings0: Map[TipConfigL2, LM],
-		bClean: Boolean
-	): Result[Option[Tuple2[Map[LM, Int], Boolean]]] = {
+		mLMTipCounts: Map[LM, Int],
+		mLMToTips: Map[LM, SortedSet[Tip]],
+		mDestToTip: Map[Item, TipConfigL2],
+		mTipToVolume: Map[TipConfigL2, Double],
+		lSrcToTip: Seq[TipWellVolume],
+		bClean: Boolean,
+		tipBindings0: Map[TipConfigL2, LM]
+		// FIXME: need to keep track of well contents too, in case we dispense more than once to a given well
+	)
+*/
+	
+	def createGroupZ(
+		states0: RobotState,
+		mLM: Map[Item, LM]
+	): GroupResult = {
+		val mLMToItems: Map[LM, Seq[Item]] = mLM.toSeq.groupBy(_._2).mapValues(_.map(_._1)).toMap
+		createGroupZ(states0, mLM, mLMToItems)
+	}
+	
+	def createGroupZ(
+		states0: RobotState,
+		mLM: Map[Item, LM],
+		mLMToItems: Map[LM, Seq[Item]]
+	): GroupResult = {
+		val groupZ0 = GroupZ(mLM, mLMToItems, states0, Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false)
+		GroupSuccess(groupZ0)
+	}
+	
+	def addItemToGroup(
+		g0: GroupZ,
+		item: L3A_PipetteItem
+	): GroupResult = {
+		for {
+			g <- GroupSuccess(g0) >>=
+				updateGroupZ2_mLMData(item) >>= 
+				updateGroupZ3_mLMTipCounts >>=
+				updateGroupZ4_mLMToTips >>=
+				updateGroupZ5_mDestToTip >>=
+				updateGroupZ6_mTipToVolume >>=
+				updateGroupZ7_lDispense >>=
+				updateGroupZ8_lAspirate
+		} yield {
+			g
+		}
+	}
+
+	/** Add the item's volume to mLMData to keep track of how many tips are needed for each LM */
+	def updateGroupZ2_mLMData(item: Item)(g0: GroupZ): GroupResult = {
+		val lItem = g0.lItem ++ Seq(item)
+		// Get a list of LMs in the order defined by lItem
+		val lLM = lItem.map(g0.mLM).toList.distinct
+		val lm = g0.mLM(item)
+		if (item.nVolume > lm.tipModel.nVolume)
+			GroupError(g0, Seq("pipette volume exceeds volume of tip: "+item))
+		
+		val data = g0.mLMData.get(lm) match {
+			case None =>
+				LMData(1, item.nVolume, item.nVolume)
+			case Some(data) =>
+				val nVolumeCurrent = data.nVolumeCurrent + item.nVolume
+				val nVolumeTotal = data.nVolumeTotal + item.nVolume
+				if (data.nVolumeCurrent == 0)
+					LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
+				else if (nVolumeCurrent <= lm.tipModel.nVolume)
+					LMData(data.nTips, nVolumeTotal, nVolumeCurrent)
+				else
+					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
+		}
+		
+		// TODO: if a source of item is in the list of previous destinations, return GroupStop(g0)
+		
+		GroupSuccess(g0.copy(
+			lItem = lItem,
+			lLM = lLM, 
+			mLMData = g0.mLMData.updated(lm, data)
+		))
+	}
+	
+	// Choose number of tips per LM, and indicate whether we need to clean the tips first 
+	def updateGroupZ3_mLMTipCounts(g0: GroupZ): GroupResult = {
 		// for i = 1 to max diff between min and max tips needed for any LM:
 		//   create map of tipModel -> sum for each LM with given tip model of math.min(max tips, min tips + i)
 		//   if device can't accommodate those tip counts, break and use the previous successful count
@@ -258,9 +261,9 @@ class PipettePlanner(
 		//     call chooseTips() again, but with no tipBindings0 and indicate on return that a cleaning was required
 		
 		// for each LM: find max number of adjacent wells for aspirate/dispense
-		val mLMToAdjacent: Map[LM, Int] = mLMToItems.mapValues(countMaxAdjacentWells)
+		val mLMToAdjacent: Map[LM, Int] = g0.mLMToItems.mapValues(countMaxAdjacentWells)
 		// list of tip count ranges: (LM, nTipsMin, nTipsMap)
-		val lLMRange1: Seq[Tuple3[LM, Int, Int]] = mLMData.toSeq.map(pair => {
+		val lLMRange1: Seq[Tuple3[LM, Int, Int]] = g0.mLMData.toSeq.map(pair => {
 			val lm = pair._1
 			val nTipsMin = pair._2.nTips
 			// nTipsMax = max(min tips needed to hold total liquid volume, max number of adjacent wells which will be dispensed into)
@@ -269,7 +272,7 @@ class PipettePlanner(
 		})
 		// Account for tipBindings0 in addition to lLMRange
 		val lLMRange2: Seq[Tuple3[LM, Int, Int]] =
-			lLMRange1 ++ tipBindings0.toSeq.filter(pair => !mLMData.contains(pair._2)).map(pair => (pair._2, 1, 1))
+			lLMRange1 ++ g0.tipBindings0.toSeq.filter(pair => !g0.mLMData.contains(pair._2)).map(pair => (pair._2, 1, 1))
 		// Maximum number of tips we might like to add to the minimum required for any LM
 		val nDiffMax = lLMRange2.foldLeft(0)((acc, tuple) => math.max(acc, tuple._3 - tuple._2))
 		// Map of tipModel to the corresponding lLMRange2 items
@@ -293,20 +296,24 @@ class PipettePlanner(
 						loop1(nAdd + 1)
 			}
 		}
-		
-		for { nAdd <- loop1(0) }
-		yield {
-			// if no successful counts were found, call chooseTips() again, but with no tipBindings0 and indicate on return that a cleaning was required
-			if (nAdd < 0) {
-				if (tipBindings0.isEmpty)
-					None
-				else
-					return tr3_mLMTipCounts(lItem, mLM, mLMToItems, mLMData, Map(), true)
-			}
-			else {
+
+		val nAdd = loop1(0) match {
+			case Error(lsError) => return GroupError(g0, lsError)
+			case Success(n) => n
+		}
+
+		// if no successful counts were found, call chooseTips() again, but with no tipBindings0 and indicate on return that a cleaning was required
+		if (nAdd < 0) {
+			if (g0.tipBindings0.isEmpty)
+				GroupStop(g0)
+			else
+				updateGroupZ3_mLMTipCounts(g0.copy(tipBindings0 = Map(), bClean = true))
+		}
+		else {
+			GroupSuccess(g0.copy(
 				// Number of tips per LM
-				Some(lLMRange2.map(range => range._1 -> math.min(range._2 + nAdd, range._3)).toMap -> bClean)
-			}
+				mLMTipCounts = lLMRange2.map(range => range._1 -> math.min(range._2 + nAdd, range._3)).toMap
+			))
 		}
 	}
 	
@@ -316,99 +323,116 @@ class PipettePlanner(
 		WellGroup(lWell).splitByAdjacent().foldLeft(0)((acc, group) => math.max(acc, group.set.size))
 	}
 	
-	def tr4_mLMToTips(
-		lItem: Seq[Item],
-		mLM: Map[Item, LM],
-		mLMToItems: Map[LM, Seq[Item]],
-		mLMTipCounts: Map[LM, Int],
-		tipBindings0: Map[TipConfigL2, LM]
-	): Result[Map[LM, SortedSet[Tip]]] = {
-		val tipsFree = HashSet((device.config.tips -- tipBindings0.map(_._1.obj)).toSeq : _*)
-		// Get a list of LMs in the order defined by lItem
-		val lLM = lItem.map(mLM).toList.distinct
-		val mMToLM = lLM.groupBy(_.tipModel)
+	def updateGroupZ4_mLMToTips(g0: GroupZ): GroupResult = {
+		val tipsFree = HashSet((device.config.tips -- g0.tipBindings0.map(_._1.obj)).toSeq : _*)
+		val mMToLM = g0.lLM.groupBy(_.tipModel)
 		// Number of tips required for each model
-		val mMToCount = mLMTipCounts.toSeq.groupBy(_._1.tipModel).mapValues(_.foldLeft(0)((acc, item) => acc + item._2)).toMap
-		val lM = lLM.map(_.tipModel).distinct
+		val mMToCount = g0.mLMTipCounts.toSeq.groupBy(_._1.tipModel).mapValues(_.foldLeft(0)((acc, item) => acc + item._2)).toMap
+		val lM = g0.lLM.map(_.tipModel).distinct
 		val lMToCount = lM.map(m => m -> mMToCount(m))
 		
-		for {
-			llTip <- device.assignTips(device.config.tips, lMToCount)
-		} yield {
-			val lLMTips: Seq[Tuple2[LM, SortedSet[Tip]]] = lLM zip llTip
-			lLMTips.toMap
+		val llTip = device.assignTips(device.config.tips, lMToCount) match {
+			case Error(lsError) => return GroupError(g0, lsError)
+			case Success(x) => x.map(_.map(_.state(g0.states0).conf))
 		}
+		
+		val mLMToTips = (g0.lLM zip llTip).toMap
+		val mTipToLM = mLMToTips.flatMap(pair => pair._2.toSeq.map(_.state(g0.states0).conf -> pair._1)) 
+		GroupSuccess(g0.copy(
+			mLMToTips = mLMToTips,
+			mTipToLM = mTipToLM
+		))
 	}
 	
-	def tr5_mDestToTip(
-		lItem: Seq[Item],
-		mLM: Map[Item, LM],
-		mLMToItems: Map[LM, Seq[Item]],
-		mLMToTips: Map[LM, SortedSet[Tip]]
-	): Result[Map[Item, TipConfigL2]] = {
-		val mDestToTip = new HashMap[Item, TipConfigL2]
-		Success(mLMToItems.flatMap(pair => {
-			val (lm, lItem) = pair
-			val lTip = mLMToTips(lm).map(_.state(ctx.states).conf)
-			val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
-			val ltw = PipetteHelper.chooseTipWellPairsAll(ctx.states, lTip, lDest).flatten
-			(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
-		}).toMap)
+	def updateGroupZ5_mDestToTip(g0: GroupZ): GroupResult = {
+		//val mDestToTip = new HashMap[Item, TipConfigL2]
+		GroupSuccess(g0.copy(
+			mDestToTip = g0.mLMToItems.flatMap(pair => {
+				val (lm, lItem) = pair
+				val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
+				val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
+				val ltw = PipetteHelper.chooseTipWellPairsAll(ctx.states, lTip, lDest).flatten
+				(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
+			}).toMap)
+		)
 	}
 	
-	def tr6_mTipToVolume(
-		lItem: Seq[Item],
-		mLM: Map[Item, LM],
-		mLMToItems: Map[LM, Seq[Item]],
-		mLMToTips: Map[LM, SortedSet[Tip]],
-		mDestToTip: Map[Item, TipConfigL2]
-	): Result[Map[TipConfigL2, Double]] = {
-		Success(mDestToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap)
+	def updateGroupZ6_mTipToVolume(g0: GroupZ): GroupResult = {
+		GroupSuccess(g0.copy(
+			mTipToVolume = g0.mDestToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap
+		))
+	}
+
+	def updateGroupZ7_lDispense(g0: GroupZ): GroupResult = {
+		val builder = new StateBuilder(g0.states0)
+		val lDispense = for (item <- g0.lItem) yield {
+			val tip = g0.mDestToTip(item)
+			val liquid = g0.mLM(item).liquid
+			val nVolume = item.nVolume
+			val nVolumeDest = item.dest.obj.state(builder).nVolume
+			// TODO: allow for policy override
+			val policy_? = device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest)
+			if (policy_?.isEmpty)
+				return GroupError(g0, Seq("Could not find dispense policy for item "+item))
+			item.dest.obj.stateWriter(builder).add(liquid, nVolume)
+			new TipWellVolumePolicy(tip, item.dest, nVolume, policy_?.get)
+		}
+		// TODO: check whether any of the dispenses force a new cleaning, and if so, return GroupStop(g0)
+		GroupSuccess(g0.copy(
+			lDispense = lDispense
+		))
+	}
+
+	def updateGroupZ8_lAspirate(g0: GroupZ): GroupResult = {
+		val lAspirate = g0.lLM.flatMap(lm => {
+			val tips = g0.mLMToTips(lm)
+			val lItem = g0.lItem.filter(item => g0.mLM(item) == lm)
+			val srcs = SortedSet(lItem.flatMap(_.srcs) : _*)
+			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
+			val ltw = lltw.flatMap(identity)
+			ltw.map(tw => {
+				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0))
+				if (policy_?.isEmpty)
+					return GroupError(g0, Seq("Could not find aspirate policy for "+tw.tip+" and "+tw.well))
+				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy_?.get)
+			})
+		})
+		GroupSuccess(g0.copy(
+			lAspirate = lAspirate
+		))
 	}
 	
 	def tr_groupB(
-		groupZ: GroupZ,
-		pipettePolicy_? : Option[PipettePolicy]
+		groupZ: GroupZ
 	): Result[GroupB] = {
-		val dispenses = groupZ.lItem.map(item => {
-			val tip = groupZ.mDestToTip(item)
-			val nVolume = item.nVolume
-			getDispensePolicy(ctx.states, tip, item, nVolume, pipettePolicy_?) match {
-				case Error(sError) => return Error(sError)
-				case Success(policy) =>
-					new L2A_SpirateItem(tip, item.dest, nVolume, policy)
-			}
-		})
-		val aspirates = 
+		val lAspirate = groupSpirateItems(groupZ, groupZ.lAspirate).map(items => L2C_Aspirate(items))
+		val lDispense = groupSpirateItems(groupZ, groupZ.lAspirate).map(items => L2C_Dispense(items))
+			
 		val groupB = GroupB(
 			groupZ.lItem,
 			groupZ.bClean,
 			Nil,
-			aspirates,
-			dispenses,
+			lAspirate = lAspirate,
+			lDispense = lDispense,
 			Nil
 		)
 		Success(groupB)
 	}
-
-	private def getDispensePolicy(
-		states: StateMap,
-		tip: TipConfigL2,
-		item: L3A_PipetteItem,
-		nVolume: Double,
-		pipettePolicy_? : Option[PipettePolicy]
-	): Result[PipettePolicy] = {
-		pipettePolicy_? match {
-			case Some(policy) => Success(policy)
-			case None =>
-				val dest = item.dest
-				val destState = dest.state(states)
-				val liquidSrc = item.srcs.head.obj.state(states).liquid
-				robot.getDispensePolicy(liquidSrc, tip, item.nVolume, destState.nVolume) match {
-					case None => Error("no dispense policy found for "+tip+" and "+dest)
-					case Some(policy) => Success(policy)
-				}
-		}
+	
+	def groupSpirateItems(
+		groupZ: GroupZ,
+		lTwvp: Seq[TipWellVolumePolicy]
+	): Seq[Seq[L2A_SpirateItem]] = {
+		// Group by: tipModel, pipettePolicy
+		val ma: Map[Tuple2[TipModel, PipettePolicy], Seq[TipWellVolumePolicy]]
+			= lTwvp.groupBy(twvp => (groupZ.mTipToLM(twvp.tip).tipModel, twvp.policy))
+		// Order of (tipModel, pipettePolicy)
+		val lMP: Seq[Tuple2[TipModel, PipettePolicy]]
+			= lTwvp.map(twvp => (groupZ.mTipToLM(twvp.tip).tipModel, twvp.policy)).distinct
+		// Create list of list of spirate items
+		lMP.map(mp => {
+			ma(mp).map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy))
+		})
 	}
 	
 	/*

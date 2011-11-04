@@ -1,6 +1,7 @@
 package roboliq.labs.bsse
 
 import scala.collection.immutable.SortedSet
+import scala.collection.mutable.HashSet
 
 import roboliq.common._
 import roboliq.commands.pipette._
@@ -11,15 +12,20 @@ import roboliq.robots.evoware.devices.EvowarePipetteDevice
 
 
 class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends EvowarePipetteDevice {
+	val tips1000 = SortedSet((0 to 3).map(i => new Tip(i)) : _*)
+	val tips50 = SortedSet((4 to 7).map(i => new Tip(i)) : _*)
 	val config = new PipetteDeviceConfig(
 		tipSpecs = Seq(tipModel50, tipModel1000),
-		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
+		tips = tips1000 ++ tips50,
 		tipGroups = {
 			val g1000 = (0 to 3).map(i => i -> tipModel1000).toSeq
 			val g50 = (4 to 7).map(i => i -> tipModel50).toSeq
 			Seq(g1000, g50)
 		}
 	)
+	val mapIndexToTip = config.tips.toSeq.map(tip => tip.index -> tip).toMap
+	val mapModelToTips = Map(tipModel1000 -> tips1000, tipModel50 -> tips50)
+	val mapTipToModels = mapModelToTips.flatMap(pair => (pair._2.toSeq).map(_ -> pair._1))
 	val mapTipModels = config.tipSpecs.map(spec => spec.id -> spec).toMap
 
 	val plateDecon = new Plate
@@ -88,8 +94,32 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		})
 		Success(b)
 	}
+	
+	def assignTips(tipsFree: SortedSet[Tip], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[Tip]]] = {
+		val tips = HashSet(tipsFree.toSeq : _*)
+		var tips1000 = tipsFree.filter(_.index < 4).toSeq
+		var tips50 = tipsFree.filter(_.index >= 4).toSeq
+		val llTip = tipModelCounts.map(pair => {
+			val (tipModel, nTips) = pair
+			val tipsForModel = tips.intersect(mapModelToTips(tipModel))
+			if (nTips <= tips1000.size)
+				return Error("INTERNAL ERROR: assignTips: not enough tips")
+			tips --= tipsForModel
+			SortedSet(tipsForModel.toSeq : _*)
+		})
+		Success(llTip)
+	}
 
 	def areTipsDisposable: Boolean = false
+	
+	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: Double, nVolumeDest: Double): Seq[TipModel] = {
+		val b1000 =
+			(nVolume >= tipModel1000.nVolumeAspirateMin)
+		val b50 =
+			(nVolume >= tipModel50.nVolumeAspirateMin && nVolume <= tipModel50.nVolume && !liquid.contaminants.contains(Contaminant.Cell))
+		
+		(if (b1000) Seq(tipModel1000) else Seq()) ++ (if (b50) Seq(tipModel50) else Seq())
+	}
 	
 	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
 		import PipettePosition._
