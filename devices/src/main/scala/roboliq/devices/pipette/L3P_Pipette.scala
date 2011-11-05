@@ -21,9 +21,25 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 		} {
 			planner.createGroupZ(ctx.states, mLM) match {
 				case planner.GroupSuccess(g1) =>
-					val g2 = planner.addItemToGroup(g1, cmd.args.items.head)
-					println("g2:")
-					println(g2)
+					var g = g1
+					var b = true
+					var i = 1;
+					var items = cmd.args.items
+					while (b && !items.isEmpty) {
+						val item = items.head
+						items = items.tail
+						planner.addItemToGroup(g, item) match {
+							case planner.GroupSuccess(g2) =>
+								g = g2
+								println("g"+i+":" + g)
+								i += 1
+							case _ =>
+								println("g*:"+g)
+								b = false
+								// FIXME: for debug only
+								Seq[Int]().head
+						}
+					}
 				case g1 =>
 					println("g1:")
 					println(g1)

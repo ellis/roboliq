@@ -95,18 +95,28 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		Success(b)
 	}
 	
-	def assignTips(tipsFree: SortedSet[Tip], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[Tip]]] = {
-		val tips = HashSet(tipsFree.toSeq : _*)
+	/*
+	def assignTips(tipsFree: SortedSet[TipConfigL2], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[TipConfigL2]]] = {
+		var tips = tipsFree
 		val llTip = tipModelCounts.map(pair => {
 			val (tipModel, nTips) = pair
-			val tipsForModel = tips.intersect(mapModelToTips(tipModel))
+			val tipsForModel = tips.filter(tip => mapModelToTips(tipModel).contains(tip.obj))
 			if (nTips > tipsForModel.size)
 				return Error("INTERNAL ERROR: assignTips: not enough tips"+(tipsFree, tipModelCounts))
 			val tips1 = tipsForModel.toSeq.take(nTips)
-			tips --= tips1
+			tips = tips -- tips1
 			SortedSet(tips1 : _*)
 		})
 		Success(llTip)
+	}
+	*/
+
+	def assignTips(lTipAvailable: SortedSet[TipConfigL2], tipModel: TipModel, nTips: Int): Result[SortedSet[TipConfigL2]] = {
+		val lTipAppropriate = lTipAvailable.filter(tip => mapModelToTips(tipModel).contains(tip.obj))
+		if (nTips > lTipAppropriate.size)
+			return Error("INTERNAL ERROR: assignTips: not enough tips"+(lTipAvailable, tipModel, nTips))
+		val lTip = lTipAppropriate.take(nTips)
+		Success(lTip)
 	}
 
 	def areTipsDisposable: Boolean = false

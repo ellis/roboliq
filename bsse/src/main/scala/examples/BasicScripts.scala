@@ -9,15 +9,20 @@ class AbstractExample01 extends Protocol {
 	val plate1 = new Plate
 	
 	pipette(ddw, plate1, 30 ul)
-	mix(plate1, 30 ul, 5)
+	//mix(plate1, 30 ul, 5)
 }
 
-class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends AbstractExample01 {
+//class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends AbstractExample01 {
+class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
+	val ddw = new Liquid("Water", CleanPolicy.NNN)
+	val plate1 = new Plate
+	
+	pipette(ddw, plate1, 30 ul)
+	
 	val lab = new EvowareLab {
 		import station._
-		//ddw.setup.group_? = Some(new roboliq.common.LiquidGroup(CleanPolicy.DDD))
 		reagent(ddw, Labwares.reagents15, 1, 8)
-		labware(plate1, Sites.cooled1, LabwareModels.platePcr)
+		labware(plate1, Sites.cooled1, LabwareModels.test8x2)
 	}
 }
 

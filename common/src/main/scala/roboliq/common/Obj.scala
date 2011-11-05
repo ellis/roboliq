@@ -84,18 +84,20 @@ class Well extends Obj { thisObj =>
 					case _ =>
 				}
 		}
-		setup.reagent_? match {
-			case None =>
+		val liquid_? : Option[Liquid] = setup.reagent_? match {
+			case None => None
 			case Some(reagent) =>
 				states.map.get(reagent) match {
-					case None => errors += "well's reagent is not listed in state map"
+					case None =>
+						errors += "well's reagent is not listed in state map"
+						None
 					case _ =>
+						Some(reagent.state(states).conf.liquid)
 				}
 		}
 		if (setup.index_?.isEmpty)
 			errors += "index not set"
 				
-		val liquid_? = setup.reagent_?.map(_.state(states).conf.liquid)
 		if (setup.bRequiresIntialLiq_?.getOrElse(false) && liquid_?.isEmpty)
 			errors += "must specify initial liquid for source wells"
 			

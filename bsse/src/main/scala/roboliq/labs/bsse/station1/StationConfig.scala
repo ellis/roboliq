@@ -89,7 +89,8 @@ class StationConfig extends EvowareTable {
 		val platePcr = new PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, 500) // FIXME: nVolume? 
 		val plateCostar = new PlateModel("D-BSSE 96 Well Costar Plate", 8, 12, 500) // FIXME: nVolume? 
 		val eppendorfs = new PlateModel("Block 20Pos 1.5 ml Eppendorf", 4, 5, 1500) // FIXME: nVolume?
-		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500) // FIXME: nVolume?
+		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500)
+		val test8x2 = new PlateModel("test 8x2 Plate", 8, 2, 500)
 		//"MTP Waste"
 	}
 	object Labwares {

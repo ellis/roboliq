@@ -12,7 +12,8 @@ abstract class PipetteDevice extends Device {
 	
 	def addKnowledge(kb: KnowledgeBase)
 	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
-	def assignTips(tipsFree: SortedSet[Tip], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[Tip]]]
+	//def assignTips(tipsFree: SortedSet[TipConfigL2], tipModelCounts: Seq[Tuple2[TipModel, Int]]): Result[Seq[SortedSet[TipConfigL2]]]
+	def assignTips(tipsFree: SortedSet[TipConfigL2], tipModel: TipModel, nTips: Int): Result[SortedSet[TipConfigL2]]
 	def areTipsDisposable: Boolean
 	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: Double, nVolumeDest: Double): Seq[TipModel]
 	/** Minimum volume which can be aspirated */
