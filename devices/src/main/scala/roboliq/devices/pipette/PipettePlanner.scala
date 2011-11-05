@@ -68,7 +68,16 @@ class PipettePlanner(
 		lAspirate: Seq[L2C_Aspirate], 
 		lDispense: Seq[L2C_Dispense], 
 		postmixes: Seq[TipWellVolume]
-	)
+	) {
+		override def toString: String = {
+			List(
+				//"mLMToItems:\n"+mLMToItems.toSeq.map(pair => pair._1.toString + " -> " + L3A_PipetteItem.toDebugString(pair._2)).mkString("    ", "\n    ", ""),
+				"lItem:\n    "+L3A_PipetteItem.toDebugString(lItem),
+				lAspirate.map(_.toDebugString).mkString("lAspirate:\n    ", "\n    ", ""),
+				lDispense.map(_.toDebugString).mkString("lDispense:\n    ", "\n    ", "")
+			).mkString("GroupB(\n  ", "\n  ", ")\n")
+		}
+	}
 	case class GroupC(
 		nItems: Int,
 		cmds: Seq[Command],
@@ -403,7 +412,7 @@ class PipettePlanner(
 		groupZ: GroupZ
 	): Result[GroupB] = {
 		val lAspirate = groupSpirateItems(groupZ, groupZ.lAspirate).map(items => L2C_Aspirate(items))
-		val lDispense = groupSpirateItems(groupZ, groupZ.lAspirate).map(items => L2C_Dispense(items))
+		val lDispense = groupSpirateItems(groupZ, groupZ.lDispense).map(items => L2C_Dispense(items))
 			
 		val groupB = GroupB(
 			groupZ.lItem,
@@ -420,6 +429,7 @@ class PipettePlanner(
 		groupZ: GroupZ,
 		lTwvp: Seq[TipWellVolumePolicy]
 	): Seq[Seq[L2A_SpirateItem]] = {
+		/*
 		// Group by: tipModel, pipettePolicy
 		val ma: Map[Tuple2[TipModel, PipettePolicy], Seq[TipWellVolumePolicy]]
 			= lTwvp.groupBy(twvp => (groupZ.mTipToLM(twvp.tip).tipModel, twvp.policy))
@@ -431,5 +441,32 @@ class PipettePlanner(
 		lMP.map(mp => {
 			ma(mp).map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy))
 		})
+		*/
+		
+		val x = lTwvp.foldLeft(List[List[TipWellVolumePolicy]]())(groupSpirateItems_add(groupZ))
+		val y = x.reverse.map(_.reverse)
+		y.map(_.map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy)))
+		//val x1 = new ArrayBuffer[Seq[L2A_SpirateItem]]
+		//var x2 = new ArrayBuffer[L2A_SpirateItem]
+	}
+	
+	def groupSpirateItems_add(groupZ: GroupZ)(
+		acc: List[List[TipWellVolumePolicy]],
+		twvp: TipWellVolumePolicy
+	): List[List[TipWellVolumePolicy]] = {
+		acc match {
+			case (xs @ List(x0, _*)) :: rest  =>
+				val tipModel = groupZ.mTipToLM(twvp.tip).tipModel
+				val tipModel0 = groupZ.mTipToLM(x0.tip).tipModel
+				val bTipAlreadyUsed = xs.exists(twvp.tip eq _.tip)
+				val bWellAlreadyVisited = xs.exists(twvp.well eq _.well)
+				// TODO: check which device about whether items can be batched together
+				if (tipModel.eq(tipModel0) && twvp.policy == x0.policy && !bTipAlreadyUsed && !bWellAlreadyVisited)
+					(twvp::xs) :: rest
+				else
+					List(twvp) :: (xs :: rest)
+			case _ =>
+				List(List(twvp))
+		}
 	}
 }

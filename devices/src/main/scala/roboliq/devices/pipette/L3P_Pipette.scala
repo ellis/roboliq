@@ -40,6 +40,15 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 								Seq[Int]().head
 						}
 					}
+					if (i > 1) {
+						planner.tr_groupB(g) match {
+							case Success(groupB) =>
+								println("groupB:")
+								println(groupB)
+							case err =>
+								println("err: " + err)
+						}
+					}
 				case g1 =>
 					println("g1:")
 					println(g1)

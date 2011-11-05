@@ -14,7 +14,7 @@ class AbstractExample01 extends Protocol {
 
 //class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends AbstractExample01 {
 class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
-	val ddw = new Liquid("Water", CleanPolicy.NNN)
+	val ddw = new Liquid("Water", CleanPolicy.TNT)
 	val plate1 = new Plate
 	
 	pipette(ddw, plate1, 30 ul)
