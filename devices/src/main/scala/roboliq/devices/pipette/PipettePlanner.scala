@@ -40,6 +40,7 @@ class PipettePlanner(
 		mTipToLM: Map[TipConfigL2, LM],
 		mDestToTip: Map[Item, TipConfigL2],
 		mTipToVolume: Map[TipConfigL2, Double],
+		mTipToCleanSpec: Map[TipConfigL2, WashSpec],
 		lDispense: Seq[TipWellVolumePolicy],
 		lAspirate: Seq[TipWellVolumePolicy],
 		bClean: Boolean
@@ -52,6 +53,7 @@ class PipettePlanner(
 				lLM.map(lm => lm.toString + " -> " + mLMTipCounts(lm)).mkString("mLMTipCounts:\n    ", "\n    ", ""),
 				lLM.map(lm => lm.toString + " -> " + mLMToTips(lm)).mkString("mLMToTips:\n    ", "\n    ", ""),
 				//lItem.map(item => Command.getWellsDebugString(Seq(item.dest)) + " -> " + mDestToTip(item)).mkString("mDestToTip:\n    ", "\n    ", ""),
+				"mTipToWashIntensity:\n    "+mTipToCleanSpec.mapValues(_.washIntensity),
 				lDispense.map(twvpString).mkString("lDispense:\n    ", "\n    ", ""),
 				lAspirate.map(twvpString).mkString("lAspirate:\n    ", "\n    ", "")
 			).mkString("GroupZ(\n  ", "\n  ", ")\n")
@@ -61,18 +63,27 @@ class PipettePlanner(
 			List(twvp.tip, Command.getWellsDebugString(Seq(twvp.well)), twvp.nVolume, twvp.policy.id).mkString(", ")			
 		}
 	}
+	
+	sealed abstract class CleanSpec2 { val tip: TipConfigL2 }
+	case class ReplaceSpec2(tip: TipConfigL2, model: TipModel) extends CleanSpec2
+	case class WashSpec2(tip: TipConfigL2, spec: WashSpec) extends CleanSpec2
+	case class DropSpec2(tip: TipConfigL2) extends CleanSpec2
+
 	case class GroupB(
 		lItem: Seq[Item],
 		bClean: Boolean,
-		premixes: Seq[TipWellVolume], 
-		lAspirate: Seq[L2C_Aspirate], 
-		lDispense: Seq[L2C_Dispense], 
+		// TODO: add precleans: Map[TipConfigL2, CleanSpec2],
+		cleans: Map[TipConfigL2, CleanSpec2],
+		premixes: Seq[TipWellVolume],
+		lAspirate: Seq[L2C_Aspirate],
+		lDispense: Seq[L2C_Dispense],
 		postmixes: Seq[TipWellVolume]
 	) {
 		override def toString: String = {
 			List(
 				//"mLMToItems:\n"+mLMToItems.toSeq.map(pair => pair._1.toString + " -> " + L3A_PipetteItem.toDebugString(pair._2)).mkString("    ", "\n    ", ""),
 				"lItem:\n    "+L3A_PipetteItem.toDebugString(lItem),
+				cleans.map(_.toString).mkString("cleans:\n    ", "\n    ", ""),
 				lAspirate.map(_.toDebugString).mkString("lAspirate:\n    ", "\n    ", ""),
 				lDispense.map(_.toDebugString).mkString("lDispense:\n    ", "\n    ", "")
 			).mkString("GroupB(\n  ", "\n  ", ")\n")
@@ -180,7 +191,7 @@ class PipettePlanner(
 		states0: RobotState,
 		mLM: Map[Item, LM]
 	): GroupResult = {
-		val groupZ0 = GroupZ(mLM, states0, Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false)
+		val groupZ0 = GroupZ(mLM, states0, Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false)
 		GroupSuccess(groupZ0)
 	}
 	
@@ -350,17 +361,17 @@ class PipettePlanner(
 	
 	def updateGroupZ5_mDestToTip(g0: GroupZ): GroupResult = {
 		println("Z5: ", g0.lLM, g0.mLMToTips)
-		//val mDestToTip = new HashMap[Item, TipConfigL2]
+		val lDestToTip = g0.lLM.flatMap(lm => {
+			val lItem = g0.mLMToItems(lm)
+			val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
+			val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
+			val ltw = PipetteHelper.chooseTipWellPairsAll(ctx.states, lTip, lDest).flatten
+			println(lTip, lDest, ltw)
+			(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
+		})
 		GroupSuccess(g0.copy(
-			mDestToTip = g0.lLM.flatMap(lm => {
-				val lItem = g0.mLMToItems(lm)
-				val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
-				val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
-				val ltw = PipetteHelper.chooseTipWellPairsAll(ctx.states, lTip, lDest).flatten
-				println(lTip, lDest, ltw)
-				(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
-			}).toMap)
-		)
+			mDestToTip = lDestToTip.toMap
+		))
 	}
 	
 	def updateGroupZ6_mTipToVolume(g0: GroupZ): GroupResult = {
@@ -370,25 +381,71 @@ class PipettePlanner(
 	}
 
 	def updateGroupZ7_lDispense(g0: GroupZ): GroupResult = {
+		val lTipEnteredCells = new HashSet[TipConfigL2]
+		val mTipToLiquidGroups = new HashMap[TipConfigL2, LiquidGroup]
+		val mTipToIntensity = new HashMap[TipConfigL2, WashIntensity.Value]
+		val mDestToPolicy = new HashMap[Item, PipettePolicy]
 		val builder = new StateBuilder(g0.states0)
+
+		// Add wash intensity pending from previous pipetting operations
+		mTipToIntensity ++= g0.mTipToLM.keys.map(tip => tip -> tip.state(g0.states0).cleanDegreePending)
+
 		val lDispense = for (item <- g0.lItem) yield {
 			val tip = g0.mDestToTip(item)
+			val destState = item.dest.state(g0.states0)
 			val liquid = g0.mLM(item).liquid
 			val nVolume = item.nVolume
-			val nVolumeDest = item.dest.obj.state(builder).nVolume
+			val nVolumeDest = destState.nVolume
+			val liquidDest = destState.liquid
+			
 			// TODO: allow for policy override
-			val policy_? = device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest)
-			if (policy_?.isEmpty)
-				return GroupError(g0, Seq("Could not find dispense policy for item "+item))
+			val policy = device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest) match {
+				case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
+				case Some(p) => p
+			}
+			
+			// TODO: allow for override via tipOverrides
+			// Tips should be washed after entering a well with cells
+			if (lTipEnteredCells.contains(tip))
+				return GroupStop(g0)
+			if (liquidDest.contaminants.contains(Contaminant.Cell))
+				lTipEnteredCells += tip
+				
+			// TODO: allow for override via tipOverrides
+			// LiquidGroups
+			val liquidGroupDest = liquidDest.group
+			val intensity = mTipToLiquidGroups.get(tip) match {
+				case None =>
+					mTipToLiquidGroups(tip) = liquidGroupDest
+					liquidGroupDest.cleanPolicy.enter
+				case Some(liquidGroup0) =>
+					if (liquidGroupDest ne liquidGroup0) {
+						// TODO: allow for override via tipOverrides
+						// i.e. if overridden, set mTipToIntensity(tip) to max of two intensities
+						return GroupStop(g0)
+					}
+					liquidGroupDest.cleanPolicy.enter
+			}
+			mTipToIntensity(tip) = WashIntensity.max(intensity, mTipToIntensity.getOrElse(tip, WashIntensity.None))
+			
 			item.dest.obj.stateWriter(builder).add(liquid, nVolume)
-			new TipWellVolumePolicy(tip, item.dest, nVolume, policy_?.get)
+			mDestToPolicy(item) = policy
+			
+			new TipWellVolumePolicy(tip, item.dest, nVolume, policy)
 		}
-		// TODO: check whether any of the dispenses force a new cleaning, and if so, return GroupStop(g0)
+		
+		val mTipToCleanSpec = mTipToIntensity.map(pair => {
+			val (tip, intensity) = pair
+			val tipState = tip.state(g0.states0)
+			tip -> new WashSpec(intensity, tipState.contamInside, tipState.contamOutside)
+		})
+
 		GroupSuccess(g0.copy(
+			mTipToCleanSpec = mTipToCleanSpec.toMap,
 			lDispense = lDispense
 		))
 	}
-
+	
 	def updateGroupZ8_lAspirate(g0: GroupZ): GroupResult = {
 		val lAspirate = g0.lLM.flatMap(lm => {
 			val tips = g0.mLMToTips(lm)
@@ -413,10 +470,17 @@ class PipettePlanner(
 	): Result[GroupB] = {
 		val lAspirate = groupSpirateItems(groupZ, groupZ.lAspirate).map(items => L2C_Aspirate(items))
 		val lDispense = groupSpirateItems(groupZ, groupZ.lDispense).map(items => L2C_Dispense(items))
+		
+		val mTipToModel = groupZ.mTipToLM.mapValues(_.tipModel)
+		val cleans = groupZ.mTipToCleanSpec.map(pair => {
+			val (tip, cleanSpec) = pair
+			tip -> getCleanSpec2(groupZ.states0, TipHandlingOverrides(), mTipToModel, tip, cleanSpec)
+		}).collect({ case (tip, Some(cleanSpec2)) => tip -> cleanSpec2 })
 			
 		val groupB = GroupB(
 			groupZ.lItem,
 			groupZ.bClean,
+			cleans = cleans,
 			Nil,
 			lAspirate = lAspirate,
 			lDispense = lDispense,
@@ -467,6 +531,36 @@ class PipettePlanner(
 					List(twvp) :: (xs :: rest)
 			case _ =>
 				List(List(twvp))
+		}
+	}
+
+	protected def getCleanSpec2(
+		states: StateMap,
+		overrides: TipHandlingOverrides,
+		mapTipToModel: Map[TipConfigL2, TipModel],
+		tip: TipConfigL2,
+		cleanSpec: WashSpec
+	): Option[CleanSpec2] = {
+		if (cleanSpec.washIntensity == WashIntensity.None) {
+			None
+		}
+		else if (device.areTipsDisposable) {
+			val tipState = tip.obj.state(states)
+			val bReplace = tipState.model_?.isEmpty || (overrides.replacement_? match {
+				case Some(TipReplacementPolicy.ReplaceAlways) => true
+				case Some(TipReplacementPolicy.KeepBetween) => false
+				case Some(TipReplacementPolicy.KeepAlways) => false
+				case None => false
+			})
+			if (bReplace)
+				Some(ReplaceSpec2(tip, mapTipToModel.getOrElse(tip, tipState.model_?.get)))
+			else
+				None
+		}
+		else {
+			val tipState = tip.obj.state(states)
+			if (cleanSpec.washIntensity > WashIntensity.None) Some(WashSpec2(tip, cleanSpec))
+			else None
 		}
 	}
 }
