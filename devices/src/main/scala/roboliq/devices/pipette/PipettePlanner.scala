@@ -72,8 +72,9 @@ class PipettePlanner(
 	case class GroupB(
 		lItem: Seq[Item],
 		bClean: Boolean,
-		// TODO: add precleans: Map[TipConfigL2, CleanSpec2],
+		precleans: Map[TipConfigL2, CleanSpec2],
 		cleans: Map[TipConfigL2, CleanSpec2],
+		lTipCleanable: SortedSet[TipConfigL2],
 		premixes: Seq[TipWellVolume],
 		lAspirate: Seq[L2C_Aspirate],
 		lDispense: Seq[L2C_Dispense],
@@ -83,7 +84,9 @@ class PipettePlanner(
 			List(
 				//"mLMToItems:\n"+mLMToItems.toSeq.map(pair => pair._1.toString + " -> " + L3A_PipetteItem.toDebugString(pair._2)).mkString("    ", "\n    ", ""),
 				"lItem:\n    "+L3A_PipetteItem.toDebugString(lItem),
+				precleans.map(_.toString).mkString("precleans:\n    ", "\n    ", ""),
 				cleans.map(_.toString).mkString("cleans:\n    ", "\n    ", ""),
+				"lTipCleanable:\n    "+lTipCleanable,
 				lAspirate.map(_.toDebugString).mkString("lAspirate:\n    ", "\n    ", ""),
 				lDispense.map(_.toDebugString).mkString("lDispense:\n    ", "\n    ", "")
 			).mkString("GroupB(\n  ", "\n  ", ")\n")
@@ -94,6 +97,8 @@ class PipettePlanner(
 		cmds: Seq[Command],
 		nScore: Double
 	)
+	
+	val lTipAll: SortedSet[TipConfigL2] = device.config.tips.map(_.state(ctx.states).conf)
 	
 	def chooseTipModels(items: Seq[Item]): Map[Liquid, TipModel] = {
 		val mapLiquidToModels = new HashMap[Liquid, Seq[TipModel]]
@@ -465,22 +470,47 @@ class PipettePlanner(
 		))
 	}
 	
+	/**
+	 * @param lTipCleanable0 tip which can potentially be washed at an earlier stage
+	 */
 	def tr_groupB(
-		groupZ: GroupZ
+		groupZ: GroupZ,
+		lTipCleanable0: SortedSet[TipConfigL2]
 	): Result[GroupB] = {
 		val lAspirate = groupSpirateItems(groupZ, groupZ.lAspirate).map(items => L2C_Aspirate(items))
 		val lDispense = groupSpirateItems(groupZ, groupZ.lDispense).map(items => L2C_Dispense(items))
 		
 		val mTipToModel = groupZ.mTipToLM.mapValues(_.tipModel)
-		val cleans = groupZ.mTipToCleanSpec.map(pair => {
+		val cleans0 = groupZ.mTipToCleanSpec.map(pair => {
 			val (tip, cleanSpec) = pair
 			tip -> getCleanSpec2(groupZ.states0, TipHandlingOverrides(), mTipToModel, tip, cleanSpec)
 		}).collect({ case (tip, Some(cleanSpec2)) => tip -> cleanSpec2 })
+		
+		val (precleans, cleans): Tuple2[Map[TipConfigL2, CleanSpec2], Map[TipConfigL2, CleanSpec2]] = {
+			if ((cleans0.keySet -- lTipCleanable0).isEmpty)
+				(cleans0, Map())
+			else
+				(Map(), cleans0)
+		}
+		
+		// Indicate which tips could be cleaned earlier for the NEXT group
+		val lTipCleanable: SortedSet[TipConfigL2] = {
+			if (precleans.size + cleans.size == 0)
+				lTipCleanable0
+			else if (cleans.isEmpty)
+				lTipCleanable0 -- precleans.keySet
+			else {
+				val lTipCleaning = SortedSet(cleans.keys.toSeq : _*)
+				device.getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll, lTipCleaning) -- cleans.keySet
+			}
+		}
 			
 		val groupB = GroupB(
 			groupZ.lItem,
 			groupZ.bClean,
+			precleans = precleans,
 			cleans = cleans,
+			lTipCleanable = lTipCleanable,
 			Nil,
 			lAspirate = lAspirate,
 			lDispense = lDispense,

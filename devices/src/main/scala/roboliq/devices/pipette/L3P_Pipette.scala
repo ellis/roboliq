@@ -41,7 +41,7 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 						}
 					}
 					if (i > 1) {
-						planner.tr_groupB(g) match {
+						planner.tr_groupB(g, SortedSet()) match {
 							case Success(groupB) =>
 								println("groupB:")
 								println(groupB)

@@ -222,4 +222,11 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		val sName = "Roboliq_"+sFamily+"_"+sPos+"_"+sTip
 		Some(PipettePolicy(sName, posDefault))
 	}
+	
+	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
+		val lModel = lTipCleaning.toSeq.map(tip => mapTipToModels(tip.obj))
+		val lTip = lTipAll.filter(tip => lModel.contains(mapTipToModels(tip.obj)))
+		lTip -- lTipCleaning
+	}
+
 }
