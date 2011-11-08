@@ -78,7 +78,8 @@ class PipettePlanner(
 		premixes: Seq[TipWellVolume],
 		lAspirate: Seq[L2C_Aspirate],
 		lDispense: Seq[L2C_Dispense],
-		postmixes: Seq[TipWellVolume]
+		postmixes: Seq[TipWellVolume],
+		nScore: Double
 	) {
 		override def toString: String = {
 			List(
@@ -88,7 +89,8 @@ class PipettePlanner(
 				cleans.map(_.toString).mkString("cleans:\n    ", "\n    ", ""),
 				"lTipCleanable:\n    "+lTipCleanable,
 				lAspirate.map(_.toDebugString).mkString("lAspirate:\n    ", "\n    ", ""),
-				lDispense.map(_.toDebugString).mkString("lDispense:\n    ", "\n    ", "")
+				lDispense.map(_.toDebugString).mkString("lDispense:\n    ", "\n    ", ""),
+				"nScore:\n    "+nScore
 			).mkString("GroupB(\n  ", "\n  ", ")\n")
 		}
 	}
@@ -481,17 +483,18 @@ class PipettePlanner(
 		val lDispense = groupSpirateItems(groupZ, groupZ.lDispense).map(items => L2C_Dispense(items))
 		
 		val mTipToModel = groupZ.mTipToLM.mapValues(_.tipModel)
+		// Tip which require cleaning before aspirate
 		val cleans0 = groupZ.mTipToCleanSpec.map(pair => {
 			val (tip, cleanSpec) = pair
 			tip -> getCleanSpec2(groupZ.states0, TipHandlingOverrides(), mTipToModel, tip, cleanSpec)
 		}).collect({ case (tip, Some(cleanSpec2)) => tip -> cleanSpec2 })
 		
-		val (precleans, cleans): Tuple2[Map[TipConfigL2, CleanSpec2], Map[TipConfigL2, CleanSpec2]] = {
-			if ((cleans0.keySet -- lTipCleanable0).isEmpty)
-				(cleans0, Map())
-			else
-				(Map(), cleans0)
-		}
+		// Tips which cannot be cleaned in a prior group
+		val cleans1 = cleans0.keySet -- lTipCleanable0
+		// Tips which are flagged to cleaning in a prior group
+		val precleans = if (cleans1.isEmpty) cleans0 else Map[TipConfigL2, CleanSpec2]()
+		// Tips which will be cleaned in this group
+		val cleans = if (cleans1.isEmpty) Map[TipConfigL2, CleanSpec2]() else cleans0
 		
 		// Indicate which tips could be cleaned earlier for the NEXT group
 		val lTipCleanable: SortedSet[TipConfigL2] = {
@@ -504,6 +507,13 @@ class PipettePlanner(
 				device.getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll, lTipCleaning) -- cleans.keySet
 			}
 		}
+		
+		// Score
+		val nScore = {
+			5.0 + scoreAspirates(lAspirate) +
+			5.0 + scoreDispenses(lDispense) +
+			(if (cleans.isEmpty) 0.0 else 40.0)
+		}
 			
 		val groupB = GroupB(
 			groupZ.lItem,
@@ -514,7 +524,8 @@ class PipettePlanner(
 			Nil,
 			lAspirate = lAspirate,
 			lDispense = lDispense,
-			Nil
+			Nil,
+			nScore
 		)
 		Success(groupB)
 	}
@@ -592,5 +603,17 @@ class PipettePlanner(
 			if (cleanSpec.washIntensity > WashIntensity.None) Some(WashSpec2(tip, cleanSpec))
 			else None
 		}
+	}
+	
+	def scoreAspirates(lAspirate: Seq[L2C_Aspirate]): Double = {
+		lAspirate.foldLeft(0.0)((acc, cmd) => {
+			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
+		})
+	}
+	
+	def scoreDispenses(lDispense: Seq[L2C_Dispense]): Double = {
+		lDispense.foldLeft(0.0)((acc, cmd) => {
+			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
+		})
 	}
 }
