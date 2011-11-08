@@ -8,6 +8,7 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._
+import roboliq.devices.pipette.scheduler._
 
 
 class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
@@ -15,45 +16,8 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
-		val planner = new PipettePlanner(robot, ctx)
-		for {
-			mLM <- planner.tr1Items(cmd.args.items)
-		} {
-			planner.createGroupZ(ctx.states, mLM) match {
-				case planner.GroupSuccess(g1) =>
-					var g = g1
-					var b = true
-					var i = 1;
-					var items = cmd.args.items
-					while (b && !items.isEmpty) {
-						val item = items.head
-						items = items.tail
-						planner.addItemToGroup(g, item) match {
-							case planner.GroupSuccess(g2) =>
-								g = g2
-								println("g"+i+":" + g)
-								i += 1
-							case _ =>
-								println("g*:"+g)
-								b = false
-								// FIXME: for debug only
-								Seq[Int]().head
-						}
-					}
-					if (i > 1) {
-						planner.tr_groupB(g, SortedSet()) match {
-							case Success(groupB) =>
-								println("groupB:")
-								println(groupB)
-							case err =>
-								println("err: " + err)
-						}
-					}
-				case g1 =>
-					println("g1:")
-					println(g1)
-			}
-		}
+		val planner = new PipetteScheduler(robot, ctx)
+		planner.x(cmd)
 		
 		val x = new L3P_Pipette_Sub(robot, ctx, cmd)
 		for { translation <- x.translation }
