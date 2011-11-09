@@ -248,7 +248,7 @@ class Example05(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	}
 }
 
-
+/*
 class Example05b(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
 	object Liquids {
 		val water = new Liquid("Water", CleanPolicy.TNT)
@@ -274,6 +274,7 @@ class Example05b(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
 	}
 }
+*/
 
 
 class Protocol06 extends Protocol {

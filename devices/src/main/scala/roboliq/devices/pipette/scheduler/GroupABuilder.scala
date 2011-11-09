@@ -16,8 +16,17 @@ class GroupABuilder(
 	val device: PipetteDevice,
 	val ctx: CompilerContextL3
 ) {
-
+	/**
+	 * Remove items with nVolume < 0
+	 */
+	def filterItems(items: Seq[Item]): Result[Seq[Item]] = {
+		Success(items.filter(_.nVolume > 0))
+	}
+	
 	def chooseTipModels(items: Seq[Item]): Map[Liquid, TipModel] = {
+		if (items.isEmpty)
+			return Map()
+			
 		val mapLiquidToModels = new HashMap[Liquid, Seq[TipModel]]
 		val lLiquidAll = new HashSet[Liquid]
 		val lTipModelAll = new HashSet[TipModel]
@@ -39,12 +48,16 @@ class GroupABuilder(
 			val lLiquidsUnassigned = lLiquidAll.clone()
 			while (!lLiquidsUnassigned.isEmpty) {
 				// find most frequently allowed tip type and assign it to all allowable items
-				val mapModelToCount = new HashMap[TipModel, Int]
-				for ((liquid, tipModels) <- mapLiquidToModels) {
-					for (tipModel <- tipModels) {
-						mapModelToCount(tipModel) = mapModelToCount.getOrElse(tipModel, 0) + 1
-					}
+				val mapModelToCount: Map[TipModel, Int] = mapLiquidToModels.toSeq.flatMap(pair => pair._2.map(_ -> pair._1)).groupBy(_._1).mapValues(_.size)
+				// FIXME: for debug only
+				println("mapModelToCount: "+mapModelToCount)
+				if (mapModelToCount.isEmpty) {
+					println(items)
+					println(mapLiquidToModels)
+					println(lLiquidAll)
+					println(lTipModelAll)
 				}
+				// ENDFIX
 				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
 				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
 				mapLiquidToModel ++= liquids.map(_ -> tipModel)
@@ -54,7 +67,9 @@ class GroupABuilder(
 		}
 	}
 	
-	/** For each item, find the source liquid and choose a tip model */
+	/** 
+	 * For each item, find the source liquid and choose a tip model
+	 */
 	def tr1Layers(layers: Seq[Seq[Item]]): Result[Map[Item, LM]] = {
 		Result.flatMap(layers)(items => {
 			val mapLiquidToTipModel = chooseTipModels(items)
@@ -62,7 +77,10 @@ class GroupABuilder(
 		}).map(_.toMap)
 	}
 	
-	/** For each item, find the source liquid and choose a tip model */
+	/** 
+	 * For each item, find the source liquid and choose a tip model
+	 * Assumes that items have already been run through filterItems()
+	 */
 	def tr1Items(items: Seq[Item]): Result[Map[Item, LM]] = {
 		val mapLiquidToTipModel = chooseTipModels(items)
 		val mLM = items.map(item => {

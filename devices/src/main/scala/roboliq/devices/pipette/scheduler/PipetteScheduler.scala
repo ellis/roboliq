@@ -28,16 +28,20 @@ class PipetteScheduler(
 	
 	def x(cmd: L3C_Pipette): Result[Seq[Command]] = {
 		for {
-			mLM <- builderA.tr1Items(cmd.args.items)
+			items <- builderA.filterItems(cmd.args.items)
+			mLM <- builderA.tr1Items(items)
 		} yield {
+			if (items.isEmpty)
+				return Success(Nil)
+			
 			val nTips = device.config.tips.size
-			val nItems = cmd.args.items.size // TODO: need to break up large pipetting items into multiple items
+			val nItems = items.size // TODO: need to break up large pipetting items into multiple items
 			lnScore = new Array[Double](nItems)
 			lGroupA = new Array[GroupA](nItems)
 			lGroupB = new Array[GroupB](nItems)
 			queue.clear
 			queue += Score(-1, 0, 0)
-			val lItemAll = cmd.args.items.toList
+			val lItemAll = items.toList
 			var bDone = false
 			while (!queue.isEmpty && !bDone) {
 				//println("lnScore: "+lnScore.toList)

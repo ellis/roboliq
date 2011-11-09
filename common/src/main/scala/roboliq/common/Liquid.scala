@@ -42,6 +42,7 @@ sealed class GroupCleanPolicy(
 )
 object GroupCleanPolicy {
 	val NNN = new GroupCleanPolicy(WashIntensity.None, WashIntensity.None, WashIntensity.None)
+	val TNN = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
 	val TNT = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
 	val DDD = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
 }
