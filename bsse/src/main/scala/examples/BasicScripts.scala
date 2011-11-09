@@ -189,7 +189,7 @@ class Example05(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	import roboliq.commands.MixItemTemplateL4
 	
 	object Liquids {
-		val water = new Liquid("Water", CleanPolicy.TNT)
+		val water = new Liquid("Water", CleanPolicy.TNN)
 		val buffer10x = new Liquid("Water", CleanPolicy.TNT)
 		val dNTP = new Liquid("Water", CleanPolicy.TNT)
 		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)

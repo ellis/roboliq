@@ -72,8 +72,8 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 		
 		// FIXME: for debug only
 		//if (lTwvp.size == 2 && lTwvp.head.well.index == 0) {
-			println("!!!!!!!!!!!")
-			println((lTwvp, b1, b2, b3))
+			//println("!!!!!!!!!!!")
+			//println((lTwvp, b1, b2, b3))
 		//}
 		
 		b1 && b2 && b3

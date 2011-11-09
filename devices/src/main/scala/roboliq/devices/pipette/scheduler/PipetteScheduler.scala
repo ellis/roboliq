@@ -149,6 +149,7 @@ class PipetteScheduler(
 		if (iItem < 0)
 			acc
 		else {
+			println("gA: "+lGroupA(iItem))
 			val gB = lGroupB(iItem)
 			if (gB == null)
 				Nil // ERROR!

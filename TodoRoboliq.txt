@@ -75,6 +75,9 @@ Tuval/Yair:
 	get date for coming to Weizmann
 	ask for PCR protocols
 Code:
+	ExampleScript05: why thorough wash instead of decontam after last dispense
+	ExampleScript05: shouldn't wash after dispensing water
+	ExampleScript05: allow for premix before aspirate
 ?	always wash/decon right after pipetting is done in order to prevent drying
 ?	extra wash before decon in case of cells
 	evoware: if the next command is not a pipetting command, move the LiHa back home
