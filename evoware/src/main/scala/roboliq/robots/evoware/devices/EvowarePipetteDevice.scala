@@ -53,7 +53,32 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 			tips2(i2) -> well
 		}
 	}
-	
+		
+	/**
+	 * Ensure that all items use the same policy and same tip sizes
+	 */
+	def canBatchSpirateItems(lTwvp: List[TipWellVolumePolicy]): Boolean = {
+		// Ensure that all items use the same policy and same tip sizes
+		val b1 = lTwvp match {
+			case Nil => true
+			case x :: xs =>
+				val ix = x.tip.index / 4
+				xs.forall(twvp => twvp.policy == x.policy && twvp.tip.index / 4 == ix)
+		}
+		// Ensure that all intra-tip distances are equal to the intra-well distances
+		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)
+		// Ensure that all wells are in the same column
+		val b3 = WellGroup(lTwvp.map(_.well)).splitByCol().size == 1
+		
+		// FIXME: for debug only
+		//if (lTwvp.size == 2 && lTwvp.head.well.index == 0) {
+			println("!!!!!!!!!!!")
+			println((lTwvp, b1, b2, b3))
+		//}
+		
+		b1 && b2 && b3
+	}
+
 	/*
 	private case class KeySpirate(plate: PlateConfigL2, iTipType: Int) {
 		def this(item: L2A_SpirateItem) = this(item.well.holder, item.tip.index / 4)

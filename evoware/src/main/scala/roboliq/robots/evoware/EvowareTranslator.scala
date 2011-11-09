@@ -143,21 +143,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				if (!items.forall(_.well.holder eq holder))
 					return Error(Seq("INTERNAL: all wells must be on the same plate"))
 				
-				// Assert that tips are spaced at equal distances to each other as the wells are to each other
-				def equidistant2(a: L1A_SpirateItem, b: L1A_SpirateItem): Boolean =
-					(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
-				// Test all adjacent items for equidistance
-				def equidistant(item: Seq[L1A_SpirateItem]): Boolean = item match {
-					case Seq() => true
-					case Seq(_) => true
-					case Seq(a, b, rest @ _*) =>
-						equidistant2(a, b) match {
-							case false => false
-							case true => equidistant(Seq(b) ++ rest)
-						}
-				}
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				val bEquidistant = equidistant(items)
+				val bEquidistant = Utils.equidistant(items.map(_.itemL2))
 				val bSameWell = items.forall(_.well eq twvp0.well)
 				if (!bEquidistant && !bSameWell)
 					return Error(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Command.getWellsDebugString(items.map(_.well))))

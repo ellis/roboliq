@@ -106,13 +106,19 @@ class GroupBBuilder(
 			case (xs @ List(x0, _*)) :: rest  =>
 				val tipModel = groupA.mTipToLM(twvp.tip).tipModel
 				val tipModel0 = groupA.mTipToLM(x0.tip).tipModel
-				val bTipAlreadyUsed = xs.exists(twvp.tip eq _.tip)
-				val bWellAlreadyVisited = xs.exists(twvp.well eq _.well)
-				// TODO: check which device about whether items can be batched together
-				if (tipModel.eq(tipModel0) && twvp.policy == x0.policy && !bTipAlreadyUsed && !bWellAlreadyVisited)
-					(twvp::xs) :: rest
+				val xs2 = twvp :: xs
+				if (
+					tipModel.eq(tipModel0) && 
+					twvp.policy == x0.policy && 
+					// tip not already used
+					!xs.exists(twvp.tip eq _.tip) &&
+					// well not already visited
+					!xs.exists(twvp.well eq _.well) && 
+					device.canBatchSpirateItems(xs2)
+				)
+					xs2 :: rest
 				else
-					List(twvp) :: (xs :: rest)
+					List(twvp) :: xs :: rest
 			case _ =>
 				List(List(twvp))
 		}

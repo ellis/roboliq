@@ -49,7 +49,7 @@ sealed class TipWellVolume(
 
 sealed class TipWellVolumePolicy(tip: TipConfigL2, well: WellConfigL2, nVolume: Double,
 		val policy: PipettePolicy
-	) extends TipWellVolume(tip, well, nVolume) {
+	) extends TipWellVolume(tip, well, nVolume) with HasTipWellVolumePolicy {
 	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+")" 
 }
 /*
