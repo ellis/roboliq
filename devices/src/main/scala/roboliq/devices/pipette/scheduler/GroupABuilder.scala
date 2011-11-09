@@ -16,6 +16,7 @@ class GroupABuilder(
 	val device: PipetteDevice,
 	val ctx: CompilerContextL3
 ) {
+
 	def chooseTipModels(items: Seq[Item]): Map[Liquid, TipModel] = {
 		val mapLiquidToModels = new HashMap[Liquid, Seq[TipModel]]
 		val lLiquidAll = new HashSet[Liquid]

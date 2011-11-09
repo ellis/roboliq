@@ -28,13 +28,8 @@ class GroupBBuilder(
 		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => L2C_Aspirate(items))
 		val lDispense = groupSpirateItems(groupA, groupA.lDispense).map(items => L2C_Dispense(items))
 		
-		val mTipToModel = groupA.mTipToLM.mapValues(_.tipModel)
 		// Tip which require cleaning before aspirate
-		val cleans0 = groupA.mTipToCleanSpec.map(pair => {
-			val (tip, cleanSpec) = pair
-			tip -> getCleanSpec2(groupA.states0, TipHandlingOverrides(), mTipToModel, tip, cleanSpec)
-		}).collect({ case (tip, Some(cleanSpec2)) => tip -> cleanSpec2 })
-		
+		val cleans0 = getCleanSpec2(groupA)
 		// Tips which cannot be cleaned in a prior group
 		val cleans1 = cleans0.keySet -- lTipCleanable0
 		// Tips which are flagged to cleaning in a prior group
@@ -122,8 +117,19 @@ class GroupBBuilder(
 				List(List(twvp))
 		}
 	}
+	
+	private def getCleanSpec2(
+		groupA: GroupA
+	): Map[TipConfigL2, CleanSpec2] = {
+		val mTipToModel = groupA.mTipToLM.mapValues(_.tipModel)
+		// Tip which require cleaning before aspirate
+		groupA.mTipToCleanSpec.map(pair => {
+			val (tip, cleanSpec) = pair
+			tip -> getCleanSpec2(groupA.states0, TipHandlingOverrides(), mTipToModel, tip, cleanSpec)
+		}).collect({ case (tip, Some(cleanSpec2)) => tip -> cleanSpec2 })
+	}
 
-	protected def getCleanSpec2(
+	private def getCleanSpec2(
 		states: StateMap,
 		overrides: TipHandlingOverrides,
 		mapTipToModel: Map[TipConfigL2, TipModel],

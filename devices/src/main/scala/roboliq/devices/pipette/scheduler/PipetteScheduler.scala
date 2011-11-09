@@ -17,6 +17,7 @@ class PipetteScheduler(
 	val device: PipetteDevice,
 	val ctx: CompilerContextL3
 ) {
+	private val lTipAll: SortedSet[TipConfigL2] = device.config.tips.map(_.state(ctx.states).conf)
 	private val builderA = new GroupABuilder(device, ctx)
 	private val builderB = new GroupBBuilder(device, ctx)
 	private var lnScore: Array[Double] = null
@@ -25,10 +26,10 @@ class PipetteScheduler(
 	case class Score(iItem: Int, nPathCost: Double, nTotalCostMin: Double)
 	private val queue = new PriorityQueue[Score]()(ScoreOrdering)
 	
-	def x(cmd: L3C_Pipette) {
+	def x(cmd: L3C_Pipette): Result[Seq[Command]] = {
 		for {
 			mLM <- builderA.tr1Items(cmd.args.items)
-		} {
+		} yield {
 			val nTips = device.config.tips.size
 			val nItems = cmd.args.items.size // TODO: need to break up large pipetting items into multiple items
 			lnScore = new Array[Double](nItems)
@@ -56,15 +57,15 @@ class PipetteScheduler(
 			
 			// Reconstruct the optimal path
 			val lB = getPath(nItems - 1, Nil)
-			val lmTipToClean = optimizeCleanSpec(lB.reverse, Map(), Nil)
+			val rB = lB.reverse
+			val lmTipToClean = optimizeCleanSpec(rB, Map(), Nil)
 			println("lmTipToClean: "+lmTipToClean)
 			
 			val lClean = lmTipToClean.map(toCleanCommand)
 			println("lClean: "+lClean)
 			
-			val lCommand = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lAspirate ++ pair._2.lDispense)
-			println("lCommand:")
-			lCommand.foreach(cmd => println(cmd.toDebugString))
+			val lCommand = getCommands(lClean, lB, lGroupA.last.states1)
+			lCommand
 		}
 	}
 	
@@ -218,5 +219,41 @@ class PipetteScheduler(
 		}
 
 		lReplace ++ lWash
+	}
+	
+	private def getCommands(lClean: List[Seq[Command]], lB: List[GroupB], statesLast: RobotState): Seq[Command] = {
+		val lCommand0 = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lAspirate ++ pair._2.lDispense)
+		//println("lCommand0:")
+		//lCommand0.foreach(cmd => println(cmd.toDebugString))
+		
+		val lCommand = lCommand0 ++ finalClean(statesLast)
+		println("lCommand:")
+		lCommand.foreach(cmd => println(cmd.toDebugString))
+		lCommand
+	}
+	
+	private def finalClean(states: StateMap): Seq[Command] = {
+		val tipOverrides = TipHandlingOverrides()
+		if (device.areTipsDisposable) {
+			tipOverrides.replacement_? match {
+				case Some(TipReplacementPolicy.KeepAlways) =>
+					Seq()
+				case _ =>
+					toCleanCommand((lTipAll.toSeq).map(tip => tip -> DropSpec2(tip)).toMap)
+			}
+		}
+		else {
+			//println("finalClean:")
+			//tips.toSeq.foreach(tip => println("state: "+tip.state(states)+", pending: "+tip.state(states).cleanDegreePending))
+			val intensity = lTipAll.foldLeft(WashIntensity.None)((acc, tip) => WashIntensity.max(acc, tip.state(states).cleanDegreePending))
+			val items = lTipAll.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity))
+			//println("items: "+items)
+			toCleanCommand(items.map(pair => pair._1-> WashSpec2(pair._1, pair._2)).toMap)
+		}
+	}
+	
+	private def createWashSpec(states: StateMap, tip: TipConfigL2, intensity: WashIntensity.Value): WashSpec = {
+		val tipState = tip.state(states)
+		new WashSpec(intensity, tipState.contamInside, tipState.contamOutside)
 	}
 }
