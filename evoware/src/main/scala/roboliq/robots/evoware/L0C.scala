@@ -186,3 +186,14 @@ case class L0C_Facts(
 		).mkString("FACTS(", ",", ");")
 	}
 }
+
+case class L0C_Subroutine(
+	sFilename: String
+) extends Command {
+	override def toString = {
+		List(
+			'"'+sFilename+'"',
+			0
+		).mkString("Subroutine(", ",", ");")
+	}
+}

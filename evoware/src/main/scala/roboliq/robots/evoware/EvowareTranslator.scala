@@ -40,6 +40,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			case c: L1C_MovePlate => movePlate(builder, c.args)
 			case c: L1C_Timer => timer(c.args)
 			case c: L1C_EvowareFacts => facts(builder, c)
+			case c: L1C_EvowareSubroutine => subroutine(builder, c)
 			case c: L1C_SaveCurrentLocation => Success(Seq())
 		}} yield {
 			builder.cmds ++= cmds0
@@ -334,6 +335,12 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			sDevice = cmd.args.sDevice,
 			sVariable = cmd.args.sVariable,
 			sValue = cmd.args.sValue
+		)))
+	}
+	
+	private def subroutine(builder: EvowareScriptBuilder, cmd: L1C_EvowareSubroutine): Result[Seq[Command]] = {
+		Success(Seq(L0C_Subroutine(
+			cmd.sFilename
 		)))
 	}
 	

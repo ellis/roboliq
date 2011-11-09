@@ -48,23 +48,36 @@ class GroupABuilder(
 			val lLiquidsUnassigned = lLiquidAll.clone()
 			while (!lLiquidsUnassigned.isEmpty) {
 				// find most frequently allowed tip type and assign it to all allowable items
-				val mapModelToCount: Map[TipModel, Int] = mapLiquidToModels.toSeq.flatMap(pair => pair._2.map(_ -> pair._1)).groupBy(_._1).mapValues(_.size)
-				// FIXME: for debug only
-				println("mapModelToCount: "+mapModelToCount)
-				if (mapModelToCount.isEmpty) {
-					println(items)
-					println(mapLiquidToModels)
-					println(lLiquidAll)
-					println(lTipModelAll)
-				}
-				// ENDFIX
+				val mapModelToCount: Map[TipModel, Int] = getNumberOfLiquidsPerModel(mapLiquidToModels, lLiquidsUnassigned)
 				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
 				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
 				mapLiquidToModel ++= liquids.map(_ -> tipModel)
+				// FIXME: for debug only
+				println("mapModelToCount: "+mapModelToCount)
+				if (liquids.isEmpty) {
+					println(items)
+					println(mapLiquidToModels)
+					println("tipModel: "+tipModel)
+					println(lLiquidAll)
+					println(lTipModelAll)
+					Seq().head
+				}
+				// ENDFIX
 				lLiquidsUnassigned --= liquids
 			}
 			mapLiquidToModel.toMap
 		}
+	}
+	
+	private def getNumberOfLiquidsPerModel(
+		mLiquidToModels: collection.Map[Liquid, Seq[TipModel]],
+		lLiquidsUnassigned: collection.Set[Liquid]
+	): Map[TipModel, Int] = {
+		val seq: Seq[Tuple2[TipModel, Liquid]] = lLiquidsUnassigned.toSeq.flatMap(liquid => {
+			val lTipModel = mLiquidToModels(liquid)
+			lTipModel.map(_ -> liquid)
+		})
+		seq.groupBy(_._1).mapValues(_.size)
 	}
 	
 	/** 

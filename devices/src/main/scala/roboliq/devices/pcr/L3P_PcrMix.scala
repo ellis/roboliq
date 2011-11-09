@@ -117,7 +117,8 @@ class L3P_PcrMix extends CommandCompilerL3 {
 			println("vWaterMinSample: "+vWaterMinSample)
 			println("vWaterMix: "+vWaterMix)
 			println("lvWaterPerWell: "+lvWaterPerWell)
-			Seq(cmd1, L3C_Pipette(new L3A_PipetteArgs(items2)), cmd3, cmd4, cmd5, cmd6)
+			val items: Seq[L3A_PipetteItem] = cmd1.args.items ++ items2 ++ cmd3.args.items ++ cmd4.args.items
+			Seq(L3C_Pipette(new L3A_PipetteArgs(items)), cmd5, cmd6)
 		}
 		
 			
