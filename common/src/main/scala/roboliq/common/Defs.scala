@@ -23,6 +23,10 @@ object WashIntensity extends Enumeration {
 	def max(a: WashIntensity.Value, b: WashIntensity.Value): WashIntensity.Value = {
 		if (a >= b) a else b
 	}
+	
+	def max(l: Traversable[WashIntensity.Value]): WashIntensity.Value = {
+		l.foldLeft(WashIntensity.None)((acc, intensity) => max(acc, intensity))
+	}
 }
 
 sealed abstract class Result[+T] {

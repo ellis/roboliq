@@ -45,6 +45,14 @@ object GroupCleanPolicy {
 	val TNN = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
 	val TNT = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
 	val DDD = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
+	
+	def max(a: GroupCleanPolicy, b: GroupCleanPolicy): GroupCleanPolicy = {
+		new GroupCleanPolicy(
+			WashIntensity.max(a.enter, b.enter),
+			WashIntensity.max(a.within, b.within),
+			WashIntensity.max(a.exit, b.exit)
+		)
+	}
 }
 
 class LiquidGroup(
@@ -84,7 +92,7 @@ class Liquid(
 					group
 				}
 				else {
-					new LiquidGroup(group.cleanPolicy)
+					new LiquidGroup(GroupCleanPolicy.max(group.cleanPolicy, other.group.cleanPolicy))
 				}
 			}
 			new Liquid(

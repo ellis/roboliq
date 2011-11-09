@@ -131,7 +131,7 @@ class PipetteScheduler(
 					val acc2 = if (g.lItem.isEmpty || nTips == nTips0) acc else g :: acc
 					x2(g2, rest, nTips, acc2)
 				case _ =>
-					println("g*:"+g)
+					//println("g*:"+g)
 					// FIXME: for debug only
 					//Seq[Int]().head
 					acc
