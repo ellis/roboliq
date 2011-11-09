@@ -55,10 +55,12 @@ class GroupBBuilder(
 		}
 		
 		// Score
+		// TODO: if cleaning is moved back to preceding group, that cleaning procedure might become more expensive
+		//  take that into consideration when calculating path cost
 		val nScore = {
-			5.0 + scoreAspirates(lAspirate) +
-			5.0 + scoreDispenses(lDispense) +
-			(if (cleans.isEmpty) 0.0 else 40.0)
+			scoreAspirates(lAspirate) +
+			scoreDispenses(lDispense) +
+			scoreCleans(cleans)
 		}
 			
 		val groupB = GroupB(
@@ -152,14 +154,22 @@ class GroupBBuilder(
 	}
 	
 	def scoreAspirates(lAspirate: Seq[L2C_Aspirate]): Double = {
-		lAspirate.foldLeft(0.0)((acc, cmd) => {
+		val nCostStart = if (lAspirate.isEmpty) 0.0 else 5.0
+		lAspirate.foldLeft(nCostStart)((acc, cmd) => {
 			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
 		})
 	}
 	
 	def scoreDispenses(lDispense: Seq[L2C_Dispense]): Double = {
-		lDispense.foldLeft(0.0)((acc, cmd) => {
+		val nCostStart = if (lDispense.isEmpty) 0.0 else 5.0
+		lDispense.foldLeft(nCostStart)((acc, cmd) => {
 			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
 		})
+	}
+	
+	def scoreCleans(cleans: Map[TipConfigL2, CleanSpec2]): Double = {
+		// TODO: if we need to wash tip groups separately, then the costs will increase!
+		val nCostStart = if (cleans.isEmpty) 0.0 else 40.0
+		nCostStart
 	}
 }

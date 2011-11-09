@@ -29,9 +29,3 @@ sealed abstract class CleanSpec2 { val tip: TipConfigL2 }
 case class ReplaceSpec2(tip: TipConfigL2, model: TipModel) extends CleanSpec2
 case class WashSpec2(tip: TipConfigL2, spec: WashSpec) extends CleanSpec2
 case class DropSpec2(tip: TipConfigL2) extends CleanSpec2
-
-case class GroupC(
-	nItems: Int,
-	cmds: Seq[Command],
-	nScore: Double
-)

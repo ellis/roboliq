@@ -31,7 +31,6 @@ class PipetteScheduler(
 		} {
 			val nTips = device.config.tips.size
 			val nItems = cmd.args.items.size // TODO: need to break up large pipetting items into multiple items
-			var iItem = 0
 			lnScore = new Array[Double](nItems)
 			lGroupA = new Array[GroupA](nItems)
 			lGroupB = new Array[GroupB](nItems)
@@ -54,6 +53,18 @@ class PipetteScheduler(
 			println("lnScore: "+lnScore.toList)
 			//println("lGroupA: "+lGroupA.toList)
 			//println("lGroupB: "+lGroupB.toList)
+			
+			// Reconstruct the optimal path
+			val lB = getPath(nItems - 1, Nil)
+			val lmTipToClean = optimizeCleanSpec(lB.reverse, Map(), Nil)
+			println("lmTipToClean: "+lmTipToClean)
+			
+			val lClean = lmTipToClean.map(toCleanCommand)
+			println("lClean: "+lClean)
+			
+			val lCommand = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lAspirate ++ pair._2.lDispense)
+			println("lCommand:")
+			lCommand.foreach(cmd => println(cmd.toDebugString))
 		}
 	}
 	
@@ -84,6 +95,7 @@ class PipetteScheduler(
 						lnScore(iItem) = nScore
 						lGroupA(iItem) = g
 						lGroupB(iItem) = gB
+						// Calculate lower bounds on cost to finish pipetting after this group
 						val nHeuristic = {
 							if (nItemsAfter == 0)
 								0.0
@@ -123,5 +135,88 @@ class PipetteScheduler(
 	
 	private def ScoreOrdering = new Ordering[Score] {
 		def compare(a: Score, b: Score): Int = -a.nTotalCostMin.compare(b.nTotalCostMin)
+	}
+	
+	/**
+	 * Gets the path of GroupB objects from start to finish
+	 */
+	private def getPath(iItem: Int, acc: List[GroupB]): List[GroupB] = {
+		if (iItem < 0)
+			acc
+		else {
+			val gB = lGroupB(iItem)
+			if (gB == null)
+				Nil // ERROR!
+			else
+				getPath(iItem - gB.lItem.size, gB :: acc)
+		}
+	}
+	
+	private def optimizeCleanSpec(
+		rB: List[GroupB],
+		mTipToCleanPending: Map[TipConfigL2, CleanSpec2],
+		acc: List[Map[TipConfigL2, CleanSpec2]]
+	): List[Map[TipConfigL2, CleanSpec2]] = {
+		rB match {
+			case Nil => acc
+			case gB :: rest =>
+				val (mTipToClean, mTipToCleanPending2) = {
+					if (gB.cleans.isEmpty)
+						(Map[TipConfigL2, CleanSpec2](), mTipToCleanPending ++ gB.precleans)
+					else
+						(gB.cleans ++ mTipToCleanPending, gB.precleans)
+				}
+				optimizeCleanSpec(rest, mTipToCleanPending2, mTipToClean :: acc)
+		}
+	}
+
+	/*
+	private def getCommandList(gB: GroupB, mTipToClean: Map[TipConfigL2, CleanSpec2]): List[Command] = {
+		
+			case TipsDrop(tips) =>
+				Seq(L3C_TipsDrop(tips))
+				
+			case TipsGet(mapTipToModel) =>
+				val items = mapTipToModel.toSeq.sortBy(_._1).map(pair => new L3A_TipsReplaceItem(pair._1, Some(pair._2)))
+				Seq(L3C_TipsReplace(items))
+			
+			case TipsWash(mapTipToSpec) =>
+				val intensity = mapTipToSpec.values.foldLeft(WashIntensity.None) { (acc, spec) => WashIntensity.max(acc, spec.washIntensity) }
+				val items = mapTipToSpec.toSeq.sortBy(_._1).map(pair => new L3A_TipsWashItem(pair._1, pair._2.contamInside, pair._2.contamOutside))
+				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
+	*/
+	
+	private def toCleanCommand(mTipToClean: Map[TipConfigL2, CleanSpec2]): Seq[Command] = {
+		val mTipToModel = new HashMap[TipConfigL2, Option[TipModel]]
+		val mTipToWash = new HashMap[TipConfigL2, WashSpec]
+		for ((tip, cleanSpec) <- mTipToClean) {
+			cleanSpec match {
+				case ReplaceSpec2(tip, model) =>
+					mTipToModel += (tip -> Some(model))
+				case WashSpec2(tip, spec) =>
+					mTipToWash(tip) = spec
+				case DropSpec2(tip) =>
+					mTipToModel += (tip -> None)
+			}
+		}
+		
+		val lReplace = {
+			if (mTipToModel.isEmpty) Seq()
+			else {
+				val items = mTipToModel.toSeq.sortBy(_._1).map(pair => new L3A_TipsReplaceItem(pair._1, pair._2))
+				Seq(L3C_TipsReplace(items))
+			}
+		}
+		
+		val lWash = {
+			if (mTipToWash.isEmpty) Seq()
+			else {
+				val intensity = mTipToWash.values.foldLeft(WashIntensity.None) { (acc, spec) => WashIntensity.max(acc, spec.washIntensity) }
+				val items = mTipToWash.toSeq.sortBy(_._1).map(pair => new L3A_TipsWashItem(pair._1, pair._2.contamInside, pair._2.contamOutside))
+				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
+			}
+		}
+
+		lReplace ++ lWash
 	}
 }
