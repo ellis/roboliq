@@ -83,7 +83,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 			case Some(rack) =>
 				val labware = Labware(id, sType, rack)
 				shared.mapLabware((rack.grid, rack.site)) = labware
-				createPlate(id, sRack)
+				createPlate(id, sRack, Some(sType))
 		}
 	}
 }

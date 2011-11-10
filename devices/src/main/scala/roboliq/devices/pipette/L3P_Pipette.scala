@@ -16,8 +16,8 @@ class L3P_Pipette(robot: PipetteDevice) extends CommandCompilerL3 {
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
-		val planner = new PipetteScheduler(robot, ctx)
-		planner.x(cmd)
+		val planner = new PipetteScheduler(robot, ctx, cmd)
+		planner.x()
 		/*
 		val x = new L3P_Pipette_Sub(robot, ctx, cmd)
 		for { translation <- x.translation }

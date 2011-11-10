@@ -252,7 +252,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	def getPlateAtLoc(sLoc: String, input: Input): Either[ParseResult[Nothing], Plate] = {
 		// Try to create a plate if none exists at the given location yet
 		if (!shared.mapLocToPlate.contains(sLoc))
-			createPlate(sLoc, sLoc)
+			createPlate(sLoc, sLoc, None)
 		
 		shared.mapLocToPlate.get(sLoc) match {
 			case Some(plate) =>
@@ -334,7 +334,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		(i0 to i1).map(pc.dim_?.get.wells.apply).toList
 	}
 	
-	def createPlate(id: String, sRack: String) {
+	def createPlate(id: String, sRack: String, sModel_? : Option[String]) {
 		shared.mapRacks.get(sRack) match {
 			case None =>
 				shared.addError("Undefined rack: "+sRack)
@@ -349,6 +349,16 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 					val setup = kb.getWellSetup(well)
 					setup.sLabel_? = Some(id+":"+(setup.index_?.get+1))
 				})
+				sModel_? match {
+					case None =>
+					case Some(sModel) =>
+						val setup = kb.getPlateSetup(plate)
+						if (!shared.mapPlateModel.contains(sModel)) {
+							shared.addError("Undefined labware \""+sModel+"\"")
+							return
+						}
+						setup.model_? = Some(shared.mapPlateModel(sModel))
+				}
 		}
 	}
 }

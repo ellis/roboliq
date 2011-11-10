@@ -15,10 +15,11 @@ import roboliq.devices.pipette._
 
 class PipetteScheduler(
 	val device: PipetteDevice,
-	val ctx: CompilerContextL3
+	val ctx: CompilerContextL3,
+	val cmd: L3C_Pipette
 ) {
 	private val lTipAll: SortedSet[TipConfigL2] = device.config.tips.map(_.state(ctx.states).conf)
-	private val builderA = new GroupABuilder(device, ctx)
+	private val builderA = new GroupABuilder(device, ctx, cmd)
 	private val builderB = new GroupBBuilder(device, ctx)
 	private var lnScore: Array[Double] = null
 	private var lGroupA: Array[GroupA] = null
@@ -26,7 +27,7 @@ class PipetteScheduler(
 	case class Score(iItem: Int, nPathCost: Double, nTotalCostMin: Double)
 	private val queue = new PriorityQueue[Score]()(ScoreOrdering)
 	
-	def x(cmd: L3C_Pipette): Result[Seq[Command]] = {
+	def x(): Result[Seq[Command]] = {
 		for {
 			items <- builderA.filterItems(cmd.args.items)
 			mLM <- builderA.tr1Items(items)
@@ -55,7 +56,7 @@ class PipetteScheduler(
 					x1(lItem, mLM, iItemParent)
 				}
 			}
-			println("lnScore: "+lnScore.toList)
+			//println("lnScore: "+lnScore.toList)
 			//println("lGroupA: "+lGroupA.toList)
 			//println("lGroupB: "+lGroupB.toList)
 			
@@ -63,10 +64,10 @@ class PipetteScheduler(
 			val lB = getPath(nItems - 1, Nil)
 			val rB = lB.reverse
 			val lmTipToClean = optimizeCleanSpec(rB, Map(), Nil)
-			println("lmTipToClean: "+lmTipToClean)
+			//println("lmTipToClean: "+lmTipToClean)
 			
 			val lClean = lmTipToClean.map(toCleanCommand)
-			println("lClean: "+lClean)
+			//println("lClean: "+lClean)
 			
 			val lCommand = getCommands(lClean, lB, lGroupA.last.states1)
 			lCommand
@@ -232,8 +233,8 @@ class PipetteScheduler(
 		//lCommand0.foreach(cmd => println(cmd.toDebugString))
 		
 		val lCommand = lCommand0 ++ finalClean(statesLast)
-		println("lCommand:")
-		lCommand.foreach(cmd => println(cmd.toDebugString))
+		//println("lCommand:")
+		//lCommand.foreach(cmd => println(cmd.toDebugString))
 		lCommand
 	}
 	

@@ -18,8 +18,16 @@ class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevi
 	)
 	
 	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: Double, nVolumeDest: Double): Seq[TipModel] = {
-		// FIXME: implement this
-		Nil
+		val l1 = tipModels.filter(tipModel => nVolume >= tipModel.nVolumeAspirateMin && nVolume <= tipModel.nVolume)
+		val l2 = {
+			if (l1.isEmpty) {
+				val tipModelLargest = tipModels.reduce((a, b) => if (a.nVolume > b.nVolume) a else b)
+				Seq(tipModelLargest)
+			}
+			else
+				l1
+		}
+		l2
 	}
 	
 	def supportTipModelCounts(tipModelCounts: Map[TipModel,Int]): Result[Boolean] = {
@@ -27,6 +35,14 @@ class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevi
 			if (tipModelCounts.isEmpty) true
 			else (tipModelCounts.size == 1 && tipModelCounts.head._2 <= 8)
 		)
+	}
+
+	def assignTips(lTipAvailable: SortedSet[TipConfigL2], tipModel: TipModel, nTips: Int): Result[SortedSet[TipConfigL2]] = {
+		val lTipAppropriate = lTipAvailable
+		if (nTips > lTipAppropriate.size)
+			return Error("INTERNAL ERROR: assignTips: not enough tips"+(lTipAvailable, tipModel, nTips))
+		val lTip = lTipAppropriate.take(nTips)
+		Success(lTip)
 	}
 	
 	//private val mapTipSpecs = config.tipModels.map(spec => spec.id -> spec).toMap
@@ -63,5 +79,9 @@ class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevi
 			Some(PipettePolicy("PIE_AUTBOT", PipettePosition.Free))
 		else
 			Some(PipettePolicy("PIE_AUT", PipettePosition.Free))
+	}
+	
+	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
+		lTipAll -- lTipCleaning
 	}
 }

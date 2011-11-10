@@ -11,7 +11,8 @@ import roboliq.commands.pipette.TipModel
 class ParserSharedData(
 	val mapTipModel: Map[String, TipModel],
 	/** Map liquid class name to PipettePolicy */
-	val mapLcToPolicy: Map[String, PipettePolicy]
+	val mapLcToPolicy: Map[String, PipettePolicy],
+	val mapPlateModel: Map[String, PlateModel]
 ) {
 	val kb = new KnowledgeBase
 	var sTable: String = null

@@ -229,10 +229,12 @@ object Compiler {
 									case None => Right(succC)
 									case Some(translator) =>
 										val finals = succC.nodes.flatMap(_.collectFinal())
+										//println("finals")
+										//println(finals)
 										val cmds1 = finals.map(_.cmd1)
-										/*println("Output:")
-										cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
-										println()*/
+										//println("Output:")
+										//cmds1.foreach(cmd => println(cmd.getClass().getSimpleName()))
+										//println()
 										
 										translator.translate(cmds1) match {
 											case Left(errT) => Left(errT)

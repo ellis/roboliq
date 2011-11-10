@@ -26,7 +26,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				case Success(cmds0) =>
 			}
 		})
-		Right(TranslatorStageSuccess(builder, Seq()))
+		//println("builder.cmds: "+builder.cmds)
+		Right(TranslatorStageSuccess(builder, builder.cmds))
 	}
 	
 	private def translate(builder: EvowareScriptBuilder, cmd1: CommandL1): Result[Unit] = {
@@ -267,17 +268,18 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		
 		val sPlateMask = encodeWells(holder, items.map(_.well.index))
 		
-		system.mapSites.get(item0.location) match {
-			case None => return Error(Seq("INTERNAL: missing evoware site for location "+item0.location))
-			case Some(site) =>
-				addLabware(builder, holder.model_?.get.id, item0.location)
-				Success(Seq(L0C_Mix(
-					mTips, sLiquidClass,
-					asVolumes,
-					site.iGrid, site.iSite,
-					sPlateMask,
-					item0.nCount
-				)))
+		for {
+			site <- getSite(item0.location)
+			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
+		} yield {
+			addLabware(builder, holderModel.id, item0.location)
+			Seq(L0C_Mix(
+				mTips, sLiquidClass,
+				asVolumes,
+				site.iGrid, site.iSite,
+				sPlateMask,
+				item0.nCount
+			))
 		}
 	}
 	
@@ -288,10 +290,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	
 	private def tipsDrop(c: L1C_TipsDrop): Result[Seq[Command]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
-		system.mapSites.get(c.location) match {
-			case None => return Error(Seq("INTERNAL: missing evoware site for location "+c.location))
-			case Some(site) =>
-				Success(Seq(L0C_DropDITI(mTips, site.iGrid, site.iSite)))
+		for (site <- getSite(c.location)) yield {
+			Seq(L0C_DropDITI(mTips, site.iGrid, site.iSite))
 		}
 	}
 	
@@ -346,7 +346,10 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	
 	private def getSite(location: String): Result[SiteObj] = {
 		system.mapSites.get(location) match {
-			case None => Error(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
+			case None =>
+				println("INTERNAL: missing evoware site for location \""+location+"\"")
+				println("system.mapSites: "+system.mapSites)
+				Error(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
 			case Some(site) => Success(site)
 		}
 	}

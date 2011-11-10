@@ -15,9 +15,15 @@ import roboliq.robots.evoware.devices.robopeel._
 import roboliq.robots.evoware.devices.trobot._
 import roboliq.labs.weizmann._
 import roboliq.labs.weizmann.devices._
+import roboliq.labs.weizmann.handlers._
 
 
 class StationConfig extends EvowareTable {
+	println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	println()
+	println()
+	println()
+	
 	object TipModels {
 		val tipModel10 = new TipModel("DiTi 10ul", 10, 0, 0, 0)
 		val tipModel20 = new TipModel("DiTi 20ul", 20, 0, 0, 0)
@@ -31,6 +37,7 @@ class StationConfig extends EvowareTable {
 	}
 
 	object CarrierModels {
+		// BSSE:
 		val wash = new CarrierModel("Wash Station Clean", 3, false)
 		val decon = new CarrierModel("decon", 3, false)
 		val reagents = new CarrierModel("reagent columns", 2, true)
@@ -45,6 +52,8 @@ class StationConfig extends EvowareTable {
 		val sealer = new CarrierModel("RoboSeal", 1, false)
 		val peeler = new CarrierModel("RoboPeel", 1, false)
 		val centrifuge = new CarrierModel("Centrifuge", 1, false)
+		// Weizmann:
+		val waste = new CarrierModel("Waste", 7, false)
 		
 		val mp3pos = new CarrierModel("MP 3Pos Fixed", 3, false)
 		val mp3posPcr = new CarrierModel("MP 3Pos Fixed PCR", 3, false)
@@ -83,8 +92,35 @@ class StationConfig extends EvowareTable {
 		val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
 		val pcr2 = new CarrierObj("TRobot2", CarrierModels.pcr, 47)
 		val centrifuge = new CarrierObj("Centrifuge", CarrierModels.centrifuge, 54)
+		// Weizmann:
+		val g1 = new CarrierObj("g1", CarrierModels.waste, 1)
+		val g23 = new CarrierObj("g23", CarrierModels.mp3pos, 23)
+		val g29 = new CarrierObj("g29", CarrierModels.mp3pos, 29)
+		val g35 = new CarrierObj("g35", CarrierModels.mp3posPcr, 35)
+		val g41a = new CarrierObj("g41a", CarrierModels.mp3pos2clips, 41)
+		val g41b = new CarrierObj("g41b", CarrierModels.mp3pos, 41)
+		val g47 = new CarrierObj("g47", CarrierModels.mp3pos, 47)
+		//val g53
+		//val g59
+		//val g65
 	}
 	object Sites {
+		def make4(nIndex: Int, carrier: CarrierObj, iSite: Int, liRoma: Seq[Int]): List[SiteObj] = {
+			List(
+				createSite(carrier, iSite, "P"+nIndex, liRoma),
+				createSite(carrier, iSite, "T"+nIndex, liRoma),
+				createSite(carrier, iSite, "BUF"+nIndex, liRoma),
+				createSite(carrier, iSite, "M"+nIndex, liRoma)
+			)
+		}
+		def make4b(nIndex: Int, carrierA: CarrierObj, carrierB: CarrierObj, iSite: Int, liRoma: Seq[Int]): List[SiteObj] = {
+			List(
+				createSite(carrierA, iSite, "P"+nIndex, liRoma),
+				createSite(carrierA, iSite, "T"+nIndex, liRoma),
+				createSite(carrierA, iSite, "BUF"+nIndex, liRoma),
+				createSite(carrierB, iSite, "M"+nIndex, liRoma)
+			)
+		}
 		val (wash1a, wash1b, wash1c) = createSites(Carriers.wash1, "wash1a", "wash1b", "wash1c", Seq())
 		val (wash2a, wash2b, wash2c) = createSites(Carriers.wash2, "wash2a", "wash2b", "wash2c", Seq())
 		val (decon1, decon2, decon3) = createSites(Carriers.decon, "decon1", "decon2", "decon3", Seq())
@@ -101,6 +137,22 @@ class StationConfig extends EvowareTable {
 		val sealer = createSites(Carriers.sealer, "sealer", Seq(1))
 		val peeler = createSites(Carriers.peeler, "peeler", Seq(1))
 		val centrifuge = createSites(Carriers.centrifuge, "centrifuge", Seq(0))
+		// Weizmann
+		createSite(Carriers.g1, 6, "WASTE", Seq())
+		make4(2, Carriers.g23, 1, Seq(0, 1))
+		make4(3, Carriers.g23, 2, Seq(0, 1))
+		make4(4, Carriers.g29, 0, Seq(0, 1))
+		make4(5, Carriers.g29, 1, Seq(0, 1))
+		make4(6, Carriers.g29, 2, Seq(0, 1))
+		createSite(Carriers.g35, 0, "P7", Seq(0, 1))
+		createSite(Carriers.g35, 1, "P8", Seq(0, 1))
+		createSite(Carriers.g35, 2, "P9", Seq(0, 1))
+		make4b(10, Carriers.g41a, Carriers.g41b, 0, Seq(0, 1))
+		make4b(11, Carriers.g41a, Carriers.g41b, 1, Seq(0, 1))
+		make4b(12, Carriers.g41a, Carriers.g41b, 2, Seq(0, 1))
+		make4(13, Carriers.g47, 0, Seq(0, 1))
+		make4(14, Carriers.g47, 1, Seq(0, 1))
+		make4(15, Carriers.g47, 2, Seq(0, 1))
 	}
 	object LabwareModels {
 		val washA = new TroughModel("Wash Station Cleaner shallow", 8, 1)
@@ -114,6 +166,9 @@ class StationConfig extends EvowareTable {
 		val plateCostar = new PlateModel("D-BSSE 96 Well Costar Plate", 8, 12, 500) // FIXME: nVolume? 
 		val eppendorfs = new PlateModel("Block 20Pos 1.5 ml Eppendorf", 4, 5, 1500) // FIXME: nVolume?
 		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500) // FIXME: nVolume?
+		// Weizmann:
+		val plateDeepWell = new PlateModel("96 Well DeepWell square", 8, 12, 1000) // FIXME: nVolume? 
+		
 		//"MTP Waste"
 	}
 	object Labwares {
@@ -131,6 +186,10 @@ class StationConfig extends EvowareTable {
 		val ethanol = new TroughObj("ethanol", LabwareModels.ethanol, Sites.ethanol)
 		val eppendorfs = new PlateObj("eppendorfs", LabwareModels.eppendorfs, Sites.eppendorfs)
 	}
+	
+	
+	Sites
+	LabwareModels
 	
 	
 	val mover = new EvowareMoveDevice

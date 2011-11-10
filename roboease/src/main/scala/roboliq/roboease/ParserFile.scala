@@ -10,8 +10,13 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 
 
-class ParserFile(mapTables: Map[String, Table], mapTipModel: Map[String, TipModel], mapLcToPolicy: Map[String, PipettePolicy]) {
-	private val shared = new ParserSharedData(mapTipModel, mapLcToPolicy)
+class ParserFile(
+	mapTables: Map[String, Table],
+	mapTipModel: Map[String, TipModel],
+	mapLcToPolicy: Map[String, PipettePolicy],
+	mapPlateModel: Map[String, PlateModel]
+) {
+	private val shared = new ParserSharedData(mapTipModel, mapLcToPolicy, mapPlateModel)
 	import shared._
 	private val pConfig = new ParserLineConfig(shared, mapTables)
 	private val pScript = new ParserLineScript(shared)

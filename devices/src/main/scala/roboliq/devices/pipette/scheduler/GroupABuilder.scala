@@ -14,7 +14,8 @@ import roboliq.devices.pipette._
 
 class GroupABuilder(
 	val device: PipetteDevice,
-	val ctx: CompilerContextL3
+	val ctx: CompilerContextL3,
+	val cmd: L3C_Pipette
 ) {
 	/**
 	 * Remove items with nVolume < 0
@@ -49,6 +50,16 @@ class GroupABuilder(
 			while (!lLiquidsUnassigned.isEmpty) {
 				// find most frequently allowed tip type and assign it to all allowable items
 				val mapModelToCount: Map[TipModel, Int] = getNumberOfLiquidsPerModel(mapLiquidToModels, lLiquidsUnassigned)
+				// FIXME: for debug only
+				if (mapModelToCount.isEmpty) {
+					println("DEBUG:")
+					println(items)
+					println(lTipModelAll)
+					println(lLiquidAll)
+					println(mapLiquidToModels)
+					println(lLiquidsUnassigned)
+				}
+				// ENDFIX
 				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
 				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
 				mapLiquidToModel ++= liquids.map(_ -> tipModel)
@@ -353,10 +364,12 @@ class GroupABuilder(
 			val nVolumeDest = destState.nVolume
 			
 			// TODO: allow for policy override
-			val policy = device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest) match {
-				case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
-				case Some(p) => p
-			}
+			val policy = cmd.args.pipettePolicy_?.getOrElse(
+				device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest) match {
+					case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
+					case Some(p) => p
+				}
+			)
 			
 			item -> policy
 		}

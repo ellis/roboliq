@@ -29,7 +29,8 @@ object Main extends App {
 		).filter(_ != null)
 		
 		val lsFileOverride = Seq(
-			//System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf"
+			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf"
+			System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf"
 		)
 		
 		if (lsFileOverride.isEmpty)
@@ -66,6 +67,10 @@ object Main extends App {
 						//val mapLabware = EvowareTranslatorHeader.LabwareMap(p.mapLabware.mapValues(toLabwareItem).toSeq : _*)
 						val mapLabware = p.mapLabware.mapValues(toLabwareItem)
 						val translator = new EvowareTranslator(toolchain.evowareConfig)
+						println("succT.cmds:")
+						println(succT.cmds)
+						println("cmds:")
+						println(cmds)
 						val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
 						println(s)
 					case Right(succ) => succ.print()
