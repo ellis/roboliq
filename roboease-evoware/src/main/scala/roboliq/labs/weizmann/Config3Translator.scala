@@ -1,4 +1,4 @@
-package roboliq.labs.weizmann
+/*package roboliq.labs.weizmann
 
 import roboliq.robots.evoware._
 
@@ -22,4 +22,4 @@ object Config3Translator {
 	def apply(sites: Iterable[SiteObj]): EvowareConfig = {
 		new EvowareConfig(sites, mapWashProgramArgs)
 	}
-}
+}*/

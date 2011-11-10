@@ -39,8 +39,8 @@ object Main extends App {
 	}
 	
 	def test2(sSourcePath: String) {
-		val stationConfig = new StationConfig
-		val roboeaseConfig = new Config2Roboease
+		val station = new StationConfig
+		val roboeaseConfig = new Config2Roboease(station)
 		val p = new RoboeaseParser(roboeaseConfig)
 
 		RoboeaseHack.bEmulateEvolab = true
@@ -52,9 +52,9 @@ object Main extends App {
 			case Right(res) =>
 				val kb = res.kb
 				val cmds = res.cmds.map(_.cmd)
-				val evowareConfig = Config3Translator(roboeaseConfig.mapTables2(p.sTable).evowareSites)
-				val compilerConfig = new Config4Compiler(evowareConfig)
-				val toolchain = new WeizmannToolchain(compilerConfig, evowareConfig)
+				//val evowareConfig = Config3Translator(roboeaseConfig.mapTables2(p.sTable).evowareSites)
+				//val compilerConfig = new Config4Compiler(evowareConfig)
+				val toolchain = new WeizmannToolchain(station)
 				toolchain.compile(kb, cmds) match {
 					case Left(err) => err.print()
 					case Right(succT: TranslatorStageSuccess) =>
@@ -65,7 +65,8 @@ object Main extends App {
 						}
 						//val mapLabware = EvowareTranslatorHeader.LabwareMap(p.mapLabware.mapValues(toLabwareItem).toSeq : _*)
 						val mapLabware = p.mapLabware.mapValues(toLabwareItem)
-						val s = compilerConfig.translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
+						val translator = new EvowareTranslator(toolchain.evowareConfig)
+						val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
 						println(s)
 					case Right(succ) => succ.print()
 				}

@@ -1,4 +1,4 @@
-package roboliq.labs.weizmann.station1
+/*package roboliq.labs.weizmann.station1
 
 import roboliq.common._
 import roboliq.compiler._
@@ -38,3 +38,4 @@ class Config4Compiler(evoware: EvowareConfig) extends CompilerConfig {
 	
 	def createTranslator: Translator = translator
 }
+*/
