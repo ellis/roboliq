@@ -14,6 +14,8 @@ import roboliq.robots.evoware.devices.roboseal._
 import roboliq.robots.evoware.devices.robopeel._
 import roboliq.robots.evoware.devices.trobot._
 import roboliq.labs.bsse._
+import roboliq.labs.bsse.devices._
+import roboliq.labs.bsse.handlers._
 
 
 class StationConfig extends EvowareTable {

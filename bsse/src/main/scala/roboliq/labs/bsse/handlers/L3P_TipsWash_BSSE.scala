@@ -1,4 +1,4 @@
-package roboliq.labs.bsse
+package roboliq.labs.bsse.handlers
 
 import scala.collection.immutable.SortedSet
 
@@ -7,6 +7,7 @@ import roboliq.compiler._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware.commands._
+import roboliq.labs.bsse.devices._
 
 
 class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: Plate) extends CommandCompilerL3 {
