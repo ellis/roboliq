@@ -114,7 +114,7 @@ class GroupBBuilder(
 					!xs.exists(twvp.tip eq _.tip) &&
 					// well not already visited
 					!xs.exists(twvp.well eq _.well) && 
-					device.canBatchSpirateItems(xs2)
+					device.canBatchSpirateItems(groupA.states0, xs2)
 				)
 					xs2 :: rest
 				else

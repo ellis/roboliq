@@ -57,13 +57,13 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	/**
 	 * Ensure that all items use the same policy and same tip sizes
 	 */
-	def canBatchSpirateItems(lTwvp: List[TipWellVolumePolicy]): Boolean = {
+	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean = {
 		// Ensure that all items use the same policy and same tip sizes
 		val b1 = lTwvp match {
 			case Nil => true
 			case x :: xs =>
-				val ix = x.tip.index / 4
-				xs.forall(twvp => twvp.policy == x.policy && twvp.tip.index / 4 == ix)
+				val tipState = x.tip.state(states)
+				xs.forall(twvp => twvp.policy == x.policy && twvp.tip.state(states).model_? == tipState.model_?)
 		}
 		// Ensure that all intra-tip distances are equal to the intra-well distances
 		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)

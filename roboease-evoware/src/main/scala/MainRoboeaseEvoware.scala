@@ -53,24 +53,16 @@ object Main extends App {
 			case Right(res) =>
 				val kb = res.kb
 				val cmds = res.cmds.map(_.cmd)
-				//val evowareConfig = Config3Translator(roboeaseConfig.mapTables2(p.sTable).evowareSites)
-				//val compilerConfig = new Config4Compiler(evowareConfig)
 				val toolchain = new WeizmannToolchain(station)
 				toolchain.compile(kb, cmds) match {
 					case Left(err) => err.print()
 					case Right(succT: TranslatorStageSuccess) =>
 						val sFilename = sSourcePath + ".esc"
-						//case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
 						def toLabwareItem(a: roboease.Labware): LabwareItem = {
 							LabwareItem(a.sLabel, a.sType, a.rack.grid, a.rack.site)
 						}
-						//val mapLabware = EvowareTranslatorHeader.LabwareMap(p.mapLabware.mapValues(toLabwareItem).toSeq : _*)
 						val mapLabware = p.mapLabware.mapValues(toLabwareItem)
 						val translator = new EvowareTranslator(toolchain.evowareConfig)
-						println("succT.cmds:")
-						println(succT.cmds)
-						println("cmds:")
-						println(cmds)
 						val s = translator.saveWithHeader(succT.cmds, p.sHeader, mapLabware, sFilename)
 						println(s)
 					case Right(succ) => succ.print()

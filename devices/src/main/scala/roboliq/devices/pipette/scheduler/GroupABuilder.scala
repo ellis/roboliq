@@ -380,8 +380,8 @@ class GroupABuilder(
 	}
 
 	def updateGroupA7_lDispense(g0: GroupA): GroupResult = {
-		val lDispense = g0.mItemToPolicy.toSeq.map(pair => {
-			val (item, policy) = pair
+		val lDispense = g0.lItem.map(item => {
+			val policy = g0.mItemToPolicy(item) 
 			val tip = g0.mItemToTip(item)
 			new TipWellVolumePolicy(tip, item.dest, item.nVolume, policy)
 		})

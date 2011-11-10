@@ -48,7 +48,7 @@ class PipetteScheduler(
 				//println("lnScore: "+lnScore.toList)
 				//println("queue: "+queue)
 				val score = queue.dequeue
-				//println("score: "+score)
+				println("score: "+score)
 				val iItemParent = score.iItem
 				bDone = (iItemParent == nItems - 1)
 				if (!bDone) {
@@ -56,12 +56,13 @@ class PipetteScheduler(
 					x1(lItem, mLM, iItemParent)
 				}
 			}
-			//println("lnScore: "+lnScore.toList)
+			println("lnScore: "+lnScore.toList)
 			//println("lGroupA: "+lGroupA.toList)
 			//println("lGroupB: "+lGroupB.toList)
 			
 			// Reconstruct the optimal path
 			val lB = getPath(nItems - 1, Nil)
+			lB.foreach(gB => { println("gB:"); println(gB) })
 			val rB = lB.reverse
 			val lmTipToClean = optimizeCleanSpec(rB, Map(), Nil)
 			//println("lmTipToClean: "+lmTipToClean)
@@ -129,7 +130,34 @@ class PipetteScheduler(
 			builderA.addItemToGroup(g, item) match {
 				case builderA.GroupSuccess(g2) =>
 					val nTips = g2.mTipToLM.size
-					val acc2 = if (g.lItem.isEmpty || nTips == nTips0) acc else g :: acc
+					/*val acc2 = {
+						// If still using same number of tips as before, don't save this group
+						if (g.lItem.isEmpty || nTips == nTips0)
+							acc
+						// Save g2 (shortest item sequence for nTips tips)
+						else if (!acc.isEmpty && acc.head.eq(g))
+							g2 :: acc
+						// Save g (longest item sequence for nTips0 tips) and g2 (shortest for nTips)
+						else
+							g2 :: g :: acc
+					}*/
+					// Save groups whenever there's a break in well adjacency
+					val acc2 = {
+						// If nothing to save yet
+						if (g.lItem.isEmpty)
+							acc
+						else {
+							val wellGroup = WellGroup(g2.lItem.takeRight(2).map(_.dest)).splitByAdjacent()
+							// If new item is not adjacent to previous one, save the preceding group
+							if (wellGroup.size > 1) {
+								//println("keep:")
+								//println(g)
+								g :: acc
+							}
+							else
+								acc
+						}
+					}
 					x2(g2, rest, nTips, acc2)
 				case _ =>
 					//println("g*:"+g)
@@ -140,7 +168,8 @@ class PipetteScheduler(
 	}
 	
 	private def ScoreOrdering = new Ordering[Score] {
-		def compare(a: Score, b: Score): Int = -a.nTotalCostMin.compare(b.nTotalCostMin)
+		//def compare(a: Score, b: Score): Int = -a.nTotalCostMin.compare(b.nTotalCostMin)
+		def compare(a: Score, b: Score): Int = -a.iItem.compare(b.iItem)
 	}
 	
 	/**
