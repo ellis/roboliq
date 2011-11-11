@@ -15,6 +15,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				{ case liquid ~ _ ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT(liquid, wells, vol, lc, opts_?) }),
 			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
 				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT(liquid, getWells(wells), vol, lc, opts_?) }),
+			("DIST_WELL", idPlate~idWell~idPlate~idWells~valVolumes~ident~opt(word) ^^
+				{ case _ ~ src ~ _ ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(Seq(src), dests, vol, lc, opts_?) }),
 			("MIX_WELLS", idPlate~idWells~valInt~valVolume~ident~opt(word) ^^
 				{ case _ ~ wells ~ nCount ~ nVolume ~ lc ~ opts_? => run_MIX_WELLS(wells, nCount, nVolume, lc, opts_?) }),
 			("PROMPT", restOfLine ^^
