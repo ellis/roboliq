@@ -1,0 +1,8 @@
+- General overview
+	- What the robot can do now
+	- What you will probably be able to do in the near future
+- Something technical where suggestions might be useful or where the info might be useful for others
+- Some open problem
+	- design of the DSL
+		- show code for PCR
+		- show code for gradient

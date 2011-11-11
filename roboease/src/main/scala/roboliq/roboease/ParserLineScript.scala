@@ -3,21 +3,26 @@ package roboliq.roboease
 import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
+import roboliq.common.{Error=>RError,Success=>RSuccess}
 import roboliq.commands.pipette._
 
 
 class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	import WellPointerImplicits._
 	
-	val cmds2 = Map[String, Parser[Unit]](
+	val cmds2 = Map[String, Parser[Result[Unit]]](
+			("DIST_REAGENT", idLiquid~idPlate~idWells~valVolumes~ident~opt(word) ^^
+				{ case liquid ~ _ ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT(liquid, wells, vol, lc, opts_?) }),
 			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
-				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT2(liquid, wells, vol, lc, opts_?) }),
+				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT(liquid, getWells(wells), vol, lc, opts_?) }),
 			("MIX_WELLS", idPlate~idWells~valInt~valVolume~ident~opt(word) ^^
-				{ case plate ~ wells ~ nCount ~ nVolume ~ lc ~ opts_? => run_MIX_WELLS(plate, wells, nCount, nVolume, lc, opts_?) }),
+				{ case _ ~ wells ~ nCount ~ nVolume ~ lc ~ opts_? => run_MIX_WELLS(wells, nCount, nVolume, lc, opts_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
-				{ case srcs ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_LOCATIONS(srcs, dests, vol, lc, opts_?) }),
+				{ case srcs ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(getWells(srcs), getWells(dests), vol, lc, opts_?) }),
+			("TRANSFER_WELLS", idPlate~idWells~idPlate~idWells~valVolumes~ident~opt(word) ^^
+				{ case _ ~ srcs ~ _ ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(srcs, dests, vol, lc, opts_?) }),
 			("%", restOfLine ^^
 				{ case s => run_ChecklistComment(s) })
 			)
@@ -29,61 +34,48 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
 	}
 	
-	def run_DIST_REAGENT2(reagent: Reagent, wells: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
+	def run_DIST_REAGENT(reagent: Reagent, wells: Seq[Well], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[Unit] = {
 		sub_pipette(Some(reagent), Nil, wells, volumes, sLiquidClass, opts_?)
 	}
 	
-	def run_MIX_WELLS(plate: Plate, wells: List[Well], nCount: Int, nVolume: Double, lc: String, opts_? : Option[String]) {
-		if (wells.isEmpty) {
-			shared.addError("list of destination wells must be non-empty")
-			return
+	def run_MIX_WELLS(wells: Seq[Well], nCount: Int, nVolume: Double, lc: String, opts_? : Option[String]): Result[Unit] = {
+		for {
+			_ <- Result.assert(!wells.isEmpty, "list of destination wells must be non-empty")
+			mixPolicy <- getPolicy(lc, None)
+			mapOpts <- getMapOpts(opts_?)
+			tipOverrides_? <- getOptTipOverrides(mapOpts)
+			tipModel_? <- getOptTipModel(mapOpts)
+		} yield {
+			createSrcWellLiquids(wells)
+			val mixSpec = new MixSpec(nVolume, nCount, Some(mixPolicy))
+			val args = new L4A_MixArgs(
+				wells.map(well => WellPointer(well)),
+				mixSpec,
+				tipOverrides_?,
+				tipModel_?
+				)
+			val cmd = L4C_Mix(args)
+			addRunCommand(cmd)
 		}
-		
-		createSrcWellLiquids(wells)
-		
-		val mixPolicy = getPolicy(lc, None) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(policy) => policy
-		}
-		val mapOpts = getMapOpts(opts_?) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(map) => map
-		}
-		var tipOverrides_? = getOptTipOverrides(mapOpts) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(opt) => opt
-		}
-		var tipModel_? = getOptTipModel(mapOpts) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(model_?) => model_?
-		}
-
-		val mixSpec = new MixSpec(nVolume, nCount, Some(mixPolicy))
-		val args = new L4A_MixArgs(
-			wells.map(well => WellPointer(well)),
-			mixSpec,
-			tipOverrides_?,
-			tipModel_?
-			)
-		val cmd = L4C_Mix(args)
-		addRunCommand(cmd)
 	}
 	
-	def run_PROMPT(s: String) {
+	def run_PROMPT(s: String): Result[Unit] = {
 		println("WARNING: PROMPT command not yet implemented")
+		RSuccess()
 	}
 	
-	def run_TRANSFER_LOCATIONS(srcs: Seq[Tuple2[Plate, Int]], dests: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
-		if (srcs.size != dests.size) {
-			shared.addError("souce and destination lists must have the same length")
-			return
+	def run_TRANSFER_WELLS(srcs: Seq[Well], dests: Seq[Well], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[Unit] = {
+		for {
+			_ <- validateEqualListLength(srcs, dests)
+		} yield {
+			createSrcWellLiquids(srcs)
+			sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
 		}
-		createSrcLiquids(srcs)
-		sub_pipette(None, srcs, dests, volumes, sLiquidClass, opts_?)
 	}
 	
-	def run_ChecklistComment(s: String) {
+	def run_ChecklistComment(s: String): Result[Unit] = {
 		println("WARNING: % command not yet implemented")
+		RSuccess()
 	}
 	
 	private def getWell(pi: Tuple2[Plate, Int]): Well = {
@@ -92,11 +84,17 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		dim.wells(iWell)
 	}
 	
+	private def getWells(l: Seq[Tuple2[Plate, Int]]): Seq[Well] = l.map(getWell)
+	
 	private def wellsToPlateIndexes(wells: Seq[Well]): Seq[Tuple2[Plate, Int]] = {
 		wells.map(well => {
 			val wellSetup = kb.getWellSetup(well)
 			(wellSetup.holder_?.get, wellSetup.index_?.get)
 		})
+	}
+	
+	private def validateEqualListLength(srcs: Seq[Well], dests: Seq[Well]): Result[Unit] = {
+		Result.assert(srcs.size == dests.size, "source and destination lists must have the same length")
 	}
 
 	private def createSrcWellLiquids(wells: Seq[Well]) {
@@ -124,102 +122,67 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		}
 	}
 	
-	private def sub_pipette(reagent_? : Option[Reagent], srcs: Seq[Tuple2[Plate, Int]], dests: Seq[Tuple2[Plate, Int]], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]) {
-		if (dests.isEmpty) {
-			shared.addError("list of destination wells must be non-empty")
-			return
+	private def sub_pipette(reagent_? : Option[Reagent], srcs: Seq[Well], dests: Seq[Well], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[Unit] = {
+		for {
+			_ <- Result.assert(!dests.isEmpty, "list of destination wells must be non-empty")
+			_ <- Result.assert(!volumes.isEmpty, "list of volumes must be non-empty")
+			_ <- Result.assert(volumes.size == 1 || dests.size == volumes.size, "lists of wells and volumes must have the same dimensions")
+			policy <- getPolicy(sLiquidClass, reagent_?)
+			mapOpts <- getMapOpts(opts_?)
+			mixSpec_? <- getOptMixSpec(mapOpts)
+			tipOverrides_? <- getOptTipOverrides(mapOpts)
+			tipModel_? <- getOptTipModel(mapOpts)
+		} yield {
+			val wvs = {
+				if (volumes.size > 1)
+					dests zip volumes
+				else
+					dests.map(_ -> volumes.head)
+			}
+			dests.foreach(well => kb.addWell(well, false)) // Indicate that these wells are destinations
+			
+			val items = reagent_? match {
+				case None =>
+					(srcs zip wvs).map(pair => {
+						val (src, (dest, nVolume)) = pair
+						kb.addWell(src, true) // Indicate that this well is a source
+						new L4A_PipetteItem(WellPointer(src), WellPointer(dest), Seq(nVolume))
+					})
+				case Some(reagent) =>
+					wvs.map(pair => {
+						val (dest, nVolume) = pair
+						new L4A_PipetteItem(WellPointer(reagent), WellPointer(dest), Seq(nVolume))
+					})
+			}
+			val args = new L4A_PipetteArgs(
+				items,
+				mixSpec_? = mixSpec_?,
+				tipOverrides_? = tipOverrides_?,
+				pipettePolicy_? = Some(policy),
+				tipModel_? = tipModel_?
+				)
+			val cmd = L4C_Pipette(args)
+			addRunCommand(cmd)
 		}
-		if (volumes.isEmpty) {
-			shared.addError("list of volumes must be non-empty")
-			return
-		}
-		if (volumes.size > 1 && dests.size != volumes.size) {
-			shared.addError("lists of wells and volumes must have the same dimensions")
-			return
-		}
-		
-		val wells2 = dests.map(getWell)
-		val wvs = {
-			if (volumes.size > 1)
-				wells2 zip volumes
-			else
-				wells2.map(_ -> volumes.head)
-		}
-		wells2.foreach(well => kb.addWell(well, false)) // Indicate that these wells are destinations
-		
-		val policy = getPolicy(sLiquidClass, reagent_?) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(policy) => policy
-		}
-		val mapOpts = getMapOpts(opts_?) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(map) => map
-		}
-		var mixSpec_? = getOptMixSpec(mapOpts) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(opt) => opt
-		}
-		var tipOverrides_? = getOptTipOverrides(mapOpts) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(opt) => opt
-		}
-		var tipModel_? = getOptTipModel(mapOpts) match {
-			case Left(sError) => shared.addError(sError); return
-			case Right(model_?) => model_?
-		}
-		
-		val items = reagent_? match {
-			case None =>
-				(srcs zip wvs).map(pair => {
-					val (pi, (dest, nVolume)) = pair
-					val src = getWell(pi)
-					kb.addWell(src, true) // Indicate that this well is a source
-					new L4A_PipetteItem(WellPointer(src), WellPointer(dest), Seq(nVolume))
-				})
-			case Some(reagent) =>
-				wvs.map(pair => {
-					val (dest, nVolume) = pair
-					new L4A_PipetteItem(WellPointer(reagent), WellPointer(dest), Seq(nVolume))
-				})
-		}
-		val args = new L4A_PipetteArgs(
-			items,
-			mixSpec_? = mixSpec_?,
-			tipOverrides_? = tipOverrides_?,
-			pipettePolicy_? = Some(policy),
-			tipModel_? = tipModel_?
-			)
-		val cmd = L4C_Pipette(args)
-		addRunCommand(cmd)
 	}
 
-	private def getPolicy(lc: String, reagent_? : Option[Reagent]): Either[String, PipettePolicy] = {
+	private def getPolicy(lc: String, reagent_? : Option[Reagent]): Result[PipettePolicy] = {
 		if (lc == "DEFAULT") {
-			reagent_? match {
-				case None =>
-					Left("Explicit liquid class required here instead of \"DEFAULT\"")
-				case Some(reagent) =>
-					shared.mapReagentToPolicy.get(reagent) match {
-						case None =>
-							Left("Explicit liquid class required here instead of \"DEFAULT\"")
-						case Some(policy) =>
-							Right(policy)
-					}
-			}
+			for {
+				reagent <- Result.get(reagent_?, "Explicit liquid class required here instead of \"DEFAULT\"")
+				policy <- Result.get(shared.mapReagentToPolicy.get(reagent), "Explicit liquid class required here instead of \"DEFAULT\"")
+			} yield policy
 		}
 		else {
-			shared.mapLcToPolicy.get(lc) match {
-				case None => Left("unknown liquid class \""+lc+"\"")
-				case Some(policy) => Right(policy)
-			}
+			Result.get(shared.mapLcToPolicy.get(lc), "unknown liquid class \""+lc+"\"")
 		}
 	}
 
 	private val lsOptNames = Set("MIX", "TIPMODE", "TIPTYPE")
 	
-	private def getMapOpts(opts_? : Option[String]): Either[String, Map[String, Seq[String]]] = {
+	private def getMapOpts(opts_? : Option[String]): Result[Map[String, Seq[String]]] = {
 		opts_? match {
-			case None => Right(Map())
+			case None => RSuccess(Map())
 			case Some(opts) =>
 				val lsOpts = opts.split(",")
 				val map = lsOpts.map(sOpt => {
@@ -227,72 +190,71 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 					val sOptName = lsParts.head
 					val args = lsParts.tail.toSeq
 					if (!lsOptNames.contains(sOptName))
-						return Left("unknown option \""+sOptName+"\"")
+						return RError("unknown option \""+sOptName+"\"")
 					sOptName -> args.toSeq
 				}).toMap
-				Right(map)
+				RSuccess(map)
 		}
 	}
 	
-	private def getOptMixSpec(mapOpts: Map[String, Seq[String]]): Either[String, Option[MixSpec]] = {
+	private def getOptMixSpec(mapOpts: Map[String, Seq[String]]): Result[Option[MixSpec]] = {
 		mapOpts.get("MIX") match {
-			case None => Right(None)
+			case None => RSuccess(None)
 			case Some(args) =>
 				args match {
 					case Seq(lc, sCountAndVol) =>
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
-								getPolicy(lc, None) match {
-									case Left(sError) => Left(sError)
-									case Right(policy) => Right(Some(MixSpec(sVol.toDouble, sCount.toInt, Some(policy))))
+								for (policy <- getPolicy(lc, None)) yield {
+									Some(MixSpec(sVol.toDouble, sCount.toInt, Some(policy)))
 								}
 							case _ =>
-								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
+								RError("unrecognized MIX parameter \""+sCountAndVol+"\"")
 						}
 					case Seq(sCountAndVol) =>
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
-								Right(Some(MixSpec(sVol.toDouble, sCount.toInt, None)))
+								RSuccess(Some(MixSpec(sVol.toDouble, sCount.toInt, None)))
 							case _ =>
-								Left("unrecognized MIX parameter \""+sCountAndVol+"\"")
+								RError("unrecognized MIX parameter \""+sCountAndVol+"\"")
 						}
 					case _ => 
-						Left("unknown MIX parameters \""+args.mkString(":")+"\"")
+						RError("unknown MIX parameters \""+args.mkString(":")+"\"")
 				}
 		}
 	}
 	
-	private def getOptTipOverrides(mapOpts: Map[String, Seq[String]]): Either[String, Option[TipHandlingOverrides]] = {
+	private def getOptTipOverrides(mapOpts: Map[String, Seq[String]]): Result[Option[TipHandlingOverrides]] = {
 		mapOpts.get("TIPMODE") match {
-			case None => Right(None)
+			case None => RSuccess(None)
 			case Some(Seq(arg)) =>
 				arg match {
 					case "KEEPTIP" =>
-						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
+						RSuccess(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
 					// NOTE: "KEEPTIP" == "KEEPTIPS"
 					case "KEEPTIPS" =>
-						Right(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
+						RSuccess(Some(new TipHandlingOverrides(Some(TipReplacementPolicy.KeepBetween), None, None, None)))
 					// This is apparently like the default behavior in roboliq
 					case "MULTIPIP" =>
-						Right(None)
+						RSuccess(None)
 					case _ =>
-						Left("unknown TIPMODE \""+arg+"\"")
+						RError("unknown TIPMODE \""+arg+"\"")
 				}
 			case Some(args) =>
-				Left("unknown TIPMODE \""+args.mkString(":")+"\"")
+				RError("unknown TIPMODE \""+args.mkString(":")+"\"")
 		}
 	}
 	
-	private def getOptTipModel(mapOpts: Map[String, Seq[String]]): Either[String, Option[TipModel]] = {
+	private def getOptTipModel(mapOpts: Map[String, Seq[String]]): Result[Option[TipModel]] = {
 		mapOpts.get("TIPTYPE") match {
-			case None => Right(None)
+			case None => RSuccess(None)
 			case Some(Seq(sType)) =>
 				shared.mapTipModel.get(sType) match {
-					case None => Left("unregister TIPTYPE: \""+sType+"\"")
-					case Some(model) => Right(Some(model))
+					case None => RError("unregister TIPTYPE: \""+sType+"\"")
+					case Some(model) => RSuccess(Some(model))
 				}
 			case Some(args) =>
-				Left("unrecognized TIPTYPE arguments: "+args.mkString(":"))
+				RError("unrecognized TIPTYPE arguments: "+args.mkString(":"))
 		}
 	}
 	

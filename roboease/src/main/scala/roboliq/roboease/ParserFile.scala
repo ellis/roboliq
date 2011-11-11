@@ -147,8 +147,13 @@ class ParserFile(
 						val r = pScript.parseAll(p, rCmd.next)
 						if (!r.successful)
 							addError(r.toString)
-						else
-							bFound = true
+						else {
+							val res: roboliq.common.Result[Unit] = r.get
+							res match {
+								case Error(lsError) => lsError.foreach(addError)
+								case _ => bFound = true
+							}
+						}
 				}
 			}
 			else {
