@@ -19,10 +19,14 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				{ case _ ~ src ~ _ ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(Seq(src), dests, vol, lc, opts_?) }),
 			("MIX_WELLS", idPlate~idWells~valInt~valVolume~ident~opt(word) ^^
 				{ case _ ~ wells ~ nCount ~ nVolume ~ lc ~ opts_? => run_MIX_WELLS(wells, nCount, nVolume, lc, opts_?) }),
+			("PREPARE_MIX", ident~integer~opt(floatingPointNumber) ^^
+				{ case id ~ nShots ~ nMargin_? => run_PREPARE_MIX(id, nShots, nMargin_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
 				{ case srcs ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(getWells(srcs), getWells(dests), vol, lc, opts_?) }),
+			("TRANSFER_SAMPLES", integer~idPlate~idPlate~valVolumes~ident~opt(word) ^^
+				{ case nWells ~ splate ~ dplate ~ vol ~ lc ~ opts_? => run_TRANSFER_SAMPLES(splate, dplate, nWells, vol, lc, opts_?) }),
 			("TRANSFER_WELLS", idPlate~idWells~idPlate~idWells~valVolumes~ident~opt(word) ^^
 				{ case _ ~ srcs ~ _ ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(srcs, dests, vol, lc, opts_?) }),
 			("%", restOfLine ^^
@@ -61,9 +65,39 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		}
 	}
 	
+	def run_PREPARE_MIX(id: String, nShots: Int, nMargin_? : Option[Double]): Result[Unit] = {
+		// Default to 8%
+		val nMargin = nMargin_? match {
+			case None => 0.08
+			case Some(n) => n
+		}
+		
+		for {
+			_ <- Result.assert(nShots > 0, "number of shots must be positive")
+			_ <- Result.assert(nMargin >= 0 && nMargin <= 0.3, "margin value must be between 0 and 0.3; you specified "+nMargin)
+		} yield {
+			val nFactor = nShots
+			
+		}
+		for {
+			_ <- Result.assert(nMari)
+		}
+	}
+	
 	def run_PROMPT(s: String): Result[Unit] = {
 		println("WARNING: PROMPT command not yet implemented")
 		RSuccess()
+	}
+	
+	def run_TRANSFER_SAMPLES(splate: Plate, dplate: Plate, nWells: Int, volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[Unit] = {
+		for {
+			srcDim <- getDim(splate)
+			destDim <- getDim(dplate)
+			_ <- Result.assert(nWells <= srcDim.wells.size && nWells <= destDim.wells.size, "number of samples cannot excede plate size")
+			_ <- RError("Need to implement PLATE config variable first for letting the user define the first well index")
+		} yield {
+			sub_pipette(None, srcDim.wells.take(nWells), destDim.wells.take(nWells), volumes, sLiquidClass, opts_?)
+		}
 	}
 	
 	def run_TRANSFER_WELLS(srcs: Seq[Well], dests: Seq[Well], volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[Unit] = {
@@ -78,6 +112,13 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	def run_ChecklistComment(s: String): Result[Unit] = {
 		println("WARNING: % command not yet implemented")
 		RSuccess()
+	}
+	
+	private def getDim(plate: Plate): Result[PlateSetupDimensionL4] = {
+		val setup = kb.getPlateSetup(plate)
+		for {
+			dim <- Result.get(setup.dim_?, "Plate \""+plate+"\" requires dimensions")
+		} yield dim
 	}
 	
 	private def getWell(pi: Tuple2[Plate, Int]): Well = {

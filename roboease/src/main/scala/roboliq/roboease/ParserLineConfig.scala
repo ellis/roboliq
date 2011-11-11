@@ -19,6 +19,9 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 				{ case id ~ value => setOption(id, value) }),
 			("REAGENT", ident~idPlate~integer~ident~opt(integer) ^^
 				{ case id ~ plate ~ iWell ~ lc ~ nWells_? => setReagent(id, plate, iWell, lc, nWells_?) }),
+			("MIXDEF", ident~rep1(ident~valVolume) ^^
+				//{ case id ~ List[~[String, Double]] => () }),
+				{ case id ~ l => setMixDef(id, l.map(x => x._1 -> x._2)) }),
 			("LABWARE", ident~ident~string ^^
 				{ case id ~ sRack ~ sType => setLabware(id, sRack, sType) })
 			)
@@ -73,6 +76,15 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		shared.mapReagents(id) = reagent
 		//shared.lReagentsInWells += (reagent -> wells)
 		shared.mapReagentToPolicy(reagent) = policy
+	}
+	
+	private def setMixDef(id: String, l: List[Tuple2[String, Double]]) {
+		val l2 = l.map(pair => {
+			shared.mapReagents.get(pair._1) match {
+				case None => shared.addError("reagent \""+pair._1+"\" not defined"); return
+				case Some(reagent) => (reagent, pair._2)
+			}
+		})
 	}
 
 	private def setLabware(id: String, sRack: String, sType: String) {

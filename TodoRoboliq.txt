@@ -80,16 +80,17 @@ x	Example05: shouldn't wash after dispensing water
 	Example05: let user suppress post-clean when pipetting
 	Example05: allow for premix before aspirate
 	Example05: better wash intensity choices, so that the two tip blocks can be independently assigned wash intensities
-	PipetteScheduler: split items whose volume is too large for the chosen tip model
+*	PipetteScheduler: split items whose volume is too large for the chosen tip model
 	PipetteScheduler: consider adding the concept of "tip blocks" in order to more directly handle some of the BSSE tip operations
-	PipetteScheduler: handle pre- and post-mixing
+*	PipetteScheduler: handle pre- and post-mixing
+*	PipetteScheduler: use tip override for asperate too
 ?	always wash/decon right after pipetting is done in order to prevent drying
 	extra wash before decon in case of cells
 	evoware: if the next command is not a pipetting command, move the LiHa back home
 	evoware: if the next command is not a RoMa command, move the RoMa back home
 ?	Example05: need to mix reagents (4 times, 75% of well volume)
 x	pipetting mix command: efficient use of multiple sources going to one destination
-	figure out how to add labware to the external devices (see "scalala" for an example)
+*	figure out how to add labware to the external devices (see "scalala" for an example)
 	try to get documentation on the PCR machine in order to control it directly
 
 	bug: if I set nFreeDispenseVolumeThreshold = 20 and run ExampleWorkshop, tips SHOULD be washed after WET dispense of colored fluid
@@ -447,20 +448,26 @@ x	DOC
 x	#
 	TABLE
 	OPTION
+	WELL_LIST
+	LOAD !!! Not sure whether this can be implemented
+	REAGENT_LIST
+	MIXDEF
+	PLATE
+	MATRIX_LIST
 x	=
 x	LIST
 x	REAGENT
 x	LABWARE
 x	TRANSFER_LOCATIONS
- *	TRANSFER_SAMPLES
- ?	TRANSFER_WELLS
- ?	DIST_REAGENT
+.	TRANSFER_SAMPLES (need to implement PLATE in order to complete this command)
+?	TRANSFER_WELLS
+?	DIST_REAGENT
 x	DIST_REAGENT2
-	UNITE_AND_TRANSFER
-	RUN
-	LOOP
-	ENDLOOP
- *	DIST_WELL
+	UNITE_AND_TRANSFER ???
+	RUN ???
+	LOOP ???
+	ENDLOOP ???
+?	DIST_WELL
 	PREPARE_MIX
 	PREPARE_LIST
 	MPDIST
@@ -488,7 +495,7 @@ x	DIST_REAGENT2
 	VACUUM_OFF
 x	MIX_WELLS
 	WAIT
-	PROMPT
+ *	PROMPT
  *	GET_TIPS
  *	DROP_TIPS
 	ROCHE_OPEN
