@@ -101,7 +101,7 @@ class L4A_PipetteItem(
 	val src: WellPointer,
 	val dest: WellPointer,
 	val lnVolume: Seq[Double],
-	val bDuplicate: Boolean = false
+	val bDuplicate: Boolean = false // TODO: remove this -- ellis, 2011-11-12
 ) {
 	def toL3(states: RobotState): Result[Seq[L3A_PipetteItem]] = {
 		for {

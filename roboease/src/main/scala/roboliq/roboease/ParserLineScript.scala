@@ -25,6 +25,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				{ case id~nShots~nMargin_? => run_PREPARE_MIX(id, nShots, nMargin_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) }),
+			("SERIAL_DILUTION", idReagent~idPlate~idWells~idPlate~idWells~valVolume~valVolume~opt(ident)~opt(word) ^^
+				{ case diluter~_~srcs~_~dests~nVolumeDiluter~nVolumeSrc~lc_? ~opts_? => robolib.serialDilution(diluter, srcs, dests, nVolumeDiluter, nVolumeSrc, lc_?, opts_?) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
 				{ case srcs~dests~vol~lc~opts_? => run_TRANSFER_WELLS(getWells(srcs), getWells(dests), vol, lc, opts_?) }),
 			("TRANSFER_SAMPLES", integer~idPlate~idPlate~valVolumes~ident~opt(word) ^^

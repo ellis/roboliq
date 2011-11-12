@@ -467,7 +467,7 @@ x	DIST_REAGENT2
 	PREPARE_MATRIX
  *	DIST_COL2ROW
 	EQUAL_CONC
-	SERIAL_DILUTION
+?	SERIAL_DILUTION
 	PLANNED_DILUTION
 	ELUTE_SAMPLES
 	SEQ_PURE
@@ -541,6 +541,7 @@ x	MIX_WELLS
 	RCHPLATE
 	SEQPLATE
 	%
+	%%
 
 Questions for Weizmann:
 	What happens with the % (ChecklistComment) commands?

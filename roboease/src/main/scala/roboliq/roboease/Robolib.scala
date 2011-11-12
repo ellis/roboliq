@@ -105,7 +105,63 @@ class Robolib(shared: ParserSharedData) {
 			CmdLog(cmd)
 		}
 	}
-
+	
+	def serialDilution(
+		diluter: Reagent,
+		srcs: Seq[Well],
+		dests: Seq[Well],
+		nVolumeDiluter: Double,
+		nVolumeSrc: Double,
+		lc_? : Option[String],
+		opts_? : Option[String]
+	): Result[CmdLog] = {
+		val srcs1 = srcs.toIndexedSeq
+		val dests1 = dests.toIndexedSeq
+		val nSrcs = srcs1.size
+		val nDests = dests1.size
+		for {
+			_ <- Result.assert(nSrcs > 0, "the source list must not be empty")
+			_ <- Result.assert(nDests > 0, "the destination list must not be empty")
+			_ <- Result.assert((nDests % nSrcs) == 0, "the number of destination wells must be an integer multiple of the number of source wells")
+			policy <- getPolicy(lc_?.getOrElse("LCWBOT"), Some(diluter))
+			mapOpts <- getMapOpts(opts_?)
+			mixSpec_? <- getOptMixSpec(mapOpts)
+			tipOverrides_? <- getOptTipOverrides(mapOpts)
+			tipModel_? <- getOptTipModel(mapOpts)
+			cmdDiluter <- PipetteCommandsL4.pipette(WellPointer(diluter.reagent), WellPointer(dests), Seq(nVolumeDiluter), tipOverrides_?)
+			items <- serialDilution2(srcs1, dests1, nVolumeSrc)
+		} yield {
+			val mixSpec = mixSpec_?.getOrElse(MixSpec((nVolumeDiluter + nVolumeSrc) / 3, 7))
+			val args = new L4A_PipetteArgs(
+				items,
+				mixSpec_? = Some(mixSpec),
+				tipOverrides_? = tipOverrides_?,
+				pipettePolicy_? = Some(policy),
+				tipModel_? = tipModel_?
+			)
+			val cmds = List(cmdDiluter, L4C_Pipette(args))
+			CmdLog(cmds)
+		}
+	}
+	
+	/**
+	 * For each src well, create pipette items to first transfer 
+	 * liquid to the first corresponding destination well and
+	 * then from that well to the next destination well.
+	 * These lists are then concatenated together.
+	 */
+	private def serialDilution2(srcs: IndexedSeq[Well], dests: IndexedSeq[Well], nVolume: Double): Result[Seq[L4A_PipetteItem]] = {
+		val nSrcs = srcs.size
+		val nDilutions = dests.size / nSrcs
+		val llItem = List.tabulate(nSrcs, nDilutions)((iSrc, iDilution) => {
+			val src = if (iDilution == 0) srcs(iSrc) else dests(iSrc + (iDilution - 1) * nSrcs)
+			val dest = if (iDilution == 0) dests(iSrc) else dests(iSrc + iDilution * nSrcs)
+			new L4A_PipetteItem(src, dest, Seq(nVolume))
+		})
+		Success(llItem.flatten)
+	}
+	
+	//------------------------------------------------------
 
 	private def getPolicy(lc: String, reagent_? : Option[Reagent]): Result[PipettePolicy] = {
 		if (lc == "DEFAULT") {

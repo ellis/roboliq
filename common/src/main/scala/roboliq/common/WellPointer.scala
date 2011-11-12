@@ -76,6 +76,7 @@ sealed trait WellPointer extends WellAddress {
 
 object WellPointer {
 	def apply(o: Well): WellPointerWell = WellPointerWell(o)
+	def apply(o: Seq[Well]): WellPointerWells = WellPointerWells(o)
 	//def apply(plate: Plate)(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
 	def apply(o: Plate): WellPointerPlate = WellPointerPlate(o)
 	def apply(o: Reagent): WellPointerReagent = new WellPointerReagent(o)
