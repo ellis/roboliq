@@ -3,7 +3,7 @@
 example*.esc
 test*.esc
 # sbt
-target/
+target
 project/boot/
 .history
 # Eclipse

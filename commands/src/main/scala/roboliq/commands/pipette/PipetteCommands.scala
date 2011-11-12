@@ -61,6 +61,26 @@ object PipetteCommandsL4 {
 	): Result[L4C_Pipette] = {
 		Success(L4C_Pipette(new L4A_PipetteArgs(items, tipOverrides_? = tipOverrides_?)))
 	}
+	
+	def copy(source: WellPointer, dest: WellPointer, nVolume: Double, tipOverrides_? : Option[TipHandlingOverrides]): Result[L4C_Pipette] = {
+		pipette(Seq(new L4A_PipetteItem(source, dest, Seq(nVolume), bDuplicate = true)), tipOverrides_?)
+	}
+	
+	def copyWithDilution(
+		diluter: WellPointer,
+		nVolumeDiluter: Double,
+		source: WellPointer,
+		nVolumeSrc: Double,
+		dest: WellPointer,
+		tipOverrides_? : Option[TipHandlingOverrides]
+	): Result[Seq[L4C_Pipette]] = {
+		for {
+			cmd1 <- pipette(Seq(new L4A_PipetteItem(diluter, dest, Seq(nVolumeDiluter), bDuplicate = true)), tipOverrides_?)
+			cmd2 <- pipette(Seq(new L4A_PipetteItem(source, dest, Seq(nVolumeSrc), bDuplicate = true)), tipOverrides_?)
+		} yield {
+			Seq(cmd1, cmd2)
+		}
+	}
 }
 
 object PipetteCommandsL3 {

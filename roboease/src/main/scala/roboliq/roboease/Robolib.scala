@@ -102,7 +102,6 @@ class Robolib(shared: ParserSharedData) {
 			yield new L4A_PipetteItem(reagent, dest, Seq(nVolume * nFactor / nDests))
 		
 		for (cmd <- PipetteCommandsL4.pipette(items)) yield {
-			// TODO: add log?
 			CmdLog(cmd)
 		}
 	}
