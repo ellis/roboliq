@@ -31,7 +31,8 @@ class ParserFile(
 	private var m_sListName: String = null
 	private var m_map31: ObjMapper = null
 	private var m_sLine: String = null
-	private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]
+	//private val m_lsErrors = new ArrayBuffer[Tuple2[String, String]]
+	private val output = new ArrayBuffer[RoboeaseCommand]
 	
 	def sTable = shared.sTable
 	def sHeader = shared.sHeader
@@ -69,9 +70,9 @@ class ParserFile(
 			iLine += 1
 		}
 		if (shared.errors.isEmpty) {
-			val cmds4 = pScript.cmds.collect { case RoboeaseCommand(_, _, cmd: CommandL4) => cmd }
+			val cmds4 = output.collect { case RoboeaseCommand(_, _, cmd: CommandL4) => cmd }
 			cmds4.foreach(_.addKnowledge(kb))
-			Right(RoboeaseResult(shared.kb, pScript.cmds))
+			Right(RoboeaseResult(shared.kb, output))
 		}
 		else {
 			val log = Log(shared.errors.map(_.sError))
@@ -148,10 +149,13 @@ class ParserFile(
 						if (!r.successful)
 							addError(r.toString)
 						else {
-							val res: roboliq.common.Result[Unit] = r.get
+							val res: roboliq.common.Result[CmdLog] = r.get
 							res match {
-								case Error(lsError) => lsError.foreach(addError)
-								case _ => bFound = true
+								case Error(lsError) =>
+									lsError.foreach(addError)
+								case Success(cmdlog) =>
+									cmdlog.cmds.foreach(addRunCommand)
+									bFound = true
 							}
 						}
 				}
@@ -174,4 +178,9 @@ class ParserFile(
 	}
 	
 	def racks = shared.mapRacks.values
+
+	def addRunCommand(cmd: Command) {
+		output += RoboeaseCommand(shared.iLineCurrent, shared.sLineCurrent, cmd)
+		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
+	}
 }
