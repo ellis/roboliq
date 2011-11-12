@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
 import roboliq.commands.pipette._
+import roboliq.commands.system._
 
 
 class Robolib(shared: ParserSharedData) {
@@ -14,6 +15,11 @@ class Robolib(shared: ParserSharedData) {
 	implicit def commandToTuple(o: Command): Tuple2[Seq[Command], Seq[String]] = Seq(o) -> Seq()
 	
 	val kb = shared.kb
+	
+
+	def comment(s: String): Result[CmdLog] = {
+		Success(CmdLog(L4C_Comment(s)))
+	}
 	
 	def mix(
 		wells: Seq[Well],
@@ -104,6 +110,10 @@ class Robolib(shared: ParserSharedData) {
 		for (cmd <- PipetteCommandsL4.pipette(items)) yield {
 			CmdLog(cmd)
 		}
+	}
+	
+	def prompt(s: String): Result[CmdLog] = {
+		Success(CmdLog(L4C_Prompt(s)))
 	}
 	
 	def serialDilution(

@@ -61,6 +61,7 @@ Roboease features which are missing:
 	handling of external reagents
 	output about resources used
 	log
+	use external scripts
 Code:
 x	Example05: why no wash after last dispense?
 x	Example05: shouldn't wash after dispensing water
@@ -483,7 +484,7 @@ x	DIST_REAGENT2
 	VACUUM_OFF
 x	MIX_WELLS
 	WAIT
- *	PROMPT
+?	PROMPT
  *	GET_TIPS
  *	DROP_TIPS
 	ROCHE_OPEN
@@ -540,7 +541,7 @@ x	MIX_WELLS
 	MULTINAPLATE
 	RCHPLATE
 	SEQPLATE
-	%
+?	%
 	%%
 
 Questions for Weizmann:

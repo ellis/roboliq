@@ -197,3 +197,25 @@ case class L0C_Subroutine(
 		).mkString("Subroutine(", ",", ");")
 	}
 }
+
+case class L0C_Comment(
+	s: String
+) extends Command {
+	override def toString = {
+		List(
+			'"'+s+'"'
+		).mkString("Comment(", ",", ");")
+	}
+}
+
+case class L0C_Prompt(
+	s: String
+) extends Command {
+	override def toString = {
+		List(
+			'"'+s+'"',
+			0,
+			-1
+		).mkString("UserPrompt(", ",", ");")
+	}
+}

@@ -24,7 +24,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			("PREPARE_MIX", ident~integer~opt(numDouble) ^^
 				{ case id~nShots~nMargin_? => run_PREPARE_MIX(id, nShots, nMargin_?) }),
 			("PROMPT", restOfLine ^^
-				{ case s => run_PROMPT(s) }),
+				{ case s => robolib.prompt(s) }),
 			("SERIAL_DILUTION", idReagent~idPlate~idWells~idPlate~idWells~valVolume~valVolume~opt(ident)~opt(word) ^^
 				{ case diluter~_~srcs~_~dests~nVolumeDiluter~nVolumeSrc~lc_? ~opts_? => robolib.serialDilution(diluter, srcs, dests, nVolumeDiluter, nVolumeSrc, lc_?, opts_?) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
@@ -34,6 +34,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			("TRANSFER_WELLS", idPlate~idWells~idPlate~idWells~valVolumes~ident~opt(word) ^^
 				{ case _~srcs~_~dests~vol~lc~opts_? => run_TRANSFER_WELLS(srcs, dests, vol, lc, opts_?) }),
 			("%", restOfLine ^^
+				{ case s => robolib.comment(s) }),
+			("%%", restOfLine ^^
 				{ case s => run_ChecklistComment(s) })
 			)
 
@@ -61,11 +63,6 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			val nFactor = nShots * (1.0 + nMargin)
 			res <- robolib.prepareMix(mixdef, nFactor)
 		} yield res
-	}
-	
-	def run_PROMPT(s: String): Result[CmdLog] = {
-		println("WARNING: PROMPT command not yet implemented")
-		RSuccess(CmdLog(Seq()))
 	}
 	
 	def run_TRANSFER_SAMPLES(splate: Plate, dplate: Plate, nWells: Int, volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[CmdLog] = {
