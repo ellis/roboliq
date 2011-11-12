@@ -10,25 +10,27 @@ import roboliq.commands.pipette._
 class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	import WellPointerImplicits._
 	
+	private val robolib = new Robolib(shared)
+	
 	val cmds2 = Map[String, Parser[Result[Unit]]](
-			("DIST_REAGENT", idLiquid~idPlate~idWells~valVolumes~ident~opt(word) ^^
-				{ case liquid ~ _ ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT(liquid, wells, vol, lc, opts_?) }),
-			("DIST_REAGENT2", idLiquid~plateWells2~valVolumes~ident~opt(word) ^^
-				{ case liquid ~ wells ~ vol ~ lc ~ opts_? => run_DIST_REAGENT(liquid, getWells(wells), vol, lc, opts_?) }),
+			("DIST_REAGENT", idReagent~idPlate~idWells~valVolumes~ident~opt(word) ^^
+				{ case liquid~_~wells~vol~lc~opts_? => run_DIST_REAGENT(liquid, wells, vol, lc, opts_?) }),
+			("DIST_REAGENT2", idReagent~plateWells2~valVolumes~ident~opt(word) ^^
+				{ case liquid~wells~vol~lc~opts_? => run_DIST_REAGENT(liquid, getWells(wells), vol, lc, opts_?) }),
 			("DIST_WELL", idPlate~idWell~idPlate~idWells~valVolumes~ident~opt(word) ^^
-				{ case _ ~ src ~ _ ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(Seq(src), dests, vol, lc, opts_?) }),
+				{ case _~src~_~dests~vol~lc~opts_? => run_TRANSFER_WELLS(Seq(src), dests, vol, lc, opts_?) }),
 			("MIX_WELLS", idPlate~idWells~valInt~valVolume~ident~opt(word) ^^
-				{ case _ ~ wells ~ nCount ~ nVolume ~ lc ~ opts_? => run_MIX_WELLS(wells, nCount, nVolume, lc, opts_?) }),
-			("PREPARE_MIX", ident~integer~opt(floatingPointNumber) ^^
-				{ case id ~ nShots ~ nMargin_? => run_PREPARE_MIX(id, nShots, nMargin_?) }),
+				{ case _~wells~nCount~nVolume~lc~opts_? => run_MIX_WELLS(wells, nCount, nVolume, lc, opts_?) }),
+			("PREPARE_MIX", ident~integer~opt(numDouble) ^^
+				{ case id~nShots~nMargin_? => run_PREPARE_MIX(id, nShots, nMargin_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => run_PROMPT(s) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
-				{ case srcs ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(getWells(srcs), getWells(dests), vol, lc, opts_?) }),
+				{ case srcs~dests~vol~lc~opts_? => run_TRANSFER_WELLS(getWells(srcs), getWells(dests), vol, lc, opts_?) }),
 			("TRANSFER_SAMPLES", integer~idPlate~idPlate~valVolumes~ident~opt(word) ^^
-				{ case nWells ~ splate ~ dplate ~ vol ~ lc ~ opts_? => run_TRANSFER_SAMPLES(splate, dplate, nWells, vol, lc, opts_?) }),
+				{ case nWells~splate~dplate~vol~lc~opts_? => run_TRANSFER_SAMPLES(splate, dplate, nWells, vol, lc, opts_?) }),
 			("TRANSFER_WELLS", idPlate~idWells~idPlate~idWells~valVolumes~ident~opt(word) ^^
-				{ case _ ~ srcs ~ _ ~ dests ~ vol ~ lc ~ opts_? => run_TRANSFER_WELLS(srcs, dests, vol, lc, opts_?) }),
+				{ case _~srcs~_~dests~vol~lc~opts_? => run_TRANSFER_WELLS(srcs, dests, vol, lc, opts_?) }),
 			("%", restOfLine ^^
 				{ case s => run_ChecklistComment(s) })
 			)
@@ -66,21 +68,17 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	}
 	
 	def run_PREPARE_MIX(id: String, nShots: Int, nMargin_? : Option[Double]): Result[Unit] = {
-		// Default to 8%
-		val nMargin = nMargin_? match {
-			case None => 0.08
-			case Some(n) => n
-		}
+		// Default to margin of 8%
+		val nMargin = nMargin_?.getOrElse(0.08)
 		
 		for {
 			_ <- Result.assert(nShots > 0, "number of shots must be positive")
 			_ <- Result.assert(nMargin >= 0 && nMargin <= 0.3, "margin value must be between 0 and 0.3; you specified "+nMargin)
+			mixdef <- getMixDef(id)
+			val nFactor = nShots * (1.0 + nMargin)
+			res <- robolib.prepareMix(mixdef, nFactor)
 		} yield {
-			val nFactor = nShots
-			
-		}
-		for {
-			_ <- Result.assert(nMari)
+			res._1.foreach(addRunCommand)
 		}
 	}
 	
@@ -113,6 +111,9 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		println("WARNING: % command not yet implemented")
 		RSuccess()
 	}
+	
+	private def getReagent(id: String) = Result.get(shared.mapReagents.get(id), "unknown reagent \""+id+"\"")
+	private def getMixDef(id: String) = Result.get(shared.mapMixDefs.get(id), "unknown mix definition \""+id+"\"")
 	
 	private def getDim(plate: Plate): Result[PlateSetupDimensionL4] = {
 		val setup = kb.getPlateSetup(plate)
@@ -155,7 +156,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				case Some(_) =>
 				case None =>
 					val sLiquid = plateSetup.sLabel_?.get + "#" + wellSetup.index_?.get
-					val reagent = new Reagent
+					val reagent = new roboliq.common.Reagent
 					val reagentSetup = kb.getReagentSetup(reagent)
 					reagentSetup.sName_? = Some(sLiquid)
 					reagentSetup.sFamily_? = Some("ROBOEASE")
@@ -194,7 +195,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				case Some(reagent) =>
 					wvs.map(pair => {
 						val (dest, nVolume) = pair
-						new L4A_PipetteItem(WellPointer(reagent), WellPointer(dest), Seq(nVolume))
+						new L4A_PipetteItem(WellPointer(reagent.reagent), WellPointer(dest), Seq(nVolume))
 					})
 			}
 			val args = new L4A_PipetteArgs(
@@ -212,12 +213,11 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	private def getPolicy(lc: String, reagent_? : Option[Reagent]): Result[PipettePolicy] = {
 		if (lc == "DEFAULT") {
 			for {
-				reagent <- Result.get(reagent_?, "Explicit liquid class required here instead of \"DEFAULT\"")
-				policy <- Result.get(shared.mapReagentToPolicy.get(reagent), "Explicit liquid class required here instead of \"DEFAULT\"")
-			} yield policy
+				reagent <- Result.get(reagent_?, "explicit liquid class required here instead of \"DEFAULT\"")
+			} yield reagent.policy
 		}
 		else {
-			Result.get(shared.mapLcToPolicy.get(lc), "unknown liquid class \""+lc+"\"")
+			shared.getPipettePolicy(lc)
 		}
 	}
 

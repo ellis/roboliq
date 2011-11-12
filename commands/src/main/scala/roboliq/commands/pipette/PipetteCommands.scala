@@ -29,6 +29,40 @@ trait PipetteCommands extends RoboliqCommands {
 	}
 }
 
+object PipetteCommandsL4 {
+	def pipette(source: WellPointer, dest: WellPointer, volume: Double): Result[L4C_Pipette] = {
+		pipette(source, dest, Seq(volume), None)
+	}
+	
+	def pipette(source: WellPointer, dest: WellPointer, volume: Double, tipOverrides: TipHandlingOverrides): Result[L4C_Pipette] = {
+		pipette(source, dest, Seq(volume), Some(tipOverrides))
+	}
+	
+	def pipette(
+		source: WellPointer,
+		dest: WellPointer,
+		lnVolume: Seq[Double]
+	): Result[L4C_Pipette] = {
+		pipette(source, dest, lnVolume, None)
+	}
+	
+	def pipette(
+		source: WellPointer,
+		dest: WellPointer,
+		lnVolume: Seq[Double],
+		tipOverrides_? : Option[TipHandlingOverrides]
+	): Result[L4C_Pipette] = {
+		pipette(Seq(new L4A_PipetteItem(source, dest, lnVolume)), tipOverrides_?)
+	}
+	
+	def pipette(
+		items: Seq[L4A_PipetteItem],
+		tipOverrides_? : Option[TipHandlingOverrides] = None
+	): Result[L4C_Pipette] = {
+		Success(L4C_Pipette(new L4A_PipetteArgs(items, tipOverrides_? = tipOverrides_?)))
+	}
+}
+
 object PipetteCommandsL3 {
 	def mix(states: RobotState, targets: Seq[WellConfigL2], volume: Double, count: Int): Result[L3C_Mix] = {
 		val mixSpec = new MixSpec(volume, count)

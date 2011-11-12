@@ -5,6 +5,7 @@ import scala.collection.mutable.HashMap
 import scala.util.parsing.combinator._
 
 import roboliq.common._
+import roboliq.common.{Error => RError, Success => RSuccess}
 import roboliq.compiler._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
@@ -19,18 +20,9 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	val integer: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
 	val restOfLine: Parser[String] = """.*""".r
 	val string: Parser[String] = "\"" ~> """[^"]*""".r <~ '"'
+	def numDouble: Parser[Double] = floatingPointNumber ^^ (_.toDouble)
 	
-	def idPlate = Parser[Plate] { in =>
-		val res1 = ident.apply(in)
-		res1 match {
-			case Success(sLoc, _) =>
-				getPlateAtLoc(sLoc, in) match {
-					case Right(plate) => Success(plate, res1.next)
-					case Left(res) => res
-				}
-			case ns: NoSuccess => ns
-		}
-	}
+	def idPlate: Parser[Plate] = idHandler(getPlateAndAssignContext)
 	
 	def idWell_index = Parser[Well] { input =>
 		val res1 = integer.apply(input)
@@ -130,7 +122,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		}
 	}*/
 	
-	def idLiquid: Parser[Reagent] = Parser[Reagent] { input =>
+	/*def idLiquid: Parser[Reagent] = Parser[Reagent] { input =>
 		val res1 = ident.apply(input)
 		res1 match {
 			case Success(sLiq, _) =>
@@ -139,6 +131,22 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 					case None => Error("Undefined reagent: "+sLiq, input)
 				}
 			case ns: NoSuccess => ns
+		}
+	}*/
+	
+	def idMixDef: Parser[MixDef] = idHandler(shared.getMixDef)
+	def idRack: Parser[Rack] = idHandler(shared.getRack)
+	def idReagent: Parser[Reagent] = idHandler(shared.getReagent)
+	
+	private def idHandler[T](f: String => Result[T]): Parser[T] = Parser[T] { input =>
+		val res1 = ident.apply(input)
+		res1 match {
+			case ns: NoSuccess => ns
+			case Success(id, _) =>
+				f(id) match {
+					case RError(lsError) => Error(lsError.mkString("; "), input)
+					case RSuccess(o) => Success(o, res1.next)
+				}
 		}
 	}
 	
@@ -249,17 +257,18 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		{ s => List(s.toInt) }
 	def valInts: Parser[List[Int]] = valInts_var | valInts_numeric
 	
-	def getPlateAtLoc(sLoc: String, input: Input): Either[ParseResult[Nothing], Plate] = {
-		// Try to create a plate if none exists at the given location yet
-		if (!shared.mapLocToPlate.contains(sLoc))
-			createPlate(sLoc, sLoc, None)
+	def getPlate(rack: Rack): Result[Plate] = {
+		shared.mapRackToPlate.get(rack) match {
+			case Some(plate) => RSuccess(plate)
+			case None => createPlate(rack.id, rack, None)
+		}
+	}
 		
-		shared.mapLocToPlate.get(sLoc) match {
-			case Some(plate) =>
-				m_contextPlate = Some(plate)
-				Right(plate)
-			case None =>
-				Left(Error("labware must be defined for location "+sLoc, input))
+	def getPlateAndAssignContext(sLoc: String): Result[Plate] = {
+		for { plate <- (shared.getRack(sLoc) >>= getPlate) }
+		yield {
+			m_contextPlate = Some(plate)
+			plate
 		}
 	}
 	
@@ -334,31 +343,27 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		(i0 to i1).map(pc.dim_?.get.wells.apply).toList
 	}
 	
-	def createPlate(id: String, sRack: String, sModel_? : Option[String]) {
-		shared.mapRacks.get(sRack) match {
-			case None =>
-				shared.addError("Undefined rack: "+sRack)
-			case Some(rack) =>
-				val plate = new Plate
-				val pp = new PlateProxy(kb, plate)
-				pp.label = id
-				pp.setDimension(rack.nCols, rack.nRows)
-				pp.location = sRack
-				shared.mapLocToPlate(sRack) = plate
-				pp.wells.foreach(well => {
-					val setup = kb.getWellSetup(well)
-					setup.sLabel_? = Some(id+":"+(setup.index_?.get+1))
-				})
-				sModel_? match {
-					case None =>
-					case Some(sModel) =>
-						val setup = kb.getPlateSetup(plate)
-						if (!shared.mapPlateModel.contains(sModel)) {
-							shared.addError("Undefined labware \""+sModel+"\"")
-							return
-						}
-						setup.model_? = Some(shared.mapPlateModel(sModel))
-				}
-		}
+	def createPlate(id: String, rack: Rack, sModel_? : Option[String]): Result[Plate] = {
+		val plate = new Plate
+		val pp = new PlateProxy(kb, plate)
+		pp.label = id
+		pp.setDimension(rack.nCols, rack.nRows)
+		pp.location = rack.id
+		shared.mapRackToPlate(rack) = plate
+		pp.wells.foreach(well => {
+			val setup = kb.getWellSetup(well)
+			setup.sLabel_? = Some(id+":"+(setup.index_?.get+1))
+		})
+		
+		// Try to assign plate model, if one was specified
+		sModel_?.foreach(sModel => {
+			if (!shared.mapPlateModel.contains(sModel)) {
+				return RError("undefined labware \""+sModel+"\"")
+			}
+			val setup = kb.getPlateSetup(plate)
+			setup.model_? = Some(shared.mapPlateModel(sModel))
+		})
+		
+		RSuccess(plate)
 	}
 }

@@ -86,10 +86,10 @@ class WellPointerPlateWrapper(plate: Plate) {
 }
 
 trait WellPointerImplicits {
-	implicit def wellToPointer(o: Well) = WellPointerWell(o)
-	implicit def plateToPointer(o: Plate) = WellPointerPlate(o)
-	implicit def plateToWrapper(o: Plate) = new WellPointerPlateWrapper(o)
-	implicit def reagentToPointer(o: Reagent) = WellPointerReagent(o)
+	implicit def wellToPointer(o: Well): WellPointerWell = WellPointerWell(o)
+	implicit def plateToPointer(o: Plate): WellPointerPlate = WellPointerPlate(o)
+	implicit def plateToWrapper(o: Plate): WellPointerPlateWrapper = new WellPointerPlateWrapper(o)
+	implicit def reagentToPointer(o: Reagent): WellPointerReagent = WellPointerReagent(o)
 }
 
 object WellPointerImplicits extends WellPointerImplicits {
