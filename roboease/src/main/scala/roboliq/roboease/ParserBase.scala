@@ -134,6 +134,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		}
 	}*/
 	
+	def idList: Parser[List[String]] = idHandler(shared.getList)
 	def idMixDef: Parser[MixDef] = idHandler(shared.getMixDef)
 	def idRack: Parser[Rack] = idHandler(shared.getRack)
 	def idReagent: Parser[Reagent] = idHandler(shared.getReagent)
@@ -365,5 +366,9 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		})
 		
 		RSuccess(plate)
+	}
+	
+	def toDouble(s: String): Result[Double] = {
+		try { RSuccess(s.toDouble) } catch { case _ => RError("expected a numeric value: "+s) }
 	}
 }

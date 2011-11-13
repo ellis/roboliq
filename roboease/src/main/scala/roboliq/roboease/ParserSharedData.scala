@@ -41,6 +41,7 @@ class ParserSharedData(
 	def errors = m_errors.toSeq
 	
 	
+	def getList(id: String) = Result.get(mapLists.get(id), "unknown list \""+id+"\"")
 	def getMixDef(id: String) = Result.get(mapMixDefs.get(id), "unknown mix definition \""+id+"\"")
 	def getPipettePolicy(id: String) = Result.get(mapLcToPolicy.get(id), "unknown liquid class \""+id+"\"")
 	def getRack(id: String) = Result.get(mapRacks.get(id), "unknown rack \""+id+"\"")

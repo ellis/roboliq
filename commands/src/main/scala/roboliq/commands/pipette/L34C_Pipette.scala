@@ -101,7 +101,8 @@ class L4A_PipetteItem(
 	val src: WellPointer,
 	val dest: WellPointer,
 	val lnVolume: Seq[Double],
-	val bDuplicate: Boolean = false // TODO: remove this -- ellis, 2011-11-12
+	val premix_? : Option[MixSpec],
+	val postmix_? : Option[MixSpec]
 ) {
 	def toL3(states: RobotState): Result[Seq[L3A_PipetteItem]] = {
 		for {
@@ -113,34 +114,29 @@ class L4A_PipetteItem(
 			val lLiquid = srcs.map(_.state(states).liquid).toSet
 			_ <- Result.assert(nSrcs > 0, "the source list must not be empty")
 			_ <- Result.assert(nDests > 0, "the destination list must not be empty")
-			// If not allowing duplicates:
-			_ <- Result.assert(bDuplicate || (lLiquid.size == 1 || nSrcs == nDests), "you must specify an equal number of source and destination wells: "+srcs+" vs "+dests)
-			_ <- Result.assert(bDuplicate || (nVolumes == 1 || nDests == nVolumes), "you must specify an equal number of destinations and volumes: "+dests+" vs "+lnVolume)
-			// If duplicating:
-			_ <- Result.assert(!bDuplicate || ((nDests % nSrcs) == 0), "the number of destination wells must be an integer multiple of the number of source wells")
-			_ <- Result.assert(!bDuplicate || (nVolumes == 1 || nDests == nVolumes || nSrcs == nVolumes), "volumes: you must specify either a single volume, a volume for each destination well, or a volume for each source well")
+			_ <- Result.assert(lLiquid.size == 1 || nSrcs == nDests, "you must specify an equal number of source and destination wells: "+srcs+" vs "+dests)
+			_ <- Result.assert(nVolumes == 1 || nDests == nVolumes, "you must specify an equal number of destinations and volumes: "+dests+" vs "+lnVolume)
 		} yield {
-			val nDuplicates = nDests / nSrcs
 			val lnVolume1: Seq[Double] = 
-				if (nVolumes == nDests) lnVolume
-				else if (nVolumes == 1) List.fill(nDests)(lnVolume.head)
-				else List.fill(nDuplicates)(lnVolume).flatten
+				if (nVolumes == 1) List.fill(nDests)(lnVolume.head)
+				else lnVolume
 			val mapDestToVolume = (dests zip lnVolume1).toMap
 
 			if (lLiquid.size == 1)
-				dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest)))
+				dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest), premix_?, postmix_?))
 			else {
-				val srcs2 = if (nSrcs == nDests) srcs else List.fill(nDuplicates)(srcs).flatten
-				(srcs2.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2)))
+				(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2), premix_?, postmix_?))
 			}
 		}
 	}
 }
 
-case class L3A_PipetteItem(
+class L3A_PipetteItem(
 	val srcs: SortedSet[WellConfigL2],
 	val dest: WellConfigL2,
-	val nVolume: Double
+	val nVolume: Double,
+	val premix_? : Option[MixSpec],
+	val postmix_? : Option[MixSpec]
 )
 
 object L3A_PipetteItem {

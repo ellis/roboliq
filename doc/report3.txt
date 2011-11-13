@@ -2,7 +2,185 @@
 	- What the robot can do now
 	- What you will probably be able to do in the near future
 - Something technical where suggestions might be useful or where the info might be useful for others
+	Trade-off: force separation between generic and specialized protocols?
 - Some open problem
 	- design of the DSL
 		- show code for PCR
 		- show code for gradient
+
+
+Language format:
+
+// Plates
+val plateA = new Plate
+
+// Programs for external devices
+val pcrMixProgram = new PcrMixProgram
+val thermocycleProgram = new ThermocycleProgram
+val centrifugeProgram = new CentrifugeProgram
+
+// Instructions
+plateA(B5+2) send through {
+	pcrMix(pcrMixProgram)
+	seal
+	thermocycle(thermocycleProgram)
+	centrifuge(centrifugeProgram)
+	peel
+}
+
+pcrMix(plateA(B5+2), pcrMixProgram)
+seal(plateA)
+thermocycle(plateA, thermocycleProgram)
+centrifuge(plateA, centrifugeProgram)
+peel(plateA)
+
+//------------------------------------
+// Setup for a specific robot
+
+reagents {
+	water      in Labwares.reagents50(1)
+	buffer10x  in Labwares.eppendorfs(A1)
+	dNPT       in Labwares.eppendorfs(B1)
+	primerF    in Labwares.eppendorfs(A2)
+	primerB    in Labwares.eppendorfs(B2)
+	polymerase in Labwares.eppendorfs(C2)
+}
+
+plates {
+	plateA at Sites.cooled2 model LabwareModels.platePcr
+	plateB at Sites.cooled1 model LabwareModels.platePcr
+}
+
+pcrMixProgram.
+
+thermocycleProgram.dir = 0
+thermocycleProgram.program = 2
+
+centrifugeProgram.speed = 2000
+centrifugeProgram.??? = "15,9,9,20"
+
+	mixItems,
+	diluter = water,
+	volume = 50 ul,
+	masterMix)
+
+===================================================
+= Non-separated script
+===================================================
+
+// Reagents
+water at Labwares.reagents50(1)
+
+// Plates
+val plateA = new Plate at Sites.cooled2 model LabwareModels.platePcr
+val plateB = new Plate at Sites.cooled1 model LabwareModels.platePcr
+
+// Programs for external devices
+val pcrMixProgram = new PcrMixProgram {
+	buffer     at Labwares.eppendorfs(A1) conc0(10 x)  conc1(1 x)
+	dNPT       at Labwares.eppendorfs(B1) conc0(2 uM)  conc1(.2 uM)
+	primerF    at Labwares.eppendorfs(A2) conc0(50 uM) conc1(.5 uM)
+	primerB    at Labwares.eppendorfs(B2) conc0(50 uM) conc1(.5 uM)
+	polymerase at Labwares.eppendorfs(C2) conc0(5)     conc1(0.01)
+	template ...???
+	volumePerWell = 50 ul
+	masterMixWells = Labwares.eppendorfs(D2)
+}
+val thermocycleProgram = new ThermocycleProgram(0, 2)
+val centrifugeProgram = new CentrifugeProgram(2000, 15, 9, 20, plateB)
+
+// Instructions
+pcrMixProgram(plateA(B5+2))
+seal(plateA)
+thermocycleProgram(plateA)
+centrifugeProgram(plateA)
+peel(plateA)
+
+                MixItemTemplateL4(well_template, Seq(20), 0.2)
+
+===================================================
+= Non-separated script
+===================================================
+
+// Liquids
+val water      = new Liquid(Properties.Water, CleanPolicy.ThoroughNone) at Labwares.reagents50(1)
+val buffer10x  = new Liquid(Properties.Water, CleanPolicy.Thorough) at Labwares.eppendorfs(A1)
+val dNTP       = new Liquid(Properties.Water, CleanPolicy.Thorough)
+val primerF    = new Liquid(Properties.Water, CleanPolicy.Decontaminate, Contaminant.DNA)
+val primerB    = new Liquid(Properties.Water, CleanPolicy.Decontaminate, Contaminant.DNA)
+val polymerase = new Liquid(Properties.Glycerol, CleanPolicy.Thorough)
+
+// Plates
+val plateA = new Plate at Sites.cooled2 model LabwareModels.platePcr
+val plateB = new Plate at Sites.cooled1 model LabwareModels.platePcr
+
+// Programs for external devices
+val pcrMixProgram = new PcrMixProgram {
+	buffer     = buffer10x initial(10 x)  final(1 x)
+	dNPT       = dNTP at Labwares.eppendorfs(B1) conc0(2 uM)  conc1(.2 uM)
+	primerF    at Labwares.eppendorfs(A2) conc0(50 uM) conc1(.5 uM)
+	primerB    at Labwares.eppendorfs(B2) conc0(50 uM) conc1(.5 uM)
+	polymerase at Labwares.eppendorfs(C2) conc0(5)     conc1(0.01)
+	template ...???
+	volumePerWell = 50 ul
+	masterMixWells = Labwares.eppendorfs(D2)
+}
+val thermocycleProgram = new ThermocycleProgram(0, 2)
+val centrifugeProgram = new CentrifugeProgram(2000, 15, 9, 20, plateB)
+
+// Instructions
+pcrMixProgram(plateA(B5+2))
+seal(plateA)
+thermocycleProgram(plateA)
+centrifugeProgram(plateA)
+peel(plateA)
+
+                MixItemTemplateL4(well_template, Seq(20), 0.2)
+
+===================================================
+= Non-separated script
+===================================================
+
+class PcrProgram {
+	// Liquids
+	val water      = new Liquid(Properties.Water, CleanPolicy.ThoroughNone) at Labwares.reagents50(1)
+	val buffer10x  = new Liquid(Properties.Water, CleanPolicy.Thorough) at Labwares.eppendorfs(A1)
+	val dNTP       = new Liquid(Properties.Water, CleanPolicy.Thorough)
+	val primerF    = new Liquid(Properties.Water, CleanPolicy.Decontaminate, Contaminant.DNA)
+	val primerB    = new Liquid(Properties.Water, CleanPolicy.Decontaminate, Contaminant.DNA)
+	val polymerase = new Liquid(Properties.Glycerol, CleanPolicy.Thorough)
+
+	// Programs for external devices
+	val pcrMixProgram = new PcrMixProgram {
+		buffer     = buffer10x initial(10 x)  final(1 x)
+		dNPT       = dNTP at Labwares.eppendorfs(B1) conc0(2 uM)  conc1(.2 uM)
+		primerF    at Labwares.eppendorfs(A2) conc0(50 uM) conc1(.5 uM)
+		primerB    at Labwares.eppendorfs(B2) conc0(50 uM) conc1(.5 uM)
+		polymerase at Labwares.eppendorfs(C2) conc0(5)     conc1(0.01)
+		template ...???
+		volumePerWell = 50 ul
+		masterMixWells = Labwares.eppendorfs(D2)
+	}
+	val thermocycleProgram = new ThermocycleProgram(0, 2)
+	val centrifugeProgram = new CentrifugeProgram(2000, 15, 9, 20, plateB)
+
+	def run(wells: Wells) {
+		// Instructions
+		pcrMixProgram(wells)
+		seal(wells)
+		thermocycleProgram(wells)
+		centrifugeProgram(wells)
+		peel(wells)
+	}
+
+		MixItemTemplateL4(well_template, Seq(20), 0.2)
+}
+
+// Plates
+val plateA = new Plate at Sites.cooled2 model LabwareModels.platePcr
+val plateB = new Plate at Sites.cooled1 model LabwareModels.platePcr
+
+val pcrProgram = new PcrProgram
+
+pcrProgram(platA(B5+2))
+

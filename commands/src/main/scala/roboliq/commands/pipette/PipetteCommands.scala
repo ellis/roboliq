@@ -23,7 +23,7 @@ trait PipetteCommands extends RoboliqCommands {
 	}
 	
 	def pipette(source: WellPointer, dest: WellPointer, lnVolume: Seq[Double], tipOverrides_? : Option[TipHandlingOverrides] = None) {
-		val item = new L4A_PipetteItem(source, dest, lnVolume)
+		val item = new L4A_PipetteItem(source, dest, lnVolume, None, None)
 		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item), tipOverrides_? = tipOverrides_?))
 		cmds += cmd
 	}
@@ -52,7 +52,7 @@ object PipetteCommandsL4 {
 		lnVolume: Seq[Double],
 		tipOverrides_? : Option[TipHandlingOverrides]
 	): Result[L4C_Pipette] = {
-		pipette(Seq(new L4A_PipetteItem(source, dest, lnVolume)), tipOverrides_?)
+		pipette(Seq(new L4A_PipetteItem(source, dest, lnVolume, None, None)), tipOverrides_?)
 	}
 	
 	def pipette(
@@ -62,8 +62,9 @@ object PipetteCommandsL4 {
 		Success(L4C_Pipette(new L4A_PipetteArgs(items, tipOverrides_? = tipOverrides_?)))
 	}
 	
+	/*
 	def copy(source: WellPointer, dest: WellPointer, nVolume: Double, tipOverrides_? : Option[TipHandlingOverrides]): Result[L4C_Pipette] = {
-		pipette(Seq(new L4A_PipetteItem(source, dest, Seq(nVolume), bDuplicate = true)), tipOverrides_?)
+		pipette(Seq(new L4A_PipetteItem(source, dest, Seq(nVolume), None, None)), tipOverrides_?)
 	}
 	
 	def copyWithDilution(
@@ -80,7 +81,7 @@ object PipetteCommandsL4 {
 		} yield {
 			Seq(cmd1, cmd2)
 		}
-	}
+	}*/
 }
 
 object PipetteCommandsL3 {
@@ -106,9 +107,9 @@ object PipetteCommandsL3 {
 			}
 			val items3 = {
 				if (lLiquid.size == 1)
-					dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest)))
+					dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest), None, None))
 				else
-					(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2)))
+					(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2), None, None))
 			}
 			val args = new L3A_PipetteArgs(items3)
 			L3C_Pipette(args)
@@ -131,9 +132,9 @@ object PipetteCommandsL3 {
 			}
 			val items3 = {
 				if (lLiquid.size == 1)
-					dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest)))
+					dests.map(dest => new L3A_PipetteItem(SortedSet(srcs : _*), dest, mapDestToVolume(dest), None, None))
 				else
-					(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2)))
+					(srcs.toSeq zip dests.toSeq).map(pair => new L3A_PipetteItem(SortedSet(pair._1), pair._2, mapDestToVolume(pair._2), None, None))
 			}
 			items3
 		}

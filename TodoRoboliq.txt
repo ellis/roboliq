@@ -436,7 +436,9 @@ cat table0.txt | \
 x	DOC
 x	#
 .	TABLE
-	OPTION
+	OPTION UPDATE_VOL_DB
+	OPTION VERIFY_TABLE
+	OPTION ...
 	WELL_LIST
 	LOAD !!! Not sure whether this can be implemented
 	REAGENT_LIST
@@ -447,6 +449,9 @@ x	=
 x	LIST
 x	REAGENT
 x	LABWARE
+
+**	PROC
+
 x	TRANSFER_LOCATIONS
 .	TRANSFER_SAMPLES (need to implement PLATE in order to complete this command)
 ?	TRANSFER_WELLS
@@ -458,7 +463,7 @@ x	DIST_REAGENT2
 	ENDLOOP ???
 ?	DIST_WELL
 ?	PREPARE_MIX
-	PREPARE_LIST
+x	PREPARE_LIST
 	MPDIST
 	MPCHECKER
 	MPREPLICATE
@@ -466,7 +471,7 @@ x	DIST_REAGENT2
 	DILUTE_AND_REPLICATE384
 	DILPROG
 	PREPARE_MATRIX
- *	DIST_COL2ROW
+	DIST_COL2ROW
 	EQUAL_CONC
 ?	SERIAL_DILUTION
 	PLANNED_DILUTION
@@ -531,18 +536,22 @@ x	MIX_WELLS
 	START_TIMER
 	WAIT_TIMER
  *	MOVE_PLATE
- *	EMAIL
- *	SMS
+	EMAIL
+	SMS
 	LOGMIX
 	LOGLIST
 	LOGPLATE
 	CEPLATE
-	BIOPLATE
+**	BIOPLATE
 	MULTINAPLATE
 	RCHPLATE
 	SEQPLATE
 ?	%
 	%%
+
+**	load external script
+	generate log
+	generate checklist
 
 Questions for Weizmann:
 	What happens with the % (ChecklistComment) commands?

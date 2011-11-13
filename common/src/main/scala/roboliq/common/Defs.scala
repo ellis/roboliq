@@ -99,6 +99,13 @@ object Result {
 		}))
 	}
 	
+	def mapOver[A, B](l: List[A])(f: A => Result[B]): Result[List[B]] = {
+		Success(l.map(a => f(a) match {
+			case Error(lsError) => return Error(lsError)
+			case Success(b) => b
+		}))
+	}
+	
 	def flatMap[A, B](l: Iterable[A], f: A => Result[Iterable[B]]): Result[Iterable[B]] = {
 		Success(l.flatMap(a => f(a) match {
 			case Error(lsError) => return Error(lsError)

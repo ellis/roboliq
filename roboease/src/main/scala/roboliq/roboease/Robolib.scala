@@ -1,6 +1,7 @@
 package roboliq.roboease
 
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 
 import roboliq.common._
 import roboliq.commands.pipette._
@@ -79,12 +80,12 @@ class Robolib(shared: ParserSharedData) {
 					(srcs zip wvs).map(pair => {
 						val (src, (dest, nVolume)) = pair
 						kb.addWell(src, true) // Indicate that this well is a source
-						new L4A_PipetteItem(WellPointer(src), WellPointer(dest), Seq(nVolume))
+						new L4A_PipetteItem(WellPointer(src), WellPointer(dest), Seq(nVolume), None, None)
 					})
 				case Some(reagent) =>
 					wvs.map(pair => {
 						val (dest, nVolume) = pair
-						new L4A_PipetteItem(WellPointer(reagent.reagent), WellPointer(dest), Seq(nVolume))
+						new L4A_PipetteItem(WellPointer(reagent.reagent), WellPointer(dest), Seq(nVolume), None, None)
 					})
 			}
 			val args = new L4A_PipetteArgs(
@@ -105,13 +106,55 @@ class Robolib(shared: ParserSharedData) {
 		
 		val items =
 			for ((reagent, nVolume) <- mixdef.items; dest <- dests)
-			yield new L4A_PipetteItem(reagent, dest, Seq(nVolume * nFactor / nDests))
+			yield new L4A_PipetteItem(reagent, dest, Seq(nVolume * nFactor / nDests), None, None)
 		
 		for (cmd <- PipetteCommandsL4.pipette(items)) yield {
 			CmdLog(cmd)
 		}
 	}
 	
+	private type RV = Tuple2[Reagent, Double]
+	private type T1 = Tuple2[Well, List[RV]]
+
+	def prepareReactionList(l: List[T1], sLiquidClass: String, opts_? : Option[String]): Result[CmdLog] = {
+		for {
+			policy <- getPolicy(sLiquidClass, None)
+			mapOpts <- getMapOpts(opts_?)
+			mixSpec_? <- getOptMixSpec(mapOpts)
+			tipOverrides_? <- getOptTipOverrides(mapOpts)
+			tipModel_? <- getOptTipModel(mapOpts)
+		} yield {
+			val mDestToRv = HashMap(l : _*)
+			val lPipetteItem = new ArrayBuffer[L4A_PipetteItem]
+			while (!mDestToRv.isEmpty) {
+				var bMix = false
+				val l2 = l.flatMap(item => {
+					val dest = item._1
+					mDestToRv.get(dest) match {
+						case None => Seq()
+						case Some(Nil) => Seq()
+						// Last reagent-volume item in dest's list
+						case Some(rv :: Nil) =>
+							mDestToRv.remove(dest)
+							Seq(new L4A_PipetteItem(WellPointer(rv._1.reagent), dest, Seq(rv._2), None, mixSpec_?))
+						case Some(rv :: rvs) =>
+							mDestToRv(dest) = rvs
+							Seq(new L4A_PipetteItem(WellPointer(rv._1.reagent), dest, Seq(rv._2), None, None))
+					}
+				})
+				lPipetteItem ++= lPipetteItem
+			}
+			val args = new L4A_PipetteArgs(
+				lPipetteItem.toSeq,
+				mixSpec_? = mixSpec_?,
+				tipOverrides_? = tipOverrides_?,
+				pipettePolicy_? = Some(policy),
+				tipModel_? = tipModel_?
+				)
+			CmdLog(L4C_Pipette(args))
+		}
+	}
+
 	def prompt(s: String): Result[CmdLog] = {
 		Success(CmdLog(L4C_Prompt(s)))
 	}
@@ -166,7 +209,7 @@ class Robolib(shared: ParserSharedData) {
 		val llItem = List.tabulate(nSrcs, nDilutions)((iSrc, iDilution) => {
 			val src = if (iDilution == 0) srcs(iSrc) else dests(iSrc + (iDilution - 1) * nSrcs)
 			val dest = if (iDilution == 0) dests(iSrc) else dests(iSrc + iDilution * nSrcs)
-			new L4A_PipetteItem(src, dest, Seq(nVolume))
+			new L4A_PipetteItem(src, dest, Seq(nVolume), None, None)
 		})
 		Success(llItem.flatten)
 	}
