@@ -225,3 +225,35 @@ val pcrProgram = new PcrProgram
 
 pcrProgram(platA(B5+2))
 
+-----------------------------
+
+Free formulation:
+
+state: S
+item: I, I_s (items pending from state s)
+tipModel: M
+syringe: Y
+source: C
+liquid: L
+
+Each item is a tuple (liquid, dest, vol)
+Partial ordering of items (i < j)
+ item_i < item_j if item_i.dest == item_j.dest || item_i.dest == item_j.src
+
+State: 
+  bit string of length n_i, 1 for done, 0 for pending
+  n to 2^n_i states (total ordering to no ordering)
+
+Actions:
+  for all subsets of pending items which respect the partial ordering (<= 2^|Is|)
+    for all assignment of t_j to s_j (|T|^|S|)
+      for all partitionings of items to s_j such that the items of s_j are compatible with t_j and s_j can hold sum(item_k.vol)
+        for all source wells of items, all assignments to the corresponding s_j's
+          also check that no tip cleaning is required
+   
+----
+Current formulation:
+
+State: (n, l_y, m_y)
+Action: (clean_y, src_y, aspvol_y, dests_y, destvols_y)
+
