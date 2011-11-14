@@ -38,7 +38,7 @@ peel(plateA)
 // Setup for a specific robot
 
 reagents {
-	water      in Labwares.reagents50(1)
+	water      at Labwares.reagents50(1)
 	buffer10x  in Labwares.eppendorfs(A1)
 	dNPT       in Labwares.eppendorfs(B1)
 	primerF    in Labwares.eppendorfs(A2)
@@ -99,6 +99,47 @@ peel(plateA)
                 MixItemTemplateL4(well_template, Seq(20), 0.2)
 
 ===================================================
+= Separated script
+===================================================
+
+// Liquids
+val water      = new Liquid(Properties.Water, CleanPolicy.ThoroughNone)
+val buffer10x  = new Liquid(Properties.Water, CleanPolicy.Thorough)
+val dNTP       = new Liquid(Properties.Water, CleanPolicy.Thorough)
+val primerF    = new Liquid(Properties.Water, CleanPolicy.Decontaminate, Contaminant.DNA)
+val primerR    = new Liquid(Properties.Water, CleanPolicy.Decontaminate, Contaminant.DNA)
+val polymerase = new Liquid(Properties.Glycerol, CleanPolicy.Thorough)
+
+// Wells
+val wellsT = new Wells      // wells containing DNA template
+val wellsP = new EmptyWells // wells for the PCR reaction
+val wellsB = new EmptyWells // balance wells for centrifugation
+
+// Programs for external devices
+val pcrMixProgram = new PcrMixProgram(
+	buffer     = buffer10x,
+	dNTP       = dNTP,
+	primerF    = primerF,
+	primerR    = primerR,
+	polymerase = polymerase
+)
+val thermocycleProgram = new ThermocycleProgram
+val centrifugeProgram = new CentrifugeProgram
+
+// Instructions
+pcrMixProgram(source = wellsT, target = wellsP)
+balance(reference = wellsP, target = wellsB, liquid = water)
+seal(wellsP, wellsB)
+thermocycleProgram(wellsP)
+centrifugeProgram(wellsP, balance = wellsB)
+
+//----------------------------------
+
+
+                MixItemTemplateL4(well_template, Seq(20), 0.2)
+
+
+===================================================
 = Non-separated script
 ===================================================
 
@@ -138,7 +179,7 @@ peel(plateA)
                 MixItemTemplateL4(well_template, Seq(20), 0.2)
 
 ===================================================
-= Non-separated script
+= Non-separated script with encapsulated protocol
 ===================================================
 
 class PcrProgram {

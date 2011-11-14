@@ -3,6 +3,11 @@ http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structur
 James Meridith: API for Evoware
 
 
+Free dispense small tips:
+	use dry dispense and remove liquid detection for dispense
+
+	before aspirating again, make sure slow wash
+
 Evoware people:
 
 	- how many LiHas does the robot have?
@@ -554,5 +559,14 @@ x	MIX_WELLS
 	generate checklist
 
 Questions for Weizmann:
-	What happens with the % (ChecklistComment) commands?
+	What happens with the %% (ChecklistComment) commands?
+
+
+def time[T](x : => T) =  {
+  val start = System.nanoTime : Double
+  val result = x
+  val duration = (System.nanoTime : Double) - start
+  println("Elapsed time " + duration / 1000000.0 + " msecs")
+  result
+}
 
