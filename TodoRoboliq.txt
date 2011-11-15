@@ -77,6 +77,7 @@ x	Example05: shouldn't wash after dispensing water
 	PipetteScheduler: consider adding the concept of "tip blocks" in order to more directly handle some of the BSSE tip operations
 *	PipetteScheduler: handle pre- and post-mixing
 *	PipetteScheduler: use tip override for asperate too
+	PipetteScheduler: also break the batch if there are both sources and destinations on separate plates? No... but sometimes it would make sense!
 	RotemScript1: there are lots of errors
 ?	always wash/decon right after pipetting is done in order to prevent drying
 	extra wash before decon in case of cells

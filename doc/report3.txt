@@ -1,6 +1,13 @@
 - General overview
+	- Overview of project
 	- What the robot can do now
 	- What you will probably be able to do in the near future
+	- More distant future
+- Discussion about the DSL
+	- show code for something really simple
+	- show code for PCR
+- Technicalities of pipetting algorithm
+	-
 - Something technical where suggestions might be useful or where the info might be useful for others
 	Trade-off: force separation between generic and specialized protocols?
 - Some open problem
@@ -10,6 +17,21 @@
 
 
 Language format:
+
+val water = new Liquid(Properties.Water, CleanPolicy.ThoroughNone)
+val wells = new Plate
+
+protocol {
+  pipette(water, plate, 30 ul)
+}
+
+customize {
+  water.liquidClass = "D-BSSE Water"
+  plate.location = "P1"
+  val p2 = new Plate(nRows = 8, nCols = 1, location = "P2")
+  p2.well(1).liquid = water
+}
+-------------------
 
 // Plates
 val plateA = new Plate
@@ -233,8 +255,12 @@ state: S
 item: I, I_s (items pending from state s)
 tipModel: M
 syringe: Y
+syringeBlock: B
 source: C
 liquid: L
+
+M_b = set of tipModels which can be assigned to syringBlock b
+m_b = model assigned to syringeBlock b
 
 Each item is a tuple (liquid, dest, vol)
 Partial ordering of items (i < j)
@@ -243,17 +269,77 @@ Partial ordering of items (i < j)
 State: 
   bit string of length n_i, 1 for done, 0 for pending
   n to 2^n_i states (total ordering to no ordering)
+  Initial state: all 0s
+  Goal state: all 1s
 
 Actions:
-  for all subsets of pending items which respect the partial ordering (<= 2^|Is|)
-    for all assignment of t_j to s_j (|T|^|S|)
-      for all partitionings of items to s_j such that the items of s_j are compatible with t_j and s_j can hold sum(item_k.vol)
-        for all source wells of items, all assignments to the corresponding s_j's
-          also check that no tip cleaning is required
-   
+  may cover:
+    all subsets of pending items (2^|I_s|)
+    all permutations of items in subset (|I_s|!)
+    all partitions among syringes (|S|^|I_s|)
+
+Actions:
+  {item} <- I_s = subset of pending items (2^|Is|) such that
+    - |{item.src.liquid}| <= |Y| (not more liquids than syringes)
+  [item] <- permutations of {item} (|{item}|!)
+    - which respect the partial ordering
+  [l_i] = [item.src.liquid]
+  [m_b] <- [M_b] = assignments of tipModels to syringeBlocks (prod_b |M_b|)
+  [[item]_y] <- partitioning of items among syringes such that (|Y|^|[item]|)
+    - the [item]_y are compatible with m_y
+    - syringe y can hold sum_i(item_y,i.vol)
+    - syringe y would not have to be washed before dispensing to [item]_y.tail
+  [src_y] <- {l_y.src} (prod_y |l_y.src|)
+  action = ...
+
+---- again ----
+
+
+
+Heuristic cost functions:
+  number of cycles = ceil(number of tips required (for each liquid group) / number or syringes)
+  number of aspirates = number of cycles
+  number of dispenses = ceil(number of items / number of syringes)
+  number of cleans = ?
+ 
+
 ----
 Current formulation:
 
+use existing order of items
+assign a tip model to each item
+
 State: (n, l_y, m_y)
-Action: (clean_y, src_y, aspvol_y, dests_y, destvols_y)
+Action: ([clean_y], [(src_y, aspvol_y)], [(dest_y, destvol_y)])
+  item = next pending item
+  liquid = item.src.liquid
+  {l} += liquid
+  {m} += getTipModel(liquid)
+  check that {m} can be assigned to available syringeBlocks
+  add item.volume to aspiration volume for liquid and calculate number of syringes required
+  assign tips to the liquids (O(|{l}|*|Y|+|[item]|))
+  assign tips to items 
+
+  [[item]_y]
+  [item] <- pending items from length 1 while
+    - |{item.src.liquid}| <= |Y| (not more liquids than syringe count unless cleaning is suppressed) (<= |I_s|)
+  [l_i] = [item.src.liquid]
+  [m_b] <- [M_b] = assignments of tipModels to syringeBlocks (prod_b |M_b|)
+  [[item]_y] <- partitioning of items among syringes such that (|Y|^|[item]|)
+    - the [item]_y are compatible with m_y
+    - syringe y can hold sum_i(item_y,i.vol)
+    - syringe y would not have to be washed before dispensing to [item]_y.tail
+  [src_y] <- {l_y.src} (prod_y |l_y.src|)
+  action = ...
+
+
+
+----
+ways to order the items:
+vertical first
+horizontal first
+vertical first, but in wide blocks of height equal to tip block height
+
+----
+Example of scenario where the algorithm would perform very poorly:
 
