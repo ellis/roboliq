@@ -27,6 +27,8 @@ case class GroupA(
 	mItemToTip: Map[Item, TipConfigL2],
 	mTipToVolume: Map[TipConfigL2, Double],
 	mItemToPolicy: Map[Item, PipettePolicy],
+	mTipToCleanSpecA: Map[TipConfigL2, WashSpec],
+	mTipToCleanSpecPendingA: Map[TipConfigL2, WashSpec],
 	mTipToCleanSpec: Map[TipConfigL2, WashSpec],
 	mTipToCleanSpecPending: Map[TipConfigL2, WashSpec],
 	lDispense: Seq[TipWellVolumePolicy],
@@ -43,11 +45,13 @@ case class GroupA(
 			lLM.map(lm => lm.toString + " -> " + mLMToTips(lm)).mkString("mLMToTips:\n    ", "\n    ", ""),
 			lItem.map(item => L3A_PipetteItem.toDebugString(Seq(item)) + " -> " + mItemToTip.get(item).map(_.toString).getOrElse("MISSING")).mkString("mItemToTip:\n    ", "\n    ", ""),
 			//lItem.map(item => Command.getWellsDebugString(Seq(item.dest)) + " -> " + mDestToTip(item)).mkString("mDestToTip:\n    ", "\n    ", ""),
+			"mTipToWashIntensityA:\n    "+mTipToCleanSpecA.mapValues(_.washIntensity),
+			"mTipToWashIntensityPendingA:\n    "+mTipToCleanSpecPendingA.mapValues(_.washIntensity),
 			"mTipToWashIntensity:\n    "+mTipToCleanSpec.mapValues(_.washIntensity),
 			"mTipToWashIntensityPending:\n    "+mTipToCleanSpecPending.mapValues(_.washIntensity),
 			lDispense.map(twvpString).mkString("lDispense:\n    ", "\n    ", ""),
 			lAspirate.map(twvpString).mkString("lAspirate:\n    ", "\n    ", "")
-		).mkString("GroupZ(\n  ", "\n  ", ")\n")
+		).mkString("GroupA(\n  ", "\n  ", ")\n")
 	}
 	
 	private def twvpString(twvp: TipWellVolumePolicy): String = {

@@ -62,6 +62,7 @@ class PipetteScheduler(
 			//println("lGroupB: "+lGroupB.toList)
 			
 			// Reconstruct the optimal path
+			printPathA(nItems - 1, Nil)
 			val lB = getPath(nItems - 1, Nil)
 			lB.foreach(gB => { println("gB:"); println(gB) })
 			val rB = lB.reverse
@@ -87,7 +88,8 @@ class PipetteScheduler(
 			}
 		}
 
-		val lG = x2(g0, lItem, 0, Nil)
+		val lG0 = x2R(lItem, List(g0)).reverse.tail
+		val lG = filterGroupAsR(lG0, Nil).reverse
 		//println("lG:")
 		//println(lG)
 
@@ -125,50 +127,39 @@ class PipetteScheduler(
 		}
 	}
 	
-	private def x2(g: GroupA, lItem: List[Item], nTips0: Int, acc: List[GroupA]): List[GroupA] = lItem match {
-		case Nil =>
-			if (g.lItem.isEmpty) acc
-			else g :: acc
+	private def x2R(lItem: List[Item], acc: List[GroupA]): List[GroupA] = lItem match {
+		case Nil => acc
 		case item :: rest =>
-			builderA.addItemToGroup(g, item) match {
-				case builderA.GroupSuccess(g2) =>
-					val nTips = g2.mTipToLM.size
-					/*val acc2 = {
-						// If still using same number of tips as before, don't save this group
-						if (g.lItem.isEmpty || nTips == nTips0)
-							acc
-						// Save g2 (shortest item sequence for nTips tips)
-						else if (!acc.isEmpty && acc.head.eq(g))
-							g2 :: acc
-						// Save g (longest item sequence for nTips0 tips) and g2 (shortest for nTips)
-						else
-							g2 :: g :: acc
-					}*/
-					// Save groups whenever there's a break in well adjacency
-					val acc2 = {
-						// If nothing to save yet
-						if (g.lItem.isEmpty)
-							acc
-						else {
-							val wellGroup = WellGroup(g2.lItem.takeRight(2).map(_.dest)).splitByAdjacent()
-							// If new item is not adjacent to previous one, save the preceding group
-							if (wellGroup.size > 1) {
-								//println("keep:")
-								//println(g)
-								g :: acc
-							}
-							else
-								acc
-						}
-					}
-					x2(g2, rest, nTips, acc2)
-				case _ =>
-					//println("g*:"+g)
-					// FIXME: for debug only
-					//Seq[Int]().head
-					if (g.lItem.isEmpty) acc
-					else g :: acc
+			builderA.addItemToGroup(acc.head, item) match {
+				case err: builderA.GroupError =>
+					//println("Error in x2R:")
+					//println(err)
+					acc
+				case stop: builderA.GroupStop => acc 
+				case builderA.GroupSuccess(g) =>
+					x2R(rest, g :: acc)
 			}
+	}
+	
+	private def filterGroupAsR(lG: List[GroupA], acc: List[GroupA]): List[GroupA] = {
+		lG match {
+			case Nil => Nil
+			// Always add last item to list
+			case g :: Nil => g :: acc
+			case g :: (lG2 @ (g2 :: _)) =>
+				val acc2 = {
+					val wellGroup = WellGroup(g2.lItem.takeRight(2).map(_.dest)).splitByAdjacent()
+					// If new item is not adjacent to previous one, save the preceding group
+					if (wellGroup.size > 1) {
+						//println("keep:")
+						//println(g)
+						g :: acc
+					}
+					else
+						acc
+				}
+				filterGroupAsR(lG2, acc2)
+		}
 	}
 	
 	private def ScoreOrdering = new Ordering[Score] {
@@ -183,7 +174,7 @@ class PipetteScheduler(
 		if (iItem < 0)
 			acc
 		else {
-			println("gA: "+lGroupA(iItem))
+			//println("gA: "+lGroupA(iItem))
 			val gB = lGroupB(iItem)
 			if (gB == null) {
 				println("lGroupA: "+lGroupA)
@@ -193,6 +184,17 @@ class PipetteScheduler(
 			}
 			else
 				getPath(iItem - gB.lItem.size, gB :: acc)
+		}
+	}
+	
+	private def printPathA(iItem: Int, acc: List[GroupA]) {
+		if (iItem < 0) {
+			println("GroupA Path:")
+			acc.foreach(println)
+		}
+		else {
+			val gA = lGroupA(iItem)
+			printPathA(iItem - gA.lItem.size, gA :: acc)
 		}
 	}
 	

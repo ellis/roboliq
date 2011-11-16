@@ -15,7 +15,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	val tips1000 = SortedSet((0 to 3).map(i => new Tip(i)) : _*)
 	val tips50 = SortedSet((4 to 7).map(i => new Tip(i)) : _*)
 	val config = new PipetteDeviceConfig(
-		tipSpecs = Seq(tipModel50, tipModel1000),
+		lTipModel = Seq(tipModel50, tipModel1000),
 		tips = tips1000 ++ tips50,
 		tipGroups = {
 			val g1000 = (0 to 3).map(i => i -> tipModel1000).toSeq
@@ -26,7 +26,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	val mapIndexToTip = config.tips.toSeq.map(tip => tip.index -> tip).toMap
 	val mapModelToTips = Map(tipModel1000 -> tips1000, tipModel50 -> tips50)
 	val mapTipToModels = mapModelToTips.flatMap(pair => (pair._2.toSeq).map(_ -> pair._1))
-	val mapTipModels = config.tipSpecs.map(spec => spec.id -> spec).toMap
+	val mapTipModels = config.lTipModel.map(spec => spec.id -> spec).toMap
 
 	val plateDecon = new Plate
 	
@@ -229,4 +229,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		lTip -- lTipCleaning
 	}
 
+	def getTipsToCleanSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
+		
+	}
 }

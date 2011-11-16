@@ -17,6 +17,8 @@ class GroupABuilder(
 	val ctx: CompilerContextL3,
 	val cmd: L3C_Pipette
 ) {
+	private val lTipAll: SortedSet[TipConfigL2] = device.config.tips.map(_.state(ctx.states).conf)
+
 	/**
 	 * Remove items with nVolume < 0
 	 */
@@ -177,7 +179,7 @@ class GroupABuilder(
 		states0: RobotState,
 		mLM: Map[Item, LM]
 	): GroupA = {
-		val groupA0 = GroupA(mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false, states0)
+		val groupA0 = GroupA(mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false, states0)
 		groupA0
 	}
 	
@@ -189,7 +191,7 @@ class GroupABuilder(
 		g0: GroupA
 	): GroupA = {
 		val g = GroupA(
-			g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false, g0.states1
+			g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false, g0.states1
 		)
 		g
 	}
@@ -501,7 +503,7 @@ class GroupABuilder(
 			// TODO: what to do by default when we free dispense in a well with cells?
 		}
 		
-		val l1 = g0.mTipToLM.map(pair => {
+		val pre_post = g0.mTipToLM.map(pair => {
 			val (tip, lm) = pair
 			val policySrc = lm.liquid.group.cleanPolicy
 			val lGroupCleanPolicyDest = mTipToLiquidGroups.getOrElse(tip, Set()).toSeq.map(_.cleanPolicy)
@@ -527,11 +529,22 @@ class GroupABuilder(
 			((tip -> cleanSpecPre), (tip -> cleanSpecPost))
 		})
 		
-		val (l2, l3) = l1.unzip(identity)
+		val (l2, l3) = pre_post.unzip(identity)
+		val mTipToCleanSpecA = l2.toMap
+		val mTipToCleanSpecPendingA = g0.mTipToCleanSpecPending0 -- l2.map(_._1) ++ l3.toMap
+		val lTipsToClean = device.getTipsToCleanSimultaneously(lTipAll, SortedSet(l2.toSeq.map(_._1) : _*)).toSet
+		val mTipToCleanSpec = lTipsToClean.map(tip => {
+			tip -> mTipToCleanSpecA.getOrElse(tip,
+					mTipToCleanSpecPendingA.getOrElse(tip, 
+							new WashSpec(WashIntensity.None, Set(), Set())))
+		}).toMap
+		val mTipToCleanSpecPending = mTipToCleanSpecPendingA.filter(pair => !mTipToCleanSpec.contains(pair._1))
 		
 		GroupSuccess(g0.copy(
-			mTipToCleanSpec = l2.toMap,
-			mTipToCleanSpecPending = l3.toMap
+			mTipToCleanSpecA = mTipToCleanSpecA,
+			mTipToCleanSpecPendingA = mTipToCleanSpecPendingA,
+			mTipToCleanSpec = mTipToCleanSpec,
+			mTipToCleanSpecPending = mTipToCleanSpecPending
 		))
 		
 		/*
