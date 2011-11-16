@@ -29,8 +29,10 @@ class PipetteScheduler(
 	
 	def x(): Result[Seq[Command]] = {
 		for {
-			items <- builderA.filterItems(cmd.args.items)
-			mLM <- builderA.tr1Items(items)
+			items0 <- builderA.filterItems(cmd.args.items)
+			mLM0 <- builderA.tr1Items(items0)
+			pair <- builderA.splitBigVolumes(items0, mLM0)
+			(items, mLM) = pair 
 		} yield {
 			if (items.isEmpty)
 				return Success(Nil)
@@ -87,6 +89,8 @@ class PipetteScheduler(
 		}
 
 		val lG = x2(g0, lItem, 0, Nil)
+		//println("lG:")
+		//println(lG)
 
 		val lTipCleanableParent = if (iItemParent < 0) SortedSet[TipConfigL2]() else lGroupB(iItemParent).lTipCleanable
 		val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)
@@ -163,7 +167,8 @@ class PipetteScheduler(
 					//println("g*:"+g)
 					// FIXME: for debug only
 					//Seq[Int]().head
-					acc
+					if (g.lItem.isEmpty) acc
+					else g :: acc
 			}
 	}
 	
@@ -181,8 +186,12 @@ class PipetteScheduler(
 		else {
 			println("gA: "+lGroupA(iItem))
 			val gB = lGroupB(iItem)
-			if (gB == null)
+			if (gB == null) {
+				println("lGroupA: "+lGroupA)
+				println(iItem, acc)
+				Seq().head
 				Nil // ERROR!
+			}
 			else
 				getPath(iItem - gB.lItem.size, gB :: acc)
 		}

@@ -24,12 +24,27 @@ object Command {
 	}
 
 	def getWellsDebugString(wells: Iterable[WellConfigL2]): String = {
+		/*
 		val sorted = wells.toSeq//.sortBy(identity)
 		val mapPlateToWell = sorted.groupBy(_.holder)
 		val lsPlates = for ((plate, wells) <- mapPlateToWell) yield {
 			val lsWells = Command.getWellStrings(wells.toList)
 			plate.sLabel + ":" + lsWells.mkString(",")
 		}
+		*/
+		val rrWell = wells.toList.foldLeft(List[List[WellConfigL2]]())((acc, well) => acc match {
+			case Nil => List(List(well))
+			case (curr @ (prev :: rest)) :: others =>
+				if (well.holder eq prev.holder) (well :: curr) :: others
+				else List(well) :: (curr :: others)
+			case _ => Nil // Error
+		})
+		val lsPlates = rrWell.reverse.map(rWell => {
+			val lWell = rWell.reverse
+			val plate = lWell.head.holder
+			val lsWells = Command.getWellStrings(lWell)
+			plate.sLabel + ":" + lsWells.mkString(",")
+		})
 		lsPlates.mkString(";")
 	}
 	

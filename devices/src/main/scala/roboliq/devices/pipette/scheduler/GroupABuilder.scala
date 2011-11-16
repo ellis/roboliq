@@ -115,6 +115,21 @@ class GroupABuilder(
 		Success(mLM)
 	}
 	
+	def splitBigVolumes(items: Seq[Item], mLM: Map[Item, LM]): Result[Tuple2[Seq[Item], Map[Item, LM]]] = {
+		var map = mLM
+		Success(items.flatMap(item => {
+			val lm = mLM(item)
+			if (item.nVolume <= lm.tipModel.nVolume) Seq(item)
+			else {
+				val n = math.ceil(item.nVolume / lm.tipModel.nVolume).asInstanceOf[Int]
+				val nVolume = item.nVolume / n
+				val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, nVolume, item.premix_?, if (i == n - 1) item.postmix_? else None))
+				map = map ++ l.map(_ -> lm)
+				l
+			}
+		}) -> map)
+	}
+	
 	// TODO: After getting back mLM: Map[Item, LM], partition any items which require more volume than the TipModel can hold
 	
 	// Return:
@@ -210,6 +225,12 @@ class GroupABuilder(
 			case Some(data) =>
 				val nVolumeCurrent = data.nVolumeCurrent + item.nVolume
 				val nVolumeTotal = data.nVolumeTotal + item.nVolume
+				/*// FIXME: for debug only
+				if (nVolumeCurrent > 1000) {
+					println(lm.tipModel, lm.tipModel.nVolume)
+					Seq().head
+				}
+				// ENDFIX*/
 				if (data.nVolumeCurrent == 0)
 					LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
 				else if (nVolumeCurrent <= lm.tipModel.nVolume)
@@ -217,6 +238,15 @@ class GroupABuilder(
 				else
 					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
 		}
+				// FIXME: for debug only
+				if (data.nVolumeCurrent > 1000) {
+					println("updateLMData")
+					println(data)
+					println(lm.tipModel, lm.tipModel.nVolume)
+					println(g0.mLMData)
+					println(g0.mLMData.get(lm))
+					Seq().head
+				}
 		
 		// TODO: if a source of item is in the list of previous destinations, return GroupStop(g0)
 		
@@ -356,6 +386,15 @@ class GroupABuilder(
 		val mTipToLiquidGroups = new HashMap[TipConfigL2, LiquidGroup]
 
 		val lItemToPolicy = for (item <- g0.lItem) yield {
+			// FIXME: For debug only
+			if (!g0.mItemToTip.contains(item)) {
+				println("updatemItemToPolicy")
+				println(item)
+				println(g0.mItemToTip)
+				println("g0:")
+				println(g0)
+			}
+			// ENDFIX
 			val tip = g0.mItemToTip(item)
 			// TODO: need to keep track of well liquid as we go, since we might dispense into a single well multiple times
 			val destState = item.dest.state(g0.states0)
