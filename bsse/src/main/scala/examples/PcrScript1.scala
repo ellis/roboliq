@@ -47,12 +47,12 @@ class PcrScript1(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 
 		reagent(Liquids.water, Labwares.reagents50, 1)
 		reagent(Liquids.buffer10x, Labwares.eppendorfs, 1)
-		reagent(Liquids.dNTP, Labwares.eppendorfs, 5)
-		reagent(Liquids.primerF, Labwares.eppendorfs, 9)
-		reagent(Liquids.primerB, Labwares.eppendorfs, 13)
-		reagent(Liquids.polymerase, Labwares.eppendorfs, 17)
+		reagent(Liquids.dNTP, Labwares.eppendorfs, 2)
+		reagent(Liquids.primerF, Labwares.eppendorfs, 3)
+		reagent(Liquids.primerB, Labwares.eppendorfs, 4)
+		reagent(Liquids.polymerase, Labwares.eppendorfs, 5)
 		
-		well_template.pointer_? = Some(Labwares.eppendorfs.commonObj(B1))
+		well_template.pointer_? = Some(Labwares.eppendorfs.commonObj(D2))
 		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(B2))
 		
 		labware(plate_balance, Sites.cooled1, LabwareModels.platePcr)

@@ -45,10 +45,10 @@ case class GroupA(
 			lLM.map(lm => lm.toString + " -> " + mLMToTips.getOrElse(lm, "NONE")).mkString("mLMToTips:\n    ", "\n    ", ""),
 			lItem.map(item => L3A_PipetteItem.toDebugString(Seq(item)) + " -> " + mItemToTip.get(item).map(_.toString).getOrElse("MISSING")).mkString("mItemToTip:\n    ", "\n    ", ""),
 			//lItem.map(item => Command.getWellsDebugString(Seq(item.dest)) + " -> " + mDestToTip(item)).mkString("mDestToTip:\n    ", "\n    ", ""),
-			"mTipToWashIntensityA:\n    "+mTipToCleanSpecA.mapValues(_.washIntensity),
-			"mTipToWashIntensityPendingA:\n    "+mTipToCleanSpecPendingA.mapValues(_.washIntensity),
-			"mTipToWashIntensity:\n    "+mTipToCleanSpec.mapValues(_.washIntensity),
-			"mTipToWashIntensityPending:\n    "+mTipToCleanSpecPending.mapValues(_.washIntensity),
+			"mTipToWashIntensityA:\n    "+mTipToCleanSpecA.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
+			"mTipToWashIntensityPendingA:\n    "+mTipToCleanSpecPendingA.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
+			"mTipToWashIntensity:\n    "+mTipToCleanSpec.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
+			"mTipToWashIntensityPending:\n    "+mTipToCleanSpecPending.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
 			lDispense.map(twvpString).mkString("lDispense:\n    ", "\n    ", ""),
 			lAspirate.map(twvpString).mkString("lAspirate:\n    ", "\n    ", "")
 		).mkString("GroupA(\n  ", "\n  ", ")\n")

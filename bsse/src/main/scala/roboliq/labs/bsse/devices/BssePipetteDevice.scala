@@ -119,10 +119,6 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 
 	def assignTips(lTipAvailable: SortedSet[TipConfigL2], tipModel: TipModel, nTips: Int): Result[SortedSet[TipConfigL2]] = {
 		val lTipAppropriate = mModelToTips(tipModel).intersect(lTipAvailable)
-		println("mModelToTips: "+mModelToTips)
-		println("mModelToTips(tipModel): "+mModelToTips(tipModel))
-		println("lTipAppropriate: "+lTipAppropriate)
-		println("nTips: "+nTips)
 		if (nTips > lTipAppropriate.size)
 			return Error("INTERNAL ERROR: assignTips: not enough tips"+(lTipAvailable, tipModel, nTips))
 		val lTip = lTipAppropriate.take(nTips)

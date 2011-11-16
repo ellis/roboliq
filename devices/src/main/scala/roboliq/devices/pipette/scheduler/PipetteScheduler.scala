@@ -90,8 +90,8 @@ class PipetteScheduler(
 
 		val lG0 = x2R(lItem, List(g0)).reverse.tail
 		val lG = filterGroupAsR(lG0, Nil).reverse
-		println("lG:")
-		println(lG)
+		//println("lG:")
+		//println(lG)
 
 		val lTipCleanableParent = if (iItemParent < 0) SortedSet[TipConfigL2]() else lGroupB(iItemParent).lTipCleanable
 		val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)

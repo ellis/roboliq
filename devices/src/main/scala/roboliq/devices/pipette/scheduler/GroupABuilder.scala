@@ -474,7 +474,7 @@ class GroupABuilder(
 		))
 	}
 
-	case class LiquidGroups(pre: LiquidGroup, asperate: LiquidGroup, dispense: LiquidGroup)
+	//case class LiquidGroups(pre: LiquidGroup, asperate: LiquidGroup, dispense: LiquidGroup)
 	
 	def updateGroupA9_mTipToCleanSpec(g0: GroupA): GroupResult = {
 		// Liquid groups of destination wells with wet contact
@@ -544,7 +544,7 @@ class GroupABuilder(
 							new WashSpec(WashIntensity.None, Set(), Set())))
 		}).toMap*/
 		//val mTipToCleanSpecPending = mTipToCleanSpecPendingA.filter(pair => !mTipToCleanSpec.contains(pair._1))
-		val mTipToCleanSpecPending = g0.mTipToCleanSpecPending0 -- mTipToCleanSpec.keys ++ l3.toMap
+		val mTipToCleanSpecPending = (g0.mTipToCleanSpecPending0 -- mTipToCleanSpec.keys ++ l3.toMap).filter(_._2.washIntensity != WashIntensity.None)
 		
 		//println("mTipToCleanSpec: "+mTipToCleanSpec)
 		//println("mTipToCleanSpecPending: "+mTipToCleanSpecPending)

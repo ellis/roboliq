@@ -210,6 +210,14 @@ trait WellCoords {
 	val C6 = WellCoord(2, 5)
 	val C7 = WellCoord(2, 6)
 	val C8 = WellCoord(2, 7)
+	val D1 = WellCoord(3, 0)
+	val D2 = WellCoord(3, 1)
+	val D3 = WellCoord(3, 3)
+	val D4 = WellCoord(3, 3)
+	val D5 = WellCoord(3, 4)
+	val D6 = WellCoord(3, 5)
+	val D7 = WellCoord(3, 6)
+	val D8 = WellCoord(3, 7)
 	val G7 = WellCoord(6, 6)
 }
 
