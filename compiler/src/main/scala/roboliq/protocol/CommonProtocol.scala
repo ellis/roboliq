@@ -35,6 +35,10 @@ trait CommonProtocol extends
 	var m_protocol: Option[() => Unit] = None
 	var m_customize: Option[() => Unit] = None
 	
+	object Properties extends Enumeration {
+		val Water, Glycerol = Value
+	}
+
 	abstract class LiquidFamily
 	object LiquidFamily {
 		case object Water extends LiquidFamily
@@ -55,6 +59,8 @@ trait CommonProtocol extends
 		def this(family: String, contaminants: Set[Contaminant.Value]) = this(family, contaminants, None)
 		def this(family: String, contaminants: Set[Contaminant.Value], cleanPolicy: GroupCleanPolicy) = this(family, contaminants, Some(cleanPolicy))
 		def this(family: String, cleanPolicy: GroupCleanPolicy) = this(family, Set[Contaminant.Value](), Some(cleanPolicy))
+		def this(properties: Properties.Value, cleanPolicy: GroupCleanPolicy) = this(properties.toString(), Set[Contaminant.Value](), Some(cleanPolicy))
+		def this(properties: Properties.Value, cleanPolicy: GroupCleanPolicy, contaminant: Contaminant.Value) = this(properties.toString(), Set(contaminant), Some(cleanPolicy))
 		
 		val setup = kb.getReagentSetup(this)
 		

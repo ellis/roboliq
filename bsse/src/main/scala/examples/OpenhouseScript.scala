@@ -46,11 +46,11 @@ class ExampleOpenhouse2(station: roboliq.labs.bsse.station1.StationConfig) exten
 		val c10 = wcc.map(_._2).zipWithIndex.filter(_._1 > 0)
 		val c1 = wcc.map(_._3).zipWithIndex.filter(_._1 > 0)
 		if (!w.isEmpty)
-			cmds += L4C_Pipette(new L4A_PipetteArgs(w.map(pair => new L4A_PipetteItem(Liquids.water, plate(WellIndex(pair._2)), Seq(pair._1)))))
+			cmds += L4C_Pipette(new L4A_PipetteArgs(w.map(pair => new L4A_PipetteItem(Liquids.water, plate(WellIndex(pair._2)), Seq(pair._1), None, None))))
 		if (!c10.isEmpty)
-			cmds += L4C_Pipette(new L4A_PipetteArgs(c10.map(pair => new L4A_PipetteItem(Liquids.color10, plate(WellIndex(pair._2)), Seq(pair._1)))))
+			cmds += L4C_Pipette(new L4A_PipetteArgs(c10.map(pair => new L4A_PipetteItem(Liquids.color10, plate(WellIndex(pair._2)), Seq(pair._1), None, None))))
 		if (!c1.isEmpty)
-			cmds += L4C_Pipette(new L4A_PipetteArgs(c1.map(pair => new L4A_PipetteItem(Liquids.color1, plate(WellIndex(pair._2)), Seq(pair._1)))))
+			cmds += L4C_Pipette(new L4A_PipetteArgs(c1.map(pair => new L4A_PipetteItem(Liquids.color1, plate(WellIndex(pair._2)), Seq(pair._1), None, None))))
 	}
 	
 	def proc1(plate: Plate): Tuple2[roboliq.commands.pcr.PcrThermocycle.Setup, roboliq.commands.centrifuge.L4A_CentrifugeSetup] = {

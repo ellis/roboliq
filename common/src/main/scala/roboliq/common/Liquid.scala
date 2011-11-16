@@ -45,6 +45,9 @@ object GroupCleanPolicy {
 	val TNN = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
 	val TNT = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
 	val DDD = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
+	val ThoroughNone = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
+	val Thorough = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
+	val Decontaminate = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
 	
 	def max(a: GroupCleanPolicy, b: GroupCleanPolicy): GroupCleanPolicy = {
 		new GroupCleanPolicy(

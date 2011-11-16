@@ -67,7 +67,7 @@ object Program02 {
 	//def mix() = Seq[Command]()
 	
 	def pipette(source: WellPointer, dest: WellPointer, volume: Double): Tuple2[Seq[Command], L4A_PipetteArgs] = {
-		val item = new L4A_PipetteItem(source, dest, Seq(volume))
+		val item = new L4A_PipetteItem(source, dest, Seq(volume), None, None)
 		val args = new L4A_PipetteArgs(Seq(item))
 		val cmd = L4C_Pipette(args)
 		(Seq(cmd), args)

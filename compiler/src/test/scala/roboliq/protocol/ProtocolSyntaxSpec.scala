@@ -2,6 +2,7 @@ package roboliq.protocol
 
 import scala.collection.immutable.SortedSet
 
+/*
 import org.scalatest.FeatureSpec
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.ShouldMatchers
@@ -27,4 +28,4 @@ class ProtocolSyntaxSpec extends FeatureSpec with GivenWhenThen with ShouldMatch
 			(p1(G7+9) + p2(A1+64)).toString should be === "P1:G7+9;P2:A1+64"
 		}
 	}
-}
+}*/
