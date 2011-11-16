@@ -28,7 +28,7 @@ abstract class PipetteDevice extends Device {
 	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2]
 	//def getTipsToCleanSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2]
-	def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Map[TipConfigL2, WashSpec]
+	def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Seq[Tuple2[WashSpec, SortedSet[TipConfigL2]]]
 	//def chooseTipWellPairs(tips: SortedSet[Tip], wells: SortedSet[Well], wellPrev_? : Option[Well]): Seq[Tuple2[Tip, Well]]
 	//def chooseWashPrograms(tip: TipConfigL2, intensity: WashIntensity.Value): Seq[Int]
 	/*def batchesForAspirate(twvps: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]]

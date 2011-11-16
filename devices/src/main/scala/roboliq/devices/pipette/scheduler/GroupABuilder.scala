@@ -400,8 +400,10 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA5_mTipToVolume(g0: GroupA): GroupResult = {
+		val mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap
+		println("mTipToVolume: "+mTipToVolume)
 		GroupSuccess(g0.copy(
-			mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap
+			mTipToVolume = mTipToVolume
 		))
 	}
 
@@ -530,13 +532,22 @@ class GroupABuilder(
 		val (l2, l3) = pre_post.unzip(identity)
 		val mTipToCleanSpecA = l2.toMap
 		val mTipToCleanSpecPendingA = g0.mTipToCleanSpecPending0 -- l2.map(_._1) ++ l3.toMap
-		val lTipsToClean = device.getTipsToCleanSimultaneously(lTipAll, SortedSet(l2.toSeq.map(_._1) : _*)).toSet
-		val mTipToCleanSpec = lTipsToClean.map(tip => {
+		//val lTipsToClean = device.getTipsToCleanSimultaneously(lTipAll, SortedSet(l2.toSeq.map(_._1) : _*)).toSet
+		val lCleanSpecToTips = device.batchCleanSpecs(lTipAll, mTipToCleanSpecA)
+		val mTipToCleanSpec = lCleanSpecToTips.flatMap(pair => {
+			val (cleanSpec, lTip) = pair
+			(lTip.toSeq).map(_ -> cleanSpec)
+		}).toMap
+		/*val mTipToCleanSpec = lTipsToClean.map(tip => {
 			tip -> mTipToCleanSpecA.getOrElse(tip,
 					mTipToCleanSpecPendingA.getOrElse(tip, 
 							new WashSpec(WashIntensity.None, Set(), Set())))
-		}).toMap
-		val mTipToCleanSpecPending = mTipToCleanSpecPendingA.filter(pair => !mTipToCleanSpec.contains(pair._1))
+		}).toMap*/
+		//val mTipToCleanSpecPending = mTipToCleanSpecPendingA.filter(pair => !mTipToCleanSpec.contains(pair._1))
+		val mTipToCleanSpecPending = g0.mTipToCleanSpecPending0 -- mTipToCleanSpec.keys ++ l3.toMap
+		
+		println("mTipToCleanSpec: "+mTipToCleanSpec)
+		println("mTipToCleanSpecPending: "+mTipToCleanSpecPending)
 		
 		GroupSuccess(g0.copy(
 			mTipToCleanSpecA = mTipToCleanSpecA,

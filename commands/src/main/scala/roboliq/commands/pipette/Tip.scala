@@ -5,21 +5,30 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 
 
-class Tip(val index: Int) extends Obj with Ordered[Tip] {
+class Tip(val index: Int, modelPermanent_? : Option[TipModel]) extends Obj with Ordered[Tip] {
 	thisObj =>
 	type Setup = TipSetup
 	type Config = TipConfigL2
 	type State = TipStateL2
 	
+	val setup = new Setup(this)
+	val (conf0, state0) = createConfigAndState0()
+	
 	override def compare(that: Tip): Int = this.index - that.index
 	
-	def createSetup() = new Setup(this)
+	def createSetup() = setup
 	
 	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
-		val conf = new TipConfigL2(this, index)
-		val state = new TipStateL2(conf, setup.modelPermanent_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
-		Success(conf, state)
+		//val conf = new TipConfigL2(this, index)
+		//val state = new TipStateL2(conf, modelPermanent_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
+		Success(conf0, state0)
 	}
+	
+	private def createConfigAndState0(): Tuple2[Config, State] = {
+		val conf = new TipConfigL2(this, index)
+		val state = new TipStateL2(conf, modelPermanent_?, Liquid.empty, 0, Set(), 0, Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
+		(conf, state)
+	} 
 	
 	class StateWriter(map: HashMap[Obj, ObjState]) {
 		def state = map(thisObj).asInstanceOf[State]
@@ -155,7 +164,7 @@ case class TipStateL2(
 }
 
 class TipSetup(val obj: Tip) extends ObjSetup {
-	var modelPermanent_? : Option[TipModel] = None
+	//var modelPermanent_? : Option[TipModel] = None
 
 	override def getLabel(kb: KnowledgeBase): String = obj.toString
 }

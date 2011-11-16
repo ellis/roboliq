@@ -4,9 +4,11 @@ import scala.collection.immutable.SortedSet
 
 import roboliq.commands.pipette._
 
-/*
-class TipBlock(lTip: SortedSet[Tip], lTipModels: Seq[TipModel])
+class TipBlock(val tTip: SortedSet[TipConfigL2], val lTipModels: Seq[TipModel]) {
+	val lTip = tTip.toSeq
+}
 
+/*
 class PipetteDeviceConfig(
 	val tips: SortedSet[Tip],
 	val tipModels: Seq[TipModel],

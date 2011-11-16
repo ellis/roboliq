@@ -88,7 +88,15 @@ class WashSpec(
 	val washIntensity: WashIntensity.Value,
 	val contamInside: Set[Contaminant.Value],
 	val contamOutside: Set[Contaminant.Value]
-)
+) {
+	def +(that: WashSpec): WashSpec = {
+		new WashSpec(
+			WashIntensity.max(washIntensity, that.washIntensity),
+			contamInside ++ that.contamInside,
+			contamOutside ++ that.contamOutside
+		)
+	}
+}
 
 class CleanSpec(
 	val replacement: Option[TipReplacementPolicy.Value],

@@ -12,8 +12,8 @@ import roboliq.robots.evoware.devices.EvowarePipetteDevice
 
 
 class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends EvowarePipetteDevice {
-	val tips1000 = SortedSet((0 to 3).map(i => new Tip(i)) : _*)
-	val tips50 = SortedSet((4 to 7).map(i => new Tip(i)) : _*)
+	val tips1000 = SortedSet((0 to 3).map(i => new Tip(i, Some(tipModel1000))) : _*)
+	val tips50 = SortedSet((4 to 7).map(i => new Tip(i, Some(tipModel50))) : _*)
 	val config = new PipetteDeviceConfig(
 		lTipModel = Seq(tipModel50, tipModel1000),
 		tips = tips1000 ++ tips50,
@@ -24,9 +24,15 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		}
 	)
 	val mapIndexToTip = config.tips.toSeq.map(tip => tip.index -> tip).toMap
-	val mapModelToTips = Map(tipModel1000 -> tips1000, tipModel50 -> tips50)
-	val mapTipToModels = mapModelToTips.flatMap(pair => (pair._2.toSeq).map(_ -> pair._1))
 	val mapTipModels = config.lTipModel.map(spec => spec.id -> spec).toMap
+
+	val tipBlock1000 = new TipBlock(tips1000.map(_.conf0), Seq(tipModel1000))
+	val tipBlock50 = new TipBlock(tips50.map(_.conf0), Seq(tipModel50))
+	val tTipAll: SortedSet[TipConfigL2] = tipBlock1000.tTip ++ tipBlock50.tTip
+	val lTipAll: Seq[TipConfigL2] = tTipAll.toSeq
+	val mTipToBlock: Map[TipConfigL2, TipBlock] = (tipBlock1000.lTip.map(_ -> tipBlock1000) ++ tipBlock50.lTip.map(_ -> tipBlock50)).toMap
+	val mTipToModel: Map[TipConfigL2, TipModel] = mTipToBlock.mapValues(_.lTipModels.head)
+	val mModelToTips = Map(tipModel1000 -> tipBlock1000.tTip, tipModel50 -> tipBlock50.tTip)
 
 	val plateDecon = new Plate
 	
@@ -65,11 +71,11 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	override def addKnowledge(kb: KnowledgeBase) = {
 		super.addKnowledge(kb)
 		
-		config.tips.foreach(tip => {
+		/*config.tips.foreach(tip => {
 			val tipSpec = if (tip.index < 4) tipModel1000 else tipModel50
 			val tipSetup = kb.getObjSetup[TipSetup](tip)
 			tipSetup.modelPermanent_? = Some(tipSpec)
-		})
+		})*/
 		new PlateProxy(kb, plateDecon) match {
 			case pp =>
 				pp.label = "Decon"
@@ -112,7 +118,11 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	*/
 
 	def assignTips(lTipAvailable: SortedSet[TipConfigL2], tipModel: TipModel, nTips: Int): Result[SortedSet[TipConfigL2]] = {
-		val lTipAppropriate = lTipAvailable.filter(tip => mapModelToTips(tipModel).contains(tip.obj))
+		val lTipAppropriate = mModelToTips(tipModel).intersect(lTipAvailable)
+		println("mModelToTips: "+mModelToTips)
+		println("mModelToTips(tipModel): "+mModelToTips(tipModel))
+		println("lTipAppropriate: "+lTipAppropriate)
+		println("nTips: "+nTips)
 		if (nTips > lTipAppropriate.size)
 			return Error("INTERNAL ERROR: assignTips: not enough tips"+(lTipAvailable, tipModel, nTips))
 		val lTip = lTipAppropriate.take(nTips)
@@ -224,16 +234,26 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	}
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
-		val lModel = lTipCleaning.toSeq.map(tip => mapTipToModels(tip.obj))
-		val lTip = lTipAll.filter(tip => lModel.contains(mapTipToModels(tip.obj)))
+		val lModel = lTipCleaning.toSeq.map(tip => mTipToModel(tip))
+		val lTip = lTipAll.filter(tip => lModel.contains(mTipToModel(tip)))
 		lTip -- lTipCleaning
 	}
 
 	def getTipsToCleanSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
-		val lModel = lTipCleaning.toSeq.map(tip => mapTipToModels(tip.obj))
-		val lTip = lTipAll.filter(tip => lModel.contains(mapTipToModels(tip.obj)))
+		val lModel = lTipCleaning.toSeq.map(tip => mTipToModel(tip))
+		val lTip = lTipAll.filter(tip => lModel.contains(mTipToModel(tip)))
 		lTip
 	}
 	
-	def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Map[TipConfigL2, WashSpec]
+	//def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Map[TipConfigL2, WashSpec]
+	def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Seq[Tuple2[WashSpec, SortedSet[TipConfigL2]]] = {
+		val lBlock = mTipToCleanSpec.keys.map(mTipToBlock)
+		val lBlockToCleanSpec = lBlock.map(block => {
+			val lCleanSpec = mTipToCleanSpec.toSeq.collect({ case (tip, cleanSpec) if block.tTip.contains(tip) => cleanSpec })
+			val cleanSpec = lCleanSpec.reduce(_ + _)
+			block -> cleanSpec
+		})
+		lBlockToCleanSpec.map(pair => pair._2 -> pair._1.tTip).toSeq
+		//val lTip = lTipAll.filter(tip => lModel.contains(mapTipToModels(tip.obj))).map()
+	}
 }

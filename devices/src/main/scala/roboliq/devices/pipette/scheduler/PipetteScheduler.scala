@@ -90,8 +90,8 @@ class PipetteScheduler(
 
 		val lG0 = x2R(lItem, List(g0)).reverse.tail
 		val lG = filterGroupAsR(lG0, Nil).reverse
-		//println("lG:")
-		//println(lG)
+		println("lG:")
+		println(lG)
 
 		val lTipCleanableParent = if (iItemParent < 0) SortedSet[TipConfigL2]() else lGroupB(iItemParent).lTipCleanable
 		val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)
@@ -135,7 +135,7 @@ class PipetteScheduler(
 					//println("Error in x2R:")
 					//println(err)
 					acc
-				case stop: builderA.GroupStop => acc 
+				case stop: builderA.GroupStop => /*println("stop:"); println(stop);*/ acc
 				case builderA.GroupSuccess(g) =>
 					x2R(rest, g :: acc)
 			}
@@ -194,7 +194,11 @@ class PipetteScheduler(
 		}
 		else {
 			val gA = lGroupA(iItem)
-			printPathA(iItem - gA.lItem.size, gA :: acc)
+			if (gA == null) {
+				println("lGroupA("+iItem+") == null")
+			}
+			else
+				printPathA(iItem - gA.lItem.size, gA :: acc)
 		}
 	}
 	
