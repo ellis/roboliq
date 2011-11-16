@@ -30,8 +30,7 @@ class PipetteScheduler(
 	def x(): Result[Seq[Command]] = {
 		for {
 			items0 <- builderA.filterItems(cmd.args.items)
-			mLM0 <- builderA.tr1Items(items0)
-			pair <- builderA.splitBigVolumes(items0, mLM0)
+			pair <- builderA.tr1Items(items0)
 			(items, mLM) = pair 
 		} yield {
 			if (items.isEmpty)

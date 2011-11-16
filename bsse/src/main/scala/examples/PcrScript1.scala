@@ -34,7 +34,7 @@ class PcrScript1(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 	
 	//pcrMix(plate_working(C6+4)+plate_working(C7+4), mixItems, Liquids.water, 50 ul, well_masterMix)
 	//pcrMix(plate_working(C6+4), mixItems, Liquids.water, 50 ul, well_masterMix)
-	pcrMix(plate_working(C6+2), mixItems, Liquids.water, 50 ul, well_masterMix)
+	pcrMix(plate_working(C6+4), mixItems, Liquids.water, 50 ul, well_masterMix)
 	seal(plate_working)
 	val setup_thermocycle = thermocycle(plate_working)
 	val setup_centrifuge = centrifuge(plate_working)

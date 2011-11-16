@@ -97,7 +97,7 @@ class GroupABuilder(
 	def tr1Layers(layers: Seq[Seq[Item]]): Result[Map[Item, LM]] = {
 		Result.flatMap(layers)(items => {
 			val mapLiquidToTipModel = chooseTipModels(items)
-			tr1Items(items).map(_.toSeq)
+			tr1Items(items).map(_._2.toSeq)
 		}).map(_.toMap)
 	}
 	
@@ -105,29 +105,35 @@ class GroupABuilder(
 	 * For each item, find the source liquid and choose a tip model
 	 * Assumes that items have already been run through filterItems()
 	 */
-	def tr1Items(items: Seq[Item]): Result[Map[Item, LM]] = {
+	def tr1Items(items: Seq[Item]): Result[Tuple2[Seq[Item], Map[Item, LM]]] = {
 		val mapLiquidToTipModel = chooseTipModels(items)
+		var bRebuild = false
 		val mLM = items.map(item => {
 			val liquid = item.srcs.head.state(ctx.states).liquid
 			val tipModel = mapLiquidToTipModel(liquid)
+			bRebuild |= (item.nVolume > tipModel.nVolume)
 			(item, LM(liquid, tipModel))
 		}).toMap
-		Success(mLM)
+		if (!bRebuild) {
+			Success(items -> mLM)
+		}
+		else {
+			val items1 = splitBigVolumes(items, mLM)
+			tr1Items(items1)
+		}
 	}
 	
-	def splitBigVolumes(items: Seq[Item], mLM: Map[Item, LM]): Result[Tuple2[Seq[Item], Map[Item, LM]]] = {
-		var map = mLM
-		Success(items.flatMap(item => {
+	def splitBigVolumes(items: Seq[Item], mLM: Map[Item, LM]): Seq[Item] = {
+		items.flatMap(item => {
 			val lm = mLM(item)
 			if (item.nVolume <= lm.tipModel.nVolume) Seq(item)
 			else {
 				val n = math.ceil(item.nVolume / lm.tipModel.nVolume).asInstanceOf[Int]
 				val nVolume = item.nVolume / n
 				val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, nVolume, item.premix_?, if (i == n - 1) item.postmix_? else None))
-				map = map ++ l.map(_ -> lm)
 				l
 			}
-		}) -> map)
+		})
 	}
 	
 	// TODO: After getting back mLM: Map[Item, LM], partition any items which require more volume than the TipModel can hold
@@ -211,10 +217,13 @@ class GroupABuilder(
 
 	/** Add the item's volume to mLMData to keep track of how many tips are needed for each LM */
 	def updateGroupA1_mLMData(item: Item)(g0: GroupA): GroupResult = {
+		println("updateGroupA1_mLMData: "+L3A_PipetteItem.toDebugString(item) + ", "+g0.lItem)
 		val lItem = g0.lItem ++ Seq(item)
+		println("lItem After: "+lItem)
 		// Get a list of LMs in the order defined by lItem
 		val lLM = lItem.map(g0.mLM).toList.distinct
 		val mLMToItems = lItem.groupBy(g0.mLM)
+		println("mLMToItems: "+mLMToItems)
 		val lm = g0.mLM(item)
 		if (item.nVolume > lm.tipModel.nVolume)
 			GroupError(g0, Seq("pipette volume exceeds volume of tip: "+item))
@@ -364,16 +373,30 @@ class GroupABuilder(
 	def updateGroupA4_mItemToTip(g0: GroupA): GroupResult = {
 		//println("Z5: ", g0.lLM, g0.mLMToTips)
 		val lItemToTip = g0.lLM.flatMap(lm => {
-			val lItem = g0.mLMToItems(lm)
+			val lItem = g0.mLMToItems(lm).toList
 			val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
-			val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
-			val ltw = PipetteHelper.chooseTipWellPairsAll(ctx.states, lTip, lDest).flatten
-			//println(lTip, lDest, ltw)
-			(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
+			//val lDest: SortedSet[WellConfigL2] = SortedSet(lItem.map(_.dest) : _*)
+			val mDestToItems = lItem.groupBy(_.dest)
+			val mItemToTip = updateGroupA4_sub(g0, lTip, mDestToItems, Map())
+			mItemToTip.toSeq
+			//val ltw = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, lDest).flatten
+			//println("A4:", lTip, lDest, ltw)
+			//(lItem zip ltw).map(pair => pair._1 -> pair._2.tip)
 		})
 		GroupSuccess(g0.copy(
 			mItemToTip = lItemToTip.toMap
 		))
+	}
+	
+	private def updateGroupA4_sub(g0: GroupA, lTip: SortedSet[TipConfigL2], mDestToItems: Map[WellConfigL2, List[Item]], acc: Map[Item, TipConfigL2]): Map[Item, TipConfigL2] = {
+		if (mDestToItems.isEmpty) acc
+		else {
+			val ltw = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)).flatten
+			val lTip2 = lTip -- ltw.map(_.tip)
+			val acc2 = acc ++ ltw.map(tw => mDestToItems(tw.well).head -> tw.tip)
+			val mDestToItems2 = mDestToItems.mapValues(_.tail).filterNot(_._2.isEmpty)
+			updateGroupA4_sub(g0, lTip2, mDestToItems2, acc2)
+		}
 	}
 	
 	def updateGroupA5_mTipToVolume(g0: GroupA): GroupResult = {

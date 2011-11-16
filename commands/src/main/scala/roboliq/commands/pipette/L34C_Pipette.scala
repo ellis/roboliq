@@ -140,7 +140,7 @@ class L3A_PipetteItem(
 )
 
 object L3A_PipetteItem {
-	def toDebugString(items: Seq[L3A_PipetteItem]) = {
+	def toDebugString(items: Seq[L3A_PipetteItem]): String = {
 		val srcs = items.groupBy(_.srcs).keys
 		if (srcs.size == 1) {
 			val sSrcs = Command.getWellsDebugString(srcs.head)
@@ -162,4 +162,6 @@ object L3A_PipetteItem {
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
 	}
+
+	def toDebugString(item: L3A_PipetteItem): String = toDebugString(Seq(item))
 }
