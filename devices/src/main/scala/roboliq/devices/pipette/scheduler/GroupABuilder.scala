@@ -401,7 +401,7 @@ class GroupABuilder(
 	
 	def updateGroupA5_mTipToVolume(g0: GroupA): GroupResult = {
 		val mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap
-		println("mTipToVolume: "+mTipToVolume)
+		//println("mTipToVolume: "+mTipToVolume)
 		GroupSuccess(g0.copy(
 			mTipToVolume = mTipToVolume
 		))
@@ -546,8 +546,8 @@ class GroupABuilder(
 		//val mTipToCleanSpecPending = mTipToCleanSpecPendingA.filter(pair => !mTipToCleanSpec.contains(pair._1))
 		val mTipToCleanSpecPending = g0.mTipToCleanSpecPending0 -- mTipToCleanSpec.keys ++ l3.toMap
 		
-		println("mTipToCleanSpec: "+mTipToCleanSpec)
-		println("mTipToCleanSpecPending: "+mTipToCleanSpecPending)
+		//println("mTipToCleanSpec: "+mTipToCleanSpec)
+		//println("mTipToCleanSpecPending: "+mTipToCleanSpecPending)
 		
 		GroupSuccess(g0.copy(
 			mTipToCleanSpecA = mTipToCleanSpecA,
