@@ -219,13 +219,11 @@ class GroupABuilder(
 
 	/** Add the item's volume to mLMData to keep track of how many tips are needed for each LM */
 	def updateGroupA1_mLMData(item: Item)(g0: GroupA): GroupResult = {
-		println("updateGroupA1_mLMData: "+L3A_PipetteItem.toDebugString(item) + ", "+g0.lItem)
+		//println("updateGroupA1_mLMData: "+L3A_PipetteItem.toDebugString(item) + ", "+g0.lItem)
 		val lItem = g0.lItem ++ Seq(item)
-		println("lItem After: "+lItem)
 		// Get a list of LMs in the order defined by lItem
 		val lLM = lItem.map(g0.mLM).toList.distinct
 		val mLMToItems = lItem.groupBy(g0.mLM)
-		println("mLMToItems: "+mLMToItems)
 		val lm = g0.mLM(item)
 		if (item.nVolume > lm.tipModel.nVolume)
 			GroupError(g0, Seq("pipette volume exceeds volume of tip: "+item))
