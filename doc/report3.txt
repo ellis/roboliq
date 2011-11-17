@@ -1,3 +1,5 @@
+Print longer algorithm description
+
 - General overview
 	- Overview of project
 	- What the robot can do now
