@@ -22,6 +22,10 @@ class Robolib(shared: ParserSharedData) {
 		Success(CmdLog(L4C_Comment(s)))
 	}
 	
+	def execute(cmd: String): Result[CmdLog] = {
+		Success(CmdLog(L4C_Execute(new LA_Execute(cmd, true, false))))
+	}
+	
 	def remote(cmd: String): Result[CmdLog] = {
 		Success(CmdLog(L4C_Execute(new LA_Execute(cmd, true, true))))
 	}

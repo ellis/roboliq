@@ -22,6 +22,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				{ case liquid~wells~vol~lc~opts_? => run_DIST_REAGENT(liquid, getWells(wells), vol, lc, opts_?) }),
 			("DIST_WELL", idPlate~idWell~idPlate~idWells~valVolumes~ident~opt(word) ^^
 				{ case _~src~_~dests~vol~lc~opts_? => run_TRANSFER_WELLS(Seq(src), dests, vol, lc, opts_?) }),
+			("EXECUTE", ident ^^
+				{ case cmd => robolib.execute(cmd) }),
 			("MIX_WELLS", idPlate~idWells~valInt~valVolume~ident~opt(word) ^^
 				{ case _~wells~nCount~nVolume~lc~opts_? => run_MIX_WELLS(wells, nCount, nVolume, lc, opts_?) }),
 			("PREPARE_LIST", idList~idPlate~idWells~ident~opt(word) ^^
@@ -30,6 +32,8 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 				{ case mixdef~nShots~nMargin_? => run_PREPARE_MIX(mixdef, nShots, nMargin_?) }),
 			("PROMPT", restOfLine ^^
 				{ case s => robolib.prompt(s) }),
+			("REMOTE", ident ^^
+				{ case cmd => robolib.remote(cmd) }),
 			("SERIAL_DILUTION", idReagent~idPlate~idWells~idPlate~idWells~valVolume~valVolume~opt(ident)~opt(word) ^^
 				{ case diluter~_~srcs~_~dests~nVolumeDiluter~nVolumeSrc~lc_? ~opts_? => robolib.serialDilution(diluter, srcs, dests, nVolumeDiluter, nVolumeSrc, lc_?, opts_?) }),
 			("TRANSFER_LOCATIONS", plateWells2~plateWells2~valVolumes~ident~opt(word) ^^
