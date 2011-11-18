@@ -6,6 +6,7 @@ import scala.collection.mutable.HashMap
 import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.commands.system._
+import roboliq.manufacturers.biorad._
 
 
 class Robolib(shared: ParserSharedData) {
@@ -17,9 +18,17 @@ class Robolib(shared: ParserSharedData) {
 	
 	val kb = shared.kb
 	
-
 	def comment(s: String): Result[CmdLog] = {
 		Success(CmdLog(L4C_Comment(s)))
+	}
+	
+	def makeBioradPlateFile(
+		sNamePlate: String,
+		lsNameSample: List[String],
+		rowcol0: Tuple2[Int, Int]
+	): Result[CmdLog] = {
+		BioradFunctions.makeBioradPlateFile(shared.dirLog, sNamePlate, lsNameSample.toArray, rowcol0)
+		Success(CmdLog(Seq()))
 	}
 	
 	def mix(

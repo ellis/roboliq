@@ -24,6 +24,12 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	
 	def idPlate: Parser[Plate] = idHandler(getPlateAndAssignContext)
 	
+	val idRowCol: Parser[Tuple2[Int, Int]] = "[A-Z]".r ~ integer ^^ { case sRow ~ nCol => {
+		val iRow = sRow.charAt(0) - 'A'
+		val iCol = nCol - 1
+		(iRow, iCol)
+	}}
+	
 	def idWell_index = Parser[Well] { input =>
 		val res1 = integer.apply(input)
 		res1 match {

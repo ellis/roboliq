@@ -2,35 +2,38 @@ package roboliq.roboease
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.Stack
 
 import roboliq.common._
 import roboliq.commands.pipette.PipettePolicy
 import roboliq.commands.pipette.TipModel
 
 
+/** @param mapLcToPolicy Map liquid class name to PipettePolicy */
 class ParserSharedData(
+	val dirProc: java.io.File,
+	val dirLog: java.io.File,
 	val mapTipModel: Map[String, TipModel],
-	/** Map liquid class name to PipettePolicy */
 	val mapLcToPolicy: Map[String, PipettePolicy],
 	val mapPlateModel: Map[String, PlateModel]
 ) {
 	val kb = new KnowledgeBase
+	var file: java.io.File = null
 	var sTable: String = null
 	var sHeader: String = null
 	val mapRacks = new HashMap[String, Rack]
-	//val lReagentsInWells = new ArrayBuffer[Tuple2[Reagent, Seq[Well]]]
-	//val mapLiquids = new HashMap[String, Liquid]
 	val mapReagents = new HashMap[String, Reagent]
-	//val mapReagentToPolicy = new HashMap[Reagent, PipettePolicy]
-	val mapVars = new HashMap[String, String]
+	var mapVars = new HashMap[String, String]
 	val mapLists = new HashMap[String, List[String]]
 	val mapOptions = new HashMap[String, String]
-	//val mapLocToPlate = new HashMap[String, Plate]
 	val mapRackToPlate = new HashMap[Rack, Plate]
 	val mapLabware = new HashMap[Tuple2[Int, Int], Labware]
 	val mapMixDefs = new HashMap[String, MixDef]
-	//val mapLabware = new HashMap[String, Tuple2[String, String]]
 	
+	val stackFile = new Stack[java.io.File]()
+	/** When a script is called, the parent's mapVars is pushed onto this stack, then popped again when the called script is finished */
+	val stackVarsFromParent = new Stack[HashMap[String, String]]
+		
 	var iLineCurrent: Int = 0
 	var sLineCurrent: String = null
 	
