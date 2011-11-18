@@ -7,6 +7,7 @@ import roboliq.compiler._
 import roboliq.devices.move._
 import roboliq.devices.pcr._
 import roboliq.devices.pipette._
+import roboliq.handlers.system._
 import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices._
 import roboliq.robots.evoware.devices.centrifuge._
@@ -19,11 +20,6 @@ import roboliq.labs.weizmann.handlers._
 
 
 class StationConfig extends EvowareTable {
-	println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-	println()
-	println()
-	println()
-	
 	object TipModels {
 		val tipModel10 = new TipModel("DiTi 10ul", 10, 0, 0, 0)
 		val tipModel20 = new TipModel("DiTi 20ul", 20, 0, 0, 0)
@@ -210,10 +206,14 @@ class StationConfig extends EvowareTable {
 	
 	val processors = Seq(
 		new L3P_CleanPending(pipetter),
+		new L3P_Comment,
+		new L3P_Execute,
 		new L3P_Mix(pipetter),
 		new L3P_MovePlate(mover),
 		new L3P_PcrMix,
 		new L3P_Pipette(pipetter),
+		new L3P_Prompt,
+		
 		new L3P_TipsDrop("WASTE"),
 		new L3P_TipsReplace,
 		new L3P_TipsWash_Weizmann,

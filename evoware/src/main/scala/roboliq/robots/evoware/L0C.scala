@@ -4,6 +4,82 @@ import roboliq.common._
 import roboliq.commands.move.LidHandling
 
 
+case class L0C_Comment(
+	s: String
+) extends Command {
+	override def toString = {
+		List(
+			'"'+s+'"'
+		).mkString("Comment(", ",", ");")
+	}
+}
+
+case class L0C_DropDITI(
+	val mTips: Int,
+	val iGrid: Int,
+	val iSite: Int
+) extends Command {
+	override def toString = {
+		Array(
+			mTips,
+			iGrid,
+			iSite,
+			10, 70
+		).mkString("DropDITI(", ",", ");")
+	}	
+}
+
+case class L0C_Execute(
+	val cmd: String,
+	val nWaitOpt: Int,
+	val sResultVar: String
+) extends Command {
+	override def toString = {
+		Array(
+			'"'+cmd+'"',
+			nWaitOpt,
+			'"'+sResultVar+'"',
+			2
+		).mkString("Execute(", ",", ");")
+	}
+}
+
+case class L0C_GetDITI2(
+	val mTips: Int,
+	val sType: String
+) extends Command {
+	override def toString = {
+		Array(
+			mTips,
+			'"'+sType+'"',
+			1, 0, 0, 0
+		).mkString("GetDITI2(", ",", ");")
+	}
+	
+}
+
+case class L0C_Mix(
+	val mTips: Int,
+	val sLiquidClass: String,
+	val asVolumes: Seq[String],
+	val iGrid: Int,
+	val iSite: Int,
+	val sPlateMask: String,
+	val nCount: Int
+) extends Command {
+	override def toString = {
+		Array(
+			mTips,
+			'"'+sLiquidClass+'"',
+			asVolumes.mkString(","),
+			iGrid, iSite,
+			1, // TODO: Spacing
+			'"'+sPlateMask+'"',
+			nCount, 0
+		).mkString("Mix(", ",", ");")
+	}
+}
+
 case class L0C_Spirate(
 	val sFunc: String,
 	val mTips: Int,
@@ -61,57 +137,6 @@ case class L0C_Wash(
 		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
 		l.mkString("Wash(", ",", ");")
 	}
-}
-
-case class L0C_Mix(
-	val mTips: Int,
-	val sLiquidClass: String,
-	val asVolumes: Seq[String],
-	val iGrid: Int,
-	val iSite: Int,
-	val sPlateMask: String,
-	val nCount: Int
-) extends Command {
-	override def toString = {
-		Array(
-			mTips,
-			'"'+sLiquidClass+'"',
-			asVolumes.mkString(","),
-			iGrid, iSite,
-			1, // TODO: Spacing
-			'"'+sPlateMask+'"',
-			nCount, 0
-		).mkString("Mix(", ",", ");")
-	}
-}
-
-case class L0C_GetDITI2(
-	val mTips: Int,
-	val sType: String
-) extends Command {
-	override def toString = {
-		Array(
-			mTips,
-			'"'+sType+'"',
-			1, 0, 0, 0
-		).mkString("GetDITI2(", ",", ");")
-	}
-	
-}
-
-case class L0C_DropDITI(
-	val mTips: Int,
-	val iGrid: Int,
-	val iSite: Int
-) extends Command {
-	override def toString = {
-		Array(
-			mTips,
-			iGrid,
-			iSite,
-			10, 70
-		).mkString("DropDITI(", ",", ");")
-	}	
 }
 
 case class L0C_Transfer_Rack(
@@ -195,16 +220,6 @@ case class L0C_Subroutine(
 			'"'+sFilename+'"',
 			0
 		).mkString("Subroutine(", ",", ");")
-	}
-}
-
-case class L0C_Comment(
-	s: String
-) extends Command {
-	override def toString = {
-		List(
-			'"'+s+'"'
-		).mkString("Comment(", ",", ");")
 	}
 }
 

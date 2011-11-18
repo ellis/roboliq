@@ -14,7 +14,6 @@ case class L4C_Prompt(s: String) extends CommandL4 {
 	def toL3(states: RobotState): Result[L3Type] = {
 		Success(new L3C_Prompt(s))
 	}
-
 }
 
 case class L3C_Prompt(s: String) extends CommandL3
@@ -33,7 +32,6 @@ case class L2C_Prompt(s: String) extends CommandL2 {
 	override def toDebugString = {
 		this.getClass().getSimpleName() + List(s).mkString("(", ", ", ")") 
 	}
-
 }
 
 case class L1C_Prompt(s: String) extends CommandL1

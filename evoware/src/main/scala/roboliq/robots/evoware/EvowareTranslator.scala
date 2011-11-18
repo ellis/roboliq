@@ -9,6 +9,7 @@ import roboliq.compiler._
 import roboliq.commands._
 import roboliq.commands.move._
 import roboliq.commands.pipette._
+import roboliq.commands.system._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware.commands._
 
@@ -32,17 +33,19 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	
 	private def translate(builder: EvowareScriptBuilder, cmd1: CommandL1): Result[Unit] = {
 		for { cmds0 <- cmd1 match {
-			case t @ L1C_Aspirate(_) => aspirate(builder, t)
-			case t @ L1C_Dispense(_) => dispense(builder, t)
-			case t @ L1C_Mix(_) => mix(builder, t.items)
-			case c: L1C_Wash => wash(c)
-			case c: L1C_TipsGet => tipsGet(c)
-			case c: L1C_TipsDrop => tipsDrop(c)
-			case c: L1C_MovePlate => movePlate(builder, c.args)
-			case c: L1C_Timer => timer(c.args)
+			case c: L1C_Aspirate => aspirate(builder, c)
+			case c: L1C_Comment => comment(c)
+			case c: L1C_Dispense => dispense(builder, c)
 			case c: L1C_EvowareFacts => facts(builder, c)
 			case c: L1C_EvowareSubroutine => subroutine(builder, c)
+			case c: L1C_Mix => mix(builder, c.items)
+			case c: L1C_MovePlate => movePlate(builder, c.args)
+			case c: L1C_Prompt => prompt(c)
+			case c: L1C_TipsGet => tipsGet(c)
+			case c: L1C_TipsDrop => tipsDrop(c)
+			case c: L1C_Timer => timer(c.args)
 			case c: L1C_SaveCurrentLocation => Success(Seq())
+			case c: L1C_Wash => wash(c)
 		}} yield {
 			builder.cmds ++= cmds0
 			()
@@ -185,6 +188,23 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				sPlateMask
 			))
 		}
+	}
+	
+	private def comment(cmd: L1C_Comment): Result[Seq[Command]] = {
+		Success(Seq(L0C_Comment(cmd.s)))
+	}
+	
+	private def execute(cmd: L1C_Execute): Result[Seq[Command]] = {
+		val nWaitOpts = (cmd.args.bWaitTillDone, cmd.args.bCheckResult) match {
+			case (true, true) => 6
+			case _ => 2
+		}
+		val sResultVar = if (cmd.args.bCheckResult) "RESULT" else ""
+		Success(Seq(L0C_Execute(cmd.args.cmd, nWaitOpts, sResultVar)))
+	}
+	
+	private def prompt(cmd: L1C_Prompt): Result[Seq[Command]] = {
+		Success(Seq(L0C_Prompt(cmd.s)))
 	}
 	
 	def wash(cmd: L1C_Wash): Result[Seq[Command]] = {
