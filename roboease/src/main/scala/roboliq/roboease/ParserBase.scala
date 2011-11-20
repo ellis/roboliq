@@ -22,14 +22,13 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	val string: Parser[String] = "\"" ~> """[^"]*""".r <~ '"'
 	def numDouble: Parser[Double] = floatingPointNumber ^^ (_.toDouble)
 	
-	def idPlate: Parser[Plate] = idHandler(getPlateAndAssignContext)
-	
 	val idRowCol: Parser[Tuple2[Int, Int]] = "[A-Z]".r ~ integer ^^ { case sRow ~ nCol => {
 		val iRow = sRow.charAt(0) - 'A'
 		val iCol = nCol - 1
 		(iRow, iCol)
 	}}
 	
+	/*
 	def idWell_index = Parser[Well] { input =>
 		val res1 = integer.apply(input)
 		res1 match {
@@ -65,6 +64,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	}
 	
 	def idWell: Parser[Well] = idWell_index | idWell_rowCol
+	*/
 	
 	/*def idWells_index = Parser[List[Well]] { input =>
 		val res1 = idWell_index.apply(input)
@@ -83,7 +83,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		}
 	}*/
 	
-	def idWells = Parser[List[Well]] { input =>
+	private def idWells_sub = Parser[List[Well]] { input =>
 		val res1 = idWell.apply(input)
 		res1 match {
 			case Success(well0, input2) =>
@@ -108,51 +108,43 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 			case ns: NoSuccess => ns
 		}
 	}
-	
-	/*def idWells = Parser[List[Well]] { input =>
-		val p1 = ("[A-Z]".r~integer~"+"~integer)
-		val p2 = ("[A-Z]".r~integer~"-"~"[A-Z]".r~integer)
-		val p3 = ("[A-Z]".r~integer)
-		val res1 = integer.apply(input)
-		res1 match {
-			case Right(n, _) =>
-				m_contextPlate match {
-					case None => Failure("Unknown parent plate", input)
-					case Some(plate) =>
-						getWell_?(plate, n) match {
-							case Some(well) => Right(well, res1.next)
-							case None => Failure("Invalid well index: "+n, input)
-						}
-				}
-			case ns: NoSuccess => ns
-		}
-	}*/
-	
-	/*def idLiquid: Parser[Reagent] = Parser[Reagent] { input =>
-		val res1 = ident.apply(input)
-		res1 match {
-			case Success(sLiq, _) =>
-				shared.mapReagents.get(sLiq) match {
-					case Some(liq) => Success(liq, res1.next)
-					case None => Error("Undefined reagent: "+sLiq, input)
-				}
-			case ns: NoSuccess => ns
-		}
-	}*/
+	def idWells: Parser[List[Well]] = directOrVar(idWells_sub)
 	
 	def idList: Parser[List[String]] = idHandler(shared.getList)
 	def idMixDef: Parser[MixDef] = idHandler(shared.getMixDef)
 	def idRack: Parser[Rack] = idHandler(shared.getRack)
 	def idReagent: Parser[Reagent] = idHandler(shared.getReagent)
+	def idPlate: Parser[Plate] = idHandler(getPlateAndAssignContext)
+	def idWell: Parser[Well] = idHandler(getWell)
 	
 	private def idHandler[T](f: String => Result[T]): Parser[T] = Parser[T] { input =>
 		val res1 = ident.apply(input)
 		res1 match {
 			case ns: NoSuccess => ns
 			case Success(id, _) =>
-				f(id) match {
+				val s = shared.subst(id)
+				f(s) match {
 					case RError(lsError) => Error(lsError.mkString("; "), input)
 					case RSuccess(o) => Success(o, res1.next)
+				}
+		}
+	}
+	
+	private def directOrVar[T](parser: Parser[T]): Parser[T] = Parser[T] { input =>
+		val res1 = parser.apply(input)
+		res1 match {
+			case Success(output, _) => Success(output, res1.next)
+			case ns1: NoSuccess =>
+				val res2 = word.apply(input)
+				res2 match {
+					case Success(id, _) =>
+						val sVar = shared.subst(id)
+						val sValue = shared.mapVars.getOrElse(sVar, sVar)
+						this.parseAll(parser, sValue) match {
+							case Success(output, _) => Success(output, res2.next)
+							case ns3: NoSuccess => ns3
+						}
+					case ns2: NoSuccess => ns1
 				}
 		}
 	}
@@ -205,8 +197,9 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 			case ns: NoSuccess => ns
 		}
 	}
-	def plateWells2: Parser[List[Tuple2[Plate, Int]]] = rep1sep(plateWells2_sub2, ";") ^^
+	def plateWells2_sub3: Parser[List[Tuple2[Plate, Int]]] = rep1sep(plateWells2_sub2, ";") ^^
 		{ ll => ll.flatMap(l => l) }
+	def plateWells2: Parser[List[Tuple2[Plate, Int]]] = directOrVar(plateWells2_sub3)
 	
 	def valVolume_var: Parser[Double] = ident ^^
 		{ s =>
@@ -221,20 +214,20 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		{ s => s.toDouble }
 	def valVolume: Parser[Double] = valVolume_var | valVolume_numeric
 	
-	def valVolumes_var: Parser[List[Double]] = ident ^^
-		{ s =>
-			if (shared.mapVars.contains(s))
-				List(shared.mapVars(s).toDouble)
-			else if (shared.mapLists.contains(s))
-				shared.mapLists(s).map(_.toDouble)
-			else {
-				shared.addError("Undefined variable: "+s)
-				Nil
+	private def getVolumes(s: String): Result[List[Double]] = {
+		if (shared.mapVars.contains(s))
+			RSuccess(List(shared.mapVars(s).toDouble))
+		else if (shared.mapLists.contains(s))
+			RSuccess(shared.mapLists(s).map(_.toDouble))
+		else {
+			toDouble(s) match {
+				case RError(lsError) => RError("invalid volume: "+s)
+				case RSuccess(n) => RSuccess(List(n))
 			}
 		}
-	def valVolumes_numeric: Parser[List[Double]] = floatingPointNumber ^^
-		{ s => List(s.toDouble) }
-	def valVolumes: Parser[List[Double]] = valVolumes_var | valVolumes_numeric
+	}
+	
+	def valVolumes: Parser[List[Double]] = idHandler(getVolumes)
 	
 	def valInt_var: Parser[Int] = ident ^^
 		{ s =>
@@ -264,6 +257,11 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		{ s => List(s.toInt) }
 	def valInts: Parser[List[Int]] = valInts_var | valInts_numeric
 	
+	private def getPlate(): Result[Plate] = {
+		for (plate <- Result.get(m_contextPlate, "Unknown parent plate"))
+		yield plate
+	}
+	
 	def getPlate(rack: Rack): Result[Plate] = {
 		shared.mapRackToPlate.get(rack) match {
 			case Some(plate) => RSuccess(plate)
@@ -271,7 +269,8 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		}
 	}
 		
-	def getPlateAndAssignContext(sLoc: String): Result[Plate] = {
+	def getPlateAndAssignContext(sLoc0: String): Result[Plate] = {
+		val sLoc = shared.subst(sLoc0)
 		for { plate <- (shared.getRack(sLoc) >>= getPlate) }
 		yield {
 			m_contextPlate = Some(plate)
@@ -279,32 +278,59 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		}
 	}
 	
-	def getWell_?(plate: Plate, iWell: Int): Option[Well] = {
-		kb.getPlateSetup(plate).dim_? match {
-			case Some(dim) =>
-				if (iWell < 0 || iWell >= dim.wells.size)
-					return Some(dim.wells(iWell))
-				else
-					None
-			case None =>
-				None
+	private def getWell(s0: String): Result[Well] = {
+		val s = shared.subst(s0)
+		if (s.isEmpty) return RError("empty string")
+		val c = s.charAt(0)
+		if (c.isDigit) {
+			for {
+				iWell1 <- toInt(s)
+				well <- getWell(iWell1 - 1)
+			} yield well
+		}
+		else if (c >= 'A' && c <= 'Z') {
+			for {
+				nRow <- toInt(s.substring(1))
+				plate <- getPlate()
+				val iCol = (c - 'A').asInstanceOf[Int]
+				well <- getWell(plate, nRow - 1, iCol)
+			} yield {
+				well
+			}
+		}
+		else {
+			RError("could not be interpreted as a well identifier")
 		}
 	}
 	
-	def getWell(plate: Plate, iRow: Int, iCol: Int, input: Input): Either[ParseResult[Nothing], Well] = {
+	private def getWell(iWell: Int): Result[Well] = {
+		for {
+			plate <- getPlate()
+			well <- getWell(plate, iWell)
+		} yield well
+	}
+
+	def getWell(plate: Plate, iWell: Int): Result[Well] = {
+		for {
+			dim <- Result.get(kb.getPlateSetup(plate).dim_?, "INTERNAL: no dimension information for plate "+plate)
+			_ <- Result.assert(iWell >= 0 && iWell < dim.wells.size, "Invalid well index: "+(iWell+1))
+		} yield dim.wells(iWell)
+	}
+	
+	def getWell(plate: Plate, iRow: Int, iCol: Int): Result[Well] = {
 		val pc = kb.getPlateSetup(plate)
 		val dim = pc.dim_?.get
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
 		if (iRow < 0 || iRow >= nRows) {
-			Left(Error("Invalid row: plate has "+nRows+" rows, but row"+(iRow+1)+"was requested", input))
+			RError("Invalid row: plate has "+nRows+" rows, but row"+(iRow+1)+"was requested")
 		}
 		else if (iCol < 0 || iCol >= nCols) {
-			Left(Error("Invalid column: plate has "+nCols+" columns, but column "+(iCol+1)+"was requested", input))
+			RError("Invalid column: plate has "+nCols+" columns, but column "+(iCol+1)+"was requested")
 		}
 		else {
 			val iWell = iRow + iCol * nRows
 			val well = dim.wells(iWell)
-			Right(well)
+			RSuccess(well)
 		}
 	}
 	
@@ -372,6 +398,10 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		})
 		
 		RSuccess(plate)
+	}
+	
+	def toInt(s: String): Result[Int] = {
+		try { RSuccess(s.toInt) } catch { case _ => RError("expected an integer value: "+s) }
 	}
 	
 	def toDouble(s: String): Result[Double] = {

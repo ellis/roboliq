@@ -23,16 +23,19 @@ class ParserSharedData(
 	var sHeader: String = null
 	val mapRacks = new HashMap[String, Rack]
 	val mapReagents = new HashMap[String, Reagent]
-	var mapVars = new HashMap[String, String]
+	val mapVars = new HashMap[String, String]
 	val mapLists = new HashMap[String, List[String]]
 	val mapOptions = new HashMap[String, String]
 	val mapRackToPlate = new HashMap[Rack, Plate]
 	val mapLabware = new HashMap[Tuple2[Int, Int], Labware]
 	val mapMixDefs = new HashMap[String, MixDef]
+	/** When an external procedure is called, we substitute certain names for others */
+	var mapSubstitutions: Map[String, String] = Map()
 	
 	val stackFile = new Stack[java.io.File]()
-	/** When a script is called, the parent's mapVars is pushed onto this stack, then popped again when the called script is finished */
-	val stackVarsFromParent = new Stack[HashMap[String, String]]
+	///** When a script is called, the parent's mapVars is pushed onto this stack, then popped again when the called script is finished */
+	//val stackVarsFromParent = new Stack[HashMap[String, String]]
+	//val stackListsFromParent = new Stack[HashMap[String, List[String]]]
 		
 	var iLineCurrent: Int = 0
 	var sLineCurrent: String = null
@@ -43,15 +46,16 @@ class ParserSharedData(
 	}
 	def errors = m_errors.toSeq
 	
+	def subst(id: String): String = mapSubstitutions.getOrElse(id, id)
 	
-	def getList(id: String) = Result.get(mapLists.get(id), "unknown list \""+id+"\"")
-	def getMixDef(id: String) = Result.get(mapMixDefs.get(id), "unknown mix definition \""+id+"\"")
-	def getPipettePolicy(id: String) = Result.get(mapLcToPolicy.get(id), "unknown liquid class \""+id+"\"")
-	def getRack(id: String) = Result.get(mapRacks.get(id), "unknown rack \""+id+"\"")
-	def getReagent(id: String) = Result.get(mapReagents.get(id), "unknown reagent \""+id+"\"")
+	def getList(id: String) = Result.get(mapLists.get(subst(id)), "unknown list \""+id+"\"")
+	def getMixDef(id: String) = Result.get(mapMixDefs.get(subst(id)), "unknown mix definition \""+id+"\"")
+	def getPipettePolicy(id: String) = Result.get(mapLcToPolicy.get(subst(id)), "unknown liquid class \""+id+"\"")
+	def getRack(id: String) = Result.get(mapRacks.get(subst(id)), "unknown rack \""+id+"\"")
+	def getReagent(id: String) = Result.get(mapReagents.get(subst(id)), "unknown reagent \""+id+"\"; known reagents are "+mapReagents.keys.toList.sortBy(identity).mkString(", "))
 	
 	def getLiquidClass(id: String): Result[String] = {
-		for { _ <- Result.assert(mapLcToPolicy.contains(id), "unknown liquid class \""+id+"\"") }
+		for { _ <- Result.assert(mapLcToPolicy.contains(subst(id)), "unknown liquid class \""+id+"\"") }
 		yield { id }
 	}
 

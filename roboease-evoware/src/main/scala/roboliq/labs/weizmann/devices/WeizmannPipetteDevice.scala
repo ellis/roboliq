@@ -13,7 +13,7 @@ import roboliq.robots.evoware.devices.EvowarePipetteDevice
 class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevice {
 	val config = new PipetteDeviceConfig(
 		tipModels,
-		tips = SortedSet((0 to 7).map(i => new Tip(i)) : _*),
+		tips = SortedSet((0 to 7).map(i => new Tip(i, None)) : _*),
 		tipGroups = tipModels.map(spec => (0 to 7).map(i => i -> spec))
 	)
 	
@@ -83,5 +83,11 @@ class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevi
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
 		lTipAll -- lTipCleaning
+	}
+
+	def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Seq[Tuple2[WashSpec, SortedSet[TipConfigL2]]] = {
+		val lCleanSpec = mTipToCleanSpec.toSeq.map(_._2)
+		val cleanSpec = lCleanSpec.reduce(_ + _)
+		Seq(cleanSpec -> lTipAll)
 	}
 }

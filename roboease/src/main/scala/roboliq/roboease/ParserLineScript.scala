@@ -14,7 +14,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	private val robolib = new Robolib(shared)
 	
 	val cmds2 = Map[String, Parser[Result[CmdLog]]](
-			("BIORAD_PLATE", ident~idList~idRowCol ^^
+			("BIOPLATE", ident~idList~idRowCol ^^
 				{ case id~lsNameSample~rowcol => robolib.makeBioradPlateFile(id, lsNameSample, rowcol) }),
 			("DIST_REAGENT", idReagent~idPlate~idWells~valVolumes~ident~opt(word) ^^
 				{ case liquid~_~wells~vol~lc~opts_? => run_DIST_REAGENT(liquid, wells, vol, lc, opts_?) }),
@@ -135,7 +135,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	}
 	
 	def run_ChecklistComment(s: String): Result[CmdLog] = {
-		println("WARNING: % command not yet implemented")
+		println("WARNING: %% command not yet implemented")
 		RSuccess(CmdLog(Seq()))
 	}
 	

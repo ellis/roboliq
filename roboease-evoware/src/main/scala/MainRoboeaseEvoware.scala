@@ -1,3 +1,4 @@
+import java.io.File
 import java.io.FileReader
 
 import scala.util.parsing.combinator._
@@ -21,16 +22,17 @@ object Main extends App {
 		import roboliq.compiler._
 		
 		val lsFiles = Seq(
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf",
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script02.conf",
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script03.conf",
-			System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script04.conf",
+			System.getProperty("user.home")+"/src/weizmann/scripts/Rotem_Script01.conf",
+			System.getProperty("user.home")+"/src/weizmann/scripts/Rotem_Script02.conf",
+			System.getProperty("user.home")+"/src/weizmann/scripts/Rotem_Script03.conf",
+			System.getProperty("user.home")+"/src/weizmann/scripts/Rotem_Script04.conf",
 			null
 		).filter(_ != null)
 		
 		val lsFileOverride = Seq(
-			//System.getProperty("user.home")+"/src/TelAviv/scripts/Rotem_Script01.conf"
-			System.getProperty("user.home")+"/src/TelAviv/scripts/temp.conf"
+			//System.getProperty("user.home")+"/src/weizmann/scripts/Rotem_Script01.conf"
+			//System.getProperty("user.home")+"/src/weizmann/scripts/temp.conf"
+			System.getProperty("user.home")+"/src/weizmann/pcr/Intronome_Script08.conf"
 		)
 		
 		if (lsFileOverride.isEmpty)
@@ -42,12 +44,15 @@ object Main extends App {
 	def test2(sSourcePath: String) {
 		val station = new StationConfig
 		val roboeaseConfig = new Config2Roboease(station)
-		val p = new RoboeaseParser(roboeaseConfig)
+		val p = new RoboeaseParser(
+			dirProc = new File(System.getProperty("user.home")+"/src/weizmann/Evolab/procEvo/"),
+			dirLog = new File(System.getProperty("user.home")+"/src/roboliq/"),
+			roboeaseConfig
+		)
 
 		RoboeaseHack.bEmulateEvolab = true
 		
-		val sSource = scala.io.Source.fromFile(sSourcePath).mkString
-		p.parse(sSource) match {
+		p.parseFile(sSourcePath) match {
 			case Left(err) =>
 				err.print()
 			case Right(res) =>

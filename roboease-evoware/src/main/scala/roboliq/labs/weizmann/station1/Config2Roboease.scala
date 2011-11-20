@@ -25,6 +25,7 @@ class Config2Roboease(stationConfig: StationConfig) extends RoboeaseConfig {
 	val pipettePolicies = Seq(
 		PipettePolicy("PIE_AUTAIR", PipettePosition.Free),
 		PipettePolicy("PIE_AUTAIR_LowVol", PipettePosition.Free),
+		PipettePolicy("PIE_AUTAIR_PCR", PipettePosition.Free),
 		PipettePolicy("PIE_AUTBOT", PipettePosition.WetContact),
 		PipettePolicy("PIE_AUTBOT_SLOW", PipettePosition.WetContact),
 		PipettePolicy("PIE_BOTBOT_SLOW", PipettePosition.WetContact),

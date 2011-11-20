@@ -99,15 +99,31 @@ class ParserFile(
 			if (!s.isEmpty())
 				println("LOG: sLine: "+s)
 			if (s.startsWith("PROC ")) {
-				val lsVar = s.drop(5).split("""\s+""")
-				if (lsVar.size != lsArg.size) {
-					shared.addError("Call to "+sName+" expected "+lsVar.size+" arguments but was passed "+lsArg.size+" arguments")
+				val lsParam = s.drop(5).split("""\s+""")
+				//if (lsVar.size != lsArg.size) {
+				if (lsParam.size > lsArg.size) {
+					shared.addError("Call to "+sName+" expected "+lsParam.size+" arguments but was passed "+lsArg.size+" arguments")
 					return
 				}
-				val mapVarsParent = shared.mapVars
-				shared.stackVarsFromParent.push(mapVarsParent)
-				shared.mapVars = new HashMap[String, String]()
-				shared.mapVars ++= (lsVar zip lsArg).map(pair => pair._1 -> mapVarsParent(pair._2))
+				/*
+				// Function to classify whether the argument is a simple variable, a list variable, or unknown
+				def categorizeArg(ss: Tuple2[String, String]): Int = {
+					if (shared.mapVars contains ss._2) 1
+					else if (shared.mapLists contains ss._2) 2
+					else 0
+				}
+				val lParamArgCat = (lsParam zip lsArg).toList.map(ss => (ss._1, ss._2, categorizeArg(ss)))
+				println("lParamArgCat: "+lParamArgCat.toList)
+				// If there are any unknown arguments, indicate the error
+				val l0 = lParamArgCat.filter(_._3 == 0)
+				if (!l0.isEmpty) {
+					shared.addError("Unknown argument(s): "+l0.map(_._2).mkString(", "))
+					return
+				}
+				shared.mapVars ++= lParamArgCat.filter(_._3 == 1).map(tuple => tuple._1 -> shared.mapVars(tuple._2))
+				shared.mapLists ++= lParamArgCat.filter(_._3 == 1).map(tuple => tuple._1 -> shared.mapLists(tuple._2))
+				*/
+				shared.mapSubstitutions = shared.mapSubstitutions ++ (lsParam zip lsArg)
 			}
 			else {
 				handleScript(s)
@@ -180,7 +196,7 @@ class ParserFile(
 				//println("sCmd = "+sCmd)
 				pScript.cmds2.get(sCmd) match {
 					case None =>
-						val l = sCmd.split("""\s+""")
+						val l = sLine.split("""\s+""")
 						val sName = l.head
 						val lsArg = l.tail
 						if (!callProcedure(sName, lsArg))
@@ -208,15 +224,28 @@ class ParserFile(
 	}
 	
 	private def callProcedure(sName: String, lsArg: Array[String]): Boolean = {
-		val lFile = List(new File(sName), new File(shared.file.getParentFile, sName), new File(dirProc, sName))
+		val sFilename = sName + ".proc"
+		val lFile = List(new File(sFilename), new File(shared.file.getParentFile, sFilename), new File(dirProc, sFilename))
 		lFile.find(_.exists) match {
 			case None => false
 			case Some(file) =>
+				// New file reference
 				val sSource = scala.io.Source.fromFile(file).mkString
 				shared.stackFile.push(shared.file)
 				shared.file = file
+				val mapSubstitutions = shared.mapSubstitutions
+				// Store variables of calling script
+				//val mapVars = shared.mapVars.toMap
+				//val mapLists = shared.mapLists.toMap
+				// Parse the procedure file
 				parseProc(sName, lsArg, sSource)
+				// Restore previous file and variable map
 				shared.file = shared.stackFile.pop
+				shared.mapSubstitutions = mapSubstitutions
+				//shared.mapVars.clear()
+				//shared.mapVars ++= mapVars
+				//shared.mapLists.clear()
+				//shared.mapLists ++= mapLists
 				true
 		}
 	}
