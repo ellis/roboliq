@@ -29,7 +29,7 @@ case class Reagent(
 	policy: PipettePolicy
 )
 
-case class LineError(iLine: Int, iCol_? : Option[Int], sLine: String, sError: String)
+case class LineError(file: java.io.File, iLine: Int, iCol_? : Option[Int], sLine: String, sError: String)
 
 case class RoboeaseResult(
 	val kb: KnowledgeBase,

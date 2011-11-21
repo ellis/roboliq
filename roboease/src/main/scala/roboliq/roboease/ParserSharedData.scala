@@ -36,7 +36,8 @@ class ParserSharedData(
 	///** When a script is called, the parent's mapVars is pushed onto this stack, then popped again when the called script is finished */
 	//val stackVarsFromParent = new Stack[HashMap[String, String]]
 	//val stackListsFromParent = new Stack[HashMap[String, List[String]]]
-		
+	
+	/*
 	var iLineCurrent: Int = 0
 	var sLineCurrent: String = null
 	
@@ -45,6 +46,7 @@ class ParserSharedData(
 		m_errors += LineError(iLineCurrent, None, sLineCurrent, sError)
 	}
 	def errors = m_errors.toSeq
+	*/
 	
 	def subst(id: String): String = mapSubstitutions.getOrElse(id, id)
 	

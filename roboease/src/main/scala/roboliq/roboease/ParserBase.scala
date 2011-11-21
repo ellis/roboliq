@@ -21,6 +21,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	val restOfLine: Parser[String] = """.*""".r
 	val string: Parser[String] = "\"" ~> """[^"]*""".r <~ '"'
 	def numDouble: Parser[Double] = floatingPointNumber ^^ (_.toDouble)
+	def numInt: Parser[Int] = """[0-9]+""".r ^^ (_.toInt)
 	
 	val idRowCol: Parser[Tuple2[Int, Int]] = "[A-Z]".r ~ integer ^^ { case sRow ~ nCol => {
 		val iRow = sRow.charAt(0) - 'A'
@@ -28,24 +29,23 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		(iRow, iCol)
 	}}
 	
-	/*
-	def idWell_index = Parser[Well] { input =>
+	private def idWell_index = Parser[Well] { input =>
 		val res1 = integer.apply(input)
 		res1 match {
 			case Success(n, _) =>
 				m_contextPlate match {
 					case None => Failure("Unknown parent plate", input)
 					case Some(plate) =>
-						getWell_?(plate, n) match {
-							case Some(well) => Success(well, res1.next)
-							case None => Error("Invalid well index: "+n, input)
+						getWell(plate, n) match {
+							case RSuccess(well) => Success(well, res1.next)
+							case RError(lsError) => Error(lsError.mkString("; "), input)
 						}
 				}
 			case ns: NoSuccess => ns
 		}
 	}
 	
-	def idWell_rowCol = Parser[Well] { input =>
+	private def idWell_rowCol = Parser[Well] { input =>
 		val res1 = ("[A-Z]".r~integer).apply(input)
 		res1 match {
 			case Success(sRow ~ nCol, _) =>
@@ -54,17 +54,16 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 					case Some(plate) =>
 						val iRow = sRow.charAt(0) - 'A'
 						val iCol = nCol - 1
-						getWell(plate, iRow, iCol, input) match {
-							case Right(well) => Success(well, res1.next)
-							case Left(e) => e
+						getWell(plate, iRow, iCol) match {
+							case RSuccess(well) => Success(well, res1.next)
+							case RError(lsError) => Error(lsError.mkString("; "), input)
 						}
 				}
 			case ns: NoSuccess => ns
 		}
 	}
 	
-	def idWell: Parser[Well] = idWell_index | idWell_rowCol
-	*/
+	private def idWell_sub: Parser[Well] = idWell_index | idWell_rowCol
 	
 	/*def idWells_index = Parser[List[Well]] { input =>
 		val res1 = idWell_index.apply(input)
@@ -84,7 +83,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	}*/
 	
 	private def idWells_sub = Parser[List[Well]] { input =>
-		val res1 = idWell.apply(input)
+		val res1 = idWell_sub.apply(input)
 		res1 match {
 			case Success(well0, input2) =>
 				val plate = m_contextPlate.get
@@ -138,13 +137,55 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 				val res2 = word.apply(input)
 				res2 match {
 					case Success(id, _) =>
-						val sVar = shared.subst(id)
-						val sValue = shared.mapVars.getOrElse(sVar, sVar)
-						this.parseAll(parser, sValue) match {
-							case Success(output, _) => Success(output, res2.next)
-							case ns3: NoSuccess => ns3
+						val sValue = shared.mapSubstitutions.get(id) match {
+							case Some(id2) =>
+								shared.mapVars.get(id2) match {
+									case Some(s) => s
+									case None => id2
+								}
+							case None =>
+								shared.mapVars.get(id) match {
+									case Some(s) => s
+									case None => null
+								}
+						}
+						if (sValue == null) {
+							Error("unknown variable \""+id+"\"", input)
+						}
+						else {
+							this.parseAll(parser, sValue) match {
+								case Success(output, _) => Success(output, res2.next)
+								case ns3: NoSuccess => ns3
+							}
 						}
 					case ns2: NoSuccess => ns1
+				}
+		}
+	}
+	
+	private def directOrVarOrList[T](parser: Parser[T]): Parser[List[T]] = Parser[List[T]] { input =>
+		val res1 = directOrVar(parser).apply(input)
+		res1 match {
+			case Success(output, next) => Success(List(output), next)
+			case _ =>
+				val res2 = word.apply(input)
+				res2 match {
+					case Success(id, _) =>
+						val sList = shared.subst(id)
+						shared.mapLists.get(sList) match {
+							case None => Error("unknown list \""+sList+"\"", input)
+							case Some(ls) =>
+								Result.mapOver(ls)(sValue => {
+									this.parseAll(parser, sValue) match {
+										case Success(output, _) => RSuccess(output)
+										case ns2: NoSuccess => RError("error in list \""+sList+"\" item \""+sValue+"\": "+ns2.msg)
+									}
+								}) match {
+									case RSuccess(l) => Success(l, res2.next)
+									case RError(lsError) => Error(lsError.mkString("; "), input)
+								}
+						}
+					case ns1: NoSuccess => ns1
 				}
 		}
 	}
@@ -201,61 +242,11 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		{ ll => ll.flatMap(l => l) }
 	def plateWells2: Parser[List[Tuple2[Plate, Int]]] = directOrVar(plateWells2_sub3)
 	
-	def valVolume_var: Parser[Double] = ident ^^
-		{ s =>
-			if (shared.mapVars.contains(s))
-				shared.mapVars(s).toDouble
-			else {
-				shared.addError("Undefined variable: "+s)
-				0
-			}
-		}
-	def valVolume_numeric: Parser[Double] = floatingPointNumber ^^
-		{ s => s.toDouble }
-	def valVolume: Parser[Double] = valVolume_var | valVolume_numeric
+	def valVolume: Parser[Double] = directOrVar(numDouble)
+	def valVolumes: Parser[List[Double]] = directOrVarOrList(numDouble)
 	
-	private def getVolumes(s: String): Result[List[Double]] = {
-		if (shared.mapVars.contains(s))
-			RSuccess(List(shared.mapVars(s).toDouble))
-		else if (shared.mapLists.contains(s))
-			RSuccess(shared.mapLists(s).map(_.toDouble))
-		else {
-			toDouble(s) match {
-				case RError(lsError) => RError("invalid volume: "+s)
-				case RSuccess(n) => RSuccess(List(n))
-			}
-		}
-	}
-	
-	def valVolumes: Parser[List[Double]] = idHandler(getVolumes)
-	
-	def valInt_var: Parser[Int] = ident ^^
-		{ s =>
-			if (shared.mapVars.contains(s))
-				shared.mapVars(s).toInt
-			else {
-				shared.addError("Undefined variable: "+s)
-				0
-			}
-		}
-	def valInt_numeric: Parser[Int] = integer ^^
-		{ s => s.toInt }
-	def valInt: Parser[Int] = valInt_var | valInt_numeric
-	
-	def valInts_var: Parser[List[Int]] = ident ^^
-		{ s =>
-			if (shared.mapVars.contains(s))
-				List(shared.mapVars(s).toInt)
-			else if (shared.mapLists.contains(s))
-				shared.mapLists(s).map(_.toInt)
-			else {
-				shared.addError("Undefined variable: "+s)
-				Nil
-			}
-		}
-	def valInts_numeric: Parser[List[Int]] = integer ^^
-		{ s => List(s.toInt) }
-	def valInts: Parser[List[Int]] = valInts_var | valInts_numeric
+	def valInt: Parser[Int] = directOrVar(numInt)
+	def valInts: Parser[List[Int]] = directOrVarOrList(numInt)
 	
 	private def getPlate(): Result[Plate] = {
 		for (plate <- Result.get(m_contextPlate, "Unknown parent plate"))

@@ -31,6 +31,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		val labware = Labware(id, sType, rack)
 		shared.mapLabware((rack.grid, rack.site)) = labware
 		createPlate(id, rack, Some(sType))
+		println("ADDED LABWARE: "+labware)
 		RSuccess()
 	}
 	
@@ -45,6 +46,8 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 	}
 	
 	private def setReagent(id: String, plate: Plate, iWellPlus1: Int, lc: String, nWells_? : Option[Int]): Result[Unit] = {
+		println("ADDIND REAGENT: "+id)
+		println("shared.getPipettePolicy(lc): "+shared.getPipettePolicy(lc))
 		for {
 			policy <- shared.getPipettePolicy(lc)
 			dim <- shared.getDim(plate)
@@ -68,6 +71,8 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 				//wellSetup.nVolume_? = Some(0)
 				//println(kb.getWellSetup(well))
 			}
+			
+			println("ADDED REAGENT: "+reagent)
 			
 			shared.mapReagents(id) = reagent
 			//shared.lReagentsInWells += (reagent -> wells)

@@ -24,7 +24,7 @@ class ParserFile(
 	mapPlateModel: Map[String, PlateModel]
 ) {
 	private val shared = new ParserSharedData(dirProc, dirLog, mapTipModel, mapLcToPolicy, mapPlateModel)
-	import shared._
+	//import shared._
 	private val pConfig = new ParserLineConfig(shared, mapTables)
 	private val pScript = new ParserLineScript(shared)
 	
@@ -38,6 +38,8 @@ class ParserFile(
 	private var m_sListName: String = null
 	private var m_map31: ObjMapper = null
 	private var m_sLine: String = null
+	private var m_iLine: Int = 0
+	private val m_errors = new ArrayBuffer[LineError]
 	private val output = new ArrayBuffer[RoboeaseCommand]
 	
 	def sTable = shared.sTable
@@ -51,7 +53,7 @@ class ParserFile(
 	}
 	
 	private def parse(sSource: String): Either[CompileStageError, RoboeaseResult] = {
-		var iLine = 1
+		m_iLine = 1
 		for (sLine <- sSource.lines) {
 			val s = sLine.replaceAll("#.*", "").trim
 			m_sLine = s
@@ -62,7 +64,7 @@ class ParserFile(
 				case "DOC" =>
 					m_section = Section.Doc
 				case "SCRIPT" =>
-					kb.concretize() match {
+					shared.kb.concretize() match {
 						case Left(errK) =>
 							m_map31 = null
 							return Left(errK)
@@ -71,28 +73,35 @@ class ParserFile(
 					}
 					m_section = Section.Script
 				case _ =>
-					m_section match {
-						case Section.Doc => handleDoc(s)
-						case Section.Config => handleConfig(s)
-						case Section.ConfigList => handleConfigList(s)
-						case Section.Script => handleScript(s)
+					val res = m_section match {
+						case Section.Doc => parseLineDoc(s)
+						case Section.Config => parseLineConfig(s)
+						case Section.ConfigList => parseLineConfigList(s)
+						case Section.Script => parseLineScript(s)
+					}
+					res match {
+						case Error(lsError) => lsError.foreach(addError)
+						case _ =>
 					}
 			}
-			iLine += 1
+			m_iLine += 1
 		}
-		if (shared.errors.isEmpty) {
+		if (m_errors.isEmpty) {
 			val cmds4 = output.collect { case RoboeaseCommand(_, _, cmd: CommandL4) => cmd }
-			cmds4.foreach(_.addKnowledge(kb))
+			cmds4.foreach(_.addKnowledge(shared.kb))
 			Right(RoboeaseResult(shared.kb, output))
 		}
 		else {
-			val log = Log(shared.errors.map(_.sError))
+			val lLogItem = m_errors.map(error => {
+				new LogItem(error.file.getName()+": line "+error.iLine+error.iCol_?.map(":"+_.toString).getOrElse(""), error.sError)
+			})
+			val log = new Log(lLogItem, Seq(), Seq())
 			Left(CompileStageError(log))
 		}
 	}
 	
 	private def parseProc(sName: String, lsArg: Array[String], sSource: String) {
-		var iLine = 1
+		m_iLine = 1
 		for (sLine <- sSource.lines) {
 			val s = sLine.replaceAll("#.*", "").trim
 			m_sLine = s
@@ -102,124 +111,121 @@ class ParserFile(
 				val lsParam = s.drop(5).split("""\s+""")
 				//if (lsVar.size != lsArg.size) {
 				if (lsParam.size > lsArg.size) {
-					shared.addError("Call to "+sName+" expected "+lsParam.size+" arguments but was passed "+lsArg.size+" arguments")
+					addError("Call to "+sName+" expected "+lsParam.size+" arguments but was passed "+lsArg.size+" arguments")
 					return
 				}
-				/*
-				// Function to classify whether the argument is a simple variable, a list variable, or unknown
-				def categorizeArg(ss: Tuple2[String, String]): Int = {
-					if (shared.mapVars contains ss._2) 1
-					else if (shared.mapLists contains ss._2) 2
-					else 0
-				}
-				val lParamArgCat = (lsParam zip lsArg).toList.map(ss => (ss._1, ss._2, categorizeArg(ss)))
-				println("lParamArgCat: "+lParamArgCat.toList)
-				// If there are any unknown arguments, indicate the error
-				val l0 = lParamArgCat.filter(_._3 == 0)
-				if (!l0.isEmpty) {
-					shared.addError("Unknown argument(s): "+l0.map(_._2).mkString(", "))
-					return
-				}
-				shared.mapVars ++= lParamArgCat.filter(_._3 == 1).map(tuple => tuple._1 -> shared.mapVars(tuple._2))
-				shared.mapLists ++= lParamArgCat.filter(_._3 == 1).map(tuple => tuple._1 -> shared.mapLists(tuple._2))
-				*/
 				shared.mapSubstitutions = shared.mapSubstitutions ++ (lsParam zip lsArg)
 			}
-			else {
-				handleScript(s)
+			else if (!s.isEmpty) {
+				val res = parseLineScript(s)
+				res match {
+					case Error(lsError) => lsError.foreach(addError)
+					case _ =>
+				}
 			}
-			iLine += 1
+			m_iLine += 1
 		}
 		Right(())
 	}
 	
-	private def handleDoc(s: String) {
+	private def parseLineDoc(s: String): Result[Unit] = {
 		if (s == "ENDDOC") {
 			m_asDoc = m_asDoc.reverse
 			m_section = Section.Config
 		}
 		else
 			m_asDoc = s :: m_asDoc
+		Success(())
 	}
 	
-	private def handleConfig(sLine: String) {
+	private def parseLineConfig(sLine: String): Result[Unit] = {
 		val rAssign = pConfig.parseAll(pConfig.cmd0Assign, sLine)
 		val rList = pConfig.parseAll(pConfig.cmd0List, sLine)
 		if (rAssign.successful) {
 			// Do nothing, because already handled by parser
+			Success()
 		}
 		else if (rList.successful) {
 			m_asList.clear
 			m_sListName = rList.get
 			m_section = Section.ConfigList
+			Success()
 		}
 		else {
-			var bFound = false
 			val rCmd = pConfig.parse(pConfig.word, sLine)
 			if (rCmd.successful) {
 				val sCmd: String = rCmd.get
 				pConfig.cmds0.get(sCmd) match {
 					case None =>
-						addError("unrecognized command: " + sCmd)
+						Error("unrecognized command: " + sCmd)
 					case Some(p) =>
 						val r = pConfig.parseAll(p, rCmd.next)
-						if (!r.successful)
-							addError(r.toString)
-						else
-							bFound = true
-				}
-			}
-			else {
-				addError("could not pares line")
-			}
-		}
-	}
-	
-	private def handleConfigList(s: String) {
-		if (s == "ENDLIST") {
-			mapLists(m_sListName) = m_asList.toList
-			m_section = Section.Config
-		}
-		else
-			m_asList += s
-	}
-	
-	private def handleScript(sLine: String) {
-		if (sLine == "ENDSCRIPT")
-			m_section = Section.Config
-		else if (m_map31 != null) {
-			//m_sScriptLine = sLine
-			var bFound = false
-			val rCmd = pScript.parse(pScript.word, sLine)
-			if (rCmd.successful) {
-				val sCmd: String = rCmd.get
-				//println("sCmd = "+sCmd)
-				pScript.cmds2.get(sCmd) match {
-					case None =>
-						val l = sLine.split("""\s+""")
-						val sName = l.head
-						val lsArg = l.tail
-						if (!callProcedure(sName, lsArg))
-							addError("unrecognized command: " + sCmd)
-					case Some(p) =>
-						val r = pScript.parseAll(p, rCmd.next)
-						if (!r.successful)
-							addError(r.toString)
+						if (!r.successful) Error(r.toString)
 						else {
-							val res: roboliq.common.Result[CmdLog] = r.get
+							val res: roboliq.common.Result[Unit] = r.get
 							res match {
-								case Error(lsError) =>
-									lsError.foreach(addError)
-								case Success(cmdlog) =>
-									cmdlog.cmds.foreach(addRunCommand)
-									bFound = true
+								case Error(lsError) => Error(lsError.mkString("; "))
+								case _ => Success()
 							}
 						}
 				}
 			}
 			else {
-				addError("could not pares line")
+				Error("could not parse config line")
 			}
+		}
+	}
+	
+	private def parseLineConfigList(s: String): Result[Unit] = {
+		if (s == "ENDLIST") {
+			shared.mapLists(m_sListName) = m_asList.toList
+			m_section = Section.Config
+		}
+		else
+			m_asList += s
+		Success()
+	}
+	
+	private def parseLineScript(sLine: String): Result[Unit] = {
+		if (sLine == "ENDSCRIPT") {
+			m_section = Section.Config
+			Success()
+		}
+		else if (m_map31 != null) {
+			//m_sScriptLine = sLine
+			val rCmd = pScript.parse(pScript.word, sLine)
+			if (rCmd.successful) {
+				val sCmd: String = rCmd.get
+				pScript.cmds2.get(sCmd) match {
+					case None =>
+						val l = sLine.split("""\s+""")
+						val sName = l.head
+						val lsArg = l.tail
+						if (callProcedure(sName, lsArg)) Success()
+						else Error("unrecognized command: " + sCmd)
+					case Some(p) =>
+						val r = pScript.parseAll(p, rCmd.next)
+						if (!r.successful)
+							Error(r.toString)
+						else {
+							val res: roboliq.common.Result[CmdLog] = r.get
+							println("r.get: "+r.get)
+							res match {
+								case Error(lsError) => Error(lsError)
+								case Success(cmdlog) =>
+									cmdlog.cmds.foreach(addRunCommand)
+									Success()
+							}
+						}
+				}
+			}
+			else {
+				Error("could not parse script line")
+			}
+		}
+		else {
+			//Error("config could not be parsed")
+			Success()
 		}
 	}
 	
@@ -249,22 +255,26 @@ class ParserFile(
 				true
 		}
 	}
+
+	def addError(sError: String) {
+		m_errors += LineError(shared.file, m_iLine, None, m_sLine, sError)
+	}
 	
 	private def toLabel(well: Well): String = {
-		kb.getWellSetup(well).sLabel_?.get
+		shared.kb.getWellSetup(well).sLabel_?.get
 	}
 	
 	def DefineRack(name: String, grid: Int, site: Int, xsize: Int, ysize: Int, nVolumeMax: Double, carrierType: String = "") {
 		val rack = Rack(
 				name, xsize, ysize, grid, site, nVolumeMax, carrierType
 				)
-		mapRacks(name) = rack
+		shared.mapRacks(name) = rack
 	}
 	
 	def racks = shared.mapRacks.values
 
 	def addRunCommand(cmd: Command) {
-		output += RoboeaseCommand(shared.iLineCurrent, shared.sLineCurrent, cmd)
+		output += RoboeaseCommand(m_iLine, m_sLine, cmd)
 		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
 	}
 }
