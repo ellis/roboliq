@@ -87,6 +87,7 @@ class ParserFile(
 			m_iLine += 1
 		}
 		if (m_errors.isEmpty) {
+			fillEmptySourceWells()
 			val cmds4 = output.collect { case RoboeaseCommand(_, _, cmd: CommandL4) => cmd }
 			cmds4.foreach(_.addKnowledge(shared.kb))
 			Right(RoboeaseResult(shared.kb, output))
@@ -255,7 +256,7 @@ class ParserFile(
 		}
 	}
 
-	def addError(sError: String) {
+	private def addError(sError: String) {
 		m_errors += LineError(shared.file, m_iLine, None, m_sLine, sError)
 	}
 	
@@ -272,8 +273,24 @@ class ParserFile(
 	
 	def racks = shared.mapRacks.values
 
-	def addRunCommand(cmd: Command) {
+	private def addRunCommand(cmd: Command) {
 		output += RoboeaseCommand(m_iLine, m_sLine, cmd)
 		println("LOG: addRunCommand: "+cmd.getClass().getCanonicalName())
+	}
+	
+	private def fillEmptySourceWells() {
+		for (well <- shared.kb.lWell) {
+			val setup = shared.kb.getWellSetup(well)
+			if (setup.bRequiresIntialLiq_? == Some(true) && setup.reagent_? == None) {
+				for {
+					plate <- setup.holder_?
+					index <- setup.index_?
+				} {
+					val id = plate.setup.getLabel(shared.kb) + "#" + (index + 1)
+					println("id: "+id)
+					pConfig.setReagent(id, plate, index + 1, "DEFAULT", None)
+				}
+			}
+		}
 	}
 }

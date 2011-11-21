@@ -41,7 +41,7 @@ class GroupABuilder(
 			lTipModelAll ++= tipModels
 			mapLiquidToModels(liquid) = mapLiquidToModels.getOrElse(liquid, Seq()) ++ tipModels
 		}
-		val lTipModelOkForAll = lTipModelAll.filter(tipModel => mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
+		val lTipModelOkForAll = device.config.lTipModel.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
 		if (!lTipModelOkForAll.isEmpty) {
 			val tipModel = lTipModelOkForAll.head
 			lLiquidAll.map(_ -> tipModel).toMap

@@ -28,6 +28,8 @@ class GroupBBuilder(
 		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => L2C_Aspirate(items))
 		val lDispense = groupSpirateItems(groupA, groupA.lDispense).map(items => L2C_Dispense(items))
 		
+		//println("groupA:"+groupA)
+		
 		// Tip which require cleaning before aspirate
 		val cleans0 = getCleanSpec2(groupA)
 		// Tips which cannot be cleaned in a prior group
@@ -138,7 +140,7 @@ class GroupBBuilder(
 	private def getCleanSpec2(
 		states: StateMap,
 		overrides: TipHandlingOverrides,
-		mapTipToModel: Map[TipConfigL2, TipModel],
+		mTipToModel: Map[TipConfigL2, TipModel],
 		tip: TipConfigL2,
 		cleanSpec: WashSpec
 	): Option[CleanSpec2] = {
@@ -147,14 +149,18 @@ class GroupBBuilder(
 		}
 		else if (device.areTipsDisposable) {
 			val tipState = tip.obj.state(states)
-			val bReplace = tipState.model_?.isEmpty || (overrides.replacement_? match {
+			val bGetTip = tipState.model_?.isEmpty && mTipToModel.contains(tip)
+			val bDropTip = !tipState.model_?.isEmpty && !mTipToModel.contains(tip)
+			val bReplace = bGetTip || (overrides.replacement_? match {
 				case Some(TipReplacementPolicy.ReplaceAlways) => true
 				case Some(TipReplacementPolicy.KeepBetween) => false
 				case Some(TipReplacementPolicy.KeepAlways) => false
 				case None => false
 			})
-			if (bReplace)
-				Some(ReplaceSpec2(tip, mapTipToModel.getOrElse(tip, tipState.model_?.get)))
+			if (bDropTip)
+				Some(DropSpec2(tip))
+			else if (bReplace)
+				Some(ReplaceSpec2(tip, mTipToModel.getOrElse(tip, tipState.model_?.get)))
 			else
 				None
 		}

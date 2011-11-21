@@ -17,6 +17,7 @@ class KnowledgeBase {
 	// Move this to Pipette device's knowledgebase
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	
+	val lWell: scala.collection.Set[Well] = m_wells
 	val setups: scala.collection.Map[Obj, ObjSetup] = m_setups
 	
 	/*def addLiquid(o: Liquid) {

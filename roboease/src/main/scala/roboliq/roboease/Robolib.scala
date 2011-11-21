@@ -19,7 +19,14 @@ class Robolib(shared: ParserSharedData) {
 	val kb = shared.kb
 	
 	def comment(s: String): Result[CmdLog] = {
-		Success(CmdLog(L4C_Comment(s)))
+		val ls = s.split(' ')
+		def getVar(s: String): String = { 
+			val s1 = shared.mapSubstitutions.getOrElse(s, s)
+			shared.mapVars.getOrElse(s1, s1)
+		}
+		val ls2 = ls.map(getVar)
+		val s2 = ls2.mkString(" ")
+		Success(CmdLog(L4C_Comment(s2)))
 	}
 	
 	def execute(cmd: String): Result[CmdLog] = {
@@ -151,15 +158,18 @@ class Robolib(shared: ParserSharedData) {
 						case None => Seq()
 						case Some(Nil) => Seq()
 						// Last reagent-volume item in dest's list
-						case Some(rv :: Nil) =>
-							mDestToRv.remove(dest)
-							Seq(new L4A_PipetteItem(WellPointer(rv._1), dest, Seq(rv._2), None, mixSpec_?))
 						case Some(rv :: rvs) =>
-							mDestToRv(dest) = rvs
-							Seq(new L4A_PipetteItem(WellPointer(rv._1), dest, Seq(rv._2), None, None))
+							val mixSpec2_? = rvs match {
+								case Nil => mDestToRv.remove(dest); mixSpec_?
+								case _ => mDestToRv(dest) = rvs; None
+							}
+							// Let knowledgebase know that this is a source well, so that we can check
+							// whether a new default liquid needs to be put in it in ParserFile.fillEmptySourceWells()
+							rv._1.foreach(shared.kb.addWell(_, true))
+							Seq(new L4A_PipetteItem(WellPointer(rv._1), dest, Seq(rv._2), None, mixSpec2_?))
 					}
 				})
-				lPipetteItem ++= lPipetteItem
+				lPipetteItem ++= l2
 			}
 			val args = new L4A_PipetteArgs(
 				lPipetteItem.toSeq,
