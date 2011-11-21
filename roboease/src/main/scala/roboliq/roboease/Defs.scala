@@ -26,7 +26,7 @@ case class Reagent(
 	id: String,
 	reagent: common.Reagent,
 	wells: IndexedSeq[Well],
-	policy: PipettePolicy
+	policy_? : Option[PipettePolicy]
 )
 
 case class LineError(file: java.io.File, iLine: Int, iCol_? : Option[Int], sLine: String, sError: String)

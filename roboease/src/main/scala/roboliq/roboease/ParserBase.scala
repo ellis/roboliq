@@ -248,6 +248,20 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	def valInt: Parser[Int] = directOrVar(numInt)
 	def valInts: Parser[List[Int]] = directOrVarOrList(numInt)
 	
+	protected def parseWells(sWells0: String): Result[List[Well]] = {
+		val sWells = shared.subst(sWells0)
+		if (shared.mapReagents.contains(sWells)) {
+			val reagent = shared.mapReagents(sWells)
+			RSuccess(reagent.wells.toList)
+		}
+		else {
+			parse(plateWells2, sWells) match {
+				case Success(lPI, _) => RSuccess(getWells(lPI))
+				case ns: NoSuccess => RError(ns.msg)
+			}
+		}
+	}
+	
 	private def getPlate(): Result[Plate] = {
 		for (plate <- Result.get(m_contextPlate, "Unknown parent plate"))
 		yield plate
@@ -366,6 +380,14 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		val pc = kb.getPlateSetup(plate)
 		(i0 to i1).map(pc.dim_?.get.wells.apply).toList
 	}
+	
+	def getWell(pi: Tuple2[Plate, Int]): Well = {
+		val (plate, iWell) = pi
+		val dim = kb.getPlateSetup(plate).dim_?.get
+		dim.wells(iWell)
+	}
+	
+	def getWells(l: Seq[Tuple2[Plate, Int]]): List[Well] = l.map(getWell).toList
 	
 	def createPlate(id: String, rack: Rack, sModel_? : Option[String]): Result[Plate] = {
 		val plate = new Plate

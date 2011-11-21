@@ -49,7 +49,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		println("ADDIND REAGENT: "+id)
 		println("shared.getPipettePolicy(lc): "+shared.getPipettePolicy(lc))
 		for {
-			policy <- shared.getPipettePolicy(lc)
+			policy_? <- if (lc == "DEFAULT") RSuccess(None) else shared.getPipettePolicy(lc).map(Some(_))
 			dim <- shared.getDim(plate)
 		} yield {
 			//mapReagents(reagent) = new Reagent(reagent, rack, iWell, nWells_?.getOrElse(1), lc)
@@ -59,7 +59,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 			val wells = dim.wells.toIndexedSeq.slice(iWell, iWellEnd)
 			
 			// Create liquid with given name
-			val reagent = new Reagent(id, new roboliq.common.Reagent, wells, policy)
+			val reagent = new Reagent(id, new roboliq.common.Reagent, wells, policy_?)
 			val reagentSetup = kb.getReagentSetup(reagent.reagent)
 			reagentSetup.sName_? = Some(id)
 			reagentSetup.sFamily_? = Some(lc)

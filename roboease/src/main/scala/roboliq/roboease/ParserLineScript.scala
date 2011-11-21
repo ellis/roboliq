@@ -62,7 +62,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	}
 
 	// Reagent-Volume
-	private type RV = Tuple2[Reagent, Double]
+	private type RV = Tuple2[List[Well], Double]
 	private type T1 = Tuple2[Well, List[RV]]
 	
 	def run_PREPARE_LIST(l: List[String], dests: Seq[Well], sLiquidClass: String, opts_? : Option[String]): Result[CmdLog] = {
@@ -79,9 +79,12 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		if ((ls1.length % 2) != 0)
 			return RError("list entry does must consist of valid reagent/volume pairs: "+sItem)
 
-		def convert(array: Array[String]): Result[Tuple2[Reagent, Double]] = {
-			for { reagent <- shared.getReagent(array(0)); nVolume <- toDouble(array(1))	}
-			yield reagent -> nVolume
+		def convert(array: Array[String]): Result[RV] = {
+			for {
+				lWell <- parseWells(array(0))
+				nVolume <- toDouble(array(1))
+			}
+			yield lWell -> nVolume
 		}
 		val ls2 = ls1.grouped(2).toList
 		Result.mapOver(ls2)(convert).map(dest -> _.toList)
@@ -148,14 +151,6 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 			dim <- Result.get(setup.dim_?, "Plate \""+plate+"\" requires dimensions")
 		} yield dim
 	}
-	
-	private def getWell(pi: Tuple2[Plate, Int]): Well = {
-		val (plate, iWell) = pi
-		val dim = kb.getPlateSetup(plate).dim_?.get
-		dim.wells(iWell)
-	}
-	
-	private def getWells(l: Seq[Tuple2[Plate, Int]]): Seq[Well] = l.map(getWell)
 	
 	private def wellsToPlateIndexes(wells: Seq[Well]): Seq[Tuple2[Plate, Int]] = {
 		wells.map(well => {

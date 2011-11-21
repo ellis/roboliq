@@ -130,7 +130,7 @@ class Robolib(shared: ParserSharedData) {
 		}
 	}
 	
-	private type RV = Tuple2[Reagent, Double]
+	private type RV = Tuple2[List[Well], Double]
 	private type T1 = Tuple2[Well, List[RV]]
 
 	def prepareReactionList(l: List[T1], sLiquidClass: String, opts_? : Option[String]): Result[CmdLog] = {
@@ -153,10 +153,10 @@ class Robolib(shared: ParserSharedData) {
 						// Last reagent-volume item in dest's list
 						case Some(rv :: Nil) =>
 							mDestToRv.remove(dest)
-							Seq(new L4A_PipetteItem(WellPointer(rv._1.reagent), dest, Seq(rv._2), None, mixSpec_?))
+							Seq(new L4A_PipetteItem(WellPointer(rv._1), dest, Seq(rv._2), None, mixSpec_?))
 						case Some(rv :: rvs) =>
 							mDestToRv(dest) = rvs
-							Seq(new L4A_PipetteItem(WellPointer(rv._1.reagent), dest, Seq(rv._2), None, None))
+							Seq(new L4A_PipetteItem(WellPointer(rv._1), dest, Seq(rv._2), None, None))
 					}
 				})
 				lPipetteItem ++= lPipetteItem
@@ -237,7 +237,8 @@ class Robolib(shared: ParserSharedData) {
 		if (lc == "DEFAULT") {
 			for {
 				reagent <- Result.get(reagent_?, "explicit liquid class required here instead of \"DEFAULT\"")
-			} yield reagent.policy
+				policy <- Result.get(reagent.policy_?, "explicit liquid class required here instead of \"DEFAULT\"")
+			} yield policy
 		}
 		else {
 			shared.getPipettePolicy(lc)

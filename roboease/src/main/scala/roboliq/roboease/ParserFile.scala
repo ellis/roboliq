@@ -209,7 +209,6 @@ class ParserFile(
 							Error(r.toString)
 						else {
 							val res: roboliq.common.Result[CmdLog] = r.get
-							println("r.get: "+r.get)
 							res match {
 								case Error(lsError) => Error(lsError)
 								case Success(cmdlog) =>
