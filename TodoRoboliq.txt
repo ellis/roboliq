@@ -74,6 +74,10 @@ Code:
 	PcrScript1: why are small tips decontaminated after last cycle?
 	PcrScript1: supress final wash after mix
 	PcrScript1: it'd be good to premix rather than mix
+	Rachel: second-to-last drop should drop all tips rather than keep some tips unnecessarily
+x	Rachel: only mix after last dispense for PREPARE_LIST
+	Rachel: why "UserPrompt("Take plate for PCR in RT-PCR",0,-1);" in ours but not theirs?
+	Rachel: first dispense of PREPARE_LIST: ours="0C08#####000000000", theirs="0C08#1000000000000"
 x	Example05: why no wash after last dispense?
 x	Example05: shouldn't wash after dispensing water
 	Example05: let user suppress post-clean when pipetting

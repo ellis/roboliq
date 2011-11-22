@@ -173,7 +173,7 @@ class Robolib(shared: ParserSharedData) {
 			}
 			val args = new L4A_PipetteArgs(
 				lPipetteItem.toSeq,
-				mixSpec_? = mixSpec_?,
+				mixSpec_? = None,
 				tipOverrides_? = tipOverrides_?,
 				pipettePolicy_? = Some(policy),
 				tipModel_? = tipModel_?
