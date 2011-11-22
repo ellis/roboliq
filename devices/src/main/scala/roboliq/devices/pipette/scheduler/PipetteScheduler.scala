@@ -58,6 +58,14 @@ class PipetteScheduler(
 				}
 			}
 			println("lnScore: "+lnScore.toList)
+			lGroupB.zipWithIndex.foreach(pair => {
+				val (gB, i) = pair
+				print(i.toString+": ")
+				if (gB == null) println("_")
+				else {
+					println(gB.nScore+"\t"+gB.lItem.head.dest.index+"\t"+gB.lItem.size)
+				}
+			})
 			//println("lGroupA: "+lGroupA.toList)
 			//println("lGroupB: "+lGroupB.toList)
 			
@@ -88,10 +96,41 @@ class PipetteScheduler(
 			}
 		}
 
-		val lG0 = x2R(lItem, List(g0)).reverse.tail
-		val lG = filterGroupAsR(lG0, Nil).reverse
+		val lG0 = x2R(lItem, List(g0)).reverse.tail // First one discarded because it's the empty g0
+		val lGR = filterGroupAsR(lG0, Nil)
+		// Remove last group if its last item is in a different column than the first and in the same column as the next pending item
+		val lGR2 = if (!lGR.isEmpty) {
+			val gLast = lGR.head
+			val lItemNext = lItem.drop(gLast.lItem.size)
+			if (!lItemNext.isEmpty) {
+				val itemNext = lItemNext.head
+				val lDest = gLast.lItem.map(_.dest)
+				val wellGroups = WellGroup(lDest).splitByCol
+				val bItemsInSameCol = (wellGroups.size == 1)
+				if (!bItemsInSameCol) {
+					val wellGroups2 = WellGroup(lDest ++ Seq(itemNext.dest)).splitByCol
+					val bNextItemInDifferentCol = (wellGroups.size < wellGroups2.size)
+					if (bNextItemInDifferentCol) {
+						lGR
+					}
+					else {
+						lGR.tail
+					}
+				}
+				else
+					lGR
+			}
+			else
+				lGR
+		}
+		else {
+			lGR
+		}
+		val lG = lGR2.reverse
 		//println("lG:")
 		//println(lG)
+		println("from well: "+lItem.head.dest.index)
+		println("well counts: "+lG.map(_.lItem.size))
 
 		val lTipCleanableParent = if (iItemParent < 0) SortedSet[TipConfigL2]() else lGroupB(iItemParent).lTipCleanable
 		val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)
@@ -153,6 +192,10 @@ class PipetteScheduler(
 					if (wellGroup.size > 1) {
 						//println("keep:")
 						//println(g)
+						// FIXME: for debug only
+						val iWell0 = g2.lItem.head.dest.index
+						val iWell1 = g2.lItem.last.dest.index
+						// ENDFIX
 						g :: acc
 					}
 					else

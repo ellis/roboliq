@@ -174,7 +174,7 @@ class GroupBBuilder(
 	def scoreAspirates(lAspirate: Seq[L2C_Aspirate]): Double = {
 		val nCostStart = if (lAspirate.isEmpty) 0.0 else 5.0
 		lAspirate.foldLeft(nCostStart)((acc, cmd) => {
-			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
+			acc + 2.0
 		})
 	}
 	

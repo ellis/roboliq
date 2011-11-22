@@ -464,9 +464,13 @@ class GroupABuilder(
 			val ltw = lltw.flatMap(identity)
 			ltw.map(tw => {
 				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0))
-				if (policy_?.isEmpty)
-					return GroupError(g0, Seq("Could not find aspirate policy for "+tw.tip+" and "+tw.well))
-				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy_?.get)
+				val policy = cmd.args.pipettePolicy_?.getOrElse(
+					device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0)) match {
+						case None => return GroupError(g0, Seq("Could not find aspirate policy for "+tw.tip+" and "+tw.well))
+						case Some(p) => p
+					}
+				)
+				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy)
 			})
 		})
 		GroupSuccess(g0.copy(
