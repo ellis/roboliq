@@ -62,7 +62,7 @@ class Robolib(shared: ParserSharedData) {
 			tipOverrides_? <- getOptTipOverrides(mapOpts)
 			tipModel_? <- getOptTipModel(mapOpts)
 		} yield {
-			val mixSpec = new MixSpec(nVolume, nCount, Some(mixPolicy))
+			val mixSpec = new MixSpec(Some(nVolume), Some(nCount), Some(mixPolicy))
 			val args = new L4A_MixArgs(
 				wells.map(well => WellPointer(well)),
 				mixSpec,
@@ -211,7 +211,7 @@ class Robolib(shared: ParserSharedData) {
 			cmdDiluter <- PipetteCommandsL4.pipette(WellPointer(diluter.reagent), WellPointer(dests), Seq(nVolumeDiluter), tipOverrides_?)
 			items <- serialDilution2(srcs1, dests1, nVolumeSrc)
 		} yield {
-			val mixSpec = mixSpec_?.getOrElse(MixSpec((nVolumeDiluter + nVolumeSrc) / 3, 7))
+			val mixSpec = mixSpec_?.getOrElse(MixSpec(Some((nVolumeDiluter + nVolumeSrc) / 3), Some(7)))
 			val args = new L4A_PipetteArgs(
 				items,
 				mixSpec_? = Some(mixSpec),
@@ -283,7 +283,7 @@ class Robolib(shared: ParserSharedData) {
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
 								for (policy <- getPolicy(lc, None)) yield {
-									Some(MixSpec(sVol.toDouble, sCount.toInt, Some(policy)))
+									Some(MixSpec(Some(sVol.toDouble), Some(sCount.toInt), Some(policy)))
 								}
 							case _ =>
 								Error("unrecognized MIX parameter \""+sCountAndVol+"\"")
@@ -291,7 +291,7 @@ class Robolib(shared: ParserSharedData) {
 					case Seq(sCountAndVol) =>
 						sCountAndVol.split("x") match {
 							case Array(sCount, sVol) =>
-								Success(Some(MixSpec(sVol.toDouble, sCount.toInt, None)))
+								Success(Some(MixSpec(Some(sVol.toDouble), Some(sCount.toInt), None)))
 							case _ =>
 								Error("unrecognized MIX parameter \""+sCountAndVol+"\"")
 						}

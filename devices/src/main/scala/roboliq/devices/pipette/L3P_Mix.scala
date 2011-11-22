@@ -55,7 +55,7 @@ private class L3P_Mix_Sub(val robot: PipetteDevice, val ctx: CompilerContextL3, 
 			getMixPolicy(states, tw.tip, tw.well, item.mixSpec.mixPolicy_?) match {
 				case Error(sError) => return Error(sError)
 				case Success(policy) =>
-					new L2A_MixItem(tw.tip, tw.well, item.mixSpec.nVolume, item.mixSpec.nCount, policy)
+					new L2A_MixItem(tw.tip, tw.well, item.mixSpec.nVolume_?.get, item.mixSpec.nCount_?.get, policy)
 			}
 		})
 		Success(items)

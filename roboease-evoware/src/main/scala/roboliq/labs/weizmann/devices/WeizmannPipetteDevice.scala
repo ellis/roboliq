@@ -81,6 +81,16 @@ class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevi
 			Some(PipettePolicy("PIE_AUT", PipettePosition.Free))
 	}
 	
+	def getMixSpec(tipState: TipStateL2, wellState: WellStateL2, mixSpec_? : Option[MixSpec]): Result[MixSpecL2] = {
+		val mixSpecDefault = MixSpec(Some(wellState.nVolume * 0.7), Some(4), Some(PipettePolicy("LCWMX", PipettePosition.WetContact)))
+		val mixSpec = mixSpec_? match {
+			case None => mixSpecDefault
+			case Some(a) => a + mixSpecDefault
+		}
+		mixSpec.toL2
+	}
+
+	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
 		lTipAll -- lTipCleaning
 	}

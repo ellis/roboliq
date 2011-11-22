@@ -8,7 +8,7 @@ import roboliq.commands.pipette._
 
 trait PipetteCommands extends RoboliqCommands {
 	def mix(target: WellPointer, volume: Double, count: Int) {
-		val mixSpec = new MixSpec(volume, count)
+		val mixSpec = new MixSpec(Some(volume), Some(count))
 		val args = new L4A_MixArgs(Seq(target), mixSpec)
 		val cmd = L4C_Mix(args)
 		cmds += cmd
@@ -86,7 +86,7 @@ object PipetteCommandsL4 {
 
 object PipetteCommandsL3 {
 	def mix(states: RobotState, targets: Seq[WellConfigL2], volume: Double, count: Int): Result[L3C_Mix] = {
-		val mixSpec = new MixSpec(volume, count)
+		val mixSpec = new MixSpec(Some(volume), Some(count))
 		val args3 = new L3A_MixArgs(
 			targets.map(well => new L3A_MixItem(well, mixSpec)),
 			tipOverrides_? = None,

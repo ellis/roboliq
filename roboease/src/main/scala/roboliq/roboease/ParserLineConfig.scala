@@ -30,9 +30,10 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 	private def setLabware(id: String, rack: Rack, sType: String): Result[Unit] = {
 		val labware = Labware(id, sType, rack)
 		shared.mapLabware((rack.grid, rack.site)) = labware
-		createPlate(id, rack, Some(sType))
+		for { _ <- createPlate(id, rack, Some(sType)) }
+		yield ()
 		//println("ADDED LABWARE: "+labware)
-		RSuccess()
+		//RSuccess()
 	}
 	
 	private def setMixDef(reagent: Reagent, l: List[Tuple2[Reagent, Double]]): Result[Unit] = {

@@ -164,6 +164,7 @@ class StationConfig extends EvowareTable {
 		val test4x3 = new PlateModel("test 4x3 Plate", 4, 3, 500) // FIXME: nVolume?
 		// Weizmann:
 		val plateDeepWell = new PlateModel("96 Well DeepWell square", 8, 12, 1000) // FIXME: nVolume? 
+		val plateBiorad = new PlateModel("96 Well PCR Plate -Biorad", 8, 12, 1000) // FIXME: nVolume? 
 		
 		//"MTP Waste"
 	}

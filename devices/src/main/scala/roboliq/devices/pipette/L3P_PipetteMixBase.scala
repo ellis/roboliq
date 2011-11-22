@@ -430,7 +430,7 @@ private trait L3P_PipetteMixBase {
 	): Result[Mix] = {
 		def toL2(itemD: L2A_SpirateItem): Result[L2A_MixItem] = {
 			getMixPolicy(states, itemD.tip, itemD.well, mixSpec.mixPolicy_?).map(
-					policy => new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume, mixSpec.nCount, policy))
+					policy => new L2A_MixItem(itemD.tip, itemD.well, mixSpec.nVolume_?.get, mixSpec.nCount_?.get, policy))
 		}
 		Result.map(actionD.items, toL2 _).map(Mix(_))
 	}

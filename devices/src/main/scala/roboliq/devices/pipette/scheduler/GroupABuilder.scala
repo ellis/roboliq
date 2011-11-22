@@ -179,7 +179,7 @@ class GroupABuilder(
 		states0: RobotState,
 		mLM: Map[Item, LM]
 	): GroupA = {
-		val groupA0 = GroupA(mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false, states0)
+		val groupA0 = new GroupA(mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, false, states0)
 		groupA0
 	}
 	
@@ -190,8 +190,8 @@ class GroupABuilder(
 	def createGroupA(
 		g0: GroupA
 	): GroupA = {
-		val g = GroupA(
-			g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, false, g0.states1
+		val g = new GroupA(
+			g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, false, g0.states1
 		)
 		g
 	}
@@ -445,13 +445,34 @@ class GroupABuilder(
 
 	def updateGroupA7_lDispense(g0: GroupA): GroupResult = {
 		val lDispense = g0.lItem.map(item => {
-			val policy = g0.mItemToPolicy(item) 
 			val tip = g0.mItemToTip(item)
+			val policy = g0.mItemToPolicy(item) 
 			new TipWellVolumePolicy(tip, item.dest, item.nVolume, policy)
 		})
 		
+		val lPostmix = g0.lItem.flatMap(item => {
+			val tip = g0.mItemToTip(item)
+			val policy = g0.mItemToPolicy(item) 
+			val mixSpec_? = (item.postmix_?, cmd.args.mixSpec_?) match {
+				case (None, None) => None
+				case (Some(a), Some(b)) => Some(a + b)
+				case (a, b) => if (a.isEmpty) b else a
+			}
+			if (mixSpec_?.isDefined) {
+				val mixSpec = device.getMixSpec(tip.state(g0.states0), item.dest.state(g0.states0), mixSpec_?) match {
+					case Error(lsError) => return GroupError(g0, lsError)
+					case Success(o) => o
+				}
+				Seq(new TipWellMix(tip, item.dest, mixSpec))
+			}
+			else {
+				Seq()
+			}
+		})
+		
 		GroupSuccess(g0.copy(
-			lDispense = lDispense
+			lDispense = lDispense,
+			lPostmix = lPostmix
 		))
 	}
 	
@@ -486,11 +507,12 @@ class GroupABuilder(
 		val mTipToDestContams = new HashMap[TipConfigL2, Set[Contaminant.Value]]
 		
 		// Fill mTipToLiquidGroup; return GroupStop if trying to dispense into multiple liquid groups
-		for ((item, policy) <- g0.mItemToPolicy) {
+		for ((item, policyDisp) <- g0.mItemToPolicy) {
+			val pos = if (item.postmix_?.isDefined || cmd.args.mixSpec_?.isDefined) PipettePosition.WetContact else policyDisp.pos
 			// TODO: need to keep track of well liquid as we go, since we might dispense into a single well multiple times
 			val liquidDest = item.dest.state(g0.states0).liquid
 			// If we enter the destination liquid:
-			if (policy.pos == PipettePosition.WetContact) {
+			if (pos == PipettePosition.WetContact) {
 				val tip = g0.mItemToTip(item)
 				mTipToLiquidGroups.get(tip) match {
 					case None =>

@@ -78,6 +78,23 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 		
 		b1 && b2 && b3
 	}
+	
+	def canBatchMixItems(states: StateMap, lTwvp: List[TipWellMix]): Boolean = {
+		// Ensure that all items use the same policy, tip sizes, and mix repetitions
+		val b1 = lTwvp match {
+			case Nil => true
+			case x :: xs =>
+				val tipState = x.tip.state(states)
+				xs.forall(twvp => twvp.mixSpec.mixPolicy == x.mixSpec.mixPolicy && twvp.tip.state(states).model_? == tipState.model_? && twvp.mixSpec.nCount == x.mixSpec.nCount)
+		}
+		// Ensure that all intra-tip distances are equal to the intra-well distances
+		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)
+		// Ensure that all wells are in the same column
+		val b3 = WellGroup(lTwvp.map(_.well)).splitByCol().size == 1
+		
+		b1 && b2 && b3
+	}
+
 
 	/*
 	private case class KeySpirate(plate: PlateConfigL2, iTipType: Int) {

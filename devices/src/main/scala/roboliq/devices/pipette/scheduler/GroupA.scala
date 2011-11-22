@@ -12,30 +12,61 @@ import roboliq.commands.pipette.{L3A_PipetteItem => Item}
  * @param mTipToLM map from tip to source LM
  * @param mItemToTip map from item to tip used for that item 
  */
-case class GroupA(
-	mLM: Map[Item, LM],
-	states0: RobotState,
-	tipBindings0: Map[TipConfigL2, LM],
-	mTipToCleanSpecPending0: Map[TipConfigL2, WashSpec],
-	lItem: Seq[Item],
-	lLM: Seq[LM],
-	mLMToItems: Map[LM, Seq[Item]],
-	mLMData: Map[LM, LMData],
-	mLMTipCounts: Map[LM, Int],
-	mLMToTips: Map[LM, SortedSet[TipConfigL2]],
-	mTipToLM: Map[TipConfigL2, LM],
-	mItemToTip: Map[Item, TipConfigL2],
-	mTipToVolume: Map[TipConfigL2, Double],
-	mItemToPolicy: Map[Item, PipettePolicy],
-	mTipToCleanSpecA: Map[TipConfigL2, WashSpec],
-	mTipToCleanSpecPendingA: Map[TipConfigL2, WashSpec],
-	mTipToCleanSpec: Map[TipConfigL2, WashSpec],
-	mTipToCleanSpecPending: Map[TipConfigL2, WashSpec],
-	lDispense: Seq[TipWellVolumePolicy],
-	lAspirate: Seq[TipWellVolumePolicy],
-	bClean: Boolean,
-	states1: RobotState
+class GroupA(
+	val mLM: Map[Item, LM],
+	val states0: RobotState,
+	val tipBindings0: Map[TipConfigL2, LM],
+	val mTipToCleanSpecPending0: Map[TipConfigL2, WashSpec],
+	val lItem: Seq[Item],
+	val lLM: Seq[LM],
+	val mLMToItems: Map[LM, Seq[Item]],
+	val mLMData: Map[LM, LMData],
+	val mLMTipCounts: Map[LM, Int],
+	val mLMToTips: Map[LM, SortedSet[TipConfigL2]],
+	val mTipToLM: Map[TipConfigL2, LM],
+	val mItemToTip: Map[Item, TipConfigL2],
+	val mTipToVolume: Map[TipConfigL2, Double],
+	val mItemToPolicy: Map[Item, PipettePolicy],
+	val mTipToCleanSpecA: Map[TipConfigL2, WashSpec],
+	val mTipToCleanSpecPendingA: Map[TipConfigL2, WashSpec],
+	val mTipToCleanSpec: Map[TipConfigL2, WashSpec],
+	val mTipToCleanSpecPending: Map[TipConfigL2, WashSpec],
+	val lDispense: Seq[TipWellVolumePolicy],
+	val lAspirate: Seq[TipWellVolumePolicy],
+	val lPostmix: Seq[TipWellMix],
+	val bClean: Boolean,
+	val states1: RobotState
 ) {
+	def copy(
+		mLM: Map[Item, LM] = mLM,
+		states0: RobotState = states0,
+		tipBindings0: Map[TipConfigL2, LM] = tipBindings0,
+		mTipToCleanSpecPending0: Map[TipConfigL2, WashSpec] = mTipToCleanSpecPending0,
+		lItem: Seq[Item] = lItem,
+		lLM: Seq[LM] = lLM,
+		mLMToItems: Map[LM, Seq[Item]] = mLMToItems,
+		mLMData: Map[LM, LMData] = mLMData,
+		mLMTipCounts: Map[LM, Int] = mLMTipCounts,
+		mLMToTips: Map[LM, SortedSet[TipConfigL2]] = mLMToTips,
+		mTipToLM: Map[TipConfigL2, LM] = mTipToLM,
+		mItemToTip: Map[Item, TipConfigL2] = mItemToTip,
+		mTipToVolume: Map[TipConfigL2, Double] = mTipToVolume,
+		mItemToPolicy: Map[Item, PipettePolicy] = mItemToPolicy,
+		mTipToCleanSpecA: Map[TipConfigL2, WashSpec] = mTipToCleanSpecA,
+		mTipToCleanSpecPendingA: Map[TipConfigL2, WashSpec] = mTipToCleanSpecPendingA,
+		mTipToCleanSpec: Map[TipConfigL2, WashSpec] = mTipToCleanSpec,
+		mTipToCleanSpecPending: Map[TipConfigL2, WashSpec] = mTipToCleanSpecPending,
+		lDispense: Seq[TipWellVolumePolicy] = lDispense,
+		lAspirate: Seq[TipWellVolumePolicy] = lAspirate,
+		lPostmix: Seq[TipWellMix] = lPostmix,
+		bClean: Boolean = bClean,
+		states1: RobotState = states1
+	): GroupA = {
+		new GroupA(mLM, states0, tipBindings0, mTipToCleanSpecPending0, lItem, lLM, mLMToItems, mLMData, mLMTipCounts, mLMToTips, mTipToLM, mItemToTip, mTipToVolume,
+				mItemToPolicy, mTipToCleanSpecA, mTipToCleanSpecPendingA, mTipToCleanSpec, mTipToCleanSpecPending, lDispense, lAspirate, lPostmix, bClean,
+				states1)
+	}
+	
 	override def toString: String = {
 		List(
 			"lItem:\n    "+L3A_PipetteItem.toDebugString(lItem),
@@ -50,11 +81,16 @@ case class GroupA(
 			"mTipToWashIntensity:\n    "+mTipToCleanSpec.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
 			"mTipToWashIntensityPending:\n    "+mTipToCleanSpecPending.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
 			lDispense.map(twvpString).mkString("lDispense:\n    ", "\n    ", ""),
-			lAspirate.map(twvpString).mkString("lAspirate:\n    ", "\n    ", "")
-		).mkString("GroupA(\n  ", "\n  ", ")\n")
+			lAspirate.map(twvpString).mkString("lAspirate:\n    ", "\n    ", ""),
+			lPostmix.map(twmString).mkString("lPostmix:\n    ", "\n    ", "")
+		).filter(!_.toString.isEmpty).mkString("GroupA(\n  ", "\n  ", ")\n")
 	}
 	
 	private def twvpString(twvp: TipWellVolumePolicy): String = {
 		List(twvp.tip, Command.getWellsDebugString(Seq(twvp.well)), twvp.nVolume, twvp.policy.id).mkString(", ")			
+	}
+	
+	private def twmString(twvp: TipWellMix): String = {
+		List(twvp.tip, Command.getWellsDebugString(Seq(twvp.well)), twvp.mixSpec.nVolume, twvp.mixSpec.nCount, twvp.mixSpec.mixPolicy.id).mkString(", ")			
 	}
 }

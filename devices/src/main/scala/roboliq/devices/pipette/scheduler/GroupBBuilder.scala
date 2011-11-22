@@ -27,6 +27,7 @@ class GroupBBuilder(
 	): Result[GroupB] = {
 		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => L2C_Aspirate(items))
 		val lDispense = groupSpirateItems(groupA, groupA.lDispense).map(items => L2C_Dispense(items))
+		val lPostmix = groupMixItems(groupA, groupA.lPostmix).map(items => L2C_Mix(items))
 		
 		//println("groupA:"+groupA)
 		
@@ -57,7 +58,8 @@ class GroupBBuilder(
 		val nScore = {
 			scoreAspirates(lAspirate) +
 			scoreDispenses(lDispense) +
-			scoreCleans(cleans)
+			scoreCleans(cleans) +
+			scorePostmixes(lDispense.size, lPostmix)
 		}
 			
 		val groupB = GroupB(
@@ -69,7 +71,7 @@ class GroupBBuilder(
 			Nil,
 			lAspirate = lAspirate,
 			lDispense = lDispense,
-			Nil,
+			lPostmix = lPostmix,
 			nScore
 		)
 		Success(groupB)
@@ -79,25 +81,9 @@ class GroupBBuilder(
 		groupA: GroupA,
 		lTwvp: Seq[TipWellVolumePolicy]
 	): Seq[Seq[L2A_SpirateItem]] = {
-		/*
-		// Group by: tipModel, pipettePolicy
-		val ma: Map[Tuple2[TipModel, PipettePolicy], Seq[TipWellVolumePolicy]]
-			= lTwvp.groupBy(twvp => (groupA.mTipToLM(twvp.tip).tipModel, twvp.policy))
-		// Order of (tipModel, pipettePolicy)
-		val lMP: Seq[Tuple2[TipModel, PipettePolicy]]
-			= lTwvp.map(twvp => (groupA.mTipToLM(twvp.tip).tipModel, twvp.policy)).distinct
-		// TODO: Make sure that the order of dispenses to a given well always remains the same
-		// Create list of list of spirate items
-		lMP.map(mp => {
-			ma(mp).map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy))
-		})
-		*/
-		
 		val x = lTwvp.foldLeft(List[List[TipWellVolumePolicy]]())(groupSpirateItems_add(groupA))
 		val y = x.reverse.map(_.reverse)
 		y.map(_.map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy)))
-		//val x1 = new ArrayBuffer[Seq[L2A_SpirateItem]]
-		//var x2 = new ArrayBuffer[L2A_SpirateItem]
 	}
 	
 	def groupSpirateItems_add(groupA: GroupA)(
@@ -117,6 +103,37 @@ class GroupBBuilder(
 					// well not already visited
 					!xs.exists(twvp.well eq _.well) && 
 					device.canBatchSpirateItems(groupA.states0, xs2)
+				)
+					xs2 :: rest
+				else
+					List(twvp) :: xs :: rest
+			case _ =>
+				List(List(twvp))
+		}
+	}
+	
+	def groupMixItems(
+		groupA: GroupA,
+		lTwvp: Seq[TipWellMix]
+	): Seq[Seq[L2A_MixItem]] = {
+		val x = lTwvp.foldLeft(List[List[TipWellMix]]())(groupMixItems_add(groupA))
+		val y = x.reverse.map(_.reverse)
+		y.map(_.map(twvp => new L2A_MixItem(twvp.tip, twvp.well, twvp.mixSpec.nVolume, twvp.mixSpec.nCount, twvp.mixSpec.mixPolicy)))
+	}
+	
+	def groupMixItems_add(groupA: GroupA)(
+		acc: List[List[TipWellMix]],
+		twvp: TipWellMix
+	): List[List[TipWellMix]] = {
+		acc match {
+			case (xs @ List(x0, _*)) :: rest  =>
+				val tipModel = groupA.mTipToLM(twvp.tip).tipModel
+				val tipModel0 = groupA.mTipToLM(x0.tip).tipModel
+				val xs2 = twvp :: xs
+				if (
+					tipModel.eq(tipModel0) && 
+					twvp.mixSpec.mixPolicy == x0.mixSpec.mixPolicy && 
+					device.canBatchMixItems(groupA.states0, xs2)
 				)
 					xs2 :: rest
 				else
@@ -182,6 +199,15 @@ class GroupBBuilder(
 		val nCostStart = if (lDispense.isEmpty) 0.0 else 5.0
 		lDispense.foldLeft(nCostStart)((acc, cmd) => {
 			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
+		})
+	}
+	
+	def scorePostmixes(nDispense: Int, lMix: Seq[L2C_Mix]): Double = {
+		if (lMix.isEmpty) return 0.0
+		
+		val nCostStart = if (nDispense == 0) 5.0 else if (nDispense == 1) 0.0 else 1.0
+		lMix.foldLeft(nCostStart)((acc, cmd) => {
+			acc + 5.0
 		})
 	}
 	

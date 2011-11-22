@@ -16,7 +16,7 @@ case class GroupB(
 	premixes: Seq[TipWellVolume],
 	lAspirate: Seq[L2C_Aspirate],
 	lDispense: Seq[L2C_Dispense],
-	postmixes: Seq[TipWellVolume],
+	lPostmix: Seq[L2C_Mix],
 	nScore: Double
 ) {
 	override def toString: String = {
@@ -28,6 +28,7 @@ case class GroupB(
 			"lTipCleanable:\n    "+lTipCleanable,
 			lAspirate.map(_.toDebugString).mkString("lAspirate:\n    ", "\n    ", ""),
 			lDispense.map(_.toDebugString).mkString("lDispense:\n    ", "\n    ", ""),
+			lPostmix.map(_.toDebugString).mkString("lPostmix:\n    ", "\n    ", ""),
 			"nScore:\n    "+nScore
 		).mkString("GroupB(\n  ", "\n  ", ")\n")
 	}

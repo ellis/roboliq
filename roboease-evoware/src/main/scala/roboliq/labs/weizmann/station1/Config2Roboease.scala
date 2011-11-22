@@ -34,5 +34,5 @@ class Config2Roboease(stationConfig: StationConfig) extends RoboeaseConfig {
 		PipettePolicy("PIE_MIX_AUT", PipettePosition.WetContact)
 	)
 	val mapLcToPolicy = pipettePolicies.map(spec => spec.id -> spec).toMap
-	val mapPlateModel = List(stationConfig.LabwareModels.plateDeepWell).map(o => o.id -> o).toMap
+	val mapPlateModel = List(stationConfig.LabwareModels.plateDeepWell, stationConfig.LabwareModels.plateBiorad).map(o => o.id -> o).toMap
 }

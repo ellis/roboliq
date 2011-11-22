@@ -6,11 +6,11 @@ import roboliq.commands.pipette._
 
 object Utils {
 	// Assert that tips are spaced at equal distances to each other as the wells are to each other
-	def equidistant(a: HasTipWellVolumePolicy, b: HasTipWellVolumePolicy): Boolean =
+	def equidistant(a: HasTipWell, b: HasTipWell): Boolean =
 		(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
 	
 	// Test all adjacent items for equidistance
-	def equidistant(item: Seq[HasTipWellVolumePolicy]): Boolean = item match {
+	def equidistant(item: Seq[HasTipWell]): Boolean = item match {
 		case Seq() => true
 		case Seq(_) => true
 		case Seq(a, b, rest @ _*) =>

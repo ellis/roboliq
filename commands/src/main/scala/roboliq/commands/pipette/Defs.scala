@@ -7,6 +7,7 @@ trait HasTip { val tip: TipConfigL2 }
 trait HasWell { val well: WellConfigL2 }
 trait HasVolume { val nVolume: Double }
 trait HasPolicy { val policy: PipettePolicy }
+trait HasMixSpecL2 { val mixSpec: MixSpecL2 }
 trait HasTipWell extends HasTip with HasWell
 trait HasTipWellVolume extends HasTipWell with HasVolume
 trait HasTipWellVolumePolicy extends HasTipWellVolume with HasPolicy
@@ -22,10 +23,33 @@ case class WPL_Plate(plate: Plate) extends WellOrPlateOrLiquid
 case class WPL_Liquid(liquid: Reagent) extends WellOrPlateOrLiquid
 */
 
+// REFACTOR: create a fully specified MixSpec and one which contains nVolume_? and nPercent_? and nCount_?
 case class MixSpec(
+	val nVolume_? : Option[Double],
+	val nCount_? : Option[Int],
+	val mixPolicy_? : Option[PipettePolicy] = None
+) {
+	def +(that: MixSpec): MixSpec = {
+		MixSpec(
+			if (nVolume_?.isEmpty) that.nVolume_? else nVolume_?,
+			if (nCount_?.isEmpty) that.nCount_? else nCount_?,
+			if (mixPolicy_?.isEmpty) that.mixPolicy_? else mixPolicy_?
+		)
+	}
+	
+	def toL2(): Result[MixSpecL2] = {
+		for {
+			nVolume <- Result.get(nVolume_?, "need to specify volume for mix")
+			nCount <- Result.get(nCount_?, "need to specify repetitions for mix")
+			mixPolicy <- Result.get(mixPolicy_?, "need to specify pipettet policy for mix")
+		} yield MixSpecL2(nVolume, nCount, mixPolicy)
+	}
+}
+
+case class MixSpecL2(
 	val nVolume: Double,
 	val nCount: Int,
-	val mixPolicy_? : Option[PipettePolicy] = None
+	val mixPolicy: PipettePolicy
 )
 
 case class TipModel(
@@ -36,7 +60,7 @@ case class TipModel(
 	val nVolumeDeconExtra: Double
 )
 
-sealed class TipWell(val tip: TipConfigL2, val well: WellConfigL2) extends HasTip {
+sealed class TipWell(val tip: TipConfigL2, val well: WellConfigL2) extends HasTipWell {
 	override def toString = "TipWell("+(tip.index+1)+","+well+")" 
 }
 
@@ -52,6 +76,19 @@ sealed class TipWellVolumePolicy(tip: TipConfigL2, well: WellConfigL2, nVolume: 
 	) extends TipWellVolume(tip, well, nVolume) with HasTipWellVolumePolicy {
 	override def toString = "TipWellVolumePolicy("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+")" 
 }
+
+sealed class TipWellMix(tip: TipConfigL2, well: WellConfigL2,
+		val mixSpec: MixSpecL2
+	) extends TipWell(tip, well) with HasMixSpecL2 {
+	override def toString = "TipWellMix("+tip.index+","+well.holder.hashCode()+":"+well.index+","+mixSpec+")" 
+}
+/*
+sealed class TipWellVolumePolicyMix(tip: TipConfigL2, well: WellConfigL2, nVolume: Double, policy: PipettePolicy,
+		val mixSpec: MixSpecL2
+	) extends TipWellVolumePolicy(tip, well, nVolume, policy) with HasMixSpecL2 {
+	override def toString = "TipWellVolumePolicyMix("+tip.index+","+well.holder.hashCode()+":"+well.index+","+nVolume+","+policy+","+mixSpec+")" 
+}
+*/
 /*
 sealed class TipWellVolumePolicyCount(tip: TipConfigL2, well: WellConfigL2, nVolume: Double, liquid: Liquid, policy: PipettePolicy,
 		val nCount: Int
