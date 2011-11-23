@@ -48,6 +48,18 @@ class Log(val errors: Seq[LogItem], val warnings: Seq[LogItem], val logs: Seq[Lo
 			println()
 		}
 	}
+
+	override def toString(): String = {
+		val l0 = Seq(
+			toList("Errors:", errors),
+			toList("Warnings:", warnings),
+			toList("Logs:", logs)
+		).flatten
+		if (l0.isEmpty) "" else l0.tail.mkString("\n")
+	}
+
+	private def toList(sLabel: String, lItem: Seq[LogItem]): Seq[String] =
+		if (!lItem.isEmpty) Seq("", sLabel) ++ lItem.map(_.getString) else Seq()
 }
 
 object Log {

@@ -76,17 +76,17 @@ Code:
 	PcrScript1: it'd be good to premix rather than mix
 	Rachel: second-to-last drop should drop all tips rather than keep some tips unnecessarily
 x	Rachel: only mix after last dispense for PREPARE_LIST
-	Rachel: why "UserPrompt("Take plate for PCR in RT-PCR",0,-1);" in ours but not theirs?
+	Rachel: why is UserPrompt("Take plate for PCR in RT-PCR",0,-1);" in ours but not theirs?
 	Rachel: first dispense of PREPARE_LIST: ours="0C08#####000000000", theirs="0C08#1000000000000"
 x	Example05: why no wash after last dispense?
 x	Example05: shouldn't wash after dispensing water
 	Example05: let user suppress post-clean when pipetting
 	Example05: allow for premix before aspirate
 	Example05: better wash intensity choices, so that the two tip blocks can be independently assigned wash intensities
-*	PipetteScheduler: split items whose volume is too large for the chosen tip model
+x	PipetteScheduler: split items whose volume is too large for the chosen tip model
 	PipetteScheduler: consider adding the concept of "tip blocks" in order to more directly handle some of the BSSE tip operations
 *	PipetteScheduler: handle pre- and post-mixing
-*	PipetteScheduler: use tip override for asperate too
+x	PipetteScheduler: use policy override for asperate too
 	PipetteScheduler: also break the batch if there are both sources and destinations on separate plates? No... but sometimes it would make sense!
 	RotemScript1: there are lots of errors
 ?	always wash/decon right after pipetting is done in order to prevent drying

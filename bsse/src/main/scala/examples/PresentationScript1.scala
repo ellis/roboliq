@@ -6,9 +6,22 @@ import roboliq.commands.pipette._
 import roboliq.labs.bsse.Protocol
 
 
-class ProtocolX extends Protocol{
-	class Wells
-	class EmptyWells extends Wells
+class Wells extends roboliq.common.WellPointerVar
+class EmptyWells extends Wells
+
+class ProtocolSettings {
+	import roboliq.common._
+	
+	def setLiquid(liquid: Liquid, loc: WellPointer) {
+		
+	}
+	
+	def setWells(wells: Wells, loc: WellPointer) {
+		
+	}
+}
+
+class ProtocolX extends Protocol {
 	class ThermocycleProgram {
 		def apply(w: Wells) {}
 	}
@@ -29,7 +42,8 @@ class ProtocolX extends Protocol{
 	def balance(reference: Wells, target: Wells, liquid: Liquid) {}
 }
 
-class PresentationScript1(station: roboliq.labs.bsse.station1.StationConfig) extends ProtocolX {
+//class PresentationScript1(station: roboliq.labs.bsse.station1.StationConfig) extends ProtocolX {
+class PresentationScript1 extends ProtocolX {
 	// Liquids
 	val water      = new Liquid(Properties.Water, CleanPolicy.ThoroughNone)
 	val buffer10x  = new Liquid(Properties.Water, CleanPolicy.Thorough)
@@ -62,3 +76,11 @@ class PresentationScript1(station: roboliq.labs.bsse.station1.StationConfig) ext
 	seal(wellsB)
 	centrifuge(wellsP, balance = wellsB)
 }
+
+/*
+class PresentationSetup1(station: roboliq.labs.bsse.station1.StationConfig) extends ProtocolSettings {
+	import station._
+	
+	configLiquid(water, station.Labwares.reagents50(1))
+}
+*/

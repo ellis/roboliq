@@ -1,7 +1,5 @@
 package roboliq.labs.bsse
 
-import scala.collection.mutable.ArrayBuffer
-
 import roboliq.common._
 import roboliq.commands.pipette._
 import roboliq.compiler._

@@ -90,7 +90,6 @@ class WeizmannPipetteDevice(tipModels: Seq[TipModel]) extends EvowarePipetteDevi
 		mixSpec.toL2
 	}
 
-	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
 		lTipAll -- lTipCleaning
 	}

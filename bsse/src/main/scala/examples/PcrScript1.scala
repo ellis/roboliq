@@ -32,8 +32,6 @@ class PcrScript1(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		MixItemTemplateL4(well_template, Seq(20), 0.2)
 	)
 	
-	//pcrMix(plate_working(C6+4)+plate_working(C7+4), mixItems, Liquids.water, 50 ul, well_masterMix)
-	//pcrMix(plate_working(C6+4), mixItems, Liquids.water, 50 ul, well_masterMix)
 	pcrMix(plate_working(C6+4), mixItems, Liquids.water, 50 ul, well_masterMix)
 	seal(plate_working)
 	val setup_thermocycle = thermocycle(plate_working)

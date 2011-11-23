@@ -4,15 +4,6 @@ import roboliq.common
 import roboliq.labs.bsse.Protocol
 
 
-class AbstractExample01 extends Protocol {
-	val ddw = new Liquid("Water")
-	val plate1 = new Plate
-	
-	pipette(ddw, plate1, 30 ul)
-	//mix(plate1, 30 ul, 5)
-}
-
-//class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends AbstractExample01 {
 class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
 	val ddw = new Liquid("Water", CleanPolicy.TNT)
 	val plate1 = new Plate
@@ -24,10 +15,6 @@ class Example01(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		reagent(ddw, Labwares.reagents15, 1, 8)
 		labware(plate1, Sites.cooled1, LabwareModels.test8x2)
 	}
-}
-
-object LiquidChangeScale extends Enumeration {
-	val SameLiquid, SameGroup, SameNothing = Value
 }
 
 class Example02(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
@@ -93,7 +80,6 @@ class Example02(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 
 
 class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
-	//import common.WellPointer
 	import roboliq.commands.MixItemL4
 	import roboliq.commands.MixItemReagentL4
 	import roboliq.commands.MixItemTemplateL4
@@ -126,13 +112,6 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 	val lab = new EvowareLab {
 		import station._
 
-		/*kb.addReagent(Liquids.water)
-		kb.addReagent(Liquids.buffer10x)
-		kb.addReagent(Liquids.dNTP)
-		kb.addReagent(Liquids.primerF)
-		kb.addReagent(Liquids.primerB)
-		kb.addReagent(Liquids.polymerase)*/
-		
 		reagent(Liquids.water, Labwares.reagents50, 1, 8)
 		reagent(Liquids.buffer10x, Labwares.eppendorfs, 1)
 		reagent(Liquids.dNTP, Labwares.eppendorfs, 5)
@@ -143,10 +122,7 @@ class Example03(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		well_template.pointer_? = Some(Labwares.eppendorfs.commonObj(B1))
 		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(B2))
 		
-		//labware(plate_template, Sites.cooled1, LabwareModels.platePcr)
 		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
-		//labware(plate_template, Sites.cooled1, LabwareModels.test4x3)
-		//labware(plate_working, Sites.cooled2, LabwareModels.test4x3)
 		for (wells <- well_template.getWells(kb); wellObj <- wells) {
 			val wellSetup = kb.getWellSetup(wellObj)
 			val sLiquid = "template#"+wellSetup.index_?.get
@@ -247,35 +223,6 @@ class Example05(station: roboliq.labs.bsse.station1.StationConfig) extends Proto
 		setup_centrifuge.idProgram_? = Some("2000,15,9,9,20")
 	}
 }
-
-/*
-class Example05b(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
-	object Liquids {
-		val water = new Liquid("Water", CleanPolicy.TNT)
-		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
-	}
-	
-	val well_masterMix = new common.WellPointerVar
-	val plate_working = new Plate
-
-	pipette(Liquids.water, well_masterMix, 150 ul)
-	pipette(Liquids.primerF, well_masterMix, 2 ul)
-
-	__findLabels(Liquids)
-
-	val lab = new EvowareLab {
-		import station._
-
-		reagent(Liquids.water, Labwares.reagents50, 1, 8)
-		reagent(Liquids.primerF, Labwares.eppendorfs, 9)
-		
-		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(B2))
-		
-		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
-	}
-}
-*/
-
 
 class Protocol06 extends Protocol {
 	import roboliq.commands.MixItemL4

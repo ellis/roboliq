@@ -15,7 +15,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	val tips1000 = SortedSet((0 to 3).map(i => new Tip(i, Some(tipModel1000))) : _*)
 	val tips50 = SortedSet((4 to 7).map(i => new Tip(i, Some(tipModel50))) : _*)
 	val config = new PipetteDeviceConfig(
-		lTipModel = Seq(tipModel50, tipModel1000),
+		lTipModel = Seq(tipModel1000, tipModel50),
 		tips = tips1000 ++ tips50,
 		tipGroups = {
 			val g1000 = (0 to 3).map(i => i -> tipModel1000).toSeq
@@ -227,6 +227,16 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		val sTip = if (bLarge) "1000" else "0050"
 		val sName = "Roboliq_"+sFamily+"_"+sPos+"_"+sTip
 		Some(PipettePolicy(sName, posDefault))
+	}
+	
+	def getMixSpec(tipState: TipStateL2, wellState: WellStateL2, mixSpec_? : Option[MixSpec]): Result[MixSpecL2] = {
+		val policyDefault_? = getAspiratePolicy(tipState, wellState)
+		val mixSpecDefault = MixSpec(Some(wellState.nVolume * 0.7), Some(4), policyDefault_?)
+		val mixSpec = mixSpec_? match {
+			case None => mixSpecDefault
+			case Some(a) => a + mixSpecDefault
+		}
+		mixSpec.toL2
 	}
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {

@@ -159,6 +159,8 @@ class KnowledgeBase {
 		val builder = new StateBuilder
 		val log = new LogBuilder
 		
+		println("A: "+log.errors.isEmpty)
+		
 		def constructConfStateTuples(setups: scala.collection.Map[Obj, ObjSetup]) {
 			for ((obj, setup) <- setups) {
 				if (!setObjTried.contains(obj)) {
@@ -175,28 +177,40 @@ class KnowledgeBase {
 		
 		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair._2.asInstanceOf[WellSetup])
 
+		println("A: "+log.errors.isEmpty)
+		fillEmptySourceWells()
+		println("A: "+log.errors.isEmpty)
+		
 		// Make sure all well reagents have been registered
 		wellSetups.foreach(pair => pair._2.reagent_? match {
 			case Some(reagent) =>
-				val reagentSetup = getReagentSetup(reagent)
-				//if (reagentSetup.sName_?.isEmpty) {
-				//	reagentSetup.sName_?
-				//}
-			case _ =>
+				getReagentSetup(reagent)
+			case None =>
+				
 		})
 		
+		println("A: "+log.errors.isEmpty)
 		// Reagents
 		val reagentSetups = m_setups.filter(_._2.isInstanceOf[ReagentSetup])
 		constructConfStateTuples(reagentSetups)
 			
+		println("A: "+log.errors.isEmpty)
 		// Plates
 		val plateSetups = m_setups.filter(_._2.isInstanceOf[PlateSetup])
 		constructConfStateTuples(plateSetups)
 
+		println("A: "+log.errors.isEmpty)
+		fillEmptySourceWells()
+		val reagentSetups2 = m_setups.filter(_._2.isInstanceOf[ReagentSetup])
+		constructConfStateTuples(reagentSetups2)
+
+		println("A: "+log.errors.isEmpty)
 		// Wells
 		for ((obj, setup) <- wellSetups) {
-			obj.createConfigAndState0(setup.asInstanceOf[obj.Setup], builder) match {
-				case Error(ls) => log.errors += new LogItem(obj, ls)
+			obj.createConfigAndState0(setup, builder) match {
+				case Error(ls) =>
+					println("Error for well:", obj, setup)
+					log.errors += new LogItem(obj, ls)
 				case Success((conf, state)) =>
 					mapConfs(obj) = conf
 					builder.map(obj) = state
@@ -204,6 +218,7 @@ class KnowledgeBase {
 			setObjTried += obj
 		}
 		
+		println("A: "+log.errors.isEmpty)
 		// Everything else
 		constructConfStateTuples(m_setups)
 
@@ -218,6 +233,36 @@ class KnowledgeBase {
 		}
 		else {
 			Left(CompileStageError(log.toImmutable()))
+		}
+	}
+	
+	private def fillEmptySourceWells() {
+		//for (well <- m_wells) {
+		//	val setup = getWellSetup(well)
+		val wellSetups = m_setups.toSeq.collect({ case (w: Well, s: WellSetup) => s })
+		for (setup <- wellSetups) {
+			fillEmptySourceWell(setup)
+		}
+	}
+	
+	private def fillEmptySourceWell(setup: WellSetup) {
+		if (setup.bRequiresIntialLiq_? == Some(true) && setup.reagent_?.isEmpty) {
+			println("fillEmptySourceWell: "+setup.bRequiresIntialLiq_?.toString+setup)
+			println(setup.holder_?, setup.index_?)
+			for {
+				plate <- setup.holder_?
+				index <- setup.index_?
+			} {
+				val id = plate.setup.getLabel(this) + "#" + (index + 1)
+				//println("id: "+id)
+				//pConfig.setReagent(id, plate, index + 1, "DEFAULT", None)
+				val reagent = new Reagent
+				val reagentSetup = getReagentSetup(reagent)
+				reagentSetup.sName_? = Some(id)
+				reagentSetup.sFamily_? = Some("Water")
+				reagentSetup.group_? = Some(new LiquidGroup(GroupCleanPolicy.Decontaminate))
+				setup.reagent_? = Some(reagent)
+			}
 		}
 	}
 	

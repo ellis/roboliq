@@ -63,8 +63,6 @@ class ExampleOpenhouse2(station: roboliq.labs.bsse.station1.StationConfig) exten
 	}
 	
 	gradient(Plates.pretty)
-	//pipette(Liquids.water, Plates.balance, 25 ul)
-	//seal(Plates.balance)
 	val (t1, c1) = proc1(Plates.pcr)
 
 	__findLabels(Liquids)
@@ -87,10 +85,6 @@ class ExampleOpenhouse2(station: roboliq.labs.bsse.station1.StationConfig) exten
 }
 
 class ExampleOpenhouse3(station: roboliq.labs.bsse.station1.StationConfig) extends Protocol {
-	import roboliq.commands.MixItemL4
-	import roboliq.commands.MixItemReagentL4
-	import roboliq.commands.MixItemTemplateL4
-	
 	object Liquids {
 		val water = new Liquid("Water", CleanPolicy.TNT)
 	}

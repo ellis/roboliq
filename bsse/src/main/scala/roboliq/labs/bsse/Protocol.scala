@@ -12,7 +12,7 @@ import roboliq.robots.evoware._
 
 trait Protocol extends CommonProtocol {
 	class EvowareLab {
-		private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
+		//private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
 		//private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]
 		
 		def reagent(reagent: Reagent, plateE: PlateObj, iWell0: Int, nWells: Int = 1) {
