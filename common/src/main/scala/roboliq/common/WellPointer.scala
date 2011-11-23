@@ -221,6 +221,8 @@ trait WellCoords {
 	val G7 = WellCoord(6, 6)
 }
 
+object WellCoords extends WellCoords
+
 case class WellIndex(index: Int) extends WellAddressSingle with WellAddressPartial{
 	def toIndex(nRows: Int, nCols: Int): Result[Int] = Success(index)
 	override def toString = index.toString
