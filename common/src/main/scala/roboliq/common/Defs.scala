@@ -120,6 +120,13 @@ object Result {
 		}))
 	}
 	
+	def flatMap[A, B](l: List[A])(f: A => Result[List[B]]): Result[List[B]] = {
+		Success(l.flatMap(a => f(a) match {
+			case Error(lsError) => return Error(lsError)
+			case Success(b) => b
+		}))
+	}
+	
 	def forall[A](l: Seq[A], f: A => Result[_ <: Any]): Result[Unit] = {
 		l.foreach(a => f(a) match {
 			case Error(lsError) => return Error(lsError)

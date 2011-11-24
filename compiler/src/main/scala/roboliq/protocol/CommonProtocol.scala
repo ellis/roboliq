@@ -29,16 +29,13 @@ trait CommonProtocol extends
 	
 	val Contaminant = common.Contaminant
 	val CleanPolicy = common.GroupCleanPolicy
+	val Properties = LiquidProperties
 	
 	val kb = new KnowledgeBase
 	val cmds = new ArrayBuffer[Command]
 	var m_protocol: Option[() => Unit] = None
 	var m_customize: Option[() => Unit] = None
 	
-	object Properties extends Enumeration {
-		val Water, Glycerol = Value
-	}
-
 	abstract class LiquidFamily
 	object LiquidFamily {
 		case object Water extends LiquidFamily

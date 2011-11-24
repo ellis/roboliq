@@ -7,7 +7,7 @@ object WellAddress {
 }
 
 sealed trait WellAddressPartial {
-	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]]
+	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]]
 	def toPointer(kb: KnowledgeBase, plate: Plate): Result[WellPointer] = {
 		for {
 			dim <- Result.get(plate.setup.dim_?, "plate dimension not set")
@@ -59,7 +59,7 @@ sealed abstract class WellAddressSingle extends WellAddress {
 	def -(b: WellAddressSingle): WellAddressMinus = new WellAddressMinus(this, b)
 	def toIndex(nRows: Int, nCols: Int): Result[Int]
 	
-	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
+	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
 		for { index <- toIndex(nRows, nCols) }
 		yield { Seq(index) }
 	}
@@ -223,13 +223,13 @@ trait WellCoords {
 
 object WellCoords extends WellCoords
 
-case class WellIndex(index: Int) extends WellAddressSingle with WellAddressPartial{
+case class WellIndex(index: Int) extends WellAddressSingle with WellAddressPartial {
 	def toIndex(nRows: Int, nCols: Int): Result[Int] = Success(index)
 	override def toString = index.toString
 }
 
 case class WellAddressPlus(a: WellAddressSingle, n: Int) extends WellAddress with WellAddressPartial {
-	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
+	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
 		for { i0 <- a.toIndex(nRows, nCols) }
 		yield { (i0 until (i0 + n)).toSeq }
 	}
@@ -238,7 +238,7 @@ case class WellAddressPlus(a: WellAddressSingle, n: Int) extends WellAddress wit
 }
 
 case class WellAddressMinus(a: WellAddressSingle, b: WellAddressSingle) extends WellAddress with WellAddressPartial {
-	protected def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
+	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
 		for {
 			i0 <- a.toIndex(nRows, nCols);
 			i1 <- b.toIndex(nRows, nCols);
@@ -247,6 +247,13 @@ case class WellAddressMinus(a: WellAddressSingle, b: WellAddressSingle) extends 
 		yield { (i0 until i1).toSeq }
 	}
 	override def toString = a + "-" + b
+}
+
+case class WellAddressList(list: Seq[WellAddressPartial]) extends WellAddress with WellAddressPartial {
+	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]] = {
+		Result.flatMap(list.toSeq)(addr => addr.toIndexes(nRows, nCols))
+	}
+	override def toString = list.mkString(";")
 }
 
 /*case class WellAddressColon(a: WellAddressSingle, b: WellAddressSingle) extends WellAddress with WellAddressPartial {

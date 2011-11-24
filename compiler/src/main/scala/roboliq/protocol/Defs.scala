@@ -4,6 +4,10 @@ import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common._
 
+	
+object LiquidProperties extends Enumeration {
+	val Water, Glycerol = Value
+}
 
 class Volume(n: Double) {
 	def ul = n
