@@ -17,7 +17,6 @@ trait EvowareToolchain {
 		val translator = compilerConfig.createTranslator
 	
 		val compiler = new Compiler(compilerConfig.processors)
-		compiler.bDebug = true
 	
 		Compiler.compile(protocol.kb, Some(compiler), Some(translator), protocol.cmds)
 	}
@@ -28,7 +27,6 @@ trait EvowareToolchain {
 		val translator = compilerConfig.createTranslator
 	
 		val compiler = new Compiler(compilerConfig.processors)
-		compiler.bDebug = true
 	
 		Compiler.compile(kb, Some(compiler), Some(translator), cmds)
 	}

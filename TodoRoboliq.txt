@@ -68,6 +68,7 @@ Roboease features which are missing:
 	log
 	use external scripts
 Code:
+	Testing: need to use 
 	PcrScript1: small tip dispense in first cycle should not be DRY contact -- need to track well state
 	PcrScript1: decontamination of big tips should occur at beginning of 2nd cycle instead of after (via optimization)
 	PcrScript1: why does cycle after mix decontaminate the big tips again?

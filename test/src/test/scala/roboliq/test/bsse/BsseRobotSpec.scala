@@ -50,8 +50,6 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 		nVolume: Double
 	): ProtocolTest = {
 		new Protocol(nVolume) with ProtocolSettings {
-			println("kb:")
-			kb.setups.foreach(println)
 			def createReagent(liquidDef: LiquidDef, sSuffix: String = ""): Reagent = {
 				val reagent = new Reagent
 				val reagentSetup = kb.getReagentSetup(reagent)
@@ -174,6 +172,8 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 	def run(station: StationConfig, protocol: ProtocolTest) {
 		protocol.__findLabels(protocol)
 		val toolchain = new BsseToolchain(station)
+		println("kb:")
+		println(protocol.kb.getPlateSetup(stationBsse.pipetter.plateDecon).dim_?)
 		val res1 = toolchain.compileProtocol(protocol, true)
 		res1 match {
 			case Left(err) =>
@@ -197,9 +197,9 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 		nVolume: Double
 	) {
 		val sScenario = List[Tuple2[String, String]](
-			"s" -> addrSrc.toString,
-			"d" -> addrDest.toString,
-			"v" -> nVolume.toString
+			"s:" -> addrSrc.toString,
+			"d:" -> addrDest.toString,
+			"v:" -> nVolume.toString
 		).map(pair => pair._1 + pair._2).mkString(", ")
 		scenario(sScenario) {
 			val protocol = createProtocolBsse(addrSrc, liquidSrc, addrDest, liquidDest, nVolume)
