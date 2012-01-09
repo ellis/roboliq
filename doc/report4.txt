@@ -1,0 +1,25 @@
+Hello Udi,
+
+Thanks for generously hosting my stay in Rehovot a while ago.  It provided a lot more insight into your workflow and the variety of robotics applications.  I was just reviewing my notes and thought that I'd send a little summary since we didn't have the opportunity to chat at the end.
+
+A few of the main points from my visit with Yair were:
+- we visited a number of labs to discuss their robots, applications, workflow, and challenges.
+- he introduced me to your production system and the automation module.
+- we discussed communication and synchronization between your two evoware robots.
+- we looked at my robot library implementation.
+- copied some scripts and Evoware configuration files for comparison and testing.
+
+The status of my roboease implementation is currently:
+- can compile roboease sample scripts to Evoware -- Gemini is not implemented, and is not planned.
+- not implemented, however, are the external scripts which get called from Evoware for checking barcodes and other forms of logging -- but something along these lines is planned.
+
+Near-future work includes:
+- getting more information from Evoware configuration files in order to reduce the number of parameters which need to be configured for roboease.
+- going through the additional scripts that Yair gave me to make sure that my implementation can handle them.
+- bring more functionality like in the automation module into the robot programming library.  This was one of the things that Yair and I also discussed, and he advised me on some of the issues to consider.
+
+For the more distant future, Joerg would like to see a means to manage larger projects in some way reminiscent of your production system.  I'll need to give some thought to that over the next year or so, and maybe you could give us some input at one of our next meetings.
+
+Best regards,
+Ellis
+
