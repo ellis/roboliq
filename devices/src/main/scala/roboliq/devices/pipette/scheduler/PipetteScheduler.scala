@@ -28,9 +28,10 @@ class PipetteScheduler(
 	private val queue = new PriorityQueue[Score]()(ScoreOrdering)
 	
 	def x(): Result[Seq[Command]] = {
+		val states = new StateBuilder(ctx.states)
 		for {
 			items0 <- builderA.filterItems(cmd.args.items)
-			pair <- builderA.tr1Items(items0)
+			pair <- builderA.tr1Items(items0, states)
 			(items, mLM) = pair 
 		} yield {
 			if (items.isEmpty)

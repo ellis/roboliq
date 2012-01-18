@@ -43,10 +43,11 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		new L4A_PipetteItem(Liquids.template, well_masterMix, List(1), None, None),
 		new L4A_PipetteItem(Liquids.primerF, well_masterMix, List(1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well_masterMix, List(1), None, None),
-		new L4A_PipetteItem(Liquids.polymerase, well_masterMix, List(1), None, None)//,
-		//new L4A_PipetteItem(well_masterMix, wells_working, List(20), Some(MixSpec(Some(200 * 0.75), Some(4))), None)
+		new L4A_PipetteItem(Liquids.polymerase, well_masterMix, List(1), None, None)/*,
+		new L4A_PipetteItem(well_masterMix, wells_working, List(20), Some(MixSpec(Some(200 * 0.75), Some(4))), None)*/
 	)
 	cmds += roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(items, tipOverrides_? = None))
+	cmds += roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(Seq(new L4A_PipetteItem(well_masterMix, wells_working, List(20), Some(MixSpec(Some(200 * 0.75), Some(4))), None)), tipOverrides_? = None))
 	
 	seal(plate_working)
 	val setup_thermocycle = thermocycle(plate_working)

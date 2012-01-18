@@ -36,37 +36,6 @@ class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: Plate) extends Co
 					if (b50) Seq(L2C_EvowareSubroutine("""C:\Program Files\TECAN\EVOware\database\Scripts\Roboliq\Roboliq_Clean_Decontaminate_0050.esc""", updateStates_wash50(cmd.intensity)))
 					else Seq()
 				Success(l1000 ++ l50)
-				/*
-				for {
-					plateDeconState <- plateDecon.stateRes(ctx.states)
-					itemsADW <- Result.mapOver(cmd.items) { item => decon(ctx, plateDeconState.conf, item) }
-				} yield {
-					val twvpsA = itemsADW.map(_._1)
-					val twvpsD = itemsADW.map(_._2)
-					val bPrewash = itemsADW.exists(_._3 == true) 
-
-					val cmdsPrewash = {
-						if (bPrewash) {
-							// Light rinse
-							Seq(
-								createWash2(ctx.states, cmd, 1),
-								createWash2(ctx.states, cmd, 2))
-						}
-						else
-							Seq()
-					}
-					
-					val cmdsDecon = Seq(
-						createWash2(ctx.states, cmd, 5),
-						L2C_Aspirate(twvpsA),
-						L2C_Dispense(twvpsD),
-						createWash2(ctx.states, cmd, 6),
-						createWash2(ctx.states, cmd, 7)
-					)
-					
-					cmdsPrewash ++ cmdsDecon
-				}
-				*/
 		}
 	}
 	

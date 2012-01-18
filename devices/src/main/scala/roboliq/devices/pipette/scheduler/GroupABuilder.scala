@@ -33,13 +33,16 @@ class GroupABuilder(
 		val mapLiquidToModels = new HashMap[Liquid, Seq[TipModel]]
 		val lLiquidAll = new HashSet[Liquid]
 		val lTipModelAll = new HashSet[TipModel]
+		val states = new StateBuilder(ctx.states)
 		for (item <- items) {
-			val liquid = item.srcs.head.state(ctx.states).liquid
-			val destState = item.dest.state(ctx.states)
+			val liquid = item.srcs.head.state(states).liquid
+			val destState = item.dest.state(states)
 			val tipModels = device.getDispenseAllowableTipModels(liquid, item.nVolume, destState.nVolume)
 			lLiquidAll += liquid
 			lTipModelAll ++= tipModels
 			mapLiquidToModels(liquid) = mapLiquidToModels.getOrElse(liquid, Seq()) ++ tipModels
+			// Update destination liquid (volume doesn't actually matter)
+			item.dest.obj.stateWriter(states).add(liquid, item.nVolume)
 		}
 		val lTipModelOkForAll = device.config.lTipModel.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
 		if (!lTipModelOkForAll.isEmpty) {
@@ -97,45 +100,59 @@ class GroupABuilder(
 	 * For each item, find the source liquid and choose a tip model
 	 */
 	def tr1Layers(layers: Seq[Seq[Item]]): Result[Map[Item, LM]] = {
+		val states = new StateBuilder(ctx.states)
 		Result.flatMap(layers)(items => {
 			val mapLiquidToTipModel = chooseTipModels(items)
-			tr1Items(items).map(_._2.toSeq)
+			tr1Items(items, states).map(_._2.toSeq)
 		}).map(_.toMap)
 	}
+	
+	/*def splitWhenAspFromDest(items: Seq[Item]): Result[Seq[Seq[Item]]] = {
+		val dests = new HashSet[WellConfigL2]
+		def step(items: Seq[Item], acc: Seq[Seq[Item]]): Seq[Seq[Item]] = items match {
+			case Seq() => return acc
+			case Seq(item, rest @ _*) =>
+				val s = item.srcs
+				// If this item treats a previous destionation as a source
+				if (item.srcs.exists(dests.contains)) {
+					
+				}
+				step(rest, acc)
+		}
+		Success(step(items, Seq()))
+	}*/
 	
 	/** 
 	 * For each item, find the source liquid and choose a tip model
 	 * Assumes that items have already been run through filterItems()
 	 */
-	def tr1Items(items: Seq[Item]): Result[Tuple2[Seq[Item], Map[Item, LM]]] = {
+	def tr1Items(items: Seq[Item], states: StateBuilder): Result[Tuple2[Seq[Item], Map[Item, LM]]] = {
 		val mapLiquidToTipModel = chooseTipModels(items)
 		var bRebuild = false
-		val mLM = items.map(item => {
-			val liquid = item.srcs.head.state(ctx.states).liquid
+		val mLM = items.flatMap(item => {
+			val liquid = item.srcs.head.state(states).liquid
+			// FIXME: for debug only
+			if (!mapLiquidToTipModel.contains(liquid))
+				println("mapLiquidToTipModel: "+mapLiquidToTipModel)
+			// ENDFIX
 			val tipModel = mapLiquidToTipModel(liquid)
 			bRebuild |= (item.nVolume > tipModel.nVolume)
-			(item, LM(liquid, tipModel))
+			// Update destination liquid (volume doesn't actually matter)
+			//item.dest.obj.stateWriter(states).add(liquid, item.nVolume)
+			// result
+			splitBigVolumes(item, tipModel).map(item => (item, LM(liquid, tipModel)))
 		}).toMap
-		if (!bRebuild) {
-			Success(items -> mLM)
-		}
-		else {
-			val items1 = splitBigVolumes(items, mLM)
-			tr1Items(items1)
-		}
+		Success(mLM.keys.toSeq -> mLM)
 	}
 	
-	def splitBigVolumes(items: Seq[Item], mLM: Map[Item, LM]): Seq[Item] = {
-		items.flatMap(item => {
-			val lm = mLM(item)
-			if (item.nVolume <= lm.tipModel.nVolume) Seq(item)
-			else {
-				val n = math.ceil(item.nVolume / lm.tipModel.nVolume).asInstanceOf[Int]
-				val nVolume = item.nVolume / n
-				val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, nVolume, item.premix_?, if (i == n - 1) item.postmix_? else None))
-				l
-			}
-		})
+	def splitBigVolumes(item: Item, tipModel: TipModel): Seq[Item] = {
+		if (item.nVolume <= tipModel.nVolume) Seq(item)
+		else {
+			val n = math.ceil(item.nVolume / tipModel.nVolume).asInstanceOf[Int]
+			val nVolume = item.nVolume / n
+			val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, nVolume, item.premix_?, if (i == n - 1) item.postmix_? else None))
+			l
+		}
 	}
 	
 	// TODO: After getting back mLM: Map[Item, LM], partition any items which require more volume than the TipModel can hold
@@ -219,6 +236,11 @@ class GroupABuilder(
 
 	/** Add the item's volume to mLMData to keep track of how many tips are needed for each LM */
 	def updateGroupA1_mLMData(item: Item)(g0: GroupA): GroupResult = {
+		// if a source of item is in the list of previous destinations, return GroupStop(g0)
+		if (item.srcs.exists(src => g0.lItem.exists(item => item.dest eq src))) {
+			return GroupStop(g0)
+		}
+		
 		//println("updateGroupA1_mLMData: "+L3A_PipetteItem.toDebugString(item) + ", "+g0.lItem)
 		val lItem = g0.lItem ++ Seq(item)
 		// Get a list of LMs in the order defined by lItem
@@ -247,18 +269,16 @@ class GroupABuilder(
 				else
 					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
 		}
-				// FIXME: for debug only
-				if (data.nVolumeCurrent > 1000) {
-					println("updateLMData")
-					println(data)
-					println(lm.tipModel, lm.tipModel.nVolume)
-					println(g0.mLMData)
-					println(g0.mLMData.get(lm))
-					Seq().head
-				}
-		
-		// TODO: if a source of item is in the list of previous destinations, return GroupStop(g0)
-		
+		// FIXME: for debug only
+		if (data.nVolumeCurrent > 1000) {
+			println("updateLMData")
+			println(data)
+			println(lm.tipModel, lm.tipModel.nVolume)
+			println(g0.mLMData)
+			println(g0.mLMData.get(lm))
+			Seq().head
+		}
+
 		GroupSuccess(g0.copy(
 			lItem = lItem,
 			lLM = lLM, 
@@ -614,6 +634,10 @@ class GroupABuilder(
 		println("g0.lAspirate: "+g0.lAspirate)
 		for (asp <- g0.lAspirate) {
 			// FIXME: for debug only
+			if ((asp.well.state(builder).liquid != g0.mTipToLM(asp.tip).liquid)) {
+				println("asp.well.state(builder): "+asp.well.state(builder))
+				println("g0.mTipToLM(asp.tip): "+g0.mTipToLM(asp.tip))
+			}
 			assert(asp.well.state(builder).liquid == g0.mTipToLM(asp.tip).liquid)
 			println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
 			// ENDFIX
@@ -623,9 +647,10 @@ class GroupABuilder(
 		
 		for (dis <- g0.lDispense) {
 			val liquid = dis.tip.state(builder).liquid
-			println("lDespense liquid: " + liquid)
+			//println("lDespense liquid: " + liquid)
 			dis.tip.obj.stateWriter(builder).dispense(dis.nVolume, dis.well.state(builder).liquid, dis.policy.pos)
 			dis.well.obj.stateWriter(builder).add(liquid, dis.nVolume)
+			println("dest state: "+dis.well.state(builder))
 		}
 		
 		// TODO: handle mixes
