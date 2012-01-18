@@ -33,6 +33,7 @@ class GroupA(
 	val mTipToCleanSpecPending: Map[TipConfigL2, WashSpec],
 	val lDispense: Seq[TipWellVolumePolicy],
 	val lAspirate: Seq[TipWellVolumePolicy],
+	val lPremix: Seq[TipWellMix],
 	val lPostmix: Seq[TipWellMix],
 	val bClean: Boolean,
 	val states1: RobotState
@@ -58,12 +59,13 @@ class GroupA(
 		mTipToCleanSpecPending: Map[TipConfigL2, WashSpec] = mTipToCleanSpecPending,
 		lDispense: Seq[TipWellVolumePolicy] = lDispense,
 		lAspirate: Seq[TipWellVolumePolicy] = lAspirate,
+		lPremix: Seq[TipWellMix] = lPostmix,
 		lPostmix: Seq[TipWellMix] = lPostmix,
 		bClean: Boolean = bClean,
 		states1: RobotState = states1
 	): GroupA = {
 		new GroupA(mLM, states0, tipBindings0, mTipToCleanSpecPending0, lItem, lLM, mLMToItems, mLMData, mLMTipCounts, mLMToTips, mTipToLM, mItemToTip, mTipToVolume,
-				mItemToPolicy, mTipToCleanSpecA, mTipToCleanSpecPendingA, mTipToCleanSpec, mTipToCleanSpecPending, lDispense, lAspirate, lPostmix, bClean,
+				mItemToPolicy, mTipToCleanSpecA, mTipToCleanSpecPendingA, mTipToCleanSpec, mTipToCleanSpecPending, lDispense, lAspirate, lPremix, lPostmix, bClean,
 				states1)
 	}
 	
@@ -82,6 +84,7 @@ class GroupA(
 			"mTipToWashIntensityPending:\n    "+mTipToCleanSpecPending.mapValues(_.washIntensity).toSeq.sortBy(_._1).mkString(", "),
 			lDispense.map(twvpString).mkString("lDispense:\n    ", "\n    ", ""),
 			lAspirate.map(twvpString).mkString("lAspirate:\n    ", "\n    ", ""),
+			lPremix.map(twmString).mkString("lPremix:\n    ", "\n    ", ""),
 			lPostmix.map(twmString).mkString("lPostmix:\n    ", "\n    ", "")
 		).filter(!_.toString.isEmpty).mkString("GroupA(\n  ", "\n  ", ")\n")
 	}
