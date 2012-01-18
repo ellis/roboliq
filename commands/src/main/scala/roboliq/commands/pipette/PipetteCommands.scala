@@ -14,6 +14,25 @@ trait PipetteCommands extends RoboliqCommands {
 		cmds += cmd
 	}
 	
+	def pipette(
+		source: WellPointer,
+		dest: WellPointer,
+		lnVolume: Seq[Double],
+		tipOverrides_? : Option[TipHandlingOverrides],
+		premix_? : Option[MixSpec],
+		postmix_? : Option[MixSpec]
+	) {
+		val item = new L4A_PipetteItem(source, dest, lnVolume, premix_?, postmix_?)
+		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item), tipOverrides_? = tipOverrides_?))
+		cmds += cmd
+	}
+	
+	def pipette(source: WellPointer, dest: WellPointer, lnVolume: Seq[Double], tipOverrides_? : Option[TipHandlingOverrides]) {
+		val item = new L4A_PipetteItem(source, dest, lnVolume, None, None)
+		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item), tipOverrides_? = tipOverrides_?))
+		cmds += cmd
+	}
+	
 	def pipette(source: WellPointer, dest: WellPointer, volume: Double) {
 		pipette(source, dest, Seq(volume), None)
 	}
@@ -22,11 +41,34 @@ trait PipetteCommands extends RoboliqCommands {
 		pipette(source, dest, Seq(volume), Some(tipOverrides))
 	}
 	
-	def pipette(source: WellPointer, dest: WellPointer, lnVolume: Seq[Double], tipOverrides_? : Option[TipHandlingOverrides] = None) {
-		val item = new L4A_PipetteItem(source, dest, lnVolume, None, None)
-		val cmd = L4C_Pipette(new L4A_PipetteArgs(Seq(item), tipOverrides_? = tipOverrides_?))
-		cmds += cmd
+	def pipette(source: WellPointer, dest: WellPointer, lnVolume: Seq[Double]) { pipette(source, dest, lnVolume, None) }
+	
+	def pipette(
+		items: Seq[L4A_PipetteItem],
+		tipOverrides_? : Option[TipHandlingOverrides] = None
+	) {
+		cmds += L4C_Pipette(new L4A_PipetteArgs(items, tipOverrides_? = tipOverrides_?))
 	}
+	
+	def mixture(
+		dest: WellPointer,
+		items: Seq[Tuple2[WellPointer, Double]]
+	) {
+		val items2 = items.map(pair => new L4A_PipetteItem(pair._1, dest, List(pair._2), None, None))
+		pipette(items2, None)
+	}
+	
+	def distribute(
+		source: WellPointer,
+		dest: WellPointer,
+		volume: Double,
+		premix: MixSpec = null,
+		postmix: MixSpec = null
+	) {
+		pipette(source, dest, Seq(volume), None, some(premix), some(postmix)) 
+	}
+	
+	private def some[T](o: T): Option[T] = if (o != null) Some(o) else None
 }
 
 object PipetteCommandsL4 {
