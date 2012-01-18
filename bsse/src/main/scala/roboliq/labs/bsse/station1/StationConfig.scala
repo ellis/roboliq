@@ -39,7 +39,7 @@ class StationConfig extends EvowareTable {
 		val cooled = new CarrierModel("MP 3Pos Cooled 1 PCR", 2, true)
 		val uncooled = new CarrierModel("MP 3Pos Cooled 2 PCR", 3, false)
 		val filters = new CarrierModel("Te-VaCS", 2, false)
-		val pcr = new CarrierModel("TRobot1", 1, false)
+		val pcr = new CarrierModel("TRobot", 1, false)
 		val sealer = new CarrierModel("RoboSeal", 1, false)
 		val peeler = new CarrierModel("RoboPeel", 1, false)
 		val centrifuge = new CarrierModel("Centrifuge", 1, false)
@@ -58,7 +58,7 @@ class StationConfig extends EvowareTable {
 		val uncooled = new CarrierObj("MP 3Pos Cooled 2 PCR", CarrierModels.uncooled, 24)
 		val filters = new CarrierObj("Te-VaCS", CarrierModels.filters, 33)
 		val sealer = new CarrierObj("RoboSeal", CarrierModels.sealer, 35)
-		val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
+		//val pcr1 = new CarrierObj("TRobot1", CarrierModels.pcr, 40)
 		val pcr2 = new CarrierObj("TRobot2", CarrierModels.pcr, 47)
 		val centrifuge = new CarrierObj("Centrifuge", CarrierModels.centrifuge, 54)
 	}
@@ -74,7 +74,7 @@ class StationConfig extends EvowareTable {
 		val (cooled1, cooled2) = createSites(Carriers.cooled, "cooled1", "cooled2", Seq(0, 1))
 		val (cooled3, cooled4, cooled5) = createSites(Carriers.uncooled, "uncooled1", "uncooled2", "uncooled3", Seq(0, 1))
 		val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
-		val pcr1 = createSite(Carriers.pcr1, 0, "pcr1", Seq(0, 1))
+		//val pcr1 = createSite(Carriers.pcr1, 0, "pcr1", Seq(0, 1))
 		val pcr2 = createSite(Carriers.pcr2, 0, "pcr2", Seq(0, 1))
 		val sealer = createSites(Carriers.sealer, "sealer", Seq(1))
 		val peeler = createSites(Carriers.peeler, "peeler", Seq(1))
@@ -116,7 +116,8 @@ class StationConfig extends EvowareTable {
 	val pipetter = new BssePipetteDevice(TipModels.tipModel50, TipModels.tipModel1000)
 	val sealer = new RoboSealDevice("RoboSeal", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf""", "sealer")
 	val peeler = new RoboPeelDevice("RoboPeel", """C:\Programme\HJBioanalytikGmbH\RoboPeel3\RoboPeel_PlateParameters\4titude_PCR_blau.bcf""", "peeler")
-	val trobot1 = new TRobotDevice("TRobot1", "pcr1")
+	//val trobot1 = new TRobotDevice("TRobot1", "pcr1")
+	val trobot2 = new TRobotDevice("TRobot2", "pcr2")
 	val centrifuge = new CentrifugeDevice("Centrifuge", "centrifuge", 4)
 	
 	val devices = Seq(
@@ -124,7 +125,7 @@ class StationConfig extends EvowareTable {
 		pipetter,
 		sealer,
 		peeler,
-		trobot1,
+		trobot2,
 		centrifuge
 	)
 	
@@ -141,10 +142,10 @@ class StationConfig extends EvowareTable {
 		new L3P_Shake_HPShaker("shaker"),
 		new L3P_Seal_RoboSeal(sealer),
 		new L3P_Peel_RoboPeel(peeler),
-		new L3P_Thermocycle_TRobot(trobot1),
-		new L3P_PcrClose(trobot1),
-		new L3P_PcrOpen(trobot1),
-		new L3P_PcrRun(trobot1),
+		new L3P_Thermocycle_TRobot(trobot2),
+		new L3P_PcrClose(trobot2),
+		new L3P_PcrOpen(trobot2),
+		new L3P_PcrRun(trobot2),
 		new L3P_Centrifuge(centrifuge),
 		new L3P_CentrifugeClose(centrifuge),
 		new L3P_CentrifugeMoveTo(centrifuge),

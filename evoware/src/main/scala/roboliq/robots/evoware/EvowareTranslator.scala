@@ -333,8 +333,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			Seq(L0C_Transfer_Rack(
 				iRoma,
 				c.sPlateModel,
-				siteSrc.iGrid, siteSrc.iSite, carrierSrc.model.sName,
-				siteDest.iGrid, siteDest.iSite, carrierDest.model.sName,
+				siteSrc.iGrid, siteSrc.iSite, carrierSrc.sLabel,
+				siteDest.iGrid, siteDest.iSite, carrierDest.sLabel,
 				c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,

@@ -131,7 +131,7 @@ class L4A_PipetteItem(
 	}
 }
 
-class L3A_PipetteItem(
+case class L3A_PipetteItem(
 	val srcs: SortedSet[WellConfigL2],
 	val dest: WellConfigL2,
 	val nVolume: Double,

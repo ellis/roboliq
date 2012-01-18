@@ -410,6 +410,7 @@ class GroupABuilder(
 	def updateGroupA6_mItemToPolicy(g0: GroupA): GroupResult = {
 		val mTipToLiquidGroups = new HashMap[TipConfigL2, LiquidGroup]
 
+		val states = new StateBuilder(g0.states0)
 		val lItemToPolicy = for (item <- g0.lItem) yield {
 			// FIXME: For debug only
 			if (!g0.mItemToTip.contains(item)) {
@@ -421,8 +422,7 @@ class GroupABuilder(
 			}
 			// ENDFIX
 			val tip = g0.mItemToTip(item)
-			// TODO: need to keep track of well liquid as we go, since we might dispense into a single well multiple times
-			val destState = item.dest.state(g0.states0)
+			val destState = item.dest.state(states)
 			val liquid = g0.mLM(item).liquid
 			val nVolume = item.nVolume
 			val nVolumeDest = destState.nVolume
@@ -434,6 +434,9 @@ class GroupABuilder(
 					case Some(p) => p
 				}
 			)
+
+			// need to keep track of well liquid as we go, since we might dispense into a single well multiple times
+			item.dest.obj.stateWriter(states).add(liquid, nVolume)
 			
 			item -> policy
 		}
@@ -450,6 +453,7 @@ class GroupABuilder(
 			new TipWellVolumePolicy(tip, item.dest, item.nVolume, policy)
 		})
 		
+		val states = new StateBuilder(g0.states0)
 		val lPostmix = g0.lItem.flatMap(item => {
 			val tip = g0.mItemToTip(item)
 			val policy = g0.mItemToPolicy(item) 
@@ -458,8 +462,11 @@ class GroupABuilder(
 				case (Some(a), Some(b)) => Some(a + b)
 				case (a, b) => if (a.isEmpty) b else a
 			}
+			// need to keep track of well liquid as we go, since we might dispense into a single well multiple times
+			item.dest.obj.stateWriter(states).add(g0.mLM(item).liquid, item.nVolume)
+			
 			if (mixSpec_?.isDefined) {
-				val mixSpec = device.getMixSpec(tip.state(g0.states0), item.dest.state(g0.states0), mixSpec_?) match {
+				val mixSpec = device.getMixSpec(tip.state(states), item.dest.state(states), mixSpec_?) match {
 					case Error(lsError) => return GroupError(g0, lsError)
 					case Success(o) => o
 				}
@@ -477,6 +484,7 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA8_lAspirate(g0: GroupA): GroupResult = {
+		val states = new StateBuilder(g0.states0)
 		val lAspirate = g0.lLM.flatMap(lm => {
 			val tips = g0.mLMToTips(lm)
 			val lItem = g0.lItem.filter(item => g0.mLM(item) == lm)
@@ -484,13 +492,24 @@ class GroupABuilder(
 			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
 			val ltw = lltw.flatMap(identity)
 			ltw.map(tw => {
-				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0))
+				val policy_? = device.getAspiratePolicy(tw.tip.state(states), tw.well.state(states))
+				// FIXME: for debug only
+				if (device.getAspiratePolicy(tw.tip.state(states), tw.well.state(states)).isEmpty) {
+					println("getAspiratePolicy")
+					println(tw.tip.state(states), tw.well.state(states))
+				}
+				// ENDFIX
 				val policy = cmd.args.pipettePolicy_?.getOrElse(
-					device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0)) match {
+					device.getAspiratePolicy(tw.tip.state(states), tw.well.state(states)) match {
 						case None => return GroupError(g0, Seq("Could not find aspirate policy for "+tw.tip+" and "+tw.well))
 						case Some(p) => p
 					}
 				)
+				// need to keep track of well liquid as we go, since we might aspirate from a single well multiple times
+				val nVolume = g0.mTipToVolume(tw.tip)
+				tw.tip.obj.stateWriter(states).aspirate(tw.well.state(states).liquid, nVolume)
+				tw.well.obj.stateWriter(states).remove(nVolume)
+
 				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy)
 			})
 		})
@@ -581,89 +600,6 @@ class GroupABuilder(
 			mTipToCleanSpec = mTipToCleanSpec,
 			mTipToCleanSpecPending = mTipToCleanSpecPending
 		))
-		
-		/*
-			
-			
-			val liquidSrc = g0.m
-			liquid.group
-			val tip = g0.mDestToTip(item)
-			val destState = item.dest.state(g0.states0)
-			val liquid = g0.mLM(item).liquid
-			val nVolume = item.nVolume
-			val nVolumeDest = destState.nVolume
-			val liquidDest = destState.liquid
-		}
-		
-		val lTipEnteredCells = new HashSet[TipConfigL2]
-		val mTipToLiquidGroups = new HashMap[TipConfigL2, LiquidGroup]
-		//val mTipToIntensity = new HashMap[TipConfigL2, WashIntensity.Value]
-		val mTipToCleanSpec = new HashMap[TipConfigL2, WashSpec]
-		val mTipToCleanSpecPending = new HashMap[TipConfigL2, WashSpec]
-		val mDestToPolicy = new HashMap[Item, PipettePolicy]
-		val builder = new StateBuilder(g0.states0)
-
-		// For the tips in this group, add clean specs pending from the previous pipetting group
-		mTipToCleanSpec ++= g0.mTipToCleanSpecPending0.filter(pair => g0.mTipToLM.contains(pair._1))
-		// Add clean specs pending from the previous pipetting group
-		// Below, we will overwrite the values for tips used in this group
-		mTipToCleanSpecPending ++= g0.mTipToCleanSpecPending0
-
-		val lDispense = for (item <- g0.lItem) yield {
-			val tip = g0.mItemToTip(item)
-			val destState = item.dest.state(g0.states0)
-			val liquid = g0.mLM(item).liquid
-			val nVolume = item.nVolume
-			val nVolumeDest = destState.nVolume
-			val liquidDest = destState.liquid
-			
-			// TODO: allow for policy override
-			val policy = device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest) match {
-				case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
-				case Some(p) => p
-			}
-			
-			// TODO: allow for override via tipOverrides
-			// Tips should be washed after entering a well with cells
-			if (lTipEnteredCells.contains(tip))
-				return GroupStop(g0)
-			if (liquidDest.contaminants.contains(Contaminant.Cell))
-				lTipEnteredCells += tip
-				
-			// TODO: allow for override via tipOverrides
-			// LiquidGroups
-			val liquidGroupDest = liquidDest.group
-			val (intensityEnter, intensityExit) = mTipToLiquidGroups.get(tip) match {
-				case None =>
-					mTipToLiquidGroups(tip) = liquidGroupDest
-					(liquidGroupDest.cleanPolicy.enter, liquidGroupDest.cleanPolicy.exit)
-				case Some(liquidGroup0) =>
-					if (liquidGroupDest ne liquidGroup0) {
-						// TODO: allow for override via tipOverrides
-						// i.e. if overridden, set mTipToIntensity(tip) to max of two intensities
-						return GroupStop(g0)
-					}
-					(liquidGroupDest.cleanPolicy.enter, liquidGroupDest.cleanPolicy.exit)
-			}
-			val tipState = tip.state(g0.states0)
-			val intensityEnterMax = WashIntensity.max(intensityEnter, mTipToCleanSpec.get(tip).map(_.washIntensity).getOrElse(WashIntensity.None))
-			val cleanSpecEnter = new WashSpec(intensityEnterMax, tipState.contamInside, tipState.contamOutside)
-			val cleanSpecPending = new WashSpec(intensityExit, tipState.contamInside, tipState.contamOutside)
-			mTipToCleanSpec(tip) = cleanSpecEnter
-			mTipToCleanSpecPending(tip) = cleanSpecPending
-			
-			item.dest.obj.stateWriter(builder).add(liquid, nVolume)
-			mDestToPolicy(item) = policy
-			
-			new TipWellVolumePolicy(tip, item.dest, nVolume, policy)
-		}
-		
-		GroupSuccess(g0.copy(
-			mTipToCleanSpec = mTipToCleanSpec.toMap,
-			mTipToCleanSpecPending = mTipToCleanSpecPending.toMap,
-			lDispense = lDispense
-		))
-		*/
 	}
 	
 	def updateGroupA9_states1(g0: GroupA): GroupResult = {
@@ -674,15 +610,22 @@ class GroupABuilder(
 		for ((tip, cleanSpec) <- g0.mTipToCleanSpec) {
 			tip.obj.stateWriter(builder).clean(cleanSpec.washIntensity)
 		}
-		
+
+		println("g0.lAspirate: "+g0.lAspirate)
 		for (asp <- g0.lAspirate) {
+			// FIXME: for debug only
+			assert(asp.well.state(builder).liquid == g0.mTipToLM(asp.tip).liquid)
+			println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
+			// ENDFIX
 			asp.tip.obj.stateWriter(builder).aspirate(asp.well.state(builder).liquid, asp.nVolume)
 			asp.well.obj.stateWriter(builder).remove(asp.nVolume)
 		}
 		
 		for (dis <- g0.lDispense) {
+			val liquid = dis.tip.state(builder).liquid
+			println("lDespense liquid: " + liquid)
 			dis.tip.obj.stateWriter(builder).dispense(dis.nVolume, dis.well.state(builder).liquid, dis.policy.pos)
-			dis.well.obj.stateWriter(builder).add(dis.well.state(builder).liquid, dis.nVolume)
+			dis.well.obj.stateWriter(builder).add(liquid, dis.nVolume)
 		}
 		
 		// TODO: handle mixes

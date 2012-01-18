@@ -171,10 +171,10 @@ class PipetteScheduler(
 		case item :: rest =>
 			builderA.addItemToGroup(acc.head, item) match {
 				case err: builderA.GroupError =>
-					//println("Error in x2R:")
-					//println(err)
+					println("Error in x2R:")
+					println(err)
 					acc
-				case stop: builderA.GroupStop => /*println("stop:"); println(stop);*/ acc
+				case stop: builderA.GroupStop => println("stop:"); println(stop); acc
 				case builderA.GroupSuccess(g) =>
 					x2R(rest, g :: acc)
 			}
@@ -220,9 +220,9 @@ class PipetteScheduler(
 			//println("gA: "+lGroupA(iItem))
 			val gB = lGroupB(iItem)
 			if (gB == null) {
-				println("lGroupA: "+lGroupA)
+				println("lGroupA: "+lGroupA.toList)
 				println(iItem, acc)
-				Seq().head
+				Seq().head // This is here to force a crash!
 				Nil // ERROR!
 			}
 			else

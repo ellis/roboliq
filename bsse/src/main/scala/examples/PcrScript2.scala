@@ -16,9 +16,9 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
 		val primerB = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
 		val polymerase = new Liquid("Glycerol", CleanPolicy.TNT)
+		val template = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
 	}
 	
-	val well_template = new common.WellPointerVar
 	val well_masterMix = new common.WellPointerVar
 	val plate_working = new Plate
 	val plate_balance = new Plate
@@ -26,7 +26,7 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 	
 	import roboliq.commands.pipette.L4A_PipetteItem
 	import roboliq.commands.pipette.MixSpec
-	mixture(dest = well_masterMix, List(
+	/*mixture(dest = well_masterMix, List(
 		(Liquids.buffer10x, 20),
 		(Liquids.dNTP, 20),
 		(well_template, 1),
@@ -35,6 +35,19 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		(Liquids.water, 156))
 	)
 	distribute(well_masterMix, wells_working, 20, premix = MixSpec(Some(200 * 0.75), Some(4)))
+	*/
+	val items = List(
+		new L4A_PipetteItem(Liquids.water, well_masterMix, List(156), None, None),
+		new L4A_PipetteItem(Liquids.buffer10x, well_masterMix, List(20), None, None),
+		new L4A_PipetteItem(Liquids.dNTP, well_masterMix, List(20), None, None),
+		new L4A_PipetteItem(Liquids.template, well_masterMix, List(1), None, None),
+		new L4A_PipetteItem(Liquids.primerF, well_masterMix, List(1), None, None),
+		new L4A_PipetteItem(Liquids.primerB, well_masterMix, List(1), None, None),
+		new L4A_PipetteItem(Liquids.polymerase, well_masterMix, List(1), None, None)//,
+		//new L4A_PipetteItem(well_masterMix, wells_working, List(20), Some(MixSpec(Some(200 * 0.75), Some(4))), None)
+	)
+	cmds += roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(items, tipOverrides_? = None))
+	
 	seal(plate_working)
 	val setup_thermocycle = thermocycle(plate_working)
 	val setup_centrifuge = centrifuge(plate_working)
@@ -48,23 +61,15 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		reagent(Liquids.water, Labwares.reagents50, 1)
 		reagent(Liquids.buffer10x, Labwares.eppendorfs, 1)
 		reagent(Liquids.dNTP, Labwares.eppendorfs, 2)
-		reagent(Liquids.primerF, Labwares.eppendorfs, 5)
-		reagent(Liquids.primerB, Labwares.eppendorfs, 6)
-		reagent(Liquids.polymerase, Labwares.eppendorfs, 7)
-		
-		well_template.pointer_? = Some(Labwares.eppendorfs.commonObj(D2))
-		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(B2))
+		reagent(Liquids.template, Labwares.eppendorfs, 5)
+		reagent(Liquids.primerF, Labwares.eppendorfs, 6)
+		reagent(Liquids.primerB, Labwares.eppendorfs, 7)
+		reagent(Liquids.polymerase, Labwares.eppendorfs, 8)
 		
 		labware(plate_balance, Sites.cooled1, LabwareModels.platePcr)
 		labware(plate_working, Sites.cooled2, LabwareModels.platePcr)
-		for (wells <- well_template.getWells(kb); wellObj <- wells) {
-			val wellSetup = kb.getWellSetup(wellObj)
-			val sLiquid = "template#"+wellSetup.index_?.get
-			val liquid = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)
-			liquid.setup.sName_? = Some(sLiquid)
-			wellSetup.reagent_? = Some(liquid)
-		}
 		
+		well_masterMix.pointer_? = Some(Labwares.eppendorfs.commonObj(A3))
 		wells_working.pointer_? = Some(plate_working(D6+2)+plate_working(D7+2))
 
 		station.centrifuge.setup.plate_balance = plate_balance

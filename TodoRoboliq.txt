@@ -1,5 +1,10 @@
 http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structures
 
+2012-01-18:
+	vital: add polymerase
+	vital: mix
+	don't decontam large tips, only thorough wash
+
 James Meridith: API for Evoware
 
 
