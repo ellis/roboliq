@@ -27,6 +27,7 @@ class GroupBBuilder(
 	): Result[GroupB] = {
 		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => L2C_Aspirate(items))
 		val lDispense = groupSpirateItems(groupA, groupA.lDispense).map(items => L2C_Dispense(items))
+		val lPremix = groupMixItems(groupA, groupA.lPremix).map(items => L2C_Mix(items))
 		val lPostmix = groupMixItems(groupA, groupA.lPostmix).map(items => L2C_Mix(items))
 		
 		//println("groupA:"+groupA)
@@ -69,6 +70,7 @@ class GroupBBuilder(
 			cleans = cleans,
 			lTipCleanable = lTipCleanable,
 			Nil,
+			lPremix = lPremix,
 			lAspirate = lAspirate,
 			lDispense = lDispense,
 			lPostmix = lPostmix,

@@ -196,7 +196,7 @@ class GroupABuilder(
 		states0: RobotState,
 		mLM: Map[Item, LM]
 	): GroupA = {
-		val groupA0 = new GroupA(mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, false, states0)
+		val groupA0 = new GroupA(mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, Nil, false, states0)
 		groupA0
 	}
 	
@@ -208,7 +208,7 @@ class GroupABuilder(
 		g0: GroupA
 	): GroupA = {
 		val g = new GroupA(
-			g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, false, g0.states1
+			g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, Nil, false, g0.states1
 		)
 		g
 	}
@@ -540,55 +540,31 @@ class GroupABuilder(
 			val srcs = SortedSet(lItem.flatMap(_.srcs) : _*)
 			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
 			val ltw = lltw.flatMap(identity)
-			// TODO: check whether any lItems have premix specs
-			// TODO: make sure all premix specs are the same
-			// TODO: if there is a premix spec, create a new TipWellMix item
-			ltw.map(tw => {
-				val policy_? = device.getAspiratePolicy(tw.tip.state(states), tw.well.state(states))
-				// FIXME: for debug only
-				if (device.getAspiratePolicy(tw.tip.state(states), tw.well.state(states)).isEmpty) {
-					println("getAspiratePolicy")
-					println(tw.tip.state(states), tw.well.state(states))
-				}
-				// ENDFIX
-				val policy = cmd.args.pipettePolicy_?.getOrElse(
-					device.getAspiratePolicy(tw.tip.state(states), tw.well.state(states)) match {
-						case None => return GroupError(g0, Seq("Could not find aspirate policy for "+tw.tip+" and "+tw.well))
-						case Some(p) => p
+			// Gather premix specs
+			lItem.map(_.premix_?).flatten match {
+				case Seq() => Seq()
+				case Seq(premix, rest @ _*) =>
+					if (!rest.forall(_ == premix)) {
+						return GroupError(g0, Seq("premix specs must be the same for all items which refer to the same source"))
 					}
-				)
-				// need to keep track of well liquid as we go, since we might aspirate from a single well multiple times
-				val nVolume = g0.mTipToVolume(tw.tip)
-				tw.tip.obj.stateWriter(states).aspirate(tw.well.state(states).liquid, nVolume)
-				tw.well.obj.stateWriter(states).remove(nVolume)
-
-				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy)
-			})
-		})
-		val lPremi1x = g0.lLM.flatMap(lm => {
-			val tips = g0.mLMToTips(lm)
-			val lItem = g0.lItem.filter(item => g0.mLM(item) == lm)
-			val tip = g0.mItemToTip(item)
-			val policy = g0.mItemToPolicy(item) 
-			val mixSpec_? = item.premix_?
-			}
-			// need to keep track of well liquid as we go, since we might dispense into a single well multiple times
-			item.dest.obj.stateWriter(states).add(g0.mLM(item).liquid, item.nVolume)
-			
-			if (mixSpec_?.isDefined) {
-				val mixSpec = device.getMixSpec(tip.state(states), item.dest.state(states), mixSpec_?) match {
-					case Error(lsError) => return GroupError(g0, lsError)
-					case Success(o) => o
-				}
-				Seq(new TipWellMix(tip, item.dest, mixSpec))
-			}
-			else {
-				Seq()
+					ltw.map(tw => {
+						val mixSpec = device.getMixSpec(tw.tip.state(states), tw.well.state(states), Some(premix)) match {
+							case Error(lsError) => return GroupError(g0, lsError)
+							case Success(o) => o
+						}
+						new TipWellMix(tw.tip, tw.well, mixSpec)
+					})
 			}
 		})
 
+		println("lPremix: "+lPremix)
+		println("g0.copy: "+(g0.copy(
+			lAspirate = lAspirate,
+			lPremix = lPremix
+		)))
 		GroupSuccess(g0.copy(
-			lAspirate = lAspirate
+			lAspirate = lAspirate,
+			lPremix = lPremix
 		))
 	}
 
