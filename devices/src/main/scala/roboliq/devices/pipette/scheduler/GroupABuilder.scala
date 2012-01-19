@@ -271,6 +271,7 @@ class GroupABuilder(
 				updateGroupA9_mTipToCleanSpec >>=
 				updateGroupA9_states1
 		} yield {
+			println("A11 g.lPremix: "+g.lPremix)
 			g
 		}
 	}
@@ -600,6 +601,7 @@ class GroupABuilder(
 	//case class LiquidGroups(pre: LiquidGroup, asperate: LiquidGroup, dispense: LiquidGroup)
 	
 	def updateGroupA9_mTipToCleanSpec(g0: GroupA): GroupResult = {
+		println("A9 g0.lPremix: "+g0.lPremix)
 		// Liquid groups of destination wells with wet contact
 		val mTipToLiquidGroups = new HashMap[TipConfigL2, Set[LiquidGroup]]
 		val mTipToDestContams = new HashMap[TipConfigL2, Set[Contaminant.Value]]
@@ -682,6 +684,7 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA9_states1(g0: GroupA): GroupResult = {
+		println("A10 g0.lPremix: "+g0.lPremix)
 		val builder = new StateBuilder(g0.states0)
 		
 		// TODO: handle tip replacement

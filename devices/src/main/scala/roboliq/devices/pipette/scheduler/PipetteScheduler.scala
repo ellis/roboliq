@@ -316,7 +316,7 @@ class PipetteScheduler(
 	}
 	
 	private def getCommands(lClean: List[Seq[Command]], lB: List[GroupB], statesLast: RobotState): Seq[Command] = {
-		val lCommand0 = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lAspirate ++ pair._2.lDispense ++ pair._2.lPostmix)
+		val lCommand0 = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lPremix ++ pair._2.lAspirate ++ pair._2.lDispense ++ pair._2.lPostmix)
 		//println("lCommand0:")
 		//lCommand0.foreach(cmd => println(cmd.toDebugString))
 		

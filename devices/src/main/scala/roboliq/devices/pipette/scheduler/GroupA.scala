@@ -61,7 +61,7 @@ class GroupA(
 		mTipToCleanSpecPending: Map[TipConfigL2, WashSpec] = mTipToCleanSpecPending,
 		lDispense: Seq[TipWellVolumePolicy] = lDispense,
 		lAspirate: Seq[TipWellVolumePolicy] = lAspirate,
-		lPremix: Seq[TipWellMix] = lPostmix,
+		lPremix: Seq[TipWellMix] = lPremix,
 		lPostmix: Seq[TipWellMix] = lPostmix,
 		bClean: Boolean = bClean,
 		states1: RobotState = states1
