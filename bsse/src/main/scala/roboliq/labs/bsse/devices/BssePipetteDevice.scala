@@ -245,11 +245,11 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		lTip -- lTipCleaning
 	}
 
-	def getTipsToCleanSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
+	/*def getTipsToCleanSimultaneously(lTipAll: SortedSet[TipConfigL2], lTipCleaning: SortedSet[TipConfigL2]): SortedSet[TipConfigL2] = {
 		val lModel = lTipCleaning.toSeq.map(tip => mTipToModel(tip))
 		val lTip = lTipAll.filter(tip => lModel.contains(mTipToModel(tip)))
 		lTip
-	}
+	}*/
 	
 	//def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Map[TipConfigL2, WashSpec]
 	def batchCleanSpecs(lTipAll: SortedSet[TipConfigL2], mTipToCleanSpec: Map[TipConfigL2, WashSpec]): Seq[Tuple2[WashSpec, SortedSet[TipConfigL2]]] = {
@@ -261,5 +261,9 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		})
 		lBlockToCleanSpec.map(pair => pair._2 -> pair._1.tTip).toSeq
 		//val lTip = lTipAll.filter(tip => lModel.contains(mapTipToModels(tip.obj))).map()
+	}
+	
+	def batchCleanTips(lTipAll: SortedSet[TipConfigL2]): Seq[SortedSet[TipConfigL2]] = {
+		lTipAll.toSeq.groupBy(mTipToBlock).values.toSeq.map(l => SortedSet(l : _*))
 	}
 }

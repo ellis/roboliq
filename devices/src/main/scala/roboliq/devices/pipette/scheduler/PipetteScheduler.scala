@@ -311,6 +311,9 @@ class PipetteScheduler(
 				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
 			}
 		}
+		
+		println("mTipToClean: "+mTipToClean)
+		println("lWash: "+lWash)
 
 		lReplace ++ lWash
 	}
@@ -337,6 +340,9 @@ class PipetteScheduler(
 			}
 		}
 		else {
+			val mTipToWashSpec = lTipAll.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity)).toMap
+			batchCleanTips
+			device.batchCleanSpecs(lTipAll, mTipToWashSpec)
 			//println("finalClean:")
 			//tips.toSeq.foreach(tip => println("state: "+tip.state(states)+", pending: "+tip.state(states).cleanDegreePending))
 			val intensity = lTipAll.foldLeft(WashIntensity.None)((acc, tip) => WashIntensity.max(acc, tip.state(states).cleanDegreePending))
