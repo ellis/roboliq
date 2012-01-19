@@ -31,8 +31,9 @@ class PipetteScheduler(
 		val states = new StateBuilder(ctx.states)
 		for {
 			items0 <- builderA.filterItems(cmd.args.items)
-			pair <- builderA.tr1Items(items0, states)
-			(items, mLM) = pair 
+			mItemToState0 = builderA.getItemStates(items0)
+			pair <- builderA.tr1Items(items0, mItemToState0)
+			(items, mItemToState, mLM) = pair 
 		} yield {
 			if (items.isEmpty)
 				return Success(Nil)
@@ -55,7 +56,7 @@ class PipetteScheduler(
 				bDone = (iItemParent == nItems - 1)
 				if (!bDone) {
 					val lItem = lItemAll.drop(iItemParent + 1)
-					x1(lItem, mLM, iItemParent)
+					x1(lItem, mItemToState, mLM, iItemParent)
 				}
 			}
 			println("lnScore: "+lnScore.toList)
@@ -86,11 +87,11 @@ class PipetteScheduler(
 		}
 	}
 	
-	private def x1(lItem: List[Item], mLM: Map[Item, LM], iItemParent: Int) {
+	private def x1(lItem: List[Item], mItemToState: Map[Item, ItemState], mLM: Map[Item, LM], iItemParent: Int) {
 		// New group with 0 items
 		val g0 = {
 			if (iItemParent < 0)
-				builderA.createGroupA(ctx.states, mLM)
+				builderA.createGroupA(ctx.states, mItemToState, mLM)
 			else {
 				val gParentA = lGroupA(iItemParent)
 				builderA.createGroupA(gParentA)

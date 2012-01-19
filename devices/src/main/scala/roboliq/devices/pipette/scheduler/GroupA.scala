@@ -13,6 +13,7 @@ import roboliq.commands.pipette.{L3A_PipetteItem => Item}
  * @param mItemToTip map from item to tip used for that item 
  */
 class GroupA(
+	val mItemToState: Map[Item, ItemState],
 	val mLM: Map[Item, LM],
 	val states0: RobotState,
 	val tipBindings0: Map[TipConfigL2, LM],
@@ -39,6 +40,7 @@ class GroupA(
 	val states1: RobotState
 ) {
 	def copy(
+		mItemToState: Map[Item, ItemState] = mItemToState,
 		mLM: Map[Item, LM] = mLM,
 		states0: RobotState = states0,
 		tipBindings0: Map[TipConfigL2, LM] = tipBindings0,
@@ -64,7 +66,7 @@ class GroupA(
 		bClean: Boolean = bClean,
 		states1: RobotState = states1
 	): GroupA = {
-		new GroupA(mLM, states0, tipBindings0, mTipToCleanSpecPending0, lItem, lLM, mLMToItems, mLMData, mLMTipCounts, mLMToTips, mTipToLM, mItemToTip, mTipToVolume,
+		new GroupA(mItemToState, mLM, states0, tipBindings0, mTipToCleanSpecPending0, lItem, lLM, mLMToItems, mLMData, mLMTipCounts, mLMToTips, mTipToLM, mItemToTip, mTipToVolume,
 				mItemToPolicy, mTipToCleanSpecA, mTipToCleanSpecPendingA, mTipToCleanSpec, mTipToCleanSpecPending, lDispense, lAspirate, lPremix, lPostmix, bClean,
 				states1)
 	}

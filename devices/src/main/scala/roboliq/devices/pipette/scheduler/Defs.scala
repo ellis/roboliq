@@ -13,6 +13,8 @@ import roboliq.compiler._
 import roboliq.devices.pipette._
 
 
+case class ItemState(item: Item, srcLiquid: Liquid, destState0: WellStateL2, destState1: WellStateL2)
+
 private class TipState(val tip: TipConfigL2) {
 	var liquid: Liquid = null
 	var nVolume: Double = 0
