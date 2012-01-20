@@ -26,16 +26,6 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 	
 	import roboliq.commands.pipette.L4A_PipetteItem
 	import roboliq.commands.pipette.MixSpec
-	/*mixture(dest = well_masterMix, List(
-		(Liquids.buffer10x, 20),
-		(Liquids.dNTP, 20),
-		(well_template, 1),
-		(Liquids.primerF, 1),
-		(Liquids.primerB, 1),
-		(Liquids.water, 156))
-	)
-	distribute(well_masterMix, wells_working, 20, premix = MixSpec(Some(200 * 0.75), Some(4)))
-	*/
 	val items = List(
 		new L4A_PipetteItem(Liquids.water, well_masterMix, List(156), None, None),
 		new L4A_PipetteItem(Liquids.buffer10x, well_masterMix, List(20), None, None),

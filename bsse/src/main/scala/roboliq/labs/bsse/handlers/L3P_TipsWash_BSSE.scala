@@ -15,28 +15,26 @@ class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: Plate) extends Co
 	val cmdType = classOf[CmdType]
 
 	def compile(ctx: CompilerContextL3, cmd: CmdType): Result[Seq[Command]] = {
-		cmd.intensity match {
-			case WashIntensity.None =>
-				Success(Seq())
-			case WashIntensity.Light =>
-				Success(Seq(
-					createWash2(ctx.states, cmd, 1),
-					createWash2(ctx.states, cmd, 2)))
-			case WashIntensity.Thorough =>
-				Success(Seq(
-					createWash2(ctx.states, cmd, 1),
-					createWash2(ctx.states, cmd, 2)))
-			case WashIntensity.Decontaminate =>
-				val b1000 = cmd.items.exists(_.tip.index < 4)
-				val b50 = cmd.items.exists(_.tip.index >= 4)
-				val l1000 =
-					if (b1000) Seq(L2C_EvowareSubroutine("""C:\Program Files\TECAN\EVOware\database\Scripts\Roboliq\Roboliq_Clean_Decontaminate_1000.esc""", updateStates_wash1000(cmd.intensity)))
-					else Seq()
-				val l50 =
-					if (b50) Seq(L2C_EvowareSubroutine("""C:\Program Files\TECAN\EVOware\database\Scripts\Roboliq\Roboliq_Clean_Decontaminate_0050.esc""", updateStates_wash50(cmd.intensity)))
-					else Seq()
-				Success(l1000 ++ l50)
+		if (cmd.intensity == WashIntensity.None)
+			return Success(Seq())
+			
+		val b1000 = cmd.items.exists(_.tip.index < 4)
+		val b50 = cmd.items.exists(_.tip.index >= 4)
+		val sIntensity = cmd.intensity match {
+			case WashIntensity.None => return Success(Seq())
+			case WashIntensity.Light => "Light"
+			case WashIntensity.Thorough => "Thorough"
+			case WashIntensity.Decontaminate => "Decontaminate"
 		}
+
+		val sScriptBase = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+sIntensity+"_"
+		val l1000 =
+			if (b1000) Seq(L2C_EvowareSubroutine(sScriptBase+"1000.esc", updateStates_wash1000(cmd.intensity)))
+			else Seq()
+		val l50 =
+			if (b50) Seq(L2C_EvowareSubroutine(sScriptBase+"0050.esc", updateStates_wash50(cmd.intensity)))
+			else Seq()
+		Success(l1000 ++ l50)
 	}
 	
 	private def createWash2(states: RobotState, cmd: CmdType, iWashProgram: Int): L2C_Wash = {

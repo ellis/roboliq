@@ -306,9 +306,18 @@ class PipetteScheduler(
 		val lWash = {
 			if (mTipToWash.isEmpty) Seq()
 			else {
-				val intensity = mTipToWash.values.foldLeft(WashIntensity.None) { (acc, spec) => WashIntensity.max(acc, spec.washIntensity) }
-				val items = mTipToWash.toSeq.sortBy(_._1).map(pair => new L3A_TipsWashItem(pair._1, pair._2.contamInside, pair._2.contamOutside))
-				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
+				val llTip = device.batchCleanTips(SortedSet(mTipToWash.keys.toSeq : _*))
+				llTip.flatMap(lTip => {
+					val intensity = lTip.foldLeft(WashIntensity.None)((acc, tip) => {
+						val spec = mTipToWash(tip)
+						WashIntensity.max(acc, spec.washIntensity)
+					})
+					val items = lTip.toSeq.map(tip => {
+						val spec = mTipToWash(tip)
+						new L3A_TipsWashItem(tip, spec.contamInside, spec.contamOutside)
+					})
+					if (items.isEmpty) None else Some(L3C_TipsWash(items, intensity))
+				})
 			}
 		}
 		
