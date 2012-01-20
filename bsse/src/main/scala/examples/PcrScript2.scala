@@ -10,7 +10,7 @@ class PcrScript2(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 	import roboliq.commands.MixItemTemplateL4
 	
 	object Liquids {
-		val water = new Liquid("Water", CleanPolicy.TNN)
+		val water = new Liquid("Water", CleanPolicy.TNL)
 		val buffer10x = new Liquid("Water", CleanPolicy.TNT)
 		val dNTP = new Liquid("Water", CleanPolicy.TNT)
 		val primerF = new Liquid("Water", Set(Contaminant.DNA), CleanPolicy.DDD)

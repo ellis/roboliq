@@ -406,22 +406,27 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA3_mLMToTips(g0: GroupA): GroupResult = {
-		val lTipAll: SortedSet[TipConfigL2] = device.config.tips.map(_.state(g0.states0).conf)
-		val lTipFree = HashSet(lTipAll.toSeq : _*)
-		val mLMToBoundTips: Map[LM, Seq[TipConfigL2]] = g0.tipBindings0.toSeq.groupBy(_._2).mapValues(_.map(_._1))
-		val llTip: Seq[SortedSet[TipConfigL2]] = g0.lLM.map(lm => {
-			val nTipTotal = g0.mLMTipCounts(lm)
-			val lTipBound = mLMToBoundTips.getOrElse(lm, Seq[TipConfigL2]())
-			val lTipAvailable = SortedSet((lTipFree ++ lTipBound).toSeq : _*)
-			//println("lTipAvailable: "+lTipAvailable)
-			device.assignTips(lTipAvailable, lm.tipModel, nTipTotal) match {
-				case Error(lsError) => return GroupError(g0, lsError)
-				case Success(lTip) =>
-					//println("lTip: "+lTip)
-					lTipFree --= lTip
-					lTip
+		println("g0.mTipToCleanSpecPending0: "+g0.mTipToCleanSpecPending0)
+		val llTip = {
+			val lTipClean = lTipAll.filter(tip => {
+				g0.mTipToCleanSpecPending0.get(tip) match {
+					case None => true
+					case Some(washSpec) => washSpec.washIntensity == WashIntensity.None
+				}
+			})
+			// FIXME: for debug only
+			if (lTipClean.size == 1)
+				lTipClean.toString()
+			// ENDFIX
+			updateGroupA3_mLMToTips_sub(g0, lTipClean) match {
+				case Error(lsError) =>
+					updateGroupA3_mLMToTips_sub(g0, lTipAll) match {
+						case Error(lsError) => return GroupError(g0, lsError)
+						case Success(llTip) => llTip
+					}
+				case Success(llTip) => llTip
 			}
-		})
+		}
 		//println("llTip: " + llTip)
 		
 		val mLMToTips = (g0.lLM zip llTip).toMap
@@ -430,6 +435,25 @@ class GroupABuilder(
 			mLMToTips = mLMToTips,
 			mTipToLM = mTipToLM
 		))
+	}
+
+	def updateGroupA3_mLMToTips_sub(g0: GroupA, lTipFree0: SortedSet[TipConfigL2]): Result[Seq[SortedSet[TipConfigL2]]] = {
+		val lTipFree = HashSet(lTipFree0.toSeq : _*)
+		val mLMToBoundTips: Map[LM, Seq[TipConfigL2]] = g0.tipBindings0.toSeq.groupBy(_._2).mapValues(_.map(_._1))
+		val llTip: Seq[SortedSet[TipConfigL2]] = g0.lLM.map(lm => {
+			val nTipTotal = g0.mLMTipCounts(lm)
+			val lTipBound = mLMToBoundTips.getOrElse(lm, Seq[TipConfigL2]())
+			val lTipAvailable = SortedSet((lTipFree ++ lTipBound).toSeq : _*)
+			//println("lTipAvailable: "+lTipAvailable)
+			device.assignTips(lTipAvailable, lm.tipModel, nTipTotal) match {
+				case Error(lsError) => return Error(lsError)
+				case Success(lTip) =>
+					//println("lTip: "+lTip)
+					lTipFree --= lTip
+					lTip
+			}
+		})
+		Success(llTip)
 	}
 	
 	def updateGroupA4_mItemToTip(g0: GroupA): GroupResult = {
