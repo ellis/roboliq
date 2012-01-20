@@ -340,15 +340,12 @@ class PipetteScheduler(
 			}
 		}
 		else {
-			val mTipToWashSpec = lTipAll.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity)).toMap
-			batchCleanTips
-			device.batchCleanSpecs(lTipAll, mTipToWashSpec)
-			//println("finalClean:")
-			//tips.toSeq.foreach(tip => println("state: "+tip.state(states)+", pending: "+tip.state(states).cleanDegreePending))
-			val intensity = lTipAll.foldLeft(WashIntensity.None)((acc, tip) => WashIntensity.max(acc, tip.state(states).cleanDegreePending))
-			val items = lTipAll.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity))
-			//println("items: "+items)
-			toCleanCommand(items.map(pair => pair._1-> WashSpec2(pair._1, pair._2)).toMap)
+			val llTip = device.batchCleanTips(lTipAll)
+			llTip.flatMap(lTip => {
+				val intensity = lTip.foldLeft(WashIntensity.None)((acc, tip) => WashIntensity.max(acc, tip.state(states).cleanDegreePending))
+				val items = lTip.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity))
+				toCleanCommand(items.map(pair => pair._1-> WashSpec2(pair._1, pair._2)).toMap)
+			})
 		}
 	}
 	
