@@ -1,17 +1,7 @@
 http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structures
 
-2012-01-18:
-	vital: add polymerase
-	vital: mix
-	don't decontam large tips, only thorough wash
-
 James Meridith: API for Evoware
 
-
-Free dispense small tips:
-	use dry dispense and remove liquid detection for dispense
-
-	before aspirating again, make sure slow wash
 
 Evoware people:
 
@@ -31,6 +21,13 @@ Big goals:
 	Weizmann: get all basic example scripts working
 	Weizmann: get commands in ALL_COMMANDS.conf working
 	Evoware: connect to Evoware's API to control operation
+	Get roboliq running on the Evoware machine
+
+Current goals:
+	esc: labware on external devices
+	nice scripts
+	read in evoware config files
+	better generation and scoring of cleaning commands
 
 Evoware commands:
 x	asperate
@@ -73,7 +70,6 @@ Roboease features which are missing:
 	log
 	use external scripts
 Code:
-	Testing: need to use 
 	PcrScript1: small tip dispense in first cycle should not be DRY contact -- need to track well state
 	PcrScript1: decontamination of big tips should occur at beginning of 2nd cycle instead of after (via optimization)
 	PcrScript1: why does cycle after mix decontaminate the big tips again?
