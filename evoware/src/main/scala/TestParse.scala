@@ -1,7 +1,4 @@
-package roboliq.robots.evoware
-
-
-object EvowareTranslatorHeader {
+object TestParse {
 	private val sDefault =
 """302F0FE9
 20110530_155010 No log in       
@@ -149,6 +146,8 @@ V;200
 --{ RPG }--"""
 	def getHeader(): String = sDefault
 	
+	class LabwareItem(val sType: String, val sLabel: String)
+	
 	type LabwareMap = Map[Tuple2[Int, Int], LabwareItem]
 	
 	def getHeader(map: LabwareMap): String = {
@@ -161,7 +160,7 @@ V;200
 		lsLineNew.mkString("\n")
 	}
 
-	private def processTop(lsLine: List[String], map: LabwareMap): List[String] = lsLine match {
+	def processTop(lsLine: List[String], map: LabwareMap): List[String] = lsLine match {
 		case Nil => Nil
 		case sLine :: rest =>
 			if (sLine.startsWith("999;"))
@@ -175,12 +174,12 @@ V;200
 			}
 	}
 
-	private def process_14(sLine14: String, lsLine: List[String], map: LabwareMap): List[String] = {
+	def process_14(sLine14: String, lsLine: List[String], map: LabwareMap): List[String] = {
 		val ls14 = sLine14.split(";", -1).tail.init.toList
 		process_line(0, ls14, lsLine, map)
 	}
 	
-	private def process_line(
+	def process_line(
 		iGrid: Int,
 		ls14: List[String],
 		lsLine: List[String],
