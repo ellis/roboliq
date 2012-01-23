@@ -1,10 +1,18 @@
-sealed abstract class Section
-case class SectionNone() extends Section
-case class Carrier(
+sealed abstract class CarrierObject
+case class SectionNone() extends CarrierObject
+case class GridObject(
 	val sName: String,
 	val id: Int,
 	val nSites: Int
-) extends Section
+) extends CarrierObject
+
+case class SiteObject(
+	parent: GridObject,
+	iGrid: Int,
+	iSite: Int,
+	sName: String,
+	sLabel: String
+)
 
 object EvowareFormat {
 	def splitSemicolons(sLine: String): Tuple2[Int, List[String]] = {
@@ -18,10 +26,10 @@ object EvowareFormat {
 object CarrierParser {
 	import EvowareFormat._
 	
-	def loadCarrierConfig(): List[Section] = {
+	def loadCarrierConfig(): List[CarrierObject] = {
 		val lsLine = scala.io.Source.fromFile("/home/ellisw/tmp/tecan/carrier.cfg", "ISO-8859-1").getLines.toList
 		//val lsLine = sInput.split("\r?\n", -1).toList
-		def x2(lsLine: List[String], acc: List[Section]): List[Section] = {
+		def x2(lsLine: List[String], acc: List[CarrierObject]): List[CarrierObject] = {
 			if (lsLine.isEmpty)
 				return acc
 			section(lsLine) match {
@@ -35,7 +43,7 @@ object CarrierParser {
 		//val ls14 = sLine14.split(";", -1).tail.init.toList
 	}
 	
-	def section(lsLine: List[String]): Tuple2[Section, List[String]] = {
+	def section(lsLine: List[String]): Tuple2[CarrierObject, List[String]] = {
 		val sLine0 = lsLine.head
 		val (nLineKind, l) = splitSemicolons(sLine0)
 		nLineKind match {
@@ -44,7 +52,7 @@ object CarrierParser {
 				val sId = l(1).split("/").head
 				val id = sId.toInt
 				val nSites = l(4).toInt
-				(Carrier(sName, id, nSites), lsLine.drop(8))
+				(GridObject(sName, id, nSites), lsLine.drop(8))
 			case _ => (SectionNone(), lsLine.tail)
 		}
 	}
@@ -53,7 +61,7 @@ object CarrierParser {
 object TableParser {
 	import EvowareFormat._
 
-	def parseFile(sections: List[Section], sFilename: String) {
+	def parseFile(sections: List[CarrierObject], sFilename: String) {
 		val lsLine = scala.io.Source.fromFile(sFilename, "ISO-8859-1").getLines.toList.drop(7)
 		//println(lsLine.takeWhile(_ != "--{ RPG }--").length)
 		val (_, l) = EvowareFormat.splitSemicolons(lsLine(1))
@@ -61,26 +69,15 @@ object TableParser {
 		println(rest.takeWhile(_ != "--{ RPG }--"))
 	}
 
-	def parse14(sections: List[Section], l: List[String], lsLine: List[String]): List[String] = {
-		val lCarrier_? = parse14_header(sections, l)
-		def step(iGrid: Int, lCarrier_? : List[Option[Carrier]], lsLine: List[String]): List[String] = lCarrier_? match {
-			case Nil => lsLine
-			case None :: rest => step(iGrid + 1, rest, lsLine.tail)
-			case Some(carrier) :: rest =>
-				val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
-				val (n1, l1) = EvowareFormat.splitSemicolons(lsLine(1))
-				assert(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)
-				println(iGrid+": "+carrier)
-				for (i <- 0 until carrier.nSites) {
-					println("\t"+i+": "+l0(i+1)+", "+l1(i))
-				}
-				step(iGrid + 1, rest, lsLine.drop(2))
-		}
-		step(0, lCarrier_?, lsLine)
+	def parse14(sections: List[CarrierObject], l: List[String], lsLine: List[String]): List[String] = {
+		val lGridObject_? = parse14_getGridObjects(sections, l)
+		val (lSiteObjects, lsLine2) = parse14_getSiteObjects(0, lGridObject_?, lsLine, Nil)
+		lSiteObjects.foreach(println)
+		lsLine2
 	}
 	
-	def parse14_header(sections: List[Section], l: List[String]): List[Option[Carrier]] = {
-		val map = sections.collect({case c: Carrier => c.id -> c}).toMap
+	def parse14_getGridObjects(sections: List[CarrierObject], l: List[String]): List[Option[GridObject]] = {
+		val map = sections.collect({case c: GridObject => c.id -> c}).toMap
 		l.map(s => {
 			val id = s.toInt
 			if (id == -1) None
@@ -93,6 +90,30 @@ object TableParser {
 				println(iGrid + ": " + map(id))
 			}
 		}*/
+	}
+	
+	def parse14_getSiteObjects(
+		iGrid: Int,
+		lGridObject_? : List[Option[GridObject]],
+		lsLine: List[String],
+		acc: List[SiteObject]
+	): Tuple2[List[SiteObject], List[String]] = {
+		lGridObject_? match {
+			case Nil => (acc, lsLine)
+			case None :: rest => parse14_getSiteObjects(iGrid + 1, rest, lsLine.tail, acc)
+			case Some(carrier) :: rest =>
+				val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
+				val (n1, l1) = EvowareFormat.splitSemicolons(lsLine(1))
+				assert(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)
+				println(iGrid+": "+carrier)
+				val l = (for (iSite <- 0 until carrier.nSites) yield {
+					//println("\t"+i+": "+l0(i+1)+", "+l1(i))
+					val sName = l0(iSite+1)
+					if (sName.isEmpty()) None
+					else Some(SiteObject(carrier, iGrid, iSite, sName, l1(iSite)))
+				}).toList.flatten
+				parse14_getSiteObjects(iGrid + 1, rest, lsLine.drop(2), acc ++ l)
+		}
 	}
 }
 
