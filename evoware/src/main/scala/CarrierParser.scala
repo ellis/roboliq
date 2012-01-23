@@ -14,6 +14,11 @@ case class SiteObject(
 	sLabel: String
 )
 
+case class HotelObject(
+	parent: GridObject,
+	iGrid: Int
+)
+
 object EvowareFormat {
 	def splitSemicolons(sLine: String): Tuple2[Int, List[String]] = {
 		val l = sLine.split(";", -1).init.toList
@@ -70,18 +75,23 @@ object TableParser {
 	}
 
 	def parse14(sections: List[CarrierObject], l: List[String], lsLine: List[String]): List[String] = {
-		val lGridObject_? = parse14_getGridObjects(sections, l)
-		val (lSiteObjects, lsLine2) = parse14_getSiteObjects(0, lGridObject_?, lsLine, Nil)
-		lSiteObjects.foreach(println)
-		lsLine2
+		val mapIdToGridObject = sections.collect({case c: GridObject => c.id -> c}).toMap
+		val lGridObject_? = parse14_getGridObjects(mapIdToGridObject, l)
+		val (lSiteObject, lsLine2) = parse14_getSiteObjects(0, lGridObject_?, lsLine, Nil)
+		val (lHotelObject, lsLine3) = parse14_getHotelObjects(mapIdToGridObject, lsLine2)
+		lSiteObject.foreach(println)
+		lHotelObject.foreach(println)
+		lsLine3
 	}
 	
-	def parse14_getGridObjects(sections: List[CarrierObject], l: List[String]): List[Option[GridObject]] = {
-		val map = sections.collect({case c: GridObject => c.id -> c}).toMap
+	def parse14_getGridObjects(
+		mapIdToGridObject: Map[Int, GridObject],
+		l: List[String]
+	): List[Option[GridObject]] = {
 		l.map(s => {
 			val id = s.toInt
 			if (id == -1) None
-			else map.get(id)
+			else mapIdToGridObject.get(id)
 		})
 		/*
 		for ((item, iGrid) <- l.zipWithIndex) {
@@ -114,6 +124,24 @@ object TableParser {
 				}).toList.flatten
 				parse14_getSiteObjects(iGrid + 1, rest, lsLine.drop(2), acc ++ l)
 		}
+	}
+	
+	def parse14_getHotelObjects(
+		mapIdToGridObject: Map[Int, GridObject],
+		lsLine: List[String]
+	): Tuple2[List[HotelObject], List[String]] = {
+		val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
+		assert(n0 == 998)
+		val nHotels = l0(0).toInt
+		val lHotelObject = lsLine.tail.take(nHotels).map(s => {
+			val (n, l) = EvowareFormat.splitSemicolons(s)
+			assert(n == 998)
+			val id = l(0).toInt
+			val iGrid = l(1).toInt
+			val parent = mapIdToGridObject(id)
+			HotelObject(parent, iGrid)
+		})
+		(lHotelObject, lsLine.drop(1 + nHotels))
 	}
 }
 
