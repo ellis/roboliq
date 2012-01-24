@@ -23,11 +23,12 @@ case class SiteObject(
 
 case class HotelObject(
 	parent: CarrierModel,
-	iGrid: Int
+	n: Int // Value of unknown significance
 )
 
 case class ExternalObject(
-	index: Int,
+	n1: Int, // Value of unknown significance
+	n2: Int, // Value of unknown significance
 	carrierModel: CarrierModel
 )
 
@@ -43,8 +44,8 @@ object EvowareFormat {
 object CarrierParser {
 	import EvowareFormat._
 	
-	def loadCarrierConfig(): List[EvowareModel] = {
-		val lsLine = scala.io.Source.fromFile("/home/ellisw/tmp/tecan/carrier.cfg", "ISO-8859-1").getLines.toList
+	def loadCarrierConfig(sFilename: String): List[EvowareModel] = {
+		val lsLine = scala.io.Source.fromFile(sFilename, "ISO-8859-1").getLines.toList
 		//val lsLine = sInput.split("\r?\n", -1).toList
 		def x2(lsLine: List[String], acc: List[EvowareModel]): List[EvowareModel] = {
 			if (lsLine.isEmpty)
@@ -70,7 +71,7 @@ object CarrierParser {
 		}
 	}
 	
-	def parse13(l: Array[String], lsLine: List[String]): Tuple2[Option[EvowareModel], List[String]] = {
+	def parse13(l: Array[String], lsLine: List[String]): Tuple2[Option[CarrierModel], List[String]] = {
 		val sName = l.head
 		val l1 = l(1).split("/")
 		val sId = l1(0)
@@ -97,31 +98,59 @@ object CarrierParser {
 	}
 }
 
-object TableParser {
+class EvowareConfigFile(sCarrierCfg: String) {
+	val models = CarrierParser.loadCarrierConfig(sCarrierCfg)
+	val mapIdToCarrierModel = models.collect({case o: CarrierModel => o.id -> o}).toMap
+	val mapNameToCarrierModel = models.collect({case o: CarrierModel => o.sName -> o}).toMap
+	val mapNameToLabwareModel = models.collect({case o: LabwareModel => o.sName -> o}).toMap
+}
+
+class EvowareTableFile(
+	val configFile: EvowareConfigFile,
+	val lSiteObject: List[SiteObject],
+	val lHotelObject: List[HotelObject],
+	val lExternalObject: List[ExternalObject],
+	val mapCarrierToGrid: Map[CarrierModel, Int]
+)
+
+object EvowareTableParser {
 	import EvowareFormat._
 
-	def parseFile(sections: List[EvowareModel], sFilename: String) {
+	def parseFile(configFile: EvowareConfigFile, sFilename: String): EvowareTableFile = {
 		val lsLine = scala.io.Source.fromFile(sFilename, "ISO-8859-1").getLines.toList.drop(7)
 		//println(lsLine.takeWhile(_ != "--{ RPG }--").length)
 		val (_, l) = EvowareFormat.splitSemicolons(lsLine(1))
-		val rest = parse14(sections, l, lsLine.drop(2))
+		val (tableFile, rest) = parse14(configFile, l, lsLine.drop(2))
 		println(rest.takeWhile(_ != "--{ RPG }--"))
+		tableFile
 	}
 
-	def parse14(sections: List[EvowareModel], l: Array[String], lsLine: List[String]): List[String] = {
-		val mapIdToCarrierModel = sections.collect({case o: CarrierModel => o.id -> o}).toMap
-		val mapNameToCarrierModel = sections.collect({case o: CarrierModel => o.sName -> o}).toMap
-		val mapNameToLabwareModel = sections.collect({case o: LabwareModel => o.sName -> o}).toMap
+	def parse14(configFile: EvowareConfigFile, l: Array[String], lsLine: List[String]): Tuple2[EvowareTableFile, List[String]] = {
+		import configFile._
 		val lCarrierModel_? = parse14_getCarrierModels(mapIdToCarrierModel, l)
 		val (lSiteObject, lsLine2) = parse14_getSiteObjects(mapNameToLabwareModel, 0, lCarrierModel_?, lsLine, Nil)
 		val (lHotelObject, lsLine3) = parse14_getHotelObjects(mapIdToCarrierModel, lsLine2)
 		val (lExternalObject, lsLine4) = parse14_getExternalObjects(mapNameToCarrierModel, lsLine3)
 		val (lExternalLabwareObject, lsLine5) = parse14_getExternalLabwares(mapIdToCarrierModel, mapNameToLabwareModel, lsLine4)
+		val (mapCarrierToGrid2, lsLine6) = parse14_getExternalCarrierGrids(lExternalObject, lsLine5)
+		
+		val mapCarrierToGrid1 = lCarrierModel_?.zipWithIndex.collect({ case (Some(o), iGrid) => o -> iGrid }).toMap
+		val mapCarrierToGrid = mapCarrierToGrid1 ++ mapCarrierToGrid2
+		
 		lSiteObject.foreach(println)
 		lHotelObject.foreach(println)
 		lExternalObject.foreach(println)
 		lExternalLabwareObject.foreach(println)
-		lsLine5
+		mapCarrierToGrid.toList.sortBy(_._2).foreach(println)
+		
+		val tableFile = new EvowareTableFile(
+			configFile,
+			lSiteObject,
+			lHotelObject,
+			lExternalObject,
+			mapCarrierToGrid
+		)
+		(tableFile, lsLine6)
 	}
 	
 	def parse14_getCarrierModels(
@@ -192,14 +221,16 @@ object TableParser {
 		val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 		assert(n0 == 998)
 		val nObjects = l0(0).toInt
-		val lObject = lsLine.tail.take(nObjects).tail.map(s => {
+		val lObject = lsLine.tail.take(nObjects).map(s => {
 			val (n, l) = EvowareFormat.splitSemicolons(s)
 			assert(n == 998)
-			val nZero = l(0).toInt
-			val index = l(1).toInt
+			val n1 = l(0).toInt
+			val n2 = l(1).toInt
 			val sName = l(2)
-			val carrierModel = mapNameToCarrierModel(sName)
-			ExternalObject(index, carrierModel)
+			val carrierModel =
+				if (n1 == 0) mapNameToCarrierModel(sName)
+				else new CarrierModel(sName, -1, 1)
+			ExternalObject(n1, n2, carrierModel)
 		})
 		(lObject, lsLine.drop(1 + nObjects))
 	}
@@ -223,12 +254,26 @@ object TableParser {
 		})
 		(lObject, lsLine.drop(1 + nObjects))
 	}
+	
+	def parse14_getExternalCarrierGrids(
+		lExternalObject: List[ExternalObject],
+		lsLine: List[String]
+	): Tuple2[Map[CarrierModel, Int], List[String]] = {
+		val map = (lExternalObject zip lsLine).map(pair => {
+			val (external, sLine) = pair
+			val (n, l) = EvowareFormat.splitSemicolons(sLine)
+			assert(n == 998)
+			val iGrid = l(0).toInt
+			external.carrierModel -> iGrid
+		}).toMap
+		(map, lsLine.drop(lExternalObject.length))
+	}
 }
 
 object T {
 	def test() {
-		val models = CarrierParser.loadCarrierConfig()
+		val configFile = new EvowareConfigFile("/home/ellisw/tmp/tecan/carrier.cfg")
 		//models.foreach(println)
-		TableParser.parseFile(models, "/home/ellisw/src/roboliq/ellis_pcr1_corrected.esc")
+		EvowareTableParser.parseFile(configFile, "/home/ellisw/src/roboliq/ellis_pcr1_corrected.esc")
 	}
 }
