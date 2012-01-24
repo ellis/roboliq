@@ -25,9 +25,10 @@ Big goals:
 
 Current goals:
 	esc: labware on external devices
-	nice scripts
 	read in evoware config files
+	nice scripts
 	better generation and scoring of cleaning commands
+	use evoware config files to select more things automatically
 
 Evoware commands:
 x	asperate
