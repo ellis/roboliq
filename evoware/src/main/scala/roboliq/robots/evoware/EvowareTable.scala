@@ -5,6 +5,7 @@ import scala.collection.mutable.HashMap
 
 
 trait EvowareTable {
+/*
 	private val m_sites = new ArrayBuffer[SiteObj]
 	private val m_mapSites = new HashMap[String, SiteObj]
 	
@@ -41,4 +42,5 @@ trait EvowareTable {
 		addSite(o._3)
 		o
 	}
+*/
 }

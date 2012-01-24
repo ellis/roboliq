@@ -10,14 +10,13 @@ import roboliq.common
 )
 */
 
+/*
 sealed abstract class PartModel(val sName: String)
 class CarrierModel(sName: String, val nSites: Int, val bCooled: Boolean) extends PartModel(sName)
 
 class RackModel(sName: String, val nRows: Int, val nCols: Int) extends PartModel(sName)
 class TroughModel(sName: String, val nRows: Int, val nCols: Int) extends PartModel(sName)
 class LabwareModel(sName: String) extends PartModel(sName)
-//class PlateModel(sName: String, val nRows: Int, val nCols: Int, val nVolume: Double) extends LabwareModel(sName)
-//class TubeModel(sName: String, val nVolume: Double) extends LabwareModel(sName)
 
 // REFACTOR: choose a better name, perhaps Location, LocationSpec, SiteSpec
 class SiteObj(val sName: String, val carrier: CarrierObj, val iSite: Int, val liRoma: Seq[Int]) {
@@ -49,4 +48,4 @@ class PlateObj(val sLabel: String, val model: common.PlateModel, val site: SiteO
 		m_common
 	}
 }
-//class TubeObj(sLabel: String, model: TubeModel, rack: RackObj, iRow: Int, iCol: Int)
+*/
