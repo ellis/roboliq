@@ -22,17 +22,17 @@ class PcrScript3(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 	val plate_working = new Plate
 	val plate_balance = new Plate
 	val well1 = plate_working(A1)
-	val well2 = plate_working(A2)
-	val well3 = plate_working(A3)
-	val well4 = plate_working(A4)
+	val well2 = plate_working(B1)
+	val well3 = plate_working(C1)
+	val well4 = plate_working(D1)
 	
 	import roboliq.commands.pipette.L4A_PipetteItem
 	import roboliq.commands.pipette.MixSpec
-	val items = List(
-		/*new L4A_PipetteItem(Liquids.water, well1, List(15.7), None, None),
+	/*val items = List(
+		new L4A_PipetteItem(Liquids.water, well1, List(15.7), None, None),
 		new L4A_PipetteItem(Liquids.water, well2, List(15.7), None, None),
 		new L4A_PipetteItem(Liquids.water, well3, List(15.7), None, None),
-		new L4A_PipetteItem(Liquids.water, well4, List(15.7), None, None),*/
+		new L4A_PipetteItem(Liquids.water, well4, List(15.7), None, None),
 		new L4A_PipetteItem(Liquids.buffer10x, well1, List(2), None, None),
 		new L4A_PipetteItem(Liquids.buffer10x, well2, List(2), None, None),
 		new L4A_PipetteItem(Liquids.buffer10x, well3, List(2), None, None),
@@ -49,14 +49,24 @@ class PcrScript3(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		new L4A_PipetteItem(Liquids.primerF, well2, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerF, well3, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerF, well4, List(0.1), None, None),
-		new L4A_PipetteItem(Liquids.primerB, well1, List(0.1), None, None)/*,
+		new L4A_PipetteItem(Liquids.primerB, well1, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well2, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well3, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well4, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well1, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well2, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well3, List(0.1), None, None),
-		new L4A_PipetteItem(Liquids.polymerase, well4, List(0.1), None, None)*/
+		new L4A_PipetteItem(Liquids.polymerase, well4, List(0.1), None, None)
+	)*/
+	val items = List(
+		new L4A_PipetteItem(Liquids.primerB, well1, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.primerB, well2, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.primerB, well3, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.primerB, well4, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.polymerase, well1, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.polymerase, well2, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.polymerase, well3, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.polymerase, well4, List(0.1), None, None)
 	)
 	cmds += roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(items, tipOverrides_? = None))
 	mix(well1+well2+well3+well4, 15, 4)

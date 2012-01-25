@@ -137,11 +137,11 @@ class PipetteScheduler(
 		}
 		val lG = lGR2.reverse
 		// FIXME: for debug only
-		if (lG0.length >= 11) {
+		//if (lG0.length >= 11) {
 			println("item counts A: "+lG0.map(_.lItem.size))
 			println("item counts B: "+lGR.map(_.lItem.size))
 			println("item counts C: "+lGR2.map(_.lItem.size))
-		}
+		//}
 		// ENDFIX
 		//println("lG:")
 		//println(lG)
@@ -191,7 +191,7 @@ class PipetteScheduler(
 					println(err)
 					acc
 				case stop: builderA.GroupStop =>
-					//println("stop:"+stop);
+					println("stop:"+stop);
 					//println("prev:"+acc.head)
 					acc
 				case builderA.GroupSuccess(g) =>
@@ -206,7 +206,7 @@ class PipetteScheduler(
 			case g :: Nil => g :: acc
 			case g :: (lG2 @ (g2 :: _)) =>
 				val acc2 = {
-					val wellGroup = WellGroup(g2.lItem.takeRight(2).map(_.dest)).splitByAdjacent()
+					val wellGroup = WellGroup(g2.lItem.takeRight(2).map(_.dest).distinct).splitByAdjacent()
 					// If new item is not adjacent to previous one, save the preceding group
 					if (wellGroup.size > 1) {
 						//println("keep:")
