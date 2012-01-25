@@ -10,11 +10,12 @@ import roboliq.commands._
 import roboliq.commands.move._
 import roboliq.commands.pipette._
 import roboliq.commands.system._
+//import roboliq.commands.config._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware.commands._
 
 
-class EvowareTranslator(system: EvowareConfig) extends Translator {
+class EvowareTranslator(config: EvowareConfig) extends Translator {
 	override def addKnowledge(kb: KnowledgeBase) {
 		// Do nothing
 	}
@@ -45,7 +46,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			case c: L1C_TipsDrop => tipsDrop(c)
 			case c: L1C_Timer => timer(c.args)
 			case c: L1C_SaveCurrentLocation => Success(Seq())
-			case c: L1C_Wash => wash(c)
+			//case c: L1C_Wash => wash(c)
 		}} yield {
 			builder.cmds ++= cmds0
 			()
@@ -142,7 +143,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 				
 				// Assert that all tips are of the same kind
 				// TODO: Readd this error check somehow? -- ellis, 2011-08-25
-				//val tipKind = system.getTipKind(twvp0.tip)
+				//val tipKind = config.getTipKind(twvp0.tip)
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
 				if (!items.forall(_.well.holder eq holder))
@@ -180,11 +181,12 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			site <- getSite(item0.location)
 			_ <- addLabware(builder, holder, item0.location)
 		} yield {
+			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
 			Seq(L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
 				asVolumes,
-				site.iGrid, site.iSite,
+				iGrid, site.iSite,
 				sPlateMask
 			))
 		}
@@ -207,8 +209,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		Success(Seq(L0C_Prompt(cmd.s)))
 	}
 	
-	def wash(cmd: L1C_Wash): Result[Seq[Command]] = {
-		system.mapWashProgramArgs.get(cmd.iWashProgram) match {
+	/*def wash(cmd: L1C_Wash): Result[Seq[Command]] = {
+		config.mapWashProgramArgs.get(cmd.iWashProgram) match {
 			case None =>
 				Error(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
 			case Some(args) =>
@@ -228,7 +230,7 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 					bUNKNOWN1 = args.bUNKNOWN1
 					)))
 		}
-	}
+	}*/
 	
 	private def mix(builder: EvowareScriptBuilder, items: Seq[L1A_MixItem]): Result[Seq[Command]] = {
 		items match {
@@ -293,10 +295,11 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
 		} yield {
 			addLabware(builder, holderModel.id, item0.location)
+			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
 			Seq(L0C_Mix(
 				mTips, sLiquidClass,
 				asVolumes,
-				site.iGrid, site.iSite,
+				iGrid, site.iSite,
 				sPlateMask,
 				item0.nCount
 			))
@@ -311,7 +314,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	private def tipsDrop(c: L1C_TipsDrop): Result[Seq[Command]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		for (site <- getSite(c.location)) yield {
-			Seq(L0C_DropDITI(mTips, site.iGrid, site.iSite))
+			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
+			Seq(L0C_DropDITI(mTips, iGrid, site.iSite))
 		}
 	}
 	
@@ -319,13 +323,18 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		for {
 			siteSrc <- getSite(c.locationSrc)
 			siteDest <- getSite(c.locationDest)
-			carrierSrc <- getCarrier(c.locationSrc)
-			carrierDest <- getCarrier(c.locationDest)
 		} yield {
 			addLabware(builder, c.sPlateModel, c.locationDest)
 			addLabware(builder, c.sPlateModel, c.locationSrc)
 			
+			val iGridSrc = config.tableFile.mapCarrierToGrid(siteSrc.carrier)
+			val iGridDest = config.tableFile.mapCarrierToGrid(siteDest.carrier)
+			
+			val lVectorSrc = config.tableFile.configFile.mapCarrierToVectors(siteSrc.carrier)
+			val lVectorDest = config.tableFile.configFile.mapCarrierToVectors(siteDest.carrier)
+
 			//println("X: ", siteSrc.liRoma, siteDest.liRoma, siteSrc.liRoma.filter(siteDest.liRoma.contains))
+			// TODO: figure out an intermediate path to follow instead (e.g. via a re-grip location)
 			if (siteSrc.liRoma.filter(siteDest.liRoma.contains).isEmpty)
 				return Error("no common RoMa: "+siteSrc.sName+" and "+siteDest.sName)
 			val iRoma = siteSrc.liRoma.filter(siteDest.liRoma.contains).head
@@ -333,8 +342,8 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 			Seq(L0C_Transfer_Rack(
 				iRoma,
 				c.sPlateModel,
-				siteSrc.iGrid, siteSrc.iSite, carrierSrc.sLabel,
-				siteDest.iGrid, siteDest.iSite, carrierDest.sLabel,
+				iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
+				iGridDest, siteDest.iSite, siteDest.carrier.sName,
 				c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,
@@ -364,20 +373,13 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 		)))
 	}
 	
-	private def getSite(location: String): Result[SiteObj] = {
-		system.mapSites.get(location) match {
+	private def getSite(location: String): Result[CarrierSite] = {
+		config.mapLabelToSite.get(location) match {
 			case None =>
 				println("INTERNAL: missing evoware site for location \""+location+"\"")
-				println("system.mapSites: "+system.mapSites)
+				println("config.mapLabelToSite: "+config.mapLabelToSite)
 				Error(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
 			case Some(site) => Success(site)
-		}
-	}
-	
-	private def getCarrier(location: String): Result[CarrierObj] = {
-		system.mapSites.get(location) match {
-			case None => Error(Seq("INTERNAL: no carrier declared at location \""+location+"\""))
-			case Some(site) => Success(site.carrier)
 		}
 	}
 	
@@ -389,11 +391,12 @@ class EvowareTranslator(system: EvowareConfig) extends Translator {
 	}
 	
 	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): Result[Unit] = {
-		val site = system.mapSites(location)
-		val coord = (site.iGrid, site.iSite)
+		val site = config.mapLabelToSite(location)
+		val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
+		val coord = (iGrid, site.iSite)
 		builder.mapLocToLabware.get(coord) match {
 			case None =>
-				builder.mapLocToLabware(coord) = LabwareItem(location, sLabwareModel, site.iGrid, site.iSite)
+				builder.mapLocToLabware(coord) = LabwareItem(location, sLabwareModel, iGrid, site.iSite)
 			case Some(item) if item.sLabel == location && item.sType == sLabwareModel =>
 				// Same as before, so we don't need to do anything
 			case Some(_) =>
