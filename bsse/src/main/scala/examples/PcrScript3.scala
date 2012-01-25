@@ -28,7 +28,7 @@ class PcrScript3(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 	
 	import roboliq.commands.pipette.L4A_PipetteItem
 	import roboliq.commands.pipette.MixSpec
-	/*val items = List(
+	val items = List(
 		new L4A_PipetteItem(Liquids.water, well1, List(15.7), None, None),
 		new L4A_PipetteItem(Liquids.water, well2, List(15.7), None, None),
 		new L4A_PipetteItem(Liquids.water, well3, List(15.7), None, None),
@@ -57,8 +57,12 @@ class PcrScript3(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		new L4A_PipetteItem(Liquids.polymerase, well2, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well3, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well4, List(0.1), None, None)
-	)*/
-	val items = List(
+	)
+	/*val items = List(
+		new L4A_PipetteItem(Liquids.buffer10x, well1, List(2), None, None),
+		new L4A_PipetteItem(Liquids.dNTP, well1, List(2), None, None),
+		new L4A_PipetteItem(Liquids.template, well1, List(0.1), None, None),
+		new L4A_PipetteItem(Liquids.primerF, well1, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well1, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well2, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.primerB, well3, List(0.1), None, None),
@@ -67,7 +71,7 @@ class PcrScript3(station: roboliq.labs.bsse.station1.StationConfig) extends Prot
 		new L4A_PipetteItem(Liquids.polymerase, well2, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well3, List(0.1), None, None),
 		new L4A_PipetteItem(Liquids.polymerase, well4, List(0.1), None, None)
-	)
+	)*/
 	cmds += roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(items, tipOverrides_? = None))
 	mix(well1+well2+well3+well4, 15, 4)
 	//cmds += roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(Seq(new L4A_PipetteItem(well_masterMix, wells_working, List(20), Some(MixSpec(Some(200 * 0.75), Some(4))), None)), tipOverrides_? = None))

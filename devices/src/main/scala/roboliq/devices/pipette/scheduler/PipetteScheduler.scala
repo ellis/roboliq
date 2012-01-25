@@ -138,6 +138,7 @@ class PipetteScheduler(
 		val lG = lGR2.reverse
 		// FIXME: for debug only
 		//if (lG0.length >= 11) {
+			println("from: "+(iItemParent+2))
 			println("item counts A: "+lG0.map(_.lItem.size))
 			println("item counts B: "+lGR.map(_.lItem.size))
 			println("item counts C: "+lGR2.map(_.lItem.size))
@@ -191,7 +192,7 @@ class PipetteScheduler(
 					println(err)
 					acc
 				case stop: builderA.GroupStop =>
-					println("stop:"+stop);
+					//println("stop:"+stop);
 					//println("prev:"+acc.head)
 					acc
 				case builderA.GroupSuccess(g) =>
