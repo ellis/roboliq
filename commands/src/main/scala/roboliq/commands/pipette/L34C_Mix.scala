@@ -11,7 +11,7 @@ case class L4C_Mix(args: L4A_MixArgs) extends CommandL4 {
 	def addKnowledge(kb: KnowledgeBase) {
 		for (target <- args.targets) {
 			target.getWells(kb).map(_.foreach(o => kb.addWell(o, true)))
-			target.getPlatesL4.map(_.foreach(o => kb.addPlate(o, true)))
+			target.getPlatesL4.map(_.foreach(o => kb.addPlate(o)))
 			target.getReagentsL4.map(_.foreach(o => kb.addReagent(o)))
 		}
 	}

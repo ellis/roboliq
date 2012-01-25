@@ -62,10 +62,16 @@ class PipetteScheduler(
 			println("lnScore: "+lnScore.toList)
 			lGroupB.zipWithIndex.foreach(pair => {
 				val (gB, i) = pair
-				print(i.toString+": ")
+				print((i+1).toString+":\t")
 				if (gB == null) println("_")
 				else {
-					println(gB.nScore+"\t"+gB.lItem.head.dest.index+"\t"+gB.lItem.size)
+					val nItems = gB.lItem.size
+					val iItemParent = i - nItems
+					val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)
+					val nScoreTotal = nScoreParent + gB.nScore
+					println(nScoreTotal+"\t"
+						+(iItemParent+2)+"->"+(i+1)+"\t"
+						+gB.nScore+"\t"+gB.lItem.head.dest)
 				}
 			})
 			//println("lGroupA: "+lGroupA.toList)
@@ -100,16 +106,17 @@ class PipetteScheduler(
 
 		val lG0 = x2R(lItem, List(g0)).reverse.tail // First one discarded because it's the empty g0
 		val lGR = filterGroupAsR(lG0, Nil)
-		// Remove last group if its last item is in a different column than the first and in the same column as the next pending item
+		// Remove last group if its last item is in a different column than the second-to-last and in the same column as the next pending item
 		val lGR2 = if (!lGR.isEmpty) {
 			val gLast = lGR.head
 			val lItemNext = lItem.drop(gLast.lItem.size)
 			if (!lItemNext.isEmpty) {
-				val itemNext = lItemNext.head
-				val lDest = gLast.lItem.map(_.dest)
+				// last two items in the group
+				val lDest = gLast.lItem.map(_.dest).reverse.take(2).reverse
 				val wellGroups = WellGroup(lDest).splitByCol
 				val bItemsInSameCol = (wellGroups.size == 1)
 				if (!bItemsInSameCol) {
+					val itemNext = lItemNext.head
 					val wellGroups2 = WellGroup(lDest ++ Seq(itemNext.dest)).splitByCol
 					val bNextItemInDifferentCol = (wellGroups.size < wellGroups2.size)
 					if (bNextItemInDifferentCol) {
@@ -129,6 +136,13 @@ class PipetteScheduler(
 			lGR
 		}
 		val lG = lGR2.reverse
+		// FIXME: for debug only
+		if (lG0.length >= 11) {
+			println("item counts A: "+lG0.map(_.lItem.size))
+			println("item counts B: "+lGR.map(_.lItem.size))
+			println("item counts C: "+lGR2.map(_.lItem.size))
+		}
+		// ENDFIX
 		//println("lG:")
 		//println(lG)
 		println("from well: "+lItem.head.dest.index)
@@ -143,7 +157,7 @@ class PipetteScheduler(
 				case Success(gB) =>
 					val nScore = nScoreParent + gB.nScore
 					val iItem = iItemParent + g.lItem.size
-					if (lnScore(iItem) == 0 || nScore < lnScore(iItem)) {
+					if (lnScore(iItem) == 0 || nScore <= lnScore(iItem)) {
 						val nItemsAfter = nItemsRemaining - g.lItem.size
 						lnScore(iItem) = nScore
 						lGroupA(iItem) = g
@@ -176,7 +190,10 @@ class PipetteScheduler(
 					println("Error in x2R:")
 					println(err)
 					acc
-				case stop: builderA.GroupStop => println("stop:"); println(stop); acc
+				case stop: builderA.GroupStop =>
+					//println("stop:"+stop);
+					//println("prev:"+acc.head)
+					acc
 				case builderA.GroupSuccess(g) =>
 					x2R(rest, g :: acc)
 			}
