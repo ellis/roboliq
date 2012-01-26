@@ -4,7 +4,44 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 
-trait EvowareTable {
+abstract class EvowareTable(configFile: EvowareConfigFile, sFilename: String) {
+	val tableFile = EvowareTableParser.parseFile(configFile, sFilename)
+	//tableFile.print()
+
+	private val m_mapLabelToSite = new HashMap[String, CarrierSite]
+	private val m_mapLabelToLabware = new HashMap[String, LabwareObject]
+	
+	def mapLabelToSite = m_mapLabelToSite.toMap
+	def mapLabelToLabware = m_mapLabelToLabware.toMap
+	
+	def labelSite(sLabel: String, sCarrierName: String, iSite: Int): CarrierSite = {
+		val carrier = configFile.mapNameToCarrier(sCarrierName)
+		val site = CarrierSite(carrier, iSite)
+		m_mapLabelToSite(sLabel) = site
+		site
+	}
+	
+	def labelSites(lsLabel: List[String], sCarrierName: String): List[CarrierSite] = {
+		lsLabel.zipWithIndex.map(pair => labelSite(pair._1, sCarrierName, pair._2))
+	}
+	
+	def labelLabware(sLabel: String, sCarrierName: String, iSite: Int): LabwareObject = {
+		val carrier = configFile.mapNameToCarrier(sCarrierName)
+		val site = CarrierSite(carrier, iSite)
+		val labware_? = tableFile.lLabwareObject.find(_.site == site) match {
+			case Some(o) => Some(o)
+			case None =>
+				tableFile.lExternalLabwareObject.find(_.site == site)
+		}
+		val labware = labware_?.get
+		m_mapLabelToLabware(sLabel) = labware
+		labware
+	}
+	
+	def labelLabwares(lsLabel: List[String], sCarrierName: String): List[LabwareObject] = {
+		lsLabel.zipWithIndex.map(pair => labelLabware(pair._1, sCarrierName, pair._2))
+	}
+	
 /*
 	private val m_sites = new ArrayBuffer[SiteObj]
 	private val m_mapSites = new HashMap[String, SiteObj]

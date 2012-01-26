@@ -10,7 +10,8 @@ import station1._
 
 
 object Main extends App {
-	val station = new StationConfig
+	val configFile = new EvowareConfigFile("/home/ellisw/tmp/tecan/carrier.cfg")
+	val station = new StationConfig(configFile, "/home/ellisw/src/roboliq/ellis_pcr1_corrected.esc")
 	//val protocol = new examples.Example01(station)
 	//val protocol = new examples.Example05(station)
 	//val protocol = new examples.ExampleOpenhouse3(station)

@@ -133,6 +133,7 @@ class EvowareConfigFile(sCarrierCfg: String) {
 
 class EvowareTableFile(
 	val configFile: EvowareConfigFile,
+	lCarrier_? : List[Option[Carrier]],
 	val lLabwareObject: List[LabwareObject],
 	val lHotelObject: List[HotelObject],
 	val lExternalObject: List[ExternalObject],
@@ -145,6 +146,77 @@ class EvowareTableFile(
 		lExternalObject.foreach(println)
 		lExternalLabwareObject.foreach(println)
 		mapCarrierToGrid.toList.sortBy(_._2).foreach(println)
+	}
+	
+	def toStringWithLabware(): String = {
+		val mapSiteToLabware = lLabwareObject.map(o => o.site -> o).toMap
+		val l = List(
+				"00000000",
+				"20111117_122139 No log in",
+				"",
+				"No user logged in",                                                                                                                                                              
+				"--{ RES }--",                                                                                                                                                                    
+				"V;200",                                                                                                                                                                   
+				"--{ CFG }--",                                                                                                                                                                    
+				"999;219;32;"
+			) ++
+			toString_carriers() ++
+			toString_tableLabware(mapSiteToLabware) ++
+			toString_hotels() ++
+			toString_externals() ++
+			toString_externalLabware() ++
+			toString_externalGrids() ++
+			List("996;0;0;", "--{RPG}--")
+		l.mkString("\n")
+	}
+	
+	private def toString_carriers(): List[String] = {
+		List("14;"+lCarrier_?.map(_ match { case None => "-1"; case Some(o) => o.id.toString }).mkString(";")+";")
+	}
+	
+	private def toString_tableLabware(mapSiteToLabware: Map[CarrierSite, LabwareObject]): List[String] = {
+		def step(lCarrier_? : List[Option[Carrier]], acc: List[String]): List[String] = {
+			lCarrier_? match {
+				case Nil => acc
+				case carrier_? :: rest =>
+					val acc2 = carrier_? match {
+						case None => List("998;0;")
+						case Some(carrier) =>
+							List(
+								"998;"+carrier.nSites+";"+((0 until carrier.nSites).map(iSite => {
+									mapSiteToLabware.get(CarrierSite(carrier, iSite)) match {
+										case None => ""
+										case Some(labware) => labware.labwareModel.sName
+									}
+								}).mkString(";"))+";",
+								"998;"+((0 until carrier.nSites).map(iSite => {
+									mapSiteToLabware.get(CarrierSite(carrier, iSite)) match {
+										case None => ""
+										case Some(labware) => labware.sLabel
+									}
+								}).mkString(";"))+";"
+							)
+					}
+					step(rest, acc ++ acc2)
+			}
+		}
+		step(lCarrier_?, Nil)
+	}
+	
+	private def toString_hotels(): List[String] = {
+		("998;"+lHotelObject.length+";") :: lHotelObject.map(o => "998;"+o.parent.id+";"+o.n+";")
+	}
+	
+	private def toString_externals(): List[String] = {
+		("998;"+lExternalObject.length+";") :: lExternalObject.map(o => "998;"+o.n1+";"+o.n2+";"+o.carrier.sName+";")
+	}
+	
+	private def toString_externalLabware(): List[String] = {
+		("998;"+lExternalLabwareObject.length+";") :: lExternalLabwareObject.map(o => "998;"+o.site.carrier.id+";"+o.labwareModel.sName+";")
+	}
+	
+	private def toString_externalGrids(): List[String] = {
+		lExternalObject.map(o => "998;"+mapCarrierToGrid(o.carrier)+";")
 	}
 }
 
@@ -174,6 +246,7 @@ object EvowareTableParser {
 		
 		val tableFile = new EvowareTableFile(
 			configFile,
+			lCarrier_?,
 			lLabwareObject,
 			lHotelObject,
 			lExternalObject,
@@ -273,7 +346,7 @@ object EvowareTableParser {
 		val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 		assert(n0 == 998)
 		val nObjects = l0(0).toInt
-		val lObject = lsLine.tail.take(nObjects).tail.map(s => {
+		val lObject = lsLine.tail.take(nObjects).map(s => {
 			val (n, l) = EvowareFormat.splitSemicolons(s)
 			assert(n == 998)
 			val idCarrier = l(0).toInt
@@ -307,5 +380,6 @@ object T {
 		//models.foreach(println)
 		val tableFile = EvowareTableParser.parseFile(configFile, "/home/ellisw/src/roboliq/ellis_pcr1_corrected.esc")
 		tableFile.print()
+		println(tableFile.toStringWithLabware())
 	}
 }

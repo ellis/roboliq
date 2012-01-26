@@ -327,20 +327,25 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 			addLabware(builder, c.sPlateModel, c.locationDest)
 			addLabware(builder, c.sPlateModel, c.locationSrc)
 			
-			val iGridSrc = config.tableFile.mapCarrierToGrid(siteSrc.carrier)
-			val iGridDest = config.tableFile.mapCarrierToGrid(siteDest.carrier)
-			
-			val lVectorSrc = config.tableFile.configFile.mapCarrierToVectors(siteSrc.carrier)
-			val lVectorDest = config.tableFile.configFile.mapCarrierToVectors(siteDest.carrier)
+			val carrierSrc = siteSrc.carrier
+			val iGridSrc = config.tableFile.mapCarrierToGrid(carrierSrc)
+			val lVectorSrc = config.tableFile.configFile.mapCarrierToVectors(carrierSrc)
 
-			//println("X: ", siteSrc.liRoma, siteDest.liRoma, siteSrc.liRoma.filter(siteDest.liRoma.contains))
+			val carrierDest = siteDest.carrier
+			val iGridDest = config.tableFile.mapCarrierToGrid(carrierDest)
+			val lVectorDest = config.tableFile.configFile.mapCarrierToVectors(carrierDest)
+
+			val mapClassToValue = Map("Narrow" -> 0, "Wide" -> 1)
+			val lVector1: Map[Tuple2[Int, String], List[Vector]] = (lVectorSrc ++ lVectorDest).groupBy(v => (v.iRoma, v.sClass)).filter(_._2.length == 2)
+			val lVector2 = lVector1.toList.sortBy(pair => pair._1._1.toString + mapClassToValue.getOrElse(pair._1._2, pair._1._2))
 			// TODO: figure out an intermediate path to follow instead (e.g. via a re-grip location)
-			if (siteSrc.liRoma.filter(siteDest.liRoma.contains).isEmpty)
-				return Error("no common RoMa: "+siteSrc.sName+" and "+siteDest.sName)
-			val iRoma = siteSrc.liRoma.filter(siteDest.liRoma.contains).head
+			if (lVector2.isEmpty) 
+				return Error("no common RoMa: "+carrierSrc.sName+" and "+carrierDest.sName)
+			val (iRoma, sClass) = lVector2.head._1
 			
 			Seq(L0C_Transfer_Rack(
 				iRoma,
+				sClass,
 				c.sPlateModel,
 				iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
 				iGridDest, siteDest.iSite, siteDest.carrier.sName,

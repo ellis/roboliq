@@ -1,5 +1,6 @@
 package roboliq.robots.evoware
 
+/*
 case class Site(val iGrid: Int, val iSite: Int)
 
 case class WashProgramArgs(
@@ -17,6 +18,7 @@ case class WashProgramArgs(
 )
 
 case class LabwareItem(sLabel: String, sType: String, iGrid: Int, iSite: Int)
+*/
 
 object RoboeaseHack {
 	var bEmulateEvolab = false

@@ -15,6 +15,7 @@ trait Protocol extends CommonProtocol {
 		//private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
 		//private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]
 		
+		/*
 		def reagent(reagent: Reagent, plateE: PlateObj, iWell0: Int, nWells: Int = 1) {
 			val plate = plateE.commonObj
 			val plateSetup = kb.getPlateSetup(plate)
@@ -34,6 +35,7 @@ trait Protocol extends CommonProtocol {
 			proxy.location = site.sName
 			proxy.setDimension(model.nRows, model.nCols)
 		}
+		*/
 		
 		/*private def getPlate(e: PlateObj): common.Plate = {
 			mapPlates.get(e) match {

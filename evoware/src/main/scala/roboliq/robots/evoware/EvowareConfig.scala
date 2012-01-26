@@ -14,7 +14,7 @@ class EvowareTable(
 class EvowareConfig(
 	val tableFile: EvowareTableFile,
 	val mapLabelToSite: Map[String, CarrierSite],
-	val mapLabelToLabware: Map[String, LabwareObject],
-	val mapWashProgramArgs: Map[Int, WashProgramArgs]
+	val mapLabelToLabware: Map[String, LabwareObject]//,
+	//val mapWashProgramArgs: Map[Int, WashProgramArgs]
 ) {
 }

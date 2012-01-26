@@ -6,7 +6,7 @@ import roboliq.roboease
 trait EvowareRoboeaseTable {
 	val roboeaseTable: roboease.Table
 	val sEvowareHeader: String
-	val evowareSites: Seq[evoware.SiteObj]
+	val evowareSites: Seq[evoware.LabwareObject]
 }
 /*
 object Converter {

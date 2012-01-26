@@ -18,7 +18,7 @@ import roboliq.labs.bsse.devices._
 import roboliq.labs.bsse.handlers._
 
 
-class StationConfig extends EvowareTable {
+class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends EvowareTable(configFile, sFilename) {
 	object TipModels {
 		val tipModel50 = new TipModel("DiTi 50ul", 45, 0.01, 0, 0)
 		val tipModel1000 = new TipModel("DiTi 1000ul", 950, 3, 0, 0)
@@ -28,6 +28,7 @@ class StationConfig extends EvowareTable {
 		Seq(tipModel50, tipModel1000)
 	}
 
+	/*
 	object CarrierModels {
 		val wash = new CarrierModel("Wash Station Clean", 3, false)
 		val decon = new CarrierModel("decon", 3, false)
@@ -95,20 +96,23 @@ class StationConfig extends EvowareTable {
 		val test8x2 = new PlateModel("test 8x2 Plate", 8, 2, 500)
 		//"MTP Waste"
 	}
-	object Labwares {
-		val wash1a = new TroughObj("wash1a", LabwareModels.washA, Sites.wash1a)
-		val wash1b = new TroughObj("wash1b", LabwareModels.washB, Sites.wash1b)
-		val wash1c = new TroughObj("wash1c", LabwareModels.washC, Sites.wash1c)
-		val wash2a = new TroughObj("wash2a", LabwareModels.washA, Sites.wash2a)
-		val wash2b = new TroughObj("wash2b", LabwareModels.washB, Sites.wash2b)
-		val wash2c = new TroughObj("wash2c", LabwareModels.washC, Sites.wash2c)
-		val decon1 = new TroughObj("decon1", LabwareModels.decon, Sites.decon1)
-		val decon2 = new TroughObj("decon2", LabwareModels.decon, Sites.decon2)
-		val decon3 = new TroughObj("decon3", LabwareModels.decon, Sites.decon3)
-		val reagents15 = new PlateObj("reagents15", LabwareModels.reagents15, Sites.reagents15)
-		val reagents50 = new PlateObj("reagents50", LabwareModels.reagents50, Sites.reagents50)
-		val ethanol = new TroughObj("ethanol", LabwareModels.ethanol, Sites.ethanol)
-		val eppendorfs = new PlateObj("eppendorfs", LabwareModels.eppendorfs, Sites.eppendorfs)
+	*/
+	object Locations {
+		val List(reagents15, reagents50) = labelLabwares(List("reagents15", "reagents50"), "Cooled 8Pos*15ml 8Pos*50ml")
+		val ethanol = labelLabware("ethanol", "Trough 1000ml", 0)
+		val holder = labelSite("holder", "Downholder", 0)
+		val List(cover, shaker) = labelSites(List("cover", "shaker"), "MP 2Pos H+P Shake")
+		val eppendorfs = labelLabware("eppendorfs", "Block 20Pos", 0)
+		val List(cooled1, cooled2) = labelSites(List("cooled1", "cooled2"), "MP 3Pos Cooled 1 PCR")
+		val List(cooled3, cooled4, cooled5) = labelSites(List("cooled3", "cooled4", "cooled5"), "MP 3Pos Cooled 2 PCR")
+		//val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
+		val waste = labelLabware("waste", "Te-VacS", 6)
+		val sealer = labelSite("sealer", "RoboSeal", 0)
+		val peeler = labelSite("peeler", "RoboPeel", 0)
+		val pcr1 = labelSite("pcr1", "TRobot1", 0)
+		val pcr2 = labelSite("pcr2", "TRobot2", 0)
+		val centrifuge = labelSite("centrifuge", "Centrifuge", 0)
+		val regrip = labelSite("regrip", "ReGrip Station", 0)
 	}
 	
 	
@@ -223,7 +227,7 @@ class StationConfig extends EvowareTable {
 				bFastWash = true)
 		)
 	}
-
+/*
 	val sHeader =
 """00000000
 20110101_000000 No log in       
@@ -369,4 +373,5 @@ V;200
 998;64;
 996;0;0;
 --{ RPG }--"""
+*/
 }

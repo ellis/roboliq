@@ -141,6 +141,7 @@ case class L0C_Wash(
 
 case class L0C_Transfer_Rack(
 	iRoma: Int, // 0 for RoMa1, 1 for RoMa2
+	sVectorClass: String, // Narrow, Wide, User Defined...
 	sPlateModel: String,
 	iGridSrc: Int, iSiteSrc: Int, sCarrierModelSrc: String,
 	iGridDest: Int, iSiteDest: Int, sCarrierModelDest: String,
@@ -161,7 +162,7 @@ case class L0C_Transfer_Rack(
 			if (lidHandling == RemoveAtSource) 1 else 0,
 			'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
 			'"'+sPlateModel+'"',
-			"\"Narrow\"", // Vector: Narrow, Wide, User Defined...
+			'"'+sVectorClass+'"',
 			"\"\"",
 			"\"\"",
 			'"'+sCarrierModelSrc+'"',

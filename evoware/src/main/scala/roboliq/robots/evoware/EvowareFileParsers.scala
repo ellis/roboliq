@@ -149,6 +149,12 @@ class EvowareTableFile(
 		lExternalLabwareObject.foreach(println)
 		mapCarrierToGrid.toList.sortBy(_._2).foreach(println)
 	}
+	
+	def labwareAtSite(sCarrierName: String, iSite: Int): Option[LabwareObject] = {
+		val carrier = configFile.mapNameToCarrier(sCarrierName)
+		val site = new CarrierSite(carrier, iSite)
+		lLabwareObject.find(_.site == site)
+	}
 }
 
 object EvowareTableParser {
