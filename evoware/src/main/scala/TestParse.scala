@@ -148,20 +148,23 @@ class EvowareTableFile(
 		mapCarrierToGrid.toList.sortBy(_._2).foreach(println)
 	}
 	
-	def toStringWithLabware(): String = {
-		val mapSiteToLabware = lLabwareObject.map(o => o.site -> o).toMap
+	def toStringWithLabware(mapSiteToLabware: Map[CarrierSite, LabwareObject]): String = {
+		val mapSiteToLabware1 = lLabwareObject.map(o => o.site -> o).toMap ++ mapSiteToLabware
+		// TODO: output current date and time
+		// TODO: See whether we need to save the RES section when loading in the table
+		// TODO: do we need to save values for the 999 line when loading the table?
 		val l = List(
 				"00000000",
 				"20111117_122139 No log in",
 				"",
-				"No user logged in",                                                                                                                                                              
-				"--{ RES }--",                                                                                                                                                                    
-				"V;200",                                                                                                                                                                   
-				"--{ CFG }--",                                                                                                                                                                    
+				"No user logged in",
+				"--{ RES }--",
+				"V;200",
+				"--{ CFG }--",
 				"999;219;32;"
 			) ++
 			toString_carriers() ++
-			toString_tableLabware(mapSiteToLabware) ++
+			toString_tableLabware(mapSiteToLabware1) ++
 			toString_hotels() ++
 			toString_externals() ++
 			toString_externalLabware() ++
@@ -380,6 +383,6 @@ object T {
 		//models.foreach(println)
 		val tableFile = EvowareTableParser.parseFile(configFile, "/home/ellisw/src/roboliq/ellis_pcr1_corrected.esc")
 		tableFile.print()
-		println(tableFile.toStringWithLabware())
+		println(tableFile.toStringWithLabware(Map()))
 	}
 }

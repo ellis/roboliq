@@ -24,7 +24,7 @@ object Main extends App {
 			//val sFilename = "example01.esc"
 			val script = succT.internal.asInstanceOf[EvowareScriptBuilder]
 			val translator = new EvowareTranslator(toolchain.evowareConfig)
-			val s = translator.saveWithHeader(script.cmds.toSeq, station.sHeader, script.mapLocToLabware.toMap, sFilename)
+			val s = translator.saveWithHeader(script.cmds.toSeq, station.tableFile, script.mapCmdToLabwareInfo.toMap, sFilename)
 			println(s)
 		case Right(succ) => succ.print()
 	}

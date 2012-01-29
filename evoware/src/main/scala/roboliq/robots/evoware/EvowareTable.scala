@@ -8,11 +8,13 @@ abstract class EvowareTable(configFile: EvowareConfigFile, sFilename: String) {
 	val tableFile = EvowareTableParser.parseFile(configFile, sFilename)
 	//tableFile.print()
 
+	// A site can be given multiple labels
 	private val m_mapLabelToSite = new HashMap[String, CarrierSite]
-	private val m_mapLabelToLabware = new HashMap[String, LabwareObject]
+	// Choose one label for a used site
+	//private val m_mapSiteToLabel = new HashMap[CarrierSite, String]
 	
 	def mapLabelToSite = m_mapLabelToSite.toMap
-	def mapLabelToLabware = m_mapLabelToLabware.toMap
+	//def mapLabelToLabware = m_mapLabelToLabware.toMap
 	
 	def labelSite(sLabel: String, sCarrierName: String, iSite: Int): CarrierSite = {
 		val carrier = configFile.mapNameToCarrier(sCarrierName)
@@ -25,6 +27,7 @@ abstract class EvowareTable(configFile: EvowareConfigFile, sFilename: String) {
 		lsLabel.zipWithIndex.map(pair => labelSite(pair._1, sCarrierName, pair._2))
 	}
 	
+	/*
 	def labelLabware(sLabel: String, sCarrierName: String, iSite: Int): LabwareObject = {
 		val carrier = configFile.mapNameToCarrier(sCarrierName)
 		val site = CarrierSite(carrier, iSite)
@@ -41,6 +44,7 @@ abstract class EvowareTable(configFile: EvowareConfigFile, sFilename: String) {
 	def labelLabwares(lsLabel: List[String], sCarrierName: String): List[LabwareObject] = {
 		lsLabel.zipWithIndex.map(pair => labelLabware(pair._1, sCarrierName, pair._2))
 	}
+	*/
 	
 /*
 	private val m_sites = new ArrayBuffer[SiteObj]

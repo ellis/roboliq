@@ -11,12 +11,29 @@ import roboliq.robots.evoware._
 
 
 trait Protocol extends CommonProtocol {
+	val tableFile: EvowareTableFile
 	class EvowareLab {
+		private val mapSiteToPlate = new HashMap[CarrierSite, common.Plate]
 		//private val mapPlates = new HashMap[evoware.PlateObj, common.Plate]
 		//private val mapPlateModels = new HashMap[evoware.PlateModel, common.PlateModel]
 		
-		/*
-		def reagent(reagent: Reagent, plateE: PlateObj, iWell0: Int, nWells: Int = 1) {
+		private def getPlate(site: CarrierSite): common.Plate = {
+			mapSiteToPlate.get(site) match {
+				case Some(plate) => plate
+				case None =>
+					val plate = new common.Plate
+					val setup = plate.setup
+					val labwareModel
+					val plateModel = new PlateModel(val id: String, val nRows: Int, val nCols: Int, val nWellVolume: Double)
+					setup.model_? = Some(model)
+					setup.sLabel_? = Some(sLabel)
+					setup.location_? = Some(site.sName)
+					setup.setDimension(model.nRows, model.nCols)
+					plate
+			}
+		}
+		
+		def reagent(reagent: Reagent, site: CarrierSite, iWell0: Int, nWells: Int = 1) {
 			val plate = plateE.commonObj
 			val plateSetup = kb.getPlateSetup(plate)
 			val wells = plateSetup.dim_?.get.wells
@@ -28,6 +45,7 @@ trait Protocol extends CommonProtocol {
 			}
 		}
 		
+		/*
 		def labware(plate: common.Plate, site: SiteObj, model: common.PlateModel) {
 			val setup = kb.getPlateSetup(plate)
 			val proxy = new PlateProxy(kb, plate)

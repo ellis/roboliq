@@ -4,6 +4,8 @@ import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 
+import scala.collection.mutable.HashMap
+
 import roboliq.common._
 import roboliq.compiler._
 import roboliq.commands._
@@ -55,16 +57,30 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 
 	def saveWithHeader(
 		cmds: Seq[Command],
-		sHeader: String,
-		mapLabware: EvowareTranslatorHeader.LabwareMap,
+		tableFile: EvowareTableFile,
+		//mapSiteToLabel: Map[CarrierSite, String],
+		mapCmdToLabwareInfo: Map[Command, List[Tuple3[CarrierSite, String, LabwareModel]]],
 		sFilename: String
 	): String = {
-		val s = cmds.mkString("\n")
+		val mapSiteToLabel = new HashMap[CarrierSite, String]
+		for (c <- cmds) {
+			mapCmdToLabwareInfo.get(c) match {
+				case None =>
+				case Some(l) =>
+					for (info <- l)
+						mapSiteToLabel(info._1) = info._2
+			}
+		}
+		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
+			cmds.collect({case c: L0C_Transfer_Rack => List(c.siteSrc -> c.labwareModel, c.siteDest -> c.labwareModel)}).flatten.toMap
+		
+		val sHeader = tableFile.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
+		val sCmds = cmds.mkString("\n")
 		val fos = new java.io.FileOutputStream(sFilename)
-		writeLines(fos, EvowareTranslatorHeader.getHeader(sHeader, mapLabware))
-		writeLines(fos, s);
+		writeLines(fos, sHeader)
+		writeLines(fos, sCmds);
 		fos.close();
-		s
+		sCmds
 	}
 	
 	private def writeLines(output: java.io.FileOutputStream, s: String) {
@@ -179,16 +195,21 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 		
 		for {
 			site <- getSite(item0.location)
-			_ <- addLabware(builder, holder, item0.location)
+			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
 		} yield {
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-			Seq(L0C_Spirate(
+			val cmd = L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
 				asVolumes,
 				iGrid, site.iSite,
 				sPlateMask
-			))
+			)
+			
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(holderModel.id)
+			builder.mapCmdToLabwareInfo(cmd) = List((site, item0.location, labwareModel))
+			
+			Seq(cmd)
 		}
 	}
 	
@@ -294,15 +315,19 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 			site <- getSite(item0.location)
 			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
 		} yield {
-			addLabware(builder, holderModel.id, item0.location)
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-			Seq(L0C_Mix(
+			val cmd = L0C_Mix(
 				mTips, sLiquidClass,
 				asVolumes,
 				iGrid, site.iSite,
 				sPlateMask,
 				item0.nCount
-			))
+			)
+			
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(holderModel.id)
+			builder.mapCmdToLabwareInfo(cmd) = List((site, item0.location, labwareModel))
+			
+			Seq(cmd)
 		}
 	}
 	
@@ -324,8 +349,7 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 			siteSrc <- getSite(c.locationSrc)
 			siteDest <- getSite(c.locationDest)
 		} yield {
-			addLabware(builder, c.sPlateModel, c.locationDest)
-			addLabware(builder, c.sPlateModel, c.locationSrc)
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(c.sPlateModel)
 			
 			val carrierSrc = siteSrc.carrier
 			val iGridSrc = config.tableFile.mapCarrierToGrid(carrierSrc)
@@ -343,17 +367,27 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 				return Error("no common RoMa: "+carrierSrc.sName+" and "+carrierDest.sName)
 			val (iRoma, sClass) = lVector2.head._1
 			
-			Seq(L0C_Transfer_Rack(
+			val cmd = L0C_Transfer_Rack(
 				iRoma,
 				sClass,
-				c.sPlateModel,
-				iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
-				iGridDest, siteDest.iSite, siteDest.carrier.sName,
+				//c.sPlateModel,
+				//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
+				//iGridDest, siteDest.iSite, siteDest.carrier.sName,
+				labwareModel,
+				iGridSrc, siteSrc,
+				iGridDest, siteDest,
 				c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,
-				sCarrierModelLid = ""
-			))
+				sCarrierLid = ""
+			)
+			
+			builder.mapCmdToLabwareInfo(cmd) = List(
+				(siteSrc, c.locationSrc, labwareModel),
+				(siteDest, c.locationDest, labwareModel)
+			)
+			
+			Seq(cmd)
 		}
 	}
 	
@@ -388,25 +422,33 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 		}
 	}
 	
-	private def addLabware(builder: EvowareScriptBuilder, plate: PlateConfigL2, location: String): Result[Unit] = {
-		if (plate.model_?.isEmpty)
-			//return Error("plate model must be assigned to plate \""+plate+"\"")
-			return Success(())
-		addLabware(builder, plate.model_?.get.id, location)
-	}
-	
-	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): Result[Unit] = {
+	/*
+	private def addLabware(builder: EvowareScriptBuilder, labwareModel: LabwareModel, location: String): Result[Unit] = {
 		val site = config.mapLabelToSite(location)
-		val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-		val coord = (iGrid, site.iSite)
-		builder.mapLocToLabware.get(coord) match {
+		val labwareModel = config.tableFile.mapSiteToLabwareModel(site)
+		
+		//val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(sLabwareModel)
+		builder.mapLocToLabware.get(site) match {
 			case None =>
-				builder.mapLocToLabware(coord) = LabwareItem(location, sLabwareModel, iGrid, site.iSite)
-			case Some(item) if item.sLabel == location && item.sType == sLabwareModel =>
+				builder.mapLocToLabware(site) = new LabwareObject(site, labwareModel, location)
+			case Some(labware) if labware.sLabel == location && labware.labwareModel == labwareModel =>
 				// Same as before, so we don't need to do anything
 			case Some(_) =>
 				// TODO: a new script needs to be started
 		}
 		Success(())
 	}
+	
+	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): Result[Unit] = {
+		val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(sLabwareModel)
+		addLabware(builder, labwareModel, location)
+	}
+	
+	private def addLabware(builder: EvowareScriptBuilder, plate: PlateConfigL2, location: String): Result[Unit] = {
+		if (plate.model_?.isEmpty)
+			//return Error("plate model must be assigned to plate \""+plate+"\"")
+			return Success(())
+		addLabware(builder, plate.model_?.get.id, location)
+	}
+	*/
 }

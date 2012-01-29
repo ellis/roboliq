@@ -98,15 +98,15 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 	}
 	*/
 	object Locations {
-		val List(reagents15, reagents50) = labelLabwares(List("reagents15", "reagents50"), "Cooled 8Pos*15ml 8Pos*50ml")
-		val ethanol = labelLabware("ethanol", "Trough 1000ml", 0)
+		val List(reagents15, reagents50) = labelSites(List("reagents15", "reagents50"), "Cooled 8Pos*15ml 8Pos*50ml")
+		val ethanol = labelSite("ethanol", "Trough 1000ml", 0)
 		val holder = labelSite("holder", "Downholder", 0)
 		val List(cover, shaker) = labelSites(List("cover", "shaker"), "MP 2Pos H+P Shake")
-		val eppendorfs = labelLabware("eppendorfs", "Block 20Pos", 0)
+		val eppendorfs = labelSite("eppendorfs", "Block 20Pos", 0)
 		val List(cooled1, cooled2) = labelSites(List("cooled1", "cooled2"), "MP 3Pos Cooled 1 PCR")
 		val List(cooled3, cooled4, cooled5) = labelSites(List("cooled3", "cooled4", "cooled5"), "MP 3Pos Cooled 2 PCR")
 		//val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
-		val waste = labelLabware("waste", "Te-VacS", 6)
+		val waste = labelSite("waste", "Te-VacS", 6)
 		val sealer = labelSite("sealer", "RoboSeal", 0)
 		val peeler = labelSite("peeler", "RoboPeel", 0)
 		val pcr1 = labelSite("pcr1", "TRobot1", 0)
@@ -158,6 +158,7 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 	)
 	//def addKnowledge
 
+	/*
 	val mapWashProgramArgs: Map[Int, WashProgramArgs] = {
 		// TODO: Set these values depending on the tip kind
 		val nWasteDelay = 500
@@ -227,6 +228,7 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 				bFastWash = true)
 		)
 	}
+	*/
 /*
 	val sHeader =
 """00000000

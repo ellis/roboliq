@@ -142,14 +142,22 @@ case class L0C_Wash(
 case class L0C_Transfer_Rack(
 	iRoma: Int, // 0 for RoMa1, 1 for RoMa2
 	sVectorClass: String, // Narrow, Wide, User Defined...
-	sPlateModel: String,
-	iGridSrc: Int, iSiteSrc: Int, sCarrierModelSrc: String,
-	iGridDest: Int, iSiteDest: Int, sCarrierModelDest: String,
+	//sPlateModel: String,
+	//iGridSrc: Int, iSiteSrc: Int, sCarrierModelSrc: String,
+	//iGridDest: Int, iSiteDest: Int, sCarrierModelDest: String,
+	labwareModel: LabwareModel,
+	iGridSrc: Int, siteSrc: CarrierSite,
+	iGridDest: Int, siteDest: CarrierSite,
 	lidHandling: LidHandling.Value,
-	iGridLid: Int, iSiteLid: Int, sCarrierModelLid: String
+	iGridLid: Int, iSiteLid: Int, sCarrierLid: String
 ) extends Command {
 	override def toString = {
 		import LidHandling._
+		
+		val sCarrierSrc = siteSrc.carrier.sName
+		val sCarrierDest = siteDest.carrier.sName
+		val iSiteSrc = siteSrc.iSite
+		val iSiteDest = siteDest.iSite
 		
 		val bMoveBackToHome = true // 1 = move back to home position
 		List(
@@ -161,13 +169,14 @@ case class L0C_Transfer_Rack(
 			iRoma,
 			if (lidHandling == RemoveAtSource) 1 else 0,
 			'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
-			'"'+sPlateModel+'"',
+			//'"'+sPlateModel+'"',
+			'"'+labwareModel.sName+'"',
 			'"'+sVectorClass+'"',
 			"\"\"",
 			"\"\"",
-			'"'+sCarrierModelSrc+'"',
-			'"'+sCarrierModelLid+'"',
-			'"'+sCarrierModelDest+'"',
+			'"'+sCarrierSrc+'"',
+			'"'+sCarrierLid+'"',
+			'"'+sCarrierDest+'"',
 			'"'+(iSiteSrc+1).toString+'"',
 			'"'+(if (lidHandling == NoLid) "(Not defined)" else (iSiteLid+1).toString)+'"',
 			'"'+(iSiteDest+1).toString+'"'

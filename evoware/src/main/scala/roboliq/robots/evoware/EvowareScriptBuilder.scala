@@ -7,13 +7,13 @@ import roboliq.common.Command
 
 
 class EvowareScriptBuilder {
-	var sHeaderDefault: String = null
-	val mapLocToLabware = new HashMap[Tuple2[Int, Int], LabwareItem]
+	//val mapLocToLabware = new HashMap[CarrierSite, LabwareObject]
+	val mapCmdToLabwareInfo = new HashMap[Command, List[Tuple3[CarrierSite, String, LabwareModel]]]
 	val cmds = new ArrayBuffer[Command]
 }
 
 class EvowareScript(
-	val sHeaderDefault: String,
-	val mapLocToLabware: Map[Tuple2[Int, Int], LabwareItem],
+	//val tableFile: EvowareTableFile,
+	val mapCmdToLabwareInfo: Map[Command, List[Tuple3[CarrierSite, String, LabwareModel]]],
 	val cmds: Seq[Command]
 )

@@ -13,8 +13,7 @@ class BsseToolchain(stationConfig: station1.StationConfig) extends EvowareToolch
 	def processors = stationConfig.processors
 	val evowareConfig = new EvowareConfig(
 		stationConfig.tableFile,
-		stationConfig.mapLabelToSite,
-		stationConfig.mapLabelToLabware)
+		stationConfig.mapLabelToSite)
 	val compilerConfig = new CompilerConfig {
 		val devices = stationConfig.devices
 		val processors = stationConfig.processors
