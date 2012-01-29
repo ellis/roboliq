@@ -466,18 +466,31 @@ taq.location = eppendorfs(A1)
 
 Pcr {
 	id: pcr
-	products: {
-		Product { forwardPrimer: "T7"; backwardPrimer: "FRO1259/60"; template: "FRP572" }
-		Product { forwardPrimer: "FRO1259/60"; backwardPrimer: "FRO1261/62"; template: "FRP128" }
-		Product { forwardPrimer: "FRO1261/62"; backwardPrimer: "T3"; template: "FRP572" }
-	}
+	Product { forwardPrimer: "T7"; backwardPrimer: "FRO1259/60"; template: "FRP572" }
+	Product { forwardPrimer: "FRO1259/60"; backwardPrimer: "FRO1261/62"; template: "FRP128" }
+	Product { forwardPrimer: "FRO1261/62"; backwardPrimer: "T3"; template: "FRP572" }
 	volumes: 20 ul
-	mixSpec.pol
 }
 Tube {
 	liquid: pcr.mixSpec.polymeraseLiquid
+	concentration: ...
 	location: "eppendorfs:A1"
 }
+
+List(
+	new Pcr {
+		id = "pcr"
+		products = List(
+			new Product(...), ...
+		)
+		volumes = List(20 ul)
+	},
+	new Tube {
+		liquid = ref("pcr.mixSpec.polymeraseLiquid")
+		concentration = ...
+		location = ref("eppendorfs:A1")
+	}
+)
 
 What the program looks for:
 for the specified genes, search the database for wells with required primers and templates
