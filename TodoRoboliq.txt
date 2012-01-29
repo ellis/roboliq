@@ -443,6 +443,133 @@ x	pipetting mix command: efficient use of multiple sources going to one destinat
 		check for plate compatibility; if replating is required, the user must specify this in the setup somehow
 		for higher-level commands, device should take multiple plates and can either process them sequentially or simultaneously
 
+
+----
+How to define a specific experiment:
+
+Database:
+plates: id, model, barcode
+liquids: id, description, washSpec, contaminants
+wells: plateId, index, liquid, volume, concentration, experiment where prepared or other notes, date created, expiration date?
+plasmid: id, template, forward primer, backward primer
+pcrMixSpec: id, version, buffer conc, dNTP conc, template conc, forward primer conc, backward primer conc, polymerase conc, other stuff amounts
+pcrThermocycleSpec: id, version
+
+Experiment description:
+pcrMix+pcrThermocycle
+genes: gene1, gene2, gene3
+volumes: 20ul
+taq.location = eppendorfs(A1)
+
+Pcr {
+	id: pcr
+	products: [
+		Product { forwardPrimer: "T7"; backwardPrimer: "FRO1259/60"; template: "FRP572" },
+		Product { forwardPrimer: "FRO1259/60"; backwardPrimer: "FRO1261/62"; template: "FRP128" },
+		Product { forwardPrimer: "FRO1261/62"; backwardPrimer: "T3"; template: "FRP572" }
+	]
+	volumes: 20 ul
+}
+Tube {
+	liquid: pcr.mixSpec.polymeraseLiquid
+	location: "eppendorfs:A1"
+}
+
+What the program looks for:
+for the specified genes, search the database for wells with required primers and templates
+if not specified, choose a default pcrMixSpec (first check project, user, group, then system defaults -- allow for arbitrary hierarchy of defaults;)
+	also, choose the newest version if no version is specified
+if not specified, choose a default pcrThermocycleSpec
+if source wells not specifed, pick the fewest possible number of source plates for those wells
+if destination wells not specified, either select from among used PCR plates with enough empty wells or pick a pcr plate model for a new plate
+if initial plate/tube positions not specified, choose initial positions for each one
+if pcr devices not specified, check how many PCR machines we need and choose which ones to use
+
+Full experiment description:
+Primer { id: T7 }
+Primer { id: FRO1259_60 }
+Primer { id: FRO1261_62 }
+Primer { id: T3 }
+Template { id: FRP572 }
+Template { id: FRP128 }
+Liquid { id: water }
+Liquid { id: taq }
+Liquid { id: buffer10x }
+Plate {
+	urn: bsse.ethz.ch/Plate/20120128_ellis
+	model: "D-BSSE DWP 96 well"
+	barcode: "12340rsate3235"
+	location: lid
+	Well {
+		index: 0
+		liquid: T7
+		volume: 50 ul
+		concentration: ...
+		dateCreated: 2012-01-28
+	}
+	Well {
+		index: 1
+		liquid: T3
+		...
+	}
+	Well ...
+}
+Plate {
+	id: plate2
+	urn: platePcr96_20120128_ellis
+	model: "D-BSSE PCR 96 well"
+	barcode: "12340rs23551aA"
+	location: cooled2
+}
+/* Centrifuge balance plate */
+Plate {
+	id: plate3
+}
+Tube {
+	liquid: water
+	location: reagents50(1)
+}
+Tube {
+	liquid: taq
+	location: eppendorfs(A1)
+	volume: 50 ul
+	concentration: ...
+	dateCreated: 2012-01-28
+}
+PcrMixSpec {
+	id: pcrMixSpec1
+	urn: bsse.ethz.ch/PcrMixSpec/0
+	bufferLiquid: buffer10x
+	primerLiquid: taq
+	bufferConc: ...
+	dNTPConc: ...
+	...
+}
+PcrThermocycleSpec {
+	id: pcrThermocycleSpec1
+	directory: 0
+	program: 5
+}
+CentrifugeSpec {
+	id: pcrCentrifugeSpec1
+
+}
+Pcr {
+	mixSpec: pcrMixSpec1
+	thermocycleSpec: pcrThermocycleSpec1
+	centrifugeSpec: pcrCentrifugeSpec1
+	destinations: plate1(A2+3)
+	genes: [
+		Gene { forwardPrimer: "T7"; backwardPrimer: "FRO1259/60"; template: "FRP572" },
+		Gene { forwardPrimer: "FRO1259/60"; backwardPrimer: "FRO1261/62"; template: "FRP128" },
+		Gene { forwardPrimer: "FRO1261/62"; backwardPrimer: "T3"; template: "FRP572" }
+	]
+	volumes: 20 ul
+}
+
+
+----
+
 echo '<table border="1">'
 cat table0.txt | \
  sed -e 's#^x.\(.*\)#<tr><td>\1</td><td align="right">100%</td><td>2011-08-31</td></tr>#' \
