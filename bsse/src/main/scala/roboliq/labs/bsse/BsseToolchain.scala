@@ -11,7 +11,10 @@ import roboliq.labs.bsse._
 class BsseToolchain(stationConfig: station1.StationConfig) extends EvowareToolchain { toolchain =>
 	def devices = stationConfig.devices
 	def processors = stationConfig.processors
-	val evowareConfig = new EvowareConfig(stationConfig.sites, stationConfig.mapWashProgramArgs)
+	val evowareConfig = new EvowareConfig(
+		stationConfig.tableFile,
+		stationConfig.mapLabelToSite,
+		stationConfig.mapLabelToLabware)
 	val compilerConfig = new CompilerConfig {
 		val devices = stationConfig.devices
 		val processors = stationConfig.processors

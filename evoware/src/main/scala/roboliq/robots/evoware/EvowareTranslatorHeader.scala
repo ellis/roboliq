@@ -154,6 +154,7 @@ V;200
 	def getHeader(map: LabwareMap): String = {
 		getHeader(sDefault, map)
 	}
+	
 	def getHeader(sOrig: String, map: LabwareMap): String = {
 		val lsLine = sOrig.split("\r?\n", -1).toList
 		val lsLineNew = processTop(lsLine, map)

@@ -60,7 +60,7 @@ class GroupABuilder(
 			mapLiquidToModels(liquid) = mapLiquidToModels.getOrElse(liquid, Seq()) ++ tipModels
 		}
 		val lTipModelOkForAll = device.config.lTipModel.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
-		if (!lTipModelOkForAll.isEmpty) {
+		if (device.areTipsDisposable && !lTipModelOkForAll.isEmpty) {
 			val tipModel = lTipModelOkForAll.head
 			lLiquidAll.map(_ -> tipModel).toMap
 		}
@@ -271,7 +271,7 @@ class GroupABuilder(
 				updateGroupA9_mTipToCleanSpec >>=
 				updateGroupA9_states1
 		} yield {
-			println("A11 g.lPremix: "+g.lPremix)
+			//println("A11 g.lPremix: "+g.lPremix)
 			g
 		}
 	}
@@ -406,7 +406,7 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA3_mLMToTips(g0: GroupA): GroupResult = {
-		println("g0.mTipToCleanSpecPending0: "+g0.mTipToCleanSpecPending0)
+		//println("g0.mTipToCleanSpecPending0: "+g0.mTipToCleanSpecPending0)
 		val llTip = {
 			val lTipClean = lTipAll.filter(tip => {
 				g0.mTipToCleanSpecPending0.get(tip) match {
@@ -477,10 +477,33 @@ class GroupABuilder(
 	private def updateGroupA4_sub(g0: GroupA, lTip: SortedSet[TipConfigL2], mDestToItems: Map[WellConfigL2, List[Item]], acc: Map[Item, TipConfigL2]): Map[Item, TipConfigL2] = {
 		if (mDestToItems.isEmpty) acc
 		else {
-			val ltw = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)).flatten
+			val ltw0 = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)).flatten
+			// Make sure that max tip volume isn't exceeded when pipetting from a single liquid to multiple destinations
+			val mTipToVolume = new HashMap[TipConfigL2, Double]
+			val ltw = ltw0.filter(tw => {
+				val nVolumeTip0 = mTipToVolume.getOrElse(tw.tip, 0.0)
+				val item = mDestToItems(tw.well).head
+				val lm = g0.mLM(item)
+				val nVolumeTip = nVolumeTip0 + item.nVolume
+				if (nVolumeTip <= lm.tipModel.nVolume) {
+					mTipToVolume(tw.tip) = nVolumeTip
+					true
+				}
+				else {
+					false
+				}
+			})
 			val lTip2 = lTip -- ltw.map(_.tip)
 			val acc2 = acc ++ ltw.map(tw => mDestToItems(tw.well).head -> tw.tip)
-			val mDestToItems2 = mDestToItems.mapValues(_.tail).filterNot(_._2.isEmpty)
+			// Remove processed items from mDestToItems
+			val mDestToItems2 = mDestToItems.map(pair => {
+				val (dest, items) = pair
+				if (ltw.exists(_.well == dest))
+					(dest, items.tail)
+				else
+					(dest, items)
+			}).filterNot(_._2.isEmpty)
+			//println("updateGroupA4_sub: ",ltw, lTip2, acc2, mDestToItems2)
 			updateGroupA4_sub(g0, lTip2, mDestToItems2, acc2)
 		}
 	}
@@ -584,6 +607,14 @@ class GroupABuilder(
 						case Some(p) => p
 					}
 				)
+				// FIXME: for debug only
+				if (!g0.mTipToVolume.contains(tw.tip)) {
+					println("g0: "+g0)
+					println("tips: "+g0.mTipToVolume)
+					println("lItem: "+lItem)
+					println("ltw: "+ltw)
+				}
+				// ENDFIX
 				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy)
 			})
 		})
@@ -611,7 +642,7 @@ class GroupABuilder(
 			}
 		})
 
-		println("lPremix: "+lPremix)
+		//println("lPremix: "+lPremix)
 		/*println("g0.copy: "+(g0.copy(
 			lAspirate = lAspirate,
 			lPremix = lPremix
@@ -625,7 +656,7 @@ class GroupABuilder(
 	//case class LiquidGroups(pre: LiquidGroup, asperate: LiquidGroup, dispense: LiquidGroup)
 	
 	def updateGroupA9_mTipToCleanSpec(g0: GroupA): GroupResult = {
-		println("A9 g0.lPremix: "+g0.lPremix)
+		//println("A9 g0.lPremix: "+g0.lPremix)
 		// Liquid groups of destination wells with wet contact
 		val mTipToLiquidGroups = new HashMap[TipConfigL2, Set[LiquidGroup]]
 		val mTipToDestContams = new HashMap[TipConfigL2, Set[Contaminant.Value]]
@@ -708,7 +739,7 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA9_states1(g0: GroupA): GroupResult = {
-		println("A10 g0.lPremix: "+g0.lPremix)
+		//println("A10 g0.lPremix: "+g0.lPremix)
 		val builder = new StateBuilder(g0.states0)
 		
 		// TODO: handle tip replacement
@@ -717,7 +748,7 @@ class GroupABuilder(
 			tip.obj.stateWriter(builder).clean(cleanSpec.washIntensity)
 		}
 
-		println("g0.lAspirate: "+g0.lAspirate)
+		//println("g0.lAspirate: "+g0.lAspirate)
 		for (asp <- g0.lAspirate) {
 			// FIXME: for debug only
 			if ((asp.well.state(builder).liquid != g0.mTipToLM(asp.tip).liquid)) {
@@ -725,7 +756,7 @@ class GroupABuilder(
 				println("g0.mTipToLM(asp.tip): "+g0.mTipToLM(asp.tip))
 			}
 			assert(asp.well.state(builder).liquid == g0.mTipToLM(asp.tip).liquid)
-			println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
+			//println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
 			// ENDFIX
 			asp.tip.obj.stateWriter(builder).aspirate(asp.well.state(builder).liquid, asp.nVolume)
 			asp.well.obj.stateWriter(builder).remove(asp.nVolume)

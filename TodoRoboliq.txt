@@ -25,9 +25,10 @@ Big goals:
 
 Current goals:
 	esc: labware on external devices
-	nice scripts
 	read in evoware config files
+	nice scripts
 	better generation and scoring of cleaning commands
+	use evoware config files to select more things automatically
 
 Evoware commands:
 x	asperate
@@ -70,6 +71,8 @@ Roboease features which are missing:
 	log
 	use external scripts
 Code:
+	Evoware config:
+		read in external template file
 	PcrScript1: small tip dispense in first cycle should not be DRY contact -- need to track well state
 	PcrScript1: decontamination of big tips should occur at beginning of 2nd cycle instead of after (via optimization)
 	PcrScript1: why does cycle after mix decontaminate the big tips again?
