@@ -464,8 +464,13 @@ genes: gene1, gene2, gene3
 volumes: 20ul
 taq.location = eppendorfs(A1)
 
-Pcr {
-	id: pcr
+Example 1:
+Pipette {
+	Distribute { source: "reagents50:1", destination: "cooled2:A1+96" }
+}
+
+Example 2:
+pcr = Pcr {
 	Product { forwardPrimer: "T7"; backwardPrimer: "FRO1259/60"; template: "FRP572" }
 	Product { forwardPrimer: "FRO1259/60"; backwardPrimer: "FRO1261/62"; template: "FRP128" }
 	Product { forwardPrimer: "FRO1261/62"; backwardPrimer: "T3"; template: "FRP572" }
@@ -501,6 +506,9 @@ if source wells not specifed, pick the fewest possible number of source plates f
 if destination wells not specified, either select from among used PCR plates with enough empty wells or pick a pcr plate model for a new plate
 if initial plate/tube positions not specified, choose initial positions for each one
 if pcr devices not specified, check how many PCR machines we need and choose which ones to use
+
+Questions for Fabian:
+	should we keep track of the various states of a substance? For example, for a particular gene: amplified, purified, etc.
 
 Full experiment description:
 Primer { id: T7 }
@@ -657,14 +665,14 @@ x	MIX_WELLS
 9	ROCHE_OPEN
 10	ROCHE_CLOSE
 11	ROCHE_RUN
-	RUN_PCR
-	PCR_RUN
-	PCR_OPEN
-	PCR_CLOSE
+ *	RUN_PCR
+ *	PCR_RUN
+ *	PCR_OPEN
+ *	PCR_CLOSE
 	PCR_COVER
 	PCR_UNCOVER
-	RUN_PCR_OPEN
-	PCR_RUN_OPEN
+ *	RUN_PCR_OPEN
+ *	PCR_RUN_OPEN
 	PR_OPEN
 	PR_CLOSE
 	PR_WAIT
