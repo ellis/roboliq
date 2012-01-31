@@ -1,6 +1,8 @@
+package temp
+
 import scala.collection.mutable.ArrayBuffer
 
-import roboliq.common._
+//import roboliq.common._
 
 	
 object LiquidProperties extends Enumeration {
@@ -24,25 +26,49 @@ class PObject {
 }
 
 abstract class PCommand extends PObject {
-	def getLiquids(): List[Liquid]
+	def getSources(nb: NameBase): List[PropertyValue[_]]
 }
 
 class Property[A] {
 	var value: PropertyValue[A] = PropertyEmpty[A]()
 	def :=(a: A) { value = PropertyObject(a) }
 	def :=(ref: TempRef) { value = PropertyRefId[A](ref.id) }
-	def :=(ref: TempName) { value = PropertyRefName[A](ref.name) }
+	def :=(ref: TempName) { value = PropertyRefDb[A](ref.name) }
 }
 
 class TempRef(val id: String)
 class TempName(val name: String)
 
-sealed abstract trait PropertyValue[A]
-case class PropertyEmpty[A]() extends PropertyValue[A]
-case class PropertyRefId[A](id: String) extends PropertyValue[A]
-case class PropertyRefName[A](name: String) extends PropertyValue[A]
-case class PropertyRefProperty[A](p: Property[A]) extends PropertyValue[A]
-case class PropertyObject[A](val value: A) extends PropertyValue[A]
+class NameBase(val mapVars: Map[String, PObject], val mapDb: Map[String, PObject]) {
+	def apply(name: String): Option[PObject] = {
+		mapVars.get(name).orElse(mapDb.get(name))
+	}
+}
+
+sealed abstract trait PropertyValue[A] {
+	def flatten(nb: NameBase): PropertyValue[A]
+	def getValueR(nb: NameBase): Option[A]
+}
+case class PropertyEmpty[A]() extends PropertyValue[A] {
+	def flatten(nb: NameBase): PropertyValue[A] = this
+	def getValueR(nb: NameBase): Option[A] = None
+}
+case class PropertyRefId[A](id: String) extends PropertyValue[A] {
+	def flatten(nb: NameBase): PropertyValue[A] = this
+	def getValueR(nb: NameBase): Option[A] = nb.mapVars.get(id).map(_.asInstanceOf[A])
+}
+case class PropertyRefDb[A](name: String) extends PropertyValue[A] {
+	def flatten(nb: NameBase): PropertyValue[A] = this
+	def getValueR(nb: NameBase): Option[A] = nb.mapDb.get(name).map(_.asInstanceOf[A])
+}
+case class PropertyRefProperty[A](p: Property[A]) extends PropertyValue[A] {
+	def flatten(nb: NameBase): PropertyValue[A] = p.value
+	def getValueR(nb: NameBase): Option[A] = flatten(nb).getValueR(nb)
+}
+case class PropertyObject[A](val value: A) extends PropertyValue[A] {
+	def flatten(nb: NameBase): PropertyValue[A] = this
+	def getValueR(nb: NameBase): Option[A] = Some(value)
+}
 
 class Substance extends PObject {
 }
@@ -50,17 +76,30 @@ class Substance extends PObject {
 class Liquid extends PObject {
 }
 
-class Pcr extends PObject {
+class Pcr extends PCommand {
 	type Product = PcrProduct
 	val products = new Property[List[Product]]
 	val volumes = new Property[List[LiquidVolume]]
 	val mixSpec = new Property[PcrMixSpec]
+	
+	def getSources(nb: NameBase): List[PropertyValue[_]] = {
+		val l = for {
+			lProduct <- products.value.getValueR(nb)
+		} yield {
+			lProduct.flatMap(prod => List(
+					prod.template.value,
+					prod.backwardPrimer.value,
+					prod.forwardPrimer.value
+					))
+		}
+		l.getOrElse(Nil)
+	}
 }
 
 class PcrProduct extends PObject {
+	val template = new Property[Liquid]
 	val forwardPrimer = new Property[Liquid]
 	val backwardPrimer = new Property[Liquid]
-	val template = new Property[Liquid]
 }
 
 class PcrMixSpec extends PObject {
@@ -87,7 +126,7 @@ class Tube extends PObject {
 
 class Test1 {
 	def refId(id: String): TempRef = new TempRef(id)
-	def refName(name: String): TempName = new TempName(name)
+	def refDb(name: String): TempName = new TempName(name)
 	
 	class IntToVolumeWrapper(n: Int) {
 		def pl = new LiquidVolume(n)
@@ -101,24 +140,29 @@ class Test1 {
 		new Pcr {
 			id := "pcr"
 			products := List(
-				new Product { template := refName("FRP572"); forwardPrimer := refName("T7"); backwardPrimer := refName("FRO1259/60") }
+				new Product { template := refDb("FRP572"); forwardPrimer := refDb("T7"); backwardPrimer := refDb("FRO1259/60") }
 			)
 			volumes := List(20 ul)
 		},
 		new Tube {
 			liquid := refId("pcr.mixSpec.polymeraseLiquid")
 			//concentration = ...
-			location := refId("eppendorfs:A1")
+			location := refId("eppendorfs(A1)")
 		}
 	)
 }
 
 class Process(items: List[PObject]) {
-	
+	def getSources(): List[PropertyValue[_]] = {
+		val nb = new NameBase(Map(), Map())
+		items.collect({case cmd: PCommand => cmd}).flatMap(_.getSources(nb))
+	}
 }
 
 object T {
 	def run {
-		
+		val test1 = new Test1
+		val p = new Process(test1.l)
+		p.getSources().foreach(println)
 	}
 }

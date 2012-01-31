@@ -455,7 +455,7 @@ plates: id, model, barcode
 liquids: id, description, washSpec, contaminants
 wells: plateId, index, liquid, volume, concentration, experiment where prepared or other notes, date created, expiration date?
 plasmid: id, template, forward primer, backward primer
-pcrMixSpec: id, version, buffer conc, dNTP conc, template conc, forward primer conc, backward primer conc, polymerase conc, other stuff amounts
+pcrMixSpec: id, version, buffer conc, dNTP conc, template conc, forward primer conc, backward primer conc, polymerase conc, other stuff amounts, default sample volume
 pcrThermocycleSpec: id, version
 
 Experiment description:
@@ -465,13 +465,14 @@ volumes: 20ul
 taq.location = eppendorfs(A1)
 
 Example 1:
+water = Liquid(...)
 Pipette {
-	Distribute { source: "reagents50:1", destination: "cooled2:A1+96" }
+	Distribute { source: reagents50(1), destination: cooled2(A1+96) }
 }
 
 Example 2:
 pcr = Pcr {
-	Product { forwardPrimer: "T7"; backwardPrimer: "FRO1259/60"; template: "FRP572" }
+	Product { forwardPrimer: "FRO115"; backwardPrimer: "FRO1259/60"; template: "FRP572" }
 	Product { forwardPrimer: "FRO1259/60"; backwardPrimer: "FRO1261/62"; template: "FRP128" }
 	Product { forwardPrimer: "FRO1261/62"; backwardPrimer: "T3"; template: "FRP572" }
 	volumes: 20 ul
@@ -496,6 +497,15 @@ List(
 		location = ref("eppendorfs:A1")
 	}
 )
+
+Script pre-processing:
+	extract unique list of source liquids and volume used (if already known)
+	extract unique list of source wells and volume used (if already known)
+	extract unique list of plates
+	look for wells in the databa
+	extract all source (unique) and volumes required of those sources (if can already calculate volume)
+
+	
 
 What the program looks for:
 for the specified genes, search the database for wells with required primers and templates
