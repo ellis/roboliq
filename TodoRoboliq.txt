@@ -465,9 +465,15 @@ volumes: 20ul
 taq.location = eppendorfs(A1)
 
 Example 1:
-water = Liquid(...)
-Pipette {
-	Distribute { source: reagents50(1), destination: cooled2(A1+96) }
+Distribute { source: reagents50(1), destination: cooled2(A1+96), volume: 10 ul }
+
+
+Pcr {
+	Product { template: "FRP572"; forwardPrimer: "FRO115"; backwardPrimer: "FRO1260" }
+	Product { template: "FRP128"; forwardPrimer: "FRO1259"; backwardPrimer: "FRO1262" }
+	Product { template: "FRP572"; forwardPrimer: "FRO1261"; backwardPrimer: "FRO114" }
+	mixSpec: "taq"
+	volumes: 20 ul
 }
 
 Example 2:
@@ -498,14 +504,14 @@ List(
 	}
 )
 
-Script pre-processing:
-	extract unique list of source liquids and volume used (if already known)
-	extract unique list of source wells and volume used (if already known)
-	extract unique list of plates
-	look for wells in the databa
-	extract all source (unique) and volumes required of those sources (if can already calculate volume)
-
-	
+Script processing:
+	extract all database references
+	try to load all database references
+	search database for all wells containing required liquids
+	choose plates (if a liquid is present on multiple plates, choose one of them to minimize overall number of plates)
+	choose table positions for plates and tubes
+	chech whether each command is complete
+	show list of items which couldn't be found in the database
 
 What the program looks for:
 for the specified genes, search the database for wells with required primers and templates
@@ -519,6 +525,13 @@ if pcr devices not specified, check how many PCR machines we need and choose whi
 
 Questions for Fabian:
 	should we keep track of the various states of a substance? For example, for a particular gene: amplified, purified, etc.
+	how should default hierarchy be defined? user, project, lab group, overall
+	idea of having the portable protocol extracted by software instead of written by 
+
+Hierarchy:
+	objects have properties
+	properties have values
+	values contain to objects, database references, or pointers to another property
 
 Full experiment description:
 Primer { id: T7 }
