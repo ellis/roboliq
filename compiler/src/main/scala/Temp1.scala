@@ -26,9 +26,13 @@ class LiquidVolume(pl: Int) extends PObject {
 
 abstract class PObject {
 	//private val m_properties = new ArrayBuffer[Property[_]]
-	//val id = new Property[String]
+	var key: String = null
 	def properties: List[Property[_]]
 	
+	def refId(id: String): TempNameA = new TempNameA(id)
+	def refDb(key: String): TempKeyA = new TempKeyA(key)
+	def refKey[A](key: String): TempKey[A] = new TempKey[A](key)
+
 	def getRefDbs(): List[PropertyRefDb[_]] = {
 		val ll: List[List[PropertyRefDb[_]]] = for (p <- properties) yield {
 			getRefDbs(p)
@@ -47,6 +51,34 @@ abstract class PObject {
 			case _ => Nil
 		}
 	}
+
+	
+	override def toString(): String = {
+		val clazz = getClass()
+		val clazzProperty = classOf[Property[_]]
+		val map: Map[String, String] = (for (m <- clazz.getDeclaredMethods() if clazzProperty.isAssignableFrom(m.getReturnType())) yield {
+			val sProperty = m.getName()
+			val p = m.invoke(this).asInstanceOf[Property[_]]
+			p.toContentString match {
+				case None => None
+				case Some(sValue) => Some(sProperty -> sValue)
+			}
+		}).flatten.toMap
+		//properties.map(p => clazz.getDeclaredMethod())
+		val pairs = ((if (key == null) Nil else ("key", key) :: Nil) ++ map.toList)
+		this.getClass().getSimpleName() + " {" +
+			pairs.map(pair => pair._1+": "+pair._2).mkString(", ") + " }"
+	}
+}
+
+class PString(val value: String) extends PObject {
+	def properties: List[Property[_]] = Nil
+	override def toString(): String = "\"" + value.toString() + "\""
+}
+
+class PInteger(val value: Int) extends PObject {
+	def properties: List[Property[_]] = Nil
+	override def toString(): String = value.toString()
 }
 
 abstract class PCommand extends PObject {
@@ -99,9 +131,24 @@ class Property[A <: PObject : ClassManifest] {
 class Property[A <: PObject](implicit m: Manifest[A]) {
 	var values: List[PropertyValue[A]] = Nil
 	def :=(a: A) { values = List(PropertyPObject(a)(m)) }
-	def :=(ref: TempRef) { values = List(PropertyRefId[A](ref.id)) }
-	def :=(ref: TempName) { values = List(PropertyRefDb[A](ref.name)) }
+	def :=(ref: TempNameA) { values = List(PropertyRefId[A](ref.name)) }
+	def :=(ref: TempKeyA) { values = List(PropertyRefDb[A](ref.key)) }
 	def :=(la: List[A]) { values = la.map(a => PropertyPObject(a)) }
+	def set(v: TempValue[A]) = v match {
+		case TempNull() => values = Nil
+		case Temp1(a) => :=(a)
+		case TempKey(s) => :=(new TempKeyA(s))
+		case TempName(s) => :=(new TempNameA(s))
+		case TempList(la) => :=(la)
+	}
+	
+	def toContentString(): Option[String] = {
+		values match {
+			case Nil => None
+			case a :: Nil => a.toContentString
+			case _ => Some(values.map(_.toContentString).flatten.mkString("[ ", ", ", " ]"))
+		}
+	}
 }
 
 /*
@@ -120,8 +167,15 @@ class PropertyList[A <: PObject](implicit m: scala.reflect.Manifest[A]) extends 
 }
 */
 
-class TempRef(val id: String)
-class TempName(val name: String)
+class TempKeyA(val key: String)
+class TempNameA(val name: String)
+
+sealed abstract class TempValue[A]
+case class TempNull[A]() extends TempValue[A]
+case class Temp1[A](val a: A) extends TempValue[A]
+case class TempKey[A](val key: String) extends TempValue[A]
+case class TempName[A](val name: String) extends TempValue[A]
+case class TempList[A](val la: List[A]) extends TempValue[A]
 
 class NameBase(val mapVars: Map[String, PObject], val mapDb: Map[String, PObject]) {
 	def apply(name: String): Option[PObject] = {
@@ -130,8 +184,10 @@ class NameBase(val mapVars: Map[String, PObject], val mapDb: Map[String, PObject
 }
 
 sealed abstract class PropertyValue[A <: PObject](implicit m: Manifest[A]) {
+	def keyEquals(sKey: String): Boolean = false
 	//def flatten(nb: NameBase): PropertyValue[A]
 	//def getValueR(nb: NameBase): Option[A]
+	def toContentString(): Option[String] = None
 }
 /*case class PropertyEmpty[A: ClassManifest]() extends PropertyValue[A] {
 	def flatten(nb: NameBase): PropertyValue[A] = this
@@ -142,6 +198,9 @@ case class PropertyRefId[A <: PObject](id: String)(implicit m: Manifest[A]) exte
 	//def getValueR(nb: NameBase): Option[A] = nb.mapVars.get(id).map(_.asInstanceOf[A])
 }
 case class PropertyRefDb[A <: PObject](name: String)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
+	override def keyEquals(sKey: String): Boolean = (name == sKey)
+	override def toContentString(): Option[String] = Some("K\""+name+"\"")
+	def getKeyPair: Tuple2[String, String] = (m.erasure.getCanonicalName() -> name)
 	//def flatten(nb: NameBase): PropertyValue[A] = this
 	//def getValueR(nb: NameBase): Option[A] = nb.mapDb.get(name).map(_.asInstanceOf[A])
 }
@@ -154,6 +213,8 @@ case class PropertyRefProperty[A <: PObject](p: Property[A])(implicit m: Manifes
 	def getValueR(nb: NameBase): Option[A] = Some(value)
 }*/
 case class PropertyPObject[A <: PObject](val value: A)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
+	override def keyEquals(sKey: String): Boolean = (sKey != null && sKey == value.key)
+	override def toContentString(): Option[String] = Some(value.toString)
 	//def flatten(nb: NameBase): PropertyValue[A] = this
 	//def getValueR(nb: NameBase): Option[A] = Some(value)
 	//def getRefDbs(): List[PropertyRefDb[_]] = value.getRefDbs()
@@ -163,7 +224,44 @@ case class PropertyPObject[A <: PObject](val value: A)(implicit m: Manifest[A]) 
 }*/
 
 class Liquid extends PObject {
+	var physical: String = null
+	var cleanPolicy: String = null
+	var contaminants: List[String] = null
 	def properties: List[Property[_]] = Nil
+}
+
+class Mixture extends Liquid {
+}
+
+class Plate extends PObject {
+	val model = new Property[PString]
+	val label = new Property[PString]
+	val description = new Property[PString]
+	def properties: List[Property[_]] = List(model, label)
+}
+
+class Well extends PObject {
+	val parent = new Property[Plate]
+	val index = new Property[PInteger]
+	val liquid = new Property[Liquid]
+	val volume = new Property[LiquidVolume]
+	def properties: List[Property[_]] = List(parent, index, liquid, volume)
+}
+
+object Well {
+	def apply(
+		parent: TempValue[Plate] = TempNull[Plate],
+		index: TempValue[PInteger] = TempNull[PInteger],
+		liquid: TempValue[Liquid] = TempNull[Liquid],
+		volume: TempValue[LiquidVolume] = TempNull[LiquidVolume]
+	): Well = {
+		val o = new Well
+		o.parent.set(parent)
+		o.index.set(index)
+		o.liquid.set(liquid)
+		o.volume.set(volume)
+		o
+	}
 }
 
 class Pcr extends PCommand {
@@ -220,9 +318,6 @@ class Tube extends PObject {
 }
 
 class Test1 {
-	def refId(id: String): TempRef = new TempRef(id)
-	def refDb(name: String): TempName = new TempName(name)
-	
 	class IntToVolumeWrapper(n: Int) {
 		def pl: LiquidVolume = new LiquidVolume(n)
 		def ul: LiquidVolume = new LiquidVolume(n * 1000)
@@ -244,18 +339,82 @@ class Test1 {
 }
 
 class Process(items: List[PObject]) {
-	def getDbRefs(): List[PropertyRefDb[_]] = items.flatMap(_.getRefDbs())
+	def getRefDbs(): List[PropertyRefDb[_]] = items.flatMap(_.getRefDbs())
+	def getClassKey(): List[Tuple2[String, String]] = getRefDbs().map(_.getKeyPair).distinct
 	/*def getSources(): List[PropertyValue[_]] = {
 		val nb = new NameBase(Map(), Map())
 		items.collect({case cmd: PCommand => cmd}).flatMap(_.getSources(nb))
 	}*/
 }
 
+object Parsers {
+	import scala.util.parsing.combinator._
+	class Parser extends JavaTokenParsers {
+		def propertyAndValue = ident ~ "=" ~ stringLiteral ^^ { case s ~ _ ~ v => (s, v) }
+		def liquidContents = repsep(propertyAndValue, ",")
+	}
+}
+
 object T {
+	val lLiquid = List[Liquid](
+		new Liquid { key = "FRO114"; },
+		new Liquid { key = "FRO115"; },
+		new Liquid { key = "FRO1259"; },
+		new Liquid { key = "FRO1260"; },
+		new Liquid { key = "FRO1261"; },
+		new Liquid { key = "FRO1262"; },
+		new Liquid { key = "FRP128"; },
+		new Liquid { key = "FRP572"; }
+	)
+	val lPlate = List[Plate](
+		new Plate { key = "P1"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("templates and primers") },
+		new Plate { key = "T1"; model := new PString("eppendorf"); description := new PString("polymerase") }
+	)
+	val lWell = List[Well](
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(0)), liquid = TempKey("FRO114")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(1)), liquid = TempKey("FRO115")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(2)), liquid = TempKey("FRO1259")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(3)), liquid = TempKey("FRO1260")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(4)), liquid = TempKey("FRO1261")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(5)), liquid = TempKey("FRO1262")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(6)), liquid = TempKey("FRP128")),
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(7)), liquid = TempKey("FRP572"))
+	)
+	val mapTables = Map[String, Map[String, PObject]](
+		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
+		"Plate" -> lPlate.map(o => o.key -> o).toMap,
+		"Well" -> lWell.map(o => o.key -> o).toMap
+	)
+	val mapClassToTable = Map[String, String](
+		classOf[Liquid].getCanonicalName() -> "Liquid"
+	)
+	
+	def lookup(pair: Tuple2[String, String]): Option[PObject] = {
+		for {
+			sTable <- mapClassToTable.get(pair._1)
+			table <- mapTables.get(sTable)
+			obj <- table.get(pair._2)
+		} yield obj
+	}
+	
+	def findWells(lsLiquidKey: List[String]): Map[String, List[Well]] = {
+		lsLiquidKey.map(sLiquidKey => {
+			sLiquidKey -> lWell.filter(_.liquid.values.exists(_.keyEquals(sLiquidKey)))
+		}).toMap
+	}
+	
 	def run {
 		val test1 = new Test1
 		val p = new Process(test1.l)
-		test1.l.flatMap(_.getRefDbs()).foreach(println)
-		//p.getSources().foreach(println)
+		val lKeyPair = p.getClassKey()
+		lKeyPair.foreach(println)
+		val mapDb = lKeyPair.map(pair => pair -> lookup(pair)).toMap
+		mapDb.foreach(println)
+		
+		println()
+		println("findWells:")
+		val lsLiquidKey = mapDb.toList.map(_._1._2)
+		val mapWells = findWells(lsLiquidKey)
+		mapWells.foreach(println)
 	}
 }

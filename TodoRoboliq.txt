@@ -476,6 +476,17 @@ Pcr {
 	volumes: 20 ul
 }
 
+json:
+{"Protocol": [
+	"Pcr": {
+		"products": [
+			{ "template": "KEY'FRP572", "forwardPrimer": "KEY'FRO115"; ... }
+			...
+		],
+		"mixSpec": "KEY'taq"
+	}
+]}
+
 Example 2:
 pcr = Pcr {
 	Product { forwardPrimer: "FRO115"; backwardPrimer: "FRO1259/60"; template: "FRP572" }
@@ -505,8 +516,8 @@ List(
 )
 
 Script processing:
-	extract all database references
-	try to load all database references
+x	extract all database references
+x	try to load all database references
 	search database for all wells containing required liquids
 	choose plates (if a liquid is present on multiple plates, choose one of them to minimize overall number of plates)
 	choose table positions for plates and tubes
