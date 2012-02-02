@@ -149,6 +149,12 @@ class Property[A <: PObject](implicit m: Manifest[A]) {
 			case _ => Some(values.map(_.toContentString).flatten.mkString("[ ", ", ", " ]"))
 		}
 	}
+
+	def getKeys: List[String] = values.map(_.getKey).flatten
+	def getKey: Option[String] = getKeys match {
+		case List(key) => Some(key)
+		case _ => None
+	}
 }
 
 /*
@@ -184,6 +190,7 @@ class NameBase(val mapVars: Map[String, PObject], val mapDb: Map[String, PObject
 }
 
 sealed abstract class PropertyValue[A <: PObject](implicit m: Manifest[A]) {
+	def getKey: Option[String] = None
 	def keyEquals(sKey: String): Boolean = false
 	//def flatten(nb: NameBase): PropertyValue[A]
 	//def getValueR(nb: NameBase): Option[A]
@@ -197,14 +204,16 @@ case class PropertyRefId[A <: PObject](id: String)(implicit m: Manifest[A]) exte
 	//def flatten(nb: NameBase): PropertyValue[A] = this
 	//def getValueR(nb: NameBase): Option[A] = nb.mapVars.get(id).map(_.asInstanceOf[A])
 }
-case class PropertyRefDb[A <: PObject](name: String)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
-	override def keyEquals(sKey: String): Boolean = (name == sKey)
-	override def toContentString(): Option[String] = Some("K\""+name+"\"")
-	def getKeyPair: Tuple2[String, String] = (m.erasure.getCanonicalName() -> name)
+case class PropertyRefDb[A <: PObject](key: String)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
+	override def getKey: Option[String] = Some(key)
+	override def keyEquals(sKey: String): Boolean = (key == sKey)
+	override def toContentString(): Option[String] = Some("K\""+key+"\"")
+	def getKeyPair: Tuple2[String, String] = (m.erasure.getCanonicalName() -> key)
 	//def flatten(nb: NameBase): PropertyValue[A] = this
 	//def getValueR(nb: NameBase): Option[A] = nb.mapDb.get(name).map(_.asInstanceOf[A])
 }
 case class PropertyRefProperty[A <: PObject](p: Property[A])(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
+	override def getKey: Option[String] = p.getKey
 	//def flatten(nb: NameBase): PropertyValue[A] = p.value
 	//def getValueR(nb: NameBase): Option[A] = flatten(nb).getValueR(nb)
 }
@@ -213,6 +222,7 @@ case class PropertyRefProperty[A <: PObject](p: Property[A])(implicit m: Manifes
 	def getValueR(nb: NameBase): Option[A] = Some(value)
 }*/
 case class PropertyPObject[A <: PObject](val value: A)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
+	override def getKey: Option[String] = Some(value.key)
 	override def keyEquals(sKey: String): Boolean = (sKey != null && sKey == value.key)
 	override def toContentString(): Option[String] = Some(value.toString)
 	//def flatten(nb: NameBase): PropertyValue[A] = this
@@ -403,6 +413,24 @@ object T {
 		}).toMap
 	}
 	
+	def findPlates(mapLiquidKeyToWells: Map[String, List[Well]]): List[String] = {
+		val lLiquidKeyToWells = mapLiquidKeyToWells.toList
+		val lLiquidKeyToPlates: List[Tuple2[String, List[String]]]
+			= lLiquidKeyToWells.map(pair => pair._1 -> pair._2.map(_.parent.getKey).flatten)
+		// Keys of the plates which are absolutely required (i.e. liquid is not available on a different plate too)
+		val lRequired: Set[String] = lLiquidKeyToPlates.collect({case (_, List(sPlateKey)) => sPlateKey}).toSet
+		// List of the items whose plates are not in lRequired
+		val lRemaining = lLiquidKeyToPlates.map({case (sLiquidKey, lPlate) => {
+			val lPlate2 = lPlate.filter(sPlateKey => !lRequired.contains(sPlateKey))
+			lPlate2 match {
+				case Nil => None
+				case _ => Some(sLiquidKey -> lPlate2)
+			}
+		}}).flatten
+		val lChosen = lRemaining.map(_._2.head)
+		(lRequired ++ lChosen).toList
+	}
+	
 	def run {
 		val test1 = new Test1
 		val p = new Process(test1.l)
@@ -414,7 +442,12 @@ object T {
 		println()
 		println("findWells:")
 		val lsLiquidKey = mapDb.toList.map(_._1._2)
-		val mapWells = findWells(lsLiquidKey)
-		mapWells.foreach(println)
+		val mapLiquidKeyToWells = findWells(lsLiquidKey)
+		mapLiquidKeyToWells.foreach(println)
+
+		println()
+		println("findPlates:")
+		val lsPlateKey = findPlates(mapLiquidKeyToWells)
+		lsPlateKey.foreach(println)
 	}
 }

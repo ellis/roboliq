@@ -518,10 +518,10 @@ List(
 Script processing:
 x	extract all database references
 x	try to load all database references
-	search database for all wells containing required liquids
-	choose plates (if a liquid is present on multiple plates, choose one of them to minimize overall number of plates)
+x	search database for all wells containing required liquids
+x	choose plates (if a liquid is present on multiple plates, choose one of them to minimize overall number of plates)
 	choose table positions for plates and tubes
-	chech whether each command is complete
+	check whether each command is complete
 	show list of items which couldn't be found in the database
 
 What the program looks for:
