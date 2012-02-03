@@ -343,6 +343,7 @@ class PcrProduct extends PObject {
 }
 
 class PcrMixSpec extends PObject {
+	val waterLiquid = new Property[Liquid]
 	val bufferLiquid = new Property[Liquid]
 	val bufferConc = new Property[LiquidAmount]
 	val dntpLiquid = new Property[Liquid]
@@ -355,7 +356,11 @@ class PcrMixSpec extends PObject {
 	val backwardPrimerConc = new Property[LiquidAmount]
 	val polymeraseLiquid = new Property[Liquid]
 	val polymeraseConc = new Property[LiquidAmount]
-	def properties: List[Property[_]] = Nil
+	def properties: List[Property[_]] = List(
+		waterLiquid,
+		bufferLiquid, bufferConc,
+		dntpLiquid, dntpConc
+	)
 }
 
 class Tube extends PObject {
@@ -383,6 +388,9 @@ class Test1 {
 				new Product { template := refDb("FRP572"); forwardPrimer := refDb("FRO1261"); backwardPrimer := refDb("FRO114") }
 			)
 			volumes := intToVolumeWrapper(20).ul
+			mixSpec := new PcrMixSpec {
+				waterLiquid := refDb("water")
+			}
 		}
 	)
 }
@@ -408,6 +416,7 @@ object Parsers {
 
 object T {
 	val lLiquid = List[Liquid](
+		new Liquid { key = "water"; },
 		new Liquid { key = "FRO114"; },
 		new Liquid { key = "FRO115"; },
 		new Liquid { key = "FRO1259"; },
@@ -418,11 +427,13 @@ object T {
 		new Liquid { key = "FRP572"; }
 	)
 	val lPlate = List[Plate](
+		new Plate { key = "T50_water"; model := new PString("Tube 50ml"); description := new PString("water") },
 		new Plate { key = "P1"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("templates and primers") },
 		new Plate { key = "T1"; model := new PString("eppendorf"); description := new PString("polymerase") },
 		new Plate { key = "P2"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("PCR products"); purpose := new PString("PCR") }
 	)
 	val lWell = List[Well](
+		Well(parent = TempKey("T50_water"), liquid = TempKey("water")),
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(0)), liquid = TempKey("FRO114")),
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(1)), liquid = TempKey("FRO115")),
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(2)), liquid = TempKey("FRO1259")),
@@ -475,7 +486,7 @@ object T {
 	
 	def queryPlateByPurpose(sPurpose: String): List[Plate] = {
 		val s = new PString(sPurpose)
-		lPlate.foreach(plate => println(plate, plate.purpose.getValue, s, plate.purpose.getValue == Some(s), plate.purpose.valueEquals(s)))
+		//lPlate.foreach(plate => println(plate, plate.purpose.getValue, s, plate.purpose.getValue == Some(s), plate.purpose.valueEquals(s)))
 		lPlate.filter(_.purpose.valueEquals(s))
 	}
 	
@@ -528,8 +539,8 @@ object T {
 
 		println()
 		println("findPlates:")
-		val lsPlateKey = findPlates(mapLiquidKeyToWells)
-		lsPlateKey.foreach(println)
+		val lsPlateKeySrc = findPlates(mapLiquidKeyToWells)
+		lsPlateKeySrc.foreach(println)
 		
 		println()
 		println("getNewPools:")
@@ -540,5 +551,16 @@ object T {
 		println("findNewPoolWells:")
 		val mapPoolToWells = findNewPoolWells(lPool)
 		mapPoolToWells.foreach(println)
+		
+		println()
+		println("all plates:")
+		val lsPlateKeyDest = mapPoolToWells.toList.flatMap(_._2).map(_.parent.getKey).flatten
+		val lsPlateKey = lsPlateKeySrc ++ lsPlateKeyDest
+		lsPlateKey.foreach(println)
+		
+		println()
+		println("choosePlateLocations:")
+		val lPlate = lsPlateKey.map(sPlateKey => lookup(("Plate", sPlateKey)).map(_.asInstanceOf[Plate])).flatten
+		
 	}
 }

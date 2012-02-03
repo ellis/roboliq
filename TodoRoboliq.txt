@@ -517,12 +517,54 @@ List(
 
 Script processing:
 x	extract all database references
+	extract all well information:
+		pre-existing or new
+		source and/or destination
+		volume aspirated prior to first dispense
+		max volume aspirated
+		max volume dispensed
+		initial mixture
+		final mixture
 x	try to load all database references
 x	search database for all wells containing required liquids
 x	choose plates (if a liquid is present on multiple plates, choose one of them to minimize overall number of plates)
+x	choose plates for new destination/temporary wells
 	choose table positions for plates and tubes
 	check whether each command is complete
 	show list of items which couldn't be found in the database
+Progressive protocol definition:
+	any command:
+		we give it a map of property names to values (values may be not-required, required, set, suggested, or constrained)
+		it gives us back:
+			an updated property map
+			L3 commands if successful
+	start with commands; we'll use Pcr as an example
+	The Pcr command will give us:
+		WellGroup: an ordered set of wells (though the wells might not be known yet)
+			a WellGroup can reference an explicit set of wells, a pool, or another WellGroup
+			WellGroups are used when performing well-oriented operations;
+			Pools are used when performing mixture-oriented operations
+		DeviceGroup: 0 or more devices of a particular type
+		Pool for each source liquid, destination product, and intermediate mixture
+			pools might be merged, such as if an intermediate pool is created which turns out not to be required
+		Pool: a set of wells which should be treated as conceptually equal
+			initial mixture if known
+			mixture transformer
+			wells if known (a WellGroup?)
+		Pool: number of wells (0 or more)
+		WellStateTransformer: adds/removes volumes, never sets volumes, keeps track of min/max levels as transition through states
+		PoolStateTransformer: places upper and lower limits on number of wells, sets the specific wells?
+	Pcr:
+		pcr[0].product[0].template: db("Liquid", "FRP572")
+		pcr[0].product[0]...
+		pcr[0].pool[0].type = VAL:0 // source only
+		pcr[0].pool[0].liquid = VAL:db("Liquid", "FRP572")
+		pcr[0].poolTransform[0].volAspirated = VAL:20000
+		pcr[0].poolTransform[0].dVol = VAL:-20000
+		pcr[0].product[0].well.count = DEFAULT:1
+		pcr[0].product[0].well[0].plate = REQUIRED:
+		pcr[0].product[0].well[0].index = REQUIRED:
+
 
 What the program looks for:
 for the specified genes, search the database for wells with required primers and templates
