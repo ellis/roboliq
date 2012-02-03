@@ -1,6 +1,7 @@
 package temp
 
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 
 //import roboliq.common._
 
@@ -14,10 +15,10 @@ class Volume(n: Double) {
 	def ml = n * 1000
 }
 
-class Pool {
+class Pool(val sPurpose: String) {
 	var liquid0_? : Option[Liquid] = None
 	var volume0_? : Option[LiquidVolume] = None
-	//var 
+	//var purpose: String = null
 }
 
 class Sample(val liquid: Liquid, val volume: LiquidVolume)
@@ -80,14 +81,22 @@ abstract class PObject {
 	}
 }
 
-class PString(val value: String) extends PObject {
+case class PString(val value: String) extends PObject {
 	def properties: List[Property[_]] = Nil
 	override def toString(): String = "\"" + value.toString() + "\""
+	override def equals(o: Any): Boolean = o match {
+		case that: PString => value == that.value
+		case _ => false
+	}
 }
 
 class PInteger(val value: Int) extends PObject {
 	def properties: List[Property[_]] = Nil
 	override def toString(): String = value.toString()
+	override def equals(o: Any): Boolean = o match {
+		case that: PInteger => value == that.value
+		case _ => false
+	}
 }
 
 abstract class PCommand extends PObject {
@@ -165,6 +174,14 @@ class Property[A <: PObject](implicit m: Manifest[A]) {
 		case List(key) => Some(key)
 		case _ => None
 	}
+
+	def getValues: List[A] = values.flatMap(_.getValues)
+	def getValue: Option[A] = getValues match {
+		case List(v) => Some(v)
+		case _ => None
+	} 
+	
+	def valueEquals(a: A): Boolean = (getValue == Some(a))
 }
 
 /*
@@ -201,7 +218,9 @@ class NameBase(val mapVars: Map[String, PObject], val mapDb: Map[String, PObject
 
 sealed abstract class PropertyValue[A <: PObject](implicit m: Manifest[A]) {
 	def getKey: Option[String] = None
+	def getValues: List[A] = Nil
 	def keyEquals(sKey: String): Boolean = false
+	//def valueEquals(b: Any): Boolean = false
 	//def flatten(nb: NameBase): PropertyValue[A]
 	//def getValueR(nb: NameBase): Option[A]
 	def toContentString(): Option[String] = None
@@ -224,6 +243,8 @@ case class PropertyRefDb[A <: PObject](key: String)(implicit m: Manifest[A]) ext
 }
 case class PropertyRefProperty[A <: PObject](p: Property[A])(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
 	override def getKey: Option[String] = p.getKey
+	override def getValues: List[A] = p.getValues
+	//override def valueEquals(b: Any): Boolean = p.valueEquals(b)
 	//def flatten(nb: NameBase): PropertyValue[A] = p.value
 	//def getValueR(nb: NameBase): Option[A] = flatten(nb).getValueR(nb)
 }
@@ -233,8 +254,10 @@ case class PropertyRefProperty[A <: PObject](p: Property[A])(implicit m: Manifes
 }*/
 case class PropertyPObject[A <: PObject](val value: A)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
 	override def getKey: Option[String] = Some(value.key)
+	override def getValues: List[A] = List(value)
 	override def keyEquals(sKey: String): Boolean = (sKey != null && sKey == value.key)
 	override def toContentString(): Option[String] = Some(value.toString)
+	//override def valueEquals(b: Any): Boolean = value.equals(b)
 	//def flatten(nb: NameBase): PropertyValue[A] = this
 	//def getValueR(nb: NameBase): Option[A] = Some(value)
 	//def getRefDbs(): List[PropertyRefDb[_]] = value.getRefDbs()
@@ -295,7 +318,7 @@ class Pcr extends PCommand {
 	def properties: List[Property[_]] = List(products, volumes, mixSpec)
 
 	override def getNewPools(): List[Pool] = {
-		List.fill(products.values.length)(new Pool)
+		List.fill(products.values.length)(new Pool("PCR"))
 	}
 	
 	/*
@@ -450,8 +473,44 @@ object T {
 		(lRequired ++ lChosen).toList
 	}
 	
-	// Plates for the new pools
-	def findNewPoolPlates
+	def queryPlateByPurpose(sPurpose: String): List[Plate] = {
+		val s = new PString(sPurpose)
+		lPlate.foreach(plate => println(plate, plate.purpose.getValue, s, plate.purpose.getValue == Some(s), plate.purpose.valueEquals(s)))
+		lPlate.filter(_.purpose.valueEquals(s))
+	}
+	
+	def queryWellByPlateKey(sPlateKey: String): List[Well] = {
+		lWell.filter(_.parent.getKey.filter(_ equals sPlateKey).isDefined)
+	}
+	
+	// Wells for the new pools
+	def findNewPoolWells(lPool: List[Pool]): Map[Pool, List[Well]] = {
+		val lsPurpose0 = lPool.map(_.sPurpose)
+		val lsPurpose = lsPurpose0.distinct
+		val mapPurposeToCount = lsPurpose0.groupBy(identity).mapValues(_.length)
+		val mapPurposeToPlates = lsPurpose.map(sPurpose => sPurpose -> queryPlateByPurpose(sPurpose)).toMap
+		val lPlate = mapPurposeToPlates.values.flatten
+		val mapPlateToFreeIndex = lPlate.map(plate => {
+			val lWell = queryWellByPlateKey(plate.key)
+			val index = lWell.foldLeft(0) {(acc, well) => well.index.getValue match {
+				case None => acc
+				case Some(i) => math.max(acc, i.value + 1)
+			}}
+			plate -> index
+		})
+		val map = new HashMap[Plate, Int]() ++ mapPlateToFreeIndex
+		println(lsPurpose0, lsPurpose, mapPurposeToCount, mapPurposeToPlates)
+		lPool.map(pool => {
+			for {
+				lPlate <- mapPurposeToPlates.get(pool.sPurpose)
+				plate <- lPlate.headOption
+				index <- map.get(plate)
+			} yield {
+				map(plate) = index + 1
+				pool -> List(Well(parent = TempKey(plate.key), index = Temp1(new PInteger(index))))
+			}
+		}).flatten.toMap
+	}
 	
 	def run {
 		val test1 = new Test1
@@ -476,5 +535,10 @@ object T {
 		println("getNewPools:")
 		val lPool = p.getNewPools()
 		lPool.foreach(println)
+		
+		println()
+		println("findNewPoolWells:")
+		val mapPoolToWells = findNewPoolWells(lPool)
+		mapPoolToWells.foreach(println)
 	}
 }
