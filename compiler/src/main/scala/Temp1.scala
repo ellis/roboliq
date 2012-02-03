@@ -14,9 +14,18 @@ class Volume(n: Double) {
 	def ml = n * 1000
 }
 
+class Pool {
+	var liquid0_? : Option[Liquid] = None
+	var volume0_? : Option[LiquidVolume] = None
+	//var 
+}
+
+class Sample(val liquid: Liquid, val volume: LiquidVolume)
+
 class LiquidAmount extends PObject {
 	def properties: List[Property[_]] = Nil
 }
+/** Volume in picoliters */
 class LiquidVolume(pl: Int) extends PObject {
 	def properties: List[Property[_]] = Nil
 }
@@ -83,6 +92,7 @@ class PInteger(val value: Int) extends PObject {
 
 abstract class PCommand extends PObject {
 	//def getSources(nb: NameBase): List[PropertyValue[_]]
+	def getNewPools(): List[Pool] = Nil
 }
 
 /*class IProperty[A <: PObject : ClassManifest, B <: PObject : ClassManifest] {
@@ -238,15 +248,17 @@ class Liquid extends PObject {
 	var cleanPolicy: String = null
 	var contaminants: List[String] = null
 	def properties: List[Property[_]] = Nil
+	var components: List[Sample] = Nil
 }
 
-class Mixture extends Liquid {
-}
+/*class Mixture extends Liquid {
+}*/
 
 class Plate extends PObject {
 	val model = new Property[PString]
 	val label = new Property[PString]
 	val description = new Property[PString]
+	val purpose = new Property[PString]
 	def properties: List[Property[_]] = List(model, label)
 }
 
@@ -282,6 +294,10 @@ class Pcr extends PCommand {
 	
 	def properties: List[Property[_]] = List(products, volumes, mixSpec)
 
+	override def getNewPools(): List[Pool] = {
+		List.fill(products.values.length)(new Pool)
+	}
+	
 	/*
 	def getSources(nb: NameBase): List[PropertyValue[_]] = {
 		products.values.flatMap(_.getValueR(nb) match {
@@ -351,6 +367,8 @@ class Test1 {
 class Process(items: List[PObject]) {
 	def getRefDbs(): List[PropertyRefDb[_]] = items.flatMap(_.getRefDbs())
 	def getClassKey(): List[Tuple2[String, String]] = getRefDbs().map(_.getKeyPair).distinct
+	def getCommands(): List[PCommand] = items.collect({case cmd: PCommand => cmd})
+	def getNewPools(): List[Pool] = getCommands().flatMap(_.getNewPools)
 	/*def getSources(): List[PropertyValue[_]] = {
 		val nb = new NameBase(Map(), Map())
 		items.collect({case cmd: PCommand => cmd}).flatMap(_.getSources(nb))
@@ -378,7 +396,8 @@ object T {
 	)
 	val lPlate = List[Plate](
 		new Plate { key = "P1"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("templates and primers") },
-		new Plate { key = "T1"; model := new PString("eppendorf"); description := new PString("polymerase") }
+		new Plate { key = "T1"; model := new PString("eppendorf"); description := new PString("polymerase") },
+		new Plate { key = "P2"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("PCR products"); purpose := new PString("PCR") }
 	)
 	val lWell = List[Well](
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(0)), liquid = TempKey("FRO114")),
@@ -431,6 +450,9 @@ object T {
 		(lRequired ++ lChosen).toList
 	}
 	
+	// Plates for the new pools
+	def findNewPoolPlates
+	
 	def run {
 		val test1 = new Test1
 		val p = new Process(test1.l)
@@ -449,5 +471,10 @@ object T {
 		println("findPlates:")
 		val lsPlateKey = findPlates(mapLiquidKeyToWells)
 		lsPlateKey.foreach(println)
+		
+		println()
+		println("getNewPools:")
+		val lPool = p.getNewPools()
+		lPool.foreach(println)
 	}
 }
