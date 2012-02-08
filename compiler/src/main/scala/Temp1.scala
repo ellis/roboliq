@@ -15,6 +15,31 @@ class Volume(n: Double) {
 	def ml = n * 1000
 }
 
+/** Volume in picoliters */
+class LiquidVolume(pl: Int) {
+	override def toString = {
+		if (pl > 1000000)
+			(pl / 1000000).toString + " ml"
+		else if (pl > 1000)
+			(pl / 1000).toString + " ul"
+		else
+			pl.toString + " pl"
+	}
+}
+object LiquidVolume {
+	def pl(n: Int): LiquidVolume = new LiquidVolume(n)
+	def ul(n: Int): LiquidVolume = new LiquidVolume(n * 1000)
+	def ml(n: Int): LiquidVolume = new LiquidVolume(n * 1000000)
+}
+
+abstract class LiquidAmount
+case class LiquidAmountByVolume(vol: LiquidVolume) extends LiquidAmount {
+	override def toString = vol.toString 
+}
+case class LiquidAmountByConc(conc: BigDecimal) extends LiquidAmount {
+	override def toString = conc.toString
+}
+
 class Pool(val sPurpose: String) {
 	var liquid0_? : Option[Liquid] = None
 	var volume0_? : Option[LiquidVolume] = None
@@ -22,14 +47,6 @@ class Pool(val sPurpose: String) {
 }
 
 class Sample(val liquid: Liquid, val volume: LiquidVolume)
-
-class LiquidAmount extends PObject {
-	def properties: List[Property[_]] = Nil
-}
-/** Volume in picoliters */
-class LiquidVolume(pl: Int) extends PObject {
-	def properties: List[Property[_]] = Nil
-}
 
 //class FixedPlate(model: PlateModel, val location: String)
 //class FixedCarrier(val location: String)
@@ -97,6 +114,21 @@ class PInteger(val value: Int) extends PObject {
 		case that: PInteger => value == that.value
 		case _ => false
 	}
+}
+
+/** Volume in picoliters */
+class PLiquidVolume(vol: LiquidVolume) extends PObject {
+	def properties: List[Property[_]] = Nil
+	override def toString = vol.toString
+}
+
+class PLiquidAmount(amt: LiquidAmount) extends PObject {
+	def properties: List[Property[_]] = Nil
+	override def toString = amt.toString
+	/*override def equals(o: Any): Boolean = o match {
+		case that: PL => value == that.value
+		case _ => false
+	}*/
 }
 
 abstract class PCommand extends PObject {
@@ -283,13 +315,16 @@ class Plate extends PObject {
 	val description = new Property[PString]
 	val purpose = new Property[PString]
 	def properties: List[Property[_]] = List(model, label)
+	
+	override def toString =
+		(key :: List(model, label, description, purpose).flatMap(_.getValue)).mkString("Plate(", ", ", ")")
 }
 
 class Well extends PObject {
 	val parent = new Property[Plate]
 	val index = new Property[PInteger]
 	val liquid = new Property[Liquid]
-	val volume = new Property[LiquidVolume]
+	val volume = new Property[PLiquidVolume]
 	def properties: List[Property[_]] = List(parent, index, liquid, volume)
 }
 
@@ -298,7 +333,7 @@ object Well {
 		parent: TempValue[Plate] = TempNull[Plate],
 		index: TempValue[PInteger] = TempNull[PInteger],
 		liquid: TempValue[Liquid] = TempNull[Liquid],
-		volume: TempValue[LiquidVolume] = TempNull[LiquidVolume]
+		volume: TempValue[PLiquidVolume] = TempNull[PLiquidVolume]
 	): Well = {
 		val o = new Well
 		o.parent.set(parent)
@@ -312,7 +347,7 @@ object Well {
 class Pcr extends PCommand {
 	type Product = PcrProduct
 	val products = new Property[Product]
-	val volumes = new Property[LiquidVolume]
+	val volumes = new Property[PLiquidVolume]
 	val mixSpec = new Property[PcrMixSpec]
 	
 	def properties: List[Property[_]] = List(products, volumes, mixSpec)
@@ -343,39 +378,37 @@ class PcrProduct extends PObject {
 }
 
 class PcrMixSpec extends PObject {
+	class Item {
+		val liquid = new Property[Liquid]
+		val amt0 = new Property[PLiquidAmount]
+		val amt1 = new Property[PLiquidAmount]
+	}
 	val waterLiquid = new Property[Liquid]
-	val bufferLiquid = new Property[Liquid]
-	val bufferConc = new Property[LiquidAmount]
-	val dntpLiquid = new Property[Liquid]
-	val dntpConc = new Property[LiquidAmount]
+	val buffer = new Item
+	val dntp = new Item
 	val templateLiquid = new Property[Liquid]
-	val templateConc = new Property[LiquidAmount]
+	val templateConc = new Property[PLiquidAmount]
 	val forwardPrimerLiquid = new Property[Liquid]
-	val forwardPrimerConc = new Property[LiquidAmount]
+	val forwardPrimerConc = new Property[PLiquidAmount]
 	val backwardPrimerLiquid = new Property[Liquid]
-	val backwardPrimerConc = new Property[LiquidAmount]
-	val polymeraseLiquid = new Property[Liquid]
-	val polymeraseConc = new Property[LiquidAmount]
-	def properties: List[Property[_]] = List(
-		waterLiquid,
-		bufferLiquid, bufferConc,
-		dntpLiquid, dntpConc
-	)
+	val backwardPrimerConc = new Property[PLiquidAmount]
+	val polymerase = new Item
+	def properties: List[Property[_]] = waterLiquid :: List(buffer, dntp, polymerase).flatMap(item => List[Property[_]](item.liquid, item.amt0, item.amt1))
 }
 
 class Tube extends PObject {
 	val liquid = new Property[Liquid]
-	val conc = new Property[LiquidAmount]
-	val volume = new Property[LiquidVolume]
+	val conc = new Property[PLiquidAmount]
+	val volume = new Property[PLiquidVolume]
 	//val location = new Property[String]
 	def properties: List[Property[_]] = List(liquid, conc, volume)//, location)
 }
 
 class Test1 {
 	class IntToVolumeWrapper(n: Int) {
-		def pl: LiquidVolume = new LiquidVolume(n)
-		def ul: LiquidVolume = new LiquidVolume(n * 1000)
-		def ml: LiquidVolume = new LiquidVolume(n * 1000000)
+		def pl: PLiquidVolume = new PLiquidVolume(new LiquidVolume(n))
+		def ul: PLiquidVolume = new PLiquidVolume(new LiquidVolume(n * 1000))
+		def ml: PLiquidVolume = new PLiquidVolume(new LiquidVolume(n * 1000000))
 	}
 	
 	implicit def intToVolumeWrapper(n: Int): IntToVolumeWrapper = new IntToVolumeWrapper(n)
@@ -390,6 +423,18 @@ class Test1 {
 			volumes := intToVolumeWrapper(20).ul
 			mixSpec := new PcrMixSpec {
 				waterLiquid := refDb("water")
+
+				buffer.liquid := refDb("buffer5x")
+				buffer.amt0 := new PLiquidAmount(LiquidAmountByConc(10))
+				buffer.amt1 := new PLiquidAmount(LiquidAmountByConc(1))
+				
+				dntp.liquid := refDb("dntp")
+				dntp.amt0 := new PLiquidAmount(LiquidAmountByConc(2))
+				dntp.amt1 := new PLiquidAmount(LiquidAmountByConc(0.2))
+				
+				polymerase.liquid := refDb("polymerase")
+				polymerase.amt0 := new PLiquidAmount(LiquidAmountByConc(5))
+				polymerase.amt1 := new PLiquidAmount(LiquidAmountByConc(0.01))
 			}
 		}
 	)
@@ -417,6 +462,9 @@ object Parsers {
 object T {
 	val lLiquid = List[Liquid](
 		new Liquid { key = "water"; },
+		new Liquid { key = "buffer10x"; },
+		new Liquid { key = "buffer5x"; },
+		new Liquid { key = "dntp"; },
 		new Liquid { key = "FRO114"; },
 		new Liquid { key = "FRO115"; },
 		new Liquid { key = "FRO1259"; },
@@ -429,8 +477,9 @@ object T {
 	val lPlate = List[Plate](
 		new Plate { key = "T50_water"; model := new PString("Tube 50ml"); description := new PString("water") },
 		new Plate { key = "P1"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("templates and primers") },
-		new Plate { key = "T1"; model := new PString("eppendorf"); description := new PString("polymerase") },
-		new Plate { key = "P2"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("PCR products"); purpose := new PString("PCR") }
+		new Plate { key = "P2"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("buffer and dntp") },
+		new Plate { key = "P3"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("polymerase") },
+		new Plate { key = "P4"; model := new PString("D-BSSE 96 Well PCR Plate"); description := new PString("PCR products"); purpose := new PString("PCR") }
 	)
 	val lWell = List[Well](
 		Well(parent = TempKey("T50_water"), liquid = TempKey("water")),
@@ -441,7 +490,10 @@ object T {
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(4)), liquid = TempKey("FRO1261")),
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(5)), liquid = TempKey("FRO1262")),
 		Well(parent = TempKey("P1"), index = Temp1(new PInteger(6)), liquid = TempKey("FRP128")),
-		Well(parent = TempKey("P1"), index = Temp1(new PInteger(7)), liquid = TempKey("FRP572"))
+		Well(parent = TempKey("P1"), index = Temp1(new PInteger(7)), liquid = TempKey("FRP572")),
+		Well(parent = TempKey("P2"), index = Temp1(new PInteger(0)), liquid = TempKey("buffer5x")),
+		Well(parent = TempKey("P2"), index = Temp1(new PInteger(1)), liquid = TempKey("dntp")),
+		Well(parent = TempKey("P3"), index = Temp1(new PInteger(0)), liquid = TempKey("polymerase"))
 	)
 	val mapTables = Map[String, Map[String, PObject]](
 		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
@@ -453,8 +505,10 @@ object T {
 	)
 	
 	def lookup(pair: Tuple2[String, String]): Option[PObject] = {
+		//if (!mapClassToTable.contains(pair._1))
+		//	println("lookup: class not found: "+pair._1)
+		val sTable = mapClassToTable.getOrElse(pair._1, pair._1)
 		for {
-			sTable <- mapClassToTable.get(pair._1)
 			table <- mapTables.get(sTable)
 			obj <- table.get(pair._2)
 		} yield obj
@@ -555,12 +609,40 @@ object T {
 		println()
 		println("all plates:")
 		val lsPlateKeyDest = mapPoolToWells.toList.flatMap(_._2).map(_.parent.getKey).flatten
-		val lsPlateKey = lsPlateKeySrc ++ lsPlateKeyDest
-		lsPlateKey.foreach(println)
+		val lsPlateKey = (lsPlateKeySrc ++ lsPlateKeyDest).distinct
+		val lPlate = lsPlateKey.map(sPlateKey => lookup(("Plate", sPlateKey)).map(_.asInstanceOf[Plate])).flatten
+		lPlate.foreach(println)
 		
+		// This task is platform specific.  In our case: tecan evoware. 
 		println()
 		println("choosePlateLocations:")
-		val lPlate = lsPlateKey.map(sPlateKey => lookup(("Plate", sPlateKey)).map(_.asInstanceOf[Plate])).flatten
-		
+		val mapLocFree = new HashMap[String, List[String]]
+		mapLocFree += "D-BSSE 96 Well PCR Plate" -> List("cooled1", "cooled2", "cooled3", "cooled4", "cooled5")
+		val mapRack = new HashMap[String, List[Int]]
+		mapRack += "Tube 50ml" -> (0 until 8).toList
+		lPlate.flatMap(plate => {
+			plate.model.getValue match {
+				case None => None
+				case Some(psModel) =>
+					val sModel = psModel.value
+					mapLocFree.get(sModel) match {
+						case None =>
+							mapRack.get(sModel) match {
+								case None => None
+								case Some(li) =>
+									mapRack(sModel) = li.tail
+									Some(plate -> li.head.toString)
+							}
+						case Some(Nil) => None
+						case Some(ls) =>
+							mapLocFree(sModel) = ls.tail
+							Some(plate -> ls.head)
+					}
+			}
+		}).foreach(println)
 	}
+}
+
+object Main extends App {
+	T.run
 }

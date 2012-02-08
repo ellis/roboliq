@@ -529,7 +529,7 @@ x	try to load all database references
 x	search database for all wells containing required liquids
 x	choose plates (if a liquid is present on multiple plates, choose one of them to minimize overall number of plates)
 x	choose plates for new destination/temporary wells
-	choose table positions for plates and tubes
+x	choose table positions for plates and tubes
 	check whether each command is complete
 	show list of items which couldn't be found in the database
 Progressive protocol definition:
