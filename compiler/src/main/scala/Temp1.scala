@@ -401,7 +401,8 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		val lPlate = lsPlateKey.flatMap(sPlateKey => db.lookup[Plate](("Plate", sPlateKey)))
 		lPlate.foreach(println)
 		
-		// This task is platform specific.  In our case: tecan evoware. 
+		/*
+		// This task is platform specific.  In our case: tecan evoware.
 		println()
 		println("choosePlateLocations:")
 		val mapLocFree = new HashMap[String, List[String]]
@@ -428,6 +429,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 					}
 			}
 		}).foreach(println)
+		*/
 		
 		new ItemListData(
 			mapKeyToItem = mapDb,
