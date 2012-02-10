@@ -2,7 +2,7 @@ package roboliq.protocol
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
-
+import roboliq.common
 import roboliq.common._
 
 	
@@ -205,11 +205,19 @@ case class PropertyPObject[A <: Item](val value: A)(implicit m: Manifest[A]) ext
 }
 
 class Liquid extends Item {
-	var physical: String = null
-	var cleanPolicy: String = null
-	var contaminants: List[String] = null
-	def properties: List[Property[_]] = Nil
+	val physical = new Property[PString]
+	val cleanPolicy = new Property[PString]
+	var contaminants = new Property[PString]
 	var components: List[Sample] = Nil
+
+	def properties: List[Property[_]] = List(physical, cleanPolicy)
+}
+
+class PlateModel extends Item {
+	val rows = new Property[PInteger]
+	val cols = new Property[PInteger]
+	
+	def properties: List[Property[_]] = List(rows, cols)
 }
 
 class Plate extends Item {
@@ -256,8 +264,10 @@ class Tube extends Item {
 
 class ItemListData(
 	val mapKeyToItem: Map[Tuple2[String, String], Option[Item]],
+	val mapKeyToPlateModel: Map[String, PlateModel],
 	val mapLiquidKeyToWells: Map[String, List[Well]],
 	//val lPlateSource: List[Plate],
+	val lLiquid: List[Liquid],
 	val lPoolNew: List[Pool],
 	val mapPoolToWellsNew: Map[Pool, List[Well]],
 	val lPlate: List[Plate]
@@ -344,6 +354,8 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		val mapDb = lKeyPair.map(pair => pair -> db.lookupItem(pair)).toMap
 		mapDb.foreach(println)
 		
+		val lLiquid = mapDb.values.toList.collect({case liq: Liquid => liq})
+		
 		println()
 		println("findWells:")
 		val lsLiquidKey = mapDb.toList.map(_._1._2)
@@ -371,6 +383,9 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		val lsPlateKey = (lsPlateKeySrc ++ lsPlateKeyDest).distinct
 		val lPlate = lsPlateKey.flatMap(sPlateKey => db.lookup[Plate](("Plate", sPlateKey)))
 		lPlate.foreach(println)
+		
+		val lsPlateModel = lPlate.flatMap(_.model.getValue.map(_.value)).distinct
+		val mapKeyToPlateModel = lsPlateModel.flatMap(key => db.lookup[PlateModel]("PlateModel", key).map(item => key -> item)).toMap
 		
 		/*
 		// This task is platform specific.  In our case: tecan evoware.
@@ -404,10 +419,85 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		
 		new ItemListData(
 			mapKeyToItem = mapDb,
+			mapKeyToPlateModel = mapKeyToPlateModel,
 			mapLiquidKeyToWells = mapLiquidKeyToWells,
+			lLiquid = lLiquid,
 			lPoolNew = lPool,
 			mapPoolToWellsNew = mapPoolToWells,
 			lPlate = lPlate
 		)
 	}
 }
+
+class PropertyToObjectMap(
+	val kb: KnowledgeBase,
+	val mapWellPointer: Map[Property[_], WellPointer]
+)
+
+object PropertyToObjectMap {
+	def apply(ild: ItemListData): PropertyToObjectMap = {
+		val kb = new KnowledgeBase
+		
+		// Create Reagent objects
+		val lReagent = ild.lLiquid.map(liquid => {
+			val reagent = new Reagent
+			val setup = kb.getReagentSetup(reagent)
+			kb.addReagent(reagent)
+			setup.sFamily_? = liquid.physical.getValue.map(_.value).orElse(Some("Water"))
+			setup.contaminants = liquid.contaminants.getValues.map(ps => Contaminant.withName(ps.value)).toSet
+			liquid.cleanPolicy.getValue match {
+				case Some(ps) =>
+					val cleanPolicy = ps.value match {
+						case "TNT" => GroupCleanPolicy.TNT
+						case "TNL" => GroupCleanPolicy.TNL
+						case "DDD" => GroupCleanPolicy.DDD
+					}
+					setup.group_? = Some(new LiquidGroup(cleanPolicy))
+				case _ =>
+			}
+			reagent
+		})
+		
+		// Create plate models
+		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue.map(_.value))
+		val mapPlateModels: Map[String, common.PlateModel] = lsPlateModel.flatMap(sPlateModel => {
+			for {
+				plateModel <- ild.mapKeyToPlateModel.get(sPlateModel)
+				nRows <- plateModel.rows.getValue.map(_.value)
+				nCols <- plateModel.cols.getValue.map(_.value)
+			} yield {
+				val nWellVolume = -1.0 // FIXME: get real volume
+				sPlateModel -> new common.PlateModel(sPlateModel, nRows, nCols, nWellVolume)
+			}
+		}).toMap
+		
+		// Create plate objects
+		val lPlate = ild.lPlate.flatMap(plate => {
+			for {
+				sPlateModel <- plate.model.getValue.map(_.value)
+				plateModel <- mapPlateModels.get(sPlateModel)
+			} yield {
+				val obj = new roboliq.common.Plate
+				val setup = kb.getPlateSetup(obj)
+				setup.sLabel_? = Some(plate.key)
+				setup.model_? = Some(plateModel)
+				setup.setDimension(plateModel.nRows, plateModel.nCols)
+				obj
+			}
+		})
+		
+		// Setup well objects
+		for ((sLiquidKey, lWell) <- ild.mapLiquidKeyToWells) {
+			for (well <- lWell) {
+				for
+			}
+		}
+		
+		new PropertyToObjectMap(
+			kb = kb,
+			mapWellPointer = Map()
+		)
+	}
+}
+
+//private class PropertyToObjectMapBuilder()

@@ -19,6 +19,8 @@ class Pcr extends PCommand {
 	}
 	
 	def createCommands(ild: ItemListData, kb: KnowledgeBase): List[common.Command] = {
+		import roboliq.commands.pipette.L4A_PipetteItem
+		import roboliq.commands.pipette.MixSpec
 		import roboliq.commands.MixItemL4
 		import roboliq.commands.MixItemReagentL4
 		import roboliq.commands.MixItemTemplateL4
@@ -38,6 +40,9 @@ class Pcr extends PCommand {
 		val plate_balance = new Plate
 		*/
 		
+		val pipetteItems = List[L4A_PipetteItem](
+			new L4A_PipetteItem(Liquids.water, well1, List(15.7), None, None)
+		)
 		val mixItems = Seq[MixItemL4](
 			MixItemReagentL4(Liquids.buffer10x, 10, 1),
 			MixItemReagentL4(Liquids.dNTP, 2, .2),
