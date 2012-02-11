@@ -32,13 +32,18 @@ object LiquidVolume {
 	def ml(n: Int): LiquidVolume = new LiquidVolume(n * 1000000)
 }
 
-abstract class LiquidAmount
+sealed abstract class LiquidAmount
 case class LiquidAmountByVolume(vol: LiquidVolume) extends LiquidAmount {
 	override def toString = vol.toString 
 }
 case class LiquidAmountByConc(conc: BigDecimal) extends LiquidAmount {
 	override def toString = conc.toString
 }
+
+/*sealed abstract class WellPointer
+case class WellPointerLiquidKey(sLiquidKey: String) extends WellPointer
+case class WellPointerLiquid(liquid: Liquid) extends WellPointer
+case class WellPointerWell()*/
 
 class Pool(val sPurpose: String) {
 	var liquid0_? : Option[Liquid] = None
@@ -110,6 +115,8 @@ class PInteger(val value: Int) extends Item {
 		case _ => false
 	}
 }
+
+//sealed abstract class PLocation extends Item
 
 /** Volume in picoliters */
 class PLiquidVolume(vol: LiquidVolume) extends Item {
@@ -263,6 +270,7 @@ class Tube extends Item {
 }
 
 class ItemListData(
+	//val mapPropertyToItem: Map[Property[_], Option[Liquid]],
 	val mapKeyToItem: Map[Tuple2[String, String], Option[Item]],
 	val mapKeyToPlateModel: Map[String, PlateModel],
 	val mapLiquidKeyToWells: Map[String, List[Well]],
@@ -353,6 +361,8 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		lKeyPair.foreach(println)
 		val mapDb = lKeyPair.map(pair => pair -> db.lookupItem(pair)).toMap
 		mapDb.foreach(println)
+		
+		items.flatMap(item => item.properties)
 		
 		val lLiquid = mapDb.values.toList.collect({case liq: Liquid => liq})
 		
