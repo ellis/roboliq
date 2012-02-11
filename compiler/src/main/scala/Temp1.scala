@@ -129,7 +129,11 @@ object T {
 	def run {
 		val test1 = new Test1
 		val db = new TestDatabase
-		ItemListData(test1.l, db)
+		val ild = ItemListData(test1.l, db)
+		val vom = ValueToObjectMap(ild)
+		val cmds = test1.l.head.createCommands(vom)
+		println("cmds:")
+		cmds.foreach(cmd => println(cmd.toDebugString))
 	}
 }
 

@@ -122,6 +122,7 @@ class PLiquidAmount(amt: LiquidAmount) extends Item {
 
 abstract class PCommand extends Item {
 	def getNewPools(): List[Pool] = Nil
+	def createCommands(vom: ValueToObjectMap): List[common.Command]
 }
 
 class Property[A](implicit m: Manifest[A]) {
@@ -415,6 +416,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		lValueKey.foreach(println)
 		//val lValueKeyToItem: List[Tuple2[ValueKey[_], Option[Item]]] = lValueKey.map(v => Tuple2[ValueKey[_], Option[Item]](v, db.lookupItem(v.route)))
 		val mapValueKeyToItem: Map[ValueKey[_], Option[Item]] = lValueKey.map(v => v -> db.lookupItem(v.route)).toMap
+		println("mapValueKeyToItem:")
 		mapValueKeyToItem.foreach(println)
 		//val mapDb = lKeyPair.map(pair => pair -> db.lookupItem(pair)).toMap
 		//mapDb.foreach(println)
@@ -502,8 +504,10 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 }
 
 class ValueToObjectMap(
+	val valueDb: ValueDatabase,
 	val kb: KnowledgeBase,
-	val mapWellPointer: Map[Value[_], WellPointer]
+	val mapValueToWellPointer: Map[Value[_], WellPointer],
+	val mapPoolToWellPointer: Map[Pool, WellPointer]
 )
 
 object ValueToObjectMap {
@@ -529,6 +533,9 @@ object ValueToObjectMap {
 			}
 			liquid.key -> reagent
 		}).toMap
+		println()
+		println("mapReagents:")
+		mapReagents.foreach(println)
 		
 		// Create plate models
 		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue(ild.valueDb))
@@ -559,20 +566,24 @@ object ValueToObjectMap {
 		}).toMap
 		//val lPlate = mapKeyToPlateObj.values.toList
 		
+		def getWellObject(well: Well): Option[common.Well] = {
+			for {
+				sPlateKey <- well.parent.getValueKey.map(_.key)
+				plateObj <- mapPlates.get(sPlateKey)
+				dim <- plateObj.setup.dim_?
+				index <- well.index.getValue
+			} yield {
+				dim.wells(index)
+			}
+		}
+		
 		// Setup well objects with the given liquid
 		for ((sLiquidKey, lWell) <- ild.mapLiquidKeyToWells) {
 			mapReagents.get(sLiquidKey) match {
 				case None =>
 				case Some(reagentObj) =>
 					for (well <- lWell) {
-						for {
-							sPlateKey <- well.parent.getValueKey.map(_.key)
-							plateObj <- mapPlates.get(sPlateKey)
-							dim <- plateObj.setup.dim_?
-							index <- well.index.getValue
-						} yield {
-							val wellObj = dim.wells(index)
-							//wellObj.setup.sLabel_? = well.liquid
+						for (wellObj <- getWellObject(well)) {
 							wellObj.setup.reagent_? = Some(reagentObj)
 						}
 					}
@@ -583,20 +594,42 @@ object ValueToObjectMap {
 		val lValueKeyToWellPointer = ild.mapValueKeyToItem.toList.flatMap(pair => {
 			val (value, item) = pair
 			item match {
-				case liquid: Liquid =>
+				case Some(liquid: Liquid) =>
+					println("X:", liquid.key, ild.mapLiquidKeyToWells.get(liquid.key), mapReagents.get(liquid.key))
 					for {
 						lWell <- ild.mapLiquidKeyToWells.get(liquid.key)
 						reagent <- mapReagents.get(liquid.key)
 					} yield {
 						value -> WellPointerReagent(reagent)
 					}
-				case _ => None
+				case _ => println("None"); None
 			}
 		})
 		
+		// Map of new pools -> WellPointerReagents
+		val lPoolToWellPointer = ild.mapPoolToWellsNew.toList.map(pair => {
+			val (pool, lWell) = pair
+			val lWellObj = lWell.flatMap(well => {
+				for (wellObj <- getWellObject(well))
+				yield wellObj
+			})
+			pool -> WellPointerWells(lWellObj)			
+		})
+		
+		println("kb:")
+		println(kb.toString())
+		
+		println("lValueKeyToWellPointer:")
+		lValueKeyToWellPointer.foreach(println)
+		
+		println("lPoolToWellPointer:")
+		lPoolToWellPointer.foreach(println)
+		
 		new ValueToObjectMap(
+			valueDb = ild.valueDb,
 			kb = kb,
-			mapWellPointer = lValueKeyToWellPointer.toMap
+			mapValueToWellPointer = lValueKeyToWellPointer.toMap,
+			mapPoolToWellPointer = lPoolToWellPointer.toMap
 		)
 	}
 }

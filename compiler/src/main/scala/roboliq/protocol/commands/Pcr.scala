@@ -13,9 +13,50 @@ class Pcr extends PCommand {
 	val mixSpec = new PropertyItem[PcrMixSpec]
 	
 	def properties: List[Property[_]] = List(products, volumes, mixSpec)
+	
+	// FIXME: This mutability is not OK! Figure out another way to associate products with pools.
+	//  perhaps create a map from Any -> Pool and pass that back in getNewPools()
+	private var m_pools: List[Pool] = Nil
 
 	override def getNewPools(): List[Pool] = {
-		List.fill(products.values.length)(new Pool("PCR"))
+		m_pools = List.fill(products.values.length)(new Pool("PCR"))
+		m_pools
+	}
+	
+	def invert[A](l: List[Option[A]]): Option[List[A]] = {
+		if (l.forall(_.isDefined)) Some(l.flatten)
+		else None
+	}
+	
+	def getWellPointer(property: PropertyItem[Liquid], vom: ValueToObjectMap): Option[common.WellPointer] = {
+		invert(property.values.map(vom.mapValueToWellPointer.get)) match {
+			case None => None
+			case Some(Nil) => None
+			case Some(x :: Nil) => Some(x)
+			case _ => None // FIXME: merge WellPointers 
+		}
+	}
+
+	def getWellPointer(pool: Pool, vom: ValueToObjectMap): Option[common.WellPointer] = {
+		vom.mapPoolToWellPointer.get(pool)
+	}
+
+	def createCommands(vom: ValueToObjectMap): List[common.Command] = {
+		import roboliq.commands.pipette.L4A_PipetteItem
+		import roboliq.commands.pipette.MixSpec
+
+		val valueDb = vom.valueDb
+		val x = for {
+			mixSpec <- this.mixSpec.getValue(valueDb)
+			water4 <- getWellPointer(mixSpec.waterLiquid, vom)
+			destA4 <- getWellPointer(m_pools.head, vom)
+		} yield {
+			val pipetteItems = List[L4A_PipetteItem](
+				new L4A_PipetteItem(water4, destA4, List(15.7), None, None)
+			)
+			roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(pipetteItems, tipOverrides_? = None))
+		}
+		x.toList
 	}
 	
 	/*
