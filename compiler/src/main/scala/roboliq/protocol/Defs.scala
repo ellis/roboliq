@@ -439,7 +439,7 @@ object PropertyToObjectMap {
 		val kb = new KnowledgeBase
 		
 		// Create Reagent objects
-		val lReagent = ild.lLiquid.map(liquid => {
+		val mapReagents = ild.lLiquid.map(liquid => {
 			val reagent = new Reagent
 			val setup = kb.getReagentSetup(reagent)
 			kb.addReagent(reagent)
@@ -455,8 +455,8 @@ object PropertyToObjectMap {
 					setup.group_? = Some(new LiquidGroup(cleanPolicy))
 				case _ =>
 			}
-			reagent
-		})
+			liquid.key -> reagent
+		}).toMap
 		
 		// Create plate models
 		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue.map(_.value))
@@ -472,7 +472,7 @@ object PropertyToObjectMap {
 		}).toMap
 		
 		// Create plate objects
-		val lPlate = ild.lPlate.flatMap(plate => {
+		val mapPlates = ild.lPlate.flatMap(plate => {
 			for {
 				sPlateModel <- plate.model.getValue.map(_.value)
 				plateModel <- mapPlateModels.get(sPlateModel)
@@ -482,14 +482,28 @@ object PropertyToObjectMap {
 				setup.sLabel_? = Some(plate.key)
 				setup.model_? = Some(plateModel)
 				setup.setDimension(plateModel.nRows, plateModel.nCols)
-				obj
+				plate.key -> obj
 			}
-		})
+		}).toMap
+		//val lPlate = mapKeyToPlateObj.values.toList
 		
-		// Setup well objects
+		// Setup well objects with the given liquid
 		for ((sLiquidKey, lWell) <- ild.mapLiquidKeyToWells) {
-			for (well <- lWell) {
-				for
+			mapReagents.get(sLiquidKey) match {
+				case None =>
+				case Some(reagentObj) =>
+					for (well <- lWell) {
+						for {
+							sPlateKey <- well.parent.getKey
+							plateObj <- mapPlates.get(sPlateKey)
+							dim <- plateObj.setup.dim_?
+							pindex <- well.index.getValue
+						} yield {
+							val wellObj = dim.wells(pindex.value)
+							//wellObj.setup.sLabel_? = well.liquid
+							wellObj.setup.reagent_? = Some(reagentObj)
+						}
+					}
 			}
 		}
 		
@@ -499,5 +513,3 @@ object PropertyToObjectMap {
 		)
 	}
 }
-
-//private class PropertyToObjectMapBuilder()
