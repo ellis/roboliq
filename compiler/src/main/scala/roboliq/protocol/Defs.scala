@@ -4,8 +4,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import roboliq.common
 import roboliq.common._
+import common.WellPointerReagent
 
-	
+
 object LiquidProperties extends Enumeration {
 	val Water, Glycerol = Value
 }
@@ -13,6 +14,10 @@ object LiquidProperties extends Enumeration {
 class Volume(n: Double) {
 	def ul = n
 	def ml = n * 1000
+}
+
+case class Route(sClass: String, sKey: String) {
+	def toPair: Tuple2[String, String] = (sClass, sKey)
 }
 
 /** Volume in picoliters */
@@ -56,30 +61,14 @@ abstract class Item {
 	var key: String = null
 	def properties: List[Property[_]]
 	
-	def refId(id: String): TempNameA = new TempNameA(id)
+	//def refId(id: String): TempNameA = new TempNameA(id)
 	def refDb(key: String): TempKeyA = new TempKeyA(key)
 	def refKey[A](key: String): TempKey[A] = new TempKey[A](key)
 
-	def getRefDbs(): List[PropertyRefDb[_]] = {
-		val ll: List[List[PropertyRefDb[_]]] = for (p <- properties) yield {
-			getRefDbs(p)
-		}
-		ll.flatten
-	}
+	def gatherValueKeys: List[ValueKey[_]] = properties.flatMap(_.gatherValueKeys).distinct
 	
-	def getRefDbs(p: Property[_]): List[PropertyRefDb[_]] = {
-		p.values.flatMap(getRefDbs)
-	}
-	
-	def getRefDbs(v: PropertyValue[_]): List[PropertyRefDb[_]] = {
-		v match {
-			case ref@PropertyRefDb(_) => List(ref)
-			case obj: PropertyPObject[_] => obj.value.getRefDbs()
-			case _ => Nil
-		}
-	}
+	def toContentString: Option[String] = Some(toString)
 
-	
 	override def toString(): String = {
 		val clazz = getClass()
 		val clazzProperty = classOf[Property[_]]
@@ -98,6 +87,7 @@ abstract class Item {
 	}
 }
 
+/*
 case class PString(val value: String) extends Item {
 	def properties: List[Property[_]] = Nil
 	override def toString(): String = "\"" + value.toString() + "\""
@@ -115,6 +105,7 @@ class PInteger(val value: Int) extends Item {
 		case _ => false
 	}
 }
+*/
 
 //sealed abstract class PLocation extends Item
 
@@ -133,59 +124,118 @@ abstract class PCommand extends Item {
 	def getNewPools(): List[Pool] = Nil
 }
 
-class Property[A <: Item](implicit m: Manifest[A]) {
-	var values: List[PropertyValue[A]] = Nil
-	def :=(a: A) { values = List(PropertyPObject(a)(m)) }
-	def :=(ref: TempNameA) { values = List(PropertyRefId[A](ref.name)) }
-	def :=(ref: TempKeyA) { values = List(PropertyRefDb[A](ref.key)) }
-	def :=(la: List[A]) { values = la.map(a => PropertyPObject(a)) }
+class Property[A](implicit m: Manifest[A]) {
+	var values: List[Value[A]] = Nil
+	def :=(a: A) { values = List(ValueBasic(a)) }
+	def :=(ref: TempKeyA) { values = List(ValueKey[A](ref.key)) }
+	def :=(la: List[A]) { values = la.map(a => ValueBasic(a)) }
 	def set(v: TempValue[A]) = v match {
 		case TempNull() => values = Nil
 		case Temp1(a) => :=(a)
 		case TempKey(s) => :=(new TempKeyA(s))
-		case TempName(s) => :=(new TempNameA(s))
 		case TempList(la) => :=(la)
 	}
 	
-	def toContentString(): Option[String] = {
+	def gatherValueKeys: List[ValueKey[_]] = values.flatMap(_.gatherValueKeys).distinct
+
+	def getValueKey: Option[ValueKey[_]] = values match {
+		case List(value) => value.getValueKey
+		case _ => None
+	}
+	def getValues(db_? : Option[ValueDatabase]): List[A] = values.flatMap(_.getValues(db_?))
+	def getValue(db_? : Option[ValueDatabase]): Option[A] = getValues(db_?) match {
+		case List(v) => Some(v)
+		case _ => None
+	}
+	def getValue(db: ValueDatabase): Option[A] = getValue(Some(db))
+	def getValue: Option[A] = getValue(None)
+	def getValues(db: ValueDatabase): List[A] = getValues(Some(db))
+	
+	def valueEquals(a: A, db_? : Option[ValueDatabase]): Boolean = (getValue(db_?) == Some(a))
+
+	def toContentString: Option[String] = {
 		values match {
 			case Nil => None
 			case a :: Nil => a.toContentString
 			case _ => Some(values.map(_.toContentString).flatten.mkString("[ ", ", ", " ]"))
 		}
 	}
-
-	def getKeys: List[String] = values.map(_.getKey).flatten
-	def getKey: Option[String] = getKeys match {
-		case List(key) => Some(key)
-		case _ => None
-	}
-
-	def getValues: List[A] = values.flatMap(_.getValues)
-	def getValue: Option[A] = getValues match {
-		case List(v) => Some(v)
-		case _ => None
-	} 
-	
-	def valueEquals(a: A): Boolean = (getValue == Some(a))
 }
 
+class PropertyItem[A <: Item](implicit m: Manifest[A]) extends Property[A]()(m) {
+	override def :=(a: A) { values = List(ValueItem(a)(m)) }
+	override def :=(la: List[A]) { values = la.map(a => ValueItem(a)) }
+}
+
+abstract class Value[A](implicit m: Manifest[A]) {
+	def getValueKey: Option[ValueKey[_]]
+	def gatherValueKeys: List[ValueKey[_]]
+	def getValues(db_? : Option[ValueDatabase]): List[A]
+	def toContentString: Option[String]
+}
+case class ValueBasic[A](value: A)(implicit m: Manifest[A]) extends Value[A]()(m) {
+	def getValueKey: Option[ValueKey[_]] = None
+	def gatherValueKeys: List[ValueKey[_]] = Nil
+	def getValues(db_? : Option[ValueDatabase]): List[A] = value :: Nil
+	def toContentString(): Option[String] = Some(value.toString)
+}
+case class ValueItem[A <: Item](item: A)(implicit m: Manifest[A]) extends Value[A]()(m) {
+	def getValueKey: Option[ValueKey[_]] = None
+	def gatherValueKeys: List[ValueKey[_]] = item.gatherValueKeys
+	def getValues(db_? : Option[ValueDatabase]): List[A] = item :: Nil
+	def toContentString(): Option[String] = Some(item.toString)
+}
+case class ValueKey[A](key: String)(implicit m: Manifest[A]) extends Value[A]()(m) {
+	def getValueKey: Option[ValueKey[_]] = Some(this)
+	def gatherValueKeys: List[ValueKey[_]] = List(this)
+	def getValues(db_? : Option[ValueDatabase]): List[A] = db_? match {
+		case Some(db) => db.lookup[A](this).toList
+		case _ => Nil
+	}
+	def toContentString(): Option[String] = Some("K\""+key+"\"")
+
+	def route = Route(m.erasure.getCanonicalName(), key)
+	override def toString: String = route.toString
+}
+case class ValueProperty[A](ptr: Property[A])(implicit m: Manifest[A]) extends Value[A]()(m) {
+	def getValueKey: Option[ValueKey[_]] = None
+	def gatherValueKeys: List[ValueKey[_]] = ptr.gatherValueKeys
+	def getValues(db_? : Option[ValueDatabase]): List[A] = ptr.getValues(db_?)
+	def toContentString(): Option[String] = Some("*"+ptr.toContentString)
+}
+
+class ValueDatabase(map: Map[Value[_], Any]) {
+	def lookup[A](key: Value[A]): Option[A] = map.get(key) match {
+		case None => None
+		case Some(v) => Some(v.asInstanceOf[A])
+	}
+}
+/*
+object ValueDatabase {
+	val empty = new ValueDatabase {
+		def lookup[A](value: Value[A]): Option[A] = None
+	}
+}*/
+
 class TempKeyA(val key: String)
-class TempNameA(val name: String)
+//class TempNameA(val name: String)
 
 sealed abstract class TempValue[A]
 case class TempNull[A]() extends TempValue[A]
 case class Temp1[A](val a: A) extends TempValue[A]
 case class TempKey[A](val key: String) extends TempValue[A]
-case class TempName[A](val name: String) extends TempValue[A]
+//case class TempName[A](val name: String) extends TempValue[A]
 case class TempList[A](val la: List[A]) extends TempValue[A]
 
+/*
 class NameBase(val mapVars: Map[String, Item], val mapDb: Map[String, Item]) {
 	def apply(name: String): Option[Item] = {
 		mapVars.get(name).orElse(mapDb.get(name))
 	}
 }
+*/
 
+/*
 sealed abstract class PropertyValue[A <: Item](implicit m: Manifest[A]) {
 	def getKey: Option[String] = None
 	def getValues: List[A] = Nil
@@ -210,48 +260,49 @@ case class PropertyPObject[A <: Item](val value: A)(implicit m: Manifest[A]) ext
 	override def keyEquals(sKey: String): Boolean = (sKey != null && sKey == value.key)
 	override def toContentString(): Option[String] = Some(value.toString)
 }
+*/
 
 class Liquid extends Item {
-	val physical = new Property[PString]
-	val cleanPolicy = new Property[PString]
-	var contaminants = new Property[PString]
+	val physical = new Property[String]
+	val cleanPolicy = new Property[String]
+	var contaminants = new Property[String]
 	var components: List[Sample] = Nil
 
 	def properties: List[Property[_]] = List(physical, cleanPolicy)
 }
 
 class PlateModel extends Item {
-	val rows = new Property[PInteger]
-	val cols = new Property[PInteger]
+	val rows = new Property[Int]
+	val cols = new Property[Int]
 	
 	def properties: List[Property[_]] = List(rows, cols)
 }
 
 class Plate extends Item {
-	val model = new Property[PString]
-	val label = new Property[PString]
-	val description = new Property[PString]
-	val purpose = new Property[PString]
+	val model = new Property[String]
+	val label = new Property[String]
+	val description = new Property[String]
+	val purpose = new Property[String]
 	def properties: List[Property[_]] = List(model, label)
 	
 	override def toString =
-		(key :: List(model, label, description, purpose).flatMap(_.getValue)).mkString("Plate(", ", ", ")")
+		(key :: List(model, label, description, purpose).flatMap(_.toContentString)).mkString("Plate(", ", ", ")")
 }
 
 class Well extends Item {
-	val parent = new Property[Plate]
-	val index = new Property[PInteger]
-	val liquid = new Property[Liquid]
-	val volume = new Property[PLiquidVolume]
+	val parent = new PropertyItem[Plate]
+	val index = new Property[Int]
+	val liquid = new PropertyItem[Liquid]
+	val volume = new Property[LiquidVolume]
 	def properties: List[Property[_]] = List(parent, index, liquid, volume)
 }
 
 object Well {
 	def apply(
 		parent: TempValue[Plate] = TempNull[Plate],
-		index: TempValue[PInteger] = TempNull[PInteger],
+		index: TempValue[Int] = TempNull[Int],
 		liquid: TempValue[Liquid] = TempNull[Liquid],
-		volume: TempValue[PLiquidVolume] = TempNull[PLiquidVolume]
+		volume: TempValue[LiquidVolume] = TempNull[LiquidVolume]
 	): Well = {
 		val o = new Well
 		o.parent.set(parent)
@@ -270,8 +321,11 @@ class Tube extends Item {
 }
 
 class ItemListData(
+	val lItem: List[Item],
+	val valueDb: ValueDatabase,
 	//val mapPropertyToItem: Map[Property[_], Option[Liquid]],
-	val mapKeyToItem: Map[Tuple2[String, String], Option[Item]],
+	val mapValueKeyToItem: Map[ValueKey[_], Option[Item]],
+	//val mapRouteToItem: Map[Route, Option[Item]],
 	val mapKeyToPlateModel: Map[String, PlateModel],
 	val mapLiquidKeyToWells: Map[String, List[Well]],
 	//val lPlateSource: List[Plate],
@@ -292,6 +346,7 @@ object ItemListData {
 
 trait ItemDatabase {
 	def lookupItem(pair: Tuple2[String, String]): Option[Item]
+	def lookupItem(route: Route): Option[Item] = lookupItem(route.toPair)
 	def lookup[A](pair: Tuple2[String, String]): Option[A]
 	def findWellsByLiquid(sLiquidKey: String): List[Well]
 	def findWellsByPlateKey(sPlateKey: String): List[Well]
@@ -299,8 +354,8 @@ trait ItemDatabase {
 }
 
 private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
-	def getRefDbs(): List[PropertyRefDb[_]] = items.flatMap(_.getRefDbs())
-	def getClassKey(): List[Tuple2[String, String]] = getRefDbs().map(_.getKeyPair).distinct
+	def gatherValueKeys(): List[ValueKey[_]] = items.flatMap(_.gatherValueKeys)
+	//def getClassKey(): List[Tuple2[String, String]] = getRefDbs().map(_.getKeyPair).distinct
 	def getCommands(): List[PCommand] = items.collect({case cmd: PCommand => cmd})
 	def getNewPools(): List[Pool] = getCommands().flatMap(_.getNewPools)
 
@@ -310,12 +365,12 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 	
 	def findPlates(mapLiquidKeyToWells: Map[String, List[Well]]): List[String] = {
 		val lLiquidKeyToWells = mapLiquidKeyToWells.toList
-		val lLiquidKeyToPlates: List[Tuple2[String, List[String]]]
-			= lLiquidKeyToWells.map(pair => pair._1 -> pair._2.map(_.parent.getKey).flatten)
+		val lLiquidKeyToPlateKeys: List[Tuple2[String, List[String]]]
+			= lLiquidKeyToWells.map(pair => pair._1 -> pair._2.flatMap(_.parent.getValueKey.map(_.key)).distinct)
 		// Keys of the plates which are absolutely required (i.e. liquid is not available on a different plate too)
-		val lRequired: Set[String] = lLiquidKeyToPlates.collect({case (_, List(sPlateKey)) => sPlateKey}).toSet
+		val lRequired: Set[String] = lLiquidKeyToPlateKeys.collect({case (_, List(sPlateKey)) => sPlateKey}).toSet
 		// List of the items whose plates are not in lRequired
-		val lRemaining = lLiquidKeyToPlates.map({case (sLiquidKey, lPlate) => {
+		val lRemaining = lLiquidKeyToPlateKeys.map({case (sLiquidKey, lPlate) => {
 			val lPlate2 = lPlate.filter(sPlateKey => !lRequired.contains(sPlateKey))
 			lPlate2 match {
 				case Nil => None
@@ -337,7 +392,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 			val lWell = db.findWellsByPlateKey(plate.key)
 			val index = lWell.foldLeft(0) {(acc, well) => well.index.getValue match {
 				case None => acc
-				case Some(i) => math.max(acc, i.value + 1)
+				case Some(i) => math.max(acc, i + 1)
 			}}
 			plate -> index
 		})
@@ -350,25 +405,29 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 				index <- map.get(plate)
 			} yield {
 				map(plate) = index + 1
-				pool -> List(Well(parent = TempKey(plate.key), index = Temp1(new PInteger(index))))
+				pool -> List(Well(parent = TempKey(plate.key), index = Temp1(index)))
 			}
 		}).flatten.toMap
 	}
 	
 	def run: ItemListData = {
-		val p = this
-		val lKeyPair = p.getClassKey()
-		lKeyPair.foreach(println)
-		val mapDb = lKeyPair.map(pair => pair -> db.lookupItem(pair)).toMap
-		mapDb.foreach(println)
+		val lValueKey: List[ValueKey[_]] = gatherValueKeys()
+		lValueKey.foreach(println)
+		//val lValueKeyToItem: List[Tuple2[ValueKey[_], Option[Item]]] = lValueKey.map(v => Tuple2[ValueKey[_], Option[Item]](v, db.lookupItem(v.route)))
+		val mapValueKeyToItem: Map[ValueKey[_], Option[Item]] = lValueKey.map(v => v -> db.lookupItem(v.route)).toMap
+		mapValueKeyToItem.foreach(println)
+		//val mapDb = lKeyPair.map(pair => pair -> db.lookupItem(pair)).toMap
+		//mapDb.foreach(println)
 		
 		items.flatMap(item => item.properties)
 		
-		val lLiquid = mapDb.values.toList.collect({case liq: Liquid => liq})
+		val lLiquid = mapValueKeyToItem.values.toList.collect({case Some(liq: Liquid) => liq})
+		println("lLiquid:")
+		lLiquid.foreach(println)
 		
 		println()
 		println("findWells:")
-		val lsLiquidKey = mapDb.toList.map(_._1._2)
+		val lsLiquidKey = lLiquid.map(_.key)
 		val mapLiquidKeyToWells = findWells(lsLiquidKey)
 		mapLiquidKeyToWells.foreach(println)
 
@@ -379,7 +438,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		
 		println()
 		println("getNewPools:")
-		val lPool = p.getNewPools()
+		val lPool = getNewPools()
 		lPool.foreach(println)
 		
 		println()
@@ -389,12 +448,12 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		
 		println()
 		println("all plates:")
-		val lsPlateKeyDest = mapPoolToWells.toList.flatMap(_._2).map(_.parent.getKey).flatten
+		val lsPlateKeyDest = mapPoolToWells.toList.flatMap(_._2).flatMap(_.parent.getValueKey.map(_.key)).distinct
 		val lsPlateKey = (lsPlateKeySrc ++ lsPlateKeyDest).distinct
 		val lPlate = lsPlateKey.flatMap(sPlateKey => db.lookup[Plate](("Plate", sPlateKey)))
 		lPlate.foreach(println)
 		
-		val lsPlateModel = lPlate.flatMap(_.model.getValue.map(_.value)).distinct
+		val lsPlateModel = lPlate.flatMap(_.model.getValue).distinct
 		val mapKeyToPlateModel = lsPlateModel.flatMap(key => db.lookup[PlateModel]("PlateModel", key).map(item => key -> item)).toMap
 		
 		/*
@@ -428,7 +487,10 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		*/
 		
 		new ItemListData(
-			mapKeyToItem = mapDb,
+			lItem = items,
+			valueDb = new ValueDatabase(mapValueKeyToItem.toMap),
+			mapValueKeyToItem = mapValueKeyToItem,
+			//mapKeyToItem = mapDb,
 			mapKeyToPlateModel = mapKeyToPlateModel,
 			mapLiquidKeyToWells = mapLiquidKeyToWells,
 			lLiquid = lLiquid,
@@ -439,13 +501,13 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 	}
 }
 
-class PropertyToObjectMap(
+class ValueToObjectMap(
 	val kb: KnowledgeBase,
-	val mapWellPointer: Map[Property[_], WellPointer]
+	val mapWellPointer: Map[Value[_], WellPointer]
 )
 
-object PropertyToObjectMap {
-	def apply(ild: ItemListData): PropertyToObjectMap = {
+object ValueToObjectMap {
+	def apply(ild: ItemListData): ValueToObjectMap = {
 		val kb = new KnowledgeBase
 		
 		// Create Reagent objects
@@ -453,11 +515,11 @@ object PropertyToObjectMap {
 			val reagent = new Reagent
 			val setup = kb.getReagentSetup(reagent)
 			kb.addReagent(reagent)
-			setup.sFamily_? = liquid.physical.getValue.map(_.value).orElse(Some("Water"))
-			setup.contaminants = liquid.contaminants.getValues.map(ps => Contaminant.withName(ps.value)).toSet
-			liquid.cleanPolicy.getValue match {
-				case Some(ps) =>
-					val cleanPolicy = ps.value match {
+			setup.sFamily_? = liquid.physical.getValue(ild.valueDb).orElse(Some("Water"))
+			setup.contaminants = liquid.contaminants.getValues(ild.valueDb).map(s => Contaminant.withName(s)).toSet
+			liquid.cleanPolicy.getValue(ild.valueDb) match {
+				case Some(s) =>
+					val cleanPolicy = s match {
 						case "TNT" => GroupCleanPolicy.TNT
 						case "TNL" => GroupCleanPolicy.TNL
 						case "DDD" => GroupCleanPolicy.DDD
@@ -469,12 +531,12 @@ object PropertyToObjectMap {
 		}).toMap
 		
 		// Create plate models
-		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue.map(_.value))
+		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue(ild.valueDb))
 		val mapPlateModels: Map[String, common.PlateModel] = lsPlateModel.flatMap(sPlateModel => {
 			for {
 				plateModel <- ild.mapKeyToPlateModel.get(sPlateModel)
-				nRows <- plateModel.rows.getValue.map(_.value)
-				nCols <- plateModel.cols.getValue.map(_.value)
+				nRows <- plateModel.rows.getValue(ild.valueDb)
+				nCols <- plateModel.cols.getValue(ild.valueDb)
 			} yield {
 				val nWellVolume = -1.0 // FIXME: get real volume
 				sPlateModel -> new common.PlateModel(sPlateModel, nRows, nCols, nWellVolume)
@@ -484,7 +546,7 @@ object PropertyToObjectMap {
 		// Create plate objects
 		val mapPlates = ild.lPlate.flatMap(plate => {
 			for {
-				sPlateModel <- plate.model.getValue.map(_.value)
+				sPlateModel <- plate.model.getValue
 				plateModel <- mapPlateModels.get(sPlateModel)
 			} yield {
 				val obj = new roboliq.common.Plate
@@ -504,12 +566,12 @@ object PropertyToObjectMap {
 				case Some(reagentObj) =>
 					for (well <- lWell) {
 						for {
-							sPlateKey <- well.parent.getKey
+							sPlateKey <- well.parent.getValueKey.map(_.key)
 							plateObj <- mapPlates.get(sPlateKey)
 							dim <- plateObj.setup.dim_?
-							pindex <- well.index.getValue
+							index <- well.index.getValue
 						} yield {
-							val wellObj = dim.wells(pindex.value)
+							val wellObj = dim.wells(index)
 							//wellObj.setup.sLabel_? = well.liquid
 							wellObj.setup.reagent_? = Some(reagentObj)
 						}
@@ -517,9 +579,24 @@ object PropertyToObjectMap {
 			}
 		}
 		
-		new PropertyToObjectMap(
+		// Map of liquids -> WellPointerReagents
+		val lValueKeyToWellPointer = ild.mapValueKeyToItem.toList.flatMap(pair => {
+			val (value, item) = pair
+			item match {
+				case liquid: Liquid =>
+					for {
+						lWell <- ild.mapLiquidKeyToWells.get(liquid.key)
+						reagent <- mapReagents.get(liquid.key)
+					} yield {
+						value -> WellPointerReagent(reagent)
+					}
+				case _ => None
+			}
+		})
+		
+		new ValueToObjectMap(
 			kb = kb,
-			mapWellPointer = Map()
+			mapWellPointer = lValueKeyToWellPointer.toMap
 		)
 	}
 }

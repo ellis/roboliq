@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import roboliq.common
 import roboliq.common._
-import roboliq.commands
+//import roboliq.commands
 import roboliq.commands._
 //import roboliq.commands.move._
 import roboliq.commands.pipette._
@@ -92,7 +92,7 @@ trait CommonProtocol extends
 		//	setup.
 		//}
 		
-		def set(model: PlateModel, location: String) {
+		def set(model: common.PlateModel, location: String) {
 			setup.model_? = Some(model)
 			proxy.setDimension(model.nRows, model.nCols)
 			proxy.location = location

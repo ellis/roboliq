@@ -8,9 +8,9 @@ import roboliq.common
 class Pcr extends PCommand {
 	type Product = PcrProduct
 	
-	val products = new Property[Product]
-	val volumes = new Property[PLiquidVolume]
-	val mixSpec = new Property[PcrMixSpec]
+	val products = new PropertyItem[Product]
+	val volumes = new Property[LiquidVolume]
+	val mixSpec = new PropertyItem[PcrMixSpec]
 	
 	def properties: List[Property[_]] = List(products, volumes, mixSpec)
 
@@ -18,7 +18,8 @@ class Pcr extends PCommand {
 		List.fill(products.values.length)(new Pool("PCR"))
 	}
 	
-	def createCommands(ild: ItemListData, kb: KnowledgeBase): List[common.Command] = {
+	/*
+	def createCommands(vom: ValueToObjectMap): List[common.Command] = {
 		import roboliq.commands.pipette.L4A_PipetteItem
 		import roboliq.commands.pipette.MixSpec
 		import roboliq.commands.MixItemL4
@@ -58,31 +59,32 @@ class Pcr extends PCommand {
 		val setup_centrifuge = centrifuge(plate_working)
 		peel(plate_working)
 	}
+	*/
 }
 
 class PcrProduct extends Item {
-	val template = new Property[Liquid]
-	val forwardPrimer = new Property[Liquid]
-	val backwardPrimer = new Property[Liquid]
+	val template = new PropertyItem[Liquid]
+	val forwardPrimer = new PropertyItem[Liquid]
+	val backwardPrimer = new PropertyItem[Liquid]
 	def properties: List[Property[_]] = List(template, forwardPrimer, backwardPrimer)
 }
 
 class PcrMixSpec extends Item {
 	class Item {
-		val liquid = new Property[Liquid]
-		val amt0 = new Property[PLiquidAmount]
-		val amt1 = new Property[PLiquidAmount]
+		val liquid = new PropertyItem[Liquid]
+		val amt0 = new Property[LiquidAmount]
+		val amt1 = new Property[LiquidAmount]
 		def properties = List[Property[_]](liquid, amt0, amt1)
 	}
-	val waterLiquid = new Property[Liquid]
+	val waterLiquid = new PropertyItem[Liquid]
 	val buffer = new Item
 	val dntp = new Item
-	val templateLiquid = new Property[Liquid]
-	val templateConc = new Property[PLiquidAmount]
-	val forwardPrimerLiquid = new Property[Liquid]
-	val forwardPrimerConc = new Property[PLiquidAmount]
-	val backwardPrimerLiquid = new Property[Liquid]
-	val backwardPrimerConc = new Property[PLiquidAmount]
+	val templateLiquid = new PropertyItem[Liquid]
+	val templateConc = new Property[LiquidAmount]
+	val forwardPrimerLiquid = new PropertyItem[Liquid]
+	val forwardPrimerConc = new Property[LiquidAmount]
+	val backwardPrimerLiquid = new PropertyItem[Liquid]
+	val backwardPrimerConc = new Property[LiquidAmount]
 	val polymerase = new Item
 	def properties: List[Property[_]] = waterLiquid :: List(buffer, dntp, polymerase).flatMap(_.properties)
 }
