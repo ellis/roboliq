@@ -114,6 +114,8 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 		val centrifuge = labelSite("centrifuge", "Centrifuge", 0)
 		val regrip = labelSite("regrip", "ReGrip Station", 0)
 	}
+	// HACK: force evaluation of Locations
+	Locations.toString()
 	
 	
 	val mover = new EvowareMoveDevice

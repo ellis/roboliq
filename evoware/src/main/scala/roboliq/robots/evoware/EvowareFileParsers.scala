@@ -231,7 +231,7 @@ class EvowareTableFile(
 		val lCarrier = lExternalObject.map(_.carrier)
 		// Map of external carrier to labware model
 		val map = mapSiteToLabwareModel2.filter(pair => lCarrier.contains(pair._1.carrier)).map(pair => pair._1.carrier -> pair._2)
-		("998;"+lCarrier.length+";") :: lCarrier.map(o => "998;"+o.id+";"+map(o).sName+";")
+		("998;"+lCarrier.length+";") :: lCarrier.filter(map.contains).map(o => "998;"+o.id+";"+map(o).sName+";")
 	}
 	
 	private def toString_externalGrids(): List[String] = {

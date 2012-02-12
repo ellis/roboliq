@@ -1,6 +1,7 @@
 package roboliq.protocol.commands
 
 import roboliq.commands.pipette.PipetteCommandsL4
+import roboliq.commands.seal.SealCommandsL4
 import roboliq.common.KnowledgeBase
 import roboliq.common
 import roboliq.protocol._
@@ -164,12 +165,19 @@ class Pcr extends PCommand {
 			val lPipetteItem = mixNext(llMixItem, Nil)
 			val lPipetteCmd = roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(lPipetteItem, tipOverrides_? = None)) :: Nil
 			
-			val lMixCmd = PipetteCommandsL4.mix(lDest4.reduce(_ + _), nVolume.pl * 0.75 / 1000.00, 4) match {
+			val dests = lDest4.reduce(_ + _)
+			
+			val lMixCmd = PipetteCommandsL4.mix(dests, nVolume.pl * 0.75 / 1000.00, 4) match {
 				case common.Success(cmd) => List(cmd)
 				case _ => Nil
 			}
 			
-			val lCmd: List[common.Command] = lPipetteCmd ++ lMixCmd
+			val lSealCmd = SealCommandsL4.seal(dests) match {
+				case common.Success(lCmd) => lCmd
+				case _ => Nil
+			}
+			
+			val lCmd: List[common.Command] = lPipetteCmd ++ lMixCmd ++ lSealCmd
 			lCmd
 		}
 		x match {

@@ -19,3 +19,15 @@ trait SealCommands extends RoboliqCommands {
 		cmd.setup
 	}
 }
+
+object SealCommandsL4 {
+	def seal(wells: WellPointer): Result[List[L4C_Seal]] = {
+		for {
+			plates <- wells.getPlatesL4
+		} yield {
+			plates.toList.distinct.map(plate => {
+				L4C_Seal(new L4A_SealArgs(plate))
+			})
+		}
+	}
+}
