@@ -157,6 +157,8 @@ class EvowareTableFile(
 	): String = {
 		val mapSiteToLabel3 = mapSiteToLabel ++ mapSiteToLabel2
 		val mapSiteToLabwareModel3 = mapSiteToLabwareModel ++ mapSiteToLabwareModel2
+		//println("mapSiteToLabwareModel:")
+		//mapSiteToLabwareModel3.foreach(println)
 		// TODO: output current date and time
 		// TODO: See whether we need to save the RES section when loading in the table
 		// TODO: do we need to save values for the 999 line when loading the table?

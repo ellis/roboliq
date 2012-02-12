@@ -12,6 +12,13 @@ class PcrExample4 {
 	val l = List(
 		new Pcr {
 			products := List(
+				// NOT1
+				new Product { template := refDb("FRP446"); forwardPrimer := refDb("FRO115"); backwardPrimer := refDb("FRO700") },
+				new Product { template := refDb("FRP332"); forwardPrimer := refDb("FRO699"); backwardPrimer := refDb("FRO114") },
+				// NOT2
+				new Product { template := refDb("FRP337"); forwardPrimer := refDb("FRO115"); backwardPrimer := refDb("FRO704") },
+				new Product { template := refDb("FRP222"); forwardPrimer := refDb("FRO703"); backwardPrimer := refDb("FRO114") },
+				// NOR3_yellow
 				new Product { template := refDb("FRP572"); forwardPrimer := refDb("FRO115"); backwardPrimer := refDb("FRO1260") },
 				new Product { template := refDb("FRP128"); forwardPrimer := refDb("FRO1259"); backwardPrimer := refDb("FRO1262") },
 				new Product { template := refDb("FRP572"); forwardPrimer := refDb("FRO1261"); backwardPrimer := refDb("FRO114") }
@@ -54,11 +61,19 @@ object ExampleRunner {
 		new Liquid { key = "polymerase"; physical := ("Glycerol"); cleanPolicy := ("TNT") },
 		new Liquid { key = "FRO114"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRO115"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRO699"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRO700"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRO703"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRO704"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRO1259"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRO1260"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRO1261"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRO1262"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRP128"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRP222"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRP332"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRP337"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
+		new Liquid { key = "FRP446"; cleanPolicy := ("DDD"); contaminants := ("DNA") },
 		new Liquid { key = "FRP572"; cleanPolicy := ("DDD"); contaminants := ("DNA") }
 	)
 	val lPlateModel = List[PlateModel](
@@ -93,15 +108,14 @@ object ExampleRunner {
 		
 		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("buffer5x")),
 		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("dntp")),
+		Well(parent = TempKey("P2"), index = Temp1(2), liquid = TempKey("water")),
+		Well(parent = TempKey("P2"), index = Temp1(3), liquid = TempKey("water")),
+		Well(parent = TempKey("P2"), index = Temp1(4), liquid = TempKey("water")),
+		Well(parent = TempKey("P2"), index = Temp1(5), liquid = TempKey("water")),
+		Well(parent = TempKey("P2"), index = Temp1(6), liquid = TempKey("water")),
+		Well(parent = TempKey("P2"), index = Temp1(7), liquid = TempKey("water")),
 		
-		Well(parent = TempKey("P3"), index = Temp1(0), liquid = TempKey("polymerase")),
-		Well(parent = TempKey("P3"), index = Temp1(1), liquid = TempKey("water")),
-		Well(parent = TempKey("P3"), index = Temp1(2), liquid = TempKey("water")),
-		Well(parent = TempKey("P3"), index = Temp1(3), liquid = TempKey("water")),
-		Well(parent = TempKey("P3"), index = Temp1(4), liquid = TempKey("water")),
-		Well(parent = TempKey("P3"), index = Temp1(5), liquid = TempKey("water")),
-		Well(parent = TempKey("P3"), index = Temp1(6), liquid = TempKey("water")),
-		Well(parent = TempKey("P3"), index = Temp1(7), liquid = TempKey("water"))
+		Well(parent = TempKey("P3"), index = Temp1(0), liquid = TempKey("polymerase"))
 	)
 	val mapTables = Map[String, Map[String, Item]](
 		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
@@ -155,30 +169,38 @@ object ExampleRunner {
 		mapLocFree += "D-BSSE 96 Well PCR Plate" -> List("cooled1", "cooled2", "cooled3", "cooled4", "cooled5")
 		val mapRack = new HashMap[String, List[Int]]
 		mapRack += "Tube 50ml" -> (0 until 8).toList
-		lPlate.flatMap(plate => {
+		val lPlateToLocation: List[Tuple2[Plate, String]] = lPlate.flatMap(plate => {
 			val plateObj = vom.mapKeyToPlateObj(plate.key)
 			val plateSetup = vom.kb.getPlateSetup(plateObj)
 			plate.model.getValue match {
 				case None => None
 				case Some(sModel) =>
-					mapLocFree.get(sModel) match {
+					val location_? = mapLocFree.get(sModel) match {
 						case None =>
 							mapRack.get(sModel) match {
 								case None => None
 								case Some(li) =>
 									mapRack(sModel) = li.tail
-									plateSetup.location_? = Some(li.head.toString)
-									Some(plate -> li.head.toString)
+									Some(li.head.toString)
 							}
 						case Some(Nil) => None
 						case Some(ls) =>
 							mapLocFree(sModel) = ls.tail
-							plateSetup.location_? = Some(ls.head.toString)
-							Some(plate -> ls.head)
+							Some(ls.head)
+					}
+					location_? match {
+						case None => None
+						case Some(location) =>
+							plateSetup.location_? = Some(location)
+							Some(plate -> location)
 					}
 			}
-		}).foreach(println)
-		
+		})
+		println("lPlateToLocation:")
+		lPlateToLocation.foreach(println)
+		roboliq.utils.FileUtils.printToFile(new java.io.File("locations.txt")) { p =>
+			lPlateToLocation.foreach(p.println)
+		}
 		
 		(vom.kb, cmds)
 	}
