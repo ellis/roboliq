@@ -28,16 +28,25 @@ class Test1 {
 				waterLiquid := refDb("water")
 
 				buffer.liquid := refDb("buffer5x")
-				buffer.amt0 := LiquidAmountByConc(10)
+				buffer.amt0 := LiquidAmountByConc(5)
 				buffer.amt1 := LiquidAmountByConc(1)
 				
 				dntp.liquid := refDb("dntp")
-				dntp.amt0 := LiquidAmountByConc(2)
-				dntp.amt1 := LiquidAmountByConc(0.2)
+				dntp.amt0 := LiquidAmountByConc(2000) // nM
+				dntp.amt1 := LiquidAmountByConc(200) // nM
+				
+				template.amt0 := LiquidAmountByConc(1) // FIXME: dummy value
+				template.amt1 := LiquidAmountByVolume(LiquidVolume.pl(500))
+				
+				forwardPrimer.amt0 := LiquidAmountByConc(100000) // nM
+				forwardPrimer.amt1 := LiquidAmountByConc(500) // nM
+				
+				backwardPrimer.amt0 := LiquidAmountByConc(100000) // nM
+				backwardPrimer.amt1 := LiquidAmountByConc(500) // nM
 				
 				polymerase.liquid := refDb("polymerase")
-				polymerase.amt0 := LiquidAmountByConc(5)
-				polymerase.amt1 := LiquidAmountByConc(0.01)
+				polymerase.amt0 := LiquidAmountByConc(200)
+				polymerase.amt1 := LiquidAmountByConc(1)
 			}
 		}
 	)

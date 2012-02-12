@@ -40,6 +40,30 @@ case class L4C_Pipette(args: L4A_PipetteArgs) extends CommandL4 {
 		for { args3 <- args.toL3(states) }
 		yield L3C_Pipette(args3)
 	}
+	
+	private def getWellsDebugString(wellPointer: WellPointer): String = {
+		wellPointer.toString
+	}
+
+	private def getWellsDebugString(lWellPointer: Seq[WellPointer]): String = {
+		lWellPointer.mkString(",")
+	}
+
+	override def toDebugString = {
+		val srcs = args.items.groupBy(_.src).keys
+		if (srcs.size == 1) {
+			val sSrcs = getWellsDebugString(srcs.head)
+			val sDests = getWellsDebugString(args.items.map(_.dest))
+			val sVolumes = getSeqDebugString(args.items.flatMap(_.lnVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+		else {
+			val sSrcs = getWellsDebugString(args.items.map(_.src))
+			val sDests = getWellsDebugString(args.items.map(_.dest))
+			val sVolumes = getSeqDebugString(args.items.flatMap(_.lnVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+	}
 }
 
 case class L3C_Pipette(args: L3A_PipetteArgs) extends CommandL3 {
@@ -129,6 +153,34 @@ class L4A_PipetteItem(
 			}
 		}
 	}
+}
+
+object L4A_PipetteItem {
+	private def getWellsDebugString(wellPointer: WellPointer): String = {
+		wellPointer.toString
+	}
+
+	private def getWellsDebugString(lWellPointer: Seq[WellPointer]): String = {
+		lWellPointer.mkString(",")
+	}
+
+	def toDebugString(items: Seq[L4A_PipetteItem]): String = {
+		val srcs = items.groupBy(_.src).keys.toSeq
+		if (srcs.size == 1) {
+			val sSrcs = getWellsDebugString(srcs)
+			val sDests = getWellsDebugString(items.map(_.dest))
+			val sVolumes = Command.getSeqDebugString(items.flatMap(_.lnVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+		else {
+			val sSrcs = getWellsDebugString(items.map(_.src))
+			val sDests = getWellsDebugString(items.map(_.dest))
+			val sVolumes = Command.getSeqDebugString(items.flatMap(_.lnVolume))
+			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
+		}
+	}
+
+	def toDebugString(item: L4A_PipetteItem): String = toDebugString(Seq(item))
 }
 
 case class L3A_PipetteItem(

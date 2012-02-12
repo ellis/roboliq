@@ -21,7 +21,7 @@ case class Route(sClass: String, sKey: String) {
 }
 
 /** Volume in picoliters */
-class LiquidVolume(pl: Int) {
+class LiquidVolume(val pl: Int) {
 	override def toString = {
 		if (pl > 1000000)
 			(pl / 1000000).toString + " ml"

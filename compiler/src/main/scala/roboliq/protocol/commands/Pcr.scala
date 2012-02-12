@@ -41,20 +41,128 @@ class Pcr extends PCommand {
 		vom.mapPoolToWellPointer.get(pool)
 	}
 
+	private class PcrProductItemL5(
+		val src: common.WellPointer,
+		val amt0: LiquidAmount,
+		val amt1: LiquidAmount
+	)
+	private class PcrProductL5(
+		val template: PcrProductItemL5,
+		val forwardPrimer: PcrProductItemL5,
+		val backwardPrimer: PcrProductItemL5
+	)
+	private def getPcrProduct5(product6: PcrProduct, mixSpec6: PcrMixSpec, vom: ValueToObjectMap): Option[PcrProductL5] = {
+		for {
+			templateSrc <- getWellPointer(product6.template, vom)
+			template <- getPcrProductItem5(templateSrc, mixSpec6.template, vom.valueDb)
+			forwardPrimerSrc <- getWellPointer(product6.forwardPrimer, vom)
+			forwardPrimer <- getPcrProductItem5(forwardPrimerSrc, mixSpec6.forwardPrimer, vom.valueDb)
+			backwardPrimerSrc <- getWellPointer(product6.backwardPrimer, vom)
+			backwardPrimer <- getPcrProductItem5(backwardPrimerSrc, mixSpec6.backwardPrimer, vom.valueDb)
+		} yield {
+			new PcrProductL5(template, forwardPrimer, backwardPrimer)
+		}
+	}
+	private def getPcrProductItem5(src: common.WellPointer, mixItem6: PcrMixSpecItem, vd: ValueDatabase): Option[PcrProductItemL5] = {
+		for {
+			amt0 <- mixItem6.amt0.getValue(vd)
+			amt1 <- mixItem6.amt1.getValue(vd)
+		} yield {
+			new PcrProductItemL5(src, amt0, amt1)
+		}
+	}
+	private class MixItemL5(
+		val src: common.WellPointer,
+		val dest: common.WellPointer,
+		val vol: LiquidVolume
+	)
+	// Get the mix items for the given product
+	private def getMixItems5(product5: PcrProductL5, dest: common.WellPointer, mixSpec6: PcrMixSpec, vol: LiquidVolume, vom: ValueToObjectMap): Option[List[MixItemL5]] = {
+		def getVol(amt0: LiquidAmount, amt1: LiquidAmount): Option[LiquidVolume] = {
+			amt1 match {
+				case LiquidAmountByVolume(vol1) => Some(vol1)
+				case LiquidAmountByConc(conc1) =>
+					amt0 match {
+						case LiquidAmountByConc(conc0) => Some(LiquidVolume.pl(vol.pl * (conc1 / conc0).toInt))
+						case _ => None
+					}
+			}
+		}
+		def getProdVol(item5: PcrProductItemL5): Option[LiquidVolume] = getVol(item5.amt0, item5.amt1)
+		def getMixSpecVol(mixItem6: PcrMixSpecItem): Option[LiquidVolume] = {
+			for {
+				amt0 <- mixItem6.amt0.getValue(vom.valueDb)
+				amt1 <- mixItem6.amt1.getValue(vom.valueDb)
+				vol <- getVol(amt0, amt1)
+			} yield {
+				vol
+			}
+		}
+		def getMixItem5(mixItem6: PcrMixSpecItem): Option[MixItemL5] = {
+			for {
+				src <- getWellPointer(mixItem6.liquid, vom)
+				vol <- getMixSpecVol(mixItem6)
+			} yield {
+				new MixItemL5(src, dest, vol)
+			}			
+		}
+		def getProductMixItem5(item5: PcrProductItemL5): Option[MixItemL5] = {
+			for {
+				vol <- getProdVol(item5)
+			} yield {
+				new MixItemL5(item5.src, dest, vol)
+			}			
+		}
+		
+		for {
+			srcWater <- getWellPointer(mixSpec6.waterLiquid, vom)
+			// Before adding water
+			lMixItem0 <- invert(List(
+				getMixItem5(mixSpec6.buffer),
+				getMixItem5(mixSpec6.dntp),
+				getProductMixItem5(product5.template),
+				getProductMixItem5(product5.forwardPrimer),
+				getProductMixItem5(product5.backwardPrimer),
+				getMixItem5(mixSpec6.polymerase)
+			))
+		} yield {
+			// Before adding water
+			val vol0 = LiquidVolume.pl(lMixItem0.foldLeft(0) {(acc, mixItem5) => acc + mixItem5.vol.pl})
+			val volWater = LiquidVolume.pl(vol.pl - vol0.pl)
+			val mixItemWater5 = new MixItemL5(srcWater, dest, volWater)
+			mixItemWater5 :: lMixItem0
+		}
+	}
+
 	def createCommands(vom: ValueToObjectMap): List[common.Command] = {
 		import roboliq.commands.pipette.L4A_PipetteItem
 		import roboliq.commands.pipette.MixSpec
 
 		val valueDb = vom.valueDb
 		val x = for {
-			mixSpec <- this.mixSpec.getValue(valueDb)
-			water4 <- getWellPointer(mixSpec.waterLiquid, vom)
-			destA4 <- getWellPointer(m_pools.head, vom)
+			nVolume <- volumes.getValue(valueDb)
+			mixSpec6 <- this.mixSpec.getValue(valueDb)
+			products6 <- this.products.getValues(valueDb) match { case Nil => None; case l => Some(l) }
+			lProduct5 <- invert(products6.map(product6 => getPcrProduct5(product6, mixSpec6, vom)))
+			water4 <- getWellPointer(mixSpec6.waterLiquid, vom)
+			lDest4 <- invert(m_pools.map(pool => getWellPointer(pool, vom)))
+			val lProductDest = lProduct5 zip lDest4
+			llMixItem <- invert(lProductDest.map(pair => {
+				val (product5, dest4) = pair
+				getMixItems5(product5, dest4, mixSpec6, nVolume, vom)
+			}))
 		} yield {
-			val pipetteItems = List[L4A_PipetteItem](
-				new L4A_PipetteItem(water4, destA4, List(15.7), None, None)
-			)
-			roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(pipetteItems, tipOverrides_? = None))
+			def mixNext(llMixItem: List[List[MixItemL5]], acc: List[L4A_PipetteItem]): List[L4A_PipetteItem] = {
+				if (llMixItem.isEmpty) return acc
+				val acc2 = acc ++ llMixItem.map(lMixItem => {
+					val mixItem5 = lMixItem.head 
+					new L4A_PipetteItem(mixItem5.src, mixItem5.dest, List(mixItem5.vol.pl / 1000.0), None, None)
+				})
+				val llMixItem2 = llMixItem.map(_.tail).filter(!_.isEmpty)
+				mixNext(llMixItem2, acc2)
+			}
+			val lPipetteItem = mixNext(llMixItem, Nil)
+			roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(lPipetteItem, tipOverrides_? = None))
 		}
 		x.toList
 	}
@@ -110,22 +218,15 @@ class PcrProduct extends Item {
 	def properties: List[Property[_]] = List(template, forwardPrimer, backwardPrimer)
 }
 
+class PcrMixSpecItem {
+	val liquid = new PropertyItem[Liquid]
+	val amt0 = new Property[LiquidAmount]
+	val amt1 = new Property[LiquidAmount]
+	def properties = List[Property[_]](liquid, amt0, amt1)
+}
+
 class PcrMixSpec extends Item {
-	class Item {
-		val liquid = new PropertyItem[Liquid]
-		val amt0 = new Property[LiquidAmount]
-		val amt1 = new Property[LiquidAmount]
-		def properties = List[Property[_]](liquid, amt0, amt1)
-	}
 	val waterLiquid = new PropertyItem[Liquid]
-	val buffer = new Item
-	val dntp = new Item
-	val templateLiquid = new PropertyItem[Liquid]
-	val templateConc = new Property[LiquidAmount]
-	val forwardPrimerLiquid = new PropertyItem[Liquid]
-	val forwardPrimerConc = new Property[LiquidAmount]
-	val backwardPrimerLiquid = new PropertyItem[Liquid]
-	val backwardPrimerConc = new Property[LiquidAmount]
-	val polymerase = new Item
-	def properties: List[Property[_]] = waterLiquid :: List(buffer, dntp, polymerase).flatMap(_.properties)
+	val buffer, dntp, template, forwardPrimer, backwardPrimer, polymerase = new PcrMixSpecItem
+	def properties: List[Property[_]] = waterLiquid :: List(buffer, dntp, template, forwardPrimer, backwardPrimer, polymerase).flatMap(_.properties)
 }
