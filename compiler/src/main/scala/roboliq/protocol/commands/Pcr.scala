@@ -1,9 +1,9 @@
 package roboliq.protocol.commands
 
-import roboliq.protocol._
+import roboliq.commands.pipette.PipetteCommandsL4
 import roboliq.common.KnowledgeBase
 import roboliq.common
-
+import roboliq.protocol._
 
 class Pcr extends PCommand {
 	type Product = PcrProduct
@@ -83,9 +83,7 @@ class Pcr extends PCommand {
 				case LiquidAmountByVolume(vol1) => Some(vol1)
 				case LiquidAmountByConc(conc1) =>
 					amt0 match {
-						case LiquidAmountByConc(conc0) =>
-							println("vol: ", vol.pl, conc1, conc0, conc0 / conc1)
-							Some(LiquidVolume.pl(vol.pl / (conc0 / conc1).toInt))
+						case LiquidAmountByConc(conc0) => Some(LiquidVolume.pl(vol.pl / (conc0 / conc1).toInt))
 						case _ => None
 					}
 			}
@@ -164,9 +162,20 @@ class Pcr extends PCommand {
 				mixNext(llMixItem2, acc2)
 			}
 			val lPipetteItem = mixNext(llMixItem, Nil)
-			roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(lPipetteItem, tipOverrides_? = None))
+			val lPipetteCmd = roboliq.commands.pipette.L4C_Pipette(new roboliq.commands.pipette.L4A_PipetteArgs(lPipetteItem, tipOverrides_? = None)) :: Nil
+			
+			val lMixCmd = PipetteCommandsL4.mix(lDest4.reduce(_ + _), nVolume.pl * 0.75 / 1000.00, 4) match {
+				case common.Success(cmd) => List(cmd)
+				case _ => Nil
+			}
+			
+			val lCmd: List[common.Command] = lPipetteCmd ++ lMixCmd
+			lCmd
 		}
-		x.toList
+		x match {
+			case None => Nil
+			case Some(lCmd) => lCmd
+		}
 	}
 	
 	/*
