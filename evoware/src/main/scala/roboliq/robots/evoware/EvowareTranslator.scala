@@ -187,7 +187,9 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 		for (twv <- items) {
 			val iTip = twv.tip.index
 			assert(iTip >= 0 && iTip < 12)
-			asVolumes(iTip) = "\""+fmt.format(twv.nVolume)+'"'
+			// HACK: robot is aborting when trying to aspirate <0.4ul from PCR well -- ellis, 2012-02-12
+			val nVolume = if (sFunc == "Aspirate" && twv.nVolume < 0.4) 0.4 else twv.nVolume
+			asVolumes(iTip) = "\""+fmt.format(nVolume)+'"'
 		}
 		//val sVolumes = asVolumes.mkString(",")
 		
