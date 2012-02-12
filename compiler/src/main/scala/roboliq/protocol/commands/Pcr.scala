@@ -83,7 +83,9 @@ class Pcr extends PCommand {
 				case LiquidAmountByVolume(vol1) => Some(vol1)
 				case LiquidAmountByConc(conc1) =>
 					amt0 match {
-						case LiquidAmountByConc(conc0) => Some(LiquidVolume.pl(vol.pl * (conc1 / conc0).toInt))
+						case LiquidAmountByConc(conc0) =>
+							println("vol: ", vol.pl, conc1, conc0, conc0 / conc1)
+							Some(LiquidVolume.pl(vol.pl / (conc0 / conc1).toInt))
 						case _ => None
 					}
 			}
