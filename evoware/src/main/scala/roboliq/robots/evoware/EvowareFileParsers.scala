@@ -162,9 +162,9 @@ class EvowareTableFile(
 		// TODO: do we need to save values for the 999 line when loading the table?
 		val l = List(
 				"00000000",
-				"20111117_122139 No log in",
-				"",
-				"No user logged in",
+				"20111117_122139 No log in       ",
+				"                                                                                                                                ",
+				"No user logged in                                                                                                               ",
 				"--{ RES }--",
 				"V;200",
 				"--{ CFG }--",
@@ -176,7 +176,7 @@ class EvowareTableFile(
 			toString_externals() ++
 			toString_externalLabware(mapSiteToLabwareModel3) ++
 			toString_externalGrids() ++
-			List("996;0;0;", "--{RPG}--")
+			List("996;0;0;", "--{ RPG }--")
 		l.mkString("\n")
 	}
 	
@@ -195,6 +195,7 @@ class EvowareTableFile(
 					val acc2 = carrier_? match {
 						case None => List("998;0;")
 						case Some(carrier) =>
+							//val sSiteCount = if (carrier.nSites > 0) carrier.nSites.toString else ""
 							List(
 								"998;"+carrier.nSites+";"+((0 until carrier.nSites).map(iSite => {
 									mapSiteToLabwareModel2.get(CarrierSite(carrier, iSite)) match {
@@ -228,10 +229,12 @@ class EvowareTableFile(
 		mapSiteToLabwareModel2: Map[CarrierSite, LabwareModel]
 	): List[String] = {
 		// List of external carriers
-		val lCarrier = lExternalObject.map(_.carrier)
+		val lCarrier0 = lExternalObject.map(_.carrier)
 		// Map of external carrier to labware model
-		val map = mapSiteToLabwareModel2.filter(pair => lCarrier.contains(pair._1.carrier)).map(pair => pair._1.carrier -> pair._2)
-		("998;"+lCarrier.length+";") :: lCarrier.filter(map.contains).map(o => "998;"+o.id+";"+map(o).sName+";")
+		val map = mapSiteToLabwareModel2.filter(pair => lCarrier0.contains(pair._1.carrier)).map(pair => pair._1.carrier -> pair._2)
+		// List of external carriers with labware on them
+		val lCarrierToLabware = lCarrier0.flatMap(carrier => map.get(carrier).map(carrier -> _))
+		("998;"+lCarrierToLabware.length+";") :: lCarrierToLabware.map(pair => "998;"+pair._1.id+";"+pair._2.sName+";")
 	}
 	
 	private def toString_externalGrids(): List[String] = {

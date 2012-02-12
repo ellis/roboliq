@@ -4,9 +4,13 @@ import roboliq.common._
 import roboliq.commands.move.LidHandling
 
 
+abstract class L0C_Command extends Command {
+	def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] = Nil
+}
+
 case class L0C_Comment(
 	s: String
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		List(
 			'"'+s+'"'
@@ -18,7 +22,7 @@ case class L0C_DropDITI(
 	val mTips: Int,
 	val iGrid: Int,
 	val iSite: Int
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		Array(
 			mTips,
@@ -33,7 +37,7 @@ case class L0C_Execute(
 	val cmd: String,
 	val nWaitOpt: Int,
 	val sResultVar: String
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		Array(
 			'"'+cmd+'"',
@@ -47,7 +51,7 @@ case class L0C_Execute(
 case class L0C_GetDITI2(
 	val mTips: Int,
 	val sType: String
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		Array(
 			mTips,
@@ -66,7 +70,7 @@ case class L0C_Mix(
 	val iSite: Int,
 	val sPlateMask: String,
 	val nCount: Int
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		Array(
 			mTips,
@@ -87,8 +91,13 @@ case class L0C_Spirate(
 	val asVolumes: Seq[String],
 	val iGrid: Int,
 	val iSite: Int,
-	val sPlateMask: String
-) extends Command {
+	val sPlateMask: String,
+	val site: CarrierSite,
+	val labwareModel: LabwareModel
+) extends L0C_Command {
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] =
+		List(site -> labwareModel)
+
 	override def toString = {
 		val l = List(
 			mTips,
@@ -116,7 +125,7 @@ case class L0C_Wash(
 	nRetractSpeed: Int,
 	bFastWash: Boolean,
 	bUNKNOWN1: Boolean
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		val fmtWaste = new java.text.DecimalFormat("#.##")
 		val fmtCleaner = if (RoboeaseHack.bEmulateEvolab) new java.text.DecimalFormat("#.0") else fmtWaste
@@ -150,7 +159,10 @@ case class L0C_Transfer_Rack(
 	iGridDest: Int, siteDest: CarrierSite,
 	lidHandling: LidHandling.Value,
 	iGridLid: Int, iSiteLid: Int, sCarrierLid: String
-) extends Command {
+) extends L0C_Command {
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] =
+		List(siteSrc -> labwareModel, siteDest -> labwareModel)
+	
 	override def toString = {
 		import LidHandling._
 		
@@ -186,7 +198,7 @@ case class L0C_Transfer_Rack(
 
 case class L0C_StartTimer(
 	id: Int
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		List(
 			'"'+id.toString+'"'
@@ -197,7 +209,7 @@ case class L0C_StartTimer(
 case class L0C_WaitTimer(
 	id: Int,
 	nSeconds: Int
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		List(
 			'"'+id.toString+'"',
@@ -210,7 +222,7 @@ case class L0C_Facts(
 	sDevice: String,
 	sVariable: String,
 	sValue: String
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		List(
 			'"'+sDevice+'"',
@@ -224,7 +236,7 @@ case class L0C_Facts(
 
 case class L0C_Subroutine(
 	sFilename: String
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		List(
 			'"'+sFilename+'"',
@@ -235,7 +247,7 @@ case class L0C_Subroutine(
 
 case class L0C_Prompt(
 	s: String
-) extends Command {
+) extends L0C_Command {
 	override def toString = {
 		List(
 			'"'+s+'"',

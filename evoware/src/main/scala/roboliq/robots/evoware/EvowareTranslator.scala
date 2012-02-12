@@ -72,7 +72,7 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 			}
 		}
 		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
-			cmds.collect({case c: L0C_Transfer_Rack => List(c.siteSrc -> c.labwareModel, c.siteDest -> c.labwareModel)}).flatten.toMap
+			cmds.collect({case c: L0C_Command => c.getSiteToLabwareModelList}).flatten.toMap
 		
 		val sHeader = tableFile.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
 		val sCmds = cmds.mkString("\n")
@@ -198,15 +198,16 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
 		} yield {
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(holderModel.id)
 			val cmd = L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
 				asVolumes,
 				iGrid, site.iSite,
-				sPlateMask
+				sPlateMask,
+				site, labwareModel
 			)
 			
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(holderModel.id)
 			builder.mapCmdToLabwareInfo(cmd) = List((site, item0.location, labwareModel))
 			
 			Seq(cmd)
