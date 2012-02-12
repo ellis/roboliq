@@ -10,18 +10,18 @@ import station1._
 
 
 object Main extends App {
-	val configFile = new EvowareConfigFile("/home/ellisw/tmp/tecan/carrier.cfg")
-	val station = new StationConfig(configFile, "/home/ellisw/src/roboliq/ellis_pcr1_corrected.esc")
+	val configFile = new EvowareConfigFile("/home/ellis/tmp/tecan/carrier.cfg")
+	val station = new StationConfig(configFile, "/home/ellis/src/roboliq/ellis_pcr1_corrected.esc")
 	//val protocol = new examples.Example01(station)
 	//val protocol = new examples.Example05(station)
 	//val protocol = new examples.ExampleOpenhouse3(station)
-	val protocol = new examples.PcrScript3(station)
+	val protocol = new examples.PcrExample4
 	val toolchain = new BsseToolchain(station)
-	toolchain.compileProtocol(protocol, true) match {
+	val (kb, cmds) = examples.ExampleRunner.run(protocol.l)
+	toolchain.compile(kb, cmds, true) match {
 		case Left(err) => err.print()
 		case Right(succT: TranslatorStageSuccess) =>
-			val sFilename = "ellis_pcr3.esc"
-			//val sFilename = "example01.esc"
+			val sFilename = "ellis_pcr4.esc"
 			val script = succT.internal.asInstanceOf[EvowareScriptBuilder]
 			val translator = new EvowareTranslator(toolchain.evowareConfig)
 			val s = translator.saveWithHeader(script.cmds.toSeq, station.tableFile, script.mapCmdToLabwareInfo.toMap, sFilename)

@@ -286,4 +286,15 @@ class KnowledgeBase {
 			println("\t"+s)
 		}
 	}*/
+	
+	override def toString: String = {
+		val lsReagent: List[String] = m_setups.toList.collect({ case (obj, setup: ReagentSetup) => setup}).map(_.getLabel(this))
+		val lsReagentWells: List[String] = m_setups.toList.collect({ case (obj, setup: ReagentSetup) => setup}).map(setup => {
+			setup.getLabel(this)+" -> "+getReagentWells(setup.obj).map(_.toString()).mkString(",")
+		})
+		(
+			("Reagents:" :: lsReagent) ++
+			("Reagent Wells" :: lsReagentWells)
+		).mkString("\n")
+	}
 }

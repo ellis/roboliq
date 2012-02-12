@@ -1,4 +1,4 @@
-package roboliq.labs.bsse
+/*package roboliq.labs.bsse
 
 import scala.collection.mutable.HashMap
 
@@ -76,3 +76,4 @@ trait Protocol extends CommonProtocol {
 		}*/
 	}
 }
+*/

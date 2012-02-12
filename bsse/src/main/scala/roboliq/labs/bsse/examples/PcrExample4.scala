@@ -1,21 +1,14 @@
-package temp
+package roboliq.labs.bsse.examples
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
+import roboliq.common
 import roboliq.protocol._
 import roboliq.protocol.commands._
 
 
-class Test1 {
-	/*class IntToVolumeWrapper(n: Int) {
-		def pl: PLiquidVolume = new PLiquidVolume(LiquidVolume.pl(n))
-		def ul: PLiquidVolume = new PLiquidVolume(LiquidVolume.ul(n))
-		def ml: PLiquidVolume = new PLiquidVolume(LiquidVolume.ml(n))
-	}
-	
-	implicit def intToVolumeWrapper(n: Int): IntToVolumeWrapper = new IntToVolumeWrapper(n)*/
-
+class PcrExample4 {
 	val l = List(
 		new Pcr {
 			products := List(
@@ -52,17 +45,7 @@ class Test1 {
 	)
 }
 
-/*
-object Parsers {
-	import scala.util.parsing.combinator._
-	class Parser extends JavaTokenParsers {
-		def propertyAndValue = ident ~ "=" ~ stringLiteral ^^ { case s ~ _ ~ v => (s, v) }
-		def liquidContents = repsep(propertyAndValue, ",")
-	}
-}
-*/
-
-object T {
+object ExampleRunner {
 	val lLiquid = List[Liquid](
 		new Liquid { key = "water"; cleanPolicy := "TNL" },
 		new Liquid { key = "buffer10x"; cleanPolicy := ("TNT") },
@@ -140,17 +123,53 @@ object T {
 		}
 	}
 	
-	def run {
-		val test1 = new Test1
+	def run(lItem: List[Item]): Tuple2[common.KnowledgeBase, List[common.Command]] = {
 		val db = new TestDatabase
-		val ild = ItemListData(test1.l, db)
+		val ild = ItemListData(lItem, db)
 		val vom = ValueToObjectMap(ild)
-		val cmds = test1.l.head.createCommands(vom)
-		println("cmds:")
-		cmds.foreach(cmd => println(cmd.toDebugString))
+		val cmds = lItem.collect({case cmd: PCommand => cmd}).flatMap(_.createCommands(vom))
+		//println("cmds:")
+		//cmds.foreach(cmd => println(cmd.toDebugString))
+		
+		// This task is platform specific.  In our case: tecan evoware.
+		println()
+		println("choosePlateLocations:")
+		val mapLocFree = new HashMap[String, List[String]]
+		mapLocFree += "D-BSSE 96 Well PCR Plate" -> List("cooled1", "cooled2", "cooled3", "cooled4", "cooled5")
+		val mapRack = new HashMap[String, List[Int]]
+		mapRack += "Tube 50ml" -> (0 until 8).toList
+		lPlate.flatMap(plate => {
+			val plateObj = vom.mapKeyToPlateObj(plate.key)
+			val plateSetup = vom.kb.getPlateSetup(plateObj)
+			plate.model.getValue match {
+				case None => None
+				case Some(sModel) =>
+					mapLocFree.get(sModel) match {
+						case None =>
+							mapRack.get(sModel) match {
+								case None => None
+								case Some(li) =>
+									mapRack(sModel) = li.tail
+									plateSetup.location_? = Some(li.head.toString)
+									Some(plate -> li.head.toString)
+							}
+						case Some(Nil) => None
+						case Some(ls) =>
+							mapLocFree(sModel) = ls.tail
+							plateSetup.location_? = Some(ls.toString)
+							Some(plate -> ls.head)
+					}
+			}
+		}).foreach(println)
+		
+		
+		(vom.kb, cmds)
 	}
 }
 
+/*
 object Main extends App {
-	T.run
+	example4
+	ExampleRunner.run
 }
+*/

@@ -428,7 +428,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		lLiquid.foreach(println)
 		
 		println()
-		println("findWells:")
+		println("mapLiquidKeyToWells:")
 		val lsLiquidKey = lLiquid.map(_.key)
 		val mapLiquidKeyToWells = findWells(lsLiquidKey)
 		mapLiquidKeyToWells.foreach(println)
@@ -457,6 +457,9 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 		
 		val lsPlateModel = lPlate.flatMap(_.model.getValue).distinct
 		val mapKeyToPlateModel = lsPlateModel.flatMap(key => db.lookup[PlateModel]("PlateModel", key).map(item => key -> item)).toMap
+		println()
+		println("mapKeyToPlateModel:")
+		mapKeyToPlateModel.foreach(println)
 		
 		/*
 		// This task is platform specific.  In our case: tecan evoware.
@@ -506,6 +509,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 class ValueToObjectMap(
 	val valueDb: ValueDatabase,
 	val kb: KnowledgeBase,
+	val mapKeyToPlateObj: Map[String, common.Plate],
 	val mapValueToWellPointer: Map[Value[_], WellPointer],
 	val mapPoolToWellPointer: Map[Pool, WellPointer]
 )
@@ -519,6 +523,7 @@ object ValueToObjectMap {
 			val reagent = new Reagent
 			val setup = kb.getReagentSetup(reagent)
 			kb.addReagent(reagent)
+			setup.sName_? = Some(liquid.key)
 			setup.sFamily_? = liquid.physical.getValue(ild.valueDb).orElse(Some("Water"))
 			setup.contaminants = liquid.contaminants.getValues(ild.valueDb).map(s => Contaminant.withName(s)).toSet
 			liquid.cleanPolicy.getValue(ild.valueDb) match {
@@ -538,7 +543,9 @@ object ValueToObjectMap {
 		mapReagents.foreach(println)
 		
 		// Create plate models
-		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue(ild.valueDb))
+		val lsPlateModel = ild.lPlate.flatMap(_.model.getValue(ild.valueDb)).distinct
+		println("lsPlateModel:")
+		lsPlateModel.foreach(println)
 		val mapPlateModels: Map[String, common.PlateModel] = lsPlateModel.flatMap(sPlateModel => {
 			for {
 				plateModel <- ild.mapKeyToPlateModel.get(sPlateModel)
@@ -549,6 +556,8 @@ object ValueToObjectMap {
 				sPlateModel -> new common.PlateModel(sPlateModel, nRows, nCols, nWellVolume)
 			}
 		}).toMap
+		println("mapPlateModels:")
+		mapPlateModels.foreach(println)
 		
 		// Create plate objects
 		val mapPlates = ild.lPlate.flatMap(plate => {
@@ -565,6 +574,8 @@ object ValueToObjectMap {
 			}
 		}).toMap
 		//val lPlate = mapKeyToPlateObj.values.toList
+		println("mapPlates:")
+		mapPlates.foreach(println)
 		
 		def getWellObject(well: Well): Option[common.Well] = {
 			for {
@@ -583,8 +594,11 @@ object ValueToObjectMap {
 				case None =>
 				case Some(reagentObj) =>
 					for (well <- lWell) {
+						println("well: ", well, getWellObject(well))
 						for (wellObj <- getWellObject(well)) {
+							wellObj.setup.sLabel_? = Some("W'"+sLiquidKey)
 							wellObj.setup.reagent_? = Some(reagentObj)
+							kb.addWell(wellObj, true)
 						}
 					}
 			}
@@ -628,6 +642,7 @@ object ValueToObjectMap {
 		new ValueToObjectMap(
 			valueDb = ild.valueDb,
 			kb = kb,
+			mapKeyToPlateObj = mapPlates,
 			mapValueToWellPointer = lValueKeyToWellPointer.toMap,
 			mapPoolToWellPointer = lPoolToWellPointer.toMap
 		)
