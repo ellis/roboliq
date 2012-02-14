@@ -1,0 +1,56 @@
+Abstractions:
+
+Roboease:
+	Provides: variables, higher-level functions, hides low-level pipetting commands, external scripts
+
+Roboease may not be the best level of abstraction to target.  It's still so low-level that scripts cannot be created for a spontaneous experiment -- they need to be worked out and debugged.  It's also excessively low-level for use as the output from higher-level programs.
+
+Abstract away from bench layout and tip assumptions by using liquids instead of locations:
+	requires: liquid specification (physical property category, contaminants, sterility requirements), locations of liquids
+	provides: more portable than well locations, automatically handles tip sterilization for both fixed-tip and disposable-tip robots, automatically chooses pipetting strategy
+
+Database:
+	requires: database of liquids, plates, wells, command data (e.g. various PCR mix specifications)
+	provides: minimizes script complexity, automatic selection of plates and wells and robot locations, enables automatic generation of portable protocols
+
+Current way to specify robot instructions: (declarative description; based on a format used for designers)
+Pcr {
+	Product { template: "FRP572"; forwardPrimer: "FRO115";  backwardPrimer: "FRO1260" }
+	Product { template: "FRP128"; forwardPrimer: "FRO1259"; backwardPrimer: "FRO1262" }
+	Product { template: "FRP572"; forwardPrimer: "FRO1261"; backwardPrimer: "FRO114" }
+	...
+	mixSpec: "Phusion-HotStart"
+	volumes: 20 ul
+}
+
+Next step:
+	continuous feedback and dynamic database update
+
+3-way Programming split (same idea as roboease):
+	command sequence specification for the user
+	callable external user-created scripts
+	more complex extensions can be acheived by a developer using the provided library
+
+Issues:
+	can we lower the priority of roboease compatibility?
+
+
+
+
+
+
+--------------
+You take the Regio from Wengen to Lauterbrunnen.
+Your journey starts at Wengen on 13.02.12 at 09:03, you arrive at Lauterbrunnen is at 09:21.
+Your journey continues by Regio from Lauterbrunnen to Interlaken Ost.
+Your journey starts at Lauterbrunnen at 09:33, you arrive at Interlaken Ost is on track 2A  at 09:54.
+Your journey continues by InterCityExpress from Interlaken Ost departing track 5  to Basel SBB.
+Your journey starts at Interlaken Ost at 10:00, you arrive at Basel SBB is on track 12  at 11:59.
+
+
+Details: I assume that you arrive at 11:50 in Basel SBB on Monday. Given the fact that you did all this before, I trust it is OK if I ask you to take the Tram from the main station to reach us? It would be tram line number 2 (leaves directly I front of the main station), direction of “Eglisee”, stop “Gewerbeschule” (one after “Messe/exhibition or fair” – that stop is typically announced in English). From there, it is only a  3 min walk to us. If you call me once you are in the tram, I would pick you up at the Tram stop (my number: +41-76-323 59 29). If you can, be sure to buy a “City-Ticket” in Wengen, that will save you the trouble of buying a public transportation ticket in Basel. 
+
+
+Sure, my swiss mobile number is 076-475-5045 
+
+
