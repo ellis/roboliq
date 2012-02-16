@@ -454,7 +454,8 @@ private trait L3P_PipetteMixBase {
 			case None =>
 				val tipState = tip.state(states)
 				val wellState = well.state(states)
-				robot.getAspiratePolicy(tipState, wellState) match {
+				// FIXME: Passing nVolume=0 is kinda dangerous -- ellis
+				robot.getAspiratePolicy(tipState, 0, wellState) match {
 					case None => Error("no mix policy found for "+tip+" and "+well.toString)
 					case Some(policy) => Success(policy)
 				}

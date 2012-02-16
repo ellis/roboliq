@@ -533,11 +533,11 @@ class GroupABuilder(
 			val itemState = g0.mItemToState(item)
 			val liquid = itemState.srcLiquid
 			val nVolume = item.nVolume
-			val nVolumeDest = itemState.destState0.nVolume
+			//val nVolumeDest = itemState.destState0.nVolume
 			
 			// TODO: allow for policy override
 			val policy = cmd.args.pipettePolicy_?.getOrElse(
-				device.getDispensePolicy(liquid, tip, nVolume, nVolumeDest) match {
+				device.getDispensePolicy(liquid, tip, nVolume, itemState.destState0) match {
 					case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
 					case Some(p) => p
 				}
@@ -594,15 +594,16 @@ class GroupABuilder(
 			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
 			val ltw = lltw.flatMap(identity)
 			ltw.map(tw => {
-				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0))
+				val nVolume = g0.mTipToVolume(tw.tip)
+				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), nVolume, tw.well.state(g0.states0))
 				// FIXME: for debug only
-				if (device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0)).isEmpty) {
+				if (policy_?.isEmpty) {
 					println("getAspiratePolicy")
 					println(tw.tip.state(g0.states0), tw.well.state(g0.states0))
 				}
 				// ENDFIX
 				val policy = cmd.args.pipettePolicy_?.getOrElse(
-					device.getAspiratePolicy(tw.tip.state(g0.states0), tw.well.state(g0.states0)) match {
+					policy_? match {
 						case None => return GroupError(g0, Seq("Could not find aspirate policy for "+tw.tip+" and "+tw.well))
 						case Some(p) => p
 					}
@@ -615,7 +616,7 @@ class GroupABuilder(
 					println("ltw: "+ltw)
 				}
 				// ENDFIX
-				new TipWellVolumePolicy(tw.tip, tw.well, g0.mTipToVolume(tw.tip), policy)
+				new TipWellVolumePolicy(tw.tip, tw.well, nVolume, policy)
 			})
 		})
 		

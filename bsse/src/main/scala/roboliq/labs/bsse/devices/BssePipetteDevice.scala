@@ -46,7 +46,8 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 					DryContact -> "Roboliq_Water_Dry_1000"),
 				"Glycerol" -> Map(
 					Free -> "Roboliq_Glycerol_Air",
-					WetContact -> "Roboliq_Glycerol_Wet_1000"
+					WetContact -> "Roboliq_Glycerol_Wet_1000",
+					DryContact -> "Roboliq_Glycerol_Dry_1000"
 				),
 				"Decon" -> Map(
 					WetContact -> "Roboliq_Decon_Wet"
@@ -59,7 +60,8 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 					DryContact -> "Roboliq_Water_Dry_0050"),
 				"Glycerol" -> Map(
 					Free -> "Roboliq_Glycerol_Air",
-					WetContact -> "Roboliq_Glycerol_Wet_0050"
+					WetContact -> "Roboliq_Glycerol_Wet_0050",
+					DryContact -> "Roboliq_Glycerol_Dry_0050"
 				),
 				"Decon" -> Map(
 					WetContact -> "Roboliq_Decon_Wet"
@@ -136,7 +138,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		(if (b1000) Seq(tipModel1000) else Seq()) ++ (if (b50) Seq(tipModel50) else Seq())
 	}
 	
-	def getAspiratePolicy(tipState: TipStateL2, wellState: WellStateL2): Option[PipettePolicy] = {
+	def getAspiratePolicy(tipState: TipStateL2, nVolume: Double, wellState: WellStateL2): Option[PipettePolicy] = {
 		import PipettePosition._
 
 		val liquid = wellState.liquid
@@ -145,11 +147,13 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		if (liquid eq Liquid.empty)
 			return None
 
+		val nVolumeSrc = wellState.nVolume
 		val bLarge = (tipState.conf.obj.index < 4)		
 		
 		val sFamily = liquid.sFamily
 		val tipModel = tipState.model_?.get
-		val posDefault = WetContact
+		val posDefault = if (nVolumeSrc > 20) WetContact else DryContact
+		//val posDefault = WetContact
 		mapLcInfo.get(tipModel) match {
 			case None =>
 			case Some(mapFamilies) =>
@@ -171,22 +175,23 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 				}
 		}
 		
-		val sPos = "Wet"
+		val sPos = if (nVolumeSrc > 20) "Wet" else "Dry"
+		//println("nVolumeSrc: "+nVolumeSrc+", "+sPos)
 		val sTip = if (bLarge) "1000" else "0050"
 		val sName = "Roboliq_"+sFamily+"_"+sPos+"_"+sTip
 		Some(PipettePolicy(sName, posDefault))
-		
 	}
 	
 	val nFreeDispenseVolumeThreshold = 5
 	
-	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, nVolumeDest: Double): Option[PipettePolicy] = {
+	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, wellState: WellStateL2): Option[PipettePolicy] = {
 		import PipettePosition._
 
 		val sFamily = liquid.sFamily
 		val bLarge = (tip.obj.index < 4)
 		val tipModel = if (tip.obj.index < 4) tipModel1000 else tipModel50
-
+		val nVolumeDest = wellState.nVolume
+		
 		val posDefault = {
 			// If our volume is high enough that we don't need to worry about accuracy
 			if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
@@ -230,7 +235,8 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	}
 	
 	def getMixSpec(tipState: TipStateL2, wellState: WellStateL2, mixSpec_? : Option[MixSpec]): Result[MixSpecL2] = {
-		val policyDefault_? = getAspiratePolicy(tipState, wellState)
+		// FIXME: Passing nVolume=0 is kinda dangerous -- ellis
+		val policyDefault_? = getAspiratePolicy(tipState, 0, wellState)
 		val mixSpecDefault = MixSpec(Some(wellState.nVolume * 0.7), Some(4), policyDefault_?)
 		val mixSpec = mixSpec_? match {
 			case None => mixSpecDefault

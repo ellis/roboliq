@@ -51,7 +51,7 @@ class PipetteScheduler(
 				//println("lnScore: "+lnScore.toList)
 				//println("queue: "+queue)
 				val score = queue.dequeue
-				println("score: "+score)
+				//println("score: "+score)
 				val iItemParent = score.iItem
 				bDone = (iItemParent == nItems - 1)
 				if (!bDone) {
@@ -59,28 +59,29 @@ class PipetteScheduler(
 					x1(lItem, mItemToState, mLM, iItemParent)
 				}
 			}
-			println("lnScore: "+lnScore.toList)
+			/*println("lnScore: "+lnScore.toList)
 			lGroupB.zipWithIndex.foreach(pair => {
 				val (gB, i) = pair
-				print((i+1).toString+":\t")
+				//print((i+1).toString+":\t")
 				if (gB == null) println("_")
 				else {
 					val nItems = gB.lItem.size
 					val iItemParent = i - nItems
 					val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)
 					val nScoreTotal = nScoreParent + gB.nScore
-					println(nScoreTotal+"\t"
+					/*println(nScoreTotal+"\t"
 						+(iItemParent+2)+"->"+(i+1)+"\t"
-						+gB.nScore+"\t"+gB.lItem.head.dest)
+						+gB.nScore+"\t"+gB.lItem.head.dest)*/
 				}
 			})
-			//println("lGroupA: "+lGroupA.toList)
-			//println("lGroupB: "+lGroupB.toList)
+			println("lGroupA: "+lGroupA.toList)
+			println("lGroupB: "+lGroupB.toList)
+			*/
 			
 			// Reconstruct the optimal path
-			printPathA(nItems - 1, Nil)
+			//printPathA(nItems - 1, Nil)
 			val lB = getPath(nItems - 1, Nil)
-			lB.foreach(gB => { println("gB:"); println(gB) })
+			//lB.foreach(gB => { println("gB:"); println(gB) })
 			val rB = lB.reverse
 			val lmTipToClean = optimizeCleanSpec(rB, Map(), Nil)
 			//println("lmTipToClean: "+lmTipToClean)
@@ -136,18 +137,18 @@ class PipetteScheduler(
 			lGR
 		}
 		val lG = lGR2.reverse
-		// FIXME: for debug only
-		//if (lG0.length >= 11) {
+		/*// FIXME: for debug only
+		if (lG0.length >= 11) {
 			println("from: "+(iItemParent+2))
 			println("item counts A: "+lG0.map(_.lItem.size))
 			println("item counts B: "+lGR.map(_.lItem.size))
 			println("item counts C: "+lGR2.map(_.lItem.size))
-		//}
-		// ENDFIX
+		}
+		// ENDFIX*/
 		//println("lG:")
 		//println(lG)
-		println("from well: "+lItem.head.dest.index)
-		println("well counts: "+lG.map(_.lItem.size))
+		//println("from well: "+lItem.head.dest.index)
+		//println("well counts: "+lG.map(_.lItem.size))
 
 		val lTipCleanableParent = if (iItemParent < 0) SortedSet[TipConfigL2]() else lGroupB(iItemParent).lTipCleanable
 		val nScoreParent = if (iItemParent < 0) 0 else lnScore(iItemParent)
@@ -339,8 +340,8 @@ class PipetteScheduler(
 			}
 		}
 		
-		println("mTipToClean: "+mTipToClean)
-		println("lWash: "+lWash)
+		//println("mTipToClean: "+mTipToClean)
+		//println("lWash: "+lWash)
 
 		lReplace ++ lWash
 	}

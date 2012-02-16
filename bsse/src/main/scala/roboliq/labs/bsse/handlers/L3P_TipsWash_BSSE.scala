@@ -53,8 +53,8 @@ class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: Plate) extends Co
 		val wellState = well.state(ctx.states)
 		val nVolumeTip = tipModel.nVolume
 		val nVolume = math.min(nVolumeTip, tipState.nContamInsideVolume + nVolumeTip / 10)
-		val policyA_? = device.getAspiratePolicy(tipState, wellState)
-		val policyD_? = device.getDispensePolicy(wellState.liquid, tip, nVolume, wellState.nVolume)
+		val policyA_? = device.getAspiratePolicy(tipState, nVolume, wellState)
+		val policyD_? = device.getDispensePolicy(wellState.liquid, tip, nVolume, wellState)
 		val well1 = wellState.conf
 		(policyA_?, policyD_?) match {
 			case (Some(policyA), Some(policyD)) =>
