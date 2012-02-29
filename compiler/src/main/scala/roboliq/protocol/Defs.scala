@@ -588,7 +588,7 @@ object ValueToObjectMap {
 			}
 		}
 		
-		// Setup well objects with the given liquid
+		// Setup well objects with the given liquid and volume
 		for ((sLiquidKey, lWell) <- ild.mapLiquidKeyToWells) {
 			mapReagents.get(sLiquidKey) match {
 				case None =>
@@ -598,6 +598,7 @@ object ValueToObjectMap {
 						for (wellObj <- getWellObject(well)) {
 							wellObj.setup.sLabel_? = Some("W'"+sLiquidKey)
 							wellObj.setup.reagent_? = Some(reagentObj)
+							well.volume.getValue.foreach(vol => wellObj.setup.nVolume_? = Some(vol.pl / 1000))
 							kb.addWell(wellObj, true)
 						}
 					}

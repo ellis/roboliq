@@ -148,11 +148,12 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 			return None
 
 		val nVolumeSrc = wellState.nVolume
-		val bLarge = (tipState.conf.obj.index < 4)		
+		val bLarge = (tipState.conf.obj.index < 4)
+		val bForceDry = (wellState.bCheckVolume && nVolumeSrc < 20)
 		
 		val sFamily = liquid.sFamily
 		val tipModel = tipState.model_?.get
-		val posDefault = if (nVolumeSrc > 20) WetContact else DryContact
+		val posDefault = if (bForceDry) DryContact else WetContact 
 		//val posDefault = WetContact
 		mapLcInfo.get(tipModel) match {
 			case None =>
@@ -175,7 +176,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 				}
 		}
 		
-		val sPos = if (nVolumeSrc > 20) "Wet" else "Dry"
+		val sPos = if (bForceDry) "Dry" else "Wet"
 		//println("nVolumeSrc: "+nVolumeSrc+", "+sPos)
 		val sTip = if (bLarge) "1000" else "0050"
 		val sName = "Roboliq_"+sFamily+"_"+sPos+"_"+sTip
