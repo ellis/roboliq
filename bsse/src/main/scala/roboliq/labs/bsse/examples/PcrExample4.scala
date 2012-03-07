@@ -32,8 +32,8 @@ class PcrExample4 {
 				buffer.amt1 := LiquidAmountByConc(1)
 				
 				dntp.liquid := refDb("dntp")
-				dntp.amt0 := LiquidAmountByConc(2000) // nM
-				dntp.amt1 := LiquidAmountByConc(200) // nM
+				dntp.amt0 := LiquidAmountByConc(2000) // uM
+				dntp.amt1 := LiquidAmountByConc(200) // uM
 				
 				template.amt0 := LiquidAmountByConc(1) // FIXME: dummy value
 				template.amt1 := LiquidAmountByVolume(LiquidVolume.pl(500))
