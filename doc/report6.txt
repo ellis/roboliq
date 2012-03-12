@@ -1,0 +1,18 @@
+Task 3.3.:
+Developed a low-level, cross-platform language for robot control, and implemented a translator for Tecan Evoware for driving Tecan robots.
+Constructed the alpha version of a high-level language to handle the low-level details of robot control for the user, by translating simple high-level commands into a potentially complex series of low-level commands.
+Designed, performed, debugged, and verified various experiments with pipetting, PCR, and control of peripheral devices such as the sealer, peeler, and centrifuge.
+Task 3.5.:
+Not yet started.
+
+
+-----------------
+
+Task 3.3:
+
+A. Developed a low-level, cross-platform language for robot control, and implemented a translator for Tecan Evoware for driving Tecan robots.
+Constructed the alpha version of a high-level language to handle the low-level details of robot control for the user, by translating simple high-level commands into a potentially complex series of low-level commands. Designed, performed, debugged, and verified various experiments with pipetting, PCR, and control of peripheral devices such as the sealer, peeler, and centrifuge.  No work was begun on on Hamilton Star robots or connecting multiple robots. 
+
+B. Tecan Evoware utilizes various configuration files, some of which are in a format which we can read.  These are now used to determine many aspects of the robot configuration so that the user does not need to specify them.
+
+C. Work has not yet started to make a public release available.

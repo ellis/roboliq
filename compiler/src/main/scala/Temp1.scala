@@ -34,8 +34,8 @@ class Test1 {
 				buffer.amt1 := (1 x)
 				
 				dntp.liquid := refDb("dntp")
-				dntp.amt0 := (2 uM)
-				dntp.amt1 := (0.2 uM)
+				dntp.amt0 := (2 mM)
+				dntp.amt1 := (0.2 mM)
 				
 				template.amt0 := (1 x) // FIXME: dummy value
 				template.amt1 := (0.5 ul)
