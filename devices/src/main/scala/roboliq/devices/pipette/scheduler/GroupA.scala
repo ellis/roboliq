@@ -28,6 +28,7 @@ class GroupA(
 	val mItemToTip: Map[Item, TipConfigL2],
 	val mTipToVolume: Map[TipConfigL2, Double],
 	val mItemToPolicy: Map[Item, PipettePolicy],
+	val mTipToPolicy: Map[TipConfigL2, PipettePolicy],
 	val mTipToCleanSpecA: Map[TipConfigL2, WashSpec],
 	val mTipToCleanSpecPendingA: Map[TipConfigL2, WashSpec],
 	val mTipToCleanSpec: Map[TipConfigL2, WashSpec],
@@ -55,6 +56,7 @@ class GroupA(
 		mItemToTip: Map[Item, TipConfigL2] = mItemToTip,
 		mTipToVolume: Map[TipConfigL2, Double] = mTipToVolume,
 		mItemToPolicy: Map[Item, PipettePolicy] = mItemToPolicy,
+		mTipToPolicy: Map[TipConfigL2, PipettePolicy] = mTipToPolicy,
 		mTipToCleanSpecA: Map[TipConfigL2, WashSpec] = mTipToCleanSpecA,
 		mTipToCleanSpecPendingA: Map[TipConfigL2, WashSpec] = mTipToCleanSpecPendingA,
 		mTipToCleanSpec: Map[TipConfigL2, WashSpec] = mTipToCleanSpec,
@@ -67,7 +69,7 @@ class GroupA(
 		states1: RobotState = states1
 	): GroupA = {
 		new GroupA(mItemToState, mLM, states0, tipBindings0, mTipToCleanSpecPending0, lItem, lLM, mLMToItems, mLMData, mLMTipCounts, mLMToTips, mTipToLM, mItemToTip, mTipToVolume,
-				mItemToPolicy, mTipToCleanSpecA, mTipToCleanSpecPendingA, mTipToCleanSpec, mTipToCleanSpecPending, lDispense, lAspirate, lPremix, lPostmix, bClean,
+				mItemToPolicy, mTipToPolicy, mTipToCleanSpecA, mTipToCleanSpecPendingA, mTipToCleanSpec, mTipToCleanSpecPending, lDispense, lAspirate, lPremix, lPostmix, bClean,
 				states1)
 	}
 	

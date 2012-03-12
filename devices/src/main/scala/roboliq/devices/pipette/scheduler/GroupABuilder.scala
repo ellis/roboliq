@@ -237,7 +237,7 @@ class GroupABuilder(
 		mItemToState: Map[Item, ItemState],
 		mLM: Map[Item, LM]
 	): GroupA = {
-		val groupA0 = new GroupA(mItemToState, mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, Nil, false, states0)
+		val groupA0 = new GroupA(mItemToState, mLM, states0, Map(), Map(), Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, Nil, false, states0)
 		groupA0
 	}
 	
@@ -249,7 +249,7 @@ class GroupABuilder(
 		g0: GroupA
 	): GroupA = {
 		val g = new GroupA(
-			g0.mItemToState, g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, Nil, false, g0.states1
+			g0.mItemToState, g0.mLM, g0.states1, g0.mTipToLM, g0.mTipToCleanSpecPending, Nil, Nil, Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Map(), Nil, Nil, Nil, Nil, false, g0.states1
 		)
 		g
 	}
@@ -546,9 +546,22 @@ class GroupABuilder(
 			item -> policy
 		}
 		
-		GroupSuccess(g0.copy(
-			mItemToPolicy = lItemToPolicy.toMap
-		))
+		// Get a list of policies associated with each tip 
+		val mTipToPolicies: Map[TipConfigL2, Seq[PipettePolicy]]
+			= lItemToPolicy.map(pair => g0.mItemToTip(pair._1) -> pair._2).groupBy(_._1).mapValues(_.map(_._2).distinct)
+		
+		// Each tip should have one unique policy
+		val bUnique = mTipToPolicies.toList.forall(_._2.length == 1)
+		if (bUnique) {
+			val mTipToPolicy = mTipToPolicies.mapValues(l => l(0))
+			GroupSuccess(g0.copy(
+				mItemToPolicy = lItemToPolicy.toMap,
+				mTipToPolicy = mTipToPolicy
+			))
+		}
+		else {
+			GroupStop(g0)
+		}
 	}
 
 	def updateGroupA7_lDispense(g0: GroupA): GroupResult = {
@@ -595,7 +608,7 @@ class GroupABuilder(
 			val ltw = lltw.flatMap(identity)
 			ltw.map(tw => {
 				val nVolume = g0.mTipToVolume(tw.tip)
-				val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), nVolume, tw.well.state(g0.states0))
+				/*val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), nVolume, tw.well.state(g0.states0))
 				// FIXME: for debug only
 				if (policy_?.isEmpty) {
 					println("getAspiratePolicy")
@@ -608,6 +621,8 @@ class GroupABuilder(
 						case Some(p) => p
 					}
 				)
+				*/
+				val policy = g0.mTipToPolicy(tw.tip)
 				// FIXME: for debug only
 				if (!g0.mTipToVolume.contains(tw.tip)) {
 					println("g0: "+g0)
