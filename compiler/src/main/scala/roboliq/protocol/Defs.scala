@@ -20,29 +20,73 @@ case class Route(sClass: String, sKey: String) {
 	def toPair: Tuple2[String, String] = (sClass, sKey)
 }
 
-/** Volume in picoliters */
-class LiquidVolume(val pl: Int) {
+/** Volume in nanoliters */
+class LiquidVolume(val nl: Int) {
 	override def toString = {
-		if (pl > 1000000)
-			(pl / 1000000).toString + " ml"
-		else if (pl > 1000)
-			(pl / 1000).toString + " ul"
+		if (nl > 1000000)
+			(nl / 1000000).toString + " ml"
+		else if (nl > 1000)
+			(nl / 1000).toString + " ul"
 		else
-			pl.toString + " pl"
+			nl.toString + " nl"
 	}
 }
 object LiquidVolume {
-	def pl(n: Int): LiquidVolume = new LiquidVolume(n)
+	def nl(n: Int): LiquidVolume = new LiquidVolume(n)
 	def ul(n: Int): LiquidVolume = new LiquidVolume(n * 1000)
 	def ml(n: Int): LiquidVolume = new LiquidVolume(n * 1000000)
+}
+
+/** Concentration in nanomolars (nM) */
+class LiquidConc(val nM: Int) {
+	override def toString = {
+		if (nM > 1000000)
+			(nM / 1000000).toString + " mM"
+		else if (nM > 1000)
+			(nM / 1000).toString + " uM"
+		else
+			nM.toString + " nM"
+	}
+}
+object LiquidConc {
+	def nM(n: Int): LiquidConc = new LiquidConc(n)
+	def uM(n: Int): LiquidConc = new LiquidConc(n * 1000)
+	def mM(n: Int): LiquidConc = new LiquidConc(n * 1000000)
 }
 
 sealed abstract class LiquidAmount
 case class LiquidAmountByVolume(vol: LiquidVolume) extends LiquidAmount {
 	override def toString = vol.toString 
 }
-case class LiquidAmountByConc(conc: BigDecimal) extends LiquidAmount {
+case class LiquidAmountByConc(conc: LiquidConc) extends LiquidAmount {
 	override def toString = conc.toString
+}
+case class LiquidAmountByFactor(factor: Int) extends LiquidAmount {
+	override def toString = factor.toString+"x"
+}
+
+object LiquidAmountImplicits {
+	class NumberWrapper(val n: BigDecimal) {
+		private def e_9: Int = n.toInt
+		private def e_6: Int = (n * 1000).toInt
+		private def e_3: Int = (n * 1000000).toInt
+		
+		def nl: LiquidVolume = new LiquidVolume(e_9)
+		def ul: LiquidVolume = new LiquidVolume(e_6)
+		def ml: LiquidVolume = new LiquidVolume(e_3)
+
+		def nM: LiquidConc = new LiquidConc(e_9)
+		def uM: LiquidConc = new LiquidConc(e_6)
+		def mM: LiquidConc = new LiquidConc(e_3)
+		
+		def x: LiquidAmountByFactor = LiquidAmountByFactor(n.toInt)
+	}
+
+	implicit def intToWrapper(n: Int): NumberWrapper = new NumberWrapper(n)
+	implicit def doubleToWrapper(n: Double): NumberWrapper = new NumberWrapper(n)
+	
+	implicit def volToAmount(vol: LiquidVolume): LiquidAmountByVolume = new LiquidAmountByVolume(vol)
+	implicit def concToAmount(conc: LiquidConc): LiquidAmountByConc = new LiquidAmountByConc(conc)
 }
 
 /*sealed abstract class WellPointer
@@ -295,6 +339,7 @@ class Well extends Item {
 	val index = new Property[Int]
 	val liquid = new PropertyItem[Liquid]
 	val volume = new Property[LiquidVolume]
+	val conc = new Property[LiquidConc]
 	def properties: List[Property[_]] = List(parent, index, liquid, volume)
 }
 
@@ -316,8 +361,8 @@ object Well {
 
 class Tube extends Item {
 	val liquid = new Property[Liquid]
-	val conc = new Property[PLiquidAmount]
-	val volume = new Property[PLiquidVolume]
+	val volume = new Property[LiquidVolume]
+	val conc = new Property[LiquidConc]
 	def properties: List[Property[_]] = List(liquid, conc, volume)//, location)
 }
 
@@ -598,7 +643,7 @@ object ValueToObjectMap {
 						for (wellObj <- getWellObject(well)) {
 							wellObj.setup.sLabel_? = Some("W'"+sLiquidKey)
 							wellObj.setup.reagent_? = Some(reagentObj)
-							well.volume.getValue.foreach(vol => wellObj.setup.nVolume_? = Some(vol.pl / 1000))
+							well.volume.getValue.foreach(vol => wellObj.setup.nVolume_? = Some(vol.nl / 1000))
 							kb.addWell(wellObj, true)
 						}
 					}

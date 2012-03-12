@@ -84,7 +84,12 @@ class Pcr extends PCommand {
 				case LiquidAmountByVolume(vol1) => Some(vol1)
 				case LiquidAmountByConc(conc1) =>
 					amt0 match {
-						case LiquidAmountByConc(conc0) => Some(LiquidVolume.pl(vol.pl / (conc0 / conc1).toInt))
+						case LiquidAmountByConc(conc0) => Some(LiquidVolume.nl(vol.nl / (conc0.nM.toDouble / conc1.nM).toInt))
+						case _ => None
+					}
+				case LiquidAmountByFactor(factor1) =>
+					amt0 match {
+						case LiquidAmountByFactor(factor0) => Some(LiquidVolume.nl(vol.nl / (factor0.toDouble / factor1).toInt))
 						case _ => None
 					}
 			}
@@ -128,8 +133,8 @@ class Pcr extends PCommand {
 			))
 		} yield {
 			// Before adding water
-			val vol0 = LiquidVolume.pl(lMixItem0.foldLeft(0) {(acc, mixItem5) => acc + mixItem5.vol.pl})
-			val volWater = LiquidVolume.pl(vol.pl - vol0.pl)
+			val vol0 = LiquidVolume.nl(lMixItem0.foldLeft(0) {(acc, mixItem5) => acc + mixItem5.vol.nl})
+			val volWater = LiquidVolume.nl(vol.nl - vol0.nl)
 			val mixItemWater5 = new MixItemL5(srcWater, dest, volWater)
 			mixItemWater5 :: lMixItem0
 		}
@@ -157,7 +162,7 @@ class Pcr extends PCommand {
 				if (llMixItem.isEmpty) return acc
 				val acc2 = acc ++ llMixItem.map(lMixItem => {
 					val mixItem5 = lMixItem.head 
-					new L4A_PipetteItem(mixItem5.src, mixItem5.dest, List(mixItem5.vol.pl / 1000.0), None, None)
+					new L4A_PipetteItem(mixItem5.src, mixItem5.dest, List(mixItem5.vol.nl / 1000.0), None, None)
 				})
 				val llMixItem2 = llMixItem.map(_.tail).filter(!_.isEmpty)
 				mixNext(llMixItem2, acc2)
@@ -167,7 +172,7 @@ class Pcr extends PCommand {
 			
 			val dests = lDest4.reduce(_ + _)
 			
-			val lMixCmd = PipetteCommandsL4.mix(dests, nVolume.pl * 0.75 / 1000.00, 4) match {
+			val lMixCmd = PipetteCommandsL4.mix(dests, nVolume.nl * 0.75 / 1000.00, 4) match {
 				case common.Success(cmd) => List(cmd)
 				case _ => Nil
 			}

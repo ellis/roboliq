@@ -9,6 +9,8 @@ import roboliq.protocol.commands._
 
 
 class PcrExample4 {
+	import LiquidAmountImplicits._
+
 	val l = List(
 		new Pcr {
 			products := List(
@@ -23,30 +25,30 @@ class PcrExample4 {
 				new Product { template := refDb("FRP128"); forwardPrimer := refDb("FRO1259"); backwardPrimer := refDb("FRO1262") },
 				new Product { template := refDb("FRP572"); forwardPrimer := refDb("FRO1261"); backwardPrimer := refDb("FRO114") }
 			)
-			volumes := LiquidVolume.ul(20)
+			volumes := (20 ul)
 			mixSpec := new PcrMixSpec {
 				waterLiquid := refDb("water")
 
 				buffer.liquid := refDb("buffer5x")
-				buffer.amt0 := LiquidAmountByConc(5)
-				buffer.amt1 := LiquidAmountByConc(1)
+				buffer.amt0 := (5 x)
+				buffer.amt1 := (1 x)
 				
 				dntp.liquid := refDb("dntp")
-				dntp.amt0 := LiquidAmountByConc(2000) // nM
-				dntp.amt1 := LiquidAmountByConc(200) // nM
+				dntp.amt0 := (2 uM)
+				dntp.amt1 := (0.2 uM)
 				
-				template.amt0 := LiquidAmountByConc(1) // FIXME: dummy value
-				template.amt1 := LiquidAmountByVolume(LiquidVolume.pl(500))
+				template.amt0 := (1 x) // FIXME: dummy value
+				template.amt1 := (2 ul)
 				
-				forwardPrimer.amt0 := LiquidAmountByConc(100000) // nM
-				forwardPrimer.amt1 := LiquidAmountByConc(500) // nM
+				forwardPrimer.amt0 := (10 uM)
+				forwardPrimer.amt1 := (0.5 uM)
 				
-				backwardPrimer.amt0 := LiquidAmountByConc(100000) // nM
-				backwardPrimer.amt1 := LiquidAmountByConc(500) // nM
+				backwardPrimer.amt0 := (10 uM)
+				backwardPrimer.amt1 := (0.5 uM)
 				
 				polymerase.liquid := refDb("polymerase")
-				polymerase.amt0 := LiquidAmountByConc(200)
-				polymerase.amt1 := LiquidAmountByConc(1)
+				polymerase.amt0 := (10 x)
+				polymerase.amt1 := (1 x)
 			}
 		}
 	)
