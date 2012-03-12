@@ -183,7 +183,9 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		Some(PipettePolicy(sName, posDefault))
 	}
 	
-	val nFreeDispenseVolumeThreshold = 5
+	val nFreeDispense1VolumeThreshold = 20
+	val nFreeDispense2VolumeThreshold = 5
+	val nFreeDispense2DestVolumeThreshold = 20
 	
 	def getDispensePolicy(liquid: Liquid, tip: TipConfigL2, nVolume: Double, wellState: WellStateL2): Option[PipettePolicy] = {
 		import PipettePosition._
@@ -194,8 +196,24 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 		val nVolumeDest = wellState.nVolume
 		
 		val posDefault = {
+			if (bLarge) {
+				if (nVolume >= nFreeDispense1VolumeThreshold)
+					Free
+				else if (nVolumeDest > nFreeDispense2DestVolumeThreshold && nVolume >= nFreeDispense2VolumeThreshold)
+					Free
+				else if (nVolumeDest == 0)
+					DryContact
+				else
+					WetContact
+			}
+			else {
+				if (nVolumeDest == 0)
+					DryContact
+				else
+					WetContact
+			}
 			// If our volume is high enough that we don't need to worry about accuracy
-			if (bLarge && nVolume >= nFreeDispenseVolumeThreshold)
+			if (bLarge && (nVolume >= nFreeDispense1VolumeThreshold || (nVolumeDest > nFreeDispense2DestVolumeThreshold && nVolume >= nFreeDispense2VolumeThreshold)))
 				Free
 			else if (nVolumeDest == 0)
 				DryContact
