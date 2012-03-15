@@ -30,6 +30,36 @@ Current goals:
 	better generation and scoring of cleaning commands
 	use evoware config files to select more things automatically
 
+Feedback:
+	starting example:
+		loop
+			request 8 new PCR wells
+			unseal plate (if sealed)
+			put 50ul of water into each
+			loop
+				add 5ul of color to each well
+				ask user whether to repeat?
+			while user said yes
+			ask user whether to do the same for more wells
+		while use said yes
+		seal plates used
+
+	analysis of above example:
+		loop1:
+			W'well_loop1_1: (50ul water) + loop2*(5ul color)
+			L'water: -400 - extra
+			L'color: -loop2*5 - extra
+
+	execution of above example:
+		step through protocol until end or feedback is required
+		for the above segment of the protocol, add info to knowlegebase
+		choose plates and wells; optionally allow user to override choices
+		bind variables
+		generate L1 tokens (including abstract tokens loops and conditions)
+		pass L1 tokens to the control module, which will need to generate scripts, call them, handle loops, conditions, and some UI
+		
+
+
 Evoware commands:
 x	asperate
 x	dispense
