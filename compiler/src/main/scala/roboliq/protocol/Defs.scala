@@ -311,9 +311,29 @@ class Liquid extends Item {
 	val physical = new Property[String]
 	val cleanPolicy = new Property[String]
 	var contaminants = new Property[String]
+	/** Minimum volume to allow multipipetting */
+	var multipipetteThreshold = new Property[LiquidVolume]
 	var components: List[Sample] = Nil
 
 	def properties: List[Property[_]] = List(physical, cleanPolicy)
+}
+
+object Liquid {
+	def apply(
+		key: String = null,
+		physical: TempValue[String] = TempNull[String],
+		cleanPolicy: TempValue[String] = TempNull[String],
+		contaminants: TempValue[String] = TempNull[String],
+		multipipetteThreshold: TempValue[LiquidVolume] = TempNull[LiquidVolume]
+	): Liquid = {
+		val o = new Liquid
+		o.key = key
+		o.physical.set(physical)
+		o.cleanPolicy.set(cleanPolicy)
+		o.contaminants.set(contaminants)
+		o.multipipetteThreshold.set(multipipetteThreshold)
+		o
+	}
 }
 
 class PlateModel extends Item {

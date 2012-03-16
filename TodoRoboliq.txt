@@ -24,11 +24,34 @@ Big goals:
 	Get roboliq running on the Evoware machine
 
 Current goals:
-	esc: labware on external devices
-	read in evoware config files
+x	esc: labware on external devices
+x	read in evoware config files
 	nice scripts
 	better generation and scoring of cleaning commands
 	use evoware config files to select more things automatically
+
+3	create database
+	make database REST updatable
+	maybe put a web interface on the database
+	scala interface to updating a local sqlite database?
+	add script line to export database after every aspirate/dispense with liquid detection
+	add script line to inform a controlling program about the liquid levels
+	controlling program should read in the exported data and update the database
+	when creating a master mix:
+		get choice of tip model to use for dispense
+		figure out how much liquid needs to be in source well considering extra wasted pipetting volumes
+		decide which plate model to use for mix well
+		figure out how much extra liquid is required for using the mix well
+		calculate how many mix wells are needed
+2	handle tubes
+	handle labware being pre-placed on the table (i.e., fresh plates)
+1	somehow allow for specification that a liquid should not be multi-pipetted if we don't want to waste any of it
+		this needs to be generalized into various pipetting methods which can be disallowed
+	have compiler get liquid class information from the evoware database (extra liquid amounts, whether there is liquid detection)
+	support feedback
+	if we need to aspirate from a well multiple times in a row, try to ensure that there is enough liquid in the well for the final aspiration that it can be detected
+	control program
+	nice scripts
 
 Feedback:
 	starting example:
