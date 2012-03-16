@@ -46,6 +46,7 @@ x	read in evoware config files
 2	handle tubes
 	handle labware being pre-placed on the table (i.e., fresh plates)
 1	somehow allow for specification that a liquid should not be multi-pipetted if we don't want to waste any of it
+		continue at GroupABuilder:updateGroupA1_mLMData, line 280
 		this needs to be generalized into various pipetting methods which can be disallowed
 	have compiler get liquid class information from the evoware database (extra liquid amounts, whether there is liquid detection)
 	support feedback
