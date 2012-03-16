@@ -52,6 +52,7 @@ x	read in evoware config files
 	if we need to aspirate from a well multiple times in a row, try to ensure that there is enough liquid in the well for the final aspiration that it can be detected
 	control program
 	nice scripts
+	use LiquidVolume in place of Double whereever it makes sense
 
 Feedback:
 	starting example:

@@ -22,6 +22,7 @@ case class Route(sClass: String, sKey: String) {
 
 /** Volume in nanoliters */
 class LiquidVolume(val nl: Int) {
+	def ml: Double = (nl / 1000.0)
 	override def toString = {
 		if (nl > 1000000)
 			(nl / 1000000).toString + " ml"
@@ -591,6 +592,7 @@ object ValueToObjectMap {
 			setup.sName_? = Some(liquid.key)
 			setup.sFamily_? = liquid.physical.getValue(ild.valueDb).orElse(Some("Water"))
 			setup.contaminants = liquid.contaminants.getValues(ild.valueDb).map(s => Contaminant.withName(s)).toSet
+			setup.multipipetteThreshold_? = liquid.multipipetteThreshold.getValue(ild.valueDb).map(_.ml)
 			liquid.cleanPolicy.getValue(ild.valueDb) match {
 				case Some(s) =>
 					val cleanPolicy = s match {

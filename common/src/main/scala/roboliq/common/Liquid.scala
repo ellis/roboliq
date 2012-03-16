@@ -68,7 +68,8 @@ class Liquid(
 	var sName: String,
 	val sFamily: String,
 	val contaminants: Set[Contaminant.Value],
-	val group: LiquidGroup
+	val group: LiquidGroup,
+	var multipipetteThreshold: Double
 	//val family: LiquidPropertiesFamily,
 	//val bFreeDispense: Boolean,
 	//val washIntensityBeforeAspirate: WashIntensity.Value,
@@ -103,13 +104,14 @@ class Liquid(
 				sName2,
 				sFamily,
 				contaminants ++ other.contaminants,
-				group2
+				group2,
+				math.min(multipipetteThreshold, other.multipipetteThreshold) 
 			)
 		}
 	}
 	
 	def setGroup(group: LiquidGroup): Liquid = {
-		new Liquid(sName, sFamily, contaminants, group)
+		new Liquid(sName, sFamily, contaminants, group, multipipetteThreshold)
 	}
 	
 	def getName() = if (sName == null) "<unnamed>" else sName
@@ -118,5 +120,5 @@ class Liquid(
 }
 
 object Liquid {
-	val empty = new Liquid("<EMPTY>", "", Set(), new LiquidGroup())
+	val empty = new Liquid("<EMPTY>", "", Set(), new LiquidGroup(), 0.0)
 }

@@ -25,7 +25,8 @@ class Reagent extends Obj { thisObj =>
 				setup.sName_?.get,
 				setup.sFamily_?.get,
 				setup.contaminants,
-				setup.group_?.getOrElse(new LiquidGroup()))
+				setup.group_?.getOrElse(new LiquidGroup()),
+				setup.multipipetteThreshold_?.getOrElse(0.0))
 			
 		val conf = new ReagentConfig(
 				obj = this,
@@ -48,6 +49,7 @@ class ReagentSetup(val obj: Reagent) extends ObjSetup {
 	var sFamily_? : Option[String] = None
 	var contaminants = Set[Contaminant.Value]()
 	var group_? : Option[LiquidGroup] = None
+	var multipipetteThreshold_? : Option[Double] = None
 	
 	override def getLabel(kb: KnowledgeBase): String = {
 		sName_?.getOrElse(toString)
