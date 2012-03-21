@@ -80,40 +80,40 @@ object ExampleRunner {
 	)
 	val lPlateModel = List[PlateModel](
 		new PlateModel { key = "D-BSSE 96 Well PCR Plate"; rows := 8; cols := 12 },
+		new PlateModel { key = "D-BSSE 96 Well DWP"; rows := 8; cols := 12 },
 		new PlateModel { key = "Tube 50ml"; rows := 1; cols := 1 }
 	)
 	val lPlate = List[Plate](
 		//new Plate { key = "T50_water"; model := ("Tube 50ml"); description := ("water") },
-		new Plate { key = "P1"; model := ("D-BSSE 96 Well PCR Plate"); description := ("templates and primers") },
-		new Plate { key = "P2"; model := ("D-BSSE 96 Well PCR Plate"); description := ("buffer and dntp") },
-		new Plate { key = "P3"; model := ("D-BSSE 96 Well PCR Plate"); description := ("polymerase") },
+		new Plate { key = "P1"; model := ("D-BSSE 96 Well PCR Plate"); description := ("templates, primers, polymerase") },
+		new Plate { key = "P2"; model := ("D-BSSE 96 Well DWP"); description := ("buffer, dntp, water") },
 		new Plate { key = "P4"; model := ("D-BSSE 96 Well PCR Plate"); description := ("PCR products"); purpose := ("PCR") }
 	)
 	private implicit def valToTempVal[A](a: A): TempValue[A] = Temp1(a)
 	val lWell = List[Well](
-		Well(parent = TempKey("P1"), index = Temp1(0), liquid = TempKey("FRP332"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(1), liquid = TempKey("FRP337"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(2), liquid = TempKey("FRP128"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(3), liquid = TempKey("FRP572"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(4), liquid = TempKey("FRP222"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(5), liquid = TempKey("FRP446"), volume = LiquidVolume.ul(5)),
+		Well(parent = TempKey("P1"), index = Temp1(0), liquid = TempKey("FRP332"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(1), liquid = TempKey("FRP337"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(2), liquid = TempKey("FRP128"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(3), liquid = TempKey("FRP572"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(4), liquid = TempKey("FRP222"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(5), liquid = TempKey("FRP446"), volume = LiquidVolume.ul(100)),
 		
-		Well(parent = TempKey("P1"), index = Temp1(16), liquid = TempKey("FRO699"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(17), liquid = TempKey("FRO700"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(18), liquid = TempKey("FRO703"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(19), liquid = TempKey("FRO704"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(20), liquid = TempKey("FRO1259"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(21), liquid = TempKey("FRO1260"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(22), liquid = TempKey("FRO1261"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(23), liquid = TempKey("FRO1262"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(24), liquid = TempKey("FRO114"), volume = LiquidVolume.ul(5)),
-		Well(parent = TempKey("P1"), index = Temp1(25), liquid = TempKey("FRO115"), volume = LiquidVolume.ul(5)),
+		Well(parent = TempKey("P1"), index = Temp1(16), liquid = TempKey("FRO699"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(17), liquid = TempKey("FRO700"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(18), liquid = TempKey("FRO703"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(19), liquid = TempKey("FRO704"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(20), liquid = TempKey("FRO1259"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(21), liquid = TempKey("FRO1260"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(22), liquid = TempKey("FRO1261"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(23), liquid = TempKey("FRO1262"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(24), liquid = TempKey("FRO114"), volume = LiquidVolume.ul(100)),
+		Well(parent = TempKey("P1"), index = Temp1(25), liquid = TempKey("FRO115"), volume = LiquidVolume.ul(100)),
 		
-		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("buffer5x"), volume = LiquidVolume.ul(100)),
-		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("dntp"), volume = LiquidVolume.ul(50)),
-		Well(parent = TempKey("P2"), index = Temp1(2), liquid = TempKey("water"), volume = LiquidVolume.ul(100)),
-		
-		Well(parent = TempKey("P3"), index = Temp1(0), liquid = TempKey("polymerase"))
+		Well(parent = TempKey("P1"), index = Temp1(32), liquid = TempKey("polymerase")),
+
+		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("buffer5x"), volume = LiquidVolume.ul(500)),
+		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("dntp"), volume = LiquidVolume.ul(500)),
+		Well(parent = TempKey("P2"), index = Temp1(7), liquid = TempKey("water"), volume = LiquidVolume.ul(500))
 	)
 	val mapTables = Map[String, Map[String, Item]](
 		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
@@ -165,6 +165,7 @@ object ExampleRunner {
 		println("choosePlateLocations:")
 		val mapLocFree = new HashMap[String, List[String]]
 		mapLocFree += "D-BSSE 96 Well PCR Plate" -> List("cooled1", "cooled2", "cooled3", "cooled4", "cooled5")
+		mapLocFree += "D-BSSE 96 Well DWP" -> List("cover", "cooled4", "cooled5")
 		val mapRack = new HashMap[String, List[Int]]
 		mapRack += "Tube 50ml" -> (0 until 8).toList
 		val lPlateToLocation: List[Tuple2[Plate, String]] = lPlate.flatMap(plate => {

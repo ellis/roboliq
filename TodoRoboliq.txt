@@ -30,6 +30,7 @@ x	read in evoware config files
 	better generation and scoring of cleaning commands
 	use evoware config files to select more things automatically
 
+	if initial well volume is available, check to make sure we don't use too much
 3	create database
 	make database REST updatable
 	maybe put a web interface on the database
