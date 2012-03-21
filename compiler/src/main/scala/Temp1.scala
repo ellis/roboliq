@@ -153,6 +153,54 @@ object T {
 	}
 }
 
+object YamlTest {
+	import org.yaml.snakeyaml.Yaml
+	import org.yaml.snakeyaml.constructor.Constructor
+	import scala.collection.mutable.ListBuffer
+	import scala.reflect.BeanProperty
+
+	/**
+	 * With the Snakeyaml Constructor approach shown in the main method,
+	 * this class must have a no-args constructor.
+	 */
+	class EmailAccount {
+		@BeanProperty var accountName: String = null
+		@BeanProperty var username: String = null
+		@BeanProperty var password: String = null
+		@BeanProperty var mailbox: String = null
+		@BeanProperty var imapServerUrl: String = null
+		@BeanProperty var minutesBetweenChecks: Int = 0
+		@BeanProperty var protocol: String = null
+		@BeanProperty var usersOfInterest = new java.util.ArrayList[String]()
+
+		override def toString: String = {
+			return String.format("acct (%s), user (%s), url (%s)", accountName, username, imapServerUrl)
+		}
+	}
+
+	object YamlBeanTest1 {
+
+		val text = """
+accountName: Ymail Account
+username: USERNAME
+password: PASSWORD
+mailbox: INBOX
+imapServerUrl: imap.mail.yahoo.com
+protocol: imaps
+minutesBetweenChecks: 1
+usersOfInterest: [barney, betty, wilma]
+"""
+
+		def run {
+			val yaml = new Yaml(new Constructor(classOf[EmailAccount]))
+			val e = yaml.load(text).asInstanceOf[EmailAccount]
+			println(e)
+		}
+
+	}
+}
+
 object Main extends App {
-	T.run
+	//T.run
+	YamlTest.YamlBeanTest1.run
 }
