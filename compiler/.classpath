@@ -7,6 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A2-commands"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A1-common"/>
-	<classpathentry kind="lib" path="/Users/ellisw/src/roboliq/lib/snakeyaml-1.10.jar"/>
+	<classpathentry kind="lib" path="lib/snakeyaml-1.10.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
