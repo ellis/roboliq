@@ -4,13 +4,13 @@ import scala.collection.immutable.SortedSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.PriorityQueue
-
 import roboliq.common._
 import roboliq.commands._
 import roboliq.commands.pipette._
 import roboliq.commands.pipette.{L3A_PipetteItem => Item}
 import roboliq.compiler._
 import roboliq.devices.pipette._
+import java.io.FileWriter
 
 
 class PipetteScheduler(
@@ -27,9 +27,13 @@ class PipetteScheduler(
 	case class Score(iItem: Int, nPathCost: Double, nTotalCostMin: Double)
 	private val queue = new PriorityQueue[Score]()(ScoreOrdering)
 	
+	private val fw = new FileWriter("PipetteScheduler.txt", false)//true)
+	fw.write(cmd.toDebugString)
+	fw.write("\n")
+	
 	def x(): Result[Seq[Command]] = {
 		val states = new StateBuilder(ctx.states)
-		for {
+		val res = for {
 			items0 <- builderA.filterItems(cmd.args.items)
 			mItemToState0 = builderA.getItemStates(items0)
 			pair <- builderA.tr1Items(items0, mItemToState0)
@@ -79,6 +83,7 @@ class PipetteScheduler(
 			*/
 			
 			// Reconstruct the optimal path
+			logPathA(nItems - 1, Nil)
 			//printPathA(nItems - 1, Nil)
 			val lB = getPath(nItems - 1, Nil)
 			//lB.foreach(gB => { println("gB:"); println(gB) })
@@ -92,6 +97,8 @@ class PipetteScheduler(
 			val lCommand = getCommands(lClean, lB, lGroupA.last.states1)
 			lCommand
 		}
+		fw.close()
+		res
 	}
 	
 	private def x1(lItem: List[Item], mItemToState: Map[Item, ItemState], mLM: Map[Item, LM], iItemParent: Int) {
@@ -105,7 +112,7 @@ class PipetteScheduler(
 			}
 		}
 
-		val lG0 = x2R(lItem, List(g0)).reverse.tail // First one discarded because it's the empty g0
+		val lG0 = x2R(lItem, iItemParent, List(g0)).reverse.tail // First one discarded because it's the empty g0
 		val lGR = filterGroupAsR(lG0, Nil)
 		// Remove last group if its last item is in a different column than the second-to-last and in the same column as the next pending item
 		val lGR2 = if (!lGR.isEmpty) {
@@ -159,6 +166,7 @@ class PipetteScheduler(
 				case Success(gB) =>
 					val nScore = nScoreParent + gB.nScore
 					val iItem = iItemParent + g.lItem.size
+					fw.write("SCORE: "+iItem.toString+": "+iItemParent+"+"+g.lItem.size+"\t+"+gB.nScore+" -> "+nScore+"\n")
 					if (lnScore(iItem) == 0 || nScore <= lnScore(iItem)) {
 						val nItemsAfter = nItemsRemaining - g.lItem.size
 						lnScore(iItem) = nScore
@@ -184,20 +192,32 @@ class PipetteScheduler(
 		}
 	}
 	
-	private def x2R(lItem: List[Item], acc: List[GroupA]): List[GroupA] = lItem match {
+	private def x2R(lItem: List[Item], iItemParent: Int, acc: List[GroupA]): List[GroupA] = lItem match {
 		case Nil => acc
 		case item :: rest =>
+			val iItem = iItemParent + acc.length + 1
+			// FIXME: for debug only
+			if (iItemParent == 23 && iItem == 27) {
+				iItemParent.toString()
+			}
+			// ENDIF
+			fw.write(item.toString()+"\n")
 			builderA.addItemToGroup(acc.head, item) match {
 				case err: builderA.GroupError =>
 					println("Error in x2R:")
 					println(err)
+					fw.write("error: "+err.lsError+"\n\n")
 					acc
 				case stop: builderA.GroupStop =>
+					fw.write("stop: "+stop.sReason+"\n")
+					fw.write(stop.groupA.toString+"\n\n")
 					//println("stop:"+stop);
 					//println("prev:"+acc.head)
 					acc
 				case builderA.GroupSuccess(g) =>
-					x2R(rest, g :: acc)
+					fw.write("GROUP: "+iItemParent+" >-< "+g.lItem.size+" = @"+(iItemParent+g.lItem.size)+"\n")
+					fw.write(g.toString()+"\n\n")
+					x2R(rest, iItemParent, g :: acc)
 			}
 	}
 	
@@ -248,6 +268,20 @@ class PipetteScheduler(
 			}
 			else
 				getPath(iItem - gB.lItem.size, gB :: acc)
+		}
+	}
+	
+	private def logPathA(iItem: Int, acc: List[Int]) {
+		if (iItem < 0) {
+			acc.foreach(i => fw.write("PATH: "+i+"\n"))
+		}
+		else {
+			val gA = lGroupA(iItem)
+			if (gA == null) {
+				println("lGroupA("+iItem+") == null")
+			}
+			else
+				logPathA(iItem - gA.lItem.size, iItem :: acc)
 		}
 	}
 	

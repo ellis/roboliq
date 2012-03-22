@@ -1,4 +1,4 @@
-package roboliq.test.bsse
+/*package roboliq.test.bsse
 
 import roboliq.common
 import roboliq.common.WellIndex
@@ -84,3 +84,4 @@ Dispense(3,"Roboliq_Water_Air_1000","30","30",0,0,0,0,0,0,0,0,0,0,17,0,1,"0C0806
 Subroutine("C:\Program Files\TECAN\EVOware\database\Scripts\Decontamination_WashBigTips.esc",0);
 Subroutine("C:\Program Files\TECAN\EVOware\database\Scripts\Decontamination_WashSmallTips.esc",0);"""
 }
+*/

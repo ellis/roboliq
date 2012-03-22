@@ -1,4 +1,4 @@
-package roboliq.test.bsse
+/*package roboliq.test.bsse
 
 import org.scalatest.FeatureSpec
 import org.scalatest.GivenWhenThen
@@ -42,3 +42,4 @@ class BsseRobotSpec extends FeatureSpec with GivenWhenThen with ShouldMatchers w
 		res1.isRight must be === true
 	}
 }
+*/

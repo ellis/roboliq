@@ -225,7 +225,7 @@ class GroupABuilder(
 		def map(f: GroupA => GroupA): GroupResult = GroupSuccess(f(groupA))
 		override def isSuccess: Boolean = true
 	}
-	case class GroupStop(groupA: GroupA) extends GroupResult {
+	case class GroupStop(groupA: GroupA, sReason: String) extends GroupResult {
 		def flatMap(f: GroupA => GroupResult): GroupResult = this
 		def map(f: GroupA => GroupA): GroupResult = this
 		override def isStop: Boolean = true
@@ -280,7 +280,7 @@ class GroupABuilder(
 	def updateGroupA1_mLMData(item: Item)(g0: GroupA): GroupResult = {
 		// if a source of item is in the list of previous destinations, return GroupStop(g0)
 		if (item.srcs.exists(src => g0.lItem.exists(item => item.dest eq src))) {
-			return GroupStop(g0)
+			return GroupStop(g0, "Item source is in list of previous destinations")
 		}
 		
 		//println("updateGroupA1_mLMData: "+L3A_PipetteItem.toDebugString(item) + ", "+g0.lItem)
@@ -304,10 +304,17 @@ class GroupABuilder(
 					Seq().head
 				}
 				// ENDFIX*/
-				if (data.nVolumeCurrent == 0)
+				// If multipipetting is not allowed, use a new tip
+				// FIXME: consider the total volume to be dispensed instead
+				if (lm.liquid.multipipetteThreshold > 0)
+					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
+				// HUH? What's this? -- ellis, 2012-03-22
+				else if (data.nVolumeCurrent == 0)
 					LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
+				// If new volume does not exceed tip capacity
 				else if (nVolumeCurrent <= lm.tipModel.nVolume)
 					LMData(data.nTips, nVolumeTotal, nVolumeCurrent)
+				// Otherwise use a new tip
 				else
 					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
 		}
@@ -387,7 +394,7 @@ class GroupABuilder(
 		// if no successful counts were found, call chooseTips() again, but with no tipBindings0 and indicate on return that a cleaning was required
 		if (nAdd < 0) {
 			if (g0.tipBindings0.isEmpty)
-				GroupStop(g0)
+				GroupStop(g0, "Unable to allocate tips")
 			else
 				updateGroupA2_mLMTipCounts(g0.copy(tipBindings0 = Map(), bClean = true))
 		}
@@ -485,12 +492,24 @@ class GroupABuilder(
 				val item = mDestToItems(tw.well).head
 				val lm = g0.mLM(item)
 				val nVolumeTip = nVolumeTip0 + item.nVolume
-				if (nVolumeTip <= lm.tipModel.nVolume) {
-					mTipToVolume(tw.tip) = nVolumeTip
-					true
+				// If multipipetting is allowed:
+				if (lm.liquid.multipipetteThreshold == 0) {
+					if (nVolumeTip <= lm.tipModel.nVolume) {
+						mTipToVolume(tw.tip) = nVolumeTip
+						true
+					}
+					else {
+						false
+					}
 				}
 				else {
-					false
+					if (nVolumeTip0 == 0.0) {
+						mTipToVolume(tw.tip) = nVolumeTip
+						true
+					}
+					else {
+						false
+					}
 				}
 			})
 			val lTip2 = lTip -- ltw.map(_.tip)
@@ -560,7 +579,7 @@ class GroupABuilder(
 			))
 		}
 		else {
-			GroupStop(g0)
+			GroupStop(g0, "New policy required for tip")
 		}
 	}
 
@@ -607,6 +626,15 @@ class GroupABuilder(
 			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
 			val ltw = lltw.flatMap(identity)
 			ltw.map(tw => {
+				// FIXME: for debug only
+				if (!g0.mTipToVolume.contains(tw.tip)) {
+					println("g0: "+g0)
+					println("tips: "+g0.mTipToVolume)
+					println("mItemToTip: "+g0.mItemToTip)
+					println("lItem: "+lItem)
+					println("ltw: "+ltw)
+				}
+				// ENDFIX
 				val nVolume = g0.mTipToVolume(tw.tip)
 				/*val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), nVolume, tw.well.state(g0.states0))
 				// FIXME: for debug only
@@ -623,14 +651,6 @@ class GroupABuilder(
 				)
 				*/
 				val policy = g0.mTipToPolicy(tw.tip)
-				// FIXME: for debug only
-				if (!g0.mTipToVolume.contains(tw.tip)) {
-					println("g0: "+g0)
-					println("tips: "+g0.mTipToVolume)
-					println("lItem: "+lItem)
-					println("ltw: "+ltw)
-				}
-				// ENDFIX
 				new TipWellVolumePolicy(tw.tip, tw.well, nVolume, policy)
 			})
 		})
@@ -693,7 +713,7 @@ class GroupABuilder(
 						if (!lLiquidGroup0.contains(liquidDest.group)) {
 							// TODO: allow for override via tipOverrides
 							// i.e. if overridden, set mTipToIntensity(tip) to max of two intensities
-							return GroupStop(g0)
+							return GroupStop(g0, "can only dispense into one liquid group")
 						}
 				}
 			}

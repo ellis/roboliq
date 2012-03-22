@@ -9,7 +9,7 @@ import roboliq.robots.evoware._
 import station1._
 
 
-object Main extends App {
+object BsseMain extends App {
 	val sHome = System.getProperty("user.home")
 	val configFile = new EvowareConfigFile(sHome+"/tmp/tecan/carrier.cfg")
 	val station = new StationConfig(configFile, sHome+"/src/roboliq/ellis_pcr1_corrected.esc")
