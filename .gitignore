@@ -1,8 +1,8 @@
 *~
 *.swp
 .cache
-example*.esc
-test*.esc
+*.esc
+locations.txt
 # sbt
 target
 project/boot/
