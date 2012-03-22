@@ -111,10 +111,10 @@ object ExampleRunner {
 		Well(parent = TempKey("P1"), index = Temp1(27), liquid = TempKey("FRO1262"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(28), liquid = TempKey("FRO1329"), volume = LiquidVolume.ul(100)),
 		
-		Well(parent = TempKey("P1"), index = Temp1(32), liquid = TempKey("polymerase")),
+		Well(parent = TempKey("P1"), index = Temp1(7), liquid = TempKey("polymerase")),
 
-		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("buffer5x"), volume = LiquidVolume.ul(500)),
-		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("dntp"), volume = LiquidVolume.ul(500)),
+		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("dntp"), volume = LiquidVolume.ul(500)),
+		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("buffer5x"), volume = LiquidVolume.ul(500)),
 		Well(parent = TempKey("P2"), index = Temp1(7), liquid = TempKey("water"), volume = LiquidVolume.ul(500))
 	)
 	val mapTables = Map[String, Map[String, Item]](
