@@ -1,4 +1,54 @@
-http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structures
+Prelude> let mw=14413.4
+Prelude> m/mw
+5.455964588507916e-2
+Prelude> m/mw/1e6
+5.455964588507916e-8
+Prelude> m/mw/1e6*1e9
+54.55964588507916
+Prelude> mol = m/mw/1e6
+
+<interactive>:1:5: parse error on input `='
+Prelude> let mol = m/mw/1e6
+Prelude> let v = mol/100e-6
+Prelude> v
+5.455964588507916e-4
+Prelude> MW
+
+<interactive>:1:1: Not in scope: data constructor `MW'
+Prelude> mw
+14413.4
+Prelude> m
+786.39
+Prelude> let m = 786.39e-6
+Prelude> let n = m/mw
+Prelude> n
+5.455964588507916e-8
+Prelude> let conc=100e-6
+Prelude> let v = n/conc
+Prelude> v
+5.455964588507916e-4
+Prelude> v*1e6
+545.5964588507917
+Prelude> let conc=1e-1
+Prelude> let v = n/conc
+Prelude> v
+5.455964588507916e-7
+Prelude> v*1e6
+0.5455964588507917
+Prelude> let conc=1e-3
+Prelude> let v = n/conc
+Prelude> v*1e6
+54.55964588507916
+Prelude> n/250e-6
+2.1823858354031665e-4
+Prelude> n/250e-6*1e6
+218.23858354031665
+Prelude> n/300e-6*1e6
+181.86548628359722
+Prelude> 
+
+
+	http://stackoverflow.com/questions/3900307/cleaner-way-to-update-nested-structures
 
 James Meridith: API for Evoware
 

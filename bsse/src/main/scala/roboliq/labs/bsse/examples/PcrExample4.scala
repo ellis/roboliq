@@ -25,7 +25,7 @@ class PcrExample4 {
 				new Product { template := refDb("FRP128"); forwardPrimer := refDb("FRO1259"); backwardPrimer := refDb("FRO1262") },
 				new Product { template := refDb("FRP572"); forwardPrimer := refDb("FRO1261"); backwardPrimer := refDb("FRO114") }
 			)
-			volumes := (20 ul)
+			volumes := (30 ul)
 			mixSpec := new PcrMixSpec {
 				waterLiquid := refDb("water")
 
@@ -38,7 +38,7 @@ class PcrExample4 {
 				dntp.amt1 := (0.2 mM)
 				
 				template.amt0 := (1 x) // FIXME: dummy value
-				template.amt1 := (2 ul)
+				template.amt1 := (3 ul)
 				
 				forwardPrimer.amt0 := (10 uM)
 				forwardPrimer.amt1 := (0.5 uM)
@@ -46,7 +46,7 @@ class PcrExample4 {
 				backwardPrimer.amt0 := (10 uM)
 				backwardPrimer.amt1 := (0.5 uM)
 				
-				polymerase.liquid := refDb("polymerase")
+				polymerase.liquid := refDb("phus-diluted")
 				polymerase.amt0 := (10 x)
 				polymerase.amt1 := (1 x)
 			}
@@ -63,6 +63,7 @@ object ExampleRunner {
 		Liquid(key = "buffer5x", cleanPolicy = ("TNT")),
 		Liquid(key = "dntp", cleanPolicy = ("TNT")),
 		Liquid(key = "polymerase", physical = ("Glycerol"), cleanPolicy = ("TNT"), multipipetteThreshold = 1000.ul),
+		Liquid(key = "phus-diluted", cleanPolicy = ("TNT"), multipipetteThreshold = 1000.ul),
 		Liquid(key = "FRO114", cleanPolicy = ("DDD"), contaminants = ("DNA"), multipipetteThreshold = 1000.ul),
 		Liquid(key = "FRO115", cleanPolicy = ("DDD"), contaminants = ("DNA"), multipipetteThreshold = 1000.ul),
 		Liquid(key = "FRO699", cleanPolicy = ("DDD"), contaminants = ("DNA"), multipipetteThreshold = 1000.ul),
@@ -100,6 +101,8 @@ object ExampleRunner {
 		Well(parent = TempKey("P1"), index = Temp1(4), liquid = TempKey("FRP446"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(5), liquid = TempKey("FRP572"), volume = LiquidVolume.ul(100)),
 		
+		Well(parent = TempKey("P1"), index = Temp1(7), liquid = TempKey("phus-diluted")),
+		
 		Well(parent = TempKey("P1"), index = Temp1(16), liquid = TempKey("FRO114"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(17), liquid = TempKey("FRO115"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(18), liquid = TempKey("FRO699"), volume = LiquidVolume.ul(100)),
@@ -112,12 +115,19 @@ object ExampleRunner {
 		Well(parent = TempKey("P1"), index = Temp1(26), liquid = TempKey("FRO1261"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(27), liquid = TempKey("FRO1262"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(28), liquid = TempKey("FRO1329"), volume = LiquidVolume.ul(100)),
-		
-		Well(parent = TempKey("P1"), index = Temp1(7), liquid = TempKey("polymerase")),
 
 		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("dntp"), volume = LiquidVolume.ul(500)),
 		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("buffer5x"), volume = LiquidVolume.ul(500)),
-		Well(parent = TempKey("P2"), index = Temp1(7), liquid = TempKey("water"), volume = LiquidVolume.ul(500))
+		Well(parent = TempKey("P2"), index = Temp1(7), liquid = TempKey("water"), volume = LiquidVolume.ul(500)),
+
+		Well(parent = TempKey("P4"), index = Temp1(0)),
+		Well(parent = TempKey("P4"), index = Temp1(1)),
+		Well(parent = TempKey("P4"), index = Temp1(2)),
+		Well(parent = TempKey("P4"), index = Temp1(3)),
+		Well(parent = TempKey("P4"), index = Temp1(4)),
+		Well(parent = TempKey("P4"), index = Temp1(5)),
+		Well(parent = TempKey("P4"), index = Temp1(6)),
+		Well(parent = TempKey("P4"), index = Temp1(7))
 	)
 	val mapTables = Map[String, Map[String, Item]](
 		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
