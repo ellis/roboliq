@@ -11,6 +11,8 @@ import roboliq.protocol.commands._
 class PrimerTest1 {
 	private val df = new DecimalFormat("00")
 	
+	"E2215"
+	
 	private def combine(sTemplateKey: String, s1a: Int, s1b: Int, s2a: Int, s2b: Int): List[PcrProduct] = {
 		val lProduct = (for (i1 <- s1a to s1b; i2 <- s2a to s2b) yield {
 			val product = new PcrProduct

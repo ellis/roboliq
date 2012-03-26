@@ -198,9 +198,19 @@ usersOfInterest: [barney, betty, wilma]
 		}
 
 	}
+	
+	def testfile() {
+		val s = scala.io.Source.fromFile("database1.yaml").mkString
+		val yaml = new Yaml
+		val o = yaml.load(s)
+		println(o)
+		println()
+		println(yaml.dump(o))
+	}
 }
 
 object Main extends App {
 	//T.run
-	YamlTest.YamlBeanTest1.run
+	//YamlTest.YamlBeanTest1.run
+	YamlTest.testfile()
 }

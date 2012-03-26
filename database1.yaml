@@ -1,0 +1,20 @@
+liquidClass:
+  water: { cleanPolicy: TNL }
+  default: { cleanPolicy: T }
+  glycerol: { physical: Glycerol, cleanPolicy: T }
+  polymerase: { physical: Glycerol, cleanPolicy: T, multipepetteThreshold: 1000 ul }
+  oligo: { cleanPolicy: D, contaminants: DNA, multipepetteThreshold: 1000 ul }
+
+plateModel:
+  "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12 }
+  "D-BSSE 96 Well DWP": { rows: 8, cols: 12 }
+  "Tube 50ml": { rows: 1, cols: 1 }
+
+plate:
+  P1: { model: "D-BSSE 96 Well PCR Plate", description: "templates, primers, polymerase" }
+  P2: { model: "D-BSSE 96 Well DWP", description: "buffer, dntp, water" }
+  P4: { model: "D-BSSE 96 Well PCR Plate", description: "PCR products", purpose: PCR }
+
+well:
+  P1:
+    - { liquid: FRP128, liquidClass: oligo, volume: 100 ul }
