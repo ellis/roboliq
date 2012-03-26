@@ -240,6 +240,10 @@ class PcrProduct extends Item {
 	val forwardPrimer = new PropertyItem[Liquid]
 	val backwardPrimer = new PropertyItem[Liquid]
 	def properties: List[Property[_]] = List(template, forwardPrimer, backwardPrimer)
+	
+	override def toString: String = {
+		"PcrProduct(template="+template.toContentString+", forwardPrimer="+forwardPrimer.toContentString+", backwardPrimer="+backwardPrimer.toContentString+")"  
+	}
 }
 
 class PcrMixSpecItem {
