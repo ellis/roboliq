@@ -10,6 +10,9 @@ plateModel:
   "D-BSSE 96 Well DWP": { rows: 8, cols: 12 }
   "Tube 50ml": { rows: 1, cols: 1 }
 
+plasmid:
+  FRP714: 
+
 plate:
   P1: { model: "D-BSSE 96 Well PCR Plate", description: "templates, primers, polymerase" }
   P2: { model: "D-BSSE 96 Well DWP", description: "buffer, dntp, water" }
