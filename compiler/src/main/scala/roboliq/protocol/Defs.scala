@@ -412,6 +412,7 @@ object ItemListData {
 }
 
 trait ItemDatabase {
+	val lPlate: List[Plate]
 	def lookupItem(pair: Tuple2[String, String]): Option[Item]
 	def lookupItem(route: Route): Option[Item] = lookupItem(route.toPair)
 	def lookup[A](pair: Tuple2[String, String]): Option[A]

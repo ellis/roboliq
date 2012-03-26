@@ -84,7 +84,7 @@ object T {
 		new PlateModel { key = "D-BSSE 96 Well PCR Plate"; rows := 8; cols := 12 },
 		new PlateModel { key = "Tube 50ml"; rows := 1; cols := 1 }
 	)
-	val lPlate = List[Plate](
+	val lPlate0 = List[Plate](
 		new Plate { key = "T50_water"; model := ("Tube 50ml"); description := ("water") },
 		new Plate { key = "P1"; model := ("D-BSSE 96 Well PCR Plate"); description := ("templates and primers") },
 		new Plate { key = "P2"; model := ("D-BSSE 96 Well PCR Plate"); description := ("buffer and dntp") },
@@ -108,7 +108,7 @@ object T {
 	val mapTables = Map[String, Map[String, Item]](
 		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
 		"PlateModel" -> lPlateModel.map(o => o.key -> o).toMap,
-		"Plate" -> lPlate.map(o => o.key -> o).toMap,
+		"Plate" -> lPlate0.map(o => o.key -> o).toMap,
 		"Well" -> lWell.map(o => o.key -> o).toMap
 	)
 	val mapClassToTable = Map[String, String](
@@ -116,6 +116,8 @@ object T {
 	)
 	
 	class TestDatabase extends ItemDatabase {
+		val lPlate = lPlate0
+		
 		def lookupItem(pair: Tuple2[String, String]): Option[Item] = {
 			val sTable = mapClassToTable.getOrElse(pair._1, pair._1)
 			for {

@@ -1,11 +1,12 @@
 package roboliq.utils
 
+import java.io.File
+
 object FileUtils {
-	/*
-	def writeToFile(fileName:String, data:String) = 
-		using (new FileWriter(fileName)) {
-		fileWriter => fileWriter.write(data)
+	def writeToFile(fileName: String, data: String) {
+		printToFile(new File(fileName))(p => p.print(data))
 	}
+	/*
 	def appendToFile(fileName:String, textData:String) =
 		using (new FileWriter(fileName, true)){ 
 		fileWriter => using (new PrintWriter(fileWriter)) {

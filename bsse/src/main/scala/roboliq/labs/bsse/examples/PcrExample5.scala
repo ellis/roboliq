@@ -8,7 +8,7 @@ import roboliq.protocol._
 import roboliq.protocol.commands._
 
 
-class PcrExample4 {
+class PcrExample5 {
 	import LiquidAmountImplicits._
 
 	val l = List(
@@ -29,8 +29,8 @@ class PcrExample4 {
 			mixSpec := new PcrMixSpec {
 				waterLiquid := refDb("water")
 
-				buffer.liquid := refDb("buffer5x")
-				buffer.amt0 := (5 x)
+				buffer.liquid := refDb("buffer10x")
+				buffer.amt0 := (10 x)
 				buffer.amt1 := (1 x)
 				
 				dntp.liquid := refDb("dntp")
@@ -46,7 +46,7 @@ class PcrExample4 {
 				backwardPrimer.amt0 := (10 uM)
 				backwardPrimer.amt1 := (0.5 uM)
 				
-				polymerase.liquid := refDb("phus-diluted")
+				polymerase.liquid := refDb("taq-diluted")
 				polymerase.amt0 := (10 x)
 				polymerase.amt1 := (1 x)
 			}
@@ -54,8 +54,7 @@ class PcrExample4 {
 	)
 }
 
-//object ExampleRunner {
-object PcrExample4Database {
+object PcrExample5Database {
 	import LiquidAmountImplicits._
 	
 	val lLiquid = List[Liquid](
@@ -64,6 +63,7 @@ object PcrExample4Database {
 		Liquid(key = "buffer5x", cleanPolicy = ("TNT")),
 		Liquid(key = "dntp", cleanPolicy = ("TNT")),
 		Liquid(key = "polymerase", physical = ("Glycerol"), cleanPolicy = ("TNT"), multipipetteThreshold = 1000.ul),
+		Liquid(key = "taq-diluted", cleanPolicy = ("TNT"), multipipetteThreshold = 1000.ul),
 		Liquid(key = "phus-diluted", cleanPolicy = ("TNT"), multipipetteThreshold = 1000.ul),
 		Liquid(key = "FRO114", cleanPolicy = ("DDD"), contaminants = ("DNA"), multipipetteThreshold = 1000.ul),
 		Liquid(key = "FRO115", cleanPolicy = ("DDD"), contaminants = ("DNA"), multipipetteThreshold = 1000.ul),
@@ -104,6 +104,8 @@ object PcrExample4Database {
 		
 		Well(parent = TempKey("P1"), index = Temp1(7), liquid = TempKey("phus-diluted")),
 		
+		Well(parent = TempKey("P1"), index = Temp1(15), liquid = TempKey("taq-diluted")),
+		
 		Well(parent = TempKey("P1"), index = Temp1(16), liquid = TempKey("FRO114"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(17), liquid = TempKey("FRO115"), volume = LiquidVolume.ul(100)),
 		Well(parent = TempKey("P1"), index = Temp1(18), liquid = TempKey("FRO699"), volume = LiquidVolume.ul(100)),
@@ -119,6 +121,7 @@ object PcrExample4Database {
 
 		Well(parent = TempKey("P2"), index = Temp1(0), liquid = TempKey("dntp"), volume = LiquidVolume.ul(500)),
 		Well(parent = TempKey("P2"), index = Temp1(1), liquid = TempKey("buffer5x"), volume = LiquidVolume.ul(500)),
+		Well(parent = TempKey("P2"), index = Temp1(2), liquid = TempKey("buffer10x"), volume = LiquidVolume.ul(500)),
 		Well(parent = TempKey("P2"), index = Temp1(7), liquid = TempKey("water"), volume = LiquidVolume.ul(500)),
 
 		Well(parent = TempKey("P4"), index = Temp1(0)),
@@ -128,7 +131,16 @@ object PcrExample4Database {
 		Well(parent = TempKey("P4"), index = Temp1(4)),
 		Well(parent = TempKey("P4"), index = Temp1(5)),
 		Well(parent = TempKey("P4"), index = Temp1(6)),
-		Well(parent = TempKey("P4"), index = Temp1(7))
+		Well(parent = TempKey("P4"), index = Temp1(7)),
+
+		Well(parent = TempKey("P4"), index = Temp1(8)),
+		Well(parent = TempKey("P4"), index = Temp1(9)),
+		Well(parent = TempKey("P4"), index = Temp1(10)),
+		Well(parent = TempKey("P4"), index = Temp1(11)),
+		Well(parent = TempKey("P4"), index = Temp1(12)),
+		Well(parent = TempKey("P4"), index = Temp1(13)),
+		Well(parent = TempKey("P4"), index = Temp1(14)),
+		Well(parent = TempKey("P4"), index = Temp1(15))
 	)
 	val mapTables = Map[String, Map[String, Item]](
 		"Liquid" -> lLiquid.map(liquid => liquid.key -> liquid).toMap,
@@ -171,10 +183,3 @@ object PcrExample4Database {
 	
 	val db = new TestDatabase
 }
-
-/*
-object Main extends App {
-	example4
-	ExampleRunner.run
-}
-*/
