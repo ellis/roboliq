@@ -24,6 +24,7 @@ class Pcr extends PCommand {
 		m_pools
 	}
 	
+	/** Change a list of options to an option of a list.  Only succeed if all items are defined. */
 	def invert[A](l: List[Option[A]]): Option[List[A]] = {
 		if (l.forall(_.isDefined)) Some(l.flatten)
 		else None

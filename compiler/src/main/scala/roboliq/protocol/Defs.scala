@@ -196,6 +196,11 @@ class Property[A](implicit m: Manifest[A]) {
 	def getValue(db: ValueDatabase): Option[A] = getValue(Some(db))
 	def getValue: Option[A] = getValue(None)
 	def getValues(db: ValueDatabase): List[A] = getValues(Some(db))
+	def getValues_?(db: ValueDatabase): Option[List[A]] = {
+		val l = values.map(_.getValues(Some(db)))
+		if (l.forall(!_.isEmpty)) Some(l.flatten)
+		else None
+	}
 	
 	def valueEquals(a: A, db_? : Option[ValueDatabase]): Boolean = (getValue(db_?) == Some(a))
 

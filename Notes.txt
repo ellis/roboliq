@@ -537,3 +537,6 @@ Rotem_Script01.esc:
 Rotem_Script03.esc:
 	DIST_REAGENT2 PHOS_MIX P13:A1+69 PHOS_MIX_LIST PIE_AUTBOT TIPTYPE:200,TIPMODE:KEEPTIP
 	replaces tips every second dispense, despite KEEPTIP
+
+Invitrogen:
+	awk -F , '{print "    " $3 ": {contents: [add: {oligo: " $6 ", amount: " $16 " nmol}]}"}' 059662.csv

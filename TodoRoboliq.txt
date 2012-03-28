@@ -56,6 +56,10 @@ Prelude>
 
 James Meridith: API for Evoware
 
+Fabian:
+	besides primers, what else will go in the oligo database?
+	what term should be used for dry substances?  "powder"?
+	is there a specific term for dilution of powder?
 
 Evoware people:
 

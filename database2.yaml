@@ -1,0 +1,71 @@
+#liquidClass:
+#  water: { cleanPolicy: TNL }
+#  default: { cleanPolicy: T }
+#  glycerol: { physical: Glycerol, cleanPolicy: T }
+#  polymerase: { physical: Glycerol, cleanPolicy: T, multipepetteThreshold: 1000 ul }
+#  oligo: { cleanPolicy: D, contaminants: DNA, multipepetteThreshold: 1000 ul }
+
+#plateModel:
+#  "D-BSSE 96 Well Costar": { rows: 8, cols: 12, volume: 350ul }
+#  "D-BSSE 96 Well DWP": { rows: 8, cols: 12 }
+#  "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12 }
+#  "Tube 50ml": { rows: 1, cols: 1 }
+
+#oligo:
+#  SEQUENCE_01: { sequence: TATAACGTTACTGGTTTCATGAATTCTTGTTAATTCAGTAAATTTTC }
+
+plate:
+  E2215: { model: "D-BSSE 96 Well Costar", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
+
+well:
+  E2215:
+    A01: {contents: [add: {oligo: SEQUENCE_01, amount: 54.62 nmol}]}
+    A02: {contents: [add: {oligo: SEQUENCE_02, amount: 72.2 nmol}]}
+    A03: {contents: [add: {oligo: SEQUENCE_03, amount: 45.39 nmol}]}
+    A04: {contents: [add: {oligo: SEQUENCE_04, amount: 49.18 nmol}]}
+    A05: {contents: [add: {oligo: SEQUENCE_05, amount: 54.95 nmol}]}
+    A06: {contents: [add: {oligo: SEQUENCE_06, amount: 58 nmol}]}
+    A07: {contents: [add: {oligo: SEQUENCE_07, amount: 54.26 nmol}]}
+    A08: {contents: [add: {oligo: SEQUENCE_08, amount: 47.16 nmol}]}
+    A09: {contents: [add: {oligo: SEQUENCE_09, amount: 40.75 nmol}]}
+    A10: {contents: [add: {oligo: SEQUENCE_10, amount: 37.08 nmol}]}
+    A11: {contents: [add: {oligo: SEQUENCE_11, amount: 47.84 nmol}]}
+    A12: {contents: [add: {oligo: SEQUENCE_12, amount: 44.33 nmol}]}
+    B01: {contents: [add: {oligo: SEQUENCE_13, amount: 48.59 nmol}]}
+    B02: {contents: [add: {oligo: SEQUENCE_14, amount: 46.24 nmol}]}
+    B03: {contents: [add: {oligo: SEQUENCE_15, amount: 48.24 nmol}]}
+    B04: {contents: [add: {oligo: SEQUENCE_16, amount: 44.01 nmol}]}
+    B05: {contents: [add: {oligo: SEQUENCE_17, amount: 49.73 nmol}]}
+    B06: {contents: [add: {oligo: SEQUENCE_18, amount: 46.95 nmol}]}
+    B07: {contents: [add: {oligo: SEQUENCE_19, amount: 51.11 nmol}]}
+    B08: {contents: [add: {oligo: SEQUENCE_20, amount: 47.76 nmol}]}
+    B09: {contents: [add: {oligo: SEQUENCE_21, amount: 115.04 nmol}]}
+    B10: {contents: [add: {oligo: SEQUENCE_22, amount: 59.09 nmol}]}
+    B11: {contents: [add: {oligo: SEQUENCE_23, amount: 47.12 nmol}]}
+    B12: {contents: [add: {oligo: SEQUENCE_24, amount: 59.1 nmol}]}
+    C01: {contents: [add: {oligo: SEQUENCE_25, amount: 41.83 nmol}]}
+    C02: {contents: [add: {oligo: SEQUENCE_26, amount: 46.81 nmol}]}
+    C03: {contents: [add: {oligo: SEQUENCE_27, amount: 54.74 nmol}]}
+    C04: {contents: [add: {oligo: SEQUENCE_28, amount: 48.5 nmol}]}
+    C05: {contents: [add: {oligo: SEQUENCE_29, amount: 54.3 nmol}]}
+    C06: {contents: [add: {oligo: SEQUENCE_30, amount: 44.18 nmol}]}
+    C07: {contents: [add: {oligo: SEQUENCE_31, amount: 59.68 nmol}]}
+    C08: {contents: [add: {oligo: SEQUENCE_32, amount: 50.06 nmol}]}
+    C09: {contents: [add: {oligo: SEQUENCE_33, amount: 45.35 nmol}]}
+    C10: {contents: [add: {oligo: SEQUENCE_34, amount: 53.01 nmol}]}
+    C11: {contents: [add: {oligo: SEQUENCE_35, amount: 48.5 nmol}]}
+    C12: {contents: [add: {oligo: SEQUENCE_36, amount: 50.42 nmol}]}
+    D01: {contents: [add: {oligo: SEQUENCE_37, amount: 52.4 nmol}]}
+    D02: {contents: [add: {oligo: SEQUENCE_38, amount: 43.38 nmol}]}
+    D03: {contents: [add: {oligo: SEQUENCE_39, amount: 48.51 nmol}]}
+    D04: {contents: [add: {oligo: SEQUENCE_40, amount: 41.33 nmol}]}
+    D05: {contents: [add: {oligo: SEQUENCE_41, amount: 38.14 nmol}]}
+    D06: {contents: [add: {oligo: SEQUENCE_42, amount: 37.41 nmol}]}
+    D07: {contents: [add: {oligo: SEQUENCE_43, amount: 46.62 nmol}]}
+    D08: {contents: [add: {oligo: SEQUENCE_44, amount: 45.13 nmol}]}
+    D09: {contents: [add: {oligo: SEQUENCE_45, amount: 47.36 nmol}]}
+    D10: {contents: [add: {oligo: SEQUENCE_46, amount: 53.71 nmol}]}
+    D11: {contents: [add: {oligo: SEQUENCE_47, amount: 46.53 nmol}]}
+    D12: {contents: [add: {oligo: SEQUENCE_48, amount: 48.48 nmol}]}
+    E01: {contents: [add: {oligo: SEQUENCE_49, amount: 56.27 nmol}]}
+

@@ -202,7 +202,7 @@ usersOfInterest: [barney, betty, wilma]
 	}
 	
 	def testfile() {
-		val s = scala.io.Source.fromFile("database1.yaml").mkString
+		val s = scala.io.Source.fromFile("database2.yaml").mkString
 		val yaml = new Yaml
 		val o = yaml.load(s)
 		println(o)
