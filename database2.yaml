@@ -17,6 +17,7 @@
 plate:
   E2215: { model: "D-BSSE 96 Well Costar", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
 
+--- !!
 well:
   E2215:
     A01: {contents: [add: {oligo: SEQUENCE_01, amount: 54.62 nmol}]}

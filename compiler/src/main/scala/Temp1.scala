@@ -2,9 +2,9 @@ package temp
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
-
 import roboliq.protocol._
 import roboliq.protocol.commands._
+import java.util.LinkedHashMap
 
 
 class Test1 {
@@ -200,10 +200,16 @@ usersOfInterest: [barney, betty, wilma]
 		}
 
 	}
+
+	val yaml = new Yaml
+
+	def toMap(o: Any): collection.mutable.Map[String, _] =
+		scala.collection.JavaConversions.mapAsScalaMap(o.asInstanceOf[LinkedHashMap[String, _]])
+	def getMap(m: collection.mutable.Map[String, _], name: String): collection.mutable.Map[String, _] =
+		toMap(m.get(name))
 	
-	def testfile() {
+	def testfile1() {
 		val s = scala.io.Source.fromFile("database2.yaml").mkString
-		val yaml = new Yaml
 		val o = yaml.load(s)
 		println(o)
 		println()
@@ -211,8 +217,54 @@ usersOfInterest: [barney, betty, wilma]
 	}
 }
 
+
+class SubstanceHolder {
+	
+}
+
+trait WellHistory
+case class WellHistoryAdd()
+
+object YamlTest2 {
+	import org.yaml.snakeyaml.Yaml
+	//import org.yaml.snakeyaml.constructor.Constructor
+	//import scala.collection.mutable.ListBuffer
+	//import scala.reflect.BeanProperty
+	
+	val yaml = new Yaml
+
+	def toMap(o: Any): collection.mutable.Map[String, _] =
+		scala.collection.JavaConversions.mapAsScalaMap(o.asInstanceOf[LinkedHashMap[String, _]])
+	def getMap(
+		m: collection.mutable.Map[String, _],
+		name: String
+	): collection.mutable.Map[String, _] = {
+		m.get(name) match {
+			case Some(o) => toMap(o)
+			case _ => collection.mutable.Map()
+		}
+	}
+	
+	val s0 = scala.io.Source.fromFile("database2.yaml").mkString
+	val o0 = yaml.load(s0)
+
+	//println(o0)
+	//println()
+	//println(yaml.dump(o0))
+			
+	val m0 = toMap(o0)
+	val mWells = getMap(m0, "well")
+	
+	for ((sPlateId, mWell0) <- mWells) {
+		val mWell = toMap(mWell0)
+		for ((sWellCoord, mWellProp) <- mWell) {
+			println(sWellCoord)
+		}
+	}
+}
+
 object Main extends App {
 	//T.run
 	//YamlTest.YamlBeanTest1.run
-	YamlTest.testfile()
+	YamlTest.testfile1()
 }

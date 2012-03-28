@@ -11,18 +11,19 @@ object LiquidProperties extends Enumeration {
 	val Water, Glycerol = Value
 }
 
-class Volume(n: Double) {
-	def ul = n
-	def ml = n * 1000
-}
-
 case class Route(sClass: String, sKey: String) {
 	def toPair: Tuple2[String, String] = (sClass, sKey)
 }
 
-/** Volume in nanoliters */
+/** Volume representation in liters [l]
+ * 
+ * Construct LiquidVolume objects using the companion object.
+ * 
+ * @param nl volume in nanoliters [nl]
+ */
 class LiquidVolume(val nl: Int) {
-	def ml: Double = (nl / 1000.0)
+	/** Volume in microliters [ul] */ 
+	def ul: Double = (nl / 1000.0)
 	override def toString = {
 		if (nl > 1000000)
 			(nl / 1000000).toString + " ml"
@@ -32,6 +33,7 @@ class LiquidVolume(val nl: Int) {
 			nl.toString + " nl"
 	}
 }
+/** Factory for [[roboliq.protocol.LiquidVolume]] */
 object LiquidVolume {
 	def nl(n: Int): LiquidVolume = new LiquidVolume(n)
 	def ul(n: Int): LiquidVolume = new LiquidVolume(n * 1000)
@@ -154,17 +156,21 @@ class PInteger(val value: Int) extends Item {
 
 //sealed abstract class PLocation extends Item
 
-/** Volume in picoliters */
+/*
+/** Database item wrapper for LiquidVolume */
 class PLiquidVolume(vol: LiquidVolume) extends Item {
 	def properties: List[Property[_]] = Nil
 	override def toString = vol.toString
 }
 
+/** Database item wrapper for LiquidAmount */
 class PLiquidAmount(amt: LiquidAmount) extends Item {
 	def properties: List[Property[_]] = Nil
 	override def toString = amt.toString
 }
+*/
 
+/** Base class for commands which can be stored in the database */
 abstract class PCommand extends Item {
 	def getNewPools(): List[Pool] = Nil
 	def createCommands(vom: ValueToObjectMap): List[common.Command]
@@ -224,18 +230,21 @@ abstract class Value[A](implicit m: Manifest[A]) {
 	def getValues(db_? : Option[ValueDatabase]): List[A]
 	def toContentString: Option[String]
 }
+/** For property basic values such as quantities and text */
 case class ValueBasic[A](value: A)(implicit m: Manifest[A]) extends Value[A]()(m) {
 	def getValueKey: Option[ValueKey[_]] = None
 	def gatherValueKeys: List[ValueKey[_]] = Nil
 	def getValues(db_? : Option[ValueDatabase]): List[A] = value :: Nil
 	def toContentString(): Option[String] = Some(value.toString)
 }
+/** For property values which hold another database item */
 case class ValueItem[A <: Item](item: A)(implicit m: Manifest[A]) extends Value[A]()(m) {
 	def getValueKey: Option[ValueKey[_]] = None
 	def gatherValueKeys: List[ValueKey[_]] = item.gatherValueKeys
 	def getValues(db_? : Option[ValueDatabase]): List[A] = item :: Nil
 	def toContentString(): Option[String] = Some(item.toString)
 }
+/** For property values which reference another database item by key */
 case class ValueKey[A](key: String)(implicit m: Manifest[A]) extends Value[A]()(m) {
 	def getValueKey: Option[ValueKey[_]] = Some(this)
 	def gatherValueKeys: List[ValueKey[_]] = List(this)
@@ -255,63 +264,21 @@ case class ValueProperty[A](ptr: Property[A])(implicit m: Manifest[A]) extends V
 	def toContentString(): Option[String] = Some("*"+ptr.toContentString)
 }
 
+/** Map from value objects to their values */
 class ValueDatabase(map: Map[Value[_], Any]) {
 	def lookup[A](key: Value[A]): Option[A] = map.get(key) match {
 		case None => None
 		case Some(v) => Some(v.asInstanceOf[A])
 	}
 }
-/*
-object ValueDatabase {
-	val empty = new ValueDatabase {
-		def lookup[A](value: Value[A]): Option[A] = None
-	}
-}*/
 
 class TempKeyA(val key: String)
-//class TempNameA(val name: String)
 
 sealed abstract class TempValue[A]
 case class TempNull[A]() extends TempValue[A]
 case class Temp1[A](val a: A) extends TempValue[A]
 case class TempKey[A](val key: String) extends TempValue[A]
-//case class TempName[A](val name: String) extends TempValue[A]
 case class TempList[A](val la: List[A]) extends TempValue[A]
-
-/*
-class NameBase(val mapVars: Map[String, Item], val mapDb: Map[String, Item]) {
-	def apply(name: String): Option[Item] = {
-		mapVars.get(name).orElse(mapDb.get(name))
-	}
-}
-*/
-
-/*
-sealed abstract class PropertyValue[A <: Item](implicit m: Manifest[A]) {
-	def getKey: Option[String] = None
-	def getValues: List[A] = Nil
-	def keyEquals(sKey: String): Boolean = false
-	def toContentString(): Option[String] = None
-}
-case class PropertyRefId[A <: Item](id: String)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
-}
-case class PropertyRefDb[A <: Item](key: String)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
-	override def getKey: Option[String] = Some(key)
-	override def keyEquals(sKey: String): Boolean = (key == sKey)
-	override def toContentString(): Option[String] = Some("K\""+key+"\"")
-	def getKeyPair: Tuple2[String, String] = (m.erasure.getCanonicalName() -> key)
-}
-case class PropertyRefProperty[A <: Item](p: Property[A])(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
-	override def getKey: Option[String] = p.getKey
-	override def getValues: List[A] = p.getValues
-}
-case class PropertyPObject[A <: Item](val value: A)(implicit m: Manifest[A]) extends PropertyValue[A]()(m) {
-	override def getKey: Option[String] = Some(value.key)
-	override def getValues: List[A] = List(value)
-	override def keyEquals(sKey: String): Boolean = (sKey != null && sKey == value.key)
-	override def toContentString(): Option[String] = Some(value.toString)
-}
-*/
 
 class Liquid extends Item {
 	val physical = new Property[String]
@@ -342,9 +309,11 @@ object Liquid {
 	}
 }
 
+/** Represents a plate model */
 class PlateModel extends Item {
 	val rows = new Property[Int]
 	val cols = new Property[Int]
+	val volume = new Property[LiquidVolume]
 	
 	def properties: List[Property[_]] = List(rows, cols)
 }
@@ -366,7 +335,7 @@ class Well extends Item {
 	val liquid = new PropertyItem[Liquid]
 	val volume = new Property[LiquidVolume]
 	val conc = new Property[LiquidConc]
-	def properties: List[Property[_]] = List(parent, index, liquid, volume)
+	def properties: List[Property[_]] = List(parent, index, liquid, volume, conc)
 }
 
 object Well {
@@ -598,7 +567,7 @@ object ValueToObjectMap {
 			setup.sName_? = Some(liquid.key)
 			setup.sFamily_? = liquid.physical.getValue(ild.valueDb).orElse(Some("Water"))
 			setup.contaminants = liquid.contaminants.getValues(ild.valueDb).map(s => Contaminant.withName(s)).toSet
-			setup.multipipetteThreshold_? = liquid.multipipetteThreshold.getValue(ild.valueDb).map(_.ml)
+			setup.multipipetteThreshold_? = liquid.multipipetteThreshold.getValue(ild.valueDb).map(_.ul)
 			liquid.cleanPolicy.getValue(ild.valueDb) match {
 				case Some(s) =>
 					val cleanPolicy = s match {

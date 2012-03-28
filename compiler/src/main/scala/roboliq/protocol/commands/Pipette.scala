@@ -38,7 +38,7 @@ class Pipette extends PCommand {
 			dest <- getWellPointer(dest, vom)
 			lVolume <- volume.getValues_?(valueDb)
 		} yield {
-			val pipetteItem = new L4A_PipetteItem(src, dest, lVolume.map(_.ml), None, None)
+			val pipetteItem = new L4A_PipetteItem(src, dest, lVolume.map(_.ul), None, None)
 			val lPipetteCmd = L4C_Pipette(new L4A_PipetteArgs(List(pipetteItem), tipOverrides_? = None)) :: Nil
 			lPipetteCmd
 		}

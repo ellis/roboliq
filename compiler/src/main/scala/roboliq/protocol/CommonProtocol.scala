@@ -143,7 +143,7 @@ trait CommonProtocol extends
 		None
 	}*/
 	
-	implicit def intToVolume(n: Int): Volume = new Volume(n)
+	//implicit def intToVolume(n: Int): Volume = new Volume(n)
 	
 	/*implicit def liquidToProxy(o: Liquid): LiquidProxy = new LiquidProxy(kb, o)
 	implicit def partToProxy(o: Part): PartProxy = new PartProxy(kb, o)
