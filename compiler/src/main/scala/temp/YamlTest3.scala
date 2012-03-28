@@ -14,18 +14,11 @@ import org.yaml.snakeyaml.introspector.Property
 import org.yaml.snakeyaml.nodes.NodeTuple
 import org.yaml.snakeyaml.TypeDescription
 
-class WellHistory2(
-	@BeanProperty var addr: String,
-	@BeanProperty var history: java.util.List[HistoryItem]
-)
+class History {
+	@BeanProperty var history: java.util.LinkedHashMap[String, java.util.List[HistoryItem]] = null
+}
 
 trait HistoryItem
-/*class HistoryItem(
-	@BeanProperty var action: String,
-	@BeanProperty var substance: String
-) {
-	
-}*/
 
 class HistoryItemAddBean extends HistoryItem {
 	@BeanProperty var substance: String = null
@@ -48,6 +41,7 @@ object HistoryItemAddBean {
 }
 
 class MyRepresenter extends Representer {
+	addClassTag(classOf[History], new Tag("!history"));
 	addClassTag(classOf[HistoryItemAddBean], new Tag("!add"));
 
 	protected override def representJavaBeanProperty(
@@ -65,6 +59,7 @@ class MyRepresenter extends Representer {
 }
 
 class MyConstructor extends Constructor {
+	addTypeDescription(new TypeDescription(classOf[History], "!history"))
 	addTypeDescription(new TypeDescription(classOf[HistoryItemAddBean], "!add"))
 }
 
@@ -73,17 +68,18 @@ class YamlTest3 {
 	val yaml = new Yaml(representer, new DumperOptions)
 	
 	val l = JavaConversions.seqAsJavaList[HistoryItem](Seq(
-		HistoryItemAddBean("FRP128", mol = new java.math.BigDecimal(51e-9)),
-		HistoryItemAddBean("FRO1259", mol = new java.math.BigDecimal(52e-9)),
-		HistoryItemAddBean("FRO1360", mol = new java.math.BigDecimal(53e-9))
+		HistoryItemAddBean("FRP128", mol = new java.math.BigDecimal("51e-9")),
+		HistoryItemAddBean("FRO1259", mol = new java.math.BigDecimal("52e-9")),
+		HistoryItemAddBean("FRO1360", mol = new java.math.BigDecimal("53e-9"))
 	))
 	
 	val wellHistories = new java.util.LinkedHashMap[String, java.util.List[HistoryItem]]
 	wellHistories.put("E2215(A01)", l)
-	val wellHistory = new WellHistory2("E2215(A01)", l)
+	val history = new History
+	history.history = wellHistories
 	
 	def run {
-		println(yaml.dump(wellHistories))
+		println(yaml.dump(history))
 	}
 }
 
@@ -94,7 +90,8 @@ class YamlTest4 {
 	val yamlIn = new Yaml(constructor)
 
 	val s0 = scala.io.Source.fromFile("database3.yaml").mkString
-	val o0 = yamlIn.loadAs(s0, classOf[java.util.LinkedHashMap[String, java.util.List[HistoryItem]]])
+	//val o0 = yamlIn.loadAs(s0, classOf[java.util.LinkedHashMap[String, java.util.List[HistoryItem]]])
+	val o0 = yamlIn.loadAs(s0, classOf[History])
 	
 	def run {
 		println(yamlOut.dump(o0))

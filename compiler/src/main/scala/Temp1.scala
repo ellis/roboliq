@@ -267,5 +267,9 @@ object Main extends App {
 	//T.run
 	//YamlTest.YamlBeanTest1.run
 	//YamlTest.testfile1()
+	new temp.YamlTest3().run
+	println()
+	println()
+	println()
 	new temp.YamlTest4().run
 }
