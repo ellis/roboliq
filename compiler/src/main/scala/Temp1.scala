@@ -266,5 +266,6 @@ object YamlTest2 {
 object Main extends App {
 	//T.run
 	//YamlTest.YamlBeanTest1.run
-	YamlTest.testfile1()
+	//YamlTest.testfile1()
+	new temp.YamlTest4().run
 }
