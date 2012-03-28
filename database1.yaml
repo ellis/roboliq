@@ -6,18 +6,64 @@ liquidClass:
   oligo: { cleanPolicy: D, contaminants: DNA, multipepetteThreshold: 1000 ul }
 
 plateModel:
-  "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12 }
+  "D-BSSE 96 Well PCR Plate": &PM_PCR { rows: 8, cols: 12 }
   "D-BSSE 96 Well DWP": { rows: 8, cols: 12 }
   "Tube 50ml": { rows: 1, cols: 1 }
 
 plasmid:
-  FRP714: 
+  FRP128: &FRP128 { name: FRP128 }
 
 plate:
-  P1: { model: "D-BSSE 96 Well PCR Plate", description: "templates, primers, polymerase" }
+  P1: { model: *PM_PCR, description: "templates, primers, polymerase" }
   P2: { model: "D-BSSE 96 Well DWP", description: "buffer, dntp, water" }
   P4: { model: "D-BSSE 96 Well PCR Plate", description: "PCR products", purpose: PCR }
 
 well:
   P1:
-    - { liquid: FRP128, liquidClass: oligo, volume: 100 ul }
+    A01: {contents: [add: {plasmid: FRP128}]}
+    B01: {contents: [add: {plasmid: FRP222}]}
+    C01: {contents: [add: {plasmid: FRP332}]}
+    D01: {contents: [add: {plasmid: FRP337}]}
+    E01: {contents: [add: {plasmid: FRP446}]}
+    F01: {contents: [add: {plasmid: FRP572}]}
+    H01: {contents: [add: {liquid: phusion_diluted}]}
+    H02: {contents: [add: {liquid: taq_diluted}]}
+
+    A03: {contents: [add: {oligo: FRO114}]}
+    B03: {contents: [add: {oligo: FRO115}]}
+    C03: {contents: [add: {oligo: FRO699}]}
+    D03: {contents: [add: {oligo: FRO700}]}
+    E03: {contents: [add: {oligo: FRO703}]}
+    F03: {contents: [add: {oligo: FRO704}]}
+
+    A04: {contents: [add: {oligo: FRO1259}]}
+    B04: {contents: [add: {oligo: FRO1260}]}
+    C04: {contents: [add: {oligo: FRO1261}]}
+    D04: {contents: [add: {oligo: FRO1262}]}
+    E04: {contents: [add: {oligo: FRO1329}]}
+  P2:
+    A01:
+      contents:
+      - add: {liquid: dntp, volume: 1000 ul, conc: 2 mM, date: '2012-03-23 14:01.23 UTC-2'}
+    B01: { contents: [{liquid: buffer5x, volume: 1000 ul}] }
+    C01: { contents: [{liquid: buffer10x, volume: 1000 ul}] }
+    H01: { contents: [{liquid: water, volume: 1000 ul}] }
+  P4:
+    A01:
+      contents:
+      - add: {well: P2(H01), volume: 12 ul}
+      - add: {well: P2(B01), volume: 6 ul}
+      - add: {well: P2(A01), volume: 3 ul}
+      - add: {well: P1(E01), volume: 3 ul}
+      - add: {well: P1(B02), volume: 1.5 ul}
+
+# Well content history:
+# need to track *source*, *amount*, *date*
+# challenge is that each source also has its own history
+# Well can also have an expiration date; automatic expiration date should be set for some things somehow
+# Things which can go into a well:
+# - contents of another well
+# - liquid
+# - plasmid with water
+# - oligo with water
+# - 
