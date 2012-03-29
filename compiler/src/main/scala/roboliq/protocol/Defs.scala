@@ -550,7 +550,7 @@ private class ItemListDataBuilder(items: List[Item], db: ItemDatabase) {
 class ValueToObjectMap(
 	val valueDb: ValueDatabase,
 	val kb: KnowledgeBase,
-	val mapKeyToPlateObj: Map[String, common.Plate],
+	val mapKeyToPlateObj: Map[String, PlateObj],
 	val mapValueToWellPointer: Map[Value[_], WellPointer],
 	val mapPoolToWellPointer: Map[Pool, WellPointer]
 )
@@ -607,7 +607,7 @@ object ValueToObjectMap {
 				sPlateModel <- plate.model.getValue
 				plateModel <- mapPlateModels.get(sPlateModel)
 			} yield {
-				val obj = new roboliq.common.Plate
+				val obj = new PlateObj
 				val setup = kb.getPlateSetup(obj)
 				setup.sLabel_? = Some(plate.key)
 				setup.model_? = Some(plateModel)

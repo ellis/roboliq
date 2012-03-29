@@ -34,7 +34,7 @@ class L4A_CentrifugeSetup {
 }
 
 class L4A_CentrifugeArgs(
-	val plates: Seq[Plate]
+	val plates: Seq[PlateObj]
 )
 
 class L3A_CentrifugeArgs(

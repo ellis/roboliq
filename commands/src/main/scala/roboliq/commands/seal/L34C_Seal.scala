@@ -34,7 +34,7 @@ class L4A_SealSetup {
 }
 
 class L4A_SealArgs(
-	val plate: Plate
+	val plate: PlateObj
 )
 
 class L3A_SealArgs(

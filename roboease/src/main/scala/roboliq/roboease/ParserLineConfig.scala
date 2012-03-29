@@ -46,7 +46,7 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 		RSuccess()
 	}
 	
-	def setReagent(id: String, plate: Plate, iWellPlus1: Int, lc: String, nWells_? : Option[Int]): Result[Unit] = {
+	def setReagent(id: String, plate: PlateObj, iWellPlus1: Int, lc: String, nWells_? : Option[Int]): Result[Unit] = {
 		//println("ADDIND REAGENT: "+id)
 		//println("shared.getPipettePolicy(lc): "+shared.getPipettePolicy(lc))
 		for {

@@ -89,7 +89,7 @@ trait CentrifugeCommands extends RoboliqCommands {
 		cmd.setup
 	}
 
-	def centrifuge(plates: Plate*): L4A_CentrifugeSetup = {
+	def centrifuge(plates: PlateObj*): L4A_CentrifugeSetup = {
 		val args = new L4A_CentrifugeArgs(plates)
 		val cmd = L4C_Centrifuge(args)
 		cmds += cmd

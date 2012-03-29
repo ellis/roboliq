@@ -24,7 +24,7 @@ case class L4C_MovePlate(args: L4A_MovePlateArgs) extends CommandL4 {
 case class L3C_MovePlate(args: L3A_MovePlateArgs) extends CommandL3
 
 class L4A_MovePlateArgs(
-	val plate: Plate,
+	val plate: PlateObj,
 	val location: Memento[String],
 	val lidHandlingSpec_? : Option[LidHandlingSpec]
 ) {

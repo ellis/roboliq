@@ -51,7 +51,7 @@ class CentrifugeDevice(val idDevice: String, val location: String, val nSlots: I
 object CentrifugeDevice {
 	class Setup(obj: CentrifugeDevice) extends ObjSetup {
 		var bUsed = false
-		var plate_balance: Plate = null
+		var plate_balance: PlateObj = null
 		def getLabel(kb: KnowledgeBase): String = obj.idDevice
 	}
 	

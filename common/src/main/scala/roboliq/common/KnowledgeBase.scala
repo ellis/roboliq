@@ -11,7 +11,7 @@ class KnowledgeBase {
 	//private val m_liqs = new HashSet[Liquid]
 	private val m_objs = new HashSet[Obj]
 	private val m_wells = new HashSet[Well]
-	private val m_plates = new HashSet[Plate]
+	private val m_plates = new HashSet[PlateObj]
 	private val m_setups = new HashMap[Obj, ObjSetup]
 
 	// Move this to Pipette device's knowledgebase
@@ -46,14 +46,14 @@ class KnowledgeBase {
 			setup.bRequiresIntialLiq_? = Some(bSrc)
 	}
 	
-	def addPlate(o: Plate) {
+	def addPlate(o: PlateObj) {
 		addObject(o)
 		if (o.setup.dim_?.isDefined)
 			o.setup.dim_?.get.wells.foreach(well => addWell(well))
 		m_plates += o
 	}
 	
-	def addPlate(o: Plate, bSrc: Boolean) {
+	def addPlate(o: PlateObj, bSrc: Boolean) {
 		val setup = getPlateSetup(o)
 		if (setup.dim_?.isDefined)
 			setup.dim_?.get.wells.foreach(well => addWell(well, bSrc))
@@ -82,7 +82,7 @@ class KnowledgeBase {
 		getObjSetup(o)
 	}
 	
-	def getPlateSetup(o: Plate): PlateSetup = {
+	def getPlateSetup(o: PlateObj): PlateSetup = {
 		addPlate(o)
 		getObjSetup(o)
 	}

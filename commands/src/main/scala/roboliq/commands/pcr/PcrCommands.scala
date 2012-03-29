@@ -91,7 +91,7 @@ trait PcrCommands extends RoboliqCommands {
 		cmd.setup
 	}
 	
-	def thermocycle(plate: Plate): PcrThermocycle.Setup = {
+	def thermocycle(plate: PlateObj): PcrThermocycle.Setup = {
 		val args = new PcrThermocycle.L4A(plate)
 		val cmd = PcrThermocycle.L4C(args)
 		cmds += cmd

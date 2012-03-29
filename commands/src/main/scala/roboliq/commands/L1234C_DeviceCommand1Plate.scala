@@ -3,7 +3,7 @@ package roboliq.commands
 import roboliq.common._
 
 
-case class L4C_DeviceCommand1Plate(idCommand: String, plate: Plate) extends CommandL4 {
+case class L4C_DeviceCommand1Plate(idCommand: String, plate: PlateObj) extends CommandL4 {
 	type L3Type = L3C_DeviceCommand1Plate
 	
 	val setup = new L4A_DeviceCommand1PlateSetup

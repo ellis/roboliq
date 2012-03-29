@@ -79,7 +79,7 @@ trait CommonProtocol extends
 	
 	class Plate private (
 		family_? : Option[PlateFamily]
-	) extends common.Plate {
+	) extends PlateObj {
 		def this() = this(None)
 		def this(family: PlateFamily) = this(Some(family))
 		

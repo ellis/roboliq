@@ -34,7 +34,7 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	val mTipToModel: Map[TipConfigL2, TipModel] = mTipToBlock.mapValues(_.lTipModels.head)
 	val mModelToTips = Map(tipModel1000 -> tipBlock1000.tTip, tipModel50 -> tipBlock50.tTip)
 
-	val plateDecon = new Plate
+	val plateDecon = new PlateObj
 	
 	private val mapLcInfo = {
 		import PipettePosition._

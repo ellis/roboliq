@@ -46,7 +46,7 @@ trait L34F_Plate { top =>
 	}
 	
 	class L4A(
-		val plate: Plate
+		val plate: PlateObj
 	)
 	
 	class Setup {

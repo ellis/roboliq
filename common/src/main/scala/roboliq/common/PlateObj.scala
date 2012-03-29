@@ -6,7 +6,7 @@ import scala.collection.mutable.HashMap
 
 class PlateModel(val id: String, val nRows: Int, val nCols: Int, val nWellVolume: Double)
 
-class Plate extends Obj {
+class PlateObj extends Obj {
 	thisObj =>
 	type Setup = PlateSetup
 	type Config = PlateConfigL2
@@ -55,7 +55,7 @@ class Plate extends Obj {
 	override def toString = setup.sLabel_?.getOrElse(super.toString)
 }
 
-class PlateSetup(val obj: Plate) extends ObjSetup {
+class PlateSetup(val obj: PlateObj) extends ObjSetup {
 	var sLabel_? : Option[String] = None
 	var model_? : Option[PlateModel] = None
 	var dim_? : Option[PlateSetupDimensionL4] = None
@@ -91,7 +91,7 @@ class PlateSetupDimensionL4(
 )
 
 class PlateConfigL2(
-	val obj: Plate,
+	val obj: PlateObj,
 	val sLabel: String,
 	val model_? : Option[PlateModel],
 	val nRows: Int,
@@ -110,7 +110,7 @@ case class PlateStateL2(
 ) extends ObjState
 
 
-class PlateProxy(kb: KnowledgeBase, obj: Plate) {
+class PlateProxy(kb: KnowledgeBase, obj: PlateObj) {
 	val setup = kb.getPlateSetup(obj)
 	
 	def label = setup.sLabel_?.get

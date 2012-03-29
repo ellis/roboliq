@@ -10,7 +10,7 @@ import roboliq.robots.evoware.commands._
 import roboliq.labs.bsse.devices._
 
 
-class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: Plate) extends CommandCompilerL3 {
+class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: PlateObj) extends CommandCompilerL3 {
 	type CmdType = L3C_TipsWash
 	val cmdType = classOf[CmdType]
 

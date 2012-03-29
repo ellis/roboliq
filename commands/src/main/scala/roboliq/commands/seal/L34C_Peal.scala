@@ -34,7 +34,7 @@ class L4A_PeelSetup {
 }
 
 class L4A_PeelArgs(
-	val plate: Plate
+	val plate: PlateObj
 )
 
 class L3A_PeelArgs(

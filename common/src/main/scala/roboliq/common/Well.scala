@@ -162,7 +162,7 @@ case class WellStateL2(
 
 class WellSetup(val obj: Well) extends ObjSetup {
 	var sLabel_? : Option[String] = None
-	var holder_? : Option[Plate] = None
+	var holder_? : Option[PlateObj] = None
 	var index_? : Option[Int] = None
 	var bRequiresIntialLiq_? : Option[Boolean] = None
 	var reagent_? : Option[Reagent] = None

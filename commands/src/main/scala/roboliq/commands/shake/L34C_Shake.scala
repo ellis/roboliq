@@ -35,7 +35,7 @@ class L4A_ShakeSetup {
 }
 
 class L4A_ShakeArgs(
-	val plate: Plate,
+	val plate: PlateObj,
 	val nDuration: Int
 )
 

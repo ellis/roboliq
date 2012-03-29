@@ -26,7 +26,7 @@ class ParserSharedData(
 	val mapVars = new HashMap[String, String]
 	val mapLists = new HashMap[String, List[String]]
 	val mapOptions = new HashMap[String, String]
-	val mapRackToPlate = new HashMap[Rack, Plate]
+	val mapRackToPlate = new HashMap[Rack, PlateObj]
 	val mapLabware = new HashMap[Tuple2[Int, Int], Labware]
 	val mapMixDefs = new HashMap[String, MixDef]
 	/** When an external procedure is called, we substitute certain names for others */
@@ -61,7 +61,7 @@ class ParserSharedData(
 		yield { id }
 	}
 
-	def getDim(plate: Plate): Result[PlateSetupDimensionL4] = {
+	def getDim(plate: PlateObj): Result[PlateSetupDimensionL4] = {
 		val setup = kb.getPlateSetup(plate)
 		Result.get(setup.dim_?, "Plate \""+plate+"\" requires dimensions")
 	}

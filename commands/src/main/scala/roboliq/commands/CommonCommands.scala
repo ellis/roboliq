@@ -12,7 +12,7 @@ trait CommonCommands extends RoboliqCommands {
 		args.setup
 	}
 	
-	def saveLocation(plate: Plate): Memento[String] = {
+	def saveLocation(plate: PlateObj): Memento[String] = {
 		val mem = new Memento[String]
 		val cmd = L4C_SaveCurrentLocation(plate, mem)
 		cmds += cmd

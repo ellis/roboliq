@@ -6,7 +6,7 @@ import roboliq.common._
 
 
 class PlateHandlingSetup {
-	var replate: Plate = null
+	var replate: PlateObj = null
 	var locationNew: Location = null
 	var locationFinal: Location = null
 	
@@ -20,7 +20,7 @@ class PlateHandlingSetup {
 }
 
 class PlateHandlingConfig(
-	val replate_? : Option[Plate],
+	val replate_? : Option[PlateObj],
 	val locationNew_? : Option[String],
 	val locationFinal_? : Option[String]
 ) {

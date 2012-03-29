@@ -3,7 +3,7 @@ package roboliq.commands
 import roboliq.common._
 
 
-case class L4C_SaveCurrentLocation(plate: Plate, mem: Memento[String]) extends CommandL4 {
+case class L4C_SaveCurrentLocation(plate: PlateObj, mem: Memento[String]) extends CommandL4 {
 	type L3Type = L3C_SaveCurrentLocation
 
 	def addKnowledge(kb: KnowledgeBase) {

@@ -119,7 +119,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		} yield res
 	}
 	
-	def run_TRANSFER_SAMPLES(splate: Plate, dplate: Plate, nWells: Int, volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[CmdLog] = {
+	def run_TRANSFER_SAMPLES(splate: PlateObj, dplate: PlateObj, nWells: Int, volumes: Seq[Double], sLiquidClass: String, opts_? : Option[String]): Result[CmdLog] = {
 		for {
 			srcDim <- getDim(splate)
 			destDim <- getDim(dplate)
@@ -145,14 +145,14 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	private def getReagent(id: String) = Result.get(shared.mapReagents.get(id), "unknown reagent \""+id+"\"")
 	private def getMixDef(id: String) = Result.get(shared.mapMixDefs.get(id), "unknown mix definition \""+id+"\"")
 	
-	private def getDim(plate: Plate): Result[PlateSetupDimensionL4] = {
+	private def getDim(plate: PlateObj): Result[PlateSetupDimensionL4] = {
 		val setup = kb.getPlateSetup(plate)
 		for {
-			dim <- Result.get(setup.dim_?, "Plate \""+plate+"\" requires dimensions")
+			dim <- Result.get(setup.dim_?, "PlateObj \""+plate+"\" requires dimensions")
 		} yield dim
 	}
 	
-	private def wellsToPlateIndexes(wells: Seq[Well]): Seq[Tuple2[Plate, Int]] = {
+	private def wellsToPlateIndexes(wells: Seq[Well]): Seq[Tuple2[PlateObj, Int]] = {
 		wells.map(well => {
 			val wellSetup = kb.getWellSetup(well)
 			(wellSetup.holder_?.get, wellSetup.index_?.get)
@@ -167,7 +167,7 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		createSrcLiquids(wellsToPlateIndexes(wells))
 	}
 	
-	private def createSrcLiquids(srcs: Seq[Tuple2[Plate, Int]]): Result[Unit] = {
+	private def createSrcLiquids(srcs: Seq[Tuple2[PlateObj, Int]]): Result[Unit] = {
 		// If source well is empty, create a new liquid for the well
 		for (pi <- srcs) {
 			val plate = pi._1

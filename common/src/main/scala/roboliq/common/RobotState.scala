@@ -13,7 +13,7 @@ trait StateMap {
 		val objs = map.keys
 		val shown = new HashSet[Obj]
 
-		val plates = objs.collect { case o: Plate => o }
+		val plates = objs.collect { case o: PlateObj => o }
 		if (!plates.isEmpty) {
 			b.append("Plates:\n")
 			for (plate <- plates) {
