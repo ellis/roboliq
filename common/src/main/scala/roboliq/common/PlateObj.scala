@@ -4,8 +4,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 
-class PlateModel(val id: String, val nRows: Int, val nCols: Int, val nWellVolume: Double)
-
 class PlateObj extends Obj {
 	thisObj =>
 	type Config = PlateConfigL2
