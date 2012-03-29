@@ -8,12 +8,12 @@ import scala.collection.immutable.SortedSet
  */
 class WellGroupPlate private[core] (
 	set: SortedSet[Well],
-	val plate: Plate,
+	val idPlate: String,
 	iCol_? : Option[Int] = None,
 	bAdjacent: Boolean = false
-) extends WellGroup(set, Some(plate), iCol_?, bAdjacent) {
+) extends WellGroup(set, Some(idPlate), iCol_?, bAdjacent) {
 	override def toString: String = {
-		getClass().getSimpleName() + List(Printer.getWellsDebugString(set), plate, iCol_?, bAdjacent).mkString("(", ", ", ")")
+		getClass().getSimpleName() + List(Printer.getWellsDebugString(set), idPlate, iCol_?, bAdjacent).mkString("(", ", ", ")")
 	}
 }
 
@@ -22,12 +22,12 @@ class WellGroupPlate private[core] (
  */
 class WellGroupCol private[core] (
 	set: SortedSet[Well],
-	plate: Plate,
+	idPlate: String,
 	val iCol: Int,
 	bAdjacent: Boolean = false
-) extends WellGroupPlate(set, plate, Some(iCol), bAdjacent) {
+) extends WellGroupPlate(set, idPlate, Some(iCol), bAdjacent) {
 	override def toString: String = {
-		getClass().getSimpleName() + List(Printer.getWellsDebugString(set), plate, iCol, bAdjacent).mkString("(", ", ", ")")
+		getClass().getSimpleName() + List(Printer.getWellsDebugString(set), idPlate, iCol, bAdjacent).mkString("(", ", ", ")")
 	}
 }
 
@@ -36,12 +36,12 @@ class WellGroupCol private[core] (
  */
 class WellGroupAdjacent private[core] (
 	set: SortedSet[Well],
-	plate: Plate,
+	idPlate: String,
 	iCol: Int
-) extends WellGroupCol(set, plate, iCol, true) {
+) extends WellGroupCol(set, idPlate, iCol, true) {
 	assert(bAdjacent == true)
 	override def toString: String = {
-		getClass().getSimpleName() + List(Printer.getWellsDebugString(set), plate, iCol).mkString("(", ", ", ")")
+		getClass().getSimpleName() + List(Printer.getWellsDebugString(set), idPlate, iCol).mkString("(", ", ", ")")
 	}
 }
 
@@ -50,27 +50,27 @@ class WellGroupAdjacent private[core] (
  */
 sealed class WellGroup private[core] (
 	val set: SortedSet[Well],
-	val plate_? : Option[Plate],
+	val idPlate_? : Option[String],
 	val iCol_? : Option[Int],
 	val bAdjacent: Boolean
 ) {
 	def add(well: Well): WellGroup = {
 		if (set.isEmpty)
-			new WellGroupAdjacent(SortedSet(well), well.holder, well.iCol)
+			new WellGroupAdjacent(SortedSet(well), well.idPlate, well.iCol)
 		else {
 			val set2 = set + well
-			plate_? match {
-				case Some(well.plate) =>
+			idPlate_? match {
+				case Some(well.idPlate) =>
 					iCol_? match {
 						case Some(iCol) if iCol == well.iCol =>
 							val indexTop = set.head.index
 							val indexBot = set.last.index
 							if (well.index == indexTop - 1 || well.index == indexBot + 1)
-								new WellGroupAdjacent(set2, well.holder, iCol)
+								new WellGroupAdjacent(set2, well.idPlate, iCol)
 							else
-								new WellGroupCol(set2, well.holder, iCol)
+								new WellGroupCol(set2, well.idPlate, iCol)
 						case _ =>
-							new WellGroupPlate(set2, well.holder)
+							new WellGroupPlate(set2, well.idPlate)
 					}
 				case _ =>
 					new WellGroup(set2, None, None, false)
@@ -81,8 +81,8 @@ sealed class WellGroup private[core] (
 	def +(well: Well): WellGroup = add(well)
 
 	def splitByPlate(): Seq[WellGroup] = {
-		plate_? match {
-			case None => set.toSeq.groupBy(_.holder).toSeq.sortBy(_._1).map(pair => WellGroup(pair._2))
+		idPlate_? match {
+			case None => set.toSeq.groupBy(_.idPlate).toSeq.sortBy(_._1).map(pair => WellGroup(pair._2))
 			case _ => Seq(this)
 		}
 	}

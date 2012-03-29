@@ -8,10 +8,11 @@ import scala.collection.mutable.ArrayBuffer
 class ObjBase(bb: BeanBase) {
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
 	private val m_mapPlate = new HashMap[String, Plate]
+	private val m_mapWell = new HashMap[String, Well]
 	//private val m_mapSubstance = new HashMap[String, SubstanceItem]
 	
-	def mapPlateModel: scala.collection.Map[String, PlateModel] = m_mapPlateModel
-	def mapPlate: scala.collection.Map[String, Plate] = m_mapPlate
+	//def mapPlateModel: scala.collection.Map[String, PlateModel] = m_mapPlateModel
+	//def mapPlate: scala.collection.Map[String, Plate] = m_mapPlate
 	//def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
 	
 	def findPlateModel(id: String): Result[PlateModel] = {
@@ -56,6 +57,43 @@ class ObjBase(bb: BeanBase) {
 	
 	private def createSubstance(id: String): Unit = {
 		
+	}
+	
+	def findWell(id: String): Result[Well] = {
+		m_mapWell.get(id) match {
+			case Some(obj) => Success(obj)
+			case None => createWell(id)
+		}
+	}
+	
+	def findWells(lId: Seq[String]): Result[Seq[Well]] = {
+		Result.mapOver(lId)(findWell)
+	}
+	
+	private def createWell(id: String): Result[Well] = {
+		for {
+			res <- Printer.parseWellId(id)
+		} yield {
+			val (idPlate, indexName, iRow, iCol) = res
+			if (indexName == "") {
+				new Tube(idPlate)
+			}
+			else {
+				findPlate(idPlate) match {
+					case Error(ls) => return Error(ls)
+					case Success(plate) =>
+						val index = iCol * plate.model.nRows
+						new PlateWell(
+							id = id,
+							idPlate = idPlate,
+							index = index,
+							iRow = iRow,
+							iCol = iCol,
+							indexName = indexName
+						)
+				}
+			}
+		}
 	}
 	
 }

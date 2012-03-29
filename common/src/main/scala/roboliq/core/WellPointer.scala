@@ -1,4 +1,4 @@
-package roboliq.core
+/*package roboliq.core
 
 sealed abstract class WellAddress
 
@@ -8,22 +8,20 @@ object WellAddress {
 
 sealed trait WellAddressPartial {
 	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]]
-	def toPointer(kb: KnowledgeBase, plate: PlateObj): Result[WellPointer] = {
+	def toPointer(bb: BeanBase, idPlate: String): Result[WellPointer] = {
 		for {
-			dim <- Result.get(plate.dim_?, "plate dimension not set")
-			li <- toIndexes(dim.nRows, dim.nCols)
+			lIdWell <- bb.findWellIdsByPlate(idPlate)
 		} yield {
-			val lWell = li.map(iWell => dim.wells(iWell))
-			if (li.size == 1) {
-				WellPointerWell(lWell.head)
+			if (lIdWell.size == 1) {
+				WellPointerWell(lIdWell.head)
 			}
 			else {
-				WellPointerWells(lWell)
+				WellPointerWells(lIdWell)
 			}
 		}
 	}
 
-	def toWells(kb: KnowledgeBase, plate: PlateObj): Result[Seq[Well]] = {
+	def toWells(kb: BeanBase, plate: PlateBean): Result[Seq[Well]] = {
 		for {
 			dim <- Result.get(plate.dim_?, "plate dimension not set")
 			li <- toIndexes(dim.nRows, dim.nCols)
@@ -32,7 +30,7 @@ sealed trait WellAddressPartial {
 		}
 	}
 
-	def toWells(states: RobotState, plate: PlateObj): Result[Seq[WellConfigL2]] = {
+	def toWells(states: RobotState, plate: PlateBean): Result[Seq[Well]] = {
 		val conf = plate.state(states).conf
 		for { li <- toIndexes(conf.nRows, conf.nCols) }
 		yield li.map(iWell => conf.wells(iWell).state(states).conf)
@@ -66,30 +64,31 @@ sealed abstract class WellAddressSingle extends WellAddress {
 }
 
 sealed trait WellPointer extends WellAddress {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]]
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]]
-	def getPlatesL4: Result[Seq[PlateObj]] = Success(Seq())
-	def getReagentsL4: Result[Seq[Reagent]] = Success(Seq())
+	def getWells(bb: BeanBase): Result[Seq[String]]
+	def getWells(ob: ObjBase): Result[Seq[Well]]
+	def getPlates: Result[Seq[String]] = Success(Seq())
+	//def getReagentsL4: Result[Seq[Reagent]] = Success(Seq())
 	def +(that: WellPointer) = new WellPointerSeq(this.toSeq ++ that.toSeq)
 	protected def toSeq: Seq[WellPointer] = Seq(this)
 }
 
 object WellPointer {
-	def apply(o: Well): WellPointerWell = WellPointerWell(o)
-	def apply(o: Seq[Well]): WellPointerWells = WellPointerWells(o)
-	//def apply(plate: Plate)(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
-	def apply(o: PlateObj): WellPointerPlate = WellPointerPlate(o)
+	def apply(id: String): WellPointerWell = {
+		WellPointerWell(o._id)
+	}
+	def apply(o: Seq[WellBean]): WellPointerWells = WellPointerWells(o.map(_.id))
+	def apply(o: PlateBean): WellPointerPlate = WellPointerPlate(o)
 	def apply(o: Reagent): WellPointerReagent = new WellPointerReagent(o)
 }
 
-class WellPointerPlateWrapper(plate: PlateObj) {
+class WellPointerPlateWrapper(plate: PlateBean) {
 	def apply(ptrs: WellAddressPartial*): WellPointerPlateAddress = new WellPointerPlateAddress(plate, ptrs.toSeq)
 }
 
 trait WellPointerImplicits {
 	implicit def wellToPointer(o: Well): WellPointerWell = WellPointerWell(o)
-	implicit def plateToPointer(o: PlateObj): WellPointerPlate = WellPointerPlate(o)
-	implicit def plateToWrapper(o: PlateObj): WellPointerPlateWrapper = new WellPointerPlateWrapper(o)
+	implicit def plateToPointer(o: PlateBean): WellPointerPlate = WellPointerPlate(o)
+	implicit def plateToWrapper(o: PlateBean): WellPointerPlateWrapper = new WellPointerPlateWrapper(o)
 	implicit def reagentToPointer(o: Reagent): WellPointerReagent = WellPointerReagent(o)
 }
 
@@ -100,41 +99,41 @@ object WellPointerImplicits extends WellPointerImplicits {
 case class WellPointerVar() extends WellPointer {
 	var pointer_? : Option[WellPointer] = None
 
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = pointer_?.map(_.getWells(kb)).getOrElse(Success(Seq()))
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = pointer_?.map(_.getWells(states)).getOrElse(Success(Seq()))
-	override def getPlatesL4: Result[Seq[PlateObj]] = pointer_?.map(_.getPlatesL4).getOrElse(Success(Seq()))
+	def getWells(bb: BeanBase): Result[Seq[String]] = pointer_?.map(_.getWells(kb)).getOrElse(Success(Seq()))
+	def getWells(ob: ObjBase): Result[Seq[Well]] = pointer_?.map(_.getWells(states)).getOrElse(Success(Seq()))
+	override def getPlatesL4: Result[Seq[PlateBean]] = pointer_?.map(_.getPlatesL4).getOrElse(Success(Seq()))
 	override def getReagentsL4: Result[Seq[Reagent]] = pointer_?.map(_.getReagentsL4).getOrElse(Success(Seq()))
 	override def toString = pointer_?.map(_.toString).getOrElse(super.toString)
 }
 
-case class WellPointerWell(well: Well) extends WellAddressSingle with WellPointer {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(Seq(well))
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(Seq(well.state(states).conf))
+case class WellPointerWell(idWell: String) extends WellAddressSingle with WellPointer {
+	def getWells(bb: BeanBase): Result[Seq[String]] = Success(Seq(idWell))
+	def getWells(ob: ObjBase): Result[Seq[Well]] = Success(Seq(well.state(states).conf))
 	def toIndex(nRows: Int, nCols: Int): Result[Int] = Result.get(well.index_?, "well index not set")
 	override def toString = well.toString
 }
 
-case class WellPointerWells(lWell: Seq[Well]) extends WellPointer {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(lWell)
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(lWell.map(_.state(states).conf))
+case class WellPointerWells(lIdWell: Seq[String]) extends WellPointer {
+	def getWells(kb: BeanBase): Result[Seq[Well]] = Success(lWell)
+	def getWells(states: RobotState): Result[Seq[Well]] = Success(lWell.map(_.state(states).conf))
 	override def toString = lWell.mkString(";")
 }
 
-case class WellPointerPlate(plate: PlateObj) extends WellPointer {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
+case class WellPointerPlate(plate: PlateBean) extends WellPointer {
+	def getWells(kb: BeanBase): Result[Seq[Well]] = {
 		for { dim <- Result.get(plate.dim_?, "plate dimension must be defined") }
 		yield { dim.wells }
 	}
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(plate.state(states).conf.wells.map(_.state(states).conf))
-	override def getPlatesL4: Result[Seq[PlateObj]] = Success(Seq(plate))
+	def getWells(states: RobotState): Result[Seq[Well]] = Success(plate.state(states).conf.wells.map(_.state(states).conf))
+	override def getPlatesL4: Result[Seq[PlateBean]] = Success(Seq(plate))
 }
 
 case class WellPointerReagent(reagent: Reagent) extends WellPointer {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
+	def getWells(kb: BeanBase): Result[Seq[Well]] = {
 		Success(kb.getReagentWells(reagent).toSeq)
 	}
 	
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
+	def getWells(states: RobotState): Result[Seq[Well]] = {
 		val lWell = states.map.toSeq.collect({ case (well: Well, wellState: WellStateL2) if well.reagent_? == Some(reagent) => wellState.conf })
 		Success(lWell)
 	}
@@ -264,26 +263,27 @@ case class WellAddressList(list: Seq[WellAddressPartial]) extends WellAddress wi
 	override def toString = a + ":" + b
 }*/
 
-case class WellPointerPlateAddress(plate: PlateObj, addrs: Seq[WellAddressPartial]) extends WellPointer {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
+case class WellPointerPlateAddress(plate: PlateBean, addrs: Seq[WellAddressPartial]) extends WellPointer {
+	def getWells(kb: BeanBase): Result[Seq[Well]] = {
 		Result.flatMap(addrs) { _.toWells(kb, plate) }
 	}
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
+	def getWells(states: RobotState): Result[Seq[Well]] = {
 		Result.flatMap(addrs) { _.toWells(states, plate) }
 	}
-	override def getPlatesL4: Result[Seq[PlateObj]] = Success(Seq(plate))
+	override def getPlatesL4: Result[Seq[PlateBean]] = Success(Seq(plate))
 	override def toString = plate.toString+":"+addrs.mkString(",") 
 }
 
 case class WellPointerSeq(seq: Seq[WellPointer]) extends WellPointer {
-	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
+	def getWells(kb: BeanBase): Result[Seq[Well]] = {
 		Result.flatMap(seq) { _.getWells(kb) }
 	}
-	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
+	def getWells(states: RobotState): Result[Seq[Well]] = {
 		Result.flatMap(seq) { _.getWells(states) }
 	}
 	override protected def toSeq: Seq[WellPointer] = seq
-	override def getPlatesL4: Result[Seq[PlateObj]] = Result.flatMap(seq) { _.getPlatesL4 }
+	override def getPlatesL4: Result[Seq[PlateBean]] = Result.flatMap(seq) { _.getPlatesL4 }
 	override def getReagentsL4: Result[Seq[Reagent]] = Result.flatMap(seq) { _.getReagentsL4 }
 	override def toString = seq.mkString(";") 
 }
+*/

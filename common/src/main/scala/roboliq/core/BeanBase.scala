@@ -35,4 +35,40 @@ class BeanBase {
 	//def findWellsBySubstance(idSubstance: String): List[String] = {
 		
 	//}
+	
+	def findPlateModel(id: String, property: String = null): Result[PlateModelBean] = {
+		if (id == null) {
+			if (property == null)
+				Error("plate model ID not set")
+			else
+				Error("`"+property+"` must be set to plate model id")
+		}
+		else {
+			if (!mapPlateModel.contains(id)) {
+			}
+			mapPlateModel.get(id) match {
+				case Some(obj) => Success(obj)
+				case None =>
+					val obj = new PlateModelBean
+					obj._id = id
+					m_mapPlateModel(id) = obj
+					Success(obj)
+			}
+		}
+	}
+	
+	def findWellIdsByPlate(idPlate: String): Result[List[String]] = {
+		for {
+			plateModel <- findPlateModel(idPlate)
+			rows <- Result.mustBeSet(plateModel.rows, "rows")
+			cols <- Result.mustBeSet(plateModel.cols, "cols")
+		} yield {
+			for {
+				col <- (1 to cols).toList
+				row <- 1 to rows
+			} yield {
+				(row + 'A').asInstanceOf[Char].toString + ("%02d".format(col))
+			}
+		}
+	}
 }

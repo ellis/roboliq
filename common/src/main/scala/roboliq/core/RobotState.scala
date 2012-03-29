@@ -34,14 +34,14 @@ trait StateMap {
 	}
 }
 
-class RobotState(val map: Map[_, Object]) extends StateMap {
-	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[_, State] = {
+class RobotState(val map: Map[Object, Object]) extends StateMap {
+	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[Object, State] = {
 		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
 	}
 }
 
-class StateBuilder(val map: HashMap[_, Object]) extends StateMap {
-	def this(states: RobotState) = this(HashMap[Any, Object](states.map.toSeq : _*))
+class StateBuilder(val map: HashMap[Object, Object]) extends StateMap {
+	def this(states: RobotState) = this(HashMap[Object, Object](states.map.toSeq : _*))
 	def this() = this(new HashMap[Object, Object])
 	
 	def toImmutable: RobotState = new RobotState(map.toMap)

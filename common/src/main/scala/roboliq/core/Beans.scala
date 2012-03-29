@@ -19,7 +19,7 @@ class RoboliqYamlBean {
 sealed trait HistoryItem extends Bean
 
 /** Represents the addition of a substance to a well's history in YAML */
-class HistoryItemAddBean extends HistoryItem {
+class HistoryAddBean extends HistoryItem {
 	/** ID of the added substance */
 	@BeanProperty var substance: String = null
 	/** Amount added in moles [mol] */
@@ -29,14 +29,14 @@ class HistoryItemAddBean extends HistoryItem {
 }
 
 /** Factory for [[roboliq.yaml.HistoryItemAddBean]] instances. */
-object HistoryItemAddBean {
+object HistoryAddBean {
 	/** Create a HistoryItemAddBean */
 	def apply(
 		substance: String,
 		mol: java.math.BigDecimal = null,
 		liter: java.math.BigDecimal = null
-	): HistoryItemAddBean = {
-		val bean = new HistoryItemAddBean
+	): HistoryAddBean = {
+		val bean = new HistoryAddBean
 		bean.substance = substance
 		bean.mol = mol
 		bean.liter = liter

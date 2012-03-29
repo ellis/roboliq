@@ -6,10 +6,15 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 
-trait Well {
+trait Well extends Ordered[Well] {
 	val id: String
 	val idPlate: String
 	val index: Int
+	val iRow: Int
+	val iCol: Int
+	val indexName: String
+	
+	override def compare(that: Well) = id.compare(that.id)
 }
 
 class WellState(
@@ -24,7 +29,10 @@ class WellState(
 class PlateWell(
 	val id: String,
 	val idPlate: String,
-	val index: Int
+	val index: Int,
+	val iRow: Int,
+	val iCol: Int,
+	val indexName: String
 ) extends Well
 
 class PlateWellState(
@@ -48,6 +56,9 @@ class Tube(
 ) extends Well {
 	val idPlate = id
 	val index = 0
+	val iRow = 0
+	val iCol = 0
+	val indexName = ""
 }
 
 class TubeState(

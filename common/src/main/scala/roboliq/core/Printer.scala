@@ -45,8 +45,7 @@ object Printer {
 			case Nil => Nil
 			case well0 :: wellsNext0 =>
 				val (well1, wellsNext) = getLastContiguousWell(well0, wellsNext0)
-				val bShowCol = (well0.holder.nCols > 1)
-				val sWells = getWellString(well0, bShowCol) + (if (well0 eq well1) "" else "+"+(well1.index - well0.index + 1).toString)
+				val sWells = well0.indexName + (if (well0 eq well1) "" else "+"+(well1.index - well0.index + 1).toString)
 				sWells :: getWellStrings(wellsNext)
 		}
 	}
@@ -63,10 +62,15 @@ object Printer {
 		}
 	}
 	
-	private def getWellString(well: Well, bShowCol: Boolean): String = {
-		if (bShowCol)
-			(well.iRow + 'A').asInstanceOf[Char].toString + (well.iCol + 1)
-		else
-			(well.index + 1).toString
+	private val PlateWellColRowPattern = """([^(]+)\(([A-Z])([0-9]+)\)""".r
+	private val PlateWellRowPattern = """([^(]+)\(([0-9]+)\)""".r
+	private val PlateWellNullPattern = """([^(]+)\(\)""".r
+	def parseWellId(id: String): Result[Tuple4[String, String, Int, Int]] = {
+		id match {
+			case PlateWellColRowPattern(idPlate, sRow, sCol) => Success(idPlate, sRow+sCol, (sRow.charAt(0) - 'A'), sCol.toInt - 1)
+			case PlateWellRowPattern(idPlate, sRow) => Success(idPlate, sRow, sRow.toInt - 1, 0)
+			case PlateWellNullPattern(idPlate) => Success(idPlate, "", 0, 0)
+			case _ => Success(id, "", 0, 0)
+		}
 	}
 }
