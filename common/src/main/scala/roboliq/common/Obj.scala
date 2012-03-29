@@ -6,9 +6,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 
-trait ObjSetup {
-	def getLabel(kb: KnowledgeBase): String
-}
 trait ObjConfig
 trait ObjState
 
@@ -21,14 +18,12 @@ trait ObjStateImpl[T <: ObjConfig] extends ObjState {
 }
 
 abstract class Obj {
-	type Setup <: ObjSetup
 	type Config <: ObjConfig
 	type State <: ObjState
 	
-	def createSetup(): Setup
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]]
+	def getLabel(kb: KnowledgeBase): String
+	def createConfigAndState0(): Result[Tuple2[Config, State]]
 	
-	def getSetup(map31: ObjMapper): Option[Setup] = map31.setup(this) match { case Some(o) => Some(o.asInstanceOf[Setup]); case None => None }
 	def getConfig(map31: ObjMapper): Option[Config] = map31.config(this) match { case Some(o) => Some(o.asInstanceOf[Config]); case None => None }
 	def getState0(map31: ObjMapper): Option[State] = map31.state0(this) match { case Some(o) => Some(o.asInstanceOf[State]); case None => None }
 	

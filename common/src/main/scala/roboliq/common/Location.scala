@@ -5,15 +5,19 @@ import scala.collection.mutable.HashMap
 
 
 class Location extends Obj { thisObj =>
-	type Setup = LocationSetup
 	type Config = LocationConfig
 	type State = LocationState
 	
-	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	var location_? : Option[String] = None
+	
+	override def getLabel(kb: KnowledgeBase): String = {
+		location_?.getOrElse("NoLoc")
+	}
+
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
-		if (setup.location_?.isEmpty)
+		if (location_?.isEmpty)
 			errors += "location not set"
 				
 		if (!errors.isEmpty)
@@ -21,7 +25,7 @@ class Location extends Obj { thisObj =>
 
 		val conf = new LocationConfig(
 				obj = this,
-				location0 = setup.location_?.get)
+				location0 = location_?.get)
 		val state = new LocationState(
 				conf = conf,
 				location = conf.location0
@@ -39,14 +43,6 @@ class Location extends Obj { thisObj =>
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 }
 
-class LocationSetup(val obj: Location) extends ObjSetup {
-	var location_? : Option[String] = None
-	
-	override def getLabel(kb: KnowledgeBase): String = {
-		location_?.getOrElse("NoLoc")
-	}
-}
-
 class LocationConfig(
 	val obj: Location,
 	val location0: String
@@ -62,5 +58,5 @@ case class LocationState(
 
 class LocationProxy(kb: KnowledgeBase, obj: Location) {
 	def location: String = null
-	def location_=(s: String) = kb.getLocationSetup(obj).location_? = Some(s)
+	def location_=(s: String) = obj.location_? = Some(s)
 }

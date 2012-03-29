@@ -1,6 +1,6 @@
 package roboliq.common
 
-class SetupConfigState(val setup: ObjSetup, val config: ObjConfig, val state0: ObjState)
+class SetupConfigState(val config: ObjConfig, val state0: ObjState)
 
 class ObjMapper(
 	val map: Map[Obj, SetupConfigState]
@@ -11,10 +11,6 @@ class ObjMapper(
 	}
 	def state0(o: Obj) = map.get(o) match {
 		case Some(v) => Some(v.state0)
-		case None => None
-	}
-	def setup(o: Obj) = map.get(o) match {
-		case Some(v) => Some(v.setup)
 		case None => None
 	}
 	

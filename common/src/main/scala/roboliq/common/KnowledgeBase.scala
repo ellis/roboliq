@@ -12,13 +12,11 @@ class KnowledgeBase {
 	private val m_objs = new HashSet[Obj]
 	private val m_wells = new HashSet[Well]
 	private val m_plates = new HashSet[PlateObj]
-	private val m_setups = new HashMap[Obj, ObjSetup]
 
 	// Move this to Pipette device's knowledgebase
 	val mapLiqToVolConsumed = new HashMap[Liquid, Double]
 	
 	val lWell: scala.collection.Set[Well] = m_wells
-	val setups: scala.collection.Map[Obj, ObjSetup] = m_setups
 	
 	/*def addLiquid(o: Liquid) {
 		m_liqs += o
@@ -27,7 +25,6 @@ class KnowledgeBase {
 	def addObject(o: Obj) {
 		if (!m_objs.contains(o)) {
 			m_objs += o
-			m_setups(o) = o.createSetup()
 		}
 	}
 	
@@ -41,22 +38,20 @@ class KnowledgeBase {
 	}
 	
 	def addWell(o: Well, bSrc: Boolean) {
-		val setup = getWellSetup(o)
-		if (setup.bRequiresIntialLiq_?.isEmpty)
-			setup.bRequiresIntialLiq_? = Some(bSrc)
+		if (o.bRequiresIntialLiq_?.isEmpty)
+			o.bRequiresIntialLiq_? = Some(bSrc)
 	}
 	
 	def addPlate(o: PlateObj) {
 		addObject(o)
-		if (o.setup.dim_?.isDefined)
-			o.setup.dim_?.get.wells.foreach(well => addWell(well))
+		if (o.dim_?.isDefined)
+			o.dim_?.get.wells.foreach(well => addWell(well))
 		m_plates += o
 	}
 	
 	def addPlate(o: PlateObj, bSrc: Boolean) {
-		val setup = getPlateSetup(o)
-		if (setup.dim_?.isDefined)
-			setup.dim_?.get.wells.foreach(well => addWell(well, bSrc))
+		if (o.dim_?.isDefined)
+			o.dim_?.get.wells.foreach(well => addWell(well, bSrc))
 	}
 
 	def addWellPointer(o: WellPointer): Unit = o match {
@@ -74,38 +69,9 @@ class KnowledgeBase {
 		o.getWells(this).foreach(_.foreach(well => addWell(well, bSrc)))
 	}
 	
-	def getObjSetup[T](o: Obj): T =
-		m_setups(o).asInstanceOf[T]
-	
-	def getWellSetup(o: Well): WellSetup = {
-		addWell(o)
-		getObjSetup(o)
-	}
-	
-	def getPlateSetup(o: PlateObj): PlateSetup = {
-		addPlate(o)
-		getObjSetup(o)
-	}
-	
-	def getReagentSetup(o: Reagent): ReagentSetup = {
-		addObject(o)
-		getObjSetup(o)
-	}
-	
-	def getLocationSetup(o: Location): LocationSetup = {
-		addObject(o)
-		getObjSetup(o)
-	}
-	
-	def getMementoSetup[T](o: Memento[T]): MementoSetup[T] = {
-		addObject(o)
-		getObjSetup(o)
-	}
-	
 	def getReagentWells(reagent: Reagent): Set[Well] = {
 		m_wells.filter(well => {
-			val wellSetup = getWellSetup(well)
-			wellSetup.reagent_? match {
+			well.reagent_? match {
 				case None => false
 				case Some(reagent2) => (reagent eq reagent2)
 			}
@@ -119,7 +85,7 @@ class KnowledgeBase {
 	}
 	
 	def doesWellRequireInitialLiq(well: Well): Boolean = {
-		getWellSetup(well).bRequiresIntialLiq_? match {
+		well.bRequiresIntialLiq_? match {
 			case None => false
 			case Some(b) => b
 		}
@@ -143,13 +109,11 @@ class KnowledgeBase {
 	
 	def concretize(): Either[CompileStageError, KnowledgeStageSuccess] = {
 		for (plate <- m_plates) {
-			val pc = getPlateSetup(plate)
-			if (pc.dim_?.isDefined && pc.sLabel_?.isDefined) {
-				for ((well, i) <- pc.dim_?.get.wells.zipWithIndex) {
-					val wc = getWellSetup(well)
-					wc.sLabel_? = Some(pc.sLabel_?.get + ":" + (i+1))
-					wc.holder_? = Some(plate)
-					wc.index_? = Some(i)
+			if (plate.dim_?.isDefined && plate.sLabel_?.isDefined) {
+				for ((well, i) <- plate.dim_?.get.wells.zipWithIndex) {
+					well.sLabel_? = Some(plate.sLabel_?.get + ":" + (i+1))
+					well.holder_? = Some(plate)
+					well.index_? = Some(i)
 				}
 			}
 		}
@@ -161,10 +125,10 @@ class KnowledgeBase {
 		
 		println("A: "+log.errors.isEmpty)
 		
-		def constructConfStateTuples(setups: scala.collection.Map[Obj, ObjSetup]) {
-			for ((obj, setup) <- setups) {
+		def constructConfStateTuples(lObj: Iterable[Obj]) {
+			for (obj <- lObj) {
 				if (!setObjTried.contains(obj)) {
-					obj.createConfigAndState0(setup.asInstanceOf[obj.Setup]) match {
+					obj.createConfigAndState0() match {
 						case Error(ls) => log.errors += new LogItem(obj, ls)
 						case Success((conf, state)) =>
 							mapConfs(obj) = conf
@@ -175,41 +139,36 @@ class KnowledgeBase {
 			}
 		}
 		
-		val wellSetups = m_setups.filter(_._2.isInstanceOf[WellSetup]).map(pair => pair._1.asInstanceOf[Well] -> pair._2.asInstanceOf[WellSetup])
-
 		println("A: "+log.errors.isEmpty)
 		fillEmptySourceWells()
 		println("A: "+log.errors.isEmpty)
 		
 		// Make sure all well reagents have been registered
-		wellSetups.foreach(pair => pair._2.reagent_? match {
-			case Some(reagent) =>
-				getReagentSetup(reagent)
+		m_wells.foreach(well => well.reagent_? match {
+			case Some(reagent) => addReagent(reagent)
 			case None =>
-				
 		})
 		
 		println("A: "+log.errors.isEmpty)
 		// Reagents
-		val reagentSetups = m_setups.filter(_._2.isInstanceOf[ReagentSetup])
-		constructConfStateTuples(reagentSetups)
+		val reagents = m_objs.collect({case o: Reagent => o})
+		constructConfStateTuples(reagents)
 			
 		println("A: "+log.errors.isEmpty)
 		// Plates
-		val plateSetups = m_setups.filter(_._2.isInstanceOf[PlateSetup])
-		constructConfStateTuples(plateSetups)
+		constructConfStateTuples(m_plates)
 
 		println("A: "+log.errors.isEmpty)
 		fillEmptySourceWells()
-		val reagentSetups2 = m_setups.filter(_._2.isInstanceOf[ReagentSetup])
-		constructConfStateTuples(reagentSetups2)
+		val reagents2 = m_objs.collect({case o: Reagent => o})
+		constructConfStateTuples(reagents2)
 
 		println("A: "+log.errors.isEmpty)
 		// Wells
-		for ((obj, setup) <- wellSetups) {
-			obj.createConfigAndState0(setup, builder) match {
+		for (obj <- m_wells) {
+			obj.createConfigAndState0(builder) match {
 				case Error(ls) =>
-					println("Error for well:", obj, setup)
+					println("Error for well:", obj)
 					log.errors += new LogItem(obj, ls)
 				case Success((conf, state)) =>
 					mapConfs(obj) = conf
@@ -220,13 +179,13 @@ class KnowledgeBase {
 		
 		println("A: "+log.errors.isEmpty)
 		// Everything else
-		constructConfStateTuples(m_setups)
+		constructConfStateTuples(m_objs)
 
 		if (log.errors.isEmpty) {
 			val map2 = builder.map.map(pair => {
 				val (obj, state) = pair
 				val conf = mapConfs(obj)
-				obj -> new SetupConfigState(m_setups(obj), conf, state)
+				obj -> new SetupConfigState(conf, state)
 			}).toMap
 			val map31 = new ObjMapper(map2)
 			Right(KnowledgeStageSuccess(map31, map31.createRobotState()))
@@ -237,15 +196,10 @@ class KnowledgeBase {
 	}
 	
 	private def fillEmptySourceWells() {
-		//for (well <- m_wells) {
-		//	val setup = getWellSetup(well)
-		val wellSetups = m_setups.toSeq.collect({ case (w: Well, s: WellSetup) => s })
-		for (setup <- wellSetups) {
-			fillEmptySourceWell(setup)
-		}
+		m_wells.foreach(fillEmptySourceWell)
 	}
 	
-	private def fillEmptySourceWell(setup: WellSetup) {
+	private def fillEmptySourceWell(setup: Well) {
 		if (setup.bRequiresIntialLiq_? == Some(true) && setup.reagent_?.isEmpty) {
 			println("fillEmptySourceWell: "+setup.bRequiresIntialLiq_?.toString+setup)
 			println(setup.holder_?, setup.index_?)
@@ -253,25 +207,20 @@ class KnowledgeBase {
 				plate <- setup.holder_?
 				index <- setup.index_?
 			} {
-				val id = plate.setup.getLabel(this) + "#" + (index + 1)
+				val id = plate.getLabel(this) + "#" + (index + 1)
 				//println("id: "+id)
 				//pConfig.setReagent(id, plate, index + 1, "DEFAULT", None)
 				val reagent = new Reagent
-				val reagentSetup = getReagentSetup(reagent)
-				reagentSetup.sName_? = Some(id)
-				reagentSetup.sFamily_? = Some("Water")
-				reagentSetup.group_? = Some(new LiquidGroup(GroupCleanPolicy.Decontaminate))
+				reagent.sName_? = Some(id)
+				reagent.sFamily_? = Some("Water")
+				reagent.group_? = Some(new LiquidGroup(GroupCleanPolicy.Decontaminate))
 				setup.reagent_? = Some(reagent)
 			}
 		}
 	}
 	
-	def getLabel(obj: Obj): String = {
-		m_setups.get(obj) match {
-			case Some(setup) => setup.getLabel(this)
-			case None => obj.toString
-		}
-	}
+	def getLabel(obj: Obj): String = obj.getLabel(this)
+
 	/*def printErrors(errors: Errors) {
 		val grouped: Map[Obj, Errors] = errors.groupBy(_._1)
 		val errors2 = grouped.map(pair => pair._1 -> pair._2.flatMap(_._2))
@@ -288,9 +237,10 @@ class KnowledgeBase {
 	}*/
 	
 	override def toString: String = {
-		val lsReagent: List[String] = m_setups.toList.collect({ case (obj, setup: ReagentSetup) => setup}).map(_.getLabel(this))
-		val lsReagentWells: List[String] = m_setups.toList.collect({ case (obj, setup: ReagentSetup) => setup}).map(setup => {
-			setup.getLabel(this)+" -> "+getReagentWells(setup.obj).map(_.toString()).mkString(",")
+		val lReagent = m_objs.toList.collect({case o: Reagent => o})
+		val lsReagent: List[String] = lReagent.map(_.getLabel(this))
+		val lsReagentWells: List[String] = lReagent.map(setup => {
+			setup.getLabel(this)+" -> "+getReagentWells(setup).map(_.toString()).mkString(",")
 		})
 		(
 			("Reagents:" :: lsReagent) ++

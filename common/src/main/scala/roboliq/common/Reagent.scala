@@ -5,12 +5,21 @@ import scala.collection.mutable.HashMap
 
 
 class Reagent extends Obj { thisObj =>
-	type Setup = ReagentSetup
 	type Config = ReagentConfig
 	type State = ReagentState
 	
-	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	var sName_? : Option[String] = None
+	var sFamily_? : Option[String] = None
+	var contaminants = Set[Contaminant.Value]()
+	var group_? : Option[LiquidGroup] = None
+	var multipipetteThreshold_? : Option[Double] = None
+	
+	override def getLabel(kb: KnowledgeBase): String = {
+		sName_?.getOrElse(toString)
+	}
+
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
+		val setup = this
 		val errors = new ArrayBuffer[String]
 
 		if (setup.sName_?.isEmpty)
@@ -42,18 +51,6 @@ class Reagent extends Obj { thisObj =>
 	}
 	//def stateWriter(map: HashMap[ThisObj, State]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-}
-
-class ReagentSetup(val obj: Reagent) extends ObjSetup {
-	var sName_? : Option[String] = None
-	var sFamily_? : Option[String] = None
-	var contaminants = Set[Contaminant.Value]()
-	var group_? : Option[LiquidGroup] = None
-	var multipipetteThreshold_? : Option[Double] = None
-	
-	override def getLabel(kb: KnowledgeBase): String = {
-		sName_?.getOrElse(toString)
-	}
 }
 
 class ReagentConfig(

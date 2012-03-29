@@ -8,14 +8,37 @@ class PlateModel(val id: String, val nRows: Int, val nCols: Int, val nWellVolume
 
 class PlateObj extends Obj {
 	thisObj =>
-	type Setup = PlateSetup
 	type Config = PlateConfigL2
 	type State = PlateStateL2
 	
-	val setup = new Setup(this)
-	def createSetup() = setup
+	var sLabel_? : Option[String] = None
+	var model_? : Option[PlateModel] = None
+	var dim_? : Option[PlateSetupDimensionL4] = None
+	var location_? : Option[String] = None
 	
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	def setDimension(rows: Int, cols: Int) {
+		assert(dim_?.isEmpty)
+		
+		val nWells = rows * cols
+		val wells = (0 until nWells).map(i => {
+			val well = new Well
+			well.index_? = Some(i)
+			well.holder_? = Some(this)
+			well
+		})
+		val dim = new PlateSetupDimensionL4(rows, cols, wells.toSeq)
+		dim_? = Some(dim)
+	}
+
+	override def getLabel(kb: KnowledgeBase): String = {
+		sLabel_? match {
+			case Some(s) => s
+			case None => toString
+		}
+	}
+
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
+		val setup = this
 		val errors = new ArrayBuffer[String]
 
 		if (setup.sLabel_?.isEmpty)
@@ -52,36 +75,7 @@ class PlateObj extends Obj {
 	}
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	
-	override def toString = setup.sLabel_?.getOrElse(super.toString)
-}
-
-class PlateSetup(val obj: PlateObj) extends ObjSetup {
-	var sLabel_? : Option[String] = None
-	var model_? : Option[PlateModel] = None
-	var dim_? : Option[PlateSetupDimensionL4] = None
-	var location_? : Option[String] = None
-	
-	def setDimension(rows: Int, cols: Int) {
-		assert(dim_?.isEmpty)
-		
-		val nWells = rows * cols
-		val wells = (0 until nWells).map(i => {
-			val well = new Well
-			val wellSetup = well.setup
-			wellSetup.index_? = Some(i)
-			wellSetup.holder_? = Some(obj)
-			well
-		})
-		val dim = new PlateSetupDimensionL4(rows, cols, wells.toSeq)
-		dim_? = Some(dim)
-	}
-
-	override def getLabel(kb: KnowledgeBase): String = {
-		sLabel_? match {
-			case Some(s) => s
-			case None => toString
-		}
-	}
+	override def toString = sLabel_?.getOrElse(super.toString)
 }
 
 class PlateSetupDimensionL4(
@@ -111,18 +105,16 @@ case class PlateStateL2(
 
 
 class PlateProxy(kb: KnowledgeBase, obj: PlateObj) {
-	val setup = kb.getPlateSetup(obj)
-	
-	def label = setup.sLabel_?.get
-	def label_=(s: String) { setup.sLabel_? = Some(s) }
+	def label = obj.sLabel_?.get
+	def label_=(s: String) { obj.sLabel_? = Some(s) }
 	
 	def setDimension(rows: Int, cols: Int) {
-		obj.setup.setDimension(rows, cols)
-		obj.setup.dim_?.get.wells.foreach(kb.addWell)
+		obj.setDimension(rows, cols)
+		obj.dim_?.get.wells.foreach(kb.addWell)
 	}
 	
-	def location = setup.location_?.get
-	def location_=(s: String) { setup.location_? = Some(s) }
+	def location = obj.location_?.get
+	def location_=(s: String) { obj.location_? = Some(s) }
 	
-	def wells = setup.dim_?.get.wells
+	def wells = obj.dim_?.get.wells
 }

@@ -5,15 +5,19 @@ import scala.collection.mutable.HashMap
 
 
 class Memento[T] extends Obj { thisObj =>
-	type Setup = MementoSetup[T]
 	type Config = MementoConfig[T]
 	type State = MementoState[T]
 	
-	def createSetup() = new Setup(this)
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	var value_? : Option[T] = None
+	
+	override def getLabel(kb: KnowledgeBase): String = {
+		value_?.getOrElse("NoValue").toString
+	}
+
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
 		val errors = new ArrayBuffer[String]
 
-		if (setup.value_?.isEmpty)
+		if (value_?.isEmpty)
 			errors += "value not set"
 				
 		if (!errors.isEmpty)
@@ -21,7 +25,7 @@ class Memento[T] extends Obj { thisObj =>
 
 		val conf = new MementoConfig(
 				obj = this,
-				value0 = setup.value_?.get)
+				value0 = value_?.get)
 		val state = new MementoState(
 				conf = conf,
 				value = conf.value0
@@ -42,14 +46,6 @@ class Memento[T] extends Obj { thisObj =>
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 }
 
-class MementoSetup[T](val obj: Memento[T]) extends ObjSetup {
-	var value_? : Option[T] = None
-	
-	override def getLabel(kb: KnowledgeBase): String = {
-		value_?.getOrElse("NoValue").toString
-	}
-}
-
 class MementoConfig[T](
 	val obj: Memento[T],
 	val value0: T
@@ -65,5 +61,5 @@ case class MementoState[T](
 
 class MementoProxy[T](kb: KnowledgeBase, obj: Memento[T]) {
 	def value: String = null
-	def value_=(v: T) = kb.getMementoSetup[T](obj).value_? = Some(v)
+	def value_=(v: T) = obj.value_? = Some(v)
 }

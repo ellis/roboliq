@@ -10,7 +10,7 @@ sealed trait WellAddressPartial {
 	def toIndexes(nRows: Int, nCols: Int): Result[Seq[Int]]
 	def toPointer(kb: KnowledgeBase, plate: PlateObj): Result[WellPointer] = {
 		for {
-			dim <- Result.get(plate.setup.dim_?, "plate dimension not set")
+			dim <- Result.get(plate.dim_?, "plate dimension not set")
 			li <- toIndexes(dim.nRows, dim.nCols)
 		} yield {
 			val lWell = li.map(iWell => dim.wells(iWell))
@@ -25,7 +25,7 @@ sealed trait WellAddressPartial {
 
 	def toWells(kb: KnowledgeBase, plate: PlateObj): Result[Seq[Well]] = {
 		for {
-			dim <- Result.get(plate.setup.dim_?, "plate dimension not set")
+			dim <- Result.get(plate.dim_?, "plate dimension not set")
 			li <- toIndexes(dim.nRows, dim.nCols)
 		} yield {
 			li.map(iWell => dim.wells(iWell))
@@ -110,7 +110,7 @@ case class WellPointerVar() extends WellPointer {
 case class WellPointerWell(well: Well) extends WellAddressSingle with WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = Success(Seq(well))
 	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(Seq(well.state(states).conf))
-	def toIndex(nRows: Int, nCols: Int): Result[Int] = Result.get(well.setup.index_?, "well index not set")
+	def toIndex(nRows: Int, nCols: Int): Result[Int] = Result.get(well.index_?, "well index not set")
 	override def toString = well.toString
 }
 
@@ -122,7 +122,7 @@ case class WellPointerWells(lWell: Seq[Well]) extends WellPointer {
 
 case class WellPointerPlate(plate: PlateObj) extends WellPointer {
 	def getWells(kb: KnowledgeBase): Result[Seq[Well]] = {
-		for { dim <- Result.get(plate.setup.dim_?, "plate dimension must be defined") }
+		for { dim <- Result.get(plate.dim_?, "plate dimension must be defined") }
 		yield { dim.wells }
 	}
 	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = Success(plate.state(states).conf.wells.map(_.state(states).conf))
@@ -135,7 +135,7 @@ case class WellPointerReagent(reagent: Reagent) extends WellPointer {
 	}
 	
 	def getWells(states: RobotState): Result[Seq[WellConfigL2]] = {
-		val lWell = states.map.toSeq.collect({ case (well: Well, wellState: WellStateL2) if well.setup.reagent_? == Some(reagent) => wellState.conf })
+		val lWell = states.map.toSeq.collect({ case (well: Well, wellState: WellStateL2) if well.reagent_? == Some(reagent) => wellState.conf })
 		Success(lWell)
 	}
 
