@@ -146,16 +146,14 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 	private def getMixDef(id: String) = Result.get(shared.mapMixDefs.get(id), "unknown mix definition \""+id+"\"")
 	
 	private def getDim(plate: PlateObj): Result[PlateSetupDimensionL4] = {
-		val setup = kb.getPlateSetup(plate)
 		for {
-			dim <- Result.get(setup.dim_?, "PlateObj \""+plate+"\" requires dimensions")
+			dim <- Result.get(plate.dim_?, "PlateObj \""+plate+"\" requires dimensions")
 		} yield dim
 	}
 	
 	private def wellsToPlateIndexes(wells: Seq[Well]): Seq[Tuple2[PlateObj, Int]] = {
 		wells.map(well => {
-			val wellSetup = kb.getWellSetup(well)
-			(wellSetup.holder_?.get, wellSetup.index_?.get)
+			(well.holder_?.get, well.index_?.get)
 		})
 	}
 	
@@ -172,17 +170,14 @@ class ParserLineScript(shared: ParserSharedData) extends ParserBase(shared) {
 		for (pi <- srcs) {
 			val plate = pi._1
 			val well = getWell(pi)
-			val plateSetup = kb.getPlateSetup(plate)
-			val wellSetup = kb.getWellSetup(well)
-			wellSetup.reagent_? match {
+			well.reagent_? match {
 				case Some(_) =>
 				case None =>
-					val sLiquid = plateSetup.sLabel_?.get + "#" + wellSetup.index_?.get
+					val sLiquid = plate.sLabel_?.get + "#" + well.index_?.get
 					val reagent = new roboliq.common.Reagent
-					val reagentSetup = kb.getReagentSetup(reagent)
-					reagentSetup.sName_? = Some(sLiquid)
-					reagentSetup.sFamily_? = Some("ROBOEASE")
-					wellSetup.reagent_? = Some(reagent)
+					reagent.sName_? = Some(sLiquid)
+					reagent.sFamily_? = Some("ROBOEASE")
+					well.reagent_? = Some(reagent)
 					//wellSetup.nVolume_? = Some(0)
 			}
 		}

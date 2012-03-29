@@ -562,7 +562,7 @@ object ValueToObjectMap {
 		// Create Reagent objects
 		val mapReagents = ild.lLiquid.map(liquid => {
 			val reagent = new Reagent
-			val setup = kb.getReagentSetup(reagent)
+			val setup = reagent
 			kb.addReagent(reagent)
 			setup.sName_? = Some(liquid.key)
 			setup.sFamily_? = liquid.physical.getValue(ild.valueDb).orElse(Some("Water"))
@@ -608,7 +608,8 @@ object ValueToObjectMap {
 				plateModel <- mapPlateModels.get(sPlateModel)
 			} yield {
 				val obj = new PlateObj
-				val setup = kb.getPlateSetup(obj)
+				val setup = obj
+				kb.addPlate(obj)
 				setup.sLabel_? = Some(plate.key)
 				setup.model_? = Some(plateModel)
 				setup.setDimension(plateModel.nRows, plateModel.nCols)
@@ -623,7 +624,7 @@ object ValueToObjectMap {
 			for {
 				sPlateKey <- well.parent.getValueKey.map(_.key)
 				plateObj <- mapPlates.get(sPlateKey)
-				dim <- plateObj.setup.dim_?
+				dim <- plateObj.dim_?
 				index <- well.index.getValue
 			} yield {
 				dim.wells(index)
@@ -638,9 +639,9 @@ object ValueToObjectMap {
 					for (well <- lWell) {
 						println("well: ", well, getWellObject(well))
 						for (wellObj <- getWellObject(well)) {
-							wellObj.setup.sLabel_? = Some("W'"+sLiquidKey)
-							wellObj.setup.reagent_? = Some(reagentObj)
-							well.volume.getValue.foreach(vol => wellObj.setup.nVolume_? = Some(vol.nl / 1000))
+							wellObj.sLabel_? = Some("W'"+sLiquidKey)
+							wellObj.reagent_? = Some(reagentObj)
+							well.volume.getValue.foreach(vol => wellObj.nVolume_? = Some(vol.nl / 1000))
 							kb.addWell(wellObj, true)
 						}
 					}

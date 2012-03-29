@@ -62,7 +62,6 @@ class ParserSharedData(
 	}
 
 	def getDim(plate: PlateObj): Result[PlateSetupDimensionL4] = {
-		val setup = kb.getPlateSetup(plate)
-		Result.get(setup.dim_?, "Plate \""+plate+"\" requires dimensions")
+		Result.get(plate.dim_?, "Plate \""+plate+"\" requires dimensions")
 	}
 }

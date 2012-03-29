@@ -43,9 +43,9 @@ class L3P_Centrifuge(device: CentrifugeDevice) extends CommandCompilerL3 {
 			
 			val plates2 = cmd.args.plates ++ {
 				if ((nPlates % 2) != 0) {
-					if (device.setup.plate_balance == null)
+					if (device.plate_balance == null)
 						return Error("must set balance plate for centrifuge")
-					val plate_balance = device.setup.plate_balance.state(states).conf
+					val plate_balance = device.plate_balance.state(states).conf
 					Seq(plate_balance)
 				}
 				else {

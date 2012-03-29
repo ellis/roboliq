@@ -108,9 +108,16 @@ class KnowledgeBase {
 	//type Errors = Seq[Tuple2[Obj, Seq[String]]]
 	
 	def concretize(): Either[CompileStageError, KnowledgeStageSuccess] = {
+		// Add plates for all wells
+		m_wells.foreach(well => well.holder_? match {
+			case Some(holder) => addPlate(holder)
+			case _ =>
+		})
+		// Add wells for all plates
 		for (plate <- m_plates) {
 			if (plate.dim_?.isDefined && plate.sLabel_?.isDefined) {
 				for ((well, i) <- plate.dim_?.get.wells.zipWithIndex) {
+					addWell(well)
 					well.sLabel_? = Some(plate.sLabel_?.get + ":" + (i+1))
 					well.holder_? = Some(plate)
 					well.index_? = Some(i)
@@ -155,8 +162,13 @@ class KnowledgeBase {
 		constructConfStateTuples(reagents)
 			
 		println("A: "+log.errors.isEmpty)
+		println("Before m_plates")
+		println("m_plates: "+m_plates)
+		builder.map.foreach(println)
 		// Plates
 		constructConfStateTuples(m_plates)
+		println("After m_plates")
+		builder.map.foreach(println)
 
 		println("A: "+log.errors.isEmpty)
 		fillEmptySourceWells()

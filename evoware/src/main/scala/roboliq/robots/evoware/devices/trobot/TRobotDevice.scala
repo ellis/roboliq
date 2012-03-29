@@ -6,20 +6,18 @@ import roboliq.common._
 
 
 class TRobotDevice(val idDevice: String, val location: String) extends PlateDevice { thisObj =>
-	type Setup = TRobotDevice.Setup
 	type Config = TRobotDevice.Config
 	type State = TRobotDevice.State
 	
-	val setup = new Setup
-	setup.sLabel_? = Some(idDevice)
+	var sLabel_? : Option[String] = Some("TRobot")
+	var bUsed = false
+	def getLabel(kb: KnowledgeBase): String = sLabel_?.getOrElse("TRobot")
 	
-	def createSetup(): Setup = setup
-	
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
 		for {
-			sLabel <- Result.get(setup.sLabel_?, "label not set")
+			sLabel <- Result.get(sLabel_?, "label not set")
 		} yield {
-			val conf = new Config(this, sLabel, setup.bUsed)
+			val conf = new Config(this, sLabel, bUsed)
 			val state = new State(this, false, false, false)
 			(conf, state)
 		}
@@ -55,12 +53,6 @@ class TRobotDevice(val idDevice: String, val location: String) extends PlateDevi
 }
 
 object TRobotDevice {
-	class Setup extends ObjSetup {
-		var sLabel_? : Option[String] = Some("TRobot")
-		var bUsed = false
-		def getLabel(kb: KnowledgeBase): String = sLabel_?.getOrElse("TRobot")
-	}
-	
 	class Config(
 		val obj: TRobotDevice,
 		val sLabel: String,

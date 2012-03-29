@@ -203,7 +203,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		//val res1 = p.apply(input)
 		res1 match {
 			case Success(plate ~ ":" ~ wellsByRowCol, _) =>
-				val pc = kb.getPlateSetup(plate)
+				val pc = plate
 				var sError: String = null
 				val list = wellsByRowCol.flatMap(pair => {
 					val dim = pc.dim_?.get
@@ -317,14 +317,13 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 
 	def getWell(plate: PlateObj, iWell: Int): Result[Well] = {
 		for {
-			dim <- Result.get(kb.getPlateSetup(plate).dim_?, "INTERNAL: no dimension information for plate "+plate)
+			dim <- Result.get(plate.dim_?, "INTERNAL: no dimension information for plate "+plate)
 			_ <- Result.assert(iWell >= 0 && iWell < dim.wells.size, "Invalid well index: "+(iWell+1))
 		} yield dim.wells(iWell)
 	}
 	
 	def getWell(plate: PlateObj, iRow: Int, iCol: Int): Result[Well] = {
-		val pc = kb.getPlateSetup(plate)
-		val dim = pc.dim_?.get
+		val dim = plate.dim_?.get
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
 		if (iRow < 0 || iRow >= nRows) {
 			RError("Invalid row: plate has "+nRows+" rows, but row"+(iRow+1)+"was requested")
@@ -359,11 +358,9 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	}*/
 	
 	def getWells(plate: PlateObj, well0: Well, nWells: Int, input: Input): Either[ParseResult[Nothing], List[Well]] = {
-		val pc = kb.getPlateSetup(plate)
-		val dim = pc.dim_?.get
+		val dim = plate.dim_?.get
 		val (nRows, nCols) = (dim.nRows, dim.nCols)
-		val wc = kb.getWellSetup(well0)
-		val i0 = wc.index_?.get
+		val i0 = well0.index_?.get
 		val i1 = i0 + nWells - 1
 		if (i1 >= nRows * nCols) {
 			Left(Error("PlateObj dimension exceeded", input))
@@ -375,15 +372,14 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 	}
 	
 	def getWells(plate: PlateObj, well0: Well, well1: Well): List[Well] = {
-		val i0 = kb.getWellSetup(well0).index_?.get
-		val i1 = kb.getWellSetup(well1).index_?.get
-		val pc = kb.getPlateSetup(plate)
-		(i0 to i1).map(pc.dim_?.get.wells.apply).toList
+		val i0 = well0.index_?.get
+		val i1 = well1.index_?.get
+		(i0 to i1).map(plate.dim_?.get.wells.apply).toList
 	}
 	
 	def getWell(pi: Tuple2[PlateObj, Int]): Well = {
 		val (plate, iWell) = pi
-		val dim = kb.getPlateSetup(plate).dim_?.get
+		val dim = plate.dim_?.get
 		dim.wells(iWell)
 	}
 	
@@ -397,8 +393,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 		pp.location = rack.id
 		shared.mapRackToPlate(rack) = plate
 		pp.wells.foreach(well => {
-			val setup = kb.getWellSetup(well)
-			setup.sLabel_? = Some(id+":"+(setup.index_?.get+1))
+			well.sLabel_? = Some(id+":"+(well.index_?.get+1))
 		})
 		
 		// Try to assign plate model, if one was specified
@@ -406,8 +401,7 @@ class ParserBase(shared: ParserSharedData) extends JavaTokenParsers {
 			if (!shared.mapPlateModel.contains(sModel)) {
 				return RError("undefined labware \""+sModel+"\"")
 			}
-			val setup = kb.getPlateSetup(plate)
-			setup.model_? = Some(shared.mapPlateModel(sModel))
+			plate.model_? = Some(shared.mapPlateModel(sModel))
 		})
 		
 		RSuccess(plate)

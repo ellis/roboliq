@@ -6,16 +6,14 @@ import roboliq.common._
 
 
 class RoboPeelDevice(val idDevice: String, val idProgramDefault: String, val location: String) extends PlateDevice { thisObj =>
-	type Setup = RoboPeelDevice.Setup
 	type Config = RoboPeelDevice.Config
 	type State = RoboPeelDevice.State
 	
-	val setup = new Setup(this)
+	var bUsed = false
+	def getLabel(kb: KnowledgeBase): String = idDevice
 	
-	def createSetup(): Setup = setup
-	
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
-		val conf = new Config(this, setup.bUsed)
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
+		val conf = new Config(this, bUsed)
 		val state = new State(this)
 		Success(conf, state)
 	}
@@ -41,11 +39,6 @@ class RoboPeelDevice(val idDevice: String, val idProgramDefault: String, val loc
 }
 
 object RoboPeelDevice {
-	class Setup(obj: RoboPeelDevice) extends ObjSetup {
-		var bUsed = false
-		def getLabel(kb: KnowledgeBase): String = obj.idDevice
-	}
-	
 	class Config(
 		val obj: RoboPeelDevice,
 		val bUsed: Boolean

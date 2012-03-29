@@ -9,9 +9,7 @@ case class L4C_SaveCurrentLocation(plate: PlateObj, mem: Memento[String]) extend
 	def addKnowledge(kb: KnowledgeBase) {
 		kb.addPlate(plate)
 		kb.addObject(mem)
-		val plateSetup = kb.getPlateSetup(plate)
-		val memSetup = kb.getMementoSetup(mem)
-		memSetup.value_? = plateSetup.location_?
+		mem.value_? = plate.location_?
 	}
 	
 	def toL3(states: RobotState): Result[L3Type] = {

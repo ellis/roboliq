@@ -6,18 +6,17 @@ import roboliq.common._
 
 
 class CentrifugeDevice(val idDevice: String, val location: String, val nSlots: Int) extends PlateDevice { thisObj =>
-	type Setup = CentrifugeDevice.Setup
 	type Config = CentrifugeDevice.Config
 	type State = CentrifugeDevice.State
 	
-	val setup = new Setup(this)
-	
-	def createSetup(): Setup = setup
-	
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	var bUsed = false
+	var plate_balance: PlateObj = null
+	def getLabel(kb: KnowledgeBase): String = idDevice
+
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
 		val conf = new Config(
 			this,
-			setup.bUsed
+			bUsed
 		)
 		val state = new State(
 			this,
@@ -49,12 +48,6 @@ class CentrifugeDevice(val idDevice: String, val location: String, val nSlots: I
 }
 
 object CentrifugeDevice {
-	class Setup(obj: CentrifugeDevice) extends ObjSetup {
-		var bUsed = false
-		var plate_balance: PlateObj = null
-		def getLabel(kb: KnowledgeBase): String = obj.idDevice
-	}
-	
 	class Config(
 		val obj: CentrifugeDevice,
 		val bUsed: Boolean

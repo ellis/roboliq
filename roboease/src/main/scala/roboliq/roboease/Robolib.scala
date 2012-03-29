@@ -336,6 +336,6 @@ class Robolib(shared: ParserSharedData) {
 	}
 	
 	private def toLabel(well: Well): String = {
-		shared.kb.getWellSetup(well).sLabel_?.get
+		well.sLabel_?.get
 	}
 }

@@ -28,7 +28,6 @@ object ExampleRunner {
 		mapRack += "Tube 50ml" -> (0 until 8).toList
 		val lPlateToLocation: List[Tuple2[Plate, String]] = db.lPlate.flatMap(plate => {
 			val plateObj = vom.mapKeyToPlateObj(plate.key)
-			val plateSetup = vom.kb.getPlateSetup(plateObj)
 			plate.model.getValue match {
 				case None => None
 				case Some(sModel) =>
@@ -48,7 +47,7 @@ object ExampleRunner {
 					location_? match {
 						case None => None
 						case Some(location) =>
-							plateSetup.location_? = Some(location)
+							plateObj.location_? = Some(location)
 							Some(plate -> location)
 					}
 			}

@@ -84,11 +84,10 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 				pp.location = "decon3"
 				pp.setDimension(8, 1)
 				val reagent = new Reagent
-				pp.wells.foreach(well => kb.getWellSetup(well).reagent_? = Some(reagent))
-				val rs = kb.getReagentSetup(reagent)
-				rs.sName_? = Some("Decon")
-				rs.sFamily_? = Some("Decon")
-				rs.group_? = Some(new LiquidGroup(GroupCleanPolicy.NNN))
+				pp.wells.foreach(well => well.reagent_? = Some(reagent))
+				reagent.sName_? = Some("Decon")
+				reagent.sFamily_? = Some("Decon")
+				reagent.group_? = Some(new LiquidGroup(GroupCleanPolicy.NNN))
 		}
 		kb.addPlate(plateDecon, true)
 	}

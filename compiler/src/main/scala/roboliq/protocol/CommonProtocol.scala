@@ -59,7 +59,7 @@ trait CommonProtocol extends
 		def this(properties: Properties.Value, cleanPolicy: GroupCleanPolicy) = this(properties.toString(), Set[Contaminant.Value](), Some(cleanPolicy))
 		def this(properties: Properties.Value, cleanPolicy: GroupCleanPolicy, contaminant: Contaminant.Value) = this(properties.toString(), Set(contaminant), Some(cleanPolicy))
 		
-		val setup = kb.getReagentSetup(this)
+		val setup = this
 		
 		kb.addReagent(this)
 		setup.sFamily_? = Some(family)
@@ -93,7 +93,7 @@ trait CommonProtocol extends
 		//}
 		
 		def set(model: common.PlateModel, location: String) {
-			setup.model_? = Some(model)
+			this.model_? = Some(model)
 			proxy.setDimension(model.nRows, model.nCols)
 			proxy.location = location
 		}
@@ -119,8 +119,8 @@ trait CommonProtocol extends
 			if (t == classOf[Plate]) {
 				f.setAccessible(true)
 				val o = f.get(container).asInstanceOf[Plate]
-				if (o.setup.sLabel_?.isEmpty)
-					o.setup.sLabel_? = Some(f.getName())
+				if (o.sLabel_?.isEmpty)
+					o.sLabel_? = Some(f.getName())
 			}
 			else if (t == classOf[Liquid]) {
 				f.setAccessible(true)

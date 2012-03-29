@@ -261,7 +261,7 @@ class ParserFile(
 	}
 	
 	private def toLabel(well: Well): String = {
-		shared.kb.getWellSetup(well).sLabel_?.get
+		well.sLabel_?.get
 	}
 	
 	def DefineRack(name: String, grid: Int, site: Int, xsize: Int, ysize: Int, nVolumeMax: Double, carrierType: String = "") {
@@ -280,13 +280,12 @@ class ParserFile(
 	
 	private def fillEmptySourceWells() {
 		for (well <- shared.kb.lWell) {
-			val setup = shared.kb.getWellSetup(well)
-			if (setup.bRequiresIntialLiq_? == Some(true) && setup.reagent_? == None) {
+			if (well.bRequiresIntialLiq_? == Some(true) && well.reagent_? == None) {
 				for {
-					plate <- setup.holder_?
-					index <- setup.index_?
+					plate <- well.holder_?
+					index <- well.index_?
 				} {
-					val id = plate.setup.getLabel(shared.kb) + "#" + (index + 1)
+					val id = plate.getLabel(shared.kb) + "#" + (index + 1)
 					println("id: "+id)
 					pConfig.setReagent(id, plate, index + 1, "DEFAULT", None)
 				}

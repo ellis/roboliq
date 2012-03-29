@@ -61,14 +61,12 @@ class ParserLineConfig(shared: ParserSharedData, mapTables: Map[String, Table]) 
 			
 			// Create liquid with given name
 			val reagent = new Reagent(id, new roboliq.common.Reagent, wells, policy_?)
-			val reagentSetup = kb.getReagentSetup(reagent.reagent)
-			reagentSetup.sName_? = Some(id)
-			reagentSetup.sFamily_? = Some(lc)
+			reagent.reagent.sName_? = Some(id)
+			reagent.reagent.sFamily_? = Some(lc)
 			
 			for (well <- wells) {
 				kb.addWell(well, true) // Indicate that it's a source
-				val wellSetup = kb.getWellSetup(well)
-				wellSetup.reagent_? = Some(reagent.reagent)
+				well.reagent_? = Some(reagent.reagent)
 				//wellSetup.nVolume_? = Some(0)
 				//println(kb.getWellSetup(well))
 			}

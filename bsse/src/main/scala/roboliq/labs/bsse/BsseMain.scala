@@ -31,7 +31,7 @@ object BsseMain extends App {
 	}
 	
 	//runProtocol(new PcrExample4().l, PcrExample4Database.db, "ellis_pcr4.esc")
-	//runProtocol(new PcrExample5().l, PcrExample5Database.db, "ellis_pcr5.esc")
+	runProtocol(new PcrExample5().l, PcrExample5Database.db, "ellis_pcr5.esc")
 	//new examples.PrimerTest1().run()
 
 	/*
@@ -49,6 +49,7 @@ object BsseMain extends App {
 		nFinalReps = 16
 	))
 	*/
+	/*
 	// Attempt at touchdown PCR for taq
 	FileUtils.writeToFile("tchdntaq.tpb", TRobotProgram.generateTouchdown(
 		0,
@@ -62,4 +63,5 @@ object BsseMain extends App {
 		nAnnealingTime = 20,
 		nFinalReps = 15
 	))
+	*/
 }

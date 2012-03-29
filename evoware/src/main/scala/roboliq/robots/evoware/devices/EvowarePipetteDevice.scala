@@ -12,12 +12,12 @@ import roboliq.robots.evoware._
 abstract class EvowarePipetteDevice extends PipetteDevice {
 	val config: PipetteDeviceConfig
 			
-	type Setup = EvowarePipetteSetup
 	type Config = EvowarePipetteConfig
 	type State = EvowarePipetteState
 	
-	def createSetup(): Setup = new Setup
-	def createConfigAndState0(setup: Setup): Result[Tuple2[Config, State]] = {
+	def getLabel(kb: KnowledgeBase): String = "pipetter"
+
+	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
 		val conf = new Config
 		val state = new State
 		Success(conf, state)
@@ -113,8 +113,5 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	*/
 }
 
-class EvowarePipetteSetup extends ObjSetup {
-	def getLabel(kb: KnowledgeBase): String = "pipetter"
-}
 class EvowarePipetteConfig extends ObjConfig
 class EvowarePipetteState extends ObjState

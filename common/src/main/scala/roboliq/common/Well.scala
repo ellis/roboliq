@@ -55,6 +55,7 @@ class Well extends Obj { thisObj =>
 			case Some(holder) =>
 				states.map.get(holder) match {
 					case None => errors += "well's holder is not listed in state map"
+						states.map.foreach(println)
 					case _ =>
 				}
 		}
@@ -77,8 +78,9 @@ class Well extends Obj { thisObj =>
 			
 		if (!errors.isEmpty)
 			return Error(errors)
-			
-		val holderState = states(holder_?.get).asInstanceOf[PlateStateL2]
+		
+		val holder = holder_?.get
+		val holderState = states(holder).asInstanceOf[PlateStateL2]
 		val bInitialVolumeKnown = nVolume_?.isDefined
 		val nVolume = nVolume_?.getOrElse(0.0)
 		val bCheckVolume = (bInitialVolumeKnown || bRequiresIntialLiq_? == Some(false))
