@@ -155,121 +155,16 @@ object T {
 	}
 }
 
-object YamlTest {
-	import org.yaml.snakeyaml.Yaml
-	import org.yaml.snakeyaml.constructor.Constructor
-	import scala.collection.mutable.ListBuffer
-	import scala.reflect.BeanProperty
-
-	/**
-	 * With the Snakeyaml Constructor approach shown in the main method,
-	 * this class must have a no-args constructor.
-	 */
-	class EmailAccount {
-		@BeanProperty var accountName: String = null
-		@BeanProperty var username: String = null
-		@BeanProperty var password: String = null
-		@BeanProperty var mailbox: String = null
-		@BeanProperty var imapServerUrl: String = null
-		@BeanProperty var minutesBetweenChecks: Int = 0
-		@BeanProperty var protocol: String = null
-		@BeanProperty var usersOfInterest = new java.util.ArrayList[String]()
-
-		override def toString: String = {
-			return String.format("acct (%s), user (%s), url (%s)", accountName, username, imapServerUrl)
-		}
-	}
-
-	object YamlBeanTest1 {
-
-		val text = """
-accountName: Ymail Account
-username: USERNAME
-password: PASSWORD
-mailbox: INBOX
-imapServerUrl: imap.mail.yahoo.com
-protocol: imaps
-minutesBetweenChecks: 1
-usersOfInterest: [barney, betty, wilma]
-"""
-
-		def run {
-			val yaml = new Yaml(new Constructor(classOf[EmailAccount]))
-			val e = yaml.load(text).asInstanceOf[EmailAccount]
-			println(e)
-		}
-
-	}
-
-	val yaml = new Yaml
-
-	def toMap(o: Any): collection.mutable.Map[String, _] =
-		scala.collection.JavaConversions.mapAsScalaMap(o.asInstanceOf[LinkedHashMap[String, _]])
-	def getMap(m: collection.mutable.Map[String, _], name: String): collection.mutable.Map[String, _] =
-		toMap(m.get(name))
+class YamlTest {
+	val bean = roboliq.yaml.RoboliqYaml.loadFile("database3.yaml")
+	val text = roboliq.yaml.RoboliqYaml.toString(bean)
 	
-	def testfile1() {
-		val s = scala.io.Source.fromFile("database2.yaml").mkString
-		val o = yaml.load(s)
-		println(o)
-		println()
-		println(yaml.dump(o))
-	}
-}
-
-
-class SubstanceHolder {
-	
-}
-
-trait WellHistory
-case class WellHistoryAdd()
-
-object YamlTest2 {
-	import org.yaml.snakeyaml.Yaml
-	//import org.yaml.snakeyaml.constructor.Constructor
-	//import scala.collection.mutable.ListBuffer
-	//import scala.reflect.BeanProperty
-	
-	val yaml = new Yaml
-
-	def toMap(o: Any): collection.mutable.Map[String, _] =
-		scala.collection.JavaConversions.mapAsScalaMap(o.asInstanceOf[LinkedHashMap[String, _]])
-	def getMap(
-		m: collection.mutable.Map[String, _],
-		name: String
-	): collection.mutable.Map[String, _] = {
-		m.get(name) match {
-			case Some(o) => toMap(o)
-			case _ => collection.mutable.Map()
-		}
-	}
-	
-	val s0 = scala.io.Source.fromFile("database2.yaml").mkString
-	val o0 = yaml.load(s0)
-
-	//println(o0)
-	//println()
-	//println(yaml.dump(o0))
-			
-	val m0 = toMap(o0)
-	val mWells = getMap(m0, "well")
-	
-	for ((sPlateId, mWell0) <- mWells) {
-		val mWell = toMap(mWell0)
-		for ((sWellCoord, mWellProp) <- mWell) {
-			println(sWellCoord)
-		}
+	def run {
+		println(text)
 	}
 }
 
 object Main extends App {
 	//T.run
-	//YamlTest.YamlBeanTest1.run
-	//YamlTest.testfile1()
-	new temp.YamlTest3().run
-	println()
-	println()
-	println()
-	new temp.YamlTest4().run
+	new YamlTest().run
 }
