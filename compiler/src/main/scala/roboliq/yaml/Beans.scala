@@ -13,35 +13,49 @@ import org.yaml.snakeyaml.nodes.NodeTuple
 import org.yaml.snakeyaml.TypeDescription
 
 
+trait Bean {
+	var _id: String = null
+}
+
 /** YAML bean representing an entire roboliq YAML file */
 class RoboliqYamlBean {
+	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
 	@BeanProperty var plates: java.util.LinkedHashMap[String, PlateBean] = null
-	@BeanProperty var substances: java.util.LinkedHashMap[String, java.util.List[SubstanceItem]] = null
+	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceItem] = null
 	@BeanProperty var history: java.util.LinkedHashMap[String, java.util.List[HistoryItem]] = null
 }
 
+/** Represents a plate model in YAML */
+class PlateModelBean extends Bean {
+	/** Number of rows on the plate */
+	@BeanProperty var rows: java.lang.Integer = null
+	/** Number of columns on the plate */
+	@BeanProperty var cols: java.lang.Integer = null
+	/** Volume of wells in liters */
+	@BeanProperty var volume: java.math.BigDecimal = null
+}
+
 /** Represents a plate in YAML */
-class PlateBean {
+class PlateBean extends Bean {
+	/** ID of the plate's model */
 	@BeanProperty var model: String = null
+	/** Description of what the plate contains or is used for */
 	@BeanProperty var description: String = null
+	/** Plate barcode */
 	@BeanProperty var barcode: String = null
 }
 
-sealed trait SubstanceItem
+sealed trait SubstanceItem extends Bean
 
 /** Represents a DNA-based substance in YAML */
 class SubstanceItemDnaBean extends SubstanceItem {
 	@BeanProperty var sequence: String = null
 }
 
-/*class HistoryBean {
-	@BeanProperty var history: java.util.LinkedHashMap[String, java.util.List[HistoryItem]] = null
-}*/
-
 /**
  * Represents a change to the state of a well.
  */
-sealed trait HistoryItem
+sealed trait HistoryItem extends Bean
 
 /** Represents the addition of a substance to a well's history in YAML */
 class HistoryItemAddBean extends HistoryItem {
