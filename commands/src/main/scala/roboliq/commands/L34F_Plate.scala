@@ -65,7 +65,7 @@ trait L34F_Plate { top =>
 	class L3A(
 		val device_? : Option[Device],
 		val program: ProgramConfig,
-		val plate: PlateConfigL2,
+		val plate: Plate,
 		val plateHandling: PlateHandlingConfig
 	)
 }

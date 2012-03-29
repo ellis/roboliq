@@ -25,10 +25,10 @@ case class PlateHandlingAction_Uncover() extends PlateHandlingAction*/
 abstract class L3P_PlateCommand(device: PlateDevice) extends CommandCompilerL3 {
 	val bReturnPlateToOriginalLocation: Boolean
 	
-	def getPlate(cmd: CmdType): PlateConfigL2
+	def getPlate(cmd: CmdType): Plate
 	def getPlateHandling(cmd: CmdType): PlateHandlingConfig
 	
-	//def isPlateCompatible(plate: PlateConfigL2): Boolean = device.isPlateCompatible(plate)
+	//def isPlateCompatible(plate: Plate): Boolean = device.isPlateCompatible(plate)
 	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = device.isPlatePreMoveRequired(plateState)
 	def chooseDeviceLocationProgram(ctx: CompilerContextL3, cmd: CmdType): Result[PlateCommandDLP]
 	

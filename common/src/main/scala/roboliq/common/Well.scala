@@ -135,7 +135,7 @@ class Well extends Obj { thisObj =>
 
 class WellConfigL2(
 	val obj: Well,
-	val holder: PlateConfigL2,
+	val holder: Plate,
 	val index: Int,
 	val bInitialVolumeKnown: Boolean
 ) extends ObjConfig with Ordered[WellConfigL2] { thisConf =>

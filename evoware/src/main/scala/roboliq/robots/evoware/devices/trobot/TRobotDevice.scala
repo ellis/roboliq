@@ -35,7 +35,7 @@ class TRobotDevice(val idDevice: String, val location: String) extends PlateDevi
 			map(thisObj) = st.copy(bOpen = b)
 		}
 		
-		/*def insertPlate(plate: PlateConfigL2) {
+		/*def insertPlate(plate: Plate) {
 			val st = state
 			map(thisObj) = st.copy(plate_? = Some(plate))
 		}
@@ -49,7 +49,7 @@ class TRobotDevice(val idDevice: String, val location: String) extends PlateDevi
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 
 	def fixedLocation_? : Option[String] = Some(location)
-	def isPlateCompatible(plate: PlateConfigL2): Boolean = true
+	def isPlateCompatible(plate: Plate): Boolean = true
 }
 
 object TRobotDevice {
@@ -64,6 +64,6 @@ object TRobotDevice {
 		val bInitialized: Boolean,
 		val bOpen: Boolean,
 		val bRunning: Boolean
-		//val plate_? : Option[PlateConfigL2]
+		//val plate_? : Option[Plate]
 	) extends ObjState
 }

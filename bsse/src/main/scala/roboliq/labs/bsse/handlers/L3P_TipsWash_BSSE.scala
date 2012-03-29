@@ -45,7 +45,7 @@ class L3P_TipsWash_BSSE(device: BssePipetteDevice, plateDecon: PlateObj) extends
 		L2C_Wash(items2, iWashProgram, cmd.intensity)
 	}
 	
-	private def decon(ctx: CompilerContextL3, plateDecon: PlateConfigL2, item: L3A_TipsWashItem): Result[Tuple3[L2A_SpirateItem, L2A_SpirateItem, Boolean]] = {
+	private def decon(ctx: CompilerContextL3, plateDecon: Plate, item: L3A_TipsWashItem): Result[Tuple3[L2A_SpirateItem, L2A_SpirateItem, Boolean]] = {
 		val tip = item.tip
 		val tipState = tip.obj.state(ctx.states)
 		val tipModel = tipState.model_?.get

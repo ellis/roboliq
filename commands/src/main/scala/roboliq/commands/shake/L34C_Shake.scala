@@ -42,7 +42,7 @@ class L4A_ShakeArgs(
 class L3A_ShakeArgs(
 	val idDevice_? : Option[String],
 	val idProgram_? : Option[String],
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	val nDuration: Int,
 	val plateHandling: PlateHandlingConfig
 )

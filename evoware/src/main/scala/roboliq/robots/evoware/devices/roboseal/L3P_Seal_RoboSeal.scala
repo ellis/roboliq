@@ -13,7 +13,7 @@ class L3P_Seal_RoboSeal(device: RoboSealDevice) extends L3P_PlateCommand(device)
 	
 	val bReturnPlateToOriginalLocation = true
 	
-	def getPlate(cmd: CmdType): PlateConfigL2 = cmd.args.plate
+	def getPlate(cmd: CmdType): Plate = cmd.args.plate
 	
 	def getPlateHandling(cmd: CmdType): PlateHandlingConfig = cmd.args.plateHandling
 	

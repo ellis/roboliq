@@ -40,6 +40,6 @@ class L4A_CentrifugeArgs(
 class L3A_CentrifugeArgs(
 	val idDevice_? : Option[String],
 	val idProgram_? : Option[String],
-	val plates: Seq[PlateConfigL2],
+	val plates: Seq[Plate],
 	val plateHandling: PlateHandlingConfig
 )

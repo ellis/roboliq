@@ -38,7 +38,7 @@ class L4A_MovePlateArgs(
 }
 
 class L3A_MovePlateArgs(
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	val location: ValueArg[String],
 	val lidHandlingSpec_? : Option[LidHandlingSpec]
 )

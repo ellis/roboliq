@@ -2,11 +2,22 @@ package roboliq.common
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import scala.reflect.BeanProperty
 
+
+/** Represents a plate in YAML */
+class PlateBean extends Bean {
+	/** ID of the plate's model */
+	@BeanProperty var model: String = null
+	/** Description of what the plate contains or is used for */
+	@BeanProperty var description: String = null
+	/** Plate barcode */
+	@BeanProperty var barcode: String = null
+}
 
 class PlateObj extends Obj {
 	thisObj =>
-	type Config = PlateConfigL2
+	type Config = Plate
 	type State = PlateStateL2
 	
 	var sLabel_? : Option[String] = None
@@ -50,7 +61,7 @@ class PlateObj extends Obj {
 
 		val dim = setup.dim_?.get
 		
-		val conf = new PlateConfigL2(
+		val conf = new Plate(
 			obj = this,
 			sLabel = setup.sLabel_?.get,
 			model_? = setup.model_?,
@@ -82,7 +93,7 @@ class PlateSetupDimensionL4(
 	val wells: Seq[Well]
 )
 
-class PlateConfigL2(
+class Plate(
 	val obj: PlateObj,
 	val sLabel: String,
 	val model_? : Option[PlateModel],
@@ -90,14 +101,14 @@ class PlateConfigL2(
 	val nCols: Int,
 	val nWells: Int,
 	val wells: Seq[Well]
-) extends ObjConfig with Ordered[PlateConfigL2] {
+) extends ObjConfig with Ordered[Plate] {
 	def state(states: StateMap) = obj.state(states)
-	override def compare(that: PlateConfigL2) = sLabel.compare(that.sLabel)
+	override def compare(that: Plate) = sLabel.compare(that.sLabel)
 	override def toString = sLabel
 }
 
 case class PlateStateL2(
-	val conf: PlateConfigL2,
+	val conf: Plate,
 	val location: String
 ) extends ObjState
 

@@ -37,7 +37,7 @@ class L3P_Thermocycle_TRobot(device: TRobotDevice) extends CommandCompilerL3 {
 		}
 	}
 	
-	def getPlate(cmd: CmdType): PlateConfigL2 = cmd.args.plate
+	def getPlate(cmd: CmdType): Plate = cmd.args.plate
 	
 	def getPlateHandling(cmd: CmdType): PlateHandlingConfig = cmd.args.plateHandling
 	

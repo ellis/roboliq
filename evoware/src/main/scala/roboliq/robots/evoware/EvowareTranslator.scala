@@ -100,7 +100,7 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 	protected def encodeTips(list: Iterable[Tip]): Int =
 		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
 
-	protected def encodeWells(holder: PlateConfigL2, aiWells: Traversable[Int]): String = {
+	protected def encodeWells(holder: Plate, aiWells: Traversable[Int]): String = {
 		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		for (iWell <- aiWells) {
@@ -447,7 +447,7 @@ class EvowareTranslator(config: EvowareConfig) extends Translator {
 		addLabware(builder, labwareModel, location)
 	}
 	
-	private def addLabware(builder: EvowareScriptBuilder, plate: PlateConfigL2, location: String): Result[Unit] = {
+	private def addLabware(builder: EvowareScriptBuilder, plate: Plate, location: String): Result[Unit] = {
 		if (plate.model_?.isEmpty)
 			//return Error("plate model must be assigned to plate \""+plate+"\"")
 			return Success(())

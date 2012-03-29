@@ -26,7 +26,7 @@ case class L2C_MovePlate(args: L2A_MovePlateArgs) extends CommandL2 {
 
 case class L2A_MovePlateArgs(
 	iRoma: Int, // 0 for RoMa1, 1 for RoMa2
-	plate: PlateConfigL2,
+	plate: Plate,
 	locationDest: String,
 	lidHandling: LidHandling.Value,
 	locationLid: String

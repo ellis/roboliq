@@ -8,7 +8,7 @@ import scala.collection.immutable.SortedSet
  */
 class WellGroupPlate private[common] (
 	set: SortedSet[WellConfigL2],
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	iCol_? : Option[Int] = None,
 	bAdjacent: Boolean = false
 ) extends WellGroup(set, Some(plate), iCol_?, bAdjacent) {
@@ -22,7 +22,7 @@ class WellGroupPlate private[common] (
  */
 class WellGroupCol private[common] (
 	set: SortedSet[WellConfigL2],
-	plate: PlateConfigL2,
+	plate: Plate,
 	val iCol: Int,
 	bAdjacent: Boolean = false
 ) extends WellGroupPlate(set, plate, Some(iCol), bAdjacent) {
@@ -36,7 +36,7 @@ class WellGroupCol private[common] (
  */
 class WellGroupAdjacent private[common] (
 	set: SortedSet[WellConfigL2],
-	plate: PlateConfigL2,
+	plate: Plate,
 	iCol: Int
 ) extends WellGroupCol(set, plate, iCol, true) {
 	assert(bAdjacent == true)
@@ -50,7 +50,7 @@ class WellGroupAdjacent private[common] (
  */
 sealed class WellGroup private[common] (
 	val set: SortedSet[WellConfigL2],
-	val plate_? : Option[PlateConfigL2],
+	val plate_? : Option[Plate],
 	val iCol_? : Option[Int],
 	val bAdjacent: Boolean
 ) {

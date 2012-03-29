@@ -42,7 +42,7 @@ class CentrifugeDevice(val idDevice: String, val location: String, val nSlots: I
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	
 	def fixedLocation_? : Option[String] = Some(location)
-	def isPlateCompatible(plate: PlateConfigL2): Boolean = true
+	def isPlateCompatible(plate: Plate): Boolean = true
 	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = true
 	//def canAccessPlate(plate: PlateStateL2) =
 }
@@ -59,6 +59,6 @@ object CentrifugeDevice {
 		val bOpen_? : Option[Boolean],
 		val iPosition_? : Option[Int]
 	) extends ObjState {
-		val mapPosToPlate = new HashMap[Int, PlateConfigL2]
+		val mapPosToPlate = new HashMap[Int, Plate]
 	}
 }

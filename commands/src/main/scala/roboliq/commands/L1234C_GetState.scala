@@ -20,9 +20,9 @@ case class L4C_SaveCurrentLocation(plate: PlateObj, mem: Memento[String]) extend
 
 }
 
-case class L3C_SaveCurrentLocation(plate: PlateConfigL2, mem: MementoConfig[String]) extends CommandL3
+case class L3C_SaveCurrentLocation(plate: Plate, mem: MementoConfig[String]) extends CommandL3
 
-case class L2C_SaveCurrentLocation(plate: PlateConfigL2, mem: MementoConfig[String]) extends CommandL2 {
+case class L2C_SaveCurrentLocation(plate: Plate, mem: MementoConfig[String]) extends CommandL2 {
 	type L1Type = L1C_SaveCurrentLocation
 	
 	def updateState(builder: StateBuilder) {

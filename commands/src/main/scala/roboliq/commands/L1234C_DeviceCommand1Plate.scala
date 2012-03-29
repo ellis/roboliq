@@ -47,7 +47,7 @@ class L3A_DeviceCommand1PlateArgs(
 	val idCommand: String,
 	val idDevice_? : Option[String],
 	val idProgram_? : Option[String],
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	val plateHandling: PlateHandlingConfig
 )
 
@@ -73,7 +73,7 @@ case class L2A_DeviceCommand1PlateArgs(
 	val idCommand: String,
 	val idDevice: String,
 	val idProgram: String,
-	val plate: PlateConfigL2
+	val plate: Plate
 )
 
 case class L1C_DeviceCommand1Plate(args: L1A_DeviceCommand1PlateArgs) extends CommandL1 {
@@ -87,6 +87,6 @@ case class L1A_DeviceCommand1PlateArgs(
 	val idCommand: String,
 	val idDevice: String,
 	val idProgram: String,
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	val location: String
 )

@@ -40,6 +40,6 @@ class L4A_PeelArgs(
 class L3A_PeelArgs(
 	val idDevice_? : Option[String],
 	val idProgram_? : Option[String],
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	val plateHandling: PlateHandlingConfig
 )

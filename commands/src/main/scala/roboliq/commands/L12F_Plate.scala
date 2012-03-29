@@ -28,7 +28,7 @@ trait L12F_Plate[DeviceConfig] { top =>
 	case class L2A(
 		val device: DeviceConfig,
 		val program: ProgramParams,
-		val plate: PlateConfigL2
+		val plate: Plate
 	)
 	
 	case class L1C(args: L1A) extends CommandL1 {
@@ -41,7 +41,7 @@ trait L12F_Plate[DeviceConfig] { top =>
 	case class L1A(
 		val device: DeviceConfig,
 		val program: ProgramParams,
-		val plate: PlateConfigL2,
+		val plate: Plate,
 		val location: String
 	)
 }

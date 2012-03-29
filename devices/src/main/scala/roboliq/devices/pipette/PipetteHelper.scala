@@ -58,7 +58,7 @@ object PipetteHelper {
 		pairs.toSeq
 	}
 
-	private def getHolderWellsCol(states: StateMap, wells: SortedSet[WellConfigL2], twsPrev: Seq[TipWell]): Tuple3[PlateConfigL2, SortedSet[WellConfigL2], Int] = {
+	private def getHolderWellsCol(states: StateMap, wells: SortedSet[WellConfigL2], twsPrev: Seq[TipWell]): Tuple3[Plate, SortedSet[WellConfigL2], Int] = {
 		// Pick a "reference" well if twsPrev isn't empty
 		val wellRef_? = {
 			if (twsPrev.isEmpty)
@@ -75,7 +75,7 @@ object PipetteHelper {
 		//println("wellRef_?: "+wellRef_?)
 
 		// Get the holder of interest
-		val holder: PlateConfigL2 = wellRef_? match {
+		val holder: Plate = wellRef_? match {
 			case None => wells.head.holder
 			case Some(wellRef) => wellRef.holder
 		}
@@ -93,7 +93,7 @@ object PipetteHelper {
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(states: StateMap, holder: PlateConfigL2, wellsOnHolder: SortedSet[WellConfigL2], iCol0: Int): WellConfigL2 = {
+	private def getFirstWell(states: StateMap, holder: Plate, wellsOnHolder: SortedSet[WellConfigL2], iCol0: Int): WellConfigL2 = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)

@@ -97,7 +97,7 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 
 
 	/*
-	private case class KeySpirate(plate: PlateConfigL2, iTipType: Int) {
+	private case class KeySpirate(plate: Plate, iTipType: Int) {
 		def this(item: L2A_SpirateItem) = this(item.well.holder, item.tip.index / 4)
 	}
 	def batchesForAspirate(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {

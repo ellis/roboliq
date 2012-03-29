@@ -6,7 +6,7 @@ abstract class Device extends Obj {
 
 abstract class PlateDevice extends Device {
 	def fixedLocation_? : Option[String]
-	def isPlateCompatible(plate: PlateConfigL2): Boolean
+	def isPlateCompatible(plate: Plate): Boolean
 	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean
 	//def canAccessPlate(plate: PlateStateL2)
 }

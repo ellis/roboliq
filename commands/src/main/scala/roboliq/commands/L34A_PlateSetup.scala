@@ -25,7 +25,7 @@ class PlateHandlingConfig(
 	val locationFinal_? : Option[String]
 ) {
 		
-	def getPreHandlingCommands(states: RobotState, plate: PlateConfigL2): Seq[Command] = {
+	def getPreHandlingCommands(states: RobotState, plate: Plate): Seq[Command] = {
 		val cmds = new ArrayBuffer[Command]
 
 		import move._
@@ -37,7 +37,7 @@ class PlateHandlingConfig(
 		cmds.toSeq
 	}
 		
-	def getPostHandlingCommands(states: RobotState, plate: PlateConfigL2): Seq[Command] = {
+	def getPostHandlingCommands(states: RobotState, plate: Plate): Seq[Command] = {
 		val cmds = new ArrayBuffer[Command]
 
 		import move._

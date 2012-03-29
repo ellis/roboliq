@@ -21,8 +21,8 @@ class L3P_Centrifuge(device: CentrifugeDevice) extends CommandCompilerL3 {
 		def open() { cmds += CentrifugeOpen.L3C(new CentrifugeOpen.L3A(Some(device), ())) }
 		def close() { cmds += CentrifugeClose.L3C(new CentrifugeClose.L3A(Some(device), ())) }
 		def moveTo(iPosition: Int) { cmds += CentrifugeMoveTo.L3C(new CentrifugeMoveTo.L3A(Some(device), iPosition)) }
-		def movePlate(plate: PlateConfigL2) { cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(device.location), None)) }
-		def removePlate(plate: PlateConfigL2) { cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(plate.state(ctx.states).location), None)) }
+		def movePlate(plate: Plate) { cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(device.location), None)) }
+		def removePlate(plate: Plate) { cmds += L3C_MovePlate(new L3A_MovePlateArgs(plate, ValueArg(plate.state(ctx.states).location), None)) }
 		
 		val nPlates = cmd.args.plates.size
 		val states = ctx.states

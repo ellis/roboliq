@@ -33,7 +33,7 @@ class RoboPeelDevice(val idDevice: String, val idProgramDefault: String, val loc
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	
 	def fixedLocation_? : Option[String] = Some(location)
-	def isPlateCompatible(plate: PlateConfigL2): Boolean = true
+	def isPlateCompatible(plate: Plate): Boolean = true
 	//def isPlatePreMoveRequired(plateState: PlateStateL2): Boolean = true
 	//def canAccessPlate(plate: PlateStateL2) =
 }

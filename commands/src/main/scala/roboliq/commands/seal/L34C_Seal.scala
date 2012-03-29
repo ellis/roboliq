@@ -40,6 +40,6 @@ class L4A_SealArgs(
 class L3A_SealArgs(
 	val idDevice_? : Option[String],
 	val idProgram_? : Option[String],
-	val plate: PlateConfigL2,
+	val plate: Plate,
 	val plateHandling: PlateHandlingConfig
 )
