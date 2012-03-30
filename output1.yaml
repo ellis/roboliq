@@ -1,0 +1,39 @@
+plates:
+  P1:
+    model: D-BSSE 96 Well PCR
+
+commands:
+- Pipette:
+    description: pipette 5ul of water from P1(A01) to P4(C03)
+    src: P1(A01)
+    dest: P4(C03)
+    volume: 5e-6
+    premix: ...
+    postmix: ...
+    tipOverrides: ...
+    pipettePolicy: ...
+    tipModel: ...
+    events:
+    - P1(A01): !rem {volume: -5e-6}
+    - P4(C03): !add {well: P1(A01), volume: 5e-6}
+    - TIP1: !flag {dirty: true}
+    translation:
+    - _Aspirate:
+        description: aspirate 5ul of water from P1(A01)
+        params:
+          items:
+          - tip: TIP1
+            well: P1(A01)
+            volume: 5e-6
+            policy: Roboliq_Water_...
+            location: cooled1
+    - command: _Dispense
+      description: dispense 5ul of water from P1(A01) to P4(C03)
+      params:
+        items:
+        - tip: TIP1
+          well: P4(C03)
+          volume: 5e-6
+          policy: Roboliq_Water_...
+          locations: cooled2
+
