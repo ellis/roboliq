@@ -5,12 +5,15 @@ import scala.reflect.BeanProperty
 import scala.collection.JavaConversions
 
 
+trait CmdBean
+
 /** YAML bean representing an entire roboliq YAML file */
 class RoboliqYamlBean {
 	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
 	@BeanProperty var plates: java.util.LinkedHashMap[String, PlateBean] = null
 	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceItem] = null
 	@BeanProperty var history: java.util.LinkedHashMap[String, java.util.List[HistoryItem]] = null
+	@BeanProperty var commands: java.util.List[CmdBean] = null
 }
 
 /**

@@ -12,11 +12,13 @@ import org.yaml.snakeyaml.introspector.Property
 import org.yaml.snakeyaml.nodes.NodeTuple
 import org.yaml.snakeyaml.TypeDescription
 
+import roboliq.core._
+
 
 class RoboliqRepresenter extends Representer {
 	//addClassTag(classOf[HistoryBean], new Tag("!history"));
 	addClassTag(classOf[SubstanceItemDnaBean], new Tag("!dna"));
-	addClassTag(classOf[HistoryItemAddBean], new Tag("!add"));
+	addClassTag(classOf[HistoryAddBean], new Tag("!add"));
 
 	protected override def representJavaBeanProperty(
 		javaBean: Object,
@@ -33,9 +35,16 @@ class RoboliqRepresenter extends Representer {
 }
 
 class RoboliqConstructor extends Constructor {
-	//addTypeDescription(new TypeDescription(classOf[HistoryBean], "!history"))
+	val topDescription = new TypeDescription(classOf[RoboliqYamlBean])
+	topDescription.putMapPropertyType("plateModels", classOf[String], classOf[PlateModelBean])
+	topDescription.putMapPropertyType("plates", classOf[String], classOf[PlateBean])
+	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceItem])
+	topDescription.putMapPropertyType("history", classOf[String], classOf[java.util.List[HistoryItem]])
+	topDescription.putListPropertyType("commands", classOf[CmdBean])
+	
+	addTypeDescription(topDescription)
 	addTypeDescription(new TypeDescription(classOf[SubstanceItemDnaBean], "!dna"))
-	addTypeDescription(new TypeDescription(classOf[HistoryItemAddBean], "!add"))
+	addTypeDescription(new TypeDescription(classOf[HistoryAddBean], "!add"))
 }
 
 object RoboliqYaml {

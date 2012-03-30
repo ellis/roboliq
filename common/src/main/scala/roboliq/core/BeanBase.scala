@@ -18,17 +18,25 @@ class BeanBase {
 	/** Add data in @param bean to this database */
 	def addBean(bean: RoboliqYamlBean) {
 		// Add plate models
-		bean.plateModels.foreach(pair => pair._2._id = pair._1)
-		m_mapPlateModel ++= bean.plateModels
+		if (bean.plateModels != null) {
+			bean.plateModels.foreach(pair => pair._2._id = pair._1)
+			m_mapPlateModel ++= bean.plateModels
+		}
 		// Add plates
-		bean.plates.foreach(pair => pair._2._id = pair._1)
-		m_mapPlate ++= bean.plates
+		if (bean.plates != null) {
+			bean.plates.foreach(pair => pair._2._id = pair._1)
+			m_mapPlate ++= bean.plates
+		}
 		// Add substances
-		bean.substances.foreach(pair => pair._2._id = pair._1)
-		m_mapSubstance ++= bean.substances
+		if (bean.substances != null) {
+			bean.substances.foreach(pair => pair._2._id = pair._1)
+			m_mapSubstance ++= bean.substances
+		}
 		// Add history
-		for ((id, history) <- bean.history) {
-			m_mapHistory(id) = history.toList
+		if (bean.history != null) {
+			for ((id, history) <- bean.history) {
+				m_mapHistory(id) = history.toList
+			}
 		}
 	}
 	

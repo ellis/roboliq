@@ -165,6 +165,6 @@ class YamlTest {
 }
 
 object Main extends App {
-	//T.run
-	new YamlTest().run
+	T.run
+	//new YamlTest().run
 }
