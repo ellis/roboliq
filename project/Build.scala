@@ -1,6 +1,8 @@
 import sbt._
 
 object MyBuild extends Build {
+	lazy val projBase = Project("base", file("base"))
+
 	lazy val projCommon = Project("common", file("common"))
 
 	lazy val projCommands = Project("commands", file("commands")) dependsOn(projCommon)
