@@ -6,7 +6,7 @@ import roboliq.core._
 
 
 case class L3C_Pipette(args: L3A_PipetteArgs) {
-	override def toDebugString = {
+	def toDebugString = {
 		val srcs = args.items.groupBy(_.srcs).keys
 		if (srcs.size == 1) {
 			val sSrcs = Printer.getWellsDebugString(srcs.head)

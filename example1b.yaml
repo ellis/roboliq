@@ -15,4 +15,3 @@ commands:
       well: P1(A01)
       volume: 5e-6
       policy: Roboliq_Water_Wet_1000
-      location: cooled1

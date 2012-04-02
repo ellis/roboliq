@@ -36,7 +36,7 @@ class LiquidVolume private (val _nl: Int) {
 	def -(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl - that._nl)
 	def +(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl - that._nl)
 	def *(n: BigDecimal): LiquidVolume = new LiquidVolume((n * _nl).toInt)
-	def /(n: BigDecimal): LiquidVolume = new LiquidVolume((_nl / n).toInt)
+	def /(n: BigDecimal): LiquidVolume = new LiquidVolume((BigDecimal(_nl) / n).toInt)
 	
 	def isEmpty: Boolean = (_nl == 0)
 	def <(that: LiquidVolume): Boolean = (_nl < that._nl)

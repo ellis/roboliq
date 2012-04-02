@@ -50,34 +50,3 @@ case class SpirateTokenItem(
 	val volume: LiquidVolume,
 	val policy: String
 )
-
-class YamlTest {
-	import org.yaml.snakeyaml._
-	
-	roboliq.yaml.RoboliqYaml.constructor.addTypeDescription(new TypeDescription(classOf[AspirateCmdBean], "!_Aspirate"))
-	val bean = roboliq.yaml.RoboliqYaml.loadFile("example1b.yaml")
-	val text = roboliq.yaml.RoboliqYaml.toString(bean)
-	
-	def run {
-		println(text)
-		
-		val bb = new BeanBase
-		bb.addBean(bean)
-		val ob = new ObjBase(bb)
-		
-		val processor = new Processor
-		val builder = new StateBuilder(ob)
-		val ctx = new ProcessorContext(processor, ob, Some(builder), builder.toImmutable)
-		
-		val handler = new AspirateCmdHandler
-
-		val cmd = bean.commands.get(0).asInstanceOf[AspirateCmdBean]
-		
-		val node = handler.process(cmd, ctx)
-		println(node)
-	}
-}
-
-object Main extends App {
-	new YamlTest().run
-}

@@ -11,7 +11,7 @@ class DispenseCmdBean extends CmdBean {
 }
 
 class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean](isFinal = true) {
-	def process(cmd: AspirateCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+	def process(cmd: DispenseCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
 		node.mustBeNonEmpty(cmd, "items")
 		if (node.getErrorCount == 0) {
 			val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, node)).flatten

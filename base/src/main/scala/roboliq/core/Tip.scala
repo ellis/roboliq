@@ -3,7 +3,7 @@ package roboliq.core
 import scala.collection.mutable.HashMap
 import scala.reflect.BeanProperty
 
-case class TipModelBean extends Bean {
+class TipModelBean extends Bean {
 	@BeanProperty var id: String = null
 	@BeanProperty var volume: java.math.BigDecimal = null
 	@BeanProperty var volumeAspirateMin: LiquidVolume = null 
@@ -20,7 +20,7 @@ case class TipModel(
 )
 
 class TipBean extends Bean {
-	@BeanProperty var index: Integer = null
+	@BeanProperty var index: java.lang.Integer = null
 	@BeanProperty var modelPermanent: TipModel = null
 }
 

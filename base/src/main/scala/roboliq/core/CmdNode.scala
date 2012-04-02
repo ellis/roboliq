@@ -105,7 +105,7 @@ class CmdNodeBean {
 					addError(sProperty, "must be assigned a list")
 				else {
 					try {
-						val lRet = ret.asInstanceOf[List[_]]
+						val lRet = ret.asInstanceOf[java.util.List[_]]
 						if (lRet.isEmpty)
 							addError(sProperty, "list must contain at least one element")
 					} catch {

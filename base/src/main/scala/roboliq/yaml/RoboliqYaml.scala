@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.nodes.NodeTuple
 import org.yaml.snakeyaml.TypeDescription
 
 import roboliq.core._
+import roboliq.commands.pipette._
 
 
 class RoboliqRepresenter extends Representer {
@@ -41,8 +42,11 @@ class RoboliqConstructor extends Constructor {
 	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceItem])
 	topDescription.putMapPropertyType("history", classOf[String], classOf[java.util.List[HistoryItem]])
 	topDescription.putListPropertyType("commands", classOf[CmdBean])
-	
 	addTypeDescription(topDescription)
+	
+	//val aspirateDescription = new TypeDescription(classOf[AspirateCmdBean])
+	
+	//addTypeDescription(aspirateDescription)
 	addTypeDescription(new TypeDescription(classOf[SubstanceItemDnaBean], "!dna"))
 	addTypeDescription(new TypeDescription(classOf[HistoryAddBean], "!add"))
 }

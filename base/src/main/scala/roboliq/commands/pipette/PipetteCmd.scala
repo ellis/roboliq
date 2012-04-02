@@ -4,6 +4,7 @@ import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import roboliq.core._
 import roboliq.commands.pipette.scheduler.PipetteScheduler
+import roboliq.devices.pipette.PipetteDevice
 
 
 class PipetteCmdBean extends CmdBean {
@@ -29,7 +30,7 @@ class PipetteCmdItemBean {
 	@BeanProperty var tipModel: String = null
 }
 
-class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean](isFinal = false) {
+class PipetteCmdHandler(device: PipetteDevice) extends CmdHandlerA[PipetteCmdBean](isFinal = false) {
 	@BeanProperty var description: String = null
 	@BeanProperty var items: java.util.List[PipetteCmdItemBean] = null
 	
@@ -39,22 +40,12 @@ class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean](isFinal = false) {
 			PipetteScheduler.createL3C(cmd, ctx.ob, node) match {
 				case None =>
 				case Some(l3c) =>
-					val scheduler = new PipetteScheduler(l3c, )
-			}
-	
-			// Update state
-			ctx.builder_? match {
-				case None =>
-				case Some(builder) =>
-					for (tip <- lTip) {
-						tip.stateWriter(builder).drop()
+					val scheduler = new PipetteScheduler(device, ctx, l3c)
+					scheduler.translate() match {
+						case Error(ls) =>
+						case Success(l) =>
+							node.translations = l.toList
 					}
-			}
-			
-			// Create final tokens
-			val liTip = lTip.map(_.index)
-			if (!liTip.isEmpty) {
-				node.tokens = List(new TipsDropToken(liTip, location))
 			}
 		}
 	}
