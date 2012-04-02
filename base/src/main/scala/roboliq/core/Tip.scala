@@ -3,6 +3,14 @@ package roboliq.core
 import scala.collection.mutable.HashMap
 import scala.reflect.BeanProperty
 
+case class TipModelBean extends Bean {
+	@BeanProperty var id: String = null
+	@BeanProperty var volume: java.math.BigDecimal = null
+	@BeanProperty var volumeAspirateMin: LiquidVolume = null 
+	//@BeanProperty var nVolumeWashExtra: LiquidVolume
+	//@BeanProperty var nVolumeDeconExtra: LiquidVolume
+}
+
 case class TipModel(
 	val id: String,
 	val nVolume: LiquidVolume, 
@@ -144,8 +152,8 @@ class Tip(
 ) extends Ordered[Tip] {
 	val id = "TIP"+index
 	
-	def state(states: StateMap): TipState = states(this).asInstanceOf[TipState]
-	def stateWriter(builder: StateBuilder): TipStateWriter = new TipStateWriter(this, builder.map)
+	def state(states: StateMap): TipState = states(this.id).asInstanceOf[TipState]
+	def stateWriter(builder: StateBuilder): TipStateWriter = new TipStateWriter(this, builder)
 
 	override def compare(that: Tip) = index - that.index
 	override def toString = id
@@ -202,25 +210,26 @@ case class TipState(
 	override def compare(that: TipState): Int = conf.compare(that.conf)
 }
 
-class TipStateWriter(o: Tip, map: HashMap[Object, Object]) {
-	def state = map(o).asInstanceOf[TipState]
+class TipStateWriter(o: Tip, builder: StateBuilder) {
+	def state = builder.map(o.id).asInstanceOf[TipState]
+	
+	private def set(state1: TipState) { builder.map(o.id) = state1 } 
 	
 	def drop() {
-		val st = state
-		map(o) = state.conf.createState0(None)
+		set(state.conf.createState0(None))
 		//println("DROP tip "+thisObj.index+": sType = "+state.model_?)
 	}
 	
 	def get(model: TipModel) {
 		val st = state
-		map(o) = st.copy(model_? = Some(model))
+		set(st.copy(model_? = Some(model)))
 		//println("tip "+thisObj.index+": sType = "+state.model_?)
 	}
 	
 	def aspirate(liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
 		val nVolumeNew = st.nVolume + nVolume2
-		map(o) = new TipState(
+		set(new TipState(
 			st.conf,
 			st.model_?,
 			st.liquid + liquid2,
@@ -233,7 +242,7 @@ class TipStateWriter(o: Tip, map: HashMap[Object, Object]) {
 			WashIntensity.None,
 			st.cleanDegreePrev,
 			WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
-		)
+		))
 	}
 	
 	def dispense(nVolumeDisp: LiquidVolume, liquidDest: Liquid, pos: PipettePosition.Value) {
@@ -246,24 +255,24 @@ class TipStateWriter(o: Tip, map: HashMap[Object, Object]) {
 	def dispenseFree(nVolume2: LiquidVolume) {
 		val st = state
 		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
-		map(o) = st.copy(
+		set(st.copy(
 			liquid = liquid,
 			nVolume = nVolume,
 			cleanDegree = WashIntensity.None
-		)
+		))
 	}
 	
 	def dispenseIn(nVolume2: LiquidVolume, liquid2: Liquid) {
 		val st = state
 		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
-		map(o) = st.copy(
+		set(st.copy(
 			liquid = liquid,
 			nVolume = nVolume,
 			contamOutside = st.contamOutside ++ liquid2.contaminants,
 			destsEntered = st.destsEntered + liquid2,
 			cleanDegree = WashIntensity.None,
 			cleanDegreePending = WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
-		)
+		))
 	}
 	
 	private def getLiquidAndVolumeAfterDispense(nVolume2: LiquidVolume): Tuple2[Liquid, LiquidVolume] = {
@@ -279,12 +288,12 @@ class TipStateWriter(o: Tip, map: HashMap[Object, Object]) {
 	
 	def clean(cleanDegree: WashIntensity.Value) {
 		val st = state
-		map(o) = st.conf.createState0(None).copy(
+		set(st.conf.createState0(None).copy(
 			model_? = st.model_?,
 			cleanDegree = cleanDegree,
 			cleanDegreePrev = cleanDegree,
 			cleanDegreePending = WashIntensity.None
-		)
+		))
 	}
 	
 	def mix(liquid2: Liquid, nVolume2: LiquidVolume) {

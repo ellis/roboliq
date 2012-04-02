@@ -6,6 +6,8 @@ import scala.collection.mutable.ArrayBuffer
 
 
 class ObjBase(bb: BeanBase) {
+	private val m_mapTipModel = new HashMap[String, TipModel]
+	private val m_mapTip = new HashMap[String, Tip]
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapWell = new HashMap[String, Well]
@@ -15,6 +17,23 @@ class ObjBase(bb: BeanBase) {
 	//def mapPlate: scala.collection.Map[String, Plate] = m_mapPlate
 	//def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
 	
+	
+	def findTip_?(id: String, node: CmdNodeBean): Option[Tip] = {
+		m_mapTip.get(id) match {
+			case Some(obj) => Some(obj)
+			case None => node.addError("tip `"+id+"` not found"); None
+		}
+	}
+	
+	def findTips_?(lId: List[String], node: CmdNodeBean): Option[List[Tip]] = {
+		val l = lId.map(id => findTip_?(id, node))
+		if (l.exists(_.isEmpty))
+			None
+		else
+			Some(l.flatten)
+	}
+
+
 	def findPlateModel(id: String): Result[PlateModel] = {
 		m_mapPlateModel.get(id) match {
 			case Some(obj) => Success(obj)
@@ -104,6 +123,16 @@ class ObjBase(bb: BeanBase) {
 						)
 				}
 			}
+		}
+	}
+	
+	def findSystemString_?(id: String, node: CmdNodeBean): Option[String] = {
+		bb.mapSystemProperties.get(id) match {
+			case None =>
+				node.addError("systemProperties", id, "must be set")
+				None
+			case Some(o) =>
+				Some(o.asInstanceOf[String])
 		}
 	}
 	

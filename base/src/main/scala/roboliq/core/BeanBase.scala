@@ -5,11 +5,17 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 class BeanBase {
+	private val m_mapSystemProperties = new HashMap[String, Object]
+	private val m_mapTipModel = new HashMap[String, TipModelBean]
+	private val m_mapTip = new HashMap[String, TipBean]
 	private val m_mapPlateModel = new HashMap[String, PlateModelBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]
 	private val m_mapSubstance = new HashMap[String, SubstanceItem]
 	private val m_mapHistory = new HashMap[String, List[HistoryItem]]
 	
+	def mapSystemProperties: scala.collection.Map[String, Object] = m_mapSystemProperties
+	def mapTipModel: scala.collection.Map[String, TipModelBean] = m_mapTipModel
+	def mapTip: scala.collection.Map[String, TipBean] = m_mapTip
 	def mapPlateModel: scala.collection.Map[String, PlateModelBean] = m_mapPlateModel
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
 	def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
@@ -17,6 +23,20 @@ class BeanBase {
 	
 	/** Add data in @param bean to this database */
 	def addBean(bean: RoboliqYamlBean) {
+		// Add system properties
+		if (bean.systemProperties != null) {
+			m_mapSystemProperties ++= bean.systemProperties
+		}
+		// Add tip models
+		if (bean.tipModels != null) {
+			bean.tipModels.foreach(pair => pair._2._id = pair._1)
+			m_mapTipModel ++= bean.tipModels
+		}
+		// Add tips
+		if (bean.tips != null) {
+			bean.tips.foreach(pair => pair._2._id = pair._1)
+			m_mapTip ++= bean.tips
+		}
 		// Add plate models
 		if (bean.plateModels != null) {
 			bean.plateModels.foreach(pair => pair._2._id = pair._1)

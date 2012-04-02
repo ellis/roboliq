@@ -14,8 +14,8 @@ trait Well extends Ordered[Well] {
 	val iCol: Int
 	val indexName: String
 	
-	def state(states: StateMap): WellState = states(this).asInstanceOf[WellState]
-	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(this, builder.map)
+	def state(states: StateMap): WellState = states(this.id).asInstanceOf[WellState]
+	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(this, builder)
 	
 	override def compare(that: Well) = id.compare(that.id)
 }
@@ -29,8 +29,10 @@ case class WellState(
 	val history: List[WellHistoryItem]
 )
 
-class WellStateWriter(o: Well, map: HashMap[Object, Object]) {
-	def state = map(o).asInstanceOf[WellState]
+class WellStateWriter(o: Well, builder: StateBuilder) {
+	def state = builder.map(o.id).asInstanceOf[WellState]
+	
+	private def set(state1: WellState) { builder.map(o.id) = state1 }
 	
 	def liquid = state.liquid
 	
@@ -38,7 +40,7 @@ class WellStateWriter(o: Well, map: HashMap[Object, Object]) {
 
 	def add(liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
-		map(o) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
+		set(st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2))
 	}
 	
 	def remove(nVolume2: LiquidVolume) {
@@ -51,7 +53,7 @@ class WellStateWriter(o: Well, map: HashMap[Object, Object]) {
 				assert(false)
 			}
 		}
-		map(o) = st.copy(nVolume = st.nVolume - nVolume2)
+		set(st.copy(nVolume = st.nVolume - nVolume2))
 	}
 }
 

@@ -121,4 +121,8 @@ class CmdNodeBean {
 	def getValueNonNull_?[A <: Object](o: A, property: String): Option[A] = {
 		checkValueNonNull_?(o, property).map(b => o)
 	}
+	
+	def getTipsById_?(lId: List[String], ob: ObjBase): Option[List[Tip]] = {
+		val l = lId.map(id => ob.findTip_?(id, this))
+	}
 }

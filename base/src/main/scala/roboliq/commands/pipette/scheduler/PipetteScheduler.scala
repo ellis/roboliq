@@ -14,7 +14,7 @@ import java.io.FileWriter
 
 class PipetteScheduler(
 	val device: PipetteDevice,
-	val ctx: CompilerContextL3,
+	val ctx: ProcessorContext,
 	val cmd: L3C_Pipette
 ) {
 	private val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)
@@ -30,7 +30,7 @@ class PipetteScheduler(
 	fw.write(cmd.toDebugString)
 	fw.write("\n")
 	
-	def x(): Result[Seq[Command]] = {
+	def x(): Result[Seq[CmdBean]] = {
 		val states = new StateBuilder(ctx.states)
 		val res = for {
 			items0 <- builderA.filterItems(cmd.args.items)
@@ -333,7 +333,7 @@ class PipetteScheduler(
 				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
 	*/
 	
-	private def toCleanCommand(mTipToClean: Map[Tip, CleanSpec2]): Seq[Command] = {
+	private def toCleanCommand(mTipToClean: Map[Tip, CleanSpec2]): Seq[CmdBean] = {
 		val mTipToModel = new HashMap[Tip, Option[TipModel]]
 		val mTipToWash = new HashMap[Tip, WashSpec]
 		for ((tip, cleanSpec) <- mTipToClean) {
@@ -379,7 +379,7 @@ class PipetteScheduler(
 		lReplace ++ lWash
 	}
 	
-	private def getCommands(lClean: List[Seq[Command]], lB: List[GroupB], statesLast: RobotState): Seq[Command] = {
+	private def getCommands(lClean: List[Seq[CmdBean]], lB: List[GroupB], statesLast: RobotState): Seq[Command] = {
 		val lCommand0 = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lPremix ++ pair._2.lAspirate ++ pair._2.lDispense ++ pair._2.lPostmix)
 		//println("lCommand0:")
 		//lCommand0.foreach(cmd => println(cmd.toDebugString))
@@ -390,7 +390,7 @@ class PipetteScheduler(
 		lCommand
 	}
 	
-	private def finalClean(states: StateMap): Seq[Command] = {
+	private def finalClean(states: StateMap): Seq[CmdBean] = {
 		val tipOverrides = TipHandlingOverrides()
 		if (device.areTipsDisposable) {
 			tipOverrides.replacement_? match {

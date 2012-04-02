@@ -6,8 +6,9 @@ import scala.collection.mutable.HashSet
 
 trait StateMap {
 	val ob: ObjBase
-	val map: collection.Map[Object, Object]
-	def apply(o: Object) = map(o)
+	/** Map from object ID to object state */
+	val map: collection.Map[String, Object]
+	def apply(id: String) = map(id)
 	
 	def toDebugString: String = {
 		/*val b = new StringBuilder
@@ -35,15 +36,15 @@ trait StateMap {
 	}
 }
 
-class RobotState(val ob: ObjBase, val map: Map[Object, Object]) extends StateMap {
-	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[Object, State] = {
+class RobotState(val ob: ObjBase, val map: Map[String, Object]) extends StateMap {
+	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
 		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
 	}
 }
 
-class StateBuilder(val ob: ObjBase, val map: HashMap[Object, Object]) extends StateMap {
-	def this(states: RobotState) = this(states.ob, HashMap[Object, Object](states.map.toSeq : _*))
-	def this(ob: ObjBase) = this(ob, new HashMap[Object, Object])
+class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap {
+	def this(states: RobotState) = this(states.ob, HashMap[String, Object](states.map.toSeq : _*))
+	def this(ob: ObjBase) = this(ob, new HashMap[String, Object])
 	
 	def toImmutable: RobotState = new RobotState(ob, map.toMap)
 }
