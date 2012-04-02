@@ -1,5 +1,6 @@
 package roboliq.commands.pipette.scheduler
 
+import scala.collection.JavaConversions._
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -11,6 +12,50 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 import java.io.FileWriter
 
+
+object PipetteScheduler {
+	def createL3C(cmd: PipetteCmdBean, ob: ObjBase, node: CmdNodeBean): Option[L3C_Pipette] = {
+		val mixSpec_? : Option[MixSpec] = if (cmd.postmix == null) None else Some(MixSpec.fromBean(cmd.postmix))
+		val tipOverrides_? : Option[TipHandlingOverrides] = None
+		val pipettePolicy_? : Option[PipettePolicy] = if (cmd.policy == null) None else Some(PipettePolicy.fromName(cmd.policy))
+		val tipModel_? : Option[TipModel] = if (cmd.tipModel == null) None else ob.findTipModel_?(cmd.tipModel, node)
+
+		val src_? : Option[Well] = ob.findWell_?(cmd.src, node, false)
+		val dest_? : Option[Well] = ob.findWell_?(cmd.dest, node, false)
+		val volumes_? : Option[List[LiquidVolume]] = if (cmd.volume == null) None else Some(cmd.volume.map(n => LiquidVolume.l(n)).toList)
+		
+		val item = new Item(
+			SortedSet(src_?.get),
+			dest_?.get,
+			volumes_?.get(0),
+			None,
+			None
+		)
+		val args = new L3A_PipetteArgs(List(item), mixSpec_?, tipOverrides_?, pipettePolicy_?, tipModel_?)
+		
+		Some(new L3C_Pipette(args))
+	}
+
+	/*
+	private createItem(bean: PipetteCmdItemBean): Item = {
+		val srcs: SortedSet[Well] = SortedSet()
+		val dest: Well,
+		val nVolume: LiquidVolume,
+		val premix_? : Option[MixSpec],
+		val postmix_? : Option[MixSpec]
+	}
+		
+	@BeanProperty var src: String = null
+	@BeanProperty var dest: String = null
+	@BeanProperty var volume: List[java.math.BigDecimal] = null
+	@BeanProperty var premix: MixSpecBean = null
+	@BeanProperty var postmix: MixSpecBean = null
+	//tipOverrides
+	@BeanProperty var policy: String = null
+	@BeanProperty var tipModel: String = null
+	*/
+	
+}
 
 class PipetteScheduler(
 	val device: PipetteDevice,
@@ -30,7 +75,7 @@ class PipetteScheduler(
 	fw.write(cmd.toDebugString)
 	fw.write("\n")
 	
-	def x(): Result[Seq[CmdBean]] = {
+	def translate(): Result[Seq[CmdBean]] = {
 		val states = new StateBuilder(ctx.states)
 		val res = for {
 			items0 <- builderA.filterItems(cmd.args.items)
@@ -347,13 +392,13 @@ class PipetteScheduler(
 			}
 		}
 		
-		val lReplace = {
+		val lReplace = Seq[CmdBean]() /* FIXME: {
 			if (mTipToModel.isEmpty) Seq()
 			else {
 				val items = mTipToModel.toSeq.sortBy(_._1).map(pair => new L3A_TipsReplaceItem(pair._1, pair._2))
 				Seq(L3C_TipsReplace(items))
 			}
-		}
+		}*/
 		
 		val lWash = {
 			if (mTipToWash.isEmpty) Seq()
@@ -364,11 +409,10 @@ class PipetteScheduler(
 						val spec = mTipToWash(tip)
 						WashIntensity.max(acc, spec.washIntensity)
 					})
-					val items = lTip.toSeq.map(tip => {
-						val spec = mTipToWash(tip)
-						new L3A_TipsWashItem(tip, spec.contamInside, spec.contamOutside)
-					})
-					if (items.isEmpty) None else Some(L3C_TipsWash(items, intensity))
+					val bean = new TipsWashCmdBean
+					bean.tips = lTip.toList.map(_.id)
+					bean.intensity = intensity.toString()
+					Some(bean)
 				})
 			}
 		}
@@ -379,7 +423,7 @@ class PipetteScheduler(
 		lReplace ++ lWash
 	}
 	
-	private def getCommands(lClean: List[Seq[CmdBean]], lB: List[GroupB], statesLast: RobotState): Seq[Command] = {
+	private def getCommands(lClean: List[Seq[CmdBean]], lB: List[GroupB], statesLast: RobotState): Seq[CmdBean] = {
 		val lCommand0 = (lClean zip lB).flatMap(pair => pair._1 ++ pair._2.lPremix ++ pair._2.lAspirate ++ pair._2.lDispense ++ pair._2.lPostmix)
 		//println("lCommand0:")
 		//lCommand0.foreach(cmd => println(cmd.toDebugString))

@@ -18,6 +18,13 @@ class ObjBase(bb: BeanBase) {
 	//def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
 	
 	
+	def findTipModel_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[TipModel] = {
+		m_mapTipModel.get(id) match {
+			case Some(obj) => Some(obj)
+			case None => node.addError("tip model `"+id+"` not found"); None
+		}
+	}
+	
 	def findTip_?(id: String, node: CmdNodeBean): Option[Tip] = {
 		m_mapTip.get(id) match {
 			case Some(obj) => Some(obj)
@@ -78,14 +85,42 @@ class ObjBase(bb: BeanBase) {
 		
 	}
 	
-	def findWell_?(id: String, node: CmdNodeBean): Option[Well] = {
-		m_mapWell.get(id) match {
-			case Some(obj) => Some(obj)
-			case None =>
-				createWell(id) match {
-					case Error(ls) => ls.foreach(node.addError); None
-					case Success(well) => Some(well)
-				}
+	/*
+	def findWell_?(o: Object, property: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
+		node.getValueNonNull_?()
+		if (id == null) {
+			if (requireId)
+				node.checkPropertyNonNull(null)
+			None
+		}
+		else {
+			m_mapWell.get(id) match {
+				case Some(obj) => Some(obj)
+				case None =>
+					createWell(id) match {
+						case Error(ls) => ls.foreach(node.addError); None
+						case Success(well) => Some(well)
+					}
+			}
+		}
+	}
+	*/
+	
+	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
+		if (id == null) {
+			if (requireId)
+				node.checkPropertyNonNull(null)
+			None
+		}
+		else {
+			m_mapWell.get(id) match {
+				case Some(obj) => Some(obj)
+				case None =>
+					createWell(id) match {
+						case Error(ls) => ls.foreach(node.addError); None
+						case Success(well) => Some(well)
+					}
+			}
 		}
 	}
 	

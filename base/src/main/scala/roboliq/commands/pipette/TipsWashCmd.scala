@@ -19,12 +19,13 @@ class TipsWashCmdBean extends CmdBean {
 
 class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean](isFinal = true) {
 	def process(cmd: TipsWashCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		node.checkPropertyNonNull_?(cmd, "washProgram", "intensity")
+		node.checkPropertyNonNull_?(cmd, "intensity")
 		for {
 			lTipId <- if (cmd.tips != null) Some(cmd.tips.toList) else None
 			lTip <- ctx.ob.findTips_?(cmd.tips.toList, node)
 		} {
-			val washProgram = cmd.washProgram.toInt
+			// FIXME: need to intelligently choose wash program!!!
+			val washProgram = if (cmd.washProgram != null) cmd.washProgram.toInt else 0
 			val intensity = WashIntensity.withName(cmd.intensity)
 			// Update state
 			ctx.builder_? match {

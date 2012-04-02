@@ -46,12 +46,15 @@ class HistoryAddBean extends HistoryItem {
 /** Factory for [[roboliq.yaml.HistoryItemAddBean]] instances. */
 object HistoryAddBean {
 	/** Create a HistoryItemAddBean */
-	def apply((
-		substance: , 
-		mol: java.math.BigDecimalnull, 
-		liter: java.math.BigDecimalnull
+	def apply(
+		substance: String, 
+		mol: java.math.BigDecimal = null, 
+		liter: java.math.BigDecimal = null
 	): HistoryAddBean = {
 		val bean = new HistoryAddBean
+		bean.substance = substance
+		bean.mol = mol
+		bean.liter = liter
 		bean
 	}
 }

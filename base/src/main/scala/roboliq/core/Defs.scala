@@ -81,6 +81,17 @@ object PipettePosition extends Enumeration {
 
 case class PipettePolicy(id: String, pos: PipettePosition.Value)
 
+object PipettePolicy {
+	def fromName(name: String): PipettePolicy = {
+		val pos = {
+			if (name.contains("Air")) PipettePosition.Free
+			else if (name.contains("Dry")) PipettePosition.DryContact
+			else PipettePosition.WetContact
+		}
+		PipettePolicy(name, pos)
+	}
+}
+
 object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with TipReplacementPolicy following Roboease
 	val ReplaceAlways, KeepBetween, KeepAlways = Value
 }

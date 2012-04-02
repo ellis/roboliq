@@ -30,16 +30,7 @@ class Memento[T] { thisObj =>
 		Success(conf, state)
 	}
 
-	class StateWriter(map: HashMap[Object, Object]) {
-		def state = map(thisObj).asInstanceOf[State]
-
-		def value = state.value
-		def value_=(v: T) {
-			val st = state
-			map(thisObj) = new MementoState[T](st.conf, v)
-		}
-	}
-	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
+	def stateWriter(builder: StateBuilder): MementoStateWriter[T] = new MementoStateWriter(this, builder)
 }
 
 class MementoConfig[T](
@@ -54,7 +45,18 @@ case class MementoState[T](
 	val value: T
 )
 
+class MementoStateWriter[T](o: Memento[T], builder: StateBuilder) {
+	def state = builder.map(o.hashCode().toString).asInstanceOf[MementoState[T]]
+
+	def value = state.value
+	def value_=(v: T) {
+		val st = state
+		builder.map(o.hashCode().toString) = new MementoState[T](st.conf, v)
+	}
+}
+/*
 class MementoProxy[T](obj: Memento[T]) {
 	def value: String = null
 	def value_=(v: T) = obj.value_? = Some(v)
 }
+*/

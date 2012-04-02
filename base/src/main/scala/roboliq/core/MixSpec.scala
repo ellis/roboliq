@@ -30,3 +30,13 @@ case class MixSpec(
 	}
 	*/
 }
+
+object MixSpec {
+	def fromBean(bean: MixSpecBean): MixSpec = {
+		MixSpec(
+			nVolume_? = if (bean.volume != null) Some(bean.volume) else None,
+			nCount_? = if (bean.count != null) Some(bean.count) else None,
+			mixPolicy_? = if (bean.policy != null) Some(PipettePolicy.fromName(bean.policy)) else None
+		)
+	}
+}

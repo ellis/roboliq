@@ -23,15 +23,24 @@ class Plate(
 	def nCols: Int = model.nCols
 	def nWells: Int = nRows * nCols
 	
-	def state(states: StateMap): PlateState = states(this).asInstanceOf[PlateState]
+	def state(states: StateMap): PlateState = states(this.id).asInstanceOf[PlateState]
 	override def compare(that: Plate) = id.compare(that.id)
 	override def toString = id
 }
 
-class PlateState(
+case class PlateState(
 	val conf: Plate,
 	val location: String
 )
+
+class PlateStateWriter(o: Plate, builder: StateBuilder) {
+	def state = builder.map(o.id).asInstanceOf[PlateState]
+	
+	private def set(state1: PlateState) { builder.map(o.id) = state1 }
+	
+	def location = state.location
+	def location_=(location: String) { set(state.copy(location = location)) }
+}
 
 /*
 class PlateObj extends Obj {

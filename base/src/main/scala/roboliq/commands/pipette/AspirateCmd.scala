@@ -67,7 +67,7 @@ class YamlTest {
 		
 		val processor = new Processor
 		val builder = new StateBuilder(ob)
-		val ctx = new ProcessorContext(processor, ob, builder.toImmutable)
+		val ctx = new ProcessorContext(processor, ob, Some(builder), builder.toImmutable)
 		
 		val handler = new AspirateCmdHandler
 

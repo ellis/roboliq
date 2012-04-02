@@ -802,7 +802,7 @@ class GroupABuilder(
 			val itemState = g0.mItemToState(item)
 			val liquid = itemState.srcLiquid
 			dis.tip.stateWriter(builder).dispense(item.nVolume, itemState.destState0.liquid, dis.policy.pos)
-			builder.map(item.dest) = itemState.destState1
+			builder.map(item.dest.id) = itemState.destState1
 		}
 		
 		// TODO: handle mixes

@@ -2,50 +2,60 @@ package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
-
 import roboliq.core._
+import roboliq.commands.pipette.scheduler.PipetteScheduler
 
 
-class PipetteCmdBean extends CmdBean(isFinal = false) {
+class PipetteCmdBean extends CmdBean {
 	@BeanProperty var description: String = null
 	@BeanProperty var items: java.util.List[PipetteCmdItemBean] = null
-	
-	def process(ob: ObjBase): Result[Unit] = {
-		if (items == null)
-			Error("`items` must be set")
-		else if (items.isEmpty())
-			Error("`items` must not be empty")
-		else {
-			for {
-				items <- Result.mapOver(items.toList) {item => item.toTokenItem(ob)}
-			} yield {
-				List(new PipetteToken(items))
-			}
-		}
-	}
+	@BeanProperty var src: String = null
+	@BeanProperty var dest: String = null
+	@BeanProperty var volume: java.util.List[java.math.BigDecimal] = null
+	@BeanProperty var premix: MixSpecBean = null
+	@BeanProperty var postmix: MixSpecBean = null
+	@BeanProperty var policy: String = null
+	@BeanProperty var tipModel: String = null
 }
 
 class PipetteCmdItemBean {
 	@BeanProperty var src: String = null
 	@BeanProperty var dest: String = null
-	@BeanProperty var volume: List[java.math.BigDecimal] = null
-	//val premix_? : Option[MixSpec],
-	//val postmix_? : Option[MixSpec]
+	@BeanProperty var volume: java.util.List[java.math.BigDecimal] = null
+	@BeanProperty var premix: MixSpecBean = null
+	@BeanProperty var postmix: MixSpecBean = null
 	//tipOverrides
 	@BeanProperty var policy: String = null
 	@BeanProperty var tipModel: String = null
+}
+
+class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean](isFinal = false) {
+	@BeanProperty var description: String = null
+	@BeanProperty var items: java.util.List[PipetteCmdItemBean] = null
 	
+	def process(cmd: PipetteCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+		node.mustBeNonEmpty(cmd, "items")
+		if (node.getErrorCount == 0) {
+			PipetteScheduler.createL3C(cmd, ctx.ob, node) match {
+				case None =>
+				case Some(l3c) =>
+					val scheduler = new PipetteScheduler(l3c, )
+			}
 	
-	def toTokenItem(ob: ObjBase): Result[PipetteTokenItem] = {
-		for {
-			idTip <- Result.mustBeSet(tip, "tip")
-			idWell <- Result.mustBeSet(well, "well")
-			idPolicy <- Result.mustBeSet(policy, "policy")
-			idLocation <- Result.mustBeSet(location, "location")
-			well <- ob.findWell(idWell)
-		} yield {
-			val iTip = idTip.drop(3).toInt
-			new PipetteTokenItem(iTip, well, idPolicy, idLocation)
+			// Update state
+			ctx.builder_? match {
+				case None =>
+				case Some(builder) =>
+					for (tip <- lTip) {
+						tip.stateWriter(builder).drop()
+					}
+			}
+			
+			// Create final tokens
+			val liTip = lTip.map(_.index)
+			if (!liTip.isEmpty) {
+				node.tokens = List(new TipsDropToken(liTip, location))
+			}
 		}
 	}
 }
