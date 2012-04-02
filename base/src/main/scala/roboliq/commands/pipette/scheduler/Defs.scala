@@ -12,10 +12,11 @@ import roboliq.commands.pipette._
 //import roboliq.devices.pipette._
 
 
+/*
 case class Item(
 	val srcs: SortedSet[Well],
 	val dest: Well,
-	val nVolume: Double,
+	val nVolume: LiquidVolume,
 	val premix_? : Option[MixSpec],
 	val postmix_? : Option[MixSpec]
 )
@@ -46,12 +47,13 @@ object Item {
 
 	def toDebugString(item: Item): String = toDebugString(Seq(item))
 }
+*/
 
 case class ItemState(item: Item, srcLiquid: Liquid, destState0: WellState, destState1: WellState)
 
-private class TipState(val tip: Tip) {
+private class TipStatus(val tip: Tip) {
 	var liquid: Liquid = null
-	var nVolume: Double = 0
+	var nVolume: LiquidVolume = LiquidVolume.empty
 }
 
 case class LM(liquid: Liquid, tipModel: TipModel) {
@@ -59,7 +61,7 @@ case class LM(liquid: Liquid, tipModel: TipModel) {
 		"LM("+liquid.getName()+", "+tipModel.id+")"
 	}
 }
-case class LMData(nTips: Int, nVolumeTotal: Double, nVolumeCurrent: Double)
+case class LMData(nTips: Int, nVolumeTotal: LiquidVolume, nVolumeCurrent: LiquidVolume)
 
 sealed abstract class CleanSpec2 { val tip: Tip }
 case class ReplaceSpec2(tip: Tip, model: TipModel) extends CleanSpec2

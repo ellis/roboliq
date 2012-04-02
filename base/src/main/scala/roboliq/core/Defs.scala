@@ -23,11 +23,29 @@ object WashIntensity extends Enumeration {
 	}
 }
 
-class LiquidVolume private (_nl: Int) {
-	/** Volume in nanoliters [nl] */ 
+class LiquidVolume private (val _nl: Int) {
+	/** Volume in nanoliters [nl] */
 	def nl: BigDecimal = _nl
-	/** Volume in microliters [ul] */ 
-	def ul: BigDecimal = (nl / 1000.0)
+	/** Volume in microliters [ul] */
+	def ul: BigDecimal = (nl / 1000)
+	/** Volume in milliliters [ml] */
+	def ml: BigDecimal = (nl / 1000000)
+	/** Volume in liters [l] */
+	def l: BigDecimal = (nl / 1000000000)
+	
+	def -(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl - that._nl)
+	def +(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl - that._nl)
+	def *(n: BigDecimal): LiquidVolume = new LiquidVolume((n * _nl).toInt)
+	def /(n: BigDecimal): LiquidVolume = new LiquidVolume((_nl / n).toInt)
+	
+	def isEmpty: Boolean = (_nl == 0)
+	def <(that: LiquidVolume): Boolean = (_nl < that._nl)
+	def <=(that: LiquidVolume): Boolean = (_nl <= that._nl)
+	def >(that: LiquidVolume): Boolean = (_nl > that._nl)
+	def >=(that: LiquidVolume): Boolean = (_nl >= that._nl)
+	def ==(that: LiquidVolume): Boolean = (_nl == that._nl)
+	def !=(that: LiquidVolume): Boolean = (_nl != that._nl)
+	
 	override def toString = {
 		if (_nl > 1000000)
 			(nl / 1000000).toString + " ml"
@@ -43,6 +61,16 @@ object LiquidVolume {
 	def ul(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000).toInt)
 	def ml(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000000).toInt)
 	def l(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000000000).toInt)
+	
+	val empty: LiquidVolume = new LiquidVolume(0)
+	
+	def max(a: LiquidVolume, b: LiquidVolume): LiquidVolume = {
+		if (a._nl > b._nl) a else b
+	}
+	
+	def min(a: LiquidVolume, b: LiquidVolume): LiquidVolume = {
+		if (a._nl < b._nl) a else b
+	}
 }
 
 object PipettePosition extends Enumeration {

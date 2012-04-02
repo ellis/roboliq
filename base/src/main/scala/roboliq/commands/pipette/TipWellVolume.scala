@@ -4,7 +4,7 @@ import roboliq.core._
 
 trait HasTip { val tip: Tip }
 trait HasWell { val well: Well }
-trait HasVolume { val nVolume: Double }
+trait HasVolume { val nVolume: LiquidVolume }
 trait HasPolicy { val policy: PipettePolicy }
 trait HasMixSpec { val mixSpec: MixSpec }
 trait HasTipWell extends HasTip with HasWell
@@ -17,12 +17,12 @@ sealed class TipWell(val tip: Tip, val well: Well) extends HasTipWell {
 
 sealed class TipWellVolume(
 		tip: Tip, well: Well,
-		val nVolume: Double
+		val nVolume: LiquidVolume
 	) extends TipWell(tip, well) {
 	override def toString = "TipWellVolume("+tip.index+","+well.id+","+nVolume+")" 
 }
 
-sealed class TipWellVolumePolicy(tip: Tip, well: Well, nVolume: Double,
+sealed class TipWellVolumePolicy(tip: Tip, well: Well, nVolume: LiquidVolume,
 		val policy: PipettePolicy
 	) extends TipWellVolume(tip, well, nVolume) with HasTipWellVolumePolicy {
 	override def toString = "TipWellVolumePolicy("+tip.index+","+well.id+","+nVolume+","+policy+")" 

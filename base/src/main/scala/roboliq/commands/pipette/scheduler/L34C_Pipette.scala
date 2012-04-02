@@ -31,23 +31,23 @@ case class L3C_Pipette(args: L3A_PipetteArgs) {
 }
 
 class L3A_PipetteArgs(
-	val items: Seq[L3A_PipetteItem],
+	val items: Seq[Item],
 	val mixSpec_? : Option[MixSpec] = None,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val pipettePolicy_? : Option[PipettePolicy] = None,
 	val tipModel_? : Option[TipModel] = None
 )
 
-case class L3A_PipetteItem(
+case class Item(
 	val srcs: SortedSet[Well],
 	val dest: Well,
-	val nVolume: Double,
+	val nVolume: LiquidVolume,
 	val premix_? : Option[MixSpec],
 	val postmix_? : Option[MixSpec]
 )
 
-object L3A_PipetteItem {
-	def toDebugString(items: Seq[L3A_PipetteItem]): String = {
+object Item {
+	def toDebugString(items: Seq[Item]): String = {
 		val srcs = items.groupBy(_.srcs).keys
 		if (srcs.size == 1) {
 			val sSrcs = Printer.getWellsDebugString(srcs.head)
@@ -70,5 +70,5 @@ object L3A_PipetteItem {
 		}
 	}
 
-	def toDebugString(item: L3A_PipetteItem): String = toDebugString(Seq(item))
+	def toDebugString(item: Item): String = toDebugString(Seq(item))
 }

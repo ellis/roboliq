@@ -1,10 +1,12 @@
 package roboliq.commands.pipette.scheduler
 
+import scala.collection.JavaConversions._
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 import roboliq.core._
+import roboliq.commands._
 import roboliq.commands.pipette._
 //import roboliq.compiler._
 import roboliq.devices.pipette._
@@ -12,7 +14,7 @@ import roboliq.devices.pipette._
 
 class GroupBBuilder(
 	val device: PipetteDevice,
-	val ctx: CompilerContextL3
+	val ctx: ProcessorContext
 ) {
 	val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)
 	
@@ -23,7 +25,7 @@ class GroupBBuilder(
 		groupA: GroupA,
 		lTipCleanable0: SortedSet[Tip]
 	): Result[GroupB] = {
-		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => L2C_Aspirate(items))
+		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => createAspirateCmdBean(items))
 		val lDispense = groupSpirateItems(groupA, groupA.lDispense).map(items => L2C_Dispense(items))
 		val lPremix = groupMixItems(groupA, groupA.lPremix).map(items => L2C_Mix(items))
 		val lPostmix = groupMixItems(groupA, groupA.lPostmix).map(items => L2C_Mix(items))
@@ -75,6 +77,24 @@ class GroupBBuilder(
 			nScore
 		)
 		Success(groupB)
+	}
+	
+	private def createAspirateCmdBean(items: Seq[TipWellVolumePolicy]): AspirateCmdBean = {
+		val bean = new AspirateCmdBean
+		bean.items = items.map(createAspirateCmdItemBean)
+		bean
+	}
+	
+	private def createAspirateCmdItemBean(twvp: TipWellVolumePolicy): AspirateCmdItemBean = {
+		val bean = new AspirateCmdItemBean
+		bean.tip = twvp.tip.id
+		bean.well = twvp.well.id
+		bean.volume = twvp.nVolume.
+		@BeanProperty var tip: String = null
+		@BeanProperty var well: String = null
+		@BeanProperty var volume: java.math.BigDecimal = null
+		@BeanProperty var policy: String = null
+		@BeanProperty var location: String = null
 	}
 	
 	def groupSpirateItems(

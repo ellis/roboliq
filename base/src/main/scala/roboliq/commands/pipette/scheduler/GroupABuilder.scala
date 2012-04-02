@@ -20,10 +20,10 @@ class GroupABuilder(
 	private val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)
 
 	/**
-	 * Remove items with nVolume < 0
+	 * Remove items with nVolume <= 0
 	 */
 	def filterItems(items: Seq[Item]): Result[Seq[Item]] = {
-		Success(items.filter(_.nVolume > 0))
+		Success(items.filter(!_.nVolume.isEmpty))
 	}
 	
 	def getItemStates(items: Seq[Item]): Map[Item, ItemState] = {
@@ -172,8 +172,8 @@ class GroupABuilder(
 			val state0 = dest.state(states)
 			
 			// Remove from source and add to dest
-			src.obj.stateWriter(states).remove(item.nVolume)
-			dest.obj.stateWriter(states).add(liquid, item.nVolume)
+			src.stateWriter(states).remove(item.nVolume)
+			dest.stateWriter(states).add(liquid, item.nVolume)
 			val state1 = dest.state(states)
 			
 			mItemToState.get(item) match {
@@ -188,7 +188,7 @@ class GroupABuilder(
 	def splitBigVolumes(item: Item, tipModel: TipModel): Seq[Item] = {
 		if (item.nVolume <= tipModel.nVolume) Seq(item)
 		else {
-			val n = math.ceil(item.nVolume / tipModel.nVolume).asInstanceOf[Int]
+			val n = math.ceil((item.nVolume.ul / tipModel.nVolume.ul).toDouble).asInstanceOf[Int]
 			val nVolume = item.nVolume / n
 			val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, nVolume, item.premix_?, if (i == n - 1) item.postmix_? else None))
 			l
@@ -256,7 +256,7 @@ class GroupABuilder(
 	
 	def addItemToGroup(
 		g0: GroupA,
-		item: L3A_PipetteItem
+		item: Item
 	): GroupResult = {
 		for {
 			g <- GroupSuccess(g0) >>=
@@ -319,7 +319,7 @@ class GroupABuilder(
 					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
 		}
 		// FIXME: for debug only
-		if (data.nVolumeCurrent > 1000) {
+		if (data.nVolumeCurrent > LiquidVolume.ul(1000)) {
 			println("updateLMData")
 			println(data)
 			println(lm.tipModel, lm.tipModel.nVolume)
@@ -486,9 +486,9 @@ class GroupABuilder(
 		else {
 			val ltw0 = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)).flatten
 			// Make sure that max tip volume isn't exceeded when pipetting from a single liquid to multiple destinations
-			val mTipToVolume = new HashMap[Tip, Double]
+			val mTipToVolume = new HashMap[Tip, LiquidVolume]
 			val ltw = ltw0.filter(tw => {
-				val nVolumeTip0 = mTipToVolume.getOrElse(tw.tip, 0.0)
+				val nVolumeTip0: LiquidVolume = mTipToVolume.getOrElse(tw.tip, LiquidVolume.empty)
 				val item = mDestToItems(tw.well).head
 				val lm = g0.mLM(item)
 				val nVolumeTip = nVolumeTip0 + item.nVolume
@@ -528,7 +528,7 @@ class GroupABuilder(
 	}
 	
 	def updateGroupA5_mTipToVolume(g0: GroupA): GroupResult = {
-		val mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(0.0)((acc, pair) => acc + pair._1.nVolume)).toMap
+		val mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(LiquidVolume.empty)((acc, pair) => acc + pair._1.nVolume)).toMap
 		//println("mTipToVolume: "+mTipToVolume)
 		GroupSuccess(g0.copy(
 			mTipToVolume = mTipToVolume
@@ -781,7 +781,7 @@ class GroupABuilder(
 		// TODO: handle tip replacement
 		
 		for ((tip, cleanSpec) <- g0.mTipToCleanSpec) {
-			tip.obj.stateWriter(builder).clean(cleanSpec.washIntensity)
+			tip.stateWriter(builder).clean(cleanSpec.washIntensity)
 		}
 
 		//println("g0.lAspirate: "+g0.lAspirate)
@@ -794,15 +794,15 @@ class GroupABuilder(
 			assert(asp.well.state(builder).liquid == g0.mTipToLM(asp.tip).liquid)
 			//println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
 			// ENDFIX
-			asp.tip.obj.stateWriter(builder).aspirate(asp.well.state(builder).liquid, asp.nVolume)
-			asp.well.obj.stateWriter(builder).remove(asp.nVolume)
+			asp.tip.stateWriter(builder).aspirate(asp.well.state(builder).liquid, asp.nVolume)
+			asp.well.stateWriter(builder).remove(asp.nVolume)
 		}
 		
 		for ((item, dis) <- g0.lItem zip g0.lDispense) {
 			val itemState = g0.mItemToState(item)
 			val liquid = itemState.srcLiquid
-			dis.tip.obj.stateWriter(builder).dispense(item.nVolume, itemState.destState0.liquid, dis.policy.pos)
-			builder.map(item.dest.obj) = itemState.destState1
+			dis.tip.stateWriter(builder).dispense(item.nVolume, itemState.destState0.liquid, dis.policy.pos)
+			builder.map(item.dest) = itemState.destState1
 		}
 		
 		// TODO: handle mixes

@@ -5,10 +5,10 @@ import scala.reflect.BeanProperty
 
 case class TipModel(
 	val id: String,
-	val nVolume: Double, 
-	val nVolumeAspirateMin: Double, 
-	val nVolumeWashExtra: Double,
-	val nVolumeDeconExtra: Double
+	val nVolume: LiquidVolume, 
+	val nVolumeAspirateMin: LiquidVolume, 
+	val nVolumeWashExtra: LiquidVolume,
+	val nVolumeDeconExtra: LiquidVolume
 )
 
 class TipBean extends Bean {
@@ -44,7 +44,7 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 		
 		def drop() {
 			val st = state
-			map(thisObj) = state.conf.createState0(None)
+			map(thisObj) = state.conf.(None)
 			//println("DROP tip "+thisObj.index+": sType = "+state.model_?)
 		}
 		
@@ -54,7 +54,7 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 			//println("tip "+thisObj.index+": sType = "+state.model_?)
 		}
 		
-		def aspirate(liquid2: Liquid, nVolume2: Double) {
+		def aspirate(liquid2: Liquid, nVolume2: LiquidVolume) {
 			val st = state
 			val nVolumeNew = st.nVolume + nVolume2
 			map(thisObj) = new TipStateL2(
@@ -73,14 +73,14 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 			)
 		}
 		
-		def dispense(nVolumeDisp: Double, liquidDest: Liquid, pos: PipettePosition.Value) {
+		def dispense(nVolumeDisp: LiquidVolume, liquidDest: Liquid, pos: PipettePosition.Value) {
 			pos match {
 				case PipettePosition.WetContact => dispenseIn(nVolumeDisp, liquidDest)
 				case _ => dispenseFree(nVolumeDisp)
 			}
 		}
 		
-		def dispenseFree(nVolume2: Double) {
+		def dispenseFree(nVolume2: LiquidVolume) {
 			val st = state
 			val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
 			map(thisObj) = st.copy(
@@ -90,7 +90,7 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 			)
 		}
 		
-		def dispenseIn(nVolume2: Double, liquid2: Liquid) {
+		def dispenseIn(nVolume2: LiquidVolume, liquid2: Liquid) {
 			val st = state
 			val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
 			map(thisObj) = st.copy(
@@ -103,7 +103,7 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 			)
 		}
 		
-		private def getLiquidAndVolumeAfterDispense(nVolume2: Double): Tuple2[Liquid, Double] = {
+		private def getLiquidAndVolumeAfterDispense(nVolume2: LiquidVolume): Tuple2[Liquid, LiquidVolume] = {
 			val st = state
 			val nVolume3 = st.nVolume - nVolume2
 			if (math.abs(nVolume3) < 0.001) {
@@ -116,7 +116,7 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 		
 		def clean(cleanDegree: WashIntensity.Value) {
 			val st = state
-			map(thisObj) = st.conf.createState0(None).copy(
+			map(thisObj) = st.conf.(None).copy(
 				model_? = st.model_?,
 				cleanDegree = cleanDegree,
 				cleanDegreePrev = cleanDegree,
@@ -124,7 +124,7 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 			)
 		}
 		
-		def mix(liquid2: Liquid, nVolume2: Double) {
+		def mix(liquid2: Liquid, nVolume2: LiquidVolume) {
 			aspirate(liquid2, nVolume2)
 			dispenseIn(nVolume2, liquid2)
 		}
@@ -140,32 +140,20 @@ class TipX(val index: Int, modelPermanent_? : Option[TipModel]) extends Ordered[
 }*/
 
 class Tip(
-	val obj: Tip,
 	val index: Int
 ) extends Ordered[Tip] {
 	val id = "TIP"+index
 	
 	def state(states: StateMap): TipState = states(this).asInstanceOf[TipState]
+	def stateWriter(builder: StateBuilder): TipStateWriter = new TipStateWriter(this, builder.map)
+
 	override def compare(that: Tip) = index - that.index
 	override def toString = id
-}
 
-case class TipState(
-	val conf: Tip,
-	val model_? : Option[TipModel],
-	val liquid: Liquid, 
-	val nVolume: Double, 
-	val contamInside: Set[Contaminant.Value], 
-	val nContamInsideVolume: Double,
-	val contamOutside: Set[Contaminant.Value],
-	val srcsEntered: Set[Liquid],
-	val destsEntered: Set[Liquid],
-	val cleanDegree: WashIntensity.Value,
-	val cleanDegreePrev: WashIntensity.Value,
-	/** Intensity of cleaning that should be performed after leaving the current liquid group */
-	val cleanDegreePending: WashIntensity.Value
-) extends Ordered[TipState] {
-	override def compare(that: TipState): Int = conf.compare(that.conf)
+	// For use by TipStateWriter
+	def createState0(model_? : Option[TipModel]): TipState = {
+		new TipState(this, model_?, Liquid.empty, LiquidVolume.l(0), Set(), LiquidVolume.l(0), Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
+	}
 }
 
 object TipSet {
@@ -193,5 +181,114 @@ object TipSet {
 			})
 			ls.mkString("Tip", ",", "")
 		}
+	}
+}
+
+case class TipState(
+	val conf: Tip,
+	val model_? : Option[TipModel],
+	val liquid: Liquid, 
+	val nVolume: LiquidVolume, 
+	val contamInside: Set[Contaminant.Value], 
+	val nContamInsideVolume: LiquidVolume,
+	val contamOutside: Set[Contaminant.Value],
+	val srcsEntered: Set[Liquid],
+	val destsEntered: Set[Liquid],
+	val cleanDegree: WashIntensity.Value,
+	val cleanDegreePrev: WashIntensity.Value,
+	/** Intensity of cleaning that should be performed after leaving the current liquid group */
+	val cleanDegreePending: WashIntensity.Value
+) extends Ordered[TipState] {
+	override def compare(that: TipState): Int = conf.compare(that.conf)
+}
+
+class TipStateWriter(o: Tip, map: HashMap[Object, Object]) {
+	def state = map(o).asInstanceOf[TipState]
+	
+	def drop() {
+		val st = state
+		map(o) = state.conf.createState0(None)
+		//println("DROP tip "+thisObj.index+": sType = "+state.model_?)
+	}
+	
+	def get(model: TipModel) {
+		val st = state
+		map(o) = st.copy(model_? = Some(model))
+		//println("tip "+thisObj.index+": sType = "+state.model_?)
+	}
+	
+	def aspirate(liquid2: Liquid, nVolume2: LiquidVolume) {
+		val st = state
+		val nVolumeNew = st.nVolume + nVolume2
+		map(o) = new TipState(
+			st.conf,
+			st.model_?,
+			st.liquid + liquid2,
+			nVolumeNew,
+			st.contamInside ++ liquid2.contaminants,
+			LiquidVolume.max(st.nContamInsideVolume, nVolumeNew),
+			st.contamOutside ++ liquid2.contaminants,
+			st.srcsEntered + liquid2,
+			st.destsEntered,
+			WashIntensity.None,
+			st.cleanDegreePrev,
+			WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+		)
+	}
+	
+	def dispense(nVolumeDisp: LiquidVolume, liquidDest: Liquid, pos: PipettePosition.Value) {
+		pos match {
+			case PipettePosition.WetContact => dispenseIn(nVolumeDisp, liquidDest)
+			case _ => dispenseFree(nVolumeDisp)
+		}
+	}
+	
+	def dispenseFree(nVolume2: LiquidVolume) {
+		val st = state
+		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
+		map(o) = st.copy(
+			liquid = liquid,
+			nVolume = nVolume,
+			cleanDegree = WashIntensity.None
+		)
+	}
+	
+	def dispenseIn(nVolume2: LiquidVolume, liquid2: Liquid) {
+		val st = state
+		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
+		map(o) = st.copy(
+			liquid = liquid,
+			nVolume = nVolume,
+			contamOutside = st.contamOutside ++ liquid2.contaminants,
+			destsEntered = st.destsEntered + liquid2,
+			cleanDegree = WashIntensity.None,
+			cleanDegreePending = WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+		)
+	}
+	
+	private def getLiquidAndVolumeAfterDispense(nVolume2: LiquidVolume): Tuple2[Liquid, LiquidVolume] = {
+		val st = state
+		val nVolume3 = st.nVolume - nVolume2
+		if (nVolume3 < LiquidVolume.nl(1)) {
+			(Liquid.empty, LiquidVolume.empty)
+		}
+		else {
+			(st.liquid, nVolume3)
+		}
+	}
+	
+	def clean(cleanDegree: WashIntensity.Value) {
+		val st = state
+		map(o) = st.conf.createState0(None).copy(
+			model_? = st.model_?,
+			cleanDegree = cleanDegree,
+			cleanDegreePrev = cleanDegree,
+			cleanDegreePending = WashIntensity.None
+		)
+	}
+	
+	def mix(liquid2: Liquid, nVolume2: LiquidVolume) {
+		aspirate(liquid2, nVolume2)
+		dispenseIn(nVolume2, liquid2)
 	}
 }

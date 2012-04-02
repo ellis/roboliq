@@ -15,44 +15,43 @@ trait Well extends Ordered[Well] {
 	val indexName: String
 	
 	def state(states: StateMap): WellState = states(this).asInstanceOf[WellState]
+	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(this, builder.map)
 	
 	override def compare(that: Well) = id.compare(that.id)
 }
 
-class WellState(
+case class WellState(
 	//val well: Well,
 	val liquid: Liquid,
-	val nVolume: Double,
+	val nVolume: LiquidVolume,
 	/** Make sure that volume doesn't go below 0 */
 	val bCheckVolume: Boolean,
 	val history: List[WellHistoryItem]
 )
 
-class WellStateWriter(map: HashMap[Object, Object]) {
-	def state = map(thisObj).asInstanceOf[State]
+class WellStateWriter(o: Well, map: HashMap[Object, Object]) {
+	def state = map(o).asInstanceOf[WellState]
 	
 	def liquid = state.liquid
-	//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
 	
 	def nVolume = state.nVolume
-	//def nVolume_=(nVolume: Double) { map(thisObj) = state.copy(nVolume = nVolume) }
 
-	def add(liquid2: Liquid, nVolume2: Double) {
+	def add(liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
-		map(thisObj) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
+		map(o) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
 	}
 	
-	def remove(nVolume2: Double) {
+	def remove(nVolume2: LiquidVolume) {
 		val st = state
 		val nVolumeNew = st.nVolume - nVolume2;
 		// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
 		if (st.bCheckVolume) {
-			if (nVolumeNew < 0) {
-				println("tried to remove too much liquid from "+thisObj)
-				assert(nVolumeNew >= 0)
+			if (nVolumeNew < LiquidVolume.empty) {
+				println("tried to remove too much liquid from "+o.id)
+				assert(false)
 			}
 		}
-		map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2)
+		map(o) = st.copy(nVolume = st.nVolume - nVolume2)
 	}
 }
 
@@ -68,7 +67,7 @@ class PlateWell(
 class PlateWellState(
 	val conf: PlateWell,
 	liquid: Liquid,
-	nVolume: Double,
+	nVolume: LiquidVolume,
 	bCheckVolume: Boolean,
 	history: List[WellHistoryItem]
 ) extends WellState(liquid, nVolume, bCheckVolume, history)
@@ -95,7 +94,7 @@ class TubeState(
 	val obj: Tube,
 	val location: String,
 	liquid: Liquid,
-	nVolume: Double,
+	nVolume: LiquidVolume,
 	bCheckVolume: Boolean,
 	history: List[WellHistoryItem]
 ) extends WellState(liquid, nVolume, bCheckVolume, history)
@@ -110,7 +109,7 @@ class Well extends Obj { thisObj =>
 	var index_? : Option[Int] = None
 	var bRequiresIntialLiq_? : Option[Boolean] = None
 	var reagent_? : Option[Reagent] = None
-	var nVolume_? : Option[Double] = None
+	var nVolume_? : Option[LiquidVolume] = None
 	
 	override def getLabel(kb: KnowledgeBase): String = {
 		val s = new StringBuilder
@@ -228,7 +227,7 @@ case class WellStateL2(
 	val conf: WellConfigL2,
 	val plateState: PlateStateL2,
 	val liquid: Liquid,
-	val nVolume: Double,
+	val nVolume: LiquidVolume,
 	/** Make sure that volume doesn't go below 0 */
 	val bCheckVolume: Boolean
 ) extends ObjState
