@@ -25,10 +25,10 @@ class GroupBBuilder(
 		groupA: GroupA,
 		lTipCleanable0: SortedSet[Tip]
 	): Result[GroupB] = {
-		val lAspirate = groupSpirateItems(groupA, groupA.lAspirate).map(items => createAspirateCmdBean(items))
-		val lDispense = groupSpirateItems(groupA, groupA.lDispense).map(items => L2C_Dispense(items))
-		val lPremix = groupMixItems(groupA, groupA.lPremix).map(items => L2C_Mix(items))
-		val lPostmix = groupMixItems(groupA, groupA.lPostmix).map(items => L2C_Mix(items))
+		val llAspirate = groupSpirateItems(groupA, groupA.lAspirate)
+		val llDispense = groupSpirateItems(groupA, groupA.lDispense)
+		val llPremix = groupMixItems(groupA, groupA.lPremix)
+		val llPostmix = groupMixItems(groupA, groupA.lPostmix)
 		
 		//println("groupA:"+groupA)
 		
@@ -57,10 +57,10 @@ class GroupBBuilder(
 		// TODO: if cleaning is moved back to preceding group, that cleaning procedure might become more expensive
 		//  take that into consideration when calculating path cost
 		val nScore = {
-			scoreAspirates(lAspirate) +
-			scoreDispenses(lDispense) +
+			scoreAspirates(llAspirate) +
+			scoreDispenses(llDispense) +
 			scoreCleans(cleans) +
-			scorePostmixes(lDispense.size, lPostmix)
+			scorePostmixes(llDispense.size, llPostmix)
 		}
 			
 		val groupB = GroupB(
@@ -70,9 +70,9 @@ class GroupBBuilder(
 			cleans = cleans,
 			lTipCleanable = lTipCleanable,
 			Nil,
-			lPremix = lPremix,
-			lAspirate = lAspirate,
-			lDispense = lDispense,
+			lPremix = llPremix,
+			lAspirate = llAspirate.map(createAspirateCmdBean),
+			lDispense = llDispense.map(createDispenseCmdBean),
 			lPostmix = lPostmix,
 			nScore
 		)
@@ -81,29 +81,38 @@ class GroupBBuilder(
 	
 	private def createAspirateCmdBean(items: Seq[TipWellVolumePolicy]): AspirateCmdBean = {
 		val bean = new AspirateCmdBean
-		bean.items = items.map(createAspirateCmdItemBean)
+		bean.items = items.map(createSpirateCmdItemBean)
 		bean
 	}
 	
-	private def createAspirateCmdItemBean(twvp: TipWellVolumePolicy): AspirateCmdItemBean = {
-		val bean = new AspirateCmdItemBean
+	private def createDispenseCmdBean(items: Seq[TipWellVolumePolicy]): DispenseCmdBean = {
+		val bean = new DispenseCmdBean
+		bean.items = items.map(createSpirateCmdItemBean)
+		bean
+	}
+	
+	private def createSpirateCmdItemBean(twvp: TipWellVolumePolicy): SpirateCmdItemBean = {
+		val bean = new SpirateCmdItemBean
 		bean.tip = twvp.tip.id
 		bean.well = twvp.well.id
-		bean.volume = twvp.nVolume.
-		@BeanProperty var tip: String = null
-		@BeanProperty var well: String = null
-		@BeanProperty var volume: java.math.BigDecimal = null
-		@BeanProperty var policy: String = null
-		@BeanProperty var location: String = null
+		bean.volume = twvp.nVolume.l.bigDecimal
+		bean.policy = twvp.policy.id
+		bean.location = "FIXME01"
+		bean
+	}
+	
+	private def createMixCmdBean(items: Seq[TipWellMix]): MixCmdBean = {
+		
 	}
 	
 	def groupSpirateItems(
 		groupA: GroupA,
 		lTwvp: Seq[TipWellVolumePolicy]
-	): Seq[Seq[L2A_SpirateItem]] = {
+	): Seq[Seq[TipWellVolumePolicy]] = {
 		val x = lTwvp.foldLeft(List[List[TipWellVolumePolicy]]())(groupSpirateItems_add(groupA))
 		val y = x.reverse.map(_.reverse)
-		y.map(_.map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy)))
+		y
+		//y.map(_.map(twvp => new L2A_SpirateItem(twvp.tip, twvp.well, twvp.nVolume, twvp.policy)))
 	}
 	
 	def groupSpirateItems_add(groupA: GroupA)(
@@ -135,10 +144,11 @@ class GroupBBuilder(
 	def groupMixItems(
 		groupA: GroupA,
 		lTwvp: Seq[TipWellMix]
-	): Seq[Seq[L2A_MixItem]] = {
+	): Seq[Seq[TipWellMix]] = {
 		val x = lTwvp.foldLeft(List[List[TipWellMix]]())(groupMixItems_add(groupA))
 		val y = x.reverse.map(_.reverse)
-		y.map(_.map(twvp => new L2A_MixItem(twvp.tip, twvp.well, twvp.mixSpec.nVolume, twvp.mixSpec.nCount, twvp.mixSpec.mixPolicy)))
+		y
+		//y.map(_.map(twvp => new L2A_MixItem(twvp.tip, twvp.well, twvp.mixSpec.nVolume, twvp.mixSpec.nCount, twvp.mixSpec.mixPolicy)))
 	}
 	
 	def groupMixItems_add(groupA: GroupA)(
@@ -185,7 +195,7 @@ class GroupBBuilder(
 			None
 		}
 		else if (device.areTipsDisposable) {
-			val tipState = tip.obj.state(states)
+			val tipState = tip.state(states)
 			val bGetTip = tipState.model_?.isEmpty && mTipToModel.contains(tip)
 			val bDropTip = !tipState.model_?.isEmpty && !mTipToModel.contains(tip)
 			val bReplace = bGetTip || (overrides.replacement_? match {
@@ -202,27 +212,27 @@ class GroupBBuilder(
 				None
 		}
 		else {
-			val tipState = tip.obj.state(states)
+			val tipState = tip.state(states)
 			if (cleanSpec.washIntensity > WashIntensity.None) Some(WashSpec2(tip, cleanSpec))
 			else None
 		}
 	}
 	
-	def scoreAspirates(lAspirate: Seq[L2C_Aspirate]): Double = {
-		val nCostStart = if (lAspirate.isEmpty) 0.0 else 5.0
-		lAspirate.foldLeft(nCostStart)((acc, cmd) => {
+	def scoreAspirates(llAspirate: Seq[Seq[TipWellVolumePolicy]]): Double = {
+		val nCostStart = if (llAspirate.isEmpty) 0.0 else 5.0
+		llAspirate.foldLeft(nCostStart)((acc, cmd) => {
 			acc + 2.0
 		})
 	}
 	
-	def scoreDispenses(lDispense: Seq[L2C_Dispense]): Double = {
-		val nCostStart = if (lDispense.isEmpty) 0.0 else 5.0
-		lDispense.foldLeft(nCostStart)((acc, cmd) => {
-			acc + (if (cmd.items.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
+	def scoreDispenses(llDispense: Seq[Seq[TipWellVolumePolicy]]): Double = {
+		val nCostStart = if (llDispense.isEmpty) 0.0 else 5.0
+		llDispense.foldLeft(nCostStart)((acc, ltwvp) => {
+			acc + (if (ltwvp.forall(_.policy.pos == PipettePosition.Free)) 1.0 else 2.0)
 		})
 	}
 	
-	def scorePostmixes(nDispense: Int, lMix: Seq[L2C_Mix]): Double = {
+	def scorePostmixes(nDispense: Int, lMix: Seq[MixCmdBean]): Double = {
 		if (lMix.isEmpty) return 0.0
 		
 		val nCostStart = if (nDispense == 0) 5.0 else if (nDispense == 1) 0.0 else 1.0

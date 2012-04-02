@@ -1,6 +1,4 @@
-package roboliq.commands
-
-import roboliq.core.RobotState
+package roboliq.core
 
 class Processor {
 
@@ -8,5 +6,6 @@ class Processor {
 
 class ProcessorContext(
 	val processor: Processor,
+	val ob: ObjBase,
 	val states: RobotState
 )

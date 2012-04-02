@@ -5,24 +5,22 @@ import scala.reflect.BeanProperty
 import roboliq.core._
 
 
-class MixCmdBean extends CmdBean(isFinal = true) {
+class MixCmdBean extends CmdBean {
 	@BeanProperty var description: String = null
 	@BeanProperty var items: java.util.List[MixCmdItemBean] = null
-	
-	def process(ob: ObjBase): Result[Unit] = {
-		if (items == null)
-			Error("`items` must be set")
-		else if (items.isEmpty())
-			Error("`items` must not be empty")
-		else {
-			for {
-				items <- Result.mapOver(items.toList) {item => item.toTokenItem(ob)}
-			} yield {
-				tokens = List(new MixToken(items))
+	@BeanProperty var mixSpec: MixSpecBean = null
+}
+
+class MixCmdHandler extends CmdHandlerA[MixCmdBean](isFinal = true) {
+	def process(cmd: MixCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+		node.mustBeNonEmpty(cmd, "items")
+		if (node.getErrorCount == 0) {
+			val lItem = cmd.items.toList.map(_.toTokenItem(cmd, ctx.ob, node)).flatten
+			if (node.getErrorCount == 0) {
+				node.tokens = List(new MixToken(lItem))
 			}
 		}
 	}
-
 	/*
 	override def toDebugString = {
 		val wells = items.map(_.well)
@@ -37,21 +35,34 @@ class MixCmdBean extends CmdBean(isFinal = true) {
 class MixCmdItemBean {
 	@BeanProperty var tip: String = null
 	@BeanProperty var well: String = null
-	@BeanProperty var volume: java.math.BigDecimal = null
-	@BeanProperty var policy: String = null
-	@BeanProperty var location: String = null
+	@BeanProperty var mixSpec: MixSpecBean = null
 	
-	
-	def toTokenItem(ob: ObjBase): Result[MixTokenItem] = {
+	def toTokenItem(cmd: MixCmdBean, ob: ObjBase, node: CmdNodeBean): Option[MixTokenItem] = {
+		val volume0 = {
+			if (mixSpec != null && mixSpec.volume != null) mixSpec.volume
+			else if (cmd.mixSpec != null && cmd.mixSpec.volume != null) cmd.mixSpec.volume
+			else null
+		}
+		val count0 = {
+			if (mixSpec != null && mixSpec.count != null) mixSpec.count
+			else if (cmd.mixSpec != null && cmd.mixSpec.count != null) cmd.mixSpec.count
+			else null
+		}
+		val policy0 = {
+			if (mixSpec != null && mixSpec.policy != null) mixSpec.policy
+			else if (cmd.mixSpec != null && cmd.mixSpec.policy != null) cmd.mixSpec.policy
+			else null
+		}
 		for {
-			idTip <- Result.mustBeSet(tip, "tip")
-			idWell <- Result.mustBeSet(well, "well")
-			idPolicy <- Result.mustBeSet(policy, "policy")
-			idLocation <- Result.mustBeSet(location, "location")
-			well <- ob.findWell(idWell)
+			idTip <- node.getValueNonNull_?(tip, "tip")
+			idWell <- node.getValueNonNull_?(well, "well")
+			volume <- node.getValueNonNull_?(volume0, "volume")
+			count <- node.getValueNonNull_?(count0, "count")
+			idPolicy <- node.getValueNonNull_?(policy0, "policy")
+			well <- ob.findWell_?(idWell, node)
 		} yield {
 			val iTip = idTip.drop(3).toInt
-			new MixTokenItem(iTip, well, idPolicy, idLocation)
+			new MixTokenItem(iTip, well, LiquidVolume.l(volume), count, idPolicy)
 		}
 	}
 }
@@ -63,6 +74,7 @@ case class MixToken(
 case class MixTokenItem(
 	val tip: java.lang.Integer,
 	val well: Well,
-	val policy: String,
-	val location: String
+	val volume: LiquidVolume,
+	val count: Int,
+	val policy: String
 )

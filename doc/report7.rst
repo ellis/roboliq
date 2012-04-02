@@ -34,6 +34,13 @@ Next Steps
 * feedback loops
 * portability via import and export?
 
+Import/Export Portability
+-------------------------
+
+* For a given set of commands, export all relevant object data along with the commands
+* During import, we need to remove data which is specific to the other lab and doesn't fit ours
+* How to merge primer data from one lab to another, given conflicting IDs?
+
 Current Questions
 -----------------
 

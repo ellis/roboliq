@@ -7,14 +7,7 @@ import scala.collection.JavaConversions
 
 class CmdToken
 
-class CmdBean(val isFinal: Boolean) {
-	@BeanProperty var errors: java.util.List[String] = null
-	@BeanProperty var warnings: java.util.List[String] = null
-	@BeanProperty var translations: java.util.List[CmdBean] = null
-	var tokens: List[CmdToken] = null
-	
-	def process(ob: ObjBase): Result[Unit]
-}
+class CmdBean
 
 /** YAML bean representing an entire roboliq YAML file */
 class RoboliqYamlBean {

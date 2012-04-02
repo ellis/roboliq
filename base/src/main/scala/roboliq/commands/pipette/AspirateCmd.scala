@@ -5,56 +5,50 @@ import scala.reflect.BeanProperty
 import roboliq.core._
 
 
-class AspirateCmdBean extends CmdBean(isFinal = true) {
+class AspirateCmdBean extends CmdBean {
 	@BeanProperty var description: String = null
-	@BeanProperty var items: java.util.List[AspirateCmdItemBean] = null
-	
-	def process(ob: ObjBase): Result[Unit] = {
-		if (items == null)
-			Error("`items` must be set")
-		else if (items.isEmpty())
-			Error("`items` must not be empty")
-		else {
-			for {
-				items <- Result.mapOver(items.toList) {item => item.toTokenItem(ob)}
-			} yield {
-				tokens = List(new AspirateToken(items))
+	@BeanProperty var items: java.util.List[SpirateCmdItemBean] = null
+}
+
+class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean](isFinal = true) {
+	def process(cmd: AspirateCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+		node.mustBeNonEmpty(cmd, "items")
+		if (node.getErrorCount == 0) {
+			val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, node)).flatten
+			if (node.getErrorCount == 0) {
+				node.tokens = List(new AspirateToken(lItem))
 			}
 		}
 	}
 }
 
-class AspirateCmdItemBean {
+class SpirateCmdItemBean {
 	@BeanProperty var tip: String = null
 	@BeanProperty var well: String = null
 	@BeanProperty var volume: java.math.BigDecimal = null
 	@BeanProperty var policy: String = null
-	@BeanProperty var location: String = null
 	
 	
-	def toTokenItem(ob: ObjBase): Result[AspirateTokenItem] = {
+	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Option[SpirateTokenItem] = {
 		for {
-			idTip <- Result.mustBeSet(tip, "tip")
-			idWell <- Result.mustBeSet(well, "well")
-			idPolicy <- Result.mustBeSet(policy, "policy")
-			idLocation <- Result.mustBeSet(location, "location")
-			well <- ob.findWell(idWell)
+			_ <- node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
+			wellObj <- ob.findWell_?(well, node)
 		} yield {
-			val iTip = idTip.drop(3).toInt
-			new AspirateTokenItem(iTip, well, idPolicy, idLocation)
+			val iTip = tip.drop(3).toInt
+			new SpirateTokenItem(iTip, wellObj, LiquidVolume.l(volume), policy)
 		}
 	}
 }
 
 case class AspirateToken(
-	val items: List[AspirateTokenItem]
+	val items: List[SpirateTokenItem]
 ) extends CmdToken
 
-case class AspirateTokenItem(
+case class SpirateTokenItem(
 	val tip: java.lang.Integer,
 	val well: Well,
-	val policy: String,
-	val location: String
+	val volume: LiquidVolume,
+	val policy: String
 )
 
 class YamlTest {
@@ -71,9 +65,16 @@ class YamlTest {
 		bb.addBean(bean)
 		val ob = new ObjBase(bb)
 		
+		val processor = new Processor
+		val builder = new StateBuilder(ob)
+		val ctx = new ProcessorContext(processor, ob, builder.toImmutable)
+		
+		val handler = new AspirateCmdHandler
+
 		val cmd = bean.commands.get(0).asInstanceOf[AspirateCmdBean]
-		val res = cmd.process(ob)
-		println(res)
+		
+		val node = handler.process(cmd, ctx)
+		println(node)
 	}
 }
 

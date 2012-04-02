@@ -59,6 +59,17 @@ class ObjBase(bb: BeanBase) {
 		
 	}
 	
+	def findWell_?(id: String, node: CmdNodeBean): Option[Well] = {
+		m_mapWell.get(id) match {
+			case Some(obj) => Some(obj)
+			case None =>
+				createWell(id) match {
+					case Error(ls) => ls.foreach(node.addError); None
+					case Success(well) => Some(well)
+				}
+		}
+	}
+	
 	def findWell(id: String): Result[Well] = {
 		m_mapWell.get(id) match {
 			case Some(obj) => Success(obj)

@@ -4,7 +4,7 @@ import scala.reflect.BeanProperty
 
 class MixSpecBean extends Bean {
 	@BeanProperty var volume: java.math.BigDecimal = null
-	@BeanProperty var count: java.math.BigDecimal = null
+	@BeanProperty var count: java.lang.Integer = null
 	@BeanProperty var policy: String = null
 }
 
