@@ -70,10 +70,10 @@ class GroupBBuilder(
 			cleans = cleans,
 			lTipCleanable = lTipCleanable,
 			Nil,
-			lPremix = llPremix,
+			lPremix = llPremix.map(createMixCmdBean),
 			lAspirate = llAspirate.map(createAspirateCmdBean),
 			lDispense = llDispense.map(createDispenseCmdBean),
-			lPostmix = lPostmix,
+			lPostmix = llPostmix.map(createMixCmdBean),
 			nScore
 		)
 		Success(groupB)
@@ -97,12 +97,30 @@ class GroupBBuilder(
 		bean.well = twvp.well.id
 		bean.volume = twvp.nVolume.l.bigDecimal
 		bean.policy = twvp.policy.id
-		bean.location = "FIXME01"
 		bean
 	}
 	
 	private def createMixCmdBean(items: Seq[TipWellMix]): MixCmdBean = {
-		
+		val bean = new MixCmdBean
+		bean.items = items.map(createMixCmdItemBean)
+		bean
+	}
+	
+	private def createMixCmdItemBean(twm: TipWellMix): MixCmdItemBean = {
+		val bean = new MixCmdItemBean
+		bean.tip = twm.tip.id
+		bean.well = twm.well.id
+		bean.mixSpec = new MixSpecBean
+		bean.mixSpec.volume = twm.mixSpec.nVolume_?.getOrElse(null)
+		bean.mixSpec.count = twm.mixSpec.nCount_? match {
+			case None => null
+			case Some(n) => n
+		}
+		bean.mixSpec.policy = twm.mixSpec.mixPolicy_? match {
+			case None => null
+			case Some(mixPolicy) => mixPolicy.id
+		}
+		bean
 	}
 	
 	def groupSpirateItems(
@@ -162,7 +180,7 @@ class GroupBBuilder(
 				val xs2 = twvp :: xs
 				if (
 					tipModel.eq(tipModel0) && 
-					twvp.mixSpec.mixPolicy == x0.mixSpec.mixPolicy && 
+					twvp.mixSpec.mixPolicy_? == x0.mixSpec.mixPolicy_? && 
 					device.canBatchMixItems(groupA.states0, xs2)
 				)
 					xs2 :: rest
@@ -232,7 +250,7 @@ class GroupBBuilder(
 		})
 	}
 	
-	def scorePostmixes(nDispense: Int, lMix: Seq[MixCmdBean]): Double = {
+	def scorePostmixes(nDispense: Int, lMix: Seq[Seq[TipWellMix]]): Double = {
 		if (lMix.isEmpty) return 0.0
 		
 		val nCostStart = if (nDispense == 0) 5.0 else if (nDispense == 1) 0.0 else 1.0
