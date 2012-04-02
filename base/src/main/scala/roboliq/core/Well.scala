@@ -28,6 +28,34 @@ class WellState(
 	val history: List[WellHistoryItem]
 )
 
+class WellStateWriter(map: HashMap[Object, Object]) {
+	def state = map(thisObj).asInstanceOf[State]
+	
+	def liquid = state.liquid
+	//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
+	
+	def nVolume = state.nVolume
+	//def nVolume_=(nVolume: Double) { map(thisObj) = state.copy(nVolume = nVolume) }
+
+	def add(liquid2: Liquid, nVolume2: Double) {
+		val st = state
+		map(thisObj) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
+	}
+	
+	def remove(nVolume2: Double) {
+		val st = state
+		val nVolumeNew = st.nVolume - nVolume2;
+		// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
+		if (st.bCheckVolume) {
+			if (nVolumeNew < 0) {
+				println("tried to remove too much liquid from "+thisObj)
+				assert(nVolumeNew >= 0)
+			}
+		}
+		map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2)
+	}
+}
+
 class PlateWell(
 	val id: String,
 	val idPlate: String,
@@ -167,33 +195,6 @@ class Well extends Obj { thisObj =>
 		Success(conf, state)
 	}
 
-	class StateWriter(map: HashMap[Obj, ObjState]) {
-		def state = map(thisObj).asInstanceOf[State]
-		
-		def liquid = state.liquid
-		//def liquid_=(liquid: Liquid) { map(thisObj) = state.copy(liquid = liquid) }
-		
-		def nVolume = state.nVolume
-		//def nVolume_=(nVolume: Double) { map(thisObj) = state.copy(nVolume = nVolume) }
-
-		def add(liquid2: Liquid, nVolume2: Double) {
-			val st = state
-			map(thisObj) = st.copy(liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2)
-		}
-		
-		def remove(nVolume2: Double) {
-			val st = state
-			val nVolumeNew = st.nVolume - nVolume2;
-			// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
-			if (st.bCheckVolume) {
-				if (nVolumeNew < 0) {
-					println("tried to remove too much liquid from "+thisObj)
-					assert(nVolumeNew >= 0)
-				}
-			}
-			map(thisObj) = st.copy(nVolume = st.nVolume - nVolume2)
-		}
-	}
 	//def stateWriter(map: HashMap[ThisObj, StateL2]) = new StateWriter(this, map)
 	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
 	

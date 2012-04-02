@@ -42,7 +42,7 @@ class RobotState(val ob: ObjBase, val map: Map[Object, Object]) extends StateMap
 }
 
 class StateBuilder(val ob: ObjBase, val map: HashMap[Object, Object]) extends StateMap {
-	def this(ob: ObjBase, states: RobotState) = this(ob, HashMap[Object, Object](states.map.toSeq : _*))
+	def this(states: RobotState) = this(states.ob, HashMap[Object, Object](states.map.toSeq : _*))
 	def this(ob: ObjBase) = this(ob, new HashMap[Object, Object])
 	
 	def toImmutable: RobotState = new RobotState(ob, map.toMap)

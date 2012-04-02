@@ -5,16 +5,16 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 import roboliq.core._
-import roboliq.commands2._
-import roboliq.commands2.pipette._
-import roboliq.devices2.pipette._
+import roboliq.commands._
+import roboliq.commands.pipette._
+import roboliq.devices.pipette._
 //import roboliq.compiler._
 //import roboliq.devices.pipette._
 
 
 class GroupABuilder(
 	val device: PipetteDevice,
-	val ctx: CompilerContextL3,
+	val ctx: ProcessorContext,
 	val cmd: L3C_Pipette
 ) {
 	private val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)

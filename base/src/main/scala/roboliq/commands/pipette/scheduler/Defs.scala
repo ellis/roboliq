@@ -6,8 +6,8 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.Queue
 
 import roboliq.core._
-import roboliq.commands2._
-import roboliq.commands2.pipette._
+import roboliq.commands._
+import roboliq.commands.pipette._
 //import roboliq.compiler._
 //import roboliq.devices.pipette._
 

@@ -3,7 +3,7 @@ package roboliq.commands.pipette.scheduler
 import scala.collection.immutable.SortedSet
 
 import roboliq.core._
-import roboliq.commands2.pipette._
+import roboliq.commands.pipette._
 
 
 case class GroupB(

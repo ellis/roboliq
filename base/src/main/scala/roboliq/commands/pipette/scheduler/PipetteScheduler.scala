@@ -6,9 +6,9 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.PriorityQueue
 import roboliq.core._
 //import roboliq.commands._
-import roboliq.commands2.pipette._
+import roboliq.commands.pipette._
 //import roboliq.compiler._
-import roboliq.devices2.pipette._
+import roboliq.devices.pipette._
 import java.io.FileWriter
 
 
