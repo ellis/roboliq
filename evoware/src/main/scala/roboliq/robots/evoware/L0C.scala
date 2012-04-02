@@ -1,10 +1,10 @@
 package roboliq.robots.evoware
 
-import roboliq.common._
+import roboliq.core._
 import roboliq.commands.move.LidHandling
 
 
-abstract class L0C_Command extends Command {
+abstract class L0C_Command {
 	def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] = Nil
 }
 

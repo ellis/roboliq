@@ -3,17 +3,16 @@ package roboliq.robots.evoware
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
-import roboliq.common.Command
+//import roboliq.common.Command
 
 
 class EvowareScriptBuilder {
 	//val mapLocToLabware = new HashMap[CarrierSite, LabwareObject]
-	val mapCmdToLabwareInfo = new HashMap[Command, List[Tuple3[CarrierSite, String, LabwareModel]]]
-	val cmds = new ArrayBuffer[Command]
+	val mapCmdToLabwareInfo = new HashMap[Object, List[Tuple3[CarrierSite, String, LabwareModel]]]
+	val cmds = new ArrayBuffer[Object]
 }
 
 class EvowareScript(
-	//val tableFile: EvowareTableFile,
-	val mapCmdToLabwareInfo: Map[Command, List[Tuple3[CarrierSite, String, LabwareModel]]],
-	val cmds: Seq[Command]
+	val mapCmdToLabwareInfo: Map[Object, List[Tuple3[CarrierSite, String, LabwareModel]]],
+	val cmds: Seq[Object]
 )

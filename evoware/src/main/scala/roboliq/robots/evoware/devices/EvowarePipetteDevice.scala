@@ -2,9 +2,9 @@ package roboliq.robots.evoware.devices
 
 import scala.collection.immutable.SortedSet
 
-import roboliq.common._
+import roboliq.core._
 import roboliq.commands.pipette._
-import roboliq.compiler._
+//import roboliq.compiler._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
 
