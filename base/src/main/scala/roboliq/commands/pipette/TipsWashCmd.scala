@@ -18,7 +18,17 @@ class TipsWashCmdBean extends CmdBean {
 }
 
 class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean](isFinal = true) {
-	def process(cmd: TipsWashCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+	def check(command: CmdBean): CmdHandlerCheckResult = {
+		val cmd = command.asInstanceOf[TipsWashCmdBean]
+		val tips = if (cmd.tips != null) cmd.tips.toList else Nil
+		new CmdHandlerCheckResult(
+			lPart = Nil,
+			lObj = tips,
+			lPoolNew = Nil
+		)
+	}
+	
+	def handle(cmd: TipsWashCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
 		node.checkPropertyNonNull_?(cmd, "intensity")
 		for {
 			lTipId <- if (cmd.tips != null) Some(cmd.tips.toList) else None

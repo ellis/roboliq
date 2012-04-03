@@ -4,9 +4,10 @@ import scala.collection
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import scala.reflect.BeanProperty
 
 
-trait Well extends Ordered[Well] {
+abstract class Well extends Part with Ordered[Well] {
 	val id: String
 	val idPlate: String
 	val index: Int
@@ -20,14 +21,83 @@ trait Well extends Ordered[Well] {
 	override def compare(that: Well) = id.compare(that.id)
 }
 
-case class WellState(
+class WellStateBean {
+	@BeanProperty var 
+}
+
+abstract class WellState(
 	//val well: Well,
 	val liquid: Liquid,
 	val nVolume: LiquidVolume,
 	/** Make sure that volume doesn't go below 0 */
 	val bCheckVolume: Boolean,
 	val history: List[WellHistoryItem]
-)
+) {
+	def copy(
+		liquid: Liquid = liquid,
+		nVolume: LiquidVolume = nVolume,
+		bCheckVolume: Boolean = bCheckVolume,
+		history: List[WellHistoryItem] = history
+	): WellState
+}
+
+class WellAddEventBean extends EventBeanA[WellState] {
+	@BeanProperty var src: String = null
+	@BeanProperty var volume: java.math.BigDecimal = null
+	
+	protected def update(state0: WellState, states0: StateMap): WellState = {
+		val volumeNew = state0.nVolume + LiquidVolume.l(volume)
+		states0(src) match {
+			case liquid: Liquid =>
+				state0.copy(
+					liquid = state0.liquid + liquid,
+					nVolume = volumeNew
+				)
+			case srcState: WellState =>
+				state0.copy(
+					liquid = state0.liquid + srcState.liquid,
+					nVolume = volumeNew
+				)
+		}
+	}
+}
+
+object WellAddEventBean {
+	def apply(well: Well, src: Well, volume: LiquidVolume): WellAddEventBean = {
+		val bean = new WellAddEventBean
+		bean.obj = well.id
+		bean.src = src.id
+		bean.volume = volume.l.bigDecimal
+		bean
+	}
+}
+
+class WellRemoveEventBean extends EventBeanA[WellState] {
+	@BeanProperty var volume: java.math.BigDecimal = null
+	
+	protected def update(state0: WellState, states0: StateMap): WellState = {
+		val volumeNew = state0.nVolume - LiquidVolume.l(volume);
+		// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
+		if (state0.bCheckVolume) {
+			if (volumeNew < LiquidVolume.empty) {
+				println("tried to remove too much liquid from "+obj)
+				assert(false)
+			}
+		}
+		state0.copy(
+			nVolume = volumeNew
+		)
+	}
+}
+
+object WellRemoveEventBean {
+	def apply(well: Well, volume: LiquidVolume): WellRemoveEventBean = {
+		val bean = new WellRemoveEventBean
+		bean.obj = well.id
+		bean.volume = volume.l.bigDecimal
+		bean
+	}
+}
 
 class WellStateWriter(o: Well, builder: StateBuilder) {
 	def state = builder.map(o.id).asInstanceOf[WellState]
@@ -64,7 +134,11 @@ class PlateWell(
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-) extends Well
+) extends Well {
+	override def createState(ob: ObjBase) = new PlateWellState(
+		this, Liquid.empty, LiquidVolume.empty, false
+	)
+}
 
 class PlateWellState(
 	val conf: PlateWell,
@@ -72,7 +146,18 @@ class PlateWellState(
 	nVolume: LiquidVolume,
 	bCheckVolume: Boolean,
 	history: List[WellHistoryItem]
-) extends WellState(liquid, nVolume, bCheckVolume, history)
+) extends WellState(liquid, nVolume, bCheckVolume, history) {
+	def copy(
+		liquid: Liquid = liquid,
+		nVolume: LiquidVolume = nVolume,
+		bCheckVolume: Boolean = bCheckVolume,
+		history: List[WellHistoryItem] = history
+	): PlateWellState = {
+		new PlateWellState(
+			conf, liquid, nVolume, bCheckVolume, history
+		)
+	}
+}
 
 sealed trait WellHistoryItem
 

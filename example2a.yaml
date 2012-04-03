@@ -1,0 +1,33 @@
+tipModels:
+  "DiTi 50ul": { volume: 45e-6, 0.01e-6 }
+  "DiTi 1000ul": { volume: 950e-6, 3e-6 }
+
+tips:
+  TIP1: { index: 0, modelPermanent: DiTi 1000ul }
+  TIP2: { index: 1, modelPermanent: DiTi 1000ul }
+  TIP3: { index: 2, modelPermanent: DiTi 1000ul }
+  TIP4: { index: 3, modelPermanent: DiTi 1000ul }
+  TIP5: { index: 4, modelPermanent: DiTi 50ul }
+  TIP6: { index: 5, modelPermanent: DiTi 50ul }
+  TIP7: { index: 6, modelPermanent: DiTi 50ul }
+  TIP8: { index: 7, modelPermanent: DiTi 50ul }
+
+plateModels:
+  "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12, volume: 200e-6 }
+  "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 6000e-6 }
+  "Tube 50ml": { rows: 1, cols: 1, volume: 50e-3 }
+
+plates:
+  P1:
+    model: D-BSSE 96 Well PCR Plate
+
+devices:
+- !!
+
+commandHandlers:
+- !!roboliq.commands.pipette.AspirateCmdHandler
+- !!roboliq.commands.pipette.DispenseCmdHandler
+- !!roboliq.commands.pipette.MixCmdHandler
+- !!roboliq.commands.pipette.TipsDropCmdHandler
+- !!roboliq.commands.pipette.TipsWashCmdHandler
+- !!roboliq.commands.pipette.PipetteCmdHandler

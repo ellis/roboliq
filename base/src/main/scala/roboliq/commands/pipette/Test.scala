@@ -26,7 +26,7 @@ class YamlTest1 {
 
 		val cmd = bean.commands.get(0).asInstanceOf[AspirateCmdBean]
 		
-		val node = handler.process(cmd, ctx)
+		val node = handler.handle(cmd, ctx)
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(node))
 	}
 }

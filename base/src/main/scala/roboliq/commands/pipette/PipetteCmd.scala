@@ -34,7 +34,17 @@ class PipetteCmdHandler(device: PipetteDevice) extends CmdHandlerA[PipetteCmdBea
 	@BeanProperty var description: String = null
 	@BeanProperty var items: java.util.List[PipetteCmdItemBean] = null
 	
-	def process(cmd: PipetteCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+	def check(command: CmdBean): CmdHandlerCheckResult = {
+		val cmd = command.asInstanceOf[PipetteCmdBean]
+		val items = if (cmd.items != null) cmd.items.toList else Nil
+		new CmdHandlerCheckResult(
+			lPart = cmd.src :: cmd.dest :: items.flatMap(item => List(item.src, item.dest)).toList,
+			lObj = items.map(item => item.tipModel).toList,
+			lPoolNew = Nil
+		)
+	}
+	
+	def handle(cmd: PipetteCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
 		node.mustBeNonEmpty(cmd, "items")
 		if (node.getErrorCount == 0) {
 			PipetteScheduler.createL3C(cmd, ctx.ob, node) match {

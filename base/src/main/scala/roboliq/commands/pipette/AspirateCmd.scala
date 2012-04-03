@@ -11,7 +11,17 @@ class AspirateCmdBean extends CmdBean {
 }
 
 class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean](isFinal = true) {
-	def process(cmd: AspirateCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+	def check(command: CmdBean): CmdHandlerCheckResult = {
+		val cmd = command.asInstanceOf[AspirateCmdBean]
+		val items = if (cmd.items != null) cmd.items.toList else Nil
+		new CmdHandlerCheckResult(
+			lPart = items.map(item => item.well).toList,
+			lObj = items.map(item => item.tip).toList,
+			lPoolNew = Nil
+		)
+	}
+	
+	def handle(cmd: AspirateCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
 		node.mustBeNonEmpty(cmd, "items")
 		if (node.getErrorCount == 0) {
 			val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, node)).flatten

@@ -12,6 +12,7 @@ class BeanBase {
 	private val m_mapPlate = new HashMap[String, PlateBean]
 	private val m_mapSubstance = new HashMap[String, SubstanceItem]
 	private val m_mapHistory = new HashMap[String, List[HistoryItem]]
+	private var m_lCmdHandler: List[CmdHandler] = Nil
 	
 	def mapSystemProperties: scala.collection.Map[String, Object] = m_mapSystemProperties
 	def mapTipModel: scala.collection.Map[String, TipModelBean] = m_mapTipModel
@@ -20,6 +21,7 @@ class BeanBase {
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
 	def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
 	def mapHistory: scala.collection.Map[String, List[HistoryItem]] = m_mapHistory
+	def lCmdHandler = m_lCmdHandler
 	
 	/** Add data in @param bean to this database */
 	def addBean(bean: RoboliqYamlBean) {
@@ -57,6 +59,10 @@ class BeanBase {
 			for ((id, history) <- bean.history) {
 				m_mapHistory(id) = history.toList
 			}
+		}
+		// Add command handlers in reverse order so that the last once defined has priority
+		if (bean.commandHandlers != null) {
+			m_lCmdHandler = bean.commandHandlers.toList.reverse ++ m_lCmdHandler
 		}
 	}
 	

@@ -7,7 +7,9 @@ class CmdNodeBean {
 	@BeanProperty var errors: java.util.List[String] = null
 	@BeanProperty var warnings: java.util.List[String] = null
 	@BeanProperty var translations: java.util.List[CmdBean] = null
+	@BeanProperty var events: java.util.List[EventBean] = null
 	var tokens: List[CmdToken] = null
+	var states1: RobotState = null
 
 	def getErrorCount: Int =
 		if (errors == null) 0 else errors.size()

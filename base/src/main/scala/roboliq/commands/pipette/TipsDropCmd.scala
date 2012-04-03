@@ -16,7 +16,17 @@ class TipsDropCmdBean extends CmdBean {
 }
 
 class TipsDropCmdHandler extends CmdHandlerA[TipsDropCmdBean](isFinal = true) {
-	def process(cmd: TipsDropCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
+	def check(command: CmdBean): CmdHandlerCheckResult = {
+		val cmd = command.asInstanceOf[TipsDropCmdBean]
+		val tips = if (cmd.tips != null) cmd.tips.toList else Nil
+		new CmdHandlerCheckResult(
+			lPart = Nil,
+			lObj = tips,
+			lPoolNew = Nil
+		)
+	}
+	
+	def handle(cmd: TipsDropCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
 		for {
 			lId <- if (cmd.tips != null) Some(cmd.tips.toList) else None
 			lTip <- ctx.ob.findTips_?(cmd.tips.toList, node)

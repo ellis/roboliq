@@ -6,16 +6,12 @@ import scala.collection.mutable.ArrayBuffer
 
 
 class ObjBase(bb: BeanBase) {
+	private val m_mapIdToPart = new HashMap[String, PartBean]
 	private val m_mapTipModel = new HashMap[String, TipModel]
 	private val m_mapTip = new HashMap[String, Tip]
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapWell = new HashMap[String, Well]
-	//private val m_mapSubstance = new HashMap[String, SubstanceItem]
-	
-	//def mapPlateModel: scala.collection.Map[String, PlateModel] = m_mapPlateModel
-	//def mapPlate: scala.collection.Map[String, Plate] = m_mapPlate
-	//def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
 	
 	
 	def findTipModel_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[TipModel] = {

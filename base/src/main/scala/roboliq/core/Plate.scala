@@ -18,11 +18,13 @@ class PlateBean extends Bean {
 class Plate(
 	val id: String,
 	val model: PlateModel
-) extends Ordered[Plate] {
+) extends Part with Ordered[Plate] {
 	def nRows: Int = model.nRows
 	def nCols: Int = model.nCols
 	def nWells: Int = nRows * nCols
 	
+	override def createState(ob: ObjBase) = new PlateState(this, "")
+
 	def state(states: StateMap): PlateState = states(this.id).asInstanceOf[PlateState]
 	override def compare(that: Plate) = id.compare(that.id)
 	override def toString = id
