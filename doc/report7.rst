@@ -19,7 +19,7 @@ Progress Since November
 
   - with and without master mix
   - sample volumes between 20ul and 50ul
-  - TAQ and Phusion-HotStart
+  - TAQ and Phusion Hot Start
   - small and large tips for pipetting
 
 * database-supported scripts
@@ -51,20 +51,73 @@ YAML Example: Data
 
 .. code-block:: yaml
 
+  substances:
+    SEQUENCE_01: !dna
+      sequence: TATAACGTTACTGGTTTCATGAATTCTTGTTAATTCAGTAAATTTTC
+
   plates:
-    E2215: { model: "D-BSSE 96 Well Costar", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
-
-YAML Example: Settings
-----------------------
-
+    E2215:
+      model: D-BSSE 96 Well Costar
+      barcode: 059662E2215
 
 YAML Example: Commands
 ----------------------
+
+.. code-block:: yaml
+
+  - !pipette
+    src: P1(A01)
+    dest: P4(C03)
+    volume: 5 ul
+  - !pipette { src: P1(A01), dest: P4(C03), volume: 5 ul }
+  - !pipette [ P1(A01), P4(C03), 5 ul ]
 
 
 YAML Example: AST
 -----------------
 
+.. code-block:: yaml
+
+  output:
+  - command: !pipette
+      src: P1(A01)
+      dest: P5(C03)
+      volume: 5 ul
+    doc: pipette 5ul of water from P1(A01) to P4(C03)
+    events:
+    - P1(A01): !rem {volume: 5e-6}
+    - P4(C03): !add {well: P1(A01), volume: 5e-6}
+    - TIP1: !flag {dirty: true}
+
+YAML Example: AST (continued)
+-----------------------------
+
+.. code-block:: yaml
+
+  ...
+    translations:
+    - command: !aspirate
+        items:
+        - tip: TIP1
+          well: P1(A01)
+          volume: 5e-6
+          policy: Roboliq_Water_Dry_1000
+  ...
+
+YAML Example: Settings
+----------------------
+
+.. code-block:: yaml
+
+  plateModels:
+    D-BSSE 96 Well PCR Plate: { rows: 8, cols: 12, volume: 200 ul }
+
+  devices:
+  - !!roboliq.labs.bsse.PipetteDevice
+
+  commandHandlers:
+  - !!roboliq.commands.pipette.AspirateCmdHandler
+  - !!roboliq.commands.pipette.DispenseCmdHandler
 
 Next Steps
 ----------
@@ -117,6 +170,4 @@ How to evaluate resource usage under uncertain program flow?
 
 .. footer::
 
-  .. class:: right
-
-    ###Page### / ###Total###
+    ###Page### of ###Total###

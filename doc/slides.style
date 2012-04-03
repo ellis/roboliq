@@ -1,31 +1,40 @@
-{
-"pageSetup": {
-    "width": "16cm",
-    "height": "9cm",
-    "margin-top": "0cm",
-    "margin-bottom": "0.25cm",
-    "margin-left": "1cm",
-    "margin-right": "1cm",
-    "margin-gutter": "0cm",
-    "spacing-header": "2mm",
-    "spacing-footer": "2mm",
-    "firstTemplate": "coverPage"
-},
-"pageTemplates": {
-	"coverPage": {
-		"frames": [
-			["0%", "10%", "100%", "80%"]
-		],
-		"showHeader": false,
-		"showFooter": false
-	},
-	"slidePage": {
-		"frames": [
-			["0%", "10%", "100%", "80%"]
-		],
-		"showHeader": false
-	}
-},
-"embeddedFonts": [ "roughage" ]
-}
+# rst2pdf report7.rst -b1 -s slides.style --font-path fonts/
 
+pageSetup:
+    width: 16cm
+    height: 9cm
+    margin-top: 0cm
+    margin-bottom: 0.25cm
+    margin-left: 1cm
+    margin-right: 1cm
+    margin-gutter: 0cm
+    spacing-header: 1mm
+    spacing-footer: 1mm
+    firstTemplate: coverPage
+
+pageTemplates:
+	coverPage:
+		frames: []
+			[0%, 10%, 100%, 80%]
+		showHeader: false
+		showFooter: false
+#		background: images/paper01.jpg
+	slidePage:
+		frames: []
+			[0%, 10%, 100%, 80%]
+		showHeader: false
+
+embeddedFonts: [ ["roughage.ttf","roughage.ttf","roughage.ttf","roughage.ttf"] ]
+
+styles:
+	footer:
+		parent: normal
+		alignment: TA_RIGHT
+		fontName: roughage
+		fontSize: 80%
+	heading1:
+		parent: heading
+		fontName: roughage
+		fontSize: 175%
+
+		
