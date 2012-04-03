@@ -3,46 +3,79 @@ Liquid Handling Robot
 
 Progress Report and Current Questions
 
-Ellis Whitehead
+:Author: Ellis Whitehead
+:Department: D-BSSE
+:Date: 2012-04-04
 
-2012-04-04
+.. raw:: pdf
+
+  PageBreak slidePage
 
 Progress Since November
 -----------------------
 
 * visit to Weizmann
 * PCR experiments
-* database-centered approach
 
-Database-Centered Approach
---------------------------
+  - with and without master mix
+  - sample volumes between 20ul and 50ul
+  - TAQ and Phusion-HotStart
+  - small and large tips for pipetting
 
-* when at Weizmann: scripts usually only have 1 command, maybe up to 3
-* for their use caes, the complexity lies in the data to supply to those commands
-* use same representation for both data and commands
-* YAML - human-readable exchange format for data and programming objects
-* output of final AST (inspection, modification)
+* database-supported scripts
 
-!!! ADD EXAMPLES
+Database-Supported Approach: Motivation
+---------------------------------------
 
-YAML
-----
+* At Weizmann, their scripts usually only have 1 to 3 commands
+* And yet they are difficult to program!
+* The complexity lies in the parameters and data supplied to the commands
 
-* represents data structures
-* like XML but more human-friendly and much easier to convert to internal program data
-* can be used for database data, configuration, representing AST
-* allows for easier development of a UI, but still allows for use of text-editor
+Database-Supported Approach
+---------------------------
+
+* Use same representation for data, settings, commands, and intermediate output (AST)
+* Facilitates protocol exchange
+* Facilitates inspection and debugging
+
+Database-Supported Approach: YAML
+---------------------------------
+
+* Represents data structures and programming object
+* Semi-human-readable streaming format for storing and exchanging data
+* Like XML but much easier to convert to internal program data
+* Eases some aspects of potential GUI, while still allowing for use of text-editor
+
+YAML Example: Data
+------------------
+
+.. code-block:: yaml
+
+  plates:
+    E2215: { model: "D-BSSE 96 Well Costar", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
+
+YAML Example: Settings
+----------------------
+
+
+YAML Example: Commands
+----------------------
+
+
+YAML Example: AST
+-----------------
+
 
 Next Steps
 ----------
 
-* run primer experiements (Fabian and Markus Uhr)
+* Run primer experiements (Fabian and Markus Uhr)
 * 1-year meeting at Weizmann
-* more database work
+* Complete database-supported approach
 * openBIS database
-* automated control of Evoware software
-* feedback loops
-* portability via import and export?
+* Automated control of Evoware software
+* Feedback loops
+* Portability via import and export
 
 Import/Export Portability
 -------------------------
@@ -78,5 +111,12 @@ How to evaluate resource usage under uncertain program flow?
 
 ...
 
+* Center heading
+* More natural font?
+* Black background?
+
 .. footer::
-  Ellis Whitehead, 2012-04-14
+
+  .. class:: right
+
+    ###Page### / ###Total###
