@@ -17,11 +17,21 @@ Progress Since November
 Database-Centered Approach
 --------------------------
 
+* when at Weizmann: scripts usually only have 1 command, maybe up to 3
+* for their use caes, the complexity lies in the data to supply to those commands
 * use same representation for both data and commands
 * YAML - human-readable exchange format for data and programming objects
 * output of final AST (inspection, modification)
 
 !!! ADD EXAMPLES
+
+YAML
+----
+
+* represents data structures
+* like XML but more human-friendly and much easier to convert to internal program data
+* can be used for database data, configuration, representing AST
+* allows for easier development of a UI, but still allows for use of text-editor
 
 Next Steps
 ----------
@@ -50,6 +60,21 @@ Current Questions
 
 Feedback
 --------
+
+History is kept as a list of events rather than a cumulative state
+Allows for better analysis of what went on when trying to debug a failed experiment
+
+Run through loops until a conditional branch is encountered
+Compile those commands for Evoware
+Run that script and wait until execution is finished
+
+* Evoware's capabilities
+* Comments in scripts
+* Call external program after each step to update database
+
+How to update values when readings are uncertain?
+
+How to evaluate resource usage under uncertain program flow?
 
 ...
 
