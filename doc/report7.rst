@@ -1,7 +1,7 @@
 Liquid Handling Robot
 ---------------------
 
-Progress Report and Current Questions
+Progress Update and Current Topics
 
 :Author: Ellis Whitehead
 :Department: D-BSSE
@@ -14,15 +14,19 @@ Progress Report and Current Questions
 Progress Since November
 -----------------------
 
-* visit to Weizmann
-* PCR experiments
+* Visit to Weizmann
+* PCR variations:
 
-  - with and without master mix
-  - sample volumes between 20ul and 50ul
-  - TAQ and Phusion Hot Start
-  - small and large tips for pipetting
+  - sample volumes,
+    sample counts,
+    sample positions on plate,
+    tip sizes,
+    polymerases,
+    master mix,
+    theromocyclers
+  - but only 1 of 8 prime/template combinations worked well
 
-* database-supported scripts
+* Database-supported protocols
 
 Database-Supported Approach: Motivation
 ---------------------------------------
@@ -30,6 +34,7 @@ Database-Supported Approach: Motivation
 * At Weizmann, their scripts usually only have 1 to 3 commands
 * And yet they are difficult to program!
 * The complexity lies in the parameters and data supplied to the commands
+  (e.g. ``Cloning7_Script08.conf``)
 
 Database-Supported Approach
 ---------------------------
@@ -70,7 +75,12 @@ YAML Example: Commands
     dest: P4(C03)
     volume: 5 ul
   - !pipette { src: P1(A01), dest: P4(C03), volume: 5 ul }
-  - !pipette [ P1(A01), P4(C03), 5 ul ]
+
+Contrast with:
+
+.. code-block:: csv
+
+  pipette,P1(A01),P4(C03),5ul
 
 
 YAML Example: AST
@@ -95,7 +105,7 @@ YAML Example: AST (continued)
 .. code-block:: yaml
 
   ...
-    translations:
+    children:
     - command: !aspirate
         items:
         - tip: TIP1
@@ -119,54 +129,73 @@ YAML Example: Settings
   - !!roboliq.commands.pipette.AspirateCmdHandler
   - !!roboliq.commands.pipette.DispenseCmdHandler
 
-Next Steps
-----------
-
-* Run primer experiements (Fabian and Markus Uhr)
-* 1-year meeting at Weizmann
-* Complete database-supported approach
-* openBIS database
-* Automated control of Evoware software
-* Feedback loops
-* Portability via import and export
-
-Import/Export Portability
--------------------------
+Import and Export for Portability
+---------------------------------
 
 * For a given set of commands, export all relevant object data along with the commands
 * During import, we need to remove data which is specific to the other lab and doesn't fit ours
-* How to merge primer data from one lab to another, given conflicting IDs?
+* Need to determine which data is lab specific
+* Need to merge data from another lab (e.g. assigning substance IDs)
 
-Current Questions
------------------
+Next Steps
+----------
 
-* biologists to test the robot before I go to Weizmann?
-* what do you think of the YAML approach?
-* feedback approach?  Feedback on my intended approach
+* Run primer experiements (generate data for Markus Uhr)
+* Optimize PCR
+* Construct Mario's parts
+* openBIS database
+* Automated control of Evoware software
+* Feedback loops
 
-Feedback
---------
+Input: YAML
+-----------
 
-History is kept as a list of events rather than a cumulative state
-Allows for better analysis of what went on when trying to debug a failed experiment
+As an exchange format?
+How would you feel about writing this?
 
-Run through loops until a conditional branch is encountered
-Compile those commands for Evoware
-Run that script and wait until execution is finished
+.. code-block:: yaml
 
-* Evoware's capabilities
-* Comments in scripts
-* Call external program after each step to update database
+  commands:
+  - !pcr
+    products:
+    - { template: FRP128, forwardPrimer: FRO1259, backwardPrimer: FRO1262 }
+    - { template: FRP572, forwardPrimer: FRO1261, backwardPrimer: FRO114 }
+    mixSpec: Phusion Hot Start
+    sampleVolume: 20 ul
 
-How to update values when readings are uncertain?
+Input: Feedback Loops 1
+-----------------------
 
-How to evaluate resource usage under uncertain program flow?
+* Given an AST with conditional branching (but no ``goto``)
+* Step through AST until feedback is required
+* Compile that section of AST for Evoware
+* Run that script and wait until execution is finished
+* Then continue process depending on how we branch
 
-...
+Input: Feedback Loops 2
+-----------------------
 
-* Center heading
-* More natural font?
-* Black background?
+1. Loop1
+
+  1.1. Command1
+
+  1.2. Loop2
+
+    1.2.1 Command2
+
+    1.2.2 Condition2
+
+  1.3 Command3
+
+  1.4 Condidion1
+
+.. raw:: pdf
+
+  PageBreak endPage
+
+
+Thanks
+~~~~~~
 
 .. footer::
 

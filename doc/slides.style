@@ -9,7 +9,7 @@ pageSetup:
     margin-right: 1cm
     margin-gutter: 0cm
     spacing-header: 1mm
-    spacing-footer: 1mm
+    spacing-footer: 0.1mm
     firstTemplate: coverPage
 
 pageTemplates:
@@ -23,10 +23,25 @@ pageTemplates:
 		frames: []
 			[0%, 10%, 100%, 80%]
 		showHeader: false
+	endPage:
+		frames: []
+			[0%, 30%, 100%, 40%]
+		showHeader: false
+		showFooter: false
 
-embeddedFonts: [ ["roughage.ttf","roughage.ttf","roughage.ttf","roughage.ttf"] ]
+embeddedFonts: []
+	["roughage.ttf","roughage.ttf","roughage.ttf","roughage.ttf"]
+	["julies.ttf","julies.ttf","julies.ttf","julies.ttf"]
 
 styles:
+	normal:
+		parent: base
+		fontSize: 120%
+	bodytext:
+		parent: normal
+		spaceBefore: 6
+		alignment: TA_LEFT
+		hyphenation: true
 	footer:
 		parent: normal
 		alignment: TA_RIGHT
@@ -36,5 +51,18 @@ styles:
 		parent: heading
 		fontName: roughage
 		fontSize: 175%
-
-		
+	heading2:
+		parent: heading
+		fontName: julies
+		fontSize: 175%
+	code:
+		parent: literal
+		leftIndent: 0
+		spaceBefore: 8
+		spaceAfter: 8
+		backColor: beige
+		borderColor: darkgray
+		borderWidth: 0.5
+		borderPadding: 6
+		fontSize: 80%
+			
