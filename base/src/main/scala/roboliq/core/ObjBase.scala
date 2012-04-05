@@ -1,5 +1,5 @@
 package roboliq.core
-
+ 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ArrayBuffer
@@ -12,6 +12,8 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapWell = new HashMap[String, Well]
+	
+	private val m_mapWellState = new HashMap[String, WellState]
 	
 	
 	def findTipModel_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[TipModel] = {
@@ -137,10 +139,20 @@ class ObjBase(bb: BeanBase) {
 		} yield {
 			val (idPlate, indexName, iRow, iCol) = res
 			if (indexName == "") {
-				new Tube(idPlate)
+				val well = new Tube(idPlate)
+				m_mapWell(id) = well
+				val wellState = new TubeState(
+					obj = well,
+					location = null,
+					liquid = Liquid.empty,
+					nVolume = LiquidVolume.empty,
+					bCheckVolume = true,
+					history = Nil
+				)
+				well
 			}
 			else {
-				findPlate(idPlate) match {
+				val well = findPlate(idPlate) match {
 					case Error(ls) => return Error(ls)
 					case Success(plate) =>
 						val index = iCol * plate.model.nRows
@@ -153,6 +165,16 @@ class ObjBase(bb: BeanBase) {
 							indexName = indexName
 						)
 				}
+				val wellState = new PlateWellState(
+					conf = well,
+					liquid = Liquid.empty,
+					nVolume = LiquidVolume.empty,
+					bCheckVolume = true,
+					history = Nil
+				)
+				m_mapWell(id) = well
+				m_mapWellState(id) = wellState
+				well
 			}
 		}
 	}

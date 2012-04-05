@@ -3,25 +3,11 @@ package roboliq.core
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 
-/**
- * A ''pool'' is a set of wells. 
- * 
- * @param lPart list of part IDs for which the part's state is also required
- * @param lObj list of object IDs (no state required) 
- * @param lPoolNew 3-tuples of an internal id, a string identifying the purpose for which the
- * pool will be used, and the number of wells required.
- *
- */
-class CmdHandlerCheckResult(
-	val lPart: List[String],
-	val lObj: List[String],
-	val lPoolNew: List[Tuple3[String, String, Int]]
-)
-
 abstract class CmdHandler(val isFinal: Boolean) {
 	/** Return true if this handler wants to process this given command */
 	def canHandle(command: CmdBean): Boolean
-	def check(command: CmdBean): CmdHandlerCheckResult
+	def expandWithoutObjBase(command: CmdBean, index: List[Int]): Option[List[CmdBean]] = None
+	def getResources(command: CmdBean): List[NeedResource]
 	def handle(command: CmdBean, ctx: ProcessorContext): CmdNodeBean
 }
 

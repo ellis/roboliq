@@ -21,8 +21,8 @@ abstract class Well extends Part with Ordered[Well] {
 	override def compare(that: Well) = id.compare(that.id)
 }
 
-class WellStateBean {
-	@BeanProperty var 
+class WellStatus {
+	var bCheckVolume: Boolean = false
 }
 
 abstract class WellState(

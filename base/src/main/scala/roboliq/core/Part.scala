@@ -8,9 +8,8 @@ trait Part {
 
 /** Represents a part which can have events and therefore needs state (plate, well, devices) */
 trait PartBean extends Bean {
-	def createState: Object
 }
 
-trait PartStateBean extends Bean {
+/*trait PartStateBean extends Bean {
 	@Bea
-}
+}*/
