@@ -135,9 +135,9 @@ class PlateWell(
 	val iCol: Int,
 	val indexName: String
 ) extends Well {
-	override def createState(ob: ObjBase) = new PlateWellState(
+	/*override def createState(ob: ObjBase) = new PlateWellState(
 		this, Liquid.empty, LiquidVolume.empty, false
-	)
+	)*/
 }
 
 class PlateWellState(

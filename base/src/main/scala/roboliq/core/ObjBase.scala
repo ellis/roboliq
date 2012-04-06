@@ -15,6 +15,8 @@ class ObjBase(bb: BeanBase) {
 	
 	private val m_mapWellState = new HashMap[String, WellState]
 	
+	def loadedPlates: Iterable[Plate] = m_mapPlate.values
+	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
 	
 	def findTipModel_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[TipModel] = {
 		m_mapTipModel.get(id) match {

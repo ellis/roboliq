@@ -11,23 +11,33 @@ class DispenseCmdBean extends CmdBean {
 }
 
 class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean](isFinal = true) {
-	def check(command: CmdBean): CmdHandlerCheckResult = {
-		val cmd = command.asInstanceOf[DispenseCmdBean]
-		val items = if (cmd.items != null) cmd.items.toList else Nil
-		new CmdHandlerCheckResult(
-			lPart = items.map(item => item.well).toList,
-			lObj = items.map(item => item.tip).toList,
-			lPoolNew = Nil
-		)
+	def expand1A(
+		cmd: CmdType,
+		messages: CmdMessageWriter
+	): Option[
+		Either[List[NeedResource], List[CmdBean]]
+	] = {
+		messages.paramMustBeNonEmpty("items")
+		if (messages.hasErrors)
+			return None
+		
+		// Item wells are sources
+		Some(Left(cmd.items.flatMap(item => {
+			List(NeedDest(item.well))
+		}).toList))
 	}
-	
-	def handle(cmd: DispenseCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		node.mustBeNonEmpty(cmd, "items")
-		if (node.getErrorCount == 0) {
-			val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, node)).flatten
-			if (node.getErrorCount == 0) {
-				node.tokens = List(new DispenseToken(lItem))
-			}
+
+	def expand2A(
+		cmd: CmdType,
+		ctx: ProcessorContext,
+		messages: CmdMessageWriter
+	): Expand2Result = {
+		val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, ctx.node)).flatten
+		if (messages.hasErrors) {
+			Expand2Errors()
+		}
+		else {
+			Expand2Tokens(List(new DispenseToken(lItem)), Nil)
 		}
 	}
 }

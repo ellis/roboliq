@@ -11,23 +11,33 @@ class AspirateCmdBean extends CmdBean {
 }
 
 class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean](isFinal = true) {
-	def check(command: CmdBean): CmdHandlerCheckResult = {
-		val cmd = command.asInstanceOf[AspirateCmdBean]
-		val items = if (cmd.items != null) cmd.items.toList else Nil
-		new CmdHandlerCheckResult(
-			lPart = items.map(item => item.well).toList,
-			lObj = items.map(item => item.tip).toList,
-			lPoolNew = Nil
-		)
+	def expand1A(
+		cmd: CmdType,
+		messages: CmdMessageWriter
+	): Option[
+		Either[List[NeedResource], List[CmdBean]]
+	] = {
+		messages.paramMustBeNonEmpty("items")
+		if (messages.hasErrors)
+			return None
+		
+		// Item wells are sources
+		Some(Left(cmd.items.flatMap(item => {
+			List(NeedSrc(item.well))
+		}).toList))
 	}
-	
-	def handle(cmd: AspirateCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		node.mustBeNonEmpty(cmd, "items")
-		if (node.getErrorCount == 0) {
-			val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, node)).flatten
-			if (node.getErrorCount == 0) {
-				node.tokens = List(new AspirateToken(lItem))
-			}
+
+	def expand2A(
+		cmd: CmdType,
+		ctx: ProcessorContext,
+		messages: CmdMessageWriter
+	): Expand2Result = {
+		val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, ctx.node)).flatten
+		if (messages.hasErrors) {
+			Expand2Errors()
+		}
+		else {
+			Expand2Tokens(List(new AspirateToken(lItem)), Nil)
 		}
 	}
 }
@@ -37,7 +47,6 @@ class SpirateCmdItemBean {
 	@BeanProperty var well: String = null
 	@BeanProperty var volume: java.math.BigDecimal = null
 	@BeanProperty var policy: String = null
-	
 	
 	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Option[SpirateTokenItem] = {
 		for {

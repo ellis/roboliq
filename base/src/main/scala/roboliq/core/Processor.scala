@@ -11,30 +11,34 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		val mapNodeToResources = new LinkedHashMap[CmdNodeBean, List[NeedResource]]
 		val builder = new StateBuilder(states0)
 		
-		// Construct top-level command nodes
-		def expand(indexParent: List[Int], cmds: List[CmdBean]): List[CmdNodeBean] = {
+		// Construct command nodes
+		def expand1(indexParent: List[Int], cmds: List[CmdBean]): List[CmdNodeBean] = {
 			cmds.zipWithIndex.map(pair => {
 				val (cmd, iCmd) = pair
 				val index = indexParent ++ List(iCmd + 1)
 				val sIndex = index.mkString(".")
 				val node = new CmdNodeBean
+				node.command = cmd
+				node.lIndex = index
+				node.index = sIndex
+				val messages = new CmdMessageWriter(node)
 				lCmdHandler.find(_.canHandle(cmd)) match {
 					case None =>
-						val node = new CmdNodeBean
-						node.command = cmd
 						node.errors = List("no command handler found for command #"+sIndex+" "+cmd.getClass().getName())
 					case Some(handler) =>
 						node.handler = handler
 						// EITHER: recursively expand children if command doesn't need objects
 						// OR: gather resource IDs
-						handler.expandWithoutObjBase(cmd, index) match {
-							case Some(l) =>
-								node.childCommands = l
-								node.children = expand(index, l)
-							case None =>
-								//val ctx = new ProcessorContext(this, ob, Some(builder), builder.toImmutable)
-								val resources = node.handler.getResources(node.command)
-								mapNodeToResources(node) = resources
+						handler.checkParams1(cmd, messages)
+						if (node.getErrorCount == 0) {
+							handler.expand1(cmd, messages) match {
+								case None =>
+								case Some(Left(resources)) =>
+									mapNodeToResources(node) = resources
+								case Some(Right(childCommands)) =>
+									node.childCommands = childCommands
+									node.children = expand1(index, childCommands)
+							}
 						}
 				}
 				node
@@ -42,7 +46,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		}
 		
 		// Expand commands to get a node-tree
-		val nodes = expand(Nil, cmds)
+		val nodes = expand1(Nil, cmds)
 		
 		// Load resource objects and their known states
 		val seen = new HashSet[String]
@@ -54,6 +58,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				if (!seen.contains(id)) {
 					seen += id
 					// Find the well in order to instantiate it as an object
+					// This will also load its state
 					ob.findWell_?(id, node)
 				}
 			}
@@ -61,22 +66,51 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		for ((node, resources) <- mapNodeToResources) {
 			for (resource <- resources) {
 				resource match {
-					case NeedSrc(id) => needWells(node, id)
-					case NeedDest(id) => needWells(node, id)
+					case NeedSrc(name) => needWells(node, name)
+					case NeedDest(name) => needWells(node, name)
 					case NeedPool(_, _, _) => // TODO: allocate new pool
 				}
 			}
 		}
 		
-		// Choose bench locations for any resources which don't already have one
+		// TODO: Choose bench locations for any resources which don't already have one
 		
 		// Expand all nodes in-order until we have only final tokens
+		def expand2(nodes: List[CmdNodeBean]) {
+			for (node <- nodes if node.getErrorCount == 0 && node.childCommands == null) {
+				val handler = node.handler
+				val cmd = node.command
+				val ctx = new ProcessorContext(this, node, ob, Some(builder), builder.toImmutable)
+				val messages = new CmdMessageWriter(node)
+				
+				handler.checkParams2(cmd, ctx, messages)
+				if (node.getErrorCount == 0) {
+					handler.expand2(cmd, ctx, messages) match {
+						case None =>
+						case Some((childCommands, events)) =>
+							if (!childCommands.isEmpty) {
+								node.childCommands = childCommands
+								node.children = expand1(node.lIndex, node.childCommands.toList)
+								if (node.getErrorCount == 0)
+									expand2(node.children.toList)
+							}
+							if (!events.isEmpty) {
+								node.events = events
+								node.events.foreach(_.update(builder)) 
+							}
+					}
+				}
+			}
+		}
+		
+		expand2(nodes)
 		
 		// Output node-tree
+		nodes.foreach(println)
 		
 		// Send node-tree to robot compiler
 		
-		Nil
+		nodes
 	}
 }
 
@@ -89,6 +123,7 @@ object Processor {
 
 class ProcessorContext(
 	val processor: Processor,
+	val node: CmdNodeBean,
 	val ob: ObjBase,
 	val builder_? : Option[StateBuilder],
 	val states: RobotState
