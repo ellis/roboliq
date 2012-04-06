@@ -34,21 +34,23 @@ class YamlTest2 {
 	import org.yaml.snakeyaml._
 	
 	roboliq.yaml.RoboliqYaml.constructor.addTypeDescription(new TypeDescription(classOf[AspirateCmdBean], "!_Aspirate"))
-	val bean = roboliq.yaml.RoboliqYaml.loadFile("example2b.yaml")
-	val text = roboliq.yaml.RoboliqYaml.toString(bean)
+	val beanA = roboliq.yaml.RoboliqYaml.loadFile("example2a.yaml")
+	val beanB = roboliq.yaml.RoboliqYaml.loadFile("example2b.yaml")
+	//val text = roboliq.yaml.RoboliqYaml.toString(bean)
 	
 	def run {
-		println(text)
+		//println(text)
 		
 		val bb = new BeanBase
-		bb.addBean(bean)
+		bb.addBean(beanA)
+		bb.addBean(beanB)
 		val ob = new ObjBase(bb)
 		
 		val builder = new StateBuilder(ob)
 		val processor = Processor(bb, builder.toImmutable)
-		val cmds = bean.commands.toList
+		val cmds = beanB.commands.toList
 		val nodes = processor.process(cmds)
-		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(nodes))
+		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
 	}
 }
 

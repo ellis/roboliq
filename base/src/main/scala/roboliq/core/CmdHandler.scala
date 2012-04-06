@@ -14,7 +14,7 @@ case class Expand2Errors() extends Expand2Result
 case class Expand2Cmds(cmds: List[CmdBean], events: List[EventBean]) extends Expand2Result
 case class Expand2Tokens(cmds: List[CmdToken], events: List[EventBean]) extends Expand2Result
 
-abstract class CmdHandler(val isFinal: Boolean) {
+abstract class CmdHandler {
 	/** Return true if this handler wants to process this given command */
 	def canHandle(command: CmdBean): Boolean
 
@@ -26,11 +26,11 @@ abstract class CmdHandler(val isFinal: Boolean) {
 	def expand2(command: CmdBean, ctx: ProcessorContext, messages: CmdMessageWriter): Expand2Result
 }
 
-abstract class CmdHandlerA[A <: CmdBean : Manifest](isFinal: Boolean) extends CmdHandler(isFinal) {
+abstract class CmdHandlerA[A <: CmdBean : Manifest] extends CmdHandler {
 	type CmdType = A
 	
 	def canHandle(command: CmdBean): Boolean = {
-		command.isInstanceOf[A]
+		manifest[A].erasure.isInstance(command)
 	}
 
 	/*

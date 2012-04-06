@@ -15,10 +15,11 @@ import java.io.FileWriter
 
 object PipetteScheduler {
 	def createL3C(cmd: PipetteCmdBean, ob: ObjBase, node: CmdNodeBean): Option[L3C_Pipette] = {
+		val messages = new CmdMessageWriter(node)
 		val mixSpec_? : Option[MixSpec] = if (cmd.postmix == null) None else Some(MixSpec.fromBean(cmd.postmix))
 		val tipOverrides_? : Option[TipHandlingOverrides] = None
 		val pipettePolicy_? : Option[PipettePolicy] = if (cmd.policy == null) None else Some(PipettePolicy.fromName(cmd.policy))
-		val tipModel_? : Option[TipModel] = if (cmd.tipModel == null) None else ob.findTipModel_?(cmd.tipModel, node)
+		val tipModel_? : Option[TipModel] = if (cmd.tipModel == null) None else ob.findTipModel_?(cmd.tipModel, messages)
 
 		val src_? : Option[Well] = ob.findWell_?(cmd.src, node, false)
 		val dest_? : Option[Well] = ob.findWell_?(cmd.dest, node, false)

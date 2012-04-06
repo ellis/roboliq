@@ -30,7 +30,8 @@ class PipetteCmdItemBean {
 	@BeanProperty var tipModel: String = null
 }
 
-class PipetteCmdHandler(device: PipetteDevice) extends CmdHandlerA[PipetteCmdBean](isFinal = false) {
+class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean] {
+	@BeanProperty var device: PipetteDevice = null
 	
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
 		if (cmd.items == null || cmd.items.isEmpty()) {

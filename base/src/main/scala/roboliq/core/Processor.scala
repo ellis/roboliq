@@ -61,8 +61,10 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			}
 		}
 		for ((node, resources) <- mapNodeToResources) {
+			val messages = new CmdMessageWriter(node)
 			for (resource <- resources) {
 				resource match {
+					case NeedTip(id) => ob.findTip_?(id, messages)
 					case NeedSrc(name) => needWells(node, name)
 					case NeedDest(name) => needWells(node, name)
 					case NeedPool(_, _, _) => // TODO: allocate new pool

@@ -37,10 +37,13 @@ class RoboliqRepresenter extends Representer {
 
 class RoboliqConstructor extends Constructor {
 	val topDescription = new TypeDescription(classOf[RoboliqYamlBean])
+	topDescription.putMapPropertyType("tipModels", classOf[String], classOf[TipModelBean])
+	topDescription.putMapPropertyType("tips", classOf[String], classOf[TipBean])
 	topDescription.putMapPropertyType("plateModels", classOf[String], classOf[PlateModelBean])
 	topDescription.putMapPropertyType("plates", classOf[String], classOf[PlateBean])
 	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceItem])
 	topDescription.putMapPropertyType("history", classOf[String], classOf[java.util.List[HistoryItem]])
+	//topDescription.putListPropertyType("commandHandlers", classOf[CmdHandler])
 	topDescription.putListPropertyType("commands", classOf[CmdBean])
 	addTypeDescription(topDescription)
 	

@@ -11,7 +11,7 @@ class MixCmdBean extends CmdBean {
 	@BeanProperty var mixSpec: MixSpecBean = null
 }
 
-class MixCmdHandler extends CmdHandlerA[MixCmdBean](isFinal = true) {
+class MixCmdHandler extends CmdHandlerA[MixCmdBean] {
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
 		messages.paramMustBeNonEmpty("items")
 		if (cmd.items != null) {

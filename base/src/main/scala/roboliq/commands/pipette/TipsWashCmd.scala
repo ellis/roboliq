@@ -10,7 +10,7 @@ class TipsWashCmdBean extends CmdBean {
 	@BeanProperty var intensity: String = null
 }
 
-class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean](isFinal = true) {
+class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean] {
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
 		messages.paramMustBeNonNull("intensity")
 		if (messages.hasErrors)
@@ -26,7 +26,7 @@ class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean](isFinal = true) {
 		ctx: ProcessorContext,
 		messages: CmdMessageWriter
 	): Expand2Result = {
-		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, ctx.node)).flatten
+		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, messages)).flatten
 		val location_? = ctx.ob.findSystemString_?("tipsDropLocation", ctx.node)
 		if (messages.hasErrors)
 			return Expand2Errors()

@@ -3,29 +3,14 @@ package roboliq.core
 import scala.collection.mutable.HashMap
 import scala.reflect.BeanProperty
 
-class TipModelBean extends Bean {
-	@BeanProperty var id: String = null
-	@BeanProperty var volume: java.math.BigDecimal = null
-	@BeanProperty var volumeAspirateMin: LiquidVolume = null 
-	//@BeanProperty var nVolumeWashExtra: LiquidVolume
-	//@BeanProperty var nVolumeDeconExtra: LiquidVolume
-}
-
-case class TipModel(
-	val id: String,
-	val nVolume: LiquidVolume, 
-	val nVolumeAspirateMin: LiquidVolume, 
-	val nVolumeWashExtra: LiquidVolume,
-	val nVolumeDeconExtra: LiquidVolume
-)
-
 class TipBean extends Bean {
 	@BeanProperty var index: java.lang.Integer = null
-	@BeanProperty var modelPermanent: TipModel = null
+	@BeanProperty var model: String = null
 }
 
 class Tip(
-	val index: Int
+	val index: Int,
+	val modelPermanent_? : Option[TipModel]
 ) extends Ordered[Tip] {
 	val id = "TIP"+index
 	
@@ -38,6 +23,17 @@ class Tip(
 	// For use by TipStateWriter
 	def createState0(model_? : Option[TipModel]): TipState = {
 		new TipState(this, model_?, Liquid.empty, LiquidVolume.l(0), Set(), LiquidVolume.l(0), Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
+	}
+}
+
+object Tip {
+	def fromBean(ob: ObjBase, messages: CmdMessageWriter)(bean: TipBean): Result[Tip] = {
+		for {
+			index <- Result.mustBeSet(bean.index, "index")
+		} yield {
+			val modelPermanent_? = if (bean.model == null) None else ob.findTipModel_?(bean.model, messages)
+			new Tip(index, modelPermanent_?)
+		}
 	}
 }
 

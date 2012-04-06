@@ -18,28 +18,47 @@ class ObjBase(bb: BeanBase) {
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
 	
-	def findTipModel_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[TipModel] = {
-		m_mapTipModel.get(id) match {
-			case Some(obj) => Some(obj)
-			case None => node.addError("tip model `"+id+"` not found"); None
+	def findTipModel_?(id: String, messages: CmdMessageWriter): Option[TipModel] = {
+		find(id, m_mapTipModel, bb.mapTipModel, TipModel.fromBean _, messages, "TipModel")
+	}
+	
+	def findTip_?(id: String, messages: CmdMessageWriter): Option[Tip] = {
+		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this, messages), messages, "Tip")
+	}
+	
+	private def find[A, B](
+		id: String,
+		mapObj: HashMap[String, A],
+		mapBean: scala.collection.Map[String, B],
+		fnCreate: (B => Result[A]),
+		messages: CmdMessageWriter,
+		sClass: String
+	): Option[A] = {
+		mapObj.get(id).orElse {
+			mapBean.get(id) match {
+				case None =>
+					messages.addError(sClass+" with id `"+id+"` not found")
+					None
+				case Some(bean) =>
+					fnCreate(bean) match {
+						case Error(ls) =>
+							ls.foreach(messages.addError)
+							None
+						case Success(obj) =>
+							mapObj(id) = obj
+							Some(obj)
+					}
+			}
 		}
 	}
 	
-	def findTip_?(id: String, node: CmdNodeBean): Option[Tip] = {
-		m_mapTip.get(id) match {
-			case Some(obj) => Some(obj)
-			case None => node.addError("tip `"+id+"` not found"); None
-		}
-	}
-	
-	def findTips_?(lId: List[String], node: CmdNodeBean): Option[List[Tip]] = {
-		val l = lId.map(id => findTip_?(id, node))
+	def findTips_?(lId: List[String], messages: CmdMessageWriter): Option[List[Tip]] = {
+		val l = lId.map(id => findTip_?(id, messages))
 		if (l.exists(_.isEmpty))
 			None
 		else
 			Some(l.flatten)
 	}
-
 
 	def findPlateModel(id: String): Result[PlateModel] = {
 		m_mapPlateModel.get(id) match {

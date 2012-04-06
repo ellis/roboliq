@@ -10,7 +10,7 @@ class DispenseCmdBean extends CmdBean {
 	@BeanProperty var items: java.util.List[SpirateCmdItemBean] = null
 }
 
-class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean](isFinal = true) {
+class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean] {
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
 		messages.paramMustBeNonEmpty("items")
 		if (messages.hasErrors)

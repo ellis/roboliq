@@ -15,7 +15,7 @@ class TipsDropCmdBean extends CmdBean {
 	}*/
 }
 
-class TipsDropCmdHandler extends CmdHandlerA[TipsDropCmdBean](isFinal = true) {
+class TipsDropCmdHandler extends CmdHandlerA[TipsDropCmdBean] {
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
 		messages.paramMustBeNonEmpty("tips")
 		if (messages.hasErrors)
@@ -30,7 +30,7 @@ class TipsDropCmdHandler extends CmdHandlerA[TipsDropCmdBean](isFinal = true) {
 		ctx: ProcessorContext,
 		messages: CmdMessageWriter
 	): Expand2Result = {
-		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, ctx.node)).flatten
+		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, messages)).flatten
 		val location_? = ctx.ob.findSystemString_?("tipsDropLocation", ctx.node)
 		if (messages.hasErrors) {
 			Expand2Errors()
