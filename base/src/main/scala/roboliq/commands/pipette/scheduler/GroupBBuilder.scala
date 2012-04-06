@@ -16,7 +16,7 @@ class GroupBBuilder(
 	val device: PipetteDevice,
 	val ctx: ProcessorContext
 ) {
-	val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)
+	val lTipAll: SortedSet[Tip] = device.getTips.map(_.state(ctx.states).conf)
 	
 	/**
 	 * @param lTipCleanable0 tip which can potentially be washed at an earlier stage
@@ -111,7 +111,7 @@ class GroupBBuilder(
 		bean.tip = twm.tip.id
 		bean.well = twm.well.id
 		bean.mixSpec = new MixSpecBean
-		bean.mixSpec.volume = twm.mixSpec.nVolume_?.getOrElse(null)
+		bean.mixSpec.volume = twm.mixSpec.nVolume_?.map(_.l.bigDecimal).getOrElse(null)
 		bean.mixSpec.count = twm.mixSpec.nCount_? match {
 			case None => null
 			case Some(n) => n

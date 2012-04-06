@@ -63,7 +63,7 @@ class PipetteScheduler(
 	val ctx: ProcessorContext,
 	val cmd: L3C_Pipette
 ) {
-	private val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)
+	private val lTipAll: SortedSet[Tip] = device.getTips.map(_.state(ctx.states).conf)
 	private val builderA = new GroupABuilder(device, ctx, cmd)
 	private val builderB = new GroupBBuilder(device, ctx)
 	private var lnScore: Array[Double] = null
@@ -87,7 +87,7 @@ class PipetteScheduler(
 			if (items.isEmpty)
 				return Success(Nil)
 			
-			val nTips = device.config.tips.size
+			val nTips = lTipAll.size
 			val nItems = items.size // TODO: need to break up large pipetting items into multiple items
 			lnScore = new Array[Double](nItems)
 			lGroupA = new Array[GroupA](nItems)

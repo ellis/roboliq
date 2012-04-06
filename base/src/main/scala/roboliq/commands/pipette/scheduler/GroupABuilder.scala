@@ -17,7 +17,7 @@ class GroupABuilder(
 	val ctx: ProcessorContext,
 	val cmd: L3C_Pipette
 ) {
-	private val lTipAll: SortedSet[Tip] = device.config.tips.map(_.state(ctx.states).conf)
+	private val lTipAll: SortedSet[Tip] = device.getTips.map(_.state(ctx.states).conf)
 
 	/**
 	 * Remove items with nVolume <= 0
@@ -59,7 +59,7 @@ class GroupABuilder(
 			lTipModelAll ++= tipModels
 			mapLiquidToModels(liquid) = mapLiquidToModels.getOrElse(liquid, Seq()) ++ tipModels
 		}
-		val lTipModelOkForAll = device.config.lTipModel.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
+		val lTipModelOkForAll = device.getTipModels.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
 		if (device.areTipsDisposable && !lTipModelOkForAll.isEmpty) {
 			val tipModel = lTipModelOkForAll.head
 			lLiquidAll.map(_ -> tipModel).toMap

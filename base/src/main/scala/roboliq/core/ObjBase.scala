@@ -18,8 +18,32 @@ class ObjBase(bb: BeanBase) {
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
 	
+	def findAllTipModels(): Result[List[TipModel]] = {
+		val l = bb.mapTipModel.keys.toList.map(findTipModel)
+		if (l.forall(_.isSuccess))
+			Result.sequence(l).map(_.toList)
+		else
+			Error(l.collect({case Error(ls) => ls}).flatten)
+	}
+	
+	def findAllTips(): Result[List[Tip]] = {
+		val l = bb.mapTip.keys.toList.map(findTip)
+		if (l.forall(_.isSuccess))
+			Result.sequence(l).map(_.toList)
+		else
+			Error(l.collect({case Error(ls) => ls}).flatten)
+	}
+	
+	def findTipModel(id: String): Result[TipModel] = {
+		find(id, m_mapTipModel, bb.mapTipModel, TipModel.fromBean _, "TipModel")
+	}
+	
 	def findTipModel_?(id: String, messages: CmdMessageWriter): Option[TipModel] = {
 		find(id, m_mapTipModel, bb.mapTipModel, TipModel.fromBean _, messages, "TipModel")
+	}
+	
+	def findTip(id: String): Result[Tip] = {
+		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this), "Tip")
 	}
 	
 	def findTip_?(id: String, messages: CmdMessageWriter): Option[Tip] = {
@@ -31,24 +55,36 @@ class ObjBase(bb: BeanBase) {
 		mapObj: HashMap[String, A],
 		mapBean: scala.collection.Map[String, B],
 		fnCreate: (B => Result[A]),
+		sClass: String
+	): Result[A] = {
+		mapObj.get(id) match {
+			case Some(obj) => Success(obj)
+			case None =>
+				mapBean.get(id) match {
+					case None =>
+						Error(sClass+" with id `"+id+"` not found")
+					case Some(bean) =>
+						fnCreate(bean) match {
+							case Error(ls) => Error(ls)
+							case Success(obj) =>
+								mapObj(id) = obj
+								Success(obj)
+						}
+				}
+		}
+	}
+	
+	private def find[A, B](
+		id: String,
+		mapObj: HashMap[String, A],
+		mapBean: scala.collection.Map[String, B],
+		fnCreate: (B => Result[A]),
 		messages: CmdMessageWriter,
 		sClass: String
 	): Option[A] = {
-		mapObj.get(id).orElse {
-			mapBean.get(id) match {
-				case None =>
-					messages.addError(sClass+" with id `"+id+"` not found")
-					None
-				case Some(bean) =>
-					fnCreate(bean) match {
-						case Error(ls) =>
-							ls.foreach(messages.addError)
-							None
-						case Success(obj) =>
-							mapObj(id) = obj
-							Some(obj)
-					}
-			}
+		find(id, mapObj, mapBean, fnCreate, sClass) match {
+			case Success(obj) => Some(obj)
+			case Error(ls) => ls.foreach(messages.addError); None
 		}
 	}
 	

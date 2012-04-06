@@ -6,8 +6,11 @@ import roboliq.core._
 import roboliq.commands.pipette._
 
 
-abstract class PipetteDevice {
-	val config: PipetteDeviceConfig
+abstract class PipetteDevice extends DeviceBean {
+	//val config: PipetteDeviceConfig
+	
+	def getTipModels: List[TipModel]
+	def getTips: SortedSet[Tip]
 	
 	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 	def assignTips(tipsFree: SortedSet[Tip], tipModel: TipModel, nTips: Int): Result[SortedSet[Tip]]

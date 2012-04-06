@@ -27,6 +27,24 @@ class Tip(
 }
 
 object Tip {
+	def fromBean(ob: ObjBase)(bean: TipBean): Result[Tip] = {
+		for {
+			index <- Result.mustBeSet(bean.index, "index")
+		} yield {
+			val modelPermanent_? = {
+				if (bean.model == null)
+					None
+				else {
+					ob.findTipModel(bean.model) match {
+						case Error(ls) => return Error(ls)
+						case Success(model) => Some(model)
+					}
+				}
+			}
+			new Tip(index, modelPermanent_?)
+		}
+	}
+	
 	def fromBean(ob: ObjBase, messages: CmdMessageWriter)(bean: TipBean): Result[Tip] = {
 		for {
 			index <- Result.mustBeSet(bean.index, "index")

@@ -46,7 +46,7 @@ abstract class CmdHandlerA[A <: CmdBean : Manifest] extends CmdHandler {
 	*/
 	
 	def expand1(command: CmdBean, messages: CmdMessageWriter): Expand1Result = {
-		expand1(command.asInstanceOf[A], messages)
+		expand1A(command.asInstanceOf[A], messages)
 	}
 
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result

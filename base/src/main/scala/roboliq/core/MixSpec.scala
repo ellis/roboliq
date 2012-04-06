@@ -9,7 +9,7 @@ class MixSpecBean extends Bean {
 }
 
 case class MixSpec(
-	val nVolume_? : Option[java.math.BigDecimal],
+	val nVolume_? : Option[LiquidVolume],
 	val nCount_? : Option[Int],
 	val mixPolicy_? : Option[PipettePolicy] = None
 ) {
@@ -34,7 +34,7 @@ case class MixSpec(
 object MixSpec {
 	def fromBean(bean: MixSpecBean): MixSpec = {
 		MixSpec(
-			nVolume_? = if (bean.volume != null) Some(bean.volume) else None,
+			nVolume_? = if (bean.volume != null) Some(LiquidVolume.l(bean.volume)) else None,
 			nCount_? = if (bean.count != null) Some(bean.count) else None,
 			mixPolicy_? = if (bean.policy != null) Some(PipettePolicy.fromName(bean.policy)) else None
 		)
