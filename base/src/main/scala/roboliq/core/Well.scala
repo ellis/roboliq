@@ -184,7 +184,18 @@ class TubeState(
 	nVolume: LiquidVolume,
 	bCheckVolume: Boolean,
 	history: List[WellHistoryItem]
-) extends WellState(liquid, nVolume, bCheckVolume, history)
+) extends WellState(liquid, nVolume, bCheckVolume, history) {
+	def copy(
+		liquid: Liquid = liquid,
+		nVolume: LiquidVolume = nVolume,
+		bCheckVolume: Boolean = bCheckVolume,
+		history: List[WellHistoryItem] = history
+	): TubeState = {
+		new TubeState(
+			obj, location, liquid, nVolume, bCheckVolume, history
+		)
+	}
+}
 
 /*
 class Well extends Obj { thisObj =>

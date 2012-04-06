@@ -23,7 +23,7 @@ class Plate(
 	def nCols: Int = model.nCols
 	def nWells: Int = nRows * nCols
 	
-	override def createState(ob: ObjBase) = new PlateState(this, "")
+	//override def createState(ob: ObjBase) = new PlateState(this, "")
 
 	def state(states: StateMap): PlateState = states(this.id).asInstanceOf[PlateState]
 	override def compare(that: Plate) = id.compare(that.id)

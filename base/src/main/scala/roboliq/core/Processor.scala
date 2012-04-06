@@ -29,16 +29,13 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						node.handler = handler
 						// EITHER: recursively expand children if command doesn't need objects
 						// OR: gather resource IDs
-						handler.checkParams1(cmd, messages)
-						if (node.getErrorCount == 0) {
-							handler.expand1(cmd, messages) match {
-								case None =>
-								case Some(Left(resources)) =>
-									mapNodeToResources(node) = resources
-								case Some(Right(childCommands)) =>
-									node.childCommands = childCommands
-									node.children = expand1(index, childCommands)
-							}
+						handler.expand1(cmd, messages) match {
+							case Expand1Errors() =>
+							case Expand1Cmds(childCommands) =>
+								node.childCommands = childCommands
+								node.children = expand1(index, childCommands)
+							case Expand1Resources(resources) =>
+								mapNodeToResources(node) = resources
 						}
 				}
 				node
@@ -83,22 +80,24 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				val ctx = new ProcessorContext(this, node, ob, Some(builder), builder.toImmutable)
 				val messages = new CmdMessageWriter(node)
 				
-				handler.checkParams2(cmd, ctx, messages)
-				if (node.getErrorCount == 0) {
-					handler.expand2(cmd, ctx, messages) match {
-						case None =>
-						case Some((childCommands, events)) =>
-							if (!childCommands.isEmpty) {
-								node.childCommands = childCommands
-								node.children = expand1(node.lIndex, node.childCommands.toList)
-								if (node.getErrorCount == 0)
-									expand2(node.children.toList)
-							}
-							if (!events.isEmpty) {
-								node.events = events
-								node.events.foreach(_.update(builder)) 
-							}
-					}
+				handler.expand2(cmd, ctx, messages) match {
+					case Expand2Errors() =>
+					case Expand2Cmds(childCommands, events) =>
+						if (!childCommands.isEmpty) {
+							node.childCommands = childCommands
+							node.children = expand1(node.lIndex, node.childCommands.toList)
+							if (node.getErrorCount == 0)
+								expand2(node.children.toList)
+						}
+						if (!events.isEmpty) {
+							node.events = events
+							node.events.foreach(_.update(builder)) 
+						}
+					case Expand2Tokens(tokens, events) =>
+						if (!tokens.isEmpty)
+							node.tokens = tokens
+						if (!events.isEmpty)
+							node.events = events
 				}
 			}
 		}

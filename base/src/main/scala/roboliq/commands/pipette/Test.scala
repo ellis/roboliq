@@ -4,6 +4,7 @@ import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import roboliq.core._
 
+/*
 class YamlTest1 {
 	import org.yaml.snakeyaml._
 	
@@ -18,20 +19,18 @@ class YamlTest1 {
 		bb.addBean(bean)
 		val ob = new ObjBase(bb)
 		
-		val processor = new Processor
 		val builder = new StateBuilder(ob)
-		val ctx = new ProcessorContext(processor, ob, Some(builder), builder.toImmutable)
-		
 		val handler = new AspirateCmdHandler
-
 		val cmd = bean.commands.get(0).asInstanceOf[AspirateCmdBean]
+		val ctx = new ProcessorContext()
 		
 		val node = handler.handle(cmd, ctx)
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(node))
 	}
 }
+*/
 
-/*class YamlTest2 {
+class YamlTest2 {
 	import org.yaml.snakeyaml._
 	
 	roboliq.yaml.RoboliqYaml.constructor.addTypeDescription(new TypeDescription(classOf[AspirateCmdBean], "!_Aspirate"))
@@ -45,19 +44,14 @@ class YamlTest1 {
 		bb.addBean(bean)
 		val ob = new ObjBase(bb)
 		
-		val processor = new Processor
 		val builder = new StateBuilder(ob)
-		val ctx = new ProcessorContext(processor, ob, Some(builder), builder.toImmutable)
-		
-		val handler = new PipetteCmdHandler
-
-		val cmd = bean.commands.get(0).asInstanceOf[PipetteCmdBean]
-		
-		val node = handler.process(cmd, ctx)
-		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(node))
+		val processor = Processor(bb, builder.toImmutable)
+		val cmds = bean.commands.toList
+		val nodes = processor.process(cmds)
+		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(nodes))
 	}
-}*/
+}
 
 object Test extends App {
-	new YamlTest1().run
+	new YamlTest2().run
 }

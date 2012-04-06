@@ -23,6 +23,16 @@ class CmdMessageWriter(node: CmdNodeBean) {
 		}
 	}
 	
+	def paramMustBeNonNull(name: String, o: Object): Boolean = {
+		if (o == null) {
+			addError(name, "must be assigned a value")
+			false
+		}
+		else {
+				true
+		}
+	}
+	
 	def paramMustBeNonEmpty(name: String): Boolean = {
 		getPropertyValue(node.command, name) match {
 			case None =>

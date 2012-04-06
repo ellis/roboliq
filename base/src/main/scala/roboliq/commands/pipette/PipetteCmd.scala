@@ -31,32 +31,39 @@ class PipetteCmdItemBean {
 }
 
 class PipetteCmdHandler(device: PipetteDevice) extends CmdHandlerA[PipetteCmdBean](isFinal = false) {
-	@BeanProperty var description: String = null
-	@BeanProperty var items: java.util.List[PipetteCmdItemBean] = null
 	
-	def check(command: CmdBean): CmdHandlerCheckResult = {
-		val cmd = command.asInstanceOf[PipetteCmdBean]
-		val items = if (cmd.items != null) cmd.items.toList else Nil
-		new CmdHandlerCheckResult(
-			lPart = cmd.src :: cmd.dest :: items.flatMap(item => List(item.src, item.dest)).toList,
-			lObj = items.map(item => item.tipModel).toList,
-			lPoolNew = Nil
-		)
+	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
+		if (cmd.items == null || cmd.items.isEmpty()) {
+			messages.paramMustBeNonNull("src")
+			messages.paramMustBeNonNull("dest")
+			messages.paramMustBeNonNull("volume")
+		}
+		else {
+			
+		}
+		if (messages.hasErrors)
+			return Expand1Errors()
+		
+		Expand1Resources(List(
+			NeedSrc(cmd.src),
+			NeedDest(cmd.dest)
+		))
 	}
-	
-	def handle(cmd: PipetteCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		node.mustBeNonEmpty(cmd, "items")
-		if (node.getErrorCount == 0) {
-			PipetteScheduler.createL3C(cmd, ctx.ob, node) match {
-				case None =>
-				case Some(l3c) =>
-					val scheduler = new PipetteScheduler(device, ctx, l3c)
-					scheduler.translate() match {
-						case Error(ls) =>
-						case Success(l) =>
-							node.translations = l.toList
-					}
-			}
+
+	def expand2A(
+		cmd: CmdType,
+		ctx: ProcessorContext,
+		messages: CmdMessageWriter
+	): Expand2Result = {
+		PipetteScheduler.createL3C(cmd, ctx.ob, ctx.node) match {
+			case None => Expand2Errors()
+			case Some(l3c) =>
+				val scheduler = new PipetteScheduler(device, ctx, l3c)
+				scheduler.translate() match {
+					case Error(ls) => Expand2Errors()
+					case Success(l) =>
+						Expand2Cmds(l.toList, Nil)
+				}
 		}
 	}
 }

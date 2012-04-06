@@ -19,6 +19,7 @@ import scala.collection.mutable.ArrayBuffer
 sealed abstract class NeedResource
 case class NeedSrc(id: String) extends NeedResource
 case class NeedDest(id: String) extends NeedResource
+case class NeedTip(id: String) extends NeedResource
 /**
  * Need a new pool (i.e., a new set of wells)
  * @param idInternal an internal id for command use

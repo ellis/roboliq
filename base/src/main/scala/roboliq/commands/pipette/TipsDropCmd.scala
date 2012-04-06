@@ -16,36 +16,27 @@ class TipsDropCmdBean extends CmdBean {
 }
 
 class TipsDropCmdHandler extends CmdHandlerA[TipsDropCmdBean](isFinal = true) {
-	def check(command: CmdBean): CmdHandlerCheckResult = {
-		val cmd = command.asInstanceOf[TipsDropCmdBean]
-		val tips = if (cmd.tips != null) cmd.tips.toList else Nil
-		new CmdHandlerCheckResult(
-			lPart = Nil,
-			lObj = tips,
-			lPoolNew = Nil
-		)
+	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
+		messages.paramMustBeNonEmpty("tips")
+		if (messages.hasErrors)
+			return Expand1Errors()
+		
+		// Item wells are sources
+		Expand1Resources(cmd.tips.map(tip => NeedTip(tip)).toList)
 	}
-	
-	def handle(cmd: TipsDropCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		for {
-			lId <- if (cmd.tips != null) Some(cmd.tips.toList) else None
-			lTip <- ctx.ob.findTips_?(cmd.tips.toList, node)
-			location <- ctx.ob.findSystemString_?("tipsDropLocation", node)
-		} {
-			// Update state
-			ctx.builder_? match {
-				case None =>
-				case Some(builder) =>
-					for (tip <- lTip) {
-						tip.stateWriter(builder).drop()
-					}
-			}
-			
-			// Create final tokens
-			val liTip = lTip.map(_.index)
-			if (!liTip.isEmpty) {
-				node.tokens = List(new TipsDropToken(liTip, location))
-			}
+
+	def expand2A(
+		cmd: CmdType,
+		ctx: ProcessorContext,
+		messages: CmdMessageWriter
+	): Expand2Result = {
+		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, ctx.node)).flatten
+		val location_? = ctx.ob.findSystemString_?("tipsDropLocation", ctx.node)
+		if (messages.hasErrors) {
+			Expand2Errors()
+		}
+		else {
+			Expand2Tokens(List(new TipsDropToken(lTip.map(_.index), location_?.get)), Nil)
 		}
 	}
 }

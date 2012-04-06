@@ -12,34 +12,40 @@ class MixCmdBean extends CmdBean {
 }
 
 class MixCmdHandler extends CmdHandlerA[MixCmdBean](isFinal = true) {
-	def check(command: CmdBean): CmdHandlerCheckResult = {
-		val cmd = command.asInstanceOf[MixCmdBean]
-		val items = if (cmd.items != null) cmd.items.toList else Nil
-		new CmdHandlerCheckResult(
-			lPart = items.map(item => item.well).toList,
-			lObj = items.map(item => item.tip).toList,
-			lPoolNew = Nil
+	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
+		messages.paramMustBeNonEmpty("items")
+		if (cmd.items != null) {
+			cmd.items.zipWithIndex.foreach(pair => {
+				val (item, i) = pair
+				messages.paramMustBeNonNull("items["+(i+1)+"].tip", item.tip)
+				messages.paramMustBeNonNull("items["+(i+1)+"].well", item.well)
+			})
+			
+		}
+		if (messages.hasErrors)
+			return Expand1Errors()
+		
+		// Item wells are sources
+		Expand1Resources(
+			cmd.items.flatMap(item => {
+				List(NeedTip(item.tip), NeedSrc(item.well))
+			}).toList
 		)
 	}
-	
-	def handle(cmd: MixCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		node.mustBeNonEmpty(cmd, "items")
-		if (node.getErrorCount == 0) {
-			val lItem = cmd.items.toList.map(_.toTokenItem(cmd, ctx.ob, node)).flatten
-			if (node.getErrorCount == 0) {
-				node.tokens = List(new MixToken(lItem))
-			}
+
+	def expand2A(
+		cmd: CmdType,
+		ctx: ProcessorContext,
+		messages: CmdMessageWriter
+	): Expand2Result = {
+		val lItem = cmd.items.toList.map(_.toTokenItem(cmd, ctx.ob, ctx.node)).flatten
+		if (messages.hasErrors) {
+			Expand2Errors()
+		}
+		else {
+			Expand2Tokens(List(new MixToken(lItem)), Nil)
 		}
 	}
-	/*
-	override def toDebugString = {
-		val wells = items.map(_.well)
-		val sTips = TipSet.toDebugString(items.map(_.tip))
-		val sVolumes = Printer.getSeqDebugString(items.map(_.getVolume()))
-		val sPolicies = Printer.getSeqDebugString(items.map(_.getPolicy()))
-		getClass().getSimpleName() + "("+sTips+", "+sVolumes+", "+sPolicies+", "+getWellsDebugString(wells)+")" 
-	}
-	*/
 }
 
 class MixCmdItemBean {

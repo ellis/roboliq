@@ -8,50 +8,41 @@ class TipsWashCmdBean extends CmdBean {
 	@BeanProperty var tips: java.util.List[String] = null
 	@BeanProperty var washProgram: java.lang.Integer = null
 	@BeanProperty var intensity: String = null
-
-	/*override def toString: String = {
-		if (tips == null)
-			"TipsWashBean()"
-		else
-			"TipsWashBean("+tips.mkString(", ")+", "+washProgram+", "+intensity+")"
-	}*/
 }
 
 class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean](isFinal = true) {
-	def check(command: CmdBean): CmdHandlerCheckResult = {
-		val cmd = command.asInstanceOf[TipsWashCmdBean]
-		val tips = if (cmd.tips != null) cmd.tips.toList else Nil
-		new CmdHandlerCheckResult(
-			lPart = Nil,
-			lObj = tips,
-			lPoolNew = Nil
-		)
+	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
+		messages.paramMustBeNonNull("intensity")
+		if (messages.hasErrors)
+			return Expand1Errors()
+		
+		// Item wells are sources
+		val tips = if (cmd.tips == null) Nil else cmd.tips.toList
+		Expand1Resources(tips.map(tip => NeedTip(tip)).toList)
 	}
-	
-	def handle(cmd: TipsWashCmdBean, ctx: ProcessorContext, node: CmdNodeBean) {
-		node.checkPropertyNonNull_?(cmd, "intensity")
-		for {
-			lTipId <- if (cmd.tips != null) Some(cmd.tips.toList) else None
-			lTip <- ctx.ob.findTips_?(cmd.tips.toList, node)
-		} {
-			// FIXME: need to intelligently choose wash program!!!
-			val washProgram = if (cmd.washProgram != null) cmd.washProgram.toInt else 0
-			val intensity = WashIntensity.withName(cmd.intensity)
-			// Update state
-			ctx.builder_? match {
-				case None =>
-				case Some(builder) =>
-					for (tip <- lTip) {
-						tip.stateWriter(builder).clean(intensity)
-					}
-			}
-			
-			// Create final tokens
-			val liTip = lTip.map(_.index)
-			if (!liTip.isEmpty) {
-				node.tokens = List(new TipsWashToken(liTip, washProgram))
-			}
-		}
+
+	def expand2A(
+		cmd: CmdType,
+		ctx: ProcessorContext,
+		messages: CmdMessageWriter
+	): Expand2Result = {
+		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, ctx.node)).flatten
+		val location_? = ctx.ob.findSystemString_?("tipsDropLocation", ctx.node)
+		if (messages.hasErrors)
+			return Expand2Errors()
+
+		
+		// FIXME: need to intelligently choose wash program!!!
+		val washProgram = if (cmd.washProgram != null) cmd.washProgram.toInt else 0
+		val degree = WashIntensity.withName(cmd.intensity)
+		
+		// Create final tokens
+		val liTip = lTip.map(_.index)
+		val tokens = List(new TipsWashToken(liTip, washProgram))
+		// Events
+		val events = lTip.map(tip => TipCleanEventBean(tip, degree))
+		
+		Expand2Tokens(List(new TipsDropToken(lTip.map(_.index), location_?.get)), events)
 	}
 }
 

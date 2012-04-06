@@ -3,6 +3,12 @@ package roboliq.core
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 
+
+sealed abstract class Expand1Result
+case class Expand1Errors() extends Expand1Result
+case class Expand1Cmds(cmds: List[CmdBean]) extends Expand1Result
+case class Expand1Resources(resources: List[NeedResource]) extends Expand1Result
+
 sealed abstract class Expand2Result
 case class Expand2Errors() extends Expand2Result
 case class Expand2Cmds(cmds: List[CmdBean], events: List[EventBean]) extends Expand2Result
@@ -15,18 +21,9 @@ abstract class CmdHandler(val isFinal: Boolean) {
 	//def checkParams1(command: CmdBean, messages: CmdMessageWriter)
 	//def checkParams2(command: CmdBean, ctx: ProcessorContext, messages: CmdMessageWriter)
 
-	def expand1(
-		command: CmdBean,
-		messages: CmdMessageWriter
-	): Option[
-		Either[List[NeedResource], List[CmdBean]]
-	]
+	def expand1(command: CmdBean, messages: CmdMessageWriter): Expand1Result
 
-	def expand2(
-		command: CmdBean,
-		ctx: ProcessorContext,
-		messages: CmdMessageWriter
-	): Expand2Result
+	def expand2(command: CmdBean, ctx: ProcessorContext, messages: CmdMessageWriter): Expand2Result
 }
 
 abstract class CmdHandlerA[A <: CmdBean : Manifest](isFinal: Boolean) extends CmdHandler(isFinal) {
@@ -48,21 +45,11 @@ abstract class CmdHandlerA[A <: CmdBean : Manifest](isFinal: Boolean) extends Cm
 	def checkParams2A(cmd: A, ctx: ProcessorContext, messages: CmdMessageWriter)
 	*/
 	
-	def expand1(
-		command: CmdBean,
-		messages: CmdMessageWriter
-	): Option[
-		Either[List[NeedResource], List[CmdBean]]
-	] = {
+	def expand1(command: CmdBean, messages: CmdMessageWriter): Expand1Result = {
 		expand1(command.asInstanceOf[A], messages)
 	}
 
-	def expand1A(
-		cmd: CmdType,
-		messages: CmdMessageWriter
-	): Option[
-		Either[List[NeedResource], List[CmdBean]]
-	]
+	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result
 	
 	def expand2(
 		command: CmdBean,

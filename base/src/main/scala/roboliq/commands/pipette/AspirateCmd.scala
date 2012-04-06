@@ -11,20 +11,15 @@ class AspirateCmdBean extends CmdBean {
 }
 
 class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean](isFinal = true) {
-	def expand1A(
-		cmd: CmdType,
-		messages: CmdMessageWriter
-	): Option[
-		Either[List[NeedResource], List[CmdBean]]
-	] = {
+	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
 		messages.paramMustBeNonEmpty("items")
 		if (messages.hasErrors)
-			return None
+			return Expand1Errors()
 		
 		// Item wells are sources
-		Some(Left(cmd.items.flatMap(item => {
-			List(NeedSrc(item.well))
-		}).toList))
+		Expand1Resources(
+			cmd.items.map(item => NeedSrc(item.well)).toList
+		)
 	}
 
 	def expand2A(
