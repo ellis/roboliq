@@ -22,7 +22,7 @@ plates:
     model: D-BSSE 96 Well PCR Plate
 
 devices:
-- !!roboliq.commands.pipette.TestPipetteDevice {}
+- !!roboliq.commands.pipette.TestPipetteDevice &id001 {}
 
 commandHandlers:
 - !!roboliq.commands.pipette.AspirateCmdHandler {}
@@ -30,4 +30,4 @@ commandHandlers:
 - !!roboliq.commands.pipette.MixCmdHandler {}
 - !!roboliq.commands.pipette.TipsDropCmdHandler {}
 - !!roboliq.commands.pipette.TipsWashCmdHandler {}
-- !!roboliq.commands.pipette.PipetteCmdHandler {}
+- !!roboliq.commands.pipette.PipetteCmdHandler { device: *id001 }
