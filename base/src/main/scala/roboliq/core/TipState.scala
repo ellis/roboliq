@@ -22,8 +22,25 @@ case class TipState(
 	override def compare(that: TipState): Int = conf.compare(that.conf)
 }
 
+object TipState {
+	def createEmpty(tip: Tip) = TipState(
+		conf = tip,
+		model_? = tip.modelPermanent_?,
+		liquid = Liquid.empty,
+		nVolume = LiquidVolume.empty,
+		contamInside = Set(),
+		nContamInsideVolume = LiquidVolume.empty,
+		contamOutside = Set(),
+		srcsEntered = Set(),
+		destsEntered = Set(),
+		cleanDegree = WashIntensity.None,
+		cleanDegreePrev = WashIntensity.None,
+		cleanDegreePending = WashIntensity.None
+	)
+}
+
 class TipStateWriter(o: Tip, builder: StateBuilder) {
-	def state = builder.map(o.id).asInstanceOf[TipState]
+	def state = builder.findTipState(o.id).get
 	
 	private def set(state1: TipState) { builder.map(o.id) = state1 } 
 	

@@ -7,7 +7,8 @@ import scala.collection.mutable.LinkedHashMap
 
 class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler], states0: RobotState) {
 	def process(cmds: List[CmdBean]): List[CmdNodeBean] = {
-		//val mapNodes = new HashMap[CmdBean, CmdNodeBean]
+		bb.lDevice.foreach(_.setObjBase(ob))
+		
 		val mapNodeToResources = new LinkedHashMap[CmdNodeBean, List[NeedResource]]
 		//val builder = new StateBuilder(states0)
 		

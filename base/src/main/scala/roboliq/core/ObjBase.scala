@@ -214,10 +214,26 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
+	def findTipState(id: String): Result[TipState] = {
+		builder.map.get(id) match {
+			case Some(state: TipState) => Success(state)
+			case Some(_) => Error("id `"+id+"`: stored state is not a TipState")
+			case None =>
+				findTip(id) match {
+					case Error(ls) => Error(ls)
+					case Success(tip) =>
+						val tipState = TipState.createEmpty(tip)
+						builder.map(id) = tipState
+						Success(tipState)
+				}
+		}
+	}
+	
 	def findWellState(id: String): Result[WellState] = {
 		println("ObjBase.findWellState: "+id)
 		builder.map.get(id) match {
-			case Some(state) => Success(state.asInstanceOf[WellState])
+			case Some(state: WellState) => Success(state)
+			case Some(_) => Error("id `"+id+"`: stored state is not a WellState")
 			case None =>
 				findWell(id) match {
 					case Error(ls) => Error(ls)

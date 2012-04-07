@@ -12,9 +12,9 @@ class Tip(
 	val index: Int,
 	val modelPermanent_? : Option[TipModel]
 ) extends Ordered[Tip] {
-	val id = "TIP"+index
+	val id = "TIP"+(index+1)
 	
-	def state(states: StateMap): TipState = states(this.id).asInstanceOf[TipState]
+	def state(states: StateMap): TipState = states.findTipState(id).get
 	def stateWriter(builder: StateBuilder): TipStateWriter = new TipStateWriter(this, builder)
 
 	override def compare(that: Tip) = index - that.index

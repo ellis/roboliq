@@ -43,28 +43,17 @@ trait StateMap extends StateQuery {
 	}
 
 	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
-	def findWell(id: String): Result[Well] = ob.findWell(id)
-}
-
-class RobotState(val ob: ObjBase, val map: Map[String, Object]) extends StateMap {
-	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
-		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
-	}
-
-	def findWellState(id: String): Result[WellState] = {
+	
+	def findTip(id: String): Result[Tip] = ob.findTip(id)
+	
+	def findTipState(id: String): Result[TipState] = {
 		map.get(id) match {
-			case Some(state) => Success(state.asInstanceOf[WellState])
-			case None => ob.findWellState(id)
-			//case None => Error("INTERNAL: well `"+id+"`: state not found")
+			case Some(state) => Success(state.asInstanceOf[TipState])
+			case None => ob.findTipState(id)
 		}
 	}
-}
-
-class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap {
-	def this(states: RobotState) = this(states.ob, HashMap[String, Object](states.map.toSeq : _*))
-	def this(ob: ObjBase) = this(ob, new HashMap[String, Object])
 	
-	def toImmutable: RobotState = new RobotState(ob, map.toMap)
+	def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findWellState(id: String): Result[WellState] = {
 		println("StateBuilder.findWellState: "+id)
@@ -73,4 +62,24 @@ class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends St
 			case None => ob.findWellState(id)
 		}
 	}
+}
+
+class RobotState(val ob: ObjBase, val map: Map[String, Object]) extends StateMap {
+	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
+		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
+	}
+
+	/*def findWellState(id: String): Result[WellState] = {
+		map.get(id) match {
+			case Some(state) => Success(state.asInstanceOf[WellState])
+			case None => Error("INTERNAL: well `"+id+"`: state not found")
+		}
+	}*/
+}
+
+class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap {
+	def this(states: RobotState) = this(states.ob, HashMap[String, Object](states.map.toSeq : _*))
+	def this(ob: ObjBase) = this(ob, new HashMap[String, Object])
+	
+	def toImmutable: RobotState = new RobotState(ob, map.toMap)
 }
