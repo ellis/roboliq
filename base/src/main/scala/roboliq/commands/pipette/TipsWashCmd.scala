@@ -27,7 +27,6 @@ class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean] {
 		messages: CmdMessageWriter
 	): Expand2Result = {
 		val lTip = cmd.tips.toList.map(tip => ctx.ob.findTip_?(tip, messages)).flatten
-		val location_? = ctx.ob.findSystemString_?("tipsDropLocation", ctx.node)
 		if (messages.hasErrors)
 			return Expand2Errors()
 
@@ -42,7 +41,7 @@ class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean] {
 		// Events
 		val events = lTip.map(tip => TipCleanEventBean(tip, degree))
 		
-		Expand2Tokens(List(new TipsDropToken(lTip.map(_.index), location_?.get)), events)
+		Expand2Tokens(List(new TipsWashToken(lTip.map(_.index), washProgram)), events)
 	}
 }
 

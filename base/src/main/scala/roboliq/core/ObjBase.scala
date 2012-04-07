@@ -259,7 +259,7 @@ class ObjBase(bb: BeanBase) {
 						}
 						builder.map(id) = wellState
 						loadWellEvents(id)
-						Success(wellState)
+						Success(builder.map(id).asInstanceOf[WellState])
 				}
 		}
 	}

@@ -82,6 +82,7 @@ class GroupABuilder(
 				// ENDFIX
 				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
 				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
+				println("liquids: "+liquids)
 				mapLiquidToModel ++= liquids.map(_ -> tipModel)
 				// FIXME: for debug only
 				println("mapModelToCount: "+mapModelToCount)
