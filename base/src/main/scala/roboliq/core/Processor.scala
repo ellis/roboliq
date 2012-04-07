@@ -9,7 +9,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 	def process(cmds: List[CmdBean]): List[CmdNodeBean] = {
 		//val mapNodes = new HashMap[CmdBean, CmdNodeBean]
 		val mapNodeToResources = new LinkedHashMap[CmdNodeBean, List[NeedResource]]
-		val builder = new StateBuilder(states0)
+		//val builder = new StateBuilder(states0)
 		
 		// Construct command nodes
 		def expand1(indexParent: List[Int], cmds: List[CmdBean]): List[CmdNodeBean] = {
@@ -73,8 +73,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			}
 		}
 		
-		println("ob.states: "+ob.states)
-		builder.map ++= ob.states
+		println("ob.builder.map: "+ob.builder.map)
 		
 		// TODO: Choose bench locations for any resources which don't already have one
 		
@@ -83,7 +82,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			for (node <- nodes if node.getErrorCount == 0 && node.childCommands == null) {
 				val handler = node.handler
 				val cmd = node.command
-				val ctx = new ProcessorContext(this, node, ob, Some(builder), builder.toImmutable)
+				val ctx = new ProcessorContext(this, node, ob, Some(ob.builder), ob.builder.toImmutable)
 				val messages = new CmdMessageWriter(node)
 				
 				handler.expand2(cmd, ctx, messages) match {
@@ -97,7 +96,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						}
 						if (!events.isEmpty) {
 							node.events = events
-							node.events.foreach(_.update(builder)) 
+							node.events.foreach(_.update(ob.builder)) 
 						}
 					case Expand2Tokens(tokens, events) =>
 						if (!tokens.isEmpty)

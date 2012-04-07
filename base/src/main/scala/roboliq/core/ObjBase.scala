@@ -16,7 +16,8 @@ class ObjBase(bb: BeanBase) {
 	//private val m_mapWellState = new HashMap[String, WellState]
 	private val m_mapState = new HashMap[String, Object]
 	
-	def states: scala.collection.Map[String, Object] = m_mapState
+	val builder = new StateBuilder(this)
+	//def states: scala.collection.Map[String, Object] = m_mapState
 	
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
@@ -152,7 +153,7 @@ class ObjBase(bb: BeanBase) {
 					bCheckVolume = true,
 					history = Nil
 				)
-				m_mapState(id) = wellState
+				builder.map(id) = wellState
 				well
 			}
 			else {
@@ -177,9 +178,19 @@ class ObjBase(bb: BeanBase) {
 					history = Nil
 				)
 				m_mapWell(id) = well
-				m_mapState(id) = wellState
+				builder.map(id) = wellState
 				well
 			}
+		}
+	}
+	
+	private def loadWellHistory(id: String) {
+		bb.mapHistory.get(id) match {
+			case None =>
+			case Some(history) =>
+				history.foreach(item => {
+					item.asInstanceOf[EventBean].update(builder)
+				})
 		}
 	}
 	
