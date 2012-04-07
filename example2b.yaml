@@ -1,8 +1,3 @@
-plateModels:
-  "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12, volume: 200e-6 }
-  "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 6000e-6 }
-  "Tube 50ml": { rows: 1, cols: 1, volume: 50e-3 }
-
 plates:
   P1:
     model: D-BSSE 96 Well PCR Plate
@@ -11,7 +6,5 @@ events:
   P1(A01): [ !add { src: water, volume: 100e-6 } ]
 
 commands:
-- !!roboliq.commands.pipette.PipetteCmdBean
-    src: P1(A01)
-    dest: P1(A02)
-    volume: [5e-6]
+#- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(B01), volume: [5e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(A01 d H), volume: [5e-6] }
