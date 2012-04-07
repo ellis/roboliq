@@ -1,0 +1,54 @@
+=============
+Roboliq Notes
+=============
+:Author: Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>
+
+Command Processing
+==================
+
+:Date:
+  2012-04-07
+
+This idea is not currently implemented.
+
+Commands can have one of several different data requirements before they can be processed:
+
+* no requirements beyond their own parameters
+* knowledge of the *invariant properties* of objects referred to by the parameters
+* knowledge of the *state* of objects referred to by the parameters
+
+A list of commands should be processed in the order deteremined by a priority stack.
+We start with a list of commands given to use by the user.
+Each of the commands is given an index according to its position in the list.
+The commands are pushed onto the priority stack.
+The priority stack orders commands by lowest data requirements first, and then lexigraphical order of index.
+Note that this ensures that no command which requires state information will be processed before the state information has become fixed for that command.
+When a command gets processed, it may produce new child commands.
+These commands are given the index of their parent plus a subindex according to their position in the child list.
+The children are then pushed onto the priority stack, and the next command is selected from the priority stack.
+
+Format For Wells
+================
+
+Many commands have source and destination parameters which refer to a well or set of wells.  For the following, assume that P1 is a 96-well plate with 8 rows and 12 columns.
+
+``P1``
+  All wells on plate P1 or a tube if P1 is a tube
+``P1(A01)``
+  The well in row A and column 01 on plate P1
+``P1(A01,B04)``
+  2 wells A01 and B04 on plate P1
+``P1(A01 d B02)``
+  10 wells starting at A01 and extending vertically downward till well B02 is reached, wrapping back around to the top row whenever necessary
+``P1(A01 r B02)``
+  14 wells starting at A01 and extending horizontally rightward till well B02 is reached, wrapping back round to the left colume whenever necessary
+``P1(A01 r 04)``
+  4 wells in row A columns 1 thru 4 on plate P1
+``P1(A01 d B)`` or ``P1(A01dB)``
+  2 wells in column 1 rows A thru B on plate P1
+``P1(A01 x C12)``
+  24 wells in rows A thru C and columns 1 thru 12
+``P1(A01 * 4)``
+  Well A01 selected 4 times
+``P1(A01),P2(D04)``
+  2 wells, A01 on plate P1 and D04 on plate P2
