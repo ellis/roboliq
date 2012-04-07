@@ -50,6 +50,14 @@ class ObjBase(bb: BeanBase) {
 		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this, messages), messages, "Tip")
 	}
 	
+	def findPlateModel(id: String): Result[PlateModel] = {
+		find(id, m_mapPlateModel, bb.mapPlateModel, PlateModel.fromBean _, "PlateModel")
+	}
+	
+	def findPlate(id: String): Result[Plate] = {
+		find(id, m_mapPlate, bb.mapPlate, Plate.fromBean(this), "Plate")
+	}
+	
 	private def find[A, B](
 		id: String,
 		mapObj: HashMap[String, A],
@@ -95,71 +103,6 @@ class ObjBase(bb: BeanBase) {
 		else
 			Some(l.flatten)
 	}
-
-	def findPlateModel(id: String): Result[PlateModel] = {
-		m_mapPlateModel.get(id) match {
-			case Some(obj) => Success(obj)
-			case None => createPlateModel(id)
-		}
-	}
-	
-	private def createPlateModel(id: String): Result[PlateModel] = {
-		for {
-			bean <- Result.get(bb.mapPlateModel.get(id), "plate model \""+id+"\" not found")
-			obj <- PlateModel.fromBean(bean)
-		}
-		yield {
-			m_mapPlateModel(id) = obj
-			obj
-		}
-	}
-	
-	def findPlate(id: String): Result[Plate] = {
-		m_mapPlate.get(id) match {
-			case Some(obj) => Success(obj)
-			case None => createPlate(id)
-		}
-	}
-	
-	private def createPlate(id: String): Result[Plate] = {
-		for {
-			bean <- Result.get(bb.mapPlate.get(id), "plate \""+id+"\" not found")
-			idModel <- Result.mustBeSet(bean.model, "model")
-			model <- findPlateModel(idModel)
-		}
-		yield {
-			val obj = new Plate(id, model)
-			m_mapPlate(id) = obj
-			obj
-		}
-	}
-
-	//def findSubstance(id: String): Result[]
-	
-	private def createSubstance(id: String): Unit = {
-		
-	}
-	
-	/*
-	def findWell_?(o: Object, property: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
-		node.getValueNonNull_?()
-		if (id == null) {
-			if (requireId)
-				node.checkPropertyNonNull(null)
-			None
-		}
-		else {
-			m_mapWell.get(id) match {
-				case Some(obj) => Some(obj)
-				case None =>
-					createWell(id) match {
-						case Error(ls) => ls.foreach(node.addError); None
-						case Success(well) => Some(well)
-					}
-			}
-		}
-	}
-	*/
 	
 	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
 		if (id == null) {
@@ -247,64 +190,3 @@ class ObjBase(bb: BeanBase) {
 	}
 	
 }
-/*
-object ObjBase {
-	def fromBeanBase(bb: BeanBase, ids: Set[String]): Result[ObjBase] = {
-		val ob = new ObjBase(bb)
-		
-		val lsError = new ArrayBuffer[String]
-		
-		val lsPlate = new HashSet[String]
-		val lsPlateModel = new HashSet[String]
-		val lsWell = new HashSet[String]
-		
-		lsWell ++= ids.filter(_.contains('('))
-		
-		lsPlate ++= ids.filter(bb.mapPlate.contains)
-		// Find all plates referenced by wells
-		lsPlate ++= lsWell.map(s => s.take(s.indexOf("(")))
-		
-		lsPlateModel ++= ids.filter(bb.mapPlateModel.contains)
-		// Find all plate models referenced by plates
-		lsPlateModel ++= lsPlate.collect({ case idPlate if bb.mapPlate(idPlate).model != null => bb.mapPlate(idPlate).model })
-		
-		// Construct PlateModel objects
-		for (id <- lsPlateModel) {
-			val b = bb.mapPlateModel(id)
-			PlateModel.fromBean(b) match {
-				case Success(obj) => ob.m_mapPlateModel(id) = obj
-				case Error(ls) => lsError ++= ls
-			}
-		}
-
-		// Construct Plate objects
-		for (id <- lsPlate) {
-			val b = bb.mapPlate(id)
-			Plate.fromBean(b, ob.mapPlateModel) match {
-				case Success(obj) => ob.m_mapPlate(id) = obj
-				case Error(ls) => lsError ++= ls
-			}
-		}
-
-		// Construct Well objects
-		for (id <- lsPlate) {
-			val plate = ob.mapPlate(id)
-			for (iWell <- 0 to plate.nWells) {
-				val sWell = PlateModel.wellIndexName(plate.model.nRows, plate.model.nCols, iWell)
-				val idWell = plate.id+"("+sWell+")"
-				bb.
-			}
-			val idWell
-			Plate.fromBean(b, ob.mapPlateModel) match {
-				case Success(obj) => ob.m_mapPlate(id) = obj
-				case Error(ls) => lsError ++= ls
-			}
-		}
-		for ((id, plate) <- bb.mapPlate if ids.contains(id)) {
-			ob.m_mapPlate
-		}
-		
-		Success(new ObjBase)
-	}
-}
-*/

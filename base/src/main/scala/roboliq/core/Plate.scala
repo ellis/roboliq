@@ -30,6 +30,18 @@ class Plate(
 	override def toString = id
 }
 
+object Plate {
+	def fromBean(ob: ObjBase)(bean: PlateBean): Result[Plate] = {
+		for {
+			id <- Result.mustBeSet(bean._id, "_id")
+			idModel <- Result.mustBeSet(bean.model, "model")
+			model <- ob.findPlateModel(idModel)
+		} yield {
+			new Plate(id, model)
+		}
+	}
+}
+
 case class PlateState(
 	val conf: Plate,
 	val location: String

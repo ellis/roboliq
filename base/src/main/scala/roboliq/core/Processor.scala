@@ -63,6 +63,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		for ((node, resources) <- mapNodeToResources) {
 			val messages = new CmdMessageWriter(node)
 			for (resource <- resources) {
+				println(resource)
 				resource match {
 					case NeedTip(id) => ob.findTip_?(id, messages)
 					case NeedSrc(name) => needWells(node, name)
