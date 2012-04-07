@@ -57,7 +57,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 					seen += id
 					// Find the well in order to instantiate it as an object
 					// This will also load its state
-					ob.findWell_?(id, node)
+					ob.findWells_?(id, node)
 				}
 			}
 		}

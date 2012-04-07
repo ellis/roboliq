@@ -151,6 +151,59 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
+	def findWells_?(name: String, node: CmdNodeBean, requireId: Boolean = true): Option[List[Well]] = {
+		if (name == null) {
+			if (requireId)
+				node.checkPropertyNonNull(null)
+			None
+		}
+		else {
+			WellSpecParser.parse(name) match {
+				case Error(ls) => ls.foreach(node.addError); None
+				case Success(l) =>
+					val lId = l.flatMap(pair => {
+						val plate = findPlate(pair._1) match {
+							case Error(ls) => ls.foreach(node.addError); return None
+							case Success(plate) => plate
+						}
+						if (pair._2.isEmpty) {
+							List(pair._1)
+						}
+						else {
+							pair._2.flatMap(_ match {
+								case WellSpecOne(rc) =>
+									List(pair._1 + "(" + rc + ")")
+								case WellSpecHorizontal(rc0, rc1) =>
+									val i0 = rc0.row + rc0.col * plate.model.nRows
+									val i1 = rc1.row + rc1.col * plate.model.nRows
+									(for (i <- i0 to i1) yield {
+										val row = i % plate.nRows
+										val col = i / plate.nRows
+										pair._1 + "(" + RowCol(row, col) + ")"
+									}).toList
+								case WellSpecVertical(rc0, rc1) =>
+									val i0 = rc0.row * plate.model.nCols + rc0.col
+									val i1 = rc1.row * plate.model.nCols + rc1.col
+									(for (i <- i0 to i1) yield {
+										val row = i / plate.nCols
+										val col = i % plate.nCols
+										pair._1 + "(" + RowCol(row, col) + ")"
+									}).toList
+								case WellSpecMatrix(rc0, rc1) =>
+									(for (row <- rc0.row to rc1.row; col <- rc0.col to rc1.col) yield {
+										pair._1 + "(" + RowCol(row, col) + ")"
+									}).toList
+							})
+						}
+					})
+					findWells(lId) match {
+						case Error(ls) => ls.foreach(node.addError); None
+						case Success(wells) => Some(wells.toList)
+					}
+			}
+		}
+	}
+	
 	def findWell(id: String): Result[Well] = {
 		m_mapWell.get(id) match {
 			case Some(obj) => Success(obj)

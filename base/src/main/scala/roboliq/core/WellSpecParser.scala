@@ -3,7 +3,11 @@ package roboliq.core
 import scala.util.parsing.combinator._
 
 
-case class RowCol(row: Int, col: Int)
+case class RowCol(row: Int, col: Int) {
+	override def toString: String = {
+		(row + 'A').asInstanceOf[Char].toString + ("%02d".format(col + 1))
+	}
+}
 sealed abstract class WellSpec
 case class WellSpecOne(rc: RowCol) extends WellSpec
 case class WellSpecVertical(rc0: RowCol, rc1: RowCol) extends WellSpec
@@ -12,7 +16,7 @@ case class WellSpecMatrix(rc0: RowCol, rc1: RowCol) extends WellSpec
 
 object WellSpecParser extends JavaTokenParsers {
 	val row: Parser[Int] = """[A-Z]""".r ^^ { case s => s.charAt(0) - 'A' }
-	val col: Parser[Int] = """0*[0-9]+""".r ^^ { case s => s.toInt - 1 }
+	val col: Parser[Int] = """[0-9]+""".r ^^ { case s => s.toInt - 1 }
 	
 	val well: Parser[WellSpecOne] = """[A-Z][0-9][0-9]""".r ^^ {
 		case s => WellSpecOne(RowCol(s.charAt(0) - 'A', s.drop(1).toInt - 1))
@@ -54,7 +58,7 @@ object WellSpecParser extends JavaTokenParsers {
 	
 	val plates: Parser[List[Tuple2[String, List[WellSpec]]]] = rep1sep(plateArg, ",")
 	
-	def parse(input: String): List[Tuple2[String, List[WellSpec]]] = {
-		parseAll(plates, input).getOrElse(Nil)
+	def parse(input: String): roboliq.core.Result[List[Tuple2[String, List[WellSpec]]]] = {
+		roboliq.core.Success(parseAll(plates, input).getOrElse(Nil))
 	}
 }

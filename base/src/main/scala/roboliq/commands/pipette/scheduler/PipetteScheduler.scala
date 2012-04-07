@@ -21,18 +21,18 @@ object PipetteScheduler {
 		val pipettePolicy_? : Option[PipettePolicy] = if (cmd.policy == null) None else Some(PipettePolicy.fromName(cmd.policy))
 		val tipModel_? : Option[TipModel] = if (cmd.tipModel == null) None else ob.findTipModel_?(cmd.tipModel, messages)
 
-		val src_? : Option[Well] = ob.findWell_?(cmd.src, node, false)
-		val dest_? : Option[Well] = ob.findWell_?(cmd.dest, node, false)
+		val src_? : Option[List[Well]] = ob.findWells_?(cmd.src, node, false)
+		val dest_? : Option[List[Well]] = ob.findWells_?(cmd.dest, node, false)
 		val volumes_? : Option[List[LiquidVolume]] = if (cmd.volume == null) None else Some(cmd.volume.map(n => LiquidVolume.l(n)).toList)
 		
-		val item = new Item(
-			SortedSet(src_?.get),
-			dest_?.get,
+		val items = dest_?.get.map(dest => new Item(
+			SortedSet(src_?.get : _*),
+			dest,
 			volumes_?.get(0),
 			None,
 			None
-		)
-		val args = new L3A_PipetteArgs(List(item), mixSpec_?, tipOverrides_?, pipettePolicy_?, tipModel_?)
+		))
+		val args = new L3A_PipetteArgs(items, mixSpec_?, tipOverrides_?, pipettePolicy_?, tipModel_?)
 		
 		Some(new L3C_Pipette(args))
 	}
