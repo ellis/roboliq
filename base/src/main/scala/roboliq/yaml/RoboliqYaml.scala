@@ -42,7 +42,7 @@ class RoboliqConstructor extends Constructor {
 	topDescription.putMapPropertyType("plateModels", classOf[String], classOf[PlateModelBean])
 	topDescription.putMapPropertyType("plates", classOf[String], classOf[PlateBean])
 	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceItem])
-	topDescription.putMapPropertyType("history", classOf[String], classOf[java.util.List[HistoryItem]])
+	topDescription.putMapPropertyType("events", classOf[String], classOf[java.util.List[EventBean]])
 	//topDescription.putListPropertyType("commandHandlers", classOf[CmdHandler])
 	topDescription.putListPropertyType("commands", classOf[CmdBean])
 	addTypeDescription(topDescription)
@@ -51,7 +51,7 @@ class RoboliqConstructor extends Constructor {
 	
 	//addTypeDescription(aspirateDescription)
 	addTypeDescription(new TypeDescription(classOf[SubstanceItemDnaBean], "!dna"))
-	addTypeDescription(new TypeDescription(classOf[HistoryAddBean], "!add"))
+	addTypeDescription(new TypeDescription(classOf[WellAddEventBean], "!add"))
 }
 
 object RoboliqYaml {

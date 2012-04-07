@@ -7,6 +7,9 @@ plates:
   P1:
     model: D-BSSE 96 Well PCR Plate
 
+events:
+  P1(A01): [ !add { src: water, volume: 100e-6 } ]
+
 commands:
 - !!roboliq.commands.pipette.PipetteCmdBean
     src: P1(A01)

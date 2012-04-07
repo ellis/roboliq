@@ -11,7 +11,7 @@ class BeanBase {
 	private val m_mapPlateModel = new HashMap[String, PlateModelBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]
 	private val m_mapSubstance = new HashMap[String, SubstanceItem]
-	private val m_mapHistory = new HashMap[String, List[HistoryItem]]
+	private val m_mapEvents = new HashMap[String, List[EventBean]]
 	private var m_lCmdHandler: List[CmdHandler] = Nil
 	
 	def mapSystemProperties: scala.collection.Map[String, Object] = m_mapSystemProperties
@@ -20,7 +20,7 @@ class BeanBase {
 	def mapPlateModel: scala.collection.Map[String, PlateModelBean] = m_mapPlateModel
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
 	def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
-	def mapHistory: scala.collection.Map[String, List[HistoryItem]] = m_mapHistory
+	def mapEvents: scala.collection.Map[String, List[EventBean]] = m_mapEvents
 	def lCmdHandler = m_lCmdHandler
 	
 	/** Add data in @param bean to this database */
@@ -54,10 +54,11 @@ class BeanBase {
 			bean.substances.foreach(pair => pair._2._id = pair._1)
 			m_mapSubstance ++= bean.substances
 		}
-		// Add history
-		if (bean.history != null) {
-			for ((id, history) <- bean.history) {
-				m_mapHistory(id) = history.toList
+		// Add events
+		if (bean.events != null) {
+			for ((id, events) <- bean.events) {
+				events.foreach(_.obj = id)
+				m_mapEvents(id) = events.toList
 			}
 		}
 		// Add command handlers in reverse order so that the last once defined has priority

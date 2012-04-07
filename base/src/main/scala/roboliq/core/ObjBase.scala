@@ -154,6 +154,7 @@ class ObjBase(bb: BeanBase) {
 					history = Nil
 				)
 				builder.map(id) = wellState
+				loadWellEvents(id)
 				well
 			}
 			else {
@@ -179,13 +180,14 @@ class ObjBase(bb: BeanBase) {
 				)
 				m_mapWell(id) = well
 				builder.map(id) = wellState
+				loadWellEvents(id)
 				well
 			}
 		}
 	}
 	
-	private def loadWellHistory(id: String) {
-		bb.mapHistory.get(id) match {
+	private def loadWellEvents(id: String) {
+		bb.mapEvents.get(id) match {
 			case None =>
 			case Some(history) =>
 				history.foreach(item => {

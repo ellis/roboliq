@@ -24,7 +24,7 @@ class RoboliqYamlBean {
 	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
 	@BeanProperty var plates: java.util.LinkedHashMap[String, PlateBean] = null
 	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceItem] = null
-	@BeanProperty var history: java.util.LinkedHashMap[String, java.util.List[HistoryItem]] = null
+	@BeanProperty var events: java.util.LinkedHashMap[String, java.util.List[EventBean]] = null
 	@BeanProperty var devices: java.util.List[DeviceBean] = null
 	@BeanProperty var commandHandlers: java.util.List[CmdHandler] = null
 	@BeanProperty var commands: java.util.List[CmdBean] = null
