@@ -13,7 +13,10 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapWell = new HashMap[String, Well]
 	
-	private val m_mapWellState = new HashMap[String, WellState]
+	//private val m_mapWellState = new HashMap[String, WellState]
+	private val m_mapState = new HashMap[String, Object]
+	
+	def states: scala.collection.Map[String, Object] = m_mapState
 	
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
@@ -149,6 +152,7 @@ class ObjBase(bb: BeanBase) {
 					bCheckVolume = true,
 					history = Nil
 				)
+				m_mapState(id) = wellState
 				well
 			}
 			else {
@@ -173,7 +177,7 @@ class ObjBase(bb: BeanBase) {
 					history = Nil
 				)
 				m_mapWell(id) = well
-				m_mapWellState(id) = wellState
+				m_mapState(id) = wellState
 				well
 			}
 		}

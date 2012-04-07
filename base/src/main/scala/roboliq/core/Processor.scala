@@ -73,6 +73,9 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			}
 		}
 		
+		println("ob.states: "+ob.states)
+		builder.map ++= ob.states
+		
 		// TODO: Choose bench locations for any resources which don't already have one
 		
 		// Expand all nodes in-order until we have only final tokens
