@@ -17,9 +17,10 @@ import roboliq.commands.pipette._
 
 
 class RoboliqRepresenter extends Representer {
-	//addClassTag(classOf[HistoryBean], new Tag("!history"));
-	addClassTag(classOf[SubstanceItemDnaBean], new Tag("!dna"));
-	addClassTag(classOf[HistoryAddBean], new Tag("!add"));
+	//addClassTag(classOf[HistoryBean], new Tag("!history"))
+	addClassTag(classOf[SubstanceDnaBean], new Tag("!dna"))
+	addClassTag(classOf[SubstanceLiquidBean], new Tag("!liquid"))
+	addClassTag(classOf[HistoryAddBean], new Tag("!add"))
 
 	protected override def representJavaBeanProperty(
 		javaBean: Object,
@@ -30,7 +31,7 @@ class RoboliqRepresenter extends Representer {
 		if (propertyValue == null) {
 			return null;
 		} else {
-			return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
+			return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag)
 		}
 	}
 }
@@ -41,7 +42,7 @@ class RoboliqConstructor extends Constructor {
 	topDescription.putMapPropertyType("tips", classOf[String], classOf[TipBean])
 	topDescription.putMapPropertyType("plateModels", classOf[String], classOf[PlateModelBean])
 	topDescription.putMapPropertyType("plates", classOf[String], classOf[PlateBean])
-	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceItem])
+	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceBean])
 	topDescription.putMapPropertyType("events", classOf[String], classOf[java.util.List[EventBean]])
 	//topDescription.putListPropertyType("commandHandlers", classOf[CmdHandler])
 	topDescription.putListPropertyType("commands", classOf[CmdBean])
@@ -50,7 +51,8 @@ class RoboliqConstructor extends Constructor {
 	//val aspirateDescription = new TypeDescription(classOf[AspirateCmdBean])
 	
 	//addTypeDescription(aspirateDescription)
-	addTypeDescription(new TypeDescription(classOf[SubstanceItemDnaBean], "!dna"))
+	addTypeDescription(new TypeDescription(classOf[SubstanceDnaBean], "!dna"))
+	addTypeDescription(new TypeDescription(classOf[SubstanceLiquidBean], "!liquid"))
 	addTypeDescription(new TypeDescription(classOf[WellAddEventBean], "!add"))
 }
 

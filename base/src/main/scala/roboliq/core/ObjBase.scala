@@ -12,9 +12,11 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapWell = new HashMap[String, Well]
+	private val m_mapSubstance = new HashMap[String, Substance]
+	private val m_mapLiquid = new HashMap[String, Liquid]
 	
 	//private val m_mapWellState = new HashMap[String, WellState]
-	private val m_mapState = new HashMap[String, Object]
+	//private val m_mapState = new HashMap[String, Object]
 	
 	val builder = new StateBuilder(this)
 	//def states: scala.collection.Map[String, Object] = m_mapState
@@ -60,6 +62,29 @@ class ObjBase(bb: BeanBase) {
 	
 	def findPlate(id: String): Result[Plate] = {
 		find(id, m_mapPlate, bb.mapPlate, Plate.fromBean(this), "Plate")
+	}
+	
+	def findSubstance(id: String): Result[Substance] = {
+		find(id, m_mapSubstance, bb.mapSubstance, Substance.fromBean _, "Substance")
+	}
+	
+	def findLiquid(id: String): Result[Liquid] = {
+		m_mapLiquid.get(id) match {
+			case Some(liquid) => Success(liquid)
+			case None =>
+				findSubstance(id) match {
+					case Error(ls) => Error(ls)
+					case Success(substance: SubstanceLiquid) =>
+						Success(new Liquid(
+							sName = id,
+							sFamily = substance.physicalProperties.toString,
+							contaminants = Set(),
+							group = new LiquidGroup(substance.cleanPolicy),
+							multipipetteThreshold = if (substance.allowMultipipette) 0 else 1000
+						))
+					case _ => Error("substance `"+id+"` is not a liquid")
+				}
+		}
 	}
 	
 	private def find[A, B](
@@ -145,16 +170,6 @@ class ObjBase(bb: BeanBase) {
 			if (indexName == "") {
 				val well = new Tube(idPlate)
 				m_mapWell(id) = well
-				val wellState = new TubeState(
-					obj = well,
-					location = null,
-					liquid = Liquid.empty,
-					nVolume = LiquidVolume.empty,
-					bCheckVolume = true,
-					history = Nil
-				)
-				builder.map(id) = wellState
-				loadWellEvents(id)
 				well
 			}
 			else {
@@ -171,25 +186,18 @@ class ObjBase(bb: BeanBase) {
 							indexName = indexName
 						)
 				}
-				val wellState = new PlateWellState(
-					conf = well,
-					liquid = Liquid.empty,
-					nVolume = LiquidVolume.empty,
-					bCheckVolume = true,
-					history = Nil
-				)
 				m_mapWell(id) = well
-				builder.map(id) = wellState
-				loadWellEvents(id)
 				well
 			}
 		}
 	}
 	
 	private def loadWellEvents(id: String) {
+		println("loadWellEvents: "+id)
 		bb.mapEvents.get(id) match {
 			case None =>
 			case Some(history) =>
+				println("history: "+history.toList)
 				history.foreach(item => {
 					item.asInstanceOf[EventBean].update(builder)
 				})
@@ -206,4 +214,52 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
+	def findWellState(id: String): Result[WellState] = {
+		println("ObjBase.findWellState: "+id)
+		builder.map.get(id) match {
+			case Some(state) => Success(state.asInstanceOf[WellState])
+			case None =>
+				findWell(id) match {
+					case Error(ls) => Error(ls)
+					case Success(well) =>
+						val wellState = well match {
+							case pwell: PlateWell =>
+								new PlateWellState(
+									conf = pwell,
+									liquid = Liquid.empty,
+									nVolume = LiquidVolume.empty,
+									bCheckVolume = true,
+									history = Nil
+								)
+							case tube: Tube =>
+								new TubeState(
+									obj = tube,
+									location = null,
+									liquid = Liquid.empty,
+									nVolume = LiquidVolume.empty,
+									bCheckVolume = true,
+									history = Nil
+								)
+						}
+						builder.map(id) = wellState
+						loadWellEvents(id)
+						Success(wellState)
+				}
+		}
+	}
+	
+	/*def loadState(id: String): Option[Object] = {
+		m_mapState.get(id).orElse {
+			if (findWell(id).isSuccess) {
+				
+			}
+			else if ()
+			m_mapWell.get(id) match {
+				case None =>
+				case Some(well) =>
+			}
+			
+			None
+		}
+	}*/
 }

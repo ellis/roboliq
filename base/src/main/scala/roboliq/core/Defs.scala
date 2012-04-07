@@ -34,7 +34,7 @@ class LiquidVolume private (val _nl: Int) {
 	def l: BigDecimal = (nl / 1000000000)
 	
 	def -(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl - that._nl)
-	def +(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl - that._nl)
+	def +(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl + that._nl)
 	def *(n: BigDecimal): LiquidVolume = new LiquidVolume((n * _nl).toInt)
 	def /(n: BigDecimal): LiquidVolume = new LiquidVolume((BigDecimal(_nl) / n).toInt)
 	

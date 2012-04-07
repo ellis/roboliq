@@ -21,6 +21,10 @@ abstract class WellState(
 		nVolume: LiquidVolume = nVolume,
 		bCheckVolume: Boolean = bCheckVolume
 	): WellState
+	
+	override def toString: String = {
+		List("liquid" -> liquid, "volume" -> nVolume).map(pair => pair._1+": "+pair._2).mkString("WellState(", ", ", ")")
+	}
 }
 
 class PlateWellState(
@@ -68,18 +72,18 @@ class WellAddEventBean extends EventBeanA[WellState] {
 	
 	protected def update(state0: WellState, states0: StateMap): WellState = {
 		val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-		states0(src) match {
-			case liquid: Liquid =>
-				state0.update(this,
-					liquid = state0.liquid + liquid,
-					nVolume = volumeNew
-				)
-			case srcState: WellState =>
-				state0.update(this,
-					liquid = state0.liquid + srcState.liquid,
-					nVolume = volumeNew
-				)
+		val liquid = states0.findLiquid(src) match {
+			case Success(liquid) => liquid
+			case Error(ls) =>
+				states0.findWellState(src) match {
+					case Success(wellState) => wellState.liquid
+					case Error(ls) => assert(false); null
+				}
 		}
+		state0.update(this,
+			liquid = state0.liquid + liquid,
+			nVolume = volumeNew
+		)
 	}
 }
 
@@ -121,7 +125,7 @@ object WellRemoveEventBean {
 }
 
 class WellStateWriter(o: Well, builder: StateBuilder) {
-	def state = builder.map(o.id).asInstanceOf[WellState]
+	def state = builder.findWellState(o.id).get
 	
 	private def set(state1: WellState) { builder.map(o.id) = state1 }
 	

@@ -10,7 +10,7 @@ class BeanBase {
 	private val m_mapTip = new HashMap[String, TipBean]
 	private val m_mapPlateModel = new HashMap[String, PlateModelBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]
-	private val m_mapSubstance = new HashMap[String, SubstanceItem]
+	private val m_mapSubstance = new HashMap[String, SubstanceBean]
 	private val m_mapEvents = new HashMap[String, List[EventBean]]
 	private var m_lCmdHandler: List[CmdHandler] = Nil
 	
@@ -19,7 +19,7 @@ class BeanBase {
 	def mapTip: scala.collection.Map[String, TipBean] = m_mapTip
 	def mapPlateModel: scala.collection.Map[String, PlateModelBean] = m_mapPlateModel
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
-	def mapSubstance: scala.collection.Map[String, SubstanceItem] = m_mapSubstance
+	def mapSubstance: scala.collection.Map[String, SubstanceBean] = m_mapSubstance
 	def mapEvents: scala.collection.Map[String, List[EventBean]] = m_mapEvents
 	def lCmdHandler = m_lCmdHandler
 	

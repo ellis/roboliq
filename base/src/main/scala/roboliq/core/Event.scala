@@ -14,6 +14,7 @@ abstract class EventBeanA[A <: Object : Manifest] extends EventBean {
 		val state0 = builder.map(obj).asInstanceOf[A]
 		val state1 = update(state0, builder)
 		builder.map(obj) = state1
+		println("state1: "+state1)
 	}
 	
 	protected def update(state0: A, states0: StateMap): A

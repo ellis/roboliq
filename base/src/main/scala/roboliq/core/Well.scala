@@ -15,7 +15,10 @@ abstract class Well extends Part with Ordered[Well] {
 	val iCol: Int
 	val indexName: String
 	
-	def state(states: StateMap): WellState = states(this.id).asInstanceOf[WellState]
+	def state(states: StateMap): WellState = states.findWellState(id) match {
+		case Success(st) => st
+		case _ => assert(false); null
+	}
 	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(this, builder)
 	
 	override def compare(that: Well) = id.compare(that.id)

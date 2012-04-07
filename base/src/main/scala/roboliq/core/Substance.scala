@@ -6,15 +6,16 @@ object LiquidPhysicalProperties extends Enumeration {
 	val Water, Glycerol = Value
 }
 
-sealed trait SubstanceItem extends Bean
+// REFACTOR: rename to SubstanceBean
+sealed trait SubstanceBean extends Bean
 
 /** Represents a DNA-based substance in YAML */
-class SubstanceItemDnaBean extends SubstanceItem {
+class SubstanceDnaBean extends SubstanceBean {
 	@BeanProperty var sequence: String = null
 }
 
 /** Represents a liquid substance in YAML */
-class SubstanceLiquidBean extends SubstanceItem {
+class SubstanceLiquidBean extends SubstanceBean {
 	@BeanProperty var physical: String = null
 	@BeanProperty var cleanPolicy: String = null
 	@BeanProperty var allowMultipipette: java.lang.Boolean = null
@@ -22,13 +23,22 @@ class SubstanceLiquidBean extends SubstanceItem {
 
 sealed trait Substance
 
+object Substance {
+	def fromBean(bean: SubstanceBean): Result[Substance] = {
+		bean match {
+			case b: SubstanceDnaBean => SubstanceDna.fromBean(b)
+			case b: SubstanceLiquidBean => SubstanceLiquid.fromBean(b)
+		}
+	}
+}
+
 case class SubstanceDna(
 	val id: String,
 	val sequence_? : Option[String]
 ) extends Substance
 
 object SubstanceDna {
-	def fromBean(bean: SubstanceItemDnaBean): Result[SubstanceDna] = {
+	def fromBean(bean: SubstanceDnaBean): Result[SubstanceDna] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {

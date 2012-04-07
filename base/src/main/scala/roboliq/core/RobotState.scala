@@ -4,11 +4,18 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 
-trait StateMap {
+trait StateMap extends StateQuery {
 	val ob: ObjBase
 	/** Map from object ID to object state */
 	val map: collection.Map[String, Object]
 	def apply(id: String) = map(id)
+	
+	/*def getWellState(id: String): WellState = {
+		map.get(id) match {
+			case Some(state) => state.asInstanceOf[WellState]
+			case None => ob.getWellState(id).get
+		}
+	}*/
 	
 	def toDebugString: String = {
 		/*val b = new StringBuilder
@@ -34,11 +41,22 @@ trait StateMap {
 		b.toString*/
 		map.map(_.toString).mkString("\n")
 	}
+
+	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
+	def findWell(id: String): Result[Well] = ob.findWell(id)
 }
 
 class RobotState(val ob: ObjBase, val map: Map[String, Object]) extends StateMap {
 	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
 		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
+	}
+
+	def findWellState(id: String): Result[WellState] = {
+		map.get(id) match {
+			case Some(state) => Success(state.asInstanceOf[WellState])
+			case None => ob.findWellState(id)
+			//case None => Error("INTERNAL: well `"+id+"`: state not found")
+		}
 	}
 }
 
@@ -47,4 +65,12 @@ class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends St
 	def this(ob: ObjBase) = this(ob, new HashMap[String, Object])
 	
 	def toImmutable: RobotState = new RobotState(ob, map.toMap)
+	
+	def findWellState(id: String): Result[WellState] = {
+		println("StateBuilder.findWellState: "+id)
+		map.get(id) match {
+			case Some(state) => Success(state.asInstanceOf[WellState])
+			case None => ob.findWellState(id)
+		}
+	}
 }

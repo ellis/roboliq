@@ -21,6 +21,9 @@ plates:
   P1:
     model: D-BSSE 96 Well PCR Plate
 
+substances:
+  water: !liquid { physical: Water, cleanPolicy: TNL, allowMultipipette: true }
+
 devices:
 - !!roboliq.commands.pipette.TestPipetteDevice &id001 {}
 
