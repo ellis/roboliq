@@ -25,6 +25,7 @@ Done:
 Soon
 ~~~~
 
+* ``PipetteCmd``: properly process all parameters, and use top parameters as defaults for item parameters
 * ``Processor``: write events to database file to be read by future scripts
 * autogenerate `doc` property
 * evoware: output `doc` comments
@@ -36,3 +37,7 @@ Intermediate
 * control program for evoware
 * read in evoware export data and write results to database
 
+Take care of someday
+--------------------
+
+* ``TipState``: simplify it so that it can only hold a single liquid, though contaminants may accumulate

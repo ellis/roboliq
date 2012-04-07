@@ -32,7 +32,15 @@ class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean] {
 			Expand2Errors()
 		}
 		else {
-			Expand2Tokens(List(new AspirateToken(lItem)), Nil)
+			val events = lItem.flatMap(item => {
+				val tip = ctx.ob.findTip(item.tip) match {
+					case Error(ls) => ls.foreach(messages.addError); return Expand2Errors()
+					case Success(tip) => tip
+				}
+				TipAspirateEventBean(tip, item.well, item.volume) ::
+				WellRemoveEventBean(item.well, item.volume) :: Nil
+			})
+			Expand2Tokens(List(new AspirateToken(lItem)), events)
 		}
 	}
 }
@@ -48,8 +56,7 @@ class SpirateCmdItemBean {
 			_ <- node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
 			wellObj <- ob.findWell_?(well, node)
 		} yield {
-			val iTip = tip.drop(3).toInt
-			new SpirateTokenItem(iTip, wellObj, LiquidVolume.l(volume), policy)
+			new SpirateTokenItem(tip, wellObj, LiquidVolume.l(volume), policy)
 		}
 	}
 }
@@ -59,7 +66,7 @@ case class AspirateToken(
 ) extends CmdToken
 
 case class SpirateTokenItem(
-	val tip: java.lang.Integer,
+	val tip: String,
 	val well: Well,
 	val volume: LiquidVolume,
 	val policy: String

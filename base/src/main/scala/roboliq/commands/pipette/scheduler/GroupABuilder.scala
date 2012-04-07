@@ -795,7 +795,7 @@ class GroupABuilder(
 			assert(asp.well.state(builder).liquid == g0.mTipToLM(asp.tip).liquid)
 			//println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
 			// ENDFIX
-			asp.tip.stateWriter(builder).aspirate(asp.well.state(builder).liquid, asp.nVolume)
+			asp.tip.stateWriter(builder).aspirate(asp.well, asp.well.state(builder).liquid, asp.nVolume)
 			asp.well.stateWriter(builder).remove(asp.nVolume)
 		}
 		

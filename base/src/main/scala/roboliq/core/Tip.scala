@@ -19,11 +19,6 @@ class Tip(
 
 	override def compare(that: Tip) = index - that.index
 	override def toString = id
-
-	// For use by TipStateWriter
-	def createState0(model_? : Option[TipModel]): TipState = {
-		new TipState(this, model_?, Liquid.empty, LiquidVolume.l(0), Set(), LiquidVolume.l(0), Set(), Set(), Set(), WashIntensity.None, WashIntensity.None, WashIntensity.None)
-	}
 }
 
 object Tip {

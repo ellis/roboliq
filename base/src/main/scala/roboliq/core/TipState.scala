@@ -7,8 +7,9 @@ import scala.reflect.BeanProperty
 case class TipState(
 	val conf: Tip,
 	val model_? : Option[TipModel],
-	val liquid: Liquid, 
-	val nVolume: LiquidVolume, 
+	val src_? : Option[Well],
+	val liquid: Liquid,
+	val nVolume: LiquidVolume,
 	val contamInside: Set[Contaminant.Value], 
 	val nContamInsideVolume: LiquidVolume,
 	val contamOutside: Set[Contaminant.Value],
@@ -26,6 +27,7 @@ object TipState {
 	def createEmpty(tip: Tip) = TipState(
 		conf = tip,
 		model_? = tip.modelPermanent_?,
+		src_? = None,
 		liquid = Liquid.empty,
 		nVolume = LiquidVolume.empty,
 		contamInside = Set(),
@@ -45,7 +47,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 	private def set(state1: TipState) { builder.map(o.id) = state1 } 
 	
 	def drop() {
-		set(state.conf.createState0(None))
+		set(TipState.createEmpty(o))
 		//println("DROP tip "+thisObj.index+": sType = "+state.model_?)
 	}
 	
@@ -55,12 +57,13 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		//println("tip "+thisObj.index+": sType = "+state.model_?)
 	}
 	
-	def aspirate(liquid2: Liquid, nVolume2: LiquidVolume) {
+	def aspirate(src: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
 		val nVolumeNew = st.nVolume + nVolume2
 		set(new TipState(
 			st.conf,
 			st.model_?,
+			Some(src),
 			st.liquid + liquid2,
 			nVolumeNew,
 			st.contamInside ++ liquid2.contaminants,
@@ -117,7 +120,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 	
 	def clean(cleanDegree: WashIntensity.Value) {
 		val st = state
-		set(st.conf.createState0(None).copy(
+		set(TipState.createEmpty(o).copy(
 			model_? = st.model_?,
 			cleanDegree = cleanDegree,
 			cleanDegreePrev = cleanDegree,
@@ -125,8 +128,8 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		))
 	}
 	
-	def mix(liquid2: Liquid, nVolume2: LiquidVolume) {
-		aspirate(liquid2, nVolume2)
+	def mix(well: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
+		aspirate(well, liquid2, nVolume2)
 		dispenseIn(nVolume2, liquid2)
 	}
 }
@@ -137,27 +140,29 @@ class TipAspirateEventBean extends EventBeanA[TipState] {
 	
 	protected def update(state0: TipState, states0: StateMap): TipState = {
 		val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-		val liquid2 = states0(src) match {
-			case liquid: Liquid => liquid
-			case srcState: WellState => srcState.liquid
-			case _ =>
-				// FIXME: handle error better
-				assert(false)
-				return state0
+		val src_? = states0.findWell(src).toOption
+		val liquid = states0.findLiquid(src) match {
+			case Success(liquid) => liquid
+			case Error(ls) =>
+				states0.findWellState(src) match {
+					case Success(wellState) => wellState.liquid
+					case Error(ls) => assert(false); null
+				}
 		}
 		new TipState(
 			state0.conf,
 			state0.model_?,
-			state0.liquid + liquid2,
+			src_?,
+			state0.liquid + liquid,
 			volumeNew,
-			state0.contamInside ++ liquid2.contaminants,
+			state0.contamInside ++ liquid.contaminants,
 			LiquidVolume.max(state0.nContamInsideVolume, volumeNew),
-			state0.contamOutside ++ liquid2.contaminants,
-			state0.srcsEntered + liquid2,
+			state0.contamOutside ++ liquid.contaminants,
+			state0.srcsEntered + liquid,
 			state0.destsEntered,
 			WashIntensity.None,
 			state0.cleanDegreePrev,
-			WashIntensity.max(state0.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			WashIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
 		)
 	}
 }
@@ -170,6 +175,13 @@ object TipAspirateEventBean {
 		bean.volume = volume.l.bigDecimal
 		bean
 	}
+	/*def apply(tip: String, src: Well, volume: LiquidVolume): TipAspirateEventBean = {
+		val bean = new TipAspirateEventBean
+		bean.obj = tip
+		bean.src = src.id
+		bean.volume = volume.l.bigDecimal
+		bean
+	}*/
 }
 
 class TipDispenseEventBean extends EventBeanA[TipState] {
@@ -179,9 +191,8 @@ class TipDispenseEventBean extends EventBeanA[TipState] {
 	
 	protected def update(state0: TipState, states0: StateMap): TipState = {
 		val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-		val liquidDest = states0(dest) match {
-			case liquid: Liquid => liquid
-			case srcState: WellState => srcState.liquid
+		val liquidDest = states0.findWellState(dest) match {
+			case Success(destState) => destState.liquid
 			case _ =>
 				// FIXME: handle error better
 				assert(false)
@@ -246,7 +257,7 @@ class TipCleanEventBean extends EventBeanA[TipState] {
 	
 	protected def update(state0: TipState, states0: StateMap): TipState = {
 		val cleanDegree = WashIntensity.withName(degree)
-		state0.conf.createState0(None).copy(
+		TipState.createEmpty(state0.conf).copy(
 			model_? = state0.model_?,
 			cleanDegree = cleanDegree,
 			cleanDegreePrev = cleanDegree,

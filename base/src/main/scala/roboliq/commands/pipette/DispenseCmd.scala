@@ -32,7 +32,16 @@ class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean] {
 			Expand2Errors()
 		}
 		else {
-			Expand2Tokens(List(new DispenseToken(lItem)), Nil)
+			val events = lItem.flatMap(item => {
+				val tip = ctx.ob.findTip(item.tip) match {
+					case Error(ls) => ls.foreach(messages.addError); return Expand2Errors()
+					case Success(tip) => tip
+				}
+				val tipState = ctx.states.findTipState(item.tip).get
+				TipDispenseEventBean(tip, item.well, item.volume, item.policy) ::
+				WellAddEventBean(item.well, tipState.src_?.get, item.volume) :: Nil
+			})
+			Expand2Tokens(List(new DispenseToken(lItem)), events)
 		}
 	}
 }
