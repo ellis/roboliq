@@ -7,6 +7,7 @@ import scala.reflect.BeanProperty
 import roboliq.core._
 import roboliq.devices.pipette._
 import roboliq.commands.pipette._
+import roboliq.robots.evoware._
 
 
 class TestPipetteDevice extends PipetteDevice {
@@ -76,27 +77,63 @@ class TestPipetteDevice extends PipetteDevice {
 		mTipToCleanSpec.toList.groupBy(_._2).mapValues(l => SortedSet(l.map(_._1) : _*)).toList
 }
 
+class TestEvowareTable(configFile: EvowareConfigFile, sFilename: String) extends EvowareTable(configFile, sFilename) {
+	object Locations {
+		val List(reagents15, reagents50) = labelSites(List("reagents15", "reagents50"), "Cooled 8Pos*15ml 8Pos*50ml")
+		val ethanol = labelSite("ethanol", "Trough 1000ml", 0)
+		val holder = labelSite("holder", "Downholder", 0)
+		val List(cover, shaker) = labelSites(List("cover", "shaker"), "MP 2Pos H+P Shake")
+		val eppendorfs = labelSite("eppendorfs", "Block 20Pos", 0)
+		val List(cooled1, cooled2) = labelSites(List("cooled1", "cooled2"), "MP 3Pos Cooled 1 PCR")
+		val List(cooled3, cooled4, cooled5) = labelSites(List("cooled3", "cooled4", "cooled5"), "MP 3Pos Cooled 2 PCR")
+		//val (filter1, filter2) = createSites(Carriers.filters, "filter1", "filter2", Seq(0, 1))
+		val waste = labelSite("waste", "Te-VacS", 6)
+		val sealer = labelSite("sealer", "RoboSeal", 0)
+		val peeler = labelSite("peeler", "RoboPeel", 0)
+		val pcr1 = labelSite("pcr1", "TRobot1", 0)
+		val pcr2 = labelSite("pcr2", "TRobot2", 0)
+		val centrifuge = labelSite("centrifuge", "Centrifuge", 0)
+		val regrip = labelSite("regrip", "ReGrip Station", 0)
+	}
+	// HACK: force evaluation of Locations
+	Locations.toString()
+}
+
 class YamlTest2 {
 	import org.yaml.snakeyaml._
+	import roboliq.yaml.RoboliqYaml
 	
-	val beanA = roboliq.yaml.RoboliqYaml.loadFile("example2a.yaml")
-	val beanB = roboliq.yaml.RoboliqYaml.loadFile("example2b.yaml")
-	//val text = roboliq.yaml.RoboliqYaml.toString(bean)
+	val sHome = System.getProperty("user.home")
+	val pathbase = sHome+"/src/roboliq/testdata/"
+	
+	val beans = List(
+		"classes-bsse1-20120408.yaml",
+		"robot-bsse1-20120408.yaml",
+		"database-001-20120408.yaml",
+		"protocol-001-20120408.yaml"
+	).map(s => RoboliqYaml.loadFile(pathbase+s))
 	
 	val bb = new BeanBase
-	bb.addBean(beanA)
-	bb.addBean(beanB)
+	beans.foreach(bb.addBean)
 	val ob = new ObjBase(bb)
 	
 	val builder = new StateBuilder(ob)
 	val processor = Processor(bb, builder.toImmutable)
-	val cmds = beanB.commands.toList
+	val cmds = beans.last.commands.toList
 	val res = processor.process(cmds)
 	val nodes = res.lNode
+	
+	val evowareConfigFile = new EvowareConfigFile(pathbase+"tecan-bsse1-20120408/carrier.cfg")
+	//val evowareTableFile = EvowareTableParser.parseFile(evowareConfigFile, pathbase+"tecan-bsse1-20120408/bench1.esc")
+	val evowareTable = new TestEvowareTable(evowareConfigFile, pathbase+"tecan-bsse1-20120408/bench1.esc")
+	val config = new EvowareConfig(evowareTable.tableFile, evowareTable.mapLabelToSite)
+	val translator = new EvowareTranslator(config)
 	
 	def run {
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
 		println(res.locationTracker.map)
+		val tres = translator.translate(res)
+		println(tres)
 	}
 }
 

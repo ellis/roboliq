@@ -1,0 +1,192 @@
+9FD2B3BD
+20110506_172334 No log in       
+EVOWARE : object in configuration edited                                                                                        
+No user logged in                                                                                                               
+PLUNGER_ASP_ACCEL=C1x2r1t1
+PLUNGER_DISP_ACCEL=C1x0r1t4.5C1x1r1t11
+PLUNGER_Drop_Diti=68000
+LAST_OFFSET_CARRIER=TeMO_3x5Pos.
+LAST_OFFSET_RACK=TeMO_DiTi_200ul
+LAST_OFFSET_GRID=16
+LAST_OFFSET_SITE=9
+Y2_MAXSPEED=2000
+DITI_PWM_LIMIT=80
+DITI_CURRENT=3
+TIPBLOCK_PWM=60
+TIPBLOCK_CURRENT=3
+INIT_TOLERANCE_X=5
+INIT_TOLERANCE_Z=15
+INIT_TOLERANCE_Y1=4
+INIT_TOLERANCE_Y2=14
+INIT_TOLERANCE_Y3=4
+RANGE_TOLERANCE_X=2
+RANGE_TOLERANCE_Z=2
+RANGE_TOLERANCE_Y1=2
+RANGE_TOLERANCE_Y2=2
+RANGE_TOLERANCE_Y3=2
+SECOND_DITI_DROP=1
+DELAY_DITI_DROP=200
+RELATIVE_MOVE_DITI_DROP=200
+RETRACT_SPEED_DITI_DROP=200
+
+[CAROUSEL]
+MAXTOWER=9 
+RETRIEVE_POS_TOWER=7
+RETRIEVE_POS_SLOT=3
+RETURN_POS_TOWER=2
+RETURN_POS_SLOT=18
+
+[VIEWS]
+VARIABLE=0
+
+[OBSTACLES]
+NO_TEMO_OBSTACLE=0
+SHOWINSIM=1
+SIMCOORDX0=310
+SIMCOORDY0=570
+HEIGHT=3000
+COLOR1=4,2
+OBSTACLE1=9625,250,9875,2700
+OBSTACLE2=11500,250,11750,2700
+COLOR1=1,2
+
+[OPTIONS]
+OPTIMIZE_ZTRAVEL=0
+ALLOW_ABSENT_CARRIER=0
+POOLSAFE_BALANCES=2
+LIHA_ALLOCATION_TIMEOUT=180000
+ROMA_ALLOCATION_TIMEOUT=180000
+MCA_ALLOCATION_TIMEOUT=180000
+PNP_ALLOCATION_TIMEOUT=180000
+POSID_ALLOCATION_TIMEOUT=1800
+LIHA_CHECKFORDEADLOCKS=0
+MCA_CHECKFORDEADLOCKS=0
+MCA384_CHECKFORDEADLOCKS=0
+
+[CFG_RACK]
+TeMO_Tipblock=101
+TeMO_HPTipblock=101
+TeMO_DiTi_100ul=101
+TeMO_DiTi_100ul_Filter=101
+TeMO_DiTi_200ul=101
+TeMO_DiTi_200ul_Filter=101
+TeMO_DiTi_50ul=101
+TeMO_StdTipblock=101
+1536 Well, landscape=101
+Microplate, landscape=101
+AB 96 Well plate on Te-MagS=101
+Wash Station Waste EVO75=101
+Wash Station Cleaner Deep EVO75=103
+Wash Station Cleaner Shallow EVO75=103
+96 Well Microplate=1001
+96 Well DeepWell=503
+96 Well PCR Plate=501
+Tube Eppendorf 3811 1.5 ml=1502
+Trough 100ml=303
+DiTi 100ul Filter MCA=101
+DiTi 200ul Filter MCA=101
+DiTi 100ul MCA=101
+DiTi 200ul MCA=101
+DiTi 50ul MCA=101
+Tipblock HP MCA=101
+Tipblock Std MCA=101
+MCA384 Adapter 96 Fixed 125�l=101
+MCA384 Adapter 96 Fixed 50�l=101
+MCA384 Adapter for 96 Tips=101
+MCA384 Adapter 384 Tips Combo=101
+Reagent Cooled 8*15 8*50=101
+Reagent Cooled 8*50ml=402
+Reagent Cooled 8*15ml=401
+Trough 1000ml=701
+D-BSSE 384 Well Plate Black=1001
+D-BSSE 96 Well PCR Plate=1702
+Wash Station Cleaner deep=103
+96 Well Macherey-Nagel Plate=101
+96 Well Separation Plate=101
+MTP Waste=3307
+D-BSSE 384 Well Plate White=1001
+D-BSSE 96 Well DWP=6101
+D-BSSE 20Pos Block=1601
+Block 20Pos=1601
+Wash Station Cleaner shallow=101
+Block 20Pos 1.5 ml Eppendorf=1601
+D-BSSE 96 Well Filter Plate=1001
+D-BSSE 96 Well Costar Plate=1001
+24 Well Nunc Culture Plate=1002
+12 Well Nunc Culture Plate=1002
+
+[CFG_VECTOR]
+asd=101
+Home1=101
+Move from A to B=101
+Move from B to A=101
+Just move around=101
+Home2=101
+Centrifuge_Narrow_1=5401
+Centifuge Bucket adjust=5501
+Centifuge bucket adjust _1=101
+Hotel3 _2=6401
+2Pos DH 1Pos Teleshake_Narrow_1=901
+2Pos DH 1Pos Teleshake_Narrow_2=902
+MP 3Pos Cooled 1_Narrow_2=1703
+MP 3Pos Cooled 1_Narrow_1=1703
+Shelf 32Pos Microplate_Narrow_2=1101
+Shelf 32Pos Microplate_Narrow_1=1101
+TRobot1_Narrow_1=4001
+Infinite F200_Wide_2=6901
+Infinite M200_Wide_2=6801
+ReGrip Station_Narrow_2=6101
+ReGrip Station_Wide_2=6101
+MP 3Pos Cooled 2_Narrow_2=2403
+Symbol954_Narrow_2=5501
+MP 3Pos Cooled 2_Narrow_1=2403
+TRobot2_Narrow_1=4701
+Te-VacS_Narrow_2=3301
+RoboSeal_Narrow_2=3501
+RoboPeel_Narrow_2=1201
+MP 3Pos Cooled 1 PCR_Narrow_1=1701
+Check Gripper Finger=6101
+MP 3Pos Cooled 2 PCR_Narrow_2=2403
+MP 3Pos Cooled 1 PCR_Narrow_2=1702
+MP 3Pos Cooled 2 PCR_Narrow_1=2401
+Downholder_Narrow_2=901
+MP 2Pos H+P Shake_Narrow_2=1002
+Te-VacS_Narrow_1=3301
+Downholder_Narrow_1=901
+Hotel 5Pos DeepWell_Narrow_1=5401
+Infinite F200_Narrow_1=6901
+Infinite M200_Narrow_1=6801
+TeVacS Wide=3301
+Te-VacS_Wide_2=3301
+Hotel 3Pos DWP_Narrow_1=5401
+Hotel 3Pos DWP_Narrow_2=5401
+Hotel 4Pos DWP 1_Narrow_2=5901
+Hotel 4Pos DWP 2_Narrow_2=6401
+Hotel 5Pos SPE_Narrow_2=5502
+PiercingStation=901
+MP 2Pos H+P Shake=1001
+MP 2Pos H+P Shake_Narrow_1=1002
+ReGrip Station_Narrow_1=6101
+
+[MAGS]
+LAST_TYPE_3=1
+
+[MCA]
+SECOND_DITI_DROP=0
+DELAY_DITI_DROP=200
+RELATIVE_MOVE_DITI_DROP=100
+RETRACT_SPEED_DITI_DROP=200
+OptimizeZTravel=1
+DITI_PWM_LIMIT=90
+DITI_PWM_LIMIT1=27
+TIPBLOCK_PWM=50
+SKIP_TIPBLOCK_COMMANDS=0
+DITI_SIDE_STEPS_X=0
+DITI_SIDE_STEPS_Y=0
+DITI_SIDE_STEPS_Z=0
+RIGHT_CUT_OUT=0
+
+[DITI]
+FETCH_MODE=0
+FETCH_MODE2=0
+POSEVAL=1

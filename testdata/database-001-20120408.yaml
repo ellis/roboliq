@@ -1,0 +1,2 @@
+substances:
+  water: !liquid { physical: Water, cleanPolicy: TNL, allowMultipipette: true }

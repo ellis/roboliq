@@ -16,10 +16,12 @@ Goal: Get the new YAML-based code running to the point that we can run a PCR mix
 
 #. ``evoware`` module: get to compile and run again, though with fewer commands
 #. ``WashCmd``: figure out how to handle this to call our BSSE scripts
+#. create script to dilute invitrogen primers
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
 #. ``PcrCmd``: add master mix functionality
 #. accommodate tubes
+#. create script to run PCR tests on invitrogen primers
 
 Done:
 
