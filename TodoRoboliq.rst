@@ -14,16 +14,16 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``bsse`` module: get it working again in minimal form
 #. create script to dilute invitrogen primers
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
 #. ``PcrCmd``: add master mix functionality
 #. accommodate tubes
-#. create script to run PCR tests on invitrogen primers
+#. create script to run PCRs on invitrogen primers
 
 Done:
 
+* ``bsse`` module: get it working again in minimal form
 * ``evoware`` module: get to compile and run again, though with fewer commands
 * ``Processor``: automatically select bench locations for plates
 * ``DispenseCmd`` and ``AspirateCmd``: add events
@@ -38,7 +38,6 @@ General
 Soon
 ----
 
-* ``WashCmd``: figure out how to handle this to call our BSSE scripts properly
 * ``CmdBean``: autogenerate ``doc`` property
 * ``EvowareTranslator``: output ``doc`` properties as comments
 * ``ObjBase``: ``builder`` should not be accessible from outside -- should only contain "original" states, not any which come from running commands
@@ -58,6 +57,7 @@ Intermediate
 * ``evoware`` module: add commands to script to export information and process it
 * control program for evoware
 * read in evoware export data and write results to database
+* ``PipetteScheduler``: produce some form of navigatable log (SVG, HTML, CSS, JavaScript, or just RST) in order to make it possible to follow the choices made
 
 Location handling
 -----------------
@@ -89,3 +89,4 @@ Take care of someday
 
 * ``TipState``: simplify it so that it can only hold a single liquid, though contaminants may accumulate
 * consider adding structure to ``roboliq.core`` and perhaps using imports in the package object.
+* ``WashCmd``: the generic handling should be improved or removed

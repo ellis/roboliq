@@ -7,8 +7,6 @@ import roboliq.commands.pipette._
 
 
 abstract class PipetteDevice extends DeviceBean {
-	//val config: PipetteDeviceConfig
-	
 	def getTipModels: List[TipModel]
 	def getTips: SortedSet[Tip]
 	

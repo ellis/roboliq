@@ -3,16 +3,13 @@ package roboliq.robots.evoware
 import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
-
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-
 import roboliq.core._
 import roboliq.commands.move._
 import roboliq.commands.pipette._
-//import roboliq.commands.system._
-//import roboliq.commands.config._
 import roboliq.devices.pipette._
+import commands.EvowareSubroutineToken
 //import roboliq.robots.evoware.commands._
 
 
@@ -56,7 +53,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			//case c: L1C_Comment => comment(c)
 			case c: DispenseToken => dispense(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
-			//case c: L1C_EvowareSubroutine => subroutine(builder, c)
+			case c: EvowareSubroutineToken => subroutine(builder, c)
 			case c: MixToken => mix(builder, c.items)
 			//case c: L1C_MovePlate => movePlate(builder, c.args)
 			//case c: L1C_Prompt => prompt(c)
@@ -444,13 +441,13 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			sValue = cmd.args.sValue
 		)))
 	}
+	*/
 	
-	private def subroutine(builder: EvowareScriptBuilder, cmd: L1C_EvowareSubroutine): Result[Seq[CmdToken]] = {
+	private def subroutine(builder: EvowareScriptBuilder, cmd: EvowareSubroutineToken): Result[Seq[L0C_Command]] = {
 		Success(Seq(L0C_Subroutine(
 			cmd.sFilename
 		)))
 	}
-	*/
 	
 	private def getLocation(idPlate: String): Result[String] = {
 		tracker.getLocationForCommand(idPlate, nodeCurrent.index)

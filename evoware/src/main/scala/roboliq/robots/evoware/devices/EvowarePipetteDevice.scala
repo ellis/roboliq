@@ -10,8 +10,6 @@ import roboliq.robots.evoware._
 
 
 abstract class EvowarePipetteDevice extends PipetteDevice {
-	val config: PipetteDeviceConfig
-			
 	def areTipsDisposable: Boolean
 	
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume =

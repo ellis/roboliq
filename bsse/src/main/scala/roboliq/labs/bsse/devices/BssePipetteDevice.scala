@@ -10,7 +10,7 @@ import roboliq.robots.evoware._
 import roboliq.robots.evoware.devices.EvowarePipetteDevice
 
 
-class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends EvowarePipetteDevice {
+class BssePipetteDevice extends EvowarePipetteDevice {
 	var tipModels: List[TipModel] = Nil
 	var tips = SortedSet[Tip]()
 	
@@ -27,29 +27,21 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	def getTipModels = tipModels
 	def getTips = tips
 	
-	lazy val tips1000 = SortedSet((0 to 3).map(i => new Tip(i, Some(tipModel1000))) : _*)
-	lazy val tips50 = SortedSet((4 to 7).map(i => new Tip(i, Some(tipModel50))) : _*)
-	lazy val config = new PipetteDeviceConfig(
-		lTipModel = Seq(tipModel1000, tipModel50),
-		tips = tips1000 ++ tips50,
-		tipGroups = {
-			lazy val g1000 = (0 to 3).map(i => i -> tipModel1000).toSeq
-			lazy val g50 = (4 to 7).map(i => i -> tipModel50).toSeq
-			Seq(g1000, g50)
-		}
-	)
-	lazy val mapIndexToTip = config.tips.toSeq.map(tip => tip.index -> tip).toMap
-	lazy val mapTipModels = config.lTipModel.map(spec => spec.id -> spec).toMap
+	lazy val tips1000 = getTips.filter(_.index < 4)
+	lazy val tips50 = getTips.filter(_.index >= 4)
+	lazy val tipModel1000 = tips1000.head.modelPermanent_?.get
+	lazy val tipModel50 = tips50.head.modelPermanent_?.get
+	private object junk {
+		lazy val tipBlock1000 = new TipBlock(tips1000, Seq(tipModel1000))
+		lazy val tipBlock50 = new TipBlock(tips50, Seq(tipModel50))
+		lazy val tTipAll: SortedSet[Tip] = tipBlock1000.tTip ++ tipBlock50.tTip
+		lazy val lTipAll: Seq[Tip] = tTipAll.toSeq
+		lazy val mTipToModel: Map[Tip, TipModel] = mTipToBlock.mapValues(_.lTipModels.head)
+	}
+	private def mTipToBlock: Map[Tip, TipBlock] = (junk.tipBlock1000.lTip.map(_ -> junk.tipBlock1000) ++ junk.tipBlock50.lTip.map(_ -> junk.tipBlock50)).toMap
+	private def mModelToTips = Map(tipModel1000 -> junk.tipBlock1000.tTip, tipModel50 -> junk.tipBlock50.tTip)
 
-	lazy val tipBlock1000 = new TipBlock(tips1000, Seq(tipModel1000))
-	lazy val tipBlock50 = new TipBlock(tips50, Seq(tipModel50))
-	lazy val tTipAll: SortedSet[Tip] = tipBlock1000.tTip ++ tipBlock50.tTip
-	lazy val lTipAll: Seq[Tip] = tTipAll.toSeq
-	lazy val mTipToBlock: Map[Tip, TipBlock] = (tipBlock1000.lTip.map(_ -> tipBlock1000) ++ tipBlock50.lTip.map(_ -> tipBlock50)).toMap
-	lazy val mTipToModel: Map[Tip, TipModel] = mTipToBlock.mapValues(_.lTipModels.head)
-	lazy val mModelToTips = Map(tipModel1000 -> tipBlock1000.tTip, tipModel50 -> tipBlock50.tTip)
-
-	private val mapLcInfo = {
+	private lazy val mapLcInfo = {
 		import PipettePosition._
 		Map(
 			tipModel1000 -> Map(
@@ -255,8 +247,8 @@ class BssePipetteDevice(tipModel50: TipModel, tipModel1000: TipModel) extends Ev
 	}
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[Tip], lTipCleaning: SortedSet[Tip]): SortedSet[Tip] = {
-		val lModel = lTipCleaning.toSeq.map(tip => mTipToModel(tip))
-		val lTip = lTipAll.filter(tip => lModel.contains(mTipToModel(tip)))
+		val lModel = lTipCleaning.toSeq.map(_.modelPermanent_?).distinct
+		val lTip = lTipAll.filter(tip => lModel.contains(tip.modelPermanent_?))
 		lTip -- lTipCleaning
 	}
 
