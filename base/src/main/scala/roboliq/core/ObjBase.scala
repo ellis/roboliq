@@ -7,12 +7,15 @@ import scala.collection.mutable.ArrayBuffer
 
 class ObjBase(bb: BeanBase) {
 	private val m_mapIdToPart = new HashMap[String, PartBean]
+	
 	private val m_mapTipModel = new HashMap[String, TipModel]
-	private val m_mapTip = new HashMap[String, Tip]
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
+	private val m_mapTip = new HashMap[String, Tip]
+	private val m_mapLocation = new HashMap[String, Location]
+
+	private val m_mapSubstance = new HashMap[String, Substance]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapWell = new HashMap[String, Well]
-	private val m_mapSubstance = new HashMap[String, Substance]
 	private val m_mapLiquid = new HashMap[String, Liquid]
 	
 	//private val m_mapWellState = new HashMap[String, WellState]
@@ -40,12 +43,24 @@ class ObjBase(bb: BeanBase) {
 			Error(l.collect({case Error(ls) => ls}).flatten)
 	}
 	
+	def findAllLocations(): Result[List[Location]] = {
+		val l = bb.mapLocation.keys.toList.map(findLocation)
+		if (l.forall(_.isSuccess))
+			Result.sequence(l).map(_.toList)
+		else
+			Error(l.collect({case Error(ls) => ls}).flatten)
+	}
+	
 	def findTipModel(id: String): Result[TipModel] = {
 		find(id, m_mapTipModel, bb.mapTipModel, TipModel.fromBean _, "TipModel")
 	}
 	
 	def findTipModel_?(id: String, messages: CmdMessageWriter): Option[TipModel] = {
 		find(id, m_mapTipModel, bb.mapTipModel, TipModel.fromBean _, messages, "TipModel")
+	}
+	
+	def findPlateModel(id: String): Result[PlateModel] = {
+		find(id, m_mapPlateModel, bb.mapPlateModel, PlateModel.fromBean _, "PlateModel")
 	}
 	
 	def findTip(id: String): Result[Tip] = {
@@ -56,8 +71,8 @@ class ObjBase(bb: BeanBase) {
 		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this, messages), messages, "Tip")
 	}
 	
-	def findPlateModel(id: String): Result[PlateModel] = {
-		find(id, m_mapPlateModel, bb.mapPlateModel, PlateModel.fromBean _, "PlateModel")
+	def findLocation(id: String): Result[Location] = {
+		find(id, m_mapLocation, bb.mapLocation, Location.fromBean(this), "Location")
 	}
 	
 	def findPlate(id: String): Result[Plate] = {
@@ -151,6 +166,14 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
+	def findWells(name: String): Result[List[Well]] = {
+		WellSpecParser.parseToIds(name, this).flatMap(findWells)
+	}
+
+	def findWells(lId: List[String]): Result[List[Well]] = {
+		Result.mapOver(lId)(findWell)
+	}
+	
 	def findWells_?(name: String, node: CmdNodeBean, requireId: Boolean = true): Option[List[Well]] = {
 		if (name == null) {
 			if (requireId)
@@ -158,48 +181,9 @@ class ObjBase(bb: BeanBase) {
 			None
 		}
 		else {
-			WellSpecParser.parse(name) match {
+			findWells(name) match {
 				case Error(ls) => ls.foreach(node.addError); None
-				case Success(l) =>
-					val lId = l.flatMap(pair => {
-						val plate = findPlate(pair._1) match {
-							case Error(ls) => ls.foreach(node.addError); return None
-							case Success(plate) => plate
-						}
-						if (pair._2.isEmpty) {
-							List(pair._1)
-						}
-						else {
-							pair._2.flatMap(_ match {
-								case WellSpecOne(rc) =>
-									List(pair._1 + "(" + rc + ")")
-								case WellSpecVertical(rc0, rc1) =>
-									val i0 = rc0.row + rc0.col * plate.model.nRows
-									val i1 = rc1.row + rc1.col * plate.model.nRows
-									(for (i <- i0 to i1) yield {
-										val row = i % plate.nRows
-										val col = i / plate.nRows
-										pair._1 + "(" + RowCol(row, col) + ")"
-									}).toList
-								case WellSpecHorizontal(rc0, rc1) =>
-									val i0 = rc0.row * plate.model.nCols + rc0.col
-									val i1 = rc1.row * plate.model.nCols + rc1.col
-									(for (i <- i0 to i1) yield {
-										val row = i / plate.nCols
-										val col = i % plate.nCols
-										pair._1 + "(" + RowCol(row, col) + ")"
-									}).toList
-								case WellSpecMatrix(rc0, rc1) =>
-									(for (row <- rc0.row to rc1.row; col <- rc0.col to rc1.col) yield {
-										pair._1 + "(" + RowCol(row, col) + ")"
-									}).toList
-							})
-						}
-					})
-					findWells(lId) match {
-						case Error(ls) => ls.foreach(node.addError); None
-						case Success(wells) => Some(wells.toList)
-					}
+				case Success(l) => Some(l)
 			}
 		}
 	}
@@ -209,10 +193,6 @@ class ObjBase(bb: BeanBase) {
 			case Some(obj) => Success(obj)
 			case None => createWell(id)
 		}
-	}
-	
-	def findWells(lId: Seq[String]): Result[Seq[Well]] = {
-		Result.mapOver(lId)(findWell)
 	}
 	
 	private def createWell(id: String): Result[Well] = {
@@ -246,11 +226,11 @@ class ObjBase(bb: BeanBase) {
 	}
 	
 	private def loadWellEvents(id: String) {
-		println("loadWellEvents: "+id)
+		//println("loadWellEvents: "+id)
 		bb.mapEvents.get(id) match {
 			case None =>
 			case Some(history) =>
-				println("history: "+history.toList)
+				//println("history: "+history.toList)
 				history.foreach(item => {
 					item.asInstanceOf[EventBean].update(builder)
 				})
@@ -283,7 +263,7 @@ class ObjBase(bb: BeanBase) {
 	}
 	
 	def findWellState(id: String): Result[WellState] = {
-		println("ObjBase.findWellState: "+id)
+		//println("ObjBase.findWellState: "+id)
 		builder.map.get(id) match {
 			case Some(state: WellState) => Success(state)
 			case Some(_) => Error("id `"+id+"`: stored state is not a WellState")

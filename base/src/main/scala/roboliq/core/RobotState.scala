@@ -56,12 +56,12 @@ trait StateMap extends StateQuery {
 	def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findWellState(id: String): Result[WellState] = {
-		println("StateBuilder.findWellState: "+id)
+		//println("StateBuilder.findWellState: "+id)
 		val s = map.get(id) match {
 			case Some(state) => Success(state.asInstanceOf[WellState])
 			case None => ob.findWellState(id)
 		}
-		println("  "+s)
+		//println("  "+s)
 		s
 	}
 }

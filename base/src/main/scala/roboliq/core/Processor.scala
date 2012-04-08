@@ -1,12 +1,18 @@
 package roboliq.core
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.LinkedHashMap
 
+case class ProcessorResult(
+	val lNode: List[CmdNodeBean],
+	val locationTracker: LocationTracker
+)
+
 class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler], states0: RobotState) {
-	def process(cmds: List[CmdBean]): List[CmdNodeBean] = {
+	def process(cmds: List[CmdBean]): ProcessorResult = {
 		bb.lDevice.foreach(_.setObjBase(ob))
 		
 		val mapNodeToResources = new LinkedHashMap[CmdNodeBean, List[NeedResource]]
@@ -46,21 +52,40 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		// Expand commands to get a node-tree
 		val nodes = expand1(Nil, cmds)
 		
-		// Load resource objects and their known states
+		// Helper function to load resource objects and their known states
 		val seen = new HashSet[String]
+		val seenPlate = new HashSet[String]
+		var lPlate = List[Tuple2[CmdNodeBean, Plate]]()
 		def needWells(node: CmdNodeBean, name: String) {
-			// TODO: parse the name RoboEase-style into a list of well ids
-			val lId = List(name)
-			// Try to load any ids which we haven't looked for yet
-			for (id <- lId) {
-				if (!seen.contains(id)) {
-					seen += id
-					// Find the well in order to instantiate it as an object
-					// This will also load its state
-					ob.findWells_?(id, node)
-				}
+			WellSpecParser.parseToIds(name, ob) match {
+				case Error(ls) => ls.foreach(node.addError)
+				case Success(lId) =>
+					// Try to load any ids which we haven't looked for yet
+					for (id <- lId) {
+						if (!seen.contains(id)) {
+							seen += id
+							ob.findPlate(id) match {
+								case Success(plate) =>
+									if (!seenPlate.contains(plate.id)) {
+										lPlate = (node, plate) :: lPlate
+										seenPlate += plate.id
+									}
+								case Error(_) =>
+									// Find the well in order to instantiate it as an object
+									ob.findWell_?(id, node) match {
+										case Some(well) =>
+											if (!seenPlate.contains(well.idPlate)) {
+												lPlate = (node, ob.findPlate(well.idPlate).get) :: lPlate
+												seenPlate += well.idPlate
+											}
+										case None =>
+									}
+							}
+						}
+					}
 			}
 		}
+		// Load resource objects and their known states saved in the database
 		for ((node, resources) <- mapNodeToResources) {
 			val messages = new CmdMessageWriter(node)
 			for (resource <- resources) {
@@ -73,8 +98,37 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				}
 			}
 		}
+
+		// Object to assign location to each plate
+		val locationBuilder = new LocationBuilder
+		//println("ob.findAllLocations(): "+ob.findAllLocations())
+		//println("lPlate: "+lPlate)
+		// If locations are defined in database
+		ob.findAllLocations().foreach(lLocation => {
+			// Construct list of all free locations [location id -> location]
+			val mapLocFree = new LinkedHashMap[String, Location]
+			mapLocFree ++= lLocation.map(loc => loc.id -> loc)
+			//println("mapLocFree: "+mapLocFree)
+			// Assign location to each plate
+			lPlate = lPlate.reverse
+			for ((node, plate) <- lPlate) {
+				val l = mapLocFree.toList.filter(pair => pair._2.plateModels.contains(plate.model))
+				//println("plate: "+plate.id+", "+plate.model.id)
+				//println("l: "+l)
+				if (!l.isEmpty) {
+					val location = l(0)._1
+					mapLocFree -= location
+					locationBuilder.addLocation(plate.id, node.index, location)
+					//println("added to location builder: ", plate.id, node.index, location)
+				}
+				else {
+					//println("ERROR: choose location")
+				}
+			}
+		})
+		//println("locationBuilder.map: "+locationBuilder.map)
 		
-		println("ob.builder.map: "+ob.builder.map)
+		//println("ob.builder.map: "+ob.builder.map)
 		
 		// TODO: Choose bench locations for any resources which don't already have one
 		
@@ -86,8 +140,8 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				val ctx = new ProcessorContext(this, node, ob, Some(builder), builder.toImmutable)
 				val messages = new CmdMessageWriter(node)
 				
-				println("expand2: command "+node.index)
-				println("expand2: TIP1 state: "+builder.findTipState("TIP1").get)
+				//println("expand2: command "+node.index)
+				//println("expand2: TIP1 state: "+builder.findTipState("TIP1").get)
 				handler.expand2(cmd, ctx, messages) match {
 					case Expand2Errors() =>
 					case Expand2Cmds(childCommands, events) =>
@@ -119,7 +173,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		
 		// Send node-tree to robot compiler
 		
-		nodes
+		ProcessorResult(nodes, new LocationTracker(locationBuilder.map.toMap))
 	}
 }
 

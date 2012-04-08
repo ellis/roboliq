@@ -17,7 +17,7 @@ abstract class EventBeanA[A <: Object : Manifest] extends EventBean {
 			state1 <- update(state0, builder)
 		} yield {
 			builder.map(obj) = state1
-			println("state1: "+state1)
+			//println("state1: "+state1)
 		}
 	}
 	

@@ -119,8 +119,10 @@ class YamlTest2 {
 		val builder = new StateBuilder(ob)
 		val processor = Processor(bb, builder.toImmutable)
 		val cmds = beanB.commands.toList
-		val nodes = processor.process(cmds)
+		val res = processor.process(cmds)
+		val nodes = res.lNode
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
+		println(res.locationTracker.map)
 	}
 }
 

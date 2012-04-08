@@ -18,15 +18,23 @@ object CmdBean {
 
 /** YAML bean representing an entire roboliq YAML file */
 class RoboliqYamlBean {
-	@BeanProperty var systemProperties: java.util.LinkedHashMap[String, Object] = null
-	@BeanProperty var tipModels: java.util.LinkedHashMap[String, TipModelBean] = null
-	@BeanProperty var tips: java.util.LinkedHashMap[String, TipBean] = null
-	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
-	@BeanProperty var plates: java.util.LinkedHashMap[String, PlateBean] = null
-	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceBean] = null
-	@BeanProperty var events: java.util.LinkedHashMap[String, java.util.List[EventBean]] = null
+	// Security-sensitive setup of classes used
 	@BeanProperty var devices: java.util.List[DeviceBean] = null
 	@BeanProperty var commandHandlers: java.util.List[CmdHandler] = null
+	
+	// Configuration of robot and systems
+	@BeanProperty var systemProperties: java.util.LinkedHashMap[String, Object] = null
+	@BeanProperty var tipModels: java.util.LinkedHashMap[String, TipModelBean] = null
+	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
+	@BeanProperty var tips: java.util.LinkedHashMap[String, TipBean] = null
+	@BeanProperty var locations: java.util.LinkedHashMap[String, LocationBean] = null
+	
+	// Database
+	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceBean] = null
+	@BeanProperty var plates: java.util.LinkedHashMap[String, PlateBean] = null
+	@BeanProperty var events: java.util.LinkedHashMap[String, java.util.List[EventBean]] = null
+	
+	// Protocol
 	@BeanProperty var commands: java.util.List[CmdBean] = null
 }
 

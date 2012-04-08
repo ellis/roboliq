@@ -43,6 +43,7 @@ class RoboliqConstructor extends Constructor {
 	topDescription.putMapPropertyType("plateModels", classOf[String], classOf[PlateModelBean])
 	topDescription.putMapPropertyType("plates", classOf[String], classOf[PlateBean])
 	topDescription.putMapPropertyType("substances", classOf[String], classOf[SubstanceBean])
+	topDescription.putMapPropertyType("locations", classOf[String], classOf[LocationBean])
 	topDescription.putMapPropertyType("events", classOf[String], classOf[java.util.List[EventBean]])
 	//topDescription.putListPropertyType("commandHandlers", classOf[CmdHandler])
 	topDescription.putListPropertyType("commands", classOf[CmdBean])

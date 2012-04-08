@@ -61,4 +61,49 @@ object WellSpecParser extends JavaTokenParsers {
 	def parse(input: String): roboliq.core.Result[List[Tuple2[String, List[WellSpec]]]] = {
 		roboliq.core.Success(parseAll(plates, input).getOrElse(Nil))
 	}
+	
+	def parseToIds(input: String, ob: ObjBase): roboliq.core.Result[List[String]] = {
+		for {
+			l <- parse(input)
+			lId <- Result.mapOver(l){entry => entryToIds(entry._1, entry._2, ob)}.map(_.flatten)
+		} yield {
+			lId
+		}
+	}
+	
+	private def entryToIds(idPlate: String, lWellSpec: List[WellSpec], ob: ObjBase): Result[List[String]] = {
+		for {
+			plate <- ob.findPlate(idPlate)
+		} yield {
+			if (lWellSpec.isEmpty) {
+				List(idPlate)
+			}
+			else {
+				lWellSpec.flatMap(_ match {
+					case WellSpecOne(rc) =>
+						List(idPlate + "(" + rc + ")")
+					case WellSpecVertical(rc0, rc1) =>
+						val i0 = rc0.row + rc0.col * plate.model.nRows
+						val i1 = rc1.row + rc1.col * plate.model.nRows
+						(for (i <- i0 to i1) yield {
+							val row = i % plate.nRows
+							val col = i / plate.nRows
+							idPlate + "(" + RowCol(row, col) + ")"
+						}).toList
+					case WellSpecHorizontal(rc0, rc1) =>
+						val i0 = rc0.row * plate.model.nCols + rc0.col
+						val i1 = rc1.row * plate.model.nCols + rc1.col
+						(for (i <- i0 to i1) yield {
+							val row = i / plate.nCols
+							val col = i % plate.nCols
+							idPlate + "(" + RowCol(row, col) + ")"
+						}).toList
+					case WellSpecMatrix(rc0, rc1) =>
+						(for (row <- rc0.row to rc1.row; col <- rc0.col to rc1.col) yield {
+							idPlate + "(" + RowCol(row, col) + ")"
+						}).toList
+				})
+			}
+		}
+	}
 }

@@ -14,15 +14,9 @@ tips:
 
 plateModels:
   "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12, volume: 200e-6 }
+  "D-BSSE 96 Well Costar": { rows: 8, cols: 12, volume: 350e-6 }
   "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 6000e-6 }
   "Tube 50ml": { rows: 1, cols: 1, volume: 50e-3 }
-
-plates:
-  P1:
-    model: D-BSSE 96 Well PCR Plate
-
-substances:
-  water: !liquid { physical: Water, cleanPolicy: TNL, allowMultipipette: true }
 
 devices:
 - !!roboliq.commands.pipette.TestPipetteDevice &id001 {}
@@ -34,3 +28,14 @@ commandHandlers:
 - !!roboliq.commands.pipette.TipsDropCmdHandler {}
 - !!roboliq.commands.pipette.TipsWashCmdHandler {}
 - !!roboliq.commands.pipette.PipetteCmdHandler { device: *id001 }
+
+locations:
+  cover: { plateModels: ["D-BSSE 96 Well Costar", "D-BSSE 96 Well DWP"] }
+  cooled1: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
+  cooled2: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
+  cooled3: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
+  cooled4: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
+  cooled5: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
+
+substances:
+  water: !liquid { physical: Water, cleanPolicy: TNL, allowMultipipette: true }
