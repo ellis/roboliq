@@ -14,8 +14,7 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``evoware`` module: get to compile again, though with fewer commands
-#. ``Processor``: intelligently select and track ``location`` separately from ``PlateState``/``TubeState``
+#. ``evoware`` module: get to compile and run again, though with fewer commands
 #. ``WashCmd``: figure out how to handle this to call our BSSE scripts
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
@@ -24,6 +23,7 @@ Goal: Get the new YAML-based code running to the point that we can run a PCR mix
 
 Done:
 
+* ``Processor``: automatically select bench locations for plates
 * ``DispenseCmd`` and ``AspirateCmd``: add events
 * parser for RoboEase well specification
 
@@ -31,17 +31,20 @@ Done:
 General
 =======
 
-:Started: 2012-04-07
+:Created: 2012-04-07
 
 Soon
 ----
 
+* ``CmdBean``: autogenerate ``doc`` property
+* ``EvowareTranslator``: output ``doc`` properties as comments
 * ``ObjBase``: ``builder`` should not be accessible from outside -- should only contain "original" states, not any which come from running commands
 * ``PipetteCmd``: properly process all parameters, and use top parameters as defaults for item parameters
 * ``Processor``: write events to database file to be read by future scripts
 * ``Processor``: restructure as described in the section "Command Processing" in NotesRoboliq.rst
-* autogenerate ``doc`` property
-* evoware: output ``doc`` comments
+* ``Processor``: allow different levels of protocol evaluation: 1) without specific device or robot assignments, 2) with specifics.
+* ``Processor``: don't select plate locations unless we have a specific robot
+* ``RoboliqYamlBean``: move ``locations`` property to an Evoware bean
 
 Intermediate
 ------------
@@ -52,7 +55,6 @@ Intermediate
 * ``evoware`` module: add commands to script to export information and process it
 * control program for evoware
 * read in evoware export data and write results to database
-* ``Processor``: allow different levels of protocol evaluation: 1) without specific device or robot assignments, 2) with specifics.
 
 Location handling
 -----------------

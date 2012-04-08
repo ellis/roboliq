@@ -7,6 +7,7 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.LinkedHashMap
 
 case class ProcessorResult(
+	val ob: ObjBase,
 	val lNode: List[CmdNodeBean],
 	val locationTracker: LocationTracker
 )
@@ -173,7 +174,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		
 		// Send node-tree to robot compiler
 		
-		ProcessorResult(nodes, new LocationTracker(locationBuilder.map.toMap))
+		ProcessorResult(ob, nodes, new LocationTracker(locationBuilder.map.toMap))
 	}
 }
 

@@ -21,7 +21,6 @@ case class L2C_EvowareFacts(args: L12A_EvowareFactsArgs) extends CommandL2 {
 	}
 
 }
-*/
 
 case class L12A_EvowareFactsArgs(
 	sDevice: String,
@@ -30,3 +29,4 @@ case class L12A_EvowareFactsArgs(
 )
 
 case class L1C_EvowareFacts(args: L12A_EvowareFactsArgs) extends CommandL1
+*/

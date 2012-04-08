@@ -17,13 +17,27 @@ import roboliq.robots.evoware.commands._
 
 
 class EvowareTranslator(config: EvowareConfig) {
-	def translate(lNode: List[CmdNodeBean], ob: ObjBase): Result[EvowareScriptBuilder] = {
+	def translate(processorResult: ProcessorResult): Result[EvowareScriptBuilder] = {
+		val t2 = new EvowareTranslator2(config, processorResult)
+		t2.translate()
+	}
+}
+
+private class EvowareTranslator2(config: EvowareConfig, processorResult: ProcessorResult) {
+	private val ob = processorResult.ob
+	private val lNode = processorResult.lNode
+	private val tracker = processorResult.locationTracker
+	
+	private var nodeCurrent: CmdNodeBean = null
+	
+	def translate(): Result[EvowareScriptBuilder] = {
 		val builder = new EvowareScriptBuilder(ob)
 		translate(lNode, builder).map(_ => builder)
 	}
 	
 	private def translate(lNode: List[CmdNodeBean], builder: EvowareScriptBuilder): Result[Unit] = {
 		Result.mapOver(lNode)(node => {
+			nodeCurrent = node
 			if (node.tokens != null) {
 				Result.mapOver(node.tokens.toList) { token => translate(token, builder) }
 			}
@@ -134,15 +148,15 @@ class EvowareTranslator(config: EvowareConfig) {
 	*/
 	
 
-	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken): Result[Seq[CmdToken]] = {
+	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken): Result[Seq[L0C_Command]] = {
 		spirate(builder, cmd.items, "Aspirate")
 	}
 	
-	private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): Result[Seq[CmdToken]] = {
+	private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): Result[Seq[L0C_Command]] = {
 		spirate(builder, cmd.items, "Dispense")
 	}
 	 
-	private def spirate(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String): Result[Seq[CmdToken]] = {
+	private def spirate(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String): Result[Seq[L0C_Command]] = {
 		items match {
 			case Seq() => Error(Seq("INTERNAL: items empty"))
 			case Seq(twvp0, rest @ _*) =>
@@ -177,7 +191,7 @@ class EvowareTranslator(config: EvowareConfig) {
 		}
 	}
 
-	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String, sLiquidClass: String): Result[Seq[CmdToken]] = {
+	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String, sLiquidClass: String): Result[Seq[L0C_Command]] = {
 		val item0 = items.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val idPlate = item0.well.idPlate
@@ -197,12 +211,12 @@ class EvowareTranslator(config: EvowareConfig) {
 		
 		for {
 			plate <- builder.ob.findPlate(idPlate)
-			site <- getSite(item0.location)
-			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
+			location <- getLocation(idPlate)
+			site <- getSite(location)
 		} yield {
 			val sPlateMask = encodeWells(plate, items.map(_.well.index))
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(holderModel.id)
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
 			val cmd = L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
@@ -212,7 +226,7 @@ class EvowareTranslator(config: EvowareConfig) {
 				site, labwareModel
 			)
 			
-			builder.mapCmdToLabwareInfo(cmd) = List((site, item0.location, labwareModel))
+			builder.mapCmdToLabwareInfo(cmd) = List((site, location, labwareModel))
 			
 			Seq(cmd)
 		}
@@ -260,7 +274,7 @@ class EvowareTranslator(config: EvowareConfig) {
 		}
 	}*/
 	
-	private def mix(builder: EvowareScriptBuilder, items: Seq[MixTokenItem]): Result[Seq[CmdToken]] = {
+	private def mix(builder: EvowareScriptBuilder, items: Seq[MixTokenItem]): Result[Seq[L0C_Command]] = {
 		items match {
 			case Seq() => Error(Seq("Empty Tip-Well-Volume list"))
 			case Seq(item0, rest @ _*) =>
@@ -300,7 +314,7 @@ class EvowareTranslator(config: EvowareConfig) {
 		}
 	}
 
-	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[MixTokenItem], sLiquidClass: String): Result[Seq[CmdToken]] = {
+	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[MixTokenItem], sLiquidClass: String): Result[Seq[L0C_Command]] = {
 		val item0 = items.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val idPlate = item0.well.idPlate
@@ -317,8 +331,9 @@ class EvowareTranslator(config: EvowareConfig) {
 		//val sVolumes = asVolumes.mkString(",")
 		
 		for {
-			site <- getSite(item0.location)
-			holderModel <- Result.get(holder.model_?, "No labware model for holder \""+holder+"\"")
+			plate <- builder.ob.findPlate(idPlate)
+			location <- getLocation(idPlate)
+			site <- getSite(location)
 		} yield {
 		val sPlateMask = encodeWells(plate, items.map(_.well.index))
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
@@ -327,11 +342,11 @@ class EvowareTranslator(config: EvowareConfig) {
 				asVolumes,
 				iGrid, site.iSite,
 				sPlateMask,
-				item0.nCount
+				item0.count
 			)
 			
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(holderModel.id)
-			builder.mapCmdToLabwareInfo(cmd) = List((site, item0.location, labwareModel))
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
+			builder.mapCmdToLabwareInfo(cmd) = List((site, location, labwareModel))
 			
 			Seq(cmd)
 		}
@@ -419,6 +434,10 @@ class EvowareTranslator(config: EvowareConfig) {
 		)))
 	}
 	*/
+	
+	private def getLocation(idPlate: String): Result[String] = {
+		tracker.getLocationForCommand(idPlate, nodeCurrent.index)
+	}
 	
 	private def getSite(location: String): Result[CarrierSite] = {
 		config.mapLabelToSite.get(location) match {
