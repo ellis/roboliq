@@ -7,4 +7,4 @@ events:
 
 commands:
 #- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(B01), volume: [5e-6] }
-- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(A01 d H), volume: [5e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(A02 d H), volume: [5e-6] }
