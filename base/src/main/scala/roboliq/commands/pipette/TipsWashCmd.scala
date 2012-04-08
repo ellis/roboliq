@@ -36,16 +36,15 @@ class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean] {
 		val degree = WashIntensity.withName(cmd.intensity)
 		
 		// Create final tokens
-		val liTip = lTip.map(_.index)
-		val tokens = List(new TipsWashToken(liTip, washProgram))
+		val tokens = List(new TipsWashToken(lTip, washProgram))
 		// Events
 		val events = lTip.map(tip => TipCleanEventBean(tip, degree))
 		
-		Expand2Tokens(List(new TipsWashToken(lTip.map(_.index), washProgram)), events)
+		Expand2Tokens(tokens, events)
 	}
 }
 
 case class TipsWashToken(
-	val tips: List[Int],
+	val tips: List[Tip],
 	val washProgram: Int
 ) extends CmdToken

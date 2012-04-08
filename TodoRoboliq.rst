@@ -14,8 +14,7 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``evoware`` module: get to compile and run again, though with fewer commands
-#. ``WashCmd``: figure out how to handle this to call our BSSE scripts
+#. ``bsse`` module: get it working again in minimal form
 #. create script to dilute invitrogen primers
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
@@ -25,6 +24,7 @@ Goal: Get the new YAML-based code running to the point that we can run a PCR mix
 
 Done:
 
+* ``evoware`` module: get to compile and run again, though with fewer commands
 * ``Processor``: automatically select bench locations for plates
 * ``DispenseCmd`` and ``AspirateCmd``: add events
 * parser for RoboEase well specification
@@ -38,6 +38,7 @@ General
 Soon
 ----
 
+* ``WashCmd``: figure out how to handle this to call our BSSE scripts properly
 * ``CmdBean``: autogenerate ``doc`` property
 * ``EvowareTranslator``: output ``doc`` properties as comments
 * ``ObjBase``: ``builder`` should not be accessible from outside -- should only contain "original" states, not any which come from running commands

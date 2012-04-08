@@ -13,7 +13,7 @@ import roboliq.commands.pipette._
 //import roboliq.commands.system._
 //import roboliq.commands.config._
 import roboliq.devices.pipette._
-import roboliq.robots.evoware.commands._
+//import roboliq.robots.evoware.commands._
 
 
 class EvowareTranslator(config: EvowareConfig) {
@@ -64,7 +64,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			//case c: L1C_TipsDrop => tipsDrop(c)
 			//case c: L1C_Timer => timer(c.args)
 			//case c: L1C_SaveCurrentLocation => Success(Seq())
-			//case c: TipsWashToken => wash(c)
+			case c: TipsWashToken => clean(builder, c)
 		}} yield {
 			builder.cmds ++= cmds0
 			()
@@ -205,7 +205,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			assert(iTip >= 0 && iTip < 12)
 			// HACK: robot is aborting when trying to aspirate <0.4ul from PCR well -- ellis, 2012-02-12
 			//val nVolume = if (sFunc == "Aspirate" && twv.volume < 0.4) 0.4 else twv.volume
-			asVolumes(iTip) = "\""+fmt.format(twv.volume)+'"'
+			asVolumes(iTip) = "\""+fmt.format(twv.volume.ul.toDouble)+'"'
 		}
 		//val sVolumes = asVolumes.mkString(",")
 		
@@ -250,6 +250,23 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		Success(Seq(L0C_Prompt(cmd.s)))
 	}
 	*/
+	
+	private def clean(builder: EvowareScriptBuilder, cmd: TipsWashToken): Result[Seq[L0C_Command]] = {
+		val lPermanent = cmd.tips.filter(_.modelPermanent_?.isDefined)
+		val lModel = lPermanent.map(_.modelPermanent_?.get.id).distinct
+		val lName = lModel.map(s => {
+			if (s.contains("1000")) "1000"
+			else "0050"
+		})
+		val sDegree = cmd.washProgram match {
+			case 0 => "Light"
+			case 1 => "Thorough"
+			case _ => "Decon"
+		}
+		Success(
+			lName.map(s => L0C_Subroutine("Roboliq_Clean_"+sDegree+"_"+s))
+		)
+	}
 	
 	/*def wash(cmd: TipsWashToken): Result[Seq[CmdToken]] = {
 		config.mapWashProgramArgs.get(cmd.iWashProgram) match {

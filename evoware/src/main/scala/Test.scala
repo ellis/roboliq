@@ -132,8 +132,11 @@ class YamlTest2 {
 	def run {
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
 		println(res.locationTracker.map)
-		val tres = translator.translate(res)
-		println(tres)
+		translator.translate(res) match {
+			case Error(ls) => ls.foreach(println)
+			case Success(tres) =>
+				tres.cmds.foreach(println)
+		}
 	}
 }
 
