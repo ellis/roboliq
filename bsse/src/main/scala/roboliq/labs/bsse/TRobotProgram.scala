@@ -1,5 +1,6 @@
 package roboliq.labs.bsse
 
+// REFACTOR: move this to evoware module
 object TRobotProgram {
 	def generate(
 		dir: Int,

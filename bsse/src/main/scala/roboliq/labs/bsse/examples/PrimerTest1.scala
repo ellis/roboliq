@@ -1,4 +1,4 @@
-package roboliq.labs.bsse.examples
+/*package roboliq.labs.bsse.examples
 
 import java.text.DecimalFormat
 
@@ -32,3 +32,4 @@ class PrimerTest1 {
 		lProduct.foreach(println)
 	}
 }
+*/

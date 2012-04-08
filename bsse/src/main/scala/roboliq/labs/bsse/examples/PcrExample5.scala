@@ -1,4 +1,4 @@
-package roboliq.labs.bsse.examples
+/*package roboliq.labs.bsse.examples
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
@@ -183,3 +183,4 @@ object PcrExample5Database {
 	
 	val db = new TestDatabase
 }
+*/

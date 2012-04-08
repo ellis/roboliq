@@ -1,4 +1,4 @@
-package roboliq.labs.bsse.examples
+/*package roboliq.labs.bsse.examples
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
@@ -177,4 +177,5 @@ object Main extends App {
 	example4
 	ExampleRunner.run
 }
+*/
 */

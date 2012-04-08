@@ -1,0 +1,10 @@
+devices:
+- !!roboliq.commands.pipette.TestPipetteDevice &id001 {}
+
+commandHandlers:
+- !!roboliq.commands.pipette.AspirateCmdHandler {}
+- !!roboliq.commands.pipette.DispenseCmdHandler {}
+- !!roboliq.commands.pipette.MixCmdHandler {}
+- !!roboliq.commands.pipette.TipsDropCmdHandler {}
+- !!roboliq.commands.pipette.TipsWashCmdHandler {}
+- !!roboliq.commands.pipette.PipetteCmdHandler { device: *id001 }

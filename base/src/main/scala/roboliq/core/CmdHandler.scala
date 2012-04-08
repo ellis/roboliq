@@ -18,9 +18,6 @@ abstract class CmdHandler {
 	/** Return true if this handler wants to process this given command */
 	def canHandle(command: CmdBean): Boolean
 
-	//def checkParams1(command: CmdBean, messages: CmdMessageWriter)
-	//def checkParams2(command: CmdBean, ctx: ProcessorContext, messages: CmdMessageWriter)
-
 	def expand1(command: CmdBean, messages: CmdMessageWriter): Expand1Result
 
 	def expand2(command: CmdBean, ctx: ProcessorContext, messages: CmdMessageWriter): Expand2Result
