@@ -78,6 +78,12 @@ Pre- and post- handling for commands
 * somehow add pre- and post- commands for ensuring valid conditions for the main command
 * somehow add pre- and post- conditions for testing whether things are what we think they are
 
+``evoware`` module
+------------------
+
+* move as much code as possible from ``bsse`` module to ``evoware`` module
+* ``PipetteDevice``: see what code can be moved in from ``EvowarePipetteDevice``
+
 Take care of someday
 --------------------
 

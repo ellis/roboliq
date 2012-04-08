@@ -1,4 +1,4 @@
-package roboliq.labs.bsse
+/*package roboliq.labs.bsse
 
 import roboliq.common._
 import roboliq.compiler._
@@ -19,4 +19,4 @@ class BsseToolchain(stationConfig: station1.StationConfig) extends EvowareToolch
 		val processors = stationConfig.processors
 		def createTranslator: Translator = new EvowareTranslator(evowareConfig)
 	}
-}
+}*/

@@ -19,7 +19,7 @@ plateModels:
   "Tube 50ml": { rows: 1, cols: 1, volume: 50e-3 }
 
 locations:
-  cover: { plateModels: ["D-BSSE 96 Well Costar", "D-BSSE 96 Well DWP"] }
+  cover: { plateModels: ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] }
   cooled1: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled2: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled3: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }

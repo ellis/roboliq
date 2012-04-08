@@ -19,7 +19,8 @@ object MyBuild extends Build {
 
 	lazy val projRoboeaseEvoware = Project("roboease-evoware", file("roboease-evoware")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware)
 
-	lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projEvoware)
+	//lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projEvoware)
+	lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projBase, projEvoware)
 	
 	lazy val projTest = Project("test", file("test")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware, projBsse, projRoboeaseEvoware)
 

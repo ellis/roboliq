@@ -1,18 +1,58 @@
 package roboliq.labs.bsse
 
-import roboliq.common._
-import roboliq.commands.pipette._
-import roboliq.compiler._
-import roboliq.protocol.ItemDatabase
-import roboliq.devices.pipette._
+import scala.collection.JavaConversions._
+
+import roboliq.core._
 import roboliq.robots.evoware._
-import roboliq.labs.bsse.examples._
 import roboliq.utils.FileUtils
 
 import station1._
 
 
+class YamlTest2 {
+	import org.yaml.snakeyaml._
+	import roboliq.yaml.RoboliqYaml
+	
+	val sHome = System.getProperty("user.home")
+	val pathbase = sHome+"/src/roboliq/testdata/"
+	
+	val beans = List(
+		"classes-bsse1-20120408.yaml",
+		"robot-bsse1-20120408.yaml",
+		"database-001-20120408.yaml",
+		"protocol-001-20120408.yaml"
+	).map(s => RoboliqYaml.loadFile(pathbase+s))
+	
+	val bb = new BeanBase
+	beans.foreach(bb.addBean)
+	val ob = new ObjBase(bb)
+	
+	val builder = new StateBuilder(ob)
+	val processor = Processor(bb, builder.toImmutable)
+	val cmds = beans.last.commands.toList
+	val res = processor.process(cmds)
+	val nodes = res.lNode
+	
+	val evowareConfigFile = new EvowareConfigFile(pathbase+"tecan-bsse1-20120408/carrier.cfg")
+	//val evowareTableFile = EvowareTableParser.parseFile(evowareConfigFile, pathbase+"tecan-bsse1-20120408/bench1.esc")
+	val evowareTable = new StationConfig(evowareConfigFile, pathbase+"tecan-bsse1-20120408/bench1.esc")
+	val config = new EvowareConfig(evowareTable.tableFile, evowareTable.mapLabelToSite)
+	val translator = new EvowareTranslator(config)
+	
+	def run {
+		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
+		println(res.locationTracker.map)
+		translator.translate(res) match {
+			case Error(ls) => ls.foreach(println)
+			case Success(tres) =>
+				tres.cmds.foreach(println)
+		}
+	}
+}
+
 object BsseMain extends App {
+	new YamlTest2().run
+	/*
 	def runProtocol(lItem: List[roboliq.protocol.Item], db: ItemDatabase, sFilename: String) {
 		val sHome = System.getProperty("user.home")
 		val configFile = new EvowareConfigFile(sHome+"/tmp/tecan/carrier.cfg")
@@ -33,6 +73,7 @@ object BsseMain extends App {
 	//runProtocol(new PcrExample4().l, PcrExample4Database.db, "ellis_pcr4.esc")
 	runProtocol(new PcrExample5().l, PcrExample5Database.db, "ellis_pcr5.esc")
 	//new examples.PrimerTest1().run()
+	*/
 
 	/*
 	// Attempt at touchdown PCR for phusion hotstart 

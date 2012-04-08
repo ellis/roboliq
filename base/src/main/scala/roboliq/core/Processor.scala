@@ -102,32 +102,32 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 
 		// Object to assign location to each plate
 		val locationBuilder = new LocationBuilder
-		//println("ob.findAllLocations(): "+ob.findAllLocations())
-		//println("lPlate: "+lPlate)
+		println("ob.findAllLocations(): "+ob.findAllLocations())
+		println("lPlate: "+lPlate)
 		// If locations are defined in database
 		ob.findAllLocations().foreach(lLocation => {
 			// Construct list of all free locations [location id -> location]
 			val mapLocFree = new LinkedHashMap[String, Location]
 			mapLocFree ++= lLocation.map(loc => loc.id -> loc)
-			//println("mapLocFree: "+mapLocFree)
+			println("mapLocFree: "+mapLocFree)
 			// Assign location to each plate
 			lPlate = lPlate.reverse
 			for ((node, plate) <- lPlate) {
 				val l = mapLocFree.toList.filter(pair => pair._2.plateModels.contains(plate.model))
-				//println("plate: "+plate.id+", "+plate.model.id)
-				//println("l: "+l)
+				println("plate: "+plate.id+", "+plate.model.id)
+				println("l: "+l)
 				if (!l.isEmpty) {
 					val location = l(0)._1
 					mapLocFree -= location
 					locationBuilder.addLocation(plate.id, node.index, location)
-					//println("added to location builder: ", plate.id, node.index, location)
+					println("added to location builder: ", plate.id, node.index, location)
 				}
 				else {
-					//println("ERROR: choose location")
+					println("ERROR: choose location")
 				}
 			}
 		})
-		//println("locationBuilder.map: "+locationBuilder.map)
+		println("locationBuilder.map: "+locationBuilder.map)
 		
 		//println("ob.builder.map: "+ob.builder.map)
 		
