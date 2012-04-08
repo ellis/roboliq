@@ -22,6 +22,7 @@ abstract class Well extends Part with Ordered[Well] {
 	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(this, builder)
 	
 	override def compare(that: Well) = id.compare(that.id)
+	override def toString = id
 }
 
 class WellStatus {

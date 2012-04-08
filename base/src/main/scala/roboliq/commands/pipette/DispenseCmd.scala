@@ -37,9 +37,16 @@ class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean] {
 					case Error(ls) => ls.foreach(messages.addError); return Expand2Errors()
 					case Success(tip) => tip
 				}
-				val tipState = ctx.states.findTipState(item.tip).get
-				TipDispenseEventBean(tip, item.well, item.volume, item.policy) ::
-				WellAddEventBean(item.well, tipState.src_?.get, item.volume) :: Nil
+				val tipState = ctx.states.findTipState(item.tip) match {
+					case Error(ls) => ls.foreach(messages.addError); return Expand2Errors()
+					case Success(tipState) => tipState
+				}
+				val src = tipState.src_? match {
+					case None => messages.addError("tip state must contain reference to source well"); return Expand2Errors()
+					case Some(src) => src
+				}
+				TipDispenseEventBean(tip, item.well, item.volume, PipettePosition.getPositionFromPolicyNameHack(item.policy)) ::
+				WellAddEventBean(item.well, src, item.volume) :: Nil
 			})
 			Expand2Tokens(List(new DispenseToken(lItem)), events)
 		}

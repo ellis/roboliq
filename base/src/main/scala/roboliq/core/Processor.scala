@@ -10,7 +10,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		bb.lDevice.foreach(_.setObjBase(ob))
 		
 		val mapNodeToResources = new LinkedHashMap[CmdNodeBean, List[NeedResource]]
-		//val builder = new StateBuilder(states0)
+		val builder = new StateBuilder(ob, HashMap[String, Object](states0.map.toSeq : _*))
 		
 		// Construct command nodes
 		def expand1(indexParent: List[Int], cmds: List[CmdBean]): List[CmdNodeBean] = {
@@ -83,9 +83,11 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			for (node <- nodes if node.getErrorCount == 0 && node.childCommands == null) {
 				val handler = node.handler
 				val cmd = node.command
-				val ctx = new ProcessorContext(this, node, ob, Some(ob.builder), ob.builder.toImmutable)
+				val ctx = new ProcessorContext(this, node, ob, Some(builder), builder.toImmutable)
 				val messages = new CmdMessageWriter(node)
 				
+				println("expand2: command "+node.index)
+				println("expand2: TIP1 state: "+builder.findTipState("TIP1").get)
 				handler.expand2(cmd, ctx, messages) match {
 					case Expand2Errors() =>
 					case Expand2Cmds(childCommands, events) =>
@@ -97,13 +99,15 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						}
 						if (!events.isEmpty) {
 							node.events = events
-							node.events.foreach(_.update(ob.builder)) 
+							node.events.foreach(_.update(builder)) 
 						}
 					case Expand2Tokens(tokens, events) =>
 						if (!tokens.isEmpty)
 							node.tokens = tokens
-						if (!events.isEmpty)
+						if (!events.isEmpty) {
 							node.events = events
+							node.events.foreach(_.update(builder))
+						}
 				}
 			}
 		}

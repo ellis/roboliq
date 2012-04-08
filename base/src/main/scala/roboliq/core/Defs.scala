@@ -75,6 +75,12 @@ object LiquidVolume {
 
 object PipettePosition extends Enumeration {
 	val Free, WetContact, DryContact = Value
+	
+	def getPositionFromPolicyNameHack(policy: String): PipettePosition.Value = {
+		if (policy.contains("Air")) PipettePosition.Free
+		else if (policy.contains("Dry")) PipettePosition.DryContact
+		else PipettePosition.WetContact
+	}
 }
 
 //case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense: PipettePosition.Value, mix: PipettePosition.Value)

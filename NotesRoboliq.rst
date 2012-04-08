@@ -3,11 +3,38 @@ Roboliq Notes
 =============
 :Author: Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>
 
+``CmdResult``
+=============
+
+:Date: 2012-04-08
+
+These are thoughts about creating a monad for handling well-structured messages propogation (errors and warnings) when processing commands.
+
+``CmdSuccess[A](x: A)``
+  for a successful calculation
+
+.. code-block:: scala
+
+  for {
+    _ <- check1 // should accumulate messages and continue to next check
+    _ <- context param "blah" check2 // give messages context of parameter "blah"
+    var1 <- getOrNull // try to get value, return null on error, but continue
+    _ <- fail if error
+  } yield {
+    ...
+  }
+
+  for {
+    lItem <- CmdResult.sequence(cmd.items.toList.map(_.toTokenItem(ctx.ob)))
+    lEvent <- CmdResult.sequence(lItem.map(expandItem)).map(_.flatten)
+  } yield {
+    Expand2Tokens(...)
+  }
+
 Command Processing
 ==================
 
-:Date:
-  2012-04-07
+:Date: 2012-04-07
 
 This idea is not currently implemented.
 

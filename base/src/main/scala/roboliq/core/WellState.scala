@@ -66,24 +66,25 @@ class TubeState(
 	}
 }
 
-class WellAddEventBean extends EventBeanA[WellState] {
+abstract class WellEventBean extends EventBeanA[WellState] {
+	protected def findState(id: String, query: StateQuery): Result[WellState] = {
+		query.findWellState(id)
+	}
+}
+
+class WellAddEventBean extends WellEventBean {
 	@BeanProperty var src: String = null
 	@BeanProperty var volume: java.math.BigDecimal = null
 	
-	protected def update(state0: WellState, states0: StateMap): WellState = {
-		val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-		val liquid = states0.findLiquid(src) match {
-			case Success(liquid) => liquid
-			case Error(ls) =>
-				states0.findWellState(src) match {
-					case Success(wellState) => wellState.liquid
-					case Error(ls) => assert(false); null
-				}
+	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
+		for { liquid <- states0.findSourceLiquid(src) }
+		yield {
+			val volumeNew = state0.nVolume + LiquidVolume.l(volume)
+			state0.update(this,
+				liquid = state0.liquid + liquid,
+				nVolume = volumeNew
+			)
 		}
-		state0.update(this,
-			liquid = state0.liquid + liquid,
-			nVolume = volumeNew
-		)
 	}
 }
 
@@ -97,21 +98,18 @@ object WellAddEventBean {
 	}
 }
 
-class WellRemoveEventBean extends EventBeanA[WellState] {
+class WellRemoveEventBean extends WellEventBean {
 	@BeanProperty var volume: java.math.BigDecimal = null
 	
-	protected def update(state0: WellState, states0: StateMap): WellState = {
+	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
 		val volumeNew = state0.nVolume - LiquidVolume.l(volume);
-		// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
-		if (state0.bCheckVolume) {
-			if (volumeNew < LiquidVolume.empty) {
-				println("tried to remove too much liquid from "+obj)
-				assert(false)
-			}
+		for {
+			_ <- Result.assert(volumeNew > LiquidVolume.empty || !state0.bCheckVolume, "tried to remove too much liquid from "+obj)
+		} yield {
+			state0.update(this,
+				nVolume = volumeNew
+			)
 		}
-		state0.update(this,
-			nVolume = volumeNew
-		)
 	}
 }
 
