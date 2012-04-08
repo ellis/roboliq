@@ -1,4 +1,4 @@
-/*package roboliq.robots.evoware
+package roboliq.robots.evoware
 
 import roboliq.core._
 //import roboliq.compiler._
@@ -39,4 +39,3 @@ trait EvowareToolchain {
 		})
 	}	
 }
-*/

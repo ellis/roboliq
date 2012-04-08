@@ -11,10 +11,10 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``PcrCmd``: create it and get it to work like the old one
-#. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
 #. ``evoware`` module: get to compile again, though with fewer commands
 #. ``Processor``: intelligently select and track ``location`` separately from ``PlateState``/``TubeState``
+#. ``PcrCmd``: create it and get it to work like the old one
+#. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
 #. ``PcrCmd``: add master mix functionality
 
 Done:
@@ -29,8 +29,8 @@ Soon
 * ``PipetteCmd``: properly process all parameters, and use top parameters as defaults for item parameters
 * ``Processor``: write events to database file to be read by future scripts
 * ``Processor``: restructure as described in the section "Command Processing" in NotesRoboliq.rst
-* autogenerate `doc` property
-* evoware: output `doc` comments
+* autogenerate ``doc`` property
+* evoware: output ``doc`` comments
 
 Intermediate
 ------------

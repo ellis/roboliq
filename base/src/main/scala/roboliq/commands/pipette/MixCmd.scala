@@ -75,10 +75,10 @@ class MixCmdItemBean {
 			volume <- node.getValueNonNull_?(volume0, "volume")
 			count <- node.getValueNonNull_?(count0, "count")
 			idPolicy <- node.getValueNonNull_?(policy0, "policy")
+			tipObj <- ob.findTip_?(tip, new CmdMessageWriter(node))
 			well <- ob.findWell_?(idWell, node)
 		} yield {
-			val iTip = idTip.drop(3).toInt
-			new MixTokenItem(iTip, well, LiquidVolume.l(volume), count, idPolicy)
+			new MixTokenItem(tipObj, well, LiquidVolume.l(volume), count, idPolicy)
 		}
 	}
 }
@@ -88,7 +88,7 @@ case class MixToken(
 ) extends CmdToken
 
 case class MixTokenItem(
-	val tip: java.lang.Integer,
+	val tip: Tip,
 	val well: Well,
 	val volume: LiquidVolume,
 	val count: Int,

@@ -1,6 +1,5 @@
 package roboliq.robots.evoware.commands
 
-/*
 import roboliq.common._
 
 
@@ -21,7 +20,6 @@ case class L2C_EvowareFacts(args: L12A_EvowareFactsArgs) extends CommandL2 {
 	}
 
 }
-*/
 
 case class L12A_EvowareFactsArgs(
 	sDevice: String,

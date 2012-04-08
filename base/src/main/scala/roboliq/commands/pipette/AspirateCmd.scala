@@ -27,20 +27,19 @@ class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean] {
 		ctx: ProcessorContext,
 		messages: CmdMessageWriter
 	): Expand2Result = {
-		val lItem = cmd.items.toList.map(_.toTokenItem(ctx.ob, ctx.node)).flatten
+		val lItem = Result.sequence(cmd.items.toList.map(_.toTokenItem(ctx.ob, ctx.node))) match {
+			case Error(ls) => ls.foreach(messages.addError); return Expand2Errors()
+			case Success(l) => l
+		}
 		if (messages.hasErrors) {
 			Expand2Errors()
 		}
 		else {
 			val events = lItem.flatMap(item => {
-				val tip = ctx.ob.findTip(item.tip) match {
-					case Error(ls) => ls.foreach(messages.addError); return Expand2Errors()
-					case Success(tip) => tip
-				}
-				TipAspirateEventBean(tip, item.well, item.volume) ::
+				TipAspirateEventBean(item.tip, item.well, item.volume) ::
 				WellRemoveEventBean(item.well, item.volume) :: Nil
 			})
-			Expand2Tokens(List(new AspirateToken(lItem)), events)
+			Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList)
 		}
 	}
 }
@@ -51,12 +50,15 @@ class SpirateCmdItemBean {
 	@BeanProperty var volume: java.math.BigDecimal = null
 	@BeanProperty var policy: String = null
 	
-	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Option[SpirateTokenItem] = {
+	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[SpirateTokenItem] = {
+		node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
+		if (node.getErrorCount != 0)
+			return Error(Nil)
 		for {
-			_ <- node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
-			wellObj <- ob.findWell_?(well, node)
+			tipObj <- ob.findTip(tip)
+			wellObj <- ob.findWell(well)
 		} yield {
-			new SpirateTokenItem(tip, wellObj, LiquidVolume.l(volume), policy)
+			new SpirateTokenItem(tipObj, wellObj, LiquidVolume.l(volume), policy)
 		}
 	}
 }
@@ -66,8 +68,8 @@ case class AspirateToken(
 ) extends CmdToken
 
 case class SpirateTokenItem(
-	val tip: String,
+	val tip: Tip,
 	val well: Well,
 	val volume: LiquidVolume,
 	val policy: String
-)
+) extends HasTipWell
