@@ -57,6 +57,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		val seen = new HashSet[String]
 		val seenPlate = new HashSet[String]
 		var lPlate = List[Tuple2[CmdNodeBean, Plate]]()
+		var lTube = List[Tuple2[CmdNodeBean, Tube]]()
 		def needWells(node: CmdNodeBean, name: String) {
 			WellSpecParser.parseToIds(name, ob) match {
 				case Error(ls) => ls.foreach(node.addError)
@@ -65,22 +66,29 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 					for (id <- lId) {
 						if (!seen.contains(id)) {
 							seen += id
-							ob.findPlate(id) match {
-								case Success(plate) =>
-									if (!seenPlate.contains(plate.id)) {
-										lPlate = (node, plate) :: lPlate
-										seenPlate += plate.id
-									}
-								case Error(_) =>
-									// Find the well in order to instantiate it as an object
-									ob.findWell_?(id, node) match {
-										case Some(well) =>
-											if (!seenPlate.contains(well.idPlate)) {
-												lPlate = (node, ob.findPlate(well.idPlate).get) :: lPlate
-												seenPlate += well.idPlate
-											}
-										case None =>
-									}
+							// If it's a plate
+							(for {plate <- ob.findPlate(id)} yield {
+								if (!seenPlate.contains(id)) {
+									lPlate = (node, plate) :: lPlate
+									seenPlate += id
+								}
+							}) orElse
+							// Else if it's a tube
+							(for {tube <- ob.findTube(id)} yield {
+								if (!seenPlate.contains(id)) {
+									lTube = (node, tube) :: lTube
+									seenPlate += id
+								}
+							}) orElse
+							// Else if it's a well
+							(for {well <- ob.findWell(id)} yield {
+								if (!seenPlate.contains(well.idPlate)) {
+									lPlate = (node, ob.findPlate(well.idPlate).get) :: lPlate
+									seenPlate += well.idPlate
+								}
+							}) match {
+								case Error(ls) => ls.foreach(node.addError)
+								case _ =>
 							}
 						}
 					}

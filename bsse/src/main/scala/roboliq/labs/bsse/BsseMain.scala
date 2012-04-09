@@ -9,19 +9,28 @@ import roboliq.utils.FileUtils
 import station1._
 
 
-class YamlTest2 {
+class YamlTest2(args: List[String]) {
 	import org.yaml.snakeyaml._
 	import roboliq.yaml.RoboliqYaml
 	
 	val sHome = System.getProperty("user.home")
 	val pathbase = sHome+"/src/roboliq/testdata/"
 	
-	val beans = List(
+	val filesDefault = List(
 		"classes-bsse1-20120408.yaml",
 		"robot-bsse1-20120408.yaml",
 		"database-001-20120408.yaml",
 		"protocol-001-20120408.yaml"
-	).map(s => RoboliqYaml.loadFile(pathbase+s))
+	)
+	val files = {
+		if (args.isEmpty) filesDefault
+		// Use default file list, but replace the protocol file
+		else if (args.tail.isEmpty) filesDefault.init ++ args
+		// Only use files passed by user
+		else args
+	}
+	
+	val beans = files.map(s => RoboliqYaml.loadFile(pathbase+s))
 	
 	val bb = new BeanBase
 	beans.foreach(bb.addBean)
@@ -52,7 +61,7 @@ class YamlTest2 {
 
 object BsseMain {
 	def main(args: Array[String]) {
-		new YamlTest2().run
+		new YamlTest2(args.toList).run
 	}
 	
 	/*

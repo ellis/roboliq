@@ -72,6 +72,11 @@ object WellSpecParser extends JavaTokenParsers {
 	}
 	
 	private def entryToIds(idPlate: String, lWellSpec: List[WellSpec], ob: ObjBase): Result[List[String]] = {
+		ob.findTube(idPlate) match {
+			case roboliq.core.Success(tube) => return roboliq.core.Success(List(idPlate))
+			case _ =>
+		}
+		
 		for {
 			plate <- ob.findPlate(idPlate)
 		} yield {

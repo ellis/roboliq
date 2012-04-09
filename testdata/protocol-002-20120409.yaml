@@ -1,0 +1,16 @@
+# Dilute Invitrogen plate E2215 to 400 mM with precalculated volumes 
+plates:
+  E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
+
+tubes:
+  T50water1: { model: "Tube 50ml" }
+
+events:
+  T50water1: [ !add { src: water, volume: 49e-3 } ]
+
+commands:
+#- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(B01), volume: [5e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: T50water1
+  dest: E2215(A01 r E01)
+  volume: [92.7, 93.525, 95.35, 101.875, 103.325, 104.575, 108.45, 110.025, 110.45, 110.825, 112.825, 113.375, 113.475, 115.6, 116.325, 116.55, 117.025, 117.375, 117.8, 117.9, 118.4, 119.4, 119.6, 120.6, 121.2, 121.25, 121.25, 121.275, 121.475, 122.95, 124.325, 125.15, 126.05, 127.775, 131, 132.525, 134.275, 135.65, 135.75, 136.55, 136.85, 137.375, 140.675, 145, 147.725, 147.75, 149.2, 180.5, 287.6]
