@@ -117,12 +117,18 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			// Assign location to each plate
 			lPlate = lPlate.reverse
 			for ((node, plate) <- lPlate) {
-				lLocFree.find(loc => loc.plateModels.contains(plate.model)) match {
-					case None => node.addError("couldn't find location for `"+plate.id+"`")
+				plate.locationPermanent_? match {
 					case Some(location) =>
-						lLocFree -= location
-						locationBuilder.addLocation(plate.id, node.index, location.id)
+						locationBuilder.addLocation(plate.id, node.index, location)
 						println("added to location builder: ", plate.id, node.index, location)
+					case None =>
+						lLocFree.find(loc => loc.plateModels.contains(plate.model)) match {
+							case None => node.addError("couldn't find location for `"+plate.id+"`")
+							case Some(location) =>
+								lLocFree -= location
+								locationBuilder.addLocation(plate.id, node.index, location.id)
+								println("added to location builder: ", plate.id, node.index, location)
+						}
 				}
 			}
 		})
@@ -151,7 +157,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			}
 		})
 		println("locationBuilder.map: "+locationBuilder.map)
-		println("test: "+ob.builder.findWellPosition("T50water1"))
+		//println("test: "+ob.builder.findWellPosition("T50water1"))
 		
 		//println("ob.builder.map: "+ob.builder.map)
 		

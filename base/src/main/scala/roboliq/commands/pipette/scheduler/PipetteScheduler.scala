@@ -14,27 +14,72 @@ import java.io.FileWriter
 
 
 object PipetteScheduler {
-	def createL3C(cmd: PipetteCmdBean, ob: ObjBase, node: CmdNodeBean): Option[L3C_Pipette] = {
+	def createL3C(cmd: PipetteCmdBean, ob: ObjBase, node: CmdNodeBean): Result[L3C_Pipette] = {
 		val messages = new CmdMessageWriter(node)
 		val mixSpec_? : Option[MixSpec] = if (cmd.postmix == null) None else Some(MixSpec.fromBean(cmd.postmix))
 		val tipOverrides_? : Option[TipHandlingOverrides] = None
 		val pipettePolicy_? : Option[PipettePolicy] = if (cmd.policy == null) None else Some(PipettePolicy.fromName(cmd.policy))
 		val tipModel_? : Option[TipModel] = if (cmd.tipModel == null) None else ob.findTipModel_?(cmd.tipModel, messages)
 
-		val src_? : Option[List[Well]] = ob.findWells_?(cmd.src, node, false)
-		val dest_? : Option[List[Well]] = ob.findWells_?(cmd.dest, node, false)
+		val srcs_? : Option[List[Well]] = ob.findWells_?(cmd.src, node, false)
+		val dests_? : Option[List[Well]] = ob.findWells_?(cmd.dest, node, false)
 		val volumes_? : Option[List[LiquidVolume]] = if (cmd.volume == null) None else Some(cmd.volume.map(n => LiquidVolume.l(n)).toList)
 		
-		val items = dest_?.get.map(dest => new Item(
-			SortedSet(src_?.get : _*),
-			dest,
-			volumes_?.get(0),
+		// If only one entry is given, use it as the default
+		val srcDefault_? = srcs_?.filter(_.tail.isEmpty).map(_.head)
+		val destDefault_? = dests_?.filter(_.tail.isEmpty).map(_.head)
+		val volumeDefault_? = volumes_?.filter(_.tail.isEmpty).map(_.head)
+		
+		val lnLen = List(
+			srcs_?.map(_.length).getOrElse(0),
+			dests_?.map(_.length).getOrElse(0),
+			volumes_?.map(_.length).getOrElse(0)
+		)
+		
+		val bLengthsOk = lnLen.filter(_ != 1) match {
+			case Nil => true
+			case x :: xs => xs.forall(_ == x)
+		}
+		
+		if (!bLengthsOk) {
+			return Error("arrays must have equal lengths")
+		}
+		
+		def zipit(
+			ls: List[Well],
+			ld: List[Well],
+			lv: List[LiquidVolume],
+			acc: List[Tuple3[Well, Well, LiquidVolume]]
+		): List[Tuple3[Well, Well, LiquidVolume]] = {
+			println((ls, ld, lv))
+			(ls, ld, lv) match {
+				case (s::ss, d::ds, v::vs) =>
+					val sdv = (s, d, v)
+					val acc2 = sdv :: acc
+					if (ss == Nil && ds == Nil && vs == Nil)
+						acc2.reverse
+					else {
+						val ls2 = if (ss.isEmpty) ls else ss
+						val ld2 = if (ds.isEmpty) ld else ds
+						val lv2 = if (vs.isEmpty) lv else vs
+						zipit(ls2, ld2, lv2, acc2)
+					}
+			}
+		}
+		
+		val lsdv = zipit(srcs_?.get, dests_?.get, volumes_?.get, Nil)
+		
+		val items = lsdv.map(svd => new Item(
+			SortedSet(svd._1),
+			svd._2,
+			//volumes_?.get(0),
+			svd._3,
 			None,
 			None
 		))
 		val args = new L3A_PipetteArgs(items, mixSpec_?, tipOverrides_?, pipettePolicy_?, tipModel_?)
 		
-		Some(new L3C_Pipette(args))
+		Success(new L3C_Pipette(args))
 	}
 
 	/*

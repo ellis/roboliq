@@ -19,7 +19,7 @@ class YamlTest2(args: List[String]) {
 	val filesDefault = List(
 		"classes-bsse1-20120408.yaml",
 		"robot-bsse1-20120408.yaml",
-		"database-001-20120408.yaml",
+		"database-002-20120409.yaml",
 		//"protocol-001-20120408.yaml"
 		"protocol-002-20120409.yaml"
 	)

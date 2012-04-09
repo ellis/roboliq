@@ -18,9 +18,12 @@ object PipetteHelper {
 		var destsRemaining = dests
 		var twsPrev = Nil
 		while (!destsRemaining.isEmpty) {
+			print("A")
 			chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev) match {
 				case Error(ls) => return Error(ls)
+				case Success(Nil) => return Success(twss)
 				case Success(tws) =>
+					//println("chooseTipWellPairsAll: tws: "+tws+", "+destsRemaining)
 					twss += tws
 					destsRemaining --= tws.map(_.well)
 			}
@@ -32,7 +35,8 @@ object PipetteHelper {
 		states.getWellPosList(wells)
 	}
 
-	def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
+	private def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
+		print("B")
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
 		//println("wells: "+wells)

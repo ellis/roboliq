@@ -13,11 +13,14 @@ class PlateBean extends Bean {
 	@BeanProperty var description: String = null
 	/** Plate barcode */
 	@BeanProperty var barcode: String = null
+	/** Location */
+	@BeanProperty var location: String = null
 }
 
 class Plate(
 	val id: String,
-	val model: PlateModel
+	val model: PlateModel,
+	val locationPermanent_? : Option[String]
 ) extends Part with Ordered[Plate] {
 	def nRows: Int = model.nRows
 	def nCols: Int = model.nCols
@@ -37,7 +40,8 @@ object Plate {
 			idModel <- Result.mustBeSet(bean.model, "model")
 			model <- ob.findPlateModel(idModel)
 		} yield {
-			new Plate(id, model)
+			val locationPermanent_? = if (bean.location != null) Some(bean.location) else None
+			new Plate(id, model, locationPermanent_?)
 		}
 	}
 }

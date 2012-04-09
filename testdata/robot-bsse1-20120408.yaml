@@ -32,7 +32,7 @@ locations:
   cooled5: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
 
 plates:
-  reagents50: { model: "Reagent Cooled 8*50ml" }
+  reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }
 
 tubeLocations:
 #  reagents15: { tubeModels: ["Tube 15ml"], rows: 8 }
