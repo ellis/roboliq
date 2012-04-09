@@ -143,7 +143,7 @@ class WellStateWriter(o: Well, builder: StateBuilder) {
 		if (st.bCheckVolume) {
 			if (nVolumeNew < LiquidVolume.empty) {
 				println("tried to remove too much liquid from "+o.id)
-				assert(false)
+				//assert(false)
 			}
 		}
 		set(st.update(null, nVolume = st.nVolume - nVolume2))
