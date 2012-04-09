@@ -10,8 +10,10 @@ class ObjBase(bb: BeanBase) {
 	
 	private val m_mapTipModel = new HashMap[String, TipModel]
 	private val m_mapPlateModel = new HashMap[String, PlateModel]
+	private val m_mapTubeModel = new HashMap[String, TubeModel]
 	private val m_mapTip = new HashMap[String, Tip]
-	private val m_mapLocation = new HashMap[String, Location]
+	private val m_mapLocation = new HashMap[String, PlateLocation]
+	private val m_mapTubeLocation = new HashMap[String, TubeLocation]
 
 	private val m_mapSubstance = new HashMap[String, Substance]
 	private val m_mapPlate = new HashMap[String, Plate]
@@ -44,8 +46,16 @@ class ObjBase(bb: BeanBase) {
 			Error(l.collect({case Error(ls) => ls}).flatten)
 	}
 	
-	def findAllLocations(): Result[List[Location]] = {
-		val l = bb.mapLocation.keys.toList.map(findLocation)
+	def findAllPlateLocations(): Result[List[PlateLocation]] = {
+		val l = bb.mapLocation.keys.toList.map(findPlateLocation)
+		if (l.forall(_.isSuccess))
+			Result.sequence(l).map(_.toList)
+		else
+			Error(l.collect({case Error(ls) => ls}).flatten)
+	}
+	
+	def findAllTubeLocations(): Result[List[TubeLocation]] = {
+		val l = bb.mapTubeLocation.keys.toList.map(findTubeLocation)
 		if (l.forall(_.isSuccess))
 			Result.sequence(l).map(_.toList)
 		else
@@ -64,6 +74,10 @@ class ObjBase(bb: BeanBase) {
 		find(id, m_mapPlateModel, bb.mapPlateModel, PlateModel.fromBean _, "PlateModel")
 	}
 	
+	def findTubeModel(id: String): Result[TubeModel] = {
+		find(id, m_mapTubeModel, bb.mapTubeModel, TubeModel.fromBean _, "TubeModel")
+	}
+	
 	def findTip(id: String): Result[Tip] = {
 		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this), "Tip")
 	}
@@ -72,8 +86,12 @@ class ObjBase(bb: BeanBase) {
 		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this, messages), messages, "Tip")
 	}
 	
-	def findLocation(id: String): Result[Location] = {
-		find(id, m_mapLocation, bb.mapLocation, Location.fromBean(this), "Location")
+	def findPlateLocation(id: String): Result[PlateLocation] = {
+		find(id, m_mapLocation, bb.mapLocation, PlateLocation.fromBean(this), "PlateLocation")
+	}
+	
+	def findTubeLocation(id: String): Result[TubeLocation] = {
+		find(id, m_mapTubeLocation, bb.mapTubeLocation, TubeLocation.fromBean(this), "TubeLocation")
 	}
 	
 	def findPlate(id: String): Result[Plate] = {

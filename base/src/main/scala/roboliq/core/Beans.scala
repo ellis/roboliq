@@ -26,8 +26,10 @@ class RoboliqYamlBean {
 	@BeanProperty var systemProperties: java.util.LinkedHashMap[String, Object] = null
 	@BeanProperty var tipModels: java.util.LinkedHashMap[String, TipModelBean] = null
 	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
+	@BeanProperty var tubeModels: java.util.LinkedHashMap[String, TubeModelBean] = null
 	@BeanProperty var tips: java.util.LinkedHashMap[String, TipBean] = null
-	@BeanProperty var locations: java.util.LinkedHashMap[String, LocationBean] = null
+	@BeanProperty var locations: java.util.LinkedHashMap[String, PlateLocationBean] = null
+	@BeanProperty var tubeLocations: java.util.LinkedHashMap[String, TubeLocationBean] = null
 	
 	// Database
 	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceBean] = null

@@ -11,25 +11,31 @@ class BeanBase {
 
 	private val m_mapTipModel = new HashMap[String, TipModelBean]
 	private val m_mapPlateModel = new HashMap[String, PlateModelBean]
+	private val m_mapTubeModel = new HashMap[String, TubeModelBean]
 	private val m_mapTip = new HashMap[String, TipBean]
-	private val m_mapLocation = new HashMap[String, LocationBean]
+	private val m_mapLocation = new HashMap[String, PlateLocationBean]
+	private val m_mapTubeLocation = new HashMap[String, TubeLocationBean]
 
 	private val m_mapSubstance = new HashMap[String, SubstanceBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]
 	private val m_mapTube = new HashMap[String, PlateBean]
 	private val m_mapEvents = new HashMap[String, List[EventBean]]
 	
+	def lDevice = m_lDevice
+	def lCmdHandler = m_lCmdHandler
 	def mapSystemProperties: scala.collection.Map[String, Object] = m_mapSystemProperties
+
 	def mapTipModel: scala.collection.Map[String, TipModelBean] = m_mapTipModel
 	def mapPlateModel: scala.collection.Map[String, PlateModelBean] = m_mapPlateModel
+	def mapTubeModel: scala.collection.Map[String, TubeModelBean] = m_mapTubeModel
 	def mapTip: scala.collection.Map[String, TipBean] = m_mapTip
-	def mapLocation: scala.collection.Map[String, LocationBean] = m_mapLocation
+	def mapLocation: scala.collection.Map[String, PlateLocationBean] = m_mapLocation
+	def mapTubeLocation: scala.collection.Map[String, TubeLocationBean] = m_mapTubeLocation
+	
 	def mapSubstance: scala.collection.Map[String, SubstanceBean] = m_mapSubstance
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
 	def mapTube: scala.collection.Map[String, PlateBean] = m_mapTube
 	def mapEvents: scala.collection.Map[String, List[EventBean]] = m_mapEvents
-	def lDevice = m_lDevice
-	def lCmdHandler = m_lCmdHandler
 	
 	/** Add data in @param bean to this database */
 	def addBean(bean: RoboliqYamlBean) {
@@ -56,15 +62,25 @@ class BeanBase {
 			bean.plateModels.foreach(pair => pair._2._id = pair._1)
 			m_mapPlateModel ++= bean.plateModels
 		}
+		// Add plate models
+		if (bean.tubeModels != null) {
+			bean.tubeModels.foreach(pair => pair._2._id = pair._1)
+			m_mapTubeModel ++= bean.tubeModels
+		}
 		// Add tips
 		if (bean.tips != null) {
 			bean.tips.foreach(pair => pair._2._id = pair._1)
 			m_mapTip ++= bean.tips
 		}
-		// Add locations
+		// Add plate locations
 		if (bean.locations != null) {
 			bean.locations.foreach(pair => pair._2._id = pair._1)
 			m_mapLocation ++= bean.locations
+		}
+		// Add plate locations
+		if (bean.tubeLocations != null) {
+			bean.tubeLocations.foreach(pair => pair._2._id = pair._1)
+			m_mapTubeLocation ++= bean.tubeLocations
 		}
 		
 		// Add substances

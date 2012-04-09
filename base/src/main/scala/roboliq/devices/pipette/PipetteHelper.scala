@@ -10,7 +10,7 @@ import roboliq.commands.pipette._
 
 
 object PipetteHelper {
-	def chooseTipWellPairsAll(states: StateMap, tips: SortedSet[Tip], dests: SortedSet[Well]): Seq[Seq[TipWell]] = {
+	def chooseTipWellPairsAll(states: StateMap, tips: SortedSet[Tip], dests: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
 		//println("chooseTipWellPairsAll()")
 		//println("tips: "+tips)
 		//println("dests: "+dests)
@@ -18,24 +18,27 @@ object PipetteHelper {
 		var destsRemaining = dests
 		var twsPrev = Nil
 		while (!destsRemaining.isEmpty) {
-			val tws = chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev)
-			twss += tws
-			destsRemaining --= tws.map(_.well)
+			chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev) match {
+				case Error(ls) => return Error(ls)
+				case Success(tws) =>
+					twss += tws
+					destsRemaining --= tws.map(_.well)
+			}
 		}
-		twss
+		Success(twss)
 	}
 
-	def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Seq[TipWell] = {
+	def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
 		//println("wells: "+wells)
 		if (tips.isEmpty || wells.isEmpty)
-			return Nil
+			return Success(Nil)
 
 		val (idPlate, wellsOnHolder, iCol) = getHolderWellsCol(states, wells, twsPrev)
 		val well0 = getFirstWell(states, idPlate, wellsOnHolder, iCol)
 		val plate = states.ob.findPlate(idPlate) match {
-			case Error(ls) => return Nil // TODO: need to return an error instead
+			case Error(ls) => return Error(ls)
 			case Success(plate) => plate
 		}
 
@@ -57,7 +60,7 @@ object PipetteHelper {
 				}
 			}
 		}
-		pairs.toSeq
+		Success(pairs.toSeq)
 	}
 
 	private def getHolderWellsCol(states: StateMap, wells: SortedSet[Well], twsPrev: Seq[TipWell]): Tuple3[String, SortedSet[Well], Int] = {
@@ -117,15 +120,18 @@ object PipetteHelper {
 		checkCol(iCol0)
 	}
 
-	def process[T, T2](items: Iterable[T], acc: Seq[Seq[T2]], fn: Iterable[T] => Tuple2[Iterable[T], Seq[T2]]): Seq[Seq[T2]] = {
+	def process[T, T2](items: Iterable[T], acc: Seq[Seq[T2]], fn: Iterable[T] => Result[Tuple2[Iterable[T], Seq[T2]]]): Result[Seq[Seq[T2]]] = {
 		if (items.isEmpty)
-			acc
+			Success(acc)
 		else {
-			val (itemsRemaining, accNew) = fn(items)
-			if (accNew.isEmpty)
-				Nil
-			else
-				process(itemsRemaining, acc ++ Seq(accNew), fn)
+			fn(items) match {
+				case Error(ls) => Error(ls)
+				case Success((itemsRemaining, accNew)) => 
+					if (accNew.isEmpty)
+						Success(Nil)
+					else
+						process(itemsRemaining, acc ++ Seq(accNew), fn)
+			}
 		}
 	}
 
@@ -218,12 +224,14 @@ object PipetteHelper {
 		SortedSet(wells : _*)
 	}
 	
-	def chooseTipSrcPairs(states: StateMap, tips: SortedSet[Tip], srcs: SortedSet[Well]): Seq[Seq[TipWell]] = {
-		def processStep(tips0: Iterable[Tip]): Tuple2[Iterable[Tip], Seq[TipWell]] = {
+	def chooseTipSrcPairs(states: StateMap, tips: SortedSet[Tip], srcs: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
+		def processStep(tips0: Iterable[Tip]): Result[Tuple2[Iterable[Tip], Seq[TipWell]]] = {
 			val tips = SortedSet[Tip](tips0.toSeq : _*)
-			val tws = chooseTipWellPairsNext(states, tips, srcs, Nil)
-			val tipsRemaining = tips -- tws.map(_.tip)
-			(tipsRemaining.toSeq, tws)
+			for { tws <- chooseTipWellPairsNext(states, tips, srcs, Nil) }
+			yield {
+				val tipsRemaining = tips -- tws.map(_.tip)
+				(tipsRemaining.toSeq, tws)
+			}
 		}
 		process(tips, Nil, processStep)
 	}

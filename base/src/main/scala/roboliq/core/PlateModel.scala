@@ -17,7 +17,7 @@ class PlateModel(
 	val id: String,
 	val nRows: Int,
 	val nCols: Int,
-	val nWellVolume: Double
+	val nWellVolume: LiquidVolume
 )
 
 object PlateModel {
@@ -28,7 +28,7 @@ object PlateModel {
 			nCols <- Result.mustBeSet(bean.cols, "cols")
 			nWellVolume <- Result.mustBeSet(bean.volume, "volume")
 		} yield {
-			new PlateModel(id, nRows, nCols, nWellVolume.doubleValue())
+			new PlateModel(id, nRows, nCols, LiquidVolume.l(nWellVolume))
 		}
 	}
 	

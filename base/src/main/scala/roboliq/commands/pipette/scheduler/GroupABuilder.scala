@@ -471,7 +471,10 @@ class GroupABuilder(
 			val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
 			//val lDest: SortedSet[Well] = SortedSet(lItem.map(_.dest) : _*)
 			val mDestToItems = lItem.groupBy(_.dest)
-			val mItemToTip = updateGroupA4_sub(g0, lTip, mDestToItems, Map())
+			val mItemToTip = updateGroupA4_sub(g0, lTip, mDestToItems, Map()) match {
+				case Error(ls) => return GroupError(g0, ls)
+				case Success(m) => m
+			}
 			mItemToTip.toSeq
 			//val ltw = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, lDest).flatten
 			//println("A4:", lTip, lDest, ltw)
@@ -482,10 +485,13 @@ class GroupABuilder(
 		))
 	}
 	
-	private def updateGroupA4_sub(g0: GroupA, lTip: SortedSet[Tip], mDestToItems: Map[Well, List[Item]], acc: Map[Item, Tip]): Map[Item, Tip] = {
-		if (mDestToItems.isEmpty) acc
+	private def updateGroupA4_sub(g0: GroupA, lTip: SortedSet[Tip], mDestToItems: Map[Well, List[Item]], acc: Map[Item, Tip]): Result[Map[Item, Tip]] = {
+		if (mDestToItems.isEmpty) Success(acc)
 		else {
-			val ltw0 = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)).flatten
+			val ltw0 = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)) match {
+				case Error(ls) => return Error(ls)
+				case Success(l) => l.flatten
+			}
 			// Make sure that max tip volume isn't exceeded when pipetting from a single liquid to multiple destinations
 			val mTipToVolume = new HashMap[Tip, LiquidVolume]
 			val ltw = ltw0.filter(tw => {
@@ -624,7 +630,10 @@ class GroupABuilder(
 			val tips = g0.mLMToTips(lm)
 			val lItem = g0.lItem.filter(item => g0.mLM(item) == lm)
 			val srcs = SortedSet(lItem.flatMap(_.srcs) : _*)
-			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
+			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs) match {
+				case Error(ls) => return GroupError(g0, ls)
+				case Success(ll) => ll
+			}
 			val ltw = lltw.flatMap(identity)
 			ltw.map(tw => {
 				// FIXME: for debug only
@@ -660,7 +669,10 @@ class GroupABuilder(
 			val tips = g0.mLMToTips(lm)
 			val lItem = g0.lItem.filter(item => g0.mLM(item) == lm)
 			val srcs = SortedSet(lItem.flatMap(_.srcs) : _*)
-			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs)
+			val lltw: Seq[Seq[TipWell]] = PipetteHelper.chooseTipSrcPairs(g0.states0, tips, srcs) match {
+				case Error(ls) => return GroupError(g0, ls)
+				case Success(ll) => ll
+			}
 			val ltw = lltw.flatMap(identity)
 			// Gather premix specs
 			lItem.map(_.premix_?).flatten match {

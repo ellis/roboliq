@@ -9,7 +9,7 @@ import scala.reflect.BeanProperty
 
 class Tube(
 	val id: String,
-	val model: PlateModel
+	val model: TubeModel
 ) extends Well {
 	val idPlate = id
 	val index = 0
@@ -23,7 +23,7 @@ object Tube {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
 			idModel <- Result.mustBeSet(bean.model, "model")
-			model <- ob.findPlateModel(idModel)
+			model <- ob.findTubeModel(idModel)
 		} yield {
 			new Tube(id, model)
 		}
