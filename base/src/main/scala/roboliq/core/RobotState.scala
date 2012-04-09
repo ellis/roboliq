@@ -68,12 +68,10 @@ trait StateMap extends StateQuery {
 		s
 	}
 	
-	def findWellPosition(id: String): Result[WellPosition] = {
-		findWellState(id) match {
-			case Success(pwell: PlateWellState) =>
-				Success(WellPosition(pwell.conf))
-			case Success(twell: TubeState) =>
-				WellPosition.forTube(twell, this)
+	def findWellPosition(id: String): Result[Well2] = {
+		findWell(id) match {
+			case Success(pwell: PlateWell) => Success(pwell)
+			case Success(twell: Tube) => Success(ob.m_mapTube2(id))
 			case Error(ls) => Error(ls)
 		}
 	}

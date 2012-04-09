@@ -139,11 +139,14 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 					case None => node.addError("couldn't find location for `"+tube.id+"`")
 					case Some(location) =>
 						lLocFree -= location
-						locationBuilder.addLocation(tube.id, node.index, location.id)
-						println("added to location builder: ", tube.id, node.index, location)
+						// Add a plate and location with the same name for tube racks
+						locationBuilder.addLocation(location.id, node.index, location.id)
+						//locationBuilder.addLocation(tube.id, node.index, location.id)
+						//println("added to location builder: ", tube.id, node.index, location)
 						// Set TubeState properties
 						TubeLocationEventBean(tube, location.id, 0, 0).update(ob.builder)
 						println("stateA: "+ob.findWellState(tube.id))
+						ob.m_mapTube2(tube.id) = Well2.forTube(ob.findWellState(tube.id).get.asInstanceOf[TubeState], ob.builder).get
 				}
 			}
 		})
@@ -186,7 +189,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						}
 				}
 				// Update states based on events
-				if (!node.events.isEmpty) {
+				if (node.events != null) {
 					node.events.foreach(_.update(builder)) 
 				}
 				node.states1 = builder.toImmutable

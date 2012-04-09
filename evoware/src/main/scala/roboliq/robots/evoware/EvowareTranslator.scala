@@ -20,7 +20,7 @@ class EvowareTranslator(config: EvowareConfig) {
 	}
 }
 
-private class WellInfo(well: Well, state: WellState, pos: WellPosition) {
+private class WellInfo(well: Well, state: WellState, pos: Well2) {
 	def id = well.id
 	def idPlate = pos.idPlate
 	def index = pos.index

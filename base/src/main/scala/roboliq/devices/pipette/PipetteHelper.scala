@@ -28,7 +28,7 @@ object PipetteHelper {
 		Success(twss)
 	}
 	
-	private def getWellPosList(states: StateMap, wells: Iterable[Well]): Result[List[Tuple2[Well, WellPosition]]] = {
+	private def getWellPosList(states: StateMap, wells: Iterable[Well]): Result[List[Tuple2[Well, Well2]]] = {
 		states.getWellPosList(wells)
 	}
 
@@ -74,7 +74,7 @@ object PipetteHelper {
 	): Result[
 		Tuple3[
 			String, 
-			List[Tuple2[Well, WellPosition]], 
+			List[Tuple2[Well, Well2]], 
 			Int
 		]
 	] = {
@@ -123,7 +123,7 @@ object PipetteHelper {
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: List[Tuple2[Well, WellPosition]], iCol0: Int): Result[Well] = {
+	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: List[Tuple2[Well, Well2]], iCol0: Int): Result[Well] = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
@@ -236,7 +236,7 @@ object PipetteHelper {
 			
 			var iRowTop = pos0.iRow
 			var iRowBot = iRowTop
-			def isAboveOrBelow(pos: WellPosition): Boolean = {
+			def isAboveOrBelow(pos: Well2): Boolean = {
 				if (pos.idPlate != pos0.idPlate)
 					false
 				else if (pos.iCol != pos0.iCol)

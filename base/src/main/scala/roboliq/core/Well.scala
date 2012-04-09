@@ -15,25 +15,34 @@ sealed abstract class Well(val id: String) extends Part with Ordered[Well] {
 	override def toString = id
 }
 
+sealed trait Well2 {
+	val id: String
+	val idPlate: String
+	val index: Int
+	val iRow: Int
+	val iCol: Int
+	val indexName: String
+}
+
 case class WellPosition(
+	val id: String,
 	val idPlate: String,
 	val index: Int,
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-)
+) extends Well2
 
-object WellPosition {
-	def apply(o: PlateWell): WellPosition = {
-		//println("WellPosition.apply: "+o.id)
-		new WellPosition(o.idPlate, o.index, o.iRow, o.iCol, o.indexName)
+object Well2 {
+	def apply(o: PlateWell): Well2 = {
+		o
 	}
-	def forTube(o: TubeState, query: StateQuery): Result[WellPosition] = {
+	def forTube(o: TubeState, query: StateQuery): Result[Well2] = {
 		//println("WellPosition.forTube: "+o.obj.id)
 		for { plate <- query.findPlate(o.idPlate) }
 		yield {
 			val index = o.row + o.col * plate.model.nRows
-			new WellPosition(o.idPlate, index, o.row, o.col, "")
+			new WellPosition(o.obj.id, o.idPlate, index, o.row, o.col, "")
 		}
 	}
 }
@@ -49,7 +58,7 @@ class PlateWell(
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-) extends Well(id) {
+) extends Well(id) with Well2 {
 	def state(states: StateMap): WellState = states.findWellState(id) match {
 		case Success(st) => st
 		case _ => assert(false); null
