@@ -66,6 +66,10 @@ class TubeState(
 			obj, idPlate, row, col, liquid, nVolume, bCheckVolume, event :: history
 		)
 	}
+	
+	override def toString: String = {
+		List(obj, idPlate, row, col, liquid, nVolume).mkString("TubeState(", ", ", ")")
+	}
 }
 
 abstract class WellEventBean extends EventBeanA[WellState] {

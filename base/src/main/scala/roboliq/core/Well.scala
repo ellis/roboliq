@@ -15,7 +15,7 @@ sealed abstract class Well(val id: String) extends Part with Ordered[Well] {
 	override def toString = id
 }
 
-class WellPosition(
+case class WellPosition(
 	val idPlate: String,
 	val index: Int,
 	val iRow: Int,
@@ -25,13 +25,15 @@ class WellPosition(
 
 object WellPosition {
 	def apply(o: PlateWell): WellPosition = {
+		//println("WellPosition.apply: "+o.id)
 		new WellPosition(o.idPlate, o.index, o.iRow, o.iCol, o.indexName)
 	}
 	def forTube(o: TubeState, query: StateQuery): Result[WellPosition] = {
+		//println("WellPosition.forTube: "+o.obj.id)
 		for { plate <- query.findPlate(o.idPlate) }
 		yield {
 			val index = o.row + o.col * plate.model.nRows
-			new WellPosition(o.obj.id, index, o.row, o.col, "")
+			new WellPosition(o.idPlate, index, o.row, o.col, "")
 		}
 	}
 }

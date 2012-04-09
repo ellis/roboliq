@@ -143,10 +143,12 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						println("added to location builder: ", tube.id, node.index, location)
 						// Set TubeState properties
 						TubeLocationEventBean(tube, location.id, 0, 0).update(ob.builder)
+						println("stateA: "+ob.findWellState(tube.id))
 				}
 			}
 		})
 		println("locationBuilder.map: "+locationBuilder.map)
+		println("test: "+ob.builder.findWellPosition("T50water1"))
 		
 		//println("ob.builder.map: "+ob.builder.map)
 		

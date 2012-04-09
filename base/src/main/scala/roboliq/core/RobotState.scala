@@ -49,7 +49,8 @@ trait StateMap extends StateQuery {
 	def findTipState(id: String): Result[TipState] = {
 		map.get(id) match {
 			case Some(state) => Success(state.asInstanceOf[TipState])
-			case None => ob.findTipState(id)
+			case None =>
+				ob.findTipState(id)
 		}
 	}
 	
