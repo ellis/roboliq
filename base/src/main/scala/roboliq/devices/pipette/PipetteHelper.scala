@@ -36,7 +36,10 @@ object PipetteHelper {
 			return Success(Nil)
 
 		val (idPlate, wellsOnHolder, iCol) = getHolderWellsCol(states, wells, twsPrev)
-		val well0 = getFirstWell(states, idPlate, wellsOnHolder, iCol)
+		val well0 = getFirstWell(states, idPlate, wellsOnHolder, iCol) match {
+			case Error(ls) => return Error(ls)
+			case Success(well0) => well0
+		}
 		val plate = states.ob.findPlate(idPlate) match {
 			case Error(ls) => return Error(ls)
 			case Success(plate) => plate
@@ -98,26 +101,30 @@ object PipetteHelper {
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: SortedSet[Well], iCol0: Int): Well = {
+	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: SortedSet[Well], iCol0: Int): Result[Well] = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
 
-		val plate = states.ob.findPlate(idPlate) match {
-			case Error(ls) => return null // TODO: need to return an error instead
-			case Success(plate) => plate
+		states.ob.findPlate(idPlate) match {
+			case Error(ls) =>
+				states.ob.findTube(idPlate) match {
+					case Error(_) => Error(ls)
+					case Success(tube) => Success(tube)
+				}
+			case Success(plate) =>
+				val nCols = plate.model.nCols
+					
+				def checkCol(iCol: Int): Well = {
+					val well_? = wellsOnHolder.find(_.iCol == iCol)
+					well_? match {
+						case Some(well) => well
+						case None => checkCol((iCol + 1) % nCols)
+					}
+				}
+		
+				Success(checkCol(iCol0))
 		}
-		val nCols = plate.model.nCols
-			
-		def checkCol(iCol: Int): Well = {
-			val well_? = wellsOnHolder.find(_.iCol == iCol)
-			well_? match {
-				case Some(well) => well
-				case None => checkCol((iCol + 1) % nCols)
-			}
-		}
-
-		checkCol(iCol0)
 	}
 
 	def process[T, T2](items: Iterable[T], acc: Seq[Seq[T2]], fn: Iterable[T] => Result[Tuple2[Iterable[T], Seq[T2]]]): Result[Seq[Seq[T2]]] = {

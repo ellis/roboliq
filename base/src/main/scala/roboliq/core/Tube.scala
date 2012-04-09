@@ -10,12 +10,15 @@ import scala.reflect.BeanProperty
 class Tube(
 	val id: String,
 	val model: TubeModel
-) extends Well {
-	val idPlate = id
-	val index = 0
-	val iRow = 0
-	val iCol = 0
-	val indexName = ""
+) extends Part with Ordered[Well] {
+	def state(states: StateMap): WellState = states.findWellState(id) match {
+		case Success(st) => st
+		case _ => assert(false); null
+	}
+	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
+	
+	override def compare(that: Well) = id.compare(that.id)
+	override def toString = id
 }
 
 object Tube {

@@ -122,10 +122,10 @@ object WellRemoveEventBean {
 	}
 }
 
-class WellStateWriter(o: Well, builder: StateBuilder) {
-	def state = builder.findWellState(o.id).get
+class WellStateWriter(id: String, builder: StateBuilder) {
+	def state = builder.findWellState(id).get
 	
-	private def set(state1: WellState) { builder.map(o.id) = state1 }
+	private def set(state1: WellState) { builder.map(id) = state1 }
 	
 	def liquid = state.liquid
 	
@@ -142,7 +142,7 @@ class WellStateWriter(o: Well, builder: StateBuilder) {
 		// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
 		if (st.bCheckVolume) {
 			if (nVolumeNew < LiquidVolume.empty) {
-				println("tried to remove too much liquid from "+o.id)
+				println("tried to remove too much liquid from "+id)
 				//assert(false)
 			}
 		}

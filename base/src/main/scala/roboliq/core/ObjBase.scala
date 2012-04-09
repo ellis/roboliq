@@ -102,6 +102,10 @@ class ObjBase(bb: BeanBase) {
 		find(id, m_mapTube, bb.mapTube, Tube.fromBean(this), "Tube")
 	}
 	
+	def findPlateOrTube(id: String): Result[Object] = {
+		findPlate(id).orElse(findTube(id))
+	}
+	
 	def findSubstance(id: String): Result[Substance] = {
 		find(id, m_mapSubstance, bb.mapSubstance, Substance.fromBean _, "Substance")
 	}
