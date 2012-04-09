@@ -79,3 +79,10 @@ Many commands have source and destination parameters which refer to a well or se
   Well A01 selected 4 times
 ``P1(A01),P2(D04)``
   2 wells, A01 on plate P1 and D04 on plate P2
+
+Limitations
+===========
+
+* Tube locations must be determined prior to execution of the script, and we assume that they will not be moved later on [2012-04-09]
+
+

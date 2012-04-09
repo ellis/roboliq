@@ -20,6 +20,23 @@ class EvowareTranslator(config: EvowareConfig) {
 	}
 }
 
+private class WellInfo(well: Well, state: WellState, pos: WellPosition) {
+	def id = well.id
+	def idPlate = pos.idPlate
+	def index = pos.index
+	//def iRow = pos.iRow
+}
+
+private object WellInfo {
+	def apply(well: Well, states: StateQuery): WellInfo = {
+		new WellInfo(
+			well,
+			states.findWellState(well.id).get,
+			states.findWellPosition(well.id).get
+		)
+	}
+}
+
 private class EvowareTranslator2(config: EvowareConfig, processorResult: ProcessorResult) {
 	private val ob = processorResult.ob
 	private val lNode = processorResult.lNode
@@ -168,18 +185,34 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				// ENDFIX
 				assert(rest.forall(twvp => twvp.policy.equals(sLiquidClass)))
 				
-				val idPlate = twvp0.well.idPlate
+				val lWellInfo = getWellInfo(items.map(_.well))
+				val idPlate = lWellInfo.head.idPlate
 				
 				// Assert that all tips are of the same kind
 				// TODO: Readd this error check somehow? -- ellis, 2011-08-25
 				//val tipKind = config.getTipKind(twvp0.tip)
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
-				if (!items.forall(_.well.idPlate eq idPlate))
+				if (!lWellInfo.forall(_.idPlate eq idPlate))
 					return Error(Seq("INTERNAL: all wells must be on the same plate"))
 				
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				val bEquidistant = Utils.equidistant(items)
+				// Assert that tips are spaced at equal distances to each other as the wells are to each other
+				def equidistant2(a: Tuple2[SpirateTokenItem, WellInfo], b: Tuple2[SpirateTokenItem, WellInfo]): Boolean =
+					(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
+				// Test all adjacent items for equidistance
+				def equidistant(tws: Seq[Tuple2[SpirateTokenItem, WellInfo]]): Boolean = tws match {
+					case Seq() => true
+					case Seq(_) => true
+					case Seq(a, b, rest @ _*) =>
+						equidistant2(a, b) match {
+							case false => false
+							case true => equidistant(Seq(b) ++ rest)
+						}
+				}
+				val lItemInfo = items zip lWellInfo
+				// All tip/well pairs are equidistant or all tips are going to the same well
+				val bEquidistant = equidistant(lItemInfo)
 				val bSameWell = items.forall(_.well eq twvp0.well)
 				if (!bEquidistant && !bSameWell)
 					return Error(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Printer.getWellsDebugString(items.map(_.well))))
@@ -189,9 +222,11 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 	}
 
 	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String, sLiquidClass: String): Result[Seq[L0C_Command]] = {
+		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head
+		val info0 = lWellInfo.head
 		//val tipKind = robot.getTipKind(item0.tip)
-		val idPlate = item0.well.idPlate
+		val idPlate = info0.idPlate
 		val mTips = encodeTips(items.map(_.tip))
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
@@ -211,7 +246,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			location <- getLocation(idPlate)
 			site <- getSite(location)
 		} yield {
-			val sPlateMask = encodeWells(plate, items.map(_.well.index))
+			val sPlateMask = encodeWells(plate, lWellInfo.map(_.index))
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
 			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
 			val cmd = L0C_Spirate(
@@ -289,17 +324,19 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 	}*/
 	
 	private def mix(builder: EvowareScriptBuilder, items: Seq[MixTokenItem]): Result[Seq[L0C_Command]] = {
-		items match {
+		val lWellInfo = getWellInfo(items.map(_.well))
+		val lItemInfo = items zip lWellInfo
+		lItemInfo match {
 			case Seq() => Error(Seq("Empty Tip-Well-Volume list"))
-			case Seq(item0, rest @ _*) =>
+			case Seq((item0, info0), rest @ _*) =>
 				// Get the liquid class
 				val sLiquidClass = item0.policy
 				// Assert that there is only one liquid class
-				if (rest.exists(_.policy != sLiquidClass)) {
+				if (rest.exists(_._1.policy != sLiquidClass)) {
 					items.foreach(item => println(item.policy))
 					return Error(Seq("INTERNAL: Liquid class must be the same for all mix items"))
 				}
-				if (rest.exists(_.count != item0.count))
+				if (rest.exists(_._1.count != item0.count))
 					return Error(Seq("INTERNAL: Mix count must be the same for all mix items"))
 				
 				// Assert that all tips are of the same kind and that all wells are on the same holder
@@ -309,10 +346,10 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				//assert(cmd.tws.forall(twv => (robot.getTipKind(twv.tip) eq tipKind) && (twv.well.holder eq holder)))
 				
 				// Assert that tips are spaced at equal distances to each other as the wells are to each other
-				def equidistant2(a: MixTokenItem, b: MixTokenItem): Boolean =
-					(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
+				def equidistant2(a: Tuple2[MixTokenItem, WellInfo], b: Tuple2[MixTokenItem, WellInfo]): Boolean =
+					(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
 				// Test all adjacent items for equidistance
-				def equidistant(tws: Seq[MixTokenItem]): Boolean = tws match {
+				def equidistant(tws: Seq[Tuple2[MixTokenItem, WellInfo]]): Boolean = tws match {
 					case Seq() => true
 					case Seq(_) => true
 					case Seq(a, b, rest @ _*) =>
@@ -322,16 +359,18 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 						}
 				}
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				assert(equidistant(items) || items.forall(_.well eq item0.well))
+				assert(equidistant(lItemInfo) || lItemInfo.forall(_._1.well eq item0.well))
 				
 				mixChecked(builder, items, sLiquidClass)
 		}
 	}
 
 	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[MixTokenItem], sLiquidClass: String): Result[Seq[L0C_Command]] = {
+		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head
+		val info0 = lWellInfo.head
 		//val tipKind = robot.getTipKind(item0.tip)
-		val idPlate = item0.well.idPlate
+		val idPlate = info0.idPlate
 		val mTips = encodeTips(items.map(_.tip))
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
@@ -349,7 +388,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			location <- getLocation(idPlate)
 			site <- getSite(location)
 		} yield {
-		val sPlateMask = encodeWells(plate, items.map(_.well.index))
+			val sPlateMask = encodeWells(plate, lWellInfo.map(_.index))
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
 			val cmd = L0C_Mix(
 				mTips, sLiquidClass,
@@ -451,6 +490,14 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 	
 	private def getLocation(idPlate: String): Result[String] = {
 		tracker.getLocationForCommand(idPlate, nodeCurrent.index)
+	}
+	
+	private def getWellInfo(well: Well): WellInfo = {
+		WellInfo(well, nodeCurrent.states0)
+	}
+	
+	private def getWellInfo(lWell: Iterable[Well]): List[WellInfo] = {
+		lWell.map(well => WellInfo(well, nodeCurrent.states0)).toList
 	}
 	
 	private def getSite(location: String): Result[CarrierSite] = {

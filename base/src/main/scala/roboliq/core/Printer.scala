@@ -27,20 +27,28 @@ object Printer {
 		val rrWell = wells.toList.foldLeft(List[List[Well]]())((acc, well) => acc match {
 			case Nil => List(List(well))
 			case (curr @ (prev :: rest)) :: others =>
-				if (well.idPlate eq prev.idPlate) (well :: curr) :: others
-				else List(well) :: (curr :: others)
+				(well, prev) match {
+					case (pwell: PlateWell, pprev: PlateWell) if (pwell.idPlate eq pprev.idPlate) =>
+						(well :: curr) :: others
+					case _ =>
+						List(well) :: (curr :: others)
+				}
 			case _ => Nil // Error
 		})
 		val lsPlates = rrWell.reverse.map(rWell => {
 			val lWell = rWell.reverse
-			val idPlate = lWell.head.idPlate
-			val lsWells = getWellStrings(lWell)
-			idPlate + ":" + lsWells.mkString(",")
+			lWell match {
+				case Nil => ""
+				case List(well) => well.id
+				case (well0: PlateWell) :: rest =>
+					val lsWells = getWellStrings(lWell.map(_.asInstanceOf[PlateWell]))
+					well0.idPlate + "(" + lsWells.mkString(",") + ")"
+			}
 		})
-		lsPlates.mkString(";")
+		lsPlates.mkString(",")
 	}
 	
-	private def getWellStrings(wells: List[Well]): List[String] = {
+	private def getWellStrings(wells: List[PlateWell]): List[String] = {
 		wells match {
 			case Nil => Nil
 			case well0 :: wellsNext0 =>
@@ -50,7 +58,7 @@ object Printer {
 		}
 	}
 	
-	private def getLastContiguousWell(wellPrev: Well, wells: List[Well]): Tuple2[Well, List[Well]] = {
+	private def getLastContiguousWell(wellPrev: PlateWell, wells: List[PlateWell]): Tuple2[PlateWell, List[PlateWell]] = {
 		wells match {
 			case Nil =>
 				(wellPrev, wells)

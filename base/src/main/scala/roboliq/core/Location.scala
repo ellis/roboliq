@@ -11,8 +11,7 @@ class PlateLocationBean extends Bean {
 
 class TubeLocationBean extends Bean {
 	@BeanProperty var tubeModels: java.util.List[String] = null
-	@BeanProperty var rows: java.lang.Integer = null
-	@BeanProperty var cols: java.lang.Integer = null
+	@BeanProperty var rackModel: String = null
 	@BeanProperty var cooled: java.lang.Boolean = null
 }
 
@@ -39,9 +38,8 @@ object PlateLocation {
 
 case class TubeLocation(
 	val id: String,
+	val rackModel: PlateModel,
 	val tubeModels: List[TubeModel],
-	val rows: Int,
-	val cols: Int,
 	val cooled: Boolean
 ) extends Location
 
@@ -49,13 +47,13 @@ object TubeLocation {
 	def fromBean(ob: ObjBase)(bean: TubeLocationBean): Result[TubeLocation] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
+			_ <- Result.mustBeSet(bean.rackModel, "rackModel")
 			tubeModels <- Result.mustBeSet(bean.tubeModels, "model")
-			lModel <- Result.mapOver(tubeModels.toList)(ob.findTubeModel)
+			lTubeModel <- Result.mapOver(tubeModels.toList)(ob.findTubeModel)
+			rackModel <- ob.findPlateModel(bean.rackModel)
 		} yield {
-			val rows: Int = if (bean.rows != null) bean.rows else 1
-			val cols: Int = if (bean.rows != null) bean.rows else 1
 			val cooled: Boolean = if (bean.cooled != null) bean.cooled else false
-			new TubeLocation(id, lModel, rows, cols, cooled)
+			new TubeLocation(id, rackModel, lTubeModel, cooled)
 		}
 	}
 }

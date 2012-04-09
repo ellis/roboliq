@@ -13,6 +13,7 @@ tips:
   TIP8: { index: 7, model: Standard 50ul }
 
 plateModels:
+  "Reagent Cooled 8*50ml": { rows: 8, cols: 1, volume: 50e-3 }
   "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12, volume: 200e-6 }
   "D-BSSE 96 Well Costar Plate": { rows: 8, cols: 12, volume: 350e-6 }
   "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 6000e-6 }
@@ -30,7 +31,10 @@ locations:
   cooled4: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled5: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
 
+plates:
+  reagents50: { model: "Reagent Cooled 8*50ml" }
+
 tubeLocations:
-  reagents15: { tubeModels: ["Tube 50ml"], rows: 8 }
-  reagents50: { tubeModels: ["Tube 50ml"], rows: 8 }
-  reagents50: { tubeModels: ["Tube 50ml"], rows: 4, cols: 5 }
+#  reagents15: { tubeModels: ["Tube 15ml"], rows: 8 }
+  reagents50: { tubeModels: ["Tube 50ml"], rackModel: "Reagent Cooled 8*50ml" }
+#  reagents1.5: { tubeModels: ["Tube 1.5ml"], rows: 4, cols: 5 }

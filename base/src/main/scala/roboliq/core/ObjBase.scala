@@ -21,6 +21,8 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapWell = new HashMap[String, Well]
 	private val m_mapLiquid = new HashMap[String, Liquid]
 	
+	//private val m_
+	
 	//private val m_mapWellState = new HashMap[String, WellState]
 	//private val m_mapState = new HashMap[String, Object]
 	
@@ -56,6 +58,7 @@ class ObjBase(bb: BeanBase) {
 	
 	def findAllTubeLocations(): Result[List[TubeLocation]] = {
 		val l = bb.mapTubeLocation.keys.toList.map(findTubeLocation)
+		println("findAllTubeLocations: "+l)
 		if (l.forall(_.isSuccess))
 			Result.sequence(l).map(_.toList)
 		else
@@ -175,6 +178,13 @@ class ObjBase(bb: BeanBase) {
 			Some(l.flatten)
 	}
 	
+	def findWell(id: String): Result[Well] = {
+		m_mapWell.get(id) match {
+			case Some(obj) => Success(obj)
+			case None => createWell(id)
+		}
+	}
+	
 	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
 		if (id == null) {
 			if (requireId)
@@ -212,13 +222,6 @@ class ObjBase(bb: BeanBase) {
 				case Error(ls) => ls.foreach(node.addError); None
 				case Success(l) => Some(l)
 			}
-		}
-	}
-	
-	def findWell(id: String): Result[Well] = {
-		m_mapWell.get(id) match {
-			case Some(obj) => Success(obj)
-			case None => createWell(id)
 		}
 	}
 	
@@ -313,7 +316,9 @@ class ObjBase(bb: BeanBase) {
 							case tube: Tube =>
 								new TubeState(
 									obj = tube,
-									location = null,
+									idPlate = null,
+									row = -1,
+									col = -1,
 									liquid = Liquid.empty,
 									nVolume = LiquidVolume.empty,
 									bCheckVolume = true,

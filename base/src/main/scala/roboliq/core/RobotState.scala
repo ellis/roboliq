@@ -53,6 +53,8 @@ trait StateMap extends StateQuery {
 		}
 	}
 	
+	def findPlate(id: String): Result[Plate] = ob.findPlate(id)
+	
 	def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findWellState(id: String): Result[WellState] = {
@@ -63,6 +65,16 @@ trait StateMap extends StateQuery {
 		}
 		//println("  "+s)
 		s
+	}
+	
+	def findWellPosition(id: String): Result[WellPosition] = {
+		findWellState(id) match {
+			case Success(pwell: PlateWellState) =>
+				Success(WellPosition(pwell.conf))
+			case Success(twell: TubeState) =>
+				WellPosition.forTube(twell, this)
+			case Error(ls) => Error(ls)
+		}
 	}
 }
 

@@ -27,6 +27,10 @@ object PipetteHelper {
 		}
 		Success(twss)
 	}
+	
+	private def getWellPosList(states: StateMap, wells: Iterable[Well]): Result[List[Tuple2[Well, WellPosition]]] = {
+		states.getWellPosList(wells)
+	}
 
 	def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
 		//println("chooseTipWellPairsNext()")
@@ -35,73 +39,91 @@ object PipetteHelper {
 		if (tips.isEmpty || wells.isEmpty)
 			return Success(Nil)
 
-		val (idPlate, wellsOnHolder, iCol) = getHolderWellsCol(states, wells, twsPrev)
-		val well0 = getFirstWell(states, idPlate, wellsOnHolder, iCol) match {
-			case Error(ls) => return Error(ls)
-			case Success(well0) => well0
-		}
-		val plate = states.ob.findPlate(idPlate) match {
-			case Error(ls) => return Error(ls)
-			case Success(plate) => plate
-		}
-
-		val tip0 = tips.head
-		val iRowTip0 = tip0.index
-		val iColTip0 = 0
-		
-		val pairs = new ArrayBuffer[TipWell]
-		pairs += new TipWell(tip0, well0)
-		//println(well0.index+" START")
-		for (tip <- tips.tail) {
-			val dRowTip = tip.index - tip0.index
-			val iWell = well0.index + dRowTip
-			val iColWell = iWell / plate.model.nRows
-			if (iColWell == well0.iCol) {
-				wellsOnHolder.find(_.index == iWell) match {
-					case None =>
-					case Some(well) => pairs += new TipWell(tip, well)
+		for {
+			temp1 <- getHolderWellsCol(states, wells, twsPrev)
+			val (idPlate, lWellPosOnHolder, iCol) = temp1
+			//lWellPos <- getWellPosList(states, wellsOnHolder)
+			well0 <- getFirstWell(states, idPlate, lWellPosOnHolder, iCol)
+			plate <- states.ob.findPlate(idPlate)
+			pos0 <- states.findWellPosition(well0.id)
+		} yield {
+			val tip0 = tips.head
+			val iRowTip0 = tip0.index
+			val iColTip0 = 0
+			
+			val pairs = new ArrayBuffer[TipWell]
+			pairs += new TipWell(tip0, well0)
+			//println(well0.index+" START")
+			for (tip <- tips.tail) {
+				val dRowTip = tip.index - tip0.index
+				val iWell = pos0.index + dRowTip
+				val iColWell = iWell / plate.model.nRows
+				if (iColWell == pos0.iCol) {
+					lWellPosOnHolder.find(_._2.index == iWell) match {
+						case None =>
+						case Some((well, pos)) => pairs += new TipWell(tip, well)
+					}
 				}
 			}
+			pairs.toSeq
 		}
-		Success(pairs.toSeq)
 	}
 
-	private def getHolderWellsCol(states: StateMap, wells: SortedSet[Well], twsPrev: Seq[TipWell]): Tuple3[String, SortedSet[Well], Int] = {
-		// Pick a "reference" well if twsPrev isn't empty
-		val wellRef_? = {
-			if (twsPrev.isEmpty)
-				None
-			else {
-				val wellRef = twsPrev.last.well
-				val idPlate = wellRef.idPlate
-				if (wells.exists(_.idPlate == idPlate))
-					Some(wellRef)
-				else
+	private def getHolderWellsCol(
+		states: StateMap, wells: SortedSet[Well], twsPrev: Seq[TipWell]
+	): Result[
+		Tuple3[
+			String, 
+			List[Tuple2[Well, WellPosition]], 
+			Int
+		]
+	] = {
+		for {
+			lWellPos <- getWellPosList(states, wells)
+		} yield {
+			// Pick a "reference" well if twsPrev isn't empty
+			val wellRef_? = {
+				if (twsPrev.isEmpty)
 					None
+				else {
+					val wellRef = twsPrev.last.well
+					states.findWellPosition(wellRef.id) match {
+						case Error(ls) => return Error(ls)
+						case Success(posRef) =>
+							if (lWellPos.exists(_._2.idPlate == posRef.idPlate))
+								Some(wellRef)
+							else
+								None
+					}
+				}
 			}
+			//println("wellRef_?: "+wellRef_?)
+			val posRef_? = wellRef_? match {
+				case None => None
+				case Some(wellRef) => states.findWellPosition(wellRef.id).toOption
+			}
+	
+			// Get the holder of interest
+			val idPlate: String = posRef_? match {
+				case None => lWellPos.head._2.idPlate
+				case Some(posRef) => posRef.idPlate
+			}
+			//println("holder: "+holder)
+	
+			// Either choose the first column or the column after the reference well
+			val iCol = posRef_? match {
+				case None => 0
+				case Some(posRef) => posRef.iCol + 1
+			}
+	
+			val lWellPosOnHolder = lWellPos.filter(_._2.idPlate == idPlate)
+			(idPlate, lWellPosOnHolder, iCol)
 		}
-		//println("wellRef_?: "+wellRef_?)
-
-		// Get the holder of interest
-		val idPlate: String = wellRef_? match {
-			case None => wells.head.idPlate
-			case Some(wellRef) => wellRef.idPlate
-		}
-		//println("holder: "+holder)
-
-		// Either choose the first column or the column after the reference well
-		val iCol = wellRef_? match {
-			case None => 0
-			case Some(wellRef) => wellRef.iCol + 1
-		}
-
-		val wellsOnHolder = wells.filter(_.idPlate == idPlate)
-		(idPlate, wellsOnHolder, iCol)
 	}
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: SortedSet[Well], iCol0: Int): Result[Well] = {
+	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: List[Tuple2[Well, WellPosition]], iCol0: Int): Result[Well] = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
@@ -116,9 +138,8 @@ object PipetteHelper {
 				val nCols = plate.model.nCols
 					
 				def checkCol(iCol: Int): Well = {
-					val well_? = wellsOnHolder.find(_.iCol == iCol)
-					well_? match {
-						case Some(well) => well
+					wellsOnHolder.find(_._2.iCol == iCol) match {
+						case Some((well, pos)) => well
 						case None => checkCol((iCol + 1) % nCols)
 					}
 				}
@@ -152,83 +173,100 @@ object PipetteHelper {
 	 *   - if there is 1 well, add it
 	 *   - if there are 2 wells, add the one which occurs first in the sorted order
 	 */
-	def chooseAdjacentWellsByVolume(states: StateMap, wells: Set[Well], nCount: Int): SortedSet[Well] = {
+	def chooseAdjacentWellsByVolume(states: StateMap, wells: Set[Well], nCount: Int): Result[SortedSet[Well]] = {
 		if (nCount <= 0 || wells.isEmpty)
-			return SortedSet()
+			return Success(SortedSet())
 		
 		// sort the sources by volume descending (secondary sort key is index order)
 		// TRUE means that well1 should be placed before well2
 		def compare(well1: Well, well2: Well): Boolean = {
-			val a = well1.state(states)
-			val b = well2.state(states)
-			if (a.nVolume == b.nVolume)
-				well1.compare(well2) <= 0
-			else
-				a.nVolume > b.nVolume
+			(for {
+				st1 <- states.findWellState(well1.id)
+				st2 <- well2.wellState(states)
+			} yield {
+				if (st1.nVolume == st2.nVolume)
+					well1.compare(well2) <= 0
+				else
+					st1.nVolume > st2.nVolume
+			}) getOrElse (well1.compare(well2) <= 0)
 		}
 		val order = wells.toSeq.sortWith(compare)
 		
 		//println("step0: "+nCount+","+wells)
-		chooseAdjacentWellsByVolume_Step1(order, nCount)
+		chooseAdjacentWellsByVolume_Step1(states, order, nCount)
 	}
 	
-	private def chooseAdjacentWellsByVolume_Step1(order: Seq[Well], nCount: Int): SortedSet[Well] = {
-		val wells = chooseAdjacentWellsByVolume_Step2(order, nCount)
-		val wellsAll = {
+	private def chooseAdjacentWellsByVolume_Step1(states: StateMap, order: Seq[Well], nCount: Int): Result[SortedSet[Well]] = {
+		def makeWellsAll(wells: Set[Well]): Result[Set[Well]] = {
 			if (wells.isEmpty)
-				Set()
+				Success(Set())
 			else {
 				val order1 = order.filter(well => !wells.contains(well))
 				val nCount1 = nCount - wells.size
 				if (nCount1 > 0 && !order1.isEmpty) {
-					wells ++ chooseAdjacentWellsByVolume_Step2(order1, nCount1)
+					chooseAdjacentWellsByVolume_Step2(states, order1, nCount1).map(wells ++ _)
 				}
 				else
-					wells
+					Success(wells)
 			}
 		}
-		//println("step1: "+SortedSet(wellsAll.toSeq : _*))
-		SortedSet(wellsAll.toSeq : _*)
+		
+		for {
+			wells <- chooseAdjacentWellsByVolume_Step2(states, order, nCount)
+			wellsAll <- makeWellsAll(wells)
+		} yield {
+			//println("step1: "+SortedSet(wellsAll.toSeq : _*))
+			SortedSet(wellsAll.toSeq : _*)
+		}
 	}
 
-	private def chooseAdjacentWellsByVolume_Step2(order: Seq[Well], nCount: Int): Set[Well] = {
+	private def chooseAdjacentWellsByVolume_Step2(states: StateMap, order: Seq[Well], nCount: Int): Result[Set[Well]] = {
 		if (nCount <= 0 || order.isEmpty)
-			return Set()
+			return Success(Set())
 
-		val well0 = order.head
-		if (nCount == 1) {
-			//println("step2: "+well0)
-			return Set(well0)
-		}
-		
-		var iRowTop = well0.iRow
-		var iRowBot = iRowTop
-		def isAboveOrBelow(well: Well): Boolean = {
-			if (well.idPlate != well0.idPlate)
-				return false
-			if (well.iCol != well0.iCol)
-				return false
-			(well.iRow == iRowTop - 1 || well.iRow == iRowBot + 1)
-		}
-		
-		val wells = new ArrayBuffer[Well]
-		wells += well0
-		var wellsInCol = order.filter(well => well.ne(well0) && well.iCol == well0.iCol)
-		def step() {
-			wellsInCol.find(isAboveOrBelow) match {
-				case None =>
-				case Some(well) =>
-					wells += well
-					wellsInCol = wellsInCol.filter(_ ne well)
-					iRowTop = math.min(iRowTop, well.iRow)
-					iRowBot = math.max(iRowBot, well.iRow)
-					if (wells.size < nCount)
-						step()
+		for {
+			lOrderPos <- getWellPosList(states, order)
+		} yield {
+			val (well0, pos0) = lOrderPos.head
+			
+			if (nCount == 1) {
+				//println("step2: "+well0)
+				return Success(Set(well0))
 			}
+			
+			var iRowTop = pos0.iRow
+			var iRowBot = iRowTop
+			def isAboveOrBelow(pos: WellPosition): Boolean = {
+				if (pos.idPlate != pos0.idPlate)
+					false
+				else if (pos.iCol != pos0.iCol)
+					false
+				else
+					(pos.iRow == iRowTop - 1 || pos.iRow == iRowBot + 1)
+			}
+			
+			val wells = new ArrayBuffer[Well]
+			wells += well0
+			var wellsInCol = lOrderPos.filter(pair => {
+				val (well, pos) = pair
+				well.ne(well0) && pos.iCol == pos0.iCol
+			})
+			def step() {
+				wellsInCol.find(pair => isAboveOrBelow(pair._2)) match {
+					case None =>
+					case Some((well, pos)) =>
+						wells += well
+						wellsInCol = wellsInCol.filter(_ ne well)
+						iRowTop = math.min(iRowTop, pos.iRow)
+						iRowBot = math.max(iRowBot, pos.iRow)
+						if (wells.size < nCount)
+							step()
+				}
+			}
+			step()
+			//println("step2: "+wells.sortBy(_.index))
+			SortedSet(wells : _*)
 		}
-		step()
-		//println("step2: "+wells.sortBy(_.index))
-		SortedSet(wells : _*)
 	}
 	
 	def chooseTipSrcPairs(states: StateMap, tips: SortedSet[Tip], srcs: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
@@ -243,9 +281,9 @@ object PipetteHelper {
 		process(tips, Nil, processStep)
 	}
 	
-	def splitTipWellPairs(tws: Seq[TipWell]): Seq[Seq[TipWell]] = {
+	def splitTipWellPairs(states: StateMap, tws: Seq[TipWell]): Seq[Seq[TipWell]] = {
 		val map = tws.map(tw => tw.well -> tw).toMap
-		val gws: Iterable[WellGroup] = WellGroup(tws.map(_.well)).splitByAdjacent()
+		val gws: Iterable[WellGroup] = WellGroup(states, tws.map(_.well)).splitByAdjacent()
 		val twss1: Iterable[Seq[TipWell]] = gws.map(_.set.toSeq.map(well => map(well)))
 		//val twss2: Iterable[Seq[TipWell]] = twss1.flatMap(splitTipWellPairs2)
 		/*println("map: "+map)

@@ -166,11 +166,11 @@ class PipetteScheduler(
 			if (!lItemNext.isEmpty) {
 				// last two items in the group
 				val lDest = gLast.lItem.map(_.dest).reverse.take(2).reverse
-				val wellGroups = WellGroup(lDest).splitByCol
+				val wellGroups = WellGroup(gLast.states0, lDest).splitByCol
 				val bItemsInSameCol = (wellGroups.size == 1)
 				if (!bItemsInSameCol) {
 					val itemNext = lItemNext.head
-					val wellGroups2 = WellGroup(lDest ++ Seq(itemNext.dest)).splitByCol
+					val wellGroups2 = WellGroup(gLast.states0, lDest ++ Seq(itemNext.dest)).splitByCol
 					val bNextItemInDifferentCol = (wellGroups.size < wellGroups2.size)
 					if (bNextItemInDifferentCol) {
 						lGR
@@ -273,14 +273,14 @@ class PipetteScheduler(
 			case g :: Nil => g :: acc
 			case g :: (lG2 @ (g2 :: _)) =>
 				val acc2 = {
-					val wellGroup = WellGroup(g2.lItem.takeRight(2).map(_.dest).distinct).splitByAdjacent()
+					val wellGroup = WellGroup(g2.states0, g2.lItem.takeRight(2).map(_.dest).distinct).splitByAdjacent()
 					// If new item is not adjacent to previous one, save the preceding group
 					if (wellGroup.size > 1) {
 						//println("keep:")
 						//println(g)
 						// FIXME: for debug only
-						val iWell0 = g2.lItem.head.dest.index
-						val iWell1 = g2.lItem.last.dest.index
+						//val iWell0 = g2.lItem.head.dest.index
+						//val iWell1 = g2.lItem.last.dest.index
 						// ENDFIX
 						g :: acc
 					}

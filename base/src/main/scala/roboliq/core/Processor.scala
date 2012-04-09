@@ -73,22 +73,19 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 									seenPlate += id
 								}
 							}) orElse
-							// Else if it's a tube
-							(for {tube <- ob.findTube(id)} yield {
-								if (!seenPlate.contains(id)) {
-									lTube = (node, tube) :: lTube
-									seenPlate += id
-								}
-							}) orElse
 							// Else if it's a well
-							(for {well <- ob.findWell(id)} yield {
-								if (!seenPlate.contains(well.idPlate)) {
-									lPlate = (node, ob.findPlate(well.idPlate).get) :: lPlate
-									seenPlate += well.idPlate
-								}
-							}) match {
+							ob.findWell(id) match {
 								case Error(ls) => ls.foreach(node.addError)
-								case _ =>
+								case Success(well: PlateWell) =>
+									if (!seenPlate.contains(well.idPlate)) {
+										lPlate = (node, ob.findPlate(well.idPlate).get) :: lPlate
+										seenPlate += well.idPlate
+									}
+								case Success(tube: Tube) =>
+									if (!seenPlate.contains(id)) {
+										lTube = (node, tube) :: lTube
+										seenPlate += id
+									}
 							}
 						}
 					}
@@ -129,6 +126,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				}
 			}
 		})
+		println("lTube: "+lTube)
 		// If tube locations are defined in database
 		ob.findAllTubeLocations().foreach(lLocation => {
 			// Construct mutable list of all free locations
@@ -143,6 +141,8 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						lLocFree -= location
 						locationBuilder.addLocation(tube.id, node.index, location.id)
 						println("added to location builder: ", tube.id, node.index, location)
+						// Set TubeState properties
+						TubeLocationEventBean(tube, location.id, 0, 0).update(ob.builder)
 				}
 			}
 		})
@@ -155,9 +155,11 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		// Expand all nodes in-order until we have only final tokens
 		def expand2(nodes: List[CmdNodeBean]) {
 			for (node <- nodes if node.getErrorCount == 0 && node.childCommands == null) {
+				node.states0 = builder.toImmutable
+
 				val handler = node.handler
 				val cmd = node.command
-				val ctx = new ProcessorContext(this, node, ob, Some(builder), builder.toImmutable)
+				val ctx = new ProcessorContext(this, node, ob, Some(builder), node.states0)
 				val messages = new CmdMessageWriter(node)
 				
 				//println("expand2: command "+node.index)
@@ -173,16 +175,19 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						}
 						if (!events.isEmpty) {
 							node.events = events
-							node.events.foreach(_.update(builder)) 
 						}
 					case Expand2Tokens(tokens, events) =>
 						if (!tokens.isEmpty)
 							node.tokens = tokens
 						if (!events.isEmpty) {
 							node.events = events
-							node.events.foreach(_.update(builder))
 						}
 				}
+				// Update states based on events
+				if (!node.events.isEmpty) {
+					node.events.foreach(_.update(builder)) 
+				}
+				node.states1 = builder.toImmutable
 			}
 		}
 		

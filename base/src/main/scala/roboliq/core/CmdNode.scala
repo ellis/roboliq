@@ -6,6 +6,7 @@ class CmdNodeBean {
 	var handler: CmdHandler = null
 	var childCommands: java.util.List[CmdBean] = null
 	var tokens: List[CmdToken] = null
+	var states0: RobotState = null
 	var states1: RobotState = null
 	var lIndex: List[Int] = null
 

@@ -30,14 +30,14 @@ class GroupABuilder(
 		val states = new StateBuilder(ctx.states)
 		items.map(item => {
 			val src = item.srcs.head
-			val liquid = src.state(states).liquid
+			val liquid = src.wellState(states).get.liquid
 			val dest = item.dest
-			val state0 = dest.state(states)
+			val state0 = dest.wellState(states).get
 			
 			// Remove from source and add to dest
 			src.stateWriter(states).remove(item.nVolume)
 			dest.stateWriter(states).add(liquid, item.nVolume)
-			val state1 = dest.state(states)
+			val state1 = dest.wellState(states).get
 			
 			item -> ItemState(item, liquid, state0, state1)
 		}).toMap
@@ -168,14 +168,14 @@ class GroupABuilder(
 		val states = new StateBuilder(ctx.states)
 		val mItemToState1 = items1.map(item => {
 			val src = item.srcs.head
-			val liquid = src.state(states).liquid
+			val liquid = src.wellState(states).get.liquid
 			val dest = item.dest
-			val state0 = dest.state(states)
+			val state0 = dest.wellState(states).get
 			
 			// Remove from source and add to dest
 			src.stateWriter(states).remove(item.nVolume)
 			dest.stateWriter(states).add(liquid, item.nVolume)
-			val state1 = dest.state(states)
+			val state1 = dest.wellState(states).get
 			
 			mItemToState.get(item) match {
 				case Some(itemState) => item -> itemState
@@ -349,7 +349,7 @@ class GroupABuilder(
 		//     call chooseTips() again, but with no tipBindings0 and indicate on return that a cleaning was required
 		
 		// for each LM: find max number of adjacent wells for aspirate/dispense
-		val mLMToAdjacent: Map[LM, Int] = g0.mLMToItems.mapValues(countMaxAdjacentWells)
+		val mLMToAdjacent: Map[LM, Int] = g0.mLMToItems.mapValues(countMaxAdjacentWells(g0.states0))
 		// list of tip count ranges: (LM, nTipsMin, nTipsMap)
 		val lLMRange1: Seq[Tuple3[LM, Int, Int]] = g0.mLMData.toSeq.map(pair => {
 			val lm = pair._1
@@ -408,9 +408,9 @@ class GroupABuilder(
 	}
 	
 	/** Get the maximum number of adjacent wells */
-	def countMaxAdjacentWells(lItem: Seq[Item]): Int = {
+	private def countMaxAdjacentWells(query: StateQuery)(lItem: Seq[Item]): Int = {
 		val lWell = lItem.map(_.dest)
-		WellGroup(lWell).splitByAdjacent().foldLeft(0)((acc, group) => math.max(acc, group.set.size))
+		WellGroup(query, lWell).splitByAdjacent().foldLeft(0)((acc, group) => math.max(acc, group.set.size))
 	}
 	
 	def updateGroupA3_mLMToTips(g0: GroupA): GroupResult = {
@@ -682,7 +682,7 @@ class GroupABuilder(
 						return GroupError(g0, Seq("premix specs must be the same for all items which refer to the same source"))
 					}
 					ltw.map(tw => {
-						val mixSpec = device.getMixSpec(tw.tip.state(g0.states0), tw.well.state(g0.states0), Some(premix)) match {
+						val mixSpec = device.getMixSpec(tw.tip.state(g0.states0), tw.well.wellState(g0.states0).get, Some(premix)) match {
 							case Error(lsError) => return GroupError(g0, lsError)
 							case Success(o) => o
 						}
@@ -714,7 +714,7 @@ class GroupABuilder(
 		for ((item, policyDisp) <- g0.mItemToPolicy) {
 			val pos = if (item.postmix_?.isDefined || cmd.args.mixSpec_?.isDefined) PipettePosition.WetContact else policyDisp.pos
 			// TODO: need to keep track of well liquid as we go, since we might dispense into a single well multiple times
-			val liquidDest = item.dest.state(g0.states0).liquid
+			val liquidDest = item.dest.wellState(g0.states0).get.liquid
 			// If we enter the destination liquid:
 			if (pos == PipettePosition.WetContact) {
 				val tip = g0.mItemToTip(item)
@@ -800,14 +800,14 @@ class GroupABuilder(
 		//println("g0.lAspirate: "+g0.lAspirate)
 		for (asp <- g0.lAspirate) {
 			// FIXME: for debug only
-			if ((asp.well.state(builder).liquid != g0.mTipToLM(asp.tip).liquid)) {
-				println("asp.well.state(builder): "+asp.well.state(builder))
+			if ((asp.well.wellState(builder).get.liquid != g0.mTipToLM(asp.tip).liquid)) {
+				println("asp.well.state(builder): "+asp.well.wellState(builder).get)
 				println("g0.mTipToLM(asp.tip): "+g0.mTipToLM(asp.tip))
 			}
-			assert(asp.well.state(builder).liquid == g0.mTipToLM(asp.tip).liquid)
+			assert(asp.well.wellState(builder).get.liquid == g0.mTipToLM(asp.tip).liquid)
 			//println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
 			// ENDFIX
-			asp.tip.stateWriter(builder).aspirate(asp.well, asp.well.state(builder).liquid, asp.nVolume)
+			asp.tip.stateWriter(builder).aspirate(asp.well, asp.well.wellState(builder).get.liquid, asp.nVolume)
 			asp.well.stateWriter(builder).remove(asp.nVolume)
 		}
 		

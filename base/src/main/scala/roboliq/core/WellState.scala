@@ -48,7 +48,9 @@ class PlateWellState(
 
 class TubeState(
 	val obj: Tube,
-	val location: String,
+	val idPlate: String,
+	val row: Int,
+	val col: Int,
 	liquid: Liquid,
 	nVolume: LiquidVolume,
 	bCheckVolume: Boolean,
@@ -61,7 +63,7 @@ class TubeState(
 		bCheckVolume: Boolean = bCheckVolume
 	): TubeState = {
 		new TubeState(
-			obj, location, liquid, nVolume, bCheckVolume, event :: history
+			obj, idPlate, row, col, liquid, nVolume, bCheckVolume, event :: history
 		)
 	}
 }
@@ -147,6 +149,43 @@ class WellStateWriter(id: String, builder: StateBuilder) {
 			}
 		}
 		set(st.update(null, nVolume = st.nVolume - nVolume2))
+	}
+}
+
+class TubeLocationEventBean extends WellEventBean {
+	@BeanProperty var location: String = null
+	@BeanProperty var row: java.lang.Integer = null
+	@BeanProperty var col: java.lang.Integer = null
+	
+	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
+		val st = state0.asInstanceOf[TubeState]
+		for {
+			_ <- Result.mustBeSet(location, "location")
+			_ <- Result.mustBeSet(row, "row")
+			_ <- Result.mustBeSet(col, "col")
+		} yield {
+			new TubeState(
+				obj = st.obj,
+				idPlate = location,
+				row = row,
+				col = col,
+				liquid = st.liquid,
+				nVolume = st.nVolume,
+				bCheckVolume = st.bCheckVolume,
+				history = st.history
+			)
+		}
+	}
+}
+
+object TubeLocationEventBean {
+	def apply(tube: Tube, location: String, row: Int, col: Int): TubeLocationEventBean = {
+		val bean = new TubeLocationEventBean
+		bean.obj = tube.id
+		bean.location = location
+		bean.row = row
+		bean.col = col
+		bean
 	}
 }
 
