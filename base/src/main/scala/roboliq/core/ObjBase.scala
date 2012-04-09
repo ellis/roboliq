@@ -15,6 +15,7 @@ class ObjBase(bb: BeanBase) {
 
 	private val m_mapSubstance = new HashMap[String, Substance]
 	private val m_mapPlate = new HashMap[String, Plate]
+	private val m_mapTube = new HashMap[String, Tube]
 	private val m_mapWell = new HashMap[String, Well]
 	private val m_mapLiquid = new HashMap[String, Liquid]
 	
@@ -77,6 +78,10 @@ class ObjBase(bb: BeanBase) {
 	
 	def findPlate(id: String): Result[Plate] = {
 		find(id, m_mapPlate, bb.mapPlate, Plate.fromBean(this), "Plate")
+	}
+	
+	def findTube(id: String): Result[Tube] = {
+		find(id, m_mapTube, bb.mapTube, Tube.fromBean(this), "Tube")
 	}
 	
 	def findSubstance(id: String): Result[Substance] = {
@@ -201,7 +206,10 @@ class ObjBase(bb: BeanBase) {
 		} yield {
 			val (idPlate, indexName, iRow, iCol) = res
 			if (indexName == "") {
-				val well = new Tube(idPlate)
+				val well = findTube(idPlate) match {
+					case Error(ls) => return Error(ls)
+					case Success(tube) => tube
+				}
 				m_mapWell(id) = well
 				well
 			}

@@ -50,8 +50,11 @@ class YamlTest2 {
 	}
 }
 
-object BsseMain extends App {
-	new YamlTest2().run
+object BsseMain {
+	def main(args: Array[String]) {
+		new YamlTest2().run
+	}
+	
 	/*
 	def runProtocol(lItem: List[roboliq.protocol.Item], db: ItemDatabase, sFilename: String) {
 		val sHome = System.getProperty("user.home")

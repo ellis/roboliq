@@ -41,13 +41,3 @@ class PlateWell(
 		this, Liquid.empty, LiquidVolume.empty, false
 	)*/
 }
-
-class Tube(
-	val id: String
-) extends Well {
-	val idPlate = id
-	val index = 0
-	val iRow = 0
-	val iCol = 0
-	val indexName = ""
-}

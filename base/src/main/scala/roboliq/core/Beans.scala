@@ -32,6 +32,7 @@ class RoboliqYamlBean {
 	// Database
 	@BeanProperty var substances: java.util.LinkedHashMap[String, SubstanceBean] = null
 	@BeanProperty var plates: java.util.LinkedHashMap[String, PlateBean] = null
+	@BeanProperty var tubes: java.util.LinkedHashMap[String, PlateBean] = null
 	@BeanProperty var events: java.util.LinkedHashMap[String, java.util.List[EventBean]] = null
 	
 	// Protocol

@@ -16,6 +16,7 @@ class BeanBase {
 
 	private val m_mapSubstance = new HashMap[String, SubstanceBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]
+	private val m_mapTube = new HashMap[String, PlateBean]
 	private val m_mapEvents = new HashMap[String, List[EventBean]]
 	
 	def mapSystemProperties: scala.collection.Map[String, Object] = m_mapSystemProperties
@@ -25,6 +26,7 @@ class BeanBase {
 	def mapLocation: scala.collection.Map[String, LocationBean] = m_mapLocation
 	def mapSubstance: scala.collection.Map[String, SubstanceBean] = m_mapSubstance
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
+	def mapTube: scala.collection.Map[String, PlateBean] = m_mapTube
 	def mapEvents: scala.collection.Map[String, List[EventBean]] = m_mapEvents
 	def lDevice = m_lDevice
 	def lCmdHandler = m_lCmdHandler
@@ -74,6 +76,11 @@ class BeanBase {
 		if (bean.plates != null) {
 			bean.plates.foreach(pair => pair._2._id = pair._1)
 			m_mapPlate ++= bean.plates
+		}
+		// Add tubes
+		if (bean.tubes != null) {
+			bean.tubes.foreach(pair => pair._2._id = pair._1)
+			m_mapTube ++= bean.tubes
 		}
 		// Add events
 		if (bean.events != null) {

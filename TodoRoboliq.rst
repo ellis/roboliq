@@ -1,5 +1,3 @@
-.. role:: done
-
 =================
 Programming Tasks
 =================
