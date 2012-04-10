@@ -117,6 +117,13 @@ class Liquid(
 	def getName() = if (sName == null) "<unnamed>" else sName
 	
 	override def toString = getName()
+	override def equals(that: Any): Boolean = {
+		that match {
+			case b: Liquid => sName == b.sName
+			case _ => assert(false); false
+		}
+	}
+	override def hashCode() = sName.hashCode()
 }
 
 object Liquid {

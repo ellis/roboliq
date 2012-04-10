@@ -14,8 +14,9 @@ tubes:
   T50water1: { model: "Tube 50ml" }
 
 events:
-  T50water1: [ !add { src: water, volume: 49e-3 } ]
-  reagents50(A01): [ !add { src: water, volume: 49e-3 } ]
+#- T50water1: [ !add { src: water, volume: 49e-3 } ]
+#- !add { obj: P1(A01), src: water, volume: 100e-6 }
+- !add { obj: reagents50(A01), substance: water, volume: 49e-3 }
 
 commands:
 - !!roboliq.commands.pipette.PipetteCmdBean

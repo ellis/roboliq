@@ -90,6 +90,19 @@ class WellAddEventBean extends WellEventBean {
 				)
 			}
 		}
+		else if (substance != null) {
+			for {sub <- states0.findSubstance(substance)}
+			yield {
+				val content: VesselContent = sub match {
+					case liquid: SubstanceLiquid =>
+						state0.content.addLiquid(liquid, LiquidVolume.l(volume))
+					case _ => assert(false); null
+				}
+				state0.update(this,
+					content = content
+				)
+			}
+		}
 		else {
 			Error("`src` must be set")
 		}

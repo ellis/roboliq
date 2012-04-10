@@ -822,6 +822,7 @@ class GroupABuilder(
 		for (asp <- g0.lAspirate) {
 			// FIXME: for debug only
 			if ((asp.well.wellState(builder).get.liquid != g0.mTipToLM(asp.tip).liquid)) {
+				println("DEBUG")
 				println("asp.well.state(builder): "+asp.well.wellState(builder).get)
 				println("g0.mTipToLM(asp.tip): "+g0.mTipToLM(asp.tip))
 			}
