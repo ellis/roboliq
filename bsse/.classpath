@@ -7,5 +7,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-B-evoware"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/roboliq-A1-base"/>
 	<classpathentry kind="lib" path="lib/snakeyaml-1.10.jar"/>
+	<classpathentry kind="lib" path="/home/public/src/roboliq/lib/commons-io-2.2.jar"/>
+	<classpathentry kind="lib" path="/home/public/src/roboliq/lib/commons-io-2.2-sources.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

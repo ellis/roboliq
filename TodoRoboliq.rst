@@ -38,6 +38,8 @@ General
 Soon
 ----
 
+* ``PipetteScheduler``: improve performance
+* ``PipetteScheduler``: create a much simpler version using a combinatorial approach -- worry about correctness, not performance
 * ``CmdBean``: autogenerate ``doc`` property
 * ``EvowareTranslator``: output ``doc`` properties as comments
 * ``ObjBase``: ``builder`` should not be accessible from outside -- should only contain "original" states, not any which come from running commands

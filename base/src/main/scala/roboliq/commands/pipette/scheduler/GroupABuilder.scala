@@ -82,10 +82,10 @@ class GroupABuilder(
 				// ENDFIX
 				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
 				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
-				println("liquids: "+liquids)
+				///println("liquids: "+liquids)
 				mapLiquidToModel ++= liquids.map(_ -> tipModel)
 				// FIXME: for debug only
-				println("mapModelToCount: "+mapModelToCount)
+				//println("mapModelToCount: "+mapModelToCount)
 				if (liquids.isEmpty) {
 					println(items)
 					println(mapLiquidToModels)
@@ -545,7 +545,7 @@ class GroupABuilder(
 				else
 					(dest, items)
 			}).filterNot(_._2.isEmpty)
-			println("updateGroupA4_sub:", ltw0, ltw, lTip2, acc2, mDestToItems2)
+			//println("updateGroupA4_sub:", ltw0, ltw, lTip2, acc2, mDestToItems2)
 			updateGroupA4_sub(g0, lTip2, mDestToItems2, acc2)
 		}
 	}

@@ -14,10 +14,41 @@ import commands.EvowareSubroutineToken
 
 
 class EvowareTranslator(config: EvowareConfig) {
-	def translate(processorResult: ProcessorResult): Result[EvowareScriptBuilder] = {
+	def translate(processorResult: ProcessorResult): Result[EvowareScript] = {
 		val t2 = new EvowareTranslator2(config, processorResult)
-		t2.translate()
+		t2.translate().map(_.toImmutable)
 	}
+
+	def saveWithHeader(script: EvowareScript, sFilename: String) {
+		val mapSiteToLabel = new HashMap[CarrierSite, String]
+		for (c <- script.cmds) {
+			script.mapCmdToLabwareInfo.get(c) match {
+				case None =>
+				case Some(l) =>
+					for (info <- l)
+						mapSiteToLabel(info._1) = info._2
+			}
+		}
+		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
+			script.cmds.collect({case c: L0C_Command => c.getSiteToLabwareModelList}).flatten.toMap
+		
+		val sHeader = config.tableFile.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
+		val sCmds = script.cmds.mkString("\n")
+		val fos = new java.io.FileOutputStream(sFilename)
+		writeLines(fos, sHeader)
+		writeLines(fos, sCmds);
+		fos.close();
+	}
+	
+	private def writeLines(output: java.io.FileOutputStream, s: String) {
+		val as = s.split("\r?\n")
+		for (sLine <- as if !s.isEmpty) {
+			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
+			output.write(bytes)
+			output.write("\r\n".getBytes())
+		}
+	}
+	
 }
 
 private class WellInfo(well: Well, state: WellState, pos: Well2) {
@@ -82,43 +113,6 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		}} yield {
 			builder.cmds ++= cmds0
 			()
-		}
-	}
-
-	def saveWithHeader(
-		cmds: Seq[CmdToken],
-		tableFile: EvowareTableFile,
-		//mapSiteToLabel: Map[CarrierSite, String],
-		mapCmdToLabwareInfo: Map[CmdToken, List[Tuple3[CarrierSite, String, LabwareModel]]],
-		sFilename: String
-	): String = {
-		val mapSiteToLabel = new HashMap[CarrierSite, String]
-		for (c <- cmds) {
-			mapCmdToLabwareInfo.get(c) match {
-				case None =>
-				case Some(l) =>
-					for (info <- l)
-						mapSiteToLabel(info._1) = info._2
-			}
-		}
-		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
-			cmds.collect({case c: L0C_Command => c.getSiteToLabwareModelList}).flatten.toMap
-		
-		val sHeader = tableFile.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
-		val sCmds = cmds.mkString("\n")
-		val fos = new java.io.FileOutputStream(sFilename)
-		writeLines(fos, sHeader)
-		writeLines(fos, sCmds);
-		fos.close();
-		sCmds
-	}
-	
-	private def writeLines(output: java.io.FileOutputStream, s: String) {
-		val as = s.split("\r?\n")
-		for (sLine <- as if !s.isEmpty) {
-			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
-			output.write(bytes)
-			output.write("\r\n".getBytes())
 		}
 	}
 	
