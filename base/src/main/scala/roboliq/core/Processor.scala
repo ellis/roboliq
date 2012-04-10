@@ -85,9 +85,9 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 					mSubstance(substance) = node
 				}) orElse
 				// Else if it's a well
-				needWell(id, node) orElse
+				needTube(id, node) orElse
 				// Else if it's a tube
-				needTube(id, node) match {
+				needWell(id, node) match {
 					case Error(ls) => ls.foreach(node.addError); Error(ls)
 					case ret => ret
 				}

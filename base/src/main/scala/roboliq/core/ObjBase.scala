@@ -231,11 +231,14 @@ class ObjBase(bb: BeanBase) {
 	}
 	
 	private def createWell(id: String): Result[PlateWell] = {
+		println("createWell: "+WellSpecParser.parse(id))
 		for {
 			lPlateWellSpec <- WellSpecParser.parse(id)
-			_ <- Result.assert(lPlateWellSpec.length == 1, "must provide a simple well ID instead of `"+id+"`")
-			_ <- Result.assert(lPlateWellSpec.head._2.isInstanceOf[WellSpecOne], "must provide a simple well ID instead of `"+id+"`")
-			val (idPlate, wellSpec: WellSpecOne) = lPlateWellSpec.head
+			_ <- Result.assert(lPlateWellSpec.length == 1, "must provide a single well ID instead of `"+id+"`")
+			val (idPlate, lWellSpec) = lPlateWellSpec.head
+			_ <- Result.assert(lWellSpec.length == 1, "must provide a single well location instead of `"+id+"`")
+			_ <- Result.assert(lWellSpec.head.isInstanceOf[WellSpecOne], "must provide a simple well ID instead of `"+id+"`")
+			val wellSpec = lWellSpec.head.asInstanceOf[WellSpecOne]
 			plate <- findPlate(idPlate)
 		} yield {
 			val index = wellSpec.rc.col * plate.model.nRows

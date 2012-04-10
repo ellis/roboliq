@@ -10,7 +10,7 @@ class VesselContent(
 	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
 	val mapSoluteToMol: Map[Substance, BigDecimal]
 ) {
-	val volume = mapSolventToVolume.values.reduce(_ + _)
+	val volume = mapSolventToVolume.values.foldLeft(LiquidVolume.empty){(acc,v) => acc + v}
 	val liquid = createLiquid()
 	
 	private def createLiquid(): Liquid = {
@@ -97,6 +97,8 @@ class VesselContent(
 	}
 	
 	def scaleToVolume(volumeNew: LiquidVolume): VesselContent = {
+		if (volume.isEmpty)
+			return this
 		val factor = volumeNew.l / volume.l
 		new VesselContent(
 			idVessel,
