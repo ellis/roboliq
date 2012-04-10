@@ -10,9 +10,11 @@ class VesselContent(
 	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
 	val mapSoluteToMol: Map[Substance, BigDecimal]
 ) {
+	val volume = mapSolventToVolume.values.reduce(_ + _)
+	val liquid = createLiquid()
+	
 	private def createLiquid(): Liquid = {
 		// Volume of solvents
-		val volume = mapSolventToVolume.values.reduce(_ + _)
 		if (volume.isEmpty)
 			Liquid.empty
 		else {
@@ -87,18 +89,59 @@ class VesselContent(
 		}
 	}
 	
+	private implicit val v1: Semigroup[LiquidVolume] = new Semigroup[LiquidVolume] {
+		def append(s1: LiquidVolume, s2: => LiquidVolume) = s1 + s2
+	}
+	private implicit val v2: Semigroup[BigDecimal] = new Semigroup[BigDecimal] {
+		def append(s1: BigDecimal, s2: => BigDecimal) = s1 + s2
+	}
+	
+	def scaleToVolume(volumeNew: LiquidVolume): VesselContent = {
+		val factor = volumeNew.l / volume.l
+		new VesselContent(
+			idVessel,
+			mapSolventToVolume.mapValues(_ * factor),
+			mapSoluteToMol.mapValues(_ * factor)
+		)
+	}
+	
 	def +(that: VesselContent): VesselContent = {
-		
-		val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
-		val mapSoluteToMol: Map[Substance, BigDecimal]
-		
+		new VesselContent(
+			idVessel,
+			mapSolventToVolume |+| that.mapSolventToVolume,
+			mapSoluteToMol |+| that.mapSoluteToMol
+		)
+	}
+	
+	//def append(a: VesselContent, b: VesselContent) = a + b
+	
+	def addContentByVolume(that: VesselContent, volume: LiquidVolume): VesselContent = {
+		this + that.scaleToVolume(volume)
+	}
+	
+	def addPowder(substance: Substance, mol: BigDecimal): VesselContent = {
+		new VesselContent(
+			idVessel,
+			mapSolventToVolume,
+			mapSoluteToMol |+| Map(substance -> mol)
+		)
+	}
+	
+	def addLiquid(substance: SubstanceLiquid, volume: LiquidVolume): VesselContent = {
+		new VesselContent(
+			idVessel,
+			mapSolventToVolume |+| Map(substance -> volume),
+			mapSoluteToMol
+		)
+	}
+
+	def removeVolume(volume: LiquidVolume): VesselContent = {
+		scaleToVolume(this.volume - volume)
 	}
 }
 
 object VesselContent {
-	def add(a: VesselContent, b: VesselContent): VesselContent = {
-		for ((solvent, volume) <- b.mapSolventToVolume) {
-			a.mapSolventToVolume
-		}
+	def createEmpty(idVessel: String) = {
+		new VesselContent(idVessel, Map(), Map())
 	}
 }

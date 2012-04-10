@@ -69,7 +69,7 @@ trait StateMap extends StateQuery {
 	def findWellPosition(id: String): Result[Well2] = {
 		findWell(id) match {
 			case Success(pwell: PlateWell) => Success(pwell)
-			case Success(twell: Tube) => Success(ob.m_mapTube2(id))
+			case Success(twell: Tube) => Success(ob.m_mapWell2(id))
 			case Error(ls) => Error(ls)
 		}
 	}
@@ -84,6 +84,15 @@ trait StateMap extends StateQuery {
 			return Error("plate `"+id+"` is not valid in this context.  Use a well, tube, or substance instead.")
 		else {
 			findWellPosition(id).map(_ :: Nil)
+		}
+	}
+	
+	def mapIdsToWell2Lists(ids: String): Result[List[List[Well2]]] = {
+		for {
+			lId <- WellSpecParser.parseToIds(ids, ob)
+			ll <- Result.mapOver(lId)(mapIdToWell2List)
+		} yield {
+			ll
 		}
 	}
 }

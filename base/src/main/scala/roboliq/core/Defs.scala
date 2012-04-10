@@ -2,6 +2,8 @@ package roboliq.core
 
 import scala.collection.mutable.ArrayBuffer
 
+import scalaz.Semigroup
+
 
 abstract class LiquidPropertiesFamily
 object LiquidPropertiesFamily {
@@ -62,7 +64,7 @@ class LiquidVolume private (val _nl: Int) {
 	}
 }
 /** Factory for [[roboliq.protocol.LiquidVolume]] */
-object LiquidVolume {
+object LiquidVolume {// extends Semigroup[LiquidVolume] {
 	def nl(n: Int): LiquidVolume = new LiquidVolume(n)
 	def ul(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000).toInt)
 	def ml(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000000).toInt)
@@ -77,6 +79,8 @@ object LiquidVolume {
 	def min(a: LiquidVolume, b: LiquidVolume): LiquidVolume = {
 		if (a._nl < b._nl) a else b
 	}
+	
+	//def append(a: LiquidVolume, b: => LiquidVolume): LiquidVolume = a + b
 }
 
 object PipettePosition extends Enumeration {

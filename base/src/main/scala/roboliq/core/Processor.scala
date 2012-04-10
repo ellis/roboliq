@@ -122,13 +122,50 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			}
 		}
 		
+		// Load history in order to reconstruct object states
+		ob.reconstructHistory()
+		
 		// Find substance wells
+		val mapSubstanceToWells = new HashMap[String, List[String]]
+		println("mSubstance: "+mSubstance)
 		for ((substance, node) <- mSubstance) {
-			ob.findAllIdsContainingSubstance(substance)
+			ob.findAllIdsContainingSubstance(substance) match {
+				case Error(ls) => ls.foreach(node.addError)
+				case Success(lId) =>
+					println("substance: "+substance.id+", lId: "+lId)
+					// TODO: intelligently choose wells rather than taking them all
+					lId.foreach(id => needId(node, id))
+					mapSubstanceToWells(substance.id) = lId
+			}
 		}
+		println("mapSubstanceToWells: "+mapSubstanceToWells)
+
+		println("mTube: "+mTube)
+
+		val locationBuilder = new LocationBuilder
+		
+		// If tube locations are defined in database
+		ob.findAllTubeLocations().foreach(lLocation => {
+			// Construct mutable list of all free locations
+			val lLocFree = ArrayBuffer[TubeLocation](lLocation : _*)
+			println("lLocFree: "+lLocFree)
+			// Assign location to each plate
+			for ((tube, node) <- mTube) {
+				lLocFree.find(loc => loc.tubeModels.contains(tube.model)) match {
+					case None => node.addError("couldn't find location for `"+tube.id+"`")
+					case Some(location) =>
+						lLocFree -= location
+						// Add a plate and location with the same name for tube racks
+						locationBuilder.addLocation(location.id, node.index, location.id)
+						//locationBuilder.addLocation(tube.id, node.index, location.id)
+						//println("added to location builder: ", tube.id, node.index, location)
+						// Set TubeState properties
+						ob.setInitialTubeLocation(tube, location.id, 0, 0)
+				}
+			}
+		})
 
 		// Object to assign location to each plate
-		val locationBuilder = new LocationBuilder
 		println("ob.findAllLocations(): "+ob.findAllPlateLocations())
 		println("mPlate: "+mPlate)
 		// If locations are defined in database
@@ -137,8 +174,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			val lLocFree = ArrayBuffer[PlateLocation](lLocation : _*)
 			println("lLocFree: "+lLocFree)
 			// Assign location to each plate
-			lPlate = lPlate.reverse
-			for ((node, plate) <- lPlate) {
+			for ((plate, node) <- mPlate) {
 				plate.locationPermanent_? match {
 					case Some(location) =>
 						locationBuilder.addLocation(plate.id, node.index, location)
@@ -151,30 +187,6 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 								locationBuilder.addLocation(plate.id, node.index, location.id)
 								println("added to location builder: ", plate.id, node.index, location)
 						}
-				}
-			}
-		})
-		println("lTube: "+lTube)
-		// If tube locations are defined in database
-		ob.findAllTubeLocations().foreach(lLocation => {
-			// Construct mutable list of all free locations
-			val lLocFree = ArrayBuffer[TubeLocation](lLocation : _*)
-			println("lLocFree: "+lLocFree)
-			// Assign location to each plate
-			lTube = lTube.reverse
-			for ((node, tube) <- lTube) {
-				lLocFree.find(loc => loc.tubeModels.contains(tube.model)) match {
-					case None => node.addError("couldn't find location for `"+tube.id+"`")
-					case Some(location) =>
-						lLocFree -= location
-						// Add a plate and location with the same name for tube racks
-						locationBuilder.addLocation(location.id, node.index, location.id)
-						//locationBuilder.addLocation(tube.id, node.index, location.id)
-						//println("added to location builder: ", tube.id, node.index, location)
-						// Set TubeState properties
-						TubeLocationEventBean(tube, location.id, 0, 0).update(ob.builder)
-						println("stateA: "+ob.findWellState(tube.id))
-						ob.m_mapTube2(tube.id) = Well2.forTube(ob.findWellState(tube.id).get.asInstanceOf[TubeState], ob.builder).get
 				}
 			}
 		})

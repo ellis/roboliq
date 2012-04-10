@@ -26,9 +26,10 @@ class ObjBase(bb: BeanBase) {
 	//private val m_mapWellState = new HashMap[String, WellState]
 	//private val m_mapState = new HashMap[String, Object]
 	
-	val builder = new StateBuilder(this)
+	private var builder: StateBuilder = null
 	//def states: scala.collection.Map[String, Object] = m_mapState
-	
+
+	def getBuilder = builder
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
 	
@@ -329,8 +330,7 @@ class ObjBase(bb: BeanBase) {
 					case Success(well) =>
 						new PlateWellState(
 							conf = well,
-							liquid = Liquid.empty,
-							nVolume = LiquidVolume.empty,
+							content = VesselContent.createEmpty(id),
 							bCheckVolume = true,
 							history = Nil
 						)
@@ -342,29 +342,54 @@ class ObjBase(bb: BeanBase) {
 								idPlate = null,
 								row = -1,
 								col = -1,
-								liquid = Liquid.empty,
-								nVolume = LiquidVolume.empty,
+								content = VesselContent.createEmpty(id),
 								bCheckVolume = true,
 								history = Nil
 							)
 					}
 				}
 				builder.map(id) = wellState
-				loadWellEvents(id)
-				Success(builder.map(id).asInstanceOf[WellState])
+				Success(wellState)
 		}
 	}
 	
-	//def findAllIdsContainingSubstance(substance: Substance): Result[List[String]] = {
-	//}
-
 	def reconstructHistory(): Result[Unit] = {
-		val mapIdToX = new HashMap[String, X]
+		builder = new StateBuilder(this)
 		for (event <- bb.lEvent) {
-			
+			findWellState(event.obj) match {
+				case Error(ls) => println("reconstructHistory: unhandled: "+event)
+				case Success(wellState) =>
+					event.update(builder)
+			}
 		}
+		Success()
 	}
 	
+	def findAllIdsContainingSubstance(substance: Substance): Result[List[String]] = {
+		def hasSubstance(st: WellState): Boolean = {
+			substance match {
+				case liquid: SubstanceLiquid => st.content.mapSolventToVolume.contains(liquid)
+				case _ => st.content.mapSoluteToMol.contains(substance)
+			}
+		}
+		
+		// Get list of 
+		val l = builder.map.values.collect({case wellState: WellState if hasSubstance(wellState) => {
+			wellState match {
+				case st: PlateWellState => st.conf.id
+				case st: TubeState => st.obj.id
+			}
+		}}).toList
+		
+		Success(l)
+	}
+	
+	def setInitialTubeLocation(tube: Tube, location: String, row: Int, col: Int) = {
+		TubeLocationEventBean(tube, location, row, col).update(builder)
+		//println("stateA: "+ob.findWellState(tube.id))
+		m_mapWell2(tube.id) = Well2.forTube(findWellState(tube.id).get.asInstanceOf[TubeState], builder).get
+	}
+
 	/*def loadState(id: String): Option[Object] = {
 		m_mapState.get(id).orElse {
 			if (findWell(id).isSuccess) {

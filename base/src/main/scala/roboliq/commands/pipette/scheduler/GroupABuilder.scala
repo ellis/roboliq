@@ -30,16 +30,16 @@ class GroupABuilder(
 		val states = new StateBuilder(ctx.states)
 		items.map(item => {
 			val src = item.srcs.head
-			val liquid = src.wellState(states).get.liquid
+			val content = src.wellState(states).get.content
 			val dest = item.dest
 			val state0 = dest.wellState(states).get
 			
 			// Remove from source and add to dest
 			src.stateWriter(states).remove(item.nVolume)
-			dest.stateWriter(states).add(liquid, item.nVolume)
+			dest.stateWriter(states).add(content, item.nVolume)
 			val state1 = dest.wellState(states).get
 			
-			item -> ItemState(item, liquid, state0, state1)
+			item -> ItemState(item, content, state0, state1)
 		}).toMap
 	}
 	
@@ -52,7 +52,7 @@ class GroupABuilder(
 		val lTipModelAll = new HashSet[TipModel]
 		for (item <- items) {
 			val itemState = mItemToState(item)
-			val liquid = itemState.srcLiquid
+			val liquid = itemState.srcContent.liquid
 			val destState = itemState.destState0
 			val tipModels = device.getDispenseAllowableTipModels(liquid, item.nVolume, destState.nVolume)
 			lLiquidAll += liquid
@@ -147,7 +147,7 @@ class GroupABuilder(
 		var bRebuild = false
 		val lLM = items.flatMap(item => {
 			val itemState = mItemToState(item)
-			val liquid = itemState.srcLiquid
+			val liquid = itemState.srcContent.liquid
 			// FIXME: for debug only
 			if (!mapLiquidToTipModel.contains(liquid))
 				println("mapLiquidToTipModel: "+mapLiquidToTipModel)
@@ -168,18 +168,18 @@ class GroupABuilder(
 		val states = new StateBuilder(ctx.states)
 		val mItemToState1 = items1.map(item => {
 			val src = item.srcs.head
-			val liquid = src.wellState(states).get.liquid
+			val content = src.wellState(states).get.content
 			val dest = item.dest
 			val state0 = dest.wellState(states).get
 			
 			// Remove from source and add to dest
 			src.stateWriter(states).remove(item.nVolume)
-			dest.stateWriter(states).add(liquid, item.nVolume)
+			dest.stateWriter(states).add(content, item.nVolume)
 			val state1 = dest.wellState(states).get
 			
 			mItemToState.get(item) match {
 				case Some(itemState) => item -> itemState
-				case _ => item -> ItemState(item, liquid, state0, state1)
+				case _ => item -> ItemState(item, content, state0, state1)
 			}
 		}).toMap
 		
@@ -573,7 +573,7 @@ class GroupABuilder(
 			// ENDFIX
 			val tip = g0.mItemToTip(item)
 			val itemState = g0.mItemToState(item)
-			val liquid = itemState.srcLiquid
+			val liquid = itemState.srcContent.liquid
 			val nVolume = item.nVolume
 			//val nVolumeDest = itemState.destState0.nVolume
 			
@@ -834,7 +834,6 @@ class GroupABuilder(
 		
 		for ((item, dis) <- g0.lItem zip g0.lDispense) {
 			val itemState = g0.mItemToState(item)
-			val liquid = itemState.srcLiquid
 			dis.tip.stateWriter(builder).dispense(item.nVolume, itemState.destState0.liquid, dis.policy.pos)
 			builder.map(item.dest.id) = itemState.destState1
 		}

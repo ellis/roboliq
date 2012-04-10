@@ -38,6 +38,7 @@ General
 Soon
 ----
 
+* ``VesselContent`` and ``Liquid``: create ``equals`` and ``hashcode`` functions
 * ``PipetteScheduler``: improve performance
 * ``PipetteScheduler``: create a much simpler version using a combinatorial approach -- worry about correctness, not performance
 * ``CmdBean``: autogenerate ``doc`` property
@@ -65,6 +66,7 @@ Intermediate
 * read in evoware export data and write results to database
 * ``PipetteScheduler``: produce some form of navigatable log (SVG, HTML, CSS, JavaScript, or just RST) in order to make it possible to follow the choices made
 * ``VesselContent``: track the cost of stock substances in the vessel
+* Remove ``WellStateWriter`` and any other ``*StateWriter`` classes
 
 Location handling
 -----------------
@@ -100,6 +102,7 @@ Take care of someday
 * Consider using unicode: ℓ for list, σ for set, mu for map, º like prime in haskell, alpha and beta for "numbering"
 * YAML: write a converter between SnakeYAML and scala immutable objects
 * See about integrating `Scalaz <http://code.google.com/p/scalaz/>`
+* ``Liquid``: consider removing it and just using ``VolumeContent``
 
 Unlikely to ever do
 -------------------

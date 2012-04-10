@@ -3,6 +3,7 @@ import sbt._
 object MyBuild extends Build {
 	lazy val projBase = Project("base", file("base"))
 
+	/*
 	lazy val projCommon = Project("common", file("common"))
 
 	lazy val projCommands = Project("commands", file("commands")) dependsOn(projCommon)
@@ -14,19 +15,16 @@ object MyBuild extends Build {
 	lazy val projRoboease = Project("roboease", file("roboease")) dependsOn(projCommon, projCommands, projCompiler, projDevices)
 
 	//lazy val projEvoware = Project("evoware", file("evoware")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease)
+	*/
 
 	lazy val projEvoware = Project("evoware", file("evoware")) dependsOn(projBase)
 
-	lazy val projRoboeaseEvoware = Project("roboease-evoware", file("roboease-evoware")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware)
+	//lazy val projRoboeaseEvoware = Project("roboease-evoware", file("roboease-evoware")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware)
 
 	//lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projEvoware)
 	lazy val projBsse = Project("bsse", file("bsse")) dependsOn(projBase, projEvoware)
 	
-	lazy val projTest = Project("test", file("test")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware, projBsse, projRoboeaseEvoware)
-
-	//lazy val projLevel2 = Project("level2", file("level2")) dependsOn(projCommon)
-
-	//lazy val projTestBsseLevel2 = Project("test-bsse-level2", file("test-bsse-level2")) dependsOn(projBsse, projLevel2)
+	//lazy val projTest = Project("test", file("test")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware, projBsse, projRoboeaseEvoware)
 
 	//scalacOptions <++= Seq("-unchecked")
 }

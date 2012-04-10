@@ -9,16 +9,17 @@ import scala.reflect.BeanProperty
 
 abstract class WellState(
 	//val well: Well,
-	val liquid: Liquid,
-	val nVolume: LiquidVolume,
+	val content: VesselContent,
 	/** Make sure that volume doesn't go below 0 */
 	val bCheckVolume: Boolean,
 	val history: List[EventBean]
 ) {
+	val liquid: Liquid = content.liquid
+	val nVolume: LiquidVolume = content.volume
+	
 	def update(
 		event: EventBean,
-		liquid: Liquid = liquid,
-		nVolume: LiquidVolume = nVolume,
+		content: VesselContent = content,
 		bCheckVolume: Boolean = bCheckVolume
 	): WellState
 	
@@ -29,19 +30,17 @@ abstract class WellState(
 
 class PlateWellState(
 	val conf: PlateWell,
-	liquid: Liquid,
-	nVolume: LiquidVolume,
+	content: VesselContent,
 	bCheckVolume: Boolean,
 	history: List[EventBean]
-) extends WellState(liquid, nVolume, bCheckVolume, history) {
+) extends WellState(content, bCheckVolume, history) {
 	def update(
 		event: EventBean,
-		liquid: Liquid = liquid,
-		nVolume: LiquidVolume = nVolume,
+		content: VesselContent = content,
 		bCheckVolume: Boolean = bCheckVolume
 	): PlateWellState = {
 		new PlateWellState(
-			conf, liquid, nVolume, bCheckVolume, event :: history
+			conf, content, bCheckVolume, event :: history
 		)
 	}
 }
@@ -51,19 +50,17 @@ class TubeState(
 	val idPlate: String,
 	val row: Int,
 	val col: Int,
-	liquid: Liquid,
-	nVolume: LiquidVolume,
+	content: VesselContent,
 	bCheckVolume: Boolean,
 	history: List[EventBean]
-) extends WellState(liquid, nVolume, bCheckVolume, history) {
+) extends WellState(content, bCheckVolume, history) {
 	def update(
 		event: EventBean,
-		liquid: Liquid = liquid,
-		nVolume: LiquidVolume = nVolume,
+		content: VesselContent = content,
 		bCheckVolume: Boolean = bCheckVolume
 	): TubeState = {
 		new TubeState(
-			obj, idPlate, row, col, liquid, nVolume, bCheckVolume, event :: history
+			obj, idPlate, row, col, content, bCheckVolume, event :: history
 		)
 	}
 	
@@ -86,12 +83,10 @@ class WellAddEventBean extends WellEventBean {
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
 		if (src != null) {
-			for { liquid <- states0.findSourceLiquid(src) }
+			for { wellState <- states0.findWellState(src) }
 			yield {
-				val volumeNew = state0.nVolume + LiquidVolume.l(volume)
 				state0.update(this,
-					liquid = state0.liquid + liquid,
-					nVolume = volumeNew
+					content = state0.content.addContentByVolume(wellState.content, LiquidVolume.l(volume))
 				)
 			}
 		}
@@ -121,24 +116,9 @@ class WellAddPowderEventBean extends WellEventBean {
 			_ <- Result.mustBeSet(mol, "mol")
 			substanceObj <- states0.findSubstance(substance)
 		} yield {
-			
-		}
-		
-		if (src != null) {
-			for { liquid <- states0.findSourceLiquid(src) }
-			yield {
-				val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-				state0.update(this,
-					liquid = state0.liquid + liquid,
-					nVolume = volumeNew
-				)
-			}
-		}
-		else if (substance != null) {
-			
-		}
-		else {
-			Error("`substance` or `src` must be set")
+			state0.update(this,
+				content = state0.content.addPowder(substanceObj, mol)
+			)
 		}
 	}
 }
@@ -152,7 +132,7 @@ class WellRemoveEventBean extends WellEventBean {
 			_ <- Result.assert(volumeNew > LiquidVolume.empty || !state0.bCheckVolume, "tried to remove too much liquid from "+obj)
 		} yield {
 			state0.update(this,
-				nVolume = volumeNew
+				content = state0.content.removeVolume(LiquidVolume.l(volume))
 			)
 		}
 	}
@@ -176,9 +156,9 @@ class WellStateWriter(id: String, builder: StateBuilder) {
 	
 	def nVolume = state.nVolume
 
-	def add(liquid2: Liquid, nVolume2: LiquidVolume) {
+	def add(content2: VesselContent, nVolume2: LiquidVolume) {
 		val st = state
-		set(st.update(null, liquid = st.liquid + liquid2, nVolume = st.nVolume + nVolume2))
+		set(st.update(null, content = st.content.addContentByVolume(content2, nVolume2)))
 	}
 	
 	def remove(nVolume2: LiquidVolume) {
@@ -191,7 +171,7 @@ class WellStateWriter(id: String, builder: StateBuilder) {
 				//assert(false)
 			}
 		}
-		set(st.update(null, nVolume = st.nVolume - nVolume2))
+		set(st.update(null, content = st.content.removeVolume(nVolume2)))
 	}
 }
 
@@ -212,10 +192,9 @@ class TubeLocationEventBean extends WellEventBean {
 				idPlate = location,
 				row = row,
 				col = col,
-				liquid = st.liquid,
-				nVolume = st.nVolume,
+				content = st.content,
 				bCheckVolume = st.bCheckVolume,
-				history = st.history
+				history = this :: st.history
 			)
 		}
 	}
