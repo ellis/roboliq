@@ -42,9 +42,11 @@ trait StateMap extends StateQuery {
 		map.map(_.toString).mkString("\n")
 	}
 
+	def findSubstance(id: String): Result[Substance] = ob.findSubstance(id)
 	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
-	
 	def findTip(id: String): Result[Tip] = ob.findTip(id)
+	def findPlate(id: String): Result[Plate] = ob.findPlate(id)
+	def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findTipState(id: String): Result[TipState] = {
 		map.get(id) match {
@@ -53,10 +55,6 @@ trait StateMap extends StateQuery {
 				ob.findTipState(id)
 		}
 	}
-	
-	def findPlate(id: String): Result[Plate] = ob.findPlate(id)
-	
-	def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findWellState(id: String): Result[WellState] = {
 		//println("StateBuilder.findWellState: "+id)
@@ -73,6 +71,19 @@ trait StateMap extends StateQuery {
 			case Success(pwell: PlateWell) => Success(pwell)
 			case Success(twell: Tube) => Success(ob.m_mapTube2(id))
 			case Error(ls) => Error(ls)
+		}
+	}
+	
+	def expandIdList(ids: String): Result[List[String]] =
+		WellSpecParser.parseToIds(ids, ob)
+	
+	def mapIdToWell2List(id: String): Result[List[Well2]] = {
+		if (findPlate(id).isSuccess)
+			Error("plate `"+id+"` is not valid in this context.  Use a well, tube, or substance instead.")
+		else if (findPlate(id).isSuccess)
+			return Error("plate `"+id+"` is not valid in this context.  Use a well, tube, or substance instead.")
+		else {
+			findWellPosition(id).map(_ :: Nil)
 		}
 	}
 }

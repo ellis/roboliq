@@ -55,38 +55,55 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		
 		// Helper function to load resource objects and their known states
 		val seen = new HashSet[String]
-		val seenPlate = new HashSet[String]
-		var lPlate = List[Tuple2[CmdNodeBean, Plate]]()
-		var lTube = List[Tuple2[CmdNodeBean, Tube]]()
-		def needWells(node: CmdNodeBean, name: String) {
-			WellSpecParser.parseToIds(name, ob) match {
+		val mPlate = new LinkedHashMap[Plate, CmdNodeBean]
+		var mTube = new LinkedHashMap[Tube, CmdNodeBean]
+		val mSubstance = new LinkedHashMap[Substance, CmdNodeBean]
+		def needPlate(id: String, node: CmdNodeBean): Result[Unit] = {
+			for {plate <- ob.findPlate(id)} yield {
+				mPlate(plate) = node
+			}
+		}
+		def needWell(id: String, node: CmdNodeBean): Result[Unit] = {
+			for {
+				well <- ob.findWell(id)
+				plate <- needPlate(well.idPlate, node)
+			} yield {}
+		}
+		def needTube(id: String, node: CmdNodeBean): Result[Unit] = {
+			for {tube <- ob.findTube(id)} yield {
+				mTube(tube) = node
+			}
+		}
+		def needId(node: CmdNodeBean, id: String): Result[Unit] = {
+			// Try to load any ids which we haven't looked for yet
+			if (!seen.contains(id)) {
+				seen += id
+				// If it's a plate
+				needPlate(id, node) orElse
+				// If it's a substance
+				(for {substance <- ob.findSubstance(id)} yield {
+					mSubstance(substance) = node
+				}) orElse
+				// Else if it's a well
+				needWell(id, node) orElse
+				// Else if it's a tube
+				needTube(id, node) match {
+					case Error(ls) => ls.foreach(node.addError); Error(ls)
+					case ret => ret
+				}
+			}
+			else {
+				Success(())
+			}
+		}
+		def needIds(node: CmdNodeBean, ids: String) {
+			WellSpecParser.parseToIds(ids, ob) match {
 				case Error(ls) => ls.foreach(node.addError)
 				case Success(lId) =>
-					// Try to load any ids which we haven't looked for yet
 					for (id <- lId) {
-						if (!seen.contains(id)) {
-							seen += id
-							// If it's a plate
-							(for {plate <- ob.findPlate(id)} yield {
-								if (!seenPlate.contains(id)) {
-									lPlate = (node, plate) :: lPlate
-									seenPlate += id
-								}
-							}) orElse
-							// Else if it's a well
-							ob.findWell(id) match {
-								case Error(ls) => ls.foreach(node.addError)
-								case Success(well: PlateWell) =>
-									if (!seenPlate.contains(well.idPlate)) {
-										lPlate = (node, ob.findPlate(well.idPlate).get) :: lPlate
-										seenPlate += well.idPlate
-									}
-								case Success(tube: Tube) =>
-									if (!seenPlate.contains(id)) {
-										lTube = (node, tube) :: lTube
-										seenPlate += id
-									}
-							}
+						needId(node, id) match {
+							case Error(ls) => ls.foreach(node.addError)
+							case _ =>
 						}
 					}
 			}
@@ -98,17 +115,22 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				println(resource)
 				resource match {
 					case NeedTip(id) => ob.findTip_?(id, messages)
-					case NeedSrc(name) => needWells(node, name)
-					case NeedDest(name) => needWells(node, name)
+					case NeedSrc(ids) => needIds(node, ids)
+					case NeedDest(ids) => needIds(node, ids)
 					case NeedPool(_, _, _) => // TODO: allocate new pool
 				}
 			}
+		}
+		
+		// Find substance wells
+		for ((substance, node) <- mSubstance) {
+			ob.findAllIdsContainingSubstance(substance)
 		}
 
 		// Object to assign location to each plate
 		val locationBuilder = new LocationBuilder
 		println("ob.findAllLocations(): "+ob.findAllPlateLocations())
-		println("lPlate: "+lPlate)
+		println("mPlate: "+mPlate)
 		// If locations are defined in database
 		ob.findAllPlateLocations().foreach(lLocation => {
 			// Construct mutable list of all free locations

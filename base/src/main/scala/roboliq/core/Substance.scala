@@ -21,7 +21,9 @@ class SubstanceLiquidBean extends SubstanceBean {
 	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
-sealed trait Substance
+sealed trait Substance {
+	val id: String
+}
 
 object Substance {
 	def fromBean(bean: SubstanceBean): Result[Substance] = {

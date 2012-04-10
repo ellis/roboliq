@@ -80,16 +80,23 @@ abstract class WellEventBean extends EventBeanA[WellState] {
 
 class WellAddEventBean extends WellEventBean {
 	@BeanProperty var src: String = null
+	@BeanProperty var substance: String = null
 	@BeanProperty var volume: java.math.BigDecimal = null
+	@BeanProperty var conc: java.math.BigDecimal = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
-		for { liquid <- states0.findSourceLiquid(src) }
-		yield {
-			val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-			state0.update(this,
-				liquid = state0.liquid + liquid,
-				nVolume = volumeNew
-			)
+		if (src != null) {
+			for { liquid <- states0.findSourceLiquid(src) }
+			yield {
+				val volumeNew = state0.nVolume + LiquidVolume.l(volume)
+				state0.update(this,
+					liquid = state0.liquid + liquid,
+					nVolume = volumeNew
+				)
+			}
+		}
+		else {
+			Error("`src` must be set")
 		}
 	}
 }
@@ -101,6 +108,38 @@ object WellAddEventBean {
 		bean.src = src.id
 		bean.volume = volume.l.bigDecimal
 		bean
+	}
+}
+
+class WellAddPowderEventBean extends WellEventBean {
+	@BeanProperty var substance: String = null
+	@BeanProperty var mol: java.math.BigDecimal = null
+	
+	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
+		for {
+			_ <- Result.mustBeSet(substance, "substance")
+			_ <- Result.mustBeSet(mol, "mol")
+			substanceObj <- states0.findSubstance(substance)
+		} yield {
+			
+		}
+		
+		if (src != null) {
+			for { liquid <- states0.findSourceLiquid(src) }
+			yield {
+				val volumeNew = state0.nVolume + LiquidVolume.l(volume)
+				state0.update(this,
+					liquid = state0.liquid + liquid,
+					nVolume = volumeNew
+				)
+			}
+		}
+		else if (substance != null) {
+			
+		}
+		else {
+			Error("`substance` or `src` must be set")
+		}
 	}
 }
 

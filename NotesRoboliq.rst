@@ -97,4 +97,35 @@ Limitations
 
 * Tube locations must be determined prior to execution of the script, and we assume that they will not be moved later on [2012-04-09]
 
+Glossary
+========
 
+Substances
+----------
+
+:Date: 2012-04-10
+
+``Substance``
+  Represents a material which can be placed in a ``Well``.
+``Liquid``
+  A ``Substance`` in liquid form and can be pipetted.
+``Powder``
+  A ``Substance`` in dry form, cannot be pipetted.
+
+Substance containers
+--------------------
+
+:Date: 2012-04-10
+
+``Well`` (rename to ``Vessel``?)
+  Container for a substance.
+``PlateWell`` (rename to ``Well``?)
+  A ``Well`` on a ``Plate``.
+``Tube``
+  A ``Well`` which can be placed in a ``Rack``.
+``Holder`` (not currently used)
+  An object that can hold wells in a row/column format.
+``Plate``
+  A ``Holder`` with permanent ``PlateWell`` wells.
+``Rack``
+  A ``Holder`` with removable ``Tube`` wells [not actually used in the code at this time].

@@ -3,6 +3,7 @@ package roboliq.core
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.LinkedHashMap
 
 class BeanBase {
 	private var m_lDevice: List[DeviceBean] = Nil
@@ -19,7 +20,7 @@ class BeanBase {
 	private val m_mapSubstance = new HashMap[String, SubstanceBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]
 	private val m_mapTube = new HashMap[String, PlateBean]
-	private val m_mapEvents = new HashMap[String, List[EventBean]]
+	private val m_lEvent = new ArrayBuffer[EventBean]
 	
 	def lDevice = m_lDevice
 	def lCmdHandler = m_lCmdHandler
@@ -35,7 +36,7 @@ class BeanBase {
 	def mapSubstance: scala.collection.Map[String, SubstanceBean] = m_mapSubstance
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
 	def mapTube: scala.collection.Map[String, PlateBean] = m_mapTube
-	def mapEvents: scala.collection.Map[String, List[EventBean]] = m_mapEvents
+	def lEvent: scala.collection.Seq[EventBean] = m_lEvent
 	
 	/** Add data in @param bean to this database */
 	def addBean(bean: RoboliqYamlBean) {
@@ -100,10 +101,7 @@ class BeanBase {
 		}
 		// Add events
 		if (bean.events != null) {
-			for ((id, events) <- bean.events) {
-				events.foreach(_.obj = id)
-				m_mapEvents(id) = events.toList
-			}
+			m_lEvent ++= bean.events
 		}
 	}
 	

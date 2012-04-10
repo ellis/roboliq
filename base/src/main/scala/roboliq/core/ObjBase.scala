@@ -18,10 +18,10 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapSubstance = new HashMap[String, Substance]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapTube = new HashMap[String, Tube]
-	private val m_mapWell = new HashMap[String, Well]
+	private val m_mapWell = new HashMap[String, PlateWell]
 	private val m_mapLiquid = new HashMap[String, Liquid]
 	
-	val m_mapTube2 = new HashMap[String, Well2]
+	val m_mapWell2 = new HashMap[String, Well2]
 	
 	//private val m_mapWellState = new HashMap[String, WellState]
 	//private val m_mapState = new HashMap[String, Object]
@@ -127,6 +127,7 @@ class ObjBase(bb: BeanBase) {
 							group = new LiquidGroup(substance.cleanPolicy),
 							multipipetteThreshold = if (substance.allowMultipipette) 0 else 1000
 						))
+						
 					case _ => Error("substance `"+id+"` is not a liquid")
 				}
 		}
@@ -178,14 +179,14 @@ class ObjBase(bb: BeanBase) {
 			Some(l.flatten)
 	}
 	
-	def findWell(id: String): Result[Well] = {
+	def findWell(id: String): Result[PlateWell] = {
 		m_mapWell.get(id) match {
 			case Some(obj) => Success(obj)
 			case None => createWell(id)
 		}
 	}
 	
-	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
+	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[PlateWell] = {
 		if (id == null) {
 			if (requireId)
 				node.checkPropertyNonNull(null)
@@ -203,15 +204,18 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
-	def findWells(name: String): Result[List[Well]] = {
+	// REFACTOR: remove this and fix any code which breaks -- ellis, 2012-04-10
+	def findWells(name: String): Result[List[PlateWell]] = {
 		WellSpecParser.parseToIds(name, this).flatMap(findWells)
 	}
 
-	def findWells(lId: List[String]): Result[List[Well]] = {
+	// REFACTOR: remove this and fix any code which breaks -- ellis, 2012-04-10
+	def findWells(lId: List[String]): Result[List[PlateWell]] = {
 		Result.mapOver(lId)(findWell)
 	}
 	
-	def findWells_?(name: String, node: CmdNodeBean, requireId: Boolean = true): Option[List[Well]] = {
+	// REFACTOR: remove this and fix any code which breaks -- ellis, 2012-04-10
+	def findWells_?(name: String, node: CmdNodeBean, requireId: Boolean = true): Option[List[PlateWell]] = {
 		if (name == null) {
 			if (requireId)
 				node.checkPropertyNonNull(null)
@@ -225,7 +229,28 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
-	private def createWell(id: String): Result[Well] = {
+	private def createWell(id: String): Result[PlateWell] = {
+		for {
+			lPlateWellSpec <- WellSpecParser.parse(id)
+			_ <- Result.assert(lPlateWellSpec.length == 1, "must provide a simple well ID instead of `"+id+"`")
+			_ <- Result.assert(lPlateWellSpec.head._2.isInstanceOf[WellSpecOne], "must provide a simple well ID instead of `"+id+"`")
+			val (idPlate, wellSpec: WellSpecOne) = lPlateWellSpec.head
+			plate <- findPlate(idPlate)
+		} yield {
+			val index = wellSpec.rc.col * plate.model.nRows
+			val well = new PlateWell(
+				id = id,
+				idPlate = idPlate,
+				index = index,
+				iRow = wellSpec.rc.row,
+				iCol = wellSpec.rc.col,
+				indexName = wellSpec.rc.toString
+			)
+			m_mapWell(id) = well
+			m_mapWell2(id) = well
+			well
+		}
+		/*
 		for {
 			res <- Printer.parseWellId(id)
 		} yield {
@@ -242,22 +267,20 @@ class ObjBase(bb: BeanBase) {
 				val well = findPlate(idPlate) match {
 					case Error(ls) => return Error(ls)
 					case Success(plate) =>
-						val index = iCol * plate.model.nRows
-						new PlateWell(
-							id = id,
-							idPlate = idPlate,
-							index = index,
-							iRow = iRow,
-							iCol = iCol,
-							indexName = indexName
-						)
-				}
-				m_mapWell(id) = well
 				well
 			}
 		}
+		*/
 	}
 	
+	def findWell2(id: String): Result[Well2] = {
+		m_mapWell2.get(id) match {
+			case None => Error("Well information not available for id `"+id+"`")
+			case Some(well2) => Success(well2)
+		}
+	}
+	
+	/*
 	private def loadWellEvents(id: String) {
 		//println("loadWellEvents: "+id)
 		bb.mapEvents.get(id) match {
@@ -269,6 +292,7 @@ class ObjBase(bb: BeanBase) {
 				})
 		}
 	}
+	*/
 	
 	def findSystemString_?(id: String, node: CmdNodeBean): Option[String] = {
 		bb.mapSystemProperties.get(id) match {
@@ -301,34 +325,43 @@ class ObjBase(bb: BeanBase) {
 			case Some(state: WellState) => Success(state)
 			case Some(_) => Error("id `"+id+"`: stored state is not a WellState")
 			case None =>
-				findWell(id) match {
-					case Error(ls) => Error(ls)
+				val wellState = findWell(id) match {
 					case Success(well) =>
-						val wellState = well match {
-							case pwell: PlateWell =>
-								new PlateWellState(
-									conf = pwell,
-									liquid = Liquid.empty,
-									nVolume = LiquidVolume.empty,
-									bCheckVolume = true,
-									history = Nil
-								)
-							case tube: Tube =>
-								new TubeState(
-									obj = tube,
-									idPlate = null,
-									row = -1,
-									col = -1,
-									liquid = Liquid.empty,
-									nVolume = LiquidVolume.empty,
-									bCheckVolume = true,
-									history = Nil
-								)
-						}
-						builder.map(id) = wellState
-						loadWellEvents(id)
-						Success(builder.map(id).asInstanceOf[WellState])
+						new PlateWellState(
+							conf = well,
+							liquid = Liquid.empty,
+							nVolume = LiquidVolume.empty,
+							bCheckVolume = true,
+							history = Nil
+						)
+					case Error(ls) => findTube(id) match {
+						case Error(ls) => return Error(ls)
+						case Success(tube) =>
+							new TubeState(
+								obj = tube,
+								idPlate = null,
+								row = -1,
+								col = -1,
+								liquid = Liquid.empty,
+								nVolume = LiquidVolume.empty,
+								bCheckVolume = true,
+								history = Nil
+							)
+					}
 				}
+				builder.map(id) = wellState
+				loadWellEvents(id)
+				Success(builder.map(id).asInstanceOf[WellState])
+		}
+	}
+	
+	//def findAllIdsContainingSubstance(substance: Substance): Result[List[String]] = {
+	//}
+
+	def reconstructHistory(): Result[Unit] = {
+		val mapIdToX = new HashMap[String, X]
+		for (event <- bb.lEvent) {
+			
 		}
 	}
 	

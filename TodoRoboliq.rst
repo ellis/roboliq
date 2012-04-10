@@ -12,7 +12,6 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``BsseMain``: save evoware scripts to a file
 #. ``Processor``: allow user to specify liquids and find their wells in the database
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
@@ -22,7 +21,8 @@ Goal: Get the new YAML-based code running to the point that we can run a PCR mix
 
 Done:
 
-#. ``protocol-003``: create script to dilute invitrogen primers
+* ``BsseMain``: save evoware scripts to a file
+* ``protocol-003``: create script to dilute invitrogen primers
 * ``bsse`` module: get it working again in minimal form
 * ``evoware`` module: get to compile and run again, though with fewer commands
 * ``Processor``: automatically select bench locations for plates
@@ -33,7 +33,7 @@ Done:
 General
 =======
 
-:Created: 2012-04-07
+:Started: 2012-04-07
 
 Soon
 ----
@@ -49,10 +49,14 @@ Soon
 * ``Processor``: allow different levels of protocol evaluation: 1) without specific device or robot assignments, 2) with specifics.
 * ``Processor``: don't select plate locations unless we have a specific robot
 * ``RoboliqYamlBean``: move ``locations`` property to an Evoware bean
+* ``Rack``: create Holder, Vessle, Rack, and other concepts defined in the Glossary
 
 Intermediate
 ------------
 
+* ``ObjBase``: design a better separation of responsibilities between ``ObjBase``, ``Processor``, ``StateQuery``, and ``StateBuilder``.
+  For example, it might be a good idea to create a ``StateBase`` which holds the state information that's currently kept in ``ObjBase``.
+* ``RobotQuery``: get rid of ``RobotState`` in favor of ``StateQuery``
 * ``Result``: adapt monad to accommodate propogation of warnings too, or create a CmdResult
 * ``Result``: use it more in code in order to avoid such things as ``if (messages.hasErrors) ...``
 * create better, more structured error/warning messages
@@ -60,6 +64,7 @@ Intermediate
 * control program for evoware
 * read in evoware export data and write results to database
 * ``PipetteScheduler``: produce some form of navigatable log (SVG, HTML, CSS, JavaScript, or just RST) in order to make it possible to follow the choices made
+* ``VesselContent``: track the cost of stock substances in the vessel
 
 Location handling
 -----------------
@@ -92,3 +97,18 @@ Take care of someday
 * ``TipState``: simplify it so that it can only hold a single liquid, though contaminants may accumulate
 * consider adding structure to ``roboliq.core`` and perhaps using imports in the package object.
 * ``WashCmd``: the generic handling should be improved or removed
+* Consider using unicode: ℓ for list, σ for set, mu for map, º like prime in haskell, alpha and beta for "numbering"
+* YAML: write a converter between SnakeYAML and scala immutable objects
+* See about integrating `Scalaz <http://code.google.com/p/scalaz/>`
+
+Unlikely to ever do
+-------------------
+
+* YAML: write or get a parser that matches better with scala?
+
+
+Questions for Fabian
+====================
+
+* Any ideas about how to determine when we're allowed to waste an expensive substance by multipipetting?
+* Lets review ``VesselContent`` class to see whether it makes sense
