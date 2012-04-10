@@ -12,7 +12,8 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. create script to dilute invitrogen primers
+#. ``BsseMain``: save evoware scripts to a file
+#. ``Processor``: allow user to specify liquids and find their wells in the database
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
 #. ``PcrCmd``: add master mix functionality
@@ -21,6 +22,7 @@ Goal: Get the new YAML-based code running to the point that we can run a PCR mix
 
 Done:
 
+#. ``protocol-003``: create script to dilute invitrogen primers
 * ``bsse`` module: get it working again in minimal form
 * ``evoware`` module: get to compile and run again, though with fewer commands
 * ``Processor``: automatically select bench locations for plates

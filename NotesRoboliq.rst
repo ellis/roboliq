@@ -54,6 +54,18 @@ When a command gets processed, it may produce new child commands.
 These commands are given the index of their parent plus a subindex according to their position in the child list.
 The children are then pushed onto the priority stack, and the next command is selected from the priority stack.
 
+:Date: 2012-04-10
+
+The command ``Processor`` will need to choose specific wells when a liquid resource is requested.
+In order to do this properly, it should know how much of that liquid is required, so that it can choose an appropriate number of source wells if they are available.
+
+The Pipette command needs to know the following information before it can constuct it's pipetting plan:
+
+* the ``PipetteDevice`` to use (this is a class which makes many choices about how pipetting is done, and is particular to each lab)
+* the wells chosen for source liquids
+* the locations of tubes (so that it can treat them like wells on a plate and potentially aspirate or dispense to adjacent tubes simulaneously)
+
+
 Format For Wells
 ================
 
