@@ -183,7 +183,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 					Free
 				else if (nVolumeDest > nFreeDispense2DestVolumeThreshold && nVolume >= nFreeDispense2VolumeThreshold)
 					Free
-				else if (nVolumeDest == 0)
+				else if (nVolumeDest.isEmpty)
 					DryContact
 				else
 					WetContact
@@ -197,7 +197,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 			// If our volume is high enough that we don't need to worry about accuracy
 			if (bLarge && (nVolume >= nFreeDispense1VolumeThreshold || (nVolumeDest > nFreeDispense2DestVolumeThreshold && nVolume >= nFreeDispense2VolumeThreshold)))
 				Free
-			else if (nVolumeDest == 0)
+			else if (nVolumeDest.isEmpty)
 				DryContact
 			else
 				WetContact

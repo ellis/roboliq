@@ -1,3 +1,6 @@
+# 2012-04-08
+# Setup for the robot in our BSSE lab
+
 tipModels:
   "Standard 50ul": { volumeMax: 45e-6, volumeMin: 0.01e-6 }
   "Standard 1000ul": { volumeMax: 950e-6, volumeMin: 3e-6 }
@@ -31,10 +34,11 @@ locations:
   cooled4: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled5: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
 
-plates:
-  reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }
-
 tubeLocations:
 #  reagents15: { tubeModels: ["Tube 15ml"], rows: 8 }
   reagents50: { tubeModels: ["Tube 50ml"], rackModel: "Reagent Cooled 8*50ml" }
 #  reagents1.5: { tubeModels: ["Tube 1.5ml"], rows: 4, cols: 5 }
+
+# Labware whose position is fixed on our bench
+plates:
+  reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }

@@ -11,21 +11,23 @@ import roboliq.commands.pipette._
 
 object PipetteHelper {
 	def chooseTipWellPairsAll(states: StateMap, tips: SortedSet[Tip], dests: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
-		//println("chooseTipWellPairsAll()")
-		//println("tips: "+tips)
-		//println("dests: "+dests)
+		println("chooseTipWellPairsAll()")
+		println("tips: "+tips)
+		println("dests: "+dests)
 		val twss = new ArrayBuffer[Seq[TipWell]]
 		var destsRemaining = dests
 		var twsPrev = Nil
 		while (!destsRemaining.isEmpty) {
-			print("A")
+			print("B")
 			chooseTipWellPairsNext(states, tips, destsRemaining, twsPrev) match {
 				case Error(ls) => return Error(ls)
 				case Success(Nil) => return Success(twss)
 				case Success(tws) =>
-					//println("chooseTipWellPairsAll: tws: "+tws+", "+destsRemaining)
+					println("chooseTipWellPairsAll: tws: "+tws+", "+destsRemaining)
 					twss += tws
+					println("destsRemaining A:"+destsRemaining)
 					destsRemaining --= tws.map(_.well)
+					println("destsRemaining B:"+destsRemaining)
 			}
 		}
 		Success(twss)
@@ -36,10 +38,10 @@ object PipetteHelper {
 	}
 
 	private def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
-		print("B")
-		//println("chooseTipWellPairsNext()")
-		//println("tips: "+tips)
-		//println("wells: "+wells)
+		print("A")
+		println("chooseTipWellPairsNext()")
+		println("tips: "+tips)
+		println("wells: "+wells)
 		if (tips.isEmpty || wells.isEmpty)
 			return Success(Nil)
 
@@ -57,7 +59,7 @@ object PipetteHelper {
 			
 			val pairs = new ArrayBuffer[TipWell]
 			pairs += new TipWell(tip0, well0)
-			//println(well0.index+" START")
+			println(pos0.index+" START")
 			for (tip <- tips.tail) {
 				val dRowTip = tip.index - tip0.index
 				val iWell = pos0.index + dRowTip
@@ -69,6 +71,7 @@ object PipetteHelper {
 					}
 				}
 			}
+			println("pair: "+pairs)
 			pairs.toSeq
 		}
 	}

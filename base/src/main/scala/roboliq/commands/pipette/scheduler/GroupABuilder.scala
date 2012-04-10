@@ -309,9 +309,9 @@ class GroupABuilder(
 				// FIXME: consider the total volume to be dispensed instead
 				if (lm.liquid.multipipetteThreshold > 0)
 					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
-				// HUH? What's this? -- ellis, 2012-03-22
-				else if (data.nVolumeCurrent == 0)
-					LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
+				// If current
+				//else if (data.nVolumeCurrent.isEmpty)
+				//	LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
 				// If new volume does not exceed tip capacity
 				else if (nVolumeCurrent <= lm.tipModel.nVolume)
 					LMData(data.nTips, nVolumeTotal, nVolumeCurrent)
@@ -473,7 +473,14 @@ class GroupABuilder(
 			val mDestToItems = lItem.groupBy(_.dest)
 			val mItemToTip = updateGroupA4_sub(g0, lTip, mDestToItems, Map()) match {
 				case Error(ls) => return GroupError(g0, ls)
-				case Success(m) => m
+				case Success(m) =>
+					if (m.isEmpty) {
+						if (g0.mItemToTip.isEmpty)
+							return GroupError(g0, List("Tip volumes too small for even one aspiration"))
+						else
+							return GroupStop(g0, "Tip volumes no large enough for further aspiration")
+					}
+					m
 			}
 			mItemToTip.toSeq
 			//val ltw = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, lDest).flatten
@@ -491,6 +498,11 @@ class GroupABuilder(
 			val ltw0 = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)) match {
 				case Error(ls) => return Error(ls)
 				case Success(l) => l.flatten
+			}
+			// FIXME: I'm not sure whether this should really happen -- ellis, 2012-04-10
+			if (ltw0.isEmpty) {
+				//assert(!ltw0.isEmpty)
+				return Error("PipetteHelper.chooseTipWellPairsAll() returned empty list")
 			}
 			// Make sure that max tip volume isn't exceeded when pipetting from a single liquid to multiple destinations
 			val mTipToVolume = new HashMap[Tip, LiquidVolume]
@@ -510,7 +522,7 @@ class GroupABuilder(
 					}
 				}
 				else {
-					if (nVolumeTip0 == 0.0) {
+					if (nVolumeTip0.isEmpty) {
 						mTipToVolume(tw.tip) = nVolumeTip
 						true
 					}
@@ -519,6 +531,10 @@ class GroupABuilder(
 					}
 				}
 			})
+			// If all tips were full
+			if (ltw.isEmpty) {
+				return Success(Map())
+			}
 			val lTip2 = lTip -- ltw.map(_.tip)
 			val acc2 = acc ++ ltw.map(tw => mDestToItems(tw.well).head -> tw.tip)
 			// Remove processed items from mDestToItems
@@ -529,7 +545,7 @@ class GroupABuilder(
 				else
 					(dest, items)
 			}).filterNot(_._2.isEmpty)
-			//println("updateGroupA4_sub: ",ltw, lTip2, acc2, mDestToItems2)
+			println("updateGroupA4_sub:", ltw0, ltw, lTip2, acc2, mDestToItems2)
 			updateGroupA4_sub(g0, lTip2, mDestToItems2, acc2)
 		}
 	}
@@ -635,9 +651,14 @@ class GroupABuilder(
 				case Success(ll) => ll
 			}
 			val ltw = lltw.flatMap(identity)
-			ltw.map(tw => {
+			// FIXME: If the tip is assigned to the well, then is SHOULD be used, but
+			// don't insist for now...
+			val ltw2 = ltw.filter(tw => g0.mTipToVolume.contains(tw.tip))
+			// ENDFIX
+			ltw2.map(tw => {
 				// FIXME: for debug only
 				if (!g0.mTipToVolume.contains(tw.tip)) {
+					println("DEBUG:")
 					println("g0: "+g0)
 					println("tips: "+g0.mTipToVolume)
 					println("mItemToTip: "+g0.mItemToTip)

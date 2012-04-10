@@ -46,6 +46,12 @@ class LiquidVolume private (val _nl: Int) {
 	def ==(that: LiquidVolume): Boolean = (_nl == that._nl)
 	def !=(that: LiquidVolume): Boolean = (_nl != that._nl)
 	
+	override def equals(that: Any): Boolean = {
+		assert(that.isInstanceOf[LiquidVolume])
+		_nl == that.asInstanceOf[LiquidVolume]._nl
+	}
+	override def hashCode = _nl.hashCode()
+	
 	override def toString = {
 		if (_nl > 1000000)
 			(nl / 1000000).toString + " ml"
