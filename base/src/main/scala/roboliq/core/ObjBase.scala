@@ -363,22 +363,51 @@ class ObjBase(bb: BeanBase) {
 	}
 	
 	def reconstructHistory(): Result[Unit] = {
+		val lsError = new ArrayBuffer[String]
 		builder = new StateBuilder(this)
 		for (event <- bb.lEvent) {
 			findWellState(event.obj) match {
-				case Error(ls) => println("reconstructHistory: unhandled: "+event)
+				case Error(ls) => lsError ++= ls
 				case Success(wellState) =>
 					event.update(builder)
 			}
 		}
-		Success()
+		if (lsError.isEmpty)
+			Success()
+		else
+			Error(lsError.toList)
 	}
 	
 	def findAllIdsContainingSubstance(substance: Substance): Result[List[String]] = {
 		def hasSubstance(st: WellState): Boolean = {
 			substance match {
-				case liquid: SubstanceLiquid => st.content.mapSolventToVolume.contains(liquid)
-				case _ => st.content.mapSoluteToMol.contains(substance)
+				// If the substance is a liquid
+				case liquid: SubstanceLiquid =>
+					val bContainsLiquid =
+						st.content.mapSolventToVolume.contains(liquid) &&
+						st.content.mapSoluteToMol.isEmpty
+						
+					if (bContainsLiquid) {
+						if (st.content.mapSolventToVolume.size == 1) {
+							true
+						}
+						// If the other liquid is water
+						else if (st.content.mapSolventToVolume.size == 2) {
+							st.content.mapSolventToVolume.keys.filter(_ ne liquid).exists(_.id == "water")
+						}
+						else {
+							false
+						}
+					}
+					else
+						false
+						
+				case _ =>
+					val bContainsSolute =
+						st.content.mapSoluteToMol.contains(substance) &&
+						st.content.mapSoluteToMol.size == 1 &&
+						st.content.mapSolventToVolume.forall(_._1.id == "water")
+					bContainsSolute
 			}
 		}
 		
@@ -390,7 +419,10 @@ class ObjBase(bb: BeanBase) {
 			}
 		}}).toList
 		
-		Success(l)
+		if (l.isEmpty)
+			Error("no vessels found which contain substance `"+substance.id+"`")
+		else
+			Success(l)
 	}
 	
 	def setInitialTubeLocation(tube: Tube, location: String, row: Int, col: Int) = {

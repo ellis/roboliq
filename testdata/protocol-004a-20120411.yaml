@@ -1,0 +1,41 @@
+# 2012-04-11
+# PCR command.
+
+substances:
+  FRP572: !dna {}
+  FRO1261: !dna {}
+  FRO114: !dna {}
+  buffer10x: !substance {}
+  dntp: !substance {}
+  taqdiluted: !substance {}
+
+plates:
+  E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
+  P1: { model: "D-BSSE 96 Well PCR Plate" }
+  P2: { model: "D-BSSE 96 Well PCR Plate" }
+
+tubes:
+  T50water1: { model: "Tube 50ml" }
+
+events:
+- !add { obj: T50water1, substance: water, volume: 49e-3 }
+- !add { obj: P1(A01), substance: buffer10x, volume: 100e-6, conc: 1 }
+- !add { obj: P1(B01), substance: dntp, volume: 100e-6, conc: 2e-3 }
+- !add { obj: P1(C01), substance: taqdiluted, volume: 100e-6, conc: 1 }
+- !add { obj: P1(A02), substance: FRP572, volume: 100e-6, conc: 1 }
+- !add { obj: P1(A03), substance: FRO114, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(B03), substance: FRO1261, volume: 100e-6, conc: 10e-6 }
+
+commands:
+- !!roboliq.commands.pcr.PcrCmdBean
+  products:
+  - { template: FRP572, forwardPrimer: FRO1261, backwardPrimer: FRO114 }
+  volume: 30e-6
+  dest: P2(A01)
+  mixSpec:
+    buffer: { liquid: buffer10x, conc: 0.1 }
+    dntp: { liquid: dntp, conc: 0.2e-3 }
+    template: { conc: 0.1 }
+    forwardPrimer: { conc: 0.5e-6 }
+    backwardPrimer: { conc: 0.5e-6 }
+    polymerase: { liquid: taqdiluted, conc: 0.1 }

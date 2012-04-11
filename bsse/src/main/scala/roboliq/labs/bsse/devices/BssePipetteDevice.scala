@@ -189,7 +189,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 					WetContact
 			}
 			else {
-				if (nVolumeDest == 0)
+				if (nVolumeDest.isEmpty)
 					DryContact
 				else
 					WetContact

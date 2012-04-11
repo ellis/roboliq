@@ -8,3 +8,4 @@ commandHandlers:
 - !!roboliq.commands.pipette.TipsDropCmdHandler {}
 - !!roboliq.labs.bsse.handlers.TipsWashCmdHandler_BSSE {}
 - !!roboliq.commands.pipette.PipetteCmdHandler { device: *id001 }
+- !!roboliq.commands.pcr.PcrCmdHandler {}

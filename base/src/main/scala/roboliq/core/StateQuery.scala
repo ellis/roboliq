@@ -43,6 +43,8 @@ trait StateQuery {
 	 */
 	def mapIdsToWell2Lists(ids: String): Result[List[List[Well2]]]
 	
+	def findDestWells(ids: String): Result[List[Well2]]
+	
 	/** get liquid from liquid or well state */
 	def findSourceLiquid(id: String): Result[Liquid] =
 		findLiquid(id).orElse(findWellState(id).map(_.liquid))

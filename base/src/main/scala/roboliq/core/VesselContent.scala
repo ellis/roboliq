@@ -140,6 +140,23 @@ class VesselContent(
 	def removeVolume(volume: LiquidVolume): VesselContent = {
 		scaleToVolume(this.volume - volume)
 	}
+	
+	def concOfSubstance(substance: Substance): Result[BigDecimal] = {
+		if (volume.isEmpty)
+			return Success(0)
+		mapSoluteToMol.get(substance) match {
+			case None => Error("vessel `"+idVessel+"` does not contain substance `"+substance.id+"`")
+			case Some(mol) => Success(mol / volume.l)
+		}
+	}
+	/*
+	def concOfSubstance(id: String): Result[BigDecimal] = {
+		mapSoluteToMol.find(pair => pair._1.id == id) match {
+			case None => Error("vessel does not contain `"+id+"`")
+			case Some(pair) => Success(pair._2 / volume.l)
+		}
+	}
+	*/
 }
 
 object VesselContent {

@@ -52,10 +52,12 @@ class RoboliqConstructor extends Constructor {
 	topDescription.putListPropertyType("commands", classOf[CmdBean])
 	addTypeDescription(topDescription)
 	
-	//val aspirateDescription = new TypeDescription(classOf[AspirateCmdBean])
+	val pcr = new TypeDescription(classOf[roboliq.commands.pcr.PcrCmdBean])
+	pcr.putListPropertyType("products", classOf[roboliq.commands.pcr.PcrProductBean])
+	addTypeDescription(pcr)
 	
-	//addTypeDescription(aspirateDescription)
 	addTypeDescription(new TypeDescription(classOf[SubstanceDnaBean], "!dna"))
+	addTypeDescription(new TypeDescription(classOf[SubstanceOtherBean], "!substance"))
 	addTypeDescription(new TypeDescription(classOf[SubstanceLiquidBean], "!liquid"))
 	addTypeDescription(new TypeDescription(classOf[WellAddEventBean], "!add"))
 }

@@ -14,6 +14,10 @@ class SubstanceDnaBean extends SubstanceBean {
 	@BeanProperty var sequence: String = null
 }
 
+/** Represents some other substance in YAML */
+class SubstanceOtherBean extends SubstanceBean {
+}
+
 /** Represents a liquid substance in YAML */
 class SubstanceLiquidBean extends SubstanceBean {
 	@BeanProperty var physical: String = null
@@ -30,6 +34,7 @@ object Substance {
 		bean match {
 			case b: SubstanceDnaBean => SubstanceDna.fromBean(b)
 			case b: SubstanceLiquidBean => SubstanceLiquid.fromBean(b)
+			case b: SubstanceOtherBean => SubstanceOther.fromBean(b)
 		}
 	}
 }
@@ -46,6 +51,20 @@ object SubstanceDna {
 		} yield {
 			val sequence = if (bean.sequence != null) Some(bean.sequence) else None
 			new SubstanceDna(id, sequence)
+		}
+	}
+}
+
+case class SubstanceOther(
+	val id: String
+) extends Substance
+
+object SubstanceOther {
+	def fromBean(bean: SubstanceOtherBean): Result[SubstanceOther] = {
+		for {
+			id <- Result.mustBeSet(bean._id, "_id")
+		} yield {
+			new SubstanceOther(id)
 		}
 	}
 }

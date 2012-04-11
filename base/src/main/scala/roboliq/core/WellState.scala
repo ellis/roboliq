@@ -82,11 +82,12 @@ class WellAddEventBean extends WellEventBean {
 	@BeanProperty var conc: java.math.BigDecimal = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
+		val v = LiquidVolume.l(volume)
 		if (src != null) {
 			for { wellState <- states0.findWellState(src) }
 			yield {
 				state0.update(this,
-					content = state0.content.addContentByVolume(wellState.content, LiquidVolume.l(volume))
+					content = state0.content.addContentByVolume(wellState.content, v)
 				)
 			}
 		}
@@ -95,8 +96,19 @@ class WellAddEventBean extends WellEventBean {
 			yield {
 				val content: VesselContent = sub match {
 					case liquid: SubstanceLiquid =>
-						state0.content.addLiquid(liquid, LiquidVolume.l(volume))
-					case _ => assert(false); null
+						state0.content.addLiquid(liquid, v)
+					case _ =>
+						Result.mustBeSet(conc, "conc") match {
+							case Error(ls) => return Error(ls)
+							case _ =>
+						}
+						val water = states0.findSubstance("water") match {
+							case Error(ls) => return Error(ls)
+							case Success(water: SubstanceLiquid) => water
+							case _ => return Error("water must be a liquid")
+						}
+						val mol = BigDecimal(conc) * volume
+						state0.content.addPowder(sub, mol).addLiquid(water, v)
 				}
 				state0.update(this,
 					content = content

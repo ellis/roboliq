@@ -40,7 +40,7 @@ Soon
 
 * ``Processor``: allow for more than one tube to be automatically placed on a rack
 * ``VesselContent`` and ``Liquid``: create ``equals`` and ``hashcode`` functions
-* ``PipetteScheduler``: improve performance
+* ``VesselContent``: name ``liquid`` by solute conc and solvent percentage (leave out water unless it's the only content) (e.g. "salt(5μmol)+oil(5%)")
 * ``PipetteScheduler``: create a much simpler version using a combinatorial approach -- worry about correctness, not performance
 * ``CmdBean``: autogenerate ``doc`` property
 * ``EvowareTranslator``: output ``doc`` properties as comments
@@ -59,15 +59,21 @@ Intermediate
 * ``ObjBase``: design a better separation of responsibilities between ``ObjBase``, ``Processor``, ``StateQuery``, and ``StateBuilder``.
   For example, it might be a good idea to create a ``StateBase`` which holds the state information that's currently kept in ``ObjBase``.
 * ``RobotQuery``: get rid of ``RobotState`` in favor of ``StateQuery``
-* ``Result``: adapt monad to accommodate propogation of warnings too, or create a CmdResult
-* ``Result``: use it more in code in order to avoid such things as ``if (messages.hasErrors) ...``
-* create better, more structured error/warning messages
+* message handling:
+
+  * ``CmdMessageWriter``: this was a bad idea, get rid of it
+  * ``Result``: adapt monad to accommodate propogation of warnings too, or create a CmdResult
+  * ``Result``: use it more in code in order to avoid such things as ``if (messages.hasErrors) ...``
+  * create better, more structured error/warning messages, including handling nested property names and list indexes
+
 * ``evoware`` module: add commands to script to export information and process it
 * control program for evoware
 * read in evoware export data and write results to database
 * ``PipetteScheduler``: produce some form of navigatable log (SVG, HTML, CSS, JavaScript, or just RST) in order to make it possible to follow the choices made
+* ``PipetteScheduler``: improve performance
 * ``VesselContent``: track the cost of stock substances in the vessel
 * Remove ``WellStateWriter`` and any other ``*StateWriter`` classes
+* ``bsse`` module: move almost all the code to ``base`` or ``evoware``, and use the yaml classes file to load any ``bsse`` classes we need
 
 Location handling
 -----------------
@@ -100,7 +106,7 @@ Take care of someday
 * ``TipState``: simplify it so that it can only hold a single liquid, though contaminants may accumulate
 * consider adding structure to ``roboliq.core`` and perhaps using imports in the package object.
 * ``WashCmd``: the generic handling should be improved or removed
-* Consider using unicode: ℓ for list, σ for set, mu for map, º like prime in haskell, alpha and beta for "numbering"
+* Consider using unicode: ℓ for list, rho for reverse list, σ for set, μ for map, º like prime in haskell, α and β for "numbering"
 * YAML: write a converter between SnakeYAML and scala immutable objects
 * See about integrating `Scalaz <http://code.google.com/p/scalaz/>`
 * ``Liquid``: consider removing it and just using ``VolumeContent``
@@ -115,4 +121,4 @@ Questions for Fabian
 ====================
 
 * Any ideas about how to determine when we're allowed to waste an expensive substance by multipipetting?
-* Lets review ``VesselContent`` class to see whether it makes sense
+* Let's review ``VesselContent`` class to see whether it makes sense
