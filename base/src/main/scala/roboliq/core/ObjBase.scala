@@ -285,6 +285,11 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
+	def findWell2List(id: String): Result[List[Well2]] = {
+		val ℓid = m_mapSubstanceToVessels.getOrElse(id, List(id))
+		Result.mapOver(ℓid)(findWell2)
+	}
+	
 	/*
 	private def loadWellEvents(id: String) {
 		//println("loadWellEvents: "+id)

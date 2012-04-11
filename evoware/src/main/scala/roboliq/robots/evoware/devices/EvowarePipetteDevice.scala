@@ -49,7 +49,7 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 				xs.forall(twvp => twvp.policy == x.policy && twvp.tip.state(states).model_? == tipState.model_?)
 		}
 		// Ensure that all intra-tip distances are equal to the intra-well distances
-		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp, states)
+		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)
 		// Ensure that all wells are in the same column
 		val b3 = WellGroup(states, lTwvp.map(_.well)).splitByCol().size == 1
 		
@@ -71,7 +71,7 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 				xs.forall(twvp => twvp.mixSpec.mixPolicy_? == x.mixSpec.mixPolicy_? && twvp.tip.state(states).model_? == tipState.model_? && twvp.mixSpec.nCount_? == x.mixSpec.nCount_?)
 		}
 		// Ensure that all intra-tip distances are equal to the intra-well distances
-		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp, states)
+		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)
 		// Ensure that all wells are in the same column
 		val b3 = WellGroup(states, lTwvp.map(_.well)).splitByCol().size == 1
 		

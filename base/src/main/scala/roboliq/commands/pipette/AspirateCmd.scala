@@ -69,7 +69,7 @@ case class AspirateToken(
 
 case class SpirateTokenItem(
 	val tip: Tip,
-	val well: Well,
+	val well: Well2,
 	val volume: LiquidVolume,
 	val policy: String
 ) extends HasTipWell

@@ -51,19 +51,18 @@ class EvowareTranslator(config: EvowareConfig) {
 	
 }
 
-private class WellInfo(well: Well, state: WellState, pos: Well2) {
+// REFACTOR: Remove this class, because it's superfluous now
+private class WellInfo(well: Well2) {
 	def id = well.id
-	def idPlate = pos.idPlate
-	def index = pos.index
+	def idPlate = well.idPlate
+	def index = well.index
 	//def iRow = pos.iRow
 }
 
 private object WellInfo {
-	def apply(well: Well, states: StateQuery): WellInfo = {
+	def apply(well: Well2): WellInfo = {
 		new WellInfo(
-			well,
-			states.findWellState(well.id).get,
-			states.findWellPosition(well.id).get
+			well
 		)
 	}
 }
@@ -321,7 +320,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val lItemInfo = items zip lWellInfo
 		lItemInfo match {
-			case Seq() => Error(Seq("Empty Tip-Well-Volume list"))
+			case Seq() => Error(Seq("Empty Tip-Well2-Volume list"))
 			case Seq((item0, info0), rest @ _*) =>
 				// Get the liquid class
 				val sLiquidClass = item0.policy
@@ -486,12 +485,12 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		tracker.getLocationForCommand(idPlate, nodeCurrent.index)
 	}
 	
-	private def getWellInfo(well: Well): WellInfo = {
-		WellInfo(well, nodeCurrent.states0)
+	private def getWellInfo(well: Well2): WellInfo = {
+		WellInfo(well)
 	}
 	
-	private def getWellInfo(lWell: Iterable[Well]): List[WellInfo] = {
-		lWell.map(well => WellInfo(well, nodeCurrent.states0)).toList
+	private def getWellInfo(lWell: Iterable[Well2]): List[WellInfo] = {
+		lWell.map(well => WellInfo(well)).toList
 	}
 	
 	private def getSite(location: String): Result[CarrierSite] = {

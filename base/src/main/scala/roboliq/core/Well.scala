@@ -13,9 +13,6 @@ sealed trait WellBase extends Ordered[WellBase] {
 }
 
 sealed abstract class Well(val id: String) extends Part {
-	def wellState(states: StateMap): Result[WellState] = states.findWellState(id)
-	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
-
 	override def toString = id
 }
 

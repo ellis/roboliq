@@ -82,10 +82,8 @@ trait StateMap extends StateQuery {
 	def mapIdToWell2List(id: String): Result[List[Well2]] = {
 		if (findPlate(id).isSuccess)
 			Error("plate `"+id+"` is not valid in this context.  Use a well, tube, or substance instead.")
-		else if (findPlate(id).isSuccess)
-			return Error("plate `"+id+"` is not valid in this context.  Use a well, tube, or substance instead.")
 		else {
-			findWellPosition(id).map(_ :: Nil)
+			ob.findWell2List(id)
 		}
 	}
 	

@@ -89,7 +89,7 @@ case class MixToken(
 
 case class MixTokenItem(
 	val tip: Tip,
-	val well: Well,
+	val well: Well2,
 	val volume: LiquidVolume,
 	val count: Int,
 	val policy: String

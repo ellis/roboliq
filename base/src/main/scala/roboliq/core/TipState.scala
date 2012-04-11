@@ -170,7 +170,7 @@ class TipAspirateEventBean extends TipEventBean {
 }
 
 object TipAspirateEventBean {
-	def apply(tip: Tip, src: Well, volume: LiquidVolume): TipAspirateEventBean = {
+	def apply(tip: Tip, src: Well2, volume: LiquidVolume): TipAspirateEventBean = {
 		val bean = new TipAspirateEventBean
 		bean.obj = tip.id
 		bean.src = src.id
@@ -242,7 +242,7 @@ class TipDispenseEventBean extends TipEventBean {
 }
 
 object TipDispenseEventBean {
-	def apply(tip: Tip, dest: Well, volume: LiquidVolume, pos: PipettePosition.Value): TipDispenseEventBean = {
+	def apply(tip: Tip, dest: Well2, volume: LiquidVolume, pos: PipettePosition.Value): TipDispenseEventBean = {
 		val bean = new TipDispenseEventBean
 		bean.obj = tip.id
 		bean.dest = dest.id

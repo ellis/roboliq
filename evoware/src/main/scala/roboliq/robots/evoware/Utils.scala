@@ -37,8 +37,8 @@ object Utils {
 	}
 	
 	// Test all adjacent items for equidistance
-	def equidistant(items: Seq[HasTipWell], query: StateQuery): Boolean = {
-		val lWellInfo = items.map(item => WellInfo(item.well, query)).toList
+	def equidistant(items: Seq[HasTipWell]): Boolean = {
+		val lWellInfo = items.map(item => WellInfo(item.well)).toList
 		val l = items zip lWellInfo
 		equidistant2(l)
 	}

@@ -8,7 +8,7 @@ import scala.reflect.BeanProperty
 
 
 abstract class WellState(
-	//val well: Well,
+	//val well: Well2,
 	val content: VesselContent,
 	/** Make sure that volume doesn't go below 0 */
 	val bCheckVolume: Boolean,
@@ -110,7 +110,7 @@ class WellAddEventBean extends WellEventBean {
 }
 
 object WellAddEventBean {
-	def apply(well: Well, src: Well, volume: LiquidVolume): WellAddEventBean = {
+	def apply(well: Well2, src: Well2, volume: LiquidVolume): WellAddEventBean = {
 		val bean = new WellAddEventBean
 		bean.obj = well.id
 		bean.src = src.id
@@ -152,7 +152,7 @@ class WellRemoveEventBean extends WellEventBean {
 }
 
 object WellRemoveEventBean {
-	def apply(well: Well, volume: LiquidVolume): WellRemoveEventBean = {
+	def apply(well: Well2, volume: LiquidVolume): WellRemoveEventBean = {
 		val bean = new WellRemoveEventBean
 		bean.obj = well.id
 		bean.volume = volume.l.bigDecimal
@@ -234,7 +234,7 @@ case class WellHistoryAdd(
 */
 
 /*
-class Well extends Obj { thisObj =>
+class Well2 extends Obj { thisObj =>
 	type Config = WellConfigL2
 	type State = WellStateL2
 	
@@ -335,7 +335,7 @@ class Well extends Obj { thisObj =>
 }
 
 class WellConfigL2(
-	val obj: Well,
+	val obj: Well2,
 	val holder: Plate,
 	val index: Int,
 	val bInitialVolumeKnown: Boolean
