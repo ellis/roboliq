@@ -142,9 +142,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		ob.m_mapSubstanceToVessels ++= mapSubstanceToWells
 
 		println("mTube: "+mTube)
-
 		val locationBuilder = new LocationBuilder
-		
 		// If tube locations are defined in database
 		ob.findAllTubeLocations().foreach(lLocation => {
 			// Construct mutable list of all free locations

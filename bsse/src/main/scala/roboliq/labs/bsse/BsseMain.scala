@@ -53,17 +53,35 @@ class YamlTest2(args: List[String]) {
 	def run {
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
 		println(res.locationTracker.map)
-		translator.translate(res) match {
-			case Error(ls) => ls.foreach(println)
-			case Success(evowareScript) =>
-				// print to screen
-				evowareScript.cmds.foreach(println)
-				// save to file
-				val sProtocolFilename = files.last
-				val sScriptFilename = pathbase + FilenameUtils.removeExtension(sProtocolFilename) + ".esc"
-				translator.saveWithHeader(evowareScript, sScriptFilename)
+		res.lNode.flatMap(getErrorMessage) match {
+			case Nil =>
+				translator.translate(res) match {
+					case Error(ls) => ls.foreach(println)
+					case Success(evowareScript) =>
+						// print to screen
+						evowareScript.cmds.foreach(println)
+						// save to file
+						val sProtocolFilename = files.last
+						val sScriptFilename = pathbase + FilenameUtils.removeExtension(sProtocolFilename) + ".esc"
+						translator.saveWithHeader(evowareScript, sScriptFilename)
+				}
+			case ls =>
+				ls.foreach(println)
 		}
 	}
+	
+	private def getErrorMessage(node: CmdNodeBean): List[String] = {
+		if (node.errors != null) {
+			node.errors.toList.map(node.index+": "+_)
+		}
+		else if (node.children != null) {
+			node.children.flatMap(getErrorMessage).toList
+		}
+		else
+			Nil
+	}
+	//def getErrorMessages(lNode: List[CmdNodeBean]): List[String] =
+		
 }
 
 object BsseMain {

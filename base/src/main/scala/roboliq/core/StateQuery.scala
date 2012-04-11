@@ -7,7 +7,7 @@ trait StateQuery {
 	def findLiquid(id: String): Result[Liquid]
 	def findTip(id: String): Result[Tip]
 	def findPlate(id: String): Result[Plate]
-	def findWell(id: String): Result[Well]
+	//def findWell(id: String): Result[Well]
 	
 	def findTipState(id: String): Result[TipState]
 	def findWellState(id: String): Result[WellState]

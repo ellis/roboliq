@@ -12,15 +12,15 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``Processor``: allow user to specify liquids and find their wells in the database
 #. ``PcrCmd``: create it and get it to work like the old one
 #. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
 #. ``PcrCmd``: add master mix functionality
-#. accommodate tubes
 #. create script to run PCRs on invitrogen primers
 
 Done:
 
+* accommodate tubes
+* ``Processor``: allow user to specify liquids and find their wells in the database
 * ``BsseMain``: save evoware scripts to a file
 * ``protocol-003``: create script to dilute invitrogen primers
 * ``bsse`` module: get it working again in minimal form
@@ -38,6 +38,7 @@ General
 Soon
 ----
 
+* ``Processor``: allow for more than one tube to be automatically placed on a rack
 * ``VesselContent`` and ``Liquid``: create ``equals`` and ``hashcode`` functions
 * ``PipetteScheduler``: improve performance
 * ``PipetteScheduler``: create a much simpler version using a combinatorial approach -- worry about correctness, not performance

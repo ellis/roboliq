@@ -87,6 +87,7 @@ class GroupABuilder(
 				// FIXME: for debug only
 				//println("mapModelToCount: "+mapModelToCount)
 				if (liquids.isEmpty) {
+					println("DEBUG:")
 					println(items)
 					println(mapLiquidToModels)
 					println("tipModel: "+tipModel)

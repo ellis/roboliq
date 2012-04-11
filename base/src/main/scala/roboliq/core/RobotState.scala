@@ -48,7 +48,7 @@ trait StateMap extends StateQuery {
 	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
 	def findTip(id: String): Result[Tip] = ob.findTip(id)
 	def findPlate(id: String): Result[Plate] = ob.findPlate(id)
-	def findWell(id: String): Result[Well] = ob.findWell(id)
+	//def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findTipState(id: String): Result[TipState] = {
 		map.get(id) match {
@@ -69,11 +69,7 @@ trait StateMap extends StateQuery {
 	}
 	
 	def findWellPosition(id: String): Result[Well2] = {
-		findWell(id) match {
-			case Success(pwell: PlateWell) => Success(pwell)
-			case Success(twell: Tube) => Success(ob.m_mapWell2(id))
-			case Error(ls) => Error(ls)
-		}
+		ob.findWell2(id)
 	}
 	
 	def expandIdList(ids: String): Result[List[String]] =

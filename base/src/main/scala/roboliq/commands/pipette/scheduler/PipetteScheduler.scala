@@ -32,19 +32,17 @@ object PipetteScheduler {
 			lv: List[LiquidVolume],
 			acc: List[Tuple3[List[Well2], Well2, LiquidVolume]]
 		): List[Tuple3[List[Well2], Well2, LiquidVolume]] = {
-			println((ls, ld, lv))
-			(ls, ld, lv) match {
-				case (s::ss, d::ds, v::vs) =>
-					val sdv = (s, d, v)
-					val acc2 = sdv :: acc
-					if (ss == Nil && ds == Nil && vs == Nil)
-						acc2.reverse
-					else {
-						val ls2 = if (ss.isEmpty) ls else ss
-						val ld2 = if (ds.isEmpty) ld else ds
-						val lv2 = if (vs.isEmpty) lv else vs
-						zipit(ls2, ld2, lv2, acc2)
-					}
+			//println("zipit:", ls, ld, lv)
+			val (s::ss, d::ds, v::vs) = (ls, ld, lv)
+			val sdv = (s, d, v)
+			val acc2 = sdv :: acc
+			if (ss == Nil && ds == Nil && vs == Nil)
+				acc2.reverse
+			else {
+				val ls2 = if (ss.isEmpty) ls else ss
+				val ld2 = if (ds.isEmpty) ld else ds
+				val lv2 = if (vs.isEmpty) lv else vs
+				zipit(ls2, ld2, lv2, acc2)
 			}
 		}
 		

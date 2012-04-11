@@ -56,7 +56,7 @@ class SpirateCmdItemBean {
 			return Error(Nil)
 		for {
 			tipObj <- ob.findTip(tip)
-			wellObj <- ob.findWell(well)
+			wellObj <- ob.findWell2(well)
 		} yield {
 			new SpirateTokenItem(tipObj, wellObj, LiquidVolume.l(volume), policy)
 		}
