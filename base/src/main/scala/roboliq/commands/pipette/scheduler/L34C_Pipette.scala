@@ -39,8 +39,8 @@ class L3A_PipetteArgs(
 )
 
 case class Item(
-	val srcs: SortedSet[Well],
-	val dest: Well,
+	val srcs: SortedSet[Well2],
+	val dest: Well2,
 	val nVolume: LiquidVolume,
 	val premix_? : Option[MixSpec],
 	val postmix_? : Option[MixSpec]

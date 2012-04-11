@@ -139,6 +139,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			}
 		}
 		println("mapSubstanceToWells: "+mapSubstanceToWells)
+		ob.m_mapSubstanceToVessels ++= mapSubstanceToWells
 
 		println("mTube: "+mTube)
 

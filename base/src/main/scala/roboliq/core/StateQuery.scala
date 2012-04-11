@@ -1,6 +1,8 @@
 package roboliq.core
 
 trait StateQuery {
+	def findTipModel(id: String): Result[TipModel]
+	
 	def findSubstance(id: String): Result[Substance]
 	def findLiquid(id: String): Result[Liquid]
 	def findTip(id: String): Result[Tip]

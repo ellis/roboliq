@@ -56,7 +56,7 @@ class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean] {
 		ctx: ProcessorContext,
 		messages: CmdMessageWriter
 	): Expand2Result = {
-		PipetteScheduler.createL3C(cmd, ctx.ob, ctx.node) match {
+		PipetteScheduler.createL3C(cmd, ctx.states, ctx.node) match {
 			case Error(ls) => ls.foreach(ctx.node.addError); Expand2Errors()
 			case Success(l3c) =>
 				val scheduler = new PipetteScheduler(device, ctx, l3c)

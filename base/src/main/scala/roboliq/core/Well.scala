@@ -7,21 +7,31 @@ import scala.collection.mutable.HashSet
 import scala.reflect.BeanProperty
 
 
-sealed abstract class Well(val id: String) extends Part with Ordered[Well] {
+sealed trait WellBase extends Ordered[WellBase] {
+	val id: String
+	override def compare(that: WellBase) = id.compare(that.id)
+}
+
+sealed abstract class Well(val id: String) extends Part {
 	def wellState(states: StateMap): Result[WellState] = states.findWellState(id)
 	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
 
-	override def compare(that: Well) = id.compare(that.id)
 	override def toString = id
 }
 
-sealed trait Well2 {
-	val id: String
+sealed trait Well2 extends Ordered[Well2] {
 	val idPlate: String
 	val index: Int
 	val iRow: Int
 	val iCol: Int
 	val indexName: String
+	val id: String
+
+	def wellState(states: StateMap): Result[WellState] = states.findWellState(id)
+	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
+
+	override def toString = id
+	override def compare(that: Well2) = id.compare(that.id)
 }
 
 case class WellPosition(
@@ -74,7 +84,7 @@ class Tube(
 		case _ => assert(false); null
 	}
 	
-	override def compare(that: Well) = id.compare(that.id)
+	//override def compare(that: Well) = id.compare(that.id)
 	override def toString = id
 }
 

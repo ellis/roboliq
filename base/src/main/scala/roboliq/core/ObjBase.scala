@@ -21,6 +21,7 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapWell = new HashMap[String, PlateWell]
 	private val m_mapLiquid = new HashMap[String, Liquid]
 	
+	val m_mapSubstanceToVessels = new HashMap[String, List[String]]
 	val m_mapWell2 = new HashMap[String, Well2]
 	
 	//private val m_mapWellState = new HashMap[String, WellState]

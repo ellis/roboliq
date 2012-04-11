@@ -7,7 +7,7 @@ import scala.reflect.BeanProperty
 case class TipState(
 	val conf: Tip,
 	val model_? : Option[TipModel],
-	val src_? : Option[Well],
+	val src_? : Option[Well2],
 	val liquid: Liquid,
 	val nVolume: LiquidVolume,
 	val contamInside: Set[Contaminant.Value], 
@@ -57,7 +57,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		//println("tip "+thisObj.index+": sType = "+state.model_?)
 	}
 	
-	def aspirate(src: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
+	def aspirate(src: Well2, liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
 		val nVolumeNew = st.nVolume + nVolume2
 		set(new TipState(
@@ -128,7 +128,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		))
 	}
 	
-	def mix(well: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
+	def mix(well: Well2, liquid2: Liquid, nVolume2: LiquidVolume) {
 		aspirate(well, liquid2, nVolume2)
 		dispenseIn(nVolume2, liquid2)
 	}
@@ -149,7 +149,7 @@ class TipAspirateEventBean extends TipEventBean {
 			liquid <- query.findSourceLiquid(src)
 		} yield {
 			val volumeNew = state0.nVolume + LiquidVolume.l(volume)
-			val src_? = query.findWell(src).toOption
+			val src_? = query.findWellPosition(src).toOption
 			new TipState(
 				state0.conf,
 				state0.model_?,

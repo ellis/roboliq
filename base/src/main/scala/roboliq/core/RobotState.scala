@@ -42,6 +42,8 @@ trait StateMap extends StateQuery {
 		map.map(_.toString).mkString("\n")
 	}
 
+	def findTipModel(id: String): Result[TipModel] = ob.findTipModel(id)
+	
 	def findSubstance(id: String): Result[Substance] = ob.findSubstance(id)
 	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
 	def findTip(id: String): Result[Tip] = ob.findTip(id)
