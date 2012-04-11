@@ -21,7 +21,7 @@ abstract class PipetteDevice extends DeviceBean {
 	/** Choose aspirate method */
 	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy]
 	/** Choose dispense method */
-	def getDispensePolicy(liquid: Liquid, tip: Tip, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy]
+	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy]
 	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec]
 	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean
 	def canBatchMixItems(states: StateMap, lTwvp: List[TipWellMix]): Boolean

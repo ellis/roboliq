@@ -78,7 +78,7 @@ class TestPipetteDevice extends PipetteDevice {
 	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] =
 		Some(new PipettePolicy("POLICY", PipettePosition.Free))
 	
-	def getDispensePolicy(liquid: Liquid, tip: Tip, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] =
+	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] =
 		Some(new PipettePolicy("POLICY", PipettePosition.Free))
 
 	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] =

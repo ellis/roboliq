@@ -1,0 +1,90 @@
+# 2012-04-11
+# PCR command.
+
+substances:
+  FRP128: !dna {}
+  FRP222: !dna {}
+  FRP332: !dna {}
+  FRP337: !dna {}
+  FRP446: !dna {}
+  FRP572: !dna {}
+  FRP572: !dna {}
+
+  FRO114: !dna {}
+  FRO115: !dna {}
+  FRO699: !dna {}
+  FRO700: !dna {}
+  FRO703: !dna {}
+  FRO704: !dna {}
+  FRO1259: !dna {}
+  FRO1260: !dna {}
+  FRO1261: !dna {}
+  FRO1262: !dna {}
+  FRO1329: !dna {}
+  FRO1261: !dna {}
+
+  buffer10x: !substance {}
+  dntp: !substance {}
+  taqdiluted: !substance {}
+
+plates:
+  E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
+  P1: { model: "D-BSSE 96 Well PCR Plate" }
+  P2: { model: "D-BSSE 96 Well PCR Plate" }
+  P4: { model: "D-BSSE 96 Well PCR Plate" }
+
+#tubes:
+#  T50water1: { model: "Tube 50ml" }
+
+events:
+#- !add { obj: T50water1, substance: water, volume: 49e-3 }
+
+- !add { obj: P1(A01), substance: FRP128, volume: 100e-6, conc: 1 }
+- !add { obj: P1(B01), substance: FRP222, volume: 100e-6, conc: 1 }
+- !add { obj: P1(C01), substance: FRP332, volume: 100e-6, conc: 1 }
+- !add { obj: P1(D01), substance: FRP337, volume: 100e-6, conc: 1 }
+- !add { obj: P1(E01), substance: FRP446, volume: 100e-6, conc: 1 }
+- !add { obj: P1(F01), substance: FRP572, volume: 100e-6, conc: 1 }
+
+- !add { obj: P1(H02), substance: taqdiluted, volume: 100e-6, conc: 1 }
+
+- !add { obj: P1(A03), substance: FRO114, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(B03), substance: FRO115, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(C03), substance: FRO699, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(D03), substance: FRO700, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(E03), substance: FRO703, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(F03), substance: FRO704, volume: 100e-6, conc: 10e-6 }
+
+- !add { obj: P1(A04), substance: FRO1259, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(B04), substance: FRO1260, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(C04), substance: FRO1261, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(D04), substance: FRO1262, volume: 100e-6, conc: 10e-6 }
+- !add { obj: P1(E04), substance: FRO1329, volume: 100e-6, conc: 10e-6 }
+
+- !add { obj: P2(A01), substance: dntp, volume: 500e-6, conc: 2e-3 }
+- !add { obj: P2(B01), substance: buffer5x, volume: 500e-6, conc: 5 }
+- !add { obj: P2(C01), substance: buffer10x, volume: 500e-6, conc: 10 }
+- !add { obj: P2(H01), substance: water, volume: 500e-6 }
+
+commands:
+- !!roboliq.commands.pcr.PcrCmdBean
+  products:
+  # NOT1
+  - { template: FRP446, forwardPrimer: FRO115, backwardPrimer: FRO700 }
+  - { template: FRP332, forwardPrimer: FRO699, backwardPrimer: FRO114 }
+  # NOT2
+  - { template: FRP337, forwardPrimer: FRO115, backwardPrimer: FRO704 }
+  - { template: FRP222, forwardPrimer: FRO703, backwardPrimer: FRO114 }
+  # NOR3_yellow
+  - { template: FRP572, forwardPrimer: FRO115, backwardPrimer: FRO1260 }
+  - { template: FRP128, forwardPrimer: FRO1259, backwardPrimer: FRO1262 }
+  - { template: FRP572, forwardPrimer: FRO1261, backwardPrimer: FRO114 }
+  volume: 30e-6
+  dest: P4(A01 d G)
+  mixSpec:
+    buffer: { liquid: buffer10x, conc: 0.1 }
+    dntp: { liquid: dntp, conc: 0.2e-3 }
+    template: { conc: 0.1 }
+    forwardPrimer: { conc: 0.5e-6 }
+    backwardPrimer: { conc: 0.5e-6 }
+    polymerase: { liquid: taqdiluted, conc: 0.1 }

@@ -300,6 +300,7 @@ class GroupABuilder(
 			case Some(data) =>
 				val nVolumeCurrent = data.nVolumeCurrent + item.nVolume
 				val nVolumeTotal = data.nVolumeTotal + item.nVolume
+				//val bRequiresNewTip = requiresDifferentTip(g0, lm, item, mLMToItems(lm))
 				/*// FIXME: for debug only
 				if (nVolumeCurrent > 1000) {
 					println(lm.tipModel, lm.tipModel.nVolume)
@@ -336,6 +337,44 @@ class GroupABuilder(
 			mLMToItems = mLMToItems,
 			mLMData = g0.mLMData.updated(lm, data)
 		))
+	}
+	
+	private def requiresDifferentTip(g0: GroupA, lm: LM, item: Item, items: Seq[Item]): Boolean = {
+		if (items.isEmpty)
+			return true
+			
+		if (lm.liquid.multipipetteThreshold > 0)
+			return true
+		
+		val item1 = items.last
+		val itemState = g0.mItemToState(item)
+		val liquid = itemState.srcContent.liquid
+		val nVolume = item.nVolume
+		
+		val policy_? = getPolicy(g0, lm, item)
+		val policy1_? = getPolicy(g0, lm, item1)
+		
+		if (policy_?.isEmpty || policy1_?.isEmpty) return true // Arbitrary error handling
+		
+		val policy = policy_?.get
+		val policy1 = policy1_?.get
+		
+		if (policy != policy1)
+			return true
+		
+		// TODO: we need to check liquid groups!
+		if (policy.pos == PipettePosition.WetContact)
+			return true
+		
+		return false
+	}
+	
+	private def getPolicy(g0: GroupA, lm: LM, item: Item): Option[PipettePolicy] = {
+		val itemState = g0.mItemToState(item)
+		val liquid = itemState.srcContent.liquid
+		cmd.args.pipettePolicy_?.orElse(
+			device.getDispensePolicy(liquid, lm.tipModel, item.nVolume, itemState.destState0)
+		)
 	}
 	
 	// Choose number of tips per LM, and indicate whether we need to clean the tips first 
@@ -572,7 +611,7 @@ class GroupABuilder(
 				println(g0)
 			}
 			// ENDFIX
-			val tip = g0.mItemToTip(item)
+			val tipModel = g0.mLM(item).tipModel
 			val itemState = g0.mItemToState(item)
 			val liquid = itemState.srcContent.liquid
 			val nVolume = item.nVolume
@@ -580,7 +619,7 @@ class GroupABuilder(
 			
 			// TODO: allow for policy override
 			val policy = cmd.args.pipettePolicy_?.getOrElse(
-				device.getDispensePolicy(liquid, tip, nVolume, itemState.destState0) match {
+				device.getDispensePolicy(liquid, tipModel, nVolume, itemState.destState0) match {
 					case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
 					case Some(p) => p
 				}

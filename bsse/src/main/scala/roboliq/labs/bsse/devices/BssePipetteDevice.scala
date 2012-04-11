@@ -169,12 +169,11 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	val nFreeDispense2VolumeThreshold = LiquidVolume.ul(5)
 	val nFreeDispense2DestVolumeThreshold = LiquidVolume.ul(20)
 	
-	def getDispensePolicy(liquid: Liquid, tip: Tip, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
+	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
 		import PipettePosition._
 
 		val sFamily = liquid.sFamily
-		val bLarge = (tip.index < 4)
-		val tipModel = if (tip.index < 4) tipModel1000 else tipModel50
+		val bLarge = (tipModel eq tipModel1000)
 		val nVolumeDest = wellState.nVolume
 		
 		val posDefault = {
