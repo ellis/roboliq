@@ -57,4 +57,9 @@ Additional steps:
 Step 3
 ------
 
+Mix the PCR together.
+
+:Time: 18:30
+:File: protocol-007b-pcrmix
+
 
