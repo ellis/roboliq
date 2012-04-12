@@ -70,11 +70,15 @@ commands:
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: water
   dest: P4(A01 d G)
-  volumes: 17.7e-6
+  volumes: 15e-6
 - !!roboliq.commands.pipette.PipetteCmdBean
-  src: water
+  src: buffer10x
   dest: P4(A01 d G)
-  volumes: 17.7e-6
+  volumes: 3e-6
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: dntp
+  dest: P4(A01 d G)
+  volumes: 3e-6
 
 - !!roboliq.commands.pcr.PcrCmdBean
   products:
