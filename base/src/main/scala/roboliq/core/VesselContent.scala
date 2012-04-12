@@ -75,8 +75,19 @@ class VesselContent(
 			// NOTE: this is very, very arbitrary -- ellis, 2012-04-10
 			// TODO: try to figure out a better method!
 			val bCanMultipipette = {
-				val nAllowMultipipette = mapSolventToVolume.keys.filter(_.allowMultipipette).size
-				nAllowMultipipette < nSolvents
+				val nAllowMultipipette1 = mapSolventToVolume.keys.filter(_.allowMultipipette).size
+				val nAllowMultipipette2 = mapSoluteToMol.keys.filter(_.allowMultipipette).size
+				//nAllowMultipipette < nSolvents
+				// If there are solutes which shouldn't be multipipetted
+				if (nAllowMultipipette2 < nSolutes) {
+					// If any DO allow multipipetting, go ahead and do so
+					nAllowMultipipette2 > 0
+				}
+				else if (nAllowMultipipette1 < nSolvents) {
+					nAllowMultipipette1 > 0
+				}
+				else
+					true
 			}
 			
 			new Liquid(
@@ -84,7 +95,7 @@ class VesselContent(
 				sFamily = physicalProperties.toString,
 				contaminants = Set(),
 				group = new LiquidGroup(cleanPolicy),
-				multipipetteThreshold = if (bCanMultipipette) 1 else 0
+				multipipetteThreshold = if (bCanMultipipette) 0 else 1
 			)
 		}
 	}

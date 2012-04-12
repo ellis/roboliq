@@ -1,31 +1,31 @@
-# 2012-04-11
-# PCR command.
+# 2012-04-12
+# Manual PCR mix using lower-level pipette commands
 
 substances:
-  FRP128: !dna { allowMultipipette: false }
-  FRP222: !dna { allowMultipipette: false }
-  FRP332: !dna { allowMultipipette: false }
-  FRP337: !dna { allowMultipipette: false }
-  FRP446: !dna { allowMultipipette: false }
-  FRP572: !dna { allowMultipipette: false }
-  FRP572: !dna { allowMultipipette: false }
+  FRP128: !dna {}
+  FRP222: !dna {}
+  FRP332: !dna {}
+  FRP337: !dna {}
+  FRP446: !dna {}
+  FRP572: !dna {}
+  FRP572: !dna {}
 
-  FRO114: !dna { allowMultipipette: false }
-  FRO115: !dna { allowMultipipette: false }
-  FRO699: !dna { allowMultipipette: false }
-  FRO700: !dna { allowMultipipette: false }
-  FRO703: !dna { allowMultipipette: false }
-  FRO704: !dna { allowMultipipette: false }
-  FRO1259: !dna { allowMultipipette: false }
-  FRO1260: !dna { allowMultipipette: false }
-  FRO1261: !dna { allowMultipipette: false }
-  FRO1262: !dna { allowMultipipette: false }
-  FRO1329: !dna { allowMultipipette: false }
-  FRO1261: !dna { allowMultipipette: false }
+  FRO114: !dna {}
+  FRO115: !dna {}
+  FRO699: !dna {}
+  FRO700: !dna {}
+  FRO703: !dna {}
+  FRO704: !dna {}
+  FRO1259: !dna {}
+  FRO1260: !dna {}
+  FRO1261: !dna {}
+  FRO1262: !dna {}
+  FRO1329: !dna {}
+  FRO1261: !dna {}
 
   buffer10x: !substance {}
   dntp: !substance {}
-  taqdiluted: !substance { allowMultipipette: false }
+  taqdiluted: !substance {}
 
 plates:
   E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
@@ -67,6 +67,15 @@ events:
 - !add { obj: P2(H01), substance: water, volume: 500e-6 }
 
 commands:
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: water
+  dest: P4(A01 d G)
+  volumes: 17.7e-6
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: water
+  dest: P4(A01 d G)
+  volumes: 17.7e-6
+
 - !!roboliq.commands.pcr.PcrCmdBean
   products:
   # NOT1

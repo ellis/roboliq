@@ -12,10 +12,12 @@ sealed trait SubstanceBean extends Bean
 /** Represents a DNA-based substance in YAML */
 class SubstanceDnaBean extends SubstanceBean {
 	@BeanProperty var sequence: String = null
+	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
 /** Represents some other substance in YAML */
 class SubstanceOtherBean extends SubstanceBean {
+	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
 /** Represents a liquid substance in YAML */
@@ -27,6 +29,7 @@ class SubstanceLiquidBean extends SubstanceBean {
 
 sealed trait Substance {
 	val id: String
+	val allowMultipipette: Boolean
 }
 
 object Substance {
@@ -41,7 +44,8 @@ object Substance {
 
 case class SubstanceDna(
 	val id: String,
-	val sequence_? : Option[String]
+	val sequence_? : Option[String],
+	val allowMultipipette: Boolean
 ) extends Substance
 
 object SubstanceDna {
@@ -50,13 +54,15 @@ object SubstanceDna {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
 			val sequence = if (bean.sequence != null) Some(bean.sequence) else None
-			new SubstanceDna(id, sequence)
+			val allowMultipipette: Boolean = if (bean.allowMultipipette == null) true else bean.allowMultipipette
+			new SubstanceDna(id, sequence, allowMultipipette)
 		}
 	}
 }
 
 case class SubstanceOther(
-	val id: String
+	val id: String,
+	val allowMultipipette: Boolean
 ) extends Substance
 
 object SubstanceOther {
@@ -64,7 +70,8 @@ object SubstanceOther {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
-			new SubstanceOther(id)
+			val allowMultipipette: Boolean = if (bean.allowMultipipette == null) true else bean.allowMultipipette
+			new SubstanceOther(id, allowMultipipette)
 		}
 	}
 }
