@@ -541,9 +541,10 @@ private object Item {
 	def apply(dest: Well2, ssc: SubSrcConc, volumeSample: LiquidVolume): Result[Item] = {
 		for {
 			_ <- Result.assert(ssc.concSrc >= ssc.concDest, "the concentration of the source reagent must not be higher than desired target concentration")
+			val volume = volumeSample * (ssc.concDest / ssc.concSrc)
+			_ <- Result.assert(volume >= LiquidVolume.ul(0.1), "the concentration of the source reagent `"+ssc.substance.id+"` is too high, such that the pipette volume is under 0.1ul")
 		} yield {
 			//val srcContent = srcState.content
-			val volume = volumeSample * (ssc.concDest / ssc.concSrc)
 			new Item(ssc.substance, dest, volume)
 		}
 	}

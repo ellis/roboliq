@@ -86,7 +86,8 @@ class YamlTest2(args: List[String]) {
 
 object BsseMain {
 	def main(args: Array[String]) {
-		new YamlTest2(args.toList).run
+		new roboliq.labs.bsse.examples.PrimerTest1().run()
+		//new YamlTest2(args.toList).run
 	}
 
 	/*

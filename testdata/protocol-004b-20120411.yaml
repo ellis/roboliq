@@ -8,7 +8,6 @@ substances:
   FRP337: !dna { allowMultipipette: false }
   FRP446: !dna { allowMultipipette: false }
   FRP572: !dna { allowMultipipette: false }
-  FRP572: !dna { allowMultipipette: false }
 
   FRO114: !dna { allowMultipipette: false }
   FRO115: !dna { allowMultipipette: false }

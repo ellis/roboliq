@@ -141,6 +141,11 @@ commands:
   dest: P4(A01 x H12)
   volume: [3e-6]
   tipReplacement: KeepBetween
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: FRO000
+  dest: P4(A01 x H12)
+  volume: [3e-6]
+  tipReplacement: KeepBetween
 #- !!roboliq.commands.pipette.PipetteCmdBean
 #  src: FRP446,FRP332,FRP337,FRP222,FRP572,FRP128,FRP572
 #  dest: P4(A01 d G)
@@ -151,10 +156,10 @@ commands:
 #  dest: P4(A01 d D)
 #  volume: [1.5e-6]
 #  allowMultipipette: false
-#- !!roboliq.commands.pipette.PipetteCmdBean
-#  src: taqdiluted
-#  dest: P4(A01 x H12)
-#  volume: [3e-6]
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: taqdiluted
+  dest: P4(A01 x H12)
+  volume: [3e-6]
   # NOT1
   #- { template: FRP446, forwardPrimer: FRO115, backwardPrimer: FRO700 }
   #- { template: FRP332, forwardPrimer: FRO699, backwardPrimer: FRO114 }
