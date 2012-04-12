@@ -83,63 +83,10 @@ events:
 - !add { obj: P2(B01), substance: buffer5x, volume: 500e-6, conc: 5 }
 - !add { obj: P2(C01), substance: buffer10x, volume: 500e-6, conc: 10 }
 
-- !add { obj: P1(A01), substance: FRP128, volume: 100e-6, conc: 1 }
-- !add { obj: P1(B01), substance: FRP222, volume: 100e-6, conc: 1 }
-- !add { obj: P1(C01), substance: FRP332, volume: 100e-6, conc: 1 }
-- !add { obj: P1(D01), substance: FRP337, volume: 100e-6, conc: 1 }
-- !add { obj: P1(E01), substance: FRP446, volume: 100e-6, conc: 1 }
-- !add { obj: P1(F01), substance: FRP572, volume: 100e-6, conc: 1 }
+- !add { obj: P1(F01), substance: FRP572, volume: 100e-6, conc: 30 }
 
 - !add { obj: E2215D(A01), substance: SEQUENCE_01, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A02), substance: SEQUENCE_02, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A03), substance: SEQUENCE_03, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A04), substance: SEQUENCE_04, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A05), substance: SEQUENCE_05, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A06), substance: SEQUENCE_06, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A07), substance: SEQUENCE_07, volume: 100e-6, conc: 10e-6 }
 - !add { obj: E2215D(A08), substance: SEQUENCE_08, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A09), substance: SEQUENCE_09, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A10), substance: SEQUENCE_10, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A11), substance: SEQUENCE_11, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(A12), substance: SEQUENCE_12, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B01), substance: SEQUENCE_13, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B02), substance: SEQUENCE_14, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B03), substance: SEQUENCE_15, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B04), substance: SEQUENCE_16, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B05), substance: SEQUENCE_17, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B06), substance: SEQUENCE_18, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B07), substance: SEQUENCE_19, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B08), substance: SEQUENCE_20, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B09), substance: SEQUENCE_21, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B10), substance: SEQUENCE_22, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B11), substance: SEQUENCE_23, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(B12), substance: SEQUENCE_24, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C01), substance: SEQUENCE_25, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C02), substance: SEQUENCE_26, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C03), substance: SEQUENCE_27, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C04), substance: SEQUENCE_28, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C05), substance: SEQUENCE_29, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C06), substance: SEQUENCE_30, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C07), substance: SEQUENCE_31, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C08), substance: SEQUENCE_32, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C09), substance: SEQUENCE_33, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C10), substance: SEQUENCE_34, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C11), substance: SEQUENCE_35, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(C12), substance: SEQUENCE_36, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D01), substance: SEQUENCE_37, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D02), substance: SEQUENCE_38, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D03), substance: SEQUENCE_39, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D04), substance: SEQUENCE_40, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D05), substance: SEQUENCE_41, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D06), substance: SEQUENCE_42, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D07), substance: SEQUENCE_43, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D08), substance: SEQUENCE_44, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D09), substance: SEQUENCE_45, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D10), substance: SEQUENCE_46, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D11), substance: SEQUENCE_47, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(D12), substance: SEQUENCE_48, volume: 100e-6, conc: 10e-6 }
-- !add { obj: E2215D(E01), substance: SEQUENCE_49, volume: 100e-6, conc: 10e-6 }
-
 
 commands:
 - !!roboliq.commands.pcr.PcrCmdBean
@@ -150,7 +97,7 @@ commands:
   mixSpec:
     buffer: { liquid: buffer10x, conc: 1 }
     dntp: { liquid: dntp, conc: 0.2e-3 }
-    template: { conc: 0.1 }
+    template: { conc: 1 }
     forwardPrimer: { conc: 0.5e-6 }
     backwardPrimer: { conc: 0.5e-6 }
     polymerase: { liquid: taqdiluted, conc: 0.1 }
