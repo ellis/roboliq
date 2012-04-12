@@ -1,10 +1,19 @@
-# 2012-04-12
-# Manual PCR mix using lower-level pipette commands
+# Series 007: create PCR mixtures for one plate of our invitrogen test
+# Version a: this uses the Pcr command on a single product merely to get the correct volumes for the subsequent versions
+# Date: 2012-04-12
 
 substances:
   buffer10x: !substance {}
   dntp: !substance {}
   taqdiluted: !substance { allowMultipipette: false }
+  
+  FRP128: !dna { allowMultipipette: false }
+  FRP222: !dna { allowMultipipette: false }
+  FRP332: !dna { allowMultipipette: false }
+  FRP337: !dna { allowMultipipette: false }
+  FRP446: !dna { allowMultipipette: false }
+  FRP572: !dna { allowMultipipette: false }
+
 #grep SEQUENCE 059662.csv | awk -F , '{print "  " $6 ": !dna {sequence: " $7 "}"}'
   SEQUENCE_01: !dna {sequence: TATAACGTTACTGGTTTCATGAATTCTTGTTAATTCAGTAAATTTTC}
   SEQUENCE_02: !dna {sequence: TATAACGTTACTGGTTTCATGAATTCTTGTTAATTCAGTAAATTTTCG}
@@ -57,7 +66,7 @@ substances:
   SEQUENCE_49: !dna {sequence: CGGGCAACGATAACAGCTAAGATATCACAGGCCCCTTTTCCTTTGTCTATATCATG}
 
 plates:
-  E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
+  E2215D: { model: "D-BSSE 96 Well PCR Plate", description: "invitrogen primers 2012-03-12 at 10uM" }
   P1: { model: "D-BSSE 96 Well PCR Plate" }
   P2: { model: "D-BSSE 96 Well PCR Plate" }
   P4: { model: "D-BSSE 96 Well PCR Plate" }
@@ -74,57 +83,62 @@ events:
 - !add { obj: P2(B01), substance: buffer5x, volume: 500e-6, conc: 5 }
 - !add { obj: P2(C01), substance: buffer10x, volume: 500e-6, conc: 10 }
 
-#grep SEQUENCE 059662.csv | awk -F , '{print "- !add { obj: " $2 "(" $3 "), substance: " $6 ", volume: 100e-6, conc: 400e-3 }"}'
-- !add { obj: E2215(A01), substance: SEQUENCE_01, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A02), substance: SEQUENCE_02, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A03), substance: SEQUENCE_03, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A04), substance: SEQUENCE_04, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A05), substance: SEQUENCE_05, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A06), substance: SEQUENCE_06, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A07), substance: SEQUENCE_07, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A08), substance: SEQUENCE_08, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A09), substance: SEQUENCE_09, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A10), substance: SEQUENCE_10, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A11), substance: SEQUENCE_11, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(A12), substance: SEQUENCE_12, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B01), substance: SEQUENCE_13, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B02), substance: SEQUENCE_14, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B03), substance: SEQUENCE_15, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B04), substance: SEQUENCE_16, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B05), substance: SEQUENCE_17, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B06), substance: SEQUENCE_18, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B07), substance: SEQUENCE_19, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B08), substance: SEQUENCE_20, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B09), substance: SEQUENCE_21, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B10), substance: SEQUENCE_22, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B11), substance: SEQUENCE_23, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(B12), substance: SEQUENCE_24, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C01), substance: SEQUENCE_25, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C02), substance: SEQUENCE_26, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C03), substance: SEQUENCE_27, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C04), substance: SEQUENCE_28, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C05), substance: SEQUENCE_29, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C06), substance: SEQUENCE_30, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C07), substance: SEQUENCE_31, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C08), substance: SEQUENCE_32, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C09), substance: SEQUENCE_33, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C10), substance: SEQUENCE_34, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C11), substance: SEQUENCE_35, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(C12), substance: SEQUENCE_36, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D01), substance: SEQUENCE_37, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D02), substance: SEQUENCE_38, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D03), substance: SEQUENCE_39, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D04), substance: SEQUENCE_40, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D05), substance: SEQUENCE_41, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D06), substance: SEQUENCE_42, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D07), substance: SEQUENCE_43, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D08), substance: SEQUENCE_44, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D09), substance: SEQUENCE_45, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D10), substance: SEQUENCE_46, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D11), substance: SEQUENCE_47, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(D12), substance: SEQUENCE_48, volume: 100e-6, conc: 400e-3 }
-- !add { obj: E2215(E01), substance: SEQUENCE_49, volume: 100e-6, conc: 400e-3 }
+- !add { obj: P1(A01), substance: FRP128, volume: 100e-6, conc: 1 }
+- !add { obj: P1(B01), substance: FRP222, volume: 100e-6, conc: 1 }
+- !add { obj: P1(C01), substance: FRP332, volume: 100e-6, conc: 1 }
+- !add { obj: P1(D01), substance: FRP337, volume: 100e-6, conc: 1 }
+- !add { obj: P1(E01), substance: FRP446, volume: 100e-6, conc: 1 }
+- !add { obj: P1(F01), substance: FRP572, volume: 100e-6, conc: 1 }
 
+- !add { obj: E2215D(A01), substance: SEQUENCE_01, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A02), substance: SEQUENCE_02, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A03), substance: SEQUENCE_03, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A04), substance: SEQUENCE_04, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A05), substance: SEQUENCE_05, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A06), substance: SEQUENCE_06, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A07), substance: SEQUENCE_07, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A08), substance: SEQUENCE_08, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A09), substance: SEQUENCE_09, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A10), substance: SEQUENCE_10, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A11), substance: SEQUENCE_11, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(A12), substance: SEQUENCE_12, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B01), substance: SEQUENCE_13, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B02), substance: SEQUENCE_14, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B03), substance: SEQUENCE_15, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B04), substance: SEQUENCE_16, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B05), substance: SEQUENCE_17, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B06), substance: SEQUENCE_18, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B07), substance: SEQUENCE_19, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B08), substance: SEQUENCE_20, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B09), substance: SEQUENCE_21, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B10), substance: SEQUENCE_22, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B11), substance: SEQUENCE_23, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(B12), substance: SEQUENCE_24, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C01), substance: SEQUENCE_25, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C02), substance: SEQUENCE_26, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C03), substance: SEQUENCE_27, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C04), substance: SEQUENCE_28, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C05), substance: SEQUENCE_29, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C06), substance: SEQUENCE_30, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C07), substance: SEQUENCE_31, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C08), substance: SEQUENCE_32, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C09), substance: SEQUENCE_33, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C10), substance: SEQUENCE_34, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C11), substance: SEQUENCE_35, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(C12), substance: SEQUENCE_36, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D01), substance: SEQUENCE_37, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D02), substance: SEQUENCE_38, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D03), substance: SEQUENCE_39, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D04), substance: SEQUENCE_40, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D05), substance: SEQUENCE_41, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D06), substance: SEQUENCE_42, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D07), substance: SEQUENCE_43, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D08), substance: SEQUENCE_44, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D09), substance: SEQUENCE_45, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D10), substance: SEQUENCE_46, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D11), substance: SEQUENCE_47, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(D12), substance: SEQUENCE_48, volume: 100e-6, conc: 10e-6 }
+- !add { obj: E2215D(E01), substance: SEQUENCE_49, volume: 100e-6, conc: 10e-6 }
 
 commands:
 - !!roboliq.commands.pipette.PipetteCmdBean
@@ -142,20 +156,19 @@ commands:
   volume: [3e-6]
   tipReplacement: KeepBetween
 - !!roboliq.commands.pipette.PipetteCmdBean
-  src: FRO000
+  src: FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128
   dest: P4(A01 x H12)
   volume: [3e-6]
-  tipReplacement: KeepBetween
-#- !!roboliq.commands.pipette.PipetteCmdBean
-#  src: FRP446,FRP332,FRP337,FRP222,FRP572,FRP128,FRP572
-#  dest: P4(A01 d G)
-#  volume: [3e-6]
-#  allowMultipipette: false
-#- !!roboliq.commands.pipette.PipetteCmdBean
-#  src: FRO115,FRO699,FRO115,FRO703
-#  dest: P4(A01 d D)
-#  volume: [1.5e-6]
-#  allowMultipipette: false
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_01,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_02,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_03,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_04,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_05,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_06,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_07,SEQUENCE_18,SEQUENCE_18,SEQUENCE_18,SEQUENCE_18,SEQUENCE_18,SEQUENCE_18,SEQUENCE_18,SEQUENCE_18,SEQUENCE_19,SEQUENCE_19,SEQUENCE_19,SEQUENCE_19,SEQUENCE_19,SEQUENCE_19,SEQUENCE_19,SEQUENCE_19,SEQUENCE_20,SEQUENCE_20,SEQUENCE_20,SEQUENCE_20,SEQUENCE_20,SEQUENCE_20,SEQUENCE_20,SEQUENCE_20,SEQUENCE_21,SEQUENCE_21
+  dest: P4(A01 x H12)
+  volume: [1.5e-6]
+  allowMultipipette: false
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_08,SEQUENCE_09,SEQUENCE_10,SEQUENCE_11,SEQUENCE_12,SEQUENCE_13,SEQUENCE_14,SEQUENCE_15,SEQUENCE_16,SEQUENCE_17,SEQUENCE_30,SEQUENCE_31,SEQUENCE_32,SEQUENCE_33,SEQUENCE_34,SEQUENCE_35,SEQUENCE_36,SEQUENCE_37,SEQUENCE_30,SEQUENCE_31,SEQUENCE_32,SEQUENCE_33,SEQUENCE_34,SEQUENCE_35,SEQUENCE_36,SEQUENCE_37,SEQUENCE_30,SEQUENCE_31,SEQUENCE_32,SEQUENCE_33,SEQUENCE_34,SEQUENCE_35,SEQUENCE_36,SEQUENCE_37,SEQUENCE_30,SEQUENCE_31
+  dest: P4(A01 x H12)
+  volume: [1.5e-6]
+  allowMultipipette: false
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: taqdiluted
   dest: P4(A01 x H12)
