@@ -97,6 +97,26 @@ Limitations
 
 * Tube locations must be determined prior to execution of the script, and we assume that they will not be moved later on [2012-04-09]
 
+Pipetting Algorithms
+====================
+
+:Date: 2012-04-12
+
+These are thoughts on a new algorithm for pipetting.
+The current algorithm is too fragile, because it tries to make a lot of decisions to cut down on the number of possibilities it needs to search through.
+I'd like to create two other algorithms as references:
+
+* a very simple one which makes as few decisions as possible and yet produces reasonable results for a certain sef of pipetting scenarios.
+* a combinatorial algorithm which looks through a lot of possible pipetting approaches, but doesn't try to do so very intelligently.  It's performance may be slow, as long as it's output is not incorrect.
+
+Simple Algorithm
+----------------
+
+Characteristics of this algorithm are:
+
+* uses a single tip model, and raises an error if that's not possible
+* by default, performs one dispense per tip
+
 Glossary
 ========
 

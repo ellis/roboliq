@@ -62,4 +62,11 @@ Mix the PCR together.
 :Time: 18:30
 :File: protocol-007b-pcrmix
 
+PCR00095 is the plate with the PCR samples in it.
+
+Three hours into the script, got to line 722, at which point the TAQ polymerase well was empty.
+The first 36 columns were completely finished, and the remaining columns still needed polymerase.
+I sealed the PCR plates and put them (along with E2215) into the fridge.  I put the three 1.5ml tubes with template into the freezer.
+
+
 
