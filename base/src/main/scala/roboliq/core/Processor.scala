@@ -150,19 +150,30 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		ob.findAllTubeLocations().foreach(lLocation => {
 			// Construct mutable list of all free locations
 			val lLocFree = ArrayBuffer[TubeLocation](lLocation : _*)
+			// Since locations may have multiple wells, this map holds the last well occupied */
+			val mLocIndexUsed = new HashMap[TubeLocation, Int]
 			println("lLocFree: "+lLocFree)
 			// Assign location to each plate
 			for ((tube, node) <- mTube) {
 				lLocFree.find(loc => loc.tubeModels.contains(tube.model)) match {
 					case None => node.addError("couldn't find location for `"+tube.id+"`")
 					case Some(location) =>
-						lLocFree -= location
+						val nWells = location.rackModel.nRows * location.rackModel.nCols
+						// Get next index to use on plate
+						val i = mLocIndexUsed.getOrElse(location, -1) + 1
+						mLocIndexUsed(location) = i
+						assert(i < nWells)
+						val iRow = i % location.rackModel.nRows
+						val iCol = i / location.rackModel.nCols
+						if (i + 1 == nWells)
+							lLocFree -= location
 						// Add a plate and location with the same name for tube racks
-						locationBuilder.addLocation(location.id, node.index, location.id)
+						if (i == 0)
+							locationBuilder.addLocation(location.id, node.index, location.id)
 						//locationBuilder.addLocation(tube.id, node.index, location.id)
 						//println("added to location builder: ", tube.id, node.index, location)
 						// Set TubeState properties
-						ob.setInitialTubeLocation(tube, location.id, 0, 0)
+						ob.setInitialTubeLocation(tube, location.id, iRow, iCol)
 				}
 			}
 		})

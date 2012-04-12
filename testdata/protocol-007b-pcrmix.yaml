@@ -65,7 +65,7 @@ substances:
 plates:
   E2215D: { model: "D-BSSE 96 Well PCR Plate", description: "invitrogen primers 2012-03-12 at 10uM", barcode: '00093' }
   P1: { model: "D-BSSE 96 Well DWP", description: 'buffer, dntp, taqdiluted' }
-  P5: { model: "D-BSSE 96 Well PCR Plate", description: 'plate of PCR samples', barcode: '00094' }
+  P4: { model: "D-BSSE 96 Well PCR Plate", description: 'plate of PCR samples', barcode: '00095' }
 
 tubes:
   T50water1: { model: "Tube 50ml" }
@@ -150,7 +150,7 @@ commands:
   volume: [3e-6]
   tipReplacement: KeepBetween
 - !!roboliq.commands.pipette.PipetteCmdBean
-  src: FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP572,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128,FRP128
+  src: template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template1,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2,template2
   dest: P4(A01 x H12)
   volume: [1e-6]
 - !!roboliq.commands.pipette.PipetteCmdBean

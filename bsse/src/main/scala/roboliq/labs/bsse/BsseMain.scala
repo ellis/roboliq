@@ -64,6 +64,20 @@ class YamlTest2(args: List[String]) {
 						val sProtocolFilename = files.last
 						val sScriptFilename = pathbase + FilenameUtils.removeExtension(sProtocolFilename) + ".esc"
 						translator.saveWithHeader(evowareScript, sScriptFilename)
+						
+						// Print plate locations again
+						println()
+						println("Plate locations:")
+						res.locationTracker.map.foreach(println)
+						
+						// Print tube locations
+						println()
+						println("Tube locations")
+						res.ob.m_mapWell2.foreach(pair => pair._2 match {
+							case pos: WellPosition =>
+								println(pair._1+": "+pos.idPlate+" row "+(pos.iRow + 1)+" col "+(pos.iCol + 1))
+							case _ =>
+						})
 				}
 			case ls =>
 				ls.foreach(println)

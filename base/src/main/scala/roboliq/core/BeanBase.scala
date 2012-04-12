@@ -14,8 +14,8 @@ class BeanBase {
 	private val m_mapPlateModel = new HashMap[String, PlateModelBean]
 	private val m_mapTubeModel = new HashMap[String, TubeModelBean]
 	private val m_mapTip = new HashMap[String, TipBean]
-	private val m_mapLocation = new HashMap[String, PlateLocationBean]
-	private val m_mapTubeLocation = new HashMap[String, TubeLocationBean]
+	private val m_mapLocation = new LinkedHashMap[String, PlateLocationBean]
+	private val m_mapTubeLocation = new LinkedHashMap[String, TubeLocationBean]
 
 	private val m_mapSubstance = new HashMap[String, SubstanceBean]
 	private val m_mapPlate = new HashMap[String, PlateBean]

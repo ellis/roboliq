@@ -124,7 +124,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
 
 	protected def encodeWells(holder: Plate, aiWells: Traversable[Int]): String = {
-		println("encodeWells:", holder.nRows, holder.nCols, aiWells)
+		//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
 		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		for (iWell <- aiWells) {
