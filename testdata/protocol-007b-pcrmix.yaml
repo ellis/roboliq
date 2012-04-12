@@ -7,12 +7,9 @@ substances:
   dntp: !substance {}
   taqdiluted: !substance { allowMultipipette: false }
   
-  FRP128: !dna { allowMultipipette: false }
-  FRP222: !dna { allowMultipipette: false }
-  FRP332: !dna { allowMultipipette: false }
-  FRP337: !dna { allowMultipipette: false }
-  FRP446: !dna { allowMultipipette: false }
-  FRP572: !dna { allowMultipipette: false }
+  template1: !dna { allowMultipipette: false }
+  template2: !dna { allowMultipipette: false }
+  template3: !dna { allowMultipipette: false }
 
 #grep SEQUENCE 059662.csv | awk -F , '{print "  " $6 ": !dna {sequence: " $7 "}"}'
   SEQUENCE_01: !dna {sequence: TATAACGTTACTGGTTTCATGAATTCTTGTTAATTCAGTAAATTTTC}
@@ -66,29 +63,26 @@ substances:
   SEQUENCE_49: !dna {sequence: CGGGCAACGATAACAGCTAAGATATCACAGGCCCCTTTTCCTTTGTCTATATCATG}
 
 plates:
-  E2215D: { model: "D-BSSE 96 Well PCR Plate", description: "invitrogen primers 2012-03-12 at 10uM" }
-  P1: { model: "D-BSSE 96 Well PCR Plate" }
-  P2: { model: "D-BSSE 96 Well PCR Plate" }
-  P4: { model: "D-BSSE 96 Well PCR Plate" }
+  E2215D: { model: "D-BSSE 96 Well PCR Plate", description: "invitrogen primers 2012-03-12 at 10uM", barcode: '00093' }
+  P1: { model: "D-BSSE 96 Well DWP", description: 'buffer, dntp, taqdiluted' }
+  P5: { model: "D-BSSE 96 Well PCR Plate", description: 'plate of PCR samples', barcode: '00094' }
 
 tubes:
   T50water1: { model: "Tube 50ml" }
+  TEPtemplate1: { model: "Tube 1.5ml" }
+  TEPtemplate2: { model: "Tube 1.5ml" }
+  TEPtemplate3: { model: "Tube 1.5ml" }
 
 events:
 - !add { obj: T50water1, substance: water, volume: 49e-3 }
 
-- !add { obj: P1(H02), substance: taqdiluted, volume: 100e-6, conc: 1 }
+- !add { obj: P1(A02), substance: buffer10x, volume: 500e-6, conc: 10 }
+- !add { obj: P1(B02), substance: dntp, volume: 500e-6, conc: 2e-3 }
+- !add { obj: P1(C02), substance: taqdiluted, volume: 400e-6, conc: 1 }
 
-- !add { obj: P2(A01), substance: dntp, volume: 500e-6, conc: 2e-3 }
-- !add { obj: P2(B01), substance: buffer5x, volume: 500e-6, conc: 5 }
-- !add { obj: P2(C01), substance: buffer10x, volume: 500e-6, conc: 10 }
-
-- !add { obj: P1(A01), substance: FRP128, volume: 100e-6, conc: 1 }
-- !add { obj: P1(B01), substance: FRP222, volume: 100e-6, conc: 1 }
-- !add { obj: P1(C01), substance: FRP332, volume: 100e-6, conc: 1 }
-- !add { obj: P1(D01), substance: FRP337, volume: 100e-6, conc: 1 }
-- !add { obj: P1(E01), substance: FRP446, volume: 100e-6, conc: 1 }
-- !add { obj: P1(F01), substance: FRP572, volume: 100e-6, conc: 1 }
+- !add { obj: TEPtemplate1, substance: template1, volume: 170e-6, conc: 30 }
+- !add { obj: TEPtemplate2, substance: template2, volume: 170e-6, conc: 30 }
+- !add { obj: TEPtemplate3, substance: template3, volume: 170e-6, conc: 30 }
 
 - !add { obj: E2215D(A01), substance: SEQUENCE_01, volume: 100e-6, conc: 10e-6 }
 - !add { obj: E2215D(A02), substance: SEQUENCE_02, volume: 100e-6, conc: 10e-6 }
