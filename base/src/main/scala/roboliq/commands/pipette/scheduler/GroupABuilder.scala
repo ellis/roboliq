@@ -309,7 +309,8 @@ class GroupABuilder(
 				// ENDFIX*/
 				// If multipipetting is not allowed, use a new tip
 				// FIXME: consider the total volume to be dispensed instead
-				if (lm.liquid.multipipetteThreshold > 0)
+				val bAllowMultipipette = lm.liquid.multipipetteThreshold <= 0 && cmdAllowsMultipipette
+				if (!bAllowMultipipette)
 					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
 				// If current
 				//else if (data.nVolumeCurrent.isEmpty)
@@ -339,6 +340,10 @@ class GroupABuilder(
 		))
 	}
 	
+	private def cmdAllowsMultipipette: Boolean =
+		cmd.args.tipOverrides_?.map(_.allowMultipipette_?.getOrElse(true)).getOrElse(true)
+
+	/*
 	private def requiresDifferentTip(g0: GroupA, lm: LM, item: Item, items: Seq[Item]): Boolean = {
 		if (items.isEmpty)
 			return true
@@ -376,6 +381,7 @@ class GroupABuilder(
 			device.getDispensePolicy(liquid, lm.tipModel, item.nVolume, itemState.destState0)
 		)
 	}
+	*/
 	
 	// Choose number of tips per LM, and indicate whether we need to clean the tips first 
 	def updateGroupA2_mLMTipCounts(g0: GroupA): GroupResult = {
@@ -552,7 +558,7 @@ class GroupABuilder(
 				val lm = g0.mLM(item)
 				val nVolumeTip = nVolumeTip0 + item.nVolume
 				// If multipipetting is allowed:
-				if (lm.liquid.multipipetteThreshold == 0) {
+				if (lm.liquid.multipipetteThreshold == 0 && cmdAllowsMultipipette) {
 					if (nVolumeTip <= lm.tipModel.nVolume) {
 						mTipToVolume(tw.tip) = nVolumeTip
 						true
@@ -785,9 +791,19 @@ class GroupABuilder(
 						mTipToDestContams(tip) = liquidDest.contaminants
 					case Some(lLiquidGroup0) =>
 						if (!lLiquidGroup0.contains(liquidDest.group)) {
-							// TODO: allow for override via tipOverrides
-							// i.e. if overridden, set mTipToIntensity(tip) to max of two intensities
-							return GroupStop(g0, "can only dispense into one liquid group")
+							// FIXME: this is a hack!!!
+							val bOverride = cmd.args.tipOverrides_? match {
+								case None => false
+								case Some(tipOverride) =>
+									tipOverride.replacement_? match {
+										case None => false
+										case Some(_) => true
+									}
+							}
+							if (!bOverride)
+								// TODO: allow for override via tipOverrides
+								// i.e. if overridden, set mTipToIntensity(tip) to max of two intensities
+								return GroupStop(g0, "can only dispense into one liquid group")
 						}
 				}
 			}

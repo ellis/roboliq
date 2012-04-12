@@ -98,7 +98,7 @@ object WellSpecParser extends JavaTokenParsers {
 						idPlate + "(" + RowCol(row, col) + ")"
 					}).toList
 				case WellSpecMatrix(rc0, rc1) =>
-					(for (row <- rc0.row to rc1.row; col <- rc0.col to rc1.col) yield {
+					(for (col <- rc0.col to rc1.col; row <- rc0.row to rc1.row) yield {
 						idPlate + "(" + RowCol(row, col) + ")"
 					}).toList
 			})

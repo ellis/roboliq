@@ -25,7 +25,7 @@ substances:
 
   buffer10x: !substance {}
   dntp: !substance {}
-  taqdiluted: !substance {}
+  taqdiluted: !substance { allowMultipipette: false }
 
 plates:
   E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
@@ -70,34 +70,38 @@ commands:
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: water
   dest: P4(A01 d G)
-  volumes: 15e-6
+  volume: [15e-6]
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: buffer10x
   dest: P4(A01 d G)
-  volumes: 3e-6
+  volume: [3e-6]
+  tipReplacement: KeepBetween
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: dntp
   dest: P4(A01 d G)
-  volumes: 3e-6
-
-- !!roboliq.commands.pcr.PcrCmdBean
-  products:
-  # NOT1
-  - { template: FRP446, forwardPrimer: FRO115, backwardPrimer: FRO700 }
-  - { template: FRP332, forwardPrimer: FRO699, backwardPrimer: FRO114 }
-  # NOT2
-  - { template: FRP337, forwardPrimer: FRO115, backwardPrimer: FRO704 }
-  - { template: FRP222, forwardPrimer: FRO703, backwardPrimer: FRO114 }
-  # NOR3_yellow
-  - { template: FRP572, forwardPrimer: FRO115, backwardPrimer: FRO1260 }
-  - { template: FRP128, forwardPrimer: FRO1259, backwardPrimer: FRO1262 }
-  - { template: FRP572, forwardPrimer: FRO1261, backwardPrimer: FRO114 }
-  volume: 30e-6
+  volume: [3e-6]
+  tipReplacement: KeepBetween
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: FRP446,FRP332,FRP337,FRP222,FRP572,FRP128,FRP572
   dest: P4(A01 d G)
-  mixSpec:
-    buffer: { liquid: buffer10x, conc: 1 }
-    dntp: { liquid: dntp, conc: 0.2e-3 }
-    template: { conc: 0.1 }
-    forwardPrimer: { conc: 0.5e-6 }
-    backwardPrimer: { conc: 0.5e-6 }
-    polymerase: { liquid: taqdiluted, conc: 0.1 }
+  volume: [3e-6]
+  allowMultipipette: false
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: FRO115,FRO699,FRO115,FRO703
+  dest: P4(A01 d D)
+  volume: [1.5e-6]
+  allowMultipipette: false
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: taqdiluted
+  dest: P4(A01 d G)
+  volume: [3e-6]
+  # NOT1
+  #- { template: FRP446, forwardPrimer: FRO115, backwardPrimer: FRO700 }
+  #- { template: FRP332, forwardPrimer: FRO699, backwardPrimer: FRO114 }
+  # NOT2
+  #- { template: FRP337, forwardPrimer: FRO115, backwardPrimer: FRO704 }
+  #- { template: FRP222, forwardPrimer: FRO703, backwardPrimer: FRO114 }
+  # NOR3_yellow
+  #- { template: FRP572, forwardPrimer: FRO115, backwardPrimer: FRO1260 }
+  #- { template: FRP128, forwardPrimer: FRO1259, backwardPrimer: FRO1262 }
+  #- { template: FRP572, forwardPrimer: FRO1261, backwardPrimer: FRO114 }

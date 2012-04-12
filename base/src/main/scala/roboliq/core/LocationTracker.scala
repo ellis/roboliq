@@ -31,7 +31,7 @@ object LocationTracker {
 						if (acc == 0) n else acc }
 					n <= 0
 				}) match {
-					case None => Error("location not yet set for `"+id+"`")
+					case None => Error("location not yet set for `"+id+"`: index: "+index+", index set: "+l)
 					case Some(pair) => Success(pair._2)
 				}
 		}
@@ -46,7 +46,8 @@ class LocationBuilder {
 			case None =>
 				map(id) = List(index -> location)
 			case Some(l) =>
-				map(id) = l ::: List(index -> location)
+				map(id) = l ++ List(index -> location)
 		}
+		println("addLocation: "+id+" = "+map.get(id))
 	}
 }

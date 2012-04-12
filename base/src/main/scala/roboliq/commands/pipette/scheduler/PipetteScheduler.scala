@@ -47,9 +47,16 @@ object PipetteScheduler {
 		}
 		
 		val mixSpec_? : Option[MixSpec] = if (cmd.postmix == null) None else Some(MixSpec.fromBean(cmd.postmix))
-		val tipOverrides_? : Option[TipHandlingOverrides] = None
 		val pipettePolicy_? : Option[PipettePolicy] = if (cmd.policy == null) None else Some(PipettePolicy.fromName(cmd.policy))
 		val volumes_? : Option[List[LiquidVolume]] = if (cmd.volume == null) None else Some(cmd.volume.map(n => LiquidVolume.l(n)).toList)
+		val tipOverrides_? = Some(new TipHandlingOverrides(
+			replacement_? = if (cmd.tipReplacement == null) None else Some(TipReplacementPolicy.withName(cmd.tipReplacement)),
+			washIntensity_? = None,
+			allowMultipipette_? = if (cmd.allowMultipipette == null) None else Some(cmd.allowMultipipette),
+			contamInside_? = None,
+			contamOutside_? = None
+		))
+		println("tipOverrides_?: "+tipOverrides_?)
 
 		for {
 			tipModel_? <- opt(cmd.tipModel, query.findTipModel _)

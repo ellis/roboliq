@@ -60,7 +60,8 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		val mSubstance = new LinkedHashMap[Substance, CmdNodeBean]
 		def needPlate(id: String, node: CmdNodeBean): Result[Unit] = {
 			for {plate <- ob.findPlate(id)} yield {
-				mPlate(plate) = node
+				if (!mPlate.contains(plate))
+					mPlate(plate) = node
 			}
 		}
 		def needWell(id: String, node: CmdNodeBean): Result[Unit] = {
@@ -166,7 +167,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 
 		// Object to assign location to each plate
 		println("ob.findAllLocations(): "+ob.findAllPlateLocations())
-		println("mPlate: "+mPlate)
+		println("mPlate: "+mPlate.mapValues(_.index))
 		// If locations are defined in database
 		ob.findAllPlateLocations().foreach(lLocation => {
 			// Construct mutable list of all free locations

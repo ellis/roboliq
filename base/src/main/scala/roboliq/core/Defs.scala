@@ -112,16 +112,16 @@ object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with Ti
 	val ReplaceAlways, KeepBetween, KeepAlways = Value
 }
 
-class TipHandlingOverrides(
+case class TipHandlingOverrides(
 	val replacement_? : Option[TipReplacementPolicy.Value],
-	//val washProgram_? : Option[Int],
 	val washIntensity_? : Option[WashIntensity.Value],
+	val allowMultipipette_? : Option[Boolean],
 	val contamInside_? : Option[Set[Contaminant.Value]],
 	val contamOutside_? : Option[Set[Contaminant.Value]]
 )
 
 object TipHandlingOverrides {
-	def apply() = new TipHandlingOverrides(None, None, None, None)
+	def apply() = new TipHandlingOverrides(None, None, None, None, None)
 }
 
 class WashSpec(

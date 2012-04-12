@@ -17,6 +17,8 @@ class PipetteCmdBean extends CmdBean {
 	@BeanProperty var postmix: MixSpecBean = null
 	@BeanProperty var policy: String = null
 	@BeanProperty var tipModel: String = null
+	@BeanProperty var tipReplacement: String = null
+	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
 class PipetteCmdItemBean {
@@ -29,6 +31,10 @@ class PipetteCmdItemBean {
 	@BeanProperty var policy: String = null
 	@BeanProperty var tipModel: String = null
 }
+
+/*class TipOverridesBean {
+	@BeanProperty var allowMultipipette: java.lang.Boolean = false
+}*/
 
 class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean] {
 	@BeanProperty var device: PipetteDevice = null
