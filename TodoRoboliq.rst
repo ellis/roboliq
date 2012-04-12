@@ -57,6 +57,8 @@ Intermediate
 ------------
 
 * ``ObjBase``: design a better separation of responsibilities between ``ObjBase``, ``Processor``, ``StateQuery``, and ``StateBuilder``.
+* figure out a way to include other yaml files so that protocols can be made more self-contained for the purposes of testing; we may want to let the individual includes be overridden, however, so it's not so simple -- for example, we might want to test out a new class file on a whole set of protocols to see whether it works
+that we can test out a new 
   For example, it might be a good idea to create a ``StateBase`` which holds the state information that's currently kept in ``ObjBase``.
 * ``RobotQuery``: get rid of ``RobotState`` in favor of ``StateQuery``
 * message handling:

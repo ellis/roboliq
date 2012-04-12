@@ -68,7 +68,9 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			for {
 				well <- ob.findWell(id)
 				plate <- needPlate(well.idPlate, node)
-			} yield {}
+			} yield {
+				println("needWell: "+id+", "+well.iRow+", "+well.iCol+", "+well.index)
+			}
 		}
 		def needTube(id: String, node: CmdNodeBean): Result[Unit] = {
 			for {tube <- ob.findTube(id)} yield {

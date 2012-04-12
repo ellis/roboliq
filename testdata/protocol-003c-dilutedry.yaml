@@ -1,25 +1,20 @@
-# 2012-04-10
-# Dilute Invitrogen plate E2215 to 400 mM with precalculated volumes
-# HACK: Use reagents50(A01) instead of T50water1, because I don't have tubes worked out yet
+# Series 003: Dilute Invitrogen plate E2215 to 400 uM with precalculated volumes
+# Version c: use 50ml tube as water source
+# Date: 2012-04-11
 # Next improvements:
-# 1) use "src: water",
-# 2) use "src: T50water1",
 # 3) then create a new function for diluting an invitrogen plate using the known molarity in each well
 
 plates:
   E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
-  reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }
 
-#tubes:
-#  T50water1: { model: "Tube 50ml" }
+tubes:
+  T50water1: { model: "Tube 50ml" }
 
 events:
-#- T50water1: [ !add { src: water, volume: 49e-3 } ]
-- !add { obj: reagents50(A01), substance: water, volume: 49e-3 }
+- !add { obj: T50water1, substance: water, volume: 49e-3 }
 
 commands:
 - !!roboliq.commands.pipette.PipetteCmdBean
-#  src: T50water1
-  src: reagents50(A01)
+  src: water
   dest: E2215(A01 r E01)
   volume: [136.55e-6, 180.5e-6, 113.475e-6, 122.95e-6, 137.375e-6, 145e-6, 135.65e-6, 117.9e-6, 101.875e-6, 92.7e-6, 119.6e-6, 110.825e-6, 121.475e-6, 115.6e-6, 120.6e-6, 110.025e-6, 124.325e-6, 117.375e-6, 127.775e-6, 119.4e-6, 287.6e-6, 147.725e-6, 117.8e-6, 147.75e-6, 104.575e-6, 117.025e-6, 136.85e-6, 121.25e-6, 135.75e-6, 110.45e-6, 149.2e-6, 125.15e-6, 113.375e-6, 132.525e-6, 121.25e-6, 126.05e-6, 131e-6, 108.45e-6, 121.275e-6, 103.325e-6, 95.35e-6, 93.525e-6, 116.55e-6, 112.825e-6, 118.4e-6, 134.275e-6, 116.325e-6, 121.2e-6, 140.675e-6]

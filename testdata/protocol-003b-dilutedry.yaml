@@ -1,16 +1,16 @@
-# 2012-04-11
-# Dilute Invitrogen plate E2215 to 400 mM with precalculated volumes
+# 2012-04-10
+# Dilute Invitrogen plate E2215 to 400 uM with precalculated volumes
+# HACK: Use reagents50(A01) instead of T50water1, because I don't have tubes worked out yet
 # Next improvements:
+# 2) use "src: T50water1",
 # 3) then create a new function for diluting an invitrogen plate using the known molarity in each well
 
 plates:
   E2215: { model: "D-BSSE 96 Well Costar Plate", description: "invitrogen primers 2012-03-12", barcode: 059662E2215 }
-
-tubes:
-  T50water1: { model: "Tube 50ml" }
+  reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }
 
 events:
-- !add { obj: T50water1, substance: water, volume: 49e-3 }
+- !add { obj: reagents50(A01), substance: water, volume: 49e-3 }
 
 commands:
 - !!roboliq.commands.pipette.PipetteCmdBean

@@ -124,6 +124,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
 
 	protected def encodeWells(holder: Plate, aiWells: Traversable[Int]): String = {
+		println("encodeWells:", holder.nRows, holder.nCols, aiWells)
 		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		for (iWell <- aiWells) {
@@ -186,8 +187,8 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				//val tipKind = config.getTipKind(twvp0.tip)
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
-				if (!lWellInfo.forall(_.idPlate eq idPlate))
-					return Error(Seq("INTERNAL: all wells must be on the same plate"))
+				if (!lWellInfo.forall(_.idPlate == idPlate))
+					return Error(Seq("INTERNAL: all wells must be on the same plate `"+idPlate+"`")++lWellInfo.map(w => w.id+" on "+w.idPlate))
 				
 				// All tip/well pairs are equidistant or all tips are going to the same well
 				// Assert that tips are spaced at equal distances to each other as the wells are to each other
