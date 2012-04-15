@@ -11,3 +11,5 @@ project/boot/
 .scala_dependencies
 PipetteScheduler.txt
 TodoRoboliq.pdf
+org.scala-ide.sdt.core.prefs
+.classpath
