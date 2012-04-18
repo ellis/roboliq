@@ -1,26 +1,9 @@
-CADMAD
-------
-
-Liquid Handling Robot
-~~~~~~~~~~~~~~~~~~~~~
-
-:Author: Ellis Whitehead
-:Institute: ETH Zurich, BSSE
-:Date: 2012-04-15
-
-Liquid Handling Robot Control
------------------------------
-
-What: a means for going from lab protocol to robot instructions
-
-...Intro
-
 Users
 -----
 
-* Other applications (via API or text)
-* Programmers (via API or text)
-* Biologists (via text)
+* Other applications
+* Programmers
+* Biologists
 
 Udi's Litmus Test
 -----------------
@@ -31,42 +14,66 @@ Is it useful and usable for actual applications by biologists?
 * Can they create their own scripts?
 * Can they troubleshoot the protocol when the results are not what they expected?
 
-Conservation Law
-----------------
-
-The Law of Conservation of Complexity
+Conservation Law of Complexity
+------------------------------
 
 Within a closed user-software-robot system, the complexity of a given task can be shifted among the components but the overall complexity cannot be reduced.
 
-We want to shift more complexity to the software
+We want to shift more of the complexity to the software
 
 Complexity Shifting 1
 ---------------------
 
-[Look at example RobeEase script (e.g. ``Cloning7_Script08.conf``)]
+.. code-block:: text
+
+  ...
+  
+  DIST_REAGENT2 LB P4:G6+30 BAC_DDW_LIST PIE_TROUGH_AUTAIR
+    TIPTYPE:1000,TIPMODE:KEEPTIP
+  TRANSFER_LOCATIONS P4:A1+30 P4:G6+30 BAC_SAMP_LIST PIE_BOTAIR
+    TIPTYPE:200,MIXBEFORE:PIE_MIX:3x100,MIX:PIE_MIX:3x100
 
 Complexity Shifting 2
 ---------------------
 
-* Old RoboEase:
+* Prior RoboEase:
 
-  * The complexity lies in the parameters and data supplied to the commands
+  * Most complexity lies in the parameters and data supplied to the commands
   * All of that information is required to generate a concrete script
 
 * New:
 
-  * Read Evoware configuration data
-  * Use database for concentration and location information
+  * read evoware configuration data for bench, plate, tip data (want liquid classes)
+  * use database for substance, concentration and location information
+
+Database-Supported Approach
+---------------------------
+
+* Use same representation for data, settings, commands, and intermediate output (AST)
+* Facilitates protocol exchange
+* Facilitates inspection and debugging
+
+Database-Supported Approach: YAML
+---------------------------------
+
+* Represents data structures and programming object
+* Semi-human-readable streaming format for storing and exchanging data
+* Like XML but much easier to convert to internal program data
+* Eases some aspects of potential GUI, while still allowing for use of text-editor
 
 Complexity Shifting 3
 ---------------------
 
-[Show examples of new scripts to illustrate how the complexity can conveniently be shifted away from the user]
+.. code-block:: yaml
 
-Exchange Format for Other Software
-----------------------------------
-
-* YAML for structured and highly flexible specification data format
+  commands:
+  - !transferAndDilute
+    src: P4(A1+30)
+    dest: P4(G6+30)
+    destConc: 0.05 mmol
+    destVolume: 200 ul
+    premix: { count: 3 }
+    postmix: { count: 3 }
 
 YAML Example: Data
 ------------------
@@ -91,13 +98,6 @@ YAML Example: Commands
     src: P1(A01)
     dest: P4(C03)
     volume: 5 ul
-
-Contrast with:
-
-.. code-block:: csv
-
-  pipette,P1(A01),P4(C03),5ul
-
 
 YAML Example: AST
 -----------------
@@ -144,14 +144,6 @@ YAML Example: Settings
   - !!roboliq.commands.pipette.AspirateCmdHandler
   - !!roboliq.commands.pipette.DispenseCmdHandler
 
-API for Programmers
--------------------
-
-* Programmers can use the data exchange format
-* There is also the DSL for use as shown before
-
-[Show example of library use]
-
 Check-Items for a Scripting Language
 ------------------------------------
 
@@ -160,27 +152,19 @@ Check-Items for a Scripting Language
 * User-defined procedures
 * Branching
 
-Progress Since 6th Month
-------------------------
+Variables
+---------
 
-* Conversion of many old RoboEase scripts
-* Began more PCR-type labwork
-* Database-supported protocols
+.. code-block:: yaml
 
-Database-Supported Approach
----------------------------
-
-* Use same representation for data, settings, commands, and intermediate output (AST)
-* Facilitates protocol exchange
-* Facilitates inspection and debugging
-
-Database-Supported Approach: YAML
----------------------------------
-
-* Represents data structures and programming object
-* Semi-human-readable streaming format for storing and exchanging data
-* Like XML but much easier to convert to internal program data
-* Eases some aspects of potential GUI, while still allowing for use of text-editor
+  commands:
+  - !context
+    vars:
+      MYVOL: 20 ul
+      MYPLATE: PCR0139
+      MYLIQUID: wine
+    commands:
+    ...
 
 Import and Export for Portability
 ---------------------------------
@@ -190,32 +174,6 @@ Import and Export for Portability
 * Need to determine which data is lab specific
 * Need to merge data from another lab (e.g. assigning substance IDs)
 
-Next Steps
-----------
-
-* Run primer experiements
-* Optimize PCR
-* Construct "parts"
-* Access to external databases
-* Automated control of Evoware software
-* Feedback loops
-
-Input: YAML
------------
-
-As an exchange format?
-How would you feel about writing this?
-
-.. code-block:: yaml
-
-  commands:
-  - !pcr
-    products:
-    - { template: FRP128, forwardPrimer: FRO1259, backwardPrimer: FRO1262 }
-    - { template: FRP572, forwardPrimer: FRO1261, backwardPrimer: FRO114 }
-    mixSpec: Phusion Hot Start
-    sampleVolume: 20 ul
-
 Input: Feedback Loops 1
 -----------------------
 
@@ -224,6 +182,7 @@ Input: Feedback Loops 1
 * Compile that section of AST for Evoware
 * Run that script and wait until execution is finished
 * Then continue process depending on how we branch
+* Execution can be suspended and continued later
 
 Input: Feedback Loops 2
 -----------------------

@@ -785,6 +785,30 @@ Pcr {
 
 ----
 
+~/src/weizmann$ awk '{print $1}' $(find . -name *.proc) | grep -v "^$" | grep -v '#' | sort | uniq -c | sort -n
+
+   1 ROCHE_CLOSE
+   1 ROCHE_RUN
+   1 UNITE_AND_TRANSFER
+   2 ROCHE_OPEN
+   2 TRANSFER_OBJECT
+   2 TRANSFER_WELLS
+   4 ADD_AND_TRANSFER
+   4 WAIT
+   9 PREPARE_LIST
+  18 WAIT_TIMER
+  19 START_TIMER
+  22 TRANSFER_LOCATIONS
+  26 MOVE_OBJECT
+  30 VACUUM
+  31 DIST_REAGENT2
+  33 LINKER_POS
+  38 %
+  41 PROC
+  43 DIST_REAGENT
+  55 PROMPT
+  56 REMOTE
+
 echo '<table border="1">'
 cat table0.txt | \
  sed -e 's#^x.\(.*\)#<tr><td>\1</td><td align="right">100%</td><td>2011-08-31</td></tr>#' \

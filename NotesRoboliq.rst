@@ -104,10 +104,12 @@ Pipetting Algorithms
 
 These are thoughts on a new algorithm for pipetting.
 The current algorithm is too fragile, because it tries to make a lot of decisions to cut down on the number of possibilities it needs to search through.
-I'd like to create two other algorithms as references:
+I'd like to create several other algorithms as references:
 
-* a very simple one which makes as few decisions as possible and yet produces reasonable results for a certain sef of pipetting scenarios.
+* a very simple one which makes as few decisions as possible and yet produces reasonable results for a certain set of pipetting scenarios.
 * a combinatorial algorithm which looks through a lot of possible pipetting approaches, but doesn't try to do so very intelligently.  It's performance may be slow, as long as it's output is not incorrect.
+* specialized algorithms for particular scenarios, such as distributing a single liquid to a set of cells
+* finally, I might try to create a "smart" algorithm
 
 Simple Algorithm
 ----------------
@@ -116,6 +118,94 @@ Characteristics of this algorithm are:
 
 * uses a single tip model, and raises an error if that's not possible
 * by default, performs one dispense per tip
+
+Basic Pipetting Methods
+-----------------------
+
+Ultimately, the robot must pipette specific volumes of liquid.
+These volumes can either be given explicitly or calculated from concentration specifications.
+You can use the following means of specifying volume or concentration:
+
+* by source volume: distribute explicit volumes
+* to source conc: distribute enough to achieve a target concentration of the source liquid in the target well
+* to dest volume: distribute enough to to reach a target volume in the target wells
+* to dest conc: distribute enough to achieve a target concentration of the substance in the target well
+
+Distribute:
+  Transfer a liquid from a set of source wells (the source wells must all contain the same liquid) to a set of destination wells (the order in which the destination wells are added may or may not matter).
+  May or may not need to premix/postmix.
+
+Transfer:
+  Transfer from list of source wells to a list of destination wells (order is preserved).
+
+Mixture:
+  Create a mixture of various source liquids in an empty target well.
+  A mixture is a multilayered sequence of distibutes and transfers in which the volumes that are calculated from concentration specifications at each step take the final volume into consideration after all layers have been transfered.
+  At least one volume must be specified, either for a source liquid or the target volume.
+  A solvent (water, by default) will be used to fill any additional volume required to achieve the specified concentrations.
+  Each source may require premix.
+  The final mixture may require postmix.
+
+Mixin:
+  Mix sources into an existing well.
+  Either the total target volume *or* the desired concentration the target's original substance can be specified, but not both.
+  A solvent (water, by default) will be used to fill any additional volume required to achieve the specified concentrations.
+  
+Specialized Pipetting Methods
+-----------------------------
+
+Dilute (In-Place):
+  Distribute a solvent to achieve a certain a target concentration or target volume of the substance in the target wells.
+
+Distribute+Transfer:
+  Distribute a solvent at a given volume and then perform transfers at given volume
+
+Dilution:
+  In target wells, create mixtures with uniform volumes and concentrations.
+  So distribute a solvent at appropriate volumes and then perform transfer of source wells at appropriate volumes.
+
+Copy:
+  A form of transfer in which the destination well is empty
+
+Copy with Dilution:
+  Distribute a solvent to empty wells and then perform transfer
+  Possible optimization: we often need to postmix -- this can sometimes be achieved by dispensing the solvent last.
+
+Serial Dilution:
+
+Gradient:
+
+Mixture:
+
+Combinatorial Mixture:
+
+
+Tip Handling
+============
+
+:Date: 2012-04-18
+
+We have three different tip usage scenarios:
+
+* tips are permanent and must be washed instead of disposed
+* tips are disposed of after use
+* used tips may be temporarily set aside and later used again
+
+Optimizing the first scenario involves minimizing the number of washes, because washing takes a long time.
+
+Optimizing the second scenario is more of a challenge, because there are sometimes two competiting costs: for some procedures, the more tips you use, the lower your time cost, but the higher the tip cost.
+I don't have a solution for this at this time, and use the same approach as for permanent tips.
+
+At this time, I am not considering the third scenario.
+
+
+Multipipetting
+==============
+
+:Date: 2012-04-18
+
+Multipipetting requires our robot to aspirate additional liquid beyond what actually gets dispensed.  This waste is sometimes not permissible.
+
 
 Glossary
 ========
@@ -131,6 +221,10 @@ Substances
   A ``Substance`` in liquid form and can be pipetted.
 ``Powder``
   A ``Substance`` in dry form, cannot be pipetted.
+``Cell``
+  A ``Substance`` composed of cells
+Solvent
+  A ``Liquid`` which is added to a ``Vessel`` in order to suspend a ``Powder`` or ``Cell``
 
 Substance containers
 --------------------
@@ -149,3 +243,4 @@ Substance containers
   A ``Holder`` with permanent ``PlateWell`` wells.
 ``Rack``
   A ``Holder`` with removable ``Tube`` wells [not actually used in the code at this time].
+

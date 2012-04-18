@@ -12,23 +12,15 @@ Top priority
 
 Goal: Get the new YAML-based code running to the point that we can run a PCR mix again.
 
-#. ``PcrCmd``: create it and get it to work like the old one
-#. ``Processor``: handle selection of new pools from the database for ``PcrCmd``
-#. ``PcrCmd``: add master mix functionality
-#. create script to run PCRs on invitrogen primers
-
-Done:
-
-* accommodate tubes
-* ``Processor``: allow user to specify liquids and find their wells in the database
-* ``BsseMain``: save evoware scripts to a file
-* ``protocol-003``: create script to dilute invitrogen primers
-* ``bsse`` module: get it working again in minimal form
-* ``evoware`` module: get to compile and run again, though with fewer commands
-* ``Processor``: automatically select bench locations for plates
-* ``DispenseCmd`` and ``AspirateCmd``: add events
-* parser for RoboEase well specification
-
+* ``PipetteCmd``: implement more robust (and less "intelligent") pipetting approaches
+* ``PcrCmd``: create it and get it to work like the old one
+* ``PcrCmd``: make sure wells are mixed
+* ``PcrCmd``: seal plate
+* ``PcrCmd``: transfer plate to thermocycler
+* ``PcrCmd``: run thermocycler
+* ``Processor``: handle selection of new pools from the database for ``PcrCmd``
+* ``PcrCmd``: add master mix functionality
+* create script to run PCRs on invitrogen primers
 
 General
 =======
@@ -76,6 +68,11 @@ that we can test out a new
 * ``VesselContent``: track the cost of stock substances in the vessel
 * Remove ``WellStateWriter`` and any other ``*StateWriter`` classes
 * ``bsse`` module: move almost all the code to ``base`` or ``evoware``, and use the yaml classes file to load any ``bsse`` classes we need
+* mixing:
+
+  * add Vessel function to determine whether the vessel is currently mixed
+  * ``PcrCmd``: smart mixing: decide whether final dispense caused sufficient mixing, or whether enough time has elapsed for mixing to have occured spontaneously, or whether to mix immediately after every final dispense, or mix after all dispenses have finished for all wells, or to seal and shake.
+  * ``PcrCmd``: use AI somehow to make the mixing/sealing/shaking decisions.  That is, we know that the plate should be sealed and mixed prior to entering the thermocycler -- find the cheapest path to reach that goal.
 
 Location handling
 -----------------
