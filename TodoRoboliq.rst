@@ -2,6 +2,11 @@
 Programming Tasks
 =================
 
+:Started: 2012-05-03
+
+* Find out minimum volume for aspiration of the various labware
+* Pipette through the last script again using water, and measure amount of source wells used afterwards
+
 YAML
 ====
 

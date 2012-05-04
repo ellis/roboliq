@@ -69,4 +69,50 @@ The first 36 columns were completely finished, and the remaining columns still n
 I sealed the PCR plates and put them (along with E2215) into the fridge.  I put the three 1.5ml tubes with template into the freezer.
 
 
+Eppendorf Volume Test
+=====================
 
+date: 2012-05-04
+time: 08:30-09:30
+file: TempEllisTestMinAspVol.esc
+
+Manually dispensed 600ul of water in an eppendorf tube *T1*.
+Had the robot pipette 20ul from *T1* to an empty eppendorf tube *T2*.
+This was repeated until the robot detected that there wasn't enough volume to aspirate anymore.
+
+28 pipetting steps were performed with the following detected volumes:
+
+T1: 673, 662, 650, 639, 627, 612, 600, 589, 569, 558, 542, 531, 515, 492, 477, 458, 438, 419, 400, 377, 354, 331, 304, 273, 246, 207, 173, 130
+T2: 0, 30, 88, 134, 173, 211, 246, 273, 300, 331, 350, 377, 400, 419, 438, 454, 473, 492, 508, 523, 539, 554, 569, 585, 596, 612, 619, 635
+
+The final detected volume in *T1* at step 29 was 119ul, at which point the robot claimed that the volume was too low.  I do not understand why it aborts on a detected level of 119ul when it wants to aspirate 20ul.
+
+Manually, I measured final volumes of *T1* = 36ul and *T2* = 550ul.  After 28 steps, I would have expected *T1* = 40ul and *T2* = 560ul.
+
+
+Test run of primer PCR mix with water
+=====================================
+
+The experiment from 2012-04-12 showed no PCR products.
+The point of this experiment is to run the script again with water, and afterwards to manually check the volumes of the source wells.
+
+file: protocol-007b-pcrmix
+
+
+Tube T50water1:
+  filled it to near the top, reagents50 row 1 col 1
+Tube TEPtemplate1:
+  1000ul, eppendorf row 1, col 1
+Tube TEPtemplate2:
+  1000ul, eppendorf row 2, col 1
+Plate P1:
+  location: cover,
+  volumes: 1000ul water in A02 to C02, representing buffer, dntp, and diluted TAQ
+Plate P4:
+  location: cooled1,
+  empty wells for putting the PCR mixes into
+Plate E2215D:
+  location: cooled2,
+  volumes: 100ul water in all wells representing diluted primers
+
+Execution of script started at 10:11
