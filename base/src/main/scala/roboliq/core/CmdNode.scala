@@ -12,6 +12,7 @@ class CmdNodeBean {
 
 	@BeanProperty var index: String = null
 	@BeanProperty var command: CmdBean = null
+	@BeanProperty var doc: String = null
 	@BeanProperty var errors: java.util.List[String] = null
 	@BeanProperty var warnings: java.util.List[String] = null
 	@BeanProperty var children: java.util.List[CmdNodeBean] = null

@@ -37,7 +37,7 @@ class TipsWashCmdHandler_BSSE extends CmdHandlerA[TipsWashCmdBean] {
 		//val washProgram = if (cmd.washProgram != null) cmd.washProgram.toInt else 0
 		val intensity = WashIntensity.withName(cmd.intensity)
 		val sIntensity = intensity match {
-			case WashIntensity.None => return Expand2Tokens(Nil, Nil)
+			case WashIntensity.None => return Expand2Tokens(Nil, Nil, null)
 			case WashIntensity.Light => "Light"
 			case WashIntensity.Thorough => "Thorough"
 			case WashIntensity.Decontaminate => "Decontaminate"
@@ -60,6 +60,8 @@ class TipsWashCmdHandler_BSSE extends CmdHandlerA[TipsWashCmdBean] {
 			else None
 		})
 		
-		Expand2Tokens(tokens, events)
+		val doc = "wash tips: "+cmd.tips.mkString(", ")
+		
+		Expand2Tokens(tokens, events, doc)
 	}
 }

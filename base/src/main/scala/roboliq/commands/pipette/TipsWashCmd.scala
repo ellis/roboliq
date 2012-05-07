@@ -40,7 +40,9 @@ class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean] {
 		// Events
 		val events = lTip.map(tip => TipCleanEventBean(tip, degree))
 		
-		Expand2Tokens(tokens, events)
+		val doc = "wash tips: "+cmd.tips.mkString(", ")
+		
+		Expand2Tokens(tokens, events, doc)
 	}
 }
 

@@ -8,25 +8,52 @@ import roboliq.core._
 case class L3C_Pipette(args: L3A_PipetteArgs) {
 	def toDebugString = {
 		val srcs = args.items.groupBy(_.srcs).keys
+		val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
+		val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
 		if (srcs.size == 1) {
 			val sSrcs = Printer.getWellsDebugString(srcs.head)
-			val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
-			val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
 		else if (args.items.forall(_.srcs.size == 1)) {
 			val sSrcs = Printer.getWellsDebugString(args.items.map(_.srcs.head))
-			val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
-			val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
 		else {
 			val lsSrcs = args.items.map(item => Printer.getWellsDebugString(item.srcs))
 			val sSrcs = Printer.getSeqDebugString(lsSrcs)
-			val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
-			val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
+	}
+	
+	def toDocString(states: RobotState): String = {
+		val srcs = args.items.groupBy(_.srcs).keys
+		val sSrcs = {
+			if (srcs.size == 1)
+				Printer.getWellsDebugString(srcs.head)
+			else if (args.items.forall(_.srcs.size == 1))
+				Printer.getWellsDebugString(args.items.map(_.srcs.head))
+			else {
+				val lsSrcs = args.items.map(item => Printer.getWellsDebugString(item.srcs))
+				Printer.getSeqDebugString(lsSrcs)
+			}
+			
+		}
+		
+		val sLiquids = {
+			val lsLiquid = srcs.toList.flatMap(_.map(_.wellState(states).map(_.liquid.sName).getOrElse("ERROR")))
+			val lsLiquid2 = lsLiquid.distinct
+			if (lsLiquid2.isEmpty)
+				""
+			else if (lsLiquid2.size == 1)
+				" of "+lsLiquid2.head
+			else
+				Printer.getSeqDebugString(lsLiquid2)
+		}
+		
+		val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
+		val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
+		
+		"pipette "+sVolumes+" ul"+sLiquids+" from "+sSrcs+" to "+sDests
 	}
 }
 

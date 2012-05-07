@@ -112,8 +112,11 @@ class PcrCmdHandler extends CmdHandlerA[PcrCmdBean] {
 			val lCmd: List[common.Command] = lPipetteCmd ++ lMixCmd ++ lSealCmd
 			lCmd
 			*/
-
-			Expand2Cmds(List(pipette), Nil)
+			
+			// FIXME: add real doc
+			val doc = null
+			
+			Expand2Cmds(List(pipette), Nil, doc)
 		}
 		
 		x match {

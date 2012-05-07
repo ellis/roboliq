@@ -39,7 +39,7 @@ class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean] {
 				TipAspirateEventBean(item.tip, item.well, item.volume) ::
 				WellRemoveEventBean(item.well, item.volume) :: Nil
 			})
-			Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList)
+			Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, null)
 		}
 	}
 }

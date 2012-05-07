@@ -43,7 +43,7 @@ class MixCmdHandler extends CmdHandlerA[MixCmdBean] {
 			Expand2Errors()
 		}
 		else {
-			Expand2Tokens(List(new MixToken(lItem)), Nil)
+			Expand2Tokens(List(new MixToken(lItem)), Nil, null)
 		}
 	}
 }

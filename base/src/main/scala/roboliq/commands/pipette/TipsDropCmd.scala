@@ -36,7 +36,8 @@ class TipsDropCmdHandler extends CmdHandlerA[TipsDropCmdBean] {
 			Expand2Errors()
 		}
 		else {
-			Expand2Tokens(List(new TipsDropToken(lTip.map(_.index), location_?.get)), Nil)
+			val doc = "drop tips: "+cmd.tips.mkString(", ")
+			Expand2Tokens(List(new TipsDropToken(lTip.map(_.index), location_?.get)), Nil, doc)
 		}
 	}
 }

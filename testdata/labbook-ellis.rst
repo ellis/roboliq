@@ -96,6 +96,7 @@ Test run of primer PCR mix with water
 The experiment from 2012-04-12 showed no PCR products.
 The point of this experiment is to run the script again with water, and afterwards to manually check the volumes of the source wells.
 
+date: 2012-05-04
 file: protocol-007b-pcrmix
 
 
@@ -115,4 +116,63 @@ Plate E2215D:
   location: cooled2,
   volumes: 100ul water in all wells representing diluted primers
 
-Execution of script started at 10:11
+Execution of script started at 10:11 and went till 13:50.
+
+After execution I measured the following volumes by hand:
+
+buffer in P1(A02): 675ul, expected 712ul
+
+dNTP in P1(B02): 760ul, expected 712ul (I'm guessing that I made a mistake in my measurement here, and that it was actualy 660ul, not 760ul).
+
+TAQ in P1(C02): 665 ul, expected 712ul (this seems to indicate that on average, 3.5ul were aspirated in each step instead of just 3ul)
+
+template1 in eppendorf TEPtemplate1: 940ul, expected 930ul (1ul x 70 aspirations)
+
+template2 in eppendorf TEPtemplate2: 950ul, expected 974ul (1ul x 26 aspirations)
+
+SEQUENCE_01 in EE215D: 70ul, expected 85ul (1.5ul x 10 aspirations)
+
+Sample volumes all appeared approximately equal by visual inspection.
+I measured two random wells and got the following unexpected and undesired result.
+
+Samples in plate P4: 22ul, expected 30ul
+
+
+Test of destination volumes for PCR mix with water
+==================================================
+
+date: 2012-05-07
+file: TempEllisTestDispenseAccuracy.esc
+time: 8:30 - 11:50
+
+I measured a couple sample volumes of only 22ul in the previous experiment, whereas 30ul were expected.
+So I wrote a new script to check the final destination volumes.
+It dispensed water in the following volumes:
+
+* 17ul to wells A01-H01
+* 3ul to wells A01-G01 (simulating buffer, total = 20ul)
+* 3ul to wells A01-F01 (simulating dNTP, total = 23ul)
+* 1ul to wells A01-E01 (simulating template, total = 24ul)
+* 1.5ul to wells A01-D01 (simulating foward primer, total = 25.5ul)
+* 1.5ul to wells A01-C01 (simulating backward primer, total = 27ul)
+* 3ul to wells A01-B02 (simulating polymerase, total = 30ul)
+
+I repeated this three times used a pipetter to manually test the volume in each well.
+
+====  ========  ========  ========  ========
+Well  Expected  Measured  Measured  Measured
+====  ========  ========  ========  ========
+A01   30ul      28ul      30ul      30
+B01   30ul      27ul      30ul      30
+C01   27ul      27ul      27ul      27
+D01   25.5ul    25.5ul    27ul      25.5
+E01   24ul      24ul      25.5ul    24+
+F01   23ul      23ul      23ul      23
+G01   20ul      20+ul     21ul      20
+H01   17ul      17+ul     17ul      17
+====  ========  ========  ========  ========
+
+The results are not entirely satisfying.
+Some of the divergences are surely due to my amateur pipetting skills, but I suspect that some of them might be genuine divergences.
+
+

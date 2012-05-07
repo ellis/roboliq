@@ -47,7 +47,7 @@ class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean] {
 				TipDispenseEventBean(item.tip, item.well, item.volume, PipettePosition.getPositionFromPolicyNameHack(item.policy)) ::
 				WellAddEventBean(item.well, src, item.volume) :: Nil
 			})
-			Expand2Tokens(List(new DispenseToken(lItem.toList)), events.toList)
+			Expand2Tokens(List(new DispenseToken(lItem.toList)), events.toList, null)
 		}
 	}
 }
