@@ -7,14 +7,16 @@ import roboliq.core.ObjBase
 
 
 class EvowareScriptBuilder(val ob: ObjBase) {
-	val mapCmdToLabwareInfo = new HashMap[Object, List[Tuple3[CarrierSite, String, LabwareModel]]]
 	val cmds = new ArrayBuffer[Object]
+	val mapCmdToLabwareInfo = new HashMap[Object, List[Tuple3[CarrierSite, String, LabwareModel]]]
+	val state = new EvowareState
 	
 	def toImmutable: EvowareScript =
-		new EvowareScript(mapCmdToLabwareInfo.toMap, cmds.toSeq)
+		new EvowareScript(cmds.toSeq, mapCmdToLabwareInfo.toMap, state)
 }
 
 class EvowareScript(
+	val cmds: Seq[Object],
 	val mapCmdToLabwareInfo: Map[Object, List[Tuple3[CarrierSite, String, LabwareModel]]],
-	val cmds: Seq[Object]
+	val state: EvowareState
 )

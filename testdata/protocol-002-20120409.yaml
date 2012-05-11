@@ -5,7 +5,7 @@ plates:
   reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }
 
 events:
-  reagents50(A01): [ !add { src: water, volume: 49e-3 } ]
+- !add { obj: reagents50(A01), src: water, volume: 49e-3 }
 
 commands:
 - !!roboliq.commands.pipette.PipetteCmdBean

@@ -1,0 +1,517 @@
+- !!roboliq.core.CmdNodeBean
+  children:
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Thorough
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP2}
+    index: '1.1'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.00083585, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP1, src: T50water1, volume: 0.00083585}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.00083585}
+    index: '1.2'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.00013655, well: E2215(A01)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A01), obj: TIP1, position: Free,
+      volume: 0.00013655}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A01), src: T50water1, volume: 0.00013655}
+    index: '1.3'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001805, well: E2215(A02)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A02), obj: TIP1, position: Free,
+      volume: 0.0001805}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A02), src: T50water1, volume: 0.0001805}
+    index: '1.4'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000113475, well: E2215(A03)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A03), obj: TIP1, position: Free,
+      volume: 0.000113475}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A03), src: T50water1, volume: 0.000113475}
+    index: '1.5'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.00012295, well: E2215(A04)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A04), obj: TIP1, position: Free,
+      volume: 0.00012295}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A04), src: T50water1, volume: 0.00012295}
+    index: '1.6'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000137375, well: E2215(A05)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A05), obj: TIP1, position: Free,
+      volume: 0.000137375}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A05), src: T50water1, volume: 0.000137375}
+    index: '1.7'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000145, well: E2215(A06)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A06), obj: TIP1, position: Free,
+      volume: 0.000145}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A06), src: T50water1, volume: 0.000145}
+    index: '1.8'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Thorough
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP2}
+    index: '1.9'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000915625, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP1, src: T50water1, volume: 0.000915625}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.000915625}
+    index: '1.10'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.00013565, well: E2215(A07)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A07), obj: TIP1, position: Free,
+      volume: 0.00013565}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A07), src: T50water1, volume: 0.00013565}
+    index: '1.11'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001179, well: E2215(A08)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A08), obj: TIP1, position: Free,
+      volume: 0.0001179}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A08), src: T50water1, volume: 0.0001179}
+    index: '1.12'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000101875, well: E2215(A09)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A09), obj: TIP1, position: Free,
+      volume: 0.000101875}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A09), src: T50water1, volume: 0.000101875}
+    index: '1.13'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0000927, well: E2215(A10)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A10), obj: TIP1, position: Free,
+      volume: 0.0000927}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A10), src: T50water1, volume: 0.0000927}
+    index: '1.14'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001196, well: E2215(A11)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A11), obj: TIP1, position: Free,
+      volume: 0.0001196}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A11), src: T50water1, volume: 0.0001196}
+    index: '1.15'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000110825, well: E2215(A12)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A12), obj: TIP1, position: Free,
+      volume: 0.000110825}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A12), src: T50water1, volume: 0.000110825}
+    index: '1.16'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000121475, well: E2215(B01)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B01), obj: TIP1, position: Free,
+      volume: 0.000121475}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B01), src: T50water1, volume: 0.000121475}
+    index: '1.17'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001156, well: E2215(B02)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B02), obj: TIP1, position: Free,
+      volume: 0.0001156}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B02), src: T50water1, volume: 0.0001156}
+    index: '1.18'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Thorough
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP2}
+    index: '1.19'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0009411, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP1, src: T50water1, volume: 0.0009411}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.0009411}
+    index: '1.20'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.00089295, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP2, src: T50water1, volume: 0.00089295}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.00089295}
+    index: '1.21'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP3, volume: 0.000826025, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP3, src: T50water1, volume: 0.000826025}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.000826025}
+    index: '1.22'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP4, volume: 0.0004932, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP4, src: T50water1, volume: 0.0004932}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.0004932}
+    index: '1.23'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001206, well: E2215(B03)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B03), obj: TIP1, position: Free,
+      volume: 0.0001206}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B03), src: T50water1, volume: 0.0001206}
+    index: '1.24'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000110025, well: E2215(B04)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B04), obj: TIP1, position: Free,
+      volume: 0.000110025}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B04), src: T50water1, volume: 0.000110025}
+    index: '1.25'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000124325, well: E2215(B05)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B05), obj: TIP1, position: Free,
+      volume: 0.000124325}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B05), src: T50water1, volume: 0.000124325}
+    index: '1.26'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000117375, well: E2215(B06)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B06), obj: TIP1, position: Free,
+      volume: 0.000117375}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B06), src: T50water1, volume: 0.000117375}
+    index: '1.27'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000127775, well: E2215(B07)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B07), obj: TIP1, position: Free,
+      volume: 0.000127775}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B07), src: T50water1, volume: 0.000127775}
+    index: '1.28'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001194, well: E2215(B08)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B08), obj: TIP1, position: Free,
+      volume: 0.0001194}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B08), src: T50water1, volume: 0.0001194}
+    index: '1.29'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP3, volume: 0.0002876, well: E2215(B09)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B09), obj: TIP3, position: Free,
+      volume: 0.0002876}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B09), src: T50water1, volume: 0.0002876}
+    index: '1.30'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP3, volume: 0.000147725, well: E2215(B10)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B10), obj: TIP3, position: Free,
+      volume: 0.000147725}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B10), src: T50water1, volume: 0.000147725}
+    index: '1.31'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP3, volume: 0.0001178, well: E2215(B11)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B11), obj: TIP3, position: Free,
+      volume: 0.0001178}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B11), src: T50water1, volume: 0.0001178}
+    index: '1.32'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP3, volume: 0.00014775, well: E2215(B12)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(B12), obj: TIP3, position: Free,
+      volume: 0.00014775}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(B12), src: T50water1, volume: 0.00014775}
+    index: '1.33'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000104575, well: E2215(C01)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C01), obj: TIP1, position: Free,
+      volume: 0.000104575}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C01), src: T50water1, volume: 0.000104575}
+    index: '1.34'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000117025, well: E2215(C02)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C02), obj: TIP1, position: Free,
+      volume: 0.000117025}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C02), src: T50water1, volume: 0.000117025}
+    index: '1.35'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.00013685, well: E2215(C03)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C03), obj: TIP2, position: Free,
+      volume: 0.00013685}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C03), src: T50water1, volume: 0.00013685}
+    index: '1.36'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.00012125, well: E2215(C04)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C04), obj: TIP2, position: Free,
+      volume: 0.00012125}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C04), src: T50water1, volume: 0.00012125}
+    index: '1.37'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.00013575, well: E2215(C05)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C05), obj: TIP2, position: Free,
+      volume: 0.00013575}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C05), src: T50water1, volume: 0.00013575}
+    index: '1.38'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.00011045, well: E2215(C06)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C06), obj: TIP2, position: Free,
+      volume: 0.00011045}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C06), src: T50water1, volume: 0.00011045}
+    index: '1.39'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.0001492, well: E2215(C07)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C07), obj: TIP2, position: Free,
+      volume: 0.0001492}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C07), src: T50water1, volume: 0.0001492}
+    index: '1.40'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP3, volume: 0.00012515, well: E2215(C08)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C08), obj: TIP3, position: Free,
+      volume: 0.00012515}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C08), src: T50water1, volume: 0.00012515}
+    index: '1.41'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP4, volume: 0.000113375, well: E2215(C09)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C09), obj: TIP4, position: Free,
+      volume: 0.000113375}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C09), src: T50water1, volume: 0.000113375}
+    index: '1.42'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP4, volume: 0.000132525, well: E2215(C10)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C10), obj: TIP4, position: Free,
+      volume: 0.000132525}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C10), src: T50water1, volume: 0.000132525}
+    index: '1.43'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP4, volume: 0.00012125, well: E2215(C11)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C11), obj: TIP4, position: Free,
+      volume: 0.00012125}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C11), src: T50water1, volume: 0.00012125}
+    index: '1.44'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP4, volume: 0.00012605, well: E2215(C12)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(C12), obj: TIP4, position: Free,
+      volume: 0.00012605}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(C12), src: T50water1, volume: 0.00012605}
+    index: '1.45'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.000131, well: E2215(D01)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D01), obj: TIP2, position: Free,
+      volume: 0.000131}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D01), src: T50water1, volume: 0.000131}
+    index: '1.46'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.00010845, well: E2215(D02)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D02), obj: TIP2, position: Free,
+      volume: 0.00010845}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D02), src: T50water1, volume: 0.00010845}
+    index: '1.47'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Thorough
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP2}
+    index: '1.48'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000901925, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP1, src: T50water1, volume: 0.000901925}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.000901925}
+    index: '1.49'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.0003718, well: T50water1}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP2, src: T50water1, volume: 0.0003718}
+    - !!roboliq.core.WellRemoveEventBean {obj: T50water1, volume: 0.0003718}
+    index: '1.50'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000121275, well: E2215(D03)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D03), obj: TIP1, position: Free,
+      volume: 0.000121275}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D03), src: T50water1, volume: 0.000121275}
+    index: '1.51'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000103325, well: E2215(D04)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D04), obj: TIP1, position: Free,
+      volume: 0.000103325}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D04), src: T50water1, volume: 0.000103325}
+    index: '1.52'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.00009535, well: E2215(D05)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D05), obj: TIP1, position: Free,
+      volume: 0.00009535}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D05), src: T50water1, volume: 0.00009535}
+    index: '1.53'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000093525, well: E2215(D06)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D06), obj: TIP1, position: Free,
+      volume: 0.000093525}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D06), src: T50water1, volume: 0.000093525}
+    index: '1.54'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.00011655, well: E2215(D07)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D07), obj: TIP1, position: Free,
+      volume: 0.00011655}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D07), src: T50water1, volume: 0.00011655}
+    index: '1.55'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000112825, well: E2215(D08)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D08), obj: TIP1, position: Free,
+      volume: 0.000112825}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D08), src: T50water1, volume: 0.000112825}
+    index: '1.56'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.0001184, well: E2215(D09)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D09), obj: TIP1, position: Free,
+      volume: 0.0001184}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D09), src: T50water1, volume: 0.0001184}
+    index: '1.57'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.000134275, well: E2215(D10)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D10), obj: TIP2, position: Free,
+      volume: 0.000134275}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D10), src: T50water1, volume: 0.000134275}
+    index: '1.58'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.000116325, well: E2215(D11)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D11), obj: TIP2, position: Free,
+      volume: 0.000116325}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D11), src: T50water1, volume: 0.000116325}
+    index: '1.59'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP2, volume: 0.0001212, well: E2215(D12)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(D12), obj: TIP2, position: Free,
+      volume: 0.0001212}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(D12), src: T50water1, volume: 0.0001212}
+    index: '1.60'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq_Water_Air_1000, tip: TIP1, volume: 0.000140675, well: E2215(E01)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(E01), obj: TIP1, position: Free,
+      volume: 0.000140675}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(E01), src: T50water1, volume: 0.000140675}
+    index: '1.61'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: None
+      tips: [TIP5, TIP6, TIP7, TIP8]
+    index: '1.62'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Light
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP2}
+    index: '1.63'
+  command: !!roboliq.commands.pipette.PipetteCmdBean
+    dest: E2215(A01 r E01)
+    src: water
+    volume: [0.00013655, 0.0001805, 0.000113475, 0.00012295, 0.000137375, 0.000145,
+      0.00013565, 0.0001179, 0.000101875, 0.0000927, 0.0001196, 0.000110825, 0.000121475,
+      0.0001156, 0.0001206, 0.000110025, 0.000124325, 0.000117375, 0.000127775, 0.0001194,
+      0.0002876, 0.000147725, 0.0001178, 0.00014775, 0.000104575, 0.000117025, 0.00013685,
+      0.00012125, 0.00013575, 0.00011045, 0.0001492, 0.00012515, 0.000113375, 0.000132525,
+      0.00012125, 0.00012605, 0.000131, 0.00010845, 0.000121275, 0.000103325, 0.00009535,
+      0.000093525, 0.00011655, 0.000112825, 0.0001184, 0.000134275, 0.000116325, 0.0001212,
+      0.000140675]
+  doc: pipette List(136.55 ul, 180.5 ul, 113.475 ul, 122.95 ul, 137.375 ul, 145 ul, 135.65 ul, 117.9 ul, 101.875 ul, 92.7 ul, 119.6 ul, 110.825 ul, 121.475 ul, 115.6 ul, 120.6 ul, 110.025 ul, 124.325 ul, 117.375 ul, 127.775 ul, 119.4 ul, 287.6 ul, 147.725 ul, 117.8 ul, 147.75 ul, 104.575 ul, 117.025 ul, 136.85 ul, 121.25 ul, 135.75 ul, 110.45 ul, 149.2 ul, 125.15 ul, 113.375 ul, 132.525 ul, 121.25 ul, 126.05 ul, 131 ul, 108.45 ul, 121.275 ul, 103.325 ul, 95.35 ul, 93.525 ul, 116.55 ul, 112.825 ul, 118.4 ul, 134.275 ul, 116.325 ul, 121.2 ul, 140.675 ul) ul of water from T50water1 to E2215(A01),E2215(A02),E2215(A03),E2215(A04),E2215(A05),E2215(A06),E2215(A07),E2215(A08),E2215(A09),E2215(A10),E2215(A11),E2215(A12),E2215(B01),E2215(B02),E2215(B03),E2215(B04),E2215(B05),E2215(B06),E2215(B07),E2215(B08),E2215(B09),E2215(B10),E2215(B11),E2215(B12),E2215(C01),E2215(C02),E2215(C03),E2215(C04),E2215(C05),E2215(C06),E2215(C07),E2215(C08),E2215(C09),E2215(C10),E2215(C11),E2215(C12),E2215(D01),E2215(D02),E2215(D03),E2215(D04),E2215(D05),E2215(D06),E2215(D07),E2215(D08),E2215(D09),E2215(D10),E2215(D11),E2215(D12),E2215(E01)
+  index: '1'

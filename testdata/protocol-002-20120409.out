@@ -1,0 +1,47 @@
+- !!roboliq.core.CmdNodeBean
+  children:
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Thorough
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP2}
+    index: '1.1'
+  - command: !!roboliq.commands.pipette.AspirateCmdBean
+      items:
+      - {policy: Roboliq__Air_1000, tip: TIP1, volume: 0.0000927, well: reagents50(A01)}
+    events:
+    - !!roboliq.core.TipAspirateEventBean {obj: TIP1, src: reagents50(A01), volume: 0.0000927}
+    - !!roboliq.core.WellRemoveEventBean {obj: reagents50(A01), volume: 0.0000927}
+    index: '1.2'
+  - command: !!roboliq.commands.pipette.DispenseCmdBean
+      items:
+      - {policy: Roboliq__Air_1000, tip: TIP1, volume: 0.0000927, well: E2215(A01)}
+    events:
+    - !!roboliq.core.TipDispenseEventBean {dest: E2215(A01), obj: TIP1, position: Free,
+      volume: 0.0000927}
+    - !!roboliq.core.WellAddEventBean {obj: E2215(A01), src: reagents50(A01), volume: 0.0000927}
+    index: '1.3'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: None
+      tips: [TIP5, TIP6, TIP7, TIP8]
+    index: '1.4'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: Thorough
+      tips: [TIP1, TIP2, TIP3, TIP4]
+    doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
+    events:
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP4}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP3}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP1}
+    - !!roboliq.core.TipCleanEventBean {degree: Thorough, obj: TIP2}
+    index: '1.5'
+  command: !!roboliq.commands.pipette.PipetteCmdBean
+    dest: E2215(A01)
+    src: reagents50(A01)
+    volume: [0.0000927]
+  doc: pipette 92.7 ul ul of <EMPTY> from reagents50(A01) to E2215(A01)
+  index: '1'
