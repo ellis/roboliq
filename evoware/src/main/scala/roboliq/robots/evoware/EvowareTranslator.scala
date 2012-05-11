@@ -83,7 +83,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		Result.mapOver(lNode)(node => {
 			nodeCurrent = node
 			if (node.tokens != null) {
-				Result.mapOver(node.tokens.toList) { token => translate(token, builder) }
+				Result.mapOver(node.tokens.toList) { token => translate(token, builder, node.states0) }
 			}
 			else if (node.children != null) {
 				translate(node.children.toList, builder)
@@ -94,9 +94,9 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		}).map(_ => ())
 	}
 	
-	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder): Result[Unit] = {
+	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder, states0: StateMap): Result[Unit] = {
 		for { cmds0 <- cmd1 match {
-			case c: AspirateToken => aspirate(builder, c)
+			case c: AspirateToken => aspirate(builder, c, states0)
 			//case c: L1C_Comment => comment(c)
 			case c: DispenseToken => dispense(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
@@ -156,7 +156,18 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 	*/
 	
 
-	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken): Result[Seq[L0C_Command]] = {
+	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken, states0: StateMap): Result[Seq[L0C_Command]] = {
+		for (item <- cmd.items) {
+			item.well.wellState(states0) match {
+				case Error(ls) => return Error(ls)
+				case Success(state) =>
+					val sLiquid = state.content.liquid.sName
+					val mapWellToAspirated = builder.state.mapLiquidToWellToAspirated.getOrElse(sLiquid, new HashMap())
+					val vol0 = mapWellToAspirated.getOrElseUpdate(item.well.id, LiquidVolume.empty)
+					mapWellToAspirated(item.well.id) = vol0 + item.volume
+					builder.state.mapLiquidToWellToAspirated(sLiquid) = mapWellToAspirated
+			}
+		}
 		spirate(builder, cmd.items, "Aspirate")
 	}
 	
@@ -183,7 +194,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				val idPlate = lWellInfo.head.idPlate
 				
 				// Assert that all tips are of the same kind
-				// TODO: Readd this error check somehow? -- ellis, 2011-08-25
+				// TODO: Re-add this error check somehow? -- ellis, 2011-08-25
 				//val tipKind = config.getTipKind(twvp0.tip)
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				

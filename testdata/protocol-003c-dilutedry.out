@@ -489,10 +489,6 @@
     - !!roboliq.core.WellAddEventBean {obj: E2215(E01), src: T50water1, volume: 0.000140675}
     index: '1.61'
   - command: !!roboliq.commands.pipette.TipsWashCmdBean
-      intensity: None
-      tips: [TIP5, TIP6, TIP7, TIP8]
-    index: '1.62'
-  - command: !!roboliq.commands.pipette.TipsWashCmdBean
       intensity: Light
       tips: [TIP1, TIP2, TIP3, TIP4]
     doc: 'wash tips: TIP1, TIP2, TIP3, TIP4'
@@ -501,6 +497,10 @@
     - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP3}
     - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP1}
     - !!roboliq.core.TipCleanEventBean {degree: Light, obj: TIP2}
+    index: '1.62'
+  - command: !!roboliq.commands.pipette.TipsWashCmdBean
+      intensity: None
+      tips: [TIP5, TIP6, TIP7, TIP8]
     index: '1.63'
   command: !!roboliq.commands.pipette.PipetteCmdBean
     dest: E2215(A01 r E01)

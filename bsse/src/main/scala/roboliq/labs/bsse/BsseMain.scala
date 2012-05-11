@@ -162,6 +162,25 @@ class YamlTest2(args: List[String]) {
 								})
 							}
 							tagPop()
+							
+							// Resource usage
+							docHeader("Resource Usage", 2)
+							tagPush("table", Map("border" -> "1"))
+							tagPush("tr")
+								tagMake("th", Map(), "Liquid")
+								tagMake("th", Map(), "Vessel")
+								tagMake("th", Map(), "Volume")
+							tagPop()
+							for ((idLiquid, map) <- evowareScript.state.mapLiquidToWellToAspirated) {
+								for ((idWell, vol) <- map) {
+										tagPush("tr")
+										tagMake("td", Map(), idLiquid)
+										tagMake("td", Map(), idWell)
+										tagMake("td", Map(), vol.toString)
+										tagPop()
+								}
+							}
+							tagPop()
 					}
 				case ls =>
 					ls.foreach(println)

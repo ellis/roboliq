@@ -7,5 +7,5 @@ import roboliq.core.LiquidVolume
 
 
 class EvowareState {
-	val mapWellToVolumeChanges = new HashMap[String, Stack[LiquidVolume]]
+	val mapLiquidToWellToAspirated = new HashMap[String, HashMap[String, LiquidVolume]]
 }
