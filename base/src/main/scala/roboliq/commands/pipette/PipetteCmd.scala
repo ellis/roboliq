@@ -69,7 +69,7 @@ class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean] {
 				scheduler.translate() match {
 					case Error(ls) => Expand2Errors()
 					case Success(l) =>
-						val doc = l3c.toDocString(ctx.states)
+						val doc = l3c.toDocString(ctx.ob, ctx.states)
 						Expand2Cmds(l.toList, Nil, doc)
 				}
 		}

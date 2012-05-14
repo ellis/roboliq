@@ -55,9 +55,9 @@ class LiquidVolume private (val _nl: Int) {
 	override def hashCode = _nl.hashCode()
 	
 	override def toString = {
-		if (_nl > 1000000)
+		if (_nl >= 1000000)
 			(nl / 1000000).toString + " ml"
-		else if (_nl > 1000)
+		else if (_nl >= 1000)
 			(nl / 1000).toString + " ul"
 		else
 			nl.toString + " nl"

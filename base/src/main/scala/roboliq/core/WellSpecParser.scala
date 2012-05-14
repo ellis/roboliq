@@ -104,4 +104,97 @@ object WellSpecParser extends JavaTokenParsers {
 			})
 		}
 	}
+	
+	def toString(lWell: List[Well2], ob: ObjBase, sep: String): String = {
+		lWell match {
+			case Nil => ""
+			case List(well) => well.id
+			case well0 :: rest =>
+				mergeVertical(lWell) match {
+					case Some(s) => s
+					case None =>
+						mergeHorizontal(lWell, ob) match {
+							case Some(s) => s
+							case None =>
+								lWell.map(_.id).mkString(sep)
+						}
+				}
+		}
+	}
+	
+	private def mergeVertical(lWell: List[Well2]): Option[String] = {
+		def expect(idPlate: String, index: Int, l: List[Well2]): Boolean = {
+			l match {
+				case Nil => true
+				case well :: rest =>
+					if (well.idPlate != idPlate || well.index != index) false
+					else expect(idPlate, index + 1, rest)
+			}
+		}
+		
+		val well0 = lWell.head
+		if (expect(well0.idPlate, well0.index + 1, lWell.tail)) {
+			Some(well0.idPlate+"("+well0.indexName+" d "+lWell.last.indexName+")")
+		}
+		else
+			None
+	}
+	
+	private def mergeHorizontal(lWell: List[Well2], ob: ObjBase): Option[String] = {
+		def expect(l: List[Well2]): Boolean = {
+			l match {
+				case Nil => false
+				case x :: Nil => true
+				case well0 :: well1 :: rest =>
+					if (well0.idPlate != well1.idPlate)
+						false
+					else if (well0.iRow == well1.iRow && well0.iCol + 1 == well1.iCol)
+						expect(l.tail)
+					else if (well0.iRow + 1 == well1.iRow && well1.iCol == 0) {
+						ob.findPlate(well0.idPlate) match {
+							case roboliq.core.Error(_) => false
+							case roboliq.core.Success(plate) =>
+								if (well0.iCol == plate.model.nCols - 1)
+									expect(l.tail)
+								else
+									false
+						}
+					}
+					else
+						false
+			}
+		}
+		
+		if (expect(lWell)) {
+			val well0 = lWell.head
+			Some(well0.idPlate+"("+well0.indexName+" r "+lWell.last.indexName+")")
+		}
+		else
+			None
+	}
+	
+	/*
+	private def merge(spec1: WellSpec, rc2: RowCol, plateModel: PlateModel): List[WellSpec] = {
+		spec1 match {
+			case WellSpecOne(rc1) =>
+				if (rc2.col == rc1.col && rc2.row == rc1.row + 1) {
+					List(WellSpecVertical(rc1, rc2))
+				}
+				else if (rc2.row == rc1.row && rc2.col == rc1.col + 1) {
+					List(WellSpecHorizontal(rc1, rc2))
+				}
+				else {
+					List(spec1, WellSpecOne(rc2))
+				}
+			case WellSpecVertical(rc0, rc1) =>
+				if (rc1.col == rc2.col && rc1.row + 1 == rc2.row)
+					List(WellSpecVertical(rc0, rc2))
+				else if (rc1.col + 1 == rc2.col && rc1.row == plateModel.nRows - 1 && rc2.row == 0) 
+					List(WellSpecVertical(rc0, rc2))
+				else
+					List(spec1, WellSpecOne(rc2))
+			case WellSpec
+		}
+	}
+	*/
 }

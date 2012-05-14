@@ -25,15 +25,18 @@ case class L3C_Pipette(args: L3A_PipetteArgs) {
 		}
 	}
 	
-	def toDocString(states: RobotState): String = {
+	def toDocString(ob: ObjBase, states: RobotState): String = {
+		def getWellsString(l: Iterable[Well2]): String =
+			WellSpecParser.toString(l.toList, ob, ", ")
+			
 		val srcs = args.items.groupBy(_.srcs).keys
 		val sSrcs = {
 			if (srcs.size == 1)
-				Printer.getWellsDebugString(srcs.head)
+				getWellsString(srcs.head)
 			else if (args.items.forall(_.srcs.size == 1))
-				Printer.getWellsDebugString(args.items.map(_.srcs.head))
+				getWellsString(args.items.map(_.srcs.head))
 			else {
-				val lsSrcs = args.items.map(item => Printer.getWellsDebugString(item.srcs))
+				val lsSrcs = args.items.map(item => getWellsString(item.srcs))
 				Printer.getSeqDebugString(lsSrcs)
 			}
 			
@@ -47,13 +50,14 @@ case class L3C_Pipette(args: L3A_PipetteArgs) {
 			else if (lsLiquid2.size == 1)
 				" of "+lsLiquid2.head
 			else
-				Printer.getSeqDebugString(lsLiquid2)
+				" of "+Printer.getSeqDebugString(lsLiquid2)
 		}
 		
-		val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
+		val sDests = getWellsString(args.items.map(_.dest))
+				//Printer.getWellsDebugString(args.items.map(_.dest))
 		val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
 		
-		"pipette "+sVolumes+" ul"+sLiquids+" from "+sSrcs+" to "+sDests
+		"Pipette "+sVolumes+sLiquids+" from "+sSrcs+" to "+sDests
 	}
 }
 
