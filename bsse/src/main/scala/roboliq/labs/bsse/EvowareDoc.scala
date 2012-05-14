@@ -6,11 +6,53 @@ import java.io.PrintWriter
 import scala.collection.JavaConversions._
 import scala.collection.mutable.Stack
 
-import roboliq.core.CmdNodeBean
-import roboliq.core.ProcessorResult
-import roboliq.core.WellPosition
+import roboliq.core._
 import roboliq.robots.evoware.EvowareScript
 import roboliq.utils.FileUtils
+
+
+private class Html(p: PrintWriter) {
+	val tags = new Stack[String]
+	
+	def docPrintln(o: Any) {
+		val sIndent = "\t" * tags.size
+		p.println(sIndent+o)
+	}
+	
+	def tagPush(tag: String, attributes: Map[String, String] = Map()) {
+		val s0 = "<"+tag;
+		val s1 = {
+			if (attributes.isEmpty) ""
+			else " "+attributes.map(pair => pair._1+"=\""+pair._2+"\"").mkString(" ")
+		}
+		docPrintln(s0+s1+">")
+		tags.push(tag)
+	}
+	
+	def tagPop() {
+		if (!tags.isEmpty) {
+			docPrintln("</"+tags.pop()+">")
+		}
+	}
+	
+	def tagMake(tag: String, attributes: Map[String, String] = Map(), contents: String = null) {
+		val s0 = "<"+tag;
+		val s1 = {
+			if (attributes.isEmpty) ""
+			else " "+attributes.map(pair => pair._1+"=\""+pair._2+"\"").mkString(" ")
+		}
+		val s2 = {
+			if (contents == null) "/>"
+			else ">"+contents+"</"+tag+">";
+		}
+		docPrintln(s0+s1+s2)
+	}
+	
+	def docHeader(sTitle: String, iLevel: Int) {
+		tagMake("h"+iLevel, Map(), sTitle)
+	}
+}
+
 
 class EvowareDoc {
 	var sProtocolFilename: String = null
@@ -22,48 +64,6 @@ class EvowareDoc {
 	
 	def printToFile(sFilename: String) {
 		FileUtils.printToFile(new File(sFilename))(printToWriter)
-	}
-	
-	class Html(p: PrintWriter) {
-		val tags = new Stack[String]
-		
-		def docPrintln(o: Any) {
-			val sIndent = "\t" * tags.size
-			p.println(sIndent+o)
-		}
-		
-		def tagPush(tag: String, attributes: Map[String, String] = Map()) {
-			val s0 = "<"+tag;
-			val s1 = {
-				if (attributes.isEmpty) ""
-				else " "+attributes.map(pair => pair._1+"=\""+pair._2+"\"").mkString(" ")
-			}
-			docPrintln(s0+s1+">")
-			tags.push(tag)
-		}
-		
-		def tagPop() {
-			if (!tags.isEmpty) {
-				docPrintln("</"+tags.pop()+">")
-			}
-		}
-		
-		def tagMake(tag: String, attributes: Map[String, String] = Map(), contents: String = null) {
-			val s0 = "<"+tag;
-			val s1 = {
-				if (attributes.isEmpty) ""
-				else " "+attributes.map(pair => pair._1+"=\""+pair._2+"\"").mkString(" ")
-			}
-			val s2 = {
-				if (contents == null) "/>"
-				else ">"+contents+"</"+tag+">";
-			}
-			docPrintln(s0+s1+s2)
-		}
-		
-		def docHeader(sTitle: String, iLevel: Int) {
-			tagMake("h"+iLevel, Map(), sTitle)
-		}
 	}
 	
 	def printToWriter(p: PrintWriter) {
@@ -158,6 +158,42 @@ class EvowareDoc {
 				}
 			}
 			tagPop()
+		}
+		
+		val lPlateWell = processorResult.ob.loadedPlateWells.toList.sortBy(_.id)
+		if (!lPlateWell.isEmpty) {
+			val states0 = processorResult.ob.getBuilder.toImmutable
+			val states1_? : Option[RobotState] = {
+				if (lNode.isEmpty) None
+				else Option(lNode.last.states1)
+			}
+			html.docHeader("Vessel Contents", 2)
+			html.tagPush("table", Map("border" -> "1"))
+			html.tagPush("tr")
+				html.tagMake("th", Map(), "Vessel")
+				html.tagMake("th", Map(), "Initial")
+				html.tagMake("th", Map(), "Final")
+			html.tagPop()
+			def getContentString(content: VesselContent): String = {
+				content.liquid.sName + " " + content.volume
+			}
+			for (well <- lPlateWell) {
+				html.tagPush("tr")
+				html.tagMake("td", Map(), well.id)
+				html.tagMake("td", Map(), well.wellState(states0) match {
+					case Error(_) => "ERROR"
+					case Success(state) => getContentString(state.content)
+				})
+				html.tagMake("td", Map(), states1_? match {
+					case None => "ERROR"
+					case Some(states1) => well.wellState(states1) match {
+						case Error(_) => ""
+						case Success(state) => getContentString(state.content)
+					}
+				})
+				html.tagPop()
+			}
+			html.tagPop()
 		}
 		
 		html.docHeader("Robot Commands", 2)

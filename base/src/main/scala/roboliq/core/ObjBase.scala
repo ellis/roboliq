@@ -33,6 +33,7 @@ class ObjBase(bb: BeanBase) {
 	def getBuilder = builder
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
+	def loadedPlateWells: Iterable[PlateWell] = m_mapWell.values 
 	
 	def findAllTipModels(): Result[List[TipModel]] = {
 		val l = bb.mapTipModel.keys.toList.map(findTipModel)
