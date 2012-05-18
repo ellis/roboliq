@@ -14,6 +14,7 @@ Programming Tasks
   * PipetteCmd: for long doc, make a table of src, dest, vol
   * wells to string: a sequence of wells from the same plate should be in PLATE(...)
   * wells to string: add ellipsis function
+  * give liquids display names (e.g., dntp => dNTP)
 
 * Create simpler pipetting methods
 * Make master mix

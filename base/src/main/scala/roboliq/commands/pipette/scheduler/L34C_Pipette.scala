@@ -29,17 +29,35 @@ case class L3C_Pipette(args: L3A_PipetteArgs) {
 		def getWellsString(l: Iterable[Well2]): String =
 			WellSpecParser.toString(l.toList, ob, ", ")
 		
-		val srcs = args.items.groupBy(_.srcs).keys
+		// All lists of sources
+		val llSrc = args.items.map(_.srcs)
+		// First source of each item
+		val lSrc0 = llSrc.map(_.head)
+		
+		val src_? : Option[Well2] = {
+			val lSrcDistinct = lSrc0.distinct
+			if (lSrcDistinct.size == 1)
+				Some(lSrcDistinct.head)
+			else
+				None
+		}
+		
 		//val bShortSrcs
-		val sSrcs = {
-			if (srcs.size == 1)
-				getWellsString(srcs.head)
-			else if (args.items.forall(_.srcs.size == 1))
-				getWellsString(args.items.map(_.srcs.head))
-			else {
-				val lsSrcs = args.items.map(item => getWellsString(item.srcs))
-				Printer.getSeqDebugString(lsSrcs)
-			}
+		val sSrcs = src_? match {
+			case Some(src) => src.id
+			case None =>
+				def step(llSrc: Seq[SortedSet[Well2]], accR: List[String]): String = {
+					if (llSrc.isEmpty)
+						accR.reverse.mkString(", ")
+					else if (llSrc.head.size > 1)
+						step(llSrc.tail, getWellsString(llSrc.head) :: accR)
+					else {
+						val (x, rest) = llSrc.span(_.size == 1)
+						val lSrc = x.map(_.head).toList
+						step(rest, getWellsString(lSrc) :: accR)
+					}
+				}
+				step(llSrc, Nil)
 		}
 		
 		val sLiquids = {
