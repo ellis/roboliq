@@ -10,6 +10,8 @@ case class RowCol(row: Int, col: Int) {
 }
 sealed abstract class WellSpec
 case class WellSpecOne(rc: RowCol) extends WellSpec
+/** A single well repeated multiple times */
+//case class WellSpecN(rc: RowCol, n: Int) extends WellSpec
 case class WellSpecVertical(rc0: RowCol, rc1: RowCol) extends WellSpec
 case class WellSpecHorizontal(rc0: RowCol, rc1: RowCol) extends WellSpec
 case class WellSpecMatrix(rc0: RowCol, rc1: RowCol) extends WellSpec
@@ -106,71 +108,128 @@ object WellSpecParser extends JavaTokenParsers {
 	}
 	
 	def toString(lWell: List[Well2], ob: ObjBase, sep: String): String = {
-		lWell match {
-			case Nil => ""
-			case List(well) => well.id
-			case well0 :: rest =>
-				mergeVertical(lWell) match {
-					case Some(s) => s
-					case None =>
-						mergeHorizontal(lWell, ob) match {
-							case Some(s) => s
-							case None =>
-								lWell.map(_.id).mkString(sep)
-						}
-				}
+		// Split list by plate
+		def partitionByPlate(lWell: List[Well2], accR: List[List[Well2]]): List[List[Well2]] = {
+			lWell match {
+				case Nil => accR.reverse
+				case well0 :: _ =>
+					val (l0, rest) = {
+						// If this is a tube:
+						if (well0.indexName.isEmpty)
+							lWell.span(_.id == well0.id)
+						// If on the same plate
+						else
+							lWell.span(_.idPlate == well0.idPlate)
+					}
+					partitionByPlate(rest, l0 :: accR)
+			}
 		}
+		val llWell = partitionByPlate(lWell, Nil)
+		// For each group of sequential wells on a single plate:
+		llWell.map(lWell => {
+			lWell match {
+				case Nil => ""
+				case List(well) => well.id
+				case well0 :: _ =>
+					def step(lWell: List[Well2], accR: List[String]): List[String] = {
+						if (lWell.isEmpty)
+							accR.reverse
+						else {
+							val nV = mergeVerticalLen(lWell)
+							val nH = mergeHorizontalLen(lWell, ob)
+							val nR = mergeRepeatLen(lWell)
+							if (nV > 2) {
+								val (l0, rest) = lWell.splitAt(nV)
+								val s = mergeVerticalString(l0)
+								step(rest, s :: accR)
+							}
+							else if (nH > 2) {
+								val (l0, rest) = lWell.splitAt(nH)
+								val s = mergeHorizontalString(l0)
+								step(rest, s :: accR)
+							}
+							else if (nR > 1) {
+								val (l0, rest) = lWell.splitAt(nR)
+								val s = mergeRepeatString(l0)
+								step(rest, s :: accR)
+							}
+							else {
+								step(lWell.tail, lWell.head.indexName :: accR)
+							}
+						}
+					}
+					val sInner = step(lWell, Nil).mkString(sep)
+					if (well0.indexName.isEmpty)
+						well0.id+sInner
+					else
+						well0.idPlate+"("+sInner+")"
+			}
+		}).mkString(sep)
 	}
 	
-	private def mergeVertical(lWell: List[Well2]): Option[String] = {
-		def expect(idPlate: String, index: Int, l: List[Well2]): Boolean = {
+	private def mergeVerticalLen(lWell: List[Well2]): Int = {
+		def expect(idPlate: String, index: Int, l: List[Well2], acc: Int): Int = {
 			l match {
-				case Nil => true
+				case Nil => acc
 				case well :: rest =>
-					if (well.idPlate != idPlate || well.index != index) false
-					else expect(idPlate, index + 1, rest)
+					if (well.idPlate != idPlate || well.index != index) acc
+					else expect(idPlate, index + 1, rest, acc + 1)
 			}
 		}
 		
 		val well0 = lWell.head
-		if (expect(well0.idPlate, well0.index + 1, lWell.tail)) {
-			Some(well0.idPlate+"("+well0.indexName+" d "+lWell.last.indexName+")")
-		}
-		else
-			None
+		expect(well0.idPlate, well0.index + 1, lWell.tail, 1)
 	}
 	
-	private def mergeHorizontal(lWell: List[Well2], ob: ObjBase): Option[String] = {
-		def expect(l: List[Well2]): Boolean = {
+	private def mergeHorizontalLen(lWell: List[Well2], ob: ObjBase): Int = {
+		def expect(l: List[Well2], acc: Int): Int = {
 			l match {
-				case Nil => false
-				case x :: Nil => true
+				case Nil => acc
+				case x :: Nil => acc
 				case well0 :: well1 :: rest =>
-					if (well0.idPlate != well1.idPlate)
-						false
-					else if (well0.iRow == well1.iRow && well0.iCol + 1 == well1.iCol)
-						expect(l.tail)
-					else if (well0.iRow + 1 == well1.iRow && well1.iCol == 0) {
-						ob.findPlate(well0.idPlate) match {
-							case roboliq.core.Error(_) => false
-							case roboliq.core.Success(plate) =>
-								if (well0.iCol == plate.model.nCols - 1)
-									expect(l.tail)
-								else
-									false
+					val bContinue = {
+						if (well0.idPlate != well1.idPlate)
+							false
+						else if (well0.iRow == well1.iRow && well0.iCol + 1 == well1.iCol)
+							true
+						else if (well0.iRow + 1 == well1.iRow && well1.iCol == 0) {
+							ob.findPlate(well0.idPlate) match {
+								case roboliq.core.Error(_) => false
+								case roboliq.core.Success(plate) =>
+									if (well0.iCol == plate.model.nCols - 1)
+										true
+									else
+										false
+							}
 						}
+						else
+							false
 					}
-					else
-						false
+					if (!bContinue) acc
+					else expect(l.tail, acc + 1)
 			}
 		}
 		
-		if (expect(lWell)) {
-			val well0 = lWell.head
-			Some(well0.idPlate+"("+well0.indexName+" r "+lWell.last.indexName+")")
-		}
-		else
-			None
+		expect(lWell, 1)
+	}
+	
+	private def mergeRepeatLen(lWell: List[Well2]): Int = {
+		val well0 = lWell.head
+		lWell.tail.takeWhile(well => well.index == well0.index).length + 1
+	}
+	
+	private def mergeVerticalString(lWell: List[Well2]): String = {
+		lWell.head.indexName+" d "+lWell.last.indexName
+	}
+	
+	private def mergeHorizontalString(lWell: List[Well2]): String = {
+		val well0 = lWell.head
+		well0.indexName+" r "+lWell.last.indexName
+	}
+	
+	private def mergeRepeatString(lWell: List[Well2]): String = {
+		val well0 = lWell.head
+		well0.indexName+"*"+lWell.length
 	}
 	
 	/*

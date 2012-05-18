@@ -11,8 +11,8 @@ case class Expand1Resources(resources: List[NeedResource]) extends Expand1Result
 
 sealed abstract class Expand2Result
 case class Expand2Errors() extends Expand2Result
-case class Expand2Cmds(cmds: List[CmdBean], events: List[EventBean], doc: String) extends Expand2Result
-case class Expand2Tokens(cmds: List[CmdToken], events: List[EventBean], doc: String) extends Expand2Result
+case class Expand2Cmds(cmds: List[CmdBean], events: List[EventBean], doc: String, docMarkDown: String = null) extends Expand2Result
+case class Expand2Tokens(cmds: List[CmdToken], events: List[EventBean], doc: String, docMarkDown: String = null) extends Expand2Result
 
 abstract class CmdHandler {
 	/** Return true if this handler wants to process this given command */

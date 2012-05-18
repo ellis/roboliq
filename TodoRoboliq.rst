@@ -2,10 +2,22 @@
 Programming Tasks
 =================
 
-:Started: 2012-05-03
+:Started: 2012-05-18
 
-* Find out minimum volume for aspiration of the various labware
-* Pipette through the last script again using water, and measure amount of source wells used afterwards
+* Automatic doc strings
+
+  * add fields for single-line and multi-line doc strings
+  * add a Markdown docstring for multi-line docs
+  * for VesselContent, create single-line and multi-line doc strings too
+  * when listing liquids or wells in the short doc, list a maximum of 3 -- if there are more show first, elipsis, last
+  * when we have multiple volumes, don't list volume at all for short doc
+  * PipetteCmd: for long doc, make a table of src, dest, vol
+  * wells to string: a sequence of wells from the same plate should be in PLATE(...)
+  * wells to string: add ellipsis function
+
+* Create simpler pipetting methods
+* Make master mix
+* Get whole PCR command working again
 
 YAML
 ====

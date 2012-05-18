@@ -12,7 +12,10 @@ class CmdNodeBean {
 
 	@BeanProperty var index: String = null
 	@BeanProperty var command: CmdBean = null
+	/** Single line of plain text to document this command */
 	@BeanProperty var doc: String = null
+	/** Arbitrary length documentation in MarkDown format */
+	@BeanProperty var docMarkDown: String = null
 	@BeanProperty var errors: java.util.List[String] = null
 	@BeanProperty var warnings: java.util.List[String] = null
 	@BeanProperty var children: java.util.List[CmdNodeBean] = null

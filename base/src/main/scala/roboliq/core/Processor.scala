@@ -225,7 +225,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				//println("expand2: TIP1 state: "+builder.findTipState("TIP1").get)
 				handler.expand2(cmd, ctx, messages) match {
 					case Expand2Errors() =>
-					case Expand2Cmds(childCommands, events, doc) =>
+					case Expand2Cmds(childCommands, events, doc, docMarkDown) =>
 						node.doc = doc
 						if (!childCommands.isEmpty) {
 							node.childCommands = childCommands
@@ -236,7 +236,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 						if (!events.isEmpty) {
 							node.events = events
 						}
-					case Expand2Tokens(tokens, events, doc) =>
+					case Expand2Tokens(tokens, events, doc, docMarkDown) =>
 						node.doc = doc
 						if (!tokens.isEmpty)
 							node.tokens = tokens
