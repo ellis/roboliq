@@ -4,21 +4,25 @@ Programming Tasks
 
 :Started: 2012-05-18
 
-* Automatic doc strings
-
-  * add fields for single-line and multi-line doc strings
-  * add a Markdown docstring for multi-line docs
-  * for VesselContent, create single-line and multi-line doc strings too
-  * when listing liquids or wells in the short doc, list a maximum of 3 -- if there are more show first, elipsis, last
-  * when we have multiple volumes, don't list volume at all for short doc
-  * PipetteCmd: for long doc, make a table of src, dest, vol
-  * wells to string: a sequence of wells from the same plate should be in PLATE(...)
-  * wells to string: add ellipsis function
-  * give liquids display names (e.g., dntp => dNTP)
-
+* doc: add a Markdown docstring for multi-line docs
+* doc: for VesselContent, create single-line and multi-line doc strings too
+* doc: for VesselContent, multi-line doc strings should show concentrations
+* doc: when listing liquids or wells in the short doc, list a maximum of 3 -- if there are more show first, elipsis, last
+* doc: when we have multiple volumes, don't list volume at all for short doc
+* doc: PipetteCmd: for long doc, make a table of src, dest, vol
+* doc: wells to string: a sequence of wells from the same plate should be in PLATE(...)
+* doc: wells to string: add ellipsis function
+* doc: give liquids display names (e.g., dntp => dNTP)
+* debug why final well volume in is 29.997 instead of 30
+* doc: round numbers to 3 significant digits
 * Create simpler pipetting methods
 * Make master mix
 * Get whole PCR command working again
+
+Done:
+
+* doc: add fields for single-line and multi-line doc strings
+
 
 YAML
 ====

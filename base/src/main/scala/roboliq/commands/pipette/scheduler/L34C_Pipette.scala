@@ -60,22 +60,50 @@ case class L3C_Pipette(args: L3A_PipetteArgs) {
 				step(llSrc, Nil)
 		}
 		
-		val sLiquids = {
-			val lsLiquid = srcs.toList.flatMap(_.map(_.wellState(states).map(_.liquid.sName).getOrElse("ERROR")))
-			val lsLiquid2 = lsLiquid.distinct
-			if (lsLiquid2.isEmpty)
-				""
-			else if (lsLiquid2.size == 1)
-				" of "+lsLiquid2.head
-			else
-				" of "+Printer.getSeqDebugString(lsLiquid2)
+		val lLiquid = lSrc0.toList.flatMap(_.wellState(states).map(_.liquid).toOption)
+		val liquid_? : Option[Liquid] = {
+			lLiquid.distinct match {
+				case liquid :: Nil => Some(liquid)
+				case _ => None
+			}
 		}
+		
+		val sLiquids_? = liquid_? match {
+			case Some(liquid) => Some(liquid.sName)
+			case _ =>
+				val lsLiquid = lLiquid.map(_.sName)
+				val lsLiquid2 = lsLiquid.distinct
+				if (lsLiquid2.isEmpty)
+					None
+				else {
+					val sLiquids = {
+						if (lsLiquid2.size <= 3)
+							lsLiquid2.mkString(", ")
+						else
+							List(lsLiquid2.head, "...", lsLiquid2.last).mkString(", ")
+					}
+					Some(sLiquids)
+				}
+		}
+		
+		val lVolume = args.items.map(_.nVolume)
+		val volume_? : Option[LiquidVolume] = lVolume.distinct match {
+			case volume :: Nil => Some(volume)
+			case _ => None
+		}
+		val sVolumes_? = volume_? match {
+			case Some(volume) => Some(volume.toString())
+			case _ => None
+		}
+
+		val sVolumesAndLiquids = List(sVolumes_?, sLiquids_?).flatten.mkString(" of ")
 		
 		val sDests = getWellsString(args.items.map(_.dest))
 				//Printer.getWellsDebugString(args.items.map(_.dest))
 		val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
 		
-		("Pipette "+sVolumes+sLiquids+" from "+sSrcs+" to "+sDests, null)
+		val doc = List("Pipette", sVolumesAndLiquids, "from", sSrcs, "to", sDests).filterNot(_.isEmpty).mkString(" ") 
+		(doc, null)
 	}
 }
 
