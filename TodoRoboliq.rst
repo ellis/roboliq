@@ -68,6 +68,8 @@ Soon
 * ``Rack``: create Holder, Vessle, Rack, and other concepts defined in the Glossary
 * ``Bean`` and ``CmdBean``: refactor classes so that Bean has CmdBean's toString but no _id, and add a class BeanWithId
 * ``Liquid``: make this more like VesselContents, just wit volume
+* ``Liquid``: can ``id`` be made into a ``val`` now instead of a ``var``?
+* ``Liquid``: can I get rid of ``def +`` in favor of ``VesselContent.+``?
 
 Done:
 

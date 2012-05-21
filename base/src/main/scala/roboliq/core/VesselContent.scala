@@ -2,6 +2,7 @@ package roboliq.core
 
 import scalaz._
 import Scalaz._
+import java.text.DecimalFormat
 
 //import scala.collection
 
@@ -12,6 +13,7 @@ class VesselContent(
 ) {
 	val volume = mapSolventToVolume.values.foldLeft(LiquidVolume.empty){(acc,v) => acc + v}
 	val liquid = createLiquid()
+	val docContent = createDocContent()
 	
 	private def createLiquid(): Liquid = {
 		// Volume of solvents
@@ -21,8 +23,8 @@ class VesselContent(
 			val nSolvents = mapSolventToVolume.size
 			val nSolutes = mapSoluteToMol.size
 			
-			// Construct liquid name
-			val sName: String = {
+			// Construct liquid id
+			val id: String = {
 				if (nSolutes == 1)
 					mapSoluteToMol.head._1.id
 				else if (nSolutes == 0 && nSolvents == 1)
@@ -91,12 +93,52 @@ class VesselContent(
 			}
 			
 			new Liquid(
-				id = sName,
+				id = id,
+				None,
 				sFamily = physicalProperties.toString,
 				contaminants = Set(),
 				group = new LiquidGroup(cleanPolicy),
 				multipipetteThreshold = if (bCanMultipipette) 0 else 1
 			)
+		}
+	}
+	
+	private def createDocContent(): Doc = {
+		// List of solvents in order of decreasing volume
+		val lSolvent: List[SubstanceLiquid] = mapSolventToVolume.toList.sortBy(-_._2.nl).map(_._1)
+		// List of solutes in order of decreasing mol
+		val lSolute: List[Substance] = mapSoluteToMol.toList.sortBy(-_._2).map(_._1)
+		
+		// Empty
+		if (mapSolventToVolume.isEmpty && mapSoluteToMol.isEmpty)
+			new Doc(None, None, None)
+		// Only solutes
+		else {
+			val sVol = {
+				if (mapSolventToVolume.isEmpty) ""
+				else volume.toString+" "
+			}
+			
+			val lsSolvent = lSolvent.map(sub => sub.id+"("+mapSolventToVolume(sub)+")")
+			val lsSolute = lSolute map { sub =>
+				val fmt = new DecimalFormat("0.##E0")
+				val nMol = mapSoluteToMol(sub)
+				val sMol = fmt.format(nMol.toDouble)
+				sub.id+"("++sMol++" mol)" 
+			}
+			val lsSubstance = (lsSolvent ++ lsSolute)
+			
+			val idLiquid = lsSubstance mkString "+"
+			val sLiquidName_? =
+				if (mapSolventToVolume.size + mapSoluteToMol.size == 1) Some(idLiquid)
+				else None
+			
+			val sContentPlainShort_? = sLiquidName_?.map(sVol + _)
+			val sContentMdLong_? = {
+				Some((sVol :: lsSubstance) mkString "\n")
+			}
+			
+			new Doc(sContentPlainShort_?, sContentPlainShort_?, sContentMdLong_?)
 		}
 	}
 	

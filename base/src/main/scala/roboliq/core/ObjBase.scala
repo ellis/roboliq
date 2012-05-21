@@ -125,6 +125,7 @@ class ObjBase(bb: BeanBase) {
 					case Success(substance: SubstanceLiquid) =>
 						Success(new Liquid(
 							id = id,
+							sName_? = Some(id),
 							sFamily = substance.physicalProperties.toString,
 							contaminants = Set(),
 							group = new LiquidGroup(substance.cleanPolicy),

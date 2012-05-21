@@ -175,7 +175,7 @@ class EvowareDoc {
 				html.tagMake("th", Map(), "Final")
 			html.tagPop()
 			def getContentString(content: VesselContent): String = {
-				content.liquid.id + " " + content.volume
+				content.docContent.mdLong_?.getOrElse("")
 			}
 			for (well <- lPlateWell) {
 				html.tagPush("tr")
