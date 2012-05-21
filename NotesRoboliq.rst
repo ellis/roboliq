@@ -207,6 +207,36 @@ Multipipetting
 Multipipetting requires our robot to aspirate additional liquid beyond what actually gets dispensed.  This waste is sometimes not permissible.
 
 
+Doc generation
+==============
+
+:Date: 2012-05-21
+
+When generating documentation, we need to accommodate two distinct requirements:
+1. a single line of plain text documentation
+2. short markdown documentation that is probably only one line long
+3. more detailed markdown documentation that may extend over multiple lines
+
+For that purpose, various components of roboliq will need to supply or generate the following:
+1. Names in plain text
+2. Names in markdown
+3. Single lines of plain text
+4. Multiple lines in markdown
+
+``Liquid`` names
+----------------
+
+The ``Liquid`` class has the following properties that are related to documentation.
+
+:``id``:
+  A string ID which uniquely identifies the liquid's type.
+  Two liquid objects with the same ID can be treated as equivalent.
+:``nameShort_?``:
+  An optional human-friendly name for the liquid.
+:``doc``:
+  A Markdown 
+
+
 Glossary
 ========
 

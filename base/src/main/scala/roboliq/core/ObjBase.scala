@@ -124,7 +124,7 @@ class ObjBase(bb: BeanBase) {
 					case Error(ls) => Error(ls)
 					case Success(substance: SubstanceLiquid) =>
 						Success(new Liquid(
-							sName = id,
+							id = id,
 							sFamily = substance.physicalProperties.toString,
 							contaminants = Set(),
 							group = new LiquidGroup(substance.cleanPolicy),

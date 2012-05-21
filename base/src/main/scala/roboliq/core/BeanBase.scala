@@ -5,6 +5,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.LinkedHashMap
 
+/**
+ * A database for beans read in from YAML
+ */
 class BeanBase {
 	private var m_lDevice: List[DeviceBean] = Nil
 	private var m_lCmdHandler: List[CmdHandler] = Nil

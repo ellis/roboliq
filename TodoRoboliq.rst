@@ -8,9 +8,7 @@ Programming Tasks
 * doc: for VesselContent, create single-line and multi-line doc strings too
 * doc: for VesselContent, multi-line doc strings should show concentrations
 * doc: when listing liquids or wells in the short doc, list a maximum of 3 -- if there are more show first, elipsis, last
-* doc: when we have multiple volumes, don't list volume at all for short doc
 * doc: PipetteCmd: for long doc, make a table of src, dest, vol
-* doc: wells to string: a sequence of wells from the same plate should be in PLATE(...)
 * doc: wells to string: add ellipsis function
 * doc: give liquids display names (e.g., dntp => dNTP)
 * debug why final well volume in is 29.997 instead of 30
@@ -21,7 +19,9 @@ Programming Tasks
 
 Done:
 
+* doc: when we have multiple volumes, don't list volume at all for short doc
 * doc: add fields for single-line and multi-line doc strings
+* doc: wells to string: a sequence of wells from the same plate should be in PLATE(...)
 
 
 YAML
@@ -66,6 +66,13 @@ Soon
 * ``Processor``: don't select plate locations unless we have a specific robot
 * ``RoboliqYamlBean``: move ``locations`` property to an Evoware bean
 * ``Rack``: create Holder, Vessle, Rack, and other concepts defined in the Glossary
+* ``Bean`` and ``CmdBean``: refactor classes so that Bean has CmdBean's toString but no _id, and add a class BeanWithId
+* ``Liquid``: make this more like VesselContents, just wit volume
+
+Done:
+
+* ``Liquid``: rename sName to id
+
 
 Intermediate
 ------------

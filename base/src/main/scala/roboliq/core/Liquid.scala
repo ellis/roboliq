@@ -65,7 +65,7 @@ class LiquidGroup(
 )
 
 class Liquid(
-	var sName: String,
+	var id: String,
 	val sFamily: String,
 	val contaminants: Set[Contaminant.Value],
 	val group: LiquidGroup,
@@ -90,8 +90,8 @@ class Liquid(
 		else if (other eq Liquid.empty)
 			this
 		else {
-			assert(sName != other.sName)
-			val sName2 = sName+":"+other.sName
+			assert(id != other.id)
+			val sName2 = id+":"+other.id
 			val group2 = {
 				if (group.eq(other.group)) {
 					group
@@ -111,19 +111,19 @@ class Liquid(
 	}
 	
 	def setGroup(group: LiquidGroup): Liquid = {
-		new Liquid(sName, sFamily, contaminants, group, multipipetteThreshold)
+		new Liquid(id, sFamily, contaminants, group, multipipetteThreshold)
 	}
 	
-	def getName() = if (sName == null) "<unnamed>" else sName
+	def getName() = if (id == null) "<unnamed>" else id
 	
 	override def toString = getName()
 	override def equals(that: Any): Boolean = {
 		that match {
-			case b: Liquid => sName == b.sName
+			case b: Liquid => id == b.id
 			case _ => assert(false); false
 		}
 	}
-	override def hashCode() = sName.hashCode()
+	override def hashCode() = id.hashCode()
 }
 
 object Liquid {

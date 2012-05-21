@@ -91,7 +91,7 @@ class VesselContent(
 			}
 			
 			new Liquid(
-				sName = sName,
+				id = sName,
 				sFamily = physicalProperties.toString,
 				contaminants = Set(),
 				group = new LiquidGroup(cleanPolicy),

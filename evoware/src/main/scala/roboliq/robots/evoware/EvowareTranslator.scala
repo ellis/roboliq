@@ -161,7 +161,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			item.well.wellState(states0) match {
 				case Error(ls) => return Error(ls)
 				case Success(state) =>
-					val sLiquid = state.content.liquid.sName
+					val sLiquid = state.content.liquid.id
 					val mapWellToAspirated = builder.state.mapLiquidToWellToAspirated.getOrElse(sLiquid, new HashMap())
 					val vol0 = mapWellToAspirated.getOrElseUpdate(item.well.id, LiquidVolume.empty)
 					mapWellToAspirated(item.well.id) = vol0 + item.volume

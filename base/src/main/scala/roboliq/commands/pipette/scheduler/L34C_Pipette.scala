@@ -69,9 +69,9 @@ case class L3C_Pipette(args: L3A_PipetteArgs) {
 		}
 		
 		val sLiquids_? = liquid_? match {
-			case Some(liquid) => Some(liquid.sName)
+			case Some(liquid) => Some(liquid.id)
 			case _ =>
-				val lsLiquid = lLiquid.map(_.sName)
+				val lsLiquid = lLiquid.map(_.id)
 				val lsLiquid2 = lsLiquid.distinct
 				if (lsLiquid2.isEmpty)
 					None
