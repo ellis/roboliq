@@ -1,3 +1,15 @@
+* Pipette into single well (check for bleed)
+* Dilution in one row (check for bleed and linearity)
+
+1:10000 is the highest concentration
+That can be further diluted 1:10000
+
+will use a buffer as solvent, diluted perhaps 1:20
+Excite at 460, Read out at ~540, with the monochormator
+
+Use upper reader
+
+
 =================
 Programming Tasks
 =================
