@@ -1,5 +1,5 @@
 <projectDescription>
-  <name>roboliq-A1-base</name>
+  <name>base</name>
   <buildSpec>
     <buildCommand>
       <name>org.scala-ide.sdt.core.scalabuilder</name>

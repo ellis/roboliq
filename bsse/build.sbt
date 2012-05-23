@@ -1,4 +1,4 @@
-name := "roboliq-C-bsse"
+name := "bsse"
 
 version := "1.0"
 
