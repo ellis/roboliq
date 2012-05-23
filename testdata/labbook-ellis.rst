@@ -176,3 +176,78 @@ The results are not entirely satisfying.
 Some of the divergences are surely due to my amateur pipetting skills, but I suspect that some of them might be genuine divergences.
 
 
+Fluorescence measurements on PCR plates
+=======================================
+
+date: 2012-05-23
+time: 9:00 - 11:30
+files: TempEllisFluor1Dilute1000.esc, Ellis-20120521a.mdfx
+
+We want to investigate the use of a particular fluorescent substance.
+We also want to investigate the properties of our PCR plates for use in the reader.
+
+Names:
+
+:FlA: the fluorescent substance we used
+:Buf: the buffer we used
+:P1: Deep well plate for FlA dilutions
+:P2: PCR plate running the readouts on.
+
+*FlA* has pH requirements, for which we used some buffer *Buf* and diluted it 1:20.
+Fabian indicated that the minimum dilution for *FlA* is 1:10000, and the max is 1:100,000,000.
+Excite at 460, read out at ~540, with the monochromator.
+
+I prepared the *FlA* dilution as follows:
+
+* Used a deep well plate *P1*.
+* All pipetting actions were done in single-pipetting mode.
+* Dispensed 25ul of the buffer into A01 an B01.
+* Dispensed 5ul of FlA into A01.
+* Add 470ul of water to A01 for a total volume of 500ul and fluorescent dilution of 1:100.
+* Mix A01 4x370ul.
+* Transfer 5ul from A01 to B01.
+* Add 470ul of water to B01 for a total volume of 500ul and fluorescent dilution of 1:10000.
+
+I then transferred the 1:10000 dilution to *P2* at volumes of 20ul, 10ul, and 5ul.
+The PCR plate was prepared as follows:
+
+* All pipetting actions were done in single-pipetting mode.
+* Transfer 20ul from P1(B01) to P2(C03)
+* Transfer 10ul from P1(B01) to P2(C06)
+* Transfer 5ul from P1(B01) to P2(C09)
+
+The readout program is specified in ``Ellis-20120521a.mdfx`` and the readout values can be found in ``Ellis-20120521a.xlsx``.
+
+
+date: 2012-05-23
+time: 14:15 - 15:15
+files: TempEllisFluor2DiluteSeries.esc, Ellis-20120521b.mdfx
+
+Create dilution series of *FlA* and measure fluorescence in the reader.
+Each column will contain 1/2 the *FlA* concentration as the previous column, except for the last two columns which have the same concentration.
+
+* Mix 950ul water and 50ul buffer into P1(D01) to create buffer 1:20 solution
+* Dispense 50ul buffer(1:20) into P2(F02 r F11)
+* Dispense 50ul *FlA* into P2(F01, F02)
+* Transfer 50ul and mix from P2(F02) to P2(F03), then 3 to 4, then 4 to 5, ..., then 11 to 12.
+
+Output not good.  Here are the values using a single flash per well.
+
+====  =====
+Well  Value
+====  =====
+F01   OVER
+F02   OVER
+F03   45981
+F04   26783
+F05   19659
+F06   14250
+F07   11447
+F08   11950
+F09   14165
+F10   12126
+F11    8652
+F12   10932
+====  =====
+
+I remeasured with 5 flashes and got essentially the same readout.
