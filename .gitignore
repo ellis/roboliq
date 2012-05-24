@@ -1,16 +1,19 @@
 *~
 *.swp
-.cache
 *.esc
-locations.txt
 # sbt
-target
+target/
 project/boot/
-.history
 # Eclipse
-.scala_dependencies
-PipetteScheduler.txt
-TodoRoboliq.pdf
-org.scala-ide.sdt.core.prefs
+.metadata
 .classpath
+.project
+.scala_dependencies
+org.scala-ide.sdt.core.prefs
+# Other
+.cache
+.history
+PipetteScheduler.txt
+locations.txt
+TodoRoboliq.pdf
 NotesRoboliq.pdf
