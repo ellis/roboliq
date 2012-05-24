@@ -110,7 +110,7 @@ class VesselContent(
 		val lSolute: List[Substance] = mapSoluteToMol.toList.sortBy(-_._2).map(_._1)
 		
 		// Empty
-		if (mapSolventToVolume.isEmpty && mapSoluteToMol.isEmpty)
+		if (volume.isEmpty)
 			new Doc(None, None, None)
 		// Only solutes
 		else {
@@ -120,22 +120,25 @@ class VesselContent(
 			}
 			
 			val lsSolvent = lSolvent.map(sub => sub.id+"("+mapSolventToVolume(sub)+")")
-			val lsSolute = lSolute map { sub =>
-				val fmt = new DecimalFormat("0.##E0")
+			val (lsSolutePlain, lsSoluteMd) = (lSolute map { sub =>
+				val fmt = new DecimalFormat("0.00E0")
 				val nMol = mapSoluteToMol(sub)
-				val sMol = fmt.format(nMol.toDouble)
-				sub.id+"("++sMol++" mol)" 
-			}
-			val lsSubstance = (lsSolvent ++ lsSolute)
+				val nM = nMol / volume.l
+				val sMPlain = fmt.format(nM.toDouble)//.replace("E", "E^")+"^"
+				val sMMd = sMPlain.replace("E", "E^")+"^"
+				(sub.id+"("++sMPlain++" M)", sub.id.replace("_", "\\_")+"("++sMMd++" M)") 
+			}).unzip
+			val lsSubstancePlain = (lsSolvent ++ lsSolutePlain)
+			val lsSubstanceMd = (lsSolvent ++ lsSoluteMd)
 			
-			val idLiquid = lsSubstance mkString "+"
+			val idLiquid = lsSubstancePlain mkString "+"
 			val sLiquidName_? =
 				if (mapSolventToVolume.size + mapSoluteToMol.size == 1) Some(idLiquid)
 				else None
 			
 			val sContentPlainShort_? = sLiquidName_?.map(sVol + _)
 			val sContentMdLong_? = {
-				Some((sVol :: lsSubstance) mkString "\n")
+				Some((sVol :: lsSubstanceMd) mkString "  \n")
 			}
 			
 			new Doc(sContentPlainShort_?, sContentPlainShort_?, sContentMdLong_?)

@@ -1,4 +1,4 @@
-name := "roboliq-B-evoware"
+name := "evoware"
 
 version := "1.0"
 

@@ -1,4 +1,4 @@
-name := "roboliq-A1-base"
+name := "base"
 
 version := "1.0"
 

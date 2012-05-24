@@ -1,3 +1,9 @@
+scala> com.github.rjeschke.txtmark.Processor.process("2^2^ = 4")
+res2: java.lang.String = 
+"<p>2^2^ = 4</p>
+"
+
+
 * Pipette into single well (check for bleed)
 * Dilution in one row (check for bleed and linearity)
 

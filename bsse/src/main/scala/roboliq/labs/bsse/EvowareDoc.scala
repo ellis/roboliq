@@ -6,6 +6,8 @@ import java.io.PrintWriter
 import scala.collection.JavaConversions._
 import scala.collection.mutable.Stack
 
+import com.github.rjeschke.txtmark
+
 import roboliq.core._
 import roboliq.robots.evoware.EvowareScript
 import roboliq.utils.FileUtils
@@ -175,7 +177,7 @@ class EvowareDoc {
 				html.tagMake("th", Map(), "Final")
 			html.tagPop()
 			def getContentString(content: VesselContent): String = {
-				content.docContent.mdLong_?.getOrElse("")
+				content.docContent.mdLong_?.map(txtmark.Processor.process).getOrElse("")
 			}
 			for (well <- lPlateWell) {
 				html.tagPush("tr")
