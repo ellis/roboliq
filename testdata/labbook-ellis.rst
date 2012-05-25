@@ -251,3 +251,18 @@ F12   10932
 ====  =====
 
 I remeasured with 5 flashes and got essentially the same readout.
+
+date: 2012-05-24
+
+Reran the above pipetting using a white plate.
+Haven't run it through the reader yet because it needs an adapter first.
+
+date: 2012-05-24
+files: TempEllisFluor3DiluteSeries.esc
+
+Want to run the above experiments again with a black flat-well plate.
+However, I need to reprogram the script because a) the plate must be at a different location, b) either liquid detection or z-offset is wrong, so mixing doesn't work, c) we need larger volumes.
+
+* Mix Buf(1/20)
+* Mix Buf(1/20)+FlA(1/10000)
+* Mix 

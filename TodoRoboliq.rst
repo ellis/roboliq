@@ -14,6 +14,9 @@ will use a buffer as solvent, diluted perhaps 1:20
 Excite at 460, Read out at ~540, with the monochormator
 
 Use upper reader
+Reader:
+Black plate: Nunclon 96 Flat White
+
 
 
 =================
@@ -40,6 +43,19 @@ Done:
 * doc: when we have multiple volumes, don't list volume at all for short doc
 * doc: add fields for single-line and multi-line doc strings
 * doc: wells to string: a sequence of wells from the same plate should be in PLATE(...)
+
+
+Declarative Liquid Preparation
+==============================
+
+:Started: 2012-05-24
+
+I'd like to have a declarative approach to preparing liquids.
+The user specified the final liquid, and roboliq figures out everything else.
+
+liquid: FlorA(1/10000)+BufferA(1/20)
+volume: 50ul
+well: P2(F01)
 
 
 YAML
