@@ -53,9 +53,28 @@ Declarative Liquid Preparation
 I'd like to have a declarative approach to preparing liquids.
 The user specified the final liquid, and roboliq figures out everything else.
 
-liquid: FlorA(1/10000)+BufferA(1/20)
-volume: 50ul
-well: P2(F01)
+Example
+-------
+
+diluents:
+- liquid: FlorA
+  diluent: BufferA(1/20)
+
+preparations:
+- liquid: FlorA(1/10000)
+  volume: 50ul
+  well: P2(F01)
+
+We have FlorA stock and BufferA stock.
+In P2(F01) we need 47.495ul water, 2.5ul BufferA, 0.005ul FlorA
+The smallest volume we can use is 0.5ul, so we need to create an intermediate sample of diluted FlorA_a.
+So FlorA_a must have concentration of at most 0.5*C_a/50 = 1/10000 => C_a = 1/100
+
+Simplest Approach
+-----------------
+
+* Every mixture which isn't available as stock will be prepared in a temporary well
+* 
 
 
 YAML
