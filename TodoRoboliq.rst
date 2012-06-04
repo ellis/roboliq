@@ -1,8 +1,5 @@
-scala> com.github.rjeschke.txtmark.Processor.process("2^2^ = 4")
-res2: java.lang.String = 
-"<p>2^2^ = 4</p>
-"
 
+http://netbeanside61.blogspot.com/2011/06/downloading-openjdk7-binary-for-mac-os.html
 
 * Pipette into single well (check for bleed)
 * Dilution in one row (check for bleed and linearity)
