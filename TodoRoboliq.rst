@@ -109,6 +109,61 @@ D2  x   x   x
 
 Then... somehow choose which mixtures to make.  Might be an iterative process.
 
+Another approach
+----------------
+
+First choose a set of sources which is independent in their contents substances.
+This might get rid of some mixtures and some dilutions.
+
+Sources
+~~~~~~~
+S1: A
+S2: AB(20)
+S3: AC(1m)
+S4: AD(1M)
+
+Dests
+~~~~~
+D1: 100ul AB(100)C(0.1M)
+D2: 100ul AB(100)D(0.1M)
+
+Dest Contents
+~~~~~~~~~~~~~
+
+Sort contents with smallest volumes first, because those are the ones which could benefit most from cominations (has a higher impact on homogeneity).
+
+D1: 10ul S3, 20ul S2, 70ul S1
+D2: 10ul S4, 20ul S2, 70ul S1
+
+Combos 2
+~~~~~~~~
+D1:
+  S23(2:1)
+  S13(7:1)
+  S12(7:2)
+D2:
+  S24(2:1)
+  S14(7:1)
+  S12(7:2)
+
+Combo Counts 2
+~~~~~~~~~~~~~~
+
+S12(7:2) = 2
+
+Conclusion
+~~~~~~~~~~
+
+Create temporary well S12(7:2) and use it for the appropriate destinations.
+
+
+More complex example
+--------------------
+
+
+
+
+
 Simplest Approach
 -----------------
 
