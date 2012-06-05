@@ -67,11 +67,51 @@ In P2(F01) we need 47.495ul water, 2.5ul BufferA, 0.005ul FlorA
 The smallest volume we can use is 0.5ul, so we need to create an intermediate sample of diluted FlorA_a.
 So FlorA_a must have concentration of at most 0.5*C_a/50 = 1/10000 => C_a = 1/100
 
+Basic scenarios to test
+-----------------------
+
+===  ===  ===  ===  ===  ===  ===
+D1   D2   D3   S1   S2   S3   S4
+===  ===  ===  ===  ===  ===  ===
+AB   AB        A    B
+AB   ABC       A    B    C
+AB   ABC       A    AB   AC
+ABC  ABD       A    B    C    D
+ABC  ABD       A    AB   AC   AD
+ABC  ABD  ACD  A    B    C    D
+===  ===  ===  ===  ===  ===  ===
+
+Also test the dilution scenario described above, as well as other dilution requirements.
+
+Step-through
+~~~~~~~~~~~~
+
+Initial analysis of source well occurance in destination wells, sorted by frequency (in this case frequencies are all the same):
+
+==  ==  ==
+D   S1  S2
+==  ==  ==
+D1  x   x
+D2  x   x
+    2   2
+==  ==  ==
+
+
+Pairwise combinations and their frequencies:
+
+==  ==  ==  ===
+D   S1  S2  S12
+==  ==  ==  ===
+D1  x   x   x
+D2  x   x   x
+    2   2   2
+==  ==  ==  ===
+
+Then... somehow choose which mixtures to make.  Might be an iterative process.
+
 Simplest Approach
 -----------------
 
-* Every mixture which isn't available as stock will be prepared in a temporary well
-* 
 
 
 YAML
