@@ -83,47 +83,23 @@ ABC  ABD  ACD  A    B    C    D
 
 Also test the dilution scenario described above, as well as other dilution requirements.
 
-Step-through
-~~~~~~~~~~~~
-
-Initial analysis of source well occurance in destination wells, sorted by frequency (in this case frequencies are all the same):
-
-==  ==  ==
-D   S1  S2
-==  ==  ==
-D1  x   x
-D2  x   x
-    2   2
-==  ==  ==
-
-
-Pairwise combinations and their frequencies:
-
-==  ==  ==  ===
-D   S1  S2  S12
-==  ==  ==  ===
-D1  x   x   x
-D2  x   x   x
-    2   2   2
-==  ==  ==  ===
-
-Then... somehow choose which mixtures to make.  Might be an iterative process.
-
-Another approach
-----------------
+Approach by example
+-------------------
 
 First choose a set of sources which is independent in their contents substances.
 This might get rid of some mixtures and some dilutions.
 
 Sources
 ~~~~~~~
+
 S1: A
 S2: AB(20)
-S3: AC(1m)
+S3: AC(1M)
 S4: AD(1M)
 
 Dests
 ~~~~~
+
 D1: 100ul AB(100)C(0.1M)
 D2: 100ul AB(100)D(0.1M)
 
@@ -137,6 +113,7 @@ D2: 10ul S4, 20ul S2, 70ul S1
 
 Combos 2
 ~~~~~~~~
+
 D1:
   S23(2:1)
   S13(7:1)
@@ -157,16 +134,96 @@ Conclusion
 Create temporary well S12(7:2) and use it for the appropriate destinations.
 
 
-More complex example
---------------------
+Another example
+---------------
 
+Sources
+~~~~~~~
 
+Need to start with a list of linearly independent sources, or at lease choose a set of linearly independent sources for each destination.
 
+S1: A
+S2: AB(20)
+S3: AC(1M)
+S4: AD(1M)
+S5: AE(1M)
 
+Dests
+~~~~~
 
-Simplest Approach
------------------
+D1: 100ul AB(100)C(0.1M)D(0.1M)
+D2: 100ul AB(100)C(0.1M)E(0.1M)
 
+Dest Contents
+~~~~~~~~~~~~~
+
+Sort contents with smallest volumes first, because those are the ones which could benefit most from cominations (has a higher impact on homogeneity).
+
+D1:
+  S3 10ul
+  S4 10ul
+  S2 20ul
+  S1 60ul
+D2: 10ul S3, 10ul S5, 20ul S2, 60ul S1
+
+Combos 2
+~~~~~~~~
+
+D1:
+  S34(1:1)
+  S32(1:2)
+  S31(1:6)
+  S42(1:2)
+  S41(1:6)
+  S21(2:6)
+D2:
+  S35(1:1)
+  S32(1:2)
+  S31(1:6)
+  S52(1:2)
+  S51(1:6)
+  S21(2:6)
+
+Combo Counts 2
+~~~~~~~~~~~~~~
+
+S32(1:2) = 2
+S31(1:6) = 2
+S21(2:6) = 2
+
+Combos 3
+~~~~~~~~
+
+D1:
+  S321(1:2:6)
+D2:
+  S321(1:2:6)
+
+Combo Counts 3
+~~~~~~~~~~~~~~
+
+S321(1:2:6) = 2
+
+Decide on pipetting strategy for dests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Check the combos in this order for dispense into destinations:
+  S321(1:2:6)
+  S32(1:2)
+  S31(1:6)
+  S21(2:6)
+
+D1: (sorted by volume descending)
+  S321(1:2:6) 90ul
+  S4 10ul
+
+Then go through the combos and decide on order for dispense from original sources and smaller combos in the same manner as for the dests.
+
+Minimal volume check
+~~~~~~~~~~~~~~~~~~~~
+
+Now check all dispensed volumes to see whether they are larger than the minimum allowed volume.
+If any are too small, dilute the releveant source well (may be a source or a combo) somehow and rerun part or all of the calculation with the new dilution.
 
 
 YAML
