@@ -97,6 +97,12 @@ Limitations
 
 * Tube locations must be determined prior to execution of the script, and we assume that they will not be moved later on [2012-04-09]
 
+Liquid Preparation
+==================
+
+* insufficient volumes
+* could not generate the requested concentrations
+
 Pipetting Algorithms
 ====================
 
