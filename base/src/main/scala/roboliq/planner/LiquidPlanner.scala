@@ -21,7 +21,7 @@ case class Step(
 	src_n: Int,
 	dst_n: Int,
 	temp_m: Map[Int, Map[Int, Double]],
-	dst_l: List[DestX]
+	dst_l: List[DestX] // change this to a map and then update dst_l on line 201
 )
 
 
