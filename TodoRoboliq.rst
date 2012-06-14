@@ -157,7 +157,7 @@ D2: 100ul AB(100)C(0.1M)E(0.1M)
 Dest Contents
 ~~~~~~~~~~~~~
 
-Sort contents with smallest volumes first, because those are the ones which could benefit most from cominations (has a higher impact on homogeneity).
+Sort contents with smallest volumes first, because those are the ones which could benefit most from combinations (has a higher impact on homogeneity).
 
 D1:
   S3 10ul

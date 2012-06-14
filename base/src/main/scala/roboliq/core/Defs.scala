@@ -66,6 +66,7 @@ class LiquidVolume private (val _nl: Int) {
 /** Factory for [[roboliq.protocol.LiquidVolume]] */
 object LiquidVolume {// extends Semigroup[LiquidVolume] {
 	def nl(n: Int): LiquidVolume = new LiquidVolume(n)
+	def nl(n: BigDecimal): LiquidVolume = new LiquidVolume(n.toInt)
 	def ul(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000).toInt)
 	def ml(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000000).toInt)
 	def l(n: BigDecimal): LiquidVolume = new LiquidVolume((n * 1000000000).toInt)
