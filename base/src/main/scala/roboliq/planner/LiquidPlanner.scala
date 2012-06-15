@@ -21,7 +21,7 @@ case class Step(
 	src_n: Int,
 	dst_n: Int,
 	temp_m: Map[Int, Map[Int, Double]],
-	dst_l: List[DestX] // change this to a map and then update dst_l on line 201
+	dst_m: Map[Int, DestX]
 )
 
 
@@ -92,7 +92,7 @@ object Combo {
 		
 		// Get the proportion of src to prior combo for each destination
 		val ℓp1 = ci.ℓχdst map { χdst =>
-			val dst = step.dst_l(χdst)
+			val dst = step.dst_m(χdst)
 			val vol_m = dst.vol_m
 			// Volume of initial combo
 			val vol0 = (ci.combo.ℓχsrc map vol_m).foldLeft(0.0)(_ + _)
@@ -165,11 +165,12 @@ class LiquidPlanner {
 		val src_n = mixture_l.head.size
 		val dst_n = mixture_l.size
 		val src_li = (0 until src_n).toList
-		val x_l = mixture_l.zipWithIndex map { pair =>
+		val dst_l = mixture_l.zipWithIndex map { pair =>
 			val volToSrc = pair._1.zipWithIndex filter (_._1 > 0)
 			DestX(pair._2, volToSrc map (_._2), volToSrc map (_.swap) toMap)
 		}
-		Step(src_n, dst_n, Map(), x_l)
+		val dst_m = dst_l.map(x => x.dst_i -> x).toMap
+		Step(src_n, dst_n, Map(), dst_m)
 	}
 	
 	def createStep0(src_l: List[VesselContent], dst_l: List[VesselContent]): Step = {
@@ -178,8 +179,7 @@ class LiquidPlanner {
 	}
 
 	def advance(step: Step): Option[Step] = {
-		val dst_n = step.dst_l.size
-		val ci0 = ComboInfo(Combo(Nil, Nil), (0 until dst_n).toList)
+		val ci0 = ComboInfo(Combo(Nil, Nil), (0 until step.dst_n).toList)
 		val src_li = (0 until step.src_n).toList
 		
 		def add(ci: ComboInfo, step: Step)(χsrc: Int): List[ComboInfo] = {
@@ -198,10 +198,25 @@ class LiquidPlanner {
 		combo2_l match {
 			case Nil => None
 			case combo :: _ =>
-				val dst_l = combo.ℓχdst
+				// Index of new intermediate mixture
+				val temp_i = step.src_n
+				// Update the DestX entries in step.dst_m which use the current combo 
+				val dst_m = step.dst_m ++ combo.ℓχdst.map(dst_i => {
+					val x = step.dst_m(dst_i)
+					// Remove the combo sources and add the new intermediate mixture
+					// from this list of sources for this destination
+					val src_li = temp_i :: (x.src_li filterNot combo.combo.ℓχsrc.contains)
+					// Total volume taken from combo's sources
+					val vol = combo.combo.ℓχsrc.foldLeft(0.0)((vol, src_i) => vol + x.vol_m(src_i))
+					// Remove volume information for the combo sources and 
+					// add volume to take from the intemediate well
+					val vol_m = (x.vol_m -- combo.combo.ℓχsrc) + (temp_i -> vol)
+					dst_i -> DestX(dst_i, src_li, vol_m)
+				})
 				Some(step.copy(
 					src_n = step.src_n + 1,
-					temp_m = step.temp_m.updated(step.src_n, combo.combo.ℓχsrc.map(_ -> 1.0).toMap)
+					temp_m = step.temp_m.updated(step.src_n, combo.combo.ℓχsrc.map(_ -> 1.0).toMap),
+					dst_m = dst_m
 				))
 		}
 	}

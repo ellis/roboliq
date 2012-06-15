@@ -48,7 +48,18 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 			bitset_l should equal (List(BitSet(0, 1, 2, 3), BitSet(0, 1, 2, 4)))
 		}
 		it("should step") {
-			println(planner.advance(step0))
+			planner.advance(step0) match {
+				case None =>
+				case Some(step1) =>
+					println("step1:")
+					println(step1)
+					planner.advance(step1) match {
+						case None =>
+						case Some(step2) =>
+							println("step2:")
+							println(step2)
+					}
+			}
 		}
 		it("should be easy") {
 			val planner = new LiquidPlanner
