@@ -55,9 +55,5 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 			println(doc)
 			FileUtils.writeToFile("LiquidPlannerSpec_exampleA.rst", doc)
 		}
-		it("should be easy") {
-			val planner = new LiquidPlanner
-			planner.run(src_l, dst_l)
-		}
 	}
 }

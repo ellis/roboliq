@@ -35,9 +35,9 @@ case class Step(
 				"{ rank = same; "+(0 until src_n).mkString("S", "; S", ";")+" }",
 				"{ rank = same; "+(0 until dst_n).mkString("D", "; D", ";")+" }"
 			) ++
-			dst_m.values.flatMap(dst => dst.src_li.map(i => srcName(i)+" -> D"+dst.dst_i+" [label=\""+dst.vol_m(i)+"\"];")).toList ++
-			tmp_m.flatMap({case (tmp_i, mixture) =>
-				mixture.map({case (src_i, vol) =>
+			dst_m.values.flatMap(dst => dst.src_li.reverse.map(i => srcName(i)+" -> D"+dst.dst_i+" [label=\""+dst.vol_m(i)+"\"];")).toList ++
+			tmp_m.toList.sortBy(_._1).flatMap({case (tmp_i, mixture) =>
+				mixture.toList.sortBy(_._1).map({case (src_i, vol) =>
 					srcName(src_i)+" -> "+srcName(tmp_i)+" [label=\""+vol+"\"];"
 				})
 			})
@@ -93,11 +93,13 @@ object Step {
 	
 	def createRst(step_l: List[Step], sTitle: String): String = {
 		val s_l =
+			// Document title
 			List(
 				sTitle,
 				sTitle.replaceAll(".", "="),
 				""
 			) ++ 
+			// For each step:
 			step_l.zipWithIndex.flatMap({ case (step, i) =>
 				val sTitle = "Step Iteration #"+i
 				val sUnderline = sTitle.replaceAll(".", "-")
@@ -306,9 +308,16 @@ class LiquidPlanner {
 					val vol_m = (x.vol_m -- combo.combo.ℓχsrc) + (tmp_i -> vol)
 					dst_i -> DestX(dst_i, src_li, vol_m)
 				})
+				val mixture =
+					combo.ℓχdst.flatMap(dst_i => {
+						val x = step.dst_m(dst_i)
+						// List of src to vol required for dst
+						combo.combo.ℓχsrc map { src_i => src_i -> x.vol_m(src_i) }
+					}).groupBy(_._1).mapValues(_.map(_._2).sum)
+				//val mixtureTmp = 
 				Some(step.copy(
 					tmp_n = step.tmp_n + 1,
-					tmp_m = step.tmp_m.updated(tmp_i, combo.combo.ℓχsrc.map(_ -> 1.0).toMap),
+					tmp_m = step.tmp_m.updated(tmp_i, mixture),
 					dst_m = dst_m
 				))
 		}
@@ -326,47 +335,7 @@ class LiquidPlanner {
 		next(List(step0))
 	}
 	
-	/*def countSourceFrequency(dst_l: List[VesselContent], mixture_l: List[List[Double]]): List[List[Int]] = {
-		mixture_l.to
-	}*/
-	
-	def run(src_l: List[VesselContent], dst_l: List[VesselContent]) {
-		// Get list of solvents and solutes
-		val ℓsolvent = Set(dst_l.flatMap(_.mapSolventToVolume.keys) : _*).toList
-		val ℓsolute = Set(dst_l.flatMap(_.mapSoluteToMol.keys) : _*).toList
-		
-		// Get mixtures of sources used to prepare the destination wells
-		val ℓmixture = dst_l.map(dst => dstToSrcVolumes(ℓsolvent, ℓsolute, dst, src_l).map(_.ul.toDouble))
-		val X = new SimpleMatrix(src_l.size, dst_l.size, false, ℓmixture.flatten : _*)
-		println(X)
-		
-		// Find number of wells that each source is in
-		def volsToOnes(ℓvol: List[Double]): List[Int] = ℓvol.map(vol => if (vol > 0) 1 else 0)
-		val ℓcount = ℓmixture.tail.foldLeft(volsToOnes(ℓmixture.head)) { (ℓn, mixture) =>
-			(ℓn, volsToOnes(mixture)).zipped.map(_ + _)
-		}
-		println("ℓcount: "+ℓcount)
-		
-		val ci0 = ComboInfo(Combo(Nil, Nil), (0 until dst_l.size).toList)
-		val x10 = Combo.add(ci0, 0, ℓmixture)
-		println("x10: "+x10)
-		val x20 = Combo.add(x10.head, 1, ℓmixture)
-		println("x20: "+x20)
-		val x30 = Combo.add(x20.head, 2, ℓmixture)
-		println("x30: "+x30)
-		val x40 = Combo.add(x30.head, 3, ℓmixture)
-		println("x40: "+x40)
-		
-		x(src_l, dst_l.size, ℓmixture)
-		/*
-		val nSrc = src_l.size
-		for (i <- 0 until (nSrc - 1); j <- i + 1 until nSrc) {
-			
-		}
-		*/
-		
-	}
-	
+	/*
 	private def x(src_l: List[VesselContent], dst_n: Int, ℓmixture: List[List[Double]]): List[ComboInfo] = {
 		val ci0 = ComboInfo(Combo(Nil, Nil), (0 until dst_n).toList)
 		val src_li = (0 until src_l.size).toList
@@ -378,7 +347,7 @@ class LiquidPlanner {
 		val combo1_l = src_li flatMap add(ci0, src_l, ℓmixture)
 		combo1_l foreach println
 		Nil
-	}
+	}*/
 	
 	private def dstToSrcVolumes(
 		ℓsolvent: List[SubstanceLiquid],
