@@ -20,9 +20,102 @@ case class DestX(
 case class Step(
 	src_n: Int,
 	dst_n: Int,
-	temp_m: Map[Int, Map[Int, Double]],
+	tmp_n: Int,
+	tmp_m: Map[Int, Map[Int, Double]],
 	dst_m: Map[Int, DestX]
-)
+) {
+	def createGraphviz: String = {
+		def srcName(i: Int): String = {
+			if (i < src_n) "S"+i
+			else "T"+(i - src_n)
+		}
+		
+		(
+			List(
+				"{ rank = same; "+(0 until src_n).mkString("S", "; S", ";")+" }",
+				"{ rank = same; "+(0 until dst_n).mkString("D", "; D", ";")+" }"
+			) ++
+			dst_m.values.flatMap(dst => dst.src_li.map(i => srcName(i)+" -> D"+dst.dst_i+" [label=\""+dst.vol_m(i)+"\"];")).toList ++
+			tmp_m.flatMap({case (tmp_i, mixture) =>
+				mixture.map({case (src_i, vol) =>
+					srcName(src_i)+" -> "+srcName(tmp_i)+" [label=\""+vol+"\"];"
+				})
+			})
+		).mkString("digraph G {\n", "\n", "\n}")
+	}
+}
+
+object Step {
+	def combineTemps(step: Step): Step = {
+		// List all src -> dst combinations
+		val srcToDst_l: List[Tuple2[Int, Int]] =
+			step.tmp_m.toList.flatMap({case (tmp_i, mixture) =>
+				mixture.map({case (src_i, vol) =>
+					(src_i -> tmp_i)
+				})
+			}) ++ step.dst_m.toList.flatMap({case (dst_i, dst) =>
+				dst.src_li map (_ -> dst_i)
+			})
+		// Gather list of all dsts which a src goes to
+		val srcToDst_m: Map[Int, Set[Int]] = srcToDst_l.groupBy(_._1).mapValues(_.map(_._2).toSet)
+		val tmp_li = (step.src_n until step.src_n + step.tmp_n).toList
+		
+		def updateTmpMap(tmp_i: Int, tmp_m: Map[Int, Map[Int, Double]]): Map[Int, Map[Int, Double]] = {
+			srcToDst_m.get(tmp_i) match {
+				case None => tmp_m
+				case Some(dst_li) =>
+					val tmp_mº = {
+						if (dst_li.size == 1) {
+							// If the temporary well has only one destination,
+							// then it must be to another temporary well
+							val dst_i = dst_li.head
+							assert(dst_i > tmp_i && tmp_m.contains(dst_i))
+							
+							val mixtureTmp = tmp_m(tmp_i)
+							val mixtureDst = (tmp_m(dst_i) - tmp_i ++ mixtureTmp)
+							(tmp_m - tmp_i) + (dst_i -> mixtureDst)
+						}
+						else {
+							tmp_m
+						}
+					}
+					updateTmpMap(tmp_i + 1, tmp_mº)
+			}
+		}
+		
+		val tmpCombined_m = updateTmpMap(step.src_n, step.tmp_m)
+		
+		step.copy(
+			//tmp_n = tmpCombined_m.size,
+			tmp_m = tmpCombined_m
+		)
+	}
+	
+	def createRst(step_l: List[Step], sTitle: String): String = {
+		val s_l =
+			List(
+				sTitle,
+				sTitle.replaceAll(".", "="),
+				""
+			) ++ 
+			step_l.zipWithIndex.flatMap({ case (step, i) =>
+				val sTitle = "Step Iteration #"+i
+				val sUnderline = sTitle.replaceAll(".", "-")
+				List(
+					sTitle,
+					sUnderline,
+					"",
+					".. graphviz::",
+					""
+				) ++ 				
+					step.createGraphviz.split("\n").map("  "+_) ++
+				List(
+					""
+				)
+			})
+		s_l.mkString("\n")
+	}
+}
 
 
 case class Combo(ℓχsrc: List[Int], ℓp: List[Double])
@@ -170,14 +263,14 @@ class LiquidPlanner {
 			DestX(pair._2, volToSrc map (_._2), volToSrc map (_.swap) toMap)
 		}
 		val dst_m = dst_l.map(x => x.dst_i -> x).toMap
-		Step(src_n, dst_n, Map(), dst_m)
+		Step(src_n, dst_n, 0, Map(), dst_m)
 	}
 	
 	def createStep0(src_l: List[VesselContent], dst_l: List[VesselContent]): Step = {
 		val mixture_l = calcMixture(src_l, dst_l)
 		createStep0(mixture_l)
 	}
-
+	
 	def advance(step: Step): Option[Step] = {
 		val ci0 = ComboInfo(Combo(Nil, Nil), (0 until step.dst_n).toList)
 		val src_li = (0 until step.src_n).toList
@@ -190,7 +283,7 @@ class LiquidPlanner {
 		val combo1_l = combo1_lº sortBy (_.n)
 		val combo2_lº = combo1_l flatMap { combo =>
 			val src0_i = combo.combo.ℓχsrc.head + 1
-			(src0_i until step.src_n) flatMap add(combo, step)
+			(src0_i until step.src_n + step.tmp_n) flatMap add(combo, step)
 		}
 		val combo2_l = combo2_lº sortBy (_.n)
 		combo1_l foreach println
@@ -199,26 +292,38 @@ class LiquidPlanner {
 			case Nil => None
 			case combo :: _ =>
 				// Index of new intermediate mixture
-				val temp_i = step.src_n
+				val tmp_i = step.src_n + step.tmp_n
 				// Update the DestX entries in step.dst_m which use the current combo 
 				val dst_m = step.dst_m ++ combo.ℓχdst.map(dst_i => {
 					val x = step.dst_m(dst_i)
 					// Remove the combo sources and add the new intermediate mixture
 					// from this list of sources for this destination
-					val src_li = temp_i :: (x.src_li filterNot combo.combo.ℓχsrc.contains)
+					val src_li = tmp_i :: (x.src_li filterNot combo.combo.ℓχsrc.contains)
 					// Total volume taken from combo's sources
 					val vol = combo.combo.ℓχsrc.foldLeft(0.0)((vol, src_i) => vol + x.vol_m(src_i))
 					// Remove volume information for the combo sources and 
 					// add volume to take from the intemediate well
-					val vol_m = (x.vol_m -- combo.combo.ℓχsrc) + (temp_i -> vol)
+					val vol_m = (x.vol_m -- combo.combo.ℓχsrc) + (tmp_i -> vol)
 					dst_i -> DestX(dst_i, src_li, vol_m)
 				})
 				Some(step.copy(
-					src_n = step.src_n + 1,
-					temp_m = step.temp_m.updated(step.src_n, combo.combo.ℓχsrc.map(_ -> 1.0).toMap),
+					tmp_n = step.tmp_n + 1,
+					tmp_m = step.tmp_m.updated(tmp_i, combo.combo.ℓχsrc.map(_ -> 1.0).toMap),
 					dst_m = dst_m
 				))
 		}
+	}
+
+	def runSteps(mixture_l: List[List[Double]]): List[Step] = {
+		def next(accR: List[Step]): List[Step] = {
+			advance(accR.head) match {
+				case None => accR.reverse
+				case Some(step) => next(step :: accR)
+			}
+		}
+
+		val step0 = createStep0(mixture_l)
+		next(List(step0))
 	}
 	
 	/*def countSourceFrequency(dst_l: List[VesselContent], mixture_l: List[List[Double]]): List[List[Int]] = {

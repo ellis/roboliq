@@ -5,6 +5,7 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import roboliq.core._
 import scala.collection.immutable.BitSet
+import roboliq.utils.FileUtils
 
 
 class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter {
@@ -40,7 +41,6 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 	describe("Planner") {
 		val mixture_l = planner.calcMixture(src_l, dst_l)
 		val bitset_l = planner.calcBitset(mixture_l)
-		val step0 = planner.createStep0(mixture_l)
 		it("should calcuate the correct mixtures for each destination well") {
 			mixture_l should equal (List(List[Double](60, 20, 10, 10, 0), List[Double](60, 20, 10, 0, 10)))
 		}
@@ -48,18 +48,12 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 			bitset_l should equal (List(BitSet(0, 1, 2, 3), BitSet(0, 1, 2, 4)))
 		}
 		it("should step") {
-			planner.advance(step0) match {
-				case None =>
-				case Some(step1) =>
-					println("step1:")
-					println(step1)
-					planner.advance(step1) match {
-						case None =>
-						case Some(step2) =>
-							println("step2:")
-							println(step2)
-					}
-			}
+			val step_l = planner.runSteps(mixture_l)
+			val step2_l = step_l ++ List(Step.combineTemps(step_l.last))
+			val doc = Step.createRst(step2_l, "Example A")
+			
+			println(doc)
+			FileUtils.writeToFile("LiquidPlannerSpec_exampleA.rst", doc)
 		}
 		it("should be easy") {
 			val planner = new LiquidPlanner
