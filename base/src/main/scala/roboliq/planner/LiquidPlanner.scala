@@ -316,10 +316,10 @@ case class Trace(
 	private def srcsToMatrix(
 		vol: LiquidVolume
 	): String = {
-		val ll = src_l map { src =>
+		val ll = src_l.map({ src =>
 			(solvent_l map { sub => (src.mapSolventToVolume.getOrElse(sub, LiquidVolume.empty).ul / src.volume.ul).toDouble }) ++
 			(solute_l map { sub => src.mapSoluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble / vol.ul.toDouble })
-		}
+		}).transpose
 		"""\mathbf{S_{"""+vol+"""}} = \left[ \begin{array}{} """ +
 		(
 			ll.map({ l =>
