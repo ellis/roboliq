@@ -25,20 +25,35 @@ class BeanBase {
 	private val m_mapTube = new HashMap[String, PlateBean]
 	private val m_lEvent = new ArrayBuffer[EventBean]
 	
+	/** List of devices */
 	def lDevice = m_lDevice
+	/** List of command handlers */
 	def lCmdHandler = m_lCmdHandler
+	/** Map of system properties.
+	 * These values can be accessed by command handlers for the purpose of configuration.
+	 */
 	def mapSystemProperties: scala.collection.Map[String, Object] = m_mapSystemProperties
 
+	/** Map of name to TipModel */
 	def mapTipModel: scala.collection.Map[String, TipModelBean] = m_mapTipModel
+	/** Map of name to PlateModel */
 	def mapPlateModel: scala.collection.Map[String, PlateModelBean] = m_mapPlateModel
+	/** Map of name to TubeModel */
 	def mapTubeModel: scala.collection.Map[String, TubeModelBean] = m_mapTubeModel
+	/** Map of name to Tip */
 	def mapTip: scala.collection.Map[String, TipBean] = m_mapTip
+	/** Map of name to Location */
 	def mapLocation: scala.collection.Map[String, PlateLocationBean] = m_mapLocation
+	/** Map of name to TubeLocation */
 	def mapTubeLocation: scala.collection.Map[String, TubeLocationBean] = m_mapTubeLocation
 	
+	/** Map of name to Substance */
 	def mapSubstance: scala.collection.Map[String, SubstanceBean] = m_mapSubstance
+	/** Map of name to Plate */
 	def mapPlate: scala.collection.Map[String, PlateBean] = m_mapPlate
+	/** Map of name to Tube */
 	def mapTube: scala.collection.Map[String, PlateBean] = m_mapTube
+	/** List of events */
 	def lEvent: scala.collection.Seq[EventBean] = m_lEvent
 	
 	/** Add data in @param bean to this database */
@@ -112,6 +127,13 @@ class BeanBase {
 		
 	//}
 	
+	/**
+	 * Find a plate model with the given `id`.
+	 * 
+	 * @param id ID of plate model.
+	 * @param property name of the bean property which should hold the ID (or null if not applicable).  This is used for error messages.
+	 * @return a Success holding the PlateModelBean if the plate is found, otherwise an Error.
+	 */
 	def findPlateModel(id: String, property: String = null): Result[PlateModelBean] = {
 		if (id == null) {
 			if (property == null)
@@ -120,8 +142,6 @@ class BeanBase {
 				Error("`"+property+"` must be set to plate model id")
 		}
 		else {
-			if (!mapPlateModel.contains(id)) {
-			}
 			mapPlateModel.get(id) match {
 				case Some(obj) => Success(obj)
 				case None =>
@@ -133,6 +153,12 @@ class BeanBase {
 		}
 	}
 	
+	/**
+	 * Find a plate with ID `idPlate` and return a list of IDs for all its wells.
+	 * 
+	 * @param idPlate ID of plate.
+	 * @return if plate found, a Success holding a list of IDs for all its wells, else Error.
+	 */
 	def findWellIdsByPlate(idPlate: String): Result[List[String]] = {
 		for {
 			plateModel <- findPlateModel(idPlate)
