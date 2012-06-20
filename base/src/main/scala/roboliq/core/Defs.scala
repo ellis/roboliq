@@ -13,6 +13,9 @@ object LiquidPropertiesFamily {
 	case object Decon extends LiquidPropertiesFamily
 }
 
+/**
+ * Enumeration of intensities with which the tips should be washed.
+ */
 object WashIntensity extends Enumeration {
 	val None, Light, Thorough, Decontaminate = Value
 	
@@ -25,6 +28,7 @@ object WashIntensity extends Enumeration {
 	}
 }
 
+/** Represents a volume of liquid. */
 class LiquidVolume private (val _nl: Int) {
 	/** Volume in nanoliters [nl] */
 	def nl: BigDecimal = _nl
@@ -40,6 +44,7 @@ class LiquidVolume private (val _nl: Int) {
 	def *(n: BigDecimal): LiquidVolume = new LiquidVolume((n * _nl).toInt)
 	def /(n: BigDecimal): LiquidVolume = new LiquidVolume((BigDecimal(_nl) / n).toInt)
 	
+	/** Return true if the volume is 0. */
 	def isEmpty: Boolean = (_nl == 0)
 	def <(that: LiquidVolume): Boolean = (_nl < that._nl)
 	def <=(that: LiquidVolume): Boolean = (_nl <= that._nl)
@@ -63,6 +68,7 @@ class LiquidVolume private (val _nl: Int) {
 			nl.toString + " nl"
 	}
 }
+
 /** Factory for [[roboliq.protocol.LiquidVolume]] */
 object LiquidVolume {// extends Semigroup[LiquidVolume] {
 	def nl(n: Int): LiquidVolume = new LiquidVolume(n)
@@ -84,6 +90,11 @@ object LiquidVolume {// extends Semigroup[LiquidVolume] {
 	//def append(a: LiquidVolume, b: => LiquidVolume): LiquidVolume = a + b
 }
 
+/**
+ * Enumeration for where the tips should be positioned with respect to the liquid being pipetted.
+ * `Free` means in the air, `WetContact` means just below the liquid surface,
+ * `DryContact` means just above the bottom of an empty vessel.
+ */
 object PipettePosition extends Enumeration {
 	val Free, WetContact, DryContact = Value
 	
@@ -96,6 +107,7 @@ object PipettePosition extends Enumeration {
 
 //case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense: PipettePosition.Value, mix: PipettePosition.Value)
 
+/** Basically a tuple of a pipette policy name and the position of the tips while pipetting. */
 case class PipettePolicy(id: String, pos: PipettePosition.Value)
 
 object PipettePolicy {
@@ -109,6 +121,9 @@ object PipettePolicy {
 	}
 }
 
+/**
+ * An enumeration of methods for replacing tips.
+ */
 object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with TipReplacementPolicy following Roboease
 	val ReplaceAlways, KeepBetween, KeepAlways = Value
 }
@@ -139,6 +154,11 @@ class WashSpec(
 	}
 }
 
+/**
+ * Specification for cleaning of tips either by replacement or washing.
+ * @param replacement optional replacement method.
+ * @param washIntensity intensity with which tips should be washed.
+ */
 class CleanSpec(
 	val replacement: Option[TipReplacementPolicy.Value],
 	val washIntensity: WashIntensity.Value,

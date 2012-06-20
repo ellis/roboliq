@@ -52,7 +52,7 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 			val doc = trace.createRst("Example A", "=-~")
 			
 			println(doc)
-			FileUtils.writeToFile("LiquidPlannerSpec_exampleA.rst", doc)
+			FileUtils.writeToFile("trace-base/LiquidPlannerSpec_exampleA.rst", doc)
 		}
 	}
 }

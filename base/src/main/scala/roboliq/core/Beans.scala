@@ -6,8 +6,15 @@ import scala.collection.JavaConversions
 import org.yaml.snakeyaml.Yaml
 
 
+/**
+ * The final command output from a [[roboliq.core.CmdHandler]] which will be passed
+ * to translator for conversion to the robot language.
+ */
 class CmdToken
 
+/**
+ * JavaBean for a command.
+ */
 class CmdBean {
 	override def toString: String = CmdBean.yaml.dump(this)
 }
@@ -19,7 +26,9 @@ object CmdBean {
 /** YAML bean representing an entire roboliq YAML file */
 class RoboliqYamlBean {
 	// Security-sensitive setup of classes used
+	/** List of devices available to the robot. */
 	@BeanProperty var devices: java.util.List[DeviceBean] = null
+	/** List of command handlers to be used for command processing. */
 	@BeanProperty var commandHandlers: java.util.List[CmdHandler] = null
 	
 	// Configuration of robot and systems
@@ -28,6 +37,7 @@ class RoboliqYamlBean {
 	@BeanProperty var plateModels: java.util.LinkedHashMap[String, PlateModelBean] = null
 	@BeanProperty var tubeModels: java.util.LinkedHashMap[String, TubeModelBean] = null
 	@BeanProperty var tips: java.util.LinkedHashMap[String, TipBean] = null
+	/** Map of valid location names on the bench and their place location data. */
 	@BeanProperty var locations: java.util.LinkedHashMap[String, PlateLocationBean] = null
 	@BeanProperty var tubeLocations: java.util.LinkedHashMap[String, TubeLocationBean] = null
 	

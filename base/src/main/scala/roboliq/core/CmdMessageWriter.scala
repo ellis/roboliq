@@ -1,5 +1,8 @@
 package roboliq.core
 
+/**
+ * A abstraction for adding error messages to a command node without having access to the node itself.
+ */
 class CmdMessageWriter(node: CmdNodeBean) {
 	def ok: Boolean = (node.getErrorCount == 0)
 	def hasErrors: Boolean = {

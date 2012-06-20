@@ -3,6 +3,11 @@ package roboliq.core
 
 /**
  * Adapted from Option.scala by Martin Odersky
+ * @define none [[roboliq.core.Error]]
+ * @define some [[roboliq.core.Success]]
+ * @define option [[roboliq.core.Result]]
+ * @define p `p`
+ * @define f `f`
  */
 sealed abstract class Result[+A] extends Product {
 	self =>
@@ -137,6 +142,9 @@ sealed abstract class Result[+A] extends Product {
 		if (isEmpty) None else Some(this.get)
 }
 
+/**
+ * Represents an error [[roboliq.core.Result]] with error messages.
+ */
 case class Error[T](lsError: Seq[String]) extends Result[T] {
 	def flatMap[B](f: T => Result[B]): Result[B] = Error[B](lsError)
 	def map[B](f: T => B): Result[B] = Error[B](lsError)
@@ -148,6 +156,9 @@ object Error {
 	def apply(sError: String) = new Error(Seq(sError))
 }
 
+/**
+ * Represents a successful [[roboliq.core.Result]] with a value.
+ */
 case class Success[T](value: T) extends Result[T] {
 	def flatMap[B](f: T => Result[B]): Result[B] = f(value)
 	def map[B](f: T => B): Result[B] = Success[B](f(value))

@@ -160,6 +160,10 @@ class CmdNodeBean {
 		(nErrors0 == getErrorCount)
 	}
 	
+	/**
+	 * Try to get the value of the property with name `property` from object `o`.
+	 * On succes, return Some value, otherwise None. 
+	 */
 	def getValueNonNull_?[A <: Object](o: A, property: String): Option[A] = {
 		checkValueNonNull_?(o, property).map(b => o)
 	}
