@@ -2,17 +2,34 @@ package roboliq.core
 
 import scala.reflect.BeanProperty
 
+
+/**
+ * YAML JavaBean for [[roboliq.core.MixSpec]].
+ */
 class MixSpecBean extends Bean {
+	/** Volume for mixing. */
 	@BeanProperty var volume: java.math.BigDecimal = null
+	/** Number of times to mix. */
 	@BeanProperty var count: java.lang.Integer = null
+	/** Name of pipette policy for mixing. */
 	@BeanProperty var policy: String = null
 }
 
+/**
+ * Specification for mixing the contents of a well (i.e. not mixing together, but making the liquid "well-mixed").
+ * 
+ * @param nVolume_? optional volume of aspiration (default will be about 70%)
+ * @param nCount_? optional number of times to mix (default will be about 4)
+ * @param mixPolicy_? optional pipette policy
+ */
 case class MixSpec(
 	val nVolume_? : Option[LiquidVolume],
 	val nCount_? : Option[Int],
 	val mixPolicy_? : Option[PipettePolicy] = None
 ) {
+	/**
+	 * Merge two mix specs by using the values of `that` for any empty values of `this`.
+	 */
 	def +(that: MixSpec): MixSpec = {
 		MixSpec(
 			if (nVolume_?.isEmpty) that.nVolume_? else nVolume_?,
@@ -20,18 +37,10 @@ case class MixSpec(
 			if (mixPolicy_?.isEmpty) that.mixPolicy_? else mixPolicy_?
 		)
 	}
-	/*
-	def toL2(): Result[MixSpec] = {
-		for {
-			nVolume <- Result.get(nVolume_?, "need to specify volume for mix")
-			nCount <- Result.get(nCount_?, "need to specify repetitions for mix")
-			mixPolicy <- Result.get(mixPolicy_?, "need to specify pipettet policy for mix")
-		} yield MixSpecL2(nVolume, nCount, mixPolicy)
-	}
-	*/
 }
 
 object MixSpec {
+	/** Convert YAML JavaBean to MixSpec. */
 	def fromBean(bean: MixSpecBean): MixSpec = {
 		MixSpec(
 			nVolume_? = if (bean.volume != null) Some(LiquidVolume.l(bean.volume)) else None,

@@ -1,5 +1,9 @@
 package roboliq.core
 
+
+/**
+ * Enumeration of possible contaminants on a tip; this probably won't be used now, so consider deleting it.
+ */
 object Contaminant extends Enumeration {
 	val Cell, DNA, DSMO, Decon, Other = Value
 }
@@ -35,11 +39,21 @@ Decon-Decon-Decon
 
 */
 
+/**
+ * Represents the intensity of tip cleaning required by a given liquid.
+ * 
+ * @param enter intensity with which tip must have been washed prior to entering a liquid.
+ * @param within intensity with which tip must have be washed between pipetteing operations performed in the same [[robolq.core.LiquidGroup]].
+ * @param exit intensity with which tip must have be washed after entering a liquid. 
+ */
 sealed class GroupCleanPolicy(
 	val enter: WashIntensity.Value,
 	val within: WashIntensity.Value,
 	val exit: WashIntensity.Value
 )
+/**
+ * Contains the standard GroupCleanPolicy instantiations.
+ */
 object GroupCleanPolicy {
 	val NNN = new GroupCleanPolicy(WashIntensity.None, WashIntensity.None, WashIntensity.None)
 	val TNN = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
@@ -50,6 +64,9 @@ object GroupCleanPolicy {
 	val Thorough = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
 	val Decontaminate = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
 	
+	/**
+	 * Return a new policy that takes the maximum sub-intensities of `a` and `b`.
+	 */
 	def max(a: GroupCleanPolicy, b: GroupCleanPolicy): GroupCleanPolicy = {
 		new GroupCleanPolicy(
 			WashIntensity.max(a.enter, b.enter),
@@ -59,11 +76,28 @@ object GroupCleanPolicy {
 	}
 }
 
+/**
+ * A LiquidGroup is a set of liquids for which a special clean policy can be defined when a tip
+ * enters two different liquids in the same group.
+ * In particular, this can be used to reduce the cleaning intensity when contamination is not
+ * a concern. 
+ */
 class LiquidGroup(
-	//val sGroupId: String,
 	val cleanPolicy: GroupCleanPolicy = GroupCleanPolicy.TNT
 )
 
+/**
+ * Represents a liquid.
+ * This is one of the most-used classes for our pipetting routines.
+ * 
+ * @note Liquid should be better integrated with the newer Substance and VesselContent classes.
+ * For example, Liquid could maintain a list of Substances and their ratios and concentrations,
+ * more similar to VesselContent.
+ * 
+ * @see [[roboliq.core.Substance]]
+ * @see [[roboliq.core.SubstanceLiquid]]
+ * @see [[roboliq.core.VesselContent]]
+ */
 class Liquid(
 	var id: String,
 	val sName_? : Option[String],
@@ -71,18 +105,7 @@ class Liquid(
 	val contaminants: Set[Contaminant.Value],
 	val group: LiquidGroup,
 	var multipipetteThreshold: Double
-	//val family: LiquidPropertiesFamily,
-	//val bFreeDispense: Boolean,
-	//val washIntensityBeforeAspirate: WashIntensity.Value,
-	//val bReplaceTipsBeforeAspirate: Boolean,
-	/** Contaminants in this liquid */
-	///** Contaminants which must be cleaned from tips before entering this liquid */
-	//val prohibitedTipContaminants: Set[Contaminant.Value]
 ) {
-	//val group = group0_?.getOrElse(new LiquidGroup())
-	//val sGroupId = sGroupId0_?.getOrElse(this.hashCode().toString)
-	//def contaminates: Boolean = contaminantLevels.map.exists(_._2 != ContaminationLevel.None)
-	
 	def +(other: Liquid): Liquid = {
 		if (this eq other)
 			this
@@ -129,5 +152,6 @@ class Liquid(
 }
 
 object Liquid {
+	/** Empty liquid */
 	val empty = new Liquid("<EMPTY>", None, "", Set(), new LiquidGroup(), 0.0)
 }

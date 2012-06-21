@@ -4,6 +4,11 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 
+/**
+ * A Memento object can be used to record a value during protocol execution for later retrieval.
+ * 
+ * @tparam T type of value to record.
+ */
 class Memento[T] { thisObj =>
 	type Config = MementoConfig[T]
 	type State = MementoState[T]
@@ -33,6 +38,9 @@ class Memento[T] { thisObj =>
 	def stateWriter(builder: StateBuilder): MementoStateWriter[T] = new MementoStateWriter(this, builder)
 }
 
+/**
+ * Initial settings for [[roboliq.core.Memento]].
+ */
 class MementoConfig[T](
 	val obj: Memento[T],
 	val value0: T
@@ -40,11 +48,17 @@ class MementoConfig[T](
 	override def toString = "Memento("+value0+")"
 }
 
+/**
+ * State of [[roboliq.core.Memento]] which holds a value.
+ */
 case class MementoState[T](
 	val conf: MementoConfig[T],
 	val value: T
 )
 
+/**
+ * Convenience class for modifying [[roboliq.core.MementoState]].
+ */
 class MementoStateWriter[T](o: Memento[T], builder: StateBuilder) {
 	def state = builder.map(o.hashCode().toString).asInstanceOf[MementoState[T]]
 
@@ -54,9 +68,3 @@ class MementoStateWriter[T](o: Memento[T], builder: StateBuilder) {
 		builder.map(o.hashCode().toString) = new MementoState[T](st.conf, v)
 	}
 }
-/*
-class MementoProxy[T](obj: Memento[T]) {
-	def value: String = null
-	def value_=(v: T) = obj.value_? = Some(v)
-}
-*/

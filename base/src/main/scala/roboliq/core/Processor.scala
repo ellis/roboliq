@@ -6,12 +6,22 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.LinkedHashMap
 
+/**
+ * Result of processing a list of commands with [[roboliq.core.Processor]].
+ * 
+ * @param ob database of objects used.
+ * @param lNode list of resulting top-level command nodes.
+ * @param locationTracker information about the location of objects during the protocol.
+ */
 case class ProcessorResult(
 	val ob: ObjBase,
 	val lNode: List[CmdNodeBean],
 	val locationTracker: LocationTracker
 )
 
+/**
+ * 
+ */
 class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler], states0: RobotState) {
 	def process(cmds: List[CmdBean]): ProcessorResult = {
 		bb.lDevice.foreach(_.setObjBase(ob))
@@ -263,6 +273,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 	}
 }
 
+/** Factory object for [[roboliq.core.Processor]]. */
 object Processor {
 	def apply(bb: BeanBase, states0: RobotState): Processor = {
 		val ob = new ObjBase(bb)
@@ -270,6 +281,23 @@ object Processor {
 	}
 }
 
+/**
+ * Provides the context information to command handlers when a command list is being processed.
+ * 
+ * @note The `processor` object may be used for internal processing of commands 
+ * by a command handler,
+ * such as is done by the pipetting handler in order to choose the among multiple
+ * possible variations in the pipetting plan.
+ * 
+ * @see [[roboliq.core.Processor]]
+ * @see [[roboliq.core.CmdHandler]]
+ * 
+ * @param processor The processor being used.
+ * @param node The command node
+ * @param ob The object database
+ * @param builder_? optional state builder (but I think it's always set???)
+ * @param states The state of objects at the start of the command.
+ */
 class ProcessorContext(
 	val processor: Processor,
 	val node: CmdNodeBean,

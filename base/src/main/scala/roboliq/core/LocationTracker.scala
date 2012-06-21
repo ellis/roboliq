@@ -2,7 +2,21 @@ package roboliq.core
 
 import scala.collection.mutable.HashMap
 
+/**
+ * Holds information about the location of objects over time.
+ * 
+ * @param map A map from object ID to a list of tuples of (command node index, location ID).
+ */
 class LocationTracker(val map: Map[String, List[Tuple2[String, String]]]) {
+	/**
+	 * Get the location of object with ID `id` at command node index `index`.
+	 * 
+	 * @see [[roboliq.core.CommandNodeBean]]
+	 * 
+	 * @param id ID of object (currently just for plates and tubes).
+	 * @param index command node index.
+	 * @return ID of location if possible.
+	 */
 	def getLocationForCommand(
 		id: String,
 		index: String
@@ -13,8 +27,14 @@ class LocationTracker(val map: Map[String, List[Tuple2[String, String]]]) {
 
 object LocationTracker {
 	/**
-	 * @param id ID of plate or tube
-	 * @param index command index
+	 * Get the location of object with ID `id` at command node index `index`.
+	 * 
+	 * @see [[roboliq.core.CommandNodeBean]]
+	 * 
+	 * @param id ID of object (currently just for plates and tubes).
+	 * @param index command node index.
+	 * @param map A map from object ID to a list of tuples of (command node index, location ID).
+	 * @return ID of location if possible.
 	 */
 	def getLocationForCommand(
 		id: String,
@@ -38,9 +58,20 @@ object LocationTracker {
 	}
 }
 
+/**
+ * A builder for [[roboliq.core.LocationTracker]].
+ */
 class LocationBuilder {
+	/** A map from object ID to a list of tuples of (command node index, location ID). */
 	val map = new HashMap[String, List[Tuple2[String, String]]]
 	
+	/**
+	 * Add location information for object with ID `id` at command node `index`.
+	 * 
+	 * @param id ID of object (currently just for plates and tubes).
+	 * @param index command node index.
+	 * @param location ID of location.
+	 */
 	def addLocation(id: String, index: String, location: String) {
 		map.get(id) match {
 			case None =>

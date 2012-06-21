@@ -3,7 +3,7 @@ package roboliq.core
 import scala.reflect.BeanProperty
 
 
-/** Represents a plate model in YAML */
+/** YAML JavaBean representatino of [[roboliq.core.PlateModel]]. */
 class PlateModelBean extends Bean {
 	/** Number of rows on the plate */
 	@BeanProperty var rows: java.lang.Integer = null
@@ -13,6 +13,14 @@ class PlateModelBean extends Bean {
 	@BeanProperty var volume: java.math.BigDecimal = null
 }
 
+/**
+ * Represents a plate or rack model.
+ * 
+ * @param id ID in database.
+ * @param nRows number of rows on the plate.
+ * @param nCols number of columns on the plate.
+ * @param nWellVolume maximum volume that can go in the wells.
+ */
 class PlateModel(
 	val id: String,
 	val nRows: Int,
@@ -21,6 +29,7 @@ class PlateModel(
 )
 
 object PlateModel {
+	/** Convert from [[roboliq.core.PlateModelBean]] to [[roboliq.core.PlateModel]]. */
 	def fromBean(bean: PlateModelBean): Result[PlateModel] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
@@ -31,7 +40,8 @@ object PlateModel {
 			new PlateModel(id, nRows, nCols, LiquidVolume.l(nWellVolume))
 		}
 	}
-	
+
+	/** Get a row/column representation of the index of the a well. */
 	def wellIndexName(nRows: Int, nCols: Int, iWell: Int): String = {
 		if (nCols == 1) {
 			if (nRows == 1) {

@@ -5,9 +5,18 @@ import scala.collection.mutable.ArrayBuffer
 import scalaz.Semigroup
 
 
+/**
+ * Base class for case objects used to specify a family of liquid properties.
+ * This indicates how it will need to be handled during pipetting.
+ */
 abstract class LiquidPropertiesFamily
+/**
+ * Holds the standard LiquidPropertiesFamily case objects: `Water`, `Cells`, `DMSO`, and `Decon`.
+ */
 object LiquidPropertiesFamily {
+	/** Liquid is water-like. */
 	case object Water extends LiquidPropertiesFamily
+	/** Liquid contains cells. */
 	case object Cells extends LiquidPropertiesFamily
 	case object DMSO extends LiquidPropertiesFamily
 	case object Decon extends LiquidPropertiesFamily
@@ -19,10 +28,12 @@ object LiquidPropertiesFamily {
 object WashIntensity extends Enumeration {
 	val None, Light, Thorough, Decontaminate = Value
 	
+	/** Return the more intense wash value. */
 	def max(a: WashIntensity.Value, b: WashIntensity.Value): WashIntensity.Value = {
 		if (a >= b) a else b
 	}
 	
+	/** Return the most intense wash value in `l`. */
 	def max(l: Traversable[WashIntensity.Value]): WashIntensity.Value = {
 		l.foldLeft(WashIntensity.None)((acc, intensity) => max(acc, intensity))
 	}
@@ -128,6 +139,12 @@ object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with Ti
 	val ReplaceAlways, KeepBetween, KeepAlways = Value
 }
 
+/**
+ * Allows the user to override the default tip-handling procedures during pipetting.
+ * @param replacement_? optional TipReplacementPolicy.
+ * @param washIntensity_? optional WashIntensity.
+ * @param allowMultipipette_? optional boolean value, false prevents multi-pipetting (i.e. aspirating once and dispensing multiple times)
+ */
 case class TipHandlingOverrides(
 	val replacement_? : Option[TipReplacementPolicy.Value],
 	val washIntensity_? : Option[WashIntensity.Value],
@@ -136,10 +153,18 @@ case class TipHandlingOverrides(
 	val contamOutside_? : Option[Set[Contaminant.Value]]
 )
 
+/**
+ * Provides a TipHandlingOverrides object with no overrides.
+ */
 object TipHandlingOverrides {
 	def apply() = new TipHandlingOverrides(None, None, None, None, None)
 }
 
+/**
+ * Basically now just a wrapper around [[roboliq.core.WashIntensity]],
+ * since I'm probably not going to use the contamination values anymore;
+ * I should probably get rid of this class.
+ */
 class WashSpec(
 	val washIntensity: WashIntensity.Value,
 	val contamInside: Set[Contaminant.Value],
