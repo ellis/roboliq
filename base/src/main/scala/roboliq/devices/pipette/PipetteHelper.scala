@@ -50,7 +50,7 @@ object PipetteHelper {
 			val (idPlate, lWellPosOnHolder, iCol) = temp1
 			//lWellPos <- getWellPosList(states, wellsOnHolder)
 			well0 <- getFirstWell(states, idPlate, lWellPosOnHolder, iCol)
-			plate <- states.ob.findPlate(idPlate)
+			plate <- states.findPlate(idPlate)
 			pos0 <- states.findWellPosition(well0.id)
 		} yield {
 			val tip0 = tips.head
@@ -135,7 +135,7 @@ object PipetteHelper {
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
 
-		states.ob.findPlate(idPlate) match {
+		states.findPlate(idPlate) match {
 			case Error(ls) => Error(ls)
 			case Success(plate) =>
 				val nCols = plate.model.nCols

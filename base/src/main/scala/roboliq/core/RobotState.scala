@@ -8,8 +8,7 @@ import scala.collection.mutable.HashSet
  * Implementation of [[roboliq.core.StateQuery]] and base class for
  * both an immutable interface ([[scala.core.RobotState]]) and a mutable one ([[scala.core.StateBuilder]]). 
  */
-abstract class StateMap extends StateQuery {
-	val ob: ObjBase
+abstract class StateMap(ob: ObjBase) extends StateQuery {
 	/** Map from object ID to object state */
 	val map: collection.Map[String, Object]
 	def apply(id: String) = map(id)
@@ -95,14 +94,16 @@ abstract class StateMap extends StateQuery {
 	}
 }
 
-class RobotState(val ob: ObjBase, val map: Map[String, Object]) extends StateMap {
+class RobotState(ob: ObjBase, val map: Map[String, Object]) extends StateMap(ob) {
 	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
 		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
 	}
+	
+	def toBuilder: StateBuilder =
+		new StateBuilder(ob, HashMap[String, Object](map.toSeq : _*))
 }
 
-class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap {
-	def this(states: RobotState) = this(states.ob, HashMap[String, Object](states.map.toSeq : _*))
+class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap(ob) {
 	def this(ob: ObjBase) = this(ob, new HashMap[String, Object])
 	
 	def toImmutable: RobotState = new RobotState(ob, map.toMap)

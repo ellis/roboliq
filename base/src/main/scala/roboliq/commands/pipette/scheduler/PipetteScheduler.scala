@@ -140,7 +140,7 @@ class PipetteScheduler(
 	fw.write("\n")
 	
 	def translate(): Result[Seq[CmdBean]] = {
-		val states = new StateBuilder(ctx.states)
+		val states = ctx.states.toBuilder
 		val res = for {
 			items0 <- builderA.filterItems(cmd.args.items)
 			mItemToState0 = builderA.getItemStates(items0)

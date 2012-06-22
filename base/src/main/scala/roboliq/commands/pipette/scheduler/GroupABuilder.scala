@@ -27,7 +27,7 @@ class GroupABuilder(
 	}
 	
 	def getItemStates(items: Seq[Item]): Map[Item, ItemState] = {
-		val states = new StateBuilder(ctx.states)
+		val states = ctx.states.toBuilder
 		items.map(item => {
 			val src = item.srcs.head
 			val content = src.wellState(states).get.content
@@ -166,7 +166,7 @@ class GroupABuilder(
 		
 		// Need to create ItemState objects for any items which were split due to large volumes
 		// REFACTOR: mostly copies code from getItemStates()
-		val states = new StateBuilder(ctx.states)
+		val states = ctx.states.toBuilder
 		val mItemToState1 = items1.map(item => {
 			val src = item.srcs.head
 			val content = src.wellState(states).get.content
@@ -866,7 +866,7 @@ class GroupABuilder(
 	
 	def updateGroupA9_states1(g0: GroupA): GroupResult = {
 		//println("A10 g0.lPremix: "+g0.lPremix)
-		val builder = new StateBuilder(g0.states0)
+		val builder = g0.states0.toBuilder
 		
 		// TODO: handle tip replacement
 		
