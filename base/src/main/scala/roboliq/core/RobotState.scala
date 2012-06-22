@@ -44,7 +44,6 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
 	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
 	def findTip(id: String): Result[Tip] = ob.findTip(id)
 	def findPlate(id: String): Result[Plate] = ob.findPlate(id)
-	//def findWell(id: String): Result[Well] = ob.findWell(id)
 	
 	def findTipState(id: String): Result[TipState] = {
 		map.get(id) match {
@@ -94,15 +93,30 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
 	}
 }
 
+/**
+ * A read-only interface to [[roboliq.core.StateQuery]] with an immutable map of
+ * object IDs to states.
+ * 
+ * @param ob The object database.
+ * @param map Map from object ID to state.
+ */
 class RobotState(ob: ObjBase, val map: Map[String, Object]) extends StateMap(ob) {
+	/** Get a map to only those states with the given type `State`. */
 	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
 		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
 	}
 	
+	/** Create a mutable state builder from this immutable state map. */
 	def toBuilder: StateBuilder =
 		new StateBuilder(ob, HashMap[String, Object](map.toSeq : _*))
 }
 
+/**
+ * An interface to [[roboliq.core.StateQuery]] and a builder for modifying object state.
+ * 
+ * @param ob The object database.
+ * @param map A mutable map from object ID to state.
+ */
 class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap(ob) {
 	def this(ob: ObjBase) = this(ob, new HashMap[String, Object])
 	

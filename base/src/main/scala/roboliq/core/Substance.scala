@@ -6,7 +6,6 @@ object LiquidPhysicalProperties extends Enumeration {
 	val Water, Glycerol = Value
 }
 
-// REFACTOR: rename to SubstanceBean
 sealed trait SubstanceBean extends Bean
 
 /** Represents a DNA-based substance in YAML */
