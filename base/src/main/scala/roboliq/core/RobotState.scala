@@ -4,18 +4,15 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 
-trait StateMap extends StateQuery {
+/**
+ * Implementation of [[roboliq.core.StateQuery]] and base class for
+ * both an immutable interface ([[scala.core.RobotState]]) and a mutable one ([[scala.core.StateBuilder]]). 
+ */
+abstract class StateMap extends StateQuery {
 	val ob: ObjBase
 	/** Map from object ID to object state */
 	val map: collection.Map[String, Object]
 	def apply(id: String) = map(id)
-	
-	/*def getWellState(id: String): WellState = {
-		map.get(id) match {
-			case Some(state) => state.asInstanceOf[WellState]
-			case None => ob.getWellState(id).get
-		}
-	}*/
 	
 	def toDebugString: String = {
 		/*val b = new StringBuilder
@@ -102,13 +99,6 @@ class RobotState(val ob: ObjBase, val map: Map[String, Object]) extends StateMap
 	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
 		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
 	}
-
-	/*def findWellState(id: String): Result[WellState] = {
-		map.get(id) match {
-			case Some(state) => Success(state.asInstanceOf[WellState])
-			case None => Error("INTERNAL: well `"+id+"`: state not found")
-		}
-	}*/
 }
 
 class StateBuilder(val ob: ObjBase, val map: HashMap[String, Object]) extends StateMap {

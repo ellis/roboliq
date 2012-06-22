@@ -1,16 +1,28 @@
 package roboliq.core
 
+
+/**
+ * Interface for finding objects and their states.
+ */
 trait StateQuery {
+	/** Find tip model with ID `id`. */
 	def findTipModel(id: String): Result[TipModel]
 	
+	/** Find substance with ID `id`. */
 	def findSubstance(id: String): Result[Substance]
+	/** Find liquid with ID `id`. */
 	def findLiquid(id: String): Result[Liquid]
+	/** Find tip with ID `id`. */
 	def findTip(id: String): Result[Tip]
+	/** Find plate with ID `id`. */
 	def findPlate(id: String): Result[Plate]
 	//def findWell(id: String): Result[Well]
 	
+	/** Find state of tip with ID `id`. */
 	def findTipState(id: String): Result[TipState]
+	/** Find state of well with ID `id`. */
 	def findWellState(id: String): Result[WellState]
+	/** Find fully defined [[roboliq.core.Well2]] of well with ID `id`. */
 	def findWellPosition(id: String): Result[Well2]
 	
 	/**
@@ -43,12 +55,17 @@ trait StateQuery {
 	 */
 	def mapIdsToWell2Lists(ids: String): Result[List[List[Well2]]]
 	
+	/**
+	 * Find fully defined [[roboliq.core.Well2]] information for the wells in string `ids`.
+	 * @see [[roboliq.core.WellSpecParser]] for the format of `ids`.
+	 */
 	def findDestWells(ids: String): Result[List[Well2]]
 	
-	/** get liquid from liquid or well state */
+	/** Find the liquid with ID `id` or the liquid currently in the well with ID `id`. */
 	def findSourceLiquid(id: String): Result[Liquid] =
 		findLiquid(id).orElse(findWellState(id).map(_.liquid))
 		
+	/** Pair all `wells` with their fully defined [[roboliq.core.Well2]]. */
 	def getWellPosList(wells: Iterable[Well]): Result[List[Tuple2[Well, Well2]]] = {
 		Result.mapOver(wells.toList)(well => findWellPosition(well.id).map(well -> _))
 	}
