@@ -3,11 +3,20 @@ package roboliq.core
 import scala.collection.mutable.HashMap
 import scala.reflect.BeanProperty
 
+/** YAML JavaBean representation of [[roboliq.core.Tip]]. */
 class TipBean extends Bean {
 	@BeanProperty var index: java.lang.Integer = null
 	@BeanProperty var model: String = null
 }
 
+/**
+ * Represents a tip for pipetting.
+ * 
+ * @see [[roboliq.core.TipModel]]
+ * 
+ * @param index unique internal index of this tip.
+ * @param modelPermanent_? optional tip model if this tip is permanent.
+ */
 class Tip(
 	val index: Int,
 	val modelPermanent_? : Option[TipModel]
@@ -22,6 +31,7 @@ class Tip(
 }
 
 object Tip {
+	/** Convert [[roboliq.core.TipBean]] to [[roboliq.core.Tip]]. */
 	def fromBean(ob: ObjBase)(bean: TipBean): Result[Tip] = {
 		for {
 			index <- Result.mustBeSet(bean.index, "index")
@@ -40,6 +50,7 @@ object Tip {
 		}
 	}
 	
+	/** Convert [[roboliq.core.TipBean]] to [[roboliq.core.Tip]]. */
 	def fromBean(ob: ObjBase, messages: CmdMessageWriter)(bean: TipBean): Result[Tip] = {
 		for {
 			index <- Result.mustBeSet(bean.index, "index")
@@ -50,6 +61,7 @@ object Tip {
 	}
 }
 
+/** Convenience class for making debug strings from sets of tips. */
 object TipSet {
 	def toDebugString(set: Set[Tip]): String = toDebugString(collection.immutable.SortedSet(set.toSeq : _*))
 	def toDebugString(set: collection.immutable.SortedSet[Tip]): String = toDebugString(set.toSeq)

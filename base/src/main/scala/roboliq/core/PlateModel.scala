@@ -3,7 +3,7 @@ package roboliq.core
 import scala.reflect.BeanProperty
 
 
-/** YAML JavaBean representatino of [[roboliq.core.PlateModel]]. */
+/** YAML JavaBean representation of [[roboliq.core.PlateModel]]. */
 class PlateModelBean extends Bean {
 	/** Number of rows on the plate */
 	@BeanProperty var rows: java.lang.Integer = null

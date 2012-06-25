@@ -2,36 +2,54 @@ package roboliq.core
 import scala.reflect.BeanProperty
 
 
+/**
+ * Enumeration of the physical property classes of liquids as relevant to pipetting
+ * (currently just Water or Glycerol).
+ */
 object LiquidPhysicalProperties extends Enumeration {
 	val Water, Glycerol = Value
 }
 
+/**
+ * Base trait YAML JavaBean for a substance
+ * @see [[roboliq.core.Substance]]
+ */
 sealed trait SubstanceBean extends Bean
 
-/** Represents a DNA-based substance in YAML */
+/** YAML JavaBean representation of [[roboliq.core.SubstanceDna]]. */
 class SubstanceDnaBean extends SubstanceBean {
 	@BeanProperty var sequence: String = null
 	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
-/** Represents some other substance in YAML */
+/** YAML JavaBean representation of [[roboliq.core.SubstanceOther]]. */
 class SubstanceOtherBean extends SubstanceBean {
 	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
-/** Represents a liquid substance in YAML */
+/** YAML JavaBean representation of [[roboliq.core.SubstanceLiquid]]. */
 class SubstanceLiquidBean extends SubstanceBean {
 	@BeanProperty var physical: String = null
 	@BeanProperty var cleanPolicy: String = null
 	@BeanProperty var allowMultipipette: java.lang.Boolean = null
 }
 
-sealed trait Substance {
+/** Represents a substance. */
+sealed abstract class Substance {
+	/** ID in database. */
 	val id: String
+	/**
+	 * Whether multipipetting is allowed.
+	 * Multipipetting is when a tip aspirates once and distributes to that volume to
+	 * multiple destinations.  In our case with our Tecan robot, this wastes more
+	 * of the source liquid than single-pipetting, so for expensive liquids we
+	 * want to prevent multipipetting.
+	 */
 	val allowMultipipette: Boolean
 }
 
 object Substance {
+	/** Convert [[roboliq.core.SubstanceBean]] to [[roboliq.core.Substance]]. */
 	def fromBean(bean: SubstanceBean): Result[Substance] = {
 		bean match {
 			case b: SubstanceDnaBean => SubstanceDna.fromBean(b)
@@ -41,6 +59,12 @@ object Substance {
 	}
 }
 
+/**
+ * Represents a DNA-based substance.
+ * @param id ID in database.
+ * @param sequence_? optional DNA sequence string.
+ * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
+ */
 case class SubstanceDna(
 	val id: String,
 	val sequence_? : Option[String],
@@ -48,6 +72,7 @@ case class SubstanceDna(
 ) extends Substance
 
 object SubstanceDna {
+	/** Convert [[roboliq.core.SubstanceDnaBean]] to [[roboliq.core.SubstanceDna]]. */
 	def fromBean(bean: SubstanceDnaBean): Result[SubstanceDna] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
@@ -59,12 +84,18 @@ object SubstanceDna {
 	}
 }
 
+/**
+ * Represents the catch-all case of a substance which isn't DNA or a liquid.
+ * @param id ID in database.
+ * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
+ */
 case class SubstanceOther(
 	val id: String,
 	val allowMultipipette: Boolean
 ) extends Substance
 
 object SubstanceOther {
+	/** Convert [[roboliq.core.SubstanceOtherBean]] to [[roboliq.core.SubstanceOther]]. */
 	def fromBean(bean: SubstanceOtherBean): Result[SubstanceOther] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
@@ -75,6 +106,13 @@ object SubstanceOther {
 	}
 }
 
+/**
+ * Represents a DNA-based substance.
+ * @param id ID in database.
+ * @param physicalProperties physical properties of the liquid (e.g. water or glycerol).
+ * @param cleanPolicy tip cleaning policy when handling this liquid.
+ * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
+ */
 case class SubstanceLiquid(
 	val id: String,
 	val physicalProperties: LiquidPhysicalProperties.Value, 
@@ -83,6 +121,7 @@ case class SubstanceLiquid(
 ) extends Substance
 
 object SubstanceLiquid {
+	/** Convert [[roboliq.core.SubstanceLiquidBean]] to [[roboliq.core.SubstanceLiquid]]. */
 	def fromBean(bean: SubstanceLiquidBean): Result[SubstanceLiquid] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
