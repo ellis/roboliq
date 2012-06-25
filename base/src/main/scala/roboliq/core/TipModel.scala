@@ -21,8 +21,8 @@ class TipModelBean extends Bean {
  * @param id ID in database.
  * @param nVolume maximum volume which this tip can hold.
  * @param nVolumeAspirateMin minimum aspiration volume.
- * @param nVolumeWashExtra not currently used.
- * @param nVolumeDeconExtra not currently used.
+ * @param nVolumeWashExtra volume which must be left unused if tip will be washed instead of discarded.
+ * @param nVolumeDeconExtra volume which must be left unused if tip will be decontaminated instead of discarded.
  */
 case class TipModel(
 	val id: String,
@@ -33,7 +33,7 @@ case class TipModel(
 )
 
 object TipModel {
-	/** Convert [[roboliq.core.TipBean]] to [[roboliq.core.Tip]]. */
+	/** Convert [[roboliq.core.TipModelBean]] to [[roboliq.core.TipModel]]. */
 	def fromBean(bean: TipModelBean): Result[TipModel] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")

@@ -5,7 +5,7 @@ import scala.collection.mutable.HashMap
 import scala.reflect.BeanProperty
 
 
-/** YAML JavaBean representation of [[roboliq.core.Plate]]. */
+/** YAML JavaBean representation of [[roboliq.core.Plate]] or [[roboliq.core.Tube]]. */
 class PlateBean extends Bean {
 	/** ID of the plate's model */
 	@BeanProperty var model: String = null

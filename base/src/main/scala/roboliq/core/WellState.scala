@@ -7,16 +7,25 @@ import scala.collection.mutable.HashSet
 import scala.reflect.BeanProperty
 
 
+/**
+ * Base class for well states.
+ * 
+ * @param content Current vessel content.
+ * @param bCheckVolume Whether it should be verified that the volume in this well doesn't go below 0.
+ * When the initial volume of liquid in the well in unknown, then this should be `false`.
+ * @param history List of events history for this well.
+ */
 abstract class WellState(
-	//val well: Well2,
 	val content: VesselContent,
-	/** Make sure that volume doesn't go below 0 */
 	val bCheckVolume: Boolean,
 	val history: List[EventBean]
 ) {
+	/** Liquid in the well. */
 	val liquid: Liquid = content.liquid
+	/** Volume of liquid in well. */
 	val nVolume: LiquidVolume = content.volume
 	
+	/** Prepend `event` to `history`, and set `content` and `bCheckVolume`. */
 	def update(
 		event: EventBean,
 		content: VesselContent = content,
@@ -28,6 +37,11 @@ abstract class WellState(
 	}
 }
 
+/**
+ * State of [[roboliq.core.PlateWell]].
+ * 
+ * @param conf The `PlateWell`.
+ */
 class PlateWellState(
 	val conf: PlateWell,
 	content: VesselContent,
@@ -45,6 +59,14 @@ class PlateWellState(
 	}
 }
 
+/**
+ * State of [[roboliq.core.Tube]].
+ * 
+ * @param obj The tube.
+ * @param idPlate ID of the rack the tube is in.
+ * @param row index of the tube's row on the rack (0-based).
+ * @param col index of the tube's column on the rack (0-based).
+ */
 class TubeState(
 	val obj: Tube,
 	val idPlate: String,
@@ -69,16 +91,25 @@ class TubeState(
 	}
 }
 
+/** Represents a event that modifies [[roboliq.core.WellState]]. */
 abstract class WellEventBean extends EventBeanA[WellState] {
 	protected def findState(id: String, query: StateQuery): Result[WellState] = {
 		query.findWellState(id)
 	}
 }
 
+/** Represents the event of adding a substance to a well. */
 class WellAddEventBean extends WellEventBean {
+	/** ID of source well -- either `src` or `substance` must be set. */
 	@BeanProperty var src: String = null
+	/** ID of substance -- either `src` or `substance` must be set. */
 	@BeanProperty var substance: String = null
+	/**
+	 * Volume to add.  Must be set and should be larger than 0.
+	 * If substance is not a liquid, this will be the volume of water added.
+	 */
 	@BeanProperty var volume: java.math.BigDecimal = null
+	/** Concentration of substance, if it's a powder. */
 	@BeanProperty var conc: java.math.BigDecimal = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
@@ -121,7 +152,9 @@ class WellAddEventBean extends WellEventBean {
 	}
 }
 
+/** Factory object for [[roboliq.core.WellEventBean]]. */
 object WellAddEventBean {
+	/** Event to . */
 	def apply(well: Well2, src: Well2, volume: LiquidVolume): WellAddEventBean = {
 		val bean = new WellAddEventBean
 		bean.obj = well.id
@@ -131,8 +164,11 @@ object WellAddEventBean {
 	}
 }
 
+/** Represents the event of adding powder to a well. */
 class WellAddPowderEventBean extends WellEventBean {
+	/** ID of powder substance in the database. */
 	@BeanProperty var substance: String = null
+	/** Volume in mol to add. */
 	@BeanProperty var mol: java.math.BigDecimal = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
@@ -148,7 +184,9 @@ class WellAddPowderEventBean extends WellEventBean {
 	}
 }
 
+/** Represents the event of removing liquid from a well. */
 class WellRemoveEventBean extends WellEventBean {
+	/** Volume in liters to remove. */
 	@BeanProperty var volume: java.math.BigDecimal = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
@@ -163,7 +201,9 @@ class WellRemoveEventBean extends WellEventBean {
 	}
 }
 
+/** Factory object for [[roboliq.core.WellRemoveEventBean]]. */
 object WellRemoveEventBean {
+	/** Event to remove `volume` from `well`. */
 	def apply(well: Well2, volume: LiquidVolume): WellRemoveEventBean = {
 		val bean = new WellRemoveEventBean
 		bean.obj = well.id
@@ -172,6 +212,12 @@ object WellRemoveEventBean {
 	}
 }
 
+/**
+ * Convenience class for modifying [[roboliq.core.WellState]].
+ * 
+ * @param id ID of well in database.
+ * @param builder The state builder.
+ */
 class WellStateWriter(id: String, builder: StateBuilder) {
 	def state = builder.findWellState(id).get
 	
@@ -200,9 +246,13 @@ class WellStateWriter(id: String, builder: StateBuilder) {
 	}
 }
 
+/** Represents a tube re-location event. */
 class TubeLocationEventBean extends WellEventBean {
+	/** ID of plate or rack. */
 	@BeanProperty var location: String = null
+	/** Index of row (0-based). */
 	@BeanProperty var row: java.lang.Integer = null
+	/** Index of column (0-based). */
 	@BeanProperty var col: java.lang.Integer = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
@@ -225,7 +275,9 @@ class TubeLocationEventBean extends WellEventBean {
 	}
 }
 
+/** Factory object for [[roboliq.core.TubeLocationEventBean]]. */
 object TubeLocationEventBean {
+	/** Event to relocate a `tube` to the given plate/rack `location` at the given `row` and `col`. */
 	def apply(tube: Tube, location: String, row: Int, col: Int): TubeLocationEventBean = {
 		val bean = new TubeLocationEventBean
 		bean.obj = tube.id
@@ -235,146 +287,3 @@ object TubeLocationEventBean {
 		bean
 	}
 }
-
-/*sealed trait WellHistoryItem
-
-/** Represents the addition of a substance to a well's history in YAML */
-case class WellHistoryAdd(
-	var substance: Liquid,
-	var volume: LiquidVolume
-) extends WellHistoryItem
-*/
-
-/*
-class Well2 extends Obj { thisObj =>
-	type Config = WellConfigL2
-	type State = WellStateL2
-	
-	var sLabel_? : Option[String] = None
-	var holder_? : Option[PlateObj] = None
-	var index_? : Option[Int] = None
-	var bRequiresIntialLiq_? : Option[Boolean] = None
-	var reagent_? : Option[Reagent] = None
-	var nVolume_? : Option[LiquidVolume] = None
-	
-	override def getLabel(kb: KnowledgeBase): String = {
-		val s = new StringBuilder
-		holder_? match {
-			case Some(holder) =>
-				s.append(holder.getLabel(kb))
-				s.append(':')
-				index_? match {
-					case Some(index) =>
-						holder.dim_? match {
-							case None => s.append(index)
-							case Some(dim) =>
-								val iRow = index % dim.nRows
-								val iCol = index / dim.nRows
-								s.append((iRow+'A').asInstanceOf[Char])
-								s.append(iCol+1)
-						}
-					case None =>
-						s.append(toString)
-				}
-			case None =>
-				s.append(toString)
-		}
-		s.toString
-	}
-
-	def createConfigAndState0(): Result[Tuple2[Config, State]] = {
-		Error(Seq("well configs must be created separately"))
-	}
-	
-	def createConfigAndState0(states: StateMap): Result[Tuple2[Config, State]] = {
-		val errors = new ArrayBuffer[String]
-		
-		// Check Config vars
-		holder_? match {
-			case None => errors += "holder not set"
-			case Some(holder) =>
-				states.map.get(holder) match {
-					case None => errors += "well's holder is not listed in state map"
-						states.map.foreach(println)
-					case _ =>
-				}
-		}
-		val liquid_? : Option[Liquid] = reagent_? match {
-			case None => None
-			case Some(reagent) =>
-				states.map.get(reagent) match {
-					case None =>
-						errors += "well's reagent is not listed in state map"
-						None
-					case _ =>
-						Some(reagent.state(states).conf.liquid)
-				}
-		}
-		if (index_?.isEmpty)
-			errors += "index not set"
-				
-		if (bRequiresIntialLiq_?.getOrElse(false) && liquid_?.isEmpty)
-			errors += "must specify initial liquid for source wells"
-			
-		if (!errors.isEmpty)
-			return Error(errors)
-		
-		val holder = holder_?.get
-		val holderState = states(holder).asInstanceOf[PlateStateL2]
-		val bInitialVolumeKnown = nVolume_?.isDefined
-		val nVolume = nVolume_?.getOrElse(0.0)
-		val bCheckVolume = (bInitialVolumeKnown || bRequiresIntialLiq_? == Some(false))
-
-		val conf = new WellConfigL2(
-				obj = this,
-				holder = holderState.conf,
-				index = index_?.get,
-				bInitialVolumeKnown = bInitialVolumeKnown)
-		val state = new WellStateL2(
-				conf = conf,
-				plateState = holderState,
-				liquid = liquid_?.getOrElse(Liquid.empty),
-				nVolume = nVolume,
-				bCheckVolume = bCheckVolume)
-		
-		Success(conf, state)
-	}
-
-	//def stateWriter(map: HashMap[ThisObj, StateL2]) = new StateWriter(this, map)
-	def stateWriter(builder: StateBuilder): StateWriter = new StateWriter(builder.map)
-	
-	override def toString = sLabel_?.toString + " " + reagent_?
-}
-
-class WellConfigL2(
-	val obj: Well2,
-	val holder: Plate,
-	val index: Int,
-	val bInitialVolumeKnown: Boolean
-) extends ObjConfig with Ordered[WellConfigL2] { thisConf =>
-	type State = WellStateL2
-	
-	def iCol = index / holder.nRows
-	def iRow = index % holder.nRows
-	
-	def state(states: StateMap) = obj.state(states)
-
-	override def compare(that: WellConfigL2): Int = {
-		holder.compare(that.holder) match {
-			case 0 => index - that.index
-			case n => n
-		}
-	}
-	
-	override def toString = holder.sLabel + ":" + (iRow+'A').asInstanceOf[Char] + (iCol+1)
-}
-
-case class WellStateL2(
-	val conf: WellConfigL2,
-	val plateState: PlateStateL2,
-	val liquid: Liquid,
-	val nVolume: LiquidVolume,
-	/** Make sure that volume doesn't go below 0 */
-	val bCheckVolume: Boolean
-) extends ObjState
-*/

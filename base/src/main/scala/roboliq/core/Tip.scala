@@ -10,9 +10,12 @@ class TipBean extends Bean {
 }
 
 /**
- * Represents a tip for pipetting.
+ * Represents a tip/syringe for pipetting.
+ * More precisely, this represents a syringe which may or may not have a tip on it.
+ * Whether there is actually a tip on the syringe is indicated by [[roboliq.core.TipState]].
  * 
  * @see [[roboliq.core.TipModel]]
+ * @see [[roboliq.core.TipState]]
  * 
  * @param index unique internal index of this tip.
  * @param modelPermanent_? optional tip model if this tip is permanent.

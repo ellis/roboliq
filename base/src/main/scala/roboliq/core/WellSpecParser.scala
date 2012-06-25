@@ -1,22 +1,47 @@
 package roboliq.core
 
-import scala.util.parsing.combinator._
+import scala.util.parsing.combinator.JavaTokenParsers
 
 
+/**
+ * Represents a row and column index.
+ * 
+ * @param row row index (0-based).
+ * @param col column index (0-based).
+ */
 case class RowCol(row: Int, col: Int) {
 	override def toString: String = {
 		(row + 'A').asInstanceOf[Char].toString + ("%02d".format(col + 1))
 	}
 }
+/**
+ * Represents slots in an array of rows and columns (usually a well on a plate).
+ */
 sealed abstract class WellSpec
+/** A single well at a given row and column. */
 case class WellSpecOne(rc: RowCol) extends WellSpec
-/** A single well repeated multiple times */
+///** A single well repeated multiple times */
 //case class WellSpecN(rc: RowCol, n: Int) extends WellSpec
+/**
+ * The sequence of wells obtained by moving downward from `rc0` to `rc1`
+ * wrapping to the top of the next column when necessary.
+ */
 case class WellSpecVertical(rc0: RowCol, rc1: RowCol) extends WellSpec
+/**
+ * The sequence of wells obtained by moving rightward from `rc0` to `rc1`
+ * wrapping to the left of the next row when necessary.
+ */
 case class WellSpecHorizontal(rc0: RowCol, rc1: RowCol) extends WellSpec
+/**
+ * The sequence of wells obtained by selecting all wells in the rectangle
+ * with `rc0` in the top left corner and `rc1` in the bottom left corner.
+ */
 case class WellSpecMatrix(rc0: RowCol, rc1: RowCol) extends WellSpec
 
-object WellSpecParser extends JavaTokenParsers {
+
+private object WellSpecParser0 extends JavaTokenParsers {
+	import scala.util.parsing.combinator._
+
 	val row: Parser[Int] = """[A-Z]""".r ^^ { case s => s.charAt(0) - 'A' }
 	val col: Parser[Int] = """[0-9]+""".r ^^ { case s => s.toInt - 1 }
 	
@@ -106,7 +131,29 @@ object WellSpecParser extends JavaTokenParsers {
 			})
 		}
 	}
+}
+
+/**
+ * Parses a string of plates and wells.
+ */
+object WellSpecParser {
+	/**
+	 * Parse `input` as a string of plates and wells,
+	 * and return a list of tuples of referenced plate ID and the wells referenced on those plate.
+	 */
+	def parse(input: String): roboliq.core.Result[List[Tuple2[String, List[WellSpec]]]] =
+		WellSpecParser0.parse(input)
 	
+	/**
+	 * Parse `input` as a string of plates and wells,
+	 * and return a list of the referenced well IDs.
+	 */
+	def parseToIds(input: String, ob: ObjBase): roboliq.core.Result[List[String]] =
+		WellSpecParser0.parseToIds(input, ob)
+	
+	/**
+	 * Given a list of wells `lWell`, return a string representation.
+	 */
 	def toString(lWell: List[Well2], ob: ObjBase, sep: String): String = {
 		// Split list by plate
 		def partitionByPlate(lWell: List[Well2], accR: List[List[Well2]]): List[List[Well2]] = {

@@ -4,6 +4,18 @@ import scala.collection.mutable.HashMap
 import scala.reflect.BeanProperty
 
 
+/**
+ * State of [[roboliq.core.Tip]].
+ * Since [[roboliq.core.Tip]] is used to represent both a synringe and a tip,
+ * this class combines state information for both the syringe and its possibly
+ * attached tip.
+ * 
+ * @param conf the syringe/tip.
+ * @param model_? optional tip model on this syringe.
+ * @param src_? source well from which liquid was aspirated.
+ * @param liquid liquid in the tip.
+ * @param nVolume volume of liquid in the tip.
+ */
 case class TipState(
 	val conf: Tip,
 	val model_? : Option[TipModel],
@@ -24,6 +36,7 @@ case class TipState(
 }
 
 object TipState {
+	/** Create an initial state for `tip` with no liquid in it. */
 	def createEmpty(tip: Tip) = TipState(
 		conf = tip,
 		model_? = tip.modelPermanent_?,
@@ -41,6 +54,9 @@ object TipState {
 	)
 }
 
+/**
+ * Convenience class for modifying a tip's state.
+ */
 class TipStateWriter(o: Tip, builder: StateBuilder) {
 	def state = builder.findTipState(o.id).get
 	
@@ -134,14 +150,18 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 	}
 }
 
+/** Base class for tip events. */
 abstract class TipEventBean extends EventBeanA[TipState] {
 	protected def findState(id: String, query: StateQuery): Result[TipState] = {
 		query.findTipState(id)
 	}
 }
 
+/** Represents an aspiration event. */
 class TipAspirateEventBean extends TipEventBean {
+	/** ID of the source well. */
 	@BeanProperty var src: String = null
+	/** Volume in liters to aspirate. */
 	@BeanProperty var volume: java.math.BigDecimal = null
 	
 	protected def update(state0: TipState, query: StateQuery): Result[TipState] = {
@@ -169,7 +189,9 @@ class TipAspirateEventBean extends TipEventBean {
 	}
 }
 
+/** Factory object for [[roboliq.core.TipAspirateEvent]]. */
 object TipAspirateEventBean {
+	/** Event to aspirate `volume` from `src` with `tip`. */
 	def apply(tip: Tip, src: Well2, volume: LiquidVolume): TipAspirateEventBean = {
 		val bean = new TipAspirateEventBean
 		bean.obj = tip.id
@@ -177,18 +199,15 @@ object TipAspirateEventBean {
 		bean.volume = volume.l.bigDecimal
 		bean
 	}
-	/*def apply(tip: String, src: Well, volume: LiquidVolume): TipAspirateEventBean = {
-		val bean = new TipAspirateEventBean
-		bean.obj = tip
-		bean.src = src.id
-		bean.volume = volume.l.bigDecimal
-		bean
-	}*/
 }
 
+/** Represents an dispense event. */
 class TipDispenseEventBean extends TipEventBean {
+	/** ID of destination vessel. */
 	@BeanProperty var dest: String = null
+	/** Volume in liters to dispense. */
 	@BeanProperty var volume: java.math.BigDecimal = null
+	/** Position of the tip relative to liquid when dispensing (see [[roboliq.core.PipettePosition]]). */
 	@BeanProperty var position: String = null
 	
 	protected def update(state0: TipState, query: StateQuery): Result[TipState] = {
@@ -241,7 +260,9 @@ class TipDispenseEventBean extends TipEventBean {
 	}
 }
 
+/** Factory object for [[roboliq.core.TipDispenseEventBean]]. */
 object TipDispenseEventBean {
+	/** Event to dispense `volume` from `tip` to `dest` at `pos`. */
 	def apply(tip: Tip, dest: Well2, volume: LiquidVolume, pos: PipettePosition.Value): TipDispenseEventBean = {
 		val bean = new TipDispenseEventBean
 		bean.obj = tip.id
@@ -252,7 +273,9 @@ object TipDispenseEventBean {
 	}
 }
 
+/** Represents a tip cleaning event. */
 class TipCleanEventBean extends TipEventBean {
+	/** Degree/intensity of cleaning (see [roboliq.core.WashIntensity]]). */
 	@BeanProperty var degree: String = null
 	
 	protected def update(state0: TipState, query: StateQuery): Result[TipState] = {
@@ -266,7 +289,9 @@ class TipCleanEventBean extends TipEventBean {
 	}
 }
 
+/** Factory object for [[roboliq.core.TipCleanEventBean]]. */
 object TipCleanEventBean {
+	/** Event to clean a `tip` with the given intensity `degree`. */
 	def apply(tip: Tip, degree: WashIntensity.Value): TipCleanEventBean = {
 		val bean = new TipCleanEventBean
 		bean.obj = tip.id

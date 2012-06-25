@@ -4,15 +4,24 @@ import scalaz._
 import Scalaz._
 import java.text.DecimalFormat
 
-//import scala.collection
 
+/**
+ * Represents the contents of a vessel, i.e. the amounts of the substances it contains.
+ * 
+ * @param idVessel ID in database.
+ * @param mapSolventToVolume map from liquid to volume.
+ * @param mapSoluteToMol map from solute to amount in mol.
+ */
 class VesselContent(
 	val idVessel: String,
 	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
 	val mapSoluteToMol: Map[Substance, BigDecimal]
 ) {
+	/** Total liquid volume in vessel. */
 	val volume = mapSolventToVolume.values.foldLeft(LiquidVolume.empty){(acc,v) => acc + v}
+	/** A [[roboliq.core.Liquid]] representation of these contents. */
 	val liquid = createLiquid()
+	/** Doc strings for this object. */
 	val docContent = createDocContent()
 	
 	private def createLiquid(): Liquid = {
@@ -152,6 +161,9 @@ class VesselContent(
 		def append(s1: BigDecimal, s2: => BigDecimal) = s1 + s2
 	}
 	
+	/**
+	 * Return a new VesselContent from this one which has been scaled to a total volume of `volumeNew`.
+	 */
 	def scaleToVolume(volumeNew: LiquidVolume): VesselContent = {
 		if (volume.isEmpty)
 			return this
@@ -163,6 +175,9 @@ class VesselContent(
 		)
 	}
 	
+	/**
+	 * Return a new VesselContent combining `this` and `that`.
+	 */
 	def +(that: VesselContent): VesselContent = {
 		new VesselContent(
 			idVessel,
@@ -170,13 +185,17 @@ class VesselContent(
 			mapSoluteToMol |+| that.mapSoluteToMol
 		)
 	}
-	
-	//def append(a: VesselContent, b: VesselContent) = a + b
-	
+
+	/**
+	 * Return a new VesselContent combining `this` and `volume` of `that`.
+	 */
 	def addContentByVolume(that: VesselContent, volume: LiquidVolume): VesselContent = {
 		this + that.scaleToVolume(volume)
 	}
 	
+	/**
+	 * Return a new VesselContent combining `this` and `mol` of a non-liquid `substance`.
+	 */
 	def addPowder(substance: Substance, mol: BigDecimal): VesselContent = {
 		new VesselContent(
 			idVessel,
@@ -185,6 +204,9 @@ class VesselContent(
 		)
 	}
 	
+	/**
+	 * Return a new VesselContent combining `this` and `volume` of a liquid `substance`.
+	 */
 	def addLiquid(substance: SubstanceLiquid, volume: LiquidVolume): VesselContent = {
 		new VesselContent(
 			idVessel,
@@ -193,10 +215,16 @@ class VesselContent(
 		)
 	}
 
+	/**
+	 * Return a new VesselContent after removing `volume` of `this`.
+	 */
 	def removeVolume(volume: LiquidVolume): VesselContent = {
 		scaleToVolume(this.volume - volume)
 	}
-	
+
+	/**
+	 * Get the molar concentration of a non-liquid `substance`. 
+	 */
 	def concOfSubstance(substance: Substance): Result[BigDecimal] = {
 		if (volume.isEmpty)
 			return Success(0)
@@ -205,17 +233,10 @@ class VesselContent(
 			case Some(mol) => Success(mol / volume.l)
 		}
 	}
-	/*
-	def concOfSubstance(id: String): Result[BigDecimal] = {
-		mapSoluteToMol.find(pair => pair._1.id == id) match {
-			case None => Error("vessel does not contain `"+id+"`")
-			case Some(pair) => Success(pair._2 / volume.l)
-		}
-	}
-	*/
 }
 
 object VesselContent {
+	/** Empty contents for this given vessel. */
 	def createEmpty(idVessel: String) = {
 		new VesselContent(idVessel, Map(), Map())
 	}

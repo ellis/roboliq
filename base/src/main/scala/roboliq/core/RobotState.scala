@@ -5,8 +5,11 @@ import scala.collection.mutable.HashSet
 
 
 /**
- * Implementation of [[roboliq.core.StateQuery]] and base class for
- * both an immutable interface ([[scala.core.RobotState]]) and a mutable one ([[scala.core.StateBuilder]]). 
+ * Extension of [[roboliq.core.StateQuery]] which uses an [[roboliq.core.ObjBase]]
+ * to also get initial object state data and also provides access to objects by their ID.
+ * 
+ * It has an immutable implementation ([[scala.core.RobotState]])
+ * and a mutable one ([[scala.core.StateBuilder]]).
  */
 abstract class StateMap(ob: ObjBase) extends StateQuery {
 	/** Map from object ID to object state */
