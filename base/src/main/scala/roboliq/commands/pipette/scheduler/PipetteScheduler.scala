@@ -99,26 +99,6 @@ object PipetteScheduler {
 			new L3C_Pipette(args)
 		}
 	}
-
-	/*
-	private createItem(bean: PipetteCmdItemBean): Item = {
-		val srcs: SortedSet[Well] = SortedSet()
-		val dest: Well,
-		val nVolume: LiquidVolume,
-		val premix_? : Option[MixSpec],
-		val postmix_? : Option[MixSpec]
-	}
-		
-	@BeanProperty var src: String = null
-	@BeanProperty var dest: String = null
-	@BeanProperty var volume: List[java.math.BigDecimal] = null
-	@BeanProperty var premix: MixSpecBean = null
-	@BeanProperty var postmix: MixSpecBean = null
-	//tipOverrides
-	@BeanProperty var policy: String = null
-	@BeanProperty var tipModel: String = null
-	*/
-	
 }
 
 class PipetteScheduler(
