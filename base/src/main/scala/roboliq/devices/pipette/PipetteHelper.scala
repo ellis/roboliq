@@ -47,7 +47,7 @@ object PipetteHelper {
 
 		for {
 			temp1 <- getHolderWellsCol(states, wells, twsPrev)
-			val (idPlate, lWellPosOnHolder, iCol) = temp1
+			(idPlate, lWellPosOnHolder, iCol) = temp1
 			//lWellPos <- getWellPosList(states, wellsOnHolder)
 			well0 <- getFirstWell(states, idPlate, lWellPosOnHolder, iCol)
 			plate <- states.findPlate(idPlate)

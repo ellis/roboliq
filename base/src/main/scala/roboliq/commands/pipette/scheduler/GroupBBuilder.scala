@@ -218,9 +218,7 @@ class GroupBBuilder(
 			val bDropTip = !tipState.model_?.isEmpty && !mTipToModel.contains(tip)
 			val bReplace = bGetTip || (overrides.replacement_? match {
 				case Some(TipReplacementPolicy.ReplaceAlways) => true
-				case Some(TipReplacementPolicy.KeepBetween) => false
-				case Some(TipReplacementPolicy.KeepAlways) => false
-				case None => false
+				case _ => false
 			})
 			if (bDropTip)
 				Some(DropSpec2(tip))

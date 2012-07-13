@@ -266,10 +266,10 @@ class ObjBase(bb: BeanBase) {
 		for {
 			lPlateWellSpec <- WellSpecParser.parse(id)
 			_ <- Result.assert(lPlateWellSpec.length == 1, "must provide a single well ID instead of `"+id+"`")
-			val (idPlate, lWellSpec) = lPlateWellSpec.head
+			(idPlate, lWellSpec) = lPlateWellSpec.head
 			_ <- Result.assert(lWellSpec.length == 1, "must provide a single well location instead of `"+id+"`")
 			_ <- Result.assert(lWellSpec.head.isInstanceOf[WellSpecOne], "must provide a simple well ID instead of `"+id+"`")
-			val wellSpec = lWellSpec.head.asInstanceOf[WellSpecOne]
+			wellSpec = lWellSpec.head.asInstanceOf[WellSpecOne]
 			plate <- findPlate(idPlate)
 		} yield {
 			val index = wellSpec.rc.col * plate.model.nRows + wellSpec.rc.row
