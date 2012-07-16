@@ -4,7 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.10.0-M4"
 
-scalacOptions ++= Seq("-unchecked", "-deprecation")
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
 initialCommands in console := """
   import roboliq.core._

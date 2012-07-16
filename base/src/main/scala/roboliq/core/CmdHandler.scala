@@ -9,7 +9,7 @@ import scala.reflect.BeanProperty
  * context of the command in the overall protocol.
  * @see [[roboliq.core.CmdHandler]]
  */
-sealed abstract class Expand1Result
+sealed trait Expand1Result
 /** Indicates that the first expansion had errors. */
 case class Expand1Errors() extends Expand1Result
 /** Indicates that the first expansion produced a list of child commands. */
