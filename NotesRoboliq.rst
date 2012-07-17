@@ -185,6 +185,21 @@ Mixture:
 
 Combinatorial Mixture:
 
+Parsing steps for pipetting command
+-----------------------------------
+
+#) Filter out items with 0 volumes.
+#) Determine tip model for each item.
+#) Divide items with excessive volumes into multiple items.
+#) Group items into cycles (the method for grouping should be exchangable, as the various methods described above)
+#) Optimize when tip cleaning is performed
+
+Grouping into cycles consists of multiple components.
+
+* A function to determine whether the next item can be added to a cycle (i.e. whether the robot can handle it).
+* A function to determine whether we want to add that item to the current cycle.
+* A cost function? I'm not sure how this would work, since cleaning should be optimized before calculating cost.
+* A search algorithm to find a path to the solution (e.g. greedy, A*).
 
 Tip Handling
 ============

@@ -13,6 +13,7 @@ import roboliq.devices.pipette._
 import java.io.FileWriter
 
 
+// REFACTOR: get rid of this and L3C_Pipette
 object PipetteScheduler {
 	def createL3C(bean: PipetteCmdBean, query: StateQuery): Result[L3C_Pipette] = {
 		for {
@@ -29,7 +30,7 @@ class PipetteScheduler(
 	val cmd: L3C_Pipette
 ) {
 	private val lTipAll: SortedSet[Tip] = device.getTips.map(_.state(ctx.states).conf)
-	private val builderA = new GroupABuilder(device, ctx, cmd)
+	private val builderA = new GroupABuilder1(device, ctx, cmd)
 	private val builderB = new GroupBBuilder(device, ctx)
 	private var lnScore: Array[Double] = null
 	private var lGroupA: Array[GroupA] = null
@@ -44,9 +45,9 @@ class PipetteScheduler(
 	def translate(): Result[Seq[CmdBean]] = {
 		val states = ctx.states.toBuilder
 		val res = for {
-			items0 <- builderA.filterItems(cmd.args.items)
-			mItemToState0 = builderA.getItemStates(items0)
-			pair <- builderA.tr1Items(items0, mItemToState0)
+			items0 <- Preprocessor.filterItems(cmd.args.items)
+			mItemToState0 = Preprocessor.getItemStates(ctx, items0)
+			pair <- Preprocessor.assignLMs(device, ctx, items0, mItemToState0)
 			(items, mItemToState, mLM) = pair 
 		} yield {
 			if (items.isEmpty)
@@ -213,18 +214,18 @@ class PipetteScheduler(
 			// ENDIF
 			fw.write(item.toString()+"\n")
 			builderA.addItemToGroup(acc.head, item) match {
-				case err: builderA.GroupError =>
+				case err: GroupError =>
 					println("Error in x2R:")
 					println(err)
 					fw.write("error: "+err.lsError+"\n\n")
 					acc
-				case stop: builderA.GroupStop =>
+				case stop: GroupStop =>
 					fw.write("stop: "+stop.sReason+"\n")
 					fw.write(stop.groupA.toString+"\n\n")
 					//println("stop:"+stop);
 					//println("prev:"+acc.head)
 					acc
-				case builderA.GroupSuccess(g) =>
+				case GroupSuccess(g) =>
 					fw.write("GROUP: "+iItemParent+" >-< "+g.lItem.size+" = @"+(iItemParent+g.lItem.size)+"\n")
 					fw.write(g.toString()+"\n\n")
 					x2R(rest, iItemParent, g :: acc)
