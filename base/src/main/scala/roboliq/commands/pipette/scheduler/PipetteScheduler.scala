@@ -43,12 +43,11 @@ class PipetteScheduler(
 	fw.write("\n")
 	
 	def translate(): Result[Seq[CmdBean]] = {
-		val states = ctx.states.toBuilder
 		val res = for {
 			items0 <- Preprocessor.filterItems(cmd.args.items)
-			mItemToState0 = Preprocessor.getItemStates(ctx, items0)
-			pair <- Preprocessor.assignLMs(device, ctx, items0, mItemToState0)
-			(items, mItemToState, mLM) = pair 
+			mItemToState0 = Preprocessor.getItemStates(items0, ctx.states)
+			pair <- Preprocessor.assignLMs(items0, mItemToState0, device, ctx.states)
+			(items, mItemToState, mLM) = pair
 		} yield {
 			if (items.isEmpty)
 				return Success(Nil)
@@ -203,6 +202,10 @@ class PipetteScheduler(
 		}
 	}
 	
+	/**
+	 * Add as many items into a group as possible.
+	 * @return reverse list of groups, one for each additional item (head contains as many items as could be joined, last is the empty group).
+	 */
 	private def x2R(lItem: List[Item], iItemParent: Int, acc: List[GroupA]): List[GroupA] = lItem match {
 		case Nil => acc
 		case item :: rest =>

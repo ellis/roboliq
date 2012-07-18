@@ -32,9 +32,9 @@ object Preprocessor {
 		ItemState(item, content, state0, state1)
 	}
 	
-	def getItemStates(ctx: ProcessorContext, items: Seq[Item]): Map[Item, ItemState] = {
-		val states = ctx.states.toBuilder
-		items.map(item => item -> createItemState(item, states)).toMap
+	def getItemStates(items: Seq[Item], state0: RobotState): Map[Item, ItemState] = {
+		val builder = state0.toBuilder
+		items.map(item => item -> createItemState(item, builder)).toMap
 	}
 	
 	private def chooseTipModels(device: PipetteDevice, items: Seq[Item], mItemToState: Map[Item, ItemState]): Map[Liquid, TipModel] = {
@@ -114,7 +114,7 @@ object Preprocessor {
 	 * 
 	 * @return list of items with guarantee of sufficiently small volumes, new map from item to state, and map from item to LM (liquid and tip model).
 	 */
-	def assignLMs(device: PipetteDevice, ctx: ProcessorContext, items: Seq[Item], mItemToState: Map[Item, ItemState]): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
+	def assignLMs(items: Seq[Item], mItemToState: Map[Item, ItemState], device: PipetteDevice, state0: RobotState): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
 		val mapLiquidToTipModel = chooseTipModels(device, items, mItemToState)
 		var bRebuild = false
 		val lLM = items.flatMap(item => {
@@ -136,11 +136,11 @@ object Preprocessor {
 		val mLM = lLM.toMap
 		
 		// Need to create ItemState objects for any items which were split due to large volumes
-		val states = ctx.states.toBuilder
+		val builder = state0.toBuilder
 		val mItemToState1 = items1.map(item => {
 			mItemToState.get(item) match {
 				case Some(itemState) => item -> itemState
-				case _ => item -> createItemState(item, states)
+				case _ => item -> createItemState(item, builder)
 			}
 		}).toMap
 		

@@ -185,8 +185,8 @@ Mixture:
 
 Combinatorial Mixture:
 
-Parsing steps for pipetting command
------------------------------------
+Processing steps for pipetting command
+--------------------------------------
 
 #) Filter out items with 0 volumes.
 #) Determine tip model for each item.
