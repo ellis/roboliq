@@ -49,7 +49,12 @@ object Item {
 }
 */
 
-case class ItemState(item: Item, srcContent: VesselContent, destState0: WellState, destState1: WellState)
+case class ItemState(
+	item: Item,
+	srcContent: VesselContent,
+	destState0: WellState,
+	destState1: WellState
+)
 
 private class TipStatus(val tip: Tip) {
 	var liquid: Liquid = null

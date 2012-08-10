@@ -7,7 +7,7 @@ import scala.reflect.BeanProperty
  * YAML JavaBean for [[roboliq.core.MixSpec]].
  */
 class MixSpecBean extends Bean {
-	/** Volume for mixing. */
+	/** Volume (in liters) for mixing. */
 	@BeanProperty var volume: java.math.BigDecimal = null
 	/** Number of times to mix. */
 	@BeanProperty var count: java.lang.Integer = null
@@ -47,5 +47,14 @@ object MixSpec {
 			nCount_? = if (bean.count != null) Some(bean.count) else None,
 			mixPolicy_? = if (bean.policy != null) Some(PipettePolicy.fromName(bean.policy)) else None
 		)
+	}
+	
+	/** Convert from MixSpec to a MixSpecBean. */
+	def toBean(mixSpec: MixSpec): MixSpecBean = {
+		val bean = new MixSpecBean
+		bean.volume = mixSpec.nVolume_?.map(_.l.bigDecimal).orNull
+		bean.count = mixSpec.nCount_?.orNull
+		bean.policy = mixSpec.mixPolicy_?.map(_.id).orNull
+		bean
 	}
 }

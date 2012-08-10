@@ -114,7 +114,12 @@ object Preprocessor {
 	 * 
 	 * @return list of items with guarantee of sufficiently small volumes, new map from item to state, and map from item to LM (liquid and tip model).
 	 */
-	def assignLMs(items: Seq[Item], mItemToState: Map[Item, ItemState], device: PipetteDevice, state0: RobotState): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
+	def assignLMs(
+		items: Seq[Item],
+		mItemToState: Map[Item, ItemState],
+		device: PipetteDevice,
+		state0: RobotState
+	): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
 		val mapLiquidToTipModel = chooseTipModels(device, items, mItemToState)
 		var bRebuild = false
 		val lLM = items.flatMap(item => {
