@@ -24,7 +24,7 @@ class MixSpecBean extends Bean {
  */
 case class MixSpec(
 	val nVolume_? : Option[LiquidVolume],
-	val nCount_? : Option[Int],
+	val nCount_? : Option[Integer],
 	val mixPolicy_? : Option[PipettePolicy] = None
 ) {
 	/**

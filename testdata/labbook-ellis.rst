@@ -267,7 +267,7 @@ However, I need to reprogram the script because a) the plate must be at a differ
 * Mix Buf(1/20)+FlA(1/10000)
 * Mix 
 
-(2012-06-11) Hmm, I didn't finish the above notes...  Had lots of problems with volume detection, but fixed them eventually.  The first and second wells go mixed quite a few times due to running the script multiple times till the errors were ironed out, so I don't include the first well in the measurements below.  Anyhow, here are the results as copied from an email I sent to Fabian:
+(2012-06-11) Hmm, I didn't finish the above notes...  Had lots of problems with volume detection, but fixed them eventually.  The first and second wells got mixed quite a few times due to running the script multiple times till the errors were ironed out, so I don't include the first well in the measurements below.  Anyhow, here are the results as copied from an email I sent to Fabian:
 
 The readout on the black nunc wells is:
 

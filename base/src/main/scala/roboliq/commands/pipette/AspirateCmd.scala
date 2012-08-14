@@ -49,6 +49,7 @@ class SpirateCmdItemBean {
 	@BeanProperty var well: String = null
 	@BeanProperty var volume: java.math.BigDecimal = null
 	@BeanProperty var policy: String = null
+	@BeanProperty var mixSpec: MixSpecBean = null
 	
 	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[SpirateTokenItem] = {
 		node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")

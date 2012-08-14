@@ -1,22 +1,21 @@
 package roboliq.commands.pipette.scheduler
 
+import scalaz.{Success => _, _}
+import scalaz.Scalaz._
+
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.SortedSet
 import scala.collection.JavaConversions._
 
-import scalaz._
-import Scalaz._
-
 import roboliq.core._
+import roboliq.core.Core._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette.PipetteDevice
 
 sealed trait PipetteStep
 case class PipetteStep_Clean(mTipToSpec: Map[Tip, CleanSpec2]) extends PipetteStep
-case class PipetteStep_PreMix(item_l: Seq[Item]) extends PipetteStep
 case class PipetteStep_Aspirate(item_l: Seq[Item]) extends PipetteStep
 case class PipetteStep_Dispense(item_l: Seq[Item]) extends PipetteStep
-case class PipetteStep_PostMix(item_l: Seq[Item]) extends PipetteStep
 
 
 /**
@@ -25,83 +24,30 @@ case class PipetteStep_PostMix(item_l: Seq[Item]) extends PipetteStep
  */
 case class PipetteGroup(
 	clean_l: Seq[PipetteStep_Clean],
-	preMix_l: Seq[PipetteStep_PreMix],
 	aspirate_l: Seq[PipetteStep_Aspirate],
-	dispense_l: Seq[PipetteStep_Dispense],
-	postMix_l: Seq[PipetteStep_PostMix]
+	dispense_l: Seq[PipetteStep_Dispense]
 )
 
-object PipetteStepGroupMonoid extends Monoid[PipetteGroup] {
-	def zero = PipetteGroup(Nil, Nil, Nil, Nil, Nil)
-	def append(a: PipetteGroup, b: PipetteGroup): PipetteGroup = {
+object PipetteGroupMonoid extends Monoid[PipetteGroup] {
+	val zero = PipetteGroup(Nil, Nil, Nil)
+	def append(a: PipetteGroup, b: => PipetteGroup): PipetteGroup = {
 		PipetteGroup(
 			a.clean_l ++ b.clean_l,
-			a.preMix_l ++ b.preMix_l,
 			a.aspirate_l ++ b.aspirate_l,
-			a.dispense_l ++ b.dispense_l,
-			a.postMix_l ++ b.postMix_l
+			a.dispense_l ++ b.dispense_l
 		)
 	}
 }
 
-/*
-private class PipettePlanner(
-	val device: PipetteDevice,
-	val ctx: ProcessorContext,
-	val cmd: L3C_Pipette
-) {
-	def run {
-		val res = for {
-			items0 <- Preprocessor.filterItems(cmd.args.items)
-			mItemToState0 = Preprocessor.getItemStates(items0, ctx.states)
-			tuple <- Preprocessor.assignLMs(items0, mItemToState0, device, ctx.states)
-			(items, mItemToState, mLM) = tuple
-			group_l = itemsToGroupList(items)
-		} yield group_l
-	}
-	
-	private def itemsToGroupList(item_l: Seq[Item]): Seq[PipetteGroup] = {
-		item_l map { item =>
-			PipetteGroup(
-				Seq(),
-				Seq(PipetteStep_PreMix(Seq(item))), // Only if source should pre-mixed 
-				Seq(PipetteStep_Aspirate(Seq(item))),
-				Seq(PipetteStep_Dispense(Seq(item))),
-				Seq(PipetteStep_PostMix(Seq(item))) // Only if dest should post-mixed
-			)
-		}
-	}
-	
-	def itemsToOptimizedGroups(
-		item_l: Seq[Item],
-		mItemToState: Map[Item, ItemState],
-		mLM: Map[Item, LM]
-	): Result[Seq[PipetteGroup]] = {
-		val group0_l = itemsToGroupList(item_l)
-		for {
-			group1_l <- initialGroupsToJoinedGroups(group0_l, mItemToState, mLM)
-			group2_l <- joinedGroupsToOptimizedGroups(group1_l, mItemToState, mLM)
-		} yield group2_l
-	}
-	
-	def initialGroupsToJoinedGroups(
-		group_l: Seq[PipetteGroup],
-		mItemToState: Map[Item, ItemState],
-		mLM: Map[Item, LM]
-	): Result[Seq[PipetteGroup]]
-	
-	def joinedGroupsToOptimizedGroups(
-		group_l: Seq[PipetteGroup],
-		mItemToState: Map[Item, ItemState],
-		mLM: Map[Item, LM]
-	): Result[Seq[PipetteGroup]]
-}
-*/
-
-case class PipetteCmdData(
-	item_l: Seq[Item],
-	itemToState_m: Map[Item, ItemState],
-	itemToLM_m: Map[Item, LM]
+case class PipetteGroupData(
+	group: PipetteGroup,
+	itemToTip_m: Map[Item, Tip],
+	tipToSrc_m: Map[Tip, Well2],
+	tipToVolume_m: Map[Tip, LiquidVolume],
+	aspiratePolicy_m: Map[Tip, PipettePolicy],
+	dispensePolicy_m: Map[Well2, PipettePolicy],
+	preMixSpec_m: Map[Tip, MixSpec],
+	postMixSpec_m: Map[Well2, MixSpec]
 )
 
 
@@ -112,13 +58,15 @@ abstract class PipetteItemGrouper {
 		mLM: Map[Item, LM],
 		device: PipetteDevice,
 		ctx: ProcessorContext
-	): Result[
-		Tuple2[
-			Seq[PipetteGroup],
-			Map[Item, Tip]
-		]
-	]
+	): Result[Seq[PipetteGroupData]]
 }
+
+/*
+case class PipetteCmdData(
+	item_l: Seq[Item],
+	itemToState_m: Map[Item, ItemState],
+	itemToLM_m: Map[Item, LM]
+)
 
 abstract class PipetteSearcher {
 	def optimizeGroup(group: PipetteGroup): Result[PipetteGroup]
@@ -133,6 +81,7 @@ abstract class PipetteSearcher {
 		ctx: ProcessorContext
 	): Result[Tuple2[Seq[PipetteGroup], Map[Item, Int]]]
 }
+*/
 
 /*
 What I'm trying to do:
@@ -193,48 +142,35 @@ object PipettePlanner {
 			mItemToState0 = Preprocessor.getItemStates(items0, state0)
 			tuple <- Preprocessor.assignLMs(items0, mItemToState0, device, state0)
 			(item_l, mItemToState, mLM) = tuple
-			(group_l, mItemToTip) <- grouper.groupItems(item_l, mItemToState, mLM, device, ctx)
-			cmd_l <- createCommands(group_l, mItemToTip)
+			groupData_l <- grouper.groupItems(item_l, mItemToState, mLM, device, ctx)
+			// TODO: optimize cleaning
+			cmd_l <- createCommands(groupData_l, device)
 		} yield cmd_l
 	}
 	
 	def createCommands(
-		group_l: Seq[PipetteGroup],
-		mItemToTip: Map[Item, Tip]
+		groupData_l: Seq[PipetteGroupData],
+		device: PipetteDevice
 	): Result[Seq[CmdBean]] = {
-		group_l flatMap groupToCommands
+		roboliq.core.Success(groupData_l.flatMap{ groupData =>
+			 groupToCommands(device)(groupData) match {
+				 case roboliq.core.Success(l) => l
+				 case roboliq.core.Error(ls) => return Error(ls)
+			 }
+		})
 	}
 	
 	private def groupToCommands(
-		mItemToTip: Map[Item, Tip],
 		device: PipetteDevice
 	)(
-		group: PipetteGroup
+		groupData: PipetteGroupData
 	): Result[Seq[CmdBean]] = {
-		group.clean_l.map(step => createCleanCommand(step, device)) ++
-		group.preMix_l.map(cc) ++
-		group.aspirate_l.map(cc) ++
-		group.dispense_l.map(cc) ++
-		group.postMix_l.map(cc)
+		val group = groupData.group
+		val l1 = group.clean_l.flatMap(step => createCleanCommand(step, device))
+		val l2 = group.aspirate_l.map(step => createAspirateCmd(step, groupData))
+		val l3 = group.dispense_l.map(step => createDispenseCmd(step, groupData))
+		Success(l1 ++ l2 ++ l3)
 	}
-
-	/*
-	def createCommand(
-		mItemToTip: Map[Item, Tip]
-	)(
-		step: PipetteStep,
-	): Result[CmdBean] = {
-		step match {
-			case PipetteStep_PreClean(item_l) => createCleanCommand
-			case PipetteStep_PreMix(item_l)
-			case PipetteStep_Aspirate(item_l)
-			case PipetteStep_Dispense(item_l)
-			case PipetteStep_PostMix(item_l)
-			case PipetteStep_PostClean(item_l)
-		}
-		
-	}
-	*/
 
 	private def createCleanCommand(
 		step: PipetteStep_Clean,
@@ -285,21 +221,55 @@ object PipettePlanner {
 		lReplace ++ lWash
 	}
 	
-	private def createMixCommand(
-		item_l: Seq[Item],
-	): Seq[CmdBean] = {
-		val bean = new MixCmdBean
-		bean.items = (item_l.map)
-	@BeanProperty var tip: String = null
-	@BeanProperty var well: String = null
-	@BeanProperty var mixSpec: MixSpecBean = null
-		@BeanProperty var items: java.util.List[MixCmdItemBean] = null
-		@BeanProperty var mixSpec: MixSpecBean = null
+	private def createAspirateCmd(
+		step: PipetteStep_Aspirate,
+		groupData: PipetteGroupData
+	): CmdBean = {
+		val bean = new AspirateCmdBean
+		bean.items = step.item_l.map(item => createAspirateCmdItem(item, groupData))
+		bean
 	}
 	
-	// QUESTION: At what level should commands be made into units
 	
-	//private def create MixSpec
+	private def createAspirateCmdItem(
+		item: Item,
+		groupData: PipetteGroupData
+	): SpirateCmdItemBean = {
+		val bean = new SpirateCmdItemBean
+		val tip = groupData.itemToTip_m(item)
+		val src = groupData.tipToSrc_m(tip)
+		val mixSpec = groupData.preMixSpec_m(tip)
+		bean.tip = tip.id
+		bean.well = src.id
+		bean.volume = groupData.tipToVolume_m(tip).l.bigDecimal
+		bean.policy = groupData.aspiratePolicy_m(tip).id
+		bean.mixSpec = MixSpec.toBean(mixSpec)
+		bean
+	}
+	
+	private def createDispenseCmd(
+		step: PipetteStep_Dispense,
+		groupData: PipetteGroupData
+	): CmdBean = {
+		val bean = new DispenseCmdBean
+		bean.items = step.item_l.map(item => createDispenseCmdItem(item, groupData))
+		bean
+	}
+	
+	private def createDispenseCmdItem(
+		item: Item,
+		groupData: PipetteGroupData
+	): SpirateCmdItemBean = {
+		val bean = new SpirateCmdItemBean
+		val tip = groupData.itemToTip_m(item)
+		val mixSpec = groupData.preMixSpec_m(tip)
+		bean.tip = tip.id
+		bean.well = item.dest.id
+		bean.volume = item.nVolume.l.bigDecimal
+		bean.policy = groupData.dispensePolicy_m(item.dest).id
+		bean.mixSpec = MixSpec.toBean(mixSpec)
+		bean
+	}
 }
 
 object PipetteUtils {
@@ -307,10 +277,8 @@ object PipetteUtils {
 		val item_l = Seq(item)
 		PipetteGroup(
 			Seq(),
-			Seq(PipetteStep_PreMix(item_l)),
 			Seq(PipetteStep_Aspirate(item_l)),
-			Seq(PipetteStep_Dispense(item_l)),
-			Seq(PipetteStep_PostMix(item_l))
+			Seq(PipetteStep_Dispense(item_l))
 		)
 	}
 	
