@@ -140,6 +140,15 @@ sealed abstract class Result[+A] extends Product {
 	  */
 	@inline final def toOption: Option[A] =
 		if (isEmpty) None else Some(this.get)
+	
+	/**
+     * Catamorphism over the result. Returns the provided function `success` applied to item contained in the Result
+     * if it is defined, otherwise, the provided value `error`.
+     */
+	def cata[X](success: A => X, error: => X): X = this match {
+		case Error(ls) => error
+		case Success(a) => success(a)
+	}
 }
 
 /**
