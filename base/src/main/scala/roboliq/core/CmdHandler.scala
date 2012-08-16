@@ -2,6 +2,8 @@ package roboliq.core
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 
 /**
@@ -67,11 +69,11 @@ abstract class CmdHandler {
  * a type parameters `A` of the CmdBean class it will process in order to
  * guarantee more type safety for derived handlers.
  */
-abstract class CmdHandlerA[A <: CmdBean : Manifest] extends CmdHandler {
+abstract class CmdHandlerA[A <: CmdBean : ClassTag] extends CmdHandler {
 	type CmdType = A
 	
 	def canHandle(command: CmdBean): Boolean = {
-		manifest[A].erasure.isInstance(command)
+		classTag[A].runtimeClass.isInstance(command)
 	}
 
 	def expand1(command: CmdBean, messages: CmdMessageWriter): Expand1Result = {

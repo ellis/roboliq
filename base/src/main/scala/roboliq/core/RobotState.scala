@@ -2,6 +2,8 @@ package roboliq.core
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import scala.reflect.ClassTag
+import scala.reflect.classTag
 
 
 /**
@@ -105,8 +107,8 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
  */
 class RobotState(ob: ObjBase, val map: Map[String, Object]) extends StateMap(ob) {
 	/** Get a map to only those states with the given type `State`. */
-	def filterByValueType[State <: Object](implicit m: Manifest[State]): Map[String, State] = {
-		map.filter(pair => m.erasure.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
+	def filterByValueType[State <: Object : ClassTag]: Map[String, State] = {
+		map.filter(pair => classTag.runtimeClass.isInstance(pair._2)).mapValues(_.asInstanceOf[State])
 	}
 	
 	/** Create a mutable state builder from this immutable state map. */

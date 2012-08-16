@@ -1,6 +1,7 @@
 package roboliq.core
 
 import scala.reflect.BeanProperty
+import scala.reflect.ClassTag
 
 /**
  * Base class for all events which change the state of an object.
@@ -24,7 +25,7 @@ abstract class EventBean {
  * to improve static type checking.
  * All events should probably be derived from this class.
  */
-abstract class EventBeanA[A <: Object : Manifest] extends EventBean {
+abstract class EventBeanA[A <: Object : ClassTag] extends EventBean {
 	def update(builder: StateBuilder): Result[Unit] = {
 		for {
 			_ <- Result.getNonNull(obj, "event must have an object ID reference")

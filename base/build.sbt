@@ -2,7 +2,7 @@ name := "base"
 
 version := "1.0"
 
-scalaVersion := "2.10.0-M4"
+scalaVersion := "2.10.0-M5"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
@@ -10,14 +10,11 @@ initialCommands in console := """
   import roboliq.core._
 """
 
-libraryDependencies += "commons-io" % "commons-io" % "2.2"
-
-//libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test"
-libraryDependencies += "org.scalatest" % "scalatest_2.10.0-M4" % "1.9-2.10.0-M4-B2"
-
-//libraryDependencies += "org.scalaz" %% "scalaz-core" % "6.0.4"
-libraryDependencies += "org.scalaz" % "scalaz-core_2.10.0-M4" % "6.0.4"
-
-libraryDependencies += "org.yaml" % "snakeyaml" % "1.10"
-
-libraryDependencies += "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
+libraryDependencies ++= Seq(
+	"org.scala-lang" % "scala-reflect" % "2.10.0-M5",
+	"commons-io" % "commons-io" % "2.2",
+	"org.scalatest" % "scalatest_2.10.0-M5" % "1.9-2.10.0-M5-B2",
+	"org.scalaz" % "scalaz-core_2.10.0-M5" % "6.0.4",
+	"org.yaml" % "snakeyaml" % "1.10",
+	"com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
+)
