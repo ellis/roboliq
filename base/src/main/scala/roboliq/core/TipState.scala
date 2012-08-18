@@ -96,7 +96,8 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 	def dispense(nVolumeDisp: LiquidVolume, liquidDest: Liquid, pos: PipettePosition.Value) {
 		pos match {
 			case PipettePosition.WetContact => dispenseIn(nVolumeDisp, liquidDest)
-			case _ => dispenseFree(nVolumeDisp)
+			case PipettePosition.Free => dispenseFree(nVolumeDisp)
+			case PipettePosition.DryContact => dispenseFree(nVolumeDisp)
 		}
 	}
 	

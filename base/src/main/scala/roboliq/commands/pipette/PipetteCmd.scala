@@ -5,6 +5,7 @@ import scala.reflect.BeanProperty
 import roboliq.core._
 import roboliq.commands.pipette.scheduler.PipetteScheduler
 import roboliq.devices.pipette.PipetteDevice
+import roboliq.commands.pipette.scheduler.L3C_Pipette
 
 
 class PipetteCmdBean extends CmdBean {
@@ -62,6 +63,18 @@ class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean] {
 		ctx: ProcessorContext,
 		messages: CmdMessageWriter
 	): Expand2Result = {
+		scheduler.PipettePlanner.run(
+			bean = cmd,
+			grouper = new method.SimpleGrouper01,
+			device = device,
+			ctx = ctx
+		) match {
+			case Error(ls) => ls.foreach(ctx.node.addError); Expand2Errors()
+			case Success((cmd, cmd_l)) =>
+				val (doc, docMarkDown) = L3C_Pipette(cmd).toDocString(ctx.ob, ctx.states)
+				Expand2Cmds(cmd_l.toList, Nil, doc, docMarkDown)
+		}
+		/*
 		PipetteScheduler.createL3C(cmd, ctx.states) match {
 			case Error(ls) => ls.foreach(ctx.node.addError); Expand2Errors()
 			case Success(l3c) =>
@@ -73,5 +86,6 @@ class PipetteCmdHandler extends CmdHandlerA[PipetteCmdBean] {
 						Expand2Cmds(l.toList, Nil, doc, docMarkDown)
 				}
 		}
+		*/
 	}
 }

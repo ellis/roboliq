@@ -134,7 +134,7 @@ object PipettePlanner {
 		grouper: PipetteItemGrouper,
 		device: PipetteDevice,
 		ctx: ProcessorContext
-	): Result[Seq[CmdBean]] = {
+	): Result[(PipetteCmd, Seq[CmdBean])] = {
 		val state0 = ctx.states
 		for {
 			cmd <- PipetteCmd.fromBean(bean, state0)
@@ -145,7 +145,7 @@ object PipettePlanner {
 			groupData_l <- grouper.groupItems(item_l, mItemToState, mLM, device, ctx)
 			// TODO: optimize cleaning
 			cmd_l <- createCommands(groupData_l, device)
-		} yield cmd_l
+		} yield (cmd, cmd_l)
 	}
 	
 	def createCommands(
@@ -238,12 +238,12 @@ object PipettePlanner {
 		val bean = new SpirateCmdItemBean
 		val tip = groupData.itemToTip_m(item)
 		val src = groupData.tipToSrc_m(tip)
-		val mixSpec = groupData.preMixSpec_m(tip)
+		val mixSpec_? = groupData.preMixSpec_m.get(tip)
 		bean.tip = tip.id
 		bean.well = src.id
 		bean.volume = groupData.tipToVolume_m(tip).l.bigDecimal
 		bean.policy = groupData.aspiratePolicy_m(tip).id
-		bean.mixSpec = MixSpec.toBean(mixSpec)
+		bean.mixSpec = mixSpec_?.map(MixSpec.toBean).orNull
 		bean
 	}
 	
@@ -262,12 +262,12 @@ object PipettePlanner {
 	): SpirateCmdItemBean = {
 		val bean = new SpirateCmdItemBean
 		val tip = groupData.itemToTip_m(item)
-		val mixSpec = groupData.preMixSpec_m(tip)
+		val mixSpec_? = groupData.preMixSpec_m.get(tip)
 		bean.tip = tip.id
 		bean.well = item.dest.id
 		bean.volume = item.nVolume.l.bigDecimal
 		bean.policy = groupData.dispensePolicy_m(item.dest).id
-		bean.mixSpec = MixSpec.toBean(mixSpec)
+		bean.mixSpec = mixSpec_?.map(MixSpec.toBean).orNull
 		bean
 	}
 }

@@ -20,19 +20,23 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 		ctx: ProcessorContext
 	): Result[Seq[PipetteGroupData]] = {
 		var states = ctx.states
-		item_l map {item =>
-			createGroup(item, mItemToState, mLM, device, ctx, states)
+		val builder = states.toBuilder
+		val group_l = item_l map {item =>
+			createGroup(item, mItemToState(item), mLM, device, ctx, builder) match {
+				case Error(ls) => return Error(ls)
+				case Success(group) => group
+			}
 		}
-		Success(Nil)
+		Success(group_l)
 	}
 	
 	private def createGroup(
 		item: Item,
-		mItemToState: Map[Item, ItemState],
+		itemState: ItemState,
 		mLM: Map[Item, LM],
 		device: PipetteDevice,
 		ctx: ProcessorContext,
-		state0: RobotState
+		builder: StateBuilder
 	): Result[PipetteGroupData] = {
 		val lm = mLM(item)
 		val group = PipetteGroup(
@@ -45,15 +49,18 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 		for {
 			tip_l <- device.assignTips(device.getTips, lm.tipModel, 1)
 			tip = tip_l.head
-			src0_l <- state0.mapIdToWell2List(lm.liquid.id)
+			src0_l <- builder.mapIdToWell2List(lm.liquid.id)
 			src1 = src0_l.filter(src => 
-				state0.findWellState(src.id).cata(st => st.nVolume > volume, false)
+				builder.findWellState(src.id).cata(st => st.nVolume > volume, false)
 			)
 			_ <- Result.assert(!src1.isEmpty, "source well(s) for `"+lm.liquid.id+"` do not contain enough liquid.")
 			src = src1.head
-			destState <- state0.findWellState(item.dest.id)
-			policy <- Result.get(device.getDispensePolicy(lm.liquid, lm.tipModel, volume, destState), "Could not find pipette policy")
+			policy <- Result.get(device.getDispensePolicy(lm.liquid, lm.tipModel, volume, itemState.destState0), "Could not find pipette policy")
 		} yield {
+			tip.stateWriter(builder).aspirate(src, lm.liquid, volume)
+			tip.stateWriter(builder).dispense(volume, itemState.destState0.liquid, policy.pos)
+			src.stateWriter(builder).remove(volume)
+			builder.map(item.dest.id) = itemState.destState1
 			PipetteGroupData(
 				group = group,
 				itemToTip_m = Map(item -> tip),
