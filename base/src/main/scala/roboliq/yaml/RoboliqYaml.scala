@@ -5,15 +5,16 @@ import org.yaml.snakeyaml.representer.Representer
 import org.yaml.snakeyaml.constructor.Constructor
 import scala.collection.mutable.ListBuffer
 import scala.reflect.BeanProperty
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 import org.yaml.snakeyaml.nodes.Tag
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.introspector.Property
 import org.yaml.snakeyaml.nodes.NodeTuple
 import org.yaml.snakeyaml.TypeDescription
-
 import roboliq.core._
 import roboliq.commands.pipette._
+import org.yaml.snakeyaml.introspector.PropertyUtils
+import org.yaml.snakeyaml.introspector.BeanAccess
 
 
 class RoboliqRepresenter extends Representer {
@@ -21,7 +22,10 @@ class RoboliqRepresenter extends Representer {
 	addClassTag(classOf[SubstanceDnaBean], new Tag("!dna"))
 	addClassTag(classOf[SubstanceLiquidBean], new Tag("!liquid"))
 	addClassTag(classOf[HistoryAddBean], new Tag("!add"))
+	
+	setPropertyUtils(new RoboliqPropertyUtils)
 
+	// Don't output null values
 	protected override def representJavaBeanProperty(
 		javaBean: Object,
 		property: Property,
@@ -33,6 +37,23 @@ class RoboliqRepresenter extends Representer {
 		} else {
 			return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag)
 		}
+	}
+}
+
+class RoboliqPropertyUtils extends PropertyUtils {
+	private val l = List("id", "index", "doc", "command", "events")
+	protected override def createPropertySet(clazz: Class[_], access: BeanAccess): java.util.Set[Property] = {
+		val properties = new java.util.LinkedHashSet[Property]
+		val p0 = super.createPropertySet(clazz, access)
+		for (s <- l) {
+			p0.find(_.getName == s) match {
+				case Some(p) =>
+					properties.add(p)
+				case _ =>
+			}
+		}
+		properties.addAll(p0)
+		properties
 	}
 }
 

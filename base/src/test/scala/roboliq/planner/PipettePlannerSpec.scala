@@ -19,9 +19,9 @@ events:
 - !add { obj: P1(A01), src: water, volume: 100e-6 }
 
 commands:
-#- !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(B01), volume: [5e-6] }
 - !!roboliq.commands.pipette.PipetteCmdBean { src: P1(A01), dest: P1(A02 d H), volume: [5e-6] }
-    """
+"""
+    
 	// The "components" we'll be mixing together
 	val cA = new SubstanceLiquid("A", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, true)
 	val cB = new SubstanceLiquid("B", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNT, true)
