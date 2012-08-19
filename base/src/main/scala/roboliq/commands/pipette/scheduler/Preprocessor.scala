@@ -37,30 +37,53 @@ object Preprocessor {
 		items.map(item => item -> createItemState(item, builder)).toMap
 	}
 	
-	private def chooseTipModels(device: PipetteDevice, items: Seq[Item], mItemToState: Map[Item, ItemState]): Map[Liquid, TipModel] = {
+	/*
+	 * TODO: Change from Liquid->TipModel to Item->TipModel for cases where the volumes to be
+	 * dispensed cannot be dispensed by a single tip model.  Still try to use a single tip model, though.
+	 * FIXME: need to preserve preference order for tips in this function -- ellis, 2012-08-19
+	 * Given a list [(tipModel, liquid, rank, count)] sorted by count, rank (count = number of items)
+	 * Each liquid needs to be assigned a single tip model. 
+	 * pick the tip models in two steps:
+	 * 	check if any tip model is abl
+	 * (liquid, tipModel,
+	 */
+	private def chooseTipModels(device: PipetteDevice, items: Seq[Item], mItemToState: Map[Item, ItemState]): Result[Map[Liquid, TipModel]] = {
 		if (items.isEmpty)
-			return Map()
+			return Success(Map())
 			
-		val mapLiquidToModels = new HashMap[Liquid, Seq[TipModel]]
-		val lLiquidAll = new HashSet[Liquid]
-		val lTipModelAll = new HashSet[TipModel]
-		for (item <- items) {
-			val itemState = mItemToState(item)
-			val liquid = itemState.srcContent.liquid
-			val destState = itemState.destState0
-			val tipModels = device.getDispenseAllowableTipModels(liquid, item.nVolume, destState.nVolume)
-			lLiquidAll += liquid
-			lTipModelAll ++= tipModels
-			mapLiquidToModels(liquid) = mapLiquidToModels.getOrElse(liquid, Seq()) ++ tipModels
+		val mapLiquidToVolumes: Map[Liquid, MinMaxOption[LiquidVolume]] = {
+			items.map(item => {
+				val itemState = mItemToState(item)
+				val liquid = itemState.srcContent.liquid
+				liquid -> item.nVolume
+			}).groupBy(_._1).mapValues(_.map(_._2).foldLeft(MinMaxOption[LiquidVolume](None))((a,v) => a + v))
 		}
+		val mapLiquidToModels: Map[Liquid, Seq[TipModel]] = for ((liquid, volumes) <- mapLiquidToVolumes) yield {
+			val (volume1, volume2) = volumes.option.get
+			val tipModels1 = device.getDispenseAllowableTipModels(liquid, volume1)
+			val tipModels2 = device.getDispenseAllowableTipModels(liquid, volume2)
+			// Find the tip models which can be used for both minimum and maximum volumes
+			val tipModels = tipModels1.intersect(tipModels2)
+
+			if (tipModels1.isEmpty)
+				return Error("Cannot find a tip model for pipetting liquid `"+liquid.id+"` at volume "+volume1)
+			else if (tipModels2.isEmpty)
+				return Error("Cannot find a tip model for pipetting liquid `"+liquid.id+"` at volume "+volume2)
+			else if (tipModels.isEmpty)
+				return Error(s"Cannot find a tip model for pipetting liquid `${liquid.id}` between volumes $volume1 and $volume2")
+			
+			(liquid, tipModels)
+		}
+		val lLiquidAll = mapLiquidToModels.keySet
+		val lTipModelAll = mapLiquidToModels.values.flatten.toSet
 		val lTipModelOkForAll = device.getTipModels.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
 		if (device.areTipsDisposable && !lTipModelOkForAll.isEmpty) {
 			val tipModel = lTipModelOkForAll.head
-			lLiquidAll.map(_ -> tipModel).toMap
+			Success(lLiquidAll.map(_ -> tipModel).toMap)
 		}
 		else {
 			val mapLiquidToModel = new HashMap[Liquid, TipModel]
-			val lLiquidsUnassigned = lLiquidAll.clone()
+			val lLiquidsUnassigned = new HashSet() ++ lLiquidAll
 			while (!lLiquidsUnassigned.isEmpty) {
 				// find most frequently allowed tip type and assign it to all allowable items
 				val mapModelToCount: Map[TipModel, Int] = getNumberOfLiquidsPerModel(mapLiquidToModels, lLiquidsUnassigned)
@@ -74,6 +97,9 @@ object Preprocessor {
 					println(lLiquidsUnassigned)
 				}
 				// ENDFIX
+				val lModelToCount = mapModelToCount.toList.sortBy(pair => pair._2)
+				// List of the tip models with the highest frequency
+				val lTipModel = lModelToCount.takeWhile(_._2 == lModelToCount.head._2).map(_._1)
 				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
 				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
 				///println("liquids: "+liquids)
@@ -92,7 +118,7 @@ object Preprocessor {
 				// ENDFIX
 				lLiquidsUnassigned --= liquids
 			}
-			mapLiquidToModel.toMap
+			Success(mapLiquidToModel.toMap)
 		}
 	}
 	
@@ -120,36 +146,39 @@ object Preprocessor {
 		device: PipetteDevice,
 		state0: RobotState
 	): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
-		val mapLiquidToTipModel = chooseTipModels(device, items, mItemToState)
-		var bRebuild = false
-		val lLM = items.flatMap(item => {
-			val itemState = mItemToState(item)
-			val liquid = itemState.srcContent.liquid
-			// FIXME: for debug only
-			if (!mapLiquidToTipModel.contains(liquid))
-				println("mapLiquidToTipModel: "+mapLiquidToTipModel)
-			// ENDFIX
-			val tipModel = mapLiquidToTipModel(liquid)
-			bRebuild |= (item.nVolume > tipModel.nVolume)
-			// Update destination liquid (volume doesn't actually matter)
-			//item.dest.obj.stateWriter(states).add(liquid, item.nVolume)
-			// result
-			splitBigVolumes(item, tipModel).map(item => (item, LM(liquid, tipModel)))
-		})
-		
-		val items1 = lLM.map(_._1)
-		val mLM = lLM.toMap
-		
-		// Need to create ItemState objects for any items which were split due to large volumes
-		val builder = state0.toBuilder
-		val mItemToState1 = items1.map(item => {
-			mItemToState.get(item) match {
-				case Some(itemState) => item -> itemState
-				case _ => item -> createItemState(item, builder)
-			}
-		}).toMap
-		
-		Success((items1, mItemToState1, mLM))
+		for {
+			mapLiquidToTipModel <- chooseTipModels(device, items, mItemToState)
+		} yield {
+			var bRebuild = false
+			val lLM = items.flatMap(item => {
+				val itemState = mItemToState(item)
+				val liquid = itemState.srcContent.liquid
+				// FIXME: for debug only
+				if (!mapLiquidToTipModel.contains(liquid))
+					println("mapLiquidToTipModel: "+mapLiquidToTipModel)
+				// ENDFIX
+				val tipModel = mapLiquidToTipModel(liquid)
+				bRebuild |= (item.nVolume > tipModel.nVolume)
+				// Update destination liquid (volume doesn't actually matter)
+				//item.dest.obj.stateWriter(states).add(liquid, item.nVolume)
+				// result
+				splitBigVolumes(item, tipModel).map(item => (item, LM(liquid, tipModel)))
+			})
+			
+			val items1 = lLM.map(_._1)
+			val mLM = lLM.toMap
+			
+			// Need to create ItemState objects for any items which were split due to large volumes
+			val builder = state0.toBuilder
+			val mItemToState1 = items1.map(item => {
+				mItemToState.get(item) match {
+					case Some(itemState) => item -> itemState
+					case _ => item -> createItemState(item, builder)
+				}
+			}).toMap
+			
+			(items1, mItemToState1, mLM)
+		}
 	}
 
 	/**

@@ -13,7 +13,7 @@ abstract class PipetteDevice extends DeviceBean {
 	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 	def assignTips(tipsFree: SortedSet[Tip], tipModel: TipModel, nTips: Int): Result[SortedSet[Tip]]
 	def areTipsDisposable: Boolean
-	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume, nVolumeDest: LiquidVolume): Seq[TipModel]
+	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume): Seq[TipModel]
 	/** Minimum volume which can be aspirated */
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume
 	/** Maximum volume of the given liquid which this tip can hold */

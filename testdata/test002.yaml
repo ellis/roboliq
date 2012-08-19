@@ -1,0 +1,27 @@
+# Test various pipetting volumes
+
+plates:
+  reagents50: { model: "Reagent Cooled 8*50ml", location: reagents50 }
+  P1: { model: D-BSSE 96 Well PCR Plate }
+
+events:
+- !add { obj: reagents50(A01), substance: water, volume: 49e-3 }
+
+commands:
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(A01), volume: [1e-7] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(B01), volume: [2e-7] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(C01), volume: [5e-7] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(A02), volume: [1e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(B02), volume: [2e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(C02), volume: [5e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(A03), volume: [10e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(B03), volume: [20e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(C03), volume: [50e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(A04), volume: [100e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(B04), volume: [200e-6] }
+
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: reagents50(B01), volume: [100e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: reagents50(C01), volume: [200e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: reagents50(D01), volume: [500e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: reagents50(E01), volume: [1000e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: reagents50(F01), volume: [2000e-6] }

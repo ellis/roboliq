@@ -37,7 +37,7 @@ class TestPipetteDevice extends PipetteDevice {
 	def areTipsDisposable: Boolean =
 		false
 	
-	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume, nVolumeDest: LiquidVolume): Seq[TipModel] =
+	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume): Seq[TipModel] =
 		tipModels
 	
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume =
