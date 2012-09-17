@@ -18,10 +18,8 @@ case class MinMaxOption[A <: Ordered[A]](val option: Option[(A, A)]) {
 
 	def +(mmo: MinMaxOption[A]): MinMaxOption[A] = {
 		MinMaxOption((option, mmo.option) match {
-			case (None, None) => None
-			case (_, None) => option
-			case (None, _) => mmo.option
 			case (Some(mm1), Some(mm2)) => Some(List(mm1._1, mm2._1).min, List(mm1._2, mm2._2).max)
+			case _ => option orElse mmo.option
 		})
 	}
 }

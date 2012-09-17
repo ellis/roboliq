@@ -24,9 +24,15 @@ commands:
 """
 */
   describe("YamlTest2") {
-    val file_l = List("test002.yaml")
+    val file_l = List(
+    	"test002-vol=0000_1.yaml",
+    	"test002-vol=0001.yaml",
+    	"test002-vol=0003.yaml",
+    	"test002-vol=0005.yaml",
+    	"test002-vol=0050.yaml"
+    )
     for (file <- file_l) {
-      it("should compile") {
+      it(s"should compile: $file") {
         val yamltest2 = new YamlTest2(List(file))
         yamltest2.run
       }

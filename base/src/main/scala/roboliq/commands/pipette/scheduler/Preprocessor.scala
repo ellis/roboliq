@@ -37,6 +37,30 @@ object Preprocessor {
 		items.map(item => item -> createItemState(item, builder)).toMap
 	}
 	
+	private case class TipModelRank(nTotal: Int, map: Map[Int, Int]) extends Ordered[TipModelRank] {
+		def incRank(rank: Int, count: Int): TipModelRank = {
+			val map2 = map.+((rank, count + map.getOrElse(rank, 0)))
+			new TipModelRank(nTotal + count, map2)
+		}
+		
+		override def compare(that: TipModelRank): Int = {
+			if (nTotal != that.nTotal) nTotal - that.nTotal
+			else {
+				val rank_l = map.keySet.union(that.map.keySet).toList.sorted
+				for (rank <- rank_l) {
+					(map.get(rank), that.map.get(rank)) match {
+						case (None, None) =>
+						case (None, _) => return -1
+						case (_, None) => return 1
+						case (Some(a), Some(b)) =>
+							if (a != b) return a - b
+					}
+				}
+				0
+			}
+		}
+	}
+	
 	/*
 	 * TODO: Change from Liquid->TipModel to Item->TipModel for cases where the volumes to be
 	 * dispensed cannot be dispensed by a single tip model.  Still try to use a single tip model, though.
@@ -44,13 +68,18 @@ object Preprocessor {
 	 * Given a list [(tipModel, liquid, rank, count)] sorted by count, rank (count = number of items)
 	 * Each liquid needs to be assigned a single tip model. 
 	 * pick the tip models in two steps:
-	 * 	check if any tip model is abl
+	 * 	check if any tip model is able to dispense everything
 	 * (liquid, tipModel,
 	 */
 	private def chooseTipModels(device: PipetteDevice, items: Seq[Item], mItemToState: Map[Item, ItemState]): Result[Map[Liquid, TipModel]] = {
 		if (items.isEmpty)
 			return Success(Map())
-			
+
+		val liquidToItems_m = items.groupBy(item => {
+			mItemToState(item).srcContent.liquid
+		})
+		val liquidToItemCount_m = liquidToItems_m.mapValues(_.size)
+		
 		val mapLiquidToVolumes: Map[Liquid, MinMaxOption[LiquidVolume]] = {
 			items.map(item => {
 				val itemState = mItemToState(item)
@@ -70,38 +99,67 @@ object Preprocessor {
 			else if (tipModels2.isEmpty)
 				return Error("Cannot find a tip model for pipetting liquid `"+liquid.id+"` at volume "+volume2)
 			else if (tipModels.isEmpty)
-				return Error(s"Cannot find a tip model for pipetting liquid `${liquid.id}` between volumes $volume1 and $volume2")
+				return Error(s"Cannot find a tip model for pipetting liquid `${liquid.id}` for both volumes $volume1 and $volume2")
 			
 			(liquid, tipModels)
 		}
+		val liquidToModelInfo_m: Map[Liquid, List[(TipModel, Int, Int)]] = mapLiquidToModels.map(pair => {
+			val (liquid, model_l) = pair
+			liquid -> model_l.toList.zipWithIndex.map(pair => {
+				val (model, rank) = pair
+				val count = liquidToItemCount_m.getOrElse(liquid, 0)
+				(model, rank, count)
+			})
+		})
+
 		val lLiquidAll = mapLiquidToModels.keySet
 		val lTipModelAll = mapLiquidToModels.values.flatten.toSet
+		
+		val rank_m = new HashMap[TipModel, TipModelRank]
+		mapLiquidToModels.foreach(pair => {
+			val (liquid, model_l) = pair
+			model_l.zipWithIndex.map(pair => {
+				val (model, i) = pair
+				val count = liquidToItemCount_m.getOrElse(liquid, 0)
+				val rank0 = rank_m.getOrElse(model, new TipModelRank(0, Map()))
+				val rank1 = rank0.incRank(i, count)
+				rank_m(model) = rank1
+			})
+		})
+		
 		val lTipModelOkForAll = device.getTipModels.filter(tipModel => lTipModelAll.contains(tipModel) && mapLiquidToModels.forall(pair => pair._2.contains(tipModel)))
 		if (device.areTipsDisposable && !lTipModelOkForAll.isEmpty) {
 			val tipModel = lTipModelOkForAll.head
 			Success(lLiquidAll.map(_ -> tipModel).toMap)
 		}
 		else {
+			val liquidToModelInfo2_m = new HashMap() ++ liquidToModelInfo_m
 			val mapLiquidToModel = new HashMap[Liquid, TipModel]
-			val lLiquidsUnassigned = new HashSet() ++ lLiquidAll
-			while (!lLiquidsUnassigned.isEmpty) {
-				// find most frequently allowed tip type and assign it to all allowable items
-				val mapModelToCount: Map[TipModel, Int] = getNumberOfLiquidsPerModel(mapLiquidToModels, lLiquidsUnassigned)
+			while (!liquidToModelInfo2_m.isEmpty) {
+				def makeRankList(l: List[(TipModel, Int, Int)], acc: Map[TipModel, TipModelRank]): List[(TipModel, TipModelRank)] = {
+					l match {
+						case Nil => acc.toList.sortBy(_._2)
+						case (tipModel, rank, count) :: rest =>
+							val rank0 = acc.getOrElse(tipModel, new TipModelRank(0, Map()))
+							val rank1 = rank0.incRank(rank, count)
+							val acc2 = acc + ((tipModel, rank1))
+							makeRankList(rest, acc2)
+					}
+				}
+				val l: List[(TipModel, Int, Int)] = liquidToModelInfo2_m.toList.flatMap(_._2)
+				val rank_l = makeRankList(l, Map())
 				// FIXME: for debug only
-				if (mapModelToCount.isEmpty) {
+				if (rank_l.isEmpty) {
 					println("DEBUG:")
 					println(items)
 					println(lTipModelAll)
 					println(lLiquidAll)
 					println(mapLiquidToModels)
-					println(lLiquidsUnassigned)
+					println(liquidToModelInfo2_m)
 				}
 				// ENDFIX
-				val lModelToCount = mapModelToCount.toList.sortBy(pair => pair._2)
-				// List of the tip models with the highest frequency
-				val lTipModel = lModelToCount.takeWhile(_._2 == lModelToCount.head._2).map(_._1)
-				val tipModel = mapModelToCount.toList.sortBy(pair => pair._2).head._1
-				val liquids = lLiquidsUnassigned.filter(liquid => mapLiquidToModels(liquid).contains(tipModel))
+				val tipModel = rank_l.head._1
+				val liquids = liquidToModelInfo2_m.filter(pair => mapLiquidToModels(pair._1).contains(tipModel))
 				///println("liquids: "+liquids)
 				mapLiquidToModel ++= liquids.map(_ -> tipModel)
 				// FIXME: for debug only
@@ -116,7 +174,7 @@ object Preprocessor {
 					Seq().head
 				}
 				// ENDFIX
-				lLiquidsUnassigned --= liquids
+				liquidToModelInfo2_m --= liquids
 			}
 			Success(mapLiquidToModel.toMap)
 		}

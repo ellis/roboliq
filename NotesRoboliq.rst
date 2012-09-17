@@ -201,6 +201,22 @@ Grouping into cycles consists of multiple components.
 * A cost function? I'm not sure how this would work, since cleaning should be optimized before calculating cost.
 * A search algorithm to find a path to the solution (e.g. greedy, A*).
 
+Variables when choosing how to pipette
+--------------------------------------
+
+Per pipetting command:
+
+* Which tip model to use for which source liquids
+* How to partition the items into pipetting groups
+
+Per pipetting group:
+
+* Which tips to use
+* Which source to use (if multiple are available)
+* When multidispensing, should multiple tips be used per liquid?
+* When multidispensing, how much to aspirate into each tip
+
+
 Tip Handling
 ============
 

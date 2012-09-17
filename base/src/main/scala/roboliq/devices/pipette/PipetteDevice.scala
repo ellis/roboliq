@@ -10,6 +10,7 @@ abstract class PipetteDevice extends DeviceBean {
 	def getTipModels: List[TipModel]
 	def getTips: SortedSet[Tip]
 	
+	/** Can the device use the given number of tip per model simultaneously? */
 	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 	def assignTips(tipsFree: SortedSet[Tip], tipModel: TipModel, nTips: Int): Result[SortedSet[Tip]]
 	def areTipsDisposable: Boolean

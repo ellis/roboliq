@@ -1,2 +1,5 @@
 labbook-ellis.pdf
 *.cmd
+test*.out
+test*.html
+test*.cmd
