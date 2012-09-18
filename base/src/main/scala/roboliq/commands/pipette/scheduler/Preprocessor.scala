@@ -51,26 +51,20 @@ object Preprocessor {
 		state0: RobotState
 	): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
 		for {
-			mapLiquidToTipModel <- TipModelChooser.chooseTipModels_OnePerLiquid(device, items, mItemToState)
+			itemToTipModel0_m <- TipModelChooser.chooseTipModels_OnePerLiquid(device, items, mItemToState)
 		} yield {
-			var bRebuild = false
-			val lLM = items.flatMap(item => {
-				val itemState = mItemToState(item)
-				val liquid = itemState.srcContent.liquid
-				// FIXME: for debug only
-				if (!mapLiquidToTipModel.contains(liquid))
-					println("mapLiquidToTipModel: "+mapLiquidToTipModel)
-				// ENDFIX
-				val tipModel = mapLiquidToTipModel(liquid)
-				bRebuild |= (item.nVolume > tipModel.nVolume)
+			// Split any items whose volumes are larger than their tip model can handle.
+			val itemToLM_m = items.flatMap(item => {
+				val liquid = mItemToState(item).srcContent.liquid
+				val tipModel = itemToTipModel0_m(item)
 				// Update destination liquid (volume doesn't actually matter)
 				//item.dest.obj.stateWriter(states).add(liquid, item.nVolume)
 				// result
-				splitBigVolumes(item, tipModel).map(item => (item, LM(liquid, tipModel)))
-			})
+				val lm = LM(liquid, tipModel)
+				splitBigVolumes(item, tipModel).map(item => (item, lm))
+			}).toMap
 			
-			val items1 = lLM.map(_._1)
-			val mLM = lLM.toMap
+			val items1 = itemToLM_m.keys.toSeq
 			
 			// Need to create ItemState objects for any items which were split due to large volumes
 			val builder = state0.toBuilder
@@ -81,7 +75,7 @@ object Preprocessor {
 				}
 			}).toMap
 			
-			(items1, mItemToState1, mLM)
+			(items1, mItemToState1, itemToLM_m)
 		}
 	}
 

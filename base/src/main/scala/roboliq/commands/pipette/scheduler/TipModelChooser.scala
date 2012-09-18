@@ -63,7 +63,7 @@ object TipModelChooser {
 		device: PipetteDevice,
 		item_l: Seq[Item],
 		mItemToState: Map[Item, ItemState]
-	): Result[Map[Liquid, TipModel]] = {
+	): Result[Map[Item, TipModel]] = {
 		if (item_l.isEmpty)
 			return Success(Map())
 
@@ -80,7 +80,7 @@ object TipModelChooser {
 				mItemToState(item).srcContent.liquid
 			})
 			val tipModel = tipModelRank.tipModel
-			liquidToItems_m.mapValues(_ => tipModel)
+			item_l.map(item => (item, tipModel)).toMap
 		}
 	}
 
@@ -88,7 +88,7 @@ object TipModelChooser {
 		device: PipetteDevice,
 		item_l: Seq[Item],
 		mItemToState: Map[Item, ItemState]
-	): Result[Map[Liquid, TipModel]] = {
+	): Result[Map[Item, TipModel]] = {
 		if (item_l.isEmpty)
 			return Success(Map())
 
@@ -115,7 +115,10 @@ object TipModelChooser {
 				
 				(liquid, rank.tipModel)
 			}
-			liquidToModel_m
+			
+			liquidToModel_m.toList.flatMap(pair => {
+				liquidToItems_m(pair._1).map(_ -> pair._2)
+			}).toMap
 		}
 	}
 
