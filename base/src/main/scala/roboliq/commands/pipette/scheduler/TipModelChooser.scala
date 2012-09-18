@@ -3,7 +3,6 @@ package roboliq.commands.pipette.scheduler
 import roboliq.core._
 import roboliq.devices.pipette._
 
-
 object TipModelChooser {
 
 	private case class TipModelRank(tipModel: TipModel, nTotal: Int, map: Map[Int, Int]) extends Ordered[TipModelRank] {
@@ -30,6 +29,36 @@ object TipModelChooser {
 		}
 	}
 
+	private class CommonData(
+		val itemToModels_m: Map[Item, Seq[TipModel]],
+		val itemToModelInfos_m: Map[Item, Seq[(TipModel, Int, Int)]]
+	)
+	
+	private def getCommonData(
+		device: PipetteDevice,
+		item_l: Seq[Item],
+		mItemToState: Map[Item, ItemState]
+	): Result[CommonData] = {
+		val itemToModels_m = item_l.map(item => {
+			val liquid = mItemToState(item).srcContent.liquid
+			val tipModel_l = device.getDispenseAllowableTipModels(liquid, item.nVolume)
+	
+			if (tipModel_l.isEmpty)
+				return Error(s"Cannot find a tip model for dispensing ${item.nVolume} of liquid `${liquid.id}`.")
+			
+			(item, tipModel_l)
+		}).toMap
+
+		val itemToModelInfos_m = itemToModels_m.mapValues(model_l => {
+			model_l.zipWithIndex.map(pair => {
+				val (model, rank) = pair
+				(model, rank, 1)
+			})
+		})
+
+		Success(new CommonData(itemToModels_m, itemToModelInfos_m))
+	}
+	
 	def chooseTipModels_OneForAll(
 		device: PipetteDevice,
 		item_l: Seq[Item],
@@ -38,53 +67,62 @@ object TipModelChooser {
 		if (item_l.isEmpty)
 			return Success(Map())
 
-		println("----- TipModelChooser")
-		val liquidToItems_m = item_l.groupBy(item => {
-			mItemToState(item).srcContent.liquid
-		})
-		val liquidToItemCount_m = liquidToItems_m.mapValues(_.size)
-		val liquidToVolumes_m: Map[Liquid, MinMaxOption[LiquidVolume]] = liquidToItems_m.mapValues(item_l => {
-			item_l.foldLeft(MinMaxOption[LiquidVolume](None))((a,item) => a + item.nVolume)
-		})
-		val liquidToModels_m: Map[Liquid, Seq[TipModel]] = for ((liquid, volumes) <- liquidToVolumes_m) yield {
-			val (volume1, volume2) = volumes.option.get
-			val tipModels1 = device.getDispenseAllowableTipModels(liquid, volume1)
-			val tipModels2 = device.getDispenseAllowableTipModels(liquid, volume2)
-			// Find the tip models which can be used for both minimum and maximum volumes
-			val tipModels = tipModels1.intersect(tipModels2)
-
-			if (tipModels1.isEmpty)
-				return Error("Cannot find a tip model for pipetting liquid `"+liquid.id+"` at volume "+volume1)
-			else if (tipModels2.isEmpty)
-				return Error("Cannot find a tip model for pipetting liquid `"+liquid.id+"` at volume "+volume2)
-			else if (tipModels.isEmpty)
-				return Error(s"Cannot find a tip model for pipetting liquid `${liquid.id}` for both volumes $volume1 and $volume2")
-			
-			(liquid, tipModels)
-		}
-		val liquidToModelInfos_m: Map[Liquid, List[(TipModel, Int, Int)]] = liquidToModels_m.map(pair => {
-			val (liquid, model_l) = pair
-			liquid -> model_l.toList.zipWithIndex.map(pair => {
-				val (model, rank) = pair
-				val count = liquidToItemCount_m.getOrElse(liquid, 0)
-				(model, rank, count)
+		for {
+			common <- getCommonData(device, item_l, mItemToState)
+		} yield {
+			val tipModelInfos_l = common.itemToModelInfos_m.values.flatten.toList
+			val rank_l = makeRankList(tipModelInfos_l, Map())
+			val tipModelRank = rank_l.head
+			if (tipModelRank.nTotal != item_l.size)
+				return Error("Could not find a single tip model which can be used for all pipetting steps.")
+				
+			val liquidToItems_m = item_l.groupBy(item => {
+				mItemToState(item).srcContent.liquid
 			})
-		})
-		val tipModelInfos_l = liquidToModelInfos_m.values.flatten.toList
-		val rank_l = makeRankList(tipModelInfos_l, Map())
-		val tipModelRank = rank_l.head
-		if (tipModelRank.nTotal != item_l.size)
-			return Error("Could not find a single tip model which can be used for all pipetting steps.")
-		
-		println(s"liquidToVolumes_m: ${liquidToVolumes_m}")
-		println(s"liquidToModels_m: ${liquidToModels_m}")
-		println(s"liquidToModelInfos_m: ${liquidToModelInfos_m}")
-		println(s"tipModelRank: $tipModelRank")
-			
-		val tipModel = tipModelRank.tipModel
-		Success(liquidToItems_m.mapValues(_ => tipModel))
+			val tipModel = tipModelRank.tipModel
+			liquidToItems_m.mapValues(_ => tipModel)
+		}
 	}
 
+	def chooseTipModels_OnePerLiquid(
+		device: PipetteDevice,
+		item_l: Seq[Item],
+		mItemToState: Map[Item, ItemState]
+	): Result[Map[Liquid, TipModel]] = {
+		if (item_l.isEmpty)
+			return Success(Map())
+
+		for {
+			common <- getCommonData(device, item_l, mItemToState)
+		} yield {
+			val liquidToItems_m = item_l.groupBy(item => {
+				mItemToState(item).srcContent.liquid
+			}).mapValues(_.toSet)
+			
+			val x = common.itemToModels_m.groupBy(pair => mItemToState(pair._1).srcContent.liquid)
+			val liquidToModel_m = for ((liquid, itemToModels_l) <- x) yield {
+				// Get the intersection of tip models which can be used for all items dispensing the given liquid
+				val tipModel_ll = itemToModels_l.map(_._2.toSet)
+				val tipModel_l = tipModel_ll.reduceLeft(_.intersect(_))
+				if (tipModel_l.isEmpty)
+					return Error(s"Cannot find a tip model which is compatible for dispensing `${liquid.id}` for the given range of volumes.")
+				
+				// Get the tipModel rankings for the current liquid and tips in tipModel_l
+				val item_l = itemToModels_l.map(_._1)
+				val info_l = item_l.flatMap(common.itemToModelInfos_m)
+				val rank_l = makeRankList(info_l.toList).filter(x => tipModel_l.contains(x._1))
+				val rank = rank_l.head
+				
+				(liquid, rank.tipModel)
+			}
+			liquidToModel_m
+		}
+	}
+
+	private def makeRankList(l: List[(TipModel, Int, Int)]): List[TipModelRank] = {
+		makeRankList(l, Map())
+	}
+	
 	private def makeRankList(l: List[(TipModel, Int, Int)], acc: Map[TipModel, TipModelRank]): List[TipModelRank] = {
 		l match {
 			case Nil => acc.toList.map(_._2).sorted

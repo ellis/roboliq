@@ -1,4 +1,4 @@
-# Volume: 5ul
+# Volume: 2.5ul
 plates:
   P1:
     model: D-BSSE 96 Well PCR Plate
@@ -7,5 +7,5 @@ events:
 - !add { obj: P1(A01), substance: water, volume: 100e-6 }
 
 commands:
-- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(A02), volume: [5e-6] }
+- !!roboliq.commands.pipette.PipetteCmdBean { src: water, dest: P1(A02), volume: [2.5e-6] }
 

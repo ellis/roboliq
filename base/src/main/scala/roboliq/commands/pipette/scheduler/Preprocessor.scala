@@ -51,7 +51,7 @@ object Preprocessor {
 		state0: RobotState
 	): Result[Tuple3[Seq[Item], Map[Item, ItemState], Map[Item, LM]]] = {
 		for {
-			mapLiquidToTipModel <- TipModelChooser.chooseTipModels_OneForAll(device, items, mItemToState)
+			mapLiquidToTipModel <- TipModelChooser.chooseTipModels_OnePerLiquid(device, items, mItemToState)
 		} yield {
 			var bRebuild = false
 			val lLM = items.flatMap(item => {
