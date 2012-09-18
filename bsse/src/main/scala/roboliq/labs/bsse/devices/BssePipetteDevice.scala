@@ -112,12 +112,12 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	def areTipsDisposable: Boolean = false
 	
 	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume): Seq[TipModel] = {
-		val b1000 =
-			(nVolume >= tipModel1000.nVolumeAspirateMin)
-		val b50 =
-			(nVolume >= tipModel50.nVolumeAspirateMin && nVolume <= tipModel50.nVolume && !liquid.contaminants.contains(Contaminant.Cell))
-		
-		(if (b1000) Seq(tipModel1000) else Seq()) ++ (if (b50) Seq(tipModel50) else Seq())
+		val b1000 = (nVolume >= tipModel1000.nVolumeAspirateMin)
+		val b50 = (nVolume >= tipModel50.nVolumeAspirateMin && nVolume <= tipModel50.nVolume && !liquid.contaminants.contains(Contaminant.Cell))
+		List(
+			if (b1000) Some(tipModel1000) else None,
+			if (b50) Some(tipModel50) else None
+		).flatten
 	}
 	
 	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {

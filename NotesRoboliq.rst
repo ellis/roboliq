@@ -217,6 +217,16 @@ Per pipetting group:
 * When multidispensing, how much to aspirate into each tip
 
 
+Tip Model Selection
+===================
+
+* OneForAll: choose a single, best tip model to use for all items in this pipetting command
+* OnePerLiquid: choose the best tip model to use per liquid (all destination wells for that liquid will use the same tip model)
+* OnePerWell: choose the best tip model to use for each individual destination well
+
+And then there's also the possibility for the user to explicitly specify the tip model to use.
+
+
 Tip Handling
 ============
 
