@@ -1,0 +1,53 @@
+Error Model
+===========
+
+Action
+------
+
+A(Ws, Wd, V, T, M)
+where
+Ws: source well
+Wd: destination well
+V: volume
+T: tip type
+M: pipetting method
+
+Change of state:
+
+- each action can potentially impact the every well on the table
+- each action can only impact a given well
+
+
+L1 = Rem(T(1), M(1), V(1), W1)
+L3 = Add(T(2), M(2), V(2), W2, Add(T(1), M(1), V(1), W1, W3))
+
+L3 = [P(50, L1), P(25, L2), P(HELP)]
+
+VOL: a probability distribution over volume; for example, if the normal distribution is chosen, then we need the parameters for mean volume and standard deviation.
+
+Model 1
+-------
+
+For m liquids and n wells, an m x n matrix with mean and stddev of each liquid in each well.
+
+The problem with this method is that it can't be used to maximize the correlation between wells which should have similar contents.
+
+Model 2
+-------
+
+For n wells, an n x n matrix with mean and stddev of the contents of each source well in each well; also an n-vector with the volume (with mean and stddev) removed from each well.
+
+Assumptions
+-----------
+
+* All sources are well mixed
+
+Overall value to minimize
+-------------------------
+
+Sum of relative variability of each entry in the model matrix.
+
+If VOL is represented as a normal distribution, for example, the variability could be given by $\sigma / \mu$.
+
+
+V_ij
