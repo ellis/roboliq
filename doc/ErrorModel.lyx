@@ -63,11 +63,70 @@
 Error Model
 \end_layout
 
+\begin_layout Subsection*
+Adding liquid to a well
+\end_layout
+
 \begin_layout Standard
-\begin_inset Formula $M=\left[\begin{array}{ccc}
-0 & v_{12} & v_{13}\\
-v_{21} & 0 & v_{23}\\
-v_{31} & v_{32} & 0
+Let 
+\begin_inset Formula $V_{add}$
+\end_inset
+
+ be a matrix of liquid volumes.
+ Each column 
+\begin_inset Formula $j$
+\end_inset
+
+ represents the mixture of liquids which have been dispensed into well 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ For example, element 
+\begin_inset Formula $v_{ij}$
+\end_inset
+
+ is the volume which was transfered from well 
+\begin_inset Formula $i$
+\end_inset
+
+ to well 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $A=\left[\begin{array}{ccc}
+0 & a_{12} & a_{13}\\
+a_{21} & 0 & a_{23}\\
+a_{31} & a_{32} & 0
+\end{array}\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Removing liquid from a well
+\end_layout
+
+\begin_layout Standard
+For every dispense, we also need to keep track of the removal of liquid
+ from the source well, which we do in the vector 
+\begin_inset Formula $V_{rem}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $r=\left[\begin{array}{c}
+r_{1}\\
+r_{2}\\
+r_{3}
 \end{array}\right]$
 \end_inset
 
@@ -75,18 +134,216 @@ v_{31} & v_{32} & 0
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $m_{ij}$
+The robot may not be capable of removing all liquid from a well, so we will
+ need a vector 
+\begin_inset Formula $d$
 \end_inset
 
- is the volume of liquid from well 
-\begin_inset Formula $j$
+ to indicate the 
+\begin_inset Quotes eld
 \end_inset
 
- mixed into well 
+dead
+\begin_inset Quotes erd
+\end_inset
+
+ volume for any well which serves as a pipetting source.
+\end_layout
+
+\begin_layout Standard
+The values 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ are subject to the following inequalities:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\sum_{j}a_{ij}\le r_{i}\le m_{i}-d_{i}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $m$
+\end_inset
+
+ is a vector holding the maximum volume of the well, prior to it's use as
+ a source:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $m_{i}=v_{i}^{(0)}+\sum_{j}a_{j}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $v_{i}^{(0)}$
+\end_inset
+
+ is the initial volume in well 
 \begin_inset Formula $i$
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection*
+Volume as a distribution
+\end_layout
+
+\begin_layout Standard
+By letting the values 
+\begin_inset Formula $a_{ij}$
+\end_inset
+
+ and 
+\begin_inset Formula $r_{i}$
+\end_inset
+
+ be probability distributions rather than scalars, we can look to optimize
+ our pipetting stategy in order to minimize the probability of error.
+\end_layout
+
+\begin_layout Subsection*
+Overall error value
+\end_layout
+
+\begin_layout Standard
+We need to summarize the variation in the volume values 
+\begin_inset Formula $a_{ij}$
+\end_inset
+
+ 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+as an error term 
+\begin_inset Formula $e_{ij}$
+\end_inset
+
+.
+ For example, if we were to choose the normal distribution to represent
+ the volumes, then 
+\begin_inset Formula $e_{ij}=\sigma_{ij}/\mu_{ij}$
+\end_inset
+
+ might be a reasonable choice.
+ The total error is then 
+\begin_inset Formula $\bar{E}=\sum_{i,j}e_{ij}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Example
+\end_layout
+
+\begin_layout Standard
+We have 6 wells: two source wells, one temporary well, and three destination
+ wells.
+ The two source wells have an initial volume of 100ul and the rest of the
+ wells are empty:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $v^{(0)}=[100,100,0,0,0]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We dispense 50ul of each of the source wells into the temporary well, then
+ 25ul from the temporary into each of the destination wells.
+ Here the 
+\begin_inset Formula $a_{ij}$
+\end_inset
+
+ values are simply represented by their mean, and their standard deviation
+ is omitted for the sake of illustration:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $A=\left[\begin{array}{cccccc}
+0 & 0 & a_{13} & 0 & 0 & 0\\
+0 & 0 & a_{23} & 0 & 0 & 0\\
+0 & 0 & 0 & a_{34} & a_{35} & a_{36}\\
+0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0
+\end{array}\right]=\left[\begin{array}{cccccc}
+0 & 0 & 50 & 0 & 0 & 0\\
+0 & 0 & 50 & 0 & 0 & 0\\
+0 & 0 & 0 & 25 & 25 & 25\\
+0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0
+\end{array}\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each aspriation may remove slightly more liquid from the source well than
+ is to be dispensed:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $r=\left[\begin{array}{c}
+r_{1}\\
+r_{2}\\
+r_{3}\\
+0\\
+0\\
+0
+\end{array}\right]=\left[\begin{array}{c}
+52\\
+52\\
+80\\
+0\\
+0\\
+0
+\end{array}\right]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the sake of simplicity, assume that that every pipetting step has an
+ error value of 0.1, resulting in a total error of 0.5:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\bar{E}=e_{13}+e_{23}+e_{34}+e_{35}+e_{36}=0.5$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If, instead, the two source wells were each mixed into the three destination
+ wells individually, 
+\begin_inset Formula $\bar{E}$
+\end_inset
+
+ would be 0.6, so the use of the temporary well reduces the error value.
 \end_layout
 
 \end_body
