@@ -227,6 +227,13 @@ Tip Model Selection
 And then there's also the possibility for the user to explicitly specify the tip model to use.
 
 
+AI Search 1
+-----------
+
+The depth of search tree is number of items (each level of the tree assigns a tip model to the next item in the list).
+The branching factor is number of tip models which are compatible with the current item (maximum is the number of tip models).
+
+
 Tip Handling
 ============
 

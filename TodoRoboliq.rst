@@ -1,3 +1,8 @@
+* Setup test framework for `base`
+* Get rid of Map[LM, Item] and family, only using Map[Item, LM]
+* Add AI search methods to roboliq
+* Improve pipetting yaml
+
 
 http://netbeanside61.blogspot.com/2011/06/downloading-openjdk7-binary-for-mac-os.html
 

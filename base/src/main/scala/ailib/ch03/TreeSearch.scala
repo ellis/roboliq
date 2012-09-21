@@ -14,18 +14,6 @@ class DebugSpec(
 	val printExpanded: Boolean = false
 )
 
-abstract class Problem[State, Action, Node] {
-	val state0: State
-	
-	def root: Node
-	
-	def goalTest(state: State): Boolean
-	
-	def actions(state: State): Iterable[Action]
-	
-	def childNode(parent: Node, action: Action): Node
-}
-
 class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 	type Problem = ch03.Problem[State, Action, Node]
 	type Frontier = ch03.Frontier[State, Node]
@@ -59,51 +47,6 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 				run2(problem, frontier, debug)
 			}
 		}
-	}
-}
-
-class GraphSearch[State, Action, Node <: ch03.Node[State]] {
-	type Problem = ch03.Problem[State, Action, Node]
-	type Frontier = ch03.Frontier[State, Node]
-	
-	def run(problem: Problem, frontier: Frontier, debug: DebugSpec = new DebugSpec): Option[Node] = {
-		assert(frontier.isEmpty)
-		val root = problem.root
-		val seen = new HashSet[State]
-		addToFrontier(frontier, seen, debug, root)
-		run2(problem, frontier, seen, debug)
-	}
-	
-	@tailrec final def run2(problem: Problem, frontier: Frontier, seen: HashSet[State], debug: DebugSpec): Option[Node] = {
-		if (frontier.isEmpty) {
-			None
-		}
-		else {
-			val node = frontier.removeChoice()
-			if (debug.printExpanded) {
-				println("E: "+node)
-			}
-			if (problem.goalTest(node.state)) {
-				Some(node)
-			}
-			else {
-				for (action <- problem.actions(node.state)) {
-					val child = problem.childNode(node, action)
-					if (!seen.contains(child.state)) {
-						addToFrontier(frontier, seen, debug, child)
-					}
-				}
-				run2(problem, frontier, seen, debug)
-			}
-		}
-	}
-	
-	private def addToFrontier(frontier: Frontier, seen: HashSet[State], debug: DebugSpec, node: Node) {
-		if (debug.printFrontier) {
-			println("F: "+node)
-		}
-		frontier.add(node)
-		seen += node.state
 	}
 }
 
