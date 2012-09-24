@@ -5,7 +5,7 @@ import roboliq.core._
 import roboliq.devices.pipette._
 import roboliq.commands.pipette._
 
-class TestPipetteDevice extends PipetteDevice {
+class TestPipetteDevice1 extends PipetteDevice {
 	val tipModel1000 = TipModel(
 		id = "TIP1000",
 		nVolume = LiquidVolume.ul(1000),

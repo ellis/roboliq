@@ -8,7 +8,7 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 
 
-object TipModelSearcher1 {
+class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 	case class MyState(l: List[(Item, TipModel)], rest: List[Item]) {
 		def +(action: MyAction): MyState = MyState((rest.head, action.tipModel) :: l, rest.tail)
 		override def toString = l.reverse.map(_._2).mkString(",")
@@ -61,7 +61,7 @@ object TipModelSearcher1 {
 				tipModel_l += tipModel
 
 				val liquid = itemToLiquid_m(item)
-				liquidToTipModels_m(liquid) += tipModel
+				liquidToTipModels_m(liquid) = liquidToTipModels_m.getOrElse(liquid, Set()) + tipModel
 			}
 			
 			val tipModelCost = tipModel_l.size - 1
@@ -124,11 +124,11 @@ object TipModelSearcher1 {
 	): Result[Map[Item, TipModel]] = {
 		val problem = new MyProblem(item_l, itemToLiquid_m, itemToModels_m)
 		val search = new GraphSearch[MyState, MyAction, MyNode]
+		//val searchBFS = new BreadthFirstSearch[State, Action]
+		//val searchDFS = new DepthFirstSearch[State, Action]
 		val frontier = new MinFirstFrontier[MyState, Int, MyNode] {
 			def compareNodes(a: MyNode, b: MyNode): Int = b.heuristic - a.heuristic 
 		}
-		//val searchBFS = new BreadthFirstSearch[State, Action]
-		//val searchDFS = new DepthFirstSearch[State, Action]
 		val debug = new DebugSpec(printFrontier = false, printExpanded = true)
 		println("A*:")
 		
