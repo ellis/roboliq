@@ -1,0 +1,46 @@
+package roboliq.core
+
+import scala.reflect.BeanProperty
+
+
+/** State of a [[roboliq.core.Plate]]. */
+case class PlateState(
+	val conf: Plate,
+	val location_? : Option[PlateLocation]
+)
+
+/*
+/** Convenience class for modifying plate state. */
+class PlateStateWriter(o: Plate, builder: StateBuilder) {
+	def state = builder.map(o.id).asInstanceOf[PlateState]
+	
+	private def set(state1: PlateState) { builder.map(o.id) = state1 }
+	
+	def location = state.location
+	def location_=(location: String) { set(state.copy(location = location)) }
+}
+*/
+
+/** Represents a plate events. */
+abstract class PlateEventBean extends EventBeanA[PlateState] {
+	protected def findState(id: String, query: StateQuery): Result[PlateState] = {
+		query.findPlateState(id)
+	}
+}
+
+/** Represents an aspiration event. */
+class PlateLocationEventBean extends PlateEventBean {
+	/** ID of the new location. */
+	@BeanProperty var location: String = null
+	
+	protected def update(state0: PlateState, query: StateQuery): Result[PlateState] = {
+		for {
+			location <- query.findPlateLocation(location)
+		} yield {
+			new PlateState(
+				state0.conf,
+				location_? = Some(location)
+			)
+		}
+	}
+}

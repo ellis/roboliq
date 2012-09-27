@@ -1,0 +1,50 @@
+# Series 008: test volume levels dispensed by using dye and a reader
+# Version a: 
+# Date: 2012-09-??
+
+substances:
+  dye: !substance {}
+
+plates:
+  P1: { model: "D-BSSE 96 Well Costar Plate", description: 'destination plate for dye' }
+
+tubes:
+  T50dye1: { model: "Tube 50ml" }
+  T50dye2: { model: "Tube 50ml" }
+  T50dye3: { model: "Tube 50ml" }
+  T50dye4: { model: "Tube 50ml" }
+
+events:
+- !add { obj: T50dye1, substance: dye, volume: 49e-3 }
+- !add { obj: T50dye2, substance: dye, volume: 49e-3 }
+- !add { obj: T50dye3, substance: dye, volume: 49e-3 }
+- !add { obj: T50dye4, substance: dye, volume: 49e-3 }
+
+commands:
+- !plate.move
+  
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: dye
+  dest: P1(A01 x H12)
+  volume: [50e-6]
+- !!roboliq.labs.bsse.commands.DyeDispense1CmdBean
+  location
+  # take plate from hotel and put it on the 'cover' location
+  # dispense dye into well
+  # measure volumes
+  # put plate into reader
+  # perform readout
+  # save reader data
+  # take out plate and put it back into the hotel
+  
+  # tips:
+  # 1) four tips
+  # 2) one tip
+  # pipetting approaches:
+  # 1) multipipette liquid to all wells, then readout
+  # 2) single pipette to all wells, then readout after all done
+  # 3) single pipette, and readout after each dispense
+  # readout approach:
+  # 1) check level once with the tip it was dispensed with
+  # 2) check level with each of the four tips
+  # 3) check level multiple times with the tip it was dispensed with

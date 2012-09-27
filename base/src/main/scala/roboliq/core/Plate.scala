@@ -56,19 +56,3 @@ object Plate {
 		}
 	}
 }
-
-/** State of a [[roboliq.core.Plate]]. */
-case class PlateState(
-	val conf: Plate,
-	val location: String
-)
-
-/** Convenience class for modifying plate state. */
-class PlateStateWriter(o: Plate, builder: StateBuilder) {
-	def state = builder.map(o.id).asInstanceOf[PlateState]
-	
-	private def set(state1: PlateState) { builder.map(o.id) = state1 }
-	
-	def location = state.location
-	def location_=(location: String) { set(state.copy(location = location)) }
-}

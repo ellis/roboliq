@@ -41,3 +41,13 @@ case class NeedTip(id: String) extends NeedResource
  * @param count the number of wells required
  */
 case class NeedPool(idInternal: String, purpose: String, count: Int) extends NeedResource
+/**
+ * Represents a plate resource.
+ * @param id plate ID.
+ */
+case class NeedPlate(id: String) extends NeedResource
+/**
+ * Represents a location.
+ * @param id location ID
+ */
+case class NeedLocation(id: String) extends NeedResource

@@ -20,6 +20,8 @@ trait StateQuery {
 	
 	/** Find state of tip with ID `id`. */
 	def findTipState(id: String): Result[TipState]
+	/** Find plate with ID `id`. */
+	def findPlateState(id: String): Result[PlateState]
 	/** Find state of well with ID `id`. */
 	def findWellState(id: String): Result[WellState]
 	/** Find fully defined [[roboliq.core.Well2]] of well with ID `id`. */
