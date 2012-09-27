@@ -7,6 +7,8 @@ substances:
 
 plates:
   P1: { model: "D-BSSE 96 Well Costar Plate", description: 'destination plate for dye' }
+  P2: { model: "D-BSSE 96 Well Costar Plate", description: 'destination plate for dye' }
+  P3: { model: "D-BSSE 96 Well Costar Plate", description: 'destination plate for dye' }
 
 tubes:
   T50dye1: { model: "Tube 50ml" }
@@ -22,13 +24,22 @@ events:
 
 commands:
 - !plate.move
-  
+  plate: P1
+  location: cover
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: dye
   dest: P1(A01 x H12)
   volume: [50e-6]
+  method: distribute
+  levelCheck: immediate
+- !!roboliq.commands.reader.DyeReadout
+  plate: P1
+- !!roboliq.commands.arm.MovePlate
+  plate: P1
+  location: hotel01
 - !!roboliq.labs.bsse.commands.DyeDispense1CmdBean
-  location
+  address: pump
+  tipCount: 4
   # take plate from hotel and put it on the 'cover' location
   # dispense dye into well
   # measure volumes

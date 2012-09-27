@@ -53,7 +53,14 @@ class MovePlateCmdHandler extends CmdHandlerA[MovePlateCmdBean] {
 	): Expand2Result = {
 		MovePlateToken.fromBean(cmd, ctx.ob) match {
 			case Error(ls) => ls.foreach(messages.addError); Expand2Errors()
-			case Success(token) => Expand2Tokens(List(token))
+			case Success(token) =>
+				val events = lItem.flatMap(item => {
+					TipAspirateEventBean(item.tip, item.well, item.volume) ::
+					WellRemoveEventBean(item.well, item.volume) :: Nil
+				})
+				val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(lItem, ctx.ob, ctx.states)
+				
+				Expand2Tokens(List(token))
 		}
 	}
 }
