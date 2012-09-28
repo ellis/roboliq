@@ -1,0 +1,68 @@
+# Series 008: test volume levels dispensed by using dye and a reader
+# Version b: Immitation of Fabian's script "LiHa PrecisionTest StandardTips.esc"
+# Date: 2012-09-??
+
+substances:
+  water: !liquid { physical: Water, cleanPolicy: TNL, allowMultipipette: true }
+  dye: !liquid { physical: Glycerol, cleanPolicy: TNL, allowMultipipette: true }
+
+plates:
+  P1: { model: "D-BSSE 96 Well Costar Plate", description: 'destination plate for dye' }
+
+tubes:
+  T50water1: { model: "Tube 50ml" }
+  T50water2: { model: "Tube 50ml" }
+  T50water3: { model: "Tube 50ml" }
+  T50water4: { model: "Tube 50ml" }
+  T15dye1: { model: "Tube 15ml" }
+  T15dye2: { model: "Tube 15ml" }
+  T15dye3: { model: "Tube 15ml" }
+  T15dye4: { model: "Tube 15ml" }
+
+events:
+- !add { obj: T50water1, substance: water, volume: 49e-3 }
+- !add { obj: T50water2, substance: water, volume: 49e-3 }
+- !add { obj: T50water3, substance: water, volume: 49e-3 }
+- !add { obj: T50water4, substance: water, volume: 49e-3 }
+- !add { obj: T15dye1, substance: dye, volume: 14e-3 }
+- !add { obj: T15dye2, substance: dye, volume: 14e-3 }
+- !add { obj: T15dye3, substance: dye, volume: 14e-3 }
+- !add { obj: T15dye4, substance: dye, volume: 14e-3 }
+
+commands:
+- !plate.move
+  plate: P1
+  location: cover
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: dye
+  dest: P1(A01 x H12)
+  volume: [50e-6]
+  method: distribute
+  levelCheck: immediate
+- !!roboliq.commands.reader.DyeReadout
+  plate: P1
+- !!roboliq.commands.arm.MovePlate
+  plate: P1
+  location: hotel01
+- !!roboliq.labs.bsse.commands.DyeDispense1CmdBean
+  address: pump
+  tipCount: 4
+  # take plate from hotel and put it on the 'cover' location
+  # dispense dye into well
+  # measure volumes
+  # put plate into reader
+  # perform readout
+  # save reader data
+  # take out plate and put it back into the hotel
+  
+  # tips:
+  # 1) four tips
+  # 2) one tip
+  # pipetting approaches:
+  # 1) multipipette liquid to all wells, then readout
+  # 2) single pipette to all wells, then readout after all done
+  # 3) single pipette, and readout after each dispense
+  # readout approach:
+  # 1) check level once with the tip it was dispensed with
+  # 2) check level with each of the four tips
+  # 3) check level multiple times with the tip it was dispensed with
