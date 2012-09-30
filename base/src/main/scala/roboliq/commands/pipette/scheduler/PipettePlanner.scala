@@ -325,7 +325,7 @@ object PipetteUtils {
 		
 		val intensitySrc = {
 			val group_l = (tipState0.destsEntered ++ tipState0.srcsEntered) //.map(_.group)
-			println("group_l: "+group_l)
+			//println("group_l: "+group_l)
 			if (group_l != Set(liquidSrc))
 				liquidSrc.group.cleanPolicy.enter
 			else
@@ -337,7 +337,7 @@ object PipetteUtils {
 			case intensity => WashIntensity.max(List(intensity, tipState0.cleanDegreePending))
 		}
 		
-		println("getWashIntensityPre: "+(liquidTip0, liquidSrc, pos, intensitySrc, intensityDestEnter, intensityPre))
+		//println("getWashIntensityPre: "+(liquidTip0, liquidSrc, pos, intensitySrc, intensityDestEnter, intensityPre))
 
 		// TODO: check whether the clean policy is overridden to not clean
 		

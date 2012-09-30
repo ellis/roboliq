@@ -361,7 +361,7 @@ Unlikely to ever do
 Terminology Choices
 ===================
 
-* Vessel or plate location on the robot bench: Location, Platform, Dock, Station, Address, Bay, Site, Port
+* Vessel or plate location on the robot bench: Location, Platform, Dock, Station, Address, Bay, Site, Port, Position
 
 
 Questions for Fabian

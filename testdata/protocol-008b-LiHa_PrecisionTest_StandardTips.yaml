@@ -43,13 +43,13 @@ commands:
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: water
   dest: P1(A01 x D12)
-  volume: [290e-6]
+  volume: [190e-6]
 #  method: distribute
 #  levelCheck: immediate
-#- !!roboliq.commands.pipette.PipetteCmdBean
-#  src: dye
-#  dest: P1(A01 x D12)
-#  volume: [10e-6]
+- !!roboliq.commands.pipette.PipetteCmdBean
+  src: dye
+  dest: P1(A01 x D12)
+  volume: [10e-6]
 #  method: distribute
 #  levelCheck: immediate
 #- !!roboliq.commands.arm.MovePlateCmdBean

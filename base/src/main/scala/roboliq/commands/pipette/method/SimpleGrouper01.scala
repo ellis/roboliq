@@ -53,9 +53,9 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 			_ <- Result.assert(!src1.isEmpty, "source well(s) for `"+lm.liquid.id+"` do not contain enough liquid.")
 			src = src1.head
 			policyDisp <- Result.get(device.getDispensePolicy(lm.liquid, lm.tipModel, volume, itemState.destState0), "Could not find pipette policy")
-			_ = println("tipLiquid1: "+tip.state(builder).srcsEntered)
+			//_ = println("tipLiquid1: "+tip.state(builder).srcsEntered)
 			intensityPre <- PipetteUtils.getWashIntensityPre(item, lm.liquid, policyDisp, builder, tip, lm.tipModel, postmix_? = None, tipOverrides_? = None)
-			_ = println("tipLiquid2: "+tip.state(builder).srcsEntered)
+			//_ = println("tipLiquid2: "+tip.state(builder).srcsEntered)
 		} yield {
 			val group = PipetteGroup(
 				Seq(PipetteStep_Clean(Map(tip -> intensityPre))),
@@ -66,12 +66,12 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 			// Update states
 			tip.stateWriter(builder).clean(intensityPre)
 			tip.stateWriter(builder).aspirate(src, lm.liquid, volume)
-			println("tipLiquid3: "+tip.state(builder).srcsEntered)
+			//println("tipLiquid3: "+tip.state(builder).srcsEntered)
 			tip.stateWriter(builder).dispense(volume, itemState.destState0.liquid, policyDisp.pos)
-			println("tipLiquid4: "+tip.state(builder).srcsEntered)
+			//println("tipLiquid4: "+tip.state(builder).srcsEntered)
 			src.stateWriter(builder).remove(volume)
 			builder.map(item.dest.id) = itemState.destState1
-			println("tipLiquid5: "+tip.state(builder).srcsEntered)
+			//println("tipLiquid5: "+tip.state(builder).srcsEntered)
 			
 			PipetteGroupData(
 				group = group,
