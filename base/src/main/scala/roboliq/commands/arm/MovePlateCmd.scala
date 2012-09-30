@@ -35,8 +35,8 @@ object MovePlateToken {
 
 class MovePlateCmdHandler extends CmdHandlerA[MovePlateCmdBean] {
 	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
-		messages.paramMustBeNonEmpty("plate")
-		messages.paramMustBeNonEmpty("plateDest")
+		messages.paramMustBeNonNull("plate")
+		messages.paramMustBeNonNull("plateDest")
 		if (messages.hasErrors)
 			return Expand1Errors()
 		

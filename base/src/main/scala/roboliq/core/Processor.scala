@@ -132,6 +132,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 					case NeedSrc(ids) => needIds(node, ids)
 					case NeedDest(ids) => needIds(node, ids)
 					case NeedPool(_, _, _) => // TODO: allocate new pool
+					case NeedPlate(id) => needIds(node, id)
 				}
 			}
 		}

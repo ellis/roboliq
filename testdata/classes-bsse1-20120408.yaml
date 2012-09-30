@@ -9,3 +9,4 @@ commandHandlers:
 - !!roboliq.labs.bsse.handlers.TipsWashCmdHandler_BSSE {}
 - !!roboliq.commands.pipette.PipetteCmdHandler { device: *id001 }
 - !!roboliq.commands.pcr.PcrCmdHandler {}
+- !!roboliq.commands.arm.MovePlateCmdHandler {}
