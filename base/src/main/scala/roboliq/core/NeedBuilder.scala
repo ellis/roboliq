@@ -50,4 +50,4 @@ case class NeedPlate(id: String) extends NeedResource
  * Represents a location.
  * @param id location ID
  */
-case class NeedLocation(id: String) extends NeedResource
+//case class NeedLocation(id: String) extends NeedResource

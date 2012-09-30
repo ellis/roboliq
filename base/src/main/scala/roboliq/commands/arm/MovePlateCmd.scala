@@ -16,7 +16,7 @@ class MovePlateCmdBean extends CmdBean {
 class MovePlateToken(
 	val deviceId_? : Option[String],
 	val plate: Plate,
-	val plateDest: Location
+	val plateDest: PlateLocation
 ) extends CmdToken
 
 object MovePlateToken {
@@ -42,7 +42,7 @@ class MovePlateCmdHandler extends CmdHandlerA[MovePlateCmdBean] {
 		
 		// Item wells are sources
 		Expand1Resources(
-			List(NeedPlate(cmd.plate), NeedLocation(cmd.plateDest))
+			List(NeedPlate(cmd.plate))
 		)
 	}
 
@@ -54,13 +54,10 @@ class MovePlateCmdHandler extends CmdHandlerA[MovePlateCmdBean] {
 		MovePlateToken.fromBean(cmd, ctx.ob) match {
 			case Error(ls) => ls.foreach(messages.addError); Expand2Errors()
 			case Success(token) =>
-				val events = lItem.flatMap(item => {
-					TipAspirateEventBean(item.tip, item.well, item.volume) ::
-					WellRemoveEventBean(item.well, item.volume) :: Nil
-				})
-				val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(lItem, ctx.ob, ctx.states)
+				val event = PlateLocationEventBean(token.plateDest.id)
+				val doc = s"Move plate `${token.plate.id}` to location `${token.plateDest.id}`"
 				
-				Expand2Tokens(List(token))
+				Expand2Tokens(List(token), List(event), doc)
 		}
 	}
 }

@@ -335,6 +335,22 @@ class ObjBase(bb: BeanBase) {
 		}
 	}
 	
+	/** Find initial state for plate with ID `id`. */
+	def findPlateState(id: String): Result[PlateState] = {
+		builder.map.get(id) match {
+			case Some(state: PlateState) => Success(state)
+			case Some(_) => Error("id `"+id+"`: stored state is not a PlateState")
+			case None =>
+				findPlate(id) match {
+					case Error(ls) => Error(ls)
+					case Success(plate) =>
+						val plateState = PlateState.createEmpty(plate)
+						builder.map(id) = plateState
+						Success(plateState)
+				}
+		}
+	}
+	
 	/** Find initial state for well with ID `id`. */
 	def findWellState(id: String): Result[WellState] = {
 		//println("ObjBase.findWellState: "+id)

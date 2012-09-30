@@ -48,6 +48,7 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
 	def findSubstance(id: String): Result[Substance] = ob.findSubstance(id)
 	def findLiquid(id: String): Result[Liquid] = ob.findLiquid(id)
 	def findTip(id: String): Result[Tip] = ob.findTip(id)
+	def findPlateLocation(id: String): Result[PlateLocation] = ob.findPlateLocation(id)
 	def findPlate(id: String): Result[Plate] = ob.findPlate(id)
 	
 	def findTipState(id: String): Result[TipState] = {
@@ -55,6 +56,13 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
 			case Some(state) => Success(state.asInstanceOf[TipState])
 			case None =>
 				ob.findTipState(id)
+		}
+	}
+	
+	def findPlateState(id: String): Result[PlateState] = {
+		map.get(id) match {
+			case Some(state) => Success(state.asInstanceOf[PlateState])
+			case None => ob.findPlateState(id)
 		}
 	}
 	

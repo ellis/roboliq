@@ -14,13 +14,15 @@ trait StateQuery {
 	def findLiquid(id: String): Result[Liquid]
 	/** Find tip with ID `id`. */
 	def findTip(id: String): Result[Tip]
+	/** Find location with ID `id`. */
+	def findPlateLocation(id: String): Result[PlateLocation]
 	/** Find plate with ID `id`. */
 	def findPlate(id: String): Result[Plate]
 	//def findWell(id: String): Result[Well]
 	
 	/** Find state of tip with ID `id`. */
 	def findTipState(id: String): Result[TipState]
-	/** Find plate with ID `id`. */
+	/** Find state of plate with ID `id`. */
 	def findPlateState(id: String): Result[PlateState]
 	/** Find state of well with ID `id`. */
 	def findWellState(id: String): Result[WellState]

@@ -9,6 +9,14 @@ case class PlateState(
 	val location_? : Option[PlateLocation]
 )
 
+/** Factory object for [[roboliq.core.PlateState]]. */
+object PlateState {
+	/** Create an initial state for `plate` with no location. */
+	def createEmpty(plate: Plate): PlateState = {
+		PlateState(plate, None)
+	}
+}
+
 /*
 /** Convenience class for modifying plate state. */
 class PlateStateWriter(o: Plate, builder: StateBuilder) {
@@ -42,5 +50,14 @@ class PlateLocationEventBean extends PlateEventBean {
 				location_? = Some(location)
 			)
 		}
+	}
+}
+
+/** Factory object for [[roboliq.core.PlateLocationEventBean]]. */
+object PlateLocationEventBean {
+	def apply(location: String): PlateLocationEventBean = {
+		val bean = new PlateLocationEventBean
+		bean.location = location
+		bean
 	}
 }

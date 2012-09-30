@@ -35,6 +35,7 @@ case class TipState(
 	override def compare(that: TipState): Int = conf.compare(that.conf)
 }
 
+/** Factory object for [[roboliq.core.TipState]]. */
 object TipState {
 	/** Create an initial state for `tip` with no liquid in it. */
 	def createEmpty(tip: Tip) = TipState(
@@ -190,7 +191,7 @@ class TipAspirateEventBean extends TipEventBean {
 	}
 }
 
-/** Factory object for [[roboliq.core.TipAspirateEvent]]. */
+/** Factory object for [[roboliq.core.TipAspirateEventBean]]. */
 object TipAspirateEventBean {
 	/** Event to aspirate `volume` from `src` with `tip`. */
 	def apply(tip: Tip, src: Well2, volume: LiquidVolume): TipAspirateEventBean = {

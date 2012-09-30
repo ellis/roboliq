@@ -29,7 +29,9 @@ class TubeLocationBean extends Bean {
 /**
  * Represents a bench location.
  */
-sealed abstract class Location
+sealed abstract class Location {
+	val id: String
+}
 
 /**
  * Represents a bench location to hold plates.
