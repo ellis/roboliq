@@ -30,39 +30,46 @@ events:
 - !add { obj: T15dye4, substance: dye, volume: 14e-3 }
 
 commands:
-- !plate.move
-  plate: P1
-  location: cover
+#- !liquid.mixtureByVolume
+#  items:
+#  - src: water
+#    volume: 190e-6
+#  - src: dye
+#    volume: 10e-6
+#  dest: P1(A01 x D12)
+#- !dye.reader
+#  obj: P1(A01 x D12)
+
 - !!roboliq.commands.pipette.PipetteCmdBean
-  src: dye
-  dest: P1(A01 x H12)
-  volume: [50e-6]
-  method: distribute
-  levelCheck: immediate
-- !!roboliq.commands.reader.DyeReadout
-  plate: P1
-- !!roboliq.commands.arm.MovePlate
-  plate: P1
-  location: hotel01
-- !!roboliq.labs.bsse.commands.DyeDispense1CmdBean
-  address: pump
-  tipCount: 4
-  # take plate from hotel and put it on the 'cover' location
-  # dispense dye into well
-  # measure volumes
-  # put plate into reader
-  # perform readout
-  # save reader data
-  # take out plate and put it back into the hotel
-  
-  # tips:
-  # 1) four tips
-  # 2) one tip
-  # pipetting approaches:
-  # 1) multipipette liquid to all wells, then readout
-  # 2) single pipette to all wells, then readout after all done
-  # 3) single pipette, and readout after each dispense
-  # readout approach:
-  # 1) check level once with the tip it was dispensed with
-  # 2) check level with each of the four tips
-  # 3) check level multiple times with the tip it was dispensed with
+  src: water
+  dest: P1(A01 x D12)
+  volume: [290e-6]
+#  method: distribute
+#  levelCheck: immediate
+#- !!roboliq.commands.pipette.PipetteCmdBean
+#  src: dye
+#  dest: P1(A01 x D12)
+#  volume: [10e-6]
+#  method: distribute
+#  levelCheck: immediate
+#- !!roboliq.commands.arm.MovePlateCmdBean
+#  plate: P1
+#  plateDest: shaker
+#- !!roboliq.commands.shaker.ShakeCmdBean
+#  plate: P1
+#  duration: 271
+#- !!roboliq.devices.InfiniteM200.OpenCmdBean {}
+#- !!roboliq.commands.arm.MovePlateCmdBean
+#  plate: P1
+#  plateDest: regrip
+#- !!roboliq.commands.arm.MovePlateCmdBean
+#  plate: P1
+#  plateDest: reader
+#- !!roboliq.devices.InfiniteM200.MeasureCmdBean {}
+#- !!roboliq.commands.arm.MovePlateCmdBean
+#  plate: P1
+#  plateDest: regrip
+#- !!roboliq.commands.arm.MovePlateCmdBean
+#  plate: P1
+#  plateDest: cover
+

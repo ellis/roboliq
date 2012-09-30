@@ -1,3 +1,4 @@
+* Clean tips before pipetting water for SimpleGrouper01
 * Setup test framework for `base`
 * Get rid of Map[LM, Item] and family, only using Map[Item, LM]
 * Add AI search methods to roboliq
@@ -355,6 +356,12 @@ Unlikely to ever do
 -------------------
 
 * YAML: write or get a parser that matches better with scala?
+
+
+Terminology Choices
+===================
+
+* Vessel or plate location on the robot bench: Location, Platform, Dock, Station, Address, Bay, Site, Port
 
 
 Questions for Fabian

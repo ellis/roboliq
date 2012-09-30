@@ -13,7 +13,7 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette.PipetteDevice
 
 sealed trait PipetteStep
-case class PipetteStep_Clean(mTipToSpec: Map[Tip, CleanSpec2]) extends PipetteStep
+case class PipetteStep_Clean(tipToIntensity_m: Map[Tip, WashIntensity.Value]) extends PipetteStep
 case class PipetteStep_Aspirate(item_l: Seq[Item]) extends PipetteStep
 case class PipetteStep_Dispense(item_l: Seq[Item]) extends PipetteStep
 
@@ -144,16 +144,17 @@ object PipettePlanner {
 			(item_l, mItemToState, mLM) = tuple
 			groupData_l <- grouper.groupItems(item_l, mItemToState, mLM, device, ctx)
 			// TODO: optimize cleaning
-			cmd_l <- createCommands(groupData_l, device)
+			cmd_l <- createCommands(groupData_l, mLM, device)
 		} yield (cmd, cmd_l)
 	}
 	
 	def createCommands(
 		groupData_l: Seq[PipetteGroupData],
+		mLM: Map[Item, LM],
 		device: PipetteDevice
 	): Result[Seq[CmdBean]] = {
 		roboliq.core.Success(groupData_l.flatMap{ groupData =>
-			 groupToCommands(device)(groupData) match {
+			 groupToCommands(mLM, device)(groupData) match {
 				 case roboliq.core.Success(l) => l
 				 case roboliq.core.Error(ls) => return Error(ls)
 			 }
@@ -161,12 +162,13 @@ object PipettePlanner {
 	}
 	
 	private def groupToCommands(
+		mLM: Map[Item, LM],
 		device: PipetteDevice
 	)(
 		groupData: PipetteGroupData
 	): Result[Seq[CmdBean]] = {
 		val group = groupData.group
-		val l1 = group.clean_l.flatMap(step => createCleanCommand(step, device))
+		val l1 = group.clean_l.flatMap(step => createCleanCommand(step, groupData, mLM, device))
 		val l2 = group.aspirate_l.map(step => createAspirateCmd(step, groupData))
 		val l3 = group.dispense_l.map(step => createDispenseCmd(step, groupData))
 		Success(l1 ++ l2 ++ l3)
@@ -174,19 +176,21 @@ object PipettePlanner {
 
 	private def createCleanCommand(
 		step: PipetteStep_Clean,
+		groupData: PipetteGroupData,
+		mLM: Map[Item, LM],
 		device: PipetteDevice
 	): Seq[CmdBean] = {
-		val mTipToClean = step.mTipToSpec
+		val tipToIntensity_m = step.tipToIntensity_m
+		
 		val mTipToModel = new HashMap[Tip, Option[TipModel]]
 		val mTipToWash = new HashMap[Tip, WashSpec]
-		for ((tip, cleanSpec) <- mTipToClean) {
-			cleanSpec match {
-				case ReplaceSpec2(tip, model) =>
-					mTipToModel += (tip -> Some(model))
-				case WashSpec2(tip, spec) =>
-					mTipToWash(tip) = spec
-				case DropSpec2(tip) =>
-					mTipToModel += (tip -> None)
+		for ((item, tip) <- groupData.itemToTip_m) {
+			val intensity = tipToIntensity_m(tip)
+			if (device.areTipsDisposable) {
+				mTipToModel(tip) = Some(mLM(item).tipModel)
+			}
+			else {
+				mTipToWash(tip) = new WashSpec(intensity, Set(), Set())
 			}
 		}
 		
@@ -273,7 +277,7 @@ object PipettePlanner {
 }
 
 object PipetteUtils {
-	def createPipetteGroup(item: Item): PipetteGroup = {
+	/*def createPipetteGroup(item: Item): PipetteGroup = {
 		val item_l = Seq(item)
 		PipetteGroup(
 			Seq(),
@@ -284,5 +288,59 @@ object PipetteUtils {
 	
 	def createPipetteGroups(item_l: Seq[Item]): Seq[PipetteGroup] = {
 		item_l map createPipetteGroup
+	}*/
+
+	/**
+	 * Get the required wash intensity for the given tip to pipette the given item from its current state.
+	 */
+	def getWashIntensityPre(
+		item: Item,
+		liquidSrc: Liquid,
+		policyDisp: PipettePolicy,
+		states0: StateMap,
+		tip: Tip,
+		tipModel: TipModel,
+		postmix_? : Option[MixSpec],
+		tipOverrides_? : Option[TipHandlingOverrides]
+	): Result[WashIntensity.Value] = {
+		val dest = item.dest
+		val liquidDest0 = item.dest.wellState(states0).get.liquid
+		val tipState0 = tip.state(states0)
+		val liquidTip0 = tipState0.liquid
+		
+		// Fill mTipToLiquidGroup; return GroupStop if trying to dispense into multiple liquid groups
+		val pos = if (item.postmix_?.isDefined || postmix_?.isDefined) PipettePosition.WetContact else policyDisp.pos
+		// Liquid groups of destination wells with wet contact
+		val (intensityDestEnter_?, contaminant_l): (Option[WashIntensity.Value], Set[Contaminant.Value]) = {
+			// If we enter the destination liquid:
+			if (pos == PipettePosition.WetContact) {
+				(Some(liquidDest0.group.cleanPolicy.enter), liquidDest0.contaminants)
+			}
+			else {
+				(None, Set())
+			}
+		}
+		
+		// TODO: what to do by default when we free dispense in a well with cells?
+		
+		val intensitySrc = {
+			val group_l = (tipState0.destsEntered ++ tipState0.srcsEntered) //.map(_.group)
+			println("group_l: "+group_l)
+			if (group_l != Set(liquidSrc))
+				liquidSrc.group.cleanPolicy.enter
+			else
+				WashIntensity.None
+		}
+		val intensityDestEnter = WashIntensity.max(intensityDestEnter_?.toTraversable)
+		val intensityPre = WashIntensity.max(List(intensitySrc, intensityDestEnter)) match {
+			case WashIntensity.None => WashIntensity.None
+			case intensity => WashIntensity.max(List(intensity, tipState0.cleanDegreePending))
+		}
+		
+		println("getWashIntensityPre: "+(liquidTip0, liquidSrc, pos, intensitySrc, intensityDestEnter, intensityPre))
+
+		// TODO: check whether the clean policy is overridden to not clean
+		
+		Success(intensityPre)
 	}
 }

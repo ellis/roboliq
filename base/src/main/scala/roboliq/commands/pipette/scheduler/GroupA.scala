@@ -10,6 +10,8 @@ import roboliq.commands.pipette._
  * @param mLM map from ALL items (not just the items in this group) to the chosen LM for the destination well
  * @param mTipToLM map from tip to source LM
  * @param mItemToTip map from item to tip used for that item 
+ * @param mTipToCleanSpecA clean specs for individual tips
+ * @param mTipToCleanSpec clean specs for tips which will be cleaned (more tips may be cleaned than is strictly necessary, because entire blocks of tips may need to be cleaned at the same time)
  */
 class GroupA(
 	val mItemToState: Map[Item, ItemState],
