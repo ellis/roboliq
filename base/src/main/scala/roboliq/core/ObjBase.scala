@@ -110,12 +110,12 @@ class ObjBase(bb: BeanBase) {
 		find(id, m_mapTip, bb.mapTip, Tip.fromBean(this, messages), messages, "Tip")
 	}
 	
-	/** Find plate location with ID `id`. */
+	/** Find initial location of plate with ID `id`. */
 	def findPlateLocation(id: String): Result[PlateLocation] = {
 		find(id, m_mapLocation, bb.mapLocation, PlateLocation.fromBean(this), "PlateLocation")
 	}
 	
-	/** Find tube location with ID `id`. */
+	/** Find initial location of tube with ID `id`. */
 	def findTubeLocation(id: String): Result[TubeLocation] = {
 		find(id, m_mapTubeLocation, bb.mapTubeLocation, TubeLocation.fromBean(this), "TubeLocation")
 	}
@@ -341,12 +341,10 @@ class ObjBase(bb: BeanBase) {
 			case Some(state: PlateState) => Success(state)
 			case Some(_) => Error("id `"+id+"`: stored state is not a PlateState")
 			case None =>
-				findPlate(id) match {
-					case Error(ls) => Error(ls)
-					case Success(plate) =>
-						val plateState = PlateState.createEmpty(plate)
-						builder.map(id) = plateState
-						Success(plateState)
+				for { plate <- findPlate(id) } yield {
+					val plateState = PlateState.createEmpty(plate)
+					builder.map(id) = plateState
+					plateState
 				}
 		}
 	}
@@ -448,6 +446,13 @@ class ObjBase(bb: BeanBase) {
 			Error("no vessels found which contain substance `"+substance.id+"`")
 		else
 			Success(l)
+	}
+	
+	/**
+	 * Set the initial location of the given plate.
+	 */
+	def setInitialPlateLocation(plate: Plate, location: String) = {
+		PlateLocationEventBean(plate, location).update(builder)
 	}
 	
 	/**

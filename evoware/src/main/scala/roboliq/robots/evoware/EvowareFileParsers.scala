@@ -110,7 +110,7 @@ object CarrierParser {
 	}
 	
 	def parse17(l: Array[String], lsLine: List[String]): Tuple2[Option[Vector], List[String]] = {
-		println(l.toList)
+		//println("parse17: "+l.toList)
 		val l0 = l.head.split("_")
 		if (l0.length < 3)
 			return (None, lsLine)
@@ -252,7 +252,7 @@ object EvowareTableParser {
 		//println(lsLine.takeWhile(_ != "--{ RPG }--").length)
 		val (_, l) = EvowareFormat.splitSemicolons(lsLine(1))
 		val (tableFile, rest) = parse14(configFile, l, lsLine.drop(2))
-		println(rest.takeWhile(_ != "--{ RPG }--"))
+		//println("parseFile: "+rest.takeWhile(_ != "--{ RPG }--"))
 		tableFile
 	}
 

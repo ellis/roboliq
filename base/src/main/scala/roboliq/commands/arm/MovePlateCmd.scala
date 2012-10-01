@@ -58,7 +58,7 @@ class MovePlateCmdHandler extends CmdHandlerA[MovePlateCmdBean] {
 		MovePlateToken.fromBean(cmd, ctx.states) match {
 			case Error(ls) => ls.foreach(messages.addError); Expand2Errors()
 			case Success(token) =>
-				val event = PlateLocationEventBean(token.plateDest.id)
+				val event = PlateLocationEventBean(token.plate, token.plateDest.id)
 				val doc = s"Move plate `${token.plate.id}` to location `${token.plateDest.id}`"
 				
 				Expand2Tokens(List(token), List(event), doc)

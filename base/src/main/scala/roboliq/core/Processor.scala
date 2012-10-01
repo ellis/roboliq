@@ -132,7 +132,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 					case NeedSrc(ids) => needIds(node, ids)
 					case NeedDest(ids) => needIds(node, ids)
 					case NeedPool(_, _, _) => // TODO: allocate new pool
-					case NeedPlate(id) => needIds(node, id)
+					case NeedPlate(id) => needPlate(id, node)
 				}
 			}
 		}
@@ -191,7 +191,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		})
 
 		// Object to assign location to each plate
-		println("ob.findAllLocations(): "+ob.findAllPlateLocations())
+		println("ob.findAllPlateLocations(): "+ob.findAllPlateLocations())
 		println("mPlate: "+mPlate.mapValues(_.index))
 		// If locations are defined in database
 		ob.findAllPlateLocations().foreach(lLocation => {
@@ -203,6 +203,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				plate.locationPermanent_? match {
 					case Some(location) =>
 						locationBuilder.addLocation(plate.id, node.index, location)
+						ob.setInitialPlateLocation(plate, location)
 						println("added to location builder: ", plate.id, node.index, location)
 					case None =>
 						lLocFree.find(loc => loc.plateModels.contains(plate.model)) match {
@@ -210,6 +211,8 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 							case Some(location) =>
 								lLocFree -= location
 								locationBuilder.addLocation(plate.id, node.index, location.id)
+								ob.setInitialPlateLocation(plate, location.id)
+								println(s"plateState.location: ${plate.id} ${ob.findPlateState(plate.id).map(_.location_?)}")
 								println("added to location builder: ", plate.id, node.index, location)
 						}
 				}

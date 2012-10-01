@@ -55,8 +55,9 @@ class PlateLocationEventBean extends PlateEventBean {
 
 /** Factory object for [[roboliq.core.PlateLocationEventBean]]. */
 object PlateLocationEventBean {
-	def apply(location: String): PlateLocationEventBean = {
+	def apply(plate: Plate, location: String): PlateLocationEventBean = {
 		val bean = new PlateLocationEventBean
+		bean.obj = plate.id
 		bean.location = location
 		bean
 	}
