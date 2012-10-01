@@ -1,7 +1,7 @@
 package roboliq.commands.arm
 
+import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import roboliq.core._
 
 
@@ -16,18 +16,22 @@ class MovePlateCmdBean extends CmdBean {
 class MovePlateToken(
 	val deviceId_? : Option[String],
 	val plate: Plate,
+	val plateSrc: PlateLocation,
 	val plateDest: PlateLocation
 ) extends CmdToken
 
 object MovePlateToken {
-	def fromBean(bean: MovePlateCmdBean, ob: ObjBase): Result[MovePlateToken] = {
+	def fromBean(bean: MovePlateCmdBean, states: StateQuery): Result[MovePlateToken] = {
 		for {
-			plate <- ob.findPlate(bean.plate)
-			plateDest <- ob.findPlateLocation(bean.plateDest)
+			plate <- states.findPlate(bean.plate)
+			plateState <- states.findPlateState(plate.id)
+			locationSrc <- Result.get(plateState.location_?, s"plate `${plate.id}` must have an location set.")
+			plateDest <- states.findPlateLocation(bean.plateDest)
 		} yield {
 			new MovePlateToken(
 				Option(bean.deviceId),
 				plate,
+				locationSrc,
 				plateDest)
 		}
 	}
@@ -51,7 +55,7 @@ class MovePlateCmdHandler extends CmdHandlerA[MovePlateCmdBean] {
 		ctx: ProcessorContext,
 		messages: CmdMessageWriter
 	): Expand2Result = {
-		MovePlateToken.fromBean(cmd, ctx.ob) match {
+		MovePlateToken.fromBean(cmd, ctx.states) match {
 			case Error(ls) => ls.foreach(messages.addError); Expand2Errors()
 			case Success(token) =>
 				val event = PlateLocationEventBean(token.plateDest.id)

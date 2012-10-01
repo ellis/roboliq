@@ -10,6 +10,7 @@ import roboliq.commands.move._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 import commands.EvowareSubroutineToken
+import roboliq.commands.arm.MovePlateToken
 //import roboliq.robots.evoware.commands._
 
 
@@ -102,7 +103,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			case c: EvowareSubroutineToken => subroutine(builder, c)
 			case c: MixToken => mix(builder, c.items)
-			//case c: L1C_MovePlate => movePlate(builder, c.args)
+			case c: MovePlateToken => movePlate(builder, c)
 			//case c: L1C_Prompt => prompt(c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
@@ -423,13 +424,14 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			Seq(L0C_DropDITI(mTips, iGrid, site.iSite))
 		}
 	}
+	*/
 	
-	private def movePlate(builder: EvowareScriptBuilder, c: L1A_MovePlateArgs): Result[Seq[CmdToken]] = {
+	private def movePlate(builder: EvowareScriptBuilder, c: MovePlateToken): Result[Seq[L0C_Command]] = {
 		for {
-			siteSrc <- getSite(c.locationSrc)
-			siteDest <- getSite(c.locationDest)
+			siteSrc <- getSite(c.plateSrc.id)
+			siteDest <- getSite(c.plateDest.id)
 		} yield {
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(c.sPlateModel)
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(c.plate.model.id)
 			
 			val carrierSrc = siteSrc.carrier
 			val iGridSrc = config.tableFile.mapCarrierToGrid(carrierSrc)
@@ -456,21 +458,22 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				labwareModel,
 				iGridSrc, siteSrc,
 				iGridDest, siteDest,
-				c.lidHandling,
+				LidHandling.NoLid, //c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,
 				sCarrierLid = ""
 			)
 			
 			builder.mapCmdToLabwareInfo(cmd) = List(
-				(siteSrc, c.locationSrc, labwareModel),
-				(siteDest, c.locationDest, labwareModel)
+				(siteSrc, c.plateSrc.id, labwareModel),
+				(siteDest, c.plateDest.id, labwareModel)
 			)
 			
 			Seq(cmd)
 		}
 	}
 	
+	/*
 	private def timer(args: L12A_TimerArgs): Result[Seq[CmdToken]] = {
 		Success(Seq(
 			L0C_StartTimer(1),
