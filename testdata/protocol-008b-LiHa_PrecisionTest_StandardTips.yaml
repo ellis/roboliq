@@ -59,9 +59,9 @@ commands:
 #  plate: P1
 #  duration: 271
 #- !!roboliq.devices.InfiniteM200.OpenCmdBean {}
-#- !!roboliq.commands.arm.MovePlateCmdBean
-#  plate: P1
-#  plateDest: regrip
+- !!roboliq.commands.arm.MovePlateCmdBean
+  plate: P1
+  plateDest: regrip
 #- !!roboliq.commands.arm.MovePlateCmdBean
 #  plate: P1
 #  plateDest: reader

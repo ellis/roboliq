@@ -177,7 +177,7 @@ case class L0C_Transfer_Rack(
 			'"'+iGridDest.toString+'"',
 			if (bMoveBackToHome) 1 else 0,
 			if (lidHandling == NoLid) 0 else 1,
-			0, // speed: 0 = maximum, 1 = taught in vector dialog
+			1, // speed: 0 = maximum, 1 = taught in vector dialog
 			iRoma,
 			if (lidHandling == RemoveAtSource) 1 else 0,
 			'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
