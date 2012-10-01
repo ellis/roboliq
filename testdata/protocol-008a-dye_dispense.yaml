@@ -50,7 +50,6 @@ commands:
   
   # tips:
   # 1) four tips
-  # 2) one tip
   # pipetting approaches:
   # 1) multipipette liquid to all wells, then readout
   # 2) single pipette to all wells, then readout after all done
@@ -59,3 +58,14 @@ commands:
   # 1) check level once with the tip it was dispensed with
   # 2) check level with each of the four tips
   # 3) check level multiple times with the tip it was dispensed with
+  # total volumes:
+  # 200ul, 100ul, 50ul, 25ul, 10ul, 5ul
+  # mixes with large tips:
+  # 200ul: 100, 30, 10, 3 dye
+  # 100ul: 30, 10, 3 dye
+  # 50ul: 10, 3 dye
+  # 25ul: 10, 3 dye
+  # mixes with small tips:
+  # 200ul: 0.25, 0.5, 1, 3 dye
+  # 25ul:
+  # 10ul:

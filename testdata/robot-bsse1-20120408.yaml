@@ -36,6 +36,7 @@ locations:
   cooled3: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled4: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled5: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
+  regrip: { plateModels: ["D-BSSE 96 Well PCR Plate", "D-BSSE 96 Well Costar Plate"] }
 
 tubeLocations:
   reagents50: { tubeModels: ["Tube 50ml"], rackModel: "Reagent Cooled 8*50ml" }
