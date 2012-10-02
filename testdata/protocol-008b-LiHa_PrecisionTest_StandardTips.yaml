@@ -44,14 +44,10 @@ commands:
   src: water
   dest: P1(A01 x D12)
   volume: [190e-6]
-#  method: distribute
-#  levelCheck: immediate
 - !!roboliq.commands.pipette.PipetteCmdBean
   src: dye
   dest: P1(A01 x D12)
   volume: [10e-6]
-#  method: distribute
-#  levelCheck: immediate
 - !!roboliq.commands.arm.MovePlateCmdBean
   plate: P1
   plateDest: shaker
@@ -62,9 +58,9 @@ commands:
 - !!roboliq.commands.arm.MovePlateCmdBean
   plate: P1
   plateDest: regrip
-#- !!roboliq.commands.arm.MovePlateCmdBean
-#  plate: P1
-#  plateDest: reader
+- !!roboliq.commands.arm.MovePlateCmdBean
+  plate: P1
+  plateDest: reader
 #- !!roboliq.devices.InfiniteM200.MeasureCmdBean {}
 #- !!roboliq.commands.arm.MovePlateCmdBean
 #  plate: P1

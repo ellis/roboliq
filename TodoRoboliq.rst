@@ -1,4 +1,4 @@
-* Clean tips before pipetting water for SimpleGrouper01
+* Why does Transfer_Rack use RoMA1 when moving from regrip to reader?
 * Setup test framework for `base`
 * Get rid of Map[LM, Item] and family, only using Map[Item, LM]
 * Add AI search methods to roboliq

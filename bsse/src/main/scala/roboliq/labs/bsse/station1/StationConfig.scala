@@ -58,6 +58,7 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 		val pcr2 = labelSite("pcr2", "TRobot2", 0)
 		val centrifuge = labelSite("centrifuge", "Centrifuge", 0)
 		val regrip = labelSite("regrip", "ReGrip Station", 0)
+		val reader = labelSite("reader", "Infinite M200", 0)
 	}
 	// HACK: force evaluation of Locations
 	Locations.toString()

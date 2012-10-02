@@ -447,11 +447,17 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			// TODO: figure out an intermediate path to follow instead (e.g. via a re-grip location)
 			if (lVector2.isEmpty) 
 				return Error("no common RoMa: "+carrierSrc.sName+" and "+carrierDest.sName)
-			val (iRoma, sClass) = lVector2.head._1
+			val (iRoma, sVectorClass) = lVector2.head._1
+			
+			//println("movePlate:")
+			//println("lVectorSrc: "+lVectorSrc)
+			//println("lVectorDest: "+lVectorDest)
+			//println("lVector1: "+lVector1)
+			//println("lVector2: "+lVector2)
 			
 			val cmd = L0C_Transfer_Rack(
 				iRoma,
-				sClass,
+				sVectorClass,
 				//c.sPlateModel,
 				//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
 				//iGridDest, siteDest.iSite, siteDest.carrier.sName,
