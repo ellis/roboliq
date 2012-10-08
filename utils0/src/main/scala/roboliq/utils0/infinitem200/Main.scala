@@ -73,7 +73,15 @@ object InfinitM200 {
 				readout = 0
 			)
 			
-			repl.interpret("def getTip(row: Int, col: Int): Int = { "+tipExpr+" }")
+			repl.interpret("""
+				def getBaseVol(row: Int, col: Int): BigDecimal = { """+c.field_m.get("baseVol").getOrElse("0")+""" }
+				def getBaseConc(row: Int, col: Int): BigDecimal = { """+c.field_m.get("baseConc").getOrElse("0")+""" }
+				def getVol(row: Int, col: Int): BigDecimal = { """+c.field_m.get("vol").getOrElse("0")+""" }
+				def getConc(row: Int, col: Int): BigDecimal = { """+c.field_m.get("conc").getOrElse("0")+""" }
+				def getTip(row: Int, col: Int): Int = { """+tipExpr+""" }
+				def getTipVol(row: Int, col: Int): BigDecimal = { """+c.field_m.get("tipVol").getOrElse("0")+""" }				
+				def getMultipipette(row: Int, col: Int): Boolean = { """+c.field_m.get("multipipette").getOrElse("false")+""" }				
+			""")
 
 			val xml = scala.xml.XML.loadFile(filename)
 			//println((xml \\ "Well"))
@@ -93,13 +101,34 @@ object InfinitM200 {
 			
 			repl.bind("rowColVal_l", rowColVal_l)
 			
-			val row_l = rowColVal_l.map(tuple => {
-				val (row_i, col_i, value_s) = tuple
-				repl.interpret(s"val tip = getTip(${row_i}, ${col_i})")
-				val tip_i = repl.valueOfTerm("tip").get.asInstanceOf[Int]
-				c.field_l ++ List[String](tip_i.toString, row_i.toString, col_i.toString, value_s)
+			repl.interpret("""
+				val l = for (tuple <- rowColVal_l) yield {
+					val (row, col, value_s) = tuple.asInstanceOf[(Int, Int, String)]
+					(
+						getBaseVol(row, col),
+						getBaseConc(row, col),
+						getVol(row, col),
+						getConc(row, col),
+						getTip(row, col),
+						getTipVol(row, col),
+						getMultipipette(row, col)
+					)
+				}
+			""")
+
+			val l = repl.valueOfTerm("l").get.asInstanceOf[List[(BigDecimal, BigDecimal, BigDecimal, BigDecimal, Int, BigDecimal, Boolean)]]
+			
+			val row_l = (rowColVal_l zip l).map(pair => {
+				val (row_i, col_i, value_s) = pair._1
+				val tuple = pair._2
 				row0.copy(
-					tip = tip_i,
+					baseVol = tuple._1,
+					baseConc = tuple._2,
+					vol = tuple._3,
+					conc = tuple._4,
+					tip = tuple._5,
+					tipVol = tuple._6,
+					multipipette = tuple._7,
 					row = row_i,
 					col = col_i,
 					readout = BigDecimal(value_s)
