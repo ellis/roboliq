@@ -16,5 +16,6 @@ libraryDependencies ++= Seq(
 	"commons-io" % "commons-io" % "2.2",
 	"org.scalatest" % "scalatest_2.10.0-M5" % "1.9-2.10.0-M5-B2",
 	"org.scalaz" % "scalaz-core_2.10.0-M5" % "6.0.4",
+	"com.google.code.gson" % "gson" % "2.2.1",
 	"org.yaml" % "snakeyaml" % "1.10"
 )
