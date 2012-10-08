@@ -1,0 +1,240 @@
+'2012-10-08_10-20-05_ellis_dye_read10times.xml':
+  id: '"read10times1Aa"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-21-55_ellis_dye_read10times.xml':
+  id: '"read10times1Ab"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-24-50_ellis_dye_read10times.xml':
+  id: '"read10times1Ba"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-26-40_ellis_dye_read10times.xml':
+  id: '"read10times1Bb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-29-35_ellis_dye_read10times.xml':
+  id: '"read10times1Ca"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-31-25_ellis_dye_read10times.xml':
+  id: '"read10times1Cb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-34-20_ellis_dye_read10times.xml':
+  id: '"read10times1Da"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-36-10_ellis_dye_read10times.xml':
+  id: '"read10times1Db"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-39-04_ellis_dye_read10times.xml':
+  id: '"read10times1Ea"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-40-54_ellis_dye_read10times.xml':
+  id: '"read10times1Eb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-43-49_ellis_dye_read10times.xml':
+  id: '"read10times1Fa"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-45-39_ellis_dye_read10times.xml':
+  id: '"read10times1Fb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-48-34_ellis_dye_read10times.xml':
+  id: '"read10times1Ga"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-50-24_ellis_dye_read10times.xml':
+  id: '"read10times1Gb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-53-18_ellis_dye_read10times.xml':
+  id: '"read10times1Ha"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-55-08_ellis_dye_read10times.xml':
+  id: '"read10times1Hb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-58-03_ellis_dye_read10times.xml':
+  id: '"read10times1Ia"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_10-59-53_ellis_dye_read10times.xml':
+  id: '"read10times1Ib"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_11-02-47_ellis_dye_read10times.xml':
+  id: '"read10times1Ja"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
+'2012-10-08_11-04-37_ellis_dye_read10times.xml':
+  id: '"read10times1Jb"'
+  date: '"2012-10-08"'
+  script: '"ellis_dye_read10times.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: if (row <= 4) 190 else 180
+  vol: if (row <= 4) 10 else 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: if (row <= 4) 10 else 20
