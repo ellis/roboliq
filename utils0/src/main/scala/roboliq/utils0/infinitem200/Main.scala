@@ -6,6 +6,7 @@ import java.io.FileInputStream
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 
+import org.apache.commons.io.FileUtils
 import org.yaml.snakeyaml.Yaml
 import com.google.gson.Gson
 
@@ -30,12 +31,16 @@ class SpecBean {
 object InfinitM200 {
 	case class Config(
 		filename: String = "",
-		outfile: String = null
+		outfile: String = null,
+		json: Boolean = false,
+		tab: Boolean = false
 	)
 
 	val parser = new scopt.immutable.OptionParser[Config]("roboliq-infinitm200-parser", "1.0") {
 		def options = Seq(
 			opt("o", "output", "Output filename") { (s, c) => c.copy(outfile = s) },
+			flag("json", "JSON output") { (c: Config) => c.copy(json = true) },
+			flag("tab", "Tab output") { (c: Config) => c.copy(tab = true) },
 			arg("SPECFILE", "A .yaml file with specs.") { (s, c) => c.copy(filename = s) }
 		)
 	}
@@ -66,12 +71,12 @@ object InfinitM200 {
 		site: String,
 		plateModel: String,
 		liquidClass: String,
-		baseVol: String,
-		baseConc: String,
+		baseVol: java.math.BigDecimal,
+		baseConc: java.math.BigDecimal,
 		vol: java.math.BigDecimal,
-		conc: String,
+		conc: java.math.BigDecimal,
 		tip: Int,
-		tipVol: String,
+		tipVol: java.math.BigDecimal,
 		multipipette: Boolean,
 		row: Int,
 		col: Int,
@@ -81,16 +86,10 @@ object InfinitM200 {
 	object RowBean {
 		def apply(r: Row): RowBean = {
 			new RowBean(r.id, r.date, r.script, r.site, r.plateModel, r.liquidClass,
-					r.baseVol.toString, r.baseConc.toString, r.vol.bigDecimal, r.conc.toString, r.tip, r.tipVol.toString, r.multipipette, r.row, r.col, r.readout.bigDecimal)
+					r.baseVol.bigDecimal, r.baseConc.bigDecimal, r.vol.bigDecimal, r.conc.bigDecimal, r.tip, r.tipVol.bigDecimal, r.multipipette, r.row, r.col, r.readout.bigDecimal)
 		}
 	}
-
-	val replSettings = new scala.tools.nsc.Settings
-	replSettings.embeddedDefaults[Config] // Arbitrary class
-	val repl = new scala.tools.nsc.interpreter.IMain(replSettings)
 	
-	val gson = new Gson
-
 	def main(args: Array[String]) {
 		val c = parser.parse(args, new Config) match {
 			case Some(config) => config
@@ -98,6 +97,7 @@ object InfinitM200 {
 		}
 		
 		val yaml = new Yaml
+		val gson = new Gson
 
 		val file = new File(c.filename)
 		val dir = file.getParentFile
@@ -105,15 +105,63 @@ object InfinitM200 {
 			println("Could not find file `"+c.filename+"`.")
 			sys.exit()
 		}
-		val input = new FileInputStream(file);
+		val input = yaml.loadAll(new FileInputStream(file))
 
-		for (o <- yaml.loadAll(input)) {
+		val replSettings = new scala.tools.nsc.Settings
+		replSettings.embeddedDefaults[Config] // Arbitrary class
+		val repl = new scala.tools.nsc.interpreter.IMain(replSettings)
+		
+		val rowAll_l = input.flatMap(o => {
 			val spec = o.asInstanceOf[SpecBean]
-			handleSpec(dir, spec)
+			val row_l = handleSpec(c, dir, spec, repl)
+		
+			row_l.foreach(println)
+			
+			if (c.json) {
+				val outfile = new File(dir, spec.id+".json")
+				val rowBean_l: java.util.Collection[RowBean] = asJavaCollection(row_l.map(RowBean.apply))
+				val out_s = gson.toJson(rowBean_l)
+				FileUtils.writeStringToFile(outfile, out_s)
+			}
+			if (c.tab) {
+				val outfile = new File(dir, spec.id+".tab")
+				val header_s = "id\tdate\tscript\tsite\tplateModel\tliquidClass\tbaseVol\tbaseConc\tvol\tconc\ttip\ttipVol\tmultipipette\trow\tcol\treadout"
+				val out_l = row_l.map(row1 => {
+					import row1._
+					s"$id\t$date\t$script\t$site\t$plateModel\t$liquidClass\t$baseVol\t$baseConc\t$vol\t$conc\t$tip\t$tipVol\t$multipipette\t$row\t$col\t$readout"
+				})
+				FileUtils.writeLines(outfile, header_s :: out_l)
+			}
+			
+			row_l
+		})
+		
+		if (c.outfile != null) {
+			val row_l = rowAll_l.toList
+			if (c.json) {
+				val outfile = new File(dir, c.outfile)
+				val rowBean_l: java.util.Collection[RowBean] = asJavaCollection(row_l.map(RowBean.apply))
+				val out_s = gson.toJson(rowBean_l)
+				FileUtils.writeStringToFile(outfile, out_s)
+			}
+			if (c.tab) {
+				val outfile = new File(dir, c.outfile)
+				val header_s = "id\tdate\tscript\tsite\tplateModel\tliquidClass\tbaseVol\tbaseConc\tvol\tconc\ttip\ttipVol\tmultipipette\trow\tcol\treadout"
+				val out_l = row_l.map(row1 => {
+					import row1._
+					s"$id\t$date\t$script\t$site\t$plateModel\t$liquidClass\t$baseVol\t$baseConc\t$vol\t$conc\t$tip\t$tipVol\t$multipipette\t$row\t$col\t$readout"
+				})
+				FileUtils.writeLines(outfile, header_s :: out_l)
+			}
 		}
 	}
 	
-	def handleSpec(dir: File, spec: SpecBean) {
+	def handleSpec(
+		c: Config,
+		dir: File,
+		spec: SpecBean,
+		repl: scala.tools.nsc.interpreter.IMain
+	): List[Row] = {
 		val row0 = Row(
 			id = spec.id,
 			date = spec.date,
@@ -194,9 +242,6 @@ object InfinitM200 {
 				readout = BigDecimal(value_s)
 			)
 		})
-		
-		row_l.foreach(println)
-		val rowBean_l: java.util.Collection[RowBean] = asJavaCollection(row_l.map(RowBean.apply))
-		println(gson.toJson(rowBean_l))
+		row_l
 	}
 }
