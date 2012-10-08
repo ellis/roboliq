@@ -26,6 +26,8 @@ object MyBuild extends Build {
 	
 	//lazy val projTest = Project("test", file("test")) dependsOn(projCommon, projCommands, projCompiler, projDevices, projRoboease, projEvoware, projBsse, projRoboeaseEvoware)
 
+	lazy val projUtils0 = Project("utils0", file("utils0"))
+	
 	//scalacOptions <++= Seq("-unchecked")
 }
 
