@@ -32,7 +32,7 @@ object InfinitM200 {
 	val fieldDefault_m = Map(
 			"baseVol" -> "0",
 			"baseConc" -> "0",
-			"multipipette" -> "false",
+			"multipipette" -> "0",
 			"row" -> "row",
 			"col" -> "col",
 			"readout" -> "0"

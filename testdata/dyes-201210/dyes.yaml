@@ -10,7 +10,7 @@
   conc: 0.08
   tip: ((row - 1) % 4) + 1
   tipVol: if (col <= 8) 100*(9 - col) else 100
-  multipipette: (col <= 8)
+  multipipette: if (col <= 8) col else 0
 '2012-10-08_13-28-26_ellis_dye12.xml':
   id: if (col <= 8) "dye12Aa" else "dye12Ab"
   date: '"2012-10-08"'
@@ -23,7 +23,7 @@
   conc: 0.08
   tip: ((row - 1) % 4) + 1
   tipVol: if (col <= 8) 50*(9 - col) else 50
-  multipipette: (col <= 8)
+  multipipette: if (col <= 8) col else 0
 '2012-10-08_16-32-20_ellis_dye13.xml':
   id: if (col <= 8) "dye13Aa" else "dye13Ab"
   date: '"2012-10-08"'
@@ -36,7 +36,7 @@
   conc: 0.8
   tip: ((row - 1) % 4) + 1
   tipVol: if (col <= 8) 10*(9 - col) else 10
-  multipipette: (col <= 8)
+  multipipette: if (col <= 8) col else 0
 '2012-10-08_17-38-26_ellis_dye14.xml':
   id: if (col <= 8) "dye14Aa" else "dye14Ab"
   date: '"2012-10-08"'
@@ -49,7 +49,7 @@
   conc: 0.8
   tip: ((row - 1) % 4) + 1
   tipVol: if (col <= 8) 10*(9 - col) else 10
-  multipipette: (col <= 8)
+  multipipette: if (col <= 8) col else 0
 '2012-10-08_18-33-35_ellis_dye15.xml':
   id: if (col <= 8) "dye15Aa" else "dye15Ab"
   date: '"2012-10-08"'
@@ -62,5 +62,116 @@
   conc: 0.8
   tip: ((row - 1) % 4) + 1
   tipVol: if (col <= 8) 5*(9 - col) else 5
-  multipipette: (col <= 8)
+  multipipette: if (col <= 8) col else 0
+'2012-10-11_11-44-44_ellis_dye16.xml':
+  desc: "200ul, large tips, single-pipetting"
+  id: '"dye16A"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye16.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 0
+  vol: 200
+  conc: 0.08
+  tip: ((row - 1) % 4) + 1
+  tipVol: 200
+  multipipette: 0
+'2012-10-11_12-56-06_ellis_dye17.xml':
+  desc: "10ul, tip 1 only, multipipette to first 7 rows, then single-pipette to last row"
+  id: if (row < 8) "dye17Aa" else "dye17Ab"
+  date: '"2012-10-11"'
+  script: '"ellis_dye17.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 190
+  vol: 10
+  conc: 0.8
+  tip: 1
+  tipVol: if (row < 8) 5*(9 - col) else 10
+  multipipette: if (row < 8) (row-1)*12+col else 0
+'2012-10-11_13-42-45_ellis_dye18.xml':
+  desc: "3ul, large tips, each tip multidispenses 24 times"
+  id: '"dye18A"'
+  date: '"2012-10-11"'
+  script: '"ellisecl_dye18.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 197
+  vol: 3
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: 3 * (24 - (((row-1) / 4) * 12 + col) + 1)
+  multipipette: (((row-1) / 4) * 12 + col)
+'2012-10-11_13-42-45_ellis_dye18.xml':
+  desc: "3ul, large tips, each tip multidispenses 24 times"
+  id: '"dye18B"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye18.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 197
+  vol: 3
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: 3 * (24 - (((row-1) / 4) * 12 + col) + 1)
+  multipipette: (((row-1) / 4) * 12 + col)
+'2012-10-11_14-40-38_ellis_dye19.xml':
+  desc: "20ul, large tips, each tip multidispenses 24 times"
+  id: '"dye19A"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye19.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 180
+  vol: 20
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: 20 * (24 - (((row-1) / 4) * 12 + col) + 1)
+  multipipette: (((row-1) / 4) * 12 + col)
+'2012-10-11_15-11-34_ellis_dye20.xml':
+  desc: "200ul, large tips, single dispense, reverse column order (right to left)"
+  id: '"dye20A"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye20.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 0
+  vol: 200
+  conc: 0.08
+  tip: ((row - 1) % 4) + 1
+  tipVol: 200
+'2012-10-11_15-50-53_ellis_dye21.xml':
+  desc: "5ul, large tips, each tip multidispenses 24 times"
+  id: '"dye21A"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye21.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 195
+  vol: 5
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: 5 * (24 - (((row-1) / 4) * 12 + col) + 1)
+  multipipette: (((row-1) / 4) * 12 + col)
+'2012-10-11_16-18-44_ellis_dye22.xml':
+  desc: "10ul, large tips, each tip multidispenses 24 times"
+  id: '"dye22A"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye22.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 190
+  vol: 10
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: 10 * (24 - (((row-1) / 4) * 12 + col) + 1)
+  multipipette: (((row-1) / 4) * 12 + col)
 
