@@ -74,12 +74,12 @@ object InfinitM200 {
 				val out_s = gson.toJson(rowBean_l)
 				FileUtils.writeStringToFile(outfile, out_s)
 			}*/
-			if (c.tab) {
+			/*if (c.tab) {
 				val outfile = new File(dir, map("id")+".tab")
 				val header_s = field_l.mkString("\t")
 				val out_l = row_l.map(row => field_l.map(row).mkString("\t"))
 				FileUtils.writeLines(outfile, header_s :: out_l)
-			}
+			}*/
 			
 			row_l
 		})

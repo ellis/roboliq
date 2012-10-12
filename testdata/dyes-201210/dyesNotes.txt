@@ -36,6 +36,9 @@ Todo in R
 
 * Give each tip a unique color
 * Figure out how to analyze whether there is any bias on a per-well basis
+* Experiments with worst variance, grouped by id
+
+Group data by site, plateModel, liquidClass, totVol, tip <= 4, multipipette > 0.
 
 Done
 ----

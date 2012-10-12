@@ -13,6 +13,14 @@ dfwell <- (df$row - 1) * 12 + df$col
 df.totVol = df$baseVol + df$vol
 df.totConc = (df$baseConc * df$baseVol + df$conc * df$vol) / df.totVol
 
+# Linear models
+lm1 = lm(df$readout ~ df.totConc)
+lm1.pred = predict(lm1, df)
+lm1.d = df$readout - lm1.pred
+lm1.dabs = abs(lm1.d)
+lm1.rel = lm1.d/lm1.pred
+lm1.relabs = lm1.dabs/lm1.pred
+
 # Compare dye13 and dye14 (10ul multi vs single, air vs wet)
 par(mfrow=c(2,2),oma = c(0, 0, 2, 0))
 df_id13Aa = df$id == 'dye13Aa'
@@ -43,6 +51,12 @@ boxplot(reader$readout[reader$vol == 20] ~ well[reader$vol == 20], main="20ul", 
 boxplot(reader$readout[reader$vol == 10] ~ well[reader$vol == 10], ylim=c(0, max(reader$readout[reader$vol == 10])), main="10ul", xlab="well")
 boxplot(reader$readout[reader$vol == 20] ~ well[reader$vol == 20], ylim=c(0, max(reader$readout[reader$vol == 20])), main="20ul", xlab="well")
 mtext("Reliability of Reader", outer = T, cex=1)
+
+# Multipipetting
+multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) ifelse(n >= 2, '2+', as.character(n))))
+plot(lm1.rel ~ multipipette_012, xlab="multipipetting step")
+x = df$tipVol / df$vol
+plot(lm1.rel ~ x, col=df$vol)
 
 # readout vs tipvol
 plot3 = function(vol) {
@@ -87,11 +101,9 @@ lm(df$readout ~ df.totConc + df$tip + df$row + df$col + df$tipVol)
 lm(scale(df$readout) ~ scale(df.totConc) + scale(df$tip) + scale(df$row) + scale(df$col) + scale(df$tipVol))
 lm(scale(df$readout) ~ scale(df.totConc) + (df$tip == 1) + (df$tip == 2) + (df$tip == 3) + (df$tip == 4) + scale(df$row) + scale(df$col) + scale(df$tipVol))
 
-lm1 = lm(df$readout ~ df.totConc)
-lm1.pred = predict(x, df)
-lm1.d = abs(df$readout - df.pred1)
-lm1.rel = lm1.d/df.pred1
 plot(ecdf(lm1.rel))
-plot(lm1.rel ~ as.factor(df$multipipette > 0))
-plot(lm1.rel[df$multipipette > 0] ~ as.factor(df$multipipette[df$multipipette > 0] == 1))
+plot(ecdf(lm1.relabs))
+multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) ifelse(n > 2, 2, n)))
+plot(lm1.rel ~ multipipette_012)
+plot(lm1.rel ~ as.factor(df$vol))
 plot(lm1.rel ~ as.factor(df$tip))
