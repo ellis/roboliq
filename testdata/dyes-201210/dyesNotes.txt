@@ -1,0 +1,48 @@
+====
+Dyes
+====
+
+Todo in Lab
+===========
+
+* Redo ellis_dye15 using "Water free dispense" modified to use wet contact?  I used Roboliq_Water_Wet_1000 originally, so maybe that wasn't so good
+* Figure out low-volume phenomenon for first multipipette dispense
+* Test whether performing a more complete wash reduces the gradual drop in the readout
+* Test how consistent the problem is with first multi-dispense step
+* Test whether we can make multidispense more consistent by performing first dispense into waste
+
+* Use Ellis Nunclon instead
+
+Done
+----
+
+* Multipipette 10ul into as many wells as possible in one go with tip 1
+* Single pipette 200ul to full plate
+* 3ul multi 24
+* 200ul single in opposite column direction
+* 20ul multi 24
+
+Methods:
+
+Multi-Dispense 12: (50)
+Multi-Dispense 24: 3, 5, 10, 20
+Multi-Dispense 48: 
+Multi-Dispense 84: 10
+Multi-Dispense 96: 
+Single-Dispense 4T*24: 
+
+Todo in R
+=========
+
+* Give each tip a unique color
+* Figure out how to analyze whether there is any bias on a per-well basis
+
+Done
+----
+
+* Change `multipipette` to 0 for single dispense, and an integer for the multipetting step otherwise.
+
+Graphs
+======
+
+* `readout` ~ `tipVol`, separate graph for each `vol` (color single pipetting readouts differently)

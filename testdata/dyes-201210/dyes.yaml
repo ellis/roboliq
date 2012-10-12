@@ -76,7 +76,6 @@
   conc: 0.08
   tip: ((row - 1) % 4) + 1
   tipVol: 200
-  multipipette: 0
 '2012-10-11_12-56-06_ellis_dye17.xml':
   desc: "10ul, tip 1 only, multipipette to first 7 rows, then single-pipette to last row"
   id: if (row < 8) "dye17Aa" else "dye17Ab"
@@ -174,4 +173,17 @@
   tip: ((row - 1) % 4) + 1
   tipVol: 10 * (24 - (((row-1) / 4) * 12 + col) + 1)
   multipipette: (((row-1) / 4) * 12 + col)
+'
+  desc: "3ul, large tips, each tip single-dispenses 24 times"
+  id: '"dye23A"'
+  date: '"2012-10-12"'
+  script: '"ellis_dye23.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 197
+  vol: 3
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVol: 3
 

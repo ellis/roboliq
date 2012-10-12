@@ -10,6 +10,8 @@ relValue = function(values) {
 
 df <- read.delim('dyes.tab', header=1)
 dfwell <- (df$row - 1) * 12 + df$col
+df.totVol = df$baseVol + df$vol
+df.totConc = (df$baseConc * df$baseVol + df$conc * df$vol) / df.totVol
 
 # Compare dye13 and dye14 (10ul multi vs single, air vs wet)
 par(mfrow=c(2,2),oma = c(0, 0, 2, 0))
@@ -61,11 +63,35 @@ scatterplotMatrix(~ df$readout + df$tipVol | df$vol)
 # 200 ul direct
 par(mfrow=c(2,1), oma=c(0, 0, 2, 0))
 # Pipetted from col 1 to 12
-plot(df$readout[df$id == 'dye16A'], main="Left-to-Right", ylab="readout", xlab="well")
+plot(df$readout[df$id == 'dye16A'], main="Left-to-Right", ylab="readout", xlab="well", col=df$tip[df$id == 'dye16A'])
 # Pipetted from col 12 to 1
-plot(df$readout[df$id == 'dye20A'], main="Right-to-Left", ylab="readout", xlab="well")
+plot(df$readout[df$id == 'dye20A'], main="Right-to-Left", ylab="readout", xlab="well", col=df$tip[df$id == 'dye16A'])
 mtext("200ul readouts, dispensed left-to-right then reversed", outer = T, cex=1)
 
-lm(relValue(df$readout[df$id == 'dye16A']) ~ df$row[df$id == 'dye16A'] + df$col[df$id == 'dye16A'])
+par(mfcol=c(3,2), oma=c(0, 0, 2, 0))
+cond = (df$id == 'dye16A')
+boxplot(df$readout[cond] ~ df$row[cond], main="Left-to-Right by Row", ylab="readout", xlab="row")
+boxplot(df$readout[cond] ~ df$col[cond], main="Left-to-Right by Col", ylab="readout", xlab="col")
+boxplot(df$readout[cond] ~ df$tip[cond], main="Left-to-Right by Tip", ylab="readout", xlab="tip")
+cond = (df$id == 'dye16A' & df$col > 1)
+boxplot(df$readout[cond] ~ df$row[cond], main="Left-to-Right by Row", ylab="readout", xlab="row")
+boxplot(df$readout[cond] ~ df$col[cond], main="Left-to-Right by Col", ylab="readout", xlab="col")
+boxplot(df$readout[cond] ~ df$tip[cond], main="Left-to-Right by Tip", ylab="readout", xlab="tip")
+
+
+lm(relValue(df$readout[cond]) ~ df$row[cond] + df$col[cond])
 lm(relValue(df$readout[df$id == 'dye20A']) ~ df$row[df$id == 'dye20A'] + df$col[df$id == 'dye20A'])
 lm(relValue(df$readout[df$id == 'dye20A']) ~ df$row[df$id == 'dye20A'] + df$col[df$id == 'dye20A'])
+
+lm(df$readout ~ df.totConc + df$tip + df$row + df$col + df$tipVol)
+lm(scale(df$readout) ~ scale(df.totConc) + scale(df$tip) + scale(df$row) + scale(df$col) + scale(df$tipVol))
+lm(scale(df$readout) ~ scale(df.totConc) + (df$tip == 1) + (df$tip == 2) + (df$tip == 3) + (df$tip == 4) + scale(df$row) + scale(df$col) + scale(df$tipVol))
+
+lm1 = lm(df$readout ~ df.totConc)
+lm1.pred = predict(x, df)
+lm1.d = abs(df$readout - df.pred1)
+lm1.rel = lm1.d/df.pred1
+plot(ecdf(lm1.rel))
+plot(lm1.rel ~ as.factor(df$multipipette > 0))
+plot(lm1.rel[df$multipipette > 0] ~ as.factor(df$multipipette[df$multipipette > 0] == 1))
+plot(lm1.rel ~ as.factor(df$tip))
