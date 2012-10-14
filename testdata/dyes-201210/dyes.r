@@ -40,6 +40,26 @@ lm2 = lm((df$readout[df$multipipette==0] / df$totConc[df$multipipette==0]) ~ df$
 lm3 = lm((df$readout[df$multipipette==1] / df$totConc[df$multipipette==1]) ~ df$vol[df$multipipette==1])
 lm4 = lm((df$readout[df$multipipette>1] / df$totConc[df$multipipette>1]) ~ df$vol[df$multipipette>1])
 
+boxplot_readTotVol_vol2 = function(cond) {
+  x = log(df$vol[cond])
+  h = hist(x, plot=F)
+  h2 = hist(df$vol[cond], breaks=exp(h$breaks), plot=F)
+  boxplot(df$readTotVol[cond] ~ df$vol[cond], breaks=h2$breaks)
+}
+boxplot_readTotVol_vol = function(df) {
+  x = log(df[['vol']])
+  h = hist(x, plot=F)
+  multipipette_012 = as.factor(apply(as.matrix(df[['multipipette']]), 1, function(n) ifelse(n >= 2, '2+', as.character(n))))
+  main = as.character(levels(as.factor(paste(
+    df[['site']],
+    df[['plateModel']],
+    df[['liquidClass']],
+    multipipette_012,
+    sep = "|"))))
+  h2 = hist(df[['vol']], breaks=exp(h$breaks), plot=F)
+  boxplot(readTotVol ~ vol, data=df, breaks=h2$breaks, main=main, xlab='vol', ylab='readTotVol')
+}
+
 # Overview of all conditions
 groups <- length(df.vol.levels)
 numbox <- length(levels(df.key))
@@ -47,9 +67,12 @@ total <- groups * numbox
 xpoints <- seq(median(1:numbox),total,numbox)
 boxplot((df$readout / df$totConc) ~ interaction(df.key, as.factor(df$vol)), col=2:(length(levels(df.key))+1), frame.plot=1, axes=0)
 axis(1, at=xpoints, labels=df.vol.levels)
+par(mfrow=c(2,3), oma=c(1,1,1,1))
+by(df, df.key, (function(df) boxplot_readTotVol_vol(df)))
 
 # Overview of all conditions, by volume
 plotOverviewByVol = function(vol) {
+  class(vol)
   main = paste(as.character(vol), "ul")
   plot(readVol ~ df.key[df$vol == vol], data=df[df$vol == vol,], horizontal=T, col="pink", las=1, ylab='readout / conc', xlab='', main=main)
 }
@@ -184,9 +207,7 @@ plot(lm1.rel ~ multipipette_012)
 plot(lm1.rel ~ as.factor(df$vol))
 plot(lm1.rel ~ as.factor(df$tip))
 
-x = log(df$vol)
-h = hist(x, plot=F)
-h2 = hist(df$vol, breaks=exp(h$breaks), plot=F)
-boxplot(df$readTotVol ~ df$vol, breaks=h2$breaks)
+par(par0)
+boxplot_readTotVol_vol(df$multipipette == 0)
 
 par(par0)

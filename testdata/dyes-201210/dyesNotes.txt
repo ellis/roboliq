@@ -36,6 +36,7 @@ Single-Dispense 4T*24:
 Todo in R
 =========
 
+* Figure out how to estimate variance for a given target volume (per `key`)
 * Give each tip a unique color
 * Figure out how to analyze whether there is any bias on a per-well basis
 * Experiments with worst variance, grouped by id
