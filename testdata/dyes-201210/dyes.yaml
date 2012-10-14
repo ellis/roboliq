@@ -9,6 +9,7 @@
   vol: 100
   conc: 0.08
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 800
   tipVol: if (col <= 8) 100*(9 - col) else 100
   multipipette: if (col <= 8) col else 0
 '2012-10-08_13-28-26_ellis_dye12.xml':
@@ -22,6 +23,7 @@
   vol: 50
   conc: 0.08
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 50*8
   tipVol: if (col <= 8) 50*(9 - col) else 50
   multipipette: if (col <= 8) col else 0
 '2012-10-08_16-32-20_ellis_dye13.xml':
@@ -35,6 +37,7 @@
   vol: 10
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 10*8
   tipVol: if (col <= 8) 10*(9 - col) else 10
   multipipette: if (col <= 8) col else 0
 '2012-10-08_17-38-26_ellis_dye14.xml':
@@ -48,6 +51,7 @@
   vol: 10
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 10*8
   tipVol: if (col <= 8) 10*(9 - col) else 10
   multipipette: if (col <= 8) col else 0
 '2012-10-08_18-33-35_ellis_dye15.xml':
@@ -61,6 +65,7 @@
   vol: 5
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 5 * 8
   tipVol: if (col <= 8) 5*(9 - col) else 5
   multipipette: if (col <= 8) col else 0
 '2012-10-11_11-44-44_ellis_dye16.xml':
@@ -88,7 +93,8 @@
   vol: 10
   conc: 0.8
   tip: 1
-  tipVol: if (row < 8) 5*(9 - col) else 10
+  tipVolMax: if (row < 8) 10 * 12 * 7 else 0
+  tipVol: if (row < 8) 10 * (12 * 7 - ((row-1)*12+col) + 1) else 10
   multipipette: if (row < 8) (row-1)*12+col else 0
 '2012-10-11_13-42-45_ellis_dye18.xml':
   desc: "3ul, large tips, each tip multidispenses 24 times"
@@ -102,6 +108,7 @@
   vol: 3
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 3 * 24
   tipVol: 3 * (24 - (((row-1) / 4) * 12 + col) + 1)
   multipipette: (((row-1) / 4) * 12 + col)
 '2012-10-11_13-42-45_ellis_dye18.xml':
@@ -116,6 +123,7 @@
   vol: 3
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 3 * 24
   tipVol: 3 * (24 - (((row-1) / 4) * 12 + col) + 1)
   multipipette: (((row-1) / 4) * 12 + col)
 '2012-10-11_14-40-38_ellis_dye19.xml':
@@ -130,6 +138,7 @@
   vol: 20
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 20 * 24
   tipVol: 20 * (24 - (((row-1) / 4) * 12 + col) + 1)
   multipipette: (((row-1) / 4) * 12 + col)
 '2012-10-11_15-11-34_ellis_dye20.xml':
@@ -157,6 +166,7 @@
   vol: 5
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 5 * 24
   tipVol: 5 * (24 - (((row-1) / 4) * 12 + col) + 1)
   multipipette: (((row-1) / 4) * 12 + col)
 '2012-10-11_16-18-44_ellis_dye22.xml':
@@ -171,6 +181,7 @@
   vol: 10
   conc: 0.8
   tip: ((row - 1) % 4) + 1
+  tipVolMax: 10 * 24
   tipVol: 10 * (24 - (((row-1) / 4) * 12 + col) + 1)
   multipipette: (((row-1) / 4) * 12 + col)
 '2012-10-12_10-38-51_ellis_dye23.xml':

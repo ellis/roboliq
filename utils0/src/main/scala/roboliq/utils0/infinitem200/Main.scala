@@ -28,10 +28,11 @@ object InfinitM200 {
 		)
 	}
 	
-	val field_l = List("id", "date", "script", "site", "plateModel", "liquidClass", "baseVol", "baseConc", "vol", "conc", "tip", "tipVol", "multipipette", "row", "col", "readout")
+	val field_l = List("id", "date", "script", "site", "plateModel", "liquidClass", "baseVol", "baseConc", "vol", "conc", "tip", "tipVolMax", "tipVol", "multipipette", "row", "col", "readout")
 	val fieldDefault_m = Map(
 			"baseVol" -> "0",
 			"baseConc" -> "0",
+			"tipVolMax" -> "0",
 			"multipipette" -> "0",
 			"row" -> "row",
 			"col" -> "col",

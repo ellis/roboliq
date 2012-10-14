@@ -5,6 +5,8 @@ Dyes
 Todo in Lab
 ===========
 
+* single-pipette full plate (and a single tip?) around 22ul using conc 0.08, then conc 0.8 to compare the dyes
+
 * Redo ellis_dye15 using "Water free dispense" modified to use wet contact?  I used Roboliq_Water_Wet_1000 originally, so maybe that wasn't so good
 * Figure out low-volume phenomenon for first multipipette dispense
 * Test whether performing a more complete wash reduces the gradual drop in the readout
@@ -37,8 +39,10 @@ Todo in R
 * Give each tip a unique color
 * Figure out how to analyze whether there is any bias on a per-well basis
 * Experiments with worst variance, grouped by id
+* Figure out a good way to visualize the multipipetting vol vs tipVol (tipVolMax vs tipVol, col=vol)
 
 Group data by site, plateModel, liquidClass, totVol, tip <= 4, multipipette > 0.
+Possibly group by dye instance (a particular mixture of the dye).
 
 Done
 ----
