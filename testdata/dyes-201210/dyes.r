@@ -3,6 +3,8 @@ library('scatterplot3d')
 
 setwd("~/src/roboliq/testdata/dyes-201210")
 
+par0 = par(no.readonly=T)
+
 relValue = function(values) {
   m = median(values)
   (values - m) / m
@@ -57,10 +59,10 @@ apply(as.array(vol_l), 1, plotOverviewByVol)
 
 # Single pipetting variance vs volume
 plotA = function(cond, main) {
-  boxplot((df$readout[cond] / df$totConc[cond]) ~ df$vol[cond], xlab="vol", ylab="readout / conc", main=main)
-  plot((df$readout[cond] / df$totConc[cond] * df$vol[cond]) ~ df$vol[cond], log='xy', xlab="log of vol", ylab="log of adjusted readout")
+  boxplot(readTotVol ~ vol, data=df[cond,], xlab='vol', ylab='readTotVol', main=main)
+  plot(readVol ~ vol, data=df[cond,], log='xy')
 }
-par(mfcol=c(2, 3))
+par(mfcol=c(2, 3), oma=par0$oma)
 plotA((df$liquidClass == 'Water free dispense' & df$multipipette == 0), "Single-Pipetting")
 plotA((df$liquidClass == 'Water free dispense' & df$multipipette == 1), "Multi-Pipetting Step 1")
 plotA((df$liquidClass == 'Water free dispense' & df$multipipette >= 2), "Multi-Pipetting Step 2+")
@@ -181,3 +183,10 @@ multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) if
 plot(lm1.rel ~ multipipette_012)
 plot(lm1.rel ~ as.factor(df$vol))
 plot(lm1.rel ~ as.factor(df$tip))
+
+x = log(df$vol)
+h = hist(x, plot=F)
+h2 = hist(df$vol, breaks=exp(h$breaks), plot=F)
+boxplot(df$readTotVol ~ df$vol, breaks=h2$breaks)
+
+par(par0)
