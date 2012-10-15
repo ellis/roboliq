@@ -13,11 +13,6 @@ relValue = function(values) {
 # readout = \epsilon * c * d, where \epsilon is a property of the dye, c is concentration, and d is the distance the beam travels through the liquid.
 # readout is therefore proportional to totConc * totVol
 df <- read.delim('dyes.tab', header=1)
-multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) ifelse(n >= 2, '2+', as.character(n))))
-df.cond.key = as.factor(paste(df$site, df$plateModel, df$liquidClass, multipipette_012, sep = "|"))
-df.cond.key.levels = levels(df.cond.key)
-df.cond.levels = LETTERS[1:length(df.cond.key.levels)]
-df.cond.map = new.env(hash=T, parent=emptyenv())
 df$well <- (df$row - 1) * 12 + df$col
 df$totVol = df$baseVol + df$vol
 df$totConc = (df$baseConc * df$baseVol + df$conc * df$vol) / df$totVol
@@ -30,6 +25,13 @@ df$readTotVol = df$readout / df$totConc
 # vol ~= (readout - baseConc * baseVol) / conc
 df$readVol = (df$readout - df$baseConc * df$baseVol) / df$conc
 df.vol.levels = levels(as.factor(df$vol))
+multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) ifelse(n >= 2, '2+', as.character(n))))
+df.cond.key = as.factor(paste(df$site, df$plateModel, df$liquidClass, multipipette_012, sep = "|"))
+df.cond.key.levels = levels(df.cond.key)
+df.cond.levels = LETTERS[1:length(df.cond.key.levels)]
+df.cond.map = new.env(hash=T, parent=emptyenv())
+apply(as.array(1:length(df.cond.key.levels)), 1, function(i) df.cond.map[[df.cond.key.levels[i]]] <- df.cond.levels[i])
+df$cond = sapply(df.cond.key, function(s) as.factor(df.cond.map[[as.character(s)]]))
 
 # Linear models
 lm1 = lm(df$readout ~ df$totConc)
@@ -65,19 +67,19 @@ boxplot_readTotVol_vol = function(df) {
 
 # Overview of all conditions
 groups <- length(df.vol.levels)
-numbox <- length(levels(df.key))
+numbox <- length(levels(df$cond))
 total <- groups * numbox
 xpoints <- seq(median(1:numbox),total,numbox)
-boxplot((df$readout / df$totConc) ~ interaction(df.key, as.factor(df$vol)), col=2:(length(levels(df.key))+1), frame.plot=1, axes=0)
+boxplot((df$readout / df$totConc) ~ interaction(df$cond, as.factor(df$vol)), col=2:(length(levels(df$cond))+1), frame.plot=1, axes=0)
 axis(1, at=xpoints, labels=df.vol.levels)
 par(mfrow=c(2,3), oma=c(1,1,1,1))
-by(df, df.key, (function(df) boxplot_readTotVol_vol(df)))
+by(df, df$cond, (function(df) boxplot_readTotVol_vol(df)))
 
 # Overview of all conditions, by volume
 plotOverviewByVol = function(vol) {
   class(vol)
   main = paste(as.character(vol), "ul")
-  plot(readVol ~ df.key[df$vol == vol], data=df[df$vol == vol,], horizontal=T, col="pink", las=1, ylab='readout / conc', xlab='', main=main)
+  plot(readVol ~ df$cond[df$vol == vol], data=df[df$vol == vol,], horizontal=T, col="pink", las=1, ylab='readout / conc', xlab='', main=main)
 }
 vol_l = c(3, 5, 10, 20, 50, 100, 200)
 par(mfcol=c(3,3))
@@ -225,9 +227,9 @@ analysis1 = function(df) {
   
   par(par.0)
 }
-analysis1(df[df$multipipette == 0,])
+analysis1(df[df$cond == 'D',])
 
 par(par0)
-boxplot_readTotVol_vol(df$multipipette == 0)
+#boxplot_readTotVol_vol(df$multipipette == 0)
 
 par(par0)
