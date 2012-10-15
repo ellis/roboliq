@@ -1,0 +1,14 @@
+'2012-10-15_10-25-24_fabian.xml':
+  desc: "200ul, fabian, single-pipetting"
+  id: '"fabianA"'
+  date: '"2012-10-15"'
+  script: '"none"'
+  site: '"none"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 0
+  vol: 200
+  conc: 0.08
+  tip: 1
+  tipVol: 200
+

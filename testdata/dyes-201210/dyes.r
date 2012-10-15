@@ -229,6 +229,10 @@ analysis1 = function(df) {
 }
 analysis1(df[df$cond == 'D',])
 
+# Analysis of dye concentrations
+# Dye dispensed in 23ul volumes, in the first plate with 0.08g/L and in the second with 0.8g/L
+with(df[df$cond == 'D' & df$vol == 23,], plot(readTotVol ~ tip, col=id))
+
 par(par0)
 #boxplot_readTotVol_vol(df$multipipette == 0)
 
