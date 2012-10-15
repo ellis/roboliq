@@ -100,7 +100,7 @@
   desc: "3ul, large tips, each tip multidispenses 24 times"
   id: '"dye18A"'
   date: '"2012-10-11"'
-  script: '"ellisecl_dye18.esc"'
+  script: '"ellis_dye18.esc"'
   site: '"10,2"'
   plateModel: '"96 Well Microplate"'
   liquidClass: '"Water free dispense"'
@@ -236,3 +236,47 @@
   conc: 0.8
   tip: ((row - 1) % 4) + 1
   tipVol: 20
+'2012-10-15_11-14-57_ellis_dye27.xml':
+  desc: "23ul, large tips, single dispense, full plate, 0.08g/L"
+  id: '"dye27A"'
+  date: '"2012-10-15"'
+  script: '"ellis_dye27.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 177
+  vol: 23
+  conc: 0.08
+  tip: ((row - 1) % 4) + 1
+  tipVolMax: 23
+  tipVol: 23
+'2012-10-15_11-31-35_ellis_dye27.xml':
+  desc: "23ul, large tips, single dispense, full plate, 0.8g/L"
+  id: '"dye27B"'
+  date: '"2012-10-15"'
+  script: '"ellis_dye27.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 177
+  vol: 23
+  conc: 0.8
+  tip: ((row - 1) % 4) + 1
+  tipVolMax: 23
+  tipVol: 23
+'2012-10-15_12-26-12_ellis_dye28.xml':
+  desc: "10ul, tips 1 and 2, each tip multidispenses 48 times"
+  id: '"dye28A"'
+  date: '"2012-10-11"'
+  script: '"ellis_dye28.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 190
+  vol: 10
+  conc: 0.8
+  tip: ((row - 1) % 2) + 1
+  tipVolMax: 10 * 48
+  tipVol: 10 * (24 - (((row-1) / 2) * 12 + col) + 1)
+  multipipette: (((row-1) / 2) * 12 + col)
+

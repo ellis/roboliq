@@ -14,7 +14,10 @@ relValue = function(values) {
 # readout is therefore proportional to totConc * totVol
 df <- read.delim('dyes.tab', header=1)
 multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) ifelse(n >= 2, '2+', as.character(n))))
-df.key = as.factor(paste(df$site, df$plateModel, df$liquidClass, multipipette_012, sep = "|"))
+df.cond.key = as.factor(paste(df$site, df$plateModel, df$liquidClass, multipipette_012, sep = "|"))
+df.cond.key.levels = levels(df.cond.key)
+df.cond.levels = LETTERS[1:length(df.cond.key.levels)]
+df.cond.map = new.env(hash=T, parent=emptyenv())
 df$well <- (df$row - 1) * 12 + df$col
 df$totVol = df$baseVol + df$vol
 df$totConc = (df$baseConc * df$baseVol + df$conc * df$vol) / df$totVol
@@ -142,6 +145,7 @@ boxplot(df$readout[df_id13or14] ~ df$id[df_id13or14])
 mtext("10ul multi vs single, air vs wet", outer = T, cex=1)
 
 # Test reader reliability (it appears to be very good)
+# We performed repeated reads of the same plate, 20 times.
 reader <- read.delim('reader.tab', header=1)
 well <- (reader$row - 1) * 12 + reader$col
 describe.by(reader$readout, well)
@@ -152,15 +156,11 @@ boxplot(reader$readout[reader$vol == 10] ~ well[reader$vol == 10], ylim=c(0, max
 boxplot(reader$readout[reader$vol == 20] ~ well[reader$vol == 20], ylim=c(0, max(reader$readout[reader$vol == 20])), main="20ul", xlab="well")
 mtext("Reliability of Reader", outer = T, cex=1)
 
-# Multipipetting
-plot(lm1.rel ~ multipipette_012, xlab="multipipetting step")
-x = df$tipVol / df$vol
-plot(lm1.rel ~ x, col=df$vol)
-
 # readout vs tipvol
 plot3 = function(vol) {
   #mask = df$vol == vol & df$multipipette == 'true'
-  plot(df$readout[df$vol==vol] ~ df$tipVol[df$vol==vol], xlab="tipVol", ylab="readout", main=paste(as.character(vol), "ul"))
+  cond = (df$vol == vol & df$multipipette > 0)
+  plot(readVol ~ tipVol, data=df[cond,], xlab="tipVol", ylab="readout", main=paste(as.character(vol), "ul"))
 }
 par(mfrow=c(2,2), oma=c(0, 0, 2, 0))
 plot3(5)
@@ -183,13 +183,13 @@ mtext("200ul readouts, dispensed left-to-right then reversed", outer = T, cex=1)
 
 par(mfcol=c(3,2), oma=c(0, 0, 2, 0))
 cond = (df$id == 'dye16A')
-boxplot(df$readout[cond] ~ df$row[cond], main="Left-to-Right by Row", ylab="readout", xlab="row")
-boxplot(df$readout[cond] ~ df$col[cond], main="Left-to-Right by Col", ylab="readout", xlab="col")
-boxplot(df$readout[cond] ~ df$tip[cond], main="Left-to-Right by Tip", ylab="readout", xlab="tip")
-cond = (df$id == 'dye16A' & df$col > 1)
-boxplot(df$readout[cond] ~ df$row[cond], main="Left-to-Right by Row", ylab="readout", xlab="row")
-boxplot(df$readout[cond] ~ df$col[cond], main="Left-to-Right by Col", ylab="readout", xlab="col")
-boxplot(df$readout[cond] ~ df$tip[cond], main="Left-to-Right by Tip", ylab="readout", xlab="tip")
+boxplot(readVol ~ row, data=df[cond,], main="Left-to-Right by Row", ylab="readVol", xlab="row")
+boxplot(readVol ~ col, data=df[cond,], main="Left-to-Right by Col", ylab="readVol", xlab="col")
+boxplot(readVol ~ tip, data=df[cond,], main="Left-to-Right by Tip", ylab="readVol", xlab="tip")
+cond = (df$id == 'dye20A')
+boxplot(readVol ~ row, data=df[cond,], main="Right-to-Left by Row", ylab="readVol", xlab="row")
+boxplot(readVol ~ col, data=df[cond,], main="Right-to-Left by Col", ylab="readVol", xlab="col")
+boxplot(readVol ~ tip, data=df[cond,], main="Right-to-Left by Tip", ylab="readVol", xlab="tip")
 
 
 lm(relValue(df$readout[cond]) ~ df$row[cond] + df$col[cond])
@@ -206,6 +206,26 @@ multipipette_012 = as.factor(apply(as.matrix(df$multipipette), 1, function(n) if
 plot(lm1.rel ~ multipipette_012)
 plot(lm1.rel ~ as.factor(df$vol))
 plot(lm1.rel ~ as.factor(df$tip))
+
+analysis1 = function(df) {
+  par.0 = par(no.readonly = T)
+  par(mfrow=c(2,3))
+  
+  with(df, hist(readTotVol))
+  with(df, plot(ecdf(readTotVol)))
+  with(df, qqnorm(readTotVol))
+  
+  boxplot(readTotVol ~ vol, data=df, xlab='vol', ylab='readTotVol')
+  boxplot(readTotVol ~ tip, data=df, xlab='tip', ylab='readTotVol')
+  
+  x = log(df$vol)
+  h = hist(x, plot=F)
+  breaks = exp(h$breaks)
+  with(df, boxplot(readTotVol ~ cut(vol, breaks), notch=T, xlab='vol', ylab='readTotVol'))
+  
+  par(par.0)
+}
+analysis1(df[df$multipipette == 0,])
 
 par(par0)
 boxplot_readTotVol_vol(df$multipipette == 0)
