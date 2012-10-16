@@ -107,16 +107,16 @@ par(par0)
 par(mfrow=c(1,2))
 cond = df$multipipette > 0 & df$tipVolMax > 0 & df$vol == 10
 tv = -df$tipVol[cond]
-with(df[cond,], plot((readout / totConc) ~ tv, col=as.factor(tipVolMax)), xlab="-tipVol")
+with(df[cond,], plot(readTotVol ~ tv, col=as.factor(tipVolMax), xlab="-tipVol"))
 x = (1 - df$tipVol[cond] / df$tipVolMax[cond])
-with(df[cond,], plot((readout / totConc) ~ x, col=as.factor(tipVolMax)))
+with(df[cond,], plot(readTotVol ~ x, col=as.factor(tipVolMax), xlab="progress"))
 # 10ul, 12*7 steps
 boxplotMultipipette = function(cond, main) {
   x = (1 - df$tipVol[cond] / df$tipVolMax[cond])
-  h = hist(x, plot=F)
+  h = hist(x, plot=F, xlab="progress")
   x2 = (1 - df$tipVol[cond] / df$tipVolMax[cond])
-  with(df[cond,], plot((readout / totConc) ~ x2, col=as.factor(tipVolMax)), xlab="progress", main=main)
-  with(df[cond,], boxplot((readout / totConc) ~ cut(x, h$breaks), notch=T))
+  with(df[cond,], plot(readTotVol ~ x2, col=as.factor(tipVolMax)), xlab="progress", main=main)
+  with(df[cond,], boxplot(readTotVol ~ cut(x, h$breaks), notch=T))
 }
 par(mfcol=c(2,4))
 #x = -df$tipVol[cond]
