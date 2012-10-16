@@ -54,3 +54,10 @@ Graphs
 ======
 
 * `readout` ~ `tipVol`, separate graph for each `vol` (color single pipetting readouts differently)
+
+Notes
+=====
+
+ellis_dye29:
+  in B9, F4 (tip 2) and G1 (tip 3), I observed that large droplets were left on the tip after dispense, as well as in may other places
+

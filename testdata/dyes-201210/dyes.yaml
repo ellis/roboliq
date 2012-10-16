@@ -277,6 +277,32 @@
   conc: 0.8
   tip: ((row - 1) % 2) + 1
   tipVolMax: 10 * 48
-  tipVol: 10 * (24 - (((row-1) / 2) * 12 + col) + 1)
+  tipVol: 10 * (48 - (((row-1) / 2) * 12 + col) + 1)
   multipipette: (((row-1) / 2) * 12 + col)
+2012-10-16_13-18-07_ellis_dye29.xml:
+  desc: "50ul, large tips, each tip single-dispenses 24 times"
+  id: '"dye29A"'
+  date: '"2012-10-16"'
+  script: '"ellis_dye29.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water free dispense"'
+  baseVol: 150
+  vol: 50
+  conc: 0.08
+  tip: ((row - 1) % 4) + 1
+  tipVol: 50
+2012-10-16_14-00-20_ellis_dye30.xml:
+  desc: "50ul, large tips, each tip single-dispenses 24 times, wet contact"
+  id: '"dye30A"'
+  date: '"2012-10-16"'
+  script: '"ellis_dye30.esc"'
+  site: '"10,2"'
+  plateModel: '"96 Well Microplate"'
+  liquidClass: '"Water_C_1000"'
+  baseVol: 150
+  vol: 50
+  conc: 0.08
+  tip: ((row - 1) % 4) + 1
+  tipVol: 50
 
