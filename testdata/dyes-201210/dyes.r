@@ -33,6 +33,12 @@ df.cond.map = new.env(hash=T, parent=emptyenv())
 apply(as.array(1:length(df.cond.key.levels)), 1, function(i) df.cond.map[[df.cond.key.levels[i]]] <- df.cond.levels[i])
 df$cond = sapply(df.cond.key, function(s) as.factor(df.cond.map[[as.character(s)]]))
 
+printConditions = function() {
+  for (v in ls(df.cond.map)) {
+    print(paste(v, "->", df.cond.map[[v]]))
+  }
+}
+
 # Linear models
 lm1 = lm(df$readout ~ df$totConc)
 lm1.pred = predict(lm1, df)
@@ -115,7 +121,7 @@ boxplotMultipipette = function(cond, main) {
   x = (1 - df$tipVol[cond] / df$tipVolMax[cond])
   h = hist(x, plot=F, xlab="progress")
   x2 = (1 - df$tipVol[cond] / df$tipVolMax[cond])
-  with(df[cond,], plot(readTotVol ~ x2, col=as.factor(tipVolMax)), xlab="progress", main=main)
+  with(df[cond,], plot(readTotVol ~ x2, col=as.factor(tipVolMax), xlab="progress", main=main))
   with(df[cond,], boxplot(readTotVol ~ cut(x, h$breaks), notch=T))
 }
 par(mfcol=c(2,4))
@@ -125,6 +131,21 @@ boxplotMultipipette(cond, "10ul from all")
 boxplotMultipipette(cond & df$tipVolMax == 80, "10ul from 80ul")
 boxplotMultipipette(cond & df$tipVolMax == 240, "10ul from 240ul")
 boxplotMultipipette(cond & df$tipVolMax == 840, "10ul from 840ul")
+par(par0)
+
+# readout vs tipvol
+plot3 = function(vol) {
+  #mask = df$vol == vol & df$multipipette == 'true'
+  cond = (df$vol == vol & df$multipipette > 0)
+  main = paste(as.character(vol), "ul")
+  plot(readVol ~ tipVol, data=df[cond,], xlab="tipVol", ylab="readout", main=main)
+}
+par(mfrow=c(2,2), oma=c(0, 0, 2, 0))
+plot3(5)
+plot3(10)
+plot3(50)
+plot3(100)
+mtext("Readout vs Tip Volume, by Volume", outer = T, cex=1)
 par(par0)
 
 cond1 = (cond & df$multipipette > 1)
@@ -165,21 +186,6 @@ boxplot(reader$readout[reader$vol == 20] ~ well[reader$vol == 20], ylim=c(0, max
 mtext("Reliability of Reader", outer = T, cex=1)
 par(par0)
 
-# readout vs tipvol
-plot3 = function(vol) {
-  #mask = df$vol == vol & df$multipipette == 'true'
-  cond = (df$vol == vol & df$multipipette > 0)
-  main = paste(as.character(vol), "ul")
-  plot(readVol ~ tipVol, data=df[cond,], xlab="tipVol", ylab="readout", main=main)
-}
-par(mfrow=c(2,2), oma=c(0, 0, 2, 0))
-plot3(5)
-plot3(10)
-plot3(50)
-plot3(100)
-mtext("Readout vs Tip Volume, by Volume", outer = T, cex=1)
-par(par0)
-
 #library(car)
 #par(mfrow=c(1,1))
 #scatterplotMatrix(~ df$readTotVol + df$vol | df$tip)
@@ -194,15 +200,17 @@ mtext("200ul readouts, dispensed left-to-right then reversed", outer = T, cex=1)
 par(par0)
 
 par(mfcol=c(3,2), oma=c(0, 0, 2, 0))
-mtext("200ul readouts, dispensed left-to-right then reversed", outer = T, cex=1)
 cond = (df$id == 'dye16A')
 boxplot(readVol ~ row, data=df[cond,], main="Left-to-Right by Row", ylab="readVol", xlab="row")
 boxplot(readVol ~ col, data=df[cond,], main="Left-to-Right by Col", ylab="readVol", xlab="col")
-boxplot(readVol ~ tip, data=df[cond,], main="Left-to-Right by Tip", ylab="readVol", xlab="tip")
+with(df[cond,], plot(readVol ~ interaction((row > 4), tip), main="Left-to-Right by tip/row"))
+#boxplot(readVol ~ tip, data=df[cond,], main="Left-to-Right by Tip", ylab="readVol", xlab="tip")
 cond = (df$id == 'dye20A')
 boxplot(readVol ~ row, data=df[cond,], main="Right-to-Left by Row", ylab="readVol", xlab="row")
 boxplot(readVol ~ col, data=df[cond,], main="Right-to-Left by Col", ylab="readVol", xlab="col")
-boxplot(readVol ~ tip, data=df[cond,], main="Right-to-Left by Tip", ylab="readVol", xlab="tip")
+with(df[cond,], plot(readVol ~ interaction((row > 4), tip), main="Left-to-Right by tip/row"))
+#boxplot(readVol ~ tip, data=df[cond,], main="Right-to-Left by Tip", ylab="readVol", xlab="tip")
+mtext("200ul readouts, dispensed left-to-right then reversed", outer = T, cex=1)
 par(par0)
 
 
@@ -275,13 +283,22 @@ analysis2(df[df$cond == 'D' & df$vol == 200,], "D, 200ul")
 
 # Analysis of dye concentrations
 # Dye dispensed in 23ul volumes, in the first plate with 0.08g/L and in the second with 0.8g/L
+# ids: dye27A and dye27B
 par.0 = par(no.readonly=T)
 par(mfrow=c(1,1), oma=c(0, 0, 2, 0))
-with(df[df$cond == 'D' & df$vol == 23,], plot(readTotVol ~ tip, col=id))
+with(df[df$cond == 'D' & df$vol == 23,], plot(readTotVol ~ row, col=id))
 mtext("Dye Batch Comparison: 0.08 g/L vs 0.8 g/L", outer = T, cex=1)
 par(par.0)
+dye27A = df[df$id == 'dye27A',]
+dye27B = df[df$id == 'dye27B',]
+cor(dye27A$readTotVol, dye27B$readTotVol)
 
-plot(df$readVol[df$vol == 200] ~ interaction((df$row[df$vol == 200] > 4), df$tip[df$vol == 200]), main="200ul lowerrows? vs tip")
+#plot(df$readVol[df$vol == 200] ~ interaction((df$row[df$vol == 200] > 4), df$tip[df$vol == 200]), main="200ul lowerrows? vs tip")
+
+plot(df$readVol[df$id == 'dye29A' | df$id == 'dye30A'], col=df$tip[df$id == 'dye29A' | df$id == 'dye30A'], main="50ul, air vs wet")
+
+analysis1(df[df$cond == 'F',], "F")
+analysis2(df[df$cond == 'F' & df$vol == 10,], "F, 10ul")
 
 par(par0)
 #boxplot_readTotVol_vol(df$multipipette == 0)
