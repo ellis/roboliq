@@ -1,0 +1,611 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MeasurementResultData Date="2012-10-18T07:06:40.01397Z">
+    <!--Plate-->
+    <Plate>
+        <ID>
+        </ID>
+    </Plate>
+    <!--Header-->
+    <Header Application="Tecan EVOware Driver">
+        <Software_Versions>
+            <Version>
+            </Version>
+            <Version>Tecan.At.Common, 1.7.1.12</Version>
+            <Version>Tecan.At.Common.Controls, 1.7.1.12</Version>
+            <Version>Tecan.At.Common.Dialogs, 1.7.1.12</Version>
+            <Version>Tecan.At.Common.MathLib, 1.7.1.12</Version>
+            <Version>Tecan.At.Common.MCS, 1.7.1.12</Version>
+            <Version>Tecan.At.Common.Results, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.Common, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.Port.IP, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.Port.RS232, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.Port.SIM.Common, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.Port.USB, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.Server, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.SIM.AMR, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.SIM.AMRPlus, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.SIM.Connect, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.SIM.GeniosUltra, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.SIM.HydroFlex, 2.0.0.7</Version>
+            <Version>Tecan.At.Communication.SIM.Safire3, 1.7.1.12</Version>
+            <Version>Tecan.At.Communication.SIM.SunriseMini, 1.7.1.12</Version>
+            <Version>Tecan.At.DocumentManagement, 1.7.1.12</Version>
+            <Version>Tecan.At.DocumentManagement.Reader, 1.7.1.12</Version>
+            <Version>Tecan.At.DocumentManagement.Washer, 1.7.1.12</Version>
+            <Version>Tecan.At.FileManagement, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Common, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Common.Reader, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Common.Stacker, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Reader.AMR, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Reader.AMRPlus, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Reader.GeniosUltra, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Reader.Safire3, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Reader.SunriseMini, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Server, 1.7.1.12</Version>
+            <Version>Tecan.At.Instrument.Stacker.Connect, 1.7.1.12</Version>
+            <Version>Tecan.At.Measurement.Common, 1.7.1.12</Version>
+            <Version>Tecan.At.Measurement.Server, 1.7.1.12</Version>
+            <Version>Tecan.At.Win32, 1.7.1.12</Version>
+            <Version>Tecan.At.XFluor.Connect.Reader, 1.7.1.12</Version>
+            <Version>Tecan.At.XFluor.Core, 1.7.1.12</Version>
+            <Version>Tecan.At.XFluor.ExcelOutput, 1.7.1.12</Version>
+            <Version>Tecan.At.XmlSettings, 1.7.1.12</Version>
+        </Software_Versions>
+        <Instrument>
+            <Name>infinite 200Pro</Name>
+            <SerialNumber>1101006617</SerialNumber>
+        </Instrument>
+        <Hardware_Versions>
+            <Version>EHC, V_3.22_12/10_Infinite (Dec 14 2010/13.07.14)</Version>
+            <Version>MTP, V_3.22_12/10_Infinite (Dec 14 2010/13.07.14)</Version>
+            <Version>INA, V_3.22_12/10_Infinite (Dec 14 2010/13.07.14)</Version>
+            <Version>HCP, V_2.02_05/06_HCP (May 23 2006/14.05.27)</Version>
+            <Version>LUM, V_2.00_04/06_LUMINESCENCE (Apr  5 2006/08.57.29)</Version>
+            <Version>MEM, V_2.12_03/08_MCR (Apr  3 2008/16.03.31)</Version>
+            <Version>MEX, V_2.13_04/10_MCR (Apr 25 2010/17.39.16)</Version>
+            <Version>ZSCAN, V_3.22_12/10_Infinite (Dec 14 2010/13.07.14)</Version>
+        </Hardware_Versions>
+        <Parameters>
+            <Parameter Name="System" Value="BS-HPDT35" />
+            <Parameter Name="User" Value="BS-HPDT35\localadmin" />
+            <Parameter Name="Plate" Value="Nunclon 96 Flat Bottom Transparent Polystyrol  [NUN96ft.pdfx]" />
+        </Parameters>
+    </Header>
+    <!--Script-->
+    <Script>
+        <TecanMeasurement id="1" class="" xmlns="tecan.at.schema.documents">
+            <MeasurementManualCycle id="2" number="1" type="Standard">
+                <CyclePlate id="3" file="NUN96ft" plateWithCover="False">
+                    <PlateRange id="0" range="A1~H12" auto="true">
+                        <Shaking id="4" mode="Linear" time="PT10M" frequency="0" amplitude="4000" maxDeviation="PT0S" settleTime="PT0S" />
+                        <MeasurementAbsorbance id="5" mode="Normal" type="" name="ABS" longname="" description="">
+                            <Well id="6" auto="true">
+                                <MeasurementReading id="7" name="" beamDiameter="700" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+                                    <ReadingLabel id="8" name="Label1" scanType="ScanFixed" refID="0">
+                                        <ReadingSettings number="10" rate="25000" />
+                                        <ReadingTime integrationTime="0" lagTime="0" readDelay="100000" flash="0" dark="0" />
+                                        <ReadingFilter id="0" type="Ex" wavelength="4920" bandwidth="90" attenuation="0" usage="ABS" />
+                                    </ReadingLabel>
+                                </MeasurementReading>
+                            </Well>
+                            <Well id="9" auto="true">
+                                <MeasurementReading id="10" name="" beamDiameter="700" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+                                    <ReadingLabel id="11" name="Ref1_Label1" scanType="ScanFixed" refID="1">
+                                        <ReadingSettings number="10" rate="25000" />
+                                        <ReadingTime integrationTime="0" lagTime="0" readDelay="100000" flash="0" dark="0" />
+                                        <ReadingFilter id="0" type="Ex" wavelength="6200" bandwidth="90" attenuation="0" usage="ABS" />
+                                    </ReadingLabel>
+                                </MeasurementReading>
+                            </Well>
+                            <CustomData id="12" />
+                        </MeasurementAbsorbance>
+                    </PlateRange>
+                </CyclePlate>
+            </MeasurementManualCycle>
+            <MeasurementInfo id="0" description="">
+                <ScriptTemplateSettings id="0">
+                    <ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+                    <ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+                </ScriptTemplateSettings>
+            </MeasurementInfo>
+        </TecanMeasurement>
+    </Script>
+    <!--Actions-->
+    <Actions />
+    <!--Section-->
+    <Section Name="Label1" Time_Start="2012-10-18T07:16:44.85772Z" Time_End="2012-10-18T07:18:23.32647Z">
+        <Warnings />
+        <Errors />
+        <Parameters>
+            <Parameter Name="Mode" Value="Absorbance" />
+            <Parameter Name="Measurement Wavelength" Value="492" Unit="nm" />
+            <Parameter Name="Bandwidth" Value="9" Unit="nm" />
+            <Parameter Name="Reference Wavelength" Value="620" Unit="nm" />
+            <Parameter Name="Bandwidth" Value="9" Unit="nm" />
+            <Parameter Name="Number of Flashes" Value="10" />
+            <Parameter Name="Settle Time" Value="100" Unit="ms" />
+        </Parameters>
+        <Data Cycle="1">
+            <Well Pos="A1" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9672</Single>
+                <Single LabelId="2" Status="Measured">0.0384</Single>
+                <Single LabelId="3" Status="Measured">0.9288</Single>
+            </Well>
+            <Well Pos="A2" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9265</Single>
+                <Single LabelId="2" Status="Measured">0.0389</Single>
+                <Single LabelId="3" Status="Measured">0.8875</Single>
+            </Well>
+            <Well Pos="A3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9329</Single>
+                <Single LabelId="2" Status="Measured">0.0368</Single>
+                <Single LabelId="3" Status="Measured">0.8961</Single>
+            </Well>
+            <Well Pos="A4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9159</Single>
+                <Single LabelId="2" Status="Measured">0.0387</Single>
+                <Single LabelId="3" Status="Measured">0.8772</Single>
+            </Well>
+            <Well Pos="A5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9272</Single>
+                <Single LabelId="2" Status="Measured">0.0384</Single>
+                <Single LabelId="3" Status="Measured">0.8888</Single>
+            </Well>
+            <Well Pos="A6" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9963</Single>
+                <Single LabelId="2" Status="Measured">0.0374</Single>
+                <Single LabelId="3" Status="Measured">0.9589</Single>
+            </Well>
+            <Well Pos="A7" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9932</Single>
+                <Single LabelId="2" Status="Measured">0.0378</Single>
+                <Single LabelId="3" Status="Measured">0.9554</Single>
+            </Well>
+            <Well Pos="A8" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9957</Single>
+                <Single LabelId="2" Status="Measured">0.0376</Single>
+                <Single LabelId="3" Status="Measured">0.958</Single>
+            </Well>
+            <Well Pos="A9" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9786</Single>
+                <Single LabelId="2" Status="Measured">0.0364</Single>
+                <Single LabelId="3" Status="Measured">0.9421</Single>
+            </Well>
+            <Well Pos="A10" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0104</Single>
+                <Single LabelId="2" Status="Measured">0.0383</Single>
+                <Single LabelId="3" Status="Measured">0.9721</Single>
+            </Well>
+            <Well Pos="A11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9497</Single>
+                <Single LabelId="2" Status="Measured">0.0364</Single>
+                <Single LabelId="3" Status="Measured">0.9134</Single>
+            </Well>
+            <Well Pos="A12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9557</Single>
+                <Single LabelId="2" Status="Measured">0.0379</Single>
+                <Single LabelId="3" Status="Measured">0.9178</Single>
+            </Well>
+            <Well Pos="B12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9802</Single>
+                <Single LabelId="2" Status="Measured">0.0369</Single>
+                <Single LabelId="3" Status="Measured">0.9433</Single>
+            </Well>
+            <Well Pos="B11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9626</Single>
+                <Single LabelId="2" Status="Measured">0.0381</Single>
+                <Single LabelId="3" Status="Measured">0.9245</Single>
+            </Well>
+            <Well Pos="B10" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9223</Single>
+                <Single LabelId="2" Status="Measured">0.0385</Single>
+                <Single LabelId="3" Status="Measured">0.8838</Single>
+            </Well>
+            <Well Pos="B9" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9964</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9578</Single>
+            </Well>
+            <Well Pos="B8" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9675</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9289</Single>
+            </Well>
+            <Well Pos="B7" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0304</Single>
+                <Single LabelId="2" Status="Measured">0.0394</Single>
+                <Single LabelId="3" Status="Measured">0.991</Single>
+            </Well>
+            <Well Pos="B6" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0449</Single>
+                <Single LabelId="2" Status="Measured">0.0396</Single>
+                <Single LabelId="3" Status="Measured">1.0053</Single>
+            </Well>
+            <Well Pos="B5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9129</Single>
+                <Single LabelId="2" Status="Measured">0.0397</Single>
+                <Single LabelId="3" Status="Measured">0.8732</Single>
+            </Well>
+            <Well Pos="B4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9124</Single>
+                <Single LabelId="2" Status="Measured">0.0394</Single>
+                <Single LabelId="3" Status="Measured">0.873</Single>
+            </Well>
+            <Well Pos="B3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9431</Single>
+                <Single LabelId="2" Status="Measured">0.0391</Single>
+                <Single LabelId="3" Status="Measured">0.904</Single>
+            </Well>
+            <Well Pos="B2" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9112</Single>
+                <Single LabelId="2" Status="Measured">0.0391</Single>
+                <Single LabelId="3" Status="Measured">0.8721</Single>
+            </Well>
+            <Well Pos="B1" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9168</Single>
+                <Single LabelId="2" Status="Measured">0.0387</Single>
+                <Single LabelId="3" Status="Measured">0.8782</Single>
+            </Well>
+            <Well Pos="C1" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9485</Single>
+                <Single LabelId="2" Status="Measured">0.0366</Single>
+                <Single LabelId="3" Status="Measured">0.9119</Single>
+            </Well>
+            <Well Pos="C2" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9388</Single>
+                <Single LabelId="2" Status="Measured">0.0374</Single>
+                <Single LabelId="3" Status="Measured">0.9014</Single>
+            </Well>
+            <Well Pos="C3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9109</Single>
+                <Single LabelId="2" Status="Measured">0.0376</Single>
+                <Single LabelId="3" Status="Measured">0.8732</Single>
+            </Well>
+            <Well Pos="C4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9711</Single>
+                <Single LabelId="2" Status="Measured">0.0374</Single>
+                <Single LabelId="3" Status="Measured">0.9336</Single>
+            </Well>
+            <Well Pos="C5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9341</Single>
+                <Single LabelId="2" Status="Measured">0.0372</Single>
+                <Single LabelId="3" Status="Measured">0.8969</Single>
+            </Well>
+            <Well Pos="C6" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0119</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9733</Single>
+            </Well>
+            <Well Pos="C7" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9677</Single>
+                <Single LabelId="2" Status="Measured">0.0375</Single>
+                <Single LabelId="3" Status="Measured">0.9302</Single>
+            </Well>
+            <Well Pos="C8" Type="Single">
+                <Single LabelId="1" Status="Measured">0.991</Single>
+                <Single LabelId="2" Status="Measured">0.0388</Single>
+                <Single LabelId="3" Status="Measured">0.9522</Single>
+            </Well>
+            <Well Pos="C9" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0001</Single>
+                <Single LabelId="2" Status="Measured">0.0376</Single>
+                <Single LabelId="3" Status="Measured">0.9625</Single>
+            </Well>
+            <Well Pos="C10" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9577</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9191</Single>
+            </Well>
+            <Well Pos="C11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9378</Single>
+                <Single LabelId="2" Status="Measured">0.0389</Single>
+                <Single LabelId="3" Status="Measured">0.899</Single>
+            </Well>
+            <Well Pos="C12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9631</Single>
+                <Single LabelId="2" Status="Measured">0.0384</Single>
+                <Single LabelId="3" Status="Measured">0.9247</Single>
+            </Well>
+            <Well Pos="D12" Type="Single">
+                <Single LabelId="1" Status="Measured">1.014</Single>
+                <Single LabelId="2" Status="Measured">0.038</Single>
+                <Single LabelId="3" Status="Measured">0.976</Single>
+            </Well>
+            <Well Pos="D11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9837</Single>
+                <Single LabelId="2" Status="Measured">0.0357</Single>
+                <Single LabelId="3" Status="Measured">0.948</Single>
+            </Well>
+            <Well Pos="D10" Type="Single">
+                <Single LabelId="1" Status="Measured">0.98</Single>
+                <Single LabelId="2" Status="Measured">0.0369</Single>
+                <Single LabelId="3" Status="Measured">0.9431</Single>
+            </Well>
+            <Well Pos="D9" Type="Single">
+                <Single LabelId="1" Status="Measured">0.966</Single>
+                <Single LabelId="2" Status="Measured">0.0375</Single>
+                <Single LabelId="3" Status="Measured">0.9285</Single>
+            </Well>
+            <Well Pos="D8" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9311</Single>
+                <Single LabelId="2" Status="Measured">0.0379</Single>
+                <Single LabelId="3" Status="Measured">0.8932</Single>
+            </Well>
+            <Well Pos="D7" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0602</Single>
+                <Single LabelId="2" Status="Measured">0.038</Single>
+                <Single LabelId="3" Status="Measured">1.0222</Single>
+            </Well>
+            <Well Pos="D6" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9684</Single>
+                <Single LabelId="2" Status="Measured">0.0384</Single>
+                <Single LabelId="3" Status="Measured">0.9301</Single>
+            </Well>
+            <Well Pos="D5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9716</Single>
+                <Single LabelId="2" Status="Measured">0.0364</Single>
+                <Single LabelId="3" Status="Measured">0.9352</Single>
+            </Well>
+            <Well Pos="D4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9409</Single>
+                <Single LabelId="2" Status="Measured">0.0366</Single>
+                <Single LabelId="3" Status="Measured">0.9043</Single>
+            </Well>
+            <Well Pos="D3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9425</Single>
+                <Single LabelId="2" Status="Measured">0.0376</Single>
+                <Single LabelId="3" Status="Measured">0.9049</Single>
+            </Well>
+            <Well Pos="D2" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9134</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.8748</Single>
+            </Well>
+            <Well Pos="D1" Type="Single">
+                <Single LabelId="1" Status="Measured">0.8761</Single>
+                <Single LabelId="2" Status="Measured">0.0366</Single>
+                <Single LabelId="3" Status="Measured">0.8395</Single>
+            </Well>
+            <Well Pos="E1" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0075</Single>
+                <Single LabelId="2" Status="Measured">0.037</Single>
+                <Single LabelId="3" Status="Measured">0.9705</Single>
+            </Well>
+            <Well Pos="E2" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9753</Single>
+                <Single LabelId="2" Status="Measured">0.0397</Single>
+                <Single LabelId="3" Status="Measured">0.9356</Single>
+            </Well>
+            <Well Pos="E3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9722</Single>
+                <Single LabelId="2" Status="Measured">0.039</Single>
+                <Single LabelId="3" Status="Measured">0.9332</Single>
+            </Well>
+            <Well Pos="E4" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0086</Single>
+                <Single LabelId="2" Status="Measured">0.0388</Single>
+                <Single LabelId="3" Status="Measured">0.9697</Single>
+            </Well>
+            <Well Pos="E5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9752</Single>
+                <Single LabelId="2" Status="Measured">0.0365</Single>
+                <Single LabelId="3" Status="Measured">0.9386</Single>
+            </Well>
+            <Well Pos="E6" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9511</Single>
+                <Single LabelId="2" Status="Measured">0.0369</Single>
+                <Single LabelId="3" Status="Measured">0.9143</Single>
+            </Well>
+            <Well Pos="E7" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9638</Single>
+                <Single LabelId="2" Status="Measured">0.0392</Single>
+                <Single LabelId="3" Status="Measured">0.9247</Single>
+            </Well>
+            <Well Pos="E8" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0658</Single>
+                <Single LabelId="2" Status="Measured">0.0394</Single>
+                <Single LabelId="3" Status="Measured">1.0264</Single>
+            </Well>
+            <Well Pos="E9" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9919</Single>
+                <Single LabelId="2" Status="Measured">0.0396</Single>
+                <Single LabelId="3" Status="Measured">0.9523</Single>
+            </Well>
+            <Well Pos="E10" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0163</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9777</Single>
+            </Well>
+            <Well Pos="E11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.98</Single>
+                <Single LabelId="2" Status="Measured">0.0373</Single>
+                <Single LabelId="3" Status="Measured">0.9427</Single>
+            </Well>
+            <Well Pos="E12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9598</Single>
+                <Single LabelId="2" Status="Measured">0.0377</Single>
+                <Single LabelId="3" Status="Measured">0.9221</Single>
+            </Well>
+            <Well Pos="F12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9615</Single>
+                <Single LabelId="2" Status="Measured">0.0383</Single>
+                <Single LabelId="3" Status="Measured">0.9231</Single>
+            </Well>
+            <Well Pos="F11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9502</Single>
+                <Single LabelId="2" Status="Measured">0.0364</Single>
+                <Single LabelId="3" Status="Measured">0.9138</Single>
+            </Well>
+            <Well Pos="F10" Type="Single">
+                <Single LabelId="1" Status="Measured">1.015</Single>
+                <Single LabelId="2" Status="Measured">0.0388</Single>
+                <Single LabelId="3" Status="Measured">0.9762</Single>
+            </Well>
+            <Well Pos="F9" Type="Single">
+                <Single LabelId="1" Status="Measured">0.983</Single>
+                <Single LabelId="2" Status="Measured">0.0392</Single>
+                <Single LabelId="3" Status="Measured">0.9438</Single>
+            </Well>
+            <Well Pos="F8" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0972</Single>
+                <Single LabelId="2" Status="Measured">0.0392</Single>
+                <Single LabelId="3" Status="Measured">1.0581</Single>
+            </Well>
+            <Well Pos="F7" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9671</Single>
+                <Single LabelId="2" Status="Measured">0.0392</Single>
+                <Single LabelId="3" Status="Measured">0.9278</Single>
+            </Well>
+            <Well Pos="F6" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9524</Single>
+                <Single LabelId="2" Status="Measured">0.0372</Single>
+                <Single LabelId="3" Status="Measured">0.9151</Single>
+            </Well>
+            <Well Pos="F5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9233</Single>
+                <Single LabelId="2" Status="Measured">0.0378</Single>
+                <Single LabelId="3" Status="Measured">0.8855</Single>
+            </Well>
+            <Well Pos="F4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9357</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.8971</Single>
+            </Well>
+            <Well Pos="F3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.967</Single>
+                <Single LabelId="2" Status="Measured">0.0394</Single>
+                <Single LabelId="3" Status="Measured">0.9276</Single>
+            </Well>
+            <Well Pos="F2" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0109</Single>
+                <Single LabelId="2" Status="Measured">0.0395</Single>
+                <Single LabelId="3" Status="Measured">0.9714</Single>
+            </Well>
+            <Well Pos="F1" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0254</Single>
+                <Single LabelId="2" Status="Measured">0.039</Single>
+                <Single LabelId="3" Status="Measured">0.9865</Single>
+            </Well>
+            <Well Pos="G1" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9562</Single>
+                <Single LabelId="2" Status="Measured">0.0356</Single>
+                <Single LabelId="3" Status="Measured">0.9206</Single>
+            </Well>
+            <Well Pos="G2" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0479</Single>
+                <Single LabelId="2" Status="Measured">0.0373</Single>
+                <Single LabelId="3" Status="Measured">1.0106</Single>
+            </Well>
+            <Well Pos="G3" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9761</Single>
+                <Single LabelId="2" Status="Measured">0.0391</Single>
+                <Single LabelId="3" Status="Measured">0.9369</Single>
+            </Well>
+            <Well Pos="G4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9426</Single>
+                <Single LabelId="2" Status="Measured">0.0384</Single>
+                <Single LabelId="3" Status="Measured">0.9042</Single>
+            </Well>
+            <Well Pos="G5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9563</Single>
+                <Single LabelId="2" Status="Measured">0.039</Single>
+                <Single LabelId="3" Status="Measured">0.9173</Single>
+            </Well>
+            <Well Pos="G6" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9621</Single>
+                <Single LabelId="2" Status="Measured">0.0389</Single>
+                <Single LabelId="3" Status="Measured">0.9232</Single>
+            </Well>
+            <Well Pos="G7" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9529</Single>
+                <Single LabelId="2" Status="Measured">0.0373</Single>
+                <Single LabelId="3" Status="Measured">0.9156</Single>
+            </Well>
+            <Well Pos="G8" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9809</Single>
+                <Single LabelId="2" Status="Measured">0.0376</Single>
+                <Single LabelId="3" Status="Measured">0.9432</Single>
+            </Well>
+            <Well Pos="G9" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0005</Single>
+                <Single LabelId="2" Status="Measured">0.0393</Single>
+                <Single LabelId="3" Status="Measured">0.9612</Single>
+            </Well>
+            <Well Pos="G10" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0164</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9778</Single>
+            </Well>
+            <Well Pos="G11" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9544</Single>
+                <Single LabelId="2" Status="Measured">0.0395</Single>
+                <Single LabelId="3" Status="Measured">0.9149</Single>
+            </Well>
+            <Well Pos="G12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9382</Single>
+                <Single LabelId="2" Status="Measured">0.0382</Single>
+                <Single LabelId="3" Status="Measured">0.9</Single>
+            </Well>
+            <Well Pos="H12" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9871</Single>
+                <Single LabelId="2" Status="Measured">0.0375</Single>
+                <Single LabelId="3" Status="Measured">0.9496</Single>
+            </Well>
+            <Well Pos="H11" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0273</Single>
+                <Single LabelId="2" Status="Measured">0.0365</Single>
+                <Single LabelId="3" Status="Measured">0.9909</Single>
+            </Well>
+            <Well Pos="H10" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9694</Single>
+                <Single LabelId="2" Status="Measured">0.0402</Single>
+                <Single LabelId="3" Status="Measured">0.9292</Single>
+            </Well>
+            <Well Pos="H9" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9385</Single>
+                <Single LabelId="2" Status="Measured">0.037</Single>
+                <Single LabelId="3" Status="Measured">0.9015</Single>
+            </Well>
+            <Well Pos="H8" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9895</Single>
+                <Single LabelId="2" Status="Measured">0.038</Single>
+                <Single LabelId="3" Status="Measured">0.9515</Single>
+            </Well>
+            <Well Pos="H7" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9855</Single>
+                <Single LabelId="2" Status="Measured">0.0386</Single>
+                <Single LabelId="3" Status="Measured">0.9469</Single>
+            </Well>
+            <Well Pos="H6" Type="Single">
+                <Single LabelId="1" Status="Measured">1.004</Single>
+                <Single LabelId="2" Status="Measured">0.038</Single>
+                <Single LabelId="3" Status="Measured">0.9661</Single>
+            </Well>
+            <Well Pos="H5" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9745</Single>
+                <Single LabelId="2" Status="Measured">0.0361</Single>
+                <Single LabelId="3" Status="Measured">0.9384</Single>
+            </Well>
+            <Well Pos="H4" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9814</Single>
+                <Single LabelId="2" Status="Measured">0.0395</Single>
+                <Single LabelId="3" Status="Measured">0.9419</Single>
+            </Well>
+            <Well Pos="H3" Type="Single">
+                <Single LabelId="1" Status="Measured">1.0118</Single>
+                <Single LabelId="2" Status="Measured">0.0371</Single>
+                <Single LabelId="3" Status="Measured">0.9747</Single>
+            </Well>
+            <Well Pos="H2" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9562</Single>
+                <Single LabelId="2" Status="Measured">0.0375</Single>
+                <Single LabelId="3" Status="Measured">0.9187</Single>
+            </Well>
+            <Well Pos="H1" Type="Single">
+                <Single LabelId="1" Status="Measured">0.9842</Single>
+                <Single LabelId="2" Status="Measured">0.0391</Single>
+                <Single LabelId="3" Status="Measured">0.9451</Single>
+            </Well>
+        </Data>
+    </Section>
+</MeasurementResultData>

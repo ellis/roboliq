@@ -12,7 +12,12 @@ relValue = function(values) {
 
 # readout = \epsilon * c * d, where \epsilon is a property of the dye, c is concentration, and d is the distance the beam travels through the liquid.
 # readout is therefore proportional to totConc * totVol
-df <- read.delim('dyes.tab', header=1)
+df0 <- read.delim('dyes.tab', header=1)
+x4 = with(df0[df0$id == 'dye16A' & df0$row == 4,], median(readout))
+x8 = with(df0[df0$id == 'dye16A' & df0$row == 8,], median(readout))
+df <- df0[df0$id != 'dye32A' & df0$id != 'dye32B',]
+# Adjust readout according to row, due to row bias in our reader
+df$readout <- df$readout * (1 + (x8 - x4) / 4 / x8 * (8 - df$row))
 df$well <- (df$row - 1) * 12 + df$col
 df$totVol = df$baseVol + df$vol
 df$totConc = (df$baseConc * df$baseVol + df$conc * df$vol) / df$totVol
@@ -105,6 +110,17 @@ plotA((df$liquidClass == 'Water free dispense' & df$multipipette == 1), "Multi-P
 plotA((df$liquidClass == 'Water free dispense' & df$multipipette >= 2), "Multi-Pipetting Step 2+")
 par(par0)
 
+# Single pipetting variance vs volume
+plotB = function(cond, main) {
+  boxplot(readTotVol ~ vol, data=df[cond & df$vol != 23 & df$vol != 200,], xlab='vol', ylab='readTotVol', main=main, ylim=c(100, 270))
+  #plot(readVol ~ vol, data=df[cond,], log='xy')
+}
+par(mfcol=c(1, 3), oma=par0$oma)
+plotB((df$liquidClass == 'Water free dispense' & df$multipipette == 0), "Single-Pipetting")
+plotB((df$liquidClass == 'Water free dispense' & df$multipipette == 1), "Multi-Pipetting Step 1")
+plotB((df$liquidClass == 'Water free dispense' & df$multipipette >= 2), "Multi-Pipetting Step 2+")
+par(par0)
+
 # Multipipetting variance
 #par(mfcol=c(1,1))
 #with(df[df$multipipette > 0 & df$tipVolMax > 0,], scatterplot3d(tipVol, tipVolMax, readout / totConc, zlab='', log='xyz'))
@@ -114,6 +130,7 @@ par(mfrow=c(1,2))
 cond = df$multipipette > 0 & df$tipVolMax > 0 & df$vol == 10
 tv = -df$tipVol[cond]
 with(df[cond,], plot(readTotVol ~ tv, col=as.factor(tipVolMax), xlab="-tipVol"))
+with(df[cond,], abline(ln(readTotVol ~ tv), col='blue'))
 x = (1 - df$tipVol[cond] / df$tipVolMax[cond])
 with(df[cond,], plot(readTotVol ~ x, col=as.factor(tipVolMax), xlab="progress"))
 # 10ul, 12*7 steps
@@ -300,7 +317,52 @@ plot(df$readVol[df$id == 'dye29A' | df$id == 'dye30A'], col=df$tip[df$id == 'dye
 analysis1(df[df$cond == 'F',], "F")
 analysis2(df[df$cond == 'F' & df$vol == 10,], "F, 10ul")
 
+#---- Predictions for 10ul multipipetting
+df2 = df[df$vol == 10 & df$multipipette > 1,]
+y = as.numeric(df2$readVol)
+x = as.numeric(df2$tipVol)
+lm3 = lm(y ~ x)
+q = predict(lm3, data.frame(x=seq.int(240, 10, -10)))
+rep(10, 24) / q
+
 par(par0)
 #boxplot_readTotVol_vol(df$multipipette == 0)
+
+# Multidispense 10ul 24 times
+dye22A = df0[df0$id == 'dye22A',]
+dye22A.readout = as.numeric(dye22A$readout)
+dye22A.readVol = as.numeric(with(dye22A, (readout - baseConc * baseVol) / conc / 23.22 * 200))
+dye22A.x = as.numeric(240-dye22A$tipVol)
+
+dye32A = df0[df0$id == 'dye32A',] # adjusted 1
+dye32A.readout = as.numeric(dye32A$readout)
+dye32A.readVol = as.numeric(with(dye32A, (readout - baseConc * baseVol) / conc / 23.22 * 200))
+dye32A.x = as.numeric(240-dye32A$tipVol)
+
+dye32B = df0[df0$id == 'dye32B',] # adjusted 2
+dye32B.readout = as.numeric(dye32B$readout)
+dye32B.readVol = as.numeric(with(dye32B, (readout - baseConc * baseVol) / conc / 23.22 * 200))
+dye32B.x = as.numeric(240-dye32B$tipVol)
+
+dye32.readVol = c(dye32A.readVol, dye32B.readVol)
+dye32.x = c(dye32A.x, dye32B.x)
+
+plot(dye32.readVol ~ dye32.x, ylab='readVol', xlab='progress', col='blue', ylim=c(8.1, 11.39))
+abline(lm(dye32.readVol ~ dye32.x), col='blue')
+points(dye22A.readVol ~ dye22A.x, col='red')
+abline(lm(dye22A.readVol ~ dye22A.x), col='red')
+
+dye32b.readVol = dye32a - 0.0009 * dye32.x
+plot(dye32b.readVol ~ dye32.x, ylab='readVol', xlab='progress', col='blue', ylim=c(8.1, 11.39))
+abline(lm(dye32b.readVol ~ dye32.x), col='blue')
+points(dye22A.readVol ~ dye22A.x, col='red')
+abline(lm(dye22A.readVol[2:length(dye22A.readVol)] ~ dye22A.x[2:length(dye22A.readVol)]), col='red')
+describe(dye32b.readVol)
+describe(dye22A.readVol)
+lm(dye32b.readVol ~ dye32.x)
+lm(dye22A.readVol[2:length(dye22A.readVol)] ~ dye22A.x[2:length(dye22A.readVol)])
+
+plot(dye32A.readVol ~ dye32A.x)
+abline(lm(dye32A.readVol ~ dye32A.x))
 
 par(par0)
