@@ -130,7 +130,7 @@ par(mfrow=c(1,2))
 cond = df$multipipette > 0 & df$tipVolMax > 0 & df$vol == 10
 tv = -df$tipVol[cond]
 with(df[cond,], plot(readTotVol ~ tv, col=as.factor(tipVolMax), xlab="-tipVol"))
-with(df[cond,], abline(ln(readTotVol ~ tv), col='blue'))
+with(df[cond,], abline(lm(readTotVol ~ tv), col='blue'))
 x = (1 - df$tipVol[cond] / df$tipVolMax[cond])
 with(df[cond,], plot(readTotVol ~ x, col=as.factor(tipVolMax), xlab="progress"))
 # 10ul, 12*7 steps
