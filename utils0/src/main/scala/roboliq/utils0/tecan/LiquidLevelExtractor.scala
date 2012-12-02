@@ -18,10 +18,10 @@ object LiquidLevelExtractor {
 	
 	case class WellData(
 		id: WellId,
+		step: Int,
 		volPrev: BigDecimal,
-		zPrev: Integer,
 		vol: BigDecimal,
-		z: Integer
+		z: Int
 	)
 	/*case class TipWell(
 		tip: Int,
@@ -75,6 +75,7 @@ object LiquidLevelExtractor {
 		//val tipToData_m = new LinkedHashMap[Int, Data]
 		//val wellToData_m = new HashMap[(Int, Int), Data]
 		val wellData_m = new HashMap[WellId, WellData]
+		val wellZPrev_m = new HashMap[WellId, Int]
 		var disp_l = disp0_l
 		var sC5 = ""
 		var sCmd = ""
@@ -87,13 +88,13 @@ object LiquidLevelExtractor {
 				case None =>
 					WellData(
 						id = wellId,
+						step = 0,
 						volPrev = 0,
-						zPrev = null,
 						vol = 0,
-						z = null
+						z = 0
 					)
 			}
-			val wd = wd0.copy(volPrev = wd0.vol, vol = wd0.vol + vol)
+			val wd = wd0.copy(step = wd0.step + 1, volPrev = wd0.vol, vol = wd0.vol + vol)
 			wellData_m += wellId -> wd
 		}
 		
@@ -101,33 +102,11 @@ object LiquidLevelExtractor {
 			val wellId = WellId(loc, row, col)
 			tw_m += tip -> wellId
 		}
-		
-		/*
-		def addVol(wellId: (Int, Int), loc: String) {
-			val wd0 = wellData_m.get(wellId) match {
-				case Some(wd) => wd
-				case None =>
-					WellData(
-						row = wellId._1,
-						col = wellId._2,
-						loc = loc,
-						vol0 = 0,
-						z0 = null,
-						vol = 0,
-						z = null
-					)
-			}
-			val dvol = disp_l.head
-			disp_l = disp_l.tail
-			val wd = wd0.copy(vol = wd0.vol + dvol)
-			wellData_m += wellId -> wd
-		}
-		*/
 
 		def setZ(wellId: WellId, z: Int) {
 			wellData_m.get(wellId) match {
 				case Some(wd0) =>
-					val wd = wd0.copy(zPrev = wd0.z, z = z)
+					val wd = wd0.copy(z = z)
 					wellData_m += wellId -> wd
 				case None =>
 					println(s"ERROR: missing well data `$wellId`")
@@ -144,7 +123,7 @@ object LiquidLevelExtractor {
 			}
 		}
 		
-		println(List("tip", "loc", "row", "col", "z", "vol").mkString("\t"))
+		println(List("tip", "loc", "row", "col", "step", "z", "vol", "dz", "dvol").mkString("\t"))
 		for (line0 <- io.Source.fromFile(args(0)).getLines) {
 			// drop first 14 chars
 			val line = line0.drop(14).trim
@@ -165,7 +144,12 @@ object LiquidLevelExtractor {
 						tw_m.foreach(pair => {
 							val (tip, wellId) = pair
 							val wd = wellData_m(wellId)
-							println(List(tip, wellId.loc, wellId.row, wellId.col, wd.z, wd.vol).mkString("\t"))
+							val dvol = wd.vol - wd.volPrev
+							val dz = wd.z - wellZPrev_m.getOrElse(wellId, 0)
+							println(List(
+									tip, wellId.loc, wellId.row, wellId.col, wd.step, wd.z, wd.vol, dz, dvol
+								).mkString("\t"))
+							wellZPrev_m += wellId -> wd.z
 						})
 					}
 					
@@ -183,6 +167,7 @@ object LiquidLevelExtractor {
 					val vol = BigDecimal(vol_s)
 					dispense(wellIdTemp_?.get, vol)
 					wellIdTemp_? = None
+					expect = Expect.None
 					
 				case Detect(tip_s, col_s, row_s, loc) =>
 					val (tip, row, col) = (tip_s.toInt, row_s.toInt, col_s.toInt)
