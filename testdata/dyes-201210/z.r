@@ -8,10 +8,12 @@ par0 = par(no.readonly=T)
 df0 <- read.delim('z02b.tab', header=1)
 df0$step = df0$step - 1
 df = df0[df0$z < 2100 & df0$step > 1,]
+#df0 <- read.delim('z02a.tab', header=1)
+#df = df0[df0$z < 2100 & (df0$step > 1 | df0$dvol == 0),]
 attach(df)
 
-plot(vol)
-plot(z)
+plot(vol, col=tip)
+plot(z, col=tip)
 plot(dz ~ dvol, col=tip)
 abline(lm(dz ~ dvol))
 
