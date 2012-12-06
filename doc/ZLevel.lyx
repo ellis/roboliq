@@ -126,13 +126,326 @@ P(z_{0}) & = & \text{from regression}\\
 P(L_{0}\mid z_{1};d_{1}) & = & P(z_{1}|L_{0};d_{1})\cdot P(L_{0};d_{1})/P(z_{1};d_{1})\\
  & = & P(z_{1}|L_{0};d_{1})\cdot P(L_{0};d_{1})/P(z_{1};d_{1})\\
 P(V_{1}\mid z_{1};d_{1}) & = & P(z_{1}|V_{1};d_{1})\cdot P(V_{1};d_{1})/P(z_{1};d_{1})\\
-P(V_{1}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}|V_{1};d_{1:2})\cdot P(V_{1};d_{1})/P(z_{1};d_{1})\\
-P(V_{2}\mid z_{1:2};d_{1:2}) & = & P(z_{1}|V_{1};d_{1})\cdot P(V_{1};d_{1})/P(z_{1};d_{1})
+ & = & P(z_{1}|V_{1})\cdot P(V_{1};d_{1})/P(z_{1};d_{1})\\
+P(V_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}|V_{1:2};d_{1:2})\cdot P(V_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
+ & = & P(z_{1}\mid V_{1};d_{1})\cdot P(z_{2}\mid z_{1},V_{1:2};d_{1:2})\cdot\left(\prod_{i}P(V_{i};d_{i})\right)/\left(P(z_{1};d_{1})\cdot P(z_{2}\mid z_{1};d_{1:2})\right)\\
+P(V_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid V_{1:n};d_{1:n})\cdot P(V_{1:n};d_{1:n})/P(z_{1:n};d_{1:n})\\
+ & = & P(z_{1:n}\mid V_{1:n})\cdot\left(\prod_{i}P(V_{i};d_{i})\right)/P(z_{1:n};d_{1:n})\\
+P(V_{i}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid V_{i};d_{1:n})\cdot P(V_{i};d_{1:n})/P(z_{1:n};d_{1:n})\\
+ & = & P(z_{1:n}\mid V_{i};d_{1:n})\cdot P(V_{i};d_{i})/P(z_{1:n};d_{1:n})
 \end{eqnarray*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+P(v_{1}\mid z_{1};d_{1}) & = & P(z_{1}\mid v_{1};d_{1})\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
+ & = & P(z_{1}\mid v_{1})\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
+P(v_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}\mid v_{1:2};d_{1:2})\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
+ & = & P(z_{1}\mid v_{1})\cdot P(z_{2}\mid z_{1},v_{1:2})\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(P(z_{1};d_{1})\cdot P(z_{2}\mid z_{1};d_{1:2})\right)\\
+P(v_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid v_{1:n};d_{1:n})\cdot P(v_{1:n};d_{1:n})/P(z_{1:n};d_{1:n})\\
+ & = & \left(\sum_{z_{0}}P(z_{0})\cdot P(z_{1:n}\mid z_{0},v_{1:n})\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)\\
+ & = & \left(\sum_{z_{0}}P(z_{0})\cdot\prod_{i}P(z_{i}\mid z_{0},\sum_{j=1}^{i}v_{j})\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Dispense 1
+\end_layout
+
+\begin_layout Standard
+Probability expression:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+P(v_{1}\mid z_{1};d_{1}) & = & P(z_{1}\mid v_{1};d_{1})\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
+ & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\, dz_{0}\right)\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
+ & \propto & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\, dz_{0}\right)\cdot P(v_{1};d_{1})
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Distributions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+z_{0} & \sim & \text{from regression using experimental data}\\
+Z_{1}\mid z_{0},v_{1} & \sim & N(E[z_{0}]+\frac{1}{A}v_{1},\ Var[z_{0}]+\sum Var[Z@v_{1}])\\
+V_{1};d_{1} & \sim & N(E[V@d_{1}],\ Var[V@d_{1}])
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $P(z_{1}\mid V_{1};d_{1})=P(z_{1},V_{1};d_{1})/P(V_{1};d_{1})=$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $Z\mid v\sim N(\mu_{0}+\frac{1}{A}v,\ \sigma_{0}^{2}+Var[Z@v])$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $V;d\sim N(E[V@d],\ Var[V@d])$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $Z_{1};d_{1}\sim N(E[Z@d_{1}],\ Var[Z@d_{1}])$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Dispense 1:2
+\end_layout
+
+\begin_layout Standard
+Probability expression:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+P(v_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}\mid v_{1:2};d_{1:2})\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
+ & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1:2}\mid z_{0},v_{1:2})\, dz_{0}\right)\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
+ & \propto & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\cdot P(z_{2}\mid z_{0},v_{1}+v_{2})\, dz_{0}\right)\cdot\left(P(v_{1};d_{1})\cdot P(v_{2};d_{2})\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Distributions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+z_{0} & \sim & \text{from regression using experimental data}\\
+Z_{1}\mid z_{0},v_{1} & \sim & N(E[z_{0}]+\frac{1}{A}v_{1},\ Var[z_{0}]+\sum Var[Z@v_{1}])\\
+Z_{2}\mid z_{0},v_{1}+v_{2} & \sim & N(E[z_{0}]+\tfrac{1}{A}(v_{1}+v_{2}),\ Var[z_{0}]+\sum Var[Z@(v_{1}+v_{2})])\\
+V_{1};d_{1} & \sim & N(E[V@d_{1}],\ Var[V@d_{1}])
+\end{eqnarray*}
+
+\end_inset
+
+Distributions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $Z_{2}\mid z_{1},v_{1:2}\sim N(\mu_{0}+\frac{1}{A}\sum v_{i},\ \sigma_{0}^{2}+\sum Var[Z@\sum v_{i}])$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $Z_{2}\mid z_{1};d_{1;2}\sim$
+\end_inset
+
+ kalman filter
+\end_layout
+
+\begin_layout Subsection*
+General
+\end_layout
+
+\begin_layout Standard
+Probability expression:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+P(v_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid v_{1:n};d_{1:n})\cdot P(v_{1:n};d_{1:n})/P(z_{1:n};d_{1:n})\\
+ & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1:n}\mid z_{0},v_{1:n})\, dz_{0}\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)\\
+ & = & \left(\int_{z_{0}}P(z_{0})\cdot\prod_{i}P(z_{i}\mid z_{0},\sum_{j=1}^{i}v_{j})\, dz_{0}\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Distributions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+z_{0} & \sim & \text{from regression using experimental data}\\
+Z_{i}\mid z_{0},\sum v_{j} & \sim & N(E[z_{0}]+\frac{1}{A}\sum v_{j},\ Var[z_{0}]+\sum Var[Z@\sum v_{j}])\\
+V_{i};d_{i} & \sim & N(E[V@d_{i}],\ Var[V@d_{i}])\\
+Z_{i}\mid z_{1:i-1};d_{1:i} & \sim & \text{either from experiments or by Kalman filter?}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $P(zs|vs)=\sum_{z_{0}}P(z_{0},zs\mid vs)=\sum_{z_{0}}P(z_{0}\mid vs)P(zs\mid z_{0},vs)=\sum_{z_{0}}P(z_{0})P(zs\mid z_{0},vs)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+P(Z|z)=sum P(Z,v|z)=sum P(Z|v)P(v|Z,z)
+\end_layout
+
+\begin_layout Standard
+P(a,b)=P(a)P(b|a)
+\end_layout
+
+\begin_layout Subsection*
+Other stuff
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $P(z_{1:n}\mid V_{1:n})=N(\mu_{0}+\frac{1}{A}\sum v_{i},\ \sigma_{0}^{2}+\sum Var[v_{i}])$
+\end_inset
+
+ **WRONG**, try chain rule 
+\begin_inset Formula $P(z_{1}\mid V_{1})P(z_{2}\mid z_{1},V_{1:2})...$
+\end_inset
+
+ or using 
+\begin_inset Formula $v_{1:n}$
+\end_inset
+
+ instead of 
+\begin_inset Formula $V$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $P(V_{i};d_{i})$
+\end_inset
+
+: we get these from the absorbtion experiments
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $P(z_{1};d_{1})$
+\end_inset
+
+: we get these from our z-level experiments
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $P(z_{1:n},V_{1:n};d_{1:n})$
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $P(z_{1:n}|V_{1:n};d_{1:n})$
+\end_inset
+
+: 
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $P(z_{1:n};d_{1:n})$
+\end_inset
+
+: we get these from our z-level experiments
 \end_layout
 
 \begin_layout Standard
