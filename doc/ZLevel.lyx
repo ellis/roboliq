@@ -59,22 +59,61 @@
 
 \begin_body
 
+\begin_layout Section*
+Estimation of component volumes in a mixture
+\end_layout
+
+\begin_layout Standard
+Motivating example: we have three liquids (
+\emph on
+a
+\emph default
+, 
+\emph on
+b
+\emph default
+, and 
+\emph on
+c
+\emph default
+) which we want the robot to mix in equal amounts in a given well.
+ Our problem is that the robot doesn't pipette with 100% accuracy.
+ Fortunately, the ratios between the liquids do not need to be absolutely
+ perfect, because our biological procedures can tolerate a certain variance
+ in the ratios.
+ But we would like to obtain probabilitistic estimates that the ratios are
+ within reasonable ranges.
+ We therefore aim to calculate three probability distributions, one each
+ for the volume ratios between 
+\emph on
+a
+\emph default
+:
+\emph on
+b
+\emph default
+, 
+\emph on
+a
+\emph default
+:
+\emph on
+c
+\emph default
+, and 
+\emph on
+b
+\emph default
+:
+\emph on
+c
+\emph default
+.
+ The procedure is described below.
+\end_layout
+
 \begin_layout Description
 Variables
-\end_layout
-
-\begin_layout Description
-\begin_inset Formula $z_{i}$
-\end_inset
-
-: observed z-level measurement
-\end_layout
-
-\begin_layout Description
-\begin_inset Formula $L_{i}$
-\end_inset
-
-: random variable for true z-level
 \end_layout
 
 \begin_layout Description
@@ -85,211 +124,256 @@ Variables
 \end_layout
 
 \begin_layout Description
-\begin_inset Formula $V_{i}$
+\begin_inset Formula $v_{i}$
 \end_inset
 
-: random variable for true volume dispensed 
+: true volume dispensed
 \end_layout
 
 \begin_layout Description
-\begin_inset Formula $l_{0}$
+\begin_inset Formula $z_{i}$
 \end_inset
 
-: level of empty well
-\end_layout
-
-\begin_layout Description
-Functions
-\end_layout
-
-\begin_layout Description
-\begin_inset Formula $\Delta_{L}(d)=d/A$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Description
-\begin_inset Formula $\Delta_{V}(z)=z\cdot A$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-P(L_{0}) & = & ...\\
-P(L_{i}\mid z_{i}) & = & ...\\
-P(z_{1};d_{1}) & = & \text{from measurements}\\
-P(z_{0}) & = & \text{from regression}\\
-P(L_{0}\mid z_{1};d_{1}) & = & P(z_{1}|L_{0};d_{1})\cdot P(L_{0};d_{1})/P(z_{1};d_{1})\\
- & = & P(z_{1}|L_{0};d_{1})\cdot P(L_{0};d_{1})/P(z_{1};d_{1})\\
-P(V_{1}\mid z_{1};d_{1}) & = & P(z_{1}|V_{1};d_{1})\cdot P(V_{1};d_{1})/P(z_{1};d_{1})\\
- & = & P(z_{1}|V_{1})\cdot P(V_{1};d_{1})/P(z_{1};d_{1})\\
-P(V_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}|V_{1:2};d_{1:2})\cdot P(V_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
- & = & P(z_{1}\mid V_{1};d_{1})\cdot P(z_{2}\mid z_{1},V_{1:2};d_{1:2})\cdot\left(\prod_{i}P(V_{i};d_{i})\right)/\left(P(z_{1};d_{1})\cdot P(z_{2}\mid z_{1};d_{1:2})\right)\\
-P(V_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid V_{1:n};d_{1:n})\cdot P(V_{1:n};d_{1:n})/P(z_{1:n};d_{1:n})\\
- & = & P(z_{1:n}\mid V_{1:n})\cdot\left(\prod_{i}P(V_{i};d_{i})\right)/P(z_{1:n};d_{1:n})\\
-P(V_{i}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid V_{i};d_{1:n})\cdot P(V_{i};d_{1:n})/P(z_{1:n};d_{1:n})\\
- & = & P(z_{1:n}\mid V_{i};d_{1:n})\cdot P(V_{i};d_{i})/P(z_{1:n};d_{1:n})
-\end{eqnarray*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-P(v_{1}\mid z_{1};d_{1}) & = & P(z_{1}\mid v_{1};d_{1})\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
- & = & P(z_{1}\mid v_{1})\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
-P(v_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}\mid v_{1:2};d_{1:2})\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
- & = & P(z_{1}\mid v_{1})\cdot P(z_{2}\mid z_{1},v_{1:2})\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(P(z_{1};d_{1})\cdot P(z_{2}\mid z_{1};d_{1:2})\right)\\
-P(v_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid v_{1:n};d_{1:n})\cdot P(v_{1:n};d_{1:n})/P(z_{1:n};d_{1:n})\\
- & = & \left(\sum_{z_{0}}P(z_{0})\cdot P(z_{1:n}\mid z_{0},v_{1:n})\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)\\
- & = & \left(\sum_{z_{0}}P(z_{0})\cdot\prod_{i}P(z_{i}\mid z_{0},\sum_{j=1}^{i}v_{j})\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)
-\end{eqnarray*}
-
-\end_inset
-
-
+: observed z-level measurement
 \end_layout
 
 \begin_layout Subsection*
-Dispense 1
+1 Step
 \end_layout
 
 \begin_layout Standard
-Probability expression:
+First we start with a single dispense command 
+\begin_inset Formula $d_{1}$
+\end_inset
+
+, a single readout of the resulting z-level 
+\begin_inset Formula $z_{1}$
+\end_inset
+
+, and then calculate the probability distribution over the true volume of
+ dispense 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+.
+ That is, we want to calculate 
+\begin_inset Formula $P(V_{1}\mid z_{1};d_{1})$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{eqnarray*}
+\begin{eqnarray}
 P(v_{1}\mid z_{1};d_{1}) & = & P(z_{1}\mid v_{1};d_{1})\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
  & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\, dz_{0}\right)\cdot P(v_{1};d_{1})/P(z_{1};d_{1})\\
  & \propto & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\, dz_{0}\right)\cdot P(v_{1};d_{1})
-\end{eqnarray*}
+\end{eqnarray}
 
 \end_inset
 
+in (1) we use Bayes' theorem to expand the left side.
+ In (2) we introduce the random variable 
+\begin_inset Formula $Z_{0}$
+\end_inset
 
+ which represents the z-level of the bottom of the well (this cannot be
+ measured directly).
+ This level varies due to manufacturing error and warping during PCR, and
+ is a major source of variance relative to the changes in z-levels once
+ the first levels has already been measured.
+ In (3) we drop the scaling factor.
 \end_layout
 
 \begin_layout Standard
-Distributions:
+The distributions required to calculate the above equation are as follows:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray*}
-z_{0} & \sim & \text{from regression using experimental data}\\
-Z_{1}\mid z_{0},v_{1} & \sim & N(E[z_{0}]+\frac{1}{A}v_{1},\ Var[z_{0}]+\sum Var[Z@v_{1}])\\
-V_{1};d_{1} & \sim & N(E[V@d_{1}],\ Var[V@d_{1}])
+Z_{0} & \sim & \text{by regression from z-level experiment data}\\
+\Delta Z\mid v_{pre},v_{post} & \sim & \text{by regression from z-level + absorbtion experiment data}\\
+Z_{1}\mid z_{0},v_{1} & \sim & Z_{0}+(\Delta Z\mid0,v_{1})\\
+V_{1};d_{1} & \sim & \text{from absorbtion experiment data}
 \end{eqnarray*}
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $P(z_{1}\mid V_{1};d_{1})=P(z_{1},V_{1};d_{1})/P(V_{1};d_{1})=$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $Z\mid v\sim N(\mu_{0}+\frac{1}{A}v,\ \sigma_{0}^{2}+Var[Z@v])$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $V;d\sim N(E[V@d],\ Var[V@d])$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $Z_{1};d_{1}\sim N(E[Z@d_{1}],\ Var[Z@d_{1}])$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Subsection*
-Dispense 1:2
+2 Steps
 \end_layout
 
 \begin_layout Standard
-Probability expression:
+We expand on the previous step by dispensing a second liquid into the well.
+ The probability expression is now:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+P(v_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}\mid v_{1:2};d_{1:2})\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\nonumber \\
+ & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1:2}\mid z_{0},v_{1:2})\, dz_{0}\right)\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\nonumber \\
+ & \propto & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\cdot P(z_{2}\mid z_{0},v_{1}+v_{2})\, dz_{0}\right)\label{eq:d2a}\\
+ &  & \quad\cdot\left(P(v_{1};d_{1})\cdot P(v_{2};d_{2})\right)\nonumber \\
+P(z_{1:2}\mid z_{0},v_{1:2}) & = & P(z_{1}\mid z_{0},v_{1})\cdot P(z_{2}\mid z_{0},z_{1},v_{1:2})\label{eq:d2b}\\
+ & = & P(z_{1}\mid z_{0},v_{1})\cdot P(z_{2}\mid z_{0},v_{1:2})\label{eq:d2c}\\
+ & = & P(z_{1}\mid z_{0},v_{1})\cdot P(z_{2}\mid z_{0},v_{1}+v_{2})\label{eq:d2d}\\
+P(v_{1:2};d_{1:2}) & = & P(v_{1};d_{1:2})\cdot P(v_{2}\mid v_{1};d_{1:2})\label{eq:d2e}\\
+ & = & P(v_{1};d_{1})\cdot P(v_{2};d_{2})\label{eq:d2f}
+\end{eqnarray}
+
+\end_inset
+
+In 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2a"
+
+\end_inset
+
+ we perform substitute in results from 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2d"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2f"
+
+\end_inset
+
+.
+ In 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2b"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2e"
+
+\end_inset
+
+ we apply the chain rule of probability.
+ In 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2c"
+
+\end_inset
+
+ we remove 
+\begin_inset Formula $z_{1}$
+\end_inset
+
+ from the list of conditioning variables from the second factor by making
+ the simplifying assumption that 
+\begin_inset Formula $z_{2}$
+\end_inset
+
+ is independent of 
+\begin_inset Formula $z_{1}$
+\end_inset
+
+ given both the level of the bottom of the well 
+\begin_inset Formula $z_{0}$
+\end_inset
+
+ and the volumes dispensed in the well.
+ (Note that this assumption should hold if the z-level is always measured
+ at the same x/y coordinate in the well.
+ This won't, however, always be the case, because of shifts that make occur
+ in the plate position on the plate holder.
+ Maybe we'll take this into consideration in the future.) In 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2d"
+
+\end_inset
+
+ we observe that 
+\begin_inset Formula $v_{1}+v_{2}$
+\end_inset
+
+ is a sufficient statistic for 
+\begin_inset Formula $v_{1:2}$
+\end_inset
+
+, since the z-level should only depend on the total volume at the time of
+ measurement.
+ In 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2f"
+
+\end_inset
+
+ we eliminate 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ from the list of conditioning variables for 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+, because the volume dispensed at one step should be independent of any
+ other step.
+\end_layout
+
+\begin_layout Standard
+The underlying distributions are similar to before:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray*}
-P(v_{1:2}\mid z_{1:2};d_{1:2}) & = & P(z_{1:2}\mid v_{1:2};d_{1:2})\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
- & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1:2}\mid z_{0},v_{1:2})\, dz_{0}\right)\cdot P(v_{1:2};d_{1:2})/P(z_{1:2};d_{1:2})\\
- & \propto & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1}\mid z_{0},v_{1})\cdot P(z_{2}\mid z_{0},v_{1}+v_{2})\, dz_{0}\right)\cdot\left(P(v_{1};d_{1})\cdot P(v_{2};d_{2})\right)
+Z_{0} & \sim & \text{by regression from z-level experiment data}\\
+\Delta Z\mid v_{pre},v_{post} & \sim & \text{by regression from z-level + absorbtion experiment data}\\
+Z_{1}\mid z_{0},v_{1} & \sim & Z_{0}+(\Delta Z\mid0,v_{1})\\
+Z_{2}\mid z_{0},v_{1}+v_{2} & \sim & Z_{0}+(\Delta Z\mid0,v_{1}+v_{2})\\
+V;d & \sim & \text{from absorbtion experiment data}
 \end{eqnarray*}
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-Distributions:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray*}
-z_{0} & \sim & \text{from regression using experimental data}\\
-Z_{1}\mid z_{0},v_{1} & \sim & N(E[z_{0}]+\frac{1}{A}v_{1},\ Var[z_{0}]+\sum Var[Z@v_{1}])\\
-Z_{2}\mid z_{0},v_{1}+v_{2} & \sim & N(E[z_{0}]+\tfrac{1}{A}(v_{1}+v_{2}),\ Var[z_{0}]+\sum Var[Z@(v_{1}+v_{2})])\\
-V_{1};d_{1} & \sim & N(E[V@d_{1}],\ Var[V@d_{1}])
-\end{eqnarray*}
-
-\end_inset
-
-Distributions:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $Z_{2}\mid z_{1},v_{1:2}\sim N(\mu_{0}+\frac{1}{A}\sum v_{i},\ \sigma_{0}^{2}+\sum Var[Z@\sum v_{i}])$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $Z_{2}\mid z_{1};d_{1;2}\sim$
-\end_inset
-
- kalman filter
 \end_layout
 
 \begin_layout Subsection*
-General
+n Steps
 \end_layout
 
 \begin_layout Standard
-Probability expression:
+Finally we generalize 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:d2a"
+
+\end_inset
+
+ to 
+\begin_inset Formula $n$
+\end_inset
+
+ mixing steps, giving us the following probability expression:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray*}
 P(v_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid v_{1:n};d_{1:n})\cdot P(v_{1:n};d_{1:n})/P(z_{1:n};d_{1:n})\\
- & = & \left(\int_{z_{0}}P(z_{0})\cdot P(z_{1:n}\mid z_{0},v_{1:n})\, dz_{0}\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)\\
- & = & \left(\int_{z_{0}}P(z_{0})\cdot\prod_{i}P(z_{i}\mid z_{0},\sum_{j=1}^{i}v_{j})\, dz_{0}\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)/\left(\prod_{i}P(z_{i}\mid z_{1:i-1},d_{1:i})\right)
+ & \propto & \left(\int_{z_{0}}P(z_{0})\cdot\prod_{i}P(z_{i}\mid z_{0},\sum_{j=1}^{i}v_{j})\, dz_{0}\right)\cdot\left(\prod_{i}P(v_{i};d_{i})\right)
 \end{eqnarray*}
 
 \end_inset
@@ -298,16 +382,16 @@ P(v_{1:n}\mid z_{1:n};d_{1:n}) & = & P(z_{1:n}\mid v_{1:n};d_{1:n})\cdot P(v_{1:
 \end_layout
 
 \begin_layout Standard
-Distributions:
+Underlying distributions:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray*}
-z_{0} & \sim & \text{from regression using experimental data}\\
-Z_{i}\mid z_{0},\sum v_{j} & \sim & N(E[z_{0}]+\frac{1}{A}\sum v_{j},\ Var[z_{0}]+\sum Var[Z@\sum v_{j}])\\
-V_{i};d_{i} & \sim & N(E[V@d_{i}],\ Var[V@d_{i}])\\
-Z_{i}\mid z_{1:i-1};d_{1:i} & \sim & \text{either from experiments or by Kalman filter?}
+Z_{0} & \sim & \text{by regression from z-level experiment data}\\
+\Delta Z\mid v_{pre},v_{post} & \sim & \text{by regression from z-level + absorbtion experiment data}\\
+Z\mid z_{0},v & \sim & Z_{0}+(\Delta Z\mid0,v)\\
+V;d & \sim & \text{from absorbtion experiment data}
 \end{eqnarray*}
 
 \end_inset
@@ -315,167 +399,36 @@ Z_{i}\mid z_{1:i-1};d_{1:i} & \sim & \text{either from experiments or by Kalman 
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula $P(zs|vs)=\sum_{z_{0}}P(z_{0},zs\mid vs)=\sum_{z_{0}}P(z_{0}\mid vs)P(zs\mid z_{0},vs)=\sum_{z_{0}}P(z_{0})P(zs\mid z_{0},vs)$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-P(Z|z)=sum P(Z,v|z)=sum P(Z|v)P(v|Z,z)
-\end_layout
-
-\begin_layout Standard
-P(a,b)=P(a)P(b|a)
-\end_layout
-
 \begin_layout Subsection*
-Other stuff
+Questions
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula $P(z_{1:n}\mid V_{1:n})=N(\mu_{0}+\frac{1}{A}\sum v_{i},\ \sigma_{0}^{2}+\sum Var[v_{i}])$
+\begin_layout Itemize
+Would this be more accurate than a Kalman filter? I think so, because the
+ estimates of all the individual 
+\begin_inset Formula $v_{i}$
 \end_inset
 
- **WRONG**, try chain rule 
-\begin_inset Formula $P(z_{1}\mid V_{1})P(z_{2}\mid z_{1},V_{1:2})...$
-\end_inset
-
- or using 
-\begin_inset Formula $v_{1:n}$
-\end_inset
-
- instead of 
-\begin_inset Formula $V$
+ are updated after each measurement, reducing the impact of 
+\begin_inset Formula $Var[Z_{0}]$
 \end_inset
 
 .
 \end_layout
 
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $P(V_{i};d_{i})$
+\begin_layout Itemize
+From a practical standpoint, I'm not sure how to compute 
+\begin_inset Formula $P(V_{1:n}\mid z_{1:n};d_{1:n})$
 \end_inset
 
-: we get these from the absorbtion experiments
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $P(z_{1};d_{1})$
-\end_inset
-
-: we get these from our z-level experiments
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $P(z_{1:n},V_{1:n};d_{1:n})$
-\end_inset
-
-: 
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $P(z_{1:n}|V_{1:n};d_{1:n})$
-\end_inset
-
-: 
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
-\begin_inset Formula $P(z_{1:n};d_{1:n})$
-\end_inset
-
-: we get these from our z-level experiments
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $P(Z_{1};d_{1})$
-\end_inset
-
-: obtained by experiments run on the robot, where we tell the robot to dispense
- various volumes 
-\begin_inset Formula $d$
-\end_inset
-
- and then measure 
-\begin_inset Formula $z$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $P(Z_{2}-Z_{1}\mid Z_{1};d_{1},d_{2})$
-\end_inset
-
-: obtained by experimentation by performing two dispenses of various volumes.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $P(V_{1};d_{1})$
-\end_inset
-
-: obtained by running regression on absorbtion experiment data.
+ from the above equation.
+ In one of Nico Beerenwinkle's courses, we looked at various methods for
+ computing such things, but I'll need to refresh my memory and/or get some
+ input from someone before I could start implementing it.
+ I guess since we're using Gaussians, it's should be a fairly straight-forward
+ matter of calculating convolutions and multiplications over multi-variate
+ Guassians.
+ Any suggestions?
 \end_layout
 
 \end_body
