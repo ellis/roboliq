@@ -209,6 +209,31 @@ V_{1};d_{1} & \sim & \text{from absorbtion experiment data}
 \end_layout
 
 \begin_layout Standard
+=
+\begin_inset Formula 
+\begin{eqnarray*}
+P(v,z;d) & = & P(a,z;d)\\
+ & = & P(z;d)\cdot P(a\mid z;d)\\
+ & =\\
+ & = & \sum_{a}P(a;d)\cdot P(v\mid a)\cdot P(z\mid v)\\
+ & = & \sum_{a}P(z;d)\cdot P(a;d)\cdot P(v\mid a)\\
+\\
+P(z;d) & = & \text{experiment}\\
+P(a;d) & = & \text{experiment}\\
+v & = & f(a)\\
+a & = & f^{-1}(v)\\
+P(v\mid a) & \propto & P(a\mid v)\\
+P(v\mid a;d) & = & P(v\mid a)\\
+P(a\mid z;d) & \propto & P(a,z;d)\\
+ & = & P(
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 We expand on the previous step by dispensing a second liquid into the well.
  The probability expression is now:
 \end_layout
