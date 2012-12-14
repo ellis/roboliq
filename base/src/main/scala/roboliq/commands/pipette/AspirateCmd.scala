@@ -48,6 +48,7 @@ class AspirateCmdHandler extends CmdHandlerA[AspirateCmdBean] {
 class SpirateCmdItemBean {
 	@BeanProperty var tip: String = null
 	@BeanProperty var well: String = null
+	/** Volume in liters. */
 	@BeanProperty var volume: java.math.BigDecimal = null
 	@BeanProperty var policy: String = null
 	@BeanProperty var mixSpec: MixSpecBean = null

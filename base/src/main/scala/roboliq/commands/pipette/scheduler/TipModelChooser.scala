@@ -110,7 +110,7 @@ object TipModelChooser {
 				// Get the tipModel rankings for the current liquid and tips in tipModel_l
 				val item_l = itemToModels_l.map(_._1)
 				val info_l = item_l.flatMap(common.itemToModelInfos_m)
-				val rank_l = makeRankList(info_l.toList).filter(x => tipModel_l.contains(x._1))
+				val rank_l = makeRankList(info_l.toList).filter(x => tipModel_l.contains(x.tipModel))
 				val rank = rank_l.head
 				
 				(liquid, rank.tipModel)
