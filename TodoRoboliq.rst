@@ -1,3 +1,4 @@
+
 * Why does Transfer_Rack use RoMA1 when moving from regrip to reader?
 * Setup test framework for `base`
 * Get rid of Map[LM, Item] and family, only using Map[Item, LM]
@@ -17,13 +18,36 @@ http://netbeanside61.blogspot.com/2011/06/downloading-openjdk7-binary-for-mac-os
 That can be further diluted 1:10000
 
 will use a buffer as solvent, diluted perhaps 1:20
-Excite at 460, Read out at ~540, with the monochormator
+Excite at 460, Read out at ~540, with the monochromator
 
 Use upper reader
 Reader:
 Black plate: Nunclon 96 Flat White
 
 
+======================
+Statistics Experiments
+======================
+
+:Started: 2012-12-14
+
+*Variables*:
+
+:d: requested dispense volume
+:v: actual volume
+:a: absorbtion measurement
+:z: z-level measurement
+
+* $d$ to $a$
+* $d$ to $z$
+* absorption calibration by measuring shape of liquid surface at various volumes
+* absorption calibration by dispensing 200ul with a calibrated pipette into each well
+* low volume z-detection to see what the minimum volume for detection is
+* multiple z-level testing to see whether the z-level keeps decreasing
+
+From the above experiments we want to obtain the following.
+
+* calibration curve for $z$ to $v$
 
 =================
 Programming Tasks
