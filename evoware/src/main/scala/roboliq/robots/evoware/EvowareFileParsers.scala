@@ -282,6 +282,8 @@ object EvowareTableParser {
 			mapSiteToLabel,
 			mapSiteToLabwareModel
 		)
+		println("tablefile:")
+		tableFile.print()
 		(tableFile, lsLine6)
 	}
 	

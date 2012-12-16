@@ -21,7 +21,8 @@ plateModels:
   "Block 20Pos 1.5 ml Eppendorf": { rows: 4, cols: 5, volume: 1.5e-3 }
   "D-BSSE 96 Well PCR Plate": { rows: 8, cols: 12, volume: 200e-6 }
   "D-BSSE 96 Well Costar Plate": { rows: 8, cols: 12, volume: 350e-6 }
-  "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 6000e-6 }
+  "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 1000e-6 }
+  "Trough 100ml": { rows: 8, cols: 1, volume: 100e-3 }
 
 tubeModels:
   "Tube 15ml": { volume: 15e-3 }
@@ -29,6 +30,9 @@ tubeModels:
   "Tube 1.5ml": { volume: 1.5e-3 }
 
 locations:
+  trough1: { plateModels: ["Trough 100ml"] }
+  trough2: { plateModels: ["Trough 100ml"] }
+  trough3: { plateModels: ["Trough 100ml"] }
   cover: { plateModels: ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] }
   shaker: { plateModels: ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] }
   cooled1: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }

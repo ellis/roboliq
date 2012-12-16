@@ -14,6 +14,12 @@ abstract class EvowareTable(configFile: EvowareConfigFile, sFilename: String) {
 	def mapLabelToSite = m_mapLabelToSite.toMap
 	
 	def labelSite(sLabel: String, sCarrierName: String, iSite: Int): CarrierSite = {
+		// FIXME: for debug only
+		if (!configFile.mapNameToCarrier.contains(sCarrierName)) {
+			println("labelSite missing")
+			configFile.mapNameToCarrier.keys.foreach(println)
+		}
+		// ENDFIX
 		val carrier = configFile.mapNameToCarrier(sCarrierName)
 		val site = CarrierSite(carrier, iSite)
 		m_mapLabelToSite(sLabel) = site

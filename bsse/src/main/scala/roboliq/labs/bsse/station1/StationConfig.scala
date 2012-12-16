@@ -43,6 +43,7 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 	}
 	*/
 	object Locations {
+		val List(trough1, trough2, trough3) = labelSites(List("trough1", "trough2", "trough3"), "LI - Trough 3Pos 100ml")
 		val List(reagents15, reagents50) = labelSites(List("reagents15", "reagents50"), "Cooled 8Pos*15ml 8Pos*50ml")
 		val ethanol = labelSite("ethanol", "Trough 1000ml", 0)
 		val holder = labelSite("holder", "Downholder", 0)

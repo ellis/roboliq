@@ -3,9 +3,9 @@ substances:
 
 plates:
   Pwater:
-    model: D-BSSE 96 Well PCR Plate
+    model: Trough 100ml
   Pdye:
-    model: D-BSSE 96 Well PCR Plate
+    model: Trough 100ml
   P1:
     model: D-BSSE 96 Well PCR Plate
 

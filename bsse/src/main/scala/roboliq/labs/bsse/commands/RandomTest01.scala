@@ -76,7 +76,7 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 			
 			// Return an item for aspiration and one for dispense
 			def makeItem(tuple: ((Tip, (Int, Int)), Int)): (SpirateCmdItemBean, SpirateCmdItemBean) = {
-				println("tuple: "+tuple)
+				//println("tuple: "+tuple)
 				val ((tip, (vol_n, well_i)), step_i) = tuple
 				val asp = new SpirateCmdItemBean
 				val volume = LiquidVolume.ul(vol_n).l.bigDecimal
