@@ -7,11 +7,10 @@ import roboliq.commands.pipette._
 
 
 class RandomTest01CmdBean extends CmdBean {
+	@BeanProperty var tips: java.util.List[String] = null
 	@BeanProperty var dye: String = null
 	@BeanProperty var water: String = null
 	@BeanProperty var plate: String = null
-	//@BeanProperty var locationLid: String = null
-	//@BeanProperty var lidHandling: LidHandling.Value
 }
 
 class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
@@ -27,7 +26,7 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 			List(
 				NeedSrc(cmd.dye),
 				NeedSrc(cmd.water),
-				NeedPlate(cmd.plate)
+				NeedDest(cmd.plate)
 			)
 		)
 	}
@@ -39,47 +38,71 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 	): Expand2Result = {
 		val bean = cmd
 		val states = ctx.states
-		for {
+		
+		val cmd_l_res = for {
+			tip_l <- if (bean.tips != null) Result.mapOver(bean.tips.toList)(states.findTip) else ctx.ob.findAllTips
 			plate <- states.findPlate(bean.plate)
-			dye <- states.findSubstance(bean.dye)
-			water <- states.findSubstance(bean.water)
-			dyeSrc_ls <- ctx.ob.findAllIdsContainingSubstance(dye)
-			waterSrc_ls <- ctx.ob.findAllIdsContainingSubstance(water)
+			dyeSrc_l <- ctx.ob.findWell2List(bean.dye)
+			//dyeSrc_ls <- ctx.ob.findAllIdsContainingSubstance(dye)
+			//dyeSrc_l <- Result.mapOver(dyeSrc_ls)(wellId => ctx.ob.findWell2(wellId))
+			waterSrc_l <- ctx.ob.findWell2List(bean.water)
+			//water <- states.findSubstance(bean.water)
+			//waterSrc_ls <- ctx.ob.findAllIdsContainingSubstance(water)
+			//waterSrc_l <- Result.mapOver(waterSrc_ls)(wellId => ctx.ob.findWell2(wellId))
 		} yield {
 			val r = new scala.util.Random(42)
-			val vol_l = 50 to 200 by 10
+			val vol_l = (50 to 200 by 10).toList
 			val d1_l = r.shuffle(List.fill(6)(vol_l).flatten)
-			val tip_l = (0 to 3).toList
 			val well_l = (0 to 95).toList
 			val well1_l = r.shuffle(well_l)
 			
-			def doit(vw_l: List[(Int, Int)]) {
-				val l = r.shuffle(tip_l).zip(vw_l)
-				val (asp_l, dis_l) = l.map(makeItems).unzip
+			def doit(vw_l: List[(Int, Int)]): List[CmdBean] = {
+				if (vw_l.isEmpty) return Nil
+				
+				val l = r.shuffle(tip_l).zip(vw_l).zipWithIndex
+				val (asp_l, dis_l) = l.map(makeItem).unzip
+				
+				val asp = new AspirateCmdBean
+				asp.items = asp_l
+				
+				val disp_l: List[CmdBean] = dis_l.map(item => {
+					val bean = new DispenseCmdBean
+					bean.items = item :: Nil
+					bean
+				})
+				
+				(asp :: disp_l) ++ doit(vw_l.drop(tip_l.size))
 			}
+			
 			// Return an item for aspiration and one for dispense
-			def makeItem(tuple: (Int, (Int, Int))): (SpirateCmdItemBean, SpirateCmdItemBean) = {
-				val (tip_i, (vol_n, well_i)) = tuple
+			def makeItem(tuple: ((Tip, (Int, Int)), Int)): (SpirateCmdItemBean, SpirateCmdItemBean) = {
+				println("tuple: "+tuple)
+				val ((tip, (vol_n, well_i)), step_i) = tuple
 				val asp = new SpirateCmdItemBean
-				asp.tip = s"Tip${tip_i + 1}"
-				asp.volume = LiquidVolume.ul(vol_n).l.bigDecimal
-				asp.well = PlateModel.wellId(plate.model, well_i)
+				val volume = LiquidVolume.ul(vol_n).l.bigDecimal
+				val dye_i = step_i % dyeSrc_l.size
+				asp.tip = tip.id
+				asp.volume = volume
+				asp.well = dyeSrc_l(dye_i).id
 				asp.policy = "Water_C_1000"
 				val dis = new SpirateCmdItemBean
-				dis.tip = s"Tip${tip_i + 1}"
-				dis.volume = LiquidVolume.ul(vol_n).l.bigDecimal
-				dis.well = PlateModel.wellId(plate.model, well_i)
+				dis.tip = tip.id
+				dis.volume = volume
+				dis.well = Plate.wellId(plate, well_i)
 				dis.policy = "Water_C_1000"
+				//println("makeItem: "+(asp, dis))
+				(asp, dis)
 			}
+			
+			doit(d1_l zip well1_l)
 		}
-		Expand2Cmds(...)
-		RandomTest01Token.fromBean(cmd, ctx.states) match {
-			case Error(ls) => ls.foreach(messages.addError); Expand2Errors()
-			case Success(token) =>
-				val event = PlateLocationEventBean(token.plate, token.plateDest.id)
-				val doc = s"Move plate `${token.plate.id}` to location `${token.plateDest.id}`"
-				
-				Expand2Tokens(List(token), List(event), doc)
+		
+		cmd_l_res match {
+			case Success(cmd_l) => 
+				Expand2Cmds(cmd_l, Nil, null)
+			case Error(ls) =>
+				println("Errors: "+ls)
+				Expand2Errors()
 		}
 	}
 }

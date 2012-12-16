@@ -1,0 +1,21 @@
+substances:
+  dye: !liquid { physical: Water, cleanPolicy: T, allowMultipipette: true }
+
+plates:
+  Pwater:
+    model: D-BSSE 96 Well PCR Plate
+  Pdye:
+    model: D-BSSE 96 Well PCR Plate
+  P1:
+    model: D-BSSE 96 Well PCR Plate
+
+events:
+- !add { obj: Pwater(A01), substance: water, volume: 100e-6 }
+- !add { obj: Pdye(A01), substance: dye, volume: 100e-6 }
+
+commands:
+- !!roboliq.labs.bsse.commands.RandomTest01CmdBean
+  tips: [TIP1, TIP2, TIP3, TIP4]
+  dye: Pdye(A01)
+  water: Pwater(A01)
+  plate: P1

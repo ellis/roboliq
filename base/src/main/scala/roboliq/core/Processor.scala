@@ -69,10 +69,11 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 		val mPlate = new LinkedHashMap[Plate, CmdNodeBean]
 		var mTube = new LinkedHashMap[Tube, CmdNodeBean]
 		val mSubstance = new LinkedHashMap[Substance, CmdNodeBean]
-		def needPlate(id: String, node: CmdNodeBean): Result[Unit] = {
+		def needPlate(id: String, node: CmdNodeBean): Result[Plate] = {
 			for {plate <- ob.findPlate(id)} yield {
 				if (!mPlate.contains(plate))
 					mPlate(plate) = node
+				plate
 			}
 		}
 		def needWell(id: String, node: CmdNodeBean): Result[Unit] = {
@@ -93,17 +94,23 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 			if (!seen.contains(id)) {
 				seen += id
 				// If it's a plate
-				needPlate(id, node) orElse
-				// If it's a substance
-				(for {substance <- ob.findSubstance(id)} yield {
-					mSubstance(substance) = node
-				}) orElse
-				// Else if it's a well
-				needTube(id, node) orElse
-				// Else if it's a tube
-				needWell(id, node) match {
-					case Error(ls) => ls.foreach(node.addError); Error(ls)
-					case ret => ret
+				needPlate(id, node) match {
+					case Success(plate) =>
+						// Load all the wells on the plate
+						(0 until plate.nWells).map(Plate.wellId(plate, _)).foreach(needWell(_, node))
+						Success(())
+					case _ =>
+						// If it's a substance
+						(for {substance <- ob.findSubstance(id)} yield {
+							mSubstance(substance) = node
+						}) orElse
+						// Else if it's a well
+						needTube(id, node) orElse
+						// Else if it's a tube
+						needWell(id, node) match {
+							case Error(ls) => ls.foreach(node.addError); Error(ls)
+							case ret => ret
+						}
 				}
 			}
 			else {

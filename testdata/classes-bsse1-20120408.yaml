@@ -10,3 +10,4 @@ commandHandlers:
 - !!roboliq.commands.pipette.PipetteCmdHandler { device: *id001 }
 - !!roboliq.commands.pcr.PcrCmdHandler {}
 - !!roboliq.commands.arm.MovePlateCmdHandler {}
+- !!roboliq.labs.bsse.commands.RandomTest01CmdHandler {}

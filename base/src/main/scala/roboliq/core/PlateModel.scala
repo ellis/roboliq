@@ -56,9 +56,4 @@ object PlateModel {
 			(iRow + 'A').asInstanceOf[Char].toString + ("%02d".format(iCol + 1))
 		}
 	}
-
-	/** Get a row/column representation of the index of the a well. */
-	def wellId(plate: PlateModel, iWell: Int): String = {
-		s"${plate.id}(${wellIndexName(plate.nRows, plate.nCols, iWell)})"
-	}
 }

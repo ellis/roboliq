@@ -55,4 +55,9 @@ object Plate {
 			new Plate(id, model, locationPermanent_?)
 		}
 	}
+
+	/** Get a row/column representation of the index of the a well. */
+	def wellId(plate: Plate, iWell: Int): String = {
+		s"${plate.id}(${PlateModel.wellIndexName(plate.nRows, plate.nCols, iWell)})"
+	}
 }
