@@ -65,10 +65,13 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 				val asp = new AspirateCmdBean
 				asp.items = asp_l
 				
-				val disp_l: List[CmdBean] = dis_l.map(item => {
-					val bean = new DispenseCmdBean
-					bean.items = item :: Nil
-					bean
+				val disp_l: List[CmdBean] = (dis_l zip lvl_l).flatMap(pair => {
+					val (ditem, litem) = pair
+					val dbean = new DispenseCmdBean
+					dbean.items = ditem :: Nil
+					val lbean = new DetectLevelCmdBean
+					lbean.items = litem :: Nil
+					List(dbean, lbean)
 				})
 				
 				(asp :: disp_l) ++ doit(vw_l.drop(tip_l.size))

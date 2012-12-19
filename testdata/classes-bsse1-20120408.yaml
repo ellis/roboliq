@@ -4,6 +4,7 @@ devices:
 commandHandlers:
 - !!roboliq.commands.pipette.AspirateCmdHandler {}
 - !!roboliq.commands.pipette.DispenseCmdHandler {}
+- !!roboliq.commands.pipette.DetectLevelCmdHandler {}
 - !!roboliq.commands.pipette.MixCmdHandler {}
 - !!roboliq.commands.pipette.TipsDropCmdHandler {}
 - !!roboliq.labs.bsse.handlers.TipsWashCmdHandler_BSSE {}
