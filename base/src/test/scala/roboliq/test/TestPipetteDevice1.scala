@@ -8,14 +8,14 @@ import roboliq.commands.pipette._
 class TestPipetteDevice1 extends PipetteDevice {
 	val tipModel1000 = TipModel(
 		id = "TIP1000",
-		nVolume = LiquidVolume.ul(1000),
+		volume = LiquidVolume.ul(1000),
 		nVolumeAspirateMin = LiquidVolume.ul(5), 
 		nVolumeWashExtra = LiquidVolume.empty,
 		nVolumeDeconExtra = LiquidVolume.empty
 	)
 	val tipModel50 = TipModel(
 		id = "TIP50",
-		nVolume = LiquidVolume.ul(50),
+		volume = LiquidVolume.ul(50),
 		nVolumeAspirateMin = LiquidVolume.ul(1), 
 		nVolumeWashExtra = LiquidVolume.empty,
 		nVolumeDeconExtra = LiquidVolume.empty
@@ -53,10 +53,10 @@ class TestPipetteDevice1 extends PipetteDevice {
 	
 	def areTipsDisposable: Boolean = false
 	
-	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume): Seq[TipModel] = {
-		if (nVolume < tipModel50.nVolumeAspirateMin) Seq()
-		else if (nVolume < tipModel1000.nVolumeAspirateMin) Seq(tipModel1000)
-		else if (nVolume <= tipModel50.nVolume) Seq(tipModel1000, tipModel50)
+	def getDispenseAllowableTipModels(liquid: Liquid, volume: LiquidVolume): Seq[TipModel] = {
+		if (volume < tipModel50.nVolumeAspirateMin) Seq()
+		else if (volume < tipModel1000.nVolumeAspirateMin) Seq(tipModel1000)
+		else if (volume <= tipModel50.volume) Seq(tipModel1000, tipModel50)
 		else Seq(tipModel1000)
 	}
 	
@@ -65,7 +65,7 @@ class TestPipetteDevice1 extends PipetteDevice {
 	}
 	
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume = {
-		tip.model_?.map(_.nVolume).getOrElse(LiquidVolume.empty)
+		tip.model_?.map(_.volume).getOrElse(LiquidVolume.empty)
 	}
 	
 	private lazy val tips1000 = getTips.filter(_.index < 4)
@@ -114,7 +114,7 @@ class TestPipetteDevice1 extends PipetteDevice {
 		)
 	}
 	
-	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
+	def getAspiratePolicy(tipState: TipState, volume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
 		import PipettePosition._
 
 		val liquid = wellState.liquid
@@ -123,7 +123,7 @@ class TestPipetteDevice1 extends PipetteDevice {
 		if (liquid eq Liquid.empty)
 			return None
 
-		val nVolumeSrc = wellState.nVolume
+		val nVolumeSrc = wellState.volume
 		val bLarge = (tipState.conf.index < 4)
 		val bForceDry = (wellState.bCheckVolume && nVolumeSrc < LiquidVolume.ul(20))
 		
@@ -163,18 +163,18 @@ class TestPipetteDevice1 extends PipetteDevice {
 	val nFreeDispense2VolumeThreshold = LiquidVolume.ul(5)
 	val nFreeDispense2DestVolumeThreshold = LiquidVolume.ul(20)
 	
-	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
+	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, volume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
 		import PipettePosition._
 
 		val sFamily = liquid.sFamily
 		val bLarge = (tipModel eq tipModel1000)
-		val nVolumeDest = wellState.nVolume
+		val nVolumeDest = wellState.volume
 		
 		val posDefault = {
 			if (bLarge) {
-				if (nVolume >= nFreeDispense1VolumeThreshold)
+				if (volume >= nFreeDispense1VolumeThreshold)
 					Free
-				else if (nVolumeDest > nFreeDispense2DestVolumeThreshold && nVolume >= nFreeDispense2VolumeThreshold)
+				else if (nVolumeDest > nFreeDispense2DestVolumeThreshold && volume >= nFreeDispense2VolumeThreshold)
 					Free
 				else if (nVolumeDest.isEmpty)
 					DryContact
@@ -188,7 +188,7 @@ class TestPipetteDevice1 extends PipetteDevice {
 					WetContact
 			}
 			// If our volume is high enough that we don't need to worry about accuracy
-			if (bLarge && (nVolume >= nFreeDispense1VolumeThreshold || (nVolumeDest > nFreeDispense2DestVolumeThreshold && nVolume >= nFreeDispense2VolumeThreshold)))
+			if (bLarge && (volume >= nFreeDispense1VolumeThreshold || (nVolumeDest > nFreeDispense2DestVolumeThreshold && volume >= nFreeDispense2VolumeThreshold)))
 				Free
 			else if (nVolumeDest.isEmpty)
 				DryContact
@@ -229,9 +229,9 @@ class TestPipetteDevice1 extends PipetteDevice {
 	}
 	
 	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] = {
-		// FIXME: Passing nVolume=0 is kinda unpredictable -- ellis
+		// FIXME: Passing volume=0 is kinda unpredictable -- ellis
 		val policyDefault_? = getAspiratePolicy(tipState, LiquidVolume.empty, wellState)
-		val mixSpecDefault = MixSpec(Some(wellState.nVolume * 0.7), Some(4), policyDefault_?)
+		val mixSpecDefault = MixSpec(Some(wellState.volume * 0.7), Some(4), policyDefault_?)
 		val mixSpec = mixSpec_? match {
 			case None => mixSpecDefault
 			case Some(a) => a + mixSpecDefault

@@ -59,7 +59,7 @@ class TestPipetteDevice extends PipetteDevice {
 		Some(new PipettePolicy("POLICY", PipettePosition.Free))
 
 	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] =
-		Success(new MixSpec(Some(wellState.nVolume * 0.7), Some(4), None))
+		Success(new MixSpec(Some(wellState.volume * 0.7), Some(4), None))
 	
 	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean =
 		true

@@ -48,7 +48,7 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 			tipState0 <- builder.findTipState(tip.id)
 			src0_l <- builder.mapIdToWell2List(lm.liquid.id)
 			src1 = src0_l.filter(src => 
-				builder.findWellState(src.id).cata(st => st.nVolume > volume, false)
+				builder.findWellState(src.id).cata(st => st.volume > volume, false)
 			)
 			_ <- Result.assert(!src1.isEmpty, "source well(s) for `"+lm.liquid.id+"` do not contain enough liquid.")
 			src = src1.head

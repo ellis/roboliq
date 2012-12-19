@@ -23,7 +23,7 @@ abstract class WellState(
 	/** Liquid in the well. */
 	val liquid: Liquid = content.liquid
 	/** Volume of liquid in well. */
-	val nVolume: LiquidVolume = content.volume
+	val volume: LiquidVolume = content.volume
 	
 	/** Prepend `event` to `history`, and set `content` and `bCheckVolume`. */
 	def update(
@@ -33,7 +33,7 @@ abstract class WellState(
 	): WellState
 	
 	override def toString: String = {
-		List("liquid" -> liquid, "volume" -> nVolume).map(pair => pair._1+": "+pair._2).mkString("WellState(", ", ", ")")
+		List("liquid" -> liquid, "volume" -> volume).map(pair => pair._1+": "+pair._2).mkString("WellState(", ", ", ")")
 	}
 }
 
@@ -87,7 +87,7 @@ class TubeState(
 	}
 	
 	override def toString: String = {
-		List(obj, idPlate, row, col, liquid, nVolume).mkString("TubeState(", ", ", ")")
+		List(obj, idPlate, row, col, liquid, volume).mkString("TubeState(", ", ", ")")
 	}
 }
 
@@ -190,7 +190,7 @@ class WellRemoveEventBean extends WellEventBean {
 	@BeanProperty var volume: java.math.BigDecimal = null
 	
 	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
-		val volumeNew = state0.nVolume - LiquidVolume.l(volume);
+		val volumeNew = state0.volume - LiquidVolume.l(volume);
 		for {
 			_ <- Result.assert(volumeNew > LiquidVolume.empty || !state0.bCheckVolume, "tried to remove too much liquid from "+obj)
 		} yield {
@@ -225,7 +225,7 @@ class WellStateWriter(id: String, builder: StateBuilder) {
 	
 	def liquid = state.liquid
 	
-	def nVolume = state.nVolume
+	def nVolume = state.volume
 
 	def add(content2: VesselContent, nVolume2: LiquidVolume) {
 		val st = state
@@ -234,7 +234,7 @@ class WellStateWriter(id: String, builder: StateBuilder) {
 	
 	def remove(nVolume2: LiquidVolume) {
 		val st = state
-		val nVolumeNew = st.nVolume - nVolume2;
+		val nVolumeNew = st.volume - nVolume2;
 		// TODO: more sophisticated checks should be made; let both minimum and maximum levels be set and issue errors rather than crashing
 		if (st.bCheckVolume) {
 			if (nVolumeNew < LiquidVolume.empty) {

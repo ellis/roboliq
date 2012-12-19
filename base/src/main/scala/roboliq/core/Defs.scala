@@ -57,7 +57,14 @@ object PipettePosition extends Enumeration {
 //case class PipetteSpec(sName: String, aspirate: PipettePosition.Value, dispense: PipettePosition.Value, mix: PipettePosition.Value)
 
 /** Basically a tuple of a pipette policy name and the position of the tips while pipetting. */
-case class PipettePolicy(id: String, pos: PipettePosition.Value)
+case class PipettePolicy(id: String, pos: PipettePosition.Value) {
+	override def equals(that: Any): Boolean = {
+		that match {
+			case b: PipettePolicy => id == b.id
+			case _ => false
+		}
+	}
+}
 
 object PipettePolicy {
 	def fromName(name: String): PipettePolicy = {

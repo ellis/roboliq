@@ -113,7 +113,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	
 	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume): Seq[TipModel] = {
 		val b1000 = (nVolume >= tipModel1000.nVolumeAspirateMin)
-		val b50 = (nVolume >= tipModel50.nVolumeAspirateMin && nVolume <= tipModel50.nVolume && !liquid.contaminants.contains(Contaminant.Cell))
+		val b50 = (nVolume >= tipModel50.nVolumeAspirateMin && nVolume <= tipModel50.volume && !liquid.contaminants.contains(Contaminant.Cell))
 		List(
 			if (b1000) Some(tipModel1000) else None,
 			if (b50) Some(tipModel50) else None
@@ -129,7 +129,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 		if (liquid eq Liquid.empty)
 			return None
 
-		val nVolumeSrc = wellState.nVolume
+		val nVolumeSrc = wellState.volume
 		val bLarge = (tipState.conf.index < 4)
 		val bForceDry = (wellState.bCheckVolume && nVolumeSrc < LiquidVolume.ul(20))
 		
@@ -174,7 +174,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 
 		val sFamily = liquid.sFamily
 		val bLarge = (tipModel eq tipModel1000)
-		val nVolumeDest = wellState.nVolume
+		val nVolumeDest = wellState.volume
 		
 		val posDefault = {
 			if (bLarge) {
@@ -237,7 +237,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] = {
 		// FIXME: Passing nVolume=0 is kinda unpredictable -- ellis
 		val policyDefault_? = getAspiratePolicy(tipState, LiquidVolume.empty, wellState)
-		val mixSpecDefault = MixSpec(Some(wellState.nVolume * 0.7), Some(4), policyDefault_?)
+		val mixSpecDefault = MixSpec(Some(wellState.volume * 0.7), Some(4), policyDefault_?)
 		val mixSpec = mixSpec_? match {
 			case None => mixSpecDefault
 			case Some(a) => a + mixSpecDefault

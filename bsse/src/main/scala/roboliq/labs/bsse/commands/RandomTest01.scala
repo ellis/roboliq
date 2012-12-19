@@ -60,7 +60,7 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 				if (vw_l.isEmpty) return Nil
 				
 				val l = r.shuffle(tip_l).zip(vw_l).zipWithIndex
-				val (asp_l, dis_l) = l.map(makeItem).unzip
+				val (asp_l, dis_l, lvl_l) = l.map(makeItem).unzip3
 				
 				val asp = new AspirateCmdBean
 				asp.items = asp_l
@@ -75,23 +75,28 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 			}
 			
 			// Return an item for aspiration and one for dispense
-			def makeItem(tuple: ((Tip, (Int, Int)), Int)): (SpirateCmdItemBean, SpirateCmdItemBean) = {
+			def makeItem(tuple: ((Tip, (Int, Int)), Int)): (SpirateCmdItemBean, SpirateCmdItemBean, DetectLevelCmdItemBean) = {
 				//println("tuple: "+tuple)
 				val ((tip, (vol_n, well_i)), step_i) = tuple
 				val asp = new SpirateCmdItemBean
 				val volume = LiquidVolume.ul(vol_n).l.bigDecimal
 				val dye_i = step_i % dyeSrc_l.size
+				val policy_id = "Roboliq_Water_Wet_121212A"
 				asp.tip = tip.id
 				asp.volume = volume
 				asp.well = dyeSrc_l(dye_i).id
-				asp.policy = "Water_C_1000"
+				asp.policy = policy_id
 				val dis = new SpirateCmdItemBean
 				dis.tip = tip.id
 				dis.volume = volume
 				dis.well = Plate.wellId(plate, well_i)
-				dis.policy = "Water_C_1000"
+				dis.policy = policy_id
 				//println("makeItem: "+(asp, dis))
-				(asp, dis)
+				val lvl = new DetectLevelCmdItemBean
+				lvl.tip = tip.id
+				lvl.well = Plate.wellId(plate, well_i)
+				lvl.policy = policy_id
+				(asp, dis, lvl)
 			}
 			
 			doit(d1_l zip well1_l)

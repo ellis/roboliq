@@ -187,10 +187,10 @@ object PipetteHelper {
 				st1 <- states.findWellState(well1.id)
 				st2 <- states.findWellState(well2.id)
 			} yield {
-				if (st1.nVolume == st2.nVolume)
+				if (st1.volume == st2.volume)
 					well1.compare(well2) <= 0
 				else
-					st1.nVolume > st2.nVolume
+					st1.volume > st2.volume
 			}) getOrElse (well1.compare(well2) <= 0)
 		}
 		val order = wells.toSeq.sortWith(compare)
