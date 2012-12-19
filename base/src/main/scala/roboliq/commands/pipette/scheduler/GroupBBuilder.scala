@@ -95,7 +95,7 @@ class GroupBBuilder(
 		val bean = new SpirateCmdItemBean
 		bean.tip = twvp.tip.id
 		bean.well = twvp.well.id
-		bean.volume = twvp.nVolume.l.bigDecimal
+		bean.volume = twvp.volume.l.bigDecimal
 		bean.policy = twvp.policy.id
 		bean
 	}

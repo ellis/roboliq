@@ -100,6 +100,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 			case c: AspirateToken => aspirate(builder, c, states0)
 			//case c: L1C_Comment => comment(c)
 			case c: DispenseToken => dispense(builder, c)
+			case c: DetectLevelToken => detectLevel(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			case c: EvowareSubroutineToken => subroutine(builder, c)
 			case c: MixToken => mix(builder, c.items)
@@ -169,27 +170,28 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 					builder.state.mapLiquidToWellToAspirated(sLiquid) = mapWellToAspirated
 			}
 		}
-		spirate(builder, cmd.items, "Aspirate")
+		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Aspirate", sLiquidClass))
 	}
 	
 	private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): Result[Seq[L0C_Command]] = {
-		spirate(builder, cmd.items, "Dispense")
+		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Dispense", sLiquidClass))
 	}
-	 
-	private def spirate(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String): Result[Seq[L0C_Command]] = {
+
+	/** Return name of liquid class */
+	private def checkTipWellPolicyItems(builder: EvowareScriptBuilder, items: Seq[HasTip with HasWell with HasPolicy]): Result[String] = {
 		items match {
 			case Seq() => Error(Seq("INTERNAL: items empty"))
 			case Seq(twvp0, rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass = twvp0.policy
+				val policy = twvp0.policy
 				// Assert that there is only one liquid class
 				// FIXME: for debug only:
-				if (!rest.forall(twvp => twvp.policy.equals(sLiquidClass))) {
-					println("sLiquidClass: " + sLiquidClass)
+				if (!rest.forall(twvp => twvp.policy.equals(policy))) {
+					println("sLiquidClass: " + policy)
 					rest.foreach(twvp => println(twvp.tip, twvp.policy))
 				}
 				// ENDFIX
-				assert(rest.forall(twvp => twvp.policy.equals(sLiquidClass)))
+				assert(rest.forall(twvp => twvp.policy.equals(policy)))
 				
 				val lWellInfo = getWellInfo(items.map(_.well))
 				val idPlate = lWellInfo.head.idPlate
@@ -202,12 +204,13 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				if (!lWellInfo.forall(_.idPlate == idPlate))
 					return Error(Seq("INTERNAL: all wells must be on the same plate `"+idPlate+"`")++lWellInfo.map(w => w.id+" on "+w.idPlate))
 				
+				/*
 				// All tip/well pairs are equidistant or all tips are going to the same well
 				// Assert that tips are spaced at equal distances to each other as the wells are to each other
-				def equidistant2(a: Tuple2[SpirateTokenItem, WellInfo], b: Tuple2[SpirateTokenItem, WellInfo]): Boolean =
+				def equidistant2(a: Tuple2[HasTip, WellInfo], b: Tuple2[HasTip, WellInfo]): Boolean =
 					(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
 				// Test all adjacent items for equidistance
-				def equidistant(tws: Seq[Tuple2[SpirateTokenItem, WellInfo]]): Boolean = tws match {
+				def equidistant(tws: Seq[Tuple2[HasTip, WellInfo]]): Boolean = tws match {
 					case Seq() => true
 					case Seq(_) => true
 					case Seq(a, b, rest @ _*) =>
@@ -216,18 +219,19 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 							case true => equidistant(Seq(b) ++ rest)
 						}
 				}
+				*/
 				val lItemInfo = items zip lWellInfo
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				val bEquidistant = equidistant(lItemInfo)
+				val bEquidistant = Utils.equidistant2(lItemInfo)
 				val bSameWell = items.forall(_.well eq twvp0.well)
 				if (!bEquidistant && !bSameWell)
 					return Error(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Printer.getWellsDebugString(items.map(_.well))))
 				
-				spirateChecked(builder, items, sFunc, sLiquidClass)
+				Success(policy.id)
 		}
 	}
 
-	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[SpirateTokenItem], sFunc: String, sLiquidClass: String): Result[Seq[L0C_Command]] = {
+	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[TipWellVolumePolicy], sFunc: String, sLiquidClass: String): Result[Seq[L0C_Command]] = {
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head
 		val info0 = lWellInfo.head
@@ -259,6 +263,39 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				sFunc, 
 				mTips, sLiquidClass,
 				asVolumes,
+				iGrid, site.iSite,
+				sPlateMask,
+				site, labwareModel
+			)
+			
+			builder.mapCmdToLabwareInfo(cmd) = List((site, location, labwareModel))
+			
+			Seq(cmd)
+		}
+	}
+	
+	private def detectLevel(builder: EvowareScriptBuilder, cmd: DetectLevelToken): Result[Seq[L0C_Command]] = {
+		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => detectLevelChecked(builder, cmd.items, sLiquidClass))
+	}
+
+	private def detectLevelChecked(builder: EvowareScriptBuilder, items: Seq[TipWellPolicy], sLiquidClass: String): Result[Seq[L0C_Command]] = {
+		val lWellInfo = getWellInfo(items.map(_.well))
+		val item0 = items.head
+		val info0 = lWellInfo.head
+		//val tipKind = robot.getTipKind(item0.tip)
+		val idPlate = info0.idPlate
+		val mTips = encodeTips(items.map(_.tip))
+		
+		for {
+			plate <- builder.ob.findPlate(idPlate)
+			location <- getLocation(idPlate)
+			site <- getSite(location)
+		} yield {
+			val sPlateMask = encodeWells(plate, lWellInfo.map(_.index))
+			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
+			val cmd = L0C_DetectLevel(
+				mTips, sLiquidClass,
 				iGrid, site.iSite,
 				sPlateMask,
 				site, labwareModel
@@ -330,15 +367,16 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 	}*/
 	
 	private def mix(builder: EvowareScriptBuilder, items: Seq[MixTokenItem]): Result[Seq[L0C_Command]] = {
+		// REFECTOR: duplicates a lot of checkTipWellVolumePolicy()
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val lItemInfo = items zip lWellInfo
 		lItemInfo match {
 			case Seq() => Error(Seq("Empty Tip-Well2-Volume list"))
 			case Seq((item0, info0), rest @ _*) =>
 				// Get the liquid class
-				val sLiquidClass = item0.policy
+				val policy = item0.policy
 				// Assert that there is only one liquid class
-				if (rest.exists(_._1.policy != sLiquidClass)) {
+				if (rest.exists(_._1.policy != policy)) {
 					items.foreach(item => println(item.policy))
 					return Error(Seq("INTERNAL: Liquid class must be the same for all mix items"))
 				}
@@ -367,10 +405,11 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 				// All tip/well pairs are equidistant or all tips are going to the same well
 				assert(equidistant(lItemInfo) || lItemInfo.forall(_._1.well eq item0.well))
 				
-				mixChecked(builder, items, sLiquidClass)
+				mixChecked(builder, items, policy.id)
 		}
 	}
 
+	// REFACTOR: duplicates a lot of spirateChecked and detectLevelChecked
 	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[MixTokenItem], sLiquidClass: String): Result[Seq[L0C_Command]] = {
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head

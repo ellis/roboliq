@@ -10,7 +10,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 	def toDebugString = {
 		val srcs = args.items.groupBy(_.srcs).keys
 		val sDests = Printer.getWellsDebugString(args.items.map(_.dest))
-		val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
+		val sVolumes = Printer.getSeqDebugString(args.items.map(_.volume))
 		if (srcs.size == 1) {
 			val sSrcs = Printer.getWellsDebugString(srcs.head)
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
@@ -87,7 +87,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 				}
 		}
 		
-		val lVolume = args.items.map(_.nVolume)
+		val lVolume = args.items.map(_.volume)
 		val volume_? : Option[LiquidVolume] = lVolume.distinct match {
 			case volume :: Nil => Some(volume)
 			case _ => None
@@ -101,7 +101,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 		
 		val sDests = getWellsString(args.items.map(_.dest))
 				//Printer.getWellsDebugString(args.items.map(_.dest))
-		val sVolumes = Printer.getSeqDebugString(args.items.map(_.nVolume))
+		val sVolumes = Printer.getSeqDebugString(args.items.map(_.volume))
 		
 		val doc = List("Pipette", sVolumesAndLiquids, "from", sSrcs, "to", sDests).filterNot(_.isEmpty).mkString(" ") 
 		(doc, null)
@@ -205,7 +205,7 @@ object PipetteCmd {
 case class Item(
 	val srcs: SortedSet[Well2],
 	val dest: Well2,
-	val nVolume: LiquidVolume,
+	val volume: LiquidVolume,
 	val premix_? : Option[MixSpec],
 	val postmix_? : Option[MixSpec]
 )
@@ -216,20 +216,20 @@ object Item {
 		if (srcs.size == 1) {
 			val sSrcs = Printer.getWellsDebugString(srcs.head)
 			val sDests = Printer.getWellsDebugString(items.map(_.dest))
-			val sVolumes = Printer.getSeqDebugString(items.map(_.nVolume))
+			val sVolumes = Printer.getSeqDebugString(items.map(_.volume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
 		else if (items.forall(_.srcs.size == 1)) {
 			val sSrcs = Printer.getWellsDebugString(items.map(_.srcs.head))
 			val sDests = Printer.getWellsDebugString(items.map(_.dest))
-			val sVolumes = Printer.getSeqDebugString(items.map(_.nVolume))
+			val sVolumes = Printer.getSeqDebugString(items.map(_.volume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
 		else {
 			val lsSrcs = items.map(item => Printer.getWellsDebugString(item.srcs))
 			val sSrcs = Printer.getSeqDebugString(lsSrcs)
 			val sDests = Printer.getWellsDebugString(items.map(_.dest))
-			val sVolumes = Printer.getSeqDebugString(items.map(_.nVolume))
+			val sVolumes = Printer.getSeqDebugString(items.map(_.volume))
 			getClass().getSimpleName() + List(sSrcs, sDests, sVolumes).mkString("(", ", ", ")")
 		}
 	}

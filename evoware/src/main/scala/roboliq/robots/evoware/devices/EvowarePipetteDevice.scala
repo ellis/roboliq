@@ -24,7 +24,7 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 				case WashIntensity.Decontaminate => tipModel.nVolumeDeconExtra
 				case _ => tipModel.nVolumeWashExtra
 			}
-			tipModel.nVolume - nExtra
+			tipModel.volume - nExtra
 		}).getOrElse(LiquidVolume.empty)
 	}
 	

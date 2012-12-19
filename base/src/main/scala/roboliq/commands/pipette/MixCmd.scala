@@ -78,7 +78,8 @@ class MixCmdItemBean {
 			tipObj <- ob.findTip_?(tip, new CmdMessageWriter(node))
 			well <- ob.findWell_?(idWell, node)
 		} yield {
-			new MixTokenItem(tipObj, well, LiquidVolume.l(volume), count, idPolicy)
+			val policy = PipettePolicy.fromName(idPolicy)
+			new MixTokenItem(tipObj, well, LiquidVolume.l(volume), count, policy)
 		}
 	}
 }
@@ -92,5 +93,5 @@ case class MixTokenItem(
 	val well: Well2,
 	val volume: LiquidVolume,
 	val count: Int,
-	val policy: String
-)
+	val policy: PipettePolicy
+) extends HasTip with HasWell with HasVolume with HasPolicy

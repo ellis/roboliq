@@ -40,7 +40,7 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 	): Result[PipetteGroupData] = {
 		val lm = mLM(item)
 		
-		val volume = item.nVolume
+		val volume = item.volume
 		
 		for {
 			tip_l <- device.assignTips(device.getTips, lm.tipModel, 1)

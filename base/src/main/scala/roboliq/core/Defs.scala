@@ -61,11 +61,7 @@ case class PipettePolicy(id: String, pos: PipettePosition.Value)
 
 object PipettePolicy {
 	def fromName(name: String): PipettePolicy = {
-		val pos = {
-			if (name.contains("Air")) PipettePosition.Free
-			else if (name.contains("Dry")) PipettePosition.DryContact
-			else PipettePosition.WetContact
-		}
+		val pos = PipettePosition.getPositionFromPolicyNameHack(name)
 		PipettePolicy(name, pos)
 	}
 }

@@ -26,7 +26,7 @@ class TipModelBean extends Bean {
  */
 case class TipModel(
 	val id: String,
-	val nVolume: LiquidVolume, 
+	val volume: LiquidVolume, 
 	val nVolumeAspirateMin: LiquidVolume, 
 	val nVolumeWashExtra: LiquidVolume,
 	val nVolumeDeconExtra: LiquidVolume

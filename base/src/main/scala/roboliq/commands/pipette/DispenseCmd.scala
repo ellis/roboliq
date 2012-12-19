@@ -44,7 +44,7 @@ class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean] {
 					case None => messages.addError("tip state must contain reference to source well"); return Expand2Errors()
 					case Some(src) => src
 				}
-				TipDispenseEventBean(item.tip, item.well, item.volume, PipettePosition.getPositionFromPolicyNameHack(item.policy)) ::
+				TipDispenseEventBean(item.tip, item.well, item.volume, item.policy.pos) ::
 				WellAddEventBean(item.well, src, item.volume) :: Nil
 			})
 			val (doc, docMarkdown) = SpirateTokenItem.toDispenseDocString(lItem, ctx.ob, ctx.states)
@@ -54,5 +54,5 @@ class DispenseCmdHandler extends CmdHandlerA[DispenseCmdBean] {
 }
 
 case class DispenseToken(
-	val items: List[SpirateTokenItem]
+	val items: List[TipWellVolumePolicy]
 ) extends CmdToken

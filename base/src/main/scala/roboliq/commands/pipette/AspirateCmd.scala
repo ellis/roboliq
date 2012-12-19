@@ -53,7 +53,7 @@ class SpirateCmdItemBean {
 	@BeanProperty var policy: String = null
 	@BeanProperty var mixSpec: MixSpecBean = null
 	
-	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[SpirateTokenItem] = {
+	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[TipWellVolumePolicy] = {
 		node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
 		if (node.getErrorCount != 0)
 			return Error(Nil)
@@ -61,25 +61,18 @@ class SpirateCmdItemBean {
 			tipObj <- ob.findTip(tip)
 			wellObj <- ob.findWell2(well)
 		} yield {
-			new SpirateTokenItem(tipObj, wellObj, LiquidVolume.l(volume), policy)
+			new TipWellVolumePolicy(tipObj, wellObj, LiquidVolume.l(volume), PipettePolicy.fromName(policy))
 		}
 	}
 }
 
 case class AspirateToken(
-	val items: List[SpirateTokenItem]
+	val items: List[TipWellVolumePolicy]
 ) extends CmdToken
-
-case class SpirateTokenItem(
-	val tip: Tip,
-	val well: Well2,
-	val volume: LiquidVolume,
-	val policy: String
-) extends HasTipWell
 
 object SpirateTokenItem {
 	
-	def toAspriateDocString(item_l: Seq[SpirateTokenItem], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
+	def toAspriateDocString(item_l: Seq[TipWellVolumePolicy], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
 		def getWellsString(l: Iterable[Well2]): String =
 			WellSpecParser.toString(l.toList, ob, ", ")
 		
@@ -139,7 +132,7 @@ object SpirateTokenItem {
 		(doc, null)
 	}
 	
-	def toDispenseDocString(item_l: Seq[SpirateTokenItem], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
+	def toDispenseDocString(item_l: Seq[TipWellVolumePolicy], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
 		def getWellsString(l: Iterable[Well2]): String =
 			WellSpecParser.toString(l.toList, ob, ", ")
 		

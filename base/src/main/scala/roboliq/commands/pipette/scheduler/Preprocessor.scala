@@ -12,10 +12,10 @@ import roboliq.devices.pipette._
 
 object Preprocessor {
 	/**
-	 * Remove items with nVolume <= 0
+	 * Remove items with volume <= 0
 	 */
 	def filterItems(items: Seq[Item]): Result[Seq[Item]] = {
-		Success(items.filter(!_.nVolume.isEmpty))
+		Success(items.filter(!_.volume.isEmpty))
 	}
 
 	private def createItemState(item: Item, builder: StateBuilder): ItemState = {
@@ -25,8 +25,8 @@ object Preprocessor {
 		val state0 = dest.wellState(builder).get
 		
 		// Remove from source and add to dest
-		src.stateWriter(builder).remove(item.nVolume)
-		dest.stateWriter(builder).add(content, item.nVolume)
+		src.stateWriter(builder).remove(item.volume)
+		dest.stateWriter(builder).add(content, item.volume)
 		val state1 = dest.wellState(builder).get
 		
 		ItemState(item, content, state0, state1)
@@ -58,7 +58,7 @@ object Preprocessor {
 				val liquid = mItemToState(item).srcContent.liquid
 				val tipModel = itemToTipModel0_m(item)
 				// Update destination liquid (volume doesn't actually matter)
-				//item.dest.obj.stateWriter(states).add(liquid, item.nVolume)
+				//item.dest.obj.stateWriter(states).add(liquid, item.volume)
 				// result
 				val lm = LM(liquid, tipModel)
 				splitBigVolumes(item, tipModel).map(item => (item, lm))
@@ -83,11 +83,11 @@ object Preprocessor {
 	 * Split an item into a list of items with volumes which can be pipetted by the given tipModel.
 	 */
 	private def splitBigVolumes(item: Item, tipModel: TipModel): Seq[Item] = {
-		if (item.nVolume <= tipModel.nVolume) Seq(item)
+		if (item.volume <= tipModel.volume) Seq(item)
 		else {
-			val n = math.ceil((item.nVolume.ul / tipModel.nVolume.ul).toDouble).asInstanceOf[Int]
-			val nVolume = item.nVolume / n
-			val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, nVolume, item.premix_?, if (i == n - 1) item.postmix_? else None))
+			val n = math.ceil((item.volume.ul / tipModel.volume.ul).toDouble).asInstanceOf[Int]
+			val volume = item.volume / n
+			val l = List.tabulate(n)(i => new Item(item.srcs, item.dest, volume, item.premix_?, if (i == n - 1) item.postmix_? else None))
 			l
 		}
 	}

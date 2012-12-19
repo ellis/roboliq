@@ -49,7 +49,7 @@ class TestPipetteDevice extends PipetteDevice {
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume =
 		tip.model_? match {
 			case None => LiquidVolume.empty
-			case Some(model) => model.nVolume
+			case Some(model) => model.volume
 		}
 	
 	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] =

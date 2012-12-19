@@ -18,6 +18,31 @@ case class L0C_Comment(
 	}
 }
 
+case class L0C_DetectLevel(
+	val mTips: Int,
+	val sLiquidClass: String,
+	val iGrid: Int,
+	val iSite: Int,
+	val sPlateMask: String,
+	val site: CarrierSite,
+	val labwareModel: LabwareModel
+) extends L0C_Command {
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] =
+		List(site -> labwareModel)
+
+	override def toString = {
+		val l = List(
+			mTips,
+			'"'+sLiquidClass+'"',
+			iGrid, iSite,
+			1,
+			'"'+sPlateMask+'"',
+			0
+		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
+		l.mkString("Detect_Liquid(", ",", ");")
+	}
+}
+
 case class L0C_DropDITI(
 	val mTips: Int,
 	val iGrid: Int,

@@ -41,10 +41,10 @@ object TipModelChooser {
 	): Result[CommonData] = {
 		val itemToModels_m = item_l.map(item => {
 			val liquid = mItemToState(item).srcContent.liquid
-			val tipModel_l = device.getDispenseAllowableTipModels(liquid, item.nVolume)
+			val tipModel_l = device.getDispenseAllowableTipModels(liquid, item.volume)
 	
 			if (tipModel_l.isEmpty)
-				return Error(s"Cannot find a tip model for dispensing ${item.nVolume} of liquid `${liquid.id}`.")
+				return Error(s"Cannot find a tip model for dispensing ${item.volume} of liquid `${liquid.id}`.")
 			
 			(item, tipModel_l)
 		}).toMap

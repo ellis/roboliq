@@ -95,7 +95,7 @@ class GroupA(
 	}
 	
 	private def twvpString(twvp: TipWellVolumePolicy): String = {
-		List(twvp.tip, Printer.getWellsDebugString(Seq(twvp.well)), twvp.nVolume, twvp.policy.id).mkString(", ")			
+		List(twvp.tip, Printer.getWellsDebugString(Seq(twvp.well)), twvp.volume, twvp.policy.id).mkString(", ")			
 	}
 	
 	private def twmString(twvp: TipWellMix): String = {

@@ -269,7 +269,7 @@ object PipettePlanner {
 		val mixSpec_? = groupData.preMixSpec_m.get(tip)
 		bean.tip = tip.id
 		bean.well = item.dest.id
-		bean.volume = item.nVolume.l.bigDecimal
+		bean.volume = item.volume.l.bigDecimal
 		bean.policy = groupData.dispensePolicy_m(item.dest).id
 		bean.mixSpec = mixSpec_?.map(MixSpec.toBean).orNull
 		bean

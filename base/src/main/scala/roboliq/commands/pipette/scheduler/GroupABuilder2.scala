@@ -53,19 +53,19 @@ class GroupABuilder2(
 		val lLM = lItem.map(g0.mLM).toList.distinct
 		val mLMToItems = lItem.groupBy(g0.mLM)
 		val lm = g0.mLM(item)
-		if (item.nVolume > lm.tipModel.nVolume)
+		if (item.volume > lm.tipModel.volume)
 			GroupError(g0, Seq("pipette volume exceeds volume of tip: "+item))
 		
 		val data = g0.mLMData.get(lm) match {
 			case None =>
-				LMData(1, item.nVolume, item.nVolume)
+				LMData(1, item.volume, item.volume)
 			case Some(data) =>
-				val nVolumeCurrent = data.nVolumeCurrent + item.nVolume
-				val nVolumeTotal = data.nVolumeTotal + item.nVolume
+				val nVolumeCurrent = data.nVolumeCurrent + item.volume
+				val nVolumeTotal = data.nVolumeTotal + item.volume
 				//val bRequiresNewTip = requiresDifferentTip(g0, lm, item, mLMToItems(lm))
 				/*// FIXME: for debug only
 				if (nVolumeCurrent > 1000) {
-					println(lm.tipModel, lm.tipModel.nVolume)
+					println(lm.tipModel, lm.tipModel.volume)
 					Seq().head
 				}
 				// ENDFIX*/
@@ -73,22 +73,22 @@ class GroupABuilder2(
 				// FIXME: consider the total volume to be dispensed instead
 				val bAllowMultipipette = lm.liquid.multipipetteThreshold <= 0 && cmdAllowsMultipipette
 				if (!bAllowMultipipette)
-					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
+					LMData(data.nTips + 1, nVolumeTotal, item.volume)
 				// If current
 				//else if (data.nVolumeCurrent.isEmpty)
 				//	LMData(data.nTips + 1, nVolumeTotal, nVolumeCurrent)
 				// If new volume does not exceed tip capacity
-				else if (nVolumeCurrent <= lm.tipModel.nVolume)
+				else if (nVolumeCurrent <= lm.tipModel.volume)
 					LMData(data.nTips, nVolumeTotal, nVolumeCurrent)
 				// Otherwise use a new tip
 				else
-					LMData(data.nTips + 1, nVolumeTotal, item.nVolume)
+					LMData(data.nTips + 1, nVolumeTotal, item.volume)
 		}
 		// FIXME: for debug only
 		if (data.nVolumeCurrent > LiquidVolume.ul(1000)) {
 			println("updateLMData")
 			println(data)
-			println(lm.tipModel, lm.tipModel.nVolume)
+			println(lm.tipModel, lm.tipModel.volume)
 			println(g0.mLMData)
 			println(g0.mLMData.get(lm))
 			Seq().head
@@ -116,7 +116,7 @@ class GroupABuilder2(
 		val item1 = items.last
 		val itemState = g0.mItemToState(item)
 		val liquid = itemState.srcContent.liquid
-		val nVolume = item.nVolume
+		val volume = item.volume
 		
 		val policy_? = getPolicy(g0, lm, item)
 		val policy1_? = getPolicy(g0, lm, item1)
@@ -140,7 +140,7 @@ class GroupABuilder2(
 		val itemState = g0.mItemToState(item)
 		val liquid = itemState.srcContent.liquid
 		cmd.args.pipettePolicy_?.orElse(
-			device.getDispensePolicy(liquid, lm.tipModel, item.nVolume, itemState.destState0)
+			device.getDispensePolicy(liquid, lm.tipModel, item.volume, itemState.destState0)
 		)
 	}
 	*/
@@ -318,10 +318,10 @@ class GroupABuilder2(
 				val nVolumeTip0: LiquidVolume = mTipToVolume.getOrElse(tw.tip, LiquidVolume.empty)
 				val item = mDestToItems(tw.well).head
 				val lm = g0.mLM(item)
-				val nVolumeTip = nVolumeTip0 + item.nVolume
+				val nVolumeTip = nVolumeTip0 + item.volume
 				// If multipipetting is allowed:
 				if (lm.liquid.multipipetteThreshold == 0 && cmdAllowsMultipipette) {
-					if (nVolumeTip <= lm.tipModel.nVolume) {
+					if (nVolumeTip <= lm.tipModel.volume) {
 						mTipToVolume(tw.tip) = nVolumeTip
 						true
 					}
@@ -359,7 +359,7 @@ class GroupABuilder2(
 	}
 	
 	def updateGroupA5_mTipToVolume(g0: GroupA): GroupResult = {
-		val mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(LiquidVolume.empty)((acc, pair) => acc + pair._1.nVolume)).toMap
+		val mTipToVolume = g0.mItemToTip.toSeq.groupBy(_._2).mapValues(_.foldLeft(LiquidVolume.empty)((acc, pair) => acc + pair._1.volume)).toMap
 		//println("mTipToVolume: "+mTipToVolume)
 		GroupSuccess(g0.copy(
 			mTipToVolume = mTipToVolume
@@ -382,12 +382,12 @@ class GroupABuilder2(
 			val tipModel = g0.mLM(item).tipModel
 			val itemState = g0.mItemToState(item)
 			val liquid = itemState.srcContent.liquid
-			val nVolume = item.nVolume
-			//val nVolumeDest = itemState.destState0.nVolume
+			val volume = item.volume
+			//val nVolumeDest = itemState.destState0.volume
 			
 			// TODO: allow for policy override
 			val policy = cmd.args.pipettePolicy_?.getOrElse(
-				device.getDispensePolicy(liquid, tipModel, nVolume, itemState.destState0) match {
+				device.getDispensePolicy(liquid, tipModel, volume, itemState.destState0) match {
 					case None => return GroupError(g0, Seq("Could not find dispense policy for item "+item))
 					case Some(p) => p
 				}
@@ -418,7 +418,7 @@ class GroupABuilder2(
 		val lDispense = g0.lItem.map(item => {
 			val tip = g0.mItemToTip(item)
 			val policy = g0.mItemToPolicy(item) 
-			new TipWellVolumePolicy(tip, item.dest, item.nVolume, policy)
+			new TipWellVolumePolicy(tip, item.dest, item.volume, policy)
 		})
 		
 		val lPostmix = g0.lItem.flatMap(item => {
@@ -474,8 +474,8 @@ class GroupABuilder2(
 					println("ltw: "+ltw)
 				}
 				// ENDFIX
-				val nVolume = g0.mTipToVolume(tw.tip)
-				/*val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), nVolume, tw.well.state(g0.states0))
+				val volume = g0.mTipToVolume(tw.tip)
+				/*val policy_? = device.getAspiratePolicy(tw.tip.state(g0.states0), volume, tw.well.state(g0.states0))
 				// FIXME: for debug only
 				if (policy_?.isEmpty) {
 					println("getAspiratePolicy")
@@ -490,7 +490,7 @@ class GroupABuilder2(
 				)
 				*/
 				val policy = g0.mTipToPolicy(tw.tip)
-				new TipWellVolumePolicy(tw.tip, tw.well, nVolume, policy)
+				new TipWellVolumePolicy(tw.tip, tw.well, volume, policy)
 			})
 		})
 		
@@ -647,13 +647,13 @@ class GroupABuilder2(
 			assert(asp.well.wellState(builder).get.liquid == g0.mTipToLM(asp.tip).liquid)
 			//println("liquid, tip: ", asp.well.state(builder).liquid, asp.tip)
 			// ENDFIX
-			asp.tip.stateWriter(builder).aspirate(asp.well, asp.well.wellState(builder).get.liquid, asp.nVolume)
-			asp.well.stateWriter(builder).remove(asp.nVolume)
+			asp.tip.stateWriter(builder).aspirate(asp.well, asp.well.wellState(builder).get.liquid, asp.volume)
+			asp.well.stateWriter(builder).remove(asp.volume)
 		}
 		
 		for ((item, dis) <- g0.lItem zip g0.lDispense) {
 			val itemState = g0.mItemToState(item)
-			dis.tip.stateWriter(builder).dispense(item.nVolume, itemState.destState0.liquid, dis.policy.pos)
+			dis.tip.stateWriter(builder).dispense(item.volume, itemState.destState0.liquid, dis.policy.pos)
 			builder.map(item.dest.id) = itemState.destState1
 		}
 		

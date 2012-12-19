@@ -5,41 +5,26 @@ import roboliq.commands.pipette._
 
 
 object Utils {
-	/*
-	// Assert that tips are spaced at equal distances to each other as the wells are to each other
-	def equidistant(a: HasTipWell, b: HasTipWell): Boolean =
-		(b.tip.index - a.tip.index) == (b.well.index - a.well.index)
-	
 	// Test all adjacent items for equidistance
-	def equidistant(item: Seq[HasTipWell]): Boolean = item match {
-		case Seq() => true
-		case Seq(_) => true
-		case Seq(a, b, rest @ _*) =>
-			equidistant(a, b) match {
-				case false => false
-				case true => equidistant(Seq(b) ++ rest)
-			}
+	def equidistant(items: Seq[HasTip with HasWell]): Boolean = {
+		val lWellInfo = items.map(item => WellInfo(item.well)).toList
+		val l = items zip lWellInfo
+		equidistant2(l)
 	}
-	*/
-	// Assert that tips are spaced at equal distances to each other as the wells are to each other
-	def equidistant2(a: Tuple2[HasTipWell, WellInfo], b: Tuple2[HasTipWell, WellInfo]): Boolean =
-		(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
 		
 	// Test all adjacent items for equidistance
-	def equidistant2(tws: Seq[Tuple2[HasTipWell, WellInfo]]): Boolean = tws match {
+	def equidistant2(tws: Seq[Tuple2[HasTip, WellInfo]]): Boolean = tws match {
 		case Seq() => true
 		case Seq(_) => true
 		case Seq(a, b, rest @ _*) =>
-			equidistant2(a, b) match {
+			equidistant3(a, b) match {
 				case false => false
 				case true => equidistant2(Seq(b) ++ rest)
 			}
 	}
 	
-	// Test all adjacent items for equidistance
-	def equidistant(items: Seq[HasTipWell]): Boolean = {
-		val lWellInfo = items.map(item => WellInfo(item.well)).toList
-		val l = items zip lWellInfo
-		equidistant2(l)
-	}
+	// All tip/well pairs are equidistant or all tips are going to the same well
+	// Assert that tips are spaced at equal distances to each other as the wells are to each other
+	def equidistant3(a: Tuple2[HasTip, WellInfo], b: Tuple2[HasTip, WellInfo]): Boolean =
+		(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
 }
