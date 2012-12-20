@@ -326,4 +326,11 @@ lines: 217 to 985
 This script is like zlevel-01.esc, but afterwards it checks the z-level of each well with all 8 tips.  The order is completely random.  In this case I just rand the random z-level checks.  No washing is performed between steps.
 Manually added light wash before starting the z-level dectection.
 
+date: 2012-12-20
+time: 12:02 - 12:14
+file: zlevel-03.esc
+lines: 1 to 218
+
+Dispense [50, 61, 74, 91, 110, 135, 164, 200] x [3, 4, 6, 9, 14, 20, 30, 43, 64, 93, 137, 200] to random wells with random tips in random order.
+Manually added a thorough wash before first aspriation.
 

@@ -104,7 +104,7 @@ class RandomFill02CmdHandler extends CmdHandlerA[RandomFill02CmdBean] {
 				(asp, dis, lvl)
 			}
 			
-			doit(wv_l.map(t => (t._1, t._2._1)), src1_l)
+			doit(wv_l.map(t => (t._1, t._2._1)), src1_l) ++ doit(wv_l.map(t => (t._1, t._2._2)), src2_l)
 		}
 		
 		cmd_l_res match {
