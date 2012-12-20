@@ -306,3 +306,24 @@ OVER
 
 Empty wells measure around 50.
 
+
+Z-level tests
+=============
+
+date: 2012-12-20
+time: 11:00
+file: zlevel-01.esc
+
+Dispense 200ul to each well.  Wells are selected randomly, tip order is also random.
+Using the non-pure water and the expensive sealed Nunc plates.  No washing is performed between steps.
+Manually added through wash before first aspiration.
+
+date: 2012-12-20
+time: 11:09 - 11:41
+file: zlevel-02.esc
+lines: 217 to 985
+
+This script is like zlevel-01.esc, but afterwards it checks the z-level of each well with all 8 tips.  The order is completely random.  In this case I just rand the random z-level checks.  No washing is performed between steps.
+Manually added light wash before starting the z-level dectection.
+
+

@@ -132,6 +132,10 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		for (iWell <- aiWells) {
 			val iChar = iWell / 7;
 			val iWell1 = iWell % 7;
+			// FIXME: for debug only
+			if (iChar >= amWells.size)
+				println("ERROR: encodeWells: "+(holder, iWell, iChar, iWell1, aiWells))
+			// ENDFIX
 			amWells(iChar) += 1 << iWell1
 		}
 		val sWellMask = amWells.map(encode).mkString

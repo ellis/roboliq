@@ -23,6 +23,7 @@ plateModels:
   "D-BSSE 96 Well Costar Plate": { rows: 8, cols: 12, volume: 350e-6 }
   "D-BSSE 96 Well DWP": { rows: 8, cols: 12, volume: 1000e-6 }
   "Trough 100ml": { rows: 8, cols: 1, volume: 100e-3 }
+  "Ellis Nunc F96 MicroWell": { rows: 8, cols: 12, volume: 400e-6 }
 
 tubeModels:
   "Tube 15ml": { volume: 15e-3 }
@@ -33,7 +34,8 @@ locations:
   trough1: { plateModels: ["Trough 100ml"] }
   trough2: { plateModels: ["Trough 100ml"] }
   trough3: { plateModels: ["Trough 100ml"] }
-  cover: { plateModels: ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] }
+  uncooled2_low: { plateModels: ["D-BSSE 96 Well DWP", "Ellis Nunc F96 MicroWell"] }
+  uncooled2_high: { plateModels: ["D-BSSE 96 Well Costar Plate"] }
   shaker: { plateModels: ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] }
   cooled1: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }
   cooled2: { plateModels: ["D-BSSE 96 Well PCR Plate"], cooled: true }

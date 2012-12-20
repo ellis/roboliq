@@ -1,0 +1,24 @@
+substances:
+  dye: !liquid { physical: Water, cleanPolicy: T, allowMultipipette: true }
+
+plates:
+  Pwater:
+    model: Trough 100ml
+  P1:
+    model: Ellis Nunc F96 MicroWell
+
+events:
+- !add { obj: Pwater(A03), substance: water, volume: 100e-6 }
+- !add { obj: Pwater(A04), substance: water, volume: 100e-6 }
+- !add { obj: Pwater(A05), substance: water, volume: 100e-6 }
+- !add { obj: Pwater(A06), substance: water, volume: 100e-6 }
+
+commands:
+- !!roboliq.labs.bsse.commands.RandomFill02CmdBean
+  tips: [TIP1, TIP2, TIP3, TIP4]
+  src1: Pwater(C01 d F01)
+  src2: Pwater(C01 d F01)
+  dest: P1(A01 x H12)
+  volumes1: [50e-6, 61e-6, 74e-6, 91e-6, 110e-6, 135e-6, 164e-6, 200e-6]
+  volumes2: [3e-6, 4e-6, 6e-6, 9e-6, 14e-6, 20e-6, 30e-6, 43e-6, 64e-6, 93e-6, 137e-6, 200e-6]
+  policy: Roboliq_Water_Wet_1000

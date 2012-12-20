@@ -49,6 +49,21 @@ From the above experiments we want to obtain the following.
 
 * calibration curve for $z$ to $v$
 
+-----
+Tests
+-----
+
+* Fill all wells with 200ul in random order; check z level after each dispense; then randomly check each well with each tip, randomly
+* Dispense 96 levels (perhaps 3-99ul) randomly to find a minimum volume for detection
+* Dispense 50-200 ul randomly (8 levels), while checking z levels, then dispense 3-200ul (12 levels) in random order to each of the initial 8 levels.  This is factorial, 8*12.
+* Dispense 50ul randomly to all wells; then randomly create wells of repeated 3, 5, 10, 20, 50, 100 dispenses until well volume would exceed 360ul.
+* Dispense 50-200 ul 0.08 dye randomly (16 levels), then surface scan, then fill each well to 200ul with water, then surface scan
+
+Repeat for air/wet, single/multi dispense, large/small tips, other plates (PCR, DWP), various washing parameters, various liquid classes?
+
+50-200, 8 levels: [50, 61, 74, 91, 110, 135, 164, 200]
+3-200, 12 levels: [3, 4, 6, 9, 14, 20, 30, 43, 64, 93, 137, 200]
+
 =================
 Programming Tasks
 =================

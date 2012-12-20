@@ -12,3 +12,6 @@ commandHandlers:
 - !!roboliq.commands.pcr.PcrCmdHandler {}
 - !!roboliq.commands.arm.MovePlateCmdHandler {}
 - !!roboliq.labs.bsse.commands.RandomTest01CmdHandler {}
+- !!roboliq.labs.bsse.commands.RandomFill01CmdHandler {}
+- !!roboliq.labs.bsse.commands.RandomFill02CmdHandler {}
+- !!roboliq.labs.bsse.commands.RandomDetect01CmdHandler {}

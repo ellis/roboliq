@@ -44,8 +44,8 @@ case class ExternalObject(
 )
 
 object EvowareFormat {
-	def splitSemicolons(sLine: String): Tuple2[Int, Array[String]] = {
-		val l = sLine.split(";", -1)//.init
+	def splitSemicolons(sLine: String): Tuple2[Int, List[String]] = {
+		val l = sLine.split(";", -1).toList//.init
 		val sLineKind = l.head
 		val nLineKind = sLineKind.toInt
 		(nLineKind, l.tail)
@@ -83,7 +83,7 @@ object CarrierParser {
 		}
 	}
 	
-	def parse13(l: Array[String], lsLine: List[String]): Tuple2[Option[Carrier], List[String]] = {
+	def parse13(l: List[String], lsLine: List[String]): Tuple2[Option[Carrier], List[String]] = {
 		val sName = l.head
 		val l1 = l(1).split("/")
 		val sId = l1(0)
@@ -93,7 +93,7 @@ object CarrierParser {
 		(Some(Carrier(sName, id, nSites)), lsLine.drop(6 + nSites))
 	}
 	
-	def parse15(l: Array[String], lsLine: List[String]): Tuple2[Option[LabwareModel], List[String]] = {
+	def parse15(l: List[String], lsLine: List[String]): Tuple2[Option[LabwareModel], List[String]] = {
 		val sName = l.head
 		val ls2 = l(2).split("/")
 		val nCols = ls2(0).toInt
@@ -109,7 +109,7 @@ object CarrierParser {
 		(Some(LabwareModel(sName, nRows, nCols)), lsLine.drop(10 + nWellLines))
 	}
 	
-	def parse17(l: Array[String], lsLine: List[String]): Tuple2[Option[Vector], List[String]] = {
+	def parse17(l: List[String], lsLine: List[String]): Tuple2[Option[Vector], List[String]] = {
 		//println("parse17: "+l.toList)
 		val l0 = l.head.split("_")
 		if (l0.length < 3)
@@ -256,7 +256,7 @@ object EvowareTableParser {
 		tableFile
 	}
 
-	def parse14(configFile: EvowareConfigFile, l: Array[String], lsLine: List[String]): Tuple2[EvowareTableFile, List[String]] = {
+	def parse14(configFile: EvowareConfigFile, l: List[String], lsLine: List[String]): Tuple2[EvowareTableFile, List[String]] = {
 		import configFile._
 		val lCarrier_? = parse14_getCarriers(mapIdToCarrier, l.init)
 		val (lTableInfo, lsLine2) = parse14_getLabwareObjects(mapNameToLabwareModel, lCarrier_?, lsLine, Nil)
@@ -289,7 +289,7 @@ object EvowareTableParser {
 	
 	def parse14_getCarriers(
 		mapIdToCarrier: Map[Int, Carrier],
-		l: Array[String]
+		l: List[String]
 	): List[Option[Carrier]] = {
 		l.map(s => {
 			val id = s.toInt
@@ -318,6 +318,14 @@ object EvowareTableParser {
 			case Some(carrier) :: rest =>
 				val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 				val (n1, l1) = EvowareFormat.splitSemicolons(lsLine(1))
+				// FIME: for debug only
+				if (!(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)) {
+					println("ERROR: parse14_getLabwareObjects:")
+					println(carrier)
+					println(lsLine.head)
+					println(n0, l0, n1, l1, carrier.nSites)
+				}
+				// ENDFIX
 				assert(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)
 				//println(iGrid+": "+carrier)
 				val l = (for (iSite <- 0 until carrier.nSites) yield {
