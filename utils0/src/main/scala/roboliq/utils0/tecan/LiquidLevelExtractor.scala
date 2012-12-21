@@ -18,10 +18,10 @@ object LiquidLevelExtractor {
 	
 	case class WellData(
 		id: WellId,
-		step: Int,
-		volPrev: BigDecimal,
-		vol: BigDecimal,
-		z: Int
+		step: Int = 0,
+		volPrev: BigDecimal = 0,
+		vol: BigDecimal = 0,
+		z: Int = 0
 	)
 	/*case class TipWell(
 		tip: Int,
@@ -82,18 +82,18 @@ object LiquidLevelExtractor {
 		var expect = Expect.None
 		var wellIdTemp_? : Option[WellId] = None
 		
-		def dispense(wellId: WellId, vol: BigDecimal) {
-			val wd0 = wellData_m.get(wellId) match {
+		def getWellData(wellId: WellId): WellData = {
+			wellData_m.get(wellId) match {
 				case Some(wd) => wd
 				case None =>
-					WellData(
-						id = wellId,
-						step = 0,
-						volPrev = 0,
-						vol = 0,
-						z = 0
-					)
+					val wd = WellData(wellId)
+					wellData_m(wellId) = wd
+					wd
 			}
+		}
+		
+		def dispense(wellId: WellId, vol: BigDecimal) {
+			val wd0 = getWellData(wellId)
 			val wd = wd0.copy(step = wd0.step + 1, volPrev = wd0.vol, vol = wd0.vol + vol)
 			wellData_m += wellId -> wd
 		}
@@ -104,13 +104,9 @@ object LiquidLevelExtractor {
 		}
 
 		def setZ(wellId: WellId, z: Int) {
-			wellData_m.get(wellId) match {
-				case Some(wd0) =>
-					val wd = wd0.copy(z = z)
-					wellData_m += wellId -> wd
-				case None =>
-					println(s"ERROR: missing well data `$wellId`")
-			}
+			val wd0 = getWellData(wellId)
+			val wd = wd0.copy(z = z)
+			wellData_m += wellId -> wd
 		}
 		
 		def handleTipLevel(tip: Int, z: Int) {
@@ -143,7 +139,7 @@ object LiquidLevelExtractor {
 					if (bDetect) {
 						tw_m.foreach(pair => {
 							val (tip, wellId) = pair
-							val wd = wellData_m(wellId)
+							val wd = getWellData(wellId)
 							val dvol = wd.vol - wd.volPrev
 							val dz = wd.z - wellZPrev_m.getOrElse(wellId, 0)
 							println(List(
@@ -178,13 +174,17 @@ object LiquidLevelExtractor {
 					expect = Expect.C5
 					
 				case _ if expect == Expect.C5 =>
-					val l = line.split(",").drop(2)
-					for ((z, tip_i) <- l.zipWithIndex) {
-						val tip = tip_i + 1
-						//println("z: ", line, l, tip_i, z)
-						handleTipLevel(tip, z.toInt)
+					// NOTE: this check is here because multiple commands may be sent at once without first waiting for a response
+					// from the robot.  This makes sure that we only try to process a response message.
+					if (line.startsWith("-")) {
+						val l = line.split(",").drop(2)
+						for ((z, tip_i) <- l.zipWithIndex) {
+							val tip = tip_i + 1
+							//println("z: ", line, l, tip_i, z)
+							handleTipLevel(tip, z.toInt)
+						}
+						expect = Expect.None
 					}
-					expect = Expect.None
 				
 				case _ =>
 					expect = Expect.None
