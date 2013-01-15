@@ -32,7 +32,9 @@ object RqError {
 	def apply[A](error: String): RqError[A] = RqError(List(error))
 }
 
-sealed case class CompilerStep()
+sealed trait CompilerStep
+case class CompilerStep_Lookup(l: LookupList) extends CompilerStep
+case class CompilerStep_Done extends CompilerStep
 
 class RqOptionW[A](opt: Option[A]) {
 	def asRq(error: String): RqResult[A] = opt match {
@@ -66,6 +68,44 @@ class Environment(
 	}
 }
 
+final class LookupVariable[A](table: String, key: String, field: String, fn: JsValue => RqResult[A]) {
+	def lookup(env: Environment): RqResult[A] = {
+		for {
+			jsval <- env.lookup(table, key, field)
+			res <- fn(jsval)
+		} yield res
+	}
+}
+
+trait LookupList {
+	def run(env: Environment): RqResult[CompilerStep]
+}
+
+final class LookupList1[A](
+	a: LookupVariable[A],
+	fn: (A) => RqResult[CompilerStep]
+) extends LookupList {
+	def run(env: Environment): RqResult[CompilerStep] = {
+		for {
+			a1 <- a.lookup(env)
+			res <- fn(a1)
+		} yield res
+	}
+}
+
+final class LookupList2[A, B](
+	a: LookupVariable[A],
+	b: LookupVariable[B],
+	fn: (A, B) => RqResult[CompilerStep]
+) extends LookupList {
+	def run(env: Environment): RqResult[CompilerStep] = {
+		for {
+			res1 <- (a.lookup(env) |@| b.lookup(env)) { fn }
+			res <- res1
+		} yield res
+	}
+}
+
 object ApplicativeMain extends App {
 	
 	def getParam(id: String)(implicit env: Environment): Option[String] = env.cmd_m.get(id)
@@ -95,44 +135,6 @@ object ApplicativeMain extends App {
 		x
 	}
 	
-	final class LookupVariable[A](table: String, key: String, field: String, fn: JsValue => RqResult[A]) {
-		def lookup(env: Environment): RqResult[A] = {
-			for {
-				jsval <- env.lookup(table, key, field)
-				res <- fn(jsval)
-			} yield res
-		}
-	}
-	
-	trait LookupList {
-		def run(env: Environment): RqResult[CompilerStep]
-	}
-	
-	final class LookupList1[A](
-		a: LookupVariable[A],
-		fn: (A) => RqResult[CompilerStep]
-	) extends LookupList {
-		def run(env: Environment): RqResult[CompilerStep] = {
-			for {
-				a1 <- a.lookup(env)
-				res <- fn(a1)
-			} yield res
-		}
-	}
-	
-	final class LookupList2[A, B](
-		a: LookupVariable[A],
-		b: LookupVariable[B],
-		fn: (A, B) => RqResult[CompilerStep]
-	) extends LookupList {
-		def run(env: Environment): RqResult[CompilerStep] = {
-			for {
-				res1 <- (a.lookup(env) |@| b.lookup(env)) { fn }
-				res <- res1
-			} yield res
-		}
-	}
-	
 	def getParam2(field: String): LookupVariable[String] = {
 		new LookupVariable[String]("cmd", "_", field, (x: JsValue) => RqSuccess(x.toString))
 	}
@@ -158,7 +160,7 @@ object ApplicativeMain extends App {
 			getParam2("liquid"),
 			(plate: String, liquid: String) => { 
 				println("level 1", plate, liquid)
-				RqSuccess(CompilerStep())
+				RqSuccess(CompilerStep_Done())
 			}
 		)
 	}
