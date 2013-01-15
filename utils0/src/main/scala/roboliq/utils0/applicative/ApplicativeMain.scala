@@ -5,6 +5,7 @@ import Scalaz._
 
 import spray.json.JsObject
 import spray.json.JsValue
+import spray.json.JsonParser
 
 sealed trait RqResult[A] {
 	val warning_r: List[String]
@@ -75,6 +76,9 @@ object ApplicativeMain extends App {
 		Map("P1" -> "Plate1", "water" -> "Water"),
 		Map("plate" -> "P1", "liquid" -> "water"),
 		table_m = Map(
+			"cmd" -> Map(
+				"_" -> JsonParser("""{ "plate": "P1", "liquid": "water" }""").asJsObject
+			),
 			"plate" -> Map()
 		)
 	)
@@ -91,10 +95,6 @@ object ApplicativeMain extends App {
 		x
 	}
 	
-	def getParam2[A: Manifest](id: String): (String, Class[A]) = {
-		(s"cmd.$id", manifest[A].runtimeClass.asInstanceOf[Class[A]])
-	}
-
 	final class LookupVariable[A](table: String, key: String, field: String, fn: JsValue => RqResult[A]) {
 		def lookup(env: Environment): RqResult[A] = {
 			for {
@@ -103,16 +103,15 @@ object ApplicativeMain extends App {
 			} yield res
 		}
 	}
-	/*final class LookupList(args: LookupList0, fn: JsValue => RqResult[A])
-	sealed trait LookupList0
-	final class LookupList1[A](a: LookupVariable[A]) extends LookupList0 {
-		apply(fn: (A) => Z): LookupList = new LookupList(this, fn)
-	}*/
+	
+	trait LookupList {
+		def run(env: Environment): RqResult[CompilerStep]
+	}
 	
 	final class LookupList1[A](
 		a: LookupVariable[A],
 		fn: (A) => RqResult[CompilerStep]
-	) {
+	) extends LookupList {
 		def run(env: Environment): RqResult[CompilerStep] = {
 			for {
 				a1 <- a.lookup(env)
@@ -125,20 +124,26 @@ object ApplicativeMain extends App {
 		a: LookupVariable[A],
 		b: LookupVariable[B],
 		fn: (A, B) => RqResult[CompilerStep]
-	) {
+	) extends LookupList {
 		def run(env: Environment): RqResult[CompilerStep] = {
-			(a.lookup(env) |@| b.lookup(env)) { fn }
+			for {
+				res1 <- (a.lookup(env) |@| b.lookup(env)) { fn }
+				res <- res1
+			} yield res
 		}
-		run _
 	}
 	
+	def getParam2(field: String): LookupVariable[String] = {
+		new LookupVariable[String]("cmd", "_", field, (x: JsValue) => RqSuccess(x.toString))
+	}
+
 	// table, key, property => JsValue
 	// fn: JsValue => A
 	// action: A, B, C, D => Action | [Cmd]
 	
 	// RqResult
 	// LookupVariable[
-	def makeit2(): (Environment => Unit) = {
+	def makeit2(): LookupList = {
 		// 1. lookup in cmd: plate, liquid
 		// 2. lookup in database: plate[P1], substance[water]
 		// 3. run: print plate and liquid info
@@ -146,19 +151,20 @@ object ApplicativeMain extends App {
 		// 1. (LookupCmdParameter[String]("plate") |@| LookupCmdParameter[String]("liquid"))
 		// fn(String, String) => RqResult[ProcessStep]
 		// 
+
 		
-		getParam2("plate")
-		def x(env0: Environment): Unit = {
-			implicit val env = env0
-			
-			(getParam("plate") |@| getParam("liquid")) { (plateId, liquidId) =>
-				(getPlate(plateId) |@| getLiquid(liquidId)) { (plate, liquid) =>
-					println(plate, liquid)
-				}
+		new LookupList2(
+			getParam2("plate"),
+			getParam2("liquid"),
+			(plate: String, liquid: String) => { 
+				println("level 1", plate, liquid)
+				RqSuccess(CompilerStep())
 			}
-		}
-		x
+		)
 	}
 	
-	makeit()(env1)
+	//makeit()(env1)
+	val x = makeit2().run(env1)
+	println("x")
+	println(x)
 }
