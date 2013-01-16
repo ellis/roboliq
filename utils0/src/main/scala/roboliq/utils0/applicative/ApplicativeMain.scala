@@ -1,5 +1,8 @@
 package roboliq.utils0.applicative
 
+import scala.language.implicitConversions
+import scala.language.postfixOps
+
 import scalaz._
 import Scalaz._
 
@@ -33,9 +36,17 @@ object RqError {
 	def apply[A](error: String): RqError[A] = RqError(List(error))
 }
 
-sealed trait CompilerStep
+sealed abstract class CompilerStep
 case class CompilerStep_Lookup(l: LookupList) extends CompilerStep
 case class CompilerStep_Done() extends CompilerStep
+
+object CompilerStep {
+	implicit def fromLookupList(l: LookupList): CompilerStep =
+		CompilerStep_Lookup(l)
+		
+	//implicit def toResult(step: CompilerStep): RqResult[CompilerStep] =
+	//	RqSuccess(step)
+}
 
 class RqOptionW[A](opt: Option[A]) {
 	def asRq(error: String): RqResult[A] = opt match {
@@ -80,6 +91,25 @@ sealed abstract class LookupVariable[A] {
 	
 	def apply(fn: (A) => RqResult[CompilerStep]): LookupList = {
 		new LookupList1(this, fn)
+	}
+	
+	def |@|[B](b: LookupVariable[B]): LookupListBuilder2[A, B] =
+		new LookupListBuilder2(this, b)
+	
+	def flatMap[B](fn: A => LookupVariable[B]): LookupVariable[B] =
+		new LookupVariableComposed(this, fn)
+}
+
+class LookupVariableComposed[A, B](
+	a: LookupVariable[A],
+	fn: A => LookupVariable[B]
+) extends LookupVariable[B] {
+	def lookup(env: Environment): RqResult[B] = {
+		for {
+			resA <- a.lookup(env)
+			b = fn(resA)
+			resB <- b.lookup(env)
+		} yield resB
 	}
 }
 
@@ -182,10 +212,6 @@ case class Plate(val id: String, val plateModel: String)
 
 object ApplicativeMain extends App {
 	
-	def getParam(id: String)(implicit env: Environment): Option[String] = env.cmd_m.get(id)
-	def getPlate(id: String)(implicit env: Environment): Option[String] = env.obj_m.get(id)
-	def getLiquid(id: String)(implicit env: Environment): Option[String] = env.obj_m.get(id)
-	
 	val env1 = new Environment(
 		Map("P1" -> "Plate1", "water" -> "Water"),
 		Map("plate" -> "P1", "liquid" -> "water"),
@@ -198,18 +224,6 @@ object ApplicativeMain extends App {
 			)
 		)
 	)
-	
-	def makeit(): (Environment => Unit) = {
-		def x(env0: Environment): Unit = {
-			implicit val env = env0
-			(getParam("plate") |@| getParam("liquid")) { (plateId, liquidId) =>
-				(getPlate(plateId) |@| getLiquid(liquidId)) { (plate, liquid) =>
-					println(plate, liquid)
-				}
-			}
-		}
-		x
-	}
 	
 	def getParam2(field: String): LookupVariable[String] = {
 		new LookupCmdField[String](field, (x: JsValue) => x match {
@@ -225,10 +239,7 @@ object ApplicativeMain extends App {
 	def getPlate2(id: String): LookupVariable[Plate] = {
 		import MyJsonProtocol._
 		def fn(jsobj: JsObject): RqResult[Plate] = {
-			try {
-				val plate = jsobj.convertTo[Plate]
-				RqSuccess(plate)
-			}
+			try RqSuccess(jsobj.convertTo[Plate])
 			catch {
 				case ex : Throwable => RqError(ex.getMessage())
 			}
@@ -240,8 +251,6 @@ object ApplicativeMain extends App {
 	// fn: JsValue => A
 	// action: A, B, C, D => Action | [Cmd]
 	
-	// RqResult
-	// LookupVariable[
 	def makeit2(): CompilerStep = {
 		// 1. lookup in cmd: plate, liquid
 		// 2. lookup in database: plate[P1], substance[water]
@@ -252,18 +261,26 @@ object ApplicativeMain extends App {
 		// 
 
 		
-		CompilerStep_Lookup(new LookupList2(
-			getParam2("plate"),
-			getParam2("liquid"),
-			(plateId: String, liquidId: String) => { 
-				println("level 1", plateId, liquidId)
-				RqSuccess(CompilerStep_Lookup(getPlate2(plateId) {
-					(plate: Plate) =>
-					println("plate", plate)
-					RqSuccess(CompilerStep_Done())
-				}))
-			}
-		))
+		(getParam2("plate") |@| getParam2("liquid")) {
+			(plateId, liquidId) =>  
+			println("level 1", plateId, liquidId)
+			RqSuccess(getPlate2(plateId) {
+				(plate) =>
+				println("plate", plate)
+				RqSuccess(CompilerStep_Done())
+			})
+		}
+	}
+	
+	def makeit3(): CompilerStep = {
+		(
+			getParam2("plate").flatMap(getPlate2) |@|
+			getParam2("liquid")
+		) {
+			(plate, liquidId) =>  
+			println("level 1", plate, liquidId)
+			RqSuccess(CompilerStep_Done())
+		}
 	}
 	
 	//makeit()(env1)
@@ -277,6 +294,6 @@ object ApplicativeMain extends App {
 				}
 		}
 	}
-	val step0 = makeit2()
+	val step0 = makeit3()
 	doit(step0)
 }
