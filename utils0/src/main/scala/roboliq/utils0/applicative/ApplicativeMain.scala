@@ -77,6 +77,10 @@ class Environment(
 
 sealed abstract class LookupVariable[A] {
 	def lookup(env: Environment): RqResult[A]
+	
+	def apply(fn: (A) => RqResult[CompilerStep]): LookupList = {
+		new LookupList1(this, fn)
+	}
 }
 
 class LookupCmdField[A](
@@ -138,6 +142,39 @@ final class LookupList2[A, B](
 			res1 <- (a.lookup(env) |@| b.lookup(env)) { fn }
 			res <- res1
 		} yield res
+	}
+}
+
+final class LookupList3[A, B, C](
+	a: LookupVariable[A],
+	b: LookupVariable[B],
+	c: LookupVariable[C],
+	fn: (A, B, C) => RqResult[CompilerStep]
+) extends LookupList {
+	def run(env: Environment): RqResult[CompilerStep] = {
+		for {
+			res1 <- (a.lookup(env) |@| b.lookup(env) |@| c.lookup(env)) { fn }
+			res <- res1
+		} yield res
+	}
+}
+
+final class LookupListBuilder2[A, B](
+	a: LookupVariable[A],
+	b: LookupVariable[B]
+) {
+	def apply(fn: (A, B) => RqResult[CompilerStep]): LookupList = {
+		new LookupList2(a, b, fn)
+	}
+	
+	def |@|[C](c: LookupVariable[C]): LookupListBuilder3[C] = {
+		new LookupListBuilder3(c)
+	}
+	
+	final class LookupListBuilder3[C](c: LookupVariable[C]) {
+		def apply(fn: (A, B, C) => RqResult[CompilerStep]): LookupList = {
+			new LookupList3(a, b, c, fn)
+		}
 	}
 }
 
@@ -220,11 +257,11 @@ object ApplicativeMain extends App {
 			getParam2("liquid"),
 			(plateId: String, liquidId: String) => { 
 				println("level 1", plateId, liquidId)
-				RqSuccess(CompilerStep_Lookup(new LookupList1(getPlate2(plateId), {
+				RqSuccess(CompilerStep_Lookup(getPlate2(plateId) {
 					(plate: Plate) =>
 					println("plate", plate)
 					RqSuccess(CompilerStep_Done())
-				})))
+				}))
 			}
 		))
 	}
