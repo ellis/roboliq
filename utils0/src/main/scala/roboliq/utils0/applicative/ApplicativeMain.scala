@@ -4,6 +4,7 @@ import scalaz._
 import Scalaz._
 
 import spray.json.JsObject
+import spray.json.JsString
 import spray.json.JsValue
 import spray.json.JsonParser
 
@@ -34,7 +35,7 @@ object RqError {
 
 sealed trait CompilerStep
 case class CompilerStep_Lookup(l: LookupList) extends CompilerStep
-case class CompilerStep_Done extends CompilerStep
+case class CompilerStep_Done() extends CompilerStep
 
 class RqOptionW[A](opt: Option[A]) {
 	def asRq(error: String): RqResult[A] = opt match {
@@ -59,23 +60,57 @@ class Environment(
 	val cmd_m: Map[String, String],
 	val table_m: Map[String, Map[String, JsObject]]
 ) {
-	def lookup(table: String, key: String, field: String): RqResult[JsValue] = {
+	def lookupObject(table: String, key: String): RqResult[JsObject] = {
 		for {
 			key_m <- table_m.get(table).asRq(s"table not found: `$table`")
-			jsitem <- key_m.get(key).asRq(s"key not found: `$key` in table `$table`")
-			jsfield <- jsitem.fields.get(field).asRq(s"field not found: `$field` of key `$key` in table `$table`")
+			jsobj <- key_m.get(key).asRq(s"key not found: `$key` in table `$table`")
+		} yield jsobj
+	}
+	
+	def lookupField(table: String, key: String, field: String): RqResult[JsValue] = {
+		for {
+			jsobj <- lookupObject(table, key)
+			jsfield <- jsobj.fields.get(field).asRq(s"field not found: `$field` of key `$key` in table `$table`")
 		} yield jsfield
 	}
 }
 
-final class LookupVariable[A](table: String, key: String, field: String, fn: JsValue => RqResult[A]) {
+sealed abstract class LookupVariable[A] {
+	def lookup(env: Environment): RqResult[A]
+}
+
+class LookupCmdField[A](
+	field: String, fn: JsValue => RqResult[A]
+) extends LookupVariable[A] {
 	def lookup(env: Environment): RqResult[A] = {
 		for {
-			jsval <- env.lookup(table, key, field)
+			jsval <- env.lookupField("cmd", "_", field)
 			res <- fn(jsval)
 		} yield res
 	}
-}
+} 
+
+class LookupObj[A](
+	table: String, key: String, fn: JsObject => RqResult[A]
+) extends LookupVariable[A] {
+	def lookup(env: Environment): RqResult[A] = {
+		for {
+			jsval <- env.lookupObject(table, key)
+			res <- fn(jsval)
+		} yield res
+	}
+} 
+
+class LookupObjField[A](
+	table: String, key: String, field: String, fn: JsValue => RqResult[A]
+) extends LookupVariable[A] {
+	def lookup(env: Environment): RqResult[A] = {
+		for {
+			jsval <- env.lookupField(table, key, field)
+			res <- fn(jsval)
+		} yield res
+	}
+} 
 
 trait LookupList {
 	def run(env: Environment): RqResult[CompilerStep]
@@ -106,6 +141,8 @@ final class LookupList2[A, B](
 	}
 }
 
+case class Plate(val id: String, val plateModel: String)
+
 object ApplicativeMain extends App {
 	
 	def getParam(id: String)(implicit env: Environment): Option[String] = env.cmd_m.get(id)
@@ -119,7 +156,9 @@ object ApplicativeMain extends App {
 			"cmd" -> Map(
 				"_" -> JsonParser("""{ "plate": "P1", "liquid": "water" }""").asJsObject
 			),
-			"plate" -> Map()
+			"plate" -> Map(
+				"P1" -> JsonParser("""{ "id": "P1", "plateModel": "Nunc" }""").asJsObject
+			)
 		)
 	)
 	
@@ -136,7 +175,28 @@ object ApplicativeMain extends App {
 	}
 	
 	def getParam2(field: String): LookupVariable[String] = {
-		new LookupVariable[String]("cmd", "_", field, (x: JsValue) => RqSuccess(x.toString))
+		new LookupCmdField[String](field, (x: JsValue) => x match {
+			case JsString(s) => RqSuccess(s)
+			case _ => RqSuccess(x.toString)
+		})
+	}
+	
+	object MyJsonProtocol extends spray.json.DefaultJsonProtocol {
+		implicit val plateFormat = jsonFormat2(Plate)
+	}
+	
+	def getPlate2(id: String): LookupVariable[Plate] = {
+		import MyJsonProtocol._
+		def fn(jsobj: JsObject): RqResult[Plate] = {
+			try {
+				val plate = jsobj.convertTo[Plate]
+				RqSuccess(plate)
+			}
+			catch {
+				case ex : Throwable => RqError(ex.getMessage())
+			}
+		}
+		new LookupObj[Plate]("plate", id, fn _)
 	}
 
 	// table, key, property => JsValue
@@ -145,7 +205,7 @@ object ApplicativeMain extends App {
 	
 	// RqResult
 	// LookupVariable[
-	def makeit2(): LookupList = {
+	def makeit2(): CompilerStep = {
 		// 1. lookup in cmd: plate, liquid
 		// 2. lookup in database: plate[P1], substance[water]
 		// 3. run: print plate and liquid info
@@ -155,18 +215,31 @@ object ApplicativeMain extends App {
 		// 
 
 		
-		new LookupList2(
+		CompilerStep_Lookup(new LookupList2(
 			getParam2("plate"),
 			getParam2("liquid"),
-			(plate: String, liquid: String) => { 
-				println("level 1", plate, liquid)
-				RqSuccess(CompilerStep_Done())
+			(plateId: String, liquidId: String) => { 
+				println("level 1", plateId, liquidId)
+				RqSuccess(CompilerStep_Lookup(new LookupList1(getPlate2(plateId), {
+					(plate: Plate) =>
+					println("plate", plate)
+					RqSuccess(CompilerStep_Done())
+				})))
 			}
-		)
+		))
 	}
 	
 	//makeit()(env1)
-	val x = makeit2().run(env1)
-	println("x")
-	println(x)
+	def doit(step: CompilerStep) {
+		step match {
+			case CompilerStep_Done() =>
+			case CompilerStep_Lookup(l) =>
+				l.run(env1) match {
+					case RqSuccess(step2, _) => doit(step2)
+					case RqError(ls, _) => ls.foreach(println)
+				}
+		}
+	}
+	val step0 = makeit2()
+	doit(step0)
 }
