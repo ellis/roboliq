@@ -1,5 +1,7 @@
 package roboliq.planner
 
+import scala.language.postfixOps
+
 import scala.collection.mutable.LinkedHashSet
 import org.ejml.simple.SimpleMatrix
 import roboliq.core._

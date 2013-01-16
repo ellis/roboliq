@@ -175,4 +175,6 @@ package roboliq
  * 
  * 
  */
-package object core {}
+package object core {
+	import RqPimper._
+}
