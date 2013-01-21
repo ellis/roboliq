@@ -35,10 +35,12 @@ case class ComputationSpec(
 )
 
 case class Computation(
-	id: List[Int],
+	id_r: List[Int],
 	entity_l: List[String],
 	fn: (List[JsValue]) => RqResult[List[ComputationResult]]
-)
+) {
+	val id: List[Int] = id_r.reverse
+}
 
 case class ComputationNode(
 	computation: Computation
@@ -68,19 +70,17 @@ class ProcessorData {
 	val dependency_m = new HashMap[String, List[Computation]]
 	val token_l = new ArrayBuffer[Token]
 
-	def getComputationChildren(id: List[Int]): List[Computation] = {
-		val n = id.length + 1
-		getComputationDecendents(id).filter(_.id.length == n)
+	def getComputationChildren(idParent: List[Int]): List[Computation] = {
+		cn_l.toList.filter(_.id.tail == idParent)
 	}
 	
 	def getComputationDecendents(id: List[Int]): List[Computation] = {
 		cn_l.filter(_.id.startsWith(id)).toList
 	}
 	
-	def getNextChildId(idParent: List[Int]): List[Int] = {
-		val l = getComputationChildren(idParent)
-		val i = l.foldLeft(1){(acc, cn) => math.max(acc, cn.id.last)}
-		idParent ++ List(i)
+	def getNextChildId_r(idParent: List[Int]): List[Int] = {
+		val i  = cn_l.filter(_.id.tail == idParent).map(_.id_r.head).foldLeft(0)(_ max _) + 1
+		i :: idParent
 	}
 	
 	def addComputation(
@@ -88,10 +88,10 @@ class ProcessorData {
 		fn: (List[JsValue]) => RqResult[List[ComputationResult]],
 		idParent: List[Int]
 	) {
-		val id = getNextChildId(idParent)
-		val cn = Computation(id, entity_l, fn)
+		val id_r = getNextChildId_r(idParent)
+		val cn = Computation(id_r, entity_l, fn)
 		cn_l += cn
-		cn_m(id) = cn
+		cn_m(cn.id) = cn
 		// Add dependencies
 		for (id <- cn.entity_l) {
 			val l: List[Computation] = dependency_m.get(id).getOrElse(Nil)
@@ -135,7 +135,12 @@ object ApplicativeMain2 extends App {
 			)))
 	val cn2 = ComputationSpec(List("c", "d"), (l) => RqSuccess(
 			List(
-				ComputationResult_Token(Token_Comment(l.mkString))
+				ComputationResult_Token(Token_Comment(l.mkString)),
+				ComputationResult_Computation(List("d"), (l) => RqSuccess(
+					List(
+						ComputationResult_Token(Token_Comment(l.mkString * 3))
+					)
+				))
 			)))
 	
 	val p = new ProcessorData
@@ -182,8 +187,8 @@ object ApplicativeMain2 extends App {
 		}
 	} 
 
-	println("Computations:")
 	println()
+	println("Computations:")
 	p.cn_l.toList.sortWith(compComputation).map(cn => cn.id.mkString(".")+" "+cn.entity_l).foreach(println)
 
 	println()
