@@ -19,27 +19,20 @@ import scala.collection.mutable.HashMap
  * and it returns a list of computations, events, commands, and tokens.  
  */
 
-class EntityBase
-
-case class Entity(
-	id: String,
-	input_l: List[String],
-	fn: (List[JsValue]) => RqResult[JsValue]
-	//castObject: (Object) => RqResult[Object],
-	//getField: (String) => Entity
-)
-
-// States:
-// 0: not evaluated yet
-// 1: stable, nothing needs to be done
-// 2: dirty
-
 sealed trait ComputationResult
 case class ComputationResult_Event(event: Event) extends ComputationResult
 case class ComputationResult_EntityRequest(id: String) extends ComputationResult
-case class ComputationResult_Computation(computation: Computation) extends ComputationResult
+case class ComputationResult_Computation(
+	entity_l: List[String],
+	fn: (List[JsValue]) => RqResult[List[ComputationResult]]
+) extends ComputationResult
 case class ComputationResult_Command(command: Command) extends ComputationResult
 case class ComputationResult_Token(token: Token) extends ComputationResult
+
+case class ComputationSpec(
+	entity_l: List[String],
+	fn: (List[JsValue]) => RqResult[List[ComputationResult]]
+)
 
 case class Computation(
 	id: List[Int],
@@ -48,9 +41,7 @@ case class Computation(
 )
 
 case class ComputationNode(
-	computation: Computation,
-	var state: Int,
-	var child_l: List[ComputationNode]
+	computation: Computation
 )
 
 /*
@@ -70,27 +61,47 @@ case class Token_Comment(s: String) extends Token
 
 class ProcessorData {
 	//val cnRoot = ComputationNode(Computation(List(), Nil, (_) => RqSuccess(Nil)), 0, Nil)
-	val cn_l = new ArrayBuffer[ComputationNode]
-	val cn_m = new HashMap[List[Int], ComputationNode]
-	val cnQueue = new scala.collection.mutable.Queue[ComputationNode]
+	val cn_l = new ArrayBuffer[Computation]
+	val cn_m = new HashMap[List[Int], Computation]
+	val cnQueue = new scala.collection.mutable.Queue[Computation]
 	val entity_m = new HashMap[String, JsValue]
-	val dependency_m = new HashMap[String, List[ComputationNode]]
+	val dependency_m = new HashMap[String, List[Computation]]
 	val token_l = new ArrayBuffer[Token]
 
-	def addComputation(computation: Computation /*, parent: ComputationNode*/) {
-		val cn = ComputationNode(computation, 0, Nil)
+	def getComputationChildren(id: List[Int]): List[Computation] = {
+		val n = id.length + 1
+		getComputationDecendents(id).filter(_.id.length == n)
+	}
+	
+	def getComputationDecendents(id: List[Int]): List[Computation] = {
+		cn_l.filter(_.id.startsWith(id)).toList
+	}
+	
+	def getNextChildId(idParent: List[Int]): List[Int] = {
+		val l = getComputationChildren(idParent)
+		val i = l.foldLeft(1){(acc, cn) => math.max(acc, cn.id.last)}
+		idParent ++ List(i)
+	}
+	
+	def addComputation(
+		entity_l: List[String],
+		fn: (List[JsValue]) => RqResult[List[ComputationResult]],
+		idParent: List[Int]
+	) {
+		val id = getNextChildId(idParent)
+		val cn = Computation(id, entity_l, fn)
 		cn_l += cn
-		cn_m(computation.id) = cn
+		cn_m(id) = cn
 		// Add dependencies
-		for (id <- computation.entity_l) {
-			val l: List[ComputationNode] = dependency_m.get(id).getOrElse(Nil)
+		for (id <- cn.entity_l) {
+			val l: List[Computation] = dependency_m.get(id).getOrElse(Nil)
 			dependency_m(id) = l ++ List(cn)
 		}
 		addToQueue(cn)
 	}
 	
-	private def addToQueue(cn: ComputationNode) {
-		if (cn.computation.entity_l.forall(entity_m.contains)) {
+	private def addToQueue(cn: Computation) {
+		if (cn.entity_l.forall(entity_m.contains)) {
 			cnQueue += cn
 		}
 	}
@@ -117,18 +128,12 @@ class ProcessorData {
  */
 
 object ApplicativeMain2 extends App {
-	val entity_l = List[Entity](
-		Entity("a", Nil, (_) => RqSuccess(JsString("1"))),
-		Entity("b", Nil, (_) => RqSuccess(JsString("2"))),
-		Entity("c", Nil, (_) => RqSuccess(JsString("3")))
-	)
-	val entity_m = entity_l.map(entity => entity.id -> entity).toMap
-	val cn1 = Computation(List(1), List("a", "b"), (l) => RqSuccess(
+	val cn1 = ComputationSpec(List("a", "b"), (l) => RqSuccess(
 			List(
 				ComputationResult_Token(Token_Comment(l.mkString)),
 				ComputationResult_EntityRequest("d")
 			)))
-	val cn2 = Computation(List(2), List("c", "d"), (l) => RqSuccess(
+	val cn2 = ComputationSpec(List("c", "d"), (l) => RqSuccess(
 			List(
 				ComputationResult_Token(Token_Comment(l.mkString))
 			)))
@@ -139,20 +144,20 @@ object ApplicativeMain2 extends App {
 	p.addEntity("b", JsString("2"))
 	p.addEntity("c", JsString("3"))
 	println(p.cnQueue)
-	p.addComputation(cn1)
+	p.addComputation(cn1.entity_l, cn1.fn, Nil)
 	println(p.cnQueue)
-	p.addComputation(cn2)
+	p.addComputation(cn2.entity_l, cn2.fn, Nil)
 	println(p.cnQueue)
 	
 	while (!p.cnQueue.isEmpty) {
 		val cn = p.cnQueue.dequeue
-		val entity_l: List[JsValue] = cn.computation.entity_l.map(p.entity_m)
-		cn.computation.fn(entity_l) match {
+		val entity_l: List[JsValue] = cn.entity_l.map(p.entity_m)
+		cn.fn(entity_l) match {
 			case RqSuccess(l, warning_l) =>
 				warning_l.foreach(println)
 				l.foreach(_ match {
 					case ComputationResult_Token(t) => p.addToken(t)
-					case ComputationResult_Computation(c) => p.addComputation(c)
+					case ComputationResult_Computation(l, fn) => p.addComputation(l, fn, cn.id)
 					case ComputationResult_EntityRequest(id) => p.addEntity(id, JsString("my "+id))
 					case _ =>
 				})
@@ -164,76 +169,27 @@ object ApplicativeMain2 extends App {
 		println(p.cnQueue)
 	}
 
+	def compComputation(cn1: Computation, cn2: Computation): Boolean =
+		compId(cn1.id, cn2.id)
+	def compId(l1: List[Int], l2: List[Int]): Boolean = {
+		if (l2.isEmpty) true
+		else if (l1.isEmpty) true
+		else {
+			val n = l1.head - l2.head
+			if (n < 0) true
+			else if (n > 0) false
+			else compId(l1.tail, l2.tail)
+		}
+	} 
+
+	println("Computations:")
+	println()
+	p.cn_l.toList.sortWith(compComputation).map(cn => cn.id.mkString(".")+" "+cn.entity_l).foreach(println)
+
+	println()
 	println("Entities:")
-	p.entity_m.foreach(println)
+	p.entity_m.toList.sortBy(_._1).foreach(pair => println(pair._1+" "+pair._2))
+	println()
 	println("Tokens:")
-	println(p.token_l)
-	
-	
-	/*
-	// Put all computation nodes into a linear list
-	val computationNode_l = new ArrayBuffer[ComputationNode]
-	def desc(root: ComputationNode) {
-		computationNode_l += root
-		root.child_l.foreach(desc)
-	}
-	desc(computationTree)
-	
-	def processComputation(computation: Computation, entity_m: Map[String, JsValue]) {
-		// If entity_m contains all inputs for this entity:
-		if (computation.entity_l.forall(entity_m.contains)) {
-			val entity_l: List[JsValue] = computation.entity_l.map(entity_m)
-			computation.fn(entity_l) match {
-				case RqSuccess(l, warning_l) =>
-					warning_l.foreach(println)
-					Some(computation.id -> jsval)
-				case RqError(error_l, warning_l) =>
-					warning_l.foreach(println)
-					error_l.foreach(println)
-					None
-			}
-		}
-	}
-	
-	def process(node_l: List[ComputationNode], entity_m: Map[String, JsValue]) {
-		for (node <- node_l if node.state == 0) {
-			processComputation(node.computation) match {
-				case None =>
-				case Some(RqSuccess(l, warning_l)) =>
-				case Some(RqError(error_l, warning_l)) =>
-			}
-		}
-	}
-	
-	def updateMap(map0: Map[String, JsValue]): Map[String, JsValue] = {
-		entityNode_l.map( node => {
-			if (map0.contains(node.entity.id))
-				None
-			// If map0 contains all inputs for this entity:
-			else if (node.entity.input_l.forall(map0.contains)) {
-				val input_l: List[JsValue] = node.entity.input_l.map(map0)
-				node.entity.fn(input_l) match {
-					case RqSuccess(jsval, warning_l) =>
-						warning_l.foreach(println)
-						Some(node.entity.id -> jsval)
-					case RqError(error_l, warning_l) =>
-						warning_l.foreach(println)
-						error_l.foreach(println)
-						None
-				}
-			}
-			else
-				None
-		}).flatten.toMap
-	}
-	
-	val map1 = updateMap(Map())
-	println(map1)
-	val map2 = updateMap(map1)
-	println(map2)
-	val map3 = updateMap(map1 ++ map2)
-	println(map3)
-	
-	//println(entityTree)
-	*/
+	p.token_l.toList.foreach(println)
 }
