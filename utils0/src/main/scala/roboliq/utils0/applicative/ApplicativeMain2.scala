@@ -11,6 +11,7 @@ import scalaz._
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
+import spray.json.JsNull
 import spray.json.JsonParser
 
 
@@ -55,24 +56,8 @@ class Token
 
 
 object ApplicativeMain2 extends App {
-	/*val entity_l = scala.collection.mutable.ArrayBuffer[Entity](
-		Entity(
-				"cmd|1",
-				Nil,
-				(_, _) => RqSuccess(JsonParser("""{"cmd": "print", "prefix": "hello, "}"""))
-		),
-		Entity(
-				"comp|1.1",
-				"param|name",
-				"
-		)
-	)
-	val entity_m = entity_l.map(x => x.id -> x).toMap
-	val relation_l = new scala.collection.mutable.ArrayBuffer[(String, String)]
-	*/
-	
 	val entityTree = EntityNode(
-		Entity("root", Nil, (_) => RqError("can't get root")),
+		Entity("root", Nil, (_) => RqSuccess(JsNull)),
 		0,
 		List(
 			EntityNode(Entity("a", Nil, (_) => RqSuccess(JsString("1"))), 0, Nil),
@@ -94,7 +79,9 @@ object ApplicativeMain2 extends App {
 	def updateMap(map0: Map[String, JsValue]): Map[String, JsValue] = {
 		entityNode_l.map( node => {
 			// If map0 contains all inputs for this entity:
-			if (node.entity.input_l.forall(map0.contains)) {
+			if (map0.contains(node.entity.id))
+				None
+			else if (node.entity.input_l.forall(map0.contains)) {
 				val input_l: List[JsValue] = node.entity.input_l.map(map0)
 				node.entity.fn(input_l) match {
 					case RqSuccess(jsval, warning_l) =>
