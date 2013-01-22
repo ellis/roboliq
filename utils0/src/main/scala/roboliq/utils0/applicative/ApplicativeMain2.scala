@@ -67,7 +67,8 @@ case class Token_Comment(s: String) extends Token
 //private class Message(id: List[Int], level: Int, message: String)
 
 class ProcessorData {
-	val cnToJs_m = new HashMap[List[Int], JsObject]
+	var cmd_n: Int = 0
+	val cmdToJs_m = new HashMap[List[Int], JsObject]
 	val cn_l = new ArrayBuffer[Computation]
 	val cn_m = new HashMap[List[Int], Computation]
 	val cnQueue = new scala.collection.mutable.LinkedHashSet[Computation]
@@ -76,10 +77,13 @@ class ProcessorData {
 	val dependency_m = new HashMap[String, List[Computation]]
 	val token_l = new ArrayBuffer[Token]
 	val message_m = new HashMap[List[Int], List[String]]
+	// Number of commands 
+	val cnToCommands_m = new HashMap[List[Int], Integer]
 
-	def addCommand(cmd: JsObject, handler: CommandHandler) {
+	def addCommand(idParent: List[Int], cmd: JsObject, handler: CommandHandler) {
+		cmd_n += 1
 		val cn = addComputation(Nil, (l: List[JsValue]) => handler.getResult, Nil)
-		cnToJs_m(cn.id) = cmd
+		cmdToJs_m(List(cmd_n)) = cmd
 	}
 	
 	def getComputationChildren(idParent: List[Int]): List[Computation] = {
@@ -95,12 +99,38 @@ class ProcessorData {
 		i :: idParent
 	}
 	
+	private def addComputationWithId(
+		id_r: List[Int],
+		entity_l: List[String],
+		fn: (List[JsValue]) => RqResult[List[ComputationResult]]
+	): Computation = {
+		val id = id_r.reverse
+		val entity2_l = cnToJs_m.get(id) match {
+			case None => entity_l
+			case Some(jsobj) =>
+				val id_s = getIdString(id)
+				entity_l.map(s => if (s(0) == '!') s"cmd[${id_s}].${s.tail}")
+		}
+		val cn = Computation(id_r, entity_l, fn)
+		cn_l += cn
+		cn_m(cn.id) = cn
+		// Add dependencies
+		for (id <- cn.entity_l) {
+			val l: List[Computation] = dependency_m.get(id).getOrElse(Nil)
+			dependency_m(id) = l ++ List(cn)
+		}
+		addToQueueOrWaiting(cn)
+		cn
+	}
+	
 	def addComputation(
 		entity_l: List[String],
 		fn: (List[JsValue]) => RqResult[List[ComputationResult]],
 		idParent: List[Int]
 	): Computation = {
 		val id_r = getNextChildId_r(idParent)
+		val id = id_r.reverse
+		val entity2_l = cnToJs_m.get(id)
 		val cn = Computation(id_r, entity_l, fn)
 		cn_l += cn
 		cn_m(cn.id) = cn
