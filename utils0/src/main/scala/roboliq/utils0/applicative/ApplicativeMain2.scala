@@ -3,6 +3,7 @@ package roboliq.utils0.applicative
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.collection.mutable.ArrayBuffer
+import scala.collection._
 import scalaz._
 import spray.json.JsObject
 import spray.json.JsString
@@ -10,6 +11,8 @@ import spray.json.JsValue
 import spray.json.JsNull
 import spray.json.JsonParser
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.MultiMap
+import scala.math.Ordering
 
 
 /**
@@ -64,10 +67,27 @@ trait Token
 
 case class Token_Comment(s: String) extends Token
 
+case class Node(parent: Node, index: Int, result: ComputationResult) {
+	def getId: List[Int] = {
+		getId_r.reverse
+	}
+	
+	def getId_r: List[Int] = {
+		index :: (if (parent != null) parent.getId else Nil)
+	}
+}
+
 //private class Message(id: List[Int], level: Int, message: String)
 
 class ProcessorData {
-	var cmd_n: Int = 0
+	// key is a Computation.id_r
+	val root = Node(null, 0, null)
+	val message_m = new HashMap[Node, List[String]]
+	val children_m = new HashMap[Node, List[Node]]
+	val status_m = new HashMap[Node, Int]
+	val dep_m: MultiMap[String, Node] = new HashMap[String, scala.collection.mutable.Set[Node]] with MultiMap[String, Node]
+	//val node_l = new scala.collection.mutable.HashSet[Node]
+	
 	val cmdToJs_m = new HashMap[List[Int], JsObject]
 	val cn_l = new ArrayBuffer[Computation]
 	val cn_m = new HashMap[List[Int], Computation]
@@ -76,14 +96,75 @@ class ProcessorData {
 	val entity_m = new HashMap[String, JsValue]
 	val dependency_m = new HashMap[String, List[Computation]]
 	val token_l = new ArrayBuffer[Token]
-	val message_m = new HashMap[List[Int], List[String]]
 	// Number of commands 
 	val cnToCommands_m = new HashMap[List[Int], Integer]
 
+	def setComputationResult(node: Node, result: RqResult[List[ComputationResult]]) {
+		val child_l: List[Node] = result match {
+			case RqSuccess(l, warning_l) =>
+				setMessages(node, warning_l)
+				l.zipWithIndex.map { case (r, index) => Node(node, index, r) }
+			case RqError(error_l, warning_l) =>
+				setMessages(node, error_l ++ warning_l)
+				Nil
+		}
+		setChildren(node, child_l)
+	}
+	
+	private def setMessages(node: Node, message_l: List[String]) {
+		if (message_l.isEmpty)
+			message_m -= node
+		else
+			message_m(node) = message_l
+	}
+	
+	private def setChildren(node: Node, child_l: List[Node]) {
+		if (child_l.isEmpty)
+			children_m -= node
+		else
+			children_m(node) = child_l
+		
+		for (child <- child_l) {
+			child.result match {
+				case ComputationResult_Computation(input_l, _) =>
+					addDependencies(child, input_l)
+					updateComputationStatus(child, input_l)
+				case ComputationResult_EntityRequest(idEntity) =>
+					setEntity(idEntity, JsString("my "+idEntity))
+				case _ =>
+			}
+		}
+		//node_l ++= child_l
+	}
+	
+	private def setEntity(id: String, jsval: JsValue) {
+		entity_m(id) = jsval
+		// Queue the computations for which all inputs are available 
+		dep_m.get(id).map(_.foreach(updateComputationStatus))
+	}
+
+	// Add node to dependency set for each of its inputs
+	private def addDependencies(node: Node, input_l: List[String]) {
+		input_l.foreach(s => dep_m.addBinding(s, node))
+	}
+	
+	private def updateComputationStatus(node: Node) {
+		node.result match {
+			case ComputationResult_Computation(input_l, _) =>
+				updateComputationStatus(node, input_l)
+			case _ =>
+				System.err.println("INTERNAL: updateComputationStatus() called on non-computation node")
+		}
+	}
+	
+	private def updateComputationStatus(node: Node, input_l: List[String]) {
+		status_m(node) = if (input_l.forall(entity_m.contains)) 1 else 0
+	}
+	/*
+	
 	def addCommand(idParent: List[Int], cmd: JsObject, handler: CommandHandler) {
-		cmd_n += 1
-		val cn = addComputation(Nil, (l: List[JsValue]) => handler.getResult, Nil)
-		cmdToJs_m(List(cmd_n)) = cmd
+		val cn = addComputation(idParent, Nil, (l: List[JsValue]) => handler.getResult)
+		cmdToJs_m(cn.id_r) = cmd
 	}
 	
 	def getComputationChildren(idParent: List[Int]): List[Computation] = {
@@ -99,39 +180,23 @@ class ProcessorData {
 		i :: idParent
 	}
 	
-	private def addComputationWithId(
-		id_r: List[Int],
-		entity_l: List[String],
-		fn: (List[JsValue]) => RqResult[List[ComputationResult]]
-	): Computation = {
-		val id = id_r.reverse
-		val entity2_l = cnToJs_m.get(id) match {
-			case None => entity_l
-			case Some(jsobj) =>
-				val id_s = getIdString(id)
-				entity_l.map(s => if (s(0) == '!') s"cmd[${id_s}].${s.tail}")
-		}
-		val cn = Computation(id_r, entity_l, fn)
-		cn_l += cn
-		cn_m(cn.id) = cn
-		// Add dependencies
-		for (id <- cn.entity_l) {
-			val l: List[Computation] = dependency_m.get(id).getOrElse(Nil)
-			dependency_m(id) = l ++ List(cn)
-		}
-		addToQueueOrWaiting(cn)
-		cn
+	def setComputationChildren(parent: Computation, children: List[Computation]) {
+		
 	}
 	
 	def addComputation(
-		entity_l: List[String],
-		fn: (List[JsValue]) => RqResult[List[ComputationResult]],
-		idParent: List[Int]
+		idParent: List[Int],
+		input_l: List[String],
+		fn: (List[JsValue]) => RqResult[List[ComputationResult]]
 	): Computation = {
 		val id_r = getNextChildId_r(idParent)
 		val id = id_r.reverse
-		val entity2_l = cnToJs_m.get(id)
-		val cn = Computation(id_r, entity_l, fn)
+		val cn = Computation(id_r, input_l, fn)
+		addComputation(cn)
+		cn
+	}
+	
+	private def addComputation(cn: Computation) {
 		cn_l += cn
 		cn_m(cn.id) = cn
 		// Add dependencies
@@ -140,9 +205,8 @@ class ProcessorData {
 			dependency_m(id) = l ++ List(cn)
 		}
 		addToQueueOrWaiting(cn)
-		cn
 	}
-	
+
 	private def addToQueueOrWaiting(cn: Computation) {
 		if (cn.entity_l.forall(entity_m.contains)) {
 			cnQueue += cn
@@ -164,18 +228,18 @@ class ProcessorData {
 		token_l += token
 	}
 	
-	def addComputationResult(result: RqResult[List[ComputationResult]], id: List[Int]) {
+	def addComputationResult(cn: Computation, result: RqResult[List[ComputationResult]]) {
 		result match {
 			case RqSuccess(l, warning_l) =>
-				addMessages(id, warning_l)
+				addMessages(cn.id, warning_l)
 				l.foreach(_ match {
 					case ComputationResult_Token(t) => addToken(t)
-					case ComputationResult_Computation(l, fn) => addComputation(l, fn, id)
+					case ComputationResult_Computation(l, fn) => addComputation(cn, l, fn)
 					case ComputationResult_EntityRequest(idEntity) => addEntity(idEntity, JsString("my "+idEntity))
 					case _ =>
 				})
 			case RqError(error_l, warning_l) =>
-				addMessages(id, error_l ++ warning_l)
+				addMessages(cn.id, error_l ++ warning_l)
 				None
 		}
 	}
@@ -186,17 +250,16 @@ class ProcessorData {
 		else
 			message_m(id) = message_l
 	}
+	*/
 	
-	def handleNextComputation(): Boolean = {
-		if (cnQueue.isEmpty)
-			return false
-		else {
-			val cn = cnQueue.head
-			cnQueue -= cn
-			val entity_l: List[JsValue] = cn.entity_l.map(entity_m)
-			addComputationResult(cn.fn(entity_l), cn.id)
-			true
-		}
+	def makeComputationList: List[Node] = {
+		status_m.filter(_._1 == 1).keys.toList.sorted(NodeOrdering)
+	}
+	
+	def handleComputation(node: Node) {
+		val input_l: List[JsValue] = cn.entity_l.map(entity_m)
+		addComputationResult(cn.fn(entity_l), cn.id)
+		true
 	}
 	
 	def makeMessagesForMissingInputs() {
@@ -227,6 +290,25 @@ class ProcessorData {
 			if (n < 0) true
 			else if (n > 0) false
 			else compId(l1.tail, l2.tail)
+		}
+	}
+	
+	implicit object ListIntOrdering extends Ordering[List[Int]] {
+		def compare(a: List[Int], b: List[Int]): Boolean = {
+			if (a.isEmpty) true
+			else if (b.isEmpty) false
+			else {
+				val n = a.head - b.head
+				if (n < 0) true
+				else if (n > 0) false
+				else compare(a.tail, b.tail)
+			}
+		}
+	}
+	
+	implicit object NodeOrdering extends Ordering[Node] {
+		def compare(a: Node, b: Node): Boolean = {
+			ListIntOrdering.compare(a.getId, b.getId)
 		}
 	}
 }

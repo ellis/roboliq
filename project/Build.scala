@@ -70,4 +70,6 @@ object MyBuild extends Build {
 	val ejml = "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
 	val json_gson = "com.google.code.gson" % "gson" % "2.2.1"
 	val json_spray = "io.spray" % "spray-json_2.10" % "1.2.3"
+
+	addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.0")
 }
