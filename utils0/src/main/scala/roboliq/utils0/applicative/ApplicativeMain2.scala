@@ -77,7 +77,10 @@ case class Node(parent: Node, index: Int, result: ComputationResult) {
 	}
 	
 	private def getId_r: List[Int] = {
-		index :: (if (parent != null) parent.getId else Nil)
+		if (parent == null)
+			Nil
+		else
+			index :: parent.getId
 	}
 }
 
