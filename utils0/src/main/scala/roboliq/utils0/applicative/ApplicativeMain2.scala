@@ -1,5 +1,6 @@
 package roboliq.utils0.applicative
 
+import scala.language.existentials
 import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.collection.mutable.ArrayBuffer
@@ -29,7 +30,7 @@ case class ComputationResult_Computation(
 	entity_l: List[String],
 	fn: (List[JsValue]) => RqResult[List[ComputationResult]]
 ) extends ComputationResult
-case class ComputationResult_Command(command: Command) extends ComputationResult
+case class ComputationResult_Command(cmd: JsObject, fn: RqResult[List[ComputationResult]]) extends ComputationResult
 case class ComputationResult_Token(token: Token) extends ComputationResult
 
 case class ComputationSpec(
@@ -68,6 +69,20 @@ trait Token
 case class Token_Comment(s: String) extends Token
 
 case class Node(parent: Node, index: Int, result: ComputationResult) {
+	lazy val id_r = getId_r
+	lazy val id = id_r.reverse
+	
+	private def getId: List[Int] = {
+		getId_r.reverse
+	}
+	
+	private def getId_r: List[Int] = {
+		index :: (if (parent != null) parent.getId else Nil)
+	}
+}
+
+/*
+class Node[A <: ComputationResult](parent: Node[_], index: Int, result: A) {
 	def getId: List[Int] = {
 		getId_r.reverse
 	}
@@ -76,6 +91,7 @@ case class Node(parent: Node, index: Int, result: ComputationResult) {
 		index :: (if (parent != null) parent.getId else Nil)
 	}
 }
+*/
 
 //private class Message(id: List[Int], level: Int, message: String)
 
@@ -86,29 +102,32 @@ class ProcessorData {
 	val children_m = new HashMap[Node, List[Node]]
 	val status_m = new HashMap[Node, Int]
 	val dep_m: MultiMap[String, Node] = new HashMap[String, scala.collection.mutable.Set[Node]] with MultiMap[String, Node]
-	//val node_l = new scala.collection.mutable.HashSet[Node]
+	//val node_l = new mutable.TreeSet[Node]()(NodeOrdering)
+	val entity_m = new HashMap[String, JsValue]
 	
+	/*
 	val cmdToJs_m = new HashMap[List[Int], JsObject]
 	val cn_l = new ArrayBuffer[Computation]
 	val cn_m = new HashMap[List[Int], Computation]
 	val cnQueue = new scala.collection.mutable.LinkedHashSet[Computation]
 	val cnWaiting = new scala.collection.mutable.LinkedHashSet[Computation]()
-	val entity_m = new HashMap[String, JsValue]
 	val dependency_m = new HashMap[String, List[Computation]]
 	val token_l = new ArrayBuffer[Token]
 	// Number of commands 
 	val cnToCommands_m = new HashMap[List[Int], Integer]
+	*/
 
 	def setComputationResult(node: Node, result: RqResult[List[ComputationResult]]) {
 		val child_l: List[Node] = result match {
 			case RqSuccess(l, warning_l) =>
 				setMessages(node, warning_l)
-				l.zipWithIndex.map { case (r, index) => Node(node, index, r) }
+				l.zipWithIndex.map { case (r, index) => Node(node, index + 1, r) }
 			case RqError(error_l, warning_l) =>
 				setMessages(node, error_l ++ warning_l)
 				Nil
 		}
 		setChildren(node, child_l)
+		status_m(node) = 2
 	}
 	
 	private def setMessages(node: Node, message_l: List[String]) {
@@ -137,7 +156,7 @@ class ProcessorData {
 		//node_l ++= child_l
 	}
 	
-	private def setEntity(id: String, jsval: JsValue) {
+	def setEntity(id: String, jsval: JsValue) {
 		entity_m(id) = jsval
 		// Queue the computations for which all inputs are available 
 		dep_m.get(id).map(_.foreach(updateComputationStatus))
@@ -251,32 +270,73 @@ class ProcessorData {
 			message_m(id) = message_l
 	}
 	*/
-	
-	def makeComputationList: List[Node] = {
-		status_m.filter(_._1 == 1).keys.toList.sorted(NodeOrdering)
+	def run() {
+		run(makePendingComputationList)
+		makeMessagesForMissingInputs()
 	}
 	
-	def handleComputation(node: Node) {
-		val input_l: List[JsValue] = cn.entity_l.map(entity_m)
-		addComputationResult(cn.fn(entity_l), cn.id)
-		true
-	}
-	
-	def makeMessagesForMissingInputs() {
-		for (cn <- cnWaiting) {
-			val message_l = cn.entity_l.filterNot(entity_m.contains).map(entity => s"ERROR: missing command parameter `$entity`")
-			addMessages(cn.id, message_l) 
+	private def run(node_l: List[Node]) {
+		println("run")
+		if (!node_l.isEmpty) {
+			node_l.foreach(handleComputation)
+			run(makePendingComputationList)
 		}
 	}
 	
+	private def makePendingComputationList: List[Node] = {
+		status_m.filter(_._2 == 1).keys.toList.sorted(NodeOrdering)
+	}
+	
+	private def handleComputation(node: Node) {
+		node.result match {
+			case ComputationResult_Computation(entity_l, fn) =>
+				val input_l: List[JsValue] = entity_l.map(entity_m)
+				setComputationResult(node, fn(input_l))
+			case _ =>
+		}
+	}
+	
+	private def makeMessagesForMissingInputs() {
+		for ((node, status) <- status_m if status == 0) {
+			node.result match {
+				case ComputationResult_Computation(entity_l, _) =>
+					val message_l = entity_l.filterNot(entity_m.contains).map(entity => s"ERROR: missing command parameter `$entity`")
+					setMessages(node, message_l) 
+				case _ =>
+			}
+		}
+	}
+	
+	def getNodeList(): List[Node] = {
+		def step(node: Node): List[Node] = {
+			node :: children_m.getOrElse(node, Nil).flatMap(step)
+		}
+		step(root).tail
+	}
+	
+	def getComputationList(): List[Node] = {
+		getNodeList.filter(_.result match {
+			case x: ComputationResult_Computation => true
+			case _ => false
+		})
+	}
+	
+	def getTokenList(): List[Node] = {
+		getNodeList.filter(_.result match {
+			case x: ComputationResult_Token => true
+			case _ => false
+		})
+	}
+	
 	def getMessages(): List[String] = {
-		message_m.toList.sortWith(compMessage).flatMap { pair =>
+		message_m.toList.sortBy(_._1).flatMap { pair =>
 			val id = getIdString(pair._1)
 			pair._2.map(s => s"$id: $s")
 		}
 	}
 	
-	def getIdString(id: List[Int]) = id.mkString(".")
+	def getIdString(node: Node): String = getIdString(node.id)
+	def getIdString(id: List[Int]): String = id.mkString(".")
 
 	def compComputation(cn1: Computation, cn2: Computation): Boolean =
 		compId(cn1.id, cn2.id)
@@ -294,21 +354,21 @@ class ProcessorData {
 	}
 	
 	implicit object ListIntOrdering extends Ordering[List[Int]] {
-		def compare(a: List[Int], b: List[Int]): Boolean = {
-			if (a.isEmpty) true
-			else if (b.isEmpty) false
-			else {
-				val n = a.head - b.head
-				if (n < 0) true
-				else if (n > 0) false
-				else compare(a.tail, b.tail)
+		def compare(a: List[Int], b: List[Int]): Int = {
+			(a, b) match {
+				case (Nil, Nil) => 0
+				case (Nil, _) => -1
+				case (_, Nil) => 1
+				case (a1 :: arest, b1 :: brest) =>
+					if (a1 != b1) a1 - b1
+					else compare(arest, brest)
 			}
 		}
 	}
 	
-	implicit object NodeOrdering extends Ordering[Node] {
-		def compare(a: Node, b: Node): Boolean = {
-			ListIntOrdering.compare(a.getId, b.getId)
+	implicit val NodeOrdering = new Ordering[Node] {
+		def compare(a: Node, b: Node): Int = {
+			ListIntOrdering.compare(a.id, b.id)
 		}
 	}
 }
@@ -319,7 +379,7 @@ class PrintCommandHandler extends CommandHandler {
 	def getResult: RqResult[List[ComputationResult]] = {
 		RqSuccess(
 			List(
-				ComputationResult_Computation(List("!text"), (l) => l match {
+				ComputationResult_Computation(List("$text"), (l) => l match {
 					case List(JsString(text)) =>
 						RqSuccess(List(
 								ComputationResult_Token(Token_Comment(text))
@@ -359,22 +419,17 @@ object ApplicativeMain2 extends App {
 	
 	val p = new ProcessorData
 	
-	p.addEntity("a", JsString("1"))
-	p.addEntity("b", JsString("2"))
-	p.addEntity("c", JsString("3"))
-	p.addEntity("cmd[1].text", JsString("Hello, World"))
-	//println(p.cnQueue)
-	p.addComputation(cn1.entity_l, cn1.fn, Nil)
-	//println(p.cnQueue)
-	p.addComputation(cn2.entity_l, cn2.fn, Nil)
-	//println(p.cnQueue)
+	p.setEntity("a", JsString("1"))
+	p.setEntity("b", JsString("2"))
+	p.setEntity("c", JsString("3"))
+	p.setEntity("cmd[1].text", JsString("Hello, World"))
+	//p.addComputation(cn1.entity_l, cn1.fn, Nil)
+	//p.addComputation(cn2.entity_l, cn2.fn, Nil)
 	val h1 = new PrintCommandHandler
-	p.addCommand(cmd1, h1)
+	//p.addCommand(cmd1, h1)
+	p.setComputationResult(p.root, RqSuccess(List(ComputationResult_Computation(Nil, (_: List[JsValue]) => h1.getResult))))
 	
-	while (p.handleNextComputation) {
-		println(p.cnQueue)
-	}
-	p.makeMessagesForMissingInputs()
+	p.run()
 
 	def compComputation(cn1: Computation, cn2: Computation): Boolean =
 		compId(cn1.id, cn2.id)
@@ -393,7 +448,13 @@ object ApplicativeMain2 extends App {
 
 	println()
 	println("Computations:")
-	p.cn_l.toList.sortWith(compComputation).map(cn => cn.id.mkString(".")+" "+cn.entity_l).foreach(println)
+	p.getComputationList.map({ node =>
+		node.result match {
+			case ComputationResult_Computation(entity_l, _) =>
+				p.getIdString(node)+": "+entity_l.mkString(",")
+			case _ =>
+		}
+	}).foreach(println)
 
 	println()
 	println("Entities:")
@@ -401,7 +462,7 @@ object ApplicativeMain2 extends App {
 	
 	println()
 	println("Tokens:")
-	p.token_l.toList.foreach(println)
+	p.getTokenList.map(_.result).foreach(println)
 	
 	println()
 	println("Messages:")
