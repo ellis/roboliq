@@ -15,6 +15,8 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
 import scala.math.Ordering
 
+import RqPimper._
+
 
 /**
  * A command is a JSON object that represents a command and its parameters.
@@ -126,6 +128,8 @@ class ProcessorData {
 	val dep_m: MultiMap[String, Node_Computation] = new HashMap[String, mutable.Set[Node_Computation]] with MultiMap[String, Node_Computation]
 	//val node_l = new mutable.TreeSet[Node]()(NodeOrdering)
 	val entity_m = new HashMap[String, JsValue]
+	val entityFind_l = mutable.Set[String]()
+	val entityMissing_l = mutable.Set[String]()
 	val cmdToJs_m = new HashMap[List[Int], JsObject]
 	
 	/*
@@ -210,13 +214,19 @@ class ProcessorData {
 	
 	def setEntity(id: String, jsval: JsValue) {
 		entity_m(id) = jsval
+		entityFind_l -= id
+		entityMissing_l -= id
 		// Queue the computations for which all inputs are available 
 		dep_m.get(id).map(_.foreach(updateComputationStatus))
 	}
 
 	// Add node to dependency set for each of its inputs
 	private def addDependencies(node: Node_Computation) {
-		node.result.entity_l.foreach(s => dep_m.addBinding(s, node))
+		node.result.entity_l.foreach(s => {
+			dep_m.addBinding(s, node)
+			if (!entity_m.contains(s) && !entityMissing_l.contains(s))
+				entityFind_l += s
+		})
 	}
 	
 	private def updateComputationStatus(node: Node_Computation) {
@@ -313,9 +323,53 @@ class ProcessorData {
 			message_m(id) = message_l
 	}
 	*/
+	private val Rx1 = """^([a-zA-Z]+)\[([0-9.]+)\]$""".r
+	private val Rx2 = """^([a-zA-Z]+)\[([0-9.]+)\]\.(.+)$""".r
+	
+	// REFACTOR: turn entity lookups into computations, somehow
 	def run() {
-		run(makePendingComputationList)
+		def step() {
+			val id_l = entityFind_l.toList
+			for (id <- id_l) {
+				entityFind_l -= id
+				(id match {
+					case Rx2(t, k, f) => findEntity(t, k, f.split('.').toList)
+					case Rx1(t, k) => findEntity(t, k, Nil)
+					case _ => RqError(s"don't know how to find entity: `$id`")
+				}) match {
+					case e: RqError[_] =>
+						entityMissing_l += id
+						System.err.println(e)
+					case RqSuccess(jsval, w) =>
+						w.foreach(System.err.println)
+						setEntity(id, jsval)
+				}
+			}
+			val l = makePendingComputationList
+			if (!l.isEmpty) {
+				run(l)
+				step()
+			}
+		}
+		step()
 		makeMessagesForMissingInputs()
+	}
+	
+	private def findEntity(table: String, key: String, field_l: List[String]): RqResult[JsValue] = {
+		val id = (s"$table[$key]" :: field_l).mkString(".")
+		entity_m.get(id) match {
+			case Some(jsval) => RqSuccess(jsval)
+			case None =>
+				if (field_l.isEmpty)
+					RqError(s"entity not found: `$id`")
+				else {
+					for {
+						jsval <- findEntity(table, key, field_l.init)
+						jsobj <- if (jsval.isInstanceOf[JsObject]) RqSuccess(jsval.asJsObject) else RqError(s"bad field name: `$id`")
+						fieldVal <- jsobj.fields.get(field_l.last).asRq(s"field not found: `$id`")
+					} yield fieldVal
+				}
+		}
 	}
 	
 	private def run(node_l: List[Node_Computation]) {
@@ -459,7 +513,7 @@ object ApplicativeMain2 extends App {
 	p.setEntity("a", JsString("1"))
 	p.setEntity("b", JsString("2"))
 	p.setEntity("c", JsString("3"))
-	p.setEntity("cmd[1].text", JsString("Hello, World"))
+	//p.setEntity("cmd[1].text", JsString("Hello, World"))
 	//p.addComputation(cn1.entity_l, cn1.fn, Nil)
 	//p.addComputation(cn2.entity_l, cn2.fn, Nil)
 	val h1 = new PrintCommandHandler
