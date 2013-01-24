@@ -68,7 +68,7 @@ trait Token
 
 case class Token_Comment(s: String) extends Token
 
-case class Node(parent: Node, index: Int, result: ComputationResult) {
+class Node(val parent: Node, val index: Int) {
 	lazy val id_r = getId_r
 	lazy val id = id_r.reverse
 	
@@ -83,6 +83,25 @@ case class Node(parent: Node, index: Int, result: ComputationResult) {
 			index :: parent.getId
 	}
 }
+
+class Node_Result(
+	parent: Node,
+	index: Int,
+	val result: ComputationResult
+) extends Node(parent, index)
+
+class Node_Computation(
+	parent: Node,
+	index: Int,
+	val result: ComputationResult_Computation,
+	val idCmd: List[Int]
+) extends Node(parent, index)
+
+class Node_Token(
+	parent: Node,
+	index: Int,
+	val token: Token
+) extends Node(parent, index)
 
 /*
 class Node[A <: ComputationResult](parent: Node[_], index: Int, result: A) {
@@ -100,13 +119,14 @@ class Node[A <: ComputationResult](parent: Node[_], index: Int, result: A) {
 
 class ProcessorData {
 	// key is a Computation.id_r
-	val root = Node(null, 0, null)
+	val root = new Node_Computation(null, 0, ComputationResult_Computation(Nil, (_: List[JsValue]) => RqError("hmm")), Nil)
 	val message_m = new HashMap[Node, List[String]]
 	val children_m = new HashMap[Node, List[Node]]
-	val status_m = new HashMap[Node, Int]
-	val dep_m: MultiMap[String, Node] = new HashMap[String, scala.collection.mutable.Set[Node]] with MultiMap[String, Node]
+	val status_m = new HashMap[Node_Computation, Int]
+	val dep_m: MultiMap[String, Node_Computation] = new HashMap[String, mutable.Set[Node_Computation]] with MultiMap[String, Node_Computation]
 	//val node_l = new mutable.TreeSet[Node]()(NodeOrdering)
 	val entity_m = new HashMap[String, JsValue]
+	val cmdToJs_m = new HashMap[List[Int], JsObject]
 	
 	/*
 	val cmdToJs_m = new HashMap[List[Int], JsObject]
@@ -120,11 +140,26 @@ class ProcessorData {
 	val cnToCommands_m = new HashMap[List[Int], Integer]
 	*/
 
-	def setComputationResult(node: Node, result: RqResult[List[ComputationResult]]) {
+	def setComputationResult(node: Node_Computation, result: RqResult[List[ComputationResult]]) {
 		val child_l: List[Node] = result match {
 			case RqSuccess(l, warning_l) =>
 				setMessages(node, warning_l)
-				l.zipWithIndex.map { case (r, index) => Node(node, index + 1, r) }
+				l.zipWithIndex.map { pair => 
+					val (r, index) = pair
+					r match {
+						case ComputationResult_Command(cmd, fn) =>
+							val result = new ComputationResult_Computation(Nil, (_: List[JsValue]) => fn)
+							val child = new Node_Computation(node, index + 1, result, Nil)
+							cmdToJs_m(child.id) = cmd
+							child
+						case result: ComputationResult_Computation =>
+							new Node_Computation(node, index + 1, result, Nil)
+						case ComputationResult_Token(token) =>
+							new Node_Token(node, index + 1, token)
+						case _ =>
+							new Node_Result(node, index + 1, r)
+					}
+				}
 			case RqError(error_l, warning_l) =>
 				setMessages(node, error_l ++ warning_l)
 				Nil
@@ -146,13 +181,14 @@ class ProcessorData {
 		else
 			children_m(node) = child_l
 		
+		// Handle addition of the child nodes to the Processor
 		for (child <- child_l) {
-			child.result match {
-				case ComputationResult_Computation(input_l, _) =>
-					addDependencies(child, input_l)
-					updateComputationStatus(child, input_l)
-				case ComputationResult_EntityRequest(idEntity) =>
-					setEntity(idEntity, JsString("my "+idEntity))
+			child match {
+				case n: Node_Computation =>
+					addDependencies(n)
+					updateComputationStatus(n)
+				//case ComputationResult_EntityRequest(idEntity) =>
+				//	setEntity(idEntity, JsString("my "+idEntity))
 				case _ =>
 			}
 		}
@@ -166,21 +202,12 @@ class ProcessorData {
 	}
 
 	// Add node to dependency set for each of its inputs
-	private def addDependencies(node: Node, input_l: List[String]) {
-		input_l.foreach(s => dep_m.addBinding(s, node))
+	private def addDependencies(node: Node_Computation) {
+		node.result.entity_l.foreach(s => dep_m.addBinding(s, node))
 	}
 	
-	private def updateComputationStatus(node: Node) {
-		node.result match {
-			case ComputationResult_Computation(input_l, _) =>
-				updateComputationStatus(node, input_l)
-			case _ =>
-				System.err.println("INTERNAL: updateComputationStatus() called on non-computation node")
-		}
-	}
-	
-	private def updateComputationStatus(node: Node, input_l: List[String]) {
-		status_m(node) = if (input_l.forall(entity_m.contains)) 1 else 0
+	private def updateComputationStatus(node: Node_Computation) {
+		status_m(node) = if (node.result.entity_l.forall(entity_m.contains)) 1 else 0
 	}
 	/*
 	
@@ -278,7 +305,7 @@ class ProcessorData {
 		makeMessagesForMissingInputs()
 	}
 	
-	private def run(node_l: List[Node]) {
+	private def run(node_l: List[Node_Computation]) {
 		println("run")
 		if (!node_l.isEmpty) {
 			node_l.foreach(handleComputation)
@@ -286,11 +313,11 @@ class ProcessorData {
 		}
 	}
 	
-	private def makePendingComputationList: List[Node] = {
+	private def makePendingComputationList: List[Node_Computation] = {
 		status_m.filter(_._2 == 1).keys.toList.sorted(NodeOrdering)
 	}
 	
-	private def handleComputation(node: Node) {
+	private def handleComputation(node: Node_Computation) {
 		node.result match {
 			case ComputationResult_Computation(entity_l, fn) =>
 				val input_l: List[JsValue] = entity_l.map(entity_m)
@@ -317,18 +344,12 @@ class ProcessorData {
 		step(root).tail
 	}
 	
-	def getComputationList(): List[Node] = {
-		getNodeList.filter(_.result match {
-			case x: ComputationResult_Computation => true
-			case _ => false
-		})
+	def getComputationList(): List[Node_Computation] = {
+		getNodeList.collect { case n: Node_Computation => n }
 	}
 	
-	def getTokenList(): List[Node] = {
-		getNodeList.filter(_.result match {
-			case x: ComputationResult_Token => true
-			case _ => false
-		})
+	def getTokenList(): List[Node_Token] = {
+		getNodeList.collect { case n: Node_Token => n }
 	}
 	
 	def getMessages(): List[String] = {
@@ -465,7 +486,7 @@ object ApplicativeMain2 extends App {
 	
 	println()
 	println("Tokens:")
-	p.getTokenList.map(_.result).foreach(println)
+	p.getTokenList.map(_.token).foreach(println)
 	
 	println()
 	println("Messages:")
