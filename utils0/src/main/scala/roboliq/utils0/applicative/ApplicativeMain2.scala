@@ -145,19 +145,32 @@ class ProcessorData {
 			case RqSuccess(l, warning_l) =>
 				setMessages(node, warning_l)
 				l.zipWithIndex.map { pair => 
-					val (r, index) = pair
+					val (r, index0) = pair
+					val index = index0 + 1
 					r match {
 						case ComputationResult_Command(cmd, fn) =>
-							val result = new ComputationResult_Computation(Nil, (_: List[JsValue]) => fn)
-							val child = new Node_Computation(node, index + 1, result, Nil)
-							cmdToJs_m(child.id) = cmd
-							child
+							val idCmd = node.id ++ List(index)
+							val idCmd_s = getIdString(idCmd)
+							val idEntity = s"cmd[${idCmd_s}]"
+							cmdToJs_m(idCmd) = cmd
+							setEntity(idEntity, cmd)
+
+							val result = ComputationResult_Computation(Nil, (_: List[JsValue]) => fn)
+							new Node_Computation(node, index, result, idCmd)
 						case result: ComputationResult_Computation =>
-							new Node_Computation(node, index + 1, result, Nil)
+							val entity2_l = result.entity_l.map(s => {
+								if (s.startsWith("$")) {
+									val idCmd_s = getIdString(node.idCmd)
+									s"cmd[${idCmd_s}].${s.tail}"
+								}
+								else s
+							})
+							val result2 = result.copy(entity_l = entity2_l)
+							new Node_Computation(node, index, result2, node.idCmd)
 						case ComputationResult_Token(token) =>
 							new Node_Token(node, index + 1, token)
 						case _ =>
-							new Node_Result(node, index + 1, r)
+							new Node_Result(node, index, r)
 					}
 				}
 			case RqError(error_l, warning_l) =>
@@ -439,7 +452,7 @@ object ApplicativeMain2 extends App {
 					)
 				))
 			)))
-	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World" }""").asJsObject
+	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	
 	val p = new ProcessorData
 	
@@ -451,7 +464,7 @@ object ApplicativeMain2 extends App {
 	//p.addComputation(cn2.entity_l, cn2.fn, Nil)
 	val h1 = new PrintCommandHandler
 	//p.addCommand(cmd1, h1)
-	p.setComputationResult(p.root, RqSuccess(List(ComputationResult_Computation(Nil, (_: List[JsValue]) => h1.getResult))))
+	p.setComputationResult(p.root, RqSuccess(List(ComputationResult_Command(cmd1, h1.getResult))))
 	
 	p.run()
 
