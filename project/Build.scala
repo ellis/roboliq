@@ -55,7 +55,7 @@ object MyBuild extends Build {
 			base = file("utils0"),
 			settings = buildSettings ++ Seq(
 				name := "utils0",
-				libraryDependencies ++= Seq(compiler, reflect, commons_io, scalatest, scalaz, yaml, ejml, json_gson, json_spray),
+				libraryDependencies ++= Seq(compiler, reflect, commons_io, scalatest, scalaz, scopt, yaml, ejml, json_gson, json_spray),
 				initialCommands in console := "import scalaz._, Scalaz._"
 			)
 		)
@@ -66,6 +66,7 @@ object MyBuild extends Build {
 	val commons_io = "commons-io" % "commons-io" % "2.2"
 	val scalatest = "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 	val scalaz = "org.scalaz" % "scalaz-core_2.10" % "7.0.0-M7"
+  val scopt = "com.github.scopt" %% "scopt" % "2.1.0"
 	val yaml = "org.yaml" % "snakeyaml" % "1.10"
 	val ejml = "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
 	val json_gson = "com.google.code.gson" % "gson" % "2.2.1"
