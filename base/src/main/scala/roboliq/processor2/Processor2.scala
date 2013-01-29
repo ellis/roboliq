@@ -86,6 +86,7 @@ class Node_Result(
 ) extends Node(parent, index)
 
 class Node_Computation(
+	val name: String,
 	parent: Node,
 	index: Int,
 	val result: ComputationResult_Computation,
@@ -100,8 +101,8 @@ class Node_Token(
 
 class ProcessorData {
 	// key is a Computation.id_r
-	val root = new Node_Computation(null, 0, ComputationResult_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
-	val rootObj = new Node_Computation(null, 0, ComputationResult_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
+	val root = new Node_Computation("root", null, 0, ComputationResult_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
+	val rootObj = new Node_Computation("rootObj", null, 0, ComputationResult_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
 	val message_m = new HashMap[Node, List[String]]
 	val children_m = new HashMap[Node, List[Node]]
 	val status_m = new HashMap[Node_Computation, Int]
@@ -134,7 +135,7 @@ class ProcessorData {
 							setEntity(idEntity, cmd)
 
 							val result = ComputationResult_Computation(Nil, (_: List[Object]) => fn)
-							new Node_Computation(node, index, result, idCmd)
+							new Node_Computation("cmd: "+cmd.fields.getOrElse("cmd", "<MISSING>"), node, index, result, idCmd)
 						case result: ComputationResult_Computation =>
 							val entity2_l = result.entity_l.map(idclass => {
 								// Substitute in full path for command parameters starting with '$'
@@ -148,11 +149,14 @@ class ProcessorData {
 								idclass2
 							})
 							val result2 = result.copy(entity_l = entity2_l)
-							new Node_Computation(node, index, result2, node.idCmd)
+							new Node_Computation(result2.entity_l.toString, node, index, result2, node.idCmd)
 						case ComputationResult_Token(token) =>
 							new Node_Token(node, index + 1, token)
 						case ComputationResult_Entity(id, jsval) =>
 							setEntity(id, jsval)
+							new Node_Result(node, index, r)
+						case ComputationResult_Object(idclass, obj) =>
+							setEntityObj(idclass, obj)
 							new Node_Result(node, index, r)
 						case _ =>
 							new Node_Result(node, index, r)
@@ -177,7 +181,7 @@ class ProcessorData {
 							case List(jsval: JsValue) =>
 								conversion(idclass, jsval)
 						})
-						val node = new Node_Computation(rootObj, 0, result, Nil)
+						val node = new Node_Computation(idclass.toString, rootObj, 0, result, Nil)
 						idclassNode_m(idclass) = node
 						Some(node)
 					}
@@ -226,6 +230,13 @@ class ProcessorData {
 		entityObj_m(idclass) = jsval
 		// Queue the computations for which all inputs are available 
 		dep_m.get(id).map(_.foreach(updateComputationStatus))
+	}
+
+	def setEntityObj(idclass: IdClass, obj: Object) {
+		assert(idclass.clazz != classOf[JsValue])
+		entityObj_m(idclass) = obj
+		// Queue the computations for which all inputs are available 
+		dep_m.get(idclass.id).map(_.foreach(updateComputationStatus))
 	}
 
 	// Add node to dependency set for each of its inputs
@@ -304,6 +315,7 @@ class ProcessorData {
 	}
 	
 	private def handleComputation(node: Node_Computation) {
+		println(s"try node ${node.name}")
 		node.result match {
 			case ComputationResult_Computation(entity_l, fn) =>
 				val input_l: List[Object] = entity_l.map(entityObj_m)
@@ -316,7 +328,7 @@ class ProcessorData {
 		for ((node, status) <- status_m if status == 0) {
 			node.result match {
 				case ComputationResult_Computation(entity_l, _) =>
-					val message_l = entity_l.filterNot(entityObj_m.contains).map(idfn => s"ERROR: missing command parameter `${idfn.id}`")
+					val message_l = entity_l.filterNot(entityObj_m.contains).map(idfn => s"ERROR: missing entity `${idfn.id}` of class `${idfn.clazz}`")
 					setMessages(node, message_l) 
 				case _ =>
 			}
@@ -525,15 +537,15 @@ object ApplicativeMain2 extends App {
 	println("Computations:")
 	p.getComputationList.map({ node =>
 		node.result match {
-			case ComputationResult_Computation(entity_l, _) =>
-				p.getIdString(node)+": "+entity_l.mkString(",")
+			case _: ComputationResult_Computation =>
+				p.getIdString(node)+": "+node.name
 			case _ =>
 		}
 	}).foreach(println)
 
 	println()
 	println("Entities:")
-	p.entity_m.toList.sortBy(_._1).foreach(pair => println(pair._1+" "+pair._2))
+	p.entity_m.toList.sortBy(_._1).foreach(pair => println(pair._1+": "+pair._2))
 	
 	println()
 	println("Tokens:")
