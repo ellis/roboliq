@@ -184,10 +184,10 @@ class ProcessorData {
 					else {
 						None
 					}
-				})
+				}) ++ List(child)
 			case child => child :: Nil
 		})
-
+		println(child_l, child2_l)
 		setChildren(node, child2_l)
 		status_m(node) = 2
 	}
