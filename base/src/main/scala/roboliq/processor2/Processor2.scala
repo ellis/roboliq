@@ -492,6 +492,15 @@ class PrintCommandHandler extends CommandHandler {
 		}
 }
 
+class Print2CommandHandler extends CommandHandler {
+	val cmd_l = List[String]("print2") 
+	
+	def getResult =
+		handlerRequire (as[Integer]('number)) { (n) =>
+			handlerReturn(Token_Comment(n.toString))
+		}
+}
+
 /**
  * Steps to test:
  * 
@@ -503,6 +512,7 @@ class PrintCommandHandler extends CommandHandler {
 
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
+	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
 	
 	val p = new ProcessorData
 	
@@ -513,8 +523,12 @@ object ApplicativeMain2 extends App {
 	//p.addComputation(cn1.entity_l, cn1.fn, Nil)
 	//p.addComputation(cn2.entity_l, cn2.fn, Nil)
 	val h1 = new PrintCommandHandler
+	val h2 = new Print2CommandHandler
 	//p.addCommand(cmd1, h1)
-	p.setComputationResult(p.root, RqSuccess(List(ComputationResult_Command(cmd1, h1.getResult))))
+	p.setComputationResult(p.root, RqSuccess(List(
+		ComputationResult_Command(cmd1, h1.getResult),
+		ComputationResult_Command(cmd2, h2.getResult)
+	)))
 	
 	p.run()
 
