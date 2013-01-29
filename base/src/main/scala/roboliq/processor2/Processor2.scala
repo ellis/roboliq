@@ -101,16 +101,19 @@ class Node_Token(
 class ProcessorData {
 	// key is a Computation.id_r
 	val root = new Node_Computation(null, 0, ComputationResult_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
+	val rootObj = new Node_Computation(null, 0, ComputationResult_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
 	val message_m = new HashMap[Node, List[String]]
 	val children_m = new HashMap[Node, List[Node]]
 	val status_m = new HashMap[Node_Computation, Int]
 	val dep_m: MultiMap[String, Node_Computation] = new HashMap[String, mutable.Set[Node_Computation]] with MultiMap[String, Node_Computation]
 	val entity_m = new HashMap[String, JsValue]
-	val entityFind_l = mutable.Set[String]()
-	val entityMissing_l = mutable.Set[String]()
+	val entityStatus_m = new HashMap[String, Int]
+	//val entityFind_l = mutable.Set[IdClass]()
+	//val entityMissing_l = mutable.Set[IdClass]()
 	val cmdToJs_m = new HashMap[List[Int], JsObject]
 	val entityObj_m = new HashMap[IdClass, Object]
-	val conversion_l = new HashMap[Class[_], JsValue => HandlerResult]
+	val conversion_m = new HashMap[Class[_], JsValue => HandlerResult]
+	val idclassNode_m = new HashMap[IdClass, Node_Computation]
 	
 	def setComputationResult(node: Node_Computation, result: HandlerResult) {
 		val child_l: List[Node] = result match {
@@ -131,11 +134,15 @@ class ProcessorData {
 							new Node_Computation(node, index, result, idCmd)
 						case result: ComputationResult_Computation =>
 							val entity2_l = result.entity_l.map(idclass => {
-								if (idclass.id.startsWith("$")) {
-									val idCmd_s = getIdString(node.idCmd)
-									idclass.copy(id = s"cmd[${idCmd_s}].${idclass.id.tail}")
+								// Substitute in full path for command parameters starting with '$'
+								val idclass2 = {
+									if (idclass.id.startsWith("$")) {
+										val idCmd_s = getIdString(node.idCmd)
+										idclass.copy(id = s"cmd[${idCmd_s}].${idclass.id.tail}")
+									}
+									else idclass
 								}
-								else idclass
+								idclass2
 							})
 							val result2 = result.copy(entity_l = entity2_l)
 							new Node_Computation(node, index, result2, node.idCmd)
@@ -152,7 +159,33 @@ class ProcessorData {
 				setMessages(node, error_l ++ warning_l)
 				Nil
 		}
-		setChildren(node, child_l)
+		
+		val child2_l = child_l.flatMap(_ match {
+			case child: Node_Computation =>
+				child.result.entity_l.flatMap(idclass => {
+					//
+					if (
+						idclass.clazz != classOf[JsValue] &&
+						!idclassNode_m.contains(idclass) &&
+						conversion_m.contains(idclass.clazz)
+					) {
+						val conversion = conversion_m(idclass.clazz)
+						val result = ComputationResult_Computation(List(IdClass(idclass.id, classOf[JsValue])), (l: List[Object]) => l match {
+							case List(jsval: JsValue) =>
+								conversion(jsval)
+						})
+						val node = new Node_Computation(rootObj, 0, result, Nil)
+						idclassNode_m(idclass) = node
+						Some(node)
+					}
+					else {
+						None
+					}
+				})
+			case child => child :: Nil
+		})
+
+		setChildren(node, child2_l)
 		status_m(node) = 2
 	}
 	
@@ -185,20 +218,19 @@ class ProcessorData {
 	
 	def setEntity(id: String, jsval: JsValue) {
 		entity_m(id) = jsval
-		entityFind_l -= id
-		entityMissing_l -= id
-		entityObj_m(IdClass(id, classOf[JsValue])) = jsval
+		entityStatus_m(id) = 1
+		val idclass = IdClass(id, classOf[JsValue])
+		entityObj_m(idclass) = jsval
 		// Queue the computations for which all inputs are available 
 		dep_m.get(id).map(_.foreach(updateComputationStatus))
 	}
 
 	// Add node to dependency set for each of its inputs
 	private def addDependencies(node: Node_Computation) {
-		node.result.entity_l.foreach(idfn => {
-			val s = idfn.id
-			dep_m.addBinding(s, node)
-			if (!entity_m.contains(s) && !entityMissing_l.contains(s))
-				entityFind_l += s
+		node.result.entity_l.foreach(idclass => {
+			dep_m.addBinding(idclass.id, node)
+			if (!entityStatus_m.contains(idclass.id))
+				entityStatus_m(idclass.id) = 0
 		})
 	}
 	
@@ -214,16 +246,15 @@ class ProcessorData {
 	// REFACTOR: turn entity lookups into computations, somehow
 	def run() {
 		def step() {
-			val id_l = entityFind_l.toList
-			for (id <- id_l) {
-				entityFind_l -= id
+			val entity_l = entityStatus_m.filter(_._2 == 0).toList.map(_._1)
+			for (id <- entity_l) {
 				(id match {
 					case Rx2(t, k, f) => findEntity(t, k, f.split('.').toList)
 					case Rx1(t, k) => findEntity(t, k, Nil)
 					case _ => RqError(s"don't know how to find entity: `$id`")
 				}) match {
 					case e: RqError[_] =>
-						entityMissing_l += id
+						entityStatus_m(id) = 2
 						System.err.println(e)
 					case RqSuccess(jsval, w) =>
 						w.foreach(System.err.println)
