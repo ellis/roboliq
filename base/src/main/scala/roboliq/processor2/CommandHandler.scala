@@ -10,18 +10,15 @@ trait CommandHandler {
 	val cmd_l: List[String]
 	def getResult: RqResult[List[ComputationResult]]
 
-	protected case class RequireItem[A](id: String, fn: JsValue => RqResult[List[ComputationResult]])//map: JsValue => RqResult[A])
+	protected case class RequireItem[A: Manifest](id: String) {
+		val clazz = implicitly[Manifest[A]].runtimeClass
+	}
 	
-	protected def handlerRequire[A](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationResult]]): RqResult[List[ComputationResult]] = {
+	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationResult]]): RqResult[List[ComputationResult]] = {
 		RqSuccess(
 			List(
-				ComputationResult_Computation(List(a.id), (j_l) => j_l match {
-					case List(oa: A) =>
-						val oa_? = a.map(ja)
-						for {
-							oa <- oa_?
-							res <- fn(oa)
-						} yield res
+				ComputationResult_Computation(List(IdClass(a.id, a.clazz)), (j_l) => j_l match {
+					case List(oa: A) => fn(oa)
 					case _ => RqError("invalid parameters")
 				})
 			)
@@ -34,18 +31,9 @@ trait CommandHandler {
 		))
 	}
 	
-	protected def getJsValue(id: String): RequireItem[JsValue] = {
-		
-	}
-	
-	protected def getJsObject(id: String): RequireItem[JsObject]
-	
-	protected def getString(a: Symbol): RequireItem[String] =
-		RequireItem[String]("$"+a.name, (jsval: JsValue) => jsval match {
-			case JsString(text) => RqSuccess(text)
-			case _ => RqSuccess(jsval.toString)
-		})
-	
+	protected def as[A: Manifest](id: String): RequireItem[A] = RequireItem[A](id)
+	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A]("$"+symbol.name)
+	/*
 	protected def getPlateModel(id: String): RequireItem[PlateModel] = {
 		handlerRequire(
 			getJsObject(s"plateModel[$id]")
@@ -81,5 +69,5 @@ trait CommandHandler {
 			case JsString(text) => RqSuccess(text)
 			case _ => RqSuccess(jsval.toString)
 		})
-	}
+	}*/
 }

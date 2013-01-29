@@ -10,6 +10,7 @@ class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
+/*
 class MovePlateHandler extends CommandHandler {
 	val cmd_l = List[String]("movePlate")
 	
@@ -44,3 +45,4 @@ class MovePlateHandler extends CommandHandler {
 		}
 	}
 }
+*/

@@ -5,13 +5,13 @@ import scala.language.implicitConversions
 import scalaz.Monad
 
 
-sealed trait RqResult[A] {
+sealed trait RqResult[+A] {
 	val warning_r: List[String]
 	def map[B](f: A => B): RqResult[B]
 	def flatMap[B](f: A => RqResult[B]): RqResult[B]
 }
 
-sealed case class RqSuccess[A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {
+sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {
 	def map[B](f: A => B): RqResult[B] = RqSuccess(f(res), warning_r)
 	def flatMap[B](f: A => RqResult[B]): RqResult[B] = {
 		f(res) match {
@@ -21,7 +21,7 @@ sealed case class RqSuccess[A](res: A, warning_r: List[String] = Nil) extends Rq
 	} 
 }
 
-sealed case class RqError[A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
+sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
 	def map[B](f: A => B): RqResult[B] = RqError[B](error_l, warning_r)
 	def flatMap[B](f: A => RqResult[B]): RqResult[B] = RqError[B](error_l, warning_r)
 }
