@@ -17,7 +17,7 @@ abstract class CommandHandler {
 		null
 	}
 	
-	def findPlate(idRef: Symbol): LookupVariable[Plate] = {
+	/*def findPlate(idRef: Symbol): LookupVariable[Plate] = {
 		import MyJsonProtocol._
 		def fn(jsobj: JsObject): RqResult[Plate] = {
 			try RqSuccess(jsobj.convertTo[Plate])
@@ -26,5 +26,5 @@ abstract class CommandHandler {
 			}
 		}
 		new LookupObj[Plate]("plate", id, fn _)
-	}
+	}*/
 }

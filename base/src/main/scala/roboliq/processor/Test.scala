@@ -10,6 +10,7 @@ class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
+/*
 class MovePlateCmdHandler extends CommandHandler {
 	def makeStep(): Step = {
 		find (
@@ -37,3 +38,4 @@ class MovePlateCmdHandler extends CommandHandler {
 		}
 	}
 }
+*/
