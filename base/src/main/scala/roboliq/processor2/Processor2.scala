@@ -33,9 +33,9 @@ case class ComputationResult_Event(event: Event) extends ComputationResult
 case class ComputationResult_EntityRequest(id: String) extends ComputationResult
 case class ComputationResult_Computation(
 	entity_l: List[IdClass],
-	fn: (List[Object]) => RqResult[List[ComputationResult]]
+	fn: (List[Object]) => HandlerResult
 ) extends ComputationResult
-case class ComputationResult_Command(cmd: JsObject, fn: RqResult[List[ComputationResult]]) extends ComputationResult
+case class ComputationResult_Command(cmd: JsObject, fn: HandlerResult) extends ComputationResult
 case class ComputationResult_Token(token: Token) extends ComputationResult
 case class ComputationResult_Entity(id: String, jsval: JsValue) extends ComputationResult
 case class ComputationResult_Object(idclass: IdClass, obj: Object) extends ComputationResult
@@ -58,7 +58,6 @@ case class ComputationNode(
 )*/
 
 class Event
-class Command
 trait Token
 
 case class Token_Comment(s: String) extends Token

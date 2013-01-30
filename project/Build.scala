@@ -10,7 +10,8 @@ object BuildSettings {
     organization := buildOrganization,
     version      := buildVersion,
     scalaVersion := buildScalaVersion,
-    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
   )
 }
 
@@ -28,7 +29,7 @@ object MyBuild extends Build {
 			base = file("base"),
 			settings = buildSettings ++ Seq(
 				name := "base",
-				libraryDependencies ++= Seq(reflect, commons_io, scalatest, scalaz, yaml, ejml, json_spray)
+				libraryDependencies ++= Seq(reflect, commons_io, scalatest, scalaz, akka, yaml, ejml, json_spray)
 			)
 		)
 
@@ -60,17 +61,18 @@ object MyBuild extends Build {
 			)
 		)
 
- 	// Dependencies
- 	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.0"
+	// Dependencies
+	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.0"
 	val reflect = "org.scala-lang" % "scala-reflect" % "2.10.0"
 	val commons_io = "commons-io" % "commons-io" % "2.2"
 	val scalatest = "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 	val scalaz = "org.scalaz" % "scalaz-core_2.10" % "7.0.0-M7"
-  val scopt = "com.github.scopt" %% "scopt" % "2.1.0"
+	val akka = "com.typesafe.akka" %% "akka-actor" % "2.1.0"
+	val scopt = "com.github.scopt" %% "scopt" % "2.1.0"
 	val yaml = "org.yaml" % "snakeyaml" % "1.10"
 	val ejml = "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
 	val json_gson = "com.google.code.gson" % "gson" % "2.2.1"
 	val json_spray = "io.spray" % "spray-json_2.10" % "1.2.3"
 
-	addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.0")
+	//addSbtPlugin("org.ensime" % "ensime-sbt-cmd" % "0.1.0")
 }
