@@ -8,16 +8,16 @@ import roboliq.core._
 
 trait CommandHandler {
 	val cmd_l: List[String]
-	def getResult: RqResult[List[ComputationResult]]
+	def getResult: RqResult[List[ComputationItem]]
 
 	protected case class RequireItem[A: Manifest](id: String) {
 		val clazz = implicitly[Manifest[A]].runtimeClass
 	}
 	
-	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationResult]]): RqResult[List[ComputationResult]] = {
+	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): RqResult[List[ComputationItem]] = {
 		RqSuccess(
 			List(
-				ComputationResult_Computation(List(IdClass(a.id, a.clazz)), (j_l) => j_l match {
+				ComputationItem_Computation(List(IdClass(a.id, a.clazz)), (j_l) => j_l match {
 					case List(oa: A) => fn(oa)
 					case _ => RqError("invalid parameters")
 				})
@@ -25,9 +25,9 @@ trait CommandHandler {
 		)
 	}
 	
-	protected def handlerReturn(a: Token): RqResult[List[ComputationResult]] = {
+	protected def handlerReturn(a: Token): RqResult[List[ComputationItem]] = {
 		RqSuccess(List(
-				ComputationResult_Token(a)
+				ComputationItem_Token(a)
 		))
 	}
 	

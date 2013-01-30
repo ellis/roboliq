@@ -9,6 +9,10 @@ sealed trait RqResult[+A] {
 	val warning_r: List[String]
 	def map[B](f: A => B): RqResult[B]
 	def flatMap[B](f: A => RqResult[B]): RqResult[B]
+	def foreach(f: A => Unit): Unit
+	
+	def getWarnings: List[String] = warning_r.reverse
+	def getErrors: List[String]
 }
 
 sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {
@@ -19,11 +23,17 @@ sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends R
 			case RqError(error_l2, warning_r2) => RqError(error_l2, warning_r2 ++ warning_r)
 		}
 	} 
+	def foreach(f: A => Unit): Unit = f(res)
+
+	def getErrors: List[String] = Nil
 }
 
 sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
 	def map[B](f: A => B): RqResult[B] = RqError[B](error_l, warning_r)
 	def flatMap[B](f: A => RqResult[B]): RqResult[B] = RqError[B](error_l, warning_r)
+	def foreach(f: A => Unit): Unit = ()
+
+	def getErrors: List[String] = error_l
 }
 
 object RqError {

@@ -5,7 +5,7 @@ import akka.routing.RoundRobinRouter
 import roboliq.core.RqResult
 import spray.json.JsValue
 
-class ConversionActor(idclass: IdClass, fn: JsValue => HandlerResult) extends Actor {
+class ConversionActor(idclass: IdClass, fn: JsValue => ComputationResult) extends Actor {
 	def receive = {
 		case ActorMessage_ConversionInput(jsval) =>
 			sender ! ActorMessage_ConversionOutput(idclass, fn(jsval))
