@@ -70,8 +70,8 @@ class ProcessorData extends Actor {
 	// key is a Computation.id_r
 	val root = new Node_Computation(null, 0, Nil, (_: List[Object]) => RqError("hmm"), Nil)
 	//val rootObj = new Node_Conversion("rootObj", null, 0, ComputationItem_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
-	val message_m = new HashMap[Node, List[String]]
-	val children_m = new HashMap[Node, List[Node]]
+	//val message_m = new HashMap[Node, List[String]]
+	val children_m = new HashMap[Node, ArrayBuffer[Node]]
 	val result_m = new HashMap[Node_Computes, RqResult[_]]
 	val status_m = new HashMap[Node_Computes, Int]
 	val dep_m: MultiMap[String, Node_Computes] = new HashMap[String, mutable.Set[Node_Computes]] with MultiMap[String, Node_Computes]
@@ -97,6 +97,44 @@ class ProcessorData extends Actor {
 			setComputationResult(node, result)
 			
 		case ActorMessage_ConversionOutput(node, result) =>
+			setConversionResult(node, result)
+			
+		case ActorMessage_AddCommand(cmd) =>
+			val parent = root
+			val index = children_m.get(root).map(_.length).getOrElse(0) + 1
+			val node = Node_Command(parent, index, cmd)
+			register(node)
+	}
+	
+	private def register(node: Node) {
+		node match {
+			case n: HasComputationHierarchy =>
+				if (n.parent != null) {
+					children_m(n.parent) = children_m.get(n.parent) match {
+						case None => ArrayBuffer(node)
+						case Some(l) => l += node; l
+					}
+				}
+			case _ =>
+		}
+		
+		node match {
+			case n: Node_Computes =>
+				addDependencies(n)
+				updateComputationStatus(n)
+			case _ =>
+		}
+	}
+
+	private def registerInputs(node: Node_Computes) {
+		node.input_l.foreach(idclass => {
+			dep_m.addBinding(idclass.id, node)
+			if (!entityStatus_m.contains(idclass.id)) {
+				entityStatus_m(idclass.id) = 0
+				workerRouter ! ActorMessage_EntityLookup(idclass.id)
+				.. continue -- should make entityStatus_m have idclass as key
+			}
+		})
 	}
 	
 	def setComputationResult(node: Node_Computation, result: ComputationResult) {
@@ -281,6 +319,11 @@ class ProcessorData extends Actor {
 		//node_l ++= child_l
 	}
 	
+	private def registerNode(node: Node_Computes) {
+		addDependencies(node)
+		updateComputationStatus(node)
+	}
+	
 	def setEntity(id: String, jsval: JsValue) {
 		entity_m(id) = jsval
 		entityStatus_m(id) = 1
@@ -314,7 +357,9 @@ class ProcessorData extends Actor {
 				val input_l = node.input_l.map(entityObj_m)
 				node match {
 					case n: Node_Command =>
+						workerRouter ! ActorMessage_CommandLookup(n)
 					case n: Node_Computation =>
+						workerRouter ! ActorMessage_ComputationInput(n, input_l)
 					case n: Node_Conversion =>
 						workerRouter ! ActorMessage_ConversionInput(n, input_l)
 				}
