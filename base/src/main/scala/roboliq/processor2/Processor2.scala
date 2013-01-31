@@ -35,7 +35,7 @@ case class ComputationItem_Computation(
 	entity_l: List[IdClass],
 	fn: (List[Object]) => ComputationResult
 ) extends ComputationItem
-case class ComputationItem_Command(cmd: JsObject, fn: ComputationResult) extends ComputationItem
+case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
 case class ComputationItem_Token(token: Token) extends ComputationItem
 case class ComputationItem_Entity(id: String, jsval: JsValue) extends ComputationItem
 //case class ComputationItem_Object(idclass: IdClass, obj: Object) extends ComputationItem
@@ -67,21 +67,24 @@ import akka.routing.RoundRobinRouter
 
 class ProcessorData extends Actor {
 	
-	// key is a Computation.id_r
+	// Root of computation hierarchy
 	val root = new Node_Computation(null, 0, Nil, (_: List[Object]) => RqError("hmm"), Nil)
+	// List of conversions
+	val idclassNode_m = new HashMap[IdClass, Node_Conversion]
+	val status_m = new HashMap[Node_Computes, Int]
+	val dep_m: MultiMap[String, Node_Computes] = new HashMap[String, mutable.Set[Node_Computes]] with MultiMap[String, Node_Computes]
 	//val rootObj = new Node_Conversion("rootObj", null, 0, ComputationItem_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
 	//val message_m = new HashMap[Node, List[String]]
 	val children_m = new HashMap[Node, ArrayBuffer[Node]]
 	val result_m = new HashMap[Node_Computes, RqResult[_]]
-	val status_m = new HashMap[Node_Computes, Int]
-	val dep_m: MultiMap[String, Node_Computes] = new HashMap[String, mutable.Set[Node_Computes]] with MultiMap[String, Node_Computes]
-	val entity_m = new HashMap[String, JsValue]
-	val entityStatus_m = new HashMap[String, Int]
+	//val entity_m = new HashMap[String, JsValue]
+	val entity_m = new HashMap[IdClass, Object]
+	//val entityStatus_m = new HashMap[String, Int]
+	val entityStatus_m = new HashMap[IdClass, Int]
 	//val entityFind_l = mutable.Set[IdClass]()
 	//val entityMissing_l = mutable.Set[IdClass]()
-	val cmdToJs_m = new HashMap[List[Int], JsObject]
-	val entityObj_m = new HashMap[IdClass, Object]
-	val idclassNode_m = new HashMap[IdClass, Node_Conversion]
+	//val cmdToJs_m = new HashMap[List[Int], JsObject]
+	//val entityObj_m = new HashMap[IdClass, Object]
 	
 	val conversion_m = new HashMap[Class[_], (IdClass, JsValue) => ConversionResult]
 	conversion_m(classOf[String]) = Conversions.toString2
@@ -129,10 +132,13 @@ class ProcessorData extends Actor {
 	private def registerInputs(node: Node_Computes) {
 		node.input_l.foreach(idclass => {
 			dep_m.addBinding(idclass.id, node)
-			if (!entityStatus_m.contains(idclass.id)) {
-				entityStatus_m(idclass.id) = 0
-				workerRouter ! ActorMessage_EntityLookup(idclass.id)
-				.. continue -- should make entityStatus_m have idclass as key
+			if (!entityStatus_m.contains(idclass)) {
+				entityStatus_m(idclass) = 0
+				if (idclass.clazz == classOf[JsValue])
+					self ! ActorMessage_EntityLookup(idclass.id)
+				else {
+					val actor = context.actorOf(Props(new ConversionActor()), name = "myactor")
+				}
 			}
 		})
 	}
