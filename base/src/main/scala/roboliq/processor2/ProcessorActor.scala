@@ -14,11 +14,15 @@ abstract class ProcessorActor extends Actor {
 	}
 }
 
+class ComputingEnvironment(
+	val handler_m: Map[String, CommandHandler],
+	val entity_m: Map[IdClass, Object]
+)
+
 abstract class ComputingActor(
 	val master: ActorRef,
-	//val parent_? : Option[ComputingActor],
 	val index_? : Option[Integer],
-	//val id_? : Option[]
+	val id: List[String],
 	val input_l: List[IdClass]
 ) extends ProcessorActor {
 	protected var status = 0
@@ -26,34 +30,77 @@ abstract class ComputingActor(
 	private var inputObj_m = Map[IdClass, Object]()
 	private var inputObj_l = List[Object]()
 	
-	def run()
-	def process(l: List[Object])
+	override def preStart() {
+		master ! ActorMessage_RequestInputs(input_l)
+	}
 	
-	def handleEntities(map: scala.collection.Map[IdClass, Object]) {
-		val input2_l = input_l.map(map.get)
-		val b = input2_l.forall(_.isDefined)
-		val inputObj2_l = {
-			if (b)
-				input2_l.flatten
-			else
-				Nil
-		}
-		if (inputObj_l != inputObj2_l) {
+	def compute(env: ComputingEnvironment) {
+		inputObj_l = Nil
+		val input2_l = input_l.map(env.entity_m.get)
+		val bHaveInput = input2_l.forall(_.isDefined)
+		val inputObj2_l = if (bHaveInput) input2_l.flatten else Nil
+		val bCompute = (bHaveInput && inputObj_l != inputObj2_l)
+		if (!bHaveInput || bCompute)
 			removeChildren()
-			inputObj_l = inputObj2_l
-			if (b) {
-				status = 1
-				run()
-			}
-			else {
-				status = 0
-			}
-		}
-		else {
+		if (bCompute) {
+			process(env, inputObj_l)
 			for (child <- context.children)
-				child ! ActorMessage_Entities(map)
+				child ! ActorMessage_Compute(env)
 		}
 	}
+
+	def handleComputationItems(l: List[ComputationItem]) {
+		l.zipWithIndex.foreach { pair =>
+			val (item, i) = pair
+			val index = i + 1
+			val idItem = id ++ List(index.toString)
+			val idItem_s = idItem.mkString(".")
+			item match {
+				case ComputationItem_Command(cmd) =>
+					val actor = new CommandActor(master, Some(index), idItem, cmd)
+					context.actorOf(Props(actor), name = idItem_s)
+				case ComputationItem_Computation(entity_l, fn) =>
+					val actor = new ComputationActor(master, Some(index), idItem, fn)
+					context.actorOf(Props(actor), name = idItem_s)
+				case ComputationItem_Token(token) =>
+			}
+		}
+	}
+
+	
+	def receive = {
+		case ActorMessage_Handler(result) =>
+			handler_? = None
+			token_l = Nil
+			removeChildren()
+			result match {
+				case RqSuccess(handler, _) =>
+					val hresult = handler.getResult
+					handler_? = Some(handler)
+					result_? = Some(hresult)
+					hresult.foreach(l => l.zipWithIndex.foreach { pair =>
+						val (item, i) = pair
+						val index = i + 1
+						val idItem = id ++ List(index.toString)
+						item match {
+							case ComputationItem_Command(cmd) =>
+								val actor = new CommandActor(master, idItem, cmd, Some(index))
+								context.actorOf(Props(actor), name = idItem.mkString("."))
+							case ComputationItem_Computation(entity_l, fn) =>
+							case ComputationItem_Token(token) =>
+						}
+					})
+				case _ =>
+					handler_? = None
+					result_? = Some(result)
+			}
+			
+		case ActorMessage_Entities(map) =>
+			handleEntities(map)
+	}
+	
+	def run()
+	def process(env: ComputingEnvironment, inputObj_l: List[Object]): RqResult[_]
 
 	def handleComputationResult(result: ComputationResult) {
 		result_? = Some(hresult)

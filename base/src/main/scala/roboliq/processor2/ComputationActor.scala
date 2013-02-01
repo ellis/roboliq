@@ -8,13 +8,14 @@ import roboliq.core._
 
 class ComputationActor(
 	master: ActorRef,
-	id: List[String],
 	index_? : Option[Integer],
+	id: List[String],
 	fn: List[Object] => ComputationResult,
 	cmdKey: String
 ) extends ComputingActor(
 	master,
 	index_?,
+	id,
 	Nil
 ) {
 	var handler_? : Option[CommandHandler] = None
