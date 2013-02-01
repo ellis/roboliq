@@ -11,7 +11,10 @@ object BuildSettings {
     version      := buildVersion,
     scalaVersion := buildScalaVersion,
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
-    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+    resolvers ++= Seq(
+      "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+      "spray-json-resolver" at "http://repo.spray.cc"
+    )
   )
 }
 
