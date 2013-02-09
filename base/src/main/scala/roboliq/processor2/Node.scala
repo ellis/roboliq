@@ -60,6 +60,10 @@ case class Node_Command(
 ) extends Node_Computes with HasComputationHierarchy {
 	val input_l: List[IdClass] = Nil
 	val idCmd: List[Int] = id
+
+	override def toString(): String = {
+		s"Node_Command(${id.mkString(".")}, ${cmd})"
+	}
 }
 
 case class Node_Computation(
@@ -68,7 +72,11 @@ case class Node_Computation(
 	input_l: List[IdClass],
 	fn: (List[Object]) => ComputationResult,
 	idCmd: List[Int]
-) extends Node_Computes with HasComputationHierarchy
+) extends Node_Computes with HasComputationHierarchy {
+	override def toString(): String = {
+		s"Node_Computation(${id.mkString(".")}, ${input_l})"
+	}
+}
 
 case class Node_Token(
 	parent: Node with HasComputationHierarchy,
@@ -87,10 +95,14 @@ class Node_Result(
 */
 
 case class Node_Conversion(
-	//idclass: IdClass,
+	idclass: IdClass,
 	input_l: List[IdClass],
 	fn: (List[Object]) => ConversionResult
-) extends Node_Computes
+) extends Node_Computes {
+	override def toString(): String = {
+		s"Node_Conversion(${input_l.mkString("+")}, ${input_l})"
+	}
+}
 
 sealed trait ConversionItem
 case class ConversionItem_Conversion(

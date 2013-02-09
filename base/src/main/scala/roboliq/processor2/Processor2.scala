@@ -81,8 +81,9 @@ class ProcessorData(
 	val result_m = new HashMap[Node_Computes, RqResult[_]]
 	//val entity_m = new HashMap[String, JsValue]
 	val entity_m = new HashMap[IdClass, Object]
-	//val entityStatus_m = new HashMap[String, Int]
-	val entityStatus_m = new HashMap[IdClass, Int]
+	val entityStatus_m = new HashMap[IdClass, Status.Value]
+	val entityMessages_m = new HashMap[IdClass, RqResult[_]]
+	val token_m = new HashMap[List[Int], Token]
 	//val entityFind_l = mutable.Set[IdClass]()
 	//val entityMissing_l = mutable.Set[IdClass]()
 	//val cmdToJs_m = new HashMap[List[Int], JsObject]
@@ -152,7 +153,7 @@ class ProcessorData(
 		setComputationResult(root, tryResult)
 	}
 	
-	private def updateComputationStatusAndResult(node: Node_Computes, result: scala.util.Try[RqResult[_]]) {
+	private def updateComputationStatusAndResult(node: Node_Computes, result: scala.util.Try[RqResult[_]]): Status.Value = {
 		val (s, r: RqResult[_]) = result match {
 			case scala.util.Success(r) =>
 				r match {
@@ -164,10 +165,12 @@ class ProcessorData(
 		}
 		status_m(node) = s
 		result_m(node) = r
+		println("node: "+node+", status: "+s)
+		println("status_m: "+status_m)
+		s
 	}
 	
-	private def setComputationResult(node: Node_Computes with HasComputationHierarchy, result: scala.util.Try[ComputationResult]) {
-		updateComputationStatusAndResult(node, result)
+	private def setComputationResult(node: Node_Computes with HasComputationHierarchy, result: scala.util.Try[ComputationResult]): Status.Value = {
 		result match {
 			case scala.util.Success(RqSuccess(l, _)) =>
 				val child_l: List[Node_Computes] = l.zipWithIndex.flatMap { pair => 
@@ -175,13 +178,13 @@ class ProcessorData(
 					val index = index0 + 1
 					r match {
 						case ComputationItem_Command(cmd) =>
-							/*val idCmd = node.id ++ List(index)
+							val idCmd = node.id ++ List(index)
 							val idCmd_s = getIdString(idCmd)
 							val idEntity = s"cmd[${idCmd_s}]"
-							cmdToJs_m(idCmd) = cmd
+							//cmdToJs_m(idCmd) = cmd
 							setEntity(idEntity, cmd)
 		
-							val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)*/
+							//val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)
 							Some(Node_Command(node, index, cmd))
 						case result: ComputationItem_Computation =>
 							val entity2_l = result.entity_l.map(idclass => {
@@ -195,10 +198,12 @@ class ProcessorData(
 								}
 								idclass2
 							})
+							
 							//val result2 = result.copy(entity_l = entity2_l)
 							Some(Node_Computation(node, index, entity2_l, result.fn, node.idCmd))
 						case ComputationItem_Token(token) =>
 							println("token: "+Node_Token(node, index + 1, token))
+							token_m(node.id ++ List(index)) =  token
 							None
 						case ComputationItem_Entity(id, jsval) =>
 							setEntity(id, jsval)
@@ -212,10 +217,10 @@ class ProcessorData(
 				setChildren(node, child_l)
 			case _ =>
 		}
+		updateComputationStatusAndResult(node, result)
 	}
 	
-	private def setConversionResult(node: Node_Conversion, result: scala.util.Try[ConversionResult]) {
-		updateComputationStatusAndResult(node, result)
+	private def setConversionResult(node: Node_Conversion, result: scala.util.Try[ConversionResult]): Status.Value = {
 		result match {
 			case scala.util.Success(RqSuccess(l, _)) =>
 				val child_l: List[Node_Computes] = l.zipWithIndex.flatMap { pair => 
@@ -223,7 +228,7 @@ class ProcessorData(
 					val index = index0 + 1
 					r match {
 						case ConversionItem_Conversion(input_l, fn) =>
-							Some(Node_Conversion(input_l, fn))
+							Some(Node_Conversion(node.idclass, input_l, fn))
 						case ConversionItem_Object(idclass, obj) =>
 							setEntityObj(idclass, obj)
 							None
@@ -232,6 +237,7 @@ class ProcessorData(
 				setChildren(node, child_l)
 			case _ =>
 		}
+		updateComputationStatusAndResult(node, result)
 	}
 	
 	/*
@@ -333,9 +339,8 @@ class ProcessorData(
 		// Handle addition of the child nodes to the Processor
 		for (child <- child_l) {
 			child match {
-				case n: Node_Computation =>
-					addDependencies(n)
-					updateComputationStatus(n)
+				case n: Node_Computes =>
+					registerNode(n)
 				//case ComputationItem_EntityRequest(idEntity) =>
 				//	setEntity(idEntity, JsString("my "+idEntity))
 				case _ =>
@@ -356,7 +361,7 @@ class ProcessorData(
 
 	def setEntityObj(idclass: IdClass, obj: Object) {
 		entity_m(idclass) = obj
-		entityStatus_m -= idclass
+		entityStatus_m(idclass) = Status.Success
 		// Queue the computations for which all inputs are available 
 		dep_m.get(idclass.id).map(_.foreach(updateComputationStatus))
 	}
@@ -365,8 +370,32 @@ class ProcessorData(
 	private def addDependencies(node: Node_Computes) {
 		node.input_l.foreach(idclass => {
 			dep_m.addBinding(idclass.id, node)
-			if (!entityStatus_m.contains(idclass))
-				entityStatus_m(idclass) = 0
+
+			// Schedule lookups and create conversion nodes
+			for (idclass <- node.input_l) {
+				val idclass0 = IdClass(idclass.id, classOf[JsValue])
+				
+				// JsValue lookup
+				if (!entityStatus_m.contains(idclass0))
+					entityStatus_m(idclass0) = Status.Ready
+					
+				// Conversion
+				if (!entityStatus_m.contains(idclass)) {
+					entityStatus_m(idclass) = Status.NotReady
+					conversion_m.get(idclass.clazz) match {
+						case Some(conversion) =>
+							val fn = (l: List[Object]) => l match {
+								case List(jsval: JsValue) =>
+									conversion(idclass, jsval)
+							}
+							val node = new Node_Conversion(idclass, List(idclass0), fn)
+							idclassNode_m(idclass) = node
+							registerNode(node)
+						case None =>
+							entityMessages_m(idclass) = RqError[Unit]("No converter register for "+idclass.clazz)
+					}
+				}
+			}
 		})
 	}
 	
@@ -399,19 +428,20 @@ class ProcessorData(
 	// REFACTOR: turn entity lookups into computations, somehow
 	def run() {
 		def step() {
-			val entity_l = entityStatus_m.filter(_._2 == 0).toList.map(_._1)
-			for (id <- entity_l) {
-				(id match {
+			val entity_l = entityStatus_m.filter(_._2 == Status.Ready).toList.map(_._1)
+			println("entity_l: "+entity_l)
+			for (idclass <- entity_l if idclass.clazz == classOf[JsValue]) {
+				(idclass.id match {
 					case Rx2(t, k, f) => findEntity(t, k, f.split('.').toList)
 					case Rx1(t, k) => findEntity(t, k, Nil)
-					case _ => RqError(s"don't know how to find entity: `$id`")
+					case _ => RqError(s"don't know how to find entity: `$idclass`")
 				}) match {
 					case e: RqError[_] =>
-						entityStatus_m(id) = 2
+						entityStatus_m(idclass) = Status.Error
 						System.err.println(e)
 					case RqSuccess(jsval, w) =>
 						w.foreach(System.err.println)
-						setEntityObj(id, jsval)
+						setEntityObj(idclass, jsval)
 				}
 			}
 			val l = makePendingComputationList
@@ -445,7 +475,8 @@ class ProcessorData(
 	private def runComputations(node_l: List[Node_Computes]) {
 		println("run")
 		if (!node_l.isEmpty) {
-			node_l.foreach(runComputation)
+			val status_l = node_l.map(runComputation)
+			println("status_l: "+status_l)
 			runComputations(makePendingComputationList)
 		}
 	}
@@ -455,7 +486,7 @@ class ProcessorData(
 		status_m.filter(_._2 == Status.Ready).keys.toList
 	}
 	
-	private def runComputation(node: Node_Computes) {
+	private def runComputation(node: Node_Computes): Status.Value = {
 		//println(s"try node ${node.name}")
 		val input_l: List[Object] = node.input_l.map(entity_m)
 		node match {
@@ -507,12 +538,12 @@ class ProcessorData(
 		step(root).tail
 	}
 	
-	def getComputationList(): List[Node_Computation] = {
-		getNodeList.collect { case n: Node_Computation => n }
+	def getComputationList(): List[Node_Computes] = {
+		getNodeList.collect { case n: Node_Computes => n }
 	}
 	
-	def getTokenList(): List[Node_Token] = {
-		getNodeList.collect { case n: Node_Token => n }
+	def getTokenList(): List[(List[Int], Token)] = {
+		token_m.toList.sortBy(_._1)
 	}
 	
 	def getMessages(): List[String] = {
@@ -712,8 +743,9 @@ object ApplicativeMain2 extends App {
 
 	println()
 	println("Computations:")
-	p.getComputationList.map({ node =>
-		p.getIdString(node.id)+": "//+node.name
+	p.getComputationList.map( _ match {
+		case node: Node_Command => p.getIdString(node.id)+": "+node.cmd
+		case node: Node_Computation => p.getIdString(node.id)+": "+node.input_l
 	}).foreach(println)
 
 	println()
@@ -722,7 +754,7 @@ object ApplicativeMain2 extends App {
 	
 	println()
 	println("Tokens:")
-	p.getTokenList.map(_.token).foreach(println)
+	p.getTokenList.map(_._2).foreach(println)
 	
 	println()
 	println("Messages:")

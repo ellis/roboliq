@@ -19,7 +19,7 @@ trait CommandHandler {
 			List(
 				ComputationItem_Computation(List(IdClass(a.id, a.clazz)), (j_l) => j_l match {
 					case List(oa: A) => fn(oa)
-					case _ => RqError("invalid parameters")
+					case _ => RqError("[CommandHandler] invalid parameters: "+j_l+" "+j_l.head.getClass())
 				})
 			)
 		)
