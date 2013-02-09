@@ -5,6 +5,8 @@ import scala.language.implicitConversions
 import scala.language.postfixOps
 import scala.collection.mutable.ArrayBuffer
 import scala.collection._
+import scala.concurrent.future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz._
 import spray.json.JsObject
 import spray.json.JsString
@@ -62,20 +64,20 @@ trait Token
 
 case class Token_Comment(s: String) extends Token
 
-import akka.actor._
-import akka.routing.RoundRobinRouter
-
-class ProcessorData extends Actor {
+class ProcessorData(
+	handler_l: List[CommandHandler]
+) {
+	private val handler_m: Map[String, CommandHandler] = handler_l.flatMap(handler => handler.cmd_l.map(_ -> handler)).toMap
 	
 	// Root of computation hierarchy
 	val root = new Node_Computation(null, 0, Nil, (_: List[Object]) => RqError("hmm"), Nil)
 	// List of conversions
 	val idclassNode_m = new HashMap[IdClass, Node_Conversion]
-	val status_m = new HashMap[Node_Computes, Int]
+	val status_m = new HashMap[Node_Computes, Status.Value]
 	val dep_m: MultiMap[String, Node_Computes] = new HashMap[String, mutable.Set[Node_Computes]] with MultiMap[String, Node_Computes]
 	//val rootObj = new Node_Conversion("rootObj", null, 0, ComputationItem_Computation(Nil, (_: List[Object]) => RqError("hmm")), Nil)
 	//val message_m = new HashMap[Node, List[String]]
-	val children_m = new HashMap[Node, ArrayBuffer[Node]]
+	val children_m = new HashMap[Node, List[Node]]
 	val result_m = new HashMap[Node_Computes, RqResult[_]]
 	//val entity_m = new HashMap[String, JsValue]
 	val entity_m = new HashMap[IdClass, Object]
@@ -90,6 +92,7 @@ class ProcessorData extends Actor {
 	conversion_m(classOf[String]) = Conversions.toString2
 	conversion_m(classOf[Integer]) = Conversions.toInteger2
 	
+	/*
 	val nrOfWorkers = 20
 	val workerRouter = context.actorOf(Props[ComputationActor].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workerRouter")
 	
@@ -114,7 +117,7 @@ class ProcessorData extends Actor {
 			case n: HasComputationHierarchy =>
 				if (n.parent != null) {
 					children_m(n.parent) = children_m.get(n.parent) match {
-						case None => ArrayBuffer(node)
+						case None => List(node)
 						case Some(l) => l += node; l
 					}
 				}
@@ -142,22 +145,42 @@ class ProcessorData extends Actor {
 			}
 		})
 	}
+	*/
 	
-	def setComputationResult(node: Node_Computation, result: ComputationResult) {
-		result_m(node) = result
+	def setCommands(cmd_l: List[JsObject]) {
+		val tryResult = scala.util.Success(RqSuccess(cmd_l.map(js => ComputationItem_Command(js))))
+		setComputationResult(root, tryResult)
+	}
+	
+	private def updateComputationStatusAndResult(node: Node_Computes, result: scala.util.Try[RqResult[_]]) {
+		val (s, r: RqResult[_]) = result match {
+			case scala.util.Success(r) =>
+				r match {
+					case RqSuccess(l, _) => (Status.Success, r)
+					case RqError(_, _) => (Status.Error, r)
+				}
+			case scala.util.Failure(e) =>
+				(Status.Error, RqError[Unit](e.getMessage()))
+		}
+		status_m(node) = s
+		result_m(node) = r
+	}
+	
+	private def setComputationResult(node: Node_Computes with HasComputationHierarchy, result: scala.util.Try[ComputationResult]) {
+		updateComputationStatusAndResult(node, result)
 		result match {
-			case RqSuccess(l, _) =>
+			case scala.util.Success(RqSuccess(l, _)) =>
 				val child_l: List[Node_Computes] = l.zipWithIndex.flatMap { pair => 
 					val (r, index0) = pair
 					val index = index0 + 1
 					r match {
-						case ComputationItem_Command(cmd, fn) =>
+						case ComputationItem_Command(cmd) =>
 							/*val idCmd = node.id ++ List(index)
 							val idCmd_s = getIdString(idCmd)
 							val idEntity = s"cmd[${idCmd_s}]"
 							cmdToJs_m(idCmd) = cmd
 							setEntity(idEntity, cmd)
-	
+		
 							val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)*/
 							Some(Node_Command(node, index, cmd))
 						case result: ComputationItem_Computation =>
@@ -187,16 +210,14 @@ class ProcessorData extends Actor {
 					}
 				}
 				setChildren(node, child_l)
-				status_m(node) = 2
 			case _ =>
-				status_m(node) = -1
 		}
 	}
 	
-	def setConversionResult(node: Node_Conversion, result: ConversionResult) {
-		result_m(node) = result
+	private def setConversionResult(node: Node_Conversion, result: scala.util.Try[ConversionResult]) {
+		updateComputationStatusAndResult(node, result)
 		result match {
-			case RqSuccess(l, _) =>
+			case scala.util.Success(RqSuccess(l, _)) =>
 				val child_l: List[Node_Computes] = l.zipWithIndex.flatMap { pair => 
 					val (r, index0) = pair
 					val index = index0 + 1
@@ -209,9 +230,7 @@ class ProcessorData extends Actor {
 					}
 				}
 				setChildren(node, child_l)
-				status_m(node) = 2
 			case _ =>
-				status_m(node) = -1
 		}
 	}
 	
@@ -331,17 +350,13 @@ class ProcessorData extends Actor {
 	}
 	
 	def setEntity(id: String, jsval: JsValue) {
-		entity_m(id) = jsval
-		entityStatus_m(id) = 1
 		val idclass = IdClass(id, classOf[JsValue])
-		entityObj_m(idclass) = jsval
-		// Queue the computations for which all inputs are available 
-		dep_m.get(id).map(_.foreach(updateComputationStatus))
+		setEntityObj(idclass, jsval)
 	}
 
 	def setEntityObj(idclass: IdClass, obj: Object) {
-		assert(idclass.clazz != classOf[JsValue])
-		entityObj_m(idclass) = obj
+		entity_m(idclass) = obj
+		entityStatus_m -= idclass
 		// Queue the computations for which all inputs are available 
 		dep_m.get(idclass.id).map(_.foreach(updateComputationStatus))
 	}
@@ -350,29 +365,29 @@ class ProcessorData extends Actor {
 	private def addDependencies(node: Node_Computes) {
 		node.input_l.foreach(idclass => {
 			dep_m.addBinding(idclass.id, node)
-			if (!entityStatus_m.contains(idclass.id))
-				entityStatus_m(idclass.id) = 0
+			if (!entityStatus_m.contains(idclass))
+				entityStatus_m(idclass) = 0
 		})
 	}
 	
 	private def updateComputationStatus(node: Node_Computes) {
-		val b = node.input_l.forall(entityObj_m.contains)
+		val b = node.input_l.forall(entity_m.contains)
 		if (b) {
 			if (status_m.getOrElse(node, 0) != 1) {
-				status_m(node) = 1
-				val input_l = node.input_l.map(entityObj_m)
+				status_m(node) = Status.Ready
+				/*val input_l = node.input_l.map(entity_m)
 				node match {
-					case n: Node_Command =>
+					case n: Node_Command =>					
 						workerRouter ! ActorMessage_CommandLookup(n)
 					case n: Node_Computation =>
 						workerRouter ! ActorMessage_ComputationInput(n, input_l)
 					case n: Node_Conversion =>
 						workerRouter ! ActorMessage_ConversionInput(n, input_l)
-				}
+				}*/
 			}
 		}
 		else {
-			status_m(node) = 0
+			status_m(node) = Status.NotReady
 		}
 	}
 
@@ -381,7 +396,6 @@ class ProcessorData extends Actor {
 	// Match "tbl[key].field"
 	private val Rx2 = """^([a-zA-Z]+)\[([0-9.]+)\]\.(.+)$""".r
 	
-	/*
 	// REFACTOR: turn entity lookups into computations, somehow
 	def run() {
 		def step() {
@@ -397,24 +411,24 @@ class ProcessorData extends Actor {
 						System.err.println(e)
 					case RqSuccess(jsval, w) =>
 						w.foreach(System.err.println)
-						setEntity(id, jsval)
+						setEntityObj(id, jsval)
 				}
 			}
 			val l = makePendingComputationList
 			if (!l.isEmpty) {
-				run(l)
+				runComputations(l)
 				step()
 			}
 		}
 		step()
 		makeMessagesForMissingInputs()
 	}
-	*/
 	
 	private def findEntity(table: String, key: String, field_l: List[String]): RqResult[JsValue] = {
 		val id = (s"$table[$key]" :: field_l).mkString(".")
-		entity_m.get(id) match {
-			case Some(jsval) => RqSuccess(jsval)
+		val idclass = IdClass(id, classOf[JsValue])
+		entity_m.get(idclass) match {
+			case Some(jsval) => RqSuccess(jsval.asInstanceOf[JsValue])
 			case None =>
 				if (field_l.isEmpty)
 					RqError(s"entity not found: `$id`")
@@ -428,34 +442,61 @@ class ProcessorData extends Actor {
 		}
 	}
 	
-	/*
-	private def run(node_l: List[Node_Computation]) {
+	private def runComputations(node_l: List[Node_Computes]) {
 		println("run")
 		if (!node_l.isEmpty) {
-			node_l.foreach(handleComputation)
-			run(makePendingComputationList)
+			node_l.foreach(runComputation)
+			runComputations(makePendingComputationList)
 		}
 	}
 	
-	private def makePendingComputationList: List[Node_Computation] = {
-		status_m.filter(_._2 == 1).keys.toList.sorted(NodeOrdering)
+	private def makePendingComputationList: List[Node_Computes] = {
+		//status_m.filter(_._2 == 1).keys.toList.sorted(NodeOrdering)
+		status_m.filter(_._2 == Status.Ready).keys.toList
 	}
 	
-	private def handleComputation(node: Node_Computation) {
-		println(s"try node ${node.name}")
-		node.result match {
-			case ComputationItem_Computation(entity_l, fn) =>
-				val input_l: List[Object] = entity_l.map(entityObj_m)
-				setComputationItem(node, fn(input_l))
-			case _ =>
+	private def runComputation(node: Node_Computes) {
+		//println(s"try node ${node.name}")
+		val input_l: List[Object] = node.input_l.map(entity_m)
+		node match {
+			case n: Node_Command =>
+				val fn = createCommandFn(n)
+				val f = scala.util.Try(fn(Nil))// future { fn(Nil) }
+				f match {
+					case tryResult => setComputationResult(n, tryResult)
+				}
+			case n: Node_Computation =>
+				val f = scala.util.Try { n.fn(input_l) }
+				f match {
+					case tryResult => setComputationResult(n, tryResult)
+				}
+			case n: Node_Conversion =>
+				val f = scala.util.Try { n.fn(input_l) }
+				f match {
+					case tryResult => setConversionResult(n, tryResult)
+				}
 		}
 	}
-	*/
+	
+	private def createCommandFn(node: Node_Command): (List[Object] => ComputationResult) = {
+		val cmd_? : Option[String] = node.cmd.fields.get("cmd").flatMap(_ match {
+			case JsString(s) => Some(s)
+			case _ => None
+		})
+		cmd_? match {
+			case None => _ => RqError("missing field `cmd`")
+			case Some(name) =>
+				handler_m.get(name) match {
+					case None => _ => RqError(s"no handler found for `cmd = ${name}`")
+					case Some(handler) => _ => handler.getResult
+				}
+		}
+	}
 	
 	private def makeMessagesForMissingInputs(): List[String] = {
 		status_m.toList.flatMap(pair => {
 			val (node, status) = pair
-			node.input_l.filterNot(entityObj_m.contains).map(idfn => s"ERROR: missing entity `${idfn.id}` of class `${idfn.clazz}`")
+			node.input_l.filterNot(entity_m.contains).map(idfn => s"ERROR: missing entity `${idfn.id}` of class `${idfn.clazz}`")
 		})
 	}
 	
@@ -634,12 +675,14 @@ class Print2CommandHandler extends CommandHandler {
  * - cache transformations of JsValues (e.g. Plate objects)
  * - deal with states
  */
-/*
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
 	
-	val p = new ProcessorData
+	val h1 = new PrintCommandHandler
+	val h2 = new Print2CommandHandler
+
+	val p = new ProcessorData(List(h1, h2))
 	
 	p.setEntity("a", JsString("1"))
 	p.setEntity("b", JsString("2"))
@@ -647,13 +690,8 @@ object ApplicativeMain2 extends App {
 	//p.setEntity("cmd[1].text", JsString("Hello, World"))
 	//p.addComputation(cn1.entity_l, cn1.fn, Nil)
 	//p.addComputation(cn2.entity_l, cn2.fn, Nil)
-	val h1 = new PrintCommandHandler
-	val h2 = new Print2CommandHandler
 	//p.addCommand(cmd1, h1)
-	p.setComputationItem(p.root, RqSuccess(List(
-		ComputationItem_Command(cmd1, h1.getResult),
-		ComputationItem_Command(cmd2, h2.getResult)
-	)))
+	p.setCommands(List(cmd1, cmd2))
 	
 	p.run()
 
@@ -675,16 +713,12 @@ object ApplicativeMain2 extends App {
 	println()
 	println("Computations:")
 	p.getComputationList.map({ node =>
-		node.result match {
-			case _: ComputationItem_Computation =>
-				p.getIdString(node)+": "+node.name
-			case _ =>
-		}
+		p.getIdString(node.id)+": "//+node.name
 	}).foreach(println)
 
 	println()
 	println("Entities:")
-	p.entity_m.toList.sortBy(_._1).foreach(pair => println(pair._1+": "+pair._2))
+	p.entity_m.toList.sortBy(_._1.id).foreach(pair => println(pair._1+": "+pair._2))
 	
 	println()
 	println("Tokens:")
@@ -694,4 +728,3 @@ object ApplicativeMain2 extends App {
 	println("Messages:")
 	p.getMessages.foreach(println)
 }
-*/

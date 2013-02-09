@@ -1,4 +1,4 @@
-package roboliq.processor2
+/*package roboliq.processor2
 
 import akka.actor._
 import akka.routing.RoundRobinRouter
@@ -11,4 +11,4 @@ class ConversionActor(val idclass: IdClass, fn: List[Object] => ConversionResult
 			val res = fn(l)
 			sender ! ActorMessage_ConversionOutput(idclass, res)
 	}
-}
+}*/

@@ -1,6 +1,7 @@
 package roboliq.processor2
 
 import spray.json.JsValue
+import spray.json.JsObject
 
 /**
  * There are several basic types of nodes.
@@ -31,6 +32,7 @@ sealed trait Node
 trait HasComputationHierarchy {
 	val parent: Node with HasComputationHierarchy
 	val index: Int
+	val idCmd: List[Int]
 	
 	lazy val id_r = getId_r
 	lazy val id = id_r.reverse
@@ -54,9 +56,10 @@ trait Node_Computes extends Node {
 case class Node_Command(
 	parent: Node with HasComputationHierarchy,
 	index: Int,
-	cmd: JsValue
+	cmd: JsObject
 ) extends Node_Computes with HasComputationHierarchy {
 	val input_l: List[IdClass] = Nil
+	val idCmd: List[Int] = id
 }
 
 case class Node_Computation(
@@ -71,7 +74,9 @@ case class Node_Token(
 	parent: Node with HasComputationHierarchy,
 	index: Int,
 	token: Token
-) extends Node with HasComputationHierarchy
+) extends Node with HasComputationHierarchy {
+	val idCmd = Nil
+}
 
 /*
 class Node_Result(
