@@ -27,12 +27,11 @@ import spray.json.JsObject
  * 
  */
 
-sealed trait Node
-
-trait HasComputationHierarchy {
-	val parent: Node with HasComputationHierarchy
+sealed trait Node {
+	val parent_? : Option[Node]
+	val label_? : Option[String]
 	val index: Int
-	val idCmd: List[Int]
+	//val idCmd: List[Int]
 	
 	lazy val id_r = getId_r
 	lazy val id = id_r.reverse
@@ -42,10 +41,18 @@ trait HasComputationHierarchy {
 	}
 	
 	private def getId_r: List[Int] = {
-		if (parent == null)
-			Nil
-		else
-			index :: parent.getId_r
+		index :: parent_?.map(_.id_r).getOrElse(Nil)
+	}
+	
+	lazy val label: String = {
+		(getRootLabel :: id.map(n => Some(n.toString))).flatten.mkString(".")
+	}
+	
+	private def getRootLabel: Option[String] = {
+		parent_? match {
+			case None => label_?
+			case Some(parent) => parent.getRootLabel
+		}
 	}
 }
 
@@ -54,37 +61,41 @@ trait Node_Computes extends Node {
 }
 
 case class Node_Command(
-	parent: Node with HasComputationHierarchy,
+	parent_? : Option[Node],
 	index: Int,
 	cmd: JsObject
-) extends Node_Computes with HasComputationHierarchy {
+) extends Node_Computes {
+	val label_? = None
 	val input_l: List[IdClass] = Nil
-	val idCmd: List[Int] = id
+	//val idCmd: List[Int] = id
 
 	override def toString(): String = {
-		s"Node_Command(${id.mkString(".")}, ${cmd})"
+		s"Node_Command($label, ${cmd})"
 	}
 }
 
 case class Node_Computation(
-	parent: Node with HasComputationHierarchy,
+	parent_? : Option[Node],
 	index: Int,
 	input_l: List[IdClass],
-	fn: (List[Object]) => ComputationResult,
-	idCmd: List[Int]
-) extends Node_Computes with HasComputationHierarchy {
+	fn: (List[Object]) => ComputationResult
+	//idCmd: List[Int]
+) extends Node_Computes {
+	val label_? = None
 	override def toString(): String = {
-		s"Node_Computation(${id.mkString(".")}, ${input_l})"
+		s"Node_Computation($label, ${input_l})"
 	}
 }
 
-case class Node_Token(
-	parent: Node with HasComputationHierarchy,
+/*case class Node_Token(
+	parent_? : Option[Node],
 	index: Int,
 	token: Token
-) extends Node with HasComputationHierarchy {
+) extends Node {
+	val parent_? = Option(parent)
+	val label_? = None
 	val idCmd = Nil
-}
+}*/
 
 /*
 class Node_Result(
@@ -95,12 +106,16 @@ class Node_Result(
 */
 
 case class Node_Conversion(
+	parent_? : Option[Node],
+	label_? : Option[String],
+	index: Int,
 	idclass: IdClass,
 	input_l: List[IdClass],
 	fn: (List[Object]) => ConversionResult
 ) extends Node_Computes {
+	val idCmd = Nil
 	override def toString(): String = {
-		s"Node_Conversion(${input_l.mkString("+")}, ${input_l})"
+		s"Node_Conversion($label, ${input_l.mkString("+")})"
 	}
 }
 
