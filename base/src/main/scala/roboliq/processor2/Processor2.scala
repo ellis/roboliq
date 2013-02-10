@@ -89,9 +89,11 @@ class ProcessorData(
 	//val cmdToJs_m = new HashMap[List[Int], JsObject]
 	//val entityObj_m = new HashMap[IdClass, Object]
 	
-	val conversion_m = new HashMap[Class[_], (IdClass, JsValue) => ConversionResult]
-	conversion_m(classOf[String]) = Conversions.toString2
-	conversion_m(classOf[Integer]) = Conversions.toInteger2
+	val conversion_m = new HashMap[Class[_], (JsValue) => ConversionResult]
+	conversion_m(classOf[String]) = Conversions.asString
+	conversion_m(classOf[Integer]) = Conversions.asInteger
+	conversion_m(classOf[PlateModel]) = Conversions.asPlateModel
+	conversion_m(classOf[Plate]) = Conversions.asPlate
 	
 	/*
 	val nrOfWorkers = 20
@@ -229,8 +231,8 @@ class ProcessorData(
 					r match {
 						case ConversionItem_Conversion(input_l, fn) =>
 							Some(Node_Conversion(node.idclass, input_l, fn))
-						case ConversionItem_Object(idclass, obj) =>
-							setEntityObj(idclass, obj)
+						case ConversionItem_Object(obj) =>
+							setEntityObj(node.idclass, obj)
 							None
 					}
 				}
@@ -386,7 +388,7 @@ class ProcessorData(
 						case Some(conversion) =>
 							val fn = (l: List[Object]) => l match {
 								case List(jsval: JsValue) =>
-									conversion(idclass, jsval)
+									conversion(jsval)
 							}
 							val node = new Node_Conversion(idclass, List(idclass0), fn)
 							idclassNode_m(idclass) = node
@@ -588,94 +590,6 @@ class ProcessorData(
 	implicit val NodeOrdering = new Ordering[HasComputationHierarchy] {
 		def compare(a: HasComputationHierarchy, b: HasComputationHierarchy): Int = {
 			ListIntOrdering.compare(a.id, b.id)
-		}
-	}
-}
-
-object Conversions {
-	def toJsValue(jsval: JsValue): RqResult[JsValue] =
-		RqSuccess(jsval)
-	
-	def toString(jsval: JsValue): RqResult[String] = {
-		jsval match {
-			case JsString(text) => RqSuccess(text)
-			case _ => RqSuccess(jsval.toString)
-		}
-	}
-	
-	private def makeConversion
-			(fn: JsValue => RqResult[Object])
-			(idclass: IdClass, jsval: JsValue): ConversionResult =
-		fn(jsval).map(obj => List(ConversionItem_Object(idclass, obj)))
-
-	val toString2 = makeConversion(toString) _
-	
-	def toInteger(jsval: JsValue): RqResult[Integer] = {
-		jsval match {
-			case JsNumber(n) => RqSuccess(n.toInt)
-			case _ => RqError("expected JsNumber")
-		}
-	}
-
-	val toInteger2 = makeConversion(toInteger) _
-	def toInteger2(idclass: IdClass, jsval: JsValue): ConversionResult =
-		toInteger(jsval).map(obj => List(ConversionItem_Object(idclass, obj)))
-	
-	private val RxVolume = """([0-9]*)(\.[0-9]*)?([mun]?l)""".r
-	def toLiquidVolume(jsval: JsValue): RqResult[LiquidVolume] = {
-		jsval match {
-			case JsString(RxVolume(a,b,c)) =>
-				val s = List(Option(a), Option(b)).flatten.mkString
-				val n = BigDecimal(s)
-				val v = c match {
-					case "l" => LiquidVolume.l(n)
-					case "ml" => LiquidVolume.ml(n)
-					case "ul" => LiquidVolume.ul(n)
-					case "nl" => LiquidVolume.nl(n)
-					case _ => return RqError(s"invalid volume suffix '$c'")
-				}
-				RqSuccess(v)
-			case JsNumber(n) => RqSuccess(LiquidVolume.l(n))
-			case _ => RqError("expected JsString in volume format")
-		}
-	}
-	
-	def toJsObject(jsval: JsValue): RqResult[JsObject] =
-		jsval match {
-			case jsobj: JsObject => RqSuccess(jsobj)
-			case _ => RqError("required a JsObject")
-		}
-	
-	def toPlateModel(jsval: JsValue): RqResult[PlateModel] = {
-		for {
-			jsobj <- toJsObject(jsval)
-			id <- getString('id, jsobj)
-			rows <- getInteger('rows, jsobj)
-			cols <- getInteger('cols, jsobj)
-			wellVolume <- getVolume('wellVolume, jsobj)
-		} yield {
-			new PlateModel(id, rows, cols, wellVolume)
-		}
-	}
-	
-	def getString(symbol: Symbol, jsobj: JsObject): RqResult[String] = {
-		jsobj.fields.get(symbol.name) match {
-			case None => RqError("missing field `${symbol.name}`")
-			case Some(jsval) => toString(jsval)
-		}
-	}
-	
-	def getInteger(symbol: Symbol, jsobj: JsObject): RqResult[Integer] = {
-		jsobj.fields.get(symbol.name) match {
-			case None => RqError("missing field `${symbol.name}`")
-			case Some(jsval) => toInteger(jsval)
-		}
-	}
-	
-	def getVolume(symbol: Symbol, jsobj: JsObject): RqResult[LiquidVolume] = {
-		jsobj.fields.get(symbol.name) match {
-			case None => RqError("missing field `${symbol.name}`")
-			case Some(jsval) => toLiquidVolume(jsval)
 		}
 	}
 }

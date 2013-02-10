@@ -5,27 +5,50 @@ import spray.json._
 import roboliq.core._
 //import RqPimper._
 
+object InputListToTuple {
+	def check1[A: Manifest](l: List[Object]): RqResult[(A)] = {
+		l match {
+			case List(a: A) => RqSuccess(a)
+			case _ => RqError("[InputList] invalid parameter types: "+l)
+		}
+	}
+
+	def check2[A: Manifest, B: Manifest](l: List[Object]): RqResult[(A, B)] = {
+		l match {
+			case List(a: A, b: B) => RqSuccess((a, b))
+			case _ => RqError("[InputList] invalid parameter types: "+l)
+		}
+	}
+
+	def check3[A: Manifest, B: Manifest, C: Manifest](l: List[Object]): RqResult[(A, B, C)] = {
+		l match {
+			case List(a: A, b: B, c: C) => RqSuccess((a, b, c))
+			case _ => RqError("[InputList] invalid parameter types: "+l)
+		}
+	}
+}
 
 trait CommandHandler {
+	import InputListToTuple._
+	
 	val cmd_l: List[String]
-	def getResult: RqResult[List[ComputationItem]]
+	def getResult: ComputationResult
 
 	protected case class RequireItem[A: Manifest](id: String) {
 		val clazz = implicitly[Manifest[A]].runtimeClass
 	}
 	
-	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): RqResult[List[ComputationItem]] = {
+	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): ComputationResult = {
 		RqSuccess(
 			List(
-				ComputationItem_Computation(List(IdClass(a.id, a.clazz)), (j_l) => j_l match {
-					case List(oa: A) => fn(oa)
-					case _ => RqError("[CommandHandler] invalid parameters: "+j_l+" "+j_l.head.getClass())
-				})
+				ComputationItem_Computation(List(IdClass(a.id, a.clazz)),
+					(j_l) => check1(j_l).flatMap { a => fn(a) }
+				)
 			)
 		)
 	}
 	
-	protected def handlerReturn(a: Token): RqResult[List[ComputationItem]] = {
+	protected def handlerReturn(a: Token): ComputationResult = {
 		RqSuccess(List(
 				ComputationItem_Token(a)
 		))
@@ -33,41 +56,4 @@ trait CommandHandler {
 	
 	protected def as[A: Manifest](id: String): RequireItem[A] = RequireItem[A](id)
 	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A]("$"+symbol.name)
-	/*
-	protected def getPlateModel(id: String): RequireItem[PlateModel] = {
-		handlerRequire(
-			getJsObject(s"plateModel[$id]")
-		) {
-			(jsobj) =>
-			handlerReturn((
-				getString('id, jsobj) |@|
-				getInteger('rows, jsobj) |@|
-				getInteger('cols, jsobj) |@|
-				getLiquidVolume('wellVolume, jsObj)
-			) {
-				new PlateModel
-			})
-		}
-	}
-		
-	protected def getPlate(id: String): RequireItem[Plate] = {
-		RequireItem[Plate](s"plate[$id]", (jsval: JsValue) => jsval match {
-			case JsString(text) => RqSuccess(text)
-			case _ => RqSuccess(jsval.toString)
-		})
-	}
-	
-	protected def getPlate(id: String): RequireItem[Plate] = {
-		RequireItem[Plate](id, (jsval: JsValue) => jsval match {
-			case JsString(text) => RqSuccess(text)
-			case _ => RqSuccess(jsval.toString)
-		})
-	}
-	
-	protected def getPlate(param: Symbol): RequireItem[Plate] = {
-		RequireItem[Plate]("$"+a.name, (jsval: JsValue) => jsval match {
-			case JsString(text) => RqSuccess(text)
-			case _ => RqSuccess(jsval.toString)
-		})
-	}*/
 }

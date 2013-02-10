@@ -109,4 +109,4 @@ case class ConversionItem_Conversion(
 	input_l: List[IdClass],
 	fn: (List[Object]) => ConversionResult
 ) extends ConversionItem
-case class ConversionItem_Object(idclass: IdClass, obj: Object) extends ConversionItem
+case class ConversionItem_Object(obj: Object) extends ConversionItem

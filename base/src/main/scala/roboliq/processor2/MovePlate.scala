@@ -10,15 +10,15 @@ class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
-/*
 class MovePlateHandler extends CommandHandler {
 	val cmd_l = List[String]("movePlate")
 	
 	def getResult = {
-		handlerRequire (paramString('text)) { (text) =>
-			handlerReturn(Token_Comment(text))
+		handlerRequire (as[PlateModel]('idModel)) { (plateModel) =>
+			handlerReturn(Token_Comment(plateModel.toString))
 		}
 	}
+	/*
 	def makeStep(): Step = {
 		find (
 			findPlate('plate),
@@ -44,5 +44,5 @@ class MovePlateHandler extends CommandHandler {
 			}
 		}
 	}
+	*/
 }
-*/
