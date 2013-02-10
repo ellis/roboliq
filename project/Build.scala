@@ -11,7 +11,10 @@ object BuildSettings {
     version      := buildVersion,
     scalaVersion := buildScalaVersion,
     scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
-    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+    resolvers ++= Seq(
+      "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+      "io.spray repo" at "http://repo.spray.io"
+    )
   )
 }
 
@@ -29,7 +32,8 @@ object MyBuild extends Build {
 			base = file("base"),
 			settings = buildSettings ++ Seq(
 				name := "base",
-				libraryDependencies ++= Seq(reflect, commons_io, scalatest, scalaz, akka, yaml, ejml, json_spray)
+				libraryDependencies ++= Seq(reflect, commons_io, scalatest, scalaz, akka, yaml, ejml, json_spray),
+				initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._"""
 			)
 		)
 
