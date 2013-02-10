@@ -64,6 +64,68 @@ trait Token
 
 case class Token_Comment(s: String) extends Token
 
+object ListIntOrdering extends Ordering[List[Int]] {
+	def compare(a: List[Int], b: List[Int]): Int = {
+		(a, b) match {
+			case (Nil, Nil) => 0
+			case (Nil, _) => -1
+			case (_, Nil) => 1
+			case (a1 :: arest, b1 :: brest) =>
+				if (a1 != b1) a1 - b1
+				else compare(arest, brest)
+		}
+	}
+}
+
+case class DataKey(time: List[Int], table: String, key: String, path: List[String]) {
+	def idWithoutTime = (s"$table[$key]" :: path).mkString(".")
+}
+
+class DataBase {
+	val m = new HashMap[List[Int], HashMap[String, JsValue]]
+	val time_l = mutable.SortedSet[List[Int]]()(ListIntOrdering)
+	var time2_l: Seq[List[Int]] = Nil
+	
+	def set(key: DataKey, jsval: JsValue) {
+		jsval match {
+			case jsobj: JsObject =>
+				jsobj.fields.foreach(pair => set(key.copy(path = key.path ++ List(pair._1)), pair._2))
+			case _ =>
+				m.getOrElseUpdate(key.time, new HashMap[String, JsValue])(key.idWithoutTime) = jsval
+				if (!time_l.contains(key.time)) {
+					time_l += key.time
+					time2_l = time_l.toSeq
+				}
+		}
+	}
+
+	def get(key: DataKey): RqResult[JsValue] = {
+		val i0 = time2_l.indexWhere(ListIntOrdering.compare(_, key.time) >= 0)
+		var i = if (i0 > 0) i0 else time_l.size - 1
+		val id = key.idWithoutTime
+		
+		while (i >= 0) {
+			val time = time2_l(i)
+			val m2 = m(time)
+			if (m2.contains(id))
+				return RqSuccess(m2(id))
+			i -= 1
+		}
+		
+		return RqError[JsValue](s"didn't find state for `$id`")
+	}
+	
+	override def toString(): String = {
+		time_l.flatMap(time => {
+			val time_s = time.mkString(".")
+			val m2 = m(time)
+			m2.keys.toList.sorted.map(id => {
+				s"${time_s}%-10s $id = ${m2(id)}"
+			})
+		}).mkString("\n")
+	}
+}
+
 class ProcessorData(
 	handler_l: List[CommandHandler]
 ) {
