@@ -45,7 +45,7 @@ trait HasComputationHierarchy {
 		if (parent == null)
 			Nil
 		else
-			index :: parent.getId
+			index :: parent.getId_r
 	}
 }
 

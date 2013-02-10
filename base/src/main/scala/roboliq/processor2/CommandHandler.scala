@@ -56,4 +56,6 @@ trait CommandHandler {
 	
 	protected def as[A: Manifest](id: String): RequireItem[A] = RequireItem[A](id)
 	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A]("$"+symbol.name)
+	
+	//protected def lookupPlateModel(symbol: Symbol): RequireItem[PlateModel] = Require
 }

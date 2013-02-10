@@ -49,7 +49,7 @@ object ConversionsDirect {
 	def toJsObject(jsval: JsValue): RqResult[JsObject] =
 		jsval match {
 			case jsobj: JsObject => RqSuccess(jsobj)
-			case _ => RqError("required a JsObject")
+			case _ => RqError("required a JsObject, but have "+jsval.getClass+": "+jsval)
 		}
 	
 	def toPlateModel(jsval: JsValue): RqResult[PlateModel] = {

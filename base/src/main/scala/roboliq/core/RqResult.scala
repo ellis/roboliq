@@ -10,9 +10,13 @@ sealed trait RqResult[+A] {
 	def map[B](f: A => B): RqResult[B]
 	def flatMap[B](f: A => RqResult[B]): RqResult[B]
 	def foreach(f: A => Unit): Unit
-	
+	//def append[B](that: RqResult[B]): RqResult[B] = this.flatMap(_ => that)
 	def getWarnings: List[String] = warning_r.reverse
 	def getErrors: List[String]
+}
+
+object RqResult {
+	def zero: RqResult[Unit] = RqSuccess[Unit](())
 }
 
 sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {
