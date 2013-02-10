@@ -249,6 +249,7 @@ class ProcessorData(
 					
 				// Conversion
 				if (!entityStatus_m.contains(idclass)) {
+					assert(!idclassNode_m.contains(idclass))
 					entityStatus_m(idclass) = Status.NotReady
 					conversion_m.get(idclass.clazz) match {
 						case Some(conversion) =>
@@ -270,7 +271,7 @@ class ProcessorData(
 	private def updateComputationStatus(node: Node_Computes) {
 		val b = node.input_l.forall(entity_m.contains)
 		if (b) {
-			if (status_m.getOrElse(node, 0) != 1) {
+			if (status_m.getOrElse(node, Status.Ready) != Status.Success) {
 				status_m(node) = Status.Ready
 				/*val input_l = node.input_l.map(entity_m)
 				node match {
@@ -316,9 +317,6 @@ class ProcessorData(
 			val l = makePendingComputationList
 			if (!l.isEmpty) {
 				runComputations(l)
-				// FIXME: for debug only
-				if (status_m.size < 15)
-				// ENDFIX
 				step()
 			}
 		}
@@ -351,10 +349,7 @@ class ProcessorData(
 			val status_l = node_l.map(runComputation)
 			println("status_l: "+status_l)
 			println("status_m: "+status_m)
-			// FIXME: for debug only
-			if (status_m.size < 15)
-			// ENDFIX
-				runComputations(makePendingComputationList)
+			runComputations(makePendingComputationList)
 		}
 	}
 	
@@ -416,8 +411,12 @@ class ProcessorData(
 		cmd1_l.flatMap(step)
 	}
 	
+	private def getConversionNodeList(node: Node_Conversion): List[Node_Conversion] = {
+		node :: (children_m.getOrElse(node, Nil).collect({case n: Node_Conversion => n}).flatMap(getConversionNodeList))
+	}
+	
 	def getConversionNodeList(): List[Node_Conversion] = {
-		idclassNode_m.toList.sortBy(_._1.toString).map(_._2)
+		idclassNode_m.toList.sortBy(_._1.toString).flatMap(pair => getConversionNodeList(pair._2))
 	}
 	
 	def getTokenList(): List[(List[Int], Token)] = {
@@ -563,7 +562,7 @@ object ApplicativeMain2 extends App {
 
 	println()
 	println("Entities:")
-	p.entity_m.toList.sortBy(_._1.id).foreach(pair => println(pair._1+": "+pair._2))
+	p.entity_m.toList.sortBy(_._1.id).foreach(pair => if (pair._1.clazz == classOf[JsValue]) println(pair._1.id+": "+pair._2))
 	
 	println()
 	println("Tokens:")
