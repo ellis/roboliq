@@ -28,7 +28,7 @@ import spray.json.JsNumber
  * and it returns a list of computations, events, commands, and tokens.  
  */
 
-case class IdClass(id: String, clazz: Class[_])
+case class IdClass(key: DataKey, clazz: Class[_])
 
 sealed trait ComputationItem
 case class ComputationItem_Event(event: Event) extends ComputationItem
@@ -39,7 +39,7 @@ case class ComputationItem_Computation(
 ) extends ComputationItem
 case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
 case class ComputationItem_Token(token: Token) extends ComputationItem
-case class ComputationItem_Entity(id: String, jsval: JsValue) extends ComputationItem
+case class ComputationItem_Entity(key: DataKey, jsval: JsValue) extends ComputationItem
 //case class ComputationItem_Object(idclass: IdClass, obj: Object) extends ComputationItem
 
 /*case class ComputationSpec(
@@ -83,6 +83,7 @@ case class DataKey(time: List[Int], table: String, key: String, path: List[Strin
 
 class DataBase {
 	val m = new HashMap[List[Int], HashMap[String, JsValue]]
+	val obj_m = new HashMap[JsValue, Object]
 	val time_l = mutable.SortedSet[List[Int]]()(ListIntOrdering)
 	var time2_l: Seq[List[Int]] = Nil
 	
@@ -115,6 +116,21 @@ class DataBase {
 		return RqError[JsValue](s"didn't find state for `$id`")
 	}
 	
+	def setObj(key: DataKey, obj: Object): RqResult[Unit] = {
+		for {
+			jsval <- get(key)
+		} yield {
+			obj_m(jsval) = obj
+		}
+	}
+	
+	def getObj(key: DataKey): RqResult[Object] = {
+		for {
+			jsval <- get(key)
+			obj <- obj_m.get(jsval).asRq("no object found for `$key`")
+		} yield obj
+	}
+
 	override def toString(): String = {
 		time_l.flatMap(time => {
 			val time_s = time.mkString(".")
@@ -140,7 +156,7 @@ class ProcessorData(
 	val dep_m: MultiMap[String, Node_Computes] = new HashMap[String, mutable.Set[Node_Computes]] with MultiMap[String, Node_Computes]
 	val children_m = new HashMap[Node, List[Node]]
 	val result_m = new HashMap[Node_Computes, RqResult[_]]
-	val entity_m = new HashMap[IdClass, Object]
+	val db = new DataBase
 	val entityStatus_m = new HashMap[IdClass, Status.Value]
 	//val entityMessages_m = new HashMap[IdClass, RqResult[_]]
 	val token_m = new HashMap[List[Int], Token]
@@ -201,16 +217,16 @@ class ProcessorData(
 
 					//val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)
 					val node = Node_Command(parent_?, index, cmd)
-					val idEntity = s"cmd[${node.label}]"
-					setEntity(idEntity, cmd)
+					val key = DataKey(Nil, "cmd", node.label, Nil)
+					setEntity(key, cmd)
 					Some(node)
 				case result: ComputationItem_Computation =>
 					val keyCmd = findCommandParent(parent_?).map(_.label).getOrElse("")
 					val entity2_l = result.entity_l.map(idclass => {
 						// Substitute in full path for command parameters starting with '$'
 						val idclass2 = {
-							if (idclass.id.startsWith("$")) {
-								idclass.copy(id = s"cmd[${keyCmd}].${idclass.id.tail}")
+							if (idclass.key.key == "$") {
+								IdClass(DataKey(Nil, "cmd", keyCmd, idclass.key.path), idclass.clazz)
 							}
 							else idclass
 						}
@@ -255,7 +271,7 @@ class ProcessorData(
 						case ConversionItem_Conversion(input_l, fn) =>
 							Some(Node_Conversion(Some(node), None, index, node.idclass, input_l, fn))
 						case ConversionItem_Object(obj) =>
-							setEntityObj(node.idclass, obj)
+							setEntityObj(node.idclass.key, obj)
 							None
 					}
 				}
@@ -284,16 +300,18 @@ class ProcessorData(
 		updateComputationStatus(node)
 	}
 	
-	def setEntity(id: String, jsval: JsValue) {
-		val idclass = IdClass(id, classOf[JsValue])
-		setEntityObj(idclass, jsval)
-	}
-
-	def setEntityObj(idclass: IdClass, obj: Object) {
-		entity_m(idclass) = obj
+	def setEntity(key: DataKey, jsval: JsValue) {
+		db.set(key, jsval)
 		entityStatus_m(idclass) = Status.Success
 		// Queue the computations for which all inputs are available 
-		dep_m.get(idclass.id).map(_.foreach(updateComputationStatus))
+		dep_m.get(IdClass()).map(_.foreach(updateComputationStatus))
+	}
+
+	def setEntityObj(key: DataKey, obj: Object) {
+		db.setObj(idclass, obj)
+		entityStatus_m(idclass) = Status.Success
+		// Queue the computations for which all inputs are available 
+		dep_m.get(idclass).map(_.foreach(updateComputationStatus))
 	}
 
 	// Add node to dependency set for each of its inputs
