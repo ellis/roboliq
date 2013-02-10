@@ -99,7 +99,7 @@ object Conversions {
 			for {
 				jsobj <- D.toJsObject(jsval)
 				id <- D.getString('id, jsobj)
-				idModel <- D.getInteger('rows, jsobj)
+				idModel <- D.getString('idModel, jsobj)
 				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
 			} yield {
 				List(ConversionItem_Conversion(

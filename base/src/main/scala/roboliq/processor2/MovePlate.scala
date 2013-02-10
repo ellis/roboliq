@@ -14,9 +14,9 @@ class MovePlateHandler extends CommandHandler {
 	val cmd_l = List[String]("movePlate")
 	
 	def getResult = {
-		handlerRequire (as[String]('idModel)) { (idModel) =>
-			handlerRequire (as[PlateModel](s"plateModel[$idModel]")) { (plateModel) =>
-				handlerReturn(Token_Comment(plateModel.toString))
+		handlerRequire (as[String]('id)) { (id) =>
+			handlerRequire (lookupPlate(id)) { (plate) =>
+				handlerReturn(Token_Comment(plate.toString))
 			}
 		}
 	}

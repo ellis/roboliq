@@ -485,7 +485,7 @@ class Print2CommandHandler extends CommandHandler {
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
-	val cmd3 = JsonParser("""{ "cmd": "movePlate", "idModel": "PCR" }""").asJsObject
+	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1" }""").asJsObject
 	
 	val h1 = new PrintCommandHandler
 	val h2 = new Print2CommandHandler
@@ -493,7 +493,8 @@ object ApplicativeMain2 extends App {
 
 	val p = new ProcessorData(List(h1, h2, h3))
 	
-	p.setEntity("plateModel[PCR]", JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }""").asJsObject)
+	p.setEntity("plateModel[PCR]", JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }"""))
+	p.setEntity("plate[P1]", JsonParser("""{ "id": "P1", "idModel": "PCR" }"""))
 	p.setEntity("a", JsString("1"))
 	p.setEntity("b", JsString("2"))
 	p.setEntity("c", JsString("3"))

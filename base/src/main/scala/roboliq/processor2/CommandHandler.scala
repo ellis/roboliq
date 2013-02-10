@@ -1,5 +1,7 @@
 package roboliq.processor2
 
+import language.implicitConversions
+
 import scalaz._
 import spray.json._
 import roboliq.core._
@@ -37,12 +39,29 @@ trait CommandHandler {
 	protected case class RequireItem[A: Manifest](id: String) {
 		val clazz = implicitly[Manifest[A]].runtimeClass
 	}
+
+	private implicit def toIdClass(ri: RequireItem[_]): IdClass = IdClass(ri.id, ri.clazz)
 	
 	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): ComputationResult = {
 		RqSuccess(
 			List(
-				ComputationItem_Computation(List(IdClass(a.id, a.clazz)),
+				ComputationItem_Computation(List(a),
 					(j_l) => check1(j_l).flatMap { a => fn(a) }
+				)
+			)
+		)
+	}
+	
+	protected def handlerRequire[A: Manifest, B: Manifest](
+		a: RequireItem[A],
+		b: RequireItem[B]
+	)(
+		fn: (A, B) => RqResult[List[ComputationItem]]
+	): ComputationResult = {
+		RqSuccess(
+			List(
+				ComputationItem_Computation(List(a, b),
+					(j_l) => check2(j_l).flatMap { case (a, b) => fn(a, b) }
 				)
 			)
 		)
@@ -57,5 +76,6 @@ trait CommandHandler {
 	protected def as[A: Manifest](id: String): RequireItem[A] = RequireItem[A](id)
 	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A]("$"+symbol.name)
 	
-	//protected def lookupPlateModel(symbol: Symbol): RequireItem[PlateModel] = Require
+	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](s"plateModel[$id]")
+	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](s"plate[$id]")
 }
