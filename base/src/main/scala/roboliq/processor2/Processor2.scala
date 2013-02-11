@@ -28,19 +28,19 @@ import spray.json.JsNumber
  * and it returns a list of computations, events, commands, and tokens.  
  */
 
-case class IdClass(key: DataKey, clazz: Class[_])
+case class KeyClass(key: TKP, clazz: Class[_])
 
 sealed trait ComputationItem
 case class ComputationItem_Event(event: Event) extends ComputationItem
 case class ComputationItem_EntityRequest(id: String) extends ComputationItem
 case class ComputationItem_Computation(
-	entity_l: List[IdClass],
+	entity_l: List[KeyClass],
 	fn: (List[Object]) => ComputationResult
 ) extends ComputationItem
 case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
 case class ComputationItem_Token(token: Token) extends ComputationItem
-case class ComputationItem_Entity(key: DataKey, jsval: JsValue) extends ComputationItem
-//case class ComputationItem_Object(idclass: IdClass, obj: Object) extends ComputationItem
+//case class ComputationItem_Entity(key: TKP, jsval: JsValue) extends ComputationItem
+//case class ComputationItem_Object(kc: KeyClass, obj: Object) extends ComputationItem
 
 /*case class ComputationSpec(
 	entity_l: List[String],
@@ -64,83 +64,9 @@ trait Token
 
 case class Token_Comment(s: String) extends Token
 
-object ListIntOrdering extends Ordering[List[Int]] {
-	def compare(a: List[Int], b: List[Int]): Int = {
-		(a, b) match {
-			case (Nil, Nil) => 0
-			case (Nil, _) => -1
-			case (_, Nil) => 1
-			case (a1 :: arest, b1 :: brest) =>
-				if (a1 != b1) a1 - b1
-				else compare(arest, brest)
-		}
-	}
-}
-
-case class DataKey(time: List[Int], table: String, key: String, path: List[String]) {
+/*case class DataKey(time: List[Int], table: String, key: String, path: List[String]) {
 	def idWithoutTime = (s"$table[$key]" :: path).mkString(".")
-}
-
-class DataBase {
-	val m = new HashMap[List[Int], HashMap[String, JsValue]]
-	val obj_m = new HashMap[JsValue, Object]
-	val time_l = mutable.SortedSet[List[Int]]()(ListIntOrdering)
-	var time2_l: Seq[List[Int]] = Nil
-	
-	def set(key: DataKey, jsval: JsValue) {
-		jsval match {
-			case jsobj: JsObject =>
-				jsobj.fields.foreach(pair => set(key.copy(path = key.path ++ List(pair._1)), pair._2))
-			case _ =>
-				m.getOrElseUpdate(key.time, new HashMap[String, JsValue])(key.idWithoutTime) = jsval
-				if (!time_l.contains(key.time)) {
-					time_l += key.time
-					time2_l = time_l.toSeq
-				}
-		}
-	}
-
-	def get(key: DataKey): RqResult[JsValue] = {
-		val i0 = time2_l.indexWhere(ListIntOrdering.compare(_, key.time) >= 0)
-		var i = if (i0 > 0) i0 else time_l.size - 1
-		val id = key.idWithoutTime
-		
-		while (i >= 0) {
-			val time = time2_l(i)
-			val m2 = m(time)
-			if (m2.contains(id))
-				return RqSuccess(m2(id))
-			i -= 1
-		}
-		
-		return RqError[JsValue](s"didn't find state for `$id`")
-	}
-	
-	def setObj(key: DataKey, obj: Object): RqResult[Unit] = {
-		for {
-			jsval <- get(key)
-		} yield {
-			obj_m(jsval) = obj
-		}
-	}
-	
-	def getObj(key: DataKey): RqResult[Object] = {
-		for {
-			jsval <- get(key)
-			obj <- obj_m.get(jsval).asRq("no object found for `$key`")
-		} yield obj
-	}
-
-	override def toString(): String = {
-		time_l.flatMap(time => {
-			val time_s = time.mkString(".")
-			val m2 = m(time)
-			m2.keys.toList.sorted.map(id => {
-				s"${time_s}%-10s $id = ${m2(id)}"
-			})
-		}).mkString("\n")
-	}
-}
+}*/
 
 class ProcessorData(
 	handler_l: List[CommandHandler]
@@ -151,18 +77,23 @@ class ProcessorData(
 	//val root = new Node_Computation(null, 0, Nil, (_: List[Object]) => RqError("hmm"), Nil)
 	// List of conversions
 	var cmd1_l: List[Node_Computes] = Nil
-	val idclassNode_m = new HashMap[IdClass, Node_Conversion]
+	val kcNode_m = new HashMap[KeyClass, Node_Conversion]
 	val status_m = new HashMap[Node_Computes, Status.Value]
-	val dep_m: MultiMap[String, Node_Computes] = new HashMap[String, mutable.Set[Node_Computes]] with MultiMap[String, Node_Computes]
+	val dep_m: MultiMap[KeyClass, Node_Computes] = new HashMap[KeyClass, mutable.Set[Node_Computes]] with MultiMap[KeyClass, Node_Computes]
 	val children_m = new HashMap[Node, List[Node]]
 	val result_m = new HashMap[Node_Computes, RqResult[_]]
 	val db = new DataBase
-	val entityStatus_m = new HashMap[IdClass, Status.Value]
-	//val entityMessages_m = new HashMap[IdClass, RqResult[_]]
+	val cache_m = new HashMap[KeyClass, Object]
+	val entityChanged_l = mutable.Set[KeyClass]()
+	// List of nodes for which we want to force a check of whether inputs are ready.
+	val nodeCheck_l = mutable.Set[Node_Computes]()
+	val inputs_m = new HashMap[Node_Computes, RqResult[List[Object]]]
+	val entityStatus_m = new HashMap[KeyClass, Status.Value]
+	//val entityMessages_m = new HashMap[KeyClass, RqResult[_]]
 	val token_m = new HashMap[List[Int], Token]
 	val lookupMessage_m = new HashMap[String, RqResult[Unit]]
 	val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
-	val conversionMessage_m = new HashMap[IdClass, RqResult[Unit]]
+	val conversionMessage_m = new HashMap[KeyClass, RqResult[Unit]]
 	
 	val conversion_m = new HashMap[Class[_], (JsValue) => ConversionResult]
 	conversion_m(classOf[String]) = Conversions.asString
@@ -217,20 +148,20 @@ class ProcessorData(
 
 					//val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)
 					val node = Node_Command(parent_?, index, cmd)
-					val key = DataKey(Nil, "cmd", node.label, Nil)
-					setEntity(key, cmd)
+					val key = TKP("cmd", node.label, Nil)
+					setEntity(key, Nil, cmd)
 					Some(node)
 				case result: ComputationItem_Computation =>
 					val keyCmd = findCommandParent(parent_?).map(_.label).getOrElse("")
-					val entity2_l = result.entity_l.map(idclass => {
+					val entity2_l = result.entity_l.map(kc => {
 						// Substitute in full path for command parameters starting with '$'
-						val idclass2 = {
-							if (idclass.key.key == "$") {
-								IdClass(DataKey(Nil, "cmd", keyCmd, idclass.key.path), idclass.clazz)
+						val kc2 = {
+							if (kc.key.key == "$") {
+								KeyClass(TKP("cmd", keyCmd, kc.key.path), kc.clazz)
 							}
-							else idclass
+							else kc
 						}
-						idclass2
+						kc2
 					})
 					
 					//val result2 = result.copy(entity_l = entity2_l)
@@ -240,10 +171,10 @@ class ProcessorData(
 					//println("token: "+Node_Token(node, index + 1, token))
 					token_m(id) = token
 					None
-				case ComputationItem_Entity(id, jsval) =>
+				/*case ComputationItem_Entity(id, jsval) =>
 					setEntity(id, jsval)
 					//new Node_Result(node, index, r)
-					None
+					None*/
 				case _ =>
 					//new Node_Result(node, index, r)
 					None
@@ -269,9 +200,9 @@ class ProcessorData(
 					val index = index0 + 1
 					r match {
 						case ConversionItem_Conversion(input_l, fn) =>
-							Some(Node_Conversion(Some(node), None, index, node.idclass, input_l, fn))
+							Some(Node_Conversion(Some(node), None, index, node.kc, input_l, fn))
 						case ConversionItem_Object(obj) =>
-							setEntityObj(node.idclass.key, obj)
+							setEntityObj(node.kc, obj)
 							None
 					}
 				}
@@ -280,7 +211,7 @@ class ProcessorData(
 			case _ =>
 		}
 		val (s, r) = updateComputationStatusAndResult(node, result)
-		conversionMessage_m(node.idclass) = r
+		conversionMessage_m(node.kc) = r
 		s
 	}
 	
@@ -296,62 +227,105 @@ class ProcessorData(
 	}
 	
 	private def registerNode(node: Node_Computes) {
+		nodeCheck_l += node
 		addDependencies(node)
-		updateComputationStatus(node)
+		//updateComputationStatus(node)
 	}
 	
-	def setEntity(key: DataKey, jsval: JsValue) {
-		db.set(key, jsval)
-		entityStatus_m(idclass) = Status.Success
+	def setEntity(key: TKP, time: List[Int], jsval: JsValue) {
+		db.set(key, time, jsval)
+		val kc = KeyClass(key, classOf[JsValue])
+		registerEntity(kc)
+		val jsChanged_l = db.popChanges.map(KeyClass(_, classOf[JsValue]))
+		entityChanged_l ++= jsChanged_l
+		/*val changed_l = db.popChanges
+		changed_l.foreach(tkp => {
+			val kc = KeyClass(tkp, classOf[JsValue])
+			// Queue the computations for which all inputs are available 
+			dep_m.get(kc).map(_.foreach(updateComputationStatus))
+		})*/
+	}
+	
+	private def registerEntity(kc: KeyClass) {
+		entityStatus_m(kc) = Status.Success
+	}
+	
+	def setEntityObj(kc: KeyClass, obj: Object) {
+		assert(kc.clazz != classOf[JsValue])
+		cache_m(kc) = obj
+		entityChanged_l += kc
+		registerEntity(kc)
 		// Queue the computations for which all inputs are available 
-		dep_m.get(IdClass()).map(_.foreach(updateComputationStatus))
+		//dep_m.get(kc).map(_.foreach(updateComputationStatus))
 	}
 
-	def setEntityObj(key: DataKey, obj: Object) {
-		db.setObj(idclass, obj)
-		entityStatus_m(idclass) = Status.Success
-		// Queue the computations for which all inputs are available 
-		dep_m.get(idclass).map(_.foreach(updateComputationStatus))
-	}
-
-	// Add node to dependency set for each of its inputs
+	// For each of the node's inputs, add the node to the input's dependency list
 	private def addDependencies(node: Node_Computes) {
-		node.input_l.foreach(idclass => {
-			dep_m.addBinding(idclass.id, node)
+		node.input_l.foreach(kc => {
+			dep_m.addBinding(kc, node)
+			if (kc.clazz == classOf[JsValue])
+				db.addWatch(kc.key)
 
 			// Schedule lookups and create conversion nodes
-			for (idclass <- node.input_l) {
-				val idclass0 = IdClass(idclass.id, classOf[JsValue])
+			for (kc <- node.input_l) {
+				val kc0 = kc.copy(clazz = classOf[JsValue])
 				
 				// JsValue lookup
-				if (!entityStatus_m.contains(idclass0))
-					entityStatus_m(idclass0) = Status.Ready
+				if (!entityStatus_m.contains(kc0))
+					entityStatus_m(kc0) = Status.Ready
 					
 				// Conversion
-				if (!entityStatus_m.contains(idclass)) {
-					assert(!idclassNode_m.contains(idclass))
-					entityStatus_m(idclass) = Status.NotReady
-					conversion_m.get(idclass.clazz) match {
+				if (!entityStatus_m.contains(kc)) {
+					assert(!kcNode_m.contains(kc))
+					entityStatus_m(kc) = Status.NotReady
+					conversion_m.get(kc.clazz) match {
 						case Some(conversion) =>
 							val fn = (l: List[Object]) => l match {
 								case List(jsval: JsValue) =>
 									conversion(jsval)
 							}
-							val node = new Node_Conversion(None, Some(idclass.toString), 0, idclass, List(idclass0), fn)
-							idclassNode_m(idclass) = node
+							val node = new Node_Conversion(None, Some(kc.toString), 0, kc, List(kc0), fn)
+							kcNode_m(kc) = node
 							registerNode(node)
 						case None =>
-							conversionMessage_m(idclass) = RqError[Unit]("No converter registered for "+idclass.clazz)
+							conversionMessage_m(kc) = RqError[Unit]("No converter registered for "+kc.clazz)
 					}
 				}
 			}
 		})
 	}
 	
+	private def updateComputationStatus() {
+		println("entityChanged_l: "+entityChanged_l)
+		// Gather all nodes whose inputs have changed
+		val node_l = nodeCheck_l ++ entityChanged_l.flatMap(kc => dep_m.getOrElse(kc, Nil)).toSet
+		val result_l = node_l.map(node => node -> RqResult.toResultOfList(node.input_l.map(getEntity)))
+		result_l.foreach(pair => {
+			val (node, result) = pair
+			if (!inputs_m.contains(node) || inputs_m(node) != result) {
+				pair._2 match {
+					case RqSuccess(input_l, _) =>
+						println("node ready: "+node)
+						status_m(node) = Status.Ready
+					case _ =>
+						println("node not ready: "+node)
+						status_m(node) = Status.NotReady
+						result_m(node) = result
+						false
+				}
+			}
+			inputs_m(node) = result
+		})
+		entityChanged_l.clear()
+		nodeCheck_l.clear()
+	}
+	
+	/*
 	private def updateComputationStatus(node: Node_Computes) {
-		val b = node.input_l.forall(entity_m.contains)
+		println("entityStatus_m: "+entityStatus_m)
+		val b = node.input_l.forall(entityStatus_m.get(_) == Some(Status.Success))
 		if (b) {
-			if (status_m.getOrElse(node, Status.Ready) != Status.Success) {
+			if (status_m.get(node) != Some(Status.Success)) {
 				status_m(node) = Status.Ready
 				/*val input_l = node.input_l.map(entity_m)
 				node match {
@@ -368,7 +342,8 @@ class ProcessorData(
 			status_m(node) = Status.NotReady
 		}
 	}
-
+	*/
+	
 	// Match "tbl[key]"
 	private val Rx1 = """^([a-zA-Z]+)\[([0-9.]+)\]$""".r
 	// Match "tbl[key].field"
@@ -379,21 +354,19 @@ class ProcessorData(
 		def step() {
 			val entity_l = entityStatus_m.filter(_._2 == Status.Ready).toList.map(_._1)
 			//println("entity_l: "+entity_l)
-			for (idclass <- entity_l if idclass.clazz == classOf[JsValue]) {
-				val result = idclass.id match {
-					case Rx2(t, k, f) => findEntity(t, k, f.split('.').toList)
-					case Rx1(t, k) => findEntity(t, k, Nil)
-					case _ => RqError(s"don't know how to find entity: `$idclass`")
-				}
-				lookupMessage_m(idclass.id) = result.map(_ => ())
+			for (kc <- entity_l if kc.clazz == classOf[JsValue]) {
+				val result = db.get(kc.key)
+				lookupMessage_m(kc.key.id) = result.map(_ => ())
 				
 				result match {
 					case e: RqError[_] =>
-						entityStatus_m(idclass) = Status.Error
+						entityStatus_m(kc) = Status.Error
 					case RqSuccess(jsval, w) =>
-						setEntityObj(idclass, jsval)
+						entityStatus_m(kc) = Status.Success
 				}
 			}
+			updateComputationStatus()
+			
 			val l = makePendingComputationList
 			if (!l.isEmpty) {
 				runComputations(l)
@@ -402,24 +375,6 @@ class ProcessorData(
 		}
 		step()
 		makeMessagesForMissingInputs()
-	}
-	
-	private def findEntity(table: String, key: String, field_l: List[String]): RqResult[JsValue] = {
-		val id = (s"$table[$key]" :: field_l).mkString(".")
-		val idclass = IdClass(id, classOf[JsValue])
-		entity_m.get(idclass) match {
-			case Some(jsval) => RqSuccess(jsval.asInstanceOf[JsValue])
-			case None =>
-				if (field_l.isEmpty)
-					RqError(s"entity not found: `$id`")
-				else {
-					for {
-						jsval <- findEntity(table, key, field_l.init)
-						jsobj <- if (jsval.isInstanceOf[JsObject]) RqSuccess(jsval.asJsObject) else RqError(s"bad field name: `$id`")
-						fieldVal <- jsobj.fields.get(field_l.last).asRq(s"field not found: `$id`")
-					} yield fieldVal
-				}
-		}
 	}
 	
 	private def runComputations(node_l: List[Node_Computes]) {
@@ -440,24 +395,38 @@ class ProcessorData(
 	
 	private def runComputation(node: Node_Computes): Status.Value = {
 		//println(s"try node ${node.name}")
-		val input_l: List[Object] = node.input_l.map(entity_m)
-		node match {
-			case n: Node_Command =>
-				val fn = createCommandFn(n)
-				val f = scala.util.Try(fn(Nil))// future { fn(Nil) }
-				f match {
-					case tryResult => setComputationResult(n, tryResult)
+		RqResult.toResultOfList(node.input_l.map(getEntity)) match {
+			case RqSuccess(input_l, _) =>
+				node match {
+					case n: Node_Command =>
+						val fn = createCommandFn(n)
+						val f = scala.util.Try(fn(Nil))// future { fn(Nil) }
+						f match {
+							case tryResult => setComputationResult(n, tryResult)
+						}
+					case n: Node_Computation =>
+						val f = scala.util.Try { n.fn(input_l) }
+						f match {
+							case tryResult => setComputationResult(n, tryResult)
+						}
+					case n: Node_Conversion =>
+						val f = scala.util.Try { n.fn(input_l) }
+						f match {
+							case tryResult => setConversionResult(n, tryResult)
+						}
 				}
-			case n: Node_Computation =>
-				val f = scala.util.Try { n.fn(input_l) }
-				f match {
-					case tryResult => setComputationResult(n, tryResult)
-				}
-			case n: Node_Conversion =>
-				val f = scala.util.Try { n.fn(input_l) }
-				f match {
-					case tryResult => setConversionResult(n, tryResult)
-				}
+			case _ =>
+				assert(false)
+				Status.Error
+		}
+	}
+	
+	private def getEntity(kc: KeyClass): RqResult[Object] = {
+		if (kc.clazz == classOf[JsValue]) {
+			db.get(kc.key)
+		}
+		else {
+			cache_m.get(kc).asRq(s"object not found `$kc`")
 		}
 	}
 	
@@ -478,9 +447,9 @@ class ProcessorData(
 	
 	private def makeMessagesForMissingInputs() {
 		entityStatus_m.toList.filterNot(_._2 == Status.Success).map(pair => {
-			val (idclass, status) = pair
-			conversionMessage_m(idclass) =
-				conversionMessage_m.getOrElse(idclass, RqResult.zero) flatMap {_ => RqError[Unit](s"missing entity `${idclass.id}` of class `${idclass.clazz}`")}
+			val (kc, status) = pair
+			conversionMessage_m(kc) =
+				conversionMessage_m.getOrElse(kc, RqResult.zero) flatMap {_ => RqError[Unit](s"missing entity `${kc.key.id}` of class `${kc.clazz}`")}
 		})
 	}
 	
@@ -496,11 +465,11 @@ class ProcessorData(
 	}
 	
 	def getConversionNodeList(): List[Node_Conversion] = {
-		idclassNode_m.toList.sortBy(_._1.toString).flatMap(pair => getConversionNodeList(pair._2))
+		kcNode_m.toList.sortBy(_._1.toString).flatMap(pair => getConversionNodeList(pair._2))
 	}
 	
 	def getTokenList(): List[(List[Int], Token)] = {
-		token_m.toList.sortBy(_._1)
+		token_m.toList.sortBy(_._1)(ListIntOrdering)
 	}
 	
 	def getMessages(): List[String] = {
@@ -508,8 +477,8 @@ class ProcessorData(
 			result.getErrors.map(id+": ERROR: "+_) ++ result.getWarnings.map(id+": WARNING: "+_)
 		}
 		lookupMessage_m.toList.sortBy(_._1).flatMap(pair => makeMessages(pair._1, pair._2)) ++
-		conversionMessage_m.toList.sortBy(_._1.id).flatMap(pair => makeMessages(pair._1.toString, pair._2)) ++
-		computationMessage_m.toList.sortBy(_._1).flatMap(pair => makeMessages(getIdString(pair._1), pair._2))
+		conversionMessage_m.toList.sortBy(_._1.key.id).flatMap(pair => makeMessages(pair._1.toString, pair._2)) ++
+		computationMessage_m.toList.sortBy(_._1)(ListIntOrdering).flatMap(pair => makeMessages(getIdString(pair._1), pair._2))
 	}
 	
 	//def getIdString(node: Node): String = getIdString(node.id)
@@ -546,19 +515,6 @@ class ProcessorData(
 			else compId(l1.tail, l2.tail)
 		}
 	}*/
-	
-	implicit object ListIntOrdering extends Ordering[List[Int]] {
-		def compare(a: List[Int], b: List[Int]): Int = {
-			(a, b) match {
-				case (Nil, Nil) => 0
-				case (Nil, _) => -1
-				case (_, Nil) => 1
-				case (a1 :: arest, b1 :: brest) =>
-					if (a1 != b1) a1 - b1
-					else compare(arest, brest)
-			}
-		}
-	}
 	
 	implicit val NodeOrdering = new Ordering[Node] {
 		def compare(a: Node, b: Node): Int = {
@@ -604,17 +560,11 @@ object ApplicativeMain2 extends App {
 
 	val p = new ProcessorData(List(h1, h2, h3))
 	
-	p.setEntity("plateModel[PCR]", JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }"""))
-	p.setEntity("plate[P1]", JsonParser("""{ "id": "P1", "idModel": "PCR" }"""))
-	p.setEntity("a", JsString("1"))
-	p.setEntity("b", JsString("2"))
-	p.setEntity("c", JsString("3"))
-	//p.setEntity("cmd[1].text", JsString("Hello, World"))
-	//p.addComputation(cn1.entity_l, cn1.fn, Nil)
-	//p.addComputation(cn2.entity_l, cn2.fn, Nil)
-	//p.addCommand(cmd1, h1)
+	p.setEntity(TKP("plateModel", "PCR", Nil), Nil, JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }"""))
+	p.setEntity(TKP("plate", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "idModel": "PCR" }"""))
 	p.setCommands(List(cmd1, cmd2, cmd3))
 	
+	//println(p.db.get(TKP("plate", "P1", Nil)))
 	p.run()
 
 	/*def compComputation(cn1: Computation, cn2: Computation): Boolean =
@@ -642,7 +592,12 @@ object ApplicativeMain2 extends App {
 
 	println()
 	println("Entities:")
-	p.entity_m.toList.sortBy(_._1.id).foreach(pair => if (pair._1.clazz == classOf[JsValue]) println(pair._1.id+": "+pair._2))
+	println(p.db)
+	//p.entity_m.toList.sortBy(_._1.id).foreach(pair => if (pair._1.clazz == classOf[JsValue]) println(pair._1.id+": "+pair._2))
+	
+	println()
+	println("Conversions:")
+	p.cache_m.toList.sortBy(_._1.key.toList)(ListStringOrdering).foreach(println)
 	
 	println()
 	println("Tokens:")

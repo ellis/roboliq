@@ -17,6 +17,13 @@ sealed trait RqResult[+A] {
 
 object RqResult {
 	def zero: RqResult[Unit] = RqSuccess[Unit](())
+	def unit[A](a: A): RqResult[A] = RqSuccess[A](a)
+	
+	def toResultOfList[B](l: List[RqResult[B]]): RqResult[List[B]] = {
+		l.foldRight(unit(List[B]()))((r, acc) => {
+			acc.flatMap(l => r.map(_ :: l))
+		})
+	}
 }
 
 sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {

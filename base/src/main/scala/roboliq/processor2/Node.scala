@@ -57,7 +57,7 @@ sealed trait Node {
 }
 
 trait Node_Computes extends Node {
-	val input_l: List[IdClass]
+	val input_l: List[KeyClass]
 }
 
 case class Node_Command(
@@ -66,7 +66,7 @@ case class Node_Command(
 	cmd: JsObject
 ) extends Node_Computes {
 	val label_? = None
-	val input_l: List[IdClass] = Nil
+	val input_l: List[KeyClass] = Nil
 	//val idCmd: List[Int] = id
 
 	override def toString(): String = {
@@ -77,7 +77,7 @@ case class Node_Command(
 case class Node_Computation(
 	parent_? : Option[Node],
 	index: Int,
-	input_l: List[IdClass],
+	input_l: List[KeyClass],
 	fn: (List[Object]) => ComputationResult
 	//idCmd: List[Int]
 ) extends Node_Computes {
@@ -109,8 +109,8 @@ case class Node_Conversion(
 	parent_? : Option[Node],
 	label_? : Option[String],
 	index: Int,
-	idclass: IdClass,
-	input_l: List[IdClass],
+	kc: KeyClass,
+	input_l: List[KeyClass],
 	fn: (List[Object]) => ConversionResult
 ) extends Node_Computes {
 	val idCmd = Nil
@@ -121,7 +121,7 @@ case class Node_Conversion(
 
 sealed trait ConversionItem
 case class ConversionItem_Conversion(
-	input_l: List[IdClass],
+	input_l: List[KeyClass],
 	fn: (List[Object]) => ConversionResult
 ) extends ConversionItem
 case class ConversionItem_Object(obj: Object) extends ConversionItem

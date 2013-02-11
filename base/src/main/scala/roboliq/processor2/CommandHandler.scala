@@ -30,17 +30,18 @@ object InputListToTuple {
 	}
 }
 
+case class RequireItem[A: Manifest](tkp: TKP) {
+	val clazz = implicitly[Manifest[A]].runtimeClass
+	val toKeyClass = KeyClass(tkp, clazz)
+}
+
 trait CommandHandler {
 	import InputListToTuple._
 	
 	val cmd_l: List[String]
 	def getResult: ComputationResult
 
-	protected case class RequireItem[A: Manifest](id: String) {
-		val clazz = implicitly[Manifest[A]].runtimeClass
-	}
-
-	private implicit def toIdClass(ri: RequireItem[_]): IdClass = IdClass(ri.id, ri.clazz)
+	private implicit def toIdClass(ri: RequireItem[_]): KeyClass = ri.toKeyClass
 	
 	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): ComputationResult = {
 		RqSuccess(
@@ -73,9 +74,9 @@ trait CommandHandler {
 		))
 	}
 	
-	protected def as[A: Manifest](id: String): RequireItem[A] = RequireItem[A](id)
-	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A]("$"+symbol.name)
+	protected def as[A: Manifest](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
+	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A](TKP("cmd", "$", List(symbol.name)))
 	
-	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](s"plateModel[$id]")
-	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](s"plate[$id]")
+	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
+	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))
 }
