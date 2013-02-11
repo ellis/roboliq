@@ -1,4 +1,4 @@
-package roboliq.processor2
+/*package roboliq.processor2
 
 import akka.actor._
 import akka.pattern.ask
@@ -57,3 +57,4 @@ class CommandActor(
 		}
 	}
 }
+*/

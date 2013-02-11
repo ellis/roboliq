@@ -1,6 +1,7 @@
 package roboliq.processor2
 
 import spray.json.JsValue
+import spray.json.JsObject
 
 /**
  * There are several basic types of nodes.
@@ -26,11 +27,11 @@ import spray.json.JsValue
  * 
  */
 
-sealed trait Node
-
-trait HasComputationHierarchy {
-	val parent: Node with HasComputationHierarchy
+sealed trait Node {
+	val parent_? : Option[Node]
+	val label_? : Option[String]
 	val index: Int
+	//val idCmd: List[Int]
 	
 	lazy val id_r = getId_r
 	lazy val id = id_r.reverse
@@ -40,38 +41,61 @@ trait HasComputationHierarchy {
 	}
 	
 	private def getId_r: List[Int] = {
-		if (parent == null)
-			Nil
-		else
-			index :: parent.getId
+		index :: parent_?.map(_.id_r).getOrElse(Nil)
+	}
+	
+	lazy val label: String = {
+		(getRootLabel :: id.map(n => Some(n.toString))).flatten.mkString(".")
+	}
+	
+	private def getRootLabel: Option[String] = {
+		parent_? match {
+			case None => label_?
+			case Some(parent) => parent.getRootLabel
+		}
 	}
 }
 
 trait Node_Computes extends Node {
-	val input_l: List[IdClass]
+	val input_l: List[KeyClassOpt]
 }
 
 case class Node_Command(
-	parent: Node with HasComputationHierarchy,
+	parent_? : Option[Node],
 	index: Int,
-	cmd: JsValue
-) extends Node_Computes with HasComputationHierarchy {
-	val input_l: List[IdClass] = Nil
+	cmd: JsObject
+) extends Node_Computes {
+	val label_? = None
+	val input_l: List[KeyClassOpt] = Nil
+	//val idCmd: List[Int] = id
+
+	override def toString(): String = {
+		s"Node_Command($label, ${cmd})"
+	}
 }
 
 case class Node_Computation(
-	parent: Node with HasComputationHierarchy,
+	parent_? : Option[Node],
 	index: Int,
-	input_l: List[IdClass],
-	fn: (List[Object]) => ComputationResult,
-	idCmd: List[Int]
-) extends Node_Computes with HasComputationHierarchy
+	input_l: List[KeyClassOpt],
+	fn: (List[Object]) => ComputationResult
+	//idCmd: List[Int]
+) extends Node_Computes {
+	val label_? = None
+	override def toString(): String = {
+		s"Node_Computation($label, ${input_l})"
+	}
+}
 
-case class Node_Token(
-	parent: Node with HasComputationHierarchy,
+/*case class Node_Token(
+	parent_? : Option[Node],
 	index: Int,
 	token: Token
-) extends Node with HasComputationHierarchy
+) extends Node {
+	val parent_? = Option(parent)
+	val label_? = None
+	val idCmd = Nil
+}*/
 
 /*
 class Node_Result(
@@ -82,14 +106,22 @@ class Node_Result(
 */
 
 case class Node_Conversion(
-	//idclass: IdClass,
-	input_l: List[IdClass],
+	parent_? : Option[Node],
+	label_? : Option[String],
+	index: Int,
+	kc: KeyClass,
+	input_l: List[KeyClassOpt],
 	fn: (List[Object]) => ConversionResult
-) extends Node_Computes
+) extends Node_Computes {
+	val idCmd = Nil
+	override def toString(): String = {
+		s"Node_Conversion($label, ${input_l.mkString("+")})"
+	}
+}
 
 sealed trait ConversionItem
 case class ConversionItem_Conversion(
-	input_l: List[IdClass],
+	input_l: List[KeyClassOpt],
 	fn: (List[Object]) => ConversionResult
 ) extends ConversionItem
-case class ConversionItem_Object(idclass: IdClass, obj: Object) extends ConversionItem
+case class ConversionItem_Object(obj: Object) extends ConversionItem

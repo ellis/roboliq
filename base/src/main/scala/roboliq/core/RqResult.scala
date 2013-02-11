@@ -10,9 +10,31 @@ sealed trait RqResult[+A] {
 	def map[B](f: A => B): RqResult[B]
 	def flatMap[B](f: A => RqResult[B]): RqResult[B]
 	def foreach(f: A => Unit): Unit
-	
+	//def append[B](that: RqResult[B]): RqResult[B] = this.flatMap(_ => that)
 	def getWarnings: List[String] = warning_r.reverse
 	def getErrors: List[String]
+	
+	def isError: Boolean
+	final def isSuccess: Boolean = !isError
+	private def isEmpty = isError
+	
+	/** Returns this $option if it is nonempty,
+	  * otherwise return the result of evaluating `alternative`.
+	  * @param alternative the alternative expression.
+	  */
+	@inline final def orElse[B >: A](alternative: => RqResult[B]): RqResult[B] =
+		if (isEmpty) alternative else this
+}
+
+object RqResult {
+	def zero: RqResult[Unit] = RqSuccess[Unit](())
+	def unit[A](a: A): RqResult[A] = RqSuccess[A](a)
+	
+	def toResultOfList[B](l: List[RqResult[B]]): RqResult[List[B]] = {
+		l.foldRight(unit(List[B]()))((r, acc) => {
+			acc.flatMap(l => r.map(_ :: l))
+		})
+	}
 }
 
 sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {
@@ -26,6 +48,8 @@ sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends R
 	def foreach(f: A => Unit): Unit = f(res)
 
 	def getErrors: List[String] = Nil
+
+	def isError = false
 }
 
 sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
@@ -34,6 +58,8 @@ sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = N
 	def foreach(f: A => Unit): Unit = ()
 
 	def getErrors: List[String] = error_l
+
+	def isError = true
 }
 
 object RqError {

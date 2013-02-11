@@ -1,4 +1,4 @@
-package roboliq.processor2
+/*package roboliq.processor2
 
 import spray.json.JsValue
 import roboliq.core.RqResult
@@ -21,3 +21,4 @@ case class ActorMessage_RequestInputs(input_l: List[IdClass]) extends ActorMessa
 case class ActorMessage_RequestCommandHandler(cmd: String) extends ActorMessage
 case class ActorMessage_Handler(result: RqResult[CommandHandler]) extends ActorMessage
 case class ActorMessage_Entities(map: scala.collection.Map[IdClass, Object]) extends ActorMessage
+*/
