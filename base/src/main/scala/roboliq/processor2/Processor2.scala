@@ -383,14 +383,22 @@ class ProcessorData(
 		if (!node_l.isEmpty) {
 			val status_l = node_l.map(runComputation)
 			println("status_l: "+status_l)
-			println("status_m: "+status_m)
+			//println("status_m: "+status_m)
 			runComputations(makePendingComputationList)
 		}
 	}
-	
+
+	/**
+	 * Return all ready commands and conversions, and the next ready computation.
+	 */
 	private def makePendingComputationList: List[Node_Computes] = {
-		//status_m.filter(_._2 == 1).keys.toList.sorted(NodeOrdering)
-		status_m.filter(_._2 == Status.Ready).keys.toList
+		// Get all nodes which are ready, but partition on whether the node is a Computation node.
+		val (computation_l, other_l) = status_m.filter(_._2 == Status.Ready).keys.toList.partition(_.isInstanceOf[Node_Computation])
+		// Return other nodes and the first computation node.
+		if (computation_l.isEmpty)
+			other_l
+		else
+			other_l ++ List(computation_l.minBy(_.id)(ListIntOrdering))
 	}
 	
 	private def runComputation(node: Node_Computes): Status.Value = {
