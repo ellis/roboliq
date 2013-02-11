@@ -14,7 +14,7 @@ class MovePlateHandler extends CommandHandler {
 	val cmd_l = List[String]("movePlate")
 	
 	def getResult = {
-		handlerRequire (as[String]('id), asOpt[String]('deviceId)) { (id, deviceId_?) =>
+		handlerRequire (as[String]('id), as[String]('deviceId)) { (id, deviceId_?) =>
 			handlerRequire (lookupPlate(id)) { (plate) =>
 				handlerReturn(Token_Comment(plate.toString + " on " + deviceId_?))
 			}

@@ -7,6 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection._
 import scala.concurrent.future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.reflect.runtime.{universe => ru}
 import scalaz._
 import spray.json.JsObject
 import spray.json.JsString
@@ -28,11 +29,11 @@ import spray.json.JsNumber
  * and it returns a list of computations, events, commands, and tokens.  
  */
 
-case class KeyClass(key: TKP, clazz: Class[_]) {
+case class KeyClass(key: TKP, clazz: ru.Type) {
 	def changeKey(key: String): KeyClass =
 		this.copy(key = this.key.copy(key = key))
 	def changeClassToJsValue: KeyClass =
-		this.copy(clazz = classOf[JsValue])
+		this.copy(clazz = ru.typeOf[JsValue])
 }
 
 case class KeyClassOpt(kc: KeyClass, opt: Boolean = false) {
@@ -574,7 +575,7 @@ class Print2CommandHandler extends CommandHandler {
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
-	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1" }""").asJsObject
+	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1", "deviceId": "ARM1" }""").asJsObject
 	
 	val h1 = new PrintCommandHandler
 	val h2 = new Print2CommandHandler

@@ -2,7 +2,10 @@ package roboliq.processor2
 
 import language.implicitConversions
 
+import scala.reflect.runtime.{universe => ru}
+
 import scalaz._
+import Scalaz._
 import spray.json._
 import roboliq.core._
 //import RqPimper._
@@ -18,10 +21,46 @@ object InputListToTuple {
 	def check2[A: Manifest, B: Manifest](l: List[Object]): RqResult[(A, B)] = {
 		l match {
 			case List(a: A, b: B) => RqSuccess((a, b))
-			case _ => RqError("[InputList] invalid parameter types: "+l)
+			case _ => RqError("[InputList] invalid parameter types: "+l+", "+l.map(_.getClass())+", "+implicitly[Manifest[A]].runtimeClass+", "+implicitly[Manifest[B]].runtimeClass)
 		}
 	}
 
+	/*
+	def checkN[FN, RET](l: List[Object], fn: FN): ComputationResult = {
+		// fn.getClass.getMethods
+		// val jm = fn.getClass.getMethod("apply", classOf[String], classOf[String])
+		// jm.invoke(fn, "b", "cd")
+		// jm.getParameterTypes
+		
+		/*import scala.reflect.runtime.{universe => ru}
+		def getTypeTag[T: ru.TypeTag](obj: T) = ru.typeTag[T]
+		val thetype = getTypeTag(f)
+		val t = thetype.tpe
+		t.asInstanceOf[ru.TypeRefApi].args*/
+		
+		def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
+		
+		val type_l = getInputTypes(fn)
+		
+		
+		
+		val l1 = pair_l.zipWithIndex.map(pair => {
+			val ((clazz, o), i) = pair
+			if (clazz.isInstance(o)) RqSuccess((clazz, o))
+			else RqError(s"wrong class for parameter ${i+1}.  Expected `${clazz}`.  Found `${o.getClass}`.")
+		})
+		RqResult.toResultOfList(l1) match {
+			case RqError(e, w) => RqError(e, w)
+			case RqSuccess(l) =>
+		}
+		
+		l match {
+			case List(a: A, b: B) => RqSuccess((a, b))
+			case _ => RqError("[InputList] invalid parameter types: "+l+", "+l.map(_.getClass())+", "+implicitly[Manifest[A]].runtimeClass+", "+implicitly[Manifest[B]].runtimeClass)
+		}
+	}
+	*/
+	
 	def check3[A: Manifest, B: Manifest, C: Manifest](l: List[Object]): RqResult[(A, B, C)] = {
 		l match {
 			case List(a: A, b: B, c: C) => RqSuccess((a, b, c))
@@ -30,8 +69,10 @@ object InputListToTuple {
 	}
 }
 
-case class RequireItem[A: Manifest](tkp: TKP, optClazzOverride_? : Option[Class[_]] = None) {
-	private val clazz = optClazzOverride_?.getOrElse(implicitly[Manifest[A]].runtimeClass)
+case class RequireItem[A: ru.TypeTag](tkp: TKP) {
+	private val clazz0 = ru.typeTag[A].tpe
+	private val clazz = if (clazz0.typeSymbol.name == "Option") t.asInstanceOf[ru.TypeRefApi].args.head else clazz0
+		optClazzOverride_?.getOrElse(implicitly[Manifest[A]].runtimeClass)
 	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), optClazzOverride_?.isDefined)
 }
 
@@ -67,11 +108,30 @@ trait CommandHandler {
 	)(
 		fn: (A, B) => RqResult[List[ComputationItem]]
 	): ComputationResult = {
+		def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
+		val type_l = getInputTypes(fn)
+		
+		println()
+		println("handlerRequire2: "+List(a, b))
+		println("type_l: "+type_l)
+		println()
+		
+		val input_l = List[KeyClassOpt](a, b)
 		RqSuccess(
 			List(
-				ComputationItem_Computation(List(a, b),
-					(j_l) => check2(j_l).flatMap { case (a, b) => fn(a, b) }
-				)
+				ComputationItem_Computation(input_l, (j_l) => {
+					val l1 = (type_l zip j_l).zipWithIndex.map(pair => {
+						val ((clazz, o), i) = pair
+						if (clazz.isInstance(o)) RqSuccess((clazz, o))
+						else RqError(s"wrong class for parameter ${i+1}.  Expected `${clazz}`.  Found `${o.getClass}`.")
+					})
+					println()
+					println("handlerRequire2: "+List(a, b))
+					println("type_l: "+type_l)
+					println()
+					check2b(input_l.map(_.kc.clazz) zip j_l).flatMap { case (a, b) => fn(a, b) }
+					RqError("woops")
+				})
 			)
 		)
 	}
