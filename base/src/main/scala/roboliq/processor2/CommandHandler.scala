@@ -30,10 +30,18 @@ object InputListToTuple {
 	}
 }
 
-case class RequireItem[A: Manifest](tkp: TKP) {
-	val clazz = implicitly[Manifest[A]].runtimeClass
-	val toKeyClass = KeyClass(tkp, clazz)
+case class RequireItem[A: Manifest](tkp: TKP, optClazzOverride_? : Option[Class[_]] = None) {
+	private val clazz = optClazzOverride_?.getOrElse(implicitly[Manifest[A]].runtimeClass)
+	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), optClazzOverride_?.isDefined)
 }
+
+/*
+case class RequireParam[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
+case class RequireParamOpt[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
+case class RequireState[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
+case class RequireEntity[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
+case class RequireRef[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
+*/
 
 trait CommandHandler {
 	import InputListToTuple._
@@ -41,7 +49,7 @@ trait CommandHandler {
 	val cmd_l: List[String]
 	def getResult: ComputationResult
 
-	private implicit def toIdClass(ri: RequireItem[_]): KeyClass = ri.toKeyClass
+	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
 	
 	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): ComputationResult = {
 		RqSuccess(
@@ -76,6 +84,9 @@ trait CommandHandler {
 	
 	protected def as[A: Manifest](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
 	protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A](TKP("cmd", "$", List(symbol.name)))
+
+	protected def asOpt[A: Manifest](tkp: TKP): RequireItem[Option[A]] = RequireItem[Option[A]](tkp, Some(implicitly[Manifest[A]].runtimeClass))
+	protected def asOpt[A: Manifest](symbol: Symbol): RequireItem[Option[A]] = asOpt[A](TKP("cmd", "$", List(symbol.name)))
 	
 	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
 	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))

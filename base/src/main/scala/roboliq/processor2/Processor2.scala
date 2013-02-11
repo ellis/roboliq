@@ -28,13 +28,25 @@ import spray.json.JsNumber
  * and it returns a list of computations, events, commands, and tokens.  
  */
 
-case class KeyClass(key: TKP, clazz: Class[_])
+case class KeyClass(key: TKP, clazz: Class[_]) {
+	def changeKey(key: String): KeyClass =
+		this.copy(key = this.key.copy(key = key))
+	def changeClassToJsValue: KeyClass =
+		this.copy(clazz = classOf[JsValue])
+}
+
+case class KeyClassOpt(kc: KeyClass, opt: Boolean = false) {
+	def changeKey(key: String): KeyClassOpt =
+		this.copy(kc = kc.changeKey(key))
+	def changeClassToJsValue: KeyClassOpt =
+		this.copy(kc = kc.changeClassToJsValue)
+}
 
 sealed trait ComputationItem
 case class ComputationItem_Event(event: Event) extends ComputationItem
 case class ComputationItem_EntityRequest(id: String) extends ComputationItem
 case class ComputationItem_Computation(
-	entity_l: List[KeyClass],
+	entity_l: List[KeyClassOpt],
 	fn: (List[Object]) => ComputationResult
 ) extends ComputationItem
 case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
@@ -153,15 +165,10 @@ class ProcessorData(
 					Some(node)
 				case result: ComputationItem_Computation =>
 					val keyCmd = findCommandParent(parent_?).map(_.label).getOrElse("")
-					val entity2_l = result.entity_l.map(kc => {
+					val entity2_l = result.entity_l.map(kco => {
 						// Substitute in full path for command parameters starting with '$'
-						val kc2 = {
-							if (kc.key.key == "$") {
-								KeyClass(TKP("cmd", keyCmd, kc.key.path), kc.clazz)
-							}
-							else kc
-						}
-						kc2
+						if (kco.kc.key.key == "$") kco.changeKey(keyCmd)
+						else kco
 					})
 					
 					//val result2 = result.copy(entity_l = entity2_l)
@@ -261,13 +268,15 @@ class ProcessorData(
 
 	// For each of the node's inputs, add the node to the input's dependency list
 	private def addDependencies(node: Node_Computes) {
-		node.input_l.foreach(kc => {
+		node.input_l.foreach(kco => {
+			val kc = kco.kc
 			dep_m.addBinding(kc, node)
 			if (kc.clazz == classOf[JsValue])
 				db.addWatch(kc.key)
 
 			// Schedule lookups and create conversion nodes
-			for (kc <- node.input_l) {
+			for (kco <- node.input_l) {
+				val kc = kco.kc
 				val kc0 = kc.copy(clazz = classOf[JsValue])
 				
 				// JsValue lookup
@@ -284,7 +293,7 @@ class ProcessorData(
 								case List(jsval: JsValue) =>
 									conversion(jsval)
 							}
-							val node = new Node_Conversion(None, Some(kc.toString), 0, kc, List(kc0), fn)
+							val node = new Node_Conversion(None, Some(kc.toString), 0, kc, List(KeyClassOpt(kc0)), fn)
 							kcNode_m(kc) = node
 							registerNode(node)
 						case None =>
@@ -436,6 +445,11 @@ class ProcessorData(
 		else {
 			cache_m.get(kc).asRq(s"object not found `$kc`")
 		}
+	}
+	
+	private def getEntity(kco: KeyClassOpt): RqResult[Object] = {
+		val res = getEntity(kco.kc)
+		res orElse RqSuccess(None)
 	}
 	
 	private def createCommandFn(node: Node_Command): (List[Object] => ComputationResult) = {

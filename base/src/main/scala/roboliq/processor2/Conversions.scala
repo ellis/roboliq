@@ -103,7 +103,7 @@ object Conversions {
 				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
 			} yield {
 				List(ConversionItem_Conversion(
-					input_l = List(KeyClass(TKP("plateModel", idModel, Nil), classOf[PlateModel])),
+					input_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), classOf[PlateModel]))),
 					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
 						val plate = new Plate(id, plateModel, locationPermanent_?)
 						List(ConversionItem_Object(plate))
