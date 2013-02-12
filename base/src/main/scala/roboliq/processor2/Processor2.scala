@@ -229,7 +229,7 @@ class ProcessorData(
 			kco.conversion_? match {
 				case Some(fnargs) =>
 					val input2_l = concretizeArgs(fnargs._2, Some(node), 0)
-					Some(Node_Conversion(None, Some(kc.toString), 0, kc, input2_l, fnargs._1))
+					Some(Node_Conversion(None, Some(s"${kc.key.id}<${kc.clazz}>"), 0, kc, input2_l, fnargs._1))
 				case None =>
 					val opt = kco.opt
 					val kc0 = kc.changeClassToJsValue
@@ -240,7 +240,7 @@ class ProcessorData(
 									case List(jsval: JsValue) =>
 										conversion(jsval)
 								}
-								Some(Node_Conversion(None, Some(kc.toString), 0, kc, List(KeyClassOpt(kc0, opt)), fn))
+								Some(Node_Conversion(None, Some(s"${kc.key.id}<${kc.clazz}>"), 0, kc, List(KeyClassOpt(kc0, opt)), fn))
 							case None =>
 								internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
 								None
