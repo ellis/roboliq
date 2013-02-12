@@ -2,9 +2,10 @@ package roboliq.processor2
 
 import scala.reflect.runtime.{universe => ru}
 import roboliq.core._
+import RqPimper._
 
 
-class MovePlateToken(
+case class MovePlateToken(
 	val deviceId_? : Option[String],
 	val plate: Plate,
 	val plateSrc: PlateLocation,
@@ -19,9 +20,22 @@ class MovePlateHandler extends CommandHandler {
 			(id: String, list: List[String]) =>
 			bank on it
 		}*/
-		handlerRequire(lookupPlate('id)) {
-			(plate: Plate) =>
-			handlerReturn(Token_Comment(plate.toString))
+		handlerRequire (
+			lookupPlate('plate),
+			lookupPlateState('plate),
+			lookupPlateLocation('dest)
+		) {
+			(plate, plateState, dest) =>
+			for {
+				locationSrc <- plateState.location_?.asRq(s"plate `${plate.id}` must have an location set.")
+			} yield {
+				val s: String = new MovePlateToken(
+					None, //deviceId_?,
+					plate,
+					locationSrc,
+					dest).toString
+				List(ComputationItem_Token(Token_Comment(s)))
+			}
 		}
 		/*
 		handlerRequire(as[String]('id), as[List[String]]('list)/*, as[Option[String]]('deviceId)*/) {

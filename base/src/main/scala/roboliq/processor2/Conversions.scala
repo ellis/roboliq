@@ -126,26 +126,7 @@ object Conversions {
 	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList) _
 	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList) _
 	
-	private val plateHandler = new ConversionHandler {
-		def getResult(jsval: JsValue): ConversionResult = {
-			for {
-				jsobj <- D.toJsObject(jsval)
-				id <- D.getString('id, jsobj)
-				idModel <- D.getString('idModel, jsobj)
-				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
-			} yield {
-				List(ConversionItem_Conversion(
-					input_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), ru.typeOf[PlateModel]))),
-					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
-						val plate = new Plate(id, plateModel, locationPermanent_?)
-						List(ConversionItem_Object(plate))
-					}
-				))
-			}
-		}
-	}
-	
-	def plateLocationHandler = new ConversionHandler {
+	private def plateLocationHandler = new ConversionHandler {
 		def getResult(jsval: JsValue): ConversionResult = {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -159,6 +140,25 @@ object Conversions {
 						val plateModel_l = l.asInstanceOf[List[PlateModel]]
 						val loc = new PlateLocation(id, plateModel_l, cooled)
 						RqSuccess(List(ConversionItem_Object(loc)))
+					}
+				))
+			}
+		}
+	}
+	
+	private val plateHandler = new ConversionHandler {
+		def getResult(jsval: JsValue): ConversionResult = {
+			for {
+				jsobj <- D.toJsObject(jsval)
+				id <- D.getString('id, jsobj)
+				idModel <- D.getString('idModel, jsobj)
+				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
+			} yield {
+				List(ConversionItem_Conversion(
+					input_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), ru.typeOf[PlateModel]))),
+					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
+						val plate = new Plate(id, plateModel, locationPermanent_?)
+						List(ConversionItem_Object(plate))
 					}
 				))
 			}
@@ -220,5 +220,7 @@ object Conversions {
 	}
 	*/
 	
+	val asPlateLocation = (jsval: JsValue) => plateLocationHandler.getResult(jsval)
 	val asPlate = (jsval: JsValue) => plateHandler.getResult(jsval)
+	val asPlateState = (jsval: JsValue) => plateStateHandler.getResult(jsval)
 }

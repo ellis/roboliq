@@ -2,6 +2,7 @@ package roboliq.processor2
 
 import language.implicitConversions
 import scala.reflect.runtime.{universe => ru}
+import scala.reflect.runtime.universe.TypeTag
 import scalaz._
 import Scalaz._
 import spray.json._
@@ -106,29 +107,49 @@ trait CommandHandler {
 		)
 	}
 	
+	/*def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
+	val type_l = getInputTypes(fn)
+	
+	println()
+	println("handlerRequire2: "+List(a, b))
+	println("type_l: "+type_l)
+	println()*/
+	
 	protected def handlerRequire[A: ru.TypeTag, B: ru.TypeTag](
 		a: RequireItem[A],
 		b: RequireItem[B]
 	)(
 		fn: (A, B) => ComputationResult
 	): ComputationResult = {
-		/*def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
-		val type_l = getInputTypes(fn)
-		
-		println()
-		println("handlerRequire2: "+List(a, b))
-		println("type_l: "+type_l)
-		println()*/
-		
 		val input_l = List[KeyClassOpt](a, b)
 		RqSuccess(
 			List(
 				ComputationItem_Computation(input_l, (arg_l) => {
-					//println("arg_l: "+arg_l.map(_.getClass))
 					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
-					//println("!!!!!!!!!!!")
 					val ret = method.invoke(fn, arg_l : _*)
-					//println("BBBBBBBBBBB")
+					ret.asInstanceOf[ComputationResult]
+				})
+			)
+		)
+	}
+	
+	protected def handlerRequire[A: ru.TypeTag, B: ru.TypeTag, C: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B],
+		c: RequireItem[C]
+	)(
+		fn: (A, B, C) => ComputationResult
+	): ComputationResult = {
+		val input_l = List[KeyClassOpt](a, b, c)
+		handlerRequireRun(input_l, fn)
+	}
+	
+	private def handlerRequireRun(input_l: List[KeyClassOpt], fn: Object): ComputationResult = {
+		RqSuccess(
+			List(
+				ComputationItem_Computation(input_l, (arg_l) => {
+					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+					val ret = method.invoke(fn, arg_l : _*)
 					ret.asInstanceOf[ComputationResult]
 				})
 			)
@@ -166,22 +187,41 @@ trait CommandHandler {
 
 	//protected def asOpt[A: ru.TypeTag](tkp: TKP): RequireItem[Option[A]] = RequireItem[Option[A]](tkp)
 	//protected def asOpt[A: ru.TypeTag](symbol: Symbol): RequireItem[Option[A]] = asOpt[A](TKP("cmd", "$", List(symbol.name)))
-	
-	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
-	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))
 
-	protected def lookupPlate(symbol: Symbol): RequireItem[Plate] = {
+	//protected def lookup[A: ru.TypeTag](table: String, symbol: Symbol): RequireItem[A] =
+	//	RequireItem[A](TKP(table, symbol.name, Nil))
+	
+	protected def lookup[A <: Object : ru.TypeTag : ClassTag](
+		symbol: Symbol,
+		lookupById: String => RequireItem[A]
+	): RequireItem[A] = {
 		val fn = (l: List[Object]) => {
 			InputListToTuple.check1[String](l).map(id => {
 				List(ConversionItem_Conversion(
-					input_l = List(lookupPlate(id)),
-					fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { plate =>
-						List(ConversionItem_Object(plate))
+					input_l = List(lookupById(id)),
+					fn = (l: List[Object]) => InputListToTuple.check1[A](l).map { a =>
+						List(ConversionItem_Object(a))
 					}
 				))
 			})
 		}
 		val args = List[KeyClassOpt](as[String](symbol))
-		RequireItem[Plate](TKP("param", "#", Nil), Some((fn, args)))
+		RequireItem[A](TKP("param", "#", Nil), Some((fn, args)))
 	}
+	
+	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
+	protected def lookupPlateModel(symbol: Symbol): RequireItem[PlateModel] = 
+		lookup(symbol, lookupPlateModel _)
+		
+	protected def lookupPlateLocation(id: String): RequireItem[PlateLocation] = RequireItem[PlateLocation](TKP("plateLocation", id, Nil))
+	protected def lookupPlateLocation(symbol: Symbol): RequireItem[PlateLocation] = 
+		lookup(symbol, lookupPlateLocation _)
+		
+	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))
+	protected def lookupPlate(symbol: Symbol): RequireItem[Plate] =
+		lookup(symbol, lookupPlate _)
+
+	protected def lookupPlateState(id: String): RequireItem[PlateState] = RequireItem[PlateState](TKP("plateState", id, Nil))
+	protected def lookupPlateState(symbol: Symbol): RequireItem[PlateState] =
+		lookup(symbol, lookupPlateState _)
 }

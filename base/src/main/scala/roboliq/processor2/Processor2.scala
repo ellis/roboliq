@@ -110,7 +110,9 @@ class ProcessorData(
 	conversion_m(ru.typeOf[String]) = Conversions.asString
 	conversion_m(ru.typeOf[Integer]) = Conversions.asInteger
 	conversion_m(ru.typeOf[PlateModel]) = Conversions.asPlateModel
+	conversion_m(ru.typeOf[PlateLocation]) = Conversions.asPlateLocation
 	conversion_m(ru.typeOf[Plate]) = Conversions.asPlate
+	conversion_m(ru.typeOf[PlateState]) = Conversions.asPlateState
 	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList
 	
 	def setCommands(cmd_l: List[JsObject]) {
@@ -647,7 +649,7 @@ class Print2CommandHandler extends CommandHandler {
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
-	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1", "list": ["PCR", "PCR", "PCR"]}""").asJsObject
+	val cmd3 = JsonParser("""{ "cmd": "movePlate", "plate": "P1", "dest": "cooled2" }""").asJsObject
 	
 	val h1 = new PrintCommandHandler
 	val h2 = new Print2CommandHandler
@@ -656,7 +658,10 @@ object ApplicativeMain2 extends App {
 	val p = new ProcessorData(List(h1, h2, h3))
 	
 	p.setEntity(TKP("plateModel", "PCR", Nil), Nil, JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }"""))
+	p.setEntity(TKP("plateLocation", "cooled1", Nil), Nil, JsonParser("""{ "id": "cooled1", "plateModels": ["PCR"], "cooled": true }"""))
+	p.setEntity(TKP("plateLocation", "cooled2", Nil), Nil, JsonParser("""{ "id": "cooled2", "plateModels": ["PCR"], "cooled": true }"""))
 	p.setEntity(TKP("plate", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "idModel": "PCR" }"""))
+	p.setEntity(TKP("plateState", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "location": "cooled1" }"""))
 	p.setCommands(List(cmd1, cmd2, cmd3))
 	
 	//println(p.db.get(TKP("plate", "P1", Nil)))
