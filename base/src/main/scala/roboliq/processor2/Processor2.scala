@@ -118,7 +118,7 @@ class ProcessorData(
 	def setCommands(cmd_l: List[JsObject]) {
 		cmd1_l = handleComputationItems(None, cmd_l.map(js => ComputationItem_Command(js)))
 	}
-	
+
 	private def setComputationResult(node: Node_Computes, result: scala.util.Try[ComputationResult]): Status.Value = {
 		val state = state_m(node)
 		val child_l = result match {
@@ -335,6 +335,18 @@ class ProcessorData(
 		// Update status for all nodes
 		state0_m.values.foreach(_.updateStatus(kcoToValue_m.apply _))
 		
+		println()
+		println("runStep")
+		println("=======")
+		println()
+		println("Entities")
+		println("--------")
+		kcoToValue_m.toList.sortBy(_._1.kc.key.id).map(pair => pair._1.kc.key.id + (if (pair._1.opt) "*" else "") + ": " + pair._2.getOrElse("...")).foreach(println)
+		println()
+		println("Nodes")
+		println("-----")
+		state0_m.values.toList.sortBy(_.node.label).map(state => state.node.label + ": " + state.status).foreach(println)
+
 		val pending_l = makePendingComputationList
 		pending_l.foreach(state => runComputation(state.node))
 
@@ -361,17 +373,11 @@ class ProcessorData(
 		})
 
 		println()
-		println("runStep")
-		println("=======")
+		println("Computations")
+		println("------------")
+		pending_l.map(state => state.node.label + ": " + state.status).foreach(println)
 		println()
-		println("Entities")
-		println("--------")
-		kcoToValue_m.toList.sortBy(_._1.kc.key.id).map(pair => pair._1.kc.key.id + (if (pair._1.opt) "*" else "") + ": " + pair._2.getOrElse("...")).foreach(println)
-		println()
-		println("Nodes")
-		println("-----")
-		state0_m.values.toList.sortBy(_.node.label).map(state => state.node.label + ": " + state.status).foreach(println)
-		println()
+		// TODO: show added conversions
 		
 		!pending_l.isEmpty || bConversionAdded 
 	}
