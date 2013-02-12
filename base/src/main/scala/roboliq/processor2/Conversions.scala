@@ -65,6 +65,26 @@ object ConversionsDirect {
 		}
 	}
 	
+	/*def toPlateLocation(jsval: JsValue): RqResult[PlateLocation] = {
+		for {
+			jsobj <- toJsObject(jsval)
+			id <- getString('id, jsobj)
+			plateModelIds <- getStringList('plateModels, jsobj)
+			cols <- getInteger('cols, jsobj)
+			wellVolume <- getVolume('wellVolume, jsobj)
+		} yield {
+			new PlateModel(id, rows, cols, wellVolume)
+		}
+		for {
+			id <- Result.mustBeSet(bean._id, "_id")
+			plateModels <- Result.mustBeSet(bean.plateModels, "model")
+			lModel <- Result.mapOver(plateModels.toList)(ob.findPlateModel)
+		} yield {
+			val cooled: Boolean = if (bean.cooled != null) bean.cooled else false
+			new PlateLocation(id, lModel, cooled)
+		}
+	}*/
+	
 	def getWith[A](symbol: Symbol, jsobj: JsObject, fn: JsValue => RqResult[A]): RqResult[A] = {
 		jsobj.fields.get(symbol.name).asRq(s"missing field `${symbol.name}`").flatMap(fn)
 	}
@@ -80,6 +100,23 @@ object ConversionsDirect {
 	def getString_?(symbol: Symbol, jsobj: JsObject) = getWith_?(symbol, jsobj, toString)
 	def getInteger(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toInteger)
 	def getVolume(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toVolume)
+
+	
+	private def toList[A](jsval: JsValue, fn: JsValue => RqResult[A]): RqResult[List[A]] = {
+		jsval match {
+			case JsArray(elements) => RqResult.toResultOfList(elements.map(fn))
+			case _ =>
+				fn(jsval) match {
+					case RqSuccess(a, w) => RqSuccess(List(a), w)
+					case r => RqError("expected JsArray of JsStrings")
+				}
+		}
+	}
+	
+	def toStringList(jsval: JsValue) = toList(jsval, toString _)
+	def toIntegerList(jsval: JsValue) = toList(jsval, toInteger _)
+	def toVolumeList(jsval: JsValue) = toList(jsval, toVolume _)
+	def toPlateModelList(jsval: JsValue) = toList(jsval, toPlateModel _)
 }
 
 object Conversions {
@@ -94,6 +131,11 @@ object Conversions {
 	val asInteger = makeConversion(ConversionsDirect.toInteger) _
 	val asVolume = makeConversion(ConversionsDirect.toVolume) _
 	val asPlateModel = makeConversion(ConversionsDirect.toPlateModel) _
+
+	val asStringList = makeConversion(ConversionsDirect.toStringList) _
+	val asIntegerList = makeConversion(ConversionsDirect.toIntegerList) _
+	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList) _
+	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList) _
 	
 	private val plateHandler = new ConversionHandler {
 		def getResult(jsval: JsValue): ConversionResult = {
@@ -113,6 +155,26 @@ object Conversions {
 			}
 		}
 	}
+	
+	/*
+	private val plateStateHandler = new ConversionHandler {
+		def getResult(jsval: JsValue): ConversionResult = {
+			for {
+				jsobj <- D.toJsObject(jsval)
+				id <- D.getString('id, jsobj)
+				location_? <- D.getString_?('location, jsobj)
+			} yield {
+				List(ConversionItem_Conversion(
+					input_l = List(KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[PlateModel]))),
+					fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { plate =>
+						val plateState = new PlateState(plate, location_?)
+						List(ConversionItem_Object(plate))
+					}
+				))
+			}
+		}
+	}
+	*/
 	
 	/*
 	private val plateHandler2 = new CommandHandler {

@@ -36,7 +36,11 @@ case class KeyClass(key: TKP, clazz: ru.Type) {
 		this.copy(clazz = ru.typeOf[JsValue])
 }
 
-case class KeyClassOpt(kc: KeyClass, opt: Boolean = false) {
+case class KeyClassOpt(
+	kc: KeyClass,
+	opt: Boolean = false//,
+	//conversion_? : Option[JsValue => ConversionResult] = None
+) {
 	def changeKey(key: String): KeyClassOpt =
 		this.copy(kc = kc.changeKey(key))
 	def changeClassToJsValue: KeyClassOpt =
@@ -114,6 +118,7 @@ class ProcessorData(
 	conversion_m(ru.typeOf[Integer]) = Conversions.asInteger
 	conversion_m(ru.typeOf[PlateModel]) = Conversions.asPlateModel
 	conversion_m(ru.typeOf[Plate]) = Conversions.asPlate
+	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList
 	
 	def setCommands(cmd_l: List[JsObject]) {
 		cmd1_l = handleComputationItems(None, cmd_l.map(js => ComputationItem_Command(js)))
@@ -335,6 +340,13 @@ class ProcessorData(
 		// Update status for all nodes
 		state0_m.values.foreach(_.updateStatus(kcoToValue_m.apply _))
 		
+		/*
+		cmd[1].id: JsValue = P1
+		cmd[1].id: String = P1
+		plate[P1] ...
+		param[1#1]: Plate = fn(cmd[1].id: JsValue) 
+		*/
+		
 		println()
 		println("runStep")
 		println("=======")
@@ -411,6 +423,8 @@ class ProcessorData(
 	}
 	*/
 	
+	// REFACTOR: This should return the results, and let the results be processed in another function
+	//  That way we could run the computations in parallel.
 	private def runComputation(node: Node_Computes): Status.Value = {
 		//println(s"try node ${node.name}")
 		RqResult.toResultOfList(node.input_l.map(getEntity)) match {
@@ -583,7 +597,7 @@ class Print2CommandHandler extends CommandHandler {
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
-	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1"}""").asJsObject
+	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1", "list": ["PCR", "PCR", "PCR"]}""").asJsObject
 	
 	val h1 = new PrintCommandHandler
 	val h2 = new Print2CommandHandler

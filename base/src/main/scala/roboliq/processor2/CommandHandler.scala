@@ -92,7 +92,7 @@ trait CommandHandler {
 
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
 	
-	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => RqResult[List[ComputationItem]]): ComputationResult = {
+	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => ComputationResult): ComputationResult = {
 		RqSuccess(
 			List(
 				ComputationItem_Computation(List(a),
@@ -106,7 +106,7 @@ trait CommandHandler {
 		a: RequireItem[A],
 		b: RequireItem[B]
 	)(
-		fn: (A, B) => RqResult[List[ComputationItem]]
+		fn: (A, B) => ComputationResult
 	): ComputationResult = {
 		/*def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
 		val type_l = getInputTypes(fn)
@@ -120,10 +120,30 @@ trait CommandHandler {
 		RqSuccess(
 			List(
 				ComputationItem_Computation(input_l, (arg_l) => {
+					//println("arg_l: "+arg_l.map(_.getClass))
+					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+					//println("!!!!!!!!!!!")
+					val ret = method.invoke(fn, arg_l : _*)
+					//println("BBBBBBBBBBB")
+					ret.asInstanceOf[ComputationResult]
+				})
+			)
+		)
+	}
+	
+	protected def handlerRequireN[A](
+		l: List[RequireItem[A]]
+	)(
+		fn: List[A] => ComputationResult
+	): ComputationResult = {
+		val input_l: List[KeyClassOpt] = l.map(_.toKeyClass)
+		RqSuccess(
+			List(
+				ComputationItem_Computation(input_l, (arg_l) => {
 					println("arg_l: "+arg_l.map(_.getClass))
 					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
 					println("!!!!!!!!!!!")
-					val ret = method.invoke(fn, arg_l : _*)
+					val ret = method.invoke(fn, arg_l)
 					println("BBBBBBBBBBB")
 					ret.asInstanceOf[ComputationResult]
 				})
