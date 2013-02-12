@@ -19,14 +19,20 @@ class MovePlateHandler extends CommandHandler {
 			(id: String, list: List[String]) =>
 			bank on it
 		}*/
-		handlerRequire (as[String]('id), as[List[String]]('list)/*, as[Option[String]]('deviceId)*/) { (id, list) =>
+		handlerRequire(lookupPlate('id)) {
+			(plate: Plate) =>
+			handlerReturn(Token_Comment(plate.toString))
+		}
+		/*
+		handlerRequire(as[String]('id), as[List[String]]('list)/*, as[Option[String]]('deviceId)*/) {
+			(id: String, list: List[String]) =>
 			handlerRequire (lookupPlate(id)) { (plate: Plate) =>
 				val l: List[RequireItem[PlateModel]] = list.map(lookupPlateModel(_): RequireItem[PlateModel])
 				handlerRequireN (l) { (list2: List[PlateModel]) =>
 					handlerReturn(Token_Comment(plate.toString + " on " + list + " to " + list2))
 				}
 			}
-		}
+		}*/
 	}
 	/*
 	def makeStep(): Step = {

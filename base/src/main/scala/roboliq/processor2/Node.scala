@@ -27,10 +27,32 @@ import spray.json.JsObject
  * 
  */
 
+
+sealed trait RqItem
+
+sealed trait ComputationItem extends RqItem
+case class ComputationItem_Event(event: Event) extends ComputationItem
+case class ComputationItem_EntityRequest(id: String) extends ComputationItem
+case class ComputationItem_Computation(
+	entity_l: List[KeyClassOpt],
+	fn: (List[Object]) => ComputationResult
+) extends ComputationItem
+case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
+case class ComputationItem_Token(token: Token) extends ComputationItem
+
+sealed trait ConversionItem extends RqItem
+case class ConversionItem_Conversion(
+	input_l: List[KeyClassOpt],
+	fn: (List[Object]) => ConversionResult
+) extends ConversionItem
+case class ConversionItem_Object(obj: Object) extends ConversionItem
+
+
 sealed trait Node {
 	val parent_? : Option[Node]
 	val label_? : Option[String]
 	val index: Int
+	val input_l: List[KeyClassOpt]
 	//val idCmd: List[Int]
 	
 	lazy val id_r = getId_r
@@ -57,7 +79,6 @@ sealed trait Node {
 }
 
 trait Node_Computes extends Node {
-	val input_l: List[KeyClassOpt]
 }
 
 case class Node_Command(
@@ -118,10 +139,3 @@ case class Node_Conversion(
 		s"Node_Conversion($label, ${input_l.mkString("+")})"
 	}
 }
-
-sealed trait ConversionItem
-case class ConversionItem_Conversion(
-	input_l: List[KeyClassOpt],
-	fn: (List[Object]) => ConversionResult
-) extends ConversionItem
-case class ConversionItem_Object(obj: Object) extends ConversionItem

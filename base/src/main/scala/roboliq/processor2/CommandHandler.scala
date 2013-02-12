@@ -1,27 +1,26 @@
 package roboliq.processor2
 
 import language.implicitConversions
-
 import scala.reflect.runtime.{universe => ru}
-
 import scalaz._
 import Scalaz._
 import spray.json._
 import roboliq.core._
+import scala.reflect.ClassTag
 //import RqPimper._
 
 object InputListToTuple {
-	def check1[A: Manifest](l: List[Object]): RqResult[(A)] = {
+	def check1[A: ClassTag](l: List[Object]): RqResult[(A)] = {
 		l match {
 			case List(a: A) => RqSuccess(a)
 			case _ => RqError("[InputList] invalid parameter types: "+l)
 		}
 	}
 
-	def check2[A: Manifest, B: Manifest](l: List[Object]): RqResult[(A, B)] = {
+	def check2[A: ClassTag, B: ClassTag](l: List[Object]): RqResult[(A, B)] = {
 		l match {
 			case List(a: A, b: B) => RqSuccess((a, b))
-			case _ => RqError("[InputList] invalid parameter types: "+l+", "+l.map(_.getClass())+", "+implicitly[Manifest[A]].runtimeClass+", "+implicitly[Manifest[B]].runtimeClass)
+			case _ => RqError("[InputList] invalid parameter types: "+l+", "+l.map(_.getClass())+", "+implicitly[ClassTag[A]]+", "+implicitly[ClassTag[B]])
 		}
 	}
 
@@ -69,11 +68,14 @@ object InputListToTuple {
 	}
 }
 
-case class RequireItem[A: ru.TypeTag](tkp: TKP) {
+case class RequireItem[A: ru.TypeTag](
+	tkp: TKP,
+	conversion_? : Option[(List[Object] => ConversionResult, RqArgs)] = None
+) {
 	private val clazz0 = ru.typeTag[A].tpe
 	private val opt = (clazz0.typeSymbol.name.decoded == "Option")
 	private val clazz = if (opt) clazz0.asInstanceOf[ru.TypeRefApi].args.head else clazz0
-	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), opt)
+	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), opt, conversion_?)
 }
 
 /*
@@ -91,6 +93,8 @@ trait CommandHandler {
 	def getResult: ComputationResult
 
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
+	//implicit def symbolToRequireItem[A: ru.TypeTag](symbol: Symbol): RequireItem[A] =
+	//	as[A](symbol)
 	
 	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => ComputationResult): ComputationResult = {
 		RqSuccess(
@@ -102,7 +106,7 @@ trait CommandHandler {
 		)
 	}
 	
-	protected def handlerRequire[A: Manifest, B: Manifest](
+	protected def handlerRequire[A: ru.TypeTag, B: ru.TypeTag](
 		a: RequireItem[A],
 		b: RequireItem[B]
 	)(
@@ -163,6 +167,21 @@ trait CommandHandler {
 	//protected def asOpt[A: ru.TypeTag](tkp: TKP): RequireItem[Option[A]] = RequireItem[Option[A]](tkp)
 	//protected def asOpt[A: ru.TypeTag](symbol: Symbol): RequireItem[Option[A]] = asOpt[A](TKP("cmd", "$", List(symbol.name)))
 	
-	protected def lookupPlateModel[PlateModel: ru.TypeTag](id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
-	protected def lookupPlate[Plate: ru.TypeTag](id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))
+	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
+	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))
+
+	protected def lookupPlate(symbol: Symbol): RequireItem[Plate] = {
+		val fn = (l: List[Object]) => {
+			InputListToTuple.check1[String](l).map(id => {
+				List(ConversionItem_Conversion(
+					input_l = List(lookupPlate(id)),
+					fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { plate =>
+						List(ConversionItem_Object(plate))
+					}
+				))
+			})
+		}
+		val args = List[KeyClassOpt](as[String](symbol))
+		RequireItem[Plate](TKP("param", "#", Nil), Some((fn, args)))
+	}
 }
