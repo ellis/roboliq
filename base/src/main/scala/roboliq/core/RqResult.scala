@@ -18,6 +18,14 @@ sealed trait RqResult[+A] {
 	final def isSuccess: Boolean = !isError
 	private def isEmpty = isError
 	
+
+	/** Returns the option's value if the option is nonempty, otherwise
+	  * return the result of evaluating `default`.
+	  *
+	  * @param default  the default expression.
+	  */
+	def getOrElse[B >: A](default: => B): B
+	
 	/** Returns this $option if it is nonempty,
 	  * otherwise return the result of evaluating `alternative`.
 	  * @param alternative the alternative expression.
@@ -50,6 +58,8 @@ sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends R
 	def getErrors: List[String] = Nil
 
 	def isError = false
+
+	def getOrElse[B >: A](default: => B): B = res
 }
 
 sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
@@ -60,6 +70,8 @@ sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = N
 	def getErrors: List[String] = error_l
 
 	def isError = true
+
+	def getOrElse[B >: A](default: => B): B = default
 }
 
 object RqError {
