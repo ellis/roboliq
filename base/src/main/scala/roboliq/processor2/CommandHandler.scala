@@ -144,6 +144,23 @@ trait CommandHandler {
 		handlerRequireRun(input_l, fn)
 	}
 	
+	protected def handlerRequire[
+		A: TypeTag,
+		B: TypeTag,
+		C: TypeTag,
+		D: TypeTag
+	](
+		a: RequireItem[A],
+		b: RequireItem[B],
+		c: RequireItem[C],
+		d: RequireItem[D]
+	)(
+		fn: (A, B, C, D) => ComputationResult
+	): ComputationResult = {
+		val input_l = List[KeyClassOpt](a, b, c, d)
+		handlerRequireRun(input_l, fn)
+	}
+	
 	private def handlerRequireRun(input_l: List[KeyClassOpt], fn: Object): ComputationResult = {
 		RqSuccess(
 			List(

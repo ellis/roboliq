@@ -23,14 +23,15 @@ class MovePlateHandler extends CommandHandler {
 		handlerRequire (
 			lookupPlate('plate),
 			lookupPlateState('plate),
-			lookupPlateLocation('dest)
+			lookupPlateLocation('dest),
+			as[Option[String]]('deviceId)
 		) {
-			(plate, plateState, dest) =>
+			(plate, plateState, dest, deviceId_?) =>
 			for {
 				locationSrc <- plateState.location_?.asRq(s"plate `${plate.id}` must have an location set.")
 			} yield {
 				val s: String = new MovePlateToken(
-					None, //deviceId_?,
+					deviceId_?,
 					plate,
 					locationSrc,
 					dest).toString
