@@ -4,6 +4,7 @@ package roboliq.processor2
 //import scala.language.implicitConversions
 //import scala.language.postfixOps
 //import scalaz._
+import scala.reflect.runtime.{universe => ru}
 import spray.json._
 import roboliq.core._
 import RqPimper._
@@ -103,7 +104,7 @@ object Conversions {
 				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
 			} yield {
 				List(ConversionItem_Conversion(
-					input_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), classOf[PlateModel]))),
+					input_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), ru.typeOf[PlateModel]))),
 					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
 						val plate = new Plate(id, plateModel, locationPermanent_?)
 						List(ConversionItem_Object(plate))

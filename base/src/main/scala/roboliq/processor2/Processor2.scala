@@ -108,11 +108,11 @@ class ProcessorData(
 	val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
 	val conversionMessage_m = new HashMap[KeyClass, RqResult[Unit]]
 	
-	val conversion_m = new HashMap[Class[_], (JsValue) => ConversionResult]
-	conversion_m(classOf[String]) = Conversions.asString
-	conversion_m(classOf[Integer]) = Conversions.asInteger
-	conversion_m(classOf[PlateModel]) = Conversions.asPlateModel
-	conversion_m(classOf[Plate]) = Conversions.asPlate
+	val conversion_m = new HashMap[ru.Type, (JsValue) => ConversionResult]
+	conversion_m(ru.typeOf[String]) = Conversions.asString
+	conversion_m(ru.typeOf[Integer]) = Conversions.asInteger
+	conversion_m(ru.typeOf[PlateModel]) = Conversions.asPlateModel
+	conversion_m(ru.typeOf[Plate]) = Conversions.asPlate
 	
 	def setCommands(cmd_l: List[JsObject]) {
 		cmd1_l = handleComputationItems(None, cmd_l.map(js => ComputationItem_Command(js)))
@@ -242,13 +242,13 @@ class ProcessorData(
 	
 	def setEntity(key: TKP, time: List[Int], jsval: JsValue) {
 		db.set(key, time, jsval)
-		val kc = KeyClass(key, classOf[JsValue])
+		val kc = KeyClass(key, ru.typeOf[JsValue])
 		registerEntity(kc)
-		val jsChanged_l = db.popChanges.map(KeyClass(_, classOf[JsValue]))
+		val jsChanged_l = db.popChanges.map(KeyClass(_, ru.typeOf[JsValue]))
 		entityChanged_l ++= jsChanged_l
 		/*val changed_l = db.popChanges
 		changed_l.foreach(tkp => {
-			val kc = KeyClass(tkp, classOf[JsValue])
+			val kc = KeyClass(tkp, ru.typeOf[JsValue])
 			// Queue the computations for which all inputs are available 
 			dep_m.get(kc).map(_.foreach(updateComputationStatus))
 		})*/
@@ -259,7 +259,7 @@ class ProcessorData(
 	}
 	
 	def setEntityObj(kc: KeyClass, obj: Object) {
-		assert(kc.clazz != classOf[JsValue])
+		assert(kc.clazz != ru.typeOf[JsValue])
 		cache_m(kc) = obj
 		entityChanged_l += kc
 		registerEntity(kc)
@@ -272,13 +272,13 @@ class ProcessorData(
 		node.input_l.foreach(kco => {
 			val kc = kco.kc
 			dep_m.addBinding(kc, node)
-			if (kc.clazz == classOf[JsValue])
+			if (kc.clazz == ru.typeOf[JsValue])
 				db.addWatch(kc.key)
 
 			// Schedule lookups and create conversion nodes
 			for (kco <- node.input_l) {
 				val kc = kco.kc
-				val kc0 = kc.copy(clazz = classOf[JsValue])
+				val kc0 = kc.copy(clazz = ru.typeOf[JsValue])
 				
 				// JsValue lookup
 				if (!entityStatus_m.contains(kc0))
@@ -305,7 +305,7 @@ class ProcessorData(
 		})
 	}
 	
-	private def updateComputationStatus() {
+	private def updateComputationInputs() {
 		println("entityChanged_l: "+entityChanged_l)
 		// Gather all nodes whose inputs have changed
 		val node_l = nodeCheck_l ++ entityChanged_l.flatMap(kc => dep_m.getOrElse(kc, Nil)).toSet
@@ -364,7 +364,7 @@ class ProcessorData(
 		def step() {
 			val entity_l = entityStatus_m.filter(_._2 == Status.Ready).toList.map(_._1)
 			//println("entity_l: "+entity_l)
-			for (kc <- entity_l if kc.clazz == classOf[JsValue]) {
+			for (kc <- entity_l if kc.clazz == ru.typeOf[JsValue]) {
 				val result = db.get(kc.key)
 				lookupMessage_m(kc.key.id) = result.map(_ => ())
 				
@@ -375,7 +375,7 @@ class ProcessorData(
 						entityStatus_m(kc) = Status.Success
 				}
 			}
-			updateComputationStatus()
+			updateComputationInputs()
 			
 			val l = makePendingComputationList
 			if (!l.isEmpty) {
@@ -440,7 +440,7 @@ class ProcessorData(
 	}
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
-		if (kc.clazz == classOf[JsValue]) {
+		if (kc.clazz == ru.typeOf[JsValue]) {
 			db.get(kc.key)
 		}
 		else {
@@ -450,7 +450,10 @@ class ProcessorData(
 	
 	private def getEntity(kco: KeyClassOpt): RqResult[Object] = {
 		val res = getEntity(kco.kc)
-		res orElse RqSuccess(None)
+		if (kco.opt)
+			res map(Some(_)) orElse RqSuccess(None)
+		else
+			res
 	}
 	
 	private def createCommandFn(node: Node_Command): (List[Object] => ComputationResult) = {
@@ -575,7 +578,7 @@ class Print2CommandHandler extends CommandHandler {
 object ApplicativeMain2 extends App {
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
-	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1", "deviceId": "ARM1" }""").asJsObject
+	val cmd3 = JsonParser("""{ "cmd": "movePlate", "id": "P1"}""").asJsObject
 	
 	val h1 = new PrintCommandHandler
 	val h2 = new Print2CommandHandler
@@ -616,7 +619,7 @@ object ApplicativeMain2 extends App {
 	println()
 	println("Entities:")
 	println(p.db)
-	//p.entity_m.toList.sortBy(_._1.id).foreach(pair => if (pair._1.clazz == classOf[JsValue]) println(pair._1.id+": "+pair._2))
+	//p.entity_m.toList.sortBy(_._1.id).foreach(pair => if (pair._1.clazz == ru.typeOf[JsValue]) println(pair._1.id+": "+pair._2))
 	
 	println()
 	println("Conversions:")

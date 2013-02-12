@@ -1,5 +1,6 @@
 package roboliq.processor2
 
+import scala.reflect.runtime.{universe => ru}
 import roboliq.core._
 
 
@@ -14,8 +15,8 @@ class MovePlateHandler extends CommandHandler {
 	val cmd_l = List[String]("movePlate")
 	
 	def getResult = {
-		handlerRequire (as[String]('id), as[String]('deviceId)) { (id, deviceId_?) =>
-			handlerRequire (lookupPlate(id)) { (plate) =>
+		handlerRequire (as[String]('id), as[Option[String]]('deviceId)) { (id, deviceId_?) =>
+			handlerRequire (lookupPlate(id)) { (plate: Plate) =>
 				handlerReturn(Token_Comment(plate.toString + " on " + deviceId_?))
 			}
 		}
