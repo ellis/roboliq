@@ -28,6 +28,13 @@ object ConversionsDirect {
 		}
 	}
 	
+	def toBoolean(jsval: JsValue): RqResult[Boolean] = {
+		jsval match {
+			case JsBoolean(b) => RqSuccess(b)
+			case _ => RqError("expected JsBoolean")
+		}
+	}
+	
 	private val RxVolume = """([0-9]*)(\.[0-9]*)?([mun]?l)""".r
 	def toVolume(jsval: JsValue): RqResult[LiquidVolume] = {
 		jsval match {
@@ -65,26 +72,6 @@ object ConversionsDirect {
 		}
 	}
 	
-	/*def toPlateLocation(jsval: JsValue): RqResult[PlateLocation] = {
-		for {
-			jsobj <- toJsObject(jsval)
-			id <- getString('id, jsobj)
-			plateModelIds <- getStringList('plateModels, jsobj)
-			cols <- getInteger('cols, jsobj)
-			wellVolume <- getVolume('wellVolume, jsobj)
-		} yield {
-			new PlateModel(id, rows, cols, wellVolume)
-		}
-		for {
-			id <- Result.mustBeSet(bean._id, "_id")
-			plateModels <- Result.mustBeSet(bean.plateModels, "model")
-			lModel <- Result.mapOver(plateModels.toList)(ob.findPlateModel)
-		} yield {
-			val cooled: Boolean = if (bean.cooled != null) bean.cooled else false
-			new PlateLocation(id, lModel, cooled)
-		}
-	}*/
-	
 	def getWith[A](symbol: Symbol, jsobj: JsObject, fn: JsValue => RqResult[A]): RqResult[A] = {
 		jsobj.fields.get(symbol.name).asRq(s"missing field `${symbol.name}`").flatMap(fn)
 	}
@@ -99,7 +86,9 @@ object ConversionsDirect {
 	def getString(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toString)
 	def getString_?(symbol: Symbol, jsobj: JsObject) = getWith_?(symbol, jsobj, toString)
 	def getInteger(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toInteger)
+	def getBoolean(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toBoolean)
 	def getVolume(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toVolume)
+	def getStringList(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toStringList)
 
 	
 	private def toList[A](jsval: JsValue, fn: JsValue => RqResult[A]): RqResult[List[A]] = {
@@ -156,7 +145,26 @@ object Conversions {
 		}
 	}
 	
-	/*
+	def plateLocationHandler = new ConversionHandler {
+		def getResult(jsval: JsValue): ConversionResult = {
+			for {
+				jsobj <- D.toJsObject(jsval)
+				id <- D.getString('id, jsobj)
+				plateModelIds <- D.getStringList('plateModels, jsobj)
+				cooled <- D.getBoolean('cooled, jsobj)
+			} yield {
+				List(ConversionItem_Conversion(
+					input_l = plateModelIds.map(id => KeyClassOpt(KeyClass(TKP("plateModel", id, Nil), ru.typeOf[PlateModel]))),
+					fn = (l: List[Object]) => {
+						val plateModel_l = l.asInstanceOf[List[PlateModel]]
+						val loc = new PlateLocation(id, plateModel_l, cooled)
+						RqSuccess(List(ConversionItem_Object(loc)))
+					}
+				))
+			}
+		}
+	}
+	
 	private val plateStateHandler = new ConversionHandler {
 		def getResult(jsval: JsValue): ConversionResult = {
 			for {
@@ -164,17 +172,32 @@ object Conversions {
 				id <- D.getString('id, jsobj)
 				location_? <- D.getString_?('location, jsobj)
 			} yield {
-				List(ConversionItem_Conversion(
-					input_l = List(KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[PlateModel]))),
-					fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { plate =>
-						val plateState = new PlateState(plate, location_?)
-						List(ConversionItem_Object(plate))
-					}
-				))
+				location_? match {
+					case Some(location) =>
+						List(ConversionItem_Conversion(
+							input_l = List(
+								KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[Plate])),
+								KeyClassOpt(KeyClass(TKP("plateLocation", location, Nil), ru.typeOf[PlateLocation]))
+							),
+							fn = (l: List[Object]) => InputListToTuple.check2[Plate, PlateLocation](l).map { case (plate, loc) =>
+								val plateState = new PlateState(plate, Some(loc))
+								List(ConversionItem_Object(plateState))
+							}
+						))
+					case None =>
+						List(ConversionItem_Conversion(
+							input_l = List(
+								KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[Plate]))
+							),
+							fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { (plate) =>
+								val plateState = new PlateState(plate, None)
+								List(ConversionItem_Object(plateState))
+							}
+						))
+				}
 			}
 		}
 	}
-	*/
 	
 	/*
 	private val plateHandler2 = new CommandHandler {
