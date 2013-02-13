@@ -498,19 +498,24 @@ class ProcessorData(
 	}
 
 	/**
-	 * Return all ready commands and conversions, and the next ready computation.
+	 * Return all ready nodes which don't depend on state,
+	 * plus the next node which depends on state after exclusely successful nodes.
 	 */
 	private def makePendingComputationList: List[NodeState] = {
-		val ready_l = state_m.values.filter(_.status == Status.Ready)
-		// FIXME: can take any computation nodes which don't require state input
-		// FIXME: if a computation node requires state input, can only take if it ALL previous nodes have finished
-		// Get all nodes which are ready, but partition on whether the node is a Computation node.
-		val (computation_l, other_l) = ready_l.filter(_.status == Status.Ready).toList.partition(_.node.isInstanceOf[Node_Computation])
-		// Return other nodes and the first computation node.
-		if (computation_l.isEmpty)
-			other_l
-		else
-			other_l ++ List(computation_l.minBy(_.node.id)(ListIntOrdering))
+		val order_l = state_m.toList.sortBy(_._1.id)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
+		order_l match {
+			case Nil => Nil
+			case next :: rest_l =>
+				val ready_l = rest_l.filter(state => {
+					// Node is ready
+					state.status == Status.Ready &&
+					// And it doesn't depend on state
+					state.node.input_l.forall(kco => !kco.kc.key.table.endsWith("State"))
+				})
+				// Take next node if it's ready (regardless of whether it depends on state)
+				if (next.status == Status.Ready) next :: ready_l
+				else ready_l
+		}
 	}
 
 	/*
