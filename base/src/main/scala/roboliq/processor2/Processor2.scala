@@ -39,7 +39,7 @@ case class KeyClass(key: TKP, clazz: ru.Type, time: List[Int] = Nil) {
 	def changeTime(time: List[Int]): KeyClass =
 		this.copy(time = time)
 	def id: String =
-		s"${key.id}<${getSimplifiedClassName}>" + (if (time.isEmpty) "" else time.mkString("@", ".", ""))
+		s"${key.id}<${getSimplifiedClassName}>" + (if (time.isEmpty) "" else time.mkString("@(", "/", ")"))
 	def getSimplifiedClassName: String = {
 		val s0 = clazz.typeSymbol.name.toString
 		val iPeriod = s0.lastIndexOf('.')
@@ -151,7 +151,7 @@ class ProcessorData(
 	}
 	
 	private def handleComputationItems(parent_? : Option[Node], l: List[ComputationItem]): List[Node] = {
-		val idParent = parent_?.map(_.id).getOrElse(Nil)
+		val idParent = parent_?.map(_.path).getOrElse(Nil)
 		l.zipWithIndex.flatMap { pair => 
 			val (r, index0) = pair
 			val index = index0 + 1
@@ -164,7 +164,7 @@ class ProcessorData(
 
 					//val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)
 					val node = Node_Command(parent_?, index, cmd)
-					val key = TKP("cmd", node.label, Nil)
+					val key = TKP("cmd", node.id, Nil)
 					setEntity(key, Nil, cmd)
 					Some(node)
 				case result: ComputationItem_Computation =>
@@ -172,7 +172,7 @@ class ProcessorData(
 					//val result2 = result.copy(entity_l = entity2_l)
 					Some(Node_Computation(parent_?, index, entity2_l, result.fn))
 				case ComputationItem_Token(token) =>
-					val id = parent_?.map(_.id).getOrElse(Nil) ++ List(index)
+					val id = parent_?.map(_.path).getOrElse(Nil) ++ List(index)
 					//println("token: "+Node_Token(node, index + 1, token))
 					token_m(id) = token
 					None
@@ -188,8 +188,8 @@ class ProcessorData(
 	}
 	
 	private def concretizeArgs(kco_l: List[KeyClassOpt], parent_? : Option[Node], index: Int): List[KeyClassOpt] = {
-		val keyCmd = findCommandParent(parent_?).map(_.label).getOrElse("")
-		val idPrefix = (parent_?.map(_.id).getOrElse(Nil) ++ List(index)).mkString("", ".", "#")
+		val keyCmd = findCommandParent(parent_?).map(_.id).getOrElse("")
+		val idPrefix = (parent_?.map(_.path).getOrElse(Nil) ++ List(index)).mkString("", "/", "#")
 		val time = parent_?.map(_.time).getOrElse(Nil)
 		kco_l.zipWithIndex.map(pair => {
 			val (kco0, i) = pair
@@ -246,8 +246,9 @@ class ProcessorData(
 	
 	private def makeConversionNodesForInputs(node: Node): List[Node] = {
 		// Try to add missing conversions for inputs which are not JsValues 
-		val l = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).flatMap(kco => {
-			makeConversionNodesForInput(node, kco)
+		val l = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).zipWithIndex.flatMap(pair => {
+			val (kco, i) = pair
+			makeConversionNodesForInput(node, kco, i + 1)
 		})
 		// Register the conversion nodes
 		l.foreach(node => kcNode_m(node.kc) = node)
@@ -257,7 +258,7 @@ class ProcessorData(
 		l
 	}
 	
-	private def makeConversionNodesForInput(node: Node, kco: KeyClassOpt): List[Node_Conversion] = {
+	private def makeConversionNodesForInput(node: Node, kco: KeyClassOpt, index: Int): List[Node_Conversion] = {
 		if (kco.kc.isJsValue)
 			return Nil
 		
@@ -266,7 +267,7 @@ class ProcessorData(
 			// If a user-supplied conversion function was supplied:
 			case Some(fnargs) =>
 				val input2_l = concretizeArgs(fnargs._2, Some(node), 0)
-				List(Node_Conversion(None, Some(kc.id), None, node.time, kc, input2_l, fnargs._1))
+				List(Node_Conversion(Some(node), Some(kc.id), Some(index), node.time, kc, input2_l, fnargs._1))
 			// Otherwise we'll 
 			case None =>
 				if (kc.clazz.typeSymbol.name.decoded == "Option") {
@@ -278,8 +279,8 @@ class ProcessorData(
 							RqSuccess(List(ConversionItem_Object(o)))
 					}
 					val kco2 = KeyClassOpt(kc2, true)
-					Node_Conversion(None, Some(kc.id), None, node.time, kc, List(kco2), fn) ::
-						makeConversionNodesForInput(node, kco2)
+					val node2 = Node_Conversion(None, Some(kc.id), None, node.time, kc, List(kco2), fn)
+					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
 				else {
 					conversion_m.get(kc.clazz) match {
@@ -451,7 +452,7 @@ class ProcessorData(
 		println()
 		println("Nodes")
 		println("-----")
-		state0_m.values.toList.sortBy(_.node.label).map(state => state.node.label + ": " + state.status).foreach(println)
+		state0_m.values.toList.sortBy(_.node.id).map(state => state.node.id + ": " + state.status).foreach(println)
 
 		val pending_l = makePendingComputationList
 		pending_l.foreach(state => runComputation(state.node, kcoToValue_m))
@@ -495,7 +496,7 @@ class ProcessorData(
 		println()
 		println("Computations")
 		println("------------")
-		pending_l.map(state => state.node.label + ": " + state.status).foreach(println)
+		pending_l.map(state => state.node.id + ": " + state.status).foreach(println)
 		println()
 		// TODO: show added conversions
 		
@@ -507,19 +508,22 @@ class ProcessorData(
 	 * plus the next node which depends on state after exclusely successful nodes.
 	 */
 	private def makePendingComputationList: List[NodeState] = {
-		val order_l = state_m.toList.sortBy(_._1.id)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
+		val order_l = state_m.values.toList.sortBy(_.node.time)(ListIntOrdering).dropWhile(_.status == Status.Success)
+		//val order_l = state_m.toList.sortBy(_._1.path)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
 		order_l match {
 			case Nil => Nil
-			case next :: rest_l =>
-				val ready_l = rest_l.filter(state => {
+			case next :: _ =>
+				val timeNext = next.node.time
+				val (prefix_l, suffix_l) = order_l.span(_.node.time == timeNext)
+				val next_l = prefix_l.filter(_.status == Status.Ready)
+				val ready_l = suffix_l.filter(state => {
 					// Node is ready
 					state.status == Status.Ready &&
 					// And it doesn't depend on state
 					state.node.input_l.forall(kco => !kco.kc.key.table.endsWith("State"))
 				})
 				// Take next node if it's ready (regardless of whether it depends on state)
-				if (next.status == Status.Ready) next :: ready_l
-				else ready_l
+				next_l ++ ready_l
 		}
 	}
 
@@ -560,7 +564,10 @@ class ProcessorData(
 							case tryResult => setConversionResult(n, tryResult)
 						}
 				}
-			case _ =>
+			case e =>
+				println("Error:")
+				println(node)
+				println(e)
 				assert(false)
 				Status.Error
 		}
@@ -632,8 +639,8 @@ class ProcessorData(
 			result.getErrors.map(id+": ERROR: "+_) ++ result.getWarnings.map(id+": WARNING: "+_)
 		}
 		lookupMessage_m.toList.sortBy(_._1).flatMap(pair => makeMessages(pair._1, pair._2)) ++
-		getConversionNodeList.map(state_m).sortBy(_.node.label).flatMap(state => makeMessages(state.node.label, state.result)) ++
-		getCommandNodeList.map(state_m).sortBy(_.node.id)(ListIntOrdering).flatMap(state => makeMessages(state.node.label, state.result)) ++
+		getConversionNodeList.map(state_m).sortBy(_.node.id).flatMap(state => makeMessages(state.node.id, state.result)) ++
+		getCommandNodeList.map(state_m).sortBy(_.node.path)(ListIntOrdering).flatMap(state => makeMessages(state.node.id, state.result)) ++
 		internalMessage_l.map(_.toString)
 	}
 	
@@ -676,7 +683,7 @@ class ProcessorData(
 	
 	implicit val NodeOrdering = new Ordering[Node] {
 		def compare(a: Node, b: Node): Int = {
-			ListIntOrdering.compare(a.id, b.id)
+			ListIntOrdering.compare(a.path, b.path)
 		}
 	}
 }
@@ -746,8 +753,8 @@ object ApplicativeMain2 extends App {
 	println()
 	println("Computations:")
 	p.getCommandNodeList.map( _ match {
-		case node: Node_Command => p.getIdString(node.id)+": "+node.cmd
-		case node: Node_Computation => p.getIdString(node.id)+": "+node.input_l
+		case node: Node_Command => p.getIdString(node.path)+": "+node.cmd
+		case node: Node_Computation => p.getIdString(node.path)+": "+node.input_l
 		case _ =>
 	}).foreach(println)
 

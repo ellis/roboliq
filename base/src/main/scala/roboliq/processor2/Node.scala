@@ -56,20 +56,22 @@ sealed trait Node {
 	val input_l: List[KeyClassOpt]
 	//val idCmd: List[Int]
 	
-	lazy val id_r = getId_r
-	lazy val id = id_r.reverse
+	val id: String
 	
-	private def getId: List[Int] = {
-		getId_r.reverse
+	lazy val path_r = getPath_r
+	lazy val path = path_r.reverse
+	
+	private def getPath: List[Int] = {
+		getPath_r.reverse
 	}
 	
-	private def getId_r: List[Int] = {
-		index_?.map(List(_)).getOrElse(Nil) ++ parent_?.map(_.id_r).getOrElse(Nil)
+	private def getPath_r: List[Int] = {
+		index_?.map(List(_)).getOrElse(Nil) ++ parent_?.map(_.path_r).getOrElse(Nil)
 	}
 	
-	lazy val label: String = {
-		(getRootLabel :: id.map(n => Some(n.toString))).flatten.mkString("-") + "@" + time.mkString("-")
-	}
+	/*lazy val label: String = {
+		(getRootLabel :: path.map(n => Some(n.toString))).flatten.mkString("-") + "@" + time.mkString("-")
+	}*/
 	
 	private def getRootLabel: Option[String] = {
 		parent_? match {
@@ -86,13 +88,15 @@ case class Node_Command(
 ) extends Node {
 	val label_? = None
 	val index_? = Some(index)
-	val time = id
+	val time = path
 	val input_l: List[KeyClassOpt] = Nil
+	
+	val id = path.mkString("/")
 	//val idCmd: List[Int] = id
 
-	override def toString(): String = {
+	/*override def toString(): String = {
 		s"Node_Command($label, ${cmd})"
-	}
+	}*/
 }
 
 case class Node_Computation(
@@ -104,10 +108,12 @@ case class Node_Computation(
 ) extends Node {
 	val label_? = None
 	val index_? = Some(index)
-	val time = id
-	override def toString(): String = {
-		s"Node_Computation($label, ${input_l})"
-	}
+	val time = path
+	
+	val id = path.mkString("/")
+	
+	//override def toString(): String =
+	//	s"Node_Computation($label, ${input_l})"
 }
 
 /*case class Node_Token(
@@ -137,8 +143,13 @@ case class Node_Conversion(
 	input_l: List[KeyClassOpt],
 	fn: (List[Object]) => ConversionResult
 ) extends Node {
-	val idCmd = Nil
-	override def toString(): String = {
-		s"Node_Conversion($label, ${input_l.mkString("+")})"
+	//val idCmd = Nil
+	val id: String = parent_? match {
+		case Some(parent: Node_Conversion) => parent.id + "/" + index_?.toList.mkString
+		case Some(parent) => parent.id + "#" + index_?.toList.mkString
+		case None => kc.id
 	}
+	
+	//override def toString(): String = {
+	//	s"Node_Conversion($label, ${input_l.mkString("+")})"
 }
