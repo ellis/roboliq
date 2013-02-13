@@ -29,21 +29,25 @@ import spray.json.JsNumber
  * and it returns a list of computations, events, commands, and tokens.  
  */
 
-case class KeyClass(key: TKP, clazz: ru.Type) {
+case class KeyClass(key: TKP, clazz: ru.Type, time: List[Int] = Nil) {
 	def changeKey(key: String): KeyClass =
 		this.copy(key = this.key.copy(key = key))
 	def isJsValue: Boolean =
 		(clazz =:= ru.typeOf[JsValue])
 	def changeClassToJsValue: KeyClass =
 		this.copy(clazz = ru.typeOf[JsValue])
+	def changeTime(time: List[Int]): KeyClass =
+		this.copy(time = time)
 	def id: String =
-		s"${key.id}<${getSimplifiedClassName}>"
+		s"${key.id}<${getSimplifiedClassName}>" + (if (time.isEmpty) "" else time.mkString("@", ".", ""))
 	def getSimplifiedClassName: String = {
 		val s0 = clazz.typeSymbol.name.toString
 		val iPeriod = s0.lastIndexOf('.')
 		if (iPeriod >= 0) s0.substring(iPeriod + 1)
 		else s0
 	}
+	
+	override def toString = id
 }
 
 case class KeyClassOpt(
@@ -55,6 +59,8 @@ case class KeyClassOpt(
 		this.copy(kc = kc.changeKey(key))
 	def changeClassToJsValue: KeyClassOpt =
 		this.copy(kc = kc.changeClassToJsValue)
+	def changeTime(time: List[Int]): KeyClassOpt =
+		this.copy(kc = kc.changeTime(time))
 }
 //case class ComputationItem_Entity(key: TKP, jsval: JsValue) extends ComputationItem
 //case class ComputationItem_Object(kc: KeyClass, obj: Object) extends ComputationItem
@@ -184,8 +190,11 @@ class ProcessorData(
 	private def concretizeArgs(kco_l: List[KeyClassOpt], parent_? : Option[Node], index: Int): List[KeyClassOpt] = {
 		val keyCmd = findCommandParent(parent_?).map(_.label).getOrElse("")
 		val idPrefix = (parent_?.map(_.id).getOrElse(Nil) ++ List(index)).mkString("", ".", "#")
+		val time = parent_?.map(_.time).getOrElse(Nil)
 		kco_l.zipWithIndex.map(pair => {
-			val (kco, i) = pair
+			val (kco0, i) = pair
+			// Set time if this is a state variables
+			val kco = if (kco0.kc.key.table.endsWith("State")) kco0.changeTime(time) else kco0
 			// Substitute in full path for command parameters starting with '$'
 			if (kco.kc.key.key == "$") kco.changeKey(keyCmd)
 			else if (kco.kc.key.key == "#") kco.changeKey(idPrefix+(i+1))
