@@ -85,6 +85,15 @@ case class RequireItem[A: TypeTag](
 abstract class RqFunctionHandler {
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
 	
+	protected implicit def itemToRqReturn(item: RqItem): RqReturn =
+		RqSuccess(List(item))
+	
+	protected implicit def fnargsToItem(fnargs: RqFunctionArgs) =
+		RqItem_Function(fnargs)
+	
+	protected implicit def fnargsToRqReturn(fnargs: RqFunctionArgs) =
+		RqSuccess(List(RqItem_Function(fnargs)))
+	
 	protected def handlerRequire[
 		A: Manifest
 	](
@@ -155,6 +164,57 @@ abstract class RqFunctionHandler {
 		)
 	}
 	
+	protected def fnRequire[A: TypeTag](
+		a: RequireItem[A]
+	)(
+		fn: (A) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a)
+		fnRequireRun(fn, arg_l)
+	}
+	
+	protected def fnRequire[A: TypeTag, B: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B]
+	)(
+		fn: (A, B) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a, b)
+		fnRequireRun(fn, arg_l)
+	}
+	
+	protected def fnRequire[A: TypeTag, B: TypeTag, C: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B],
+		c: RequireItem[C]
+	)(
+		fn: (A, B, C) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a, b, c)
+		fnRequireRun(fn, arg_l)
+	}
+
+	protected def fnRequire[A: TypeTag, B: TypeTag, C: TypeTag, D: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B],
+		c: RequireItem[C],
+		d: RequireItem[D]
+	)(
+		fn: (A, B, C, D) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a, b, c, d)
+		fnRequireRun(fn, arg_l)
+	}
+
+	private def fnRequireRun(fn: Object, arg_l: RqArgs): RqFunctionArgs = {
+		val fn2: RqFunction = (arg_l) => {
+			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+			val ret = method.invoke(fn, arg_l : _*)
+			ret.asInstanceOf[RqReturn]
+		}
+		RqFunctionArgs(fn2, arg_l)
+	}
+	
 	protected def handlerRequireN[A](
 		l: List[RequireItem[A]]
 	)(
@@ -178,6 +238,13 @@ abstract class RqFunctionHandler {
 				ComputationItem_Token(a)
 		))
 	}
+	
+	protected def fnReturn(a: CmdToken): RqReturn = {
+		ComputationItem_Token(a)
+	}
+	
+	protected def returnObject(obj: Object) =
+		ConversionItem_Object(obj)
 	
 	//protected def get
 	protected def as[A: TypeTag](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
@@ -231,12 +298,11 @@ abstract class RqFunctionHandler0 extends RqFunctionHandler {
 
 abstract class CommandHandler(
 	val cmd_l: String*
-) extends RqFunctionHandler0 {
-	val fn: RqFunction = (_) => getResult
-	val getResult: RqReturn
+) extends RqFunctionHandler {
+	val fnargs: RqFunctionArgs
 }
 
-abstract class ConversionHandler extends RqFunctionHandler {
+abstract class ConversionHandler1 extends RqFunctionHandler {
 	val fn: RqFunction = (l: List[Object]) => {
 		l match {
 			case List(jsval: JsValue) => getResult(jsval)
@@ -249,8 +315,12 @@ abstract class ConversionHandler extends RqFunctionHandler {
 		RqFunctionArgs(fn, List(KeyClassOpt(kc, false)))
 }
 
-object ConversionHandler {
-	def apply(getResult0: JsValue => RqReturn): ConversionHandler = new ConversionHandler {
+object ConversionHandler1 {
+	def apply(getResult0: JsValue => RqReturn): ConversionHandler1 = new ConversionHandler1 {
 		val getResult = getResult0
 	}
+}
+
+abstract class ConversionHandlerN extends RqFunctionHandler {
+	val fnargs: RqFunctionArgs
 }

@@ -4,6 +4,9 @@ import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.Type
 import spray.json.JsValue
 
+//sealed trait RqParam
+//case class RqParam_Entity(kco: KeyClassOpt) extends RqParam
+//case class RqParam_Deref extends RqParam
 
 case class KeyClass(key: TKP, clazz: Type, time: List[Int] = Nil) {
 	def changeKey(key: String): KeyClass =

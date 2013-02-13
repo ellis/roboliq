@@ -28,7 +28,7 @@ object ConversionsDirect {
 		}
 	}
 	
-	def toBoolean(jsval: JsValue): RqResult[Boolean] = {
+	def toBoolean(jsval: JsValue): RqResult[java.lang.Boolean] = {
 		jsval match {
 			case JsBoolean(b) => RqSuccess(b)
 			case _ => RqError("expected JsBoolean")
@@ -111,13 +111,14 @@ object ConversionsDirect {
 object Conversions {
 	private val D = ConversionsDirect
 	
-	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler(
+	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler1(
 		(jsval: JsValue) =>
 			fn(jsval).map(obj => List(ConversionItem_Object(obj)))
 	)
 
 	val asString = makeConversion(ConversionsDirect.toString)
 	val asInteger = makeConversion(ConversionsDirect.toInteger)
+	val asBoolean = makeConversion(ConversionsDirect.toBoolean)
 	val asVolume = makeConversion(ConversionsDirect.toVolume)
 	val asPlateModel = makeConversion(ConversionsDirect.toPlateModel)
 
@@ -126,7 +127,16 @@ object Conversions {
 	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList)
 	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList)
 	
-	val plateLocationHandler = ConversionHandler(
+	val plateLocationHandler = new ConversionHandlerN {
+		val fnargs = fnRequire (
+			as[String]('id), lookupPlateModel('plateModels), as[Boolean]('cooled)
+		) { (id, plateModels, cooled) =>
+			val loc = new PlateLocation(id, List(plateModels), cooled)
+			returnObject(loc)
+		}
+	}
+	
+	val plateLocationHandlerX = ConversionHandler1(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -146,7 +156,15 @@ object Conversions {
 		}
 	)
 	
-	val plateHandler = ConversionHandler(
+	val testHandler = new ConversionHandlerN {
+		val fnargs = fnRequire (
+			as[String]('id)
+		) { (id) =>
+			returnObject(Test(id))
+		}
+	}
+	
+	val plateHandler = ConversionHandler1(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -165,7 +183,7 @@ object Conversions {
 		}
 	)
 	
-	val plateStateHandler = ConversionHandler(
+	val plateStateHandler = ConversionHandler1(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -220,7 +238,7 @@ object Conversions {
 	}
 	*/
 	
-	val asPlateLocation = (jsval: JsValue) => plateLocationHandler.getResult(jsval)
+	//val asPlateLocation = (jsval: JsValue) => plateLocationHandler.getResult(jsval)
 	val asPlate = (jsval: JsValue) => plateHandler.getResult(jsval)
 	val asPlateState = (jsval: JsValue) => plateStateHandler.getResult(jsval)
 }

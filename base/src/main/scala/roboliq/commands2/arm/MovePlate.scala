@@ -14,8 +14,8 @@ case class MovePlateToken(
 ) extends CmdToken
 
 class MovePlateHandler extends CommandHandler("movePlate") {
-	val getResult = {
-		handlerRequire (
+	val fnargs = {
+		fnRequire (
 			lookupPlate('plate),
 			lookupPlateState('plate),
 			lookupPlateLocation('dest),
