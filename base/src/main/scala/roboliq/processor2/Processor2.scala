@@ -253,9 +253,13 @@ class ProcessorData(
 				}
 				else {
 					conversion_m.get(kc.clazz) match {
+						case Some(handler: ConversionHandler) =>
+							val kc0 = kc.changeClassToJsValue
+							val fnargs = handler.createFunctionArgs(kc0)
+							List(Node_Conversion(None, Some(kc.id), None, node.time, Some(kc0.key), fnargs, kc))
 						case Some(handler) =>
 							val kc0 = kc.changeClassToJsValue
-							val fnargs = RqFunctionArgs(handler.handler, List(KeyClassOpt(kc0, false)))
+							val fnargs = handler.createFunctionArgs(kc0)
 							List(Node_Conversion(None, Some(kc.id), None, node.time, Some(kc0.key), fnargs, kc))
 						case None =>
 							// FIXME: should put this message in a map so it only shows up once

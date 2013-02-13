@@ -111,7 +111,7 @@ object ConversionsDirect {
 object Conversions {
 	private val D = ConversionsDirect
 	
-	private def makeConversion(fn: JsValue => RqResult[Object]) = new ConversionHandler(
+	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler(
 		(jsval: JsValue) =>
 			fn(jsval).map(obj => List(ConversionItem_Object(obj)))
 	)
@@ -126,7 +126,7 @@ object Conversions {
 	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList)
 	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList)
 	
-	val plateLocationHandler = new ConversionHandler(
+	val plateLocationHandler = ConversionHandler(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -146,7 +146,7 @@ object Conversions {
 		}
 	)
 	
-	val plateHandler = new ConversionHandler(
+	val plateHandler = ConversionHandler(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -165,7 +165,7 @@ object Conversions {
 		}
 	)
 	
-	val plateStateHandler = new ConversionHandler(
+	val plateStateHandler = ConversionHandler(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)

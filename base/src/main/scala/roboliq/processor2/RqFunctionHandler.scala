@@ -83,13 +83,7 @@ case class RequireItem[A: TypeTag](
 
 // REFACTOR: Rename Handler => Builder ?
 abstract class RqFunctionHandler {
-	import InputListToTuple._
-	
-	val handler: RqFunction
-	
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
-	//implicit def symbolToRequireItem[A: TypeTag](symbol: Symbol): RequireItem[A] =
-	//	as[A](symbol)
 	
 	protected def handlerRequire[
 		A: Manifest
@@ -230,20 +224,33 @@ abstract class RqFunctionHandler {
 		lookup(symbol, lookupPlateState _)
 }
 
+abstract class RqFunctionHandler0 extends RqFunctionHandler {
+	val fn: RqFunction
+	val fnargs = RqFunctionArgs(fn, Nil)
+}
+
 abstract class CommandHandler(
 	val cmd_l: String*
-) extends RqFunctionHandler {
-	val handler: RqFunction = (_) => getResult
+) extends RqFunctionHandler0 {
+	val fn: RqFunction = (_) => getResult
 	val getResult: RqReturn
 }
 
-class ConversionHandler(
-	val getResult: JsValue => RqReturn
-) extends RqFunctionHandler {
-	val handler: RqFunction = (l: List[Object]) => {
+abstract class ConversionHandler extends RqFunctionHandler {
+	val fn: RqFunction = (l: List[Object]) => {
 		l match {
 			case List(jsval: JsValue) => getResult(jsval)
 			case _ => RqError("expected JsValue")
 		}
+	}
+	val getResult: JsValue => RqReturn
+	
+	def createFunctionArgs(kc: KeyClass): RqFunctionArgs =
+		RqFunctionArgs(fn, List(KeyClassOpt(kc, false)))
+}
+
+object ConversionHandler {
+	def apply(getResult0: JsValue => RqReturn): ConversionHandler = new ConversionHandler {
+		val getResult = getResult0
 	}
 }
