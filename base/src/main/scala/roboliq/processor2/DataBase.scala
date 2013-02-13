@@ -76,7 +76,7 @@ class DataBase {
 			handleChange(tkp.copy(path = tkp.path.init))
 	}
 	
-	def get(tkp: TKP): RqResult[JsValue] = {
+	def get(tkp: TKP, time: List[Int] = Nil): RqResult[JsValue] = {
 		js_m.get(tkp) match {
 			// Not a JsValue, maybe a JsObject?
 			case None =>
@@ -90,16 +90,22 @@ class DataBase {
 				}
 				
 			case Some(timeToValue_m) =>
-				if (timeToValue_m.size == 0)
-					RqError[JsValue](s"didn't find data for `$tkp`")
-				else {
-					val time = timeToValue_m.keySet.max(ListIntOrdering)
-					val jsval = timeToValue_m(time)
-					RqSuccess(jsval)
-				}
+				get(timeToValue_m, time).asRq(s"didn't find data for `$tkp`" + (if (time.isEmpty) "" else " @ " +time.mkString("/")))
 		}
 	}
 
+	private def get(timeToValue_m: Map[List[Int], JsValue], time: List[Int]): Option[JsValue] = {
+		if (timeToValue_m.size == 0) {
+			None
+		}
+		else {
+			val time_l = timeToValue_m.keys.toList.sorted(ListIntOrdering)
+			val i0 = time_l.indexWhere(ListIntOrdering.compare(_, time) >= 0)
+			var i = if (i0 > 0) i0 else time_l.size - 1
+			Some(timeToValue_m(time_l(i)))
+		}
+	}
+	
 	/*
 	
 	// The JsValues (but no JsObjects) in the database

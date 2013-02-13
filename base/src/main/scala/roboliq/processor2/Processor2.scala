@@ -38,8 +38,9 @@ case class KeyClass(key: TKP, clazz: ru.Type, time: List[Int] = Nil) {
 		this.copy(clazz = ru.typeOf[JsValue])
 	def changeTime(time: List[Int]): KeyClass =
 		this.copy(time = time)
-	def id: String =
-		s"${key.id}<${getSimplifiedClassName}>" + (if (time.isEmpty) "" else time.mkString("@(", "/", ")"))
+	val id: String = {
+		key.id + (if (!isJsValue) "<"+getSimplifiedClassName+">" else "") + (if (time.isEmpty) "" else time.mkString("@(", "/", ")"))
+	}
 	def getSimplifiedClassName: String = {
 		val s0 = clazz.typeSymbol.name.toString
 		val iPeriod = s0.lastIndexOf('.')
@@ -446,9 +447,9 @@ class ProcessorData(
 			val (kc, result) = pair
 			(if (opt_m(kc)) "*" else "") + ": " + result.getOrElse("...")
 		}
-		e1.toList.sortBy(_._1.key.id).map(pair => pair._1.key.id + getEntityString(pair)).foreach(println)
+		e1.toList.sortBy(_._1.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
 		println()
-		e2.toList.sortBy(_._1.key.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
+		e2.toList.sortBy(_._1.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
 		println()
 		println("Nodes")
 		println("-----")
@@ -575,7 +576,7 @@ class ProcessorData(
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
 		if (kc.clazz == ru.typeOf[JsValue]) {
-			db.get(kc.key)
+			db.get(kc.key, kc.time)
 		}
 		else {
 			cache_m.get(kc).asRq(s"object not found `$kc`")
@@ -729,7 +730,7 @@ object ApplicativeMain2 extends App {
 	p.setEntity(TKP("plateLocation", "cooled1", Nil), Nil, JsonParser("""{ "id": "cooled1", "plateModels": ["PCR"], "cooled": true }"""))
 	p.setEntity(TKP("plateLocation", "cooled2", Nil), Nil, JsonParser("""{ "id": "cooled2", "plateModels": ["PCR"], "cooled": true }"""))
 	p.setEntity(TKP("plate", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "idModel": "PCR" }"""))
-	p.setEntity(TKP("plateState", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "location": "cooled1" }"""))
+	p.setEntity(TKP("plateState", "P1", Nil), List(0), JsonParser("""{ "id": "P1", "location": "cooled1" }"""))
 	p.setCommands(List(cmd1, cmd2, cmd3))
 	
 	//println(p.db.get(TKP("plate", "P1", Nil)))
