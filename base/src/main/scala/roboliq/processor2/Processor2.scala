@@ -92,22 +92,22 @@ class ProcessorData(
 	
 	val db = new DataBase
 	// Top levels command nodes
-	var cmd1_l: List[Node_Computes] = Nil
+	var cmd1_l: List[Node] = Nil
 	// Conversion nodes
 	val kcNode_m = new HashMap[KeyClass, Node_Conversion]
-	val state_m = new HashMap[Node_Computes, NodeState]
-	//val status_m = new HashMap[Node_Computes, Status.Value]
-	//val dep_m: MultiMap[KeyClass, Node_Computes] = new HashMap[KeyClass, mutable.Set[Node_Computes]] with MultiMap[KeyClass, Node_Computes]
+	val state_m = new HashMap[Node, NodeState]
+	//val status_m = new HashMap[Node, Status.Value]
+	//val dep_m: MultiMap[KeyClass, Node] = new HashMap[KeyClass, mutable.Set[Node]] with MultiMap[KeyClass, Node]
 	//val children_m = new HashMap[Node, List[Node]]
-	//val result_m = new HashMap[Node_Computes, RqResult[_]]
+	//val result_m = new HashMap[Node, RqResult[_]]
 	//val entity_m = new HashMap[KeyClass, RqFunctionArgs]
 	//val fnCache_m = new HashMap[RqFunctionInputs, RqReturn]
 	//val argsCache_m = new HashMap[RqArgs, RqInputs]
 	val cache_m = new HashMap[KeyClass, Object]
 	//val entityChanged_l = mutable.Set[KeyClass]()
 	// List of nodes for which we want to force a check of whether inputs are ready.
-	//val nodeCheck_l = mutable.Set[Node_Computes]()
-	//val inputs_m = new HashMap[Node_Computes, RqResult[List[Object]]]
+	//val nodeCheck_l = mutable.Set[Node]()
+	//val inputs_m = new HashMap[Node, RqResult[List[Object]]]
 	//val entityStatus_m = new HashMap[KeyClass, Status.Value]
 	//val entityMessages_m = new HashMap[KeyClass, RqResult[_]]
 	val token_m = new HashMap[List[Int], Token]
@@ -130,7 +130,7 @@ class ProcessorData(
 		registerNodes(cmd1_l)
 	}
 
-	private def setComputationResult(node: Node_Computes, result: scala.util.Try[ComputationResult]): Status.Value = {
+	private def setComputationResult(node: Node, result: scala.util.Try[ComputationResult]): Status.Value = {
 		println("setComputationResult()")
 		val state = state_m(node)
 		val child_l = result match {
@@ -144,7 +144,7 @@ class ProcessorData(
 		state.status
 	}
 	
-	private def handleComputationItems(parent_? : Option[Node_Computes], l: List[ComputationItem]): List[Node_Computes] = {
+	private def handleComputationItems(parent_? : Option[Node], l: List[ComputationItem]): List[Node] = {
 		val idParent = parent_?.map(_.id).getOrElse(Nil)
 		l.zipWithIndex.flatMap { pair => 
 			val (r, index0) = pair
@@ -181,7 +181,7 @@ class ProcessorData(
 		}
 	}
 	
-	private def concretizeArgs(kco_l: List[KeyClassOpt], parent_? : Option[Node_Computes], index: Int): List[KeyClassOpt] = {
+	private def concretizeArgs(kco_l: List[KeyClassOpt], parent_? : Option[Node], index: Int): List[KeyClassOpt] = {
 		val keyCmd = findCommandParent(parent_?).map(_.label).getOrElse("")
 		val idPrefix = (parent_?.map(_.id).getOrElse(Nil) ++ List(index)).mkString("", ".", "#")
 		kco_l.zipWithIndex.map(pair => {
@@ -211,7 +211,7 @@ class ProcessorData(
 					r match {
 						case ConversionItem_Conversion(input_l, fn) =>
 							val input2_l = concretizeArgs(input_l, Some(node), index)
-							Some(Node_Conversion(Some(node), None, index, node.kc, input2_l, fn))
+							Some(Node_Conversion(Some(node), None, Some(index), node.time, node.kc, input2_l, fn))
 						case ConversionItem_Object(obj) =>
 							setEntityObj(node.kc, obj)
 							None
@@ -225,17 +225,17 @@ class ProcessorData(
 		state.status
 	}
 	
-	private def registerNodes(node_l: List[Node_Computes]) {
+	private def registerNodes(node_l: List[Node]) {
 		node_l.foreach(registerNode)
 	}
 	
-	private def registerNode(node: Node_Computes) {
+	private def registerNode(node: Node) {
 		val state = new NodeState(node)
 		state_m(node) = state
 		makeConversionNodesForInputs(node)
 	}
 	
-	private def makeConversionNodesForInputs(node: Node_Computes): List[Node_Computes] = {
+	private def makeConversionNodesForInputs(node: Node): List[Node] = {
 		// Try to add missing conversions for inputs which are not JsValues 
 		val l = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).flatMap(kco => {
 			makeConversionNodesForInput(node, kco)
@@ -248,7 +248,7 @@ class ProcessorData(
 		l
 	}
 	
-	private def makeConversionNodesForInput(node: Node_Computes, kco: KeyClassOpt): List[Node_Conversion] = {
+	private def makeConversionNodesForInput(node: Node, kco: KeyClassOpt): List[Node_Conversion] = {
 		if (kco.kc.isJsValue)
 			return Nil
 		
@@ -257,7 +257,7 @@ class ProcessorData(
 			// If a user-supplied conversion function was supplied:
 			case Some(fnargs) =>
 				val input2_l = concretizeArgs(fnargs._2, Some(node), 0)
-				List(Node_Conversion(None, Some(s"${kc.key.id}<${kc.clazz}>"), 0, kc, input2_l, fnargs._1))
+				List(Node_Conversion(None, Some(kc.id), None, node.time, kc, input2_l, fnargs._1))
 			// Otherwise we'll 
 			case None =>
 				if (kc.clazz.typeSymbol.name.decoded == "Option") {
@@ -269,11 +269,7 @@ class ProcessorData(
 							RqSuccess(List(ConversionItem_Object(o)))
 					}
 					val kco2 = KeyClassOpt(kc2, true)
-					println()
-					println("!!!!!!!!!!!!!!!!!")
-					println(kco2)
-					println()
-					Node_Conversion(None, Some(kc.id), 0, kc, List(kco2), fn) ::
+					Node_Conversion(None, Some(kc.id), None, node.time, kc, List(kco2), fn) ::
 						makeConversionNodesForInput(node, kco2)
 				}
 				else {
@@ -284,7 +280,7 @@ class ProcessorData(
 								case List(jsval: JsValue) =>
 									conversion(jsval)
 							}
-							List(Node_Conversion(None, Some(kc.id), 0, kc, List(KeyClassOpt(kc0, false)), fn))
+							List(Node_Conversion(None, Some(kc.id), None, node.time, kc, List(KeyClassOpt(kc0, false)), fn))
 						case None =>
 							// FIXME: should put this message in a map so it only shows up once
 							internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
@@ -323,7 +319,7 @@ class ProcessorData(
 
 	/*
 	// For each of the node's inputs, add the node to the input's dependency list
-	private def addDependencies(node: Node_Computes) {
+	private def addDependencies(node: Node) {
 		node.input_l.foreach(kco => {
 			val kc = kco.kc
 			dep_m.addBinding(kc, node)
@@ -362,7 +358,7 @@ class ProcessorData(
 	*/
 	
 	/*
-	private def updateComputationStatus(node: Node_Computes) {
+	private def updateComputationStatus(node: Node) {
 		println("entityStatus_m: "+entityStatus_m)
 		val b = node.input_l.forall(entityStatus_m.get(_) == Some(Status.Success))
 		if (b) {
@@ -519,7 +515,7 @@ class ProcessorData(
 	}
 
 	/*
-	private def runComputations(node_l: List[Node_Computes]) {
+	private def runComputations(node_l: List[Node]) {
 		println("run")
 		printNodesAndStatus()
 		if (!node_l.isEmpty) {
@@ -533,7 +529,7 @@ class ProcessorData(
 	
 	// REFACTOR: This should return the results, and let the results be processed in another function
 	//  That way we could run the computations in parallel.
-	private def runComputation(node: Node_Computes, kcoToValue_m: Map[KeyClassOpt, RqResult[Object]]): Status.Value = {
+	private def runComputation(node: Node, kcoToValue_m: Map[KeyClassOpt, RqResult[Object]]): Status.Value = {
 		//println(s"try node ${node.name}")
 		RqResult.toResultOfList(node.input_l.map(kcoToValue_m)) match {
 			case RqSuccess(input_l, _) =>
@@ -601,8 +597,8 @@ class ProcessorData(
 		})*/
 	}
 	
-	def getCommandNodeList(): List[Node_Computes] = {
-		def step(node: Node_Computes): List[Node_Computes] = {
+	def getCommandNodeList(): List[Node] = {
+		def step(node: Node): List[Node] = {
 			val state = state_m(node)
 			node :: state.child_l.flatMap(step)
 		}
@@ -644,7 +640,7 @@ class ProcessorData(
 			case node: Node_Command =>
 				val class_s = node.getClass().getName().dropWhile(_ != '_').tail
 				println(node.label+" "+class_s+" "+status_m.getOrElse(node, "<missing>")+" "+node.cmd)
-			case node: Node_Computes =>
+			case node: Node =>
 				//val prefix = "  " * (node.id.length - 1)
 				//println(prefix+node)
 				val class_s = node.getClass().getName().dropWhile(_ != '_').tail

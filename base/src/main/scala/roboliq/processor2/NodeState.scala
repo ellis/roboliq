@@ -3,12 +3,12 @@ package roboliq.processor2
 import roboliq.core._
 
 
-class NodeState(val node: Node_Computes) {
+class NodeState(val node: Node) {
 	private var _status = Status.NotReady 
 	private var _input_l = List[Object]()
 	private var _inputResult: RqResult[Unit] = RqResult.zero
 	private var _functionResult: RqResult[Unit] = RqResult.zero
-	private var _child_l = List[Node_Computes]()
+	private var _child_l = List[Node]()
 	
 	def status = _status
 	def inputResult = _inputResult
@@ -50,7 +50,7 @@ class NodeState(val node: Node_Computes) {
 		//println("node: "+node+", status: "+s)
 	}
 	
-	def setChildren(child_l: List[Node_Computes]) {
+	def setChildren(child_l: List[Node]) {
 		_child_l = child_l
 	}
 }

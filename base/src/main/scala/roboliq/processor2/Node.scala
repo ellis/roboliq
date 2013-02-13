@@ -51,7 +51,8 @@ case class ConversionItem_Object(obj: Object) extends ConversionItem
 sealed trait Node {
 	val parent_? : Option[Node]
 	val label_? : Option[String]
-	val index: Int
+	val index_? : Option[Int]
+	val time: List[Int]
 	val input_l: List[KeyClassOpt]
 	//val idCmd: List[Int]
 	
@@ -63,11 +64,11 @@ sealed trait Node {
 	}
 	
 	private def getId_r: List[Int] = {
-		index :: parent_?.map(_.id_r).getOrElse(Nil)
+		index_?.map(List(_)).getOrElse(Nil) ++ parent_?.map(_.id_r).getOrElse(Nil)
 	}
 	
 	lazy val label: String = {
-		(getRootLabel :: id.map(n => Some(n.toString))).flatten.mkString(".")
+		(getRootLabel :: id.map(n => Some(n.toString))).flatten.mkString("-") + "@" + time.mkString("-")
 	}
 	
 	private def getRootLabel: Option[String] = {
@@ -78,15 +79,14 @@ sealed trait Node {
 	}
 }
 
-trait Node_Computes extends Node {
-}
-
 case class Node_Command(
 	parent_? : Option[Node],
 	index: Int,
 	cmd: JsObject
-) extends Node_Computes {
+) extends Node {
 	val label_? = None
+	val index_? = Some(index)
+	val time = id
 	val input_l: List[KeyClassOpt] = Nil
 	//val idCmd: List[Int] = id
 
@@ -101,8 +101,10 @@ case class Node_Computation(
 	input_l: List[KeyClassOpt],
 	fn: (List[Object]) => ComputationResult
 	//idCmd: List[Int]
-) extends Node_Computes {
+) extends Node {
 	val label_? = None
+	val index_? = Some(index)
+	val time = id
 	override def toString(): String = {
 		s"Node_Computation($label, ${input_l})"
 	}
@@ -129,11 +131,12 @@ class Node_Result(
 case class Node_Conversion(
 	parent_? : Option[Node],
 	label_? : Option[String],
-	index: Int,
+	index_? : Option[Int],
+	time: List[Int],
 	kc: KeyClass,
 	input_l: List[KeyClassOpt],
 	fn: (List[Object]) => ConversionResult
-) extends Node_Computes {
+) extends Node {
 	val idCmd = Nil
 	override def toString(): String = {
 		s"Node_Conversion($label, ${input_l.mkString("+")})"
