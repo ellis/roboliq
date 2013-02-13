@@ -74,9 +74,9 @@ case class RequireItem[A: ru.TypeTag](
 	conversion_? : Option[(List[Object] => ConversionResult, RqArgs)] = None
 ) {
 	private val clazz0 = ru.typeTag[A].tpe
-	private val opt = (clazz0.typeSymbol.name.decoded == "Option")
-	private val clazz = if (opt) clazz0.asInstanceOf[ru.TypeRefApi].args.head else clazz0
-	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), opt, conversion_?)
+	//private val opt = (clazz0.typeSymbol.name.decoded == "Option")
+	private val clazz = clazz0//if (opt) clazz0.asInstanceOf[ru.TypeRefApi].args.head else clazz0
+	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), false, conversion_?)
 }
 
 /*

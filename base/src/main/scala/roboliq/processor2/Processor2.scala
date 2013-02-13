@@ -32,8 +32,18 @@ import spray.json.JsNumber
 case class KeyClass(key: TKP, clazz: ru.Type) {
 	def changeKey(key: String): KeyClass =
 		this.copy(key = this.key.copy(key = key))
+	def isJsValue: Boolean =
+		(clazz =:= ru.typeOf[JsValue])
 	def changeClassToJsValue: KeyClass =
 		this.copy(clazz = ru.typeOf[JsValue])
+	def id: String =
+		s"${key.id}<${getSimplifiedClassName}>"
+	def getSimplifiedClassName: String = {
+		val s0 = clazz.typeSymbol.name.toString
+		val iPeriod = s0.lastIndexOf('.')
+		if (iPeriod >= 0) s0.substring(iPeriod + 1)
+		else s0
+	}
 }
 
 case class KeyClassOpt(
@@ -226,31 +236,9 @@ class ProcessorData(
 	}
 	
 	private def makeConversionNodesForInputs(node: Node_Computes): List[Node_Computes] = {
-		val l = node.input_l.filterNot(kco => kcNode_m.contains(kco.kc)).flatMap(kco => {
-			val kc = kco.kc
-			kco.conversion_? match {
-				case Some(fnargs) =>
-					val input2_l = concretizeArgs(fnargs._2, Some(node), 0)
-					Some(Node_Conversion(None, Some(s"${kc.key.id}<${kc.clazz}>"), 0, kc, input2_l, fnargs._1))
-				case None =>
-					val opt = kco.opt
-					val kc0 = kc.changeClassToJsValue
-					if (kc != kc0) {
-						conversion_m.get(kc.clazz) match {
-							case Some(conversion) =>
-								val fn = (l: List[Object]) => l match {
-									case List(jsval: JsValue) =>
-										conversion(jsval)
-								}
-								Some(Node_Conversion(None, Some(s"${kc.key.id}<${kc.clazz}>"), 0, kc, List(KeyClassOpt(kc0, opt)), fn))
-							case None =>
-								internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
-								None
-						}
-					}
-					else
-						None
-			}
+		// Try to add missing conversions for inputs which are not JsValues 
+		val l = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).flatMap(kco => {
+			makeConversionNodesForInput(node, kco)
 		})
 		// Register the conversion nodes
 		l.foreach(node => kcNode_m(node.kc) = node)
@@ -258,6 +246,52 @@ class ProcessorData(
 		println("l: "+l)
 		registerNodes(l)
 		l
+	}
+	
+	private def makeConversionNodesForInput(node: Node_Computes, kco: KeyClassOpt): List[Node_Conversion] = {
+		if (kco.kc.isJsValue)
+			return Nil
+		
+		val kc = kco.kc
+		kco.conversion_? match {
+			// If a user-supplied conversion function was supplied:
+			case Some(fnargs) =>
+				val input2_l = concretizeArgs(fnargs._2, Some(node), 0)
+				List(Node_Conversion(None, Some(s"${kc.key.id}<${kc.clazz}>"), 0, kc, input2_l, fnargs._1))
+			// Otherwise we'll 
+			case None =>
+				if (kc.clazz.typeSymbol.name.decoded == "Option") {
+					// type parameter of option (e.g, if Option[String], clazz2 will be String)
+					val clazz2 = kc.clazz.asInstanceOf[ru.TypeRefApi].args.head
+					val kc2 = kc.copy(clazz = clazz2)
+					val fn = (l: List[Object]) => l match {
+						case List(o) =>
+							RqSuccess(List(ConversionItem_Object(o)))
+					}
+					val kco2 = KeyClassOpt(kc2, true)
+					println()
+					println("!!!!!!!!!!!!!!!!!")
+					println(kco2)
+					println()
+					Node_Conversion(None, Some(kc.id), 0, kc, List(kco2), fn) ::
+						makeConversionNodesForInput(node, kco2)
+				}
+				else {
+					conversion_m.get(kc.clazz) match {
+						case Some(conversion) =>
+							val kc0 = kc.changeClassToJsValue
+							val fn = (l: List[Object]) => l match {
+								case List(jsval: JsValue) =>
+									conversion(jsval)
+							}
+							List(Node_Conversion(None, Some(kc.id), 0, kc, List(KeyClassOpt(kc0, false)), fn))
+						case None =>
+							// FIXME: should put this message in a map so it only shows up once
+							internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
+							Nil
+					}
+				}
+		}
 	}
 	
 	def setEntity(key: TKP, time: List[Int], jsval: JsValue) {
@@ -373,7 +407,15 @@ class ProcessorData(
 		// TODO: at this point we should perhaps lookup the KeyClasses in opt_m
 
 		// Try to get values for all kcos
-		val kcoToValue_m = kco_l.toList.map(kco => kco -> getEntity(kco)).toMap
+		val kcToValue_m = opt_m.keys.toList.map(kc => kc -> getEntity(kc)).toMap
+		val kcoToValue_m = kco_l.toList.map(kco => {
+			val value0 = kcToValue_m(kco.kc)
+			val value = {
+				if (kco.opt) value0.map(Some.apply).orElse(RqSuccess(None))
+				else value0
+			}
+			kco -> value
+		}).toMap
 		
 		// Update status for all nodes
 		state0_m.values.foreach(_.updateStatus(kcoToValue_m.apply _))
@@ -391,14 +433,23 @@ class ProcessorData(
 		println()
 		println("Entities")
 		println("--------")
-		kcoToValue_m.toList.sortBy(_._1.kc.key.id).map(pair => pair._1.kc.key.id + (if (pair._1.opt) "*" else "") + ": " + pair._2.getOrElse("...")).foreach(println)
+		// First print JsValue entities, then others
+		val (e1, e2) = kcToValue_m.toList.partition(_._1.isJsValue)
+		//val (e1, e2) = kcoToValue_m.toList.partition(_._1.kc.clazz == ru.typeOf[JsValue])
+		def getEntityString(pair: (KeyClass, RqResult[Object])): String = {
+			val (kc, result) = pair
+			(if (opt_m(kc)) "*" else "") + ": " + result.getOrElse("...")
+		}
+		e1.toList.sortBy(_._1.key.id).map(pair => pair._1.key.id + getEntityString(pair)).foreach(println)
+		println()
+		e2.toList.sortBy(_._1.key.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
 		println()
 		println("Nodes")
 		println("-----")
 		state0_m.values.toList.sortBy(_.node.label).map(state => state.node.label + ": " + state.status).foreach(println)
 
 		val pending_l = makePendingComputationList
-		pending_l.foreach(state => runComputation(state.node))
+		pending_l.foreach(state => runComputation(state.node, kcoToValue_m))
 
 		// Add conversion nodes
 		var bConversionAdded = false
@@ -477,9 +528,9 @@ class ProcessorData(
 	
 	// REFACTOR: This should return the results, and let the results be processed in another function
 	//  That way we could run the computations in parallel.
-	private def runComputation(node: Node_Computes): Status.Value = {
+	private def runComputation(node: Node_Computes, kcoToValue_m: Map[KeyClassOpt, RqResult[Object]]): Status.Value = {
 		//println(s"try node ${node.name}")
-		RqResult.toResultOfList(node.input_l.map(getEntity)) match {
+		RqResult.toResultOfList(node.input_l.map(kcoToValue_m)) match {
 			case RqSuccess(input_l, _) =>
 				node match {
 					case n: Node_Command =>
