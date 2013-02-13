@@ -193,7 +193,7 @@ trait CommandHandler {
 		)
 	}
 	
-	protected def handlerReturn(a: Token): ComputationResult = {
+	protected def handlerReturn(a: CmdToken): ComputationResult = {
 		RqSuccess(List(
 				ComputationItem_Token(a)
 		))

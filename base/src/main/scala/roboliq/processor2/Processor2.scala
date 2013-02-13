@@ -84,9 +84,9 @@ case class ComputationNode(
 )*/
 
 class Event
-trait Token
+//trait Token
 
-case class Token_Comment(s: String) extends Token
+case class Token_Comment(s: String) extends CmdToken
 
 /*case class DataKey(time: List[Int], table: String, key: String, path: List[String]) {
 	def idWithoutTime = (s"$table[$key]" :: path).mkString(".")
@@ -117,7 +117,7 @@ class ProcessorData(
 	//val inputs_m = new HashMap[Node, RqResult[List[Object]]]
 	//val entityStatus_m = new HashMap[KeyClass, Status.Value]
 	//val entityMessages_m = new HashMap[KeyClass, RqResult[_]]
-	val token_m = new HashMap[List[Int], Token]
+	val token_m = new HashMap[List[Int], CmdToken]
 	val lookupMessage_m = new HashMap[String, RqResult[Unit]]
 	val internalMessage_l = new ArrayBuffer[RqResult[Unit]]
 	//val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
@@ -631,7 +631,7 @@ class ProcessorData(
 		kcNode_m.toList.sortBy(_._1.toString).flatMap(pair => getConversionNodeList(pair._2))
 	}
 	
-	def getTokenList(): List[(List[Int], Token)] = {
+	def getTokenList(): List[(List[Int], CmdToken)] = {
 		token_m.toList.sortBy(_._1)(ListIntOrdering)
 	}
 	

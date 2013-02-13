@@ -30,12 +30,12 @@ class MovePlateHandler extends CommandHandler {
 			for {
 				locationSrc <- plateState.location_?.asRq(s"plate `${plate.id}` must have an location set.")
 			} yield {
-				val s: String = new MovePlateToken(
+				val token = new MovePlateToken(
 					deviceId_?,
 					plate,
 					locationSrc,
-					dest).toString
-				List(ComputationItem_Token(Token_Comment(s)))
+					dest)
+				List(ComputationItem_Token(token))
 			}
 		}
 		/*

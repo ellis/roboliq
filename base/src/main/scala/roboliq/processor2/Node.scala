@@ -3,6 +3,8 @@ package roboliq.processor2
 import spray.json.JsValue
 import spray.json.JsObject
 
+import roboliq.core.CmdToken
+
 /**
  * There are several basic types of nodes.
  * 
@@ -38,7 +40,7 @@ case class ComputationItem_Computation(
 	fn: (List[Object]) => ComputationResult
 ) extends ComputationItem
 case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
-case class ComputationItem_Token(token: Token) extends ComputationItem
+case class ComputationItem_Token(token: CmdToken) extends ComputationItem
 
 sealed trait ConversionItem extends RqItem
 case class ConversionItem_Conversion(
