@@ -1,13 +1,13 @@
 :Started: 2013-02-12
 
-* Handle param lists
-* Custom converters (e.g. for references by ID)
 * ConversionHandler should use the same method for accessing parameters as ComputationHandler
 * Be able to convert a list parameter to a list of referenced objects
-* PlateState ConversionHandler
 * For conversions, automatically recognize lists and create an appropriate converter, rather than requiring a list converter to be registered.
 * Consider adding min and max element count to KeyClass in order to treat all values as vectors
-* Improve Option handling of entities so that no errors are printed out when value is missing
+* Load in database json
+* Use yaml only for configuration
+* Put tecan configuration in yaml file
+* Read more tecan configuration from tecan files
 
 Earlier stuff:
 

@@ -1,8 +1,9 @@
-package roboliq.processor2
+package roboliq.commands2.arm
 
 import scala.reflect.runtime.{universe => ru}
 import roboliq.core._
 import RqPimper._
+import roboliq.processor2._
 
 
 case class MovePlateToken(
@@ -12,14 +13,8 @@ case class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
-class MovePlateHandler extends CommandHandler {
-	val cmd_l = List[String]("movePlate")
-	
-	def getResult = {
-		/*require ('id, 'list) {
-			(id: String, list: List[String]) =>
-			bank on it
-		}*/
+class MovePlateHandler extends CommandHandler("movePlate") {
+	val getResult = {
 		handlerRequire (
 			lookupPlate('plate),
 			lookupPlateState('plate),
@@ -49,31 +44,4 @@ class MovePlateHandler extends CommandHandler {
 			}
 		}*/
 	}
-	/*
-	def makeStep(): Step = {
-		find (
-			findPlate('plate),
-			findPlateState('plate),
-			findPlateLocation('plateDest),
-			asString_?('deviceId)
-			//p("plate") map { plateId => (findPlate(plateId), findPlateState(plateId)) },
-			//p("dest") map findPlateLocation,
-			//p_?("deviceId")
-		) {
-			(plate, plateState, dest, deviceId_?) =>
-			for {
-				locationSrc <- plateState.location_?.asRq(s"plate `${plate.id}` must have an location set.")
-			} yield {
-				val token = new MovePlateToken(
-					deviceId_?,
-					plate,
-					locationSrc,
-					dest)
-				val event = PlateLocationEventBean(token.plate, token.plateDest.id)
-				val doc = s"Move plate `${token.plate.id}` to location `${token.plateDest.id}`"
-				Step_SubCommands(List(token), event, doc)
-			}
-		}
-	}
-	*/
 }

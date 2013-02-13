@@ -8,6 +8,8 @@ import scala.collection._
 import scala.concurrent.future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.runtime.{universe => ru}
+import scala.reflect.runtime.universe.Type
+import scala.reflect.runtime.universe.TypeTag
 import scalaz._
 import spray.json.JsObject
 import spray.json.JsString
@@ -20,6 +22,7 @@ import scala.math.Ordering
 import roboliq.core._
 import RqPimper._
 import spray.json.JsNumber
+import roboliq.commands2.arm.MovePlateHandler
 
 
 /**
@@ -28,41 +31,6 @@ import spray.json.JsNumber
  * json parameters and objects in the database or programmatically generated objects,
  * and it returns a list of computations, events, commands, and tokens.  
  */
-
-case class KeyClass(key: TKP, clazz: ru.Type, time: List[Int] = Nil) {
-	def changeKey(key: String): KeyClass =
-		this.copy(key = this.key.copy(key = key))
-	def isJsValue: Boolean =
-		(clazz =:= ru.typeOf[JsValue])
-	def changeClassToJsValue: KeyClass =
-		this.copy(clazz = ru.typeOf[JsValue])
-	def changeTime(time: List[Int]): KeyClass =
-		this.copy(time = time)
-	val id: String = {
-		key.id + (if (!isJsValue) "<"+getSimplifiedClassName+">" else "") + (if (time.isEmpty) "" else time.mkString("@(", "/", ")"))
-	}
-	def getSimplifiedClassName: String = {
-		val s0 = clazz.typeSymbol.name.toString
-		val iPeriod = s0.lastIndexOf('.')
-		if (iPeriod >= 0) s0.substring(iPeriod + 1)
-		else s0
-	}
-	
-	override def toString = id
-}
-
-case class KeyClassOpt(
-	kc: KeyClass,
-	opt: Boolean = false,
-	conversion_? : Option[(List[Object] => ConversionResult, RqArgs)] = None
-) {
-	def changeKey(key: String): KeyClassOpt =
-		this.copy(kc = kc.changeKey(key))
-	def changeClassToJsValue: KeyClassOpt =
-		this.copy(kc = kc.changeClassToJsValue)
-	def changeTime(time: List[Int]): KeyClassOpt =
-		this.copy(kc = kc.changeTime(time))
-}
 //case class ComputationItem_Entity(key: TKP, jsval: JsValue) extends ComputationItem
 //case class ComputationItem_Object(kc: KeyClass, obj: Object) extends ComputationItem
 
@@ -123,13 +91,13 @@ class ProcessorData(
 	//val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
 	//val conversionMessage_m = new HashMap[KeyClass, RqResult[Unit]]
 	
-	val conversion_m = new HashMap[ru.Type, (JsValue) => ConversionResult]
+	val conversion_m = new HashMap[Type, ConversionHandler]
 	conversion_m(ru.typeOf[String]) = Conversions.asString
 	conversion_m(ru.typeOf[Integer]) = Conversions.asInteger
 	conversion_m(ru.typeOf[PlateModel]) = Conversions.asPlateModel
-	conversion_m(ru.typeOf[PlateLocation]) = Conversions.asPlateLocation
-	conversion_m(ru.typeOf[Plate]) = Conversions.asPlate
-	conversion_m(ru.typeOf[PlateState]) = Conversions.asPlateState
+	conversion_m(ru.typeOf[PlateLocation]) = Conversions.plateLocationHandler
+	conversion_m(ru.typeOf[Plate]) = Conversions.plateHandler
+	conversion_m(ru.typeOf[PlateState]) = Conversions.plateStateHandler
 	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList
 	
 	def setCommands(cmd_l: List[JsObject]) {
@@ -137,7 +105,7 @@ class ProcessorData(
 		registerNodes(cmd1_l)
 	}
 
-	private def setComputationResult(node: Node, result: scala.util.Try[ComputationResult]): Status.Value = {
+	private def setComputationResult(node: Node, result: scala.util.Try[RqReturn]): Status.Value = {
 		println("setComputationResult()")
 		val state = state_m(node)
 		val child_l = result match {
@@ -151,43 +119,38 @@ class ProcessorData(
 		state.status
 	}
 	
-	private def handleComputationItems(parent_? : Option[Node], l: List[ComputationItem]): List[Node] = {
+	private def handleComputationItems(parent_? : Option[Node], l: List[RqItem]): List[Node] = {
 		val idParent = parent_?.map(_.path).getOrElse(Nil)
 		l.zipWithIndex.flatMap { pair => 
 			val (r, index0) = pair
 			val index = index0 + 1
 			r match {
 				case ComputationItem_Command(cmd) =>
-					//val idCmd = node_?.map(_.id).getOrElse(Nil) ++ List(index)
-					//val idCmd_s = getIdString(idCmd)
-					//cmdToJs_m(idCmd) = cmd
-					//setEntity(idEntity, cmd)
-
-					//val result = ComputationItem_Computation(Nil, (_: List[Object]) => fn)
-					val node = Node_Command(parent_?, index, cmd)
-					val key = TKP("cmd", node.id, Nil)
-					setEntity(key, Nil, cmd)
+					// Store command
+					val id = Node_Command.getCommandId(parent_?, index)
+					val contextKey = TKP("cmd", id, Nil)
+					setEntity(contextKey, Nil, cmd)
+					// Create node
+					val fnargs = createCommandFnArgs(cmd)
+					val node = Node_Command(parent_?, index, contextKey, fnargs)
 					Some(node)
-				case result: ComputationItem_Computation =>
-					val entity2_l = concretizeArgs(result.entity_l, parent_?, index)
-					//val result2 = result.copy(entity_l = entity2_l)
-					Some(Node_Computation(parent_?, index, entity2_l, result.fn))
+				case RqItem_Function(fnargs) =>
+					val fnargs2 = concretizeArgs(fnargs, parent_?, index)
+					Some(Node_Computation(parent_?, index, parent_?.flatMap(_.contextKey_?), fnargs2))
 				case ComputationItem_Token(token) =>
 					val id = parent_?.map(_.path).getOrElse(Nil) ++ List(index)
-					//println("token: "+Node_Token(node, index + 1, token))
 					token_m(id) = token
 					None
-				/*case ComputationItem_Entity(id, jsval) =>
-					setEntity(id, jsval)
-					//new Node_Result(node, index, r)
-					None*/
 				case _ =>
-					//new Node_Result(node, index, r)
 					None
 			}
 		}
 	}
 	
+	private def concretizeArgs(fnargs: RqFunctionArgs, parent_? : Option[Node], index: Int): RqFunctionArgs = {
+		fnargs.copy(arg_l = concretizeArgs(fnargs.arg_l, parent_?, index))
+	}
+
 	private def concretizeArgs(kco_l: List[KeyClassOpt], parent_? : Option[Node], index: Int): List[KeyClassOpt] = {
 		val keyCmd = findCommandParent(parent_?).map(_.id).getOrElse("")
 		val idPrefix = (parent_?.map(_.path).getOrElse(Nil) ++ List(index)).mkString("", "/", "#")
@@ -211,7 +174,7 @@ class ProcessorData(
 		}
 	}
 	
-	private def setConversionResult(node: Node_Conversion, result: scala.util.Try[ConversionResult]): Status.Value = {
+	private def setConversionResult(node: Node_Conversion, result: scala.util.Try[RqReturn]): Status.Value = {
 		val state = state_m(node)
 		val child_l = result match {
 			case scala.util.Success(RqSuccess(l, _)) =>
@@ -219,11 +182,14 @@ class ProcessorData(
 					val (r, index0) = pair
 					val index = index0 + 1
 					r match {
-						case ConversionItem_Conversion(input_l, fn) =>
-							val input2_l = concretizeArgs(input_l, Some(node), index)
-							Some(Node_Conversion(Some(node), None, Some(index), node.time, node.kc, input2_l, fn))
+						case RqItem_Function(fnargs) =>
+							val fnargs2 = concretizeArgs(fnargs, Some(node), index)
+							Some(Node_Conversion(Some(node), None, Some(index), node.time, node.contextKey_?, fnargs2, node.kc))
 						case ConversionItem_Object(obj) =>
 							setEntityObj(node.kc, obj)
+							None
+						case _ =>
+							internalMessage_l += RqError("invalid return item for a conversion node")
 							None
 					}
 				}
@@ -266,9 +232,10 @@ class ProcessorData(
 		val kc = kco.kc
 		kco.conversion_? match {
 			// If a user-supplied conversion function was supplied:
-			case Some(fnargs) =>
-				val input2_l = concretizeArgs(fnargs._2, Some(node), 0)
-				List(Node_Conversion(Some(node), Some(kc.id), Some(index), node.time, kc, input2_l, fnargs._1))
+			case Some(fnargs0) =>
+				val contextKey_? = if (kc.isJsValue) Some(kc.key) else None
+				val fnargs = concretizeArgs(fnargs0, Some(node), 0)
+				List(Node_Conversion(Some(node), Some(kc.id), Some(index), node.time, contextKey_?, fnargs, kc))
 			// Otherwise we'll 
 			case None =>
 				if (kc.clazz.typeSymbol.name.decoded == "Option") {
@@ -280,18 +247,16 @@ class ProcessorData(
 							RqSuccess(List(ConversionItem_Object(o)))
 					}
 					val kco2 = KeyClassOpt(kc2, true)
-					val node2 = Node_Conversion(None, Some(kc.id), None, node.time, kc, List(kco2), fn)
+					val fnargs = RqFunctionArgs(fn, List(kco2))
+					val node2 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc)
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
 				else {
 					conversion_m.get(kc.clazz) match {
-						case Some(conversion) =>
+						case Some(handler) =>
 							val kc0 = kc.changeClassToJsValue
-							val fn = (l: List[Object]) => l match {
-								case List(jsval: JsValue) =>
-									conversion(jsval)
-							}
-							List(Node_Conversion(None, Some(kc.id), None, node.time, kc, List(KeyClassOpt(kc0, false)), fn))
+							val fnargs = RqFunctionArgs(handler.handler, List(KeyClassOpt(kc0, false)))
+							List(Node_Conversion(None, Some(kc.id), None, node.time, Some(kc0.key), fnargs, kc))
 						case None =>
 							// FIXME: should put this message in a map so it only shows up once
 							internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
@@ -547,23 +512,14 @@ class ProcessorData(
 		//println(s"try node ${node.name}")
 		RqResult.toResultOfList(node.input_l.map(kcoToValue_m)) match {
 			case RqSuccess(input_l, _) =>
+				val tryResult = scala.util.Try { node.fnargs.fn(input_l) }
 				node match {
 					case n: Node_Command =>
-						val fn = createCommandFn(n)
-						val f = scala.util.Try(fn(Nil))// future { fn(Nil) }
-						f match {
-							case tryResult => setComputationResult(n, tryResult)
-						}
+						setComputationResult(n, tryResult)
 					case n: Node_Computation =>
-						val f = scala.util.Try { n.fn(input_l) }
-						f match {
-							case tryResult => setComputationResult(n, tryResult)
-						}
+						setComputationResult(n, tryResult)
 					case n: Node_Conversion =>
-						val f = scala.util.Try { n.fn(input_l) }
-						f match {
-							case tryResult => setConversionResult(n, tryResult)
-						}
+						setConversionResult(n, tryResult)
 				}
 			case e =>
 				println("Error:")
@@ -591,12 +547,12 @@ class ProcessorData(
 			res
 	}
 	
-	private def createCommandFn(node: Node_Command): (List[Object] => ComputationResult) = {
-		val cmd_? : Option[String] = node.cmd.fields.get("cmd").flatMap(_ match {
+	private def createCommandFnArgs(cmd: JsObject): RqFunctionArgs = {
+		val cmd_? : Option[String] = cmd.fields.get("cmd").flatMap(_ match {
 			case JsString(s) => Some(s)
 			case _ => None
 		})
-		cmd_? match {
+		val fn: RqFunction = cmd_? match {
 			case None => _ => RqError("missing field `cmd`")
 			case Some(name) =>
 				handler_m.get(name) match {
@@ -604,6 +560,7 @@ class ProcessorData(
 					case Some(handler) => _ => handler.getResult
 				}
 		}
+		RqFunctionArgs(fn, Nil)
 	}
 	
 	private def makeMessagesForMissingInputs() {
@@ -689,19 +646,15 @@ class ProcessorData(
 	}
 }
 
-class PrintCommandHandler extends CommandHandler {
-	val cmd_l = List[String]("print") 
-	
-	def getResult =
+class PrintCommandHandler extends CommandHandler("print") { 
+	val getResult =
 		handlerRequire (as[String]('text)) { (text) =>
 			handlerReturn(Token_Comment(text))
 		}
 }
 
-class Print2CommandHandler extends CommandHandler {
-	val cmd_l = List[String]("print2") 
-	
-	def getResult =
+class Print2CommandHandler extends CommandHandler("print2") {
+	val getResult =
 		handlerRequire (as[Integer]('number)) { (n) =>
 			handlerReturn(Token_Comment(n.toString))
 		}
@@ -754,7 +707,7 @@ object ApplicativeMain2 extends App {
 	println()
 	println("Computations:")
 	p.getCommandNodeList.map( _ match {
-		case node: Node_Command => p.getIdString(node.path)+": "+node.cmd
+		case node: Node_Command => p.getIdString(node.path)+":"
 		case node: Node_Computation => p.getIdString(node.path)+": "+node.input_l
 		case _ =>
 	}).foreach(println)

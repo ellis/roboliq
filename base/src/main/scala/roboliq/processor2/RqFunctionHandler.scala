@@ -10,6 +10,8 @@ import roboliq.core._
 import scala.reflect.ClassTag
 //import RqPimper._
 
+case class RqFunctionArgs(fn: RqFunction, arg_l: List[KeyClassOpt])
+
 object InputListToTuple {
 	def check1[A: ClassTag](l: List[Object]): RqResult[(A)] = {
 		l match {
@@ -26,19 +28,19 @@ object InputListToTuple {
 	}
 
 	/*
-	def checkN[FN, RET](l: List[Object], fn: FN): ComputationResult = {
+	def checkN[FN, RET](l: List[Object], fn: FN): RqReturn = {
 		// fn.getClass.getMethods
 		// val jm = fn.getClass.getMethod("apply", classOf[String], classOf[String])
 		// jm.invoke(fn, "b", "cd")
 		// jm.getParameterTypes
 		
 		/*import scala.reflect.runtime.{universe => ru}
-		def getTypeTag[T: ru.TypeTag](obj: T) = ru.typeTag[T]
+		def getTypeTag[T: TypeTag](obj: T) = TypeTag[T]
 		val thetype = getTypeTag(f)
 		val t = thetype.tpe
 		t.asInstanceOf[ru.TypeRefApi].args*/
 		
-		def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
+		def getInputTypes[FN: TypeTag](fn: FN) = TypeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
 		
 		val type_l = getInputTypes(fn)
 		
@@ -69,9 +71,9 @@ object InputListToTuple {
 	}
 }
 
-case class RequireItem[A: ru.TypeTag](
+case class RequireItem[A: TypeTag](
 	tkp: TKP,
-	conversion_? : Option[(List[Object] => ConversionResult, RqArgs)] = None
+	conversion_? : Option[RqFunctionArgs] = None
 ) {
 	private val clazz0 = ru.typeTag[A].tpe
 	//private val opt = (clazz0.typeSymbol.name.decoded == "Option")
@@ -79,35 +81,28 @@ case class RequireItem[A: ru.TypeTag](
 	val toKeyClass = KeyClassOpt(KeyClass(tkp, clazz), false, conversion_?)
 }
 
-/*
-case class RequireParam[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
-case class RequireParamOpt[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
-case class RequireState[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
-case class RequireEntity[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
-case class RequireRef[A: Manifest](tkp: TKP) extends RequireItem[A](tkp)
-*/
-
-trait CommandHandler {
+// REFACTOR: Rename Handler => Builder ?
+abstract class RqFunctionHandler {
 	import InputListToTuple._
 	
-	val cmd_l: List[String]
-	def getResult: ComputationResult
-
+	val handler: RqFunction
+	
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
-	//implicit def symbolToRequireItem[A: ru.TypeTag](symbol: Symbol): RequireItem[A] =
+	//implicit def symbolToRequireItem[A: TypeTag](symbol: Symbol): RequireItem[A] =
 	//	as[A](symbol)
 	
-	protected def handlerRequire[A: Manifest](a: RequireItem[A])(fn: (A) => ComputationResult): ComputationResult = {
-		RqSuccess(
-			List(
-				ComputationItem_Computation(List(a),
-					(j_l) => check1(j_l).flatMap { a => fn(a) }
-				)
-			)
-		)
+	protected def handlerRequire[
+		A: Manifest
+	](
+		a: RequireItem[A]
+	)(
+		fn: (A) => RqReturn
+	): RqReturn = {
+		val arg_l = List[KeyClassOpt](a)
+		handlerRequireRun(fn, arg_l)
 	}
 	
-	/*def getInputTypes[FN: ru.TypeTag](fn: FN) = ru.typeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
+	/*def getInputTypes[FN: TypeTag](fn: FN) = TypeTag[FN].tpe.asInstanceOf[ru.TypeRefApi].args.init
 	val type_l = getInputTypes(fn)
 	
 	println()
@@ -115,33 +110,25 @@ trait CommandHandler {
 	println("type_l: "+type_l)
 	println()*/
 	
-	protected def handlerRequire[A: ru.TypeTag, B: ru.TypeTag](
+	protected def handlerRequire[A: TypeTag, B: TypeTag](
 		a: RequireItem[A],
 		b: RequireItem[B]
 	)(
-		fn: (A, B) => ComputationResult
-	): ComputationResult = {
-		val input_l = List[KeyClassOpt](a, b)
-		RqSuccess(
-			List(
-				ComputationItem_Computation(input_l, (arg_l) => {
-					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
-					val ret = method.invoke(fn, arg_l : _*)
-					ret.asInstanceOf[ComputationResult]
-				})
-			)
-		)
+		fn: (A, B) => RqReturn
+	): RqReturn = {
+		val arg_l = List[KeyClassOpt](a, b)
+		handlerRequireRun(fn, arg_l)
 	}
 	
-	protected def handlerRequire[A: ru.TypeTag, B: ru.TypeTag, C: TypeTag](
+	protected def handlerRequire[A: TypeTag, B: TypeTag, C: TypeTag](
 		a: RequireItem[A],
 		b: RequireItem[B],
 		c: RequireItem[C]
 	)(
-		fn: (A, B, C) => ComputationResult
-	): ComputationResult = {
-		val input_l = List[KeyClassOpt](a, b, c)
-		handlerRequireRun(input_l, fn)
+		fn: (A, B, C) => RqReturn
+	): RqReturn = {
+		val arg_l = List[KeyClassOpt](a, b, c)
+		handlerRequireRun(fn, arg_l)
 	}
 	
 	protected def handlerRequire[
@@ -155,20 +142,21 @@ trait CommandHandler {
 		c: RequireItem[C],
 		d: RequireItem[D]
 	)(
-		fn: (A, B, C, D) => ComputationResult
-	): ComputationResult = {
-		val input_l = List[KeyClassOpt](a, b, c, d)
-		handlerRequireRun(input_l, fn)
+		fn: (A, B, C, D) => RqReturn
+	): RqReturn = {
+		val arg_l = List[KeyClassOpt](a, b, c, d)
+		handlerRequireRun(fn, arg_l)
 	}
 	
-	private def handlerRequireRun(input_l: List[KeyClassOpt], fn: Object): ComputationResult = {
+	private def handlerRequireRun(fn: Object, arg_l: RqArgs): RqReturn = {
+		val fn2: RqFunction = (arg_l) => {
+			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+			val ret = method.invoke(fn, arg_l : _*)
+			ret.asInstanceOf[RqReturn]
+		}
 		RqSuccess(
 			List(
-				ComputationItem_Computation(input_l, (arg_l) => {
-					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
-					val ret = method.invoke(fn, arg_l : _*)
-					ret.asInstanceOf[ComputationResult]
-				})
+				RqItem_Function(RqFunctionArgs(fn2, arg_l))
 			)
 		)
 	}
@@ -176,54 +164,53 @@ trait CommandHandler {
 	protected def handlerRequireN[A](
 		l: List[RequireItem[A]]
 	)(
-		fn: List[A] => ComputationResult
-	): ComputationResult = {
-		val input_l: List[KeyClassOpt] = l.map(_.toKeyClass)
+		fn: List[A] => RqReturn
+	): RqReturn = {
+		val fn2: RqFunction = (arg_l) => {
+			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+			val ret = method.invoke(fn, arg_l)
+			ret.asInstanceOf[RqReturn]
+		}
+		val arg_l: List[KeyClassOpt] = l.map(_.toKeyClass)
 		RqSuccess(
 			List(
-				ComputationItem_Computation(input_l, (arg_l) => {
-					println("arg_l: "+arg_l.map(_.getClass))
-					val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
-					println("!!!!!!!!!!!")
-					val ret = method.invoke(fn, arg_l)
-					println("BBBBBBBBBBB")
-					ret.asInstanceOf[ComputationResult]
-				})
+				RqItem_Function(RqFunctionArgs(fn2, arg_l))
 			)
 		)
 	}
 	
-	protected def handlerReturn(a: CmdToken): ComputationResult = {
+	protected def handlerReturn(a: CmdToken): RqReturn = {
 		RqSuccess(List(
 				ComputationItem_Token(a)
 		))
 	}
 	
-	protected def as[A: ru.TypeTag](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
-	protected def as[A: ru.TypeTag](symbol: Symbol): RequireItem[A] = as[A](TKP("cmd", "$", List(symbol.name)))
+	//protected def get
+	protected def as[A: TypeTag](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
+	protected def as[A: TypeTag](symbol: Symbol): RequireItem[A] = as[A](TKP("cmd", "$", List(symbol.name)))
 
-	//protected def asOpt[A: ru.TypeTag](tkp: TKP): RequireItem[Option[A]] = RequireItem[Option[A]](tkp)
-	//protected def asOpt[A: ru.TypeTag](symbol: Symbol): RequireItem[Option[A]] = asOpt[A](TKP("cmd", "$", List(symbol.name)))
+	//protected def asOpt[A: TypeTag](tkp: TKP): RequireItem[Option[A]] = RequireItem[Option[A]](tkp)
+	//protected def asOpt[A: TypeTag](symbol: Symbol): RequireItem[Option[A]] = asOpt[A](TKP("cmd", "$", List(symbol.name)))
 
-	//protected def lookup[A: ru.TypeTag](table: String, symbol: Symbol): RequireItem[A] =
+	//protected def lookup[A: TypeTag](table: String, symbol: Symbol): RequireItem[A] =
 	//	RequireItem[A](TKP(table, symbol.name, Nil))
 	
-	protected def lookup[A <: Object : ru.TypeTag : ClassTag](
+	protected def lookup[A <: Object : TypeTag : ClassTag](
 		symbol: Symbol,
 		lookupById: String => RequireItem[A]
 	): RequireItem[A] = {
 		val fn = (l: List[Object]) => {
 			InputListToTuple.check1[String](l).map(id => {
-				List(ConversionItem_Conversion(
-					input_l = List(lookupById(id)),
+				List(RqItem_Function(RqFunctionArgs(
+					arg_l = List(lookupById(id)),
 					fn = (l: List[Object]) => InputListToTuple.check1[A](l).map { a =>
 						List(ConversionItem_Object(a))
 					}
-				))
+				)))
 			})
 		}
 		val args = List[KeyClassOpt](as[String](symbol))
-		RequireItem[A](TKP("param", "#", Nil), Some((fn, args)))
+		RequireItem[A](TKP("param", "#", Nil), Some(RqFunctionArgs(fn, args)))
 	}
 	
 	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
@@ -241,4 +228,22 @@ trait CommandHandler {
 	protected def lookupPlateState(id: String): RequireItem[PlateState] = RequireItem[PlateState](TKP("plateState", id, Nil))
 	protected def lookupPlateState(symbol: Symbol): RequireItem[PlateState] =
 		lookup(symbol, lookupPlateState _)
+}
+
+abstract class CommandHandler(
+	val cmd_l: String*
+) extends RqFunctionHandler {
+	val handler: RqFunction = (_) => getResult
+	val getResult: RqReturn
+}
+
+class ConversionHandler(
+	val getResult: JsValue => RqReturn
+) extends RqFunctionHandler {
+	val handler: RqFunction = (l: List[Object]) => {
+		l match {
+			case List(jsval: JsValue) => getResult(jsval)
+			case _ => RqError("expected JsValue")
+		}
+	}
 }

@@ -1,3 +1,4 @@
+/*
 package roboliq.processor2
 
 import scalaz._
@@ -23,4 +24,4 @@ abstract class ConversionHandler {
 	
 	protected def as[A: Manifest](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
 	//protected def as[A: Manifest](symbol: Symbol): RequireItem[A] = as[A]("$"+symbol.name)
-}
+}*/

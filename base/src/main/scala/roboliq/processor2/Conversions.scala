@@ -111,62 +111,62 @@ object ConversionsDirect {
 object Conversions {
 	private val D = ConversionsDirect
 	
-	private def makeConversion
-			(fn: JsValue => RqResult[Object])
-			(jsval: JsValue): ConversionResult =
-		fn(jsval).map(obj => List(ConversionItem_Object(obj)))
+	private def makeConversion(fn: JsValue => RqResult[Object]) = new ConversionHandler(
+		(jsval: JsValue) =>
+			fn(jsval).map(obj => List(ConversionItem_Object(obj)))
+	)
 
-	val asString = makeConversion(ConversionsDirect.toString) _
-	val asInteger = makeConversion(ConversionsDirect.toInteger) _
-	val asVolume = makeConversion(ConversionsDirect.toVolume) _
-	val asPlateModel = makeConversion(ConversionsDirect.toPlateModel) _
+	val asString = makeConversion(ConversionsDirect.toString)
+	val asInteger = makeConversion(ConversionsDirect.toInteger)
+	val asVolume = makeConversion(ConversionsDirect.toVolume)
+	val asPlateModel = makeConversion(ConversionsDirect.toPlateModel)
 
-	val asStringList = makeConversion(ConversionsDirect.toStringList) _
-	val asIntegerList = makeConversion(ConversionsDirect.toIntegerList) _
-	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList) _
-	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList) _
+	val asStringList = makeConversion(ConversionsDirect.toStringList)
+	val asIntegerList = makeConversion(ConversionsDirect.toIntegerList)
+	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList)
+	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList)
 	
-	private def plateLocationHandler = new ConversionHandler {
-		def getResult(jsval: JsValue): ConversionResult = {
+	val plateLocationHandler = new ConversionHandler(
+		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
 				id <- D.getString('id, jsobj)
 				plateModelIds <- D.getStringList('plateModels, jsobj)
 				cooled <- D.getBoolean('cooled, jsobj)
 			} yield {
-				List(ConversionItem_Conversion(
-					input_l = plateModelIds.map(id => KeyClassOpt(KeyClass(TKP("plateModel", id, Nil), ru.typeOf[PlateModel]))),
+				List(RqItem_Function(RqFunctionArgs(
+					arg_l = plateModelIds.map(id => KeyClassOpt(KeyClass(TKP("plateModel", id, Nil), ru.typeOf[PlateModel]))),
 					fn = (l: List[Object]) => {
 						val plateModel_l = l.asInstanceOf[List[PlateModel]]
 						val loc = new PlateLocation(id, plateModel_l, cooled)
 						RqSuccess(List(ConversionItem_Object(loc)))
 					}
-				))
+				)))
 			}
 		}
-	}
+	)
 	
-	private val plateHandler = new ConversionHandler {
-		def getResult(jsval: JsValue): ConversionResult = {
+	val plateHandler = new ConversionHandler(
+		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
 				id <- D.getString('id, jsobj)
 				idModel <- D.getString('idModel, jsobj)
 				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
 			} yield {
-				List(ConversionItem_Conversion(
-					input_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), ru.typeOf[PlateModel]))),
+				List(RqItem_Function(RqFunctionArgs(
+					arg_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), ru.typeOf[PlateModel]))),
 					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
 						val plate = new Plate(id, plateModel, locationPermanent_?)
 						List(ConversionItem_Object(plate))
 					}
-				))
+				)))
 			}
 		}
-	}
+	)
 	
-	private val plateStateHandler = new ConversionHandler {
-		def getResult(jsval: JsValue): ConversionResult = {
+	val plateStateHandler = new ConversionHandler(
+		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
 				id <- D.getString('id, jsobj)
@@ -174,8 +174,8 @@ object Conversions {
 			} yield {
 				location_? match {
 					case Some(location) =>
-						List(ConversionItem_Conversion(
-							input_l = List(
+						List(RqItem_Function(RqFunctionArgs(
+							arg_l = List(
 								KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[Plate])),
 								KeyClassOpt(KeyClass(TKP("plateLocation", location, Nil), ru.typeOf[PlateLocation]))
 							),
@@ -183,21 +183,21 @@ object Conversions {
 								val plateState = new PlateState(plate, Some(loc))
 								List(ConversionItem_Object(plateState))
 							}
-						))
+						)))
 					case None =>
-						List(ConversionItem_Conversion(
-							input_l = List(
+						List(RqItem_Function(RqFunctionArgs(
+							arg_l = List(
 								KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[Plate]))
 							),
 							fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { (plate) =>
 								val plateState = new PlateState(plate, None)
 								List(ConversionItem_Object(plateState))
 							}
-						))
+						)))
 				}
 			}
 		}
-	}
+	)
 	
 	/*
 	private val plateHandler2 = new CommandHandler {

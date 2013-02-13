@@ -3,7 +3,7 @@ package roboliq.processor2
 import spray.json.JsValue
 import spray.json.JsObject
 
-import roboliq.core.CmdToken
+import roboliq.core._
 
 /**
  * There are several basic types of nodes.
@@ -32,126 +32,79 @@ import roboliq.core.CmdToken
 
 sealed trait RqItem
 
-sealed trait ComputationItem extends RqItem
-case class ComputationItem_Event(event: Event) extends ComputationItem
-case class ComputationItem_EntityRequest(id: String) extends ComputationItem
-case class ComputationItem_Computation(
-	entity_l: List[KeyClassOpt],
-	fn: (List[Object]) => ComputationResult
-) extends ComputationItem
-case class ComputationItem_Command(cmd: JsObject) extends ComputationItem
-case class ComputationItem_Token(token: CmdToken) extends ComputationItem
+case class RqItem_Function(fnargs: RqFunctionArgs) extends RqItem
 
-sealed trait ConversionItem extends RqItem
-case class ConversionItem_Conversion(
-	input_l: List[KeyClassOpt],
-	fn: (List[Object]) => ConversionResult
-) extends ConversionItem
-case class ConversionItem_Object(obj: Object) extends ConversionItem
+case class ComputationItem_Event(event: Event) extends RqItem
+case class ComputationItem_EntityRequest(id: String) extends RqItem
+case class ComputationItem_Command(cmd: JsObject) extends RqItem
+case class ComputationItem_Token(token: CmdToken) extends RqItem
+
+case class ConversionItem_Object(obj: Object) extends RqItem
 
 
 sealed trait Node {
+	val id: String
 	val parent_? : Option[Node]
 	val label_? : Option[String]
 	val index_? : Option[Int]
+	val path: List[Int]
 	val time: List[Int]
-	val input_l: List[KeyClassOpt]
-	//val idCmd: List[Int]
+	val contextKey_? : Option[TKP]
+	val fnargs: RqFunctionArgs
 	
-	val id: String
-	
-	lazy val path_r = getPath_r
-	lazy val path = path_r.reverse
-	
-	private def getPath: List[Int] = {
-		getPath_r.reverse
-	}
-	
-	private def getPath_r: List[Int] = {
-		index_?.map(List(_)).getOrElse(Nil) ++ parent_?.map(_.path_r).getOrElse(Nil)
-	}
-	
-	/*lazy val label: String = {
-		(getRootLabel :: path.map(n => Some(n.toString))).flatten.mkString("-") + "@" + time.mkString("-")
-	}*/
-	
-	private def getRootLabel: Option[String] = {
-		parent_? match {
-			case None => label_?
-			case Some(parent) => parent.getRootLabel
-		}
-	}
+	// REFACTOR: remove this
+	def input_l = fnargs.arg_l
 }
 
 case class Node_Command(
 	parent_? : Option[Node],
 	index: Int,
-	cmd: JsObject
+	contextKey: TKP,
+	fnargs: RqFunctionArgs
 ) extends Node {
+	val path = Node_Command.getCommandPath(parent_?, index)
+	val id = Node_Command.getCommandId(path)
 	val label_? = None
 	val index_? = Some(index)
 	val time = path
-	val input_l: List[KeyClassOpt] = Nil
-	
-	val id = path.mkString("/")
-	//val idCmd: List[Int] = id
+	val contextKey_? = Some(contextKey)
+}
 
-	/*override def toString(): String = {
-		s"Node_Command($label, ${cmd})"
-	}*/
+object Node_Command {
+	def getCommandPath(parent_? : Option[Node], index: Int): List[Int] =
+		parent_?.map(_.path).getOrElse(Nil) ++ List(index)
+	def getCommandId(path: List[Int]): String =
+		path.mkString("/")
+	def getCommandId(parent_? : Option[Node], index: Int): String =
+		getCommandId(getCommandPath(parent_?, index))
 }
 
 case class Node_Computation(
 	parent_? : Option[Node],
 	index: Int,
-	input_l: List[KeyClassOpt],
-	fn: (List[Object]) => ComputationResult
-	//idCmd: List[Int]
+	contextKey_? : Option[TKP],
+	fnargs: RqFunctionArgs
 ) extends Node {
+	val path = Node_Command.getCommandPath(parent_?, index)
+	val id = Node_Command.getCommandId(path)
 	val label_? = None
 	val index_? = Some(index)
 	val time = path
-	
-	val id = path.mkString("/")
-	
-	//override def toString(): String =
-	//	s"Node_Computation($label, ${input_l})"
 }
-
-/*case class Node_Token(
-	parent_? : Option[Node],
-	index: Int,
-	token: Token
-) extends Node {
-	val parent_? = Option(parent)
-	val label_? = None
-	val idCmd = Nil
-}*/
-
-/*
-class Node_Result(
-	parent: Node,
-	index: Int,
-	val result: ComputationItem
-) extends Node(parent, index)
-*/
 
 case class Node_Conversion(
 	parent_? : Option[Node],
 	label_? : Option[String],
 	index_? : Option[Int],
 	time: List[Int],
-	kc: KeyClass,
-	input_l: List[KeyClassOpt],
-	fn: (List[Object]) => ConversionResult
+	contextKey_? : Option[TKP],
+	fnargs: RqFunctionArgs,
+	kc: KeyClass
 ) extends Node {
-	//val idCmd = Nil
+	val path = parent_?.map(_.path).getOrElse(Nil) ++ index_?
 	val id: String = parent_? match {
 		case Some(parent: Node_Conversion) => parent.id + "/" + index_?.toList.mkString
 		case Some(parent) => parent.id + "#" + index_?.toList.mkString
 		case None => kc.id
 	}
-	
-	//override def toString(): String = {
-	//	s"Node_Conversion($label, ${input_l.mkString("+")})"
 }
