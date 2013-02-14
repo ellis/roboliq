@@ -277,7 +277,7 @@ class GroupABuilder1(
 		val lItemToTip = g0.lLM.flatMap(lm => {
 			val lItem = g0.mLMToItems(lm).toList
 			val lTip = g0.mLMToTips(lm).map(_.state(ctx.states).conf)
-			//val lDest: SortedSet[Well2] = SortedSet(lItem.map(_.dest) : _*)
+			//val lDest: SortedSet[Well] = SortedSet(lItem.map(_.dest) : _*)
 			val mDestToItems = lItem.groupBy(_.dest)
 			val mItemToTip = updateGroupA4_sub(g0, lTip, mDestToItems, Map()) match {
 				case Error(ls) => return GroupError(g0, ls)
@@ -300,7 +300,7 @@ class GroupABuilder1(
 		))
 	}
 	
-	private def updateGroupA4_sub(g0: GroupA, lTip: SortedSet[Tip], mDestToItems: Map[Well2, List[Item]], acc: Map[Item, Tip]): Result[Map[Item, Tip]] = {
+	private def updateGroupA4_sub(g0: GroupA, lTip: SortedSet[Tip], mDestToItems: Map[Well, List[Item]], acc: Map[Item, Tip]): Result[Map[Item, Tip]] = {
 		if (mDestToItems.isEmpty) Success(acc)
 		else {
 			val ltw0 = PipetteHelper.chooseTipWellPairsAll(g0.states0, lTip, SortedSet(mDestToItems.keySet.toSeq : _*)) match {

@@ -10,7 +10,7 @@ import roboliq.commands.pipette._
 
 
 object PipetteHelper {
-	def chooseTipWellPairsAll(states: StateMap, tips: SortedSet[Tip], dests: SortedSet[Well2]): Result[Seq[Seq[TipWell]]] = {
+	def chooseTipWellPairsAll(states: StateMap, tips: SortedSet[Tip], dests: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
 		//println("chooseTipWellPairsAll()")
 		//println("tips: "+tips)
 		//println("dests: "+dests)
@@ -33,11 +33,11 @@ object PipetteHelper {
 		Success(twss)
 	}
 	
-	//private def getWellPosList(states: StateMap, wells: Iterable[Well2]): Result[List[Tuple2[Well2, Well2]]] = {
+	//private def getWellPosList(states: StateMap, wells: Iterable[Well]): Result[List[Tuple2[Well, Well]]] = {
 		//states.getWellPosList(wells)
 	//}
 
-	private def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well2], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
+	private def chooseTipWellPairsNext(states: StateMap, tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
 		//print("A")
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
@@ -77,11 +77,11 @@ object PipetteHelper {
 	}
 
 	private def getHolderWellsCol(
-		states: StateMap, wells: SortedSet[Well2], twsPrev: Seq[TipWell]
+		states: StateMap, wells: SortedSet[Well], twsPrev: Seq[TipWell]
 	): Result[
 		Tuple3[
 			String, 
-			List[Well2], 
+			List[Well], 
 			Int
 		]
 	] = {
@@ -130,7 +130,7 @@ object PipetteHelper {
 
 	// Get the upper-most well in iCol.
 	// If none found, loop through columns until wells are found
-	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: List[Well2], iCol0: Int): Result[Well2] = {
+	private def getFirstWell(states: StateMap, idPlate: String, wellsOnHolder: List[Well], iCol0: Int): Result[Well] = {
 		//println("getFirstWell()")
 		//println("wells: "+wellsOnHolder)
 		assert(!wellsOnHolder.isEmpty)
@@ -140,7 +140,7 @@ object PipetteHelper {
 			case Success(plate) =>
 				val nCols = plate.model.nCols
 					
-				def checkCol(iCol: Int): Well2 = {
+				def checkCol(iCol: Int): Well = {
 					wellsOnHolder.find(_.iCol == iCol) match {
 						case Some(well) => well
 						case None => checkCol((iCol + 1) % nCols)
@@ -176,13 +176,13 @@ object PipetteHelper {
 	 *   - if there is 1 well, add it
 	 *   - if there are 2 wells, add the one which occurs first in the sorted order
 	 */
-	def chooseAdjacentWellsByVolume(states: StateMap, wells: Set[Well2], nCount: Int): Result[SortedSet[Well2]] = {
+	def chooseAdjacentWellsByVolume(states: StateMap, wells: Set[Well], nCount: Int): Result[SortedSet[Well]] = {
 		if (nCount <= 0 || wells.isEmpty)
 			return Success(SortedSet())
 		
 		// sort the sources by volume descending (secondary sort key is index order)
 		// TRUE means that well1 should be placed before well2
-		def compare(well1: Well2, well2: Well2): Boolean = {
+		def compare(well1: Well, well2: Well): Boolean = {
 			(for {
 				st1 <- states.findWellState(well1.id)
 				st2 <- states.findWellState(well2.id)
@@ -199,8 +199,8 @@ object PipetteHelper {
 		chooseAdjacentWellsByVolume_Step1(states, order, nCount)
 	}
 	
-	private def chooseAdjacentWellsByVolume_Step1(states: StateMap, order: Seq[Well2], nCount: Int): Result[SortedSet[Well2]] = {
-		def makeWellsAll(wells: Set[Well2]): Result[Set[Well2]] = {
+	private def chooseAdjacentWellsByVolume_Step1(states: StateMap, order: Seq[Well], nCount: Int): Result[SortedSet[Well]] = {
+		def makeWellsAll(wells: Set[Well]): Result[Set[Well]] = {
 			if (wells.isEmpty)
 				Success(Set())
 			else {
@@ -223,7 +223,7 @@ object PipetteHelper {
 		}
 	}
 
-	private def chooseAdjacentWellsByVolume_Step2(states: StateMap, order: Seq[Well2], nCount: Int): Result[Set[Well2]] = {
+	private def chooseAdjacentWellsByVolume_Step2(states: StateMap, order: Seq[Well], nCount: Int): Result[Set[Well]] = {
 		if (nCount <= 0 || order.isEmpty)
 			return Success(Set())
 
@@ -240,7 +240,7 @@ object PipetteHelper {
 			
 			var iRowTop = pos0.iRow
 			var iRowBot = iRowTop
-			def isAboveOrBelow(pos: Well2): Boolean = {
+			def isAboveOrBelow(pos: Well): Boolean = {
 				if (pos.idPlate != pos0.idPlate)
 					false
 				else if (pos.iCol != pos0.iCol)
@@ -249,7 +249,7 @@ object PipetteHelper {
 					(pos.iRow == iRowTop - 1 || pos.iRow == iRowBot + 1)
 			}
 			
-			val wells = new ArrayBuffer[Well2]
+			val wells = new ArrayBuffer[Well]
 			wells += well0
 			var wellsInCol = lOrderPos.filter(well => {
 				well.ne(well0) && well.iCol == pos0.iCol
@@ -272,7 +272,7 @@ object PipetteHelper {
 		}
 	}
 	
-	def chooseTipSrcPairs(states: StateMap, tips: SortedSet[Tip], srcs: SortedSet[Well2]): Result[Seq[Seq[TipWell]]] = {
+	def chooseTipSrcPairs(states: StateMap, tips: SortedSet[Tip], srcs: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
 		def processStep(tips0: Iterable[Tip]): Result[Tuple2[Iterable[Tip], Seq[TipWell]]] = {
 			val tips = SortedSet[Tip](tips0.toSeq : _*)
 			for { tws <- chooseTipWellPairsNext(states, tips, srcs, Nil) }

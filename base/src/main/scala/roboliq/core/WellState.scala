@@ -155,7 +155,7 @@ class WellAddEventBean extends WellEventBean {
 /** Factory object for [[roboliq.core.WellEventBean]]. */
 object WellAddEventBean {
 	/** Event to . */
-	def apply(well: Well2, src: Well2, volume: LiquidVolume): WellAddEventBean = {
+	def apply(well: Well, src: Well, volume: LiquidVolume): WellAddEventBean = {
 		val bean = new WellAddEventBean
 		bean.obj = well.id
 		bean.src = src.id
@@ -204,7 +204,7 @@ class WellRemoveEventBean extends WellEventBean {
 /** Factory object for [[roboliq.core.WellRemoveEventBean]]. */
 object WellRemoveEventBean {
 	/** Event to remove `volume` from `well`. */
-	def apply(well: Well2, volume: LiquidVolume): WellRemoveEventBean = {
+	def apply(well: Well, volume: LiquidVolume): WellRemoveEventBean = {
 		val bean = new WellRemoveEventBean
 		bean.obj = well.id
 		bean.volume = volume.l.bigDecimal

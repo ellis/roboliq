@@ -26,8 +26,8 @@ trait StateQuery {
 	def findPlateState(id: String): Result[PlateState]
 	/** Find state of well with ID `id`. */
 	def findWellState(id: String): Result[WellState]
-	/** Find fully defined [[roboliq.core.Well2]] of well with ID `id`. */
-	def findWellPosition(id: String): Result[Well2]
+	/** Find fully defined [[roboliq.core.Well]] of well with ID `id`. */
+	def findWellPosition(id: String): Result[Well]
 	
 	/**
 	 * Split @param ids into a list of ids which can be looked up.
@@ -38,39 +38,39 @@ trait StateQuery {
 	def expandIdList(ids: String): Result[List[String]]
 	
 	/**
-	 * Map @param id onto a list of [[roboliq.core.Well2]].
-	 * A liquid id will be mapped onto a list of one or more Well2 objects,
+	 * Map @param id onto a list of [[roboliq.core.Well]].
+	 * A liquid id will be mapped onto a list of one or more Well objects,
 	 * depending on how many wells on the bench contain that liquid.
-	 * A tube id will be mapped to a singleton Well2 list for the rack it's in and its index in the rack.
-	 * A well id will be mapped to a singleton Well list (Well extends Well2).
-	 * A plate id will not be mapped to a Well2 list, and will return an error.
+	 * A tube id will be mapped to a singleton Well list for the rack it's in and its index in the rack.
+	 * A well id will be mapped to a singleton Well list (Well extends Well).
+	 * A plate id will not be mapped to a Well list, and will return an error.
 	 * All other ids will also return a error. 
 	 */
-	def mapIdToWell2List(id: String): Result[List[Well2]]
+	def mapIdToWell2List(id: String): Result[List[Well]]
 	
 	/**
-	 * Map @param ids onto a list of [[roboliq.core.Well2]] lists.
-	 * A liquid id will be mapped onto a list of one or more Well2 objects,
+	 * Map @param ids onto a list of [[roboliq.core.Well]] lists.
+	 * A liquid id will be mapped onto a list of one or more Well objects,
 	 * depending on how many wells on the bench contain that liquid.
-	 * A tube id will be mapped to a singleton Well2 list for the rack it's in and its index in the rack.
-	 * A well id will be mapped to a singleton Well list (Well extends Well2).
-	 * A plate id will not be mapped to a Well2 list, and will return an error.
+	 * A tube id will be mapped to a singleton Well list for the rack it's in and its index in the rack.
+	 * A well id will be mapped to a singleton Well list (Well extends Well).
+	 * A plate id will not be mapped to a Well list, and will return an error.
 	 * All other ids will also return a error. 
 	 */
-	def mapIdsToWell2Lists(ids: String): Result[List[List[Well2]]]
+	def mapIdsToWell2Lists(ids: String): Result[List[List[Well]]]
 	
 	/**
-	 * Find fully defined [[roboliq.core.Well2]] information for the wells in string `ids`.
+	 * Find fully defined [[roboliq.core.Well]] information for the wells in string `ids`.
 	 * @see [[roboliq.core.WellSpecParser]] for the format of `ids`.
 	 */
-	def findDestWells(ids: String): Result[List[Well2]]
+	def findDestWells(ids: String): Result[List[Well]]
 	
 	/** Find the liquid with ID `id` or the liquid currently in the well with ID `id`. */
 	def findSourceLiquid(id: String): Result[Liquid] =
 		findLiquid(id).orElse(findWellState(id).map(_.liquid))
 		
-	/** Pair all `wells` with their fully defined [[roboliq.core.Well2]]. */
-	def getWellPosList(wells: Iterable[Vessel]): Result[List[Tuple2[Vessel, Well2]]] = {
+	/** Pair all `wells` with their fully defined [[roboliq.core.Well]]. */
+	def getWellPosList(wells: Iterable[Vessel]): Result[List[Tuple2[Vessel, Well]]] = {
 		Result.mapOver(wells.toList)(well => findWellPosition(well.id).map(well -> _))
 	}
 }

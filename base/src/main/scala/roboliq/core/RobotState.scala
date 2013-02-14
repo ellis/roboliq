@@ -76,18 +76,18 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
 		s
 	}
 	
-	def findWellPosition(id: String): Result[Well2] = {
+	def findWellPosition(id: String): Result[Well] = {
 		ob.findWell2(id)
 	}
 	
 	def expandIdList(ids: String): Result[List[String]] =
 		WellSpecParser.parseToIds(ids, ob)
 	
-	def mapIdToWell2List(id: String): Result[List[Well2]] = {
+	def mapIdToWell2List(id: String): Result[List[Well]] = {
 		ob.findWell2List(id)
 	}
 	
-	def mapIdsToWell2Lists(ids: String): Result[List[List[Well2]]] = {
+	def mapIdsToWell2Lists(ids: String): Result[List[List[Well]]] = {
 		for {
 			lId <- WellSpecParser.parseToIds(ids, ob)
 			ll <- Result.mapOver(lId)(mapIdToWell2List)
@@ -96,7 +96,7 @@ abstract class StateMap(ob: ObjBase) extends StateQuery {
 		}
 	}
 	
-	def findDestWells(ids: String): Result[List[Well2]] = {
+	def findDestWells(ids: String): Result[List[Well]] = {
 		for {
 			ℓid <- WellSpecParser.parseToIds(ids, ob)
 			ℓwell <- Result.mapOver(ℓid)(ob.findWell2)

@@ -42,12 +42,12 @@ object PipetteGroupMonoid extends Monoid[PipetteGroup] {
 case class PipetteGroupData(
 	group: PipetteGroup,
 	itemToTip_m: Map[Item, Tip],
-	tipToSrc_m: Map[Tip, Well2],
+	tipToSrc_m: Map[Tip, Well],
 	tipToVolume_m: Map[Tip, LiquidVolume],
 	aspiratePolicy_m: Map[Tip, PipettePolicy],
-	dispensePolicy_m: Map[Well2, PipettePolicy],
+	dispensePolicy_m: Map[Well, PipettePolicy],
 	preMixSpec_m: Map[Tip, MixSpec],
-	postMixSpec_m: Map[Well2, MixSpec]
+	postMixSpec_m: Map[Well, MixSpec]
 )
 
 

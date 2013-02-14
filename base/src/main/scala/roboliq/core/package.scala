@@ -45,10 +45,10 @@ package roboliq
  * There are two kinds of vessels:
  * [[roboliq.core.PlateWell]] and [[roboliq.core.Tube]].
  * 
- * Also of interest is the poorly-named [[roboliq.core.Well2]],
+ * Also of interest is the poorly-named [[roboliq.core.Well]],
  * which represents a vessel on a vessel holder.
- * A `PlateWell` is automatically also a `Well2`, 
- * whereas a `Tube` doesn't have `Well2` information until it has been placed on a rack.
+ * A `PlateWell` is automatically also a `Well`, 
+ * whereas a `Tube` doesn't have `Well` information until it has been placed on a rack.
  * 
  * ===Vessel holders===
  * 

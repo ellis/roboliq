@@ -13,11 +13,11 @@ sealed abstract class Vessel(val id: String) extends Part {
 
 /**
  * Represents a vessel whose position on its plate is known.
- * A [[roboliq.core.PlateWell]] is an instance of `Well2`,
+ * A [[roboliq.core.PlateWell]] is an instance of `Well`,
  * whereas a [[roboliq.core.WellPosition]] must be created for a [[roboliq.core.Tube]] 
  * once its position on a rack has been determined.
  */
-sealed trait Well2 extends Ordered[Well2] {
+sealed trait Well extends Ordered[Well] {
 	/** ID of plate in database. */
 	val idPlate: String
 	/** Index of well on plate. */
@@ -37,7 +37,7 @@ sealed trait Well2 extends Ordered[Well2] {
 	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
 
 	override def toString = id
-	override def compare(that: Well2) = id.compare(that.id)
+	override def compare(that: Well) = id.compare(that.id)
 }
 
 /**
@@ -57,15 +57,15 @@ case class WellPosition(
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-) extends Well2
+) extends Well
 
-object Well2 {
-	/** Case a [[roboliq.core.PlateWell]] `o` to a [[roboliq.core.Well2]]. */
-	def apply(o: PlateWell): Well2 = {
+object Well {
+	/** Case a [[roboliq.core.PlateWell]] `o` to a [[roboliq.core.Well]]. */
+	def apply(o: PlateWell): Well = {
 		o
 	}
 	/** Get the [[roboliq.core.WellPosition]] object for a given tube `o`. */
-	def forTube(o: TubeState, query: StateQuery): Result[Well2] = {
+	def forTube(o: TubeState, query: StateQuery): Result[Well] = {
 		//println("WellPosition.forTube: "+o.obj.id)
 		for { plate <- query.findPlate(o.idPlate) }
 		yield {
@@ -91,7 +91,7 @@ class PlateWell(
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-) extends Vessel(id) with Well2 {
+) extends Vessel(id) with Well {
 	@deprecated("use Well.wellState() instead", "0.1")
 	def state(states: StateMap): WellState = states.findWellState(id) match {
 		case Success(st) => st

@@ -214,7 +214,7 @@ case class AspirateToken(
 
 case class SpirateTokenItem(
 	val tip: Tip,
-	val well: Well2,
+	val well: Well,
 	val volume: LiquidVolume,
 	val policy: String
 ) extends HasTipWell
@@ -222,13 +222,13 @@ case class SpirateTokenItem(
 object SpirateTokenItem {
 	
 	def toAspriateDocString(item_l: Seq[SpirateTokenItem], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
-		def getWellsString(l: Iterable[Well2]): String =
+		def getWellsString(l: Iterable[Well]): String =
 			WellSpecParser.toString(l.toList, ob, ", ")
 		
 		// All wells
 		val well_l = item_l.map(_.well).toList
 		
-		val well_? : Option[Well2] = well_l.distinct match {
+		val well_? : Option[Well] = well_l.distinct match {
 			case well :: Nil => Some(well)
 			case _ => None
 		}
@@ -282,14 +282,14 @@ object SpirateTokenItem {
 	}
 	
 	def toDispenseDocString(item_l: Seq[SpirateTokenItem], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
-		def getWellsString(l: Iterable[Well2]): String =
+		def getWellsString(l: Iterable[Well]): String =
 			WellSpecParser.toString(l.toList, ob, ", ")
 		
 		// All wells
 		val well_l = item_l.map(_.well).toList
 		val tip_l = item_l.map(_.tip).toList
 		
-		val well_? : Option[Well2] = well_l.distinct match {
+		val well_? : Option[Well] = well_l.distinct match {
 			case well :: Nil => Some(well)
 			case _ => None
 		}

@@ -159,7 +159,7 @@ class PcrCmdHandler extends CmdHandlerA[PcrCmdBean] {
 	}
 
 	private class PcrProductItemL5(
-		val src: List[Well2],
+		val src: List[Well],
 		val amt0: LiquidAmount,
 		val amt1: LiquidAmount
 	)
@@ -180,7 +180,7 @@ class PcrCmdHandler extends CmdHandlerA[PcrCmdBean] {
 			new PcrProductL5(template, forwardPrimer, backwardPrimer)
 		}
 	}
-	private def getPcrProductItem5(src: List[Well2], mixItem6: SubSrcConc, vd: ValueDatabase): Option[PcrProductItemL5] = {
+	private def getPcrProductItem5(src: List[Well], mixItem6: SubSrcConc, vd: ValueDatabase): Option[PcrProductItemL5] = {
 		for {
 			amt0 <- mixItem6.amt0.getValue(vd)
 			amt1 <- mixItem6.amt1.getValue(vd)
@@ -189,12 +189,12 @@ class PcrCmdHandler extends CmdHandlerA[PcrCmdBean] {
 		}
 	}
 	private class MixItemL5(
-		val src: List[Well2],
-		val dest: Well2,
+		val src: List[Well],
+		val dest: Well,
 		val vol: LiquidVolume
 	)
 	// Get the mix items for the given product
-	private def getMixItems5(product5: PcrProductL5, dest: Well2, mixSpec6: PcrMixSpec, vol: LiquidVolume, vom: ValueToObjectMap): Option[List[MixItemL5]] = {
+	private def getMixItems5(product5: PcrProductL5, dest: Well, mixSpec6: PcrMixSpec, vol: LiquidVolume, vom: ValueToObjectMap): Option[List[MixItemL5]] = {
 		def getVol(amt0: LiquidAmount, amt1: LiquidAmount): Option[LiquidVolume] = {
 			amt1 match {
 				case LiquidAmountByVolume(vol1) => Some(vol1)
@@ -374,9 +374,9 @@ class PcrProductBean {
 }
 
 class PcrProduct(
-	val template: SubSrcConc, //List[Well2],
-	val forwardPrimer: List[Well2],
-	val backwardPrimer: List[Well2]
+	val template: SubSrcConc, //List[Well],
+	val forwardPrimer: List[Well],
+	val backwardPrimer: List[Well]
 )
 
 /*object PcrProduct {
@@ -412,7 +412,7 @@ class PcrMixSpecItemBean {
 
 class SubSrcConc(
 	val substance: Substance,
-	val src: List[Well2],
+	val src: List[Well],
 	val concSrc: BigDecimal,
 	val concDest: BigDecimal
 )
@@ -521,13 +521,13 @@ object PcrMixSpec {
 
 private class Item(
 	val substance: Substance,
-	//val src: List[Well2],
-	val dest: Well2,
+	//val src: List[Well],
+	val dest: Well,
 	val volume: LiquidVolume
 )
 
 private object Item {
-	def from(dest: Well2, product: PcrProductBean, mixSpec: PcrMixSpecBean, volumeSample: LiquidVolume, water: Substance, query: StateQuery): Result[List[Item]] = {
+	def from(dest: Well, product: PcrProductBean, mixSpec: PcrMixSpecBean, volumeSample: LiquidVolume, water: Substance, query: StateQuery): Result[List[Item]] = {
 		for {
 			buffer <- SubSrcConc.fromBean(mixSpec.buffer, query)
 			dntp <- SubSrcConc.fromBean(mixSpec.dntp, query)
@@ -541,7 +541,7 @@ private object Item {
 		} yield itemWater :: ℓitem1
 	}
 	
-	def apply(dest: Well2, ssc: SubSrcConc, volumeSample: LiquidVolume): Result[Item] = {
+	def apply(dest: Well, ssc: SubSrcConc, volumeSample: LiquidVolume): Result[Item] = {
 		for {
 			_ <- Result.assert(ssc.concSrc >= ssc.concDest, "the concentration of the source reagent must not be higher than desired target concentration")
 			volume = volumeSample * (ssc.concDest / ssc.concSrc)
@@ -552,7 +552,7 @@ private object Item {
 		}
 	}
 	
-	private def createWaterItem(dest: Well2, water: Substance, ℓitem1: List[Item], volumeSample: LiquidVolume): Result[Item] = {
+	private def createWaterItem(dest: Well, water: Substance, ℓitem1: List[Item], volumeSample: LiquidVolume): Result[Item] = {
 		// Volume of the other items so far
 		val volume1 = ℓitem1.foldLeft(LiquidVolume.empty)((acc, item) => acc + item.volume)
 		val volumeWater = volumeSample - volume1
@@ -563,7 +563,7 @@ private object Item {
 	}
 	
 	/*def apply(
-		dest: Well2,
+		dest: Well,
 		product: PcrProduct,
 		mixSpec: PcrMixSpec,
 		volumeSample: LiquidVolume,
@@ -584,7 +584,7 @@ private object Item {
 		}
 	}
 	
-	private def makeOne(dest: Well2, mixSpecItem: SubSrcConc, volumeSample: LiquidVolume, query: StateQuery): Result[Item] = {
+	private def makeOne(dest: Well, mixSpecItem: SubSrcConc, volumeSample: LiquidVolume, query: StateQuery): Result[Item] = {
 		val src = mixSpecItem.src
 		val src0 = src.head
 		for {
@@ -598,7 +598,7 @@ private object Item {
 		}
 	}
 	
-	private def makeOne(dest: Well2, src: List[Well2], substance: Substance, conc: BigDecimal, volumeSample: LiquidVolume, query: StateQuery): Result[Item] = {
+	private def makeOne(dest: Well, src: List[Well], substance: Substance, conc: BigDecimal, volumeSample: LiquidVolume, query: StateQuery): Result[Item] = {
 		val src0 = src.head
 		for {
 			srcState <- query.findWellState(src0.id)

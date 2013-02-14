@@ -8,7 +8,7 @@ import scala.collection.immutable.SortedSet
  */
 class WellGroupPlate private[core] (
 	query: StateQuery,
-	set: SortedSet[Well2],
+	set: SortedSet[Well],
 	val idPlate: String,
 	iCol_? : Option[Int] = None,
 	bAdjacent: Boolean = false
@@ -23,7 +23,7 @@ class WellGroupPlate private[core] (
  */
 class WellGroupCol private[core] (
 	query: StateQuery,
-	set: SortedSet[Well2],
+	set: SortedSet[Well],
 	idPlate: String,
 	val iCol: Int,
 	bAdjacent: Boolean = false
@@ -38,7 +38,7 @@ class WellGroupCol private[core] (
  */
 class WellGroupAdjacent private[core] (
 	query: StateQuery,
-	set: SortedSet[Well2],
+	set: SortedSet[Well],
 	idPlate: String,
 	iCol: Int
 ) extends WellGroupCol(query, set, idPlate, iCol, true) {
@@ -53,12 +53,12 @@ class WellGroupAdjacent private[core] (
  */
 sealed class WellGroup private[core] (
 	query: StateQuery,
-	val set: SortedSet[Well2],
+	val set: SortedSet[Well],
 	val idPlate_? : Option[String],
 	val iCol_? : Option[Int],
 	val bAdjacent: Boolean
 ) {
-	def add(well: Well2): WellGroup = {
+	def add(well: Well): WellGroup = {
 		query.findWellPosition(well.id) match {
 			case Error(_) =>
 				println("WARNING: WellGroup.add: no position found for `"+well.id+"`")
@@ -91,7 +91,7 @@ sealed class WellGroup private[core] (
 		}
 	}
 	
-	def +(well: Well2): WellGroup = add(well)
+	def +(well: Well): WellGroup = add(well)
 
 	def splitByPlate(): Seq[WellGroup] = {
 		idPlate_? match {
@@ -140,7 +140,7 @@ sealed class WellGroup private[core] (
 object WellGroup {
 	def createEmpty(query: StateQuery) = new WellGroup(query, SortedSet(), None, None, false)
 	
-	def apply(query: StateQuery, well: Well2): WellGroup = createEmpty(query).add(well)
+	def apply(query: StateQuery, well: Well): WellGroup = createEmpty(query).add(well)
 	
-	def apply(query: StateQuery, wells: Iterable[Well2]): WellGroup = wells.foldLeft(createEmpty(query)) { (acc, well) => acc.add(well) }
+	def apply(query: StateQuery, wells: Iterable[Well]): WellGroup = wells.foldLeft(createEmpty(query)) { (acc, well) => acc.add(well) }
 }

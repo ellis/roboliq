@@ -23,11 +23,11 @@ class ObjBase(bb: BeanBase) {
 	private val m_mapSubstance = new HashMap[String, Substance]
 	private val m_mapPlate = new HashMap[String, Plate]
 	private val m_mapTube = new HashMap[String, Tube]
-	private val m_mapWell = new HashMap[String, PlateWell]
+	private val m_mapPlateWell = new HashMap[String, PlateWell]
 	private val m_mapLiquid = new HashMap[String, Liquid]
 	
 	val m_mapSubstanceToVessels = new HashMap[String, List[String]]
-	val m_mapWell2 = new HashMap[String, Well2]
+	val m_mapWell2 = new HashMap[String, Well]
 	
 	private var builder: StateBuilder = null
 
@@ -39,9 +39,9 @@ class ObjBase(bb: BeanBase) {
 	/** List of plates which have been loaded from the database. */
 	def loadedPlates: Iterable[Plate] = m_mapPlate.values
 	/** List of tubes which have been loaded from the database. */
-	def loadedTubes: Iterable[Tube] = m_mapWell.values.collect({case o: Tube => o})
+	def loadedTubes: Iterable[Tube] = m_mapTube.values
 	/** List of wells on plates which have been loaded from the database. */
-	def loadedPlateWells: Iterable[PlateWell] = m_mapWell.values 
+	def loadedPlateWells: Iterable[PlateWell] = m_mapPlateWell.values 
 	
 	/** List of tip models in the database. */
 	def findAllTipModels(): Result[List[TipModel]] = {
@@ -211,7 +211,7 @@ class ObjBase(bb: BeanBase) {
 	
 	/** Find well with ID `id`. */
 	def findWell(id: String): Result[PlateWell] = {
-		m_mapWell.get(id) match {
+		m_mapPlateWell.get(id) match {
 			case Some(obj) => Success(obj)
 			case None => createWell(id)
 		}
@@ -225,7 +225,7 @@ class ObjBase(bb: BeanBase) {
 			None
 		}
 		else {
-			m_mapWell.get(id) match {
+			m_mapPlateWell.get(id) match {
 				case Some(obj) => Some(obj)
 				case None =>
 					createWell(id) match {
@@ -281,14 +281,14 @@ class ObjBase(bb: BeanBase) {
 				iCol = wellSpec.rc.col,
 				indexName = wellSpec.rc.toString
 			)
-			m_mapWell(id) = well
+			m_mapPlateWell(id) = well
 			m_mapWell2(id) = well
 			well
 		}
 	}
 	
 	/** Find well with ID `id`. */
-	def findWell2(id: String): Result[Well2] = {
+	def findWell2(id: String): Result[Well] = {
 		m_mapWell2.get(id) match {
 			case None => Error("Well information not available for id `"+id+"`")
 			case Some(well2) => Success(well2)
@@ -303,7 +303,7 @@ class ObjBase(bb: BeanBase) {
 	 * 
 	 * @see findAllIdsContainingSubstance()
 	 */
-	def findWell2List(id: String): Result[List[Well2]] = {
+	def findWell2List(id: String): Result[List[Well]] = {
 		val ℓid = m_mapSubstanceToVessels.getOrElse(id, List(id))
 		Result.mapOver(ℓid)(findWell2)
 	}
@@ -461,6 +461,6 @@ class ObjBase(bb: BeanBase) {
 	def setInitialTubeLocation(tube: Tube, location: String, row: Int, col: Int) = {
 		TubeLocationEventBean(tube, location, row, col).update(builder)
 		//println("stateA: "+ob.findWellState(tube.id))
-		m_mapWell2(tube.id) = Well2.forTube(findWellState(tube.id).get.asInstanceOf[TubeState], builder).get
+		m_mapWell2(tube.id) = Well.forTube(findWellState(tube.id).get.asInstanceOf[TubeState], builder).get
 	}
 }

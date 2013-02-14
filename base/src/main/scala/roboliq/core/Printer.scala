@@ -15,7 +15,7 @@ object Printer {
 		}
 	}
 
-	def getWellsDebugString(wells: Iterable[Well2]): String = {
+	def getWellsDebugString(wells: Iterable[Well]): String = {
 		/*
 		val sorted = wells.toSeq//.sortBy(identity)
 		val mapPlateToWell = sorted.groupBy(_.holder)
@@ -24,7 +24,7 @@ object Printer {
 			plate.sLabel + ":" + lsWells.mkString(",")
 		}
 		*/
-		val rrWell = wells.toList.foldLeft(List[List[Well2]]())((acc, well) => acc match {
+		val rrWell = wells.toList.foldLeft(List[List[Well]]())((acc, well) => acc match {
 			case Nil => List(List(well))
 			case (curr @ (prev :: rest)) :: others =>
 				(well, prev) match {

@@ -154,9 +154,9 @@ object WellSpecParser {
 	/**
 	 * Given a list of wells `lWell`, return a string representation.
 	 */
-	def toString(lWell: List[Well2], ob: ObjBase, sep: String): String = {
+	def toString(lWell: List[Well], ob: ObjBase, sep: String): String = {
 		// Split list by plate
-		def partitionByPlate(lWell: List[Well2], accR: List[List[Well2]]): List[List[Well2]] = {
+		def partitionByPlate(lWell: List[Well], accR: List[List[Well]]): List[List[Well]] = {
 			lWell match {
 				case Nil => accR.reverse
 				case well0 :: _ =>
@@ -178,7 +178,7 @@ object WellSpecParser {
 				case Nil => ""
 				case List(well) => well.id
 				case well0 :: _ =>
-					def step(lWell: List[Well2], accR: List[String]): List[String] = {
+					def step(lWell: List[Well], accR: List[String]): List[String] = {
 						if (lWell.isEmpty)
 							accR.reverse
 						else {
@@ -214,8 +214,8 @@ object WellSpecParser {
 		}).mkString(sep)
 	}
 	
-	private def mergeVerticalLen(lWell: List[Well2]): Int = {
-		def expect(idPlate: String, index: Int, l: List[Well2], acc: Int): Int = {
+	private def mergeVerticalLen(lWell: List[Well]): Int = {
+		def expect(idPlate: String, index: Int, l: List[Well], acc: Int): Int = {
 			l match {
 				case Nil => acc
 				case well :: rest =>
@@ -228,8 +228,8 @@ object WellSpecParser {
 		expect(well0.idPlate, well0.index + 1, lWell.tail, 1)
 	}
 	
-	private def mergeHorizontalLen(lWell: List[Well2], ob: ObjBase): Int = {
-		def expect(l: List[Well2], acc: Int): Int = {
+	private def mergeHorizontalLen(lWell: List[Well], ob: ObjBase): Int = {
+		def expect(l: List[Well], acc: Int): Int = {
 			l match {
 				case Nil => acc
 				case x :: Nil => acc
@@ -260,21 +260,21 @@ object WellSpecParser {
 		expect(lWell, 1)
 	}
 	
-	private def mergeRepeatLen(lWell: List[Well2]): Int = {
+	private def mergeRepeatLen(lWell: List[Well]): Int = {
 		val well0 = lWell.head
 		lWell.tail.takeWhile(well => well.index == well0.index).length + 1
 	}
 	
-	private def mergeVerticalString(lWell: List[Well2]): String = {
+	private def mergeVerticalString(lWell: List[Well]): String = {
 		lWell.head.indexName+" d "+lWell.last.indexName
 	}
 	
-	private def mergeHorizontalString(lWell: List[Well2]): String = {
+	private def mergeHorizontalString(lWell: List[Well]): String = {
 		val well0 = lWell.head
 		well0.indexName+" r "+lWell.last.indexName
 	}
 	
-	private def mergeRepeatString(lWell: List[Well2]): String = {
+	private def mergeRepeatString(lWell: List[Well]): String = {
 		val well0 = lWell.head
 		well0.indexName+"*"+lWell.length
 	}

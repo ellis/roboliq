@@ -19,7 +19,7 @@ import scala.reflect.BeanProperty
 case class TipState(
 	val conf: Tip,
 	val model_? : Option[TipModel],
-	val src_? : Option[Well2],
+	val src_? : Option[Well],
 	val liquid: Liquid,
 	val nVolume: LiquidVolume,
 	val contamInside: Set[Contaminant.Value], 
@@ -74,7 +74,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		//println("tip "+thisObj.index+": sType = "+state.model_?)
 	}
 	
-	def aspirate(src: Well2, liquid2: Liquid, nVolume2: LiquidVolume) {
+	def aspirate(src: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
 		val nVolumeNew = st.nVolume + nVolume2
 		set(new TipState(
@@ -146,7 +146,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		))
 	}
 	
-	def mix(well: Well2, liquid2: Liquid, nVolume2: LiquidVolume) {
+	def mix(well: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
 		aspirate(well, liquid2, nVolume2)
 		dispenseIn(nVolume2, liquid2)
 	}
@@ -194,7 +194,7 @@ class TipAspirateEventBean extends TipEventBean {
 /** Factory object for [[roboliq.core.TipAspirateEventBean]]. */
 object TipAspirateEventBean {
 	/** Event to aspirate `volume` from `src` with `tip`. */
-	def apply(tip: Tip, src: Well2, volume: LiquidVolume): TipAspirateEventBean = {
+	def apply(tip: Tip, src: Well, volume: LiquidVolume): TipAspirateEventBean = {
 		val bean = new TipAspirateEventBean
 		bean.obj = tip.id
 		bean.src = src.id
@@ -265,7 +265,7 @@ class TipDispenseEventBean extends TipEventBean {
 /** Factory object for [[roboliq.core.TipDispenseEventBean]]. */
 object TipDispenseEventBean {
 	/** Event to dispense `volume` from `tip` to `dest` at `pos`. */
-	def apply(tip: Tip, dest: Well2, volume: LiquidVolume, pos: PipettePosition.Value): TipDispenseEventBean = {
+	def apply(tip: Tip, dest: Well, volume: LiquidVolume, pos: PipettePosition.Value): TipDispenseEventBean = {
 		val bean = new TipDispenseEventBean
 		bean.obj = tip.id
 		bean.dest = dest.id

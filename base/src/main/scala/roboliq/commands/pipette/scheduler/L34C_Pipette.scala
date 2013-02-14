@@ -27,7 +27,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 	}
 	
 	def toDocString(ob: ObjBase, states: RobotState): Tuple2[String, String] = {
-		def getWellsString(l: Iterable[Well2]): String =
+		def getWellsString(l: Iterable[Well]): String =
 			WellSpecParser.toString(l.toList, ob, ", ")
 		
 		// All lists of sources
@@ -35,7 +35,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 		// First source of each item
 		val lSrc0 = llSrc.map(_.head)
 		
-		val src_? : Option[Well2] = {
+		val src_? : Option[Well] = {
 			val lSrcDistinct = lSrc0.distinct
 			if (lSrcDistinct.size == 1)
 				Some(lSrcDistinct.head)
@@ -47,7 +47,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 		val sSrcs = src_? match {
 			case Some(src) => src.id
 			case None =>
-				def step(llSrc: Seq[SortedSet[Well2]], accR: List[String]): String = {
+				def step(llSrc: Seq[SortedSet[Well]], accR: List[String]): String = {
 					if (llSrc.isEmpty)
 						accR.reverse.mkString(", ")
 					else if (llSrc.head.size > 1)
@@ -129,11 +129,11 @@ object PipetteCmd {
 		}
 		
 		def zipit(
-			ls: List[List[Well2]],
-			ld: List[Well2],
+			ls: List[List[Well]],
+			ld: List[Well],
 			lv: List[LiquidVolume],
-			acc: List[Tuple3[List[Well2], Well2, LiquidVolume]]
-		): List[Tuple3[List[Well2], Well2, LiquidVolume]] = {
+			acc: List[Tuple3[List[Well], Well, LiquidVolume]]
+		): List[Tuple3[List[Well], Well, LiquidVolume]] = {
 			//println("zipit:", ls, ld, lv)
 			val (s::ss, d::ds, v::vs) = (ls, ld, lv)
 			val sdv = (s, d, v)
@@ -203,8 +203,8 @@ object PipetteCmd {
 }
 
 case class Item(
-	val srcs: SortedSet[Well2],
-	val dest: Well2,
+	val srcs: SortedSet[Well],
+	val dest: Well,
 	val volume: LiquidVolume,
 	val premix_? : Option[MixSpec],
 	val postmix_? : Option[MixSpec]
