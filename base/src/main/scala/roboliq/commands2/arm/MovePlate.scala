@@ -19,7 +19,7 @@ case class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
-class MovePlateHandler extends CommandHandler("movePlate") {
+class MovePlateHandler extends CommandHandler("arm.movePlate") {
 	val fnargs = cmdAs[MovePlateCmd] { cmd =>
 		import cmd._
 		for {

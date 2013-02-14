@@ -94,6 +94,13 @@ abstract class RqFunctionHandler {
 	protected implicit def fnargsToRqReturn(fnargs: RqFunctionArgs) =
 		RqSuccess(List(RqItem_Function(fnargs)))
 	
+	protected implicit def tokenToItem(token: CmdToken) =
+		ComputationItem_Token(token)
+	
+	protected implicit def tokenToRqReturn(token: CmdToken) =
+		RqSuccess(List(ComputationItem_Token(token)))
+	
+
 	protected def handlerRequire[
 		A: Manifest
 	](

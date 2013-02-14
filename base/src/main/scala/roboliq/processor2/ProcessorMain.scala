@@ -81,15 +81,10 @@ object ApplicativeMain2 extends App {
 	
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
-	val cmd3 = JsonParser("""{ "cmd": "movePlate", "&plate": "P1", "&dest": "cooled2", "deviceId": "ROMA2" }""").asJsObject
+	val cmd3 = JsonParser("""{ "cmd": "arm.movePlate", "&plate": "P1", "&dest": "cooled2", "deviceId": "ROMA2" }""").asJsObject
 	//val cmd4 = JsonParser("""{ "cmd": "test", "description": "my command", "items": [{"&tip": "TIP1", "well": "P1(A1)", "volume": "50ul", "policy": "Wet"}]}""").asJsObject
 	val cmd4 = JsonParser("""{ "cmd": "test", "&tip": "TIP1"}""").asJsObject
 	
-	val h1 = new PrintCommandHandler
-	val h2 = new Print2CommandHandler
-	val h3 = new MovePlateHandler
-	val h4 = new TestCommandHandler
-
 	/*
 	case class B(name: String)
 	case class C(s: String, n: Integer, l: List[Integer])//, bs: List[B])
@@ -118,7 +113,13 @@ object ApplicativeMain2 extends App {
 	sys.exit()
 	*/
 	
-	val p = new ProcessorData(List(h1, h2, h3, h4))
+	val p = new ProcessorData(List(
+		new PrintCommandHandler,
+		new Print2CommandHandler,
+		new MovePlateHandler,
+		new roboliq.commands2.pipette.AspirateHandler,
+		new TestCommandHandler
+	))
 	
 	config.fields.foreach(pair => {
 		val (table, JsArray(elements)) = pair

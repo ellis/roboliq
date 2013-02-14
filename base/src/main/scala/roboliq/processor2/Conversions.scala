@@ -17,7 +17,10 @@ object ConversionsDirect {
 		import scala.reflect.runtime.{currentMirror => cm}
 
 		println("conv: "+jsval+", "+typ)
-		val ret = if (typ =:= typeOf[String]) {
+		// TODO: handle this by inspection somehow, so that the individual conversions
+		// don't need to be maintained here.
+		val ret =
+		if (typ =:= typeOf[String]) {
 			ConversionsDirect.toString(jsval)
 		}
 		else if (typ =:= typeOf[Int]) {
@@ -41,9 +44,9 @@ object ConversionsDirect {
 				case _ => RqError("!")
 			}
 		}
-		else if (typ <:< typeOf[LiquidVolume]) {
-			toVolume(jsval)
-		}
+		else if (typ <:< typeOf[LiquidVolume]) toVolume(jsval)
+		else if (typ <:< typeOf[PipettePosition.Value]) toPipettePosition(jsval)
+		else if (typ <:< typeOf[PipettePolicy]) toPipettePolicy(jsval)
 		else if (jsval.isInstanceOf[JsObject]) {
 			val jsobj = jsval.asJsObject
 			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
@@ -163,6 +166,28 @@ object ConversionsDirect {
 			wellVolume <- getVolume('wellVolume, jsobj)
 		} yield {
 			new PlateModel(id, rows, cols, wellVolume)
+		}
+	}
+	
+	def toPipettePosition(jsval: JsValue): RqResult[PipettePosition.Value] = {
+		for {
+			s <- toString(jsval)
+		} yield {
+			PipettePosition.withName(s)
+		}
+	}
+	
+	def toPipettePolicy(jsval: JsValue): RqResult[PipettePolicy] = {
+		jsval match {
+			case JsString(name) => RqSuccess(PipettePolicy.fromName(name))
+			case _ =>
+				for {
+					jsobj <- toJsObject(jsval)
+					id <- getString('id, jsobj)
+					pos <- getWith('pos, jsobj, toPipettePosition _)
+				} yield {
+					PipettePolicy(id, pos)
+				}
 		}
 	}
 	

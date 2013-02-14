@@ -12,14 +12,32 @@ import roboliq.commands.pipette.TipWellVolumePolicy
 
 case class AspirateCmd(
 	description: String,
-	items: List[SpirateCmdItem]
+	items: List[TipWellVolumePolicy] //FIXME: This should be TipWellVolumePolicyMixspec
 )
 
+case class AspirateToken(
+	val items: List[TipWellVolumePolicy]
+) extends CmdToken
+
+class AspirateHandler extends CommandHandler("pipetter.aspirate") {
+	val fnargs = cmdAs[AspirateCmd] { cmd =>
+		val events = cmd.items.flatMap(item => {
+			TipAspirateEventBean(item.tip, item.well, item.volume) ::
+			WellRemoveEventBean(item.well, item.volume) :: Nil
+		})
+		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
+		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
+		AspirateToken(cmd.items)
+	}
+}
+
+/*
 case class SpirateCmdItem(
 	tip: Tip,
-	well: String,
+	well: Well,
 	volume: LiquidVolume,
-	policy: String
+	policy: PipettePolicy,
+	x: TipWellVolumePolicy
 	//@BeanProperty var mixSpec: MixSpecBean = null
 	/*
 	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[TipWellVolumePolicy] = {
@@ -34,6 +52,7 @@ case class SpirateCmdItem(
 		}
 	}*/
 )
+*/
 /*
 class AspirateHandler extends CommandHandler("aspirate") {
 	import roboliq.processor2.{ConversionsDirect => D}
@@ -146,10 +165,7 @@ class AspirateHandler extends CommandHandler("aspirate") {
 		}
 	}
 }
-
-case class AspirateToken(
-	val items: List[TipWellVolumePolicy]
-) extends CmdToken
+*/
 
 object SpirateTokenItem {
 	
@@ -274,4 +290,3 @@ object SpirateTokenItem {
 		(doc, null)
 	}
 }
-*/
