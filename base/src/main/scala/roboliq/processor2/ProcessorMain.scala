@@ -58,19 +58,26 @@ class TestCommandHandler extends CommandHandler("test") {
  * - deal with states
  */
 object ApplicativeMain2 extends App {
-	val config = List[(String, JsValue)](
-		"tipModel" -> JsonParser("""{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" }"""),
-		"tipModel" -> JsonParser("""{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }"""),
-		
-		"tip" -> JsonParser("""{ "id": "TIP1", "index": 0, "model": "Standard 1000ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP2", "index": 1, "model": "Standard 1000ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP3", "index": 2, "model": "Standard 1000ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP4", "index": 3, "model": "Standard 1000ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP5", "index": 4, "model": "Standard 50ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP6", "index": 5, "model": "Standard 50ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP7", "index": 6, "model": "Standard 50ul" }"""),
-		"tip" -> JsonParser("""{ "id": "TIP8", "index": 7, "model": "Standard 50ul" }""")
-	)
+	//val config = List[(String, JsValue)](
+	//	"tipModel" -> JsonParser("""{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" }"""),
+	//	"tipModel" -> JsonParser("""{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }"""),
+	val config = JsonParser(
+"""{
+"tipModel": [
+	{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" },
+	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
+	],
+"tip": [
+	{ "id": "TIP1", "index": 0, "model": "Standard 1000ul" },
+	{ "id": "TIP2", "index": 1, "model": "Standard 1000ul" },
+	{ "id": "TIP3", "index": 2, "model": "Standard 1000ul" },
+	{ "id": "TIP4", "index": 3, "model": "Standard 1000ul" },
+	{ "id": "TIP5", "index": 4, "model": "Standard 50ul" },
+	{ "id": "TIP6", "index": 5, "model": "Standard 50ul" },
+	{ "id": "TIP7", "index": 6, "model": "Standard 50ul" },
+	{ "id": "TIP8", "index": 7, "model": "Standard 50ul" }
+	]
+}""").asJsObject
 	
 	val cmd1 = JsonParser("""{ "cmd": "print", "text": "Hello, World!" }""").asJsObject
 	val cmd2 = JsonParser("""{ "cmd": "print2", "number": 3 }""").asJsObject
@@ -113,12 +120,14 @@ object ApplicativeMain2 extends App {
 	
 	val p = new ProcessorData(List(h1, h2, h3, h4))
 	
-	config.foreach(pair => {
-		val (table, jsval) = pair
-		val jsobj = jsval.asJsObject
-		val key = jsobj.fields("id").asInstanceOf[JsString].value
-		val tkp = TKP(table, key, Nil)
-		p.setEntity(tkp, Nil, jsval)
+	config.fields.foreach(pair => {
+		val (table, JsArray(elements)) = pair
+		elements.foreach(jsval => {
+			val jsobj = jsval.asJsObject
+			val key = jsobj.fields("id").asInstanceOf[JsString].value
+			val tkp = TKP(table, key, Nil)
+			p.setEntity(tkp, Nil, jsval)
+		})
 	})
 	
 	p.setEntity(TKP("plateModel", "PCR", Nil), Nil, JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }"""))
