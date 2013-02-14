@@ -91,6 +91,8 @@ class ProcessorData(
 	val internalMessage_l = new ArrayBuffer[RqResult[Unit]]
 	//val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
 	//val conversionMessage_m = new HashMap[KeyClass, RqResult[Unit]]
+	val plateWell_m = new HashMap[String, PlateWell]
+	val well_m = new HashMap[String, Well]
 	
 	val conversion_m = new HashMap[Type, RqFunctionHandler]
 	conversion_m(ru.typeOf[String]) = Conversions.asString
@@ -160,6 +162,7 @@ class ProcessorData(
 		fnargs.copy(arg_l = concretizeArgs(fnargs.arg_l, contextKey_?, parent_?, index))
 	}
 
+	// REFACTOR: Remove this, if the functionality is now is Node
 	private def concretizeArgs(
 		kco_l: List[KeyClassOpt],
 		contextKey_? : Option[TKP],
@@ -257,7 +260,7 @@ class ProcessorData(
 			case None =>
 				// If this is an Option[A], create a conversion from A to Option[A],
 				// then recurse into creating a conversion for A.
-				if (kc.clazz.typeSymbol.name.decoded == "Option") {
+				if (kc.clazz <:< ru.typeOf[Option[Any]]) {
 					// type parameter of option (e.g, if Option[String], clazz2 will be String)
 					val clazz2 = kc.clazz.asInstanceOf[ru.TypeRefApi].args.head
 					val kc2 = kc.copy(clazz = clazz2)
@@ -270,6 +273,45 @@ class ProcessorData(
 					val node2 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc)
 					// REFACTOR: Can the recursion be removed, since registerNode will be called on node2 soon anyway
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
+				}
+				// Create well objects, which are not stored as JsValue entities
+				else if (kc.clazz <:< ru.typeOf[Well]) {
+					WellSpecParser.parse(kc.key.key) match {
+						case roboliq.core.Error(l) =>
+							internalMessage_l += RqError(l.toList, Nil)
+							Nil
+						case roboliq.core.Success(l) =>
+							val wellInfo_l = l.flatMap(pair => {
+								val (plateId, wellSpec_l) = pair
+								wellSpec_l.flatMap(_ match {
+									case wellSpec: WellSpecOne =>
+										Some(plateId -> wellSpec.rc)
+									case _ =>
+										internalMessage_l += RqError("Expected wellSpec to be WellSpecOne")
+										None
+								})
+							})
+							val arg_l = wellInfo_l.map(pair =>
+								KeyClassOpt(KeyClass(TKP("plate", pair._1, Nil), ru.typeOf[Plate]), false)
+							)
+							val fn = (l: List[Object]) => {
+								val well_l = (l.asInstanceOf[List[Plate]] zip wellInfo_l).map(pair => {
+									val (plate, (_, rc)) = pair
+									val well = new WellPosition(
+										id = WellSpecParser.wellId(plate, rc.row, rc.col),
+										idPlate = plate.id,
+										index = WellSpecParser.wellIndex(plate, rc.row, rc.col),
+										iRow = rc.row,
+										iCol = rc.col,
+										indexName = WellSpecParser.wellIndexName(plate.nRows, plate.nCols, rc.row, rc.col)
+									)
+									ConversionItem_Object(well)
+								})
+								RqSuccess(well_l)
+							}
+							val fnargs = RqFunctionArgs(fn, arg_l)
+							List(Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc))
+					}
 				}
 				else {
 					//val contextKey_? = node.contextKey_?
@@ -308,7 +350,7 @@ class ProcessorData(
 							val fnargs = RqFunctionArgs(fn, arg_l)
 							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
 							// FIXME: should put this message in a map so it only shows up once
-							internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
+							internalMessage_l += RqError[Unit](s"No converter registered for ${kco.kc.id}, required by ${node.id}")
 							Nil
 					}
 				}

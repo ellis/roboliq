@@ -42,6 +42,7 @@ object PlateModel {
 	}
 
 	/** Get a row/column representation of the index of the a well. */
+	@deprecated("use WellSpecParser.wellIndexName() instead", "0.1")
 	def wellIndexName(nRows: Int, nCols: Int, iWell: Int): String = {
 		if (nCols == 1) {
 			if (nRows == 1) {

@@ -141,7 +141,7 @@ object WellSpecParser {
 	 * Parse `input` as a string of plates and wells,
 	 * and return a list of tuples of referenced plate ID and the wells referenced on those plate.
 	 */
-	def parse(input: String): roboliq.core.Result[List[Tuple2[String, List[WellSpec]]]] =
+	def parse(input: String): roboliq.core.Result[List[(String, List[WellSpec])]] =
 		WellSpecParser0.parse(input)
 	
 	/**
@@ -303,4 +303,36 @@ object WellSpecParser {
 		}
 	}
 	*/
+	
+	/** Get a row/column representation of the index of the a well. */
+	def wellIndexName(nRows: Int, nCols: Int, iRow: Int, iCol: Int): String = {
+		if (nCols == 1) {
+			if (nRows == 1) "" else (iRow + 1).toString
+		}
+		else if (nRows == 1) {
+			(iCol + 1).toString
+		}
+		else {
+			(iRow + 'A').asInstanceOf[Char].toString + ("%02d".format(iCol + 1))
+		}
+	}
+
+	/** Get a row/column representation of the index of the a well. */
+	def wellIndexName(nRows: Int, nCols: Int, iWell: Int): String = {
+		wellIndexName(nRows, nCols, iWell % nRows, iWell / nRows)
+	}
+	
+	/** Get a row/column representation of the index of the a well. */
+	def wellId(plate: Plate, iWell: Int): String = {
+		s"${plate.id}(${wellIndexName(plate.nRows, plate.nCols, iWell)})"
+	}
+
+	/** Get a row/column representation of the index of the a well. */
+	def wellId(plate: Plate, iRow: Int, iCol: Int): String = {
+		s"${plate.id}(${wellIndexName(plate.nRows, plate.nCols, iRow, iCol)})"
+	}
+
+	def wellIndex(plate: Plate, iRow: Int, iCol: Int): Int = {
+		iCol + iRow * plate.nCols
+	}
 }
