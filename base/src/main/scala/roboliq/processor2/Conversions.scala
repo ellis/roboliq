@@ -11,6 +11,61 @@ import RqPimper._
 
 
 object ConversionsDirect {
+	
+	def conv(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
+		import scala.reflect.runtime.universe._
+		import scala.reflect.runtime.{currentMirror => cm}
+
+		println("conv: "+jsval+", "+typ)
+		val ret = if (typ =:= typeOf[String]) {
+			ConversionsDirect.toString(jsval)
+		}
+		else if (typ =:= typeOf[Int]) {
+			jsval match {
+				case JsNumber(v) => RqSuccess(v.toInt)
+				case _ => RqError("expected JsNumber")
+			}
+		}
+		else if (typ =:= typeOf[Integer]) {
+			toInteger(jsval)
+		}
+		else if (typ <:< typeOf[List[Any]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			jsval match {
+				case JsArray(v) =>
+					RqResult.toResultOfList(v.map(jsval => conv(jsval, typ2)))
+				case _ => RqError("!")
+			}
+		}
+		else if (typ <:< typeOf[LiquidVolume]) {
+			toVolume(jsval)
+		}
+		else if (jsval.isInstanceOf[JsObject]) {
+			val jsobj = jsval.asJsObject
+			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
+			val p0_l = ctor.paramss(0)
+			val p_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
+			for {
+				arg_l <- RqResult.toResultOfList(p_l.map(pair => {
+					val (name, typ2) = pair
+					jsobj.fields.get(name) match {
+						case Some(jsval2) => conv(jsval2, typ2)
+						case None => RqError(s"missing field `$name`")
+					}
+				}))
+			} yield {
+				val c = typ.typeSymbol.asClass
+				val mm = cm.reflectClass(c).reflectConstructor(ctor)
+				mm(arg_l : _*)
+			}
+		}
+		else {
+			RqError("Unhandled type")
+		}
+		println(ret)
+		ret
+	}
+
 	def toJsValue(jsval: JsValue): RqResult[JsValue] =
 		RqSuccess(jsval)
 	

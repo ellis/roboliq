@@ -303,6 +303,18 @@ abstract class RqFunctionHandler {
 	protected def lookupPlateState(id: String): RequireItem[PlateState] = RequireItem[PlateState](TKP("plateState", id, Nil))
 	protected def lookupPlateState(symbol: Symbol): RequireItem[PlateState] =
 		lookup(symbol, lookupPlateState _)
+	
+	protected def cmdAs[A <: Object : TypeTag](fn: A => RqReturn): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](RequireItem[JsValue](TKP("cmd", "$", Nil)))
+		val fn0: RqFunction = (l: List[Object]) => l match {
+			case List(jsval: JsValue) =>
+				val typ = ru.typeTag[A].tpe
+				ConversionsDirect.conv(jsval, typ).flatMap(o => fn(o.asInstanceOf[A]))
+			case _ =>
+				RqError("Expected JsValue")
+		}
+		RqFunctionArgs(fn0, arg_l)
+	}
 		
 	implicit class SymbolWrapper(symbol: Symbol) {
 		def as[A: TypeTag]: RequireItem[A] = RequireItem[A](TKP("cmd", "$", List(symbol.name)))

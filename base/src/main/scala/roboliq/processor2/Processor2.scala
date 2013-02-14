@@ -11,6 +11,7 @@ import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.TypeTag
 import scalaz._
+import spray.json.JsArray
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
@@ -716,6 +717,29 @@ object ApplicativeMain2 extends App {
 	val h3 = new MovePlateHandler
 	val h4 = new TestCommandHandler
 
+	case class B(name: String)
+	case class C(s: String, n: Integer, l: List[Integer])//, bs: List[B])
+	case class D(bs: List[B])
+	case class E(s: String, n: Integer, l: List[Integer], bs: List[B])
+	//{
+		import scala.reflect.runtime.universe._
+		import scala.reflect.runtime.{currentMirror => cm}
+
+	import ConversionsDirect.conv
+		
+		println(conv(JsString("hello"), typeOf[String]))
+		println(conv(JsonParser("""["a", "b", "c"]"""), typeOf[List[String]]))
+		println(conv(JsonParser("""[1, 2, 3]"""), typeOf[List[Integer]]))
+		println(conv(JsonParser("""[1, 2, 3]"""), typeOf[List[Int]]))
+		println(conv(JsonParser("""{"name": "Ellis"}"""), typeOf[B]))
+		println(conv(JsonParser("""{"s": "String", "n": 42, "l": [1,2,3]}"""), typeOf[C]))
+		println(conv(JsonParser("""{"bs": []}"""), typeOf[D]))
+		println(conv(JsonParser("""{"s": "String", "n": 42, "l": [1,2,3], "bs": []}"""), typeOf[E]))
+		println(conv(JsonParser("""{"s": "String", "n": 42, "l": [1,2,3], "bs": [{"name": "Howard"}]}"""), typeOf[E]))
+		println(conv(JsonParser("""{"description": "my command", "items": [{"tip": "TIP1", "well": "P1(A1)", "volume": "50ul", "policy": "Wet"}]}"""), typeOf[roboliq.commands2.pipette.AspirateCmdBean]))
+	//}
+	sys.exit()
+	
 	val p = new ProcessorData(List(h1, h2, h3, h4))
 	
 	p.setEntity(TKP("plateModel", "PCR", Nil), Nil, JsonParser("""{ "id": "PCR", "rows": 8, "cols": 12, "wellVolume": "100ul" }"""))

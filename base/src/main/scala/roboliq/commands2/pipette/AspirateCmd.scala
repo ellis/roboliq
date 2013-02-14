@@ -1,23 +1,82 @@
-/*package roboliq.commands2.pipette
+package roboliq.commands2.pipette
 
 import scala.reflect.runtime.{universe => ru}
 import roboliq.core._
 import RqPimper._
 import roboliq.processor2._
-
 import scala.collection.JavaConversions._
 import scala.Option.option2Iterable
+import spray.json._
+import roboliq.commands.pipette.TipWellVolumePolicy
 
 
-class AspirateCmdBean extends CmdBean {
-	@BeanProperty var description: String = null
-	@BeanProperty var items: java.util.List[SpirateCmdItemBean] = null
-}
+case class AspirateCmdBean(
+	description: String,
+	items: List[SpirateCmdItemBean]
+)
 
-class AspirateHandler extends CommandHandler {
+case class SpirateCmdItemBean(
+	tip: String,
+	well: String,
+	volume: LiquidVolume,
+	policy: String
+	//@BeanProperty var mixSpec: MixSpecBean = null
+	/*
+	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[TipWellVolumePolicy] = {
+		node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
+		if (node.getErrorCount != 0)
+			return Error(Nil)
+		for {
+			tipObj <- ob.findTip(tip)
+			wellObj <- ob.findWell2(well)
+		} yield {
+			new TipWellVolumePolicy(tipObj, wellObj, LiquidVolume.l(volume), PipettePolicy.fromName(policy))
+		}
+	}*/
+)
+/*
+
+class AspirateHandler extends CommandHandler("aspirate") {
 	import roboliq.processor2.{ConversionsDirect => D}
 
-	val cmd_l = List[String]("aspirate")
+	val fnargs = fnRequire(
+		'description.as[String],
+		'items.as[JsValue]
+	) { (description, items0) =>
+		items0 match {
+			case JsArray(elements) =>
+				
+			case _ => RqError("expected JsArray")
+		}
+	}
+	
+	private def toTwvp(jsval: JsValue): RqResult[TipWellVolumePolicy] = {
+		for {
+			jsobj <- D.toJsObject(jsval)
+			id <- D.getString('tip, jsobj)
+			plateModelIds <- D.getStringList('plateModels, jsobj)
+			cooled <- D.getBoolean('cooled, jsobj)
+		} yield {
+		
+	}
+	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[TipWellVolumePolicy] = {
+		node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
+		if (node.getErrorCount != 0)
+			return Error(Nil)
+		for {
+			tipObj <- ob.findTip(tip)
+			wellObj <- ob.findWell2(well)
+		} yield {
+			new TipWellVolumePolicy(tipObj, wellObj, LiquidVolume.l(volume), PipettePolicy.fromName(policy))
+		}
+	}
+
+	@BeanProperty var tip: String = null
+	@BeanProperty var well: String = null
+	/** Volume in liters. */
+	@BeanProperty var volume: java.math.BigDecimal = null
+	@BeanProperty var policy: String = null
+	@BeanProperty var mixSpec: MixSpecBean = null
 
 	def getResult = {
 		handlerRequire (
@@ -92,27 +151,6 @@ class AspirateHandler extends CommandHandler {
 			})
 			val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(lItem, ctx.ob, ctx.states)
 			Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
-		}
-	}
-}
-
-class SpirateCmdItemBean {
-	@BeanProperty var tip: String = null
-	@BeanProperty var well: String = null
-	/** Volume in liters. */
-	@BeanProperty var volume: java.math.BigDecimal = null
-	@BeanProperty var policy: String = null
-	@BeanProperty var mixSpec: MixSpecBean = null
-	
-	def toTokenItem(ob: ObjBase, node: CmdNodeBean): Result[TipWellVolumePolicy] = {
-		node.checkPropertyNonNull_?(this, "tip", "well", "volume", "policy")
-		if (node.getErrorCount != 0)
-			return Error(Nil)
-		for {
-			tipObj <- ob.findTip(tip)
-			wellObj <- ob.findWell2(well)
-		} yield {
-			new TipWellVolumePolicy(tipObj, wellObj, LiquidVolume.l(volume), PipettePolicy.fromName(policy))
 		}
 	}
 }
