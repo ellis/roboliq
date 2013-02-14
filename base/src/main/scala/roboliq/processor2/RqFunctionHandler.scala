@@ -289,6 +289,25 @@ abstract class RqFunctionHandler {
 	protected def lookupPlateState(id: String): RequireItem[PlateState] = RequireItem[PlateState](TKP("plateState", id, Nil))
 	protected def lookupPlateState(symbol: Symbol): RequireItem[PlateState] =
 		lookup(symbol, lookupPlateState _)
+		
+	implicit class SymbolWrapper(symbol: Symbol) {
+		def lookup_?[A: TypeTag]: RequireItem[Option[A]] = {
+			val fnargs = fnRequire (as[Option[String]](symbol)) { (id_?) =>
+				id_? match {
+					case Some(id) =>
+						val t = ru.typeTag[A].tpe
+						val s0 = t.typeSymbol.name.decoded
+						val s = s0.take(1).toLowerCase + s0.tail
+						fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
+							returnObject(Some(o))
+						}
+					case None =>
+						returnObject(None)
+				}
+			}
+			RequireItem[Option[A]](TKP("param", "#", Nil), Some(fnargs))
+		}
+	}
 }
 
 abstract class RqFunctionHandler0 extends RqFunctionHandler {

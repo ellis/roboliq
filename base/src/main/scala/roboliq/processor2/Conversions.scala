@@ -136,26 +136,6 @@ object Conversions {
 		}
 	}
 	
-	val plateLocationHandlerX = ConversionHandler1(
-		(jsval: JsValue) => {
-			for {
-				jsobj <- D.toJsObject(jsval)
-				id <- D.getString('id, jsobj)
-				plateModelIds <- D.getStringList('plateModels, jsobj)
-				cooled <- D.getBoolean('cooled, jsobj)
-			} yield {
-				List(RqItem_Function(RqFunctionArgs(
-					arg_l = plateModelIds.map(id => KeyClassOpt(KeyClass(TKP("plateModel", id, Nil), ru.typeOf[PlateModel]))),
-					fn = (l: List[Object]) => {
-						val plateModel_l = l.asInstanceOf[List[PlateModel]]
-						val loc = new PlateLocation(id, plateModel_l, cooled)
-						RqSuccess(List(ConversionItem_Object(loc)))
-					}
-				)))
-			}
-		}
-	)
-	
 	val testHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
 			as[String]('id)
@@ -183,7 +163,17 @@ object Conversions {
 		}
 	)
 	
-	val plateStateHandler = ConversionHandler1(
+	val plateStateHandler = new ConversionHandlerN {
+		val fnargs = fnRequire (
+			lookupPlate('id),
+			'location.lookup_?[PlateLocation]
+		) { (plate, location_?) =>
+			val plateState = new PlateState(plate, location_?)
+			returnObject(plateState)
+		}
+	}
+	
+	val plateStateHandlerX = ConversionHandler1(
 		(jsval: JsValue) => {
 			for {
 				jsobj <- D.toJsObject(jsval)
@@ -240,5 +230,5 @@ object Conversions {
 	
 	//val asPlateLocation = (jsval: JsValue) => plateLocationHandler.getResult(jsval)
 	val asPlate = (jsval: JsValue) => plateHandler.getResult(jsval)
-	val asPlateState = (jsval: JsValue) => plateStateHandler.getResult(jsval)
+	//val asPlateState = (jsval: JsValue) => plateStateHandler.getResult(jsval)
 }
