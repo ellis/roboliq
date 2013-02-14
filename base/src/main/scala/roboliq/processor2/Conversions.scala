@@ -12,7 +12,7 @@ import RqPimper._
 
 object ConversionsDirect {
 	
-	def conv(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
+	def conv(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): RqResult[Any] = {
 		import scala.reflect.runtime.universe._
 		import scala.reflect.runtime.{currentMirror => cm}
 
@@ -33,7 +33,7 @@ object ConversionsDirect {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			jsval match {
 				case JsArray(v) =>
-					RqResult.toResultOfList(v.map(jsval => conv(jsval, typ2)))
+					RqResult.toResultOfList(v.map(jsval => conv(jsval, typ2, lookup_l)))
 				case _ => RqError("!")
 			}
 		}
@@ -45,12 +45,24 @@ object ConversionsDirect {
 			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 			val p0_l = ctor.paramss(0)
 			val p_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
+			var lookup2_l = lookup_l
 			for {
 				arg_l <- RqResult.toResultOfList(p_l.map(pair => {
 					val (name, typ2) = pair
 					jsobj.fields.get(name) match {
-						case Some(jsval2) => conv(jsval2, typ2)
-						case None => RqError(s"missing field `$name`")
+						case Some(jsval2) => conv(jsval2, typ2, lookup2_l)
+						case None =>
+							jsobj.fields.get("&"+name) match {
+								case Some(JsString(id)) =>
+									lookup2_l match {
+										case lookup :: rest =>
+											lookup2_l = rest
+											RqSuccess(lookup)
+										case _ =>
+											RqError(s"No value for `$name` in lookup list")
+									}
+								case _ => RqError(s"missing field `$name`")
+							}
 					}
 				}))
 			} yield {
@@ -115,6 +127,17 @@ object ConversionsDirect {
 			case _ => RqError("required a JsObject, but have "+jsval.getClass+": "+jsval)
 		}
 	
+	def toTipModel(jsval: JsValue): RqResult[TipModel] = {
+		for {
+			jsobj <- toJsObject(jsval)
+			id <- getString('id, jsobj)
+			volume <- getVolume('volume, jsobj).orElse(RqSuccess(LiquidVolume.empty))
+			volumeMin <- getVolume('volumeMin, jsobj).orElse(RqSuccess(LiquidVolume.empty))
+		} yield {
+			new TipModel(id, volume, volumeMin, LiquidVolume.empty, LiquidVolume.empty)
+		}
+	}
+	
 	def toPlateModel(jsval: JsValue): RqResult[PlateModel] = {
 		for {
 			jsobj <- toJsObject(jsval)
@@ -166,6 +189,52 @@ object ConversionsDirect {
 object Conversions {
 	private val D = ConversionsDirect
 	
+	def tableForType(tpe: ru.Type): String = {
+		val s = tpe.typeSymbol.name.decoded
+		s.take(1).toLowerCase + s.tail
+	}
+
+	def convLookup(jsval: JsValue, typ: ru.Type): RqResult[List[KeyClassOpt]] = {
+		import scala.reflect.runtime.universe._
+		import scala.reflect.runtime.{currentMirror => cm}
+
+		println("convLookup: "+jsval+", "+typ)
+		val ret =
+		if (typ <:< typeOf[List[Any]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			jsval match {
+				case JsArray(v) =>
+					RqResult.toResultOfList(v.map(jsval => convLookup(jsval, typ2))).map(_.flatten)
+				case _ => convLookup(jsval, typ2)
+			}
+		}
+		else if (jsval.isInstanceOf[JsObject]) {
+			val jsobj = jsval.asJsObject
+			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
+			val p0_l = ctor.paramss(0)
+			val p_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
+			RqResult.toResultOfList(p_l.map(pair => {
+				val (name, typ2) = pair
+				jsobj.fields.get(name) match {
+					case Some(jsval2) => convLookup(jsval2, typ2)
+					case None =>
+						jsobj.fields.get("&"+name) match {
+							case Some(JsString(id)) =>
+								val table = tableForType(typ2)
+								val tkp = TKP(table, id, Nil)
+								RqSuccess(List(KeyClassOpt(KeyClass(tkp, typ2), false, None)))
+							case _ => RqError(s"missing field `$name`")
+						}
+				}
+			})).map(_.flatten)
+		}
+		else {
+			RqSuccess(Nil)
+		}
+		println(ret)
+		ret
+	}
+
 	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler1(
 		(jsval: JsValue) =>
 			fn(jsval).map(obj => List(ConversionItem_Object(obj)))
@@ -175,6 +244,7 @@ object Conversions {
 	val asInteger = makeConversion(ConversionsDirect.toInteger)
 	val asBoolean = makeConversion(ConversionsDirect.toBoolean)
 	val asVolume = makeConversion(ConversionsDirect.toVolume)
+	val tipModelHandler = makeConversion(ConversionsDirect.toTipModel)
 	val asPlateModel = makeConversion(ConversionsDirect.toPlateModel)
 
 	val asStringList = makeConversion(ConversionsDirect.toStringList)
@@ -182,11 +252,18 @@ object Conversions {
 	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList)
 	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList)
 	
+	val tipHandler = new ConversionHandlerN {
+		val fnargs = fnRequire (
+			'index.as[Integer], 'model.lookup_?[TipModel]
+		) { (index, modelPermanent_?) =>
+			returnObject(new Tip(index, modelPermanent_?))
+		}
+	}
+	
 	val plateLocationHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
 			'id.as[String], 'plateModels.lookupList[PlateModel], 'cooled.as[Boolean]
 		) { (id, plateModels, cooled) =>
-			// FIXME: plateModels needs to be a list
 			val loc = new PlateLocation(id, plateModels, cooled)
 			returnObject(loc)
 		}

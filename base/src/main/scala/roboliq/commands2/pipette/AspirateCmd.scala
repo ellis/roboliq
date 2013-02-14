@@ -10,13 +10,13 @@ import spray.json._
 import roboliq.commands.pipette.TipWellVolumePolicy
 
 
-case class AspirateCmdBean(
+case class AspirateCmd(
 	description: String,
-	items: List[SpirateCmdItemBean]
+	items: List[SpirateCmdItem]
 )
 
-case class SpirateCmdItemBean(
-	tip: String,
+case class SpirateCmdItem(
+	tip: Tip,
 	well: String,
 	volume: LiquidVolume,
 	policy: String
@@ -35,19 +35,11 @@ case class SpirateCmdItemBean(
 	}*/
 )
 /*
-
 class AspirateHandler extends CommandHandler("aspirate") {
 	import roboliq.processor2.{ConversionsDirect => D}
 
-	val fnargs = fnRequire(
-		'description.as[String],
-		'items.as[JsValue]
-	) { (description, items0) =>
-		items0 match {
-			case JsArray(elements) =>
-				
-			case _ => RqError("expected JsArray")
-		}
+	val fnargs = cmdAs[AspriateCmd] { cmd =>
+		fnRequireList
 	}
 	
 	private def toTwvp(jsval: JsValue): RqResult[TipWellVolumePolicy] = {
