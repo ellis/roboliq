@@ -269,14 +269,6 @@ object Conversions {
 		}
 	}
 	
-	val testHandler = new ConversionHandlerN {
-		val fnargs = fnRequire (
-			'id.as[String]
-		) { (id) =>
-			returnObject(Test(id))
-		}
-	}
-	
 	val plateHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
 			'id.as[String],

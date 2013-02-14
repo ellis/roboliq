@@ -289,15 +289,23 @@ class ProcessorData(
 							internalMessage_l += RqError[Unit]("Unhandled converter registered for "+node+" "+kco)
 							Nil
 						case None =>
-							val fnargs = RqFunctionArgs(
-								arg_l = List(),
-								fn = (l: List[Object]) => l match {
-									case List(jsval: JsValue) =>
-										ConversionsDirect.conv(jsval, kc.clazz).map(o => List(ConversionItem_Object(o.asInstanceOf[Object])))
-									case _ =>
-										RqError("Expected JsValue")
-								}
-							)
+							// REFACTOR: Is practically a duplicate of RqFunctionHandler.cmdAs
+							val arg_l = List(KeyClassOpt(kc, false))
+							val fn: RqFunction = (l: List[Object]) => l match {
+								case List(jsval: JsValue) =>
+									Conversions.convLookup(jsval, kc.clazz).map { arg_l =>
+										List(RqItem_Function(RqFunctionArgs(
+											arg_l = arg_l,
+											fn = (input_l) => {
+												ConversionsDirect.conv(jsval, kc.clazz, input_l).map(o => 
+													List(ConversionItem_Object(o.asInstanceOf[Object])))
+											}
+										)))
+									}
+								case _ =>
+									RqError("Expected JsValue")
+							}
+							val fnargs = RqFunctionArgs(fn, arg_l)
 							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
 							// FIXME: should put this message in a map so it only shows up once
 							internalMessage_l += RqError[Unit]("No converter registered for "+node+" "+kco)
