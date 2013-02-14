@@ -70,7 +70,7 @@ trait StateQuery {
 		findLiquid(id).orElse(findWellState(id).map(_.liquid))
 		
 	/** Pair all `wells` with their fully defined [[roboliq.core.Well2]]. */
-	def getWellPosList(wells: Iterable[Well]): Result[List[Tuple2[Well, Well2]]] = {
+	def getWellPosList(wells: Iterable[Vessel]): Result[List[Tuple2[Vessel, Well2]]] = {
 		Result.mapOver(wells.toList)(well => findWellPosition(well.id).map(well -> _))
 	}
 }

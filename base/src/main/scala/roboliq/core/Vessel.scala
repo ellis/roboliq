@@ -7,7 +7,7 @@ import scala.collection.mutable.HashSet
 import scala.reflect.BeanProperty
 
 
-sealed abstract class Well(val id: String) extends Part {
+sealed abstract class Vessel(val id: String) extends Part {
 	override def toString = id
 }
 
@@ -91,7 +91,7 @@ class PlateWell(
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-) extends Well(id) with Well2 {
+) extends Vessel(id) with Well2 {
 	@deprecated("use Well.wellState() instead", "0.1")
 	def state(states: StateMap): WellState = states.findWellState(id) match {
 		case Success(st) => st
@@ -109,7 +109,7 @@ class PlateWell(
 class Tube(
 	id: String,
 	val model: TubeModel
-) extends Well(id) {
+) extends Vessel(id) {
 	@deprecated("use Well.wellState() instead", "0.1")
 	def state(states: StateMap): WellState = states.findWellState(id) match {
 		case Success(st) => st
