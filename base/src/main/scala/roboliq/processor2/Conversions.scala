@@ -129,39 +129,31 @@ object Conversions {
 	
 	val plateLocationHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
-			as[String]('id), lookupPlateModel('plateModels), as[Boolean]('cooled)
+			'id.as[String], 'plateModels.lookupList[PlateModel], 'cooled.as[Boolean]
 		) { (id, plateModels, cooled) =>
-			val loc = new PlateLocation(id, List(plateModels), cooled)
+			// FIXME: plateModels needs to be a list
+			val loc = new PlateLocation(id, plateModels, cooled)
 			returnObject(loc)
 		}
 	}
 	
 	val testHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
-			as[String]('id)
+			'id.as[String]
 		) { (id) =>
 			returnObject(Test(id))
 		}
 	}
 	
-	val plateHandler = ConversionHandler1(
-		(jsval: JsValue) => {
-			for {
-				jsobj <- D.toJsObject(jsval)
-				id <- D.getString('id, jsobj)
-				idModel <- D.getString('idModel, jsobj)
-				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
-			} yield {
-				List(RqItem_Function(RqFunctionArgs(
-					arg_l = List(KeyClassOpt(KeyClass(TKP("plateModel", idModel, Nil), ru.typeOf[PlateModel]))),
-					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
-						val plate = new Plate(id, plateModel, locationPermanent_?)
-						List(ConversionItem_Object(plate))
-					}
-				)))
-			}
+	val plateHandler = new ConversionHandlerN {
+		val fnargs = fnRequire (
+			'id.as[String],
+			'idModel.lookup[PlateModel],
+			'locationPermanent.as[Option[String]]
+		) { (id, plateModel, locationPermanent_?) =>
+			returnObject(new Plate(id, plateModel, locationPermanent_?))
 		}
-	)
+	}
 	
 	val plateStateHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (

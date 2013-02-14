@@ -205,6 +205,20 @@ abstract class RqFunctionHandler {
 		val arg_l = List[KeyClassOpt](a, b, c, d)
 		fnRequireRun(fn, arg_l)
 	}
+	
+	protected def fnRequireList[A](
+		l: List[RequireItem[A]]
+	)(
+		fn: List[A] => RqReturn
+	): RqFunctionArgs = {
+		val fn2: RqFunction = (arg_l) => {
+			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+			val ret = method.invoke(fn, arg_l)
+			ret.asInstanceOf[RqReturn]
+		}
+		val arg_l: List[KeyClassOpt] = l.map(_.toKeyClass)
+		RqFunctionArgs(fn2, arg_l)
+	}
 
 	private def fnRequireRun(fn: Object, arg_l: RqArgs): RqFunctionArgs = {
 		val fn2: RqFunction = (arg_l) => {
@@ -291,8 +305,10 @@ abstract class RqFunctionHandler {
 		lookup(symbol, lookupPlateState _)
 		
 	implicit class SymbolWrapper(symbol: Symbol) {
+		def as[A: TypeTag]: RequireItem[A] = RequireItem[A](TKP("cmd", "$", List(symbol.name)))
+
 		def lookup[A <: Object : TypeTag]: RequireItem[A] = {
-			val fnargs = fnRequire (as[String](symbol)) { (id) =>
+			val fnargs = fnRequire (as[String]) { (id) =>
 				val t = ru.typeTag[A].tpe
 				val s0 = t.typeSymbol.name.decoded
 				val s = s0.take(1).toLowerCase + s0.tail
@@ -304,7 +320,7 @@ abstract class RqFunctionHandler {
 		}
 
 		def lookup_?[A: TypeTag]: RequireItem[Option[A]] = {
-			val fnargs = fnRequire (as[Option[String]](symbol)) { (id_?) =>
+			val fnargs = fnRequire (as[Option[String]]) { (id_?) =>
 				id_? match {
 					case Some(id) =>
 						val t = ru.typeTag[A].tpe
@@ -318,6 +334,18 @@ abstract class RqFunctionHandler {
 				}
 			}
 			RequireItem[Option[A]](TKP("param", "#", Nil), Some(fnargs))
+		}
+		
+		def lookupList[A <: Object : TypeTag]: RequireItem[List[A]] = {
+			val fnargs = fnRequire (as[List[String]]) { (id_l) =>
+				val t = ru.typeTag[A].tpe
+				val s0 = t.typeSymbol.name.decoded
+				val s = s0.take(1).toLowerCase + s0.tail
+				fnRequireList (id_l.map(id => RequireItem[A](TKP(s, id, Nil)))) { o =>
+					returnObject(o)
+				}
+			}
+			RequireItem[List[A]](TKP("param", "#", Nil), Some(fnargs))
 		}
 	}
 }
