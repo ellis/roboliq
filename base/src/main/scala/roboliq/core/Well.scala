@@ -7,11 +7,6 @@ import scala.collection.mutable.HashSet
 import scala.reflect.BeanProperty
 
 
-sealed trait WellBase extends Ordered[WellBase] {
-	val id: String
-	override def compare(that: WellBase) = id.compare(that.id)
-}
-
 sealed abstract class Well(val id: String) extends Part {
 	override def toString = id
 }
