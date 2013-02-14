@@ -27,7 +27,9 @@ class AspirateHandler extends CommandHandler("pipetter.aspirate") {
 		})
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
-		AspirateToken(cmd.items)
+		RqSuccess(List(
+			ComputationItem_Token(AspirateToken(cmd.items))
+		))
 	}
 }
 
