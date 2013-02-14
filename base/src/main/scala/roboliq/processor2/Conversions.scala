@@ -29,6 +29,10 @@ object ConversionsDirect {
 		else if (typ =:= typeOf[Integer]) {
 			toInteger(jsval)
 		}
+		else if (typ <:< typeOf[Option[Any]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			conv(jsval, typ2, lookup_l).map(Option.apply)
+		}
 		else if (typ <:< typeOf[List[Any]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			jsval match {
@@ -48,7 +52,8 @@ object ConversionsDirect {
 			var lookup2_l = lookup_l
 			for {
 				arg_l <- RqResult.toResultOfList(p_l.map(pair => {
-					val (name, typ2) = pair
+					val (name0, typ2) = pair
+					val name = name0.replace("_?", "")
 					jsobj.fields.get(name) match {
 						case Some(jsval2) => conv(jsval2, typ2, lookup2_l)
 						case None =>
@@ -61,7 +66,18 @@ object ConversionsDirect {
 										case _ =>
 											RqError(s"No value for `$name` in lookup list")
 									}
-								case _ => RqError(s"missing field `$name`")
+								case Some(jsval2) =>
+									RqError(s"Require string for ID")
+								case None =>
+									if (typ2 <:< typeOf[Option[Any]]) {
+										RqSuccess(None)
+									}
+									else if (typ2 <:< typeOf[List[Any]]) {
+										RqSuccess(Nil)
+									}
+									else {
+										RqError(s"missing field `$name`")
+									}
 							}
 					}
 				}))
@@ -223,7 +239,18 @@ object Conversions {
 								val table = tableForType(typ2)
 								val tkp = TKP(table, id, Nil)
 								RqSuccess(List(KeyClassOpt(KeyClass(tkp, typ2), false, None)))
-							case _ => RqError(s"missing field `$name`")
+							case Some(jsval2) =>
+								RqError(s"Require string for ID")
+							case None =>
+								if (typ2 <:< typeOf[Option[Any]]) {
+									RqSuccess(Nil)
+								}
+								else if (typ2 <:< typeOf[List[Any]]) {
+									RqSuccess(Nil)
+								}
+								else {
+									RqError(s"missing field `$name`")
+								}
 						}
 				}
 			})).map(_.flatten)
