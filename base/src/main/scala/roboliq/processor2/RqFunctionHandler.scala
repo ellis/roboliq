@@ -291,6 +291,18 @@ abstract class RqFunctionHandler {
 		lookup(symbol, lookupPlateState _)
 		
 	implicit class SymbolWrapper(symbol: Symbol) {
+		def lookup[A <: Object : TypeTag]: RequireItem[A] = {
+			val fnargs = fnRequire (as[String](symbol)) { (id) =>
+				val t = ru.typeTag[A].tpe
+				val s0 = t.typeSymbol.name.decoded
+				val s = s0.take(1).toLowerCase + s0.tail
+				fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
+					returnObject(o)
+				}
+			}
+			RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
+		}
+
 		def lookup_?[A: TypeTag]: RequireItem[Option[A]] = {
 			val fnargs = fnRequire (as[Option[String]](symbol)) { (id_?) =>
 				id_? match {

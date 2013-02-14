@@ -165,70 +165,11 @@ object Conversions {
 	
 	val plateStateHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
-			lookupPlate('id),
+			'id.lookup[Plate],
 			'location.lookup_?[PlateLocation]
 		) { (plate, location_?) =>
 			val plateState = new PlateState(plate, location_?)
 			returnObject(plateState)
 		}
 	}
-	
-	val plateStateHandlerX = ConversionHandler1(
-		(jsval: JsValue) => {
-			for {
-				jsobj <- D.toJsObject(jsval)
-				id <- D.getString('id, jsobj)
-				location_? <- D.getString_?('location, jsobj)
-			} yield {
-				location_? match {
-					case Some(location) =>
-						List(RqItem_Function(RqFunctionArgs(
-							arg_l = List(
-								KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[Plate])),
-								KeyClassOpt(KeyClass(TKP("plateLocation", location, Nil), ru.typeOf[PlateLocation]))
-							),
-							fn = (l: List[Object]) => InputListToTuple.check2[Plate, PlateLocation](l).map { case (plate, loc) =>
-								val plateState = new PlateState(plate, Some(loc))
-								List(ConversionItem_Object(plateState))
-							}
-						)))
-					case None =>
-						List(RqItem_Function(RqFunctionArgs(
-							arg_l = List(
-								KeyClassOpt(KeyClass(TKP("plate", id, Nil), ru.typeOf[Plate]))
-							),
-							fn = (l: List[Object]) => InputListToTuple.check1[Plate](l).map { (plate) =>
-								val plateState = new PlateState(plate, None)
-								List(ConversionItem_Object(plateState))
-							}
-						)))
-				}
-			}
-		}
-	)
-	
-	/*
-	private val plateHandler2 = new CommandHandler {
-		def getResult: ComputationResult = {
-			for {
-				jsobj <- D.toJsObject(jsval)
-				id <- D.getString('id, jsobj)
-				idModel <- D.getInteger('rows, jsobj)
-				locationPermanent_? <- D.getString_?('locationPermanent, jsobj)
-			} yield {
-				List(ConversionItem_Conversion(
-					input_l = List(IdClass("plateModel["+idModel+"]", classOf[PlateModel])),
-					fn = (l: List[Object]) => InputListToTuple.check1[PlateModel](l).map { plateModel =>
-						val plate = new Plate(id, plateModel, locationPermanent_?)
-						List(ConversionItem_Object(plate))
-					}
-				))
-			}
-		}
-	}
-	*/
-	
-	//val asPlateLocation = (jsval: JsValue) => plateLocationHandler.getResult(jsval)
-	val asPlate = (jsval: JsValue) => plateHandler.getResult(jsval)
-	//val asPlateState = (jsval: JsValue) => plateStateHandler.getResult(jsval)
 }
