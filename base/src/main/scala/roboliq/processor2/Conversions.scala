@@ -114,6 +114,13 @@ object ConversionsDirect {
 		}
 	}
 	
+	def toBigDecimal(jsval: JsValue): RqResult[BigDecimal] = {
+		jsval match {
+			case JsNumber(n) => RqSuccess(n)
+			case _ => RqError("expected JsNumber")
+		}
+	}
+	
 	def toBoolean(jsval: JsValue): RqResult[java.lang.Boolean] = {
 		jsval match {
 			case JsBoolean(b) => RqSuccess(b)
@@ -169,6 +176,32 @@ object ConversionsDirect {
 		}
 	}
 	
+	def toSubstance(jsval: JsValue): RqResult[Substance] = {
+		for {
+			jsobj <- toJsObject(jsval)
+			id <- getString('id, jsobj)
+			kind <- getString('kind, jsobj)
+			costPerUnit_? <- getBigDecimal_?('costPerUnit, jsobj)
+			substance <- kind match {
+				case "liquid" =>
+					for {
+						sequence_? <- getString_?('sequence, jsobj)
+					} yield {
+						SubstanceDna(id, sequence_?, costPerUnit_?)
+					}
+				case "dna" =>
+					for {
+						sequence_? <- getString_?('sequence, jsobj)
+					} yield {
+						SubstanceDna(id, sequence_?, costPerUnit_?)
+					}
+				case "solid" =>
+					RqSuccess(SubstanceOther(id, costPerUnit_?))
+				case _ => RqError("unknown value for `kind`")
+			}
+		}
+	}
+	
 	def toPipettePosition(jsval: JsValue): RqResult[PipettePosition.Value] = {
 		for {
 			s <- toString(jsval)
@@ -205,6 +238,8 @@ object ConversionsDirect {
 	def getString(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toString)
 	def getString_?(symbol: Symbol, jsobj: JsObject) = getWith_?(symbol, jsobj, toString)
 	def getInteger(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toInteger)
+	def getBigDecimal(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toBigDecimal)
+	def getBigDecimal_?(symbol: Symbol, jsobj: JsObject) = getWith_?(symbol, jsobj, toBigDecimal)
 	def getBoolean(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toBoolean)
 	def getVolume(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toVolume)
 	def getStringList(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toStringList)

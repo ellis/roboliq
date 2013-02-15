@@ -43,10 +43,10 @@ Decon-Decon-Decon
  * Represents the intensity of tip cleaning required by a given liquid.
  * 
  * @param enter intensity with which tip must have been washed prior to entering a liquid.
- * @param within intensity with which tip must have be washed between pipetteing operations performed in the same [[robolq.core.LiquidGroup]].
- * @param exit intensity with which tip must have be washed after entering a liquid. 
+ * @param within intensity with which tip must be washed between pipetteing operations performed in the same [[robolq.core.LiquidGroup]].
+ * @param exit intensity with which tip must be washed after entering a liquid. 
  */
-sealed class GroupCleanPolicy(
+case class GroupCleanPolicy(
 	val enter: WashIntensity.Value,
 	val within: WashIntensity.Value,
 	val exit: WashIntensity.Value

@@ -47,7 +47,7 @@ sealed abstract class Substance {
 	 * of the source liquid than single-pipetting, so for expensive liquids we
 	 * want to prevent multipipetting.
 	 */
-	val expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
+	def expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
 }
 
 object Substance {
