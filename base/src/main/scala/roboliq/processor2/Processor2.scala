@@ -52,14 +52,9 @@ case class ComputationNode(
 	computation: Computation
 )*/
 
-class Event
-//trait Token
+trait Event
 
 case class Token_Comment(s: String) extends CmdToken
-
-/*case class DataKey(time: List[Int], table: String, key: String, path: List[String]) {
-	def idWithoutTime = (s"$table[$key]" :: path).mkString(".")
-}*/
 
 class ProcessorData(
 	handler_l: List[CommandHandler]
@@ -513,42 +508,6 @@ class ProcessorData(
 
 		val pending_l = makePendingComputationList
 		pending_l.foreach(state => runComputation(state.node, kcoToValue_m))
-
-		// Add conversion nodes
-		var bConversionAdded = false
-		/*
-		// Add "parameter transformation" conversion nodes
-		kco_l.filter(_.conversion_?.isDefined).foreach(kco => {
-			val fnargs = kco.conversion_?.get
-			val kc = kco.kc
-			if (!kcNode_m.contains(kc)) {
-				val node = new Node_Conversion(None, Some(kc.toString), 0, kc, fnargs._2, fnargs._1)
-				kcNode_m(kc) = node
-				registerNode(node)
-				bConversionAdded = true
-			}
-		})
-		// Add more conversion nodes
-		opt_m.foreach(pair => {
-			val (kc, opt) = pair
-			val kc0 = kc.changeClassToJsValue
-			if (kc != kc0 && !kcNode_m.contains(kc)) {
-				conversion_m.get(kc.clazz) match {
-					case Some(conversion) =>
-						val fn = (l: List[Object]) => l match {
-							case List(jsval: JsValue) =>
-								conversion(jsval)
-						}
-						val node = new Node_Conversion(None, Some(kc.toString), 0, kc, List(KeyClassOpt(kc0, opt)), fn)
-						kcNode_m(kc) = node
-						registerNode(node)
-						bConversionAdded = true
-					case None =>
-						internalMessage_l += RqError[Unit]("No converter registered for "+kc.clazz)
-				}
-			}
-		})
-		*/
 		
 		println()
 		println("Computations")
@@ -557,7 +516,7 @@ class ProcessorData(
 		println()
 		// TODO: show added conversions
 		
-		!pending_l.isEmpty || bConversionAdded 
+		!pending_l.isEmpty
 	}
 
 	/**

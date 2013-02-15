@@ -21,7 +21,7 @@ case class TipState(
 	val model_? : Option[TipModel],
 	val src_? : Option[Well],
 	val liquid: Liquid,
-	val nVolume: LiquidVolume,
+	val volume: LiquidVolume,
 	val contamInside: Set[Contaminant.Value], 
 	val nContamInsideVolume: LiquidVolume,
 	val contamOutside: Set[Contaminant.Value],
@@ -43,7 +43,7 @@ object TipState {
 		model_? = tip.modelPermanent_?,
 		src_? = None,
 		liquid = Liquid.empty,
-		nVolume = LiquidVolume.empty,
+		volume = LiquidVolume.empty,
 		contamInside = Set(),
 		nContamInsideVolume = LiquidVolume.empty,
 		contamOutside = Set(),
@@ -76,7 +76,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 	
 	def aspirate(src: Well, liquid2: Liquid, nVolume2: LiquidVolume) {
 		val st = state
-		val nVolumeNew = st.nVolume + nVolume2
+		val nVolumeNew = st.volume + nVolume2
 		set(new TipState(
 			st.conf,
 			st.model_?,
@@ -107,7 +107,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
 		set(st.copy(
 			liquid = liquid,
-			nVolume = nVolume,
+			volume = nVolume,
 			cleanDegree = WashIntensity.None
 		))
 	}
@@ -117,7 +117,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(nVolume2)
 		set(st.copy(
 			liquid = liquid,
-			nVolume = nVolume,
+			volume = nVolume,
 			contamOutside = st.contamOutside ++ liquid2.contaminants,
 			destsEntered = st.destsEntered + liquid2,
 			cleanDegree = WashIntensity.None,
@@ -127,7 +127,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 	
 	private def getLiquidAndVolumeAfterDispense(nVolume2: LiquidVolume): Tuple2[Liquid, LiquidVolume] = {
 		val st = state
-		val nVolume3 = st.nVolume - nVolume2
+		val nVolume3 = st.volume - nVolume2
 		if (nVolume3 < LiquidVolume.nl(1)) {
 			(Liquid.empty, LiquidVolume.empty)
 		}
@@ -170,7 +170,7 @@ class TipAspirateEventBean extends TipEventBean {
 		for {
 			liquid <- query.findSourceLiquid(src)
 		} yield {
-			val volumeNew = state0.nVolume + LiquidVolume.l(volume)
+			val volumeNew = state0.volume + LiquidVolume.l(volume)
 			val src_? = query.findWellPosition(src).toOption
 			new TipState(
 				state0.conf,
@@ -217,7 +217,7 @@ class TipDispenseEventBean extends TipEventBean {
 			destState <- query.findWellState(dest)
 		} yield {
 			val liquidDest = destState.liquid
-			val volumeNew = state0.nVolume + LiquidVolume.l(volume)
+			val volumeNew = state0.volume + LiquidVolume.l(volume)
 			val pos = PipettePosition.withName(position)
 			dispense(state0, LiquidVolume.l(volume), liquidDest, pos)
 		}
@@ -234,7 +234,7 @@ class TipDispenseEventBean extends TipEventBean {
 		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(state0, nVolume2)
 		state0.copy(
 			liquid = liquid,
-			nVolume = nVolume,
+			volume = nVolume,
 			cleanDegree = WashIntensity.None
 		)
 	}
@@ -243,7 +243,7 @@ class TipDispenseEventBean extends TipEventBean {
 		val (liquid, nVolume) = getLiquidAndVolumeAfterDispense(state0, nVolume2)
 		state0.copy(
 			liquid = liquid,
-			nVolume = nVolume,
+			volume = nVolume,
 			contamOutside = state0.contamOutside ++ liquid2.contaminants,
 			destsEntered = state0.destsEntered + liquid2,
 			cleanDegree = WashIntensity.None,
@@ -252,7 +252,7 @@ class TipDispenseEventBean extends TipEventBean {
 	}
 	
 	private def getLiquidAndVolumeAfterDispense(state0: TipState, nVolume2: LiquidVolume): Tuple2[Liquid, LiquidVolume] = {
-		val nVolume3 = state0.nVolume - nVolume2
+		val nVolume3 = state0.volume - nVolume2
 		if (nVolume3 < LiquidVolume.nl(1)) {
 			(Liquid.empty, LiquidVolume.empty)
 		}

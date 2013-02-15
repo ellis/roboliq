@@ -154,7 +154,7 @@ class ObjBase(bb: BeanBase) {
 							sFamily = substance.physicalProperties.toString,
 							contaminants = Set(),
 							group = new LiquidGroup(substance.cleanPolicy),
-							multipipetteThreshold = if (substance.allowMultipipette) 0 else 1000
+							multipipetteThreshold = if (substance.expensive) 0 else 1000
 						))
 						
 					case _ => Error("substance `"+id+"` is not a liquid")

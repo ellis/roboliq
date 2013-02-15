@@ -19,19 +19,19 @@ sealed trait SubstanceBean extends Bean
 /** YAML JavaBean representation of [[roboliq.core.SubstanceDna]]. */
 class SubstanceDnaBean extends SubstanceBean {
 	@BeanProperty var sequence: String = null
-	@BeanProperty var allowMultipipette: java.lang.Boolean = null
+	@BeanProperty var expensive: java.lang.Boolean = null
 }
 
 /** YAML JavaBean representation of [[roboliq.core.SubstanceOther]]. */
 class SubstanceOtherBean extends SubstanceBean {
-	@BeanProperty var allowMultipipette: java.lang.Boolean = null
+	@BeanProperty var expensive: java.lang.Boolean = null
 }
 
 /** YAML JavaBean representation of [[roboliq.core.SubstanceLiquid]]. */
 class SubstanceLiquidBean extends SubstanceBean {
 	@BeanProperty var physical: String = null
 	@BeanProperty var cleanPolicy: String = null
-	@BeanProperty var allowMultipipette: java.lang.Boolean = null
+	@BeanProperty var expensive: java.lang.Boolean = null
 }
 
 /** Represents a substance. */
@@ -45,7 +45,7 @@ sealed abstract class Substance {
 	 * of the source liquid than single-pipetting, so for expensive liquids we
 	 * want to prevent multipipetting.
 	 */
-	val allowMultipipette: Boolean
+	val expensive: Boolean
 }
 
 object Substance {
@@ -68,7 +68,7 @@ object Substance {
 case class SubstanceDna(
 	val id: String,
 	val sequence_? : Option[String],
-	val allowMultipipette: Boolean
+	val expensive: Boolean
 ) extends Substance
 
 object SubstanceDna {
@@ -78,7 +78,7 @@ object SubstanceDna {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
 			val sequence = if (bean.sequence != null) Some(bean.sequence) else None
-			val allowMultipipette: Boolean = if (bean.allowMultipipette == null) true else bean.allowMultipipette
+			val allowMultipipette: Boolean = if (bean.expensive == null) true else bean.expensive
 			new SubstanceDna(id, sequence, allowMultipipette)
 		}
 	}
@@ -91,7 +91,7 @@ object SubstanceDna {
  */
 case class SubstanceOther(
 	val id: String,
-	val allowMultipipette: Boolean
+	val expensive: Boolean
 ) extends Substance
 
 object SubstanceOther {
@@ -100,7 +100,7 @@ object SubstanceOther {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
-			val allowMultipipette: Boolean = if (bean.allowMultipipette == null) true else bean.allowMultipipette
+			val allowMultipipette: Boolean = if (bean.expensive == null) true else bean.expensive
 			new SubstanceOther(id, allowMultipipette)
 		}
 	}
@@ -117,7 +117,7 @@ case class SubstanceLiquid(
 	val id: String,
 	val physicalProperties: LiquidPhysicalProperties.Value, 
 	val cleanPolicy: GroupCleanPolicy,
-	val allowMultipipette: Boolean
+	val expensive: Boolean
 ) extends Substance
 
 object SubstanceLiquid {
@@ -144,8 +144,8 @@ object SubstanceLiquid {
 				}
 			}
 			val allowMultipipette: Boolean = {
-				if (bean.allowMultipipette == null) true
-				else bean.allowMultipipette
+				if (bean.expensive == null) true
+				else bean.expensive
 			}
 
 			new SubstanceLiquid(id, physicalProperties, cleanPolicy, allowMultipipette)

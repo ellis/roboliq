@@ -32,7 +32,48 @@ class AspirateHandler extends CommandHandler("pipetter.aspirate") {
 		))
 	}
 }
+/*
+/** Represents an aspiration event. */
+case class TipAspirateEvent(
+	/** Source well ID. */
+	src: String,
+	/** Volume in liters to aspirate. */
+	volume: LiquidVolume
+)
 
+case class WellState(
+	well: Well,
+	content: VesselContent,
+	isInitialStateKnown: Boolean,
+	history: List[EventBean]
+)
+
+class TipAspirateEventHandler extends ConversionHandlerN {
+	val fnargs = fnRequire(
+		'src.lookupSourceLiquid
+	) { () => *[P1]
+		
+	}
+	protected def update(state0: TipState): RqResult[TipState] = {
+		val volumeNew = state0.volume + volume
+		RqSuccess(TipState(
+			state0.conf,
+			state0.model_?,
+			Some(src),
+			state0.liquid + liquid,
+			volumeNew,
+			state0.contamInside ++ liquid.contaminants,
+			LiquidVolume.max(state0.nContamInsideVolume, volumeNew),
+			state0.contamOutside ++ liquid.contaminants,
+			state0.srcsEntered + liquid,
+			state0.destsEntered,
+			WashIntensity.None,
+			state0.cleanDegreePrev,
+			WashIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
+		))
+	}
+}
+*/
 /*
 case class SpirateCmdItem(
 	tip: Tip,

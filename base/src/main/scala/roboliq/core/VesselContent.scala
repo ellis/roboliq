@@ -86,8 +86,8 @@ class VesselContent(
 			// NOTE: this is very, very arbitrary -- ellis, 2012-04-10
 			// TODO: try to figure out a better method!
 			val bCanMultipipette = {
-				val nAllowMultipipette1 = mapSolventToVolume.keys.filter(_.allowMultipipette).size
-				val nAllowMultipipette2 = mapSoluteToMol.keys.filter(_.allowMultipipette).size
+				val nAllowMultipipette1 = mapSolventToVolume.keys.filter(_.expensive).size
+				val nAllowMultipipette2 = mapSoluteToMol.keys.filter(_.expensive).size
 				//nAllowMultipipette < nSolvents
 				// If there are solutes which shouldn't be multipipetted
 				if (nAllowMultipipette2 < nSolutes) {
