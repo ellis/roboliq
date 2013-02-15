@@ -19,25 +19,27 @@ sealed trait SubstanceBean extends Bean
 /** YAML JavaBean representation of [[roboliq.core.SubstanceDna]]. */
 class SubstanceDnaBean extends SubstanceBean {
 	@BeanProperty var sequence: String = null
-	@BeanProperty var expensive: java.lang.Boolean = null
+	@BeanProperty var costPerUnit: java.math.BigDecimal = null
 }
 
 /** YAML JavaBean representation of [[roboliq.core.SubstanceOther]]. */
 class SubstanceOtherBean extends SubstanceBean {
-	@BeanProperty var expensive: java.lang.Boolean = null
+	@BeanProperty var costPerUnit: java.math.BigDecimal = null
 }
 
 /** YAML JavaBean representation of [[roboliq.core.SubstanceLiquid]]. */
 class SubstanceLiquidBean extends SubstanceBean {
 	@BeanProperty var physical: String = null
 	@BeanProperty var cleanPolicy: String = null
-	@BeanProperty var expensive: java.lang.Boolean = null
+	@BeanProperty var costPerUnit: java.math.BigDecimal = null
 }
 
 /** Represents a substance. */
 sealed abstract class Substance {
 	/** ID in database. */
 	val id: String
+	/** Cost per unit (either liter or mol) of the substance */
+	val costPerUnit_? : Option[BigDecimal]
 	/**
 	 * Whether multipipetting is allowed.
 	 * Multipipetting is when a tip aspirates once and distributes to that volume to
@@ -45,7 +47,7 @@ sealed abstract class Substance {
 	 * of the source liquid than single-pipetting, so for expensive liquids we
 	 * want to prevent multipipetting.
 	 */
-	val expensive: Boolean
+	val expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
 }
 
 object Substance {
@@ -60,6 +62,11 @@ object Substance {
 }
 
 /**
+ * A solid substance, in contrast to [[roboliq.core.SubstanceLiquid]].
+ */
+abstract class SubstanceSolid extends Substance
+
+/**
  * Represents a DNA-based substance.
  * @param id ID in database.
  * @param sequence_? optional DNA sequence string.
@@ -68,8 +75,8 @@ object Substance {
 case class SubstanceDna(
 	val id: String,
 	val sequence_? : Option[String],
-	val expensive: Boolean
-) extends Substance
+	val costPerUnit_? : Option[BigDecimal]
+) extends SubstanceSolid
 
 object SubstanceDna {
 	/** Convert [[roboliq.core.SubstanceDnaBean]] to [[roboliq.core.SubstanceDna]]. */
@@ -78,8 +85,8 @@ object SubstanceDna {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
 			val sequence = if (bean.sequence != null) Some(bean.sequence) else None
-			val allowMultipipette: Boolean = if (bean.expensive == null) true else bean.expensive
-			new SubstanceDna(id, sequence, allowMultipipette)
+			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
+			new SubstanceDna(id, sequence, costPerUnit_?)
 		}
 	}
 }
@@ -91,8 +98,8 @@ object SubstanceDna {
  */
 case class SubstanceOther(
 	val id: String,
-	val expensive: Boolean
-) extends Substance
+	val costPerUnit_? : Option[BigDecimal]
+) extends SubstanceSolid
 
 object SubstanceOther {
 	/** Convert [[roboliq.core.SubstanceOtherBean]] to [[roboliq.core.SubstanceOther]]. */
@@ -100,8 +107,8 @@ object SubstanceOther {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
-			val allowMultipipette: Boolean = if (bean.expensive == null) true else bean.expensive
-			new SubstanceOther(id, allowMultipipette)
+			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
+			new SubstanceOther(id, costPerUnit_?)
 		}
 	}
 }
@@ -117,7 +124,7 @@ case class SubstanceLiquid(
 	val id: String,
 	val physicalProperties: LiquidPhysicalProperties.Value, 
 	val cleanPolicy: GroupCleanPolicy,
-	val expensive: Boolean
+	val costPerUnit_? : Option[BigDecimal]
 ) extends Substance
 
 object SubstanceLiquid {
@@ -143,12 +150,9 @@ object SubstanceLiquid {
 					}
 				}
 			}
-			val allowMultipipette: Boolean = {
-				if (bean.expensive == null) true
-				else bean.expensive
-			}
+			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
 
-			new SubstanceLiquid(id, physicalProperties, cleanPolicy, allowMultipipette)
+			new SubstanceLiquid(id, physicalProperties, cleanPolicy, costPerUnit_?)
 		}
 	}
 }

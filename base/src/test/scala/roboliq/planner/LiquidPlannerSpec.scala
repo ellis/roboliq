@@ -11,11 +11,11 @@ import roboliq.utils.FileUtils
 class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter {
 	
 	// The "components" we'll be mixing together
-	val cA = new SubstanceLiquid("A", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, true)
-	val cB = new SubstanceLiquid("B", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNT, true)
-	val cC = new SubstanceDna("C", None, true)
-	val cD = new SubstanceDna("D", None, true)
-	val cE = new SubstanceDna("E", None, true)
+	val cA = new SubstanceLiquid("A", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+	val cB = new SubstanceLiquid("B", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNT, None)
+	val cC = new SubstanceDna("C", None, None)
+	val cD = new SubstanceDna("D", None, None)
+	val cE = new SubstanceDna("E", None, None)
 	
 	// Our source wells
 	val s1 = new VesselContent("S1", Map(cA -> LiquidVolume.ul(1000)), Map())

@@ -15,7 +15,7 @@ import java.text.DecimalFormat
 class VesselContent(
 	val idVessel: String,
 	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
-	val mapSoluteToMol: Map[Substance, BigDecimal]
+	val mapSoluteToMol: Map[SubstanceSolid, BigDecimal]
 ) {
 	/** Total liquid volume in vessel. */
 	val volume = mapSolventToVolume.values.foldLeft(LiquidVolume.empty){(acc,v) => acc + v}
@@ -116,7 +116,7 @@ class VesselContent(
 		// List of solvents in order of decreasing volume
 		val lSolvent: List[SubstanceLiquid] = mapSolventToVolume.toList.sortBy(-_._2.nl).map(_._1)
 		// List of solutes in order of decreasing mol
-		val lSolute: List[Substance] = mapSoluteToMol.toList.sortBy(-_._2).map(_._1)
+		val lSolute: List[SubstanceSolid] = mapSoluteToMol.toList.sortBy(-_._2).map(_._1)
 		
 		// Empty
 		if (volume.isEmpty)
@@ -196,7 +196,7 @@ class VesselContent(
 	/**
 	 * Return a new VesselContent combining `this` and `mol` of a non-liquid `substance`.
 	 */
-	def addPowder(substance: Substance, mol: BigDecimal): VesselContent = {
+	def addPowder(substance: SubstanceSolid, mol: BigDecimal): VesselContent = {
 		new VesselContent(
 			idVessel,
 			mapSolventToVolume,
@@ -225,12 +225,34 @@ class VesselContent(
 	/**
 	 * Get the molar concentration of a non-liquid `substance`. 
 	 */
-	def concOfSubstance(substance: Substance): Result[BigDecimal] = {
+	def concOfSolid(substance: SubstanceSolid): Result[BigDecimal] = {
 		if (volume.isEmpty)
 			return Success(0)
 		mapSoluteToMol.get(substance) match {
 			case None => Error("vessel `"+idVessel+"` does not contain substance `"+substance.id+"`")
 			case Some(mol) => Success(mol / volume.l)
+		}
+	}
+
+	/**
+	 * Get the proportion of a liquid in this vessel. 
+	 */
+	def concOfLiquid(substance: SubstanceLiquid): Result[BigDecimal] = {
+		if (volume.isEmpty)
+			return Success(0)
+		mapSolventToVolume.get(substance) match {
+			case None => Error("vessel `"+idVessel+"` does not contain liquid `"+substance.id+"`")
+			case Some(vol) => Success(vol.l / volume.l)
+		}
+	}
+
+	/**
+	 * Get the proportion of a liquid in this vessel. 
+	 */
+	def concOfSubstance(substance: Substance): Result[BigDecimal] = {
+		substance match {
+			case liquid: SubstanceLiquid => concOfLiquid(liquid)
+			case solid: SubstanceSolid => concOfSolid(solid)
 		}
 	}
 }

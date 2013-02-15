@@ -418,8 +418,8 @@ class SubSrcConc(
 )
 
 object SubSrcConc {
-	def fromBean(query: StateQuery)(bean: PcrMixSpecItemBean, liquid_? : Option[String] = None): Result[SubSrcConc] = {
-		val liquid = liquid_?.getOrElse(bean.liquid)
+	def fromBean(query: StateQuery)(bean: PcrMixSpecItemBean): Result[SubSrcConc] = {
+		val liquid = bean.liquid
 		for {
 			_ <- Result.mustBeSet(liquid, "liquid")
 			_ <- Result.mustBeSet(bean.conc, "conc")

@@ -128,7 +128,7 @@ class WellAddEventBean extends WellEventBean {
 				val content: VesselContent = sub match {
 					case liquid: SubstanceLiquid =>
 						state0.content.addLiquid(liquid, v)
-					case _ =>
+					case solid: SubstanceSolid =>
 						Result.mustBeSet(conc, "conc") match {
 							case Error(ls) => return Error(ls)
 							case _ =>
@@ -139,7 +139,7 @@ class WellAddEventBean extends WellEventBean {
 							case _ => return Error("water must be a liquid")
 						}
 						val mol = BigDecimal(conc) * volume
-						state0.content.addPowder(sub, mol).addLiquid(water, v)
+						state0.content.addPowder(solid, mol).addLiquid(water, v)
 				}
 				state0.update(this,
 					content = content
@@ -176,9 +176,11 @@ class WellAddPowderEventBean extends WellEventBean {
 			_ <- Result.mustBeSet(substance, "substance")
 			_ <- Result.mustBeSet(mol, "mol")
 			substanceObj <- states0.findSubstance(substance)
+			_ <- Result.assert(substanceObj.isInstanceOf[SubstanceSolid], s"substance `$substance` must be a solid")
 		} yield {
+			val solid = substanceObj.asInstanceOf[SubstanceSolid]
 			state0.update(this,
-				content = state0.content.addPowder(substanceObj, mol)
+				content = state0.content.addPowder(solid, mol)
 			)
 		}
 	}

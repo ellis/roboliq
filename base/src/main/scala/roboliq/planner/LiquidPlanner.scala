@@ -248,7 +248,7 @@ case class Trace(
 	val src_l: List[VesselContent],
 	val dst_l: List[VesselContent],
 	val solvent_l: List[SubstanceLiquid],
-	val solute_l: List[Substance],
+	val solute_l: List[SubstanceSolid],
 	val mixture_l: List[List[Double]],
 	val step_r: List[Step]
 ) {
@@ -477,7 +477,7 @@ class LiquidPlanner {
 	
 	private def dstToSrcVolumes(
 		solvent_l: List[SubstanceLiquid],
-		solute_l: List[Substance],
+		solute_l: List[SubstanceSolid],
 		dst: VesselContent,
 		src_l: List[VesselContent]
 	): List[LiquidVolume] = {
@@ -494,7 +494,7 @@ class LiquidPlanner {
 	
 	private def dstToVector(
 		solvent_l: List[SubstanceLiquid],
-		solute_l: List[Substance],
+		solute_l: List[SubstanceSolid],
 		dst: VesselContent
 	): SimpleMatrix = {
 		val bº = 
@@ -510,7 +510,7 @@ class LiquidPlanner {
 	 */
 	private def srcsToMatrix(
 		solvent_l: List[SubstanceLiquid],
-		solute_l: List[Substance],
+		solute_l: List[SubstanceSolid],
 		dst: VesselContent,
 		src_l: List[VesselContent]
 	): SimpleMatrix = {

@@ -425,9 +425,9 @@ class ObjBase(bb: BeanBase) {
 					else
 						false
 						
-				case _ =>
+				case solid: SubstanceSolid =>
 					val bContainsSolute =
-						st.content.mapSoluteToMol.contains(substance) &&
+						st.content.mapSoluteToMol.contains(solid) &&
 						st.content.mapSoluteToMol.size == 1 &&
 						st.content.mapSolventToVolume.forall(_._1.id == "water")
 					bContainsSolute
