@@ -6,6 +6,7 @@ import scala.reflect.runtime.universe.TypeTag
 import org.scalatest.FunSpec
 import spray.json._
 import roboliq.core._
+import ConversionsDirect._
 
 
 object A extends Enumeration {
@@ -16,11 +17,10 @@ class ConversionsSpec extends FunSpec {
 	private def getTypeTag[T: TypeTag](obj: T) = ru.typeTag[T]
 	private def getType[T: TypeTag](obj: T) = ru.typeTag[T].tpe
 
-	describe("conv") {
-		import ConversionsDirect._
+	//def check[A: TypeTag](jsval: JsValue, exp: A) =
+	//	assert(ConversionsDirect.conv(jsval, ru.typeTag[A].tpe) == RqSuccess(exp))
 
-		//def check[A: TypeTag](jsval: JsValue, exp: A) =
-		//	assert(ConversionsDirect.conv(jsval, ru.typeTag[A].tpe) == RqSuccess(exp))
+	describe("conv") {
 		def check[A: TypeTag](succeed_l: List[(JsValue, A)], fail_l: List[JsValue]) = {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ") {
@@ -32,7 +32,7 @@ class ConversionsSpec extends FunSpec {
 				}
 			}
 		}
-		
+
 		check[String](
 			List(JsString("test") -> "test"),
 			List(JsNumber(1), JsNull)
@@ -82,9 +82,22 @@ class ConversionsSpec extends FunSpec {
 				JsNumber(1) -> Set(1)),
 			List(JsString("1"))
 		)
+		check[Map[String, Int]](
+			List(
+				JsonParser("""{"a": 1, "b": 2}""") -> Map("a" -> 1, "b" -> 2),
+				JsNull -> Map()
+			),
+			List(JsString("1"))
+		)
 		check[PipettePolicy](
 			List(
 				JsonParser("""{"id": "myId", "pos": "WetContact"}""") -> PipettePolicy("myId", PipettePosition.WetContact)
+			),
+			List(JsNull)
+		)
+		check[Substance](
+			List(
+				JsonParser("""{"id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
 			),
 			List(JsNull)
 		)
@@ -104,5 +117,37 @@ class ConversionsSpec extends FunSpec {
 			assert(conv(JsNumber(1), typeOf[A.Value]).isError)
 			assert(conv(JsNull, typeOf[A.Value]).isError)
 		}*/
+	}
+	
+	describe("convRequirements") {
+		/*def checkList[A: TypeTag](jsval: JsValue, lookup_m: Map[String, Object]succeed_l: List[(JsValue, A)], fail_l: List[JsValue]) = {
+			val typ = ru.typeTag[A].tpe
+			it(s"should parse $typ") {
+				for (pair <- succeed_l) {
+					assert(conv(pair._1, typ) === RqSuccess(pair._2))
+				}
+				for (jsval <- fail_l) {
+					assert(conv(jsval, typ).isError)
+				}
+			}
+		}*/
+	/*val idVessel: String,
+	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
+	val mapSoluteToMol: Map[SubstanceSolid, BigDecimal]
+		check[VesselContent](
+			List(
+				JsonParser("""{"idVessel": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			),
+			List(JsNull)
+		)*/
+		it("should parse Map[Substance, Int]") {
+			assert(
+				convRequirements(JsonParser("""{"water": 1, "power": 20}"""), typeOf[Map[Substance, Int]]) ===
+					RqSuccess(Left(Map(
+						"water#" -> KeyClassOpt(KeyClass(TKP("substance", "water", Nil), typeOf[Substance]), false),
+						"power#" -> KeyClassOpt(KeyClass(TKP("substance", "power", Nil), typeOf[Substance]), false)
+					)))
+			)
+		}
 	}
 }
