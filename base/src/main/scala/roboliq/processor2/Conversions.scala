@@ -1,7 +1,7 @@
 package roboliq.processor2
 
 //import scala.language.existentials
-//import scala.language.implicitConversions
+import scala.language.implicitConversions
 //import scala.language.postfixOps
 //import scalaz._
 import scala.reflect.runtime.{universe => ru}
@@ -14,40 +14,135 @@ import RqPimper._
 
 
 object ConversionsDirect {
+	/*
+	def conv3(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): RqResult[Any] = {
+		conv2(jsval, typ, lookup_l)._1
+	}
 	
-	def conv(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): RqResult[Any] = {
+	private def convWithDereferencing(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): (RqResult[Any], List[Object]) = {
+		jsval match {
+			case JsString(s) if s.startsWith("*") =>
+				lookup2_l match {
+					case lookup :: rest =>
+						lookup2_l = rest
+						RqSuccess(lookup)
+					case _ =>
+						RqError(s"No value for `$name` in lookup list")
+				}
+			case _ =>
+				conv2(jsval, typ, lookup_l)
+		}
+	}
+	*/
+	private sealed trait ConvResult
+	private case class ConvObject(o: Any) extends ConvResult
+	private case class ConvRequire(require_m: Map[String, KeyClassOpt]) extends ConvResult
+	
+	def tableForType(tpe: ru.Type): String = {
+		val s = tpe.typeSymbol.name.decoded
+		s.take(1).toLowerCase + s.tail
+	}
+
+	//private def reduceConvResultList(l: List[ConvResult]): 
+	def conv(jsval: JsValue, typ: ru.Type, lookup_m: Map[String, Object] = Map()): RqResult[Any] = {
+		convOrRequire(Nil, jsval, typ, Some(lookup_m)).flatMap(_ match {
+			case ConvRequire(m) => RqError("need to lookup values for "+m.keys.mkString(", "))
+			case ConvObject(o) => RqSuccess(o)
+		})
+	}
+
+	def convRequirements(jsval: JsValue, typ: ru.Type): RqResult[Either[Map[String, KeyClassOpt], Any]] = {
+		convOrRequire(Nil, jsval, typ, None).flatMap(_ match {
+			case ConvRequire(m) => RqSuccess(Left(m))
+			case ConvObject(o) => RqSuccess(Right(o))
+		})
+	}
+
+	private def convOrRequire(path_r: List[String], jsval: JsValue, typ: ru.Type, lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
-		println("conv: "+jsval+", "+typ)
-		// TODO: handle this by inspection somehow, so that the individual conversions
-		// don't need to be maintained here.
-		val ret =
+		val path = path_r.mkString(".")
+		println(s"conv2: ${path}: $typ = $jsval")
+
+		// Check whether the json value requests a lookup of another object
+		jsval match {
+			case JsString(s) if s.startsWith("*") =>
+				return lookup_m_? match {
+					// If we've been passed the map of objects to lookup:
+					case Some(lookup_m) =>
+						lookup_m.get(path) match {
+							case Some(o) => RqSuccess(ConvObject(o))
+							case None => RqError(s"value at `$path = $s` not found")
+						}
+					// Otherwise create a list of required objects
+					case None =>
+						val table = tableForType(typ)
+						val id = s.tail
+						val tkp = TKP(table, id, Nil)
+						val kco = KeyClassOpt(KeyClass(tkp, typ), false, None)
+						RqSuccess(ConvRequire(Map(path -> kco)))
+				}
+			case _ =>
+		}
+		
+		implicit def changeResult(res: RqResult[Any]): RqResult[ConvResult] = res.map(ConvObject)
+		
+		val ret: RqResult[ConvResult] =
 		if (typ =:= typeOf[String]) ConversionsDirect.toString(jsval)
 		else if (typ =:= typeOf[Int]) toInt(jsval)
 		else if (typ =:= typeOf[Integer]) toInteger(jsval)
+		else if (typ =:= typeOf[BigDecimal]) toBigDecimal(jsval)
+		else if (typ =:= typeOf[Boolean]) toBoolean(jsval)//.map(_.asInstanceOf[Boolean])
+		else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
 		else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
-		else if (typ <:< typeOf[Option[Any]]) {
+		else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
+		else if (typ <:< typeOf[Option[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-			conv(jsval, typ2, lookup_l).map(Option.apply)
+			if (jsval == JsNull) RqSuccess(ConvObject(None))
+			else convOrRequire(path_r, jsval, typ2, lookup_m_?).map(_ match {
+				case ConvObject(o) => ConvObject(Option(o))
+				case res => res
+			})
 		}
-		else if (typ <:< typeOf[List[Any]]) {
+		else if (typ <:< typeOf[List[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			convList(path_r, jsval, typ2, lookup_m_?)
+		}
+		else if (typ <:< typeOf[Set[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			convList(path_r, jsval, typ2, lookup_m_?).map(_ match {
+				case ConvObject(l: List[_]) => ConvObject(Set(l : _*))
+				case r => r
+			})
+		}
+		else if (typ <:< typeOf[Map[_, _]]) {
 			jsval match {
-				case JsArray(v) =>
-					RqResult.toResultOfList(v.map(jsval => conv(jsval, typ2, lookup_l)))
-				case _ => RqError("!")
+				case jsobj @ JsObject(fields) =>
+					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(1)
+					val nameToType_l = fields.toList.map(_._1 -> typ2)
+					convMap(path_r, jsobj, nameToType_l, lookup_m_?)
+				case _ =>
+					RqError("expected a JsObject")
 			}
 		}
-		else if (typ <:< typeOf[LiquidVolume]) toVolume(jsval)
-		else if (typ <:< typeOf[PipettePosition.Value]) toPipettePosition(jsval)
-		else if (typ <:< typeOf[PipettePolicy]) toPipettePolicy(jsval)
 		else if (jsval.isInstanceOf[JsObject]) {
 			val jsobj = jsval.asJsObject
 			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 			val p0_l = ctor.paramss(0)
-			val p_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
+			val nameToType_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
+			convMap(path_r, jsobj, nameToType_l, lookup_m_?).map(_ match {
+				case ConvObject(o) =>
+					val nameToObj_m = o.asInstanceOf[Map[String, _]]
+					val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
+					val c = typ.typeSymbol.asClass
+					val mm = mirror.reflectClass(c).reflectConstructor(ctor)
+					val obj = mm(arg_l : _*)
+					ConvObject(obj)
+				case r => r
+			})
+			/*
 			var lookup2_l = lookup_l
 			for {
 				arg_l <- RqResult.toResultOfList(p_l.map(pair => {
@@ -84,13 +179,77 @@ object ConversionsDirect {
 				val c = typ.typeSymbol.asClass
 				val mm = mirror.reflectClass(c).reflectConstructor(ctor)
 				mm(arg_l : _*)
-			}
+			}*/
 		}
 		else {
-			RqError("Unhandled type")
+			RqError(s"Unhandled type: ${typ}")
 		}
 		println(ret)
 		ret
+	}
+	
+	private def convList(path_r: List[String], jsval: JsValue, typ2: ru.Type, lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
+		import scala.reflect.runtime.universe._
+		
+		val mirror = runtimeMirror(this.getClass.getClassLoader)
+
+		jsval match {
+			case JsArray(v) =>
+				// Try to convert each element of the array
+				val res0 = RqResult.toResultOfList(v.zipWithIndex.map(pair => {
+					val (jsval2, i) = pair
+					val path2_r = path_r match {
+						case Nil => List(s"[$i]")
+						case head :: rest => (s"$head[$i]") :: rest
+					}
+					convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
+				}))
+				// If there were no errors in conversion,
+				res0.map(l => {
+					// If there are any requirements, return a list of all requirements.
+					if (l.exists(_.isInstanceOf[ConvRequire])) {
+						ConvRequire(l.collect({case ConvRequire(m) => m}).flatten.toMap)
+					}
+					// Otherwise, return list of objects.
+					else {
+						ConvObject(l.collect({case ConvObject(o) => o}))
+					}
+				})
+			case JsNull =>
+				RqSuccess(ConvObject(Nil))
+			case _ =>
+				convOrRequire(path_r, jsval, typ2, lookup_m_?).map(_ match {
+					case x: ConvRequire => x
+					case ConvObject(o) => ConvObject(List(o))
+				}).orElse(RqError(s"expected an array of ${typ2.typeSymbol.name.toString}"))
+		}
+	}
+	
+	private def convMap(path_r: List[String], jsobj: JsObject, nameToType_l: List[(String, ru.Type)], lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
+		import scala.reflect.runtime.universe._
+		
+		val mirror = runtimeMirror(this.getClass.getClassLoader)
+
+		// Try to convert each element of the object
+		val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
+			val (name, typ2) = pair
+			val path2_r = name :: path_r
+			jsobj.fields.get(name) match {
+				case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
+				case None => convOrRequire(path2_r, JsNull, typ2, lookup_m_?)
+			}
+		}))
+		// If there were no errors in conversion,
+		res0.map(l => {
+			// If there are any requirements, return a list of all requirements.
+			if (l.exists(_.isInstanceOf[ConvRequire])) {
+				ConvRequire(l.collect({case ConvRequire(m) => m}).flatten.toMap)
+			}
+			// Otherwise, return map of names to objects.
+			else {
+				ConvObject((nameToType_l zip l).collect({case ((name: String, _), ConvObject(o)) => name -> o}).toMap)
+			}
+		})
 	}
 
 	def toJsValue(jsval: JsValue): RqResult[JsValue] =
@@ -99,7 +258,7 @@ object ConversionsDirect {
 	def toString(jsval: JsValue): RqResult[String] = {
 		jsval match {
 			case JsString(text) => RqSuccess(text)
-			case _ => RqSuccess(jsval.toString)
+			case _ => RqError("expected JsString")
 		}
 	}
 	
@@ -228,28 +387,6 @@ object ConversionsDirect {
 		} yield substance
 	}
 	
-	def toPipettePosition(jsval: JsValue): RqResult[PipettePosition.Value] = {
-		for {
-			s <- toString(jsval)
-		} yield {
-			PipettePosition.withName(s)
-		}
-	}
-	
-	def toPipettePolicy(jsval: JsValue): RqResult[PipettePolicy] = {
-		jsval match {
-			case JsString(name) => RqSuccess(PipettePolicy.fromName(name))
-			case _ =>
-				for {
-					jsobj <- toJsObject(jsval)
-					id <- getString('id, jsobj)
-					pos <- getWith('pos, jsobj, toPipettePosition _)
-				} yield {
-					PipettePolicy(id, pos)
-				}
-		}
-	}
-	
 	def getWith[A](symbol: Symbol, jsobj: JsObject, fn: JsValue => RqResult[A]): RqResult[A] = {
 		jsobj.fields.get(symbol.name).asRq(s"missing field `${symbol.name}`").flatMap(fn)
 	}
@@ -262,7 +399,7 @@ object ConversionsDirect {
 	}
 
 	implicit class SymbolWrapper(symbol: Symbol) {
-		private def conv2[A: TypeTag](jsval: JsValue) = conv(jsval, ru.typeTag[A].tpe, Nil).map(_.asInstanceOf[A])
+		private def conv2[A: TypeTag](jsval: JsValue) = conv(jsval, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
 		def as[A: TypeTag](jsobj: JsObject): RqResult[A] = getWith(symbol, jsobj, conv2[A] _)
 	}
 	
@@ -297,63 +434,6 @@ object ConversionsDirect {
 object Conversions {
 	private val D = ConversionsDirect
 	
-	def tableForType(tpe: ru.Type): String = {
-		val s = tpe.typeSymbol.name.decoded
-		s.take(1).toLowerCase + s.tail
-	}
-
-	def convLookup(jsval: JsValue, typ: ru.Type): RqResult[List[KeyClassOpt]] = {
-		import scala.reflect.runtime.universe._
-		import scala.reflect.runtime.{currentMirror => cm}
-
-		println("convLookup: "+jsval+", "+typ)
-		val ret =
-		if (typ <:< typeOf[List[Any]]) {
-			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-			jsval match {
-				case JsArray(v) =>
-					RqResult.toResultOfList(v.map(jsval => convLookup(jsval, typ2))).map(_.flatten)
-				case _ => convLookup(jsval, typ2)
-			}
-		}
-		else if (jsval.isInstanceOf[JsObject]) {
-			val jsobj = jsval.asJsObject
-			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
-			val p0_l = ctor.paramss(0)
-			val p_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
-			RqResult.toResultOfList(p_l.map(pair => {
-				val (name, typ2) = pair
-				jsobj.fields.get(name) match {
-					case Some(jsval2) => convLookup(jsval2, typ2)
-					case None =>
-						jsobj.fields.get("&"+name) match {
-							case Some(JsString(id)) =>
-								val table = tableForType(typ2)
-								val tkp = TKP(table, id, Nil)
-								RqSuccess(List(KeyClassOpt(KeyClass(tkp, typ2), false, None)))
-							case Some(jsval2) =>
-								RqError(s"Require string for ID")
-							case None =>
-								if (typ2 <:< typeOf[Option[Any]]) {
-									RqSuccess(Nil)
-								}
-								else if (typ2 <:< typeOf[List[Any]]) {
-									RqSuccess(Nil)
-								}
-								else {
-									RqError(s"missing field `$name`")
-								}
-						}
-				}
-			})).map(_.flatten)
-		}
-		else {
-			RqSuccess(Nil)
-		}
-		println(ret)
-		ret
-	}
-
 	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler1(
 		(jsval: JsValue) =>
 			fn(jsval).map(obj => List(ConversionItem_Object(obj)))

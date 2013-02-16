@@ -327,10 +327,24 @@ class ProcessorData(
 							Nil
 						case None =>
 							// REFACTOR: Is practically a duplicate of RqFunctionHandler.cmdAs
-							val arg_l = List(KeyClassOpt(kc, false))
 							val fn: RqFunction = (l: List[Object]) => l match {
 								case List(jsval: JsValue) =>
-									Conversions.convLookup(jsval, kc.clazz).map { arg_l =>
+									ConversionsDirect.convRequirements(jsval, kc.clazz).map(_ match {
+										case Left(pathToKey_m) =>
+											val pathToKey_l = pathToKey_m.toList
+											val arg_l = pathToKey_l.map(_._2)
+											List(RqItem_Function(RqFunctionArgs(
+												arg_l = arg_l,
+												fn = (input_l) => {
+													val lookup_m = (pathToKey_l.map(_._1) zip input_l).toMap
+													ConversionsDirect.conv(jsval, kc.clazz, lookup_m).map(o =>
+														List(ConversionItem_Object(o.asInstanceOf[Object])))
+												}
+											)))
+										case Right(o) =>
+											List(ConversionItem_Object(o.asInstanceOf[Object]))
+									})
+									/*ConversionsDirect.convLookup(jsval, kc.clazz).map { arg_l =>
 										List(RqItem_Function(RqFunctionArgs(
 											arg_l = arg_l,
 											fn = (input_l) => {
@@ -338,10 +352,11 @@ class ProcessorData(
 													List(ConversionItem_Object(o.asInstanceOf[Object])))
 											}
 										)))
-									}
+									}*/
 								case _ =>
 									RqError("Expected JsValue")
 							}
+							val arg_l = List(KeyClassOpt(kc, false))
 							val fnargs = RqFunctionArgs(fn, arg_l)
 							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
 							// FIXME: should put this message in a map so it only shows up once

@@ -300,14 +300,25 @@ abstract class RqFunctionHandler {
 		val fn0: RqFunction = (l: List[Object]) => l match {
 			case List(jsval: JsValue) =>
 				val typ = ru.typeTag[A].tpe
-				Conversions.convLookup(jsval, typ).map { arg_l =>
-					List(RqItem_Function(RqFunctionArgs(
-						arg_l = arg_l,
-						fn = (input_l) => {
-							ConversionsDirect.conv(jsval, typ, input_l).flatMap(o => fn(o.asInstanceOf[A]))
-						}
-					)))
-				}
+				ConversionsDirect.convRequirements(jsval, typ).map(_ match {
+					case Left(pathToKey_m) =>
+						val pathToKey_l = pathToKey_m.toList
+						val arg_l = pathToKey_l.map(_._2)
+						List(RqItem_Function(RqFunctionArgs(
+							arg_l = arg_l,
+							fn = (input_l) => {
+								val lookup_m = (pathToKey_l.map(_._1) zip input_l).toMap
+								ConversionsDirect.conv(jsval, typ, lookup_m).flatMap(o => fn(o.asInstanceOf[A]))
+							}
+						)))
+					case Right(o) =>
+						List(RqItem_Function(RqFunctionArgs(
+							arg_l = Nil,
+							fn = (_) => {
+								fn(o.asInstanceOf[A])
+							}
+						)))
+				})
 			case _ =>
 				RqError("Expected JsValue")
 		}
@@ -320,7 +331,7 @@ abstract class RqFunctionHandler {
 		def lookup[A <: Object : TypeTag]: RequireItem[A] = {
 			val fnargs = fnRequire (as[String]) { (id) =>
 				val t = ru.typeTag[A].tpe
-				val s = Conversions.tableForType(t)
+				val s = ConversionsDirect.tableForType(t)
 				fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
 					returnObject(o)
 				}
