@@ -148,7 +148,7 @@ object ConversionsDirect {
 		jsval match {
 			case JsString(s) =>
 				value_l.find(_.toString == s).asRq(s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
-			case _ => RqError("expected JsNumber")
+			case _ => RqError("expected JsString")
 		}
 
 	}

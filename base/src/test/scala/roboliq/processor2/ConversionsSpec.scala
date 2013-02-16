@@ -28,36 +28,12 @@ class ConversionsSpec extends FunSpec {
 			val jsval = JsNumber(exp)
 			assert(conv(jsval, getType(exp)) === RqSuccess(exp))
 		}
-		/*it("help") {
-			val mirror = ru.runtimeMirror(A.getClass.getClassLoader)
-			val typ = typeOf[A.Value]
-			// Get enclosing enumeration (e.g. MyStatus.Value => MyStatus)
-			val enumType = typ.find(_ <:< typeOf[Enumeration]).get
-			val enumModule = enumType.termSymbol.asModule
-			val enumMirror = mirror.reflectModule(enumModule)
-			val enum1 = enumMirror.instance.asInstanceOf[Enumeration]
-			print(enum1.values)
-
-			val enumClass = enumType.typeSymbol.asClass
-			val clazz = mirror.runtimeClass(enumClass)
-			println(clazz)
-			val ctor = clazz.getConstructor()
-			println(ctor)
-			val enum0 = ctor.newInstance()
-			
-			val enumCtorMethod = enumType.member(ru.nme.CONSTRUCTOR).asMethod
-			val enumCtorMirror = mirror.reflectClass(enumClass).reflectConstructor(enumCtorMethod)
-			val enum = enumCtorMirror().asInstanceOf[Enumeration]
-			val value_l = enum.values
-			val s = "B"
-			println(value_l.find(_.toString == s).map(_.asInstanceOf[A.Value]))
-		}
-	*/
 		it("should parse Enum") {
-			val exp = 42
-			val jsval = JsNumber(exp)
-			assert(toEnum[A.Value](JsString("B")) === RqSuccess(A.B))
 			assert(conv(JsString("B"), typeOf[A.Value]) === RqSuccess(A.B))
+			assert(conv(JsString("C"), typeOf[A.Value]) === RqSuccess(A.C))
+			assert(conv(JsString(""), typeOf[A.Value]).isError)
+			assert(conv(JsNumber(1), typeOf[A.Value]).isError)
+			assert(conv(JsNull, typeOf[A.Value]).isError)
 		}
 	}
 }
