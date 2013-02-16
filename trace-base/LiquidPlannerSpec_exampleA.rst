@@ -21,7 +21,7 @@ Destinations
 
 .. math::
 
-  \mathbf{D} = \left[ \begin{array}{} 99 ul & 99 ul \\ 1 ul & 1 ul \\ 0.1 & 0.1 \\ 0.1 & 0 \\ 0 & 0.1 \end{array} \right]
+  \mathbf{D} = \left[ \begin{array}{} 99 ul & 99 ul \\ 1 ul & 1 ul \\ 0.1 & 0.1 \\ 0.1 & 0.0 \\ 0.0 & 0.1 \end{array} \right]
 
 
 Sources
@@ -29,11 +29,11 @@ Sources
 
 .. math::
 
-  \mathbf{S} = \left[ \begin{array}{} 1 ml & 950 ul & 1 ml & 1 ml & 1 ml \\ 0 & 50 ul & 0 & 0 & 0 \\ 0 & 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0 & 1 \end{array} \right]
+  \mathbf{S} = \left[ \begin{array}{} 1 ml & 950 ul & 1 ml & 1 ml & 1 ml \\ 0.0 & 50 ul & 0.0 & 0.0 & 0.0 \\ 0.0 & 0.0 & 1 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 & 1 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.0 & 1 \end{array} \right]
 
 .. math::
 
-  \mathbf{S_{1 ul}} = \left[ \begin{array}{} 1 & 0.95 & 1 & 1 & 1 \\ 0 & 0.05 & 0 & 0 & 0 \\ 0 & 0 & 0.01 & 0 & 0 \\ 0 & 0 & 0 & 0.01 & 0 \\ 0 & 0 & 0 & 0 & 0.01 \end{array} \right]
+  \mathbf{S_{100 ul}} = \left[ \begin{array}{} 1.0 & 0.95 & 1.0 & 1.0 & 1.0 \\ 0.0 & 0.05 & 0.0 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.01 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.01 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.0 & 0.01 \end{array} \right]
 
 
 Direct solution
@@ -41,11 +41,7 @@ Direct solution
 
 .. math::
 
-  \mathbf{D} = \mathbf{S_{1 ul}} \mathbf{X}
-
-.. math::
-
-  \mathbf{X} = \left[ \begin{array}{} 60 & 60 \\ 20 & 20 \\ 10 & 10 \\ 10 & 0 \\ 0 & 10 \end{array} \right]
+  \mathbf{X} = \left[ \begin{array}{} 60.0 & 60.0 \\ 20.0 & 20.0 \\ 10.0 & 10.0 \\ 10.0 & 0.0 \\ 0.0 & 10.0 \end{array} \right]
 
 
 Step Iteration #0

@@ -5,6 +5,9 @@ package roboliq.processor2
 //import scala.language.postfixOps
 //import scalaz._
 import scala.reflect.runtime.{universe => ru}
+//import scala.reflect.runtime.{currentMirror => cm}
+import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.runtime.universe.typeOf
 import spray.json._
 import roboliq.core._
 import RqPimper._
@@ -14,24 +17,17 @@ object ConversionsDirect {
 	
 	def conv(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): RqResult[Any] = {
 		import scala.reflect.runtime.universe._
-		import scala.reflect.runtime.{currentMirror => cm}
+		
+		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		println("conv: "+jsval+", "+typ)
 		// TODO: handle this by inspection somehow, so that the individual conversions
 		// don't need to be maintained here.
 		val ret =
-		if (typ =:= typeOf[String]) {
-			ConversionsDirect.toString(jsval)
-		}
-		else if (typ =:= typeOf[Int]) {
-			jsval match {
-				case JsNumber(v) => RqSuccess(v.toInt)
-				case _ => RqError("expected JsNumber")
-			}
-		}
-		else if (typ =:= typeOf[Integer]) {
-			toInteger(jsval)
-		}
+		if (typ =:= typeOf[String]) ConversionsDirect.toString(jsval)
+		else if (typ =:= typeOf[Int]) toInt(jsval)
+		else if (typ =:= typeOf[Integer]) toInteger(jsval)
+		else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
 		else if (typ <:< typeOf[Option[Any]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			conv(jsval, typ2, lookup_l).map(Option.apply)
@@ -86,7 +82,7 @@ object ConversionsDirect {
 				}))
 			} yield {
 				val c = typ.typeSymbol.asClass
-				val mm = cm.reflectClass(c).reflectConstructor(ctor)
+				val mm = mirror.reflectClass(c).reflectConstructor(ctor)
 				mm(arg_l : _*)
 			}
 		}
@@ -104,6 +100,13 @@ object ConversionsDirect {
 		jsval match {
 			case JsString(text) => RqSuccess(text)
 			case _ => RqSuccess(jsval.toString)
+		}
+	}
+	
+	def toInt(jsval: JsValue): RqResult[Int] = {
+		jsval match {
+			case JsNumber(n) => RqSuccess(n.toInt)
+			case _ => RqError("expected JsNumber")
 		}
 	}
 	
@@ -126,6 +129,28 @@ object ConversionsDirect {
 			case JsBoolean(b) => RqSuccess(b)
 			case _ => RqError("expected JsBoolean")
 		}
+	}
+
+	def toEnum[A <: Enumeration#Value : TypeTag](jsval: JsValue): RqResult[A] = {
+		val typ = ru.typeTag[A].tpe
+		toEnum(jsval, typ).map(_.asInstanceOf[A])
+	}
+	
+	private def toEnum(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
+		//val mirror = clazz_?.map(clazz => ru.runtimeMirror(clazz.getClassLoader)).getOrElse(scala.reflect.runtime.currentMirror)
+		val mirror = ru.runtimeMirror(getClass.getClassLoader)
+		// Get enclosing enumeration (e.g. MyStatus.Value => MyStatus)
+		val enumType = typ.find(_ <:< typeOf[Enumeration]).get
+		val enumModule = enumType.termSymbol.asModule
+		val enumMirror = mirror.reflectModule(enumModule)
+		val enum = enumMirror.instance.asInstanceOf[Enumeration]
+		val value_l = enum.values
+		jsval match {
+			case JsString(s) =>
+				value_l.find(_.toString == s).asRq(s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
+			case _ => RqError("expected JsNumber")
+		}
+
 	}
 	
 	private val RxVolume = """([0-9]*)(\.[0-9]*)?([mun]?l)""".r
@@ -185,9 +210,10 @@ object ConversionsDirect {
 			substance <- kind match {
 				case "liquid" =>
 					for {
-						sequence_? <- getString_?('sequence, jsobj)
+						physicalProperties <- 'physicalProperties.as[LiquidPhysicalProperties.Value](jsobj) 
+						cleanPolicy <- 'cleanPolicy.as[GroupCleanPolicy](jsobj)
 					} yield {
-						SubstanceDna(id, sequence_?, costPerUnit_?)
+						SubstanceLiquid(id, physicalProperties, cleanPolicy, costPerUnit_?)
 					}
 				case "dna" =>
 					for {
@@ -199,7 +225,7 @@ object ConversionsDirect {
 					RqSuccess(SubstanceOther(id, costPerUnit_?))
 				case _ => RqError("unknown value for `kind`")
 			}
-		}
+		} yield substance
 	}
 	
 	def toPipettePosition(jsval: JsValue): RqResult[PipettePosition.Value] = {
@@ -234,6 +260,11 @@ object ConversionsDirect {
 			case Some(jsval) => fn(jsval).map(Some(_))
 		}
 	}
+
+	implicit class SymbolWrapper(symbol: Symbol) {
+		private def conv2[A: TypeTag](jsval: JsValue) = conv(jsval, ru.typeTag[A].tpe, Nil).map(_.asInstanceOf[A])
+		def as[A: TypeTag](jsobj: JsObject): RqResult[A] = getWith(symbol, jsobj, conv2[A] _)
+	}
 	
 	def getString(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toString)
 	def getString_?(symbol: Symbol, jsobj: JsObject) = getWith_?(symbol, jsobj, toString)
@@ -241,6 +272,7 @@ object ConversionsDirect {
 	def getBigDecimal(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toBigDecimal)
 	def getBigDecimal_?(symbol: Symbol, jsobj: JsObject) = getWith_?(symbol, jsobj, toBigDecimal)
 	def getBoolean(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toBoolean)
+	def getEnum[A <: Enumeration#Value : TypeTag](symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toEnum[A])
 	def getVolume(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toVolume)
 	def getStringList(symbol: Symbol, jsobj: JsObject) = getWith(symbol, jsobj, toStringList)
 
