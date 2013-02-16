@@ -231,7 +231,8 @@ object ConversionsDirect {
 		ret
 		}
 		catch {
-			case e: Throwable => RqError(s"error converting `$path`: "+e.getStackTrace())
+			case e: Throwable => //e.RqError(s"error converting `$path`: "+e.getStackTrace())
+				throw e
 		}
 	}
 	
@@ -278,35 +279,77 @@ object ConversionsDirect {
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		// Handle keys if they need to be looked up
-		val resKey_? = findTableForType(typKey).map(_ => {
-			RqResult.toResultOfList(nameToType_l.map(pair => {
-				val (id, _) = pair
-				val path2_r = (id + "#") :: path_r
-				convOrRequire(path2_r, JsString(id), typKey, lookup_m_?)
-			}))
-			/*(res0, res1) match {
-				case (_: RqError[_], _) =>
-					res1.flatMap(_ => res0)
-				case (_, _: RqError[_]) =>
-					res1.flatMap(_ => res0)
-				case (RqSuccess(ConvObject(m0), w0), RqSuccess(ConvObject(m1), w1)) =>
-					val map0 = m0.asInstanceOf[Map[String, _]]
-					val map1 = m1.asInstanceOf[Map[String, _]]
-					RqSuccess(ConvObject(name_l.map(name => map1(name) -> map0(name)).toMap))
-				case (RqSuccess(c0, w0), RqSuccess(c1, w1)) =>
-					RqSuccess(c0 + c1, w1 ++ w0)
-			}*/
-		})
+		val (errK_l, wK, convK_l, key_l):
+			(List[String], List[String], Map[String, KeyClassOpt], List[_]) =
+			findTableForType(typKey) match {
+				case Some(_) =>
+					val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
+						val (id, _) = pair
+						val path2_r = (id + "#") :: path_r
+						convOrRequire(path2_r, JsString(id), typKey, lookup_m_?)
+					}))
+					res0 match {
+						case RqError(e, w) => (e, w, Map(), Nil)
+						case RqSuccess(l, w) =>
+							val conv_l = l.collect({case ConvRequire(m) => m}).flatten.toMap
+							val obj_l = l.collect({case ConvObject(o) => o})
+							(Nil, w, conv_l, obj_l)
+					}
+				/*(res0, res1) match {
+					case (_: RqError[_], _) =>
+						res1.flatMap(_ => res0)
+					case (_, _: RqError[_]) =>
+						res1.flatMap(_ => res0)
+					case (RqSuccess(ConvObject(m0), w0), RqSuccess(ConvObject(m1), w1)) =>
+						val map0 = m0.asInstanceOf[Map[String, _]]
+						val map1 = m1.asInstanceOf[Map[String, _]]
+						RqSuccess(ConvObject(name_l.map(name => map1(name) -> map0(name)).toMap))
+					case (RqSuccess(c0, w0), RqSuccess(c1, w1)) =>
+						RqSuccess(c0 + c1, w1 ++ w0)
+				}*/
+				case None =>
+					(Nil, Nil, Map(), nameToType_l.map(_._1))
+			}
 		
 		// Try to convert each element of the object
-		val resVal = RqResult.toResultOfList(nameToType_l.map(pair => {
-			val (name, typ2) = pair
-			val path2_r = name :: path_r
-			jsobj.fields.get(name) match {
-				case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
-				case None => convOrRequire(path2_r, JsNull, typ2, lookup_m_?)
+		val (errV_l, wV, convV_l, val_l):
+			(List[String], List[String], Map[String, KeyClassOpt], List[_]) = {
+			val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
+				val (name, typ2) = pair
+				val path2_r = name :: path_r
+				jsobj.fields.get(name) match {
+					case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
+					case None => convOrRequire(path2_r, JsNull, typ2, lookup_m_?)
+				}
+			}))
+			res0 match {
+				case RqError(e, w) => (e, w, Map(), Nil)
+				case RqSuccess(l, w) =>
+					val conv_l = l.collect({case ConvRequire(m) => m}).flatten.toMap
+					val obj_l = l.collect({case ConvObject(o) => o})
+					(Nil, w, conv_l, obj_l)
 			}
-		}))
+		}
+
+		val err_l = errK_l ++ errV_l
+		val warning_l = wK ++ wV
+		err_l match {
+			// No errors
+			case Nil =>
+				val conv_l = convV_l ++ convK_l
+				// Nothing to look up
+				if (conv_l.isEmpty) {
+					RqSuccess(ConvObject((key_l zip val_l).toMap), warning_l)
+				}
+				else {
+					RqSuccess(ConvRequire(conv_l), warning_l)
+				}
+			case _ =>
+				RqError(err_l, warning_l)
+		}
+		/*
+		val convK_l: List[ConvRequire] = resKey_?.map(_.collect{case o: ConvRequire => o})
+		val convV_l: List[ConvRequire] = resVal.map(_.collect{case o: ConvRequire => o})
 		
 		val res0 = (resKey_?, resVal) match {
 			case (None, _) => resVal
@@ -324,7 +367,7 @@ object ConversionsDirect {
 			else {
 				ConvObject((nameToType_l zip l).collect({case ((name: String, _), ConvObject(o)) => name -> o}).toMap)
 			}
-		})
+		})*/
 	}
 
 	def toJsValue(jsval: JsValue): RqResult[JsValue] =
