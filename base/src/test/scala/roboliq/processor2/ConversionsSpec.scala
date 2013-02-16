@@ -192,14 +192,14 @@ class ConversionsSpec extends FunSpec {
 	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
 ],
 "tip": [
-	{ "id": "TIP1", "index": 0, "model": "Standard 1000ul" },
-	{ "id": "TIP2", "index": 1, "model": "Standard 1000ul" },
-	{ "id": "TIP3", "index": 2, "model": "Standard 1000ul" },
-	{ "id": "TIP4", "index": 3, "model": "Standard 1000ul" },
-	{ "id": "TIP5", "index": 4, "model": "Standard 50ul" },
-	{ "id": "TIP6", "index": 5, "model": "Standard 50ul" },
-	{ "id": "TIP7", "index": 6, "model": "Standard 50ul" },
-	{ "id": "TIP8", "index": 7, "model": "Standard 50ul" }
+	{ "id": "TIP1", "index": 0, "modelPermanent": "Standard 1000ul" },
+	{ "id": "TIP2", "index": 1, "modelPermanent": "Standard 1000ul" },
+	{ "id": "TIP3", "index": 2, "modelPermanent": "Standard 1000ul" },
+	{ "id": "TIP4", "index": 3, "modelPermanent": "Standard 1000ul" },
+	{ "id": "TIP5", "index": 4, "modelPermanent": "Standard 50ul" },
+	{ "id": "TIP6", "index": 5, "modelPermanent": "Standard 50ul" },
+	{ "id": "TIP7", "index": 6, "modelPermanent": "Standard 50ul" },
+	{ "id": "TIP8", "index": 7, "modelPermanent": "Standard 50ul" }
 ],
 "plateModel": [
 	{ "id": "Reagent Cooled 8*50ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
@@ -258,9 +258,10 @@ class ConversionsSpec extends FunSpec {
 		val tip = Tip(0, Some(tipModel))
 		val plate_P1 = Plate("P1", plateModel, None)
 		
-		def read(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
+		def read(kc: KeyClass): RqResult[Any] = {
 			for {
-				either <- convRequirements(jsval, typ)
+				jsval <- db.get(kc.key, Nil)
+				either <- convRequirements(jsval, kc.clazz)
 				ret <- either match {
 					case Right(ret) => RqSuccess(ret)
 					case Left(require_m) => 
@@ -268,12 +269,11 @@ class ConversionsSpec extends FunSpec {
 							lookup_l <- RqResult.toResultOfList(require_m.toList.map(pair => {
 								val (name, kco) = pair
 								for {
-									jsval2 <- db.get(kco.kc.key, Nil)
-									ret <- read(jsval2, kco.kc.clazz)
+									ret <- read(kco.kc)
 								} yield name -> ret
 							}))
 							lookup_m = lookup_l.toMap
-							ret <- conv(jsval, typ, lookup_m)
+							ret <- conv(jsval, kc.clazz, lookup_m)
 						} yield ret
 				}
 			} yield ret
@@ -282,10 +282,8 @@ class ConversionsSpec extends FunSpec {
 		def check[A <: Object : TypeTag](id: String, exp: A) = {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ") {
-				val ret = for {
-					jsval <- db.get(TKP(ConversionsDirect.tableForType(typ), id, Nil))
-					ret <- read(jsval, typ)
-				} yield ret
+				val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
+				val ret = read(kc)
 				assert(ret === RqSuccess(exp))
 			}
 		}
@@ -295,5 +293,16 @@ class ConversionsSpec extends FunSpec {
 		check[PlateLocation]("cooled1", plateLocation_cooled1)
 		check[Tip]("TIP1", tip)
 		check[Plate]("P1", plate_P1)
+		/*
+		println("-----------")
+		println(read(KeyClass(TKP("tip", "TIP1", Nil), typeOf[Tip])))
+		
+		read(KeyClass(TKP("tip", "TIP1", Nil), typeOf[Tip])).foreach { o =>
+			val tip1 = o.asInstanceOf[Tip]
+			println("****************")
+			println((tip.id, tip1.id, tip.id == tip1.id))
+			println((tip.index, tip1.index, tip.index == tip1.index))
+			println((tip.modelPermanent_?, tip1.modelPermanent_?, tip.modelPermanent_? == tip1.modelPermanent_?))
+		}*/
 	}
 }

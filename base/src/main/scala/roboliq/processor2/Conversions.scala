@@ -17,7 +17,10 @@ import RqPimper._
 object ConversionsDirect {
 	
 	val typeToTable_l = List[(Type, String)](
+		typeOf[TipModel] -> "tipModel",
 		typeOf[PlateModel] -> "plateModel",
+		typeOf[PlateLocation] -> "plateLocation",
+		typeOf[Tip] -> "tip",
 		typeOf[Plate] -> "plate",
 		typeOf[Substance] -> "substance"
 	)
@@ -183,7 +186,7 @@ object ConversionsDirect {
 			val jsobj = jsval.asJsObject
 			val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 			val p0_l = ctor.paramss(0)
-			val nameToType_l = p0_l.map(p => p.name.decoded -> p.typeSignature)
+			val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
 			convMap(path_r, jsobj, typeOf[String], nameToType_l, lookup_m_?).map(_ match {
 				case ConvObject(o) =>
 					val nameToObj_m = o.asInstanceOf[Map[String, _]]
