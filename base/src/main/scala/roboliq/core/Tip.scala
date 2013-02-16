@@ -23,7 +23,7 @@ class TipBean extends Bean {
 // TODO: add deviceId_? and make id a parameter rather than automatically generating it.
 case class Tip(
 	val index: Int,
-	val modelPermanent_? : Option[TipModel]
+	val permanent_? : Option[TipModel]
 ) extends Ordered[Tip] {
 	val id = "TIP"+(index+1)
 	

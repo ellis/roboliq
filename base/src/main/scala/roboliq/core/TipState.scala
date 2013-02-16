@@ -40,7 +40,7 @@ object TipState {
 	/** Create an initial state for `tip` with no liquid in it. */
 	def createEmpty(tip: Tip) = TipState(
 		conf = tip,
-		model_? = tip.modelPermanent_?,
+		model_? = tip.permanent_?,
 		src_? = None,
 		liquid = Liquid.empty,
 		volume = LiquidVolume.empty,

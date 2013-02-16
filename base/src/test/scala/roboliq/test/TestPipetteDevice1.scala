@@ -239,8 +239,8 @@ class TestPipetteDevice1 extends PipetteDevice {
 	def canBatchMixItems(states: StateMap, lTwvp: List[TipWellMix]): Boolean = true
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[Tip], lTipCleaning: SortedSet[Tip]): SortedSet[Tip] = {
-		val lModel = lTipCleaning.toSeq.map(_.modelPermanent_?).distinct
-		val lTip = lTipAll.filter(tip => lModel.contains(tip.modelPermanent_?))
+		val lModel = lTipCleaning.toSeq.map(_.permanent_?).distinct
+		val lTip = lTipAll.filter(tip => lModel.contains(tip.permanent_?))
 		lTip -- lTipCleaning
 	}
 

@@ -192,14 +192,14 @@ class ConversionsSpec extends FunSpec {
 	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
 ],
 "tip": [
-	{ "id": "TIP1", "index": 0, "modelPermanent": "Standard 1000ul" },
-	{ "id": "TIP2", "index": 1, "modelPermanent": "Standard 1000ul" },
-	{ "id": "TIP3", "index": 2, "modelPermanent": "Standard 1000ul" },
-	{ "id": "TIP4", "index": 3, "modelPermanent": "Standard 1000ul" },
-	{ "id": "TIP5", "index": 4, "modelPermanent": "Standard 50ul" },
-	{ "id": "TIP6", "index": 5, "modelPermanent": "Standard 50ul" },
-	{ "id": "TIP7", "index": 6, "modelPermanent": "Standard 50ul" },
-	{ "id": "TIP8", "index": 7, "modelPermanent": "Standard 50ul" }
+	{ "id": "TIP1", "index": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP2", "index": 1, "permanent": "Standard 1000ul" },
+	{ "id": "TIP3", "index": 2, "permanent": "Standard 1000ul" },
+	{ "id": "TIP4", "index": 3, "permanent": "Standard 1000ul" },
+	{ "id": "TIP5", "index": 4, "permanent": "Standard 50ul" },
+	{ "id": "TIP6", "index": 5, "permanent": "Standard 50ul" },
+	{ "id": "TIP7", "index": 6, "permanent": "Standard 50ul" },
+	{ "id": "TIP8", "index": 7, "permanent": "Standard 50ul" }
 ],
 "plateModel": [
 	{ "id": "Reagent Cooled 8*50ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
