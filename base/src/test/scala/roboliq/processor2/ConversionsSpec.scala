@@ -161,5 +161,26 @@ class ConversionsSpec extends FunSpec {
 					=== RqSuccess(Map(water -> 1, powder -> 20))
 			)
 		}
+		it("should parse Map[String, Substance]") {
+			assert(
+				convRequirements(JsonParser("""{"first": "water", "second": "powder"}"""), typeOf[Map[String, Substance]])
+					=== RqSuccess(Left(Map(
+						"first" -> KeyClassOpt(KeyClass(TKP("substance", "water", Nil), typeOf[Substance]), false),
+						"second" -> KeyClassOpt(KeyClass(TKP("substance", "powder", Nil), typeOf[Substance]), false)
+					)))
+			)
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			val powder = SubstanceOther("powder", Some(3.5))
+			assert(
+				conv(
+					JsonParser("""{"first": "water", "second": "powder"}"""),
+					typeOf[Map[String, Substance]],
+					Map(
+						"first" -> water,
+						"second" -> powder
+					))
+					=== RqSuccess(Map("first" -> water, "second" -> powder))
+			)
+		}
 	}
 }
