@@ -252,6 +252,7 @@ class ConversionsSpec extends FunSpec {
 			})
 		})
 		
+		//val tipModel = TipModel()
 		val plateModel = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
 		val plate_P1 = Plate("P1", plateModel, None)
 		

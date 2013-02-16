@@ -74,7 +74,7 @@ object ConversionsDirect {
 	}
 
 	//private def reduceConvResultList(l: List[ConvResult]): 
-	def conv(jsval: JsValue, typ: ru.Type, lookup_m: Map[String, Object] = Map()): RqResult[Any] = {
+	def conv(jsval: JsValue, typ: ru.Type, lookup_m: Map[String, Any] = Map()): RqResult[Any] = {
 		convOrRequire(Nil, jsval, typ, Some(lookup_m)).flatMap(_ match {
 			case ConvRequire(m) => RqError("need to lookup values for "+m.keys.mkString(", "))
 			case ConvObject(o) => RqSuccess(o)
@@ -95,7 +95,7 @@ object ConversionsDirect {
 		})
 	}
 	
-	private def convOrRequire(path_r: List[String], jsval: JsValue, typ: ru.Type, lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
+	private def convOrRequire(path_r: List[String], jsval: JsValue, typ: ru.Type, lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -246,7 +246,7 @@ object ConversionsDirect {
 		}
 	}
 	
-	private def convList(path_r: List[String], jsval: JsValue, typ2: ru.Type, lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
+	private def convList(path_r: List[String], jsval: JsValue, typ2: ru.Type, lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -283,7 +283,7 @@ object ConversionsDirect {
 		}
 	}
 	
-	private def convMap(path_r: List[String], jsobj: JsObject, typKey: Type, nameToType_l: List[(String, ru.Type)], lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
+	private def convMap(path_r: List[String], jsobj: JsObject, typKey: Type, nameToType_l: List[(String, ru.Type)], lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
