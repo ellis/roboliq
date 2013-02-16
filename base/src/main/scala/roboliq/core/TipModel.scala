@@ -20,14 +20,14 @@ class TipModelBean extends Bean {
  * 
  * @param id ID in database.
  * @param nVolume maximum volume which this tip can hold.
- * @param nVolumeAspirateMin minimum aspiration volume.
+ * @param volumeMin minimum aspiration volume.
  * @param nVolumeWashExtra volume which must be left unused if tip will be washed instead of discarded.
  * @param nVolumeDeconExtra volume which must be left unused if tip will be decontaminated instead of discarded.
  */
 case class TipModel(
 	val id: String,
 	val volume: LiquidVolume, 
-	val nVolumeAspirateMin: LiquidVolume, 
+	val volumeMin: LiquidVolume, 
 	val nVolumeWashExtra: LiquidVolume,
 	val nVolumeDeconExtra: LiquidVolume
 )

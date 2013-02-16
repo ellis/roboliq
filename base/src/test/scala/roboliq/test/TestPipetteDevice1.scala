@@ -9,14 +9,14 @@ class TestPipetteDevice1 extends PipetteDevice {
 	val tipModel1000 = TipModel(
 		id = "TIP1000",
 		volume = LiquidVolume.ul(1000),
-		nVolumeAspirateMin = LiquidVolume.ul(5), 
+		volumeMin = LiquidVolume.ul(5), 
 		nVolumeWashExtra = LiquidVolume.empty,
 		nVolumeDeconExtra = LiquidVolume.empty
 	)
 	val tipModel50 = TipModel(
 		id = "TIP50",
 		volume = LiquidVolume.ul(50),
-		nVolumeAspirateMin = LiquidVolume.ul(1), 
+		volumeMin = LiquidVolume.ul(1), 
 		nVolumeWashExtra = LiquidVolume.empty,
 		nVolumeDeconExtra = LiquidVolume.empty
 	)
@@ -54,14 +54,14 @@ class TestPipetteDevice1 extends PipetteDevice {
 	def areTipsDisposable: Boolean = false
 	
 	def getDispenseAllowableTipModels(liquid: Liquid, volume: LiquidVolume): Seq[TipModel] = {
-		if (volume < tipModel50.nVolumeAspirateMin) Seq()
-		else if (volume < tipModel1000.nVolumeAspirateMin) Seq(tipModel1000)
+		if (volume < tipModel50.volumeMin) Seq()
+		else if (volume < tipModel1000.volumeMin) Seq(tipModel1000)
 		else if (volume <= tipModel50.volume) Seq(tipModel1000, tipModel50)
 		else Seq(tipModel1000)
 	}
 	
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume = {
-		tip.model_?.map(_.nVolumeAspirateMin).getOrElse(LiquidVolume.empty)
+		tip.model_?.map(_.volumeMin).getOrElse(LiquidVolume.empty)
 	}
 	
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume = {

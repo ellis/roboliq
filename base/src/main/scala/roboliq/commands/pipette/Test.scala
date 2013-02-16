@@ -66,7 +66,7 @@ class TestPipetteDevice extends PipetteDevice {
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume =
 		tip.model_? match {
 			case None => LiquidVolume.empty
-			case Some(model) => model.nVolumeAspirateMin
+			case Some(model) => model.volumeMin
 		}
 	
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume =
