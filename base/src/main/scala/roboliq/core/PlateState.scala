@@ -5,7 +5,7 @@ import scala.reflect.BeanProperty
 
 /** State of a [[roboliq.core.Plate]]. */
 case class PlateState(
-	val conf: Plate,
+	val plate: Plate,
 	val location_? : Option[PlateLocation]
 )
 
@@ -46,7 +46,7 @@ class PlateLocationEventBean extends PlateEventBean {
 			location <- query.findPlateLocation(location)
 		} yield {
 			new PlateState(
-				state0.conf,
+				state0.plate,
 				location_? = Some(location)
 			)
 		}

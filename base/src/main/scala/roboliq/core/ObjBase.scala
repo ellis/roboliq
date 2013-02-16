@@ -272,7 +272,7 @@ class ObjBase(bb: BeanBase) {
 			wellSpec = lWellSpec.head.asInstanceOf[WellSpecOne]
 			plate <- findPlate(idPlate)
 		} yield {
-			val index = wellSpec.rc.col * plate.model.nRows + wellSpec.rc.row
+			val index = wellSpec.rc.col * plate.model.rows + wellSpec.rc.row
 			val well = new PlateWell(
 				id = id,
 				idPlate = idPlate,

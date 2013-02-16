@@ -17,6 +17,8 @@ import RqPimper._
 object ConversionsDirect {
 	
 	val typeToTable_l = List[(Type, String)](
+		typeOf[PlateModel] -> "plateModel",
+		typeOf[Plate] -> "plate",
 		typeOf[Substance] -> "substance"
 	)
 	
@@ -86,6 +88,13 @@ object ConversionsDirect {
 		})
 	}
 
+	def convRequirements[A <: Object : TypeTag](jsval: JsValue): RqResult[Either[Map[String, KeyClassOpt], A]] = {
+		convRequirements(jsval, ru.typeTag[A].tpe).map(_ match {
+			case Left(x) => Left(x)
+			case Right(o) => Right(o.asInstanceOf[A])
+		})
+	}
+	
 	private def convOrRequire(path_r: List[String], jsval: JsValue, typ: ru.Type, lookup_m_? : Option[Map[String, Object]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 
@@ -181,6 +190,7 @@ object ConversionsDirect {
 					val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
 					val c = typ.typeSymbol.asClass
 					val mm = mirror.reflectClass(c).reflectConstructor(ctor)
+					println("arg_l: "+arg_l)
 					val obj = mm(arg_l : _*)
 					ConvObject(obj)
 				case r => r

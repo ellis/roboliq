@@ -23,11 +23,11 @@ class MovePlateHandler extends CommandHandler("arm.movePlate") {
 	val fnargs = cmdAs[MovePlateCmd] { cmd =>
 		import cmd._
 		for {
-			locationSrc <- plate.location_?.asRq(s"plate `${plate.conf.id}` must have an location set.")
+			locationSrc <- plate.location_?.asRq(s"plate `${plate.plate.id}` must have an location set.")
 		} yield {
 			val token = new MovePlateToken(
 				deviceId_?,
-				plate.conf,
+				plate.plate,
 				locationSrc,
 				dest)
 			List(ComputationItem_Token(token))

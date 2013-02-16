@@ -63,7 +63,7 @@ object PipetteHelper {
 			for (tip <- tips.tail) {
 				val dRowTip = tip.index - tip0.index
 				val iWell = pos0.index + dRowTip
-				val iColWell = iWell / plate.model.nRows
+				val iColWell = iWell / plate.model.rows
 				if (iColWell == pos0.iCol) {
 					lWellPosOnHolder.find(_.index == iWell) match {
 						case None =>
@@ -138,7 +138,7 @@ object PipetteHelper {
 		states.findPlate(idPlate) match {
 			case Error(ls) => Error(ls)
 			case Success(plate) =>
-				val nCols = plate.model.nCols
+				val nCols = plate.model.cols
 					
 				def checkCol(iCol: Int): Well = {
 					wellsOnHolder.find(_.iCol == iCol) match {

@@ -109,16 +109,16 @@ private object WellSpecParser0 extends JavaTokenParsers {
 				case WellSpecOne(rc) =>
 					List(idPlate + "(" + rc + ")")
 				case WellSpecVertical(rc0, rc1) =>
-					val i0 = rc0.row + rc0.col * plate.model.nRows
-					val i1 = rc1.row + rc1.col * plate.model.nRows
+					val i0 = rc0.row + rc0.col * plate.model.rows
+					val i1 = rc1.row + rc1.col * plate.model.rows
 					(for (i <- i0 to i1) yield {
 						val row = i % plate.nRows
 						val col = i / plate.nRows
 						idPlate + "(" + RowCol(row, col) + ")"
 					}).toList
 				case WellSpecHorizontal(rc0, rc1) =>
-					val i0 = rc0.row * plate.model.nCols + rc0.col
-					val i1 = rc1.row * plate.model.nCols + rc1.col
+					val i0 = rc0.row * plate.model.cols + rc0.col
+					val i1 = rc1.row * plate.model.cols + rc1.col
 					(for (i <- i0 to i1) yield {
 						val row = i / plate.nCols
 						val col = i % plate.nCols
@@ -243,7 +243,7 @@ object WellSpecParser {
 							ob.findPlate(well0.idPlate) match {
 								case roboliq.core.Error(_) => false
 								case roboliq.core.Success(plate) =>
-									if (well0.iCol == plate.model.nCols - 1)
+									if (well0.iCol == plate.model.cols - 1)
 										true
 									else
 										false

@@ -24,15 +24,15 @@ class PlateBean extends Bean {
  * @param model plate model.
  * @param locationPermanent_? opitonal location ID if this plate cannot be moved.
  */
-class Plate(
+case class Plate(
 	val id: String,
 	val model: PlateModel,
 	val locationPermanent_? : Option[String]
 ) extends Part with Ordered[Plate] {
 	/** Number of rows. */
-	def nRows: Int = model.nRows
+	def nRows: Int = model.rows
 	/** Number of columns. */
-	def nCols: Int = model.nCols
+	def nCols: Int = model.cols
 	/** Number of wells. */
 	def nWells: Int = nRows * nCols
 	

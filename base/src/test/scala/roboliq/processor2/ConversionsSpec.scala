@@ -32,7 +32,7 @@ class ConversionsSpec extends FunSpec {
 				}
 			}
 		}
-
+	
 		check[String](
 			List(JsString("test") -> "test"),
 			List(JsNumber(1), JsNull)
@@ -182,5 +182,112 @@ class ConversionsSpec extends FunSpec {
 					=== RqSuccess(Map("first" -> water, "second" -> powder))
 			)
 		}
+	}
+	
+	describe("conv for database objects") {
+		val config = JsonParser(
+"""{
+"tipModel": [
+	{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" },
+	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
+],
+"tip": [
+	{ "id": "TIP1", "index": 0, "model": "Standard 1000ul" },
+	{ "id": "TIP2", "index": 1, "model": "Standard 1000ul" },
+	{ "id": "TIP3", "index": 2, "model": "Standard 1000ul" },
+	{ "id": "TIP4", "index": 3, "model": "Standard 1000ul" },
+	{ "id": "TIP5", "index": 4, "model": "Standard 50ul" },
+	{ "id": "TIP6", "index": 5, "model": "Standard 50ul" },
+	{ "id": "TIP7", "index": 6, "model": "Standard 50ul" },
+	{ "id": "TIP8", "index": 7, "model": "Standard 50ul" }
+],
+"plateModel": [
+	{ "id": "Reagent Cooled 8*50ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
+	{ "id": "Reagent Cooled 8*15ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
+	{ "id": "Block 20Pos 1.5 ml Eppendorf", "rows": 4, "cols": 5, "wellVolume": "1.5ml" },
+	{ "id": "D-BSSE 96 Well PCR Plate", "rows": 8, "cols": 12, "wellVolume": "200ul" },
+	{ "id": "D-BSSE 96 Well Costar Plate", "rows": 8, "cols": 12, "wellVolume": "350ul" },
+	{ "id": "D-BSSE 96 Well DWP", "rows": 8, "cols": 12, "wellVolume": "1000ul" },
+	{ "id": "Trough 100ml", "rows": 8, "cols": 1, "wellVolume": "100ul" },
+	{ "id": "Ellis Nunc F96 MicroWell", "rows": 8, "cols": 12, "wellVolume": "400ul" }
+],
+"plateLocation": [
+	{ "id": "trough1", "plateModels": ["Trough 100ml"] },
+	{ "id": "trough2", "plateModels": ["Trough 100ml"] },
+	{ "id": "trough3", "plateModels": ["Trough 100ml"] },
+	{ "id": "uncooled2_low", "plateModels": ["D-BSSE 96 Well DWP", "Ellis Nunc F96 MicroWell"] },
+	{ "id": "uncooled2_high", "plateModels": ["D-BSSE 96 Well Costar Plate"] },
+	{ "id": "shaker", "plateModels": ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] },
+	{ "id": "cooled1", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cooled2", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cooled3", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cooled4", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cooled5", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "regrip", "plateModels": ["D-BSSE 96 Well PCR Plate", "D-BSSE 96 Well Costar Plate"] },
+	{ "id": "reader", "plateModels": ["D-BSSE 96 Well Costar Plate"] }
+],
+"tubeLocation": [
+	{ "id": "reagents50", "tubeModels": ["Tube 50ml"], "rackModel": "Reagent Cooled 8*50ml" },
+	{ "id": "reagents15", "tubeModels": ["Tube 15ml"], "rackModel": "Reagent Cooled 8*15ml" },
+	{ "id": "reagents1.5", "tubeModels": ["Tube 1.5ml"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
+],
+"plate": [
+	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
+	{ "id": "reagents15", "model": "Reagent Cooled 8*15ml", "location": "reagents15" },
+	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" }
+],
+"plate": [
+	{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
+]
+}""").asJsObject
+	
+		val db = new DataBase
+		config.fields.foreach(pair => {
+			val (table, JsArray(elements)) = pair
+			elements.foreach(jsval => {
+				val jsobj = jsval.asJsObject
+				val key = jsobj.fields("id").asInstanceOf[JsString].value
+				val tkp = TKP(table, key, Nil)
+				db.set(tkp, Nil, jsval)
+			})
+		})
+		
+		val plateModel = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
+		val plate_P1 = Plate("P1", plateModel, None)
+		
+		def read(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
+			for {
+				either <- convRequirements(jsval, typ)
+				ret <- either match {
+					case Right(ret) => RqSuccess(ret)
+					case Left(require_m) => 
+						for {
+							lookup_l <- RqResult.toResultOfList(require_m.toList.map(pair => {
+								val (name, kco) = pair
+								for {
+									jsval2 <- db.get(kco.kc.key, Nil)
+									ret <- read(jsval2, kco.kc.clazz)
+								} yield name -> ret
+							}))
+							lookup_m = lookup_l.toMap
+							ret <- conv(jsval, typ, lookup_m)
+						} yield ret
+				}
+			} yield ret
+		}
+		
+		def check[A <: Object : TypeTag](id: String, exp: A) = {
+			val typ = ru.typeTag[A].tpe
+			it(s"should parse $typ") {
+				val ret = for {
+					jsval <- db.get(TKP(ConversionsDirect.tableForType(typ), id, Nil))
+					ret <- read(jsval, typ)
+				} yield ret
+				assert(ret === RqSuccess(exp))
+			}
+		}
+
+		check[PlateModel]("D-BSSE 96 Well PCR Plate", plateModel)
+		check[Plate]("P1", plate_P1)
 	}
 }

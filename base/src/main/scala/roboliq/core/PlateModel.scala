@@ -21,11 +21,11 @@ class PlateModelBean extends Bean {
  * @param nCols number of columns on the plate.
  * @param nWellVolume maximum volume that can go in the wells.
  */
-class PlateModel(
+case class PlateModel(
 	val id: String,
-	val nRows: Int,
-	val nCols: Int,
-	val nWellVolume: LiquidVolume
+	val rows: Int,
+	val cols: Int,
+	val wellVolume: LiquidVolume
 )
 
 object PlateModel {

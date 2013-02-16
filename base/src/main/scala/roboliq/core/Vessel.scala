@@ -69,7 +69,7 @@ object Well {
 		//println("WellPosition.forTube: "+o.obj.id)
 		for { plate <- query.findPlate(o.idPlate) }
 		yield {
-			val index = o.row + o.col * plate.model.nRows
+			val index = o.row + o.col * plate.model.rows
 			new WellPosition(o.obj.id, o.idPlate, index, o.row, o.col, "")
 		}
 	}

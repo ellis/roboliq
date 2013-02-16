@@ -177,13 +177,13 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				lLocFree.find(loc => loc.tubeModels.contains(tube.model)) match {
 					case None => node.addError("couldn't find location for `"+tube.id+"`")
 					case Some(location) =>
-						val nWells = location.rackModel.nRows * location.rackModel.nCols
+						val nWells = location.rackModel.rows * location.rackModel.cols
 						// Get next index to use on plate
 						val i = mLocIndexUsed.getOrElse(location, -1) + 1
 						mLocIndexUsed(location) = i
 						assert(i < nWells)
-						val iRow = i % location.rackModel.nRows
-						val iCol = i / location.rackModel.nCols
+						val iRow = i % location.rackModel.rows
+						val iCol = i / location.rackModel.cols
 						if (i + 1 == nWells)
 							lLocFree -= location
 						// Add a plate and location with the same name for tube racks
