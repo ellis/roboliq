@@ -27,10 +27,12 @@ class TipModelBean extends Bean {
 case class TipModel(
 	val id: String,
 	val volume: LiquidVolume, 
-	val volumeMin: LiquidVolume, 
-	val nVolumeWashExtra: LiquidVolume,
-	val nVolumeDeconExtra: LiquidVolume
-)
+	val volumeMin: LiquidVolume,
+	val cleanIntensityToExtraVolume: Map[WashIntensity.Value, LiquidVolume] = Map()
+) {
+	val volumeWashExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(WashIntensity.Thorough, LiquidVolume.empty)
+	val volumeDeconExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(WashIntensity.Decontaminate, LiquidVolume.empty)
+}
 
 object TipModel {
 	/** Convert [[roboliq.core.TipModelBean]] to [[roboliq.core.TipModel]]. */
@@ -40,7 +42,7 @@ object TipModel {
 			volumeMax <- Result.mustBeSet(bean.volumeMax, "volumeMax")
 			volumeMin <- Result.mustBeSet(bean.volumeMin, "volumeMin")
 		} yield {
-			new TipModel(id, LiquidVolume.l(volumeMax), LiquidVolume.l(volumeMin), LiquidVolume.empty, LiquidVolume.empty)
+			new TipModel(id, LiquidVolume.l(volumeMax), LiquidVolume.l(volumeMin), Map())
 		}
 	}
 }

@@ -9,16 +9,12 @@ class TestPipetteDevice1 extends PipetteDevice {
 	val tipModel1000 = TipModel(
 		id = "TIP1000",
 		volume = LiquidVolume.ul(1000),
-		volumeMin = LiquidVolume.ul(5), 
-		nVolumeWashExtra = LiquidVolume.empty,
-		nVolumeDeconExtra = LiquidVolume.empty
+		volumeMin = LiquidVolume.ul(5)
 	)
 	val tipModel50 = TipModel(
 		id = "TIP50",
 		volume = LiquidVolume.ul(50),
-		volumeMin = LiquidVolume.ul(1), 
-		nVolumeWashExtra = LiquidVolume.empty,
-		nVolumeDeconExtra = LiquidVolume.empty
+		volumeMin = LiquidVolume.ul(1)
 	)
 	val tipModels = List(tipModel1000, tipModel50)
 	val tips = SortedSet[Tip](

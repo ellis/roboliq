@@ -465,7 +465,7 @@ object ConversionsDirect {
 			case _ => RqError("required a JsObject, but have "+jsval.getClass+": "+jsval)
 		}
 	
-	def toTipModel(jsval: JsValue): RqResult[TipModel] = {
+	/*def toTipModel(jsval: JsValue): RqResult[TipModel] = {
 		for {
 			jsobj <- toJsObject(jsval)
 			id <- getString('id, jsobj)
@@ -474,7 +474,7 @@ object ConversionsDirect {
 		} yield {
 			new TipModel(id, volume, volumeMin, LiquidVolume.empty, LiquidVolume.empty)
 		}
-	}
+	}*/
 	
 	def toPlateModel(jsval: JsValue): RqResult[PlateModel] = {
 		for {
@@ -571,15 +571,15 @@ object Conversions {
 	val asInteger = makeConversion(ConversionsDirect.toInteger)
 	val asBoolean = makeConversion(ConversionsDirect.toBoolean)
 	val asVolume = makeConversion(ConversionsDirect.toVolume)
-	val tipModelHandler = makeConversion(ConversionsDirect.toTipModel)
-	val asPlateModel = makeConversion(ConversionsDirect.toPlateModel)
+	//val tipModelHandler = makeConversion(ConversionsDirect.toTipModel)
+	//val asPlateModel = makeConversion(ConversionsDirect.toPlateModel)
 
 	val asStringList = makeConversion(ConversionsDirect.toStringList)
 	val asIntegerList = makeConversion(ConversionsDirect.toIntegerList)
 	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList)
 	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList)
 	
-	val tipHandler = new ConversionHandlerN {
+	/*val tipHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
 			'index.as[Integer], 'model.lookup_?[TipModel]
 		) { (index, modelPermanent_?) =>
@@ -604,7 +604,7 @@ object Conversions {
 		) { (id, plateModel, locationPermanent_?) =>
 			returnObject(new Plate(id, plateModel, locationPermanent_?))
 		}
-	}
+	}*/
 	
 	val plateStateHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (

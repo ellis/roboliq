@@ -97,7 +97,7 @@ class Processor private (bb: BeanBase, ob: ObjBase, lCmdHandler: List[CmdHandler
 				needPlate(id, node) match {
 					case Success(plate) =>
 						// Load all the wells on the plate
-						(0 until plate.nWells).map(Plate.wellId(plate, _)).foreach(needWell(_, node))
+						(0 until plate.nWells).map(WellSpecParser.wellId(plate, _)).foreach(needWell(_, node))
 						Success(())
 					case _ =>
 						// If it's a substance

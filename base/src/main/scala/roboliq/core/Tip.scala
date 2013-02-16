@@ -21,7 +21,7 @@ class TipBean extends Bean {
  * @param modelPermanent_? optional tip model if this tip is permanent.
  */
 // TODO: add deviceId_? and make id a parameter rather than automatically generating it.
-class Tip(
+case class Tip(
 	val index: Int,
 	val modelPermanent_? : Option[TipModel]
 ) extends Ordered[Tip] {

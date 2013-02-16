@@ -252,8 +252,10 @@ class ConversionsSpec extends FunSpec {
 			})
 		})
 		
-		//val tipModel = TipModel()
+		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
 		val plateModel = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
+		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel), true)
+		val tip = Tip(0, Some(tipModel))
 		val plate_P1 = Plate("P1", plateModel, None)
 		
 		def read(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
@@ -288,7 +290,10 @@ class ConversionsSpec extends FunSpec {
 			}
 		}
 
+		check[TipModel]("Standard 1000ul", tipModel)
 		check[PlateModel]("D-BSSE 96 Well PCR Plate", plateModel)
+		check[PlateLocation]("cooled1", plateLocation_cooled1)
+		check[Tip]("TIP1", tip)
 		check[Plate]("P1", plate_P1)
 	}
 }

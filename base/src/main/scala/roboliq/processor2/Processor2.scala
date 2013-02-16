@@ -93,11 +93,11 @@ class ProcessorData(
 	conversion_m(ru.typeOf[String]) = Conversions.asString
 	conversion_m(ru.typeOf[Integer]) = Conversions.asInteger
 	conversion_m(ru.typeOf[Boolean]) = Conversions.asBoolean
-	conversion_m(ru.typeOf[TipModel]) = Conversions.tipModelHandler
+	/*conversion_m(ru.typeOf[TipModel]) = Conversions.tipModelHandler
 	conversion_m(ru.typeOf[Tip]) = Conversions.tipHandler
 	conversion_m(ru.typeOf[PlateModel]) = Conversions.asPlateModel
 	conversion_m(ru.typeOf[PlateLocation]) = Conversions.plateLocationHandler
-	conversion_m(ru.typeOf[Plate]) = Conversions.plateHandler
+	conversion_m(ru.typeOf[Plate]) = Conversions.plateHandler*/
 	conversion_m(ru.typeOf[PlateState]) = Conversions.plateStateHandler
 	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList
 	//conversion_m(ru.typeOf[Test]) = Conversions.testHandler
