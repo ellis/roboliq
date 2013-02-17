@@ -240,8 +240,8 @@ class ProcessorData(
 	var temp = 0
 	private def makeConversionNodesForInputs(node: Node): List[Node] = {
 		// Create default entities
-		// TODO: I removed this while debugging a problem with DataBase.  It could probably be put back in now.
-		val default_l = Nil/*node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
+		// TODO: Create a general approach to creating default objects
+		val default_l = node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
 			if (kco.kc.key.table == "tipState") {
 				if (temp > 0)
 					sys.exit()
@@ -250,7 +250,8 @@ class ProcessorData(
 				val id = kc.key.key
 				//sys.exit()
 				val time = List(0)
-				if (db.get(kc.key, time).isError) {
+				// If there is no initial tipState registered yet:
+				if (db.getAt(kc.key, time).isError) {
 					import RqFunctionHandler._
 					val fnargs = fnRequire(lookup[Tip](id)) { (tip) =>
 						val tipState = TipState0.createEmpty(tip)
@@ -265,7 +266,7 @@ class ProcessorData(
 			}
 			else
 				Nil
-		})*/
+		})
 		
 		
 		// Try to add missing conversions for inputs which are not JsValues 

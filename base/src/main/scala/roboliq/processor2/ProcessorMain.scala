@@ -194,19 +194,6 @@ object ApplicativeMain2 extends App {
 		})
 	})
 
-	// Initialize tip states
-	for (i <- 0 to 7) {
-		val id = "TIP" + (i + 1)
-		for {
-			tip <- Conversions.readById[Tip](p.db, id)
-		} {
-			val tipState = TipState0.createEmpty(tip)
-			val tipStateKey = TKP("tipState", "TIP1", Nil)
-			val tipStateJson = Conversions.tipStateToJson(tipState)
-			p.db.set(tipStateKey, List(0), tipStateJson)
-		}
-	}
-	
 	p.setEntity(TKP("plate", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "idModel": "D-BSSE 96 Well PCR Plate" }"""))
 	p.setEntity(TKP("plateState", "P1", Nil), List(0), JsonParser("""{ "id": "P1", "location": "cooled1" }"""))
 	//p.setEntity(TKP("test", "T1", Nil), List(0), JsonParser("""{ "id": "T1" }"""))
