@@ -153,7 +153,7 @@ class ObjBase(bb: BeanBase) {
 							sName_? = Some(id),
 							sFamily = substance.physicalProperties.toString,
 							contaminants = Set(),
-							group = new LiquidGroup(substance.cleanPolicy),
+							substance.cleanPolicy,
 							multipipetteThreshold = if (substance.expensive) 0 else 1000
 						))
 						

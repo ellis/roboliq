@@ -20,7 +20,7 @@ case class TipState(
 	val conf: Tip,
 	val model_? : Option[TipModel],
 	val src_? : Option[Well],
-	val liquid: Liquid,
+	val liquid: Liquid, // REFACTOR: change to VesselContent?
 	val volume: LiquidVolume,
 	val contamInside: Set[Contaminant.Value], 
 	val nContamInsideVolume: LiquidVolume,
@@ -90,7 +90,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 			st.destsEntered,
 			CleanIntensity.None,
 			st.cleanDegreePrev,
-			CleanIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			CleanIntensity.max(st.cleanDegreePending, liquid2.tipCleanPolicy.exit)
 		))
 	}
 	
@@ -121,7 +121,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 			contamOutside = st.contamOutside ++ liquid2.contaminants,
 			destsEntered = st.destsEntered + liquid2,
 			cleanDegree = CleanIntensity.None,
-			cleanDegreePending = CleanIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			cleanDegreePending = CleanIntensity.max(st.cleanDegreePending, liquid2.tipCleanPolicy.exit)
 		))
 	}
 	
@@ -185,7 +185,7 @@ class TipAspirateEventBean extends TipEventBean {
 				state0.destsEntered,
 				CleanIntensity.None,
 				state0.cleanDegreePrev,
-				CleanIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
+				CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
 			)
 		}
 	}
@@ -247,7 +247,7 @@ class TipDispenseEventBean extends TipEventBean {
 			contamOutside = state0.contamOutside ++ liquid2.contaminants,
 			destsEntered = state0.destsEntered + liquid2,
 			cleanDegree = CleanIntensity.None,
-			cleanDegreePending = CleanIntensity.max(state0.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			cleanDegreePending = CleanIntensity.max(state0.cleanDegreePending, liquid2.tipCleanPolicy.exit)
 		)
 	}
 	

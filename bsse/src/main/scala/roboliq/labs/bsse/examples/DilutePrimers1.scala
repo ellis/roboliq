@@ -125,7 +125,7 @@ class DilutePrimers1 {
 		sName = "water",
 		sFamily = "Water",
 		contaminants = Nil,
-		group = new LiquidGroup(GroupCleanPolicy.TNL),
+		group = new LiquidGroup(TipCleanPolicy.TNL),
 		multipipetteThreshold = 0)
 	
 	val plate = new Plate

@@ -314,7 +314,7 @@ object PipetteUtils {
 		val (intensityDestEnter_?, contaminant_l): (Option[CleanIntensity.Value], Set[Contaminant.Value]) = {
 			// If we enter the destination liquid:
 			if (pos == PipettePosition.WetContact) {
-				(Some(liquidDest0.group.cleanPolicy.enter), liquidDest0.contaminants)
+				(Some(liquidDest0.tipCleanPolicy.enter), liquidDest0.contaminants)
 			}
 			else {
 				(None, Set())
@@ -327,7 +327,7 @@ object PipetteUtils {
 			val group_l = (tipState0.destsEntered ++ tipState0.srcsEntered) //.map(_.group)
 			//println("group_l: "+group_l)
 			if (group_l != Set(liquidSrc))
-				liquidSrc.group.cleanPolicy.enter
+				liquidSrc.tipCleanPolicy.enter
 			else
 				CleanIntensity.None
 		}

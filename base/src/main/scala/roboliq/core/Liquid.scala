@@ -46,45 +46,33 @@ Decon-Decon-Decon
  * @param within intensity with which tip must be washed between pipetteing operations performed in the same [[robolq.core.LiquidGroup]].
  * @param exit intensity with which tip must be washed after entering a liquid. 
  */
-case class GroupCleanPolicy(
+case class TipCleanPolicy(
 	val enter: CleanIntensity.Value,
-	val within: CleanIntensity.Value,
 	val exit: CleanIntensity.Value
 )
 /**
- * Contains the standard GroupCleanPolicy instantiations.
+ * Contains the standard TipCleanPolicy instantiations.
  */
-object GroupCleanPolicy {
-	val NNN = new GroupCleanPolicy(CleanIntensity.None, CleanIntensity.None, CleanIntensity.None)
-	val TNN = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.None)
-	val TNL = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.Light)
-	val TNT = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.Thorough)
-	val DDD = new GroupCleanPolicy(CleanIntensity.Decontaminate, CleanIntensity.Decontaminate, CleanIntensity.Decontaminate)
-	val ThoroughNone = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.None)
-	val Thorough = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.Thorough)
-	val Decontaminate = new GroupCleanPolicy(CleanIntensity.Decontaminate, CleanIntensity.Decontaminate, CleanIntensity.Decontaminate)
+object TipCleanPolicy {
+	val NN = new TipCleanPolicy(CleanIntensity.None, CleanIntensity.None)
+	val TN = new TipCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None)
+	val TL = new TipCleanPolicy(CleanIntensity.Thorough, CleanIntensity.Light)
+	val TT = new TipCleanPolicy(CleanIntensity.Thorough, CleanIntensity.Thorough)
+	val DD = new TipCleanPolicy(CleanIntensity.Decontaminate, CleanIntensity.Decontaminate)
+	val ThoroughNone = TN
+	val Thorough = TT
+	val Decontaminate = DD
 	
 	/**
 	 * Return a new policy that takes the maximum sub-intensities of `a` and `b`.
 	 */
-	def max(a: GroupCleanPolicy, b: GroupCleanPolicy): GroupCleanPolicy = {
-		new GroupCleanPolicy(
+	def max(a: TipCleanPolicy, b: TipCleanPolicy): TipCleanPolicy = {
+		new TipCleanPolicy(
 			CleanIntensity.max(a.enter, b.enter),
-			CleanIntensity.max(a.within, b.within),
 			CleanIntensity.max(a.exit, b.exit)
 		)
 	}
 }
-
-/**
- * A LiquidGroup is a set of liquids for which a special clean policy can be defined when a tip
- * enters two different liquids in the same group.
- * In particular, this can be used to reduce the cleaning intensity when contamination is not
- * a concern. 
- */
-class LiquidGroup(
-	val cleanPolicy: GroupCleanPolicy = GroupCleanPolicy.TNT
-)
 
 /**
  * Represents a liquid.
@@ -99,12 +87,12 @@ class LiquidGroup(
  * @see [[roboliq.core.VesselContent]]
  */
 class Liquid(
-	var id: String,
+	val id: String,
 	val sName_? : Option[String],
 	val sFamily: String,
 	val contaminants: Set[Contaminant.Value],
-	val group: LiquidGroup,
-	var multipipetteThreshold: Double
+	val tipCleanPolicy: TipCleanPolicy,
+	val multipipetteThreshold: Double
 ) {
 	def +(other: Liquid): Liquid = {
 		if (this eq other)
@@ -115,28 +103,17 @@ class Liquid(
 			this
 		else {
 			assert(id != other.id)
-			val id2 = id+":"+other.id
-			val group2 = {
-				if (group.eq(other.group)) {
-					group
-				}
-				else {
-					new LiquidGroup(GroupCleanPolicy.max(group.cleanPolicy, other.group.cleanPolicy))
-				}
-			}
+			val id_# = id+":"+other.id
+			val tipCleanPolicy_# = TipCleanPolicy.max(tipCleanPolicy, other.tipCleanPolicy)
 			new Liquid(
-				id2,
+				id_#,
 				None,
 				sFamily,
 				contaminants ++ other.contaminants,
-				group2,
+				tipCleanPolicy_#,
 				math.min(multipipetteThreshold, other.multipipetteThreshold) 
 			)
 		}
-	}
-	
-	def setGroup(group: LiquidGroup): Liquid = {
-		new Liquid(id, sName_?, sFamily, contaminants, group, multipipetteThreshold)
 	}
 	
 	def getName() = if (id == null) "<unnamed>" else id
@@ -153,5 +130,5 @@ class Liquid(
 
 object Liquid {
 	/** Empty liquid */
-	val empty = new Liquid("<EMPTY>", None, "", Set(), new LiquidGroup(), 0.0)
+	val empty = new Liquid("<EMPTY>", None, "", Set(), TipCleanPolicy.Thorough, 0.0)
 }

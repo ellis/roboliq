@@ -385,28 +385,18 @@ object PipetteHelper {
 		chooseWashSpec(
 			tipOverrides,
 			liquidDest,
-			tipState.destsEntered ++ tipState.srcsEntered.filter(_.group ne liquidSrc.group),
+			tipState.destsEntered ++ tipState.srcsEntered,
 			tipState
 		)
 	}
 	
 	private def chooseWashSpec(tipOverrides: TipHandlingOverrides, liquid0: Liquid, liquids: Iterable[Liquid], tipState: TipState): WashSpec = {
-		val group = liquid0.group
-		
 		val intensity = {
-			var bDifferentLiquid = false
-			var bDifferentGroup = false
-			// Check previously entered liquids
-			for (liquid <- liquids) {
-				bDifferentGroup |= (liquid.group ne group)
-				bDifferentLiquid |= (liquid ne liquid0)
-			}
-			
-			val policy = group.cleanPolicy
+			val bDifferentLiquid = liquids.exists(_ ne liquid0)
+			val policy = liquid0.tipCleanPolicy
 			if (tipState.cleanDegreePrev == CleanIntensity.None) tipOverrides.washIntensity_?.getOrElse(policy.enter)
 			else if (tipOverrides.washIntensity_?.isDefined) tipOverrides.washIntensity_?.get
-			else if (bDifferentGroup) CleanIntensity.max(policy.enter, tipState.cleanDegreePending)
-			else if (bDifferentLiquid) policy.within
+			else if (bDifferentLiquid) CleanIntensity.max(policy.enter, tipState.cleanDegreePending)
 			else CleanIntensity.None
 		}
 		val contamInside = tipOverrides.contamInside_? match { case Some(v) => v; case None => tipState.contamInside }

@@ -97,7 +97,7 @@ class ConversionsSpec extends FunSpec {
 		)
 		check[Substance](
 			List(
-				JsonParser("""{"id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+				JsonParser("""{"id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, TipCleanPolicy.TL, None)
 			),
 			List(JsNull)
 		)
@@ -142,7 +142,7 @@ class ConversionsSpec extends FunSpec {
 	val soluteToMol: Map[SubstanceSolid, BigDecimal]
 		check[VesselContent](
 			List(
-				JsonParser("""{"idVessel": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+				JsonParser("""{"idVessel": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, TipCleanPolicy.TNL, None)
 			),
 			List(JsNull)
 		)*/
@@ -154,7 +154,7 @@ class ConversionsSpec extends FunSpec {
 						"powder#" -> KeyClassOpt(KeyClass(TKP("substance", "powder", Nil), typeOf[Substance]), false)
 					)))
 			)
-			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, TipCleanPolicy.TL, None)
 			val powder = SubstanceOther("powder", Some(3.5))
 			assert(
 				conv(
@@ -175,7 +175,7 @@ class ConversionsSpec extends FunSpec {
 						"second" -> KeyClassOpt(KeyClass(TKP("substance", "powder", Nil), typeOf[Substance]), false)
 					)))
 			)
-			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, TipCleanPolicy.TL, None)
 			val powder = SubstanceOther("powder", Some(3.5))
 			assert(
 				conv(
@@ -189,7 +189,7 @@ class ConversionsSpec extends FunSpec {
 			)
 		}
 		it("should parse VesselContent") {
-			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, TipCleanPolicy.TL, None)
 			assert(
 				conv(
 					JsonParser("""{ "idVessel": "T1", "solventToVolume": { "water": "100ul" } }"""),
@@ -201,7 +201,7 @@ class ConversionsSpec extends FunSpec {
 			)
 		}
 		it("should parse VesselState") {
-			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, TipCleanPolicy.TL, None)
 			val t1 = Vessel0("t1", None)
 			assert(
 				conv(

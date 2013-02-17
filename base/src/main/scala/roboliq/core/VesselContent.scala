@@ -75,11 +75,11 @@ case class VesselContent(
 					else acc + 1
 				})
 				if (nBio > 0)
-					GroupCleanPolicy.DDD
+					TipCleanPolicy.DD
 				else if (nOtherº2 > 0)
-					GroupCleanPolicy.TNT
+					TipCleanPolicy.TT
 				else
-					GroupCleanPolicy.TNL
+					TipCleanPolicy.TL
 			}
 			
 			// Allow multipipetting if there are substances which don't prohibit it.
@@ -106,7 +106,7 @@ case class VesselContent(
 				None,
 				sFamily = physicalProperties.toString,
 				contaminants = Set(),
-				group = new LiquidGroup(cleanPolicy),
+				cleanPolicy,
 				multipipetteThreshold = if (bCanMultipipette) 0 else 1
 			)
 		}

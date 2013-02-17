@@ -123,7 +123,7 @@ object SubstanceOther {
 case class SubstanceLiquid(
 	val id: String,
 	val physicalProperties: LiquidPhysicalProperties.Value, 
-	val cleanPolicy: GroupCleanPolicy,
+	val cleanPolicy: TipCleanPolicy,
 	val costPerUnit_? : Option[BigDecimal]
 ) extends Substance
 
@@ -140,12 +140,12 @@ object SubstanceLiquid {
 				else LiquidPhysicalProperties.withName(bean.physical)
 			}
 			val cleanPolicy = {
-				if (bean.cleanPolicy == null) GroupCleanPolicy.Thorough
+				if (bean.cleanPolicy == null) TipCleanPolicy.Thorough
 				else {
 					bean.cleanPolicy match {
-						case "T" => GroupCleanPolicy.Thorough
-						case "D" => GroupCleanPolicy.Decontaminate
-						case "TNL" => GroupCleanPolicy.TNL
+						case "T" => TipCleanPolicy.Thorough
+						case "D" => TipCleanPolicy.Decontaminate
+						case "TNL" => TipCleanPolicy.TL
 						case _ => return Error("unrecognized `cleanPolicy` value \""+bean.cleanPolicy+"\"")
 					}
 				}

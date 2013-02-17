@@ -20,7 +20,7 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume = {
 		tip.model_?.map(tipModel => {
-			val nExtra = CleanIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
+			val nExtra = CleanIntensity.max(tip.cleanDegreePending, liquid.tipCleanPolicy.exit) match {
 				case CleanIntensity.Decontaminate => tipModel.volumeDeconExtra
 				case _ => tipModel.volumeWashExtra
 			}

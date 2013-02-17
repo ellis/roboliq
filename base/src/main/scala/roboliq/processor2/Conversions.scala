@@ -512,7 +512,7 @@ object ConversionsDirect {
 				case "liquid" =>
 					for {
 						physicalProperties <- 'physicalProperties.as[LiquidPhysicalProperties.Value](jsobj) 
-						cleanPolicy <- 'cleanPolicy.as[GroupCleanPolicy](jsobj)
+						cleanPolicy <- 'cleanPolicy.as[TipCleanPolicy](jsobj)
 					} yield {
 						SubstanceLiquid(id, physicalProperties, cleanPolicy, costPerUnit_?)
 					}
@@ -620,7 +620,7 @@ object Conversions {
 		}
 	}*/
 	
-	val plateStateHandler = new ConversionHandlerN {
+	/*val plateStateHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
 			'id.lookup[Plate],
 			'location.lookup_?[PlateLocation]
@@ -628,5 +628,53 @@ object Conversions {
 			val plateState = new PlateState(plate, location_?)
 			returnObject(plateState)
 		}
+	}*/
+	
+	/*
+	def liquidToJson(liquid: Liquid): JsValue = {
+		import liquid._
+		JsObject(Map(
+			"id" -> JsString(id),
+			"sName" -> sName_?.map(JsString(_)).getOrElse(JsNull),
+			"sFamily" -> JsString(sFamily),
+			"contaminants" -> JsArray(contaminants.toList.map(v => JsString(v.toString))),
+			"group": 
+		))
 	}
+class Liquid(
+	val id: String,
+	val sName_? : Option[String],
+	val sFamily: String,
+	val contaminants: Set[Contaminant.Value],
+	val group: LiquidGroup,
+	val multipipetteThreshold: Double
+) {
+		
+	}
+	
+	def tipStateToJson(tipState: TipState): JsValue = {
+		import tipState._
+		JsObject(Map(
+			"id" -> JsString(conf.id),
+			"model" -> model_?.map(v => JsString(v.id)).getOrElse(JsNull),
+			"src" -> src_?.map(v => JsString(v.id)).getOrElse(JsNull),
+			"liquid" -> JsString(liquid.id)
+		))
+		case class TipState(
+			val conf: Tip,
+			val model_? : Option[TipModel],
+			val src_? : Option[Well],
+			val liquid: Liquid,
+			val volume: LiquidVolume,
+			val contamInside: Set[Contaminant.Value], 
+			val nContamInsideVolume: LiquidVolume,
+			val contamOutside: Set[Contaminant.Value],
+			val srcsEntered: Set[Liquid],
+			val destsEntered: Set[Liquid],
+			val cleanDegree: CleanIntensity.Value,
+			val cleanDegreePrev: CleanIntensity.Value,
+			/** Intensity of cleaning that should be performed after leaving the current liquid group */
+			val cleanDegreePending: CleanIntensity.Value
+		
+	}*/
 }

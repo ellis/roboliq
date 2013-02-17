@@ -367,7 +367,7 @@ class GroupABuilder1(
 	}
 
 	def updateGroupA6_mItemToPolicy(g0: GroupA): GroupResult = {
-		val mTipToLiquidGroups = new HashMap[Tip, LiquidGroup]
+		//val mTipToLiquid = new HashMap[Tip, Liquid]
 
 		val lItemToPolicy = for (item <- g0.lItem) yield {
 			// FIXME: For debug only
@@ -536,7 +536,7 @@ class GroupABuilder1(
 	def updateGroupA9_mTipToCleanSpec(g0: GroupA): GroupResult = {
 		//println("A9 g0.lPremix: "+g0.lPremix)
 		// Liquid groups of destination wells with wet contact
-		val mTipToLiquidGroups = new HashMap[Tip, Set[LiquidGroup]]
+		val mTipToLiquids = new HashMap[Tip, Set[Liquid]]
 		val mTipToDestContams = new HashMap[Tip, Set[Contaminant.Value]]
 		
 		// Fill mTipToLiquidGroup; return GroupStop if trying to dispense into multiple liquid groups
@@ -547,12 +547,12 @@ class GroupABuilder1(
 			// If we enter the destination liquid:
 			if (pos == PipettePosition.WetContact) {
 				val tip = g0.mItemToTip(item)
-				mTipToLiquidGroups.get(tip) match {
+				mTipToLiquids.get(tip) match {
 					case None =>
-						mTipToLiquidGroups(tip) = Set(liquidDest.group)
+						mTipToLiquids(tip) = Set(liquidDest)
 						mTipToDestContams(tip) = liquidDest.contaminants
-					case Some(lLiquidGroup0) =>
-						if (!lLiquidGroup0.contains(liquidDest.group)) {
+					case Some(lLiquid0) =>
+						if (!lLiquid0.contains(liquidDest)) {
 							// FIXME: this is a hack!!!
 							val bOverride = cmd.args.tipOverrides_? match {
 								case None => false
@@ -574,10 +574,10 @@ class GroupABuilder1(
 		
 		val pre_post = g0.mTipToLM.map(pair => {
 			val (tip, lm) = pair
-			val policySrc = lm.liquid.group.cleanPolicy
-			val lGroupCleanPolicyDest = mTipToLiquidGroups.getOrElse(tip, Set()).toSeq.map(_.cleanPolicy)
-			val intensityDestEnter = CleanIntensity.max(lGroupCleanPolicyDest.map(_.enter))
-			val intensityDestExit = CleanIntensity.max(lGroupCleanPolicyDest.map(_.exit))
+			val policySrc = lm.liquid.tipCleanPolicy
+			val lTipCleanPolicyDest = mTipToLiquids.getOrElse(tip, Set()).toSeq.map(_.tipCleanPolicy)
+			val intensityDestEnter = CleanIntensity.max(lTipCleanPolicyDest.map(_.enter))
+			val intensityDestExit = CleanIntensity.max(lTipCleanPolicyDest.map(_.exit))
 			val cleanSpecPending_? = g0.mTipToCleanSpecPending0.get(tip)
 			val intensityPending = cleanSpecPending_?.map(_.washIntensity).getOrElse(CleanIntensity.None)
 			val intensityPre = CleanIntensity.max(List(policySrc.enter, intensityDestEnter, intensityPending))
