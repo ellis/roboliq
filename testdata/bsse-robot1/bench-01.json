@@ -1,3 +1,4 @@
+{
 "tipModel": [
 	{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" },
 	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
@@ -51,8 +52,9 @@
 "plate": [
 	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
 	{ "id": "reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },
-	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" },
+	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" }
 ],
 "plateState": [
 	{ "id": "reagents15000", "location": "reagents15000" }
 ]
+}

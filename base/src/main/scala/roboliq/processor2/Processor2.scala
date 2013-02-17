@@ -110,15 +110,22 @@ class ProcessorData(
 		loadJsonData(config)
 	}
 	
-	def loadJsonData(config: JsObject) {
-		config.fields.foreach(pair => {
+	def loadJsonData(data: JsObject) {
+		data.fields.foreach(pair => {
 			val (table, JsArray(elements)) = pair
-			elements.foreach(jsval => {
-				val jsobj = jsval.asJsObject
-				val key = jsobj.fields("id").asInstanceOf[JsString].value
-				val tkp = TKP(table, key, Nil)
-				setEntity(tkp, Nil, jsval)
-			})
+			if (table != "cmd") {
+				elements.foreach(jsval => {
+					val jsobj = jsval.asJsObject
+					val key = jsobj.fields("id").asInstanceOf[JsString].value
+					val tkp = TKP(table, key, Nil)
+					setEntity(tkp, Nil, jsval)
+				})
+			}
+		})
+		data.fields.get("cmd").foreach(jsval => {
+			val JsArray(elements) = jsval
+			val cmd_l = elements.map(_.asInstanceOf[JsObject])
+			setCommands(cmd_l)
 		})
 	}
 
@@ -530,8 +537,10 @@ class ProcessorData(
 	def run(maxLoops: Int = -1) {
 		var countdown = maxLoops
 		while (countdown != 0) {
-			runStep()
-			countdown -= 1
+			if (runStep())
+				countdown -= 1
+			else
+				countdown = 0
 		}
 		//makeMessagesForMissingInputs()
 	}

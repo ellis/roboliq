@@ -1,3 +1,5 @@
+{
 "substance": [
 	{ "id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}
 ]
+}
