@@ -332,32 +332,11 @@ class ConversionsSpec extends FunSpec {
 			println(db.toString)
 		}
 		
-		def read(kc: KeyClass): RqResult[Any] = {
-			for {
-				jsval <- db.get(kc.key, Nil)
-				either <- convRequirements(jsval, kc.clazz)
-				ret <- either match {
-					case Right(ret) => RqSuccess(ret)
-					case Left(require_m) => 
-						for {
-							lookup_l <- RqResult.toResultOfList(require_m.toList.map(pair => {
-								val (name, kco) = pair
-								for {
-									ret <- read(kco.kc)
-								} yield name -> ret
-							}))
-							lookup_m = lookup_l.toMap
-							ret <- conv(jsval, kc.clazz, lookup_m)
-						} yield ret
-				}
-			} yield ret
-		}
-		
 		def check[A <: Object : TypeTag](id: String, exp: A) = {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ `$id`") {
 				val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
-				val ret = read(kc)
+				val ret = Conversions.readAny(db, kc)
 				assert(ret === RqSuccess(exp))
 			}
 		}

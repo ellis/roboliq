@@ -146,6 +146,8 @@ class ProcessorData(
 				case ComputationItem_Events(event_l) =>
 					List(Node_Events(parent_?, index, event_l))
 				case EventItem_State(key, jsval) =>
+					println((key, parent_?.map(_.time).getOrElse(List(0)), jsval))
+					//sys.exit()
 					db.set(key, parent_?.map(_.time).getOrElse(List(0)), jsval)
 					Nil
 				case _ =>
@@ -209,6 +211,9 @@ class ProcessorData(
 						case ConversionItem_Object(obj) =>
 							setEntityObj(node.kc, obj)
 							None
+						case EventItem_State(key, jsval) =>
+							setEntity(key, node.time, jsval)
+							None
 						case _ =>
 							internalMessage_l += RqError("invalid return item for a conversion node")
 							None
@@ -232,12 +237,43 @@ class ProcessorData(
 		makeConversionNodesForInputs(node)
 	}
 	
+	var temp = 0
 	private def makeConversionNodesForInputs(node: Node): List[Node] = {
+		// Create default entities
+		// TODO: I removed this while debugging a problem with DataBase.  It could probably be put back in now.
+		val default_l = Nil/*node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
+			if (kco.kc.key.table == "tipState") {
+				if (temp > 0)
+					sys.exit()
+				temp += 1
+				val kc = kco.kc
+				val id = kc.key.key
+				//sys.exit()
+				val time = List(0)
+				if (db.get(kc.key, time).isError) {
+					import RqFunctionHandler._
+					val fnargs = fnRequire(lookup[Tip](id)) { (tip) =>
+						val tipState = TipState0.createEmpty(tip)
+						val tipStateJson = Conversions.tipStateToJson(tipState)
+						returnEvent(kc.key, tipStateJson)
+					}
+					List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
+				}
+				else {
+					Nil
+				}
+			}
+			else
+				Nil
+		})*/
+		
+		
 		// Try to add missing conversions for inputs which are not JsValues 
-		val l = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).zipWithIndex.flatMap(pair => {
+		val l0 = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).zipWithIndex.flatMap(pair => {
 			val (kco, i) = pair
 			makeConversionNodesForInput(node, kco, i + 1)
 		})
+		val l = default_l ++ l0 
 		// Register the conversion nodes
 		l.foreach(node => kcNode_m(node.kc) = node)
 		//println("node.input_l: "+node.input_l)
@@ -363,12 +399,12 @@ class ProcessorData(
 								case _ =>
 									RqError("Expected JsValue")
 							}
-							val arg_l = List(KeyClassOpt(kc, false))
+							val arg_l = List(KeyClassOpt(kc.changeClassToJsValue, false))
 							val fnargs = RqFunctionArgs(fn, arg_l)
 							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
 							// FIXME: should put this message in a map so it only shows up once
-							internalMessage_l += RqError[Unit](s"No converter registered for ${kco.kc.id}, required by ${node.id}")
-							Nil
+							//internalMessage_l += RqError[Unit](s"No converter registered for ${kco.kc.id}, required by ${node.id}")
+							//Nil
 					}
 				}
 		}
@@ -471,8 +507,12 @@ class ProcessorData(
 	private val Rx2 = """^([a-zA-Z]+)\[([0-9.]+)\]\.(.+)$""".r
 	
 	// REFACTOR: turn entity lookups into computations, somehow
-	def run() {
-		while (runStep()) { }
+	def run(maxLoops: Int = -1) {
+		var countdown = maxLoops
+		while (countdown != 0) {
+			runStep()
+			countdown -= 1
+		}
 		//makeMessagesForMissingInputs()
 	}
 	
@@ -606,7 +646,7 @@ class ProcessorData(
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
 		if (kc.clazz == ru.typeOf[JsValue]) {
-			db.get(kc.key, kc.time)
+			db.getBefore(kc.key, kc.time)
 		}
 		else {
 			cache_m.get(kc).asRq(s"object not found `$kc`")

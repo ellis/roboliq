@@ -577,6 +577,33 @@ object ConversionsDirect {
 
 object Conversions {
 	private val D = ConversionsDirect
+
+	def readById[A <: Object : TypeTag](db: DataBase, id: String) = {
+		val typ = ru.typeTag[A].tpe
+		val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
+		readAny(db, kc).map(_.asInstanceOf[A])
+	}
+	
+	def readAny(db: DataBase, kc: KeyClass): RqResult[Any] = {
+		for {
+			jsval <- db.get(kc.key)
+			either <- D.convRequirements(jsval, kc.clazz)
+			ret <- either match {
+				case Right(ret) => RqSuccess(ret)
+				case Left(require_m) => 
+					for {
+						lookup_l <- RqResult.toResultOfList(require_m.toList.map(pair => {
+							val (name, kco) = pair
+							for {
+								ret <- readAny(db, kco.kc)
+							} yield name -> ret
+						}))
+						lookup_m = lookup_l.toMap
+						ret <- D.conv(jsval, kc.clazz, lookup_m)
+					} yield ret
+			}
+		} yield ret
+	}
 	
 	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler1(
 		(jsval: JsValue) =>
@@ -662,8 +689,8 @@ object Conversions {
 			"contamInside" -> JsArray(contamInside.toList.map(v => JsString(v.toString))),
 			"nContamInsideVolume" -> JsString(nContamInsideVolume.toString),
 			"contamOutside" -> JsArray(contamOutside.toList.map(v => JsString(v.toString))),
-			"srcsEntered" -> JsArray(srcsEntered.toList.map(v => JsString(v.toString))),
-			"destsEntered" -> JsArray(destsEntered.toList.map(v => JsString(v.toString))),
+			"srcsEntered" -> JsArray(srcsEntered.toList.map(liquidToJson)),
+			"destsEntered" -> JsArray(destsEntered.toList.map(liquidToJson)),
 			"cleanDegree" -> JsString(cleanDegree.toString),
 			"cleanDegreePrev" -> JsString(cleanDegreePrev.toString),
 			"cleanDegreePending" -> JsString(cleanDegreePending.toString)

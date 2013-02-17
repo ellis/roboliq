@@ -347,16 +347,16 @@ abstract class RqFunctionHandler {
 }
 
 object RqFunctionHandler {
-	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
-	protected implicit def itemToRqReturn(item: RqItem): RqReturn =
+	implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
+	implicit def itemToRqReturn(item: RqItem): RqReturn =
 		RqSuccess(List(item))
-	protected implicit def fnargsToItem(fnargs: RqFunctionArgs) =
+	implicit def fnargsToItem(fnargs: RqFunctionArgs) =
 		RqItem_Function(fnargs)
-	protected implicit def fnargsToRqReturn(fnargs: RqFunctionArgs) =
+	implicit def fnargsToRqReturn(fnargs: RqFunctionArgs) =
 		RqSuccess(List(RqItem_Function(fnargs)))
-	protected implicit def tokenToItem(token: CmdToken) =
+	implicit def tokenToItem(token: CmdToken) =
 		ComputationItem_Token(token)
-	protected implicit def tokenToRqReturn(token: CmdToken) =
+	implicit def tokenToRqReturn(token: CmdToken) =
 		RqSuccess(List(ComputationItem_Token(token)))
 
 	def fnRequire[A: TypeTag](

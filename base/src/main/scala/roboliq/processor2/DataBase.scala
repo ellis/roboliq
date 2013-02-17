@@ -71,7 +71,21 @@ class DataBase {
 			handleChange(tkp.copy(path = tkp.path.init))
 	}
 	
-	def get(tkp: TKP, time: List[Int] = Nil): RqResult[JsValue] = {
+	def getBefore(tkp: TKP, time: List[Int] = Nil): RqResult[JsValue] = {
+		def fn(time_l: List[List[Int]]): Int =
+			time_l.indexWhere(ListIntOrdering.compare(_, time) >= 0) - 1
+		getWith(tkp, time, fn _)
+	}
+	
+	def getAt(tkp: TKP, time: List[Int]): RqResult[JsValue] = {
+		def fn(time_l: List[List[Int]]): Int =
+			time_l.indexWhere(ListIntOrdering.compare(_, time) >= 0)
+		getWith(tkp, time, fn _)
+	}
+	
+	def get(tkp: TKP): RqResult[JsValue] = getAt(tkp, Nil)
+	
+	private def getWith(tkp: TKP, time: List[Int], fn: (List[List[Int]]) => Int): RqResult[JsValue] = {
 		js_m.get(tkp) match {
 			// Not a JsValue, maybe a JsObject?
 			case None =>
@@ -85,18 +99,18 @@ class DataBase {
 				}
 				
 			case Some(timeToValue_m) =>
-				get(timeToValue_m, time).asRq(s"didn't find data for `$tkp`" + (if (time.isEmpty) "" else " @ " +time.mkString("/")))
+				get(timeToValue_m, time, fn).asRq(s"didn't find data for `$tkp`" + (if (time.isEmpty) "" else " @ " +time.mkString("/")))
 		}
 	}
 
-	private def get(timeToValue_m: Map[List[Int], JsValue], time: List[Int]): Option[JsValue] = {
+	private def get(timeToValue_m: Map[List[Int], JsValue], time: List[Int], fn: List[List[Int]] => Int): Option[JsValue] = {
 		if (timeToValue_m.size == 0) {
 			None
 		}
 		else {
 			val time_l = timeToValue_m.keys.toList.sorted(ListIntOrdering)
-			val i0 = time_l.indexWhere(ListIntOrdering.compare(_, time) >= 0)
-			var i = if (i0 > 0) i0 else time_l.size - 1
+			val i0 = fn(time_l)
+			val i = if (i0 >= 0) i0 else time_l.size - 1
 			Some(timeToValue_m(time_l(i)))
 		}
 	}

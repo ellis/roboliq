@@ -1,10 +1,11 @@
-/*package roboliq.commands.pipette
+package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import roboliq.core._
 
 
+/*
 class DetectLevelCmdBean extends CmdBean {
 	@BeanProperty var description: String = null
 	@BeanProperty var items: java.util.List[DetectLevelCmdItemBean] = null
@@ -65,8 +66,8 @@ class DetectLevelCmdItemBean {
 		}
 	}
 }
+*/
 
 case class DetectLevelToken(
 	val items: List[TipWellPolicy]
 ) extends CmdToken
-*/
