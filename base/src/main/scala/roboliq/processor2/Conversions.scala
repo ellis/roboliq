@@ -454,7 +454,7 @@ object ConversionsDirect {
 
 	}
 	
-	private val RxVolume = """([0-9]*)(\.[0-9]*)?([mun]?l)""".r
+	private val RxVolume = """([0-9]*)(\.[0-9]*)? ?([mun]?l)""".r
 	def toVolume(jsval: JsValue): RqResult[LiquidVolume] = {
 		jsval match {
 			case JsString(RxVolume(a,b,c)) =>

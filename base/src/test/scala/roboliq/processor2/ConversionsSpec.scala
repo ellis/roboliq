@@ -289,6 +289,21 @@ class ConversionsSpec extends FunSpec {
 	{ "id": "P1(A01)", "position": { "plate": "P1", "index": 0 }, "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
 ]
 }""").asJsObject
+
+		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
+		val tip = Tip(0, Some(tipModel))
+		val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
+		val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
+		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
+		val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
+		val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
+		val plate_15000 = Plate("reagents15000", plateModel_15000, None)
+		val plate_P1 = Plate("P1", plateModel_PCR, None)
+		val vessel_T1 = Vessel0("T1", Some(tubeModel_15000))
+		val tipState = TipState.createEmpty(tip)
+		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
+		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
+		val vesselState_T1 = VesselState(vessel_T1, Some(VesselPosition(plateState_15000, 0)), new VesselContent("T1", Map(), Map()))
 	
 		val db = new DataBase
 		it("should read back same objects as set in the database") {
@@ -304,22 +319,13 @@ class ConversionsSpec extends FunSpec {
 					assert(db.get(tkp, Nil) === RqSuccess(jsval))
 				})
 			})
+			// Also add tip state
+			val tipStateKey = TKP("tipState", "TIP1", Nil)
+			val tipStateJson = Conversions.tipStateToJson(tipState)
+			db.set(tipStateKey, List(0), tipStateJson)
+			assert(db.get(tipStateKey, List(0)) === RqSuccess(tipStateJson))
 			println(db.toString)
 		}
-
-		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-		val tip = Tip(0, Some(tipModel))
-		val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
-		val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
-		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
-		val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
-		val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
-		val plate_15000 = Plate("reagents15000", plateModel_15000, None)
-		val plate_P1 = Plate("P1", plateModel_PCR, None)
-		val vessel_T1 = Vessel0("T1", Some(tubeModel_15000))
-		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
-		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
-		val vesselState_T1 = VesselState(vessel_T1, Some(VesselPosition(plateState_15000, 0)), new VesselContent("T1", Map(), Map()))
 		
 		def read(kc: KeyClass): RqResult[Any] = {
 			for {
@@ -360,6 +366,7 @@ class ConversionsSpec extends FunSpec {
 		check[TubeModel]("Tube 15000ul", tubeModel_15000)
 		check[Plate]("P1", plate_P1)
 		check[Plate]("reagents15000", plate_15000)
+		check[TipState]("TIP1", tipState)
 		check[PlateState]("P1", plateState_P1)
 		check[Vessel0]("T1", vessel_T1)
 		check[VesselState]("T1", vesselState_T1)

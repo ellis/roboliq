@@ -92,7 +92,7 @@ class Liquid(
 	val sFamily: String,
 	val contaminants: Set[Contaminant.Value],
 	val tipCleanPolicy: TipCleanPolicy,
-	val multipipetteThreshold: Double
+	val multipipetteThreshold: BigDecimal
 ) {
 	def +(other: Liquid): Liquid = {
 		if (this eq other)
@@ -111,7 +111,7 @@ class Liquid(
 				sFamily,
 				contaminants ++ other.contaminants,
 				tipCleanPolicy_#,
-				math.min(multipipetteThreshold, other.multipipetteThreshold) 
+				if (multipipetteThreshold <= other.multipipetteThreshold) multipipetteThreshold else other.multipipetteThreshold
 			)
 		}
 	}
