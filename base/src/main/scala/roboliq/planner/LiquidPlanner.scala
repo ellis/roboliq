@@ -298,12 +298,12 @@ case class Trace(
 		(
 			solvent_l.map({ solvent =>
 				(content_l map { src =>
-					src.mapSolventToVolume.getOrElse(solvent, 0.0)
+					src.solventToVolume.getOrElse(solvent, 0.0)
 				}).mkString(" & ")
 			}) ++
 			solute_l.map({ solute =>
 				(content_l map { src =>
-					src.mapSoluteToMol.getOrElse(solute, 0.0)
+					src.soluteToMol.getOrElse(solute, 0.0)
 				}).mkString(" & ")
 			})
 		).mkString(""" \\ """) +
@@ -319,8 +319,8 @@ case class Trace(
 		vol: LiquidVolume
 	): String = {
 		val ll = src_l.map({ src =>
-			(solvent_l map { sub => (src.mapSolventToVolume.getOrElse(sub, LiquidVolume.empty).ul / src.volume.ul).toDouble }) ++
-			(solute_l map { sub => src.mapSoluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble / vol.ul.toDouble })
+			(solvent_l map { sub => (src.solventToVolume.getOrElse(sub, LiquidVolume.empty).ul / src.volume.ul).toDouble }) ++
+			(solute_l map { sub => src.soluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble / vol.ul.toDouble })
 		}).transpose
 		"""\mathbf{S_{"""+vol+"""}} = \left[ \begin{array}{} """ +
 		(
@@ -363,8 +363,8 @@ class LiquidPlanner {
 	 */
 	def calcMixture(src_l: List[VesselContent], dst_l: List[VesselContent]): Trace = {
 		// Get list of solvents and solutes
-		val solvent_l = Set(dst_l.flatMap(_.mapSolventToVolume.keys) : _*).toList
-		val solute_l = Set(dst_l.flatMap(_.mapSoluteToMol.keys) : _*).toList
+		val solvent_l = Set(dst_l.flatMap(_.solventToVolume.keys) : _*).toList
+		val solute_l = Set(dst_l.flatMap(_.soluteToMol.keys) : _*).toList
 		
 		// Get mixtures of sources used to prepare the destination wells
 		val mixture_l = dst_l.map(dst => dstToSrcVolumes(solvent_l, solute_l, dst, src_l).map(_.ul.toDouble))
@@ -498,8 +498,8 @@ class LiquidPlanner {
 		dst: VesselContent
 	): SimpleMatrix = {
 		val bº = 
-			(solvent_l map { sub => (dst.mapSolventToVolume.getOrElse(sub, LiquidVolume.empty).ul).toDouble }) ++
-			(solute_l map { sub => dst.mapSoluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble })
+			(solvent_l map { sub => (dst.solventToVolume.getOrElse(sub, LiquidVolume.empty).ul).toDouble }) ++
+			(solute_l map { sub => dst.soluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble })
 		new SimpleMatrix(bº.size, 1, false, bº : _*)
 	}
 	
@@ -515,25 +515,25 @@ class LiquidPlanner {
 		src_l: List[VesselContent]
 	): SimpleMatrix = {
 		val aº = src_l flatMap { src =>
-			(solvent_l map { sub => (src.mapSolventToVolume.getOrElse(sub, LiquidVolume.empty).ul / src.volume.ul).toDouble }) ++
-			(solute_l map { sub => src.mapSoluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble / dst.volume.ul.toDouble })
+			(solvent_l map { sub => (src.solventToVolume.getOrElse(sub, LiquidVolume.empty).ul / src.volume.ul).toDouble }) ++
+			(solute_l map { sub => src.soluteToMol.getOrElse(sub, BigDecimal(0.0)).toDouble / dst.volume.ul.toDouble })
 		}
 		new SimpleMatrix(solvent_l.size + solute_l.size, src_l.size, false, aº : _*)
 	}
 	
 	private def getVolume(dst: VesselContent, src: VesselContent): LiquidVolume = {
 		
-		val ℓvolSolute = src.mapSoluteToMol map { pair => 
+		val ℓvolSolute = src.soluteToMol map { pair => 
 			val (solute, srcMol) = pair
-			dst.mapSoluteToMol.get(solute) match {
+			dst.soluteToMol.get(solute) match {
 				case None => return LiquidVolume.empty
 				case Some(dstMol) => dst.volume * dstMol / srcMol
 			}
 		} toList
 		
-		val ℓvolSolvent = src.mapSolventToVolume map { pair => 
+		val ℓvolSolvent = src.solventToVolume map { pair => 
 			val (solvent, srcVol) = pair
-			dst.mapSolventToVolume.get(solvent) match {
+			dst.solventToVolume.get(solvent) match {
 				case None => return LiquidVolume.empty
 				case Some(dstVol) =>
 					if (dstVol <= srcVol)

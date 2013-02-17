@@ -9,16 +9,16 @@ import java.text.DecimalFormat
  * Represents the contents of a vessel, i.e. the amounts of the substances it contains.
  * 
  * @param idVessel ID in database.
- * @param mapSolventToVolume map from liquid to volume.
- * @param mapSoluteToMol map from solute to amount in mol.
+ * @param solventToVolume map from liquid to volume.
+ * @param soluteToMol map from solute to amount in mol.
  */
-class VesselContent(
+case class VesselContent(
 	val idVessel: String,
-	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
-	val mapSoluteToMol: Map[SubstanceSolid, BigDecimal]
+	val solventToVolume: Map[SubstanceLiquid, LiquidVolume],
+	val soluteToMol: Map[SubstanceSolid, BigDecimal]
 ) {
 	/** Total liquid volume in vessel. */
-	val volume = mapSolventToVolume.values.foldLeft(LiquidVolume.empty){(acc,v) => acc + v}
+	val volume = solventToVolume.values.foldLeft(LiquidVolume.empty){(acc,v) => acc + v}
 	/** A [[roboliq.core.Liquid]] representation of these contents. */
 	val liquid = createLiquid()
 	/** Doc strings for this object. */
@@ -29,24 +29,24 @@ class VesselContent(
 		if (volume.isEmpty)
 			Liquid.empty
 		else {
-			val nSolvents = mapSolventToVolume.size
-			val nSolutes = mapSoluteToMol.size
+			val nSolvents = solventToVolume.size
+			val nSolutes = soluteToMol.size
 			
 			// Construct liquid id
 			val id: String = {
 				if (nSolutes == 1)
-					mapSoluteToMol.head._1.id
+					soluteToMol.head._1.id
 				else if (nSolutes == 0 && nSolvents == 1)
-					mapSolventToVolume.head._1.id
+					solventToVolume.head._1.id
 				else
-					(mapSoluteToMol.keys.map(_.id).toList.sorted ++
-						mapSolventToVolume.keys.map(_.id).toList.sorted
+					(soluteToMol.keys.map(_.id).toList.sorted ++
+						solventToVolume.keys.map(_.id).toList.sorted
 					).mkString("+")
 			}
 			
 			// Determine physical properties (either water-like or glycerol-like)
 			val physicalProperties: LiquidPhysicalProperties.Value = {
-				val volumeGlycerol = mapSolventToVolume.foldLeft(LiquidVolume.empty) {(acc, pair) =>
+				val volumeGlycerol = solventToVolume.foldLeft(LiquidVolume.empty) {(acc, pair) =>
 					val (solution, volume) = pair
 					solution.physicalProperties match {
 						case LiquidPhysicalProperties.Glycerol => acc + volume
@@ -63,14 +63,14 @@ class VesselContent(
 			
 			// Water only => TNL, DNA and Cells => Decon, other => TNT
 			val cleanPolicy = {
-				val (nBio, nOtherº1) = mapSoluteToMol.keys.foldLeft((0, 0))((acc, substance) => {
+				val (nBio, nOtherº1) = soluteToMol.keys.foldLeft((0, 0))((acc, substance) => {
 					substance match {
 						case dna: SubstanceDna => (acc._1 + 1, acc._2)
 						//case cell: SubstanceCell => (acc._1 + 1, acc._2)
 						case _ => (acc._1, acc._2 + 1)
 					}
 				})
-				val nOtherº2 = mapSolventToVolume.keys.foldLeft(nOtherº1)((acc, substance) => {
+				val nOtherº2 = solventToVolume.keys.foldLeft(nOtherº1)((acc, substance) => {
 					if (substance.id == "water") acc
 					else acc + 1
 				})
@@ -86,8 +86,8 @@ class VesselContent(
 			// NOTE: this is very, very arbitrary -- ellis, 2012-04-10
 			// TODO: try to figure out a better method!
 			val bCanMultipipette = {
-				val nAllowMultipipette1 = mapSolventToVolume.keys.filter(_.expensive).size
-				val nAllowMultipipette2 = mapSoluteToMol.keys.filter(_.expensive).size
+				val nAllowMultipipette1 = solventToVolume.keys.filter(_.expensive).size
+				val nAllowMultipipette2 = soluteToMol.keys.filter(_.expensive).size
 				//nAllowMultipipette < nSolvents
 				// If there are solutes which shouldn't be multipipetted
 				if (nAllowMultipipette2 < nSolutes) {
@@ -114,9 +114,9 @@ class VesselContent(
 	
 	private def createDocContent(): Doc = {
 		// List of solvents in order of decreasing volume
-		val lSolvent: List[SubstanceLiquid] = mapSolventToVolume.toList.sortBy(-_._2.nl).map(_._1)
+		val lSolvent: List[SubstanceLiquid] = solventToVolume.toList.sortBy(-_._2.nl).map(_._1)
 		// List of solutes in order of decreasing mol
-		val lSolute: List[SubstanceSolid] = mapSoluteToMol.toList.sortBy(-_._2).map(_._1)
+		val lSolute: List[SubstanceSolid] = soluteToMol.toList.sortBy(-_._2).map(_._1)
 		
 		// Empty
 		if (volume.isEmpty)
@@ -124,14 +124,14 @@ class VesselContent(
 		// Only solutes
 		else {
 			val sVol = {
-				if (mapSolventToVolume.isEmpty) ""
+				if (solventToVolume.isEmpty) ""
 				else volume.toString+" "
 			}
 			
-			val lsSolvent = lSolvent.map(sub => sub.id+"("+mapSolventToVolume(sub)+")")
+			val lsSolvent = lSolvent.map(sub => sub.id+"("+solventToVolume(sub)+")")
 			val (lsSolutePlain, lsSoluteMd) = (lSolute map { sub =>
 				val fmt = new DecimalFormat("0.00E0")
-				val nMol = mapSoluteToMol(sub)
+				val nMol = soluteToMol(sub)
 				val nM = nMol / volume.l
 				val sMPlain = fmt.format(nM.toDouble)//.replace("E", "E^")+"^"
 				val sMMd = sMPlain.replace("E", "E^")+"^"
@@ -142,7 +142,7 @@ class VesselContent(
 			
 			val idLiquid = lsSubstancePlain mkString "+"
 			val sLiquidName_? =
-				if (mapSolventToVolume.size + mapSoluteToMol.size == 1) Some(idLiquid)
+				if (solventToVolume.size + soluteToMol.size == 1) Some(idLiquid)
 				else None
 			
 			val sContentPlainShort_? = sLiquidName_?.map(sVol + _)
@@ -170,8 +170,8 @@ class VesselContent(
 		val factor = volumeNew.l / volume.l
 		new VesselContent(
 			idVessel,
-			mapSolventToVolume.mapValues(_ * factor),
-			mapSoluteToMol.mapValues(_ * factor)
+			solventToVolume.mapValues(_ * factor),
+			soluteToMol.mapValues(_ * factor)
 		)
 	}
 	
@@ -181,8 +181,8 @@ class VesselContent(
 	def +(that: VesselContent): VesselContent = {
 		new VesselContent(
 			idVessel,
-			mapSolventToVolume |+| that.mapSolventToVolume,
-			mapSoluteToMol |+| that.mapSoluteToMol
+			solventToVolume |+| that.solventToVolume,
+			soluteToMol |+| that.soluteToMol
 		)
 	}
 
@@ -199,8 +199,8 @@ class VesselContent(
 	def addPowder(substance: SubstanceSolid, mol: BigDecimal): VesselContent = {
 		new VesselContent(
 			idVessel,
-			mapSolventToVolume,
-			mapSoluteToMol |+| Map(substance -> mol)
+			solventToVolume,
+			soluteToMol |+| Map(substance -> mol)
 		)
 	}
 	
@@ -210,8 +210,8 @@ class VesselContent(
 	def addLiquid(substance: SubstanceLiquid, volume: LiquidVolume): VesselContent = {
 		new VesselContent(
 			idVessel,
-			mapSolventToVolume |+| Map(substance -> volume),
-			mapSoluteToMol
+			solventToVolume |+| Map(substance -> volume),
+			soluteToMol
 		)
 	}
 
@@ -228,7 +228,7 @@ class VesselContent(
 	def concOfSolid(substance: SubstanceSolid): Result[BigDecimal] = {
 		if (volume.isEmpty)
 			return Success(0)
-		mapSoluteToMol.get(substance) match {
+		soluteToMol.get(substance) match {
 			case None => Error("vessel `"+idVessel+"` does not contain substance `"+substance.id+"`")
 			case Some(mol) => Success(mol / volume.l)
 		}
@@ -240,7 +240,7 @@ class VesselContent(
 	def concOfLiquid(substance: SubstanceLiquid): Result[BigDecimal] = {
 		if (volume.isEmpty)
 			return Success(0)
-		mapSolventToVolume.get(substance) match {
+		solventToVolume.get(substance) match {
 			case None => Error("vessel `"+idVessel+"` does not contain liquid `"+substance.id+"`")
 			case Some(vol) => Success(vol.l / volume.l)
 		}

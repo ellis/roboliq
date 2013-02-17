@@ -19,10 +19,14 @@ object ConversionsDirect {
 	val typeToTable_l = List[(Type, String)](
 		typeOf[TipModel] -> "tipModel",
 		typeOf[PlateModel] -> "plateModel",
+		typeOf[TubeModel] -> "tubeModel",
 		typeOf[PlateLocation] -> "plateLocation",
 		typeOf[Tip] -> "tip",
+		typeOf[Substance] -> "substance",
 		typeOf[Plate] -> "plate",
-		typeOf[Substance] -> "substance"
+		typeOf[Vessel0] -> "vessel",
+		typeOf[PlateState] -> "plateState",
+		typeOf[VesselState] -> "vesselState"
 	)
 	
 	/*
@@ -103,7 +107,7 @@ object ConversionsDirect {
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
-		val path = path_r.mkString(".")
+		val path = path_r.reverse.mkString(".")
 		println(s"conv2: ${path}: $typ = $jsval")
 
 		try {
@@ -332,7 +336,14 @@ object ConversionsDirect {
 				val path2_r = name :: path_r
 				jsobj.fields.get(name) match {
 					case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
-					case None => convOrRequire(path2_r, JsNull, typ2, lookup_m_?)
+					case None =>
+						// Field is missing
+						// If this should be an object in the database and an `id` field is available,
+						if (findTableForType(typ2).isDefined && jsobj.fields.contains("id"))
+							convOrRequire(path2_r, jsobj.fields("id"), typ2, lookup_m_?)
+						// Else try using JsNull
+						else
+							convOrRequire(path2_r, JsNull, typ2, lookup_m_?)
 				}
 			}))
 			res0 match {

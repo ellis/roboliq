@@ -101,6 +101,12 @@ class ConversionsSpec extends FunSpec {
 			),
 			List(JsNull)
 		)
+		check[VesselContent](
+			List(
+				JsonParser("""{ "idVessel": "T1" }""") -> VesselContent("T1", Map(), Map())
+			),
+			List(JsNull)
+		)
 		/*
 		it("should parse String") {
 			check(JsString("test"), "test")
@@ -132,8 +138,8 @@ class ConversionsSpec extends FunSpec {
 			}
 		}*/
 	/*val idVessel: String,
-	val mapSolventToVolume: Map[SubstanceLiquid, LiquidVolume],
-	val mapSoluteToMol: Map[SubstanceSolid, BigDecimal]
+	val solventToVolume: Map[SubstanceLiquid, LiquidVolume],
+	val soluteToMol: Map[SubstanceSolid, BigDecimal]
 		check[VesselContent](
 			List(
 				JsonParser("""{"idVessel": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
@@ -182,6 +188,32 @@ class ConversionsSpec extends FunSpec {
 					=== RqSuccess(Map("first" -> water, "second" -> powder))
 			)
 		}
+		it("should parse VesselContent") {
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			assert(
+				conv(
+					JsonParser("""{ "idVessel": "T1", "solventToVolume": { "water": "100ul" } }"""),
+					typeOf[VesselContent],
+					Map(
+						"solventToVolume.water#" -> water
+					))
+					=== RqSuccess(VesselContent("T1", Map(water -> LiquidVolume.ul(100)), Map()))
+			)
+		}
+		it("should parse VesselState") {
+			val water = SubstanceLiquid("water", LiquidPhysicalProperties.Water, GroupCleanPolicy.TNL, None)
+			val t1 = Vessel0("t1", None)
+			assert(
+				conv(
+					JsonParser("""{ "id": "T1", "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }"""),
+					typeOf[VesselState],
+					Map(
+						"vessel" -> t1,
+						"content.solventToVolume.water#" -> water
+					))
+					=== RqSuccess(VesselState(t1, None, VesselContent("T1", Map(water -> LiquidVolume.ul(100)), Map())))
+			)
+		}
 	}
 	
 	describe("conv for database objects") {
@@ -203,7 +235,7 @@ class ConversionsSpec extends FunSpec {
 ],
 "plateModel": [
 	{ "id": "Reagent Cooled 8*50ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
-	{ "id": "Reagent Cooled 8*15ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
+	{ "id": "Reagent Cooled 8*15ml", "rows": 8, "cols": 1, "wellVolume": "15ml" },
 	{ "id": "Block 20Pos 1.5 ml Eppendorf", "rows": 4, "cols": 5, "wellVolume": "1.5ml" },
 	{ "id": "D-BSSE 96 Well PCR Plate", "rows": 8, "cols": 12, "wellVolume": "200ul" },
 	{ "id": "D-BSSE 96 Well Costar Plate", "rows": 8, "cols": 12, "wellVolume": "350ul" },
@@ -215,6 +247,7 @@ class ConversionsSpec extends FunSpec {
 	{ "id": "trough1", "plateModels": ["Trough 100ml"] },
 	{ "id": "trough2", "plateModels": ["Trough 100ml"] },
 	{ "id": "trough3", "plateModels": ["Trough 100ml"] },
+	{ "id": "reagents15000", "plateModels": ["Reagent Cooled 8*15ml"], "cooled": true },
 	{ "id": "uncooled2_low", "plateModels": ["D-BSSE 96 Well DWP", "Ellis Nunc F96 MicroWell"] },
 	{ "id": "uncooled2_high", "plateModels": ["D-BSSE 96 Well Costar Plate"] },
 	{ "id": "shaker", "plateModels": ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] },
@@ -226,37 +259,67 @@ class ConversionsSpec extends FunSpec {
 	{ "id": "regrip", "plateModels": ["D-BSSE 96 Well PCR Plate", "D-BSSE 96 Well Costar Plate"] },
 	{ "id": "reader", "plateModels": ["D-BSSE 96 Well Costar Plate"] }
 ],
+"tubeModel": [
+	{ "id": "Tube 50000ul", "volume": "50000ul" },
+	{ "id": "Tube 15000ul", "volume": "15000ul" },
+	{ "id": "Tube 1500ul", "volume": "1500ul" }
+],
 "tubeLocation": [
-	{ "id": "reagents50", "tubeModels": ["Tube 50ml"], "rackModel": "Reagent Cooled 8*50ml" },
-	{ "id": "reagents15", "tubeModels": ["Tube 15ml"], "rackModel": "Reagent Cooled 8*15ml" },
-	{ "id": "reagents1.5", "tubeModels": ["Tube 1.5ml"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
+	{ "id": "reagents50", "tubeModels": ["Tube 50000ul"], "rackModel": "Reagent Cooled 8*50ml" },
+	{ "id": "reagents15000", "tubeModels": ["Tube 15000ul"], "rackModel": "Reagent Cooled 8*15ml" },
+	{ "id": "reagents1.5", "tubeModels": ["Tube 1500ul"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
 ],
 "plate": [
 	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
-	{ "id": "reagents15", "model": "Reagent Cooled 8*15ml", "location": "reagents15" },
-	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" }
-],
-"plate": [
+	{ "id": "reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },
+	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" },
 	{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
+],
+"vessel": [
+	{ "id": "T1", "tubeModel": "Tube 15000ul" },
+	{ "id": "P1(A01)" }
+],
+
+"plateState": [
+	{ "id": "reagents15000", "location": "reagents15000" },
+	{ "id": "P1", "location": "cooled1" }
+],
+"vesselState": [
+	{ "id": "T1", "position": { "plate": "reagents15000", "index": 0 }, "content": { "idVessel": "T1" } },
+	{ "id": "P1(A01)", "position": { "plate": "P1", "index": 0 }, "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
 ]
 }""").asJsObject
 	
 		val db = new DataBase
-		config.fields.foreach(pair => {
-			val (table, JsArray(elements)) = pair
-			elements.foreach(jsval => {
-				val jsobj = jsval.asJsObject
-				val key = jsobj.fields("id").asInstanceOf[JsString].value
-				val tkp = TKP(table, key, Nil)
-				db.set(tkp, Nil, jsval)
+		it("should read back same objects as set in the database") {
+			config.fields.foreach(pair => {
+				val (table, JsArray(elements)) = pair
+				elements.foreach(jsval => {
+					val jsobj = jsval.asJsObject
+					val key = jsobj.fields("id").asInstanceOf[JsString].value
+					val tkp = TKP(table, key, Nil)
+					db.set(tkp, Nil, jsval)
+					if (db.get(tkp, Nil) != RqSuccess(jsval))
+						println(db.toString)
+					assert(db.get(tkp, Nil) === RqSuccess(jsval))
+				})
 			})
-		})
-		
+			println(db.toString)
+		}
+
 		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-		val plateModel = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
-		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel), true)
 		val tip = Tip(0, Some(tipModel))
-		val plate_P1 = Plate("P1", plateModel, None)
+		val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
+		val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
+		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
+		val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
+		val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
+		val plate_15000 = Plate("reagents15000", plateModel_15000, None)
+		val plate_P1 = Plate("P1", plateModel_PCR, None)
+		val vessel_T1 = Vessel0("T1", Some(tubeModel_15000))
+		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
+		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
+		val vesselState_T1 = VesselState(vessel_T1, Some(VesselPosition(plateState_15000, 0)), new VesselContent("T1", Map(), Map()))
 		
 		def read(kc: KeyClass): RqResult[Any] = {
 			for {
@@ -281,7 +344,7 @@ class ConversionsSpec extends FunSpec {
 		
 		def check[A <: Object : TypeTag](id: String, exp: A) = {
 			val typ = ru.typeTag[A].tpe
-			it(s"should parse $typ") {
+			it(s"should parse $typ `$id`") {
 				val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
 				val ret = read(kc)
 				assert(ret === RqSuccess(exp))
@@ -289,10 +352,17 @@ class ConversionsSpec extends FunSpec {
 		}
 
 		check[TipModel]("Standard 1000ul", tipModel)
-		check[PlateModel]("D-BSSE 96 Well PCR Plate", plateModel)
-		check[PlateLocation]("cooled1", plateLocation_cooled1)
 		check[Tip]("TIP1", tip)
+		check[PlateModel]("D-BSSE 96 Well PCR Plate", plateModel_PCR)
+		check[PlateModel]("Reagent Cooled 8*15ml", plateModel_15000)
+		check[PlateLocation]("cooled1", plateLocation_cooled1)
+		check[PlateLocation]("reagents15000", plateLocation_15000)
+		check[TubeModel]("Tube 15000ul", tubeModel_15000)
 		check[Plate]("P1", plate_P1)
+		check[Plate]("reagents15000", plate_15000)
+		check[PlateState]("P1", plateState_P1)
+		check[Vessel0]("T1", vessel_T1)
+		check[VesselState]("T1", vesselState_T1)
 		/*
 		println("-----------")
 		println(read(KeyClass(TKP("tip", "TIP1", Nil), typeOf[Tip])))

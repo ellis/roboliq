@@ -42,11 +42,6 @@ class DataBase {
 				jsobj.fields.foreach(pair => set(tkp.copy(path = tkp.path ++ List(pair._1)), time, pair._2))
 			case _ =>
 				js_m.getOrElseUpdate(tkp, new HashMap[List[Int], JsValue]())(time) = jsval
-				// Register children
-				if (!tkp.path.isEmpty) {
-					val tkpParent = tkp.copy(path = tkp.path.init)
-					children_m.getOrElseUpdate(tkpParent, mutable.Set[TKP]()) += tkp
-				}
 				registerChild(tkp)
 				handleChange(tkp)
 		}

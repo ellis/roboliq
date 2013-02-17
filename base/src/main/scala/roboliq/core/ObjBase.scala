@@ -407,16 +407,16 @@ class ObjBase(bb: BeanBase) {
 				// If the substance is a liquid
 				case liquid: SubstanceLiquid =>
 					val bContainsLiquid =
-						st.content.mapSolventToVolume.contains(liquid) &&
-						st.content.mapSoluteToMol.isEmpty
+						st.content.solventToVolume.contains(liquid) &&
+						st.content.soluteToMol.isEmpty
 						
 					if (bContainsLiquid) {
-						if (st.content.mapSolventToVolume.size == 1) {
+						if (st.content.solventToVolume.size == 1) {
 							true
 						}
 						// If the other liquid is water
-						else if (st.content.mapSolventToVolume.size == 2) {
-							st.content.mapSolventToVolume.keys.filter(_ ne liquid).exists(_.id == "water")
+						else if (st.content.solventToVolume.size == 2) {
+							st.content.solventToVolume.keys.filter(_ ne liquid).exists(_.id == "water")
 						}
 						else {
 							false
@@ -427,9 +427,9 @@ class ObjBase(bb: BeanBase) {
 						
 				case solid: SubstanceSolid =>
 					val bContainsSolute =
-						st.content.mapSoluteToMol.contains(solid) &&
-						st.content.mapSoluteToMol.size == 1 &&
-						st.content.mapSolventToVolume.forall(_._1.id == "water")
+						st.content.soluteToMol.contains(solid) &&
+						st.content.soluteToMol.size == 1 &&
+						st.content.solventToVolume.forall(_._1.id == "water")
 					bContainsSolute
 			}
 		}
