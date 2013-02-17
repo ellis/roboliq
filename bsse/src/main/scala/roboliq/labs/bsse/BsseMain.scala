@@ -26,10 +26,10 @@ object JsonTest {
 			new roboliq.commands2.pipette.AspirateHandler
 		))
 	
-		val pathbase = "testdata/"
+		val pathbase = "testdata/bsse-robot1/"
 		val databaseFiles = List(
-			"bsse-robot1/bench-01.json",
-			"bsse-robot1/database-01.json"
+			"config/bench-01.json",
+			"config/database-01.json"
 		)
 		databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s)))
 		
@@ -42,16 +42,16 @@ object JsonTest {
 		val pathToToken_l = processor.getTokenList
 		val token_l = pathToToken_l.map(_._2)
 	
-		val evowareConfigFile = new EvowareConfigFile(pathbase+"bsse-robot1/carrier.cfg")
-		val evowareTable = new StationConfig(evowareConfigFile, pathbase+"bsse-robot1/bench-01.esc")
+		val evowareConfigFile = new EvowareConfigFile(pathbase+"config/carrier.cfg")
+		val evowareTable = new StationConfig(evowareConfigFile, pathbase+"config/bench-01.esc")
 		val config = new EvowareConfig(evowareTable.tableFile, evowareTable.mapLabelToSite)
 		val translator = new EvowareTranslator(config)
 
-		val sProtocolFilename = pathbase + "noname.json"
-		val sBasename = pathbase + FilenameUtils.removeExtension(sProtocolFilename)
+		val sProtocolFilename = pathbase + args(0)
+		val sBasename = FilenameUtils.removeExtension(sProtocolFilename)
 		val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
 		//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
-		FileUtils.writeToFile(sBasename+".out", yamlOut.dump(seqAsJavaList(token_l)))
+		FileUtils.writeToFile(sBasename+".out", token_l.mkString("\n"))
 
 		/*val doc = new EvowareDoc
 		doc.sProtocolFilename = sProtocolFilename
