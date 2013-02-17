@@ -67,9 +67,9 @@ class TipAspirateEventHandler extends ConversionHandlerN {
 			state0.contamOutside ++ liquid.contaminants,
 			state0.srcsEntered + liquid,
 			state0.destsEntered,
-			WashIntensity.None,
+			CleanIntensity.None,
 			state0.cleanDegreePrev,
-			WashIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
+			CleanIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
 		))
 	}
 }

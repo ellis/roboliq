@@ -29,8 +29,8 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	
 	lazy val tips1000 = getTips.filter(_.index < 4)
 	lazy val tips50 = getTips.filter(_.index >= 4)
-	lazy val tipModel1000 = tips1000.head.modelPermanent_?.get
-	lazy val tipModel50 = tips50.head.modelPermanent_?.get
+	lazy val tipModel1000 = tips1000.head.permanent_?.get
+	lazy val tipModel50 = tips50.head.permanent_?.get
 	private object junk {
 		lazy val tipBlock1000 = new TipBlock(tips1000, Seq(tipModel1000))
 		lazy val tipBlock50 = new TipBlock(tips50, Seq(tipModel50))
@@ -112,8 +112,8 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	def areTipsDisposable: Boolean = false
 	
 	def getDispenseAllowableTipModels(liquid: Liquid, nVolume: LiquidVolume): Seq[TipModel] = {
-		val b1000 = (nVolume >= tipModel1000.nVolumeAspirateMin)
-		val b50 = (nVolume >= tipModel50.nVolumeAspirateMin && nVolume <= tipModel50.volume && !liquid.contaminants.contains(Contaminant.Cell))
+		val b1000 = (nVolume >= tipModel1000.volumeMin)
+		val b50 = (nVolume >= tipModel50.volumeMin && nVolume <= tipModel50.volume && !liquid.contaminants.contains(Contaminant.Cell))
 		List(
 			if (b1000) Some(tipModel1000) else None,
 			if (b50) Some(tipModel50) else None
@@ -246,8 +246,8 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	}
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[Tip], lTipCleaning: SortedSet[Tip]): SortedSet[Tip] = {
-		val lModel = lTipCleaning.toSeq.map(_.modelPermanent_?).distinct
-		val lTip = lTipAll.filter(tip => lModel.contains(tip.modelPermanent_?))
+		val lModel = lTipCleaning.toSeq.map(_.permanent_?).distinct
+		val lTip = lTipAll.filter(tip => lModel.contains(tip.permanent_?))
 		lTip -- lTipCleaning
 	}
 

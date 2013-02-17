@@ -28,10 +28,10 @@ case class TipModel(
 	val id: String,
 	val volume: LiquidVolume, 
 	val volumeMin: LiquidVolume,
-	val cleanIntensityToExtraVolume: Map[WashIntensity.Value, LiquidVolume] = Map()
+	val cleanIntensityToExtraVolume: Map[CleanIntensity.Value, LiquidVolume] = Map()
 ) {
-	val volumeWashExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(WashIntensity.Thorough, LiquidVolume.empty)
-	val volumeDeconExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(WashIntensity.Decontaminate, LiquidVolume.empty)
+	val volumeWashExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(CleanIntensity.Thorough, LiquidVolume.empty)
+	val volumeDeconExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(CleanIntensity.Decontaminate, LiquidVolume.empty)
 }
 
 object TipModel {

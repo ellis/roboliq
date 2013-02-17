@@ -209,7 +209,7 @@ class GroupBBuilder(
 		tip: Tip,
 		cleanSpec: WashSpec
 	): Option[CleanSpec2] = {
-		if (cleanSpec.washIntensity == WashIntensity.None) {
+		if (cleanSpec.washIntensity == CleanIntensity.None) {
 			None
 		}
 		else if (device.areTipsDisposable) {
@@ -229,7 +229,7 @@ class GroupBBuilder(
 		}
 		else {
 			val tipState = tip.state(states)
-			if (cleanSpec.washIntensity > WashIntensity.None) Some(WashSpec2(tip, cleanSpec))
+			if (cleanSpec.washIntensity > CleanIntensity.None) Some(WashSpec2(tip, cleanSpec))
 			else None
 		}
 	}

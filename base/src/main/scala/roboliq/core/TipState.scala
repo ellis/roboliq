@@ -27,10 +27,10 @@ case class TipState(
 	val contamOutside: Set[Contaminant.Value],
 	val srcsEntered: Set[Liquid],
 	val destsEntered: Set[Liquid],
-	val cleanDegree: WashIntensity.Value,
-	val cleanDegreePrev: WashIntensity.Value,
+	val cleanDegree: CleanIntensity.Value,
+	val cleanDegreePrev: CleanIntensity.Value,
 	/** Intensity of cleaning that should be performed after leaving the current liquid group */
-	val cleanDegreePending: WashIntensity.Value
+	val cleanDegreePending: CleanIntensity.Value
 ) extends Ordered[TipState] {
 	override def compare(that: TipState): Int = conf.compare(that.conf)
 }
@@ -49,9 +49,9 @@ object TipState {
 		contamOutside = Set(),
 		srcsEntered = Set(),
 		destsEntered = Set(),
-		cleanDegree = WashIntensity.None,
-		cleanDegreePrev = WashIntensity.None,
-		cleanDegreePending = WashIntensity.None
+		cleanDegree = CleanIntensity.None,
+		cleanDegreePrev = CleanIntensity.None,
+		cleanDegreePending = CleanIntensity.None
 	)
 }
 
@@ -88,9 +88,9 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 			st.contamOutside ++ liquid2.contaminants,
 			st.srcsEntered + liquid2,
 			st.destsEntered,
-			WashIntensity.None,
+			CleanIntensity.None,
 			st.cleanDegreePrev,
-			WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			CleanIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
 		))
 	}
 	
@@ -108,7 +108,7 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		set(st.copy(
 			liquid = liquid,
 			volume = nVolume,
-			cleanDegree = WashIntensity.None
+			cleanDegree = CleanIntensity.None
 		))
 	}
 	
@@ -120,8 +120,8 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 			volume = nVolume,
 			contamOutside = st.contamOutside ++ liquid2.contaminants,
 			destsEntered = st.destsEntered + liquid2,
-			cleanDegree = WashIntensity.None,
-			cleanDegreePending = WashIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			cleanDegree = CleanIntensity.None,
+			cleanDegreePending = CleanIntensity.max(st.cleanDegreePending, liquid2.group.cleanPolicy.exit)
 		))
 	}
 	
@@ -136,13 +136,13 @@ class TipStateWriter(o: Tip, builder: StateBuilder) {
 		}
 	}
 	
-	def clean(cleanDegree: WashIntensity.Value) {
+	def clean(cleanDegree: CleanIntensity.Value) {
 		val st = state
 		set(TipState.createEmpty(o).copy(
 			model_? = st.model_?,
 			cleanDegree = cleanDegree,
 			cleanDegreePrev = cleanDegree,
-			cleanDegreePending = WashIntensity.None
+			cleanDegreePending = CleanIntensity.None
 		))
 	}
 	
@@ -183,9 +183,9 @@ class TipAspirateEventBean extends TipEventBean {
 				state0.contamOutside ++ liquid.contaminants,
 				state0.srcsEntered + liquid,
 				state0.destsEntered,
-				WashIntensity.None,
+				CleanIntensity.None,
 				state0.cleanDegreePrev,
-				WashIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
+				CleanIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
 			)
 		}
 	}
@@ -235,7 +235,7 @@ class TipDispenseEventBean extends TipEventBean {
 		state0.copy(
 			liquid = liquid,
 			volume = nVolume,
-			cleanDegree = WashIntensity.None
+			cleanDegree = CleanIntensity.None
 		)
 	}
 	
@@ -246,8 +246,8 @@ class TipDispenseEventBean extends TipEventBean {
 			volume = nVolume,
 			contamOutside = state0.contamOutside ++ liquid2.contaminants,
 			destsEntered = state0.destsEntered + liquid2,
-			cleanDegree = WashIntensity.None,
-			cleanDegreePending = WashIntensity.max(state0.cleanDegreePending, liquid2.group.cleanPolicy.exit)
+			cleanDegree = CleanIntensity.None,
+			cleanDegreePending = CleanIntensity.max(state0.cleanDegreePending, liquid2.group.cleanPolicy.exit)
 		)
 	}
 	
@@ -277,16 +277,16 @@ object TipDispenseEventBean {
 
 /** Represents a tip cleaning event. */
 class TipCleanEventBean extends TipEventBean {
-	/** Degree/intensity of cleaning (see [roboliq.core.WashIntensity]]). */
+	/** Degree/intensity of cleaning (see [roboliq.core.CleanIntensity]]). */
 	@BeanProperty var degree: String = null
 	
 	protected def update(state0: TipState, query: StateQuery): Result[TipState] = {
-		val cleanDegree = WashIntensity.withName(degree)
+		val cleanDegree = CleanIntensity.withName(degree)
 		Success(TipState.createEmpty(state0.conf).copy(
 			model_? = state0.model_?,
 			cleanDegree = cleanDegree,
 			cleanDegreePrev = cleanDegree,
-			cleanDegreePending = WashIntensity.None
+			cleanDegreePending = CleanIntensity.None
 		))
 	}
 }
@@ -294,7 +294,7 @@ class TipCleanEventBean extends TipEventBean {
 /** Factory object for [[roboliq.core.TipCleanEventBean]]. */
 object TipCleanEventBean {
 	/** Event to clean a `tip` with the given intensity `degree`. */
-	def apply(tip: Tip, degree: WashIntensity.Value): TipCleanEventBean = {
+	def apply(tip: Tip, degree: CleanIntensity.Value): TipCleanEventBean = {
 		val bean = new TipCleanEventBean
 		bean.obj = tip.id
 		bean.degree = degree.toString

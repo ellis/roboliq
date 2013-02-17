@@ -44,11 +44,11 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 			plate <- states.findPlate(bean.plate)
 			dyeSrc_l <- ctx.ob.findWell2List(bean.dye)
 			//dyeSrc_ls <- ctx.ob.findAllIdsContainingSubstance(dye)
-			//dyeSrc_l <- Result.mapOver(dyeSrc_ls)(wellId => ctx.ob.findWell2(wellId))
+			//dyeSrc_l <- Result.mapOver(dyeSrc_ls)(wellId => ctx.ob.findWell(wellId))
 			waterSrc_l <- ctx.ob.findWell2List(bean.water)
 			//water <- states.findSubstance(bean.water)
 			//waterSrc_ls <- ctx.ob.findAllIdsContainingSubstance(water)
-			//waterSrc_l <- Result.mapOver(waterSrc_ls)(wellId => ctx.ob.findWell2(wellId))
+			//waterSrc_l <- Result.mapOver(waterSrc_ls)(wellId => ctx.ob.findWell(wellId))
 		} yield {
 			val r = new scala.util.Random(42)
 			val vol_l = (50 to 200 by 10).toList
@@ -92,12 +92,12 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 				val dis = new SpirateCmdItemBean
 				dis.tip = tip.id
 				dis.volume = volume
-				dis.well = Plate.wellId(plate, well_i)
+				dis.well = WellSpecParser.wellId(plate, well_i)
 				dis.policy = policy_id
 				//println("makeItem: "+(asp, dis))
 				val lvl = new DetectLevelCmdItemBean
 				lvl.tip = tip.id
-				lvl.well = Plate.wellId(plate, well_i)
+				lvl.well = WellSpecParser.wellId(plate, well_i)
 				lvl.policy = policy_id
 				(asp, dis, lvl)
 			}

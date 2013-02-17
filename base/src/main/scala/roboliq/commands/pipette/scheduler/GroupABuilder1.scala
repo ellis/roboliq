@@ -227,7 +227,7 @@ class GroupABuilder1(
 			val lTipClean = lTipAll.filter(tip => {
 				g0.mTipToCleanSpecPending0.get(tip) match {
 					case None => true
-					case Some(washSpec) => washSpec.washIntensity == WashIntensity.None
+					case Some(washSpec) => washSpec.washIntensity == CleanIntensity.None
 				}
 			})
 			// FIXME: for debug only
@@ -576,11 +576,11 @@ class GroupABuilder1(
 			val (tip, lm) = pair
 			val policySrc = lm.liquid.group.cleanPolicy
 			val lGroupCleanPolicyDest = mTipToLiquidGroups.getOrElse(tip, Set()).toSeq.map(_.cleanPolicy)
-			val intensityDestEnter = WashIntensity.max(lGroupCleanPolicyDest.map(_.enter))
-			val intensityDestExit = WashIntensity.max(lGroupCleanPolicyDest.map(_.exit))
+			val intensityDestEnter = CleanIntensity.max(lGroupCleanPolicyDest.map(_.enter))
+			val intensityDestExit = CleanIntensity.max(lGroupCleanPolicyDest.map(_.exit))
 			val cleanSpecPending_? = g0.mTipToCleanSpecPending0.get(tip)
-			val intensityPending = cleanSpecPending_?.map(_.washIntensity).getOrElse(WashIntensity.None)
-			val intensityPre = WashIntensity.max(List(policySrc.enter, intensityDestEnter, intensityPending))
+			val intensityPending = cleanSpecPending_?.map(_.washIntensity).getOrElse(CleanIntensity.None)
+			val intensityPre = CleanIntensity.max(List(policySrc.enter, intensityDestEnter, intensityPending))
 
 			val cleanSpecPre = new WashSpec(
 				washIntensity = intensityPre,
@@ -588,7 +588,7 @@ class GroupABuilder1(
 				contamOutside = cleanSpecPending_?.map(_.contamOutside).getOrElse(Set()))
 			
 			// TODO: if the clean policy is overridden to not clean, then the intensityPending should be added to intensityPost
-			val intensityPost = WashIntensity.max(List(policySrc.exit, intensityDestExit))
+			val intensityPost = CleanIntensity.max(List(policySrc.exit, intensityDestExit))
 			// TODO: if the clean policy is overridden to not clean, then the intensityPending should be added to intensityPost
 			// i.e. ++ (cleanSpecPending_?.map(_.contamInside).getOrElse(Set()))
 			val contamInside = lm.liquid.contaminants
@@ -610,10 +610,10 @@ class GroupABuilder1(
 		/*val mTipToCleanSpec = lTipsToClean.map(tip => {
 			tip -> mTipToCleanSpecA.getOrElse(tip,
 					mTipToCleanSpecPendingA.getOrElse(tip, 
-							new WashSpec(WashIntensity.None, Set(), Set())))
+							new WashSpec(CleanIntensity.None, Set(), Set())))
 		}).toMap*/
 		//val mTipToCleanSpecPending = mTipToCleanSpecPendingA.filter(pair => !mTipToCleanSpec.contains(pair._1))
-		val mTipToCleanSpecPending = (g0.mTipToCleanSpecPending0 -- mTipToCleanSpec.keys ++ l3.toMap).filter(_._2.washIntensity != WashIntensity.None)
+		val mTipToCleanSpecPending = (g0.mTipToCleanSpecPending0 -- mTipToCleanSpec.keys ++ l3.toMap).filter(_._2.washIntensity != CleanIntensity.None)
 		
 		//println("mTipToCleanSpec: "+mTipToCleanSpec)
 		//println("mTipToCleanSpecPending: "+mTipToCleanSpecPending)

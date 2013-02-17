@@ -13,7 +13,7 @@ import roboliq.commands.pipette._
 import roboliq.devices.pipette.PipetteDevice
 
 sealed trait PipetteStep
-case class PipetteStep_Clean(tipToIntensity_m: Map[Tip, WashIntensity.Value]) extends PipetteStep
+case class PipetteStep_Clean(tipToIntensity_m: Map[Tip, CleanIntensity.Value]) extends PipetteStep
 case class PipetteStep_Aspirate(item_l: Seq[Item]) extends PipetteStep
 case class PipetteStep_Dispense(item_l: Seq[Item]) extends PipetteStep
 
@@ -207,9 +207,9 @@ object PipettePlanner {
 			else {
 				val llTip = device.batchCleanTips(SortedSet(mTipToWash.keys.toSeq : _*))
 				llTip.flatMap(lTip => {
-					val intensity = lTip.foldLeft(WashIntensity.None)((acc, tip) => {
+					val intensity = lTip.foldLeft(CleanIntensity.None)((acc, tip) => {
 						val spec = mTipToWash(tip)
-						WashIntensity.max(acc, spec.washIntensity)
+						CleanIntensity.max(acc, spec.washIntensity)
 					})
 					val bean = new TipsWashCmdBean
 					bean.tips = lTip.toList.map(_.id)
@@ -293,7 +293,7 @@ object PipetteUtils {
 	/**
 	 * Get the required wash intensity for the given tip to pipette the given item from its current state.
 	 */
-	def getWashIntensityPre(
+	def getCleanIntensityPre(
 		item: Item,
 		liquidSrc: Liquid,
 		policyDisp: PipettePolicy,
@@ -302,7 +302,7 @@ object PipetteUtils {
 		tipModel: TipModel,
 		postmix_? : Option[MixSpec],
 		tipOverrides_? : Option[TipHandlingOverrides]
-	): Result[WashIntensity.Value] = {
+	): Result[CleanIntensity.Value] = {
 		val dest = item.dest
 		val liquidDest0 = item.dest.wellState(states0).get.liquid
 		val tipState0 = tip.state(states0)
@@ -311,7 +311,7 @@ object PipetteUtils {
 		// Fill mTipToLiquidGroup; return GroupStop if trying to dispense into multiple liquid groups
 		val pos = if (item.postmix_?.isDefined || postmix_?.isDefined) PipettePosition.WetContact else policyDisp.pos
 		// Liquid groups of destination wells with wet contact
-		val (intensityDestEnter_?, contaminant_l): (Option[WashIntensity.Value], Set[Contaminant.Value]) = {
+		val (intensityDestEnter_?, contaminant_l): (Option[CleanIntensity.Value], Set[Contaminant.Value]) = {
 			// If we enter the destination liquid:
 			if (pos == PipettePosition.WetContact) {
 				(Some(liquidDest0.group.cleanPolicy.enter), liquidDest0.contaminants)
@@ -329,15 +329,15 @@ object PipetteUtils {
 			if (group_l != Set(liquidSrc))
 				liquidSrc.group.cleanPolicy.enter
 			else
-				WashIntensity.None
+				CleanIntensity.None
 		}
-		val intensityDestEnter = WashIntensity.max(intensityDestEnter_?.toTraversable)
-		val intensityPre = WashIntensity.max(List(intensitySrc, intensityDestEnter)) match {
-			case WashIntensity.None => WashIntensity.None
-			case intensity => WashIntensity.max(List(intensity, tipState0.cleanDegreePending))
+		val intensityDestEnter = CleanIntensity.max(intensityDestEnter_?.toTraversable)
+		val intensityPre = CleanIntensity.max(List(intensitySrc, intensityDestEnter)) match {
+			case CleanIntensity.None => CleanIntensity.None
+			case intensity => CleanIntensity.max(List(intensity, tipState0.cleanDegreePending))
 		}
 		
-		//println("getWashIntensityPre: "+(liquidTip0, liquidSrc, pos, intensitySrc, intensityDestEnter, intensityPre))
+		//println("getCleanIntensityPre: "+(liquidTip0, liquidSrc, pos, intensitySrc, intensityDestEnter, intensityPre))
 
 		// TODO: check whether the clean policy is overridden to not clean
 		

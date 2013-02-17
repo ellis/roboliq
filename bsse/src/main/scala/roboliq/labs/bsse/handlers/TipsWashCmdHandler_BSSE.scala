@@ -35,12 +35,12 @@ class TipsWashCmdHandler_BSSE extends CmdHandlerA[TipsWashCmdBean] {
 			return Expand2Errors()
 
 		//val washProgram = if (cmd.washProgram != null) cmd.washProgram.toInt else 0
-		val intensity = WashIntensity.withName(cmd.intensity)
+		val intensity = CleanIntensity.withName(cmd.intensity)
 		val sIntensity = intensity match {
-			case WashIntensity.None => return Expand2Tokens(Nil, Nil, null)
-			case WashIntensity.Light => "Light"
-			case WashIntensity.Thorough => "Thorough"
-			case WashIntensity.Decontaminate => "Decontaminate"
+			case CleanIntensity.None => return Expand2Tokens(Nil, Nil, null)
+			case CleanIntensity.Light => "Light"
+			case CleanIntensity.Thorough => "Thorough"
+			case CleanIntensity.Decontaminate => "Decontaminate"
 		}
 		
 		val b1000 = lTip.exists(_.index < 4)

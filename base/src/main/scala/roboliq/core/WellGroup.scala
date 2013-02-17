@@ -80,6 +80,9 @@ sealed class WellGroup private[core] (
 												new WellGroupAdjacent(query, set2, pos.idPlate, iCol)
 											else
 												new WellGroupCol(query, set2, pos.idPlate, iCol)
+										case _ =>
+											println(s"WARNING: WellGroup.add: no position found for `${set.head.id}` and/or `${set.last.id}`")
+											this
 									}
 								case _ =>
 									new WellGroupPlate(query, set2, pos.idPlate)

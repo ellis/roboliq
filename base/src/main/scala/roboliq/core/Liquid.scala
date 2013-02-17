@@ -47,31 +47,31 @@ Decon-Decon-Decon
  * @param exit intensity with which tip must be washed after entering a liquid. 
  */
 case class GroupCleanPolicy(
-	val enter: WashIntensity.Value,
-	val within: WashIntensity.Value,
-	val exit: WashIntensity.Value
+	val enter: CleanIntensity.Value,
+	val within: CleanIntensity.Value,
+	val exit: CleanIntensity.Value
 )
 /**
  * Contains the standard GroupCleanPolicy instantiations.
  */
 object GroupCleanPolicy {
-	val NNN = new GroupCleanPolicy(WashIntensity.None, WashIntensity.None, WashIntensity.None)
-	val TNN = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
-	val TNL = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Light)
-	val TNT = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
-	val DDD = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
-	val ThoroughNone = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.None)
-	val Thorough = new GroupCleanPolicy(WashIntensity.Thorough, WashIntensity.None, WashIntensity.Thorough)
-	val Decontaminate = new GroupCleanPolicy(WashIntensity.Decontaminate, WashIntensity.Decontaminate, WashIntensity.Decontaminate)
+	val NNN = new GroupCleanPolicy(CleanIntensity.None, CleanIntensity.None, CleanIntensity.None)
+	val TNN = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.None)
+	val TNL = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.Light)
+	val TNT = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.Thorough)
+	val DDD = new GroupCleanPolicy(CleanIntensity.Decontaminate, CleanIntensity.Decontaminate, CleanIntensity.Decontaminate)
+	val ThoroughNone = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.None)
+	val Thorough = new GroupCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None, CleanIntensity.Thorough)
+	val Decontaminate = new GroupCleanPolicy(CleanIntensity.Decontaminate, CleanIntensity.Decontaminate, CleanIntensity.Decontaminate)
 	
 	/**
 	 * Return a new policy that takes the maximum sub-intensities of `a` and `b`.
 	 */
 	def max(a: GroupCleanPolicy, b: GroupCleanPolicy): GroupCleanPolicy = {
 		new GroupCleanPolicy(
-			WashIntensity.max(a.enter, b.enter),
-			WashIntensity.max(a.within, b.within),
-			WashIntensity.max(a.exit, b.exit)
+			CleanIntensity.max(a.enter, b.enter),
+			CleanIntensity.max(a.within, b.within),
+			CleanIntensity.max(a.exit, b.exit)
 		)
 	}
 }

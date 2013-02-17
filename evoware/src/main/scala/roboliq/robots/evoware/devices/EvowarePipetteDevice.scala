@@ -15,14 +15,14 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume =
 		tip.model_? match {
 			case None => LiquidVolume.empty
-			case Some(model) => model.nVolumeAspirateMin
+			case Some(model) => model.volumeMin
 		}
 	
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume = {
 		tip.model_?.map(tipModel => {
-			val nExtra = WashIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
-				case WashIntensity.Decontaminate => tipModel.nVolumeDeconExtra
-				case _ => tipModel.nVolumeWashExtra
+			val nExtra = CleanIntensity.max(tip.cleanDegreePending, liquid.group.cleanPolicy.exit) match {
+				case CleanIntensity.Decontaminate => tipModel.volumeDeconExtra
+				case _ => tipModel.volumeWashExtra
 			}
 			tipModel.volume - nExtra
 		}).getOrElse(LiquidVolume.empty)
@@ -89,7 +89,7 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	def batchesForDispense(items: Seq[L2A_SpirateItem]): Seq[Seq[L2A_SpirateItem]] = {
 		items.groupBy(item => new KeySpirate(item)).values.toSeq
 	}
-	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, WashIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, WashIntensity.Value]]] = Seq(tcs)
+	def batchesForClean(tcs: Seq[Tuple2[TipConfigL2, CleanIntensity.Value]]): Seq[Seq[Tuple2[TipConfigL2, CleanIntensity.Value]]] = Seq(tcs)
 	def batchesForMix(items: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = {
 		items.groupBy(item => KeySpirate(item.well.holder, item.tip.index / 4)).values.toSeq
 	}

@@ -53,7 +53,7 @@ class EvowareTranslator(config: EvowareConfig) {
 }
 
 // REFACTOR: Remove this class, because it's superfluous now
-private class WellInfo(well: Well2) {
+private class WellInfo(well: Well) {
 	def id = well.id
 	def idPlate = well.idPlate
 	def index = well.index
@@ -61,7 +61,7 @@ private class WellInfo(well: Well2) {
 }
 
 private object WellInfo {
-	def apply(well: Well2): WellInfo = {
+	def apply(well: Well): WellInfo = {
 		new WellInfo(
 			well
 		)
@@ -331,8 +331,8 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 	*/
 	
 	private def clean(builder: EvowareScriptBuilder, cmd: TipsWashToken): Result[Seq[L0C_Command]] = {
-		val lPermanent = cmd.tips.filter(_.modelPermanent_?.isDefined)
-		val lModel = lPermanent.map(_.modelPermanent_?.get.id).distinct
+		val lPermanent = cmd.tips.filter(_.permanent_?.isDefined)
+		val lModel = lPermanent.map(_.permanent_?.get.id).distinct
 		val lName = lModel.map(s => {
 			if (s.contains("1000")) "1000"
 			else "0050"
@@ -375,7 +375,7 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val lItemInfo = items zip lWellInfo
 		lItemInfo match {
-			case Seq() => Error(Seq("Empty Tip-Well2-Volume list"))
+			case Seq() => Error(Seq("Empty Tip-Well-Volume list"))
 			case Seq((item0, info0), rest @ _*) =>
 				// Get the liquid class
 				val policy = item0.policy
@@ -549,11 +549,11 @@ private class EvowareTranslator2(config: EvowareConfig, processorResult: Process
 		tracker.getLocationForCommand(idPlate, nodeCurrent.index)
 	}
 	
-	private def getWellInfo(well: Well2): WellInfo = {
+	private def getWellInfo(well: Well): WellInfo = {
 		WellInfo(well)
 	}
 	
-	private def getWellInfo(lWell: Iterable[Well2]): List[WellInfo] = {
+	private def getWellInfo(lWell: Iterable[Well]): List[WellInfo] = {
 		lWell.map(well => WellInfo(well)).toList
 	}
 	

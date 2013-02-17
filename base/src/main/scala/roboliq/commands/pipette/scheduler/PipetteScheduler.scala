@@ -343,7 +343,7 @@ class PipetteScheduler(
 				Seq(L3C_TipsReplace(items))
 			
 			case TipsWash(mapTipToSpec) =>
-				val intensity = mapTipToSpec.values.foldLeft(WashIntensity.None) { (acc, spec) => WashIntensity.max(acc, spec.washIntensity) }
+				val intensity = mapTipToSpec.values.foldLeft(CleanIntensity.None) { (acc, spec) => CleanIntensity.max(acc, spec.washIntensity) }
 				val items = mapTipToSpec.toSeq.sortBy(_._1).map(pair => new L3A_TipsWashItem(pair._1, pair._2.contamInside, pair._2.contamOutside))
 				if (items.isEmpty) Seq() else Seq(L3C_TipsWash(items, intensity))
 	*/
@@ -375,9 +375,9 @@ class PipetteScheduler(
 			else {
 				val llTip = device.batchCleanTips(SortedSet(mTipToWash.keys.toSeq : _*))
 				llTip.flatMap(lTip => {
-					val intensity = lTip.foldLeft(WashIntensity.None)((acc, tip) => {
+					val intensity = lTip.foldLeft(CleanIntensity.None)((acc, tip) => {
 						val spec = mTipToWash(tip)
-						WashIntensity.max(acc, spec.washIntensity)
+						CleanIntensity.max(acc, spec.washIntensity)
 					})
 					val bean = new TipsWashCmdBean
 					bean.tips = lTip.toList.map(_.id)
@@ -417,14 +417,14 @@ class PipetteScheduler(
 		else {
 			val llTip = device.batchCleanTips(lTipAll)
 			llTip.flatMap(lTip => {
-				val intensity = lTip.foldLeft(WashIntensity.None)((acc, tip) => WashIntensity.max(acc, tip.state(states).cleanDegreePending))
+				val intensity = lTip.foldLeft(CleanIntensity.None)((acc, tip) => CleanIntensity.max(acc, tip.state(states).cleanDegreePending))
 				val items = lTip.toSeq.map(tip => tip -> createWashSpec(states, tip, intensity))
 				toCleanCommand(items.map(pair => pair._1-> WashSpec2(pair._1, pair._2)).toMap)
 			})
 		}
 	}
 	
-	private def createWashSpec(states: StateMap, tip: Tip, intensity: WashIntensity.Value): WashSpec = {
+	private def createWashSpec(states: StateMap, tip: Tip, intensity: CleanIntensity.Value): WashSpec = {
 		val tipState = tip.state(states)
 		new WashSpec(intensity, tipState.contamInside, tipState.contamOutside)
 	}

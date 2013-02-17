@@ -54,7 +54,7 @@ class ExampleOpenhouse2(station: roboliq.labs.bsse.station1.StationConfig) exten
 	}
 	
 	def proc1(plate: Plate): Tuple2[roboliq.commands.pcr.PcrThermocycle.Setup, roboliq.commands.centrifuge.L4A_CentrifugeSetup] = {
-		val tipOverrides = new roboliq.commands.pipette.TipHandlingOverrides(None, Some(roboliq.common.WashIntensity.None), None, None)
+		val tipOverrides = new roboliq.commands.pipette.TipHandlingOverrides(None, Some(roboliq.common.CleanIntensity.None), None, None)
 		pipette(Plates.pretty, plate, 25 ul, tipOverrides)
 		seal(plate)
 		val setup_thermocycle = thermocycle(plate)
@@ -95,7 +95,7 @@ class ExampleOpenhouse3(station: roboliq.labs.bsse.station1.StationConfig) exten
 	}
 		
 	def proc1(plate: Plate): Tuple2[roboliq.commands.pcr.PcrThermocycle.Setup, roboliq.commands.centrifuge.L4A_CentrifugeSetup] = {
-		val tipOverrides = new roboliq.commands.pipette.TipHandlingOverrides(None, Some(roboliq.common.WashIntensity.None), None, None)
+		val tipOverrides = new roboliq.commands.pipette.TipHandlingOverrides(None, Some(roboliq.common.CleanIntensity.None), None, None)
 		pipette(Liquids.water, plate, 25 ul, tipOverrides)
 		seal(plate)
 		val setup_thermocycle = thermocycle(plate)

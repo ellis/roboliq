@@ -44,7 +44,7 @@ class RandomDetect01CmdHandler extends CmdHandlerA[RandomDetect01CmdBean] {
 			val tw0_l = dest0_l.flatMap(dest => tip_l.map(_ -> dest))
 			val tw_l = r.shuffle(tw0_l)
 			
-			def doit(tw_l: List[(Tip, Well2)]): List[CmdBean] = {
+			def doit(tw_l: List[(Tip, Well)]): List[CmdBean] = {
 				if (tw_l.isEmpty) return Nil
 				
 				val lvl_l = tw_l.map(makeItem)
@@ -57,7 +57,7 @@ class RandomDetect01CmdHandler extends CmdHandlerA[RandomDetect01CmdBean] {
 			}
 			
 			// Return an item for aspiration and one for dispense
-			def makeItem(tuple: (Tip, Well2)): DetectLevelCmdItemBean = {
+			def makeItem(tuple: (Tip, Well)): DetectLevelCmdItemBean = {
 				//println("tuple: "+tuple)
 				val (tip, well) = tuple
 				val lvl = new DetectLevelCmdItemBean

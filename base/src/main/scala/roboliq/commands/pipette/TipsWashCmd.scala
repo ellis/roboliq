@@ -33,7 +33,7 @@ class TipsWashCmdHandler extends CmdHandlerA[TipsWashCmdBean] {
 		
 		// FIXME: need to intelligently choose wash program!!!
 		val washProgram = if (cmd.washProgram != null) cmd.washProgram.toInt else 0
-		val degree = WashIntensity.withName(cmd.intensity)
+		val degree = CleanIntensity.withName(cmd.intensity)
 		
 		// Create final tokens
 		val tokens = List(new TipsWashToken(lTip, washProgram))

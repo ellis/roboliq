@@ -54,7 +54,7 @@ class SimpleGrouper01 extends PipetteItemGrouper {
 			src = src1.head
 			policyDisp <- Result.get(device.getDispensePolicy(lm.liquid, lm.tipModel, volume, itemState.destState0), "Could not find pipette policy")
 			//_ = println("tipLiquid1: "+tip.state(builder).srcsEntered)
-			intensityPre <- PipetteUtils.getWashIntensityPre(item, lm.liquid, policyDisp, builder, tip, lm.tipModel, postmix_? = None, tipOverrides_? = None)
+			intensityPre <- PipetteUtils.getCleanIntensityPre(item, lm.liquid, policyDisp, builder, tip, lm.tipModel, postmix_? = None, tipOverrides_? = None)
 			//_ = println("tipLiquid2: "+tip.state(builder).srcsEntered)
 		} yield {
 			val group = PipetteGroup(

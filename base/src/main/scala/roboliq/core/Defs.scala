@@ -25,17 +25,17 @@ object LiquidPropertiesFamily {
 /**
  * Enumeration of intensities with which the tips should be washed.
  */
-object WashIntensity extends Enumeration {
+object CleanIntensity extends Enumeration {
 	val None, Light, Thorough, Decontaminate = Value
 	
 	/** Return the more intense wash value. */
-	def max(a: WashIntensity.Value, b: WashIntensity.Value): WashIntensity.Value = {
+	def max(a: CleanIntensity.Value, b: CleanIntensity.Value): CleanIntensity.Value = {
 		if (a >= b) a else b
 	}
 	
 	/** Return the most intense wash value in `l`. */
-	def max(l: Traversable[WashIntensity.Value]): WashIntensity.Value = {
-		l.foldLeft(WashIntensity.None)((acc, intensity) => max(acc, intensity))
+	def max(l: Traversable[CleanIntensity.Value]): CleanIntensity.Value = {
+		l.foldLeft(CleanIntensity.None)((acc, intensity) => max(acc, intensity))
 	}
 }
 
@@ -83,12 +83,12 @@ object TipReplacementPolicy extends Enumeration { // FIXME: Replace this with Ti
 /**
  * Allows the user to override the default tip-handling procedures during pipetting.
  * @param replacement_? optional TipReplacementPolicy.
- * @param washIntensity_? optional WashIntensity.
+ * @param washIntensity_? optional CleanIntensity.
  * @param allowMultipipette_? optional boolean value, false prevents multi-pipetting (i.e. aspirating once and dispensing multiple times)
  */
 case class TipHandlingOverrides(
 	val replacement_? : Option[TipReplacementPolicy.Value],
-	val washIntensity_? : Option[WashIntensity.Value],
+	val washIntensity_? : Option[CleanIntensity.Value],
 	val allowMultipipette_? : Option[Boolean],
 	val contamInside_? : Option[Set[Contaminant.Value]],
 	val contamOutside_? : Option[Set[Contaminant.Value]]
@@ -102,18 +102,18 @@ object TipHandlingOverrides {
 }
 
 /**
- * Basically now just a wrapper around [[roboliq.core.WashIntensity]],
+ * Basically now just a wrapper around [[roboliq.core.CleanIntensity]],
  * since I'm probably not going to use the contamination values anymore;
  * I should probably get rid of this class.
  */
 class WashSpec(
-	val washIntensity: WashIntensity.Value,
+	val washIntensity: CleanIntensity.Value,
 	val contamInside: Set[Contaminant.Value],
 	val contamOutside: Set[Contaminant.Value]
 ) {
 	def +(that: WashSpec): WashSpec = {
 		new WashSpec(
-			WashIntensity.max(washIntensity, that.washIntensity),
+			CleanIntensity.max(washIntensity, that.washIntensity),
 			contamInside ++ that.contamInside,
 			contamOutside ++ that.contamOutside
 		)
@@ -127,7 +127,7 @@ class WashSpec(
  */
 class CleanSpec(
 	val replacement: Option[TipReplacementPolicy.Value],
-	val washIntensity: WashIntensity.Value,
+	val washIntensity: CleanIntensity.Value,
 	val contamInside: Set[Contaminant.Value],
 	val contamOutside: Set[Contaminant.Value]
 )

@@ -61,7 +61,7 @@ class RandomFill02CmdHandler extends CmdHandlerA[RandomFill02CmdBean] {
 			println("Fill02: ")
 			println(wv_l)
 			
-			def doit(wv_l: List[(Well2, LiquidVolume)], src_l: List[Well2]): List[CmdBean] = {
+			def doit(wv_l: List[(Well, LiquidVolume)], src_l: List[Well]): List[CmdBean] = {
 				if (wv_l.isEmpty) return Nil
 				
 				val l = r.shuffle(tip_l).zip(wv_l).zipWithIndex
@@ -83,7 +83,7 @@ class RandomFill02CmdHandler extends CmdHandlerA[RandomFill02CmdBean] {
 			}
 			
 			// Return an item for aspiration and one for dispense
-			def makeItem(src_l: List[Well2])(tuple: ((Tip, (Well2, LiquidVolume)), Int)): (SpirateCmdItemBean, SpirateCmdItemBean, DetectLevelCmdItemBean) = {
+			def makeItem(src_l: List[Well])(tuple: ((Tip, (Well, LiquidVolume)), Int)): (SpirateCmdItemBean, SpirateCmdItemBean, DetectLevelCmdItemBean) = {
 				val ((tip, (well, volume)), step_i) = tuple
 				val asp = new SpirateCmdItemBean
 				val src_i = tip.index % src_l.size
