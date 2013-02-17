@@ -11,6 +11,85 @@ import scala.collection.mutable.Stack
 import java.io.PrintWriter
 
 
+class JsonTest(args: List[String]) {
+	import spray.json.JsonParser
+	import roboliq.processor2.ProcessorData
+	
+	val sHome = System.getProperty("user.home")
+	val pathbase = sHome+"/src/roboliq/testdata/"
+
+	// TODO: should load the handlers via a yaml config file
+	val processor = new ProcessorData(List(
+		new roboliq.commands2.arm.MovePlateHandler,
+		new roboliq.commands2.pipette.AspirateHandler
+	))
+
+	val databaseFiles = List(
+		"bsse-robot1/bench-01.json",
+		"bsse-robot1/database-01.json"
+	)
+	databaseFiles.map(s => processor.loadJsonData(new java.io.File(s)))
+	
+	val movePlate = JsonParser("""{ "cmd": "arm.movePlate", "&plate": "P1", "&dest": "cooled2", "deviceId": "ROMA2" }""").asJsObject
+	val aspirate = JsonParser("""{ "cmd": "pipetter.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }""").asJsObject
+	processor.setCommands(List(aspirate))
+	processor.run()
+
+	//val cmds = beans.last.commands.toList
+	//val res = processor.process(cmds)
+	//val nodes = res.lNode
+	val pathToToken_l = processor.getTokenList
+	val token_l = pathToToken_l.map(_._2)
+
+	val evowareConfigFile = new EvowareConfigFile(pathbase+"bsse-robot1/carrier.cfg")
+	val evowareTable = new StationConfig(evowareConfigFile, pathbase+"bsse-robot1/bench-01.esc")
+	val config = new EvowareConfig(evowareTable.tableFile, evowareTable.mapLabelToSite)
+	val translator = new EvowareTranslator(config)
+
+	def run {
+		val sProtocolFilename = files.last
+		val sBasename = pathbase + FilenameUtils.removeExtension(sProtocolFilename)
+		val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
+		//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
+		FileUtils.writeToFile(sBasename+".out", yamlOut.dump(seqAsJavaList(token_l)))
+
+		/*val doc = new EvowareDoc
+		doc.sProtocolFilename = sProtocolFilename
+		doc.lNode = nodes
+		doc.processorResult = res
+		*/
+		
+		//println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
+		translator.translate(token_l) match {
+			case RqError(e, w) =>
+				//doc.lsTranslatorError = ls.toList
+				e.foreach(println)
+				w.foreach(println)
+			case RqSuccess(evowareScript, w) =>
+				//doc.evowareScript = evowareScript
+				// save to file
+				val sScriptFilename = sBasename+".esc"
+				translator.saveWithHeader(evowareScript, sScriptFilename)
+		}
+		
+		//doc.printToFile(sBasename+".html")
+	}
+	
+	private def getErrorMessage(node: CmdNodeBean): List[String] = {
+		if (node.errors != null) {
+			node.errors.toList.map(node.index+": "+_)
+		}
+		else if (node.children != null) {
+			node.children.flatMap(getErrorMessage).toList
+		}
+		else
+			Nil
+	}
+	//def getErrorMessages(lNode: List[CmdNodeBean]): List[String] =
+		
+}
+
+/*
 class YamlTest2(args: List[String]) {
 	import org.yaml.snakeyaml._
 	import roboliq.yaml.RoboliqYaml
@@ -58,10 +137,10 @@ class YamlTest2(args: List[String]) {
 		FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
 		FileUtils.writeToFile(sBasename+".out", yamlOut.dump(seqAsJavaList(nodes)))
 
-		val doc = new EvowareDoc
+		/*val doc = new EvowareDoc
 		doc.sProtocolFilename = sProtocolFilename
 		doc.lNode = nodes
-		doc.processorResult = res
+		doc.processorResult = res*/
 		
 		//println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
 		println(res.locationTracker.map)
@@ -69,20 +148,20 @@ class YamlTest2(args: List[String]) {
 			case Nil =>
 				translator.translate(res) match {
 					case Error(ls) =>
-						doc.lsTranslatorError = ls.toList
+						//doc.lsTranslatorError = ls.toList
 						ls.foreach(println)
 					case Success(evowareScript) =>
-						doc.evowareScript = evowareScript
+						//doc.evowareScript = evowareScript
 						// save to file
 						val sScriptFilename = sBasename+".esc"
 						translator.saveWithHeader(evowareScript, sScriptFilename)
 				}
 			case ls =>
-				doc.lsProcessorError = ls
+				//doc.lsProcessorError = ls
 				ls.foreach(println)
 		}
 		
-		doc.printToFile(sBasename+".html")
+		//doc.printToFile(sBasename+".html")
 	}
 	
 	private def getErrorMessage(node: CmdNodeBean): List[String] = {
@@ -98,11 +177,13 @@ class YamlTest2(args: List[String]) {
 	//def getErrorMessages(lNode: List[CmdNodeBean]): List[String] =
 		
 }
+*/
 
 object BsseMain {
 	def main(args: Array[String]) {
 		//new roboliq.labs.bsse.examples.PrimerTest1().run()
-		new YamlTest2(args.toList).run
+		//new YamlTest2(args.toList).run
+		new JsonTest(args.toList).run
 	}
 
 	/*

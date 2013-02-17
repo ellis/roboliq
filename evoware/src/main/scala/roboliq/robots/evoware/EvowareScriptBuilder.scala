@@ -6,7 +6,7 @@ import scala.collection.mutable.HashMap
 import roboliq.core.ObjBase
 
 
-class EvowareScriptBuilder(val ob: ObjBase) {
+class EvowareScriptBuilder {
 	val cmds = new ArrayBuffer[Object]
 	val mapCmdToLabwareInfo = new HashMap[Object, List[Tuple3[CarrierSite, String, LabwareModel]]]
 	val state = new EvowareState

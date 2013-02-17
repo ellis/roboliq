@@ -103,6 +103,25 @@ class ProcessorData(
 	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList*/
 	//conversion_m(ru.typeOf[Test]) = Conversions.testHandler
 	
+	def loadJsonData(file: java.io.File) {
+		import org.apache.commons.io.FileUtils
+		val s = FileUtils.readFileToString(file)
+		val config = JsonParser(s).asJsObject
+		loadJsonData(config)
+	}
+	
+	def loadJsonData(config: JsObject) {
+		config.fields.foreach(pair => {
+			val (table, JsArray(elements)) = pair
+			elements.foreach(jsval => {
+				val jsobj = jsval.asJsObject
+				val key = jsobj.fields("id").asInstanceOf[JsString].value
+				val tkp = TKP(table, key, Nil)
+				setEntity(tkp, Nil, jsval)
+			})
+		})
+	}
+
 	def setCommands(cmd_l: List[JsObject]) {
 		cmd1_l = handleComputationItems(None, cmd_l.map(js => ComputationItem_Command(js)))
 		registerNodes(cmd1_l)

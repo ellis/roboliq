@@ -1,4 +1,4 @@
-package roboliq.robots.evoware
+/*package roboliq.robots.evoware
 
 import java.io.File
 import java.io.BufferedWriter
@@ -6,20 +6,17 @@ import java.io.FileWriter
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import roboliq.core._
-import roboliq.core.RqPimper._
-import roboliq.commands.move.LidHandling
-import roboliq.commands.pipette.HasTip
-import roboliq.commands.pipette.HasWell
-import roboliq.commands.pipette.HasPolicy
-import roboliq.commands.pipette.TipWellVolumePolicy
-import roboliq.commands2.arm._
-import roboliq.commands2.pipette._
+import roboliq.commands.move._
+import roboliq.commands.pipette._
+import roboliq.devices.pipette._
 import commands.EvowareSubroutineToken
+import roboliq.commands.arm.MovePlateToken
+//import roboliq.robots.evoware.commands._
 
 
 class EvowareTranslator(config: EvowareConfig) {
-	def translate(token_l: List[CmdToken]): RqResult[EvowareScript] = {
-		val t2 = new EvowareTranslator2(config, token_l)
+	def translate(processorResult: ProcessorResult): Result[EvowareScript] = {
+		val t2 = new EvowareTranslator2(config, processorResult)
 		t2.translate().map(_.toImmutable)
 	}
 
@@ -55,37 +52,65 @@ class EvowareTranslator(config: EvowareConfig) {
 	
 }
 
-private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken]) {
-	private var nodeCurrent: CmdToken = null
+// REFACTOR: Remove this class, because it's superfluous now
+private class WellInfo(well: Well) {
+	def id = well.id
+	def idPlate = well.idPlate
+	def index = well.index
+	//def iRow = pos.iRow
+}
+
+private object WellInfo {
+	def apply(well: Well): WellInfo = {
+		new WellInfo(
+			well
+		)
+	}
+}
+
+private class EvowareTranslator2(config: EvowareConfig, processorResult: ProcessorResult) {
+	private val ob = processorResult.ob
+	private val lNode = processorResult.lNode
+	private val tracker = processorResult.locationTracker
 	
-	def translate(): RqResult[EvowareScriptBuilder] = {
-		val builder = new EvowareScriptBuilder
-		translate(token_l, builder).map(_ => builder)
+	private var nodeCurrent: CmdNodeBean = null
+	
+	def translate(): Result[EvowareScriptBuilder] = {
+		val builder = new EvowareScriptBuilder(ob)
+		translate(lNode, builder).map(_ => builder)
 	}
 	
-	private def translate(token_l: List[CmdToken], builder: EvowareScriptBuilder): RqResult[Unit] = {
-		RqResult.toResultOfList(token_l.map(token => {
-			nodeCurrent = token
-			translate(token, builder)
-		})).map(_ => ())
+	private def translate(lNode: List[Ob], builder: EvowareScriptBuilder): Result[Unit] = {
+		Result.mapOver(lNode)(node => {
+			nodeCurrent = node
+			if (node.tokens != null) {
+				Result.mapOver(node.tokens.toList) { token => translate(token, builder, node.states0) }
+			}
+			else if (node.children != null) {
+				translate(node.children.toList, builder)
+			}
+			else {
+				Success()
+			}
+		}).map(_ => ())
 	}
 	
-	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder): RqResult[Unit] = {
+	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder): Result[Unit] = {
 		for { cmds0 <- cmd1 match {
-			case c: AspirateToken => aspirate(builder, c)
+			case c: AspirateToken => aspirate(builder, c, states0)
 			//case c: L1C_Comment => comment(c)
-			//case c: DispenseToken => dispense(builder, c)
-			//case c: DetectLevelToken => detectLevel(builder, c)
+			case c: DispenseToken => dispense(builder, c)
+			case c: DetectLevelToken => detectLevel(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
-			//case c: EvowareSubroutineToken => subroutine(builder, c)
-			//case c: MixToken => mix(builder, c.items)
+			case c: EvowareSubroutineToken => subroutine(builder, c)
+			case c: MixToken => mix(builder, c.items)
 			case c: MovePlateToken => movePlate(builder, c)
 			//case c: L1C_Prompt => prompt(c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
 			//case c: L1C_Timer => timer(c.args)
 			//case c: L1C_SaveCurrentLocation => Success(Seq())
-			//case c: TipsWashToken => clean(builder, c)
+			case c: TipsWashToken => clean(builder, c)
 		}} yield {
 			builder.cmds ++= cmds0
 			()
@@ -137,26 +162,29 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	*/
 	
 
-	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken): RqResult[List[L0C_Command]] = {
+	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken, states0: StateMap): Result[Seq[L0C_Command]] = {
 		for (item <- cmd.items) {
-			val state = item.well.vessel
-			val sLiquid = state.content.liquid.id
-			val mapWellToAspirated = builder.state.mapLiquidToWellToAspirated.getOrElse(sLiquid, new HashMap())
-			val vol0 = mapWellToAspirated.getOrElseUpdate(item.well.id, LiquidVolume.empty)
-			mapWellToAspirated(item.well.id) = vol0 + item.volume
-			builder.state.mapLiquidToWellToAspirated(sLiquid) = mapWellToAspirated
+			item.well.wellState(states0) match {
+				case Error(ls) => return Error(ls)
+				case Success(state) =>
+					val sLiquid = state.content.liquid.id
+					val mapWellToAspirated = builder.state.mapLiquidToWellToAspirated.getOrElse(sLiquid, new HashMap())
+					val vol0 = mapWellToAspirated.getOrElseUpdate(item.well.id, LiquidVolume.empty)
+					mapWellToAspirated(item.well.id) = vol0 + item.volume
+					builder.state.mapLiquidToWellToAspirated(sLiquid) = mapWellToAspirated
+			}
 		}
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Aspirate", sLiquidClass))
 	}
 	
-	/*private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): RqResult[Seq[L0C_Command]] = {
+	private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): Result[Seq[L0C_Command]] = {
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Dispense", sLiquidClass))
-	}*/
+	}
 
 	/** Return name of liquid class */
-	private def checkTipWellPolicyItems(builder: EvowareScriptBuilder, items: List[HasTip with HasWell with HasPolicy]): RqResult[String] = {
+	private def checkTipWellPolicyItems(builder: EvowareScriptBuilder, items: Seq[HasTip with HasWell with HasPolicy]): Result[String] = {
 		items match {
-			case Seq() => RqError("INTERNAL: items empty")
+			case Seq() => Error(Seq("INTERNAL: items empty"))
 			case Seq(twvp0, rest @ _*) =>
 				// Get the liquid class
 				val policy = twvp0.policy
@@ -169,7 +197,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				// ENDFIX
 				assert(rest.forall(twvp => twvp.policy.equals(policy)))
 				
-				val lWellInfo = items.map(_.well)
+				val lWellInfo = getWellInfo(items.map(_.well))
 				val idPlate = lWellInfo.head.idPlate
 				
 				// Assert that all tips are of the same kind
@@ -178,7 +206,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
 				if (!lWellInfo.forall(_.idPlate == idPlate))
-					return RqError(("INTERNAL: all wells must be on the same plate `"+idPlate+"`") :: lWellInfo.map(w => w.id+" on "+w.idPlate))
+					return Error(Seq("INTERNAL: all wells must be on the same plate `"+idPlate+"`")++lWellInfo.map(w => w.id+" on "+w.idPlate))
 				
 				/*
 				// All tip/well pairs are equidistant or all tips are going to the same well
@@ -201,14 +229,14 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				val bEquidistant = Utils.equidistant2(lItemInfo)
 				val bSameWell = items.forall(_.well eq twvp0.well)
 				if (!bEquidistant && !bSameWell)
-					return RqError("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Printer.getWellsDebugString(items.map(_.well)))
+					return Error(Seq("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Printer.getWellsDebugString(items.map(_.well))))
 				
-				RqSuccess(policy.id)
+				Success(policy.id)
 		}
 	}
 
-	private def spirateChecked(builder: EvowareScriptBuilder, items: List[TipWellVolumePolicy], sFunc: String, sLiquidClass: String): RqResult[List[L0C_Command]] = {
-		val lWellInfo = items.map(_.well)
+	private def spirateChecked(builder: EvowareScriptBuilder, items: Seq[TipWellVolumePolicy], sFunc: String, sLiquidClass: String): Result[Seq[L0C_Command]] = {
+		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head
 		val info0 = lWellInfo.head
 		//val tipKind = robot.getTipKind(item0.tip)
@@ -227,14 +255,14 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		}
 		//val sVolumes = asVolumes.mkString(",")
 		
-		val plate = info0.position.plate
 		for {
-			location <- info0.position.plate.location_?.asRq(s"plate location must be set for plate `$plate.id`")
-			site <- getSite(location.id)
+			plate <- builder.ob.findPlate(idPlate)
+			location <- getLocation(idPlate)
+			site <- getSite(location)
 		} yield {
-			val sPlateMask = encodeWells(plate.plate, lWellInfo.map(_.index))
+			val sPlateMask = encodeWells(plate, lWellInfo.map(_.index))
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.plate.model.id)
+			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
 			val cmd = L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
@@ -244,17 +272,17 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				site, labwareModel
 			)
 			
-			builder.mapCmdToLabwareInfo(cmd) = List((site, location.id, labwareModel))
+			builder.mapCmdToLabwareInfo(cmd) = List((site, location, labwareModel))
 			
-			List(cmd)
+			Seq(cmd)
 		}
 	}
 	
-	/*private def detectLevel(builder: EvowareScriptBuilder, cmd: DetectLevelToken): RqResult[Seq[L0C_Command]] = {
+	private def detectLevel(builder: EvowareScriptBuilder, cmd: DetectLevelToken): Result[Seq[L0C_Command]] = {
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => detectLevelChecked(builder, cmd.items, sLiquidClass))
 	}
 
-	private def detectLevelChecked(builder: EvowareScriptBuilder, items: Seq[TipWellPolicy], sLiquidClass: String): RqResult[Seq[L0C_Command]] = {
+	private def detectLevelChecked(builder: EvowareScriptBuilder, items: Seq[TipWellPolicy], sLiquidClass: String): Result[Seq[L0C_Command]] = {
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head
 		val info0 = lWellInfo.head
@@ -282,13 +310,13 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			Seq(cmd)
 		}
 	}
-	*/
+	
 	/*
-	private def comment(cmd: L1C_Comment): RqResult[Seq[CmdToken]] = {
+	private def comment(cmd: L1C_Comment): Result[Seq[CmdToken]] = {
 		Success(Seq(L0C_Comment(cmd.s)))
 	}
 	
-	private def execute(cmd: L1C_Execute): RqResult[Seq[CmdToken]] = {
+	private def execute(cmd: L1C_Execute): Result[Seq[CmdToken]] = {
 		val nWaitOpts = (cmd.args.bWaitTillDone, cmd.args.bCheckResult) match {
 			case (true, true) => 6
 			case _ => 2
@@ -297,12 +325,12 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		Success(Seq(L0C_Execute(cmd.args.cmd, nWaitOpts, sResultVar)))
 	}
 	
-	private def prompt(cmd: L1C_Prompt): RqResult[Seq[CmdToken]] = {
+	private def prompt(cmd: L1C_Prompt): Result[Seq[CmdToken]] = {
 		Success(Seq(L0C_Prompt(cmd.s)))
 	}
 	*/
-	/*
-	private def clean(builder: EvowareScriptBuilder, cmd: TipsWashToken): RqResult[Seq[L0C_Command]] = {
+	
+	private def clean(builder: EvowareScriptBuilder, cmd: TipsWashToken): Result[Seq[L0C_Command]] = {
 		val lPermanent = cmd.tips.filter(_.permanent_?.isDefined)
 		val lModel = lPermanent.map(_.permanent_?.get.id).distinct
 		val lName = lModel.map(s => {
@@ -318,8 +346,8 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			lName.map(s => L0C_Subroutine("Roboliq_Clean_"+sDegree+"_"+s))
 		)
 	}
-	*/
-	/*def wash(cmd: TipsWashToken): RqResult[Seq[CmdToken]] = {
+	
+	/*def wash(cmd: TipsWashToken): Result[Seq[CmdToken]] = {
 		config.mapWashProgramArgs.get(cmd.iWashProgram) match {
 			case None =>
 				Error(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
@@ -341,8 +369,8 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 					)))
 		}
 	}*/
-	/*
-	private def mix(builder: EvowareScriptBuilder, items: Seq[MixTokenItem]): RqResult[Seq[L0C_Command]] = {
+	
+	private def mix(builder: EvowareScriptBuilder, items: Seq[MixTokenItem]): Result[Seq[L0C_Command]] = {
 		// REFECTOR: duplicates a lot of checkTipWellVolumePolicy()
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val lItemInfo = items zip lWellInfo
@@ -386,7 +414,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 
 	// REFACTOR: duplicates a lot of spirateChecked and detectLevelChecked
-	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[MixTokenItem], sLiquidClass: String): RqResult[Seq[L0C_Command]] = {
+	private def mixChecked(builder: EvowareScriptBuilder, items: Seq[MixTokenItem], sLiquidClass: String): Result[Seq[L0C_Command]] = {
 		val lWellInfo = getWellInfo(items.map(_.well))
 		val item0 = items.head
 		val info0 = lWellInfo.head
@@ -425,14 +453,14 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			Seq(cmd)
 		}
 	}
-	*/
+	
 	/*
-	private def tipsGet(c: L1C_TipsGet): RqResult[Seq[CmdToken]] = {
+	private def tipsGet(c: L1C_TipsGet): Result[Seq[CmdToken]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		Success(Seq(L0C_GetDITI2(mTips, c.model.id)))
 	}
 	
-	private def tipsDrop(c: L1C_TipsDrop): RqResult[Seq[CmdToken]] = {
+	private def tipsDrop(c: L1C_TipsDrop): Result[Seq[CmdToken]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		for (site <- getSite(c.location)) yield {
 			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
@@ -441,7 +469,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	*/
 	
-	private def movePlate(builder: EvowareScriptBuilder, c: MovePlateToken): RqResult[Seq[L0C_Command]] = {
+	private def movePlate(builder: EvowareScriptBuilder, c: MovePlateToken): Result[Seq[L0C_Command]] = {
 		for {
 			siteSrc <- getSite(c.plateSrc.id)
 			siteDest <- getSite(c.plateDest.id)
@@ -461,7 +489,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			val lVector2 = lVector1.toList.sortBy(pair => pair._1._1.toString + mapClassToValue.getOrElse(pair._1._2, pair._1._2))
 			// TODO: figure out an intermediate path to follow instead (e.g. via a re-grip location)
 			if (lVector2.isEmpty) 
-				return RqError("no common RoMa: "+carrierSrc.sName+" and "+carrierDest.sName)
+				return Error("no common RoMa: "+carrierSrc.sName+" and "+carrierDest.sName)
 			val (iRoma, sVectorClass) = lVector2.head._1
 			
 			//println("movePlate:")
@@ -495,14 +523,14 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	
 	/*
-	private def timer(args: L12A_TimerArgs): RqResult[Seq[CmdToken]] = {
+	private def timer(args: L12A_TimerArgs): Result[Seq[CmdToken]] = {
 		Success(Seq(
 			L0C_StartTimer(1),
 			L0C_WaitTimer(1, args.nSeconds)
 		))
 	}
 	
-	private def facts(builder: EvowareScriptBuilder, cmd: L1C_EvowareFacts): RqResult[Seq[CmdToken]] = {
+	private def facts(builder: EvowareScriptBuilder, cmd: L1C_EvowareFacts): Result[Seq[CmdToken]] = {
 		Success(Seq(L0C_Facts(
 			sDevice = cmd.args.sDevice,
 			sVariable = cmd.args.sVariable,
@@ -511,14 +539,13 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	*/
 	
-	private def subroutine(builder: EvowareScriptBuilder, cmd: EvowareSubroutineToken): RqResult[Seq[L0C_Command]] = {
-		RqSuccess(List(L0C_Subroutine(
+	private def subroutine(builder: EvowareScriptBuilder, cmd: EvowareSubroutineToken): Result[Seq[L0C_Command]] = {
+		Success(Seq(L0C_Subroutine(
 			cmd.sFilename
 		)))
 	}
 	
-	/*
-	private def getLocation(idPlate: String): RqResult[String] = {
+	private def getLocation(idPlate: String): Result[String] = {
 		tracker.getLocationForCommand(idPlate, nodeCurrent.index)
 	}
 	
@@ -528,20 +555,20 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	
 	private def getWellInfo(lWell: Iterable[Well]): List[WellInfo] = {
 		lWell.map(well => WellInfo(well)).toList
-	}*/
+	}
 	
-	private def getSite(location: String): RqResult[CarrierSite] = {
+	private def getSite(location: String): Result[CarrierSite] = {
 		config.mapLabelToSite.get(location) match {
 			case None =>
 				println("INTERNAL: missing evoware site for location \""+location+"\"")
 				println("config.mapLabelToSite: "+config.mapLabelToSite)
-				RqError("INTERNAL: missing evoware site for location \""+location+"\"")
-			case Some(site) => RqSuccess(site)
+				Error(Seq("INTERNAL: missing evoware site for location \""+location+"\""))
+			case Some(site) => Success(site)
 		}
 	}
 	
 	/*
-	private def addLabware(builder: EvowareScriptBuilder, labwareModel: LabwareModel, location: String): RqResult[Unit] = {
+	private def addLabware(builder: EvowareScriptBuilder, labwareModel: LabwareModel, location: String): Result[Unit] = {
 		val site = config.mapLabelToSite(location)
 		val labwareModel = config.tableFile.mapSiteToLabwareModel(site)
 		
@@ -557,12 +584,12 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		Success(())
 	}
 	
-	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): RqResult[Unit] = {
+	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): Result[Unit] = {
 		val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(sLabwareModel)
 		addLabware(builder, labwareModel, location)
 	}
 	
-	private def addLabware(builder: EvowareScriptBuilder, plate: Plate, location: String): RqResult[Unit] = {
+	private def addLabware(builder: EvowareScriptBuilder, plate: Plate, location: String): Result[Unit] = {
 		if (plate.model_?.isEmpty)
 			//return Error("plate model must be assigned to plate \""+plate+"\"")
 			return Success(())
@@ -570,3 +597,4 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	*/
 }
+*/

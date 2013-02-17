@@ -184,18 +184,8 @@ object ApplicativeMain2 extends App {
 		new TestCommandHandler
 	))
 	
-	config.fields.foreach(pair => {
-		val (table, JsArray(elements)) = pair
-		elements.foreach(jsval => {
-			val jsobj = jsval.asJsObject
-			val key = jsobj.fields("id").asInstanceOf[JsString].value
-			val tkp = TKP(table, key, Nil)
-			p.setEntity(tkp, Nil, jsval)
-		})
-	})
+	p.loadJsonData(config)
 
-	p.setEntity(TKP("plate", "P1", Nil), Nil, JsonParser("""{ "id": "P1", "idModel": "D-BSSE 96 Well PCR Plate" }"""))
-	p.setEntity(TKP("plateState", "P1", Nil), List(0), JsonParser("""{ "id": "P1", "location": "cooled1" }"""))
 	//p.setEntity(TKP("test", "T1", Nil), List(0), JsonParser("""{ "id": "T1" }"""))
 	//p.setCommands(List(cmd1, cmd2, cmd3))
 	p.setCommands(List(aspirate))

@@ -1,4 +1,4 @@
-package roboliq.labs.bsse.commands
+/*package roboliq.labs.bsse.commands
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConversions._
@@ -107,3 +107,4 @@ class RandomFill01CmdHandler extends CmdHandlerA[RandomFill01CmdBean] {
 		}
 	}
 }
+*/

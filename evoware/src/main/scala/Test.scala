@@ -1,4 +1,4 @@
-//package roboliq.commands.pipette
+/*//package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.SortedSet
@@ -133,13 +133,13 @@ class YamlTest2 {
 		println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
 		println(res.locationTracker.map)
 		translator.translate(res) match {
-			case Error(ls) => ls.foreach(println)
-			case Success(tres) =>
-				tres.cmds.foreach(println)
+			case RqError(ls, _) => ls.foreach(println)
+			case RqSuccess(tres, _) =>
+				tres.foreach(println)
 		}
 	}
 }
 
 object Test extends App {
 	new YamlTest2().run
-}
+}*/
