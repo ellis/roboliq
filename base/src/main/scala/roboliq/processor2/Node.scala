@@ -231,6 +231,9 @@ case class Node_Events(
 					case event: roboliq.commands2.pipette.TipAspirateEvent =>
 						val handler = new roboliq.commands2.pipette.TipAspirateEventHandler
 						RqSuccess(handler.fnargs(event))
+					case event: roboliq.commands2.pipette.TipDispenseEvent =>
+						val handler = new roboliq.commands2.pipette.TipDispenseEventHandler
+						RqSuccess(handler.fnargs(event))
 					case _ =>
 						RqError(s"No handler for event `$event0`")
 				}

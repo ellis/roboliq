@@ -74,7 +74,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		for { cmds0 <- cmd1 match {
 			case c: AspirateToken => aspirate(builder, c)
 			//case c: L1C_Comment => comment(c)
-			//case c: DispenseToken => dispense(builder, c)
+			case c: DispenseToken => dispense(builder, c)
 			//case c: DetectLevelToken => detectLevel(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			//case c: EvowareSubroutineToken => subroutine(builder, c)
@@ -149,9 +149,9 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Aspirate", sLiquidClass))
 	}
 	
-	/*private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): RqResult[Seq[L0C_Command]] = {
+	private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): RqResult[Seq[L0C_Command]] = {
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Dispense", sLiquidClass))
-	}*/
+	}
 
 	/** Return name of liquid class */
 	private def checkTipWellPolicyItems(builder: EvowareScriptBuilder, items: List[HasTip with HasWell with HasPolicy]): RqResult[String] = {

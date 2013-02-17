@@ -103,7 +103,7 @@ class ConversionsSpec extends FunSpec {
 		)
 		check[VesselContent](
 			List(
-				JsonParser("""{ "idVessel": "T1" }""") -> VesselContent("T1", Map(), Map())
+				JsonParser("""{}""") -> VesselContent(Map(), Map())
 			),
 			List(JsNull)
 		)
@@ -197,7 +197,7 @@ class ConversionsSpec extends FunSpec {
 					Map(
 						"solventToVolume.water#" -> water
 					))
-					=== RqSuccess(VesselContent("T1", Map(water -> LiquidVolume.ul(100)), Map()))
+					=== RqSuccess(VesselContent(Map(water -> LiquidVolume.ul(100)), Map()))
 			)
 		}
 		it("should parse VesselState") {
@@ -205,13 +205,22 @@ class ConversionsSpec extends FunSpec {
 			val t1 = Vessel0("t1", None)
 			assert(
 				conv(
-					JsonParser("""{ "id": "T1", "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }"""),
+					JsonParser("""{ "id": "T1", "content": { "solventToVolume": { "water": "100ul" } } }"""),
 					typeOf[VesselState],
 					Map(
 						"vessel" -> t1,
 						"content.solventToVolume.water#" -> water
 					))
-					=== RqSuccess(VesselState(t1, VesselContent("T1", Map(water -> LiquidVolume.ul(100)), Map())))
+					=== RqSuccess(VesselState(t1, VesselContent(Map(water -> LiquidVolume.ul(100)), Map())))
+			)
+			assert(
+				conv(
+					JsonParser("""{"id":"T1","content":{"solventToVolume":{},"soluteToMol":{}}}"""),
+					typeOf[VesselState],
+					Map(
+						"vessel" -> t1
+					))
+					=== RqSuccess(VesselState(t1, VesselContent(Map(), Map())))
 			)
 		}
 	}
@@ -307,7 +316,7 @@ class ConversionsSpec extends FunSpec {
 		val tipState = TipState0.createEmpty(tip)
 		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
-		val vesselState_T1 = VesselState(vessel_T1, new VesselContent("T1", Map(), Map()))
+		val vesselState_T1 = VesselState(vessel_T1, new VesselContent(Map(), Map()))
 		val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
 	
 		val db = new DataBase

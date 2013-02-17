@@ -18,19 +18,19 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 	val cE = new SubstanceDna("E", None, None)
 	
 	// Our source wells
-	val s1 = new VesselContent("S1", Map(cA -> LiquidVolume.ul(1000)), Map())
-	val s2 = new VesselContent("S2", Map(cA -> LiquidVolume.ul(950), cB -> LiquidVolume.ul(50)), Map())
-	val s3 = new VesselContent("S3", Map(cA -> LiquidVolume.ul(1000)), Map(cC -> 1))
-	val s4 = new VesselContent("S4", Map(cA -> LiquidVolume.ul(1000)), Map(cD -> 1))
-	val s5 = new VesselContent("S5", Map(cA -> LiquidVolume.ul(1000)), Map(cE -> 1))
+	val s1 = new VesselContent(/*"S1",*/ Map(cA -> LiquidVolume.ul(1000)), Map())
+	val s2 = new VesselContent(/*"S2",*/ Map(cA -> LiquidVolume.ul(950), cB -> LiquidVolume.ul(50)), Map())
+	val s3 = new VesselContent(/*"S3",*/ Map(cA -> LiquidVolume.ul(1000)), Map(cC -> 1))
+	val s4 = new VesselContent(/*"S4",*/ Map(cA -> LiquidVolume.ul(1000)), Map(cD -> 1))
+	val s5 = new VesselContent(/*"S5",*/ Map(cA -> LiquidVolume.ul(1000)), Map(cE -> 1))
 	val src_l = List(s1, s2, s3, s4, s5)
 	
 	// Dest wells
-	val d1 = new VesselContent("D1",
+	val d1 = new VesselContent(/*"D1",*/
 		Map(cA -> LiquidVolume.ul(99), cB -> LiquidVolume.ul(1)),
 		Map(cC -> 0.1, cD -> 0.1)
 	)
-	val d2 = new VesselContent("D2",
+	val d2 = new VesselContent(/*"D2",*/
 		Map(cA -> LiquidVolume.ul(99), cB -> LiquidVolume.ul(1)),
 		Map(cC -> 0.1, cE -> 0.1)
 	)

@@ -1,4 +1,4 @@
-package roboliq.test.bsse
+/*package roboliq.test.bsse
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
@@ -137,3 +137,4 @@ class YamlTest2(args: List[String]) {
 	//def getErrorMessages(lNode: List[CmdNodeBean]): List[String] =
 		
 }
+*/

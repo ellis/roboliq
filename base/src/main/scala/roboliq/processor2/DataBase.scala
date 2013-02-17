@@ -39,7 +39,14 @@ class DataBase {
 	def set(tkp: TKP, time: List[Int], jsval: JsValue) {
 		jsval match {
 			case jsobj: JsObject =>
-				jsobj.fields.foreach(pair => set(tkp.copy(path = tkp.path ++ List(pair._1)), time, pair._2))
+				if (jsobj.fields.isEmpty) {
+					js_m.getOrElseUpdate(tkp, new HashMap[List[Int], JsValue]())(time) = jsval
+					registerChild(tkp)
+					handleChange(tkp)
+				}
+				else {
+					jsobj.fields.foreach(pair => set(tkp.copy(path = tkp.path ++ List(pair._1)), time, pair._2))
+				}
 			case _ =>
 				js_m.getOrElseUpdate(tkp, new HashMap[List[Int], JsValue]())(time) = jsval
 				registerChild(tkp)

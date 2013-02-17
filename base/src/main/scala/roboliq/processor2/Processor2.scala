@@ -306,12 +306,14 @@ class ProcessorData(
 						val fnargs = fnRequire(lookup[Vessel0](id)) { (vessel) =>
 							val vesselState = VesselState(vessel, VesselContent.createEmpty)
 							val vesselStateJson = Conversions.vesselStateToJson(vesselState)
+							//println("vesselStateJson: "+vesselStateJson)
+							//db.set(kc.key, time, vesselStateJson)
+							//println("indb: "+db.get(kc.key))
+							//sys.exit()
 							returnEvent(kc.key, vesselStateJson)
+							//RqSuccess(List())
 						}
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
-						//WellSpecParser.parse(input)
-						db.set(kc.key, time, JsObject("id" -> JsString(id)))
-						Nil
 					case _ =>
 						Nil
 				}

@@ -23,7 +23,8 @@ object JsonTest {
 		// TODO: should load the handlers via a yaml config file
 		val processor = new ProcessorData(List(
 			new roboliq.commands2.arm.MovePlateHandler,
-			new roboliq.commands2.pipette.AspirateHandler
+			new roboliq.commands2.pipette.AspirateHandler,
+			new roboliq.commands2.pipette.DispenseHandler
 		))
 	
 		val pathbase = "testdata/bsse-robot1/"
