@@ -630,7 +630,13 @@ object Conversions {
 		}
 	}*/
 	
-	/*
+	def tipCleanPolicyToJson(policy: TipCleanPolicy): JsValue = {
+		JsObject(Map(
+			"enter" -> JsString(policy.enter.toString),
+			"exit" -> JsString(policy.exit.toString)
+		))
+	}
+	
 	def liquidToJson(liquid: Liquid): JsValue = {
 		import liquid._
 		JsObject(Map(
@@ -638,18 +644,9 @@ object Conversions {
 			"sName" -> sName_?.map(JsString(_)).getOrElse(JsNull),
 			"sFamily" -> JsString(sFamily),
 			"contaminants" -> JsArray(contaminants.toList.map(v => JsString(v.toString))),
-			"group": 
+			"tipCleanPolicy" -> tipCleanPolicyToJson(tipCleanPolicy),
+			"multipipetteThreshold" -> JsNumber(multipipetteThreshold)
 		))
-	}
-class Liquid(
-	val id: String,
-	val sName_? : Option[String],
-	val sFamily: String,
-	val contaminants: Set[Contaminant.Value],
-	val group: LiquidGroup,
-	val multipipetteThreshold: Double
-) {
-		
 	}
 	
 	def tipStateToJson(tipState: TipState): JsValue = {
@@ -658,23 +655,16 @@ class Liquid(
 			"id" -> JsString(conf.id),
 			"model" -> model_?.map(v => JsString(v.id)).getOrElse(JsNull),
 			"src" -> src_?.map(v => JsString(v.id)).getOrElse(JsNull),
-			"liquid" -> JsString(liquid.id)
+			"liquid" -> liquidToJson(liquid),
+			"volume" -> JsString(volume.toString),
+			"contamInside" -> JsArray(contamInside.toList.map(v => JsString(v.toString))),
+			"nContamInsideVolume" -> JsString(nContamInsideVolume.toString),
+			"contamOutside" -> JsArray(contamOutside.toList.map(v => JsString(v.toString))),
+			"srcsEntered" -> JsArray(srcsEntered.toList.map(v => JsString(v.toString))),
+			"destsEntered" -> JsArray(destsEntered.toList.map(v => JsString(v.toString))),
+			"cleanDegree" -> JsString(cleanDegree.toString),
+			"cleanDegreePrev" -> JsString(cleanDegreePrev.toString),
+			"cleanDegreePending" -> JsString(cleanDegreePending.toString)
 		))
-		case class TipState(
-			val conf: Tip,
-			val model_? : Option[TipModel],
-			val src_? : Option[Well],
-			val liquid: Liquid,
-			val volume: LiquidVolume,
-			val contamInside: Set[Contaminant.Value], 
-			val nContamInsideVolume: LiquidVolume,
-			val contamOutside: Set[Contaminant.Value],
-			val srcsEntered: Set[Liquid],
-			val destsEntered: Set[Liquid],
-			val cleanDegree: CleanIntensity.Value,
-			val cleanDegreePrev: CleanIntensity.Value,
-			/** Intensity of cleaning that should be performed after leaving the current liquid group */
-			val cleanDegreePending: CleanIntensity.Value
-		
-	}*/
+	}
 }
