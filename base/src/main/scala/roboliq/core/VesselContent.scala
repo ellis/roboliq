@@ -13,7 +13,9 @@ import java.text.DecimalFormat
  * @param soluteToMol map from solute to amount in mol.
  */
 case class VesselContent(
-	val idVessel: String,
+	// REFACTOR: Change VesselContent to a recursive structure
+	//  such as ((water)@100ul+(beer)@100ml)@100ml+(rum)@20ml
+	//val idVessel: String,
 	val solventToVolume: Map[SubstanceLiquid, LiquidVolume],
 	val soluteToMol: Map[SubstanceSolid, BigDecimal]
 ) {
@@ -169,7 +171,7 @@ case class VesselContent(
 			return this
 		val factor = volumeNew.l / volume.l
 		new VesselContent(
-			idVessel,
+			//idVessel,
 			solventToVolume.mapValues(_ * factor),
 			soluteToMol.mapValues(_ * factor)
 		)
@@ -180,7 +182,7 @@ case class VesselContent(
 	 */
 	def +(that: VesselContent): VesselContent = {
 		new VesselContent(
-			idVessel,
+			//idVessel,
 			solventToVolume |+| that.solventToVolume,
 			soluteToMol |+| that.soluteToMol
 		)
@@ -198,7 +200,7 @@ case class VesselContent(
 	 */
 	def addPowder(substance: SubstanceSolid, mol: BigDecimal): VesselContent = {
 		new VesselContent(
-			idVessel,
+//			idVessel,
 			solventToVolume,
 			soluteToMol |+| Map(substance -> mol)
 		)
@@ -209,7 +211,7 @@ case class VesselContent(
 	 */
 	def addLiquid(substance: SubstanceLiquid, volume: LiquidVolume): VesselContent = {
 		new VesselContent(
-			idVessel,
+//			idVessel,
 			solventToVolume |+| Map(substance -> volume),
 			soluteToMol
 		)
@@ -229,7 +231,7 @@ case class VesselContent(
 		if (volume.isEmpty)
 			return Success(0)
 		soluteToMol.get(substance) match {
-			case None => Error("vessel `"+idVessel+"` does not contain substance `"+substance.id+"`")
+			case None => Error("vessel does not contain substance `"+substance.id+"`")
 			case Some(mol) => Success(mol / volume.l)
 		}
 	}
@@ -241,7 +243,7 @@ case class VesselContent(
 		if (volume.isEmpty)
 			return Success(0)
 		solventToVolume.get(substance) match {
-			case None => Error("vessel `"+idVessel+"` does not contain liquid `"+substance.id+"`")
+			case None => Error("vessel does not contain liquid `"+substance.id+"`")
 			case Some(vol) => Success(vol.l / volume.l)
 		}
 	}
@@ -259,7 +261,7 @@ case class VesselContent(
 
 object VesselContent {
 	/** Empty contents for this given vessel. */
-	def createEmpty(idVessel: String) = {
-		new VesselContent(idVessel, Map(), Map())
+	def createEmpty = {
+		new VesselContent(Map(), Map())
 	}
 }

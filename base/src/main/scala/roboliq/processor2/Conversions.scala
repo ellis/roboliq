@@ -696,4 +696,18 @@ object Conversions {
 			"cleanDegreePending" -> JsString(cleanDegreePending.toString)
 		))
 	}
+	
+	def vesselContentToJson(vesselContent: VesselContent): JsValue = {
+		JsObject(
+			"solventToVolume" -> JsObject(vesselContent.solventToVolume.toList.map(pair => pair._1.id -> JsString(pair._2.toString)).toMap),
+			"soluteToMol" -> JsObject(vesselContent.soluteToMol.toList.map(pair => pair._1.id -> JsNumber(pair._2)).toMap)
+		)
+	}
+	
+	def vesselStateToJson(vesselState: VesselState): JsValue = {
+		JsObject(
+			"id" -> JsString(vesselState.id),
+			"content" -> vesselContentToJson(vesselState.content)
+		)
+	}
 }

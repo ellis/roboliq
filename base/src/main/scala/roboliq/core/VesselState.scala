@@ -8,12 +8,18 @@ case class Vessel0(
 case class VesselState(
 	vessel: Vessel0,
 	content: VesselContent
-)
+) {
+	def id = vessel.id
+}
 
 case class VesselSituatedState(
-	vessel: VesselState,
+	vesselState: VesselState,
 	position: VesselPosition
 ) extends Ordered[VesselSituatedState] {
+	def vessel = vesselState.vessel
+	def id = vessel.id
+	def plate = position.plate
+	
 	/** ID of plate in database. */
 	val idPlate: String = position.plate.plate.id
 	/** Index of well on plate. */
@@ -24,15 +30,13 @@ case class VesselSituatedState(
 	val iCol: Int = WellSpecParser.wellCol(position.plate.plate, index)
 	/** String representation of the well's plate location. */
 	val indexName: String = WellSpecParser.wellIndexName(position.plate.plate.nRows, position.plate.plate.nCols, iRow, iCol)
-	/** ID of well in database. */
-	val id: String = vessel.vessel.id
 
 	/** Get well's state. */
 	def wellState(states: StateMap): Result[WellState] = states.findWellState(id)
 	/** Get well's state writer. */
 	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
 	
-	override def compare(that: VesselSituatedState) = vessel.vessel.id.compare(that.vessel.vessel.id)
+	override def compare(that: VesselSituatedState) = id.compare(that.id)
 }
 
 /**

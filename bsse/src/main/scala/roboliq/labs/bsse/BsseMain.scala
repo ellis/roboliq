@@ -36,9 +36,6 @@ object JsonTest {
 		processor.loadJsonData(new java.io.File(pathbase + args(0)))
 		processor.run()
 	
-		//val cmds = beans.last.commands.toList
-		//val res = processor.process(cmds)
-		//val nodes = res.lNode
 		val pathToToken_l = processor.getTokenList
 		val token_l = pathToToken_l.map(_._2)
 	

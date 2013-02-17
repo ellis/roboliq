@@ -379,7 +379,7 @@ class ObjBase(bb: BeanBase) {
 					case Success(well) =>
 						new PlateWellState(
 							conf = well,
-							content = VesselContent.createEmpty(id),
+							content = VesselContent.createEmpty,
 							bCheckVolume = true,
 							history = Nil
 						)
@@ -391,7 +391,7 @@ class ObjBase(bb: BeanBase) {
 								idPlate = null,
 								row = -1,
 								col = -1,
-								content = VesselContent.createEmpty(id),
+								content = VesselContent.createEmpty,
 								bCheckVolume = true,
 								history = Nil
 							)

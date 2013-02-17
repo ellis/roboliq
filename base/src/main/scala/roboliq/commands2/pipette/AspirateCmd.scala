@@ -22,7 +22,7 @@ case class AspirateToken(
 class AspirateHandler extends CommandHandler("pipetter.aspirate") {
 	val fnargs = cmdAs[AspirateCmd] { cmd =>
 		val events = cmd.items.flatMap(item => {
-			TipAspirateEvent(item.tip, item.well.vessel, item.volume) :: Nil
+			TipAspirateEvent(item.tip, item.well.vesselState, item.volume) :: Nil
 			//WellRemoveEventBean(item.well.vessel, item.volume) :: Nil
 		})
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)

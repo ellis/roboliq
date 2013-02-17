@@ -263,37 +263,8 @@ class ProcessorData(
 		makeConversionNodesForInputs(node)
 	}
 	
-	var temp = 0
 	private def makeConversionNodesForInputs(node: Node): List[Node] = {
-		// Create default entities
-		// TODO: Create a general approach to creating default objects
-		val default_l = node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
-			if (kco.kc.key.table == "tipState") {
-				if (temp > 0)
-					sys.exit()
-				temp += 1
-				val kc = kco.kc
-				val id = kc.key.key
-				//sys.exit()
-				val time = List(0)
-				// If there is no initial tipState registered yet:
-				if (db.getAt(kc.key, time).isError) {
-					import RqFunctionHandler._
-					val fnargs = fnRequire(lookup[Tip](id)) { (tip) =>
-						val tipState = TipState0.createEmpty(tip)
-						val tipStateJson = Conversions.tipStateToJson(tipState)
-						returnEvent(kc.key, tipStateJson)
-					}
-					List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
-				}
-				else {
-					Nil
-				}
-			}
-			else
-				Nil
-		})
-		
+		val default_l = makeConversionNodesForDefaults(node)
 		
 		// Try to add missing conversions for inputs which are not JsValues 
 		val l0 = node.input_l.filterNot(kco => kco.kc.isJsValue || kcNode_m.contains(kco.kc)).zipWithIndex.flatMap(pair => {
@@ -307,6 +278,47 @@ class ProcessorData(
 		//println("l: "+l)
 		registerNodes(l)
 		l
+	}
+	
+	private def makeConversionNodesForDefaults(node: Node): List[Node_Conversion] = {
+		// Create default entities
+		// TODO: Create a general approach to creating default objects
+		node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
+			val kc = kco.kc
+			val id = kc.key.key
+			val time = List(0)
+			// If there is no initial tipState registered yet:
+			if (db.getAt(kc.key, time).isError) {
+				import RqFunctionHandler._
+				kc.key.table match {
+					case "tipState" =>
+						val fnargs = fnRequire(lookup[Tip](id)) { (tip) =>
+							val tipState = TipState0.createEmpty(tip)
+							val tipStateJson = Conversions.tipStateToJson(tipState)
+							returnEvent(kc.key, tipStateJson)
+						}
+						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
+					case "vessel" =>
+						//WellSpecParser.parse(input)
+						db.set(kc.key, time, JsObject("id" -> JsString(id)))
+						Nil
+					case "vesselState" =>
+						val fnargs = fnRequire(lookup[Vessel0](id)) { (vessel) =>
+							val vesselState = VesselState(vessel, VesselContent.createEmpty)
+							val vesselStateJson = Conversions.vesselStateToJson(vesselState)
+							returnEvent(kc.key, vesselStateJson)
+						}
+						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
+						//WellSpecParser.parse(input)
+						db.set(kc.key, time, JsObject("id" -> JsString(id)))
+						Nil
+					case _ =>
+						Nil
+				}
+			}
+			else
+				Nil
+		})
 	}
 	
 	private def makeConversionNodesForInput(node: Node, kco: KeyClassOpt, index: Int): List[Node_Conversion] = {

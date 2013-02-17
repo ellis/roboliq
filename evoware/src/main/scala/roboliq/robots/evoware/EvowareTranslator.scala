@@ -139,7 +139,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 
 	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken): RqResult[List[L0C_Command]] = {
 		for (item <- cmd.items) {
-			val state = item.well.vessel
+			val state = item.well.vesselState
 			val sLiquid = state.content.liquid.id
 			val mapWellToAspirated = builder.state.mapLiquidToWellToAspirated.getOrElse(sLiquid, new HashMap())
 			val vol0 = mapWellToAspirated.getOrElseUpdate(item.well.id, LiquidVolume.empty)
