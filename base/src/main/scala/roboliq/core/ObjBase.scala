@@ -218,7 +218,9 @@ class ObjBase(bb: BeanBase) {
 	}
 	
 	/** Find well with ID `id`. */
-	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[PlateWell] = {
+	def findWell_?(id: String, node: CmdNodeBean, requireId: Boolean = true): Option[Well] = {
+		None
+		/* OUT:
 		if (id == null) {
 			if (requireId)
 				node.checkPropertyNonNull(null)
@@ -233,7 +235,7 @@ class ObjBase(bb: BeanBase) {
 						case Success(well) => Some(well)
 					}
 			}
-		}
+		}*/
 	}
 	
 	// REFACTOR: remove this and fix any code which breaks -- ellis, 2012-04-10
@@ -282,7 +284,7 @@ class ObjBase(bb: BeanBase) {
 				indexName = wellSpec.rc.toString
 			)
 			m_mapPlateWell(id) = well
-			m_mapWell2(id) = well
+			// OUT: m_mapWell2(id) = well
 			well
 		}
 	}
@@ -290,7 +292,24 @@ class ObjBase(bb: BeanBase) {
 	/** Find well with ID `id`. */
 	def findWell2(id: String): Result[Well] = {
 		m_mapWell2.get(id) match {
-			case None => Error("Well information not available for id `"+id+"`")
+			case None =>
+				/*if (m_mapPlateWell.contains(id)) {
+					for {
+						well <- findWell(id)
+						plate <- findPlate(well.idPlate)
+						location <- findPlateLocation(well.idPlate)
+						builder.findWellState(id)
+					} yield {
+						
+						val well = VesselSituatedState()
+					}
+				}
+				else if (m_mapTube.contains(id)) {
+					
+				}
+				else*/ {
+					Error("Well information not available for id `"+id+"`")
+				}
 			case Some(well2) => Success(well2)
 		}
 	}
@@ -461,6 +480,6 @@ class ObjBase(bb: BeanBase) {
 	def setInitialTubeLocation(tube: Tube, location: String, row: Int, col: Int) = {
 		TubeLocationEventBean(tube, location, row, col).update(builder)
 		//println("stateA: "+ob.findWellState(tube.id))
-		m_mapWell2(tube.id) = Well.forTube(findWellState(tube.id).get.asInstanceOf[TubeState], builder).get
+		// OUT: m_mapWell2(tube.id) = Well.forTube(findWellState(tube.id).get.asInstanceOf[TubeState], builder).get
 	}
 }

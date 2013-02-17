@@ -11,6 +11,7 @@ sealed abstract class Vessel(val id: String) extends Part {
 	override def toString = id
 }
 
+/*
 /**
  * Represents a vessel whose position on its plate is known.
  * A [[roboliq.core.PlateWell]] is an instance of `Well`,
@@ -74,6 +75,7 @@ object Well {
 		}
 	}
 }
+*/
 
 /**
  * Represents a well on a [[roboliq.core.Plate]].
@@ -91,7 +93,7 @@ class PlateWell(
 	val iRow: Int,
 	val iCol: Int,
 	val indexName: String
-) extends Vessel(id) with Well {
+) extends Vessel(id) {
 	@deprecated("use Well.wellState() instead", "0.1")
 	def state(states: StateMap): WellState = states.findWellState(id) match {
 		case Success(st) => st

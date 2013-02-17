@@ -211,7 +211,7 @@ class ConversionsSpec extends FunSpec {
 						"vessel" -> t1,
 						"content.solventToVolume.water#" -> water
 					))
-					=== RqSuccess(VesselState(t1, None, VesselContent("T1", Map(water -> LiquidVolume.ul(100)), Map())))
+					=== RqSuccess(VesselState(t1, VesselContent("T1", Map(water -> LiquidVolume.ul(100)), Map())))
 			)
 		}
 	}
@@ -285,8 +285,12 @@ class ConversionsSpec extends FunSpec {
 	{ "id": "P1", "location": "cooled1" }
 ],
 "vesselState": [
-	{ "id": "T1", "position": { "plate": "reagents15000", "index": 0 }, "content": { "idVessel": "T1" } },
-	{ "id": "P1(A01)", "position": { "plate": "P1", "index": 0 }, "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
+	{ "id": "T1", "content": { "idVessel": "T1" } },
+	{ "id": "P1(A01)", "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
+],
+"vesselSituatedState": [
+	{ "id": "T1", "position": { "plate": "reagents15000", "index": 0 } },
+	{ "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } }
 ]
 }""").asJsObject
 
@@ -300,10 +304,11 @@ class ConversionsSpec extends FunSpec {
 		val plate_15000 = Plate("reagents15000", plateModel_15000, None)
 		val plate_P1 = Plate("P1", plateModel_PCR, None)
 		val vessel_T1 = Vessel0("T1", Some(tubeModel_15000))
-		val tipState = TipState.createEmpty(tip)
+		val tipState = TipState0.createEmpty(tip)
 		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
-		val vesselState_T1 = VesselState(vessel_T1, Some(VesselPosition(plateState_15000, 0)), new VesselContent("T1", Map(), Map()))
+		val vesselState_T1 = VesselState(vessel_T1, new VesselContent("T1", Map(), Map()))
+		val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
 	
 		val db = new DataBase
 		it("should read back same objects as set in the database") {
@@ -366,10 +371,11 @@ class ConversionsSpec extends FunSpec {
 		check[TubeModel]("Tube 15000ul", tubeModel_15000)
 		check[Plate]("P1", plate_P1)
 		check[Plate]("reagents15000", plate_15000)
-		check[TipState]("TIP1", tipState)
+		check[TipState0]("TIP1", tipState)
 		check[PlateState]("P1", plateState_P1)
 		check[Vessel0]("T1", vessel_T1)
 		check[VesselState]("T1", vesselState_T1)
+		check[VesselSituatedState]("T1", vesselSituatedState_T1)
 		/*
 		println("-----------")
 		println(read(KeyClass(TKP("tip", "TIP1", Nil), typeOf[Tip])))

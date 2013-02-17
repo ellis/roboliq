@@ -86,8 +86,9 @@ class ProcessorData(
 	val internalMessage_l = new ArrayBuffer[RqResult[Unit]]
 	//val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
 	//val conversionMessage_m = new HashMap[KeyClass, RqResult[Unit]]
-	val plateWell_m = new HashMap[String, PlateWell]
-	val well_m = new HashMap[String, Well]
+	//val plateWell_m = new HashMap[String, PlateWell]
+	//val well_m = new HashMap[String, Well]
+	//val events_m = new HashMap[List[Int], List[Event]]
 	
 	val conversion_m = new HashMap[Type, RqFunctionHandler]
 	/*conversion_m(ru.typeOf[String]) = Conversions.asString
@@ -134,16 +135,21 @@ class ProcessorData(
 					val node = Node_Command(parent_?, index, fnargs0)
 					// Store command
 					setEntity(node.contextKey, Nil, cmd)
-					Some(node)
+					List(node)
 				case RqItem_Function(fnargs) =>
 					//val fnargs2 = concretizeArgs(fnargs, parent_?.flatMap(_.contextKey_?), parent_?, index)
-					Some(Node_Computation(parent_?, index, parent_?.flatMap(_.contextKey_?), fnargs))
+					List(Node_Computation(parent_?, index, parent_?.flatMap(_.contextKey_?), fnargs))
 				case ComputationItem_Token(token) =>
 					val id = parent_?.map(_.path).getOrElse(Nil) ++ List(index)
 					token_m(id) = token
-					None
+					Nil
+				case ComputationItem_Events(event_l) =>
+					List(Node_Events(parent_?, index, event_l))
+				case EventItem_State(key, jsval) =>
+					db.set(key, parent_?.map(_.time).getOrElse(List(0)), jsval)
+					Nil
 				case _ =>
-					None
+					Nil
 			}
 		}
 	}
@@ -269,6 +275,7 @@ class ProcessorData(
 					// REFACTOR: Can the recursion be removed, since registerNode will be called on node2 soon anyway
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
+				/*
 				// Create well objects, which are not stored as JsValue entities
 				else if (kc.clazz <:< ru.typeOf[Well]) {
 					WellSpecParser.parse(kc.key.key) match {
@@ -307,7 +314,7 @@ class ProcessorData(
 							val fnargs = RqFunctionArgs(fn, arg_l)
 							List(Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc))
 					}
-				}
+				}*/
 				else {
 					//val contextKey_? = node.contextKey_?
 					val contextKey_? = if (kc.isJsValue) Some(kc.key) else None
@@ -585,6 +592,8 @@ class ProcessorData(
 						setComputationResult(n, tryResult)
 					case n: Node_Conversion =>
 						setConversionResult(n, tryResult)
+					case n: Node_Events =>
+						setComputationResult(n, tryResult)
 				}
 			case e =>
 				println("Error:")

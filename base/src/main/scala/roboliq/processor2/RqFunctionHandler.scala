@@ -83,6 +83,8 @@ case class RequireItem[A: TypeTag](
 
 // REFACTOR: Rename Handler => Builder ?
 abstract class RqFunctionHandler {
+	//import RqFunctionHandler._
+	
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
 	
 	protected implicit def itemToRqReturn(item: RqItem): RqReturn =
@@ -175,20 +177,14 @@ abstract class RqFunctionHandler {
 		a: RequireItem[A]
 	)(
 		fn: (A) => RqReturn
-	): RqFunctionArgs = {
-		val arg_l = List[KeyClassOpt](a)
-		fnRequireRun(fn, arg_l)
-	}
+	): RqFunctionArgs = RqFunctionHandler.fnRequire[A](a)(fn)
 	
 	protected def fnRequire[A: TypeTag, B: TypeTag](
 		a: RequireItem[A],
 		b: RequireItem[B]
 	)(
 		fn: (A, B) => RqReturn
-	): RqFunctionArgs = {
-		val arg_l = List[KeyClassOpt](a, b)
-		fnRequireRun(fn, arg_l)
-	}
+	): RqFunctionArgs = RqFunctionHandler.fnRequire[A, B](a, b)(fn)
 	
 	protected def fnRequire[A: TypeTag, B: TypeTag, C: TypeTag](
 		a: RequireItem[A],
@@ -196,10 +192,7 @@ abstract class RqFunctionHandler {
 		c: RequireItem[C]
 	)(
 		fn: (A, B, C) => RqReturn
-	): RqFunctionArgs = {
-		val arg_l = List[KeyClassOpt](a, b, c)
-		fnRequireRun(fn, arg_l)
-	}
+	): RqFunctionArgs = RqFunctionHandler.fnRequire[A, B, C](a, b, c)(fn)
 
 	protected def fnRequire[A: TypeTag, B: TypeTag, C: TypeTag, D: TypeTag](
 		a: RequireItem[A],
@@ -208,24 +201,13 @@ abstract class RqFunctionHandler {
 		d: RequireItem[D]
 	)(
 		fn: (A, B, C, D) => RqReturn
-	): RqFunctionArgs = {
-		val arg_l = List[KeyClassOpt](a, b, c, d)
-		fnRequireRun(fn, arg_l)
-	}
+	): RqFunctionArgs = RqFunctionHandler.fnRequire[A, B, C, D](a, b, c, d)(fn)
 	
 	protected def fnRequireList[A](
 		l: List[RequireItem[A]]
 	)(
 		fn: List[A] => RqReturn
-	): RqFunctionArgs = {
-		val fn2: RqFunction = (arg_l) => {
-			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
-			val ret = method.invoke(fn, arg_l)
-			ret.asInstanceOf[RqReturn]
-		}
-		val arg_l: List[KeyClassOpt] = l.map(_.toKeyClass)
-		RqFunctionArgs(fn2, arg_l)
-	}
+	): RqFunctionArgs = RqFunctionHandler.fnRequireList[A](l)(fn)
 
 	private def fnRequireRun(fn: Object, arg_l: RqArgs): RqFunctionArgs = {
 		val fn2: RqFunction = (arg_l) => {
@@ -264,8 +246,7 @@ abstract class RqFunctionHandler {
 		ComputationItem_Token(a)
 	}
 	
-	protected def returnObject(obj: Object) =
-		ConversionItem_Object(obj)
+	protected def returnObject(obj: Object) = RqFunctionHandler.returnObject(obj)
 	
 	//protected def get
 	protected def as[A: TypeTag](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
@@ -277,24 +258,28 @@ abstract class RqFunctionHandler {
 	//protected def lookup[A: TypeTag](table: String, symbol: Symbol): RequireItem[A] =
 	//	RequireItem[A](TKP(table, symbol.name, Nil))
 	
-	import RqFunctionHandler._
-	
 	protected def lookupPlateModel(id: String): RequireItem[PlateModel] = RequireItem[PlateModel](TKP("plateModel", id, Nil))
 	protected def lookupPlateModel(symbol: Symbol): RequireItem[PlateModel] = 
-		lookup(symbol, lookupPlateModel _)
+		RqFunctionHandler.lookupBy(symbol, lookupPlateModel _)
 		
 	protected def lookupPlateLocation(id: String): RequireItem[PlateLocation] = RequireItem[PlateLocation](TKP("plateLocation", id, Nil))
 	protected def lookupPlateLocation(symbol: Symbol): RequireItem[PlateLocation] = 
-		lookup(symbol, lookupPlateLocation _)
+		RqFunctionHandler.lookupBy(symbol, lookupPlateLocation _)
 		
 	protected def lookupPlate(id: String): RequireItem[Plate] = RequireItem[Plate](TKP("plate", id, Nil))
 	protected def lookupPlate(symbol: Symbol): RequireItem[Plate] =
-		lookup(symbol, lookupPlate _)
+		RqFunctionHandler.lookupBy(symbol, lookupPlate _)
 
 	protected def lookupPlateState(id: String): RequireItem[PlateState] = RequireItem[PlateState](TKP("plateState", id, Nil))
 	protected def lookupPlateState(symbol: Symbol): RequireItem[PlateState] =
-		lookup(symbol, lookupPlateState _)
-	
+		RqFunctionHandler.lookupBy(symbol, lookupPlateState _)
+
+	protected def lookup[A <: Object : TypeTag](symbol: Symbol): RequireItem[A] =
+		RqFunctionHandler.lookup[A](symbol)
+		
+	protected def lookup[A <: Object : TypeTag](id: String): RequireItem[A] =
+		RqFunctionHandler.lookup[A](id)
+		
 	protected def cmdAs[A <: Object : TypeTag](fn: A => RqReturn): RqFunctionArgs = {
 		val arg_l = List[KeyClassOpt](RequireItem[JsValue](TKP("cmd", "$", Nil)).toKeyClass)
 		val fn0: RqFunction = (l: List[Object]) => l match {
@@ -328,16 +313,7 @@ abstract class RqFunctionHandler {
 	implicit class SymbolWrapper(symbol: Symbol) {
 		def as[A: TypeTag]: RequireItem[A] = RequireItem[A](TKP("cmd", "$", List(symbol.name)))
 
-		def lookup[A <: Object : TypeTag]: RequireItem[A] = {
-			val fnargs = fnRequire (as[String]) { (id) =>
-				val t = ru.typeTag[A].tpe
-				val s = ConversionsDirect.tableForType(t)
-				fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
-					returnObject(o)
-				}
-			}
-			RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
-		}
+		def lookup[A <: Object : TypeTag]: RequireItem[A] = RqFunctionHandler.lookup[A](symbol)
 
 		def lookup_?[A: TypeTag]: RequireItem[Option[A]] = {
 			val fnargs = fnRequire (as[Option[String]]) { (id_?) =>
@@ -372,11 +348,106 @@ abstract class RqFunctionHandler {
 
 object RqFunctionHandler {
 	private implicit def toIdClass(ri: RequireItem[_]): KeyClassOpt = ri.toKeyClass
+	protected implicit def itemToRqReturn(item: RqItem): RqReturn =
+		RqSuccess(List(item))
+	protected implicit def fnargsToItem(fnargs: RqFunctionArgs) =
+		RqItem_Function(fnargs)
+	protected implicit def fnargsToRqReturn(fnargs: RqFunctionArgs) =
+		RqSuccess(List(RqItem_Function(fnargs)))
+	protected implicit def tokenToItem(token: CmdToken) =
+		ComputationItem_Token(token)
+	protected implicit def tokenToRqReturn(token: CmdToken) =
+		RqSuccess(List(ComputationItem_Token(token)))
+
+	def fnRequire[A: TypeTag](
+		a: RequireItem[A]
+	)(
+		fn: (A) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a)
+		fnRequireRun(fn, arg_l)
+	}
+	
+	def fnRequire[A: TypeTag, B: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B]
+	)(
+		fn: (A, B) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a, b)
+		fnRequireRun(fn, arg_l)
+	}
+	
+	def fnRequire[A: TypeTag, B: TypeTag, C: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B],
+		c: RequireItem[C]
+	)(
+		fn: (A, B, C) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a, b, c)
+		fnRequireRun(fn, arg_l)
+	}
+
+	def fnRequire[A: TypeTag, B: TypeTag, C: TypeTag, D: TypeTag](
+		a: RequireItem[A],
+		b: RequireItem[B],
+		c: RequireItem[C],
+		d: RequireItem[D]
+	)(
+		fn: (A, B, C, D) => RqReturn
+	): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](a, b, c, d)
+		fnRequireRun(fn, arg_l)
+	}
+	
+	def fnRequireList[A](
+		l: List[RequireItem[A]]
+	)(
+		fn: List[A] => RqReturn
+	): RqFunctionArgs = {
+		val fn2: RqFunction = (arg_l) => {
+			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+			val ret = method.invoke(fn, arg_l)
+			ret.asInstanceOf[RqReturn]
+		}
+		val arg_l: List[KeyClassOpt] = l.map(_.toKeyClass)
+		RqFunctionArgs(fn2, arg_l)
+	}
+
+	private def fnRequireRun(fn: Object, arg_l: RqArgs): RqFunctionArgs = {
+		val fn2: RqFunction = (arg_l) => {
+			val method = fn.getClass.getMethods.toList.find(_.getName == "apply").get
+			val ret = method.invoke(fn, arg_l : _*)
+			ret.asInstanceOf[RqReturn]
+		}
+		RqFunctionArgs(fn2, arg_l)
+	}
 
 	def as[A: TypeTag](tkp: TKP): RequireItem[A] = RequireItem[A](tkp)
 	def as[A: TypeTag](symbol: Symbol): RequireItem[A] = as[A](TKP("cmd", "$", List(symbol.name)))
 	
-	def lookup[A <: Object : TypeTag : ClassTag](
+	def lookup[A <: Object : TypeTag](symbol: Symbol): RequireItem[A] = {
+		val fnargs = fnRequire (as[String](symbol)) { (id) =>
+			val t = ru.typeTag[A].tpe
+			val s = ConversionsDirect.tableForType(t)
+			fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
+				returnObject(o)
+			}
+		}
+		RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
+	}
+		
+	def lookup[A <: Object : TypeTag](id: String): RequireItem[A] = {
+		val t = ru.typeTag[A].tpe
+		val s = ConversionsDirect.tableForType(t)
+		val fnargs = fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
+			returnObject(o)
+		}
+		RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
+	}
+		
+	def lookupBy[A <: Object : TypeTag : ClassTag](
 		symbol: Symbol,
 		lookupById: String => RequireItem[A]
 	): RequireItem[A] = {
@@ -393,6 +464,12 @@ object RqFunctionHandler {
 		val args = List[KeyClassOpt](as[String](symbol))
 		RequireItem[A](TKP("param", "#", Nil), Some(RqFunctionArgs(fn, args)))
 	}
+
+	def returnObject(obj: Object) =
+		ConversionItem_Object(obj)
+
+	def returnEvent(key: TKP, jsval: JsValue) =
+		EventItem_State(key, jsval)
 }
 
 abstract class RqFunctionHandler0 extends RqFunctionHandler {
@@ -427,4 +504,38 @@ object ConversionHandler1 {
 
 abstract class ConversionHandlerN extends RqFunctionHandler {
 	val fnargs: RqFunctionArgs
+}
+
+abstract class EventHandler[A: TypeTag] extends RqFunctionHandler {
+	protected def eventAs[A <: Object : TypeTag](fn: A => RqReturn): RqFunctionArgs = {
+		val arg_l = List[KeyClassOpt](RequireItem[JsValue](TKP("cmd", "$", Nil)).toKeyClass)
+		val fn0: RqFunction = (l: List[Object]) => l match {
+			case List(jsval: JsValue) =>
+				val typ = ru.typeTag[A].tpe
+				ConversionsDirect.convRequirements(jsval, typ).map(_ match {
+					case Left(pathToKey_m) =>
+						val pathToKey_l = pathToKey_m.toList
+						val arg_l = pathToKey_l.map(_._2)
+						List(RqItem_Function(RqFunctionArgs(
+							arg_l = arg_l,
+							fn = (input_l) => {
+								val lookup_m = (pathToKey_l.map(_._1) zip input_l).toMap
+								ConversionsDirect.conv(jsval, typ, lookup_m).flatMap(o => fn(o.asInstanceOf[A]))
+							}
+						)))
+					case Right(o) =>
+						List(RqItem_Function(RqFunctionArgs(
+							arg_l = Nil,
+							fn = (_) => {
+								fn(o.asInstanceOf[A])
+							}
+						)))
+				})
+			case _ =>
+				RqError("Expected JsValue")
+		}
+		RqFunctionArgs(fn0, arg_l)
+	}
+	
+	def returnEvent(key: TKP, jsval: JsValue) = RqFunctionHandler.returnEvent(key, jsval)
 }

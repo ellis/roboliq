@@ -25,8 +25,10 @@ object ConversionsDirect {
 		typeOf[Substance] -> "substance",
 		typeOf[Plate] -> "plate",
 		typeOf[Vessel0] -> "vessel",
+		typeOf[TipState0] -> "tipState",
 		typeOf[PlateState] -> "plateState",
-		typeOf[VesselState] -> "vesselState"
+		typeOf[VesselState] -> "vesselState",
+		typeOf[VesselSituatedState] -> "vesselSituatedState"
 	)
 	
 	/*
@@ -649,12 +651,12 @@ object Conversions {
 		))
 	}
 	
-	def tipStateToJson(tipState: TipState): JsValue = {
+	def tipStateToJson(tipState: TipState0): JsValue = {
 		import tipState._
 		JsObject(Map(
 			"id" -> JsString(conf.id),
 			"model" -> model_?.map(v => JsString(v.id)).getOrElse(JsNull),
-			"src" -> src_?.map(v => JsString(v.id)).getOrElse(JsNull),
+			"src" -> src_?.map(v => JsString(v.vessel.id)).getOrElse(JsNull),
 			"liquid" -> liquidToJson(liquid),
 			"volume" -> JsString(volume.toString),
 			"contamInside" -> JsArray(contamInside.toList.map(v => JsString(v.toString))),

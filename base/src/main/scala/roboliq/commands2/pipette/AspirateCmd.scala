@@ -22,58 +22,62 @@ case class AspirateToken(
 class AspirateHandler extends CommandHandler("pipetter.aspirate") {
 	val fnargs = cmdAs[AspirateCmd] { cmd =>
 		val events = cmd.items.flatMap(item => {
-			TipAspirateEventBean(item.tip, item.well, item.volume) ::
-			WellRemoveEventBean(item.well, item.volume) :: Nil
+			TipAspirateEvent(item.tip, item.well.vessel, item.volume) :: Nil
+			//WellRemoveEventBean(item.well.vessel, item.volume) :: Nil
 		})
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
 		RqSuccess(List(
-			ComputationItem_Token(AspirateToken(cmd.items))
+			ComputationItem_Token(AspirateToken(cmd.items)),
+			ComputationItem_Events(events)
 		))
 	}
 }
-/*
+
 /** Represents an aspiration event. */
 case class TipAspirateEvent(
+	tip: Tip,
 	/** Source well ID. */
-	src: String,
+	src: VesselState,
 	/** Volume in liters to aspirate. */
 	volume: LiquidVolume
-)
-
-case class WellState(
-	well: Well,
-	content: VesselContent,
-	isInitialStateKnown: Boolean,
-	history: List[EventBean]
-)
-
-class TipAspirateEventHandler extends ConversionHandlerN {
-	val fnargs = fnRequire(
-		'src.lookupSourceLiquid
-	) { () => *[P1]
-		
-	}
-	protected def update(state0: TipState): RqResult[TipState] = {
-		val volumeNew = state0.volume + volume
-		RqSuccess(TipState(
-			state0.conf,
-			state0.model_?,
-			Some(src),
-			state0.liquid + liquid,
-			volumeNew,
-			state0.contamInside ++ liquid.contaminants,
-			LiquidVolume.max(state0.nContamInsideVolume, volumeNew),
-			state0.contamOutside ++ liquid.contaminants,
-			state0.srcsEntered + liquid,
-			state0.destsEntered,
-			CleanIntensity.None,
-			state0.cleanDegreePrev,
-			CleanIntensity.max(state0.cleanDegreePending, liquid.group.cleanPolicy.exit)
+) extends Event {
+	def toJson: JsValue = {
+		JsObject(Map(
+			"kind" -> JsString("tip.aspirate"),
+			"tip" -> JsString(tip.id),
+			"src" -> JsString(src.vessel.id),
+			"volume" -> JsString(volume.toString)
 		))
 	}
 }
-*/
+
+class TipAspirateEventHandler {// extends EventHandler {
+	import RqFunctionHandler._
+	
+	def fnargs(event: TipAspirateEvent) = {
+		fnRequire (lookup[TipState0](event.tip.id)) { state0 =>
+			val liquid = event.src.content.liquid
+			val volumeNew = state0.volume + event.volume
+			val state_# = TipState0(
+				state0.conf,
+				state0.model_?,
+				Some(event.src),
+				state0.liquid + liquid,
+				volumeNew,
+				state0.contamInside ++ liquid.contaminants,
+				LiquidVolume.max(state0.nContamInsideVolume, volumeNew),
+				state0.contamOutside ++ liquid.contaminants,
+				state0.srcsEntered + liquid,
+				state0.destsEntered,
+				CleanIntensity.None,
+				state0.cleanDegreePrev,
+				CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
+			)
+			RqSuccess(List(EventItem_State(TKP("tipState", event.tip.id, Nil), Conversions.tipStateToJson(state_#))))
+		}
+	}
+}
 /*
 case class SpirateCmdItem(
 	tip: Tip,
@@ -210,6 +214,8 @@ class AspirateHandler extends CommandHandler("aspirate") {
 }
 */
 
+
+/*
 object SpirateTokenItem {
 	
 	def toAspriateDocString(item_l: Seq[TipWellVolumePolicy], ob: ObjBase, states: RobotState): Tuple2[String, String] = {
@@ -333,3 +339,4 @@ object SpirateTokenItem {
 		(doc, null)
 	}
 }
+*/

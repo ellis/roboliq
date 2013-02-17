@@ -34,12 +34,14 @@ sealed trait RqItem
 
 case class RqItem_Function(fnargs: RqFunctionArgs) extends RqItem
 
-case class ComputationItem_Event(event: Event) extends RqItem
+case class ComputationItem_Events(event_l: List[Event]) extends RqItem
 case class ComputationItem_EntityRequest(id: String) extends RqItem
 case class ComputationItem_Command(cmd: JsObject) extends RqItem
 case class ComputationItem_Token(token: CmdToken) extends RqItem
 
 case class ConversionItem_Object(obj: Object) extends RqItem
+
+case class EventItem_State(key: TKP, jsval: JsValue) extends RqItem
 
 
 sealed trait Node {
@@ -208,4 +210,37 @@ case class Node_Conversion(
 			else kco
 		})
 	}
+}
+
+case class Node_Events(
+	parent_? : Option[Node],
+	index: Int,
+	event_l: List[Event]
+) extends Node {
+	val path = Node_Command.getCommandPath(parent_?, index)
+	val id = Node_Command.getCommandId(path)
+	val label_? = None
+	val index_? = Some(index)
+	val time = path
+	val contextKey_? = None
+	val fnargs = RqFunctionArgs(
+		arg_l = Nil,
+		fn = (_) => {
+			val l: RqResult[List[RqFunctionArgs]] = RqResult.toResultOfList(event_l.map(event0 => {
+				event0 match {
+					case event: roboliq.commands2.pipette.TipAspirateEvent =>
+						val handler = new roboliq.commands2.pipette.TipAspirateEventHandler
+						RqSuccess(handler.fnargs(event))
+					case _ =>
+						RqError(s"No handler for event `$event0`")
+				}
+			}))
+			l.map(_.map(fnargs => RqItem_Function(fnargs)))
+		}
+	)
+	
+	println()
+	println("Node_Event "+id)
+	println("event_l: "+event_l)
+	println()
 }

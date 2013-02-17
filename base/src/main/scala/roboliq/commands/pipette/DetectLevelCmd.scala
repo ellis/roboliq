@@ -1,4 +1,4 @@
-package roboliq.commands.pipette
+/*package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
@@ -58,7 +58,7 @@ class DetectLevelCmdItemBean {
 			idWell <- node.getValueNonNull_?(well, "well")
 			idPolicy <- node.getValueNonNull_?(policy, "policy")
 			tipObj <- ob.findTip_?(tip, new CmdMessageWriter(node))
-			well <- ob.findWell_?(idWell, node)
+			well <- ob.findWell2(idWell, node)
 		} yield {
 			val policy = PipettePolicy.fromName(idPolicy)
 			new TipWellPolicy(tipObj, well, policy)
@@ -69,3 +69,4 @@ class DetectLevelCmdItemBean {
 case class DetectLevelToken(
 	val items: List[TipWellPolicy]
 ) extends CmdToken
+*/

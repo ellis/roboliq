@@ -6,7 +6,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.reflect.BeanProperty
 
-
 /**
  * Base class for well states.
  * 
