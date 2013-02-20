@@ -12,7 +12,7 @@ import roboliq.commands.pipette.TipWellVolumePolicy
 
 case class AspirateCmd(
 	description_? : Option[String],
-	items: List[TipWellVolumePolicy] //FIXME: This should be TipWellVolumePolicyMixspec
+	items: List[TipWellVolumePolicy]
 )
 
 case class AspirateToken(

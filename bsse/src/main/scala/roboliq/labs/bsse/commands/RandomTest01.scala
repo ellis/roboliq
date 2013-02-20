@@ -43,12 +43,7 @@ class RandomTest01CmdHandler extends CmdHandlerA[RandomTest01CmdBean] {
 			tip_l <- if (bean.tips != null) Result.mapOver(bean.tips.toList)(states.findTip) else ctx.ob.findAllTips
 			plate <- states.findPlate(bean.plate)
 			dyeSrc_l <- ctx.ob.findWell2List(bean.dye)
-			//dyeSrc_ls <- ctx.ob.findAllIdsContainingSubstance(dye)
-			//dyeSrc_l <- Result.mapOver(dyeSrc_ls)(wellId => ctx.ob.findWell(wellId))
 			waterSrc_l <- ctx.ob.findWell2List(bean.water)
-			//water <- states.findSubstance(bean.water)
-			//waterSrc_ls <- ctx.ob.findAllIdsContainingSubstance(water)
-			//waterSrc_l <- Result.mapOver(waterSrc_ls)(wellId => ctx.ob.findWell(wellId))
 		} yield {
 			val r = new scala.util.Random(42)
 			val vol_l = (50 to 200 by 10).toList
