@@ -9,12 +9,14 @@ import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe.typeOf
+import grizzled.slf4j.Logger
 import spray.json._
 import roboliq.core._
 import RqPimper._
 
 
 object ConversionsDirect {
+	val logger = Logger("roboliq.processor2.ConversionsDirect")
 	
 	val typeToTable_l = List[(Type, String)](
 		typeOf[TipModel] -> "tipModel",
@@ -31,26 +33,6 @@ object ConversionsDirect {
 		typeOf[VesselSituatedState] -> "vesselSituatedState"
 	)
 	
-	/*
-	def conv3(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): RqResult[Any] = {
-		conv2(jsval, typ, lookup_l)._1
-	}
-	
-	private def convWithDereferencing(jsval: JsValue, typ: ru.Type, lookup_l: List[Object] = Nil): (RqResult[Any], List[Object]) = {
-		jsval match {
-			case JsString(s) if s.startsWith("*") =>
-				lookup2_l match {
-					case lookup :: rest =>
-						lookup2_l = rest
-						RqSuccess(lookup)
-					case _ =>
-						RqError(s"No value for `$name` in lookup list")
-				}
-			case _ =>
-				conv2(jsval, typ, lookup_l)
-		}
-	}
-	*/
 	private sealed trait ConvResult {
 		def +(that: ConvResult): ConvResult
 	}
@@ -108,9 +90,10 @@ object ConversionsDirect {
 		import scala.reflect.runtime.universe._
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
+		//val mirror = scala.reflect.runtime.currentMirror
 
 		val path = path_r.reverse.mkString(".")
-		println(s"conv2: ${path}: $typ = $jsval")
+		logger.debug(s"conv2: ${path}: $typ = $jsval")
 
 		try {
 		jsval match {
@@ -199,7 +182,7 @@ object ConversionsDirect {
 					val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
 					val c = typ.typeSymbol.asClass
 					val mm = mirror.reflectClass(c).reflectConstructor(ctor)
-					println("arg_l: "+arg_l)
+					logger.debug("arg_l: "+arg_l)
 					val obj = mm(arg_l : _*)
 					ConvObject(obj)
 				case r => r
@@ -246,7 +229,7 @@ object ConversionsDirect {
 		else {
 			RqError(s"Unhandled type: ${typ}")
 		}
-		println(ret)
+		logger.debug(ret)
 		ret
 		}
 		catch {
@@ -610,18 +593,6 @@ object Conversions {
 			fn(jsval).map(obj => List(ConversionItem_Object(obj)))
 	)
 
-	val asString = makeConversion(ConversionsDirect.toString)
-	val asInteger = makeConversion(ConversionsDirect.toInteger)
-	val asBoolean = makeConversion(ConversionsDirect.toBoolean)
-	val asVolume = makeConversion(ConversionsDirect.toVolume)
-	//val tipModelHandler = makeConversion(ConversionsDirect.toTipModel)
-	//val asPlateModel = makeConversion(ConversionsDirect.toPlateModel)
-
-	val asStringList = makeConversion(ConversionsDirect.toStringList)
-	val asIntegerList = makeConversion(ConversionsDirect.toIntegerList)
-	val asVolumeList = makeConversion(ConversionsDirect.toVolumeList)
-	val asPlateModelList = makeConversion(ConversionsDirect.toPlateModelList)
-	
 	/*val tipHandler = new ConversionHandlerN {
 		val fnargs = fnRequire (
 			'index.as[Integer], 'model.lookup_?[TipModel]
