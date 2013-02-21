@@ -28,8 +28,7 @@ class ConversionsSpec extends FunSpec {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ") {
 				for (pair <- succeed_l) {
-					conv(pair._1, typ)
-					//assert(conv(pair._1, typ) === RqSuccess(pair._2))
+					assert(conv(pair._1, typ) === RqSuccess(pair._2))
 				}
 				for (jsval <- fail_l) {
 					assert(conv(jsval, typ).isError)
@@ -113,9 +112,7 @@ class ConversionsSpec extends FunSpec {
 		)
 	}
 
-	/*
 	describe("convRequirements") {
-		println("11111111: convRequirements")
 
 		it("should parse Map[Substance, Int]") {
 			assert(
@@ -197,7 +194,6 @@ class ConversionsSpec extends FunSpec {
 	}
 	
 	describe("conv for database objects") {
-		println("11111111: conv for database objects")
 		val config = JsonParser(
 """{
 "tipModel": [
@@ -322,7 +318,6 @@ class ConversionsSpec extends FunSpec {
 			}
 		}
 
-		System.err.println("222222222222: conv for database objects")
 		check[TipModel]("Standard 1000ul", tipModel)
 		check[Tip]("TIP1", tip)
 		check[PlateModel]("D-BSSE 96 Well PCR Plate", plateModel_PCR)
@@ -337,7 +332,5 @@ class ConversionsSpec extends FunSpec {
 		check[Vessel0]("T1", vessel_T1)
 		check[VesselState]("T1", vesselState_T1)
 		check[VesselSituatedState]("T1", vesselSituatedState_T1)
-		println("33333333333333: conv for database objects")
 	}
-	*/
 }
