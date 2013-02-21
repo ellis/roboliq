@@ -81,8 +81,12 @@ class TestPipetteDevice extends PipetteDevice {
 	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy] =
 		Some(new PipettePolicy("POLICY", PipettePosition.Free))
 
-	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] =
-		Success(new MixSpec(Some(wellState.volume * 0.7), Some(4), None))
+	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec] = {
+		val volume = mixSpec_?.flatMap(_.nVolume_?).getOrElse(wellState.volume * 0.7)
+		val count: Integer = mixSpec_?.flatMap(_.nCount_?).getOrElse(4)
+		val policy = mixSpec_?.flatMap(_.mixPolicy_?).getOrElse(new PipettePolicy("MIXPOLICY", PipettePosition.WetContact))
+		Success(new MixSpec(volume, count, policy))
+	}
 	
 	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean =
 		true

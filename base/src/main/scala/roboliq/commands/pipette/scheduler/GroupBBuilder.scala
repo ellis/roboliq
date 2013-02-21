@@ -111,15 +111,9 @@ class GroupBBuilder(
 		bean.tip = twm.tip.id
 		bean.well = twm.well.id
 		bean.mixSpec = new MixSpecBean
-		bean.mixSpec.volume = twm.mixSpec.nVolume_?.map(_.l.bigDecimal).getOrElse(null)
-		bean.mixSpec.count = twm.mixSpec.nCount_? match {
-			case None => null
-			case Some(n) => n
-		}
-		bean.mixSpec.policy = twm.mixSpec.mixPolicy_? match {
-			case None => null
-			case Some(mixPolicy) => mixPolicy.id
-		}
+		bean.mixSpec.volume = twm.mixSpec.volume.l.bigDecimal
+		bean.mixSpec.count = twm.mixSpec.count
+		bean.mixSpec.policy = twm.mixSpec.mixPolicy.id
 		bean
 	}
 	
@@ -180,7 +174,7 @@ class GroupBBuilder(
 				val xs2 = twvp :: xs
 				if (
 					tipModel.eq(tipModel0) && 
-					twvp.mixSpec.mixPolicy_? == x0.mixSpec.mixPolicy_? && 
+					twvp.mixSpec.mixPolicy == x0.mixSpec.mixPolicy && 
 					device.canBatchMixItems(groupA.states0, xs2)
 				)
 					xs2 :: rest

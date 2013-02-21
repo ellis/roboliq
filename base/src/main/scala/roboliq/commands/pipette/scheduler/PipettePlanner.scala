@@ -46,8 +46,8 @@ case class PipetteGroupData(
 	tipToVolume_m: Map[Tip, LiquidVolume],
 	aspiratePolicy_m: Map[Tip, PipettePolicy],
 	dispensePolicy_m: Map[Well, PipettePolicy],
-	preMixSpec_m: Map[Tip, MixSpec],
-	postMixSpec_m: Map[Well, MixSpec]
+	preMixSpec_m: Map[Tip, MixSpecOpt],
+	postMixSpec_m: Map[Well, MixSpecOpt]
 )
 
 
@@ -247,7 +247,7 @@ object PipettePlanner {
 		bean.well = src.id
 		bean.volume = groupData.tipToVolume_m(tip).l.bigDecimal
 		bean.policy = groupData.aspiratePolicy_m(tip).id
-		bean.mixSpec = mixSpec_?.map(MixSpec.toBean).orNull
+		bean.mixSpec = mixSpec_?.map(MixSpecOpt.toBean).orNull
 		bean
 	}
 	
@@ -271,7 +271,7 @@ object PipettePlanner {
 		bean.well = item.dest.id
 		bean.volume = item.volume.l.bigDecimal
 		bean.policy = groupData.dispensePolicy_m(item.dest).id
-		bean.mixSpec = mixSpec_?.map(MixSpec.toBean).orNull
+		bean.mixSpec = mixSpec_?.map(MixSpecOpt.toBean).orNull
 		bean
 	}
 }

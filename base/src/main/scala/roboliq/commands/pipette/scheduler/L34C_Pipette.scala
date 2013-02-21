@@ -110,7 +110,7 @@ case class L3C_Pipette(args: PipetteCmd) {
 
 class PipetteCmd(
 	val items: Seq[Item],
-	val mixSpec_? : Option[MixSpec] = None,
+	val mixSpec_? : Option[MixSpecOpt] = None,
 	val tipOverrides_? : Option[TipHandlingOverrides] = None,
 	val pipettePolicy_? : Option[PipettePolicy] = None,
 	val tipModel_? : Option[TipModel] = None
@@ -148,7 +148,7 @@ object PipetteCmd {
 			}
 		}
 		
-		val mixSpec_? : Option[MixSpec] = if (cmd.postmix == null) None else Some(MixSpec.fromBean(cmd.postmix))
+		val mixSpec_? : Option[MixSpecOpt] = if (cmd.postmix == null) None else Some(MixSpecOpt.fromBean(cmd.postmix))
 		val pipettePolicy_? : Option[PipettePolicy] = if (cmd.policy == null) None else Some(PipettePolicy.fromName(cmd.policy))
 		val volumes_? : Option[List[LiquidVolume]] = if (cmd.volume == null) None else Some(cmd.volume.map(n => LiquidVolume.l(n)).toList)
 		val tipOverrides_? = Some(new TipHandlingOverrides(
@@ -206,8 +206,8 @@ case class Item(
 	val srcs: SortedSet[Well],
 	val dest: Well,
 	val volume: LiquidVolume,
-	val premix_? : Option[MixSpec],
-	val postmix_? : Option[MixSpec]
+	val premix_? : Option[MixSpecOpt],
+	val postmix_? : Option[MixSpecOpt]
 )
 
 object Item {

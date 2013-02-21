@@ -99,6 +99,6 @@ class GroupA(
 	}
 	
 	private def twmString(twvp: TipWellMix): String = {
-		List(twvp.tip, Printer.getWellsDebugString(Seq(twvp.well)), twvp.mixSpec.nVolume_?, twvp.mixSpec.nCount_?, twvp.mixSpec.mixPolicy_?).mkString(", ")			
+		List(twvp.tip, Printer.getWellsDebugString(Seq(twvp.well)), twvp.mixSpec.volume, twvp.mixSpec.count, twvp.mixSpec.mixPolicy).mkString(", ")			
 	}
 }

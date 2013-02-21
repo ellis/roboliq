@@ -176,7 +176,7 @@ package roboliq
  * 
  */
 package object core {
-	import RqPimper._
-	
 	type Well = VesselSituatedState
+	
+	implicit val rqPimper = RqPimper
 }

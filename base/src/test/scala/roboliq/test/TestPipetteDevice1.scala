@@ -224,15 +224,17 @@ class TestPipetteDevice1 extends PipetteDevice {
 		Some(PipettePolicy(sName, posDefault))
 	}
 	
-	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] = {
+	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec] = {
 		// FIXME: Passing volume=0 is kinda unpredictable -- ellis
 		val policyDefault_? = getAspiratePolicy(tipState, LiquidVolume.empty, wellState)
-		val mixSpecDefault = MixSpec(Some(wellState.volume * 0.7), Some(4), policyDefault_?)
-		val mixSpec = mixSpec_? match {
+		val mixSpecDefault = MixSpecOpt(Some(wellState.volume * 0.7), Some(4), policyDefault_?)
+		(mixSpec_? match {
 			case None => mixSpecDefault
 			case Some(a) => a + mixSpecDefault
+		}).toMixSpec match {
+			case RqSuccess(x, _) => Success(x)
+			case RqError(l, _) => Error(l)
 		}
-		Success(mixSpec)
 	}
 
 	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean = true
