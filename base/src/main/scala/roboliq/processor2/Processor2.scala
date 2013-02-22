@@ -560,6 +560,8 @@ class ProcessorData(
 	}
 	
 	private def runStep(): Boolean = {
+		lookupMessage_m.clear
+
 		val state0_m = state_m.toMap
 		
 		// Get all KeyClassOpt from all nodes
@@ -579,6 +581,9 @@ class ProcessorData(
 			}
 			kco -> value
 		}).toMap
+		
+		// Set message for missing entities
+		lookupMessage_m  ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
 		
 		// Update status for all nodes
 		state0_m.values.foreach(_.updateStatus(kcoToValue_m.apply _))
@@ -702,6 +707,31 @@ class ProcessorData(
 			res map(Some(_)) orElse RqSuccess(None)
 		else
 			res
+	}
+
+	def setObj[A: TypeTag](id: String, a: A, time: List[Int] = Nil): RqResult[Unit] = {
+		val typ = ru.typeTag[A].tpe
+		for {
+			table <- ConversionsDirect.findTableForType(typ).asRq(s"Type `$typ` does not have a table")
+			jsval <- ConversionsDirect.toJson(a)
+		} yield {
+			val tkp = TKP(table, id, Nil)
+			setEntity(tkp, time, jsval)
+			()
+		}
+	}
+	
+	def getObjFromDbAt[A: TypeTag](id: String, time: List[Int]): RqResult[A] = {
+		val typ = ru.typeTag[A].tpe
+		for {
+			table <- ConversionsDirect.findTableForType(typ).asRq(s"Type `$typ` does not have a table")
+			kc = KeyClass(TKP(table, id, Nil), typ, Nil)
+			_ = println("kc: "+kc)
+			obj <- cache_m.get(kc) match {
+				case Some(x) => RqSuccess(x)
+				case None => Conversions.readByIdAt(db, id, time)
+			}
+		} yield obj.asInstanceOf[A]
 	}
 	
 	private def createCommandFnArgs(cmd: JsObject): RqFunctionArgs = {

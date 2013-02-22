@@ -43,6 +43,9 @@ class ConversionsSpec extends FunSpec {
 				0.0 -> JsNumber(0.0),
 				42.0 -> JsNumber(42.0))
 		check(
+				LiquidVolume.ul(42) -> JsString("42 ul")
+		)
+		check(
 				List(1, 2, 3) -> JsArray(JsNumber(1), JsNumber(2), JsNumber(3)),
 				Nil -> JsArray(Nil)
 		)
@@ -57,7 +60,7 @@ class ConversionsSpec extends FunSpec {
 		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
 		val tip = Tip(0, Some(tipModel))
 		check(
-			tip -> JsObject("index" -> JsNumber(0), "permanent" -> JsString("Standard 1000ul"))
+			tip -> JsObject("id" -> JsString("TIP1"), "index" -> JsNumber(0), "permanent" -> JsString("Standard 1000ul"))
 		)
 	}
 	
@@ -274,7 +277,7 @@ class ConversionsSpec extends FunSpec {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ `$id`") {
 				val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
-				val ret = Conversions.readAny(db, kc)
+				val ret = Conversions.readAnyAt(db, kc)
 				assert(ret === RqSuccess(exp))
 			}
 		}

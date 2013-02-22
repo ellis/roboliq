@@ -18,14 +18,14 @@ class TestPipetteDevice1 extends PipetteDevice {
 	)
 	val tipModels = List(tipModel1000, tipModel50)
 	val tips = SortedSet[Tip](
-		new Tip(0, Some(tipModel1000)),
-		new Tip(1, Some(tipModel1000)),
-		new Tip(2, Some(tipModel1000)),
-		new Tip(3, Some(tipModel1000)),
-		new Tip(4, Some(tipModel50)),
-		new Tip(5, Some(tipModel50)),
-		new Tip(6, Some(tipModel50)),
-		new Tip(7, Some(tipModel50))
+		Tip(0, Some(tipModel1000)),
+		Tip(1, Some(tipModel1000)),
+		Tip(2, Some(tipModel1000)),
+		Tip(3, Some(tipModel1000)),
+		Tip(4, Some(tipModel50)),
+		Tip(5, Some(tipModel50)),
+		Tip(6, Some(tipModel50)),
+		Tip(7, Some(tipModel50))
 	)
 
 	def setObjBase(ob: ObjBase): Result[Unit] = {

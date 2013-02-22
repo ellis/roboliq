@@ -78,6 +78,7 @@ object ConversionsDirect {
 		else if (typ <:< typeOf[Float]) RqSuccess(JsNumber(obj.asInstanceOf[Float]))
 		else if (typ <:< typeOf[Double]) RqSuccess(JsNumber(obj.asInstanceOf[Double]))
 		else if (typ <:< typeOf[BigDecimal]) RqSuccess(JsNumber(obj.asInstanceOf[BigDecimal]))
+		else if (typ <:< typeOf[LiquidVolume]) RqSuccess(JsString(obj.asInstanceOf[LiquidVolume].toString))
 		else if (typ <:< typeOf[Option[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(0)
 			obj.asInstanceOf[Option[_]] match {
@@ -603,15 +604,21 @@ object ConversionsDirect {
 object Conversions {
 	private val D = ConversionsDirect
 
-	def readById[A <: Object : TypeTag](db: DataBase, id: String) = {
+	def readByIdAt[A <: Object : TypeTag](db: DataBase, id: String, time: List[Int]) = {
 		val typ = ru.typeTag[A].tpe
-		val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
-		readAny(db, kc).map(_.asInstanceOf[A])
+		val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ, time)
+		readAnyAt(db, kc).map(_.asInstanceOf[A])
+	}
+
+	def readByIdBefore[A <: Object : TypeTag](db: DataBase, id: String, time: List[Int]) = {
+		val typ = ru.typeTag[A].tpe
+		val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ, time)
+		readAnyBefore(db, kc).map(_.asInstanceOf[A])
 	}
 	
-	def readAny(db: DataBase, kc: KeyClass): RqResult[Any] = {
+	def readAnyAt(db: DataBase, kc: KeyClass): RqResult[Any] = {
 		for {
-			jsval <- db.get(kc.key)
+			jsval <- db.getAt(kc.key, kc.time)
 			either <- D.convRequirements(jsval, kc.clazz)
 			ret <- either match {
 				case Right(ret) => RqSuccess(ret)
@@ -620,7 +627,28 @@ object Conversions {
 						lookup_l <- RqResult.toResultOfList(require_m.toList.map(pair => {
 							val (name, kco) = pair
 							for {
-								ret <- readAny(db, kco.kc)
+								ret <- readAnyAt(db, kco.kc)
+							} yield name -> ret
+						}))
+						lookup_m = lookup_l.toMap
+						ret <- D.conv(jsval, kc.clazz, lookup_m)
+					} yield ret
+			}
+		} yield ret
+	}
+	
+	def readAnyBefore(db: DataBase, kc: KeyClass): RqResult[Any] = {
+		for {
+			jsval <- db.getBefore(kc.key, kc.time)
+			either <- D.convRequirements(jsval, kc.clazz)
+			ret <- either match {
+				case Right(ret) => RqSuccess(ret)
+				case Left(require_m) => 
+					for {
+						lookup_l <- RqResult.toResultOfList(require_m.toList.map(pair => {
+							val (name, kco) = pair
+							for {
+								ret <- readAnyBefore(db, kco.kc)
 							} yield name -> ret
 						}))
 						lookup_m = lookup_l.toMap

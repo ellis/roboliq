@@ -22,10 +22,11 @@ class TipBean extends Bean {
  */
 // TODO: add deviceId_? and make id a parameter rather than automatically generating it.
 case class Tip(
+	val id: String,
 	val index: Int,
 	val permanent_? : Option[TipModel]
 ) extends Ordered[Tip] {
-	val id = "TIP"+(index+1)
+	//	Tip("TIP)
 	
 	def state(states: StateMap): TipState = states.findTipState(id).get
 	def stateWriter(builder: StateBuilder): TipStateWriter = new TipStateWriter(this, builder)
@@ -35,6 +36,8 @@ case class Tip(
 }
 
 object Tip {
+	def apply(index: Int, permanent_? : Option[TipModel] = None) = new Tip("TIP"+(index+1), index, permanent_?)
+	
 	/** Convert [[roboliq.core.TipBean]] to [[roboliq.core.Tip]]. */
 	def fromBean(ob: ObjBase)(bean: TipBean): Result[Tip] = {
 		for {
@@ -50,7 +53,7 @@ object Tip {
 					}
 				}
 			}
-			new Tip(index, modelPermanent_?)
+			Tip(index, modelPermanent_?)
 		}
 	}
 	
@@ -60,7 +63,7 @@ object Tip {
 			index <- Result.mustBeSet(bean.index, "index")
 		} yield {
 			val modelPermanent_? = if (bean.model == null) None else ob.findTipModel_?(bean.model, messages)
-			new Tip(index, modelPermanent_?)
+			Tip(index, modelPermanent_?)
 		}
 	}
 }
