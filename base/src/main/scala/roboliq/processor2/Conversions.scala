@@ -63,6 +63,90 @@ object ConversionsDirect {
 				s.take(1).toLowerCase + s.tail
 		}
 	}
+	
+	def toJson[A: TypeTag](a: A): RqResult[JsValue] = {
+		val typ = ru.typeTag[A].tpe
+		toJson2(a, typ)
+	}
+	
+	private def toJson2(obj: Any, typ: Type): RqResult[JsValue] = {
+		logger.trace(s"toJson($obj, $typ)")
+		if (typ <:< typeOf[String]) RqSuccess(JsString(obj.toString))
+		else if (typ <:< typeOf[Int]) RqSuccess(JsNumber(obj.asInstanceOf[Int]))
+		else if (typ <:< typeOf[Integer]) RqSuccess(JsNumber(obj.asInstanceOf[Integer]))
+		else if (typ <:< typeOf[Boolean]) RqSuccess(JsBoolean(obj.asInstanceOf[Boolean]))
+		else if (typ <:< typeOf[Float]) RqSuccess(JsNumber(obj.asInstanceOf[Float]))
+		else if (typ <:< typeOf[Double]) RqSuccess(JsNumber(obj.asInstanceOf[Double]))
+		else if (typ <:< typeOf[BigDecimal]) RqSuccess(JsNumber(obj.asInstanceOf[BigDecimal]))
+		else if (typ <:< typeOf[Option[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(0)
+			obj.asInstanceOf[Option[_]] match {
+				case Some(x) => toJsonOrId(x, typ2)
+				case None => RqSuccess(JsNull)
+			}
+		}
+		else if (typ <:< typeOf[Map[_, _]]) {
+			val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
+			val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
+			val l = obj.asInstanceOf[scala.collection.GenTraversable[(_, _)]].toList
+			val key_l = findTableForType(typKey) match {
+				case Some(_) =>
+					val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
+					val clazz = mirror.runtimeClass(typKey.typeSymbol.asClass)
+					// TODO: return a RqError if this method doesn't exist
+					val method = clazz.getMethod("id")
+					l.map(pair => {
+						val (objKey, _) = pair
+						val id = method.invoke(objKey).toString
+						id
+					})
+				case None =>
+					l.map(_._1.toString)
+			}
+			val value_l = RqResult.toResultOfList(l.map(pair => toJsonOrId(pair._2, typVal)))
+			RqResult.toResultOfTuple(RqSuccess(key_l), value_l).map(pair => {
+				val (key_l, value_l) = pair
+				val m = (key_l zip value_l).toMap
+				JsObject(m)
+			})
+		}
+		else if (typ <:< typeOf[scala.collection.GenTraversable[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(0)
+			val l = obj.asInstanceOf[scala.collection.GenTraversable[_]]
+			RqResult.toResultOfList(l.map(o => toJson2(o, typ2)).toList).map(JsArray(_))
+		}
+		else if (typ <:< typeOf[Object]) {
+			val ctor = typ.member(ru.nme.CONSTRUCTOR).asMethod
+			val p0_l = ctor.paramss(0)
+			val nameToType_l = p0_l.map(p => (p.name.encoded, p.name.decoded.replace("_?", ""), p.typeSignature))
+			val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
+			val clazz = mirror.runtimeClass(typ.typeSymbol.asClass)
+			RqResult.toResultOfList(nameToType_l.map(pair => {
+				val (name, label, typ2) = pair
+				val method = clazz.getMethod(name)
+				val obj2 = method.invoke(obj)
+				toJsonOrId(obj2, typ2).map(label -> _)
+			})).map(nameToValue_l => JsObject(nameToValue_l.toMap))
+		}
+		else {
+			RqError(s"Unhandled type: ${typ}")
+		}
+		
+	}
+
+	private def toJsonOrId(obj: Any, typ: Type): RqResult[JsValue] = {
+		findTableForType(typ) match {
+			case Some(_) =>
+				val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
+				val clazz = mirror.runtimeClass(typ.typeSymbol.asClass)
+				// TODO: return a RqError if this method doesn't exist
+				val method = clazz.getMethod("id")
+				val id = method.invoke(obj).toString
+				RqSuccess(JsString(id))
+			case None =>
+				toJson2(obj, typ)
+		}
+	}
 
 	//private def reduceConvResultList(l: List[ConvResult]): 
 	def conv(jsval: JsValue, typ: ru.Type, lookup_m: Map[String, Any] = Map()): RqResult[Any] = {
@@ -133,6 +217,7 @@ object ConversionsDirect {
 		if (typ =:= typeOf[String]) ConversionsDirect.toString(jsval)
 		else if (typ =:= typeOf[Int]) toInt(jsval)
 		else if (typ =:= typeOf[Integer]) toInteger(jsval)
+		else if (typ =:= typeOf[Double]) toDouble(jsval)
 		else if (typ =:= typeOf[BigDecimal]) toBigDecimal(jsval)
 		else if (typ =:= typeOf[Boolean]) toBoolean(jsval)//.map(_.asInstanceOf[Boolean])
 		else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
@@ -187,44 +272,6 @@ object ConversionsDirect {
 					ConvObject(obj)
 				case r => r
 			})
-			/*
-			var lookup2_l = lookup_l
-			for {
-				arg_l <- RqResult.toResultOfList(p_l.map(pair => {
-					val (name0, typ2) = pair
-					val name = name0.replace("_?", "")
-					jsobj.fields.get(name) match {
-						case Some(jsval2) => conv(jsval2, typ2, lookup2_l)
-						case None =>
-							jsobj.fields.get("&"+name) match {
-								case Some(JsString(id)) =>
-									lookup2_l match {
-										case lookup :: rest =>
-											lookup2_l = rest
-											RqSuccess(lookup)
-										case _ =>
-											RqError(s"No value for `$name` in lookup list")
-									}
-								case Some(jsval2) =>
-									RqError(s"Require string for ID")
-								case None =>
-									if (typ2 <:< typeOf[Option[Any]]) {
-										RqSuccess(None)
-									}
-									else if (typ2 <:< typeOf[List[Any]]) {
-										RqSuccess(Nil)
-									}
-									else {
-										RqError(s"missing field `$name`")
-									}
-							}
-					}
-				}))
-			} yield {
-				val c = typ.typeSymbol.asClass
-				val mm = mirror.reflectClass(c).reflectConstructor(ctor)
-				mm(arg_l : _*)
-			}*/
 		}
 		else {
 			RqError(s"Unhandled type: ${typ}")
@@ -297,18 +344,6 @@ object ConversionsDirect {
 							val obj_l = l.collect({case ConvObject(o) => o})
 							(Nil, w, conv_l, obj_l)
 					}
-				/*(res0, res1) match {
-					case (_: RqError[_], _) =>
-						res1.flatMap(_ => res0)
-					case (_, _: RqError[_]) =>
-						res1.flatMap(_ => res0)
-					case (RqSuccess(ConvObject(m0), w0), RqSuccess(ConvObject(m1), w1)) =>
-						val map0 = m0.asInstanceOf[Map[String, _]]
-						val map1 = m1.asInstanceOf[Map[String, _]]
-						RqSuccess(ConvObject(name_l.map(name => map1(name) -> map0(name)).toMap))
-					case (RqSuccess(c0, w0), RqSuccess(c1, w1)) =>
-						RqSuccess(c0 + c1, w1 ++ w0)
-				}*/
 				case None =>
 					(Nil, Nil, Map(), nameToType_l.map(_._1))
 			}
@@ -399,6 +434,13 @@ object ConversionsDirect {
 	def toInteger(jsval: JsValue): RqResult[Integer] = {
 		jsval match {
 			case JsNumber(n) => RqSuccess(n.toInt)
+			case _ => RqError("expected JsNumber")
+		}
+	}
+	
+	def toDouble(jsval: JsValue): RqResult[Double] = {
+		jsval match {
+			case JsNumber(n) => RqSuccess(n.toDouble)
 			case _ => RqError("expected JsNumber")
 		}
 	}

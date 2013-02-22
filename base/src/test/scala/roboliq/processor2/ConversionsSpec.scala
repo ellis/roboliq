@@ -10,9 +10,11 @@ import _root_.roboliq.core._
 import ConversionsDirect._
 
 
-object A extends Enumeration {
+private object A extends Enumeration {
 	val B, C = Value
 }
+
+private case class MyClass1(s: String, n: Int, l: List[Boolean])
 
 class ConversionsSpec extends FunSpec {
 	private val logger = Logger[this.type]
@@ -23,6 +25,42 @@ class ConversionsSpec extends FunSpec {
 	//def check[A: TypeTag](jsval: JsValue, exp: A) =
 	//	assert(ConversionsDirect.conv(jsval, ru.typeTag[A].tpe) == RqSuccess(exp))
 
+	describe("toJson") {
+		def check[A: TypeTag](l: (A, JsValue)*) = {
+			val typ = ru.typeTag[A].tpe
+			it(s"should parse $typ") {
+				for ((a, jsval) <- l) {
+					assert(toJson(a) === RqSuccess(jsval))
+				}
+			}
+		}
+	
+		check("Hello, World" -> JsString("Hello, World"), "" -> JsString(""))
+		check(
+				0 -> JsNumber(0),
+				42 -> JsNumber(42))
+		check(
+				0.0 -> JsNumber(0.0),
+				42.0 -> JsNumber(42.0))
+		check(
+				List(1, 2, 3) -> JsArray(JsNumber(1), JsNumber(2), JsNumber(3)),
+				Nil -> JsArray(Nil)
+		)
+		check[Map[String, Int]](
+				Map("a" -> 1, "b" -> 2) -> JsObject("a" -> JsNumber(1), "b" -> JsNumber(2)),
+				Map() -> JsObject()
+		)
+		check(
+				MyClass1("text", 42, List(true, false)) -> JsObject("s" -> JsString("text"), "n" -> JsNumber(42), "l" -> JsArray(JsBoolean(true), JsBoolean(false)))
+		)
+
+		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
+		val tip = Tip(0, Some(tipModel))
+		check(
+			tip -> JsObject("index" -> JsNumber(0), "permanent" -> JsString("Standard 1000ul"))
+		)
+	}
+	
 	describe("conv") {
 		def check[A: TypeTag](succeed_l: List[(JsValue, A)], fail_l: List[JsValue]) = {
 			val typ = ru.typeTag[A].tpe
@@ -256,4 +294,25 @@ class ConversionsSpec extends FunSpec {
 		check[VesselState]("T1", vesselState_T1)
 		check[VesselSituatedState]("T1", vesselSituatedState_T1)
 	}
+
+	describe("toJson and back") {
+		def check[A: TypeTag](l: A*) = {
+			val typ = ru.typeTag[A].tpe
+			it(s"should parse $typ") {
+				for (o <- l) {
+					val jsval_? = toJson(o)
+					val o2_? = jsval_?.flatMap(conv(_, typ))
+					assert(o2_? === RqSuccess(o))
+				}
+			}
+		}
+	
+		check("Hello, World", "")
+		check(0, 42)
+		check(0.0, 42.0)
+		check(List(1, 2, 3), Nil)
+		check[Map[String, Int]](Map("a" -> 1, "b" -> 2), Map())
+		check(MyClass1("text", 42, List(true, false)))
+	}
+	
 }

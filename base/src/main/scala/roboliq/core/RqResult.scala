@@ -43,6 +43,13 @@ object RqResult {
 			acc.flatMap(l => r.map(_ :: l))
 		})
 	}
+	
+	def toResultOfTuple[A, B](tuple: (RqResult[A], RqResult[B])): RqResult[(A, B)] = {
+		tuple match {
+			case (RqSuccess(a, wa), RqSuccess(b, wb)) => RqSuccess((a, b), wa ++ wb)
+			case (a, b) => RqError(a.getErrors ++ b.getErrors, a.getWarnings ++ b.getWarnings)
+		}
+	}
 }
 
 sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends RqResult[A] {
