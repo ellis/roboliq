@@ -118,29 +118,39 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 	}
 
 	describe("A Processor") {
-		/*
 		it("should handle arm.movePlate") {
-			val p = makeProcessor(List(movePlate))
+			val p = makeProcessor(
+				"labware" -> JsonParser(
+					"""{
+					"plate": [
+						{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
+					]
+					}""").asJsObject,
+				"states" -> JsonParser(
+					"""{	
+					"plateState": [
+						{ "id": "P1", "location": "cooled1" }
+					]
+					}""").asJsObject,
+				"commands" -> JsonParser("""{
+					"cmd": [
+						{ "cmd": "arm.movePlate", "plate": "P1", "dest": "cooled2", "deviceId": "ROMA2" }
+					]
+					}""").asJsObject
+			)
 			
 			Then("there should be no errors or warnings")
 			assert(p.getMessages === Nil)
 			
 			And("correct tokens should be generated")
 			val (_, token_l) = p.getTokenList.unzip
-			val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-			val tip = Tip(0, Some(tipModel))
-			val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
-			val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
-			val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
-			val plateLocation_cooled2 = PlateLocation("cooled2", List(plateModel_PCR), true)
-			val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
-			val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
-			val plate_15000 = Plate("reagents15000", plateModel_15000, None)
-			val plate_P1 = Plate("P1", plateModel_PCR, None)
+			val plateLocation_cooled1 = p.getObjFromDbAt[PlateLocation]("cooled1", Nil).getOrElse(null)
+			val plateLocation_cooled2 = p.getObjFromDbAt[PlateLocation]("cooled2", Nil).getOrElse(null)
+			val plate_P1 = p.getObjFromDbAt[Plate]("P1", Nil).getOrElse(null)
 			assert(token_l === List(
 				commands2.arm.MovePlateToken(Some("ROMA2"), plate_P1, plateLocation_cooled1, plateLocation_cooled2)
 			))
-		}*/
+		}
 
 		it("should handle pipette.aspirate") {
 			import roboliq.commands.pipette._
@@ -199,6 +209,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			println("vss_P1_A01_?: " + vss_P1_A01_?)
 			assert(vss_P1_A01_?.isSuccess)
 			val vss_P1_A01 = vss_P1_A01_?.getOrElse(null)
+			//assert(token_l.head.items.head.)
 			assert(token_l === List(
 				roboliq.commands2.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 			))

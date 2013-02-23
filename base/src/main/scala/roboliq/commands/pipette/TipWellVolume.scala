@@ -26,23 +26,23 @@ sealed class TipWellVolume(
 		tip: Tip, well: Well,
 		val volume: LiquidVolume
 	) extends TipWell(tip, well) with HasVolume {
-	override def toString = "TipWellVolume("+tip.index+","+well.id+","+volume+")" 
+	override def toString = "TipWellVolume("+tip.index+","+well.id+","+volume+")"
 }
 
 sealed class TipWellPolicy(tip: Tip, well: Well,
 		val policy: PipettePolicy
 	) extends TipWell(tip, well) with HasPolicy {
-	override def toString = "TipWellPolicy("+tip.index+","+well.id+","+policy+")" 
+	override def toString = "TipWellPolicy("+tip.index+","+well.id+","+policy+")"
 }
 
 sealed class TipWellVolumePolicy(tip: Tip, well: Well, volume: LiquidVolume,
 		val policy: PipettePolicy
 	) extends TipWellVolume(tip, well, volume) with HasPolicy {
-	override def toString = "TipWellVolumePolicy("+tip.index+","+well.id+","+volume+","+policy+")" 
+	override def toString = "TipWellVolumePolicy("+tip.index+","+well.id+","+volume+","+policy+")"
 }
 
 sealed class TipWellMix(tip: Tip, well: Well,
 		val mixSpec: MixSpec
 	) extends TipWell(tip, well) with HasMixSpec {
-	override def toString = "TipWellMix("+tip.index+","+well.id+","+mixSpec+")" 
+	override def toString = "TipWellMix("+tip.index+","+well.id+","+mixSpec+")"
 }
