@@ -276,7 +276,7 @@ class ConversionsSpec extends FunSpec {
 		def check[A <: Object : TypeTag](id: String, exp: A) = {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ `$id`") {
-				val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ)
+				val kc = KeyClass(TKP(ConversionsDirect.findTableForType(typ).getOrElse(null), id, Nil), typ)
 				val ret = Conversions.readAnyAt(db, kc)
 				assert(ret === RqSuccess(exp))
 			}

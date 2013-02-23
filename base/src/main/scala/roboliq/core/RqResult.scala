@@ -99,4 +99,11 @@ object RqPimper {
 		def bind[A, B](fa: RqResult[A])(f: (A) => RqResult[B]) = fa.flatMap(f)
 		def point[A](a: => A) = new RqSuccess[A](a)
 	}
+	
+	implicit def tryRqResultToRqResult[A](o: scala.util.Try[RqResult[A]]): RqResult[A] = {
+		o match {
+			case scala.util.Success(x) => x
+			case scala.util.Failure(x) => RqError(x.getMessage())
+		}
+	}
 }

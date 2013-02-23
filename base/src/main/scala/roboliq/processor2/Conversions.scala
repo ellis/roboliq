@@ -51,18 +51,20 @@ object ConversionsDirect {
 		}
 	}
 	
-	def findTableForType(tpe: ru.Type): Option[String] = {
-		typeToTable_l.find(tpe <:< _._1).map(_._2)
+	def findTableForType(tpe: ru.Type): RqResult[String] = {
+		typeToTable_l.find(tpe <:< _._1).map(_._2).asRq(s"type `$tpe` has no table")
 	}
 	
+	/*
 	def tableForType(tpe: ru.Type): String = {
 		findTableForType(tpe) match {
-			case Some(table) => table
+			case Rq(table) => table
 			case None =>
 				val s = tpe.typeSymbol.name.decoded
 				s.take(1).toLowerCase + s.tail
 		}
 	}
+	*/
 	
 	def toJson[A: TypeTag](a: A): RqResult[JsValue] = {
 		val typ = ru.typeTag[A].tpe
@@ -91,7 +93,7 @@ object ConversionsDirect {
 			val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 			val l = obj.asInstanceOf[scala.collection.GenTraversable[(_, _)]].toList
 			val key_l = findTableForType(typKey) match {
-				case Some(_) =>
+				case RqSuccess(_, _) =>
 					val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
 					val clazz = mirror.runtimeClass(typKey.typeSymbol.asClass)
 					// TODO: return a RqError if this method doesn't exist
@@ -101,7 +103,7 @@ object ConversionsDirect {
 						val id = method.invoke(objKey).toString
 						id
 					})
-				case None =>
+				case _ =>
 					l.map(_._1.toString)
 			}
 			val value_l = RqResult.toResultOfList(l.map(pair => toJsonOrId(pair._2, typVal)))
@@ -137,14 +139,14 @@ object ConversionsDirect {
 
 	private def toJsonOrId(obj: Any, typ: Type): RqResult[JsValue] = {
 		findTableForType(typ) match {
-			case Some(_) =>
+			case RqSuccess(_, _) =>
 				val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
 				val clazz = mirror.runtimeClass(typ.typeSymbol.asClass)
 				// TODO: return a RqError if this method doesn't exist
 				val method = clazz.getMethod("id")
 				val id = method.invoke(obj).toString
 				RqSuccess(JsString(id))
-			case None =>
+			case _ =>
 				toJson2(obj, typ)
 		}
 	}
@@ -187,7 +189,7 @@ object ConversionsDirect {
 				val id_? = {
 					if (s.startsWith("*"))
 						Some(s.tail)
-					else if (findTableForType(typ).isDefined)
+					else if (findTableForType(typ).isSuccess)
 						Some(s)
 					else
 						None
@@ -202,11 +204,12 @@ object ConversionsDirect {
 							}
 						// Otherwise create a list of required objects
 						case None =>
-							val table = tableForType(typ)
-							val id = id_?.get
-							val tkp = TKP(table, id, Nil)
-							val kco = KeyClassOpt(KeyClass(tkp, typ), false, None)
-							RqSuccess(ConvRequire(Map(path -> kco)))
+							findTableForType(typ).map { table =>
+								val id = id_?.get
+								val tkp = TKP(table, id, Nil)
+								val kco = KeyClassOpt(KeyClass(tkp, typ), false, None)
+								ConvRequire(Map(path -> kco))
+							}
 					}
 				}
 			case _ =>
@@ -332,7 +335,7 @@ object ConversionsDirect {
 		val (errK_l, wK, convK_l, key_l):
 			(List[String], List[String], Map[String, KeyClassOpt], List[_]) =
 			findTableForType(typKey) match {
-				case Some(_) =>
+				case RqSuccess(_, _) =>
 					val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
 						val (id, _) = pair
 						val path2_r = (id + "#") :: path_r
@@ -345,7 +348,7 @@ object ConversionsDirect {
 							val obj_l = l.collect({case ConvObject(o) => o})
 							(Nil, w, conv_l, obj_l)
 					}
-				case None =>
+				case _ =>
 					(Nil, Nil, Map(), nameToType_l.map(_._1))
 			}
 		
@@ -360,7 +363,7 @@ object ConversionsDirect {
 					case None =>
 						// Field is missing
 						// If this should be an object in the database and an `id` field is available,
-						if (findTableForType(typ2).isDefined && jsobj.fields.contains("id"))
+						if (findTableForType(typ2).isSuccess && jsobj.fields.contains("id"))
 							convOrRequire(path2_r, jsobj.fields("id"), typ2, lookup_m_?)
 						// Else try using JsNull
 						else
@@ -466,20 +469,23 @@ object ConversionsDirect {
 	}
 	
 	private def toEnum(jsval: JsValue, typ: ru.Type): RqResult[Any] = {
-		//val mirror = clazz_?.map(clazz => ru.runtimeMirror(clazz.getClassLoader)).getOrElse(scala.reflect.runtime.currentMirror)
-		val mirror = ru.runtimeMirror(getClass.getClassLoader)
-		// Get enclosing enumeration (e.g. MyStatus.Value => MyStatus)
-		val enumType = typ.find(_ <:< typeOf[Enumeration]).get
-		val enumModule = enumType.termSymbol.asModule
-		val enumMirror = mirror.reflectModule(enumModule)
-		val enum = enumMirror.instance.asInstanceOf[Enumeration]
-		val value_l = enum.values
-		jsval match {
-			case JsString(s) =>
-				value_l.find(_.toString == s).asRq(s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
-			case _ => RqError("expected JsString")
+		try {
+			//val mirror = clazz_?.map(clazz => ru.runtimeMirror(clazz.getClassLoader)).getOrElse(scala.reflect.runtime.currentMirror)
+			val mirror = ru.runtimeMirror(getClass.getClassLoader)
+			// Get enclosing enumeration (e.g. MyStatus.Value => MyStatus)
+			val enumType = typ.find(_ <:< typeOf[Enumeration]).get
+			val enumModule = enumType.termSymbol.asModule
+			val enumMirror = mirror.reflectModule(enumModule)
+			val enum = enumMirror.instance.asInstanceOf[Enumeration]
+			val value_l = enum.values
+			jsval match {
+				case JsString(s) =>
+					value_l.find(_.toString == s).asRq(s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
+				case _ => RqError("expected JsString")
+			}
+		} catch {
+			case e: Throwable => RqError(s"type: $typ, jsval: $jsval, error: ${e.getMessage}")
 		}
-
 	}
 	
 	private val RxVolume = """([0-9]*)(\.[0-9]*)? ?([mun]?l)""".r
@@ -602,18 +608,28 @@ object ConversionsDirect {
 }
 
 object Conversions {
+	private val logger = Logger[this.type]
+	
 	private val D = ConversionsDirect
 
-	def readByIdAt[A <: Object : TypeTag](db: DataBase, id: String, time: List[Int]) = {
+	def readByIdAt[A <: Object : TypeTag](db: DataBase, id: String, time: List[Int]): RqResult[A] = {
 		val typ = ru.typeTag[A].tpe
-		val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ, time)
-		readAnyAt(db, kc).map(_.asInstanceOf[A])
+		logger.trace(s"readByIdAt[$typ](db, $id, $time)")
+		for {
+			table <- ConversionsDirect.findTableForType(typ)
+			kc = KeyClass(TKP(table, id, Nil), typ, time)
+			ret <- readAnyAt(db, kc).map(_.asInstanceOf[A])
+		} yield ret
 	}
 
 	def readByIdBefore[A <: Object : TypeTag](db: DataBase, id: String, time: List[Int]) = {
 		val typ = ru.typeTag[A].tpe
-		val kc = KeyClass(TKP(ConversionsDirect.tableForType(typ), id, Nil), typ, time)
-		readAnyBefore(db, kc).map(_.asInstanceOf[A])
+		logger.trace(s"readByIdBefore[$typ](db, $id, $time)")
+		for {
+			table <- ConversionsDirect.findTableForType(typ)
+			kc = KeyClass(TKP(table, id, Nil), typ, time)
+			ret <- readAnyBefore(db, kc).map(_.asInstanceOf[A])
+		} yield ret
 	}
 	
 	def readAnyAt(db: DataBase, kc: KeyClass): RqResult[Any] = {

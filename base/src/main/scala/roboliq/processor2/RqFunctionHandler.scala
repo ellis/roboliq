@@ -428,22 +428,28 @@ object RqFunctionHandler {
 	def as[A: TypeTag](symbol: Symbol): RequireItem[A] = as[A](TKP("cmd", "$", List(symbol.name)))
 	
 	def lookup[A <: Object : TypeTag](symbol: Symbol): RequireItem[A] = {
+		val t = ru.typeTag[A].tpe
 		val fnargs = fnRequire (as[String](symbol)) { (id) =>
-			val t = ru.typeTag[A].tpe
-			val s = ConversionsDirect.tableForType(t)
-			fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
-				returnObject(o)
+			ConversionsDirect.findTableForType(t).flatMap { table =>
+				fnRequire (RequireItem[A](TKP(table, id, Nil))) { o =>
+					returnObject(o)
+				}
 			}
 		}
 		RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
 	}
 		
+	// REFACTOR: Return RqResult[RequireItem[A]]
 	def lookup[A <: Object : TypeTag](id: String): RequireItem[A] = {
 		val t = ru.typeTag[A].tpe
-		val s = ConversionsDirect.tableForType(t)
-		val fnargs = fnRequire (RequireItem[A](TKP(s, id, Nil))) { o =>
-			returnObject(o)
-		}
+		val fnargs = RqFunctionArgs(
+			arg_l = Nil,
+			fn = (_) => ConversionsDirect.findTableForType(t).flatMap { table =>
+				fnRequire (RequireItem[A](TKP(table, id, Nil))) { o =>
+					returnObject(o)
+				}
+			}
+		)
 		RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
 	}
 		

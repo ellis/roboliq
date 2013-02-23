@@ -11,7 +11,7 @@ import _root_.roboliq.core._
 
 class DataBaseSpec extends FunSpec {
 	describe("DataBase") {
-		it("should read back equivalent JsValues as set, time=Nil") {
+		it("should read back equivalent JsValues as those set, with time=Nil") {
 			val db = new DataBase
 			val l = List[(TKP, JsValue)](
 				TKP("a", "1", Nil) -> JsString("Hello, World!"),

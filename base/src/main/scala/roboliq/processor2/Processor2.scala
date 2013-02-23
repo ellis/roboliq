@@ -11,6 +11,7 @@ import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.TypeTag
 import scalaz._
+import grizzled.slf4j.Logger
 import spray.json.JsArray
 import spray.json.JsObject
 import spray.json.JsString
@@ -59,6 +60,8 @@ case class Token_Comment(s: String) extends CmdToken
 class ProcessorData(
 	handler_l: List[CommandHandler]
 ) {
+	val logger = Logger[this.type]
+
 	private val handler_m: Map[String, CommandHandler] = handler_l.flatMap(handler => handler.cmd_l.map(_ -> handler)).toMap
 	
 	val db = new DataBase
@@ -712,7 +715,7 @@ class ProcessorData(
 	def setObj[A: TypeTag](id: String, a: A, time: List[Int] = Nil): RqResult[Unit] = {
 		val typ = ru.typeTag[A].tpe
 		for {
-			table <- ConversionsDirect.findTableForType(typ).asRq(s"Type `$typ` does not have a table")
+			table <- ConversionsDirect.findTableForType(typ)
 			jsval <- ConversionsDirect.toJson(a)
 		} yield {
 			val tkp = TKP(table, id, Nil)
@@ -721,17 +724,18 @@ class ProcessorData(
 		}
 	}
 	
-	def getObjFromDbAt[A: TypeTag](id: String, time: List[Int]): RqResult[A] = {
+	def getObjFromDbAt[A <: Object : TypeTag](id: String, time: List[Int]): RqResult[A] = {
 		val typ = ru.typeTag[A].tpe
+		logger.trace(s"getObjFromDbAt[$typ]($id, $time)")
 		for {
-			table <- ConversionsDirect.findTableForType(typ).asRq(s"Type `$typ` does not have a table")
+			table <- ConversionsDirect.findTableForType(typ)
 			kc = KeyClass(TKP(table, id, Nil), typ, Nil)
-			_ = println("kc: "+kc)
+			//_ = println("kc: "+kc)
 			obj <- cache_m.get(kc) match {
-				case Some(x) => RqSuccess(x)
-				case None => Conversions.readByIdAt(db, id, time)
+				case Some(x) => RqSuccess(x.asInstanceOf[A])
+				case None => Conversions.readByIdAt[A](db, id, time)
 			}
-		} yield obj.asInstanceOf[A]
+		} yield obj
 	}
 	
 	private def createCommandFnArgs(cmd: JsObject): RqFunctionArgs = {
