@@ -7,7 +7,9 @@ import scala.reflect.BeanProperty
 case class PlateState(
 	val plate: Plate,
 	val location_? : Option[PlateLocation]
-)
+) {
+	def id = plate.id
+}
 
 /** Factory object for [[roboliq.core.PlateState]]. */
 object PlateState {

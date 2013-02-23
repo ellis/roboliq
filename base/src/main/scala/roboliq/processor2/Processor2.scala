@@ -119,6 +119,7 @@ class ProcessorData(
 			if (table != "cmd") {
 				elements.foreach(jsval => {
 					val jsobj = jsval.asJsObject
+					val idField = ConversionsDirect.findIdFieldForTable(table)
 					val key = jsobj.fields("id").asInstanceOf[JsString].value
 					val tkp = TKP(table, key, Nil)
 					setEntity(tkp, Nil, jsval)

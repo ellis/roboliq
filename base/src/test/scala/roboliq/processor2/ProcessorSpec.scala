@@ -46,13 +46,16 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 			makeTable[PlateLocation](plateLocation1, plateLocation2),
 			makeTable[TubeModel](tubeModel1),
 			makeTable[Plate](plate1, plate2),
-			makeTable[Vessel0](vessel_TUBE1)
+			makeTable[Vessel0](vessel_TUBE1),
+			makeTable(tipState),
+			makeTable(plateState_P1, plateState_15000),
+			makeTable(vesselState_T1),
+			makeTable(vesselSituatedState_T1)
 		)
 		//info("l1: "+l1)
 		val l_? : RqResult[List[(String, JsArray)]] = RqResult.toResultOfList(l1)
 		val jsobj_? = l_?.map(l => JsObject(l.toMap))
 		
-		Given("a default setup")
 		val p = new ProcessorData(List(
 			new arm.MovePlateHandler,
 			new pipette.AspirateHandler,
@@ -61,14 +64,15 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 		))
 		
 		//info("jsobj_?: "+jsobj_?)
-		//assert(l2.isSuccess)
+		assert(jsobj_?.isSuccess)
 		jsobj_?.foreach(jsobj => {
 			//println("jsobj: "+jsobj)
+			Given("a specific configuration")
 			p.loadJsonData(jsobj)
 			//println("p.db:")
 			//println(p.db)
 
-			it("should hold expected objects") {
+			it("should hold a copy of each of those configuration objects") {
 				assert(p.getObjFromDbAt[TipModel]("TIPMODEL1", Nil) === RqSuccess(tipModel1))
 				assert(p.getObjFromDbAt[Tip]("TIP1", Nil) === RqSuccess(tip1))
 				assert(p.getObjFromDbAt[PlateModel]("PLATEMODEL1", Nil) === RqSuccess(plateModel1))
@@ -78,6 +82,11 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 				assert(p.getObjFromDbAt[Plate]("PLATE1", Nil) === RqSuccess(plate1))
 				assert(p.getObjFromDbAt[Plate]("PLATE2", Nil) === RqSuccess(plate2))
 				assert(p.getObjFromDbAt[Vessel0]("TUBE1", Nil) === RqSuccess(vessel_TUBE1))
+				assert(p.getObjFromDbAt[TipState0]("TIP1", List(0)) === RqSuccess(tipState))
+				assert(p.getObjFromDbAt[PlateState]("PLATE1", List(0)) === RqSuccess(plateState_P1))
+				assert(p.getObjFromDbAt[PlateState]("PLATE2", List(0)) === RqSuccess(plateState_15000))
+				assert(p.getObjFromDbAt[VesselState]("TUBE1", List(0)) === RqSuccess(vesselState_T1))
+				assert(p.getObjFromDbAt[VesselSituatedState]("TUBE1", List(0)) === RqSuccess(vesselSituatedState_T1))
 			}
 		})
 	}
