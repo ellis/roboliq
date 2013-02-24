@@ -28,5 +28,26 @@ class DataBaseSpec extends FunSpec {
 				assert(jsval2_? === RqSuccess(jsval))
 			}
 		}
+		
+		it("should read back equivalent JsValues as those set with time != Nil") {
+			val db = new DataBase
+			val jsval0 = JsObject("s" -> JsString("_"), "n" -> JsNumber(0))
+			val jsval1 = JsObject("s" -> JsString("a"), "n" -> JsNumber(1))
+			val jsval2 = JsObject("s" -> JsString("b"), "n" -> JsNumber(2))
+			val tkp = TKP("TABLE", "KEY", Nil)
+			
+			db.set(tkp, Nil, jsval0)
+			assert(db.get(tkp) === RqSuccess(jsval0))
+			
+			db.set(tkp, List(1), jsval1)
+			assert(db.getAt(tkp, List(1)) === RqSuccess(jsval1))
+			
+			db.set(tkp, List(2), jsval2)
+			assert(db.getAt(tkp, List(2)) === RqSuccess(jsval2))
+
+			assert(db.get(tkp) === jsval0)
+			assert(db.getAt(tkp, Nil) === jsval0)
+			assert(db.getAt(tkp, List(1)) === RqSuccess(jsval1))
+		}
 	}
 }
