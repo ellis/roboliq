@@ -32,7 +32,7 @@ case class MixTokenItem(
 	val policy: PipettePolicy
 ) extends HasTip with HasWell with HasVolume with HasPolicy
 
-class MixHandler extends CommandHandler("pipetter.dispense") {
+class MixHandler extends CommandHandler("pipetter.mix") {
 	val fnargs = cmdAs[MixCmd] { cmd =>
 		val event_l = cmd.items.flatMap(item => {
 			TipAspirateEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil

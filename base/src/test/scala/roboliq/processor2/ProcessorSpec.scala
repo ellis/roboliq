@@ -214,6 +214,73 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				roboliq.commands2.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 			))
 		}
+
+		it("should handle pipette.dispense") {
+			import roboliq.commands.pipette._
+			import roboliq.commands2.pipette._
+			
+			val p = makeProcessor(
+				"database" -> JsonParser(
+					"""{
+					"substance": [
+						{ "id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}
+					]
+					}""").asJsObject,
+				"labware" -> JsonParser(
+					"""{
+					"plate": [
+						{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
+					]
+					}""").asJsObject,
+				"states" -> JsonParser(
+					"""{	
+					"plateState": [
+						{ "id": "P1", "location": "cooled1" }
+					],
+					"vesselState": [
+						{ "id": "P1(A01)", "content": { "solventToVolume": { "water": "100ul" } } }
+					],
+					"vesselSituatedState": [
+					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } },
+					  { "id": "P1(B01)", "position": { "plate": "P1", "index": 1 } }
+					]
+					}""").asJsObject,
+				"commands" -> JsonParser("""{
+					"cmd": [
+					  { "cmd": "pipetter.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] },
+					  { "cmd": "pipetter.dispense", "items": [{"tip": "TIP1", "well": "P1(B01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
+					]
+					}""").asJsObject
+			)
+			
+			Then("there should be no errors or warnings")
+			assert(p.getMessages === Nil)
+			
+			And("correct tokens should be generated")
+			val (_, token_l) = p.getTokenList.unzip
+			val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
+			val vss_P1_A01_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(Int.MaxValue))
+			val vss_P1_B01_? = p.getObjFromDbAt[VesselSituatedState]("P1(B01)", List(Int.MaxValue))
+			assert(vss_P1_A01_?.isSuccess)
+			assert(vss_P1_B01_?.isSuccess)
+			val vss_P1_A01 = vss_P1_A01_?.getOrElse(null)
+			val vss_P1_B01 = vss_P1_B01_?.getOrElse(null)
+			assert(token_l === List(
+				roboliq.commands2.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact)))),
+				roboliq.commands2.pipette.DispenseToken(List(new TipWellVolumePolicy(tip, vss_P1_B01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
+			))
+			
+			And("correct contents should be in the source well")
+			val water = p.getObjFromDbAt[SubstanceLiquid]("water", Nil).getOrElse(null)
+			val vesselState_P1_A01_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(Int.MaxValue))
+			assert(vesselState_P1_A01_?.isSuccess)
+			val vesselState_P1_A01 = vesselState_P1_A01_?.getOrElse(null)
+			assert(vesselState_P1_A01.content === VesselContent(Map(water -> LiquidVolume.ul(50)), Map()))
+			assert(vesselState_P1_A01.content.volume === LiquidVolume.ul(50))
+
+			And("correct contents should be in the destination well")
+			val vesselState_P1_B01_? = p.getObjFromDbAt[VesselState]("P1(B01)", List(Int.MaxValue))
+		}
 	}
 	
 }
