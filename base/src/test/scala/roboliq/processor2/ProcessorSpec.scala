@@ -146,7 +146,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 					}""").asJsObject
 			)
 			
-			info(p.db.toString)
+			//info(p.db.toString)
 			
 			Then("there should be no errors or warnings")
 			assert(p.getMessages === Nil)
@@ -165,7 +165,6 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			assert(plateState_P1_?.map(_.location_?.map(_.id)) === RqSuccess(Some("cooled2")))
 		}
 
-		/*
 		it("should handle pipette.aspirate") {
 			import roboliq.commands.pipette._
 			import roboliq.commands2.pipette._
@@ -215,7 +214,6 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				roboliq.commands2.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 			))
 		}
-		*/
 	}
 	
 }

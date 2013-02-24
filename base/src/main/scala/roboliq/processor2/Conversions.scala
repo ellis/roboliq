@@ -182,27 +182,27 @@ object ConversionsDirect {
 
 	//private def reduceConvResultList(l: List[ConvResult]): 
 	def conv(jsval: JsValue, typ: ru.Type, lookup_m: Map[String, Any] = Map()): RqResult[Any] = {
-		convOrRequire(Nil, jsval, typ, Some(lookup_m)).flatMap(_ match {
+		convOrRequire(Nil, jsval, typ, Nil, Some(lookup_m)).flatMap(_ match {
 			case ConvRequire(m) => RqError("need to lookup values for "+m.keys.mkString(", "))
 			case ConvObject(o) => RqSuccess(o)
 		})
 	}
 
-	def convRequirements(jsval: JsValue, typ: ru.Type): RqResult[Either[Map[String, KeyClassOpt], Any]] = {
-		convOrRequire(Nil, jsval, typ, None).flatMap(_ match {
+	def convRequirements(jsval: JsValue, typ: ru.Type, time: List[Int] = Nil): RqResult[Either[Map[String, KeyClassOpt], Any]] = {
+		convOrRequire(Nil, jsval, typ, time, None).flatMap(_ match {
 			case ConvRequire(m) => RqSuccess(Left(m))
 			case ConvObject(o) => RqSuccess(Right(o))
 		})
 	}
 
-	def convRequirements[A <: Object : TypeTag](jsval: JsValue): RqResult[Either[Map[String, KeyClassOpt], A]] = {
-		convRequirements(jsval, ru.typeTag[A].tpe).map(_ match {
+	def convRequirements[A <: Object : TypeTag](jsval: JsValue, time: List[Int] = Nil): RqResult[Either[Map[String, KeyClassOpt], A]] = {
+		convRequirements(jsval, ru.typeTag[A].tpe, time).map(_ match {
 			case Left(x) => Left(x)
 			case Right(o) => Right(o.asInstanceOf[A])
 		})
 	}
 	
-	private def convOrRequire(path_r: List[String], jsval: JsValue, typ: ru.Type, lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
+	private def convOrRequire(path_r: List[String], jsval: JsValue, typ: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -210,7 +210,7 @@ object ConversionsDirect {
 
 		val path = path_r.reverse.mkString(".")
 		val prefix = if (path_r.isEmpty) "" else path + ": "
-		logger.debug(s"conv2: ${path}: $typ = $jsval")
+		logger.trace(s"convOrRequire(${path}, $jsval, $typ, $time, ${}lookup_m_?})")
 
 		try {
 			jsval match {
@@ -237,7 +237,7 @@ object ConversionsDirect {
 								findTableForType(typ).map { table =>
 									val id = id_?.get
 									val tkp = TKP(table, id, Nil)
-									val kco = KeyClassOpt(KeyClass(tkp, typ), false, None)
+									val kco = KeyClassOpt(KeyClass(tkp, typ, time), false, None)
 									ConvRequire(Map(path -> kco))
 								}
 						}
@@ -269,18 +269,18 @@ object ConversionsDirect {
 			else if (typ <:< typeOf[Option[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 				if (jsval == JsNull) RqSuccess(ConvObject(None))
-				else convOrRequire(path_r, jsval, typ2, lookup_m_?).map(_ match {
+				else convOrRequire(path_r, jsval, typ2, time, lookup_m_?).map(_ match {
 					case ConvObject(o) => ConvObject(Option(o))
 					case res => res
 				})
 			}
 			else if (typ <:< typeOf[List[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-				convList(path_r, jsval, typ2, lookup_m_?)
+				convList(path_r, jsval, typ2, time, lookup_m_?)
 			}
 			else if (typ <:< typeOf[Set[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-				convList(path_r, jsval, typ2, lookup_m_?).map(_ match {
+				convList(path_r, jsval, typ2, time, lookup_m_?).map(_ match {
 					case ConvObject(l: List[_]) => ConvObject(Set(l : _*))
 					case r => r
 				})
@@ -292,7 +292,7 @@ object ConversionsDirect {
 						val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 						val name_l = fields.toList.map(_._1)
 						val nameToType_l = name_l.map(_ -> typVal)
-						convMap(path_r, jsobj, typKey, nameToType_l, lookup_m_?)
+						convMap(path_r, jsobj, typKey, nameToType_l, time, lookup_m_?)
 					case JsNull => RqSuccess(ConvObject(Map()))
 					case _ =>
 						RqError("expected a JsObject")
@@ -303,7 +303,7 @@ object ConversionsDirect {
 				val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 				val p0_l = ctor.paramss(0)
 				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
-				convMap(path_r, jsobj, typeOf[String], nameToType_l, lookup_m_?).map(_ match {
+				convMap(path_r, jsobj, typeOf[String], nameToType_l, time, lookup_m_?).map(_ match {
 					case ConvObject(o) =>
 						val nameToObj_m = o.asInstanceOf[Map[String, _]]
 						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
@@ -316,7 +316,7 @@ object ConversionsDirect {
 				})
 			}
 			else {
-				RqError("unhandled type: ${typ}")
+				RqError(s"unhandled type or value. type=${typ}, value=${jsval}")
 			}
 			logger.debug(ret)
 			ret
@@ -327,7 +327,7 @@ object ConversionsDirect {
 		}
 	}
 	
-	private def convList(path_r: List[String], jsval: JsValue, typ2: ru.Type, lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
+	private def convList(path_r: List[String], jsval: JsValue, typ2: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -341,7 +341,7 @@ object ConversionsDirect {
 						case Nil => List(s"[$i]")
 						case head :: rest => (s"$head[$i]") :: rest
 					}
-					convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
+					convOrRequire(path2_r, jsval2, typ2, time, lookup_m_?)
 				}))
 				// If there were no errors in conversion,
 				res0.map(l => {
@@ -357,14 +357,14 @@ object ConversionsDirect {
 			case JsNull =>
 				RqSuccess(ConvObject(Nil))
 			case _ =>
-				convOrRequire(path_r, jsval, typ2, lookup_m_?).map(_ match {
+				convOrRequire(path_r, jsval, typ2, time, lookup_m_?).map(_ match {
 					case x: ConvRequire => x
 					case ConvObject(o) => ConvObject(List(o))
 				}).orElse(RqError(s"expected an array of ${typ2.typeSymbol.name.toString}"))
 		}
 	}
 	
-	private def convMap(path_r: List[String], jsobj: JsObject, typKey: Type, nameToType_l: List[(String, ru.Type)], lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
+	private def convMap(path_r: List[String], jsobj: JsObject, typKey: Type, nameToType_l: List[(String, ru.Type)], time: List[Int], lookup_m_? : Option[Map[String, Any]]): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -377,7 +377,7 @@ object ConversionsDirect {
 					val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
 						val (id, _) = pair
 						val path2_r = (id + "#") :: path_r
-						convOrRequire(path2_r, JsString(id), typKey, lookup_m_?)
+						convOrRequire(path2_r, JsString(id), typKey, time, lookup_m_?)
 					}))
 					res0 match {
 						case RqError(e, w) => (e, w, Map(), Nil)
@@ -397,15 +397,15 @@ object ConversionsDirect {
 				val (name, typ2) = pair
 				val path2_r = name :: path_r
 				jsobj.fields.get(name) match {
-					case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, lookup_m_?)
+					case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, time, lookup_m_?)
 					case None =>
 						// Field is missing
 						// If this should be an object in the database and an `id` field is available,
 						if (findTableForType(typ2).isSuccess && jsobj.fields.contains("id"))
-							convOrRequire(path2_r, jsobj.fields("id"), typ2, lookup_m_?)
+							convOrRequire(path2_r, jsobj.fields("id"), typ2, time, lookup_m_?)
 						// Else try using JsNull
 						else
-							convOrRequire(path2_r, JsNull, typ2, lookup_m_?)
+							convOrRequire(path2_r, JsNull, typ2, time, lookup_m_?)
 				}
 			}))
 			res0 match {
@@ -648,7 +648,7 @@ object ConversionsDirect {
 }
 
 object Conversions {
-	private val logger = Logger[this.type]
+	private val logger = Logger("roboliq.processor2.Conversions")
 	
 	private val D = ConversionsDirect
 
@@ -673,9 +673,10 @@ object Conversions {
 	}
 	
 	def readAnyAt(db: DataBase, kc: KeyClass): RqResult[Any] = {
+		logger.trace(s"readAnyAt(db, $kc)")
 		for {
 			jsval <- db.getAt(kc.key, kc.time)
-			either <- D.convRequirements(jsval, kc.clazz)
+			either <- D.convRequirements(jsval, kc.clazz, kc.time)
 			ret <- either match {
 				case Right(ret) => RqSuccess(ret)
 				case Left(require_m) => 

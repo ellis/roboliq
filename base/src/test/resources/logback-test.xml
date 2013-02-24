@@ -11,6 +11,10 @@
   <root level="info">
     <appender-ref ref="STDOUT" />
   </root>
-
-  <logger name="roboliq.processor2.ConversionsDirect" level="info"/>
+  <!--
+  <logger name="roboliq.processor2.ConversionsDirect" level="trace"/>
+  <logger name="roboliq.processor2.Conversions" level="trace"/>
+  <logger name="roboliq.processor2.DataBase" level="trace"/>
+  <logger name="roboliq.processor2.ProcessorData" level="trace"/>
+  -->
 </configuration>

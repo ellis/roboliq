@@ -584,6 +584,7 @@ class ProcessorData(
 
 		// Try to get values for all kcos
 		val kcToValue_m = opt_m.keys.toList.map(kc => kc -> getEntity(kc)).toMap
+		//println("kcToValue_m: "+kcToValue_m)
 		val kcoToValue_m = kco_l.toList.map(kco => {
 			val value0 = kcToValue_m(kco.kc)
 			val value = {
@@ -626,6 +627,7 @@ class ProcessorData(
 		println("Nodes")
 		println("-----")
 		state0_m.values.toList.sortBy(_.node.id).map(state => state.node.id + ": " + state.status + " " + state.node.contextKey_?.map(_.id)).foreach(println)
+		//state_m.foreach(println)
 
 		val pending_l = makePendingComputationList
 		pending_l.foreach(state => runComputation(state.node, kcoToValue_m))
@@ -705,7 +707,10 @@ class ProcessorData(
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
 		if (kc.clazz == ru.typeOf[JsValue]) {
-			db.getBefore(kc.key, kc.time)
+			if (kc.time.isEmpty)
+				db.get(kc.key)
+			else
+				db.getBefore(kc.key, kc.time)
 		}
 		else {
 			cache_m.get(kc).asRq(s"object not found `$kc`")

@@ -85,6 +85,7 @@ class DataBase {
 	
 	def getBefore(tkp: TKP, time: List[Int]): RqResult[JsValue] = {
 		logger.trace(s"getBefore($tkp, $time)")
+		assert(!time.isEmpty)
 		def chooseTime(time_l: List[List[Int]]): Option[List[Int]] =
 			time_l.takeWhile(ListIntOrdering.compare(_, time) < 0).lastOption
 		getWith(tkp, time, chooseTime _)

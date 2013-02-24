@@ -22,9 +22,6 @@ class ConversionsSpec extends FunSpec {
 	private def getTypeTag[T: TypeTag](obj: T) = ru.typeTag[T]
 	private def getType[T: TypeTag](obj: T) = ru.typeTag[T].tpe
 
-	//def check[A: TypeTag](jsval: JsValue, exp: A) =
-	//	assert(ConversionsDirect.conv(jsval, ru.typeTag[A].tpe) == RqSuccess(exp))
-
 	describe("toJson") {
 		def check[A: TypeTag](l: (A, JsValue)*) = {
 			val typ = ru.typeTag[A].tpe
@@ -152,9 +149,8 @@ class ConversionsSpec extends FunSpec {
 			List(JsNull)
 		)
 	}
-
+	
 	describe("convRequirements") {
-
 		it("should parse Map[Substance, Int]") {
 			assert(
 				convRequirements(JsonParser("""{"water": 1, "powder": 20}"""), typeOf[Map[Substance, Int]])
@@ -233,7 +229,7 @@ class ConversionsSpec extends FunSpec {
 			)
 		}
 	}
-	
+
 	describe("conv for database objects") {
 		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
 		val tip = Tip(0, Some(tipModel))
@@ -276,7 +272,9 @@ class ConversionsSpec extends FunSpec {
 		def check[A <: Object : TypeTag](id: String, exp: A) = {
 			val typ = ru.typeTag[A].tpe
 			it(s"should parse $typ `$id`") {
-				val kc = KeyClass(TKP(ConversionsDirect.findTableForType(typ).getOrElse(null), id, Nil), typ)
+				val table = ConversionsDirect.findTableForType(typ).getOrElse(null)
+				val time = if (table.endsWith("State")) List(0) else Nil
+				val kc = KeyClass(TKP(table, id, Nil), typ, time)
 				val ret = Conversions.readAnyAt(db, kc)
 				assert(ret === RqSuccess(exp))
 			}
@@ -317,5 +315,4 @@ class ConversionsSpec extends FunSpec {
 		check[Map[String, Int]](Map("a" -> 1, "b" -> 2), Map())
 		check(MyClass1("text", 42, List(true, false)))
 	}
-	
 }
