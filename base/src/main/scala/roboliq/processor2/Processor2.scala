@@ -122,7 +122,8 @@ class ProcessorData(
 					val idField = ConversionsDirect.findIdFieldForTable(table)
 					val key = jsobj.fields("id").asInstanceOf[JsString].value
 					val tkp = TKP(table, key, Nil)
-					setEntity(tkp, Nil, jsval)
+					val time = if (table.endsWith("State")) List(0) else Nil
+					setState(tkp, time, jsval)
 				})
 			}
 		})
@@ -164,7 +165,7 @@ class ProcessorData(
 					// Create node
 					val node = Node_Command(parent_?, index, fnargs0)
 					// Store command
-					setEntity(node.contextKey, Nil, cmd)
+					setEntity(node.contextKey, cmd)
 					List(node)
 				case RqItem_Function(fnargs) =>
 					//val fnargs2 = concretizeArgs(fnargs, parent_?.flatMap(_.contextKey_?), parent_?, index)
@@ -178,7 +179,7 @@ class ProcessorData(
 				case EventItem_State(key, jsval) =>
 					println("EventItem_State: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
 					//sys.exit()
-					db.set(key, parent_?.map(_.time).getOrElse(List(0)), jsval)
+					db.setAt(key, parent_?.map(_.time).getOrElse(List(0)), jsval)
 					Nil
 				case _ =>
 					Nil
@@ -242,7 +243,7 @@ class ProcessorData(
 							setEntityObj(node.kc, obj)
 							None
 						case EventItem_State(key, jsval) =>
-							setEntity(key, node.time, jsval)
+							setState(key, node.time, jsval)
 							None
 						case _ =>
 							internalMessage_l += RqError("invalid return item for a conversion node")
@@ -304,7 +305,7 @@ class ProcessorData(
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 					case "vessel" =>
 						//WellSpecParser.parse(input)
-						db.set(kc.key, time, JsObject("id" -> JsString(id)))
+						db.set(kc.key, JsObject("id" -> JsString(id)))
 						Nil
 					case "vesselState" =>
 						val fnargs = fnRequire(lookup[Vessel0](id)) { (vessel) =>
@@ -455,8 +456,14 @@ class ProcessorData(
 		}
 	}
 	
-	def setEntity(key: TKP, time: List[Int], jsval: JsValue) {
-		db.set(key, time, jsval)
+	def setEntity(key: TKP, jsval: JsValue) {
+		db.set(key, jsval)
+		val kc = KeyClass(key, ru.typeOf[JsValue])
+		registerEntity(kc)
+	}
+	
+	def setState(key: TKP, time: List[Int], jsval: JsValue) {
+		db.setAt(key, time, jsval)
 		val kc = KeyClass(key, ru.typeOf[JsValue])
 		registerEntity(kc)
 		//val jsChanged_l = db.popChanges.map(KeyClass(_, ru.typeOf[JsValue]))
@@ -720,7 +727,7 @@ class ProcessorData(
 			jsval <- ConversionsDirect.toJson(a)
 		} yield {
 			val tkp = TKP(table, id, Nil)
-			setEntity(tkp, time, jsval)
+			setState(tkp, time, jsval)
 			()
 		}
 	}

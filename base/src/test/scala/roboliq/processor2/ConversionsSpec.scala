@@ -259,7 +259,7 @@ class ConversionsSpec extends FunSpec {
 					val jsobj = jsval.asJsObject
 					val key = jsobj.fields("id").asInstanceOf[JsString].value
 					val tkp = TKP(table, key, Nil)
-					db.set(tkp, Nil, jsval)
+					db.set(tkp, jsval)
 					if (db.get(tkp) != RqSuccess(jsval))
 						logger.debug(db.toString)
 					assert(db.get(tkp) === RqSuccess(jsval))
@@ -268,7 +268,7 @@ class ConversionsSpec extends FunSpec {
 			// Also add tip state
 			val tipStateKey = TKP("tipState", "TIP1", Nil)
 			val tipStateJson = Conversions.tipStateToJson(tipState)
-			db.set(tipStateKey, List(0), tipStateJson)
+			db.setAt(tipStateKey, List(0), tipStateJson)
 			assert(db.getAt(tipStateKey, List(0)) === RqSuccess(tipStateJson))
 			logger.debug(db.toString)
 		}

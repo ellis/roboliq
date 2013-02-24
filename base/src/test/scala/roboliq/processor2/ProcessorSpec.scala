@@ -25,12 +25,15 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 		val tubeModel1 = TubeModel("TUBEMODEL1", LiquidVolume.ml(15))
 		val plate1 = Plate("PLATE1", plateModel1, None)
 		val plate2 = Plate("PLATE2", plateModel1, None)
+		val vessel_PLATE1_A01 = Vessel0("PLATE1(A01)", None)
 		val vessel_TUBE1 = Vessel0("TUBE1", Some(tubeModel1))
-		val tipState = TipState0.createEmpty(tip1)
+		val tipState1 = TipState0.createEmpty(tip1)
 		val plateState_P1 = PlateState(plate1, Some(plateLocation1))
-		val plateState_15000 = PlateState(plate2, Some(plateLocation2))
+		val plateState_P2 = PlateState(plate2, Some(plateLocation2))
+		val vesselState_PLATE1_A01 = VesselState(vessel_PLATE1_A01, new VesselContent(Map(), Map()))
 		val vesselState_T1 = VesselState(vessel_TUBE1, new VesselContent(Map(), Map()))
-		val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
+		val vesselSituatedState_PLATE1_A01 = VesselSituatedState(vesselState_PLATE1_A01, VesselPosition(plateState_P1, 0))
+		val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_P2, 0))
 		
 		def makeTable[A <: Object : TypeTag](a_l: A*): RqResult[(String, JsArray)] = {
 			val l: List[A] = a_l.toList
@@ -46,11 +49,11 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 			makeTable[PlateLocation](plateLocation1, plateLocation2),
 			makeTable[TubeModel](tubeModel1),
 			makeTable[Plate](plate1, plate2),
-			makeTable[Vessel0](vessel_TUBE1),
-			makeTable(tipState),
-			makeTable(plateState_P1, plateState_15000),
-			makeTable(vesselState_T1),
-			makeTable(vesselSituatedState_T1)
+			makeTable[Vessel0](vessel_PLATE1_A01, vessel_TUBE1),
+			makeTable(tipState1),
+			makeTable(plateState_P1, plateState_P2),
+			makeTable(vesselState_PLATE1_A01, vesselState_T1),
+			makeTable(vesselSituatedState_PLATE1_A01, vesselSituatedState_T1)
 		)
 		//info("l1: "+l1)
 		val l_? : RqResult[List[(String, JsArray)]] = RqResult.toResultOfList(l1)
@@ -69,8 +72,8 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 			//println("jsobj: "+jsobj)
 			Given("a specific configuration")
 			p.loadJsonData(jsobj)
-			//println("p.db:")
-			//println(p.db)
+			println("p.db:")
+			println(p.db)
 
 			it("should hold a copy of each of those configuration objects") {
 				assert(p.getObjFromDbAt[TipModel]("TIPMODEL1", Nil) === RqSuccess(tipModel1))
@@ -81,11 +84,15 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 				assert(p.getObjFromDbAt[TubeModel]("TUBEMODEL1", Nil) === RqSuccess(tubeModel1))
 				assert(p.getObjFromDbAt[Plate]("PLATE1", Nil) === RqSuccess(plate1))
 				assert(p.getObjFromDbAt[Plate]("PLATE2", Nil) === RqSuccess(plate2))
+				assert(p.getObjFromDbAt[Vessel0]("PLATE1(A01)", Nil) === RqSuccess(vessel_PLATE1_A01))
 				assert(p.getObjFromDbAt[Vessel0]("TUBE1", Nil) === RqSuccess(vessel_TUBE1))
-				assert(p.getObjFromDbAt[TipState0]("TIP1", List(0)) === RqSuccess(tipState))
+				assert(p.getObjFromDbAt[TipState0]("TIP1", List(0)) === RqSuccess(tipState1))
+				//assert(p.db.getAt(TKP("plateState", "PLATE)))
 				assert(p.getObjFromDbAt[PlateState]("PLATE1", List(0)) === RqSuccess(plateState_P1))
-				assert(p.getObjFromDbAt[PlateState]("PLATE2", List(0)) === RqSuccess(plateState_15000))
+				assert(p.getObjFromDbAt[PlateState]("PLATE2", List(0)) === RqSuccess(plateState_P2))
+				assert(p.getObjFromDbAt[VesselState]("PLATE1(A01)", List(0)) === RqSuccess(vesselState_PLATE1_A01))
 				assert(p.getObjFromDbAt[VesselState]("TUBE1", List(0)) === RqSuccess(vesselState_T1))
+				assert(p.getObjFromDbAt[VesselSituatedState]("PLATE1(A01)", List(0)) === RqSuccess(vesselSituatedState_PLATE1_A01))
 				assert(p.getObjFromDbAt[VesselSituatedState]("TUBE1", List(0)) === RqSuccess(vesselSituatedState_T1))
 			}
 		})
