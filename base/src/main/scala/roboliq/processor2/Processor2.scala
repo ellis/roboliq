@@ -176,7 +176,7 @@ class ProcessorData(
 				case ComputationItem_Events(event_l) =>
 					List(Node_Events(parent_?, index, event_l))
 				case EventItem_State(key, jsval) =>
-					println((key, parent_?.map(_.time).getOrElse(List(0)), jsval))
+					println("EventItem_State: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
 					//sys.exit()
 					db.set(key, parent_?.map(_.time).getOrElse(List(0)), jsval)
 					Nil

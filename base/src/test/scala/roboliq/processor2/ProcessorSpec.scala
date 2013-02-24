@@ -139,6 +139,8 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 					}""").asJsObject
 			)
 			
+			info(p.db.toString)
+			
 			Then("there should be no errors or warnings")
 			assert(p.getMessages === Nil)
 			
@@ -150,8 +152,13 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			assert(token_l === List(
 				commands2.arm.MovePlateToken(Some("ROMA2"), plate_P1, plateLocation_cooled1, plateLocation_cooled2)
 			))
+			
+			And("plate should have correct final location")
+			val plateState_P1_? = p.getObjFromDbAt[PlateState]("P1", List(2))
+			assert(plateState_P1_?.map(_.location_?.map(_.id)) === RqSuccess(Some("cooled2")))
 		}
 
+		/*
 		it("should handle pipette.aspirate") {
 			import roboliq.commands.pipette._
 			import roboliq.commands2.pipette._
@@ -192,28 +199,16 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			assert(p.getMessages === Nil)
 			
 			And("correct tokens should be generated")
-
 			val (_, token_l) = p.getTokenList.unzip
-			val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-			val tip = Tip(0, Some(tipModel))
-			val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
-			val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
-			val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
-			val plateLocation_cooled2 = PlateLocation("cooled2", List(plateModel_PCR), true)
-			val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
-			val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
-			val plate_15000 = Plate("reagents15000", plateModel_15000, None)
-			val plate_P1 = Plate("P1", plateModel_PCR, None)
-			println("token_l: "+token_l)
+			val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
 			val vss_P1_A01_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(Int.MaxValue))
-			println("vss_P1_A01_?: " + vss_P1_A01_?)
 			assert(vss_P1_A01_?.isSuccess)
 			val vss_P1_A01 = vss_P1_A01_?.getOrElse(null)
-			//assert(token_l.head.items.head.)
 			assert(token_l === List(
 				roboliq.commands2.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 			))
 		}
+		*/
 	}
 	
 }

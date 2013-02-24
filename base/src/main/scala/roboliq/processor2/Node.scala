@@ -4,6 +4,7 @@ import spray.json.JsValue
 import spray.json.JsObject
 
 import roboliq.core._
+import roboliq.commands2._
 
 /**
  * There are several basic types of nodes.
@@ -228,10 +229,13 @@ case class Node_Events(
 		fn = (_) => {
 			val l: RqResult[List[RqFunctionArgs]] = RqResult.toResultOfList(event_l.map(event0 => {
 				event0 match {
-					case event: roboliq.commands2.pipette.TipAspirateEvent =>
+					case event: arm.PlateLocationEvent =>
+						val handler = new arm.PlateLocationEventHandler
+						RqSuccess(handler.fnargs(event))
+					case event: pipette.TipAspirateEvent =>
 						val handler = new roboliq.commands2.pipette.TipAspirateEventHandler
 						RqSuccess(handler.fnargs(event))
-					case event: roboliq.commands2.pipette.TipDispenseEvent =>
+					case event: pipette.TipDispenseEvent =>
 						val handler = new roboliq.commands2.pipette.TipDispenseEventHandler
 						RqSuccess(handler.fnargs(event))
 					case _ =>
