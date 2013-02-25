@@ -156,3 +156,50 @@ object SubstanceLiquid {
 		}
 	}
 }
+
+object Temp {
+	sealed trait Substance {
+		val id: String
+	}
+	
+	case class Mixture(
+		list: List[SubstanceAmount]
+	) extends Substance {
+		def isEmpty = list.isEmpty
+		def isLiquid = list.exists(_.substance.isInstanceOf[SubstanceLiquid])
+		def isSolid = !list.isEmpty && !isLiquid
+		def id = list.mkString("+")
+		override def toString = id
+	}
+	
+	case class Liquid(
+		list: List[SubstanceAmount]
+	) extends Substance {
+		
+	}
+	
+	object RqUnit extends Enumeration {
+		val None, l, mol, g = Value
+	}
+	
+	case class Amount(n: BigDecimal, unit: RqUnit.Value) {
+		override def toString = {
+			val s = if (unit == RqUnit.None) "" else unit.toString
+			s"($n)@$n$s"
+		}
+	}
+	
+	case class SubstanceAmount(substance: Substance, amount: Amount) {
+		override def toString = s"(${substance.id})@${amount}"
+	}
+	
+	/*
+	case class LiquidAmount(liquid: SubstanceLiquid, volume: LiquidVolume) extends SubstanceAmount {
+		override def toString = s"(${liquid.id})@$volume"
+	}
+	
+	case class SolidAmount(solid: SubstanceSolid, mol: BigDecimal) extends SubstanceAmount {
+		override def toString = s"(${solid.id})@${mol}mol"
+	}
+	*/
+}

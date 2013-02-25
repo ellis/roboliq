@@ -79,6 +79,66 @@ class TipAspirateEventHandler {// extends EventHandler {
 	}
 }
 /*
+case class VesselAddEvent(
+		/** ID of source well -- either `src` or `substance` must be set. */
+	@BeanProperty var src: String = null
+	/** ID of substance -- either `src` or `substance` must be set. */
+	@BeanProperty var substance: String = null
+	/**
+	 * Volume to add.  Must be set and should be larger than 0.
+	 * If substance is not a liquid, this will be the volume of water added.
+	 */
+	@BeanProperty var volume: java.math.BigDecimal = null
+	/** Concentration of substance, if it's a powder. */
+	@BeanProperty var conc: java.math.BigDecimal = null
+	
+	protected def update(state0: WellState, states0: StateQuery): Result[WellState] = {
+		val v = LiquidVolume.l(volume)
+		if (src != null) {
+			for { wellState <- states0.findWellState(src) }
+			yield {
+				state0.update(this,
+					content = state0.content.addContentByVolume(wellState.content, v)
+				)
+			}
+		}
+		else if (substance != null) {
+			for {sub <- states0.findSubstance(substance)}
+			yield {
+				val content: VesselContent = sub match {
+					case liquid: SubstanceLiquid =>
+						state0.content.addLiquid(liquid, v)
+					case solid: SubstanceSolid =>
+						Result.mustBeSet(conc, "conc") match {
+							case Error(ls) => return Error(ls)
+							case _ =>
+						}
+						val water = states0.findSubstance("water") match {
+							case Error(ls) => return Error(ls)
+							case Success(water: SubstanceLiquid) => water
+							case _ => return Error("water must be a liquid")
+						}
+						val mol = BigDecimal(conc) * volume
+						state0.content.addPowder(solid, mol).addLiquid(water, v)
+				}
+				state0.update(this,
+					content = content
+				)
+			}
+		}
+		else {
+			Error("`src` must be set")
+		}
+	}
+
+) extends Event {
+	
+}
+*/
+
+
+
+/*
 case class SpirateCmdItem(
 	tip: Tip,
 	well: Well,

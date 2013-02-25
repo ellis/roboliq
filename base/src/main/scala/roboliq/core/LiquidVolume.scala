@@ -40,11 +40,11 @@ class LiquidVolume private (val _nl: Int) extends Ordered[LiquidVolume] {
 	
 	override def toString = {
 		if (_nl >= 1000000)
-			(nl / 1000000).toString + " ml"
+			(nl / 1000000).toString + "ml"
 		else if (_nl >= 1000)
-			(nl / 1000).toString + " ul"
+			(nl / 1000).toString + "ul"
 		else
-			nl.toString + " nl"
+			nl.toString + "nl"
 	}
 }
 
