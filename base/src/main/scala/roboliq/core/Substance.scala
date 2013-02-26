@@ -1,5 +1,8 @@
 package roboliq.core
+
 import scala.reflect.BeanProperty
+import scalaz._
+import Scalaz._
 
 
 /**
@@ -35,11 +38,15 @@ class SubstanceLiquidBean extends SubstanceBean {
 }
 
 /** Represents a substance. */
-sealed abstract class Substance {
+sealed trait Substance {
 	/** ID in database. */
 	val id: String
+	/** List of contaminants in this substance */
+	val contaminants: Set[String]
 	/** Cost per unit (either liter or mol) of the substance */
 	val costPerUnit_? : Option[BigDecimal]
+	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
+	val valuePerUnit_? : Option[BigDecimal]
 	/**
 	 * Whether multipipetting is allowed.
 	 * Multipipetting is when a tip aspirates once and distributes to that volume to
@@ -48,6 +55,12 @@ sealed abstract class Substance {
 	 * want to prevent multipipetting.
 	 */
 	def expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
+
+	val isEmpty: Boolean
+	val isLiquid: Boolean
+	val isSolid: Boolean
+	
+	val simpleMap: Map[SubstanceSimple, Amount]
 }
 
 object Substance {
@@ -59,12 +72,35 @@ object Substance {
 			case b: SubstanceOtherBean => SubstanceOther.fromBean(b)
 		}
 	}
+	
+	val Empty = new Substance {
+		val id = "<EMPTY>"
+		val contaminants = Set()
+		val costPerUnit_? = None
+		val valuePerUnit_? = None
+		
+		val isEmpty = true
+		val isLiquid = false
+		val isSolid = false
+		val simpleMap: Map[SubstanceSimple, Amount] = Map()
+	}
+}
+
+/**
+ * A substance which can be defined directly, not as a mixture of other substances
+ */
+sealed trait SubstanceSimple extends Substance {
+	val isEmpty = true
+	val simpleMap: Map[SubstanceSimple, Amount] = Map(this -> Amount(1, RqUnit.None))
 }
 
 /**
  * A solid substance, in contrast to [[roboliq.core.SubstanceLiquid]].
  */
-abstract class SubstanceSolid extends Substance
+sealed trait SubstanceSolid extends SubstanceSimple {
+	val isLiquid = false
+	val isSolid = true
+}
 
 /**
  * Represents a DNA-based substance.
@@ -75,8 +111,11 @@ abstract class SubstanceSolid extends Substance
 case class SubstanceDna(
 	val id: String,
 	val sequence_? : Option[String],
-	val costPerUnit_? : Option[BigDecimal]
-) extends SubstanceSolid
+	val costPerUnit_? : Option[BigDecimal],
+	val valuePerUnit_? : Option[BigDecimal]
+) extends SubstanceSolid {
+	val contaminants = Set[String]("DNA")
+}
 
 object SubstanceDna {
 	/** Convert [[roboliq.core.SubstanceDnaBean]] to [[roboliq.core.SubstanceDna]]. */
@@ -86,7 +125,7 @@ object SubstanceDna {
 		} yield {
 			val sequence = if (bean.sequence != null) Some(bean.sequence) else None
 			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
-			new SubstanceDna(id, sequence, costPerUnit_?)
+			new SubstanceDna(id, sequence, costPerUnit_?, None)
 		}
 	}
 }
@@ -98,7 +137,9 @@ object SubstanceDna {
  */
 case class SubstanceOther(
 	val id: String,
-	val costPerUnit_? : Option[BigDecimal]
+	val contaminants: Set[String],
+	val costPerUnit_? : Option[BigDecimal],
+	val valuePerUnit_? : Option[BigDecimal]
 ) extends SubstanceSolid
 
 object SubstanceOther {
@@ -108,7 +149,7 @@ object SubstanceOther {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
 			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
-			new SubstanceOther(id, costPerUnit_?)
+			new SubstanceOther(id, Set(), costPerUnit_?, None)
 		}
 	}
 }
@@ -122,10 +163,17 @@ object SubstanceOther {
  */
 case class SubstanceLiquid(
 	val id: String,
-	val physicalProperties: LiquidPhysicalProperties.Value, 
 	val cleanPolicy: TipCleanPolicy,
-	val costPerUnit_? : Option[BigDecimal]
-) extends Substance
+	val viscosity: BigDecimal,
+	val contaminants: Set[String],
+	val costPerUnit_? : Option[BigDecimal],
+	val valuePerUnit_? : Option[BigDecimal]
+) extends SubstanceSimple {
+	val isLiquid = true
+	val isSolid = false
+	val physicalProperties: LiquidPhysicalProperties.Value = 
+		if (viscosity > 0.1) LiquidPhysicalProperties.Glycerol else LiquidPhysicalProperties.Water
+}
 
 object SubstanceLiquid {
 	/** Convert [[roboliq.core.SubstanceLiquidBean]] to [[roboliq.core.SubstanceLiquid]]. */
@@ -152,54 +200,61 @@ object SubstanceLiquid {
 			}
 			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
 
-			new SubstanceLiquid(id, physicalProperties, cleanPolicy, costPerUnit_?)
+			new SubstanceLiquid(id, cleanPolicy, 0, Set(), costPerUnit_?, None)
 		}
 	}
 }
 
-object Temp {
-	sealed trait Substance {
-		val id: String
-	}
+sealed trait SubstanceMixture extends Substance {
+	val list: List[SubstanceAmount]
+
+	def isEmpty = list.isEmpty
+	def isLiquid = list.exists(_.substance.isInstanceOf[SubstanceLiquid])
+	def isSolid = !list.isEmpty && !isLiquid
+	def id = list.mkString("+")
+	override def toString = id
+}
+
+case class Liquid0(
+	list: List[SubstanceAmount]
+) extends SubstanceMixture {
+	private val substance_l = list.map(_.substance)
+	private val liquid_l = substance_l.collect({case x: SubstanceLiquid => x})
+	private val solid_l = substance_l.collect({case x: SubstanceSolid => x})
 	
-	case class Mixture(
-		list: List[SubstanceAmount]
-	) extends Substance {
-		def isEmpty = list.isEmpty
-		def isLiquid = list.exists(_.substance.isInstanceOf[SubstanceLiquid])
-		def isSolid = !list.isEmpty && !isLiquid
-		def id = list.mkString("+")
-		override def toString = id
-	}
-	
-	case class Liquid(
-		list: List[SubstanceAmount]
-	) extends Substance {
+	val map: Map[SubstanceSimple, Amount] = list.flatMap(sa => sa.substance match {
+		case sub: SubstanceSimple => List(sub -> sa)
+		case sub: Liquid0 => sub.map.toList
+	}).groupBy(_._1).mapValues(l => l)
+
+	val viscosity = list.foldLeft(BigDecimal(0)){(acc, x) =>
 		
 	}
-	
-	object RqUnit extends Enumeration {
-		val None, l, mol, g = Value
+	val physicalProperties: LiquidPhysicalProperties.Value = if (liquid_l.exists(_.physicalProperties == LiquidPhysicalProperties.Glycerol)) LiquidPhysicalProperties.Glycerol else LiquidPhysicalProperties.Water
+	val cleanPolicy: TipCleanPolicy = liquid_l.map(_.cleanPolicy).concatenate
+	val contaminants: Set[String] = substance_l.map(_.contaminants).concatenate
+	val costPerUnit_? : Option[BigDecimal] = substance_l.map(_.costPerUnit_?).concatenate
+	val valuePerUnit_? : Option[BigDecimal] = substance_l.map(_.valuePerUnit_?).concatenate
+}
+
+object RqUnit extends Enumeration {
+	val None, l, mol, g = Value
+}
+
+case class Amount(n: BigDecimal, unit: RqUnit.Value) {
+	override def toString = {
+		val s = if (unit == RqUnit.None) "" else unit.toString
+		s"$n$s"
 	}
-	
-	case class Amount(n: BigDecimal, unit: RqUnit.Value) {
-		override def toString = {
-			val s = if (unit == RqUnit.None) "" else unit.toString
-			s"($n)@$n$s"
-		}
+}
+
+object Amount {
+	implicit object AmountMonoid extends Monoid[Amount] {
+		def append(a: Amount, b: Amount) = max(a, b)
+		def zero = NN
 	}
-	
-	case class SubstanceAmount(substance: Substance, amount: Amount) {
-		override def toString = s"(${substance.id})@${amount}"
-	}
-	
-	/*
-	case class LiquidAmount(liquid: SubstanceLiquid, volume: LiquidVolume) extends SubstanceAmount {
-		override def toString = s"(${liquid.id})@$volume"
-	}
-	
-	case class SolidAmount(solid: SubstanceSolid, mol: BigDecimal) extends SubstanceAmount {
-		override def toString = s"(${solid.id})@${mol}mol"
-	}
-	*/
+}
+
+case class SubstanceAmount(substance: Substance, amount: Amount) {
+	override def toString = s"(${substance.id})@${amount}"
 }

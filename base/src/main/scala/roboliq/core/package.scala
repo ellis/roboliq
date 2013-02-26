@@ -1,5 +1,9 @@
 package roboliq
 
+import scalaz._
+import Scalaz._
+
+
 /**
  * =Roboliq Core=
  * 

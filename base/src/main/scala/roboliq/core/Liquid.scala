@@ -1,5 +1,8 @@
 package roboliq.core
 
+import scalaz._
+import Scalaz._
+
 
 /**
  * Enumeration of possible contaminants on a tip; this probably won't be used now, so consider deleting it.
@@ -71,6 +74,11 @@ object TipCleanPolicy {
 			CleanIntensity.max(a.enter, b.enter),
 			CleanIntensity.max(a.exit, b.exit)
 		)
+	}
+	
+	implicit object TipCleanPolicyMonoid extends Monoid[TipCleanPolicy] {
+		def append(a: TipCleanPolicy, b: TipCleanPolicy) = max(a, b)
+		def zero = NN
 	}
 }
 
