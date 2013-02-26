@@ -237,6 +237,12 @@ case class Liquid0(
 	val valuePerUnit_? : Option[BigDecimal] = substance_l.map(_.valuePerUnit_?).concatenate
 }
 
+object Substance {
+	def append(a: Substance, b: Substance): Substance = {
+		case
+	}
+}
+
 object RqUnit extends Enumeration {
 	val None, l, mol, g = Value
 }
@@ -245,13 +251,6 @@ case class Amount(n: BigDecimal, unit: RqUnit.Value) {
 	override def toString = {
 		val s = if (unit == RqUnit.None) "" else unit.toString
 		s"$n$s"
-	}
-}
-
-object Amount {
-	implicit object AmountMonoid extends Monoid[Amount] {
-		def append(a: Amount, b: Amount) = max(a, b)
-		def zero = NN
 	}
 }
 
