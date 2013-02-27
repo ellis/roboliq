@@ -47,6 +47,13 @@ sealed trait Substance {
 	val costPerUnit_? : Option[BigDecimal]
 	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
 	val valuePerUnit_? : Option[BigDecimal]
+
+	val isEmpty: Boolean
+	val isLiquid: Boolean
+	val isSolid: Boolean
+	
+	val simpleAmounts: List[SubstanceAmount]
+	
 	/**
 	 * Whether multipipetting is allowed.
 	 * Multipipetting is when a tip aspirates once and distributes to that volume to
@@ -55,12 +62,6 @@ sealed trait Substance {
 	 * want to prevent multipipetting.
 	 */
 	def expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
-
-	val isEmpty: Boolean
-	val isLiquid: Boolean
-	val isSolid: Boolean
-	
-	val simpleMap: Map[SubstanceSimple, Amount]
 }
 
 object Substance {
@@ -90,14 +91,29 @@ object Substance {
  * A substance which can be defined directly, not as a mixture of other substances
  */
 sealed trait SubstanceSimple extends Substance {
-	val isEmpty = true
+	val isEmpty = false
 	val simpleMap: Map[SubstanceSimple, Amount] = Map(this -> Amount(1, RqUnit.None))
 }
 
 /**
  * A solid substance, in contrast to [[roboliq.core.SubstanceLiquid]].
  */
-sealed trait SubstanceSolid extends SubstanceSimple {
+sealed trait SubstanceSolid extends Substance {
+	val isLiquid = false
+	val isSolid = true
+}
+
+/**
+ * A solid which is defined directly, rather than as a mixture of other substances.
+ */
+sealed trait SubstanceSolidSimple extends SubstanceSolid {
+	
+}
+
+/**
+ * A liquid substance, in contrast to [[roboliq.core.SubstanceSolid]].
+ */
+sealed trait SubstanceLiquid extends Substance {
 	val isLiquid = false
 	val isSolid = true
 }
@@ -108,16 +124,16 @@ sealed trait SubstanceSolid extends SubstanceSimple {
  * @param sequence_? optional DNA sequence string.
  * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
  */
-case class SubstanceDna(
+case class SolidDna(
 	val id: String,
 	val sequence_? : Option[String],
 	val costPerUnit_? : Option[BigDecimal],
 	val valuePerUnit_? : Option[BigDecimal]
-) extends SubstanceSolid {
+) extends SubstanceSolidSimple {
 	val contaminants = Set[String]("DNA")
 }
 
-object SubstanceDna {
+object SolidDna {
 	/** Convert [[roboliq.core.SubstanceDnaBean]] to [[roboliq.core.SubstanceDna]]. */
 	def fromBean(bean: SubstanceDnaBean): Result[SubstanceDna] = {
 		for {
@@ -135,21 +151,21 @@ object SubstanceDna {
  * @param id ID in database.
  * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
  */
-case class SubstanceOther(
+case class SolidOther(
 	val id: String,
 	val contaminants: Set[String],
 	val costPerUnit_? : Option[BigDecimal],
 	val valuePerUnit_? : Option[BigDecimal]
-) extends SubstanceSolid
+) extends SubstanceSolidSimple
 
-object SubstanceOther {
+object SolidOther {
 	/** Convert [[roboliq.core.SubstanceOtherBean]] to [[roboliq.core.SubstanceOther]]. */
-	def fromBean(bean: SubstanceOtherBean): Result[SubstanceOther] = {
+	def fromBean(bean: SubstanceOtherBean): Result[SolidOther] = {
 		for {
 			id <- Result.mustBeSet(bean._id, "_id")
 		} yield {
 			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
-			new SubstanceOther(id, Set(), costPerUnit_?, None)
+			new SolidOther(id, Set(), costPerUnit_?, None)
 		}
 	}
 }
@@ -161,14 +177,14 @@ object SubstanceOther {
  * @param cleanPolicy tip cleaning policy when handling this liquid.
  * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
  */
-case class SubstanceLiquid(
+case class LiquidSimple(
 	val id: String,
 	val cleanPolicy: TipCleanPolicy,
 	val viscosity: BigDecimal,
 	val contaminants: Set[String],
 	val costPerUnit_? : Option[BigDecimal],
 	val valuePerUnit_? : Option[BigDecimal]
-) extends SubstanceSimple {
+) extends SubstanceLiquid {
 	val isLiquid = true
 	val isSolid = false
 	val physicalProperties: LiquidPhysicalProperties.Value = 
@@ -222,7 +238,7 @@ case class Liquid0(
 	private val liquid_l = substance_l.collect({case x: SubstanceLiquid => x})
 	private val solid_l = substance_l.collect({case x: SubstanceSolid => x})
 	
-	val map: Map[SubstanceSimple, Amount] = list.flatMap(sa => sa.substance match {
+	val simpleList: List[(SubstanceSimple, Amount)] = list.flatMap(sa => sa.substance match {
 		case sub: SubstanceSimple => List(sub -> sa)
 		case sub: Liquid0 => sub.map.toList
 	}).groupBy(_._1).mapValues(l => l)
@@ -237,12 +253,6 @@ case class Liquid0(
 	val valuePerUnit_? : Option[BigDecimal] = substance_l.map(_.valuePerUnit_?).concatenate
 }
 
-object Substance {
-	def append(a: Substance, b: Substance): Substance = {
-		case
-	}
-}
-
 object RqUnit extends Enumeration {
 	val None, l, mol, g = Value
 }
@@ -253,7 +263,37 @@ case class Amount(n: BigDecimal, unit: RqUnit.Value) {
 		s"$n$s"
 	}
 }
+/*
+((A)@a+(B)@b)@c => (A)@(a/(a+b)*c)+(B)@(b/(a+b)*c) 
+*/
+case class SolidMixture(list: List[SolidAmount]) extends SubstanceSolid {
+	val simpleAmounts = {
+		val 
+		list.flatMap(_.simpleAmounts)
+	}
+}
 
-case class SubstanceAmount(substance: Substance, amount: Amount) {
-	override def toString = s"(${substance.id})@${amount}"
+sealed trait HasLiquid
+sealed trait HasSolid
+sealed trait SubstanceAmount
+case class LiquidAmount(substance: Substance with HasLiquid, volume: LiquidVolume) extends SubstanceAmount {
+	override def toString = s"(${substance.id})@${volume}"
+
+	def +(sa: SubstanceAmount): SubstanceAmount = {
+		sa match {
+			
+		}
+	}
+}
+
+case class SolidAmount(substance: Substance with HasSolid, mol: BigDecimal) extends SubstanceAmount {
+	override def toString = s"(${substance.id})@${mol}mol"
+	
+	def +(sa: SubstanceAmount): SubstanceAmount = {
+		sa match {
+			case LiquidAmount(liquid, volume) =>
+			case SolidAmount(solid2, mol2) =>
+		}
+	}
+
 }
