@@ -276,7 +276,7 @@ case class SolidMixture(list: List[SolidAmount]) extends SubstanceSolid {
 sealed trait HasLiquid
 sealed trait HasSolid
 sealed trait SubstanceAmount
-case class LiquidAmount(substance: Substance with HasLiquid, volume: LiquidVolume) extends SubstanceAmount {
+case class LiquidAmount(substance: Substance with HasLiquid, num: LiquidVolume, den: LiquidVolume) extends SubstanceAmount {
 	override def toString = s"(${substance.id})@${volume}"
 
 	def +(sa: SubstanceAmount): SubstanceAmount = {
@@ -286,7 +286,7 @@ case class LiquidAmount(substance: Substance with HasLiquid, volume: LiquidVolum
 	}
 }
 
-case class SolidAmount(substance: Substance with HasSolid, mol: BigDecimal) extends SubstanceAmount {
+case class SolidAmount(substance: Substance with HasSolid, num: BigDecimal, den: LiquidVolume) extends SubstanceAmount {
 	override def toString = s"(${substance.id})@${mol}mol"
 	
 	def +(sa: SubstanceAmount): SubstanceAmount = {
