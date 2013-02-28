@@ -16,6 +16,7 @@ class LiquidVolume private (val _nl: Int) extends Ordered[LiquidVolume] {
 	def +(that: LiquidVolume): LiquidVolume = new LiquidVolume(_nl + that._nl)
 	def *(n: BigDecimal): LiquidVolume = new LiquidVolume((n * _nl).toInt)
 	def /(n: BigDecimal): LiquidVolume = new LiquidVolume((BigDecimal(_nl) / n).toInt)
+	def /(that: LiquidVolume): BigDecimal = nl / that.nl
 	
 	/** Return true if the volume is 0. */
 	def isEmpty: Boolean = (_nl == 0)
