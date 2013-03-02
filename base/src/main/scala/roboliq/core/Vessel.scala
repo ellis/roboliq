@@ -7,9 +7,10 @@ import scala.collection.mutable.HashSet
 import scala.reflect.BeanProperty
 
 
-sealed abstract class Vessel(val id: String) extends Part {
-	override def toString = id
-}
+case class Vessel(
+	id: String,
+	tubeModel_? : Option[TubeModel]
+)
 
 /*
 /**
@@ -75,7 +76,6 @@ object Well {
 		}
 	}
 }
-*/
 
 /**
  * Represents a well on a [[roboliq.core.Plate]].
@@ -134,3 +134,4 @@ object Tube {
 		}
 	}
 }
+*/

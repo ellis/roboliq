@@ -1,45 +1,34 @@
 package roboliq.core
-import scala.reflect.BeanProperty
+
+import scalaz._
+import Scalaz._
 
 
-/**
- * Enumeration of the physical property classes of liquids as relevant to pipetting
- * (currently just Water or Glycerol).
- */
-object LiquidPhysicalProperties extends Enumeration {
-	val Water, Glycerol = Value
-}
-
-/**
- * Base trait YAML JavaBean for a substance
- * @see [[roboliq.core.Substance]]
- */
-sealed trait SubstanceBean extends Bean
-
-/** YAML JavaBean representation of [[roboliq.core.SubstanceDna]]. */
-class SubstanceDnaBean extends SubstanceBean {
-	@BeanProperty var sequence: String = null
-	@BeanProperty var costPerUnit: java.math.BigDecimal = null
-}
-
-/** YAML JavaBean representation of [[roboliq.core.SubstanceOther]]. */
-class SubstanceOtherBean extends SubstanceBean {
-	@BeanProperty var costPerUnit: java.math.BigDecimal = null
-}
-
-/** YAML JavaBean representation of [[roboliq.core.SubstanceLiquid]]. */
-class SubstanceLiquidBean extends SubstanceBean {
-	@BeanProperty var physical: String = null
-	@BeanProperty var cleanPolicy: String = null
-	@BeanProperty var costPerUnit: java.math.BigDecimal = null
-}
+//case class CelciusToLiterPerMole(celcius: BigDecimal, literPerMole: BigDecimal)
+case class CelciusAndConcToViscosity(celcius: BigDecimal, conc: BigDecimal, viscosity: BigDecimal)
 
 /** Represents a substance. */
-sealed abstract class Substance {
+case class Substance(
 	/** ID in database. */
-	val id: String
+	val id: String,
+	/** Tip cleaning policy when handling this substance with pipetter. */
+	val tipCleanPolicy: TipCleanPolicy,
+	/** List of contaminants in this substance */
+	val contaminants: Set[String],
 	/** Cost per unit (either liter or mol) of the substance */
-	val costPerUnit_? : Option[BigDecimal]
+	val costPerUnit_? : Option[BigDecimal],
+	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
+	val valuePerUnit_? : Option[BigDecimal],
+	
+	val gramPerMole_? : Option[BigDecimal],
+	val literPerMole_? : Option[BigDecimal],
+	val celciusAndConcToViscosity: List[CelciusAndConcToViscosity],
+
+	val sequence_? : Option[String],
+	
+	val isEmpty: Boolean,
+	val isLiquid: Boolean
+) {
 	/**
 	 * Whether multipipetting is allowed.
 	 * Multipipetting is when a tip aspirates once and distributes to that volume to
@@ -48,9 +37,14 @@ sealed abstract class Substance {
 	 * want to prevent multipipetting.
 	 */
 	def expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
+	
+//	def literPerMoleAt(celcius: BigDecimal): Option[BigDecimal] = {
+//		celciusToLiterPerMole.find(_.celcius == celcius).map(_.literPerMole)
+//	}
 }
 
 object Substance {
+	/*
 	/** Convert [[roboliq.core.SubstanceBean]] to [[roboliq.core.Substance]]. */
 	def fromBean(bean: SubstanceBean): Result[Substance] = {
 		bean match {
@@ -59,100 +53,92 @@ object Substance {
 			case b: SubstanceOtherBean => SubstanceOther.fromBean(b)
 		}
 	}
-}
-
-/**
- * A solid substance, in contrast to [[roboliq.core.SubstanceLiquid]].
- */
-abstract class SubstanceSolid extends Substance
-
-/**
- * Represents a DNA-based substance.
- * @param id ID in database.
- * @param sequence_? optional DNA sequence string.
- * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
- */
-case class SubstanceDna(
-	val id: String,
-	val sequence_? : Option[String],
-	val costPerUnit_? : Option[BigDecimal]
-) extends SubstanceSolid
-
-object SubstanceDna {
-	/** Convert [[roboliq.core.SubstanceDnaBean]] to [[roboliq.core.SubstanceDna]]. */
-	def fromBean(bean: SubstanceDnaBean): Result[SubstanceDna] = {
-		for {
-			id <- Result.mustBeSet(bean._id, "_id")
-		} yield {
-			val sequence = if (bean.sequence != null) Some(bean.sequence) else None
-			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
-			new SubstanceDna(id, sequence, costPerUnit_?)
-		}
+	*/
+	
+	val Empty = Substance(
+		id = "<EMPTY>",
+		tipCleanPolicy = TipCleanPolicy.NN,
+		contaminants = Set(),
+		costPerUnit_? = None,
+		valuePerUnit_? = None,
+		gramPerMole_? = None,
+		literPerMole_? = None,
+		celciusAndConcToViscosity = Nil,
+		sequence_? = None,
+		isEmpty = true,
+		isLiquid = false
+	)
+	
+	def liquid(
+		id: String,
+		literPerMole: BigDecimal,
+		tipCleanPolicy: TipCleanPolicy = TipCleanPolicy.TT,
+		contaminants: Set[String] = Set(),
+		costPerUnit_? : Option[BigDecimal] = None,
+		valuePerUnit_? : Option[BigDecimal] = None,
+		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
+	): Substance = {
+		Substance(
+			id = id,
+			tipCleanPolicy = tipCleanPolicy,
+			contaminants = contaminants,
+			costPerUnit_? = costPerUnit_?,
+			valuePerUnit_? = valuePerUnit_?,
+			gramPerMole_? = None,
+			literPerMole_? = Some(literPerMole),
+			celciusAndConcToViscosity = celciusAndConcToViscosity,
+			sequence_? = None,
+			isEmpty = false,
+			isLiquid = true
+		)
 	}
-}
-
-/**
- * Represents the catch-all case of a substance which isn't DNA or a liquid.
- * @param id ID in database.
- * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
- */
-case class SubstanceOther(
-	val id: String,
-	val costPerUnit_? : Option[BigDecimal]
-) extends SubstanceSolid
-
-object SubstanceOther {
-	/** Convert [[roboliq.core.SubstanceOtherBean]] to [[roboliq.core.SubstanceOther]]. */
-	def fromBean(bean: SubstanceOtherBean): Result[SubstanceOther] = {
-		for {
-			id <- Result.mustBeSet(bean._id, "_id")
-		} yield {
-			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
-			new SubstanceOther(id, costPerUnit_?)
-		}
+	
+	def dna(
+		id: String,
+		sequence_? : Option[String] = None,
+		costPerUnit_? : Option[BigDecimal] = None,
+		valuePerUnit_? : Option[BigDecimal] = None,
+		gramPerMole_? : Option[BigDecimal] = None,
+		literPerMole_? : Option[BigDecimal] = None,
+		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
+	): Substance = {
+		Substance(
+			id = id,
+			tipCleanPolicy = TipCleanPolicy.DD,
+			contaminants = Set("DNA"),
+			costPerUnit_? = costPerUnit_?,
+			valuePerUnit_? = valuePerUnit_?,
+			gramPerMole_? = gramPerMole_?,
+			literPerMole_? = literPerMole_?,
+			celciusAndConcToViscosity = celciusAndConcToViscosity,
+			sequence_? = None,
+			isEmpty = false,
+			isLiquid = false
+		)
 	}
-}
-
-/**
- * Represents a DNA-based substance.
- * @param id ID in database.
- * @param physicalProperties physical properties of the liquid (e.g. water or glycerol).
- * @param cleanPolicy tip cleaning policy when handling this liquid.
- * @param allowMultipipette Whether multipipetting is allowed (see [[roboliq.core.Substance]]).
- */
-case class SubstanceLiquid(
-	val id: String,
-	val physicalProperties: LiquidPhysicalProperties.Value, 
-	val cleanPolicy: TipCleanPolicy,
-	val costPerUnit_? : Option[BigDecimal]
-) extends Substance
-
-object SubstanceLiquid {
-	/** Convert [[roboliq.core.SubstanceLiquidBean]] to [[roboliq.core.SubstanceLiquid]]. */
-	def fromBean(bean: SubstanceLiquidBean): Result[SubstanceLiquid] = {
-		for {
-			id <- Result.mustBeSet(bean._id, "_id")
-			id <- Result.mustBeSet(bean._id, "_id")
-			id <- Result.mustBeSet(bean._id, "_id")
-		} yield {
-			val physicalProperties = {
-				if (bean.physical == null) LiquidPhysicalProperties.Water
-				else LiquidPhysicalProperties.withName(bean.physical)
-			}
-			val cleanPolicy = {
-				if (bean.cleanPolicy == null) TipCleanPolicy.Thorough
-				else {
-					bean.cleanPolicy match {
-						case "T" => TipCleanPolicy.Thorough
-						case "D" => TipCleanPolicy.Decontaminate
-						case "TNL" => TipCleanPolicy.TL
-						case _ => return Error("unrecognized `cleanPolicy` value \""+bean.cleanPolicy+"\"")
-					}
-				}
-			}
-			val costPerUnit_? : Option[BigDecimal] = if (bean.costPerUnit == null) None else Some(bean.costPerUnit)
-
-			new SubstanceLiquid(id, physicalProperties, cleanPolicy, costPerUnit_?)
-		}
+	
+	def other(
+		id: String,
+		tipCleanPolicy: TipCleanPolicy = TipCleanPolicy.TT,
+		contaminants: Set[String] = Set(),
+		costPerUnit_? : Option[BigDecimal] = None,
+		valuePerUnit_? : Option[BigDecimal] = None,
+		gramPerMole_? : Option[BigDecimal] = None,
+		literPerMole_? : Option[BigDecimal] = None,
+		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
+	): Substance = {
+		Substance(
+			id = id,
+			tipCleanPolicy = tipCleanPolicy,
+			contaminants = contaminants,
+			costPerUnit_? = costPerUnit_?,
+			valuePerUnit_? = valuePerUnit_?,
+			gramPerMole_? = gramPerMole_?,
+			literPerMole_? = literPerMole_?,
+			celciusAndConcToViscosity = celciusAndConcToViscosity,
+			sequence_? = None,
+			isEmpty = false,
+			isLiquid = false
+		)
 	}
 }

@@ -1,15 +1,15 @@
 package roboliq.core
 
-case class Vessel0(
-	id: String,
-	tubeModel_? : Option[TubeModel]
-)
-
 case class VesselState(
-	vessel: Vessel0,
-	content: VesselContent
+	vessel: Vessel,
+	content: VesselContent = VesselContent.Empty,
+	isInitialVolumeKnown_? : Option[Boolean] = None
 ) {
 	def id = vessel.id
+	def isInitialVolumeKnown = isInitialVolumeKnown_?.getOrElse(false)
+
+	def liquid = content.liquid
+	def volume = content.volume
 }
 
 case class VesselSituatedState(
@@ -19,6 +19,10 @@ case class VesselSituatedState(
 	def vessel = vesselState.vessel
 	def id = vessel.id
 	def plate = position.plate
+	def content = vesselState.content
+	def liquid = content.liquid
+	def volume = content.volume
+	def isInitialVolumeKnown = vesselState.isInitialVolumeKnown
 	
 	/** ID of plate in database. */
 	val idPlate: String = position.plate.plate.id
@@ -31,11 +35,6 @@ case class VesselSituatedState(
 	/** String representation of the well's plate location. */
 	val indexName: String = WellSpecParser.wellIndexName(position.plate.plate.nRows, position.plate.plate.nCols, iRow, iCol)
 
-	/** Get well's state. */
-	def wellState(states: StateMap): Result[WellState] = states.findWellState(id)
-	/** Get well's state writer. */
-	def stateWriter(builder: StateBuilder): WellStateWriter = new WellStateWriter(id, builder)
-	
 	override def compare(that: VesselSituatedState) = id.compare(that.id)
 }
 

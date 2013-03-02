@@ -1,88 +1,23 @@
 package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
-import scala.reflect.BeanProperty
 import roboliq.core._
+import roboliq.core.RqPimper._
+//import roboliq.commands.pipette.{HasTip,HasWell,HasVolume,HasPolicy}
+import roboliq.processor._
 
 
-class MixCmdBean extends CmdBean {
-	@BeanProperty var description: String = null
-	@BeanProperty var items: java.util.List[MixCmdItemBean] = null
-	@BeanProperty var mixSpec: MixSpecBean = null
-}
+case class MixCmd(
+	description_? : Option[String],
+	items: List[MixItem],
+	mixSpec_? : Option[MixSpecOpt]
+)
 
-class MixCmdHandler extends CmdHandlerA[MixCmdBean] {
-	def expand1A(cmd: CmdType, messages: CmdMessageWriter): Expand1Result = {
-		messages.paramMustBeNonEmpty("items")
-		if (cmd.items != null) {
-			cmd.items.zipWithIndex.foreach(pair => {
-				val (item, i) = pair
-				messages.paramMustBeNonNull("items["+(i+1)+"].tip", item.tip)
-				messages.paramMustBeNonNull("items["+(i+1)+"].well", item.well)
-			})
-			
-		}
-		if (messages.hasErrors)
-			return Expand1Errors()
-		
-		// Item wells are sources
-		Expand1Resources(
-			cmd.items.flatMap(item => {
-				List(NeedTip(item.tip), NeedSrc(item.well))
-			}).toList
-		)
-	}
-
-	def expand2A(
-		cmd: CmdType,
-		ctx: ProcessorContext,
-		messages: CmdMessageWriter
-	): Expand2Result = {
-		val lItem = cmd.items.toList.map(_.toTokenItem(cmd, ctx.ob, ctx.node)).flatten
-		if (messages.hasErrors) {
-			Expand2Errors()
-		}
-		else {
-			Expand2Tokens(List(new MixToken(lItem)), Nil, null)
-		}
-	}
-}
-
-class MixCmdItemBean {
-	@BeanProperty var tip: String = null
-	@BeanProperty var well: String = null
-	@BeanProperty var mixSpec: MixSpecBean = null
-	
-	def toTokenItem(cmd: MixCmdBean, ob: ObjBase, node: CmdNodeBean): Option[MixTokenItem] = {
-		val volume0 = {
-			if (mixSpec != null && mixSpec.volume != null) mixSpec.volume
-			else if (cmd.mixSpec != null && cmd.mixSpec.volume != null) cmd.mixSpec.volume
-			else null
-		}
-		val count0 = {
-			if (mixSpec != null && mixSpec.count != null) mixSpec.count
-			else if (cmd.mixSpec != null && cmd.mixSpec.count != null) cmd.mixSpec.count
-			else null
-		}
-		val policy0 = {
-			if (mixSpec != null && mixSpec.policy != null) mixSpec.policy
-			else if (cmd.mixSpec != null && cmd.mixSpec.policy != null) cmd.mixSpec.policy
-			else null
-		}
-		for {
-			idTip <- node.getValueNonNull_?(tip, "tip")
-			idWell <- node.getValueNonNull_?(well, "well")
-			volume <- node.getValueNonNull_?(volume0, "volume")
-			count <- node.getValueNonNull_?(count0, "count")
-			idPolicy <- node.getValueNonNull_?(policy0, "policy")
-			tipObj <- ob.findTip_?(tip, new CmdMessageWriter(node))
-			well <- ob.findWell_?(idWell, node)
-		} yield {
-			val policy = PipettePolicy.fromName(idPolicy)
-			new MixTokenItem(tipObj, well, LiquidVolume.l(volume), count, policy)
-		}
-	}
-}
+case class MixItem(
+	tip: Tip,
+	well: Well,
+	mixSpec_? : Option[MixSpecOpt]
+)
 
 case class MixToken(
 	val items: List[MixTokenItem]
@@ -95,3 +30,39 @@ case class MixTokenItem(
 	val count: Int,
 	val policy: PipettePolicy
 ) extends HasTip with HasWell with HasVolume with HasPolicy
+
+class MixHandler extends CommandHandler("pipetter.mix") {
+	val fnargs = cmdAs[MixCmd] { cmd =>
+		val event_l = cmd.items.flatMap(item => {
+			TipAspirateEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
+			//WellAddEventBean(item.well, src, item.volume) :: Nil
+		})
+		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
+		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
+		for {
+			item_l <- RqResult.toResultOfList(cmd.items.map(item => toTokenItem(cmd.mixSpec_?, item)))
+		} yield {
+			List(
+				ComputationItem_Token(MixToken(item_l)),
+				ComputationItem_Events(event_l)
+			)
+		}
+	}
+	
+	private def toTokenItem(mixSpec0_? : Option[MixSpecOpt], item0: MixItem): RqResult[MixTokenItem] = {
+		val mixSpecOpt_? : RqResult[MixSpecOpt] = (mixSpec0_?, item0.mixSpec_?) match {
+			case (None, None) => RqError("A MixSpec must be specified")
+			case (Some(x), None) => RqSuccess(x)
+			case (None, Some(y)) => RqSuccess(y)
+			case (Some(x), Some(y)) => RqSuccess(y + x)
+		}
+		for {
+			mixSpecOpt <- mixSpecOpt_?
+			volume <- mixSpecOpt.nVolume_?.asRq("mix volume must be specified")
+			count <- mixSpecOpt.nCount_?.asRq("mix count must be specified")
+			policy <- mixSpecOpt.mixPolicy_?.asRq("mix policy must be specified")
+		} yield {
+			MixTokenItem(item0.tip, item0.well, volume, count, policy) 
+		}
+	}
+}

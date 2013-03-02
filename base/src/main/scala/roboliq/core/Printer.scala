@@ -39,14 +39,14 @@ object Printer {
 				case Nil => ""
 				case List(well) => well.id
 				case well0 :: rest =>
-					val lsWells = getWellStrings(lWell.map(_.asInstanceOf[PlateWell]))
+					val lsWells = getWellStrings(lWell.map(_.asInstanceOf[Well]))
 					well0.idPlate + "(" + lsWells.mkString(",") + ")"
 			}
 		})
 		lsPlates.mkString(",")
 	}
 	
-	private def getWellStrings(wells: List[PlateWell]): List[String] = {
+	private def getWellStrings(wells: List[Well]): List[String] = {
 		wells match {
 			case Nil => Nil
 			case well0 :: wellsNext0 =>
@@ -56,7 +56,7 @@ object Printer {
 		}
 	}
 	
-	private def getLastContiguousWell(wellPrev: PlateWell, wells: List[PlateWell]): Tuple2[PlateWell, List[PlateWell]] = {
+	private def getLastContiguousWell(wellPrev: Well, wells: List[Well]): Tuple2[Well, List[Well]] = {
 		wells match {
 			case Nil =>
 				(wellPrev, wells)
@@ -68,14 +68,14 @@ object Printer {
 		}
 	}
 	
-	private val PlateWellColRowPattern = """([^(]+)\(([A-Z])([0-9]+)\)""".r
-	private val PlateWellRowPattern = """([^(]+)\(([0-9]+)\)""".r
-	private val PlateWellNullPattern = """([^(]+)\(\)""".r
+	private val WellColRowPattern = """([^(]+)\(([A-Z])([0-9]+)\)""".r
+	private val WellRowPattern = """([^(]+)\(([0-9]+)\)""".r
+	private val WellNullPattern = """([^(]+)\(\)""".r
 	def parseWellId(id: String): Result[Tuple4[String, String, Int, Int]] = {
 		id match {
-			case PlateWellColRowPattern(idPlate, sRow, sCol) => Success(idPlate, sRow+sCol, (sRow.charAt(0) - 'A'), sCol.toInt - 1)
-			case PlateWellRowPattern(idPlate, sRow) => Success(idPlate, sRow, sRow.toInt - 1, 0)
-			case PlateWellNullPattern(idPlate) => Success(idPlate, "", 0, 0)
+			case WellColRowPattern(idPlate, sRow, sCol) => Success(idPlate, sRow+sCol, (sRow.charAt(0) - 'A'), sCol.toInt - 1)
+			case WellRowPattern(idPlate, sRow) => Success(idPlate, sRow, sRow.toInt - 1, 0)
+			case WellNullPattern(idPlate) => Success(idPlate, "", 0, 0)
 			case _ => Success(id, "", 0, 0)
 		}
 	}

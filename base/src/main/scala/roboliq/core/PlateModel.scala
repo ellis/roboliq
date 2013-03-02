@@ -1,17 +1,5 @@
 package roboliq.core
 
-import scala.reflect.BeanProperty
-
-
-/** YAML JavaBean representation of [[roboliq.core.PlateModel]]. */
-class PlateModelBean extends Bean {
-	/** Number of rows on the plate */
-	@BeanProperty var rows: java.lang.Integer = null
-	/** Number of columns on the plate */
-	@BeanProperty var cols: java.lang.Integer = null
-	/** Volume of wells in liters */
-	@BeanProperty var volume: java.math.BigDecimal = null
-}
 
 /**
  * Represents a plate or rack model.
@@ -29,18 +17,6 @@ case class PlateModel(
 )
 
 object PlateModel {
-	/** Convert from [[roboliq.core.PlateModelBean]] to [[roboliq.core.PlateModel]]. */
-	def fromBean(bean: PlateModelBean): Result[PlateModel] = {
-		for {
-			id <- Result.mustBeSet(bean._id, "_id")
-			nRows <- Result.mustBeSet(bean.rows, "rows")
-			nCols <- Result.mustBeSet(bean.cols, "cols")
-			nWellVolume <- Result.mustBeSet(bean.volume, "volume")
-		} yield {
-			new PlateModel(id, nRows, nCols, LiquidVolume.l(nWellVolume))
-		}
-	}
-
 	/** Get a row/column representation of the index of the a well. */
 	@deprecated("use WellSpecParser.wellIndexName() instead", "0.1")
 	def wellIndexName(nRows: Int, nCols: Int, iWell: Int): String = {

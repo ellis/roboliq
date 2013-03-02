@@ -5,44 +5,6 @@ import Scalaz._
 
 
 /**
- * Enumeration of possible contaminants on a tip; this probably won't be used now, so consider deleting it.
- */
-object Contaminant extends Enumeration {
-	val Cell, DNA, DSMO, Decon, Other = Value
-}
-
-/*
-A = none?, light*, thorough?, decon (Same Group, different well)
-B = thorough*, decon (different group)
-C = thorough*, decon (before next group)
-
-NoneThorough?
-NoneDecon?
-LightThorough*
-LightDecon
--Thorough (because this would be the behavior for non-grouped liquids)
-ThoroughDecon?
-Decon
-
-
-Decon before entering from another group (boolean) (default is thorough)
-Decon before entering the next group (boolean) (default is thorough)
-degree when entering from another well of the same group
-
-Thorough-None-Thorough
-Thorough-Light-Thorough*
--Thorough-Thorough-Thorough
--Thorough-Decon-Thorough
-Decon-*-Thorough?
-Decon-None-Decon?
-Decon-Light-Decon?
-Decon-Thorough-Decon?
-Decon-Decon-Decon
-
-
-*/
-
-/**
  * Represents the intensity of tip cleaning required by a given liquid.
  * 
  * @param enter intensity with which tip must have been washed prior to entering a liquid.
@@ -82,61 +44,45 @@ object TipCleanPolicy {
 	}
 }
 
-/**
- * Represents a liquid.
- * This is one of the most-used classes for our pipetting routines.
- * 
- * @note Liquid should be better integrated with the newer Substance and VesselContent classes.
- * For example, Liquid could maintain a list of Substances and their ratios and concentrations,
- * more similar to VesselContent.
- * 
- * @see [[roboliq.core.Substance]]
- * @see [[roboliq.core.SubstanceLiquid]]
- * @see [[roboliq.core.VesselContent]]
- */
-class Liquid(
+
+sealed class Liquid private(
 	val id: String,
-	val sName_? : Option[String],
-	val sFamily: String,
-	val contaminants: Set[Contaminant.Value],
-	val tipCleanPolicy: TipCleanPolicy,
-	val multipipetteThreshold: BigDecimal
+	val contents: Map[Substance, BigDecimal]
 ) {
-	def +(other: Liquid): Liquid = {
-		if (this eq other)
-			this
-		else if (this eq Liquid.empty)
-			other
-		else if (other eq Liquid.empty)
-			this
-		else {
-			assert(id != other.id)
-			val id_# = id+":"+other.id
-			val tipCleanPolicy_# = TipCleanPolicy.max(tipCleanPolicy, other.tipCleanPolicy)
-			new Liquid(
-				id_#,
-				None,
-				sFamily,
-				contaminants ++ other.contaminants,
-				tipCleanPolicy_#,
-				if (multipipetteThreshold <= other.multipipetteThreshold) multipipetteThreshold else other.multipipetteThreshold
-			)
-		}
-	}
+	val substance_l = contents.keys.toList
 	
-	def getName() = if (id == null) "<unnamed>" else id
+	/** Tip cleaning policy when handling this substance with pipetter. */
+	val tipCleanPolicy: TipCleanPolicy = substance_l.map(_.tipCleanPolicy).concatenate
+	/** List of contaminants in this substance */
+	val contaminants: Set[String] = substance_l.map(_.contaminants).concatenate
+	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
+	val valuePerUnit_? : Option[BigDecimal] = substance_l.map(_.valuePerUnit_?).concatenate
 	
-	override def toString = getName()
-	override def equals(that: Any): Boolean = {
-		that match {
-			case b: Liquid => id == b.id
-			case _ => assert(false); false
-		}
+//	val gramPerMole_? : Option[BigDecimal] = substance_l.map(_.gramPerMole_?).concatenate
+//	val celciusToLiterPerMole: List[CelciusToLiterPerMole]
+//	val celciusAndConcToLiterPerMole: List[CelciusAndConcToLiterPerMole]
+//	val celciusToViscosity: List[CelciusToViscosity]
+	
+	val isEmpty: Boolean = contents.isEmpty
+	val isLiquid: Boolean = substance_l.exists(_.isLiquid)
+	// "water"@5.44e-10,"oil"@1.23e-23,
+	
+	override def equals(that: Any): Boolean = that match {
+		case that_# : Liquid => id == that_#.id
+		case _ => assert(false); false
 	}
 	override def hashCode() = id.hashCode()
 }
 
 object Liquid {
-	/** Empty liquid */
-	val empty = new Liquid("<EMPTY>", None, "", Set(), TipCleanPolicy.Thorough, 0.0)
+	def apply(contents: Map[Substance, BigDecimal]): Liquid = {
+		val l = contents.toList.sortBy(_._2).reverse
+		val id = l.map(pair => "\"" + pair._1 + "\"@" + {pair._2}).mkString("(", ",", ")")
+		// Make sure fractions are normalized to 1
+		val factor = 1 / contents.values.sum
+		val contents_# = contents.mapValues(_ * factor)
+		new Liquid(id, contents_#)
+	}
+	
+	val Empty = new Liquid("<EMPTY>", Map())
 }

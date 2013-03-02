@@ -6,7 +6,7 @@ import roboliq.core._
 import roboliq.commands.pipette._
 
 
-abstract class PipetteDevice extends DeviceBean {
+abstract class PipetteDevice {
 	def getTipModels: List[TipModel]
 	def getTips: SortedSet[Tip]
 	
@@ -20,12 +20,12 @@ abstract class PipetteDevice extends DeviceBean {
 	/** Maximum volume of the given liquid which this tip can hold */
 	def getTipHoldVolumeMax(tip: TipState, liquid: Liquid): LiquidVolume
 	/** Choose aspirate method */
-	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy]
+	def getAspiratePolicy(tipState: TipState, nVolume: LiquidVolume, wellState: VesselState): Option[PipettePolicy]
 	/** Choose dispense method */
-	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: WellState): Option[PipettePolicy]
-	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec]
-	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean
-	def canBatchMixItems(states: StateMap, lTwvp: List[TipWellMix]): Boolean
+	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: VesselState): Option[PipettePolicy]
+	def getMixSpec(tipState: TipState, wellState: VesselState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec]
+	def canBatchSpirateItems(lTwvp: List[TipWellVolumePolicy]): Boolean
+	def canBatchMixItems(lTwvp: List[TipWellMix]): Boolean
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[Tip], lTipCleaning: SortedSet[Tip]): SortedSet[Tip]
 	def batchCleanTips(lTipAll: SortedSet[Tip]): Seq[SortedSet[Tip]]
 	def batchCleanSpecs(lTipAll: SortedSet[Tip], mTipToCleanSpec: Map[Tip, WashSpec]): Seq[Tuple2[WashSpec, SortedSet[Tip]]]

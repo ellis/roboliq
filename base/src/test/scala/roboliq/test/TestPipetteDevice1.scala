@@ -28,10 +28,6 @@ class TestPipetteDevice1 extends PipetteDevice {
 		Tip(7, Some(tipModel50))
 	)
 
-	def setObjBase(ob: ObjBase): Result[Unit] = {
-		Success()
-	}
-	
 	def getTipModels = tipModels
 	def getTips = tips
 	
@@ -110,20 +106,20 @@ class TestPipetteDevice1 extends PipetteDevice {
 		)
 	}
 	
-	def getAspiratePolicy(tipState: TipState, volume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
+	def getAspiratePolicy(tipState: TipState, volume: LiquidVolume, wellState: VesselState): Option[PipettePolicy] = {
 		import PipettePosition._
 
 		val liquid = wellState.liquid
 		// Can't aspirate from an empty well
 		//assert(liquid ne Liquid.empty)
-		if (liquid eq Liquid.empty)
+		if (liquid eq Liquid.Empty)
 			return None
 
 		val nVolumeSrc = wellState.volume
 		val bLarge = (tipState.conf.index < 4)
-		val bForceDry = (wellState.bCheckVolume && nVolumeSrc < LiquidVolume.ul(20))
+		val bForceDry = (wellState.isInitialVolumeKnown && nVolumeSrc < LiquidVolume.ul(20))
 		
-		val sFamily = liquid.sFamily
+		val sFamily = "Glycerol" //liquid.sFamily
 		val tipModel = tipState.model_?.get
 		val posDefault = if (bForceDry) DryContact else WetContact 
 		//val posDefault = WetContact
@@ -159,10 +155,10 @@ class TestPipetteDevice1 extends PipetteDevice {
 	val nFreeDispense2VolumeThreshold = LiquidVolume.ul(5)
 	val nFreeDispense2DestVolumeThreshold = LiquidVolume.ul(20)
 	
-	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, volume: LiquidVolume, wellState: WellState): Option[PipettePolicy] = {
+	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, volume: LiquidVolume, wellState: VesselState): Option[PipettePolicy] = {
 		import PipettePosition._
 
-		val sFamily = liquid.sFamily
+		val sFamily = "Glycerol" //liquid.sFamily
 		val bLarge = (tipModel eq tipModel1000)
 		val nVolumeDest = wellState.volume
 		
@@ -224,7 +220,7 @@ class TestPipetteDevice1 extends PipetteDevice {
 		Some(PipettePolicy(sName, posDefault))
 	}
 	
-	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec] = {
+	def getMixSpec(tipState: TipState, wellState: VesselState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec] = {
 		// FIXME: Passing volume=0 is kinda unpredictable -- ellis
 		val policyDefault_? = getAspiratePolicy(tipState, LiquidVolume.empty, wellState)
 		val mixSpecDefault = MixSpecOpt(Some(wellState.volume * 0.7), Some(4), policyDefault_?)
@@ -237,8 +233,8 @@ class TestPipetteDevice1 extends PipetteDevice {
 		}
 	}
 
-	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean = true
-	def canBatchMixItems(states: StateMap, lTwvp: List[TipWellMix]): Boolean = true
+	def canBatchSpirateItems(lTwvp: List[TipWellVolumePolicy]): Boolean = true
+	def canBatchMixItems(lTwvp: List[TipWellMix]): Boolean = true
 	
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[Tip], lTipCleaning: SortedSet[Tip]): SortedSet[Tip] = {
 		val lModel = lTipCleaning.toSeq.map(_.permanent_?).distinct

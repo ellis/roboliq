@@ -1,20 +1,7 @@
 package roboliq.core
 
-import scala.reflect.BeanProperty
 import RqPimper._
 
-
-/**
- * YAML JavaBean for [[roboliq.core.MixSpec]].
- */
-class MixSpecBean extends Bean {
-	/** Volume (in liters) for mixing. */
-	@BeanProperty var volume: java.math.BigDecimal = null
-	/** Number of times to mix. */
-	@BeanProperty var count: java.lang.Integer = null
-	/** Name of pipette policy for mixing. */
-	@BeanProperty var policy: String = null
-}
 
 case class MixSpec(
 	val volume: LiquidVolume,
@@ -51,25 +38,5 @@ case class MixSpecOpt(
 			if (nCount_?.isEmpty) that.nCount_? else nCount_?,
 			if (mixPolicy_?.isEmpty) that.mixPolicy_? else mixPolicy_?
 		)
-	}
-}
-
-object MixSpecOpt {
-	/** Convert YAML JavaBean to MixSpec. */
-	def fromBean(bean: MixSpecBean): MixSpecOpt = {
-		MixSpecOpt(
-			nVolume_? = if (bean.volume != null) Some(LiquidVolume.l(bean.volume)) else None,
-			nCount_? = if (bean.count != null) Some(bean.count) else None,
-			mixPolicy_? = if (bean.policy != null) Some(PipettePolicy.fromName(bean.policy)) else None
-		)
-	}
-	
-	/** Convert from MixSpec to a MixSpecBean. */
-	def toBean(mixSpec: MixSpecOpt): MixSpecBean = {
-		val bean = new MixSpecBean
-		bean.volume = mixSpec.nVolume_?.map(_.l.bigDecimal).orNull
-		bean.count = mixSpec.nCount_?.orNull
-		bean.policy = mixSpec.mixPolicy_?.map(_.id).orNull
-		bean
 	}
 }

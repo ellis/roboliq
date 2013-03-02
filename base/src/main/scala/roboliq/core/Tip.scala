@@ -1,13 +1,6 @@
 package roboliq.core
 
 import scala.collection.mutable.HashMap
-import scala.reflect.BeanProperty
-
-/** YAML JavaBean representation of [[roboliq.core.Tip]]. */
-class TipBean extends Bean {
-	@BeanProperty var index: java.lang.Integer = null
-	@BeanProperty var model: String = null
-}
 
 /**
  * Represents a tip/syringe for pipetting.
@@ -26,46 +19,12 @@ case class Tip(
 	val index: Int,
 	val permanent_? : Option[TipModel]
 ) extends Ordered[Tip] {
-	//	Tip("TIP)
-	
-	def state(states: StateMap): TipState = states.findTipState(id).get
-	def stateWriter(builder: StateBuilder): TipStateWriter = new TipStateWriter(this, builder)
-
 	override def compare(that: Tip) = index - that.index
 	override def toString = id
 }
 
 object Tip {
 	def apply(index: Int, permanent_? : Option[TipModel] = None) = new Tip("TIP"+(index+1), index, permanent_?)
-	
-	/** Convert [[roboliq.core.TipBean]] to [[roboliq.core.Tip]]. */
-	def fromBean(ob: ObjBase)(bean: TipBean): Result[Tip] = {
-		for {
-			index <- Result.mustBeSet(bean.index, "index")
-		} yield {
-			val modelPermanent_? = {
-				if (bean.model == null)
-					None
-				else {
-					ob.findTipModel(bean.model) match {
-						case Error(ls) => return Error(ls)
-						case Success(model) => Some(model)
-					}
-				}
-			}
-			Tip(index, modelPermanent_?)
-		}
-	}
-	
-	/** Convert [[roboliq.core.TipBean]] to [[roboliq.core.Tip]]. */
-	def fromBean(ob: ObjBase, messages: CmdMessageWriter)(bean: TipBean): Result[Tip] = {
-		for {
-			index <- Result.mustBeSet(bean.index, "index")
-		} yield {
-			val modelPermanent_? = if (bean.model == null) None else ob.findTipModel_?(bean.model, messages)
-			Tip(index, modelPermanent_?)
-		}
-	}
 }
 
 /** Convenience class for making debug strings from sets of tips. */

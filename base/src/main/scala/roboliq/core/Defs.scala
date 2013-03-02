@@ -90,8 +90,8 @@ case class TipHandlingOverrides(
 	val replacement_? : Option[TipReplacementPolicy.Value],
 	val washIntensity_? : Option[CleanIntensity.Value],
 	val allowMultipipette_? : Option[Boolean],
-	val contamInside_? : Option[Set[Contaminant.Value]],
-	val contamOutside_? : Option[Set[Contaminant.Value]]
+	val contamInside_? : Option[Set[String]],
+	val contamOutside_? : Option[Set[String]]
 )
 
 /**
@@ -108,8 +108,8 @@ object TipHandlingOverrides {
  */
 class WashSpec(
 	val washIntensity: CleanIntensity.Value,
-	val contamInside: Set[Contaminant.Value],
-	val contamOutside: Set[Contaminant.Value]
+	val contamInside: Set[String],
+	val contamOutside: Set[String]
 ) {
 	def +(that: WashSpec): WashSpec = {
 		new WashSpec(
@@ -128,6 +128,8 @@ class WashSpec(
 class CleanSpec(
 	val replacement: Option[TipReplacementPolicy.Value],
 	val washIntensity: CleanIntensity.Value,
-	val contamInside: Set[Contaminant.Value],
-	val contamOutside: Set[Contaminant.Value]
+	val contamInside: Set[String],
+	val contamOutside: Set[String]
 )
+
+trait CmdToken

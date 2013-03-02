@@ -38,7 +38,7 @@ case class WellSpecHorizontal(rc0: RowCol, rc1: RowCol) extends WellSpec
  */
 case class WellSpecMatrix(rc0: RowCol, rc1: RowCol) extends WellSpec
 
-
+/*
 private object WellSpecParser0 extends JavaTokenParsers {
 	import scala.util.parsing.combinator._
 
@@ -132,11 +132,15 @@ private object WellSpecParser0 extends JavaTokenParsers {
 		}
 	}
 }
+*/
 
 /**
  * Parses a string of plates and wells.
  */
 object WellSpecParser {
+	
+	/*
+	
 	/**
 	 * Parse `input` as a string of plates and wells,
 	 * and return a list of tuples of referenced plate ID and the wells referenced on those plate.
@@ -259,6 +263,7 @@ object WellSpecParser {
 		
 		expect(lWell, 1)
 	}
+	*/
 	
 	private def mergeRepeatLen(lWell: List[Well]): Int = {
 		val well0 = lWell.head
