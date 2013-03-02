@@ -156,7 +156,6 @@ case class VesselContent(
 
 object VesselContent {
 	/** Empty vessel contents. */
-	val empty = VesselContent(Liquid.Empty, 0)
 	val Empty = VesselContent(Liquid.Empty, 0)
 	
 	def byVolume(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] =
