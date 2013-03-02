@@ -23,8 +23,7 @@ case class VesselContent(
 	
 	val substanceToMol: Map[Substance, BigDecimal] = {
 		val partsTotal = liquid.contents.values.sum
-		val factor = totalMole / partsTotal
-		liquid.contents.mapValues(_ * totalMole)
+		liquid.contents.mapValues(_ * totalMole / partsTotal)
 	}
 	val substanceToVolume: Map[Substance, LiquidVolume] =
 		substanceToMol.toList.flatMap(pair => {
@@ -157,7 +156,8 @@ case class VesselContent(
 
 object VesselContent {
 	/** Empty vessel contents. */
-	val Empty = new VesselContent(Liquid.Empty, 0)
+	val empty = VesselContent(Liquid.Empty, 0)
+	val Empty = VesselContent(Liquid.Empty, 0)
 	
 	def byVolume(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] =
 		Empty.addLiquid(substance, volume)
