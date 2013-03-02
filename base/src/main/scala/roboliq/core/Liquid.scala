@@ -77,7 +77,7 @@ object TipCleanPolicy {
 	}
 	
 	implicit object TipCleanPolicyMonoid extends Monoid[TipCleanPolicy] {
-		def append(a: TipCleanPolicy, b: TipCleanPolicy) = max(a, b)
+		def append(a: TipCleanPolicy, b: => TipCleanPolicy) = max(a, b)
 		def zero = NN
 	}
 }

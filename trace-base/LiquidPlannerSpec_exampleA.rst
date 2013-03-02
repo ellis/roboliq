@@ -21,7 +21,7 @@ Destinations
 
 .. math::
 
-  \mathbf{D} = \left[ \begin{array}{} 99 ul & 99 ul \\ 1 ul & 1 ul \\ 0.1 & 0.1 \\ 0.1 & 0.0 \\ 0.0 & 0.1 \end{array} \right]
+  \mathbf{D} = \left[ \begin{array}{} 99ul & 99ul \\ 1ul & 1ul \\ 0.1 & 0.1 \\ 0.1 & 0.0 \\ 0.0 & 0.1 \end{array} \right]
 
 
 Sources
@@ -29,11 +29,11 @@ Sources
 
 .. math::
 
-  \mathbf{S} = \left[ \begin{array}{} 1 ml & 950 ul & 1 ml & 1 ml & 1 ml \\ 0.0 & 50 ul & 0.0 & 0.0 & 0.0 \\ 0.0 & 0.0 & 1 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 & 1 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.0 & 1 \end{array} \right]
+  \mathbf{S} = \left[ \begin{array}{} 1ml & 950ul & 1ml & 1ml & 1ml \\ 0.0 & 50ul & 0.0 & 0.0 & 0.0 \\ 0.0 & 0.0 & 1 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 & 1 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.0 & 1 \end{array} \right]
 
 .. math::
 
-  \mathbf{S_{100 ul}} = \left[ \begin{array}{} 1.0 & 0.95 & 1.0 & 1.0 & 1.0 \\ 0.0 & 0.05 & 0.0 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.01 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.01 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.0 & 0.01 \end{array} \right]
+  \mathbf{S_{100ul}} = \left[ \begin{array}{} 1.0 & 0.95 & 1.0 & 1.0 & 1.0 \\ 0.0 & 0.05 & 0.0 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.01 & 0.0 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.01 & 0.0 \\ 0.0 & 0.0 & 0.0 & 0.0 & 0.01 \end{array} \right]
 
 
 Direct solution

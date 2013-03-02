@@ -40,7 +40,7 @@ class ConversionsSpec extends FunSpec {
 				0.0 -> JsNumber(0.0),
 				42.0 -> JsNumber(42.0))
 		check(
-				LiquidVolume.ul(42) -> JsString("42 ul")
+				LiquidVolume.ul(42) -> JsString("42ul")
 		)
 		check(
 				List(1, 2, 3) -> JsArray(JsNumber(1), JsNumber(2), JsNumber(3)),
