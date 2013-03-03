@@ -17,20 +17,23 @@ object MathUtils {
 		n.round(mathContext3).toString
 	}
 	
-	def toChemistString3(n: BigDecimal): String = {
+	def toChemistString3(n: BigDecimal, suffix: String = ""): String = {
 		val zeros = n.scale - n.precision
 		val a = n.round(mathContext3).bigDecimal
-		if (zeros >= 12)
-			a.toEngineeringString()
-		else if (zeros >= 9)
-			a.movePointRight(12).toString + "p"
-		else if (zeros >= 6)
-			a.movePointRight(9).toString + "n"
-		else if (zeros >= 3)
-			a.movePointRight(6).toString + "u"
-		else if (zeros >= 0)
-			a.movePointRight(3).toString + "m"
-		else
-			a.toEngineeringString()
+		val s = {
+			if (zeros >= 12)
+				a.toEngineeringString()
+			else if (zeros >= 9)
+				a.movePointRight(12).toString + "p"
+			else if (zeros >= 6)
+				a.movePointRight(9).toString + "n"
+			else if (zeros >= 3)
+				a.movePointRight(6).toString + "u"
+			else if (zeros >= 0)
+				a.movePointRight(3).toString + "m"
+			else
+				a.toEngineeringString()
+		}
+		s + suffix
 	}
 }

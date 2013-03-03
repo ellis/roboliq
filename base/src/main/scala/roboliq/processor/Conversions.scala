@@ -13,6 +13,7 @@ import grizzled.slf4j.Logger
 import spray.json._
 import roboliq.core._
 import RqPimper._
+import roboliq.utils.MathUtils
 
 
 private case class TableInfo[A <: Object : TypeTag](
@@ -50,6 +51,11 @@ private case class ConvInfo[A: TypeTag](
 	def toJson(obj: Any) = fnToJson(obj.asInstanceOf[A])
 }
 
+sealed trait Quantity
+case class Quantity_Liter(n: BigDecimal) extends Quantity
+case class Quantity_Mole(n: BigDecimal) extends Quantity
+
+
 object ConversionsDirect {
 	private val logger = Logger("roboliq.processor.ConversionsDirect")
 	
@@ -69,6 +75,15 @@ object ConversionsDirect {
 	)
 	
 	private val convInfo_l = List[ConvInfo[_]](
+		ConvInfo[Quantity](
+			o => o match {
+				case Quantity_Liter(n) => RqSuccess(JsString(LiquidVolume.l(n).toString))
+				case Quantity_Mole(n) => RqSuccess(JsString(MathUtils.toChemistString3(n, "mol")))
+			},
+			(path_r: List[String], jsval: JsValue, typ: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]) => {
+				toQuantity(jsval).map(ConvObject)
+			}
+		),
 		ConvInfo[TipCleanPolicy](
 			(o: TipCleanPolicy) => {
 				RqSuccess(JsString(s"${o.enter}${o.exit}"))
@@ -99,9 +114,23 @@ object ConversionsDirect {
 		ConvInfo[VesselContent](
 			(o: VesselContent) => toJson(o.contents),
 			(path_r: List[String], jsval: JsValue, typ: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]) => {
-				convOrRequire(path_r, jsval, typeOf[Map[Substance, BigDecimal]], time, lookup_m_?).map(_ match {
-					case ConvObject(obj) => ConvObject(VesselContent(obj.asInstanceOf[Map[Substance, BigDecimal]]))
-					case x => x
+				convOrRequire(path_r, jsval, typeOf[Map[Substance, Quantity]], time, lookup_m_?).flatMap(_ match {
+					case ConvObject(obj) =>
+						val m1 = obj.asInstanceOf[Map[Substance, Quantity]]
+						val contents_? : RqResult[List[(Substance, BigDecimal)]] = RqResult.toResultOfList(m1.toList.map(pair => {
+							val (substance, quantity) = pair
+							val ret: RqResult[BigDecimal] = quantity match {
+								case Quantity_Mole(n) => RqSuccess(n)
+								case Quantity_Liter(n) =>
+									if (substance.molarity <= 0)
+										RqError(s"molarity must be specifed for substance `${substance.id}` in order to use liter units.")
+									else
+										RqSuccess(n * substance.molarity)
+							}
+							ret.map(substance -> _)
+						}))
+						contents_?.map(contents => ConvObject(VesselContent(contents.toMap)))
+					case x => RqSuccess(x)
 				})
 			}
 		)
@@ -594,6 +623,36 @@ object ConversionsDirect {
 				}
 				RqSuccess(v)
 			case JsNumber(n) => RqSuccess(LiquidVolume.l(n))
+			case _ => RqError("expected JsString in volume format")
+		}
+	}
+	
+	private val RxMole = """([-0123456789+E.]*) ?([munp]?)mol$""".r
+	def toQuantity(jsval: JsValue): RqResult[Quantity] = {
+		jsval match {
+			case JsString(RxVolume(a,b,c)) =>
+				val s = List(Option(a), Option(b)).flatten.mkString
+				val n = BigDecimal(s)
+				val v = c match {
+					case "l" => LiquidVolume.l(n)
+					case "ml" => LiquidVolume.ml(n)
+					case "ul" => LiquidVolume.ul(n)
+					case "nl" => LiquidVolume.nl(n)
+					case _ => return RqError(s"invalid volume suffix '$c'")
+				}
+				RqSuccess(Quantity_Liter(v.l))
+			case JsString(RxMole(a,b)) =>
+				val n = BigDecimal(a).bigDecimal
+				val v = b match {
+					case "" => n
+					case "m" => n.movePointLeft(3)
+					case "u" => n.movePointLeft(6)
+					case "n" => n.movePointLeft(9)
+					case "p" => n.movePointLeft(12)
+					case _ => return RqError(s"invalid mole suffix '${b}mol'")
+				}
+				RqSuccess(Quantity_Mole(v))
+			case JsNumber(n) => RqSuccess(Quantity_Mole(n))
 			case _ => RqError("expected JsString in volume format")
 		}
 	}

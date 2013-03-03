@@ -235,22 +235,31 @@ class ConversionsSpec extends FunSpec {
 					))
 					=== VesselContent.byVolume(water, LiquidVolume.l(1))
 			)
+			assert(
+				conv(
+					JsonParser("""{ "water": "1l" }"""),
+					typeOf[VesselContent],
+					Map(
+						"water#" -> water
+					))
+					=== VesselContent.byVolume(water, LiquidVolume.l(1))
+			)
 		}
 		it("should parse VesselState") {
 			val t1 = Vessel("t1", None)
 			assert(
 				conv(
-					JsonParser("""{ "id": "T1", "content": { "solventToVolume": { "water": "100ul" } } }"""),
+					JsonParser("""{ "id": "T1", "content": { "water": "100ul" } }"""),
 					typeOf[VesselState],
 					Map(
 						"vessel" -> t1,
-						"content.solventToVolume.water#" -> water
+						"content.water#" -> water
 					))
 					=== VesselContent.byVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _))
 			)
 			assert(
 				conv(
-					JsonParser("""{"id":"T1","content":{"solventToVolume":{},"soluteToMol":{}}}"""),
+					JsonParser("""{"id": "T1", "content": {} }"""),
 					typeOf[VesselState],
 					Map(
 						"vessel" -> t1
