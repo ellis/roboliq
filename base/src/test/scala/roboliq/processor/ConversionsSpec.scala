@@ -143,7 +143,7 @@ class ConversionsSpec extends FunSpec {
 		)
 		check[Substance](
 			List(
-				JsonParser("""{"id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}""") -> water
+				JsonParser("""{"id": "water", "kind": "Liquid", "tipCleanPolicy": {"enter": "Thorough", "exit": "None"}, "literPerMole": 55}""") -> water
 			),
 			List(JsNull)
 		)

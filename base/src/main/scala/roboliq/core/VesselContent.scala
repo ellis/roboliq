@@ -14,17 +14,16 @@ import RqPimper._
  * @param solventToVolume map from liquid to volume.
  * @param soluteToMol map from solute to amount in mol.
  */
-case class VesselContent(
+class VesselContent private(
 	// REFACTOR: consider merging Liquid and VesselContent, where Liquid is a VesselContent normalized to 1 
-	val liquid: Liquid,
-	val totalMole: BigDecimal
+	val contents: Map[Substance, BigDecimal]
 ) {
 	private val logger = Logger[this.type]
 	
-	val substanceToMol: Map[Substance, BigDecimal] = {
-		val partsTotal = liquid.contents.values.sum
-		liquid.contents.mapValues(_ * totalMole / partsTotal)
-	}
+	val liquid = Liquid(contents)
+	val totalMole = contents.values.sum
+	
+	val substanceToMol: Map[Substance, BigDecimal] = contents
 	val substanceToVolume: Map[Substance, LiquidVolume] =
 		substanceToMol.toList.flatMap(pair => {
 			val (substance, mole) = pair
@@ -91,9 +90,11 @@ case class VesselContent(
 		if (volume.isEmpty) {
 			logger.warn(s"called VesselContent.scaleToVolume() on empty vessel: $this")
 			return this
+		} else {
+			val factor = volumeNew.l / volume.l
+			val contents_# = VesselContent.scaleBy(contents, factor)
+			new VesselContent(contents_#)
 		}
-		val totalMole_# = totalMole * volumeNew.l / volume.l
-		VesselContent(liquid, totalMole_#)
 	}
 	
 	/**
@@ -101,11 +102,7 @@ case class VesselContent(
 	 */
 	def +(that: VesselContent): VesselContent = {
 		val contents_# = substanceToMol |+| that.substanceToMol
-		val liquid_# = Liquid(contents_#)
-		new VesselContent(
-			liquid_#,
-			totalMole + that.totalMole
-		)
+		new VesselContent(contents_#)
 	}
 
 	/**
@@ -120,11 +117,7 @@ case class VesselContent(
 	 */
 	def addSubstance(substance: Substance, mol: BigDecimal): VesselContent = {
 		val content_# = substanceToMol |+| Map(substance -> mol)
-		val liquid_# = Liquid(content_#)
-		new VesselContent(
-			liquid_#,
-			totalMole + mol
-		)
+		new VesselContent(content_#)
 	}
 	
 	/**
@@ -150,14 +143,24 @@ case class VesselContent(
 	 * Get the molar concentration of a non-liquid `substance`. 
 	 */
 	def substanceFraction(substance: Substance): BigDecimal = {
-		substanceToMol.get(substance).map(_ / totalMole).getOrElse(0)
+		if (totalMole > 0)
+			substanceToMol.get(substance).map(_ / totalMole).getOrElse(0)
+		else
+			0
 	}
 }
 
 object VesselContent {
+	def apply(liquid: Liquid, totalMole: BigDecimal): VesselContent = {
+		null
+	}
+	
 	/** Empty vessel contents. */
 	val Empty = VesselContent(Liquid.Empty, 0)
 	
 	def byVolume(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] =
 		Empty.addLiquid(substance, volume)
+		
+	def scaleBy(contents: Map[Substance, BigDecimal], factor: BigDecimal): Map[Substance, BigDecimal] =
+		contents.mapValues(_ * factor)
 }

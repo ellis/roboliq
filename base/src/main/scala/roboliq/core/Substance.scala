@@ -7,10 +7,16 @@ import Scalaz._
 //case class CelciusToLiterPerMole(celcius: BigDecimal, literPerMole: BigDecimal)
 case class CelciusAndConcToViscosity(celcius: BigDecimal, conc: BigDecimal, viscosity: BigDecimal)
 
+object SubstanceKind extends Enumeration {
+	val None, Liquid, Dna, Other = Value
+}
+
 /** Represents a substance. */
 case class Substance(
 	/** ID in database. */
 	val id: String,
+	/** Kind of substance */
+	val kind: SubstanceKind.Value,
 	/** Tip cleaning policy when handling this substance with pipetter. */
 	val tipCleanPolicy: TipCleanPolicy,
 	/** List of contaminants in this substance */
@@ -24,11 +30,12 @@ case class Substance(
 	val literPerMole_? : Option[BigDecimal],
 	val celciusAndConcToViscosity: List[CelciusAndConcToViscosity],
 
-	val sequence_? : Option[String],
-	
-	val isEmpty: Boolean,
-	val isLiquid: Boolean
+	val sequence_? : Option[String]
 ) {
+	val isEmpty: Boolean = (kind == SubstanceKind.None)
+	val isLiquid: Boolean = (kind == SubstanceKind.Liquid) 
+	def literPerMole: BigDecimal = literPerMole_?.getOrElse(0)
+	
 	/**
 	 * Whether multipipetting is allowed.
 	 * Multipipetting is when a tip aspirates once and distributes to that volume to
@@ -57,6 +64,7 @@ object Substance {
 	
 	val Empty = Substance(
 		id = "<EMPTY>",
+		kind = SubstanceKind.None,
 		tipCleanPolicy = TipCleanPolicy.NN,
 		contaminants = Set(),
 		costPerUnit_? = None,
@@ -64,9 +72,7 @@ object Substance {
 		gramPerMole_? = None,
 		literPerMole_? = None,
 		celciusAndConcToViscosity = Nil,
-		sequence_? = None,
-		isEmpty = true,
-		isLiquid = false
+		sequence_? = None
 	)
 	
 	def liquid(
@@ -80,6 +86,7 @@ object Substance {
 	): Substance = {
 		Substance(
 			id = id,
+			kind = SubstanceKind.Liquid,
 			tipCleanPolicy = tipCleanPolicy,
 			contaminants = contaminants,
 			costPerUnit_? = costPerUnit_?,
@@ -87,9 +94,7 @@ object Substance {
 			gramPerMole_? = None,
 			literPerMole_? = Some(literPerMole),
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
-			sequence_? = None,
-			isEmpty = false,
-			isLiquid = true
+			sequence_? = None
 		)
 	}
 	
@@ -104,6 +109,7 @@ object Substance {
 	): Substance = {
 		Substance(
 			id = id,
+			kind = SubstanceKind.Dna,
 			tipCleanPolicy = TipCleanPolicy.DD,
 			contaminants = Set("DNA"),
 			costPerUnit_? = costPerUnit_?,
@@ -111,9 +117,7 @@ object Substance {
 			gramPerMole_? = gramPerMole_?,
 			literPerMole_? = literPerMole_?,
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
-			sequence_? = None,
-			isEmpty = false,
-			isLiquid = false
+			sequence_? = None
 		)
 	}
 	
@@ -129,6 +133,7 @@ object Substance {
 	): Substance = {
 		Substance(
 			id = id,
+			kind = SubstanceKind.Other,
 			tipCleanPolicy = tipCleanPolicy,
 			contaminants = contaminants,
 			costPerUnit_? = costPerUnit_?,
@@ -136,9 +141,7 @@ object Substance {
 			gramPerMole_? = gramPerMole_?,
 			literPerMole_? = literPerMole_?,
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
-			sequence_? = None,
-			isEmpty = false,
-			isLiquid = false
+			sequence_? = None
 		)
 	}
 }
