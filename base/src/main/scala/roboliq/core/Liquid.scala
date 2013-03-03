@@ -2,6 +2,7 @@ package roboliq.core
 
 import scalaz._
 import Scalaz._
+import roboliq.utils.MathUtils
 
 
 /**
@@ -46,9 +47,12 @@ object TipCleanPolicy {
 
 
 sealed class Liquid private(
-	val id: String,
 	val contents: Map[Substance, BigDecimal]
 ) {
+	val id = {
+		if (contents.isEmpty) "<EMPTY>"
+		else contents.map(pair => "\"" + pair._1.id + "\"@" + MathUtils.toChemistString3(pair._2)).mkString("(", ",", ")")
+	}
 	val substance_l = contents.keys.toList
 	
 	/** Tip cleaning policy when handling this substance with pipetter. */
@@ -67,6 +71,7 @@ sealed class Liquid private(
 	val isLiquid: Boolean = substance_l.exists(_.isLiquid)
 	// "water"@5.44e-10,"oil"@1.23e-23,
 	
+	override def toString = id
 	override def equals(that: Any): Boolean = that match {
 		case that_# : Liquid => id == that_#.id
 		case _ => assert(false); false
@@ -77,12 +82,11 @@ sealed class Liquid private(
 object Liquid {
 	def apply(contents: Map[Substance, BigDecimal]): Liquid = {
 		val l = contents.toList.sortBy(_._2).reverse
-		val id = l.map(pair => "\"" + pair._1 + "\"@" + {pair._2}).mkString("(", ",", ")")
 		// Make sure fractions are normalized to 1
 		val factor = 1 / contents.values.sum
 		val contents_# = contents.mapValues(_ * factor)
-		new Liquid(id, contents_#)
+		new Liquid(contents_#)
 	}
 	
-	val Empty = new Liquid("<EMPTY>", Map())
+	val Empty = new Liquid(Map())
 }

@@ -24,6 +24,8 @@ class ConversionsSpec extends FunSpec {
 	
 	val water = Substance.liquid("water", 55, TipCleanPolicy.TN)
 	val powder = Substance.other("powder", TipCleanPolicy.DD, Set("DNA"))
+	
+	val liquid_water = Liquid(Map(water -> 1))
 
 	describe("toJson") {
 		def check[A: TypeTag](l: (A, JsValue)*) = {
@@ -192,17 +194,36 @@ class ConversionsSpec extends FunSpec {
 					=== RqSuccess(Map("first" -> water, "second" -> powder))
 			)
 		}
+		it("should parse Liquid") {
+			assert(
+				conv(
+					JsonParser("""{}"""),
+					typeOf[Liquid],
+					Map())
+					=== RqSuccess(Liquid.Empty)
+			)
+			assert(
+				conv(
+					JsonParser("""{ "contents": { "water": 1 } }"""),
+					typeOf[Liquid],
+					Map(
+						"contents.water#" -> water
+					))
+					=== RqSuccess(liquid_water)
+			)
+		}
+		/*
 		it("should parse VesselContent") {
 			assert(
 				conv(
-					JsonParser("""{ "idVessel": "T1", "solventToVolume": { "water": "100ul" } }"""),
+					JsonParser("""{ "liquid": { solventToVolume": { "water": "100ul" } }"""),
 					typeOf[VesselContent],
 					Map(
 						"solventToVolume.water#" -> water
 					))
 					=== VesselContent.byVolume(water, LiquidVolume.ul(100))
 			)
-		}
+		}*/
 		it("should parse VesselState") {
 			val t1 = Vessel("t1", None)
 			assert(
