@@ -55,6 +55,11 @@ object Config {
 	{ "id": "reagents15000", "tubeModels": ["Tube 15000ul"], "rackModel": "Reagent Cooled 8*15ml" },
 	{ "id": "reagents1.5", "tubeModels": ["Tube 1500ul"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
 ],
+
+"substance": [
+	{ "id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
+],
+
 "plate": [
 	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
 	{ "id": "reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },
@@ -71,8 +76,8 @@ object Config {
 	{ "id": "P1", "location": "cooled1" }
 ],
 "vesselState": [
-	{ "id": "T1", "content": { "idVessel": "T1" } },
-	{ "id": "P1(A01)", "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
+	{ "id": "T1", "content": {} },
+	{ "id": "P1(A01)", "content": { "water": "100ul" } }
 ],
 "vesselSituatedState": [
 	{ "id": "T1", "position": { "plate": "reagents15000", "index": 0 } },

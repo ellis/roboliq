@@ -86,6 +86,7 @@ object Substance {
 		contaminants: Set[String] = Set(),
 		costPerUnit_? : Option[BigDecimal] = None,
 		valuePerUnit_? : Option[BigDecimal] = None,
+		gramPerMole_? : Option[BigDecimal] = None,
 		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
 	): Substance = {
 		Substance(
@@ -96,7 +97,7 @@ object Substance {
 			costPerUnit_? = costPerUnit_?,
 			valuePerUnit_? = valuePerUnit_?,
 			molarity_? = Some(molarity),
-			gramPerMole_? = None,
+			gramPerMole_? = gramPerMole_?,
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
 			sequence_? = None
 		)

@@ -22,7 +22,7 @@ class ConversionsSpec extends FunSpec {
 	private def getTypeTag[T: TypeTag](obj: T) = ru.typeTag[T]
 	private def getType[T: TypeTag](obj: T) = ru.typeTag[T].tpe
 	
-	val water = Substance.liquid("water", 55, TipCleanPolicy.TN)
+	val water = Substance.liquid("water", 55, TipCleanPolicy.TN, gramPerMole_? = Some(18))
 	val powder = Substance.other("powder", TipCleanPolicy.DD, Set("DNA"))
 	
 	val liquid_water = Liquid(Map(water -> 1))
@@ -143,7 +143,7 @@ class ConversionsSpec extends FunSpec {
 		)
 		check[Substance](
 			List(
-				JsonParser("""{"id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55}""") -> water
+				JsonParser("""{"id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18}""") -> water
 			),
 			List(JsNull)
 		)
@@ -279,11 +279,13 @@ class ConversionsSpec extends FunSpec {
 		val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
 		val plate_15000 = Plate("reagents15000", plateModel_15000, None)
 		val plate_P1 = Plate("P1", plateModel_PCR, None)
+		val vessel_P1_A01 = Vessel("P1(A01)", None)
 		val vessel_T1 = Vessel("T1", Some(tubeModel_15000))
 		val tipState = TipState.createEmpty(tip)
 		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
 		val vesselState_T1 = VesselState(vessel_T1, VesselContent.Empty)
+		val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.byVolume(water, LiquidVolume.ul(100)).getOrElse(null))
 		val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
 	
 		val db = new DataBase
@@ -330,7 +332,9 @@ class ConversionsSpec extends FunSpec {
 		check[Plate]("reagents15000", plate_15000)
 		check[TipState]("TIP1", tipState)
 		check[PlateState]("P1", plateState_P1)
+		check[Vessel]("P1(A01)", vessel_P1_A01)
 		check[Vessel]("T1", vessel_T1)
+		check[VesselState]("P1(A01)", vesselState_P1_A01)
 		check[VesselState]("T1", vesselState_T1)
 		check[VesselSituatedState]("T1", vesselSituatedState_T1)
 	}
