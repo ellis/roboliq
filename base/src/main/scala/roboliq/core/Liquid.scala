@@ -82,9 +82,16 @@ sealed class Liquid private(
 object Liquid {
 	def apply(contents: Map[Substance, BigDecimal]): Liquid = {
 		val l = contents.toList.sortBy(_._2).reverse
-		// Make sure fractions are normalized to 1
-		val factor = 1 / contents.values.sum
-		val contents_# = contents.mapValues(_ * factor)
+		val z = contents.values.sum
+		val contents_# = {
+			if (z > 0) {
+				// Make sure fractions are normalized to 1
+				val factor = 1 / z
+				contents.mapValues(_ * factor)
+			}
+			else
+				contents
+		}
 		new Liquid(contents_#)
 	}
 	

@@ -143,7 +143,7 @@ class ConversionsSpec extends FunSpec {
 		)
 		check[Substance](
 			List(
-				JsonParser("""{"id": "water", "kind": "Liquid", "tipCleanPolicy": {"enter": "Thorough", "exit": "None"}, "literPerMole": 55}""") -> water
+				JsonParser("""{"id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "literPerMole": 55}""") -> water
 			),
 			List(JsNull)
 		)
@@ -204,26 +204,25 @@ class ConversionsSpec extends FunSpec {
 			)
 			assert(
 				conv(
-					JsonParser("""{ "contents": { "water": 1 } }"""),
+					JsonParser("""{ "water": 1 }"""),
 					typeOf[Liquid],
 					Map(
-						"contents.water#" -> water
+						"water#" -> water
 					))
 					=== RqSuccess(liquid_water)
 			)
 		}
-		/*
 		it("should parse VesselContent") {
 			assert(
 				conv(
-					JsonParser("""{ "liquid": { solventToVolume": { "water": "100ul" } }"""),
+					JsonParser("""{ "contents": { "water": "100ul" } }"""),
 					typeOf[VesselContent],
 					Map(
 						"solventToVolume.water#" -> water
 					))
 					=== VesselContent.byVolume(water, LiquidVolume.ul(100))
 			)
-		}*/
+		}
 		it("should parse VesselState") {
 			val t1 = Vessel("t1", None)
 			assert(

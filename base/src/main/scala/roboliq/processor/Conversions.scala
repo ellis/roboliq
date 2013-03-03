@@ -24,6 +24,32 @@ private case class TableInfo[A <: Object : TypeTag](
 	val typ = ru.typeTag[A].tpe
 }
 
+private sealed trait ConvResult {
+	def +(that: ConvResult): ConvResult
+}
+private case class ConvObject(o: Any) extends ConvResult {
+	def +(that: ConvResult): ConvResult = {
+		that
+	}
+}
+
+private case class ConvRequire(require_m: Map[String, KeyClassOpt]) extends ConvResult {
+	def +(that: ConvResult): ConvResult = {
+		that match {
+			case _: ConvObject => this
+			case ConvRequire(m) => ConvRequire(require_m ++ m)
+		}
+	}
+}
+
+private case class ConvInfo[A: TypeTag](
+	fnToJson: A => RqResult[JsValue],
+	fromJson: (List[String], JsValue, ru.Type, List[Int], Option[Map[String, Any]]) => RqResult[ConvResult]
+) {
+	val typ = ru.typeTag[A].tpe
+	def toJson(obj: Any) = fnToJson(obj.asInstanceOf[A])
+}
+
 object ConversionsDirect {
 	private val logger = Logger("roboliq.processor.ConversionsDirect")
 	
@@ -42,23 +68,35 @@ object ConversionsDirect {
 		TableInfo[VesselSituatedState]("vesselSituatedState", Some("vesselState"), None, None)
 	)
 	
-	private sealed trait ConvResult {
-		def +(that: ConvResult): ConvResult
-	}
-	private case class ConvObject(o: Any) extends ConvResult {
-		def +(that: ConvResult): ConvResult = {
-			that
-		}
-	}
-	
-	private case class ConvRequire(require_m: Map[String, KeyClassOpt]) extends ConvResult {
-		def +(that: ConvResult): ConvResult = {
-			that match {
-				case _: ConvObject => this
-				case ConvRequire(m) => ConvRequire(require_m ++ m)
+	private val convInfo_l = List[ConvInfo[_]](
+		ConvInfo[TipCleanPolicy](
+			(o: TipCleanPolicy) => {
+				RqSuccess(JsString(s"${o.enter}${o.exit}"))
+			},
+			(path_r: List[String], jsval: JsValue, typ: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]) => {
+				jsval match {
+					case JsString(text) => text match {
+						case "None" => RqSuccess(ConvObject(TipCleanPolicy.NN))
+						case "ThoroughNone" => RqSuccess(ConvObject(TipCleanPolicy.TN))
+						case "ThoroughLight" => RqSuccess(ConvObject(TipCleanPolicy.TL))
+						case "Thorough" => RqSuccess(ConvObject(TipCleanPolicy.TT))
+						case "Decontaminate" => RqSuccess(ConvObject(TipCleanPolicy.DD))
+						case _ => RqError("unrecognized TipCleanPolicy")
+					}
+					case _ => RqError("expected JsString")
+				}
 			}
-		}
-	}
+		),
+		ConvInfo[Liquid](
+			(o: Liquid) => toJson(o.contents),
+			(path_r: List[String], jsval: JsValue, typ: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]) => {
+				convOrRequire(path_r, jsval, typeOf[Map[Substance, BigDecimal]], time, lookup_m_?).map(_ match {
+					case ConvObject(obj) => ConvObject(Liquid(obj.asInstanceOf[Map[Substance, BigDecimal]]))
+					case x => x
+				})
+			}
+		)
+	)
 	
 	private def findTableInfoForType(tpe: ru.Type): RqResult[TableInfo[_]] = {
 		tableInfo_l.find(tpe <:< _.typ).asRq(s"type `$tpe` has no table")
@@ -94,7 +132,9 @@ object ConversionsDirect {
 	
 	private def toJson2(obj: Any, typ: Type): RqResult[JsValue] = {
 		logger.trace(s"toJson($obj, $typ)")
-		if (typ <:< typeOf[String]) RqSuccess(JsString(obj.toString))
+		val convInfo_? = convInfo_l.find(typ <:< _.typ)
+		if (convInfo_?.isDefined) convInfo_?.get.toJson(obj)
+		else if (typ <:< typeOf[String]) RqSuccess(JsString(obj.toString))
 		else if (typ <:< typeOf[Int]) RqSuccess(JsNumber(obj.asInstanceOf[Int]))
 		else if (typ <:< typeOf[Integer]) RqSuccess(JsNumber(obj.asInstanceOf[Integer]))
 		else if (typ <:< typeOf[Boolean]) RqSuccess(JsBoolean(obj.asInstanceOf[Boolean]))
@@ -255,8 +295,10 @@ object ConversionsDirect {
 				}
 			}
 			
+			val convInfo_? = convInfo_l.find(typ <:< _.typ)
 			val ret: RqResult[ConvResult] =
-			if (typ =:= typeOf[String]) ConversionsDirect.toString(jsval)
+			if (convInfo_?.isDefined) convInfo_?.get.fromJson(path_r, jsval, typ, time, lookup_m_?)
+			else if (typ =:= typeOf[String]) ConversionsDirect.toString(jsval)
 			else if (typ =:= typeOf[Int]) toInt(jsval)
 			else if (typ =:= typeOf[Integer]) toInteger(jsval)
 			else if (typ =:= typeOf[Double]) toDouble(jsval)
