@@ -113,7 +113,8 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			new pipette.DispenseHandler,
 			new pipette.MixHandler
 		))
-		p.loadJsonData(Config.config01)
+		p.loadJsonData(Config01.benchJson)
+		p.loadJsonData(Config01.protocol1Json)
 		
 		val (name_l, json_l) = nameToJson_l.unzip
 		Given("custom configs: "+name_l.mkString(", "))
@@ -169,12 +170,6 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			import roboliq.commands.pipette._
 			
 			val p = makeProcessor(
-				"database" -> JsonParser(
-					"""{
-					"substance": [
-						{ "id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}
-					]
-					}""").asJsObject,
 				"labware" -> JsonParser(
 					"""{
 					"plate": [
@@ -187,7 +182,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 						{ "id": "P1", "location": "cooled1" }
 					],
 					"vesselState": [
-						{ "id": "P1(A01)", "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
+						{ "id": "P1(A01)", "content": { "water": "100ul" } }
 					],
 					"vesselSituatedState": [
 					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } }
@@ -218,12 +213,6 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			import roboliq.commands.pipette._
 			
 			val p = makeProcessor(
-				"database" -> JsonParser(
-					"""{
-					"substance": [
-						{ "id": "water", "kind": "liquid", "physicalProperties": "Water", "cleanPolicy": {"enter": "Thorough", "within": "None", "exit": "Light"}}
-					]
-					}""").asJsObject,
 				"labware" -> JsonParser(
 					"""{
 					"plate": [
@@ -236,7 +225,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 						{ "id": "P1", "location": "cooled1" }
 					],
 					"vesselState": [
-						{ "id": "P1(A01)", "content": { "solventToVolume": { "water": "100ul" } } }
+						{ "id": "P1(A01)", "content": { "water": "100ul" } }
 					],
 					"vesselSituatedState": [
 					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } },

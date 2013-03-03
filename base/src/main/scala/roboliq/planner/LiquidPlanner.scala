@@ -363,8 +363,8 @@ class LiquidPlanner {
 	 */
 	def calcMixture(src_l: List[VesselContent], dst_l: List[VesselContent]): Trace = {
 		// Get list of solvents and solutes
-		val solvent_l = Set(dst_l.flatMap(_.liquid.contents.keys.filter(_.isLiquid)) : _*).toList
-		val solute_l = Set(dst_l.flatMap(_.liquid.contents.keys.filterNot(_.isLiquid)) : _*).toList
+		val solvent_l = Set(dst_l.flatMap(_.liquid.contents.keys.filter(_.isLiquid)) : _*).toList.sortBy(_.id)
+		val solute_l = Set(dst_l.flatMap(_.liquid.contents.keys.filterNot(_.isLiquid)) : _*).toList.sortBy(_.id)
 		
 		// Get mixtures of sources used to prepare the destination wells
 		val mixture_l = dst_l.map(dst => dstToSrcVolumes(solvent_l, solute_l, dst, src_l).map(_.ul.toDouble))
@@ -415,8 +415,8 @@ class LiquidPlanner {
 			(src0_i until step.src_n + step.tmp_n) flatMap add(combo, step)
 		}
 		val combo2_l = combo2_lº sortBy (_.n)
-		combo1_l foreach println
-		combo2_l foreach println
+		//combo1_l foreach println
+		//combo2_l foreach println
 		combo2_l match {
 			case Nil => None
 			case combo :: _ =>
@@ -488,7 +488,7 @@ class LiquidPlanner {
 		//println("A:")
 		//println(A)
 		val x = A.solve(b)
-		println(x)
+		//println(x)
 		x.getMatrix().getData().toList.map(n => LiquidVolume.ul(BigDecimal(n)))
 	}
 	

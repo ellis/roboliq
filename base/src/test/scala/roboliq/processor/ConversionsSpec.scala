@@ -290,7 +290,7 @@ class ConversionsSpec extends FunSpec {
 	
 		val db = new DataBase
 		it("should read back same objects as set in the database") {
-			Config.config01.fields.foreach(pair => {
+			def readBack(pair: (String, JsValue)) {
 				val (table, JsArray(elements)) = pair
 				elements.foreach(jsval => {
 					val jsobj = jsval.asJsObject
@@ -301,7 +301,10 @@ class ConversionsSpec extends FunSpec {
 						logger.debug(db.toString)
 					assert(db.get(tkp) === RqSuccess(jsval))
 				})
-			})
+			}
+			Config01.benchJson.fields.foreach(readBack)
+			Config01.protocol1Json.fields.foreach(readBack)
+
 			// Also add tip state
 			val tipStateKey = TKP("tipState", "TIP1", Nil)
 			val tipStateJson = ConversionsDirect.toJson(tipState).getOrElse(null)

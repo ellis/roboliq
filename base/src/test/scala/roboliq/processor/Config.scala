@@ -1,9 +1,34 @@
 package roboliq.processor
 
 import spray.json.JsonParser
+import grizzled.slf4j.Logger
+import spray.json._
+import _root_.roboliq.core._
+import ConversionsDirect._
 
-object Config {
-	val config01 = JsonParser(
+object Config01 {
+	val tipModel1000 = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
+	val tip1 = Tip(0, Some(tipModel1000))
+	val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
+	val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
+	val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
+	val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
+	val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
+	val plate_15000 = Plate("reagents15000", plateModel_15000, None)
+	val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
+
+	val water = Substance.liquid("water", 55, TipCleanPolicy.TN, gramPerMole_? = Some(18))
+
+	val plate_P1 = Plate("P1", plateModel_PCR, None)
+	val vessel_P1_A01 = Vessel("P1(A01)", None)
+	val vessel_T1 = Vessel("T1", Some(tubeModel_15000))
+	val tipState1 = TipState.createEmpty(tip1)
+	val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
+	val vesselState_T1 = VesselState(vessel_T1, VesselContent.Empty)
+	val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.byVolume(water, LiquidVolume.ul(100)).getOrElse(null))
+	val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
+
+	val benchJson = JsonParser(
 """{
 "tipModel": [
 	{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" },
@@ -63,16 +88,23 @@ object Config {
 "plate": [
 	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
 	{ "id": "reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },
-	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" },
+	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" }
+],
+"plateState": [
+	{ "id": "reagents15000", "location": "reagents15000" }
+]
+}""").asJsObject
+	
+	val protocol1Json = JsonParser(
+"""{
+"plate": [
 	{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
 ],
 "vessel": [
 	{ "id": "T1", "tubeModel": "Tube 15000ul" },
 	{ "id": "P1(A01)" }
 ],
-
 "plateState": [
-	{ "id": "reagents15000", "location": "reagents15000" },
 	{ "id": "P1", "location": "cooled1" }
 ],
 "vesselState": [

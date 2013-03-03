@@ -35,6 +35,7 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 	val planner = new LiquidPlanner
 
 	describe("Planner") {
+		info(src_l.toString)
 		val trace0 = planner.calcMixture(src_l, dst_l)
 		val bitset_l = planner.calcBitset(trace0.mixture_l)
 		it("should calcuate the correct mixtures for each destination well") {
@@ -47,7 +48,7 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 			val trace = planner.run(src_l, dst_l)
 			val doc = trace.createRst("Example A", "=-~")
 			
-			println(doc)
+			//println(doc)
 			FileUtils.writeToFile("trace-base/LiquidPlannerSpec_exampleA.rst", doc)
 		}
 	}

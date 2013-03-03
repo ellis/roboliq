@@ -22,7 +22,8 @@ class MovePlateSpec extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
 			new pipette.MixHandler
 		))
 	
-		p.loadJsonData(Config.config01)
+		p.loadJsonData(Config01.benchJson)
+		p.loadJsonData(Config01.protocol1Json)
 	}
 /*
 	feature("The user can move plates") {
