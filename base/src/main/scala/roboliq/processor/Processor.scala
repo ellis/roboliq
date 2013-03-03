@@ -53,8 +53,6 @@ case class ComputationNode(
 	computation: Computation
 )*/
 
-trait Event
-
 case class Token_Comment(s: String) extends CmdToken
 
 class ProcessorData(

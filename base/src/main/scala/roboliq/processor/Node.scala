@@ -218,6 +218,8 @@ case class Node_Events(
 	index: Int,
 	event_l: List[Event]
 ) extends Node {
+	import roboliq.events._
+	
 	val path = Node_Command.getCommandPath(parent_?, index)
 	val id = Node_Command.getCommandId(path)
 	val label_? = None
@@ -232,11 +234,11 @@ case class Node_Events(
 					case event: arm.PlateLocationEvent =>
 						val handler = new arm.PlateLocationEventHandler
 						RqSuccess(handler.fnargs(event))
-					case event: pipette.TipAspirateEvent =>
-						val handler = new roboliq.commands.pipette.TipAspirateEventHandler
+					case event: TipAspirateEvent =>
+						val handler = new TipAspirateEventHandler
 						RqSuccess(handler.fnargs(event))
-					case event: pipette.TipDispenseEvent =>
-						val handler = new roboliq.commands.pipette.TipDispenseEventHandler
+					case event: TipDispenseEvent =>
+						val handler = new TipDispenseEventHandler
 						RqSuccess(handler.fnargs(event))
 					case _ =>
 						RqError(s"No handler for event `$event0`")

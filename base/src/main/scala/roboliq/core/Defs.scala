@@ -133,3 +133,4 @@ class CleanSpec(
 )
 
 trait CmdToken
+trait Event

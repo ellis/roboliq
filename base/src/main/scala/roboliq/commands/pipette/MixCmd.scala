@@ -2,6 +2,7 @@ package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import roboliq.core._
+import roboliq.events._
 import roboliq.core.RqPimper._
 //import roboliq.commands.pipette.{HasTip,HasWell,HasVolume,HasPolicy}
 import roboliq.processor._

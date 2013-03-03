@@ -2,8 +2,9 @@ package roboliq.commands.pipette
 
 import scala.reflect.runtime.{universe => ru}
 import roboliq.core._
-import RqPimper._
+import roboliq.events._
 import roboliq.processor._
+import RqPimper._
 import scala.collection.JavaConversions._
 import scala.Option.option2Iterable
 import spray.json._
@@ -33,50 +34,6 @@ class AspirateHandler extends CommandHandler("pipetter.aspirate") {
 	}
 }
 
-/** Represents an aspiration event. */
-case class TipAspirateEvent(
-	tip: Tip,
-	/** Source well ID. */
-	src: VesselState,
-	/** Volume in liters to aspirate. */
-	volume: LiquidVolume
-) extends Event {
-	def toJson: JsValue = {
-		JsObject(Map(
-			"kind" -> JsString("tip.aspirate"),
-			"tip" -> JsString(tip.id),
-			"src" -> JsString(src.vessel.id),
-			"volume" -> JsString(volume.toString)
-		))
-	}
-}
-
-class TipAspirateEventHandler {// extends EventHandler {
-	import RqFunctionHandler._
-	
-	def fnargs(event: TipAspirateEvent) = {
-		fnRequire (lookup[TipState](event.tip.id)) { state0 =>
-			val liquid = event.src.content.liquid
-			val content_# = state0.content.addContentByVolume(event.src.content, event.volume)
-			val state_# = TipState(
-				state0.conf,
-				state0.model_?,
-				Some(event.src),
-				content_#,
-				state0.contamInside ++ liquid.contaminants,
-				LiquidVolume.max(state0.nContamInsideVolume, content_#.volume),
-				state0.contamOutside ++ liquid.contaminants,
-				state0.srcsEntered + liquid,
-				state0.destsEntered,
-				CleanIntensity.None,
-				state0.cleanDegreePrev,
-				CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
-			)
-			for { json <- ConversionsDirect.toJson[TipState](state_#) }
-			yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
-		}
-	}
-}
 /*
 case class VesselAddEvent(
 		/** ID of source well -- either `src` or `substance` must be set. */
