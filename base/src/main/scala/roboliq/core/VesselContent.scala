@@ -28,7 +28,7 @@ class VesselContent private(
 	val substanceToVolume: Map[Substance, LiquidVolume] =
 		substanceToMol.toList.flatMap(pair => {
 			val (substance, mole) = pair
-			substance.literPerMole_?.map(literPerMole => substance -> LiquidVolume.l(literPerMole * mole))
+			substance.molarity_?.map(molarity => substance -> LiquidVolume.l(mole / molarity))
 		}).toMap
 	/** Total liquid volume in vessel at 25C. */
 	val volume = substanceToVolume.values.toList.concatenate
@@ -126,9 +126,9 @@ class VesselContent private(
 	 */
 	def addLiquid(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] = {
 		for {
-			literPerMole <- substance.literPerMole_?.asRq("substance must specify literPerMole in order to work with volumes")
+			molarity <- substance.molarity_?.asRq("substance must specify literPerMole in order to work with volumes")
 		} yield {
-			val mole = volume.l / literPerMole
+			val mole = molarity * volume.l
 			addSubstance(substance, mole)
 		}
 	}

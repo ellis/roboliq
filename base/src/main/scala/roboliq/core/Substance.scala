@@ -11,7 +11,11 @@ object SubstanceKind extends Enumeration {
 	val None, Liquid, Dna, Other = Value
 }
 
-/** Represents a substance. */
+/**
+ * Represents a substance.
+ * 
+ * @param molarity_? moles per liter
+ */
 case class Substance(
 	/** ID in database. */
 	val id: String,
@@ -26,15 +30,15 @@ case class Substance(
 	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
 	val valuePerUnit_? : Option[BigDecimal],
 	
+	val molarity_? : Option[BigDecimal],
 	val gramPerMole_? : Option[BigDecimal],
-	val literPerMole_? : Option[BigDecimal],
 	val celciusAndConcToViscosity: List[CelciusAndConcToViscosity],
 
 	val sequence_? : Option[String]
 ) {
 	val isEmpty: Boolean = (kind == SubstanceKind.None)
 	val isLiquid: Boolean = (kind == SubstanceKind.Liquid) 
-	def literPerMole: BigDecimal = literPerMole_?.getOrElse(0)
+	def molarity: BigDecimal = molarity_?.getOrElse(0)
 	
 	/**
 	 * Whether multipipetting is allowed.
@@ -69,15 +73,15 @@ object Substance {
 		contaminants = Set(),
 		costPerUnit_? = None,
 		valuePerUnit_? = None,
+		molarity_? = None,
 		gramPerMole_? = None,
-		literPerMole_? = None,
 		celciusAndConcToViscosity = Nil,
 		sequence_? = None
 	)
 	
 	def liquid(
 		id: String,
-		literPerMole: BigDecimal,
+		molarity: BigDecimal,
 		tipCleanPolicy: TipCleanPolicy = TipCleanPolicy.TT,
 		contaminants: Set[String] = Set(),
 		costPerUnit_? : Option[BigDecimal] = None,
@@ -91,8 +95,8 @@ object Substance {
 			contaminants = contaminants,
 			costPerUnit_? = costPerUnit_?,
 			valuePerUnit_? = valuePerUnit_?,
+			molarity_? = Some(molarity),
 			gramPerMole_? = None,
-			literPerMole_? = Some(literPerMole),
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
 			sequence_? = None
 		)
@@ -103,8 +107,8 @@ object Substance {
 		sequence_? : Option[String] = None,
 		costPerUnit_? : Option[BigDecimal] = None,
 		valuePerUnit_? : Option[BigDecimal] = None,
+		molarity_? : Option[BigDecimal] = None,
 		gramPerMole_? : Option[BigDecimal] = None,
-		literPerMole_? : Option[BigDecimal] = None,
 		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
 	): Substance = {
 		Substance(
@@ -114,8 +118,8 @@ object Substance {
 			contaminants = Set("DNA"),
 			costPerUnit_? = costPerUnit_?,
 			valuePerUnit_? = valuePerUnit_?,
+			molarity_? = molarity_?,
 			gramPerMole_? = gramPerMole_?,
-			literPerMole_? = literPerMole_?,
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
 			sequence_? = None
 		)
@@ -127,8 +131,8 @@ object Substance {
 		contaminants: Set[String] = Set(),
 		costPerUnit_? : Option[BigDecimal] = None,
 		valuePerUnit_? : Option[BigDecimal] = None,
+		molarity_? : Option[BigDecimal] = None,
 		gramPerMole_? : Option[BigDecimal] = None,
-		literPerMole_? : Option[BigDecimal] = None,
 		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
 	): Substance = {
 		Substance(
@@ -138,8 +142,8 @@ object Substance {
 			contaminants = contaminants,
 			costPerUnit_? = costPerUnit_?,
 			valuePerUnit_? = valuePerUnit_?,
+			molarity_? = molarity_?,
 			gramPerMole_? = gramPerMole_?,
-			literPerMole_? = literPerMole_?,
 			celciusAndConcToViscosity = celciusAndConcToViscosity,
 			sequence_? = None
 		)
