@@ -40,6 +40,7 @@ class DataBase {
 	}
 	
 	def setAt(tkp: TKP, time: List[Int], jsval: JsValue) {
+		logger.trace(s"setAt($tkp, $time, $jsval)")
 		jsval match {
 			case jsobj: JsObject =>
 				if (jsobj.fields.isEmpty) {
@@ -55,6 +56,7 @@ class DataBase {
 				registerChild(tkp)
 				handleChange(tkp)
 		}
+		logger.trace(s" result: "+getAt(tkp, time))
 	}
 	
 	def set(tkp: TKP, jsval: JsValue) = setAt(tkp, Nil, jsval)

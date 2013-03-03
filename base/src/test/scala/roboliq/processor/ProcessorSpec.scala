@@ -126,7 +126,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 	}
 
 	describe("A Processor") {
-		it("should handle arm.movePlate") {
+		ignore("should handle arm.movePlate") {
 			val p = makeProcessor(
 				"labware" -> JsonParser(
 					"""{
@@ -209,7 +209,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			))
 		}
 
-		it("should handle pipette.dispense") {
+		ignore("should handle pipette.dispense") {
 			import roboliq.commands.pipette._
 			
 			val p = makeProcessor(

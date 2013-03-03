@@ -240,6 +240,12 @@ case class Node_Events(
 					case event: TipDispenseEvent =>
 						val handler = new TipDispenseEventHandler
 						RqSuccess(handler.fnargs(event))
+					case event: VesselAddEvent =>
+						val handler = new VesselAddEventHandler
+						RqSuccess(handler.fnargs(event))
+					case event: VesselRemoveEvent =>
+						val handler = new VesselRemoveEventHandler
+						RqSuccess(handler.fnargs(event))
 					case _ =>
 						RqError(s"No handler for event `$event0`")
 				}

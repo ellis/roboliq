@@ -255,7 +255,17 @@ class ConversionsSpec extends FunSpec {
 						"vessel" -> t1,
 						"content.water#" -> water
 					))
-					=== VesselContent.byVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _))
+					=== VesselContent.byVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _, None))
+			)
+			assert(
+				conv(
+					JsonParser("""{ "id": "T1", "content": { "water": "100ul" }, "isInitialVolumeKnown": true }"""),
+					typeOf[VesselState],
+					Map(
+						"vessel" -> t1,
+						"content.water#" -> water
+					))
+					=== VesselContent.byVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _, Some(true)))
 			)
 			assert(
 				conv(

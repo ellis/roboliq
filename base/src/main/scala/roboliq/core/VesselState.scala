@@ -5,6 +5,7 @@ case class VesselState(
 	content: VesselContent = VesselContent.Empty,
 	isInitialVolumeKnown_? : Option[Boolean] = None
 ) {
+	assert(isInitialVolumeKnown_? != null)
 	def id = vessel.id
 	def isInitialVolumeKnown = isInitialVolumeKnown_?.getOrElse(false)
 
