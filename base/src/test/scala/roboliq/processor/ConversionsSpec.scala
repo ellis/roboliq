@@ -147,6 +147,12 @@ class ConversionsSpec extends FunSpec {
 			),
 			List(JsNull)
 		)
+		check[TipCleanPolicy](
+			List(
+				JsString("ThoroughNone") -> TipCleanPolicy.ThoroughNone
+			),
+			List(JsNull, JsString(""), JsString("x"))
+		)
 		/*check[VesselContent](
 			List(
 				JsonParser("""{"liquid": {"id": "<EMPTY>"}, "totalMole": 0}""") -> VesselContent.Empty
@@ -215,12 +221,19 @@ class ConversionsSpec extends FunSpec {
 		it("should parse VesselContent") {
 			assert(
 				conv(
-					JsonParser("""{ "contents": { "water": "100ul" } }"""),
+					JsonParser("""{}"""),
+					typeOf[VesselContent],
+					Map())
+					=== RqSuccess(VesselContent.Empty)
+			)
+			assert(
+				conv(
+					JsonParser("""{ "water": 55 }"""),
 					typeOf[VesselContent],
 					Map(
-						"solventToVolume.water#" -> water
+						"water#" -> water
 					))
-					=== VesselContent.byVolume(water, LiquidVolume.ul(100))
+					=== VesselContent.byVolume(water, LiquidVolume.l(1))
 			)
 		}
 		it("should parse VesselState") {

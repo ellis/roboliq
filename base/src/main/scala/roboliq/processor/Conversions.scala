@@ -95,6 +95,15 @@ object ConversionsDirect {
 					case x => x
 				})
 			}
+		),
+		ConvInfo[VesselContent](
+			(o: VesselContent) => toJson(o.contents),
+			(path_r: List[String], jsval: JsValue, typ: ru.Type, time: List[Int], lookup_m_? : Option[Map[String, Any]]) => {
+				convOrRequire(path_r, jsval, typeOf[Map[Substance, BigDecimal]], time, lookup_m_?).map(_ match {
+					case ConvObject(obj) => ConvObject(VesselContent(obj.asInstanceOf[Map[Substance, BigDecimal]]))
+					case x => x
+				})
+			}
 		)
 	)
 	

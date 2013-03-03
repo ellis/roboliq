@@ -5,6 +5,7 @@ import Scalaz._
 import java.text.DecimalFormat
 import grizzled.slf4j.Logger
 import RqPimper._
+import roboliq.utils.MathUtils
 
 
 /**
@@ -148,15 +149,29 @@ class VesselContent private(
 		else
 			0
 	}
+
+	override def toString = 
+		if (contents.isEmpty) "<EMPTY>"
+		else contents.map(pair => "\"" + pair._1.id + "\"@" + MathUtils.toChemistString3(pair._2) + "mol").mkString("(", "+", ")")
+		
+	override def equals(that: Any): Boolean = that match {
+		case that_# : VesselContent => contents == that_#.contents
+		case _ => assert(false); false
+	}
+	override def hashCode() = id.hashCode()
 }
 
 object VesselContent {
+	def apply(contents: Map[Substance, BigDecimal]): VesselContent = {
+		new VesselContent(contents)
+	}
+	
 	def apply(liquid: Liquid, totalMole: BigDecimal): VesselContent = {
-		null
+		new VesselContent(scaleBy(liquid.contents, totalMole))
 	}
 	
 	/** Empty vessel contents. */
-	val Empty = VesselContent(Liquid.Empty, 0)
+	val Empty = new VesselContent(Map())
 	
 	def byVolume(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] =
 		Empty.addLiquid(substance, volume)
