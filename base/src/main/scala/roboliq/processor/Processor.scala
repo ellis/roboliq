@@ -241,7 +241,7 @@ class ProcessorData(
 							setEntityObj(node.kc, obj)
 							None
 						case EventItem_State(key, jsval) =>
-							setState(key, node.time, jsval)
+							setState(key, node.time ++ List(Int.MaxValue), jsval)
 							None
 						case _ =>
 							internalMessage_l += RqError("invalid return item for a conversion node")
@@ -564,16 +564,18 @@ class ProcessorData(
 	// REFACTOR: turn entity lookups into computations, somehow
 	def run(maxLoops: Int = -1) {
 		var countdown = maxLoops
+		var step_i = 0
 		while (countdown != 0) {
-			if (runStep())
+			if (runStep(step_i))
 				countdown -= 1
 			else
 				countdown = 0
+			step_i += 1
 		}
 		//makeMessagesForMissingInputs()
 	}
 	
-	private def runStep(): Boolean = {
+	private def runStep(step_i: Int): Boolean = {
 		lookupMessage_m.clear
 
 		val state0_m = state_m.toMap
@@ -609,6 +611,12 @@ class ProcessorData(
 		plate[P1] ...
 		param[1#1]: Plate = fn(cmd[1].id: JsValue) 
 		*/
+		
+		val g = new ProcessorGraph
+		g.setStep(step_i)
+		state0_m.foreach(pair => g.setNode(pair._2))
+		println("dot:")
+		println(g.toDot)
 		
 		println()
 		println("runStep")
