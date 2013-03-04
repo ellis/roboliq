@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>Les MisÃ©rables Co-occurrence</title>
+<title>Les Miserables Co-occurrence</title>
 <style>
 
 @import url(../style.css?20120427);
@@ -20,8 +19,11 @@ text.active {
 fill: red;
 }
 
+svg {
+margin-left: 5em;
+}
 </style>
-<script src="http://d3js.org/d3.v2.min.js?2.8.1"></script>
+<script src="d3.js"></script>
 </head>
 <body>
 <header>
@@ -29,7 +31,6 @@ fill: red;
 <a href="../" rel="author">Mike Bostock</a>
 </header>
 
-<h1><i>Les MisÃ©rables</i> Co-occurrence</h1>
 
 <aside style="margin-top:80px;">
 <p>Order: <select id="order">
