@@ -11,30 +11,53 @@ private case class NodeData(
 	child_l: List[Node]
 )
 
+private case class EntityData(
+	kco: KeyClassOpt,
+	status: Status.Value
+)
+
+private class StepData(step_i: Int) {
+	val json_l = new ArrayBuffer[EntityData]
+	val object_l = new ArrayBuffer[EntityData]
+	val conv_l = new ArrayBuffer[NodeData]
+	val comp_l = new ArrayBuffer[NodeData]
+}
+
 class ProcessorGraph {
-	private var step_i = 0
+	private var step_i = -1
+	private var stepData: StepData = null
+	private val stepData_m = new HashMap[Int, StepData]
 	private var index_i = 0
-	private val nodeData_l = new ArrayBuffer[NodeData]
 	/** Map tuple (step, node.id) to a node name in the graph */
 	private val nodeName_m = new HashMap[(Int, String), String]
 	
 	def setStep(i: Int) {
 		step_i = i
+		stepData = stepData_m.getOrElseUpdate(step_i, new StepData(step_i))
 	}
 	
 	def setNode(node: NodeState) {
 		val name = s"n${step_i}_${index_i}"
 		index_i += 1
 		val nodeData = NodeData(step_i, name, node.node, node.status, node.child_l)
-		nodeData_l += nodeData
+		
+		node.node match {
+			case n: Node_Conversion => stepData.conv_l += nodeData
+			case _ => stepData.comp_l += nodeData
+		}
+
 		nodeName_m((step_i, node.node.id)) = name
 	}
 	
 	def toDot(): String = {
+		val stepData_l = stepData_m.toList.sortBy(_._1)
+		
 		val nl = nodeData_l.toList.groupBy(_.step_i).mapValues(l => l.sortBy(_.node.id)).toList.sortBy(_._1)
 		val l = List[String](
 			"digraph G {"
-		) ++ nl.flatMap(pair => {
+		) ++ stepData_l.flatMap(pair => {
+			val (step_i, stepData) = pair
+			step
 			val (step_i, nodeData_l) = pair
 			val l2: List[String] = 
 				List[List[String]](
