@@ -66,5 +66,27 @@ class DataBaseSpec extends FunSpec {
 			// Should find jsval2 at time 3
 			assert(db.getAt(tkp, List(3)) === RqSuccess(jsval2))
 		}
+		
+		it("should handle state changes when adding a new field") {
+			val tkp = TKP("vesselState", "P1(A01)", Nil)
+			val time11 = List(1, 1)
+			val time1122 = List(1, 1, 2, 2)
+			val time1122_+ = List(1, 1, 2, 2, Int.MaxValue)
+			val jsval1 = JsonParser("""{"id":"P1(A01)","content":{"water":"100ul"}}""")
+			val jsval2 = JsonParser("""{"id":"P1(A01)","content":{"water":0.00275},"isInitialVolumeKnown":null}""")
+			
+			val db = new DataBase
+			db.setAt(tkp, List(0), jsval1)
+			assert(db.getBefore(tkp, time11) === RqSuccess(jsval1))
+			assert(db.getBefore(tkp, time1122) === RqSuccess(jsval1))
+
+			info(db.toString)
+			db.setAt(tkp, time1122_+, jsval2)
+			info(db.toString)
+			assert(db.getAt(tkp, time1122_+) === RqSuccess(jsval2))
+			assert(db.getAt(tkp, List(0)) === RqSuccess(jsval1))
+			assert(db.getBefore(tkp, time1122_+) === RqSuccess(jsval1))
+			assert(db.getBefore(tkp, time1122) === RqSuccess(jsval1))
+		}
 	}
 }

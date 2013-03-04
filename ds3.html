@@ -145,7 +145,6 @@ column.append("text")
 	.text(function(d, i) { return entities[i].name; });
 
 function row(row) {
-	var nodes = rowNodes;
 	var cell = d3.select(this).selectAll(".cell")
 		.data(row.filter(function(d) { return d.z; }))
 		.enter().append("rect")

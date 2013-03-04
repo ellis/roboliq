@@ -177,7 +177,7 @@ class ProcessorData(
 				case EventItem_State(key, jsval) =>
 					println("EventItem_State: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
 					//sys.exit()
-					db.setAt(key, parent_?.map(_.time).getOrElse(List(0)), jsval)
+					db.setAt(key, parent_?.map(_.time).getOrElse(List(0)) ++ List(Int.MaxValue), jsval)
 					Nil
 				case _ =>
 					Nil
@@ -617,8 +617,8 @@ class ProcessorData(
 
 		g.setEntities(kcoToValue_m)
 		state0_m.foreach(pair => g.setNode(pair._2))
-		println("dot:")
-		println(g.toDot)
+		//println("dot:")
+		//println(g.toDot)
 		
 		println()
 		println("runStep")

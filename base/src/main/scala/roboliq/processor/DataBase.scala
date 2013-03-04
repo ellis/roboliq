@@ -115,10 +115,14 @@ class DataBase {
 						//println("children_m: "+children_m)
 						RqError[JsValue](s"didn't find data for `${tkp.id}`")
 					case Some(child_l) =>
-						val result = child_l.toList.map(tkp => getWith(tkp, time, fnChooseTime).map(tkp.path.last -> _))
-						RqResult.toResultOfList(result).map { pair_l =>
-							JsObject(pair_l.toMap)
-						}
+						val result: List[(String, JsValue)] = child_l.toList.map(tkp => getWith(tkp, time, fnChooseTime) match {
+							case RqSuccess(x, _) => Some(tkp.path.last -> x)
+							case _ => None
+						}).flatten
+						if (result.isEmpty && !child_l.isEmpty)
+							RqError[JsValue](s"couldn't find any fields for `${tkp.id}` at time $time")
+						else
+							RqSuccess(JsObject(result.toMap))
 				}
 				
 			case Some(timeToValue_m) =>
