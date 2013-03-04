@@ -1,5 +1,6 @@
 package roboliq.processor
 
+import scala.language.postfixOps
 import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.typeOf
 import scala.reflect.runtime.universe.TypeTag
@@ -121,7 +122,8 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 		json_l.foreach(p.loadJsonData)
 
 		When("commands are run")
-		p.run()
+		val g = p.run()
+		org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.dot"), g.toDot)
 		p
 	}
 

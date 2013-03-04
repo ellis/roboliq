@@ -562,20 +562,23 @@ class ProcessorData(
 	private val Rx2 = """^([a-zA-Z]+)\[([0-9.]+)\]\.(.+)$""".r
 	
 	// REFACTOR: turn entity lookups into computations, somehow
-	def run(maxLoops: Int = -1) {
+	def run(maxLoops: Int = -1): ProcessorGraph = {
 		var countdown = maxLoops
 		var step_i = 0
+		val g = new ProcessorGraph
 		while (countdown != 0) {
-			if (runStep(step_i))
+			g.setStep(step_i)
+			if (runStep(g))
 				countdown -= 1
 			else
 				countdown = 0
 			step_i += 1
 		}
 		//makeMessagesForMissingInputs()
+		g
 	}
 	
-	private def runStep(step_i: Int): Boolean = {
+	private def runStep(g: ProcessorGraph): Boolean = {
 		lookupMessage_m.clear
 
 		val state0_m = state_m.toMap
@@ -600,7 +603,7 @@ class ProcessorData(
 		}).toMap
 		
 		// Set message for missing entities
-		lookupMessage_m  ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
+		lookupMessage_m ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
 		
 		// Update status for all nodes
 		state0_m.values.foreach(_.updateStatus(kcoToValue_m.apply _))
@@ -611,9 +614,8 @@ class ProcessorData(
 		plate[P1] ...
 		param[1#1]: Plate = fn(cmd[1].id: JsValue) 
 		*/
-		
-		val g = new ProcessorGraph
-		g.setStep(step_i)
+
+		g.setEntities(kcoToValue_m)
 		state0_m.foreach(pair => g.setNode(pair._2))
 		println("dot:")
 		println(g.toDot)

@@ -2,10 +2,10 @@ package roboliq.processor
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import roboliq.core.RqResult
 
 private case class NodeData(
 	step_i: Int,
-	name: String,
 	node: Node,
 	status: Status.Value,
 	child_l: List[Node]
@@ -37,41 +37,101 @@ class ProcessorGraph {
 	}
 	
 	def setNode(node: NodeState) {
-		val name = s"n${step_i}_${index_i}"
+		//val name = s"n${step_i}_${index_i}"
 		index_i += 1
-		val nodeData = NodeData(step_i, name, node.node, node.status, node.child_l)
+		val nodeData = NodeData(step_i, node.node, node.status, node.child_l)
 		
 		node.node match {
 			case n: Node_Conversion => stepData.conv_l += nodeData
 			case _ => stepData.comp_l += nodeData
 		}
 
-		nodeName_m((step_i, node.node.id)) = name
+		//nodeName_m((step_i, node.node.id)) = name
 	}
+	
+	def setEntities(kcoToValue_m: Map[KeyClassOpt, RqResult[Object]]) {
+		for ((kco, value) <- kcoToValue_m) {
+			val entityData = EntityData(kco, if (value.isSuccess) Status.Success else Status.NotReady)
+			stepData.json_l += entityData
+		}
+	}
+	
+	/*def toDs3Json(): String = {
+		
+		val node_l = conv_l.toList ++ comp_l.toList
+		
+	}*/
+
+	private val statusToColor = Map[Status.Value, String](
+		Status.NotReady -> "grey",
+		Status.Ready -> "green",
+		Status.Success -> "white",
+		Status.Error -> "red"
+	)
 	
 	def toDot(): String = {
 		val stepData_l = stepData_m.toList.sortBy(_._1)
+
+		val line_l = new ArrayBuffer[String]
 		
-		val nl = nodeData_l.toList.groupBy(_.step_i).mapValues(l => l.sortBy(_.node.id)).toList.sortBy(_._1)
-		val l = List[String](
-			"digraph G {"
-		) ++ stepData_l.flatMap(pair => {
-			val (step_i, stepData) = pair
-			step
-			val (step_i, nodeData_l) = pair
-			val l2: List[String] = 
-				List[List[String]](
-					(s"subgraph step${step_i} {") :: 
-						("label=\"step "+step_i+"\";") ::
-						("color=blue;") :: Nil,
-					nodeData_l.map(data => data.name+"[label=\""+data.node.id+"\"];"),
-					nodeData_l.flatMap(data => {
-						data.child_l.map(child => s"${data.name} -> ${nodeName_m((step_i, child.id))}")
-					}),
-					"}" :: Nil
-				).flatten
-			l2
-		}) ++ List("}")
-		l.mkString("\n")
+		//val nl = nodeData_l.toList.groupBy(_.step_i).mapValues(l => l.sortBy(_.node.id)).toList.sortBy(_._1)
+		line_l += "digraph G {"
+		line_l += "  rankdir=LR;"
+		for ((step_i, stepData) <- stepData_l) {
+			val convData_l = stepData.conv_l.toList.sortBy(_.node.id)
+			val compData_l = stepData.comp_l.toList.sortBy(_.node.id)
+			val nodeName_m: Map[String, String] =
+				convData_l.zipWithIndex.map(pair => pair._1.node.id -> s"s${step_i}o${pair._2}").toMap ++
+				compData_l.zipWithIndex.map(pair => pair._1.node.id -> s"s${step_i}f${pair._2}").toMap
+			val entityName_m: Map[String, String] = stepData.json_l.toList.zipWithIndex.map(pair => pair._1.kco.kc.id -> s"s${step_i}e${pair._2}").toMap
+			line_l += s"  subgraph cluster_${step_i} {"
+			line_l += "    label=\"Step "+step_i+"\";"
+			line_l += "    color=blue;"
+			line_l += "    rank=same;"
+				
+			// Conversion nodes
+			line_l += "    subgraph {"
+			for (data <- convData_l) {
+				val label = "\""+data.node.id+"\""
+				val color = statusToColor(data.status)
+				line_l += s"    ${nodeName_m(data.node.id)} [label=$label,fillcolor=$color,style=filled];"
+			}
+			// Conversion children relationships
+			for (data <- convData_l; child <- data.child_l) {
+				line_l += s"    ${nodeName_m(data.node.id)} -> ${nodeName_m(child.id)};"
+			}
+			line_l += "    }"
+				
+			// Entity nodes
+			line_l += "    subgraph {"
+			for (data <- stepData.json_l) {
+				val id = data.kco.kc.id
+				val label = "\""+id+"\""
+				val color = statusToColor(data.status)
+				line_l += s"    ${entityName_m(id)} [label=$label,fillcolor=$color,style=filled,shape=box];"
+			}
+			line_l += "    }"
+
+			// Computation nodes
+			line_l += "    subgraph {"
+			for (data <- compData_l) {
+				val label = "\""+data.node.id+"\""
+				val color = statusToColor(data.status)
+				line_l += s"    ${nodeName_m(data.node.id)} [label=$label,fillcolor=$color,style=filled];"
+			}
+			// Computation children relationships
+			for (data <- compData_l; child <- data.child_l) {
+				line_l += s"    ${nodeName_m(data.node.id)} -> ${nodeName_m(child.id)};"
+			}
+			line_l += "    }"
+				
+			// Inputs
+			for (data <- (convData_l ++ compData_l); kco <- data.node.input_l) {
+				line_l += s"    ${entityName_m(kco.kc.id)} -> ${nodeName_m(data.node.id)} [style=dotted];"
+			}
+			line_l += "  }"
+		}
+		line_l += "}"
+		line_l.mkString("\n")
 	}
 }

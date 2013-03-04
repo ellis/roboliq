@@ -48,8 +48,8 @@ fill: red;
 <script>
 
 var margin = {top: 80, right: 0, bottom: 10, left: 80},
-width = 720,
-height = 720;
+width = 120,
+height = 120;
 
 var x = d3.scale.ordinal().rangeBands([0, width]),
 z = d3.scale.linear().domain([0, 4]).clamp(true),
@@ -62,16 +62,19 @@ var svg = d3.select("body").append("svg")
 .append("g")
 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
+// Status colors: not ready, ready, success, error
+var statusColors = ['#808080', '#00ff00', '#000000', '#ff0000'];
+// Relation colors: ready
+var relationColors = ['#']
 
 var rowNodes = [
-{ name: "1", status: 1, inputs: [], outputs: [] },
+{ name: "1", status: 0, inputs: [], outputs: [] },
 { name: "1/1", status: 1, inputs: [0, 1], outputs: [] }
 ];
 
 var entities = [
-{ name: "tip[TIP1]", status: 1 },
-{ name: "tip[TIP2]", status: 1 }
+{ name: "tip[TIP1]", status: 2 },
+{ name: "tip[TIP2]", status: 3 }
 ];
 
 
@@ -121,6 +124,7 @@ row.append("text")
 	.attr("y", x.rangeBand() / 2)
 	.attr("dy", ".32em")
 	.attr("text-anchor", "end")
+    .style("fill", function(d, i) { return statusColors[rowNodes[i].status]; })
 	.text(function(d, i) { return rowNodes[i].name; });
 
 var column = svg.selectAll(".column")
@@ -137,6 +141,7 @@ column.append("text")
 	.attr("y", x.rangeBand() / 2)
 	.attr("dy", ".32em")
 	.attr("text-anchor", "start")
+    .style("fill", function(d, i) { return statusColors[entities[i].status]; })
 	.text(function(d, i) { return entities[i].name; });
 
 function row(row) {
