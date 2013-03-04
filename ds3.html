@@ -19,9 +19,6 @@ text.active {
 fill: red;
 }
 
-svg {
-margin-left: 5em;
-}
 </style>
 <script src="d3.js"></script>
 </head>
@@ -61,20 +58,20 @@ c = d3.scale.category10().domain(d3.range(10));
 var svg = d3.select("body").append("svg")
 .attr("width", width + margin.left + margin.right)
 .attr("height", height + margin.top + margin.bottom)
-.style("margin-left", -margin.left + "px")
+.style("margin-left", margin.left + "px")
 .append("g")
 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
 
 var rowNodes = [
-{ name: "1", group: 1, inputs: [] },
-{ name: "1/1", group: 1, inputs: [0, 1] }
+{ name: "1", status: 1, inputs: [], outputs: [] },
+{ name: "1/1", status: 1, inputs: [0, 1], outputs: [] }
 ];
 
 var entities = [
-{ name: "tip[TIP1]", group: 1 },
-{ name: "tip[TIP2]", group: 1 }
+{ name: "tip[TIP1]", status: 1 },
+{ name: "tip[TIP2]", status: 1 }
 ];
 
 
@@ -92,7 +89,7 @@ rowNodes.forEach(function(node, i) {
 // Convert links to matrix; count character occurrences.
 rowNodes.forEach(function(node) {
 	node.inputs.forEach(function(j) {
-		matrix[node.index][j] = 10;
+            matrix[node.index][j].z = 1;
 	});
 });
 
@@ -152,7 +149,7 @@ function row(row) {
 		.attr("width", x.rangeBand())
 		.attr("height", x.rangeBand())
 		//.style("fill-opacity", function(d) { return z(d.z); })
-		.style("fill", function(d) { return nodes[d.x].group == nodes[d.y].group ? c(nodes[d.x].group) : null; })
+        .style("fill", function(d) { return d.z > 0 ? c(d.z) : null; })
 		.on("mouseover", mouseover)
 		.on("mouseout", mouseout);
 }
@@ -188,10 +185,6 @@ function order(value) {
 	.attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
 }
 
-var timeout = setTimeout(function() {
-		order("group");
-		d3.select("#order").property("selectedIndex", 2).node().focus();
-	}, 5000);
 //});
 
 </script>
