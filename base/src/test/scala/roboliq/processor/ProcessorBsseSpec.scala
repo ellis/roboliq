@@ -38,13 +38,33 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 
 		When("commands are run")
 		val g = p.run()
-		org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.dot"), g.toDot)
+		//org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.dot"), g.toDot)
 		p
+	}
+	
+	def getObj[A <: Object : TypeTag](id: String)(implicit p: ProcessorData): A = {
+		checkObj(p.getObjFromDbAt[A](id, Nil))
+	}
+	
+	def getState[A <: Object : TypeTag](id: String, time: List[Int])(implicit p: ProcessorData): A = {
+		checkObj(p.getObjFromDbBefore[A](id, time))
+	}
+	
+	def checkObj[A <: Object : TypeTag](a_? : RqResult[A]): A = {
+		a_? match {
+			case RqSuccess(a, w) =>
+				assert(w === Nil)
+				a
+			case RqError(e, w) =>
+				info(w.toString)
+				assert(e === Nil)
+				null.asInstanceOf[A]
+		}		
 	}
 
 	describe("A Processor") {
 		it("should handle arm.movePlate") {
-			val p = makeProcessor(
+			implicit val p = makeProcessor(
 				"labware" -> JsonParser(
 					"""{
 					"plate": [
@@ -83,10 +103,10 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			assert(plateState_P1_?.map(_.location_?.map(_.id)) === RqSuccess(Some("cooled2")))
 		}
 
-		it("should handle pipette.aspirate") {
+		describe("should handle pipette.aspirate") {
 			import roboliq.commands.pipette._
 			
-			val p = makeProcessor(
+			implicit val p = makeProcessor(
 				"labware" -> JsonParser(
 					"""{
 					"plate": [
@@ -112,36 +132,39 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 					}""").asJsObject
 			)
 			
-			Then("there should be no errors or warnings")
-			assert(p.getMessages === Nil)
+			it("should have no errors or warnings") {
+				assert(p.getMessages === Nil)
+			}
 			
-			And("correct tokens should be generated")
-			val (_, token_l) = p.getTokenList.unzip
-			val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
-			val vss_P1_A01_0_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0))
-			val vss_P1_A01_1_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(1, Int.MaxValue))
-			assert(vss_P1_A01_0_?.isSuccess)
-			assert(vss_P1_A01_1_?.isSuccess)
-			val vss_P1_A01_0 = vss_P1_A01_0_?.getOrElse(null)
-			val vss_P1_A01_1 = vss_P1_A01_1_?.getOrElse(null)
-			assert(token_l === List(
-				commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01_0, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
-			))
+			it("should generate correct tokens") {
+				val (_, token_l) = p.getTokenList.unzip
+				val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
+				val tipState_1 = getState[TipState]("TIP1", List(1))
+				val vss_P1_A01_0_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0))
+				val vss_P1_A01_1_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(1, Int.MaxValue))
+				assert(vss_P1_A01_0_?.isSuccess)
+				assert(vss_P1_A01_1_?.isSuccess)
+				val vss_P1_A01_0 = vss_P1_A01_0_?.getOrElse(null)
+				val vss_P1_A01_1 = vss_P1_A01_1_?.getOrElse(null)
+				assert(token_l === List(
+					commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01_0, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
+				))
+			}
 
-			And("correct contents should be in the source well")
-			val water = p.getObjFromDbAt[Substance]("water", Nil).getOrElse(null)
-			val vesselState_P1_A01_1_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(1, Int.MaxValue))
-			assert(vesselState_P1_A01_1_?.isSuccess)
-			val vesselState_P1_A01 = vesselState_P1_A01_1_?.getOrElse(null)
-			val vesselContent_P1_A01_expected_? = VesselContent.byVolume(water, LiquidVolume.ul(50))
-			assert(RqSuccess(vesselState_P1_A01.content) === vesselContent_P1_A01_expected_?)
-			assert(vesselState_P1_A01.content.volume === LiquidVolume.ul(50))
+			it("correct contents should be in the source well") {
+				val water = p.getObjFromDbAt[Substance]("water", Nil).getOrElse(null)
+				val vesselState_P1_A01_1_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(1, Int.MaxValue))
+				assert(vesselState_P1_A01_1_?.isSuccess)
+				val vesselState_P1_A01 = vesselState_P1_A01_1_?.getOrElse(null)
+				val vesselContent_P1_A01_expected_? = VesselContent.fromVolume(water, LiquidVolume.ul(50))
+				assert(RqSuccess(vesselState_P1_A01.content) === vesselContent_P1_A01_expected_?)
+			}
 		}
 
 		describe("given a pipette.dispense command") {
 			import roboliq.commands.pipette._
 			
-			val p = makeProcessor(
+			implicit val p = makeProcessor(
 				"labware" -> JsonParser(
 					"""{
 					"plate": [
@@ -178,6 +201,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			it("should generated correct tokens") {
 				val (_, token_l) = p.getTokenList.unzip
 				val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
+				val tipState_1 = getState[TipState]("TIP1", List(1))
 				val vss_P1_A01_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0, Int.MaxValue))
 				val vss_P1_B01_? = p.getObjFromDbAt[VesselSituatedState]("P1(B01)", List(1, Int.MaxValue))
 				assert(vss_P1_A01_?.isSuccess)
@@ -185,8 +209,8 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				val vss_P1_A01 = vss_P1_A01_?.getOrElse(null)
 				val vss_P1_B01 = vss_P1_B01_?.getOrElse(null)
 				assert(token_l === List(
-					commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tip, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact)))),
-					commands.pipette.DispenseToken(List(new TipWellVolumePolicy(tip, vss_P1_B01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
+					commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact)))),
+					commands.pipette.DispenseToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_B01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 				))
 			}
 			
@@ -194,7 +218,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				val vesselState_P1_A01_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(2, Int.MaxValue))
 				assert(vesselState_P1_A01_?.isSuccess)
 				val vesselState_P1_A01 = vesselState_P1_A01_?.getOrElse(null)
-				val vesselContent_P1_A01_expected_? = VesselContent.byVolume(water, LiquidVolume.ul(50))
+				val vesselContent_P1_A01_expected_? = VesselContent.fromVolume(water, LiquidVolume.ul(50))
 				assert(RqSuccess(vesselState_P1_A01.content) === vesselContent_P1_A01_expected_?)
 			}
 			
@@ -202,7 +226,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				val vesselState_P1_B01_? = p.getObjFromDbAt[VesselState]("P1(B01)", List(2, Int.MaxValue))
 				assert(vesselState_P1_B01_?.isSuccess)
 				val vesselState_P1_B01 = vesselState_P1_B01_?.getOrElse(null)
-				val vesselContent_P1_B01_expected_? = VesselContent.byVolume(water, LiquidVolume.ul(50))
+				val vesselContent_P1_B01_expected_? = VesselContent.fromVolume(water, LiquidVolume.ul(50))
 				assert(RqSuccess(vesselState_P1_B01.content) === vesselContent_P1_B01_expected_?)
 			}
 		}

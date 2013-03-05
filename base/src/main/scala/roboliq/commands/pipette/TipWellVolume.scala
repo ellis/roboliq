@@ -3,7 +3,7 @@ package roboliq.commands.pipette
 import roboliq.core._
 
 
-trait HasTip { val tip: Tip }
+trait HasTip { val tip: TipState }
 trait HasWell { val well: Well }
 trait HasVolume { val volume: LiquidVolume }
 trait HasPolicy { val policy: PipettePolicy }
@@ -19,14 +19,14 @@ trait HasTipWellVolumePolicy extends HasTipWellVolume with HasPolicy
 //class TWVP(val tip: Tip, val well: Well, val volume: LiquidVolume, val policy: String) extends HasTip with HasWell with HasVolume with HasPolicy
 
 case class TipWell(
-	tip: Tip,
+	tip: TipState,
 	well: Well
 ) extends HasTipWell {
 	override def toString = s"TipWell(${tip.id},${well.id})"
 }
 
 case class TipWellVolume(
-	tip: Tip,
+	tip: TipState,
 	well: Well,
 	volume: LiquidVolume
 ) extends HasTipWellVolume {
@@ -34,7 +34,7 @@ case class TipWellVolume(
 }
 
 case class TipWellPolicy(
-	tip: Tip,
+	tip: TipState,
 	well: Well,
 	policy: PipettePolicy
 ) extends HasTipWellPolicy {
@@ -42,7 +42,7 @@ case class TipWellPolicy(
 }
 
 case class TipWellVolumePolicy(
-	tip: Tip,
+	tip: TipState,
 	well: Well,
 	volume: LiquidVolume,
 	policy: PipettePolicy
@@ -51,7 +51,7 @@ case class TipWellVolumePolicy(
 }
 
 case class TipWellMix(
-	tip: Tip,
+	tip: TipState,
 	well: Well,
 	mixSpec: MixSpec
 ) extends HasTipWell with HasMixSpec {

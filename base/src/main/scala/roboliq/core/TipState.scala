@@ -1,7 +1,7 @@
 package roboliq.core
 
+import scala.language.implicitConversions
 import scala.collection.mutable.HashMap
-import scala.reflect.BeanProperty
 
 
 /**
@@ -31,7 +31,12 @@ case class TipState(
 	/** Intensity of cleaning that should be performed after leaving the current liquid group */
 	val cleanDegreePending: CleanIntensity.Value
 ) extends Ordered[TipState] {
+	def id = conf.id
+	def index = conf.index
+	def permanent_? = conf.permanent_?
+	
 	override def compare(that: TipState): Int = conf.compare(that.conf)
+	override def toString = id
 }
 
 /** Factory object for [[roboliq.core.TipState]]. */
@@ -51,4 +56,6 @@ object TipState {
 		cleanDegreePrev = CleanIntensity.None,
 		cleanDegreePending = CleanIntensity.None
 	)
+	
+	implicit def toTip(o: TipState): Tip = o.conf
 }

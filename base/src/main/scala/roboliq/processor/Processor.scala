@@ -750,6 +750,21 @@ class ProcessorData(
 		}
 	}
 	
+	def getObjFromDbBefore[A <: Object : TypeTag](id: String, time: List[Int]): RqResult[A] = {
+		val typ = ru.typeTag[A].tpe
+		logger.trace(s"getObjFromDbBefore[$typ]($id, $time)")
+		for {
+			table <- ConversionsDirect.findTableForType(typ)
+			kc = KeyClass(TKP(table, id, Nil), typ, Nil)
+			//_ = println("kc: "+kc)
+			obj <- cache_m.get(kc) match {
+				case Some(x) => RqSuccess(x.asInstanceOf[A])
+				case None => Conversions.readByIdBefore[A](db, id, time)
+			}
+		} yield obj
+	}
+	
+	// REFACTOR: basically a duplicate of getObjFromDbBefore().  Should figure out a better approach to this before/after stuff for states.
 	def getObjFromDbAt[A <: Object : TypeTag](id: String, time: List[Int]): RqResult[A] = {
 		val typ = ru.typeTag[A].tpe
 		logger.trace(s"getObjFromDbAt[$typ]($id, $time)")

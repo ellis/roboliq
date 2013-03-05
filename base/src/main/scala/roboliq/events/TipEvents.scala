@@ -30,23 +30,24 @@ class TipAspirateEventHandler {// extends EventHandler {
 	def fnargs(event: TipAspirateEvent) = {
 		fnRequire (lookup[TipState](event.tip.id)) { state0 =>
 			val liquid = event.src.content.liquid
-			val content_# = state0.content.addContentByVolume(event.src.content, event.volume)
-			val state_# = TipState(
-				state0.conf,
-				state0.model_?,
-				Some(event.src),
-				content_#,
-				state0.contamInside ++ liquid.contaminants,
-				LiquidVolume.max(state0.nContamInsideVolume, content_#.volume),
-				state0.contamOutside ++ liquid.contaminants,
-				state0.srcsEntered + liquid,
-				state0.destsEntered,
-				CleanIntensity.None,
-				state0.cleanDegreePrev,
-				CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
-			)
-			for { json <- ConversionsDirect.toJson[TipState](state_#) }
-			yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
+			for {
+				content_# <- state0.content.addContentByVolume(event.src.content, event.volume)
+				state_# = TipState(
+					state0.conf,
+					state0.model_?,
+					Some(event.src),
+					content_#,
+					state0.contamInside ++ liquid.contaminants,
+					LiquidVolume.max(state0.nContamInsideVolume, content_#.volume),
+					state0.contamOutside ++ liquid.contaminants,
+					state0.srcsEntered + liquid,
+					state0.destsEntered,
+					CleanIntensity.None,
+					state0.cleanDegreePrev,
+					CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
+				)
+				json <- ConversionsDirect.toJson[TipState](state_#)
+			} yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
 		}
 	}
 }
@@ -78,10 +79,11 @@ class TipDispenseEventHandler {// extends EventHandler {
 	def fnargs(event: TipDispenseEvent) = {
 		fnRequire (lookup[TipState](event.tip.id)) { state0 =>
 			val liquid = event.dest.content.liquid
-			val content_# = state0.content.removeVolume(event.volume)
-			val state_# = dispense(state0, content_#, liquid, event.pos)
-			for { json <- ConversionsDirect.toJson[TipState](state_#) }
-			yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
+			for {
+				content_# <- state0.content.removeVolume(event.volume)
+				state_# = dispense(state0, content_#, liquid, event.pos)
+				json <- ConversionsDirect.toJson[TipState](state_#)
+			} yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
 		}
 	}
 

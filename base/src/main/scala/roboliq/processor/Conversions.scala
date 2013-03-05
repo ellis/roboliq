@@ -267,6 +267,7 @@ object ConversionsDirect {
 	}
 
 	def convRequirements(jsval: JsValue, typ: ru.Type, time: List[Int] = Nil): RqResult[Either[Map[String, KeyClassOpt], Any]] = {
+		logger.trace(s"convRequirements($jsval, $typ, $time)")
 		convOrRequire(Nil, jsval, typ, time, None).flatMap(_ match {
 			case ConvRequire(m) => RqSuccess(Left(m))
 			case ConvObject(o) => RqSuccess(Right(o))
@@ -806,9 +807,10 @@ object Conversions {
 	}
 	
 	def readAnyBefore(db: DataBase, kc: KeyClass): RqResult[Any] = {
+		logger.trace(s"readAnyBefore(db, $kc)")
 		for {
 			jsval <- db.getBefore(kc.key, kc.time)
-			either <- D.convRequirements(jsval, kc.clazz)
+			either <- D.convRequirements(jsval, kc.clazz, kc.time)
 			ret <- either match {
 				case Right(ret) => RqSuccess(ret)
 				case Left(require_m) => 

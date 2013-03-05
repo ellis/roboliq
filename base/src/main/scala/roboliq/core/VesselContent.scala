@@ -16,12 +16,11 @@ import roboliq.utils.MathUtils
  * @param soluteToMol map from solute to amount in mol.
  */
 class VesselContent private(
-	// REFACTOR: consider merging Liquid and VesselContent, where Liquid is a VesselContent normalized to 1 
-	val contents: Map[Substance, BigDecimal]
+	val contents: Map[Substance, BigDecimal],
+	val liquid: Liquid
 ) {
 	private val logger = Logger[this.type]
 	
-	val liquid = Liquid(contents)
 	val totalMole = contents.values.sum
 	
 	val substanceToMol: Map[Substance, BigDecimal] = contents
@@ -87,19 +86,27 @@ class VesselContent private(
 	/**
 	 * Return a new VesselContent from this one which has been scaled to a total volume of `volumeNew`.
 	 */
-	def scaleToVolume(volumeNew: LiquidVolume): VesselContent = {
+	def scaleToVolume(volumeNew: LiquidVolume): RqResult[VesselContent] = {
+		// Make sure that this vessel contains something that can be scaled
 		if (liquid.isEmpty) {
-			logger.warn(s"called VesselContent.scaleToVolume() on empty vessel: $this")
-			return this
+			RqError(s"called VesselContent.scaleToVolume() on an empty vessel: $this")
 		}
-		/*else if (volume.isEmpty) {
-			val contents_# = VesselContent.scaleBy(liquid.contents, factor)
-			new VesselContent(contents_#)
-		}*/
+		// If there are no contents whose molarity is defined:
+		else if (substanceToVolume.isEmpty) {
+			RqError(s"called VesselContent.scaleToVolume() on a vessel whose contents do not have molarity specified: $this")
+		}
+		// If the vessel doesn't have a volume specified, take the liquid and try to scale it appropriately
+		else if (volume.isEmpty) {
+			val content_# = VesselContent(liquid, 1)
+			if (content_#.volume.isEmpty)
+				RqError(s"called VesselContent.scaleToVolume() on a vessel whose contents do not have positive molarity specified: $this")
+			else
+				content_#.scaleToVolume(volumeNew)
+		}
 		else {
 			val factor = volumeNew.l / volume.l
 			val contents_# = VesselContent.scaleBy(contents, factor)
-			new VesselContent(contents_#)
+			RqSuccess(VesselContent(contents_#))
 		}
 	}
 	
@@ -108,14 +115,14 @@ class VesselContent private(
 	 */
 	def +(that: VesselContent): VesselContent = {
 		val contents_# = substanceToMol |+| that.substanceToMol
-		new VesselContent(contents_#)
+		VesselContent(contents_#)
 	}
 
 	/**
 	 * Return a new VesselContent combining `this` and `volume` of `that`.
 	 */
-	def addContentByVolume(that: VesselContent, volume: LiquidVolume): VesselContent = {
-		this + that.scaleToVolume(volume)
+	def addContentByVolume(that: VesselContent, volume: LiquidVolume): RqResult[VesselContent] = {
+		that.scaleToVolume(volume).map(this + _)
 	}
 	
 	/**
@@ -123,7 +130,7 @@ class VesselContent private(
 	 */
 	def addSubstance(substance: Substance, mol: BigDecimal): VesselContent = {
 		val content_# = substanceToMol |+| Map(substance -> mol)
-		new VesselContent(content_#)
+		VesselContent(content_#)
 	}
 	
 	/**
@@ -141,19 +148,29 @@ class VesselContent private(
 	/**
 	 * Return a new VesselContent after removing `volume` of `this`.
 	 */
-	def removeVolume(volume: LiquidVolume): VesselContent = {
+	def removeVolume(volume: LiquidVolume): RqResult[VesselContent] = {
 		scaleToVolume(this.volume - volume)
 	}
 
 	/**
-	 * Get the molar concentration of a non-liquid `substance`. 
+	 * Get the mole fraction of `substance` (i.e., moles of substance in vessel divided by total moles in vessel). 
 	 */
-	def substanceFraction(substance: Substance): BigDecimal = {
+	def moleFractionOf(substance: Substance): BigDecimal = {
 		if (totalMole > 0)
 			substanceToMol.get(substance).map(_ / totalMole).getOrElse(0)
 		else
 			0
 	}
+
+	/**
+	 * Get the molar concentration of `substance` (i.e., moles of substance in vessel divided by total volume in vessel). 
+	 */
+//	def molarConcOf(substance: Substance): BigDecimal = {
+//		if (totalMole > 0)
+//			substanceToMol.get(substance).map(_ / totalMole).getOrElse(0)
+//		else
+//			0
+//	}
 
 	override def toString = 
 		if (contents.isEmpty) "<EMPTY>"
@@ -168,19 +185,29 @@ class VesselContent private(
 
 object VesselContent {
 	def apply(contents: Map[Substance, BigDecimal]): VesselContent = {
-		new VesselContent(contents)
+		new VesselContent(contents, Liquid(contents))
 	}
 	
 	def apply(liquid: Liquid, totalMole: BigDecimal): VesselContent = {
-		new VesselContent(scaleBy(liquid.contents, totalMole))
+		new VesselContent(scaleBy(liquid.contents, totalMole), liquid)
 	}
 	
 	/** Empty vessel contents. */
-	val Empty = new VesselContent(Map())
+	val Empty = new VesselContent(Map(), Liquid.Empty)
 	
-	def byVolume(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] =
+	def fromVolume(substance: Substance, volume: LiquidVolume): RqResult[VesselContent] =
 		Empty.addLiquid(substance, volume)
+		
+	def fromVolume(liquid: Liquid, volume: LiquidVolume): RqResult[VesselContent] = {
+		val content_# = VesselContent(liquid, 1)
+		content_#.scaleToVolume(volume)
+	}
 		
 	def scaleBy(contents: Map[Substance, BigDecimal], factor: BigDecimal): Map[Substance, BigDecimal] =
 		contents.mapValues(_ * factor)
+	
+	implicit object VesselContentMonoid extends Monoid[VesselContent] {
+		def zero = Empty
+		def append(a: VesselContent, b: => VesselContent): VesselContent = a + b
+	}
 }

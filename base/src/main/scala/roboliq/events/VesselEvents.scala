@@ -39,9 +39,11 @@ class VesselRemoveEventHandler {// extends EventHandler {
 	
 	def fnargs(event: VesselRemoveEvent) = {
 		fnRequire (lookup[VesselState](event.vessel.id)) { state0 =>
-			val state_# = state0.copy(content = state0.content.removeVolume(event.volume))
-			for { json <- ConversionsDirect.toJson[VesselState](state_#) }
-			yield List(EventItem_State(TKP("vesselState", event.vessel.id, Nil), json))
+			for {
+				content_# <- state0.content.removeVolume(event.volume)
+				state_# = state0.copy(content = content_#)
+				json <- ConversionsDirect.toJson[VesselState](state_#)
+			} yield List(EventItem_State(TKP("vesselState", event.vessel.id, Nil), json))
 		}
 	}
 

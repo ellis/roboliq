@@ -10,7 +10,7 @@ import roboliq.commands.pipette._
 
 
 object PipetteHelper {
-	def chooseTipWellPairsAll(tips: SortedSet[Tip], dests: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
+	def chooseTipWellPairsAll(tips: SortedSet[TipState], dests: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
 		//println("chooseTipWellPairsAll()")
 		//println("tips: "+tips)
 		//println("dests: "+dests)
@@ -37,7 +37,7 @@ object PipetteHelper {
 		//states.getWellPosList(wells)
 	//}
 
-	private def chooseTipWellPairsNext(tips: SortedSet[Tip], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
+	private def chooseTipWellPairsNext(tips: SortedSet[TipState], wells: SortedSet[Well], twsPrev: Seq[TipWell]): Result[Seq[TipWell]] = {
 		//print("A")
 		//println("chooseTipWellPairsNext()")
 		//println("tips: "+tips)
@@ -241,9 +241,9 @@ object PipetteHelper {
 		}
 	}
 	
-	def chooseTipSrcPairs(tips: SortedSet[Tip], srcs: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
-		def processStep(tips0: Iterable[Tip]): Result[Tuple2[Iterable[Tip], Seq[TipWell]]] = {
-			val tips = SortedSet[Tip](tips0.toSeq : _*)
+	def chooseTipSrcPairs(tips: SortedSet[TipState], srcs: SortedSet[Well]): Result[Seq[Seq[TipWell]]] = {
+		def processStep(tips0: Iterable[TipState]): Result[Tuple2[Iterable[TipState], Seq[TipWell]]] = {
+			val tips = SortedSet[TipState](tips0.toSeq : _*)
 			for { tws <- chooseTipWellPairsNext(tips, srcs, Nil) }
 			yield {
 				val tipsRemaining = tips -- tws.map(_.tip)

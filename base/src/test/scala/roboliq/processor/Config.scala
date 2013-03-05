@@ -25,7 +25,7 @@ object Config01 {
 	val tipState1 = TipState.createEmpty(tip1)
 	val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 	val vesselState_T1 = VesselState(vessel_T1, VesselContent.Empty)
-	val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.byVolume(water, LiquidVolume.ul(100)).getOrElse(null))
+	val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.fromVolume(water, LiquidVolume.ul(100)).getOrElse(null))
 	val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
 
 	val benchJson = JsonParser(

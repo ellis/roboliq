@@ -21,15 +21,26 @@ case class DispenseToken(
 
 class DispenseHandler extends CommandHandler("pipetter.dispense") {
 	val fnargs = cmdAs[DispenseCmd] { cmd =>
-		val events = cmd.items.flatMap(item => {
-			TipDispenseEvent(item.tip, item.well.vesselState, item.volume, item.policy.pos) ::
-			VesselRemoveEvent(item.well, item.volume) :: Nil
-		})
-		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
-		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
-		RqSuccess(List(
-			ComputationItem_Token(DispenseToken(cmd.items)),
-			ComputationItem_Events(events)
-		))
+		/*fnRequireList[TipState](cmd.items.map(item => lookup[TipState](item.tip.id)) { }
+		{
+			fnRequireList(l)(fn)
+		}*/
+		for {
+			events <- RqResult.toResultOfList(cmd.items.map(item => {
+				for {
+					content <- item.well.content.scaleToVolume(item.volume)
+				} yield {
+					TipDispenseEvent(item.tip, item.well, item.volume, item.policy.pos) ::
+					VesselAddEvent(item.well, content) :: Nil
+				}
+			})).map(_.flatten)
+		} yield {
+			//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
+			//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
+			List(
+				ComputationItem_Token(DispenseToken(cmd.items)),
+				ComputationItem_Events(events)
+			)
+		}
 	}
 }

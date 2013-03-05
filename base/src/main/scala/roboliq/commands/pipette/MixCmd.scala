@@ -15,7 +15,7 @@ case class MixCmd(
 )
 
 case class MixItem(
-	tip: Tip,
+	tip: TipState,
 	well: Well,
 	mixSpec_? : Option[MixSpecOpt]
 )
@@ -25,7 +25,7 @@ case class MixToken(
 ) extends CmdToken
 
 case class MixTokenItem(
-	val tip: Tip,
+	val tip: TipState,
 	val well: Well,
 	val volume: LiquidVolume,
 	val count: Int,

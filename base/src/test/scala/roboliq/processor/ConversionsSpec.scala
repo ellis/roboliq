@@ -233,7 +233,7 @@ class ConversionsSpec extends FunSpec {
 					Map(
 						"water#" -> water
 					))
-					=== VesselContent.byVolume(water, LiquidVolume.l(1))
+					=== VesselContent.fromVolume(water, LiquidVolume.l(1))
 			)
 			assert(
 				conv(
@@ -242,7 +242,7 @@ class ConversionsSpec extends FunSpec {
 					Map(
 						"water#" -> water
 					))
-					=== VesselContent.byVolume(water, LiquidVolume.l(1))
+					=== VesselContent.fromVolume(water, LiquidVolume.l(1))
 			)
 		}
 		it("should parse VesselState") {
@@ -255,7 +255,7 @@ class ConversionsSpec extends FunSpec {
 						"vessel" -> t1,
 						"content.water#" -> water
 					))
-					=== VesselContent.byVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _, None))
+					=== VesselContent.fromVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _, None))
 			)
 			assert(
 				conv(
@@ -265,7 +265,7 @@ class ConversionsSpec extends FunSpec {
 						"vessel" -> t1,
 						"content.water#" -> water
 					))
-					=== VesselContent.byVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _, Some(true)))
+					=== VesselContent.fromVolume(water, LiquidVolume.ul(100)).map(VesselState(t1, _, Some(true)))
 			)
 			assert(
 				conv(
@@ -295,7 +295,7 @@ class ConversionsSpec extends FunSpec {
 		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
 		val vesselState_T1 = VesselState(vessel_T1, VesselContent.Empty)
-		val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.byVolume(water, LiquidVolume.ul(100)).getOrElse(null))
+		val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.fromVolume(water, LiquidVolume.ul(100)).getOrElse(null))
 		val vesselSituatedState_T1 = VesselSituatedState(vesselState_T1, VesselPosition(plateState_15000, 0))
 	
 		val db = new DataBase
