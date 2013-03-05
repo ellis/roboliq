@@ -16,7 +16,8 @@ import RqPimper._
 import roboliq.utils.MathUtils
 
 
-private case class TableInfo[A <: Object : TypeTag](
+// REFACTOR: Make this private again once I've merged ConversionsDirect and Conversions into Converter
+case class TableInfo[A <: Object : TypeTag](
 	table: String,
 	id_? : Option[String] = None,
 	toJson_? : Option[A => RqResult[JsValue]] = None,
@@ -59,7 +60,7 @@ case class Quantity_Mole(n: BigDecimal) extends Quantity
 object ConversionsDirect {
 	private val logger = Logger("roboliq.processor.ConversionsDirect")
 	
-	private val tableInfo_l = List[TableInfo[_]](
+	val tableInfo_l = List[TableInfo[_ <: Object]](
 		TableInfo[TipModel]("tipModel", None, None),
 		TableInfo[PlateModel]("plateModel", None, None),
 		TableInfo[TubeModel]("tubeModel", None, None),
@@ -168,7 +169,8 @@ object ConversionsDirect {
 		toJson2(a, typ)
 	}
 	
-	private def toJson2(obj: Any, typ: Type): RqResult[JsValue] = {
+	// REFACTOR: make private
+	def toJson2(obj: Any, typ: Type): RqResult[JsValue] = {
 		logger.trace(s"toJson($obj, $typ)")
 		val convInfo_? = convInfo_l.find(typ <:< _.typ)
 		if (convInfo_?.isDefined) convInfo_?.get.toJson(obj)
@@ -826,6 +828,29 @@ object Conversions {
 					} yield ret
 			}
 		} yield ret
+	}
+	
+	def toJsonConfig(l: List[Object]): RqResult[JsObject] = {
+		val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
+		val classToInfo_m: Map[Class[_], TableInfo[_]] =
+			D.tableInfo_l.map(info => mirror.runtimeClass(info.typ) -> info).toMap
+		
+		val l0: List[RqResult[(String, JsValue)]] = l.map(o => {
+			val clazz = o.getClass
+			classToInfo_m.get(clazz) match {
+				case Some(info) => D.toJson2(o, info.typ).map(info.table -> _)
+				case None => RqError(s"object doesn't have a table: $o")
+			}
+		})
+		val l1_? : RqResult[List[(String, JsValue)]] = RqResult.toResultOfList(l0)
+		for {
+			l1 <- l1_?
+		} yield {
+			val m0: Map[String, List[(String, JsValue)]] = l1.groupBy(_._1)
+			val m1: Map[String, List[JsValue]] = m0.mapValues(_.map(_._2))
+			val m2: Map[String, JsArray] = m1.mapValues(JsArray(_))
+			JsObject(m2)
+		}
 	}
 	
 	private def makeConversion(fn: JsValue => RqResult[Object]) = ConversionHandler1(

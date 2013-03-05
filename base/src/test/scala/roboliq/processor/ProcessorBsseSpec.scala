@@ -63,7 +63,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 	}
 
 	describe("A Processor") {
-		it("should handle arm.movePlate") {
+		describe("should handle arm.movePlate") {
 			implicit val p = makeProcessor(
 				"labware" -> JsonParser(
 					"""{
@@ -138,20 +138,27 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			
 			it("should generate correct tokens") {
 				val (_, token_l) = p.getTokenList.unzip
-				val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
 				val tipState_1 = getState[TipState]("TIP1", List(1))
-				val vss_P1_A01_0_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0))
-				val vss_P1_A01_1_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(1, Int.MaxValue))
-				assert(vss_P1_A01_0_?.isSuccess)
-				assert(vss_P1_A01_1_?.isSuccess)
-				val vss_P1_A01_0 = vss_P1_A01_0_?.getOrElse(null)
-				val vss_P1_A01_1 = vss_P1_A01_1_?.getOrElse(null)
+				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
 				assert(token_l === List(
-					commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01_0, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
+					commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01_1, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 				))
 			}
+			
+			it("should have correct TipStates") {
+				val tip = getObj[Tip]("TIP1")
+				val tipState_1 = getState[TipState]("TIP1", List(1))
+				val tipState_2 = getState[TipState]("TIP1", List(2))
+				val tipState_1_expected = TipState.createEmpty(tip)
+				val tipState_2_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
+				
+				println(p.db)
+				
+				assert(tipState_1 === tipState_1_expected)
+				assert(tipState_2.content === tipState_2_content_expected)
+			}
 
-			it("correct contents should be in the source well") {
+			it("should have correct VesselState for source well") {
 				val water = p.getObjFromDbAt[Substance]("water", Nil).getOrElse(null)
 				val vesselState_P1_A01_1_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(1, Int.MaxValue))
 				assert(vesselState_P1_A01_1_?.isSuccess)

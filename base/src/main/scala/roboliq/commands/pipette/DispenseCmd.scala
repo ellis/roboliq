@@ -27,8 +27,9 @@ class DispenseHandler extends CommandHandler("pipetter.dispense") {
 		}*/
 		for {
 			events <- RqResult.toResultOfList(cmd.items.map(item => {
+				println("DispenseHandler item.tip.content: "+item.tip.content)
 				for {
-					content <- item.well.content.scaleToVolume(item.volume)
+					content <- item.tip.content.scaleToVolume(item.volume)
 				} yield {
 					TipDispenseEvent(item.tip, item.well, item.volume, item.policy.pos) ::
 					VesselAddEvent(item.well, content) :: Nil

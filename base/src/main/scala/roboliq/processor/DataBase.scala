@@ -43,13 +43,21 @@ class DataBase {
 		logger.trace(s"setAt($tkp, $time, $jsval)")
 		jsval match {
 			case jsobj: JsObject =>
-				if (jsobj.fields.isEmpty) {
+				// FIXME: HACK: write state maps as atomic objects
+				if ((tkp.table == "tipState" || tkp.table == "vesselState") && tkp.path == List("content")) {
 					js_m.getOrElseUpdate(tkp, new HashMap[List[Int], JsValue]())(time) = jsval
 					registerChild(tkp)
 					handleChange(tkp)
 				}
 				else {
-					jsobj.fields.foreach(pair => setAt(tkp.copy(path = tkp.path ++ List(pair._1)), time, pair._2))
+					if (jsobj.fields.isEmpty) {
+						js_m.getOrElseUpdate(tkp, new HashMap[List[Int], JsValue]())(time) = jsval
+						registerChild(tkp)
+						handleChange(tkp)
+					}
+					else {
+						jsobj.fields.foreach(pair => setAt(tkp.copy(path = tkp.path ++ List(pair._1)), time, pair._2))
+					}
 				}
 			case _ =>
 				js_m.getOrElseUpdate(tkp, new HashMap[List[Int], JsValue]())(time) = jsval
