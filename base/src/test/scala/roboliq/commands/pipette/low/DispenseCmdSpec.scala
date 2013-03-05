@@ -13,12 +13,6 @@ class DispenseCmdSpec extends CommandSpecBase {
 				Config01.protocol1Json,
 				JsonParser(
 					"""{	
-					"plateState": [
-						{ "id": "P1", "location": "cooled1" }
-					],
-					"vesselState": [
-						{ "id": "P1(A01)", "content": { "water": "100ul" } }
-					],
 					"vesselSituatedState": [
 					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } },
 					  { "id": "P1(B01)", "position": { "plate": "P1", "index": 1 } }
