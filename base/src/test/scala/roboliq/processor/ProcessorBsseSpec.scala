@@ -86,21 +86,26 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			
 			//info(p.db.toString)
 			
-			Then("there should be no errors or warnings")
-			assert(p.getMessages === Nil)
+			it("should have no errors or warnings") {
+				assert(p.getMessages === Nil)
+			}
 			
-			And("correct tokens should be generated")
-			val (_, token_l) = p.getTokenList.unzip
-			val plateLocation_cooled1 = p.getObjFromDbAt[PlateLocation]("cooled1", Nil).getOrElse(null)
-			val plateLocation_cooled2 = p.getObjFromDbAt[PlateLocation]("cooled2", Nil).getOrElse(null)
-			val plate_P1 = p.getObjFromDbAt[Plate]("P1", Nil).getOrElse(null)
-			assert(token_l === List(
-				commands.arm.MovePlateToken(Some("ROMA2"), plate_P1, plateLocation_cooled1, plateLocation_cooled2)
-			))
+			it("should generate correct tokens") {
+				val (_, token_l) = p.getTokenList.unzip
+				assert(token_l === List(
+					commands.arm.MovePlateToken(
+						Some("ROMA2"),
+						Config01.plate_P1,
+						Config01.plateLocation_cooled1,
+						Config01.plateLocation_cooled2
+					)
+				))
+			}
 			
-			And("plate should have correct final location")
-			val plateState_P1_? = p.getObjFromDbAt[PlateState]("P1", List(2))
-			assert(plateState_P1_?.map(_.location_?.map(_.id)) === RqSuccess(Some("cooled2")))
+			it("should place plate at correct final location") {
+				val plateState_P1_2 = getState[PlateState]("P1", List(2))
+				assert(plateState_P1_2.location_?.map(_.id) === Some("cooled2"))
+			}
 		}
 
 		describe("should handle pipette.aspirate") {

@@ -12,6 +12,7 @@ object Config01 {
 	val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
 	val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
 	val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
+	val plateLocation_cooled2 = PlateLocation("cooled2", List(plateModel_PCR), true)
 	val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
 	val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
 	val plate_15000 = Plate("reagents15000", plateModel_15000, None)
