@@ -87,7 +87,6 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 				assert(p.getObjFromDbAt[Vessel]("PLATE1(A01)", Nil) === RqSuccess(vessel_PLATE1_A01))
 				assert(p.getObjFromDbAt[Vessel]("TUBE1", Nil) === RqSuccess(vessel_TUBE1))
 				assert(p.getObjFromDbAt[TipState]("TIP1", List(0)) === RqSuccess(tipState1))
-				//assert(p.db.getAt(TKP("plateState", "PLATE)))
 				assert(p.getObjFromDbAt[PlateState]("PLATE1", List(0)) === RqSuccess(plateState_P1))
 				assert(p.getObjFromDbAt[PlateState]("PLATE2", List(0)) === RqSuccess(plateState_P2))
 				assert(p.getObjFromDbAt[VesselState]("PLATE1(A01)", List(0)) === RqSuccess(vesselState_PLATE1_A01))
