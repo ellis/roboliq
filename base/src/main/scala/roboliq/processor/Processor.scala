@@ -289,10 +289,11 @@ class ProcessorData(
 			val kc = kco.kc
 			val id = kc.key.key
 			val time = List(0)
-			// If there is no initial tipState registered yet:
+			// If object is not already in database:
 			if (db.getAt(kc.key, time).isError) {
 				import RqFunctionHandler._
 				kc.key.table match {
+					// If there is no initial tipState registered yet:
 					case "tipState" =>
 						val fnargs = fnRequire(lookup[Tip](id)) { (tip) =>
 							val tipState = TipState.createEmpty(tip)
@@ -304,7 +305,6 @@ class ProcessorData(
 						}
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 					case "vessel" =>
-						//WellSpecParser.parse(input)
 						db.set(kc.key, JsObject("id" -> JsString(id)))
 						Nil
 					case "vesselState" =>
@@ -321,6 +321,39 @@ class ProcessorData(
 							}
 						}
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
+					case "vesselSituatedState" =>
+						WellSpecParser.parse(id) match {
+							// If well list is empty, this is a tube
+							case RqSuccess(List((plate, Nil)), _) =>
+								// Look up the tube's initial location
+								val fnargs = fnRequire(lookup[VesselState](id), lookup[InitialLocation](id)) { (vesselState, loc) =>
+									// The tube's plate must be set
+									for {
+										position <- loc.position_?.asRq(s"the tube `$id` must have its initial `position` set on a plate")
+										well = VesselSituatedState(vesselState, position)
+										jsval <- ConversionsDirect.toJson[VesselSituatedState](well)
+									} yield {
+										List(returnEvent(kc.key, jsval))
+									}
+								}
+								List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
+							// If there is a plate and a single well:
+							case RqSuccess(List((plate, WellSpecOne(rc) :: Nil)), _) =>
+								// Look up the tube's initial location
+								val fnargs = fnRequire(lookup[VesselState](id), lookup[PlateState](plate)) { (vesselState, plateState) =>
+									val index = WellSpecParser.wellIndex(plateState, rc.row, rc.col)
+									val position = VesselPosition(plateState, index)
+									val well = VesselSituatedState(vesselState, position)
+									for {
+										jsval <- ConversionsDirect.toJson[VesselSituatedState](well)
+									} yield {
+										List(returnEvent(kc.key, jsval))
+									}
+								}
+								List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
+							case _ =>
+								Nil
+						}
 					case _ =>
 						Nil
 				}

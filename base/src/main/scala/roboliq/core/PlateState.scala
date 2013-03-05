@@ -1,5 +1,7 @@
 package roboliq.core
 
+import scala.language.implicitConversions
+
 
 /** State of a [[roboliq.core.Plate]]. */
 case class PlateState(
@@ -21,4 +23,6 @@ object PlateState {
 	def createEmpty(plate: Plate): PlateState = {
 		PlateState(plate, None)
 	}
+	
+	implicit def toPlate(o: PlateState): Plate = o.plate
 }
