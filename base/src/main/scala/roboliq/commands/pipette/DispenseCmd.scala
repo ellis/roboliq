@@ -21,10 +21,6 @@ case class DispenseToken(
 
 class DispenseHandler extends CommandHandler("pipetter.dispense") {
 	val fnargs = cmdAs[DispenseCmd] { cmd =>
-		/*fnRequireList[TipState](cmd.items.map(item => lookup[TipState](item.tip.id)) { }
-		{
-			fnRequireList(l)(fn)
-		}*/
 		for {
 			events <- RqResult.toResultOfList(cmd.items.map(item => {
 				println("DispenseHandler item.tip.content: "+item.tip.content)

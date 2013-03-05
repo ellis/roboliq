@@ -360,7 +360,10 @@ object RqFunctionHandler {
 		RqSuccess(List(ComputationItem_Token(token)))
 
 	def fnRequire()(fn: => RqReturn): RqFunctionArgs = {
-		fnRequireRun(fn, Nil)
+		RqFunctionArgs(
+			arg_l = Nil,
+			fn = (_) => fn
+		)
 	}
 	
 	def fnRequire[A: TypeTag](

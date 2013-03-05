@@ -207,17 +207,13 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				
 			it("should generated correct tokens") {
 				val (_, token_l) = p.getTokenList.unzip
-				val tip = p.getObjFromDbAt[Tip]("TIP1", Nil).getOrElse(null)
 				val tipState_1 = getState[TipState]("TIP1", List(1))
-				val vss_P1_A01_? = p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0, Int.MaxValue))
-				val vss_P1_B01_? = p.getObjFromDbAt[VesselSituatedState]("P1(B01)", List(1, Int.MaxValue))
-				assert(vss_P1_A01_?.isSuccess)
-				assert(vss_P1_B01_?.isSuccess)
-				val vss_P1_A01 = vss_P1_A01_?.getOrElse(null)
-				val vss_P1_B01 = vss_P1_B01_?.getOrElse(null)
+				val tipState_2 = getState[TipState]("TIP1", List(2))
+				val vss_P1_A01 = getState[VesselSituatedState]("P1(A01)", List(1))
+				val vss_P1_B01 = getState[VesselSituatedState]("P1(B01)", List(2))
 				assert(token_l === List(
 					commands.pipette.AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact)))),
-					commands.pipette.DispenseToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_B01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
+					commands.pipette.DispenseToken(List(new TipWellVolumePolicy(tipState_2, vss_P1_B01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 				))
 			}
 			

@@ -54,6 +54,7 @@ sealed trait Node {
 	val time: List[Int]
 	val contextKey_? : Option[TKP]
 	val fnargs: RqFunctionArgs
+	val desc: String
 	
 	// REFACTOR: remove this
 	def input_l = fnargs.arg_l
@@ -62,7 +63,8 @@ sealed trait Node {
 case class Node_Command(
 	parent_? : Option[Node],
 	index: Int,
-	fnargs0: RqFunctionArgs
+	fnargs0: RqFunctionArgs,
+	desc: String
 ) extends Node {
 	val path = Node_Command.getCommandPath(parent_?, index)
 	val id = Node_Command.getCommandId(path)
@@ -123,6 +125,7 @@ case class Node_Computation(
 	val index_? = Some(index)
 	val time = path
 	val fnargs = concretizeArgs
+	val desc = fnargs.arg_l.map(_.kc.id).mkString("(", ", ", ") => Result")
 	
 	println()
 	println("Node_Computation "+id)
@@ -180,6 +183,7 @@ case class Node_Conversion(
 		case None => Some(kc.key)
 	}
 	val fnargs = concretizeArgs
+	val desc = fnargs.arg_l.map(_.kc.id).mkString("(", ", ", ") => Object")
 	
 	println()
 	println("Node_Conversion "+id)
@@ -253,6 +257,7 @@ case class Node_Events(
 			l.map(_.map(fnargs => RqItem_Function(fnargs)))
 		}
 	)
+	val desc = "events: "+event_l
 	
 	println()
 	println("Node_Event "+id)

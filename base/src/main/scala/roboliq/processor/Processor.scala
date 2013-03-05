@@ -161,12 +161,11 @@ class ProcessorData(
 					// Find handler for this command
 					val fnargs0 = createCommandFnArgs(cmd)
 					// Create node
-					val node = Node_Command(parent_?, index, fnargs0)
+					val node = Node_Command(parent_?, index, fnargs0, desc=cmd.toString)
 					// Store command
 					setEntity(node.contextKey, cmd)
 					List(node)
 				case RqItem_Function(fnargs) =>
-					//val fnargs2 = concretizeArgs(fnargs, parent_?.flatMap(_.contextKey_?), parent_?, index)
 					List(Node_Computation(parent_?, index, parent_?.flatMap(_.contextKey_?), fnargs))
 				case ComputationItem_Token(token) =>
 					val id = parent_?.map(_.path).getOrElse(Nil) ++ List(index)
@@ -639,7 +638,7 @@ class ProcessorData(
 		println()
 		println("Nodes")
 		println("-----")
-		state0_m.values.toList.sortBy(_.node.id).map(state => state.node.id + ": " + state.status + " " + state.node.contextKey_?.map(_.id)).foreach(println)
+		state0_m.values.toList.sortBy(_.node.id).map(state => state.node.id + ": " + state.status + " " + state.node.contextKey_?.map(_.id) + " " + state.node.desc).foreach(println)
 		//state_m.foreach(println)
 
 		val pending_l = makePendingComputationList
