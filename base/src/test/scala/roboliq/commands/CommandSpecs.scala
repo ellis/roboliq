@@ -7,6 +7,7 @@ import _root_.roboliq._
 import _root_.roboliq.core._
 import _root_.roboliq.processor._
 import _root_.roboliq.processor.ConversionsDirect._
+import roboliq.test.Config01
 
 
 class MovePlateSpec extends FeatureSpec with GivenWhenThen with BeforeAndAfter {

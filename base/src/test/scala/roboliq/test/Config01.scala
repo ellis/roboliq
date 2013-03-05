@@ -1,10 +1,10 @@
-package roboliq.processor
+package roboliq.test
 
 import spray.json.JsonParser
-import grizzled.slf4j.Logger
-import spray.json._
-import _root_.roboliq.core._
-import ConversionsDirect._
+//import spray.json._
+import roboliq.core._
+//import roboliq.processor.ConversionsDirect._
+//import scala.math.BigDecimal.int2bigDecimal
 
 object Config01 {
 	val tipModel1000 = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))

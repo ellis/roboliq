@@ -2,30 +2,18 @@ package roboliq.commands.pipette.low
 
 import spray.json.JsonParser
 import roboliq.core._
+import roboliq.commands.pipette._
 import roboliq.commands.CommandSpecBase
 import roboliq.test.Config01
 
-class MixCmdSpec extends CommandSpecBase {
-	describe("pipette.low.mix") {
+class AspirateCmdSpec extends CommandSpecBase {
+	describe("pipette.low.aspirate") {
 		describe("BSSE configuration") {
-			
 			implicit val p = makeProcessorBsse(
 				Config01.protocol1Json,
-				JsonParser(
-					"""{	
-					"plateState": [
-						{ "id": "P1", "location": "cooled1" }
-					],
-					"vesselState": [
-						{ "id": "P1(A01)", "content": { "water": "100ul" } }
-					],
-					"vesselSituatedState": [
-					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } }
-					]
-					}""").asJsObject,
 				JsonParser("""{
 					"cmd": [
-					  { "cmd": "pipette.low.mix", "mixSpec": {"volume": "30ul", "count": 4, "mixPolicy": { "id": "Mix", "pos": "WetContact" }}, "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul"}] }
+					  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
 					]
 					}""").asJsObject
 			)
@@ -39,11 +27,7 @@ class MixCmdSpec extends CommandSpecBase {
 				val tipState_1 = getState[TipState]("TIP1", List(1))
 				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
 				assert(token_l === List(
-					MixToken(
-						List(
-							MixTokenItem(tipState_1, vss_P1_A01_1, LiquidVolume.ul(30), 4, PipettePolicy("Mix", PipettePosition.WetContact))
-						)
-					)
+					AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01_1, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 				))
 			}
 			
@@ -53,13 +37,14 @@ class MixCmdSpec extends CommandSpecBase {
 				assert(tipState_1 === tipState_1_expected)
 
 				val tipState_2 = getState[TipState]("TIP1", List(2))
-				assert(tipState_2.content === VesselContent.Empty)
+				val tipState_2_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
+				assert(tipState_2.content === tipState_2_content_expected)
 			}
 
-			it("should have correct VesselState for mix well") {
-				val vesselState_P1_A01_1 = getState[VesselState]("P1(A01)", List(1))
+			it("should have correct VesselState for source well") {
 				val vesselState_P1_A01_2 = getState[VesselState]("P1(A01)", List(2))
-				assert(vesselState_P1_A01_1.content === vesselState_P1_A01_2.content)
+				val vesselContent_P1_A01_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
+				assert(vesselState_P1_A01_2.content === vesselContent_P1_A01_content_expected)
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import org.scalatest.FunSpec
 import spray.json._
 import _root_.roboliq.core._
 import ConversionsDirect._
+import roboliq.test.Config01
 
 
 private object A extends Enumeration {
