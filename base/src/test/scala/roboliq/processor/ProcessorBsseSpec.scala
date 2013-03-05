@@ -151,25 +151,19 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			}
 			
 			it("should have correct TipStates") {
-				val tip = getObj[Tip]("TIP1")
 				val tipState_1 = getState[TipState]("TIP1", List(1))
-				val tipState_2 = getState[TipState]("TIP1", List(2))
-				val tipState_1_expected = TipState.createEmpty(tip)
-				val tipState_2_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
-				
-				println(p.db)
-				
+				val tipState_1_expected = TipState.createEmpty(Config01.tip1)
 				assert(tipState_1 === tipState_1_expected)
+
+				val tipState_2 = getState[TipState]("TIP1", List(2))
+				val tipState_2_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
 				assert(tipState_2.content === tipState_2_content_expected)
 			}
 
 			it("should have correct VesselState for source well") {
-				val water = p.getObjFromDbAt[Substance]("water", Nil).getOrElse(null)
-				val vesselState_P1_A01_1_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(1, Int.MaxValue))
-				assert(vesselState_P1_A01_1_?.isSuccess)
-				val vesselState_P1_A01 = vesselState_P1_A01_1_?.getOrElse(null)
-				val vesselContent_P1_A01_expected_? = VesselContent.fromVolume(water, LiquidVolume.ul(50))
-				assert(RqSuccess(vesselState_P1_A01.content) === vesselContent_P1_A01_expected_?)
+				val vesselState_P1_A01_2 = getState[VesselState]("P1(A01)", List(2))
+				val vesselContent_P1_A01_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
+				assert(vesselState_P1_A01_2.content === vesselContent_P1_A01_content_expected)
 			}
 		}
 
