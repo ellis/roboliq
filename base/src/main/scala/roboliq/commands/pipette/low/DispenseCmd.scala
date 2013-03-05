@@ -1,13 +1,15 @@
-package roboliq.commands.pipette
+package roboliq.commands.pipette.low
 
 import scala.reflect.runtime.{universe => ru}
 import roboliq.core._
 import roboliq.events._
-import RqPimper._
+import roboliq.core.RqPimper._
 import roboliq.processor._
 import scala.collection.JavaConversions._
-import scala.Option.option2Iterable
 import spray.json._
+import roboliq.commands.pipette.TipWellVolumePolicy
+import roboliq.core.TipState.toTip
+import roboliq.core.VesselSituatedState.toVesselState
 
 
 case class DispenseCmd(
@@ -19,7 +21,7 @@ case class DispenseToken(
 	val items: List[TipWellVolumePolicy]
 ) extends CmdToken
 
-class DispenseHandler extends CommandHandler("pipetter.dispense") {
+class DispenseHandler extends CommandHandler("pipette.low.dispense") {
 	val fnargs = cmdAs[DispenseCmd] { cmd =>
 		for {
 			events <- RqResult.toResultOfList(cmd.items.map(item => {

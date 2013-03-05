@@ -244,6 +244,9 @@ case class Node_Events(
 					case event: TipDispenseEvent =>
 						val handler = new TipDispenseEventHandler
 						RqSuccess(handler.fnargs(event))
+					case event: TipMixEvent =>
+						val handler = new TipMixEventHandler
+						RqSuccess(handler.fnargs(event))
 					case event: VesselAddEvent =>
 						val handler = new VesselAddEventHandler
 						RqSuccess(handler.fnargs(event))

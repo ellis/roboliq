@@ -24,7 +24,7 @@ import roboliq.core._
 import RqPimper._
 import spray.json.JsNumber
 import roboliq.commands.arm.MovePlateHandler
-import roboliq.commands.pipette.AspirateCmd
+import roboliq.commands.pipette.low.AspirateCmd
 
 class PrintCommandHandler extends CommandHandler("print") { 
 	val fnargs =
@@ -180,7 +180,7 @@ object ApplicativeMain2 extends App {
 		new PrintCommandHandler,
 		new Print2CommandHandler,
 		new MovePlateHandler,
-		new roboliq.commands.pipette.AspirateHandler,
+		new roboliq.commands.pipette.low.AspirateHandler,
 		new TestCommandHandler
 	))
 	

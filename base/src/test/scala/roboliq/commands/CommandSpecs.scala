@@ -17,9 +17,9 @@ class MovePlateSpec extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
 	before {
 		p = new ProcessorData(List(
 			new arm.MovePlateHandler,
-			new pipette.AspirateHandler,
-			new pipette.DispenseHandler,
-			new pipette.MixHandler
+			new roboliq.commands.pipette.low.AspirateHandler,
+			new roboliq.commands.pipette.low.DispenseHandler,
+			new roboliq.commands.pipette.low.MixHandler
 		))
 	
 		p.loadJsonData(Config01.benchJson)

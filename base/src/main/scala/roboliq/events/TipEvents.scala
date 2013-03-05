@@ -64,7 +64,7 @@ case class TipDispenseEvent(
 ) extends Event {
 	def toJson: JsValue = {
 		JsObject(Map(
-			"kind" -> JsString("tip.aspirate"),
+			"kind" -> JsString("tip.dispense"),
 			"tip" -> JsString(tip.id),
 			"dest" -> JsString(dest.vessel.id),
 			"volume" -> JsString(volume.toString),
@@ -109,5 +109,47 @@ class TipDispenseEventHandler {// extends EventHandler {
 			cleanDegree = CleanIntensity.None,
 			cleanDegreePending = CleanIntensity.max(state0.cleanDegreePending, liquid2.tipCleanPolicy.exit)
 		)
+	}
+}
+
+/** Represents an aspiration event. */
+case class TipMixEvent(
+	tip: TipState,
+	/** Source well ID. */
+	src: VesselState,
+	/** Volume in liters to aspirate. */
+	volume: LiquidVolume
+) extends Event {
+	def toJson: JsValue = {
+		JsObject(Map(
+			"kind" -> JsString("tip.mix"),
+			"tip" -> JsString(tip.id),
+			"src" -> JsString(src.vessel.id),
+			"volume" -> JsString(volume.toString)
+		))
+	}
+}
+
+class TipMixEventHandler {// extends EventHandler {
+	import RqFunctionHandler._
+	
+	def fnargs(event: TipMixEvent) = {
+		fnRequire() {
+			val state0 = event.tip
+			val liquid = event.src.content.liquid
+			val state_# = state0.copy(
+				src_? = Some(event.src),
+				contamInside = state0.contamInside ++ liquid.contaminants,
+				nContamInsideVolume = LiquidVolume.max(state0.nContamInsideVolume, event.volume),
+				contamOutside = state0.contamOutside ++ liquid.contaminants,
+				srcsEntered = state0.srcsEntered + liquid,
+				cleanDegree = CleanIntensity.None,
+				cleanDegreePrev = state0.cleanDegreePrev,
+				cleanDegreePending = CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
+			)
+			for {
+				json <- ConversionsDirect.toJson[TipState](state_#)
+			} yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
+		}
 	}
 }

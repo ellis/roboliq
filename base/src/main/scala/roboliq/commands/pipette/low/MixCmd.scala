@@ -1,11 +1,15 @@
-package roboliq.commands.pipette
+package roboliq.commands.pipette.low
 
 import scala.collection.JavaConversions._
 import roboliq.core._
 import roboliq.events._
 import roboliq.core.RqPimper._
-//import roboliq.commands.pipette.{HasTip,HasWell,HasVolume,HasPolicy}
 import roboliq.processor._
+import roboliq.commands.pipette.HasPolicy
+import roboliq.commands.pipette.HasTip
+import roboliq.commands.pipette.HasVolume
+import roboliq.commands.pipette.HasWell
+import scala.reflect.runtime.universe
 
 
 case class MixCmd(
@@ -32,11 +36,10 @@ case class MixTokenItem(
 	val policy: PipettePolicy
 ) extends HasTip with HasWell with HasVolume with HasPolicy
 
-class MixHandler extends CommandHandler("pipetter.mix") {
+class MixHandler extends CommandHandler("pipette.low.mix") {
 	val fnargs = cmdAs[MixCmd] { cmd =>
 		val event_l = cmd.items.flatMap(item => {
-			TipAspirateEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
-			//WellAddEventBean(item.well, src, item.volume) :: Nil
+			TipMixEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
 		})
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
