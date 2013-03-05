@@ -198,8 +198,6 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 					}""").asJsObject
 			)
 
-			val water = p.getObjFromDbAt[Substance]("water", Nil).getOrElse(null)
-			
 			it("should have no errors or warnings") {
 				assert(p.getMessages === Nil)
 			}
@@ -216,20 +214,11 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				))
 			}
 			
-			it("should have correct final contents in the source well") {
-				val vesselState_P1_A01_? = p.getObjFromDbAt[VesselState]("P1(A01)", List(2, Int.MaxValue))
-				assert(vesselState_P1_A01_?.isSuccess)
-				val vesselState_P1_A01 = vesselState_P1_A01_?.getOrElse(null)
-				val vesselContent_P1_A01_expected_? = VesselContent.fromVolume(water, LiquidVolume.ul(50))
-				assert(RqSuccess(vesselState_P1_A01.content) === vesselContent_P1_A01_expected_?)
-			}
-			
 			it("should have correct final contents in the destination well") {
-				val vesselState_P1_B01_? = p.getObjFromDbAt[VesselState]("P1(B01)", List(2, Int.MaxValue))
-				assert(vesselState_P1_B01_?.isSuccess)
-				val vesselState_P1_B01 = vesselState_P1_B01_?.getOrElse(null)
-				val vesselContent_P1_B01_expected_? = VesselContent.fromVolume(water, LiquidVolume.ul(50))
-				assert(RqSuccess(vesselState_P1_B01.content) === vesselContent_P1_B01_expected_?)
+				assert(
+					getState[VesselState]("P1(B01)", List(3)).content ===
+					checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
+				)
 			}
 		}
 	}
