@@ -359,6 +359,10 @@ object RqFunctionHandler {
 	implicit def tokenToRqReturn(token: CmdToken) =
 		RqSuccess(List(ComputationItem_Token(token)))
 
+	def fnRequire()(fn: => RqReturn): RqFunctionArgs = {
+		fnRequireRun(fn, Nil)
+	}
+	
 	def fnRequire[A: TypeTag](
 		a: RequireItem[A]
 	)(

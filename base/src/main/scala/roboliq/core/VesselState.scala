@@ -1,5 +1,8 @@
 package roboliq.core
 
+import scala.language.implicitConversions
+
+
 case class VesselState(
 	vessel: Vessel,
 	content: VesselContent = VesselContent.Empty,
@@ -37,6 +40,11 @@ case class VesselSituatedState(
 	val indexName: String = WellSpecParser.wellIndexName(position.plate.plate.nRows, position.plate.plate.nCols, iRow, iCol)
 
 	override def compare(that: VesselSituatedState) = id.compare(that.id)
+}
+
+object VesselSituatedState {
+	implicit def toVessel(o: VesselSituatedState): Vessel = o.vessel
+	implicit def toVesselState(o: VesselSituatedState): VesselState = o.vesselState
 }
 
 /**

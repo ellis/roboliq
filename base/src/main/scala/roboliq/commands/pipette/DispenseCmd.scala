@@ -22,8 +22,8 @@ case class DispenseToken(
 class DispenseHandler extends CommandHandler("pipetter.dispense") {
 	val fnargs = cmdAs[DispenseCmd] { cmd =>
 		val events = cmd.items.flatMap(item => {
-			TipDispenseEvent(item.tip, item.well.vesselState, item.volume, item.policy.pos) :: Nil
-			//WellAddEventBean(item.well, src, item.volume) :: Nil
+			TipDispenseEvent(item.tip, item.well.vesselState, item.volume, item.policy.pos) ::
+			VesselRemoveEvent(item.well, item.volume) :: Nil
 		})
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)

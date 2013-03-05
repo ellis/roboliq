@@ -88,10 +88,15 @@ class VesselContent private(
 	 * Return a new VesselContent from this one which has been scaled to a total volume of `volumeNew`.
 	 */
 	def scaleToVolume(volumeNew: LiquidVolume): VesselContent = {
-		if (volume.isEmpty) {
+		if (liquid.isEmpty) {
 			logger.warn(s"called VesselContent.scaleToVolume() on empty vessel: $this")
 			return this
-		} else {
+		}
+		/*else if (volume.isEmpty) {
+			val contents_# = VesselContent.scaleBy(liquid.contents, factor)
+			new VesselContent(contents_#)
+		}*/
+		else {
 			val factor = volumeNew.l / volume.l
 			val contents_# = VesselContent.scaleBy(contents, factor)
 			new VesselContent(contents_#)

@@ -8,7 +8,7 @@ import roboliq.processor._
 
 /** Represents an aspiration event. */
 case class VesselAddEvent(
-	vessel: Vessel,
+	vessel: VesselState,
 	content: VesselContent
 ) extends Event {
 }
@@ -17,7 +17,8 @@ class VesselAddEventHandler {// extends EventHandler {
 	import RqFunctionHandler._
 	
 	def fnargs(event: VesselAddEvent) = {
-		fnRequire (lookup[VesselState](event.vessel.id)) { state0 =>
+		fnRequire () {
+			val state0 = event.vessel
 			val state_# = state0.copy(content = state0.content + event.content)
 			for { json <- ConversionsDirect.toJson[VesselState](state_#) }
 			yield List(EventItem_State(TKP("vesselState", event.vessel.id, Nil), json))
