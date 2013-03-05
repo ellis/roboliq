@@ -17,14 +17,14 @@ case class MixSpec(
  * @param mixPolicy_? optional pipette policy
  */
 case class MixSpecOpt(
-	val nVolume_? : Option[LiquidVolume],
-	val nCount_? : Option[Integer],
+	val volume_? : Option[LiquidVolume],
+	val count_? : Option[Integer],
 	val mixPolicy_? : Option[PipettePolicy] = None
 ) {
 	def toMixSpec: RqResult[MixSpec] = {
 		for {
-			volume <- nVolume_?.asRq("MixSpec requires volume")
-			count <- nCount_?.asRq("MixSpec requires volume")
+			volume <- volume_?.asRq("MixSpec requires volume")
+			count <- count_?.asRq("MixSpec requires volume")
 			mixPolicy <- mixPolicy_?.asRq("MixSpec requires volume")
 		} yield MixSpec(volume, count, mixPolicy)
 	}
@@ -34,8 +34,8 @@ case class MixSpecOpt(
 	 */
 	def +(that: MixSpecOpt): MixSpecOpt = {
 		MixSpecOpt(
-			if (nVolume_?.isEmpty) that.nVolume_? else nVolume_?,
-			if (nCount_?.isEmpty) that.nCount_? else nCount_?,
+			if (volume_?.isEmpty) that.volume_? else volume_?,
+			if (count_?.isEmpty) that.count_? else count_?,
 			if (mixPolicy_?.isEmpty) that.mixPolicy_? else mixPolicy_?
 		)
 	}

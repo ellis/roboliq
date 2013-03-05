@@ -241,7 +241,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 					}""").asJsObject,
 				"commands" -> JsonParser("""{
 					"cmd": [
-					  { "cmd": "pipette.low.mix", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
+					  { "cmd": "pipette.low.mix", "mixSpec": {"volume": "30ul", "count": 4, "mixPolicy": { "id": "Mix", "pos": "WetContact" }}, "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul"}] }
 					]
 					}""").asJsObject
 			)
@@ -251,11 +251,16 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			}
 			
 			it("should generate correct tokens") {
+				import low._
 				val (_, token_l) = p.getTokenList.unzip
 				val tipState_1 = getState[TipState]("TIP1", List(1))
 				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
 				assert(token_l === List(
-					commands.pipette.low.AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01_1, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
+					MixToken(
+						List(
+							MixTokenItem(tipState_1, vss_P1_A01_1, LiquidVolume.ul(30), 4, PipettePolicy("Mix", PipettePosition.WetContact))
+						)
+					)
 				))
 			}
 			
@@ -265,14 +270,13 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 				assert(tipState_1 === tipState_1_expected)
 
 				val tipState_2 = getState[TipState]("TIP1", List(2))
-				val tipState_2_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
-				assert(tipState_2.content === tipState_2_content_expected)
+				assert(tipState_2.content === VesselContent.Empty)
 			}
 
-			it("should have correct VesselState for source well") {
+			it("should have correct VesselState for mix well") {
+				val vesselState_P1_A01_1 = getState[VesselState]("P1(A01)", List(1))
 				val vesselState_P1_A01_2 = getState[VesselState]("P1(A01)", List(2))
-				val vesselContent_P1_A01_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
-				assert(vesselState_P1_A01_2.content === vesselContent_P1_A01_content_expected)
+				assert(vesselState_P1_A01_1.content === vesselState_P1_A01_2.content)
 			}
 		}
 	}

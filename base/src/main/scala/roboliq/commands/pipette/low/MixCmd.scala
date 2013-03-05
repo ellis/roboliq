@@ -62,8 +62,8 @@ class MixHandler extends CommandHandler("pipette.low.mix") {
 		}
 		for {
 			mixSpecOpt <- mixSpecOpt_?
-			volume <- mixSpecOpt.nVolume_?.asRq("mix volume must be specified")
-			count <- mixSpecOpt.nCount_?.asRq("mix count must be specified")
+			volume <- mixSpecOpt.volume_?.asRq("mix volume must be specified")
+			count <- mixSpecOpt.count_?.asRq("mix count must be specified")
 			policy <- mixSpecOpt.mixPolicy_?.asRq("mix policy must be specified")
 		} yield {
 			MixTokenItem(item0.tip, item0.well, volume, count, policy) 
