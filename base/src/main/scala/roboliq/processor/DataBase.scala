@@ -96,9 +96,14 @@ class DataBase {
 	def getBefore(tkp: TKP, time: List[Int]): RqResult[JsValue] = {
 		logger.trace(s"getBefore($tkp, $time)")
 		assert(!time.isEmpty)
-		def chooseTime(time_l: List[List[Int]]): Option[List[Int]] =
-			time_l.takeWhile(ListIntOrdering.compare(_, time) < 0).lastOption
-		getWith(tkp, time, chooseTime _)
+		// REFACTOR: HACK: This is done to let conversion nodes for default initial states access other initial state values -- should probably fix in Processor instead. 
+		if (time == List(0))
+			getAt(tkp, time)
+		else {
+			def chooseTime(time_l: List[List[Int]]): Option[List[Int]] =
+				time_l.takeWhile(ListIntOrdering.compare(_, time) < 0).lastOption
+			getWith(tkp, time, chooseTime _)
+		}
 	}
 	
 	def getAt(tkp: TKP, time: List[Int]): RqResult[JsValue] = {

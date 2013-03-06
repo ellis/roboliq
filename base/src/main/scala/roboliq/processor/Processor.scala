@@ -240,7 +240,8 @@ class ProcessorData(
 							setEntityObj(node.kc, obj)
 							None
 						case EventItem_State(key, jsval) =>
-							setState(key, node.time ++ List(Int.MaxValue), jsval)
+							val time = if (node.time == List(0)) node.time else node.time ++ List(Int.MaxValue)
+							setState(key, time, jsval)
 							None
 						case _ =>
 							internalMessage_l += RqError("invalid return item for a conversion node")
@@ -671,7 +672,15 @@ class ProcessorData(
 		println()
 		println("Nodes")
 		println("-----")
-		state0_m.values.toList.sortBy(_.node.id).map(state => state.node.id + ": " + state.status + " " + state.node.contextKey_?.map(_.id) + " " + state.node.desc).foreach(println)
+		state0_m.values.toList.sortBy(_.node.id).map(state => {
+			val status = state.status match {
+				case Status.NotReady => "_"
+				case Status.Ready => "."
+				case Status.Success => "x"
+				case Status.Error => "!"
+			}
+			status + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc
+		}).foreach(println)
 		//state_m.foreach(println)
 
 		val pending_l = makePendingComputationList

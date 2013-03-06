@@ -11,13 +11,6 @@ class DispenseCmdSpec extends CommandSpecBase {
 		describe("BSSE configuration") {
 			implicit val p = makeProcessorBsse(
 				Config01.protocol1Json,
-				JsonParser(
-					"""{	
-					"vesselSituatedState": [
-					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } },
-					  { "id": "P1(B01)", "position": { "plate": "P1", "index": 1 } }
-					]
-					}""").asJsObject,
 				JsonParser("""{
 					"cmd": [
 					  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] },
@@ -25,6 +18,9 @@ class DispenseCmdSpec extends CommandSpecBase {
 					]
 					}""").asJsObject
 			)
+			
+			println("db:")
+			println(p.db)
 			
 			it("should have no errors or warnings") {
 				assert(p.getMessages === Nil)
