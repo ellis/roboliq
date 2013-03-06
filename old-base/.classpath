@@ -1,0 +1,25 @@
+<classpath>
+  <classpathentry output="target/scala-2.10/classes" path="src/main/scala" kind="src"></classpathentry>
+  <classpathentry output="target/scala-2.10/classes" path="src/main/java" kind="src"></classpathentry>
+  <classpathentry output="target/scala-2.10/test-classes" path="src/test/scala" kind="src"></classpathentry>
+  <classpathentry output="target/scala-2.10/test-classes" path="src/test/java" kind="src"></classpathentry>
+  <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.10.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.2.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.scalaz/scalaz-core_2.10/bundles/scalaz-core_2.10-7.0.0-M7.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.clapper/grizzled-slf4j_2.10/jars/grizzled-slf4j_2.10-1.0.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.0.7.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.0.7.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/io.spray/spray-json_2.10/jars/spray-json_2.10-1.2.3.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.parboiled/parboiled-scala_2.10/jars/parboiled-scala_2.10-1.1.4.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.parboiled/parboiled-core/jars/parboiled-core-1.1.4.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/com.typesafe.akka/akka-actor_2.10/bundles/akka-actor_2.10-2.1.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/com.typesafe/config/bundles/config-1.0.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.yaml/snakeyaml/bundles/snakeyaml-1.10.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/com.googlecode.efficient-java-matrix-library/ejml/jars/ejml-0.16.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.scalatest/scalatest_2.10/jars/scalatest_2.10-1.9.1.jar" kind="lib"></classpathentry>
+  <classpathentry path="/home/ellis/.ivy2/cache/org.scala-lang/scala-actors/jars/scala-actors-2.10.0.jar" kind="lib"></classpathentry>
+  <classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"></classpathentry>
+  <classpathentry path="bin" kind="output"></classpathentry>
+</classpath>

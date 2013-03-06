@@ -26,7 +26,7 @@ object LiquidPropertiesFamily {
  * Enumeration of intensities with which the tips should be washed.
  */
 object CleanIntensity extends Enumeration {
-	val None, Light, Thorough, Decontaminate = Value
+	val None, Flush, Light, Thorough, Decontaminate = Value
 	
 	/** Return the more intense wash value. */
 	def max(a: CleanIntensity.Value, b: CleanIntensity.Value): CleanIntensity.Value = {

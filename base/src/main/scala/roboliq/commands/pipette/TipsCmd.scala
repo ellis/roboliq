@@ -1,45 +1,38 @@
 package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
+import scalaz._
+import Scalaz._
 import roboliq.core._
 import roboliq.events._
 import roboliq.core.RqPimper._
 import roboliq.processor._
-import roboliq.commands.pipette.HasPolicy
-import roboliq.commands.pipette.HasTip
-import roboliq.commands.pipette.HasVolume
-import roboliq.commands.pipette.HasWell
-import scala.reflect.runtime.universe
 
 
 case class TipsCmd(
 	description_? : Option[String],
-	items: List[MixItem],
-	mixSpec_? : Option[MixSpecOpt]
+	items: List[TipsItem]
 )
 
 case class TipsItem(
 	tip: TipState,
-	well: Well,
-	mixSpec_? : Option[MixSpecOpt]
+	tipModel_? : Option[TipModel],
+	cleanIntensity: CleanIntensity.Value
 )
 
-case class MixToken(
-	val items: List[MixTokenItem]
-) extends CmdToken
+class CommandHandlerFunction
+Writer[Endo[CommandHandlerFunction], Task]
 
-case class MixTokenItem(
-	val tip: TipState,
-	val well: Well,
-	val volume: LiquidVolume,
-	val count: Int,
-	val policy: PipettePolicy
-) extends HasTip with HasWell with HasVolume with HasPolicy
 
-class MixHandler extends CommandHandler("pipette.low.mix") {
-	val fnargs = cmdAs[MixCmd] { cmd =>
+class TipsHandler_Fixed extends CommandHandler[TipsCmd]("pipette.tips") {
+	def doit(cmd: TipsCmd) = for {
+		(a, b) <- require(lookup[A](cmd.a), lookup[B](cmd.b), lookupAll[WashProgram])
+		_ <- event TipCleanEvent()
+		_ <- token MixToken()
+	} yield ()
+	val fnargs = cmdAs[TipsCmd] { cmd =>
 		val event_l = cmd.items.flatMap(item => {
-			TipMixEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
+			TipCleanEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
 		})
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)

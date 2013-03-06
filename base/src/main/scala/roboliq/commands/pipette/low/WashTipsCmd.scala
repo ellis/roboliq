@@ -18,7 +18,7 @@ case class WashTipsToken(
 class WashTipsHandler extends CommandHandler("pipette.low.mix") {
 	val fnargs = cmdAs[WashTipsCmd] { cmd =>
 		val event_l = cmd.tips.flatMap(item => {
-			TipCleanEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
+			TipCleanEvent(item.tip, cmd.washProgram) :: Nil
 		})
 		RqSuccess(List(
 			ComputationItem_Token(WashTipsToken(cmd.washProgram.id, cmd.tips)),
