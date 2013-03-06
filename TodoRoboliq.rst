@@ -1,3 +1,12 @@
+:Started: 2013-03-06
+
+* Create EventHandler[A <: Event] class
+* Move some code from roboliq.processor and roboliq.events to roboliq.core so that command handlers only need to import roboliq.core._
+* Register EventHandlers, rather than hard-coding them in Node_Events
+* Load handlers from YAML (and add YAML to Config01)
+* Make DbTable and DbField classes or typeclasses to handle database objects more gracefully
+* Refactor TipState member names
+
 :Started: 2013-02-12
 
 * ConversionHandler should use the same method for accessing parameters as ComputationHandler
