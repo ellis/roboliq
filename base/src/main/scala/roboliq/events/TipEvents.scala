@@ -153,3 +153,30 @@ class TipMixEventHandler {// extends EventHandler {
 		}
 	}
 }
+
+case class TipCleanEvent(
+	tip: TipState,
+	washProgram: WashProgram
+) extends Event
+
+class TipCleanEventHandler {
+	import RqFunctionHandler._
+	
+	def fnargs(event: TipCleanEvent) = fnRequire() {
+		val w = event.washProgram
+		val s = event.tip
+		val state_# = s.copy(
+			content = VesselContent.Empty,
+			contamInside = s.contamInside -- w.contaminantsRemoved,
+			contamOutside = s.contamOutside -- w.contaminantsRemoved,
+			srcsEntered = Set(),
+			destsEntered = Set(),
+			cleanDegree = w.intensity,
+			cleanDegreePrev = w.intensity,
+			cleanDegreePending = if (s.cleanDegreePending <= w.intensity) CleanIntensity.None else s.cleanDegreePending
+		)
+		for {
+			json <- ConversionsDirect.toJson[TipState](state_#)
+		} yield List(EventItem_State(TKP("tipState", event.tip.id, Nil), json))
+	}
+}

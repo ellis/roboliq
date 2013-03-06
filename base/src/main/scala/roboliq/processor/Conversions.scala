@@ -69,6 +69,8 @@ object ConversionsDirect {
 		TableInfo[Substance]("substance", None, None),
 		TableInfo[Plate]("plate", None, None),
 		TableInfo[Vessel]("vessel", None, None),
+		TableInfo[WashProgram]("washProgram"),
+		TableInfo[InitialLocation]("initialLocation"),
 		TableInfo[TipState]("tipState", Some("conf"), None, None),
 		TableInfo[PlateState]("plateState", Some("plate"), None, None),
 		TableInfo[VesselState]("vesselState", Some("vessel"), None, None),

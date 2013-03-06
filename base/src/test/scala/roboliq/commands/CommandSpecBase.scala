@@ -19,7 +19,7 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 			new arm.MovePlateHandler,
 			new commands.pipette.low.AspirateHandler,
 			new commands.pipette.low.DispenseHandler,
-			new commands.pipette.low.MixHandler
+			new roboliq.commands.pipette.MixHandler
 		))
 		p.loadJsonData(Config01.benchJson)
 		

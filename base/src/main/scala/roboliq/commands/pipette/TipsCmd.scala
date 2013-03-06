@@ -1,4 +1,4 @@
-package roboliq.commands.pipette.low
+package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import roboliq.core._
@@ -10,17 +10,15 @@ import roboliq.commands.pipette.HasTip
 import roboliq.commands.pipette.HasVolume
 import roboliq.commands.pipette.HasWell
 import scala.reflect.runtime.universe
-import roboliq.commands.pipette.MixTokenItem
-import roboliq.commands.pipette.MixToken
 
 
-case class MixCmd(
+case class TipsCmd(
 	description_? : Option[String],
 	items: List[MixItem],
 	mixSpec_? : Option[MixSpecOpt]
 )
 
-case class MixItem(
+case class TipsItem(
 	tip: TipState,
 	well: Well,
 	mixSpec_? : Option[MixSpecOpt]

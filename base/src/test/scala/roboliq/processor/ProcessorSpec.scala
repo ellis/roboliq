@@ -63,7 +63,7 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 			new arm.MovePlateHandler,
 			new roboliq.commands.pipette.low.AspirateHandler,
 			new roboliq.commands.pipette.low.DispenseHandler,
-			new roboliq.commands.pipette.low.MixHandler
+			new roboliq.commands.pipette.MixHandler
 		))
 		
 		//info("jsobj_?: "+jsobj_?)
