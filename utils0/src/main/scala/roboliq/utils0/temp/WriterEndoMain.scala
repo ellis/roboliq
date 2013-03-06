@@ -17,13 +17,21 @@ case class Func(
 )
 
 object WriterEndoMain extends App {
-	val withEvent = (event: Event, func: Func) => func.copy(event_l = event :: func.event_l)
+	def withEvent(event: Event, func: Func): Func = func.copy(event_l = event :: func.event_l)
+	def withToken(o: Token, func: Func): Func = func.copy(token_l = o :: func.token_l)
 	
 	def event(s: String): Writer[Endo[Func], Event] = {
 		val event = Event(s)
 		for {
 			_ <- tell(((func: Func) => withEvent(event, func)).endo)
 		} yield event
+	}
+	
+	def token(s: String): Writer[Endo[Func], Token] = {
+		val o = Token(s)
+		for {
+			_ <- tell(((func: Func) => withToken(o, func)).endo)
+		} yield o
 	}
 	
 	def func(e: Writer[Endo[Func], Unit]): Func = {
@@ -35,6 +43,7 @@ object WriterEndoMain extends App {
 		for {
 			_ <- event("hi")
 			_ <- event("bye")
+			_ <- token("token")
 		} yield ()
 	}
 	
