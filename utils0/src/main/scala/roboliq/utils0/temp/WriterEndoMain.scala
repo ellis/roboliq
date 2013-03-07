@@ -1,5 +1,6 @@
 package roboliq.utils0.temp
 
+import scala.language.implicitConversions
 import scalaz._
 //import Scalaz._
 import Endo._
@@ -25,11 +26,11 @@ case class FuncBody(
 case class Output(
 	event_r: List[Event] = Nil,
 	token_r: List[Token] = Nil,
-	sub_r: List[Func] = Nil
+	sub_r: List[Fn] = Nil
 ) {
 	def event(o: String): Output = copy(event_r = Event(o) :: event_r)
 	def token(o: String): Output = copy(token_r = Token(o) :: token_r)
-	def sub(o: Func): Output = copy(sub_r = o :: sub_r)
+	def sub(o: Fn): Output = copy(sub_r = o :: sub_r)
 }
 
 case class Fn(
@@ -43,30 +44,52 @@ object WriterEndoMain extends App {
 	def input
 		(a: String)
 		(fn: (String) => Validation[String, Output])
-		: Validation[String, Fn]
+		: Validation[String, Output]
 	= {
 		def fn_#(l: List[String]) = fn(l.head)
-		Fn(List(a), fn_# _).success
+		output.sub(Fn(List(a), fn_# _))
 	}
 	
-	def handleCmd1(cmd: String): Validation[String, Output] = {
+	implicit def OutputToValidation(output: Output): Validation[String, Output] = output.success
+	
+	def handleCmd0(cmd: String): Validation[String, Output] = {
 		output
 			.event("E1")
 			.event("E2")
 			.success
 	}
 	
-	def handleCmd2(cmd: String): Validation[String, Fn] = {
+	def handleCmd1(cmd: String): Validation[String, Output] = {
 		input ("a") { (a) =>
 			output
 				.event("E1:"+a)
 				.event("E2")
-				.success
 		}
 	}
 	
-	println(handleCmd1("wash"))
-	println(handleCmd2("wash"))
+	def handleCmd2(cmd: String): Validation[String, Output] = {
+		input("a") { (a) =>
+			input("b") { (b) =>
+				output
+					.event("E1:"+a)
+					.event("E2:"+b)
+			}
+		}
+	}
+	// C1/S1/S1/E[12]
+	
+	println(handleCmd0("wash"))
+	println()
+	
+	val fn1_? = handleCmd1("wash")
+	println(fn1_?)
+	println(fn1_?.map(_.sub_r.map(_.fn(List("me")))))
+	println()
+	
+	val fn2_? = handleCmd2("wash")
+	println(fn2_?)
+	println(fn2_?.map(_.sub_r.map(_.fn(List("me")))))
+	println()
 }
 
 object WriterEndoMain2 extends App {
