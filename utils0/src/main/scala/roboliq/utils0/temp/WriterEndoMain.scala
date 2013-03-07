@@ -32,15 +32,21 @@ case class Output(
 	def sub(o: Func): Output = copy(sub_r = o :: sub_r)
 }
 
+case class Fn(
+	arg_l: List[String],
+	fn: (List[String]) => Validation[String, Output]
+)
+
 object WriterEndoMain extends App {
 	val output = Output()
 	
 	def input
 		(a: String)
 		(fn: (String) => Validation[String, Output])
-		: Validation[String, Output]
+		: Validation[String, Fn]
 	= {
-		"woops".failure
+		def fn_#(l: List[String]) = fn(l.head)
+		Fn(List(a), fn_# _).success
 	}
 	
 	def handleCmd1(cmd: String): Validation[String, Output] = {
@@ -50,20 +56,17 @@ object WriterEndoMain extends App {
 			.success
 	}
 	
-	def handleCmd2(cmd: String): Validation[String, Output] = {
-		input ("a") {
-			
+	def handleCmd2(cmd: String): Validation[String, Fn] = {
+		input ("a") { (a) =>
+			output
+				.event("E1:"+a)
+				.event("E2")
+				.success
 		}
-		for {
-			e
-		}
-		output
-			.event("E1")
-			.event("E2")
-			.success
 	}
 	
 	println(handleCmd1("wash"))
+	println(handleCmd2("wash"))
 }
 
 object WriterEndoMain2 extends App {
