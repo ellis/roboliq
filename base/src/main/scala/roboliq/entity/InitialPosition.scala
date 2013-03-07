@@ -1,4 +1,4 @@
-package roboliq.core
+package roboliq.entity
 
 /**
  * Initial location for a tube or plate.

@@ -1,4 +1,4 @@
-package roboliq.core
+package roboliq.entity
 
 case class WashProgram(
 	id: String,

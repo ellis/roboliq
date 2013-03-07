@@ -9,8 +9,7 @@ import scala.collection.mutable.MultiMap
 import scala.math.Ordering
 import scalaz._
 import grizzled.slf4j.Logger
-import roboliq.core._
-import RqPimper._
+import roboliq.core._, roboliq.entity._
 import spray.json._
 
 case class TKP(table: String, key: String, path: List[String]) {

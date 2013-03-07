@@ -1,10 +1,10 @@
-package roboliq.core
+package roboliq.entity
 
 import scalaz._
 import Scalaz._
 import java.text.DecimalFormat
 import grizzled.slf4j.Logger
-import RqPimper._
+import roboliq.core._
 import roboliq.utils.MathUtils
 
 

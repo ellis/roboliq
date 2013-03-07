@@ -1,4 +1,4 @@
-package roboliq.core
+package roboliq.entity
 
 import scalaz.Semigroup
 import scalaz.Monoid

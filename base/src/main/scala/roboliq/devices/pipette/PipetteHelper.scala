@@ -4,7 +4,7 @@ import scala.collection.immutable.SortedSet
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-import roboliq.core._
+import roboliq.core._, roboliq.entity._, roboliq.processor._
 import roboliq.commands.pipette._
 //import roboliq.robot._
 

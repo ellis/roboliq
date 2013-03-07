@@ -92,7 +92,7 @@ class RqOptionW[A](opt: Option[A]) {
 	}
 }
 
-object RqPimper {
+trait RqPimper {
 	implicit def pimpedOption[A](opt: Option[A]) = new RqOptionW(opt)
 	
 	implicit def resultMonad: Monad[RqResult] = new Monad[RqResult] {

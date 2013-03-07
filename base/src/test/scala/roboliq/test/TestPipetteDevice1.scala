@@ -1,7 +1,7 @@
 package roboliq.test
 
 import scala.collection.immutable.SortedSet
-import roboliq.core._
+import roboliq.core._, roboliq.entity._
 import roboliq.devices.pipette._
 import roboliq.commands.pipette._
 

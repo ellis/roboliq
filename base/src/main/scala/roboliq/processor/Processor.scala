@@ -21,8 +21,7 @@ import spray.json.JsonParser
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
 import scala.math.Ordering
-import roboliq.core._
-import RqPimper._
+import roboliq.core._, roboliq.entity._
 import spray.json.JsNumber
 import roboliq.commands.arm.MovePlateHandler
 

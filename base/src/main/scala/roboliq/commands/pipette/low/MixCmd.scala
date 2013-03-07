@@ -1,15 +1,7 @@
 package roboliq.commands.pipette.low
 
-import scala.collection.JavaConversions._
-import roboliq.core._
-import roboliq.events._
-import roboliq.core.RqPimper._
-import roboliq.processor._
-import roboliq.commands.pipette.HasPolicy
-import roboliq.commands.pipette.HasTip
-import roboliq.commands.pipette.HasVolume
-import roboliq.commands.pipette.HasWell
-import scala.reflect.runtime.universe
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
+import roboliq.commands.pipette._
 
 
 case class MixCmd(

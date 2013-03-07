@@ -6,7 +6,7 @@ import scala.reflect.runtime.universe.TypeTag
 import scalaz._
 import Scalaz._
 import spray.json._
-import roboliq.core._
+import roboliq.core._, roboliq.entity._
 import scala.reflect.ClassTag
 //import RqPimper._
 

@@ -4,7 +4,7 @@ import scala.language.postfixOps
 
 import scala.collection.mutable.LinkedHashSet
 import org.ejml.simple.SimpleMatrix
-import roboliq.core._
+import roboliq.core._, roboliq.entity._
 import scala.collection.immutable.BitSet
 import roboliq.utils.RstDoc
 

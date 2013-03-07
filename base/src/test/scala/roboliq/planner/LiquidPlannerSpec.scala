@@ -3,7 +3,7 @@ package roboliq.planner
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
-import roboliq.core._
+import roboliq.core._, roboliq.entity._
 import scala.collection.immutable.BitSet
 import roboliq.utils.FileUtils
 

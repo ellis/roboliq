@@ -179,8 +179,5 @@ import Scalaz._
  * 
  * 
  */
-package object core {
-	type Well = VesselSituatedState
-	
-	implicit val rqPimper = RqPimper
+package object core extends RqPimper {
 }

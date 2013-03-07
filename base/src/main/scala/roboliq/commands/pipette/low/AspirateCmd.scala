@@ -1,14 +1,9 @@
 package roboliq.commands.pipette.low
 
-import scala.reflect.runtime.{universe => ru}
-import roboliq.core._
-import roboliq.events._
-import roboliq.processor._
-import roboliq.core.RqPimper._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import scala.collection.JavaConversions._
 import spray.json._
-import roboliq.commands.pipette.TipWellVolumePolicy
-import roboliq.core.TipState.toTip
+import roboliq.commands.pipette._
 
 
 case class AspirateCmd(

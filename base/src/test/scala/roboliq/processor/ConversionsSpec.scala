@@ -6,7 +6,7 @@ import scala.reflect.runtime.universe.TypeTag
 import grizzled.slf4j.Logger
 import org.scalatest.FunSpec
 import spray.json._
-import _root_.roboliq.core._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import ConversionsDirect._
 import roboliq.test.Config01
 

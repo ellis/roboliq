@@ -1,6 +1,6 @@
-package roboliq.core
+package roboliq.entity
 
-import RqPimper._
+import roboliq.core._
 
 
 case class MixSpec(

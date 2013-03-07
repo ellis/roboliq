@@ -2,7 +2,7 @@ package roboliq.devices.pipette
 
 import scala.collection.immutable.SortedSet
 
-import roboliq.core._
+import roboliq.core._, roboliq.entity._, roboliq.processor._
 import roboliq.commands.pipette._
 
 

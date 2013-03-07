@@ -1,4 +1,4 @@
-package roboliq.core
+package roboliq.entity
 
 import scalaz._
 import Scalaz._

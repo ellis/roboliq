@@ -1,8 +1,6 @@
 package roboliq.commands.pipette.low
 
-import roboliq.core._
-import roboliq.events._
-import roboliq.processor._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 
 
 case class WashTipsCmd(

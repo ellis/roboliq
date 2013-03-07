@@ -1,8 +1,7 @@
 package roboliq.events
 
 import spray.json._
-import roboliq.core._
-import roboliq.processor._
+import roboliq.core._, roboliq.entity._, roboliq.processor._
 
 
 

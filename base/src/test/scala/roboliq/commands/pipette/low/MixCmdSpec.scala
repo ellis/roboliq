@@ -1,7 +1,7 @@
 package roboliq.commands.pipette.low
 
 import spray.json.JsonParser
-import roboliq.core._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import roboliq.commands.CommandSpecBase
 import roboliq.test.Config01
 

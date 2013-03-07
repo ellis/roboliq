@@ -11,8 +11,7 @@ import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe.typeOf
 import grizzled.slf4j.Logger
 import spray.json._
-import roboliq.core._
-import RqPimper._
+import roboliq.core._, roboliq.entity._
 import roboliq.utils.MathUtils
 
 

@@ -1,6 +1,8 @@
-package roboliq.core
+package roboliq.entity
 
 import scala.collection.immutable.SortedSet
+import roboliq.core._
+
 
 object Printer {
 	def getSeqDebugString[T](seq: Seq[T]): String = {
@@ -71,12 +73,12 @@ object Printer {
 	private val WellColRowPattern = """([^(]+)\(([A-Z])([0-9]+)\)""".r
 	private val WellRowPattern = """([^(]+)\(([0-9]+)\)""".r
 	private val WellNullPattern = """([^(]+)\(\)""".r
-	def parseWellId(id: String): Result[Tuple4[String, String, Int, Int]] = {
+	def parseWellId(id: String): RqResult[Tuple4[String, String, Int, Int]] = {
 		id match {
-			case WellColRowPattern(idPlate, sRow, sCol) => Success(idPlate, sRow+sCol, (sRow.charAt(0) - 'A'), sCol.toInt - 1)
-			case WellRowPattern(idPlate, sRow) => Success(idPlate, sRow, sRow.toInt - 1, 0)
-			case WellNullPattern(idPlate) => Success(idPlate, "", 0, 0)
-			case _ => Success(id, "", 0, 0)
+			case WellColRowPattern(idPlate, sRow, sCol) => RqSuccess((idPlate, sRow+sCol, (sRow.charAt(0) - 'A'), sCol.toInt - 1))
+			case WellRowPattern(idPlate, sRow) => RqSuccess((idPlate, sRow, sRow.toInt - 1, 0))
+			case WellNullPattern(idPlate) => RqSuccess((idPlate, "", 0, 0))
+			case _ => RqSuccess((id, "", 0, 0))
 		}
 	}
 }

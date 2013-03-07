@@ -1,9 +1,6 @@
 package roboliq.commands.arm
 
-import scala.reflect.runtime.{universe => ru}
-import roboliq.core._
-import RqPimper._
-import roboliq.processor._
+import roboliq.core._, roboliq.entity._, roboliq.processor._
 
 
 case class MovePlateCmd(

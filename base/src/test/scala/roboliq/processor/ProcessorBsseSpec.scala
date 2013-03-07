@@ -8,7 +8,7 @@ import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.GivenWhenThen
 import spray.json._
-import _root_.roboliq.core._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import ConversionsDirect._
 import _root_.roboliq.commands._
 import _root_.roboliq._

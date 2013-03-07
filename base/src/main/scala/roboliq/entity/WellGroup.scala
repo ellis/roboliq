@@ -1,4 +1,4 @@
-package roboliq.core
+package roboliq.entity
 
 import scala.collection.immutable.SortedSet
 
@@ -6,7 +6,7 @@ import scala.collection.immutable.SortedSet
 /**
  * Wells are guaranteed to be on the same plate
  */
-class WellGroupPlate private[core] (
+class WellGroupPlate private[entity] (
 	set: SortedSet[Well],
 	val idPlate: String,
 	iCol_? : Option[Int] = None,
@@ -20,7 +20,7 @@ class WellGroupPlate private[core] (
 /**
  * Wells are guaranteed to be in the same column of the same plate
  */
-class WellGroupCol private[core] (
+class WellGroupCol private[entity] (
 	set: SortedSet[Well],
 	idPlate: String,
 	val iCol: Int,
@@ -34,7 +34,7 @@ class WellGroupCol private[core] (
 /**
  * Wells are guaranteed to be adjacent in the same column of the same plate
  */
-class WellGroupAdjacent private[core] (
+class WellGroupAdjacent private[entity] (
 	set: SortedSet[Well],
 	idPlate: String,
 	iCol: Int
@@ -48,7 +48,7 @@ class WellGroupAdjacent private[core] (
 /**
  * Base class for grouping wells in such a way as to guarantee that some criterion is fulfilled
  */
-sealed class WellGroup private[core] (
+sealed class WellGroup private[entity] (
 	val set: SortedSet[Well],
 	val idPlate_? : Option[String],
 	val iCol_? : Option[Int],
