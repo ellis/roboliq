@@ -1,4 +1,4 @@
-package roboliq.commands.pipette
+/*package roboliq.commands.pipette
 
 import scala.collection.JavaConversions._
 import scalaz._
@@ -63,3 +63,4 @@ class TipsHandler_Fixed extends CommandHandler[TipsCmd]("pipette.tips") {
 		}
 	}
 }
+*/

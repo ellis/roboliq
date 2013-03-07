@@ -56,11 +56,11 @@ case class ComputationNode(
 case class Token_Comment(s: String) extends CmdToken
 
 class ProcessorData(
-	handler_l: List[CommandHandler]
+	handler_l: List[CommandHandler[_ <: Object]]
 ) {
 	val logger = Logger[this.type]
 
-	private val handler_m: Map[String, CommandHandler] = handler_l.flatMap(handler => handler.cmd_l.map(_ -> handler)).toMap
+	private val handler_m: Map[String, CommandHandler[_ <: Object]] = handler_l.map(handler => handler.id -> handler).toMap
 	
 	val db = new DataBase
 	// Top levels command nodes

@@ -20,18 +20,17 @@ case class AspirateToken(
 	val items: List[TipWellVolumePolicy]
 ) extends CmdToken
 
-class AspirateHandler extends CommandHandler("pipette.low.aspirate") {
-	val fnargs = cmdAs[AspirateCmd] { cmd =>
-		val events = cmd.items.flatMap(item => {
+class AspirateHandler extends CommandHandler[AspirateCmd]("pipette.low.aspirate") {
+	def handleCmd(cmd: AspirateCmd): RqReturn = {
+		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
+		val event_l = cmd.items.flatMap(item => {
 			TipAspirateEvent(item.tip, item.well.vesselState, item.volume) ::
 			VesselRemoveEvent(item.well.vessel, item.volume) :: Nil
 		})
-		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
-		//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
-		RqSuccess(List(
-			ComputationItem_Token(AspirateToken(cmd.items)),
-			ComputationItem_Events(events)
-		))
+		output(
+			AspirateToken(cmd.items),
+			event_l
+		)
 	}
 }
 

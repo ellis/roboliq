@@ -10,8 +10,6 @@ import roboliq.commands.pipette.HasTip
 import roboliq.commands.pipette.HasVolume
 import roboliq.commands.pipette.HasWell
 import scala.reflect.runtime.universe
-import roboliq.commands.pipette.MixTokenItem
-import roboliq.commands.pipette.MixToken
 
 
 case class MixCmd(
@@ -38,8 +36,8 @@ case class MixTokenItem(
 	val policy: PipettePolicy
 ) extends HasTip with HasWell with HasVolume with HasPolicy
 
-class MixHandler extends CommandHandler("pipette.low.mix") {
-	val fnargs = cmdAs[MixCmd] { cmd =>
+class MixHandler extends CommandHandler[MixCmd]("pipette.low.mix") {
+	def handleCmd(cmd: MixCmd): RqReturn = {
 		val event_l = cmd.items.flatMap(item => {
 			TipMixEvent(item.tip, item.well.vesselState, LiquidVolume.empty) :: Nil
 		})

@@ -4,8 +4,7 @@ import spray.json.JsonParser
 import roboliq.core._
 import roboliq.commands.CommandSpecBase
 import roboliq.test.Config01
-import roboliq.commands.pipette.MixTokenItem
-import roboliq.commands.pipette.MixToken
+
 
 class MixCmdSpec extends CommandSpecBase {
 	describe("pipette.low.mix") {

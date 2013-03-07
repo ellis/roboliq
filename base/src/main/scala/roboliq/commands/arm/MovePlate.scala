@@ -19,25 +19,21 @@ case class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
-class MovePlateHandler extends CommandHandler("arm.movePlate") {
-	val fnargs = cmdAs[MovePlateCmd] { cmd =>
+class MovePlateHandler extends CommandHandler[MovePlateCmd]("arm.movePlate") {
+	def handleCmd(cmd: MovePlateCmd) = {
 		import cmd._
 		for {
 			locationSrc <- plate.location_?.asRq(s"plate `${plate.plate.id}` must have a location set.")
-		} yield {
-			val events = List(
+			ret <- output(
+				new MovePlateToken(
+					deviceId_?,
+					plate.plate,
+					locationSrc,
+					dest
+				),
 				PlateLocationEvent(cmd.plate.plate, cmd.dest)
 			)
-			val token = new MovePlateToken(
-				deviceId_?,
-				plate.plate,
-				locationSrc,
-				dest)
-			List(
-				ComputationItem_Token(token),
-				ComputationItem_Events(events)
-			)
-		}
+		} yield ret
 	}
 }
 

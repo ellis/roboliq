@@ -12,6 +12,8 @@ import scala.reflect.ClassTag
 
 case class RqFunctionArgs(fn: RqFunction, arg_l: List[KeyClassOpt])
 
+class RqReturnBuilder(val l: List[RqResult[RqItem]])
+
 object InputListToTuple {
 	def check1[A: ClassTag](l: List[Object]): RqResult[(A)] = {
 		l match {
@@ -490,10 +492,33 @@ abstract class RqFunctionHandler0 extends RqFunctionHandler {
 	val fnargs = RqFunctionArgs(fn, Nil)
 }
 
-abstract class CommandHandler(
-	val cmd_l: String*
+abstract class CommandHandler[A <: Object : TypeTag](
+	val id: String
 ) extends RqFunctionHandler {
-	val fnargs: RqFunctionArgs
+	
+	//implicit def RqItemToValidationOutput(a: RqItem): Validation[String, Output] =
+	//	List(a).success
+	implicit def RqItemToRqReturnBuilder(a: RqItem): RqReturnBuilder =
+		new RqReturnBuilder(List(RqSuccess(a)))
+	implicit def TokenToReturnBuilder(a: CmdToken): RqReturnBuilder =
+		new RqReturnBuilder(List(RqSuccess(ComputationItem_Token(a))))
+	implicit def EventToReturnBuilder(a: Event): RqReturnBuilder =
+		new RqReturnBuilder(List(RqSuccess(ComputationItem_Events(List(a)))))
+	implicit def ListEventToReturnBuilder(l: Iterable[Event]): RqReturnBuilder =
+		new RqReturnBuilder(List(RqSuccess(ComputationItem_Events(l.toList))))
+	
+	val fnargs: RqFunctionArgs = {
+		cmdAs[A] { cmd =>
+			handleCmd(cmd)
+		}
+	}
+	
+	def handleCmd(cmd: A): RqReturn
+
+	def output(l: RqReturnBuilder*): RqReturn = {
+		val l1: List[RqResult[RqItem]] = l.toList.flatMap(_.l)
+		RqResult.toResultOfList(l1)
+	}
 }
 
 abstract class ConversionHandler1 extends RqFunctionHandler {

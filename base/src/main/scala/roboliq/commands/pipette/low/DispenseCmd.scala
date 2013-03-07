@@ -21,9 +21,10 @@ case class DispenseToken(
 	val items: List[TipWellVolumePolicy]
 ) extends CmdToken
 
-class DispenseHandler extends CommandHandler("pipette.low.dispense") {
-	val fnargs = cmdAs[DispenseCmd] { cmd =>
+class DispenseHandler extends CommandHandler[DispenseCmd]("pipette.low.dispense") {
+	def handleCmd(cmd: DispenseCmd): RqReturn = {
 		for {
+			//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 			events <- RqResult.toResultOfList(cmd.items.map(item => {
 				println("DispenseHandler item.tip.content: "+item.tip.content)
 				for {
@@ -33,13 +34,10 @@ class DispenseHandler extends CommandHandler("pipette.low.dispense") {
 					VesselAddEvent(item.well, content) :: Nil
 				}
 			})).map(_.flatten)
-		} yield {
-			//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
-			//Expand2Tokens(List(new AspirateToken(lItem.toList)), events.toList, doc, docMarkdown)
-			List(
-				ComputationItem_Token(DispenseToken(cmd.items)),
-				ComputationItem_Events(events)
+			ret <- output(
+				DispenseToken(cmd.items),
+				events
 			)
-		}
+		} yield ret
 	}
 }

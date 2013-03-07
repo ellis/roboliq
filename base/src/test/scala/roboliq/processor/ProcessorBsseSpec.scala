@@ -16,6 +16,8 @@ import roboliq.commands.pipette.TipWellVolumePolicy
 import roboliq.test.Config01
 
 
+// REFACTOR: move arm.movePlate command to MovePlateSpec
+// REFACTOR: should probably derive this class from CommandSpecBase
 class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 	private def makeProcessor(nameToJson_l: (String, JsObject)*): ProcessorData = {
 		Given("a BSSE configuration (8 fixed tips, 4 large, 4 small)")
@@ -23,7 +25,7 @@ class ProcessorBsseSpec extends FunSpec with GivenWhenThen {
 			new arm.MovePlateHandler,
 			new roboliq.commands.pipette.low.AspirateHandler,
 			new roboliq.commands.pipette.low.DispenseHandler,
-			new roboliq.commands.pipette.MixHandler
+			new roboliq.commands.pipette.low.MixHandler
 		))
 		p.loadJsonData(Config01.benchJson)
 		p.loadJsonData(Config01.protocol1Json)
