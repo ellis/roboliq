@@ -2,11 +2,12 @@ package roboliq.utils0.temp
 
 import scala.language.implicitConversions
 import scalaz._
-//import Scalaz._
-import Endo._
-import WriterT._
-import scalaz.syntax.all._
-import scalaz.syntax.std.all._
+import Scalaz._
+//import Endo._
+//import List._
+//import WriterT._
+//import scalaz.syntax.all._
+//import scalaz.syntax.std.all._
 
 trait Task
 case class Event(s: String) extends Task
@@ -23,23 +24,62 @@ case class FuncBody(
 	sub_l: List[Func]
 )
 
-case class Output(
-	event_r: List[Event] = Nil,
-	token_r: List[Token] = Nil,
-	sub_r: List[Fn] = Nil
-) {
-	def event(o: String): Output = copy(event_r = Event(o) :: event_r)
-	def token(o: String): Output = copy(token_r = Token(o) :: token_r)
-	def sub(o: Fn): Output = copy(sub_r = o :: sub_r)
-}
+/*case class Output(
+	l: List[Task] = Nil
+)*/
 
 case class Fn(
 	arg_l: List[String],
-	fn: (List[String]) => Validation[String, Output]
-)
+	fn: (List[String]) => Validation[String, List[Task]]
+) extends Task
+
+class OutputBuilder(val l: List[Validation[String, Task]]) {
+	/*
+	def |&|(a: Task, b: Task): Validation[String, Output] =
+		Output(a :: b :: Nil).success
+	
+	def |&|(a: Validation[String, Output], b: Task): Validation[String, Output] =
+		a.map(_ << b)
+	
+	def |&|(a: Validation[String, Output], b: Validation[String, Task]): Validation[String, Output] =
+		a.flatMap(x => b.map(y => x << y))
+	*/
+}
 
 object WriterEndoMain extends App {
-	val output = Output()
+	type V[A] = Validation[String, A]
+	type Output = List[Task]
+	
+	implicit def OutputToValidation(output: Output): Validation[String, Output] = output.success
+	/*implicit object OutputMonoid extends Monoid[Output] {
+		def zero = Nil
+		def append(a: Output, b: => Output) = Output(a.l ++ b.l)
+	}*/
+	implicit def TaskToValidationOutput(a: Task): Validation[String, Output] =
+		List(a).success
+	implicit def TaskToOutputBuilder(a: Task): OutputBuilder =
+		new OutputBuilder(List(a.success))
+	
+	/*class OutputBuilder
+	def |&|(a: Task, b: Task): Validation[String, Output] =
+		Output(a :: b :: Nil).success
+	
+	def |&|(a: Validation[String, Output], b: Task): Validation[String, Output] =
+		a.map(_ << b)
+	
+	def |&|(a: Validation[String, Output], b: Validation[String, Task]): Validation[String, Output] =
+		a.flatMap(x => b.map(y => x << y))
+	*/
+		
+	//val output = Output()
+	//val output = Monoid[Output].zero
+	
+	def output(l: OutputBuilder*): V[Output] = {
+		val l1: List[V[Task]] = l.toList.flatMap(_.l)
+		val l2: V[List[Task]] = l1.sequence
+		//val l3: V[Output] = l2.map(Output(_))
+		l2
+	}
 	
 	def input
 		(a: String)
@@ -47,32 +87,32 @@ object WriterEndoMain extends App {
 		: Validation[String, Output]
 	= {
 		def fn_#(l: List[String]) = fn(l.head)
-		output.sub(Fn(List(a), fn_# _))
+		output(Fn(List(a), fn_# _))
 	}
 	
-	implicit def OutputToValidation(output: Output): Validation[String, Output] = output.success
-	
 	def handleCmd0(cmd: String): Validation[String, Output] = {
-		output
-			.event("E1")
-			.event("E2")
-			.success
+		output(
+			Event("E1"),
+			Event("E2")
+		)
 	}
 	
 	def handleCmd1(cmd: String): Validation[String, Output] = {
 		input ("a") { (a) =>
-			output
-				.event("E1:"+a)
-				.event("E2")
+			output(
+				Event("E1:"+a),
+				Event("E2")
+			)
 		}
 	}
 	
 	def handleCmd2(cmd: String): Validation[String, Output] = {
 		input("a") { (a) =>
 			input("b") { (b) =>
-				output
-					.event("E1:"+a)
-					.event("E2:"+b)
+				output(
+					Event("E1:"+a),
+					Event("E2:"+b)
+				)
 			}
 		}
 	}
@@ -83,16 +123,19 @@ object WriterEndoMain extends App {
 	
 	val fn1_? = handleCmd1("wash")
 	println(fn1_?)
-	println(fn1_?.map(_.sub_r.map(_.fn(List("me")))))
+	//println(fn1_?.map(_.sub_r.map(_.fn(List("me")))))
 	println()
 	
 	val fn2_? = handleCmd2("wash")
 	println(fn2_?)
-	println(fn2_?.map(_.sub_r.map(_.fn(List("me")))))
+	//println(fn2_?.map(_.sub_r.map(_.fn(List("me")))))
 	println()
 }
 
 object WriterEndoMain2 extends App {
+	//import Endo._
+	import WriterT._
+
 	def withEvent(event: Event, body: FuncBody): FuncBody = body.copy(event_l = event :: body.event_l)
 	def withToken(o: Token, body: FuncBody): FuncBody = body.copy(token_l = o :: body.token_l)
 	def withSub(o: Func, body: FuncBody): FuncBody = body.copy(sub_l = o :: body.sub_l)
