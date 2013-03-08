@@ -7,7 +7,7 @@ import scala.language.implicitConversions
 case class PlateState(
 	val plate: Plate,
 	val location_? : Option[PlateLocation]
-) {
+) extends Entity {
 	def id = plate.id
 	/** Number of rows. */
 	def rows: Int = plate.nRows

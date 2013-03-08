@@ -1,6 +1,7 @@
 package roboliq
 
 import roboliq.core._
+import roboliq.entity.Entity
 
 package object processor {
 	type RqArgs = List[KeyClassOpt]

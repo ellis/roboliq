@@ -7,7 +7,7 @@ case class VesselState(
 	vessel: Vessel,
 	content: VesselContent = VesselContent.Empty,
 	isInitialVolumeKnown_? : Option[Boolean] = None
-) {
+) extends Entity {
 	assert(isInitialVolumeKnown_? != null)
 	def id = vessel.id
 	def isInitialVolumeKnown = isInitialVolumeKnown_?.getOrElse(false)
@@ -19,7 +19,7 @@ case class VesselState(
 case class VesselSituatedState(
 	vesselState: VesselState,
 	position: VesselPosition
-) extends Ordered[VesselSituatedState] {
+) extends Entity with Ordered[VesselSituatedState] {
 	def vessel = vesselState.vessel
 	def id = vessel.id
 	def plate = position.plate

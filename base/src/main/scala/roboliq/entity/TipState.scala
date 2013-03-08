@@ -30,10 +30,12 @@ case class TipState(
 	val cleanDegreePrev: CleanIntensity.Value,
 	/** Intensity of cleaning that should be performed after leaving the current liquid group */
 	val cleanDegreePending: CleanIntensity.Value
-) extends Ordered[TipState] {
+) extends Entity with Ordered[TipState] {
 	def id = conf.id
 	def index = conf.index
 	def permanent_? = conf.permanent_?
+	
+	def getTableName = "tipState"
 	
 	override def compare(that: TipState): Int = conf.compare(that.conf)
 	override def toString =

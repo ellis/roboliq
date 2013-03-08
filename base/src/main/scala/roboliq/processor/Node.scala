@@ -4,6 +4,7 @@ import spray.json.JsValue
 import spray.json.JsObject
 
 import roboliq.core._
+import roboliq.entity.Entity
 import roboliq.commands._
 
 /**
@@ -35,7 +36,7 @@ sealed trait RqItem
 
 case class RqItem_Function(fnargs: RqFunctionArgs) extends RqItem
 
-case class ComputationItem_Events(event_l: List[Event]) extends RqItem
+case class ComputationItem_Events(event_l: List[Event[Entity]]) extends RqItem
 case class ComputationItem_EntityRequest(id: String) extends RqItem
 case class ComputationItem_Command(cmd: JsObject) extends RqItem
 case class ComputationItem_Token(token: CmdToken) extends RqItem
@@ -220,7 +221,7 @@ case class Node_Conversion(
 case class Node_Events(
 	parent_? : Option[Node],
 	index: Int,
-	event_l: List[Event]
+	event_l: List[Event[Entity]]
 ) extends Node {
 	import roboliq.events._
 	
@@ -233,31 +234,34 @@ case class Node_Events(
 	val fnargs = RqFunctionArgs(
 		arg_l = Nil,
 		fn = (_) => {
-			val l: RqResult[List[RqFunctionArgs]] = RqResult.toResultOfList(event_l.map(event0 => {
+			// RqReturn = RqResult[List[RqItem]]
+			val l1: List[RqReturn] = event_l.map(event0 => {
 				event0 match {
-					case event: arm.PlateLocationEvent =>
-						val handler = new arm.PlateLocationEventHandler
-						RqSuccess(handler.fnargs(event))
+					case event: PlateLocationEvent =>
+						val handler = new PlateLocationEventHandler
+						handler.fnargs(event)
 					case event: TipAspirateEvent =>
 						val handler = new TipAspirateEventHandler
-						RqSuccess(handler.fnargs(event))
+						handler.fnargs(event)
 					case event: TipDispenseEvent =>
 						val handler = new TipDispenseEventHandler
-						RqSuccess(handler.fnargs(event))
+						handler.fnargs(event)
 					case event: TipMixEvent =>
 						val handler = new TipMixEventHandler
-						RqSuccess(handler.fnargs(event))
+						handler.fnargs(event)
 					case event: VesselAddEvent =>
 						val handler = new VesselAddEventHandler
-						RqSuccess(handler.fnargs(event))
+						handler.fnargs(event)
 					case event: VesselRemoveEvent =>
 						val handler = new VesselRemoveEventHandler
-						RqSuccess(handler.fnargs(event))
+						handler.fnargs(event)
 					case _ =>
 						RqError(s"No handler for event `$event0`")
 				}
-			}))
-			l.map(_.map(fnargs => RqItem_Function(fnargs)))
+			})
+			val l2: RqResult[List[List[RqItem]]] = RqResult.toResultOfList(l1)
+			val l3: RqReturn = l2.map(_.flatten)
+			l3
 		}
 	)
 	val desc = "events: "+event_l

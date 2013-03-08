@@ -20,7 +20,7 @@ class AspirateHandler extends CommandHandler[AspirateCmd]("pipette.low.aspirate"
 		//val (doc, docMarkdown) = SpirateTokenItem.toAspriateDocString(cmd.items, ctx.ob, ctx.states)
 		val event_l = cmd.items.flatMap(item => {
 			TipAspirateEvent(item.tip, item.well.vesselState, item.volume) ::
-			VesselRemoveEvent(item.well.vessel, item.volume) :: Nil
+			VesselRemoveEvent(item.well, item.volume) :: Nil
 		})
 		output(
 			AspirateToken(cmd.items),

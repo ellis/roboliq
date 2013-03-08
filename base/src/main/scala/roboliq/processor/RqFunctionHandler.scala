@@ -502,9 +502,9 @@ abstract class CommandHandler[A <: Object : TypeTag](
 		new RqReturnBuilder(List(RqSuccess(a)))
 	implicit def TokenToReturnBuilder(a: CmdToken): RqReturnBuilder =
 		new RqReturnBuilder(List(RqSuccess(ComputationItem_Token(a))))
-	implicit def EventToReturnBuilder(a: Event): RqReturnBuilder =
+	implicit def EventToReturnBuilder(a: Event[Entity]): RqReturnBuilder =
 		new RqReturnBuilder(List(RqSuccess(ComputationItem_Events(List(a)))))
-	implicit def ListEventToReturnBuilder(l: Iterable[Event]): RqReturnBuilder =
+	implicit def ListEventToReturnBuilder(l: Iterable[Event[Entity]]): RqReturnBuilder =
 		new RqReturnBuilder(List(RqSuccess(ComputationItem_Events(l.toList))))
 	
 	val fnargs: RqFunctionArgs = {
@@ -542,17 +542,6 @@ object ConversionHandler1 {
 
 abstract class ConversionHandlerN extends RqFunctionHandler {
 	val fnargs: RqFunctionArgs
-}
-
-abstract class EventHandler[A <: Event : TypeTag](
-	val id: String
-) extends RqFunctionHandler {
-	def handleEvent(event: A): RqReturn
-
-	def output(l: RqReturnBuilder*): RqReturn = {
-		val l1: List[RqResult[RqItem]] = l.toList.flatMap(_.l)
-		RqResult.toResultOfList(l1)
-	}
 }
 
 /*

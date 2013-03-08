@@ -1,49 +1,37 @@
 package roboliq.events
 
-import spray.json._
 import roboliq.core._, roboliq.entity._, roboliq.processor._
-
 
 
 /** Represents an aspiration event. */
 case class VesselAddEvent(
 	vessel: VesselState,
 	content: VesselContent
-) extends Event {
+) extends Event[VesselState] {
+	def getStateOrId = Right(vessel)
 }
 
-class VesselAddEventHandler {// extends EventHandler {
-	import RqFunctionHandler._
-	
-	def fnargs(event: VesselAddEvent) = {
-		fnRequire () {
-			val state0 = event.vessel
-			val state_# = state0.copy(content = state0.content + event.content)
-			for { json <- ConversionsDirect.toJson[VesselState](state_#) }
-			yield List(EventItem_State(TKP("vesselState", event.vessel.id, Nil), json))
-		}
+class VesselAddEventHandler extends EventHandler[VesselState, VesselAddEvent]("vessel.add") {
+	def handleEvent(state0: VesselState, event: VesselAddEvent) = {
+		RqSuccess(state0.copy(content = state0.content + event.content))
 	}
 }
 
 /** Represents an aspiration event. */
 case class VesselRemoveEvent(
-	vessel: Vessel,
+	vessel: VesselState,
 	/** Volume in liters to remove. */
 	volume: LiquidVolume
-) extends Event {
+) extends Event[VesselState] {
+	def getStateOrId = Right(vessel)
 }
 
-class VesselRemoveEventHandler {// extends EventHandler {
-	import RqFunctionHandler._
-	
-	def fnargs(event: VesselRemoveEvent) = {
-		fnRequire (lookup[VesselState](event.vessel.id)) { state0 =>
-			for {
-				content_# <- state0.content.removeVolume(event.volume)
-				state_# = state0.copy(content = content_#)
-				json <- ConversionsDirect.toJson[VesselState](state_#)
-			} yield List(EventItem_State(TKP("vesselState", event.vessel.id, Nil), json))
-		}
+class VesselRemoveEventHandler extends EventHandler[VesselState, VesselRemoveEvent]("vessel.remove") {
+	def handleEvent(state0: VesselState, event: VesselRemoveEvent) = {
+		for {
+			content_# <- state0.content.removeVolume(event.volume)
+			state_# = state0.copy(content = content_#)
+		} yield state_#
 	}
 
 	private def dispense(state0: TipState, content: VesselContent, liquidDest: Liquid, pos: PipettePosition.Value): TipState = {

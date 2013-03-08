@@ -1,6 +1,6 @@
 package roboliq.commands.arm
 
-import roboliq.core._, roboliq.entity._, roboliq.processor._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 
 
 case class MovePlateCmd(
@@ -28,26 +28,8 @@ class MovePlateHandler extends CommandHandler[MovePlateCmd]("arm.movePlate") {
 					locationSrc,
 					dest
 				),
-				PlateLocationEvent(cmd.plate.plate, cmd.dest)
+				PlateLocationEvent(cmd.plate, cmd.dest)
 			)
 		} yield ret
-	}
-}
-
-case class PlateLocationEvent(
-	plate: Plate,
-	location: PlateLocation
-) extends Event
-
-class PlateLocationEventHandler {// extends EventHandler {
-	import RqFunctionHandler._
-	
-	def fnargs(event: PlateLocationEvent) = {
-		fnRequire (lookup[PlateState](event.plate.id)) { state0 =>
-			val state_# = PlateState(event.plate, Some(event.location))
-			ConversionsDirect.toJson(state_#).map(jsstate =>
-				List(EventItem_State(TKP("plateState", event.plate.id, Nil), jsstate))
-			)
-		}
 	}
 }
