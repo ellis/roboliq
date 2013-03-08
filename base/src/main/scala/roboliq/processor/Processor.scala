@@ -21,7 +21,7 @@ import spray.json.JsonParser
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
 import scala.math.Ordering
-import roboliq.core._, roboliq.entity._
+import roboliq.core._, roboliq.entity._, roboliq.events._
 import spray.json.JsNumber
 import roboliq.commands.arm.MovePlateHandler
 
@@ -59,7 +59,16 @@ class ProcessorData(
 ) {
 	val logger = Logger[this.type]
 
+	private val eventHandler_l0 = List(
+		new PlateLocationEventHandler,
+		new TipAspirateEventHandler,
+		new TipMixEventHandler,
+		new TipCleanEventHandler,
+		new VesselAddEventHandler
+	)
+	
 	private val handler_m: Map[String, CommandHandler[_ <: Object]] = handler_l.map(handler => handler.id -> handler).toMap
+	private val eventHandler_m: Map[Class[_], EventHandler[_, _]] = eventHandler_l.map(handler => handler.eventClass -> handler).toMap
 	
 	val db = new DataBase
 	// Top levels command nodes
@@ -392,46 +401,6 @@ class ProcessorData(
 					// REFACTOR: Can the recursion be removed, since registerNode will be called on node2 soon anyway
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
-				/*
-				// Create well objects, which are not stored as JsValue entities
-				else if (kc.clazz <:< ru.typeOf[Well]) {
-					WellSpecParser.parse(kc.key.key) match {
-						case roboliq.core.Error(l) =>
-							internalMessage_l += RqError(l.toList, Nil)
-							Nil
-						case roboliq.core.Success(l) =>
-							val wellInfo_l = l.flatMap(pair => {
-								val (plateId, wellSpec_l) = pair
-								wellSpec_l.flatMap(_ match {
-									case wellSpec: WellSpecOne =>
-										Some(plateId -> wellSpec.rc)
-									case _ =>
-										internalMessage_l += RqError("Expected wellSpec to be WellSpecOne")
-										None
-								})
-							})
-							val arg_l = wellInfo_l.map(pair =>
-								KeyClassOpt(KeyClass(TKP("plate", pair._1, Nil), ru.typeOf[Plate]), false)
-							)
-							val fn = (l: List[Object]) => {
-								val well_l = (l.asInstanceOf[List[Plate]] zip wellInfo_l).map(pair => {
-									val (plate, (_, rc)) = pair
-									val well = new WellPosition(
-										id = WellSpecParser.wellId(plate, rc.row, rc.col),
-										idPlate = plate.id,
-										index = WellSpecParser.wellIndex(plate, rc.row, rc.col),
-										iRow = rc.row,
-										iCol = rc.col,
-										indexName = WellSpecParser.wellIndexName(plate.nRows, plate.nCols, rc.row, rc.col)
-									)
-									ConversionItem_Object(well)
-								})
-								RqSuccess(well_l)
-							}
-							val fnargs = RqFunctionArgs(fn, arg_l)
-							List(Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc))
-					}
-				}*/
 				else {
 					//val contextKey_? = node.contextKey_?
 					val contextKey_? = if (kc.isJsValue) Some(kc.key) else None
@@ -600,7 +569,7 @@ class ProcessorData(
 		val g = new ProcessorGraph
 		while (countdown != 0) {
 			g.setStep(step_i)
-			if (runStep(g))
+			if (runStep(g, step_i))
 				countdown -= 1
 			else
 				countdown = 0
@@ -610,17 +579,48 @@ class ProcessorData(
 		g
 	}
 	
-	private def runStep(g: ProcessorGraph): Boolean = {
+	private class NodeListBuilder {
+		val node_l = new mutable.HashSet[Node]
+		val kco_l = new mutable.HashSet[KeyClassOpt]
+		val kc_l = new mutable.HashSet[KeyClass]
+		
+		def addNode(node: Node) {
+			if (!node_l.contains(node)) {
+				node_l += node
+				
+				// Add child nodes
+				val state = state_m(node)
+				state.child_l.foreach(addNode)
+				
+				node.input_l.foreach(addKco)
+			}
+		}
+		
+		private def addKco(kco: KeyClassOpt) {
+			if (!kco_l.contains(kco)) {
+				kco_l += kco
+				val kc = kco.kc
+				if (!kc_l.contains(kc)) {
+					kc_l += kc
+					kcNode_m.get(kc).map(addNode)
+				}
+			}
+		}
+	}
+	
+	private def runStep(g: ProcessorGraph, step_i: Int): Boolean = {
 		lookupMessage_m.clear
 
-		val state0_m = state_m.toMap
-		
-		// Get all KeyClassOpt from all nodes
-		val kco_l = state0_m.keySet.flatMap(_.input_l)
+		val nodeListBuilder = new NodeListBuilder
+		cmd1_l.foreach(nodeListBuilder.addNode)
+
+		val node_l = nodeListBuilder.node_l.toList.sortBy(_.id)
+		val kco_l = nodeListBuilder.kco_l.toSet
+		val kc_l = nodeListBuilder.kc_l.toList.sortBy(_.id)
+
+		val state_l = node_l.map(state_m)
 		// Find whether KeyClass is optional for all nodes
 		val opt_m = kco_l.groupBy(_.kc).mapValues(l => l.find(_.opt == false).isEmpty)
-
-		// TODO: at this point we should perhaps lookup the KeyClasses in opt_m
 
 		// Try to get values for all kcos
 		val kcToValue_m = opt_m.keys.toList.map(kc => kc -> getEntity(kc)).toMap
@@ -634,11 +634,20 @@ class ProcessorData(
 			kco -> value
 		}).toMap
 		
+		/*val nodeToState_m = node_l.map(node => node -> {
+			state_m.get(node) match {
+				case None => node -> new NodeState(node)
+				case Some(state) => state
+			}
+		}).toMap*/
+
+		//val state0_m = state_m.toMap
+		
 		// Set message for missing entities
 		lookupMessage_m ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
 		
 		// Update status for all nodes
-		state0_m.values.foreach(_.updateStatus(kcoToValue_m.apply _))
+		state_l.foreach(_.updateInput(kcoToValue_m.apply _))
 		
 		/*
 		cmd[1].id: JsValue = P1
@@ -648,13 +657,13 @@ class ProcessorData(
 		*/
 
 		g.setEntities(kcoToValue_m)
-		state0_m.foreach(pair => g.setNode(pair._2))
+		state_l.foreach(g.setNode)
 		//println("dot:")
 		//println(g.toDot)
 		
 		println()
-		println("runStep")
-		println("=======")
+		println("runStep "+step_i)
+		println("=========")
 		println()
 		println("Entities")
 		println("--------")
@@ -671,12 +680,12 @@ class ProcessorData(
 		println()
 		println("Nodes")
 		println("-----")
-		state0_m.values.toList.sortBy(_.node.id).map(state => {
+		state_l.sortBy(_.node.id).map(state => {
 			val status = state.status match {
-				case Status.NotReady => "_"
-				case Status.Ready => "."
-				case Status.Success => "x"
-				case Status.Error => "!"
+				case Status.NotReady => "N"
+				case Status.Ready => "R"
+				case Status.Success => "S"
+				case Status.Error => "E"
 			}
 			status + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc
 		}).foreach(println)

@@ -16,7 +16,7 @@ class NodeState(val node: Node) {
 	def result = _inputResult.flatMap(_ => _functionResult)
 	def child_l = _child_l
 	
-	def updateStatus(getEntity: KeyClassOpt => RqResult[Object]) {
+	def updateInput(getEntity: KeyClassOpt => RqResult[Object]) {
 		if (node.input_l.isEmpty && _status == Status.NotReady) {
 			_status = Status.Ready
 		}
@@ -27,12 +27,24 @@ class NodeState(val node: Node) {
 					// If inputs have changed, then the function should be recomputed.
 					if (_input_l != input2_l) {
 						_status = Status.Ready
+						_input_l = input2_l
+						_inputResult = result.map(_ => ())
+						_functionResult = RqResult.zero
+						_child_l = Nil
 					}
-					_input_l = input2_l
+				// Error
 				case _ =>
 					_input_l = Nil
+					_inputResult = result.map(_ => ())
+					_functionResult = RqResult.zero
+					_child_l = Nil
 			}
 		}
+	}
+	
+	private def reset() {
+		_functionResult = RqResult.zero
+		_child_l = Nil
 	}
 
 	def setFunctionResult(result: scala.util.Try[RqResult[_]]) {
