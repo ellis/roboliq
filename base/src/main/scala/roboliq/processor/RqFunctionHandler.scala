@@ -544,6 +544,18 @@ abstract class ConversionHandlerN extends RqFunctionHandler {
 	val fnargs: RqFunctionArgs
 }
 
+abstract class EventHandler[A <: Event : TypeTag](
+	val id: String
+) extends RqFunctionHandler {
+	def handleEvent(event: A): RqReturn
+
+	def output(l: RqReturnBuilder*): RqReturn = {
+		val l1: List[RqResult[RqItem]] = l.toList.flatMap(_.l)
+		RqResult.toResultOfList(l1)
+	}
+}
+
+/*
 abstract class EventHandler[A: TypeTag] extends RqFunctionHandler {
 	protected def eventAs[A <: Object : TypeTag](fn: A => RqReturn): RqFunctionArgs = {
 		val arg_l = List[KeyClassOpt](RequireItem[JsValue](TKP("cmd", "$", Nil)).toKeyClass)
@@ -577,3 +589,4 @@ abstract class EventHandler[A: TypeTag] extends RqFunctionHandler {
 	
 	def returnEvent(key: TKP, jsval: JsValue) = RqFunctionHandler.returnEvent(key, jsval)
 }
+*/
