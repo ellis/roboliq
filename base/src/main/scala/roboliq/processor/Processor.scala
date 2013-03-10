@@ -403,6 +403,30 @@ class ProcessorData(
 					// REFACTOR: Can the recursion be removed, since registerNode will be called on node2 soon anyway
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
+				// If we are supposed to return a list of all entities in the given table:
+				else if (kc.clazz <:< ru.typeOf[List[_]] && kc.key.key == "*") {
+					val tkp_l = db.getAllKeys(kc.key.table).sortBy(_.id)
+					// type parameter of option (e.g, if List[String], clazz2 will be String)
+					val clazz2 = kc.clazz.asInstanceOf[ru.TypeRefApi].args.head
+					val kco2_l = tkp_l.map(tkp => KeyClassOpt(KeyClass(tkp, clazz2)))
+					
+					val fnargs1 = RqFunctionArgs(
+						arg_l = kco2_l,
+						fn = (l: List[Object]) => { 
+							RqSuccess(List(ConversionItem_Object(l)))
+						}
+					)
+					val node1 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs1, kc)
+					
+					// FIXME: HACK: this will not update when items are added or removed from the table
+					val x = node1 :: kco2_l.zipWithIndex.flatMap(pair => {
+						val (kco2, i) = pair
+						makeConversionNodesForInput(node1, kco2, i + 1)
+					})
+					println("x: "+x)
+					//sys.exit()
+					x
+				}
 				else {
 					//val contextKey_? = node.contextKey_?
 					val contextKey_? = if (kc.isJsValue) Some(kc.key) else None

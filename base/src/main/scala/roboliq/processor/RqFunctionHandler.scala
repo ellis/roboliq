@@ -485,7 +485,16 @@ object RqFunctionHandler {
 	}
 
 	def lookupAll[A <: Object : TypeTag](): RequireItem[List[A]] = {
-		lookup[List[A]]("*")
+		val t = ru.typeTag[A].tpe
+		val fnargs = RqFunctionArgs(
+			arg_l = Nil,
+			fn = (_) => ConversionsDirect.findTableForType(t).flatMap { table =>
+				fnRequire (RequireItem[List[A]](TKP(table, "*", Nil))) { o =>
+					returnObject(o)
+				}
+			}
+		)
+		RequireItem[List[A]](TKP("param", "#", Nil), Some(fnargs))
 	}
 	
 	def returnObject(obj: Object) =

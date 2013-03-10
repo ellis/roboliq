@@ -93,12 +93,14 @@ class DataBaseSpec extends FunSpec {
 			val jsvalA = JsObject("s" -> JsString("a"), "n" -> JsNumber(1))
 			val jsvalB = JsObject("s" -> JsString("b"), "n" -> JsNumber(2))
 			val jsvalC = JsObject("s" -> JsString("c"), "n" -> JsNumber(3))
+			val jsvalX = JsObject("s" -> JsString("x"), "n" -> JsNumber(9))
 
 			val db = new DataBase
 			
 			db.set(TKP("TABLE", "A", Nil), jsvalA)
 			db.set(TKP("TABLE", "B", Nil), jsvalB)
 			db.set(TKP("TABLE", "C", Nil), jsvalC)
+			db.set(TKP("TABLEX", "X", Nil), jsvalX)
 
 			// Object should now be found at time 0
 			assert(db.getAll("TABLE").toSet === Set(jsvalA, jsvalB, jsvalC))
