@@ -83,6 +83,10 @@ object Config01 {
 	{ "id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
 ],
 
+"washProgram": [
+	{ "id": "Thorough", "intensity": "Thorough" }
+],
+
 "plate": [
 	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
 	{ "id": "reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },

@@ -226,7 +226,12 @@ object ConversionsDirect {
 			val p0_l = ctor.paramss(0)
 			val tableInfo_? = findTableInfoForType(typ)
 			val idName = tableInfo_?.map(_.id_?.getOrElse("id")).getOrElse("id")
-			val nameToType_l = p0_l.map(p => (p.name.encoded, p.name.decoded.replace("_?", "").replace(idName, "id"), p.typeSignature))
+			val nameToType0_l = p0_l.map(p => (p.name.encoded, p.name.decoded.replace("_?", "").replace(idName, "id"), p.typeSignature))
+			// REFACTOR: HACK: use class attributes or some other more general approach to getting the `kind` field.
+			val nameToType_l = nameToType0_l ++ (
+				if (typ <:< typeOf[Cmd]) List(("cmd", "cmd", typeOf[String]))
+				else List()
+			)
 			val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
 			val clazz = mirror.runtimeClass(typ.typeSymbol.asClass)
 			RqResult.toResultOfList(nameToType_l.map(pair => {

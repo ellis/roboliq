@@ -7,7 +7,9 @@ case class WashTipsCmd(
 	description_? : Option[String],
 	washProgram: WashProgram,
 	tips: List[TipState]
-) extends Cmd
+) extends Cmd {
+	def cmd = "pipette.low.washTips"
+}
 
 case class WashTipsToken(
 	washProgram: String,
