@@ -88,5 +88,20 @@ class DataBaseSpec extends FunSpec {
 			assert(db.getBefore(tkp, time1122_+) === RqSuccess(jsval1))
 			assert(db.getBefore(tkp, time1122) === RqSuccess(jsval1))
 		}
+
+		it("should read back all entities in table with getAll()") {
+			val jsvalA = JsObject("s" -> JsString("a"), "n" -> JsNumber(1))
+			val jsvalB = JsObject("s" -> JsString("b"), "n" -> JsNumber(2))
+			val jsvalC = JsObject("s" -> JsString("c"), "n" -> JsNumber(3))
+
+			val db = new DataBase
+			
+			db.set(TKP("TABLE", "A", Nil), jsvalA)
+			db.set(TKP("TABLE", "B", Nil), jsvalB)
+			db.set(TKP("TABLE", "C", Nil), jsvalC)
+
+			// Object should now be found at time 0
+			assert(db.getAll("TABLE").toSet === Set(jsvalA, jsvalB, jsvalC))
+		}
 	}
 }

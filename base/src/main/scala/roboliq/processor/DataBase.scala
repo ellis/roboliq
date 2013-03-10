@@ -116,6 +116,19 @@ class DataBase {
 
 	def get(table: String, key: String, path: List[String] = Nil): RqResult[JsValue] = get(TKP(table, key, path))
 	
+	def getAll(table: String): List[JsValue] = {
+		logger.trace(s"getAll($table)")
+		// Get list of root keys in table
+		val tkp_l = children_m.filterKeys(_ match {
+			case TKP(table, id, Nil) => true
+			case _ => false
+		}).keys.toList
+		// Try to get all entities
+		tkp_l.map(tkp => {
+			get(tkp).map(Option(_)).getOrElse(None)
+		}).flatten
+	}
+	
 	private def getWith(tkp: TKP, time: List[Int], fnChooseTime: (List[List[Int]]) => Option[List[Int]]): RqResult[JsValue] = {
 		logger.trace(s"getWith($tkp, $time)")
 		js_m.get(tkp) match {

@@ -5,4 +5,4 @@ case class WashProgram(
 	intensity: CleanIntensity.Value,
 	contaminantsRemoved: Set[String],
 	contaminantsForbidden: Set[String]
-)
+) extends Entity
