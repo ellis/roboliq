@@ -39,8 +39,8 @@ case class TipState(
 	def getTableName = "tipState"
 	
 	override def compare(that: TipState): Int = conf.compare(that.conf)
-	//override def toString =
-	//	s"TipState(${conf.id}, ${model_?.map(_.id).getOrElse("")}, $content, $cleanDegree, $cleanDegreePending)"
+	override def toString =
+		s"TipState(${conf.id}, ${model_?.map(_.id).getOrElse("")}, $content, $cleanDegree, $cleanDegreePending)"
 }
 
 /** Factory object for [[roboliq.core.TipState]]. */

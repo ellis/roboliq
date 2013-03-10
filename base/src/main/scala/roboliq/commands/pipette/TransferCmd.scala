@@ -6,22 +6,15 @@ import Scalaz._
 import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 
 
-case class TipsCmd(
+case class TransferCmd(
 	description_? : Option[String],
-	tips: List[TipState],
-	tipModel_? : Option[TipModel],
-	cleanIntensity_? : Option[CleanIntensity.Value],
-	items: List[TipsItem]
+	source: List[String],
+	destination: List[String],
+	amount: List[String]
 )
 
-case class TipsItem(
-	tip: TipState,
-	tipModel_? : Option[TipModel],
-	cleanIntensity_? : Option[CleanIntensity.Value]
-)
-
-class TipsHandler_Fixed extends CommandHandler[TipsCmd]("pipette.tips") {
-	def handleCmd(cmd: TipsCmd): RqReturn = {
+class TransferHandler_Fixed extends CommandHandler[TransferCmd]("pipette.transfer") {
+	def handleCmd(cmd: TransferCmd): RqReturn = {
 		fnRequire(lookupAll[WashProgram]) { program_l =>
 			// Get list of items by combining cmd.tips and cmd.items
 			// And make sure that each tip is only specified once

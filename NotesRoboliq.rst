@@ -137,16 +137,16 @@ You can use the following means of specifying volume or concentration:
 * to dest volume: distribute enough to to reach a target volume in the target wells
 * to dest conc: distribute enough to achieve a target concentration of the substance in the target well
 
+Transfer:
+  Transfer from list of source wells to a list of destination wells (order is preserved).
+
 Distribute:
   Transfer a liquid from a set of source wells (the source wells must all contain the same liquid) to a set of destination wells (the order in which the destination wells are added may or may not matter).
   May or may not need to premix/postmix.
 
-Transfer:
-  Transfer from list of source wells to a list of destination wells (order is preserved).
-
 Mixture:
   Create a mixture of various source liquids in an empty target well.
-  A mixture is a multilayered sequence of distibutes and transfers in which the volumes that are calculated from concentration specifications at each step take the final volume into consideration after all layers have been transfered.
+  A mixture is a multi-layered sequence of distributes and transfers in which the volumes that are calculated from concentration specifications at each step take the final volume into consideration after all layers have been transfered.
   At least one volume must be specified, either for a source liquid or the target volume.
   A solvent (water, by default) will be used to fill any additional volume required to achieve the specified concentrations.
   Each source may require premix.
@@ -156,7 +156,7 @@ Mixin:
   Mix sources into an existing well.
   Either the total target volume *or* the desired concentration the target's original substance can be specified, but not both.
   A solvent (water, by default) will be used to fill any additional volume required to achieve the specified concentrations.
-  
+
 Specialized Pipetting Methods
 -----------------------------
 
@@ -191,7 +191,7 @@ Processing steps for pipetting command
 #) Filter out items with 0 volumes.
 #) Determine tip model for each item.
 #) Divide items with excessive volumes into multiple items.
-#) Group items into cycles (the method for grouping should be exchangable, as the various methods described above)
+#) Group items into cycles (the method for grouping should be exchangeable, as the various methods described above)
 #) Optimize when tip cleaning is performed
 
 Grouping into cycles consists of multiple components.
