@@ -11,7 +11,7 @@ case class VesselAddEvent(
 	def getStateOrId = Right(vessel)
 }
 
-class VesselAddEventHandler extends EventHandler[VesselState, VesselAddEvent]("vessel.add") {
+class VesselAddEventHandler extends EventHandlerAB[VesselState, VesselAddEvent]("vessel.add") {
 	def handleEvent(state0: VesselState, event: VesselAddEvent) = {
 		RqSuccess(state0.copy(content = state0.content + event.content))
 	}
@@ -26,7 +26,7 @@ case class VesselRemoveEvent(
 	def getStateOrId = Right(vessel)
 }
 
-class VesselRemoveEventHandler extends EventHandler[VesselState, VesselRemoveEvent]("vessel.remove") {
+class VesselRemoveEventHandler extends EventHandlerAB[VesselState, VesselRemoveEvent]("vessel.remove") {
 	def handleEvent(state0: VesselState, event: VesselRemoveEvent) = {
 		for {
 			content_# <- state0.content.removeVolume(event.volume)

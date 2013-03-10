@@ -59,7 +59,7 @@ class ProcessorData(
 ) {
 	val logger = Logger[this.type]
 
-	private val eventHandler_l0 = List(
+	private val eventHandler_l0 = List[EventHandler](
 		new PlateLocationEventHandler,
 		new TipAspirateEventHandler,
 		new TipMixEventHandler,
@@ -68,7 +68,7 @@ class ProcessorData(
 	)
 	
 	private val handler_m: Map[String, CommandHandler[_ <: Object]] = handler_l.map(handler => handler.id -> handler).toMap
-	private val eventHandler_m: Map[Class[_], EventHandler[_, _]] = eventHandler_l.map(handler => handler.eventClass -> handler).toMap
+	private val eventHandler_m: Map[Class[_], EventHandler] = eventHandler_l0.map(handler => handler.eventClass -> handler).toMap
 	
 	val db = new DataBase
 	// Top levels command nodes

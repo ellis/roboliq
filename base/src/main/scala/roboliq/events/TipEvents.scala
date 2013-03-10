@@ -25,7 +25,7 @@ case class TipAspirateEvent(
 	}*/
 }
 
-class TipAspirateEventHandler extends EventHandler[TipState, TipAspirateEvent]("tip.aspirate") {
+class TipAspirateEventHandler extends EventHandlerAB[TipState, TipAspirateEvent]("tip.aspirate") {
 	def handleEvent(state0: TipState, event: TipAspirateEvent): RqResult[TipState] = {
 		val liquid = event.src.content.liquid
 		for {
@@ -71,7 +71,7 @@ case class TipDispenseEvent(
 	}*/
 }
 
-class TipDispenseEventHandler extends EventHandler[TipState, TipDispenseEvent]("tip.dispense") {
+class TipDispenseEventHandler extends EventHandlerAB[TipState, TipDispenseEvent]("tip.dispense") {
 	def handleEvent(state0: TipState, event: TipDispenseEvent): RqResult[TipState] = {
 		val liquid = event.dest.content.liquid
 		for {
@@ -124,7 +124,7 @@ case class TipMixEvent(
 	}*/
 }
 
-class TipMixEventHandler extends EventHandler[TipState, TipMixEvent]("tip.mix") {
+class TipMixEventHandler extends EventHandlerAB[TipState, TipMixEvent]("tip.mix") {
 	def handleEvent(state0: TipState, event: TipMixEvent) = {
 		val liquid = event.src.content.liquid
 		RqSuccess(state0.copy(
@@ -147,7 +147,7 @@ case class TipCleanEvent(
 	def getStateOrId = Right(tip)
 }
 
-class TipCleanEventHandler extends EventHandler[TipState, TipCleanEvent]("tip.clean") {
+class TipCleanEventHandler extends EventHandlerAB[TipState, TipCleanEvent]("tip.clean") {
 	def handleEvent(state0: TipState, event: TipCleanEvent) = {
 		val w = event.washProgram
 		val s = event.tip

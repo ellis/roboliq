@@ -10,7 +10,7 @@ case class PlateLocationEvent(
 	def getStateOrId = Right(plate)
 }
 
-class PlateLocationEventHandler extends EventHandler[PlateState, PlateLocationEvent]("plate.location") {
+class PlateLocationEventHandler extends EventHandlerAB[PlateState, PlateLocationEvent]("plate.location") {
 	def handleEvent(state0: PlateState, event: PlateLocationEvent): RqResult[PlateState] = {
 		RqSuccess(state0.copy(location_? = Some(event.location)))
 	}

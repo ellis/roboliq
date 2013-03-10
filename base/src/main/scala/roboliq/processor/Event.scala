@@ -17,19 +17,31 @@ abstract class Event[+A <: Entity : TypeTag] {
 	//def kind: String
 }
 
-
-abstract class EventHandler[St <: Entity : TypeTag, Ev <: Event[St] : TypeTag : ClassTag](
+abstract class EventHandler(
 	val id: String
 ) extends RqFunctionHandler {
+	def eventClass: Class[_]
+
+	def fnargs(event: Event[_ <: Entity]): RqReturn
+}
+
+abstract class EventHandlerAB[St <: Entity : TypeTag, Ev <: Event[St] : TypeTag : ClassTag](
+	id: String
+) extends EventHandler(id) {
 	def eventClass: Class[_] = scala.reflect.classTag[Ev].runtimeClass
 	
 	def handleEvent(state0: St, event: Ev): RqResult[St]
 
-	def fnargs(event: Ev): RqReturn = {
-		event.getStateOrId match {
-			case Right(state0) => fnargs(state0, event)
-			case Left(id) =>
-				fnRequire (lookup[St](id)) { state0 => fnargs(state0, event) }
+	def fnargs(event: Event[_ <: Entity]): RqReturn = {
+		event match {
+			case event_# : Ev =>
+				event_#.getStateOrId match {
+					case Right(state0) => fnargs(state0, event_#)
+					case Left(id) =>
+						fnRequire (lookup[St](id)) { state0 => fnargs(state0, event_#) }
+				}
+			case _ =>
+				RqError(s"expected event class `$eventClass`, but received `${event.getClass}`.")
 		}
 	}
 	
