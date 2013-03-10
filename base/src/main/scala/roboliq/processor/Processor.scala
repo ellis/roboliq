@@ -62,9 +62,11 @@ class ProcessorData(
 	private val eventHandler_l0 = List[EventHandler](
 		new PlateLocationEventHandler,
 		new TipAspirateEventHandler,
+		new TipDispenseEventHandler,
 		new TipMixEventHandler,
 		new TipCleanEventHandler,
-		new VesselAddEventHandler
+		new VesselAddEventHandler,
+		new VesselRemoveEventHandler
 	)
 	
 	private val handler_m: Map[String, CommandHandler[_ <: Object]] = handler_l.map(handler => handler.id -> handler).toMap
@@ -180,7 +182,7 @@ class ProcessorData(
 					token_m(id) = token
 					Nil
 				case ComputationItem_Events(event_l) =>
-					List(Node_Events(parent_?, index, event_l))
+					List(Node_Events(parent_?, index, event_l, eventHandler_m.toMap))
 				case EventItem_State(key, jsval) =>
 					println("EventItem_State: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
 					//sys.exit()

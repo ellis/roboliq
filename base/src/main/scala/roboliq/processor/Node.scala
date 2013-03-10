@@ -218,10 +218,12 @@ case class Node_Conversion(
 	}
 }
 
+// REFACTOR: HACK: this is rather hacky approach to translating events into states.  It'd be better to have something more centralized in Processor.
 case class Node_Events(
 	parent_? : Option[Node],
 	index: Int,
-	event_l: List[Event[Entity]]
+	event_l: List[Event[Entity]],
+	eventHandler_m: Map[Class[_], EventHandler]
 ) extends Node {
 	import roboliq.events._
 	
@@ -235,28 +237,10 @@ case class Node_Events(
 		arg_l = Nil,
 		fn = (_) => {
 			// RqReturn = RqResult[List[RqItem]]
-			val l1: List[RqReturn] = event_l.map(event0 => {
-				event0 match {
-					case event: PlateLocationEvent =>
-						val handler = new PlateLocationEventHandler
-						handler.fnargs(event)
-					case event: TipAspirateEvent =>
-						val handler = new TipAspirateEventHandler
-						handler.fnargs(event)
-					case event: TipDispenseEvent =>
-						val handler = new TipDispenseEventHandler
-						handler.fnargs(event)
-					case event: TipMixEvent =>
-						val handler = new TipMixEventHandler
-						handler.fnargs(event)
-					case event: VesselAddEvent =>
-						val handler = new VesselAddEventHandler
-						handler.fnargs(event)
-					case event: VesselRemoveEvent =>
-						val handler = new VesselRemoveEventHandler
-						handler.fnargs(event)
-					case _ =>
-						RqError(s"No handler for event `$event0`")
+			val l1: List[RqReturn] = event_l.map(event => {
+				eventHandler_m.get(event.getClass) match {
+					case None => RqError(s"No handler for event `$event`, class `${event.getClass}`")
+					case Some(handler) => handler.fnargs(event)
 				}
 			})
 			val l2: RqResult[List[List[RqItem]]] = RqResult.toResultOfList(l1)
