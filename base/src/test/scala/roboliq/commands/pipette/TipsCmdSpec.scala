@@ -38,8 +38,12 @@ class TipCmdSpec extends CommandSpecBase {
 				assert(tipState_1 === tipState_1_expected)
 
 				val tipState_2 = getState[TipState]("TIP1", List(2))
-				val tipState_2_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
-				assert(tipState_2.content === tipState_2_content_expected)
+				val tipState_2_expected = tipState_1.copy(
+					cleanDegree = CleanIntensity.Thorough,
+					cleanDegreePrev = CleanIntensity.Thorough,
+					cleanDegreePending = CleanIntensity.None
+				)
+				assert(tipState_2 === tipState_2_expected)
 			}
 		}
 	}

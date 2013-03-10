@@ -134,7 +134,6 @@ class TipMixEventHandler extends EventHandlerAB[TipState, TipMixEvent]("tip.mix"
 			contamOutside = state0.contamOutside ++ liquid.contaminants,
 			srcsEntered = state0.srcsEntered + liquid,
 			cleanDegree = CleanIntensity.None,
-			cleanDegreePrev = state0.cleanDegreePrev,
 			cleanDegreePending = CleanIntensity.max(state0.cleanDegreePending, liquid.tipCleanPolicy.exit)
 		))
 	}

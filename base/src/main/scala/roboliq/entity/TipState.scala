@@ -15,9 +15,10 @@ import scala.collection.mutable.HashMap
  * @param src_? source well from which liquid was aspirated.
  * @param liquid liquid in the tip.
  * @param nVolume volume of liquid in the tip.
+ * @param cleanDegreePrev intensity of most recent cleaning
  */
 case class TipState(
-	val conf: Tip,
+	val conf: Tip, // REFACTOR: rename `conf` to `tip`
 	val model_? : Option[TipModel],
 	val src_? : Option[VesselState],
 	val content: VesselContent,
@@ -38,8 +39,8 @@ case class TipState(
 	def getTableName = "tipState"
 	
 	override def compare(that: TipState): Int = conf.compare(that.conf)
-	override def toString =
-		s"TipState(${conf.id}, ${model_?.map(_.id).getOrElse("")}, $content, $cleanDegree, $cleanDegreePending)"
+	//override def toString =
+	//	s"TipState(${conf.id}, ${model_?.map(_.id).getOrElse("")}, $content, $cleanDegree, $cleanDegreePending)"
 }
 
 /** Factory object for [[roboliq.core.TipState]]. */
