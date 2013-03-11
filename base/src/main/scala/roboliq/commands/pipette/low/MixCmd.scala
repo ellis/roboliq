@@ -8,7 +8,10 @@ case class MixCmd(
 	description_? : Option[String],
 	items: List[MixItem],
 	mixSpec_? : Option[MixSpecOpt]
-)
+) extends Cmd {
+	def cmd = "pipette.low.mix"
+}
+
 
 case class MixItem(
 	tip: TipState,

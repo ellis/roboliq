@@ -9,7 +9,10 @@ import roboliq.commands.pipette._
 case class DispenseCmd(
 	description_? : Option[String],
 	items: List[TipWellVolumePolicy] //FIXME: This should be TipWellVolumePolicyMixspec
-)
+) extends Cmd {
+	def cmd = "pipette.low.dispense"
+}
+
 
 case class DispenseToken(
 	val items: List[TipWellVolumePolicy]

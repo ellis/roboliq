@@ -6,11 +6,13 @@ import scala.language.implicitConversions
 case class VesselState(
 	vessel: Vessel,
 	content: VesselContent = VesselContent.Empty,
-	isInitialVolumeKnown_? : Option[Boolean] = None
+	isInitialVolumeKnown_? : Option[Boolean] = None, // REFACTOR: Once Conversions.conv can read default values, just make this a Boolean with default false
+	isSource_? : Option[Boolean] = None
 ) extends Entity {
 	assert(isInitialVolumeKnown_? != null)
 	def id = vessel.id
 	def isInitialVolumeKnown = isInitialVolumeKnown_?.getOrElse(false)
+	def isSource = isSource_?.getOrElse(false)
 
 	def liquid = content.liquid
 	def volume = content.volume

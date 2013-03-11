@@ -86,6 +86,8 @@ class ProcessorData(
 	//val fnCache_m = new HashMap[RqFunctionInputs, RqReturn]
 	//val argsCache_m = new HashMap[RqArgs, RqInputs]
 	val cache_m = new HashMap[KeyClass, Object]
+	/** Map from source ID to vessel IDs containing that source */
+	val sources_m = new HashMap[String, List[String]]
 	//val entityChanged_l = mutable.Set[KeyClass]()
 	// List of nodes for which we want to force a check of whether inputs are ready.
 	//val nodeCheck_l = mutable.Set[Node]()
@@ -247,7 +249,7 @@ class ProcessorData(
 							val fnargs2 = concretizeArgs(fnargs, node.contextKey_?, Some(node), index)
 							Some(Node_Conversion(Some(node), None, Some(index), node.time, node.contextKey_?, fnargs2, node.kc))
 						case ConversionItem_Object(obj) =>
-							setEntityObj(node.kc, obj)
+							setCacheObj(node.kc, obj)
 							None
 						case EventItem_State(key, jsval) =>
 							val time = if (node.time == List(0)) node.time else node.time ++ List(Int.MaxValue)
@@ -490,6 +492,22 @@ class ProcessorData(
 		db.set(key, jsval)
 		val kc = KeyClass(key, ru.typeOf[JsValue])
 		registerEntity(kc)
+		
+		// REFACTOR: This is a hack (but *maybe* not too bad)
+		// Generate additional entities that may be required:
+		val id = key.key
+		key.table match {
+			case "vessel" => addSource(id, id)
+			case "plate" =>
+				getObjFromDbAt[Plate](id, Nil) match {
+					case x: RqError[Plate] => logger.error("Could not load plate for creation of `source` entity: "+x.toString)
+					case RqSuccess(plate, _) =>
+						val wellId_l = (0 until plate.nWells).map(i => WellSpecParser.wellId(plate, i)).toList
+						wellId_l.foreach(wellId => addSource(id, wellId))
+						wellId_l.foreach(wellId => addSource(wellId, wellId))
+				}
+			case _ =>
+		}
 	}
 	
 	def setState(key: TKP, time: List[Int], jsval: JsValue) {
@@ -504,13 +522,51 @@ class ProcessorData(
 			// Queue the computations for which all inputs are available 
 			dep_m.get(kc).map(_.foreach(updateComputationStatus))
 		})*/
+
+		// REFACTOR: This is a hack -- need to accumulate this information instead, and then create the SourceState object when requested
+		// Generate additional entities that may be required:
+		key.table match {
+			case "vesselState" if ListIntOrdering.compare(time, List(0)) <= 0 =>
+				val id = key.key
+				getObjFromDbAt[VesselState](id, Nil) match {
+					case x: RqError[VesselState] => logger.error("Could not load VesselState for creation of `source` entity: "+x.toString)
+					case RqSuccess(vesselState, _) =>
+						if (vesselState.isSource) {
+							addSource(vesselState.liquid.id, id)
+							for ((substance, _) <- vesselState.content.substanceToMol) {
+								addSource(substance.id, id)
+							}
+						}
+				}
+			case _ =>
+		}
+	}
+
+	def setEntity[A: TypeTag](id: String, a: A, time: List[Int] = Nil): RqResult[Unit] = {
+		val typ = ru.typeTag[A].tpe
+		for {
+			table <- ConversionsDirect.findTableForType(typ)
+			jsval <- ConversionsDirect.toJson(a)
+		} yield {
+			val tkp = TKP(table, id, Nil)
+			setState(tkp, time, jsval)
+			()
+		}
 	}
 	
 	private def registerEntity(kc: KeyClass) {
 		//entityStatus_m(kc) = Status.Success
 	}
 	
-	def setEntityObj(kc: KeyClass, obj: Object) {
+	private def addSource(idSource: String, idVessel: String) {
+		sources_m.update(idSource, idVessel :: sources_m.getOrElse(idSource, Nil))
+	}
+	
+	private def createVesselSource(id: String) {
+		db.set(TKP("source", id, Nil), JsObject("id" -> JsString(id), "vessels" -> JsArray(JsString(id))))
+	}
+
+	private def setCacheObj(kc: KeyClass, obj: Object) {
 		assert(kc.clazz != ru.typeOf[JsValue])
 		cache_m(kc) = obj
 		//entityChanged_l += kc
@@ -649,7 +705,7 @@ class ProcessorData(
 		val opt_m = kco_l.groupBy(_.kc).mapValues(l => l.find(_.opt == false).isEmpty)
 
 		// Try to get values for all kcos
-		val kcToValue_m = opt_m.keys.toList.map(kc => kc -> getEntity(kc)).toMap
+		val kcToValue_m = kc_l.map(kc => kc -> getEntity(kc)).toMap
 		//println("kcToValue_m: "+kcToValue_m)
 		val kcoToValue_m = kco_l.toList.map(kco => {
 			val value0 = kcToValue_m(kco.kc)
@@ -795,10 +851,24 @@ class ProcessorData(
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
 		if (kc.clazz == ru.typeOf[JsValue]) {
-			if (kc.time.isEmpty)
-				db.get(kc.key)
+			// REFACTOR: This is a horrible hack -- implement a better system!
+			val x = 
+				if (kc.time.isEmpty)
+					db.get(kc.key)
+				else
+					db.getBefore(kc.key, kc.time)
+			if (x.isError && kc.key.table == "source" && sources_m.contains(kc.key.key)) {
+				val id = kc.key.key
+				val wellId_l = sources_m(id).reverse
+				val jsobj = JsObject(
+					"id" -> JsString(id),
+					"vessels" -> JsArray(wellId_l.map(JsString(_)))
+				)
+				db.set(TKP("source", id, Nil), jsobj)
+				RqSuccess(jsobj)
+			}
 			else
-				db.getBefore(kc.key, kc.time)
+				x
 		}
 		else {
 			cache_m.get(kc).asRq(s"object not found `$kc`")
@@ -811,18 +881,6 @@ class ProcessorData(
 			res map(Some(_)) orElse RqSuccess(None)
 		else
 			res
-	}
-
-	def setObj[A: TypeTag](id: String, a: A, time: List[Int] = Nil): RqResult[Unit] = {
-		val typ = ru.typeTag[A].tpe
-		for {
-			table <- ConversionsDirect.findTableForType(typ)
-			jsval <- ConversionsDirect.toJson(a)
-		} yield {
-			val tkp = TKP(table, id, Nil)
-			setState(tkp, time, jsval)
-			()
-		}
 	}
 	
 	def getObjFromDbBefore[A <: Object : TypeTag](id: String, time: List[Int]): RqResult[A] = {

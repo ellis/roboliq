@@ -9,7 +9,9 @@ import roboliq.commands.pipette._
 case class AspirateCmd(
 	description_? : Option[String],
 	items: List[TipWellVolumePolicy]
-)
+) extends Cmd {
+	def cmd = "pipette.low.aspirate"
+}
 
 case class AspirateToken(
 	val items: List[TipWellVolumePolicy]
