@@ -78,6 +78,8 @@ class ProcessorData(
 	// Conversion nodes
 	val kcNode_m = new HashMap[KeyClass, Node_Conversion]
 	val state_m = new HashMap[Node, NodeState]
+	// REFACTOR: this is a hack...
+	val defaultKc_l = new ArrayBuffer[KeyClass]
 	//val status_m = new HashMap[Node, Status.Value]
 	//val dep_m: MultiMap[KeyClass, Node] = new HashMap[KeyClass, mutable.Set[Node]] with MultiMap[KeyClass, Node]
 	//val children_m = new HashMap[Node, List[Node]]
@@ -316,6 +318,7 @@ class ProcessorData(
 								List(returnEvent(kc.key, tipStateJson))
 							}
 						}
+						defaultKc_l += kc
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 					case "vessel" =>
 						db.set(kc.key, JsObject("id" -> JsString(id)))
@@ -333,6 +336,7 @@ class ProcessorData(
 								List(returnEvent(kc.key, vesselStateJson))
 							}
 						}
+						defaultKc_l += kc
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 					case "vesselSituatedState" =>
 						WellSpecParser.parse(id) match {
@@ -349,6 +353,7 @@ class ProcessorData(
 										List(returnEvent(kc.key, jsval))
 									}
 								}
+								defaultKc_l += kc
 								List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 							// If there is a plate and a single well:
 							case RqSuccess(List((plate, WellSpecOne(rc) :: Nil)), _) =>
@@ -363,6 +368,7 @@ class ProcessorData(
 										List(returnEvent(kc.key, jsval))
 									}
 								}
+								defaultKc_l += kc
 								List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 							case _ =>
 								Nil
@@ -707,6 +713,7 @@ class ProcessorData(
 
 		val nodeListBuilder = new NodeListBuilder
 		cmd1_l.foreach(nodeListBuilder.addNode)
+		defaultKc_l.foreach(kc => nodeListBuilder.addNode(kcNode_m(kc)))
 
 		val node_l = nodeListBuilder.node_l.toList.sortBy(_.id)
 		val kco_l = nodeListBuilder.kco_l.toSet
