@@ -62,13 +62,97 @@ class ProcessorGraph {
 		
 	}*/
 
-	private val statusToColor = Map[Status.Value, String](
+	private val htmlStatusToColor = Map[Status.Value, String](
+		Status.NotReady -> "grey",
+		Status.Ready -> "green",
+		Status.Success -> "blue",
+		Status.Error -> "red"
+	)
+	
+	def toHtmlTable(): String = {
+		val stepData_l = stepData_m.toList.sortBy(_._1)
+
+		val line_l = new ArrayBuffer[String]
+		
+		//val nl = nodeData_l.toList.groupBy(_.step_i).mapValues(l => l.sortBy(_.node.id)).toList.sortBy(_._1)
+		line_l ++= List("<!DOCTYPE html>", "<html>", "<body>")
+		line_l ++= List("<table border='1'>")
+		line_l ++= List("<tr><th>time</th><th>node</th><th>inputs</th><th>outputs</th></tr>")
+		for ((step_i, stepData) <- stepData_l) {
+			val convData_l = stepData.conv_l.toList.sortBy(_.node.id)
+			val compData_l = stepData.comp_l.toList.sortBy(_.node.id)
+			val kcoToStatus_m = (stepData.json_l ++ stepData.object_l).map(data => data.kco -> data.status).toMap
+
+			line_l += s"<tr><td colspan='4' style='font-weight: bold; font-size: 150%'>Step ${step_i}</td></tr>"
+				
+			val node_l = (convData_l ++ compData_l).sortBy(_.node.time)(ListIntOrdering)
+			for (data <- node_l) {
+				line_l += "<tr>"
+				val color = htmlStatusToColor(data.status)
+				line_l += s"<td>${data.node.time.mkString("/")}</td>"
+				line_l += s"<td style='color: $color'>${escape(data.node.id)}</td>"
+				line_l += "<td>"
+				// Inputs
+				for (kco <- data.node.input_l) {
+					val color = htmlStatusToColor(kcoToStatus_m(kco))
+					line_l += s"<span style='color: $color'>${escape(kco.kc.id)}<span> "
+				}
+				line_l += "</td>"
+				line_l += "</tr>"
+			}
+			/*
+			// Conversion children relationships
+			for (data <- convData_l; child <- data.child_l) {
+				line_l += s"    ${nodeName_m(data.node.id)} -> ${nodeName_m(child.id)};"
+			}
+			line_l += "    }"
+				
+			// Entity nodes
+			line_l += "    subgraph {"
+			for (data <- stepData.json_l) {
+				val id = data.kco.kc.id
+				val label = "\""+id+"\""
+				val color = dotStatusToColor(data.status)
+				line_l += s"    ${entityName_m(id)} [label=$label,fillcolor=$color,style=filled,shape=box];"
+			}
+			line_l += "    }"
+
+			// Computation nodes
+			line_l += "    subgraph {"
+			for (data <- compData_l) {
+				val label = "\""+data.node.id+"\""
+				val color = dotStatusToColor(data.status)
+				line_l += s"    ${nodeName_m(data.node.id)} [label=$label,fillcolor=$color,style=filled];"
+			}
+			// Computation children relationships
+			for (data <- compData_l; child <- data.child_l) {
+				line_l += s"    ${nodeName_m(data.node.id)} -> ${nodeName_m(child.id)};"
+			}
+			line_l += "    }"
+				
+			// Inputs
+			for (data <- (convData_l ++ compData_l); kco <- data.node.input_l) {
+				line_l += s"    ${entityName_m(kco.kc.id)} -> ${nodeName_m(data.node.id)} [style=dotted];"
+			}
+			line_l += "  }"
+			*/
+		}
+		line_l += "</table>"
+		line_l ++= List("</body>", "</html>")
+		line_l.mkString("\n")
+	}
+	
+	private def escape(s: String): String = {
+		s.replace("<", "&lt;").replace(">", "&gt;")
+	}
+
+	private val dotStatusToColor = Map[Status.Value, String](
 		Status.NotReady -> "grey",
 		Status.Ready -> "green",
 		Status.Success -> "white",
 		Status.Error -> "red"
 	)
-	
+
 	def toDot(): String = {
 		val stepData_l = stepData_m.toList.sortBy(_._1)
 
@@ -93,7 +177,7 @@ class ProcessorGraph {
 			line_l += "    subgraph {"
 			for (data <- convData_l) {
 				val label = "\""+data.node.id+"\""
-				val color = statusToColor(data.status)
+				val color = dotStatusToColor(data.status)
 				line_l += s"    ${nodeName_m(data.node.id)} [label=$label,fillcolor=$color,style=filled];"
 			}
 			// Conversion children relationships
@@ -107,7 +191,7 @@ class ProcessorGraph {
 			for (data <- stepData.json_l) {
 				val id = data.kco.kc.id
 				val label = "\""+id+"\""
-				val color = statusToColor(data.status)
+				val color = dotStatusToColor(data.status)
 				line_l += s"    ${entityName_m(id)} [label=$label,fillcolor=$color,style=filled,shape=box];"
 			}
 			line_l += "    }"
@@ -116,7 +200,7 @@ class ProcessorGraph {
 			line_l += "    subgraph {"
 			for (data <- compData_l) {
 				val label = "\""+data.node.id+"\""
-				val color = statusToColor(data.status)
+				val color = dotStatusToColor(data.status)
 				line_l += s"    ${nodeName_m(data.node.id)} [label=$label,fillcolor=$color,style=filled];"
 			}
 			// Computation children relationships

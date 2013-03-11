@@ -34,6 +34,7 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 		When("commands are run")
 		val g = p.run()
 		//org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.dot"), g.toDot)
+		org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.html"), g.toHtmlTable)
 		p
 	}
 	

@@ -806,7 +806,7 @@ class ProcessorData(
 		println()
 		println("makePending")
 		order_l.foreach(state => 
-			println(state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
+			println(state.node.time + " " + state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
 		)
 		println()
 		//val order_l = state_m.toList.sortBy(_._1.path)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
