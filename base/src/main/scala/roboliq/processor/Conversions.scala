@@ -70,6 +70,7 @@ object ConversionsDirect {
 		TableInfo[Vessel]("vessel", None, None),
 		TableInfo[WashProgram]("washProgram"),
 		TableInfo[InitialLocation]("initialLocation"),
+		TableInfo[Source]("source"),
 		TableInfo[TipState]("tipState", Some("conf"), None, None),
 		TableInfo[PlateState]("plateState", Some("plate"), None, None),
 		TableInfo[VesselState]("vesselState", Some("vessel"), None, None),

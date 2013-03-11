@@ -511,6 +511,7 @@ class ProcessorData(
 	}
 	
 	def setState(key: TKP, time: List[Int], jsval: JsValue) {
+		println(s"setState($key, $time, $jsval)")
 		db.setAt(key, time, jsval)
 		val kc = KeyClass(key, ru.typeOf[JsValue])
 		registerEntity(kc)
@@ -525,10 +526,19 @@ class ProcessorData(
 
 		// REFACTOR: This is a hack -- need to accumulate this information instead, and then create the SourceState object when requested
 		// Generate additional entities that may be required:
+		val id = key.key
 		key.table match {
+			case "vessel" => addSource(id, id)
+			case "plate" =>
+				getObjFromDbAt[Plate](id, Nil) match {
+					case x: RqError[Plate] => logger.error("Could not load plate for creation of `source` entity: "+x.toString)
+					case RqSuccess(plate, _) =>
+						val wellId_l = (0 until plate.nWells).map(i => WellSpecParser.wellId(plate, i)).toList
+						wellId_l.foreach(wellId => addSource(id, wellId))
+						wellId_l.foreach(wellId => addSource(wellId, wellId))
+				}
 			case "vesselState" if ListIntOrdering.compare(time, List(0)) <= 0 =>
-				val id = key.key
-				getObjFromDbAt[VesselState](id, Nil) match {
+				getObjFromDbAt[VesselState](id, time) match {
 					case x: RqError[VesselState] => logger.error("Could not load VesselState for creation of `source` entity: "+x.toString)
 					case RqSuccess(vesselState, _) =>
 						if (vesselState.isSource) {
@@ -559,6 +569,7 @@ class ProcessorData(
 	}
 	
 	private def addSource(idSource: String, idVessel: String) {
+		println(s"addSource($idSource, $idVessel)")
 		sources_m.update(idSource, idVessel :: sources_m.getOrElse(idSource, Nil))
 	}
 	
@@ -773,7 +784,7 @@ class ProcessorData(
 		}).foreach(println)
 		//state_m.foreach(println)
 
-		val pending_l = makePendingComputationList
+		val pending_l = makePendingComputationList(node_l)
 		pending_l.foreach(state => runComputation(state.node, kcoToValue_m))
 		
 		println()
@@ -788,10 +799,16 @@ class ProcessorData(
 
 	/**
 	 * Return all ready nodes which don't depend on state,
-	 * plus the next node which depends on state after exclusely successful nodes.
+	 * plus the next node which depends on state after exclusively successful nodes.
 	 */
-	private def makePendingComputationList: List[NodeState] = {
+	private def makePendingComputationList(node_l: List[Node]): List[NodeState] = {
 		val order_l = state_m.values.toList.sortBy(_.node.time)(ListIntOrdering).dropWhile(_.status == Status.Success)
+		println()
+		println("makePending")
+		order_l.foreach(state => 
+			println(state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
+		)
+		println()
 		//val order_l = state_m.toList.sortBy(_._1.path)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
 		order_l match {
 			case Nil => Nil
@@ -850,6 +867,7 @@ class ProcessorData(
 	}
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
+		println(s"getEntity($kc)")
 		if (kc.clazz == ru.typeOf[JsValue]) {
 			// REFACTOR: This is a horrible hack -- implement a better system!
 			val x = 
@@ -857,6 +875,7 @@ class ProcessorData(
 					db.get(kc.key)
 				else
 					db.getBefore(kc.key, kc.time)
+			println(" x: "+x)
 			if (x.isError && kc.key.table == "source" && sources_m.contains(kc.key.key)) {
 				val id = kc.key.key
 				val wellId_l = sources_m(id).reverse
@@ -865,6 +884,7 @@ class ProcessorData(
 					"vessels" -> JsArray(wellId_l.map(JsString(_)))
 				)
 				db.set(TKP("source", id, Nil), jsobj)
+				println("get source: " + db.get(kc.key))
 				RqSuccess(jsobj)
 			}
 			else

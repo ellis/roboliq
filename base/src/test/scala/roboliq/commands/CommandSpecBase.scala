@@ -18,6 +18,7 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 		val p = new ProcessorData(List(
 			new arm.MovePlateHandler,
 			new commands.pipette.TipsHandler_Fixed,
+			new commands.pipette.TransferHandler,
 			new commands.pipette.low.AspirateHandler,
 			new commands.pipette.low.DispenseHandler,
 			new commands.pipette.low.MixHandler,

@@ -13,5 +13,5 @@ package roboliq.entity
  */
 case class Source(
 	id: String,
-	vessels: List[VesselSituatedState]
+	vessels: List[Vessel]
 )
