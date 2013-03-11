@@ -299,11 +299,11 @@ class ProcessorData(
 		// Create default entities
 		// TODO: Create a general approach to creating default objects
 		node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
-			val kc = kco.kc
-			val id = kc.key.key
 			val time = List(0)
+			val kc = kco.kc.copy(time = time)
 			// If object is not already in database:
 			if (db.getAt(kc.key, time).isError) {
+				val id = kc.key.key
 				import RqFunctionHandler._
 				kc.key.table match {
 					// If there is no initial tipState registered yet:
@@ -382,6 +382,7 @@ class ProcessorData(
 		
 		val kc = kco.kc
 		//val contextKey_? = if (kc.isJsValue) Some(kc.key) else None
+		val time2 = if (kc.key.table.endsWith("State")) node.time else Nil
 		kco.conversion_? match {
 			// If a user-supplied conversion function was supplied:
 			case Some(fnargs0) =>
@@ -401,7 +402,7 @@ class ProcessorData(
 					}
 					val kco2 = KeyClassOpt(kc2, true)
 					val fnargs = RqFunctionArgs(fn, List(kco2))
-					val node2 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc)
+					val node2 = Node_Conversion(None, Some(kc.id), None, time2, None, fnargs, kc)
 					// REFACTOR: Can the recursion be removed, since registerNode will be called on node2 soon anyway
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
@@ -418,7 +419,7 @@ class ProcessorData(
 							RqSuccess(List(ConversionItem_Object(l)))
 						}
 					)
-					val node1 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs1, kc)
+					val node1 = Node_Conversion(None, Some(kc.id), None, time2, None, fnargs1, kc)
 					
 					// FIXME: HACK: this will not update when items are added or removed from the table
 					val x = node1 :: kco2_l.zipWithIndex.flatMap(pair => {
@@ -437,11 +438,11 @@ class ProcessorData(
 							val kc0 = kc.changeClassToJsValue
 							val fnargs0 = handler.createFunctionArgs(kc0)
 							val fnargs = concretizeArgs(fnargs0, contextKey_?, None, 0)
-							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
+							List(Node_Conversion(None, Some(kc.id), None, time2, contextKey_?, fnargs, kc))
 						case Some(handler: ConversionHandlerN) =>
 							val kc0 = kc.changeClassToJsValue
 							val fnargs0 = handler.fnargs
-							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs0, kc))
+							List(Node_Conversion(None, Some(kc.id), None, time2, contextKey_?, fnargs0, kc))
 						case Some(handler) =>
 							// FIXME: should put this message in a map so it only shows up once
 							internalMessage_l += RqError[Unit]("Unhandled converter registered for "+node+" "+kco)
@@ -479,7 +480,7 @@ class ProcessorData(
 							}
 							val arg_l = List(KeyClassOpt(kc.changeClassToJsValue, false))
 							val fnargs = RqFunctionArgs(fn, arg_l)
-							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
+							List(Node_Conversion(None, Some(kc.id), None, time2, contextKey_?, fnargs, kc))
 							// FIXME: should put this message in a map so it only shows up once
 							//internalMessage_l += RqError[Unit](s"No converter registered for ${kco.kc.id}, required by ${node.id}")
 							//Nil
@@ -878,7 +879,7 @@ class ProcessorData(
 			println(" x: "+x)
 			if (x.isError && kc.key.table == "source" && sources_m.contains(kc.key.key)) {
 				val id = kc.key.key
-				val wellId_l = sources_m(id).reverse
+				val wellId_l = sources_m(id).reverse.distinct
 				val jsobj = JsObject(
 					"id" -> JsString(id),
 					"vessels" -> JsArray(wellId_l.map(JsString(_)))
