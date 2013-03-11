@@ -489,7 +489,13 @@ object RqFunctionHandler {
 		val fnargs = RqFunctionArgs(
 			arg_l = Nil,
 			fn = (_) => ConversionsDirect.findTableForType(t).flatMap { table =>
+				println()
+				println("lookup table: "+table)
+				println()
 				fnRequire (RequireItem[List[A]](TKP(table, "*", Nil))) { o =>
+					println()
+					println("lookupAll: "+o)
+					println()
 					returnObject(o)
 				}
 			}
@@ -523,15 +529,15 @@ abstract class CommandHandler[A <: Object : TypeTag](
 		new RqReturnBuilder(List(RqSuccess(ComputationItem_Events(List(a)))))
 	implicit def ListEventToReturnBuilder(l: Iterable[Event[Entity]]): RqReturnBuilder =
 		new RqReturnBuilder(List(RqSuccess(ComputationItem_Events(l.toList))))
-	implicit def CmdToReturnBuilder[A <: Cmd : TypeTag](a: A): RqReturnBuilder = {
+	implicit def CmdToReturnBuilder[A <: Cmd](a: A): RqReturnBuilder = {
 		new RqReturnBuilder(List(
-			ConversionsDirect.toJson[A](a).map(json => ComputationItem_Command(json.asJsObject))
+			ConversionsDirect.toJson2(a, a.typ).map(json => ComputationItem_Command(json.asJsObject))
 		))
 	}
-	implicit def ListCmdToReturnBuilder[A <: Cmd : TypeTag](l: Iterable[A]): RqReturnBuilder = {
+	implicit def ListCmdToReturnBuilder[A <: Cmd](l: Iterable[A]): RqReturnBuilder = {
 		new RqReturnBuilder(
 			l.toList.map(a => {
-				ConversionsDirect.toJson[A](a).map(json => ComputationItem_Command(json.asJsObject))
+				ConversionsDirect.toJson2(a, a.typ).map(json => ComputationItem_Command(json.asJsObject))
 			})
 		)
 	}

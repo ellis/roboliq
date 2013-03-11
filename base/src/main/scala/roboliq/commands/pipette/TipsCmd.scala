@@ -1,5 +1,6 @@
 package roboliq.commands.pipette
 
+import scala.reflect.runtime.{universe => ru}
 import scala.collection.JavaConversions._
 import scalaz._
 import Scalaz._
@@ -12,7 +13,10 @@ case class TipsCmd(
 	tipModel_? : Option[TipModel],
 	cleanIntensity_? : Option[CleanIntensity.Value],
 	items: List[TipsItem]
-)
+) extends Cmd {
+	def cmd = "pipette.tips"
+	def typ = ru.typeOf[this.type]
+}
 
 case class TipsItem(
 	tip: TipState,

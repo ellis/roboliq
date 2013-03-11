@@ -304,7 +304,7 @@ class ProcessorData(
 			val time = List(0)
 			val kc = kco.kc.copy(time = time)
 			// If object is not already in database:
-			if (db.getAt(kc.key, time).isError) {
+			if (db.getAt(kc.key, time).isError && !defaultKc_l.contains(kc)) {
 				val id = kc.key.key
 				import RqFunctionHandler._
 				kc.key.table match {
@@ -417,7 +417,7 @@ class ProcessorData(
 					val tkp_l = db.getAllKeys(kc.key.table).sortBy(_.id)
 					// type parameter of option (e.g, if List[String], clazz2 will be String)
 					val clazz2 = kc.clazz.asInstanceOf[ru.TypeRefApi].args.head
-					val kco2_l = tkp_l.map(tkp => KeyClassOpt(KeyClass(tkp, clazz2)))
+					val kco2_l = tkp_l.map(tkp => KeyClassOpt(KeyClass(tkp, clazz2, time2)))
 					
 					val fnargs1 = RqFunctionArgs(
 						arg_l = kco2_l,
@@ -666,6 +666,7 @@ class ProcessorData(
 	def run(maxLoops: Int = -1): ProcessorGraph = {
 		var countdown = maxLoops
 		var step_i = 0
+		makeDefaults()
 		val g = new ProcessorGraph
 		while (countdown != 0) {
 			g.setStep(step_i)
@@ -677,6 +678,27 @@ class ProcessorData(
 		}
 		//makeMessagesForMissingInputs()
 		g
+	}
+	
+	private def makeDefaults() {
+		db.getAllKeys("tip") foreach { tkp =>
+			val id = tkp.key
+			val tkp_# = TKP("tipState", id, Nil)
+			if (db.getAt(tkp_#, List(0)).isError) {
+				val x = for {
+					tip <- getObjFromDbAt[Tip](id, Nil)
+					tipState = TipState.createEmpty(tip)
+					tipStateJson <- ConversionsDirect.toJson(tipState)
+				} yield {
+					db.setAt(tkp_#, List(0), tipStateJson)
+				}
+				x match {
+					case x : RqError[Unit] => logger.error(s"makeDefaults: couldn't load tip `$id`")
+					case _ =>
+				}
+			}
+		}
+		
 	}
 	
 	private class NodeListBuilder {
@@ -778,6 +800,7 @@ class ProcessorData(
 		e1.toList.sortBy(_._1.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
 		println()
 		e2.toList.sortBy(_._1.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
+		
 		println()
 		println("Nodes")
 		println("-----")
@@ -817,6 +840,7 @@ class ProcessorData(
 			println(state.node.time + " " + state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
 		)
 		println()
+		
 		//val order_l = state_m.toList.sortBy(_._1.path)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
 		order_l match {
 			case Nil => Nil
