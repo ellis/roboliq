@@ -45,13 +45,6 @@ class TestPipetteDevice1 extends PipetteDevice {
 	
 	def areTipsDisposable: Boolean = false
 	
-	def getDispenseAllowableTipModels(liquid: Liquid, volume: LiquidVolume): Seq[TipModel] = {
-		if (volume < tipModel50.volumeMin) Seq()
-		else if (volume < tipModel1000.volumeMin) Seq(tipModel1000)
-		else if (volume <= tipModel50.volume) Seq(tipModel1000, tipModel50)
-		else Seq(tipModel1000)
-	}
-	
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume = {
 		tip.model_?.map(_.volumeMin).getOrElse(LiquidVolume.empty)
 	}
