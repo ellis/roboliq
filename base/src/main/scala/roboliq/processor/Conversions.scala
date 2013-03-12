@@ -64,7 +64,7 @@ object ConversionsDirect {
 		TableInfo[PlateModel]("plateModel", None, None),
 		TableInfo[TubeModel]("tubeModel", None, None),
 		TableInfo[PlateLocation]("plateLocation", None, None),
-		TableInfo[Tip]("tip", None, None),
+		TableInfo[Tip]("tip", Some("id"), None),
 		TableInfo[Substance]("substance", None, None),
 		TableInfo[Plate]("plate", None, None),
 		TableInfo[Vessel]("vessel", None, None),

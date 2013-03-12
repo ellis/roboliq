@@ -5,7 +5,7 @@ import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 
 object Config01 {
 	val tipModel1000 = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-	val tip1 = Tip(0, Some(tipModel1000))
+	val tip1 = Tip("TIP1", "LiHa", 0, 0, 0, Some(tipModel1000))
 	val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
 	val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
 	val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
@@ -33,14 +33,14 @@ object Config01 {
 	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
 ],
 "tip": [
-	{ "id": "TIP1", "index": 0, "permanent": "Standard 1000ul" },
-	{ "id": "TIP2", "index": 1, "permanent": "Standard 1000ul" },
-	{ "id": "TIP3", "index": 2, "permanent": "Standard 1000ul" },
-	{ "id": "TIP4", "index": 3, "permanent": "Standard 1000ul" },
-	{ "id": "TIP5", "index": 4, "permanent": "Standard 50ul" },
-	{ "id": "TIP6", "index": 5, "permanent": "Standard 50ul" },
-	{ "id": "TIP7", "index": 6, "permanent": "Standard 50ul" },
-	{ "id": "TIP8", "index": 7, "permanent": "Standard 50ul" }
+	{ "id": "TIP1", "deviceId": "LiHa", "index": 0, "row": 0, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP2", "deviceId": "LiHa", "index": 1, "row": 1, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP3", "deviceId": "LiHa", "index": 2, "row": 2, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP4", "deviceId": "LiHa", "index": 3, "row": 3, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP5", "deviceId": "LiHa", "index": 4, "row": 4, "col": 0, "permanent": "Standard 50ul" },
+	{ "id": "TIP6", "deviceId": "LiHa", "index": 5, "row": 5, "col": 0, "permanent": "Standard 50ul" },
+	{ "id": "TIP7", "deviceId": "LiHa", "index": 6, "row": 6, "col": 0, "permanent": "Standard 50ul" },
+	{ "id": "TIP8", "deviceId": "LiHa", "index": 7, "row": 7, "col": 0, "permanent": "Standard 50ul" }
 ],
 "plateModel": [
 	{ "id": "Reagent Cooled 8*50ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },

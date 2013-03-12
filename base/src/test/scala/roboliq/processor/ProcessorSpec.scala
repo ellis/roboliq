@@ -18,7 +18,7 @@ import roboliq.commands.pipette.TipWellVolumePolicy
 class ProcessorSpec extends FunSpec with GivenWhenThen {
 	describe("A Processor") {
 		val tipModel1 = TipModel("TIPMODEL1", LiquidVolume.ul(950), LiquidVolume.ul(4))
-		val tip1 = Tip("TIP1", 0, Some(tipModel1))
+		val tip1 = Tip("TIP1", "LiHa", 0, 0, 0, Some(tipModel1))
 		val plateModel1 = PlateModel("PLATEMODEL1", 8, 12, LiquidVolume.ul(200))
 		val plateLocation1 = PlateLocation("PLATELOCATION1", List(plateModel1), true)
 		val plateLocation2 = PlateLocation("PLATELOCATION2", List(plateModel1), true)

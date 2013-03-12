@@ -60,13 +60,20 @@ class ConversionsSpec extends FunSpec {
 				MyClass1("text", 42, List(true, false)) -> JsObject("s" -> JsString("text"), "n" -> JsNumber(42), "l" -> JsArray(JsBoolean(true), JsBoolean(false)))
 		)
 
-		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-		val tip = Tip(0, Some(tipModel))
+		val tipModel1000 = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
+		val tip = Tip("TIP1", "LiHa", 0, 0, 0, Some(tipModel1000))
 		check(
-			tip -> JsObject("id" -> JsString("TIP1"), "index" -> JsNumber(0), "permanent" -> JsString("Standard 1000ul"))
+			tip -> JsObject(
+				"id" -> JsString("TIP1"),
+				"deviceId" -> JsString("LiHa"),
+				"index" -> JsNumber(0),
+				"row" -> JsNumber(0),
+				"col" -> JsNumber(0),
+				"permanent" -> JsString("Standard 1000ul")
+			)
 		)
 	}
-	
+
 	describe("conv") {
 		def check[A: TypeTag](succeed_l: List[(JsValue, A)], fail_l: List[JsValue]) = {
 			val typ = ru.typeTag[A].tpe
@@ -282,7 +289,7 @@ class ConversionsSpec extends FunSpec {
 
 	describe("conv for database objects") {
 		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-		val tip = Tip(0, Some(tipModel))
+		val tip = Tip("TIP1", "LiHa", 0, 0, 0, Some(tipModel))
 		val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
 		val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
 		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
