@@ -56,14 +56,14 @@ class TransferPlannerSpec extends CommandSpecBase {
 				assert(x === RqSuccess(List(1)))
 			}
 
-			it("should work for 2 non-neighboring items") {
+			it("should work for 2 neighboring items") {
 				val vss_P1_A01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0)))
 				val vss_P1_B01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(B01)", List(0)))
 				val vss_P1_C01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(C01)", List(0)))
 				val vss_P1_D01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(D01)", List(0)))
 				val item_l = List(
-					TransferPlanner.Item(vss_P1_A01, vss_P1_D01, LiquidVolume.ul(50)),
-					TransferPlanner.Item(vss_P1_B01, vss_P1_C01, LiquidVolume.ul(50))
+					TransferPlanner.Item(vss_P1_A01, vss_P1_C01, LiquidVolume.ul(50)),
+					TransferPlanner.Item(vss_P1_B01, vss_P1_D01, LiquidVolume.ul(50))
 				)
 				
 				val x = TransferPlanner.searchGraph(
@@ -74,17 +74,17 @@ class TransferPlannerSpec extends CommandSpecBase {
 					item_l
 				)
 			
-				assert(x === RqSuccess(List(1, 1)))
+				assert(x === RqSuccess(List(2)))
 			}
 
-			it("should work for 2 neighboring items") {
+			it("should work for 2 non-neighboring items") {
 				val vss_P1_A01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(A01)", List(0)))
 				val vss_P1_B01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(B01)", List(0)))
 				val vss_P1_C01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(C01)", List(0)))
 				val vss_P1_D01 = checkObj(p.getObjFromDbAt[VesselSituatedState]("P1(D01)", List(0)))
 				val item_l = List(
-					TransferPlanner.Item(vss_P1_A01, vss_P1_C01, LiquidVolume.ul(50)),
-					TransferPlanner.Item(vss_P1_B01, vss_P1_D01, LiquidVolume.ul(50))
+					TransferPlanner.Item(vss_P1_A01, vss_P1_D01, LiquidVolume.ul(50)),
+					TransferPlanner.Item(vss_P1_B01, vss_P1_C01, LiquidVolume.ul(50))
 				)
 				
 				val x = TransferPlanner.searchGraph(
