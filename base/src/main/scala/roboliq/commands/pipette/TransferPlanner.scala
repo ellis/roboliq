@@ -153,7 +153,9 @@ object TransferPlanner {
 				val chain_l = getChain(node)
 				println("chain:", chain_l)
 				node.printChain
-				RqSuccess(chain_l.map(_.state.n))
+				// drop the root node, which has no interesting information
+				val n_l = chain_l.tail.map(_.state.n)
+				RqSuccess(n_l)
 		}
 	}
 }
