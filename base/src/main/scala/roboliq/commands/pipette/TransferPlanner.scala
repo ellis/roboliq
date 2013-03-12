@@ -126,9 +126,9 @@ object TransferPlanner {
 	
 	private def getChain(node: MyNode): List[MyNode] = {
 		def step(node: MyNode): List[MyNode] = {
-			node :: node.parentOpt.map(getChain).getOrElse(Nil)
+			node :: node.parentOpt.map(step).getOrElse(Nil)
 		}
-		step(node).reverse
+		step(node).reverse.tail
 	}
 
 	def searchGraph(
@@ -151,10 +151,10 @@ object TransferPlanner {
 				RqError("Tips could not be assigned to items")
 			case Some(node) =>
 				val chain_l = getChain(node)
-				println("chain:", chain_l)
+				println("chain:", chain_l.size, chain_l)
 				node.printChain
 				// drop the root node, which has no interesting information
-				val n_l = chain_l.tail.map(_.state.n)
+				val n_l = chain_l.map(_.state.n)
 				RqSuccess(n_l)
 		}
 	}
