@@ -145,6 +145,11 @@ class ProcessorData(
 			setCommands(cmd_l)
 		})
 	}
+	
+	def setPipetteDevice(device: roboliq.devices.pipette.PipetteDevice) {
+		val kc = KeyClass(TKP("pipetteDevice", "default", Nil), ru.typeOf[roboliq.devices.pipette.PipetteDevice])
+		cache_m(kc) = device
+	}
 
 	def setCommands(cmd_l: List[JsObject]) {
 		cmd1_l = handleComputationItems(None, cmd_l.map(js => ComputationItem_Command(js)))
@@ -436,6 +441,11 @@ class ProcessorData(
 					//sys.exit()
 					x
 				}
+				// REFACTOR: HACK: this kind of thing should be taken care of in a general fashion
+				else if (kc.clazz <:< ru.typeOf[roboliq.devices.pipette.PipetteDevice]) {
+					Nil
+				}
+				// Otherwise, neither and Option[A] nor a list of all entities:
 				else {
 					//val contextKey_? = node.contextKey_?
 					val contextKey_? = if (kc.isJsValue) Some(kc.key) else None

@@ -69,6 +69,7 @@ object ConversionsDirect {
 		TableInfo[Plate]("plate", None, None),
 		TableInfo[Vessel]("vessel", None, None),
 		TableInfo[WashProgram]("washProgram"),
+		TableInfo[roboliq.devices.pipette.PipetteDevice]("pipetteDevice"),
 		TableInfo[InitialLocation]("initialLocation"),
 		TableInfo[Source]("source"),
 		TableInfo[TipState]("tipState", Some("conf"), None, None),

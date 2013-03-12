@@ -455,14 +455,14 @@ object RqFunctionHandler {
 	// REFACTOR: Return RqResult[RequireItem[A]]
 	def lookup[A <: Object : TypeTag](id: String): RequireItem[A] = {
 		val t = ru.typeTag[A].tpe
-		val fnargs = RqFunctionArgs(
-			arg_l = Nil,
-			fn = (_) => ConversionsDirect.findTableForType(t).flatMap { table =>
+		val fnargs = ConversionsDirect.findTableForType(t) match {
+			case RqError(e, w) =>
+				fnRequire () { RqError(e, w) }
+			case RqSuccess(table, w) =>
 				fnRequire (RequireItem[A](TKP(table, id, Nil))) { o =>
 					returnObject(o)
 				}
-			}
-		)
+		}
 		RequireItem[A](TKP("param", "#", Nil), Some(fnargs))
 	}
 		
