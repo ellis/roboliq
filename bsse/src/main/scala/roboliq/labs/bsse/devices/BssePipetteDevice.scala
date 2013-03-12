@@ -3,7 +3,7 @@ package roboliq.labs.bsse.devices
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable.HashSet
 
-import roboliq.core._
+import roboliq.core._,roboliq.entity._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._

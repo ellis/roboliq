@@ -1,12 +1,7 @@
 package roboliq.labs.bsse.station1
 
 import roboliq.core
-import roboliq.core._
-import roboliq.commands.pipette._
 import roboliq.robots.evoware._
-import roboliq.labs.bsse._
-import roboliq.labs.bsse.devices._
-import roboliq.labs.bsse.handlers._
 
 
 class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends EvowareTable(configFile, sFilename) {

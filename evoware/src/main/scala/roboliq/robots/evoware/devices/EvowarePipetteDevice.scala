@@ -2,9 +2,8 @@ package roboliq.robots.evoware.devices
 
 import scala.collection.immutable.SortedSet
 
-import roboliq.core._
+import roboliq.core._,roboliq.entity._
 import roboliq.commands.pipette._
-//import roboliq.compiler._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
 
@@ -40,18 +39,18 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	/**
 	 * Ensure that all items use the same policy and same tip sizes
 	 */
-	def canBatchSpirateItems(states: StateMap, lTwvp: List[TipWellVolumePolicy]): Boolean = {
+	def canBatchSpirateItems(lTwvp: List[TipWellVolumePolicy]): Boolean = {
 		// Ensure that all items use the same policy and same tip sizes
 		val b1 = lTwvp match {
 			case Nil => true
 			case x :: xs =>
-				val tipState = x.tip.state(states)
-				xs.forall(twvp => twvp.policy == x.policy && twvp.tip.state(states).model_? == tipState.model_?)
+				val tipState = x.tip
+				xs.forall(twvp => twvp.policy == x.policy && twvp.tip.model_? == tipState.model_?)
 		}
 		// Ensure that all intra-tip distances are equal to the intra-well distances
 		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)
 		// Ensure that all wells are in the same column
-		val b3 = WellGroup(states, lTwvp.map(_.well)).splitByCol().size == 1
+		val b3 = WellGroup(lTwvp.map(_.well)).splitByCol().size == 1
 		
 		// FIXME: for debug only
 		//if (lTwvp.size == 2 && lTwvp.head.well.index == 0) {
@@ -62,18 +61,18 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 		b1 && b2 && b3
 	}
 	
-	def canBatchMixItems(states: StateMap, lTwvp: List[TipWellMix]): Boolean = {
+	def canBatchMixItems(lTwvp: List[TipWellMix]): Boolean = {
 		// Ensure that all items use the same policy, tip sizes, and mix repetitions
 		val b1 = lTwvp match {
 			case Nil => true
 			case x :: xs =>
-				val tipState = x.tip.state(states)
-				xs.forall(twvp => twvp.mixSpec.mixPolicy_? == x.mixSpec.mixPolicy_? && twvp.tip.state(states).model_? == tipState.model_? && twvp.mixSpec.nCount_? == x.mixSpec.nCount_?)
+				val tipState = x.tip
+				xs.forall(twvp => twvp.mixSpec.mixPolicy == x.mixSpec.mixPolicy && twvp.tip.model_? == tipState.model_? && twvp.mixSpec.count == x.mixSpec.count)
 		}
 		// Ensure that all intra-tip distances are equal to the intra-well distances
 		val b2 = roboliq.robots.evoware.Utils.equidistant(lTwvp)
 		// Ensure that all wells are in the same column
-		val b3 = WellGroup(states, lTwvp.map(_.well)).splitByCol().size == 1
+		val b3 = WellGroup(lTwvp.map(_.well)).splitByCol().size == 1
 		
 		b1 && b2 && b3
 	}

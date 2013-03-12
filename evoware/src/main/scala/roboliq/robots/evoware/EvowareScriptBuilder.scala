@@ -3,8 +3,6 @@ package roboliq.robots.evoware
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
-import roboliq.core.ObjBase
-
 
 class EvowareScriptBuilder {
 	val cmds = new ArrayBuffer[Object]

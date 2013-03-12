@@ -1,6 +1,6 @@
 package roboliq.robots.evoware
 
-import roboliq.core._
+import roboliq.core._, roboliq.entity._
 import roboliq.commands.pipette._
 
 
