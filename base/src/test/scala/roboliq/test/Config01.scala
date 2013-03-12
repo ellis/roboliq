@@ -6,6 +6,9 @@ import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 object Config01 {
 	val tipModel1000 = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
 	val tip1 = Tip("TIP1", "LiHa", 0, 0, 0, Some(tipModel1000))
+	val tip2 = Tip("TIP2", "LiHa", 1, 1, 0, Some(tipModel1000))
+	val tip3 = Tip("TIP3", "LiHa", 2, 2, 0, Some(tipModel1000))
+	val tip4 = Tip("TIP4", "LiHa", 3, 3, 0, Some(tipModel1000))
 	val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
 	val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
 	val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)

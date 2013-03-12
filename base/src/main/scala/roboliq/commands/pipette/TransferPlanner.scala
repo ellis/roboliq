@@ -53,6 +53,7 @@ object TransferPlanner {
 	//case class MyAction_Clean() extends MyAction
 	
 	case class MyNode(
+		val id: Int,
 		val state: MyState, 
 		val parentOpt: Option[MyNode], 
 		val pathCost: Int, 
@@ -61,6 +62,8 @@ object TransferPlanner {
 		override def getPrintString: String = {
 			state.toString + ": g=" + pathCost.toString + ", f=" + heuristic
 		}
+		override def toString =
+			s"MyNode($id, $state, ${parentOpt.map(_.id)}, $pathCost, $heuristic)"
 	}
 	
 	class MyProblem(
@@ -74,15 +77,17 @@ object TransferPlanner {
 		
 		//private val tipForModel_l = tip_l.filter(tip => tip.permanent_?.isEmpty || tip.permanent_? == Some(tipModel))
 		private val N = item_l.size
+		private var idPrev = 0;
 
 		val state0 = MyState(0, 0)
 		
-		val root = new MyNode(state0, None, 0, calcHeuristic(state0))
+		val root = new MyNode(0, state0, None, 0, calcHeuristic(state0))
 		
 		def goalTest(state: MyState): Boolean = (state.n1 == N)
 		
 		def actions(state: MyState): Iterable[MyAction] = {
 			val nMax = math.min(tip_l.size, N - state.n1)
+			println(s"math.min(${tip_l.size}, ${N - state.n1}) = $nMax")
 			(1 to nMax).map(n => MyAction_Pipette(n))
 		}
 		
@@ -91,7 +96,8 @@ object TransferPlanner {
 			val g = parent.pathCost + calcCost(state)
 			val h = calcHeuristic(state)
 			val f = g + h
-			new MyNode(state, Some(parent), g, f)
+			idPrev += 1
+			new MyNode(idPrev, state, Some(parent), g, f)
 		}
 		
 		def calcCost(state: MyState): Int = {
@@ -143,7 +149,7 @@ object TransferPlanner {
 		val frontier = new MinFirstFrontier[MyState, Int, MyNode] {
 			def compareNodes(a: MyNode, b: MyNode): Int = b.heuristic - a.heuristic 
 		}
-		val debug = new DebugSpec(printFrontier = false, printExpanded = true)
+		val debug = new DebugSpec(printFrontier = true, printExpanded = true)
 		println("A*:")
 		
 		search.run(problem, frontier, debug) match {
