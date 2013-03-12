@@ -15,16 +15,16 @@ import scala.collection.mutable.HashMap
  */
 // TODO: add deviceId_? and make id a parameter rather than automatically generating it.
 case class Tip(
-	val id: String,
+	val deviceId: String,
 	val index: Int,
+	val row: Int,
+	val col: Int,
 	val permanent_? : Option[TipModel]
 ) extends Ordered[Tip] {
+	val id: String = "TIP"+(index+1)
+	
 	override def compare(that: Tip) = index - that.index
 	override def toString = id
-}
-
-object Tip {
-	def apply(index: Int, permanent_? : Option[TipModel] = None) = new Tip("TIP"+(index+1), index, permanent_?)
 }
 
 /** Convenience class for making debug strings from sets of tips. */

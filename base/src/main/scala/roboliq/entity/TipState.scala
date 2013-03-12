@@ -34,6 +34,8 @@ case class TipState(
 ) extends Entity with Ordered[TipState] {
 	def id = conf.id
 	def index = conf.index
+	def row = conf.row
+	def col = conf.col
 	def permanent_? = conf.permanent_?
 	
 	def getTableName = "tipState"

@@ -7,9 +7,6 @@ import roboliq.commands.pipette._
 
 
 abstract class PipetteDevice {
-	def getTipModels: List[TipModel]
-	def getTips: SortedSet[Tip]
-	
 	/** Can the device use the given number of tip per model simultaneously? */
 	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 	def assignTips(tipsFree: SortedSet[Tip], tipModel: TipModel, nTips: Int): Result[SortedSet[Tip]]
@@ -25,6 +22,7 @@ abstract class PipetteDevice {
 	def getDispensePolicy(liquid: Liquid, tipModel: TipModel, nVolume: LiquidVolume, wellState: VesselState): Option[PipettePolicy]
 	def getMixSpec(tipState: TipState, wellState: VesselState, mixSpec_? : Option[MixSpecOpt]): Result[MixSpec]
 	def canBatchSpirateItems(lTwvp: List[TipWellVolumePolicy]): Boolean
+	def groupSpirateItems(l: List[TipWellVolumePolicy]): List[List[TipWellVolumePolicy]]
 	def canBatchMixItems(lTwvp: List[TipWellMix]): Boolean
 	def getOtherTipsWhichCanBeCleanedSimultaneously(lTipAll: SortedSet[Tip], lTipCleaning: SortedSet[Tip]): SortedSet[Tip]
 	def batchCleanTips(lTipAll: SortedSet[Tip]): Seq[SortedSet[Tip]]
