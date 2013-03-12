@@ -24,9 +24,9 @@ class TransferCmdSpec extends CommandSpecBase {
 			}
 			
 			it("should generate correct tokens") {
-				val (_, token_l) = p.getTokenList.unzip
-				val tipState_A = getState[TipState]("TIP1", List(1))
-				val tipState_B = getState[TipState]("TIP1", List(1, 1, 1, 1, 2))
+				val (time_l, token_l) = p.getTokenList.unzip
+				val tipState_A = getState[TipState]("TIP1", time_l(0))
+				val tipState_B = getState[TipState]("TIP1", time_l(1))
 				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
 				val vss_P1_B01_1 = getState[VesselSituatedState]("P1(B01)", List(1))
 				assert(token_l === List(
