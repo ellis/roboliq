@@ -50,7 +50,7 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 						PipettePolicy("POLICY", PipettePosition.Free),
 						item_l
 					)
-					cmd_l = makeGroups(cmd, item_l, group_l, tip_l)
+					cmd_l = makeGroups(device, cmd, item_l, group_l, tip_l)
 					ret <- output(
 						cmd_l
 					)
@@ -59,23 +59,27 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 		}
 	}
 	
-	private def makeGroups(cmd: TransferCmd, item_l: List[TransferPlanner.Item], group_l: List[Int], tip_l: List[TipState]): List[Cmd] = {
+	private def makeGroups(device: PipetteDevice, cmd: TransferCmd, item_l: List[TransferPlanner.Item], group_l: List[Int], tip_l: List[TipState]): List[Cmd] = {
 		var rest = item_l
 		group_l.flatMap(n => {
 			val item_l_# = rest.take(n)
 			rest = rest.drop(n)
-			(item_l_# zip tip_l).map(pair => {
+			val twvpA_l = (item_l_# zip tip_l).map(pair => {
 				val (item, tip) = pair
 				val policy = PipettePolicy(cmd.pipettePolicy_?.get, PipettePosition.WetContact)
-				val twvpA = TipWellVolumePolicy(tip, item.src, item.volume, policy)
-				low.AspirateCmd(None, List(twvpA))
-			}) ++
-			(item_l_# zip tip_l).map(pair => {
-				val (item, tip) = pair
-				val policy = PipettePolicy(cmd.pipettePolicy_?.get, PipettePosition.WetContact)
-				val twvpA = TipWellVolumePolicy(tip, item.dst, item.volume, policy)
-				low.DispenseCmd(None, List(twvpA))
+				TipWellVolumePolicy(tip, item.src, item.volume, policy)
+				//low.AspirateCmd(None, List(twvpA))
 			})
+			val twvpD_l = (item_l_# zip tip_l).map(pair => {
+				val (item, tip) = pair
+				val policy = PipettePolicy(cmd.pipettePolicy_?.get, PipettePosition.WetContact)
+				TipWellVolumePolicy(tip, item.dst, item.volume, policy)
+				//low.DispenseCmd(None, List(twvpA))
+			})
+			val twvpA_ll = device.groupSpirateItems(twvpA_l)
+			val twvpD_ll = device.groupSpirateItems(twvpD_l)
+			twvpA_ll.map(twvp_l => low.AspirateCmd(None, twvp_l)) ++
+			twvpD_ll.map(twvp_l => low.DispenseCmd(None, twvp_l))
 		})
 	}
 }
