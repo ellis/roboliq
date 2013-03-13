@@ -22,8 +22,12 @@ object Config01 {
 
 	val plate_P1 = Plate("P1", plateModel_PCR, None)
 	val vessel_P1_A01 = Vessel("P1(A01)", None)
+	val vessel_P1_B01 = Vessel("P1(B01)", None)
+	val vessel_P1_C01 = Vessel("P1(C01)", None)
+	val vessel_P1_D01 = Vessel("P1(D01)", None)
 	val vessel_T1 = Vessel("T1", Some(tubeModel_15000))
 	val tipState1 = TipState.createEmpty(tip1)
+	val tipState2 = TipState.createEmpty(tip2)
 	val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 	val vesselState_T1 = VesselState(vessel_T1, VesselContent.Empty)
 	val vesselState_P1_A01 = VesselState(vessel_P1_A01, VesselContent.fromVolume(water, LiquidVolume.ul(100)).getOrElse(null))

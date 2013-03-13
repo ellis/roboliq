@@ -9,7 +9,7 @@ import roboliq.test.Config01
 class TransferCmdSpec extends CommandSpecBase {
 	describe("pipette.transfer") {
 		describe("BSSE configuration") {
-			describe("single item") {
+			ignore("single item") {
 				implicit val p = makeProcessorBsse(
 					Config01.protocol1Json,
 					//{ "cmd": "pipette.tips", "cleanIntensity": "Thorough", "items": [{"tip": "TIP1"}] }

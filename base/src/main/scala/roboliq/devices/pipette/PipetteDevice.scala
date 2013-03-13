@@ -52,8 +52,10 @@ abstract class PipetteDevice {
 						val b3 = TipWell.equidistant(check_l)
 						if (b1 && b2 && b3)
 							step(l.tail, group_#, acc_r)
-						else
+						else {
+							println(s"failed test: $b1, $b2, $b3: ${l}")
 							step(l.tail, List(item), group_r.reverse :: acc_r)
+						}
 					}
 			}
 		}
