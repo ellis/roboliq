@@ -6,6 +6,10 @@
 * Load handlers from YAML (and add YAML to Config01)
 * Make DbTable and DbField classes or typeclasses to handle database objects more gracefully
 * Refactor TipState member names
+* Move roboliq.commands to roboliq.device, arm => transport, devices => device
+* Maybe do something to put roboliq.events classes into roboliq.entity?
+* Create package roboliq.device.pipette.planner and put planning/scheduling classes in there
+* PipettePosition as database Entity
 
 :Started: 2013-02-12
 
