@@ -81,17 +81,21 @@ class TransferCmdSpec extends CommandSpecBase {
 				it("should generate correct tokens") {
 					val (time_l, token_l) = p.getTokenList.unzip
 					val tipState_TIP1_A = getState[TipState]("TIP1", time_l(0))
+					val tipState_TIP2_A = getState[TipState]("TIP2", time_l(0))
 					val tipState_TIP1_B = getState[TipState]("TIP1", time_l(1))
-					val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
-					val vss_P1_B01_1 = getState[VesselSituatedState]("P1(B01)", List(1))
-					val vss_P1_C01_1 = getState[VesselSituatedState]("P1(C01)", List(1))
-					val vss_P1_D01_1 = getState[VesselSituatedState]("P1(D01)", List(1))
+					val tipState_TIP2_B = getState[TipState]("TIP2", time_l(1))
+					val vss_P1_A01_A = getState[VesselSituatedState]("P1(A01)", time_l(0))
+					val vss_P1_B01_A = getState[VesselSituatedState]("P1(B01)", time_l(0))
+					val vss_P1_C01_B = getState[VesselSituatedState]("P1(C01)", time_l(1))
+					val vss_P1_D01_B = getState[VesselSituatedState]("P1(D01)", time_l(1))
 					assert(token_l === List(
 						low.AspirateToken(List(
-							TipWellVolumePolicy(tipState_TIP1_A, vss_P1_A01_1, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP1_A, vss_P1_A01_A, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact)),
+							TipWellVolumePolicy(tipState_TIP2_A, vss_P1_B01_A, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
 						)),
 						low.DispenseToken(List(
-							TipWellVolumePolicy(tipState_TIP1_B, vss_P1_B01_1, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP1_B, vss_P1_C01_B, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact)),
+							TipWellVolumePolicy(tipState_TIP2_B, vss_P1_D01_B, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
 						))
 					))
 				}
