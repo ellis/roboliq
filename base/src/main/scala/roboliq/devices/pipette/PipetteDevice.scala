@@ -53,7 +53,8 @@ abstract class PipetteDevice {
 						if (b1 && b2 && b3)
 							step(l.tail, group_#, acc_r)
 						else {
-							println(s"failed test: $b1, $b2, $b3: ${l}")
+							println(s"failed test: $b1, $b2, $b3: l=${l}, check_l=${check_l}")
+							check_l.foreach(twvp => println(twvp.tip.row, twvp.tip.col, twvp.well.index, twvp.well.row, twvp.well.col))
 							step(l.tail, List(item), group_r.reverse :: acc_r)
 						}
 					}

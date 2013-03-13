@@ -21,19 +21,47 @@ class MiscSpec extends CommandSpecBase {
 		
 		val policy = PipettePolicy("POLICY", PipettePosition.WetContact)
 		
-		it ("1") {
+		it ("should return true for single well") {
 			val twvp_l = List(
 				TipWellVolumePolicy(tipState1, vssA, LiquidVolume.ul(50), policy)
 			)
 			assert(TipWell.equidistant(twvp_l) === true)
 		}
 		
-		it ("2a") {
+		it ("should return true for two adjacent wells") {
 			val twvp_l = List(
 				TipWellVolumePolicy(tipState1, vssA, LiquidVolume.ul(50), policy),
 				TipWellVolumePolicy(tipState2, vssB, LiquidVolume.ul(50), policy)
 			)
 			assert(TipWell.equidistant(twvp_l) === true)
+		}
+		
+		it ("2b") {
+			val twvp_l = List(
+				TipWellVolumePolicy(tipState1, vssC, LiquidVolume.ul(50), policy),
+				TipWellVolumePolicy(tipState2, vssD, LiquidVolume.ul(50), policy)
+			)
+			assert(TipWell.equidistant(twvp_l) === true)
+		}
+	}
+	
+	describe("WellSpecParser") {
+		it ("wellRow()") {
+			val plate = Config01.plate_P1
+			assert(WellSpecParser.wellRow(plate, 0) === 0)
+			assert(WellSpecParser.wellRow(plate, 8) === 0)
+			assert(WellSpecParser.wellRow(plate, 88) === 0)
+
+			assert(WellSpecParser.wellRow(plate, 1) === 1)
+			assert(WellSpecParser.wellRow(plate, 2) === 2)
+		}
+		
+		it ("wellIndexName()") {
+			assert(WellSpecParser.wellIndexName(8, 12, 0) === "A01")
+			assert(WellSpecParser.wellIndexName(8, 12, 95) === "H12")
+			assert(WellSpecParser.wellIndexName(8, 12, 1) === "B01")
+			assert(WellSpecParser.wellIndexName(8, 12, 2) === "C01")
+			assert(WellSpecParser.wellIndexName(8, 12, 10) === "C02")
 		}
 	}
 }

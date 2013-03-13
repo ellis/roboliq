@@ -367,6 +367,7 @@ class ProcessorData(
 									val index = WellSpecParser.wellIndex(plateState, rc.row, rc.col)
 									val position = VesselPosition(plateState, index)
 									val well = VesselSituatedState(vesselState, position)
+									println(s"default VesselPosition[$id] = ${well.index}, ${well.row}, ${well.col}")
 									for {
 										jsval <- ConversionsDirect.toJson[VesselSituatedState](well)
 									} yield {
