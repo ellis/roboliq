@@ -3,7 +3,7 @@ package roboliq.labs.bsse.devices
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable.HashSet
 
-import roboliq.core._
+import roboliq.core._,roboliq.entity._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette._
 import roboliq.robots.evoware._
@@ -11,6 +11,7 @@ import roboliq.robots.evoware.devices.EvowarePipetteDevice
 
 
 class BssePipetteDevice extends EvowarePipetteDevice {
+	/*
 	var tipModels: List[TipModel] = Nil
 	var tips = SortedSet[Tip]()
 	
@@ -40,6 +41,7 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	}
 	private def mTipToBlock: Map[Tip, TipBlock] = (junk.tipBlock1000.lTip.map(_ -> junk.tipBlock1000) ++ junk.tipBlock50.lTip.map(_ -> junk.tipBlock50)).toMap
 	private def mModelToTips = Map(tipModel1000 -> junk.tipBlock1000.tTip, tipModel50 -> junk.tipBlock50.tTip)
+	*/
 
 	private lazy val mapLcInfo = {
 		import PipettePosition._
@@ -234,10 +236,10 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 		Some(PipettePolicy(sName, posDefault))
 	}
 	
-	def getMixSpec(tipState: TipState, wellState: WellState, mixSpec_? : Option[MixSpec]): Result[MixSpec] = {
+	def getMixSpec(tipState: TipState, wellState: VesselState, mixSpec_? : Option[MixSpec]): Result[MixSpec] = {
 		// FIXME: Passing nVolume=0 is kinda unpredictable -- ellis
 		val policyDefault_? = getAspiratePolicy(tipState, LiquidVolume.empty, wellState)
-		val mixSpecDefault = MixSpec(Some(wellState.volume * 0.7), Some(4), policyDefault_?)
+		val mixSpecDefault = MixSpec(wellState.volume, 4, policyDefault_?.get)
 		val mixSpec = mixSpec_? match {
 			case None => mixSpecDefault
 			case Some(a) => a + mixSpecDefault

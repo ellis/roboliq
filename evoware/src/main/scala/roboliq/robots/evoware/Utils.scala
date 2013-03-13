@@ -1,6 +1,6 @@
 package roboliq.robots.evoware
 
-import roboliq.core._
+import roboliq.core._, roboliq.entity._
 import roboliq.commands.pipette._
 
 
@@ -13,7 +13,7 @@ object Utils {
 	}
 		
 	// Test all adjacent items for equidistance
-	def equidistant2(tws: Seq[Tuple2[HasTip, Well]]): Boolean = tws match {
+	def equidistant2(tws: Seq[(HasTip, Well)]): Boolean = tws match {
 		case Seq() => true
 		case Seq(_) => true
 		case Seq(a, b, rest @ _*) =>
@@ -25,6 +25,10 @@ object Utils {
 	
 	// All tip/well pairs are equidistant or all tips are going to the same well
 	// Assert that tips are spaced at equal distances to each other as the wells are to each other
-	def equidistant3(a: Tuple2[HasTip, Well], b: Tuple2[HasTip, Well]): Boolean =
-		(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
+	def equidistant3(a: Tuple2[HasTip, Well], b: Tuple2[HasTip, Well]): Boolean = {
+		(b._1.tip.row - a._1.tip.row) == (b._2.row - a._2.row) &&
+		(b._1.tip.col - a._1.tip.col) == (b._2.col - a._2.col) &&
+		(b._2.plate == a._2.plate)
+	}
+		
 }

@@ -78,6 +78,8 @@ class ProcessorData(
 	// Conversion nodes
 	val kcNode_m = new HashMap[KeyClass, Node_Conversion]
 	val state_m = new HashMap[Node, NodeState]
+	// REFACTOR: this is a hack...
+	val defaultKc_l = new ArrayBuffer[KeyClass]
 	//val status_m = new HashMap[Node, Status.Value]
 	//val dep_m: MultiMap[KeyClass, Node] = new HashMap[KeyClass, mutable.Set[Node]] with MultiMap[KeyClass, Node]
 	//val children_m = new HashMap[Node, List[Node]]
@@ -142,6 +144,11 @@ class ProcessorData(
 			val cmd_l = elements.map(_.asInstanceOf[JsObject])
 			setCommands(cmd_l)
 		})
+	}
+	
+	def setPipetteDevice(device: roboliq.devices.pipette.PipetteDevice) {
+		val kc = KeyClass(TKP("pipetteDevice", "default", Nil), ru.typeOf[roboliq.devices.pipette.PipetteDevice])
+		cache_m(kc) = device
 	}
 
 	def setCommands(cmd_l: List[JsObject]) {
@@ -299,11 +306,11 @@ class ProcessorData(
 		// Create default entities
 		// TODO: Create a general approach to creating default objects
 		node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
-			val kc = kco.kc
-			val id = kc.key.key
 			val time = List(0)
+			val kc = kco.kc.copy(time = time)
 			// If object is not already in database:
-			if (db.getAt(kc.key, time).isError) {
+			if (db.getAt(kc.key, time).isError && !defaultKc_l.contains(kc)) {
+				val id = kc.key.key
 				import RqFunctionHandler._
 				kc.key.table match {
 					// If there is no initial tipState registered yet:
@@ -316,6 +323,7 @@ class ProcessorData(
 								List(returnEvent(kc.key, tipStateJson))
 							}
 						}
+						defaultKc_l += kc
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 					case "vessel" =>
 						db.set(kc.key, JsObject("id" -> JsString(id)))
@@ -333,6 +341,7 @@ class ProcessorData(
 								List(returnEvent(kc.key, vesselStateJson))
 							}
 						}
+						defaultKc_l += kc
 						List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 					case "vesselSituatedState" =>
 						WellSpecParser.parse(id) match {
@@ -349,6 +358,7 @@ class ProcessorData(
 										List(returnEvent(kc.key, jsval))
 									}
 								}
+								defaultKc_l += kc
 								List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 							// If there is a plate and a single well:
 							case RqSuccess(List((plate, WellSpecOne(rc) :: Nil)), _) =>
@@ -357,12 +367,14 @@ class ProcessorData(
 									val index = WellSpecParser.wellIndex(plateState, rc.row, rc.col)
 									val position = VesselPosition(plateState, index)
 									val well = VesselSituatedState(vesselState, position)
+									println(s"default VesselPosition[$id] = ${well.index}, ${well.row}, ${well.col}")
 									for {
 										jsval <- ConversionsDirect.toJson[VesselSituatedState](well)
 									} yield {
 										List(returnEvent(kc.key, jsval))
 									}
 								}
+								defaultKc_l += kc
 								List(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc))
 							case _ =>
 								Nil
@@ -382,6 +394,7 @@ class ProcessorData(
 		
 		val kc = kco.kc
 		//val contextKey_? = if (kc.isJsValue) Some(kc.key) else None
+		val time2 = if (kc.key.table.endsWith("State")) node.time else Nil
 		kco.conversion_? match {
 			// If a user-supplied conversion function was supplied:
 			case Some(fnargs0) =>
@@ -401,7 +414,7 @@ class ProcessorData(
 					}
 					val kco2 = KeyClassOpt(kc2, true)
 					val fnargs = RqFunctionArgs(fn, List(kco2))
-					val node2 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs, kc)
+					val node2 = Node_Conversion(None, Some(kc.id), None, time2, None, fnargs, kc)
 					// REFACTOR: Can the recursion be removed, since registerNode will be called on node2 soon anyway
 					node2 :: makeConversionNodesForInput(node2, kco2, 1)
 				}
@@ -410,7 +423,7 @@ class ProcessorData(
 					val tkp_l = db.getAllKeys(kc.key.table).sortBy(_.id)
 					// type parameter of option (e.g, if List[String], clazz2 will be String)
 					val clazz2 = kc.clazz.asInstanceOf[ru.TypeRefApi].args.head
-					val kco2_l = tkp_l.map(tkp => KeyClassOpt(KeyClass(tkp, clazz2)))
+					val kco2_l = tkp_l.map(tkp => KeyClassOpt(KeyClass(tkp, clazz2, time2)))
 					
 					val fnargs1 = RqFunctionArgs(
 						arg_l = kco2_l,
@@ -418,7 +431,7 @@ class ProcessorData(
 							RqSuccess(List(ConversionItem_Object(l)))
 						}
 					)
-					val node1 = Node_Conversion(None, Some(kc.id), None, node.time, None, fnargs1, kc)
+					val node1 = Node_Conversion(None, Some(kc.id), None, time2, None, fnargs1, kc)
 					
 					// FIXME: HACK: this will not update when items are added or removed from the table
 					val x = node1 :: kco2_l.zipWithIndex.flatMap(pair => {
@@ -429,6 +442,11 @@ class ProcessorData(
 					//sys.exit()
 					x
 				}
+				// REFACTOR: HACK: this kind of thing should be taken care of in a general fashion
+				else if (kc.clazz <:< ru.typeOf[roboliq.devices.pipette.PipetteDevice]) {
+					Nil
+				}
+				// Otherwise, neither and Option[A] nor a list of all entities:
 				else {
 					//val contextKey_? = node.contextKey_?
 					val contextKey_? = if (kc.isJsValue) Some(kc.key) else None
@@ -437,11 +455,11 @@ class ProcessorData(
 							val kc0 = kc.changeClassToJsValue
 							val fnargs0 = handler.createFunctionArgs(kc0)
 							val fnargs = concretizeArgs(fnargs0, contextKey_?, None, 0)
-							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
+							List(Node_Conversion(None, Some(kc.id), None, time2, contextKey_?, fnargs, kc))
 						case Some(handler: ConversionHandlerN) =>
 							val kc0 = kc.changeClassToJsValue
 							val fnargs0 = handler.fnargs
-							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs0, kc))
+							List(Node_Conversion(None, Some(kc.id), None, time2, contextKey_?, fnargs0, kc))
 						case Some(handler) =>
 							// FIXME: should put this message in a map so it only shows up once
 							internalMessage_l += RqError[Unit]("Unhandled converter registered for "+node+" "+kco)
@@ -479,7 +497,7 @@ class ProcessorData(
 							}
 							val arg_l = List(KeyClassOpt(kc.changeClassToJsValue, false))
 							val fnargs = RqFunctionArgs(fn, arg_l)
-							List(Node_Conversion(None, Some(kc.id), None, node.time, contextKey_?, fnargs, kc))
+							List(Node_Conversion(None, Some(kc.id), None, time2, contextKey_?, fnargs, kc))
 							// FIXME: should put this message in a map so it only shows up once
 							//internalMessage_l += RqError[Unit](s"No converter registered for ${kco.kc.id}, required by ${node.id}")
 							//Nil
@@ -659,6 +677,7 @@ class ProcessorData(
 	def run(maxLoops: Int = -1): ProcessorGraph = {
 		var countdown = maxLoops
 		var step_i = 0
+		makeDefaults()
 		val g = new ProcessorGraph
 		while (countdown != 0) {
 			g.setStep(step_i)
@@ -670,6 +689,27 @@ class ProcessorData(
 		}
 		//makeMessagesForMissingInputs()
 		g
+	}
+	
+	private def makeDefaults() {
+		db.getAllKeys("tip") foreach { tkp =>
+			val id = tkp.key
+			val tkp_# = TKP("tipState", id, Nil)
+			if (db.getAt(tkp_#, List(0)).isError) {
+				val x = for {
+					tip <- getObjFromDbAt[Tip](id, Nil)
+					tipState = TipState.createEmpty(tip)
+					tipStateJson <- ConversionsDirect.toJson(tipState)
+				} yield {
+					db.setAt(tkp_#, List(0), tipStateJson)
+				}
+				x match {
+					case x : RqError[Unit] => logger.error(s"makeDefaults: couldn't load tip `$id`")
+					case _ =>
+				}
+			}
+		}
+		
 	}
 	
 	private class NodeListBuilder {
@@ -706,6 +746,7 @@ class ProcessorData(
 
 		val nodeListBuilder = new NodeListBuilder
 		cmd1_l.foreach(nodeListBuilder.addNode)
+		defaultKc_l.foreach(kc => nodeListBuilder.addNode(kcNode_m(kc)))
 
 		val node_l = nodeListBuilder.node_l.toList.sortBy(_.id)
 		val kco_l = nodeListBuilder.kco_l.toSet
@@ -770,6 +811,7 @@ class ProcessorData(
 		e1.toList.sortBy(_._1.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
 		println()
 		e2.toList.sortBy(_._1.id).map(pair => pair._1.id + getEntityString(pair)).foreach(println)
+		
 		println()
 		println("Nodes")
 		println("-----")
@@ -806,9 +848,10 @@ class ProcessorData(
 		println()
 		println("makePending")
 		order_l.foreach(state => 
-			println(state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
+			println(state.node.time + " " + state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
 		)
 		println()
+		
 		//val order_l = state_m.toList.sortBy(_._1.path)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
 		order_l match {
 			case Nil => Nil
@@ -878,7 +921,7 @@ class ProcessorData(
 			println(" x: "+x)
 			if (x.isError && kc.key.table == "source" && sources_m.contains(kc.key.key)) {
 				val id = kc.key.key
-				val wellId_l = sources_m(id).reverse
+				val wellId_l = sources_m(id).reverse.distinct
 				val jsobj = JsObject(
 					"id" -> JsString(id),
 					"vessels" -> JsArray(wellId_l.map(JsString(_)))

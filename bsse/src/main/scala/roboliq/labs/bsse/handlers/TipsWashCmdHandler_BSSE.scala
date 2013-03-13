@@ -1,4 +1,4 @@
-package roboliq.labs.bsse.handlers
+/*package roboliq.labs.bsse.handlers
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.SortedSet
@@ -65,3 +65,4 @@ class TipsWashCmdHandler_BSSE extends CmdHandlerA[TipsWashCmdBean] {
 		Expand2Tokens(tokens, events, doc)
 	}
 }
+*/

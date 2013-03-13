@@ -1,5 +1,6 @@
 package roboliq.commands.pipette.low
 
+import scala.reflect.runtime.{universe => ru}
 import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import scala.collection.JavaConversions._
 import spray.json._
@@ -11,6 +12,7 @@ case class DispenseCmd(
 	items: List[TipWellVolumePolicy] //FIXME: This should be TipWellVolumePolicyMixspec
 ) extends Cmd {
 	def cmd = "pipette.low.dispense"
+	def typ = ru.typeOf[this.type]
 }
 
 

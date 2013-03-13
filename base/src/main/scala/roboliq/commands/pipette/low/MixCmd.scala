@@ -1,5 +1,6 @@
 package roboliq.commands.pipette.low
 
+import scala.reflect.runtime.{universe => ru}
 import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import roboliq.commands.pipette._
 
@@ -10,6 +11,7 @@ case class MixCmd(
 	mixSpec_? : Option[MixSpecOpt]
 ) extends Cmd {
 	def cmd = "pipette.low.mix"
+	def typ = ru.typeOf[this.type]
 }
 
 

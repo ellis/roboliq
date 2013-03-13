@@ -10,6 +10,7 @@ import _root_.roboliq._
 import _root_.roboliq.core._
 import _root_.roboliq.processor._
 import roboliq.test.Config01
+import roboliq.test.TestPipetteDevice1
 //import ConversionsDirect._
 
 
@@ -25,6 +26,7 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 			new commands.pipette.low.WashTipsHandler
 		))
 		p.loadJsonData(Config01.benchJson)
+		p.setPipetteDevice(new TestPipetteDevice1)
 		
 		for (o <- configs) {
 			if (o.isInstanceOf[JsObject])
@@ -34,6 +36,7 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 		When("commands are run")
 		val g = p.run()
 		//org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.dot"), g.toDot)
+		org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("temp.html"), g.toHtmlTable)
 		p
 	}
 	

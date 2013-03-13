@@ -5,15 +5,16 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import roboliq.core._
-import roboliq.core.RqPimper._
-import roboliq.commands.move.LidHandling
+import roboliq.core._,roboliq.entity._
+import roboliq.commands._
+/*import roboliq.commands.move.LidHandling
+import roboliq.commands2.arm._
+import roboliq.commands2.pipette._
+*/
 import roboliq.commands.pipette.HasTip
 import roboliq.commands.pipette.HasWell
 import roboliq.commands.pipette.HasPolicy
 import roboliq.commands.pipette.TipWellVolumePolicy
-import roboliq.commands2.arm._
-import roboliq.commands2.pipette._
 import commands.EvowareSubroutineToken
 
 
@@ -72,14 +73,14 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	
 	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder): RqResult[Unit] = {
 		for { cmds0 <- cmd1 match {
-			case c: AspirateToken => aspirate(builder, c)
+			case c: pipette.low.AspirateToken => aspirate(builder, c)
 			//case c: L1C_Comment => comment(c)
-			case c: DispenseToken => dispense(builder, c)
+			case c: pipette.low.DispenseToken => dispense(builder, c)
 			//case c: DetectLevelToken => detectLevel(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			//case c: EvowareSubroutineToken => subroutine(builder, c)
 			//case c: MixToken => mix(builder, c.items)
-			case c: MovePlateToken => movePlate(builder, c)
+			case c: arm.MovePlateToken => movePlate(builder, c)
 			//case c: L1C_Prompt => prompt(c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
@@ -137,7 +138,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	*/
 	
 
-	private def aspirate(builder: EvowareScriptBuilder, cmd: AspirateToken): RqResult[List[L0C_Command]] = {
+	private def aspirate(builder: EvowareScriptBuilder, cmd: pipette.low.AspirateToken): RqResult[List[L0C_Command]] = {
 		for (item <- cmd.items) {
 			val state = item.well.vesselState
 			val sLiquid = state.content.liquid.id
@@ -149,7 +150,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Aspirate", sLiquidClass))
 	}
 	
-	private def dispense(builder: EvowareScriptBuilder, cmd: DispenseToken): RqResult[Seq[L0C_Command]] = {
+	private def dispense(builder: EvowareScriptBuilder, cmd: pipette.low.DispenseToken): RqResult[Seq[L0C_Command]] = {
 		checkTipWellPolicyItems(builder, cmd.items).flatMap(sLiquidClass => spirateChecked(builder, cmd.items, "Dispense", sLiquidClass))
 	}
 
@@ -201,7 +202,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				val bEquidistant = Utils.equidistant2(lItemInfo)
 				val bSameWell = items.forall(_.well eq twvp0.well)
 				if (!bEquidistant && !bSameWell)
-					return RqError("INTERNAL: not equidistant, "+TipSet.toDebugString(items.map(_.tip))+" -> "+Printer.getWellsDebugString(items.map(_.well)))
+					return RqError("INTERNAL: not equidistant, "+items.map(_.tip.conf.id)+" -> "+Printer.getWellsDebugString(items.map(_.well)))
 				
 				RqSuccess(policy.id)
 		}
@@ -213,7 +214,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		val info0 = lWellInfo.head
 		//val tipKind = robot.getTipKind(item0.tip)
 		val idPlate = info0.idPlate
-		val mTips = encodeTips(items.map(_.tip))
+		val mTips = encodeTips(items.map(_.tip.conf))
 		
 		// Create a list of volumes for each used tip, leaving the remaining values at 0
 		val asVolumes = Array.fill(12)("0")
@@ -441,7 +442,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	*/
 	
-	private def movePlate(builder: EvowareScriptBuilder, c: MovePlateToken): RqResult[Seq[L0C_Command]] = {
+	private def movePlate(builder: EvowareScriptBuilder, c: arm.MovePlateToken): RqResult[Seq[L0C_Command]] = {
 		for {
 			siteSrc <- getSite(c.plateSrc.id)
 			siteDest <- getSite(c.plateDest.id)
@@ -479,7 +480,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				labwareModel,
 				iGridSrc, siteSrc,
 				iGridDest, siteDest,
-				LidHandling.NoLid, //c.lidHandling,
+				arm.LidHandling.NoLid, //c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,
 				sCarrierLid = ""

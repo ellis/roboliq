@@ -1,7 +1,8 @@
 package roboliq.commands.pipette.low
 
-import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
+import scala.reflect.runtime.{universe => ru}
 import scala.collection.JavaConversions._
+import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 import spray.json._
 import roboliq.commands.pipette._
 
@@ -11,6 +12,7 @@ case class AspirateCmd(
 	items: List[TipWellVolumePolicy]
 ) extends Cmd {
 	def cmd = "pipette.low.aspirate"
+	def typ = ru.typeOf[this.type]
 }
 
 case class AspirateToken(

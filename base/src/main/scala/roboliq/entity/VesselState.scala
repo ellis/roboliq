@@ -25,6 +25,8 @@ case class VesselSituatedState(
 	def vessel = vesselState.vessel
 	def id = vessel.id
 	def plate = position.plate
+	def row = iRow
+	def col = iCol
 	def content = vesselState.content
 	def liquid = content.liquid
 	def volume = content.volume

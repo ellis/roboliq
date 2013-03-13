@@ -121,7 +121,7 @@ class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 		item_l: List[Item],
 		itemToLiquid_m: Map[Item, Liquid],
 		itemToModels_m: Map[Item, Seq[TipModel]]
-	): Result[Map[Item, TipModel]] = {
+	): RqResult[Map[Item, TipModel]] = {
 		val problem = new MyProblem(item_l, itemToLiquid_m, itemToModels_m)
 		val search = new GraphSearch[MyState, MyAction, MyNode]
 		//val searchBFS = new BreadthFirstSearch[State, Action]
@@ -133,11 +133,11 @@ class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 		println("A*:")
 		
 		search.run(problem, frontier, debug) match {
-			case None => Error("Tip models could not be assigned to items")
+			case None => RqError("Tip models could not be assigned to items")
 			case Some(node) =>
 				println("chain:", node)
 				node.printChain
-				return Success(node.state.l.toMap)
+				return RqSuccess(node.state.l.toMap)
 		}
 	}
 }

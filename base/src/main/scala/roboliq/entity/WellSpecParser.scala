@@ -339,7 +339,7 @@ object WellSpecParser {
 	}
 
 	def wellIndex(plate: Plate, iRow: Int, iCol: Int): Int = {
-		iCol + iRow * plate.nCols
+		iRow + iCol * plate.nRows
 	}
 	
 	def wellRow(plate: Plate, index: Int): Int = {
