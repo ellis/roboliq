@@ -1,4 +1,4 @@
-package roboliq.commands.pipette
+package roboliq.commands.pipette.planner
 
 import scala.collection.immutable.SortedSet
 import scalaz._
@@ -6,29 +6,14 @@ import Scalaz._
 import ailib.ch03
 import ailib.ch03._
 import roboliq.core._,roboliq.entity._,roboliq.processor._,roboliq.events._
+import roboliq.commands.pipette._
 import roboliq.devices.pipette.PipetteDevice
 
-/*
-case class Group(
-	item: Item,
-	tip: Tip,
-)*/
-
-/**
- * The order of items is fixed.
- * For the items as a whole group, we need to choose a single:
- * - pipette policy
- * - tip model
- * For each item, we need to choose:
- * - whether to wash before the item
- * - tip to assign to an item
- */
-object TransferPlanner {
+object TipSourcePlanner {
 
 	case class Item(
-		src: Well,
-		dst: Well,
-		volume: LiquidVolume
+		tip: Tip,
+		src_l: List[Well]
 	)
 	
 	case class MyState(
@@ -139,6 +124,7 @@ object TransferPlanner {
 
 	def searchGraph(
 		device: PipetteDevice,
+		
 		tip_l: SortedSet[Tip],
 		tipModel: TipModel,
 		pipettePolicy: PipettePolicy,

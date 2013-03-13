@@ -68,15 +68,27 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 		}
 	}
 	
+	/**
+	 * Simplifications for planning:
+	 * - only deal with one tip model
+	 */
+	
+	/**
+	 * Think about creating a PDDL representation for this problem or its subproblems.
+	 * types { }
+	 */
+	
 	private def makeGroups(
 		device: PipetteDevice,
 		cmd: TransferCmd,
 		item_l: List[TransferPlanner.Item],
 		group_l: List[Int],
-		tip_l: List[TipState],
+		tip0_l: List[TipState],
 		policy: PipettePolicy
 	): List[Cmd] = {
 		var rest = item_l
+		var tip_l = tip0_l
+		//var tipToSterility: Map[TipState, CleanIntensity.Value] = tip_l.map(tip => tip -> tip.cleanDegreePending).toMap
 		group_l.flatMap(n => {
 			val item_l_# = rest.take(n)
 			rest = rest.drop(n)
@@ -93,16 +105,12 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 			val twvpA_ll = device.groupSpirateItems(twvpA_l)
 			val twvpD_ll = device.groupSpirateItems(twvpD_l)
 			
-			val cleanA_m = twvpA_l.map(twvp => twvp.tip -> twvp.well.liquid.tipCleanPolicy).toMap
-			val cleanD_m: Map[TipState, TipCleanPolicy] = {
-				if (policy.pos == PipettePosition.WetContact)
-					twvpD_l.map(twvp => twvp.tip -> twvp.well.liquid.tipCleanPolicy).toMap
-				else
-					Map()
-			}
-			val clean_m = cleanA_m |+| cleanD_m
-			val preclean_m: Map[TipState, CleanIntensity.Value] = clean_m.mapValues(_.enter)
-			val postclean_m: Map[TipState, CleanIntensity.Value] = clean_m.mapValues(_.enter)
+			val tipToTipCleanPolicy_m: Map[TipState, TipCleanPolicy] =
+				getTipCleanPolicies(None, tip_l, twvpA_l, twvpD_l)
+			val tipCmd_l = makeTipsCmds(tipToTipCleanPolicy_m)
+
+			// Update tip state's cleanDegreePending property
+			tip_l = tip_l.map(tip => tip.copy(cleanDegreePending = tipToTipCleanPolicy_m.get(tip).map(_.exit).getOrElse(tip.cleanDegreePending)))
 			
 			// Create mixing commands
 			val premix_l = makeMixCmds(cmd.preMixSpec_?, twvpA_ll)
@@ -118,12 +126,11 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 		})
 	}
 
-	private def makeTipsCmds(
-		cmd: TransferCmd,
+	private def getTipCleanPolicies(
 		sterilize_? : Option[CleanIntensity.Value],
+		tipState_l: List[TipState],
 		twvpA_l: List[TipWellVolumePolicy],
-		twvpD_l: List[TipWellVolumePolicy],
-		sterilePending_m: Map[TipState, CleanIntensity.Value]
+		twvpD_l: List[TipWellVolumePolicy]
 	): Map[TipState, TipCleanPolicy] = {
 		sterilize_? match {
 			case Some(cleanIntensity) =>
@@ -131,6 +138,9 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 					twvp.tip -> TipCleanPolicy(cleanIntensity, cleanIntensity)
 				}).toMap
 			case None =>
+				// TipCleanPolicies pending from prior pipetting
+				val cleanT_m = tipState_l.map(tip => tip -> TipCleanPolicy(tip.cleanDegreePending, CleanIntensity.None)).toMap
+
 				// Aspriate TipCleanPolicies
 				val cleanA_m = twvpA_l.map(twvp => twvp.tip -> twvp.well.liquid.tipCleanPolicy).toMap
 				// Dispense TipCleanPolicies
@@ -142,24 +152,9 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 							TipCleanPolicy.NN
 					)).toMap
 				}
-				// Pre-existing TipCleanPolicies based on tip state
-				val cleanT_m = tip_l.map(tip => tip -> TipCleanPolicy(tip.cleanDegreePending, tip.cleanDegreePending)).toMap
 				
-				val clean_m = cleanA_m |+| cleanD_m |+| cleanT_m
-				
-				// Maximum clean intensity required per tip before entering the source or destination wells
-				val cleanEnter_m = clean_m.mapValues(_.enter)
-				// Clean intensity required per tip after pipetting these items
-				val cleanExit_m = clean_m.mapValues(_.enter)
+				cleanT_m |+| cleanA_m |+| cleanD_m
 		}
-
-		val preclean_m: Map[TipState, CleanIntensity.Value] = clean_m.mapValues(_.enter)
-		val postclean_m: Map[TipState, CleanIntensity.Value] = clean_m.mapValues(_.enter)
-		TipsCmd:
-		tips: List[TipState],
-		tipModel_? : Option[TipModel],
-		cleanIntensity_? : Option[CleanIntensity.Value],
-		items: List[TipsItem]
 	}
 	
 	private def makeTipsCmds(
@@ -168,41 +163,12 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 		if (tipToTipCleanPolicy_m.isEmpty)
 			return None
 		
-		val items = tipToTipCleanPolicy_m.map(twvp => {
+		val items = tipToTipCleanPolicy_m.toList.map(pair => {
+			val (tip, cleanPolicy) = pair
 			// FIXME: set Some(tipModel)
-			TipsItem(twvp.tip, None, Some(cleanIntensity))
+			TipsItem(tip, None, Some(cleanPolicy.enter))
 		})
 		Some(TipsCmd(None, Nil, None, None, items))
-			case None =>
-				// Aspriate TipCleanPolicies
-				val cleanA_m = twvpA_l.map(twvp => twvp.tip -> twvp.well.liquid.tipCleanPolicy).toMap
-				// Dispense TipCleanPolicies
-				val cleanD_m: Map[TipState, TipCleanPolicy] = {
-					twvpD_l.map(twvp => twvp.tip -> (
-						if (twvp.policy.pos == PipettePosition.WetContact)
-							twvp.well.liquid.tipCleanPolicy
-						else
-							TipCleanPolicy.NN
-					)).toMap
-				}
-				// Pre-existing TipCleanPolicies based on tip state
-				val cleanT_m = tip_l.map(tip => tip -> TipCleanPolicy(tip.cleanDegreePending, tip.cleanDegreePending)).toMap
-				
-				val clean_m = cleanA_m |+| cleanD_m |+| cleanT_m
-				
-				// Maximum clean intensity required per tip before entering the source or destination wells
-				val cleanEnter_m = clean_m.mapValues(_.enter)
-				// Clean intensity required per tip after pipetting these items
-				val cleanExit_m = clean_m.mapValues(_.enter)
-		}
-
-		val preclean_m: Map[TipState, CleanIntensity.Value] = clean_m.mapValues(_.enter)
-		val postclean_m: Map[TipState, CleanIntensity.Value] = clean_m.mapValues(_.enter)
-		TipsCmd:
-		tips: List[TipState],
-		tipModel_? : Option[TipModel],
-		cleanIntensity_? : Option[CleanIntensity.Value],
-		items: List[TipsItem]
 	}
 	
 	private def makeMixCmds(mixSpecOpt_? : Option[MixSpecOpt], twvp_ll: List[List[TipWellVolumePolicy]]): List[low.MixCmd] = {
