@@ -2,7 +2,7 @@ package roboliq.labs.bsse
 
 import scala.collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
-import roboliq.core._
+import roboliq.core._, roboliq.processor._
 import roboliq.robots.evoware._
 import roboliq.utils.FileUtils
 import station1._
@@ -13,7 +13,7 @@ import java.io.PrintWriter
 
 object JsonTest {
 	import spray.json.JsonParser
-	import roboliq.processor2.ProcessorData
+	import roboliq.processor.ProcessorData
 	
 	def run(args: List[String]) {
 		if (args.isEmpty) {
@@ -47,7 +47,7 @@ object JsonTest {
 
 		val sProtocolFilename = pathbase + args(0)
 		val sBasename = FilenameUtils.removeExtension(sProtocolFilename)
-		val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
+		//val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
 		//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
 		FileUtils.writeToFile(sBasename+".out", token_l.mkString("\n"))
 
