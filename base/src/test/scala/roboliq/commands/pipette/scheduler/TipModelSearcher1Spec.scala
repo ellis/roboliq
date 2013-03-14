@@ -46,7 +46,7 @@ class TipModelSearcher1Spec extends FunSpec with ShouldMatchers with BeforeAndAf
 			itemToModels_m = l.map(o => (o._1, o._2._2)).toMap
 		)
 		val map = itemAll_l.zip(tm_l).toMap
-		res should equal (Success(map))
+		res should equal (RqSuccess(map))
 	}
 	
 	describe("[11]") {
