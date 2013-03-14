@@ -1,11 +1,12 @@
-package roboliq.commands.pipette
+package roboliq.commands.pipette.planner
 
 import scala.collection.immutable.SortedSet
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 import ailib.ch03
 import ailib.ch03._
 import roboliq.core._,roboliq.entity._,roboliq.processor._,roboliq.events._
+import roboliq.commands.pipette._
 import roboliq.devices.pipette.PipetteDevice
 
 /*
@@ -26,7 +27,7 @@ case class Group(
 object TransferPlanner {
 
 	case class Item(
-		src: Well,
+		src_l: List[Well],
 		dst: Well,
 		volume: LiquidVolume
 	)
@@ -67,7 +68,7 @@ object TransferPlanner {
 	}
 	
 	class MyProblem(
-		pipetteDevice: PipetteDevice,
+		device: PipetteDevice,
 		tip_l: SortedSet[Tip],
 		tipModel: TipModel,
 		pipettePolicy: PipettePolicy,
@@ -103,13 +104,24 @@ object TransferPlanner {
 		def calcCost(state: MyState): Int = {
 			val tip2_l = tip_l.toList.take(state.n)
 			val item2_l = item_l.drop(state.n0).take(state.n)
-			val src_l = item2_l.map(_.src)
+			val src_ll = item2_l.map(_.src_l)
 			val dst_l = item2_l.map(_.dst)
+			
+			val tipState2_l = tip2_l.map(TipState.createEmpty)
+			
+			// Decide which source wells to assign the tips to
+			val tspItem_l: List[TipSourcePlanner.Item] = (tipState2_l zip item2_l).map(pair => {
+				val (tip, item) = pair
+				TipSourcePlanner.Item(tip, item.src_l, item.volume, pipettePolicy)
+			})
+			val tipToSrcWell_m = TipSourcePlanner.searchGraph(device, tspItem_l).getOrElse(null)
+			
 			// Aspirate items
-			val twvpA_l = (tip2_l zip item2_l).map(pair => {
+			val twvpA_l = (tipState2_l zip item2_l).map(pair => {
 				val (tip, item) = pair
 				val tipState = TipState.createEmpty(tip)
-				TipWellVolumePolicy(tipState, item.src, item.volume, pipettePolicy)
+				val src = tipToSrcWell_m(tip)
+				TipWellVolumePolicy(tipState, src, item.volume, pipettePolicy)
 			})
 			// Dispense items
 			val twvpD_l = (tip2_l zip item2_l).map(pair => {
@@ -117,8 +129,8 @@ object TransferPlanner {
 				val tipState = TipState.createEmpty(tip)
 				TipWellVolumePolicy(tipState, item.dst, item.volume, pipettePolicy)
 			})
-			val nA = pipetteDevice.groupSpirateItems(twvpA_l).size
-			val nD = pipetteDevice.groupSpirateItems(twvpD_l).size
+			val nA = device.groupSpirateItems(twvpA_l).size
+			val nD = device.groupSpirateItems(twvpD_l).size
 			(if (nA > 0) nA + 4 else 0) + (if (nD > 0) nD + 4 else 0)
 		}
 		

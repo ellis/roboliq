@@ -78,6 +78,17 @@ case class TipWellVolumePolicy(
 	override def toString = s"TipWellVolumePolicy(${tip.id},${well.id},$volume,$policy)"
 }
 
+/*
+case class TipWellVolumePolicy0(
+	tip: Tip,
+	well: Well,
+	volume: LiquidVolume,
+	policy: PipettePolicy
+) extends HasTipWellVolumePolicy {
+	override def toString = s"TipWellVolumePolicy(${tip.id},${well.id},$volume,$policy)"
+}
+*/
+
 case class TipWellMix(
 	tip: TipState,
 	well: Well,

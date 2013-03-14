@@ -2,10 +2,14 @@ package roboliq.commands.pipette
 
 import scala.collection.immutable.SortedSet
 import spray.json.JsonParser
-import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
+import roboliq.core._
+roboliq.entity._
+roboliq.processor._
+roboliq.events._
 import roboliq.commands.pipette._
 import roboliq.commands.CommandSpecBase
 import roboliq.test.Config01
+import roboliq.commands.pipette.planner.TransferPlanner
 
 class TransferPlannerSpec extends CommandSpecBase {
 	describe("TransferPlanner") {

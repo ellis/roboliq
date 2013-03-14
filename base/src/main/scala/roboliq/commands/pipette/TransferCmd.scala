@@ -5,6 +5,7 @@ import scalaz._
 import Scalaz._
 import roboliq.core._,roboliq.entity._,roboliq.processor._,roboliq.events._
 import roboliq.devices.pipette.PipetteDevice
+import roboliq.commands.pipette.planner._
 
 
 case class TransferCmd(
@@ -35,14 +36,15 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 			) { (device, tipModel_l, tip_l) =>
 				val item_l = l.map(tuple => {
 					val (src, dst, volume) = tuple
-					TransferPlanner.Item(vss_m(src.id), vss_m(dst.id), volume)
+					val src_l = src.vessels.map(vessel => vss_m(vessel.id))
+					TransferPlanner2.Item(src_l, vss_m(dst.id), volume)
 				})
 
 				val tipModel_? = cmd.tipModel_? match {
 					case Some(tipModel) => RqSuccess(tipModel)
 					case None =>
 						val itemToLiquid_m = item_l.map(item => item -> item.dst.liquid).toMap
-						val itemToModels_m = item_l.map(item => item -> device.getDispenseAllowableTipModels(tipModel_l, item.src.liquid, item.volume)).toMap
+						val itemToModels_m = item_l.map(item => item -> device.getDispenseAllowableTipModels(tipModel_l, item.src_l.head.liquid, item.volume)).toMap
 						val tipModelSearcher = new scheduler.TipModelSearcher1[TransferPlanner.Item, Liquid, TipModel]
 						val itemToTipModel_m_? = tipModelSearcher.searchGraph(item_l, itemToLiquid_m, itemToModels_m)
 						itemToTipModel_m_?.map(_.values.toSet.head)
@@ -52,14 +54,14 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 				val pipettePolicy = cmd.pipettePolicy_?.map(s => PipettePolicy(s, PipettePosition.Free)).getOrElse(PipettePolicy("POLICY", PipettePosition.Free))
 				for {
 					tipModel <- tipModel_?
-					group_l <- TransferPlanner.searchGraph(
+					batch_l <- planner.TransferPlanner2.searchGraph(
 						device,
 						SortedSet(tip_l.map(_.conf).toSeq : _*),
 						tipModel,
 						pipettePolicy,
 						item_l
 					)
-					cmd_l = makeGroups(device, cmd, item_l, group_l, tip_l, pipettePolicy)
+					cmd_l = makeBatches(device, cmd, batch_l, tip_l, pipettePolicy)
 					ret <- output(
 						cmd_l
 					)
@@ -78,28 +80,26 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 	 * types { }
 	 */
 	
-	private def makeGroups(
+	private def makeBatches(
 		device: PipetteDevice,
 		cmd: TransferCmd,
-		item_l: List[TransferPlanner.Item],
-		group_l: List[Int],
+		batch_l: List[TransferPlanner2.Batch],
 		tip0_l: List[TipState],
 		policy: PipettePolicy
 	): List[Cmd] = {
-		var rest = item_l
-		var tip_l = tip0_l
+		//var rest = batch_l
+		//var tip_l = tip0_l
 		//var tipToSterility: Map[TipState, CleanIntensity.Value] = tip_l.map(tip => tip -> tip.cleanDegreePending).toMap
-		group_l.flatMap(n => {
-			val item_l_# = rest.take(n)
-			rest = rest.drop(n)
+		batch_l.flatMap(batch => {
 			// Create TipWellVolumePolicy lists from item and tip lists
-			val twvpA_l = (item_l_# zip tip_l).map(pair => {
-				val (item, tip) = pair
-				TipWellVolumePolicy(tip, item.src, item.volume, policy)
+			val twvpA_l = batch.item_l.map(item => {
+				val tipState = TipState.createEmpty(item.tip)
+				TipWellVolumePolicy(tipState, item.src, item.volume, policy)
 			})
-			val twvpD_l = (item_l_# zip tip_l).map(pair => {
-				val (item, tip) = pair
-				TipWellVolumePolicy(tip, item.dst, item.volume, policy)
+			// Dispenses TWVP
+			val twvpD_l = batch.item_l.map(item => {
+				val tipState = TipState.createEmpty(item.tip)
+				TipWellVolumePolicy(tipState, item.dst, item.volume, policy)
 			})
 			// Group the TWVPs into groups that can be performed simultaneously
 			val twvpA_ll = device.groupSpirateItems(twvpA_l)
@@ -113,8 +113,8 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 			tip_l = tip_l.map(tip => tip.copy(cleanDegreePending = tipToTipCleanPolicy_m.get(tip).map(_.exit).getOrElse(tip.cleanDegreePending)))
 			
 			// Create mixing commands
-			val premix_l = makeMixCmds(cmd.preMixSpec_?, twvpA_ll)
-			val postmix_l = makeMixCmds(cmd.postMixSpec_?, twvpD_ll)
+			val premix_l = makeMixCmds(cmd.aspirateMixSpec_?, twvpA_ll)
+			val postmix_l = makeMixCmds(cmd.dispenseMixSpec_?, twvpD_ll)
 			// Create aspriate and dispense commands
 			val asp_l = twvpA_ll.map(twvp_l => low.AspirateCmd(None, twvp_l))
 			val disp_l = twvpD_ll.map(twvp_l => low.DispenseCmd(None, twvp_l)) 

@@ -3,6 +3,33 @@ Roboliq Notes
 =============
 :Author: Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>
 
+First-order logic for pipetting
+===============================
+
+:Date: 2013-03-14
+
+Rules
+-----
+
+* Each destination item is processed in order
+* Items are batched together in clean/aspriate/dispense cycles
+* Each stage of a batch is composed of atomic cleans, aspirates, and dispenses
+* Batch sizes can be between 1 and the number of tips (for single pipetting)
+* Batches should have dispense wells on the same plate
+* Batches should probably have aspirate wells on the same plate
+* Clean before each aspirate,
+
+for each item, choose: tip model, tip, pipette policy
+
+
+(define (domain pipetting)
+  (:requirements :strips :typing)
+  (:types Item TipModel Plate Well)
+  (:predicates
+    (isDest ?item - Item ?well - Well)
+    (onPlate ?well - Well ?plate - Plate)
+
+
 ``CmdResult``
 =============
 
