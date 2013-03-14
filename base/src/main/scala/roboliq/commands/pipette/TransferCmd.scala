@@ -45,7 +45,7 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 					case None =>
 						val itemToLiquid_m = item_l.map(item => item -> item.dst.liquid).toMap
 						val itemToModels_m = item_l.map(item => item -> device.getDispenseAllowableTipModels(tipModel_l, item.src_l.head.liquid, item.volume)).toMap
-						val tipModelSearcher = new scheduler.TipModelSearcher1[TransferPlanner.Item, Liquid, TipModel]
+						val tipModelSearcher = new scheduler.TipModelSearcher1[TransferPlanner2.Item, Liquid, TipModel]
 						val itemToTipModel_m_? = tipModelSearcher.searchGraph(item_l, itemToLiquid_m, itemToModels_m)
 						itemToTipModel_m_?.map(_.values.toSet.head)
 				}
@@ -88,7 +88,7 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 		policy: PipettePolicy
 	): List[Cmd] = {
 		//var rest = batch_l
-		//var tip_l = tip0_l
+		var tip_l = tip0_l
 		//var tipToSterility: Map[TipState, CleanIntensity.Value] = tip_l.map(tip => tip -> tip.cleanDegreePending).toMap
 		batch_l.flatMap(batch => {
 			// Create TipWellVolumePolicy lists from item and tip lists
@@ -119,6 +119,7 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 			val asp_l = twvpA_ll.map(twvp_l => low.AspirateCmd(None, twvp_l))
 			val disp_l = twvpD_ll.map(twvp_l => low.DispenseCmd(None, twvp_l)) 
 
+			tipCmd_l ++
 			premix_l ++
 			asp_l ++
 			disp_l ++

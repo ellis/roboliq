@@ -30,16 +30,22 @@ object TransferPlanner2 {
 		src_l: List[Well],
 		dst: Well,
 		volume: LiquidVolume
-	)
+	) {
+		override def toString = s"Item(${src_l.map(_.id).mkString("+")}, ${dst.id}, $volume)"
+	}
 	
 	case class BatchItem(
 		tip: Tip,
 		src: Well,
 		dst: Well,
 		volume: LiquidVolume
-	)
+	) {
+		override def toString = s"BatchItem(${tip.id}, ${src.id}, ${dst.id}, $volume)"
+	}
 	
-	case class Batch(item_l: List[BatchItem])
+	case class Batch(item_l: List[BatchItem]) {
+		override def toString = item_l.mkString("Batch(\n  ", "\n  ", "\n)")
+	}
 	
 	case class MyState(
 		n: Int,
