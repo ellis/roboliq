@@ -1,6 +1,7 @@
 package roboliq.commands.pipette
 
 import scala.collection.immutable.SortedSet
+import scala.collection.mutable
 import scalaz._
 import Scalaz._
 import roboliq.core._,roboliq.entity._,roboliq.processor._,roboliq.events._
@@ -88,9 +89,10 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 		policy: PipettePolicy
 	): List[Cmd] = {
 		//var rest = batch_l
+		val tipSterilized_l = new mutable.HashSet[Tip]
 		var tip_l = tip0_l
 		//var tipToSterility: Map[TipState, CleanIntensity.Value] = tip_l.map(tip => tip -> tip.cleanDegreePending).toMap
-		batch_l.flatMap(batch => {
+		val batchesCmd_l = batch_l.flatMap(batch => {
 			// Create TipWellVolumePolicy lists from item and tip lists
 			val twvpA_l = batch.item_l.map(item => {
 				val tipState = TipState.createEmpty(item.tip)
@@ -106,12 +108,11 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 			val twvpD_ll = device.groupSpirateItems(twvpD_l)
 			
 			val tipToTipCleanPolicy_m: Map[TipState, TipCleanPolicy] =
-				getTipCleanPolicies(None, tip_l, twvpA_l, twvpD_l)
-			val tipCmd_l = makeTipsCmds(tipToTipCleanPolicy_m)
+				getTipCleanPolicies(None, Nil, twvpA_l, twvpD_l)
+			val tipCmd_? = makeTipsCmds(tipToTipCleanPolicy_m)
+			// Note tips which have been sterilized
+			tipSterilized_l ++= tipCmd_?.map(_.items.map(_.tip.conf)).getOrElse(Nil)
 
-			// Update tip state's cleanDegreePending property
-			tip_l = tip_l.map(tip => tip.copy(cleanDegreePending = tipToTipCleanPolicy_m.get(tip).map(_.exit).getOrElse(tip.cleanDegreePending)))
-			
 			// Create mixing commands
 			val premix_l = makeMixCmds(cmd.aspirateMixSpec_?, twvpA_ll)
 			val postmix_l = makeMixCmds(cmd.dispenseMixSpec_?, twvpD_ll)
@@ -119,12 +120,23 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 			val asp_l = twvpA_ll.map(twvp_l => low.AspirateCmd(None, twvp_l))
 			val disp_l = twvpD_ll.map(twvp_l => low.DispenseCmd(None, twvp_l)) 
 
-			tipCmd_l ++
+			tipCmd_? ++
 			premix_l ++
 			asp_l ++
 			disp_l ++
 			postmix_l
 		})
+		
+		val tipsAfter_? = {
+			// List of tips which haven't been 
+			val tip_l = tip0_l.filter(tipState => !tipSterilized_l.contains(tipState.conf) && tipState.cleanDegreePending > CleanIntensity.None)
+			
+			val tipToTipCleanPolicy_m: Map[TipState, TipCleanPolicy] =
+				getTipCleanPolicies(cmd.sterilityAfter_?, tip_l, Nil, Nil)
+			makeTipsCmds(tipToTipCleanPolicy_m)
+		}
+		
+		batchesCmd_l ++ tipsAfter_?
 	}
 
 	private def getTipCleanPolicies(
@@ -142,7 +154,7 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 				// TipCleanPolicies pending from prior pipetting
 				val cleanT_m = tipState_l.map(tip => tip -> TipCleanPolicy(tip.cleanDegreePending, CleanIntensity.None)).toMap
 
-				// Aspriate TipCleanPolicies
+				// Aspirate TipCleanPolicies
 				val cleanA_m = twvpA_l.map(twvp => twvp.tip -> twvp.well.liquid.tipCleanPolicy).toMap
 				// Dispense TipCleanPolicies
 				val cleanD_m: Map[TipState, TipCleanPolicy] = {

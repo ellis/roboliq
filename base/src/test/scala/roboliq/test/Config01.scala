@@ -91,7 +91,7 @@ object Config01 {
 ],
 
 "washProgram": [
-	{ "id": "Thorough", "intensity": "Thorough" }
+	{ "id": "Thorough", "intensity": "Thorough", "tips": ["TIP1", "TIP2", "TIP3", "TIP4"] }
 ],
 
 "plate": [

@@ -20,11 +20,14 @@ case class WashTipsToken(
 
 class WashTipsHandler extends CommandHandler[WashTipsCmd]("pipette.low.washTips") {
 	def handleCmd(cmd: WashTipsCmd): RqReturn = {
+		val tip_l = cmd.tips.sortBy(_.conf)
 		output(
-			WashTipsToken(cmd.washProgram.id, cmd.tips),
-			cmd.tips.flatMap(tip => {
+			WashTipsToken(cmd.washProgram.id, tip_l),
+			tip_l.flatMap(tip => {
 				TipCleanEvent(tip, cmd.washProgram) :: Nil
 			})
 		)
 	}
+	
+	//def run(cmd: WashTipsCmd): List[Either[Event[_], Cmd]]
 }

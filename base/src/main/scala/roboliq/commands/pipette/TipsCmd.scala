@@ -31,7 +31,7 @@ class TipsHandler_Fixed extends CommandHandler[TipsCmd]("pipette.tips") {
 			// And make sure that each tip is only specified once
 			val tipToItems0_m = cmd.items.groupBy(_.tip)
 			val tipToItems1_m = cmd.tips.map(tip => tip -> List(TipsItem(tip, None, None))).toMap
-			val tipToItems2_m = tipToItems0_m |+| tipToItems1_m
+			val tipToItems2_m = (tipToItems0_m |+| tipToItems1_m)
 			val tipToItems3_m = tipToItems2_m.map(pair => {
 				pair._1 -> (pair._2 match {
 					case List(item) => RqSuccess(item)

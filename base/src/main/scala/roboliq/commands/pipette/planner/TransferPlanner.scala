@@ -9,21 +9,7 @@ import roboliq.core._,roboliq.entity._,roboliq.processor._,roboliq.events._
 import roboliq.commands.pipette._
 import roboliq.devices.pipette.PipetteDevice
 
-/*
-case class Group(
-	item: Item,
-	tip: Tip,
-)*/
-
-/**
- * The order of items is fixed.
- * For the items as a whole group, we need to choose a single:
- * - pipette policy
- * - tip model
- * For each item, we need to choose:
- * - whether to wash before the item
- * - tip to assign to an item
- */
+// REFACTOR: delete this class and rename TransferPlanner2 to TransferPlanner
 object TransferPlanner {
 
 	case class Item(
