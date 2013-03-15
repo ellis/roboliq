@@ -115,17 +115,13 @@ object Utils {
 		
 		// Get or create an ID for each site on the table
 		val gridSiteToSiteId_m: Map[(Int, Int), (CarrierSite, String)] =
-			table.mapSiteToLabel.toList.flatMap(pair => {
-				val (site, id0) = pair
-				table.mapCarrierToGrid.get(site.carrier) match {
-					case None =>
-						warning_l += s"site '$site': no grid assigned to the given carrier"
-						None
-					case Some(grid_i) =>
-						val gridSite = (grid_i, site.iSite)
-						val id = gridSiteToId0_m.getOrElse(gridSite, if (!id0.isEmpty) id0 else f"(${grid_i}%03d,${site.iSite+1})")
-						Some(gridSite -> (site, id))
-				}
+			table.mapCarrierToGrid.toList.flatMap(pair => {
+				val (carrier, grid_i) = pair
+				(0 until carrier.nSites).map(site_i => {
+					val gridSite = (grid_i, site_i)
+					val id = gridSiteToId0_m.getOrElse(gridSite, f"G${grid_i}%03dS${site_i+1}")
+					gridSite -> (CarrierSite(carrier, site_i), id)
+				})
 			}).toMap
 
 		val gridSite_l = gridSiteToSiteId_m.keys.toList
@@ -149,8 +145,8 @@ object Utils {
 		
 		val plateAndState_l = gridSiteToSiteId_m.toList.flatMap(pair => {
 			val (_, (site, id)) = pair
-			val labware = table.mapSiteToLabwareModel(site)
 			for {
+				labware <- table.mapSiteToLabwareModel.get(site)
 				plateModel <- plateModel_m.get(labware.sName)
 				plateLocation <- plateLocation_m.get(id)
 			} yield {

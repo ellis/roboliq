@@ -22,7 +22,9 @@ case class PlateLocation(
 	val id: String,
 	val plateModels: List[PlateModel],
 	val cooled: Boolean
-) extends Location
+) extends Location {
+	override def toString = s"PlateLocation($id, ${plateModels.map(_.id)}, $cooled)"
+}
 
 /**
  * Represents a bench location to hold tubes.
