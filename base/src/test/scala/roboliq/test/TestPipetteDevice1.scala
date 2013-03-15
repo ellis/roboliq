@@ -6,6 +6,7 @@ import roboliq.devices.pipette._
 import roboliq.commands.pipette._
 
 class TestPipetteDevice1 extends PipetteDevice {
+	/*
 	val tipModel1000 = TipModel(
 		id = "TIP1000",
 		volume = LiquidVolume.ul(1000),
@@ -249,5 +250,5 @@ class TestPipetteDevice1 extends PipetteDevice {
 	def batchCleanTips(lTipAll: SortedSet[Tip]): Seq[SortedSet[Tip]] = {
 		Seq(lTipAll)
 	}
-
+	*/
 }

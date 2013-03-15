@@ -9,6 +9,7 @@ import roboliq.robots.evoware._
 
 
 abstract class EvowarePipetteDevice extends PipetteDevice {
+	/*
 	def areTipsDisposable: Boolean
 	
 	def getTipAspirateVolumeMin(tip: TipState, liquid: Liquid): LiquidVolume =
@@ -92,5 +93,6 @@ abstract class EvowarePipetteDevice extends PipetteDevice {
 	def batchesForMix(items: Seq[L2A_MixItem]): Seq[Seq[L2A_MixItem]] = {
 		items.groupBy(item => KeySpirate(item.well.holder, item.tip.index / 4)).values.toSeq
 	}
+	*/
 	*/
 }

@@ -41,7 +41,6 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	}
 	private def mTipToBlock: Map[Tip, TipBlock] = (junk.tipBlock1000.lTip.map(_ -> junk.tipBlock1000) ++ junk.tipBlock50.lTip.map(_ -> junk.tipBlock50)).toMap
 	private def mModelToTips = Map(tipModel1000 -> junk.tipBlock1000.tTip, tipModel50 -> junk.tipBlock50.tTip)
-	*/
 
 	private lazy val mapLcInfo = {
 		import PipettePosition._
@@ -274,4 +273,5 @@ class BssePipetteDevice extends EvowarePipetteDevice {
 	def batchCleanTips(lTipAll: SortedSet[Tip]): Seq[SortedSet[Tip]] = {
 		lTipAll.toSeq.groupBy(mTipToBlock).values.toSeq.map(l => SortedSet(l : _*))
 	}
+	*/
 }

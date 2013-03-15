@@ -3,6 +3,7 @@ package roboliq.labs.bsse
 import scala.collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
 import roboliq.core._, roboliq.processor._
+import roboliq.commands._
 import roboliq.robots.evoware._
 import roboliq.utils.FileUtils
 import station1._
@@ -22,9 +23,13 @@ object JsonTest {
 		
 		// TODO: should load the handlers via a yaml config file
 		val processor = new ProcessorData(List(
-			new roboliq.commands2.arm.MovePlateHandler,
-			new roboliq.commands2.pipette.AspirateHandler,
-			new roboliq.commands2.pipette.DispenseHandler
+			new arm.MovePlateHandler,
+			new pipette.TipsHandler_Fixed,
+			new pipette.TransferHandler,
+			new pipette.low.AspirateHandler,
+			new pipette.low.DispenseHandler,
+			new pipette.low.MixHandler,
+			new pipette.low.WashTipsHandler
 		))
 	
 		val pathbase = "testdata/bsse-robot1/"
