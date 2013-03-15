@@ -34,7 +34,7 @@ object JsonTest {
 	
 		val pathbase = "testdata/bsse-robot1/"
 		val databaseFiles = List(
-			"config/bench-01.json",
+			"config/robot.json",
 			"config/database-01.json"
 		)
 		databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s)))
@@ -45,9 +45,10 @@ object JsonTest {
 		val pathToToken_l = processor.getTokenList
 		val token_l = pathToToken_l.map(_._2)
 	
-		val evowareConfigFile = new EvowareConfigFile(pathbase+"config/carrier.cfg")
-		val evowareTable = new StationConfig(evowareConfigFile, pathbase+"config/bench-01.esc")
-		val config = new EvowareConfig(evowareTable.tableFile, evowareTable.mapLabelToSite)
+		val carrierData = EvowareCarrierData.loadFile(pathbase+"config/carrier.cfg")
+		val tableData = EvowareTableParser.parseFile(carrierData, pathbase+"config/bench-01.esc")
+		//	new StationConfig(evowareConfigFile, )
+		val config = new EvowareConfig(tableData, Map[(Int, Int), String]())
 		val translator = new EvowareTranslator(config)
 
 		val sProtocolFilename = pathbase + args(0)
