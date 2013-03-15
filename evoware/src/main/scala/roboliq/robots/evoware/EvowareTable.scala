@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 
 
-abstract class EvowareTable(configFile: EvowareConfigFile, sFilename: String) {
+abstract class EvowareTable(configFile: EvowareCarrierData, sFilename: String) {
 	val tableFile = EvowareTableParser.parseFile(configFile, sFilename)
 	//tableFile.print()
 

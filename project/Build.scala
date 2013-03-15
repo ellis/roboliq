@@ -59,7 +59,8 @@ object MyBuild extends Build {
 			base = file("evoware"),
 			settings = buildSettings ++ Seq(
 				name := "evoware",
-				libraryDependencies ++= Seq(scalatest, yaml, ejml)
+				libraryDependencies ++= Seq(scalatest, yaml, ejml),
+				initialCommands in console := """import scalaz._, Scalaz._, roboliq.robots.evoware._"""
 			)
 		) dependsOn(projBase)
 

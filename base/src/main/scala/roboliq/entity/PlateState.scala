@@ -15,6 +15,8 @@ case class PlateState(
 	def cols: Int = plate.nCols
 	/** Number of wells. */
 	def wellCount: Int = plate.nWells
+	
+	override def toString = s"PlateState(${plate.id}, ${location_?.map(_.id)})"
 }
 
 /** Factory object for [[roboliq.core.PlateState]]. */

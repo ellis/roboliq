@@ -86,9 +86,6 @@ object Config01 {
 	{ "id": "reagents1.5", "tubeModels": ["Tube 1500ul"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
 ],
 
-"substance": [
-	{ "id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
-],
 
 "washProgram": [
 	{ "id": "Thorough", "intensity": "Thorough", "tips": ["TIP1", "TIP2", "TIP3", "TIP4"] }
@@ -104,6 +101,12 @@ object Config01 {
 ]
 }""").asJsObject
 	
+	val database1Json = JsonParser("""{
+"substance": [
+	{ "id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
+]
+}""")
+
 	val protocol1Json = JsonParser(
 """{
 "plate": [
