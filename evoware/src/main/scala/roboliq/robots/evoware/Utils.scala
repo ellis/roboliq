@@ -1,7 +1,9 @@
 package roboliq.robots.evoware
 
+import scala.collection.mutable
 import grizzled.slf4j.Logger
-import roboliq.core._, roboliq.entity._
+import roboliq.core._
+import roboliq.entity._
 import roboliq.commands.pipette._
 
 
@@ -100,5 +102,81 @@ object Utils {
 			bit_l.map(bit_i => c_i * 7 + bit_i)
 		})
 		RqSuccess((col_n, row_n, i_l))
+	}
+	
+	def toCoreEntities(
+		carrier: EvowareCarrierData,
+		table: EvowareTableData,
+		gridSiteToId0_m: Map[(Int, Int), String]
+	): List[Entity] = {
+		val warning_l = new mutable.ArrayBuffer[String]
+		
+		val gridToCarrier_m = table.mapCarrierToGrid.map(pair => pair._2 -> pair._1)
+		
+		// Get or create an ID for each site on the table
+		val gridSiteToSiteId_m: Map[(Int, Int), (CarrierSite, String)] =
+			table.mapSiteToLabel.toList.flatMap(pair => {
+				val (site, id0) = pair
+				table.mapCarrierToGrid.get(site.carrier) match {
+					case None =>
+						warning_l += s"site '$site': no grid assigned to the given carrier"
+						None
+					case Some(grid_i) =>
+						val gridSite = (grid_i, site.iSite)
+						val id = gridSiteToId0_m.getOrElse(gridSite, if (!id0.isEmpty) id0 else f"(${grid_i}%03d,${site.iSite+1})")
+						Some(gridSite -> (site, id))
+				}
+			}).toMap
+
+		val gridSite_l = gridSiteToSiteId_m.keys.toList
+		
+		//val siteToId_m = table.mapLabelToSite.toList.map(pair => pair._2 -> pair._1).toMap
+		
+		val plateModel_m = carrier.mapNameToLabwareModel.map(pair => {
+			val (id, labware) = pair
+			id -> PlateModel(id, labware.nRows, labware.nCols, LiquidVolume.ul(labware.ul))
+		})
+		
+		val plateModelAll_l = new mutable.HashSet[PlateModel]
+		val plateLocation_m = gridSiteToSiteId_m.map(pair => {
+			val (_, (site, id)) = pair
+			val sitepair = (site.carrier.id, site.iSite)
+			val labware_l = carrier.mapNameToLabwareModel.values.filter(labware => labware.sites.contains(sitepair)).toList
+			val plateModel_l = labware_l.map(labware => plateModel_m(labware.sName))
+			plateModelAll_l ++= plateModel_l
+			id -> PlateLocation(id, plateModel_l, false)
+		})
+		
+		val plateAndState_l = gridSiteToSiteId_m.toList.flatMap(pair => {
+			val (_, (site, id)) = pair
+			val labware = table.mapSiteToLabwareModel(site)
+			for {
+				plateModel <- plateModel_m.get(labware.sName)
+				plateLocation <- plateLocation_m.get(id)
+			} yield {
+				val plate = Plate(id, plateModel, Some(id))
+				val plateState = PlateState(plate, Some(plateLocation))
+				(plate, plateState)
+			}
+		})
+		
+		val plateModel_l = plateModelAll_l.toList.sortBy(_.id)
+		val plateLocation_l = plateLocation_m.values.toList.sortBy(_.id)
+		val plate_l = plateAndState_l.map(_._1).sortBy(_.id)
+		val plateState_l = plateAndState_l.map(_._2).sortBy(_.id)
+		
+		plateModel_l ++ plateLocation_l ++ plate_l ++ plateState_l
+	}
+
+	// E.G.:
+	// Utils.toCoreEntities("testdata/bsse-robot1/config/carrier.cfg", "testdata/bsse-robot1/config/bench-01.esc", Map[(Int, Int), String]())
+	def toCoreEntities(
+		carrierFilename: String,
+		tableFilename: String,
+		gridSiteToId_m: Map[(Int, Int), String]
+	): List[Entity] = {
+		val x = EvowareCarrierData.loadFile(carrierFilename)
+		val y = EvowareTableParser.parseFile(x, tableFilename)
+		toCoreEntities(x, y, gridSiteToId_m)
 	}
 }
