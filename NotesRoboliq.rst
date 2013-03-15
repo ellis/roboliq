@@ -3,6 +3,15 @@ Roboliq Notes
 =============
 :Author: Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>
 
+Carrier.cfg
+===========
+
+15;Reagent Cooled 8*50ml;0;1/8/8;124/279/124/2831/279;2445/1259/1319/1200;572.6;1;1;0/10/10;100;256;-1;0;0;0;16;0;185;185;5;2;
+2445 = bottom
+1319 = dispense
+572.6 = area
+
+
 First-order logic for pipetting
 ===============================
 
