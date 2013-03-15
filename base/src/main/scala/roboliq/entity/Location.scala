@@ -7,7 +7,7 @@ import scala.reflect.BeanProperty
 /**
  * Represents a bench location.
  */
-sealed abstract class Location {
+sealed abstract class Location extends Entity {
 	val id: String
 }
 
