@@ -14,7 +14,7 @@ case class PlateModel(
 	val rows: Int,
 	val cols: Int,
 	val wellVolume: LiquidVolume
-)
+) extends Entity
 
 object PlateModel {
 	/** Get a row/column representation of the index of the a well. */
