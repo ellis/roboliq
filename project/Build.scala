@@ -15,7 +15,7 @@ object BuildSettings {
       "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
       "io.spray repo" at "http://repo.spray.io"
     ),
-	libraryDependencies ++= Seq(reflect, commons_io, scalaz, grizzled, logback, json_spray),
+	libraryDependencies ++= Seq(reflect, commons_io, scalaz, grizzled, logback, json_spray, yaml),
 	parallelExecution in Test := false
   )
   

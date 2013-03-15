@@ -169,10 +169,13 @@ object Utils {
 	def toCoreEntities(
 		carrierFilename: String,
 		tableFilename: String,
-		gridSiteToId_m: Map[(Int, Int), String]
+		siteFilename: String
 	): List[Entity] = {
 		val x = EvowareCarrierData.loadFile(carrierFilename)
 		val y = EvowareTableParser.parseFile(x, tableFilename)
+		import org.yaml.snakeyaml._
+		
+		val gridSiteToId_m: Map[(Int, Int), String]
 		toCoreEntities(x, y, gridSiteToId_m)
 	}
 }
