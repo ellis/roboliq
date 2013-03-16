@@ -6,7 +6,6 @@ import roboliq.core._, roboliq.processor._
 import roboliq.commands._
 import roboliq.robots.evoware._
 import roboliq.utils.FileUtils
-import station1._
 import java.io.File
 import scala.collection.mutable.Stack
 import java.io.PrintWriter
@@ -46,36 +45,38 @@ object JsonTest {
 		val token_l = pathToToken_l.map(_._2)
 	
 		val carrierData = EvowareCarrierData.loadFile(pathbase+"config/carrier.cfg")
-		val tableData = EvowareTableParser.parseFile(carrierData, pathbase+"config/bench-01.esc")
-		//	new StationConfig(evowareConfigFile, )
-		val config = new EvowareConfig(tableData, Map[(Int, Int), String]())
-		val translator = new EvowareTranslator(config)
-
-		val sProtocolFilename = pathbase + args(0)
-		val sBasename = FilenameUtils.removeExtension(sProtocolFilename)
-		//val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
-		//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
-		FileUtils.writeToFile(sBasename+".out", token_l.mkString("\n"))
-
-		/*val doc = new EvowareDoc
-		doc.sProtocolFilename = sProtocolFilename
-		doc.lNode = nodes
-		doc.processorResult = res
-		*/
-		
-		//println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
-		translator.translate(token_l) match {
+		val tableData = EvowareTableParser.parseFile(carrierData, pathbase+"config/table-01.esc")
+		val message = for {
+			configData <- EvowareConfigData.loadFile(pathbase+"config/table-01.yaml")
+			config = new EvowareConfig(carrierData, tableData, configData)
+	
+			sProtocolFilename = pathbase + args(0)
+			sBasename = FilenameUtils.removeExtension(sProtocolFilename)
+			//val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
+			//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
+			_ = FileUtils.writeToFile(sBasename+".out", token_l.mkString("\n"))
+	
+			/*val doc = new EvowareDoc
+			doc.sProtocolFilename = sProtocolFilename
+			doc.lNode = nodes
+			doc.processorResult = res
+			*/
+			
+			//println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
+			translator = new EvowareTranslator(config)
+			script <- translator.translate(token_l)
+		} yield {
+			val sScriptFilename = sBasename+".esc"
+			translator.saveWithHeader(script, sScriptFilename)
+			()
+		}
+		message match {
 			case RqError(e, w) =>
-				//doc.lsTranslatorError = ls.toList
 				e.foreach(println)
 				w.foreach(println)
-			case RqSuccess(evowareScript, w) =>
-				//doc.evowareScript = evowareScript
-				// save to file
-				val sScriptFilename = sBasename+".esc"
-				translator.saveWithHeader(evowareScript, sScriptFilename)
-		}
-		
+			case RqSuccess(_, w) =>
+				w.foreach(println)
+		}		
 		//doc.printToFile(sBasename+".html")
 	}
 }

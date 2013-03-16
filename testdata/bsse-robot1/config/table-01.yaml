@@ -2,5 +2,5 @@ siteId:
   G009S1: pipette2hi
   G009S2: pipette2lo
   G010S1: pipette1hi
-  G001S2: pipette1lo
-  G001S4: shaker
+  G010S2: pipette1lo
+  G010S4: shaker

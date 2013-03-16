@@ -107,8 +107,8 @@ object Utils {
 	def toCoreEntities(
 		carrier: EvowareCarrierData,
 		table: EvowareTableData,
-		gridSiteToId0_m: Map[(Int, Int), String]
-	): List[Entity] = {
+		config: EvowareConfigData
+	): RqResult[List[Entity]] = {
 		val warning_l = new mutable.ArrayBuffer[String]
 		
 		val gridToCarrier_m = table.mapCarrierToGrid.map(pair => pair._2 -> pair._1)
@@ -119,7 +119,8 @@ object Utils {
 				val (carrier, grid_i) = pair
 				(0 until carrier.nSites).map(site_i => {
 					val gridSite = (grid_i, site_i)
-					val id = gridSiteToId0_m.getOrElse(gridSite, f"G${grid_i}%03dS${site_i+1}")
+					val id0 = f"G${grid_i}%03dS${site_i+1}"
+					val id = config.siteIds.getOrElse(id0, id0)
 					gridSite -> (CarrierSite(carrier, site_i), id)
 				})
 			}).toMap
@@ -161,7 +162,8 @@ object Utils {
 		val plate_l = plateAndState_l.map(_._1).sortBy(_.id)
 		val plateState_l = plateAndState_l.map(_._2).sortBy(_.id)
 		
-		plateModel_l ++ plateLocation_l ++ plate_l ++ plateState_l
+		val l = plateModel_l ++ plateLocation_l ++ plate_l ++ plateState_l
+		RqSuccess(l, warning_l.toList)
 	}
 
 	// E.G.:
@@ -169,13 +171,13 @@ object Utils {
 	def toCoreEntities(
 		carrierFilename: String,
 		tableFilename: String,
-		siteFilename: String
-	): List[Entity] = {
+		configFilename: String
+	): RqResult[List[Entity]] = {
 		val x = EvowareCarrierData.loadFile(carrierFilename)
 		val y = EvowareTableParser.parseFile(x, tableFilename)
-		import org.yaml.snakeyaml._
-		
-		val gridSiteToId_m: Map[(Int, Int), String]
-		toCoreEntities(x, y, gridSiteToId_m)
+		for {
+			config <- EvowareConfigData.loadFile(configFilename)
+			ret <- toCoreEntities(x, y, config)
+		} yield ret
 	}
 }
