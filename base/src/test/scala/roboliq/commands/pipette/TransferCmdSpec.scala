@@ -67,10 +67,6 @@ class TransferCmdSpec extends CommandSpecBase {
 							{ "id": "P1(A01)", "content": { "water": "100ul" } },
 							{ "id": "P1(B01)", "content": { "water": "100ul" } }
 						],
-						"vesselSituatedState": [
-							{ "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } },
-							{ "id": "P1(B01)", "position": { "plate": "P1", "index": 1 } }
-						],
 						"cmd": [
 						  { "cmd": "pipette.transfer", "source": ["P1(A01)", "P1(B01)"], "destination": ["P1(C01)", "P1(D01)"], "amount": ["50ul", "50ul"], "pipettePolicy": "Water free dispense" }
 						]
