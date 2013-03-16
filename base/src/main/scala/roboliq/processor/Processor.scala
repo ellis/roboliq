@@ -153,11 +153,16 @@ class ProcessorData(
 	
 	def loadEntity[A <: Entity : TypeTag](a: A): RqResult[Unit] = {
 		val typ = ru.typeOf[A]
+		println("--------------")
 		for {
 			table <- ConversionsDirect.findTableForType(typ)
+			_ = println("A")
 			jsval <- ConversionsDirect.toJson[A](a)
-			jsobj <- Try(jsval.asJsObject) : RqResult[JsObject]
-			_ <- loadJsonData(jsobj)
+			_ = println("B")
+			//jsobj <- Try(jsval.asJsObject) : RqResult[JsObject]
+			_ = println("C")
+			_ <- loadJsonData(JsObject(table -> JsArray(jsval)))
+			_ = println("D")
 		} yield ()
 	}
 	

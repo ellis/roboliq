@@ -2,7 +2,7 @@ package roboliq.labs.bsse
 
 import scala.collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
-import roboliq.core._, roboliq.processor._
+import roboliq.core._, roboliq.entity._, roboliq.processor._
 import roboliq.commands._
 import roboliq.robots.evoware._
 import roboliq.utils.FileUtils
@@ -47,8 +47,12 @@ object JsonTest {
 			tableData <- EvowareTableData.loadFile(carrierData, pathbase+"config/table-01.esc")
 			// Load user-defined table config
 			configData <- EvowareConfigData.loadFile(pathbase+"config/table-01.yaml")
-			//
+			// Load evoware entities into processor
 			entityData <- EvowareEntityData.createEntities(carrierData, tableData, configData)
+			_ <- RqResult.toResultOfList(entityData.plateModel_l.map(processor.loadEntity[PlateModel]))
+			_ <- RqResult.toResultOfList(entityData.plateLocation_l.map(processor.loadEntity[PlateLocation]))
+			_ <- RqResult.toResultOfList(entityData.plate_l.map(processor.loadEntity[Plate]))
+			_ <- RqResult.toResultOfList(entityData.plateState_l.map(processor.loadEntity[PlateState]))
 
 			// Load entities from files
 			_ <- RqResult.toResultOfList(databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s))))
@@ -79,14 +83,22 @@ object JsonTest {
 			()
 		}
 		
-		processor.getMessages.foreach(println)
+		val l0 = processor.getMessages
+		if (!l0.isEmpty) {
+			println("Proccessor Messages")
+			l0.foreach(println)
+		}
 		
 		message match {
 			case RqError(e, w) =>
+				println("Errors:")
 				e.foreach(println)
 				w.foreach(println)
 			case RqSuccess(_, w) =>
-				w.foreach(println)
+				if (!w.isEmpty) {
+					println("Warnings:")
+					w.foreach(println)
+				}
 		}		
 		//doc.printToFile(sBasename+".html")
 	}
