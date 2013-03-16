@@ -151,6 +151,16 @@ class ProcessorData(
 		}
 	}
 	
+	def loadEntity[A <: Entity : TypeTag](a: A): RqResult[Unit] = {
+		val typ = ru.typeOf[A]
+		for {
+			table <- ConversionsDirect.findTableForType(typ)
+			jsval <- ConversionsDirect.toJson[A](a)
+			jsobj <- Try(jsval.asJsObject) : RqResult[JsObject]
+			_ <- loadJsonData(jsobj)
+		} yield ()
+	}
+	
 	def setPipetteDevice(device: roboliq.devices.pipette.PipetteDevice) {
 		val kc = KeyClass(TKP("pipetteDevice", "default", Nil), ru.typeOf[roboliq.devices.pipette.PipetteDevice])
 		cache_m(kc) = device

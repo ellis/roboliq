@@ -47,6 +47,8 @@ object JsonTest {
 			tableData <- EvowareTableData.loadFile(carrierData, pathbase+"config/table-01.esc")
 			// Load user-defined table config
 			configData <- EvowareConfigData.loadFile(pathbase+"config/table-01.yaml")
+			//
+			entityData <- EvowareEntityData.createEntities(carrierData, tableData, configData)
 
 			// Load entities from files
 			_ <- RqResult.toResultOfList(databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s))))
