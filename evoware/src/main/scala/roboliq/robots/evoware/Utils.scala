@@ -173,11 +173,11 @@ object Utils {
 		tableFilename: String,
 		configFilename: String
 	): RqResult[List[Entity]] = {
-		val x = EvowareCarrierData.loadFile(carrierFilename)
-		val y = EvowareTableParser.parseFile(x, tableFilename)
 		for {
+			carrier <- EvowareCarrierData.loadFile(carrierFilename)
+			table <- EvowareTableData.loadFile(carrier, tableFilename)
 			config <- EvowareConfigData.loadFile(configFilename)
-			ret <- toCoreEntities(x, y, config)
+			ret <- toCoreEntities(carrier, table, config)
 		} yield ret
 	}
 }

@@ -10,6 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.TypeTag
+import scala.util.Try
 import scalaz._
 import grizzled.slf4j.Logger
 import spray.json.JsArray
@@ -118,32 +119,36 @@ class ProcessorData(
 	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList*/
 	//conversion_m(ru.typeOf[Test]) = Conversions.testHandler
 	
-	def loadJsonData(file: java.io.File) {
-		import org.apache.commons.io.FileUtils
-		val s = FileUtils.readFileToString(file)
-		val config = JsonParser(s).asJsObject
-		loadJsonData(config)
+	def loadJsonData(file: java.io.File): RqResult[Unit] = {
+		Try {
+			import org.apache.commons.io.FileUtils
+			val s = FileUtils.readFileToString(file)
+			val config = JsonParser(s).asJsObject
+			loadJsonData(config)
+		}
 	}
 	
-	def loadJsonData(data: JsObject) {
-		data.fields.foreach(pair => {
-			val (table, JsArray(elements)) = pair
-			if (table != "cmd") {
-				elements.foreach(jsval => {
-					val jsobj = jsval.asJsObject
-					val idField = ConversionsDirect.findIdFieldForTable(table)
-					val key = jsobj.fields("id").asInstanceOf[JsString].value
-					val tkp = TKP(table, key, Nil)
-					val time = if (table.endsWith("State")) List(0) else Nil
-					setState(tkp, time, jsval)
-				})
-			}
-		})
-		data.fields.get("cmd").foreach(jsval => {
-			val JsArray(elements) = jsval
-			val cmd_l = elements.map(_.asInstanceOf[JsObject])
-			setCommands(cmd_l)
-		})
+	def loadJsonData(data: JsObject): RqResult[Unit] = {
+		Try {
+			data.fields.foreach(pair => {
+				val (table, JsArray(elements)) = pair
+				if (table != "cmd") {
+					elements.foreach(jsval => {
+						val jsobj = jsval.asJsObject
+						val idField = ConversionsDirect.findIdFieldForTable(table)
+						val key = jsobj.fields("id").asInstanceOf[JsString].value
+						val tkp = TKP(table, key, Nil)
+						val time = if (table.endsWith("State")) List(0) else Nil
+						setState(tkp, time, jsval)
+					})
+				}
+			})
+			data.fields.get("cmd").foreach(jsval => {
+				val JsArray(elements) = jsval
+				val cmd_l = elements.map(_.asInstanceOf[JsObject])
+				setCommands(cmd_l)
+			})
+		}
 	}
 	
 	def setPipetteDevice(device: roboliq.devices.pipette.PipetteDevice) {

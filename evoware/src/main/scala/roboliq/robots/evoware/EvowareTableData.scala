@@ -125,3 +125,15 @@ class EvowareTableData(
 		lExternalObject.map(o => "998;"+mapCarrierToGrid(o.carrier)+";")
 	}
 }
+
+object EvowareTableData {
+	def loadFile(carrierData: EvowareCarrierData, filename: String): RqResult[EvowareTableData] = {
+		try {
+			val tableData = EvowareTableParser.parseFile(carrierData, filename)
+			RqSuccess(tableData)
+		}
+		catch {
+			case ex: Throwable => RqError(ex.getMessage)
+		}
+	}
+}

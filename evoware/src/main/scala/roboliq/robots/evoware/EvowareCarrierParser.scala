@@ -66,9 +66,14 @@ object EvowareCarrierData {
 		)
 	}
 
-	def loadFile(filename: String): EvowareCarrierData = {
-		val models = EvowareCarrierParser.loadFile(filename)
-		apply(models)
+	def loadFile(filename: String): RqResult[EvowareCarrierData] = {
+		try {
+			val models = EvowareCarrierParser.loadFile(filename)
+			RqSuccess(apply(models))
+		}
+		catch {
+			case ex: Throwable => RqError(ex.getMessage)
+		}
 	}
 }
 

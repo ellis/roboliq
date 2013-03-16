@@ -4,3 +4,14 @@ siteId:
   G010S1: pipette1hi
   G010S2: pipette1lo
   G010S4: shaker
+  G016S1: reagents1500
+  G017S1: cooled1hi
+  G017S2: cooled1lo
+  G017S3: cooled2hi
+  G017S4: cooled2lo
+  G024S1: cooled3hi
+  G024S2: cooled3lo
+  G024S3: cooled4hi
+  G024S4: cooled4lo
+  G024S5: cooled5hi
+  G024S6: cooled5lo
