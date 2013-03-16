@@ -797,9 +797,6 @@ class ProcessorData(
 
 		//val state0_m = state_m.toMap
 		
-		// Set message for missing entities
-		lookupMessage_m ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
-		
 		// Update status for all nodes
 		state_l.foreach(_.updateInput(kcoToValue_m.apply _))
 		
@@ -856,6 +853,10 @@ class ProcessorData(
 		println()
 		// TODO: show added conversions
 		
+		// Set message for missing entities
+		if (pending_l.isEmpty)
+			lookupMessage_m ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
+
 		!pending_l.isEmpty
 	}
 

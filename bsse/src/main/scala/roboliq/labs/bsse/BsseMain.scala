@@ -58,15 +58,18 @@ object JsonTest {
 			_ <- RqResult.toResultOfList(databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s))))
 			// Load entities and commands from file passed on the command line
 			_ <- processor.loadJsonData(new java.io.File(pathbase + args(0)))
-			// 
-			_ = processor.run()
+
+			// Try to run the commands, returning a processor graph
+			graph = processor.run()
+			// write graph as HTML for debugging
+			_ = org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("lastrun.html"), graph.toHtmlTable)
 
 			pathToToken_l = processor.getTokenList
 			token_l = pathToToken_l.map(_._2)
 
 			//val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
 			//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
-			_ = FileUtils.writeToFile(sBasename+".out", token_l.mkString("\n"))
+			_ = FileUtils.writeToFile(sBasename+".out", token_l.mkString("", "\n", "\n"))
 	
 			/*val doc = new EvowareDoc
 			doc.sProtocolFilename = sProtocolFilename
