@@ -1,13 +1,17 @@
-package roboliq.commands.arm
+package roboliq.device.transport
 
+import scala.reflect.runtime.{universe => ru}
 import roboliq.core._, roboliq.entity._, roboliq.processor._, roboliq.events._
 
 
 case class MovePlateCmd(
 	plate: PlateState,
-	dest: PlateLocation,
+	destination: PlateLocation,
 	deviceId_? : Option[String]
-)
+) {
+	def cmd = "transport.movePlate"
+	def typ = ru.typeOf[this.type]
+}
 
 case class MovePlateToken(
 	val deviceId_? : Option[String],
@@ -16,19 +20,19 @@ case class MovePlateToken(
 	val plateDest: PlateLocation
 ) extends CmdToken
 
-class MovePlateHandler extends CommandHandler[MovePlateCmd]("arm.movePlate") {
+class MovePlateHandler extends CommandHandler[MovePlateCmd]("transport.movePlate") {
 	def handleCmd(cmd: MovePlateCmd) = {
-		import cmd._
+		val plate = cmd.plate
 		for {
 			locationSrc <- plate.location_?.asRq(s"plate `${plate.plate.id}` must have a location set.")
 			ret <- output(
 				new MovePlateToken(
-					deviceId_?,
+					cmd.deviceId_?,
 					plate.plate,
 					locationSrc,
-					dest
+					cmd.destination
 				),
-				PlateLocationEvent(cmd.plate, cmd.dest)
+				PlateLocationEvent(plate, cmd.destination)
 			)
 		} yield ret
 	}

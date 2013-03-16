@@ -1,4 +1,4 @@
-package roboliq.commands.arm
+package roboliq.device.transport
 
 object LidHandling extends Enumeration {
         val NoLid, CoverAtSource, RemoveAtSource = Value

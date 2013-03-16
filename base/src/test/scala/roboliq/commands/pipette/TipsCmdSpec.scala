@@ -10,8 +10,8 @@ class TipCmdSpec extends CommandSpecBase {
 	describe("pipette.tips") {
 		describe("BSSE configuration") {
 			implicit val p = makeProcessorBsse(
+				Config01.database1Json,
 				Config01.protocol1Json,
-				//{ "cmd": "pipette.tips", "cleanIntensity": "Thorough", "items": [{"tip": "TIP1"}] }
 				JsonParser("""{
 					"cmd": [
 					  { "cmd": "pipette.tips", "cleanIntensity": "Thorough", "tips": ["TIP1"] }

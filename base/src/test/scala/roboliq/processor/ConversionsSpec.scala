@@ -321,6 +321,7 @@ class ConversionsSpec extends FunSpec {
 				})
 			}
 			Config01.benchJson.fields.foreach(readBack)
+			Config01.database1Json.fields.foreach(readBack)
 			Config01.protocol1Json.fields.foreach(readBack)
 
 			// Also add tip state

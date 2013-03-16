@@ -11,19 +11,8 @@ class MixCmdSpec extends CommandSpecBase {
 		describe("BSSE configuration") {
 			
 			implicit val p = makeProcessorBsse(
+				Config01.database1Json,
 				Config01.protocol1Json,
-				JsonParser(
-					"""{	
-					"plateState": [
-						{ "id": "P1", "location": "cooled1" }
-					],
-					"vesselState": [
-						{ "id": "P1(A01)", "content": { "water": "100ul" } }
-					],
-					"vesselSituatedState": [
-					  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } }
-					]
-					}""").asJsObject,
 				JsonParser("""{
 					"cmd": [
 					  { "cmd": "pipette.low.mix", "mixSpec": {"volume": "30ul", "count": 4, "mixPolicy": { "id": "Mix", "pos": "WetContact" }}, "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul"}] }

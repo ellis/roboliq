@@ -9,6 +9,7 @@ import spray.json._
 import _root_.roboliq._
 import _root_.roboliq.core._
 import _root_.roboliq.processor._
+import _root_.roboliq.device._
 import roboliq.test.Config01
 import roboliq.test.TestPipetteDevice1
 //import ConversionsDirect._
@@ -17,7 +18,8 @@ import roboliq.test.TestPipetteDevice1
 abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 	protected def makeProcessorBsse(configs: Object*): ProcessorData = {
 		val p = new ProcessorData(List(
-			new arm.MovePlateHandler,
+			new control.PromptHandler,
+			new transport.MovePlateHandler,
 			new commands.pipette.TipsHandler_Fixed,
 			new commands.pipette.TransferHandler,
 			new commands.pipette.low.AspirateHandler,

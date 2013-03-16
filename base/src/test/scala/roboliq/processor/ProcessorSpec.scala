@@ -61,7 +61,7 @@ class ProcessorSpec extends FunSpec with GivenWhenThen {
 		val jsobj_? = l_?.map(l => JsObject(l.toMap))
 		
 		val p = new ProcessorData(List(
-			new arm.MovePlateHandler,
+			new roboliq.device.transport.MovePlateHandler,
 			new roboliq.commands.pipette.low.AspirateHandler,
 			new roboliq.commands.pipette.low.DispenseHandler,
 			new roboliq.commands.pipette.low.MixHandler

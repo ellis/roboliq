@@ -10,6 +10,7 @@ class DispenseCmdSpec extends CommandSpecBase {
 	describe("pipette.low.dispense") {
 		describe("BSSE configuration") {
 			implicit val p = makeProcessorBsse(
+				Config01.database1Json,
 				Config01.protocol1Json,
 				JsonParser("""{
 					"cmd": [

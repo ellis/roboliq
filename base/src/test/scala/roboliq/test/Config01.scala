@@ -49,6 +49,9 @@ object Config01 {
 	{ "id": "TIP7", "deviceId": "LiHa", "index": 6, "row": 6, "col": 0, "permanent": "Standard 50ul" },
 	{ "id": "TIP8", "deviceId": "LiHa", "index": 7, "row": 7, "col": 0, "permanent": "Standard 50ul" }
 ],
+"pipettePolicy": [
+	{ "id": "Water free dispense", "pos": "WetContact" }
+],
 "plateModel": [
 	{ "id": "Reagent Cooled 8*50ml", "rows": 8, "cols": 1, "wellVolume": "50ml" },
 	{ "id": "Reagent Cooled 8*15ml", "rows": 8, "cols": 1, "wellVolume": "15ml" },
@@ -105,7 +108,7 @@ object Config01 {
 "substance": [
 	{ "id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
 ]
-}""")
+}""").asJsObject
 
 	val protocol1Json = JsonParser(
 """{
