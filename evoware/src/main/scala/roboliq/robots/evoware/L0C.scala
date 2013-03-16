@@ -1,7 +1,7 @@
 package roboliq.robots.evoware
 
 import roboliq.core._
-import roboliq.commands.arm.LidHandling
+import roboliq.device.transport.LidHandling
 
 
 abstract class L0C_Command {

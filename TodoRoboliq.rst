@@ -2,13 +2,15 @@
 
 For workshop.
 
-* Roboease: show interface for other programs; show commands: several basic, PCR, custom-programmed
+* Roboease: show interface for other programs; show commands: several basic (move plates, transfer, post mix, prompt), PCR, custom-programmed
 * Quality control: show scripts, graphs, application of data for improving performance; generating new liquid classes
 * Protocols: show evoware scripts?
 * Configuration: show example of reading in files and outputting yaml/json
 
 :Started: 2013-03-06
 
+* Copy some evoware scripts for the protocols deliverable
+* Get PDF or help files for Evoware with command parameters (e.g. for `Subroutine()`)
 * Converter from YAML to JSON for more easily writable script files
 * Move some code from roboliq.processor and roboliq.events to roboliq.core so that command handlers only need to import roboliq.core._
 * Maybe do something to put roboliq.events classes into roboliq.entity?
