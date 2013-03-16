@@ -3,9 +3,11 @@ package roboliq.robots.evoware
 import scala.collection.mutable
 import grizzled.slf4j.Logger
 import spray.json._
+import org.yaml.snakeyaml.Yaml
 import roboliq.core._
 import roboliq.entity._
 import roboliq.processor.ConversionsDirect
+import org.yaml.snakeyaml.Dumper
 
 
 case class EvowareEntityData private (
@@ -38,6 +40,16 @@ case class EvowareEntityData private (
 			json <- toJson
 		} yield {
 			json.prettyPrint
+		}
+	}
+	
+	def toYamlString: RqResult[String] = {
+		val yaml = new Yaml
+		for {
+			json_s <- toJsonString
+		} yield {
+			val o = yaml.load(json_s)
+			yaml.dump(o)
 		}
 	}
 }
