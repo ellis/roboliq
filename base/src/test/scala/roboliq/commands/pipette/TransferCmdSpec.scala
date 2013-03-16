@@ -9,7 +9,7 @@ import roboliq.test.Config01
 class TransferCmdSpec extends CommandSpecBase {
 	describe("pipette.transfer") {
 		describe("BSSE configuration") {
-			ignore("single item") {
+			describe("single item") {
 				implicit val p = makeProcessorBsse(
 					Config01.database1Json,
 					Config01.protocol1Json,
@@ -19,7 +19,6 @@ class TransferCmdSpec extends CommandSpecBase {
 						]
 						}""").asJsObject
 				)
-				
 				val policy = getObj[PipettePolicy]("Water free dispense")
 				
 				it("should have no errors or warnings") {
@@ -77,6 +76,7 @@ class TransferCmdSpec extends CommandSpecBase {
 						]
 						}""").asJsObject
 				)
+				val policy = getObj[PipettePolicy]("Water free dispense")
 				
 				it("should have no errors or warnings") {
 					assert(p.getMessages === Nil)
@@ -97,12 +97,12 @@ class TransferCmdSpec extends CommandSpecBase {
 					assert(token_l === List(
 						low.WashTipsToken("Thorough", List(tipState_TIP1_A, tipState_TIP2_A)),
 						low.AspirateToken(List(
-							TipWellVolumePolicy(tipState_TIP1_B, vss_P1_A01_B, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact)),
-							TipWellVolumePolicy(tipState_TIP2_B, vss_P1_B01_B, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP1_B, vss_P1_A01_B, LiquidVolume.ul(50), policy),
+							TipWellVolumePolicy(tipState_TIP2_B, vss_P1_B01_B, LiquidVolume.ul(50), policy)
 						)),
 						low.DispenseToken(List(
-							TipWellVolumePolicy(tipState_TIP1_C, vss_P1_C01_C, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact)),
-							TipWellVolumePolicy(tipState_TIP2_C, vss_P1_D01_C, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP1_C, vss_P1_C01_C, LiquidVolume.ul(50), policy),
+							TipWellVolumePolicy(tipState_TIP2_C, vss_P1_D01_C, LiquidVolume.ul(50), policy)
 						))
 					))
 				}
@@ -122,7 +122,7 @@ class TransferCmdSpec extends CommandSpecBase {
 				}
 			}
 
-			ignore("two items, source wells adjacent but dest wells not adjacent") {
+			describe("two items, source wells adjacent but dest wells not adjacent") {
 				implicit val p = makeProcessorBsse(
 					Config01.database1Json,
 					Config01.protocol1Json,
@@ -136,6 +136,7 @@ class TransferCmdSpec extends CommandSpecBase {
 						]
 						}""").asJsObject
 				)
+				val policy = getObj[PipettePolicy]("Water free dispense")
 				
 				it("should have no errors or warnings") {
 					assert(p.getMessages === Nil)
@@ -156,14 +157,14 @@ class TransferCmdSpec extends CommandSpecBase {
 					assert(token_l === List(
 						low.WashTipsToken("Thorough", List(tipState_TIP1_A, tipState_TIP2_A)),
 						low.AspirateToken(List(
-							TipWellVolumePolicy(tipState_TIP1_B, vss_P1_A01_B, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact)),
-							TipWellVolumePolicy(tipState_TIP2_B, vss_P1_B01_B, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP1_B, vss_P1_A01_B, LiquidVolume.ul(50), policy),
+							TipWellVolumePolicy(tipState_TIP2_B, vss_P1_B01_B, LiquidVolume.ul(50), policy)
 						)),
 						low.DispenseToken(List(
-							TipWellVolumePolicy(tipState_TIP1_C, vss_P1_C01_C, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP1_C, vss_P1_C01_C, LiquidVolume.ul(50), policy)
 						)),
 						low.DispenseToken(List(
-							TipWellVolumePolicy(tipState_TIP2_D, vss_P1_C02_D, LiquidVolume.ul(50), PipettePolicy("POLICY", PipettePosition.WetContact))
+							TipWellVolumePolicy(tipState_TIP2_D, vss_P1_C02_D, LiquidVolume.ul(50), policy)
 						))
 					))
 				}
