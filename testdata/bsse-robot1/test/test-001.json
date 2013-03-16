@@ -9,6 +9,6 @@
 	{ "id": "P1(A01)", "content": { "water": "100ul" } }
 ],
 "cmd": [
-  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
+  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": "Water free dispense"}] }
 ]
 }
