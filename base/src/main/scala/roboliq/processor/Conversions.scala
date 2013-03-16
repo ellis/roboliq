@@ -222,7 +222,7 @@ object ConversionsDirect {
 		else if (typ <:< typeOf[scala.collection.GenTraversable[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(0)
 			val l = obj.asInstanceOf[scala.collection.GenTraversable[_]]
-			RqResult.toResultOfList(l.map(o => toJson2(o, typ2)).toList).map(JsArray(_))
+			RqResult.toResultOfList(l.map(o => toJsonOrId(o, typ2)).toList).map(JsArray(_))
 		}
 		else if (typ <:< typeOf[Object]) {
 			val ctor = typ.member(ru.nme.CONSTRUCTOR).asMethod
