@@ -137,17 +137,24 @@ object EvowareCarrierParser {
 		val zBottom = ls4(0).toInt
 		val zDispense = ls4(2).toInt
 		val nArea = l(5).toDouble // mm^2
-		val nDepthOfCone = l(15).toDouble // mm
+		val nDepthOfBottom = l(15).toDouble // mm
 		//val nTipsPerWell = l(6).toDouble
 		//val nDepth = l(15).toDouble // mm
 		val nCarriers = l(20).toInt
 		// shape: flat, round, v-shaped (if nDepth == 0, then flat, if > 0 then v-shaped, if < 0 then round
 		// labware can have lid
 		
+		// negative values for rounded bottom, positive for cone, 0 for flat
+		val (nDepthOfCone, nDepthOfRound) =
+			if (nDepthOfBottom > 0) (nDepthOfBottom, 0.0)
+			else (0.0, -nDepthOfBottom)
+		val r = math.sqrt(nArea / math.Pi)
 		// Calculate the volume in microliters
-		val ul = ((zBottom - zDispense) / 10.0 - nDepthOfCone) * nArea +
-			// Area of a cone: (1/3)*area*height
-			(nDepthOfCone * nArea / 3)
+		val ul = ((zBottom - zDispense) / 10.0 - nDepthOfCone - nDepthOfRound) * nArea +
+			// Volume of a cone: (1/3)*area*height
+			(nDepthOfCone * nArea / 3) +
+			// Volume of a half-sphere: 
+			((4.0 / 6.0) * math.Pi * r * r *r)
 		
 		val lsCarrier = lsLine.take(nCarriers)
 		val sites = lsCarrier.flatMap(s => {
