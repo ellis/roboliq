@@ -20,8 +20,8 @@ class DispenseCmdSpec extends CommandSpecBase {
 					}""").asJsObject
 			)
 			
-			println("db:")
-			println(p.db)
+			//println("db:")
+			//println(p.db)
 			
 			it("should have no errors or warnings") {
 				assert(p.getMessages === Nil)

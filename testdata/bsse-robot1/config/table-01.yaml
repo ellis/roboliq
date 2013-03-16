@@ -1,4 +1,7 @@
 siteId:
+  G003S1: trough1
+  G003S2: trough2
+  G003S3: trough3
   G004S1: reagents15000
   G004S2: reagents50000
   G009S1: pipette2hi
@@ -6,6 +9,8 @@ siteId:
   G010S1: pipette1hi
   G010S2: pipette1lo
   G010S4: shaker
+  G011S1: hotel1
+  G011S2: hotel2
   G016S1: reagents1500
   G017S1: cooled1hi
   G017S2: cooled1lo

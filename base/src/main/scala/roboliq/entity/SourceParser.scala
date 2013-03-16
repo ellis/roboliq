@@ -3,43 +3,15 @@ package roboliq.entity
 import scala.util.parsing.combinator.JavaTokenParsers
 import roboliq.core._
 
+trait SourceSpec
 
-/**
- * Represents a row and column index.
- * 
- * @param row row index (0-based).
- * @param col column index (0-based).
- */
-case class RowCol(row: Int, col: Int) {
-	override def toString: String = {
-		(row + 'A').asInstanceOf[Char].toString + ("%02d".format(col + 1))
-	}
-}
-/**
- * Represents slots in an array of rows and columns (usually a well on a plate).
- */
-sealed abstract class WellSpec
-/** A single well at a given row and column. */
-case class WellSpecOne(rc: RowCol) extends WellSpec
-///** A single well repeated multiple times */
-//case class WellSpecN(rc: RowCol, n: Int) extends WellSpec
-/**
- * The sequence of wells obtained by moving downward from `rc0` to `rc1`
- * wrapping to the top of the next column when necessary.
- */
-case class WellSpecVertical(rc0: RowCol, rc1: RowCol) extends WellSpec
-/**
- * The sequence of wells obtained by moving rightward from `rc0` to `rc1`
- * wrapping to the left of the next row when necessary.
- */
-case class WellSpecHorizontal(rc0: RowCol, rc1: RowCol) extends WellSpec
-/**
- * The sequence of wells obtained by selecting all wells in the rectangle
- * with `rc0` in the top left corner and `rc1` in the bottom left corner.
- */
-case class WellSpecMatrix(rc0: RowCol, rc1: RowCol) extends WellSpec
+case class SourceSpec_Plate(id: String) extends SourceSpec
+case class SourceSpec_PlateWell(id: String) extends SourceSpec
+case class SourceSpec_PlateWells(id: String, wellSpec_l: List[WellSpec]) extends SourceSpec
+case class SourceSpec_Tube(id: String) extends SourceSpec
+case class SourceSpec_Substance(id: String) extends SourceSpec
 
-private object WellSpecParser0 extends JavaTokenParsers {
+private object SourceParser0 extends JavaTokenParsers {
 	import scala.util.parsing.combinator._
 
 	val row: Parser[Int] = """[A-Z]""".r ^^ { case s => s.charAt(0) - 'A' }
@@ -73,22 +45,54 @@ private object WellSpecParser0 extends JavaTokenParsers {
 	
 	val wells: Parser[List[WellSpec]] = rep1sep(wellArg, ",")
 	
-	val plateWells: Parser[Tuple2[String, List[WellSpec]]] = ident ~ "(" ~ wells ~ ")" ^^ {
-		case plate ~ _ ~ l ~ _ => plate -> l
+	val plateWells: Parser[SourceSpec_PlateWells] = "P_" ~ ident ~ "(" ~ wells ~ ")" ^^ {
+		case _ ~ plate ~ _ ~ l ~ _ => SourceSpec_PlateWells(s"P_$plate", l)
 	}
 	
-	val plate: Parser[Tuple2[String, List[WellSpec]]] = ident ^^ {
-		case plate => plate -> Nil
+	val plate: Parser[SourceSpec_Plate] = "P_" ~ ident ^^ {
+		case _ ~ plate => SourceSpec_Plate("P_"+plate)
 	}
 	
-	val plateArg = plateWells | plate
-	
-	val plates: Parser[List[Tuple2[String, List[WellSpec]]]] = rep1sep(plateArg, ",")
-	
-	def parse(input: String): RqResult[List[(String, List[WellSpec])]] = {
-		RqSuccess(parseAll(plates, input).getOrElse(Nil))
+	val tube: Parser[SourceSpec_Tube] = "T_" ~ ident ^^ {
+		case _ ~ tube => SourceSpec_Tube("T_"+tube)
 	}
 	
+	val substance: Parser[SourceSpec_Substance] = "S_" ~ ident ^^ {
+		case _ ~ s => SourceSpec_Substance("S_"+s)
+	}
+	
+	val sourceArg = plateWells | plate | tube | substance
+	
+	val sources: Parser[List[SourceSpec]] = rep1sep(sourceArg, ",")
+	
+	def parse(input: String): RqResult[List[SourceSpec]] = {
+		parseAll(sources, input) match {
+			case Success(l, _) =>
+				val l2 = l.flatMap(_ match {
+					case SourceSpec_PlateWells(plateId, wellSpec_l) =>
+						wellSpec_l.flatMap(wellSpec => wellSpec match {
+							case WellSpecOne(rc) =>
+								List(SourceSpec_PlateWell(plateId + "(" + rc + ")"))
+							case WellSpecVertical(rc0, rc1) if rc0.col == rc1.col =>
+								(rc0.row to rc1.row).toList.map(row_i => SourceSpec_PlateWell(plateId + "(" + RowCol(row_i, rc0.col) + ")"))
+							case WellSpecHorizontal(rc0, rc1) if rc0.row == rc1.row =>
+								(rc0.col to rc1.col).toList.map(col_i => SourceSpec_PlateWell(plateId + "(" + RowCol(rc0.row, col_i) + ")"))
+							case WellSpecMatrix(rc0, rc1) =>
+								(for (col <- rc0.col to rc1.col; row <- rc0.row to rc1.row) yield {
+									SourceSpec_PlateWell(plateId + "(" + RowCol(row, col) + ")")
+								}).toList
+							case _ =>
+								List(SourceSpec_PlateWells(plateId, List(wellSpec)))
+						})
+					case x => List(x)
+				})
+				RqSuccess(l2)
+			case NoSuccess(msg, _) =>
+				RqError(msg)
+		}
+	}
+
+	/*
 	def parseToIds(input: String): RqResult[List[String]] = {
 		for {
 			l <- parse(input)
@@ -97,6 +101,7 @@ private object WellSpecParser0 extends JavaTokenParsers {
 			id_ll.flatten
 		}
 	}
+	*/
 	
 	/*
 	private def entryToIds(idPlate: String, lWellSpec: List[WellSpec], ob: ObjBase): Result[List[String]] = {
@@ -133,66 +138,19 @@ private object WellSpecParser0 extends JavaTokenParsers {
 		}
 	}
 	*/
-	
-	private def entryToIds(
-		plate_? : Option[Plate],
-		idPlate: String,
-		lWellSpec: List[WellSpec]
-	): RqResult[List[String]] = {
-		if (lWellSpec.isEmpty)
-			return RqSuccess(List(idPlate))
-		
-		val l = lWellSpec.flatMap(_ match {
-			case WellSpecOne(rc) =>
-				List(idPlate + "(" + rc + ")")
-			/*case WellSpecVertical(rc0, rc1) =>
-				(for {
-					row_i <- rc0.row to rc1.row
-					col_i <- rc0.col to rc1.col
-				} yield {
-					idPlate + "(" + RowCol(row_i, col_i) + ")"
-				}).toList
-			case WellSpecHorizontal(rc0, rc1) =>
-				(for {
-					row_i <- rc0.row to rc1.row
-					col_i <- rc0.col to rc1.col
-				} yield {
-					idPlate + "(" + RowCol(row_i, col_i) + ")"
-				}).toList
-				val i0 = rc0.row * plate.model.cols + rc0.col
-				val i1 = rc1.row * plate.model.cols + rc1.col
-				(for (i <- i0 to i1) yield {
-					val row = i / plate.nCols
-					val col = i % plate.nCols
-					idPlate + "(" + RowCol(row, col) + ")"
-				}).toList*/
-			case WellSpecMatrix(rc0, rc1) =>
-				(for (col <- rc0.col to rc1.col; row <- rc0.row to rc1.row) yield {
-					idPlate + "(" + RowCol(row, col) + ")"
-				}).toList
-		})
-		RqSuccess(l)
-	}
 }
 
 /**
  * Parses a string of plates and wells.
  */
-object WellSpecParser {
+object SourceParser {
 
 	/**
 	 * Parse `input` as a string of plates and wells,
 	 * and return a list of tuples of referenced plate ID and the wells referenced on those plate.
 	 */
-	def parse(input: String): RqResult[List[(String, List[WellSpec])]] =
-		WellSpecParser0.parse(input)
-	
-	/**
-	 * Parse `input` as a string of plates and wells,
-	 * and return a list of the referenced well IDs.
-	 */
-	def parseToIds(input: String): RqResult[List[String]] =
-		WellSpecParser0.parseToIds(input)
+	def parse(input: String): RqResult[List[SourceSpec]] =
+		SourceParser0.parse(input)
 	
 	/*
 	/**
@@ -304,88 +262,4 @@ object WellSpecParser {
 		expect(lWell, 1)
 	}
 	*/
-	
-	private def mergeRepeatLen(lWell: List[Well]): Int = {
-		val well0 = lWell.head
-		lWell.tail.takeWhile(well => well.index == well0.index).length + 1
-	}
-	
-	private def mergeVerticalString(lWell: List[Well]): String = {
-		lWell.head.indexName+" d "+lWell.last.indexName
-	}
-	
-	private def mergeHorizontalString(lWell: List[Well]): String = {
-		val well0 = lWell.head
-		well0.indexName+" r "+lWell.last.indexName
-	}
-	
-	private def mergeRepeatString(lWell: List[Well]): String = {
-		val well0 = lWell.head
-		well0.indexName+"*"+lWell.length
-	}
-	
-	/*
-	private def merge(spec1: WellSpec, rc2: RowCol, plateModel: PlateModel): List[WellSpec] = {
-		spec1 match {
-			case WellSpecOne(rc1) =>
-				if (rc2.col == rc1.col && rc2.row == rc1.row + 1) {
-					List(WellSpecVertical(rc1, rc2))
-				}
-				else if (rc2.row == rc1.row && rc2.col == rc1.col + 1) {
-					List(WellSpecHorizontal(rc1, rc2))
-				}
-				else {
-					List(spec1, WellSpecOne(rc2))
-				}
-			case WellSpecVertical(rc0, rc1) =>
-				if (rc1.col == rc2.col && rc1.row + 1 == rc2.row)
-					List(WellSpecVertical(rc0, rc2))
-				else if (rc1.col + 1 == rc2.col && rc1.row == plateModel.nRows - 1 && rc2.row == 0) 
-					List(WellSpecVertical(rc0, rc2))
-				else
-					List(spec1, WellSpecOne(rc2))
-			case WellSpec
-		}
-	}
-	*/
-	
-	/** Get a row/column representation of the index of the a well. */
-	def wellIndexName(nRows: Int, nCols: Int, iRow: Int, iCol: Int): String = {
-		if (nCols == 1) {
-			if (nRows == 1) "" else (iRow + 1).toString
-		}
-		else if (nRows == 1) {
-			(iCol + 1).toString
-		}
-		else {
-			(iRow + 'A').asInstanceOf[Char].toString + ("%02d".format(iCol + 1))
-		}
-	}
-
-	/** Get a row/column representation of the index of the a well. */
-	def wellIndexName(nRows: Int, nCols: Int, iWell: Int): String = {
-		wellIndexName(nRows, nCols, iWell % nRows, iWell / nRows)
-	}
-	
-	/** Get a row/column representation of the index of the a well. */
-	def wellId(plate: Plate, iWell: Int): String = {
-		s"${plate.id}(${wellIndexName(plate.nRows, plate.nCols, iWell)})"
-	}
-
-	/** Get a row/column representation of the index of the a well. */
-	def wellId(plate: Plate, iRow: Int, iCol: Int): String = {
-		s"${plate.id}(${wellIndexName(plate.nRows, plate.nCols, iRow, iCol)})"
-	}
-
-	def wellIndex(plate: Plate, iRow: Int, iCol: Int): Int = {
-		iRow + iCol * plate.nRows
-	}
-	
-	def wellRow(plate: Plate, index: Int): Int = {
-		index % plate.nRows
-	}
-	
-	def wellCol(plate: Plate, index: Int): Int = {
-		index / plate.nRows
-	}
 }
