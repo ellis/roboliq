@@ -2,24 +2,25 @@ val nN = 100
 val times = new Array[Int](nN)
 
 def time[T](x : => T) =  {
-	val start = System.nanoTime : Double
+	val start = System.nanoTime
 	val result = x
-	val duration = (System.nanoTime : Double) - start
-	println("Elapsed time " + duration / 1000000.0 + " msecs")
+	val duration = System.nanoTime - start
+	//println("Elapsed time " + duration / 1000000.0 + " msecs")
+	println("Elapsed time " + duration + " nsecs")
 	result
 }
 
 def time1[T](x : => T): Int = {
-	val start = System.nanoTime : Double
+	val start = System.nanoTime
 	val result = x
-	val duration = (System.nanoTime : Double) - start
-	math.round(duration / 1000.0).asInstanceOf[Int]
+	val duration = System.nanoTime - start
+	math.round(duration).asInstanceOf[Int]
 }
 
 def timeN[T](f : => T): Int = {
 	(0 until nN).foreach(i => times(i) = time1(f))
-	val median: Int = times.toIndexedSeq[Int].sortBy(identity).apply(nN / 2)
-	println("Median time " + median + " usecs")
+	val median: Int = times.toIndexedSeq.sortBy(identity).apply(nN / 2)
+	println("Median time " + median + " nsecs")
 	median
 }
 
