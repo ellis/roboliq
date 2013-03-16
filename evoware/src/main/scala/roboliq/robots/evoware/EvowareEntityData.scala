@@ -10,7 +10,8 @@ case class EvowareEntityData private (
 	val plateModel_l: List[PlateModel],
 	val plateLocation_l: List[PlateLocation],
 	val plate_l: List[Plate],
-	val plateState_l: List[PlateState]
+	val plateState_l: List[PlateState],
+	val pipettePolicy_l: List[PipettePolicy]
 )
 
 object EvowareEntityData {
@@ -19,7 +20,8 @@ object EvowareEntityData {
 	def createEntities(
 		carrier: EvowareCarrierData,
 		table: EvowareTableData,
-		config: EvowareConfigData
+		config: EvowareConfigData,
+		pipettePolicy_l: List[PipettePolicy]
 	): RqResult[EvowareEntityData] = {
 		val warning_l = new mutable.ArrayBuffer[String]
 		
@@ -73,7 +75,8 @@ object EvowareEntityData {
 			plateModelAll_l.toList.sortBy(_.id),
 			plateLocation_m.values.toList.sortBy(_.id),
 			plateAndState_l.map(_._1).sortBy(_.id),
-			plateAndState_l.map(_._2).sortBy(_.id)
+			plateAndState_l.map(_._2).sortBy(_.id),
+			pipettePolicy_l
 		)
 		
 		RqSuccess(entities, warning_l.toList)
@@ -84,13 +87,17 @@ object EvowareEntityData {
 	def createEntities(
 		carrierFilename: String,
 		tableFilename: String,
-		configFilename: String
+		configFilename: String,
+		defaultLcsFilename: String,
+		customLcsFilename: String
 	): RqResult[EvowareEntityData] = {
 		for {
 			carrier <- EvowareCarrierData.loadFile(carrierFilename)
 			table <- EvowareTableData.loadFile(carrier, tableFilename)
 			config <- EvowareConfigData.loadFile(configFilename)
-			ret <- createEntities(carrier, table, config)
+			defaultLcs <- EvowareLiquidClassParser.parseFile(defaultLcsFilename)
+			customLcs <- EvowareLiquidClassParser.parseFile(customLcsFilename)
+			ret <- createEntities(carrier, table, config, defaultLcs ++ customLcs)
 		} yield ret
 	}
 }

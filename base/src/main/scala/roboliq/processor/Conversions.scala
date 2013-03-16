@@ -61,6 +61,7 @@ object ConversionsDirect {
 	
 	val tableInfo_l = List[TableInfo[_ <: Object]](
 		TableInfo[TipModel]("tipModel", None, None),
+		TableInfo[PipettePolicy]("pipettePolicy"),
 		TableInfo[PlateModel]("plateModel", None, None),
 		TableInfo[TubeModel]("tubeModel", None, None),
 		TableInfo[PlateLocation]("plateLocation", None, None),

@@ -1,15 +1,25 @@
+:Started: 2013-03-16
+
+For workshop.
+
+* Configuration: show example of reading in files and outputting json
+* Quality control: show scripts, graphs, application of data for improving performance; generating new liquid classes
+* Protocols: show evoware scripts?
+* Roboease: show interface for other programs; show commands: several basic, PCR, custom-programmed
+
 :Started: 2013-03-06
 
-* Create EventHandler[A <: Event] class
+* Read in liquid classes from XML files
+* Convert EvowareEntityData to json object
+* PipettePolicy as database Entity
+* Converter from YAML to JSON
 * Move some code from roboliq.processor and roboliq.events to roboliq.core so that command handlers only need to import roboliq.core._
-* Register EventHandlers, rather than hard-coding them in Node_Events
+* Maybe do something to put roboliq.events classes into roboliq.entity?
+* Create package roboliq.device.pipette.planner and put planning/scheduling classes in there
 * Load handlers from YAML (and add YAML to Config01)
 * Make DbTable and DbField classes or typeclasses to handle database objects more gracefully
 * Refactor TipState member names
 * Move roboliq.commands to roboliq.device, arm => transport, devices => device
-* Maybe do something to put roboliq.events classes into roboliq.entity?
-* Create package roboliq.device.pipette.planner and put planning/scheduling classes in there
-* PipettePosition as database Entity
 
 :Started: 2013-02-12
 

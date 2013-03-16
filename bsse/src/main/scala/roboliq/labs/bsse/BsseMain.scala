@@ -47,8 +47,12 @@ object JsonTest {
 			tableData <- EvowareTableData.loadFile(carrierData, pathbase+"config/table-01.esc")
 			// Load user-defined table config
 			configData <- EvowareConfigData.loadFile(pathbase+"config/table-01.yaml")
+			// Load liquid classes
+			defaultLcs <- EvowareLiquidClassParser.parseFile(pathbase+"config/DefaultLCs.XML")
+			customLcs <- EvowareLiquidClassParser.parseFile(pathbase+"config/CustomLCs.XML")
 			// Load evoware entities into processor
-			entityData <- EvowareEntityData.createEntities(carrierData, tableData, configData)
+			entityData <- EvowareEntityData.createEntities(carrierData, tableData, configData, defaultLcs ++ customLcs)
+			_ <- RqResult.toResultOfList(entityData.pipettePolicy_l.map(processor.loadEntity[PipettePolicy]))
 			_ <- RqResult.toResultOfList(entityData.plateModel_l.map(processor.loadEntity[PlateModel]))
 			_ <- RqResult.toResultOfList(entityData.plateLocation_l.map(processor.loadEntity[PlateLocation]))
 			_ <- RqResult.toResultOfList(entityData.plate_l.map(processor.loadEntity[Plate]))
