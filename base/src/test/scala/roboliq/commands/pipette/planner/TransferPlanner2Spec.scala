@@ -15,8 +15,8 @@ class TransferPlanner2Spec extends CommandSpecBase {
 		describe("BSSE configuration") {
 			import TransferPlanner2.{Item,BatchItem,Batch}
 			implicit val p = makeProcessorBsse(
+				Config01.database1Json,
 				Config01.protocol1Json,
-				//{ "cmd": "pipette.tips", "cleanIntensity": "Thorough", "items": [{"tip": "TIP1"}] }
 				JsonParser("""{
 					"vessel": [
 						{ "id": "P1(A01)" },
