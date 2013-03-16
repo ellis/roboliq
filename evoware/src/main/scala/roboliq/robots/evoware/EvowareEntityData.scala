@@ -2,8 +2,10 @@ package roboliq.robots.evoware
 
 import scala.collection.mutable
 import grizzled.slf4j.Logger
+import spray.json._
 import roboliq.core._
 import roboliq.entity._
+import roboliq.processor.ConversionsDirect
 
 
 case class EvowareEntityData private (
@@ -12,7 +14,33 @@ case class EvowareEntityData private (
 	val plate_l: List[Plate],
 	val plateState_l: List[PlateState],
 	val pipettePolicy_l: List[PipettePolicy]
-)
+) {
+	def toJson: RqResult[JsObject] = {
+		for {
+			pipettePolicyJson <- RqResult.toResultOfList(pipettePolicy_l.map(ConversionsDirect.toJson[PipettePolicy]))
+			plateModelJson <- RqResult.toResultOfList(plateModel_l.map(ConversionsDirect.toJson[PlateModel]))
+			plateLocationJson <- RqResult.toResultOfList(plateLocation_l.map(ConversionsDirect.toJson[PlateLocation]))
+			plateJson <- RqResult.toResultOfList(plate_l.map(ConversionsDirect.toJson[Plate]))
+			plateStateJson <- RqResult.toResultOfList(plateState_l.map(ConversionsDirect.toJson[PlateState]))
+		} yield {
+			JsObject(
+				"pipettePolicy" -> JsArray(pipettePolicyJson),
+				"plateModel" -> JsArray(plateModelJson),
+				"plateLocation" -> JsArray(plateLocationJson),
+				"plate" -> JsArray(plateJson),
+				"plateState" -> JsArray(plateStateJson)
+			)
+		}
+	}
+
+	def toJsonString: RqResult[String] = {
+		for {
+			json <- toJson
+		} yield {
+			json.prettyPrint
+		}
+	}
+}
 
 object EvowareEntityData {
 	private val logger = Logger("roboliq.robots.evoware.EvowareEntityData")
@@ -82,8 +110,8 @@ object EvowareEntityData {
 		RqSuccess(entities, warning_l.toList)
 	}
 
-	// E.G.:
-	// Utils.toCoreEntities("testdata/bsse-robot1/config/carrier.cfg", "testdata/bsse-robot1/config/bench-01.esc", Map[(Int, Int), String]())
+	// Can call from sbt console with e.g.:
+	// EvowareEntityData.createEntities("testdata/bsse-robot1/config/carrier.cfg", "testdata/bsse-robot1/config/table-01.esc", "testdata/bsse-robot1/config/table-01.yaml", "testdata/bsse-robot1/config/DefaultLCs.XML", "testdata/bsse-robot1/config/CustomLCs.XML")
 	def createEntities(
 		carrierFilename: String,
 		tableFilename: String,

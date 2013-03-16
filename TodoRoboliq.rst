@@ -9,9 +9,7 @@ For workshop.
 
 :Started: 2013-03-06
 
-* Read in liquid classes from XML files
 * Convert EvowareEntityData to json object
-* PipettePolicy as database Entity
 * Converter from YAML to JSON
 * Move some code from roboliq.processor and roboliq.events to roboliq.core so that command handlers only need to import roboliq.core._
 * Maybe do something to put roboliq.events classes into roboliq.entity?
