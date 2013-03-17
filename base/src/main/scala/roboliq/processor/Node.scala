@@ -38,6 +38,7 @@ case class RqItem_Function(fnargs: RqFunctionArgs) extends RqItem
 
 case class ComputationItem_Events(event_l: List[Event[Entity]]) extends RqItem
 case class ComputationItem_EntityRequest(id: String) extends RqItem
+case class ComputationItem_Entity(key: TKP, jsval: JsValue) extends RqItem
 case class ComputationItem_Command(cmd: JsObject) extends RqItem
 case class ComputationItem_Token(token: CmdToken) extends RqItem
 

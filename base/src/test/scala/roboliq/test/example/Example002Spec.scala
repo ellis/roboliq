@@ -6,21 +6,34 @@ import roboliq.commands.pipette._
 import roboliq.commands.CommandSpecBase
 import roboliq.test.Config01
 
-class Example001Spec extends CommandSpecBase {
-	ignore("BSSE configuration") {
+class Example002Spec extends CommandSpecBase {
+	describe("BSSE configuration") {
 		implicit val p = makeProcessorBsse(
 			//Config01.database1Json,
 			JsonParser("""{
 				"substance": [
-					{ "id": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
+					{ "id": "S_water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone", "molarity": 55, "gramPerMole": 18 }
 				]
 				}""").asJsObject,
 			JsonParser("""{
+				"plate": [
+					{ "id": "P_EW_water", "model": "Trough 100ml" },
+					{ "id": "P_EW_dye", "model": "Trough 100ml" },
+					{ "id": "P_SCRAP1", "model": "Ellis Nunc F96 MicroWell" }
+				],
+				"plateState": [
+					{ "id": "P_EW_water", "location": "trough1" },
+					{ "id": "P_EW_dye", "location": "trough2" },
+					{ "id": "P_SCRAP1", "location": "pipette1" }
+				],
+				"vesselState": [
+					{ "id": "P_EW_water(A01)", "content": { "S_water": "10ml" }, "isSource": true },
+					{ "id": "P_EW_water(B01)", "content": { "S_water": "10ml" }, "isSource": true },
+					{ "id": "P_EW_water(C01)", "content": { "S_water": "10ml" }, "isSource": true },
+					{ "id": "P_EW_water(D01)", "content": { "S_water": "10ml" }, "isSource": true }
+				],
 				"cmd": [
-					{ "cmd": "resource.liquid", "id": "L_water", "liquid": { "water": 1 }, "vessels": ["P_EW_water(A01)", "P_EW_water(B01)", "P_EW_water(C01)", "P_EW_water(D01)"] },
-					{ "cmd": "resource.plate", "id": "P_SCRAP1", "model": "Ellis Nunc F96 MicroWell", "location": "pipette1" },
-					{ "cmd": "resource.plate", "id": "P_EW_water", "model": "Trough 100ml", "location": "trough1" },
-					{ "cmd": "pipette.transfer", "source": ["L_water"], "destination": ["P_SCRAP1"], "amount": ["50ul"], "pipettePolicy": "Water free dispense" }
+					{ "cmd": "pipette.transfer", "source": ["S_water"], "destination": ["P_SCRAP1(A01xH01)"], "amount": ["50ul"], "pipettePolicy": "Water free dispense" }
 				]
 				}""").asJsObject
 		)

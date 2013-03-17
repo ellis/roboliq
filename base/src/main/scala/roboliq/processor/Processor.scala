@@ -211,6 +211,15 @@ class ProcessorData(
 					Nil
 				case ComputationItem_Events(event_l) =>
 					List(Node_Events(parent_?, index, event_l, eventHandler_m.toMap))
+				case ComputationItem_Entity(key, jsval) =>
+					println("ComputationItem_Entity: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
+					//sys.exit()
+					//5 / 0
+					if (key.table.endsWith("State"))
+						setState(key, List(0), jsval)
+					else
+						setEntity(key, jsval)
+					Nil
 				case EventItem_State(key, jsval) =>
 					println("EventItem_State: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
 					//sys.exit()
@@ -275,6 +284,7 @@ class ProcessorData(
 							val fnargs2 = concretizeArgs(fnargs, node.contextKey_?, Some(node), index)
 							Some(Node_Conversion(Some(node), None, Some(index), node.time, node.contextKey_?, fnargs2, node.kc))
 						case ConversionItem_Object(obj) =>
+							
 							setCacheObj(node.kc, obj)
 							None
 						case EventItem_State(key, jsval) =>
@@ -307,6 +317,7 @@ class ProcessorData(
 			logger.warn(s"Node with id `${node.id}` was already registered and will not be registered again")
 			logger.warn("node: "+node)
 			logger.warn("previous: "+state_m.find(_._1.id == node.id))
+			5 / 0
 			return
 		}
 		// ENDFIX
@@ -891,13 +902,18 @@ class ProcessorData(
 	 */
 	private def makePendingComputationList(node_l: List[Node]): List[NodeState] = {
 		val order_l = state_m.values.toList.sortBy(_.node.time)(ListIntOrdering).dropWhile(_.status == Status.Success)
+		// Find first node which isn't ready and depends on state
+		val blocker_? = order_l.find(state => state.status == Status.NotReady && state.node.input_l.exists(_.kc.key.table.endsWith("State")))
+		val timeEnd = blocker_?.map(_.node.time).getOrElse(List(Int.MaxValue))
 		println()
-		println("makePending")
+		println(s"makePending (<= $timeEnd)")
 		order_l.foreach(state => 
 			println(state.node.time + " " + state.status.toString.take(1) + " " + state.node.id + ": " + state.node.contextKey_?.map(_.id + " ").getOrElse("") + state.node.desc)
 		)
 		println()
 		
+		order_l.filter(state => state.status == Status.Ready && ListIntOrdering.compare(state.node.time, timeEnd) <= 0)
+		/*
 		//val order_l = state_m.toList.sortBy(_._1.path)(ListIntOrdering).map(_._2).dropWhile(_.status == Status.Success)
 		order_l match {
 			case Nil => Nil
@@ -913,7 +929,7 @@ class ProcessorData(
 				})
 				// Take next node if it's ready (regardless of whether it depends on state)
 				next_l ++ ready_l
-		}
+		}*/
 	}
 
 	/*

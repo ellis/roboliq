@@ -21,6 +21,10 @@ Improvements over roboease:
 * Get PDF or help files for Evoware with command parameters (e.g. for `Subroutine()`)
 * Try to modify CustomLCs.XML
 * Try to output comments for evoware .LOG file for latter parsing
+* Find location of relevant files -- copy a bunch of evoware files
+* Evoware USB stick
+* Get bluetooth keyboard
+* Print israel entry document
 
 * DistributeCmd
 * Well groups

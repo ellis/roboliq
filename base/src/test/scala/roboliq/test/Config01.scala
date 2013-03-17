@@ -10,6 +10,7 @@ object Config01 {
 	val tip3 = Tip("TIP3", "LiHa", 2, 2, 0, Some(tipModel1000))
 	val tip4 = Tip("TIP4", "LiHa", 3, 3, 0, Some(tipModel1000))
 	val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
+	val plateModel_Nunc = PlateModel("Ellis Nunc F96 MicroWell", 8, 12, LiquidVolume.ul(400))
 	val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
 	val plateLocation_cooled1 = PlateLocation("cool1PCR", List(plateModel_PCR), true)
 	val plateLocation_cooled2 = PlateLocation("cool2PCR", List(plateModel_PCR), true)
@@ -67,9 +68,9 @@ object Config01 {
 	{ "id": "trough2", "plateModels": ["Trough 100ml"], "cooled": false },
 	{ "id": "trough3", "plateModels": ["Trough 100ml"], "cooled": false },
 	{ "id": "reagents15000", "plateModels": ["Reagent Cooled 8*15ml"], "cooled": true },
-	{ "id": "uncooled2_low", "plateModels": ["D-BSSE 96 Well DWP", "Ellis Nunc F96 MicroWell"] },
-	{ "id": "uncooled2_high", "plateModels": ["D-BSSE 96 Well Costar Plate"] },
-	{ "id": "shaker", "plateModels": ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] },
+	{ "id": "pipette1", "plateModels": ["D-BSSE 96 Well DWP", "Ellis Nunc F96 MicroWell"], "cooled": false },
+	{ "id": "warm1PCR", "plateModels": ["D-BSSE 96 Well Costar Plate"], "cooled": false },
+	{ "id": "shaker", "plateModels": ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"], "cooled": false },
 	{ "id": "cool1PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
 	{ "id": "cool2PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
 	{ "id": "cool3PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },

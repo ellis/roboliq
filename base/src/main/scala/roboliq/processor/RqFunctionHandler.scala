@@ -541,6 +541,27 @@ abstract class CommandHandler[A <: Object : TypeTag](
 			})
 		)
 	}
+	def entityToReturnBuilder[A <: Entity : TypeTag](a: A): RqReturnBuilder = {
+		val item_? = for {
+				json <- ConversionsDirect.toJson[A](a)
+				table <- ConversionsDirect.findTableForType(ru.typeTag[A].tpe)
+			} yield ComputationItem_Entity(TKP(table, a.id, Nil), json)
+		// FIXME: for debug only
+		if (item_?.isError) {
+			println("item_?: "+item_?)
+			1 / 0
+		}
+		new RqReturnBuilder(List(item_?))
+	}
+	def entitiesToReturnBuilder[A <: Entity : TypeTag](l: List[A]): RqReturnBuilder = {
+		val item_? = l.map(a => {
+			for {
+				json <- ConversionsDirect.toJson[A](a)
+				table <- ConversionsDirect.findTableForType(ru.typeTag[A].tpe)
+			} yield ComputationItem_Entity(TKP(table, a.id, Nil), json)
+		})
+		new RqReturnBuilder(item_?)
+	}
 	
 	val fnargs: RqFunctionArgs = {
 		cmdAs[A] { cmd =>
