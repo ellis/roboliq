@@ -5,7 +5,7 @@ For workshop.
 * Roboease: show interface for other programs; show commands: several basic (move plates, transfer, post mix, prompt), PCR, custom-programmed
 * Quality control: show scripts, graphs, application of data for improving performance; generating new liquid classes
 * Protocols: show evoware scripts?
-* Configuration: show example of reading in files and outputting yaml/json
+* Configuration: show example of reading in files and outputting yaml/json; automatic device loading
 
 Improvements over roboease:
 
@@ -17,14 +17,11 @@ Improvements over roboease:
 
 :Started: 2013-03-06
 
-* Copy some evoware scripts for the protocols deliverable
-* Get PDF or help files for Evoware with command parameters (e.g. for `Subroutine()`)
+OrangeG 0.08 and 0.8 g/L
 * Try to modify CustomLCs.XML
-* Try to output comments for evoware .LOG file for latter parsing
 * Find location of relevant files -- copy a bunch of evoware files
-* Evoware USB stick
-* Get bluetooth keyboard
-* Print israel entry document
+
+in ``database`` are files ``*LCs.XML, EVOWARE.{xml,inf,opt}, Carrier.cfg``
 
 * DistributeCmd
 * Well groups
