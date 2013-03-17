@@ -78,7 +78,11 @@ class TransferHandler extends CommandHandler[TransferCmd]("pipette.transfer") {
 						if (cmd.amount.size != 1 && cmd.amount.size != n)
 							return RqError("`amount` must have same length as `source` and `destination`, or be a singul entity")
 							
-						val l1 = srcAll_ll.zip(dstAll_l).zip(cmd.amount)
+						val srcAll2_ll = if (srcAll_ll.size == 1) List.fill(n)(srcAll_ll.head) else srcAll_ll
+						val dstAll2_l = if (dstAll_l.size == 1) List.fill(n)(dstAll_l.head) else dstAll_l
+						val amount_l = if (cmd.amount.size == 1) List.fill(n)(cmd.amount.head) else cmd.amount
+
+						val l1 = srcAll2_ll.zip(dstAll2_l).zip(amount_l)
 						val l = l1.map(tuple => (tuple._1._1, tuple._1._2, tuple._2))
 						val item_l = l.map(tuple => {
 							val (src_l, dst, volume) = tuple

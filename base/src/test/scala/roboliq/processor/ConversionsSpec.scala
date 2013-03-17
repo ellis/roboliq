@@ -23,7 +23,7 @@ class ConversionsSpec extends FunSpec {
 	private def getTypeTag[T: TypeTag](obj: T) = ru.typeTag[T]
 	private def getType[T: TypeTag](obj: T) = ru.typeTag[T].tpe
 	
-	val water = Substance.liquid("water", 55, TipCleanPolicy.TN, gramPerMole_? = Some(18))
+	import Config01.water
 	val powder = Substance.other("powder", TipCleanPolicy.DD, Set("DNA"))
 	
 	val liquid_water = Liquid(Map(water -> 1))
@@ -288,18 +288,9 @@ class ConversionsSpec extends FunSpec {
 	}
 
 	describe("conv for database objects") {
-		val tipModel = TipModel("Standard 1000ul", LiquidVolume.ul(950), LiquidVolume.ul(4))
-		val tip = Tip("TIP1", "LiHa", 0, 0, 0, Some(tipModel))
-		val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
-		val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
-		val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
-		val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
-		val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
-		val plate_15000 = Plate("reagents15000", plateModel_15000, None)
-		val plate_P1 = Plate("P1", plateModel_PCR, None)
-		val vessel_P1_A01 = Vessel("P1(A01)", None)
-		val vessel_T1 = Vessel("T1", Some(tubeModel_15000))
-		val tipState = TipState.createEmpty(tip)
+		import Config01._
+		
+		val tipState = TipState.createEmpty(tip1)
 		val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
 		val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
 		val vesselState_T1 = VesselState(vessel_T1, VesselContent.Empty)
@@ -343,22 +334,22 @@ class ConversionsSpec extends FunSpec {
 			}
 		}
 
-		check[TipModel]("Standard 1000ul", tipModel)
-		check[Tip]("TIP1", tip)
+		check[TipModel]("Standard 1000ul", tipModel1000)
+		check[Tip]("TIP1", tip1)
 		check[PlateModel]("D-BSSE 96 Well PCR Plate", plateModel_PCR)
 		check[PlateModel]("Reagent Cooled 8*15ml", plateModel_15000)
-		check[PlateLocation]("cooled1", plateLocation_cooled1)
+		check[PlateLocation]("cool1PCR", plateLocation_cooled1)
 		check[PlateLocation]("reagents15000", plateLocation_15000)
 		check[TubeModel]("Tube 15000ul", tubeModel_15000)
-		check[Plate]("P1", plate_P1)
-		check[Plate]("reagents15000", plate_15000)
+		check[Plate]("P_1", plate_P1)
+		check[Plate]("P_reagents15000", plate_15000)
 		check[TipState]("TIP1", tipState)
-		check[PlateState]("P1", plateState_P1)
-		check[Vessel]("P1(A01)", vessel_P1_A01)
-		check[Vessel]("T1", vessel_T1)
-		check[VesselState]("P1(A01)", vesselState_P1_A01)
-		check[VesselState]("T1", vesselState_T1)
-		check[VesselSituatedState]("T1", vesselSituatedState_T1)
+		check[PlateState]("P_1", plateState_P1)
+		check[Vessel]("P_1(A01)", vessel_P1_A01)
+		check[Vessel]("T_1", vessel_T1)
+		check[VesselState]("P_1(A01)", vesselState_P1_A01)
+		check[VesselState]("T_1", vesselState_T1)
+		check[VesselSituatedState]("T_1", vesselSituatedState_T1)
 	}
 
 	describe("toJson and back") {

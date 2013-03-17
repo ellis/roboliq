@@ -7,10 +7,23 @@ For workshop.
 * Protocols: show evoware scripts?
 * Configuration: show example of reading in files and outputting yaml/json
 
+Improvements over roboease:
+
+* work with well groups instead of table positions
+* much more information tracked, so many things can be calculated
+* data can be culled from multiple sources
+* easier to use as a tool by other programs
+* extensions using more powerful language (JVM vs perl)
+
 :Started: 2013-03-06
 
 * Copy some evoware scripts for the protocols deliverable
 * Get PDF or help files for Evoware with command parameters (e.g. for `Subroutine()`)
+* Try to modify CustomLCs.XML
+* Try to output comments for evoware .LOG file for latter parsing
+
+* DistributeCmd
+* Well groups
 * Converter from YAML to JSON for more easily writable script files
 * Move some code from roboliq.processor and roboliq.events to roboliq.core so that command handlers only need to import roboliq.core._
 * Maybe do something to put roboliq.events classes into roboliq.entity?

@@ -15,7 +15,7 @@ class TransferCmdSpec extends CommandSpecBase {
 					Config01.protocol1Json,
 					JsonParser("""{
 						"cmd": [
-						  { "cmd": "pipette.transfer", "source": ["P1(A01)"], "destination": ["P1(B01)"], "amount": ["50ul"], "pipettePolicy": "Water free dispense" }
+						  { "cmd": "pipette.transfer", "source": ["P_1(A01)"], "destination": ["P_1(B01)"], "amount": ["50ul"], "pipettePolicy": "Water free dispense" }
 						]
 						}""").asJsObject
 				)
@@ -30,8 +30,8 @@ class TransferCmdSpec extends CommandSpecBase {
 					val tipState_1_A = getState[TipState]("TIP1", time_l(0))
 					val tipState_1_B = getState[TipState]("TIP1", time_l(1))
 					val tipState_1_C = getState[TipState]("TIP1", time_l(2))
-					val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
-					val vss_P1_B01_1 = getState[VesselSituatedState]("P1(B01)", List(1))
+					val vss_P1_A01_1 = getState[VesselSituatedState]("P_1(A01)", List(1))
+					val vss_P1_B01_1 = getState[VesselSituatedState]("P_1(B01)", List(1))
 					assert(token_l === List(
 						low.WashTipsToken("Thorough", List(tipState_1_A)),
 						low.AspirateToken(List(
@@ -64,11 +64,11 @@ class TransferCmdSpec extends CommandSpecBase {
 					Config01.protocol1Json,
 					JsonParser("""{
 						"vesselState": [
-							{ "id": "P1(A01)", "content": { "water": "100ul" } },
-							{ "id": "P1(B01)", "content": { "water": "100ul" } }
+							{ "id": "P_1(A01)", "content": { "water": "100ul" } },
+							{ "id": "P_1(B01)", "content": { "water": "100ul" } }
 						],
 						"cmd": [
-						  { "cmd": "pipette.transfer", "source": ["P1(A01)", "P1(B01)"], "destination": ["P1(C01)", "P1(D01)"], "amount": ["50ul", "50ul"], "pipettePolicy": "Water free dispense" }
+						  { "cmd": "pipette.transfer", "source": ["P_1(A01)", "P_1(B01)"], "destination": ["P_1(C01)", "P_1(D01)"], "amount": ["50ul", "50ul"], "pipettePolicy": "Water free dispense" }
 						]
 						}""").asJsObject
 				)
@@ -86,10 +86,10 @@ class TransferCmdSpec extends CommandSpecBase {
 					val tipState_TIP2_B = getState[TipState]("TIP2", time_l(1))
 					val tipState_TIP1_C = getState[TipState]("TIP1", time_l(2))
 					val tipState_TIP2_C = getState[TipState]("TIP2", time_l(2))
-					val vss_P1_A01_B = getState[VesselSituatedState]("P1(A01)", time_l(1))
-					val vss_P1_B01_B = getState[VesselSituatedState]("P1(B01)", time_l(1))
-					val vss_P1_C01_C = getState[VesselSituatedState]("P1(C01)", time_l(2))
-					val vss_P1_D01_C = getState[VesselSituatedState]("P1(D01)", time_l(2))
+					val vss_P1_A01_B = getState[VesselSituatedState]("P_1(A01)", time_l(1))
+					val vss_P1_B01_B = getState[VesselSituatedState]("P_1(B01)", time_l(1))
+					val vss_P1_C01_C = getState[VesselSituatedState]("P_1(C01)", time_l(2))
+					val vss_P1_D01_C = getState[VesselSituatedState]("P_1(D01)", time_l(2))
 					assert(token_l === List(
 						low.WashTipsToken("Thorough", List(tipState_TIP1_A, tipState_TIP2_A)),
 						low.AspirateToken(List(
@@ -124,11 +124,11 @@ class TransferCmdSpec extends CommandSpecBase {
 					Config01.protocol1Json,
 					JsonParser("""{
 						"vesselState": [
-							{ "id": "P1(A01)", "content": { "water": "100ul" } },
-							{ "id": "P1(B01)", "content": { "water": "100ul" } }
+							{ "id": "P_1(A01)", "content": { "water": "100ul" } },
+							{ "id": "P_1(B01)", "content": { "water": "100ul" } }
 						],
 						"cmd": [
-						  { "cmd": "pipette.transfer", "source": ["P1(A01)", "P1(B01)"], "destination": ["P1(C01)", "P1(C02)"], "amount": ["50ul", "50ul"], "pipettePolicy": "Water free dispense" }
+						  { "cmd": "pipette.transfer", "source": ["P_1(A01)", "P_1(B01)"], "destination": ["P_1(C01)", "P_1(C02)"], "amount": ["50ul", "50ul"], "pipettePolicy": "Water free dispense" }
 						]
 						}""").asJsObject
 				)
@@ -146,10 +146,10 @@ class TransferCmdSpec extends CommandSpecBase {
 					val tipState_TIP2_B = getState[TipState]("TIP2", time_l(1))
 					val tipState_TIP1_C = getState[TipState]("TIP1", time_l(2))
 					val tipState_TIP2_D = getState[TipState]("TIP2", time_l(3))
-					val vss_P1_A01_B = getState[VesselSituatedState]("P1(A01)", time_l(1))
-					val vss_P1_B01_B = getState[VesselSituatedState]("P1(B01)", time_l(1))
-					val vss_P1_C01_C = getState[VesselSituatedState]("P1(C01)", time_l(2))
-					val vss_P1_C02_D = getState[VesselSituatedState]("P1(C02)", time_l(3))
+					val vss_P1_A01_B = getState[VesselSituatedState]("P_1(A01)", time_l(1))
+					val vss_P1_B01_B = getState[VesselSituatedState]("P_1(B01)", time_l(1))
+					val vss_P1_C01_C = getState[VesselSituatedState]("P_1(C01)", time_l(2))
+					val vss_P1_C02_D = getState[VesselSituatedState]("P_1(C02)", time_l(3))
 					assert(token_l === List(
 						low.WashTipsToken("Thorough", List(tipState_TIP1_A, tipState_TIP2_A)),
 						low.AspirateToken(List(

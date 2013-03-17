@@ -598,6 +598,9 @@ class ProcessorData(
 						wellId_l.foreach(wellId => addSource(wellId, wellId))
 				}
 			case "vesselState" if ListIntOrdering.compare(time, List(0)) <= 0 =>
+				if (db.get(TKP("vessel", id, Nil)).isError)
+					setEntity(TKP("vessel", id, Nil), JsObject("id" -> JsString(id)))
+
 				getObjFromDbAt[VesselState](id, time) match {
 					case x: RqError[VesselState] => logger.error("Could not load VesselState for creation of `source` entity: "+x.toString)
 					case RqSuccess(vesselState, _) =>
@@ -876,7 +879,7 @@ class ProcessorData(
 		// TODO: show added conversions
 		
 		// Set message for missing entities
-		if (pending_l.isEmpty)
+		if (pending_l.isEmpty && getMessages.isEmpty)
 			lookupMessage_m ++= kcoToValue_m.toList.filter(pair => pair._2.isError && pair._1.kc.isJsValue).map(pair => pair._1.kc.id -> RqError("missing")).toMap
 
 		!pending_l.isEmpty

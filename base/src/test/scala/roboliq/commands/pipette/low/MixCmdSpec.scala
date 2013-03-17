@@ -15,7 +15,7 @@ class MixCmdSpec extends CommandSpecBase {
 				Config01.protocol1Json,
 				JsonParser("""{
 					"cmd": [
-					  { "cmd": "pipette.low.mix", "mixSpec": {"volume": "30ul", "count": 4, "mixPolicy": { "id": "Mix", "pos": "WetContact" }}, "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul"}] }
+					  { "cmd": "pipette.low.mix", "mixSpec": {"volume": "30ul", "count": 4, "mixPolicy": { "id": "Mix", "pos": "WetContact" }}, "items": [{"tip": "TIP1", "well": "P_1(A01)", "volume": "50ul"}] }
 					]
 					}""").asJsObject
 			)
@@ -27,7 +27,7 @@ class MixCmdSpec extends CommandSpecBase {
 			it("should generate correct tokens") {
 				val (_, token_l) = p.getTokenList.unzip
 				val tipState_1 = getState[TipState]("TIP1", List(1))
-				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
+				val vss_P1_A01_1 = getState[VesselSituatedState]("P_1(A01)", List(1))
 				assert(token_l === List(
 					MixToken(
 						List(
@@ -47,8 +47,8 @@ class MixCmdSpec extends CommandSpecBase {
 			}
 
 			it("should have correct VesselState for mix well") {
-				val vesselState_P1_A01_1 = getState[VesselState]("P1(A01)", List(1))
-				val vesselState_P1_A01_2 = getState[VesselState]("P1(A01)", List(2))
+				val vesselState_P1_A01_1 = getState[VesselState]("P_1(A01)", List(1))
+				val vesselState_P1_A01_2 = getState[VesselState]("P_1(A01)", List(2))
 				assert(vesselState_P1_A01_1.content === vesselState_P1_A01_2.content)
 			}
 		}

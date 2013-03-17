@@ -14,8 +14,8 @@ class DispenseCmdSpec extends CommandSpecBase {
 				Config01.protocol1Json,
 				JsonParser("""{
 					"cmd": [
-					  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] },
-					  { "cmd": "pipette.low.dispense", "items": [{"tip": "TIP1", "well": "P1(B01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
+					  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P_1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] },
+					  { "cmd": "pipette.low.dispense", "items": [{"tip": "TIP1", "well": "P_1(B01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
 					]
 					}""").asJsObject
 			)
@@ -31,8 +31,8 @@ class DispenseCmdSpec extends CommandSpecBase {
 				val (_, token_l) = p.getTokenList.unzip
 				val tipState_1 = getState[TipState]("TIP1", List(1))
 				val tipState_2 = getState[TipState]("TIP1", List(2))
-				val vss_P1_A01 = getState[VesselSituatedState]("P1(A01)", List(1))
-				val vss_P1_B01 = getState[VesselSituatedState]("P1(B01)", List(2))
+				val vss_P1_A01 = getState[VesselSituatedState]("P_1(A01)", List(1))
+				val vss_P1_B01 = getState[VesselSituatedState]("P_1(B01)", List(2))
 				assert(token_l === List(
 					AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact)))),
 					DispenseToken(List(new TipWellVolumePolicy(tipState_2, vss_P1_B01, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
@@ -41,7 +41,7 @@ class DispenseCmdSpec extends CommandSpecBase {
 			
 			it("should have correct final contents in the destination well") {
 				assert(
-					getState[VesselState]("P1(B01)", List(3)).content ===
+					getState[VesselState]("P_1(B01)", List(3)).content ===
 					checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
 				)
 			}

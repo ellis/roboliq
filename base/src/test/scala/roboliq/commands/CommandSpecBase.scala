@@ -56,7 +56,8 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 				assert(w === Nil)
 				a
 			case RqError(e, w) =>
-				info(w.toString)
+				if (!w.isEmpty) info(w.toString)
+				info(s"Failed to get object of type ${ru.typeOf[A]}")
 				assert(e === Nil)
 				null.asInstanceOf[A]
 		}		

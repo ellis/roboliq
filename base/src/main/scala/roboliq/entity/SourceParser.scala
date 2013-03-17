@@ -45,23 +45,18 @@ private object SourceParser0 extends JavaTokenParsers {
 	
 	val wells: Parser[List[WellSpec]] = rep1sep(wellArg, ",")
 	
-	val plateWells: Parser[SourceSpec_PlateWells] = "P_" ~ ident ~ "(" ~ wells ~ ")" ^^ {
-		case _ ~ plate ~ _ ~ l ~ _ => SourceSpec_PlateWells(s"P_$plate", l)
+	val plateWells: Parser[SourceSpec_PlateWells] = ident ~ "(" ~ wells ~ ")" ^^ {
+		case plate ~ _ ~ l ~ _ => SourceSpec_PlateWells(plate, l)
 	}
 	
-	val plate: Parser[SourceSpec_Plate] = "P_" ~ ident ^^ {
-		case _ ~ plate => SourceSpec_Plate("P_"+plate)
+	val plateTubeOrSubstance: Parser[SourceSpec] = ident ^^ {
+		case id if id.startsWith("P") => SourceSpec_Plate(id)
+		case id if id.startsWith("T") => SourceSpec_Tube(id)
+		//case id if id.startsWith("S") => SourceSpec_Substance(id)
+		case id => SourceSpec_Substance(id)
 	}
 	
-	val tube: Parser[SourceSpec_Tube] = "T_" ~ ident ^^ {
-		case _ ~ tube => SourceSpec_Tube("T_"+tube)
-	}
-	
-	val substance: Parser[SourceSpec_Substance] = "S_" ~ ident ^^ {
-		case _ ~ s => SourceSpec_Substance("S_"+s)
-	}
-	
-	val sourceArg = plateWells | plate | tube | substance
+	val sourceArg = plateWells | plateTubeOrSubstance
 	
 	val sources: Parser[List[SourceSpec]] = rep1sep(sourceArg, ",")
 	

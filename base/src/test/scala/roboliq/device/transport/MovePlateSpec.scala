@@ -19,10 +19,9 @@ class MovePlateSpec extends CommandSpecBase {
 		describe("should handle arm.movePlate") {
 			implicit val p = makeProcessorBsse(
 				Config01.protocol1Json,
-				//{ "cmd": "pipette.tips", "cleanIntensity": "Thorough", "items": [{"tip": "TIP1"}] }
 				JsonParser("""{
 					"cmd": [
-						{ "cmd": "transport.movePlate", "plate": "P1", "destination": "cooled2", "deviceId": "ROMA2" }
+						{ "cmd": "transport.movePlate", "plate": "P_1", "destination": "cool2PCR", "deviceId": "ROMA2" }
 					]
 					}""").asJsObject
 			)
@@ -44,8 +43,8 @@ class MovePlateSpec extends CommandSpecBase {
 			}
 			
 			it("should place plate at correct final location") {
-				val plateState_P1_2 = getState[PlateState]("P1", List(2))
-				assert(plateState_P1_2.location_?.map(_.id) === Some("cooled2"))
+				val plateState_P1_2 = getState[PlateState]("P_1", List(2))
+				assert(plateState_P1_2.location_?.map(_.id) === Some("cool2PCR"))
 			}
 		}
 	}

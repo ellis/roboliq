@@ -11,21 +11,21 @@ object Config01 {
 	val tip4 = Tip("TIP4", "LiHa", 3, 3, 0, Some(tipModel1000))
 	val plateModel_PCR = PlateModel("D-BSSE 96 Well PCR Plate", 8, 12, LiquidVolume.ul(200))
 	val plateModel_15000 = PlateModel("Reagent Cooled 8*15ml", 8, 1, LiquidVolume.ml(15))
-	val plateLocation_cooled1 = PlateLocation("cooled1", List(plateModel_PCR), true)
-	val plateLocation_cooled2 = PlateLocation("cooled2", List(plateModel_PCR), true)
+	val plateLocation_cooled1 = PlateLocation("cool1PCR", List(plateModel_PCR), true)
+	val plateLocation_cooled2 = PlateLocation("cool2PCR", List(plateModel_PCR), true)
 	val plateLocation_15000 = PlateLocation("reagents15000", List(plateModel_15000), true)
 	val tubeModel_15000 = TubeModel("Tube 15000ul", LiquidVolume.ml(15))
-	val plate_15000 = Plate("reagents15000", plateModel_15000, None)
+	val plate_15000 = Plate("P_reagents15000", plateModel_15000, None)
 	val plateState_15000 = PlateState(plate_15000, Some(plateLocation_15000))
 
 	val water = Substance.liquid("water", 55, TipCleanPolicy.TN, gramPerMole_? = Some(18))
 
-	val plate_P1 = Plate("P1", plateModel_PCR, None)
-	val vessel_P1_A01 = Vessel("P1(A01)", None)
-	val vessel_P1_B01 = Vessel("P1(B01)", None)
-	val vessel_P1_C01 = Vessel("P1(C01)", None)
-	val vessel_P1_D01 = Vessel("P1(D01)", None)
-	val vessel_T1 = Vessel("T1", Some(tubeModel_15000))
+	val plate_P1 = Plate("P_1", plateModel_PCR, None)
+	val vessel_P1_A01 = Vessel("P_1(A01)", None)
+	val vessel_P1_B01 = Vessel("P_1(B01)", None)
+	val vessel_P1_C01 = Vessel("P_1(C01)", None)
+	val vessel_P1_D01 = Vessel("P_1(D01)", None)
+	val vessel_T1 = Vessel("T_1", Some(tubeModel_15000))
 	val tipState1 = TipState.createEmpty(tip1)
 	val tipState2 = TipState.createEmpty(tip2)
 	val plateState_P1 = PlateState(plate_P1, Some(plateLocation_cooled1))
@@ -59,22 +59,22 @@ object Config01 {
 	{ "id": "D-BSSE 96 Well PCR Plate", "rows": 8, "cols": 12, "wellVolume": "200ul" },
 	{ "id": "D-BSSE 96 Well Costar Plate", "rows": 8, "cols": 12, "wellVolume": "350ul" },
 	{ "id": "D-BSSE 96 Well DWP", "rows": 8, "cols": 12, "wellVolume": "1000ul" },
-	{ "id": "Trough 100ml", "rows": 8, "cols": 1, "wellVolume": "100ul" },
+	{ "id": "Trough 100ml", "rows": 8, "cols": 1, "wellVolume": "100ml" },
 	{ "id": "Ellis Nunc F96 MicroWell", "rows": 8, "cols": 12, "wellVolume": "400ul" }
 ],
 "plateLocation": [
-	{ "id": "trough1", "plateModels": ["Trough 100ml"] },
-	{ "id": "trough2", "plateModels": ["Trough 100ml"] },
-	{ "id": "trough3", "plateModels": ["Trough 100ml"] },
+	{ "id": "trough1", "plateModels": ["Trough 100ml"], "cooled": false },
+	{ "id": "trough2", "plateModels": ["Trough 100ml"], "cooled": false },
+	{ "id": "trough3", "plateModels": ["Trough 100ml"], "cooled": false },
 	{ "id": "reagents15000", "plateModels": ["Reagent Cooled 8*15ml"], "cooled": true },
 	{ "id": "uncooled2_low", "plateModels": ["D-BSSE 96 Well DWP", "Ellis Nunc F96 MicroWell"] },
 	{ "id": "uncooled2_high", "plateModels": ["D-BSSE 96 Well Costar Plate"] },
 	{ "id": "shaker", "plateModels": ["D-BSSE 96 Well Costar Plate", "D-BSSE 96 Well DWP"] },
-	{ "id": "cooled1", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
-	{ "id": "cooled2", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
-	{ "id": "cooled3", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
-	{ "id": "cooled4", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
-	{ "id": "cooled5", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cool1PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cool2PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cool3PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cool4PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
+	{ "id": "cool5PCR", "plateModels": ["D-BSSE 96 Well PCR Plate"], "cooled": true },
 	{ "id": "regrip", "plateModels": ["D-BSSE 96 Well PCR Plate", "D-BSSE 96 Well Costar Plate"] },
 	{ "id": "reader", "plateModels": ["D-BSSE 96 Well Costar Plate"] }
 ],
@@ -84,9 +84,9 @@ object Config01 {
 	{ "id": "Tube 1500ul", "volume": "1500ul" }
 ],
 "tubeLocation": [
-	{ "id": "reagents50", "tubeModels": ["Tube 50000ul"], "rackModel": "Reagent Cooled 8*50ml" },
+	{ "id": "reagents50000", "tubeModels": ["Tube 50000ul"], "rackModel": "Reagent Cooled 8*50ml" },
 	{ "id": "reagents15000", "tubeModels": ["Tube 15000ul"], "rackModel": "Reagent Cooled 8*15ml" },
-	{ "id": "reagents1.5", "tubeModels": ["Tube 1500ul"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
+	{ "id": "reagents1500", "tubeModels": ["Tube 1500ul"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
 ],
 
 
@@ -95,12 +95,12 @@ object Config01 {
 ],
 
 "plate": [
-	{ "id": "reagents50", "model": "Reagent Cooled 8*50ml", "location": "reagents50" },
-	{ "id": "reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },
-	{ "id": "reagents1.5", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1.5" }
+	{ "id": "P_reagents50000", "model": "Reagent Cooled 8*50ml", "location": "reagents50000" },
+	{ "id": "P_reagents15000", "model": "Reagent Cooled 8*15ml", "location": "reagents15000" },
+	{ "id": "P_reagents1500", "model": "Block 20Pos 1.5 ml Eppendorf", "location": "reagents1500" }
 ],
 "plateState": [
-	{ "id": "reagents15000", "location": "reagents15000" }
+	{ "id": "P_reagents15000", "location": "reagents15000" }
 ]
 }""").asJsObject
 	
@@ -113,22 +113,22 @@ object Config01 {
 	val protocol1Json = JsonParser(
 """{
 "plate": [
-	{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
+	{ "id": "P_1", "model": "D-BSSE 96 Well PCR Plate" }
 ],
 "vessel": [
-	{ "id": "T1", "tubeModel": "Tube 15000ul" },
-	{ "id": "P1(A01)" }
+	{ "id": "P_1(A01)" },
+	{ "id": "T_1", "tubeModel": "Tube 15000ul" }
 ],
 "plateState": [
-	{ "id": "P1", "location": "cooled1" }
+	{ "id": "P_1", "location": "cool1PCR" }
 ],
 "vesselState": [
-	{ "id": "T1", "content": {} },
-	{ "id": "P1(A01)", "content": { "water": "100ul" } }
+	{ "id": "T_1", "content": {} },
+	{ "id": "P_1(A01)", "content": { "water": "100ul" } }
 ],
 "vesselSituatedState": [
-	{ "id": "T1", "position": { "plate": "reagents15000", "index": 0 } },
-	{ "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } }
+	{ "id": "T_1", "position": { "plate": "P_reagents15000", "index": 0 } },
+	{ "id": "P_1(A01)", "position": { "plate": "P_1", "index": 0 } }
 ]
 }""").asJsObject
 }
