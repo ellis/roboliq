@@ -8,4 +8,4 @@ case class InitialLocation(
 	id: String,
 	position_? : Option[VesselPosition],
 	location_? : Option[PlateLocation]
-)
+) extends Entity

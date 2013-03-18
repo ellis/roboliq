@@ -19,7 +19,7 @@ case class TipModel(
 	val volume: LiquidVolume, 
 	val volumeMin: LiquidVolume,
 	val cleanIntensityToExtraVolume: Map[CleanIntensity.Value, LiquidVolume] = Map()
-) {
+) extends Entity {
 	val volumeWashExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(CleanIntensity.Thorough, LiquidVolume.empty)
 	val volumeDeconExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(CleanIntensity.Decontaminate, LiquidVolume.empty)
 }

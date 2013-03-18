@@ -10,7 +10,7 @@ import scala.reflect.BeanProperty
 case class Vessel(
 	id: String,
 	tubeModel_? : Option[TubeModel]
-)
+) extends Entity
 
 /*
 /**

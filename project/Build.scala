@@ -4,7 +4,7 @@ import sbt.Keys._
 object BuildSettings {
   val buildOrganization = "bsse.ethz.ch"
   val buildVersion      = "0.1"
-  val buildScalaVersion = "2.10.1"
+  val buildScalaVersion = "2.10.0"
 
   val buildSettings = Defaults.defaultSettings ++ Seq (
     organization := buildOrganization,
