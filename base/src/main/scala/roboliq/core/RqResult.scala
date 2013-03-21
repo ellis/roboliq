@@ -34,6 +34,8 @@ sealed trait RqResult[+A] {
 		if (isEmpty) alternative else this
 	
 	def flatten[B](implicit ev: A <:< RqResult[B]): RqResult[B]
+	
+	def toOption: Option[A]
 }
 
 object RqResult {
@@ -72,6 +74,8 @@ sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends R
 
 	def flatten[B](implicit ev: A <:< RqResult[B]): RqResult[B] =
     	ev(res)
+    
+    def toOption: Option[A] = Some(res)
 }
 
 sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
@@ -87,6 +91,8 @@ sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = N
 
 	def flatten[B](implicit ev: A <:< RqResult[B]): RqResult[B] =
     	RqError(error_l, warning_r)
+
+    def toOption: Option[A] = None
 }
 
 object RqError {

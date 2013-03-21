@@ -3,6 +3,7 @@ package roboliq.processor
 import scala.reflect.ClassTag
 import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.runtime.universe.typeTag
 import roboliq.core._, roboliq.entity._
 
 
@@ -48,10 +49,8 @@ abstract class EventHandlerAB[St <: Entity : TypeTag, Ev <: Event[St] : TypeTag 
 	private def fnargs(state0: St, event: Ev): RqReturn = {
 		for {
 			state_# <- handleEvent(state0, event)
-			json <- ConversionsDirect.toJson[St](state_#)
-			table <- ConversionsDirect.findTableForType(ru.typeTag[St].tpe)
 		} yield {
-			List(EventItem_State(TKP(table, state_#.id, Nil), json))
+			List(EventItem_State(typeTag[St].tpe, state_#))
 		}
 	}
 }

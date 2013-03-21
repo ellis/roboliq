@@ -4,7 +4,7 @@ import roboliq.core._
 import roboliq.entity.Entity
 
 package object processor {
-	type RqArgs = List[KeyClassOpt]
+	type RqArgs = List[Lookup]
 	type RqInputs = List[Object]
 	type RqReturn = RqResult[List[RqItem]]
 	type RqFunction = List[Object] => RqReturn

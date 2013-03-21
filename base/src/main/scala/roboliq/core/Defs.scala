@@ -10,4 +10,4 @@ trait Cmd {
 	def typ: Type
 }
 
-trait CmdToken
+trait CmdToken // REFACTOR: rename to Token

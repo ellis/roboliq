@@ -10,6 +10,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.reflect.runtime.{universe => ru}
 import scala.reflect.runtime.universe.Type
 import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.runtime.universe.typeOf
+import scala.reflect.runtime.universe.typeTag
 import scala.util.Try
 import scalaz._
 import grizzled.slf4j.Logger
@@ -72,51 +74,22 @@ class ProcessorData(
 	private val handler_m: Map[String, CommandHandler[_ <: Object]] = handler_l.map(handler => handler.id -> handler).toMap
 	private val eventHandler_m: Map[Class[_], EventHandler] = eventHandler_l0.map(handler => handler.eventClass -> handler).toMap
 	
-	val db = new DataBase
+	val db = new DataBase2
 	// Top levels command nodes
 	var cmd1_l: List[Node] = Nil
 	// Conversion nodes
-	val kcNode_m = new HashMap[KeyClass, Node_Conversion]
+	//val kcNode_m = new HashMap[KeyClass, Node_Conversion]
 	val state_m = new HashMap[Node, NodeState]
 	// REFACTOR: this is a hack...
-	val defaultKc_l = new ArrayBuffer[KeyClass]
-	//val status_m = new HashMap[Node, Status.Value]
-	//val dep_m: MultiMap[KeyClass, Node] = new HashMap[KeyClass, mutable.Set[Node]] with MultiMap[KeyClass, Node]
-	//val children_m = new HashMap[Node, List[Node]]
-	//val result_m = new HashMap[Node, RqResult[_]]
-	//val entity_m = new HashMap[KeyClass, RqFunctionArgs]
-	//val fnCache_m = new HashMap[RqFunctionInputs, RqReturn]
-	//val argsCache_m = new HashMap[RqArgs, RqInputs]
-	val cache_m = new HashMap[KeyClass, Object]
-	/** Map from source ID to vessel IDs containing that source */
-	val sources_m = new HashMap[String, List[String]]
-	//val entityChanged_l = mutable.Set[KeyClass]()
-	// List of nodes for which we want to force a check of whether inputs are ready.
-	//val nodeCheck_l = mutable.Set[Node]()
-	//val inputs_m = new HashMap[Node, RqResult[List[Object]]]
-	//val entityStatus_m = new HashMap[KeyClass, Status.Value]
-	//val entityMessages_m = new HashMap[KeyClass, RqResult[_]]
+	//val defaultKc_l = new ArrayBuffer[KeyClass]
+	//val cache_m = new HashMap[KeyClass, Object]
+	///** Map from source ID to vessel IDs containing that source */
+	//val sources_m = new HashMap[String, List[String]]
 	val token_m = new HashMap[List[Int], CmdToken]
 	val lookupMessage_m = new HashMap[String, RqResult[Unit]]
 	val internalMessage_l = new ArrayBuffer[RqResult[Unit]]
-	//val computationMessage_m = new HashMap[List[Int], RqResult[Unit]]
-	//val conversionMessage_m = new HashMap[KeyClass, RqResult[Unit]]
-	//val plateWell_m = new HashMap[String, PlateWell]
-	//val well_m = new HashMap[String, Well]
-	//val events_m = new HashMap[List[Int], List[Event]]
 	
 	val conversion_m = new HashMap[Type, RqFunctionHandler]
-	/*conversion_m(ru.typeOf[String]) = Conversions.asString
-	conversion_m(ru.typeOf[Integer]) = Conversions.asInteger
-	conversion_m(ru.typeOf[Boolean]) = Conversions.asBoolean
-	conversion_m(ru.typeOf[TipModel]) = Conversions.tipModelHandler
-	conversion_m(ru.typeOf[Tip]) = Conversions.tipHandler
-	conversion_m(ru.typeOf[PlateModel]) = Conversions.asPlateModel
-	conversion_m(ru.typeOf[PlateLocation]) = Conversions.plateLocationHandler
-	conversion_m(ru.typeOf[Plate]) = Conversions.plateHandler
-	conversion_m(ru.typeOf[PlateState]) = Conversions.plateStateHandler
-	conversion_m(ru.typeOf[List[String]]) = Conversions.asStringList*/
-	//conversion_m(ru.typeOf[Test]) = Conversions.testHandler
 	
 	def loadJsonData(file: java.io.File): RqResult[Unit] = {
 		Try {
@@ -150,28 +123,13 @@ class ProcessorData(
 		}
 	}
 	
-	def loadEntity[A <: Entity : TypeTag](a: A): RqResult[Unit] = {
-		val typ = ru.typeOf[A]
-		println("--------------")
-		for {
-			table <- ConversionsDirect.findTableForType(typ)
-			_ = println("A")
-			jsval <- ConversionsDirect.toJson[A](a)
-			_ = println("B")
-			//jsobj <- Try(jsval.asJsObject) : RqResult[JsObject]
-			_ = println("C")
-			_ <- loadJsonData(JsObject(table -> JsArray(jsval)))
-			_ = println("D")
-		} yield ()
-	}
-	
 	def setPipetteDevice(device: roboliq.devices.pipette.PipetteDevice) {
 		val kc = KeyClass(TKP("pipetteDevice", "default", Nil), ru.typeOf[roboliq.devices.pipette.PipetteDevice])
 		cache_m(kc) = device
 	}
 
-	def setCommands(cmd_l: List[JsObject]) {
-		cmd1_l = handleComputationItems(None, cmd_l.map(js => ComputationItem_Command(js)))
+	def setCommands(cmd_l: List[Cmd]) {
+		cmd1_l = handleComputationItems(None, cmd_l.map(cmd => ComputationItem_Command(cmd)))
 		registerNodes(cmd1_l)
 	}
 
@@ -201,7 +159,7 @@ class ProcessorData(
 					// Create node
 					val node = Node_Command(parent_?, index, fnargs0, desc=cmd.toString)
 					// Store command
-					setEntity(node.contextKey, cmd)
+					db.addCmd(node.contextKey.key, cmd)
 					List(node)
 				case RqItem_Function(fnargs) =>
 					List(Node_Computation(parent_?, index, parent_?.flatMap(_.contextKey_?), fnargs))
@@ -211,19 +169,17 @@ class ProcessorData(
 					Nil
 				case ComputationItem_Events(event_l) =>
 					List(Node_Events(parent_?, index, event_l, eventHandler_m.toMap))
-				case ComputationItem_Entity(key, jsval) =>
-					println("ComputationItem_Entity: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
+				case ComputationItem_Entity(tpe, entity) =>
+					logger.trace(s"ComputationItem_Entity: $tpe, $entity")
 					//sys.exit()
 					//5 / 0
-					if (key.table.endsWith("State"))
-						setState(key, List(0), jsval)
-					else
-						setEntity(key, jsval)
+					db.set(tpe, entity)
 					Nil
-				case EventItem_State(key, jsval) =>
-					println("EventItem_State: "+(key, parent_?.map(_.time).getOrElse(List(0)), jsval))
+				case EventItem_State(tpe, state) =>
+					val time = parent_?.map(_.time).getOrElse(Nil)
+					logger.trace(s"EventItem_State: $tpe, $state, $time")
 					//sys.exit()
-					db.setAt(key, parent_?.map(_.time).getOrElse(List(0)) ++ List(Int.MaxValue), jsval)
+					db.setAfter(tpe, state, time)
 					Nil
 				case _ =>
 					Nil
@@ -232,17 +188,35 @@ class ProcessorData(
 	}
 	
 	private def concretizeArgs(
-		fnargs: RqFunctionArgs,
+		fnlookups: RqFunctionLookups,
 		contextKey_? : Option[TKP],
 		parent_? : Option[Node],
 		index: Int
 	): RqFunctionArgs = {
-		fnargs.copy(arg_l = concretizeArgs(fnargs.arg_l, contextKey_?, parent_?, index))
+		RqFunctionArgs(
+			fn = fnlookups.fn,
+			arg_l = fnlookups.lookup_l.map(_ match {
+				case Lookup_Command
+case class Lookup_Command(tpe: Type, context: List[Int] = Nil) extends Lookup {
+	val keyName = s"cmd[${context.mkString("/")}]"
+}
+case class Lookup_Entity(tpe: Type, id: String) extends Lookup {
+	val keyName = s"$tpe[$id]"
+}
+case class Lookup_EntityOption(tpe: Type, id: String) extends Lookup {
+	val keyName = s"$tpe[$id]?"
+}
+case class Lookup_EntityList(tpe: Type, id_l: List[String]) extends Lookup {
+	val keyName = s"$tpe[${id_l.mkString(",")}]"
+}
+case class Lookup_EntityAll(tpe: Type) extends Lookup {
+			})
+		)
 	}
 
 	// REFACTOR: Remove this, if the functionality is now is Node
 	private def concretizeArgs(
-		kco_l: List[KeyClassOpt],
+		arg_l: List[Lookup],
 		contextKey_? : Option[TKP],
 		parent_? : Option[Node],
 		index: Int
@@ -284,12 +258,12 @@ class ProcessorData(
 							val fnargs2 = concretizeArgs(fnargs, node.contextKey_?, Some(node), index)
 							Some(Node_Conversion(Some(node), None, Some(index), node.time, node.contextKey_?, fnargs2, node.kc))
 						case ConversionItem_Object(obj) =>
-							
-							setCacheObj(node.kc, obj)
+							db.set(node.kc.clazz, obj)
 							None
-						case EventItem_State(key, jsval) =>
-							val time = if (node.time == List(0)) node.time else node.time ++ List(Int.MaxValue)
-							setState(key, time, jsval)
+						case EventItem_State(tpe, state) =>
+							logger.trace(s"EventItem_State: $tpe, $state, $time")
+							val time = if (node.time == List(0)) Nil else node.time
+							db.setAfter(tpe, state, time)
 							None
 						case _ =>
 							internalMessage_l += RqError("invalid return item for a conversion node")
@@ -326,14 +300,11 @@ class ProcessorData(
 	}
 	
 	private def makeConversionNodesForInputs(node: Node) {
-		val default_l = makeConversionNodesForDefaults(node)
-		
 		// Try to add missing conversions for inputs which are not JsValues 
-		val l0 = node.input_l.filter(kco => !kco.kc.isJsValue && !kcNode_m.contains(kco.kc)).zipWithIndex.flatMap(pair => {
+		val l = node.input_l.filter(kco => !kco.kc.isJsValue && !kcNode_m.contains(kco.kc)).zipWithIndex.flatMap(pair => {
 			val (kco, i) = pair
 			makeConversionNodesForInput(node, kco, i + 1)
 		})
-		val l = default_l ++ l0 
 		// FIXME: for debug only
 		l.foreach(node => assert(kcNode_m.contains(node.kc)))
 		//println("node.input_l: "+node.input_l)
@@ -351,92 +322,6 @@ class ProcessorData(
 			case Some(node2) =>
 				node2
 		}
-	}
-	
-	private def makeConversionNodesForDefaults(node: Node): List[Node_Conversion] = {
-		// Create default entities
-		// TODO: Create a general approach to creating default objects
-		node.input_l.filter(kco => kco.kc.isJsValue).flatMap(kco => {
-			val time = List(0)
-			val kc = kco.kc.copy(time = time)
-			// If object is not already in database:
-			if (db.getAt(kc.key, time).isError && !defaultKc_l.contains(kc)) {
-				val id = kc.key.key
-				import RqFunctionHandler._
-				kc.key.table match {
-					// If there is no initial tipState registered yet:
-					case "tipState" =>
-						val fnargs = fnRequire(lookup[Tip](id)) { (tip) =>
-							val tipState = TipState.createEmpty(tip)
-							for {
-								tipStateJson <- ConversionsDirect.toJson(tipState)
-							} yield {
-								List(returnEvent(kc.key, tipStateJson))
-							}
-						}
-						defaultKc_l += kc
-						List(regconv(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc)))
-					case "vessel" =>
-						db.set(kc.key, JsObject("id" -> JsString(id)))
-						Nil
-					case "vesselState" =>
-						val fnargs = fnRequire(lookup[Vessel](id)) { (vessel) =>
-							val vesselState = VesselState(vessel, VesselContent.Empty)
-							for {
-								vesselStateJson <- ConversionsDirect.toJson[VesselState](vesselState)//Conversions.vesselStateToJson(vesselState)
-							} yield {
-								//println("vesselStateJson: "+vesselStateJson)
-								//db.set(kc.key, time, vesselStateJson)
-								//println("indb: "+db.get(kc.key))
-								//sys.exit()
-								List(returnEvent(kc.key, vesselStateJson))
-							}
-						}
-						defaultKc_l += kc
-						List(regconv(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc)))
-					case "vesselSituatedState" =>
-						WellSpecParser.parse(id) match {
-							// If well list is empty, this is a tube
-							case RqSuccess(List((plate, Nil)), _) =>
-								// Look up the tube's initial location
-								val fnargs = fnRequire(lookup[VesselState](id), lookup[InitialLocation](id)) { (vesselState, loc) =>
-									// The tube's plate must be set
-									for {
-										position <- loc.position_?.asRq(s"the tube `$id` must have its initial `position` set on a plate")
-										well = VesselSituatedState(vesselState, position)
-										jsval <- ConversionsDirect.toJson[VesselSituatedState](well)
-									} yield {
-										List(returnEvent(kc.key, jsval))
-									}
-								}
-								defaultKc_l += kc
-								List(regconv(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc)))
-							// If there is a plate and a single well:
-							case RqSuccess(List((plate, WellSpecOne(rc) :: Nil)), _) =>
-								// Look up the tube's initial location
-								val fnargs = fnRequire(lookup[VesselState](id), lookup[PlateState](plate)) { (vesselState, plateState) =>
-									val index = WellSpecParser.wellIndex(plateState, rc.row, rc.col)
-									val position = VesselPosition(plateState, index)
-									val well = VesselSituatedState(vesselState, position)
-									println(s"default VesselPosition[$id] = ${well.index}, ${well.row}, ${well.col}")
-									for {
-										jsval <- ConversionsDirect.toJson[VesselSituatedState](well)
-									} yield {
-										List(returnEvent(kc.key, jsval))
-									}
-								}
-								defaultKc_l += kc
-								List(regconv(Node_Conversion(None, Some(kc.id), None, time, None, fnargs, kc)))
-							case _ =>
-								Nil
-						}
-					case _ =>
-						Nil
-				}
-			}
-			else
-				Nil
-		})
 	}
 	
 	private def makeConversionNodesForInput(node: Node, kco: KeyClassOpt, index: Int): List[Node_Conversion] = {
@@ -471,27 +356,14 @@ class ProcessorData(
 				}
 				// If we are supposed to return a list of all entities in the given table:
 				else if (kc.clazz <:< ru.typeOf[List[_]] && kc.key.key == "*") {
-					val tkp_l = db.getAllKeys(kc.key.table).sortBy(_.id)
-					// type parameter of option (e.g, if List[String], clazz2 will be String)
-					val clazz2 = kc.clazz.asInstanceOf[ru.TypeRefApi].args.head
-					val kco2_l = tkp_l.map(tkp => KeyClassOpt(KeyClass(tkp, clazz2, time2)))
-					
+					// FIXME: this will not update when database updates!
 					val fnargs1 = RqFunctionArgs(
-						arg_l = kco2_l,
-						fn = (l: List[Object]) => { 
-							RqSuccess(List(ConversionItem_Object(l)))
+						arg_l = Nil,
+						fn = (l: List[Object]) => {
+							RqSuccess(List(ConversionItem_Object(db.getAll(kc.clazz))))
 						}
 					)
-					val node1 = regconv(Node_Conversion(None, Some(kc.id), None, time2, None, fnargs1, kc))
-					
-					// FIXME: HACK: this will not update when items are added or removed from the table
-					val x = node1 :: kco2_l.zipWithIndex.flatMap(pair => {
-						val (kco2, i) = pair
-						makeConversionNodesForInput(node1, kco2, i + 1)
-					})
-					//println("x: "+x)
-					//sys.exit()
-					x
+					List(regconv(Node_Conversion(None, Some(kc.id), None, time2, None, fnargs1, kc)))
 				}
 				// REFACTOR: HACK: this kind of thing should be taken care of in a general fashion
 				else if (kc.clazz <:< ru.typeOf[roboliq.devices.pipette.PipetteDevice]) {
@@ -559,171 +431,18 @@ class ProcessorData(
 		}
 	}
 	
-	def setEntity(key: TKP, jsval: JsValue) {
-		db.set(key, jsval)
-		val kc = KeyClass(key, ru.typeOf[JsValue])
-		registerEntity(kc)
-		
-		// REFACTOR: This is a hack (but *maybe* not too bad)
-		// Generate additional entities that may be required:
-		val id = key.key
-		key.table match {
-			case "vessel" => addSource(id, id)
-			case "plate" =>
-				getObjFromDbAt[Plate](id, Nil) match {
-					case x: RqError[Plate] => logger.error("Could not load plate for creation of `source` entity: "+x.toString)
-					case RqSuccess(plate, _) =>
-						val wellId_l = (0 until plate.nWells).map(i => WellSpecParser.wellId(plate, i)).toList
-						wellId_l.foreach(wellId => addSource(id, wellId))
-						wellId_l.foreach(wellId => addSource(wellId, wellId))
-				}
-			case _ =>
-		}
+	def setEntity[A <: Entity : TypeTag](a: A): RqResult[Unit] =
+		setEntity(ru.typeTag[A].tpe, a)
+	
+	def setEntity(tpe: Type, entity: Entity): RqResult[Unit] = {
+		db.set(tpe, entity)
 	}
 	
-	def setState(key: TKP, time: List[Int], jsval: JsValue) {
-		println(s"setState($key, $time, $jsval)")
-		db.setAt(key, time, jsval)
-		val kc = KeyClass(key, ru.typeOf[JsValue])
-		registerEntity(kc)
-		//val jsChanged_l = db.popChanges.map(KeyClass(_, ru.typeOf[JsValue]))
-		//entityChanged_l ++= jsChanged_l
-		/*val changed_l = db.popChanges
-		changed_l.foreach(tkp => {
-			val kc = KeyClass(tkp, ru.typeOf[JsValue])
-			// Queue the computations for which all inputs are available 
-			dep_m.get(kc).map(_.foreach(updateComputationStatus))
-		})*/
-
-		// REFACTOR: This is a hack -- need to accumulate this information instead, and then create the SourceState object when requested
-		// Generate additional entities that may be required:
-		val id = key.key
-		key.table match {
-			case "vessel" => addSource(id, id)
-			case "plate" =>
-				getObjFromDbAt[Plate](id, Nil) match {
-					case x: RqError[Plate] => logger.error("Could not load plate for creation of `source` entity: "+x.toString)
-					case RqSuccess(plate, _) =>
-						val wellId_l = (0 until plate.nWells).map(i => WellSpecParser.wellId(plate, i)).toList
-						wellId_l.foreach(wellId => addSource(id, wellId))
-						wellId_l.foreach(wellId => addSource(wellId, wellId))
-				}
-			case "vesselState" if ListIntOrdering.compare(time, List(0)) <= 0 =>
-				if (db.get(TKP("vessel", id, Nil)).isError)
-					setEntity(TKP("vessel", id, Nil), JsObject("id" -> JsString(id)))
-
-				getObjFromDbAt[VesselState](id, time) match {
-					case x: RqError[VesselState] => logger.error("Could not load VesselState for creation of `source` entity: "+x.toString)
-					case RqSuccess(vesselState, _) =>
-						if (vesselState.isSource) {
-							addSource(vesselState.liquid.id, id)
-							for ((substance, _) <- vesselState.content.substanceToMol) {
-								addSource(substance.id, id)
-							}
-						}
-				}
-			case _ =>
-		}
+	def setState(tpe: Type, state: Entity, time: List[Int]) {
+		//logger.trace(s"setState($tpe, $state, $time)")
+		db.setAfter(tpe, state, time)
 	}
 
-	def setEntity[A: TypeTag](id: String, a: A, time: List[Int] = Nil): RqResult[Unit] = {
-		val typ = ru.typeTag[A].tpe
-		for {
-			table <- ConversionsDirect.findTableForType(typ)
-			jsval <- ConversionsDirect.toJson(a)
-		} yield {
-			val tkp = TKP(table, id, Nil)
-			setState(tkp, time, jsval)
-			()
-		}
-	}
-	
-	private def registerEntity(kc: KeyClass) {
-		//entityStatus_m(kc) = Status.Success
-	}
-	
-	private def addSource(idSource: String, idVessel: String) {
-		println(s"addSource($idSource, $idVessel)")
-		sources_m.update(idSource, idVessel :: sources_m.getOrElse(idSource, Nil))
-	}
-	
-	private def createVesselSource(id: String) {
-		db.set(TKP("source", id, Nil), JsObject("id" -> JsString(id), "vessels" -> JsArray(JsString(id))))
-	}
-
-	private def setCacheObj(kc: KeyClass, obj: Object) {
-		assert(kc.clazz != ru.typeOf[JsValue])
-		cache_m(kc) = obj
-		//entityChanged_l += kc
-		registerEntity(kc)
-		// Queue the computations for which all inputs are available 
-		//dep_m.get(kc).map(_.foreach(updateComputationStatus))
-	}
-
-	/*
-	// For each of the node's inputs, add the node to the input's dependency list
-	private def addDependencies(node: Node) {
-		node.input_l.foreach(kco => {
-			val kc = kco.kc
-			dep_m.addBinding(kc, node)
-			if (kc.clazz == ru.typeOf[JsValue])
-				db.addWatch(kc.key)
-
-			// Schedule lookups and create conversion nodes
-			for (kco <- node.input_l) {
-				val kc = kco.kc
-				val kc0 = kc.copy(clazz = ru.typeOf[JsValue])
-				
-				// JsValue lookup
-				if (!entityStatus_m.contains(kc0))
-					entityStatus_m(kc0) = Status.Ready
-					
-				// Conversion
-				if (!entityStatus_m.contains(kc)) {
-					assert(!kcNode_m.contains(kc))
-					entityStatus_m(kc) = Status.NotReady
-					conversion_m.get(kc.clazz) match {
-						case Some(conversion) =>
-							val fn = (l: List[Object]) => l match {
-								case List(jsval: JsValue) =>
-									conversion(jsval)
-							}
-							val node = new Node_Conversion(None, Some(kc.toString), 0, kc, List(KeyClassOpt(kc0)), fn)
-							kcNode_m(kc) = node
-							registerNode(node)
-						case None =>
-							conversionMessage_m(kc) = RqError[Unit]("No converter registered for "+kc.clazz)
-					}
-				}
-			}
-		})
-	}
-	*/
-	
-	/*
-	private def updateComputationStatus(node: Node) {
-		println("entityStatus_m: "+entityStatus_m)
-		val b = node.input_l.forall(entityStatus_m.get(_) == Some(Status.Success))
-		if (b) {
-			if (status_m.get(node) != Some(Status.Success)) {
-				status_m(node) = Status.Ready
-				/*val input_l = node.input_l.map(entity_m)
-				node match {
-					case n: Node_Command =>					
-						workerRouter ! ActorMessage_CommandLookup(n)
-					case n: Node_Computation =>
-						workerRouter ! ActorMessage_ComputationInput(n, input_l)
-					case n: Node_Conversion =>
-						workerRouter ! ActorMessage_ConversionInput(n, input_l)
-				}*/
-			}
-		}
-		else {
-			status_m(node) = Status.NotReady
-		}
-	}
-	*/
-	
 	// Match "tbl[key]"
 	private val Rx1 = """^([a-zA-Z]+)\[([0-9.]+)\]$""".r
 	// Match "tbl[key].field"
@@ -733,7 +452,6 @@ class ProcessorData(
 	def run(maxLoops: Int = -1): ProcessorGraph = {
 		var countdown = maxLoops
 		var step_i = 0
-		makeDefaults()
 		val g = new ProcessorGraph
 		while (countdown != 0) {
 			g.setStep(step_i)
@@ -745,27 +463,6 @@ class ProcessorData(
 		}
 		//makeMessagesForMissingInputs()
 		g
-	}
-	
-	private def makeDefaults() {
-		db.getAllKeys("tip") foreach { tkp =>
-			val id = tkp.key
-			val tkp_# = TKP("tipState", id, Nil)
-			if (db.getAt(tkp_#, List(0)).isError) {
-				val x = for {
-					tip <- getObjFromDbAt[Tip](id, Nil)
-					tipState = TipState.createEmpty(tip)
-					tipStateJson <- ConversionsDirect.toJson(tipState)
-				} yield {
-					db.setAt(tkp_#, List(0), tipStateJson)
-				}
-				x match {
-					case x : RqError[Unit] => logger.error(s"makeDefaults: couldn't load tip `$id`")
-					case _ =>
-				}
-			}
-		}
-		
 	}
 	
 	private class NodeListBuilder {
@@ -972,32 +669,11 @@ class ProcessorData(
 	}
 	
 	private def getEntity(kc: KeyClass): RqResult[Object] = {
-		println(s"getEntity($kc)")
-		if (kc.clazz == ru.typeOf[JsValue]) {
-			// REFACTOR: This is a horrible hack -- implement a better system!
-			val x = 
-				if (kc.time.isEmpty)
-					db.get(kc.key)
-				else
-					db.getBefore(kc.key, kc.time)
-			println(" x: "+x)
-			if (x.isError && kc.key.table == "source" && sources_m.contains(kc.key.key)) {
-				val id = kc.key.key
-				val wellId_l = sources_m(id).reverse.distinct
-				val jsobj = JsObject(
-					"id" -> JsString(id),
-					"vessels" -> JsArray(wellId_l.map(JsString(_)))
-				)
-				db.set(TKP("source", id, Nil), jsobj)
-				println("get source: " + db.get(kc.key))
-				RqSuccess(jsobj)
-			}
-			else
-				x
-		}
-		else {
-			cache_m.get(kc).asRq(s"object not found `$kc`")
-		}
+		logger.trace(s"getEntity($kc)")
+		if (kc.time.isEmpty)
+			db.get(kc.clazz, kc.key.key)
+		else
+			db.getAt(kc.clazz, kc.key.key, kc.time)
 	}
 	
 	private def getEntity(kco: KeyClassOpt): RqResult[Object] = {
@@ -1008,47 +684,10 @@ class ProcessorData(
 			res
 	}
 	
-	def getObjFromDbBefore[A <: Object : TypeTag](id: String, time: List[Int]): RqResult[A] = {
-		val typ = ru.typeTag[A].tpe
-		logger.trace(s"getObjFromDbBefore[$typ]($id, $time)")
-		for {
-			table <- ConversionsDirect.findTableForType(typ)
-			kc = KeyClass(TKP(table, id, Nil), typ, Nil)
-			//_ = println("kc: "+kc)
-			obj <- cache_m.get(kc) match {
-				case Some(x) => RqSuccess(x.asInstanceOf[A])
-				case None => Conversions.readByIdBefore[A](db, id, time)
-			}
-		} yield obj
-	}
-	
-	// REFACTOR: basically a duplicate of getObjFromDbBefore().  Should figure out a better approach to this before/after stuff for states.
-	def getObjFromDbAt[A <: Object : TypeTag](id: String, time: List[Int]): RqResult[A] = {
-		val typ = ru.typeTag[A].tpe
-		logger.trace(s"getObjFromDbAt[$typ]($id, $time)")
-		for {
-			table <- ConversionsDirect.findTableForType(typ)
-			kc = KeyClass(TKP(table, id, Nil), typ, Nil)
-			//_ = println("kc: "+kc)
-			obj <- cache_m.get(kc) match {
-				case Some(x) => RqSuccess(x.asInstanceOf[A])
-				case None => Conversions.readByIdAt[A](db, id, time)
-			}
-		} yield obj
-	}
-	
-	private def createCommandFnArgs(cmd: JsObject): RqFunctionArgs = {
-		val cmd_? : Option[String] = cmd.fields.get("cmd").flatMap(_ match {
-			case JsString(s) => Some(s)
-			case _ => None
-		})
-		cmd_? match {
-			case None => RqFunctionArgs(_ => RqError("missing field `cmd`"), Nil)
-			case Some(name) =>
-				handler_m.get(name) match {
-					case None => RqFunctionArgs(_ => RqError(s"no handler found for `cmd = ${name}`"), Nil)
-					case Some(handler) => handler.fnargs
-				}
+	private def createCommandFnArgs(cmd: Cmd): RqFunctionArgs = {
+		handler_m.get(cmd.cmd) match {
+			case None => RqFunctionArgs(_ => RqError(s"no handler found for `cmd = ${cmd.cmd}`"), Nil)
+			case Some(handler) => handler.fnargs
 		}
 	}
 	
