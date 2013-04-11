@@ -1,0 +1,7 @@
+(define (problem disjunctive-pb)
+   	(:domain disjunctive)
+   	(:requirements :strips :disjunctive-preconditions :conditional-effects)
+   	(:objects a b)
+	(:init (p1 a b))              
+	(:goal (p3 a b))
+)
