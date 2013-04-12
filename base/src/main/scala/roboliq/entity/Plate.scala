@@ -15,7 +15,7 @@ case class Plate(
 	val id: String,
 	val model: PlateModel,
 	val locationPermanent_? : Option[String]
-) extends Ordered[Plate] {
+) extends Entity with Ordered[Plate] {
 	/** Number of rows. */
 	def nRows: Int = model.rows
 	/** Number of columns. */

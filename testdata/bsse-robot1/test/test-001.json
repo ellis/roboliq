@@ -3,15 +3,12 @@
 	{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
 ],
 "plateState": [
-	{ "id": "P1", "location": "cooled1" }
+	{ "id": "P1", "location": "cooled1hi" }
 ],
 "vesselState": [
-	{ "id": "P1(A01)", "content": { "idVessel": "T1", "solventToVolume": { "water": "100ul" } } }
-],
-"vesselSituatedState": [
-  { "id": "P1(A01)", "position": { "plate": "P1", "index": 0 } }
+	{ "id": "P1(A01)", "content": { "water": "100ul" } }
 ],
 "cmd": [
-  { "cmd": "pipetter.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
+  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": "Water free dispense"}] }
 ]
 }

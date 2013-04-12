@@ -16,13 +16,28 @@ import roboliq.utils.MathUtils
 
 
 // REFACTOR: Make this private again once I've merged ConversionsDirect and Conversions into Converter
-case class TableInfo[A <: Object : TypeTag](
+case class TableInfo(
+	tpe: Type,
 	table: String,
 	id_? : Option[String] = None,
-	toJson_? : Option[A => RqResult[JsValue]] = None,
-	fromJson_? : Option[JsValue => RqResult[A]] = None
+	toJson_? : Option[_ <: Entity => RqResult[JsValue]] = None,
+	fromJson_? : Option[JsValue => RqResult[_ <: Entity]] = None
 ) {
-	val typ = ru.typeTag[A].tpe
+	val typ = tpe
+}
+
+object TableInfo {
+	def apply[A <: Object : TypeTag](
+		table: String,
+		id_? : Option[String] = None,
+		toJson_? : Option[A => RqResult[JsValue]] = None,
+		fromJson_? : Option[JsValue => RqResult[A]] = None
+	): TableInfo = {
+		TableInfo(ru.typeTag[A].tpe, table, id_?,
+			None, //toJson_?,
+			None //fromJson_?
+		)
+	}
 }
 
 private sealed trait ConvResult {
@@ -59,8 +74,9 @@ case class Quantity_Mole(n: BigDecimal) extends Quantity
 object ConversionsDirect {
 	private val logger = Logger("roboliq.processor.ConversionsDirect")
 	
-	val tableInfo_l = List[TableInfo[_ <: Object]](
+	val tableInfo_l = List[TableInfo](
 		TableInfo[TipModel]("tipModel", None, None),
+		TableInfo[PipettePolicy]("pipettePolicy"),
 		TableInfo[PlateModel]("plateModel", None, None),
 		TableInfo[TubeModel]("tubeModel", None, None),
 		TableInfo[PlateLocation]("plateLocation", None, None),
@@ -140,11 +156,11 @@ object ConversionsDirect {
 		)
 	)
 	
-	private def findTableInfoForType(tpe: ru.Type): RqResult[TableInfo[_]] = {
+	private def findTableInfoForType(tpe: ru.Type): RqResult[TableInfo] = {
 		tableInfo_l.find(tpe <:< _.typ).asRq(s"type `$tpe` has no table")
 	}
 	
-	private def findTableInfoForTable(table: String): RqResult[TableInfo[_]] = {
+	private def findTableInfoForTable(table: String): RqResult[TableInfo] = {
 		tableInfo_l.find(_.table == table).asRq(s"table `$table` has no table info")
 	}
 	
@@ -221,7 +237,7 @@ object ConversionsDirect {
 		else if (typ <:< typeOf[scala.collection.GenTraversable[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(0)
 			val l = obj.asInstanceOf[scala.collection.GenTraversable[_]]
-			RqResult.toResultOfList(l.map(o => toJson2(o, typ2)).toList).map(JsArray(_))
+			RqResult.toResultOfList(l.map(o => toJsonOrId(o, typ2)).toList).map(JsArray(_))
 		}
 		else if (typ <:< typeOf[Object]) {
 			val ctor = typ.member(ru.nme.CONSTRUCTOR).asMethod
@@ -840,7 +856,7 @@ object Conversions {
 	
 	def toJsonConfig(l: List[Object]): RqResult[JsObject] = {
 		val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
-		val classToInfo_m: Map[Class[_], TableInfo[_]] =
+		val classToInfo_m: Map[Class[_], TableInfo] =
 			D.tableInfo_l.map(info => mirror.runtimeClass(info.typ) -> info).toMap
 		
 		val l0: List[RqResult[(String, JsValue)]] = l.map(o => {

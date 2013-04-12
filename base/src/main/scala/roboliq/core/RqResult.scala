@@ -32,6 +32,10 @@ sealed trait RqResult[+A] {
 	  */
 	@inline final def orElse[B >: A](alternative: => RqResult[B]): RqResult[B] =
 		if (isEmpty) alternative else this
+	
+	def flatten[B](implicit ev: A <:< RqResult[B]): RqResult[B]
+	
+	def toOption: Option[A]
 }
 
 object RqResult {
@@ -67,6 +71,11 @@ sealed case class RqSuccess[+A](res: A, warning_r: List[String] = Nil) extends R
 	def isError = false
 
 	def getOrElse[B >: A](default: => B): B = res
+
+	def flatten[B](implicit ev: A <:< RqResult[B]): RqResult[B] =
+    	ev(res)
+    
+    def toOption: Option[A] = Some(res)
 }
 
 sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = Nil) extends RqResult[A] {
@@ -79,6 +88,11 @@ sealed case class RqError[+A](error_l: List[String], warning_r: List[String] = N
 	def isError = true
 
 	def getOrElse[B >: A](default: => B): B = default
+
+	def flatten[B](implicit ev: A <:< RqResult[B]): RqResult[B] =
+    	RqError(error_l, warning_r)
+
+    def toOption: Option[A] = None
 }
 
 object RqError {
@@ -100,9 +114,19 @@ trait RqPimper {
 		def point[A](a: => A) = new RqSuccess[A](a)
 	}
 	
+	implicit def resultResultToResult[A](o: RqResult[RqResult[A]]): RqResult[A] =
+		o.flatten
+	
 	implicit def tryRqResultToRqResult[A](o: scala.util.Try[RqResult[A]]): RqResult[A] = {
 		o match {
 			case scala.util.Success(x) => x
+			case scala.util.Failure(x) => RqError(x.getMessage())
+		}
+	}
+	
+	implicit def tryToRqResult[A](o: scala.util.Try[A]): RqResult[A] = {
+		o match {
+			case scala.util.Success(x) => RqSuccess(x)
 			case scala.util.Failure(x) => RqError(x.getMessage())
 		}
 	}

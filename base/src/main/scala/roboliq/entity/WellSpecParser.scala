@@ -89,16 +89,16 @@ private object WellSpecParser0 extends JavaTokenParsers {
 		RqSuccess(parseAll(plates, input).getOrElse(Nil))
 	}
 	
-	/*
-	def parseToIds(input: String, ob: ObjBase): roboliq.core.Result[List[String]] = {
+	def parseToIds(input: String): RqResult[List[String]] = {
 		for {
 			l <- parse(input)
-			lId <- Result.mapOver(l){entry => entryToIds(entry._1, entry._2, ob)}.map(_.flatten)
+			id_ll <- RqResult.toResultOfList(l.map(entry => entryToIds(None, entry._1, entry._2)))
 		} yield {
-			lId
+			id_ll.flatten
 		}
 	}
 	
+	/*
 	private def entryToIds(idPlate: String, lWellSpec: List[WellSpec], ob: ObjBase): Result[List[String]] = {
 		if (lWellSpec.isEmpty)
 			return roboliq.core.Success(List(idPlate))
@@ -133,6 +133,46 @@ private object WellSpecParser0 extends JavaTokenParsers {
 		}
 	}
 	*/
+	
+	private def entryToIds(
+		plate_? : Option[Plate],
+		idPlate: String,
+		lWellSpec: List[WellSpec]
+	): RqResult[List[String]] = {
+		if (lWellSpec.isEmpty)
+			return RqSuccess(List(idPlate))
+		
+		val l = lWellSpec.flatMap(_ match {
+			case WellSpecOne(rc) =>
+				List(idPlate + "(" + rc + ")")
+			/*case WellSpecVertical(rc0, rc1) =>
+				(for {
+					row_i <- rc0.row to rc1.row
+					col_i <- rc0.col to rc1.col
+				} yield {
+					idPlate + "(" + RowCol(row_i, col_i) + ")"
+				}).toList
+			case WellSpecHorizontal(rc0, rc1) =>
+				(for {
+					row_i <- rc0.row to rc1.row
+					col_i <- rc0.col to rc1.col
+				} yield {
+					idPlate + "(" + RowCol(row_i, col_i) + ")"
+				}).toList
+				val i0 = rc0.row * plate.model.cols + rc0.col
+				val i1 = rc1.row * plate.model.cols + rc1.col
+				(for (i <- i0 to i1) yield {
+					val row = i / plate.nCols
+					val col = i % plate.nCols
+					idPlate + "(" + RowCol(row, col) + ")"
+				}).toList*/
+			case WellSpecMatrix(rc0, rc1) =>
+				(for (col <- rc0.col to rc1.col; row <- rc0.row to rc1.row) yield {
+					idPlate + "(" + RowCol(row, col) + ")"
+				}).toList
+		})
+		RqSuccess(l)
+	}
 }
 
 /**
@@ -147,15 +187,14 @@ object WellSpecParser {
 	def parse(input: String): RqResult[List[(String, List[WellSpec])]] =
 		WellSpecParser0.parse(input)
 	
-	/*
-	
 	/**
 	 * Parse `input` as a string of plates and wells,
 	 * and return a list of the referenced well IDs.
 	 */
-	def parseToIds(input: String, ob: ObjBase): roboliq.core.Result[List[String]] =
-		WellSpecParser0.parseToIds(input, ob)
+	def parseToIds(input: String): RqResult[List[String]] =
+		WellSpecParser0.parseToIds(input)
 	
+	/*
 	/**
 	 * Given a list of wells `lWell`, return a string representation.
 	 */

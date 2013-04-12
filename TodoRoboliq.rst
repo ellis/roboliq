@@ -1,15 +1,38 @@
+:Started: 2013-03-16
+
+For workshop.
+
+* Roboease: show interface for other programs; show commands: several basic (move plates, transfer, post mix, prompt), PCR, custom-programmed
+* Quality control: show scripts, graphs, application of data for improving performance; generating new liquid classes
+* Protocols: show evoware scripts?
+* Configuration: show example of reading in files and outputting yaml/json; automatic device loading
+
+Improvements over roboease:
+
+* work with well groups instead of table positions
+* much more information tracked, so many things can be calculated
+* data can be culled from multiple sources
+* easier to use as a tool by other programs
+* extensions using more powerful language (JVM vs perl)
+
 :Started: 2013-03-06
 
-* Create EventHandler[A <: Event] class
+OrangeG 0.08 and 0.8 g/L
+* Try to modify CustomLCs.XML
+* Find location of relevant files -- copy a bunch of evoware files
+
+in ``database`` are files ``*LCs.XML, EVOWARE.{xml,inf,opt}, Carrier.cfg``
+
+* DistributeCmd
+* Well groups
+* Converter from YAML to JSON for more easily writable script files
 * Move some code from roboliq.processor and roboliq.events to roboliq.core so that command handlers only need to import roboliq.core._
-* Register EventHandlers, rather than hard-coding them in Node_Events
+* Maybe do something to put roboliq.events classes into roboliq.entity?
+* Create package roboliq.device.pipette.planner and put planning/scheduling classes in there
 * Load handlers from YAML (and add YAML to Config01)
 * Make DbTable and DbField classes or typeclasses to handle database objects more gracefully
 * Refactor TipState member names
 * Move roboliq.commands to roboliq.device, arm => transport, devices => device
-* Maybe do something to put roboliq.events classes into roboliq.entity?
-* Create package roboliq.device.pipette.planner and put planning/scheduling classes in there
-* PipettePosition as database Entity
 
 :Started: 2013-02-12
 

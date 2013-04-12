@@ -10,8 +10,8 @@ class TipCmdSpec extends CommandSpecBase {
 	describe("pipette.tips") {
 		describe("BSSE configuration") {
 			implicit val p = makeProcessorBsse(
+				Config01.database1Json,
 				Config01.protocol1Json,
-				//{ "cmd": "pipette.tips", "cleanIntensity": "Thorough", "items": [{"tip": "TIP1"}] }
 				JsonParser("""{
 					"cmd": [
 					  { "cmd": "pipette.tips", "cleanIntensity": "Thorough", "tips": ["TIP1"] }
@@ -26,7 +26,7 @@ class TipCmdSpec extends CommandSpecBase {
 			it("should generate correct tokens") {
 				val (_, token_l) = p.getTokenList.unzip
 				val tipState_1 = getState[TipState]("TIP1", List(1))
-				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
+				val vss_P1_A01_1 = getState[VesselSituatedState]("P_1(A01)", List(1))
 				assert(token_l === List(
 					low.WashTipsToken("Thorough", List(tipState_1))
 				))

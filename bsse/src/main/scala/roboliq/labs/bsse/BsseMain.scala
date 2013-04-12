@@ -2,11 +2,10 @@ package roboliq.labs.bsse
 
 import scala.collection.JavaConversions._
 import org.apache.commons.io.FilenameUtils
-import roboliq.core._, roboliq.processor._
+import roboliq.core._, roboliq.entity._, roboliq.processor._
 import roboliq.commands._
 import roboliq.robots.evoware._
 import roboliq.utils.FileUtils
-import station1._
 import java.io.File
 import scala.collection.mutable.Stack
 import java.io.PrintWriter
@@ -34,47 +33,80 @@ object JsonTest {
 	
 		val pathbase = "testdata/bsse-robot1/"
 		val databaseFiles = List(
-			"config/bench-01.json",
+			"config/robot.json",
 			"config/database-01.json"
 		)
-		databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s)))
-		
-		processor.loadJsonData(new java.io.File(pathbase + args(0)))
-		processor.run()
 	
-		val pathToToken_l = processor.getTokenList
-		val token_l = pathToToken_l.map(_._2)
-	
-		val evowareConfigFile = new EvowareConfigFile(pathbase+"config/carrier.cfg")
-		val evowareTable = new StationConfig(evowareConfigFile, pathbase+"config/bench-01.esc")
-		val config = new EvowareConfig(evowareTable.tableFile, evowareTable.mapLabelToSite)
-		val translator = new EvowareTranslator(config)
-
 		val sProtocolFilename = pathbase + args(0)
 		val sBasename = FilenameUtils.removeExtension(sProtocolFilename)
-		//val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
-		//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
-		FileUtils.writeToFile(sBasename+".out", token_l.mkString("\n"))
-
-		/*val doc = new EvowareDoc
-		doc.sProtocolFilename = sProtocolFilename
-		doc.lNode = nodes
-		doc.processorResult = res
-		*/
 		
-		//println(roboliq.yaml.RoboliqYaml.yamlOut.dump(seqAsJavaList(nodes)))
-		translator.translate(token_l) match {
-			case RqError(e, w) =>
-				//doc.lsTranslatorError = ls.toList
-				e.foreach(println)
-				w.foreach(println)
-			case RqSuccess(evowareScript, w) =>
-				//doc.evowareScript = evowareScript
-				// save to file
-				val sScriptFilename = sBasename+".esc"
-				translator.saveWithHeader(evowareScript, sScriptFilename)
+		val message = for {
+			// Load carrier.cfg
+			carrierData <- EvowareCarrierData.loadFile(pathbase+"config/carrier.cfg")
+			// Load .esc file for table template
+			tableData <- EvowareTableData.loadFile(carrierData, pathbase+"config/table-01.esc")
+			// Load user-defined table config
+			configData <- EvowareConfigData.loadFile(pathbase+"config/table-01.yaml")
+			// Load liquid classes
+			defaultLcs <- EvowareLiquidClassParser.parseFile(pathbase+"config/DefaultLCs.XML")
+			customLcs <- EvowareLiquidClassParser.parseFile(pathbase+"config/CustomLCs.XML")
+			// Load evoware entities into processor
+			entityData <- EvowareEntityData.createEntities(carrierData, tableData, configData, defaultLcs ++ customLcs)
+			_ <- RqResult.toResultOfList(entityData.pipettePolicy_l.map(processor.loadEntity[PipettePolicy]))
+			_ <- RqResult.toResultOfList(entityData.plateModel_l.map(processor.loadEntity[PlateModel]))
+			_ <- RqResult.toResultOfList(entityData.plateLocation_l.map(processor.loadEntity[PlateLocation]))
+			_ <- RqResult.toResultOfList(entityData.plate_l.map(processor.loadEntity[Plate]))
+			_ <- RqResult.toResultOfList(entityData.plateState_l.map(processor.loadEntity[PlateState]))
+
+			// Load entities from files
+			_ <- RqResult.toResultOfList(databaseFiles.map(s => processor.loadJsonData(new java.io.File(pathbase + s))))
+			// Load entities and commands from file passed on the command line
+			_ <- processor.loadJsonData(new java.io.File(pathbase + args(0)))
+
+			// Try to run the commands, returning a processor graph
+			graph = processor.run()
+			// write graph as HTML for debugging
+			_ = org.apache.commons.io.FileUtils.writeStringToFile(new java.io.File("lastrun.html"), graph.toHtmlTable)
+
+			pathToToken_l = processor.getTokenList
+			token_l = pathToToken_l.map(_._2)
+
+			//val yamlOut = roboliq.yaml.RoboliqYaml.yamlOut
+			//FileUtils.writeToFile(sBasename+".cmd", yamlOut.dump(seqAsJavaList(cmds)))
+			_ = FileUtils.writeToFile(sBasename+".out", token_l.mkString("", "\n", "\n"))
+	
+			/*val doc = new EvowareDoc
+			doc.sProtocolFilename = sProtocolFilename
+			doc.lNode = nodes
+			doc.processorResult = res
+			*/
+			
+			config = new EvowareConfig(carrierData, tableData, configData)
+			translator = new EvowareTranslator(config)
+			script <- translator.translate(token_l)
+		} yield {
+			val sScriptFilename = sBasename+".esc"
+			translator.saveWithHeader(script, sScriptFilename)
+			()
 		}
 		
+		val l0 = processor.getMessages
+		if (!l0.isEmpty) {
+			println("Proccessor Messages")
+			l0.foreach(println)
+		}
+		
+		message match {
+			case RqError(e, w) =>
+				println("Errors:")
+				e.foreach(println)
+				w.foreach(println)
+			case RqSuccess(_, w) =>
+				if (!w.isEmpty) {
+					println("Warnings:")
+					w.foreach(println)
+				}
+		}		
 		//doc.printToFile(sBasename+".html")
 	}
 }

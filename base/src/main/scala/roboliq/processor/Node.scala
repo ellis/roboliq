@@ -1,5 +1,7 @@
 package roboliq.processor
 
+import scala.reflect.runtime.universe.Type
+
 import spray.json.JsValue
 import spray.json.JsObject
 
@@ -38,14 +40,19 @@ case class RqItem_Function(fnargs: RqFunctionArgs) extends RqItem
 
 case class ComputationItem_Events(event_l: List[Event[Entity]]) extends RqItem
 case class ComputationItem_EntityRequest(id: String) extends RqItem
-case class ComputationItem_Command(cmd: JsObject) extends RqItem
+case class ComputationItem_Entity(tpe: Type, entity: Entity) extends RqItem
+case class ComputationItem_Command(cmd: Cmd) extends RqItem
 case class ComputationItem_Token(token: CmdToken) extends RqItem
 
-case class ConversionItem_Object(obj: Object) extends RqItem
+case class ConversionItem_Object(obj: Entity) extends RqItem
 
-case class EventItem_State(key: TKP, jsval: JsValue) extends RqItem
+case class EventItem_State(tpe: Type, state: Entity) extends RqItem
 
 
+/**
+ * @param path path to node in tree? (not sure)
+ * @param time time of this node for the purpose of state reading/writing
+ */
 sealed trait Node {
 	val id: String
 	val parent_? : Option[Node]
@@ -53,56 +60,26 @@ sealed trait Node {
 	val index_? : Option[Int]
 	val path: List[Int]
 	val time: List[Int]
-	val contextKey_? : Option[TKP]
 	val fnargs: RqFunctionArgs
 	val desc: String
-	
-	// REFACTOR: remove this
-	def input_l = fnargs.arg_l
 }
 
 case class Node_Command(
 	parent_? : Option[Node],
 	index: Int,
-	fnargs0: RqFunctionArgs,
-	desc: String
+	fnargs: RqFunctionArgs,
+	desc: String,
+	cmd: Cmd
 ) extends Node {
 	val path = Node_Command.getCommandPath(parent_?, index)
 	val id = Node_Command.getCommandId(path)
 	val label_? = None
 	val index_? = Some(index)
 	val time = path
-	val contextKey = TKP("cmd", id, Nil)
-	val contextKey_? = Some(contextKey)
-	val fnargs = concretizeArgs
 	
 	println()
 	println("Node_Command "+id)
-	println("contextKey: "+contextKey.id)
-	println("args: "+fnargs.arg_l)
 	println()
-
-	private def concretizeArgs: RqFunctionArgs = {
-		fnargs0.copy(arg_l = concretizeArgs(fnargs0.arg_l))
-	}
-
-	private def concretizeArgs(
-		kco_l: List[KeyClassOpt]
-	): List[KeyClassOpt] = {
-		val idPrefix = path.mkString("", "/", "#")
-		kco_l.zipWithIndex.map(pair => {
-			val (kco0, i) = pair
-			// Set time if this is a state variables
-			val kco = if (kco0.kc.key.table.endsWith("State")) kco0.changeTime(time) else kco0
-			// Substitute in full path for "context" arguments
-			if (kco.kc.key.key == "$") {
-				val key2 = contextKey.copy(key = id, path = contextKey.path ++ kco.kc.key.path)
-				kco.copy(kc = kco.kc.copy(key = key2))
-			}
-			else if (kco.kc.key.key == "#") kco.changeKey(idPrefix+(i+1))
-			else kco
-		})
-	}
 }
 
 object Node_Command {
@@ -114,10 +91,47 @@ object Node_Command {
 		getCommandId(getCommandPath(parent_?, index))
 }
 
+// REFACTOR: Rename to Node_Entity
+case class Node_Entity(
+	key: Key,
+	fnargs: RqFunctionArgs
+) extends Node {
+	val parent_? = None
+	val label_? = None
+	val index_? = None
+	val path = Nil
+	val id = key.name
+	val desc = fnargs.arg_l.map(_.name).mkString("(", ", ", ") => " + key.name)
+	
+	println()
+	println("Node_Conversion "+id)
+	println("desc: "+desc)
+	println()
+}
+
+// REFACTOR: Rename to Node_Entity
+case class Node_Lookup(
+	parent: Node,
+	index: Int,
+	lookupKey: LookupKey,
+	fnargs: RqFunctionArgs
+) extends Node {
+	val parent_? = Some(parent)
+	val label_? = None
+	val index_? = Some(index)
+	val path = parent_?.map(_.path).getOrElse(Nil) ++ index_?
+	val id = s"${parent.id}#$index"
+	val desc = fnargs.arg_l.map(_.name).mkString("(", ", ", ") => " + lookupKey.name)
+	
+	println()
+	println("Node_Lookup "+id)
+	println("desc: "+desc)
+	println()
+}
+
 case class Node_Computation(
 	parent_? : Option[Node],
 	index: Int,
-	contextKey_? : Option[TKP],
 	fnargs0: RqFunctionArgs
 ) extends Node {
 	val path = Node_Command.getCommandPath(parent_?, index)
@@ -126,97 +140,38 @@ case class Node_Computation(
 	val index_? = Some(index)
 	val time = path
 	val fnargs = concretizeArgs
-	val desc = fnargs.arg_l.map(_.kc.id).mkString("(", ", ", ") => Result")
+	val desc = fnargs.arg_l.map(_.name).mkString("(", ", ", ") => Result")
 	
 	println()
 	println("Node_Computation "+id)
-	println("contextKey: "+contextKey_?.map(_.id))
-	println("args: "+fnargs.arg_l)
+	println("desc: "+desc)
 	println()
-
-	private def concretizeArgs: RqFunctionArgs = {
-		fnargs0.copy(arg_l = concretizeArgs(fnargs0.arg_l))
-	}
-
-	private def concretizeArgs(
-		kco_l: List[KeyClassOpt]
-	): List[KeyClassOpt] = {
-		val idPrefix = path.mkString("", "/", "#")
-		kco_l.zipWithIndex.map(pair => {
-			val (kco0, i) = pair
-			// Set time if this is a state variables
-			val kco = if (kco0.kc.key.table.endsWith("State")) kco0.changeTime(time) else kco0
-			// Substitute in full path for "context" arguments
-			if (kco.kc.key.key == "$" && contextKey_?.isDefined) {
-				val contextKey = contextKey_?.get
-				val key2 = contextKey.copy(key = id, path = contextKey.path ++ kco.kc.key.path)
-				kco.copy(kc = kco.kc.copy(key = key2))
-			}
-			else if (kco.kc.key.key == "#") kco.changeKey(idPrefix+(i+1))
-			else kco
-		})
-	}
 }
 
+/*
+// REFACTOR: Rename to Node_Entity
 case class Node_Conversion(
 	parent_? : Option[Node],
 	label_? : Option[String],
 	index_? : Option[Int],
-	time: List[Int],
-	contextKey0_? : Option[TKP],
-	fnargs0: RqFunctionArgs,
-	kc: KeyClass
+	key: Key,
+	fnargs: RqFunctionArgs
 ) extends Node {
 	val path = parent_?.map(_.path).getOrElse(Nil) ++ index_?
 	val id: String = parent_? match {
 		case Some(parent: Node_Conversion) => parent.id + "/" + index_?.toList.mkString
 		case Some(parent) => parent.id + "#" + index_?.toList.mkString
-		case None => kc.id
+		case None => entityId
 	}
-	/*val paramKey_? : Option[String] = parent_? match {
-		case Some(parent: Node_Conversion) => parent.paramKey_?
-		case Some(parent) => Some(parent.id + "#" + index_?.toList.mkString)
-		case None => None
-	}*/
-	val contextKey_? : Option[TKP] = parent_? match {
-		case Some(parent: Node_Conversion) => Some(parent.kc.key)
-		case Some(parent) => parent.contextKey_?
-		case None => Some(kc.key)
-	}
-	val fnargs = concretizeArgs
-	val desc = fnargs.arg_l.map(_.kc.id).mkString("(", ", ", ") => Object")
+	val desc = fnargs.arg_l.map(_.keyName).mkString("(", ", ", ") => Object")
 	
 	println()
 	println("Node_Conversion "+id)
 	println("contextKey: "+contextKey_?)
-	println("args0: "+fnargs0.arg_l)
 	println("args: "+fnargs.arg_l)
 	println()
-
-	private def concretizeArgs: RqFunctionArgs = {
-		fnargs0.copy(arg_l = concretizeArgs(fnargs0.arg_l))
-	}
-
-	private def concretizeArgs(
-		kco_l: List[KeyClassOpt]
-	): List[KeyClassOpt] = {
-		val idPrefix = path.mkString("", "/", "#")
-		kco_l.zipWithIndex.map(pair => {
-			val (kco0, i) = pair
-			val index = i + 1
-			// Set time if this is a state variables
-			val kco = if (kco0.kc.key.table.endsWith("State")) kco0.changeTime(time) else kco0
-			// Substitute in full path for "context" arguments
-			if (kco.kc.key.key == "$" && contextKey_?.isDefined) {
-				val contextKey = contextKey_?.get
-				val key2 = contextKey.copy(path = contextKey.path ++ kco.kc.key.path)
-				kco.copy(kc = kco.kc.copy(key = key2))
-			}
-			else if (kco.kc.key.key == "#") kco.changeKey(id + "#" + index)
-			else kco
-		})
-	}
 }
+*/
 
 // REFACTOR: HACK: this is rather hacky approach to translating events into states.  It'd be better to have something more centralized in Processor.
 case class Node_Events(

@@ -14,4 +14,4 @@ package roboliq.entity
 case class Source(
 	id: String,
 	vessels: List[Vessel]
-)
+) extends Entity

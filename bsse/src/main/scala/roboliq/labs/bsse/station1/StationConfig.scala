@@ -1,4 +1,4 @@
-package roboliq.labs.bsse.station1
+/*package roboliq.labs.bsse.station1
 
 import roboliq.core
 import roboliq.robots.evoware._
@@ -27,3 +27,4 @@ class StationConfig(configFile: EvowareConfigFile, sFilename: String) extends Ev
 	// HACK: force evaluation of Locations
 	Locations.toString()
 }
+*/

@@ -5,12 +5,11 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import roboliq.core._,roboliq.entity._
+import grizzled.slf4j.Logger
+import roboliq.core._
+import roboliq.entity._
 import roboliq.commands._
-/*import roboliq.commands.move.LidHandling
-import roboliq.commands2.arm._
-import roboliq.commands2.pipette._
-*/
+import roboliq.device._
 import roboliq.commands.pipette.HasTip
 import roboliq.commands.pipette.HasWell
 import roboliq.commands.pipette.HasPolicy
@@ -19,6 +18,8 @@ import commands.EvowareSubroutineToken
 
 
 class EvowareTranslator(config: EvowareConfig) {
+	private val logger = Logger[this.type]
+	
 	def translate(token_l: List[CmdToken]): RqResult[EvowareScript] = {
 		val t2 = new EvowareTranslator2(config, token_l)
 		t2.translate().map(_.toImmutable)
@@ -37,7 +38,7 @@ class EvowareTranslator(config: EvowareConfig) {
 		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
 			script.cmds.collect({case c: L0C_Command => c.getSiteToLabwareModelList}).flatten.toMap
 		
-		val sHeader = config.tableFile.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
+		val sHeader = config.table.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
 		val sCmds = script.cmds.mkString("\n")
 		val fos = new java.io.FileOutputStream(sFilename)
 		writeLines(fos, sHeader)
@@ -57,6 +58,7 @@ class EvowareTranslator(config: EvowareConfig) {
 }
 
 private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken]) {
+	private val logger = Logger[this.type]
 	private var nodeCurrent: CmdToken = null
 	
 	def translate(): RqResult[EvowareScriptBuilder] = {
@@ -73,15 +75,17 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	
 	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder): RqResult[Unit] = {
 		for { cmds0 <- cmd1 match {
+			case c: control.CommentToken => comment(c)
+			case c: control.PromptToken => prompt(c)
+			case c: control.low.CallToken => call(c)
+			case c: control.low.ExecToken => execute(c)
 			case c: pipette.low.AspirateToken => aspirate(builder, c)
-			//case c: L1C_Comment => comment(c)
 			case c: pipette.low.DispenseToken => dispense(builder, c)
 			//case c: DetectLevelToken => detectLevel(builder, c)
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			//case c: EvowareSubroutineToken => subroutine(builder, c)
 			//case c: MixToken => mix(builder, c.items)
-			case c: arm.MovePlateToken => movePlate(builder, c)
-			//case c: L1C_Prompt => prompt(c)
+			case c: transport.MovePlateToken => movePlate(builder, c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
 			//case c: L1C_Timer => timer(c.args)
@@ -234,8 +238,8 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			site <- getSite(location.id)
 		} yield {
 			val sPlateMask = encodeWells(plate.plate, lWellInfo.map(_.index))
-			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.plate.model.id)
+			val iGrid = config.table.mapCarrierToGrid(site.carrier)
+			val labwareModel = config.table.configFile.mapNameToLabwareModel(plate.plate.model.id)
 			val cmd = L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
@@ -269,8 +273,8 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			site <- getSite(location)
 		} yield {
 			val sPlateMask = encodeWells(plate, lWellInfo.map(_.index))
-			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
+			val iGrid = config.table.mapCarrierToGrid(site.carrier)
+			val labwareModel = config.table.configFile.mapNameToLabwareModel(plate.model.id)
 			val cmd = L0C_DetectLevel(
 				mTips, sLiquidClass,
 				iGrid, site.iSite,
@@ -284,24 +288,24 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		}
 	}
 	*/
-	/*
-	private def comment(cmd: L1C_Comment): RqResult[Seq[CmdToken]] = {
-		Success(Seq(L0C_Comment(cmd.s)))
+
+	private def comment(cmd: control.CommentToken): RqResult[Seq[L0C_Command]] = {
+		RqSuccess(Seq(L0C_Comment(cmd.text)))
 	}
 	
-	private def execute(cmd: L1C_Execute): RqResult[Seq[CmdToken]] = {
-		val nWaitOpts = (cmd.args.bWaitTillDone, cmd.args.bCheckResult) match {
+	private def execute(cmd: control.low.ExecToken): RqResult[Seq[L0C_Command]] = {
+		val nWaitOpts = (cmd.waitTillDone, cmd.checkResult) match {
 			case (true, true) => 6
 			case _ => 2
 		}
-		val sResultVar = if (cmd.args.bCheckResult) "RESULT" else ""
-		Success(Seq(L0C_Execute(cmd.args.cmd, nWaitOpts, sResultVar)))
+		val sResultVar = if (cmd.checkResult) "RESULT" else ""
+		RqSuccess(Seq(L0C_Execute(cmd.text, nWaitOpts, sResultVar)))
 	}
 	
-	private def prompt(cmd: L1C_Prompt): RqResult[Seq[CmdToken]] = {
-		Success(Seq(L0C_Prompt(cmd.s)))
+	private def prompt(cmd: control.PromptToken): RqResult[Seq[L0C_Command]] = {
+		RqSuccess(Seq(L0C_Prompt(cmd.text)))
 	}
-	*/
+
 	/*
 	private def clean(builder: EvowareScriptBuilder, cmd: TipsWashToken): RqResult[Seq[L0C_Command]] = {
 		val lPermanent = cmd.tips.filter(_.permanent_?.isDefined)
@@ -411,7 +415,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 			site <- getSite(location)
 		} yield {
 			val sPlateMask = encodeWells(plate, lWellInfo.map(_.index))
-			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
+			val iGrid = config.table.mapCarrierToGrid(site.carrier)
 			val cmd = L0C_Mix(
 				mTips, sLiquidClass,
 				asVolumes,
@@ -420,7 +424,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				item0.count
 			)
 			
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(plate.model.id)
+			val labwareModel = config.table.configFile.mapNameToLabwareModel(plate.model.id)
 			builder.mapCmdToLabwareInfo(cmd) = List((site, location, labwareModel))
 			
 			Seq(cmd)
@@ -436,26 +440,26 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	private def tipsDrop(c: L1C_TipsDrop): RqResult[Seq[CmdToken]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		for (site <- getSite(c.location)) yield {
-			val iGrid = config.tableFile.mapCarrierToGrid(site.carrier)
+			val iGrid = config.table.mapCarrierToGrid(site.carrier)
 			Seq(L0C_DropDITI(mTips, iGrid, site.iSite))
 		}
 	}
 	*/
 	
-	private def movePlate(builder: EvowareScriptBuilder, c: arm.MovePlateToken): RqResult[Seq[L0C_Command]] = {
+	private def movePlate(builder: EvowareScriptBuilder, c: transport.MovePlateToken): RqResult[Seq[L0C_Command]] = {
 		for {
 			siteSrc <- getSite(c.plateSrc.id)
 			siteDest <- getSite(c.plateDest.id)
 		} yield {
-			val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(c.plate.model.id)
+			val labwareModel = config.table.configFile.mapNameToLabwareModel(c.plate.model.id)
 			
 			val carrierSrc = siteSrc.carrier
-			val iGridSrc = config.tableFile.mapCarrierToGrid(carrierSrc)
-			val lVectorSrc = config.tableFile.configFile.mapCarrierToVectors(carrierSrc)
+			val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
+			val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
 
 			val carrierDest = siteDest.carrier
-			val iGridDest = config.tableFile.mapCarrierToGrid(carrierDest)
-			val lVectorDest = config.tableFile.configFile.mapCarrierToVectors(carrierDest)
+			val iGridDest = config.table.mapCarrierToGrid(carrierDest)
+			val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
 
 			val mapClassToValue = Map("Narrow" -> 0, "Wide" -> 1)
 			val lVector1: Map[Tuple2[Int, String], List[Vector]] = (lVectorSrc ++ lVectorDest).groupBy(v => (v.iRoma, v.sClass)).filter(_._2.length == 2)
@@ -480,7 +484,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				labwareModel,
 				iGridSrc, siteSrc,
 				iGridDest, siteDest,
-				arm.LidHandling.NoLid, //c.lidHandling,
+				transport.LidHandling.NoLid, //c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,
 				sCarrierLid = ""
@@ -512,9 +516,9 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	*/
 	
-	private def subroutine(builder: EvowareScriptBuilder, cmd: EvowareSubroutineToken): RqResult[Seq[L0C_Command]] = {
+	private def call(cmd: control.low.CallToken): RqResult[Seq[L0C_Command]] = {
 		RqSuccess(List(L0C_Subroutine(
-			cmd.sFilename
+			cmd.text
 		)))
 	}
 	
@@ -532,10 +536,10 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}*/
 	
 	private def getSite(location: String): RqResult[CarrierSite] = {
-		config.mapLabelToSite.get(location) match {
+		config.idToSite_m.get(location) match {
 			case None =>
-				println("INTERNAL: missing evoware site for location \""+location+"\"")
-				println("config.mapLabelToSite: "+config.mapLabelToSite)
+				logger.error("INTERNAL: missing evoware site for location \""+location+"\"")
+				logger.error("config.mapLabelToSite: "+config.idToSite_m)
 				RqError("INTERNAL: missing evoware site for location \""+location+"\"")
 			case Some(site) => RqSuccess(site)
 		}
@@ -544,9 +548,9 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	/*
 	private def addLabware(builder: EvowareScriptBuilder, labwareModel: LabwareModel, location: String): RqResult[Unit] = {
 		val site = config.mapLabelToSite(location)
-		val labwareModel = config.tableFile.mapSiteToLabwareModel(site)
+		val labwareModel = config.table.mapSiteToLabwareModel(site)
 		
-		//val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(sLabwareModel)
+		//val labwareModel = config.table.configFile.mapNameToLabwareModel(sLabwareModel)
 		builder.mapLocToLabware.get(site) match {
 			case None =>
 				builder.mapLocToLabware(site) = new LabwareObject(site, labwareModel, location)
@@ -559,7 +563,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	
 	private def addLabware(builder: EvowareScriptBuilder, sLabwareModel: String, location: String): RqResult[Unit] = {
-		val labwareModel = config.tableFile.configFile.mapNameToLabwareModel(sLabwareModel)
+		val labwareModel = config.table.configFile.mapNameToLabwareModel(sLabwareModel)
 		addLabware(builder, labwareModel, location)
 	}
 	

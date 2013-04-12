@@ -66,12 +66,7 @@ Evoware people:
 	- how many LiHas does the robot have?
 	- how to tell whether tips are fixed?
 	- tip types on fixed-tip robots?
-	- which carriers are on the table, how many sites they have, and which labware they accept
-	- which labware is available? for any given labware, how many wells and what well volume?
-	- which external devices are available
-	- how to define which labware is on which external devices in a new .esc file
-		- TRAC.ini
-	- where are the liquid class names stored?
+	- TRAC.ini
 
 Big goals:
 	Weizmann: first fully functional translation of example evolab script

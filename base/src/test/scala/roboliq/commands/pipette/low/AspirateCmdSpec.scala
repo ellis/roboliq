@@ -10,10 +10,11 @@ class AspirateCmdSpec extends CommandSpecBase {
 	describe("pipette.low.aspirate") {
 		describe("BSSE configuration") {
 			implicit val p = makeProcessorBsse(
+				Config01.database1Json,
 				Config01.protocol1Json,
 				JsonParser("""{
 					"cmd": [
-					  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
+					  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P_1(A01)", "volume": "50ul", "policy": { "id": "Wet", "pos": "WetContact" }}] }
 					]
 					}""").asJsObject
 			)
@@ -25,7 +26,7 @@ class AspirateCmdSpec extends CommandSpecBase {
 			it("should generate correct tokens") {
 				val (_, token_l) = p.getTokenList.unzip
 				val tipState_1 = getState[TipState]("TIP1", List(1))
-				val vss_P1_A01_1 = getState[VesselSituatedState]("P1(A01)", List(1))
+				val vss_P1_A01_1 = getState[VesselSituatedState]("P_1(A01)", List(1))
 				assert(token_l === List(
 					AspirateToken(List(new TipWellVolumePolicy(tipState_1, vss_P1_A01_1, LiquidVolume.ul(50), PipettePolicy("Wet", PipettePosition.WetContact))))
 				))
@@ -42,7 +43,7 @@ class AspirateCmdSpec extends CommandSpecBase {
 			}
 
 			it("should have correct VesselState for source well") {
-				val vesselState_P1_A01_2 = getState[VesselState]("P1(A01)", List(2))
+				val vesselState_P1_A01_2 = getState[VesselState]("P_1(A01)", List(2))
 				val vesselContent_P1_A01_content_expected = checkObj(VesselContent.fromVolume(Config01.water, LiquidVolume.ul(50)))
 				assert(vesselState_P1_A01_2.content === vesselContent_P1_A01_content_expected)
 			}

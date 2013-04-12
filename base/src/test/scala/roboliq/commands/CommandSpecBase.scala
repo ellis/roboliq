@@ -9,6 +9,7 @@ import spray.json._
 import _root_.roboliq._
 import _root_.roboliq.core._
 import _root_.roboliq.processor._
+import _root_.roboliq.device._
 import roboliq.test.Config01
 import roboliq.test.TestPipetteDevice1
 //import ConversionsDirect._
@@ -17,7 +18,10 @@ import roboliq.test.TestPipetteDevice1
 abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 	protected def makeProcessorBsse(configs: Object*): ProcessorData = {
 		val p = new ProcessorData(List(
-			new arm.MovePlateHandler,
+			new control.PromptHandler,
+			new resource.LiquidHandler,
+			new resource.PlateHandler,
+			new transport.MovePlateHandler,
 			new commands.pipette.TipsHandler_Fixed,
 			new commands.pipette.TransferHandler,
 			new commands.pipette.low.AspirateHandler,
@@ -54,7 +58,8 @@ abstract class CommandSpecBase extends FunSpec with GivenWhenThen {
 				assert(w === Nil)
 				a
 			case RqError(e, w) =>
-				info(w.toString)
+				if (!w.isEmpty) info(w.toString)
+				info(s"Failed to get object of type ${ru.typeOf[A]}")
 				assert(e === Nil)
 				null.asInstanceOf[A]
 		}		

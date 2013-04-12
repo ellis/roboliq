@@ -12,4 +12,4 @@ package roboliq.entity
 case class TubeModel(
 	val id: String,
 	val volume: LiquidVolume
-)
+) extends Entity

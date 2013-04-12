@@ -1,0 +1,29 @@
+{
+"tipModel": [
+	{ "id": "Standard 50ul", "volume": "45ul", "volumeMin": "0.01ul" },
+	{ "id": "Standard 1000ul", "volume": "950ul", "volumeMin": "4ul" }
+],
+"tip": [
+	{ "id": "TIP1", "deviceId": "LiHa", "index": 0, "row": 0, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP2", "deviceId": "LiHa", "index": 1, "row": 1, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP3", "deviceId": "LiHa", "index": 2, "row": 2, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP4", "deviceId": "LiHa", "index": 3, "row": 3, "col": 0, "permanent": "Standard 1000ul" },
+	{ "id": "TIP5", "deviceId": "LiHa", "index": 4, "row": 4, "col": 0, "permanent": "Standard 50ul" },
+	{ "id": "TIP6", "deviceId": "LiHa", "index": 5, "row": 5, "col": 0, "permanent": "Standard 50ul" },
+	{ "id": "TIP7", "deviceId": "LiHa", "index": 6, "row": 6, "col": 0, "permanent": "Standard 50ul" },
+	{ "id": "TIP8", "deviceId": "LiHa", "index": 7, "row": 7, "col": 0, "permanent": "Standard 50ul" }
+],
+"tubeModel": [
+	{ "id": "Tube 50000ul", "volume": "50000ul" },
+	{ "id": "Tube 15000ul", "volume": "15000ul" },
+	{ "id": "Tube 1500ul", "volume": "1500ul" }
+],
+"tubeLocation": [
+	{ "id": "reagents50", "tubeModels": ["Tube 50000ul"], "rackModel": "Reagent Cooled 8*50ml" },
+	{ "id": "reagents15000", "tubeModels": ["Tube 15000ul"], "rackModel": "Reagent Cooled 8*15ml" },
+	{ "id": "reagents1.5", "tubeModels": ["Tube 1500ul"], "rackModel": "Block 20Pos 1.5 ml Eppendorf" }
+],
+"washProgram": [
+	{ "id": "Thorough", "intensity": "Thorough", "tips": ["TIP1", "TIP2", "TIP3", "TIP4"] }
+]
+}
