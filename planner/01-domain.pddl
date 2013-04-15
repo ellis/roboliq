@@ -3,6 +3,7 @@
 (define (domain liquid-handling-robot)
  (:requirements :strips :typing :negative-preconditions)
  (:types
+  robot ; a robot
   site ; a site which is accessible to the robot
   plateModel ; a plate model
   plate ; a plate
@@ -12,6 +13,7 @@
  )
 
  (:predicates
+  (robot-is-running ?r) ; whether the robot is running -- must be off for humans to interact with bench
   (site-plateModel ?s - site ?m - plateModel) ; whether the site accepts the given plate model
   (plate-model ?p - plate ?m - plateModel) ; whether the plate is of the given model
   (plate-site ?p - plate ?s - site) ; whether the plate is at the given site
