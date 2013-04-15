@@ -60,13 +60,17 @@
 
  (:action robot-start
   :parameters ()
-  :precondition ()
+  :precondition (and
+   (not (robot-is-running))
+  )
   :effect (robot-is-running)
  )
  
  (:action robot-stop
   :parameters ()
-  :precondition ()
+  :precondition (and
+   (robot-is-running)
+  )
   :effect (not (robot-is-running))
  )
 
