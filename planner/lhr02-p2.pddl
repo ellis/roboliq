@@ -1,5 +1,5 @@
 ;; a trival problem which will have the user place a plate on the table
-(define (problem lhr02-p1)
+(define (problem lhr02-p2)
  (:domain liquid-handling-robot)
  (:requirements :strips :typing :negative-preconditions)
 
@@ -18,6 +18,7 @@
   (arm-can-plateModel a1 m1)
   (arm-can-site a1 s1)
   (arm-can-site a1 s2)
+  (arm-can-plateModel userArm m1)
   (arm-can-site userArm s1)
   (site-accepts-plateModel s1 m1)
   (site-accepts-plateModel s2 m1)
@@ -26,7 +27,8 @@
  )
 
  (:goal (and
-  (robot-running)
+  (plate-site p1 s1)
+  (robot-is-running)
 ;  (mix-done mixA)
 ;  (not (robot-running))
  ))
