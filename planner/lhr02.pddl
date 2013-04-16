@@ -46,13 +46,15 @@
   :parameters (?p - plate ?m - plateModel ?s2 - site)
   :precondition (and
    (not (robot-is-running))
-   (plate-model ?p ?m)
-   (plate-site ?p elsewhere)
+   (arm-can-plateModel userArm ?m)
+   (arm-can-site userArm ?s2)
    (not (site-is-occupied ?s2))
    (not (site-is-closed ?s2))
    (site-accepts-plateModel ?s2 ?m)
+   (plate-model ?p ?m)
+   (plate-site ?p elsewhere)
   )
-  :effect (and 
+  :effect (and
    (site-is-occupied ?s2)
    (plate-site ?p ?s2)
   )
@@ -65,7 +67,7 @@
   )
   :effect (robot-is-running)
  )
- 
+
  (:action robot-stop
   :parameters ()
   :precondition (and
@@ -78,12 +80,15 @@
   :parameters (?a - arm ?p - plate ?m - plateModel ?s1 - site ?s2 - site)
   :precondition (and
    (robot-is-running)
+   (arm-can-plateModel ?a ?m)
+   (arm-can-site ?a ?s1)
+   (arm-can-site ?a ?s2)
+   (not (site-is-closed ?s1))
+   (not (site-is-closed ?s2))
+   (not (site-is-occupied ?s2))
+   (site-accepts-plateModel ?s2 ?m)
    (plate-model ?p ?m)
    (plate-site ?p ?s1)
-   (not (site-is-closed ?s1))
-   (not (site-is-occupied ?s2))
-   (not (site-is-closed ?s2))
-   (site-accepts-plateModel ?s2 ?m)
   )
   :effect (and
    (not (site-is-occupied ?s1))

@@ -18,15 +18,15 @@
   (arm-can-plateModel a1 m1)
   (arm-can-site a1 s1)
   (arm-can-site a1 s2)
-  (arm-can-plateModel userArm m1)
   (arm-can-site userArm s1)
   (site-accepts-plateModel s1 m1)
+  (site-accepts-plateModel s2 m1)
   (plate-model p1 m1)
   (plate-site p1 elsewhere)
  )
 
  (:goal (and
-  (plate-site p1 s1)
+  (robot-running)
 ;  (mix-done mixA)
 ;  (not (robot-running))
  ))
