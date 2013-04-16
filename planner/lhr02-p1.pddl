@@ -15,6 +15,7 @@
  )
 
  (:init
+  (robot-is-not-running)
   (arm-can-plateModel a1 m1)
   (arm-can-site a1 s1)
   (arm-can-site a1 s2)
@@ -27,7 +28,5 @@
 
  (:goal (and
   (plate-site p1 s1)
-;  (mix-done mixA)
-;  (not (robot-running))
  ))
 )

@@ -23,6 +23,7 @@
 
  (:predicates
   (robot-is-running) ; whether the robot is running -- must be off for humans to interact with the sites on the robot
+  (robot-is-not-running) ; added because Graphplan apparently can't accept negated goals...
   (arm-can-site ?a - arm ?s - site) ; whether the arm can access the site
   (arm-can-plateModel ?a - arm ?m - plateModel) ; whether the arm can handle the plateModel
 
@@ -65,7 +66,10 @@
   :precondition (and
    (not (robot-is-running))
   )
-  :effect (robot-is-running)
+  :effect (and
+   (robot-is-running)
+   (not (robot-is-not-running))
+  )
  )
 
  (:action robot-stop
@@ -73,7 +77,10 @@
   :precondition (and
    (robot-is-running)
   )
-  :effect (not (robot-is-running))
+  :effect (and
+   (not (robot-is-running))
+   (robot-is-not-running)
+  )
  )
 
  (:action arm-move-plate
