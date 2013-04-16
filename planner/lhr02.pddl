@@ -57,6 +57,7 @@
   )
   :effect (and
    (site-is-occupied ?s2)
+   (not (plate-site ?p elsewhere))
    (plate-site ?p ?s2)
   )
  )
@@ -105,14 +106,6 @@
   )
  )
 
- (:action mixA-run
-  :parameters (?x - mix ?p1 - plate ?s1 - site)
-  :precondition (and
-   (plate-site ?p1 ?s1)
-  )
-  :effect (mix-done ?x)
- )
-
  (:action thermocycler-run
   :parameters (?p - plate ?s - site)
   :precondition (and
@@ -122,5 +115,14 @@
   :effect (and
    (plate-is-thermocycled ?p)
   )
+ )
+
+ (:action mixA-run
+  :parameters (?x - mix ?p1 - plate ?s1 - site)
+  :precondition (and
+   (robot-is-running)
+   (plate-site ?p1 ?s1)
+  )
+  :effect (mix-done ?x)
  )
 )
