@@ -17,6 +17,9 @@
   p1 - plate
   m1 - plateModel
   pipetteA - pipetteSpec
+  dummy1 - thermocycleSpec
+  dummy2 - thermocycleDevice
+  dummy3 - pipetteDevice
  )
 
  (:init

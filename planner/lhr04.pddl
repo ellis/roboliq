@@ -1,6 +1,4 @@
 ;; Sepcification in PDDL3 of liquid handling robot domain
-;; Constants:
-;; * agents: user, robot1
 ;; Device types:
 ;; * sealer
 ;; * peeler
