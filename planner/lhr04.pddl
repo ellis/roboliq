@@ -6,7 +6,7 @@
 ;; * peeler
 ;; * thermocycler
 
-(define (domain lhr03)
+(define (domain lhr04)
  (:requirements :strips :typing :negative-preconditions :equality)
  (:types
   agent ; a robot or human
@@ -16,7 +16,8 @@
   plate ; a plate
   vessel ; a plate's well or a tube
   plateLid ; a lid on a plate
-  ;pipetteDevice
+
+  pipetteDevice
   pipetteSpec
 
   sealDevice ; sealer device
@@ -30,12 +31,12 @@
  (:constants
   user - agent ; a human user
   userArm - arm ; the user can also move plates around
-  elsewhere - site ; an off-robot site which is only accessible by the user
  )
 
  (:predicates
   (agent-is-active ?a - agent) ; whether the agent can currently be given commands -- robots must be off for humans to interact with the sites on the robot
   (agent-has-arm ?a - agent ?d - arm) ; whether the agent has the given arm
+  (agent-has-pipetteDevice ?a - agent ?d - pipetteDevice) ; whether the agent has the given pipette device
 
   (arm-can-site ?a - arm ?s - site) ; whether the arm can access the site
   (arm-can-plateModel ?a - arm ?m - plateModel) ; whether the arm can handle the plateModel
@@ -43,6 +44,7 @@
   (site-can-plateModel ?s - site ?m - plateModel) ; whether the site can accept the plate model
   (site-is-occupied ?s - site) ; whether the site has a plate on it
   (site-is-closed ?s - site) ; whether the site is "closed" within a device
+  (site-is-offsite ?s - site) ; whether the site can hold multiple plates
 
   (plate-is-undetermined ?p) ; whether the plate has not yet been assigned a model
   (plate-model ?p - plate ?m - plateModel) ; whether the plate is of the given model
@@ -51,39 +53,19 @@
 
   ;(vessel-plate ?v - vessel ?p - plate) ; whether the vessel is on the given plate
 
+  (pipette-can-site ?d - pipetteDevice ?s - site)
+  (pipette-can-plateModel ?d - pipetteDevice ?m - plateModel)
   (pipette-done ?spec - pipetteSpec) ; whether the pipetting sequence has been completed
 
   (seal-site ?d - sealDevice ?s - site)
   (seal-can-plateModel ?d - sealDevice ?m - plateModel)
 
   (peel-site ?d - peelDevice ?s - site)
-  (peel-can-plateModel ?d - sealDevice ?m - plateModel)
+  (peel-can-plateModel ?d - peelDevice ?m - plateModel)
 
-  (thermocycle-site ?s - site) ; whether the given plate is a thermocycler site
+  (thermocycle-site ?d - thermocycleDevice ?s - site) ; whether the given plate is a thermocycler site
+  (thermocycle-can-plateModel ?d - thermocycleDevice ?m - plateModel)
   (thermocycle-done ?spec - thermocycleSpec ?p - plate) ; whether the given plate has been thermocycled
- )
-
- (:action user-plate-site
-  :parameters (?p - plate ?m - plateModel ?s2 - site)
-  :precondition (and
-   ; agent
-   (not (agent-is-active r1))
-   ; device
-   (arm-can-plateModel userArm ?m)
-   (arm-can-site userArm ?s2)
-   ; site
-   (not (site-is-occupied ?s2))
-   (not (site-is-closed ?s2))
-   (site-accepts-plateModel ?s2 ?m)
-   ; plate
-   (plate-model ?p ?m)
-   (plate-site ?p elsewhere)
-  )
-  :effect (and
-   (site-is-occupied ?s2)
-   (not (plate-site ?p elsewhere))
-   (plate-site ?p ?s2)
-  )
  )
 
  (:action agent-start
@@ -99,7 +81,7 @@
  (:action agent-stop
   :parameters (?a - agent)
   :precondition (and
-   (robot-is-active)
+   (agent-is-active ?a)
   )
   :effect (and
    (not (agent-is-active ?a))
@@ -116,11 +98,12 @@
    (arm-can-plateModel ?d ?m)
    (arm-can-site ?d ?s1)
    (arm-can-site ?d ?s2)
-   ; site conditions
-   (not (= ?s1 elsewhere))
-   (not (= ?s2 elsewhere))
-   (site-can-plateModel ?s2 ?m)
+   ; site s1
+   (not (site-is-offsite ?s1))
    (not (site-is-closed ?s1))
+   ; site s2
+   (not (site-is-offsite ?s2))
+   (site-can-plateModel ?s2 ?m)
    (not (site-is-closed ?s2))
    (not (site-is-occupied ?s2))
    ; plate
@@ -131,6 +114,62 @@
    (not (site-is-occupied ?s1))
    (not (plate-site ?p ?s1))
    (site-is-occupied ?s2)
+   (plate-site ?p ?s2)
+  )
+ )
+
+ (:action arm-move-plate-from-offsite
+  :parameters (?a - agent ?d - arm ?p - plate ?m - plateModel ?s1 - site ?s2 - site)
+  :precondition (and
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-arm ?a ?d)
+   ; device
+   (arm-can-plateModel ?d ?m)
+   (arm-can-site ?d ?s1)
+   (arm-can-site ?d ?s2)
+   ; site s1
+   (site-is-offsite ?s1)
+   (not (site-is-closed ?s1))
+   ; site s2
+   (not (site-is-offsite ?s2))
+   (site-can-plateModel ?s2 ?m)
+   (not (site-is-closed ?s2))
+   (not (site-is-occupied ?s2))
+   ; plate
+   (plate-model ?p ?m)
+   (plate-site ?p ?s1)
+  )
+  :effect (and
+   (not (plate-site ?p ?s1))
+   (site-is-occupied ?s2)
+   (plate-site ?p ?s2)
+  )
+ )
+
+ (:action arm-move-plate-to-offsite
+  :parameters (?a - agent ?d - arm ?p - plate ?m - plateModel ?s1 - site ?s2 - site)
+  :precondition (and
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-arm ?a ?d)
+   ; device
+   (arm-can-plateModel ?d ?m)
+   (arm-can-site ?d ?s1)
+   (arm-can-site ?d ?s2)
+   ; site conditions
+   (not (site-is-offsite ?s1))
+   (site-is-offsite ?s2)
+   (site-can-plateModel ?s2 ?m)
+   (not (site-is-closed ?s1))
+   (not (site-is-closed ?s2))
+   ; plate
+   (plate-model ?p ?m)
+   (plate-site ?p ?s1)
+  )
+  :effect (and
+   (not (site-is-occupied ?s1))
+   (not (plate-site ?p ?s1))
    (plate-site ?p ?s2)
   )
  )
@@ -161,8 +200,8 @@
    ; agent
    (agent-is-active ?a)
    ; device
-   (seal-site ?d ?s)
-   (seal-can-plateModel ?d ?m)
+   (peel-site ?d ?s)
+   (peel-can-plateModel ?d ?m)
    ; site
    (site-can-plateModel ?s ?m)
    ; plate
@@ -185,17 +224,17 @@
  ; * close lid
  ; This is because the thermocycler lid may not be left open, or we risk crashing an arm against it.
  (:action thermocycler-run
-  :parameters (?a - agent ?d - thermocycleDevice ?p - plate ?s - site ?arm - arm ?s1 - site ?s2 - site)
+  :parameters (?a - agent ?d - thermocycleDevice ?spec - thermocycleSpec ?p - plate ?m - plateModel ?s - site ?arm - arm ?s1 - site ?s2 - site)
   :precondition (and
    ; agent
    (agent-is-active ?a)
-   (agent-has-arm ?a ?d)
+   (agent-has-arm ?a ?arm)
    ; device
    (thermocycle-can-plateModel ?d ?m)
    (thermocycle-site ?d ?s)
-   (arm-can-plateModel ?a ?m)
-   (arm-can-site ?a ?s1)
-   (arm-can-site ?a ?s2)
+   (arm-can-plateModel ?arm ?m)
+   (arm-can-site ?arm ?s1)
+   (arm-can-site ?arm ?s2)
    ; site conditions
    (site-can-plateModel ?s2 ?m)
    (not (site-is-closed ?s1))
@@ -206,7 +245,7 @@
    (plate-site ?p ?s1)
   )
   :effect (and
-   (thermocycle-done ?d ?p)
+   (thermocycle-done ?spec ?p)
    (not (site-is-occupied ?s1))
    (not (plate-site ?p ?s1))
    (site-is-occupied ?s2)
@@ -215,11 +254,32 @@
  )
 
  (:action pipetteA-run
-  :parameters (?spec - pipetteSpec ?p1 - plate ?s1 - site)
+  :parameters (
+   ?a - agent
+   ?d - pipetteDevice
+   ?spec - pipetteSpec
+   ?p1 - plate
+   ?m1 - plateModel
+   ?s1 - site
+   ?p2 - plate
+   ?m2 - plateModel
+   ?s2 - site
+  )
   :precondition (and
-   (robot-is-running)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-pipetteDevice ?a ?d)
+   ; device
+   (pipette-can-plateModel ?d ?m1)
+   (pipette-can-plateModel ?d ?m2)
+   (pipette-can-site ?d ?s1)
+   (pipette-can-site ?d ?s2)
+   ; plate
+   (not (= ?p1 ?p2))
+   (plate-model ?p1 ?m1)
    (plate-site ?p1 ?s1)
-   (not (plate-is-sealed ?p1))
+   (plate-model ?p2 ?m2)
+   (plate-site ?p2 ?s2)
   )
   :effect (pipette-done ?spec)
  )

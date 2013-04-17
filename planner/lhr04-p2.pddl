@@ -1,4 +1,4 @@
-;; Plate plate `p1` on site `s1`
+;; Place plate `p1` on site `s2`
 (define (problem lhr04-p1)
  (:domain lhr04)
  (:requirements :strips :typing :negative-preconditions)
@@ -7,6 +7,7 @@
   user - agent ; the human user
   userArm - arm ; the user can also move plates around
   offsite - site ; an off-robot site which is only accessible by the user
+  r1 - agent ; robot
   a1 - arm
   s1 - site
   s2 - site
@@ -20,11 +21,14 @@
  )
 
  (:init
+  ; user
   (agent-is-active user)
   (agent-has-arm user userArm)
   (arm-can-plateModel userArm m1)
   (arm-can-site userArm offsite)
   (arm-can-site userArm s1)
+  ; robot r1
+  (agent-has-arm r1 a1)
   (arm-can-plateModel a1 m1)
   (arm-can-site a1 s1)
   (arm-can-site a1 s2)
@@ -44,8 +48,6 @@
  )
 
  (:goal (and
-  ;(pipette-done pipetteA)
-  ;(plate-is-sealed p1)
-  (plate-site p1 s1)
+  (plate-site p1 s2)
  ))
 )
