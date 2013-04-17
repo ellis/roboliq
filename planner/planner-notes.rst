@@ -11,3 +11,9 @@ javaff: doesn't handle negative preconditions
 Metric-FF: doesn't handling typing
 seq-sat-lama: didn't like my pddl problem file
 
+To run sgplan6:
+
+.. code-block:: sh
+
+  cd /home/public/src/extern/planning/tempo-sat-sgplan6
+  ./sgplan -o /home/public/src/roboliq/planner/lhr05.pddl -f /home/public/src/roboliq/planner/lhr05-p1.pddl

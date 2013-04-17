@@ -72,6 +72,7 @@
 
   (taskA-done ?p - plate)
   (taskB-done ?p - plate)
+  (taskC-done ?p - plate)
  )
 
  (:action agent-start
@@ -296,4 +297,8 @@
    (taskB-done ?p)
   )
  )
+
+ ;(:action taskC-run-centrifuge
+  ;:parameters (?a - agent ?d - centrifugeDevice ?p - plate ?pBalance)
+ ;)
 )
