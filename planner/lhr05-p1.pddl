@@ -1,5 +1,5 @@
 ;; Perform pipetting specification `pipetteA` using plates `p1` and `p2`
-(define (problem lhr04-p4)
+(define (problem lhr04-p5)
  (:domain lhr04)
  (:requirements :strips :typing :negative-preconditions :equality)
 
@@ -65,7 +65,6 @@
  )
 
  (:goal (and
-  ;(plate-is-sealed p1)
-  (pipette-done pipetteA)
+  (taskA-done p1)
  ))
 )
