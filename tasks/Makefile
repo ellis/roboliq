@@ -4,5 +4,10 @@ lhr01.class: lhr01.lisp
 
 lhr01_p2: lhr01_p2.lisp lhr01.class
 	java JSHOP2.InternalDomain -r $<
-	javac lhr01_p2.java
-	java lhr01_p2
+	javac $@.java
+	java $@
+
+lhr01_p3: lhr01_p3.lisp lhr01.class
+	java JSHOP2.InternalDomain -r $<
+	javac $@.java
+	java $@
