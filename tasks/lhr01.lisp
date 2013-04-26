@@ -50,5 +50,11 @@
   (
    (!arm-move-plate ?a ?d ?p ?m ?s1 ?s)
   )
+  INDIRECT
+  ()
+  (
+   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
+   (set-plate-site ?p ?m ?s)
+  )
  )
 ))
