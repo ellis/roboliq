@@ -38,4 +38,17 @@
    (plate-site ?p ?s2)
   )
  )
+
+ (:method (set-plate-site ?p ?m ?s)
+  ; preconditions
+  (
+   (is-plate ?p)
+   (is-site ?s)
+   ;
+  )
+  ; task list
+  (
+   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s)
+  )
+ )
 ))
