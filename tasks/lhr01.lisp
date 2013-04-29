@@ -39,6 +39,26 @@
   )
  )
 
+ (:method (move-plate ?p ?m ?s1 ?s2)
+  move-plate-DIRECT
+  ; preconditions
+  (
+   (is-arm ?d)
+   (arm-can-site ?d ?s1)
+   (arm-can-site ?d ?s2)
+  )
+  ; task list
+  (
+   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
+  )
+  move-plate-INDIRECT
+  (is-site ?s3)
+  (
+   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s3)
+   (move-plate ?p ?m ?s3 ?s2)
+  )
+ )
+
  (:method (set-plate-site ?p ?m ?s)
   ; preconditions
   (
@@ -54,7 +74,7 @@
   ()
   (
    (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
-   (set-plate-site ?p ?m ?s)
+   (move-plate ?p ?m ?s2 ?s)
   )
  )
 ))

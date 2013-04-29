@@ -29,6 +29,8 @@
  )
  ; tasks
  (
-  (set-plate-site p1 m1 s3)
+  ;(set-plate-site p1 m1 s3)
+  (move-plate p1 m1 s1 s3)
+  ;(set-plate-site p1 m1 s3)
  )
 )
