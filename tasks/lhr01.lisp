@@ -26,6 +26,7 @@
    ; plate
    (plate-model ?p ?m)
    (plate-site ?p ?s1)
+   (not (plate-site ?p ?s2))
   )
   ; delete list
   (
@@ -40,6 +41,12 @@
  )
 
  (:method (move-plate ?p ?m ?s1 ?s2)
+  move-plate-NULL
+  (
+   (plate-site ?p ?s2)
+  )
+  ()
+
   move-plate-DIRECT
   ; preconditions
   (
@@ -51,6 +58,7 @@
   (
    (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
   )
+
   move-plate-INDIRECT
   (is-site ?s3)
   (
@@ -60,21 +68,11 @@
  )
 
  (:method (set-plate-site ?p ?m ?s)
-  ; preconditions
   (
-   (is-plate ?p)
-   (is-site ?s)
-   ;
+   (plate-site ?p ?s1)
   )
-  ; task list
   (
-   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s)
-  )
-  INDIRECT
-  ()
-  (
-   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
-   (move-plate ?p ?m ?s2 ?s)
+   (move-plate ?p ?m ?s1 ?s)
   )
  )
 ))

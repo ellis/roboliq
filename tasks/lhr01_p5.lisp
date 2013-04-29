@@ -1,5 +1,5 @@
-; Want user arm to move from s1 to s2, then robot arm to move from s2 to s3
-(defproblem lhr01_p4 lhr01
+; Use `set-plate-site` to have user arm to move from s1 to s2, then robot arm to move from s2 to s3
+(defproblem lhr01_p5 lhr01
  ; initial conditions
  (
   (is-agent user)
@@ -29,7 +29,6 @@
  )
  ; tasks
  (
-  (move-plate p1 m1 s1 s3)
-  ;(set-plate-site p1 m1 s3)
+  (set-plate-site p1 m1 s3)
  )
 )
