@@ -23,3 +23,16 @@ lhr01_p5: lhr01_p5.lisp lhr01.class
 	java JSHOP2.InternalDomain -r $<
 	javac $@.java
 	scala -e "println($@.getPlans())"
+
+lhr02.class: lhr02.lisp
+	java JSHOP2.InternalDomain $<
+
+lhr02_p1: lhr02_p1.lisp lhr02.class
+	java JSHOP2.InternalDomain -r $<
+	javac $@.java
+	scala -e "println($@.getPlans())"
+
+lhr02_p2: lhr02_p2.lisp lhr02.class
+	java JSHOP2.InternalDomain -r $<
+	javac $@.java
+	scala -e "println($@.getPlans())"
