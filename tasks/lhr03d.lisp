@@ -1,6 +1,6 @@
 ; Seal with seal-plate
 ; Want user arm to move from offsite to s1, then robot arm to move from s1 to sealerSite
-(defproblem lhr03b lhr03
+(defproblem lhr03d lhr03
  ; initial conditions
  (
   ; types
@@ -52,13 +52,6 @@
  )
  ; tasks
  (
-  (!thermocycler-open r1 thermocycler)
-  (!thermocycler-close r1 thermocycler)
-  (!thermocycler-run r1 thermocycler thermocyclerSpec1)
-  (thermocycler-open thermocycler)
-  (thermocycler-open thermocycler)
-  (thermocycler-close thermocycler)
-  (thermocycler-close thermocycler)
-  ;(thermocycle-plate thermocycler thermocyclerSpec1 p1 s1)
+  (thermocycle-plate thermocycler thermocyclerSpec1 p1 s1)
  )
 )

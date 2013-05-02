@@ -229,11 +229,11 @@
   )
   ; sub-tasks
   (
-   (thermocycler-open ?a ?d)
+   (thermocycler-open ?d)
    (set-plate-site ?p ?m ?s)
    (!thermocycler-run ?a ?d ?spec)
    (set-plate-site ?p ?m ?s2)
-   (thermocycler-close ?a ?d)
+   (thermocycler-close ?d)
   )
  )
 ))
