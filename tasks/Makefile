@@ -39,3 +39,17 @@ lhr02_p2: lhr02_p2.lisp lhr02.class
 	java JSHOP2.InternalDomain -r $<
 	javac $@.java
 	scala -e "println($@.getPlans())"
+
+lhr02_p3: lhr02_p3.lisp lhr02.class
+	java JSHOP2.InternalDomain -r $<
+	javac $@.java
+	scala -e "println($@.getPlans())"
+
+lhr02%: lhr02%.lisp lhr02.class
+
+lhr%: lhr%.lisp
+	java JSHOP2.InternalDomain -r $<
+	javac $@.java
+	echo "public class $@_run { public static void main(String[] args) { System.out.println($@.getPlans()); } }" > $@_run.java
+	javac $@_run.java
+	java $@_run
