@@ -3,16 +3,6 @@
 (defproblem lhr02_p2 lhr02
  ; initial conditions
  (
-  (arm-can-plateModel r1arm m1)
-  (arm-can-site r1arm s1)
-  (arm-can-site r1arm sealerSite)
-  (site-can-plateModel offsite m1)
-  (site-can-plateModel s1 m1)
-  (site-can-plateModel sealerSite m1)
-  (plate-model p1 m1)
-  (plate-site p1 offsite)
-
-
   (is-agent user)
   (is-arm userArm)
   (is-agent r1)
@@ -23,6 +13,7 @@
   (is-site sealerSite)
   (is-plate p1)
   (is-plateModel m1)
+
   ; user
   (agent-is-active user)
   (agent-has-arm user userArm)
@@ -46,6 +37,8 @@
   (site-can-plateModel s1 m1)
   (site-can-plateModel sealerSite m1)
 
+  (plate-model p1 m1)
+  (plate-site p1 offsite)
  )
  ; tasks
  (

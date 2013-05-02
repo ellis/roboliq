@@ -75,64 +75,64 @@
    (move-plate ?p ?m ?s1 ?s)
   )
  )
-;
-; (:operator (!sealer-run ?a ?d ?p ?m ?s)
-;  ; preconditions
-;  (
-;   (is-agent ?a)
-;   (is-sealer ?d)
-;   (is-plate ?p)
-;   (is-plateModel ?m)
-;   (is-site ?s)
-;   ; agent
-;   (agent-is-active ?a)
-;   (agent-has-sealer ?d)
-;   ; device
-;   (sealer-site ?d ?s)
-;   (sealer-can-plateModel ?d ?m)
-;   ; site
-;   (site-can-plateModel ?s ?m)
-;   ; plate
-;   (plate-site ?p ?s)
-;   (plate-model ?p ?m)
-;   (not (plate-is-sealed ?p))
-;  )
-;  ; delete list
-;  ()
-;  ; add list
-;  (
-;   (plate-is-sealed ?p)
-;  )
-; )
-;
-; (:method (seal-plate-adpms ?a ?d ?p ?m ?s)
-;  seal-plate-adpms-NULL
-;  (
-;   (plate-is-sealed ?p)
-;  )
-;  ()
-;
-;  seal-plate-adpms-DO
-;  ()
-;  ((set-plate-site ?p ?m ?s) (!sealer-run ?a ?d ?p ?m ?s))
-; )
-;
-; (:method (seal-plate-pm ?p ?m)
-;  (
-;   (is-agent ?a)
-;   (is-sealer ?d)
-;   (is-site ?s)
-;   (agent-has-sealer ?a ?d)
-;   (sealer-site ?d ?s)
-;  )
-;  ((seal-plate-adpms ?a ?d ?p ?m ?s))
-; )
-;
-; (:method (seal-plate ?p)
-;  (
-;   (is-plateModel ?m)
-;   (plate-model ?p ?m)
-;  )
-;  ((set-plate-site ?p ?m ?s) (seal-plate ?p))
-; )
+
+ (:operator (!sealer-run ?a ?d ?p ?m ?s)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-sealer ?d)
+   (is-plate ?p)
+   (is-plateModel ?m)
+   (is-site ?s)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-sealer ?d)
+   ; device
+   (sealer-site ?d ?s)
+   (sealer-can-plateModel ?d ?m)
+   ; site
+   (site-can-plateModel ?s ?m)
+   ; plate
+   (plate-site ?p ?s)
+   (plate-model ?p ?m)
+   (not (plate-is-sealed ?p))
+  )
+  ; delete list
+  ()
+  ; add list
+  (
+   (plate-is-sealed ?p)
+  )
+ )
+
+ (:method (seal-plate-adpms ?a ?d ?p ?m ?s)
+  seal-plate-adpms-NULL
+  (
+   (plate-is-sealed ?p)
+  )
+  ()
+
+  seal-plate-adpms-DO
+  ()
+  ((set-plate-site ?p ?m ?s) (!sealer-run ?a ?d ?p ?m ?s))
+ )
+
+ (:method (seal-plate-pm ?p ?m)
+  (
+   (is-agent ?a)
+   (is-sealer ?d)
+   (is-site ?s)
+   (agent-has-sealer ?a ?d)
+   (sealer-site ?d ?s)
+  )
+  ((seal-plate-adpms ?a ?d ?p ?m ?s))
+ )
+
+ (:method (seal-plate ?p)
+  (
+   (is-plateModel ?m)
+   (plate-model ?p ?m)
+  )
+  ((set-plate-site ?p ?m ?s) (seal-plate ?p))
+ )
 ))
