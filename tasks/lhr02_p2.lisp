@@ -44,5 +44,8 @@
  (
   (set-plate-site p1 m1 s1)
   (set-plate-site p1 m1 sealerSite)
+  (!sealer-run r1 sealer p1 m1 sealerSite)
+  ;(seal-plate p1)
+  ;(!seal-plate-adpms r1 sealer p1 m1 sealerSite)
  )
 )

@@ -1,4 +1,5 @@
-; Use `seal-plate` to have user arm to move from s1 to sealerSite, then seal
+; Move p1 from offsite to s1 using a method
+;; Want user arm to move from offsite to s1, then robot arm to move from s2 to sealerSite
 (defproblem lhr02_p1 lhr02
  ; initial conditions
  (
@@ -12,6 +13,7 @@
   (is-site sealerSite)
   (is-plate p1)
   (is-plateModel m1)
+
   ; user
   (agent-is-active user)
   (agent-has-arm user userArm)
@@ -35,14 +37,12 @@
   (site-can-plateModel s1 m1)
   (site-can-plateModel sealerSite m1)
 
-  ; problem setup
   (plate-model p1 m1)
-  (plate-site p1 sealerSite)
+  (plate-site p1 offsite)
  )
  ; tasks
  (
-  ;(seal-plate p1)
-  ;(!seal-plate-adpms r1 sealer p1 m1 sealerSite)
-  (set-plate-site p1 m1 s3)
+  (set-plate-site p1 m1 s1)
+  (set-plate-site p1 m1 sealerSite)
  )
 )

@@ -1,3 +1,6 @@
+clean:
+	rm -f lhr*.java
+	rm -f *.class
 
 lhr01.class: lhr01.lisp
 	java JSHOP2.InternalDomain $<

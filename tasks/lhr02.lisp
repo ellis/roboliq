@@ -86,7 +86,7 @@
    (is-site ?s)
    ; agent
    (agent-is-active ?a)
-   (agent-has-sealer ?d)
+   (agent-has-sealer ?a ?d)
    ; device
    (sealer-site ?d ?s)
    (sealer-can-plateModel ?d ?m)
