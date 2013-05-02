@@ -133,6 +133,6 @@
    (is-plateModel ?m)
    (plate-model ?p ?m)
   )
-  ((set-plate-site ?p ?m ?s) (seal-plate ?p))
+  ((seal-plate-pm ?p ?m))
  )
 ))
