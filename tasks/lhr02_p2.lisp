@@ -43,5 +43,6 @@
  ; tasks
  (
   (set-plate-site p1 m1 s1)
+  (set-plate-site p1 m1 sealerSite)
  )
 )
