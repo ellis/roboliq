@@ -30,6 +30,9 @@ lhr01_p5: lhr01_p5.lisp lhr01.class
 lhr02.class: lhr02.lisp
 	java JSHOP2.InternalDomain $<
 
+lhr03.class: lhr03.lisp
+	java JSHOP2.InternalDomain $<
+
 lhr02_p1: lhr02_p1.lisp lhr02.class
 	java JSHOP2.InternalDomain -r $<
 	javac $@.java
@@ -46,6 +49,11 @@ lhr02_p3: lhr02_p3.lisp lhr02.class
 	scala -e "println($@.getPlans())"
 
 lhr02%: lhr02%.class lhr02.class
+	echo "public class $@_run { public static void main(String[] args) { System.out.println($@.getPlans()); } }" > $@_run.java
+	javac $@_run.java
+	java $@_run
+
+lhr03%: lhr03%.class lhr03.class
 	echo "public class $@_run { public static void main(String[] args) { System.out.println($@.getPlans()); } }" > $@_run.java
 	javac $@_run.java
 	java $@_run
