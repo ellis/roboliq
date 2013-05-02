@@ -1,3 +1,5 @@
+.SECONDARY:
+
 clean:
 	rm -f lhr*.java
 	rm -f *.class

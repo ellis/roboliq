@@ -150,7 +150,7 @@
   ((thermocycler-is-open ?d))
  )
 
- (:method (thermocycler-open ?a ?d)
+ (:method (thermocycler-open ?d)
   thermocycler-open-NULL
   (
    (thermocycler-is-open ?p)
@@ -176,10 +176,10 @@
   ()
  )
 
- (:method (thermocycler-close ?a ?d)
+ (:method (thermocycler-close ?d)
   thermocycler-close-NULL
   (
-   (thermocycler-is-close ?p)
+   (not (thermocycler-is-open ?p))
   )
   ()
 
@@ -200,12 +200,6 @@
   ()
   ; add list
   ()
- )
-
- (:method (thermocycler-run-adc ?a ?d ?spec)
-  thermocycler-open-DO
-  ()
-  ((!thermocycler-open ?a ?d))
  )
 
  ; This is a complex action which involves:
@@ -237,7 +231,7 @@
   (
    (thermocycler-open ?a ?d)
    (set-plate-site ?p ?m ?s)
-   (thermocycler-run ?d ?spec)
+   (!thermocycler-run ?a ?d ?spec)
    (set-plate-site ?p ?m ?s2)
    (thermocycler-close ?a ?d)
   )

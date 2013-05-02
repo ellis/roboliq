@@ -51,7 +51,13 @@
  )
  ; tasks
  (
-  (seal-plate p1)
-  (thermocycle-plate thermocycler thermocyclerSpec1 p1)
+  (!thermocycler-open r1 thermocycler)
+  (!thermocycler-close r1 thermocycler)
+  (!thermocycler-run r1 thermocycler thermocyclerSpec1)
+  (thermocycler-open thermocycler)
+  (thermocycler-open thermocycler)
+  (thermocycler-close thermocycler)
+  (thermocycler-close thermocycler)
+  ;(thermocycle-plate thermocycler thermocyclerSpec1 p1 s1)
  )
 )
