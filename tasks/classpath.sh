@@ -8,7 +8,7 @@ prepend_path()
   fi
 }
 
-JSHOP2PATH=/home/public/src/extern/JSHOP2GUI_1.0.1
+JSHOP2PATH=~/src/extern/JSHOP2GUI_1.0.1
 prepend_path CLASSPATH $JSHOP2PATH/antlr.jar
 prepend_path CLASSPATH $JSHOP2PATH/bin.build/JSHOP2.jar
 
