@@ -1,6 +1,6 @@
 ; Seal with seal-plate
 ; Want user arm to move from offsite to s1, then robot arm to move from s1 to sealerSite
-(defproblem lhr03d lhr03
+(defproblem pd domain
  ; initial conditions
  (
   ; types

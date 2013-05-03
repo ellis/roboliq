@@ -1,4 +1,4 @@
-(defdomain lhr03 (
+(defdomain domain (
  (:operator (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
   ; preconditions
   (

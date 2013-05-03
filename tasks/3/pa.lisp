@@ -1,6 +1,6 @@
 ; Seal with seal-plate
 ; Want user arm to move from offsite to s1, then robot arm to move from s1 to sealerSite
-(defproblem lhr03c lhr03
+(defproblem pa domain
  ; initial conditions
  (
   ; types
@@ -9,12 +9,9 @@
   (is-agent r1)
   (is-arm r1arm)
   (is-sealer sealer)
-  (is-thermocycler thermocycler)
-  (is-thermocyclerSpec thermocyclerSpec1)
   (is-site offsite)
   (is-site s1)
   (is-site sealerSite)
-  (is-site thermocyclerSite)
   (is-plate p1)
   (is-plateModel m1)
 
@@ -29,22 +26,17 @@
   (agent-is-active r1)
   (agent-has-arm r1 r1arm)
   (agent-has-sealer r1 sealer)
-  (agent-has-thermocycler r1 thermocycler)
   ; robot arm
   (arm-can-plateModel r1arm m1)
   (arm-can-site r1arm s1)
   (arm-can-site r1arm sealerSite)
-  (arm-can-site r1arm thermocyclerSite)
   ; sealer
   (sealer-site sealer sealerSite)
   (sealer-can-plateModel sealer m1)
-  ; thermocycler
-  (thermocycler-site thermocycler thermocyclerSite)
   ; sites
   (site-can-plateModel offsite m1)
   (site-can-plateModel s1 m1)
   (site-can-plateModel sealerSite m1)
-  (site-can-plateModel thermocyclerSite m1)
 
   ; Initial state of labware
   (plate-model p1 m1)
@@ -52,11 +44,6 @@
  )
  ; tasks
  (
-  (thermocycler-open thermocycler)
-  (set-plate-site p1 m1 thermocyclerSite)
-  (!thermocycler-run ?a ?d ?spec)
-  (set-plate-site ?p ?m ?s2)
-  (thermocycler-close ?d)
-  ; (thermocycle-plate thermocycler thermocyclerSpec1 p1 s1)
+  (seal-plate p1)
  )
 )
