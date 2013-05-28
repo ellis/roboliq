@@ -1,13 +1,19 @@
 (defdomain domain (
- (:operator (!aspirate1 ?t ?src)
+ (:operator (!aspirate1 ?t1 ?s1 ?l1 ?d1)
   ; preconditions
   (
-   (is-tip ?t)
-   (not (tip-contains-liquid ?t ?src))
+   ; types
+   (is-tip ?t1)
+   (is-vessel ?s1)
+   (is-liquid ?l1)
+   (is-vessel ?d1)
+   ; tip
+   (tip-is-clean ?t1)
   )
   ; delete list
   ()
   ; add list
+  (tip-hold-liquid ?t1 ?l1)
  )
  (:operator (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
   ; preconditions

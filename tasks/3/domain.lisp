@@ -229,7 +229,7 @@
   )
   ; sub-tasks
   (
-   (seal-plate ?)
+   (seal-plate ?p)
    (thermocycler-open ?d)
    (set-plate-site ?p ?m ?s)
    (thermocycler-close ?d)
