@@ -1,49 +1,4 @@
 (defdomain domain (
- (:operator (!aspirate1 ?t1 ?s1 ?l1)
-  ; preconditions
-  (
-   ; types
-   (is-tip ?t1)
-   (is-vessel ?s1)
-   (is-liquid ?l1)
-  )
-  ; delete list
-  ()
-  ; add list
-  (tip-contains-liquid ?t1 ?l1)
- )
-
- (:operator (!dispense1 ?t1 ?l1 ?d1)
-  ; preconditions
-  (
-   ; types
-   (is-tip ?t1)
-   (is-liquid ?l1)
-   (is-vessel ?d1)
-   ; tip
-   (tip-contains-liquid ?t1 ?l1)
-  )
-  ; delete list
-  ()
-  ; add list
-  ()
- )
-
- (:operator (!wash4 ?t1 ?t2 ?t3 ?t4)
-  ; preconditions
-  (
-   ; types
-   (is-tip ?t1)
-   (is-tip ?t2)
-   (is-tip ?t3)
-   (is-tip ?t4)
-  )
-  ; delete list
-  ()
-  ; add list
-  ()
- )
-
  (:operator (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
   ; preconditions
   (
@@ -274,7 +229,7 @@
   )
   ; sub-tasks
   (
-   (seal-plate ?)
+   (seal-plate ?p)
    (thermocycler-open ?d)
    (set-plate-site ?p ?m ?s)
    (thermocycler-close ?d)
@@ -282,6 +237,37 @@
    (thermocycler-open ?d)
    (set-plate-site ?p ?m ?s2)
    (thermocycler-close ?d)
+  )
+ )
+
+ (:operator (!pipette1 ?a ?d ?p ?m ?s)
+  ; preconditions
+  (
+   ; types
+   (is-agent ?a)
+   (is-pipetter ?d)
+   (is-plate ?p)
+   (is-plateModel ?m)
+   (is-site ?s)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-pipetter ?a ?d)
+   ; plate
+   (plate-model ?p ?m)
+   (plate-site ?p ?s)
+  )
+  ; delete list
+  ()
+  ; add list
+  ()
+ )
+
+ (:method (pipette1-adpms ?a ?d ?p ?m ?s)
+  ; preconditions
+  ()
+  ; task list
+  (
+   (set-plate-site )
   )
  )
 ))
