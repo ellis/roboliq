@@ -210,7 +210,7 @@
  ; * open lid
  ; * move plate to ?s2
  ; * close lid
- ; This is because the thermocycler lid may not be left open, or we risk crashing an arm against it.
+ ; We need to ensure that the lid is closed as the last action, or we risk crashing an arm against it.
  (:method (thermocycle-plate ?d ?spec ?p ?s2)
   ; preconditions
   (

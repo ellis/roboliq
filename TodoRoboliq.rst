@@ -1,3 +1,26 @@
+:Started: 2013-05-30
+
+Responsive framework for complex computations for Scala 2013 conference.
+
+* Separate repository: put it on github and make a submodule link to it from roboliq
+
+Planning descriptions for:
+
+* Labware selection
+* Sealer
+* Thermocycler
+* Shaker
+* Centrifuge
+* Filter
+* Pipetting
+
+  * Distribute
+  * Mixture
+  * Mixtures
+
+* Optimize commands (drop unnecessary washes, have user put all plates on table before robot starts)
+* Translate planner output to Evoware
+
 :Started: 2013-03-16
 
 For workshop.
