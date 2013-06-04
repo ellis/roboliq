@@ -252,6 +252,9 @@
    ; agent
    (agent-is-active ?a)
    (agent-has-pipetter ?a ?d)
+   ; device
+   (pipetter-can-plateModel ?d ?m)
+   (pipetter-can-site ?d ?s)
    ; plate
    (plate-model ?p ?m)
    (plate-site ?p ?s)
@@ -267,7 +270,34 @@
   ()
   ; task list
   (
-   (set-plate-site )
+   (set-plate-site ?p ?m ?s)
+   (!pipette1 ?a ?d ?p ?m ?s)
+  )
+ )
+
+ (:method (pipette1-pm ?p ?m)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-pipetter ?d)
+   (is-site ?s)
+   (agent-has-pipetter ?a ?d)
+   (pipetter-can-site ?d ?s)
+  )
+  ; task list
+  (
+   (pipette1-adpms ?a ?d ?p ?m ?s)
+  )
+ )
+
+ (:method (pipette1 ?p)
+  ; preconditions
+  (
+   (is-plateModel ?m)
+  )
+  ; task list
+  (
+   (pipette1-pm ?p ?m)
   )
  )
 ))
