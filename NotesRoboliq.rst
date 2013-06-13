@@ -3,6 +3,29 @@ Roboliq Notes
 =============
 :Author: Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>
 
+SHOP2 Hierarchical Task Planner
+===============================
+
+:Date: 2013-06-06
+
+Pipetting
+---------
+
+It's harder to figure out how to get the SHOP2 algorithm to plan pipetting.
+It looks like it might be possible, however.  Error reporting, however, would
+be non-existant, so it's probably a bad idea.  Nonetheless, here are some thoughts.
+
+Let's first consider the case of just using the 4 large tips and only performing single-pipetting steps.
+Don't consider what to do if more liquid needs to be transfered than fits in a single tip.
+
+item i w l v -- index, well, liquid, volume
+tip-volMax t1 950
+tip-liquid t l v -- tip, liquid, volume
+
+!aspirate1 t w v
+!dispense1 t w v
+
+
 Carrier.cfg
 ===========
 
