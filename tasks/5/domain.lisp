@@ -300,4 +300,76 @@
    (pipette1-pm ?p ?m)
   )
  )
+
+ (:operator (!pipette2 ?a ?d ?p1 ?m1 ?s1 ?p2 ?m2 ?s2)
+  ; preconditions
+  (
+   ; types
+   (is-agent ?a)
+   (is-pipetter ?d)
+   (is-plate ?p1)
+   (is-plateModel ?m1)
+   (is-site ?s1)
+   (is-plate ?p2)
+   (is-plateModel ?m2)
+   (is-site ?s2)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-pipetter ?a ?d)
+   ; device
+   (pipetter-can-plateModel ?d ?m1)
+   (pipetter-can-site ?d ?s1)
+   (pipetter-can-plateModel ?d ?m2)
+   (pipetter-can-site ?d ?s2)
+   ; plate
+   (plate-model ?p ?m1)
+   (plate-site ?p ?s1)
+   (plate-model ?p ?m2)
+   (plate-site ?p ?s2)
+  )
+  ; delete list
+  ()
+  ; add list
+  ()
+ )
+
+ (:method (pipette2-adpms ?a ?d ?p1 ?m1 ?s1 ?p2 ?m2 ?s2)
+  ; preconditions
+  ()
+  ; task list
+  (
+   (set-plate-site ?p1 ?m1 ?s1)
+   (set-plate-site ?p2 ?m2 ?s2)
+   (!pipette2 ?a ?d ?p1 ?m1 ?s1 ?p2 ?m2 ?s2)
+  )
+ )
+
+ (:method (pipette2-pm ?p1 ?m1 ?p2 ?m2)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-pipetter ?d)
+   (is-site ?s1)
+   (is-site ?s2)
+   (agent-has-pipetter ?a ?d)
+   (pipetter-can-site ?d ?s1)
+   (pipetter-can-site ?d ?s2)
+  )
+  ; task list
+  (
+   (pipette2-adpms ?a ?d ?p1 ?m1 ?s1 ?p2 ?m2 ?s2)
+  )
+ )
+
+ (:method (pipette2 ?p1 ?p2)
+  ; preconditions
+  (
+   (is-plateModel ?m1)
+   (is-plateModel ?m2)
+  )
+  ; task list
+  (
+   (pipette2-pm ?p1 ?m1 ?p2 ?m2)
+  )
+ )
 ))
