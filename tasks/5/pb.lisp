@@ -59,7 +59,7 @@
  ; tasks
  (
   ;(set-plate-site p1 m1 s1)
-  (!arm-move-plate user userArm p2 m2 offsite s2)
+  (!arm-move-plate user userArm p2 m2 offsite ?s)
   ;(set-plate-site p2 m2 s2)
   ;(!pipette2 r1 pipetter p1 m1 s1 p2 m2 s2)
   ;(pipette1-adpms r1 pipetter p1 m1 s1) ; works
