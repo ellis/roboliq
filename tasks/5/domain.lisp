@@ -322,10 +322,10 @@
    (pipetter-can-plateModel ?d ?m2)
    (pipetter-can-site ?d ?s2)
    ; plate
-   (plate-model ?p ?m1)
-   (plate-site ?p ?s1)
-   (plate-model ?p ?m2)
-   (plate-site ?p ?s2)
+   (plate-model ?p1 ?m1)
+   (plate-site ?p1 ?s1)
+   (plate-model ?p2 ?m2)
+   (plate-site ?p2 ?s2)
   )
   ; delete list
   ()

@@ -14,6 +14,7 @@
   (is-site s2)
   (is-site sealerSite)
   (is-plate p1)
+  (is-plate p2)
   (is-plateModel m1)
   (is-plateModel m2)
 
@@ -58,12 +59,11 @@
  )
  ; tasks
  (
-  ;(set-plate-site p1 m1 s1)
-  (!arm-move-plate user userArm p2 m2 offsite ?s)
-  ;(set-plate-site p2 m2 s2)
+  ;(set-plate-site p1 m1 s1) ; works
+  ;(set-plate-site p2 m2 s2) ; works
   ;(!pipette2 r1 pipetter p1 m1 s1 p2 m2 s2)
-  ;(pipette1-adpms r1 pipetter p1 m1 s1) ; works
+  ;(pipette2-adpms r1 pipetter p1 m1 s1 p2 m2 s2)
   ;(pipette1-pm p1 m1) ; works
-  ;(pipette2 p1 p2)
+  (pipette2 p1 p2)
  )
 )
