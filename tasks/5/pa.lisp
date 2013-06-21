@@ -9,11 +9,13 @@
   (is-arm r1arm)
   (is-pipetter pipetter)
   (is-sealer sealer)
+  (is-shaker shaker)
   (is-site offsite)
   (is-site s1)
   (is-site sealerSite)
   (is-plate p1)
   (is-plateModel m1)
+  (is-shakerSpec shakerSpec1)
 
   ; user
   (agent-is-active user)

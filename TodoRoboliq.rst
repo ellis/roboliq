@@ -1,3 +1,24 @@
+:Started: 2013-06-21
+
+Scala 2103 talk:
+
+* re-work talk
+* create a few computation-graph examples
+* try it with an sqlite backend?
+
+Planning:
+
+* Generate problem files from 1) tecan setup, 2) extra configuration files, 3) protocol
+* Optimize such that the user places all plates onto robot at start of plan rather than waiting till they are needed
+* We probably need to provide the problem with an extra set of plates which it can initialize if required
+* Convert from SHOP2 to Tecan
+
+Planning devices to get working:
+
+* Shaker
+* Centrifuge
+* Two robots
+
 :Started: 2013-05-30
 
 Responsive framework for complex computations for Scala 2013 conference.

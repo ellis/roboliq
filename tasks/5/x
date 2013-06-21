@@ -163,6 +163,31 @@
   ()
  )
 
+ (:method (shake-plate-pm ?p ?m)
+  (
+   (is-agent ?a)
+   (is-shaker ?d)
+   (is-site ?s)
+   (agent-has-shaker ?a ?d)
+   (shaker-site ?d ?s)
+  )
+  ((shake-plate-adpms ?a ?d ?p ?m ?s))
+ )
+
+ (:method (shake-plate ?spec ?p)
+  (
+   (is-shakerSpec ?spec)
+   (is-plateModel ?m)
+
+   (plate-model ?p ?m)
+   (shaker-site ?d ?s)
+  )
+  (
+   (set-plate-site ?p ?m ?s)
+   (!shaker-run ?a ?d ?spec ?p ?m ?s)
+  )
+ )
+
  (:operator (!thermocycler-open ?a ?d)
   ; preconditions
   (
