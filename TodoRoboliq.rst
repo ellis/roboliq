@@ -1,11 +1,5 @@
 :Started: 2013-06-21
 
-Scala 2103 talk:
-
-* re-work talk
-* create a few computation-graph examples
-* try it with an sqlite backend?
-
 Planning:
 
 * Generate problem files from 1) tecan setup, 2) extra configuration files, 3) protocol
@@ -15,9 +9,8 @@ Planning:
 
 Planning devices to get working:
 
-* Shaker
-* Centrifuge
 * Two robots
+* Centrifuge
 
 :Started: 2013-05-30
 

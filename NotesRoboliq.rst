@@ -3,6 +3,55 @@ Roboliq Notes
 =============
 :Author: Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>
 
+Object representation for task planner
+======================================
+
+Here are some of the things which are difficult to represent:
+
+* stacked plates, as we use for purification and centrifugation
+* sites which can hold multiple plates (like "offsite", centrifuge, plate dispenser)
+* sites which block other sites when occupied
+
+If we didn't have stackable plates, then we could have different sites for different plate heights
+depending on which adapters are on the carrier position.
+For Tecan, if an adapter is on a site, that site needs to be addressed via a different site index.
+
+Consider placing a filter plate on top of a DWP:
+
+* this means we need to have a new "site" on the DWP with an appropriate site index.
+* But before the filter plate is placed on top, we should still be able to pipette to it.
+* After filter is on top, no pipetting to DWP, but filter can be pipetted to.
+
+Similar idea for a cover on a plate.
+
+Sites may have potentially overlapping subsites, whereby the occupation of one may make other inoccupiable.
+Sites may also be a "gateway" to a larger collection of sites, such as the single centrifuge "site" for accessing
+the four internal sites.
+
+I should program a stackable labware concept.  Tables have carriers, have adapters, have plates, have plate, have tops.
+
+How can we let a labware model have multiple sites?  The problem is that we can't generate new objects during task
+planning.  Maybe we'll need to define distinct sites for each labware.  Or perhaps only for labware which has
+multiple subsites.
+
+If labware is stackable, how to determine when a labware-as-site is accessible to an arm or pipetter?
+In general, the pipetter can access the top labware, and the arm can access any of them.  The arm
+then moves that labware and any on top of it.
+
+Site types:
+
+* simple sites -- accept a single labware
+* random-access infinite sites -- sites which can store any number of labware, and they can all be accesses instantly
+* gateway sites -- not sure how to handle these...
+
+Conclusion for now
+~~~~~~~~~~~~~~~~~~
+
+* a site is a position on the plane of the table.  It is the root of a labware stack.
+* labware is stackable, so each labware represents a potential destination for another labware.
+* need to think about gateway sites.  E.g., should centrifuge be considered to have a single gateway site or four sites, one of which may
+  be open?
+
 SHOP2 Hierarchical Task Planner
 ===============================
 
