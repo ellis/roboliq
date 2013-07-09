@@ -24,7 +24,7 @@ Consider placing a filter plate on top of a DWP:
 
 Similar idea for a cover on a plate.
 
-Sites may have potentially overlapping subsites, whereby the occupation of one may make other inoccupiable.
+Sites may have potentially overlapping sub-sites, whereby the occupation of one may make other non-occupiable.
 Sites may also be a "gateway" to a larger collection of sites, such as the single centrifuge "site" for accessing
 the four internal sites.
 
