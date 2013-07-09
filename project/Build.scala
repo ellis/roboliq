@@ -2,23 +2,23 @@ import sbt._
 import sbt.Keys._
 
 object BuildSettings {
-  val buildOrganization = "bsse.ethz.ch"
-  val buildVersion      = "0.1"
-  val buildScalaVersion = "2.10.0"
+	val buildOrganization = "bsse.ethz.ch"
+	val buildVersion      = "0.1"
+	val buildScalaVersion = "2.10.0"
 
-  val buildSettings = Defaults.defaultSettings ++ Seq (
-    organization := buildOrganization,
-    version      := buildVersion,
-    scalaVersion := buildScalaVersion,
-    scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
-    resolvers ++= Seq(
-      "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-      "io.spray repo" at "http://repo.spray.io"
-    ),
-	libraryDependencies ++= Seq(reflect, commons_io, scalaz, grizzled, logback, json_spray, yaml),
-	parallelExecution in Test := false
-  )
-  
+	val buildSettings = Defaults.defaultSettings ++ Seq (
+		organization := buildOrganization,
+		version      := buildVersion,
+		scalaVersion := buildScalaVersion,
+		scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
+		resolvers ++= Seq(
+			"Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+			"io.spray repo" at "http://repo.spray.io"
+		),
+		libraryDependencies ++= Seq(reflect, commons_io, scalaz, grizzled, logback, json_spray, yaml),
+		parallelExecution in Test := false
+	)
+
 	// Dependencies
 	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.0"
 	val reflect = "org.scala-lang" % "scala-reflect" % "2.10.0"
@@ -42,7 +42,17 @@ object MyBuild extends Build {
 			id = "root",
 			base = file("."),
 			settings = buildSettings
-		) aggregate(projBase, projUtils0)
+		) aggregate(projBase2, projUtils0)
+
+	lazy val projBase2 = Project(
+			id = "base2", 
+			base = file("base2"),
+			settings = buildSettings ++ Seq(
+				name := "base2",
+				libraryDependencies ++= Seq(scalatest),
+				initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._"""
+			)
+		)
 
 	lazy val projBase = Project(
 			id = "base", 

@@ -1,7 +1,27 @@
+:Started: 2013-07-08
+
+Data-flow from user-script to Tecan & control scripts
+
+* input protocol is in yaml or json
+* the json gets loaded into internal structure
+* the json commands produce domain and problem entries for planning (as well as data about pseudo-low-level commands such as "pipette1")
+* the domain and problem are parsed by the planner
+* possibly re-plan using planner but with plates moved from offsite at the beginning
+* planner output is parsed to lower level commands
+* lower level commands are compiled into tecan scripts and control instructions
+
+The json has sections for:
+
+* entities
+* scopes where variables, default values, and functions can be defined
+* commands
+* allow loading other json files?
+
 :Started: 2013-06-21
 
 Planning:
 
+* Generate domain files from 1) tecan setup, 2) extra configuration files, 3) protocol
 * Generate problem files from 1) tecan setup, 2) extra configuration files, 3) protocol
 * Optimize such that the user places all plates onto robot at start of plan rather than waiting till they are needed
 * We probably need to provide the problem with an extra set of plates which it can initialize if required

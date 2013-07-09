@@ -52,6 +52,18 @@ Conclusion for now
 * need to think about gateway sites.  E.g., should centrifuge be considered to have a single gateway site or four sites, one of which may
   be open?
 
+Pipetting
+~~~~~~~~~
+
+Pipetting represents a complication, because it's only partially plannable by the overall planner.
+The tip choices, pipette ordering, etc, is chosen by a separate AI module.  The planner should make
+choices about plate and tube positions.  Should the planner also make choices about plate and tube
+models?  Perhaps one reasonable approach would be to say that input labware must be pre-defined,
+and output labware can be pre-defined or planned.  Note: the planner needs to know input vessels,
+not input liquids.  Perhaps the output model will also need to be specified, but it would be really
+nice if it didn't need to be.  It would be nice if the planner could select new plates from a plate
+supply.
+
 SHOP2 Hierarchical Task Planner
 ===============================
 
