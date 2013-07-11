@@ -45,18 +45,34 @@ case class ThermocyclerSpec(id: String) extends Entity{
 	def typeName = "thermocyclerSpec"
 }
 
-case class SiteModel(id: String) extends Entity {
-	
+trait LabwareModel extends Entity
+
+trait Labware extends Entity
+
+case class SiteModel(id: String) extends LabwareModel {
+	def typeName = "siteModel"
 }
 
-case class Site(id: String) extends Entity {
+case class Site(id: String) extends Labware {
 	def typeName = "site"
 }
 
-case class LabwareModel(id: String) extends Entity {
-	def typeName = "labwareModel"
+case class Liquid(id: String) extends Entity {
+	def typeName = "liquid"
 }
 
-case class Labware(id: String) extends Entity {
-	def typeName = "labware"
+case class PlateModel(id: String) extends LabwareModel {
+	def typeName = "plateModel"
+}
+
+case class Plate(id: String) extends Labware {
+	def typeName = "plate"
+}
+
+case class TubeModel(id: String) extends Entity {
+	def typeName = "tubeModel"
+}
+
+case class Tube(id: String) extends Entity {
+	def typeName = "tube"
 }
