@@ -160,7 +160,7 @@
 ;  )
  )
 
- (:operator (!sealer-run ?a ?d ?p ?m ?s)
+ (:operator (!sealer-run ?a ?d ?p ?s)
   ; preconditions
   (
    ; types
@@ -210,7 +210,7 @@
    (model ?p ?m)
   )
   ;((set-plate-site ?p ?m ?s) (!sealer-run ?a ?d ?p ?m ?s))
-  ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?m ?s))
+  ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?s))
   ;((!sealer-run ?a ?d ?p ?m ?s))
  )
 ))
