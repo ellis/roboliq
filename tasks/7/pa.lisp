@@ -82,9 +82,12 @@
  )
  ;tasks
  (
-  (!transporter-run user userArm plate1 s1)
-  (agent-activate r1)
-  (transporter-run r1 r1arm plate1 sealerSite)
-  ;(sealer-run ?a0001 ?d0002 plate1 m1 ?s0003)
+  ;(!transporter-run user userArm plate1 s1)
+  ;(agent-activate r1)
+  ;(transporter-run r1 r1arm plate1 sealerSite)
+  ;(move-labware plate1 s1)
+  ;(transporter-run r1 r1arm plate1 sealerSite)
+  (move-labware plate1 sealerSite)
+  (sealer-run ?a0001 ?d0002 plate1 m1 ?s0003)
  )
 )

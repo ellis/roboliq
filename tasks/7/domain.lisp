@@ -36,9 +36,9 @@
  (:method (agent-activate ?a)
   agent-active-NULL
   (
-   (agent-is-activate ?a)
+   (agent-is-active ?a)
   )
-  ()
+  nil
 
   agent-activate-DO
   ; preconditions
@@ -97,17 +97,6 @@
   )
   nil
 
-  move-plate-ACTIVATE
-  ; preconditions
-  (
-   (not (agent-is-active ?a))
-  )
-  ; task list
-  (
-   (agent-activate ?a)
-   (transporter-run ?a ?d ?p ?s2)
-  )
-
   move-plate-DIRECT
   ; preconditions
   (
@@ -117,14 +106,8 @@
   )
   ; task list
   (
+   (agent-activate ?a)
    (!transporter-run ?a ?d ?p ?s2)
-  )
-
-  move-plate-INDIRECT
-  (is-site ?s3)
-  (
-   (!transporter-run ?a ?d ?p ?s3)
-   (transporter-run ?a ?d ?p ?s2)
   )
  )
 
@@ -148,12 +131,33 @@
    (transporter-run ?a ?d ?p ?s2)
   )
 
-  move-plate-INDIRECT
-  (is-site ?s3)
+  move-plate-TWO
   (
-   (transporter-run ?a1 ?d2 ?p ?s3)
+   (is-agent ?a1)
+   (is-agent ?a2)
+   (is-transporter ?d1)
+   (is-transporter ?d2)
+   (is-site ?s3)
+   (device-can-site ?d1 ?s3)
+   (device-can-site ?d2 ?s3)
+  )
+  (
+   (transporter-run ?a1 ?d1 ?p ?s3)
    (transporter-run ?a2 ?d2 ?p ?s2)
   )
+
+;  move-plate-INDIRECT
+;  (
+;   ;(is-agent ?a1)
+;   ;(is-agent ?a2)
+;   ;(is-transporter ?d1)
+;   ;(is-transporter ?d2)
+;   (is-site ?s3)
+;  )
+;  (
+;   (transporter-run ?a1 ?d1 ?p ?s3)
+;   (move-labware ?p ?s2)
+;  )
  )
 
  (:operator (!sealer-run ?a ?d ?p ?m ?s)
@@ -196,6 +200,7 @@
   sealer-run-DO
   ()
   ;((set-plate-site ?p ?m ?s) (!sealer-run ?a ?d ?p ?m ?s))
+  ;((move-labware ?p ?s) (activate-agent ?a) (!sealer-run ?a ?d ?p ?m ?s))
   ((!sealer-run ?a ?d ?p ?m ?s))
  )
 ))
