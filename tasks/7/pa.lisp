@@ -84,7 +84,7 @@
  (
   (!transporter-run user userArm plate1 s1)
   (agent-activate r1)
-  (!transporter-run r1 r1arm plate1 sealerSite)
+  (transporter-run r1 r1arm plate1 sealerSite)
   ;(sealer-run ?a0001 ?d0002 plate1 m1 ?s0003)
  )
 )

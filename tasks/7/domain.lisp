@@ -95,7 +95,7 @@
   (
    (location ?p ?s2)
   )
-  ()
+  nil
 
   move-plate-ACTIVATE
   ; preconditions
@@ -111,27 +111,48 @@
   move-plate-DIRECT
   ; preconditions
   (
-   (is-arm ?d)
-   (arm-can-site ?d ?s1)
-   (arm-can-site ?d ?s2)
+   (location ?p ?s1)
+   (device-can-site ?d ?s1)
+   (device-can-site ?d ?s2)
   )
   ; task list
   (
-   (!transporter-run ?a ?d ?p ?m ?s1 ?s2)
+   (!transporter-run ?a ?d ?p ?s2)
   )
 
   move-plate-INDIRECT
   (is-site ?s3)
   (
-   (!transporter-run ?a ?d ?p ?m ?s1 ?s3)
-   (transporter-run ?p ?m ?s3 ?s2)
+   (!transporter-run ?a ?d ?p ?s3)
+   (transporter-run ?a ?d ?p ?s2)
   )
  )
 
- (:method (set-plate-site ?p ?s)
-  ()
+ (:method (move-labware ?p ?s2)
+  move-plate-NULL
   (
-   (transporter-run ?a ?d ?p ?s)
+   (location ?p ?s2)
+  )
+  nil
+
+  move-plate-DIRECT
+  ; preconditions
+  (
+   (is-transporter ?d)
+   (location ?p ?s1)
+   (device-can-site ?d ?s1)
+   (device-can-site ?d ?s2)
+  )
+  ; task list
+  (
+   (transporter-run ?a ?d ?p ?s2)
+  )
+
+  move-plate-INDIRECT
+  (is-site ?s3)
+  (
+   (transporter-run ?a1 ?d2 ?p ?s3)
+   (transporter-run ?a2 ?d2 ?p ?s2)
   )
  )
 
