@@ -1,9 +1,5 @@
 package roboliq.entities
 
-case class Rel(name: String, args: List[String]) {
-	override def toString(): String = s"($name " + args.mkString("", " ", ")")
-}
-
 object TestMain extends App {
 	def gid: String = java.util.UUID.randomUUID().toString()
 	val user = Agent(gid)
@@ -27,6 +23,7 @@ object TestMain extends App {
 	val m2 = PlateModel(gid)
 	val shakerSpec1 = ShakerSpec(gid)
 	val thermocyclerSpec1 = ThermocyclerSpec(gid)
+	
 	val p1 = Plate(gid)
 	val p2 = Plate(gid)
 	
@@ -52,6 +49,7 @@ object TestMain extends App {
 		"m2" -> m2,
 		"shakerSpec1" -> shakerSpec1,
 		"thermocyclerSpec1" -> thermocyclerSpec1,
+		
 		"p1" -> p1,
 		"p2" -> p2
 	)
