@@ -28,7 +28,7 @@ object InputMain extends App {
 	val eb = new EntityBase
 	
 	val plateInputs = List[Map[String, String]](
-		Map("name" -> "plate1", "model" -> "Thermocycler Plate")
+		Map("name" -> "plate1", "model" -> "Thermocycler Plate", "location" -> "sealerSite")
 	)
 	val tubeInputs = List[Map[String, String]](
 		//Map("name" -> "tube1", "model" -> "Small Tube", "contents" -> "water")
@@ -64,6 +64,12 @@ object InputMain extends App {
 		val plate = new Plate(id)
 		eb.addLabware(plate, name)
 		eb.setModel(plate, model)
+		m.get("location") match {
+			case Some(key) =>
+				val entity = eb.getEntity(key).get
+				eb.setLocation(plate, entity)
+			case _ =>
+		}
 	}
 	
 	for (m <- tubeInputs) {
@@ -166,6 +172,11 @@ object InputMain extends App {
 		eb.setModel(thermocyclerSite, siteModel1)
 	}
 
+	println("(defproblem problem domain")
 	println(eb.makeInitialConditions)
-	tasks.foreach(println)
+	println(" ;tasks")
+	println(" (")
+	tasks.foreach(r => println("  "+r))
+	println(" )")
+	println(")")
 }
