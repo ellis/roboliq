@@ -27,112 +27,56 @@ object TestMain extends App {
 	val p1 = Plate(gid)
 	val p2 = Plate(gid)
 	
-	val entities = List[(String, Entity)](
-		"user" -> user,
-		"r1" -> r1,
-		"userArm" -> userArm,
-		"r1Arm" -> r1arm,
-		"pipetter" -> pipetter,
-		"sealer" -> sealer,
-		"shaker" -> shaker,
-		"thermocycler" -> thermocycler,
-		"siteModelAll" -> siteModelAll,
-		"siteModel1" -> siteModel1,
-		"siteModel12" -> siteModel12,
-		"offsite" -> offsite,
-		"s1" -> s1,
-		"s2" -> s2,
-		"sealerSite" -> sealerSite,
-		"shakerSite" -> shakerSite,
-		"thermocyclerSite" -> thermocyclerSite,
-		"m1" -> m1,
-		"m2" -> m2,
-		"shakerSpec1" -> shakerSpec1,
-		"thermocyclerSpec1" -> thermocyclerSpec1,
-		
-		"p1" -> p1,
-		"p2" -> p2
-	)
-	val names: Map[Entity, String] = entities.map(pair => pair._2 -> pair._1).toMap
-	val agentToDevices_m = Map[Agent, List[Device]](
-		user -> List(userArm),
-		r1 -> List(r1arm, pipetter, sealer, shaker, thermocycler)
-	)
-	// LabwareModels that devices can use
-	val deviceToModels_m = Map[Device, List[LabwareModel]](
-		userArm -> List(m1, m2),
-		r1arm -> List(m1, m2),
-		pipetter -> List(m1, m2),
-		sealer -> List(m1),
-		shaker -> List(m1, m2),
-		thermocycler -> List(m1)
-	)
-	// Sites that devices can access
-	val deviceToSites_m = Map[Device, List[Site]](
-		userArm -> List(offsite, s1),
-		r1arm -> List(s1, s2, sealerSite, thermocyclerSite),
-		pipetter -> List(s1, s2),
-		sealer -> List(sealerSite),
-		shaker -> List(shakerSite),
-		thermocycler -> List(thermocyclerSite)
-	)
-	// Specs that devices accept
-	val deviceToSpecs_m = Map[Device, List[Entity]](
-		shaker -> List(shakerSpec1),
-		thermocycler -> List(thermocyclerSpec1)
-	)
-	// Models which another model can have stacked on top of it
-	val stackables_m = Map[LabwareModel, List[LabwareModel]](
-		siteModelAll -> List(m1, m2),
-		siteModel1 -> List(m1),
-		siteModel12 -> List(m1, m2)
-	)
-	// Each labware's model
-	val labwareToModel_m = Map[Labware, LabwareModel](
-		offsite -> siteModelAll,
-		s1 -> siteModel12,
-		s2 -> siteModel12,
-		sealerSite -> siteModel1,
-		shakerSite -> siteModel12,
-		thermocyclerSite -> siteModel1,
-		p1 -> m1,
-		p2 -> m2
-	)
-	val labwareToLocation_m = Map[Labware, Entity](
-		p1 -> offsite,
-		p2 -> offsite
-	)
+	val eb = new EntityBase
 	
-	def makeInitialConditionsList(): List[Rel] = {
-		entities.map(pair => Rel(s"is-${pair._2.typeName}", List(pair._1))) ++
-		agentToDevices_m.flatMap(pair => pair._2.map(device => {
-			Rel(s"agent-has-device", List(names(pair._1), names(device)))
-		})) ++
-		deviceToModels_m.flatMap(pair => pair._2.map(model => {
-			Rel(s"device-can-model", List(names(pair._1), names(model)))
-		})) ++
-		deviceToSites_m.flatMap(pair => pair._2.map(site => {
-			Rel(s"device-can-site", List(names(pair._1), names(site)))
-		})) ++
-		deviceToSpecs_m.flatMap(pair => pair._2.map(spec => {
-			Rel(s"device-can-spec", List(names(pair._1), names(spec)))
-		})) ++
-		stackables_m.flatMap(pair => pair._2.map(model => {
-			Rel(s"stackable", List(names(pair._1), names(model)))
-		})) ++
-		labwareToModel_m.map(pair => Rel(s"stackable", List(names(pair._1), names(pair._2)))) ++
-		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2))))
-	}
+	eb.addAgent(user, "user")
+	eb.addAgent(r1, "r1")
+	eb.addModel(siteModelAll, "siteModelAll")
+	eb.addModel(siteModel1, "siteModel1")
+	eb.addModel(siteModel12, "siteModel12")
+	eb.addModel(m1, "m1")
+	eb.addModel(m2, "m2")
+	eb.addSite(offsite, "offsite")
+	eb.addSite(s1, "s1")
+	eb.addSite(s2, "s2")
+	eb.addSite(sealerSite, "sealerSite")
+	eb.addSite(shakerSite, "shakerSite")
+	eb.addSite(thermocyclerSite, "thermocyclerSite")
+	eb.addDevice(user, userArm, "userArm")
+	eb.addDevice(r1, r1arm, "r1arm")
+	eb.addDevice(r1, pipetter, "pipetter")
+	eb.addDevice(r1, sealer, "sealer")
+	eb.addDevice(r1, shaker, "shaker")
+	eb.addDevice(r1, thermocycler, "thermocycler")
+	eb.setDeviceModels(userArm, List(m1, m2))
+	eb.setDeviceModels(r1arm, List(m1, m2))
+	eb.setDeviceModels(pipetter, List(m1, m2))
+	eb.setDeviceModels(sealer, List(m1))
+	eb.setDeviceModels(shaker, List(m1, m2))
+	eb.setDeviceModels(thermocycler, List(m1))
+	eb.setDeviceSites(userArm, List(offsite, s1))
+	eb.setDeviceSites(r1arm, List(s1, s2, sealerSite, thermocyclerSite))
+	eb.setDeviceSites(pipetter, List(s1, s2))
+	eb.setDeviceSites(sealer, List(sealerSite))
+	eb.setDeviceSites(shaker, List(shakerSite))
+	eb.setDeviceSites(thermocycler, List(thermocyclerSite))
+	eb.addDeviceSpec(shaker, shakerSpec1, "shakerSpec1")
+	eb.addDeviceSpec(thermocycler, thermocyclerSpec1, "thermocyclerSpec1")
+	eb.setStackable(siteModelAll, List(m1, m2))
+	eb.setStackable(siteModel1, List(m1))
+	eb.setStackable(siteModel12, List(m1, m2))
+	eb.setModel(offsite, siteModelAll)
+	eb.setModel(s1, siteModel12)
+	eb.setModel(s2, siteModel12)
+	eb.setModel(sealerSite, siteModel1)
+	eb.setModel(shakerSite, siteModel12)
+	eb.setModel(thermocyclerSite, siteModel1)
+	eb.addLabware(p1, "p1")
+	eb.addLabware(p2, "p2")
+	eb.setModel(p1, m1)
+	eb.setModel(p2, m2)
+	eb.setLocation(p1, offsite)
+	eb.setLocation(p2, offsite)
 	
-	def makeInitialConditions(): String = {
-		val l: List[Rel] = makeInitialConditionsList
-		val l2: List[String] =
-			" ; initial conditions" ::
-			" (" ::
-			l.map(r => "  " + r) ++
-			List(" )")
-		l2.mkString("\n")
-	}
-	
-	println(makeInitialConditions)
+	println(eb.makeInitialConditions)
 }

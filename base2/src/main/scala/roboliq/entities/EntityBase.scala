@@ -1,5 +1,6 @@
 package roboliq.entities
 
+import scala.collection._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.MultiMap
@@ -7,7 +8,7 @@ import scala.collection.mutable.MultiMap
 class EntityBase {
 	var names = new HashMap[Entity, String]
 	var agents = new ArrayBuffer[Agent]
-	var agentToDevices_m = new HashMap[Agent, Set[Device]] with MultiMap[Agent, Device]
+	var agentToDevices_m = new HashMap[Agent, mutable.Set[Device]] with MultiMap[Agent, Device]
 	/**
 	 * LabwareModels that devices can use
 	 */
@@ -19,7 +20,7 @@ class EntityBase {
 	/**
 	 * Specs that devices accept
 	 */
-	var deviceToSpecs_m = new HashMap[Device, List[Entity]] with MultiMap[Device, Entity]
+	var deviceToSpecs_m = new HashMap[Device, mutable.Set[Entity]] with MultiMap[Device, Entity]
 	/**
 	 * Models which another model can have stacked on top of it
 	 */
@@ -61,7 +62,7 @@ class EntityBase {
 		deviceToSites_m(d) = l
 	}
 	
-	def addSpec(d: Device, spec: Entity, name: String) {
+	def addDeviceSpec(d: Device, spec: Entity, name: String) {
 		assert(names.contains(d))
 		names(spec) = name
 		deviceToSpecs_m.addBinding(d, spec)
@@ -77,6 +78,10 @@ class EntityBase {
 		assert(names.contains(l))
 		assert(names.contains(m))
 		labwareToModel_m(l) = m
+	}
+	
+	def addLabware(e: Labware, name: String) {
+		names(e) = name
 	}
 
 	def setLocation(l: Labware, e: Entity) {
