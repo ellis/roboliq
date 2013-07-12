@@ -199,6 +199,7 @@
 
   sealer-run-DO
   (
+   (is-sealer ?d)
    (agent-has-device ?a ?d)
    (device-can-model ?d ?m)
    (device-can-site ?d ?s)
