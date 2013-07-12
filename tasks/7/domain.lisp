@@ -163,11 +163,13 @@
  (:operator (!sealer-run ?a ?d ?p ?m ?s)
   ; preconditions
   (
+   ; types
    (is-agent ?a)
    (is-sealer ?d)
    (is-plate ?p)
-   (is-plateModel ?m)
    (is-site ?s)
+   ; lookup types
+   (is-plateModel ?m)
    ; agent
    ;(agent-is-active ?a)
    (agent-has-device ?a ?d)
@@ -190,7 +192,7 @@
   )
  )
 
- (:method (sealer-run ?a ?d ?p ?m ?s)
+ (:method (sealer-run ?a ?d ?p ?s)
   sealer-run-NULL
   (
    (plate-is-sealed ?p)
@@ -199,10 +201,13 @@
 
   sealer-run-DO
   (
+   (is-agent ?a)
    (is-sealer ?d)
+   (is-site ?s)
    (agent-has-device ?a ?d)
    (device-can-model ?d ?m)
    (device-can-site ?d ?s)
+   (model ?p ?m)
   )
   ;((set-plate-site ?p ?m ?s) (!sealer-run ?a ?d ?p ?m ?s))
   ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?m ?s))
