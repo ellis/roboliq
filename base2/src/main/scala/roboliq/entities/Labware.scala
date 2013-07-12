@@ -61,7 +61,12 @@ case class Liquid(id: String) extends Entity {
 	def typeName = "liquid"
 }
 
-case class PlateModel(id: String) extends LabwareModel {
+case class PlateModel(
+	id: String,
+	rows: Int,
+	cols: Int,
+	wellVolume: LiquidVolume
+) extends LabwareModel {
 	def typeName = "plateModel"
 }
 

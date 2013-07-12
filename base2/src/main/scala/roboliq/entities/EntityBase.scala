@@ -7,6 +7,8 @@ import scala.collection.mutable.MultiMap
 
 class EntityBase {
 	var names = new HashMap[Entity, String]
+	var nameToEntity = new HashMap[String, Entity]
+	var idToEntity = new HashMap[String, Entity]
 	var agents = new ArrayBuffer[Agent]
 	var agentToDevices_m = new HashMap[Agent, mutable.Set[Device]] with MultiMap[Agent, Device]
 	/**
@@ -34,21 +36,31 @@ class EntityBase {
 	 */
 	val labwareToLocation_m = new HashMap[Labware, Entity]
 	
-	def addAgent(e: Agent, name: String) {
+	private def addEntity(e: Entity, name: String) {
 		names(e) = name
+		nameToEntity(name) = e
+		idToEntity(e.id) = e
+	}
+	
+	def getEntity(key: String): Option[Entity] = {
+		nameToEntity.get(key).orElse(idToEntity.get(key))
+	}
+	
+	def addAgent(e: Agent, name: String) {
+		addEntity(e, name)
 	}
 	
 	def addModel(e: LabwareModel, name: String) {
-		names(e) = name
+		addEntity(e, name)
 	}
 	
 	def addSite(e: Site, name: String) {
-		names(e) = name
+		addEntity(e, name)
 	}
 	
 	def addDevice(a: Agent, d: Device, name: String) {
 		assert(names.contains(a))
-		names(d) = name
+		addEntity(d, name)
 		agentToDevices_m.addBinding(a, d)
 	}
 	
@@ -81,7 +93,7 @@ class EntityBase {
 	}
 	
 	def addLabware(e: Labware, name: String) {
-		names(e) = name
+		addEntity(e, name)
 	}
 
 	def setLocation(l: Labware, e: Entity) {
@@ -107,7 +119,7 @@ class EntityBase {
 		stackables_m.flatMap(pair => pair._2.map(model => {
 			Rel(s"stackable", List(names(pair._1), names(model)))
 		})) ++
-		labwareToModel_m.map(pair => Rel(s"stackable", List(names(pair._1), names(pair._2)))) ++
+		labwareToModel_m.map(pair => Rel(s"model", List(names(pair._1), names(pair._2)))) ++
 		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2))))
 	}
 	
