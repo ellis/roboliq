@@ -2,11 +2,11 @@ package roboliq.entities
 
 sealed trait Entity {
 	val id: String
-	def typeName: String
+	def typeNames: List[String]
 }
 
 case class Agent(id: String) extends Entity {
-	def typeName = "agent"
+	def typeNames = List("agent")
 }
 
 trait DeviceModel extends Entity {
@@ -18,31 +18,31 @@ trait Device extends Entity {
 }
 
 case class Transporter(id: String) extends Device {
-	def typeName = "transporter"
+	def typeNames = List("transporter")
 }
 
 case class Pipetter(id: String) extends Device {
-	def typeName = "pipetter"
+	def typeNames = List("pipetter")
 }
 
 case class Sealer(id: String) extends Device {
-	def typeName = "sealer"
+	def typeNames = List("sealer")
 }
 
 case class Shaker(id: String) extends Device {
-	def typeName = "shaker"
+	def typeNames = List("shaker")
 }
 
 case class ShakerSpec(id: String) extends Entity {
-	def typeName = "shakerSpec"
+	def typeNames = List("shakerSpec")
 }
 
 case class Thermocycler(id: String) extends Device {
-	def typeName = "thermocycler"
+	def typeNames = List("thermocycler")
 }
 
 case class ThermocyclerSpec(id: String) extends Entity{
-	def typeName = "thermocyclerSpec"
+	def typeNames = List("thermocyclerSpec")
 }
 
 trait LabwareModel extends Entity
@@ -50,15 +50,15 @@ trait LabwareModel extends Entity
 trait Labware extends Entity
 
 case class SiteModel(id: String) extends LabwareModel {
-	def typeName = "siteModel"
+	def typeNames = List("model", "siteModel")
 }
 
 case class Site(id: String) extends Labware {
-	def typeName = "site"
+	def typeNames = List("labware", "site")
 }
 
 case class Liquid(id: String) extends Entity {
-	def typeName = "liquid"
+	def typeNames = List("liquid")
 }
 
 case class PlateModel(
@@ -67,17 +67,17 @@ case class PlateModel(
 	cols: Int,
 	wellVolume: LiquidVolume
 ) extends LabwareModel {
-	def typeName = "plateModel"
+	def typeNames = List("model", "plateModel")
 }
 
 case class Plate(id: String) extends Labware {
-	def typeName = "plate"
+	def typeNames = List("labware", "plate")
 }
 
 case class TubeModel(id: String) extends Entity {
-	def typeName = "tubeModel"
+	def typeNames = List("model", "tubeModel")
 }
 
 case class Tube(id: String) extends Entity {
-	def typeName = "tube"
+	def typeNames = List("labware", "tube")
 }

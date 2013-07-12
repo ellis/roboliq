@@ -103,7 +103,7 @@ class EntityBase {
 	}
 	
 	def makeInitialConditionsList(): List[Rel] = {
-		names.toList.map(pair => Rel(s"is-${pair._1.typeName}", List(pair._2))) ++
+		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2)))) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
 			Rel(s"agent-has-device", List(names(pair._1), names(device)))
 		})) ++
