@@ -1,18 +1,55 @@
 (defdomain domain (
- (:operator (!agent-activate ?a)
+ (:operator (!agent-deactivate ?a)
   ; preconditions
-  (
-   (not (agent-is-active ?a))
-  )
+  (agent-is-active ?a)
   ; delete list
-  (
-   (forall (?a2) (agent-is-active ?a2) ((agent-is-active ?a2)))
-  )
+  ((agent-is-active ?a))
   ; add list
+  ()
+ )
+
+ (:method (agent-deactivate)
+  agent-deactivate-DO
+  ; preconditions
   (
    (agent-is-active ?a)
   )
+  ; task list
+  ((!agent-deactivate ?a) (agent-deactivate))
+
+  agent-deactivate-NULL
+  nil
+  nil
  )
+
+ (:operator (!agent-activate ?a)
+  ; preconditions
+  (
+   (forall (?a2) (is-agent ?a2) ((not (agent-is-active ?a2))))
+  )
+  ; delete list
+  ()
+  ; add list
+  ((agent-is-active ?a))
+ )
+
+ (:method (agent-activate ?a)
+  agent-active-NULL
+  (
+   (agent-is-activate ?a)
+  )
+  ()
+
+  agent-activate-DO
+  ; preconditions
+  ()
+  ; task list
+  (
+   (agent-deactivate)
+   (!agent-activate ?a)
+  )
+ )
+
  (:operator (!transporter-run ?a ?d ?p ?s2)
   ; preconditions
   (
@@ -60,6 +97,17 @@
   )
   ()
 
+  move-plate-ACTIVATE
+  ; preconditions
+  (
+   (not (agent-is-active ?a))
+  )
+  ; task list
+  (
+   (agent-activate ?a)
+   (transporter-run ?a ?d ?p ?s2)
+  )
+
   move-plate-DIRECT
   ; preconditions
   (
@@ -69,23 +117,21 @@
   )
   ; task list
   (
-   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s2)
+   (!transporter-run ?a ?d ?p ?m ?s1 ?s2)
   )
 
   move-plate-INDIRECT
   (is-site ?s3)
   (
-   (!arm-move-plate ?a ?d ?p ?m ?s1 ?s3)
-   (move-plate ?p ?m ?s3 ?s2)
+   (!transporter-run ?a ?d ?p ?m ?s1 ?s3)
+   (transporter-run ?p ?m ?s3 ?s2)
   )
  )
 
- (:method (set-plate-site ?p ?m ?s)
+ (:method (set-plate-site ?p ?s)
+  ()
   (
-   (plate-site ?p ?s1)
-  )
-  (
-   (move-plate ?p ?m ?s1 ?s)
+   (transporter-run ?a ?d ?p ?s)
   )
  )
 

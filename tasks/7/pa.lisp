@@ -78,12 +78,13 @@
   (model offsite siteModelAll)
   (location plate1 offsite)
   (agent-is-active user)
-  (agent-is-active r1)
+  ;(agent-is-active r1)
  )
  ;tasks
  (
   (!transporter-run user userArm plate1 s1)
+  (agent-activate r1)
   (!transporter-run r1 r1arm plate1 sealerSite)
-  (sealer-run ?a0001 ?d0002 plate1 m1 ?s0003)
+  ;(sealer-run ?a0001 ?d0002 plate1 m1 ?s0003)
  )
 )
