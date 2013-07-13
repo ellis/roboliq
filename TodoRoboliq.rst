@@ -2,6 +2,7 @@
 
 * load all relations we can from Evoware
 * load json data/scripts
+* aliases
 * convert planner output to evoware
 * get planner state?
 * handle pipetting

@@ -4,7 +4,7 @@ import sbt.Keys._
 object BuildSettings {
 	val buildOrganization = "bsse.ethz.ch"
 	val buildVersion      = "0.1"
-	val buildScalaVersion = "2.10.0"
+	val buildScalaVersion = "2.10.2"
 
 	val buildSettings = Defaults.defaultSettings ++ Seq (
 		organization := buildOrganization,
@@ -20,8 +20,8 @@ object BuildSettings {
 	)
 
 	// Dependencies
-	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.0"
-	val reflect = "org.scala-lang" % "scala-reflect" % "2.10.0"
+	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.2"
+	val reflect = "org.scala-lang" % "scala-reflect" % "2.10.2"
 	val commons_io = "commons-io" % "commons-io" % "2.2"
 	val scalaz = "org.scalaz" % "scalaz-core_2.10" % "7.0.0-M7"
 	val grizzled = "org.clapper" % "grizzled-slf4j_2.10" % "1.0.1"
@@ -42,7 +42,9 @@ object MyBuild extends Build {
 			id = "root",
 			base = file("."),
 			settings = buildSettings
-		) aggregate(projBase2, projUtils0)
+		) aggregate(projBase2, projUtils0, projReactiveSim)
+
+	lazy val projReactiveSim = Project("reactivesim", file("extern/reactive-sim/core"))
 
 	lazy val projBase2 = Project(
 			id = "base2", 
@@ -52,7 +54,7 @@ object MyBuild extends Build {
 				libraryDependencies ++= Seq(scalatest),
 				initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._"""
 			)
-		)
+		) dependsOn(projReactiveSim)
 
 	lazy val projBase = Project(
 			id = "base", 

@@ -81,3 +81,23 @@ case class TubeModel(id: String) extends Entity {
 case class Tube(id: String) extends Entity {
 	def typeNames = List("labware", "tube")
 }
+
+/////
+
+/** Basically a tuple of a pipette policy name and the position of the tips while pipetting. */
+case class PipettePolicy(id: String, pos: PipettePosition.Value) extends Entity {
+	def typeNames = List("pipettePolicy")
+	override def equals(that: Any): Boolean = {
+		that match {
+			case b: PipettePolicy => id == b.id
+			case _ => false
+		}
+	}
+}
+
+object PipettePolicy {
+	def fromName(name: String): PipettePolicy = {
+		val pos = PipettePosition.getPositionFromPolicyNameHack(name)
+		PipettePolicy(name, pos)
+	}
+}
