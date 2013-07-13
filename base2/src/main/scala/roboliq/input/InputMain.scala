@@ -174,7 +174,7 @@ object InputMain extends App {
 
 	println("(defproblem problem domain")
 	println(eb.makeInitialConditions)
-	println(" ;tasks")
+	println(" ; tasks")
 	println(" (")
 	tasks.foreach(r => println("  "+r))
 	println(" )")

@@ -1,3 +1,15 @@
+:Started: 2013-07-13
+
+* load all relations we can from Evoware
+* load json data/scripts
+* convert planner output to evoware
+* get planner state?
+* handle pipetting
+* handle centrifuge
+* convert YAML to json
+* special multi-aspirate pipetting
+* purification with plate stacking
+
 :Started: 2013-07-08
 
 Data-flow from user-script to Tecan & control scripts
