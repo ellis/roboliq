@@ -14,11 +14,11 @@ class EntityBase {
 	/**
 	 * LabwareModels that devices can use
 	 */
-	var deviceToModels_m = new HashMap[Device, List[LabwareModel]]
+	var deviceToModels_m = new HashMap[Device, mutable.Set[LabwareModel]] with MultiMap[Device, LabwareModel]
 	/**
 	 * Sites that devices can access
 	 */
-	var deviceToSites_m = new HashMap[Device, List[Site]]
+	var deviceToSites_m = new HashMap[Device, mutable.Set[Site]] with MultiMap[Device, Site]
 	/**
 	 * Specs that devices accept
 	 */
@@ -26,7 +26,7 @@ class EntityBase {
 	/**
 	 * Models which another model can have stacked on top of it
 	 */
-	val stackables_m = new HashMap[LabwareModel, List[LabwareModel]]
+	val stackables_m = new HashMap[LabwareModel, mutable.Set[LabwareModel]] with MultiMap[LabwareModel, LabwareModel]
 	/**
 	 * Each labware's model
 	 */
@@ -64,14 +64,24 @@ class EntityBase {
 		agentToDevices_m.addBinding(a, d)
 	}
 	
-	def setDeviceModels(d: Device, l: List[LabwareModel]) {
-		assert(l.forall(names.contains))
-		deviceToModels_m(d) = l
+	def addDeviceModel(d: Device, m: LabwareModel) {
+		assert(names.contains(d))
+		assert(names.contains(m))
+		deviceToModels_m.addBinding(d, m)
 	}
 	
-	def setDeviceSites(d: Device, l: List[Site]) {
-		assert(l.forall(names.contains))
-		deviceToSites_m(d) = l
+	def addDeviceModels(d: Device, l: List[LabwareModel]) {
+		l.foreach(e => addDeviceModel(d, e))
+	}
+	
+	def addDeviceSite(d: Device, s: Site) {
+		assert(names.contains(d))
+		assert(names.contains(s))
+		deviceToSites_m.addBinding(d, s)
+	}
+	
+	def addDeviceSites(d: Device, l: List[Site]) {
+		l.foreach(s => addDeviceSite(d, s))
 	}
 	
 	def addDeviceSpec(d: Device, spec: Entity, name: String) {
@@ -80,10 +90,14 @@ class EntityBase {
 		deviceToSpecs_m.addBinding(d, spec)
 	}
 	
-	def setStackable(m: LabwareModel, l: List[LabwareModel]) {
-		assert(names.contains(m))
-		assert(l.forall(names.contains))
-		stackables_m(m) = l
+	def addStackable(bot: LabwareModel, top: LabwareModel) {
+		assert(names.contains(bot))
+		assert(names.contains(top))
+		stackables_m.addBinding(bot, top)
+	}
+	
+	def addStackables(bot: LabwareModel, l: List[LabwareModel]) {
+		l.foreach(top => addStackable(bot, top))
 	}
 	
 	def setModel(l: Labware, m: LabwareModel) {
@@ -130,6 +144,6 @@ class EntityBase {
 			" (" ::
 			l.map(r => "  " + r) ++
 			List(" )")
-		l2.mkString("\n")
+		l2.sorted.mkString("\n")
 	}
 }
