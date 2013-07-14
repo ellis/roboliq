@@ -8,6 +8,7 @@ import roboliq.entities._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
+import roboliq.utils.FileUtils
 
 class PlateBean {
 	var name: String = null
@@ -306,9 +307,9 @@ object InputMain extends App {
 				for (site_i <- 0 until carrierE.nSites) {
 					val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 					val siteId = (carrierE.id, site_i)
-					val site = Site(s"device_${carrierE.id}x${site_i+1}")
+					val site = Site(carrierE.sName)
 					siteIdToSite_m(siteId) = site
-					eb.addSite(site, carrierE.sName+site.id)
+					eb.addSite(site, s"device_${carrierE.id}x${site_i+1}")
 				}
 			}
 			
@@ -455,11 +456,13 @@ object InputMain extends App {
 		}
 	}
 	
-	println("(defproblem problem domain")
-	println(eb.makeInitialConditions)
-	println(" ; tasks")
-	println(" (")
-	tasks.foreach(r => println("  "+r))
-	println(" )")
-	println(")")
+	FileUtils.printToFile(new java.io.File("tasks/autogen/problem.lisp")) { p =>
+		p.println("(defproblem problem domain")
+		p.println(eb.makeInitialConditions)
+		p.println(" ; tasks")
+		p.println(" (")
+		tasks.foreach(r => p.println("  "+r))
+		p.println(" )")
+		p.println(")")
+	}
 }

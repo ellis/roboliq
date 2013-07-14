@@ -2,13 +2,17 @@ Started 2013-07-13
 
 - [ ] load all relations we can from Evoware
     - [ ] add description field to Entity and use it to print comments in LISP planner file
-    - [ ] better name for device sites, such that they can't have spaces in them
+    - [x] better name for device sites, such that they can't have spaces in them
     - [x] setup sealer device
         - [x] device site
         - [x] device models
         - [x] setup domain so that sealer uses spec
         - [x] user needs to provide sealer specs
+    - [ ] the plate specified in protocol should get the correct platemodel (m002, not m1)
     - [ ] problem file: sealer-run p1
+- [ ] domain: transporter-run
+    - [ ] check for closed device sites
+    - [ ] handle sites which can accept multiple labware (e.g. offsite and centrifuge)
 - [ ] load json data/scripts
 - [ ] aliases
 - [ ] convert planner output to evoware
