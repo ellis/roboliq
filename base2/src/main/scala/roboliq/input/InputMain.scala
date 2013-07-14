@@ -195,6 +195,7 @@ object InputMain extends App {
 		val siteModelAll = SiteModel(gid)
 		val siteModel1 = SiteModel(gid)
 		val siteModel12 = SiteModel(gid)
+		val offsiteModel = SiteModel(gid)
 		val offsite = Site(gid)
 		val s1 = Site(gid)
 		val s2 = Site(gid)
@@ -206,6 +207,7 @@ object InputMain extends App {
 		val thermocyclerSpec1 = ThermocyclerSpec(gid)
 		
 		eb.addAgent(user, "user")
+		eb.addModel(offsiteModel, "offsiteModel")
 		eb.addModel(siteModelAll, "siteModelAll")
 		eb.addModel(siteModel1, "siteModel1")
 		eb.addModel(siteModel12, "siteModel12")
@@ -218,19 +220,24 @@ object InputMain extends App {
 		eb.addSite(thermocyclerSite, "thermocyclerSite")
 		eb.addDevice(user, userArm, "userArm")
 		
+		// userArm can transport from offsite
+		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "nil")))
+		// A few other user-specified sites where the user can put plates on the robot
+		eb.addRel(Rel("transporter-can", List("userArm", "hotel_245x1", "nil")))
+		
 		val labwareNamesOfInterest_l = new HashSet[String]
 		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
+		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
+
 		
 		/*eb.addDevice(r1, pipetter, "pipetter")
 		eb.addDevice(r1, shaker, "shaker")
 		eb.addDevice(r1, thermocycler, "thermocycler")
-		eb.addDeviceModels(userArm, List(m1, m2))
 		//eb.addDeviceModels(r1arm, List(m1, m2))
 		eb.addDeviceModels(pipetter, List(m1, m2))
 		//eb.addDeviceModels(sealer, List(m1))
 		eb.addDeviceModels(shaker, List(m1, m2))
 		eb.addDeviceModels(thermocycler, List(m1))
-		eb.addDeviceSites(userArm, List(offsite, s1))
 		//eb.addDeviceSites(r1arm, List(s1, s2, thermocyclerSite))
 		eb.addDeviceSites(pipetter, List(s1, s2))
 		eb.addDeviceSites(shaker, List(shakerSite))
@@ -263,14 +270,22 @@ object InputMain extends App {
 					val m = PlateModel(mE.sName, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
 					idToModel_m(mE.sName) = m
 					eb.addModel(m, f"m${idToModel_m.size}%03d")
+					// All models can be offsite
+					eb.addStackable(offsiteModel, m)
+					// The user arm can handle all models
+					eb.addDeviceModel(userArm, m)
+					//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
 				}
 			}
 			
+			//
 			// Create Sites
+			//
+			
 			val siteEsToSiteModel_m = new HashMap[List[(Int, Int)], SiteModel]
 			val siteIdToSite_m = new HashMap[(Int, Int), Site]
-			//val siteEToSite_m = new HashMap[roboliq.evoware.parser.CarrierSite, Site]
 			val carriersSeen_l = new HashSet[Int]
+			
 			// Create Hotel Sites
 			for (o <- table.lHotelObject) {
 				val carrierE = o.parent
@@ -297,7 +312,7 @@ object InputMain extends App {
 				}
 			}
 			
-			// Create on-bench Sites
+			// Create on-bench Sites for Plates
 			for ((carrierE, grid_i) <- table.mapCarrierToGrid if !carriersSeen_l.contains(carrierE.id)) {
 				for (site_i <- 0 until carrierE.nSites) {
 					val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
@@ -322,6 +337,10 @@ object InputMain extends App {
 					*/
 				}
 			}
+			
+			// TODO: Create on-bench Sites and SiteModels for Tubes
+			// TODO: Let userArm handle tube models
+			// TODO: Let userArm access all sites that the robot arms can't
 			
 			// Create SiteModels for for sites which hold Plates
 			{
@@ -354,7 +373,33 @@ object InputMain extends App {
 				}
 			}
 			
-
+			// Create transporters
+			val roma_m = new HashMap[Int, Transporter]()
+			
+			{
+				// List of RoMa indexes
+				val roma_li = carrier.mapCarrierToVectors.values.flatMap(_.map(_.iRoma)).toSet
+				// Add transporter device for each RoMa
+				for (roma_i <- roma_li) {
+					val roma = Transporter(s"RoMa${roma_i + 1}")
+					roma_m(roma_i) = roma
+					eb.addDevice(r1, roma, s"r1_transporter${roma_i + 1}")
+				}
+			}
+			
+			// Find which sites the transporters can access
+			for ((carrierE, vector_l) <- carrier.mapCarrierToVectors) {
+				for (site_i <- 0 until carrierE.nSites) {
+					val siteId = (carrierE.id, site_i)
+					siteIdToSite_m.get(siteId).foreach { site =>
+						for (vector <- vector_l) {
+							val transporter = roma_m(vector.iRoma)
+							eb.addRel(Rel("transporter-can", List(eb.names(transporter), eb.names(site), vector.sClass)))
+						}
+					}
+				}
+			}
+			
 			/*
 			// Create Sites and SiteModels
 			for ((carrierE, grid_i) <- table.mapCarrierToGrid) {

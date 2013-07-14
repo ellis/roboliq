@@ -35,6 +35,10 @@ class EntityBase {
 	 * Initial location of labware
 	 */
 	val labwareToLocation_m = new HashMap[Labware, Entity]
+	/**
+	 * List of custom Relations
+	 */
+	val rel_l = new ArrayBuffer[Rel]
 	
 	private def addEntity(e: Entity, name: String) {
 		names(e) = name
@@ -116,6 +120,10 @@ class EntityBase {
 		labwareToLocation_m(l) = e
 	}
 	
+	def addRel(rel: Rel) {
+		rel_l += rel
+	}
+	
 	def makeInitialConditionsList(): List[Rel] = {
 		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.id))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
@@ -134,7 +142,8 @@ class EntityBase {
 			Rel(s"stackable", List(names(pair._1), names(model)))
 		})).toList.sortBy(_.toString) ++
 		labwareToModel_m.map(pair => Rel(s"model", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString) ++
-		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString)
+		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString) ++
+		rel_l.toList.sortBy(_.toString)
 	}
 	
 	def makeInitialConditions(): String = {
