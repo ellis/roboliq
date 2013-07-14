@@ -320,21 +320,6 @@ object InputMain extends App {
 					val site = Site(siteId.toString)
 					siteIdToSite_m(siteId) = site
 					eb.addSite(site, f"bench_${grid_i}%03dx${site_i+1}")
-					/*
-					// if the site has labware on it, then limit labwareModels to that model
-					val filtered = labwareModelEs.filter(mE => idToModel_m.contains(mE.sName) && mE.sites.contains(siteId))
-					for (modelE <- ) {
-						val model = idToModel_m.get(modelE.sName) match {
-							case Some(model) => model
-							case None =>
-								val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
-								idToModel_m(model.id) = model
-								eb.addModel(model, f"m${idToModel_m.size}%03d")
-								model
-						}
-						eb.addStackable(siteModel, model)
-					}
-					*/
 				}
 			}
 			
@@ -343,9 +328,10 @@ object InputMain extends App {
 			// TODO: Let userArm access all sites that the robot arms can't
 			
 			// Create SiteModels for for sites which hold Plates
+			val siteIdToModels_m = new HashMap[(Int, Int), collection.mutable.Set[LabwareModel]] with MultiMap[(Int, Int), LabwareModel]
+			
 			{
 				// First gather map of all relevant labware models that can be placed on each site 
-				val siteIdToModels_m = new HashMap[(Int, Int), collection.mutable.Set[LabwareModel]] with MultiMap[(Int, Int), LabwareModel]
 				for (mE <- labwareModelEs if idToModel_m.contains(mE.sName)) {
 					val m = idToModel_m(mE.sName)
 					for (siteId <- mE.sites if siteIdToSite_m.contains(siteId)) {
@@ -434,134 +420,37 @@ object InputMain extends App {
 			}
 
 			table.mapCarrierToGrid.keys.toList.map(_.sName).sorted.foreach(println)
+			*/
+			
+			def addDevice(
+				typeName: String,
+				deviceName: String,
+				carrierE: roboliq.evoware.parser.Carrier
+			) {
+				val carrierData = table.configFile
+				
+				// Add device
+				val device = new Device { val id = carrierE.sName; val typeNames = List(typeName) }
+				eb.addDevice(r1, device, deviceName)
+		
+				// Add device sites
+				for (site_i <- 0 until carrierE.nSites) {
+					val siteId = (carrierE.id, site_i)
+					val site: Site = siteIdToSite_m(siteId)
+					eb.addDeviceSite(device, site)
+					siteIdToModels_m(siteId).foreach(m => eb.addDeviceModel(device, m))
+				}
+			}
+
+			
 			for ((carrierE, iGrid) <- table.mapCarrierToGrid) {
 				carrierE.sName match {
 					case "RoboSeal" =>
-						addDevice(
-							r1,
-							"sealer",
-							"sealer",
-							carrierE,
-							iGrid,
-							table,
-							roma_m,
-							labwareModels,
-							idToModel_m
-						)
+						addDevice("sealer", "sealer", carrierE)
 					case "RoboPeel" =>
-						addDevice(
-							r1,
-							"peeler",
-							"peeler",
-							carrierE,
-							iGrid,
-							table,
-							roma_m,
-							labwareModels,
-							idToModel_m
-						)
+						addDevice("peeler", "peeler", carrierE)
 					case _ =>
-						addCarrier(
-							carrierE,
-							iGrid,
-							table,
-							roma_m,
-							labwareModels,
-							idToModel_m
-						)
 				}
-			}
-			*/
-		}
-	}
-
-	def addDevice(
-		agent: Agent,
-		typeName: String,
-		deviceName: String,
-		carrierE: roboliq.evoware.parser.Carrier,
-		iGrid: Int,
-		table: roboliq.evoware.parser.EvowareTableData,
-		roma_m: HashMap[Int, Transporter],
-		labwareModels: List[roboliq.evoware.parser.LabwareModel],
-		idToModel_m: HashMap[String, LabwareModel]
-	) {
-		val carrierData = table.configFile
-		
-		// Add device
-		val device = new Device { val id = carrierE.sName; val typeNames = List(typeName) }
-		eb.addDevice(agent, device, deviceName)
-
-		// Add device sites
-		for (site_i <- 0 until carrierE.nSites) {
-			// Create site and its model (each site requires its own model)
-			val siteModel = SiteModel(gid)
-			val site = Site(f"site_${iGrid}%03dx${site_i+1}")
-			eb.addModel(siteModel, s"${deviceName}SiteModel${site_i+1}")
-			eb.addSite(site, s"${deviceName}Site${site_i+1}")
-			eb.setModel(site, siteModel)
-			eb.addDeviceSite(device, site)
-			// List transporters which can access this site
-			// NOTE: SHOULD USE TRANSPORTER SPEC (== Vector)
-			for (vector <- carrierData.mapCarrierToVectors.getOrElse(carrierE, Nil)) {
-				val roma = roma_m(vector.iRoma)
-				eb.addDeviceSite(roma, site)
-			}
-			// Find the labwares which this site and device accept
-			// FIXME: SHOULD USE SEALER SPEC INSTEAD OF addDeviceModel
-			val id = (carrierE.id, site_i)
-			for (modelE <- labwareModels.filter(_.sites.contains(id))) {
-				val model = idToModel_m.get(modelE.sName) match {
-					case Some(model) => model
-					case None =>
-						val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
-						idToModel_m(model.id) = model
-						eb.addModel(model, f"m${idToModel_m.size}%03d")
-						model
-				}
-				eb.addDeviceModel(device, model)
-				eb.addStackable(siteModel, model)
-			}
-		}
-	}
-
-	def addCarrier(
-		carrierE: roboliq.evoware.parser.Carrier,
-		iGrid: Int,
-		table: roboliq.evoware.parser.EvowareTableData,
-		roma_m: HashMap[Int, Transporter],
-		labwareModels: List[roboliq.evoware.parser.LabwareModel],
-		idToModel_m: HashMap[String, LabwareModel]
-	) {
-		val carrierData = table.configFile
-		
-		// Add carrier sites
-		for (site_i <- 0 until carrierE.nSites) {
-			// Create site and its model (each site requires its own model)
-			val siteModel = SiteModel(gid)
-			val site = Site(f"site_${iGrid}%03dx${site_i+1}")
-			eb.addModel(siteModel, f"siteModel_${iGrid}%03dx${site_i+1}")
-			eb.addSite(site, f"site_${iGrid}%03dx${site_i+1}")
-			eb.setModel(site, siteModel)
-			// List transporters which can access this site
-			// NOTE: SHOULD USE TRANSPORTER SPEC (== Vector)
-			for (vector <- carrierData.mapCarrierToVectors.getOrElse(carrierE, Nil)) {
-				val roma = roma_m(vector.iRoma)
-				eb.addDeviceSite(roma, site)
-			}
-			// Find the labwares which this site and device accept
-			// FIXME: SHOULD USE SEALER SPEC INSTEAD OF addDeviceModel
-			val id = (carrierE.id, site_i)
-			for (modelE <- labwareModels.filter(_.sites.contains(id))) {
-				val model = idToModel_m.get(modelE.sName) match {
-					case Some(model) => model
-					case None =>
-						val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
-						idToModel_m(model.id) = model
-						eb.addModel(model, f"m${idToModel_m.size}%03d")
-						model
-				}
-				eb.addStackable(siteModel, model)
 			}
 		}
 	}
