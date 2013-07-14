@@ -7,6 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 import roboliq.entities._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.MultiMap
 
 class PlateBean {
 	var name: String = null
@@ -173,6 +174,15 @@ object InputMain extends App {
 		eb.setModel(thermocyclerSite, siteModel1)
 	}
 	
+	/**
+	 * Challenges when reading in Evoware configuration files:
+	 * 
+	 * There are lots of labware models we don't want to use, so we need to filter them out somehow.
+	 * A carrier may have mutually exclusive sites, so in such cases, we need to filter out the ones that can't be used on the current table.
+	 * When a table has tube labware on which cannot be moved by the RoMa, that labware should be treated as a site for tubes.
+	 * What to do with other labware on the table definition?  One thing we should probably do is add it to this list of labware models we're interested in.
+	 * We want to use site models, but these are not declared in Evoware, so we'll need to extract them indirectly. 
+	 */
 	def setup2() {
 		import roboliq.entities._
 		
@@ -206,18 +216,22 @@ object InputMain extends App {
 		eb.addSite(s2, "s2")
 		eb.addSite(shakerSite, "shakerSite")
 		eb.addSite(thermocyclerSite, "thermocyclerSite")
-		/*eb.addDevice(user, userArm, "userArm")
-		eb.addDevice(r1, pipetter, "pipetter")
+		eb.addDevice(user, userArm, "userArm")
+		
+		val labwareNamesOfInterest_l = new HashSet[String]
+		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
+		
+		/*eb.addDevice(r1, pipetter, "pipetter")
 		eb.addDevice(r1, shaker, "shaker")
 		eb.addDevice(r1, thermocycler, "thermocycler")
 		eb.addDeviceModels(userArm, List(m1, m2))
-		eb.addDeviceModels(r1arm, List(m1, m2))
+		//eb.addDeviceModels(r1arm, List(m1, m2))
 		eb.addDeviceModels(pipetter, List(m1, m2))
-		eb.addDeviceModels(sealer, List(m1))
+		//eb.addDeviceModels(sealer, List(m1))
 		eb.addDeviceModels(shaker, List(m1, m2))
 		eb.addDeviceModels(thermocycler, List(m1))
 		eb.addDeviceSites(userArm, List(offsite, s1))
-		eb.addDeviceSites(r1arm, List(s1, s2, thermocyclerSite))
+		//eb.addDeviceSites(r1arm, List(s1, s2, thermocyclerSite))
 		eb.addDeviceSites(pipetter, List(s1, s2))
 		eb.addDeviceSites(shaker, List(shakerSite))
 		eb.addDeviceSites(thermocycler, List(thermocyclerSite))
@@ -236,9 +250,124 @@ object InputMain extends App {
 			carrier <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg")
 			table <- roboliq.evoware.parser.EvowareTableData.loadFile(carrier, "./testdata/bsse-robot1/config/table-01.esc")
 		} {
-			val labwareModels = carrier.models.collect({case m: roboliq.evoware.parser.LabwareModel => m})
-			val idToModel_m = new HashMap[String, LabwareModel]
 			eb.addAgent(r1, "r1")
+
+			// Add labware on the table definition to the list of labware we're interested in
+			labwareNamesOfInterest_l ++= table.mapSiteToLabwareModel.values.map(_.sName)
+
+			// Create PlateModels
+			val labwareModelEs = carrier.models.collect({case m: roboliq.evoware.parser.LabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
+			val idToModel_m = new HashMap[String, LabwareModel]
+			for (mE <- labwareModelEs) {
+				if (mE.sName.contains("Plate") || mE.sName.contains("96")) {
+					val m = PlateModel(mE.sName, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+					idToModel_m(mE.sName) = m
+					eb.addModel(m, f"m${idToModel_m.size}%03d")
+				}
+			}
+			
+			// Create Sites
+			val siteEsToSiteModel_m = new HashMap[List[(Int, Int)], SiteModel]
+			val siteIdToSite_m = new HashMap[(Int, Int), Site]
+			//val siteEToSite_m = new HashMap[roboliq.evoware.parser.CarrierSite, Site]
+			val carriersSeen_l = new HashSet[Int]
+			// Create Hotel Sites
+			for (o <- table.lHotelObject) {
+				val carrierE = o.parent
+				carriersSeen_l += carrierE.id
+				for (site_i <- 0 until carrierE.nSites) {
+					val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
+					val siteId = (carrierE.id, site_i)
+					val site = Site(s"hotel_${carrierE.id}x${site_i+1}")
+					siteIdToSite_m(siteId) = site
+					//eb.addSite(site, site.id)
+				}
+			}
+			
+			// Create Device Sites
+			for (o <- table.lExternalObject if !carriersSeen_l.contains(o.carrier.id)) {
+				val carrierE = o.carrier
+				carriersSeen_l += carrierE.id
+				for (site_i <- 0 until carrierE.nSites) {
+					val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
+					val siteId = (carrierE.id, site_i)
+					val site = Site(s"device_${carrierE.id}x${site_i+1}")
+					siteIdToSite_m(siteId) = site
+					//eb.addSite(site, carrierE.sName+site.id)
+				}
+			}
+			
+			// Create on-bench Sites
+			for ((carrierE, grid_i) <- table.mapCarrierToGrid if !carriersSeen_l.contains(carrierE.id)) {
+				for (site_i <- 0 until carrierE.nSites) {
+					val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
+					val siteId = (carrierE.id, site_i)
+					val site = Site(siteId.toString)
+					siteIdToSite_m(siteId) = site
+					eb.addSite(site, f"bench_${grid_i}%03dx${site_i+1}")
+					/*
+					// if the site has labware on it, then limit labwareModels to that model
+					val filtered = labwareModelEs.filter(mE => idToModel_m.contains(mE.sName) && mE.sites.contains(siteId))
+					for (modelE <- ) {
+						val model = idToModel_m.get(modelE.sName) match {
+							case Some(model) => model
+							case None =>
+								val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
+								idToModel_m(model.id) = model
+								eb.addModel(model, f"m${idToModel_m.size}%03d")
+								model
+						}
+						eb.addStackable(siteModel, model)
+					}
+					*/
+				}
+			}
+			
+			// Create SiteModels
+			{
+				// First gather map of all relevant labware models that can be placed on each site 
+				val siteIdToModel_m = new HashMap[(Int, Int), collection.mutable.Set[LabwareModel]] with MultiMap[(Int, Int), LabwareModel]
+				for (mE <- labwareModelEs if idToModel_m.contains(mE.sName)) {
+					val m = idToModel_m(mE.sName)
+					for (siteId <- mE.sites if siteIdToSite_m.contains(siteId)) {
+						val site = siteIdToSite_m(siteId)
+						siteIdToModel_m.addBinding(siteId, m)
+					}
+				}
+				// Find all unique sets of labware models
+				val unique = siteIdToModel_m.values.toSet
+				var i = 1
+				for (l <- unique) {
+					val m = SiteModel(l.toString)
+					eb.addModel(m, f"sm${i}")
+					i += 1
+				}
+			}
+			
+			// Assign SiteModels to Sites
+
+			/*
+			// Create Sites and SiteModels
+			for ((carrierE, grid_i) <- table.mapCarrierToGrid) {
+				for (site_i <- 0 until carrierE.nSites) {
+					val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
+					val siteId = (carrierE.id, site_i)
+					// if the site has labware on it, then limit labwareModels to that model
+					val filtered = labwareModelEs.filter(mE => idToModel_m.contains(mE.sName) && mE.sites.contains(siteId))
+					for (modelE <- ) {
+						val model = idToModel_m.get(modelE.sName) match {
+							case Some(model) => model
+							case None =>
+								val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
+								idToModel_m(model.id) = model
+								eb.addModel(model, f"m${idToModel_m.size}%03d")
+								model
+						}
+						eb.addStackable(siteModel, model)
+					}
+				}
+			}
+			
 			
 			// List of RoMa indexes
 			val roma_li = carrier.mapCarrierToVectors.values.flatMap(_.map(_.iRoma)).toSet
@@ -250,47 +379,139 @@ object InputMain extends App {
 				eb.addDevice(r1, roma, s"r1arm${roma_i + 1}")
 			}
 
+			table.mapCarrierToGrid.keys.toList.map(_.sName).sorted.foreach(println)
 			for ((carrierE, iGrid) <- table.mapCarrierToGrid) {
 				carrierE.sName match {
 					case "RoboSeal" =>
-						val sealer = Sealer(carrierE.sName)
-						eb.addDevice(r1, sealer, "sealer")
-						for (site_i <- 0 until carrierE.nSites) {
-							// Create site and it's model (each site requires its own model)
-							val sealerSiteModel = SiteModel(gid)
-							val sealerSite = Site(s"site_${iGrid}x${site_i+1}")
-							eb.addModel(sealerSiteModel, s"sealerSiteModel${site_i+1}")
-							eb.addSite(sealerSite, s"sealerSite${site_i+1}")
-							eb.setModel(sealerSite, sealerSiteModel)
-							eb.addDeviceSite(sealer, sealerSite)
-							// List transporters which can access this site
-							// NOTE: SHOULD USE TRANSPORTER SPEC (== Vector)
-							for (vector <- carrier.mapCarrierToVectors.getOrElse(carrierE, Nil)) {
-								val roma = roma_m(vector.iRoma)
-								eb.addDeviceSite(roma, sealerSite)
-							}
-							// Find the labwares which this site and device accept
-							// FIXME: SHOULD USE SEALER SPEC INSTEAD OF addDeviceModel
-							val id = (carrierE.id, site_i)
-							for (modelE <- labwareModels.filter(_.sites.contains(id))) {
-								val model = idToModel_m.get(modelE.sName) match {
-									case Some(model) => model
-									case None =>
-										val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
-										idToModel_m(model.id) = model
-										eb.addModel(model, f"m${idToModel_m.size}%03d")
-										model
-								}
-								eb.addDeviceModel(sealer, model)
-								eb.addStackable(sealerSiteModel, model)
-							}
-						}
+						addDevice(
+							r1,
+							"sealer",
+							"sealer",
+							carrierE,
+							iGrid,
+							table,
+							roma_m,
+							labwareModels,
+							idToModel_m
+						)
+					case "RoboPeel" =>
+						addDevice(
+							r1,
+							"peeler",
+							"peeler",
+							carrierE,
+							iGrid,
+							table,
+							roma_m,
+							labwareModels,
+							idToModel_m
+						)
 					case _ =>
+						addCarrier(
+							carrierE,
+							iGrid,
+							table,
+							roma_m,
+							labwareModels,
+							idToModel_m
+						)
 				}
+			}
+			*/
+		}
+	}
+
+	def addDevice(
+		agent: Agent,
+		typeName: String,
+		deviceName: String,
+		carrierE: roboliq.evoware.parser.Carrier,
+		iGrid: Int,
+		table: roboliq.evoware.parser.EvowareTableData,
+		roma_m: HashMap[Int, Transporter],
+		labwareModels: List[roboliq.evoware.parser.LabwareModel],
+		idToModel_m: HashMap[String, LabwareModel]
+	) {
+		val carrierData = table.configFile
+		
+		// Add device
+		val device = new Device { val id = carrierE.sName; val typeNames = List(typeName) }
+		eb.addDevice(agent, device, deviceName)
+
+		// Add device sites
+		for (site_i <- 0 until carrierE.nSites) {
+			// Create site and its model (each site requires its own model)
+			val siteModel = SiteModel(gid)
+			val site = Site(f"site_${iGrid}%03dx${site_i+1}")
+			eb.addModel(siteModel, s"${deviceName}SiteModel${site_i+1}")
+			eb.addSite(site, s"${deviceName}Site${site_i+1}")
+			eb.setModel(site, siteModel)
+			eb.addDeviceSite(device, site)
+			// List transporters which can access this site
+			// NOTE: SHOULD USE TRANSPORTER SPEC (== Vector)
+			for (vector <- carrierData.mapCarrierToVectors.getOrElse(carrierE, Nil)) {
+				val roma = roma_m(vector.iRoma)
+				eb.addDeviceSite(roma, site)
+			}
+			// Find the labwares which this site and device accept
+			// FIXME: SHOULD USE SEALER SPEC INSTEAD OF addDeviceModel
+			val id = (carrierE.id, site_i)
+			for (modelE <- labwareModels.filter(_.sites.contains(id))) {
+				val model = idToModel_m.get(modelE.sName) match {
+					case Some(model) => model
+					case None =>
+						val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
+						idToModel_m(model.id) = model
+						eb.addModel(model, f"m${idToModel_m.size}%03d")
+						model
+				}
+				eb.addDeviceModel(device, model)
+				eb.addStackable(siteModel, model)
 			}
 		}
 	}
 
+	def addCarrier(
+		carrierE: roboliq.evoware.parser.Carrier,
+		iGrid: Int,
+		table: roboliq.evoware.parser.EvowareTableData,
+		roma_m: HashMap[Int, Transporter],
+		labwareModels: List[roboliq.evoware.parser.LabwareModel],
+		idToModel_m: HashMap[String, LabwareModel]
+	) {
+		val carrierData = table.configFile
+		
+		// Add carrier sites
+		for (site_i <- 0 until carrierE.nSites) {
+			// Create site and its model (each site requires its own model)
+			val siteModel = SiteModel(gid)
+			val site = Site(f"site_${iGrid}%03dx${site_i+1}")
+			eb.addModel(siteModel, f"siteModel_${iGrid}%03dx${site_i+1}")
+			eb.addSite(site, f"site_${iGrid}%03dx${site_i+1}")
+			eb.setModel(site, siteModel)
+			// List transporters which can access this site
+			// NOTE: SHOULD USE TRANSPORTER SPEC (== Vector)
+			for (vector <- carrierData.mapCarrierToVectors.getOrElse(carrierE, Nil)) {
+				val roma = roma_m(vector.iRoma)
+				eb.addDeviceSite(roma, site)
+			}
+			// Find the labwares which this site and device accept
+			// FIXME: SHOULD USE SEALER SPEC INSTEAD OF addDeviceModel
+			val id = (carrierE.id, site_i)
+			for (modelE <- labwareModels.filter(_.sites.contains(id))) {
+				val model = idToModel_m.get(modelE.sName) match {
+					case Some(model) => model
+					case None =>
+						val model = PlateModel(modelE.sName, modelE.nRows, modelE.nCols, LiquidVolume.ul(modelE.ul))
+						idToModel_m(model.id) = model
+						eb.addModel(model, f"m${idToModel_m.size}%03d")
+						model
+				}
+				eb.addStackable(siteModel, model)
+			}
+		}
+	}
+	
 	println("(defproblem problem domain")
 	println(eb.makeInitialConditions)
 	println(" ; tasks")

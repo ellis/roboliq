@@ -29,6 +29,10 @@ case class Sealer(id: String) extends Device {
 	def typeNames = List("sealer")
 }
 
+case class Peeler(id: String) extends Device {
+	def typeNames = List("peeler")
+}
+
 case class Shaker(id: String) extends Device {
 	def typeNames = List("shaker")
 }
