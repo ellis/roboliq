@@ -117,24 +117,24 @@ class EntityBase {
 	}
 	
 	def makeInitialConditionsList(): List[Rel] = {
-		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2)))) ++
+		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.id))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
 			Rel(s"agent-has-device", List(names(pair._1), names(device)))
-		})) ++
+		})).toList.sortBy(_.toString) ++
 		deviceToModels_m.flatMap(pair => pair._2.map(model => {
 			Rel(s"device-can-model", List(names(pair._1), names(model)))
-		})) ++
+		})).toList.sortBy(_.toString) ++
 		deviceToSites_m.flatMap(pair => pair._2.map(site => {
 			Rel(s"device-can-site", List(names(pair._1), names(site)))
-		})) ++
+		})).toList.sortBy(_.toString) ++
 		deviceToSpecs_m.flatMap(pair => pair._2.toList.map(spec => {
 			Rel(s"device-can-spec", List(names(pair._1), names(spec)))
-		})) ++
+		})).toList.sortBy(_.toString) ++
 		stackables_m.flatMap(pair => pair._2.map(model => {
 			Rel(s"stackable", List(names(pair._1), names(model)))
-		})) ++
-		labwareToModel_m.map(pair => Rel(s"model", List(names(pair._1), names(pair._2)))) ++
-		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2))))
+		})).toList.sortBy(_.toString) ++
+		labwareToModel_m.map(pair => Rel(s"model", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString) ++
+		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString)
 	}
 	
 	def makeInitialConditions(): String = {
@@ -142,8 +142,8 @@ class EntityBase {
 		val l2: List[String] =
 			" ; initial conditions" ::
 			" (" ::
-			l.map(r => "  " + r) ++
+			l.map(r => "  " + r.toStringWithComment) ++
 			List(" )")
-		l2.sorted.mkString("\n")
+		l2.mkString("\n")
 	}
 }

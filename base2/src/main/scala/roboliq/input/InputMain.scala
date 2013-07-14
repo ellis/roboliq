@@ -280,7 +280,7 @@ object InputMain extends App {
 					val siteId = (carrierE.id, site_i)
 					val site = Site(s"hotel_${carrierE.id}x${site_i+1}")
 					siteIdToSite_m(siteId) = site
-					//eb.addSite(site, site.id)
+					eb.addSite(site, site.id)
 				}
 			}
 			
@@ -293,7 +293,7 @@ object InputMain extends App {
 					val siteId = (carrierE.id, site_i)
 					val site = Site(s"device_${carrierE.id}x${site_i+1}")
 					siteIdToSite_m(siteId) = site
-					//eb.addSite(site, carrierE.sName+site.id)
+					eb.addSite(site, carrierE.sName+site.id)
 				}
 			}
 			
@@ -323,28 +323,37 @@ object InputMain extends App {
 				}
 			}
 			
-			// Create SiteModels
+			// Create SiteModels for for sites which hold Plates
 			{
 				// First gather map of all relevant labware models that can be placed on each site 
-				val siteIdToModel_m = new HashMap[(Int, Int), collection.mutable.Set[LabwareModel]] with MultiMap[(Int, Int), LabwareModel]
+				val siteIdToModels_m = new HashMap[(Int, Int), collection.mutable.Set[LabwareModel]] with MultiMap[(Int, Int), LabwareModel]
 				for (mE <- labwareModelEs if idToModel_m.contains(mE.sName)) {
 					val m = idToModel_m(mE.sName)
 					for (siteId <- mE.sites if siteIdToSite_m.contains(siteId)) {
 						val site = siteIdToSite_m(siteId)
-						siteIdToModel_m.addBinding(siteId, m)
+						siteIdToModels_m.addBinding(siteId, m)
 					}
 				}
 				// Find all unique sets of labware models
-				val unique = siteIdToModel_m.values.toSet
+				val unique = siteIdToModels_m.values.toSet
+				val modelsToSiteModel_m = new HashMap[collection.mutable.Set[LabwareModel], SiteModel]
 				var i = 1
 				for (l <- unique) {
-					val m = SiteModel(l.toString)
-					eb.addModel(m, f"sm${i}")
+					val sm = SiteModel(l.toString)
+					modelsToSiteModel_m(l) = sm
+					eb.addModel(sm, f"sm${i}")
+					eb.addStackables(sm, l.toList)
 					i += 1
+				}
+
+				// Assign SiteModels to Sites
+				for ((siteId, l) <- siteIdToModels_m) {
+					val site = siteIdToSite_m(siteId)
+					val sm = modelsToSiteModel_m(l)
+					eb.setModel(site, sm)
 				}
 			}
 			
-			// Assign SiteModels to Sites
 
 			/*
 			// Create Sites and SiteModels
