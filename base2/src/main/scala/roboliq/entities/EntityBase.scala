@@ -6,23 +6,24 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.MultiMap
 
 class EntityBase {
-	var names = new HashMap[Entity, String]
-	var nameToEntity = new HashMap[String, Entity]
-	var idToEntity = new HashMap[String, Entity]
-	var agents = new ArrayBuffer[Agent]
-	var agentToDevices_m = new HashMap[Agent, mutable.Set[Device]] with MultiMap[Agent, Device]
+	val aliases = new HashMap[String, String]
+	val names = new HashMap[Entity, String]
+	val nameToEntity = new HashMap[String, Entity]
+	val idToEntity = new HashMap[String, Entity]
+	val agents = new ArrayBuffer[Agent]
+	val agentToDevices_m = new HashMap[Agent, mutable.Set[Device]] with MultiMap[Agent, Device]
 	/**
 	 * LabwareModels that devices can use
 	 */
-	var deviceToModels_m = new HashMap[Device, mutable.Set[LabwareModel]] with MultiMap[Device, LabwareModel]
+	val deviceToModels_m = new HashMap[Device, mutable.Set[LabwareModel]] with MultiMap[Device, LabwareModel]
 	/**
 	 * Sites that devices can access
 	 */
-	var deviceToSites_m = new HashMap[Device, mutable.Set[Site]] with MultiMap[Device, Site]
+	val deviceToSites_m = new HashMap[Device, mutable.Set[Site]] with MultiMap[Device, Site]
 	/**
 	 * Specs that devices accept
 	 */
-	var deviceToSpecs_m = new HashMap[Device, mutable.Set[Entity]] with MultiMap[Device, Entity]
+	val deviceToSpecs_m = new HashMap[Device, mutable.Set[Entity]] with MultiMap[Device, Entity]
 	/**
 	 * Models which another model can have stacked on top of it
 	 */
@@ -40,6 +41,11 @@ class EntityBase {
 	 */
 	val rel_l = new ArrayBuffer[Rel]
 	
+	def addAlias(from: String, to: String) {
+		// TODO: Check for loops
+		aliases(from) = to
+	}
+	
 	private def addEntity(e: Entity, name: String) {
 		names(e) = name
 		nameToEntity(name) = e
@@ -47,7 +53,12 @@ class EntityBase {
 	}
 	
 	def getEntity(key: String): Option[Entity] = {
-		nameToEntity.get(key).orElse(idToEntity.get(key))
+		// TODO: improve lookup, this is very hacky.  Should use scope instead,
+		// which would involve handing lookup outside of this class.
+		// First try name, then ID, then alias
+		nameToEntity.get(key).orElse(idToEntity.get(key)).orElse {
+			aliases.get(key).flatMap(getEntity)
+		}
 	}
 	
 	def addAgent(e: Agent, name: String) {

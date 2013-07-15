@@ -95,9 +95,7 @@ object InputMain extends App {
 							val device = f"?d$nvar%04d"
 							val plate = eb.getEntity(key).get.asInstanceOf[Labware]
 							val plateName = eb.names(plate)
-							val model = eb.labwareToModel_m(plate)
-							val modelName = eb.names(model)
-							tasks += Rel("sealer-run", List(agent, device, plateName, modelName, f"?s$nvar%04d"))
+							tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
 						case _ =>
 					}
 				case Some(JsString("seal")) =>
@@ -193,27 +191,28 @@ object InputMain extends App {
 		val pipetter = Pipetter(gid)
 		val shaker = Shaker(gid)
 		val thermocycler = Thermocycler(gid)
-		val siteModelAll = SiteModel(gid)
-		val siteModel1 = SiteModel(gid)
-		val siteModel12 = SiteModel(gid)
+		//val siteModelAll = SiteModel(gid)
+		//val siteModel1 = SiteModel(gid)
+		//val siteModel12 = SiteModel(gid)
 		val offsiteModel = SiteModel(gid)
 		val offsite = Site(gid)
 		val s1 = Site(gid)
 		val s2 = Site(gid)
 		val shakerSite = Site(gid)
 		val thermocyclerSite = Site(gid)
-		val m1 = PlateModel("Thermocycler Plate", 8, 12, LiquidVolume.ul(100))
-		val m2 = PlateModel("Deep Plate", 8, 12, LiquidVolume.ul(500))
+		//val m1 = PlateModel("Thermocycler Plate", 8, 12, LiquidVolume.ul(100))
+		//val m2 = PlateModel("Deep Plate", 8, 12, LiquidVolume.ul(500))
 		val shakerSpec1 = ShakerSpec(gid)
 		val thermocyclerSpec1 = ThermocyclerSpec(gid)
 		
+		eb.addAlias("Thermocycler Plate", "D-BSSE 96 Well PCR Plate")
 		eb.addAgent(user, "user")
 		eb.addModel(offsiteModel, "offsiteModel")
-		eb.addModel(siteModelAll, "siteModelAll")
-		eb.addModel(siteModel1, "siteModel1")
-		eb.addModel(siteModel12, "siteModel12")
-		eb.addModel(m1, "m1")
-		eb.addModel(m2, "m2")
+		//eb.addModel(siteModelAll, "siteModelAll")
+		//eb.addModel(siteModel1, "siteModel1")
+		//eb.addModel(siteModel12, "siteModel12")
+		//eb.addModel(m1, "m1")
+		//eb.addModel(m2, "m2")
 		eb.addSite(offsite, "offsite")
 		eb.addSite(s1, "s1")
 		eb.addSite(s2, "s2")
@@ -456,13 +455,17 @@ object InputMain extends App {
 		}
 	}
 	
-	FileUtils.printToFile(new java.io.File("tasks/autogen/problem.lisp")) { p =>
-		p.println("(defproblem problem domain")
-		p.println(eb.makeInitialConditions)
-		p.println(" ; tasks")
-		p.println(" (")
-		tasks.foreach(r => p.println("  "+r))
-		p.println(" )")
-		p.println(")")
+	def writeProblem(name: String) {
+		FileUtils.printToFile(new java.io.File(s"tasks/autogen/$name.lisp")) { p =>
+			p.println(s"(defproblem $name domain")
+			p.println(eb.makeInitialConditions)
+			p.println(" ; tasks")
+			p.println(" (")
+			tasks.foreach(r => p.println("  "+r))
+			p.println(" )")
+			p.println(")")
+		}
 	}
+	
+	writeProblem("pb")
 }
