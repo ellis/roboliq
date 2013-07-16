@@ -14,19 +14,19 @@
      <string>x</string>
      <void method="set">
       <object idref="Point2D$Double0"/>
-      <double>302.0</double>
+      <double>361.0</double>
      </void>
     </void>
     <void class="java.awt.geom.Point2D$Double" method="getField">
      <string>y</string>
      <void method="set">
       <object idref="Point2D$Double0"/>
-      <double>108.0</double>
+      <double>123.0</double>
      </void>
     </void>
     <void method="setLocation">
-     <double>302.0</double>
-     <double>108.0</double>
+     <double>361.0</double>
+     <double>123.0</double>
     </void>
    </object>
   </void>
@@ -48,24 +48,31 @@
      <string>x</string>
      <void method="set">
       <object idref="Point2D$Double1"/>
-      <double>301.0</double>
+      <double>355.0</double>
      </void>
     </void>
     <void class="java.awt.geom.Point2D$Double" method="getField">
      <string>y</string>
      <void method="set">
       <object idref="Point2D$Double1"/>
-      <double>308.0</double>
+      <double>313.0</double>
      </void>
     </void>
     <void method="setLocation">
-     <double>301.0</double>
-     <double>308.0</double>
+     <double>355.0</double>
+     <double>313.0</double>
     </void>
    </object>
   </void>
   <void method="addNode">
    <object class="com.horstmann.violet.ClassNode" id="ClassNode2">
+    <void property="attributes">
+     <void property="text">
+      <string>vesselRows: Int
+vesselCols: Int
+vesselVol: LiquidVolume</string>
+     </void>
+    </void>
     <void property="name">
      <void property="text">
       <string>LabwareModel</string>
@@ -129,6 +136,11 @@
   </void>
   <void method="addNode">
    <object class="com.horstmann.violet.ClassNode" id="ClassNode4">
+    <void property="attributes">
+     <void property="text">
+      <string>volume: LiquidVolume</string>
+     </void>
+    </void>
     <void property="name">
      <void property="text">
       <string>VesselModel</string>
@@ -169,19 +181,19 @@
      <string>x</string>
      <void method="set">
       <object idref="Point2D$Double5"/>
-      <double>872.0</double>
+      <double>829.0</double>
      </void>
     </void>
     <void class="java.awt.geom.Point2D$Double" method="getField">
      <string>y</string>
      <void method="set">
       <object idref="Point2D$Double5"/>
-      <double>228.0</double>
+      <double>33.0</double>
      </void>
     </void>
     <void method="setLocation">
-     <double>872.0</double>
-     <double>228.0</double>
+     <double>829.0</double>
+     <double>33.0</double>
     </void>
    </object>
   </void>
@@ -275,7 +287,7 @@
   <void method="connect">
    <object class="com.horstmann.violet.ClassRelationshipEdge">
     <void property="bentStyle">
-     <object class="com.horstmann.violet.BentStyle" field="HVH"/>
+     <object class="com.horstmann.violet.BentStyle" field="VH"/>
     </void>
     <void property="endLabel">
      <string>*</string>
@@ -289,6 +301,24 @@
    </object>
    <object idref="ClassNode5"/>
    <object idref="ClassNode3"/>
+  </void>
+  <void method="connect">
+   <object class="com.horstmann.violet.ClassRelationshipEdge">
+    <void property="bentStyle">
+     <object class="com.horstmann.violet.BentStyle" field="HV"/>
+    </void>
+    <void property="endLabel">
+     <string>*</string>
+    </void>
+    <void property="middleLabel">
+     <string>siteModel-accepts</string>
+    </void>
+    <void property="startLabel">
+     <string>1</string>
+    </void>
+   </object>
+   <object idref="ClassNode5"/>
+   <object idref="ClassNode2"/>
   </void>
  </object>
 </java>
