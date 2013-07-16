@@ -1,6 +1,7 @@
-package roboliq.commands.pipette
+package roboliq.pipette
 
-import roboliq.core._, roboliq.entity._, roboliq.processor._
+import roboliq.core._
+import roboliq.entities.PipettePolicy
 
 
 trait HasTip { val tip: TipState }
