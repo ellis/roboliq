@@ -1,5 +1,8 @@
 Started 2013-07-13
 
+- [ ] Generate evoware output from tasks
+- [ ] Test pipetting command
+
 - [ ] load all relations we can from Evoware
     - [ ] add description field to Entity and use it to print comments in LISP planner file
     - [x] better name for device sites, such that they can't have spaces in them

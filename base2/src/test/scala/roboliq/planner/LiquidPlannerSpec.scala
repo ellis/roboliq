@@ -1,4 +1,4 @@
-package roboliq.planner
+/*package roboliq.planner
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
@@ -52,4 +52,4 @@ class LiquidPlannerSpec extends FunSpec with ShouldMatchers with BeforeAndAfter 
 			FileUtils.writeToFile("trace-base/LiquidPlannerSpec_exampleA.rst", doc)
 		}
 	}
-}
+}*/

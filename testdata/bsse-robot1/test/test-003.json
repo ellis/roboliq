@@ -1,0 +1,15 @@
+{
+"plate": [
+	{ "id": "P1", "model": "D-BSSE 96 Well PCR Plate" }
+],
+"plateState": [
+	{ "id": "P1", "location": "cooled1hi" }
+],
+"vesselState": [
+	{ "id": "P1(A01)", "content": { "water": "100ul" } }
+],
+"cmd": [
+  { "cmd": "vesselState.setContent", "vessel": "P1(A01xH12)", "content": {"water": "100ul"} },
+  { "cmd": "pipette.low.aspirate", "items": [{"tip": "TIP1", "well": "P1(A01)", "volume": "50ul", "policy": "Water free dispense"}] }
+]
+}
