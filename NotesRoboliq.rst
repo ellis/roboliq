@@ -44,6 +44,40 @@ Site types:
 * random-access infinite sites -- sites which can store any number of labware, and they can all be accesses instantly
 * gateway sites -- not sure how to handle these...
 
+Sites and labware stacking
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example of a complicated scenario.
+
+First, we may stack a filter plate on top of a deep well plate.  When accessing the filter plate, we need to use
+a different site ID.  And that site ID can *only* be used when the deep well plate is already on the underlying site.
+Once the filter plate is on top, the RoMa can still move the whole stack (i.e., use the underlying site), but
+the pipetter can only access the upper site.
+
+How can the user specify this to the planner?
+
+S: site
+D: deep well plate
+F: filter plate
+
+stackable S D
+stackable S F
+stackable D F
+
+A pipetter condition will need to be that no labware is on top of the labware being targeted.
+
+More complex labware structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We could possibly make the whole system more flexible by generalizing the Labware or LabwareModel class.
+To do this, labware would need to provide both sites and vessels.  A plate could have a site for a cover,
+for example, but if covered, its vessels can't be accessed.
+
+Or we could have two kinds of labware: labware with vessels and zero or one sites for stacking, and holder labware with one or more sites.
+By merging sites and labware, a site becomes a labware whose model accepts other models.  A holder labware
+is one whose sites are `on` it.
+
+
 Conclusion for now
 ~~~~~~~~~~~~~~~~~~
 

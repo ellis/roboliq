@@ -1,7 +1,6 @@
 package roboliq.pipette
 
 trait Entity
-case class Well(id: String)
 
 /**
  * Base class for case objects used to specify a family of liquid properties.

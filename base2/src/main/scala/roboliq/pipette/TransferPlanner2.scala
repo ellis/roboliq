@@ -7,10 +7,6 @@ import ailib.ch03
 import ailib.ch03._
 import roboliq.core._
 import roboliq.entities._
-import roboliq.commands.pipette._
-import ch.ethz.reactivesim.RsResult
-import ch.ethz.reactivesim.RsError
-import ch.ethz.reactivesim.RsSuccess
 
 /*
 case class Group(

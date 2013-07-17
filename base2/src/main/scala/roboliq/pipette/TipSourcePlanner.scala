@@ -6,11 +6,6 @@ import Scalaz._
 import ailib.ch03
 import ailib.ch03._
 import roboliq.core._
-import roboliq.commands.pipette._
-import roboliq.devices.pipette.PipetteDevice
-import ch.ethz.reactivesim.RsResult
-import ch.ethz.reactivesim.RsError
-import ch.ethz.reactivesim.RsSuccess
 
 /**
  * Rules:

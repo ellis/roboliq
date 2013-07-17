@@ -4,10 +4,10 @@ import scala.io.Source
 import scala.util.Try
 import scala.collection.mutable.ArrayBuffer
 import roboliq.core._
-import roboliq.entities.PipettePolicy
-import roboliq.entities.PipettePosition
 import ch.ethz.reactivesim.RsResult
 import ch.ethz.reactivesim.RsSuccess
+import roboliq.pipette.PipettePolicy
+import roboliq.pipette.PipettePosition
 
 object EvowareLiquidClassParser {
 	val RxLiquidClass = """^  <LiquidClass name="([^"]+)".*""".r
