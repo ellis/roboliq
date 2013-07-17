@@ -3,9 +3,15 @@
  <object class="com.horstmann.violet.ClassDiagramGraph">
   <void method="addNode">
    <object class="com.horstmann.violet.ClassNode" id="ClassNode0">
+    <void property="attributes">
+     <void property="text">
+      <string>plate-is-sealed
+site-is-closed</string>
+     </void>
+    </void>
     <void property="name">
      <void property="text">
-      <string>Labware</string>
+      <string>Object</string>
      </void>
     </void>
    </object>
@@ -34,7 +40,8 @@
    <object class="com.horstmann.violet.ClassNode" id="ClassNode1">
     <void property="name">
      <void property="text">
-      <string>LabwareModel</string>
+      <string>
+Model</string>
      </void>
     </void>
    </object>
@@ -72,19 +79,19 @@
      <string>x</string>
      <void method="set">
       <object idref="Point2D$Double2"/>
-      <double>91.0</double>
+      <double>370.0</double>
      </void>
     </void>
     <void class="java.awt.geom.Point2D$Double" method="getField">
      <string>y</string>
      <void method="set">
       <object idref="Point2D$Double2"/>
-      <double>453.0</double>
+      <double>534.0</double>
      </void>
     </void>
     <void method="setLocation">
-     <double>91.0</double>
-     <double>453.0</double>
+     <double>370.0</double>
+     <double>534.0</double>
     </void>
    </object>
   </void>
@@ -118,7 +125,7 @@
    </object>
   </void>
   <void method="addNode">
-   <object class="com.horstmann.violet.ClassNode" id="ClassNode4">
+   <object class="com.horstmann.violet.ClassNode">
     <void property="name">
      <void property="text">
       <string>Pipetter</string>
@@ -169,35 +176,6 @@
     </void>
    </object>
   </void>
-  <void method="addNode">
-   <object class="com.horstmann.violet.ClassNode" id="ClassNode5">
-    <void property="name">
-     <void property="text">
-      <string>Device</string>
-     </void>
-    </void>
-   </object>
-   <object class="java.awt.geom.Point2D$Double" id="Point2D$Double6">
-    <void class="java.awt.geom.Point2D$Double" method="getField">
-     <string>x</string>
-     <void method="set">
-      <object idref="Point2D$Double6"/>
-      <double>366.0</double>
-     </void>
-    </void>
-    <void class="java.awt.geom.Point2D$Double" method="getField">
-     <string>y</string>
-     <void method="set">
-      <object idref="Point2D$Double6"/>
-      <double>456.0</double>
-     </void>
-    </void>
-    <void method="setLocation">
-     <double>366.0</double>
-     <double>456.0</double>
-    </void>
-   </object>
-  </void>
   <void method="connect">
    <object class="com.horstmann.violet.ClassRelationshipEdge">
     <void property="bentStyle">
@@ -207,7 +185,7 @@
      <string>*</string>
     </void>
     <void property="middleLabel">
-     <string>labware-model</string>
+     <string>object-model</string>
     </void>
     <void property="startArrowHead">
      <object class="com.horstmann.violet.ArrowHead" field="V"/>
@@ -218,51 +196,6 @@
    </object>
    <object idref="ClassNode1"/>
    <object idref="ClassNode0"/>
-  </void>
-  <void method="connect">
-   <object class="com.horstmann.violet.ClassRelationshipEdge">
-    <void property="bentStyle">
-     <object class="com.horstmann.violet.BentStyle" field="VHV"/>
-    </void>
-    <void property="endArrowHead">
-     <object class="com.horstmann.violet.ArrowHead" field="TRIANGLE"/>
-    </void>
-    <void property="lineStyle">
-     <object class="com.horstmann.violet.LineStyle" field="DOTTED"/>
-    </void>
-   </object>
-   <object idref="ClassNode3"/>
-   <object idref="ClassNode5"/>
-  </void>
-  <void method="connect">
-   <object class="com.horstmann.violet.ClassRelationshipEdge">
-    <void property="bentStyle">
-     <object class="com.horstmann.violet.BentStyle" field="VHV"/>
-    </void>
-    <void property="endArrowHead">
-     <object class="com.horstmann.violet.ArrowHead" field="TRIANGLE"/>
-    </void>
-    <void property="lineStyle">
-     <object class="com.horstmann.violet.LineStyle" field="DOTTED"/>
-    </void>
-   </object>
-   <object idref="ClassNode4"/>
-   <object idref="ClassNode5"/>
-  </void>
-  <void method="connect">
-   <object class="com.horstmann.violet.ClassRelationshipEdge">
-    <void property="bentStyle">
-     <object class="com.horstmann.violet.BentStyle" field="HVH"/>
-    </void>
-    <void property="endArrowHead">
-     <object class="com.horstmann.violet.ArrowHead" field="V"/>
-    </void>
-    <void property="middleLabel">
-     <string>agent-device</string>
-    </void>
-   </object>
-   <object idref="ClassNode2"/>
-   <object idref="ClassNode5"/>
   </void>
   <void method="connect">
    <object class="com.horstmann.violet.ClassRelationshipEdge">
@@ -332,6 +265,21 @@
    </object>
    <object idref="ClassNode3"/>
    <object idref="ClassNode0"/>
+  </void>
+  <void method="connect">
+   <object class="com.horstmann.violet.ClassRelationshipEdge">
+    <void property="bentStyle">
+     <object class="com.horstmann.violet.BentStyle" field="VHV"/>
+    </void>
+    <void property="endArrowHead">
+     <object class="com.horstmann.violet.ArrowHead" field="V"/>
+    </void>
+    <void property="middleLabel">
+     <string>agent-transporter</string>
+    </void>
+   </object>
+   <object idref="ClassNode2"/>
+   <object idref="ClassNode3"/>
   </void>
  </object>
 </java>
