@@ -1,10 +1,14 @@
-package roboliq.robots.evoware
+package roboliq.evoware.translator
 
 import roboliq.core._
-import roboliq.device.transport.LidHandling
+import roboliq.evoware.parser._
 
 
 abstract class L0C_Command {
+	/**
+	 * List of sites which need to be assigned to particular labware in order
+	 * for this command to work in Evoware.
+	 */
 	def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] = Nil
 }
 
@@ -37,8 +41,9 @@ case class L0C_DetectLevel(
 			iGrid, iSite,
 			1,
 			'"'+sPlateMask+'"',
+			0,
 			0
-		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
+		)
 		l.mkString("Detect_Liquid(", ",", ");")
 	}
 }
@@ -55,7 +60,7 @@ case class L0C_DropDITI(
 			iSite,
 			10, 70
 		).mkString("DropDITI(", ",", ");")
-	}	
+	}
 }
 
 case class L0C_Execute(
@@ -131,8 +136,9 @@ case class L0C_Spirate(
 			iGrid, iSite,
 			1,
 			'"'+sPlateMask+'"',
+			0,
 			0
-		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
+		)
 		l.mkString(sFunc+"(", ",", ");")
 	}
 }
@@ -153,7 +159,7 @@ case class L0C_Wash(
 ) extends L0C_Command {
 	override def toString = {
 		val fmtWaste = new java.text.DecimalFormat("#.##")
-		val fmtCleaner = if (RoboeaseHack.bEmulateEvolab) new java.text.DecimalFormat("#.0") else fmtWaste
+		val fmtCleaner = fmtWaste
 		val l = Seq(
 			mTips,
 			iWasteGrid, iWasteSite,
@@ -167,8 +173,9 @@ case class L0C_Wash(
 			nRetractSpeed,
 			(if (bFastWash) 1 else 0),
 			(if (bUNKNOWN1) 1 else 0),
-			1000
-		) ++ (if (RoboeaseHack.bEmulateEvolab) Seq() else Seq(0))
+			1000,
+			0
+		)
 		l.mkString("Wash(", ",", ");")
 	}
 }

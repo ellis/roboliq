@@ -1,4 +1,4 @@
-package roboliq.robots.evoware
+package roboliq.evoware.translator
 
 import java.io.File
 import java.io.BufferedWriter
@@ -7,20 +7,23 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import grizzled.slf4j.Logger
 import roboliq.core._
-import roboliq.entity._
-import roboliq.commands._
-import roboliq.device._
-import roboliq.commands.pipette.HasTip
-import roboliq.commands.pipette.HasWell
-import roboliq.commands.pipette.HasPolicy
-import roboliq.commands.pipette.TipWellVolumePolicy
-import commands.EvowareSubroutineToken
+import roboliq.evoware.parser._
+import roboliq.pipette.HasTip
+import roboliq.pipette.HasWell
+import roboliq.pipette.HasPolicy
+import roboliq.pipette.TipWellVolumePolicy
+import roboliq.tokens._
+import ch.ethz.reactivesim.RsResult
+import roboliq.pipette.Tip
+import roboliq.pipette.Plate
+import roboliq.pipette.LiquidVolume
+import roboliq.pipette.Printer
 
 
 class EvowareTranslator(config: EvowareConfig) {
 	private val logger = Logger[this.type]
 	
-	def translate(token_l: List[CmdToken]): RqResult[EvowareScript] = {
+	def translate(token_l: List[Token]): RqResult[EvowareScript] = {
 		val t2 = new EvowareTranslator2(config, token_l)
 		t2.translate().map(_.toImmutable)
 	}
@@ -57,23 +60,23 @@ class EvowareTranslator(config: EvowareConfig) {
 	
 }
 
-private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken]) {
+private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 	private val logger = Logger[this.type]
-	private var nodeCurrent: CmdToken = null
+	private var nodeCurrent: Token = null
 	
 	def translate(): RqResult[EvowareScriptBuilder] = {
 		val builder = new EvowareScriptBuilder
 		translate(token_l, builder).map(_ => builder)
 	}
 	
-	private def translate(token_l: List[CmdToken], builder: EvowareScriptBuilder): RqResult[Unit] = {
-		RqResult.toResultOfList(token_l.map(token => {
+	private def translate(token_l: List[Token], builder: EvowareScriptBuilder): RqResult[Unit] = {
+		RsResult.toResultOfList(token_l.map(token => {
 			nodeCurrent = token
 			translate(token, builder)
 		})).map(_ => ())
 	}
-	
-	private def translate(cmd1: CmdToken, builder: EvowareScriptBuilder): RqResult[Unit] = {
+
+	private def translate(cmd1: Token, builder: EvowareScriptBuilder): RqResult[Unit] = {
 		for { cmds0 <- cmd1 match {
 			case c: control.CommentToken => comment(c)
 			case c: control.PromptToken => prompt(c)
@@ -234,7 +237,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		
 		val plate = info0.position.plate
 		for {
-			location <- info0.position.plate.location_?.asRq(s"plate location must be set for plate `$plate.id`")
+			location <- info0.position.plate.location_?.asRs(s"plate location must be set for plate `$plate.id`")
 			site <- getSite(location.id)
 		} yield {
 			val sPlateMask = encodeWells(plate.plate, lWellInfo.map(_.index))
@@ -324,7 +327,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 		)
 	}
 	*/
-	/*def wash(cmd: TipsWashToken): RqResult[Seq[CmdToken]] = {
+	/*def wash(cmd: TipsWashToken): RqResult[Seq[Token]] = {
 		config.mapWashProgramArgs.get(cmd.iWashProgram) match {
 			case None =>
 				Error(Seq("INTERNAL: Wash program "+cmd.iWashProgram+" not defined"))
@@ -432,12 +435,12 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	*/
 	/*
-	private def tipsGet(c: L1C_TipsGet): RqResult[Seq[CmdToken]] = {
+	private def tipsGet(c: L1C_TipsGet): RqResult[Seq[Token]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		Success(Seq(L0C_GetDITI2(mTips, c.model.id)))
 	}
 	
-	private def tipsDrop(c: L1C_TipsDrop): RqResult[Seq[CmdToken]] = {
+	private def tipsDrop(c: L1C_TipsDrop): RqResult[Seq[Token]] = {
 		val mTips = encodeTips(c.tips.map(_.obj))
 		for (site <- getSite(c.location)) yield {
 			val iGrid = config.table.mapCarrierToGrid(site.carrier)
@@ -484,7 +487,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 				labwareModel,
 				iGridSrc, siteSrc,
 				iGridDest, siteDest,
-				transport.LidHandling.NoLid, //c.lidHandling,
+				LidHandling.NoLid, //c.lidHandling,
 				iGridLid = 0,
 				iSiteLid = 0,
 				sCarrierLid = ""
@@ -500,14 +503,14 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[CmdToken])
 	}
 	
 	/*
-	private def timer(args: L12A_TimerArgs): RqResult[Seq[CmdToken]] = {
+	private def timer(args: L12A_TimerArgs): RqResult[Seq[Token]] = {
 		Success(Seq(
 			L0C_StartTimer(1),
 			L0C_WaitTimer(1, args.nSeconds)
 		))
 	}
 	
-	private def facts(builder: EvowareScriptBuilder, cmd: L1C_EvowareFacts): RqResult[Seq[CmdToken]] = {
+	private def facts(builder: EvowareScriptBuilder, cmd: L1C_EvowareFacts): RqResult[Seq[Token]] = {
 		Success(Seq(L0C_Facts(
 			sDevice = cmd.args.sDevice,
 			sVariable = cmd.args.sVariable,

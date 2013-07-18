@@ -186,4 +186,10 @@ package object core extends RsPimper {
 	type RsError[A] = ch.ethz.reactivesim.RsError[A]
 	val RsSuccess = ch.ethz.reactivesim.RsSuccess
 	val RsError = ch.ethz.reactivesim.RsError
+
+	type RqResult[A] = ch.ethz.reactivesim.RsResult[A]
+	type RqSuccess[A] = ch.ethz.reactivesim.RsSuccess[A]
+	type RqError[A] = ch.ethz.reactivesim.RsError[A]
+	val RqSuccess = ch.ethz.reactivesim.RsSuccess
+	val RqError = ch.ethz.reactivesim.RsError
 }

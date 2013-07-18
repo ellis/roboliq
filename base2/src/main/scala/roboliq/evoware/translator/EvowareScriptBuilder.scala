@@ -1,7 +1,8 @@
-package roboliq.robots.evoware
+package roboliq.evoware.translator
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import roboliq.evoware.parser._
 
 
 class EvowareScriptBuilder {

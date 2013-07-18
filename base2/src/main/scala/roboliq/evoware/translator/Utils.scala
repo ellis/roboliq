@@ -1,17 +1,16 @@
-package roboliq.evoware.parser
+package roboliq.evoware.translator
 
 import scala.collection.mutable
 import grizzled.slf4j.Logger
 import roboliq.core._
-//import roboliq.commands.pipette._
+import roboliq.pipette._
 import ch.ethz.reactivesim.RsSuccess
 import ch.ethz.reactivesim.RsResult
 
 
 object Utils {
-	private val logger = Logger("roboliq.evoware.parser.Utils")
+	private val logger = Logger("roboliq.evoware.translator.Utils")
 	
-	/*
 	// Test all adjacent items for equidistance
 	def equidistant(items: Seq[HasTip with HasWell]): Boolean = {
 		val lWellInfo = items.map(_.well).toList
@@ -37,20 +36,6 @@ object Utils {
 		(b._1.tip.col - a._1.tip.col) == (b._2.col - a._2.col) &&
 		(b._2.plate == a._2.plate)
 	}
-	*/
-	
-	/**
-	 * Encode an integer as an ASCII character.
-	 * Evoware uses this to generate a string representing a list of wells or sites.
-	 */
-	def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
-	
-	/**
-	 * Decode a character to an integer.
-	 */
-	def decode(c: Char): Int = (c - '0')
-	
-	def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
 	
 	/*
 	/**
@@ -91,21 +76,4 @@ object Utils {
 		sPlateMask
 	}
 	*/
-
-	/**
-	 * Takes an encoding of indexes on a 2D surface (as found in the file Carrier.cfg)
-	 * and returns (row count, col count, list of indexes).
-	 */
-	def parseEncodedIndexes(encoded: String): RsResult[(Int, Int, List[Int])] = {
-		val col_n = decode(encoded.charAt(1))
-		val row_n = decode(encoded.charAt(3))
-		val s = encoded.substring(4)
-		val i_l: List[Int] = s.toList.zipWithIndex.flatMap(pair => {
-			val (c, c_i) = pair
-			val n = decode(c)
-			val bit_l = (0 to 7).flatMap(bit_i => if ((n & (1 << bit_i)) > 0) Some(bit_i) else None)
-			bit_l.map(bit_i => c_i * 7 + bit_i)
-		})
-		RsSuccess((col_n, row_n, i_l))
-	}
 }
