@@ -11,18 +11,28 @@ Started 2013-07-13
         - [x] device models
         - [x] setup domain so that sealer uses spec
         - [x] user needs to provide sealer specs
-    - [ ] aliases (i.e. "Thermocycler Plate" => "D-BSSE 96 PCR")
-    - [ ] the plate specified in protocol should get the correct platemodel (m002, not m1)
-    - [ ] problem file: sealer-run plate1
+    - [x] aliases (i.e. "Thermocycler Plate" => "D-BSSE 96 PCR")
+    - [x] the plate specified in protocol should get the correct platemodel (m002, not m1)
+    - [x] problem file: sealer-run plate1
 - [ ] domain: transporter-run
     - [ ] check for closed device sites
     - [ ] handle sites which can accept multiple labware (e.g. offsite and centrifuge)
 - [ ] load json data/scripts
-- [ ] aliases
-- [ ] convert planner output to evoware
 - [ ] get planner state?
 - [ ] handle pipetting
 - [ ] handle centrifuge
 - [ ] convert YAML to json
 - [ ] special multi-aspirate pipetting
 - [ ] purification with plate stacking
+- [ ] Parse tokens, with agent always as first argument, into an Evoware script
+
+- [ ] Control
+    - [ ] Server that controls agent clients
+    - [ ] Agent clients (one to interact with user, one to interact with Evoware)
+    - [ ] Evoware scripts send feedback to server or client when measurements are obtained
+    - [ ] Server can start, pause, resume, stop complex scripts with feedback
+
+Big stuff
+
+- [ ] Implement my own planner/optimizer using reactive-sim, in order to print errors and warnings, and allow for parsing execution up to a branching point
+- [ ] 

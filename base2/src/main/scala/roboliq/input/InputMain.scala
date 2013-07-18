@@ -42,7 +42,7 @@ object InputMain extends App {
 			"object" -> JsString("plate1")
 		), 
 		JsObject(
-			"command" -> JsString("seak"),
+			"command" -> JsString("seal"),
 			"object" -> JsString("plate1")
 		)
 	)
@@ -88,7 +88,7 @@ object InputMain extends App {
 	for (js <- protocol) {
 		if (js.fields.contains("command")) {
 			js.fields.get("command") match {
-				case Some(JsString("shake")) =>
+				case Some(JsString("seal")) =>
 					js.fields.get("object") match {
 						case Some(JsString(key)) =>
 							val agent = f"?a$nvar%04d"
@@ -98,7 +98,7 @@ object InputMain extends App {
 							tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
 						case _ =>
 					}
-				case Some(JsString("seal")) =>
+				case Some(JsString("shake")) =>
 				case _ =>
 			}
 		}
