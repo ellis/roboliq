@@ -50,6 +50,18 @@
   )
  )
 
+ (:operator (!comment ?a ?text)
+  ((is-agent ?a))
+  nil
+  nil
+ )
+
+ (:operator (!prompt ?a ?text)
+  ((is-agent ?a))
+  nil
+  nil
+ )
+
  (:operator (!transporter-run ?a ?d ?p ?s2 ?vectorClass)
   ; preconditions
   (

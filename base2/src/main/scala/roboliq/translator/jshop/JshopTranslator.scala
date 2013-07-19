@@ -17,6 +17,8 @@ object JshopTranslator {
 				val agent = l(1)
 				op match {
 					case "agent-activate" =>
+					case "comment" =>
+						//CommentToken()
 					case "transporter-run" =>
 					case _ =>
 				}
