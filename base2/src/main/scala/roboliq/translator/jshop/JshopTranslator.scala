@@ -3,6 +3,7 @@ package roboliq.translator.jshop
 import roboliq.tokens.control.CommentToken
 import roboliq.input.Protocol
 import roboliq.tokens.Token
+import roboliq.tokens.control.PromptToken
 
 object JshopTranslator {
 	
@@ -25,7 +26,13 @@ object JshopTranslator {
 						val textId = l(2)
 						val text = protocol.idToObject(textId).toString
 						CommentToken(text) :: Nil
-					case "transporter-run" => Nil
+					case "transporter-run" =>
+						if (agent == "user") {
+							PromptToken(s"Please move labware `${l(3)}` model `` from `` to ``")
+						}
+						else if (agent == "r1") {
+							
+						}
 					case _ => Nil
 				}
 			case _ => Nil
