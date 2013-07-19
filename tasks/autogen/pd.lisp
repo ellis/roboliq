@@ -1,8 +1,8 @@
-(defproblem pc domain
+(defproblem pd domain
  ; initial conditions
  (
-  (is-agent r1) ; f6970b88-5928-496c-90a2-ac0a47fca878
-  (is-agent user) ; e20108a6-e193-4ad0-affb-4a73ba76da04
+  (is-agent r1) ; e521b091-b055-478e-a756-c9a0059a017f
+  (is-agent user) ; 39c8f6cd-30fc-4430-b0cd-7e854ed845f6
   (is-labware bench_001x1) ; (239,0)
   (is-labware bench_001x2) ; (239,1)
   (is-labware bench_001x3) ; (239,2)
@@ -87,20 +87,16 @@
   (is-labware hotel_85x3) ; hotel_85x3
   (is-labware hotel_85x4) ; hotel_85x4
   (is-labware hotel_85x5) ; hotel_85x5
-  (is-labware offsite) ; a6d7b1d4-dd9f-4b9e-867c-40e12c2df687
-  (is-labware plate1) ; 1c5fdec8-a271-47d8-8e1d-afaa69304ea4
-  (is-labware s1) ; 161f698d-b8bd-4875-93c7-91d2ab17a64b
-  (is-labware s2) ; 0584ba2f-7a0b-40f6-887d-0a7f3e9fdbdd
-  (is-labware shakerSite) ; 25236e86-a843-42dc-a409-807cf0621ba2
-  (is-labware thermocyclerSite) ; 8b795007-ac5b-4473-bfbe-3940fc10d4b8
+  (is-labware offsite) ; c7c9f05a-7ba3-47d6-8f90-bdeea13220ef
+  (is-labware plate1) ; 561e3f8a-a066-4f29-bf99-179dff906829
   (is-model m001) ; D-BSSE 96 Well DWP
   (is-model m002) ; D-BSSE 96 Well PCR Plate
-  (is-model offsiteModel) ; 68ddd997-b731-4cd7-b9e4-6b6d261cb652
+  (is-model offsiteModel) ; 31a5579a-bb3a-45b7-9216-b2452b966293
   (is-model sm1) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul))
   (is-model sm2) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul), PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-model sm3) ; Set(PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-peeler peeler) ; RoboPeel
-  (is-plate plate1) ; 1c5fdec8-a271-47d8-8e1d-afaa69304ea4
+  (is-plate plate1) ; 561e3f8a-a066-4f29-bf99-179dff906829
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
   (is-sealer sealer) ; RoboSeal
@@ -188,18 +184,14 @@
   (is-site hotel_85x3) ; hotel_85x3
   (is-site hotel_85x4) ; hotel_85x4
   (is-site hotel_85x5) ; hotel_85x5
-  (is-site offsite) ; a6d7b1d4-dd9f-4b9e-867c-40e12c2df687
-  (is-site s1) ; 161f698d-b8bd-4875-93c7-91d2ab17a64b
-  (is-site s2) ; 0584ba2f-7a0b-40f6-887d-0a7f3e9fdbdd
-  (is-site shakerSite) ; 25236e86-a843-42dc-a409-807cf0621ba2
-  (is-site thermocyclerSite) ; 8b795007-ac5b-4473-bfbe-3940fc10d4b8
-  (is-siteModel offsiteModel) ; 68ddd997-b731-4cd7-b9e4-6b6d261cb652
+  (is-site offsite) ; c7c9f05a-7ba3-47d6-8f90-bdeea13220ef
+  (is-siteModel offsiteModel) ; 31a5579a-bb3a-45b7-9216-b2452b966293
   (is-siteModel sm1) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul))
   (is-siteModel sm2) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul), PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-siteModel sm3) ; Set(PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-transporter r1_transporter1) ; RoMa1
   (is-transporter r1_transporter2) ; RoMa2
-  (is-transporter userArm) ; bf0bc5e4-961c-44f6-9809-29f5f5102a37
+  (is-transporter userArm) ; fa61bf48-d5dd-47cb-abbb-b77f28527297
   (agent-has-device r1 peeler)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
@@ -421,12 +413,9 @@
   (transporter-can r1_transporter2 hotel_245x9 Narrow)
   (transporter-can userArm hotel_245x1 nil)
   (transporter-can userArm offsite nil)
-  ;(is-text text1)
-  ;(is-text text2)
  )
  ; tasks
  (
-  (!log r1 text1)
-  (!prompt r1 text2)
+  (!log ?a0001 text0002)
  )
 )

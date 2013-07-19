@@ -50,7 +50,7 @@
   )
  )
 
- (:operator (!comment ?a ?text)
+ (:operator (!log ?a ?text)
   ((is-agent ?a))
   nil
   nil

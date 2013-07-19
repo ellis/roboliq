@@ -29,8 +29,10 @@ case class TubeInput(
 object InputMain extends App {
 	val protocol = new Protocol
 	
+	val carrier = roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg").getOrElse(null)
+	val table = roboliq.evoware.parser.EvowareTableData.loadFile(carrier, "./testdata/bsse-robot1/config/table-01.esc").getOrElse(null)
 	protocol.loadConfig()
-	protocol.loadEvoware()
+	protocol.loadEvoware(carrier, table)
 	protocol.loadJson("""
 {
 "plates": [
