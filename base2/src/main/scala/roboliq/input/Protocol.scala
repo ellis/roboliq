@@ -10,10 +10,14 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
 import roboliq.utils.FileUtils
 
-class Protocol(json: JsObject) {
+class Protocol {
 	val eb = new EntityBase
 	private var tasks = new ArrayBuffer[Rel]
 	private var var_i = 0
+
+	// HACK: defined here so that loadConfig() and loadEvoware() both have access
+	private val offsiteModel = SiteModel(gid)
+	private val userArm = Transporter(gid)
 
 	private def gid: String = java.util.UUID.randomUUID().toString()
 	private def nvar: Int = { var_i += 1; var_i }
@@ -26,8 +30,6 @@ class Protocol(json: JsObject) {
 		import roboliq.entities._
 		
 		val user = Agent(gid)
-		val userArm = Transporter(gid)
-		val offsiteModel = SiteModel(gid)
 		val offsite = Site(gid)
 		val shakerSpec1 = ShakerSpec(gid)
 		val thermocyclerSpec1 = ThermocyclerSpec(gid)
@@ -67,36 +69,50 @@ class Protocol(json: JsObject) {
 						case _ =>
 					}
 				}
-		}
-		/*
-		for (m <- tubeInputs) {
-			val id = m.getOrElse("id", gid)
-			val name = m.getOrElse("name", id)
-			val modelKey = m("model")
-			val model = eb.getEntity(modelKey).get.asInstanceOf[LabwareModel]
-			val tube = new Plate(id)
-			eb.addLabware(tube, name)
-			eb.setModel(tube, model)
+			case _ =>
 		}
 		
-		for (js <- protocol) {
-			if (js.fields.contains("command")) {
-				js.fields.get("command") match {
-					case Some(JsString("seal")) =>
-						js.fields.get("object") match {
-							case Some(JsString(key)) =>
-								val agent = f"?a$nvar%04d"
-								val device = f"?d$nvar%04d"
-								val plate = eb.getEntity(key).get.asInstanceOf[Labware]
-								val plateName = eb.names(plate)
-								tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
-							case _ =>
-						}
-					case Some(JsString("shake")) =>
-					case _ =>
+		jsobj.fields.get("tubes") match {
+			case Some(js) =>
+				val tubeInputs = js.convertTo[List[Map[String, String]]]
+				for (m <- tubeInputs) {
+					val id = m.getOrElse("id", gid)
+					val name = m.getOrElse("name", id)
+					val modelKey = m("model")
+					val model = eb.getEntity(modelKey).get.asInstanceOf[LabwareModel]
+					val tube = new Plate(id)
+					eb.addLabware(tube, name)
+					eb.setModel(tube, model)
 				}
-			}
-		}*/
+			case _ =>
+		}
+		
+		jsobj.fields.get("protocol") match {
+			case Some(JsArray(l)) =>
+				for (js <- l) {
+					js match {
+						case JsObject(fields) =>
+							if (fields.contains("command")) {
+								fields.get("command") match {
+									case Some(JsString("seal")) =>
+										fields.get("object") match {
+											case Some(JsString(key)) =>
+												val agent = f"?a$nvar%04d"
+												val device = f"?d$nvar%04d"
+												val plate = eb.getEntity(key).get.asInstanceOf[Labware]
+												val plateName = eb.names(plate)
+												tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
+											case _ =>
+										}
+									case Some(JsString("shake")) =>
+									case _ =>
+								}
+							}
+						case _ =>
+					}
+				}
+			case _ =>
+		}
 	}
 	
 	/**
@@ -108,39 +124,10 @@ class Protocol(json: JsObject) {
 	 * What to do with other labware on the table definition?  One thing we should probably do is add it to this list of labware models we're interested in.
 	 * We want to use site models, but these are not declared in Evoware, so we'll need to extract them indirectly. 
 	 */
-	def setup2() {
+	def loadEvoware() {
 		import roboliq.entities._
 		
-		val user = Agent(gid)
-		val r1 = Agent(gid)
-		val userArm = Transporter(gid)
-		val pipetter = Pipetter(gid)
-		val shaker = Shaker(gid)
-		val thermocycler = Thermocycler(gid)
-		val offsiteModel = SiteModel(gid)
-		val offsite = Site(gid)
-		val s1 = Site(gid)
-		val s2 = Site(gid)
-		val shakerSite = Site(gid)
-		val thermocyclerSite = Site(gid)
-		val shakerSpec1 = ShakerSpec(gid)
-		val thermocyclerSpec1 = ThermocyclerSpec(gid)
-		
-		eb.addAlias("Thermocycler Plate", "D-BSSE 96 Well PCR Plate")
-		eb.addAgent(user, "user")
-		eb.addModel(offsiteModel, "offsiteModel")
-		eb.addSite(offsite, "offsite")
-		eb.addSite(s1, "s1")
-		eb.addSite(s2, "s2")
-		eb.addSite(shakerSite, "shakerSite")
-		eb.addSite(thermocyclerSite, "thermocyclerSite")
-		eb.addDevice(user, userArm, "userArm")
-		
-		// userArm can transport from offsite
-		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "nil")))
-		// A few other user-specified sites where the user can put plates on the robot
-		eb.addRel(Rel("transporter-can", List("userArm", "hotel_245x1", "nil")))
-		
+		// FIXME: This really doesn't belong here at all!
 		val labwareNamesOfInterest_l = new HashSet[String]
 		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
 		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
@@ -149,6 +136,7 @@ class Protocol(json: JsObject) {
 			carrier <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg")
 			table <- roboliq.evoware.parser.EvowareTableData.loadFile(carrier, "./testdata/bsse-robot1/config/table-01.esc")
 		} {
+			val r1 = Agent(gid)
 			eb.addAgent(r1, "r1")
 
 			// Add labware on the table definition to the list of labware we're interested in
@@ -297,7 +285,6 @@ class Protocol(json: JsObject) {
 					siteIdToModels_m(siteId).foreach(m => eb.addDeviceModel(device, m))
 				}
 			}
-
 			
 			for ((carrierE, iGrid) <- table.mapCarrierToGrid) {
 				carrierE.sName match {
@@ -311,7 +298,7 @@ class Protocol(json: JsObject) {
 		}
 	}
 	
-	def writeProblem(name: String) {
+	def saveProblem(name: String) {
 		FileUtils.printToFile(new java.io.File(s"tasks/autogen/$name.lisp")) { p =>
 			p.println(s"(defproblem $name domain")
 			p.println(eb.makeInitialConditions)

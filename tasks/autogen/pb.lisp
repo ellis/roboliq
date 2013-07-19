@@ -1,8 +1,8 @@
 (defproblem pb domain
  ; initial conditions
  (
-  (is-agent r1) ; f6970b88-5928-496c-90a2-ac0a47fca878
-  (is-agent user) ; e20108a6-e193-4ad0-affb-4a73ba76da04
+  (is-agent r1) ; 6afde8ef-f2ae-44ad-8b50-ddbeeae1ecc8
+  (is-agent user) ; 6edeeaed-9898-4fc0-9b78-3325f09771f3
   (is-labware bench_001x1) ; (239,0)
   (is-labware bench_001x2) ; (239,1)
   (is-labware bench_001x3) ; (239,2)
@@ -87,20 +87,16 @@
   (is-labware hotel_85x3) ; hotel_85x3
   (is-labware hotel_85x4) ; hotel_85x4
   (is-labware hotel_85x5) ; hotel_85x5
-  (is-labware offsite) ; a6d7b1d4-dd9f-4b9e-867c-40e12c2df687
-  (is-labware plate1) ; 1c5fdec8-a271-47d8-8e1d-afaa69304ea4
-  (is-labware s1) ; 161f698d-b8bd-4875-93c7-91d2ab17a64b
-  (is-labware s2) ; 0584ba2f-7a0b-40f6-887d-0a7f3e9fdbdd
-  (is-labware shakerSite) ; 25236e86-a843-42dc-a409-807cf0621ba2
-  (is-labware thermocyclerSite) ; 8b795007-ac5b-4473-bfbe-3940fc10d4b8
+  (is-labware offsite) ; 1de70c23-cc60-4c70-99ba-27c4aa686c15
+  (is-labware plate1) ; e10c1b92-d08d-4d3d-a6b9-5d39722a35fe
   (is-model m001) ; D-BSSE 96 Well DWP
   (is-model m002) ; D-BSSE 96 Well PCR Plate
-  (is-model offsiteModel) ; 68ddd997-b731-4cd7-b9e4-6b6d261cb652
+  (is-model offsiteModel) ; c9f78cd1-5ab3-4496-8ecc-ed87dd7bfb68
   (is-model sm1) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul))
   (is-model sm2) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul), PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-model sm3) ; Set(PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-peeler peeler) ; RoboPeel
-  (is-plate plate1) ; 1c5fdec8-a271-47d8-8e1d-afaa69304ea4
+  (is-plate plate1) ; e10c1b92-d08d-4d3d-a6b9-5d39722a35fe
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
   (is-sealer sealer) ; RoboSeal
@@ -188,18 +184,14 @@
   (is-site hotel_85x3) ; hotel_85x3
   (is-site hotel_85x4) ; hotel_85x4
   (is-site hotel_85x5) ; hotel_85x5
-  (is-site offsite) ; a6d7b1d4-dd9f-4b9e-867c-40e12c2df687
-  (is-site s1) ; 161f698d-b8bd-4875-93c7-91d2ab17a64b
-  (is-site s2) ; 0584ba2f-7a0b-40f6-887d-0a7f3e9fdbdd
-  (is-site shakerSite) ; 25236e86-a843-42dc-a409-807cf0621ba2
-  (is-site thermocyclerSite) ; 8b795007-ac5b-4473-bfbe-3940fc10d4b8
-  (is-siteModel offsiteModel) ; 68ddd997-b731-4cd7-b9e4-6b6d261cb652
+  (is-site offsite) ; 1de70c23-cc60-4c70-99ba-27c4aa686c15
+  (is-siteModel offsiteModel) ; c9f78cd1-5ab3-4496-8ecc-ed87dd7bfb68
   (is-siteModel sm1) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul))
   (is-siteModel sm2) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul), PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-siteModel sm3) ; Set(PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-transporter r1_transporter1) ; RoMa1
   (is-transporter r1_transporter2) ; RoMa2
-  (is-transporter userArm) ; bf0bc5e4-961c-44f6-9809-29f5f5102a37
+  (is-transporter userArm) ; 892da069-1299-485e-870a-9695e3aabd0c
   (agent-has-device r1 peeler)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
