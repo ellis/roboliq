@@ -31,11 +31,14 @@ object JshopTranslator {
 						val text = protocol.idToObject(textId).toString
 						PromptToken(text) :: Nil
 					case "transporter-run" =>
+						val List(deviceName, labwareName, modelName, originName, destinationName, vectorName) = l.toList.drop(2)
 						if (agent == "user") {
-							PromptToken(s"Please move labware `${l(3)}` model `` from `` to ``") :: Nil
+							PromptToken(s"Please move labware `${labwareName}` model `${modelName}` from `${originName}` to `${destinationName}`") :: Nil
 						}
 						else {
-							/*MovePlateToken()
+//(!transporter-run r1 r1_transporter1 plate1 m002 hotel_245x1 bench_017x1 narrow)
+							val plate = 
+							MovePlateToken(Some(deviceName), )
 		val deviceId_? : Option[String],
 		val plate: Plate,
 		val plateSrc: PlateLocation,

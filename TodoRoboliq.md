@@ -1,12 +1,34 @@
 Started 2013-07-22
 
-- [ ] domain: !evoware-transporter-run, !user-move-labware
 - [ ] JshopTranslator: translate operations per agent (i.e., system, user, evoware)
+- [ ] JshopTranslator: output system, evoware, and user instructions
 - [ ] jshop: link in Jshop2
 - [ ] jshop: compile .lisp file using Jshop2
 - [ ] jshop: run java problem
 - [ ] jshop: get solution
 - [ ] send jshop solution to JshopTranslator
+- [ ] distinct planning methods: overall method is like HTN planner, with pre-conditions and tasks.  Labware positioning requires some path-finding algorithm.  Pipetting requires its own complex search routines.
+- [ ] evoware: log time of each command so that we get a database of how long commands require to execute.
+- [ ] domain: !evoware-transporter-run, !user-move-labware (but can't do this until we implement our own path-finding algorithm)
+
+## Translating ground operators
+
+(agent, command)
+(agent, command, client)
+
+Generally the first commands will need to be run by the user.  Those commands can go to a user client.
+For now, we'll let
+the user client be the main Evoware machine, but it should be made into a separate client as soon as possible.
+When we want to switch clients, the client which is being paused should be informed to wait until it's activated
+again.
+For now, when we want to start a new script, this information should go to the user client.
+Evoware should send information back to the server very frequently.
+Evoware scripts should be able to start a next script, when we need to change the labware on a site.
+
+Clients may need to switch whenever agents switch.
+
+How should client switching be handled?
+
 
 Started 2013-07-13
 

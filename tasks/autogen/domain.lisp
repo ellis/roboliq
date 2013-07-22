@@ -62,7 +62,7 @@
   nil
  )
 
- (:operator (!transporter-run ?a ?d ?p ?s2 ?vectorClass)
+ (:operator (!transporter-run ?a ?d ?p ?m ?s1 ?s2 ?vectorClass)
   ; preconditions
   (
    (is-agent ?a)
@@ -119,7 +119,7 @@
   ; task list
   (
    (agent-activate ?a)
-   (!transporter-run ?a ?d ?p ?s2 ?vectorClass)
+   (!transporter-run ?a ?d ?p ?m ?s1 ?s2 ?vectorClass)
   )
  )
 
