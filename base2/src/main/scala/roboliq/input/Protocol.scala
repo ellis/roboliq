@@ -106,6 +106,22 @@ class Protocol {
 												tasks += Rel("!log", List(agent, textId))
 											case _ =>
 										}
+									case Some(JsString("prompt")) =>
+										fields.get("text") match {
+											case Some(JsString(text)) =>
+												val agent = f"?a$nvar%04d"
+												val textId = f"text$nvar%04d"
+												idToObject(textId) = text
+												println("idToObject:" + idToObject)
+												tasks += Rel("!prompt", List(agent, textId))
+											case _ =>
+										}
+									case Some(JsString("move")) =>
+										//val agent = x(fields, "agent")
+										//val device = x(fields, "device")
+										val labware = fields("labware").asInstanceOf[JsString].value
+										val destination = fields("destination").asInstanceOf[JsString].value
+										tasks += Rel("move-labware", List(labware, destination))
 									case Some(JsString("seal")) =>
 										fields.get("object") match {
 											case Some(JsString(key)) =>
@@ -124,6 +140,16 @@ class Protocol {
 					}
 				}
 			case _ =>
+		}
+	}
+	
+	private def x(fields: Map[String, JsValue], id: String): String =
+		x(fields, id, f"?x$nvar%04d")
+	
+	private def x(fields: Map[String, JsValue], id: String, default: => String): String = {
+		fields.get(id) match {
+			case Some(JsString(value)) => value
+			case _ => default
 		}
 	}
 	

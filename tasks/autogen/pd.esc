@@ -148,3 +148,6 @@ V;200
 996;0;0;
 --{ RPG }--
 Comment("do the right thing");
+UserPrompt("Please do the right thing, then press ENTER.",0,-1);
+UserPrompt("Please move labware `plate1` model `` from `` to ``",0,-1);
+UserPrompt("Please move labware `plate1` model `` from `` to ``",0,-1);

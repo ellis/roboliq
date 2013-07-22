@@ -23,7 +23,8 @@ object JshopMain extends App {
 ],
 "protocol": [
 	{ "command": "log", "text": "do the right thing" },
-	{ "command": "prompt", "text": "Please do the right thing, then press ENTER." }
+	{ "command": "prompt", "text": "Please do the right thing, then press ENTER." },
+	{ "command": "move", "labware": "plate1", "destination": "bench_017x1" }
 ]
 }""".asJson.asJsObject
 		)
@@ -31,10 +32,19 @@ object JshopMain extends App {
 		val protocolName = "pd"
 		protocol.saveProblem(protocolName)
 		
-		val taskOutput = """(!log r1 text0002)"""
+		val taskOutput = """(!log r1 text0002)
+(!prompt r1 text0004)
+(!agent-activate user)
+(!transporter-run user userarm plate1 hotel_245x1 NIL)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter1 plate1 bench_017x1 narrow)
+"""
 			
 		val token_l = JshopTranslator.translate(protocol, taskOutput)
+		println("Tokens:")
 		token_l.foreach(println)
+		println()
 
 		val configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
 		val config = new EvowareConfig(carrierData, tableData, configData)

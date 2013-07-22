@@ -1,8 +1,8 @@
 (defproblem pd domain
  ; initial conditions
  (
-  (is-agent r1) ; e521b091-b055-478e-a756-c9a0059a017f
-  (is-agent user) ; 39c8f6cd-30fc-4430-b0cd-7e854ed845f6
+  (is-agent r1) ; b91b9b3d-841c-4b64-824b-004efd40fdf6
+  (is-agent user) ; 44f977d1-2a63-4c09-b103-3c4847392ed9
   (is-labware bench_001x1) ; (239,0)
   (is-labware bench_001x2) ; (239,1)
   (is-labware bench_001x3) ; (239,2)
@@ -87,16 +87,16 @@
   (is-labware hotel_85x3) ; hotel_85x3
   (is-labware hotel_85x4) ; hotel_85x4
   (is-labware hotel_85x5) ; hotel_85x5
-  (is-labware offsite) ; c7c9f05a-7ba3-47d6-8f90-bdeea13220ef
-  (is-labware plate1) ; 561e3f8a-a066-4f29-bf99-179dff906829
+  (is-labware offsite) ; befd003c-ec35-4228-ac1c-68aaee838c44
+  (is-labware plate1) ; 5dfd4b0e-7c51-4c64-8dab-31a0eeaac26f
   (is-model m001) ; D-BSSE 96 Well DWP
   (is-model m002) ; D-BSSE 96 Well PCR Plate
-  (is-model offsiteModel) ; 31a5579a-bb3a-45b7-9216-b2452b966293
+  (is-model offsiteModel) ; 07ce50e4-ffcb-493d-a6a8-7fa5ee074ef5
   (is-model sm1) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul))
   (is-model sm2) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul), PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-model sm3) ; Set(PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-peeler peeler) ; RoboPeel
-  (is-plate plate1) ; 561e3f8a-a066-4f29-bf99-179dff906829
+  (is-plate plate1) ; 5dfd4b0e-7c51-4c64-8dab-31a0eeaac26f
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
   (is-sealer sealer) ; RoboSeal
@@ -184,14 +184,14 @@
   (is-site hotel_85x3) ; hotel_85x3
   (is-site hotel_85x4) ; hotel_85x4
   (is-site hotel_85x5) ; hotel_85x5
-  (is-site offsite) ; c7c9f05a-7ba3-47d6-8f90-bdeea13220ef
-  (is-siteModel offsiteModel) ; 31a5579a-bb3a-45b7-9216-b2452b966293
+  (is-site offsite) ; befd003c-ec35-4228-ac1c-68aaee838c44
+  (is-siteModel offsiteModel) ; 07ce50e4-ffcb-493d-a6a8-7fa5ee074ef5
   (is-siteModel sm1) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul))
   (is-siteModel sm2) ; Set(PlateModel(D-BSSE 96 Well PCR Plate,8,12,287.642ul), PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-siteModel sm3) ; Set(PlateModel(D-BSSE 96 Well DWP,8,12,2.515122ml))
   (is-transporter r1_transporter1) ; RoMa1
   (is-transporter r1_transporter2) ; RoMa2
-  (is-transporter userArm) ; fa61bf48-d5dd-47cb-abbb-b77f28527297
+  (is-transporter userArm) ; fe76f602-6abb-4a34-b0fa-f8114a182c60
   (agent-has-device r1 peeler)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
@@ -417,5 +417,7 @@
  ; tasks
  (
   (!log ?a0001 text0002)
+  (!prompt ?a0003 text0004)
+  (move-labware plate1 bench_017x1)
  )
 )

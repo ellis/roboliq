@@ -1,3 +1,13 @@
+Started 2013-07-22
+
+- [ ] domain: !evoware-transporter-run, !user-move-labware
+- [ ] JshopTranslator: translate operations per agent (i.e., system, user, evoware)
+- [ ] jshop: link in Jshop2
+- [ ] jshop: compile .lisp file using Jshop2
+- [ ] jshop: run java problem
+- [ ] jshop: get solution
+- [ ] send jshop solution to JshopTranslator
+
 Started 2013-07-13
 
 - [ ] Generate evoware output from tasks
