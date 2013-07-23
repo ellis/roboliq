@@ -26,6 +26,10 @@ class Protocol {
 	 * Map of task variable identifier to an internal object -- for example, the name of a text variable to the actual text.
 	 */
 	val idToObject = new HashMap[String, Object]
+	/**
+	 * Individual agents may need to map identifiers to internal objects
+	 */
+	val agentToIdentToInternalObject = new HashMap[String, HashMap[String, Object]]
 
 	/**
 	 * This should eventually load a YAML file.
@@ -177,8 +181,11 @@ class Protocol {
 		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
 		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
 		
-		val r1 = Agent(gid)
-		eb.addAgent(r1, agentIdent)
+		val agent = Agent(gid)
+		eb.addAgent(agent, agentIdent)
+		
+		val identToAgentObject = new HashMap[String, Object]
+		agentToIdentToInternalObject(agentIdent) = identToAgentObject
 
 		// Add labware on the table definition to the list of labware we're interested in
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
@@ -189,13 +196,15 @@ class Protocol {
 		for (mE <- labwareModelEs) {
 			if (mE.sName.contains("Plate") || mE.sName.contains("96")) {
 				val m = PlateModel(mE.sName, None, None, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+				val ident = f"m${idToModel_m.size + 1}%03d"
 				idToModel_m(mE.sName) = m
-				eb.addModel(m, f"m${idToModel_m.size}%03d")
+				eb.addModel(m, ident)
 				// All models can be offsite
 				eb.addStackable(offsiteModel, m)
 				// The user arm can handle all models
 				eb.addDeviceModel(userArm, m)
 				//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
+				identToAgentObject(ident) = mE
 			}
 		}
 		
@@ -216,7 +225,9 @@ class Protocol {
 				val siteId = (carrierE.id, site_i)
 				val site = Site(gid, Some(s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}"))
 				val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
+				agentToIdentToInternalObject(agentIdent)
 				siteIdToSite_m(siteId) = site
+				identToAgentObject(siteIdent) = siteE
 				eb.addSite(site, siteIdent)
 			}
 		}
@@ -231,6 +242,7 @@ class Protocol {
 				val site = Site(gid, Some(s"${agentIdent} device ${carrierE.sName} site ${site_i+1}"))
 				val siteIdent = s"${agentIdent}_device_${carrierE.id}x${site_i+1}"
 				siteIdToSite_m(siteId) = site
+				identToAgentObject(siteIdent) = siteE
 				eb.addSite(site, siteIdent)
 			}
 		}
@@ -243,6 +255,7 @@ class Protocol {
 				val site = Site(gid, Some(s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}"))
 				val siteIdent = f"${agentIdent}_bench_${grid_i}%03dx${site_i+1}"
 				siteIdToSite_m(siteId) = site
+				identToAgentObject(siteIdent) = siteE
 				eb.addSite(site, siteIdent)
 			}
 		}
@@ -291,9 +304,11 @@ class Protocol {
 			val roma_li = carrierData.mapCarrierToVectors.values.flatMap(_.map(_.iRoma)).toSet
 			// Add transporter device for each RoMa
 			for (roma_i <- roma_li) {
-				val roma = Transporter(s"RoMa${roma_i + 1}")
+				val ident = s"r1_transporter${roma_i + 1}"
+				val roma = Transporter(gid)
+				identToAgentObject(ident) = roma_i.asInstanceOf[Integer]
 				roma_m(roma_i) = roma
-				eb.addDevice(r1, roma, s"r1_transporter${roma_i + 1}")
+				eb.addDevice(agent, roma, ident)
 			}
 		}
 		
@@ -319,7 +334,8 @@ class Protocol {
 			
 			// Add device
 			val device = new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(typeName) }
-			eb.addDevice(r1, device, deviceName)
+			eb.addDevice(agent, device, deviceName)
+			identToAgentObject(deviceName) = carrierE
 	
 			// Add device sites
 			for (site_i <- 0 until carrierE.nSites) {

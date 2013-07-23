@@ -4,6 +4,7 @@ import roboliq.tokens.control.CommentToken
 import roboliq.input.Protocol
 import roboliq.tokens.Token
 import roboliq.tokens.control.PromptToken
+import roboliq.tokens.transport.EvowareTransporterRunToken
 
 object JshopTranslator {
 	
@@ -19,7 +20,8 @@ object JshopTranslator {
 			case RxOperator(s) =>
 				val l = s.split(' ')
 				val op = l(0)
-				val agent = l(1)
+				val agentIdent = l(1)
+				val identToAgentObject: Map[String, Object] = protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
 				op match {
 					case "agent-activate" => Nil
 					case "log" =>
@@ -31,11 +33,15 @@ object JshopTranslator {
 						val text = protocol.idToObject(textId).toString
 						PromptToken(text) :: Nil
 					case "transporter-run" =>
-						val List(deviceName, labwareName, modelName, originName, destinationName, vectorName) = l.toList.drop(2)
-						if (agent == "user") {
-							PromptToken(s"Please move labware `${labwareName}` model `${modelName}` from `${originName}` to `${destinationName}`") :: Nil
+						val List(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) = l.toList.drop(2)
+						if (agentIdent == "user") {
+							PromptToken(s"Please move labware `${labwareIdent}` model `${modelIdent}` from `${originIdent}` to `${destinationIdent}`") :: Nil
 						}
 						else {
+							val roma_i: Int = identToAgentObject(deviceIdent).asInstanceOf[Integer]
+							val model = identToAgentObject(modelIdent).asInstanceOf[roboliq.evoware.parser.LabwareModel]
+							val origin = identToAgentObject(originIdent).asInstanceOf[roboliq.evoware.parser.CarrierSite]
+							val destination = identToAgentObject(destinationIdent).asInstanceOf[roboliq.evoware.parser.CarrierSite]
 //(!transporter-run r1 r1_transporter1 plate1 m002 hotel_245x1 bench_017x1 narrow)
 							/*val plate = 
 							MovePlateToken(Some(deviceName), )
@@ -43,7 +49,13 @@ object JshopTranslator {
 		val plate: Plate,
 		val plateSrc: PlateLocation,
 		val plateDest: PlateLocation*/
-							PromptToken(s"Please move labware `${l(3)}` model `` from `` to ``") :: Nil
+							EvowareTransporterRunToken(
+								roma_i = roma_i,
+								vectorClass = vectorIdent,
+								model = model,
+								origin = origin,
+								destination = destination
+							) :: Nil
 						}
 					case _ => Nil
 				}

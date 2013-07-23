@@ -39,13 +39,13 @@ package pipette {
 }
 
 package transport {
-	case class TransporterRunToken(
-		val device: roboliq.entities.Device,
-		val spec: String,
-		val model: String,
-		val origin: String,
-		val destination: String
-	)
+	case class EvowareTransporterRunToken(
+		val roma_i: Int,
+		val vectorClass: String,
+		val model: roboliq.evoware.parser.LabwareModel,
+		val origin: roboliq.evoware.parser.CarrierSite,
+		val destination: roboliq.evoware.parser.CarrierSite
+	) extends Token
 	// FIXME: Delete this?
 	case class MovePlateToken(
 		val deviceId_? : Option[String],

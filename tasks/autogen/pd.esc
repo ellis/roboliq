@@ -32,8 +32,8 @@ V;200
 998;0;
 998;1;;
 998;;
-998;4;;;;;
-998;;;;;
+998;4;D-BSSE 96 Well PCR Plate;;;;
+998;C243S1;;;;
 998;0;
 998;0;
 998;0;
@@ -134,7 +134,8 @@ V;200
 998;0;4;TRobot2;
 998;0;0;Hotel 5Pos DeepWell;
 998;0;2;Shelf 32Pos Microplate;
-998;0;
+998;1;
+998;245;D-BSSE 96 Well PCR Plate;
 998;1;
 998;55;
 998;68;
@@ -150,4 +151,4 @@ V;200
 Comment("do the right thing");
 UserPrompt("Please do the right thing, then press ENTER.",0,-1);
 UserPrompt("Please move labware `plate1` model `m002` from `offsite` to `r1_hotel_245x1`",0,-1);
-UserPrompt("Please move labware `plate1` model `` from `` to ``",0,-1);
+Transfer_Rack("11","17",1,0,1,0,0,"","D-BSSE 96 Well PCR Plate","narrow","","","Shelf 32Pos Microplate","","MP 3Pos Cooled 1 PCR","1","(Not defined)","1");

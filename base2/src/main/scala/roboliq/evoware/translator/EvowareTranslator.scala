@@ -30,12 +30,16 @@ class EvowareTranslator(config: EvowareConfig) {
 
 	def saveWithHeader(script: EvowareScript, sFilename: String) {
 		val mapSiteToLabel = new HashMap[CarrierSite, String]
+		// TODO: Need to split into multiple scripts is a single site needs to accomodate multiple labware models
 		for (c <- script.cmds) {
 			script.mapCmdToLabwareInfo.get(c) match {
 				case None =>
 				case Some(l) =>
-					for (info <- l)
-						mapSiteToLabel(info._1) = info._2
+					for ((site, model) <- l) {
+						val id0 = f"C${site.carrier.id}%03dS${site.iSite+1}"
+						val label = config.config.siteIds.getOrElse(id0, id0)
+						mapSiteToLabel(site) = label
+					}
 			}
 		}
 		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
@@ -88,7 +92,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			//case c: EvowareSubroutineToken => subroutine(builder, c)
 			//case c: MixToken => mix(builder, c.items)
-			case c: transport.TransporterRunToken => transportLabware(builder, c)
+			case c: transport.EvowareTransporterRunToken => transportLabware(builder, c)
 			case c: transport.MovePlateToken => movePlate(builder, c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
@@ -253,7 +257,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 				site, labwareModel
 			)
 			
-			builder.mapCmdToLabwareInfo(cmd) = List((site, location.id, labwareModel))
+			builder.mapCmdToLabwareInfo(cmd) = List((site, labwareModel))
 			
 			List(cmd)
 		}
@@ -450,33 +454,36 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 	}
 	*/
 	
-	private def transportLabware(builder: EvowareScriptBuilder, c: transport.TransporterRunToken): RqResult[Seq[L0C_Command]] = {
-		/*for {
-			labwareModel <- config.carrier.mapNameToLabwareModel.get(c.model).asRs(s"invalid labware model name `${c.model}`")
-		} yield {
-			val cmd = L0C_Transfer_Rack(
-				c.device.internalId.asInstanceOf[Integer],
-				c.spec,
-				//c.sPlateModel,
-				//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
-				//iGridDest, siteDest.iSite, siteDest.carrier.sName,
-				labwareModel,
-				iGridSrc, siteSrc,
-				iGridDest, siteDest,
-				LidHandling.NoLid, //c.lidHandling,
-				iGridLid = 0,
-				iSiteLid = 0,
-				sCarrierLid = ""
-			)
-			
-			builder.mapCmdToLabwareInfo(cmd) = List(
-				(siteSrc, c.plateSrc.id, labwareModel),
-				(siteDest, c.plateDest.id, labwareModel)
-			)
-			
-			Seq(cmd)
-		}*/
-		RqError("Not implemented")
+	private def transportLabware(builder: EvowareScriptBuilder, c: transport.EvowareTransporterRunToken): RqResult[Seq[L0C_Command]] = {
+		val carrierSrc = c.origin.carrier
+		val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
+		val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
+
+		val carrierDest = c.destination.carrier
+		val iGridDest = config.table.mapCarrierToGrid(carrierDest)
+		val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
+
+		val cmd = L0C_Transfer_Rack(
+			c.roma_i,
+			c.vectorClass,
+			//c.sPlateModel,
+			//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
+			//iGridDest, siteDest.iSite, siteDest.carrier.sName,
+			c.model,
+			iGridSrc, c.origin,
+			iGridDest, c.destination,
+			LidHandling.NoLid, //c.lidHandling,
+			iGridLid = 0,
+			iSiteLid = 0,
+			sCarrierLid = ""
+		)
+		
+		builder.mapCmdToLabwareInfo(cmd) = List(
+			(c.origin, c.model),
+			(c.destination, c.model)
+		)
+		
+		RqSuccess(Seq(cmd))
 	}
 	
 	private def movePlate(builder: EvowareScriptBuilder, c: transport.MovePlateToken): RqResult[Seq[L0C_Command]] = {
@@ -524,8 +531,8 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 			)
 			
 			builder.mapCmdToLabwareInfo(cmd) = List(
-				(siteSrc, c.plateSrc.id, labwareModel),
-				(siteDest, c.plateDest.id, labwareModel)
+				(siteSrc, labwareModel),
+				(siteDest, labwareModel)
 			)
 			
 			Seq(cmd)
