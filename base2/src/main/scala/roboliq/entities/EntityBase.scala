@@ -49,7 +49,7 @@ class EntityBase {
 	private def addEntity(e: Entity, name: String) {
 		names(e) = name
 		nameToEntity(name) = e
-		idToEntity(e.id) = e
+		idToEntity(e.key) = e
 	}
 	
 	def getEntity(key: String): Option[Entity] = {
@@ -136,7 +136,7 @@ class EntityBase {
 	}
 	
 	def makeInitialConditionsList(): List[Rel] = {
-		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.id))).toList.sortBy(_.toString) ++
+		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.label.getOrElse(null)))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
 			Rel(s"agent-has-device", List(names(pair._1), names(device)))
 		})).toList.sortBy(_.toString) ++

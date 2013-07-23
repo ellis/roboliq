@@ -166,6 +166,7 @@ class Protocol {
 	 * We want to use site models, but these are not declared in Evoware, so we'll need to extract them indirectly. 
 	 */
 	def loadEvoware(
+		agentIdent: String,
 		carrierData: roboliq.evoware.parser.EvowareCarrierData,
 		tableData: roboliq.evoware.parser.EvowareTableData
 	) {
@@ -177,7 +178,7 @@ class Protocol {
 		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
 		
 		val r1 = Agent(gid)
-		eb.addAgent(r1, "r1")
+		eb.addAgent(r1, agentIdent)
 
 		// Add labware on the table definition to the list of labware we're interested in
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
@@ -187,7 +188,7 @@ class Protocol {
 		val idToModel_m = new HashMap[String, LabwareModel]
 		for (mE <- labwareModelEs) {
 			if (mE.sName.contains("Plate") || mE.sName.contains("96")) {
-				val m = PlateModel(mE.sName, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+				val m = PlateModel(mE.sName, None, None, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
 				idToModel_m(mE.sName) = m
 				eb.addModel(m, f"m${idToModel_m.size}%03d")
 				// All models can be offsite
@@ -213,9 +214,10 @@ class Protocol {
 			for (site_i <- 0 until carrierE.nSites) {
 				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 				val siteId = (carrierE.id, site_i)
-				val site = Site(s"hotel_${carrierE.id}x${site_i+1}")
+				val site = Site(gid, Some(s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}"))
+				val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
 				siteIdToSite_m(siteId) = site
-				eb.addSite(site, site.id)
+				eb.addSite(site, siteIdent)
 			}
 		}
 		
@@ -226,9 +228,10 @@ class Protocol {
 			for (site_i <- 0 until carrierE.nSites) {
 				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 				val siteId = (carrierE.id, site_i)
-				val site = Site(carrierE.sName)
+				val site = Site(gid, Some(s"${agentIdent} device ${carrierE.sName} site ${site_i+1}"))
+				val siteIdent = s"${agentIdent}_device_${carrierE.id}x${site_i+1}"
 				siteIdToSite_m(siteId) = site
-				eb.addSite(site, s"device_${carrierE.id}x${site_i+1}")
+				eb.addSite(site, siteIdent)
 			}
 		}
 		
@@ -237,9 +240,10 @@ class Protocol {
 			for (site_i <- 0 until carrierE.nSites) {
 				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 				val siteId = (carrierE.id, site_i)
-				val site = Site(siteId.toString)
+				val site = Site(gid, Some(s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}"))
+				val siteIdent = f"${agentIdent}_bench_${grid_i}%03dx${site_i+1}"
 				siteIdToSite_m(siteId) = site
-				eb.addSite(site, f"bench_${grid_i}%03dx${site_i+1}")
+				eb.addSite(site, siteIdent)
 			}
 		}
 		
@@ -314,7 +318,7 @@ class Protocol {
 			val carrierData = tableData.configFile
 			
 			// Add device
-			val device = new Device { val id = carrierE.sName; val typeNames = List(typeName) }
+			val device = new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(typeName) }
 			eb.addDevice(r1, device, deviceName)
 	
 			// Add device sites

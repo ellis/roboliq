@@ -149,5 +149,5 @@ V;200
 --{ RPG }--
 Comment("do the right thing");
 UserPrompt("Please do the right thing, then press ENTER.",0,-1);
-UserPrompt("Please move labware `plate1` model `` from `` to ``",0,-1);
+UserPrompt("Please move labware `plate1` model `m002` from `offsite` to `r1_hotel_245x1`",0,-1);
 UserPrompt("Please move labware `plate1` model `` from `` to ``",0,-1);

@@ -19,8 +19,8 @@ object TestMain extends App {
 	val sealerSite = Site(gid)
 	val shakerSite = Site(gid)
 	val thermocyclerSite = Site(gid)
-	val m1 = PlateModel("Thermocycler Plate", 8, 12, LiquidVolume.ul(100))
-	val m2 = PlateModel("Deep Plate", 8, 12, LiquidVolume.ul(500))
+	val m1 = PlateModel("Thermocycler Plate", None, None, 8, 12, LiquidVolume.ul(100))
+	val m2 = PlateModel("Deep Plate", None, None, 8, 12, LiquidVolume.ul(500))
 	val shakerSpec1 = ShakerSpec(gid)
 	val thermocyclerSpec1 = ThermocyclerSpec(gid)
 	

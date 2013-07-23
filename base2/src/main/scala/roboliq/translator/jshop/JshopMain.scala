@@ -15,7 +15,7 @@ object JshopMain extends App {
 		tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/bsse-robot1/config/table-01.esc")
 	} {
 		protocol.loadConfig()
-		protocol.loadEvoware(carrierData, tableData)
+		protocol.loadEvoware("r1", carrierData, tableData)
 		protocol.loadJson("""
 {
 "plates": [
@@ -24,7 +24,7 @@ object JshopMain extends App {
 "protocol": [
 	{ "command": "log", "text": "do the right thing" },
 	{ "command": "prompt", "text": "Please do the right thing, then press ENTER." },
-	{ "command": "move", "labware": "plate1", "destination": "bench_017x1" }
+	{ "command": "move", "labware": "plate1", "destination": "r1_bench_017x1" }
 ]
 }""".asJson.asJsObject
 		)
@@ -35,10 +35,10 @@ object JshopMain extends App {
 		val taskOutput = """(!log r1 text0002)
 (!prompt r1 text0004)
 (!agent-activate user)
-(!transporter-run user userarm plate1 m002 offsite hotel_245x1 NIL)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 NIL)
 (!agent-deactivate user)
 (!agent-activate r1)
-(!transporter-run r1 r1_transporter1 plate1 m002 hotel_245x1 bench_017x1 narrow)
+(!transporter-run r1 r1_transporter1 plate1 m002 r1_hotel_245x1 r1_bench_017x1 narrow)
 """
 			
 		val token_l = JshopTranslator.translate(protocol, taskOutput)

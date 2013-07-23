@@ -11,6 +11,7 @@ Started 2013-07-22
 - [ ] evoware: log time of each command so that we get a database of how long commands require to execute.
 - [ ] domain: !evoware-transporter-run, !user-move-labware (but can't do this until we implement our own path-finding algorithm)
 - [ ] domain: get rid of site type, just using objects
+- [ ] domain: what's a good way to indicate which sites the userArm can access?
 
 ## Translating ground operators
 
