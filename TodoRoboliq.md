@@ -10,6 +10,7 @@ Started 2013-07-22
 - [ ] distinct planning methods: overall method is like HTN planner, with pre-conditions and tasks.  Labware positioning requires some path-finding algorithm.  Pipetting requires its own complex search routines.
 - [ ] evoware: log time of each command so that we get a database of how long commands require to execute.
 - [ ] domain: !evoware-transporter-run, !user-move-labware (but can't do this until we implement our own path-finding algorithm)
+- [ ] domain: get rid of site type, just using objects
 
 ## Translating ground operators
 

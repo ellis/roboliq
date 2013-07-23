@@ -39,6 +39,14 @@ package pipette {
 }
 
 package transport {
+	case class TransporterRunToken(
+		val device: roboliq.entities.Device,
+		val spec: String,
+		val model: String,
+		val origin: String,
+		val destination: String
+	)
+	// FIXME: Delete this?
 	case class MovePlateToken(
 		val deviceId_? : Option[String],
 		val plate: Plate,

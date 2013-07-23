@@ -45,7 +45,7 @@ case class Thermocycler(id: String) extends Device {
 	def typeNames = List("thermocycler")
 }
 
-case class ThermocyclerSpec(id: String) extends Entity{
+case class ThermocyclerSpec(id: String) extends Entity {
 	def typeNames = List("thermocyclerSpec")
 }
 

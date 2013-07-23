@@ -88,6 +88,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 			//case c: L1C_EvowareFacts => facts(builder, c)
 			//case c: EvowareSubroutineToken => subroutine(builder, c)
 			//case c: MixToken => mix(builder, c.items)
+			case c: transport.TransporterRunToken => transportLabware(builder, c)
 			case c: transport.MovePlateToken => movePlate(builder, c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
@@ -448,6 +449,35 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 		}
 	}
 	*/
+	
+	private def transportLabware(builder: EvowareScriptBuilder, c: transport.TransporterRunToken): RqResult[Seq[L0C_Command]] = {
+		/*for {
+			labwareModel <- config.carrier.mapNameToLabwareModel.get(c.model).asRs(s"invalid labware model name `${c.model}`")
+		} yield {
+			val cmd = L0C_Transfer_Rack(
+				c.device.internalId.asInstanceOf[Integer],
+				c.spec,
+				//c.sPlateModel,
+				//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
+				//iGridDest, siteDest.iSite, siteDest.carrier.sName,
+				labwareModel,
+				iGridSrc, siteSrc,
+				iGridDest, siteDest,
+				LidHandling.NoLid, //c.lidHandling,
+				iGridLid = 0,
+				iSiteLid = 0,
+				sCarrierLid = ""
+			)
+			
+			builder.mapCmdToLabwareInfo(cmd) = List(
+				(siteSrc, c.plateSrc.id, labwareModel),
+				(siteDest, c.plateDest.id, labwareModel)
+			)
+			
+			Seq(cmd)
+		}*/
+		RqError("Not implemented")
+	}
 	
 	private def movePlate(builder: EvowareScriptBuilder, c: transport.MovePlateToken): RqResult[Seq[L0C_Command]] = {
 		for {

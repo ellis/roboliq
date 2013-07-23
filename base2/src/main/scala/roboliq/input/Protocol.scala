@@ -22,6 +22,9 @@ class Protocol {
 	private def gid: String = java.util.UUID.randomUUID().toString()
 	private def nvar: Int = { var_i += 1; var_i }
 	
+	/**
+	 * Map of task variable identifier to an internal object -- for example, the name of a text variable to the actual text.
+	 */
 	val idToObject = new HashMap[String, Object]
 
 	/**

@@ -37,7 +37,7 @@ object JshopTranslator {
 						}
 						else {
 //(!transporter-run r1 r1_transporter1 plate1 m002 hotel_245x1 bench_017x1 narrow)
-							val plate = 
+							/*val plate = 
 							MovePlateToken(Some(deviceName), )
 		val deviceId_? : Option[String],
 		val plate: Plate,
