@@ -35,7 +35,13 @@ object JshopTranslator {
 					case "transporter-run" =>
 						val List(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) = l.toList.drop(2)
 						if (agentIdent == "user") {
-							PromptToken(s"Please move labware `${labwareIdent}` model `${modelIdent}` from `${originIdent}` to `${destinationIdent}`") :: Nil
+							val model = protocol.eb.getEntity(modelIdent).get
+							val modelLabel = model.label.getOrElse(model.key)
+							val origin = protocol.eb.getEntity(originIdent).get
+							val originLabel = origin.label.getOrElse(origin.key)
+							val destination = protocol.eb.getEntity(destinationIdent).get
+							val destinationLabel = destination.label.getOrElse(destination.key)
+							PromptToken(s"Please move labware `${labwareIdent}` model `${modelLabel}` from `${originLabel}` to `${destinationLabel}`") :: Nil
 						}
 						else {
 							val roma_i: Int = identToAgentObject(deviceIdent).asInstanceOf[Integer]

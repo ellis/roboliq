@@ -1,5 +1,9 @@
 Started 2013-07-22
 
+- [ ] protocol/domain: create TransporterSpec for Vector Class
+- [ ] Protocol: give labels to plate models
+- [ ] JshopTranslator: user move plate: insert Evoware labels instead of identifiers
+
 - [ ] JshopTranslator: translate operations per agent (i.e., system, user, evoware)
 - [ ] JshopTranslator: output system, evoware, and user instructions
 - [ ] jshop: link in Jshop2
@@ -12,7 +16,6 @@ Started 2013-07-22
 - [ ] domain: !evoware-transporter-run, !user-move-labware (but can't do this until we implement our own path-finding algorithm)
 - [ ] domain: get rid of site type, just using objects
 - [ ] domain: what's a good way to indicate which sites the userArm can access?
-- [ ] protocol/domain: create TransporterSpec for Vector Class
 
 ## Translating ground operators
 

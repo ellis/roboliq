@@ -38,8 +38,8 @@ class Protocol {
 	def loadConfig() {
 		import roboliq.entities._
 		
-		val user = Agent(gid)
-		val offsite = Site(gid)
+		val user = Agent(gid, Some("user"))
+		val offsite = Site(gid, Some("offsite"))
 		val shakerSpec1 = ShakerSpec(gid)
 		val thermocyclerSpec1 = ThermocyclerSpec(gid)
 		
@@ -195,7 +195,7 @@ class Protocol {
 		val idToModel_m = new HashMap[String, LabwareModel]
 		for (mE <- labwareModelEs) {
 			if (mE.sName.contains("Plate") || mE.sName.contains("96")) {
-				val m = PlateModel(mE.sName, None, None, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+				val m = PlateModel(mE.sName, Some(mE.sName), None, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
 				val ident = f"m${idToModel_m.size + 1}%03d"
 				idToModel_m(mE.sName) = m
 				eb.addModel(m, ident)

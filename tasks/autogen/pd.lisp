@@ -2,8 +2,8 @@
  ; initial conditions
  (
   (is-agent r1)
-  (is-agent user)
-  (is-labware offsite)
+  (is-agent user) ; user
+  (is-labware offsite) ; offsite
   (is-labware plate1)
   (is-labware r1_bench_001x1) ; r1 bench Wash Station Clean site 1
   (is-labware r1_bench_001x2) ; r1 bench Wash Station Clean site 2
@@ -89,18 +89,18 @@
   (is-labware r1_hotel_85x3) ; r1 hotel Hotel 5Pos DeepWell site 3
   (is-labware r1_hotel_85x4) ; r1 hotel Hotel 5Pos DeepWell site 4
   (is-labware r1_hotel_85x5) ; r1 hotel Hotel 5Pos DeepWell site 5
-  (is-model m001)
-  (is-model m002)
+  (is-model m001) ; D-BSSE 96 Well DWP
+  (is-model m002) ; D-BSSE 96 Well PCR Plate
   (is-model offsiteModel)
   (is-model sm1)
   (is-model sm2)
   (is-model sm3)
   (is-peeler peeler) ; RoboPeel
   (is-plate plate1)
-  (is-plateModel m001)
-  (is-plateModel m002)
+  (is-plateModel m001) ; D-BSSE 96 Well DWP
+  (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
   (is-sealer sealer) ; RoboSeal
-  (is-site offsite)
+  (is-site offsite) ; offsite
   (is-site r1_bench_001x1) ; r1 bench Wash Station Clean site 1
   (is-site r1_bench_001x2) ; r1 bench Wash Station Clean site 2
   (is-site r1_bench_001x3) ; r1 bench Wash Station Clean site 3
