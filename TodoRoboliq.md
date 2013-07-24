@@ -1,8 +1,8 @@
 Started 2013-07-22
 
 - [ ] protocol/domain: create TransporterSpec for Vector Class
-- [ ] Protocol: give labels to plate models
-- [ ] JshopTranslator: user move plate: insert Evoware labels instead of identifiers
+- [x] Protocol: give labels to plate models
+- [x] JshopTranslator: user move plate: insert Evoware labels instead of identifiers
 
 - [ ] JshopTranslator: translate operations per agent (i.e., system, user, evoware)
 - [ ] JshopTranslator: output system, evoware, and user instructions

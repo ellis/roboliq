@@ -65,10 +65,10 @@
  (:operator (!transporter-run ?a ?d ?p ?m ?s1 ?s2 ?vectorClass)
   ; preconditions
   (
-   (is-agent ?a)
-   (is-transporter ?d)
-   (is-plate ?p)
-   (is-site ?s2)
+;   (is-agent ?a)
+;   (is-transporter ?d)
+;   (is-plate ?p)
+;   (is-site ?s2)
 ;   ; looked-up types
 ;   (is-model ?m)
 ;   (is-site ?s1)
@@ -114,13 +114,14 @@
   (
    (location ?p ?s1)
    (model ?p ?m)
-   (transporter-can ?d ?s1 ?vectorClass)
-   (transporter-can ?d ?s2 ?vectorClass)
+   (is-transporterSpec ?spec)
+   (transporter-can ?d ?s1 ?spec)
+;   (transporter-can ?d ?s2 ?spec)
   )
   ; task list
   (
    (agent-activate ?a)
-   (!transporter-run ?a ?d ?p ?m ?s1 ?s2 ?vectorClass)
+   (!transporter-run ?a ?d ?p ?m ?s1 ?s2 ?spec)
   )
  )
 
@@ -138,8 +139,9 @@
    (agent-has-device ?a ?d)
    (is-transporter ?d)
    (location ?p ?s1)
-   (transporter-can ?d ?s1 ?vectorClass)
-   (transporter-can ?d ?s2 ?vectorClass)
+   (is-transporterSpec ?spec)
+   (transporter-can ?d ?s1 ?spec)
+   (transporter-can ?d ?s2 ?spec)
   )
   ; task list
   (

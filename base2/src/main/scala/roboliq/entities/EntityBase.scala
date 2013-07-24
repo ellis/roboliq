@@ -101,7 +101,7 @@ class EntityBase {
 	
 	def addDeviceSpec(d: Device, spec: Entity, name: String) {
 		assert(names.contains(d))
-		names(spec) = name
+		addEntity(spec, name)
 		deviceToSpecs_m.addBinding(d, spec)
 	}
 	

@@ -27,6 +27,10 @@ case class Transporter(key: String, label: Option[String] = None, description: O
 	def typeNames = List("transporter")
 }
 
+case class TransporterSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+	def typeNames = List("transporterSpec")
+}
+
 case class Pipetter(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
 	def typeNames = List("pipetter")
 }

@@ -18,6 +18,7 @@ class Protocol {
 	// HACK: defined here so that loadConfig() and loadEvoware() both have access
 	private val offsiteModel = SiteModel(gid)
 	private val userArm = Transporter(gid)
+	private val userArmSpec = TransporterSpec("userArmSpec")
 
 	private def gid: String = java.util.UUID.randomUUID().toString()
 	private def nvar: Int = { var_i += 1; var_i }
@@ -48,11 +49,12 @@ class Protocol {
 		eb.addModel(offsiteModel, "offsiteModel")
 		eb.addSite(offsite, "offsite")
 		eb.addDevice(user, userArm, "userArm")
+		eb.addDeviceSpec(userArm, userArmSpec, "userArmSpec")
 		
 		// userArm can transport from offsite
-		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "nil")))
+		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		// A few other user-specified sites where the user can put plates on the robot
-		eb.addRel(Rel("transporter-can", List("userArm", "hotel_245x1", "nil")))
+		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
 	}
 
 	def loadJson(jsobj: JsObject) {
@@ -312,6 +314,25 @@ class Protocol {
 			}
 		}
 		
+		// Create transporter specs
+		// Map vector class to transporter spec
+		val transporterSpec_m = new HashMap[String, TransporterSpec]()
+		
+		{
+			val vectorClass_l: List[String] = carrierData.mapCarrierToVectors.toList.flatMap(_._2).map(_.sClass).toSet.toList.sorted
+			var vector_i = 0
+			for (vectorClass <- vectorClass_l) {
+				val spec = TransporterSpec(gid, Some(s"${agentIdent} ${vectorClass}"))
+				val ident = s"${agentIdent}_transporterSpec${vector_i}"
+				identToAgentObject(ident) = vectorClass
+				transporterSpec_m(vectorClass) = spec
+				for (roma <- roma_m.values) {
+					vector_i += 1
+					eb.addDeviceSpec(roma, spec, ident)
+				}
+			}
+		}
+		
 		// Find which sites the transporters can access
 		for ((carrierE, vector_l) <- carrierData.mapCarrierToVectors) {
 			for (site_i <- 0 until carrierE.nSites) {
@@ -319,7 +340,8 @@ class Protocol {
 				siteIdToSite_m.get(siteId).foreach { site =>
 					for (vector <- vector_l) {
 						val transporter = roma_m(vector.iRoma)
-						eb.addRel(Rel("transporter-can", List(eb.names(transporter), eb.names(site), vector.sClass)))
+						val spec = transporterSpec_m(vector.sClass)
+						eb.addRel(Rel("transporter-can", List(eb.names(transporter), eb.names(site), eb.names(spec))))
 					}
 				}
 			}
