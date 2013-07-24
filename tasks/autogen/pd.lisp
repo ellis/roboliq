@@ -192,9 +192,9 @@
   (is-transporter r1_transporter1)
   (is-transporter r1_transporter2)
   (is-transporter userArm)
-  (is-transporterSpec userArmSpec)
   (is-transporterSpec r1_transporterSpec0) ; r1 Narrow
   (is-transporterSpec r1_transporterSpec2) ; r1 Wide
+  (is-transporterSpec userArmSpec)
   (agent-has-device r1 peeler)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
@@ -210,6 +210,7 @@
   (device-can-spec r1_transporter1 r1_transporterSpec2)
   (device-can-spec r1_transporter2 r1_transporterSpec0)
   (device-can-spec r1_transporter2 r1_transporterSpec2)
+  (device-can-spec userArm userArmSpec)
   (stackable offsiteModel m001)
   (stackable offsiteModel m002)
   (stackable sm1 m002)
@@ -425,9 +426,6 @@
  (
   (!log ?a0001 text0002)
   (!prompt ?a0003 text0004)
-  ;(agent-activate user)
-  ;(!transporter-run user userArm plate1 m002 offsite r1_hotel_245x1 nil)
-  ;(transporter-run user userArm plate1 r1_hotel_245x1)
   (move-labware plate1 r1_bench_017x1)
  )
 )

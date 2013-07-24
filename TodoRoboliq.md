@@ -1,6 +1,6 @@
 Started 2013-07-22
 
-- [ ] protocol/domain: create TransporterSpec for Vector Class
+- [x] protocol/domain: create TransporterSpec for Vector Class
 - [x] Protocol: give labels to plate models
 - [x] JshopTranslator: user move plate: insert Evoware labels instead of identifiers
 
