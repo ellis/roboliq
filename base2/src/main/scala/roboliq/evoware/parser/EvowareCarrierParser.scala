@@ -186,6 +186,6 @@ object EvowareCarrierParser {
 		val iRoma = l0(2).toInt - 1
 		val nSteps = l(3).toInt
 		val idCarrier = l(4).toInt
-		(Some(Vector(idCarrier, sClass, iRoma)), lsLine.drop(nSteps))
+		((if (nSteps > 2) Some(Vector(idCarrier, sClass, iRoma)) else None), lsLine.drop(nSteps))
 	}
 }

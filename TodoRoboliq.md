@@ -1,3 +1,12 @@
+Started 2013-07-24
+
+Trying to run pd.lisp on Evoware
+
+- [x] check out carrier.cfg on robot
+- [ ] the trough carrier to the left of the shaker (grid 9) should have 3 sites instead of 2
+- [x] use RoMa2 instead of RoMa1
+- [ ] EvowareCarrierParser: FIXME: currently, vectors are filtered out which have only two positions (starting and ending) -- but there could be valid vectors like that I think.  Might be able to improve the filter by seeing whether the lines are the same.  Problem is that "absolute" flat changes the X value by -250 on our machine.
+
 Started 2013-07-22
 
 - [x] protocol/domain: create TransporterSpec for Vector Class
@@ -42,7 +51,7 @@ Started 2013-07-13
 - [x] Test pipetting command
 
 - [ ] load all relations we can from Evoware
-    - [ ] add description field to Entity and use it to print comments in LISP planner file
+    - [x] add description field to Entity and use it to print comments in LISP planner file
     - [x] better name for device sites, such that they can't have spaces in them
     - [x] setup sealer device
         - [x] device site

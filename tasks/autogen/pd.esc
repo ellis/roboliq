@@ -151,4 +151,4 @@ V;200
 Comment("do the right thing");
 UserPrompt("Please do the right thing, then press ENTER.",0,-1);
 UserPrompt("Please move labware `plate1` model `D-BSSE 96 Well PCR Plate` from `offsite` to `r1 hotel Shelf 32Pos Microplate site 1`",0,-1);
-Transfer_Rack("11","17",1,0,1,0,0,"","D-BSSE 96 Well PCR Plate","Narrow","","","Shelf 32Pos Microplate","","MP 3Pos Cooled 1 PCR","1","(Not defined)","1");
+Transfer_Rack("11","17",1,0,1,1,0,"","D-BSSE 96 Well PCR Plate","Narrow","","","Shelf 32Pos Microplate","","MP 3Pos Cooled 1 PCR","1","(Not defined)","1");
