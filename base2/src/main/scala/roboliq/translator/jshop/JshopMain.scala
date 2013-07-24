@@ -35,10 +35,10 @@ object JshopMain extends App {
 		val taskOutput = """(!log r1 text0002)
 (!prompt r1 text0004)
 (!agent-activate user)
-(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 NIL)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
 (!agent-deactivate user)
 (!agent-activate r1)
-(!transporter-run r1 r1_transporter1 plate1 m002 r1_hotel_245x1 r1_bench_017x1 narrow)
+(!transporter-run r1 r1_transporter1 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
 """
 			
 		val token_l = JshopTranslator.translate(protocol, taskOutput)

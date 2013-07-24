@@ -206,7 +206,7 @@ class Protocol {
 				// The user arm can handle all models
 				eb.addDeviceModel(userArm, m)
 				//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
-				identToAgentObject(ident) = mE
+				identToAgentObject(ident.toLowerCase) = mE
 			}
 		}
 		
@@ -229,7 +229,7 @@ class Protocol {
 				val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
 				agentToIdentToInternalObject(agentIdent)
 				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent) = siteE
+				identToAgentObject(siteIdent.toLowerCase) = siteE
 				eb.addSite(site, siteIdent)
 			}
 		}
@@ -244,7 +244,7 @@ class Protocol {
 				val site = Site(gid, Some(s"${agentIdent} device ${carrierE.sName} site ${site_i+1}"))
 				val siteIdent = s"${agentIdent}_device_${carrierE.id}x${site_i+1}"
 				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent) = siteE
+				identToAgentObject(siteIdent.toLowerCase) = siteE
 				eb.addSite(site, siteIdent)
 			}
 		}
@@ -257,7 +257,7 @@ class Protocol {
 				val site = Site(gid, Some(s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}"))
 				val siteIdent = f"${agentIdent}_bench_${grid_i}%03dx${site_i+1}"
 				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent) = siteE
+				identToAgentObject(siteIdent.toLowerCase) = siteE
 				eb.addSite(site, siteIdent)
 			}
 		}
@@ -308,7 +308,7 @@ class Protocol {
 			for (roma_i <- roma_li) {
 				val ident = s"r1_transporter${roma_i + 1}"
 				val roma = Transporter(gid)
-				identToAgentObject(ident) = roma_i.asInstanceOf[Integer]
+				identToAgentObject(ident.toLowerCase) = roma_i.asInstanceOf[Integer]
 				roma_m(roma_i) = roma
 				eb.addDevice(agent, roma, ident)
 			}
@@ -324,7 +324,7 @@ class Protocol {
 			for (vectorClass <- vectorClass_l) {
 				val spec = TransporterSpec(gid, Some(s"${agentIdent} ${vectorClass}"))
 				val ident = s"${agentIdent}_transporterSpec${vector_i}"
-				identToAgentObject(ident) = vectorClass
+				identToAgentObject(ident.toLowerCase) = vectorClass
 				transporterSpec_m(vectorClass) = spec
 				for (roma <- roma_m.values) {
 					vector_i += 1

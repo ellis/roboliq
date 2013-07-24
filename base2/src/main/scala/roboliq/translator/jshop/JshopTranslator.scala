@@ -48,6 +48,7 @@ object JshopTranslator {
 							val model = identToAgentObject(modelIdent).asInstanceOf[roboliq.evoware.parser.LabwareModel]
 							val origin = identToAgentObject(originIdent).asInstanceOf[roboliq.evoware.parser.CarrierSite]
 							val destination = identToAgentObject(destinationIdent).asInstanceOf[roboliq.evoware.parser.CarrierSite]
+							val vectorClass = identToAgentObject(vectorIdent).toString
 //(!transporter-run r1 r1_transporter1 plate1 m002 hotel_245x1 bench_017x1 narrow)
 							/*val plate = 
 							MovePlateToken(Some(deviceName), )
@@ -57,7 +58,7 @@ object JshopTranslator {
 		val plateDest: PlateLocation*/
 							EvowareTransporterRunToken(
 								roma_i = roma_i,
-								vectorClass = vectorIdent,
+								vectorClass = vectorClass,
 								model = model,
 								origin = origin,
 								destination = destination
