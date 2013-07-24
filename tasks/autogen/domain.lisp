@@ -65,32 +65,32 @@
  (:operator (!transporter-run ?a ?d ?p ?m ?s1 ?s2 ?vectorClass)
   ; preconditions
   (
-;   (is-agent ?a)
-;   (is-transporter ?d)
-;   (is-plate ?p)
-;   (is-site ?s2)
-;   ; looked-up types
-;   (is-model ?m)
-;   (is-site ?s1)
-;   (is-model ?sm2)
-;   ; agent
-;   (agent-is-active ?a)
-;   (agent-has-device ?a ?d)
-;   ; device
-;   ;(device-can-model ?d ?m)
-;   (transporter-can ?d ?s1 ?vectorClass)
-;   (transporter-can ?d ?s2 ?vectorClass)
-;   ; site s1
-;   ;(not (site-is-closed ?s1))
-;   ; site s2
-;   (model ?s2 ?sm2)
-;   (stackable ?sm2 ?m)
-;   ;(not (site-is-closed ?s2))
-;   (not (location ?other ?s2)) ; nothing is already at s2
-;   ; plate
-;   (model ?p ?m)
-;   (location ?p ?s1)
-;   (not (location ?p ?s2))
+   (is-agent ?a)
+   (is-transporter ?d)
+   (is-plate ?p)
+   (is-site ?s2)
+   (is-model ?m)
+   (is-site ?s1)
+   (is-model ?sm2)
+   (is-transporterSpec ?vectorClass)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-device ?a ?d)
+   ; device
+   ;(device-can-model ?d ?m)
+   (transporter-can ?d ?s1 ?vectorClass)
+   (transporter-can ?d ?s2 ?vectorClass)
+   ; site s1
+   ;(not (site-is-closed ?s1))
+   ; site s2
+   (model ?s2 ?sm2)
+   (stackable ?sm2 ?m)
+   ;(not (site-is-closed ?s2))
+   (not (location ?other ?s2)) ; nothing is already at s2
+   ; plate
+   (model ?p ?m)
+   (location ?p ?s1)
+   (not (location ?p ?s2))
   )
   ; delete list
   (
@@ -116,7 +116,7 @@
    (model ?p ?m)
    (is-transporterSpec ?spec)
    (transporter-can ?d ?s1 ?spec)
-;   (transporter-can ?d ?s2 ?spec)
+   (transporter-can ?d ?s2 ?spec)
   )
   ; task list
   (
