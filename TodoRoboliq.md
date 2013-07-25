@@ -1,10 +1,23 @@
+Started 2013-07-25
+
+Current big steps:
+
+- [ ] Get pipetting command to work
+- [ ] Get pipeline working to compile a roboliq protocol on disk to an evoware script
+- [ ] Create server/clients to monitor and control protocol execution
+- [ ] Use simpler entities and a different method for querying state, one that's compatible with planning methods
+- [ ] Start using sqlite database for storing relevant information
+
+Details:
+- [ ] 
+
 Started 2013-07-24
 
 Trying to run pd.lisp on Evoware
 
 - [x] check out carrier.cfg on robot
-- [ ] the trough carrier to the left of the shaker (grid 9) should have 3 sites instead of 2
 - [x] use RoMa2 instead of RoMa1
+- [ ] the trough carrier to the left of the shaker (grid 9) should have 3 sites instead of 2
 - [ ] EvowareCarrierParser: FIXME: currently, vectors are filtered out which have only two positions (starting and ending) -- but there could be valid vectors like that I think.  Might be able to improve the filter by seeing whether the lines are the same.  Problem is that "absolute" flat changes the X value by -250 on our machine.
 
 Started 2013-07-22
