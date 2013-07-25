@@ -97,3 +97,33 @@ case class TubeModel(key: String, label: Option[String] = None, description: Opt
 case class Tube(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
 	def typeNames = List("labware", "tube")
 }
+
+case class Vessel(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+	def typeNames = List("vessel")
+}
+
+case class Tip(
+	key: String,
+	label: Option[String] = None,
+	description: Option[String] = None,
+	val index: Int,
+	val row: Int,
+	val col: Int,
+	val permanent_? : Option[TipModel]
+) extends Entity {
+	def typeNames = List("tip")
+}
+
+case class TipModel(
+	key: String,
+	label: Option[String] = None,
+	description: Option[String] = None,
+	val id: String,
+	val volume: LiquidVolume, 
+	val volumeMin: LiquidVolume,
+	val cleanIntensityToExtraVolume: Map[CleanIntensity.Value, LiquidVolume] = Map()
+) extends Entity {
+	def typeNames = List("tipModel")
+	val volumeWashExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(CleanIntensity.Thorough, LiquidVolume.empty)
+	val volumeDeconExtra: LiquidVolume = cleanIntensityToExtraVolume.getOrElse(CleanIntensity.Decontaminate, LiquidVolume.empty)
+}

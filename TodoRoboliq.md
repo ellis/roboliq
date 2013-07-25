@@ -7,6 +7,8 @@ Current big steps:
 - [ ] Create server/clients to monitor and control protocol execution
 - [ ] Use simpler entities and a different method for querying state, one that's compatible with planning methods
 - [ ] Start using sqlite database for storing relevant information
+- [ ] Change domain to have a more generic concept of labware which subsumes sites, tubes, and plates.
+- [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details:
 - [ ] 

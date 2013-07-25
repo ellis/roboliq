@@ -1,4 +1,4 @@
-package roboliq.pipette
+/*package roboliq.pipette
 
 import scalaz.Semigroup
 import scalaz.Monoid
@@ -80,3 +80,4 @@ object LiquidVolume {// extends Semigroup[LiquidVolume] {
 		def zero = empty
 	}
 }
+*/
