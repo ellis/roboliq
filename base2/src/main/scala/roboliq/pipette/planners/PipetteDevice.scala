@@ -45,12 +45,12 @@ abstract class PipetteDevice {
 					else {
 						val prev = group_r.head
 						val group_# = a :: group_r
-						// Can use up to three items to test equidistance-ness 
-						val check_l = group_#.take(3).reverse
+						// Can use up to three items to test equidistant-ness
+						val check_l = group_#.take(3).map(_.twvp).reverse
 						// Same tip model, pipette policy, and equidistant?
 						val b1 = (a.tipModel_? == prev.tipModel_?)
 						val b2 = (a.twvp.policy == prev.twvp.policy)
-						val b3 = TipWell.equidistant(check_l)
+						val b3 = TipWell.equidistant(check_l, state)
 						if (b1 && b2 && b3)
 							step(l.tail, group_#, acc_r)
 						else {

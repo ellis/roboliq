@@ -11,7 +11,7 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details:
-- [ ] 
+- [ ] adapt VesselState, VesselContents for new system
 
 Started 2013-07-24
 

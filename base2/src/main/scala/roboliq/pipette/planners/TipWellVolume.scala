@@ -1,8 +1,9 @@
 package roboliq.pipette.planners
 
-import roboliq.core._
-import roboliq.entities._
-import roboliq.pipette.PipettePolicy
+import roboliq.entities.LiquidVolume
+import roboliq.entities.Tip
+import roboliq.entities.Vessel
+import roboliq.entities.WorldState
 import roboliq.pipette.MixSpec
 
 
@@ -30,29 +31,35 @@ case class TipWell(
 
 object TipWell {
 	// Test all adjacent items for equidistance
-	def equidistant(items: Seq[HasTip with HasVessel]): Boolean = {
+	def equidistant(items: Seq[HasTip with HasVessel], state: WorldState): Boolean = {
 		val lVesselInfo = items.map(_.well).toList
 		val l = items zip lVesselInfo
-		equidistant2(l)
+		equidistant2(l, state)
 	}
 		
 	// Test all adjacent items for equidistance
-	def equidistant2(tws: Seq[(HasTip, Vessel)]): Boolean = tws match {
+	def equidistant2(tws: Seq[(HasTip, Vessel)], state: WorldState): Boolean = tws match {
 		case Seq() => true
 		case Seq(_) => true
 		case Seq(a, b, rest @ _*) =>
-			equidistant3(a, b) match {
+			equidistant3(a, b, state) match {
 				case false => false
-				case true => equidistant2(Seq(b) ++ rest)
+				case true => equidistant2(Seq(b) ++ rest, state)
 			}
 	}
 	
 	// All tip/well pairs are equidistant or all tips are going to the same well
 	// Assert that tips are spaced at equal distances to each other as the wells are to each other
-	def equidistant3(a: Tuple2[HasTip, Vessel], b: Tuple2[HasTip, Vessel]): Boolean = {
-		(b._1.tip.row - a._1.tip.row) == (b._2.row - a._2.row) &&
-		(b._1.tip.col - a._1.tip.col) == (b._2.col - a._2.col) &&
-		(b._2.plate == a._2.plate)
+	def equidistant3(a: Tuple2[HasTip, Vessel], b: Tuple2[HasTip, Vessel], state: WorldState): Boolean = {
+		(state.getWellPosition(a._2), state.getWellPosition(b._2)) match {
+			case (Some(posA), Some(posB)) =>
+				(b._1.tip.row - a._1.tip.row) == (posB.row - posA.row) &&
+				(b._1.tip.col - a._1.tip.col) == (posB.col - posA.col) &&
+				(posB.parent == posA.parent)
+			case _ =>
+				// REFACTOR: consider returning an error from this function instead
+				false
+		}
 	}
 }
 
