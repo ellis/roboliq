@@ -13,6 +13,28 @@ Current big steps:
 Details:
 - [ ] adapt VesselState, VesselContents for new system
 
+Substance, Liquids, WellContents, WellHistory:
+
+We can take the Substance class from before.  This represents the basic substances which
+may be used in protocols, either directly or in mixtures.
+
+The are a number of possible unknowns in a mixture.  We might, for example, know the volume of the diliuter,
+but not the amount of dilutee (e.g., someone puts some sugar in tee).  Or we may know the relative
+concentrations of various substances, but not how much of the mixture we have.
+
+In order to handle these cases, we probably need to trace the mixtures in various wells.
+That is, a mixture may be composed of volumes of other mixtures taken from specific wells,
+where the volume of each sub-mixture is subject to uncertainty.
+
+We probably don't want to get too smart here, though, insofar as time may change a mixture,
+and such changes shouldn't be propogated.
+
+And of course, each pipetting action has a degree of uncertainty.
+
+What about wells that get refilled, such as a trough for water, or the system water source.
+For those, we can use liquid level detection to estimate volume during a given run,
+but that information should not be preserved between non-sequential runs.
+
 Started 2013-07-24
 
 Trying to run pd.lisp on Evoware
