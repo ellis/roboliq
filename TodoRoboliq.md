@@ -26,8 +26,8 @@ In order to handle these cases, we probably need to trace the mixtures in variou
 That is, a mixture may be composed of volumes of other mixtures taken from specific wells,
 where the volume of each sub-mixture is subject to uncertainty.
 
-We probably don't want to get too smart here, though, insofar as time may change a mixture,
-and such changes shouldn't be propogated.
+We probably don't want to get too elaborate here, though, insofar as time may change a mixture,
+and such changes shouldn't generally be propagated.
 
 And of course, each pipetting action has a degree of uncertainty.
 

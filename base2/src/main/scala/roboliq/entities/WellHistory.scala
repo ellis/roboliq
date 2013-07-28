@@ -38,6 +38,17 @@ case class WellEvent_Dispense(
 	volume: LiquidVolume
 ) extends WellEvent
 
+trait Distribution
+
+case class Distribution_Unknown() extends Distribution
+case class Distribution_Normal(mean: SubstanceAmount, variance: SubstanceAmount) extends Distribution
+case class Distribution_Uniform(min: SubstanceAmount, max: SubstanceAmount) extends Distribution
+case class Distribution_Histogram() extends Distribution
+
+class Mixture(
+	contents: List[(Substance, Distribution)]
+)
+
 class WellHistory(
 	state0: WellState,
 	events: List[WellEvent]
