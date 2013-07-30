@@ -1,8 +1,8 @@
 package roboliq.entities
 
 import scala.collection.mutable.ArrayBuffer
-
 import scalaz.Semigroup
+import scalaz.Monoid
 
 
 /**
@@ -114,3 +114,43 @@ class CleanSpec(
 	val contamInside: Set[String],
 	val contamOutside: Set[String]
 )
+
+/**
+ * Represents the intensity of tip cleaning required by a given liquid.
+ * 
+ * @param enter intensity with which tip must have been washed prior to entering a liquid.
+ * @param within intensity with which tip must be washed between pipetteing operations performed in the same [[robolq.core.LiquidGroup]].
+ * @param exit intensity with which tip must be washed after entering a liquid. 
+ */
+case class TipCleanPolicy(
+	val enter: CleanIntensity.Value,
+	val exit: CleanIntensity.Value
+)
+/**
+ * Contains the standard TipCleanPolicy instantiations.
+ */
+object TipCleanPolicy {
+	val NN = new TipCleanPolicy(CleanIntensity.None, CleanIntensity.None)
+	val TN = new TipCleanPolicy(CleanIntensity.Thorough, CleanIntensity.None)
+	val TL = new TipCleanPolicy(CleanIntensity.Thorough, CleanIntensity.Light)
+	val TT = new TipCleanPolicy(CleanIntensity.Thorough, CleanIntensity.Thorough)
+	val DD = new TipCleanPolicy(CleanIntensity.Decontaminate, CleanIntensity.Decontaminate)
+	val ThoroughNone = TN
+	val Thorough = TT
+	val Decontaminate = DD
+	
+	/**
+	 * Return a new policy that takes the maximum sub-intensities of `a` and `b`.
+	 */
+	def max(a: TipCleanPolicy, b: TipCleanPolicy): TipCleanPolicy = {
+		new TipCleanPolicy(
+			CleanIntensity.max(a.enter, b.enter),
+			CleanIntensity.max(a.exit, b.exit)
+		)
+	}
+	
+	implicit object TipCleanPolicyMonoid extends Monoid[TipCleanPolicy] {
+		def append(a: TipCleanPolicy, b: => TipCleanPolicy) = max(a, b)
+		def zero = NN
+	}
+}

@@ -47,7 +47,7 @@ class WorldState(
 		tip_model_m.get(tip)
 	}
 	
-	def getWellPosition(well: Vessel): Option[WellPosition] = {
+	/*def getWellPosition(well: Vessel): Option[WellPosition] = {
 		well_position_m.get(well)
-	}
+	}*/
 }

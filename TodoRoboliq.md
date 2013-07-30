@@ -12,6 +12,7 @@ Current big steps:
 
 Details:
 - [ ] adapt VesselState, VesselContents for new system
+- [ ] function from MixtureDistribution + events => MixtureDistribution, or from MixtureEstimate
 
 Substance, Liquids, WellContents, WellHistory:
 
