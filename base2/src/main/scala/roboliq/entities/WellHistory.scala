@@ -50,39 +50,45 @@ case class Distribution_Normal(mean: Amount, variance: Amount) extends Distribut
 case class Distribution_Uniform(min: Amount, max: Amount) extends Distribution
 case class Distribution_Histogram(data: List[(Amount, BigDecimal)]) extends Distribution
 
-case class MixtureDistribution(
-	source: Either[Substance, List[MixtureDistribution]],
-	distribution: Distribution
+/**
+ * An aliquot is an amount of a mixture.
+ * A mixture tells us the ratios of the contained substances:
+ *  it is composed of aliquots of substances, where the absolute relative ratios are important rather than the absolute values. 
+ */
+
+case class Aliquot(
+	mixture: Mixture,
+	distrubtion: Distribution
 )
 
-object MixtureDistribution {
-	def empty = new MixtureDistribution(Right(Nil), Distribution_Singular(Amount_Zero()))
+object Aliquot {
+	def empty = new Aliquot(Mixture.empty, Distribution_Singular(Amount_Zero()))
+}
+
+case class Mixture(
+	source: Either[Substance, List[Aliquot]]
+)
+
+object Mixture {
+	def empty = new Mixture(Right(Nil))
 }
 
 /**
  * An estimate of amounts of substances in this mixture, as well as the total liquid volume of the mixture.
  */
-class Mixture(
+class AliquotFlat(
 	val content: Map[Substance, Amount],
 	val volume: LiquidVolume
 )
 
-object Mixture {
-	def empty = new Mixture(Map(), LiquidVolume.empty)
+object AliquotFlat {
+	def empty = new AliquotFlat(Map(), LiquidVolume.empty)
 }
 
 class WellHistory(
-	val content0: MixtureDistribution,
+	val aliquot0: Aliquot,
 	val events: List[WellEvent]
 )
-
-class WellState(
-	history: WellHistory,
-	content: MixtureDistribution,
-	estimate: Mixture
-) {
-
-}
 
 sealed trait Amount
 case class Amount_Zero() extends Amount

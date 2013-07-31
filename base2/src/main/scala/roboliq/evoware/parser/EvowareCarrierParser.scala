@@ -18,7 +18,7 @@ case class Carrier(
 /**
  * @param sites list of (carrier ID, site index) where this labware can be placed.
  */
-case class LabwareModel(
+case class EvowareLabwareModel(
 	val sName: String,
 	val nRows: Int,
 	val nCols: Int,
@@ -50,7 +50,7 @@ class EvowareCarrierData(
 	val models: List[EvowareModel],
 	val mapIdToCarrier: Map[Int, Carrier],
 	val mapNameToCarrier: Map[String, Carrier],
-	val mapNameToLabwareModel: Map[String, LabwareModel],
+	val mapNameToLabwareModel: Map[String, EvowareLabwareModel],
 	val mapCarrierToVectors: Map[Carrier, List[Vector]]
 )
 
@@ -61,7 +61,7 @@ object EvowareCarrierData {
 			models = models,
 			mapIdToCarrier = mapIdToCarrier,
 			mapNameToCarrier = models.collect({case o: Carrier => o.sName -> o}).toMap,
-			mapNameToLabwareModel = models.collect({case o: LabwareModel => o.sName -> o}).toMap,
+			mapNameToLabwareModel = models.collect({case o: EvowareLabwareModel => o.sName -> o}).toMap,
 			mapCarrierToVectors = models.collect({case o: Vector if mapIdToCarrier.contains(o.idCarrier) => mapIdToCarrier(o.idCarrier) -> o})
 				.groupBy(_._1)
 				.map(pair => pair._1 -> pair._2.map(_._2))
@@ -130,7 +130,7 @@ object EvowareCarrierParser {
 	/**
 	 * Parse a labware object; labware lines begin with "15"
 	 */
-	def parse15(l: List[String], lsLine: List[String]): Tuple2[Option[LabwareModel], List[String]] = {
+	def parse15(l: List[String], lsLine: List[String]): Tuple2[Option[EvowareLabwareModel], List[String]] = {
 		val sName = l.head
 		val ls2 = l(2).split("/")
 		val nCols = ls2(0).toInt
@@ -170,7 +170,7 @@ object EvowareCarrierParser {
 			}
 		})
 		
-		(Some(LabwareModel(sName, nRows, nCols, ul, sites)), lsLine.drop(10 + nCarriers))
+		(Some(EvowareLabwareModel(sName, nRows, nCols, ul, sites)), lsLine.drop(10 + nCarriers))
 	}
 	
 	/**

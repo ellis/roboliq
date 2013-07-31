@@ -9,7 +9,7 @@ abstract class L0C_Command {
 	 * List of sites which need to be assigned to particular labware in order
 	 * for this command to work in Evoware.
 	 */
-	def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] = Nil
+	def getSiteToLabwareModelList: List[Tuple2[CarrierSite, EvowareLabwareModel]] = Nil
 }
 
 case class L0C_Comment(
@@ -29,9 +29,9 @@ case class L0C_DetectLevel(
 	val iSite: Int,
 	val sPlateMask: String,
 	val site: CarrierSite,
-	val labwareModel: LabwareModel
+	val labwareModel: EvowareLabwareModel
 ) extends L0C_Command {
-	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] =
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, EvowareLabwareModel]] =
 		List(site -> labwareModel)
 
 	override def toString = {
@@ -123,9 +123,9 @@ case class L0C_Spirate(
 	val iSite: Int,
 	val sPlateMask: String,
 	val site: CarrierSite,
-	val labwareModel: LabwareModel
+	val labwareModel: EvowareLabwareModel
 ) extends L0C_Command {
-	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] =
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, EvowareLabwareModel]] =
 		List(site -> labwareModel)
 
 	override def toString = {
@@ -186,13 +186,13 @@ case class L0C_Transfer_Rack(
 	//sPlateModel: String,
 	//iGridSrc: Int, iSiteSrc: Int, sCarrierModelSrc: String,
 	//iGridDest: Int, iSiteDest: Int, sCarrierModelDest: String,
-	labwareModel: LabwareModel,
+	labwareModel: EvowareLabwareModel,
 	iGridSrc: Int, siteSrc: CarrierSite,
 	iGridDest: Int, siteDest: CarrierSite,
 	lidHandling: LidHandling.Value,
 	iGridLid: Int, iSiteLid: Int, sCarrierLid: String
 ) extends L0C_Command {
-	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, LabwareModel]] =
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, EvowareLabwareModel]] =
 		List(siteSrc -> labwareModel, siteDest -> labwareModel)
 	
 	override def toString = {

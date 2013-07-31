@@ -13,6 +13,8 @@ Current big steps:
 Details:
 - [ ] adapt VesselState, VesselContents for new system
 - [ ] function from MixtureDistribution + events => MixtureDistribution, or from MixtureEstimate
+- [x] TipWell.equidistant3: figure out where to calculate row/col from platemodel and well index
+- [ ] EvowareTranslator: let it translate one command at a time and produce multiple scripts
 
 Substance, Liquids, WellContents, WellHistory:
 

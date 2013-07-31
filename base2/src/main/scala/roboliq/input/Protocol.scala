@@ -12,6 +12,7 @@ import roboliq.utils.FileUtils
 
 class Protocol {
 	val eb = new EntityBase
+	val state0 = new WorldStateBuilder
 	private var tasks = new ArrayBuffer[Rel]
 	private var var_i = 0
 
@@ -55,6 +56,19 @@ class Protocol {
 		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		// A few other user-specified sites where the user can put plates on the robot
 		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
+		
+		val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
+		val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
+		
+		val tip1 = Tip("tip1", None, None, 0, 0, 0, Some(tipModel1000))
+		val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
+		val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
+		val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
+		
+		state0.tip_model_m(tip1) = tipModel1000
+		state0.tip_model_m(tip2) = tipModel1000
+		state0.tip_model_m(tip3) = tipModel1000
+		state0.tip_model_m(tip4) = tipModel1000
 	}
 
 	def loadJson(jsobj: JsObject) {
@@ -73,6 +87,15 @@ class Protocol {
 					val plate = new Plate(id)
 					eb.addLabware(plate, name)
 					eb.setModel(plate, model)
+					state0.labware_model_m(plate) = model
+					// Create plate wells
+					for (row <- 0 until model.rows; col <- 0 until model.cols) {
+						val index = row + col * model.rows
+						val ident = WellIdentParser.wellId(plate, model, row, col)
+						val well = new Well(gid, Some(ident))
+						state0.well_index_m(well) = index
+						state0.well_labware_m(well) = plate
+					}
 					m.get("location") match {
 						case Some(key) =>
 							val entity = eb.getEntity(key).get
@@ -94,6 +117,11 @@ class Protocol {
 					val tube = new Plate(id)
 					eb.addLabware(tube, name)
 					eb.setModel(tube, model)
+					state0.labware_model_m(tube) = model
+					// Create tube well
+					val well = new Well(gid, Some(s"$name()"))
+					state0.well_index_m(well) = 0
+					state0.well_labware_m(well) = tube
 				}
 			case _ =>
 		}
@@ -111,7 +139,7 @@ class Protocol {
 												val agent = f"?a$nvar%04d"
 												val textId = f"text$nvar%04d"
 												idToObject(textId) = text
-												println("idToObject:" + idToObject)
+												//println("idToObject:" + idToObject)
 												tasks += Rel("!log", List(agent, textId))
 											case _ =>
 										}
@@ -121,7 +149,7 @@ class Protocol {
 												val agent = f"?a$nvar%04d"
 												val textId = f"text$nvar%04d"
 												idToObject(textId) = text
-												println("idToObject:" + idToObject)
+												//println("idToObject:" + idToObject)
 												tasks += Rel("!prompt", List(agent, textId))
 											case _ =>
 										}
@@ -193,7 +221,7 @@ class Protocol {
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
 
 		// Create PlateModels
-		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.LabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
+		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
 		val idToModel_m = new HashMap[String, LabwareModel]
 		for (mE <- labwareModelEs) {
 			if (mE.sName.contains("Plate") || mE.sName.contains("96")) {

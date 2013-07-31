@@ -98,7 +98,7 @@ case class Tube(key: String, label: Option[String] = None, description: Option[S
 	def typeNames = List("labware", "tube")
 }
 
-case class Vessel(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+case class Well(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
 	def typeNames = List("vessel")
 }
 
@@ -110,15 +110,15 @@ case class Tip(
 	val row: Int,
 	val col: Int,
 	val permanent_? : Option[TipModel]
-) extends Entity {
+) extends Entity with Ordered[Tip]{
 	def typeNames = List("tip")
+	override def compare(that: Tip): Int = (index - that.index)
 }
 
 case class TipModel(
 	key: String,
 	label: Option[String] = None,
 	description: Option[String] = None,
-	val id: String,
 	val volume: LiquidVolume, 
 	val volumeMin: LiquidVolume,
 	val cleanIntensityToExtraVolume: Map[CleanIntensity.Value, LiquidVolume] = Map()

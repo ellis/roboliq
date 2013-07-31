@@ -16,7 +16,7 @@ class EvowareTableData(
 	val lExternalObject: List[ExternalObject],
 	val mapCarrierToGrid: Map[Carrier, Int],
 	val mapSiteToLabel: Map[CarrierSite, String],
-	val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel]
+	val mapSiteToLabwareModel: Map[CarrierSite, EvowareLabwareModel]
 ) {
 	/*def print() {
 		lHotelObject.foreach(println)
@@ -38,7 +38,7 @@ class EvowareTableData(
 	
 	def toStringWithLabware(
 		mapSiteToLabel2: Map[CarrierSite, String],
-		mapSiteToLabwareModel2: Map[CarrierSite, LabwareModel]
+		mapSiteToLabwareModel2: Map[CarrierSite, EvowareLabwareModel]
 	): String = {
 		val mapSiteToLabel3 = mapSiteToLabel ++ mapSiteToLabel2
 		val mapSiteToLabwareModel3 = mapSiteToLabwareModel ++ mapSiteToLabwareModel2
@@ -73,7 +73,7 @@ class EvowareTableData(
 	
 	private def toString_tableLabware(
 		mapSiteToLabel2: Map[CarrierSite, String],
-		mapSiteToLabwareModel2: Map[CarrierSite, LabwareModel]
+		mapSiteToLabwareModel2: Map[CarrierSite, EvowareLabwareModel]
 	): List[String] = {
 		def step(lCarrier_? : List[Option[Carrier]], acc: List[String]): List[String] = {
 			lCarrier_? match {
@@ -113,7 +113,7 @@ class EvowareTableData(
 	}
 	
 	private def toString_externalLabware(
-		mapSiteToLabwareModel2: Map[CarrierSite, LabwareModel]
+		mapSiteToLabwareModel2: Map[CarrierSite, EvowareLabwareModel]
 	): List[String] = {
 		// List of external carriers
 		val lCarrier0 = lExternalObject.map(_.carrier)

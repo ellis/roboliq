@@ -7,17 +7,18 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import grizzled.slf4j.Logger
 import roboliq.core._
+import roboliq.entities._
 import roboliq.evoware.parser._
-import roboliq.pipette.HasTip
-import roboliq.pipette.HasWell
-import roboliq.pipette.HasPolicy
-import roboliq.pipette.TipWellVolumePolicy
+//import roboliq.pipette.HasTip
+//import roboliq.pipette.HasWell
+//import roboliq.pipette.HasPolicy
+//import roboliq.pipette.TipWellVolumePolicy
 import roboliq.tokens._
 import ch.ethz.reactivesim.RsResult
-import roboliq.pipette.Tip
-import roboliq.pipette.Plate
-import roboliq.pipette.LiquidVolume
-import roboliq.pipette.Printer
+//import roboliq.pipette.Tip
+//import roboliq.pipette.Plate
+//import roboliq.pipette.LiquidVolume
+//import roboliq.pipette.Printer
 
 
 class EvowareTranslator(config: EvowareConfig) {
@@ -42,7 +43,7 @@ class EvowareTranslator(config: EvowareConfig) {
 					}
 			}
 		}
-		val mapSiteToLabwareModel: Map[CarrierSite, LabwareModel] =
+		val mapSiteToLabwareModel: Map[CarrierSite, EvowareLabwareModel] =
 			script.cmds.collect({case c: L0C_Command => c.getSiteToLabwareModelList}).flatten.toMap
 		
 		val sHeader = config.table.toStringWithLabware(mapSiteToLabel.toMap, mapSiteToLabwareModel)
@@ -93,7 +94,7 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 			//case c: EvowareSubroutineToken => subroutine(builder, c)
 			//case c: MixToken => mix(builder, c.items)
 			case c: transport.EvowareTransporterRunToken => transportLabware(builder, c)
-			case c: transport.MovePlateToken => movePlate(builder, c)
+			//case c: transport.MovePlateToken => movePlate(builder, c)
 			//case c: L1C_TipsGet => tipsGet(c)
 			//case c: L1C_TipsDrop => tipsDrop(c)
 			//case c: L1C_Timer => timer(c.args)
@@ -113,21 +114,21 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 	protected def encodeTips(list: Iterable[Tip]): Int =
 		list.foldLeft(0) { (sum, tip) => sum | (1 << tip.index) }
 
-	protected def encodeWells(holder: Plate, aiWells: Traversable[Int]): String = {
+	protected def encodeWells(model: PlateModel, aiWells: Traversable[Int]): String = {
 		//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
-		val nWellMaskChars = math.ceil(holder.nRows * holder.nCols / 7.0).asInstanceOf[Int]
+		val nWellMaskChars = math.ceil(model.rows * model.cols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		for (iWell <- aiWells) {
 			val iChar = iWell / 7;
 			val iWell1 = iWell % 7;
 			// FIXME: for debug only
 			if (iChar >= amWells.size)
-				println("ERROR: encodeWells: "+(holder, iWell, iChar, iWell1, aiWells))
+				println("ERROR: encodeWells: "+(model, iWell, iChar, iWell1, aiWells))
 			// ENDFIX
 			amWells(iChar) += 1 << iWell1
 		}
 		val sWellMask = amWells.map(encode).mkString
-		val sPlateMask = Array('0', hex(holder.nCols), '0', hex(holder.nRows)).mkString + sWellMask
+		val sPlateMask = Array('0', hex(model.cols), '0', hex(model.rows)).mkString + sWellMask
 		sPlateMask
 	}
 

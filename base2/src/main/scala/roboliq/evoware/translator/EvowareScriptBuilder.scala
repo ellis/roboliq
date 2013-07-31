@@ -7,7 +7,7 @@ import roboliq.evoware.parser._
 
 class EvowareScriptBuilder {
 	val cmds = new ArrayBuffer[Object]
-	val mapCmdToLabwareInfo = new HashMap[Object, List[(CarrierSite, LabwareModel)]]
+	val mapCmdToLabwareInfo = new HashMap[Object, List[(CarrierSite, EvowareLabwareModel)]]
 	val state = new EvowareState
 	
 	def toImmutable: EvowareScript =
@@ -16,6 +16,6 @@ class EvowareScriptBuilder {
 
 class EvowareScript(
 	val cmds: Seq[Object],
-	val mapCmdToLabwareInfo: Map[Object, List[(CarrierSite, LabwareModel)]],
+	val mapCmdToLabwareInfo: Map[Object, List[(CarrierSite, EvowareLabwareModel)]],
 	val state: EvowareState
 )

@@ -82,12 +82,12 @@ object EvowareTableParser {
 	}
 	
 	def parse14_getLabwareObjects(
-		mapNameToLabwareModel: Map[String, LabwareModel],
+		mapNameToLabwareModel: Map[String, EvowareLabwareModel],
 		//iGrid: Int,
 		lCarrier_? : List[Option[Carrier]],
 		lsLine: List[String],
-		acc: List[Tuple3[CarrierSite, String, LabwareModel]]
-	): Tuple2[List[Tuple3[CarrierSite, String, LabwareModel]], List[String]] = {
+		acc: List[Tuple3[CarrierSite, String, EvowareLabwareModel]]
+	): Tuple2[List[Tuple3[CarrierSite, String, EvowareLabwareModel]], List[String]] = {
 		lCarrier_? match {
 			case Nil => (acc, lsLine)
 			case None :: rest => parse14_getLabwareObjects(mapNameToLabwareModel, rest, lsLine.tail, acc)
@@ -155,9 +155,9 @@ object EvowareTableParser {
 	
 	def parse14_getExternalLabwares(
 		mapIdToCarrier: Map[Int, Carrier],
-		mapNameToLabwareModel: Map[String, LabwareModel],
+		mapNameToLabwareModel: Map[String, EvowareLabwareModel],
 		lsLine: List[String]
-	): Tuple2[Map[CarrierSite, LabwareModel], List[String]] = {
+	): Tuple2[Map[CarrierSite, EvowareLabwareModel], List[String]] = {
 		val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 		assert(n0 == 998)
 		val nObjects = l0(0).toInt

@@ -5,17 +5,22 @@ import roboliq.input.Protocol
 import roboliq.tokens.Token
 import roboliq.tokens.control.PromptToken
 import roboliq.tokens.transport.EvowareTransporterRunToken
+import roboliq.entities.WorldStateBuilder
 
-object JshopTranslator {
+object JshopTranslator2 {
 	
-	def translate(protocol: Protocol, s: String): List[Token] = {
-		val l = s.split("\r?\n")
-		l.toList.flatMap(line => translateLine(protocol, line))
+	def translate(protocol: Protocol, solution: String) {
+		val l = solution.split("\r?\n")
+		val state = protocol.state0.toImmutable.toMutable
+		val agentToTranslator_m = Map[String, ]
+		for (line <- l) {
+			translateLine(protocol, state, line)
+		}
 	}
 	
 	val RxOperator = """\(!(.*)\)""".r
 	
-	def translateLine(protocol: Protocol, line: String): List[Token] = {
+	def translateLine(protocol: Protocol, state: WorldStateBuilder, line: String) {
 		line match {
 			case RxOperator(s) =>
 				val l = s.split(' ')
