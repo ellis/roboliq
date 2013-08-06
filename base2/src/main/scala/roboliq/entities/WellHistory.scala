@@ -1,6 +1,9 @@
 package roboliq.entities
 
-trait WellEvent
+import scalaz._
+import Scalaz._
+
+sealed trait WellEvent
 
 case class WellEvent_TipDetectVolume(
 	time: java.util.Date,
@@ -40,16 +43,6 @@ case class WellEvent_Dispense(
 	volume: LiquidVolume
 ) extends WellEvent
 
-trait Distribution
-
-case class Distribution_Singular(value: Amount) extends Distribution
-case class Distribution_Min(min: Amount) extends Distribution
-case class Distribution_Max(max: Amount) extends Distribution
-case class Distribution_MinMax(min: Amount, max: Amount) extends Distribution
-case class Distribution_Normal(mean: Amount, variance: Amount) extends Distribution
-case class Distribution_Uniform(min: Amount, max: Amount) extends Distribution
-case class Distribution_Histogram(data: List[(Amount, BigDecimal)]) extends Distribution
-
 /**
  * An aliquot is an amount of a mixture.
  * A mixture tells us the ratios of the contained substances:
@@ -59,15 +52,38 @@ case class Distribution_Histogram(data: List[(Amount, BigDecimal)]) extends Dist
 case class Aliquot(
 	mixture: Mixture,
 	distrubtion: Distribution
-)
+) {
+	/*
+	def flatten: AliquotFlat =
+		AliquotFlat(
+		)
+	*/
+}
 
 object Aliquot {
-	def empty = new Aliquot(Mixture.empty, Distribution_Singular(Amount_Zero()))
+	def empty = new Aliquot(Mixture.empty, Distribution_Empty())
 }
 
 case class Mixture(
 	source: Either[Substance, List[Aliquot]]
-)
+) {
+	/*def flatten: Map[Substance, Amount] = {
+		source match {
+			case Left(substance) => substance :: Nil
+			case Right(aliquot_l) => aliquot_l.flatMap(_.mixture.flatten)
+		}
+	}*/
+	/** Tip cleaning policy when handling this substance with pipetter. */
+	val tipCleanPolicy: TipCleanPolicy = source match {
+		case Left(substance) => substance.tipCleanPolicy
+		case Right(aliquot_l) => aliquot_l.map(_.mixture.tipCleanPolicy).foldLeft(TipCleanPolicy.NN)(TipCleanPolicy.max(_, _))
+	}
+	/** List of contaminants in this substance */
+	val contaminants: Set[String] = source match {
+		case Left(substance) => substance.contaminants
+		case Right(aliquot_l) => aliquot_l.flatMap(_.mixture.contaminants).toSet
+	}
+}
 
 object Mixture {
 	def empty = new Mixture(Right(Nil))
@@ -79,7 +95,17 @@ object Mixture {
 class AliquotFlat(
 	val content: Map[Substance, Amount],
 	val volume: LiquidVolume
-)
+) {
+	val substance_l = content.keys.toList
+	
+	/** Tip cleaning policy when handling this substance with pipetter. */
+	val tipCleanPolicy: TipCleanPolicy = substance_l.map(_.tipCleanPolicy).concatenate
+	/** List of contaminants in this substance */
+	val contaminants: Set[String] = substance_l.map(_.contaminants).concatenate
+	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
+	val valuePerUnit_? : Option[BigDecimal] = substance_l.map(_.valuePerUnit_?).concatenate
+
+}
 
 object AliquotFlat {
 	def empty = new AliquotFlat(Map(), LiquidVolume.empty)
@@ -90,8 +116,11 @@ class WellHistory(
 	val events: List[WellEvent]
 )
 
-sealed trait Amount
-case class Amount_Zero() extends Amount
-case class Amount_Liter(n: BigDecimal) extends Amount
-case class Amount_Mol(n: BigDecimal) extends Amount
-case class Amount_Gram(n: BigDecimal) extends Amount
+object SubstanceUnits extends Enumeration {
+	val None, Liter, Mol, Gram = Value
+}
+
+case class Amount(units: SubstanceUnits.Value, amount: BigDecimal)
+object Amount {
+	def empty = Amount(SubstanceUnits.None, 0)
+}

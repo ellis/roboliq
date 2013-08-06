@@ -63,6 +63,10 @@ case class WorldState(
 		}
 	}
 	
+	def getWellTipCleanPolicy(well: Well): TipCleanPolicy = {
+		well_aliquot_m.get(well).map(_.mixture.tipCleanPolicy).getOrElse(TipCleanPolicy.NN)		
+	}
+	
 	def toMutable = {
 		val self = this
 		new WorldStateBuilder {
