@@ -1,4 +1,4 @@
-package roboliq.evoware.translator
+/*package roboliq.evoware.translator
 
 import java.io.File
 import java.io.BufferedWriter
@@ -616,3 +616,4 @@ private class EvowareTranslator2(config: EvowareConfig, token_l: List[Token]) {
 	}
 	*/
 }
+*/

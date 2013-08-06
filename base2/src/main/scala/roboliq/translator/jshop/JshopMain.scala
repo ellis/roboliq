@@ -5,7 +5,8 @@ import roboliq.core._
 import roboliq.input.Protocol
 import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareConfig
-import roboliq.evoware.translator.EvowareTranslator
+import roboliq.evoware.translator.EvowareClientScriptBuilder
+import roboliq.entities.ClientScriptBuilder
 
 object JshopMain extends App {
 	val protocol = new Protocol
@@ -40,20 +41,26 @@ object JshopMain extends App {
 (!agent-activate r1)
 (!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
 """
-			
-		val token_l = JshopTranslator.translate(protocol, taskOutput)
-		println("Tokens:")
-		token_l.foreach(println)
-		println()
 
 		val configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
 		val config = new EvowareConfig(carrierData, tableData, configData)
-		val translator = new EvowareTranslator(config)
-		translator.translate(token_l) match {
-			case RsError(e, w) => println(e); println(w)
-			case RsSuccess(script, w) =>
-				translator.saveWithHeader(script, s"tasks/autogen/$protocolName.esc")
-				script.cmds.foreach(println)
+		val scriptBuilder = new EvowareClientScriptBuilder(config, s"tasks/autogen/2$protocolName")
+		val agentToBuilder_m = Map[String, ClientScriptBuilder](
+			"user" -> scriptBuilder,
+			"r1" -> scriptBuilder
+		)
+		val result_? = JshopTranslator2.translate(protocol, taskOutput, agentToBuilder_m)
+		println("Warnings and Errors:")
+		result_?.getErrors.foreach(println)
+		result_?.getWarnings.foreach(println)
+		println()
+
+		if (result_?.isSuccess) {
+			for (script <- scriptBuilder.script_l) {
+				scriptBuilder.saveWithHeader(script, script.filename)
+			}
+			//translator.saveWithHeader(script, s"tasks/autogen/$protocolName.esc")
+			//script.cmds.foreach(println)
 		}
 	}
 }

@@ -3,7 +3,7 @@ package roboliq.entities
 import roboliq.core._
 
 
-trait HasTip { val tip: TipState }
+trait HasTip { val tip: Tip }
 trait HasWell { val well: Well }
 trait HasVolume { val volume: LiquidVolume }
 trait HasPolicy { val policy: PipettePolicy }
@@ -19,10 +19,10 @@ trait HasTipWellVolumePolicy extends HasTipWellVolume with HasPolicy
 //class TWVP(val tip: Tip, val well: Well, val volume: LiquidVolume, val policy: String) extends HasTip with HasWell with HasVolume with HasPolicy
 
 case class TipWell(
-	tip: TipState,
+	tip: Tip,
 	well: Well
 ) extends HasTipWell {
-	override def toString = s"TipWell(${tip.id},${well.key})"
+	override def toString = s"TipWell(${tip.key},${well.key})"
 }
 
 object TipWell {

@@ -6,8 +6,8 @@ import scala.collection.mutable.ArrayBuffer
 import roboliq.core._
 import ch.ethz.reactivesim.RsResult
 import ch.ethz.reactivesim.RsSuccess
-import roboliq.pipette.PipettePolicy
-import roboliq.pipette.PipettePosition
+import roboliq.entities.PipettePolicy
+import roboliq.entities.PipettePosition
 
 object EvowareLiquidClassParser {
 	val RxLiquidClass = """^  <LiquidClass name="([^"]+)".*""".r

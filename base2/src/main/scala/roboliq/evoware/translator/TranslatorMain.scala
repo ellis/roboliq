@@ -1,4 +1,4 @@
-package roboliq.evoware.translator
+/*package roboliq.evoware.translator
 
 import roboliq.tokens.control.CommentToken
 import ch.ethz.reactivesim.RsError
@@ -18,4 +18,4 @@ object TranslatorMain extends App {
 				script.cmds.foreach(println)
 		}
 	}
-}
+}*/

@@ -40,7 +40,7 @@ case class TipState(
 	
 	override def compare(that: TipState): Int = conf.compare(that.conf)
 	override def toString =
-		s"TipState(${conf.key}, ${model_?.map(_.id).getOrElse("")}, $content, $cleanDegree, $cleanDegreePending)"
+		s"TipState(${conf.key}, ${model_?.map(_.key).getOrElse("")}, $content, $cleanDegree, $cleanDegreePending)"
 }
 
 /** Factory object for [[roboliq.core.TipState]]. */

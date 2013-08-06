@@ -69,7 +69,7 @@ Started 2013-07-22
 ## Translating ground operators
 
 (agent, command)
-(agent, command, client)
+(agent, command, [(client, client-command)])
 
 Generally the first commands will need to be run by the user.  Those commands can go to a user client.
 For now, we'll let
@@ -84,6 +84,26 @@ Clients may need to switch whenever agents switch.
 
 How should client switching be handled?
 
+### Scenario: single client on Evoware machine
+
+Everything is contained in a set of evoware scripts and perhaps a text file.
+
+### Scenario: two clients, a primary Evoware machine and a secondary Evoware machine
+
+Sets of scripts are made for each evoware client.  When a script is supposed to be run
+on the secondary machine, the primary machine prompts the user to load that script and
+to press OK when that script is finished.  The secondary scripts end as soon as another
+agent is activated.
+
+### Scenario: server, user client, evoware client
+
+The lab worker starts a protocol from the user client.  The server
+checks that all clients are working.  The server sends the user the
+initial instructions.  Once the user's part is finished, the evoware
+client receives instructions to start a script.  Whenever a command
+is given to the user, the evoware script will run an external
+command, which waits for the evoware client to receive a message that it
+can continue (i.e., the user is done).
 
 Started 2013-07-13
 

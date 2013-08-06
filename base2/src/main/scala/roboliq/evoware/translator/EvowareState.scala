@@ -3,7 +3,7 @@ package roboliq.evoware.translator
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.Stack
-import roboliq.pipette.LiquidVolume
+import roboliq.entities.LiquidVolume
 
 
 class EvowareState {
