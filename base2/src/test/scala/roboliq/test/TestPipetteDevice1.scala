@@ -2,7 +2,7 @@ package roboliq.test
 
 import scala.collection.immutable.SortedSet
 import roboliq.core._
-import roboliq.pipette.PipetteDevice
+import roboliq.pipette.planners.PipetteDevice
 
 class TestPipetteDevice1 extends PipetteDevice {
 	/*

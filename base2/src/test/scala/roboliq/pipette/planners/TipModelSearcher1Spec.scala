@@ -1,4 +1,4 @@
-package roboliq.pipette
+package roboliq.pipette.planners
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter

@@ -6,7 +6,7 @@ import roboliq.core._
 import roboliq.entities._
 
 
-/*abstract*/ class PipetteDevice {
+abstract class PipetteDevice {
 	/** Can the device use the given number of tip per model simultaneously? */
 //	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 //	def assignTips(tipsFree: SortedSet[Tip], tipModel: TipModel, nTips: Int): Result[SortedSet[Tip]]

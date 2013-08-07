@@ -169,6 +169,8 @@ class Protocol {
 												tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
 											case _ =>
 										}
+									case Some(JsString("dispense")) =>
+										// e.g. dispense [liquid]
 									case Some(JsString("shake")) =>
 									case _ =>
 								}

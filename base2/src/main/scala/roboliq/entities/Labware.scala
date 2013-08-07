@@ -90,7 +90,12 @@ case class Plate(key: String, label: Option[String] = None, description: Option[
 	def typeNames = List("labware", "plate")
 }
 
-case class TubeModel(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+case class TubeModel(
+	key: String,
+	label: Option[String] = None,
+	description: Option[String] = None,
+	wellVolume: LiquidVolume
+) extends LabwareModel {
 	def typeNames = List("model", "tubeModel")
 }
 

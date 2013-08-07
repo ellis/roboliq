@@ -1,10 +1,8 @@
-package roboliq.commands.pipette.planner
+package roboliq.pipette.planners
 
 import scala.collection.immutable.SortedSet
-import spray.json.JsonParser
 import roboliq.core._
-import roboliq.pipette._
-import roboliq.commands.pipette.planner._
+import roboliq.entities._
 import org.scalatest.FunSpec
 
 
