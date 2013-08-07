@@ -11,10 +11,11 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details:
-- [ ] adapt VesselState, VesselContents for new system
-- [ ] function from MixtureDistribution + events => MixtureDistribution, or from MixtureEstimate
+- [x] adapt VesselState, VesselContents for new system
+- [ ] function from Aliquot + events => Aliquot
 - [x] TipWell.equidistant3: figure out where to calculate row/col from platemodel and well index
-- [ ] EvowareTranslator: let it translate one command at a time and produce multiple scripts
+- [x] EvowareTranslator: let it translate one command at a time and produce multiple scripts
+- [ ] Extend JshopMain, Protocol, EvowareClientScriptBuilder to handle a pipette command
 
 Substance, Liquids, WellContents, WellHistory:
 
