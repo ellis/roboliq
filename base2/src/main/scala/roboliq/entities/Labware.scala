@@ -1,9 +1,9 @@
 package roboliq.entities
 
-sealed trait Entity {
+trait Entity {
 	/** Key in database */
 	val key: String
-	/** Key in database */
+	/** A more human-friendly name */
 	val label: Option[String]
 	/** Description for the user */
 	val description: Option[String]

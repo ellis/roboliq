@@ -4,6 +4,7 @@ import spray.json._
 import spray.json.DefaultJsonProtocol._
 import roboliq.entities.Entity
 import scala.collection.mutable.ArrayBuffer
+import roboliq.core._
 import roboliq.entities._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
@@ -169,8 +170,23 @@ class Protocol {
 												tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
 											case _ =>
 										}
-									case Some(JsString("dispense")) =>
-										// e.g. dispense [liquid]
+									case Some(JsString("distribute")) =>
+										val source_? = fields.get("source") match {
+											case Some(JsString(sourceIdent)) =>
+												WellIdentParser.parse(sourceIdent) match {
+													case RsError(e, w) => None
+													case RsSuccess(l, _) =>
+														l
+												}
+												eb.getEntity(key) match {
+													case None => None
+													case Some()
+												}
+											case _ => None
+										}
+										// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
+										// The script builder later lookups up the spec in the protocol.
+										// That should return an object that accepts the two labware objects.
 									case Some(JsString("shake")) =>
 									case _ =>
 								}

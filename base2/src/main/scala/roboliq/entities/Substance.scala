@@ -17,8 +17,12 @@ object SubstanceKind extends Enumeration {
  * @param molarity_? moles per liter
  */
 case class Substance(
-	/** ID in database. */
-	val id: String,
+	/** Key in database */
+	val key: String,
+	/** A more human-friendly name */
+	val label: Option[String],
+	/** Description for the user */
+	val description: Option[String],
 	/** Kind of substance */
 	val kind: SubstanceKind.Value,
 	/** Tip cleaning policy when handling this substance with pipetter. */
@@ -35,39 +39,17 @@ case class Substance(
 	val celciusAndConcToViscosity: List[CelciusAndConcToViscosity],
 
 	val sequence_? : Option[String]
-) {
+) extends Entity {
 	val isEmpty: Boolean = (kind == SubstanceKind.None)
 	val isLiquid: Boolean = (kind == SubstanceKind.Liquid) 
 	def molarity: BigDecimal = molarity_?.getOrElse(0)
-	
-	/**
-	 * Whether multipipetting is allowed.
-	 * Multipipetting is when a tip aspirates once and distributes to that volume to
-	 * multiple destinations.  In our case with our Tecan robot, this wastes more
-	 * of the source liquid than single-pipetting, so for expensive liquids we
-	 * want to prevent multipipetting.
-	 */
-	def expensive: Boolean = costPerUnit_?.filter(_ > 0).isDefined
-	
-//	def literPerMoleAt(celcius: BigDecimal): Option[BigDecimal] = {
-//		celciusToLiterPerMole.find(_.celcius == celcius).map(_.literPerMole)
-//	}
 }
 
 object Substance {
-	/*
-	/** Convert [[roboliq.core.SubstanceBean]] to [[roboliq.core.Substance]]. */
-	def fromBean(bean: SubstanceBean): Result[Substance] = {
-		bean match {
-			case b: SubstanceDnaBean => SubstanceDna.fromBean(b)
-			case b: SubstanceLiquidBean => SubstanceLiquid.fromBean(b)
-			case b: SubstanceOtherBean => SubstanceOther.fromBean(b)
-		}
-	}
-	*/
-	
 	val Empty = Substance(
-		id = "<EMPTY>",
+		key = "<EMPTY>",
+		label = None,
+		description = None,
 		kind = SubstanceKind.None,
 		tipCleanPolicy = TipCleanPolicy.NN,
 		contaminants = Set(),
@@ -90,7 +72,9 @@ object Substance {
 		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
 	): Substance = {
 		Substance(
-			id = id,
+			key = id,
+			label = None,
+			description = None,
 			kind = SubstanceKind.Liquid,
 			tipCleanPolicy = tipCleanPolicy,
 			contaminants = contaminants,
@@ -113,7 +97,9 @@ object Substance {
 		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
 	): Substance = {
 		Substance(
-			id = id,
+			key = id,
+			label = None,
+			description = None,
 			kind = SubstanceKind.Dna,
 			tipCleanPolicy = TipCleanPolicy.DD,
 			contaminants = Set("DNA"),
@@ -137,7 +123,9 @@ object Substance {
 		celciusAndConcToViscosity: List[CelciusAndConcToViscosity] = Nil
 	): Substance = {
 		Substance(
-			id = id,
+			key = id,
+			label = None,
+			description = None,
 			kind = SubstanceKind.Other,
 			tipCleanPolicy = tipCleanPolicy,
 			contaminants = contaminants,
