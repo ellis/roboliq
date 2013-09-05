@@ -39,7 +39,7 @@ case class Substance(
 	val celciusAndConcToViscosity: List[CelciusAndConcToViscosity],
 
 	val sequence_? : Option[String]
-) extends Entity {
+) {
 	val isEmpty: Boolean = (kind == SubstanceKind.None)
 	val isLiquid: Boolean = (kind == SubstanceKind.Liquid) 
 	def molarity: BigDecimal = molarity_?.getOrElse(0)

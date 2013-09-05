@@ -4,6 +4,7 @@ import scala.collection._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.MultiMap
+import roboliq.core._
 
 class EntityBase {
 	val aliases = new HashMap[String, String]
@@ -165,5 +166,60 @@ class EntityBase {
 			l.map(r => "  " + r.toStringWithComment) ++
 			List(" )")
 		l2.mkString("\n")
+	}
+	
+	def lookupLiquidSource(sourceIdent: String): RsResult[List[(Labware, RowCol)]] = {
+		for {
+			parsed_l <- WellIdentParser.parse(sourceIdent)
+			ll_? : List[RsResult[List[(Labware, RowCol)]]] = parsed_l.map(pair => {
+				val (entityIdent, index_l) = pair
+				getEntity(entityIdent) match {
+					// For plates and tubes
+					case Some(labware: Labware) =>
+						for {
+							// Get labware model
+							model <- labwareToModel_m.get(labware).asRs(s"model not set for labware `$entityIdent`")
+							// Get number of rows and cols on labware
+							rowsCols <- model match {
+								case m: PlateModel => RsSuccess((m.rows, m.cols))
+								case m: TubeModel => RsSuccess((1, 1))
+								case _ => RsError(s"model of labware `$entityIdent` must be a plate or tube")
+							}
+						} yield {
+							// TODO: check that the RowCol values are valid for the labware model
+							val l: List[(Labware, RowCol)] = index_l.flatMap(_ match {
+								case WellIdentOne(rc) =>
+									List((labware, rc))
+								case WellIdentVertical(rc0, rc1) =>
+									(for {
+										col_i <- rc0.col to rc1.col
+										row_i <- (if (col_i == rc0.col) rc0.row else 0) to (if (col_i == rc1.col) rc1.row else rowsCols._1)
+									} yield {
+										(labware, RowCol(row_i, col_i))
+									}).toList
+								case WellIdentHorizontal(rc0, rc1) =>
+									(for {
+										row_i <- rc0.row to rc1.row
+										col_i <- (if (row_i == rc0.row) rc0.col else 0) to (if (row_i == rc1.row) rc1.col else rowsCols._2)
+									} yield {
+										(labware, RowCol(row_i, col_i))
+									}).toList
+								case WellIdentMatrix(rc0, rc1) =>
+									(for {
+										row_i <- rc0.row to rc1.row
+										col_i <- rc0.col to rc1.col
+									} yield {
+										(labware, RowCol(row_i, col_i))
+									}).toList
+							})
+							l
+						}
+
+					case None => RsError(s"entity not found: `$entityIdent`")
+					case _ => RsError(s"require a labware entity: `$entityIdent`")
+				}
+			})
+			ll /*: List[List[(Labware, RowCol)]]*/ <- RsResult.toResultOfList(ll_?)
+		} yield ll.flatten
 	}
 }

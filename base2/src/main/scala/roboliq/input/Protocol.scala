@@ -173,20 +173,37 @@ class Protocol {
 									case Some(JsString("distribute")) =>
 										val source_? = fields.get("source") match {
 											case Some(JsString(sourceIdent)) =>
-												WellIdentParser.parse(sourceIdent) match {
-													case RsError(e, w) => None
-													case RsSuccess(l, _) =>
-														l
-												}
-												eb.getEntity(key) match {
-													case None => None
-													case Some()
-												}
-											case _ => None
+												eb.lookupLiquidSource(sourceIdent)
+											case _ => RsError("must supply a `source` string")
+										}
+										val destination_? = fields.get("destination") match {
+											case Some(JsString(destinationIdent)) =>
+												eb.lookupLiquidSource(destinationIdent)
+											case _ => RsError("must supply a `destination` string")
+										}
+										val volume_? = fields.get("volume") match {
+											case Some(JsString(volume_s)) =>
+												LiquidVolumeParser.parse(volume_s)
+											case _ => RsError("must supply a `volume` string")
 										}
 										// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
 										// The script builder later lookups up the spec in the protocol.
 										// That should return an object that accepts the two labware objects.
+										for {
+											source <- source_?
+											destination <- destination_?
+											volume <- volume_?
+										} {
+											val agentIdent = f"?a$nvar%04d"
+											val deviceIdent = f"?d$nvar%04d"
+											val labware_l: List[Labware] = (source ++ destination).map(_._1).distinct
+											val labwareIdent_l: List[String] = labware_l.map(eb.names)
+											val n = labware_l.size
+											val spec = PipetteSpec(source, destination, volume)
+											val specIdent = f"?spec$nvar%04d"
+											idToObject(specIdent) = spec
+											tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+										}
 									case Some(JsString("shake")) =>
 									case _ =>
 								}
