@@ -255,9 +255,40 @@
   ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?s))
  )
 
- (:method (dispense1 ?a ?d ?spec ?p1)
+ (:operator (!pipetter-run ?a ?d ?spec)
   ; preconditions
   (
    (is-agent ?a)
-   (is-
+   (is-pipetter ?d)
+   (is-pipetterSpec ?spec)
+   (agent-has-device ?a ?d)
+  )
+  ; delete list
+  ()
+  ; add list
+  ()
+ )
+
+ (:method (dispense1 ?a ?d ?spec ?p1)
+  ; preconditions
+  (
+   ; parameter types
+   (is-agent ?a)
+   (is-pipetter ?d)
+   (is-pipetterSpec ?spec)
+   (is-plate ?p1)
+   ; 
+   (agent-has-device ?a ?d)
+   (model ?p1 ?m1) ; model of p1
+   (is-model ?m1)
+   (device-can-model ?d ?m1)
+   ; Find location for p1
+   (device-can-site ?d ?s1)
+   (is-site ?s1)
+   (model ?s1 ?sm1) ; site model
+   (stackable ?sm1 ?m1) ; site model accepts m1
+  )
+  ; task list
+  ((move-labware ?p1 ?s1) (agent-activate ?a) (!pipetter-run ?a ?d ?spec))
+ )
 ))
