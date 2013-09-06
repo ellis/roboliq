@@ -186,6 +186,7 @@ class Protocol {
 												LiquidVolumeParser.parse(volume_s)
 											case _ => RsError("must supply a `volume` string")
 										}
+										println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
 										// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
 										// The script builder later lookups up the spec in the protocol.
 										// That should return an object that accepts the two labware objects.

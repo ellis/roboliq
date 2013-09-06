@@ -254,4 +254,10 @@
   )
   ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?s))
  )
+
+ (:method (dispense1 ?a ?d ?spec ?p1)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-
 ))

@@ -382,5 +382,6 @@
  )
  ; tasks
  (
+  (distribute1 ?a0001 ?d0002 ?spec0003 plate1)
  )
 )
