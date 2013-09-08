@@ -1,4 +1,4 @@
-(defproblem pe domain
+(defproblem pe2 domain
  ; initial conditions
  (
   (is-agent r1)
@@ -379,17 +379,17 @@
   (transporter-can r1_transporter2 r1_hotel_245x9 r1_transporterSpec0)
   (transporter-can userArm offsite userArmSpec)
   (transporter-can userArm r1_hotel_245x1 userArmSpec)
- ; user initial conditions
+  ; added to try to get distribute1 to work
   (is-pipetter r1_pipetter1) 
   (agent-has-device r1 r1_pipetter1)
   (device-can-site r1_pipetter1 r1_bench_017x1)
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
-
  )
  ; tasks
  (
+  ;(!pipetter-run ?a0001 ?d0002 ?spec0003)
   (distribute1 ?a0001 ?d0002 spec0003 plate1)
  )
 )

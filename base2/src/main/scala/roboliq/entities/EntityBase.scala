@@ -160,11 +160,7 @@ class EntityBase {
 	
 	def makeInitialConditions(): String = {
 		val l: List[Rel] = makeInitialConditionsList
-		val l2: List[String] =
-			" ; initial conditions" ::
-			" (" ::
-			l.map(r => "  " + r.toStringWithComment) ++
-			List(" )")
+		val l2: List[String] = l.map(r => "  " + r.toStringWithComment)
 		l2.mkString("\n")
 	}
 	

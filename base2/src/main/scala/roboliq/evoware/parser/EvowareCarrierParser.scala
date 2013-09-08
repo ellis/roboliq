@@ -110,6 +110,7 @@ object EvowareCarrierParser {
 			case 13 => parse13(l, lsLine.tail)
 			case 15 => parse15(l, lsLine.tail)
 			case 17 => parse17(l, lsLine.tail)
+			// NOTE: There are also 23 and 25 lines, but I don't know what they're for.
 			case _ => (None, lsLine.tail)
 		}
 	}

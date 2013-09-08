@@ -201,7 +201,7 @@ class Protocol {
 											val labwareIdent_l: List[String] = labware_l.map(eb.names)
 											val n = labware_l.size
 											val spec = PipetteSpec(source, destination, volume)
-											val specIdent = f"?spec$nvar%04d"
+											val specIdent = f"spec$nvar%04d"
 											idToObject(specIdent) = spec
 											tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
 										}
@@ -443,10 +443,17 @@ class Protocol {
 		}
 	}
 	
-	def saveProblem(name: String) {
+	def saveProblem(name: String, userInitialConditions: String = "") {
 		FileUtils.printToFile(new java.io.File(s"tasks/autogen/$name.lisp")) { p =>
 			p.println(s"(defproblem $name domain")
+			p.println(" ; initial conditions")
+			p.println(" (")
 			p.println(eb.makeInitialConditions)
+			if (userInitialConditions != null && !userInitialConditions.isEmpty()) {
+				p.println(" ; user initial conditions")
+				p.println(userInitialConditions)
+			}
+			p.println(" )")
 			p.println(" ; tasks")
 			p.println(" (")
 			tasks.foreach(r => p.println("  "+r))

@@ -11,6 +11,14 @@ import roboliq.entities.ClientScriptBuilder
 object JshopMain extends App {
 	val protocol = new Protocol
 
+	val userInitialConditions = """  (is-pipetter r1_pipetter1) 
+  (agent-has-device r1 r1_pipetter1)
+  (device-can-site r1_pipetter1 r1_bench_017x1)
+  (device-can-site r1_pipetter1 r1_bench_017x2)
+  (device-can-site r1_pipetter1 r1_bench_017x3)
+  (device-can-site r1_pipetter1 r1_bench_017x4)
+"""
+	
 	val pd = (
 		"""{
 		"plates": [
@@ -41,7 +49,12 @@ object JshopMain extends App {
 			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate1(B01)", "volume": "50ul" }
 		]
 		}""",
-		"""(distribute1 ?a0001 ?d0002 ?spec0003 plate1)
+		"""(!agent-activate user)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
+(!pipetter-run r1 r1_pipetter1 spec0003)
 		"""
 	)
 	
@@ -54,7 +67,7 @@ object JshopMain extends App {
 			protocol.loadEvoware("r1", carrierData, tableData)
 			protocol.loadJson(input.asJson.asJsObject)
 			
-			protocol.saveProblem(protocolName)
+			protocol.saveProblem(protocolName, userInitialConditions)
 			
 			val taskOutput = output
 
