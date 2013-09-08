@@ -104,7 +104,7 @@ case class Tube(key: String, label: Option[String] = None, description: Option[S
 }
 
 case class Well(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
-	def typeNames = List("vessel")
+	def typeNames = List("well")
 }
 
 case class Tip(

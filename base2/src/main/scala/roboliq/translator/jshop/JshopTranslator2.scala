@@ -10,6 +10,7 @@ import roboliq.entities.WorldStateBuilder
 import roboliq.entities.ClientScriptBuilder
 import roboliq.evoware.translator.EvowareScriptBuilder
 import roboliq.entities.WorldState
+import roboliq.input.PipetteSpec
 
 object JshopTranslator2 {
 	
@@ -45,16 +46,39 @@ object JshopTranslator2 {
 			case RxOperator(s) =>
 				s.split(' ').toList match {
 					case operation :: agentIdent :: arg_l =>
-						val builder = agentToBuilder_m(agentIdent)
-						for {
-							state <- builder.addOperation(
-								protocol,
-								state0,
-								operation,
-								agentIdent,
-								arg_l
-							)
-						} yield state
+						if (operation == "!pipetter-run") {
+							val specIdent = arg_l(1)
+							protocol.idToObject(specIdent) match {
+								case spec: PipetteSpec => {
+									import roboliq.pipette.planners.TransferPlanner.{Item,BatchItem,Batch}
+									val (srcLabware, srcRowcol) = spec.source_l.head
+									state0.getWellPosition(well)
+									... NEXT: get well object from state0 for the given labware and rowcol ...
+									val item_l = spec.destination_l.map(pair => {
+										val (labware, rowcol) = pair
+										Item(src, dst, spec.volume)
+									})
+									use TransferPlanner to plan the steps
+									use the Batch list to create clean, aspirate, dispense commands
+									translate that list of commands for the given agent
+									RsSuccess(state0) // FIXME: return new state
+								}
+								case _ =>
+									RsError("invalid PipetteSpec")
+							}
+						}
+						else {
+							val builder = agentToBuilder_m(agentIdent)
+							for {
+								state <- builder.addOperation(
+									protocol,
+									state0,
+									operation,
+									agentIdent,
+									arg_l
+								)
+							} yield state
+						}
 					case _ =>
 						RsError(s"invalid operation line: $line")
 				}
