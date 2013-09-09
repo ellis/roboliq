@@ -2,14 +2,14 @@ package roboliq.entities
 
 import roboliq.core._
 import roboliq.input.Protocol
+import roboliq.commands.Command
 
 abstract class ClientScriptBuilder {
-	def addOperation(
+	def addCommand(
 		protocol: Protocol,
 		state0: WorldState,
-		operation: String,
 		agentIdent: String,
-		args: List[String]
+		command: Command
 	): RsResult[WorldState]
 	
 	/**
