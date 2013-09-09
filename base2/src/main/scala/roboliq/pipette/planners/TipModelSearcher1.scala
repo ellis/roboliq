@@ -10,7 +10,7 @@ import ch.ethz.reactivesim.RsError
 import ch.ethz.reactivesim.RsSuccess
 
 
-class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
+class TipModelSearcher1[Item, Mixture, TipModel <: AnyRef] {
 	case class MyState(l: List[(Item, TipModel)], rest: List[Item]) {
 		def +(action: MyAction): MyState = MyState((rest.head, action.tipModel) :: l, rest.tail)
 		override def toString = l.reverse.map(_._2).mkString(",")
@@ -31,7 +31,7 @@ class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 	
 	class MyProblem(
 		item_l: List[Item],
-		itemToLiquid_m: Map[Item, Liquid],
+		itemToMixture_m: Map[Item, Mixture],
 		itemToModels_m: Map[Item, Seq[TipModel]]
 	) extends ch03.Problem[MyState, MyAction, MyNode] {
 		val state0 = new MyState(Nil, item_l)
@@ -53,7 +53,7 @@ class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 		
 		def calcCost(l: List[(Item, TipModel)]): Int = {
 			val tipModel_l = new HashSet[TipModel]
-			val liquidToTipModels_m = new HashMap[Liquid, Set[TipModel]]
+			val mixtureToTipModels_m = new HashMap[Mixture, Set[TipModel]]
 			
 			var itemCost = 0
 			for ((item, tipModel) <- l) {
@@ -62,13 +62,13 @@ class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 				
 				tipModel_l += tipModel
 
-				val liquid = itemToLiquid_m(item)
-				liquidToTipModels_m(liquid) = liquidToTipModels_m.getOrElse(liquid, Set()) + tipModel
+				val mixture = itemToMixture_m(item)
+				mixtureToTipModels_m(mixture) = mixtureToTipModels_m.getOrElse(mixture, Set()) + tipModel
 			}
 			
 			val tipModelCost = tipModel_l.size - 1
-			val liquidCost = liquidToTipModels_m.map(_._2.size - 1).sum
-			itemCost + 10000 * tipModelCost + 1000000 * liquidCost
+			val mixtureCost = mixtureToTipModels_m.map(_._2.size - 1).sum
+			itemCost + 10000 * tipModelCost + 1000000 * mixtureCost
 		}
 		
 		def calcHeuristic(state: MyState): Int = {
@@ -121,15 +121,15 @@ class TipModelSearcher1[Item, Liquid, TipModel <: AnyRef] {
 
 	def searchGraph(
 		item_l: List[Item],
-		itemToLiquid_m: Map[Item, Liquid],
+		itemToMixture_m: Map[Item, Mixture],
 		itemToModels_m: Map[Item, Seq[TipModel]]
 	): RsResult[Map[Item, TipModel]] = {
-		val problem = new MyProblem(item_l, itemToLiquid_m, itemToModels_m)
+		val problem = new MyProblem(item_l, itemToMixture_m, itemToModels_m)
 		val search = new GraphSearch[MyState, MyAction, MyNode]
 		//val searchBFS = new BreadthFirstSearch[State, Action]
 		//val searchDFS = new DepthFirstSearch[State, Action]
 		val frontier = new MinFirstFrontier[MyState, Int, MyNode] {
-			def compareNodes(a: MyNode, b: MyNode): Int = b.heuristic - a.heuristic 
+			def compareNodes(a: MyNode, b: MyNode): Int = b.heuristic - a.heuristic
 		}
 		val debug = new DebugSpec(printFrontier = false, printExpanded = true)
 		println("A*:")

@@ -21,6 +21,7 @@ case class WorldState(
 	//properties: Map[WorldProperty.Value, Map[List[Object], Object]],
 	tip_model_m: Map[Tip, TipModel],
 	labware_model_m: Map[Labware, LabwareModel],
+	labwareRowCol_well_m: Map[(Labware, RowCol), Well],
 	well_labware_m: Map[Well, Labware],
 	well_index_m: Map[Well, Int],
 	well_isSource_l: Set[Well],
@@ -48,6 +49,10 @@ case class WorldState(
 	
 	def getTipModel(tip: Tip): Option[TipModel] = {
 		tip_model_m.get(tip)
+	}
+	
+	def getWell(key: (Labware, RowCol)): RsResult[Well] = {
+		labwareRowCol_well_m.get(key).asRs(s"well not found for ${key._1.key}(${key._2})")
 	}
 	
 	def getWellPosition(well: Well): Option[WellPosition] = {
@@ -85,16 +90,28 @@ case class WorldState(
 class WorldStateBuilder {
 	val tip_model_m = new HashMap[Tip, TipModel]
 	val labware_model_m = new HashMap[Labware, LabwareModel]
+	val labwareRowCol_well_m = new HashMap[(Labware, RowCol), Well]
 	val well_labware_m = new HashMap[Well, Labware]
 	val well_index_m = new HashMap[Well, Int]
 	val well_isSource_l = new HashSet[Well]
 	val well_history_m = new HashMap[Well, WellHistory]
 	val well_aliquot_m = new HashMap[Well, Aliquot]
+
+	def addWell(well: Well, labware: Labware, rowcol: RowCol, index: Int) {
+		labwareRowCol_well_m((labware, rowcol)) = well
+		well_labware_m(well) = labware
+		well_index_m(well) = index
+	}
 	
+	def getWell(key: (Labware, RowCol)): RsResult[Well] = {
+		labwareRowCol_well_m.get(key).asRs(s"well not found for ${key._1.key}(${key._2})")
+	}
+
 	def toImmutable = {
 		WorldState(
 			tip_model_m.toMap,
 			labware_model_m.toMap,
+			labwareRowCol_well_m.toMap,
 			well_labware_m.toMap,
 			well_index_m.toMap,
 			well_isSource_l.toSet,

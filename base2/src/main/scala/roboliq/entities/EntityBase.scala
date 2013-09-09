@@ -38,6 +38,14 @@ class EntityBase {
 	 */
 	val labwareToLocation_m = new HashMap[Labware, Entity]
 	/**
+	 * Pipetter to tips
+	 */
+	val pipetterToTips_m = new HashMap[Pipetter, List[Tip]]
+	/**
+	 * Tip to tip models
+	 */
+	val tipToTipModels_m = new HashMap[Tip, List[TipModel]]
+	/**
 	 * List of custom Relations
 	 */
 	val rel_l = new ArrayBuffer[Rel]

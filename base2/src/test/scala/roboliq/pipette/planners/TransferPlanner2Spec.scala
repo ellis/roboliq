@@ -9,7 +9,7 @@ import org.scalatest.FunSpec
 class TransferPlanner2Spec extends FunSpec {
 	describe("TransferPlanner") {
 		describe("BSSE configuration") {
-			import TransferPlanner2.{Item,BatchItem,Batch}
+			import TransferPlanner.{Item,BatchItem,Batch}
 			/*
 			implicit val p = makeProcessorBsse(
 				Config01.database1Json,

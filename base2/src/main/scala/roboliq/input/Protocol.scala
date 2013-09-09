@@ -25,6 +25,7 @@ class Protocol {
 	private def gid: String = java.util.UUID.randomUUID().toString()
 	private def nvar: Int = { var_i += 1; var_i }
 	
+	val nameToSubstance_m = new HashMap[String, Substance]
 	/**
 	 * Map of task variable identifier to an internal object -- for example, the name of a text variable to the actual text.
 	 */
@@ -57,22 +58,31 @@ class Protocol {
 		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		// A few other user-specified sites where the user can put plates on the robot
 		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
-		
-		val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
-		val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
-		
-		val tip1 = Tip("tip1", None, None, 0, 0, 0, Some(tipModel1000))
-		val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
-		val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
-		val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
-		
-		state0.tip_model_m(tip1) = tipModel1000
-		state0.tip_model_m(tip2) = tipModel1000
-		state0.tip_model_m(tip3) = tipModel1000
-		state0.tip_model_m(tip4) = tipModel1000
 	}
 
 	def loadJson(jsobj: JsObject) {
+		jsobj.fields.get("substances") match {
+			case Some(js) =>
+				val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
+				for (m <- inputs) {
+					val key = m.getOrElse("id", gid)
+					val name = m.getOrElse("name", key)
+					val kind = m("kind") match {
+						case "Liquid" => SubstanceKind.Liquid
+					}
+					val tipCleanPolicy = m.getOrElse("tipCleanPolicy", "Thorough") match {
+						case "None" => TipCleanPolicy.NN
+						case "ThoroughNone" => TipCleanPolicy.TN
+						case "ThoroughLight" => TipCleanPolicy.TL
+						case "Thorough" => TipCleanPolicy.TT
+						case "Decontaminate" => TipCleanPolicy.DD
+					}
+					val substance = Substance(key, Some(name), None, kind, tipCleanPolicy, Set(), None, None, None, None, Nil, None)
+					nameToSubstance_m(name) = substance
+				}
+			case _ =>
+		}
+		
 		jsobj.fields.get("plates") match {
 			case Some(js) =>
 				val plateInputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
@@ -94,8 +104,7 @@ class Protocol {
 						val index = row + col * model.rows
 						val ident = WellIdentParser.wellId(plate, model, row, col)
 						val well = new Well(gid, Some(ident))
-						state0.well_index_m(well) = index
-						state0.well_labware_m(well) = plate
+						state0.addWell(well, plate, RowCol(row, col), index)
 					}
 					m.get("location") match {
 						case Some(key) =>
@@ -121,8 +130,26 @@ class Protocol {
 					state0.labware_model_m(tube) = model
 					// Create tube well
 					val well = new Well(gid, Some(s"$name()"))
-					state0.well_index_m(well) = 0
-					state0.well_labware_m(well) = tube
+					state0.addWell(well, tube, RowCol(0, 0), 0)
+				}
+			case _ =>
+		}
+		
+		jsobj.fields.get("wellContents") match {
+			case Some(js) =>
+				val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
+				for (m <- inputs) {
+					val wellIdent = m("name")
+					val contents_s = m("contents")
+					for {
+						aliquot <- AliquotParser.parseAliquot(contents_s, nameToSubstance_m.toMap)
+						l <- eb.lookupLiquidSource(wellIdent)
+						well_l <- RsResult.toResultOfList(l.map(state0.getWell))
+					} {
+						for (well <- well_l) {
+							state0.well_aliquot_m(well) = aliquot
+						}
+					}
 				}
 			case _ =>
 		}
@@ -242,17 +269,40 @@ class Protocol {
 	) {
 		import roboliq.entities._
 		
-		// FIXME: This really doesn't belong here at all!
-		val labwareNamesOfInterest_l = new HashSet[String]
-		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
-		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
-		
 		val agent = Agent(gid)
 		eb.addAgent(agent, agentIdent)
 		
 		val identToAgentObject = new HashMap[String, Object]
 		agentToIdentToInternalObject(agentIdent) = identToAgentObject
 
+		// FIXME: This doesn't belong here at all!
+		val labwareNamesOfInterest_l = new HashSet[String]
+		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
+		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
+		val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
+		val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
+		
+		val tip1 = Tip("tip1", None, None, 0, 0, 0, Some(tipModel1000))
+		val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
+		val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
+		val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
+		
+		// Permanent tips at BSSE
+		state0.tip_model_m(tip1) = tipModel1000
+		state0.tip_model_m(tip2) = tipModel1000
+		state0.tip_model_m(tip3) = tipModel1000
+		state0.tip_model_m(tip4) = tipModel1000
+
+		val pipetterIdent = agentIdent+"_pipetter1"
+		val pipetter = new Pipetter(gid, Some(agentIdent+" LiHa"))
+		eb.addDevice(agent, pipetter, pipetterIdent)
+		eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4)
+		eb.tipToTipModels_m(tip1) = List(tipModel1000)
+		eb.tipToTipModels_m(tip2) = List(tipModel1000)
+		eb.tipToTipModels_m(tip3) = List(tipModel1000)
+		eb.tipToTipModels_m(tip4) = List(tipModel1000)
+		// ENDFIX
+		
 		// Add labware on the table definition to the list of labware we're interested in
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
 

@@ -11,9 +11,7 @@ import roboliq.entities.ClientScriptBuilder
 object JshopMain extends App {
 	val protocol = new Protocol
 
-	val userInitialConditions = """  (is-pipetter r1_pipetter1) 
-  (agent-has-device r1 r1_pipetter1)
-  (device-can-site r1_pipetter1 r1_bench_017x1)
+	val userInitialConditions = """  (device-can-site r1_pipetter1 r1_bench_017x1)
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
@@ -42,8 +40,14 @@ object JshopMain extends App {
 	
 	val pe = (
 		"""{
+		"substances": [
+			{ "name": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" }
+		],
 		"plates": [
 			{ "name": "plate1", "model": "Thermocycler Plate", "location": "offsite"}
+		],
+		"wellContents": [
+			{ "name": "plate1(A01)", "contents": "water@100ul" }
 		],
 		"protocol": [
 			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate1(B01)", "volume": "50ul" }

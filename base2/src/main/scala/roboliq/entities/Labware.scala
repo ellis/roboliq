@@ -1,5 +1,7 @@
 package roboliq.entities
 
+import roboliq.core._
+
 trait Entity {
 	/** Key in database */
 	val key: String
@@ -84,6 +86,16 @@ case class PlateModel(
 	wellVolume: LiquidVolume
 ) extends LabwareModel {
 	def typeNames = List("model", "plateModel")
+	
+	def isValidRowCol(row: Int, col: Int): Boolean =
+		(row < 0 || row >= rows || col < 0 || col >= cols)
+	
+	def rowColToIndex(row: Int, col: Int): RsResult[Int] = {
+		if (isValidRowCol(row, col))
+			RsSuccess(col * rows + row)
+		else
+			RsError("invalid row/col")
+	}
 }
 
 case class Plate(key: String, label: Option[String] = None, description: Option[String] = None) extends Labware {

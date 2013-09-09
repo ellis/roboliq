@@ -11,7 +11,7 @@ import roboliq.entities._
 //	def supportTipModelCounts(tipModelCounts: Map[TipModel, Int]): Result[Boolean]
 //	def assignTips(tipsFree: SortedSet[Tip], tipModel: TipModel, nTips: Int): Result[SortedSet[Tip]]
 //	def areTipsDisposable: Boolean
-	def getDispenseAllowableTipModels(tipModel_l: List[TipModel], liquid: Liquid, volume: LiquidVolume): List[TipModel] = {
+	def getDispenseAllowableTipModels(tipModel_l: List[TipModel], mixture: Mixture, volume: LiquidVolume): List[TipModel] = {
 		tipModel_l.filter(tipModel => {
 			volume >= tipModel.volumeMin && volume <= tipModel.volume
 		})

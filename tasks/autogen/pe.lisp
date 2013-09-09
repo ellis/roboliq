@@ -96,6 +96,7 @@
   (is-model sm2)
   (is-model sm3)
   (is-peeler peeler) ; RoboPeel
+  (is-pipetter r1_pipetter1) ; r1 LiHa
   (is-plate plate1)
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
@@ -196,6 +197,7 @@
   (is-transporterSpec r1_transporterSpec2) ; r1 Wide
   (is-transporterSpec userArmSpec)
   (agent-has-device r1 peeler)
+  (agent-has-device r1 r1_pipetter1)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
   (agent-has-device r1 sealer)
@@ -380,8 +382,6 @@
   (transporter-can userArm offsite userArmSpec)
   (transporter-can userArm r1_hotel_245x1 userArmSpec)
  ; user initial conditions
-  (is-pipetter r1_pipetter1) 
-  (agent-has-device r1 r1_pipetter1)
   (device-can-site r1_pipetter1 r1_bench_017x1)
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
