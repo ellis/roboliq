@@ -17,6 +17,20 @@ case class EvowareScript2(
 	cmd_l: List[Object]
 )
 
+private case class TranslationItem(
+	token: L0C_Command,
+	siteToModel_l: List[(CarrierSite, EvowareLabwareModel)]
+)
+
+private case class TranslationResult(
+	item_l: List[TranslationItem],
+	state1: WorldState
+)
+
+private object TranslationResult {
+	def empty(state1: WorldState) = TranslationResult(Nil, state1)
+}
+
 class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extends ClientScriptBuilder {
 	private val logger = Logger[this.type]
 
@@ -94,10 +108,21 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				cmds += cmd
 				// TODO: change state of labware so it's now in the new given location
 				RqSuccess(state0)
-			case PipetterAspirate(item_l) =>
-				L0C_Spirate(
-					"Aspirate"
-				)
+			case cmd: PipetterAspirate =>
+				for {
+					result <- aspirate(
+						protocol,
+						state0,
+						identToAgentObject_m,
+						cmd
+					)
+				} yield {
+					for (item <- result.item_l) {
+						item.siteToModel_l
+					}
+					cmds ++= result.item_l.map(_.token)
+					result.state1
+				}
 			case _ =>
 				RsError(s"unknown command `$command`")
 		}
@@ -185,8 +210,8 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		command: PipetterAspirate
-	): RqResult[List[L0C_Command]] = {
-		if (command.item_l.isEmpty) return RsSuccess(Nil)
+	): RqResult[TranslationResult] = {
+		if (command.item_l.isEmpty) return RsSuccess(TranslationResult.empty(state0))
 		
 		/*for (item <- cmd.item_l) {
 			val state = item.well.vesselState
@@ -217,10 +242,10 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			// List of items and their well indexes
 			item_l = tuple_l.map(tuple => tuple._1 -> tuple._2.index)
 			// Check item validity and get liquid class
-			sLiquidClass <- checkTipWellPolicyItems(protocol, state0, command, command.item_l)
+			sLiquidClass <- checkTipWellPolicyItems(protocol, state0, command, tuple_l.map(tuple => tuple._1 -> tuple._2))
 			// Translate items into evoware commands
-			command_l <- spirateChecked(protocol, state0, identToAgentObject_m, siteE, plateModelE, item_l, "Aspirate", sLiquidClass)
-		} yield command_l
+			result <- spirateChecked(protocol, state0, identToAgentObject_m, siteE, plateModelE, item_l, "Aspirate", sLiquidClass)
+		} yield result
 	}
 	
 	//private def dispense(builder: EvowareScriptBuilder, cmd: pipette.low.DispenseToken): RqResult[Seq[L0C_Command]] = {
@@ -232,55 +257,34 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		protocol: Protocol,
 		state0: WorldState,
 		command: PipetterAspirate,
-		items: List[HasTip with HasWell with HasPolicy]
+		item_l: List[(HasTip with HasWell with HasPolicy, WellPosition)]
 	): RqResult[String] = {
-		items match {
+		item_l match {
 			case Seq() => RqError("INTERNAL: items empty")
-			case Seq(twvp0, rest @ _*) =>
+			case Seq(item0, rest @ _*) =>
 				// Get the liquid class
-				val policy = twvp0.policy
+				val policy = item0._1.policy
 				// Assert that there is only one liquid class
 				// FIXME: for debug only:
-				if (!rest.forall(twvp => twvp.policy.equals(policy))) {
-					println("sLiquidClass: " + policy)
-					rest.foreach(twvp => println(twvp.tip, twvp.policy))
-				}
+				//if (!rest.forall(twvp => twvp.policy.equals(policy))) {
+				//	println("sLiquidClass: " + policy)
+				//	rest.foreach(twvp => println(twvp.tip, twvp.policy))
+				//}
 				// ENDFIX
-				assert(rest.forall(twvp => twvp.policy.equals(policy)))
-				
-				val lWellInfo = items.map(_.well)
-				val idPlate = lWellInfo.head.idPlate
+				if (!rest.forall(twvp => twvp._1.policy.equals(policy))) {
+					return RqError("INTERNAL: policy should be the same for all spirate items: "+item_l)
+				}
 				
 				// Assert that all tips are of the same kind
 				// TODO: Re-add this error check somehow? -- ellis, 2011-08-25
 				//val tipKind = config.getTipKind(twvp0.tip)
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
-				if (!lWellInfo.forall(_.idPlate == idPlate))
-					return RqError(("INTERNAL: all wells must be on the same plate `"+idPlate+"`") :: lWellInfo.map(w => w.id+" on "+w.idPlate))
-				
-				/*
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				// Assert that tips are spaced at equal distances to each other as the wells are to each other
-				def equidistant2(a: Tuple2[HasTip, WellInfo], b: Tuple2[HasTip, WellInfo]): Boolean =
-					(b._1.tip.index - a._1.tip.index) == (b._2.index - a._2.index)
-				// Test all adjacent items for equidistance
-				def equidistant(tws: Seq[Tuple2[HasTip, WellInfo]]): Boolean = tws match {
-					case Seq() => true
-					case Seq(_) => true
-					case Seq(a, b, rest @ _*) =>
-						equidistant2(a, b) match {
-							case false => false
-							case true => equidistant(Seq(b) ++ rest)
-						}
-				}
-				*/
-				val lItemInfo = items zip lWellInfo
-				// All tip/well pairs are equidistant or all tips are going to the same well
-				val bEquidistant = Utils.equidistant2(lItemInfo)
-				val bSameWell = items.forall(_.well eq twvp0.well)
+				val bEquidistant = TipWell.equidistant(item_l)
+				val bSameWell = item_l.forall(item => item._1.well eq item0._1.well)
 				if (!bEquidistant && !bSameWell)
-					return RqError("INTERNAL: not equidistant, "+items.map(_.tip.id)+" -> "+Printer.getWellsDebugString(items.map(_.well)))
+					return RqError("INTERNAL: not equidistant, "+item_l.map(_._1.tip.index)+" -> "+item_l.map(_._2.index))
 				
 				RqSuccess(policy.id)
 		}
@@ -295,7 +299,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		item_l: List[(TipWellVolumePolicy, Int)],
 		sFunc: String,
 		sLiquidClass: String
-	): RqResult[List[L0C_Command]] = {
+	): RqResult[TranslationResult] = {
 		val tip_l = item_l.map(_._1.tip)
 		val well_li = item_l.map(_._2)
 		
@@ -327,9 +331,10 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				siteE, labwareModelE
 			)
 			
-			setModelSites(labwareModelE, List(siteE))
-			
-			List(cmd)
+			TranslationResult(
+				List(TranslationItem(cmd, List(siteE -> labwareModelE))),
+				state0
+			)
 		}
 	}
 

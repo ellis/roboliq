@@ -32,13 +32,13 @@ object TipWell {
 		val l = items zip lWellInfo
 		equidistant2(l, state)
 	}
-		
+	
 	// Test all adjacent items for equidistance
 	def equidistant2(tws: Seq[(HasTip, Well)], state: WorldState): Boolean = tws match {
 		case Seq() => true
 		case Seq(_) => true
 		case Seq(a, b, rest @ _*) =>
-			equidistant3(a, b, state) match {
+			equidistant2sub(a, b, state) match {
 				case false => false
 				case true => equidistant2(Seq(b) ++ rest, state)
 			}
@@ -46,16 +46,35 @@ object TipWell {
 	
 	// All tip/well pairs are equidistant or all tips are going to the same well
 	// Assert that tips are spaced at equal distances to each other as the wells are to each other
-	def equidistant3(a: Tuple2[HasTip, Well], b: Tuple2[HasTip, Well], state: WorldState): Boolean = {
+	private def equidistant2sub(a: Tuple2[HasTip, Well], b: Tuple2[HasTip, Well], state: WorldState): Boolean = {
 		(state.getWellPosition(a._2), state.getWellPosition(b._2)) match {
-			case (Some(posA), Some(posB)) =>
-				(posB.parent == posA.parent) && // wells are are same parent
-				(b._1.tip.row - a._1.tip.row) == (posB.row - posA.row) && // tip rows and plate rows are equidistant
-				(b._1.tip.col - a._1.tip.col) == (posB.col - posA.col) // tip columns and plate columns are equidistant
+			case (RsSuccess(posA, _), RsSuccess(posB, _)) =>
+				equidistantItems((a._1, posA), (b._1, posB))
 			case _ =>
 				// REFACTOR: consider returning an error from this function instead
 				false
 		}
+	}
+	
+	// Test all adjacent items for equidistance
+	def equidistant(tws: Seq[(HasTip, WellPosition)]): Boolean = tws match {
+		case Seq() => true
+		case Seq(_) => true
+		case Seq(a, b, rest @ _*) =>
+			equidistantItems(a, b) match {
+				case false => false
+				case true => equidistant(Seq(b) ++ rest)
+			}
+	}
+	
+	// All tip/well pairs are equidistant or all tips are going to the same well
+	// Assert that tips are spaced at equal distances to each other as the wells are to each other
+	private def equidistantItems(a: Tuple2[HasTip, WellPosition], b: Tuple2[HasTip, WellPosition]): Boolean = {
+		val posA = a._2
+		val posB = b._2
+		(posB.parent == posA.parent) && // wells are are same parent
+		(b._1.tip.row - a._1.tip.row) == (posB.row - posA.row) && // tip rows and plate rows are equidistant
+		(b._1.tip.col - a._1.tip.col) == (posB.col - posA.col) // tip columns and plate columns are equidistant
 	}
 }
 
