@@ -48,15 +48,18 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 	): RsResult[WorldState] = {
 		println(s"addCommand: $agentIdent, $command")
 		val identToAgentObject_m: Map[String, Object] = protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
-		command match {
-			case AgentActivate() => RsSuccess(state0)
-			case AgentDeactivate() => RsSuccess(state0)
+		val result_? : RsResult[TranslationResult] = command match {
+			case AgentActivate() => RsSuccess(TranslationResult.empty(state0))
+			case AgentDeactivate() => RsSuccess(TranslationResult.empty(state0))
+			
 			case Log(text) =>
-				cmds += L0C_Comment(text)
-				RsSuccess(state0)
+				val item = TranslationItem(L0C_Comment(text), Nil)
+				RsSuccess(TranslationResult(List(item), state0))
+			
 			case Prompt(text) =>
-				cmds += L0C_Prompt(text)
-				RsSuccess(state0)
+				val item = TranslationItem(L0C_Prompt(text), Nil)
+				RsSuccess(TranslationResult(List(item), state0))
+
 			case TransporterRun(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) =>
 				val labware = protocol.eb.getEntity(labwareIdent).get.asInstanceOf[Labware]
 				val labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
@@ -116,22 +119,23 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				}
 				
 				// Finish up
-				val result = TranslationResult(List(TranslationItem(cmd, siteToModel_l)), state1.toImmutable)
-				RqSuccess(handleTranslationResult(result))
+				val item = TranslationItem(cmd, siteToModel_l)
+				RsSuccess(TranslationResult(List(item), state1.toImmutable))
 				
 			case cmd: PipetterAspirate =>
-				for {
-					result <- aspirate(
-						protocol,
-						state0,
-						identToAgentObject_m,
-						cmd
-					)
-				} yield {
-					handleTranslationResult(result)
-				}
+				aspirate(protocol, state0, identToAgentObject_m, cmd.item_l)
+				
+			case cmd: PipetterDispense =>
+				dispense(protocol, state0, identToAgentObject_m, cmd.item_l)
+				
 			case _ =>
 				RsError(s"unknown command `$command`")
+		}
+
+		for {
+			result <- result_?
+		} yield {
+			handleTranslationResult(result)
 		}
 	}
 	
@@ -237,14 +241,35 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			output.write("\r\n".getBytes())
 		}
 	}
+	
 	private def aspirate(
 		protocol: Protocol,
 		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
-		command: PipetterAspirate
+		twvp_l: List[TipWellVolumePolicy]
 	): RqResult[TranslationResult] = {
-		if (command.item_l.isEmpty) return RsSuccess(TranslationResult.empty(state0))
+		spirate(protocol, state0, identToAgentObject_m, twvp_l, "Aspirate")
+	}
+	
+	private def dispense(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		twvp_l: List[TipWellVolumePolicy]
+	): RqResult[TranslationResult] = {
+		spirate(protocol, state0, identToAgentObject_m, twvp_l, "Dispense")
+	}
+
+	private def spirate(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		twvp_l: List[TipWellVolumePolicy],
+		func_s: String
+	): RqResult[TranslationResult] = {
+		if (twvp_l.isEmpty) return RsSuccess(TranslationResult.empty(state0))
 		
+		// TODO: Track volumes aspirated, like here:
 		/*for (item <- cmd.item_l) {
 			val state = item.well.vesselState
 			val sLiquid = state.content.liquid.id
@@ -255,7 +280,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		}*/
 		for {
 			// Get WellPosition and CarrierSite for each item
-			tuple_l <- RsResult.toResultOfList(command.item_l.map { item =>
+			tuple_l <- RsResult.toResultOfList(twvp_l.map { item =>
 				for {
 					wellPosition <- state0.getWellPosition(item.well)
 					siteE <- getCarrierSite(protocol, state0, identToAgentObject_m, wellPosition.parent)
@@ -274,9 +299,9 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			// List of items and their well indexes
 			item_l = tuple_l.map(tuple => tuple._1 -> tuple._2.index)
 			// Check item validity and get liquid class
-			sLiquidClass <- checkTipWellPolicyItems(protocol, state0, command, tuple_l.map(tuple => tuple._1 -> tuple._2))
+			sLiquidClass <- checkTipWellPolicyItems(protocol, state0, tuple_l.map(tuple => tuple._1 -> tuple._2))
 			// Translate items into evoware commands
-			result <- spirateChecked(protocol, state0, identToAgentObject_m, siteE, plateModelE, item_l, "Aspirate", sLiquidClass)
+			result <- spirateChecked(protocol, state0, identToAgentObject_m, siteE, plateModelE, item_l, func_s, sLiquidClass)
 		} yield result
 	}
 	
@@ -288,7 +313,6 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 	private def checkTipWellPolicyItems(
 		protocol: Protocol,
 		state0: WorldState,
-		command: PipetterAspirate,
 		item_l: List[(HasTip with HasWell with HasPolicy, WellPosition)]
 	): RqResult[String] = {
 		item_l match {

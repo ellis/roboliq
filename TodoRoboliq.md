@@ -11,6 +11,24 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details:
+- [ ] JshopTranslator: distribute: generate dispense command
+- [ ] JshopTranslator: distribute: generate clean command
+- [ ] EvowareClientScriptBuilder: PipetterDispense
+- [ ] EvowareClientScriptBuilder: PipetterTipsDrop
+- [ ] EvowareClientScriptBuilder: PipetterTipsGet
+- [ ] EvowareClientScriptBuilder: PipetterTipsClean
+- [ ] start testing more complete protocol to perform various PCR-related tasks: pipette, seal, thermocycle
+- [ ] EvowareClientScriptBuilder: SealerRun
+- [ ] EvowareClientScriptBuilder: ThermocyclerRun
+- [ ] start testing more complete protocol for PCR (without centrifugation)
+- [ ] create PCR command
+- [ ] run PCR protocol on our robot
+- [ ] handle tubes
+- [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
+- [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+- [ ] PipettePlanner: more pipetting methods, allow multi-pipetting
+- [ ] PipettePlanner: allow for dispensing large volumes by multiple aspirations/dispenses
+- [ ] JshopTranslator: 
 - [ ] Protocol: handle substances
 - [ ] Protocol: handle mixtures
 - [ ] Protocol: handle wells with aliquot contents

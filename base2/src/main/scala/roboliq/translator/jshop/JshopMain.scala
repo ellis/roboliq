@@ -82,7 +82,7 @@ object JshopMain extends App {
 				"user" -> scriptBuilder,
 				"r1" -> scriptBuilder
 			)
-			val result_? = JshopTranslator2.translate(protocol, taskOutput, agentToBuilder_m)
+			val result_? = JshopTranslator.translate(protocol, taskOutput, agentToBuilder_m)
 			println("Warnings and Errors:")
 			result_?.getErrors.foreach(println)
 			result_?.getWarnings.foreach(println)
