@@ -144,6 +144,8 @@ class EntityBase {
 		rel_l += rel
 	}
 	
+	def getIdent(e: Entity): RsResult[String] = names.get(e).asRs(s"missing identifier for entity $e")
+	
 	def makeInitialConditionsList(): List[Rel] = {
 		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.label.getOrElse(null)))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {

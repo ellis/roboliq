@@ -21,6 +21,8 @@ case class WorldState(
 	//properties: Map[WorldProperty.Value, Map[List[Object], Object]],
 	tip_model_m: Map[Tip, TipModel],
 	labware_model_m: Map[Labware, LabwareModel],
+	// Labware can either be on a site or another piece of labware
+	labware_location_m: Map[Labware, Entity], 
 	labwareRowCol_well_m: Map[(Labware, RowCol), Well],
 	well_labware_m: Map[Well, Labware],
 	well_index_m: Map[Well, Int],
@@ -55,12 +57,15 @@ case class WorldState(
 		labwareRowCol_well_m.get(key).asRs(s"well not found for ${key._1.key}(${key._2})")
 	}
 	
-	def getWellPosition(well: Well): Option[WellPosition] = {
+	def getLabwareModel(labware: Labware): RsResult[LabwareModel] = labware_model_m.get(labware).asRs(s"missing model for labware $labware")
+	def getWellLabware(well: Well): RsResult[Labware] = well_labware_m.get(well).asRs(s"missing labware for well $well")
+	
+	def getWellPosition(well: Well): RsResult[WellPosition] = {
 		for {
-			labware <- well_labware_m.get(well)
-			model <- labware_model_m.get(labware)
-			plateModel <- Option(if (model.isInstanceOf[PlateModel]) model.asInstanceOf[PlateModel] else null)
-			index <- well_index_m.get(well)
+			labware <- getWellLabware(well)
+			model <- getLabwareModel(labware)
+			plateModel <- RsResult.asInstanceOf[PlateModel](model)
+			index <- well_index_m.get(well).asRs(s"missing index for well $well")
 		} yield {
 			val row = WellIdentParser.wellRow(plateModel, index)
 			val col = WellIdentParser.wellCol(plateModel, index)
@@ -77,6 +82,8 @@ case class WorldState(
 		new WorldStateBuilder {
 			tip_model_m ++= self.tip_model_m
 			labware_model_m ++= self.labware_model_m
+			labware_location_m ++= self.labware_location_m
+			labwareRowCol_well_m ++= self.labwareRowCol_well_m
 			well_labware_m ++= self.well_labware_m
 			well_index_m ++= self.well_index_m
 			well_isSource_l ++= self.well_isSource_l
@@ -90,6 +97,7 @@ case class WorldState(
 class WorldStateBuilder {
 	val tip_model_m = new HashMap[Tip, TipModel]
 	val labware_model_m = new HashMap[Labware, LabwareModel]
+	val labware_location_m = new HashMap[Labware, Entity] 
 	val labwareRowCol_well_m = new HashMap[(Labware, RowCol), Well]
 	val well_labware_m = new HashMap[Well, Labware]
 	val well_index_m = new HashMap[Well, Int]
@@ -111,6 +119,7 @@ class WorldStateBuilder {
 		WorldState(
 			tip_model_m.toMap,
 			labware_model_m.toMap,
+			labware_location_m.toMap,
 			labwareRowCol_well_m.toMap,
 			well_labware_m.toMap,
 			well_index_m.toMap,
