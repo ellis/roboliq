@@ -10,30 +10,38 @@ Current big steps:
 - [ ] Change domain to have a more generic concept of labware which subsumes sites, tubes, and plates.
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
-Details:
-- [ ] JshopTranslator: distribute: generate dispense command
+Details for before trip to Weizmann:
+- [ ] Protocol evoware: setup thermocyclers
+- [ ] domain: thermocycler
+- [ ] start testing more complete protocol to perform various PCR-related tasks: pipette, seal, thermocycle
+- [ ] EvowareClientScriptBuilder: SealerRun
+- [ ] EvowareClientScriptBuilder: ThermocyclerRun
 - [ ] JshopTranslator: distribute: generate clean command
+- [ ] Distribute task test: use multiple plates
+- [ ] Distribute task test: distribute to multiple wells
+- [ ] Distribute task test: distribute from multiple wells
 - [ ] EvowareClientScriptBuilder: PipetterDispense
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] EvowareClientScriptBuilder: PipetterTipsClean
-- [ ] start testing more complete protocol to perform various PCR-related tasks: pipette, seal, thermocycle
-- [ ] EvowareClientScriptBuilder: SealerRun
-- [ ] EvowareClientScriptBuilder: ThermocyclerRun
 - [ ] start testing more complete protocol for PCR (without centrifugation)
+- [ ] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [ ] create PCR command
 - [ ] run PCR protocol on our robot
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+
+Details for later:
 - [ ] PipettePlanner: more pipetting methods, allow multi-pipetting
 - [ ] PipettePlanner: allow for dispensing large volumes by multiple aspirations/dispenses
-- [ ] JshopTranslator: 
+- [ ] more sophisticated customization pipetting tasks, allowing user to specify pipette policy, multipipetting, tip size, tip handling, etc
 - [ ] Protocol: handle substances
 - [ ] Protocol: handle mixtures
 - [ ] Protocol: handle wells with aliquot contents
 - [ ] function from Aliquot + events => Aliquot
 - [ ] Extend JshopMain, Protocol, EvowareClientScriptBuilder to handle a pipette command
+- [x] JshopTranslator: distribute: generate dispense command
 - [x] adapt VesselState, VesselContents for new system
 - [x] TipWell.equidistant3: figure out where to calculate row/col from platemodel and well index
 - [x] EvowareTranslator: let it translate one command at a time and produce multiple scripts

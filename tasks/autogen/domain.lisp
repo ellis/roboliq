@@ -255,6 +255,132 @@
   ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?s))
  )
 
+ (:method (seal-plate ?p)
+  (
+   (is-agent ?a)
+   (is-sealer ?d)
+   (is-site ?s)
+   (agent-has-device ?a ?d)
+   (model ?p ?m)
+   (device-can-model ?d ?m)
+   (device-can-site ?d ?s)
+  )
+  ((sealer-run ?a ?d ?p ?s))
+ )
+
+
+ (:operator (!thermocycler-open ?a ?d)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-thermocycler ?d)
+   (agent-has-device ?a ?d)
+   (not (thermocycler-is-open ?d))
+  )
+  ; delete list
+  ()
+  ; add list
+  ((thermocycler-is-open ?d))
+ )
+
+ (:method (thermocycler-open ?a ?d)
+  thermocycler-open-NULL
+  (
+   (thermocycler-is-open ?d)
+  )
+  ()
+
+  thermocycler-open-DO
+  (
+   (is-agent ?a)
+   (is-thermocycler ?d)
+   (agent-has-device ?a ?d)
+  )
+  ((!thermocycler-open ?a ?d))
+ )
+
+ (:operator (!thermocycler-close ?a ?d)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-thermocycler ?d)
+   (agent-has-device ?a ?d)
+   (thermocycler-is-open ?d)
+  )
+  ; delete list
+  ((thermocycler-is-open ?d))
+  ; add list
+  ()
+ )
+
+ (:method (thermocycler-close ?a ?d)
+  thermocycler-close-NULL
+  (
+   (not (thermocycler-is-open ?d))
+  )
+  ()
+
+  thermocycler-close-DO
+  (
+   (is-agent ?a)
+   (is-thermocycler ?d)
+   (agent-has-device ?a ?d)
+  )
+  ((!thermocycler-close ?a ?d))
+ )
+
+ (:operator (!thermocycler-run ?a ?d ?spec)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-thermocycler ?d)
+   (is-thermocyclerSpec ?spec)
+   (agent-has-device ?a ?d)
+  )
+  ; delete list
+  ()
+  ; add list
+  ()
+ )
+
+ ; This is a complex action which involves:
+ ; * opening the thermocycler lid
+ ; * move plate from ?s1 to ?s
+ ; * close lid
+ ; * run the thermocycler
+ ; * open lid
+ ; * move plate to ?s2
+ ; * close lid
+ ; This is because the thermocycler lid may not be left open, or we risk crashing an arm against it.
+ (:method (thermocycle-plate ?a ?d ?spec ?p ?s2)
+  ; preconditions
+  (
+   (is-agent ?a)
+   (is-thermocycler ?d)
+   (is-thermocyclerSpec ?spec)
+   (is-plate ?p)
+   (is-site ?s2)
+
+   (location ?p ?s)
+   (is-site ?s)
+
+   (agent-has-device ?a ?d)
+   (plate-model ?p ?m)
+   (device-can-site ?d ?s)
+  )
+  ; sub-tasks
+  (
+   (seal-plate ?p)
+   (thermocycler-open ?a ?d)
+   (move-labware ?p ?s)
+   (thermocycler-close ?a ?d)
+   (!thermocycler-run ?a ?d ?spec)
+   (thermocycler-open ?a ?d)
+   (move-labware ?p ?s2)
+   (thermocycler-close ?a ?d)
+  )
+ )
+
  (:operator (!pipetter-run ?a ?d ?spec)
   ; preconditions
   (

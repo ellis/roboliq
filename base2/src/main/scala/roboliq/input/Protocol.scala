@@ -488,6 +488,8 @@ class Protocol {
 					addDevice("sealer", "sealer", carrierE)
 				case "RoboPeel" =>
 					addDevice("peeler", "peeler", carrierE)
+				case "TRobot1" =>
+					addDevice("thermocycler", "thermocycler1", carrierE)
 				case _ =>
 			}
 		}
