@@ -11,11 +11,13 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
-- [ ] Protocol evoware: setup thermocyclers
+- [ ] Protocol: add configurable thermocycler specs
 - [ ] domain: thermocycler
+- [ ] EvowareClientScriptBuilder: ThermocyclerOpen
+- [ ] EvowareClientScriptBuilder: ThermocyclerClose
+- [ ] EvowareClientScriptBuilder: ThermocyclerRun
 - [ ] start testing more complete protocol to perform various PCR-related tasks: pipette, seal, thermocycle
 - [ ] EvowareClientScriptBuilder: SealerRun
-- [ ] EvowareClientScriptBuilder: ThermocyclerRun
 - [ ] JshopTranslator: distribute: generate clean command
 - [ ] Distribute task test: use multiple plates
 - [ ] Distribute task test: distribute to multiple wells
@@ -24,13 +26,16 @@ Details for before trip to Weizmann:
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] EvowareClientScriptBuilder: PipetterTipsClean
-- [ ] start testing more complete protocol for PCR (without centrifugation)
+- [ ] start testing more complete protocol for PCR (without centrifugation or have user centrifuge)
 - [ ] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [ ] create PCR command
 - [ ] run PCR protocol on our robot
+- [ ] consider adding task for "bench-setup-labware" to place labware onto the robot bench before other tasks
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+- [x] Protocol evoware: setup thermocyclers
+- [x] Protocol: add "thermocycle" command in loadJson()
 
 Details for later:
 - [ ] PipettePlanner: more pipetting methods, allow multi-pipetting

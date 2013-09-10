@@ -359,14 +359,13 @@
    (is-thermocycler ?d)
    (is-thermocyclerSpec ?spec)
    (is-plate ?p)
-   (is-site ?s2)
-
-   (location ?p ?s)
-   (is-site ?s)
-
+;   (is-site ?s2) ; TODO: Make sure that ?s2 != ?s, either by comparison or by making sure that ?s isn't accessible when the thermocycler is closed
+;
+;   (location ?p ?s)
+;
    (agent-has-device ?a ?d)
-   (plate-model ?p ?m)
    (device-can-site ?d ?s)
+   (is-site ?s)
   )
   ; sub-tasks
   (

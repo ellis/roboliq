@@ -15,6 +15,7 @@ object JshopMain extends App {
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
+  (is-thermocyclerSpec thermocyclerSpec1)
 """
 	
 	val pd = (
@@ -75,7 +76,7 @@ object JshopMain extends App {
 		],
 		"protocol": [
 			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate1(B01)", "volume": "50ul" },
-			{ "command": "thermocycle", "object": "plate1", "spec": "xxx" }
+			{ "command": "thermocycle", "object": "plate1", "spec": "thermocyclerSpec1" }
 		]
 		}""",
 		"""(!agent-activate user)
@@ -124,5 +125,5 @@ object JshopMain extends App {
 	}
 	
 	//run("pd", pd._1, pd._2)
-	run("pe", pe._1, pe._2)
+	run("pf", pf._1, pf._2)
 }

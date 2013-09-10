@@ -197,6 +197,24 @@ class Protocol {
 												tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
 											case _ =>
 										}
+									case Some(JsString("thermocycle")) =>
+										val plateIdent_? = fields.get("object") match {
+											case Some(JsString(plateIdent)) => RsSuccess(plateIdent)
+											case _ => RsError("must supply an `object` which references a plate by name")
+										}
+										val specIdent_? = fields.get("spec") match {
+											case Some(JsString(specIdent)) => RsSuccess(specIdent)
+											case _ => RsError("must supply a `spec`")
+										}
+										for {
+											plateIdent <- plateIdent_?
+											specIdent <- specIdent_?
+										} {
+											val agentIdent = f"?a$nvar%04d"
+											val deviceIdent = f"?d$nvar%04d"
+											val site2Ident = f"?s$nvar%04d"
+											tasks += Rel("thermocycle-plate", List(agentIdent, deviceIdent, specIdent, plateIdent, site2Ident))
+										}
 									case Some(JsString("distribute")) =>
 										val source_? = fields.get("source") match {
 											case Some(JsString(sourceIdent)) =>
