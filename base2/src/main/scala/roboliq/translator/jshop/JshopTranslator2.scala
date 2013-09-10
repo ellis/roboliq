@@ -10,6 +10,7 @@ import roboliq.pipette.planners.TransferPlanner
 import roboliq.pipette.planners.PipetteDevice
 import roboliq.pipette.planners.TipModelSearcher1
 import scala.collection.immutable.SortedSet
+import roboliq.commands.PipetterAspirate
 
 object JshopTranslator2 {
 	
@@ -84,7 +85,7 @@ object JshopTranslator2 {
 			case "prompt" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				RsSuccess(List(Log(text)))
+				RsSuccess(List(Prompt(text)))
 			case "pipetter-run" =>
 				val specIdent = arg_l(1)
 				protocol.idToObject(specIdent) match {
@@ -134,21 +135,11 @@ object JshopTranslator2 {
 							// use the Batch list to create clean, aspirate, dispense commands
 							println("batch_l: "+batch_l)
 							batch_l.flatMap(batch => {
-								batch.item_l
+								val twvpAsp_l = batch.item_l.map(item => {
+									TipWellVolumePolicy(item.tip, item.src, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
+								})
+								List(PipetterAspirate(twvpAsp_l))
 							})
-							// translate that list of commands for the given agent
-							val builder = agentToBuilder_m(agentIdent)
-							for {
-								state <- builder.addOperation(
-									protocol,
-									state0,
-									operator,
-									agentIdent,
-									arg_l
-								)
-							} yield state
-							//state0 // FIXME: return new state
-							Nil
 						}
 					}
 					case _ =>
