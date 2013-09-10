@@ -59,13 +59,16 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				RsSuccess(state0)
 			case TransporterRun(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) =>
 				val labware = protocol.eb.getEntity(labwareIdent).get.asInstanceOf[Labware]
+				val labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
+				val origin = protocol.eb.getEntity(originIdent).get
+				val originE_? = identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
 				val destination = protocol.eb.getEntity(destinationIdent).get
+				val destinationE_? = identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
 				//val state = state0.toMutable
 				val cmd = {
 					if (agentIdent == "user") {
 						val model = protocol.eb.getEntity(modelIdent).get
 						val modelLabel = model.label.getOrElse(model.key)
-						val origin = protocol.eb.getEntity(originIdent).get
 						val originLabel = origin.label.getOrElse(origin.key)
 						val destinationLabel = destination.label.getOrElse(destination.key)
 						val text = s"Please move labware `${labwareIdent}` model `${modelLabel}` from `${originLabel}` to `${destinationLabel}`"
@@ -75,15 +78,14 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					else {
 						val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
 						val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
-						val origin = identToAgentObject_m(originIdent).asInstanceOf[roboliq.evoware.parser.CarrierSite]
-						val destination = identToAgentObject_m(destinationIdent).asInstanceOf[roboliq.evoware.parser.CarrierSite]
+						val originE = originE_?.get
+						val destinationE = destinationE_?.get
 						val vectorClass = identToAgentObject_m(vectorIdent).toString
-						setModelSites(model, List(origin, destination))
-						val carrierSrc = origin.carrier
+						val carrierSrc = originE.carrier
 						val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
 						val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
 				
-						val carrierDest = destination.carrier
+						val carrierDest = destinationE.carrier
 						val iGridDest = config.table.mapCarrierToGrid(carrierDest)
 						val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
 				
@@ -94,8 +96,8 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 							//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
 							//iGridDest, siteDest.iSite, siteDest.carrier.sName,
 							model,
-							iGridSrc, origin,
-							iGridDest, destination,
+							iGridSrc, originE,
+							iGridDest, destinationE,
 							LidHandling.NoLid, //c.lidHandling,
 							iGridLid = 0,
 							iSiteLid = 0,
@@ -103,11 +105,20 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 						)
 					}
 				}
-				var state = state0.toMutable
-				state.labware_location_m(labware) = destination
-				cmds += cmd
-				// TODO: change state of labware so it's now in the new given location
-				RqSuccess(state0)
+				// Move labware to new location
+				var state1 = state0.toMutable
+				state1.labware_location_m(labware) = destination
+				
+				// List of site/labware mappings for those labware and sites which evoware has equivalences for
+				val siteToModel_l = labwareModel_? match {
+					case None => Nil
+					case Some(labwareModel) => List(originE_?, destinationE_?).flatten.map(_ -> labwareModel)
+				}
+				
+				// Finish up
+				val result = TranslationResult(List(TranslationItem(cmd, siteToModel_l)), state1.toImmutable)
+				RqSuccess(handleTranslationResult(result))
+				
 			case cmd: PipetterAspirate =>
 				for {
 					result <- aspirate(
@@ -117,11 +128,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 						cmd
 					)
 				} yield {
-					for (item <- result.item_l) {
-						item.siteToModel_l
-					}
-					cmds ++= result.item_l.map(_.token)
-					result.state1
+					handleTranslationResult(result)
 				}
 			case _ =>
 				RsError(s"unknown command `$command`")
@@ -131,6 +138,14 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 	def end(): RsResult[Unit] = {
 		endScript()
 		RsSuccess(())
+	}
+	
+	private def handleTranslationResult(result: TranslationResult): WorldState = {
+		for (item <- result.item_l) {
+			setSiteModels(item.siteToModel_l)
+			cmds += item.token
+		}
+		result.state1
 	}
 	
 	private def getCarrierSite(
@@ -153,7 +168,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		} yield siteE
 	}
 	
-	private def setModelSites(model: EvowareLabwareModel, sites: List[CarrierSite]) {
+	/*private def setModelSites(model: EvowareLabwareModel, sites: List[CarrierSite]) {
 		// The assignment of labware to sites is compatible with the current
 		// table setup iff none of the sites have already been assigned to a different labware model.
 		val isCompatible = sites.forall(site => {
@@ -167,6 +182,23 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			endScript()
 		}
 		sites.foreach(site => siteToModel_m(site) = model)
+	}*/
+	
+	private def setSiteModels(siteModel_l: List[(CarrierSite, EvowareLabwareModel)]) {
+		// The assignment of labware to sites is compatible with the current
+		// table setup iff none of the sites have already been assigned to a different labware model.
+		val isCompatible = siteModel_l.forall(pair => {
+			val (site, model) = pair
+			siteToModel_m.get(site) match {
+				case None => true
+				case Some(model) => true
+				case _ => false
+			}
+		})
+		if (!isCompatible) {
+			endScript()
+		}
+		siteModel_l.foreach(pair => siteToModel_m(pair._1) = pair._2)
 	}
 	
 	private def endScript() {
