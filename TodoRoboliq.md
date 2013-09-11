@@ -12,7 +12,7 @@ Current big steps:
 
 Details for before trip to Weizmann:
 - [ ] JshopTranslator: distribute: generate clean command
-- [ ] Distribute task test: use multiple plates
+- [x] Distribute task test: use multiple plates
 - [ ] Distribute task test: distribute to multiple wells
 - [ ] Distribute task test: distribute from multiple wells
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
@@ -47,6 +47,7 @@ Details for later:
 - [ ] domain and Protocol: (agent, device, spec, site, model) needed to know whether a device can operate on a given labware.  Some of these may be irrelevant or orthogonal, however.  For each device type, have something in the config determine which relationships must be specified.
 - [ ] domain: as an example of the above, there is no reason to have 'device-can-model' or 'device-can-spec' for sealer, since we have the sealer spec.  Use 'device-spec-can-model' instead.
 - [ ] domain: use ?l for labware instead of ?p (which used to mean 'plate')
+- [ ] Protocol: evoware objects are mapped to using idents as keys; change this to using entities where possible.  Then the Command classes can be easily changed to use entities instead of idents.
 - [ ] PipettePlanner: more pipetting methods, allow multi-pipetting
 - [ ] PipettePlanner: allow for dispensing large volumes by multiple aspirations/dispenses
 - [ ] more sophisticated customization pipetting tasks, allowing user to specify pipette policy, multipipetting, tip size, tip handling, etc

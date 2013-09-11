@@ -96,6 +96,26 @@ object JshopMain extends App {
 		"""
 	)
 	
+	val pg = (
+		"""{
+		"substances": [
+			{ "name": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" }
+		],
+		"plates": [
+			{ "name": "plate1", "model": "Thermocycler Plate", "location": "offsite"},
+			{ "name": "plate2", "model": "Thermocycler Plate", "location": "offsite"}
+		],
+		"wellContents": [
+			{ "name": "plate1(A01)", "contents": "water@100ul" }
+		],
+		"protocol": [
+			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01)", "volume": "50ul" }
+		]
+		}""",
+		"""(!agent-activate user)
+		"""
+	)
+	
 	def run(protocolName: String, input: String, output: String) {
 		for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg")
@@ -133,5 +153,6 @@ object JshopMain extends App {
 	}
 	
 	//run("pd", pd._1, pd._2)
-	run("pf", pf._1, pf._2)
+	//run("pf", pf._1, pf._2)
+	run("pg", pg._1, pg._2)
 }
