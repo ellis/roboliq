@@ -11,6 +11,7 @@ import roboliq.pipette.planners.PipetteDevice
 import roboliq.pipette.planners.TipModelSearcher1
 import scala.collection.immutable.SortedSet
 import roboliq.commands.PipetterAspirate
+import roboliq.input.PipetteSpecList
 
 object JshopTranslator {
 	
@@ -74,6 +75,9 @@ object JshopTranslator {
 		}
 	}
 	
+	/**
+	 * Translate an operator to a Command
+	 */
 	private def handleOperator(
 		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
@@ -92,68 +96,13 @@ object JshopTranslator {
 			case "pipetter-run" =>
 				val specIdent = arg_l(1)
 				protocol.idToObject(specIdent) match {
-					case spec: PipetteSpec => {
-						import roboliq.pipette.planners.TransferPlanner.{Item,BatchItem,Batch}
-						
-						// from the deviceIdent, we need to get a list of tips and tip models
-						val deviceIdent = arg_l(0)
-						val pipetter = protocol.eb.getEntity(deviceIdent).get.asInstanceOf[Pipetter]
-						val tip_l = protocol.eb.pipetterToTips_m(pipetter)
-						val tipModel_l = tip_l.flatMap(protocol.eb.tipToTipModels_m).distinct
-						
-						val device = new PipetteDevice
-						val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]
-						
+					case spec: PipetteSpecList => {
 						for {
-							// sources for the liquid we want to transfer
-							src_l <- RsResult.toResultOfList(spec.source_l.map(state0.getWell))
-							
-							// Create list of items for TransferPlanner
-							item_l <- RsResult.toResultOfList(spec.destination_l.map(dstKey => {
-								state0.getWell(dstKey).map(dst => Item(src_l, dst, spec.volume))
-							}))
-							
-							// Map of item to its source mixture
-							itemToMixture_l <- RsResult.toResultOfList(item_l.map(item => {
-								state0.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs("no liquid specified in source well")
-							}))
-							itemToMixture_m = itemToMixture_l.toMap
-							// TODO: need to track liquids in wells as we go along in case
-							// a former destination well becomes a source well and doesn't have
-							// the same liquid contents as in the initial state.
-							itemToModels_m = for ((item, mixture) <- itemToMixture_m) yield {
-								item -> device.getDispenseAllowableTipModels(tipModel_l, mixture, item.volume)
-							}
-							itemToTipModel_m <- tipModelSearcher.searchGraph(item_l, itemToMixture_m, itemToModels_m)
-							// Run transfer planner to get pippetting batches
-							batch_l <- TransferPlanner.searchGraph(
-								device,
-								state0,
-								SortedSet(tip_l : _*),
-								itemToTipModel_m.head._2,
-								PipettePolicy("POLICY", PipettePosition.Free),
-								item_l
-							)
-						} yield {
-							// use the Batch list to create clean, aspirate, dispense commands
-							println("batch_l: "+batch_l)
-							batch_l.flatMap(batch => {
-								val twvpAsp0_l = batch.item_l.map(item => {
-									TipWellVolumePolicy(item.tip, item.src, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
-								})
-								val twvpAsp_ll = device.groupSpirateItems(twvpAsp0_l, state0)
-								val asp_l = twvpAsp_ll.map(twvp_l => PipetterAspirate(twvp_l))
-
-								val twvpDis0_l = batch.item_l.map(item => {
-									TipWellVolumePolicy(item.tip, item.dst, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
-								})
-								val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
-								val dis_l = twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l))
-								
-								asp_l ++ dis_l
-							})
-						}
+							command_ll <- RsResult.toResultOfList(spec.step_l.map(spec2 => handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec2, arg_l)))
+						} yield command_ll.flatten
 					}
+					case spec: PipetteSpec =>
+						handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec, arg_l)
 					case _ =>
 						RsError("invalid PipetteSpec")
 				}
@@ -210,6 +159,75 @@ object JshopTranslator {
 
 			case _ =>
 				RsError(s"unknown operator: $operator")
+		}
+	}
+	
+	private def handleOperator_PipetteSpec(
+		protocol: Protocol,
+		agentToBuilder_m: Map[String, ClientScriptBuilder],
+		state0: WorldState,
+		spec: PipetteSpec,
+		arg_l: List[String]
+	): RsResult[List[Command]] = {
+		import roboliq.pipette.planners.TransferPlanner.{Item,BatchItem,Batch}
+		
+		// from the deviceIdent, we need to get a list of tips and tip models
+		val deviceIdent = arg_l(0)
+		val pipetter = protocol.eb.getEntity(deviceIdent).get.asInstanceOf[Pipetter]
+		val tip_l = protocol.eb.pipetterToTips_m(pipetter)
+		val tipModel_l = tip_l.flatMap(protocol.eb.tipToTipModels_m).distinct
+		
+		val device = new PipetteDevice
+		val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]
+		
+		for {
+			// sources for the liquid we want to transfer
+			src_l <- RsResult.toResultOfList(spec.source_l.map(state0.getWell))
+			
+			// Create list of items for TransferPlanner
+			item_l <- RsResult.toResultOfList(spec.destination_l.map(dstKey => {
+				state0.getWell(dstKey).map(dst => Item(src_l, dst, spec.volume))
+			}))
+			
+			// Map of item to its source mixture
+			itemToMixture_l <- RsResult.toResultOfList(item_l.map(item => {
+				state0.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs("no liquid specified in source well")
+			}))
+			itemToMixture_m = itemToMixture_l.toMap
+			// TODO: need to track liquids in wells as we go along in case
+			// a former destination well becomes a source well and doesn't have
+			// the same liquid contents as in the initial state.
+			itemToModels_m = for ((item, mixture) <- itemToMixture_m) yield {
+				item -> device.getDispenseAllowableTipModels(tipModel_l, mixture, item.volume)
+			}
+			itemToTipModel_m <- tipModelSearcher.searchGraph(item_l, itemToMixture_m, itemToModels_m)
+			// Run transfer planner to get pippetting batches
+			batch_l <- TransferPlanner.searchGraph(
+				device,
+				state0,
+				SortedSet(tip_l : _*),
+				itemToTipModel_m.head._2,
+				PipettePolicy("POLICY", PipettePosition.Free),
+				item_l
+			)
+		} yield {
+			// use the Batch list to create clean, aspirate, dispense commands
+			println("batch_l: "+batch_l)
+			batch_l.flatMap(batch => {
+				val twvpAsp0_l = batch.item_l.map(item => {
+					TipWellVolumePolicy(item.tip, item.src, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
+				})
+				val twvpAsp_ll = device.groupSpirateItems(twvpAsp0_l, state0)
+				val asp_l = twvpAsp_ll.map(twvp_l => PipetterAspirate(twvp_l))
+
+				val twvpDis0_l = batch.item_l.map(item => {
+					TipWellVolumePolicy(item.tip, item.dst, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
+				})
+				val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
+				val dis_l = twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l))
+				
+				asp_l ++ dis_l
+			})
 		}
 	}
 }

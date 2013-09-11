@@ -11,12 +11,12 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
-- [x] Distribute task test: distribute to multiple wells
-- [ ] Distribute task test: distribute from multiple wells
 - [ ] JshopTranslator: distribute: generate clean command
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] EvowareClientScriptBuilder: PipetterTipsClean
+- [ ] EvowareClientScriptBuilder: need to update tip states in pipetting commands
+- [ ] Protocol: 'wellContents.name' => 'wellContents.well'
 - [ ] start testing more complete protocol for PCR (without centrifugation or have user centrifuge)
 - [ ] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [ ] create PCR command
@@ -25,6 +25,9 @@ Details for before trip to Weizmann:
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+- [ ] Protocol: means to specify which variables should be specified for each new lab, and let them be speficied in the protocol
+- [x] Distribute task test: distribute from multiple wells
+- [x] Distribute task test: distribute to multiple wells
 - [x] Distribute task test: use multiple plates
 - [x] JshopTranslator: thermocycler-run
 - [x] EvowareClientScriptBuilder: ThermocyclerRun
@@ -44,6 +47,9 @@ Details for before trip to Weizmann:
 - [x] EvowareClientScriptBuilder: PipetterDispense
 
 Details for later:
+- [ ] peeler
+- [ ] pipetting and protocol: let liquid amounts be specified in concentrations
+- [ ] protocol: possibly let the user specify which wells should be considered as sources when searching for substances for creating mixtures
 - [ ] domain and Protocol: (agent, device, spec, site, model) needed to know whether a device can operate on a given labware.  Some of these may be irrelevant or orthogonal, however.  For each device type, have something in the config determine which relationships must be specified.
 - [ ] domain: as an example of the above, there is no reason to have 'device-can-model' or 'device-can-spec' for sealer, since we have the sealer spec.  Use 'device-spec-can-model' instead.
 - [ ] domain: use ?l for labware instead of ?p (which used to mean 'plate')

@@ -86,6 +86,7 @@ class Protocol {
 					val name = m.getOrElse("name", key)
 					val kind = m("kind") match {
 						case "Liquid" => SubstanceKind.Liquid
+						case "Dna" => SubstanceKind.Dna
 					}
 					val tipCleanPolicy = m.getOrElse("tipCleanPolicy", "Thorough") match {
 						case "None" => TipCleanPolicy.NN
@@ -233,42 +234,37 @@ class Protocol {
 											val site2Ident = f"?s$nvar%04d"
 											tasks += Rel("thermocycle-plate", List(agentIdent, deviceIdent, specIdent, plateIdent, site2Ident))
 										}
+									case Some(JsString("pipette")) =>
+										fields.get("steps") match {
+											case Some(JsArray(step_l)) =>
+												val l0: List[RsResult[PipetteSpec]] = for (step <- step_l) yield {
+													val jsobj = step.asJsObject
+													jsobj.fields.get("command") match {
+														case Some(JsString("distribute")) =>
+															loadJsonProtocol_DistributeSub(jsobj.fields)
+														case Some(JsString(command)) =>
+															RsError("unrecognized pipette command: $command")
+														case x =>
+															RsError("unrecognized pipette step: $x")
+													}
+												}
+												for {
+													item_l <- RsResult.toResultOfList(l0)
+												} {
+													val agentIdent = f"?a$nvar%04d"
+													val deviceIdent = f"?d$nvar%04d"
+													val specIdent = f"spec$nvar%04d"
+													val labware_l: List[Labware] = item_l.flatMap(item => item.source_l ++ item.destination_l).map(_._1).distinct
+													val labwareIdent_l: List[String] = labware_l.map(eb.names)
+													val n = labware_l.size
+													val spec = PipetteSpecList(item_l)
+													idToObject(specIdent) = spec
+													tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+												}
+											case _ =>
+										}
 									case Some(JsString("distribute")) =>
-										val source_? = fields.get("source") match {
-											case Some(JsString(sourceIdent)) =>
-												eb.lookupLiquidSource(sourceIdent)
-											case _ => RsError("must supply a `source` string")
-										}
-										val destination_? = fields.get("destination") match {
-											case Some(JsString(destinationIdent)) =>
-												eb.lookupLiquidSource(destinationIdent)
-											case _ => RsError("must supply a `destination` string")
-										}
-										val volume_? = fields.get("volume") match {
-											case Some(JsString(volume_s)) =>
-												LiquidVolumeParser.parse(volume_s)
-											case _ => RsError("must supply a `volume` string")
-										}
-										println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
-										// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
-										// The script builder later lookups up the spec in the protocol.
-										// That should return an object that accepts the two labware objects.
-										for {
-											source <- source_?
-											destination <- destination_?
-											volume <- volume_?
-										} {
-											val agentIdent = f"?a$nvar%04d"
-											val deviceIdent = f"?d$nvar%04d"
-											val labware_l: List[Labware] = (source ++ destination).map(_._1).distinct
-											val labwareIdent_l: List[String] = labware_l.map(eb.names)
-											val n = labware_l.size
-											val spec = PipetteSpec(source, destination, volume)
-											val specIdent = f"spec$nvar%04d"
-											idToObject(specIdent) = spec
-											tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
-										}
-									case Some(JsString("shake")) =>
+										loadJsonProtocol_Distribute(fields)
 									case _ =>
 								}
 							}
@@ -276,6 +272,74 @@ class Protocol {
 					}
 				}
 			case _ =>
+		}
+	}
+	
+	private def loadJsonProtocol_Distribute(fields: Map[String, JsValue]) {
+		val source_? = fields.get("source") match {
+			case Some(JsString(sourceIdent)) =>
+				eb.lookupLiquidSource(sourceIdent)
+			case _ => RsError("must supply a `source` string")
+		}
+		val destination_? = fields.get("destination") match {
+			case Some(JsString(destinationIdent)) =>
+				eb.lookupLiquidSource(destinationIdent)
+			case _ => RsError("must supply a `destination` string")
+		}
+		val volume_? = fields.get("volume") match {
+			case Some(JsString(volume_s)) =>
+				LiquidVolumeParser.parse(volume_s)
+			case _ => RsError("must supply a `volume` string")
+		}
+		println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
+		// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
+		// The script builder later lookups up the spec in the protocol.
+		// That should return an object that accepts the two labware objects.
+		for {
+			source <- source_?
+			destination <- destination_?
+			volume <- volume_?
+		} {
+			val agentIdent = f"?a$nvar%04d"
+			val deviceIdent = f"?d$nvar%04d"
+			val labware_l: List[Labware] = (source ++ destination).map(_._1).distinct
+			val labwareIdent_l: List[String] = labware_l.map(eb.names)
+			val n = labware_l.size
+			val spec = PipetteSpec(source, destination, volume)
+			val specIdent = f"spec$nvar%04d"
+			idToObject(specIdent) = spec
+			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+		}
+	}
+	
+	// REFACTOR: lots of duplication with loadJsonProtocol_Distribute()
+	private def loadJsonProtocol_DistributeSub(fields: Map[String, JsValue]): RsResult[PipetteSpec] = {
+		val source_? = fields.get("source") match {
+			case Some(JsString(sourceIdent)) =>
+				eb.lookupLiquidSource(sourceIdent)
+			case _ => RsError("must supply a `source` string")
+		}
+		val destination_? = fields.get("destination") match {
+			case Some(JsString(destinationIdent)) =>
+				eb.lookupLiquidSource(destinationIdent)
+			case _ => RsError("must supply a `destination` string")
+		}
+		val volume_? = fields.get("volume") match {
+			case Some(JsString(volume_s)) =>
+				LiquidVolumeParser.parse(volume_s)
+			case _ => RsError("must supply a `volume` string")
+		}
+		println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
+		// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
+		// The script builder later lookups up the spec in the protocol.
+		// That should return an object that accepts the two labware objects.
+		for {
+			source <- source_?
+			destination <- destination_?
+			volume <- volume_?
+		} yield {
+			val labware_l: List[Labware] = (source ++ destination).map(_._1).distinct
+			PipetteSpec(source, destination, volume)
 		}
 	}
 	

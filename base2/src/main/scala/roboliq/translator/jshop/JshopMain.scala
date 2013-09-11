@@ -131,6 +131,58 @@ object JshopMain extends App {
 		"""
 	)
 	
+	val ph = (
+		"""{
+		"substances": [
+			{ "name": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" },
+			{ "name": "buffer10x", "kind": "Liquid", "tipCleanPolicy": "Thorough" },
+			{ "name": "dntp", "kind": "Liquid", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "taqdiluted", "kind": "Liquid", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "template", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "primer1", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "primer2", "kind": "Dna", "tipCleanPolicy": "Decontaminate" }
+		],
+		"plates": [
+			{ "name": "plate1", "model": "Thermocycler Plate", "location": "offsite"},
+			{ "name": "plate2", "model": "Thermocycler Plate", "location": "offsite"}
+		],
+		"wellContents": [
+			{ "name": "plate1(A01 d D01)", "contents": "water@200ul" },
+			{ "name": "plate1(A02)", "contents": "buffer10x@200ul" },
+			{ "name": "plate1(B02)", "contents": "dntp@200ul" },
+			{ "name": "plate1(C02)", "contents": "template@200ul" },
+			{ "name": "plate1(D02)", "contents": "primer1@200ul" },
+			{ "name": "plate1(E02)", "contents": "primer2@200ul" },
+			{ "name": "plate1(F02)", "contents": "taqdiluted@200ul" }
+		],
+		"protocol": [
+			{ "command": "pipette", "steps": [
+				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "17ul" },
+				{ "command": "distribute", "source": "plate1(A02)", "destination": "plate2(A01 d D01)", "volume": "3ul" },
+				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul" },
+				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1ul" },
+				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul" },
+				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul" },
+				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "3ul" }
+				]
+			}
+		]
+		}""",
+		"""(!agent-activate user)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
+(!agent-deactivate r1)
+(!agent-activate user)
+(!transporter-run user userarm plate2 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+		"""
+	)
+	
 	def run(protocolName: String, input: String, output: String) {
 		for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg")
@@ -169,5 +221,6 @@ object JshopMain extends App {
 	
 	//run("pd", pd._1, pd._2)
 	//run("pf", pf._1, pf._2)
-	run("pg", pg._1, pg._2)
+	//run("pg", pg._1, pg._2)
+	run("ph", ph._1, ph._2)
 }

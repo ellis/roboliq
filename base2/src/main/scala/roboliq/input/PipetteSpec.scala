@@ -9,3 +9,7 @@ case class PipetteSpec(
 	destination_l: List[(Labware, RowCol)],
 	volume: LiquidVolume
 )
+
+case class PipetteSpecList(
+	step_l: List[PipetteSpec]
+)
