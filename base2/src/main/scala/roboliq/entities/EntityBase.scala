@@ -52,23 +52,56 @@ class EntityBase {
 	
 	def addAlias(from: String, to: String) {
 		// TODO: Check for loops
-		aliases(from) = to
+		aliases(from.toLowerCase) = to
 	}
 	
-	private def addEntity(e: Entity, name: String) {
-		if (nameToEntity.contains(name))
-			assert(nameToEntity(name) eq e)
-		names(e) = name
-		nameToEntity(name) = e
+	private def addEntity(e: Entity, ident: String) {
+		val lower = ident.toLowerCase
+		if (nameToEntity.contains(lower))
+			assert(nameToEntity(lower) eq e)
+		names(e) = ident
+		nameToEntity(lower) = e
 		idToEntity(e.key) = e
 	}
 	
 	def getEntity(key: String): Option[Entity] = {
+		val ident = key.toLowerCase
 		// TODO: improve lookup, this is very hacky.  Should use scope instead,
 		// which would involve handing lookup outside of this class.
 		// First try name, then ID, then alias
-		nameToEntity.get(key).orElse(idToEntity.get(key)).orElse {
-			aliases.get(key).flatMap(getEntity)
+		nameToEntity.get(ident).orElse(idToEntity.get(key)).orElse {
+			aliases.get(ident).flatMap(getEntity)
+		}
+	}
+	
+	def getEntityAs[A <: Entity : Manifest](key: String): RsResult[A] = {
+		val lower = key.toLowerCase
+		nameToEntity.get(lower) match {
+			case Some(entity) =>
+				RsResult.asInstanceOf(entity)
+			case None =>
+				idToEntity.get(key) match {
+					case Some(entity) =>
+						RsResult.asInstanceOf(entity)
+					case None =>
+						aliases.get(lower) match {
+							case Some(ident2) => getEntityAs(ident2)
+							case None => RsError(s"missing entity with key `$key`")
+						}
+				}
+		}
+	}
+	
+	def getEntityByIdent[A <: Entity : Manifest](ident0: String): RsResult[A] = {
+		val ident = ident0.toLowerCase
+		nameToEntity.get(ident) match {
+			case None =>
+				aliases.get(ident) match {
+					case None => RsError(s"missing entity with ident `$ident`")
+					case Some(ident2) => getEntityByIdent(ident2)
+				}
+			case Some(entity) =>
+				RsResult.asInstanceOf(entity)
 		}
 	}
 	

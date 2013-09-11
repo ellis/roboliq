@@ -155,7 +155,16 @@ object JshopTranslator {
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
 				RsSuccess(List(Prompt(text)))
-			//case "sealer-run" =>
+			
+			case "sealer-run" =>
+				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
+				for {
+					_ <- protocol.eb.getEntityByIdent[Sealer](deviceIdent)
+					_ <- protocol.eb.getEntityByIdent[SealerSpec](specIdent)
+					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
+				} yield {
+					List(SealerRun(deviceIdent, specIdent, labwareIdent))
+				}
 				
 			case "transporter-run" =>
 				RsSuccess(List(TransporterRun(

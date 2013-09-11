@@ -98,11 +98,12 @@ class Protocol {
 					val id = m.getOrElse("id", gid)
 					val name = m.getOrElse("name", id)
 					val modelKey = m("model")
-					//println("modelKey: "+modelKey)
+					println("modelKey: "+modelKey)
 					//println("eb.nameToEntity: "+eb.nameToEntity)
 					//println("eb.idToEntity: "+eb.idToEntity)
 					//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
-					val model = eb.getEntity(modelKey).get.asInstanceOf[PlateModel]
+					println("eb.aliases: "+eb.aliases)
+					val model = eb.getEntityAs[PlateModel](modelKey).toOption.get
 					val plate = new Plate(id)
 					eb.addLabware(plate, name)
 					eb.setModel(plate, model)
@@ -487,17 +488,14 @@ class Protocol {
 			}
 		}
 		
-		def addDevice(
-			typeName: String,
-			deviceName: String,
+		def addDevice0(
+			device: Device,
+			deviceIdent: String,
 			carrierE: roboliq.evoware.parser.Carrier
 		): Device = {
-			val carrierData = tableData.configFile
-			
 			// Add device
-			val device = new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(typeName) }
-			eb.addDevice(agent, device, deviceName)
-			identToAgentObject(deviceName) = carrierE
+			eb.addDevice(agent, device, deviceIdent)
+			identToAgentObject(deviceIdent) = carrierE
 	
 			// Add device sites
 			for (site_i <- 0 until carrierE.nSites) {
@@ -510,11 +508,29 @@ class Protocol {
 			device
 		}
 		
+		def addDevice(
+			typeName: String,
+			deviceName: String,
+			carrierE: roboliq.evoware.parser.Carrier
+		): Device = {
+			// Add device
+			val device = new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(typeName) }
+			addDevice0(device, deviceName, carrierE)
+		}
+		
+		def addSealer(
+			deviceName: String,
+			carrierE: roboliq.evoware.parser.Carrier
+		): Device = {
+			val device = new Sealer(gid, Some(carrierE.sName))
+			addDevice0(device, deviceName, carrierE)
+		}
+		
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
 			carrierE.sName match {
 				case "RoboSeal" =>
 					val deviceIdent = agentIdent+"_sealer"
-					val device = addDevice("sealer", deviceIdent, carrierE)
+					val device = addSealer(deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, plateModelId, specIdent) <- sealerSpecRel_l if deviceIdent2 == deviceIdent) {
 						// Get or create the sealer spec for specIdent
