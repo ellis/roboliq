@@ -185,6 +185,19 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					val item = TranslationItem(token, Nil)
 					TranslationResult(List(item), state1.toImmutable)
 				}
+			
+			case cmd: ThermocyclerRun =>
+				for {
+					device <- protocol.eb.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
+					value <- identToAgentObject_m.get(cmd.specIdent).asRs(s"missing evoware data for spec `${cmd.specIdent}`").flatMap(RsResult.asInstanceOf[String])
+				} yield {
+					// Token
+					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_RunProgram", value)
+					// Return
+					val item = TranslationItem(token, Nil)
+					TranslationResult(List(item), state0)
+				}
 				
 			case _ =>
 				RsError(s"unknown command `$command`")

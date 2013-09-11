@@ -24,12 +24,17 @@ case class SealerRun(
 	siteIdent: String
 ) extends Command
 
+case class ThermocyclerClose(
+	deviceIdent: String
+) extends Command
+
 case class ThermocyclerOpen(
 	deviceIdent: String
 ) extends Command
 
-case class ThermocyclerClose(
-	deviceIdent: String
+case class ThermocyclerRun(
+	deviceIdent: String,
+	specIdent: String
 ) extends Command
 
 case class TransporterRun(

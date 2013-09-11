@@ -183,6 +183,15 @@ object JshopTranslator {
 					List(ThermocyclerOpen(deviceIdent))
 				}
 				
+			case "thermocycler-run" =>
+				val List(deviceIdent, specIdent) = arg_l
+				for {
+					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
+					_ <- protocol.eb.getEntityByIdent[ThermocyclerSpec](specIdent)
+				} yield {
+					List(ThermocyclerRun(deviceIdent, specIdent))
+				}
+				
 			case "transporter-run" =>
 				RsSuccess(List(TransporterRun(
 					deviceIdent = arg_l(0),

@@ -90,11 +90,10 @@ object JshopMain extends App {
 (!thermocycler-open r1 r1_thermocycler1)
 (!transporter-run r1 r1_transporter2 plate1 m002 r1_device_236x1 r1_device_234x1 r1_transporterspec0)
 (!thermocycler-close r1 r1_thermocycler1)
-		"""/*
 (!thermocycler-run r1 r1_thermocycler1 thermocyclerspec1)
 (!thermocycler-open r1 r1_thermocycler1)
 (!thermocycler-close r1 r1_thermocycler1)
-		"""*/
+		"""
 	)
 	
 	def run(protocolName: String, input: String, output: String) {
