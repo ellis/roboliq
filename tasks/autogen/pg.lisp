@@ -404,5 +404,6 @@
  ; tasks
  (
   (distribute2 ?a0001 ?d0002 spec0003 plate1 plate2)
+  (distribute2 ?a0004 ?d0005 spec0006 plate1 plate2)
  )
 )

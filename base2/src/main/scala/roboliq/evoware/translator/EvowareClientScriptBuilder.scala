@@ -510,6 +510,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 
 		val iGrid = config.table.mapCarrierToGrid(siteE.carrier)
 		val sPlateMask = encodeWells(labwareModelE.nRows, labwareModelE.nCols, well_li)
+		println("well_li: "+well_li)
 
 		for {
 			_ <- RsResult.zero

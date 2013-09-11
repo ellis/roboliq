@@ -109,10 +109,23 @@ object JshopMain extends App {
 			{ "name": "plate1(A01)", "contents": "water@100ul" }
 		],
 		"protocol": [
-			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01)", "volume": "50ul" }
+			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01)", "volume": "50ul" },
+			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01 d B01)", "volume": "50ul" }
 		]
 		}""",
 		"""(!agent-activate user)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
+(!agent-deactivate r1)
+(!agent-activate user)
+(!transporter-run user userarm plate2 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+(!pipetter-run r1 r1_pipetter1 spec0006)
 		"""
 	)
 	

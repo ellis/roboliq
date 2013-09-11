@@ -138,13 +138,19 @@ object JshopTranslator {
 							// use the Batch list to create clean, aspirate, dispense commands
 							println("batch_l: "+batch_l)
 							batch_l.flatMap(batch => {
-								val twvpAsp_l = batch.item_l.map(item => {
+								val twvpAsp0_l = batch.item_l.map(item => {
 									TipWellVolumePolicy(item.tip, item.src, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
 								})
-								val twvpDis_l = batch.item_l.map(item => {
+								val twvpAsp_ll = device.groupSpirateItems(twvpAsp0_l, state0)
+								val asp_l = twvpAsp_ll.map(twvp_l => PipetterAspirate(twvp_l))
+
+								val twvpDis0_l = batch.item_l.map(item => {
 									TipWellVolumePolicy(item.tip, item.dst, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
 								})
-								List(PipetterAspirate(twvpAsp_l), PipetterDispense(twvpDis_l))
+								val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
+								val dis_l = twvpDis_ll.map(twvp_l => PipetterAspirate(twvp_l))
+								
+								asp_l ++ dis_l
 							})
 						}
 					}
