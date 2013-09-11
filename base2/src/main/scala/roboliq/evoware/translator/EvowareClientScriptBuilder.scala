@@ -10,6 +10,7 @@ import roboliq.tokens._
 import scala.collection.mutable.HashMap
 import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.EvowareLabwareModel
+import roboliq.evoware.parser.Carrier
 
 case class EvowareScript2(
 	filename: String,
@@ -47,8 +48,27 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		command: Command
 	): RsResult[WorldState] = {
 		println(s"addCommand: $agentIdent, $command")
+		val result_? = {
+			if (agentIdent == "user")
+				addCommandUser(protocol, state0, agentIdent, command)
+			else
+				addCommandRobot(protocol, state0, agentIdent, command)
+		}
+		for {
+			result <- result_?
+		} yield {
+			handleTranslationResult(result)
+		}
+	}
+
+	private def addCommandRobot(
+		protocol: Protocol,
+		state0: WorldState,
+		agentIdent: String,
+		command: Command
+	): RsResult[TranslationResult] = {
 		val identToAgentObject_m: Map[String, Object] = protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
-		val result_? : RsResult[TranslationResult] = command match {
+		command match {
 			case AgentActivate() => RsSuccess(TranslationResult.empty(state0))
 			case AgentDeactivate() => RsSuccess(TranslationResult.empty(state0))
 			
@@ -61,6 +81,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				RsSuccess(TranslationResult(List(item), state0))
 
 			case TransporterRun(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) =>
+				// REFACTOR: lots of duplication with TransporterRun for user
 				val labware = protocol.eb.getEntity(labwareIdent).get.asInstanceOf[Labware]
 				val labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
 				val origin = protocol.eb.getEntity(originIdent).get
@@ -69,44 +90,33 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				val destinationE_? = identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
 				//val state = state0.toMutable
 				val cmd = {
-					if (agentIdent == "user") {
-						val model = protocol.eb.getEntity(modelIdent).get
-						val modelLabel = model.label.getOrElse(model.key)
-						val originLabel = origin.label.getOrElse(origin.key)
-						val destinationLabel = destination.label.getOrElse(destination.key)
-						val text = s"Please move labware `${labwareIdent}` model `${modelLabel}` from `${originLabel}` to `${destinationLabel}`"
-						// TODO: if destination or source site have evoware equivalents, then call setModelSites() for them
-						L0C_Prompt(text)
-					}
-					else {
-						val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
-						val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
-						val originE = originE_?.get
-						val destinationE = destinationE_?.get
-						val vectorClass = identToAgentObject_m(vectorIdent).toString
-						val carrierSrc = originE.carrier
-						val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
-						val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
-				
-						val carrierDest = destinationE.carrier
-						val iGridDest = config.table.mapCarrierToGrid(carrierDest)
-						val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
-				
-						L0C_Transfer_Rack(
-							roma_i,
-							vectorClass,
-							//c.sPlateModel,
-							//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
-							//iGridDest, siteDest.iSite, siteDest.carrier.sName,
-							model,
-							iGridSrc, originE,
-							iGridDest, destinationE,
-							LidHandling.NoLid, //c.lidHandling,
-							iGridLid = 0,
-							iSiteLid = 0,
-							sCarrierLid = ""
-						)
-					}
+					val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
+					val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
+					val originE = originE_?.get
+					val destinationE = destinationE_?.get
+					val vectorClass = identToAgentObject_m(vectorIdent).toString
+					val carrierSrc = originE.carrier
+					val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
+					val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
+			
+					val carrierDest = destinationE.carrier
+					val iGridDest = config.table.mapCarrierToGrid(carrierDest)
+					val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
+			
+					L0C_Transfer_Rack(
+						roma_i,
+						vectorClass,
+						//c.sPlateModel,
+						//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
+						//iGridDest, siteDest.iSite, siteDest.carrier.sName,
+						model,
+						iGridSrc, originE,
+						iGridDest, destinationE,
+						LidHandling.NoLid, //c.lidHandling,
+						iGridLid = 0,
+						iSiteLid = 0,
+						sCarrierLid = ""
+					)
 				}
 				// Move labware to new location
 				var state1 = state0.toMutable
@@ -128,17 +138,100 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			case cmd: PipetterDispense =>
 				dispense(protocol, state0, identToAgentObject_m, cmd.item_l)
 				
+			case cmd: SealerRun =>
+				for {
+					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
+					filepath <- identToAgentObject_m.get(cmd.specIdent).asRs(s"missing evoware data for spec `${cmd.specIdent}`").flatMap(RsResult.asInstanceOf[String])
+					// List of site/labware mappings for those labware and sites which evoware has equivalences for
+					siteToModel_l <- siteLabwareEntry(protocol, state0, identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
+					labware <- protocol.eb.getEntityByIdent[Labware](cmd.labwareIdent)
+				} yield {
+					// Token
+					val token = L0C_Facts(carrierE.sName, "RoboSeal_Seal", filepath)
+					// Update state
+					var state1 = state0.toMutable
+					state1.labware_isSealed_l += labware
+					// Return
+					val item = TranslationItem(token, siteToModel_l)
+					TranslationResult(List(item), state1.toImmutable)
+				}
+				
 			case _ =>
 				RsError(s"unknown command `$command`")
 		}
+	}
 
-		for {
-			result <- result_?
-		} yield {
-			handleTranslationResult(result)
+	private def addCommandUser(
+		protocol: Protocol,
+		state0: WorldState,
+		agentIdent: String,
+		command: Command
+	): RsResult[TranslationResult] = {
+		val identToAgentObject_m: Map[String, Object] = protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
+		
+		def promptUnknown(): RsResult[TranslationResult] = {
+			val item = TranslationItem(L0C_Prompt(s"Please perform this command: $command"), Nil)
+			RsSuccess(TranslationResult(List(item), state0))
+		}
+		
+		def prompt(text: String, state1: WorldState): RsResult[TranslationResult] = {
+			val item = TranslationItem(L0C_Prompt(text), Nil)
+			RsSuccess(TranslationResult(List(item), state1))
+		}
+		
+		command match {
+			case AgentActivate() => RsSuccess(TranslationResult.empty(state0))
+			case AgentDeactivate() => RsSuccess(TranslationResult.empty(state0))
+			
+			case Log(text) =>
+				val item = TranslationItem(L0C_Comment(text), Nil)
+				RsSuccess(TranslationResult(List(item), state0))
+			
+			case Prompt(text) =>
+				val item = TranslationItem(L0C_Prompt(text), Nil)
+				RsSuccess(TranslationResult(List(item), state0))
+
+			case TransporterRun(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) =>
+				for {
+					labware <- protocol.eb.getEntityAs[Labware](labwareIdent)
+					model <- protocol.eb.getEntityAs[LabwareModel](modelIdent)
+					origin <- protocol.eb.getEntityAs[Site](originIdent)
+					destination <- protocol.eb.getEntityAs[Site](destinationIdent)
+					//originE <- identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs(s"missing evoware data for site `$originIdent`")
+					//destinationE <- identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs(s"missing evoware data for site `$destinationIdent`")
+				} yield {
+					val modelLabel = model.label.getOrElse(model.key)
+					val originLabel = origin.label.getOrElse(origin.key)
+					val destinationLabel = destination.label.getOrElse(destination.key)
+					val text = s"Please move labware `${labwareIdent}` model `${modelLabel}` from `${originLabel}` to `${destinationLabel}`"
+
+					// Move labware to new location
+					var state1 = state0.toMutable
+					state1.labware_location_m(labware) = destination
+					
+					// List of site/labware mappings for those labware and sites which evoware has equivalences for
+					val labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
+					val originE_? = identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
+					val destinationE_? = identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
+					val siteToModel_l = labwareModel_? match {
+						case None => Nil
+						case Some(labwareModel) => List(originE_?, destinationE_?).flatten.map(_ -> labwareModel)
+					}
+					
+					// Finish up
+					val item = TranslationItem(L0C_Prompt(text), siteToModel_l)
+					TranslationResult(List(item), state1.toImmutable)
+				}
+				
+			case cmd: PipetterAspirate => promptUnknown()
+			case cmd: PipetterDispense => promptUnknown()
+			case cmd: SealerRun => promptUnknown()
+				
+			case _ =>
+				RsError(s"unknown command `$command`")
 		}
 	}
-	
+
 	def end(): RsResult[Unit] = {
 		endScript()
 		RsSuccess(())
@@ -418,5 +511,49 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		val sWellMask = amWells.map(encode).mkString
 		val sPlateMask = Array('0', hex(cols), '0', hex(rows)).mkString + sWellMask
 		sPlateMask
+	}
+	
+	private def siteLabwareEntry(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		siteIdent: String,
+		labwareIdent: String
+	): RsResult[Option[(CarrierSite, EvowareLabwareModel)]] = {
+		for {
+			labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
+			model <- protocol.eb.labwareToModel_m.get(labware).asRs(s"missing model for labware `$labwareIdent`")
+			modelIdent <- protocol.eb.getIdent(model)
+		} yield {
+			val modelE_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[EvowareLabwareModel])
+			val siteE_? = identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[CarrierSite])
+
+			(siteE_?, modelE_?) match {
+				case (Some(siteE), Some(modelE)) => Some(siteE -> modelE)
+				case _ => None
+			}
+		}
+	}
+	
+	private def siteLabwareEntry(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		site: Site,
+		labware: Labware
+	): RsResult[Option[(CarrierSite, EvowareLabwareModel)]] = {
+		for {
+			siteIdent <- protocol.eb.getIdent(site)
+			model <- protocol.eb.labwareToModel_m.get(labware).asRs(s"missing model for labware `$labware`")
+			modelIdent <- protocol.eb.getIdent(model)
+		} yield {
+			val modelE_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[EvowareLabwareModel])
+			val siteE_? = identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[CarrierSite])
+
+			(siteE_?, modelE_?) match {
+				case (Some(siteE), Some(modelE)) => Some(siteE -> modelE)
+				case _ => None
+			}
+		}
 	}
 }

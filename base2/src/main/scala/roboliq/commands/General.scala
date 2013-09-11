@@ -20,7 +20,8 @@ case class Prompt(text: String) extends Command
 case class SealerRun(
 	deviceIdent: String,
 	specIdent: String,
-	labwareIdent: String
+	labwareIdent: String,
+	siteIdent: String
 ) extends Command
 
 case class TransporterRun(

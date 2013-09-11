@@ -162,8 +162,9 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[Sealer](deviceIdent)
 					_ <- protocol.eb.getEntityByIdent[SealerSpec](specIdent)
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
+					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
 				} yield {
-					List(SealerRun(deviceIdent, specIdent, labwareIdent))
+					List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
 				}
 				
 			case "transporter-run" =>

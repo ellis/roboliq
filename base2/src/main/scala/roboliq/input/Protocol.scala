@@ -539,7 +539,7 @@ class Protocol {
 							case None =>
 								// Store the evoware string for this spec
 								val internal = sealerSpec_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent) = internal
+								identToAgentObject(specIdent.toLowerCase) = internal
 								SealerSpec(gid, None, Some(internal))
 						}
 						// Register the spec

@@ -22,7 +22,8 @@ case class WorldState(
 	tip_model_m: Map[Tip, TipModel],
 	labware_model_m: Map[Labware, LabwareModel],
 	// Labware can either be on a site or another piece of labware
-	labware_location_m: Map[Labware, Entity], 
+	labware_location_m: Map[Labware, Entity],
+	labware_isSealed_l: Set[Labware],
 	labwareRowCol_well_m: Map[(Labware, RowCol), Well],
 	well_labware_m: Map[Well, Labware],
 	well_index_m: Map[Well, Int],
@@ -83,6 +84,7 @@ case class WorldState(
 			tip_model_m ++= self.tip_model_m
 			labware_model_m ++= self.labware_model_m
 			labware_location_m ++= self.labware_location_m
+			labware_isSealed_l ++= self.labware_isSealed_l
 			labwareRowCol_well_m ++= self.labwareRowCol_well_m
 			well_labware_m ++= self.well_labware_m
 			well_index_m ++= self.well_index_m
@@ -98,6 +100,7 @@ class WorldStateBuilder {
 	val tip_model_m = new HashMap[Tip, TipModel]
 	val labware_model_m = new HashMap[Labware, LabwareModel]
 	val labware_location_m = new HashMap[Labware, Entity] 
+	val labware_isSealed_l = new HashSet[Labware]
 	val labwareRowCol_well_m = new HashMap[(Labware, RowCol), Well]
 	val well_labware_m = new HashMap[Well, Labware]
 	val well_index_m = new HashMap[Well, Int]
@@ -120,6 +123,7 @@ class WorldStateBuilder {
 			tip_model_m.toMap,
 			labware_model_m.toMap,
 			labware_location_m.toMap,
+			labware_isSealed_l.toSet,
 			labwareRowCol_well_m.toMap,
 			well_labware_m.toMap,
 			well_index_m.toMap,
