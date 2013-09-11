@@ -106,11 +106,12 @@ object JshopMain extends App {
 			{ "name": "plate2", "model": "Thermocycler Plate", "location": "offsite"}
 		],
 		"wellContents": [
-			{ "name": "plate1(A01)", "contents": "water@100ul" }
+			{ "name": "plate1(A01 d D01)", "contents": "water@200ul" }
 		],
 		"protocol": [
 			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01)", "volume": "50ul" },
-			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01 d B01)", "volume": "50ul" }
+			{ "command": "distribute", "source": "plate1(A01)", "destination": "plate2(A01 d B01)", "volume": "50ul" },
+			{ "command": "distribute", "source": "plate1(C01 d D01)", "destination": "plate2(C01 d D01)", "volume": "50ul" }
 		]
 		}""",
 		"""(!agent-activate user)
@@ -126,6 +127,7 @@ object JshopMain extends App {
 (!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
 (!pipetter-run r1 r1_pipetter1 spec0003)
 (!pipetter-run r1 r1_pipetter1 spec0006)
+(!pipetter-run r1 r1_pipetter1 spec0009)
 		"""
 	)
 	

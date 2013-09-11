@@ -148,7 +148,7 @@ object JshopTranslator {
 									TipWellVolumePolicy(item.tip, item.dst, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
 								})
 								val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
-								val dis_l = twvpDis_ll.map(twvp_l => PipetterAspirate(twvp_l))
+								val dis_l = twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l))
 								
 								asp_l ++ dis_l
 							})
