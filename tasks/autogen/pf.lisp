@@ -192,6 +192,7 @@
   (is-siteModel sm2)
   (is-siteModel sm3)
   (is-thermocycler r1_thermocycler1) ; TRobot1
+  (is-thermocyclerSpec thermocyclerSpec1)
   (is-transporter r1_transporter1)
   (is-transporter r1_transporter2)
   (is-transporter userArm)
@@ -214,6 +215,7 @@
   (device-can-site r1_sealer r1_device_236x1)
   (device-can-site r1_thermocycler1 r1_device_234x1)
   (device-can-spec r1_sealer sealerSpec1)
+  (device-can-spec r1_thermocycler1 thermocyclerSpec1)
   (device-can-spec r1_transporter1 r1_transporterSpec0)
   (device-can-spec r1_transporter1 r1_transporterSpec2)
   (device-can-spec r1_transporter2 r1_transporterSpec0)
@@ -393,7 +395,6 @@
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
-  (is-thermocyclerSpec thermocyclerSpec1)
 
  )
  ; tasks

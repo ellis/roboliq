@@ -16,7 +16,6 @@ object JshopMain extends App {
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
-  (is-thermocyclerSpec thermocyclerSpec1)
 """
 	
 	val pd = (

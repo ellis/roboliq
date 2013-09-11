@@ -29,6 +29,12 @@ class Protocol {
 	val sealerSpec_l = new ArrayBuffer[(String, String)]
 	/** Tuple: (deviceIdent, evoware plate model ID, specIdent) */
 	val sealerSpecRel_l = new ArrayBuffer[(String, String, String)]
+	
+	/** Tuple: (specIdent, dir.prog) */
+	val thermocyclerSpec_l = new ArrayBuffer[(String, String)]
+	/** Tuple: (deviceIdent, specIdent) */
+	val thermocyclerSpecRel_l = new ArrayBuffer[(String, String)]
+	
 	val nameToSubstance_m = new HashMap[String, Substance]
 	/**
 	 * Map of task variable identifier to an internal object -- for example, the name of a text variable to the actual text.
@@ -66,6 +72,9 @@ class Protocol {
 		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
 		sealerSpec_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf"""))
 		sealerSpecRel_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
+		
+		thermocyclerSpec_l += (("thermocyclerSpec1", "0.3"))
+		thermocyclerSpecRel_l += (("r1_thermocycler1", "thermocyclerSpec1"))
 	}
 
 	def loadJson(jsobj: JsObject) {
@@ -552,7 +561,22 @@ class Protocol {
 				case "RoboPeel" =>
 					addDevice("peeler", agentIdent+"_peeler", carrierE)
 				case "TRobot1" =>
-					addDevice0(new Thermocycler(gid, Some(carrierE.sName)), agentIdent+"_thermocycler1", carrierE)
+					val deviceIdent = agentIdent+"_thermocycler1"
+					val device = addDevice0(new Thermocycler(gid, Some(carrierE.sName)), deviceIdent, carrierE)
+					// Add user-defined specs for this device
+					for ((deviceIdent2, specIdent) <- thermocyclerSpecRel_l if deviceIdent2 == deviceIdent) {
+						// Get or create the spec for specIdent
+						val spec: ThermocyclerSpec = eb.getEntity(specIdent) match {
+							case Some(spec) => spec.asInstanceOf[ThermocyclerSpec]
+							case None =>
+								// Store the evoware string for this spec
+								val internal = thermocyclerSpec_l.find(_._1 == specIdent).get._2
+								identToAgentObject(specIdent.toLowerCase) = internal
+								ThermocyclerSpec(gid, None, Some(internal))
+						}
+						// Register the spec
+						eb.addDeviceSpec(device, spec, specIdent)
+					}
 				case _ =>
 			}
 		}
