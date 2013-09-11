@@ -29,7 +29,8 @@ case class WorldState(
 	well_index_m: Map[Well, Int],
 	well_isSource_l: Set[Well],
 	well_history_m: Map[Well, WellHistory],
-	well_aliquot_m: Map[Well, Aliquot]
+	well_aliquot_m: Map[Well, Aliquot],
+	device_isOpen_l: Set[Device]
 ) {
 	/*def getProperty[A : Manifest](property: WorldProperty.Value, args: List[Object]): RsResult[A] = {
 		properties.get(property) match {
@@ -107,6 +108,7 @@ class WorldStateBuilder {
 	val well_isSource_l = new HashSet[Well]
 	val well_history_m = new HashMap[Well, WellHistory]
 	val well_aliquot_m = new HashMap[Well, Aliquot]
+	val device_isOpen_l = new HashSet[Device]
 
 	def addWell(well: Well, labware: Labware, rowcol: RowCol, index: Int) {
 		labwareRowCol_well_m((labware, rowcol)) = well
@@ -129,7 +131,8 @@ class WorldStateBuilder {
 			well_index_m.toMap,
 			well_isSource_l.toSet,
 			well_history_m.toMap,
-			well_aliquot_m.toMap
+			well_aliquot_m.toMap,
+			device_isOpen_l.toSet
 		)
 	}
 }

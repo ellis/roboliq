@@ -11,7 +11,7 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
-- [ ] EvowareClientScriptBuilder: SealerRun
+- [ ] JshopTranslator: thermocycler-close
 - [ ] EvowareClientScriptBuilder: ThermocyclerOpen
 - [ ] EvowareClientScriptBuilder: ThermocyclerClose
 - [ ] Protocol: add configurable thermocycler specs
@@ -32,6 +32,9 @@ Details for before trip to Weizmann:
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+- [x] JshopTranslator: thermocycler-open
+- [x] EvowareClientScriptBuilder: ThermocyclerOpen
+- [x] EvowareClientScriptBuilder: SealerRun
 - [x] JshopTranslator: sealer-run
 - [x] Protocol: config for sealer specs
 - [x] Protocol: config for (sealer device + plate model) -> spec

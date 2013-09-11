@@ -147,12 +147,27 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					labware <- protocol.eb.getEntityByIdent[Labware](cmd.labwareIdent)
 				} yield {
 					// Token
-					val token = L0C_Facts(carrierE.sName, "RoboSeal_Seal", filepath)
+					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
 					// Update state
 					var state1 = state0.toMutable
 					state1.labware_isSealed_l += labware
 					// Return
 					val item = TranslationItem(token, siteToModel_l)
+					TranslationResult(List(item), state1.toImmutable)
+				}
+			
+			case cmd: ThermocyclerOpen =>
+				for {
+					device <- protocol.eb.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
+				} yield {
+					// Token
+					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidOpen", "")
+					// Update state
+					var state1 = state0.toMutable
+					state1.device_isOpen_l += device
+					// Return
+					val item = TranslationItem(token, Nil)
 					TranslationResult(List(item), state1.toImmutable)
 				}
 				
@@ -227,8 +242,8 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			case cmd: PipetterDispense => promptUnknown()
 			case cmd: SealerRun => promptUnknown()
 				
-			case _ =>
-				RsError(s"unknown command `$command`")
+			case _ => promptUnknown()
+				//RsError(s"unknown command `$command`")
 		}
 	}
 

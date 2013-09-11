@@ -166,6 +166,14 @@ object JshopTranslator {
 				} yield {
 					List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
 				}
+			
+			case "thermocycler-open" =>
+				val List(deviceIdent) = arg_l
+				for {
+					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
+				} yield {
+					List(ThermocyclerOpen(deviceIdent))
+				}
 				
 			case "transporter-run" =>
 				RsSuccess(List(TransporterRun(

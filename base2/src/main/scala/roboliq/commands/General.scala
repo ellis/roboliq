@@ -24,6 +24,10 @@ case class SealerRun(
 	siteIdent: String
 ) extends Command
 
+case class ThermocyclerOpen(
+	deviceIdent: String
+) extends Command
+
 case class TransporterRun(
 	deviceIdent: String,
 	labwareIdent: String,

@@ -552,7 +552,7 @@ class Protocol {
 				case "RoboPeel" =>
 					addDevice("peeler", agentIdent+"_peeler", carrierE)
 				case "TRobot1" =>
-					addDevice("thermocycler", agentIdent+"_thermocycler1", carrierE)
+					addDevice0(new Thermocycler(gid, Some(carrierE.sName)), agentIdent+"_thermocycler1", carrierE)
 				case _ =>
 			}
 		}
