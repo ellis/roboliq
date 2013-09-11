@@ -89,19 +89,6 @@ object JshopTranslator {
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
 				RsSuccess(List(Log(text)))
-			case "prompt" =>
-				val List(textIdent) = arg_l
-				val text = protocol.idToObject(textIdent).toString
-				RsSuccess(List(Prompt(text)))
-			case "transporter-run" =>
-				RsSuccess(List(TransporterRun(
-					deviceIdent = arg_l(0),
-					labwareIdent = arg_l(1),
-					modelIdent = arg_l(2),
-					originIdent = arg_l(3),
-					destinationIdent = arg_l(4),
-					vectorIdent = arg_l(5)
-				)))
 			case "pipetter-run" =>
 				val specIdent = arg_l(1)
 				protocol.idToObject(specIdent) match {
@@ -164,7 +151,22 @@ object JshopTranslator {
 					case _ =>
 						RsError("invalid PipetteSpec")
 				}
-			
+			case "prompt" =>
+				val List(textIdent) = arg_l
+				val text = protocol.idToObject(textIdent).toString
+				RsSuccess(List(Prompt(text)))
+			//case "sealer-run" =>
+				
+			case "transporter-run" =>
+				RsSuccess(List(TransporterRun(
+					deviceIdent = arg_l(0),
+					labwareIdent = arg_l(1),
+					modelIdent = arg_l(2),
+					originIdent = arg_l(3),
+					destinationIdent = arg_l(4),
+					vectorIdent = arg_l(5)
+				)))
+
 			case _ =>
 				RsError(s"unknown operator: $operator")
 		}

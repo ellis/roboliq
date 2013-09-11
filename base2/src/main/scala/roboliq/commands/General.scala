@@ -7,7 +7,21 @@ sealed trait Command
 case class AgentActivate() extends Command
 case class AgentDeactivate() extends Command
 case class Log(text: String) extends Command
+case class PipetterAspirate(
+	val item_l: List[TipWellVolumePolicy]
+) extends Command
+
+case class PipetterDispense(
+	val item_l: List[TipWellVolumePolicy]
+) extends Command
+
 case class Prompt(text: String) extends Command
+
+case class SealerRun(
+	deviceIdent: String,
+	specIdent: String
+) extends Command
+
 case class TransporterRun(
 	deviceIdent: String,
 	labwareIdent: String,
@@ -15,11 +29,4 @@ case class TransporterRun(
 	originIdent: String,
 	destinationIdent: String,
 	vectorIdent: String
-) extends Command
-case class PipetterAspirate(
-	val item_l: List[TipWellVolumePolicy]
-) extends Command
-
-case class PipetterDispense(
-	val item_l: List[TipWellVolumePolicy]
 ) extends Command

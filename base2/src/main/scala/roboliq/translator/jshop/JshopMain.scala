@@ -11,6 +11,7 @@ import roboliq.entities.ClientScriptBuilder
 object JshopMain extends App {
 	val protocol = new Protocol
 
+	// HACK: this belongs in a general config file
 	val userInitialConditions = """  (device-can-site r1_pipetter1 r1_bench_017x1)
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
@@ -85,6 +86,14 @@ object JshopMain extends App {
 (!agent-activate r1)
 (!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
 (!pipetter-run r1 r1_pipetter1 spec0003)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_bench_017x1 r1_device_236x1 r1_transporterspec0)
+(!sealer-run r1 sealer plate1 r1_device_236x1)
+(!thermocycler-open r1 thermocycler1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_device_236x1 r1_device_234x1 r1_transporterspec0)
+(!thermocycler-close r1 thermocycler1)
+(!thermocycler-run r1 thermocycler1 thermocyclerspec1)
+(!thermocycler-open r1 thermocycler1)
+(!thermocycler-close r1 thermocycler1)
 		"""
 	)
 	

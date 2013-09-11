@@ -56,6 +56,8 @@ class EntityBase {
 	}
 	
 	private def addEntity(e: Entity, name: String) {
+		if (nameToEntity.contains(name))
+			assert(nameToEntity(name) eq e)
 		names(e) = name
 		nameToEntity(name) = e
 		idToEntity(e.key) = e

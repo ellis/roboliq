@@ -202,40 +202,38 @@
 ;  )
  )
 
- (:operator (!sealer-run ?a ?d ?p ?s)
+ (:operator (!sealer-run ?a ?d ?spec ?p ?s)
   ; preconditions
   (
    ; types
    (is-agent ?a)
    (is-sealer ?d)
+   (is-sealerSpec ?spec)
    (is-plate ?p)
    (is-site ?s)
-   ; lookup types
-   (is-plateModel ?m)
    ; agent
-   ;(agent-is-active ?a)
+   (agent-is-active ?a)
    (agent-has-device ?a ?d)
    ; device
    (device-can-site ?d ?s)
-   (device-can-model ?d ?m)
+   (device-spec-can-model ?d ?spec ?m)
    ; plate
    (model ?p ?m)
    (location ?p ?s)
    (not (plate-is-sealed ?p))
-   ; site
-   (model ?s ?sm)
-   (stackable ?sm ?m)
+   ; site (not really necessary)
+   ;(model ?s ?sm)
+   ;(stackable ?sm ?m)
   )
   ; delete list
   ()
   ; add list
   (
-   (agent-activate ?a)
    (plate-is-sealed ?p)
   )
  )
 
- (:method (sealer-run ?a ?d ?p ?s)
+ (:method (sealer-run ?a ?d ?spec ?p ?s)
   sealer-run-NULL
   (
    (plate-is-sealed ?p)
@@ -246,28 +244,33 @@
   (
    (is-agent ?a)
    (is-sealer ?d)
+   (is-sealerSpec ?spec)
    (is-site ?s)
    (agent-has-device ?a ?d)
-   (device-can-model ?d ?m)
    (device-can-site ?d ?s)
+   (device-spec-can-model ?d ?spec ?m)
    (model ?p ?m)
   )
-  ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?p ?s))
+  ((move-labware ?p ?s) (agent-activate ?a) (!sealer-run ?a ?d ?spec ?p ?s))
  )
 
  (:method (seal-plate ?p)
   (
    (is-agent ?a)
    (is-sealer ?d)
+   (is-sealerSpec ?spec)
    (is-site ?s)
    (agent-has-device ?a ?d)
    (model ?p ?m)
-   (device-can-model ?d ?m)
    (device-can-site ?d ?s)
+   (device-spec-can-model ?d ?spec ?m)
   )
-  ((sealer-run ?a ?d ?p ?s))
+  ((sealer-run ?a ?d ?spec ?p ?s))
  )
 
+ ;
+ ; THERMOCYCLER
+ ;
 
  (:operator (!thermocycler-open ?a ?d)
   ; preconditions

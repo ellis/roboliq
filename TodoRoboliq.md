@@ -11,18 +11,17 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
-- [ ] Protocol: add configurable thermocycler specs
-- [ ] domain: thermocycler
+- [ ] JshopTranslator: sealer-run
+- [ ] EvowareClientScriptBuilder: SealerRun
 - [ ] EvowareClientScriptBuilder: ThermocyclerOpen
 - [ ] EvowareClientScriptBuilder: ThermocyclerClose
+- [ ] Protocol: add configurable thermocycler specs
 - [ ] EvowareClientScriptBuilder: ThermocyclerRun
 - [ ] start testing more complete protocol to perform various PCR-related tasks: pipette, seal, thermocycle
-- [ ] EvowareClientScriptBuilder: SealerRun
 - [ ] JshopTranslator: distribute: generate clean command
 - [ ] Distribute task test: use multiple plates
 - [ ] Distribute task test: distribute to multiple wells
 - [ ] Distribute task test: distribute from multiple wells
-- [ ] EvowareClientScriptBuilder: PipetterDispense
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] EvowareClientScriptBuilder: PipetterTipsClean
@@ -34,10 +33,17 @@ Details for before trip to Weizmann:
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+- [x] Protocol: config for sealer specs
+- [x] Protocol: config for (sealer device + plate model) -> spec
+- [x] domain: thermocycler
 - [x] Protocol evoware: setup thermocyclers
 - [x] Protocol: add "thermocycle" command in loadJson()
+- [x] EvowareClientScriptBuilder: PipetterDispense
 
 Details for later:
+- [ ] domain and Protocol: (agent, device, spec, site, model) needed to know whether a device can operate on a given labware.  Some of these may be irrelevant or orthogonal, however.  For each device type, have something in the config determine which relationships must be specified.
+- [ ] domain: as an example of the above, there is no reason to have 'device-can-model' or 'device-can-spec' for sealer, since we have the sealer spec.  Use 'device-spec-can-model' instead.
+- [ ] domain: use ?l for labware instead of ?p (which used to mean 'plate')
 - [ ] PipettePlanner: more pipetting methods, allow multi-pipetting
 - [ ] PipettePlanner: allow for dispensing large volumes by multiple aspirations/dispenses
 - [ ] more sophisticated customization pipetting tasks, allowing user to specify pipette policy, multipipetting, tip size, tip handling, etc

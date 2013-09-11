@@ -95,12 +95,13 @@
   (is-model sm1)
   (is-model sm2)
   (is-model sm3)
-  (is-peeler peeler) ; RoboPeel
+  (is-peeler r1_peeler) ; RoboPeel
   (is-pipetter r1_pipetter1) ; r1 LiHa
   (is-plate plate1)
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
-  (is-sealer sealer) ; RoboSeal
+  (is-sealer r1_sealer) ; RoboSeal
+  (is-sealerSpec sealerSpec1)
   (is-site offsite) ; offsite
   (is-site r1_bench_001x1) ; r1 bench Wash Station Clean site 1
   (is-site r1_bench_001x2) ; r1 bench Wash Station Clean site 2
@@ -190,28 +191,29 @@
   (is-siteModel sm1)
   (is-siteModel sm2)
   (is-siteModel sm3)
-  (is-thermocycler thermocycler1) ; TRobot1
+  (is-thermocycler r1_thermocycler1) ; TRobot1
   (is-transporter r1_transporter1)
   (is-transporter r1_transporter2)
   (is-transporter userArm)
   (is-transporterSpec r1_transporterSpec0) ; r1 Narrow
   (is-transporterSpec r1_transporterSpec2) ; r1 Wide
   (is-transporterSpec userArmSpec)
-  (agent-has-device r1 peeler)
+  (agent-has-device r1 r1_peeler)
   (agent-has-device r1 r1_pipetter1)
+  (agent-has-device r1 r1_sealer)
+  (agent-has-device r1 r1_thermocycler1)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
-  (agent-has-device r1 sealer)
-  (agent-has-device r1 thermocycler1)
   (agent-has-device user userArm)
-  (device-can-model peeler m002)
-  (device-can-model sealer m002)
-  (device-can-model thermocycler1 m002)
+  (device-can-model r1_peeler m002)
+  (device-can-model r1_sealer m002)
+  (device-can-model r1_thermocycler1 m002)
   (device-can-model userArm m001)
   (device-can-model userArm m002)
-  (device-can-site peeler r1_device_237x1)
-  (device-can-site sealer r1_device_236x1)
-  (device-can-site thermocycler1 r1_device_234x1)
+  (device-can-site r1_peeler r1_device_237x1)
+  (device-can-site r1_sealer r1_device_236x1)
+  (device-can-site r1_thermocycler1 r1_device_234x1)
+  (device-can-spec r1_sealer sealerSpec1)
   (device-can-spec r1_transporter1 r1_transporterSpec0)
   (device-can-spec r1_transporter1 r1_transporterSpec2)
   (device-can-spec r1_transporter2 r1_transporterSpec0)
@@ -279,6 +281,7 @@
   (model r1_hotel_85x4 sm3)
   (model r1_hotel_85x5 sm3)
   (location plate1 offsite)
+  (device-spec-can-model r1_sealer sealerSpec1 m002)
   (transporter-can r1_transporter1 r1_bench_010x1 r1_transporterSpec0)
   (transporter-can r1_transporter1 r1_bench_010x2 r1_transporterSpec0)
   (transporter-can r1_transporter1 r1_bench_010x3 r1_transporterSpec0)

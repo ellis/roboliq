@@ -25,6 +25,10 @@ class Protocol {
 	private def gid: String = java.util.UUID.randomUUID().toString()
 	private def nvar: Int = { var_i += 1; var_i }
 	
+	/** Tuple: (specIdent, filepath) */
+	val sealerSpec_l = new ArrayBuffer[(String, String)]
+	/** Tuple: (deviceIdent, evoware plate model ID, specIdent) */
+	val sealerSpecRel_l = new ArrayBuffer[(String, String, String)]
 	val nameToSubstance_m = new HashMap[String, Substance]
 	/**
 	 * Map of task variable identifier to an internal object -- for example, the name of a text variable to the actual text.
@@ -58,6 +62,10 @@ class Protocol {
 		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		// A few other user-specified sites where the user can put plates on the robot
 		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
+		
+		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
+		sealerSpec_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf"""))
+		sealerSpecRel_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
 	}
 
 	def loadJson(jsobj: JsObject) {
@@ -483,7 +491,7 @@ class Protocol {
 			typeName: String,
 			deviceName: String,
 			carrierE: roboliq.evoware.parser.Carrier
-		) {
+		): Device = {
 			val carrierData = tableData.configFile
 			
 			// Add device
@@ -498,16 +506,37 @@ class Protocol {
 				eb.addDeviceSite(device, site)
 				siteIdToModels_m(siteId).foreach(m => eb.addDeviceModel(device, m))
 			}
+			
+			device
 		}
 		
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
 			carrierE.sName match {
 				case "RoboSeal" =>
-					addDevice("sealer", "sealer", carrierE)
+					val deviceIdent = agentIdent+"_sealer"
+					val device = addDevice("sealer", deviceIdent, carrierE)
+					// Add user-defined specs for this device
+					for ((deviceIdent2, plateModelId, specIdent) <- sealerSpecRel_l if deviceIdent2 == deviceIdent) {
+						// Get or create the sealer spec for specIdent
+						val spec: SealerSpec = eb.getEntity(specIdent) match {
+							case Some(spec) => spec.asInstanceOf[SealerSpec]
+							case None =>
+								// Store the evoware string for this spec
+								val internal = sealerSpec_l.find(_._1 == specIdent).get._2
+								identToAgentObject(specIdent) = internal
+								SealerSpec(gid, None, Some(internal))
+						}
+						// Register the spec
+						eb.addDeviceSpec(device, spec, specIdent)
+						// Let entity base know that that the spec can be used for the plate model
+						val plateModel = idToModel_m(plateModelId)
+						val plateModelIdent = eb.getIdent(plateModel).toOption.get
+						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
+					}
 				case "RoboPeel" =>
-					addDevice("peeler", "peeler", carrierE)
+					addDevice("peeler", agentIdent+"_peeler", carrierE)
 				case "TRobot1" =>
-					addDevice("thermocycler", "thermocycler1", carrierE)
+					addDevice("thermocycler", agentIdent+"_thermocycler1", carrierE)
 				case _ =>
 			}
 		}
