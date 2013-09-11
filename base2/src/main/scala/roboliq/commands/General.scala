@@ -28,6 +28,10 @@ case class ThermocyclerOpen(
 	deviceIdent: String
 ) extends Command
 
+case class ThermocyclerClose(
+	deviceIdent: String
+) extends Command
+
 case class TransporterRun(
 	deviceIdent: String,
 	labwareIdent: String,

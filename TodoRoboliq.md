@@ -11,10 +11,8 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
-- [ ] JshopTranslator: thermocycler-close
-- [ ] EvowareClientScriptBuilder: ThermocyclerOpen
-- [ ] EvowareClientScriptBuilder: ThermocyclerClose
 - [ ] Protocol: add configurable thermocycler specs
+- [ ] JshopTranslator: thermocycler-run
 - [ ] EvowareClientScriptBuilder: ThermocyclerRun
 - [ ] start testing more complete protocol to perform various PCR-related tasks: pipette, seal, thermocycle
 - [ ] JshopTranslator: distribute: generate clean command
@@ -32,6 +30,8 @@ Details for before trip to Weizmann:
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
+- [x] JshopTranslator: thermocycler-close
+- [x] EvowareClientScriptBuilder: ThermocyclerClose
 - [x] JshopTranslator: thermocycler-open
 - [x] EvowareClientScriptBuilder: ThermocyclerOpen
 - [x] EvowareClientScriptBuilder: SealerRun
