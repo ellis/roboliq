@@ -200,12 +200,18 @@ object JshopTranslator {
 			itemToModels_m = for ((item, mixture) <- itemToMixture_m) yield {
 				item -> device.getDispenseAllowableTipModels(tipModel_l, mixture, item.volume)
 			}
+			// Choose a single tip model
 			itemToTipModel_m <- tipModelSearcher.searchGraph(item_l, itemToMixture_m, itemToModels_m)
+			tipModelCandidate_l = itemToTipModel_m.toList.map(_._2).toSet
+			_ <- RsResult.assert(tipModelCandidate_l.size == 1, "TransferPlanner can only handle a single tip model at a time")
+			tipModel = tipModelCandidate_l.head
+			// Filter for those tips which can be used with the tip model
+			tipCandidate_l = tip_l.filter(tip => protocol.eb.tipToTipModels_m.get(tip).map(_.contains(tipModel)).getOrElse(false))
 			// Run transfer planner to get pippetting batches
 			batch_l <- TransferPlanner.searchGraph(
 				device,
 				state0,
-				SortedSet(tip_l : _*),
+				SortedSet(tipCandidate_l : _*),
 				itemToTipModel_m.head._2,
 				PipettePolicy("POLICY", PipettePosition.Free),
 				item_l

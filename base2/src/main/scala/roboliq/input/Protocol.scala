@@ -386,21 +386,33 @@ class Protocol {
 		val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
 		val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
 		val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
+		val tip5 = Tip("tip5", None, None, 4, 4, 0, Some(tipModel50))
+		val tip6 = Tip("tip6", None, None, 5, 5, 0, Some(tipModel50))
+		val tip7 = Tip("tip7", None, None, 6, 6, 0, Some(tipModel50))
+		val tip8 = Tip("tip8", None, None, 7, 7, 0, Some(tipModel50))
 		
 		// Permanent tips at BSSE
 		state0.tip_model_m(tip1) = tipModel1000
 		state0.tip_model_m(tip2) = tipModel1000
 		state0.tip_model_m(tip3) = tipModel1000
 		state0.tip_model_m(tip4) = tipModel1000
+		state0.tip_model_m(tip5) = tipModel50
+		state0.tip_model_m(tip6) = tipModel50
+		state0.tip_model_m(tip7) = tipModel50
+		state0.tip_model_m(tip8) = tipModel50
 
 		val pipetterIdent = agentIdent+"_pipetter1"
 		val pipetter = new Pipetter(gid, Some(agentIdent+" LiHa"))
 		eb.addDevice(agent, pipetter, pipetterIdent)
-		eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4)
+		eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
 		eb.tipToTipModels_m(tip1) = List(tipModel1000)
 		eb.tipToTipModels_m(tip2) = List(tipModel1000)
 		eb.tipToTipModels_m(tip3) = List(tipModel1000)
 		eb.tipToTipModels_m(tip4) = List(tipModel1000)
+		eb.tipToTipModels_m(tip5) = List(tipModel50)
+		eb.tipToTipModels_m(tip6) = List(tipModel50)
+		eb.tipToTipModels_m(tip7) = List(tipModel50)
+		eb.tipToTipModels_m(tip8) = List(tipModel50)
 		// ENDFIX
 		
 		// Add labware on the table definition to the list of labware we're interested in
