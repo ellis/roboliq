@@ -208,7 +208,8 @@ object JshopTranslator {
 			// Filter for those tips which can be used with the tip model
 			tipCandidate_l = tip_l.filter(tip => protocol.eb.tipToTipModels_m.get(tip).map(_.contains(tipModel)).getOrElse(false))
 			// TODO: Need to choose pipette policy intelligently
-			pipettePolicy = PipettePolicy(spec.pipettePolicy_?.getOrElse("POLICY"), PipettePosition.Free)
+			pipettePolicy_s = spec.pipettePolicy_?.getOrElse("POLICY")
+			pipettePolicy = PipettePolicy(pipettePolicy_s, PipettePosition.getPositionFromPolicyNameHack(pipettePolicy_s))
 			// Run transfer planner to get pippetting batches
 			batch_l <- TransferPlanner.searchGraph(
 				device,

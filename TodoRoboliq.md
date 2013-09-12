@@ -11,7 +11,6 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
-- [ ] PipetteSpec: user manually specifies liquid class name, and verify whether that class exists, and automatically find its contact type (air, wet, dry)
 - [ ] PipetteSpec: user manually specifies tip handling and liquid class
 - [ ] PipetteSpec: user manually specifies tip handling
 - [ ] JshopTranslator: distribute: generate clean command
@@ -19,8 +18,8 @@ Details for before trip to Weizmann:
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] EvowareClientScriptBuilder: PipetterTipsClean
 - [ ] EvowareClientScriptBuilder: need to update tip states in pipetting commands
+- [ ] start testing PCR protocol with pipetting, sealing, thermocyling (without centrifugation or have user centrifuge)
 - [ ] Protocol: 'wellContents.name' => 'wellContents.well'
-- [ ] start testing more complete protocol for PCR (without centrifugation or have user centrifuge)
 - [ ] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [ ] create PCR command
 - [ ] run PCR protocol on our robot
@@ -53,6 +52,8 @@ Details for before trip to Weizmann:
 - [x] EvowareClientScriptBuilder: PipetterDispense
 
 Details for later:
+- [ ] rename PipettePosition to PipetteContact, with values Air, Wet, Dry
+- [ ] PipetteSpec: when user manually specifies liquid class name, verify whether that class exists, and automatically find its contact type (air, wet, dry).  Should start using EvowareLiquidClassParser.
 - [ ] peeler
 - [ ] pipetting and protocol: let liquid amounts be specified in concentrations
 - [ ] protocol: possibly let the user specify which wells should be considered as sources when searching for substances for creating mixtures

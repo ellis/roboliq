@@ -48,7 +48,7 @@ object PipettePosition extends Enumeration {
 	val Free, WetContact, DryContact = Value
 	
 	def getPositionFromPolicyNameHack(policy: String): PipettePosition.Value = {
-		if (policy.contains("Air")) PipettePosition.Free
+		if (policy.contains("Air") || policy.contains("_A_")) PipettePosition.Free
 		else if (policy.contains("Dry")) PipettePosition.DryContact
 		else PipettePosition.WetContact
 	}
