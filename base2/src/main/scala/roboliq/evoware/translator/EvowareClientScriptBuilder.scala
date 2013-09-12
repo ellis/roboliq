@@ -76,6 +76,10 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				val item = TranslationItem(L0C_Comment(text), Nil)
 				RsSuccess(TranslationResult(List(item), state0))
 			
+			case EvowareSubroutine(path) =>
+				val item = TranslationItem(L0C_Subroutine(path), Nil)
+				RsSuccess(TranslationResult(List(item), state0))
+			
 			case Prompt(text) =>
 				val item = TranslationItem(L0C_Prompt(text), Nil)
 				RsSuccess(TranslationResult(List(item), state0))

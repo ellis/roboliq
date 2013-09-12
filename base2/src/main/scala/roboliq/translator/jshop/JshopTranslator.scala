@@ -220,9 +220,33 @@ object JshopTranslator {
 				item_l
 			)
 		} yield {
+			val clean_l = {
+				spec.preClean_? match {
+					case Some(preClean) if preClean != CleanIntensity.None =>
+						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
+						// FIXME: This is a BSSE-specific HACK!
+						val b1000 = tip_l.exists(_.index < 4)
+						val b50 = tip_l.exists(_.index >= 4)
+						val sIntensity = preClean match {
+							case CleanIntensity.None => null
+							case CleanIntensity.Light => "Light"
+							case CleanIntensity.Thorough => "Thorough"
+							case CleanIntensity.Decontaminate => "Decontaminate"
+						}
+						val sScriptBase = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+sIntensity+"_"
+						val l1000 =
+							if (b1000) List(EvowareSubroutine(sScriptBase+"1000.esc"))
+							else Nil
+						val l50 =
+							if (b50) List(EvowareSubroutine(sScriptBase+"0050.esc"))
+							else Nil
+						l1000 ++ l50
+					case _ => Nil
+				}
+			}
 			// use the Batch list to create clean, aspirate, dispense commands
 			println("batch_l: "+batch_l)
-			batch_l.flatMap(batch => {
+			clean_l ++ batch_l.flatMap(batch => {
 				val twvpAsp0_l = batch.item_l.map(item => {
 					TipWellVolumePolicy(item.tip, item.src, item.volume, pipettePolicy)
 				})

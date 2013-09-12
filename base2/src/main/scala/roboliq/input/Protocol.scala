@@ -311,6 +311,10 @@ class Protocol {
 			case Some(JsString(pipettePolicy)) => Some(pipettePolicy)
 			case _ => None
 		}
+		val preClean_? : Option[CleanIntensity.Value] = fields.get("preClean") match {
+			case Some(JsString(s)) => Some(CleanIntensity.withName(s))
+			case _ => None
+		}
 		//println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
 		// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
 		// The script builder later lookups up the spec in the protocol.
@@ -320,7 +324,7 @@ class Protocol {
 			destination <- destination_?
 			volume <- volume_?
 		} yield {
-			PipetteSpec(source, destination, volume, pipettePolicy_?)
+			PipetteSpec(source, destination, volume, pipettePolicy_?, preClean_?)
 		}
 	}
 	

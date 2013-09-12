@@ -8,7 +8,8 @@ case class PipetteSpec(
 	source_l: List[(Labware, RowCol)],
 	destination_l: List[(Labware, RowCol)],
 	volume: LiquidVolume,
-	pipettePolicy_? : Option[String]
+	pipettePolicy_? : Option[String],
+	preClean_? : Option[CleanIntensity.Value]
 )
 
 case class PipetteSpecList(

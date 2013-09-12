@@ -341,3 +341,26 @@ lines: 219 - end
 
 continuation of previous section.
 
+PCR Test
+========
+
+date: 2013-09-12
+
+3ul thermopol buffer 10x
+3ul dNTPs 2mM each
+1.5 template 1:10
+1.5 FRO115 1:10
+1.5 FRO114 1:10
+1.5 Taq polymerase 1:10 (in 1x thermopol buffer)
+18ul water
+----
+30ul per well
+
+Amplified region in 1.4kb
+
+Thermocycler
+95 denaturing 3min
+
+
+elongation ~1.5min
+

@@ -1,15 +1,23 @@
 package roboliq.commands
 
 import roboliq.entities.TipWellVolumePolicy
+import roboliq.entities.CleanIntensity
+import roboliq.entities.Tip
 
 sealed trait Command
 
 case class AgentActivate() extends Command
 case class AgentDeactivate() extends Command
+case class EvowareSubroutine(path: String) extends Command
 case class Log(text: String) extends Command
 case class PipetterAspirate(
 	val item_l: List[TipWellVolumePolicy]
 ) extends Command
+
+case class PipetterWash(
+	tip_l: List[Tip],
+	intensity: CleanIntensity.Value
+)
 
 case class PipetterDispense(
 	val item_l: List[TipWellVolumePolicy]
