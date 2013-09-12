@@ -7,7 +7,8 @@ import roboliq.entities._
 case class PipetteSpec(
 	source_l: List[(Labware, RowCol)],
 	destination_l: List[(Labware, RowCol)],
-	volume: LiquidVolume
+	volume: LiquidVolume,
+	pipettePolicy_? : Option[String]
 )
 
 case class PipetteSpecList(

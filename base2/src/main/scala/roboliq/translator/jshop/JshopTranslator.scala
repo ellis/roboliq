@@ -207,13 +207,15 @@ object JshopTranslator {
 			tipModel = tipModelCandidate_l.head
 			// Filter for those tips which can be used with the tip model
 			tipCandidate_l = tip_l.filter(tip => protocol.eb.tipToTipModels_m.get(tip).map(_.contains(tipModel)).getOrElse(false))
+			// TODO: Need to choose pipette policy intelligently
+			pipettePolicy = PipettePolicy(spec.pipettePolicy_?.getOrElse("POLICY"), PipettePosition.Free)
 			// Run transfer planner to get pippetting batches
 			batch_l <- TransferPlanner.searchGraph(
 				device,
 				state0,
 				SortedSet(tipCandidate_l : _*),
 				itemToTipModel_m.head._2,
-				PipettePolicy("POLICY", PipettePosition.Free),
+				pipettePolicy,
 				item_l
 			)
 		} yield {
@@ -221,13 +223,13 @@ object JshopTranslator {
 			println("batch_l: "+batch_l)
 			batch_l.flatMap(batch => {
 				val twvpAsp0_l = batch.item_l.map(item => {
-					TipWellVolumePolicy(item.tip, item.src, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
+					TipWellVolumePolicy(item.tip, item.src, item.volume, pipettePolicy)
 				})
 				val twvpAsp_ll = device.groupSpirateItems(twvpAsp0_l, state0)
 				val asp_l = twvpAsp_ll.map(twvp_l => PipetterAspirate(twvp_l))
 
 				val twvpDis0_l = batch.item_l.map(item => {
-					TipWellVolumePolicy(item.tip, item.dst, item.volume, PipettePolicy("POLICY", PipettePosition.Free))
+					TipWellVolumePolicy(item.tip, item.dst, item.volume, pipettePolicy)
 				})
 				val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
 				val dis_l = twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l))

@@ -11,7 +11,9 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for before trip to Weizmann:
+- [ ] PipetteSpec: user manually specifies liquid class name, and verify whether that class exists, and automatically find its contact type (air, wet, dry)
 - [ ] PipetteSpec: user manually specifies tip handling and liquid class
+- [ ] PipetteSpec: user manually specifies tip handling
 - [ ] JshopTranslator: distribute: generate clean command
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
@@ -26,7 +28,8 @@ Details for before trip to Weizmann:
 - [ ] handle tubes
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
-- [ ] Protocol: means to specify which variables should be specified for each new lab, and let them be speficied in the protocol
+- [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] PipetteSpec: user manually specifies liquid class name
 - [x] L0C_Spirate: decimal point in volume is displayed as a comma on my mac
 - [x] pipetting: large tips are being chosen for small volumes instead of small tips
 - [x] Distribute task test: distribute from multiple wells

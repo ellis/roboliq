@@ -157,13 +157,13 @@ object JshopMain extends App {
 		],
 		"protocol": [
 			{ "command": "pipette", "steps": [
-				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "17ul" },
-				{ "command": "distribute", "source": "plate1(A02)", "destination": "plate2(A01 d D01)", "volume": "3ul" },
-				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul" },
-				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1ul" },
-				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul" },
-				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul" },
-				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "3ul" }
+				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "17ul", "pipettePolicy": "Water_C_1000" },
+				{ "command": "distribute", "source": "plate1(A02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Water_C_1000" },
+				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Water_C_1000" },
+				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1ul", "pipettePolicy": "Water_C_50" },
+				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50" },
+				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50" },
+				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Water_C_1000" }
 				]
 			}
 		]
