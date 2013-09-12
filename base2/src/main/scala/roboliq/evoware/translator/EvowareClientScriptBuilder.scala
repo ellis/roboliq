@@ -503,9 +503,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		for (item <- item_l) {
 			val iTip = item._1.tip.index
 			assert(iTip >= 0 && iTip < 12)
-			// HACK: robot is aborting when trying to aspirate <0.4ul from PCR well -- ellis, 2012-02-12
-			//val nVolume = if (sFunc == "Aspirate" && twv.volume < 0.4) 0.4 else twv.volume
-			asVolumes(iTip) = "\""+fmt.format(item._1.volume.ul.toDouble)+'"'
+			asVolumes(iTip) = ("\""+fmt.format(item._1.volume.ul.toDouble)+'"').replace(',', '.') // REFACTOR: rather than replacing ',' with '.', make sure that US locale is used for formatting
 		}
 
 		val iGrid = config.table.mapCarrierToGrid(siteE.carrier)
