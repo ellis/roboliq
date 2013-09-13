@@ -10,13 +10,21 @@ Current big steps:
 - [ ] Change domain to have a more generic concept of labware which subsumes sites, tubes, and plates.
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
+For Friday:
+- [ ] good cleaning commands
+- [?] add 'Decon' plate to bench.esc
+- [ ] seal
+- [ ] mix after dispense of taq
+- [ ] possibly take plate out of thermocycler
+- [ ] tell user to centrifuge
+
 Details for before trip to Weizmann:
 - [ ] PipetteSpec: user manually specifies tip handling
 - [ ] JshopTranslator: distribute: generate clean command
+- [ ] JshopTranslator: need much better tip cleaning algorithm
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] EvowareClientScriptBuilder: PipetterTipsClean
-- [ ] EvowareClientScriptBuilder: need to update tip states in pipetting commands
 - [ ] mixing and/or shaking
 - [ ] start testing PCR protocol with pipetting, sealing, thermocyling (without centrifugation or have user centrifuge)
 - [ ] Protocol: 'wellContents.name' => 'wellContents.well'
@@ -28,6 +36,7 @@ Details for before trip to Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [ ] PipetteSpec: allow user to manually specify tip model
 - [x] PipetteSpec: user manually specifies liquid class name
 - [x] L0C_Spirate: decimal point in volume is displayed as a comma on my mac
 - [x] pipetting: large tips are being chosen for small volumes instead of small tips
@@ -52,6 +61,9 @@ Details for before trip to Weizmann:
 - [x] EvowareClientScriptBuilder: PipetterDispense
 
 Details for later:
+- [ ] instructions to turn on cooler and pump for PCR protocols
+- [ ] ensure that PCR plates are on cooled carriers
+- [ ] re-import TipEvents
 - [ ] rename PipettePosition to PipetteContact, with values Air, Wet, Dry
 - [ ] PipetteSpec: when user manually specifies liquid class name, verify whether that class exists, and automatically find its contact type (air, wet, dry).  Should start using EvowareLiquidClassParser.
 - [ ] peeler
@@ -69,6 +81,7 @@ Details for later:
 - [ ] Protocol: handle wells with aliquot contents
 - [ ] function from Aliquot + events => Aliquot
 - [ ] Extend JshopMain, Protocol, EvowareClientScriptBuilder to handle a pipette command
+- [ ] WashProgram: config for specifying wash programs; see also TipCleanEvent
 - [x] JshopTranslator: distribute: generate dispense command
 - [x] adapt VesselState, VesselContents for new system
 - [x] TipWell.equidistant3: figure out where to calculate row/col from platemodel and well index

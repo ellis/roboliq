@@ -12,6 +12,8 @@ import roboliq.pipette.planners.TipModelSearcher1
 import scala.collection.immutable.SortedSet
 import roboliq.commands.PipetterAspirate
 import roboliq.input.PipetteSpecList
+import roboliq.pipette.planners.PipetteHelper
+import roboliq.entities.TipHandlingOverrides
 
 object JshopTranslator {
 	
@@ -94,6 +96,9 @@ object JshopTranslator {
 				val text = protocol.idToObject(textIdent).toString
 				RsSuccess(List(Log(text)))
 			case "pipetter-run" =>
+				// TODO: the details of how to handle pipetting depends on the agent.
+				// For the user agent, we should have a single command, whereas for Evoware, we need to do a lot of processing.
+				// Possibly take that into consideration, and let the builder process the operator?
 				val specIdent = arg_l(1)
 				protocol.idToObject(specIdent) match {
 					case spec: PipetteSpecList => {
@@ -220,14 +225,15 @@ object JshopTranslator {
 				item_l
 			)
 		} yield {
-			val clean_l = {
-				spec.preClean_? match {
-					case Some(preClean) if preClean != CleanIntensity.None =>
+			val cleanBefore_l = {
+				spec.cleanBefore_? match {
+					case Some(intensity) if intensity != CleanIntensity.None =>
 						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
+						
 						// FIXME: This is a BSSE-specific HACK!
 						val b1000 = tip_l.exists(_.index < 4)
 						val b50 = tip_l.exists(_.index >= 4)
-						val sIntensity = preClean match {
+						val sIntensity = intensity match {
 							case CleanIntensity.None => null
 							case CleanIntensity.Light => "Light"
 							case CleanIntensity.Thorough => "Thorough"
@@ -240,13 +246,54 @@ object JshopTranslator {
 						val l50 =
 							if (b50) List(EvowareSubroutine(sScriptBase+"0050.esc"))
 							else Nil
-						l1000 ++ l50
+						val refresh = PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+							(tip, intensity, Some(tipModel))
+						}))
+						/*l1000 ++ l50 ++*/ List(refresh)
+					case _ => Nil
+				}
+			}
+			val cleanAfter_l = {
+				// REFACTOR: duplicates code above
+				spec.cleanAfter_? match {
+					case Some(intensity) if intensity != CleanIntensity.None =>
+						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
+						// FIXME: This is a BSSE-specific HACK!
+						val b1000 = tip_l.exists(_.index < 4)
+						val b50 = tip_l.exists(_.index >= 4)
+						val sIntensity = intensity match {
+							case CleanIntensity.None => null
+							case CleanIntensity.Light => "Light"
+							case CleanIntensity.Thorough => "Thorough"
+							case CleanIntensity.Decontaminate => "Decontaminate"
+						}
+						val sScriptBase = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+sIntensity+"_"
+						val l1000 =
+							if (b1000) List(EvowareSubroutine(sScriptBase+"1000.esc"))
+							else Nil
+						val l50 =
+							if (b50) List(EvowareSubroutine(sScriptBase+"0050.esc"))
+							else Nil
+						val refresh = PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+							(tip, intensity, Some(tipModel))
+						}))
+						/*l1000 ++ l50 ++*/ List(refresh)
 					case _ => Nil
 				}
 			}
 			// use the Batch list to create clean, aspirate, dispense commands
 			println("batch_l: "+batch_l)
-			clean_l ++ batch_l.flatMap(batch => {
+			val aspdis_l = batch_l.flatMap(batch => {
+				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanBefore_?, None, None, None)
+				val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {
+					val mixtureSrc = state0.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
+					val mixtureDst = state0.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
+					val tipState = state0.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+					val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, mixtureSrc, tipState)
+					val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverridesAsp, mixtureSrc, mixtureDst, tipState)
+					val washSpec = washSpecAsp + washSpecDis
+					(item.tip, washSpec.washIntensity, Some(tipModel))
+				}))
 				val twvpAsp0_l = batch.item_l.map(item => {
 					TipWellVolumePolicy(item.tip, item.src, item.volume, pipettePolicy)
 				})
@@ -259,8 +306,10 @@ object JshopTranslator {
 				val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
 				val dis_l = twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l))
 				
-				asp_l ++ dis_l
+				refresh :: asp_l ++ dis_l
 			})
+			// TODO: add a PipetterTipsRefresh command at the end
+			cleanBefore_l ++ aspdis_l ++ cleanAfter_l
 		}
 	}
 }

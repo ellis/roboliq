@@ -73,7 +73,7 @@ class Protocol {
 		sealerSpec_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf"""))
 		sealerSpecRel_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
 		
-		thermocyclerSpec_l += (("thermocyclerSpec1", "0.3"))
+		thermocyclerSpec_l += (("thermocyclerSpec1", "1.0"))
 		thermocyclerSpecRel_l += (("r1_thermocycler1", "thermocyclerSpec1"))
 	}
 
@@ -311,7 +311,11 @@ class Protocol {
 			case Some(JsString(pipettePolicy)) => Some(pipettePolicy)
 			case _ => None
 		}
-		val preClean_? : Option[CleanIntensity.Value] = fields.get("preClean") match {
+		val cleanBefore_? : Option[CleanIntensity.Value] = fields.get("cleanBefore") match {
+			case Some(JsString(s)) => Some(CleanIntensity.withName(s))
+			case _ => None
+		}
+		val cleanAfter_? : Option[CleanIntensity.Value] = fields.get("cleanAfter") match {
 			case Some(JsString(s)) => Some(CleanIntensity.withName(s))
 			case _ => None
 		}
@@ -324,7 +328,7 @@ class Protocol {
 			destination <- destination_?
 			volume <- volume_?
 		} yield {
-			PipetteSpec(source, destination, volume, pipettePolicy_?, preClean_?)
+			PipetteSpec(source, destination, volume, pipettePolicy_?, cleanBefore_?, cleanAfter_?)
 		}
 	}
 	

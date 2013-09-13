@@ -157,26 +157,17 @@ object JshopMain extends App {
 		],
 		"protocol": [
 			{ "command": "pipette", "steps": [
-				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "18ul", "pipettePolicy": "Water_C_1000", "preClean": "Thorough" },
+				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "18ul", "pipettePolicy": "Water_C_1000", "cleanBefore": "Thorough" },
 				{ "command": "distribute", "source": "plate1(A02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Water_C_1000" },
-				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Water_C_1000", "preClean": "Decontaminate" },
-				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "preClean": "Decontaminate" },
-				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "preClean": "Decontaminate" },
-				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "preClean": "Decontaminate" },
-				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "preClean": "Decontaminate" }
+				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Water_C_1000", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Water_C_50", "cleanBefore": "Decontaminate" }
 				]
 			}
 		]
 		}""",
-/*
-				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "17ul" },
-				{ "command": "distribute", "source": "plate1(A02)", "destination": "plate2(A01 d D01)", "volume": "3ul" },
-				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul" },
-				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1ul" },
-				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul" },
-				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul" },
-				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "3ul" }
-*/
 		"""(!agent-activate user)
 (!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
 (!agent-deactivate user)
@@ -189,6 +180,67 @@ object JshopMain extends App {
 (!agent-activate r1)
 (!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
 (!pipetter-run r1 r1_pipetter1 spec0003)
+		"""
+	)
+	
+	val pi = (
+		"""{
+		"substances": [
+			{ "name": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" },
+			{ "name": "buffer10x", "kind": "Liquid", "tipCleanPolicy": "Thorough" },
+			{ "name": "dntp", "kind": "Liquid", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "taqdiluted", "kind": "Liquid", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "template", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "primer1", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "primer2", "kind": "Dna", "tipCleanPolicy": "Decontaminate" }
+		],
+		"plates": [
+			{ "name": "plate1", "model": "Thermocycler Plate", "location": "offsite"},
+			{ "name": "plate2", "model": "Thermocycler Plate", "location": "offsite"}
+		],
+		"wellContents": [
+			{ "name": "plate1(A01 d D01)", "contents": "water@200ul" },
+			{ "name": "plate1(A02)", "contents": "buffer10x@200ul" },
+			{ "name": "plate1(B02)", "contents": "dntp@200ul" },
+			{ "name": "plate1(C02)", "contents": "template@200ul" },
+			{ "name": "plate1(D02)", "contents": "primer1@200ul" },
+			{ "name": "plate1(E02)", "contents": "primer2@200ul" },
+			{ "name": "plate1(F02)", "contents": "taqdiluted@200ul" }
+		],
+		"protocol": [
+			{ "command": "pipette", "steps": [
+				{ "command": "distribute", "source": "plate1(A01 d D01)", "destination": "plate2(A01 d D01)", "volume": "18ul", "pipettePolicy": "Roboliq_Water_Wet_1000", "cleanBefore": "Thorough" },
+				{ "command": "distribute", "source": "plate1(A02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Roboliq_Water_Wet_1000" },
+				{ "command": "distribute", "source": "plate1(B02)", "destination": "plate2(A01 d D01)", "volume": "3ul", "pipettePolicy": "Roboliq_Water_Wet_1000", "cleanBefore": "Decontaminate", "cleanAfter": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(C02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Roboliq_Water_Wet_0050", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(D02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Roboliq_Water_Wet_0050", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(E02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Roboliq_Water_Wet_0050", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "plate1(F02)", "destination": "plate2(A01 d D01)", "volume": "1.5ul", "pipettePolicy": "Roboliq_Glycerol_Wet_0050", "cleanBefore": "Decontaminate", "cleanAfter": "Decontaminate" }
+				]
+			},
+			{ "command": "thermocycle", "object": "plate1", "spec": "thermocyclerSpec1" }
+		]
+		}""",
+		"""(!agent-activate user)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
+(!agent-deactivate r1)
+(!agent-activate user)
+(!transporter-run user userarm plate2 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_bench_017x1 r1_device_236x1 r1_transporterspec0)
+(!sealer-run r1 r1_sealer sealerspec1 plate1 r1_device_236x1)
+(!thermocycler-open r1 r1_thermocycler1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_device_236x1 r1_device_234x1 r1_transporterspec0)
+(!thermocycler-close r1 r1_thermocycler1)
+(!thermocycler-run r1 r1_thermocycler1 thermocyclerspec1)
+(!thermocycler-open r1 r1_thermocycler1)
+(!thermocycler-close r1 r1_thermocycler1)
 		"""
 	)
 	
@@ -231,5 +283,6 @@ object JshopMain extends App {
 	//run("pd", pd._1, pd._2)
 	//run("pf", pf._1, pf._2)
 	//run("pg", pg._1, pg._2)
-	run("ph", ph._1, ph._2)
+	//run("ph", ph._1, ph._2)
+	run("pi", pi._1, pi._2)
 }

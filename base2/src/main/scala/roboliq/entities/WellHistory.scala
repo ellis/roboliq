@@ -2,6 +2,7 @@ package roboliq.entities
 
 import scalaz._
 import Scalaz._
+import roboliq.core._
 
 sealed trait WellEvent
 
@@ -51,13 +52,23 @@ case class WellEvent_Dispense(
 
 case class Aliquot(
 	mixture: Mixture,
-	distrubtion: Distribution
+	distribution: Distribution
 ) {
-	/*
-	def flatten: AliquotFlat =
-		AliquotFlat(
-		)
-	*/
+	def add(that: Aliquot): RsResult[Aliquot] = {
+		for {
+			distribution_~ <- distribution.add(that.distribution)
+		} yield {
+			Aliquot(Mixture(Right(List(this, that))), distribution_~)
+		}
+	}
+	
+	def remove(amount: Distribution): RsResult[Aliquot] = {
+		for {
+			amount_~ <-  distribution.subtract(amount)
+		} yield {
+			Aliquot(mixture, amount_~)
+		}
+	}
 }
 
 object Aliquot {

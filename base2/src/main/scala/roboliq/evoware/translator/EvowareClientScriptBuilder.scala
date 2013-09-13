@@ -142,6 +142,9 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			case cmd: PipetterDispense =>
 				dispense(protocol, state0, identToAgentObject_m, cmd.item_l)
 				
+			case cmd: PipetterTipsRefresh =>
+				pipetterTipsRefresh(protocol, state0, identToAgentObject_m, cmd)
+				
 			case cmd: SealerRun =>
 				for {
 					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
@@ -533,6 +536,58 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		}
 	}
 
+	private def pipetterTipsRefresh(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		cmd: PipetterTipsRefresh
+	): RqResult[TranslationResult] = {
+		pipetterTipsRefresh_BSSE(protocol, state0, identToAgentObject_m, cmd)
+	}
+
+	// FIXME: This is a BSSE-specific HACK.  The function for handling this command should be loaded from a config file.
+	private def pipetterTipsRefresh_BSSE(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		cmd: PipetterTipsRefresh
+	): RqResult[TranslationResult] = {
+		val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1))
+		val tip1000_l = tipAll_l.filter(_.index < 4)
+		val tip0050_l = tipAll_l.filter(_.index >= 4)
+		val item1000_l = cmd.item_l.filter(_._1.index < 4)
+		val item0050_l = cmd.item_l.filter(_._1.index >= 4)
+		
+		val state = state0.toMutable
+		def doit(item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])], tip_l: List[Tip], suffix: String): Option[TranslationItem] = {
+			item_l match {
+				case Nil => None
+				case item0 :: rest =>
+					val intensity: CleanIntensity.Value = rest.foldLeft(item0._2){(acc, item) => CleanIntensity.max(acc, item._2)}
+					val intensity_s_? = intensity match {
+						case CleanIntensity.None => None
+						case CleanIntensity.Light => Some("Light")
+						case CleanIntensity.Thorough => Some("Thorough")
+						case CleanIntensity.Decontaminate => Some("Decontaminate")
+					}
+					intensity_s_?.map { intensity_s =>
+						// Set tip state to clean for the four tips that are being washed
+						tip_l.foreach { tip =>
+							val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+							val event = TipCleanEvent(tip, intensity)
+							state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
+						}
+						// Call the appropriate subroutine for cleaning
+						val path = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+intensity_s+"_"+suffix+".esc"
+						TranslationItem(L0C_Subroutine(path), Nil)
+					}
+			}
+		}
+		
+		val translationItem_l = List(doit(item1000_l, tip1000_l, "1000"), doit(item0050_l, tip0050_l, "0050")).flatten
+		RsSuccess(TranslationResult(translationItem_l, state.toImmutable))
+	}
+	
 	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
 	private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
 	

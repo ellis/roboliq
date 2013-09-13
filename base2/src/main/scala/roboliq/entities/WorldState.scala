@@ -20,6 +20,7 @@ case class WorldState(
 	//truth: Set[Rel],
 	//properties: Map[WorldProperty.Value, Map[List[Object], Object]],
 	tip_model_m: Map[Tip, TipModel],
+	tip_state_m: Map[Tip, TipState],
 	labware_model_m: Map[Labware, LabwareModel],
 	// Labware can either be on a site or another piece of labware
 	labware_location_m: Map[Labware, Entity],
@@ -83,6 +84,7 @@ case class WorldState(
 		val self = this
 		new WorldStateBuilder {
 			tip_model_m ++= self.tip_model_m
+			tip_state_m ++= self.tip_state_m
 			labware_model_m ++= self.labware_model_m
 			labware_location_m ++= self.labware_location_m
 			labware_isSealed_l ++= self.labware_isSealed_l
@@ -99,6 +101,7 @@ case class WorldState(
 
 class WorldStateBuilder {
 	val tip_model_m = new HashMap[Tip, TipModel]
+	val tip_state_m = new HashMap[Tip, TipState]
 	val labware_model_m = new HashMap[Labware, LabwareModel]
 	val labware_location_m = new HashMap[Labware, Entity] 
 	val labware_isSealed_l = new HashSet[Labware]
@@ -123,6 +126,7 @@ class WorldStateBuilder {
 	def toImmutable = {
 		WorldState(
 			tip_model_m.toMap,
+			tip_state_m.toMap,
 			labware_model_m.toMap,
 			labware_location_m.toMap,
 			labware_isSealed_l.toSet,

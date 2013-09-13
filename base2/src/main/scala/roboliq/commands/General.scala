@@ -1,8 +1,6 @@
 package roboliq.commands
 
-import roboliq.entities.TipWellVolumePolicy
-import roboliq.entities.CleanIntensity
-import roboliq.entities.Tip
+import roboliq.entities._
 
 sealed trait Command
 
@@ -14,13 +12,19 @@ case class PipetterAspirate(
 	val item_l: List[TipWellVolumePolicy]
 ) extends Command
 
-case class PipetterWash(
+/*case class PipetterWash(
 	tip_l: List[Tip],
 	intensity: CleanIntensity.Value
-)
+)*/
 
 case class PipetterDispense(
 	val item_l: List[TipWellVolumePolicy]
+) extends Command
+
+case class PipetterTipsRefresh(
+	device: Pipetter,
+	// tip, clean intensity, tipModel_?
+	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
 ) extends Command
 
 case class Prompt(text: String) extends Command

@@ -25,8 +25,8 @@ case class TipState(
 	val contamInside: Set[String], 
 	val nContamInsideVolume: LiquidVolume,
 	val contamOutside: Set[String],
-	val srcsEntered: Set[Liquid],
-	val destsEntered: Set[Liquid],
+	val srcsEntered: Set[Mixture],
+	val destsEntered: Set[Mixture],
 	val cleanDegree: CleanIntensity.Value,
 	val cleanDegreePrev: CleanIntensity.Value,
 	/** Intensity of cleaning that should be performed after leaving the current liquid group */
@@ -60,6 +60,23 @@ object TipState {
 		cleanDegreePrev = CleanIntensity.None,
 		cleanDegreePending = CleanIntensity.None
 	)
+	
+	/*
+	/** Create an initial state for `tip` with no liquid in it. */
+	def createClean(tip: Tip, model_? : Option[TipModel], cleanIntensity: CleanIntensity.Value) = TipState(
+		conf = tip,
+		model_? = model_?,
+		src_? = None,
+		content = Aliquot.empty,
+		contamInside = Set(),
+		nContamInsideVolume = LiquidVolume.empty,
+		contamOutside = Set(),
+		srcsEntered = Set(),
+		destsEntered = Set(),
+		cleanDegree = cleanIntensity,
+		cleanDegreePrev = cleanIntensity,
+		cleanDegreePending = CleanIntensity.None
+	)*/
 	
 	implicit def toTip(o: TipState): Tip = o.conf
 }

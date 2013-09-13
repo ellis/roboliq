@@ -349,18 +349,18 @@ date: 2013-09-12
 3ul thermopol buffer 10x
 3ul dNTPs 2mM each
 1.5 template 1:10
-1.5 FRO115 1:10
-1.5 FRO114 1:10
-1.5 Taq polymerase 1:10 (in 1x thermopol buffer)
+1.5 FRO115 1:10 (primer)
+1.5 FRO114 1:10 (primer)
+1.5 Taq polymerase diluted 1:10 (in 1x thermopol buffer)
 18ul water
 ----
 30ul per well
 
-Amplified region in 1.4kb
+Amplified region in 1.4kb, elongation time ~1.5min
 
-Thermocycler
-95 denaturing 3min
+Used program TaqPCR4 in dir 1 prg 0 on TRobot1.
 
+MISTAKE: I forgot to seal the plate before thermocycling.
 
-elongation ~1.5min
+However, the result was successful, the gel turned out fine with the correct readout.
 
