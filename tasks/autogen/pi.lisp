@@ -97,6 +97,7 @@
   (is-model sm2)
   (is-model sm3)
   (is-peeler r1_peeler) ; RoboPeel
+  (is-peelerSpec peelerSpec1)
   (is-pipetter r1_pipetter1) ; r1 LiHa
   (is-plate plate1)
   (is-plate plate2)
@@ -216,6 +217,7 @@
   (device-can-site r1_peeler r1_device_237x1)
   (device-can-site r1_sealer r1_device_236x1)
   (device-can-site r1_thermocycler1 r1_device_234x1)
+  (device-can-spec r1_peeler peelerSpec1)
   (device-can-spec r1_sealer sealerSpec1)
   (device-can-spec r1_thermocycler1 thermocyclerSpec1)
   (device-can-spec r1_transporter1 r1_transporterSpec0)
@@ -287,6 +289,7 @@
   (model r1_hotel_85x5 sm3)
   (location plate1 offsite)
   (location plate2 offsite)
+  (device-spec-can-model r1_peeler peelerSpec1 m002)
   (device-spec-can-model r1_sealer sealerSpec1 m002)
   (transporter-can r1_transporter1 r1_bench_010x1 r1_transporterSpec0)
   (transporter-can r1_transporter1 r1_bench_010x2 r1_transporterSpec0)

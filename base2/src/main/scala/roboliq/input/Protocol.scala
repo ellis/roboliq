@@ -25,15 +25,12 @@ class Protocol {
 	private def gid: String = java.util.UUID.randomUUID().toString()
 	private def nvar: Int = { var_i += 1; var_i }
 	
-	/** Tuple: (specIdent, filepath) */
-	val sealerSpec_l = new ArrayBuffer[(String, String)]
-	/** Tuple: (deviceIdent, evoware plate model ID, specIdent) */
-	val sealerSpecRel_l = new ArrayBuffer[(String, String, String)]
-	
-	/** Tuple: (specIdent, dir.prog) */
-	val thermocyclerSpec_l = new ArrayBuffer[(String, String)]
-	/** Tuple: (deviceIdent, specIdent) */
-	val thermocyclerSpecRel_l = new ArrayBuffer[(String, String)]
+	/** Specs which consists of a single string.  This is a list of tuples (specIdent, string) */
+	val specToString_l = new ArrayBuffer[(String, String)]
+	/** Valid device+spec combinations.  List of tuples (deviceIdent, specIdent) */
+	val deviceToSpec_l = new ArrayBuffer[(String, String)]
+	/** Valid device+model+spec combinations.  List of tuples (deviceIdent, evoware plate model ID, specIdent) */
+	val deviceToModelToSpec_l = new ArrayBuffer[(String, String, String)]
 	
 	val nameToSubstance_m = new HashMap[String, Substance]
 	/**
@@ -70,11 +67,49 @@ class Protocol {
 		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
 		
 		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
-		sealerSpec_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_blau.bcf"""))
-		sealerSpecRel_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
+		specToString_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
+		deviceToModelToSpec_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
+
+		specToString_l += (("peelerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
+		deviceToModelToSpec_l += (("r1_peeler", "D-BSSE 96 Well PCR Plate", "peelerSpec1"))
 		
-		thermocyclerSpec_l += (("thermocyclerSpec1", "1.0"))
-		thermocyclerSpecRel_l += (("r1_thermocycler1", "thermocyclerSpec1"))
+		specToString_l += (("thermocyclerSpec1", "1.0"))
+		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
+	}
+
+	/**
+	 * This should eventually load a YAML file.
+	 * For now it's just hard-coded for my testing purposes.
+	 */
+	def loadConfig_Weizmann() {
+		import roboliq.entities._
+		
+		val user = Agent(gid, Some("user"))
+		val offsite = Site(gid, Some("offsite"))
+		val shakerSpec1 = ShakerSpec(gid)
+		val thermocyclerSpec1 = ThermocyclerSpec(gid)
+		
+		eb.addAlias("Thermocycler Plate", "D-BSSE 96 Well PCR Plate")
+		eb.addAgent(user, "user")
+		eb.addModel(offsiteModel, "offsiteModel")
+		eb.addSite(offsite, "offsite")
+		eb.addDevice(user, userArm, "userArm")
+		eb.addDeviceSpec(userArm, userArmSpec, "userArmSpec")
+		
+		// userArm can transport from offsite
+		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
+		// A few other user-specified sites where the user can put plates on the robot
+		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
+		
+		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
+		specToString_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
+		deviceToModelToSpec_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
+
+		specToString_l += (("peelerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
+		deviceToModelToSpec_l += (("r1_peeler", "D-BSSE 96 Well PCR Plate", "peelerSpec1"))
+		
+		specToString_l += (("thermocyclerSpec1", "1.0"))
+		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
 	}
 
 	def loadJson(jsobj: JsObject) {
@@ -190,6 +225,22 @@ class Protocol {
 												tasks += Rel("!log", List(agent, textId))
 											case _ =>
 										}
+									case Some(JsString("move")) =>
+										//val agent = x(fields, "agent")
+										//val device = x(fields, "device")
+										val labware = fields("labware").asInstanceOf[JsString].value
+										val destination = fields("destination").asInstanceOf[JsString].value
+										tasks += Rel("move-labware", List(labware, destination))
+									case Some(JsString("peel")) =>
+										fields.get("object") match {
+											case Some(JsString(key)) =>
+												val agent = f"?a$nvar%04d"
+												val device = f"?d$nvar%04d"
+												val plate = eb.getEntity(key).get.asInstanceOf[Labware]
+												val plateName = eb.names(plate)
+												tasks += Rel("peeler-run", List(agent, device, plateName, f"?s$nvar%04d"))
+											case _ =>
+										}
 									case Some(JsString("prompt")) =>
 										fields.get("text") match {
 											case Some(JsString(text)) =>
@@ -200,12 +251,6 @@ class Protocol {
 												tasks += Rel("!prompt", List(agent, textId))
 											case _ =>
 										}
-									case Some(JsString("move")) =>
-										//val agent = x(fields, "agent")
-										//val device = x(fields, "device")
-										val labware = fields("labware").asInstanceOf[JsString].value
-										val destination = fields("destination").asInstanceOf[JsString].value
-										tasks += Rel("move-labware", List(labware, destination))
 									case Some(JsString("seal")) =>
 										fields.get("object") match {
 											case Some(JsString(key)) =>
@@ -364,44 +409,68 @@ class Protocol {
 		val identToAgentObject = new HashMap[String, Object]
 		agentToIdentToInternalObject(agentIdent) = identToAgentObject
 
-		// FIXME: This doesn't belong here at all!
-		val labwareNamesOfInterest_l = new HashSet[String]
-		labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
-		labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
-		val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
-		val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
-		
-		val tip1 = Tip("tip1", None, None, 0, 0, 0, Some(tipModel1000))
-		val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
-		val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
-		val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
-		val tip5 = Tip("tip5", None, None, 4, 4, 0, Some(tipModel50))
-		val tip6 = Tip("tip6", None, None, 5, 5, 0, Some(tipModel50))
-		val tip7 = Tip("tip7", None, None, 6, 6, 0, Some(tipModel50))
-		val tip8 = Tip("tip8", None, None, 7, 7, 0, Some(tipModel50))
-		
-		// Permanent tips at BSSE
-		state0.tip_model_m(tip1) = tipModel1000
-		state0.tip_model_m(tip2) = tipModel1000
-		state0.tip_model_m(tip3) = tipModel1000
-		state0.tip_model_m(tip4) = tipModel1000
-		state0.tip_model_m(tip5) = tipModel50
-		state0.tip_model_m(tip6) = tipModel50
-		state0.tip_model_m(tip7) = tipModel50
-		state0.tip_model_m(tip8) = tipModel50
-
 		val pipetterIdent = agentIdent+"_pipetter1"
 		val pipetter = new Pipetter(gid, Some(agentIdent+" LiHa"))
 		eb.addDevice(agent, pipetter, pipetterIdent)
-		eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
-		eb.tipToTipModels_m(tip1) = List(tipModel1000)
-		eb.tipToTipModels_m(tip2) = List(tipModel1000)
-		eb.tipToTipModels_m(tip3) = List(tipModel1000)
-		eb.tipToTipModels_m(tip4) = List(tipModel1000)
-		eb.tipToTipModels_m(tip5) = List(tipModel50)
-		eb.tipToTipModels_m(tip6) = List(tipModel50)
-		eb.tipToTipModels_m(tip7) = List(tipModel50)
-		eb.tipToTipModels_m(tip8) = List(tipModel50)
+
+		// FIXME: This doesn't belong here at all!
+		val labwareNamesOfInterest_l = new HashSet[String]
+		def bsse() {
+			labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
+			labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
+			val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
+			val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
+			
+			val tip1 = Tip("tip1", None, None, 0, 0, 0, Some(tipModel1000))
+			val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
+			val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
+			val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
+			val tip5 = Tip("tip5", None, None, 4, 4, 0, Some(tipModel50))
+			val tip6 = Tip("tip6", None, None, 5, 5, 0, Some(tipModel50))
+			val tip7 = Tip("tip7", None, None, 6, 6, 0, Some(tipModel50))
+			val tip8 = Tip("tip8", None, None, 7, 7, 0, Some(tipModel50))
+			
+			// Permanent tips at BSSE
+			state0.tip_model_m(tip1) = tipModel1000
+			state0.tip_model_m(tip2) = tipModel1000
+			state0.tip_model_m(tip3) = tipModel1000
+			state0.tip_model_m(tip4) = tipModel1000
+			state0.tip_model_m(tip5) = tipModel50
+			state0.tip_model_m(tip6) = tipModel50
+			state0.tip_model_m(tip7) = tipModel50
+			state0.tip_model_m(tip8) = tipModel50
+	
+			eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
+			eb.tipToTipModels_m(tip1) = List(tipModel1000)
+			eb.tipToTipModels_m(tip2) = List(tipModel1000)
+			eb.tipToTipModels_m(tip3) = List(tipModel1000)
+			eb.tipToTipModels_m(tip4) = List(tipModel1000)
+			eb.tipToTipModels_m(tip5) = List(tipModel50)
+			eb.tipToTipModels_m(tip6) = List(tipModel50)
+			eb.tipToTipModels_m(tip7) = List(tipModel50)
+			eb.tipToTipModels_m(tip8) = List(tipModel50)
+		}
+		def weizmann() {
+			labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
+			labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
+			val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
+			val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
+			val tipModel_l = List(tipModel50, tipModel1000)
+			
+			val tip1 = Tip("tip1", None, None, 0, 0, 0, None)
+			val tip2 = Tip("tip2", None, None, 1, 1, 0, None)
+			val tip3 = Tip("tip3", None, None, 2, 2, 0, None)
+			val tip4 = Tip("tip4", None, None, 3, 3, 0, None)
+			val tip5 = Tip("tip5", None, None, 4, 4, 0, None)
+			val tip6 = Tip("tip6", None, None, 5, 5, 0, None)
+			val tip7 = Tip("tip7", None, None, 6, 6, 0, None)
+			val tip8 = Tip("tip8", None, None, 7, 7, 0, None)
+			val tip_l = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
+			
+			eb.pipetterToTips_m(pipetter) = tip_l
+			tip_l.foreach(tip => eb.tipToTipModels_m(tip) = tipModel_l)
+		}
+		weizmann()
 		// ENDFIX
 		
 		// Add labware on the table definition to the list of labware we're interested in
@@ -600,19 +669,27 @@ class Protocol {
 			addDevice0(device, deviceName, carrierE)
 		}
 		
+		def addPeeler(
+			deviceName: String,
+			carrierE: roboliq.evoware.parser.Carrier
+		): Device = {
+			val device = new Peeler(gid, Some(carrierE.sName))
+			addDevice0(device, deviceName, carrierE)
+		}
+		
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
 			carrierE.sName match {
 				case "RoboSeal" =>
 					val deviceIdent = agentIdent+"_sealer"
 					val device = addSealer(deviceIdent, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, plateModelId, specIdent) <- sealerSpecRel_l if deviceIdent2 == deviceIdent) {
+					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
 						// Get or create the sealer spec for specIdent
 						val spec: SealerSpec = eb.getEntity(specIdent) match {
 							case Some(spec) => spec.asInstanceOf[SealerSpec]
 							case None =>
 								// Store the evoware string for this spec
-								val internal = sealerSpec_l.find(_._1 == specIdent).get._2
+								val internal = specToString_l.find(_._1 == specIdent).get._2
 								identToAgentObject(specIdent.toLowerCase) = internal
 								SealerSpec(gid, None, Some(internal))
 						}
@@ -624,18 +701,37 @@ class Protocol {
 						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
 					}
 				case "RoboPeel" =>
-					addDevice("peeler", agentIdent+"_peeler", carrierE)
+					val deviceIdent = agentIdent+"_peeler"
+					val device = addPeeler(deviceIdent, carrierE)
+					// Add user-defined specs for this device
+					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
+						// Get or create the sealer spec for specIdent
+						val spec: PeelerSpec = eb.getEntity(specIdent) match {
+							case Some(spec) => spec.asInstanceOf[PeelerSpec]
+							case None =>
+								// Store the evoware string for this spec
+								val internal = specToString_l.find(_._1 == specIdent).get._2
+								identToAgentObject(specIdent.toLowerCase) = internal
+								PeelerSpec(gid, None, Some(internal))
+						}
+						// Register the spec
+						eb.addDeviceSpec(device, spec, specIdent)
+						// Let entity base know that that the spec can be used for the plate model
+						val plateModel = idToModel_m(plateModelId)
+						val plateModelIdent = eb.getIdent(plateModel).toOption.get
+						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
+					}
 				case "TRobot1" =>
 					val deviceIdent = agentIdent+"_thermocycler1"
 					val device = addDevice0(new Thermocycler(gid, Some(carrierE.sName)), deviceIdent, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, specIdent) <- thermocyclerSpecRel_l if deviceIdent2 == deviceIdent) {
+					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
 						// Get or create the spec for specIdent
 						val spec: ThermocyclerSpec = eb.getEntity(specIdent) match {
 							case Some(spec) => spec.asInstanceOf[ThermocyclerSpec]
 							case None =>
 								// Store the evoware string for this spec
-								val internal = thermocyclerSpec_l.find(_._1 == specIdent).get._2
+								val internal = specToString_l.find(_._1 == specIdent).get._2
 								identToAgentObject(specIdent.toLowerCase) = internal
 								ThermocyclerSpec(gid, None, Some(internal))
 						}

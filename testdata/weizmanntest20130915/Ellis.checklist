@@ -1,0 +1,48 @@
+Plates defined in the Script
+============================
+
+ Plate PCR1 used in pos P7
+ Plate TEMPLATE1 used in pos P4
+ Plate PRIMER1 used in pos P13
+
+
+Make sure of the following before starting the script
+=====================================================
+
+
+
+Total Reagents Consumption Report
+=======================================
+
++-------------------------------------------------------------------------+
+| Reagent       | Rack  | First | # of  | Total  |   +   | In each|   +   |
+|               |       | Well  | Tubes | Volume | Spare |  Tube  | Spare |
++-------------------------------------------------------------------------+
+| KOD           | T10   |    1  |   4   |     32 |   236 |      8 |    59 |
++-------------------------------------------------------------------------+
+
+
+
+
+Check List for S:/Ellis/Ellis.temp
+Used Tips
+=========================================================
+Please confirm the below Items are ready on the robot table
+
+- 0 tips of 10ul and the tip counter is set correctly
+- 0 tips of 20ul and the tip counter is set correctly
+- 16 tips of 50ul and the tip counter is set correctly
+- 0 tips of 200ul and the tip counter is set correctly
+- 0 tips of 1000ul and the tip counter is set correctly
+
+
+
+Used Plates
+=======================================
+
+P13
+P4
+P7
+T10
+
+

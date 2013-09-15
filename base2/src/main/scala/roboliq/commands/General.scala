@@ -8,14 +8,10 @@ case class AgentActivate() extends Command
 case class AgentDeactivate() extends Command
 case class EvowareSubroutine(path: String) extends Command
 case class Log(text: String) extends Command
+
 case class PipetterAspirate(
 	val item_l: List[TipWellVolumePolicy]
 ) extends Command
-
-/*case class PipetterWash(
-	tip_l: List[Tip],
-	intensity: CleanIntensity.Value
-)*/
 
 case class PipetterDispense(
 	val item_l: List[TipWellVolumePolicy]
@@ -25,6 +21,13 @@ case class PipetterTipsRefresh(
 	device: Pipetter,
 	// tip, clean intensity, tipModel_?
 	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
+) extends Command
+
+case class PeelerRun(
+	deviceIdent: String,
+	specIdent: String,
+	labwareIdent: String,
+	siteIdent: String
 ) extends Command
 
 case class Prompt(text: String) extends Command

@@ -52,7 +52,14 @@ class EvowareCarrierData(
 	val mapNameToCarrier: Map[String, Carrier],
 	val mapNameToLabwareModel: Map[String, EvowareLabwareModel],
 	val mapCarrierToVectors: Map[Carrier, List[Vector]]
-)
+) {
+	/**
+	 * Print debug output: carrier id, carrier name
+	 */
+	def printCarriersById() {
+		mapIdToCarrier.toList.sortBy(_._1).foreach(pair => println(f"${pair._1}%3d ${pair._2.sName}"))
+	}
+}
 
 object EvowareCarrierData {
 	def apply(models: List[EvowareModel]): EvowareCarrierData = {

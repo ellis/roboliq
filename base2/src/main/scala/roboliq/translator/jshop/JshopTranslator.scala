@@ -95,6 +95,18 @@ object JshopTranslator {
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
 				RsSuccess(List(Log(text)))
+			
+			case "peeler-run" =>
+				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
+				for {
+					_ <- protocol.eb.getEntityByIdent[Sealer](deviceIdent)
+					_ <- protocol.eb.getEntityByIdent[SealerSpec](specIdent)
+					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
+					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
+				} yield {
+					List(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
+				}
+
 			case "pipetter-run" =>
 				// TODO: the details of how to handle pipetting depends on the agent.
 				// For the user agent, we should have a single command, whereas for Evoware, we need to do a lot of processing.
@@ -111,6 +123,7 @@ object JshopTranslator {
 					case _ =>
 						RsError("invalid PipetteSpec")
 				}
+				
 			case "prompt" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString

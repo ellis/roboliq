@@ -57,8 +57,13 @@ class EntityBase {
 	
 	private def addEntity(e: Entity, ident: String) {
 		val lower = ident.toLowerCase
-		if (nameToEntity.contains(lower))
+		if (nameToEntity.contains(lower)) {
+			// FIXME: for debug only
+			if ((nameToEntity(lower) ne e))
+				println("e, ident, lower, nameToEntity = "+(e, ident, lower, nameToEntity(lower)))
+			// ENDFIX
 			assert(nameToEntity(lower) eq e)
+		}
 		names(e) = ident
 		nameToEntity(lower) = e
 		idToEntity(e.key) = e

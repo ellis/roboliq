@@ -244,12 +244,63 @@ object JshopMain extends App {
 		"""
 	)
 	
+	val wa = (
+		"""{
+		"substances": [
+			{ "name": "kod", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" },
+			{ "name": "template", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "primer1", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+			{ "name": "primer2", "kind": "Dna", "tipCleanPolicy": "Decontaminate" }
+		],
+		"plates": [
+			{ "name": "pcrPlate1", "model": "Thermocycler Plate", "location": "offsite" },
+			{ "name": "reagentPlate1", "model": "Thermocycler Plate", "location": "offsite" }
+		],
+		"wellContents": [
+			{ "name": "reagentPlate1(A01 d D01)", "contents": "kod@200ul" },
+			{ "name": "reagentPlate1(D02)", "contents": "primer1@200ul" },
+			{ "name": "reagentPlate1(E02)", "contents": "primer2@200ul" },
+			{ "name": "reagentPlate1(C02)", "contents": "template@200ul" }
+		],
+		"protocol": [
+			{ "command": "pipette", "steps": [
+				{ "command": "distribute", "source": "reagentPlate1(A01 d D01)", "destination": "pcrPlate1(A01 d D01)", "volume": "8ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "reagentPlate1(D02)", "destination": "pcrPlate1(A01 d D01)", "volume": "13ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "reagentPlate1(E02)", "destination": "pcrPlate1(A01 d D01)", "volume": "13ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" },
+				{ "command": "distribute", "source": "reagentPlate1(C02)", "destination": "pcrPlate1(A01 d D01)", "volume": "7ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" }
+				]
+			}
+		]
+		}""",
+		"""(!agent-activate user)
+(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
+(!agent-deactivate r1)
+(!agent-activate user)
+(!transporter-run user userarm plate2 m002 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_bench_017x1 r1_device_236x1 r1_transporterspec0)
+(!sealer-run r1 r1_sealer sealerspec1 plate1 r1_device_236x1)
+(!thermocycler-open r1 r1_thermocycler1)
+(!transporter-run r1 r1_transporter2 plate1 m002 r1_device_236x1 r1_device_234x1 r1_transporterspec0)
+(!thermocycler-close r1 r1_thermocycler1)
+(!thermocycler-run r1 r1_thermocycler1 thermocyclerspec1)
+(!thermocycler-open r1 r1_thermocycler1)
+(!thermocycler-close r1 r1_thermocycler1)
+		"""
+	)
+	
 	def run(protocolName: String, input: String, output: String) {
 		for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg")
 			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/bsse-robot1/config/table-01.esc")
 		} {
-			protocol.loadConfig()
+			protocol.loadConfig_Weizmann()
 			protocol.loadEvoware("r1", carrierData, tableData)
 			protocol.loadJson(input.asJson.asJsObject)
 			
@@ -280,9 +331,46 @@ object JshopMain extends App {
 		}
 	}
 	
+	def runWeizmann(protocolName: String, input: String, taskOutput: String) {
+		val x = for {
+			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/weizmann-sealy/config/carrier.cfg")
+			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/weizmann-sealy/config/table-01.esc")
+			
+			_ = protocol.loadConfig()
+			_ = protocol.loadEvoware("r1", carrierData, tableData)
+			_ = protocol.loadJson(input.asJson.asJsObject)
+			
+			_ = protocol.saveProblem(protocolName, userInitialConditions)
+			
+			configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
+			config = new EvowareConfig(carrierData, tableData, configData)
+			scriptBuilder = new EvowareClientScriptBuilder(config, s"tasks/wisauto/$protocolName")
+			agentToBuilder_m = Map[String, ClientScriptBuilder](
+				"user" -> scriptBuilder,
+				"r1" -> scriptBuilder
+			)
+			result <- JshopTranslator.translate(protocol, taskOutput, agentToBuilder_m)
+		} yield {
+			for (script <- scriptBuilder.script_l) {
+				scriptBuilder.saveWithHeader(script, script.filename)
+			}
+		}
+
+		val error_l = x.getErrors
+		val warning_l = x.getWarnings
+		if (!error_l.isEmpty || !warning_l.isEmpty) {
+			println("Warnings and Errors:")
+			error_l.foreach(println)
+			warning_l.foreach(println)
+			println()
+		}
+	}
+	
 	//run("pd", pd._1, pd._2)
 	//run("pf", pf._1, pf._2)
 	//run("pg", pg._1, pg._2)
 	//run("ph", ph._1, ph._2)
-	run("pi", pi._1, pi._2)
+	//run("pi", pi._1, pi._2)
+	
+	runWeizmann("pa", wa._1, wa._2)
 }

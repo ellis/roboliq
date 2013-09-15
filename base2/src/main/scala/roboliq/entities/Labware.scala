@@ -49,6 +49,10 @@ case class Peeler(key: String, label: Option[String] = None, description: Option
 	def typeNames = List("peeler")
 }
 
+case class PeelerSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+	def typeNames = List("peelerSpec")
+}
+
 case class Shaker(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
 	def typeNames = List("shaker")
 }

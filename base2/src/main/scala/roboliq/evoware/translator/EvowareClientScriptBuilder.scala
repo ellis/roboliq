@@ -79,6 +79,24 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			case EvowareSubroutine(path) =>
 				val item = TranslationItem(L0C_Subroutine(path), Nil)
 				RsSuccess(TranslationResult(List(item), state0))
+				
+			case cmd: PeelerRun =>
+				for {
+					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
+					filepath <- identToAgentObject_m.get(cmd.specIdent).asRs(s"missing evoware data for spec `${cmd.specIdent}`").flatMap(RsResult.asInstanceOf[String])
+					// List of site/labware mappings for those labware and sites which evoware has equivalences for
+					siteToModel_l <- siteLabwareEntry(protocol, state0, identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
+					labware <- protocol.eb.getEntityByIdent[Labware](cmd.labwareIdent)
+				} yield {
+					// Token
+					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Peel", filepath)
+					// Update state
+					var state1 = state0.toMutable
+					state1.labware_isSealed_l -= labware
+					// Return
+					val item = TranslationItem(token, siteToModel_l)
+					TranslationResult(List(item), state1.toImmutable)
+				}
 			
 			case Prompt(text) =>
 				val item = TranslationItem(L0C_Prompt(text), Nil)

@@ -5,26 +5,32 @@ Current big steps:
 - [ ] Get pipetting command to work
 - [ ] Get pipeline working to compile a roboliq protocol on disk to an evoware script
 - [ ] Create server/clients to monitor and control protocol execution
-- [ ] Use simpler entities and a different method for querying state, one that's compatible with planning methods
+- [ ] Use simpler entities and a different method for querying state, one that is compatible with planning methods
 - [ ] Start using sqlite database for storing relevant information
 - [ ] Change domain to have a more generic concept of labware which subsumes sites, tubes, and plates.
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
-For Friday:
+Details for while at Weizmann:
+- [ ] get sealer Carrier.cfg, a bench ESC, the liquid class files, and more ini files
 - [ ] good cleaning commands
 - [?] add 'Decon' plate to bench.esc
-- [ ] seal
+- [?] domain: peeler
+- [?] Protocol: peeler
+- [?] JshopTranslator: peeler
+- [?] EvowareClientScriptBuilder: peeler
+- [ ] get name of new sealy computer
+- [ ] domain: shaker
+- [ ] Protocol: shaker
+- [ ] JshopTranslator: shaker
+- [ ] EvowareClientScriptBuilder: shaker
 - [ ] mix after dispense of taq
 - [ ] possibly take plate out of thermocycler
 - [ ] tell user to centrifuge
-
-Details for before trip to Weizmann:
 - [ ] PipetteSpec: user manually specifies tip handling
 - [ ] JshopTranslator: distribute: generate clean command
 - [ ] JshopTranslator: need much better tip cleaning algorithm
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
-- [ ] EvowareClientScriptBuilder: PipetterTipsClean
 - [ ] mixing and/or shaking
 - [ ] start testing PCR protocol with pipetting, sealing, thermocyling (without centrifugation or have user centrifuge)
 - [ ] Protocol: 'wellContents.name' => 'wellContents.well'
@@ -37,6 +43,7 @@ Details for before trip to Weizmann:
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
 - [ ] PipetteSpec: allow user to manually specify tip model
+- [x] seal: use _red now instead of _blue
 - [x] PipetteSpec: user manually specifies liquid class name
 - [x] L0C_Spirate: decimal point in volume is displayed as a comma on my mac
 - [x] pipetting: large tips are being chosen for small volumes instead of small tips
@@ -60,7 +67,19 @@ Details for before trip to Weizmann:
 - [x] Protocol: add "thermocycle" command in loadJson()
 - [x] EvowareClientScriptBuilder: PipetterDispense
 
+First tasks for back at BSSE:
+- [ ] Urs: should the centrifuge be at grid 54 or 55?  It is at 54 in the Empty template, but 55 in my scripts
+- [ ] create a better bench file (correct centrifuge grid?, Peeler, Sealer, additional trough and hotels)
+
+Restructure commands after Weizmann trip:
+- ProtocolCommand: a case class for the command written in a json or yaml protocol
+- ProtocolCommandHandler: translates a ProtocolCommand to a list of ProtocolCommands and ShopCommands, as well as internal map entries
+- ShopCommand: a logical Rel representating a method or operator for processing by jshop
+- Operator: the results of jshop processing
+- OperatorTranslator: 
+
 Details for later:
+- [ ] Protocol.loadEvoware: have it return an RsResult, and catch errors that may occur in the function
 - [ ] instructions to turn on cooler and pump for PCR protocols
 - [ ] ensure that PCR plates are on cooled carriers
 - [ ] re-import TipEvents
