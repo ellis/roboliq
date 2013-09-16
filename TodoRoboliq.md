@@ -16,7 +16,6 @@ Details for while at Weizmann:
 - [ ] read protocol from json file
 - [ ] run jshop on our lisp output from within JshopMain
 - [ ] read jshop operators from a .jshop file
-- [ ] good cleaning command
 - [?] add 'Decon' plate to bench.esc
 - [?] domain: peeler
 - [?] Protocol: peeler
@@ -29,8 +28,6 @@ Details for while at Weizmann:
 - [ ] possibly take plate out of thermocycler
 - [ ] tell user to centrifuge
 - [ ] PipetteSpec: user manually specifies tip handling
-- [ ] JshopTranslator: distribute: generate clean command
-- [ ] JshopTranslator: need much better tip cleaning algorithm
 - [ ] start testing PCR protocol with pipetting, sealing, thermocyling (without centrifugation or have user centrifuge)
 - [ ] Protocol: 'wellContents.name' => 'wellContents.well'
 - [ ] create PCR command
@@ -40,6 +37,9 @@ Details for while at Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] JshopTranslator: distribute: generate clean command
+- [x] JshopTranslator: need much better tip cleaning algorithm
+- [x] good cleaning command
 - [x] figure out why prewashing is being performed more than once
 - [x] drop tips after last dispense
 - [x] merge PippeteTipsRefresh items (washes should not happen twice in a row)

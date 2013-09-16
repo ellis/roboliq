@@ -55,6 +55,13 @@ class EntityBase {
 		aliases(from.toLowerCase) = to
 	}
 	
+	def addEntityWithoutIdent(e: Entity) {
+		if (idToEntity.contains(e.key)) {
+			assert(idToEntity(e.key) eq e)
+		}
+		idToEntity(e.key) = e
+	}
+	
 	private def addEntity(e: Entity, ident: String) {
 		val lower = ident.toLowerCase
 		if (nameToEntity.contains(lower)) {

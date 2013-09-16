@@ -268,10 +268,10 @@ object JshopMain extends App {
 		],
 		"protocol": [
 			{ "command": "pipette", "steps": [
-				{ "command": "distribute", "source": "reagentPlate1(A01 d D01)", "destination": "pcrPlate1(A01 d D01)", "volume": "8ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" },
-				{ "command": "distribute", "source": "reagentPlate1(D02)", "destination": "pcrPlate1(A01 d D01)", "volume": "13ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" },
-				{ "command": "distribute", "source": "reagentPlate1(E02)", "destination": "pcrPlate1(A01 d D01)", "volume": "13ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" },
-				{ "command": "distribute", "source": "reagentPlate1(C02)", "destination": "pcrPlate1(A01 d D01)", "volume": "7ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate" }
+				{ "command": "distribute", "source": "reagentPlate1(A01 d D01)", "destination": "pcrPlate1(A01 d D01)", "volume": "8ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate", "tipModel": "DiTi 50ul" },
+				{ "command": "distribute", "source": "reagentPlate1(D02)", "destination": "pcrPlate1(A01 d D01)", "volume": "13ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate", "tipModel": "DiTi 50ul" },
+				{ "command": "distribute", "source": "reagentPlate1(E02)", "destination": "pcrPlate1(A01 d D01)", "volume": "13ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate", "tipModel": "DiTi 50ul" },
+				{ "command": "distribute", "source": "reagentPlate1(C02)", "destination": "pcrPlate1(A01 d D01)", "volume": "7ul", "pipettePolicy": "BOT_BOT_LIQUID", "cleanBefore": "Decontaminate", "tipModel": "DiTi 50ul" }
 				]
 			}
 		]

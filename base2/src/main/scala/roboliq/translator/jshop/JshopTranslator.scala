@@ -220,7 +220,11 @@ object JshopTranslator {
 			}
 			// Choose a single tip model
 			itemToTipModel_m <- tipModelSearcher.searchGraph(item_l, itemToMixture_m, itemToModels_m)
-			tipModelCandidate_l = itemToTipModel_m.toList.map(_._2).toSet
+			// TODO: produce a warning if the user specified a tip model which isn't available for all items
+			tipModelCandidate_l = spec.tipModel_? match {
+				case Some(x) => Set(x)
+				case None => itemToTipModel_m.toList.map(_._2).toSet
+			} 
 			_ <- RsResult.assert(tipModelCandidate_l.size == 1, "TransferPlanner can only handle a single tip model at a time")
 			tipModel = tipModelCandidate_l.head
 			// Filter for those tips which can be used with the tip model
