@@ -12,10 +12,14 @@ object JshopMain extends App {
 	val protocol = new Protocol
 
 	// HACK: this belongs in a general config file
-	val userInitialConditions = """  (device-can-site r1_pipetter1 r1_bench_017x1)
+	val userInitialConditionsBSSE = """  (device-can-site r1_pipetter1 r1_bench_017x1)
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
+"""
+	val userInitialConditionsWIS = """  (device-can-site r1_pipetter1 r1_bench_035x1)
+  (device-can-site r1_pipetter1 r1_bench_035x2)
+  (device-can-site r1_pipetter1 r1_bench_035x3)
 """
 	
 	val pd = (
@@ -273,25 +277,11 @@ object JshopMain extends App {
 		]
 		}""",
 		"""(!agent-activate user)
-(!transporter-run user userarm plate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!transporter-run user userarm reagentplate1 m001 offsite r1_bench_035x1 userarmspec)
+(!transporter-run user userarm pcrplate1 m001 offsite r1_bench_035x2 userarmspec)
 (!agent-deactivate user)
 (!agent-activate r1)
-(!transporter-run r1 r1_transporter2 plate1 m002 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
-(!agent-deactivate r1)
-(!agent-activate user)
-(!transporter-run user userarm plate2 m002 offsite r1_hotel_245x1 userarmspec)
-(!agent-deactivate user)
-(!agent-activate r1)
-(!transporter-run r1 r1_transporter2 plate2 m002 r1_hotel_245x1 r1_bench_017x3 r1_transporterspec0)
 (!pipetter-run r1 r1_pipetter1 spec0003)
-(!transporter-run r1 r1_transporter2 plate1 m002 r1_bench_017x1 r1_device_236x1 r1_transporterspec0)
-(!sealer-run r1 r1_sealer sealerspec1 plate1 r1_device_236x1)
-(!thermocycler-open r1 r1_thermocycler1)
-(!transporter-run r1 r1_transporter2 plate1 m002 r1_device_236x1 r1_device_234x1 r1_transporterspec0)
-(!thermocycler-close r1 r1_thermocycler1)
-(!thermocycler-run r1 r1_thermocycler1 thermocyclerspec1)
-(!thermocycler-open r1 r1_thermocycler1)
-(!thermocycler-close r1 r1_thermocycler1)
 		"""
 	)
 	
@@ -304,7 +294,7 @@ object JshopMain extends App {
 			protocol.loadEvoware("r1", carrierData, tableData)
 			protocol.loadJson(input.asJson.asJsObject)
 			
-			protocol.saveProblem(s"tasks/autogen/$protocolName.lisp", userInitialConditions)
+			protocol.saveProblem(s"tasks/autogen/$protocolName.lisp", userInitialConditionsBSSE)
 			
 			val taskOutput = output
 
@@ -340,7 +330,7 @@ object JshopMain extends App {
 			_ = protocol.loadEvoware("r1", carrierData, tableData)
 			_ = protocol.loadJson(input.asJson.asJsObject)
 			
-			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", userInitialConditions)
+			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", userInitialConditionsWIS)
 			
 			configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
 			config = new EvowareConfig(carrierData, tableData, configData)

@@ -169,10 +169,9 @@
   (transporter-can userArm r1_bench_035x2 userArmSpec)
   (transporter-can userArm r1_bench_035x3 userArmSpec)
  ; user initial conditions
-  (device-can-site r1_pipetter1 r1_bench_017x1)
-  (device-can-site r1_pipetter1 r1_bench_017x2)
-  (device-can-site r1_pipetter1 r1_bench_017x3)
-  (device-can-site r1_pipetter1 r1_bench_017x4)
+  (device-can-site r1_pipetter1 r1_bench_035x1)
+  (device-can-site r1_pipetter1 r1_bench_035x2)
+  (device-can-site r1_pipetter1 r1_bench_035x3)
 
  )
  ; tasks
