@@ -238,59 +238,14 @@ object JshopTranslator {
 				item_l
 			)
 		} yield {
-			val cleanBefore_l = {
+			// Refresh command before pipetting starts
+			val refreshBefore_l = {
 				spec.cleanBefore_? match {
 					case Some(intensity) if intensity != CleanIntensity.None =>
 						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
-						
-						// FIXME: This is a BSSE-specific HACK!
-						val b1000 = tip_l.exists(_.index < 4)
-						val b50 = tip_l.exists(_.index >= 4)
-						val sIntensity = intensity match {
-							case CleanIntensity.None => null
-							case CleanIntensity.Light => "Light"
-							case CleanIntensity.Thorough => "Thorough"
-							case CleanIntensity.Decontaminate => "Decontaminate"
-						}
-						val sScriptBase = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+sIntensity+"_"
-						val l1000 =
-							if (b1000) List(EvowareSubroutine(sScriptBase+"1000.esc"))
-							else Nil
-						val l50 =
-							if (b50) List(EvowareSubroutine(sScriptBase+"0050.esc"))
-							else Nil
-						val refresh = PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+						PipetterTipsRefresh(pipetter, tip_l.map(tip => {
 							(tip, intensity, Some(tipModel))
-						}))
-						/*l1000 ++ l50 ++*/ List(refresh)
-					case _ => Nil
-				}
-			}
-			val cleanAfter_l = {
-				// REFACTOR: duplicates code above
-				spec.cleanAfter_? match {
-					case Some(intensity) if intensity != CleanIntensity.None =>
-						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
-						// FIXME: This is a BSSE-specific HACK!
-						val b1000 = tip_l.exists(_.index < 4)
-						val b50 = tip_l.exists(_.index >= 4)
-						val sIntensity = intensity match {
-							case CleanIntensity.None => null
-							case CleanIntensity.Light => "Light"
-							case CleanIntensity.Thorough => "Thorough"
-							case CleanIntensity.Decontaminate => "Decontaminate"
-						}
-						val sScriptBase = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+sIntensity+"_"
-						val l1000 =
-							if (b1000) List(EvowareSubroutine(sScriptBase+"1000.esc"))
-							else Nil
-						val l50 =
-							if (b50) List(EvowareSubroutine(sScriptBase+"0050.esc"))
-							else Nil
-						val refresh = PipetterTipsRefresh(pipetter, tip_l.map(tip => {
-							(tip, intensity, Some(tipModel))
-						}))
-						/*l1000 ++ l50 ++*/ List(refresh)
+						})) :: Nil
 					case _ => Nil
 				}
 			}
@@ -321,8 +276,18 @@ object JshopTranslator {
 				
 				refresh :: asp_l ++ dis_l
 			})
+
+			val refreshAfter_l = {
+				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanBefore_?, None, None, None)
+				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+					val tipState = state0.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, Mixture.empty, tipState)
+					(tip, washSpec.washIntensity, None)
+				})) :: Nil
+			}
+			
 			// TODO: add a PipetterTipsRefresh command at the end
-			cleanBefore_l ++ aspdis_l ++ cleanAfter_l
+			refreshBefore_l ++ aspdis_l ++ refreshAfter_l
 		}
 	}
 }
