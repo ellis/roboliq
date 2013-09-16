@@ -459,10 +459,10 @@ class Protocol {
 			eb.tipToTipModels_m(tip8) = List(tipModel50)
 		}
 		def weizmann() {
-			labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
-			labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
-			val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
-			val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
+			labwareNamesOfInterest_l += "96 Well PCR Plate"
+			labwareNamesOfInterest_l += "96 Well DWP"
+			val tipModel1000 = TipModel("DiTi 1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
+			val tipModel50 = TipModel("DiTi 50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
 			val tipModel_l = List(tipModel50, tipModel1000)
 			
 			val tip1 = Tip("tip1", None, None, 0, 0, 0, None)

@@ -11,11 +11,13 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for while at Weizmann:
+- [ ] drop tips after last dispense
+- [ ] merge PippeteTipsRefresh items (washes should not happen twice in a row)
 - [ ] Q: is there danger of running my scripts with regard to having enough tips?
-- [x] get name of new sealy computer: pcrobot
 - [ ] PipetteSpec: allow user to manually specify tip model
-- [ ] EvowareClientScriptBuilder: PipetterTipsDrop
-- [ ] EvowareClientScriptBuilder: PipetterTipsGet
+- [ ] read protocol from json file
+- [ ] run jshop on our lisp output from within JshopMain
+- [ ] read jshop operators from a .jshop file
 - [ ] good cleaning command
 - [?] add 'Decon' plate to bench.esc
 - [?] domain: peeler
@@ -40,6 +42,8 @@ Details for while at Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] wrong tip model name is given as "50ul" for GetDITI2
+- [x] get name of new sealy computer: pcrobot
 - [x] ?: Wash command in roboease scripts has "1, 1000" at end, whereas we have "1000, 0". We decide this can be safely ignored.
 - [x] get sealer Carrier.cfg, a bench ESC, the liquid class files, and more ini files
 - [x] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
@@ -80,6 +84,9 @@ Restructure commands after Weizmann trip:
 - OperatorTranslator: 
 
 Details for later:
+- [ ] EvowareClientScriptBuilder: PipetterTipsDrop
+- [ ] EvowareClientScriptBuilder: PipetterTipsGet
+- [ ] see what information we can get about tips and the LiHa from evoware configuration files
 - [ ] RsResult: add a 'prefix' or 'context' which get prefixed to warning and error messages
 - [ ] domain: shaker
 - [ ] Protocol: shaker

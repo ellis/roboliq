@@ -614,14 +614,15 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		identToAgentObject_m: Map[String, Object],
 		cmd: PipetterTipsRefresh
 	): RqResult[TranslationResult] = {
-		//val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1))
+		val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1)).toSet
+		val tipAll_m = encodeTips(tipAll_l)
 		
 		val state = state0.toMutable
 		def doit(item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]): List[TranslationItem] = {
 			item_l match {
 				case Nil => Nil
 				case item0 :: rest =>
-					val tip_l = item_l.map(_._1)
+					val tip_l = item_l.map(_._1).toSet
 					//tip_l.foreach(tip => println("state.tip_model_m(tip): "+state.tip_model_m.get(tip)))
 					val intensity: CleanIntensity.Value = rest.foldLeft(item0._2){(acc, item) => CleanIntensity.max(acc, item._2)}
 					val tipModel_? : Option[TipModel] = rest.foldLeft(item0._3){(acc, item) => acc.orElse(item._3)}
@@ -632,12 +633,18 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					//val tip_m = encodeTips(tip_l)
 					
 					// If tips are currently attached and either the cleanIntensity >= Thorough or we're changing tip models, then drop old tips
-					val tipDrop_l = item_l.filter(tuple => {
+					val tipDrop1_l = item_l.filter(tuple => {
 						val (tip, _, tipModel_?) = tuple
 						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 						println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
 						(tipState.model_?.isDefined && (intensity >= CleanIntensity.Thorough || tipState.model_? != tipModel_?))
-					}).map(_._1).toSet
+					}).map(_._1)
+					// Also dropped any tips which weren't mentioned but are attached
+					val tipDrop2_l = tipAll_l.filter(tip => {
+						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+						!tip_l.contains(tip) && tipState.model_?.isDefined
+					})
+					val tipDrop_l = tipDrop2_l ++ tipDrop1_l
 					val tipDrop_m = encodeTips(tipDrop_l)
 					
 					// If we need new tips and either didn't have any before or are dropping our previous ones
@@ -652,13 +659,13 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 						if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
 						if (prewash_b) {
 							List(
-								L0C_Wash(tipGet_m, 1,1,1,0,50,500,1,500,20,70,30,true,true),
-								L0C_Wash(tipGet_m,1,1,1,0,4,500,1,500,20,70,30,false,true)
+								L0C_Wash(tipAll_m, 1,1,1,0,50,500,1,500,20,70,30,true,true),
+								L0C_Wash(tipAll_m,1,1,1,0,4,500,1,500,20,70,30,false,true)
 							)
 						} else Nil,
 						if (tipGet_m > 0) {
 							List(
-								L0C_Wash(tipGet_m,1,1,1,0,2.0,500,1.0,500,20,70,30,true,true),
+								L0C_Wash(tipAll_m,1,1,1,0,2.0,500,1.0,500,20,70,30,true,true),
 								L0C_GetDITI2(tipGet_m, tipModel_?.get.key)
 							)
 						} else Nil
