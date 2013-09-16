@@ -1,6 +1,7 @@
 package roboliq.commands
 
 import roboliq.entities._
+import scala.collection.mutable.SortedSet
 
 sealed trait Command
 
@@ -22,6 +23,22 @@ case class PipetterTipsRefresh(
 	// tip, clean intensity, tipModel_?
 	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
 ) extends Command
+
+object PipetterTipsRefresh {
+	def combine(l: List[PipetterTipsRefresh]): List[PipetterTipsRefresh] = {
+		l.groupBy(_.device).toList.map(pair => {
+			val (device, refresh_l) = pair
+			val item_l = refresh_l.flatMap(_.item_l)
+			val tipToItems_m = item_l.groupBy(_._1)
+			val item_l_~ = tipToItems_m.toList.sortBy(_._1).map(pair => {
+				val (tip, item_l) = pair
+				val intensity = CleanIntensity.max(item_l.map(_._2))
+				(tip, intensity, item_l.last._3)
+			})
+			PipetterTipsRefresh(device, item_l_~)
+		})
+	}
+}
 
 /*case class PipetterTipsRefreshItem(
 	tip: Tip,

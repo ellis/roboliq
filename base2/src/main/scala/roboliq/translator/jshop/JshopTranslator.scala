@@ -116,10 +116,10 @@ object JshopTranslator {
 					case spec: PipetteSpecList => {
 						for {
 							command_ll <- RsResult.toResultOfList(spec.step_l.map(spec2 => handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec2, arg_l)))
-						} yield command_ll.flatten
+						} yield combineTipsRefreshCommands(command_ll.flatten)
 					}
 					case spec: PipetteSpec =>
-						handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec, arg_l)
+						handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec, arg_l).map(combineTipsRefreshCommands)
 					case _ =>
 						RsError("invalid PipetteSpec")
 				}
@@ -289,5 +289,23 @@ object JshopTranslator {
 			// TODO: add a PipetterTipsRefresh command at the end
 			refreshBefore_l ++ aspdis_l ++ refreshAfter_l
 		}
+	}
+	
+	private def combineTipsRefreshCommands(command_l: List[Command]): List[Command] = {
+		def doit(l: List[Command], acc_r: List[Command]): List[Command] = {
+			l.span(_.isInstanceOf[PipetterTipsRefresh]) match {
+				case (Nil, Nil) =>
+					acc_r.reverse
+				case (Nil, x :: rest) =>
+					doit(rest, x :: acc_r)
+				case (x :: Nil, rest) =>
+					doit(rest, x :: acc_r)
+				case (l1, rest) =>
+					val l2 = l1.asInstanceOf[List[PipetterTipsRefresh]]
+					val l3 = PipetterTipsRefresh.combine(l2)
+					doit(rest, l3.reverse ++ acc_r)
+			}
+		}
+		doit(command_l, Nil)
 	}
 }

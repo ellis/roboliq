@@ -628,10 +628,6 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					val tipModel_? : Option[TipModel] = rest.foldLeft(item0._3){(acc, item) => acc.orElse(item._3)}
 					val tipState_l = tip_l.map(tip => state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip)))
 					
-					// If tip state has no clean state, do a pre-wash
-					val prewash_b = tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
-					//val tip_m = encodeTips(tip_l)
-					
 					// If tips are currently attached and either the cleanIntensity >= Thorough or we're changing tip models, then drop old tips
 					val tipDrop1_l = item_l.filter(tuple => {
 						val (tip, _, tipModel_?) = tuple
@@ -655,6 +651,9 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					}).map(_._1).toSet
 					val tipGet_m = encodeTips(tipGet_l)
 				
+					// If tip state has no clean state, do a pre-wash
+					val prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
+					
 					val token_ll = List[List[L0C_Command]](
 						if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
 						if (prewash_b) {
