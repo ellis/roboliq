@@ -304,7 +304,7 @@ object JshopMain extends App {
 			protocol.loadEvoware("r1", carrierData, tableData)
 			protocol.loadJson(input.asJson.asJsObject)
 			
-			protocol.saveProblem(protocolName, userInitialConditions)
+			protocol.saveProblem(s"tasks/autogen/$protocolName.lisp", userInitialConditions)
 			
 			val taskOutput = output
 
@@ -336,11 +336,11 @@ object JshopMain extends App {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/weizmann-sealy/config/carrier.cfg")
 			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/weizmann-sealy/config/table-01.esc")
 			
-			_ = protocol.loadConfig()
+			_ = protocol.loadConfig_Weizmann()
 			_ = protocol.loadEvoware("r1", carrierData, tableData)
 			_ = protocol.loadJson(input.asJson.asJsObject)
 			
-			_ = protocol.saveProblem(protocolName, userInitialConditions)
+			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", userInitialConditions)
 			
 			configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
 			config = new EvowareConfig(carrierData, tableData, configData)

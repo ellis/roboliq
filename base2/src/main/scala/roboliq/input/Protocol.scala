@@ -10,6 +10,7 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
 import roboliq.utils.FileUtils
+import org.apache.commons.io.FilenameUtils
 
 class Protocol {
 	val eb = new EntityBase
@@ -89,7 +90,7 @@ class Protocol {
 		val shakerSpec1 = ShakerSpec(gid)
 		val thermocyclerSpec1 = ThermocyclerSpec(gid)
 		
-		eb.addAlias("Thermocycler Plate", "D-BSSE 96 Well PCR Plate")
+		eb.addAlias("Thermocycler Plate", "96 Well PCR Plate")
 		eb.addAgent(user, "user")
 		eb.addModel(offsiteModel, "offsiteModel")
 		eb.addSite(offsite, "offsite")
@@ -99,7 +100,9 @@ class Protocol {
 		// userArm can transport from offsite
 		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		// A few other user-specified sites where the user can put plates on the robot
-		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
+		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x1", "userArmSpec")))
+		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x2", "userArmSpec")))
+		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x3", "userArmSpec")))
 		
 		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
 		specToString_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
@@ -364,6 +367,10 @@ class Protocol {
 			case Some(JsString(s)) => Some(CleanIntensity.withName(s))
 			case _ => None
 		}
+		val tipModel_?? : RsResult[Option[TipModel]] = fields.get("tipModel") match {
+			case Some(JsString(key)) => eb.getEntityAs[TipModel](key).map(Some(_))
+			case _ => RsSuccess(None)
+		}
 		//println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
 		// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
 		// The script builder later lookups up the spec in the protocol.
@@ -372,8 +379,9 @@ class Protocol {
 			source <- source_?
 			destination <- destination_?
 			volume <- volume_?
+			tipModel_? <- tipModel_??
 		} yield {
-			PipetteSpec(source, destination, volume, pipettePolicy_?, cleanBefore_?, cleanAfter_?)
+			PipetteSpec(source, destination, volume, pipettePolicy_?, cleanBefore_?, cleanAfter_?, tipModel_?)
 		}
 	}
 	
@@ -506,6 +514,7 @@ class Protocol {
 		for (o <- tableData.lHotelObject) {
 			val carrierE = o.parent
 			carriersSeen_l += carrierE.id
+			//println("carrier: "+carrierE)
 			for (site_i <- 0 until carrierE.nSites) {
 				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 				val siteId = (carrierE.id, site_i)
@@ -743,8 +752,10 @@ class Protocol {
 		}
 	}
 	
-	def saveProblem(name: String, userInitialConditions: String = "") {
-		FileUtils.printToFile(new java.io.File(s"tasks/autogen/$name.lisp")) { p =>
+	def saveProblem(path: String, userInitialConditions: String = "") {
+		val file = new java.io.File(path)
+		val name = FilenameUtils.getBaseName(file.getName())
+		FileUtils.printToFile(file) { p =>
 			p.println(s"(defproblem $name domain")
 			p.println(" ; initial conditions")
 			p.println(" (")

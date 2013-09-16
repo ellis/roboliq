@@ -10,7 +10,8 @@ case class PipetteSpec(
 	volume: LiquidVolume,
 	pipettePolicy_? : Option[String],
 	cleanBefore_? : Option[CleanIntensity.Value],
-	cleanAfter_? : Option[CleanIntensity.Value]
+	cleanAfter_? : Option[CleanIntensity.Value],
+	tipModel_? : Option[TipModel]
 )
 
 case class PipetteSpecList(

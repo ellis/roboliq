@@ -11,30 +11,28 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for while at Weizmann:
+- [ ] get name of new sealy computer
 - [ ] get sealer Carrier.cfg, a bench ESC, the liquid class files, and more ini files
+- [ ] PipetteSpec: allow user to manually specify tip model
+- [ ] EvowareClientScriptBuilder: PipetterTipsDrop
+- [ ] EvowareClientScriptBuilder: PipetterTipsGet
 - [ ] good cleaning commands
 - [?] add 'Decon' plate to bench.esc
 - [?] domain: peeler
 - [?] Protocol: peeler
 - [?] JshopTranslator: peeler
 - [?] EvowareClientScriptBuilder: peeler
-- [ ] get name of new sealy computer
-- [ ] domain: shaker
-- [ ] Protocol: shaker
-- [ ] JshopTranslator: shaker
-- [ ] EvowareClientScriptBuilder: shaker
+- [ ] Protocol: pipetter mix
+- [ ] JshopTranslator: pipetter mix
+- [ ] EvowareClientScriptBuilder: pipetter mix
 - [ ] mix after dispense of taq
 - [ ] possibly take plate out of thermocycler
 - [ ] tell user to centrifuge
 - [ ] PipetteSpec: user manually specifies tip handling
 - [ ] JshopTranslator: distribute: generate clean command
 - [ ] JshopTranslator: need much better tip cleaning algorithm
-- [ ] EvowareClientScriptBuilder: PipetterTipsDrop
-- [ ] EvowareClientScriptBuilder: PipetterTipsGet
-- [ ] mixing and/or shaking
 - [ ] start testing PCR protocol with pipetting, sealing, thermocyling (without centrifugation or have user centrifuge)
 - [ ] Protocol: 'wellContents.name' => 'wellContents.well'
-- [ ] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [ ] create PCR command
 - [ ] run PCR protocol on our robot
 - [ ] consider adding task for "bench-setup-labware" to place labware onto the robot bench before other tasks
@@ -42,7 +40,7 @@ Details for while at Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
-- [ ] PipetteSpec: allow user to manually specify tip model
+- [x] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [x] seal: use _red now instead of _blue
 - [x] PipetteSpec: user manually specifies liquid class name
 - [x] L0C_Spirate: decimal point in volume is displayed as a comma on my mac
@@ -70,6 +68,7 @@ Details for while at Weizmann:
 First tasks for back at BSSE:
 - [ ] Urs: should the centrifuge be at grid 54 or 55?  It is at 54 in the Empty template, but 55 in my scripts
 - [ ] create a better bench file (correct centrifuge grid?, Peeler, Sealer, additional trough and hotels)
+- [ ] Allow for a carrier model to be on bench multiple times, like for WIS external 5Pos hotels in carrier-orig.cfg
 
 Restructure commands after Weizmann trip:
 - ProtocolCommand: a case class for the command written in a json or yaml protocol
@@ -79,6 +78,11 @@ Restructure commands after Weizmann trip:
 - OperatorTranslator: 
 
 Details for later:
+- [ ] RsResult: add a 'prefix' or 'context' which get prefixed to warning and error messages
+- [ ] domain: shaker
+- [ ] Protocol: shaker
+- [ ] JshopTranslator: shaker
+- [ ] EvowareClientScriptBuilder: shaker
 - [ ] Protocol.loadEvoware: have it return an RsResult, and catch errors that may occur in the function
 - [ ] instructions to turn on cooler and pump for PCR protocols
 - [ ] ensure that PCR plates are on cooled carriers
