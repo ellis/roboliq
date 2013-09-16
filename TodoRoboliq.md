@@ -11,12 +11,12 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for while at Weizmann:
-- [ ] get name of new sealy computer
-- [ ] get sealer Carrier.cfg, a bench ESC, the liquid class files, and more ini files
+- [ ] Q: is there danger of running my scripts with regard to having enough tips?
+- [x] get name of new sealy computer: pcrobot
 - [ ] PipetteSpec: allow user to manually specify tip model
 - [ ] EvowareClientScriptBuilder: PipetterTipsDrop
 - [ ] EvowareClientScriptBuilder: PipetterTipsGet
-- [ ] good cleaning commands
+- [ ] good cleaning command
 - [?] add 'Decon' plate to bench.esc
 - [?] domain: peeler
 - [?] Protocol: peeler
@@ -40,6 +40,8 @@ Details for while at Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] ?: Wash command in roboease scripts has "1, 1000" at end, whereas we have "1000, 0". We decide this can be safely ignored.
+- [x] get sealer Carrier.cfg, a bench ESC, the liquid class files, and more ini files
 - [x] PipettePlanner: make sure we are configured to be able to use both BSSE small and large tips
 - [x] seal: use _red now instead of _blue
 - [x] PipetteSpec: user manually specifies liquid class name

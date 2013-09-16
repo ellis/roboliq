@@ -19,7 +19,7 @@ case class WellPosition(
 case class WorldState(
 	//truth: Set[Rel],
 	//properties: Map[WorldProperty.Value, Map[List[Object], Object]],
-	tip_model_m: Map[Tip, TipModel],
+	//tip_model_m: Map[Tip, TipModel],
 	tip_state_m: Map[Tip, TipState],
 	labware_model_m: Map[Labware, LabwareModel],
 	// Labware can either be on a site or another piece of labware
@@ -53,7 +53,7 @@ case class WorldState(
 	}*/
 	
 	def getTipModel(tip: Tip): Option[TipModel] = {
-		tip_model_m.get(tip)
+		tip_state_m.get(tip).flatMap(_.model_?)
 	}
 	
 	def getWell(key: (Labware, RowCol)): RsResult[Well] = {
@@ -83,7 +83,7 @@ case class WorldState(
 	def toMutable = {
 		val self = this
 		new WorldStateBuilder {
-			tip_model_m ++= self.tip_model_m
+			//tip_model_m ++= self.tip_model_m
 			tip_state_m ++= self.tip_state_m
 			labware_model_m ++= self.labware_model_m
 			labware_location_m ++= self.labware_location_m
@@ -100,7 +100,7 @@ case class WorldState(
 
 
 class WorldStateBuilder {
-	val tip_model_m = new HashMap[Tip, TipModel]
+	//val tip_model_m = new HashMap[Tip, TipModel]
 	val tip_state_m = new HashMap[Tip, TipState]
 	val labware_model_m = new HashMap[Labware, LabwareModel]
 	val labware_location_m = new HashMap[Labware, Entity] 
@@ -125,7 +125,7 @@ class WorldStateBuilder {
 
 	def toImmutable = {
 		WorldState(
-			tip_model_m.toMap,
+			//tip_model_m.toMap,
 			tip_state_m.toMap,
 			labware_model_m.toMap,
 			labware_location_m.toMap,

@@ -560,7 +560,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		identToAgentObject_m: Map[String, Object],
 		cmd: PipetterTipsRefresh
 	): RqResult[TranslationResult] = {
-		pipetterTipsRefresh_BSSE(protocol, state0, identToAgentObject_m, cmd)
+		pipetterTipsRefresh_WIS(protocol, state0, identToAgentObject_m, cmd)
 	}
 
 	// FIXME: This is a BSSE-specific HACK.  The function for handling this command should be loaded from a config file.
@@ -584,6 +584,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					val intensity: CleanIntensity.Value = rest.foldLeft(item0._2){(acc, item) => CleanIntensity.max(acc, item._2)}
 					val intensity_s_? = intensity match {
 						case CleanIntensity.None => None
+						case CleanIntensity.Flush => Some("Light")
 						case CleanIntensity.Light => Some("Light")
 						case CleanIntensity.Thorough => Some("Thorough")
 						case CleanIntensity.Decontaminate => Some("Decontaminate")
@@ -603,6 +604,87 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		}
 		
 		val translationItem_l = List(doit(item1000_l, tip1000_l, "1000"), doit(item0050_l, tip0050_l, "0050")).flatten
+		RsSuccess(TranslationResult(translationItem_l, state.toImmutable))
+	}
+
+	// FIXME: This is a WIS-specific HACK.  The function for handling this command should be loaded from a config file.
+	private def pipetterTipsRefresh_WIS(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		cmd: PipetterTipsRefresh
+	): RqResult[TranslationResult] = {
+		//val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1))
+		
+		val state = state0.toMutable
+		def doit(item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]): List[TranslationItem] = {
+			item_l match {
+				case Nil => Nil
+				case item0 :: rest =>
+					val tip_l = item_l.map(_._1)
+					//tip_l.foreach(tip => println("state.tip_model_m(tip): "+state.tip_model_m.get(tip)))
+					val intensity: CleanIntensity.Value = rest.foldLeft(item0._2){(acc, item) => CleanIntensity.max(acc, item._2)}
+					val tipModel_? : Option[TipModel] = rest.foldLeft(item0._3){(acc, item) => acc.orElse(item._3)}
+					val tipState_l = tip_l.map(tip => state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip)))
+					
+					// If tip state has no clean state, do a pre-wash
+					val prewash_b = tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
+					//val tip_m = encodeTips(tip_l)
+					
+					// If tips are currently attached and either the cleanIntensity >= Thorough or we're changing tip models, then drop old tips
+					val tipDrop_l = item_l.filter(tuple => {
+						val (tip, _, tipModel_?) = tuple
+						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+						println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
+						(tipState.model_?.isDefined && (intensity >= CleanIntensity.Thorough || tipState.model_? != tipModel_?))
+					}).map(_._1).toSet
+					val tipDrop_m = encodeTips(tipDrop_l)
+					
+					// If we need new tips and either didn't have any before or are dropping our previous ones
+					val tipGet_l = item_l.filter(tuple => {
+						val (tip, _, tipModel_?) = tuple
+						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+						(tipModel_?.isDefined && (tipState.model_? == None || tipDrop_l.contains(tip)))
+					}).map(_._1).toSet
+					val tipGet_m = encodeTips(tipGet_l)
+				
+					val token_ll = List[List[L0C_Command]](
+						if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
+						if (prewash_b) {
+							List(
+								L0C_Wash(tipGet_m, 1,1,1,0,50,500,1,500,20,70,30,true,true),
+								L0C_Wash(tipGet_m,1,1,1,0,4,500,1,500,20,70,30,false,true)
+							)
+						} else Nil,
+						if (tipGet_m > 0) {
+							List(
+								L0C_Wash(tipGet_m,1,1,1,0,2.0,500,1.0,500,20,70,30,true,true),
+								L0C_GetDITI2(tipGet_m, tipModel_?.get.key)
+							)
+						} else Nil
+					)
+					
+					// Update tip states
+					for (tip <- tipDrop_l) {
+						// Set tip state to clean for the tips that are being washed
+						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+						state.tip_state_m(tip) = tipState0.copy(model_? = None)
+					}
+					// Set tip state to clean for the tips that are being washed
+					for (tip <- tipGet_l) {
+						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+						val event = TipCleanEvent(tip, CleanIntensity.Decontaminate)
+						state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get.copy(model_? = tipModel_?)
+					}
+
+					val x = token_ll.flatten.map(token => TranslationItem(token, Nil))
+					println("x: "+x)
+					println()
+					x
+			}
+		}
+		
+		val translationItem_l = doit(cmd.item_l)
 		RsSuccess(TranslationResult(translationItem_l, state.toImmutable))
 	}
 	

@@ -23,6 +23,14 @@ case class PipetterTipsRefresh(
 	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
 ) extends Command
 
+/*case class PipetterTipsRefreshItem(
+	tip: Tip,
+	intensity: CleanIntensity.Value,
+	
+	// tip, clean intensity, tipModel_?
+	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
+) extends Command*/
+
 case class PeelerRun(
 	deviceIdent: String,
 	specIdent: String,

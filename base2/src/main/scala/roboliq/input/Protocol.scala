@@ -439,14 +439,14 @@ class Protocol {
 			val tip8 = Tip("tip8", None, None, 7, 7, 0, Some(tipModel50))
 			
 			// Permanent tips at BSSE
-			state0.tip_model_m(tip1) = tipModel1000
-			state0.tip_model_m(tip2) = tipModel1000
-			state0.tip_model_m(tip3) = tipModel1000
-			state0.tip_model_m(tip4) = tipModel1000
-			state0.tip_model_m(tip5) = tipModel50
-			state0.tip_model_m(tip6) = tipModel50
-			state0.tip_model_m(tip7) = tipModel50
-			state0.tip_model_m(tip8) = tipModel50
+			state0.tip_state_m(tip1) = TipState.createEmpty(tip1).copy(model_? = Some(tipModel1000))
+			state0.tip_state_m(tip2) = TipState.createEmpty(tip2).copy(model_? = Some(tipModel1000))
+			state0.tip_state_m(tip3) = TipState.createEmpty(tip3).copy(model_? = Some(tipModel1000))
+			state0.tip_state_m(tip4) = TipState.createEmpty(tip4).copy(model_? = Some(tipModel1000))
+			state0.tip_state_m(tip5) = TipState.createEmpty(tip5).copy(model_? = Some(tipModel50))
+			state0.tip_state_m(tip6) = TipState.createEmpty(tip6).copy(model_? = Some(tipModel50))
+			state0.tip_state_m(tip7) = TipState.createEmpty(tip7).copy(model_? = Some(tipModel50))
+			state0.tip_state_m(tip8) = TipState.createEmpty(tip8).copy(model_? = Some(tipModel50))
 	
 			eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
 			eb.tipToTipModels_m(tip1) = List(tipModel1000)
