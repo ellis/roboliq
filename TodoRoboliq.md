@@ -11,8 +11,6 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for while at Weizmann:
-- [ ] drop tips after last dispense
-- [ ] merge PippeteTipsRefresh items (washes should not happen twice in a row)
 - [ ] Q: is there danger of running my scripts with regard to having enough tips?
 - [ ] PipetteSpec: allow user to manually specify tip model
 - [ ] read protocol from json file
@@ -42,6 +40,9 @@ Details for while at Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] figure out why prewashing is being performed more than once
+- [x] drop tips after last dispense
+- [x] merge PippeteTipsRefresh items (washes should not happen twice in a row)
 - [x] wrong tip model name is given as "50ul" for GetDITI2
 - [x] get name of new sealy computer: pcrobot
 - [x] ?: Wash command in roboease scripts has "1, 1000" at end, whereas we have "1000, 0". We decide this can be safely ignored.

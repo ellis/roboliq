@@ -632,7 +632,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					val tipDrop1_l = item_l.filter(tuple => {
 						val (tip, _, tipModel_?) = tuple
 						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
+						//println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
 						(tipState.model_?.isDefined && (intensity >= CleanIntensity.Thorough || tipState.model_? != tipModel_?))
 					}).map(_._1)
 					// Also dropped any tips which weren't mentioned but are attached
@@ -640,7 +640,16 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 						!tip_l.contains(tip) && tipState.model_?.isDefined
 					})
-					val tipDrop_l = tipDrop2_l ++ tipDrop1_l
+					// If we need to drop any tips, drop all of them
+					val tipDrop_l: Set[Tip] = {
+						if (!tipDrop2_l.isEmpty || !tipDrop1_l.isEmpty)
+							tipAll_l.filter(tip => {
+								val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+								tipState.model_?.isDefined
+							})
+						else
+							Set()
+					}
 					val tipDrop_m = encodeTips(tipDrop_l)
 					
 					// If we need new tips and either didn't have any before or are dropping our previous ones
@@ -653,6 +662,7 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 				
 					// If tip state has no clean state, do a pre-wash
 					val prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
+					println("prewash_b:", prewash_b, tipGet_m > 0, tipState_l.map(s => (s.conf.index, s.cleanDegreePrev)))
 					
 					val token_ll = List[List[L0C_Command]](
 						if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
@@ -671,16 +681,16 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 					)
 					
 					// Update tip states
-					for (tip <- tipDrop_l) {
-						// Set tip state to clean for the tips that are being washed
-						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						state.tip_state_m(tip) = tipState0.copy(model_? = None)
-					}
-					// Set tip state to clean for the tips that are being washed
-					for (tip <- tipGet_l) {
+					val tipClean_l = if (prewash_b) tipAll_l else tipGet_l ++ tipDrop_l
+					val tipToModel_l: List[(Tip, Option[TipModel])] = (tipDrop_l.toList.map(_ -> None) ++ tipGet_l.toList.map(_ -> tipModel_?))
+					for (tip <- tipClean_l) {
 						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 						val event = TipCleanEvent(tip, CleanIntensity.Decontaminate)
-						state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get.copy(model_? = tipModel_?)
+						state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
+					}
+					for ((tip, tipModel_?) <- tipToModel_l) {
+						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+						state.tip_state_m(tip) = tipState0.copy(model_? = tipModel_?)
 					}
 
 					val x = token_ll.flatten.map(token => TranslationItem(token, Nil))
