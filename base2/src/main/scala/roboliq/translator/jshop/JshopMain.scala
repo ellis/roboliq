@@ -326,8 +326,8 @@ object JshopMain extends App {
 	def runWeizmann(protocolName: String) {
 		import scala.sys.process._
 		val x = for {
-			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/weizmann-sealy/config/carrier.cfg")
-			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/weizmann-sealy/config/table-01.esc")
+			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/wis-pcrobot/config/carrier.cfg")
+			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/wis-pcrobot/config/table-01.esc")
 			
 			_ = protocol.loadConfig_Weizmann()
 			_ = protocol.loadEvoware("r1", carrierData, tableData)
@@ -371,5 +371,5 @@ object JshopMain extends App {
 	//run("ph", ph._1, ph._2)
 	//run("pi", pi._1, pi._2)
 	
-	runWeizmann("pa")
+	runWeizmann("pb")
 }

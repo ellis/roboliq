@@ -52,8 +52,6 @@ class Protocol {
 		
 		val user = Agent(gid, Some("user"))
 		val offsite = Site(gid, Some("offsite"))
-		val shakerSpec1 = ShakerSpec(gid)
-		val thermocyclerSpec1 = ThermocyclerSpec(gid)
 		
 		eb.addAlias("Thermocycler Plate", "D-BSSE 96 Well PCR Plate")
 		eb.addAgent(user, "user")
@@ -87,8 +85,6 @@ class Protocol {
 		
 		val user = Agent(gid, Some("user"))
 		val offsite = Site(gid, Some("offsite"))
-		val shakerSpec1 = ShakerSpec(gid)
-		val thermocyclerSpec1 = ThermocyclerSpec(gid)
 		
 		eb.addAlias("Thermocycler Plate", "96 Well PCR Plate")
 		eb.addAgent(user, "user")
@@ -104,7 +100,6 @@ class Protocol {
 		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x2", "userArmSpec")))
 		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x3", "userArmSpec")))
 		
-		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
 		specToString_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
 		deviceToModelToSpec_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
 
