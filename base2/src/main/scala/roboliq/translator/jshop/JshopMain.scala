@@ -7,6 +7,8 @@ import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.entities.ClientScriptBuilder
+import org.apache.commons.io.FileUtils
+import java.io.File
 
 object JshopMain extends App {
 	val protocol = new Protocol
@@ -321,13 +323,14 @@ object JshopMain extends App {
 		}
 	}
 	
-	def runWeizmann(protocolName: String, input: String, taskOutput: String) {
+	def runWeizmann(protocolName: String, taskOutput: String) {
 		val x = for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/weizmann-sealy/config/carrier.cfg")
 			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/weizmann-sealy/config/table-01.esc")
 			
 			_ = protocol.loadConfig_Weizmann()
 			_ = protocol.loadEvoware("r1", carrierData, tableData)
+			input = FileUtils.readFileToString(new File(s"tasks/wisauto/$protocolName.json"))
 			_ = protocol.loadJson(input.asJson.asJsObject)
 			
 			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", userInitialConditionsWIS)
@@ -362,5 +365,5 @@ object JshopMain extends App {
 	//run("ph", ph._1, ph._2)
 	//run("pi", pi._1, pi._2)
 	
-	runWeizmann("pa", wa._1, wa._2)
+	runWeizmann("pa", wa._2)
 }

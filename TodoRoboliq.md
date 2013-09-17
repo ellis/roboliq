@@ -12,7 +12,6 @@ Current big steps:
 
 Details for while at Weizmann:
 - [ ] Q: is there danger of running my scripts with regard to having enough tips?
-- [ ] read protocol from json file
 - [ ] run jshop on our lisp output from within JshopMain
 - [ ] read jshop operators from a .jshop file
 - [?] add 'Decon' plate to bench.esc
@@ -36,6 +35,7 @@ Details for while at Weizmann:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] read protocol from json file
 - [x] PipetteSpec: allow user to manually specify tip model
 - [x] JshopTranslator: distribute: generate clean command
 - [x] JshopTranslator: need much better tip cleaning algorithm
