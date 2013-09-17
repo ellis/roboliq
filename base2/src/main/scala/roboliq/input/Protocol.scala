@@ -109,6 +109,58 @@ class Protocol {
 		specToString_l += (("thermocyclerSpec1", "1.0"))
 		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
 	}
+	
+	def loadConfigBean(configBean: ConfigBean) {
+		import roboliq.entities._
+		import scala.collection.JavaConversions._
+		
+		val user = Agent(gid, Some("user"))
+		val offsite = Site(gid, Some("offsite"))
+		
+		eb.addAgent(user, "user")
+		eb.addModel(offsiteModel, "offsiteModel")
+		eb.addSite(offsite, "offsite")
+		eb.addDevice(user, userArm, "userArm")
+		eb.addDeviceSpec(userArm, userArmSpec, "userArmSpec")
+		// userArm can transport from offsite
+		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
+		
+		// Aliases
+		if (configBean.aliases != null) {
+			for ((key, value) <- configBean.aliases.toMap) {
+				eb.addAlias(key, value)
+			}
+		}
+		
+		// Logic
+		if (configBean.logic != null) {
+			for (s <- configBean.logic.toList) {
+				val l = s.split(" ").toList
+				eb.addRel(Rel(l.head, l.tail))
+			}
+		}
+
+		// Specs
+		if (configBean.specs != null) {
+			for ((key, value) <- configBean.specs.toMap) {
+				specToString_l += ((key, value))
+			}
+		}
+		
+		// device+spec combinations
+		if (configBean.deviceToSpec != null) {
+			for (l <- configBean.deviceToSpec.toList) {
+				deviceToSpec_l += ((l(0), l(1)))
+			}
+		}
+		
+		// device+model+spec combinations
+		if (configBean.deviceToModelToSpec != null) {
+			for (l <- configBean.deviceToModelToSpec.toList) {
+				deviceToModelToSpec_l += ((l(0), l(1), l(2)))
+			}
+		}
+	}
 
 	def loadJson(jsobj: JsObject) {
 		jsobj.fields.get("substances") match {

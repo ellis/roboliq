@@ -9,6 +9,7 @@ import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.entities.ClientScriptBuilder
 import org.apache.commons.io.FileUtils
 import java.io.File
+import roboliq.input.ConfigBean
 
 object JshopMain extends App {
 	val protocol = new Protocol
@@ -18,10 +19,6 @@ object JshopMain extends App {
   (device-can-site r1_pipetter1 r1_bench_017x2)
   (device-can-site r1_pipetter1 r1_bench_017x3)
   (device-can-site r1_pipetter1 r1_bench_017x4)
-"""
-	val userInitialConditionsWIS = """  (device-can-site r1_pipetter1 r1_bench_035x1)
-  (device-can-site r1_pipetter1 r1_bench_035x2)
-  (device-can-site r1_pipetter1 r1_bench_035x3)
 """
 	
 	val pd = (
@@ -324,17 +321,20 @@ object JshopMain extends App {
 	}
 	
 	def runWeizmann(protocolName: String) {
+		import org.yaml.snakeyaml.Yaml
+		import org.yaml.snakeyaml.constructor.Constructor
 		import scala.sys.process._
 		val x = for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/wis-pcrobot/config/carrier.cfg")
 			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/wis-pcrobot/config/table-01.esc")
-			
-			_ = protocol.loadConfig_Weizmann()
+			configBean <- loadConfigBean("tasks/wisauto/config.yaml")
+
+			_ = protocol.loadConfigBean(configBean)
 			_ = protocol.loadEvoware("r1", carrierData, tableData)
 			input = FileUtils.readFileToString(new File(s"tasks/wisauto/$protocolName.json"))
 			_ = protocol.loadJson(input.asJson.asJsObject)
 			
-			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", userInitialConditionsWIS)
+			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", "")
 			_ = Seq("bash", "-c", s"source tasks/classpath.sh; make -C tasks/wisauto/ $protocolName.plan").!!
 			planOutput = scala.io.Source.fromFile(s"tasks/wisauto/$protocolName.plan").getLines.toList
 			_ <- RsResult.assert(planOutput.size > 4, "JSON planner did not find a plan")
@@ -363,6 +363,16 @@ object JshopMain extends App {
 			warning_l.foreach(println)
 			println()
 		}
+	}
+	
+	private def loadConfigBean(path: String): RsResult[ConfigBean] = {
+		import org.yaml.snakeyaml.Yaml
+		import org.yaml.snakeyaml.constructor.Constructor
+		
+		val text = scala.io.Source.fromFile("tasks/wisauto/config.yaml").mkString
+		val yaml = new Yaml(new Constructor(classOf[ConfigBean]))
+	    val configBean = yaml.load(text).asInstanceOf[ConfigBean]
+		RsSuccess(configBean)
 	}
 	
 	//run("pd", pd._1, pd._2)

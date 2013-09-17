@@ -1,0 +1,41 @@
+aliases:
+  Thermocycler Plate: 96 Well PCR Plate
+
+logic:
+  - transporter-can userArm r1_bench_035x1 userArmSpec
+  - transporter-can userArm r1_bench_035x2 userArmSpec
+  - transporter-can userArm r1_bench_035x3 userArmSpec
+  - device-can-site r1_pipetter1 r1_bench_035x1
+  - device-can-site r1_pipetter1 r1_bench_035x2
+  - device-can-site r1_pipetter1 r1_bench_035x3
+
+specs:
+  sealerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  peelerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  thermocyclerSpec1: "1.0"
+
+deviceToSpec:
+  - [r1_thermocycler1, thermocyclerSpec1]
+
+deviceToModelToSpec:
+  - [r1_sealer, "96 Well PCR Plate", sealerSpec1]
+  - [r1_peeler, "96 Well PCR Plate", peelerSpec1]
+
+labware:
+  - 96 Well PCR Plate
+  - 96 Well DWP
+
+tipModels:
+  - DiTi 50ul
+  - DiTi 1000ul
+
+tips:
+  - row: 1
+  - row: 2
+  - row: 3
+  - row: 4
+  - row: 5
+  - row: 6
+  - row: 7
+  - row: 8
+

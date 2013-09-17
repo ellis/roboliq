@@ -140,6 +140,9 @@
   (model reagentPlate1 m001)
   (location pcrPlate1 offsite)
   (location reagentPlate1 offsite)
+  (device-can-site r1_pipetter1 r1_bench_035x1)
+  (device-can-site r1_pipetter1 r1_bench_035x2)
+  (device-can-site r1_pipetter1 r1_bench_035x3)
   (transporter-can r1_transporter1 r1_bench_035x1 r1_transporterSpec0)
   (transporter-can r1_transporter1 r1_bench_035x2 r1_transporterSpec0)
   (transporter-can r1_transporter1 r1_bench_035x3 r1_transporterSpec0)
@@ -168,11 +171,6 @@
   (transporter-can userArm r1_bench_035x1 userArmSpec)
   (transporter-can userArm r1_bench_035x2 userArmSpec)
   (transporter-can userArm r1_bench_035x3 userArmSpec)
- ; user initial conditions
-  (device-can-site r1_pipetter1 r1_bench_035x1)
-  (device-can-site r1_pipetter1 r1_bench_035x2)
-  (device-can-site r1_pipetter1 r1_bench_035x3)
-
  )
  ; tasks
  (

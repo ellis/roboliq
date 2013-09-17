@@ -11,7 +11,16 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for while at Weizmann:
-- [ ] Q: is there danger of running my scripts with regard to having enough tips?
+- [ ] config yaml: move lab-specific code from Protocol.loadConfig to config file
+- [ ] config yaml: move lab-specific code from Protocol.loadEvoware to config file
+- [ ] liquid class selection: make it more portable
+- [ ] WIS domain: thermocycle command should be performed by user
+- [ ] perform PCR
+
+For tomorrow:
+- [ ] operate peripherals
+- [ ] operate multiple robots
+
 - [?] add 'Decon' plate to bench.esc
 - [?] domain: peeler
 - [?] Protocol: peeler

@@ -160,6 +160,9 @@ public class pb
 		s.add(new Predicate(9, 0, new TermList(TermConstant.getConstant(67), new TermList(TermConstant.getConstant(68), TermList.NIL))));
 		s.add(new Predicate(11, 0, new TermList(TermConstant.getConstant(27), new TermList(TermConstant.getConstant(25), TermList.NIL))));
 		s.add(new Predicate(11, 0, new TermList(TermConstant.getConstant(67), new TermList(TermConstant.getConstant(25), TermList.NIL))));
+		s.add(new Predicate(14, 0, new TermList(TermConstant.getConstant(73), new TermList(TermConstant.getConstant(36), TermList.NIL))));
+		s.add(new Predicate(14, 0, new TermList(TermConstant.getConstant(73), new TermList(TermConstant.getConstant(37), TermList.NIL))));
+		s.add(new Predicate(14, 0, new TermList(TermConstant.getConstant(73), new TermList(TermConstant.getConstant(38), TermList.NIL))));
 		s.add(new Predicate(8, 0, new TermList(TermConstant.getConstant(76), new TermList(TermConstant.getConstant(36), new TermList(TermConstant.getConstant(79), TermList.NIL)))));
 		s.add(new Predicate(8, 0, new TermList(TermConstant.getConstant(76), new TermList(TermConstant.getConstant(37), new TermList(TermConstant.getConstant(79), TermList.NIL)))));
 		s.add(new Predicate(8, 0, new TermList(TermConstant.getConstant(76), new TermList(TermConstant.getConstant(38), new TermList(TermConstant.getConstant(79), TermList.NIL)))));
@@ -188,9 +191,6 @@ public class pb
 		s.add(new Predicate(8, 0, new TermList(TermConstant.getConstant(78), new TermList(TermConstant.getConstant(36), new TermList(TermConstant.getConstant(80), TermList.NIL)))));
 		s.add(new Predicate(8, 0, new TermList(TermConstant.getConstant(78), new TermList(TermConstant.getConstant(37), new TermList(TermConstant.getConstant(80), TermList.NIL)))));
 		s.add(new Predicate(8, 0, new TermList(TermConstant.getConstant(78), new TermList(TermConstant.getConstant(38), new TermList(TermConstant.getConstant(80), TermList.NIL)))));
-		s.add(new Predicate(14, 0, new TermList(TermConstant.getConstant(73), new TermList(TermConstant.getConstant(36), TermList.NIL))));
-		s.add(new Predicate(14, 0, new TermList(TermConstant.getConstant(73), new TermList(TermConstant.getConstant(37), TermList.NIL))));
-		s.add(new Predicate(14, 0, new TermList(TermConstant.getConstant(73), new TermList(TermConstant.getConstant(38), TermList.NIL))));
 	}
 
 	public static LinkedList<Plan> getPlans()
