@@ -3,6 +3,7 @@ package roboliq.input
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 import roboliq.entities.Entity
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import roboliq.core._
 import roboliq.entities._
@@ -76,6 +77,7 @@ class Protocol {
 		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
 	}
 
+	/*
 	/**
 	 * This should eventually load a YAML file.
 	 * For now it's just hard-coded for my testing purposes.
@@ -108,11 +110,10 @@ class Protocol {
 		
 		specToString_l += (("thermocyclerSpec1", "1.0"))
 		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
-	}
+	}*/
 	
 	def loadConfigBean(configBean: ConfigBean) {
 		import roboliq.entities._
-		import scala.collection.JavaConversions._
 		
 		val user = Agent(gid, Some("user"))
 		val offsite = Site(gid, Some("offsite"))
@@ -454,7 +455,8 @@ class Protocol {
 	def loadEvoware(
 		agentIdent: String,
 		carrierData: roboliq.evoware.parser.EvowareCarrierData,
-		tableData: roboliq.evoware.parser.EvowareTableData
+		tableData: roboliq.evoware.parser.EvowareTableData,
+		configBean: ConfigBean
 	) {
 		import roboliq.entities._
 		
@@ -470,6 +472,7 @@ class Protocol {
 
 		// FIXME: This doesn't belong here at all!
 		val labwareNamesOfInterest_l = new HashSet[String]
+		/*
 		def bsse() {
 			labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
 			labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
@@ -505,28 +508,42 @@ class Protocol {
 			eb.tipToTipModels_m(tip7) = List(tipModel50)
 			eb.tipToTipModels_m(tip8) = List(tipModel50)
 		}
-		def weizmann() {
-			labwareNamesOfInterest_l += "96 Well PCR Plate"
-			labwareNamesOfInterest_l += "96 Well DWP"
-			val tipModel1000 = TipModel("DiTi 1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
-			val tipModel50 = TipModel("DiTi 50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
-			val tipModel_l = List(tipModel50, tipModel1000)
-			tipModel_l.foreach(eb.addEntityWithoutIdent)
+		*/
+		def loadConfigBean() {
+			// Labware to be used
+			if (configBean.labware != null) {
+				labwareNamesOfInterest_l ++= configBean.labware
+			}
 			
-			val tip1 = Tip("tip1", None, None, 0, 0, 0, None)
-			val tip2 = Tip("tip2", None, None, 1, 1, 0, None)
-			val tip3 = Tip("tip3", None, None, 2, 2, 0, None)
-			val tip4 = Tip("tip4", None, None, 3, 3, 0, None)
-			val tip5 = Tip("tip5", None, None, 4, 4, 0, None)
-			val tip6 = Tip("tip6", None, None, 5, 5, 0, None)
-			val tip7 = Tip("tip7", None, None, 6, 6, 0, None)
-			val tip8 = Tip("tip8", None, None, 7, 7, 0, None)
-			val tip_l = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
+			// Tip models
+			val tipModel_l = new ArrayBuffer[TipModel]
+			if (configBean.tipModels != null) {
+				for ((id, tipModelBean) <- configBean.tipModels.toMap) {
+					val tipModel = TipModel(id, None, None, LiquidVolume.ul(BigDecimal(tipModelBean.max)), LiquidVolume.ul(BigDecimal(tipModelBean.min)), Map())
+					tipModel_l += tipModel
+					eb.addEntityWithoutIdent(tipModel)
+				}
+			}
 			
-			eb.pipetterToTips_m(pipetter) = tip_l
-			tip_l.foreach(tip => eb.tipToTipModels_m(tip) = tipModel_l)
+			// Tips
+			val tip_l = new ArrayBuffer[Tip]
+			if (configBean.tips != null) {
+				for ((tipBean, index) <- configBean.tips.zipWithIndex) {
+					val row: Int = if (tipBean.row == 0) index else tipBean.row
+					val col = 0
+					// FIXME: handle the error message from eb.getEntityAs
+					val permanentTipModel_? = if (tipBean.permanentModel == null) None else eb.getEntityAs(tipBean.permanentModel).toOption
+					val tip = Tip("tip"+(index + 1), None, None, index, row, col, permanentTipModel_?)
+					tip_l += tip
+					
+					// FIXME: handle the error message from eb.getEntityAs
+					val tipModel2_l = if (tipBean.models == null) tipModel_l.toList else tipBean.models.toList.map(eb.getEntityAs(tipBean.permanentModel).toOption.get)
+					eb.tipToTipModels_m(tip) = tipModel2_l.toList
+				}
+			}
+			eb.pipetterToTips_m(pipetter) = tip_l.toList
 		}
-		weizmann()
+		loadConfigBean()
 		// ENDFIX
 		
 		// Add labware on the table definition to the list of labware we're interested in

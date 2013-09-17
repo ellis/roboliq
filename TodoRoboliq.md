@@ -11,8 +11,6 @@ Current big steps:
 - [ ] New command structure: preconditions leading to search through variable space, preconditions leading to search through actions to achieve that state, further task breakdown, add and delete lists for state
 
 Details for while at Weizmann:
-- [ ] config yaml: move lab-specific code from Protocol.loadConfig to config file
-- [ ] config yaml: move lab-specific code from Protocol.loadEvoware to config file
 - [ ] liquid class selection: make it more portable
 - [ ] WIS domain: thermocycle command should be performed by user
 - [ ] perform PCR
@@ -42,6 +40,8 @@ For tomorrow:
 - [ ] Protocol: when a plate is given an initial position, enter this information into the WorldStateBuilder
 - [ ] JshopTranslator: intelligently select liquid class (especially air, bot, wet contact)
 - [ ] Protocol: section for lab-specific variables and their values (possibly use aliases)
+- [x] config yaml: move lab-specific code from Protocol.loadConfig to config file
+- [x] config yaml: move lab-specific code from Protocol.loadEvoware to config file
 - [x] run jshop on our lisp output from within JshopMain
 - [x] read jshop operators from a .jshop file
 - [x] read protocol from json file

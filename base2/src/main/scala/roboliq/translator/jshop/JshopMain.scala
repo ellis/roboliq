@@ -284,12 +284,13 @@ object JshopMain extends App {
 		"""
 	)
 	
+	/*
 	def run(protocolName: String, input: String, output: String) {
 		for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/bsse-robot1/config/carrier.cfg")
 			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/bsse-robot1/config/table-01.esc")
 		} {
-			protocol.loadConfig_Weizmann()
+			protocol.loadConfig()
 			protocol.loadEvoware("r1", carrierData, tableData)
 			protocol.loadJson(input.asJson.asJsObject)
 			
@@ -319,6 +320,7 @@ object JshopMain extends App {
 			}
 		}
 	}
+	*/
 	
 	def runWeizmann(protocolName: String) {
 		import org.yaml.snakeyaml.Yaml
@@ -330,7 +332,7 @@ object JshopMain extends App {
 			configBean <- loadConfigBean("tasks/wisauto/config.yaml")
 
 			_ = protocol.loadConfigBean(configBean)
-			_ = protocol.loadEvoware("r1", carrierData, tableData)
+			_ = protocol.loadEvoware("r1", carrierData, tableData, configBean)
 			input = FileUtils.readFileToString(new File(s"tasks/wisauto/$protocolName.json"))
 			_ = protocol.loadJson(input.asJson.asJsObject)
 			
@@ -366,11 +368,17 @@ object JshopMain extends App {
 	}
 	
 	private def loadConfigBean(path: String): RsResult[ConfigBean] = {
-		import org.yaml.snakeyaml.Yaml
+		import org.yaml.snakeyaml._
 		import org.yaml.snakeyaml.constructor.Constructor
+		import roboliq.input._
 		
 		val text = scala.io.Source.fromFile("tasks/wisauto/config.yaml").mkString
-		val yaml = new Yaml(new Constructor(classOf[ConfigBean]))
+		val constructor = new Constructor(classOf[ConfigBean])
+		val description = new TypeDescription(classOf[ConfigBean])
+		description.putMapPropertyType("tipModels", classOf[String], classOf[TipModelBean])
+		description.putListPropertyType("tips", classOf[TipBean])
+		constructor.addTypeDescription(description);
+		val yaml = new Yaml(constructor)
 	    val configBean = yaml.load(text).asInstanceOf[ConfigBean]
 		RsSuccess(configBean)
 	}

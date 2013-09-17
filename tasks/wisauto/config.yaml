@@ -26,8 +26,8 @@ labware:
   - 96 Well DWP
 
 tipModels:
-  - DiTi 50ul
-  - DiTi 1000ul
+  DiTi 50ul: { min: 2, max: 45 }
+  DiTi 1000ul: { min: 50, max: 925 }
 
 tips:
   - row: 1
