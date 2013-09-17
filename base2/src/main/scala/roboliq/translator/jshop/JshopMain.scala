@@ -323,7 +323,8 @@ object JshopMain extends App {
 		}
 	}
 	
-	def runWeizmann(protocolName: String, taskOutput: String) {
+	def runWeizmann(protocolName: String) {
+		import scala.sys.process._
 		val x = for {
 			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/weizmann-sealy/config/carrier.cfg")
 			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/weizmann-sealy/config/table-01.esc")
@@ -334,6 +335,11 @@ object JshopMain extends App {
 			_ = protocol.loadJson(input.asJson.asJsObject)
 			
 			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", userInitialConditionsWIS)
+			_ = Seq("bash", "-c", s"source tasks/classpath.sh; make -C tasks/wisauto/ $protocolName.plan").!!
+			planOutput = scala.io.Source.fromFile(s"tasks/wisauto/$protocolName.plan").getLines.toList
+			_ <- RsResult.assert(planOutput.size > 4, "JSON planner did not find a plan")
+			plan_l = planOutput.drop(2).reverse.drop(2).reverse
+			plan = plan_l.mkString("\n")
 			
 			configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
 			config = new EvowareConfig(carrierData, tableData, configData)
@@ -342,7 +348,7 @@ object JshopMain extends App {
 				"user" -> scriptBuilder,
 				"r1" -> scriptBuilder
 			)
-			result <- JshopTranslator.translate(protocol, taskOutput, agentToBuilder_m)
+			result <- JshopTranslator.translate(protocol, plan, agentToBuilder_m)
 		} yield {
 			for (script <- scriptBuilder.script_l) {
 				scriptBuilder.saveWithHeader(script, script.filename)
@@ -365,5 +371,5 @@ object JshopMain extends App {
 	//run("ph", ph._1, ph._2)
 	//run("pi", pi._1, pi._2)
 	
-	runWeizmann("pa", wa._2)
+	runWeizmann("pa")
 }
