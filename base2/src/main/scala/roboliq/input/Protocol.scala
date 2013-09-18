@@ -312,6 +312,23 @@ class Protocol {
 												tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
 											case _ =>
 										}
+									case Some(JsString("shake")) =>
+										val plateIdent_? = fields.get("object") match {
+											case Some(JsString(plateIdent)) => RsSuccess(plateIdent)
+											case _ => RsError("must supply an `object` which references a plate by name")
+										}
+										val specIdent_? = fields.get("spec") match {
+											case Some(JsString(specIdent)) => RsSuccess(specIdent)
+											case _ => RsError("must supply a `spec`")
+										}
+										for {
+											plateIdent <- plateIdent_?
+											specIdent <- specIdent_?
+										} {
+											val agent = f"?a$nvar%04d"
+											val device = f"?d$nvar%04d"
+											tasks += Rel("shaker-run", List(agent, device, specIdent, plateIdent, f"?s$nvar%04d"))
+										}
 									case Some(JsString("thermocycle")) =>
 										val plateIdent_? = fields.get("object") match {
 											case Some(JsString(plateIdent)) => RsSuccess(plateIdent)
@@ -753,6 +770,27 @@ class Protocol {
 		
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
 			carrierE.sName match {
+				case "RoboPeel" =>
+					val deviceIdent = agentIdent+"_peeler"
+					val device = addPeeler(deviceIdent, carrierE)
+					// Add user-defined specs for this device
+					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
+						// Get or create the sealer spec for specIdent
+						val spec: PeelerSpec = eb.getEntity(specIdent) match {
+							case Some(spec) => spec.asInstanceOf[PeelerSpec]
+							case None =>
+								// Store the evoware string for this spec
+								val internal = specToString_l.find(_._1 == specIdent).get._2
+								identToAgentObject(specIdent.toLowerCase) = internal
+								PeelerSpec(gid, None, Some(internal))
+						}
+						// Register the spec
+						eb.addDeviceSpec(device, spec, specIdent)
+						// Let entity base know that that the spec can be used for the plate model
+						val plateModel = idToModel_m(plateModelId)
+						val plateModelIdent = eb.getIdent(plateModel).toOption.get
+						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
+					}
 				case "RoboSeal" =>
 					val deviceIdent = agentIdent+"_sealer"
 					val device = addSealer(deviceIdent, carrierE)
@@ -774,26 +812,22 @@ class Protocol {
 						val plateModelIdent = eb.getIdent(plateModel).toOption.get
 						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
 					}
-				case "RoboPeel" =>
-					val deviceIdent = agentIdent+"_peeler"
-					val device = addPeeler(deviceIdent, carrierE)
+				case "Te-Shake 2Pos" =>
+					val deviceIdent = agentIdent+"_shaker"
+					val device = addDevice0(new Shaker(gid, Some(carrierE.sName)), deviceIdent, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
-						// Get or create the sealer spec for specIdent
-						val spec: PeelerSpec = eb.getEntity(specIdent) match {
-							case Some(spec) => spec.asInstanceOf[PeelerSpec]
+					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
+						// Get or create the spec for specIdent
+						val spec: ShakerSpec = eb.getEntity(specIdent) match {
+							case Some(spec) => spec.asInstanceOf[ShakerSpec]
 							case None =>
 								// Store the evoware string for this spec
 								val internal = specToString_l.find(_._1 == specIdent).get._2
 								identToAgentObject(specIdent.toLowerCase) = internal
-								PeelerSpec(gid, None, Some(internal))
+								ShakerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
 						eb.addDeviceSpec(device, spec, specIdent)
-						// Let entity base know that that the spec can be used for the plate model
-						val plateModel = idToModel_m(plateModelId)
-						val plateModelIdent = eb.getIdent(plateModel).toOption.get
-						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
 					}
 				case "TRobot1" =>
 					val deviceIdent = agentIdent+"_thermocycler1"

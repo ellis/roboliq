@@ -273,6 +273,53 @@
  )
 
  ;
+ ; SHAKER
+ ;
+
+ (:operator (!shaker-run ?a ?d ?spec ?p ?s)
+  ; preconditions
+  (
+   ; types
+   (is-agent ?a)
+   (is-shaker ?d)
+   (is-shakerSpec ?spec)
+   (is-plate ?p)
+   (is-site ?s)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-device ?a ?d)
+   ; device
+   (device-can-site ?d ?s)
+   (device-can-spec ?d ?spec)
+   ; plate
+   (model ?p ?m)
+   (location ?p ?s)
+   ; site (not really necessary)
+   ;(model ?s ?sm)
+   ;(stackable ?sm ?m)
+  )
+  ; delete list
+  nil
+  ; add list
+  nil
+ )
+
+ (:method (shaker-run ?a ?d ?spec ?p ?s)
+  (
+   (is-agent ?a)
+   (is-shaker ?d)
+   (is-shakerSpec ?spec)
+   (is-plate ?p)
+   (is-site ?s)
+   (agent-has-device ?a ?d)
+   (device-can-site ?d ?s)
+   (device-can-spec ?d ?spec)
+   (model ?p ?m)
+  )
+  ((move-labware ?p ?s) (agent-activate ?a) (!shaker-run ?a ?d ?spec ?p ?s))
+ )
+
+ ;
  ; PEELER
  ;
 
@@ -332,72 +379,13 @@
  ; THERMOCYCLER
  ;
 
- (:operator (!thermocycler-open ?a ?d)
-  ; preconditions
-  (
-   (is-agent ?a)
-   (is-thermocycler ?d)
-   (agent-has-device ?a ?d)
-   (not (thermocycler-is-open ?d))
-  )
-  ; delete list
-  ()
-  ; add list
-  ((thermocycler-is-open ?d))
- )
-
- (:method (thermocycler-open ?a ?d)
-  thermocycler-open-NULL
-  (
-   (thermocycler-is-open ?d)
-  )
-  ()
-
-  thermocycler-open-DO
-  (
-   (is-agent ?a)
-   (is-thermocycler ?d)
-   (agent-has-device ?a ?d)
-  )
-  ((!thermocycler-open ?a ?d))
- )
-
- (:operator (!thermocycler-close ?a ?d)
-  ; preconditions
-  (
-   (is-agent ?a)
-   (is-thermocycler ?d)
-   (agent-has-device ?a ?d)
-   (thermocycler-is-open ?d)
-  )
-  ; delete list
-  ((thermocycler-is-open ?d))
-  ; add list
-  ()
- )
-
- (:method (thermocycler-close ?a ?d)
-  thermocycler-close-NULL
-  (
-   (not (thermocycler-is-open ?d))
-  )
-  ()
-
-  thermocycler-close-DO
-  (
-   (is-agent ?a)
-   (is-thermocycler ?d)
-   (agent-has-device ?a ?d)
-  )
-  ((!thermocycler-close ?a ?d))
- )
-
- (:operator (!thermocycler-run ?a ?d ?spec)
+ (:operator (!thermocycler-run ?a ?d ?spec ?p)
   ; preconditions
   (
    (is-agent ?a)
    (is-thermocycler ?d)
    (is-thermocyclerSpec ?spec)
+   (is-plate ?p)
    (agent-has-device ?a ?d)
   )
   ; delete list
@@ -427,19 +415,10 @@
 ;   (location ?p ?s)
 ;
    (agent-has-device ?a ?d)
-   (device-can-site ?d ?s)
-   (is-site ?s)
   )
   ; sub-tasks
   (
-   (seal-plate ?p)
-   (thermocycler-open ?a ?d)
-   (move-labware ?p ?s)
-   (thermocycler-close ?a ?d)
-   (!thermocycler-run ?a ?d ?spec)
-   (thermocycler-open ?a ?d)
-   (move-labware ?p ?s2)
-   (thermocycler-close ?a ?d)
+   (!thermocycler-run ?a ?d ?spec ?p)
   )
  )
 

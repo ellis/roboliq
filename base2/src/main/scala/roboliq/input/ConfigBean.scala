@@ -14,6 +14,7 @@ class ConfigBean {
 	@BeanProperty var labware: java.util.ArrayList[String] = null
 	@BeanProperty var tipModels: java.util.HashMap[String, TipModelBean] = null
 	@BeanProperty var tips: java.util.ArrayList[TipBean] = null
+	@BeanProperty var externalThermocyclers: java.util.ArrayList[String] = null
 }
 
 class TipModelBean {

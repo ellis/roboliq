@@ -101,6 +101,9 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			case Prompt(text) =>
 				val item = TranslationItem(L0C_Prompt(text), Nil)
 				RsSuccess(TranslationResult(List(item), state0))
+			
+			case cmd: ShakerRun =>
+				shakerRun(protocol, state0, identToAgentObject_m, cmd)
 
 			case TransporterRun(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) =>
 				// REFACTOR: lots of duplication with TransporterRun for user
@@ -400,6 +403,28 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
 			output.write(bytes)
 			output.write("\r\n".getBytes())
+		}
+	}
+	
+	private def shakerRun(
+		protocol: Protocol,
+		state0: WorldState,
+		identToAgentObject_m: Map[String, Object],
+		cmd: ShakerRun
+	): RsResult[TranslationResult] = {
+		for {
+			specIdent <- protocol.eb.getIdent(cmd.spec)
+			internal_s <- identToAgentObject_m.get(specIdent.toLowerCase).asRs(s"missing internal value for specIdent `$specIdent`")
+		} yield {
+			val token_l = List(
+				L0C_Facts("Shaker", "Shaker_Init", ""),
+				L0C_Facts("Shaker","Shaker_Start","1"),
+				L0C_StartTimer(1),
+				L0C_WaitTimer(1, Integer.parseInt(internal_s.toString)),
+				L0C_Facts("Shaker","Shaker_Stop","")
+			)
+			val item_l = token_l.map(token => TranslationItem(token, Nil))
+			TranslationResult(item_l, state0)
 		}
 	}
 	

@@ -1,0 +1,9 @@
+[Plan cost: 5.0
+
+(!agent-activate user)
+(!transporter-run user userarm plate1 m001 offsite r1_device_44x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!shaker-run r1 r1_shaker shakerspec1 plate1 r1_device_44x1)
+--------------------
+]

@@ -5,17 +5,24 @@ logic:
   - transporter-can userArm r1_bench_035x1 userArmSpec
   - transporter-can userArm r1_bench_035x2 userArmSpec
   - transporter-can userArm r1_bench_035x3 userArmSpec
+  - transporter-can userArm r1_device_44x1 userArmSpec
+  - transporter-can userArm r1_device_44x2 userArmSpec
   - device-can-site r1_pipetter1 r1_bench_035x1
   - device-can-site r1_pipetter1 r1_bench_035x2
   - device-can-site r1_pipetter1 r1_bench_035x3
+  - is-thermocycler thermocycler1
+  - is-thermocyclerSpec thermocyclerSpec1
+  - agent-has-device user thermocycler1
 
 specs:
-  sealerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
   peelerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  sealerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  shakerSpec1: "60"
   thermocyclerSpec1: "1.0"
 
 deviceToSpec:
-  - [r1_thermocycler1, thermocyclerSpec1]
+  - [thermocycler, thermocyclerSpec1]
+  - [r1_shaker, shakerSpec1]
 
 deviceToModelToSpec:
   - [r1_sealer, "96 Well PCR Plate", sealerSpec1]
@@ -23,6 +30,8 @@ deviceToModelToSpec:
 
 labware:
   - 96 Well PCR Plate
+  - 96 Well PCR Plate- Roche
+  - 96 Well PlateReader
   - 96 Well DWP
 
 tipModels:

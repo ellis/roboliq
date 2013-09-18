@@ -389,5 +389,5 @@ object JshopMain extends App {
 	//run("ph", ph._1, ph._2)
 	//run("pi", pi._1, pi._2)
 	
-	runWeizmann("pb")
+	runWeizmann("pf")
 }

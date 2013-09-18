@@ -139,6 +139,17 @@ object JshopTranslator {
 				} yield {
 					List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
 				}
+				
+			case "shaker-run" =>
+				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
+				for {
+					device <- protocol.eb.getEntityByIdent[Shaker](deviceIdent)
+					spec <- protocol.eb.getEntityByIdent[ShakerSpec](specIdent)
+					labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
+					site <- protocol.eb.getEntityByIdent[Site](siteIdent)
+				} yield {
+					List(ShakerRun(device, spec, List(labware -> site)))
+				}
 			
 			case "thermocycler-close" =>
 				val List(deviceIdent) = arg_l
@@ -157,12 +168,13 @@ object JshopTranslator {
 				}
 				
 			case "thermocycler-run" =>
-				val List(deviceIdent, specIdent) = arg_l
+				val List(deviceIdent, specIdent, plateIdent) = arg_l
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
 					_ <- protocol.eb.getEntityByIdent[ThermocyclerSpec](specIdent)
+					_ <- protocol.eb.getEntityByIdent[Plate](plateIdent)
 				} yield {
-					List(ThermocyclerRun(deviceIdent, specIdent))
+					List(ThermocyclerRun(deviceIdent, specIdent, plateIdent))
 				}
 				
 			case "transporter-run" =>

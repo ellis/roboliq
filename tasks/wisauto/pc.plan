@@ -1,0 +1,11 @@
+[Plan cost: 7.0
+
+(!agent-activate user)
+(!transporter-run user userarm reagentplate1 m001 offsite r1_bench_035x1 userarmspec)
+(!transporter-run user userarm pcrplate1 m001 offsite r1_bench_035x2 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+(!thermocycler-run user thermocycler1 thermocyclerspec1 pcrplate1)
+--------------------
+]

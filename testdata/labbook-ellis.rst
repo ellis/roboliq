@@ -364,3 +364,27 @@ MISTAKE: I forgot to seal the plate before thermocycling.
 
 However, the result was successful, the gel turned out fine with the correct readout.
 
+WIS tests
+=========
+
+date: 2013-09-17
+
+In Udi Shapiro's lab at Weizmann.  Ran a PCR mixing script with water this morning.  Everything looked
+like it went well.  Script: pd.esc
+
+Then got real reagents.  Mix as follows:
+
+4ul doubly-distilled water
+4ul PCR mix KOD X5
+8ul primers mix (rev+fw) 1uM
+4ul DNA template (30ng/ul)
+----
+20ul per well
+
+4 wells.
+
+Readout in a real-time PCR machine, Roche LightCycler 480.
+
+First attempt didn't work because we forgot to seal the plate, so everything evaporated.
+
+Second attempt using script 'pe.esc' (which just changed the column of dispense), the fluorescent readout didn't really work. Tzipy thinks that the fluorescent mix was probably too old.  She will run a gel on it.

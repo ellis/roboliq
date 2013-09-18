@@ -64,6 +64,15 @@ case class SealerRun(
 	siteIdent: String
 ) extends Command
 
+/**
+ * @param object_l [(labwareIdent, siteIdent)]
+ */
+case class ShakerRun(
+	device: Shaker,
+	spec: ShakerSpec,
+	labwareToSite_l: List[(Labware, Site)]
+) extends Command
+
 case class ThermocyclerClose(
 	deviceIdent: String
 ) extends Command
@@ -74,7 +83,8 @@ case class ThermocyclerOpen(
 
 case class ThermocyclerRun(
 	deviceIdent: String,
-	specIdent: String
+	specIdent: String,
+	plateIdent: String
 ) extends Command
 
 case class TransporterRun(

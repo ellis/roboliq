@@ -1,0 +1,27 @@
+{
+	"substances": [
+		{ "name": "ddw", "kind": "Liquid", "tipCleanPolicy": "Decontaminate" },
+		{ "name": "kod", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+		{ "name": "primers", "kind": "Dna", "tipCleanPolicy": "Decontaminate" },
+		{ "name": "template", "kind": "Dna", "tipCleanPolicy": "Decontaminate" }
+	],
+	"plates": [
+		{ "name": "pcrPlate1", "model": "96 Well PCR Plate- Roche", "location": "offsite" },
+		{ "name": "reagentPlate1", "model": "96 Well PCR Plate- Roche", "location": "offsite" }
+	],
+	"wellContents": [
+		{ "name": "reagentPlate1(A01)", "contents": "ddw@200ul" },
+		{ "name": "reagentPlate1(B01)", "contents": "kod@200ul" },
+		{ "name": "reagentPlate1(C01)", "contents": "primers@200ul" },
+		{ "name": "reagentPlate1(D01)", "contents": "template@200ul" }
+	],
+	"protocol": [
+		{ "command": "pipette", "steps": [
+			{ "command": "distribute", "source": "reagentPlate1(A01)", "destination": "pcrPlate1(A02 d D02)", "volume": "4ul", "pipettePolicy": "BOT_BOT_LIQUID", "tipModel": "DiTi 50ul" },
+			{ "command": "distribute", "source": "reagentPlate1(B01)", "destination": "pcrPlate1(A02 d D02)", "volume": "4ul", "pipettePolicy": "BOT_BOT_LIQUID", "tipModel": "DiTi 50ul" },
+			{ "command": "distribute", "source": "reagentPlate1(C01)", "destination": "pcrPlate1(A02 d D02)", "volume": "8ul", "pipettePolicy": "BOT_BOT_LIQUID", "tipModel": "DiTi 50ul" },
+			{ "command": "distribute", "source": "reagentPlate1(D01)", "destination": "pcrPlate1(A02 d D02)", "volume": "4ul", "pipettePolicy": "BOT_BOT_LIQUID", "tipModel": "DiTi 50ul" }
+			]
+		}
+	]
+}
