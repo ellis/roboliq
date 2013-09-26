@@ -28,7 +28,7 @@ object BuildSettings {
 	val logback = "ch.qos.logback" % "logback-classic" % "1.0.7"
 	val scalatest = "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 	val akka = "com.typesafe.akka" %% "akka-actor" % "2.1.0"
-	val scopt = "com.github.scopt" %% "scopt" % "2.1.0"
+	val scopt = "com.github.scopt" %% "scopt" % "3.1.0"
 	val yaml = "org.yaml" % "snakeyaml" % "1.10"
 	val ejml = "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
 	val json_gson = "com.google.code.gson" % "gson" % "2.2.1"
