@@ -51,7 +51,7 @@ object MyBuild extends Build {
 			base = file("base2"),
 			settings = buildSettings ++ Seq(
 				name := "base2",
-				libraryDependencies ++= Seq(scalatest),
+				libraryDependencies ++= Seq(scalatest, scopt, json_gson),
 				initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._"""
 			)
 		) dependsOn(projReactiveSim)

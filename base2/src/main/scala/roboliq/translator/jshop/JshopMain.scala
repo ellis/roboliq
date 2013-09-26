@@ -1,15 +1,28 @@
 package roboliq.translator.jshop
 
-import spray.json._
-import roboliq.core._
-import roboliq.input.Protocol
-import roboliq.evoware.translator.EvowareConfigData
-import roboliq.evoware.translator.EvowareConfig
-import roboliq.evoware.translator.EvowareClientScriptBuilder
-import roboliq.entities.ClientScriptBuilder
-import org.apache.commons.io.FileUtils
 import java.io.File
+
+import scala.sys.process.stringSeqToProcess
+
+import org.apache.commons.io.FileUtils
+import org.yaml.snakeyaml.TypeDescription
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.constructor.Constructor
+
+import com.google.gson.Gson
+
+import roboliq.core.RsResult
+import roboliq.core.RsSuccess
+import roboliq.entities.ClientScriptBuilder
+import roboliq.evoware.translator.EvowareClientScriptBuilder
+import roboliq.evoware.translator.EvowareConfig
+import roboliq.evoware.translator.EvowareConfigData
 import roboliq.input.ConfigBean
+import roboliq.input.Protocol
+import roboliq.input.TipBean
+import roboliq.input.TipModelBean
+import spray.json.JsObject
+import spray.json.pimpString
 
 object JshopMain extends App {
 	val protocol = new Protocol
@@ -333,8 +346,8 @@ object JshopMain extends App {
 
 			_ = protocol.loadConfigBean(configBean)
 			_ = protocol.loadEvoware("r1", carrierData, tableData, configBean)
-			input = FileUtils.readFileToString(new File(s"tasks/wisauto/$protocolName.json"))
-			_ = protocol.loadJson(input.asJson.asJsObject)
+			jsobj <- loadProtocolJson(s"tasks/wisauto/$protocolName")
+			_ = protocol.loadJson(jsobj)
 			
 			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", "")
 			_ = Seq("bash", "-c", s"source tasks/classpath.sh; make -C tasks/wisauto/ $protocolName.plan").!!
@@ -379,8 +392,31 @@ object JshopMain extends App {
 		description.putListPropertyType("tips", classOf[TipBean])
 		constructor.addTypeDescription(description);
 		val yaml = new Yaml(constructor)
-	    val configBean = yaml.load(text).asInstanceOf[ConfigBean]
+		val configBean = yaml.load(text).asInstanceOf[ConfigBean]
 		RsSuccess(configBean)
+	}
+	
+	private def yamlToJson(s: String): RsResult[String] = {
+		import org.yaml.snakeyaml._
+		val yaml = new Yaml()
+		val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
+		val gson = new Gson
+		val s_~ = gson.toJson(o)
+		println("gson: " + s_~)
+		RsSuccess(s_~)
+	}
+	
+	private def loadProtocolJson(base: String): RsResult[JsObject] = {
+		val prot = new File(s"$base.prot")
+		val json = new File(s"$base.json")
+		val yaml = new File(s"$base.yaml")
+		
+		val file = if (prot.exists) prot else if (json.exists) json else yaml
+		for {
+			_ <- RsResult.assert(file.exists, s"File not found: $base with extension prot, json, or yaml")
+			input0 = FileUtils.readFileToString(file)
+			input <- if (file eq json) RsSuccess(input0) else yamlToJson(input0)
+		} yield input.asJson.asJsObject
 	}
 	
 	//run("pd", pd._1, pd._2)
@@ -389,5 +425,28 @@ object JshopMain extends App {
 	//run("ph", ph._1, ph._2)
 	//run("pi", pi._1, pi._2)
 	
-	runWeizmann("pf")
+	runWeizmann("pg")
+	
+	/*
+	loadProtocolBean("", """{
+"substances": [
+  { "name": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" }
+],
+"plates": [
+  { "name": "plate1", "model": "Thermocycler Plate", "location": "offsite"},
+  { "name": "plate2", "model": "Thermocycler Plate", "location": "offsite"}
+]
+}""")
+
+
+	yamlToJson("""{
+"substances": [
+  { "name": "water", "kind": "Liquid", "tipCleanPolicy": "ThoroughNone" }
+],
+"plates": [
+  { "name": "plate1", "model": "Thermocycler Plate", "location": "offsite"},
+  { "name": "plate2", "model": "Thermocycler Plate", "location": "offsite"}
+]
+}""")
+*/
 }

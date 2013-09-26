@@ -1,0 +1,11 @@
+description: shake a plate
+
+plates:
+- name: plate1
+  model: 96 Well PlateReader
+  location: offsite
+
+protocol:
+- command: shake
+  object: plate1
+  spec: shakerSpec1
