@@ -6,7 +6,7 @@ import roboliq.entities._
 import org.scalatest.FunSpec
 
 
-class TransferPlanner2Spec extends FunSpec {
+class TransferPlannerSpec extends FunSpec {
 	describe("TransferPlanner") {
 		describe("BSSE configuration") {
 			import TransferPlanner.{Item,BatchItem,Batch}
