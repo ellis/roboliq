@@ -1,5 +1,20 @@
 Started 2013-07-25
 
+For 0.1 release:
+
+- [ ] Protocol: YAML to JSON converter, to allow protocols to be written in YAML
+- [ ] Make scripts with Alan
+- [ ] Command line interface to software (via ScOpt)
+- [ ] Make sure it runs on windows and finds the default Evoware directories
+- [ ] Protocol: create a "variables" section for customizing the script
+- [ ] ProtocolCommand: convert protocol command json to case classes
+- [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
+- [ ] PcrCommand: create an abstract PCR command which is easily portable
+
+For 0.2 release:
+
+- [ ] Try to remove dependency on Jshop, or reduce it to finding paths and positions?
+
 Current big steps:
 
 - [ ] Get pipetting command to work

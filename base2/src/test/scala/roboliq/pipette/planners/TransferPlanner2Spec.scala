@@ -40,26 +40,27 @@ class TransferPlanner2Spec extends FunSpec {
 			val device = new roboliq.test.TestPipetteDevice1
 			val tip_l = SortedSet(Config01.tip1, Config01.tip2, Config01.tip3, Config01.tip4)
 			
-			val p_P1 = Plate("P_1", Config01.plateModel_PCR, None)
-			val ps_P1_0 = PlateState(p_P1, Some(Config01.plateLocation_cooled1))
+			val state0 = new WorldStateBuilder
+			val site_cooled1 = Site("cooled1")
+			val p_P1 = Plate("P_1")
+			state0.labware_location_m(p_P1) = site_cooled1
 
-			val v_P1_A01 = Vessel("P_1(A01)", None)
-			val vs_P1_A01_0 = VesselState(v_P1_A01, VesselContent.fromVolume(Config01.water, LiquidVolume.ul(100)).getOrElse(null))
-			val vp_P1_A01_0 = VesselPosition(ps_P1_0, 0)
-			val vss_P1_A01_0 = VesselSituatedState(vs_P1_A01_0, vp_P1_A01_0)
+			val v_P1_A01 = Well("P_1(A01)")
+			state0.addWell(v_P1_A01, p_P1, RowCol(0, 0), 0)
+			state0.well_aliquot_m(v_P1_A01) = Aliquot(Mixture(Left(Config01.water)), Distribution.fromVolume(LiquidVolume.ul(100)))
 
-			val v_P1_B01 = Vessel("P_1(B01)", None)
-			val vs_P1_B01_0 = VesselState(v_P1_B01, VesselContent.fromVolume(Config01.water, LiquidVolume.ul(100)).getOrElse(null))
-			val vp_P1_B01_0 = VesselPosition(ps_P1_0, 0)
-			val vss_P1_B01_0 = VesselSituatedState(vs_P1_B01_0, vp_P1_B01_0)
+			val v_P1_B01 = Well("P_1(B01)")
+			state0.addWell(v_P1_B01, p_P1, RowCol(1, 0), 0)
+			state0.well_aliquot_m(v_P1_B01) = Aliquot(Mixture(Left(Config01.water)), Distribution.fromVolume(LiquidVolume.ul(100)))
 			
 			it("should work for 1 item") {
 				val item_l = List(
-					TransferPlanner2.Item(List(vss_P1_A01_0), vss_P1_B01_0, LiquidVolume.ul(50))
+					TransferPlanner.Item(List(v_P1_A01), v_P1_B01, LiquidVolume.ul(50))
 				)
 				
-				val x = TransferPlanner2.searchGraph(
+				val x = TransferPlanner.searchGraph(
 					device,
+					state0.toImmutable,
 					tip_l,
 					Config01.tipModel1000,
 					PipettePolicy("POLICY", PipettePosition.Free),
@@ -68,7 +69,7 @@ class TransferPlanner2Spec extends FunSpec {
 			
 				assert(x === RsSuccess(List(
 					Batch(List(
-						BatchItem(Config01.tip1, vss_P1_A01_0, vss_P1_B01_0, LiquidVolume.ul(50))
+						BatchItem(Config01.tip1, v_P1_A01, v_P1_B01, LiquidVolume.ul(50))
 					))
 				)))
 			}
