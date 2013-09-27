@@ -1,0 +1,47 @@
+evowareAgents:
+  r1:
+    evowareDir: testdata/bsse-robot1/config
+    tableFile: testdata/bsse-robot1/config/table-01.esc
+    labware:
+      - D-BSSE 96 Well PCR Plate
+      - D-BSSE 96 Well DWP
+
+    tipModels:
+      Standard 50ul: { min: 0.1, max: 45 }
+      Standard 1000ul: { min: 3, max: 950 }
+
+    tips:
+      - { row: 1, permanentModel: Standard 1000ul }
+      - { row: 2, permanentModel: Standard 1000ul }
+      - { row: 3, permanentModel: Standard 1000ul }
+      - { row: 4, permanentModel: Standard 1000ul }
+      - { row: 5, permanentModel: Standard 50ul }
+      - { row: 6, permanentModel: Standard 50ul }
+      - { row: 7, permanentModel: Standard 50ul }
+      - { row: 8, permanentModel: Standard 50ul }
+
+aliases:
+  Thermocycler Plate: D-BSSE 96 Well PCR Plate
+
+logic:
+  - transporter-can userArm r1_hotel_245x1 userArmSpec
+  - transporter-can userArm r1_hotel_245x2 userArmSpec
+  - device-can-site r1_pipetter1 r1_bench_017x1
+  - device-can-site r1_pipetter1 r1_bench_017x2
+  - device-can-site r1_pipetter1 r1_bench_017x3
+  - device-can-site r1_pipetter1 r1_bench_017x4
+
+specs:
+  peelerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  sealerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  shakerSpec1: "60"
+  thermocyclerSpec1: "1.0"
+
+deviceToSpec:
+  - [r1_thermocycler1, thermocyclerSpec1]
+  - [r1_shaker, shakerSpec1]
+
+deviceToModelToSpec:
+  - [r1_sealer, "D-BSSE 96 Well PCR Plate", sealerSpec1]
+  - [r1_peeler, "D-BSSE 96 Well PCR Plate", peelerSpec1]
+

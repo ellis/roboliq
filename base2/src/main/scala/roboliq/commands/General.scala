@@ -83,8 +83,8 @@ case class ThermocyclerOpen(
 
 case class ThermocyclerRun(
 	deviceIdent: String,
-	specIdent: String,
-	plateIdent: String
+	specIdent: String/*,
+	plateIdent: String*/
 ) extends Command
 
 case class TransporterRun(

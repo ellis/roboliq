@@ -49,75 +49,6 @@ class Protocol {
 	val agentToIdentToInternalObject = new HashMap[String, HashMap[String, Object]]
 	val agentToBuilder_m = new HashMap[String, ClientScriptBuilder]
 
-	/**
-	 * This should eventually load a YAML file.
-	 * For now it's just hard-coded for my testing purposes.
-	 */
-	// FIXME: Remove this function -- need to put this data into a BSSE config file instead
-	def loadConfig() {
-		import roboliq.entities._
-		
-		val user = Agent(gid, Some("user"))
-		val offsite = Site(gid, Some("offsite"))
-		
-		eb.addAlias("Thermocycler Plate", "D-BSSE 96 Well PCR Plate")
-		eb.addAgent(user, "user")
-		eb.addModel(offsiteModel, "offsiteModel")
-		eb.addSite(offsite, "offsite")
-		eb.addDevice(user, userArm, "userArm")
-		eb.addDeviceSpec(userArm, userArmSpec, "userArmSpec")
-		
-		// userArm can transport from offsite
-		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
-		// A few other user-specified sites where the user can put plates on the robot
-		eb.addRel(Rel("transporter-can", List("userArm", "r1_hotel_245x1", "userArmSpec")))
-		
-		//eb.addRel(Rel("sealer-can", List("r1_sealer", ")))
-		specToString_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
-		deviceToModelToSpec_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
-
-		specToString_l += (("peelerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
-		deviceToModelToSpec_l += (("r1_peeler", "D-BSSE 96 Well PCR Plate", "peelerSpec1"))
-		
-		specToString_l += (("thermocyclerSpec1", "1.0"))
-		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
-	}
-
-	/*
-	/**
-	 * This should eventually load a YAML file.
-	 * For now it's just hard-coded for my testing purposes.
-	 */
-	def loadConfig_Weizmann() {
-		import roboliq.entities._
-		
-		val user = Agent(gid, Some("user"))
-		val offsite = Site(gid, Some("offsite"))
-		
-		eb.addAlias("Thermocycler Plate", "96 Well PCR Plate")
-		eb.addAgent(user, "user")
-		eb.addModel(offsiteModel, "offsiteModel")
-		eb.addSite(offsite, "offsite")
-		eb.addDevice(user, userArm, "userArm")
-		eb.addDeviceSpec(userArm, userArmSpec, "userArmSpec")
-		
-		// userArm can transport from offsite
-		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
-		// A few other user-specified sites where the user can put plates on the robot
-		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x1", "userArmSpec")))
-		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x2", "userArmSpec")))
-		eb.addRel(Rel("transporter-can", List("userArm", "r1_bench_035x3", "userArmSpec")))
-		
-		specToString_l += (("sealerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
-		deviceToModelToSpec_l += (("r1_sealer", "D-BSSE 96 Well PCR Plate", "sealerSpec1"))
-
-		specToString_l += (("peelerSpec1", """C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf"""))
-		deviceToModelToSpec_l += (("r1_peeler", "D-BSSE 96 Well PCR Plate", "peelerSpec1"))
-		
-		specToString_l += (("thermocyclerSpec1", "1.0"))
-		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
-	}*/
-	
 	def loadConfigBean(configBean: ConfigBean): RsResult[Unit] = {
 		import roboliq.entities._
 		
@@ -586,6 +517,11 @@ class Protocol {
 				}
 			}
 			eb.pipetterToTips_m(pipetter) = tip_l.toList
+			// FIXME: for debug only
+			println("tipModel_l: "+tipModel_l.toList)
+			println("tip_l: "+tip_l.toList)
+			1 / 1
+			// ENDFIX
 		}
 		loadAgentBean()
 		

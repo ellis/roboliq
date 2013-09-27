@@ -168,13 +168,14 @@ object JshopTranslator {
 				}
 				
 			case "thermocycler-run" =>
-				val List(deviceIdent, specIdent, plateIdent) = arg_l
+				//val List(deviceIdent, specIdent, plateIdent) = arg_l
+				val List(deviceIdent, specIdent) = arg_l
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
 					_ <- protocol.eb.getEntityByIdent[ThermocyclerSpec](specIdent)
-					_ <- protocol.eb.getEntityByIdent[Plate](plateIdent)
+					//_ <- protocol.eb.getEntityByIdent[Plate](plateIdent)
 				} yield {
-					List(ThermocyclerRun(deviceIdent, specIdent, plateIdent))
+					List(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/))
 				}
 				
 			case "transporter-run" =>

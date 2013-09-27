@@ -289,6 +289,10 @@
   (model r1_hotel_85x5 sm3)
   (location plate1 offsite)
   (location plate2 offsite)
+  (device-can-site r1_pipetter1 r1_bench_017x1)
+  (device-can-site r1_pipetter1 r1_bench_017x2)
+  (device-can-site r1_pipetter1 r1_bench_017x3)
+  (device-can-site r1_pipetter1 r1_bench_017x4)
   (device-spec-can-model r1_peeler peelerSpec1 m002)
   (device-spec-can-model r1_sealer sealerSpec1 m002)
   (transporter-can r1_transporter1 r1_bench_010x1 r1_transporterSpec0)
@@ -397,12 +401,7 @@
   (transporter-can r1_transporter2 r1_hotel_245x9 r1_transporterSpec0)
   (transporter-can userArm offsite userArmSpec)
   (transporter-can userArm r1_hotel_245x1 userArmSpec)
- ; user initial conditions
-  (device-can-site r1_pipetter1 r1_bench_017x1)
-  (device-can-site r1_pipetter1 r1_bench_017x2)
-  (device-can-site r1_pipetter1 r1_bench_017x3)
-  (device-can-site r1_pipetter1 r1_bench_017x4)
-
+  (transporter-can userArm r1_hotel_245x2 userArmSpec)
  )
  ; tasks
  (

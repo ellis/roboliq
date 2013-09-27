@@ -46,6 +46,7 @@ object Main extends App {
 		val protocol = new Protocol
 		val x = for {
 			configBean <- loadConfigBean(opt.configFile.getPath())
+			_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
 			_ <- protocol.loadConfigBean(configBean)
 
 			jsobj <- loadProtocolJson(opt.protocolFile.getPath())
@@ -89,7 +90,7 @@ object Main extends App {
 		import org.yaml.snakeyaml.constructor.Constructor
 		import roboliq.input._
 		
-		val text = scala.io.Source.fromFile("tasks/wisauto/config.yaml").mkString
+		val text = scala.io.Source.fromFile(path).mkString
 		
 		val descriptionEvoware = new TypeDescription(classOf[EvowareAgentBean])
 		descriptionEvoware.putMapPropertyType("tipModels", classOf[String], classOf[TipModelBean])
