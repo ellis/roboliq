@@ -18,6 +18,32 @@ For 0.1 release:
 - [x] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
 - [x] Add command line interface to software (via ScOpt)
 
+Portable PCR script:
+
+    plates:
+      plate1:
+        model: $plateModel
+
+    sources:
+      water:
+      buffer:
+      dntp:
+      template:
+      primer1:
+      primer2:
+      polymerase:
+
+    protocol:
+      - command: mix
+        ...
+      - command: thermocycle
+        object: plate1
+        spec: $thermocyclerSpec
+
+    variables:
+      thermocyclerSpec: thermocyclerSpec1
+      plateModel: D-BSSE 96 Well PCR Plate
+
 For 0.2 release:
 
 - [ ] Try to remove dependency on Jshop, or reduce it to finding paths and positions?
