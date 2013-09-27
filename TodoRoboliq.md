@@ -2,8 +2,6 @@ Started 2013-07-25
 
 For 0.1 release:
 
-- [?] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
-- [ ] Command line interface to software (via ScOpt)
 - [ ] Get BSSE scripts to run again using new config file setup
 - [ ] Fix site index to be grid+site+carrier
 - [ ] Make scripts with Alan
@@ -17,6 +15,8 @@ For 0.1 release:
 - [ ] Create documentation
 - [ ] Entities should have there names (protocol name, database name, jshop name), a label for messages, and a long description.
 - [x] Protocol: YAML to JSON converter, to allow protocols to be written in YAML
+- [x] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
+- [x] Add command line interface to software (via ScOpt)
 
 For 0.2 release:
 
