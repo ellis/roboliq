@@ -1,3 +1,27 @@
+evowareAgents:
+  r1:
+    evowareDir: testdata/wis-pcrobot/config
+    tableFile: testdata/wis-pcrobot/config/table-01.esc
+    labware:
+      - 96 Well PCR Plate
+      - 96 Well PCR Plate- Roche
+      - 96 Well PlateReader
+      - 96 Well DWP
+
+    tipModels:
+      DiTi 50ul: { min: 2, max: 45 }
+      DiTi 1000ul: { min: 50, max: 925 }
+
+    tips:
+      - row: 1
+      - row: 2
+      - row: 3
+      - row: 4
+      - row: 5
+      - row: 6
+      - row: 7
+      - row: 8
+
 aliases:
   Thermocycler Plate: 96 Well PCR Plate
 
@@ -27,24 +51,4 @@ deviceToSpec:
 deviceToModelToSpec:
   - [r1_sealer, "96 Well PCR Plate", sealerSpec1]
   - [r1_peeler, "96 Well PCR Plate", peelerSpec1]
-
-labware:
-  - 96 Well PCR Plate
-  - 96 Well PCR Plate- Roche
-  - 96 Well PlateReader
-  - 96 Well DWP
-
-tipModels:
-  DiTi 50ul: { min: 2, max: 45 }
-  DiTi 1000ul: { min: 50, max: 925 }
-
-tips:
-  - row: 1
-  - row: 2
-  - row: 3
-  - row: 4
-  - row: 5
-  - row: 6
-  - row: 7
-  - row: 8
 

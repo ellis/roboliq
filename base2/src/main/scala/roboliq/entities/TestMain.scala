@@ -1,4 +1,4 @@
-package roboliq.entities
+/*package roboliq.entities
 
 object TestMain extends App {
 	def gid: String = java.util.UUID.randomUUID().toString()
@@ -80,3 +80,4 @@ object TestMain extends App {
 	
 	println(eb.makeInitialConditions)
 }
+*/

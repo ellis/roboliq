@@ -2,6 +2,7 @@ package roboliq.main
 
 import java.io.File
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import com.google.gson.Gson
 import spray.json.JsObject
 import spray.json.pimpString
@@ -15,8 +16,8 @@ import roboliq.entities.ClientScriptBuilder
 import roboliq.translator.jshop.JshopTranslator
 
 case class Opt(
-	configFile: File = new File("."),
-	protocolFile: File = new File(".")
+	configFile: File = null,
+	protocolFile: File = null
 )
 
 case class EvowareOpt(
@@ -35,44 +36,41 @@ object Main extends App {
 			o.copy(protocolFile = x) } text("protocol file")
 	}
 	parser.parse(args, Opt()) map { opt =>
-		
+		run(opt)
 	} getOrElse {
 		// arguments are bad, usage message will have been displayed
 	}
-	val protocol = new Protocol
 	
-	def runWeizmann(protocolName: String) {
-		import org.yaml.snakeyaml.Yaml
-		import org.yaml.snakeyaml.constructor.Constructor
+	def run(opt: Opt) {
 		import scala.sys.process._
+		val protocol = new Protocol
 		val x = for {
-			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile("./testdata/wis-pcrobot/config/carrier.cfg")
-			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, "./testdata/wis-pcrobot/config/table-01.esc")
-			configBean <- loadConfigBean("tasks/wisauto/config.yaml")
+			configBean <- loadConfigBean(opt.configFile.getPath())
+			_ <- protocol.loadConfigBean(configBean)
 
-			_ = protocol.loadConfigBean(configBean)
-			_ = protocol.loadEvoware("r1", carrierData, tableData, configBean)
-			jsobj <- loadProtocolJson(s"tasks/wisauto/$protocolName")
+			jsobj <- loadProtocolJson(opt.protocolFile.getPath())
 			_ = protocol.loadJson(jsobj)
 			
-			_ = protocol.saveProblem(s"tasks/wisauto/$protocolName.lisp", "")
-			_ = Seq("bash", "-c", s"source tasks/classpath.sh; make -C tasks/wisauto/ $protocolName.plan").!!
-			planOutput = scala.io.Source.fromFile(s"tasks/wisauto/$protocolName.plan").getLines.toList
+			dir = opt.protocolFile.getParentFile()
+			basename = FilenameUtils.getBaseName(opt.protocolFile.getPath())
+			_ = protocol.saveProblem(new File(dir, basename+".lisp").getPath, "")
+
+			filePlan = new File(dir, basename+".plan")
+			_ = Seq("bash", "-c", s"source tasks/classpath.sh; make -C ${filePlan.getParent} ${filePlan.getName}").!!
+			planOutput = scala.io.Source.fromFile(filePlan.getPath).getLines.toList
 			_ <- RsResult.assert(planOutput.size > 4, "JSON planner did not find a plan")
 			plan_l = planOutput.drop(2).reverse.drop(2).reverse
 			plan = plan_l.mkString("\n")
 			
-			configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
-			config = new EvowareConfig(carrierData, tableData, configData)
-			scriptBuilder = new EvowareClientScriptBuilder(config, s"tasks/wisauto/$protocolName")
-			agentToBuilder_m = Map[String, ClientScriptBuilder](
-				"user" -> scriptBuilder,
-				"r1" -> scriptBuilder
-			)
-			result <- JshopTranslator.translate(protocol, plan, agentToBuilder_m)
+			result <- JshopTranslator.translate(protocol, plan)
+			_ = println("result: " + result)
 		} yield {
-			for (script <- scriptBuilder.script_l) {
-				scriptBuilder.saveWithHeader(script, script.filename)
+			val builder_l = protocol.agentToBuilder_m.values.toSet
+			for (scriptBuilder <- builder_l) {
+				val basename2 = new File(dir, basename + "_" + scriptBuilder.agentName).getPath
+				println("basename2: " + basename2)
+				println("scriptBuilder: " + scriptBuilder)
+				scriptBuilder.saveScripts(basename2)
 			}
 		}
 
@@ -100,9 +98,10 @@ object Main extends App {
 		constructorEvoware.addTypeDescription(descriptionEvoware);
 
 		val descriptionConfig = new TypeDescription(classOf[ConfigBean])
-		descriptionConfig.putListPropertyType("evowareAgents", classOf[EvowareAgentBean])
+		descriptionConfig.putMapPropertyType("evowareAgents", classOf[String], classOf[EvowareAgentBean])
 		val constructorConfig = new Constructor(classOf[ConfigBean])
-		constructorConfig.addTypeDescription(descriptionConfig);
+		constructorConfig.addTypeDescription(descriptionConfig)
+		constructorConfig.addTypeDescription(descriptionEvoware)
 		
 		val yaml = new Yaml(constructorConfig)
 		val configBean = yaml.load(text).asInstanceOf[ConfigBean]

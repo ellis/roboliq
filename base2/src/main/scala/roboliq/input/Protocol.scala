@@ -12,6 +12,10 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
 import roboliq.utils.FileUtils
 import org.apache.commons.io.FilenameUtils
+import java.io.File
+import roboliq.evoware.translator.EvowareConfigData
+import roboliq.evoware.translator.EvowareConfig
+import roboliq.evoware.translator.EvowareClientScriptBuilder
 
 class Protocol {
 	val eb = new EntityBase
@@ -43,11 +47,13 @@ class Protocol {
 	 * Individual agents may need to map identifiers to internal objects
 	 */
 	val agentToIdentToInternalObject = new HashMap[String, HashMap[String, Object]]
+	val agentToBuilder_m = new HashMap[String, ClientScriptBuilder]
 
 	/**
 	 * This should eventually load a YAML file.
 	 * For now it's just hard-coded for my testing purposes.
 	 */
+	// FIXME: Remove this function -- need to put this data into a BSSE config file instead
 	def loadConfig() {
 		import roboliq.entities._
 		
@@ -112,12 +118,13 @@ class Protocol {
 		deviceToSpec_l += (("r1_thermocycler1", "thermocyclerSpec1"))
 	}*/
 	
-	def loadConfigBean(configBean: ConfigBean) {
+	def loadConfigBean(configBean: ConfigBean): RsResult[Unit] = {
 		import roboliq.entities._
 		
 		val user = Agent(gid, Some("user"))
 		val offsite = Site(gid, Some("offsite"))
 		
+		// TODO: put these into a for-comprehension in order to return warnings and errors
 		eb.addAgent(user, "user")
 		eb.addModel(offsiteModel, "offsiteModel")
 		eb.addSite(offsite, "offsite")
@@ -160,6 +167,25 @@ class Protocol {
 			for (l <- configBean.deviceToModelToSpec.toList) {
 				deviceToModelToSpec_l += ((l(0), l(1), l(2)))
 			}
+		}
+		
+		if (configBean.evowareAgents == null) {
+			RsSuccess(())
+		}
+		else {
+			RsResult.toResultOfList(configBean.evowareAgents.toList.map(pair => {
+				val (name, agent) = pair
+				for {
+					// Load carrier file
+					evowarePath <- RsResult(agent.evowareDir, "evowareDir must be set")
+					carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "carrier.cfg").getPath)
+					// Load table file
+					tableFile <- RsResult(agent.tableFile, "tableFile must be set")
+					tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
+					
+					_ <- loadEvoware(name, carrierData, tableData, agent)
+				} yield ()
+			})).map(_ => ())
 		}
 	}
 
@@ -473,8 +499,8 @@ class Protocol {
 		agentIdent: String,
 		carrierData: roboliq.evoware.parser.EvowareCarrierData,
 		tableData: roboliq.evoware.parser.EvowareTableData,
-		configBean: ConfigBean
-	) {
+		agentBean: EvowareAgentBean
+	): RsResult[Unit] = {
 		import roboliq.entities._
 		
 		val agent = Agent(gid)
@@ -487,9 +513,9 @@ class Protocol {
 		val pipetter = new Pipetter(gid, Some(agentIdent+" LiHa"))
 		eb.addDevice(agent, pipetter, pipetterIdent)
 
-		// FIXME: This doesn't belong here at all!
 		val labwareNamesOfInterest_l = new HashSet[String]
 		/*
+		// FIXME: This doesn't belong here at all!
 		def bsse() {
 			labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
 			labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
@@ -525,17 +551,18 @@ class Protocol {
 			eb.tipToTipModels_m(tip7) = List(tipModel50)
 			eb.tipToTipModels_m(tip8) = List(tipModel50)
 		}
+		// ENDFIX
 		*/
-		def loadConfigBean() {
+		def loadAgentBean() {
 			// Labware to be used
-			if (configBean.labware != null) {
-				labwareNamesOfInterest_l ++= configBean.labware
+			if (agentBean.labware != null) {
+				labwareNamesOfInterest_l ++= agentBean.labware
 			}
 			
 			// Tip models
 			val tipModel_l = new ArrayBuffer[TipModel]
-			if (configBean.tipModels != null) {
-				for ((id, tipModelBean) <- configBean.tipModels.toMap) {
+			if (agentBean.tipModels != null) {
+				for ((id, tipModelBean) <- agentBean.tipModels.toMap) {
 					val tipModel = TipModel(id, None, None, LiquidVolume.ul(BigDecimal(tipModelBean.max)), LiquidVolume.ul(BigDecimal(tipModelBean.min)), Map())
 					tipModel_l += tipModel
 					eb.addEntityWithoutIdent(tipModel)
@@ -544,8 +571,8 @@ class Protocol {
 			
 			// Tips
 			val tip_l = new ArrayBuffer[Tip]
-			if (configBean.tips != null) {
-				for ((tipBean, index) <- configBean.tips.zipWithIndex) {
+			if (agentBean.tips != null) {
+				for ((tipBean, index) <- agentBean.tips.zipWithIndex) {
 					val row: Int = if (tipBean.row == 0) index else tipBean.row
 					val col = 0
 					// FIXME: handle the error message from eb.getEntityAs
@@ -560,11 +587,13 @@ class Protocol {
 			}
 			eb.pipetterToTips_m(pipetter) = tip_l.toList
 		}
-		loadConfigBean()
-		// ENDFIX
+		loadAgentBean()
 		
 		// Add labware on the table definition to the list of labware we're interested in
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
+		// FIXME: for debug only
+		println("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
+		// ENDFIX
 
 		// Create PlateModels
 		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
@@ -849,6 +878,16 @@ class Protocol {
 				case _ =>
 			}
 		}
+		
+		val configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
+		val config = new EvowareConfig(carrierData, tableData, configData)
+		val scriptBuilder = new EvowareClientScriptBuilder(agentIdent, config)
+		agentToBuilder_m += agentIdent -> scriptBuilder
+		if (!agentToBuilder_m.contains("user"))
+			agentToBuilder_m += "user" -> scriptBuilder
+
+		// TODO: Return real warnings and errors
+		RsSuccess(())
 	}
 	
 	def saveProblem(path: String, userInitialConditions: String = "") {

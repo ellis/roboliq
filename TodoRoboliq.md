@@ -4,6 +4,8 @@ For 0.1 release:
 
 - [?] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
 - [ ] Command line interface to software (via ScOpt)
+- [ ] Get BSSE scripts to run again using new config file setup
+- [ ] Fix site index to be grid+site+carrier
 - [ ] Make scripts with Alan
 - [ ] Make sure it runs on windows and finds the default Evoware directories
 - [ ] Protocol: create a "variables" section for customizing the script

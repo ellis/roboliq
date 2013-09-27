@@ -19,9 +19,9 @@ object JshopTranslator {
 	
 	def translate(
 		protocol: Protocol,
-		solution: String,
-		agentToBuilder_m: Map[String, ClientScriptBuilder]
+		solution: String
 	): RqResult[Unit] = {
+		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
 		val l = solution.split("\r?\n").toList
 		val state0 = protocol.state0.toImmutable
 		println(s"l: $l")

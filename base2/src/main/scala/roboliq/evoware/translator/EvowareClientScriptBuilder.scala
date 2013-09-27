@@ -13,9 +13,9 @@ import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.Carrier
 
 case class EvowareScript2(
-	filename: String,
+	index: Int,
 	siteToModel_m: Map[CarrierSite, EvowareLabwareModel],
-	cmd_l: List[Object]
+	cmd_l: List[L0C_Command]
 )
 
 private case class TranslationItem(
@@ -32,12 +32,14 @@ private object TranslationResult {
 	def empty(state1: WorldState) = TranslationResult(Nil, state1)
 }
 
-class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extends ClientScriptBuilder {
+class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) extends ClientScriptBuilder(agentName) {
 	private val logger = Logger[this.type]
 
 	val script_l = new ArrayBuffer[EvowareScript2]
+	private var scriptIndex: Int = 0
 	//val builder = new EvowareScriptBuilder
-	val cmds = new ArrayBuffer[Object]
+	// REFACTOR: Rename to token_l
+	val cmds = new ArrayBuffer[L0C_Command]
 	//val mapCmdToLabwareInfo = new HashMap[Object, List[(CarrierSite, EvowareLabwareModel)]]
 	val siteToModel_m = new HashMap[CarrierSite, EvowareLabwareModel]
 	
@@ -371,8 +373,9 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 	
 	private def endScript() {
 		if (!cmds.isEmpty) {
+			scriptIndex += 1
 			val script = EvowareScript2(
-				basename + ".esc",
+				scriptIndex,
 				siteToModel_m.toMap,
 				cmds.toList
 			)
@@ -382,7 +385,16 @@ class EvowareClientScriptBuilder(config: EvowareConfig, basename: String) extend
 		cmds.clear
 	}
 
-	def saveWithHeader(script: EvowareScript2, sFilename: String) {
+	def saveScripts(basename: String): RsResult[Unit] = {
+		for ((script, index) <- script_l.zipWithIndex) {
+			val filename = basename + (if (scriptIndex <= 1) "" else f"_$index%02d") + ".esc"
+			println("filename: "+filename)
+			saveWithHeader(script, filename)
+		}
+		RsSuccess(())
+	}
+	
+	private def saveWithHeader(script: EvowareScript2, sFilename: String) {
 		val siteToLabel_m = script.siteToModel_m.map(pair => {
 			val (site, _) = pair
 			val id0 = f"C${site.carrier.id}%03dS${site.iSite+1}"

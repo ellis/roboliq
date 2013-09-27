@@ -2,6 +2,7 @@ package roboliq.evoware.translator
 
 import roboliq.core._
 import roboliq.evoware.parser._
+import java.io.File
 
 
 abstract class L0C_Command {
@@ -10,6 +11,8 @@ abstract class L0C_Command {
 	 * for this command to work in Evoware.
 	 */
 	def getSiteToLabwareModelList: List[Tuple2[CarrierSite, EvowareLabwareModel]] = Nil
+	
+	//def toEvowareString(file: File): String = toString
 }
 
 case class L0C_Comment(
@@ -276,6 +279,26 @@ case class L0C_Subroutine(
 		).mkString("Subroutine(", ",", ");")
 	}
 }
+
+/*
+case class L0C_SubroutineIndexed(
+	sFilename: String
+) extends L0C_Command {
+	override def toEvowareString(file: File): String = {
+		List(
+			'"'+(new File(file.getParentFile, sFilename).getPath)+'"',
+			0
+		).mkString("Subroutine(", ",", ");")
+	}
+	
+	override def toString = {
+		List(
+			'"'+sFilename+'"',
+			0
+		).mkString("Subroutine(", ",", ");")
+	}
+}
+*/
 
 case class L0C_Prompt(
 	s: String

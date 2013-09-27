@@ -1,4 +1,4 @@
-package roboliq.translator.jshop
+/*package roboliq.translator.jshop
 
 import java.io.File
 
@@ -449,4 +449,4 @@ object JshopMain extends App {
 ]
 }""")
 */
-}
+}*/
