@@ -99,8 +99,8 @@ object JshopTranslator {
 			case "peeler-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
 				for {
-					_ <- protocol.eb.getEntityByIdent[Sealer](deviceIdent)
-					_ <- protocol.eb.getEntityByIdent[SealerSpec](specIdent)
+					_ <- protocol.eb.getEntityByIdent[Peeler](deviceIdent)
+					_ <- protocol.eb.getEntityByIdent[PeelerSpec](specIdent)
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
 				} yield {

@@ -2,10 +2,13 @@ Started 2013-07-25
 
 For 0.1 release:
 
-- [ ] Get BSSE scripts to run again using new config file setup
+- [ ] alan01: figure out why "platePcr1(A04 d H06)" tries to pipette to I04
+- [ ] alan01: distribute.destination: make sure we can use "plate1(A01 r A12 + B06 d H06)"
+- [ ] alan01: shaker: produce jshop output
 - [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
 - [ ] Make protocol from Alan's email using tubes
+- [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
 - [ ] Fix site index to be grid+site+carrier
 - [ ] Make sure it runs on windows and finds the default Evoware directories
 - [ ] Protocol: create a "variables" section for customizing the script
@@ -13,12 +16,18 @@ For 0.1 release:
 - [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
 - [ ] PcrCommand: create an abstract PCR command which is easily portable
 - [ ] Clean up source directory, removing everything that's not used
-- [ ] Create Readme.md file
+- [ ] Redirect debug output to log file
+- [ ] Create Readme file
 - [ ] Create documentation
-- [ ] Entities should have there names (protocol name, database name, jshop name), a label for messages, and a long description.
+- [ ] Entities should have three names (protocol name, database name, jshop name), a label for messages, and a long description.
 - [x] Protocol: YAML to JSON converter, to allow protocols to be written in YAML
 - [x] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
 - [x] Add command line interface to software (via ScOpt)
+- [x] Get BSSE scripts to run again using new config file setup
+
+This line is causing problems:
+./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
+
 
 Portable PCR script:
 
@@ -49,6 +58,13 @@ Portable PCR script:
 For 0.2 release:
 
 - [ ] Try to remove dependency on Jshop, or reduce it to finding paths and positions?
+
+Further big release milestones:
+
+- [ ] Database integration
+- [ ] Server/client architecture
+- [ ] Quality control
+- [ ] Feedback loops
 
 Current big steps:
 

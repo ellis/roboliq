@@ -1,0 +1,52 @@
+substances:
+  - name: substance1
+    kind: Liquid
+    tipCleanPolicy: ThoroughNone
+  - name: substance2
+    kind: Liquid
+    tipCleanPolicy: ThoroughNone
+
+plates:
+  - { "name": "sourcePlate1", "model": "D-BSSE 96 Well DWP", "location": "offsite"}
+  - { "name": "pcrPlate1", "model": "Thermocycler Plate", "location": "offsite"}
+
+wellContents:
+  - { "name": "sourcePlate1(A01)", "contents": "substance1@400ul" }
+  - { "name": "sourcePlate1(A02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(B02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(C02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(D02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(E02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(F02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(G02)", "contents": "substance2@400ul" }
+  - { "name": "sourcePlate1(H02)", "contents": "substance2@400ul" }
+
+protocol:
+  - command: pipette
+    steps:
+      - command: distribute
+        source: sourcePlate1(A01)
+        destination: pcrPlate1(A01 r A12)
+        volume: 20ul
+        pipettePolicy: Roboliq_Water_Wet_1000
+      - command: distribute
+        source: sourcePlate1(A01)
+        destination: pcrPlate1(B06 d H06)
+        volume: 20ul
+        pipettePolicy: Roboliq_Water_Wet_1000
+  - command: seal
+    object: pcrPlate1
+  - command: shake
+    object: pcrPlate1
+    duration: 300
+    speed: 800
+  - command: peel
+    object: pcrPlate1
+  - command: distribute
+    source: sourcePlate1(A02 d H02)
+    destination: pcrPlate1(A03 d H03)
+    volume: 80ul
+    pipettePolicy: Roboliq_Water_Air_1000
+  - { command: seal, object: pcrPlate1 }
+  - { command: shake, object: pcrPlate1, duration: 300, speed: 400 }
+  - { command: peel, object: pcrPlate1 }

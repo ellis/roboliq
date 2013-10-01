@@ -597,7 +597,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		identToAgentObject_m: Map[String, Object],
 		cmd: PipetterTipsRefresh
 	): RqResult[TranslationResult] = {
-		pipetterTipsRefresh_WIS(protocol, state0, identToAgentObject_m, cmd)
+		pipetterTipsRefresh_BSSE(protocol, state0, identToAgentObject_m, cmd)
 	}
 
 	// FIXME: This is a BSSE-specific HACK.  The function for handling this command should be loaded from a config file.

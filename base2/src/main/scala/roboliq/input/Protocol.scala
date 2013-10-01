@@ -244,9 +244,11 @@ class Protocol {
 											case Some(JsString(key)) =>
 												val agent = f"?a$nvar%04d"
 												val device = f"?d$nvar%04d"
+												val specIdent = f"?spec$nvar%04d"
+												val siteIdent = f"?s$nvar%04d"
 												val plate = eb.getEntity(key).get.asInstanceOf[Labware]
 												val plateName = eb.names(plate)
-												tasks += Rel("peeler-run", List(agent, device, plateName, f"?s$nvar%04d"))
+												tasks += Rel("peeler-run", List(agent, device, specIdent, plateName, siteIdent))
 											case _ =>
 										}
 									case Some(JsString("prompt")) =>
@@ -264,9 +266,11 @@ class Protocol {
 											case Some(JsString(key)) =>
 												val agent = f"?a$nvar%04d"
 												val device = f"?d$nvar%04d"
+												val specIdent = f"?spec$nvar%04d"
+												val siteIdent = f"?s$nvar%04d"
 												val plate = eb.getEntity(key).get.asInstanceOf[Labware]
 												val plateName = eb.names(plate)
-												tasks += Rel("sealer-run", List(agent, device, plateName, f"?s$nvar%04d"))
+												tasks += Rel("sealer-run", List(agent, device, specIdent, plateName, siteIdent))
 											case _ =>
 										}
 									case Some(JsString("shake")) =>
