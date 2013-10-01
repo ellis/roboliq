@@ -49,7 +49,7 @@ object Main extends App {
 			_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
 			_ <- protocol.loadConfigBean(configBean)
 
-			jsobj <- loadProtocolJson(opt.protocolFile.getPath())
+			jsobj <- loadProtocolJson(opt.protocolFile)
 			_ = protocol.loadJson(jsobj)
 			
 			dir = opt.protocolFile.getParentFile()
@@ -119,17 +119,17 @@ object Main extends App {
 		RsSuccess(s_~)
 	}
 	
-	private def loadProtocolJson(base: String): RsResult[JsObject] = {
-		val prot = new File(s"$base.prot")
-		val json = new File(s"$base.json")
-		val yaml = new File(s"$base.yaml")
-		
-		val file = if (prot.exists) prot else if (json.exists) json else yaml
+	private def loadProtocolJson(file: File): RsResult[JsObject] = {
 		for {
-			_ <- RsResult.assert(file.exists, s"File not found: $base with extension prot, json, or yaml")
+			_ <- RsResult.assert(file.exists, s"File not found: ${file.getPath}")
+			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
+				case "json" => RsSuccess(false)
+				case "yaml" => RsSuccess(true)
+				case "prot" => RsSuccess(true)
+				case ext => RsError(s"unrecognized protocol file extension `$ext`")
+			}
 			input0 = FileUtils.readFileToString(file)
-			input <- if (file eq json) RsSuccess(input0) else yamlToJson(input0)
+			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
 		} yield input.asJson.asJsObject
 	}
-
 }
