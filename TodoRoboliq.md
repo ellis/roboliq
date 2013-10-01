@@ -3,8 +3,10 @@ Started 2013-07-25
 For 0.1 release:
 
 - [ ] Get BSSE scripts to run again using new config file setup
+- [ ] Make protocol from Alan's email (but with DWP instead of tubes)
+- [ ] Get tubes working
+- [ ] Make protocol from Alan's email using tubes
 - [ ] Fix site index to be grid+site+carrier
-- [ ] Make scripts with Alan
 - [ ] Make sure it runs on windows and finds the default Evoware directories
 - [ ] Protocol: create a "variables" section for customizing the script
 - [ ] ProtocolCommand: convert protocol command json to case classes
