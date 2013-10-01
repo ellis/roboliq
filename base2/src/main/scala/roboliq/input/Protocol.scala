@@ -720,14 +720,6 @@ class Protocol {
 			addDevice0(device, deviceName, carrierE)
 		}
 		
-		def addSealer(
-			deviceName: String,
-			carrierE: roboliq.evoware.parser.Carrier
-		): Device = {
-			val device = new Sealer(gid, Some(carrierE.sName))
-			addDevice0(device, deviceName, carrierE)
-		}
-		
 		def addPeeler(
 			deviceName: String,
 			carrierE: roboliq.evoware.parser.Carrier
@@ -736,8 +728,46 @@ class Protocol {
 			addDevice0(device, deviceName, carrierE)
 		}
 		
+		def addSealer(
+			deviceName: String,
+			carrierE: roboliq.evoware.parser.Carrier
+		): Device = {
+			val device = new Sealer(gid, Some(carrierE.sName))
+			addDevice0(device, deviceName, carrierE)
+		}
+		
+		def addShaker(
+			deviceName: String,
+			carrierE: roboliq.evoware.parser.Carrier
+		): Device = {
+			val device = new Shaker(gid, Some(carrierE.sName))
+			addDevice0(device, deviceName, carrierE)
+		}
+		
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
 			carrierE.sName match {
+				case "HPShaker" =>
+					val deviceIdent = agentIdent+"_shaker"
+					val device = addShaker(deviceIdent, carrierE)
+					... shaker specs... should let them by specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
+					// Add user-defined specs for this device
+					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
+						// Get or create the sealer spec for specIdent
+						val spec: PeelerSpec = eb.getEntity(specIdent) match {
+							case Some(spec) => spec.asInstanceOf[PeelerSpec]
+							case None =>
+								// Store the evoware string for this spec
+								val internal = specToString_l.find(_._1 == specIdent).get._2
+								identToAgentObject(specIdent.toLowerCase) = internal
+								PeelerSpec(gid, None, Some(internal))
+						}
+						// Register the spec
+						eb.addDeviceSpec(device, spec, specIdent)
+						// Let entity base know that that the spec can be used for the plate model
+						val plateModel = idToModel_m(plateModelId)
+						val plateModelIdent = eb.getIdent(plateModel).toOption.get
+						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
+					}
 				case "RoboPeel" =>
 					val deviceIdent = agentIdent+"_peeler"
 					val device = addPeeler(deviceIdent, carrierE)

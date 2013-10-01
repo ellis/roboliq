@@ -18,6 +18,7 @@ For 0.1 release:
 - [ ] Create Readme file
 - [ ] Create documentation
 - [ ] Entities should have three names (protocol name, database name, jshop name), a label for messages, and a long description.
+- [ ] WellIdentParser: possibly consider A01-A12 + B06|H06 and A01-*12 + B06|*7
 - [x] Protocol: YAML to JSON converter, to allow protocols to be written in YAML
 - [x] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
 - [x] Add command line interface to software (via ScOpt)
