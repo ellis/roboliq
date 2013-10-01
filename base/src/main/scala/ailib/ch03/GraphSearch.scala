@@ -3,13 +3,15 @@ package ailib.ch03
 import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-
 import ailib.ch03
+import grizzled.slf4j.Logger
 
 class GraphSearch[State, Action, Node <: ch03.Node[State]] {
 	type Problem = ch03.Problem[State, Action, Node]
 	type Frontier = ch03.Frontier[State, Node]
-	
+
+	private val logger = Logger[this.type]
+
 	def run(problem: Problem, frontier: Frontier, debug: DebugSpec = new DebugSpec): Option[Node] = {
 		assert(frontier.isEmpty)
 		val root = problem.root
@@ -25,7 +27,7 @@ class GraphSearch[State, Action, Node <: ch03.Node[State]] {
 		else {
 			val node = frontier.removeChoice()
 			if (debug.printExpanded) {
-				println("E: "+node)
+				logger.info("E: "+node)
 			}
 			if (problem.goalTest(node.state)) {
 				Some(node)
@@ -44,7 +46,7 @@ class GraphSearch[State, Action, Node <: ch03.Node[State]] {
 	
 	private def addToFrontier(frontier: Frontier, seen: HashSet[State], debug: DebugSpec, node: Node) {
 		if (debug.printFrontier) {
-			println("F: "+node)
+			logger.info("F: "+node)
 		}
 		frontier.add(node)
 		seen += node.state
@@ -54,6 +56,8 @@ class GraphSearch[State, Action, Node <: ch03.Node[State]] {
 class HeuristicGraphSearch[State, Action, T, Node <: ch03.Node[State] with NodeHeuristic[T]] {
 	type Problem = ch03.Problem[State, Action, Node]
 	type Frontier = ch03.MinFirstFrontier[State, T, Node]
+	
+	private val logger = Logger[this.type]
 	
 	def run(problem: Problem, frontier: Frontier, debug: DebugSpec = new DebugSpec): Option[Node] = {
 		assert(frontier.isEmpty)
@@ -70,7 +74,7 @@ class HeuristicGraphSearch[State, Action, T, Node <: ch03.Node[State] with NodeH
 		else {
 			val node = frontier.removeChoice()
 			if (debug.printExpanded) {
-				println("E: "+node)
+				logger.info("E: "+node)
 			}
 			if (problem.goalTest(node.state)) {
 				Some(node)
@@ -93,7 +97,7 @@ class HeuristicGraphSearch[State, Action, T, Node <: ch03.Node[State] with NodeH
 	
 	private def addToFrontier(frontier: Frontier, seen: HashMap[State, Node], debug: DebugSpec, node: Node) {
 		if (debug.printFrontier) {
-			println("F: "+node)
+			logger.info("F: "+node)
 		}
 		frontier.add(node)
 		seen(node.state) = node

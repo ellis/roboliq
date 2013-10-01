@@ -44,7 +44,7 @@ protocol:
     object: pcrPlate1
   - command: distribute
     source: sourcePlate1(A02 d H02)
-    destination: pcrPlate1(A03 d H03)
+    destination: pcrPlate1(A03 d H05)
     volume: 80ul
     pipettePolicy: Roboliq_Water_Air_1000
   - { command: seal, object: pcrPlate1 }

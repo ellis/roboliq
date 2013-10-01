@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.Queue
 import scala.collection.mutable.PriorityQueue
+import grizzled.slf4j.Logger
 
 import ailib.ch03
 
@@ -18,6 +19,8 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 	type Problem = ch03.Problem[State, Action, Node]
 	type Frontier = ch03.Frontier[State, Node]
 	
+	private val logger = Logger[this.type]
+	
 	def run(problem: Problem, frontier: Frontier, debug: DebugSpec = new DebugSpec): Option[Node] = {
 		assert(frontier.isEmpty)
 		frontier.add(problem.root)
@@ -31,7 +34,7 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 		else {
 			val node = frontier.removeChoice()
 			if (debug.printExpanded) {
-				println("E: "+node.state)
+				logger.info("E: "+node.state)
 			}
 			if (problem.goalTest(node.state)) {
 				Some(node)
@@ -40,7 +43,7 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 				for (action <- problem.actions(node.state)) {
 					val child = problem.childNode(node, action)
 					if (debug.printFrontier) {
-						println("F: "+node.state)
+						logger.info("F: "+node.state)
 					}
 					frontier.add(child)
 				}
@@ -72,7 +75,7 @@ class BreadthFirstSearch[State, Action] {
 			//frontierSet += node
 			seen += node.state
 			if (debug.debug) {
-				println("F: "+node.state)
+				logger.info("F: "+node.state)
 			}
 		}
 		
@@ -87,7 +90,7 @@ class BreadthFirstSearch[State, Action] {
 		while (!frontierQueue.isEmpty) {
 			node = popFrontier()
 			if (debug.debug) {
-				println("E: "+node.state)
+				logger.info("E: "+node.state)
 				//explored ::= node.state
 			}
 			for (action <- problem.actions(node.state)) {
@@ -114,7 +117,7 @@ class DepthFirstSearch[State, Action] {
 	}
 	
 	private def x(problem: Problem, debug: DebugSpec, node: Node): Option[Node] = {
-		println("E: "+node.state)
+		logger.info("E: "+node.state)
 		if (problem.goalTest(node.state)) {
 			Some(node)
 		}

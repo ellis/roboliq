@@ -364,7 +364,6 @@ class Protocol {
 		}
 	}
 	
-	// REFACTOR: lots of duplication with loadJsonProtocol_Distribute()
 	private def loadJsonProtocol_DistributeSub(fields: Map[String, JsValue]): RsResult[PipetteSpec] = {
 		val source_? = fields.get("source") match {
 			case Some(JsString(sourceIdent)) =>

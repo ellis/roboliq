@@ -246,14 +246,14 @@ class EntityBase {
 								case WellIdentVertical(rc0, rc1) =>
 									(for {
 										col_i <- rc0.col to rc1.col
-										row_i <- (if (col_i == rc0.col) rc0.row else 0) to (if (col_i == rc1.col) rc1.row else rowsCols._1)
+										row_i <- (if (col_i == rc0.col) rc0.row else 0) to (if (col_i == rc1.col) rc1.row else rowsCols._1 - 1)
 									} yield {
 										(labware, RowCol(row_i, col_i))
 									}).toList
 								case WellIdentHorizontal(rc0, rc1) =>
 									(for {
 										row_i <- rc0.row to rc1.row
-										col_i <- (if (row_i == rc0.row) rc0.col else 0) to (if (row_i == rc1.row) rc1.col else rowsCols._2)
+										col_i <- (if (row_i == rc0.row) rc0.col else 0) to (if (row_i == rc1.row) rc1.col else rowsCols._2 - 1)
 									} yield {
 										(labware, RowCol(row_i, col_i))
 									}).toList
