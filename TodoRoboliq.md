@@ -2,7 +2,6 @@ Started 2013-07-25
 
 For 0.1 release:
 
-- [ ] alan01: distribute.destination: make sure we can use "plate1(A01 r A12 + B06 d H06)"
 - [ ] alan01: shaker: produce jshop output
 - [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
@@ -24,6 +23,7 @@ For 0.1 release:
 - [x] Add command line interface to software (via ScOpt)
 - [x] Get BSSE scripts to run again using new config file setup
 - [x] alan01: figure out why "platePcr1(A04 d H06)" tries to pipette to I04
+- [x] alan01: distribute.destination: make sure we can use "plate1(A01 r A12 + B06 d H06)"
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;

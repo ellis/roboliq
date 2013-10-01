@@ -22,18 +22,11 @@ wellContents:
   - { "name": "sourcePlate1(H02)", "contents": "substance2@400ul" }
 
 protocol:
-  - command: pipette
-    steps:
-      - command: distribute
-        source: sourcePlate1(A01)
-        destination: pcrPlate1(A01 r A12)
-        volume: 20ul
-        pipettePolicy: Roboliq_Water_Wet_1000
-      - command: distribute
-        source: sourcePlate1(A01)
-        destination: pcrPlate1(B06 d H06)
-        volume: 20ul
-        pipettePolicy: Roboliq_Water_Wet_1000
+  - command: distribute
+    source: sourcePlate1(A01)
+    destination: pcrPlate1(A01 r A12 + B06 d H06)
+    volume: 20ul
+    pipettePolicy: Roboliq_Water_Wet_1000
   - command: seal
     object: pcrPlate1
   - command: shake

@@ -73,7 +73,7 @@ private object WellIdentParser0 extends JavaTokenParsers {
 	
 	val wellArg: Parser[WellIdent] = well_v_well | well_v_row | well_h_well | well_h_col | well_x_well | well
 	
-	val wells: Parser[List[WellIdent]] = rep1sep(wellArg, ",")
+	val wells: Parser[List[WellIdent]] = rep1sep(wellArg, "+")
 	
 	val plateWells: Parser[Tuple2[String, List[WellIdent]]] = ident ~ "(" ~ wells ~ ")" ^^ {
 		case plate ~ _ ~ l ~ _ => plate -> l
@@ -85,7 +85,7 @@ private object WellIdentParser0 extends JavaTokenParsers {
 	
 	val plateArg = plateWells | plate
 	
-	val plates: Parser[List[Tuple2[String, List[WellIdent]]]] = rep1sep(plateArg, ",")
+	val plates: Parser[List[Tuple2[String, List[WellIdent]]]] = rep1sep(plateArg, "+")
 	
 	def parse(input: String): RsResult[List[(String, List[WellIdent])]] = {
 		RsSuccess(parseAll(plates, input).getOrElse(Nil))
