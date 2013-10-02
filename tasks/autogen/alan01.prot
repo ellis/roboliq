@@ -31,6 +31,7 @@ protocol:
     object: pcrPlate1
   - command: shake
     object: pcrPlate1
+    spec: shakerSpec1
     duration: 300
     speed: 800
   - command: peel
@@ -41,5 +42,5 @@ protocol:
     volume: 80ul
     pipettePolicy: Roboliq_Water_Air_1000
   - { command: seal, object: pcrPlate1 }
-  - { command: shake, object: pcrPlate1, duration: 300, speed: 400 }
+  - { command: shake, object: pcrPlate1, spec: shakerSpec1, duration: 300, speed: 400 }
   - { command: peel, object: pcrPlate1 }

@@ -1,4 +1,4 @@
-[Plan cost: 17.0
+[Plan cost: 21.0
 
 (!agent-activate user)
 (!transporter-run user userarm sourceplate1 m001 offsite r1_bench_010x2 userarmspec)
@@ -9,13 +9,17 @@
 (!pipetter-run r1 r1_pipetter1 spec0003)
 (!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_bench_010x1 r1_device_236x1 r1_transporterspec0)
 (!sealer-run r1 r1_sealer sealerspec1 pcrplate1 r1_device_236x1)
-(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_device_236x1 r1_device_237x1 r1_transporterspec0)
+(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_device_236x1 r1_bench_010x1 r1_transporterspec0)
+(!shaker-run r1 r1_shaker shakerspec1 pcrplate1 r1_bench_010x1)
+(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_bench_010x1 r1_device_237x1 r1_transporterspec0)
 (!peeler-run r1 r1_peeler peelerspec1 pcrplate1 r1_device_237x1)
 (!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_device_237x1 r1_bench_010x1 r1_transporterspec0)
-(!pipetter-run r1 r1_pipetter1 spec0014)
+(!pipetter-run r1 r1_pipetter1 spec0017)
 (!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_bench_010x1 r1_device_236x1 r1_transporterspec0)
 (!sealer-run r1 r1_sealer sealerspec1 pcrplate1 r1_device_236x1)
-(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_device_236x1 r1_device_237x1 r1_transporterspec0)
+(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_device_236x1 r1_bench_010x1 r1_transporterspec0)
+(!shaker-run r1 r1_shaker shakerspec1 pcrplate1 r1_bench_010x1)
+(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_bench_010x1 r1_device_237x1 r1_transporterspec0)
 (!peeler-run r1 r1_peeler peelerspec1 pcrplate1 r1_device_237x1)
 --------------------
 ]

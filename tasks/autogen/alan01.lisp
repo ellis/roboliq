@@ -105,6 +105,8 @@
   (is-plateModel m002) ; D-BSSE 96 Well PCR Plate
   (is-sealer r1_sealer) ; RoboSeal
   (is-sealerSpec sealerSpec1)
+  (is-shaker r1_shaker) ; MP 2Pos H+P Shake
+  (is-shakerSpec shakerSpec1)
   (is-site offsite) ; offsite
   (is-site r1_bench_001x1) ; r1 bench Wash Station Clean site 1
   (is-site r1_bench_001x2) ; r1 bench Wash Station Clean site 2
@@ -205,20 +207,27 @@
   (agent-has-device r1 r1_peeler)
   (agent-has-device r1 r1_pipetter1)
   (agent-has-device r1 r1_sealer)
+  (agent-has-device r1 r1_shaker)
   (agent-has-device r1 r1_thermocycler1)
   (agent-has-device r1 r1_transporter1)
   (agent-has-device r1 r1_transporter2)
   (agent-has-device user userArm)
   (device-can-model r1_peeler m002)
   (device-can-model r1_sealer m002)
+  (device-can-model r1_shaker m001)
+  (device-can-model r1_shaker m002)
   (device-can-model r1_thermocycler1 m002)
   (device-can-model userArm m001)
   (device-can-model userArm m002)
   (device-can-site r1_peeler r1_device_237x1)
   (device-can-site r1_sealer r1_device_236x1)
+  (device-can-site r1_shaker r1_bench_010x1)
+  (device-can-site r1_shaker r1_bench_010x2)
+  (device-can-site r1_shaker r1_bench_010x4)
   (device-can-site r1_thermocycler1 r1_device_234x1)
   (device-can-spec r1_peeler peelerSpec1)
   (device-can-spec r1_sealer sealerSpec1)
+  (device-can-spec r1_shaker shakerSpec1)
   (device-can-spec r1_thermocycler1 thermocyclerSpec1)
   (device-can-spec r1_transporter1 r1_transporterSpec0)
   (device-can-spec r1_transporter1 r1_transporterSpec2)
@@ -411,9 +420,11 @@
  (
   (distribute2 ?a0001 ?d0002 spec0003 sourcePlate1 pcrPlate1)
   (sealer-run ?a0004 ?d0005 ?spec0006 pcrPlate1 ?s0007)
-  (peeler-run ?a0008 ?d0009 ?spec0010 pcrPlate1 ?s0011)
-  (distribute2 ?a0012 ?d0013 spec0014 sourcePlate1 pcrPlate1)
-  (sealer-run ?a0015 ?d0016 ?spec0017 pcrPlate1 ?s0018)
-  (peeler-run ?a0019 ?d0020 ?spec0021 pcrPlate1 ?s0022)
+  (shaker-run ?a0008 ?d0009 shakerSpec1 pcrPlate1 ?s0010)
+  (peeler-run ?a0011 ?d0012 ?spec0013 pcrPlate1 ?s0014)
+  (distribute2 ?a0015 ?d0016 spec0017 sourcePlate1 pcrPlate1)
+  (sealer-run ?a0018 ?d0019 ?spec0020 pcrPlate1 ?s0021)
+  (shaker-run ?a0022 ?d0023 shakerSpec1 pcrPlate1 ?s0024)
+  (peeler-run ?a0025 ?d0026 ?spec0027 pcrPlate1 ?s0028)
  )
 )

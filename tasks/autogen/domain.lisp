@@ -273,6 +273,53 @@
  )
 
  ;
+ ; SHAKER
+ ;
+
+ (:operator (!shaker-run ?a ?d ?spec ?p ?s)
+  ; preconditions
+  (
+   ; types
+   (is-agent ?a)
+   (is-shaker ?d)
+   (is-shakerSpec ?spec)
+   (is-plate ?p)
+   (is-site ?s)
+   ; agent
+   (agent-is-active ?a)
+   (agent-has-device ?a ?d)
+   ; device
+   (device-can-site ?d ?s)
+   (device-can-spec ?d ?spec)
+   ; plate
+   (model ?p ?m)
+   (location ?p ?s)
+   ; site (not really necessary)
+   ;(model ?s ?sm)
+   ;(stackable ?sm ?m)
+  )
+  ; delete list
+  nil
+  ; add list
+  nil
+ )
+
+ (:method (shaker-run ?a ?d ?spec ?p ?s)
+  (
+   (is-agent ?a)
+   (is-shaker ?d)
+   (is-shakerSpec ?spec)
+   (is-plate ?p)
+   (is-site ?s)
+   (agent-has-device ?a ?d)
+   (device-can-site ?d ?s)
+   (device-can-spec ?d ?spec)
+   (model ?p ?m)
+  )
+  ((move-labware ?p ?s) (agent-activate ?a) (!shaker-run ?a ?d ?spec ?p ?s))
+ )
+
+ ;
  ; PEELER
  ;
 

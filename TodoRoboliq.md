@@ -6,6 +6,7 @@ For 0.1 release:
 - [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
 - [ ] Make protocol from Alan's email using tubes
+- [ ] shaker specs... should let them be specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
 - [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
 - [ ] Fix site index to be grid+site+carrier
 - [ ] Make sure it runs on windows and finds the default Evoware directories
@@ -45,16 +46,16 @@ Portable PCR script:
       primer2:
       polymerase:
 
+    variables:
+      thermocyclerSpec: thermocyclerSpec1
+      plateModel: D-BSSE 96 Well PCR Plate
+
     protocol:
       - command: mix
         ...
       - command: thermocycle
         object: plate1
         spec: $thermocyclerSpec
-
-    variables:
-      thermocyclerSpec: thermocyclerSpec1
-      plateModel: D-BSSE 96 Well PCR Plate
 
 For 0.2 release:
 
