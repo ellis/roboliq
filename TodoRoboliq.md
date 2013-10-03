@@ -3,6 +3,7 @@ Started 2013-07-25
 For 0.1 release:
 
 - [ ] alan01: shaker: produce jshop output
+- [ ] Protocol: "MP 2Pos H+P Shake": only one of the sites can be used for shaking?
 - [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
 - [ ] Make protocol from Alan's email using tubes
