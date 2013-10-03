@@ -428,13 +428,22 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			specIdent <- protocol.eb.getIdent(cmd.spec)
 			internal_s <- identToAgentObject_m.get(specIdent.toLowerCase).asRs(s"missing internal value for specIdent `$specIdent`")
 		} yield {
-			val token_l = List(
-				L0C_Facts("Shaker", "Shaker_Init", ""),
-				L0C_Facts("Shaker","Shaker_Start","1"),
-				L0C_StartTimer(1),
-				L0C_WaitTimer(1, Integer.parseInt(internal_s.toString)),
-				L0C_Facts("Shaker","Shaker_Stop","")
-			)
+			val token_l = {
+				if (cmd.device.label == Some("MP 2Pos H+P Shake")) {
+					List(
+						L0C_Facts("HPShaker", "HPShaker_HP__ShakeForTime", "*271|8*30*30*30*30|2|*30|1|*30|1,5*30*30|255*27")
+					)
+				}
+				else {
+					List(
+						L0C_Facts("Shaker", "Shaker_Init", ""),
+						L0C_Facts("Shaker", "Shaker_Start","1"),
+						L0C_StartTimer(1),
+						L0C_WaitTimer(1, Integer.parseInt(internal_s.toString)),
+						L0C_Facts("Shaker", "Shaker_Stop","")
+					)
+				}
+			}
 			val item_l = token_l.map(token => TranslationItem(token, Nil))
 			TranslationResult(item_l, state0)
 		}

@@ -27,7 +27,7 @@ logic:
   - transporter-can userArm r1_hotel_245x1 userArmSpec
   - transporter-can userArm r1_hotel_245x2 userArmSpec
   - transporter-can userArm r1_bench_010x2 userArmSpec
-  - device-can-site r1_pipetter1 r1_bench_010x1
+#  - device-can-site r1_pipetter1 r1_bench_010x1
   - device-can-site r1_pipetter1 r1_bench_010x2
   - device-can-site r1_pipetter1 r1_bench_010x4
   - device-can-site r1_pipetter1 r1_bench_017x1

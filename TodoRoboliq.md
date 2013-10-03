@@ -3,6 +3,7 @@ Started 2013-07-25
 For 0.1 release:
 
 - [ ] alan01: shaker: produce jshop output
+- [ ] Protocol: check when carrier sites overlap, and only use one of them, selected by user in config file
 - [ ] Protocol: "MP 2Pos H+P Shake": only one of the sites can be used for shaking?
 - [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
@@ -57,6 +58,14 @@ Portable PCR script:
       - command: thermocycle
         object: plate1
         spec: $thermocyclerSpec
+
+roboliq.yaml for evoware table:
+
+    P1: {grid: 1, site: 1}
+    P2: {grid: 1, site: 2, excludes: [P1]}
+    P3: {grid, 2, site: 1, device: "MP 2Pos H+P Shaker"}
+    pipetterSites: [P1, P2, P3]
+
 
 For 0.2 release:
 
