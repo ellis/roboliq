@@ -2,9 +2,10 @@ Started 2013-07-25
 
 For 0.1 release:
 
-- [ ] alan01: shaker: produce jshop output
+- [ ] alan01: pipetting tries to use all 8 tips instead of only the 4 big ones
+- [ ] alan01: why didn't it wash after the last dispense?
+- [ ] alan01: change peeling file to "blue" from "red"
 - [ ] Protocol: check when carrier sites overlap, and only use one of them, selected by user in config file
-- [ ] Protocol: "MP 2Pos H+P Shake": only one of the sites can be used for shaking?
 - [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
 - [ ] Make protocol from Alan's email using tubes
@@ -28,6 +29,8 @@ For 0.1 release:
 - [x] Get BSSE scripts to run again using new config file setup
 - [x] alan01: figure out why "platePcr1(A04 d H06)" tries to pipette to I04
 - [x] alan01: distribute.destination: make sure we can use "plate1(A01 r A12 + B06 d H06)"
+- [x] alan01: shaker: produce jshop output
+- [x] Protocol: "MP 2Pos H+P Shake": only one of the sites can be used for shaking?
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
