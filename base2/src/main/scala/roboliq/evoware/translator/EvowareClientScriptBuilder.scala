@@ -333,7 +333,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		for {
 			location <- state.labware_location_m.get(labware).asRs("labware has not been placed anywhere yet")
 			site <- if (location.isInstanceOf[Site]) RsSuccess(location.asInstanceOf[Site]) else RsError("expected labware to be on a site")
-			siteIdent <- protocol.eb.names.get(site).asRs("site has not been assigned an identifier")
+			siteIdent <- protocol.eb.getIdent(site)
 			siteE <- identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs("no evoware site corresponds to site")
 		} yield siteE
 	}

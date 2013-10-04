@@ -8,9 +8,18 @@ import roboliq.core._
 
 class EntityBase {
 	val aliases = new HashMap[String, String]
-	val names = new HashMap[Entity, String]
-	val nameToEntity = new HashMap[String, Entity]
-	val idToEntity = new HashMap[String, Entity]
+	/**
+	 * Map from entity to its JSHOP identifier
+	 */
+	val entityToIdent_m = new HashMap[Entity, String]
+	/**
+	 * Map from JSHOP identifier to entity
+	 */
+	val identToEntity_m = new HashMap[String, Entity]
+	/**
+	 * Map from database key to entity
+	 */
+	val keyToEntity_m = new HashMap[String, Entity]
 	val agents = new ArrayBuffer[Agent]
 	val agentToDevices_m = new HashMap[Agent, mutable.Set[Device]] with MultiMap[Agent, Device]
 	/**
@@ -56,24 +65,24 @@ class EntityBase {
 	}
 	
 	def addEntityWithoutIdent(e: Entity) {
-		if (idToEntity.contains(e.key)) {
-			assert(idToEntity(e.key) eq e)
+		if (keyToEntity_m.contains(e.key)) {
+			assert(keyToEntity_m(e.key) eq e)
 		}
-		idToEntity(e.key) = e
+		keyToEntity_m(e.key) = e
 	}
 	
 	private def addEntity(e: Entity, ident: String) {
 		val lower = ident.toLowerCase
-		if (nameToEntity.contains(lower)) {
+		if (identToEntity_m.contains(lower)) {
 			// FIXME: for debug only
-			if ((nameToEntity(lower) ne e))
-				println("e, ident, lower, nameToEntity = "+(e, ident, lower, nameToEntity(lower)))
+			if ((identToEntity_m(lower) ne e))
+				println("e, ident, lower, nameToEntity = "+(e, ident, lower, identToEntity_m(lower)))
 			// ENDFIX
-			assert(nameToEntity(lower) eq e)
+			assert(identToEntity_m(lower) eq e)
 		}
-		names(e) = ident
-		nameToEntity(lower) = e
-		idToEntity(e.key) = e
+		entityToIdent_m(e) = ident
+		identToEntity_m(lower) = e
+		keyToEntity_m(e.key) = e
 	}
 	
 	def getEntity(key: String): Option[Entity] = {
@@ -81,18 +90,18 @@ class EntityBase {
 		// TODO: improve lookup, this is very hacky.  Should use scope instead,
 		// which would involve handing lookup outside of this class.
 		// First try name, then ID, then alias
-		nameToEntity.get(ident).orElse(idToEntity.get(key)).orElse {
+		identToEntity_m.get(ident).orElse(keyToEntity_m.get(key)).orElse {
 			aliases.get(ident).flatMap(getEntity)
 		}
 	}
 	
 	def getEntityAs[A <: Entity : Manifest](key: String): RsResult[A] = {
 		val lower = key.toLowerCase
-		nameToEntity.get(lower) match {
+		identToEntity_m.get(lower) match {
 			case Some(entity) =>
 				RsResult.asInstanceOf(entity)
 			case None =>
-				idToEntity.get(key) match {
+				keyToEntity_m.get(key) match {
 					case Some(entity) =>
 						RsResult.asInstanceOf(entity)
 					case None =>
@@ -106,7 +115,7 @@ class EntityBase {
 	
 	def getEntityByIdent[A <: Entity : Manifest](ident0: String): RsResult[A] = {
 		val ident = ident0.toLowerCase
-		nameToEntity.get(ident) match {
+		identToEntity_m.get(ident) match {
 			case None =>
 				aliases.get(ident) match {
 					case None => RsError(s"missing entity with ident `$ident`")
@@ -130,14 +139,14 @@ class EntityBase {
 	}
 	
 	def addDevice(a: Agent, d: Device, name: String) {
-		assert(names.contains(a))
+		assert(entityToIdent_m.contains(a))
 		addEntity(d, name)
 		agentToDevices_m.addBinding(a, d)
 	}
 	
 	def addDeviceModel(d: Device, m: LabwareModel) {
-		assert(names.contains(d))
-		assert(names.contains(m))
+		assert(entityToIdent_m.contains(d))
+		assert(entityToIdent_m.contains(m))
 		deviceToModels_m.addBinding(d, m)
 	}
 	
@@ -146,8 +155,8 @@ class EntityBase {
 	}
 	
 	def addDeviceSite(d: Device, s: Site) {
-		assert(names.contains(d))
-		assert(names.contains(s))
+		assert(entityToIdent_m.contains(d))
+		assert(entityToIdent_m.contains(s))
 		deviceToSites_m.addBinding(d, s)
 	}
 	
@@ -156,14 +165,14 @@ class EntityBase {
 	}
 	
 	def addDeviceSpec(d: Device, spec: Entity, name: String) {
-		assert(names.contains(d))
+		assert(entityToIdent_m.contains(d))
 		addEntity(spec, name)
 		deviceToSpecs_m.addBinding(d, spec)
 	}
 	
 	def addStackable(bot: LabwareModel, top: LabwareModel) {
-		assert(names.contains(bot))
-		assert(names.contains(top))
+		assert(entityToIdent_m.contains(bot))
+		assert(entityToIdent_m.contains(top))
 		stackables_m.addBinding(bot, top)
 	}
 	
@@ -172,8 +181,8 @@ class EntityBase {
 	}
 	
 	def setModel(l: Labware, m: LabwareModel) {
-		assert(names.contains(l))
-		assert(names.contains(m))
+		assert(entityToIdent_m.contains(l))
+		assert(entityToIdent_m.contains(m))
 		labwareToModel_m(l) = m
 	}
 	
@@ -182,8 +191,8 @@ class EntityBase {
 	}
 
 	def setLocation(l: Labware, e: Entity) {
-		assert(names.contains(l))
-		assert(names.contains(e))
+		assert(entityToIdent_m.contains(l))
+		assert(entityToIdent_m.contains(e))
 		labwareToLocation_m(l) = e
 	}
 	
@@ -191,27 +200,27 @@ class EntityBase {
 		rel_l += rel
 	}
 	
-	def getIdent(e: Entity): RsResult[String] = names.get(e).asRs(s"missing identifier for entity $e")
+	def getIdent(e: Entity): RsResult[String] = entityToIdent_m.get(e).asRs(s"missing identifier for entity $e")
 	
 	def makeInitialConditionsList(): List[Rel] = {
-		names.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.label.getOrElse(null)))).toList.sortBy(_.toString) ++
+		entityToIdent_m.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.label.getOrElse(null)))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
-			Rel(s"agent-has-device", List(names(pair._1), names(device)))
+			Rel(s"agent-has-device", List(entityToIdent_m(pair._1), entityToIdent_m(device)))
 		})).toList.sortBy(_.toString) ++
 		deviceToModels_m.flatMap(pair => pair._2.map(model => {
-			Rel(s"device-can-model", List(names(pair._1), names(model)))
+			Rel(s"device-can-model", List(entityToIdent_m(pair._1), entityToIdent_m(model)))
 		})).toList.sortBy(_.toString) ++
 		deviceToSites_m.flatMap(pair => pair._2.map(site => {
-			Rel(s"device-can-site", List(names(pair._1), names(site)))
+			Rel(s"device-can-site", List(entityToIdent_m(pair._1), entityToIdent_m(site)))
 		})).toList.sortBy(_.toString) ++
 		deviceToSpecs_m.flatMap(pair => pair._2.toList.map(spec => {
-			Rel(s"device-can-spec", List(names(pair._1), names(spec)))
+			Rel(s"device-can-spec", List(entityToIdent_m(pair._1), entityToIdent_m(spec)))
 		})).toList.sortBy(_.toString) ++
 		stackables_m.flatMap(pair => pair._2.map(model => {
-			Rel(s"stackable", List(names(pair._1), names(model)))
+			Rel(s"stackable", List(entityToIdent_m(pair._1), entityToIdent_m(model)))
 		})).toList.sortBy(_.toString) ++
-		labwareToModel_m.map(pair => Rel(s"model", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString) ++
-		labwareToLocation_m.map(pair => Rel(s"location", List(names(pair._1), names(pair._2)))).toList.sortBy(_.toString) ++
+		labwareToModel_m.map(pair => Rel(s"model", List(entityToIdent_m(pair._1), entityToIdent_m(pair._2)))).toList.sortBy(_.toString) ++
+		labwareToLocation_m.map(pair => Rel(s"location", List(entityToIdent_m(pair._1), entityToIdent_m(pair._2)))).toList.sortBy(_.toString) ++
 		rel_l.toList.sortBy(_.toString)
 	}
 	

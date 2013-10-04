@@ -11,12 +11,12 @@ sources:
     liquidType: DNA
    - [liquidType, XXX(XX), DNA]
 
-variables:
-  wellGroup1: pcrPlate1(A01-A12+B06|H06)
+#variables:
+#  wellGroup1: pcrPlate1(A01-A12+B06|H06)
 
 protocol:
   - distribute substance1 pcrPlate1(A01-A12+B06|H06) 20ul
-  - distribute substance1 $wellGroup1 20ul
+#  - distribute substance1 $wellGroup1 20ul
   - seal pcrPlate1
   - shake pcrPlate1 5min 800rpm
   - peel pcrPlate1

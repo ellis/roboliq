@@ -6,7 +6,7 @@ For CADMAD Venice meeting:
 - [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
 - [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
 - [ ] PcrCommand: create an abstract PCR command which is easily portable
-- [ ] Evoware: Read device INI files
+- [ ] Evoware: Read device INI files?
 - [ ] Evoware: Read liquid class files?
 
 For 0.1 release:

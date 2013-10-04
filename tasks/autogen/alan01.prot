@@ -22,25 +22,25 @@ wellContents:
   - { "name": "sourcePlate1(H02)", "contents": "substance2@400ul" }
 
 protocol:
-  - command: distribute
-    source: sourcePlate1(A01)
-    destination: pcrPlate1(A01-A12 + B06|H06)
-    volume: 20ul
-    pipettePolicy: Roboliq_Water_Wet_1000
-  - command: seal
-    object: pcrPlate1
-  - command: shake
-    object: pcrPlate1
-    spec: shakerSpec1
-    duration: 300
-    speed: 800
-  - command: peel
-    object: pcrPlate1
-  - command: distribute
-    source: sourcePlate1(A02 d H02)
-    destination: pcrPlate1(A03 d H05)
-    volume: 80ul
-    pipettePolicy: Roboliq_Water_Air_1000
-  - { command: seal, object: pcrPlate1 }
-  - { command: shake, object: pcrPlate1, spec: shakerSpec1, duration: 300, speed: 400 }
-  - { command: peel, object: pcrPlate1 }
+  - distribute:
+      source: sourcePlate1(A01)
+      destination: pcrPlate1(A01-A12 + B06|H06)
+      volume: 20ul
+      pipettePolicy: Roboliq_Water_Wet_1000
+  - seal:
+      object: pcrPlate1
+  - shake:
+      object: pcrPlate1
+      spec: shakerSpec1
+      duration: 300
+      speed: 800
+  - peel:
+      object: pcrPlate1
+  - distribute:
+      source: sourcePlate1(A02 d H02)
+      destination: pcrPlate1(A03 d H05)
+      volume: 80ul
+      pipettePolicy: Roboliq_Water_Air_1000
+  - seal: { object: pcrPlate1 }
+  - shake: { object: pcrPlate1, spec: shakerSpec1, duration: 300, speed: 400 }
+  - peel: { object: pcrPlate1 }

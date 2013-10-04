@@ -50,7 +50,7 @@ object Main extends App {
 			_ <- protocol.loadConfigBean(configBean)
 
 			jsobj <- loadProtocolJson(opt.protocolFile)
-			_ = protocol.loadJson(jsobj)
+			_ <- protocol.loadJson(jsobj)
 			
 			dir = opt.protocolFile.getParentFile()
 			basename = FilenameUtils.getBaseName(opt.protocolFile.getPath())

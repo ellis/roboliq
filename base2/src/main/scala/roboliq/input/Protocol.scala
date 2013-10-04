@@ -127,7 +127,39 @@ class Protocol {
 		}
 	}
 
-	def loadJson(jsobj: JsObject) {
+	def loadJson(jsobj: JsObject): RsResult[Unit] = {
+		jsobj.fields.get("labware") match {
+			case Some(JsObject(map)) =>
+				for ((name, jsobj) <- map) {
+					jsobj match {
+						case JsString(modelRef) =>
+							// REFACTOR: duplicates lots of code from the `plates` section below
+							val key = gid
+							//logger.debug("modelKey: "+modelKey)
+							//println("eb.nameToEntity: "+eb.nameToEntity)
+							//println("eb.idToEntity: "+eb.idToEntity)
+							//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
+							//logger.debug("eb.aliases: "+eb.aliases)
+							val model = eb.getEntityAs[PlateModel](modelRef).toOption.get
+							val plate = new Plate(key, Some(name))
+							eb.addLabware(plate, name)
+							eb.setModel(plate, model)
+							state0.labware_model_m(plate) = model
+							// Create plate wells
+							for (row <- 0 until model.rows; col <- 0 until model.cols) {
+								val index = row + col * model.rows
+								val ident = WellIdentParser.wellId(plate, model, row, col)
+								val well = new Well(gid, Some(ident))
+								state0.addWell(well, plate, RowCol(row, col), index)
+							}
+							val site = eb.getEntity("offsite").get
+							eb.setLocation(plate, site)
+						case _ =>
+					}
+				}
+			case _ =>
+		}
+		
 		jsobj.fields.get("substances") match {
 			case Some(js) =>
 				val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
@@ -224,146 +256,372 @@ class Protocol {
 		}
 		
 		jsobj.fields.get("protocol") match {
-			case Some(JsArray(l)) =>
-				for (js <- l) {
-					js match {
-						case JsObject(fields) =>
-							if (fields.contains("command")) {
-								fields.get("command") match {
-									case Some(JsString("log")) =>
-										fields.get("text") match {
-											case Some(JsString(text)) =>
-												val agent = f"?a$nvar%04d"
-												val textId = f"text$nvar%04d"
-												idToObject(textId) = text
-												//println("idToObject:" + idToObject)
-												tasks += Rel("!log", List(agent, textId))
-											case _ =>
-										}
-									case Some(JsString("move")) =>
-										//val agent = x(fields, "agent")
-										//val device = x(fields, "device")
-										val labware = fields("labware").asInstanceOf[JsString].value
-										val destination = fields("destination").asInstanceOf[JsString].value
-										tasks += Rel("move-labware", List(labware, destination))
-									case Some(JsString("peel")) =>
-										fields.get("object") match {
-											case Some(JsString(key)) =>
-												val agent = f"?a$nvar%04d"
-												val device = f"?d$nvar%04d"
-												val specIdent = f"?spec$nvar%04d"
-												val siteIdent = f"?s$nvar%04d"
-												val plate = eb.getEntity(key).get.asInstanceOf[Labware]
-												val plateName = eb.names(plate)
-												tasks += Rel("peeler-run", List(agent, device, specIdent, plateName, siteIdent))
-											case _ =>
-										}
-									case Some(JsString("prompt")) =>
-										fields.get("text") match {
-											case Some(JsString(text)) =>
-												val agent = f"?a$nvar%04d"
-												val textId = f"text$nvar%04d"
-												idToObject(textId) = text
-												//println("idToObject:" + idToObject)
-												tasks += Rel("!prompt", List(agent, textId))
-											case _ =>
-										}
-									case Some(JsString("seal")) =>
-										fields.get("object") match {
-											case Some(JsString(key)) =>
-												val agent = f"?a$nvar%04d"
-												val device = f"?d$nvar%04d"
-												val specIdent = f"?spec$nvar%04d"
-												val siteIdent = f"?s$nvar%04d"
-												val plate = eb.getEntity(key).get.asInstanceOf[Labware]
-												val plateName = eb.names(plate)
-												tasks += Rel("sealer-run", List(agent, device, specIdent, plateName, siteIdent))
-											case _ =>
-										}
-									case Some(JsString("shake")) =>
-										val plateIdent_? = fields.get("object") match {
-											case Some(JsString(plateIdent)) => RsSuccess(plateIdent)
-											case _ => RsError("must supply an `object` which references a plate by name")
-										}
-										val specIdent_? = fields.get("spec") match {
-											case Some(JsString(specIdent)) => RsSuccess(specIdent)
-											case _ => RsError("must supply a `spec`")
-										}
-										for {
-											plateIdent <- plateIdent_?
-											specIdent <- specIdent_?
-										} {
-											val agent = f"?a$nvar%04d"
-											val device = f"?d$nvar%04d"
-											tasks += Rel("shaker-run", List(agent, device, specIdent, plateIdent, f"?s$nvar%04d"))
-										}
-									case Some(JsString("thermocycle")) =>
-										val plateIdent_? = fields.get("object") match {
-											case Some(JsString(plateIdent)) => RsSuccess(plateIdent)
-											case _ => RsError("must supply an `object` which references a plate by name")
-										}
-										val specIdent_? = fields.get("spec") match {
-											case Some(JsString(specIdent)) => RsSuccess(specIdent)
-											case _ => RsError("must supply a `spec`")
-										}
-										for {
-											plateIdent <- plateIdent_?
-											specIdent <- specIdent_?
-										} {
-											val agentIdent = f"?a$nvar%04d"
-											val deviceIdent = f"?d$nvar%04d"
-											val site2Ident = f"?s$nvar%04d"
-											tasks += Rel("thermocycle-plate", List(agentIdent, deviceIdent, specIdent, plateIdent, site2Ident))
-										}
-									case Some(JsString("pipette")) =>
-										fields.get("steps") match {
-											case Some(JsArray(step_l)) =>
-												val l0: List[RsResult[PipetteSpec]] = for (step <- step_l) yield {
-													val jsobj = step.asJsObject
-													jsobj.fields.get("command") match {
-														case Some(JsString("distribute")) =>
-															loadJsonProtocol_DistributeSub(jsobj.fields)
-														case Some(JsString(command)) =>
-															RsError("unrecognized pipette command: $command")
-														case x =>
-															RsError("unrecognized pipette step: $x")
-													}
-												}
-												for {
-													item_l <- RsResult.toResultOfList(l0)
-												} {
-													val agentIdent = f"?a$nvar%04d"
-													val deviceIdent = f"?d$nvar%04d"
-													val specIdent = f"spec$nvar%04d"
-													val labware_l: List[Labware] = item_l.flatMap(item => item.source_l ++ item.destination_l).map(_._1).distinct
-													val labwareIdent_l: List[String] = labware_l.map(eb.names)
-													val n = labware_l.size
-													val spec = PipetteSpecList(item_l)
-													idToObject(specIdent) = spec
-													tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
-												}
-											case _ =>
-										}
-									case Some(JsString("distribute")) =>
-										loadJsonProtocol_Distribute(fields)
-									case _ =>
-								}
-							}
-						case _ =>
-					}
-				}
-			case _ =>
+			case Some(jsval) => loadJsonProtocol_Protocol(jsval)
+			case _ => RsSuccess(())
 		}
 	}
 	
-	private def loadJsonProtocol_Distribute(fields: Map[String, JsValue]) {
+	private def loadJsonProtocol_Protocol(jsval: JsValue): RsResult[Unit] = {
+		logger.debug("parse `protocol`")
+		jsval match {
+			case JsArray(jscmd_l) =>
+				RsResult.toResultOfList(jscmd_l.map(jscmd => {
+					for {
+						pair <- loadJsonProtocol_Protocol_getCommand(jscmd)
+						//_ = println("pair: "+pair)
+						res <- pair match {
+							case Some((cmd, nameToVal_l)) =>
+								loadJsonProtocol_ProtocolCommand(cmd, nameToVal_l)
+							case None => RsSuccess(())
+						}
+					} yield res
+				})).map(_ => ())
+			case _ =>
+				RsError("unrecognized format for `protocol` section")
+		}
+	}
+
+	private def loadJsonProtocol_Protocol_getCommand(
+		jscmd: JsValue
+	): RsResult[Option[(String, List[(Option[String], JsValue)])]] = {
+		jscmd match {
+			case JsString(line) =>
+				// TODO: Create a parser
+				val word_l = line.split(" ").toList
+				word_l match {
+					case Nil => RsSuccess(None)
+					case cmd :: arg_l =>
+						for {
+							nameToVal_l <- loadJsonProtocol_Protocol_getNameVals(JsArray(arg_l.map(JsString(_))))
+						} yield Some((cmd, nameToVal_l))
+				}
+			case JsObject(cmd_m) =>
+				if (cmd_m.size == 0)
+					RsSuccess(None)
+				else if (cmd_m.size > 1)
+					RsError("expected single field with command name")
+				else {
+					val (cmd, jsval) = cmd_m.head
+					for {
+						nameToVal_l <- loadJsonProtocol_Protocol_getNameVals(jsval)
+					} yield Some((cmd, nameToVal_l))
+				}
+			case _ =>
+				RsError("unrecognized command format")
+		}
+	}
+	
+	private def loadJsonProtocol_Protocol_getNameVals(
+		args: JsValue
+	): RsResult[List[(Option[String], JsValue)]] = {
+		args match {
+			case JsString(s) =>
+				val arg_l = s.split(" ").toList
+				val l = arg_l.map { s =>
+					val i = s.indexOf(" ")
+					if (i > 0) (Some(s.substring(0, i)), JsString(s.substring(i)))
+					else (None, JsString(s))
+				}
+				RsSuccess(l)
+			case JsNull =>
+				RsSuccess(Nil)
+			case n: JsNumber =>
+				RsSuccess(List((None, n)))
+			case JsArray(arg_l) =>
+				val l = arg_l.map(jsval => (None, jsval))
+				RsSuccess(l)
+			case JsObject(arg_m) =>
+				val l = arg_m.toList.map(pair => (Some(pair._1), pair._2))
+				RsSuccess(l)
+			case _ =>
+				RsError("invalid argument list")
+		}
+	}
+
+	private def loadJsonProtocol_ProtocolCommand(cmd: String, nameVal_l: List[(Option[String], JsValue)]): RsResult[Unit] = {
+		cmd match {
+			case "log" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("text"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsString(text))) =>
+							val agentIdent = f"?a$nvar%04d"
+							val textIdent = f"text$nvar%04d"
+							idToObject(textIdent) = text
+							tasks += Rel("!log", List(agentIdent, textIdent))
+							RsSuccess(())
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "move" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object", "destination"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsString(objectRef)), Some(JsString(dstRef))) =>
+							for {
+								labware <- eb.getEntityAs[Labware](objectRef)
+								dst <- eb.getEntityAs[Labware](dstRef)
+								labwareIdent <- eb.getIdent(labware)
+								dstIdent <- eb.getIdent(dst)
+							} yield {
+								tasks += Rel("move-labware", List(labwareIdent, dstIdent))
+							}
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "peel" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsString(objectRef))) =>
+							for {
+								labware <- eb.getEntityAs[Labware](objectRef)
+								labwareIdent <- eb.getIdent(labware)
+							} yield {
+								val agentIdent = f"?a$nvar%04d"
+								val deviceIdent = f"?d$nvar%04d"
+								val specIdent = f"?spec$nvar%04d"
+								val siteIdent = f"?s$nvar%04d"
+								tasks += Rel("peeler-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+							}
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "prompt" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("text"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsString(text))) =>
+							val agentIdent = f"?a$nvar%04d"
+							val textIdent = f"text$nvar%04d"
+							idToObject(textIdent) = text
+							tasks += Rel("!prompt", List(agentIdent, textIdent))
+							RsSuccess(())
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "seal" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsString(objectRef))) =>
+							for {
+								labware <- eb.getEntityAs[Labware](objectRef)
+								labwareIdent <- eb.getIdent(labware)
+							} yield {
+								val agentIdent = f"?a$nvar%04d"
+								val deviceIdent = f"?d$nvar%04d"
+								val specIdent = f"?spec$nvar%04d"
+								val siteIdent = f"?s$nvar%04d"
+								tasks += Rel("sealer-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+							}
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "shake" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object", "spec"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsString(objectRef)), Some(JsString(specIdent))) =>
+							for {
+								labware <- eb.getEntityAs[Labware](objectRef)
+								labwareIdent <- eb.getIdent(labware)
+							} yield {
+								val agentIdent = f"?a$nvar%04d"
+								val deviceIdent = f"?d$nvar%04d"
+								val siteIdent = f"?s$nvar%04d"
+								tasks += Rel("shaker-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+							}
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "thermocycle" =>
+				val argSpec_l = List(
+					("object", true, jsvalToEntity[Labware] _),
+					("spec", true, jsvalToString _)
+				)
+				for {
+					arg_l <- parseArgList(argSpec_l, nameVal_l)
+					_ <- arg_l match {
+						case List(Some(labware: Labware), Some(specIdent: String)) =>
+							for {
+								labwareIdent <- eb.getIdent(labware)
+							} yield {
+								val agentIdent = f"?a$nvar%04d"
+								val deviceIdent = f"?d$nvar%04d"
+								val siteIdent = f"?s$nvar%04d"
+								tasks += Rel("thermocycle-plate", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+							}
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "pipette" =>
+				for {
+					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("steps"), nameVal_l)
+					_ <- arg_l match {
+						case List(Some(JsArray(step_l))) =>
+							for {
+								l0 <- RsResult.toResultOfList(step_l.map(loadJsonProtocol_Protocol_getCommand))
+								l1 = l0.flatten
+								l2 <- RsResult.toResultOfList(l1.map(pair => {
+									val (cmd, nameToVal_l) = pair
+									cmd match {
+										case "distribute" =>
+											loadJsonProtocol_DistributeSub(nameToVal_l).map(Option(_))
+										case _ =>
+											RsError("unrecognized pipette sub-command: $command")
+									}
+								}))
+								item_l = l2.flatten
+								labware_l = item_l.flatMap(item => item.source_l ++ item.destination_l).map(_._1).distinct
+								labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
+							} yield {
+								val agentIdent = f"?a$nvar%04d"
+								val deviceIdent = f"?d$nvar%04d"
+								val specIdent = f"spec$nvar%04d"
+								val n = labware_l.size
+								val spec = PipetteSpecList(item_l)
+								idToObject(specIdent) = spec
+								tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+							}
+						case _ => RsError(s"bad arguments to `$cmd`")
+					}
+				} yield ()
+			case "distribute" =>
+				loadJsonProtocol_Distribute(nameVal_l)
+			case _ =>
+				RsSuccess(())
+		}
+	}
+	
+	private def jsvalToString(argname: String, jsval: JsValue): RsResult[String] = {
+		jsval match {
+			case JsString(s) => RsSuccess(s)
+			case _ => RsSuccess(jsval.toString)
+		}
+	}
+	
+	private def jsvalToEntity[A <: Entity : Manifest](argname: String, jsval: JsValue): RsResult[A] = {
+		jsval match {
+			case JsString(ref) => eb.getEntityAs[A](ref)
+			case _ => RsError(s"`$argname`: expected reference to entity")
+		}
+	}
+	
+	private def parseArgList(
+		argSpec_l: List[(String, Boolean, (String, JsValue) => RsResult[Object])],
+		nameVal_l: List[(Option[String], JsValue)]
+	): RsResult[List[Object]] = {
+		
+		def doit(
+			spec_l: List[(String, Boolean, (String, JsValue) => RsResult[Object])],
+			jsval_l: List[JsValue],
+			nameToVal_m: Map[String, JsValue],
+			acc_r: List[Object]
+		): RsResult[List[Object]] = {
+			spec_l match {
+				case Nil => RsSuccess(acc_r.reverse)
+				case spec :: spec_l_~ =>
+					val (name, required, fn) = spec
+					// Check whether named parameter is provided
+					nameToVal_m.get(name) match {
+						case Some(jsval) =>
+							val nameToVal_m_~ = nameToVal_m - name
+							fn(name, jsval).flatMap(o => doit(spec_l_~, jsval_l, nameToVal_m_~, (if (required) o else Some(o)) :: acc_r))
+						case None =>
+							jsval_l match {
+								// Use unnamed parameter
+								case jsval :: jsval_l_~ =>
+									fn(name, jsval).flatMap(o => doit(spec_l_~, jsval_l_~, nameToVal_m, (if (required) o else Some(o)) :: acc_r))
+								// Else parameter value is blank
+								case Nil =>
+									if (required) RsError(s"missing argument for `$name`")
+									else doit(spec_l_~, jsval_l, nameToVal_m, None :: acc_r)
+							}
+					}
+			}
+		}
+
+		val jsval_l = nameVal_l.collect({case (None, jsval) => jsval})
+		val nameToVal2_l: List[(String, JsValue)] = nameVal_l.collect({case (Some(name), jsval) => (name, jsval)})
+		val nameToVals_m: Map[String, List[(String, JsValue)]] = nameToVal2_l.groupBy(_._1)
+		val nameToVals_l: List[(String, List[JsValue])] = nameToVals_m.toList.map(pair => pair._1 -> pair._2.map(_._2))
+		
 		for {
-			spec <- loadJsonProtocol_DistributeSub(fields)
-		} {
+			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
+				val (name, jsval_l) = pair
+				jsval_l match {
+					case jsval :: Nil => RsSuccess((name, jsval))
+					case _ => RsError(s"too many values supplied for argument `$name`")
+				}
+			}))
+			nameToVal_m = nameToVal3_l.toMap
+			l <- doit(argSpec_l, jsval_l, nameToVal_m, Nil)
+		} yield l
+	}
+	
+	private def loadJsonProtocol_ProtocolCommand_getArgList(
+		name_l: List[String],
+		nameVal_l: List[(Option[String], JsValue)]
+	): RsResult[List[Option[JsValue]]] = {
+		
+		def doit(
+			name_l: List[String],
+			jsval_l: List[JsValue],
+			nameToVal_m: Map[String, JsValue],
+			acc_r: List[Option[JsValue]]
+		): RsResult[List[Option[JsValue]]] = {
+			name_l match {
+				case Nil => RsSuccess(acc_r.reverse)
+				case name :: name_l_~ =>
+					// Check whether named parameter is provided
+					nameToVal_m.get(name) match {
+						case Some(jsval) =>
+							val nameToVal_m_~ = nameToVal_m - name
+							doit(name_l_~, jsval_l, nameToVal_m_~, Some(jsval) :: acc_r)
+						case None =>
+							jsval_l match {
+								// Use unnamed parameter
+								case jsval :: jsval_l_~ =>
+									doit(name_l_~, jsval_l_~, nameToVal_m, Some(jsval) :: acc_r)
+								// Else parameter value is blank
+								case Nil =>
+									doit(name_l_~, jsval_l, nameToVal_m, None :: acc_r)
+							}
+					}
+			}
+		}
+
+		val nameToIndex_m = name_l.zipWithIndex.toMap
+		// TODO: check for duplicate names when arguments are passed by name
+		val jsval_l = nameVal_l.collect({case (None, jsval) => jsval})
+		val nameToVal2_l: List[(String, JsValue)] = nameVal_l.collect({case (Some(name), jsval) => (name, jsval)})
+		val nameToVals_m: Map[String, List[(String, JsValue)]] = nameToVal2_l.groupBy(_._1)
+		val nameToVals_l: List[(String, List[JsValue])] = nameToVals_m.toList.map(pair => pair._1 -> pair._2.map(_._2))
+		
+		for {
+			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
+				val (name, jsval_l) = pair
+				jsval_l match {
+					case jsval :: Nil => RsSuccess((name, jsval))
+					case _ => RsError(s"too many values supplied for argument `$name`")
+				}
+			}))
+			nameToVal_m = nameToVal3_l.toMap
+			l <- doit(name_l, jsval_l, nameToVal_m, Nil)
+		} yield l
+	}
+	
+	private def loadJsonProtocol_Distribute(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[Unit] = {
+		for {
+			spec <- loadJsonProtocol_DistributeSub(nameToVal_l)
+			labware_l = (spec.source_l ++ spec.destination_l).map(_._1).distinct
+			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
+		} yield {
 			val agentIdent = f"?a$nvar%04d"
 			val deviceIdent = f"?d$nvar%04d"
-			val labware_l: List[Labware] = (spec.source_l ++ spec.destination_l).map(_._1).distinct
-			val labwareIdent_l: List[String] = labware_l.map(eb.names)
 			val n = labware_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = spec
@@ -371,50 +629,54 @@ class Protocol {
 		}
 	}
 	
-	private def loadJsonProtocol_DistributeSub(fields: Map[String, JsValue]): RsResult[PipetteSpec] = {
-		val source_? = fields.get("source") match {
-			case Some(JsString(sourceIdent)) =>
-				eb.lookupLiquidSource(sourceIdent)
-			case _ => RsError("must supply a `source` string")
-		}
-		val destination_? = fields.get("destination") match {
-			case Some(JsString(destinationIdent)) =>
-				eb.lookupLiquidSource(destinationIdent)
-			case _ => RsError("must supply a `destination` string")
-		}
-		val volume_? = fields.get("volume") match {
-			case Some(JsString(volume_s)) =>
-				LiquidVolumeParser.parse(volume_s)
-			case _ => RsError("must supply a `volume` string")
-		}
-		val pipettePolicy_? = fields.get("pipettePolicy") match {
-			case Some(JsString(pipettePolicy)) => Some(pipettePolicy)
-			case _ => None
-		}
-		val cleanBefore_? : Option[CleanIntensity.Value] = fields.get("cleanBefore") match {
-			case Some(JsString(s)) => Some(CleanIntensity.withName(s))
-			case _ => None
-		}
-		val cleanAfter_? : Option[CleanIntensity.Value] = fields.get("cleanAfter") match {
-			case Some(JsString(s)) => Some(CleanIntensity.withName(s))
-			case _ => None
-		}
-		val tipModel_?? : RsResult[Option[TipModel]] = fields.get("tipModel") match {
-			case Some(JsString(key)) => eb.getEntityAs[TipModel](key).map(Some(_))
-			case _ => RsSuccess(None)
-		}
-		//println(s"source: ${source_?}, dest: ${destination_?}, vol: ${volume_?}")
-		// produces a Relation such as: distribute2 [agent] [device] [spec] [labware1] [labware2]
-		// The script builder later lookups up the spec in the protocol.
-		// That should return an object that accepts the two labware objects.
+	private def loadJsonProtocol_DistributeSub(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[PipetteSpec] = {
+		val argSpec_l = List(
+			("source", true, jsvalToString _),
+			("destination", true, jsvalToString _),
+			("volume", true, jsvalToString _),
+			("pipettePolicy", false, jsvalToString _),
+			("dispensePosition", false, jsvalToString _),
+			("cleanBefore", false, jsvalToString _),
+			("cleanAfter", false, jsvalToString _),
+			("tipModel", false, jsvalToString _)
+		)
 		for {
-			source <- source_?
-			destination <- destination_?
-			volume <- volume_?
-			tipModel_? <- tipModel_??
-		} yield {
-			PipetteSpec(source, destination, volume, pipettePolicy_?, cleanBefore_?, cleanAfter_?, tipModel_?)
-		}
+			arg_l <- parseArgList(argSpec_l, nameToVal_l)
+			spec <- arg_l match {
+				case List(
+					srcRef: String,
+					dstRef: String,
+					volumeRef: String,
+					pipettePolicyRef_? : Option[String],
+					dispensePosition_? : Option[String],
+					cleanBeforeRef_? : Option[String],
+					cleanAfterRef_? : Option[String],
+					tipModelRef_? : Option[String]
+				) =>
+					for {
+						src <- eb.lookupLiquidSource(srcRef)
+						dst <- eb.lookupLiquidSource(dstRef)
+						volume <- LiquidVolumeParser.parse(volumeRef)
+						tipModel_? <- tipModelRef_? match {
+							case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
+							case _ => RsSuccess(None)
+						}
+					} yield {
+						val cleanBefore_? : Option[CleanIntensity.Value] = cleanBeforeRef_? match {
+							case Some(s) => Some(CleanIntensity.withName(s))
+							case _ => None
+						}
+						val cleanAfter_? : Option[CleanIntensity.Value] = cleanAfterRef_? match {
+							case Some(s) => Some(CleanIntensity.withName(s))
+							case _ => None
+						}
+						PipetteSpec(src, dst, volume, pipettePolicyRef_?, cleanBefore_?, cleanAfter_?, tipModel_?)
+					}
+				case _ => RsError(s"bad arguments to `distribute`: ${arg_l}")
+			}
+		} yield spec
 	}
 	
 	private def x(fields: Map[String, JsValue], id: String): String =
@@ -656,7 +918,7 @@ class Protocol {
 					for (vector <- vector_l) {
 						val transporter = roma_m(vector.iRoma)
 						val spec = transporterSpec_m(vector.sClass)
-						eb.addRel(Rel("transporter-can", List(eb.names(transporter), eb.names(site), eb.names(spec))))
+						eb.addRel(Rel("transporter-can", List(eb.entityToIdent_m(transporter), eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
 					}
 				}
 			}
