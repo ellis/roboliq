@@ -141,7 +141,7 @@ class Protocol {
 							//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
 							//logger.debug("eb.aliases: "+eb.aliases)
 							val model = eb.getEntityAs[PlateModel](modelRef).toOption.get
-							val plate = new Plate(key, Some(name))
+							val plate = new Plate(key)
 							eb.addLabware(plate, name)
 							eb.setModel(plate, model)
 							state0.labware_model_m(plate) = model

@@ -40,6 +40,7 @@ For 0.1 release:
 - [x] Redirect debug output to log file
 - [x] WellIdentParser: possibly consider A01-A12 + B06|H06
 - [x] alan01: why didn't it wash after the last dispense?
+- [x] Protocol: add 'labware' field
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
