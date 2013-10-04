@@ -1,3 +1,7 @@
+language: 1
+
+benchLayout: standard
+
 labware:
   sourcePlate1: Deep Well Plate
   pcrPlate1: Thermocycler Plate
@@ -7,6 +11,8 @@ reagents:
   substance2: sourcePlate1(A02|H02)
 
 sources:
+  substance1:
+    wells: sourcePlate1(A01)@100ul
   - wells: XXX(XX)
     liquidType: DNA
    - [liquidType, XXX(XX), DNA]
@@ -19,6 +25,7 @@ protocol:
 #  - distribute substance1 $wellGroup1 20ul
   - seal pcrPlate1
   - shake pcrPlate1 5min 800rpm
+  - shake: pcrPlate1, 5min, 800rpm
   - peel pcrPlate1
   - distribute substance2 pcrPlate1(A03|H05) 80ul dispensePosition=air
   - seal pcrPlate1

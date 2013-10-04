@@ -11,6 +11,7 @@
 * Multi-script protocols for allowing multiple labwares to be placed on a single site (at different times)
 * FUTURE: Stackable labware
 * FUTURE: Partial scripts and script continuation to allow for dynamic feedback
+* FUTURE: Probabilistic state
 
 ## Disadvantages
 

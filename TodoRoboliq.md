@@ -2,15 +2,22 @@ Started 2013-07-25
 
 For CADMAD Venice meeting:
 
+- [ ] Protocol: add 'reagents' field with wells, viscosity, liquid/dna/cells, pipettePolicy
+- [ ] Make sure protocol can run with unknown volumes in source wells
+- [ ] dispense: Let user specify reagent as source
+- [ ] mixture: implement mixture lists for pipetting mixtures
+- [ ] PcrCommand: create an abstract PCR command which is easily portable
+- [ ] Protocol: add 'benchLayout' field
+- [ ] Protocol: add 'language' field for version of language
 - [ ] shaker specs... should let them be specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
 - [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
 - [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
-- [ ] PcrCommand: create an abstract PCR command which is easily portable
 - [ ] Evoware: Read device INI files?
 - [ ] Evoware: Read liquid class files?
 
 For 0.1 release:
 
+- [ ] Mix command
 - [ ] Pipetting: once pipetting is done, move pipetters to home position
 - [ ] Protocol: check when carrier sites overlap, and only use one of them, selected by user in config file
 - [ ] Get tubes working
@@ -20,7 +27,7 @@ For 0.1 release:
 - [ ] ProtocolCommand: convert protocol command json to case classes
 - [ ] Entities should have three names (protocol name, database name, jshop name), a label for messages, and a long description.
 - [ ] WellIdentParser: rename to WellSelectionParser
-- [ ] WellIdentParser: possibly consider A01-*12 + B06|*7
+- [ ] WellIdentParser: possibly consider A01-*12 + B06|*7 + A03*8
 - [ ] Thoroughly test pipetting methods
 - [ ] Make sure it runs on windows and finds the default Evoware directories
 - [ ] Clean up source directory, removing everything that's not used
@@ -215,6 +222,7 @@ Details for later:
 - [ ] function from Aliquot + events => Aliquot
 - [ ] Extend JshopMain, Protocol, EvowareClientScriptBuilder to handle a pipette command
 - [ ] WashProgram: config for specifying wash programs; see also TipCleanEvent
+- [ ] get multi-pipetting working again
 - [x] JshopTranslator: distribute: generate dispense command
 - [x] adapt VesselState, VesselContents for new system
 - [x] TipWell.equidistant3: figure out where to calculate row/col from platemodel and well index
