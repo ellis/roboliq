@@ -1,26 +1,32 @@
 Started 2013-07-25
 
-For 0.1 release:
+For CADMAD Venice meeting:
 
 - [ ] alan01: why didn't it wash after the last dispense?
+- [ ] shaker specs... should let them be specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
+- [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
+- [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
+- [ ] PcrCommand: create an abstract PCR command which is easily portable
+- [ ] Evoware: Read device INI files
+- [ ] Evoware: Read liquid class files?
+
+For 0.1 release:
+
 - [ ] Pipetting: once pipetting is done, move pipetters to home position
 - [ ] Protocol: check when carrier sites overlap, and only use one of them, selected by user in config file
 - [ ] Get tubes working
 - [ ] Make protocol from Alan's email using tubes
-- [ ] shaker specs... should let them be specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
-- [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
 - [ ] Fix site index to be grid+site+carrier
-- [ ] Make sure it runs on windows and finds the default Evoware directories
 - [ ] Protocol: create a "variables" section for customizing the script
 - [ ] ProtocolCommand: convert protocol command json to case classes
-- [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
-- [ ] PcrCommand: create an abstract PCR command which is easily portable
+- [ ] Entities should have three names (protocol name, database name, jshop name), a label for messages, and a long description.
+- [ ] WellIdentParser: rename to WellSelectionParser
+- [ ] WellIdentParser: possibly consider A01-*12 + B06|*7
+- [ ] Thoroughly test pipetting methods
+- [ ] Make sure it runs on windows and finds the default Evoware directories
 - [ ] Clean up source directory, removing everything that's not used
-- [ ] Redirect debug output to log file
 - [ ] Create Readme file
 - [ ] Create documentation
-- [ ] Entities should have three names (protocol name, database name, jshop name), a label for messages, and a long description.
-- [ ] WellIdentParser: possibly consider A01-A12 + B06|H06 and A01-*12 + B06|*7
 - [x] Protocol: YAML to JSON converter, to allow protocols to be written in YAML
 - [x] ConfigBean: add "agents" field for configuring paths to evoware and other configuration files
 - [x] Add command line interface to software (via ScOpt)
@@ -32,6 +38,8 @@ For 0.1 release:
 - [x] alan01: pipetting tries to use all 8 tips instead of only the 4 big ones
 - [x] alan01: change peeling file to "blue" from "red"
 - [x] Make protocol from Alan's email (but with DWP instead of tubes)
+- [x] Redirect debug output to log file
+- [x] WellIdentParser: possibly consider A01-A12 + B06|H06
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;

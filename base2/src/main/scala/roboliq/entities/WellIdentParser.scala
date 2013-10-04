@@ -51,19 +51,21 @@ private object WellIdentParser0 extends JavaTokenParsers {
 		case s => WellIdentOne(RowCol(s.charAt(0) - 'A', s.drop(1).toInt - 1))
 	}
 	
-	val well_v_well: Parser[WellIdentVertical] = well ~ "d" ~ well ^^ {
+	val well_v_well: Parser[WellIdentVertical] = well ~ ("d" | "|") ~ well ^^ {
 		case w0 ~ _ ~ w1 => WellIdentVertical(w0.rc, w1.rc)
 	}
 	
-	val well_v_row: Parser[WellIdentVertical]  = well ~ "d" ~ row ^^ {
+	// TODO: should I remove this?
+	val well_v_row: Parser[WellIdentVertical]  = well ~ ("d" | "|") ~ row ^^ {
 		case w0 ~ _ ~ row1 => WellIdentVertical(w0.rc, RowCol(row1, w0.rc.col))
 	}
 	
-	val well_h_well = well ~ "r" ~ well ^^ {
+	val well_h_well = well ~ ("r" | "-") ~ well ^^ {
 		case w0 ~ _ ~ w1 => WellIdentHorizontal(w0.rc, w1.rc)
 	}
 
-	val well_h_col  = well ~ "r" ~ col ^^ {
+	// TODO: should I remove this?
+	val well_h_col  = well ~ ("r" | "-") ~ col ^^ {
 		case w0 ~ _ ~ col1 => WellIdentHorizontal(w0.rc, RowCol(w0.rc.row, col1))
 	}
 	

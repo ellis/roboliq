@@ -24,7 +24,7 @@ wellContents:
 protocol:
   - command: distribute
     source: sourcePlate1(A01)
-    destination: pcrPlate1(A01 r A12 + B06 d H06)
+    destination: pcrPlate1(A01-A12 + B06|H06)
     volume: 20ul
     pipettePolicy: Roboliq_Water_Wet_1000
   - command: seal
