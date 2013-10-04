@@ -214,18 +214,20 @@ object JshopTranslator {
 		val device = new PipetteDevice
 		val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]
 		
+		val state = state0.toMutable
+		
 		for {
 			// sources for the liquid we want to transfer
-			src_l <- RsResult.toResultOfList(spec.source_l.map(state0.getWell))
+			src_l <- RsResult.toResultOfList(spec.source_l.map(state.getWell))
 			
 			// Create list of items for TransferPlanner
 			item_l <- RsResult.toResultOfList(spec.destination_l.map(dstKey => {
-				state0.getWell(dstKey).map(dst => Item(src_l, dst, spec.volume))
+				state.getWell(dstKey).map(dst => Item(src_l, dst, spec.volume))
 			}))
 			
 			// Map of item to its source mixture
 			itemToMixture_l <- RsResult.toResultOfList(item_l.map(item => {
-				state0.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs("no liquid specified in source well")
+				state.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs("no liquid specified in source well")
 			}))
 			itemToMixture_m = itemToMixture_l.toMap
 			// TODO: need to track liquids in wells as we go along in case
@@ -274,21 +276,44 @@ object JshopTranslator {
 			val aspdis_l = batch_l.flatMap(batch => {
 				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanBefore_?, None, None, None)
 				val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {
-					val mixtureSrc = state0.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
-					val mixtureDst = state0.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
-					val tipState = state0.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+					val mixtureSrc = state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
+					val mixtureDst = state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
+					val tipState = state.getTipState(item.tip)
 					val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, mixtureSrc, tipState)
 					val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverridesAsp, mixtureSrc, mixtureDst, tipState)
 					val washSpec = washSpecAsp + washSpecDis
+					
+					// Update tip state after refresh
+					val event = TipCleanEvent(item.tip, washSpec.washIntensity)
+					val tipState_~ = new TipCleanEventHandler().handleEvent(tipState, event)
+					state.tip_state_m(item.tip) = tipState_~.toOption.get
+					logger.debug(s"refresh tipState: ${tipState} -> ${washSpec.washIntensity} -> ${tipState_~}")
+					
 					(item.tip, washSpec.washIntensity, Some(tipModel))
 				}))
 				val twvpAsp0_l = batch.item_l.map(item => {
+					// Update tip state after aspiration
+					val mixtureSrc = state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
+					val event = TipAspirateEvent(item.tip, item.src, mixtureSrc, item.volume)
+					val tipState = state.getTipState(item.tip)
+					val tipState_~ = new TipAspirateEventHandler().handleEvent(tipState, event)
+					state.tip_state_m(item.tip) = tipState_~.toOption.get
+					logger.debug(s"asp tipState: ${tipState} -> ${tipState_~}")
+					
 					TipWellVolumePolicy(item.tip, item.src, item.volume, pipettePolicy)
 				})
 				val twvpAsp_ll = device.groupSpirateItems(twvpAsp0_l, state0)
 				val asp_l = twvpAsp_ll.map(twvp_l => PipetterAspirate(twvp_l))
 
 				val twvpDis0_l = batch.item_l.map(item => {
+					// Update tip state after dispense
+					val mixtureDst = state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
+					val event = TipDispenseEvent(item.tip, mixtureDst, item.volume, pipettePolicy.pos)
+					val tipState = state.getTipState(item.tip)
+					val tipState_~ = new TipDispenseEventHandler().handleEvent(tipState, event)
+					state.tip_state_m(item.tip) = tipState_~.toOption.get
+					logger.debug(s"dis tipState: ${tipState} -> ${tipState_~}")
+					
 					TipWellVolumePolicy(item.tip, item.dst, item.volume, pipettePolicy)
 				})
 				val twvpDis_ll = device.groupSpirateItems(twvpDis0_l, state0)
@@ -298,9 +323,9 @@ object JshopTranslator {
 			})
 
 			val refreshAfter_l = {
-				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanBefore_?, None, None, None)
+				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanAfter_?, None, None, None)
 				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
-					val tipState = state0.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+					val tipState = state.getTipState(tip)
 					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, Mixture.empty, tipState)
 					(tip, washSpec.washIntensity, None)
 				})) :: Nil

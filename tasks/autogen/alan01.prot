@@ -1,10 +1,10 @@
 substances:
   - name: substance1
     kind: Liquid
-    tipCleanPolicy: ThoroughNone
+    tipCleanPolicy: Thorough
   - name: substance2
     kind: Liquid
-    tipCleanPolicy: ThoroughNone
+    tipCleanPolicy: Thorough
 
 plates:
   - { "name": "sourcePlate1", "model": "D-BSSE 96 Well DWP", "location": "offsite"}

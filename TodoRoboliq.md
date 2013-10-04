@@ -2,7 +2,6 @@ Started 2013-07-25
 
 For CADMAD Venice meeting:
 
-- [ ] alan01: why didn't it wash after the last dispense?
 - [ ] shaker specs... should let them be specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
 - [ ] EvowareClientScriptBuilder.pipetterTipsRefresh: let it be configured for BSSE or WIZ in config file
 - [ ] Make the whole command processing chain pluggable again: protocol commands and handlers, internal commands and handlers
@@ -40,6 +39,7 @@ For 0.1 release:
 - [x] Make protocol from Alan's email (but with DWP instead of tubes)
 - [x] Redirect debug output to log file
 - [x] WellIdentParser: possibly consider A01-A12 + B06|H06
+- [x] alan01: why didn't it wash after the last dispense?
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;

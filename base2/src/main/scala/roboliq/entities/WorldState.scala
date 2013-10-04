@@ -122,6 +122,16 @@ class WorldStateBuilder {
 	def getWell(key: (Labware, RowCol)): RsResult[Well] = {
 		labwareRowCol_well_m.get(key).asRs(s"well not found for ${key._1.key}(${key._2})")
 	}
+	
+	def getTipState(tip: Tip): TipState = {
+		tip_state_m.get(tip) match {
+			case Some(tipState) => tipState
+			case None =>
+				val tipState = TipState.createEmpty(tip)
+				tip_state_m(tip) = tipState
+				tipState
+		}
+	}
 
 	def toImmutable = {
 		WorldState(

@@ -58,7 +58,11 @@ case class Aliquot(
 		for {
 			distribution_~ <- distribution.add(that.distribution)
 		} yield {
-			Aliquot(Mixture(Right(List(this, that))), distribution_~)
+			(this.distribution.isEmpty, that.distribution.isEmpty) match {
+				case (true, _) => that
+				case (_, true) => this
+				case _ => Aliquot(Mixture(Right(List(this, that))), distribution_~)
+			}
 		}
 	}
 	
@@ -69,6 +73,15 @@ case class Aliquot(
 			Aliquot(mixture, amount_~)
 		}
 	}
+	
+	def toShortString: String = {
+		if (distribution.isEmpty) "EMPTY"
+		else {
+			mixture.toShortString+"@"+distribution.toShortString
+		}
+	}
+	
+	override def toString = toShortString
 }
 
 object Aliquot {
@@ -93,6 +106,14 @@ case class Mixture(
 	val contaminants: Set[String] = source match {
 		case Left(substance) => substance.contaminants
 		case Right(aliquot_l) => aliquot_l.flatMap(_.mixture.contaminants).toSet
+	}
+	
+	def toShortString: String = {
+		source match {
+			case Left(substance) => substance.label.getOrElse(substance.key)
+			case Right(Nil) => "EMPTY"
+			case Right(aliquot_l) => aliquot_l.map(_.toShortString).mkString("(", "+", ")")
+		}
 	}
 }
 
@@ -129,6 +150,13 @@ class WellHistory(
 
 object SubstanceUnits extends Enumeration {
 	val None, Liter, Mol, Gram = Value
+	
+	def toShortString(units: Value): String = units match {
+		case None => ""
+		case Liter => "l"
+		case Mol => "mol"
+		case Gram => "g"
+	}
 }
 
 case class Amount(units: SubstanceUnits.Value, amount: BigDecimal)

@@ -49,7 +49,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		agentIdent: String,
 		command: Command
 	): RsResult[WorldState] = {
-		logger.trace(s"addCommand: $agentIdent, $command")
+		logger.debug(s"addCommand: $agentIdent, $command")
 		val result_? = {
 			if (agentIdent == "user")
 				addCommandUser(protocol, state0, agentIdent, command)
@@ -579,7 +579,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 
 		val iGrid = config.table.mapCarrierToGrid(siteE.carrier)
 		val sPlateMask = encodeWells(labwareModelE.nRows, labwareModelE.nCols, well_li)
-		logger.debug("well_li: "+well_li)
+		//logger.debug("well_li: "+well_li)
 
 		for {
 			_ <- RsResult.zero

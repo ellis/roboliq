@@ -9,6 +9,7 @@ sealed trait Distribution {
 	val units: SubstanceUnits.Value
 	def isEmpty: Boolean
 	def bestGuess: Amount
+	def toShortString: String
 	
 	def toVolume: RsResult[LiquidVolume] = {
 		for {
@@ -73,28 +74,37 @@ case class Distribution_Empty() extends Distribution {
 	val units = SubstanceUnits.None
 	def isEmpty = true
 	def bestGuess = Amount.empty
+	def toShortString: String = "0"
 }
 
 case class Distribution_Singular(units: SubstanceUnits.Value, value: BigDecimal) extends Distribution {
 	def isEmpty = value == 0
 	def bestGuess = Amount(units, value)
+	def toShortString: String = value.toString + SubstanceUnits.toShortString(units)
 }
 
 case class Distribution_Uniform(units: SubstanceUnits.Value, min: BigDecimal, max: BigDecimal) extends Distribution {
 	def isEmpty = (min == 0 && max == 0)
 	def bestGuess = Amount(units, (min + max) / 2)
+	def toShortString: String = s"UNI(${min.toString}${SubstanceUnits.toShortString(units)},${min.toString}${SubstanceUnits.toShortString(units)})"
 }
+
 case class Distribution_Normal(units: SubstanceUnits.Value, mean: BigDecimal, variance: BigDecimal) extends Distribution {
 	def isEmpty = (mean == 0 && variance == 0)
 	def bestGuess = Amount(units, mean)
+	def toShortString: String = s"NORM(${mean.toString}${SubstanceUnits.toShortString(units)},${variance.toString}${SubstanceUnits.toShortString(units)}^2)"
 }
 
 case class Distribution_Histogram(units: SubstanceUnits.Value, data: List[(BigDecimal, BigDecimal)]) extends Distribution {
 	def isEmpty = data.isEmpty
 	def bestGuess = if (data.isEmpty) Amount.empty else Amount(units, data.head._1)
+	def toShortString: String = s"HIST(...)"
 }
 
 case class Distribution_Sum(units: SubstanceUnits.Value, summands: List[Distribution]) extends Distribution {
 	def isEmpty = summands.isEmpty
 	def bestGuess = if (summands.isEmpty) Amount.empty else Amount(units, summands.filter(_.units == units).foldLeft(BigDecimal(0)){(acc, dist) => acc + dist.bestGuess.amount})
+	def toShortString: String =
+		if (summands.isEmpty) "0"
+		else summands.map(_.toShortString).mkString("(", "+", ")")
 }
