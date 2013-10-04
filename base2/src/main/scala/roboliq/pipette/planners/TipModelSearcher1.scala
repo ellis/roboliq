@@ -8,9 +8,13 @@ import scala.collection.mutable.HashMap
 import ch.ethz.reactivesim.RsResult
 import ch.ethz.reactivesim.RsError
 import ch.ethz.reactivesim.RsSuccess
+import grizzled.slf4j.Logger
 
 
 class TipModelSearcher1[Item, Mixture, TipModel <: AnyRef] {
+	
+	private val logger = Logger[this.type]
+
 	case class MyState(l: List[(Item, TipModel)], rest: List[Item]) {
 		def +(action: MyAction): MyState = MyState((rest.head, action.tipModel) :: l, rest.tail)
 		override def toString = l.reverse.map(_._2).mkString(",")
@@ -132,13 +136,13 @@ class TipModelSearcher1[Item, Mixture, TipModel <: AnyRef] {
 			def compareNodes(a: MyNode, b: MyNode): Int = b.heuristic - a.heuristic
 		}
 		val debug = new DebugSpec(printFrontier = false, printExpanded = true)
-		println("A*:")
+		logger.debug("TipModelSearcher A*1:")
 		
 		search.run(problem, frontier, debug) match {
 			case None => RsError("Tip models could not be assigned to items")
 			case Some(node) =>
-				println("chain:", node)
-				node.printChain
+				logger.debug("TipModelSearcher chain1: "+node)
+				node.getChainString.foreach(logger.debug(_))
 				return RsSuccess(node.state.l.toMap)
 		}
 	}

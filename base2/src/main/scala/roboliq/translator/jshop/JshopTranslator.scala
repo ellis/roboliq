@@ -1,5 +1,7 @@
 package roboliq.translator.jshop
 
+import scala.collection.immutable.SortedSet
+import grizzled.slf4j.Logger
 import roboliq.core._
 import roboliq.entities._
 import roboliq.commands._
@@ -9,13 +11,14 @@ import roboliq.input.PipetteSpec
 import roboliq.pipette.planners.TransferPlanner
 import roboliq.pipette.planners.PipetteDevice
 import roboliq.pipette.planners.TipModelSearcher1
-import scala.collection.immutable.SortedSet
 import roboliq.commands.PipetterAspirate
 import roboliq.input.PipetteSpecList
 import roboliq.pipette.planners.PipetteHelper
 import roboliq.entities.TipHandlingOverrides
 
 object JshopTranslator {
+	
+	private val logger = Logger[this.type]
 	
 	def translate(
 		protocol: Protocol,
@@ -24,7 +27,7 @@ object JshopTranslator {
 		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
 		val l = solution.split("\r?\n").toList
 		val state0 = protocol.state0.toImmutable
-		println(s"l: $l")
+		logger.debug(s"l: $l")
 		def translateStep(line_l: List[String], state: WorldState): RsResult[Unit] = {
 			line_l match {
 				case Nil => RsSuccess(())
@@ -267,7 +270,7 @@ object JshopTranslator {
 				}
 			}
 			// use the Batch list to create clean, aspirate, dispense commands
-			println("batch_l: "+batch_l)
+			logger.debug("batch_l: "+batch_l)
 			val aspdis_l = batch_l.flatMap(batch => {
 				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanBefore_?, None, None, None)
 				val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {

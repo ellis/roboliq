@@ -49,7 +49,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		agentIdent: String,
 		command: Command
 	): RsResult[WorldState] = {
-		println(s"addCommand: $agentIdent, $command")
+		logger.trace(s"addCommand: $agentIdent, $command")
 		val result_? = {
 			if (agentIdent == "user")
 				addCommandUser(protocol, state0, agentIdent, command)
@@ -388,7 +388,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	def saveScripts(basename: String): RsResult[Unit] = {
 		for ((script, index) <- script_l.zipWithIndex) {
 			val filename = basename + (if (scriptIndex <= 1) "" else f"_$index%02d") + ".esc"
-			println("filename: "+filename)
+			logger.debug("filename: "+filename)
 			saveWithHeader(script, filename)
 		}
 		RsSuccess(())
@@ -579,7 +579,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 
 		val iGrid = config.table.mapCarrierToGrid(siteE.carrier)
 		val sPlateMask = encodeWells(labwareModelE.nRows, labwareModelE.nCols, well_li)
-		println("well_li: "+well_li)
+		logger.debug("well_li: "+well_li)
 
 		for {
 			_ <- RsResult.zero
@@ -708,7 +708,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				
 					// If tip state has no clean state, do a pre-wash
 					val prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
-					println("prewash_b:", prewash_b, tipGet_m > 0, tipState_l.map(s => (s.conf.index, s.cleanDegreePrev)))
+					logger.debug(("prewash_b:", prewash_b, tipGet_m > 0, tipState_l.map(s => (s.conf.index, s.cleanDegreePrev))))
 					
 					val token_ll = List[List[L0C_Command]](
 						if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
@@ -740,8 +740,8 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					}
 
 					val x = token_ll.flatten.map(token => TranslationItem(token, Nil))
-					println("x: "+x)
-					println()
+					logger.debug("x: "+x)
+					logger.debug()
 					x
 			}
 		}

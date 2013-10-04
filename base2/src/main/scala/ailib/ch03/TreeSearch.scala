@@ -34,7 +34,7 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 		else {
 			val node = frontier.removeChoice()
 			if (debug.printExpanded) {
-				logger.info("E: "+node.state)
+				logger.debug("E: "+node.state)
 			}
 			if (problem.goalTest(node.state)) {
 				Some(node)
@@ -43,7 +43,7 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 				for (action <- problem.actions(node.state)) {
 					val child = problem.childNode(node, action)
 					if (debug.printFrontier) {
-						logger.info("F: "+node.state)
+						logger.debug("F: "+node.state)
 					}
 					frontier.add(child)
 				}

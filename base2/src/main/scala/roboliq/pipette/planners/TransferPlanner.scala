@@ -3,6 +3,7 @@ package roboliq.pipette.planners
 import scala.collection.immutable.SortedSet
 import scalaz._
 import scalaz.Scalaz._
+import grizzled.slf4j.Logger
 import ailib.ch03
 import ailib.ch03._
 import roboliq.core._
@@ -24,6 +25,8 @@ case class Group(
  * - tip to assign to an item
  */
 object TransferPlanner {
+	
+	private val logger = Logger[this.type]
 
 	case class Item(
 		src_l: List[Well],
@@ -184,15 +187,15 @@ object TransferPlanner {
 			def compareNodes(a: MyNode, b: MyNode): Int = b.heuristic - a.heuristic 
 		}
 		val debug = new DebugSpec(printFrontier = true, printExpanded = true)
-		println("A*:")
+		logger.debug("TransferPlanner A*:")
 		
 		search.run(problem, frontier, debug) match {
 			case None =>
 				RsError("Tips could not be assigned to items")
 			case Some(node) =>
 				val chain_l = getChain(node)
-				println("chain:", chain_l.size, chain_l)
-				node.printChain
+				logger.debug("chain3:", chain_l.size, chain_l)
+				node.getChainString.foreach(logger.debug(_))
 				// drop the root node, which has no interesting information
 				val batch_l = chain_l.map(node => Batch(node.action.item_l))
 				RsSuccess(batch_l)

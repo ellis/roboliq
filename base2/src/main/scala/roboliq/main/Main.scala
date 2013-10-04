@@ -46,7 +46,7 @@ object Main extends App {
 		val protocol = new Protocol
 		val x = for {
 			configBean <- loadConfigBean(opt.configFile.getPath())
-			_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
+			//_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
 			_ <- protocol.loadConfigBean(configBean)
 
 			jsobj <- loadProtocolJson(opt.protocolFile)
@@ -64,13 +64,13 @@ object Main extends App {
 			plan = plan_l.mkString("\n")
 			
 			result <- JshopTranslator.translate(protocol, plan)
-			_ = println("result: " + result)
+			//_ = println("result: " + result)
 		} yield {
 			val builder_l = protocol.agentToBuilder_m.values.toSet
 			for (scriptBuilder <- builder_l) {
 				val basename2 = new File(dir, basename + "_" + scriptBuilder.agentName).getPath
-				println("basename2: " + basename2)
-				println("scriptBuilder: " + scriptBuilder)
+				println("basename: " + basename2)
+				//println("scriptBuilder: " + scriptBuilder)
 				scriptBuilder.saveScripts(basename2)
 			}
 		}
@@ -115,7 +115,7 @@ object Main extends App {
 		val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
 		val gson = new Gson
 		val s_~ = gson.toJson(o)
-		println("gson: " + s_~)
+		//println("gson: " + s_~)
 		RsSuccess(s_~)
 	}
 	

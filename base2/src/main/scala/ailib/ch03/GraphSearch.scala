@@ -27,7 +27,7 @@ class GraphSearch[State, Action, Node <: ch03.Node[State]] {
 		else {
 			val node = frontier.removeChoice()
 			if (debug.printExpanded) {
-				logger.info("E: "+node)
+				logger.debug("E: "+node)
 			}
 			if (problem.goalTest(node.state)) {
 				Some(node)
@@ -46,7 +46,7 @@ class GraphSearch[State, Action, Node <: ch03.Node[State]] {
 	
 	private def addToFrontier(frontier: Frontier, seen: HashSet[State], debug: DebugSpec, node: Node) {
 		if (debug.printFrontier) {
-			logger.info("F: "+node)
+			logger.debug("F: "+node)
 		}
 		frontier.add(node)
 		seen += node.state
@@ -74,7 +74,7 @@ class HeuristicGraphSearch[State, Action, T, Node <: ch03.Node[State] with NodeH
 		else {
 			val node = frontier.removeChoice()
 			if (debug.printExpanded) {
-				logger.info("E: "+node)
+				logger.debug("E: "+node)
 			}
 			if (problem.goalTest(node.state)) {
 				Some(node)
@@ -97,7 +97,7 @@ class HeuristicGraphSearch[State, Action, T, Node <: ch03.Node[State] with NodeH
 	
 	private def addToFrontier(frontier: Frontier, seen: HashMap[State, Node], debug: DebugSpec, node: Node) {
 		if (debug.printFrontier) {
-			logger.info("F: "+node)
+			logger.debug("F: "+node)
 		}
 		frontier.add(node)
 		seen(node.state) = node

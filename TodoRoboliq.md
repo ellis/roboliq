@@ -2,11 +2,9 @@ Started 2013-07-25
 
 For 0.1 release:
 
-- [ ] alan01: pipetting tries to use all 8 tips instead of only the 4 big ones
 - [ ] alan01: why didn't it wash after the last dispense?
-- [ ] alan01: change peeling file to "blue" from "red"
+- [ ] Pipetting: once pipetting is done, move pipetters to home position
 - [ ] Protocol: check when carrier sites overlap, and only use one of them, selected by user in config file
-- [ ] Make protocol from Alan's email (but with DWP instead of tubes)
 - [ ] Get tubes working
 - [ ] Make protocol from Alan's email using tubes
 - [ ] shaker specs... should let them be specified beforehand OR let the user specify them inline?  In general, a shaker spec should work with any shaker, but sometimes it would make sense to require a specific shaker 
@@ -31,6 +29,9 @@ For 0.1 release:
 - [x] alan01: distribute.destination: make sure we can use "plate1(A01 r A12 + B06 d H06)"
 - [x] alan01: shaker: produce jshop output
 - [x] Protocol: "MP 2Pos H+P Shake": only one of the sites can be used for shaking?
+- [x] alan01: pipetting tries to use all 8 tips instead of only the 4 big ones
+- [x] alan01: change peeling file to "blue" from "red"
+- [x] Make protocol from Alan's email (but with DWP instead of tubes)
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;

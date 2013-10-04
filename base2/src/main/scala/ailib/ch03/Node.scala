@@ -9,6 +9,9 @@ trait Node[State] {
 		state.toString
 	}
 	
+	def getChainString: List[String] = 
+		makeChain(Nil).map(_.getPrintString)
+	
 	def printChain() {
 		val l = makeChain(Nil)
 		l.foreach(n => println(n.getPrintString))

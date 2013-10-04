@@ -2,6 +2,7 @@ package roboliq.input
 
 import spray.json._
 import spray.json.DefaultJsonProtocol._
+import grizzled.slf4j.Logger
 import roboliq.entities.Entity
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -18,6 +19,9 @@ import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 
 class Protocol {
+	
+	private val logger = Logger[this.type]
+
 	val eb = new EntityBase
 	val state0 = new WorldStateBuilder
 	private var tasks = new ArrayBuffer[Rel]
@@ -111,7 +115,7 @@ class Protocol {
 					evowarePath <- RsResult(agent.evowareDir, "evowareDir must be set")
 					carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "carrier.cfg").getPath)
 					// FIXME: for debug only
-					_ = carrierData.printCarriersById
+					//_ = carrierData.printCarriersById
 					// ENDIF
 					// Load table file
 					tableFile <- RsResult(agent.tableFile, "tableFile must be set")
@@ -154,11 +158,11 @@ class Protocol {
 					val id = m.getOrElse("id", gid)
 					val name = m.getOrElse("name", id)
 					val modelKey = m("model")
-					println("modelKey: "+modelKey)
+					logger.debug("modelKey: "+modelKey)
 					//println("eb.nameToEntity: "+eb.nameToEntity)
 					//println("eb.idToEntity: "+eb.idToEntity)
 					//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
-					println("eb.aliases: "+eb.aliases)
+					logger.debug("eb.aliases: "+eb.aliases)
 					val model = eb.getEntityAs[PlateModel](modelKey).toOption.get
 					val plate = new Plate(id)
 					eb.addLabware(plate, name)
@@ -451,46 +455,8 @@ class Protocol {
 		eb.addDevice(agent, pipetter, pipetterIdent)
 
 		val labwareNamesOfInterest_l = new HashSet[String]
-		/*
-		// FIXME: This doesn't belong here at all!
-		def bsse() {
-			labwareNamesOfInterest_l += "D-BSSE 96 Well PCR Plate"
-			labwareNamesOfInterest_l += "D-BSSE 96 Well DWP"
-			val tipModel1000 = TipModel("1000ul", None, None, LiquidVolume.ul(950), LiquidVolume.ul(3), Map())
-			val tipModel50 = TipModel("50ul", None, None, LiquidVolume.ul(45), LiquidVolume.ul(0.1), Map())
-			
-			val tip1 = Tip("tip1", None, None, 0, 0, 0, Some(tipModel1000))
-			val tip2 = Tip("tip2", None, None, 1, 1, 0, Some(tipModel1000))
-			val tip3 = Tip("tip3", None, None, 2, 2, 0, Some(tipModel1000))
-			val tip4 = Tip("tip4", None, None, 3, 3, 0, Some(tipModel1000))
-			val tip5 = Tip("tip5", None, None, 4, 4, 0, Some(tipModel50))
-			val tip6 = Tip("tip6", None, None, 5, 5, 0, Some(tipModel50))
-			val tip7 = Tip("tip7", None, None, 6, 6, 0, Some(tipModel50))
-			val tip8 = Tip("tip8", None, None, 7, 7, 0, Some(tipModel50))
-			
-			// Permanent tips at BSSE
-			state0.tip_state_m(tip1) = TipState.createEmpty(tip1).copy(model_? = Some(tipModel1000))
-			state0.tip_state_m(tip2) = TipState.createEmpty(tip2).copy(model_? = Some(tipModel1000))
-			state0.tip_state_m(tip3) = TipState.createEmpty(tip3).copy(model_? = Some(tipModel1000))
-			state0.tip_state_m(tip4) = TipState.createEmpty(tip4).copy(model_? = Some(tipModel1000))
-			state0.tip_state_m(tip5) = TipState.createEmpty(tip5).copy(model_? = Some(tipModel50))
-			state0.tip_state_m(tip6) = TipState.createEmpty(tip6).copy(model_? = Some(tipModel50))
-			state0.tip_state_m(tip7) = TipState.createEmpty(tip7).copy(model_? = Some(tipModel50))
-			state0.tip_state_m(tip8) = TipState.createEmpty(tip8).copy(model_? = Some(tipModel50))
-	
-			eb.pipetterToTips_m(pipetter) = List(tip1, tip2, tip3, tip4, tip5, tip6, tip7, tip8)
-			eb.tipToTipModels_m(tip1) = List(tipModel1000)
-			eb.tipToTipModels_m(tip2) = List(tipModel1000)
-			eb.tipToTipModels_m(tip3) = List(tipModel1000)
-			eb.tipToTipModels_m(tip4) = List(tipModel1000)
-			eb.tipToTipModels_m(tip5) = List(tipModel50)
-			eb.tipToTipModels_m(tip6) = List(tipModel50)
-			eb.tipToTipModels_m(tip7) = List(tipModel50)
-			eb.tipToTipModels_m(tip8) = List(tipModel50)
-		}
-		// ENDFIX
-		*/
-		def loadAgentBean() {
+
+		def loadAgentBean(): RsResult[Unit] = {
 			// Labware to be used
 			if (agentBean.labware != null) {
 				labwareNamesOfInterest_l ++= agentBean.labware
@@ -508,34 +474,37 @@ class Protocol {
 			
 			// Tips
 			val tip_l = new ArrayBuffer[Tip]
-			if (agentBean.tips != null) {
-				for ((tipBean, index) <- agentBean.tips.zipWithIndex) {
+			val tipBean_l = if (agentBean.tips != null) agentBean.tips.toList else Nil
+			val x = for {
+				_ <- RsResult.toResultOfList(tipBean_l.zipWithIndex.map { pair =>
+					val (tipBean, index) = pair
 					val row: Int = if (tipBean.row == 0) index else tipBean.row
 					val col = 0
-					// FIXME: handle the error message from eb.getEntityAs
-					val permanentTipModel_? = if (tipBean.permanentModel == null) None else eb.getEntityAs(tipBean.permanentModel).toOption
-					val tip = Tip("tip"+(index + 1), None, None, index, row, col, permanentTipModel_?)
-					tip_l += tip
-					
-					// FIXME: handle the error message from eb.getEntityAs
-					val tipModel2_l = if (tipBean.models == null) tipModel_l.toList else tipBean.models.toList.map(eb.getEntityAs(tipBean.permanentModel).toOption.get)
-					eb.tipToTipModels_m(tip) = tipModel2_l.toList
-				}
-			}
+					for {
+						permanentTipModel_? <- if (tipBean.permanentModel == null) RsSuccess(None) else eb.getEntityAs[TipModel](tipBean.permanentModel).map(Option(_))
+						tipModel2_l <- (permanentTipModel_?, tipBean.models) match {
+							case (Some(tipModel), _) => RsSuccess(List(tipModel))
+							case (_, null) => RsSuccess(tipModel_l.toList)
+							case _ => RsResult.toResultOfList(tipBean.models.toList.map(eb.getEntityAs[TipModel](_)))
+						}
+					} yield {
+						val tip = Tip("tip"+(index + 1), None, None, index, row, col, permanentTipModel_?)
+						tip_l += tip
+						eb.tipToTipModels_m(tip) = tipModel2_l.toList
+					}
+				})
+			} yield ()
+			
 			eb.pipetterToTips_m(pipetter) = tip_l.toList
-			// FIXME: for debug only
-			println("tipModel_l: "+tipModel_l.toList)
-			println("tip_l: "+tip_l.toList)
-			1 / 1
-			// ENDFIX
+			x
 		}
-		loadAgentBean()
+		val x = loadAgentBean()
+		if (x.isError)
+			return x
 		
 		// Add labware on the table definition to the list of labware we're interested in
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
-		// FIXME: for debug only
-		println("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
-		// ENDFIX
+		//logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
 
 		// Create PlateModels
 		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
