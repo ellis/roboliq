@@ -2,6 +2,10 @@ labware:
   sourcePlate1: D-BSSE 96 Well DWP
   pcrPlate1: Thermocycler Plate
 
+reagents:
+  substance1:
+    wells: sourcePlate1(A01)
+
 substances:
   - name: substance1
     kind: Liquid

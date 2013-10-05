@@ -18,6 +18,11 @@ import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 
+case class ReagentBean(
+	id: String,
+	wells: String
+)
+
 class Protocol {
 	
 	private val logger = Logger[this.type]
@@ -159,6 +164,12 @@ class Protocol {
 				}
 			case _ =>
 		}
+		
+		jsobj.fields.get("reagents").map(jsval => {
+			val x = Converter.convAs[Set[ReagentBean]](jsval, eb)
+			println("x: "+x)
+			1 / 0
+		})
 		
 		jsobj.fields.get("substances") match {
 			case Some(js) =>
