@@ -343,13 +343,15 @@ class Protocol {
 		jscmd match {
 			case JsString(line) =>
 				// TODO: Create a parser
-				val word_l = line.split(" ").toList
-				word_l match {
-					case Nil => RsSuccess(None)
-					case cmd :: arg_l =>
-						for {
-							nameToVal_l <- loadJsonProtocol_Protocol_getNameVals(JsArray(arg_l.map(JsString(_))))
-						} yield Some((cmd, nameToVal_l))
+				val space_i = line.indexOf(" ")
+				if (space_i <= 0) {
+					RsSuccess(None)
+				} else {
+					val cmd = line.substring(0, space_i)
+					val args = line.substring(space_i + 1)
+					for {
+						nameToVal_l <- loadJsonProtocol_Protocol_getNameVals(JsString(args))
+					} yield Some((cmd, nameToVal_l))
 				}
 			case JsObject(cmd_m) =>
 				if (cmd_m.size == 0)
@@ -374,8 +376,8 @@ class Protocol {
 			case JsString(s) =>
 				val arg_l = s.split(" ").toList
 				val l = arg_l.map { s =>
-					val i = s.indexOf(" ")
-					if (i > 0) (Some(s.substring(0, i)), JsString(s.substring(i)))
+					val i = s.indexOf("=")
+					if (i > 0) (Some(s.substring(0, i)), JsString(s.substring(i + 1)))
 					else (None, JsString(s))
 				}
 				RsSuccess(l)
@@ -688,52 +690,7 @@ class Protocol {
 	private def loadJsonProtocol_DistributeSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[PipetteSpec] = {
-		val argSpec_l = List(
-			("source", true, jsvalToString _),
-			("destination", true, jsvalToString _),
-			("volume", true, jsvalToString _),
-			("pipettePolicy", false, jsvalToString _),
-			("dispensePosition", false, jsvalToString _),
-			("cleanBefore", false, jsvalToString _),
-			("cleanAfter", false, jsvalToString _),
-			("tipModel", false, jsvalToString _)
-		)
 		for {
-			/*
-			arg_l <- parseArgList(argSpec_l, nameToVal_l)
-			spec <- arg_l match {
-				case List(
-					srcRef: String,
-					dstRef: String,
-					volumeRef: String,
-					pipettePolicyRef_? : Option[String],
-					dispensePosition_? : Option[String],
-					cleanBeforeRef_? : Option[String],
-					cleanAfterRef_? : Option[String],
-					tipModelRef_? : Option[String]
-				) =>
-					for {
-						src <- eb.lookupLiquidSource(srcRef, state0.toImmutable)
-						dst <- eb.lookupLiquidSource(dstRef, state0.toImmutable)
-						volume <- LiquidVolumeParser.parse(volumeRef)
-						tipModel_? <- tipModelRef_? match {
-							case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
-							case _ => RsSuccess(None)
-						}
-					} yield {
-						val cleanBefore_? : Option[CleanIntensity.Value] = cleanBeforeRef_? match {
-							case Some(s) => Some(CleanIntensity.withName(s))
-							case _ => None
-						}
-						val cleanAfter_? : Option[CleanIntensity.Value] = cleanAfterRef_? match {
-							case Some(s) => Some(CleanIntensity.withName(s))
-							case _ => None
-						}
-						PipetteSpec(src, dst, volume, pipettePolicyRef_?, cleanBefore_?, cleanAfter_?, tipModel_?)
-					}
-				case _ => RsError(s"bad arguments to `distribute`: ${arg_l}")
-			}
-			*/
 			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb)
 			src <- eb.lookupLiquidSource(cmd.source, state0.toImmutable)
 			dst <- eb.lookupLiquidSource(cmd.destination, state0.toImmutable)

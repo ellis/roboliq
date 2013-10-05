@@ -11,11 +11,7 @@ reagents:
   substance2: sourcePlate1(A02|H02)
 
 protocol:
-  - distribute:
-      source: substance1
-      destination: pcrPlate1(A01-A12 + B06|H06)
-      volume: 20ul
-      pipettePolicy: Roboliq_Water_Wet_1000
+  - distribute substance1 pcrPlate1(A01-A12+B06|H06) 20ul pipettePolicy=Roboliq_Water_Wet_1000
   - seal pcrPlate1
   - shake:
       object: pcrPlate1

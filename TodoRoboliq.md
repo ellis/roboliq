@@ -14,6 +14,9 @@ For CADMAD Venice meeting:
 
 For 0.1 release:
 
+- [ ] alan01: intelligent selection of liquid class
+- [ ] alan01: inline shaker spec
+- [ ] alan01: duration parser and frequency parser for shaker spec
 - [ ] Split Protocol class into classes for reading config, evoware, database, protocol
 - [ ] Protocol: add 'reagents' field with viscosity, pipettePolicy
 - [ ] Mix command
