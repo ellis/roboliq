@@ -20,7 +20,13 @@ class EntityBase {
 	 * Map from database key to entity
 	 */
 	val keyToEntity_m = new HashMap[String, Entity]
+	/**
+	 * List of agents
+	 */
 	val agents = new ArrayBuffer[Agent]
+	/**
+	 * Map of agents and their devices
+	 */
 	val agentToDevices_m = new HashMap[Agent, mutable.Set[Device]] with MultiMap[Agent, Device]
 	/**
 	 * LabwareModels that devices can use
@@ -47,13 +53,17 @@ class EntityBase {
 	 */
 	val labwareToLocation_m = new HashMap[Labware, Entity]
 	/**
-	 * Pipetter to tips
+	 * Map of pipetter to its tips
 	 */
 	val pipetterToTips_m = new HashMap[Pipetter, List[Tip]]
 	/**
-	 * Tip to tip models
+	 * Map of tip to the tip models which can be used by that tip
 	 */
 	val tipToTipModels_m = new HashMap[Tip, List[TipModel]]
+	/**
+	 * Map of reagent name to source wells
+	 */
+	val reagentToWells_m = new HashMap[String, List[Well]]
 	/**
 	 * List of custom Relations
 	 */
@@ -230,7 +240,7 @@ class EntityBase {
 		l2.mkString("\n")
 	}
 	
-	def lookupLiquidSource(sourceIdent: String): RsResult[List[(Labware, RowCol)]] = {
+	def lookupLiquidSource(sourceIdent: String, state: WorldState): RsResult[List[(Labware, RowCol)]] = {
 		for {
 			parsed_l <- WellIdentParser.parse(sourceIdent)
 			ll_? : List[RsResult[List[(Labware, RowCol)]]] = parsed_l.map(pair => {
@@ -277,7 +287,18 @@ class EntityBase {
 							l
 						}
 
-					case None => RsError(s"entity not found: `$entityIdent`")
+					case None =>
+						reagentToWells_m.get(entityIdent) match {
+							case Some(well_l) =>
+								RsResult.toResultOfList(well_l.map(well => {
+									state.getWellPosition(well).map(pos =>
+										(pos.parent, RowCol(pos.row, pos.col))
+									)
+								}))
+							case None =>
+								RsError(s"entity not found: `$entityIdent`")
+						}
+					
 					case _ => RsError(s"require a labware entity: `$entityIdent`")
 				}
 			})

@@ -2,7 +2,7 @@ Started 2013-07-25
 
 For CADMAD Venice meeting:
 
-- [ ] dispense: Let user specify reagent as source
+- [ ] Protocol: try to use json Converter for distribute command
 - [ ] mixture: implement mixture lists for pipetting mixtures
 - [ ] PcrCommand: create an abstract PCR command which is easily portable
 - [ ] Protocol: add 'benchLayout' field
@@ -49,6 +49,7 @@ For 0.1 release:
 - [x] Protocol: add 'labware' field
 - [x] Protocol: add 'reagents' field with wells, tipPolicy, contaminants
 - [x] Make sure protocol can run with unknown volumes in source wells
+- [x] dispense: Let user specify reagent as source
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;

@@ -12,7 +12,7 @@ reagents:
 
 protocol:
   - distribute:
-      source: sourcePlate1(A01)
+      source: substance1
       destination: pcrPlate1(A01-A12 + B06|H06)
       volume: 20ul
       pipettePolicy: Roboliq_Water_Wet_1000
@@ -24,7 +24,7 @@ protocol:
       speed: 800
   - peel pcrPlate1
   - distribute:
-      source: sourcePlate1(A02 d H02)
+      source: substance2
       destination: pcrPlate1(A03 d H05)
       volume: 80ul
       pipettePolicy: Roboliq_Water_Air_1000

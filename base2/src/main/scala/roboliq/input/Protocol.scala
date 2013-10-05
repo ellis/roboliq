@@ -186,7 +186,7 @@ class Protocol {
 							case "replace" => RsSuccess(TipCleanPolicy.DD)
 							case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
 						}
-						l <- eb.lookupLiquidSource(bean.wells)
+						l <- eb.lookupLiquidSource(bean.wells, state0.toImmutable)
 						well_l <- RsResult.toResultOfList(l.map(state0.getWell))
 					} yield {
 						val substance = Substance(
@@ -204,6 +204,7 @@ class Protocol {
 							sequence_? = None
 						)
 						nameToSubstance_m(name) = substance
+						eb.reagentToWells_m(name) = well_l
 						val mixture = Mixture(Left(substance))
 						val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
 						// Add aliquot to all referenced wells
@@ -299,7 +300,7 @@ class Protocol {
 					val contents_s = m("contents")
 					for {
 						aliquot <- AliquotParser.parseAliquot(contents_s, nameToSubstance_m.toMap)
-						l <- eb.lookupLiquidSource(wellIdent)
+						l <- eb.lookupLiquidSource(wellIdent, state0.toImmutable)
 						well_l <- RsResult.toResultOfList(l.map(state0.getWell))
 					} {
 						for (well <- well_l) {
@@ -711,8 +712,8 @@ class Protocol {
 					tipModelRef_? : Option[String]
 				) =>
 					for {
-						src <- eb.lookupLiquidSource(srcRef)
-						dst <- eb.lookupLiquidSource(dstRef)
+						src <- eb.lookupLiquidSource(srcRef, state0.toImmutable)
+						dst <- eb.lookupLiquidSource(dstRef, state0.toImmutable)
 						volume <- LiquidVolumeParser.parse(volumeRef)
 						tipModel_? <- tipModelRef_? match {
 							case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
