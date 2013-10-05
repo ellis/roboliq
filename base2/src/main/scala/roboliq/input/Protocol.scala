@@ -20,7 +20,12 @@ import roboliq.evoware.translator.EvowareClientScriptBuilder
 
 case class ReagentBean(
 	id: String,
-	wells: String
+	wells: String,
+	contaminants : Set[String],
+	viscosity_? : Option[String],
+	tipPolicy_? : Option[String],
+	pipettePolicy_? : Option[String],
+	key_? : Option[String]
 )
 
 class Protocol {
@@ -166,9 +171,48 @@ class Protocol {
 		}
 		
 		jsobj.fields.get("reagents").map(jsval => {
-			val x = Converter.convAs[Set[ReagentBean]](jsval, eb)
-			println("x: "+x)
-			1 / 0
+			for {
+				reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb)
+				substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
+					val key = bean.key_?.getOrElse(gid)
+					val name = bean.id
+					val kind = SubstanceKind.Liquid
+					for {
+						tipCleanPolicy <- bean.tipPolicy_?.getOrElse("rinse").toLowerCase match {
+							case "keep" => RsSuccess(TipCleanPolicy.NN)
+							case "rinse/none" => RsSuccess(TipCleanPolicy.TN)
+							case "rinse/light" => RsSuccess(TipCleanPolicy.TL)
+							case "rinse" => RsSuccess(TipCleanPolicy.TT)
+							case "replace" => RsSuccess(TipCleanPolicy.DD)
+							case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
+						}
+						l <- eb.lookupLiquidSource(bean.wells)
+						well_l <- RsResult.toResultOfList(l.map(state0.getWell))
+					} yield {
+						val substance = Substance(
+							key = key,
+							label = Some(bean.id),
+							description = None,
+							kind = SubstanceKind.Liquid,
+							tipCleanPolicy = tipCleanPolicy,
+							contaminants = bean.contaminants,
+							costPerUnit_? = None,
+							valuePerUnit_? = None,
+							molarity_? = None,
+							gramPerMole_? = None,
+							celciusAndConcToViscosity = Nil,
+							sequence_? = None
+						)
+						nameToSubstance_m(name) = substance
+						val mixture = Mixture(Left(substance))
+						val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
+						// Add aliquot to all referenced wells
+						for (well <- well_l) {
+							state0.well_aliquot_m(well) = aliquot
+						}
+					}
+				}))
+			} yield ()
 		})
 		
 		jsobj.fields.get("substances") match {

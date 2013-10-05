@@ -2,8 +2,6 @@ Started 2013-07-25
 
 For CADMAD Venice meeting:
 
-- [ ] Protocol: add 'reagents' field with wells, viscosity, liquid/dna/cells, pipettePolicy
-- [ ] Make sure protocol can run with unknown volumes in source wells
 - [ ] dispense: Let user specify reagent as source
 - [ ] mixture: implement mixture lists for pipetting mixtures
 - [ ] PcrCommand: create an abstract PCR command which is easily portable
@@ -17,6 +15,7 @@ For CADMAD Venice meeting:
 
 For 0.1 release:
 
+- [ ] Protocol: add 'reagents' field with viscosity, pipettePolicy
 - [ ] Mix command
 - [ ] Pipetting: once pipetting is done, move pipetters to home position
 - [ ] Protocol: check when carrier sites overlap, and only use one of them, selected by user in config file
@@ -48,6 +47,8 @@ For 0.1 release:
 - [x] WellIdentParser: possibly consider A01-A12 + B06|H06
 - [x] alan01: why didn't it wash after the last dispense?
 - [x] Protocol: add 'labware' field
+- [x] Protocol: add 'reagents' field with wells, tipPolicy, contaminants
+- [x] Make sure protocol can run with unknown volumes in source wells
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;

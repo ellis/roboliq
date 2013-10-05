@@ -205,26 +205,30 @@ object Converter {
 				}
 			}
 			else {
-				jsval match {
+				val ctor = typ.member(nme.CONSTRUCTOR).asMethod
+				val p0_l = ctor.paramss(0)
+				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
+				val res = jsval match {
 					case jsobj: JsObject =>
-						val jsobj = jsval.asJsObject
-						val ctor = typ.member(nme.CONSTRUCTOR).asMethod
-						val p0_l = ctor.paramss(0)
-						val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
-						convMap(path_r, jsobj, typeOf[String], nameToType_l, eb, id_?).map(_ match {
-							case ConvObject(o) =>
-								val nameToObj_m = o.asInstanceOf[Map[String, _]]
-								val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
-								val c = typ.typeSymbol.asClass
-								val mm = mirror.reflectClass(c).reflectConstructor(ctor)
-								logger.debug("arg_l: "+arg_l)
-								val obj = mm(arg_l : _*)
-								ConvObject(obj)
-							case r => r
-						})
+						convMap(path_r, jsobj, typeOf[String], nameToType_l, eb, id_?)
+					case JsArray(jsval_l) =>
+						convListToObject(path_r, jsval_l, nameToType_l, eb, id_?)
 					case _ =>
-						RqError(s"unhandled type or value. type=${typ}, value=${jsval}")
+						convListToObject(path_r, List(jsval), nameToType_l, eb, id_?)
+					//case _ =>
+					//	RqError(s"unhandled type or value. type=${typ}, value=${jsval}")
 				}
+				res.map(_ match {
+					case ConvObject(o) =>
+						val nameToObj_m = o.asInstanceOf[Map[String, _]]
+						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
+						val c = typ.typeSymbol.asClass
+						val mm = mirror.reflectClass(c).reflectConstructor(ctor)
+						logger.debug("arg_l: "+arg_l)
+						val obj = mm(arg_l : _*)
+						ConvObject(obj)
+					case r => r
+				})
 			}
 			logger.debug(ret)
 			ret
@@ -301,10 +305,70 @@ object Converter {
 			}
 			// Otherwise, return list of objects.
 			else {
-				ConvObject(l.collect({case ConvObject(o) => o}))
+				ConvObject(l.collect({case ConvObject(o) => o}).toSet)
 			}
 		})
 	}
+	
+	private def convListToObject(
+		path_r: List[String],
+		jsval_l: List[JsValue],
+		nameToType_l: List[(String, ru.Type)],
+		eb: EntityBase,
+		id_? : Option[String]
+	): RqResult[ConvResult] = {
+		import scala.reflect.runtime.universe._
+		
+		val mirror = runtimeMirror(this.getClass.getClassLoader)
+
+		// Try to convert each element of the object
+		val (errV_l, wV, convV_l, val_l):
+			(List[String], List[String], Map[String, KeyClassOpt], List[_]) = {
+			var jsval_l_~ = jsval_l
+			val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
+				val (name, typ2) = pair
+				val path2_r = name :: path_r
+				if (name == "id" && id_?.isDefined)
+					RsSuccess(ConvObject(id_?.get))
+				else {
+					jsval_l_~ match {
+						case jsval :: rest =>
+							jsval_l_~ = rest
+							convOrRequire(path2_r, jsval, typ2, eb, Some(name))
+						// Else try using JsNull
+						case Nil =>
+							convOrRequire(path2_r, JsNull, typ2, eb, Some(name))
+					}
+				}
+			}))
+			res0 match {
+				case RqError(e, w) => (e, w, Map(), Nil)
+				case RqSuccess(l, w) =>
+					val conv_l = l.collect({case ConvRequire(m) => m}).flatten.toMap
+					val obj_l = l.collect({case ConvObject(o) => o})
+					(Nil, w, conv_l, obj_l)
+			}
+		}
+
+		val key_l = nameToType_l.map(_._1)
+		val err_l = errV_l
+		val warning_l = wV
+		err_l match {
+			// No errors
+			case Nil =>
+				val conv_l = convV_l
+				// Nothing to look up
+				if (conv_l.isEmpty) {
+					RqSuccess(ConvObject((key_l zip val_l).toMap), warning_l)
+				}
+				else {
+					RqSuccess(ConvRequire(conv_l), warning_l)
+				}
+			case _ =>
+				RqError(err_l, warning_l)
+		}
+	}
+
 	
 	private def convMap(
 		path_r: List[String],

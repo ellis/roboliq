@@ -1,29 +1,14 @@
+# Labware used in this protocol
+# labware_name: labware_model
 labware:
   sourcePlate1: D-BSSE 96 Well DWP
   pcrPlate1: Thermocycler Plate
 
+# Reagents used in this protocol
+# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [tipPolicy=keep|rinse|replace] [pipettePolicy=...]
 reagents:
-  substance1:
-    wells: sourcePlate1(A01)
-
-substances:
-  - name: substance1
-    kind: Liquid
-    tipCleanPolicy: Thorough
-  - name: substance2
-    kind: Liquid
-    tipCleanPolicy: Thorough
-
-wellContents:
-  - { "name": "sourcePlate1(A01)", "contents": "substance1@400ul" }
-  - { "name": "sourcePlate1(A02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(B02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(C02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(D02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(E02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(F02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(G02)", "contents": "substance2@400ul" }
-  - { "name": "sourcePlate1(H02)", "contents": "substance2@400ul" }
+  substance1: sourcePlate1(A01)
+  substance2: sourcePlate1(A02|H02)
 
 protocol:
   - distribute:
