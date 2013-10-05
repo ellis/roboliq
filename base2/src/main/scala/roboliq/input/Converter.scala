@@ -89,6 +89,66 @@ object Converter {
 		})
 	}
 	
+	def convCommandAs[A <: commands.Command : TypeTag](
+		nameToVal_l: List[(Option[String], JsValue)],
+		eb: EntityBase
+	): RqResult[A] = {
+		import scala.reflect.runtime.universe._
+
+		val typ = ru.typeTag[A].tpe
+		val ctor = typ.member(nme.CONSTRUCTOR).asMethod
+		val p0_l = ctor.paramss(0)
+		val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
+
+		def doit(
+			nameToType_l: List[(String, Type)],
+			jsval_l: List[JsValue],
+			nameToVal_m: Map[String, JsValue],
+			acc_r: List[JsValue]
+		): RsResult[List[JsValue]] = {
+			nameToType_l match {
+				case Nil =>
+					// TODO: return warning for any extra parameters
+					RsSuccess(acc_r.reverse)
+				case nameToType :: nameToType_l_~ =>
+					val (name, typ) = nameToType
+					// Check whether named parameter is provided
+					nameToVal_m.get(name) match {
+						case Some(jsval) =>
+							val nameToVal_m_~ = nameToVal_m - name
+							doit(nameToType_l_~, jsval_l, nameToVal_m_~, jsval :: acc_r)
+						case None =>
+							jsval_l match {
+								// Use unnamed parameter
+								case jsval :: jsval_l_~ =>
+									doit(nameToType_l_~, jsval_l_~, nameToVal_m, jsval :: acc_r)
+								// Else parameter value is blank
+								case Nil =>
+									doit(nameToType_l_~, jsval_l, nameToVal_m, JsNull :: acc_r)
+							}
+					}
+			}
+		}
+
+		val jsval_l = nameToVal_l.collect({case (None, jsval) => jsval})
+		val nameToVal2_l: List[(String, JsValue)] = nameToVal_l.collect({case (Some(name), jsval) => (name, jsval)})
+		val nameToVals_m: Map[String, List[(String, JsValue)]] = nameToVal2_l.groupBy(_._1)
+		val nameToVals_l: List[(String, List[JsValue])] = nameToVals_m.toList.map(pair => pair._1 -> pair._2.map(_._2))
+		
+		for {
+			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
+				val (name, jsval_l) = pair
+				jsval_l match {
+					case jsval :: Nil => RsSuccess((name, jsval))
+					case _ => RsError(s"too many values supplied for argument `$name`")
+				}
+			}))
+			nameToVal_m = nameToVal3_l.toMap
+			l <- doit(nameToType_l, jsval_l, nameToVal_m, Nil)
+			res <- conv(JsArray(l), typ, eb)
+		} yield res.asInstanceOf[A]
+	}
+	
 	def conv(jsval: JsValue, typ: ru.Type, eb: EntityBase): RqResult[Any] = {
 		convOrRequire(Nil, jsval, typ, eb).flatMap(_ match {
 			case ConvRequire(m) => RqError("need to lookup values for "+m.keys.mkString(", "))

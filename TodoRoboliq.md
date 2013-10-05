@@ -15,6 +15,7 @@ For CADMAD Venice meeting:
 
 For 0.1 release:
 
+- [ ] Split Protocol class into classes for reading config, evoware, database, protocol
 - [ ] Protocol: add 'reagents' field with viscosity, pipettePolicy
 - [ ] Mix command
 - [ ] Pipetting: once pipetting is done, move pipetters to home position
