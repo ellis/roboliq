@@ -5,7 +5,7 @@ labware:
   pcrPlate1: Thermocycler Plate
 
 # Reagents used in this protocol
-# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [tipPolicy=keep|rinse|replace] [pipettePolicy=...]
+# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
 reagents:
   substance1: sourcePlate1(A01)
   substance2: sourcePlate1(A02|H02)

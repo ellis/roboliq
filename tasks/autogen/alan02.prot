@@ -10,13 +10,6 @@ reagents:
   substance1: sourcePlate1(A01)
   substance2: sourcePlate1(A02|H02)
 
-sources:
-  substance1:
-    wells: sourcePlate1(A01)@100ul
-  - wells: XXX(XX)
-    liquidType: DNA
-   - [liquidType, XXX(XX), DNA]
-
 #variables:
 #  wellGroup1: pcrPlate1(A01-A12+B06|H06)
 

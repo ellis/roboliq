@@ -23,7 +23,7 @@ case class ReagentBean(
 	wells: String,
 	contaminants : Set[String],
 	viscosity_? : Option[String],
-	tipHandling_? : Option[String],
+	sterilize_? : Option[String],
 	pipettePolicy_? : Option[String],
 	key_? : Option[String]
 )
@@ -178,7 +178,7 @@ class Protocol {
 					val name = bean.id
 					val kind = SubstanceKind.Liquid
 					for {
-						tipCleanPolicy <- bean.tipHandling_?.getOrElse("rinse").toLowerCase match {
+						tipCleanPolicy <- bean.sterilize_?.getOrElse("rinse").toLowerCase match {
 							case "keep" => RsSuccess(TipCleanPolicy.NN)
 							case "rinse/none" => RsSuccess(TipCleanPolicy.TN)
 							case "rinse/light" => RsSuccess(TipCleanPolicy.TL)
@@ -742,15 +742,17 @@ class Protocol {
 				case _ => RsSuccess(None)
 			}
 		} yield {
-			val cleanBefore_? : Option[CleanIntensity.Value] = cmd.tipHandlingBefore_? match {
-				case Some(s) => Some(CleanIntensity.withName(s))
-				case _ => None
-			}
-			val cleanAfter_? : Option[CleanIntensity.Value] = cmd.tipHandlingAfter_? match {
-				case Some(s) => Some(CleanIntensity.withName(s))
-				case _ => None
-			}
-			PipetteSpec(src, dst, cmd.volume, cmd.pipettePolicy_?, cleanBefore_?, cleanAfter_?, tipModel_?)
+			PipetteSpec(
+				src,
+				dst,
+				cmd.volume,
+				cmd.pipettePolicy_?,
+				cmd.sterilize_?,
+				cmd.sterilizeBefore_?,
+				cmd.sterilizeBetween_?,
+				cmd.sterilizeAfter_?,
+				tipModel_?
+			)
 		}
 	}
 	

@@ -9,7 +9,9 @@ case class PipetteSpec(
 	destination_l: List[(Labware, RowCol)],
 	volume: LiquidVolume,
 	pipettePolicy_? : Option[String],
+	sterilize_? : Option[CleanIntensity.Value],
 	cleanBefore_? : Option[CleanIntensity.Value],
+	sterilizeBetween_? : Option[CleanIntensity.Value],
 	cleanAfter_? : Option[CleanIntensity.Value],
 	tipModel_? : Option[TipModel]
 )

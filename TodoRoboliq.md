@@ -2,7 +2,6 @@ Started 2013-07-25
 
 For CADMAD Venice meeting:
 
-- [ ] Protocol: try to use json Converter for distribute command
 - [ ] mixture: implement mixture lists for pipetting mixtures
 - [ ] PcrCommand: create an abstract PCR command which is easily portable
 - [ ] Protocol: add 'benchLayout' field
@@ -51,6 +50,8 @@ For 0.1 release:
 - [x] Protocol: add 'reagents' field with wells, tipPolicy, contaminants
 - [x] Make sure protocol can run with unknown volumes in source wells
 - [x] dispense: Let user specify reagent as source
+- [x] commands.Dispense: try converting CleanIntensity
+- [x] Protocol: try to use json Converter for distribute command
 
 This line is causing problems:
 ./JSHOP2/InternalDomain.java:    s += "\t\tTermVariable.initialize(" + varsMaxSize + ");" + endl + endl;
@@ -183,7 +184,7 @@ For tomorrow:
 - [x] EvowareClientScriptBuilder: PipetterDispense
 
 First tasks for back at BSSE:
-- [ ] Urs: should the centrifuge be at grid 54 or 55?  It is at 54 in the Empty template, but 55 in my scripts
+- [x] Urs: should the centrifuge be at grid 54 or 55?  It is at 54 in the Empty template, but 55 in my scripts
 - [ ] create a better bench file (correct centrifuge grid?, Peeler, Sealer, additional trough and hotels)
 - [ ] Allow for a carrier model to be on bench multiple times, like for WIS external 5Pos hotels in carrier-orig.cfg
 
@@ -226,6 +227,7 @@ Details for later:
 - [ ] Extend JshopMain, Protocol, EvowareClientScriptBuilder to handle a pipette command
 - [ ] WashProgram: config for specifying wash programs; see also TipCleanEvent
 - [ ] get multi-pipetting working again
+- [ ] Detecting liquid level before mixing would be an easy example of feedback
 - [x] JshopTranslator: distribute: generate dispense command
 - [x] adapt VesselState, VesselContents for new system
 - [x] TipWell.equidistant3: figure out where to calculate row/col from platemodel and well index

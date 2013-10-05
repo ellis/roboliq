@@ -53,6 +53,48 @@ object Converter {
 	private val logger = Logger[this.type]
 	
 	private val convInfo_l = List[ConvInfo[_]](
+		ConvInfo[CleanIntensity.Value](
+			(o: CleanIntensity.Value) => {
+				RsSuccess(JsString(o match {
+					case CleanIntensity.None => "none"
+					case CleanIntensity.Flush => "flush"
+					case CleanIntensity.Light => "light"
+					case CleanIntensity.Thorough => "thorough"
+					case CleanIntensity.Decontaminate => "decontaminate"
+				}))
+			},
+			(path_r: List[String], jsval: JsValue, typ: ru.Type, eb: EntityBase) => {
+				jsval match {
+					case JsString(text) => text match {
+						case "none" => RqSuccess(ConvObject(CleanIntensity.None))
+						case "flush" => RqSuccess(ConvObject(CleanIntensity.Flush))
+						case "light" => RqSuccess(ConvObject(CleanIntensity.Light))
+						case "thorough" => RqSuccess(ConvObject(CleanIntensity.Thorough))
+						case "decontaminate" => RqSuccess(ConvObject(CleanIntensity.Decontaminate))
+					}
+					case _ => RqError("expected JsString")
+				}
+			}
+		),
+		ConvInfo[PipettePosition.Value](
+			(o: PipettePosition.Value) => {
+				RsSuccess(JsString(o match {
+					case PipettePosition.Free => "air"
+					case PipettePosition.WetContact => "wet"
+					case PipettePosition.DryContact => "dry"
+				}))
+			},
+			(path_r: List[String], jsval: JsValue, typ: ru.Type, eb: EntityBase) => {
+				jsval match {
+					case JsString(text) => text match {
+						case "air" => RqSuccess(ConvObject(PipettePosition.Free))
+						case "wet" => RqSuccess(ConvObject(PipettePosition.WetContact))
+						case "dry" => RqSuccess(ConvObject(PipettePosition.DryContact))
+					}
+					case _ => RqError("expected JsString")
+				}
+			}
+		),
 		ConvInfo[TipCleanPolicy](
 			(o: TipCleanPolicy) => {
 				RqSuccess(JsString(s"${o.enter}${o.exit}"))

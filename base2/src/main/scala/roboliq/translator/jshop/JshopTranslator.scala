@@ -262,7 +262,7 @@ object JshopTranslator {
 		} yield {
 			// Refresh command before pipetting starts
 			val refreshBefore_l = {
-				spec.cleanBefore_? match {
+				spec.cleanBefore_?.orElse(spec.sterilize_?) match {
 					case Some(intensity) if intensity != CleanIntensity.None =>
 						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
 						PipetterTipsRefresh(pipetter, tip_l.map(tip => {
@@ -274,7 +274,7 @@ object JshopTranslator {
 			// use the Batch list to create clean, aspirate, dispense commands
 			logger.debug("batch_l: "+batch_l)
 			val aspdis_l = batch_l.flatMap(batch => {
-				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanBefore_?, None, None, None)
+				val tipOverridesAsp = TipHandlingOverrides(None, spec.sterilizeBetween_?.orElse(spec.sterilize_?), None, None, None)
 				val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {
 					val mixtureSrc = state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
 					val mixtureDst = state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
@@ -323,7 +323,7 @@ object JshopTranslator {
 			})
 
 			val refreshAfter_l = {
-				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanAfter_?, None, None, None)
+				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.sterilize_?), None, None, None)
 				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
 					val tipState = state.getTipState(tip)
 					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, Mixture.empty, tipState)
