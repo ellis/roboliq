@@ -4,7 +4,7 @@ import sbt.Keys._
 object BuildSettings {
 	val buildOrganization = "bsse.ethz.ch"
 	val buildVersion      = "0.1"
-	val buildScalaVersion = "2.10.2"
+	val buildScalaVersion = "2.10.3"
 
 	val buildSettings = Defaults.defaultSettings ++ Seq (
 		organization := buildOrganization,
@@ -21,8 +21,8 @@ object BuildSettings {
 	)
 
 	// Dependencies
-	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.2"
-	val reflect = "org.scala-lang" % "scala-reflect" % "2.10.2"
+	val compiler = "org.scala-lang" % "scala-compiler" % "2.10.3"
+	val reflect = "org.scala-lang" % "scala-reflect" % "2.10.3"
 	val commons_io = "commons-io" % "commons-io" % "2.2"
 	val scalaz = "org.scalaz" % "scalaz-core_2.10" % "7.0.0-M7"
 	val grizzled = "org.clapper" % "grizzled-slf4j_2.10" % "1.0.1"
