@@ -1,3 +1,3 @@
-[submodule "extern/reactive-sim"]
-	path = extern/reactive-sim
+[submodule "source/extern/reactive-sim"]
+	path = source/extern/reactive-sim
 	url = https://github.com/ellis/reactive-sim
