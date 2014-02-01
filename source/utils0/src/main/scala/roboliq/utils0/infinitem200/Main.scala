@@ -19,13 +19,12 @@ object InfinitM200 {
 		tab: Boolean = false
 	)
 
-	val parser = new scopt.immutable.OptionParser[Config]("roboliq-infinitm200-parser", "1.0") {
-		def options = Seq(
-			opt("o", "output", "Output filename") { (s, c) => c.copy(outfile = s) },
-			flag("json", "JSON output") { (c: Config) => c.copy(json = true) },
-			flag("tab", "Tab output") { (c: Config) => c.copy(tab = true) },
-			arg("SPECFILE", "A .yaml file with specs.") { (s, c) => c.copy(filename = s) }
-		)
+	val parser = new scopt.OptionParser[Config]("roboliq-infinitm200-parser") {
+		head("roboliq-infinitm200-parser", "1.0")
+		opt[String]('o', "output") action { (s, c) => c.copy(outfile = s) } text("Output filename")
+		opt[Unit]("json") action { (_, c: Config) => c.copy(json = true) } text("JSON output")
+		opt[Unit]("tab") action { (_, c: Config) => c.copy(tab = true) } text("Tab output")
+		arg[String]("SPECFILE") action { (s, c) => c.copy(filename = s) } text("A .yaml file with specs.")
 	}
 	
 	val field_l = List("id", "date", "script", "site", "plateModel", "liquidClass", "baseVol", "baseConc", "vol", "conc", "tip", "tipVolMax", "tipVol", "multipipette", "row", "col", "readout")

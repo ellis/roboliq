@@ -13,7 +13,8 @@ object BuildSettings {
 		scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
 		resolvers ++= Seq(
 			"Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-			"io.spray repo" at "http://repo.spray.io"
+			"io.spray repo" at "http://repo.spray.io",
+			Resolver.sonatypeRepo("public")
 		),
 		libraryDependencies ++= Seq(reflect, commons_io, scalaz, grizzled, logback, json_spray, yaml),
 		parallelExecution in Test := false
@@ -28,7 +29,7 @@ object BuildSettings {
 	val logback = "ch.qos.logback" % "logback-classic" % "1.0.7"
 	val scalatest = "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 	val akka = "com.typesafe.akka" %% "akka-actor" % "2.1.0"
-	val scopt = "com.github.scopt" %% "scopt" % "3.1.0"
+	val scopt = "com.github.scopt" %% "scopt" % "3.2.0"
 	val yaml = "org.yaml" % "snakeyaml" % "1.10"
 	val ejml = "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.16"
 	val json_gson = "com.google.code.gson" % "gson" % "2.2.1"
@@ -47,7 +48,7 @@ object MyBuild extends Build {
 	lazy val projReactiveSim = Project("reactivesim", file("extern/reactive-sim/core"))
 
 	lazy val projBase2 = Project(
-			id = "base2", 
+			id = "base2",
 			base = file("base2"),
 			settings = buildSettings ++ Seq(
 				name := "base2",
@@ -56,34 +57,6 @@ object MyBuild extends Build {
 			)
 		) dependsOn(projReactiveSim)
 
-	lazy val projBase = Project(
-			id = "base", 
-			base = file("base"),
-			settings = buildSettings ++ Seq(
-				name := "base",
-				libraryDependencies ++= Seq(scalatest, akka, yaml, ejml),
-				initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._"""
-			)
-		)
-
-	lazy val projEvoware = Project(
-			id = "evoware",
-			base = file("evoware"),
-			settings = buildSettings ++ Seq(
-				name := "evoware",
-				libraryDependencies ++= Seq(scalatest, yaml, ejml),
-				initialCommands in console := """import scalaz._, Scalaz._, roboliq.robots.evoware._"""
-			)
-		) dependsOn(projBase)
-
-	lazy val projBsse = Project(
-			id = "bsse",
-			base = file("bsse"),
-			settings = buildSettings ++ Seq(
-				name := "bsse",
-				libraryDependencies ++= Seq(scalatest, yaml, ejml)
-			)
-		) dependsOn(projBase, projEvoware)
 	
 	lazy val projUtils0 = Project(
 			id = "utils0",
