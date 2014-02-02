@@ -552,4 +552,30 @@
   ;((!pipetter-run ?a ?d ?spec))
   ((move-labware ?p1 ?s1) (move-labware ?p2 ?s2) (agent-activate ?a) (!pipetter-run ?a ?d ?spec))
  )
+
+ (:method (titrationSeries2 ?a ?d ?spec ?p1 ?p2)
+  ; preconditions
+  (
+   ; parameter types
+   (is-agent ?a)
+   (is-pipetter ?d)
+   ;(is-pipetterSpec ?spec)
+   (is-plate ?p1)
+   (is-plate ?p2)
+   ; 
+   (agent-has-device ?a ?d)
+   (model ?p1 ?m1) ; model of p1
+   (model ?p2 ?m2) ; model of p2
+   ; Find location for p1
+   (device-can-site ?d ?s1)
+   (device-can-site ?d ?s2)
+   (model ?s1 ?sm1) ; site model
+   (stackable ?sm1 ?m1) ; site model accepts m1
+   (model ?s2 ?sm2) ; site model
+   (stackable ?sm2 ?m2) ; site model accepts m1
+  )
+  ; task list
+  ;((!pipetter-run ?a ?d ?spec))
+  ((move-labware ?p1 ?s1) (move-labware ?p2 ?s2) (agent-activate ?a) (!pipetter-run ?a ?d ?spec))
+ )
 ))
