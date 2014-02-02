@@ -173,7 +173,7 @@ class Protocol {
 		
 		jsobj.fields.get("reagents").map(jsval => {
 			for {
-				reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb)
+				reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, None)
 				substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
 					val key = bean.key_?.getOrElse(gid)
 					val name = bean.id
@@ -694,7 +694,7 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[PipetteSpec] = {
 		for {
-			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb)
+			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb, state0.toImmutable)
 			src <- eb.lookupLiquidSource(cmd.source, state0.toImmutable)
 			dst <- eb.lookupLiquidSource(cmd.destination, state0.toImmutable)
 			tipModel_? <- cmd.tipModel_? match {
@@ -737,27 +737,10 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[PipetteSpec] = {
 		for {
-			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb)
-			source_l <- RsResult.toResultOfList(cmd.source.map(TitrationSeriesParser.parseSource))
-			src_l <- RsResult.toResultOfList(source_l.map(s => eb.lookupLiquidSource(s.source, state0.toImmutable)))
-			dst <- eb.lookupLiquidSource(cmd.destination, state0.toImmutable)
-			tipModel_? <- cmd.tipModel_? match {
-				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
-				case _ => RsSuccess(None)
-			}
-		} yield {
-			PipetteSpec(
-				src,
-				dst,
-				cmd.volume,
-				cmd.pipettePolicy_?,
-				cmd.sterilize_?,
-				cmd.sterilizeBefore_?,
-				cmd.sterilizeBetween_?,
-				cmd.sterilizeAfter_?,
-				tipModel_?
-			)
-		}
+			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
+			_ = println(cmd)
+			_ <- RqError("not implemented")
+		} yield null
 	}
 	
 	private def x(fields: Map[String, JsValue], id: String): String =

@@ -324,7 +324,14 @@ object Converter {
 						val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 						val name_l = fields.toList.map(_._1)
 						val nameToType_l = name_l.map(_ -> typVal)
-						convMap(path_r, jsobj, typKey, nameToType_l, eb, state_?, id_?)
+						for {
+							res <- convMap(path_r, jsobj, typKey, nameToType_l, eb, state_?, id_?)
+						} yield {
+							res match {
+								case Right(map) => ConvObject(map)
+								case Left(req) => req
+							}
+						}
 					case JsNull => RqSuccess(ConvObject(Map()))
 					case _ =>
 						RqError("expected a JsObject")
@@ -342,23 +349,25 @@ object Converter {
 					case JsString(s) =>
 						for {
 							nameToVal_l <- parseStringToArgs(s)
-							res <- convArgs(nameToVal_l, typ, eb, state_?)
-						} yield ConvObject(res)
+							res <- convArgsToMap(path_r, nameToVal_l, typ, nameToType_l, eb, state_?)
+							//_ = println("res: "+res.toString)
+						} yield res
 					case _ =>
 						convListToObject(path_r, List(jsval), nameToType_l, eb, state_?, id_?)
 					//case _ =>
 					//	RqError(s"unhandled type or value. type=${typ}, value=${jsval}")
 				}
 				res.map(_ match {
-					case ConvObject(o) =>
-						val nameToObj_m = o.asInstanceOf[Map[String, _]]
+					case Right(map) =>
+						val nameToObj_m = map.asInstanceOf[Map[String, _]]
 						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
 						val c = typ.typeSymbol.asClass
+						//println("arg_l: "+arg_l)
 						val mm = mirror.reflectClass(c).reflectConstructor(ctor)
 						logger.debug("arg_l: "+arg_l)
 						val obj = mm(arg_l : _*)
 						ConvObject(obj)
-					case r => r
+					case Left(r) => r
 				})
 			}
 			logger.debug(ret)
@@ -450,7 +459,7 @@ object Converter {
 		eb: EntityBase,
 		state_? : Option[WorldState],
 		id_? : Option[String]
-	): RqResult[ConvResult] = {
+	): RqResult[Either[ConvRequire, Map[String, _]]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -493,10 +502,10 @@ object Converter {
 				val conv_l = convV_l
 				// Nothing to look up
 				if (conv_l.isEmpty) {
-					RqSuccess(ConvObject((key_l zip val_l).toMap), warning_l)
+					RqSuccess(Right((key_l zip val_l).toMap), warning_l)
 				}
 				else {
-					RqSuccess(ConvRequire(conv_l), warning_l)
+					RqSuccess(Left(ConvRequire(conv_l)), warning_l)
 				}
 			case _ =>
 				RqError(err_l, warning_l)
@@ -512,7 +521,7 @@ object Converter {
 		eb: EntityBase,
 		state_? : Option[WorldState],
 		id_? : Option[String]
-	): RqResult[ConvResult] = {
+	): RqResult[Either[ConvRequire, Map[_, _]]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -573,15 +582,75 @@ object Converter {
 				val conv_l = convV_l ++ convK_l
 				// Nothing to look up
 				if (conv_l.isEmpty) {
-					RqSuccess(ConvObject((key_l zip val_l).toMap), warning_l)
+					RqSuccess(Right((key_l zip val_l).toMap), warning_l)
 				}
 				else {
-					RqSuccess(ConvRequire(conv_l), warning_l)
+					RqSuccess(Left(ConvRequire(conv_l)), warning_l)
 				}
 			case _ =>
 				RqError(err_l, warning_l)
 		}
 	}
+
+	private def convArgsToMap(
+		path_r: List[String],
+		nameToVal_l: List[(Option[String], JsValue)],
+		typ: ru.Type,
+		nameToType_l: List[(String, ru.Type)],
+		eb: EntityBase,
+		state_? : Option[WorldState]
+	): RqResult[Either[ConvRequire, Map[String, _]]] = {
+		import scala.reflect.runtime.universe._
+
+		def doit(
+			nameToType_l: List[(String, Type)],
+			jsval_l: List[JsValue],
+			nameToVal_m: Map[String, JsValue],
+			acc_r: List[JsValue]
+		): RqResult[List[JsValue]] = {
+			nameToType_l match {
+				case Nil =>
+					// TODO: return warning for any extra parameters
+					RsSuccess(acc_r.reverse)
+				case nameToType :: nameToType_l_~ =>
+					val (name, typ) = nameToType
+					// Check whether named parameter is provided
+					nameToVal_m.get(name) match {
+						case Some(jsval) =>
+							val nameToVal_m_~ = nameToVal_m - name
+							doit(nameToType_l_~, jsval_l, nameToVal_m_~, jsval :: acc_r)
+						case None =>
+							jsval_l match {
+								// Use unnamed parameter
+								case jsval :: jsval_l_~ =>
+									doit(nameToType_l_~, jsval_l_~, nameToVal_m, jsval :: acc_r)
+								// Else parameter value is blank
+								case Nil =>
+									doit(nameToType_l_~, jsval_l, nameToVal_m, JsNull :: acc_r)
+							}
+					}
+			}
+		}
+
+		val jsval_l = nameToVal_l.collect({case (None, jsval) => jsval})
+		val nameToVal2_l: List[(String, JsValue)] = nameToVal_l.collect({case (Some(name), jsval) => (name, jsval)})
+		val nameToVals_m: Map[String, List[(String, JsValue)]] = nameToVal2_l.groupBy(_._1)
+		val nameToVals_l: List[(String, List[JsValue])] = nameToVals_m.toList.map(pair => pair._1 -> pair._2.map(_._2))
+		
+		for {
+			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
+				val (name, jsval_l) = pair
+				jsval_l match {
+					case jsval :: Nil => RsSuccess((name, jsval))
+					case _ => RsError(s"too many values supplied for argument `$name`")
+				}
+			}))
+			nameToVal_m = nameToVal3_l.toMap
+			l <- doit(nameToType_l, jsval_l, nameToVal_m, Nil)
+			res <- convListToObject(path_r, l, nameToType_l, eb, state_?, None)
+		} yield res
+	}
+	
 	private def parseStringToArgs(
 		line: String
 	): RsResult[List[(Option[String], JsValue)]] = {
