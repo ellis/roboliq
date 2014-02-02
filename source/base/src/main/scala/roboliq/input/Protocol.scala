@@ -724,16 +724,16 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[Unit] = {
 		for {
-			spec <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
-			labware_l = Nil //(spec.source_l ++ spec.destination_l).map(_._1).distinct
+			spec_l <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
+			labware_l = spec_l.flatMap(spec => (spec.source_l ++ spec.destination_l).map(_._1)).distinct
 			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
 			val agentIdent = f"?a$nvar%04d"
 			val deviceIdent = f"?d$nvar%04d"
 			val n = labware_l.size
 			val specIdent = f"spec$nvar%04d"
-			idToObject(specIdent) = spec
-			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+			idToObject(specIdent) = spec_l
+			tasks += Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
 		}
 	}
 	
@@ -743,23 +743,25 @@ class Protocol {
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
-			_ = println("cmd: "+cmd)
-			_ <- RqError("woops")
+			//_ = println("cmd: "+cmd)
 		} yield {
-			null
-			/*cmd.source.map(step => {
-				PipetteSpec(
-					step.source,
-					step.des,
-					cmd.volume,
-					cmd.pipettePolicy_?,
-					cmd.sterilize_?,
-					cmd.sterilizeBefore_?,
-					cmd.sterilizeBetween_?,
-					cmd.sterilizeAfter_?,
-					tipModel_?
-				)
-			})*/
+			cmd.source.flatMap(step => {
+				(step.volume_?) match {
+					case (Some(volume)) =>
+						Some(PipetteSpec(
+							step.source.l,
+							cmd.destination.l,
+							volume,
+							step.pipettePolicy_?,
+							step.sterilize_?,
+							step.sterilizeBefore_?,
+							step.sterilizeBetween_?,
+							step.sterilizeAfter_?,
+							None // FIXME: handle tipModel_?
+						))
+					case _ => None
+				}
+			})
 		}
 	}
 	

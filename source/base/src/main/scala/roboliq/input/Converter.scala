@@ -781,7 +781,7 @@ object Converter {
 	def toLiquidSource(
 		jsval: JsValue,
 		eb: EntityBase,
-		state_? : Option[WorldState] = None
+		state_? : Option[WorldState]
 	): RqResult[LiquidSource] = {
 		jsval match {
 			case JsString(s) =>
@@ -799,7 +799,7 @@ object Converter {
 	def toLiquidDestination(
 		jsval: JsValue,
 		eb: EntityBase,
-		state_? : Option[WorldState] = None
+		state_? : Option[WorldState]
 	): RqResult[LiquidDestination] = {
 		jsval match {
 			case JsString(s) =>

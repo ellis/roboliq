@@ -26,6 +26,6 @@ protocol:
         - substance3 min=0ul max=20ul
         - substance4 20ul
         - substance5
-      destination: pcrPlate1
+      destination: pcrPlate1(A01xH12)
       volume: 100ul
   - seal pcrPlate1

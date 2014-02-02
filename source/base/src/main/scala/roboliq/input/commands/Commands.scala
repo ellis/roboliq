@@ -29,7 +29,7 @@ case class TitrationSource(
 
 case class TitrationSeries(
 	source: List[TitrationStep],
-	destination: String,
+	destination: LiquidDestination,
 	volume_? : Option[LiquidVolume]
 ) extends Command
 
