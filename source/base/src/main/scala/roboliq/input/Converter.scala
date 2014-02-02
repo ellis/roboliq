@@ -123,9 +123,13 @@ object Converter {
 		else RsError("INTERNAL")
 	}
 	
-	def convAs[A: TypeTag](jsval: JsValue, eb: EntityBase): RqResult[A] = {
+	def convAs[A: TypeTag](
+		jsval: JsValue,
+		eb: EntityBase,
+		state_? : Option[WorldState]
+	): RqResult[A] = {
 		val typ = ru.typeTag[A].tpe
-		convOrRequire(Nil, jsval, typ, eb).flatMap(_ match {
+		convOrRequire(Nil, jsval, typ, eb, state_?).flatMap(_ match {
 			case ConvRequire(m) => RqError("need to lookup values for "+m.keys.mkString(", "))
 			case ConvObject(o) => RqSuccess(o.asInstanceOf[A])
 		})
@@ -133,11 +137,25 @@ object Converter {
 	
 	def convCommandAs[A <: commands.Command : TypeTag](
 		nameToVal_l: List[(Option[String], JsValue)],
-		eb: EntityBase
+		eb: EntityBase,
+		state: WorldState
 	): RqResult[A] = {
 		import scala.reflect.runtime.universe._
 
 		val typ = ru.typeTag[A].tpe
+		for {
+			res <- convArgs(nameToVal_l, typ, eb, Some(state))
+		} yield res.asInstanceOf[A]
+	}
+	
+	def convArgs(
+		nameToVal_l: List[(Option[String], JsValue)],
+		typ: ru.Type,
+		eb: EntityBase,
+		state_? : Option[WorldState]
+	): RqResult[Any] = {
+		import scala.reflect.runtime.universe._
+
 		val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 		val p0_l = ctor.paramss(0)
 		val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
@@ -147,7 +165,7 @@ object Converter {
 			jsval_l: List[JsValue],
 			nameToVal_m: Map[String, JsValue],
 			acc_r: List[JsValue]
-		): RsResult[List[JsValue]] = {
+		): RqResult[List[JsValue]] = {
 			nameToType_l match {
 				case Nil =>
 					// TODO: return warning for any extra parameters
@@ -187,12 +205,17 @@ object Converter {
 			}))
 			nameToVal_m = nameToVal3_l.toMap
 			l <- doit(nameToType_l, jsval_l, nameToVal_m, Nil)
-			res <- conv(JsArray(l), typ, eb)
-		} yield res.asInstanceOf[A]
+			res <- conv(JsArray(l), typ, eb, state_?)
+		} yield res
 	}
 	
-	def conv(jsval: JsValue, typ: ru.Type, eb: EntityBase): RqResult[Any] = {
-		convOrRequire(Nil, jsval, typ, eb).flatMap(_ match {
+	def conv(
+		jsval: JsValue,
+		typ: ru.Type,
+		eb: EntityBase,
+		state_? : Option[WorldState] = None
+	): RqResult[Any] = {
+		convOrRequire(Nil, jsval, typ, eb, state_?).flatMap(_ match {
 			case ConvRequire(m) => RqError("need to lookup values for "+m.keys.mkString(", "))
 			case ConvObject(o) => RqSuccess(o)
 		})
@@ -203,6 +226,7 @@ object Converter {
 		jsval: JsValue,
 		typ: Type,
 		eb: EntityBase,
+		state_? : Option[WorldState],
 		id_? : Option[String] = None
 	): RsResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
@@ -272,22 +296,22 @@ object Converter {
 			else if (typ <:< typeOf[Option[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 				if (jsval == JsNull) RqSuccess(ConvObject(None))
-				else convOrRequire(path_r, jsval, typ2, eb).map(_ match {
+				else convOrRequire(path_r, jsval, typ2, eb, state_?).map(_ match {
 					case ConvObject(o) => ConvObject(Option(o))
 					case res => res
 				})
 			}
 			else if (typ <:< typeOf[List[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-				convList(path_r, jsval, typ2, eb)
+				convList(path_r, jsval, typ2, eb, state_?)
 			}
 			else if (typ <:< typeOf[Set[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 				jsval match {
 					case jsobj @ JsObject(fields) =>
-						convSet(path_r, jsobj, typ2, eb)
+						convSet(path_r, jsobj, typ2, eb, state_?)
 					case _ =>
-						convList(path_r, jsval, typ2, eb).map(_ match {
+						convList(path_r, jsval, typ2, eb, state_?).map(_ match {
 							case ConvObject(l: List[_]) => ConvObject(Set(l : _*))
 							case r => r
 						})
@@ -300,7 +324,7 @@ object Converter {
 						val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 						val name_l = fields.toList.map(_._1)
 						val nameToType_l = name_l.map(_ -> typVal)
-						convMap(path_r, jsobj, typKey, nameToType_l, eb, id_?)
+						convMap(path_r, jsobj, typKey, nameToType_l, eb, state_?, id_?)
 					case JsNull => RqSuccess(ConvObject(Map()))
 					case _ =>
 						RqError("expected a JsObject")
@@ -312,11 +336,16 @@ object Converter {
 				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
 				val res = jsval match {
 					case jsobj: JsObject =>
-						convMap(path_r, jsobj, typeOf[String], nameToType_l, eb, id_?)
+						convMap(path_r, jsobj, typeOf[String], nameToType_l, eb, state_?, id_?)
 					case JsArray(jsval_l) =>
-						convListToObject(path_r, jsval_l, nameToType_l, eb, id_?)
+						convListToObject(path_r, jsval_l, nameToType_l, eb, state_?, id_?)
+					case JsString(s) =>
+						for {
+							nameToVal_l <- parseStringToArgs(s)
+							res <- convArgs(nameToVal_l, typ, eb, state_?)
+						} yield ConvObject(res)
 					case _ =>
-						convListToObject(path_r, List(jsval), nameToType_l, eb, id_?)
+						convListToObject(path_r, List(jsval), nameToType_l, eb, state_?, id_?)
 					//case _ =>
 					//	RqError(s"unhandled type or value. type=${typ}, value=${jsval}")
 				}
@@ -345,7 +374,8 @@ object Converter {
 		path_r: List[String],
 		jsval: JsValue,
 		typ2: Type,
-		eb: EntityBase
+		eb: EntityBase,
+		state_? : Option[WorldState]
 	): RsResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
@@ -360,7 +390,7 @@ object Converter {
 						case Nil => List(s"[$i]")
 						case head :: rest => (s"$head[$i]") :: rest
 					}
-					convOrRequire(path2_r, jsval2, typ2, eb)
+					convOrRequire(path2_r, jsval2, typ2, eb, state_?)
 				}))
 				// If there were no errors in conversion,
 				res0.map(l => {
@@ -376,7 +406,7 @@ object Converter {
 			case JsNull =>
 				RsSuccess(ConvObject(Nil))
 			case _ =>
-				convOrRequire(path_r, jsval, typ2, eb).map(_ match {
+				convOrRequire(path_r, jsval, typ2, eb, state_?).map(_ match {
 					case x: ConvRequire => x
 					case ConvObject(o) => ConvObject(List(o))
 				}).orElse(RsError(s"expected an array of ${typ2.typeSymbol.name.toString}"))
@@ -387,7 +417,8 @@ object Converter {
 		path_r: List[String],
 		jsobj: JsObject,
 		typ2: Type,
-		eb: EntityBase
+		eb: EntityBase,
+		state_? : Option[WorldState]
 	): RsResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
 		
@@ -397,7 +428,7 @@ object Converter {
 		val res0 = RqResult.toResultOfList(jsobj.fields.toList.map(pair => {
 			val (id, jsval) = pair
 			val path_r_~ = id :: path_r
-			convOrRequire(path_r_~, jsval, typ2, eb, Some(id))
+			convOrRequire(path_r_~, jsval, typ2, eb, state_?, Some(id))
 		}))
 		// If there were no errors in conversion,
 		res0.map(l => {
@@ -417,6 +448,7 @@ object Converter {
 		jsval_l: List[JsValue],
 		nameToType_l: List[(String, ru.Type)],
 		eb: EntityBase,
+		state_? : Option[WorldState],
 		id_? : Option[String]
 	): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
@@ -436,10 +468,10 @@ object Converter {
 					jsval_l_~ match {
 						case jsval :: rest =>
 							jsval_l_~ = rest
-							convOrRequire(path2_r, jsval, typ2, eb, Some(name))
+							convOrRequire(path2_r, jsval, typ2, eb, state_?, Some(name))
 						// Else try using JsNull
 						case Nil =>
-							convOrRequire(path2_r, JsNull, typ2, eb, Some(name))
+							convOrRequire(path2_r, JsNull, typ2, eb, state_?, Some(name))
 					}
 				}
 			}))
@@ -478,6 +510,7 @@ object Converter {
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)],
 		eb: EntityBase,
+		state_? : Option[WorldState],
 		id_? : Option[String]
 	): RqResult[ConvResult] = {
 		import scala.reflect.runtime.universe._
@@ -492,7 +525,7 @@ object Converter {
 					val res0 = RqResult.toResultOfList(nameToType_l.map(pair => {
 						val (id, _) = pair
 						val path2_r = (id + "#") :: path_r
-						convOrRequire(path2_r, JsString(id), typKey, eb)
+						convOrRequire(path2_r, JsString(id), typKey, eb, state_?)
 					}))
 					res0 match {
 						case RqError(e, w) => (e, w, Map(), Nil)
@@ -512,7 +545,7 @@ object Converter {
 				val (name, typ2) = pair
 				val path2_r = name :: path_r
 				jsobj.fields.get(name) match {
-					case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, eb, Some(name))
+					case Some(jsval2) => convOrRequire(path2_r, jsval2, typ2, eb, state_?, Some(name))
 					// Field is missing
 					case None =>
 						// If this is the special ID field, and an ID was passed:
@@ -520,7 +553,7 @@ object Converter {
 							RsSuccess(ConvObject(id_?.get))
 						// Else try using JsNull
 						else
-							convOrRequire(path2_r, JsNull, typ2, eb, Some(name))
+							convOrRequire(path2_r, JsNull, typ2, eb, state_?, Some(name))
 				}
 			}))
 			res0 match {
@@ -548,6 +581,17 @@ object Converter {
 			case _ =>
 				RqError(err_l, warning_l)
 		}
+	}
+	private def parseStringToArgs(
+		line: String
+	): RsResult[List[(Option[String], JsValue)]] = {
+		val arg_l = line.split(" ").toList
+		val l = arg_l.map { s =>
+			val i = s.indexOf("=")
+			if (i > 0) (Some(s.substring(0, i)), JsString(s.substring(i + 1)))
+			else (None, JsString(s))
+		}
+		RsSuccess(l)
 	}
 
 	def toJsValue(jsval: JsValue): RqResult[JsValue] =

@@ -171,3 +171,7 @@ object PipettePolicy {
 		PipettePolicy(name, pos)
 	}
 }
+
+case class LiquidSource(l: List[(Labware, RowCol)])
+
+case class LiquidDestination(l: List[(Labware, RowCol)])

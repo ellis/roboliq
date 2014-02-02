@@ -17,6 +17,7 @@ import java.io.File
 import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
+import roboliq.input.commands.TitrationSeriesParser
 
 case class ReagentBean(
 	id: String,
@@ -547,6 +548,8 @@ class Protocol {
 				} yield ()
 			case "distribute" =>
 				loadJsonProtocol_Distribute(nameVal_l)
+			case "titrationSeries" =>
+				loadJsonProtocol_TitrationSeries(nameVal_l)
 			case _ =>
 				RsSuccess(())
 		}
@@ -693,6 +696,50 @@ class Protocol {
 		for {
 			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb)
 			src <- eb.lookupLiquidSource(cmd.source, state0.toImmutable)
+			dst <- eb.lookupLiquidSource(cmd.destination, state0.toImmutable)
+			tipModel_? <- cmd.tipModel_? match {
+				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
+				case _ => RsSuccess(None)
+			}
+		} yield {
+			PipetteSpec(
+				src,
+				dst,
+				cmd.volume,
+				cmd.pipettePolicy_?,
+				cmd.sterilize_?,
+				cmd.sterilizeBefore_?,
+				cmd.sterilizeBetween_?,
+				cmd.sterilizeAfter_?,
+				tipModel_?
+			)
+		}
+	}
+	
+	private def loadJsonProtocol_TitrationSeries(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[Unit] = {
+		for {
+			spec <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
+			labware_l = (spec.source_l ++ spec.destination_l).map(_._1).distinct
+			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
+		} yield {
+			val agentIdent = f"?a$nvar%04d"
+			val deviceIdent = f"?d$nvar%04d"
+			val n = labware_l.size
+			val specIdent = f"spec$nvar%04d"
+			idToObject(specIdent) = spec
+			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+		}
+	}
+	
+	private def loadJsonProtocol_TitrationSeriesSub(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[PipetteSpec] = {
+		for {
+			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb)
+			source_l <- RsResult.toResultOfList(cmd.source.map(TitrationSeriesParser.parseSource))
+			src_l <- RsResult.toResultOfList(source_l.map(s => eb.lookupLiquidSource(s.source, state0.toImmutable)))
 			dst <- eb.lookupLiquidSource(cmd.destination, state0.toImmutable)
 			tipModel_? <- cmd.tipModel_? match {
 				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
