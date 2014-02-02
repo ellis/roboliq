@@ -1,0 +1,36 @@
+roboease: 1
+robolic
+roboliq
+robolique
+
+# Labware used in this protocol
+# labware_name: labware_model
+labware:
+  sourcePlate1: D-BSSE 96 Well DWP
+  pcrPlate1: Thermocycler Plate
+
+# Reagents used in this protocol
+# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
+reagents:
+  substance1: sourcePlate1(A01|H01)
+  substance2: sourcePlate1(A02|H02)
+  substance3: sourcePlate1(A03|H03)
+  substance4: sourcePlate1(A04|H04)
+  substance5: sourcePlate1(A05|H05)
+
+protocol:
+  - distribute substance1 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
+  - distribute substance2 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
+  - distribute substance3 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
+  - distribute substance4 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
+  - distribute substance5 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
+  - titrationSeries:
+      sources:
+        - substance1 20ul
+        - substance2 20ul
+        - substance3 (range 0 20ul)
+        - substance4 20ul
+        - substance5
+      destination: pcrPlate1
+      volume: 100ul
+  - seal pcrPlate1
