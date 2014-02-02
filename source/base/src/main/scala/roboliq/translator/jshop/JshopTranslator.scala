@@ -117,6 +117,8 @@ object JshopTranslator {
 				val specIdent = arg_l(1)
 				protocol.idToObject(specIdent) match {
 					case spec: PipetteSpecList => {
+						println("spec list:")
+						spec.step_l.foreach(println)
 						for {
 							command_ll <- RsResult.toResultOfList(spec.step_l.map(spec2 => handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec2, arg_l)))
 						} yield combineTipsRefreshCommands(command_ll.flatten)

@@ -732,7 +732,7 @@ class Protocol {
 			val deviceIdent = f"?d$nvar%04d"
 			val n = labware_l.size
 			val specIdent = f"spec$nvar%04d"
-			idToObject(specIdent) = spec_l
+			idToObject(specIdent) = PipetteSpecList(spec_l)
 			tasks += Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
 		}
 	}
