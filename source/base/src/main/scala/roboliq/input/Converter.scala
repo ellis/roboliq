@@ -292,6 +292,8 @@ object Converter {
 			else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
 			else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
 			else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
+			else if (typ =:= typeOf[LiquidDestination]) toLiquidDestination(jsval, eb, state_?)
+			else if (typ =:= typeOf[LiquidSource]) toLiquidSource(jsval, eb, state_?)
 			//else if (typ <:< typeOf[Substance]) toSubstance(jsval)
 			else if (typ <:< typeOf[Option[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
@@ -343,13 +345,14 @@ object Converter {
 				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
 				val res = jsval match {
 					case jsobj: JsObject =>
-						convMap(path_r, jsobj, typeOf[String], nameToType_l, eb, state_?, id_?)
+						convMapString(path_r, jsobj, nameToType_l, eb, state_?, id_?)
 					case JsArray(jsval_l) =>
 						convListToObject(path_r, jsval_l, nameToType_l, eb, state_?, id_?)
 					case JsString(s) =>
 						for {
 							nameToVal_l <- parseStringToArgs(s)
-							res <- convArgsToMap(path_r, nameToVal_l, typ, nameToType_l, eb, state_?)
+							//_ = println("nameToVal_l: "+nameToVal_l.toString)
+							res <- convArgsToMap(path_r, nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
 							//_ = println("res: "+res.toString)
 						} yield res
 					case _ =>
@@ -358,8 +361,7 @@ object Converter {
 					//	RqError(s"unhandled type or value. type=${typ}, value=${jsval}")
 				}
 				res.map(_ match {
-					case Right(map) =>
-						val nameToObj_m = map.asInstanceOf[Map[String, _]]
+					case Right(nameToObj_m) =>
 						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
 						val c = typ.typeSymbol.asClass
 						//println("arg_l: "+arg_l)
@@ -512,7 +514,6 @@ object Converter {
 		}
 	}
 
-	
 	private def convMap(
 		path_r: List[String],
 		jsobj: JsObject,
@@ -592,13 +593,32 @@ object Converter {
 		}
 	}
 
+	private def convMapString(
+		path_r: List[String],
+		jsobj: JsObject,
+		nameToType_l: List[(String, ru.Type)],
+		eb: EntityBase,
+		state_? : Option[WorldState],
+		id_? : Option[String]
+	): RqResult[Either[ConvRequire, Map[String, _]]] = {
+		for {
+			res <- convMap(path_r, jsobj, typeOf[String], nameToType_l, eb, state_?, id_?)
+		} yield {
+			res match {
+				case Right(map) => Right(map.asInstanceOf[Map[String, _]])
+				case Left(x) => Left(x)
+			}
+		}
+	}
+	
 	private def convArgsToMap(
 		path_r: List[String],
 		nameToVal_l: List[(Option[String], JsValue)],
 		typ: ru.Type,
 		nameToType_l: List[(String, ru.Type)],
 		eb: EntityBase,
-		state_? : Option[WorldState]
+		state_? : Option[WorldState],
+		id_? : Option[String]
 	): RqResult[Either[ConvRequire, Map[String, _]]] = {
 		import scala.reflect.runtime.universe._
 
@@ -606,27 +626,27 @@ object Converter {
 			nameToType_l: List[(String, Type)],
 			jsval_l: List[JsValue],
 			nameToVal_m: Map[String, JsValue],
-			acc_r: List[JsValue]
-		): RqResult[List[JsValue]] = {
+			acc: Map[String, JsValue]
+		): RqResult[Map[String, JsValue]] = {
 			nameToType_l match {
 				case Nil =>
 					// TODO: return warning for any extra parameters
-					RsSuccess(acc_r.reverse)
+					RsSuccess(acc)
 				case nameToType :: nameToType_l_~ =>
 					val (name, typ) = nameToType
 					// Check whether named parameter is provided
 					nameToVal_m.get(name) match {
 						case Some(jsval) =>
 							val nameToVal_m_~ = nameToVal_m - name
-							doit(nameToType_l_~, jsval_l, nameToVal_m_~, jsval :: acc_r)
+							doit(nameToType_l_~, jsval_l, nameToVal_m_~, acc + (name -> jsval))
 						case None =>
 							jsval_l match {
 								// Use unnamed parameter
 								case jsval :: jsval_l_~ =>
-									doit(nameToType_l_~, jsval_l_~, nameToVal_m, jsval :: acc_r)
+									doit(nameToType_l_~, jsval_l_~, nameToVal_m, acc + (name -> jsval))
 								// Else parameter value is blank
 								case Nil =>
-									doit(nameToType_l_~, jsval_l, nameToVal_m, JsNull :: acc_r)
+									doit(nameToType_l_~, jsval_l, nameToVal_m, acc)
 							}
 					}
 			}
@@ -636,6 +656,11 @@ object Converter {
 		val nameToVal2_l: List[(String, JsValue)] = nameToVal_l.collect({case (Some(name), jsval) => (name, jsval)})
 		val nameToVals_m: Map[String, List[(String, JsValue)]] = nameToVal2_l.groupBy(_._1)
 		val nameToVals_l: List[(String, List[JsValue])] = nameToVals_m.toList.map(pair => pair._1 -> pair._2.map(_._2))
+		// If the nameToType list has "id" and we are passed id_?:
+		val (nameToType2_l, map0): (List[(String, ru.Type)], Map[String, JsValue]) = (id_?, nameToType_l) match {
+			case (Some(id), ("id", _) :: rest) => (rest, Map("id" -> JsString(id)))
+			case _ => (nameToType_l, Map())
+		}
 		
 		for {
 			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
@@ -646,8 +671,9 @@ object Converter {
 				}
 			}))
 			nameToVal_m = nameToVal3_l.toMap
-			l <- doit(nameToType_l, jsval_l, nameToVal_m, Nil)
-			res <- convListToObject(path_r, l, nameToType_l, eb, state_?, None)
+			map <- doit(nameToType2_l, jsval_l, nameToVal_m, map0)
+			//_ = println("map: "+map)
+			res <- convMapString(path_r, JsObject(map), nameToType_l, eb, state_?, id_?)
 		} yield res
 	}
 	
@@ -749,6 +775,43 @@ object Converter {
 				RqSuccess(v)
 			case JsNumber(n) => RqSuccess(LiquidVolume.l(n))
 			case _ => RqError("expected JsString in volume format")
+		}
+	}
+
+	def toLiquidSource(
+		jsval: JsValue,
+		eb: EntityBase,
+		state_? : Option[WorldState] = None
+	): RqResult[LiquidSource] = {
+		jsval match {
+			case JsString(s) =>
+				state_? match {
+					case None => RqError("require world state information for liquid source")
+					case Some(state) =>
+						for {
+							l <- eb.lookupLiquidSource(s, state)
+						} yield LiquidSource(l)
+				}
+			case _ => RqError("expected JsString in liquid source")
+		}
+	}
+
+	def toLiquidDestination(
+		jsval: JsValue,
+		eb: EntityBase,
+		state_? : Option[WorldState] = None
+	): RqResult[LiquidDestination] = {
+		jsval match {
+			case JsString(s) =>
+				state_? match {
+					case None => RqError("require world state information for liquid source")
+					case Some(state) =>
+						for {
+							// FIXME: need to create/use a lookupLiquidDestination function
+							l <- eb.lookupLiquidSource(s, state)
+						} yield LiquidDestination(l)
+				}
+			case _ => RqError("expected JsString in liquid source")
 		}
 	}
 }

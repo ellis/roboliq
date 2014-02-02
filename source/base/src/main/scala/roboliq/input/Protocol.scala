@@ -171,9 +171,13 @@ class Protocol {
 			case _ =>
 		}
 		
+		//println(jsobj.fields.get("reagents"))
 		jsobj.fields.get("reagents").map(jsval => {
+			//println("jsval: "+jsval)
+			//println(Converter.convAs[Set[ReagentBean]](jsval, eb, None))
 			for {
 				reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, None)
+				//_ = println("reagentBean_l: "+reagentBean_l)
 				substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
 					val key = bean.key_?.getOrElse(gid)
 					val name = bean.id
@@ -721,7 +725,7 @@ class Protocol {
 	): RsResult[Unit] = {
 		for {
 			spec <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
-			labware_l = (spec.source_l ++ spec.destination_l).map(_._1).distinct
+			labware_l = Nil //(spec.source_l ++ spec.destination_l).map(_._1).distinct
 			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
 			val agentIdent = f"?a$nvar%04d"
@@ -735,12 +739,28 @@ class Protocol {
 	
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
-	): RsResult[PipetteSpec] = {
+	): RsResult[List[PipetteSpec]] = {
+		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
-			_ = println(cmd)
-			_ <- RqError("not implemented")
-		} yield null
+			_ = println("cmd: "+cmd)
+			_ <- RqError("woops")
+		} yield {
+			null
+			/*cmd.source.map(step => {
+				PipetteSpec(
+					step.source,
+					step.des,
+					cmd.volume,
+					cmd.pipettePolicy_?,
+					cmd.sterilize_?,
+					cmd.sterilizeBefore_?,
+					cmd.sterilizeBetween_?,
+					cmd.sterilizeAfter_?,
+					tipModel_?
+				)
+			})*/
+		}
 	}
 	
 	private def x(fields: Map[String, JsValue], id: String): String =

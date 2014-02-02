@@ -34,7 +34,7 @@ case class TitrationSeries(
 ) extends Command
 
 case class TitrationStep(
-	source: String,
+	source: LiquidSource,
 	volume_? : Option[LiquidVolume],
 	min_? : Option[LiquidVolume],
 	max_? : Option[LiquidVolume],
