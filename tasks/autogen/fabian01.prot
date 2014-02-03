@@ -7,11 +7,11 @@ labware:
 # Reagents used in this protocol
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
 reagents:
-  substance1: sourcePlate1(A01)
-  substance2: sourcePlate1(A02)
-  substance3: sourcePlate1(A03)
-  substance4: sourcePlate1(A04)
-  substance5: sourcePlate1(A05)
+  substance1: sourcePlate1(A01|B01)
+  substance2: sourcePlate1(A02|B02)
+  substance3: sourcePlate1(A03|B03)
+  substance4: sourcePlate1(A04|B04)
+  substance5: sourcePlate1(A05|B05)
   buffer: sourcePlate1(A06|D06)
   salt: sourcePlate1(A07|D07)
   liquid: sourcePlate1(A08|D08)
