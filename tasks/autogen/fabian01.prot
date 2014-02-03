@@ -2,7 +2,8 @@
 # labware_name: labware_model
 labware:
   sourcePlate1: D-BSSE 96 Well DWP
-  mixPlate: Thermocycler Plate
+#  mixPlate: Thermocycler Plate
+  mixPlate: "384 Well Plate"
 
 # Reagents used in this protocol
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
@@ -31,4 +32,4 @@ protocol:
           volume: 1ul
       destination: mixPlate(A01|B02)
       volume: 100ul
-  - seal mixPlate
+#  - seal mixPlate

@@ -5,7 +5,8 @@ evowareAgents:
     labware:
       - D-BSSE 96 Well PCR Plate
       - D-BSSE 96 Well DWP
-      - D-BSSE 384 Well Plate Black
+#      - D-BSSE 384 Well Plate Black
+      - D-BSSE 384 Well Plate White
 
     tipModels:
       Standard 50ul: { min: 0.1, max: 45 }
@@ -23,6 +24,7 @@ evowareAgents:
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
+  "384 Well Plate": D-BSSE 384 Well Plate White
 
 logic:
   - transporter-can userArm r1_hotel_245x1 userArmSpec
