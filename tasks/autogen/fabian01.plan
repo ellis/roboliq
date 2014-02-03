@@ -2,12 +2,12 @@
 
 (!agent-activate user)
 (!transporter-run user userarm sourceplate1 m001 offsite r1_bench_010x2 userarmspec)
-(!transporter-run user userarm pcrplate1 m002 offsite r1_hotel_245x1 userarmspec)
+(!transporter-run user userarm mixplate m003 offsite r1_hotel_245x1 userarmspec)
 (!agent-deactivate user)
 (!agent-activate r1)
-(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_hotel_245x1 r1_bench_010x4 r1_transporterspec0)
+(!transporter-run r1 r1_transporter2 mixplate m003 r1_hotel_245x1 r1_bench_010x4 r1_transporterspec0)
 (!pipetter-run r1 r1_pipetter1 spec0003)
-(!transporter-run r1 r1_transporter2 pcrplate1 m002 r1_bench_010x4 r1_device_236x1 r1_transporterspec0)
-(!sealer-run r1 r1_sealer sealerspec1 pcrplate1 r1_device_236x1)
+(!transporter-run r1 r1_transporter2 mixplate m003 r1_bench_010x4 r1_device_236x1 r1_transporterspec0)
+(!sealer-run r1 r1_sealer sealerspec1 mixplate r1_device_236x1)
 --------------------
 ]
