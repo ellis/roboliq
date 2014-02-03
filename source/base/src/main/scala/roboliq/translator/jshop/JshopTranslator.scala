@@ -221,12 +221,15 @@ object JshopTranslator {
 		val volume_l = spec.volume_l match {
 			case Nil => Nil
 			case x :: Nil => List.fill(spec.destination_l.length)(x)
-			case x => Stream.continually(x).flatten.take(spec.destination_l.length).toList
+			case x => x
 		}
 		
 		for {
 			// sources for the liquid we want to transfer
 			src_l <- RsResult.toResultOfList(spec.source_l.map(state.getWell))
+			
+			_ <- RqResult.assert(!volume_l.isEmpty, "Volumes must be specified for pipetting")
+			_ <- RqResult.assert(volume_l.length == spec.destination_l.length, "Same number of volumes must be specied as there are desination wells")
 			
 			// Create list of items for TransferPlanner
 			item_l <- RsResult.toResultOfList((spec.destination_l zip volume_l).map(pair => {

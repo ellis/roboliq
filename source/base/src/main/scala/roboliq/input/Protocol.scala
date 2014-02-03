@@ -779,7 +779,7 @@ class Protocol {
 					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
 					else RqSuccess(l)
 			}
-			stepToList_l = cmd.steps.filter(_.volume_?.isDefined).map(step => {
+			stepToList_l = cmd.steps.map(step => {
 				// If this is the filler step:
 				step.volume_? match {
 					case None => step -> fillVolume_l.map(step.source -> _)
