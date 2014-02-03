@@ -18,6 +18,7 @@ import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.input.commands.TitrationSeriesParser
+import roboliq.input.commands.TitrationStep
 
 case class ReagentBean(
 	id: String,
@@ -545,7 +546,7 @@ class Protocol {
 									}
 								}))
 								item_l = l2.flatten
-								labware_l = item_l.flatMap(item => item.source_l ++ item.destination_l).map(_._1).distinct
+								labware_l: List[Labware] = item_l.flatMap(item => item.sources.sources.flatMap(_.l) ++ item.destinations.l).map(_._1).distinct
 								labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 							} yield {
 								val agentIdent = f"?a$nvar%04d"
@@ -691,7 +692,7 @@ class Protocol {
 	): RsResult[Unit] = {
 		for {
 			spec <- loadJsonProtocol_DistributeSub(nameToVal_l)
-			labware_l = (spec.source_l ++ spec.destination_l).map(_._1).distinct
+			labware_l = (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_._1).distinct
 			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
 			val agentIdent = f"?a$nvar%04d"
@@ -709,14 +710,14 @@ class Protocol {
 		for {
 			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb, state0.toImmutable)
 			src <- eb.lookupLiquidSource(cmd.source, state0.toImmutable)
-			dst <- eb.lookupLiquidSource(cmd.destination, state0.toImmutable)
+			dst <- eb.lookupPipetteDestinations(cmd.destination)
 			tipModel_? <- cmd.tipModel_? match {
 				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
 				case _ => RsSuccess(None)
 			}
 		} yield {
 			PipetteSpec(
-				src,
+				PipetteSources(List(LiquidSource(src))),
 				dst,
 				List(cmd.volume),
 				cmd.pipettePolicy_?,
@@ -734,7 +735,7 @@ class Protocol {
 	): RsResult[Unit] = {
 		for {
 			spec_l <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
-			labware_l = spec_l.flatMap(spec => (spec.source_l ++ spec.destination_l).map(_._1)).distinct
+			labware_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_._1)).distinct
 			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
 			val agentIdent = f"?a$nvar%04d"
@@ -755,7 +756,7 @@ class Protocol {
 			//_ = println("cmd: "+cmd)
 			// Number of groups is the product of the number of unique sources and volumes for each step
 			groupCount = cmd.steps.map(step => {
-				step.source.length * step.volume_?.map(_.length).getOrElse(1)
+				step.source.sources.length * step.volume_?.map(_.length).getOrElse(1)
 			}).foldLeft(if (cmd.steps.isEmpty) 0 else 1){_ * _}
 			_ <- RqResult.assert(groupCount > 0, "A titration series must specify steps with reagents and volumes")
 			wellsPerGroup = cmd.destination.l.length / groupCount
@@ -775,10 +776,10 @@ class Protocol {
 				step.volume_? match {
 					case None => None
 					case Some(volume) =>
-						val wellsPerSource = wellCount / step.source.length
+						val wellsPerSource = wellCount / step.source.sources.length
 						val wellsPerVolume = wellsPerSource / volume.length
-						val source_l = step.source.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(step.source.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						val source_l = step.source.sources.flatMap(x => List.fill(wellsPerSource)(x))
+						val volume_l = List.fill(step.source.sources.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
 						//println("stuff:", wellsPerSource, wellsPerVolume, source_l.length, volume_l)
 						Some(source_l zip volume_l)
                 }
@@ -793,29 +794,31 @@ class Protocol {
 					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
 					else RqSuccess(l)
 			}
-			stepToList_l = cmd.steps.map(step => {
+			stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
 				// If this is the filler step:
 				step.volume_? match {
-					case None => step -> fillVolume_l.map(step.source -> _)
+					case None => val l = step -> fillVolume_l.map(step.source.sources.head -> _)
+						l
 					case Some(volume) =>
-						val wellsPerSource = wellCount / step.source.length
+						val wellsPerSource = wellCount / step.source.sources.length
 						val wellsPerVolume = wellsPerSource / volume.length
-						val source_l = step.source.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(step.source.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						val source_l = step.source.sources.flatMap(x => List.fill(wellsPerSource)(x))
+						val volume_l = List.fill(step.source.sources.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
 						//println("s x v: "+source_l.length+", "+volume_l.length)
-						step -> (source_l zip volume_l)
+						val l = step -> (source_l zip volume_l)
+						l
                 }
 			})
 		} yield {
-			val destination_l = cmd.destination.l.take(wellCount)
+			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
 			//println("len: "+stepToList_l.map(_._2.length))
 			stepToList_l.map(pair => {
 				val (step, sourceToVolume_l) = pair
 				val (source_l, volume_l) = sourceToVolume_l.unzip
 				//println("volume_l: "+volume_l)
 				PipetteSpec(
-					step.source.head.l,
-					destination_l,
+					PipetteSources(source_l),
+					destinations,
 					volume_l,
 					step.pipettePolicy_?,
 					step.sterilize_?,

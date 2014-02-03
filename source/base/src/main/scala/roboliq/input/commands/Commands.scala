@@ -30,12 +30,12 @@ case class TitrationSource(
 
 case class TitrationSeries(
 	steps: List[TitrationStep],
-	destination: LiquidDestination,
+	destination: PipetteDestinations,
 	volume_? : Option[LiquidVolume]
 ) extends Command
 
 case class TitrationStep(
-	source: List[LiquidSource],
+	source: PipetteSources,
 	volume_? : Option[List[LiquidVolume]],
 	min_? : Option[LiquidVolume],
 	max_? : Option[LiquidVolume],

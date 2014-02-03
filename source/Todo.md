@@ -3,8 +3,8 @@
 - [x] Create titationSeries command
 - [x] TitrationSeries: handle multiple volumes for a given step, for grouping
 - [x] TitrationSeries: handle reagent without volume, to use as filler
-- [?] TitrationSeries: handle multiple reagents for a given step, for grouping
-- [ ] Need to create a Transfer command for Pipetting, rather than using distribute!
+- [x] TitrationSeries: handle multiple reagents for a given step, for grouping
+- [x] TitrationSeries: BUG: for the multi-source step, all aspirations are happening from a single well
 - [ ] Use 384 well plate
 - [ ] small tips
 - [ ] Ask Fabian about a verb for the TitrationSeries command: titrate

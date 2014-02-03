@@ -174,4 +174,6 @@ object PipettePolicy {
 
 case class LiquidSource(l: List[(Labware, RowCol)])
 
-case class LiquidDestination(l: List[(Labware, RowCol)])
+case class PipetteSources(sources: List[LiquidSource])
+
+case class PipetteDestinations(l: List[(Labware, RowCol)])

@@ -5,8 +5,8 @@ import roboliq.entities._
 
 
 case class PipetteSpec(
-	source_l: List[(Labware, RowCol)],
-	destination_l: List[(Labware, RowCol)],
+	sources: PipetteSources,
+	destinations: PipetteDestinations,
 	volume_l: List[LiquidVolume],
 	pipettePolicy_? : Option[String],
 	sterilize_? : Option[CleanIntensity.Value],

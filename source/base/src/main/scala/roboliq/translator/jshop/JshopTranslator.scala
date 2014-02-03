@@ -218,23 +218,35 @@ object JshopTranslator {
 		
 		val state = state0.toMutable
 		
+		val source_l = spec.sources.sources match {
+			case Nil => Nil
+			case x :: Nil => List.fill(spec.destinations.l.length)(x)
+			case x => x
+		}
+		
 		val volume_l = spec.volume_l match {
 			case Nil => Nil
-			case x :: Nil => List.fill(spec.destination_l.length)(x)
+			case x :: Nil => List.fill(spec.destinations.l.length)(x)
 			case x => x
 		}
 		
 		for {
+			_ <- RqSuccess(()) // Dummy to let compile know that this should be an RqResult monad
 			// sources for the liquid we want to transfer
-			src_l <- RsResult.toResultOfList(spec.source_l.map(state.getWell))
+			//src_l <- RsResult.toResultOfList(source_l.map(state.getWell))
 			
+			_ <- RqResult.assert(!source_l.isEmpty, "Source must be specified for pipetting")
+			_ <- RqResult.assert(source_l.length == spec.destinations.l.length, "Must specify same number of sources and destinations")
 			_ <- RqResult.assert(!volume_l.isEmpty, "Volumes must be specified for pipetting")
-			_ <- RqResult.assert(volume_l.length == spec.destination_l.length, "Same number of volumes must be specied as there are desination wells: "+volume_l)
+			_ <- RqResult.assert(volume_l.length == spec.destinations.l.length, "Same number of volumes must be specied as there are desination wells")
 			
 			// Create list of items for TransferPlanner
-			item_l <- RsResult.toResultOfList((spec.destination_l zip volume_l).map(pair => {
-				val (dstKey, volume) = pair
-				state.getWell(dstKey).map(dst => Item(src_l, dst, volume))
+			item_l <- RsResult.toResultOfList((spec.destinations.l, source_l, volume_l).zipped.toList.map(tuple => {
+				val (dstKey, srcKey, volume) = tuple
+				for {
+					dst <- state.getWell(dstKey)
+					src_l <- RqResult.toResultOfList(srcKey.l.map(state.getWell))
+				} yield Item(src_l, dst, volume)
 			}))
 			
 			// Map of item to its source mixture
