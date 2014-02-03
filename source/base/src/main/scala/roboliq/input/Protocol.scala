@@ -744,23 +744,69 @@ class Protocol {
 		for {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
 			//_ = println("cmd: "+cmd)
+			// Number of groups is the product of the number of unique sources and volumes for each step
+			groupCount = cmd.steps.map(step => {
+				step.source.length * step.volume_?.map(_.length).getOrElse(1)
+			}).foldLeft(if (cmd.steps.isEmpty) 0 else 1){_ * _}
+			_ <- RqResult.assert(groupCount > 0, "A titration series must specify steps with reagents and volumes")
+			wellsPerGroup = cmd.destination.l.length / groupCount
+			_ <- RqResult.assert(wellsPerGroup > 0, "You must allocate more destination wells")
+			stepFiller_l = cmd.steps.filter(step => step.volume_?.isEmpty && step.min_?.isEmpty)
+			stepFiller_? <- stepFiller_l match {
+				case Nil => RqSuccess(None)
+				case step :: Nil => RqSuccess(Some(step))
+				case _ => RqError("Only one step may have an unspecified volume")
+			}
+			wellCount = wellsPerGroup * groupCount
+			l1 = cmd.steps.filter(_.volume_?.isDefined).map(step => {
+				// If this is the filler step:
+				step.volume_? match {
+					case None => Nil
+					case Some(volume) =>
+						val wellsPerSource = wellCount / step.source.length
+						val wellsPerVolume = wellsPerSource / volume.length
+						val source_l = step.source.flatMap(x => List.fill(wellsPerSource)(x))
+						val volume_l = List.fill(wellsPerSource / wellsPerVolume)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						source_l zip volume_l
+                }
+			})
+			l2 = l1.transpose
+			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){_ + _})
+			fillVolume_l <- cmd.volume_? match {
+				case None => RqSuccess(Nil)
+				case Some(volumeTotal) =>
+					val l = wellVolumeBeforeFill_l.map(volumeTotal - _)
+					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
+					else RqSuccess(l)
+			}
+			stepToList_l = cmd.steps.filter(_.volume_?.isDefined).map(step => {
+				// If this is the filler step:
+				step.volume_? match {
+					case None => step -> fillVolume_l.map(step.source -> _)
+					case Some(volume) =>
+						val wellsPerSource = wellCount / step.source.length
+						val wellsPerVolume = wellsPerSource / volume.length
+						val source_l = step.source.flatMap(x => List.fill(wellsPerSource)(x))
+						val volume_l = List.fill(wellsPerSource / wellsPerVolume)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						step -> (source_l zip volume_l)
+                }
+			})
 		} yield {
-			cmd.steps.flatMap(step => {
-				(step.volume_?) match {
-					case (Some(volume)) =>
-						Some(PipetteSpec(
-							step.source.head.l,
-							cmd.destination.l,
-							volume.head,
-							step.pipettePolicy_?,
-							step.sterilize_?,
-							step.sterilizeBefore_?,
-							step.sterilizeBetween_?,
-							step.sterilizeAfter_?,
-							None // FIXME: handle tipModel_?
-						))
-					case _ => None
-				}
+			val destination_l = cmd.destination.l.take(wellCount)
+			stepToList_l.map(pair => {
+				val (step, sourceToVolume_l) = pair
+				val (source_l, volume_l) = sourceToVolume_l.unzip
+				PipetteSpec(
+					step.source.head.l,
+					destination_l,
+					volume_l.head,
+					step.pipettePolicy_?,
+					step.sterilize_?,
+					step.sterilizeBefore_?,
+					step.sterilizeBetween_?,
+					step.sterilizeAfter_?,
+					None // FIXME: handle tipModel_?
+				)
 			})
 		}
 	}
