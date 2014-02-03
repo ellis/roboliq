@@ -28,7 +28,7 @@ protocol:
           volume: 20ul
         - source: water
         - source: [substance1,substance2,substance3,substance4,substance5]
-          volume: 30ul
+          volume: 1ul
       destination: pcrPlate1(A01|B02)
       volume: 100ul
   - seal pcrPlate1
