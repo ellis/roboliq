@@ -30,6 +30,6 @@ protocol:
         - source: water
         - source: [substance1,substance2,substance3,substance4,substance5]
           volume: 1ul
-      destination: mixPlate(A01|B02)
+      destination: mixPlate(A01|P24)
       volume: 100ul
 #  - seal mixPlate
