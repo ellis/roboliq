@@ -22,20 +22,21 @@ sealed trait TitrationAmount
 case class TitrationAmount_Volume(volume: LiquidVolume) extends TitrationAmount
 case class TitrationAmount_Range(min: LiquidVolume, max: LiquidVolume) extends TitrationAmount
 
+// REFACTOR: delete this
 case class TitrationSource(
 	source: String,
 	amount_? : Option[TitrationAmount]
 )
 
 case class TitrationSeries(
-	source: List[TitrationStep],
+	steps: List[TitrationStep],
 	destination: LiquidDestination,
 	volume_? : Option[LiquidVolume]
 ) extends Command
 
 case class TitrationStep(
-	source: LiquidSource,
-	volume_? : Option[LiquidVolume],
+	source: List[LiquidSource],
+	volume_? : Option[List[LiquidVolume]],
 	min_? : Option[LiquidVolume],
 	max_? : Option[LiquidVolume],
 	contact_? : Option[PipettePosition.Value],

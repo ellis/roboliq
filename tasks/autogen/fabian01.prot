@@ -20,7 +20,7 @@ protocol:
 #  - distribute substance4 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
 #  - distribute substance5 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
   - titrationSeries:
-      source:
+      steps:
         - substance1 20ul
         - substance2 20ul
         - substance3 min=0ul max=20ul

@@ -745,13 +745,13 @@ class Protocol {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
 			//_ = println("cmd: "+cmd)
 		} yield {
-			cmd.source.flatMap(step => {
+			cmd.steps.flatMap(step => {
 				(step.volume_?) match {
 					case (Some(volume)) =>
 						Some(PipetteSpec(
-							step.source.l,
+							step.source.head.l,
 							cmd.destination.l,
-							volume,
+							volume.head,
 							step.pipettePolicy_?,
 							step.sterilize_?,
 							step.sterilizeBefore_?,
