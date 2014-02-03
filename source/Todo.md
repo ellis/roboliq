@@ -5,6 +5,7 @@
 - [x] TitrationSeries: handle reagent without volume, to use as filler
 - [x] TitrationSeries: handle multiple reagents for a given step, for grouping
 - [x] TitrationSeries: BUG: for the multi-source step, all aspirations are happening from a single well
+- [ ] Speed up pipetting algorithm -- need to get it fast enough to handle 384 well plate
 - [ ] Use 384 well plate
 - [ ] Ask Fabian about a verb for the TitrationSeries command: titrate
 - [ ] TitrationSeries: filter out 0-volume dispenses
