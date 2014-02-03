@@ -218,13 +218,20 @@ object JshopTranslator {
 		
 		val state = state0.toMutable
 		
+		val volume_l = spec.volume_l match {
+			case Nil => Nil
+			case x :: Nil => List.fill(spec.destination_l.length)(x)
+			case x => Stream.continually(x).flatten.take(spec.destination_l.length).toList
+		}
+		
 		for {
 			// sources for the liquid we want to transfer
 			src_l <- RsResult.toResultOfList(spec.source_l.map(state.getWell))
 			
 			// Create list of items for TransferPlanner
-			item_l <- RsResult.toResultOfList(spec.destination_l.map(dstKey => {
-				state.getWell(dstKey).map(dst => Item(src_l, dst, spec.volume))
+			item_l <- RsResult.toResultOfList((spec.destination_l zip volume_l).map(pair => {
+				val (dstKey, volume) = pair
+				state.getWell(dstKey).map(dst => Item(src_l, dst, volume))
 			}))
 			
 			// Map of item to its source mixture

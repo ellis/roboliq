@@ -709,7 +709,7 @@ class Protocol {
 			PipetteSpec(
 				src,
 				dst,
-				cmd.volume,
+				List(cmd.volume),
 				cmd.pipettePolicy_?,
 				cmd.sterilize_?,
 				cmd.sterilizeBefore_?,
@@ -799,7 +799,7 @@ class Protocol {
 				PipetteSpec(
 					step.source.head.l,
 					destination_l,
-					volume_l.head,
+					volume_l,
 					step.pipettePolicy_?,
 					step.sterilize_?,
 					step.sterilizeBefore_?,
