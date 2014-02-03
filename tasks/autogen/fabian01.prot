@@ -12,21 +12,23 @@ reagents:
   substance3: sourcePlate1(A03|H03)
   substance4: sourcePlate1(A04|H04)
   substance5: sourcePlate1(A05|H05)
+  buffer: sourcePlate1(A06|D06)
+  salt: sourcePlate1(A07|D07)
+  liquid: sourcePlate1(A08|D08)
+  water: sourcePlate1(A09|D09)
 
 protocol:
-#  - distribute substance1 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
-#  - distribute substance2 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
-#  - distribute substance3 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
-#  - distribute substance4 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
-#  - distribute substance5 pcrPlate1 20ul pipettePolicy=Roboliq_Water_Wet_1000
   - titrationSeries:
       steps:
-        - substance1 10ul
-        - substance2 20ul
-        - source: substance3
+        - source: buffer
+          volume: 10ul
+        - source: salt
           volume: [5ul, 15ul]
-        - substance4 30ul
-        - substance5
-      destination: pcrPlate1(A01xH03)
+        - source: liquid
+          volume: 20ul
+        - source: water
+        - source: [substance1,substance2,substance3,substance4,substance5]
+          volume: 30ul
+      destination: pcrPlate1(A01|B02)
       volume: 100ul
   - seal pcrPlate1

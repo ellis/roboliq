@@ -117,8 +117,8 @@ object JshopTranslator {
 				val specIdent = arg_l(1)
 				protocol.idToObject(specIdent) match {
 					case spec: PipetteSpecList => {
-						println("spec list:")
-						spec.step_l.foreach(println)
+						//println("spec list:")
+						//spec.step_l.foreach(println)
 						for {
 							command_ll <- RsResult.toResultOfList(spec.step_l.map(spec2 => handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec2, arg_l)))
 						} yield combineTipsRefreshCommands(command_ll.flatten)
@@ -229,7 +229,7 @@ object JshopTranslator {
 			src_l <- RsResult.toResultOfList(spec.source_l.map(state.getWell))
 			
 			_ <- RqResult.assert(!volume_l.isEmpty, "Volumes must be specified for pipetting")
-			_ <- RqResult.assert(volume_l.length == spec.destination_l.length, "Same number of volumes must be specied as there are desination wells")
+			_ <- RqResult.assert(volume_l.length == spec.destination_l.length, "Same number of volumes must be specied as there are desination wells: "+volume_l)
 			
 			// Create list of items for TransferPlanner
 			item_l <- RsResult.toResultOfList((spec.destination_l zip volume_l).map(pair => {

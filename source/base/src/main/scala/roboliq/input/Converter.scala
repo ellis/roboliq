@@ -420,7 +420,7 @@ object Converter {
 				convOrRequire(path_r, jsval, typ2, eb, state_?).map(_ match {
 					case x: ConvRequire => x
 					case ConvObject(o) => ConvObject(List(o))
-				}).orElse(RsError(s"expected an array of ${typ2.typeSymbol.name.toString}"))
+				}).orElse(RsError(List(s"expected an array of ${typ2.typeSymbol.name.toString}", s"instead got: ${jsval}", eb.getEntity("water").toString)))
 		}
 	}
 	

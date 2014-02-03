@@ -139,187 +139,196 @@ class Protocol {
 	}
 
 	def loadJson(jsobj: JsObject): RsResult[Unit] = {
-		jsobj.fields.get("labware") match {
-			case Some(JsObject(map)) =>
-				for ((name, jsobj) <- map) {
-					jsobj match {
-						case JsString(modelRef) =>
-							// REFACTOR: duplicates lots of code from the `plates` section below
-							val key = gid
-							//logger.debug("modelKey: "+modelKey)
-							//println("eb.nameToEntity: "+eb.nameToEntity)
-							//println("eb.idToEntity: "+eb.idToEntity)
-							//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
-							//logger.debug("eb.aliases: "+eb.aliases)
-							val model = eb.getEntityAs[PlateModel](modelRef).toOption.get
-							val plate = new Plate(key)
-							eb.addLabware(plate, name)
-							eb.setModel(plate, model)
-							state0.labware_model_m(plate) = model
-							// Create plate wells
-							for (row <- 0 until model.rows; col <- 0 until model.cols) {
-								val index = row + col * model.rows
-								val ident = WellIdentParser.wellId(plate, model, row, col)
-								val well = new Well(gid, Some(ident))
-								state0.addWell(well, plate, RowCol(row, col), index)
+		for {
+			_ <- jsobj.fields.get("labware") match {
+				case Some(JsObject(map)) =>
+					RqResult.toResultOfList(map.toList.map(pair => {
+						val (name,jsobj) = pair
+						jsobj match {
+							case JsString(modelRef) =>
+								// REFACTOR: duplicates lots of code from the `plates` section below
+								val key = gid
+								//logger.debug("modelKey: "+modelKey)
+								//println("eb.nameToEntity: "+eb.nameToEntity)
+								//println("eb.idToEntity: "+eb.idToEntity)
+								//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
+								//logger.debug("eb.aliases: "+eb.aliases)
+								val model = eb.getEntityAs[PlateModel](modelRef).toOption.get
+								val plate = new Plate(key)
+								eb.addLabware(plate, name)
+								eb.setModel(plate, model)
+								state0.labware_model_m(plate) = model
+								// Create plate wells
+								for (row <- 0 until model.rows; col <- 0 until model.cols) {
+									val index = row + col * model.rows
+									val ident = WellIdentParser.wellId(plate, model, row, col)
+									val well = new Well(gid, Some(ident))
+									state0.addWell(well, plate, RowCol(row, col), index)
+								}
+								val site = eb.getEntity("offsite").get
+								eb.setLocation(plate, site)
+								RqSuccess(())
+							case _ => RqError("Expected a string for model reference")
+						}
+					}))
+				case _ => RqSuccess(())
+			}
+			
+			//println(jsobj.fields.get("reagents"))
+			_ <- jsobj.fields.get("reagents") match {
+				case Some(jsval) =>
+					//println("jsval: "+jsval)
+					//println(Converter.convAs[Set[ReagentBean]](jsval, eb, None))
+					for {
+						reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, None)
+						//_ = println("reagentBean_l: "+reagentBean_l)
+						substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
+							val key = bean.key_?.getOrElse(gid)
+							val name = bean.id
+							val kind = SubstanceKind.Liquid
+							for {
+								tipCleanPolicy <- bean.sterilize_?.getOrElse("rinse").toLowerCase match {
+									case "keep" => RsSuccess(TipCleanPolicy.NN)
+									case "rinse/none" => RsSuccess(TipCleanPolicy.TN)
+									case "rinse/light" => RsSuccess(TipCleanPolicy.TL)
+									case "rinse" => RsSuccess(TipCleanPolicy.TT)
+									case "replace" => RsSuccess(TipCleanPolicy.DD)
+									case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
+								}
+								l <- eb.lookupLiquidSource(bean.wells, state0.toImmutable)
+								well_l <- RsResult.toResultOfList(l.map(state0.getWell))
+							} yield {
+								val substance = Substance(
+									key = key,
+									label = Some(bean.id),
+									description = None,
+									kind = SubstanceKind.Liquid,
+									tipCleanPolicy = tipCleanPolicy,
+									contaminants = bean.contaminants,
+									costPerUnit_? = None,
+									valuePerUnit_? = None,
+									molarity_? = None,
+									gramPerMole_? = None,
+									celciusAndConcToViscosity = Nil,
+									sequence_? = None
+								)
+								nameToSubstance_m(name) = substance
+								eb.reagentToWells_m(name) = well_l
+								val mixture = Mixture(Left(substance))
+								val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
+								// Add aliquot to all referenced wells
+								for (well <- well_l) {
+									state0.well_aliquot_m(well) = aliquot
+								}
 							}
-							val site = eb.getEntity("offsite").get
-							eb.setLocation(plate, site)
-						case _ =>
-					}
-				}
-			case _ =>
-		}
-		
-		//println(jsobj.fields.get("reagents"))
-		jsobj.fields.get("reagents").map(jsval => {
-			//println("jsval: "+jsval)
-			//println(Converter.convAs[Set[ReagentBean]](jsval, eb, None))
-			for {
-				reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, None)
-				//_ = println("reagentBean_l: "+reagentBean_l)
-				substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
-					val key = bean.key_?.getOrElse(gid)
-					val name = bean.id
-					val kind = SubstanceKind.Liquid
-					for {
-						tipCleanPolicy <- bean.sterilize_?.getOrElse("rinse").toLowerCase match {
-							case "keep" => RsSuccess(TipCleanPolicy.NN)
-							case "rinse/none" => RsSuccess(TipCleanPolicy.TN)
-							case "rinse/light" => RsSuccess(TipCleanPolicy.TL)
-							case "rinse" => RsSuccess(TipCleanPolicy.TT)
-							case "replace" => RsSuccess(TipCleanPolicy.DD)
-							case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
+						}))
+					} yield ()
+				case _ => RqSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("substances") match {
+				case Some(js) =>
+					val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
+					RqResult.toResultOfList(inputs.map(m => {
+						val key = m.getOrElse("id", gid)
+						val name = m.getOrElse("name", key)
+						val kind = m("kind") match {
+							case "Liquid" => SubstanceKind.Liquid
+							case "Dna" => SubstanceKind.Dna
 						}
-						l <- eb.lookupLiquidSource(bean.wells, state0.toImmutable)
-						well_l <- RsResult.toResultOfList(l.map(state0.getWell))
-					} yield {
-						val substance = Substance(
-							key = key,
-							label = Some(bean.id),
-							description = None,
-							kind = SubstanceKind.Liquid,
-							tipCleanPolicy = tipCleanPolicy,
-							contaminants = bean.contaminants,
-							costPerUnit_? = None,
-							valuePerUnit_? = None,
-							molarity_? = None,
-							gramPerMole_? = None,
-							celciusAndConcToViscosity = Nil,
-							sequence_? = None
-						)
+						val tipCleanPolicy = m.getOrElse("tipCleanPolicy", "Thorough") match {
+							case "None" => TipCleanPolicy.NN
+							case "ThoroughNone" => TipCleanPolicy.TN
+							case "ThoroughLight" => TipCleanPolicy.TL
+							case "Thorough" => TipCleanPolicy.TT
+							case "Decontaminate" => TipCleanPolicy.DD
+						}
+						val substance = Substance(key, Some(name), None, kind, tipCleanPolicy, Set(), None, None, None, None, Nil, None)
 						nameToSubstance_m(name) = substance
-						eb.reagentToWells_m(name) = well_l
-						val mixture = Mixture(Left(substance))
-						val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
-						// Add aliquot to all referenced wells
-						for (well <- well_l) {
-							state0.well_aliquot_m(well) = aliquot
+						RqSuccess(())
+					}))
+				case _ => RqSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("plates") match {
+				case Some(js) =>
+					val plateInputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
+					for (m <- plateInputs) {
+						val id = m.getOrElse("id", gid)
+						val name = m.getOrElse("name", id)
+						val modelKey = m("model")
+						logger.debug("modelKey: "+modelKey)
+						//println("eb.nameToEntity: "+eb.nameToEntity)
+						//println("eb.idToEntity: "+eb.idToEntity)
+						//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
+						logger.debug("eb.aliases: "+eb.aliases)
+						val model = eb.getEntityAs[PlateModel](modelKey).toOption.get
+						val plate = new Plate(id)
+						eb.addLabware(plate, name)
+						eb.setModel(plate, model)
+						state0.labware_model_m(plate) = model
+						// Create plate wells
+						for (row <- 0 until model.rows; col <- 0 until model.cols) {
+							val index = row + col * model.rows
+							val ident = WellIdentParser.wellId(plate, model, row, col)
+							val well = new Well(gid, Some(ident))
+							state0.addWell(well, plate, RowCol(row, col), index)
+						}
+						m.get("location") match {
+							case Some(key) =>
+								val entity = eb.getEntity(key).get
+								eb.setLocation(plate, entity)
+							case _ =>
 						}
 					}
-				}))
-			} yield ()
-		})
-		
-		jsobj.fields.get("substances") match {
-			case Some(js) =>
-				val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
-				for (m <- inputs) {
-					val key = m.getOrElse("id", gid)
-					val name = m.getOrElse("name", key)
-					val kind = m("kind") match {
-						case "Liquid" => SubstanceKind.Liquid
-						case "Dna" => SubstanceKind.Dna
+					RqSuccess(())
+				case _ => RqSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("tubes") match {
+				case Some(js) =>
+					val tubeInputs = js.convertTo[List[Map[String, String]]]
+					for (m <- tubeInputs) {
+						val id = m.getOrElse("id", gid)
+						val name = m.getOrElse("name", id)
+						val modelKey = m("model")
+						val model = eb.getEntity(modelKey).get.asInstanceOf[LabwareModel]
+						val tube = new Plate(id)
+						eb.addLabware(tube, name)
+						eb.setModel(tube, model)
+						state0.labware_model_m(tube) = model
+						// Create tube well
+						val well = new Well(gid, Some(s"$name()"))
+						state0.addWell(well, tube, RowCol(0, 0), 0)
 					}
-					val tipCleanPolicy = m.getOrElse("tipCleanPolicy", "Thorough") match {
-						case "None" => TipCleanPolicy.NN
-						case "ThoroughNone" => TipCleanPolicy.TN
-						case "ThoroughLight" => TipCleanPolicy.TL
-						case "Thorough" => TipCleanPolicy.TT
-						case "Decontaminate" => TipCleanPolicy.DD
-					}
-					val substance = Substance(key, Some(name), None, kind, tipCleanPolicy, Set(), None, None, None, None, Nil, None)
-					nameToSubstance_m(name) = substance
-				}
-			case _ =>
-		}
-		
-		jsobj.fields.get("plates") match {
-			case Some(js) =>
-				val plateInputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
-				for (m <- plateInputs) {
-					val id = m.getOrElse("id", gid)
-					val name = m.getOrElse("name", id)
-					val modelKey = m("model")
-					logger.debug("modelKey: "+modelKey)
-					//println("eb.nameToEntity: "+eb.nameToEntity)
-					//println("eb.idToEntity: "+eb.idToEntity)
-					//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
-					logger.debug("eb.aliases: "+eb.aliases)
-					val model = eb.getEntityAs[PlateModel](modelKey).toOption.get
-					val plate = new Plate(id)
-					eb.addLabware(plate, name)
-					eb.setModel(plate, model)
-					state0.labware_model_m(plate) = model
-					// Create plate wells
-					for (row <- 0 until model.rows; col <- 0 until model.cols) {
-						val index = row + col * model.rows
-						val ident = WellIdentParser.wellId(plate, model, row, col)
-						val well = new Well(gid, Some(ident))
-						state0.addWell(well, plate, RowCol(row, col), index)
-					}
-					m.get("location") match {
-						case Some(key) =>
-							val entity = eb.getEntity(key).get
-							eb.setLocation(plate, entity)
-						case _ =>
-					}
-				}
-			case _ =>
-		}
-		
-		jsobj.fields.get("tubes") match {
-			case Some(js) =>
-				val tubeInputs = js.convertTo[List[Map[String, String]]]
-				for (m <- tubeInputs) {
-					val id = m.getOrElse("id", gid)
-					val name = m.getOrElse("name", id)
-					val modelKey = m("model")
-					val model = eb.getEntity(modelKey).get.asInstanceOf[LabwareModel]
-					val tube = new Plate(id)
-					eb.addLabware(tube, name)
-					eb.setModel(tube, model)
-					state0.labware_model_m(tube) = model
-					// Create tube well
-					val well = new Well(gid, Some(s"$name()"))
-					state0.addWell(well, tube, RowCol(0, 0), 0)
-				}
-			case _ =>
-		}
-		
-		jsobj.fields.get("wellContents") match {
-			case Some(js) =>
-				val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
-				for (m <- inputs) {
-					val wellIdent = m("name")
-					val contents_s = m("contents")
-					for {
-						aliquot <- AliquotParser.parseAliquot(contents_s, nameToSubstance_m.toMap)
-						l <- eb.lookupLiquidSource(wellIdent, state0.toImmutable)
-						well_l <- RsResult.toResultOfList(l.map(state0.getWell))
-					} {
-						for (well <- well_l) {
-							state0.well_aliquot_m(well) = aliquot
+					RqSuccess(())
+				case _ => RqSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("wellContents") match {
+				case Some(js) =>
+					val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
+					RqResult.toResultOfList(inputs.map(m => {
+						val wellIdent = m("name")
+						val contents_s = m("contents")
+						for {
+							aliquot <- AliquotParser.parseAliquot(contents_s, nameToSubstance_m.toMap)
+							l <- eb.lookupLiquidSource(wellIdent, state0.toImmutable)
+							well_l <- RsResult.toResultOfList(l.map(state0.getWell))
+						} yield {
+							for (well <- well_l) {
+								state0.well_aliquot_m(well) = aliquot
+							}
 						}
-					}
-				}
-			case _ =>
-		}
-		
-		jsobj.fields.get("protocol") match {
-			case Some(jsval) => loadJsonProtocol_Protocol(jsval)
-			case _ => RsSuccess(())
-		}
+					}))
+				case _ => RsSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("protocol") match {
+				case Some(jsval) => loadJsonProtocol_Protocol(jsval)
+				case _ => RsSuccess(())
+			}
+		} yield ()
 	}
 	
 	private def loadJsonProtocol_Protocol(jsval: JsValue): RsResult[Unit] = {
@@ -758,18 +767,23 @@ class Protocol {
 				case _ => RqError("Only one step may have an unspecified volume")
 			}
 			wellCount = wellsPerGroup * groupCount
-			l1 = cmd.steps.filter(_.volume_?.isDefined).map(step => {
+			//_ = println("wellsPerGroup: "+wellsPerGroup)
+			//_ = println("groupCount: "+groupCount)
+			//_ = println("wellCount: "+wellCount)
+			l1 = cmd.steps.flatMap(step => {
 				// If this is the filler step:
 				step.volume_? match {
-					case None => Nil
+					case None => None
 					case Some(volume) =>
 						val wellsPerSource = wellCount / step.source.length
 						val wellsPerVolume = wellsPerSource / volume.length
 						val source_l = step.source.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(wellsPerSource / wellsPerVolume)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
-						source_l zip volume_l
+						val volume_l = List.fill(step.source.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						//println("stuff:", wellsPerSource, wellsPerVolume, source_l.length, volume_l)
+						Some(source_l zip volume_l)
                 }
 			})
+			//_ = println(l1.map(_.length))
 			l2 = l1.transpose
 			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){_ + _})
 			fillVolume_l <- cmd.volume_? match {
@@ -787,15 +801,18 @@ class Protocol {
 						val wellsPerSource = wellCount / step.source.length
 						val wellsPerVolume = wellsPerSource / volume.length
 						val source_l = step.source.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(wellsPerSource / wellsPerVolume)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						val volume_l = List.fill(step.source.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
+						//println("s x v: "+source_l.length+", "+volume_l.length)
 						step -> (source_l zip volume_l)
                 }
 			})
 		} yield {
 			val destination_l = cmd.destination.l.take(wellCount)
+			//println("len: "+stepToList_l.map(_._2.length))
 			stepToList_l.map(pair => {
 				val (step, sourceToVolume_l) = pair
 				val (source_l, volume_l) = sourceToVolume_l.unzip
+				//println("volume_l: "+volume_l)
 				PipetteSpec(
 					step.source.head.l,
 					destination_l,
