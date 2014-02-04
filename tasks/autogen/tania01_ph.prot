@@ -17,10 +17,10 @@ reagents:
   buffer_pH70: sourcePlate1(A07|D07)
   buffer_pH75: sourcePlate1(A08|D08)
   sfGFP: sourcePlate2(A01)
-  Assam: sourcePlate2(B01)
-  "p1200": sourcePlate2(C01)
-  "p1201": sourcePlate2(D01)
-  "p1205": sourcePlate2(E01)
+  Assam: sourcePlate2(A02)
+  "p1200": sourcePlate2(A03)
+  "p1201": sourcePlate2(A04)
+  "p1205": sourcePlate2(A05)
 
 protocol:
   - titrationSeries:

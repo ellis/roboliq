@@ -753,6 +753,46 @@ class Protocol {
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[List[PipetteSpec]] = {
+		def dox(
+			step_l: List[TitrationStep],
+			replicateCount: Int,
+			well_l: List[(LiquidSource, LiquidVolume)],
+			plate_r: List[List[(LiquidSource, LiquidVolume)]]
+		): List[List[(LiquidSource, LiquidVolume)]] = step_l match {
+			case Nil => (List.fill(replicateCount)(well_l) ++ plate_r).reverse
+			case step :: rest =>
+				step.volume_? match {
+					case None => dox(rest, replicateCount, well_l, plate_r)
+					case Some(volumes) =>
+						//val groupCount2 = groupCount / step.source.sources.length / volumes.length
+						(for {
+							source <- step.source.sources
+							volume <- volumes
+						} yield {
+							val well2_l = well_l ++ List((source, volume))
+							dox(rest, replicateCount, well2_l, plate_r)
+						}).flatten
+				}
+		}
+		def doy(ll: List[List[(LiquidSource, LiquidVolume)]]): Unit = {
+			var i = 1
+			for (l <- ll) {
+				val x = for ((source, volume) <- l) yield {
+					val y = for {
+						well <- state0.getWell(source.l.head)
+						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
+					} yield {
+						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
+					}
+					y match {
+						case RqSuccess(l, _) => l
+						case RqError(_, _) => List("\"ERROR\"", "0")
+					}
+				}
+				println(x.flatten.mkString(", "))
+			}
+			
+		}
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
@@ -774,7 +814,7 @@ class Protocol {
 			//_ = println("wellsPerGroup: "+wellsPerGroup)
 			//_ = println("groupCount: "+groupCount)
 			//_ = println("wellCount: "+wellCount)
-			l1 = cmd.steps.flatMap(step => {
+			/*l1 = cmd.steps.flatMap(step => {
 				// If this is the filler step:
 				step.volume_? match {
 					case None => None
@@ -786,9 +826,10 @@ class Protocol {
 						//println("stuff:", wellsPerSource, wellsPerVolume, source_l.length, volume_l)
 						Some(source_l zip volume_l)
                 }
-			})
+			})*/
+			l2 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
 			//_ = println(l1.map(_.length))
-			l2 = l1.transpose
+			//l2 = l1.transpose
 			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){_ + _})
 			fillVolume_l <- cmd.volume_? match {
 				case None => RqSuccess(Nil)
@@ -797,7 +838,8 @@ class Protocol {
 					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
 					else RqSuccess(l)
 			}
-			stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
+			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
+			/*stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
 				// If this is the filler step:
 				step.volume_? match {
 					case None => val l = step -> fillVolume_l.map(step.source.sources.head -> _)
@@ -812,7 +854,11 @@ class Protocol {
 						val l = step -> (source_l zip volume_l)
 						l
                 }
-			})
+			})*/
+			stepToList_l = cmd.steps zip l2.transpose
+			_ = doy(l2)
+			_ = println("----------------")
+			_ = doy(stepToList_l.map(_._2))
 		} yield {
 			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
 			//println("len: "+stepToList_l.map(_._2.length))
