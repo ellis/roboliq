@@ -28,6 +28,7 @@ protocol:
         - source: [buffer_pH4, buffer_pH45, buffer_pH5, buffer_pH55, buffer_pH6, buffer_pH65, buffer_pH70, buffer_pH75]
           volume: 99.75ul
           pipettePolicy: Water_A_1000
+          sterilizeBefore: thorough
           sterilizeBetween: none
         - source: [sfGFP, Assam, "p1200", "p1201", "p1205"]
           volume: .25ul

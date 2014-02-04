@@ -6,6 +6,9 @@
 - [x] TitrationSeries: handle multiple reagents for a given step, for grouping
 - [x] TitrationSeries: BUG: for the multi-source step, all aspirations are happening from a single well
 - [x] Speed up pipetting algorithm -- need to get it fast enough to handle 384 well plate
+- [ ] TitrationSeries: randomize dispenses
+- [ ] pipetting: should sterilize tips before first aspirate (see tania01 without the sterilizeBefore spec)
+- [ ] tania??: uria will require a thorough post-cleaning
 - [ ] A '.' in a reagent name causes eb.lookupLiquidSource not to work for that reagent
 - [ ] Ask Fabian about a verb for the TitrationSeries command: titrate
 - [ ] TitrationSeries: filter out 0-volume dispenses
