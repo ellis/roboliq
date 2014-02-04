@@ -772,7 +772,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			amWells(iChar) += 1 << iWell1
 		}
 		val sWellMask = amWells.map(encode).mkString
-		val sPlateMask = Array('0', hex(cols), '0', hex(rows)).mkString + sWellMask
+		val sPlateMask = f"$cols%02X$rows%02X" + sWellMask
 		sPlateMask
 	}
 	

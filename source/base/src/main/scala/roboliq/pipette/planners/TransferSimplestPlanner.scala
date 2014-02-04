@@ -175,11 +175,29 @@ object TransferSimplestPlanner {
 	): RsResult[List[Batch]] = {
 		val sourceUsed_l = mutable.Queue[Well]()
 		val item_ll = item_l.grouped(tip_l.size)
+		def pickNextSource(src_l: List[Well]): Well = {
+			// Get index of these sources in the queue
+			val index_l = src_l.map(well => sourceUsed_l.indexOf(well))
+			// If any of the sources hasn't been used yet,
+			val notyet = index_l.indexOf(-1)
+			if (notyet != -1) {
+				// return the first one of the unused sources
+				src_l(notyet)
+			}
+			else {
+				// otherwise, pick the source with the lowest index (hasn't been used for the longest)
+				val l1 = src_l zip index_l
+				val l2 = l1.sortBy(_._2)
+				l2.head._1
+			}
+		}
 		val batch_l = item_ll.toList.map(item_l => {
 			// Map each Item to a BatchItem
 			val batchItem_l = (tip_l.toList zip item_l).map(pair => {
 				val (tip, item) = pair
-				val src = sourceUsed_l.dequeueFirst(item.src_l.contains).getOrElse(item.src_l.head)
+				//val src = sourceUsed_l.dequeueFirst(item.src_l.contains).getOrElse(item.src_l.head)
+				val src = pickNextSource(item.src_l)
+				sourceUsed_l.dequeueFirst(_.eq(src))
 				sourceUsed_l += src
 				BatchItem(tip, src, item.dst, item.volume)
 			})

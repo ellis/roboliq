@@ -90,6 +90,7 @@
   (is-labware r1_hotel_85x4) ; r1 hotel Hotel 5Pos DeepWell site 4
   (is-labware r1_hotel_85x5) ; r1 hotel Hotel 5Pos DeepWell site 5
   (is-labware sourcePlate1)
+  (is-labware sourcePlate2)
   (is-model m001) ; D-BSSE 96 Well DWP
   (is-model m002) ; D-BSSE 384 Well Plate White
   (is-model m003) ; D-BSSE 96 Well PCR Plate
@@ -105,6 +106,7 @@
   (is-pipetter r1_pipetter1) ; r1 LiHa
   (is-plate mixPlate)
   (is-plate sourcePlate1)
+  (is-plate sourcePlate2)
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 384 Well Plate White
   (is-plateModel m003) ; D-BSSE 96 Well PCR Plate
@@ -319,8 +321,10 @@
   (model r1_hotel_85x4 sm5)
   (model r1_hotel_85x5 sm5)
   (model sourcePlate1 m001)
+  (model sourcePlate2 m003)
   (location mixPlate offsite)
   (location sourcePlate1 offsite)
+  (location sourcePlate2 offsite)
   (device-can-site r1_pipetter1 r1_bench_010x2)
   (device-can-site r1_pipetter1 r1_bench_010x4)
   (device-can-site r1_pipetter1 r1_bench_017x1)
@@ -440,6 +444,6 @@
  )
  ; tasks
  (
-  (titrationSeries2 ?a0001 ?d0002 spec0003 sourcePlate1 mixPlate)
+  (titrationSeries3 ?a0001 ?d0002 spec0003 sourcePlate1 mixPlate sourcePlate2)
  )
 )
