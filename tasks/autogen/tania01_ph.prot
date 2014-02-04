@@ -29,5 +29,5 @@ protocol:
           volume: 99.75ul
         - source: [sfGFP, Assam, "p1200", "p1201", "p1205"]
           volume: .25ul
-      destination: mixPlate(A01|P24)
+      destination: mixPlate(A01|P08)
       volume: 100ul

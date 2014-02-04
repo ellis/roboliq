@@ -6,7 +6,7 @@
 - [x] TitrationSeries: handle multiple reagents for a given step, for grouping
 - [x] TitrationSeries: BUG: for the multi-source step, all aspirations are happening from a single well
 - [x] Speed up pipetting algorithm -- need to get it fast enough to handle 384 well plate
-- [ ] A '.' in a reagent name leads
+- [ ] A '.' in a reagent name causes eb.lookupLiquidSource not to work for that reagent
 - [ ] Ask Fabian about a verb for the TitrationSeries command: titrate
 - [ ] TitrationSeries: filter out 0-volume dispenses
 - [ ] TitrationSeries/PipetteSpec: allow for a list of volumes rather than just a single volume

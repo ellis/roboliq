@@ -178,11 +178,11 @@ class Protocol {
 			//println(jsobj.fields.get("reagents"))
 			_ <- jsobj.fields.get("reagents") match {
 				case Some(jsval) =>
-					println("jsval: "+jsval)
-					println(Converter.convAs[Set[ReagentBean]](jsval, eb, None))
+					//println("jsval: "+jsval)
+					//println(Converter.convAs[Set[ReagentBean]](jsval, eb, None))
 					for {
 						reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, None)
-						_ = println("reagentBean_l: "+reagentBean_l)
+						//_ = println("reagentBean_l: "+reagentBean_l)
 						substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
 							val key = bean.key_?.getOrElse(gid)
 							val name = bean.id
@@ -213,8 +213,8 @@ class Protocol {
 									celciusAndConcToViscosity = Nil,
 									sequence_? = None
 								)
-								println("substance: "+substance)
-								println("well_l: "+well_l)
+								//println("substance: "+substance)
+								//println("well_l: "+well_l)
 								nameToSubstance_m(name) = substance
 								eb.reagentToWells_m(name) = well_l
 								val mixture = Mixture(Left(substance))
@@ -223,7 +223,7 @@ class Protocol {
 								for (well <- well_l) {
 									state0.well_aliquot_m(well) = aliquot
 								}
-								println(eb.lookupLiquidSource(bean.id, state0.toImmutable))
+								//println(eb.lookupLiquidSource(bean.id, state0.toImmutable))
 							}
 						}))
 					} yield ()
