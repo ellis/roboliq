@@ -32,6 +32,9 @@ protocol:
           sterilizeBetween: none
         - source: [sfGFP, Assam, "p1200", "p1201", "p1205"]
           volume: .25ul
+          sterilizeBefore: thorough
+          sterilizeBetween: thorough
+          sterilizeAfter: thorough
           pipettePolicy: Water_C_50
       destination: mixPlate(A01|P08)
       volume: 100ul
