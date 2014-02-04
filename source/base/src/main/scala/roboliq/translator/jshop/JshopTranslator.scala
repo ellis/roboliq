@@ -15,6 +15,8 @@ import roboliq.commands.PipetterAspirate
 import roboliq.input.PipetteSpecList
 import roboliq.pipette.planners.PipetteHelper
 import roboliq.entities.TipHandlingOverrides
+import roboliq.pipette.planners.TransferSimplestPlanner
+import roboliq.pipette.planners.TipModelSearcher0
 
 object JshopTranslator {
 	
@@ -55,6 +57,19 @@ object JshopTranslator {
 					case operator :: agentIdent :: arg_l =>
 						val builder = agentToBuilder_m(agentIdent)
 						def doit(state0: WorldState, command_l: List[Command]): RsResult[WorldState] = {
+							command_l.foldLeft(RsSuccess(state0) : RsResult[WorldState]) { (state0_?, command) =>
+								for {
+									state0 <- state0_?
+									state1 <- builder.addCommand(
+													protocol,
+													state0,
+													agentIdent,
+													command
+												)
+								} yield state1
+							}
+						}
+						/*def doit(state0: WorldState, command_l: List[Command]): RsResult[WorldState] = {
 							command_l match {
 								case Nil => RsSuccess(state0)
 								case command :: rest =>
@@ -66,7 +81,7 @@ object JshopTranslator {
 									)
 									state1_?.flatMap(state1 => doit(state1, rest))
 							}
-						}
+						}*/
 						for {
 							command_l <- handleOperator(protocol, agentToBuilder_m, state0, operator, agentIdent, arg_l)
 							state1 <- doit(state0, command_l)
@@ -214,7 +229,8 @@ object JshopTranslator {
 		val tipModel_l = tip_l.flatMap(protocol.eb.tipToTipModels_m).distinct
 		
 		val device = new PipetteDevice
-		val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]
+		//val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]
+		val tipModelSearcher = new TipModelSearcher0[Item, Mixture, TipModel]
 		
 		val state = state0.toMutable
 		
@@ -246,7 +262,18 @@ object JshopTranslator {
 				for {
 					dst <- state.getWell(dstKey)
 					src_l <- RqResult.toResultOfList(srcKey.l.map(state.getWell))
-				} yield Item(src_l, dst, volume)
+				} yield {
+					// FIXME: for debug only
+					if (src_l.isEmpty) {
+						println("src_l empty:")
+						println(spec.destinations.l.length)
+						println(source_l)
+						println(volume_l)
+						assert(!src_l.isEmpty)
+					}
+					// ENDFIX
+					Item(src_l, dst, volume)
+				}
 			}))
 			
 			// Map of item to its source mixture
@@ -260,6 +287,7 @@ object JshopTranslator {
 			itemToModels_m = for ((item, mixture) <- itemToMixture_m) yield {
 				item -> device.getDispenseAllowableTipModels(tipModel_l, mixture, item.volume)
 			}
+			/* Have to use TipModelSearcher0 instead of 1 for 384 well plates
 			// Choose a single tip model
 			itemToTipModel_m <- tipModelSearcher.searchGraph(item_l, itemToMixture_m, itemToModels_m)
 			// TODO: produce a warning if the user specified a tip model which isn't available for all items
@@ -269,17 +297,22 @@ object JshopTranslator {
 			} 
 			_ <- RsResult.assert(tipModelCandidate_l.size == 1, "TransferPlanner can only handle a single tip model at a time")
 			tipModel = tipModelCandidate_l.head
+			*/
+			//_ = println("volumes: "+item_l.map(_.volume))
+			//_ = println("tipModels: ")
+			//_ = itemToModels_m.values.foreach(println)
+			tipModel <- tipModelSearcher.searchGraph(tipModel_l, itemToModels_m)
 			// Filter for those tips which can be used with the tip model
 			tipCandidate_l = tip_l.filter(tip => protocol.eb.tipToTipModels_m.get(tip).map(_.contains(tipModel)).getOrElse(false))
 			// TODO: Need to choose pipette policy intelligently
 			pipettePolicy_s = spec.pipettePolicy_?.getOrElse("POLICY")
 			pipettePolicy = PipettePolicy(pipettePolicy_s, PipettePosition.getPositionFromPolicyNameHack(pipettePolicy_s))
 			// Run transfer planner to get pippetting batches
-			batch_l <- TransferPlanner.searchGraph(
+			batch_l <- TransferSimplestPlanner.searchGraph(
 				device,
 				state0,
 				SortedSet(tipCandidate_l : _*),
-				itemToTipModel_m.head._2,
+				tipModel, //itemToTipModel_m.head._2,
 				pipettePolicy,
 				item_l
 			)

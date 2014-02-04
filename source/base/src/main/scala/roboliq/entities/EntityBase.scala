@@ -360,6 +360,10 @@ class EntityBase {
 				}
 			})
 			ll /*: List[List[(Labware, RowCol)]]*/ <- RsResult.toResultOfList(ll_?)
-		} yield ll.flatten
+			_ <- RqResult.assert(!ll.flatten.isEmpty, s"No wells found for `${sourceIdent}`")
+		} yield {
+			assert(!ll.flatten.isEmpty)
+			ll.flatten
+		}
 	}
 }
