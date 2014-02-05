@@ -11,6 +11,8 @@
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: create better data structure that supports recursive components and alternatives, and allows for different total volumes 
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
+- [ ] TitrationSeries: let user explicitly specify number of replicates
+- [ ] Print out liquid usage for source wells, so I know how much we need to put in
 - [ ] pipetting: should sterilize tips before first aspirate (see tania01 without the sterilizeBefore spec)
 - [ ] tania??: uria will require a thorough post-cleaning
 - [ ] A '.' in a reagent name causes eb.lookupLiquidSource not to work for that reagent
