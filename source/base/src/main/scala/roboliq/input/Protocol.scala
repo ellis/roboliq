@@ -753,7 +753,8 @@ class Protocol {
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[List[PipetteSpec]] = {
-		def dox(
+		// Return a list of source+volume for each well, except for the filler step
+		def createWellMixtures(
 			step_l: List[TitrationStep],
 			replicateCount: Int,
 			well_l: List[(LiquidSource, LiquidVolume)],
@@ -762,7 +763,8 @@ class Protocol {
 			case Nil => (List.fill(replicateCount)(well_l) ++ plate_r).reverse
 			case step :: rest =>
 				step.volume_? match {
-					case None => dox(rest, replicateCount, well_l, plate_r)
+					case None =>
+						createWellMixtures(rest, replicateCount, well_l, plate_r)
 					case Some(volumes) =>
 						//val groupCount2 = groupCount / step.source.sources.length / volumes.length
 						(for {
@@ -770,11 +772,29 @@ class Protocol {
 							volume <- volumes
 						} yield {
 							val well2_l = well_l ++ List((source, volume))
-							dox(rest, replicateCount, well2_l, plate_r)
+							createWellMixtures(rest, replicateCount, well2_l, plate_r)
 						}).flatten
 				}
 		}
-		def doy(ll: List[List[(LiquidSource, LiquidVolume)]]): Unit = {
+		def addFillVolume(
+			step_l: List[TitrationStep],
+			mixture_ll: List[List[(LiquidSource, LiquidVolume)]],
+			fillVolume_l: List[LiquidVolume]
+		): List[List[(LiquidSource, LiquidVolume)]] = {
+			val i = step_l.indexWhere(step => step.volume_?.isEmpty)
+			if (i == -1) {
+				mixture_ll
+			}
+			else {
+				assert(mixture_ll.length == fillVolume_l.length)
+				val step = step_l(i)
+				for {
+					(mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
+					source <- step.source.sources
+				} yield mixture_l.take(i) ++ List((source, fillVolume)) ++ mixture_l.drop(i)
+			}
+		}
+		def printMixtureCsv(ll: List[List[(LiquidSource, LiquidVolume)]]): Unit = {
 			var i = 1
 			for (l <- ll) {
 				val x = for ((source, volume) <- l) yield {
@@ -791,7 +811,6 @@ class Protocol {
 				}
 				println(x.flatten.mkString(", "))
 			}
-			
 		}
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
@@ -827,7 +846,7 @@ class Protocol {
 						Some(source_l zip volume_l)
                 }
 			})*/
-			l2 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
+			l2 = createWellMixtures(cmd.steps, wellsPerGroup, Nil, Nil)
 			//_ = println(l1.map(_.length))
 			//l2 = l1.transpose
 			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){_ + _})
@@ -838,6 +857,7 @@ class Protocol {
 					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
 					else RqSuccess(l)
 			}
+			l3 = addFillVolume(cmd.steps, l2, fillVolume_l)
 			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
 			/*stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
 				// If this is the filler step:
@@ -855,10 +875,10 @@ class Protocol {
 						l
                 }
 			})*/
-			stepToList_l = cmd.steps zip l2.transpose
-			_ = doy(l2)
+			stepToList_l = cmd.steps zip l3.transpose
+			_ = printMixtureCsv(l3)
 			_ = println("----------------")
-			_ = doy(stepToList_l.map(_._2))
+			_ = printMixtureCsv(stepToList_l.map(_._2))
 		} yield {
 			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
 			//println("len: "+stepToList_l.map(_._2.length))
