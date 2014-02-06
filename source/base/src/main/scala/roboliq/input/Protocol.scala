@@ -966,8 +966,11 @@ class Protocol {
 			val tipBean_l = if (agentBean.tips != null) agentBean.tips.toList else Nil
 			val x = for {
 				_ <- RsResult.toResultOfList(tipBean_l.zipWithIndex.map { pair =>
-					val (tipBean, index) = pair
-					val row: Int = if (tipBean.row == 0) index else tipBean.row
+					val (tipBean, index_) = pair
+					val row: Int = if (tipBean.row == 0) index_ else tipBean.row
+					// HACK: use the row as index instead, need to figure out a more general solution,
+					//  such as specifying that a tip cannot be used -- ellis, 2014-02-06
+					val index = row - 1
 					val col = 0
 					for {
 						permanentTipModel_? <- if (tipBean.permanentModel == null) RsSuccess(None) else eb.getEntityAs[TipModel](tipBean.permanentModel).map(Option(_))

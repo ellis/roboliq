@@ -593,9 +593,23 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				siteE, labwareModelE
 			)
 			
+			val state1 = sFunc match {
+				case "Aspirate" =>
+					item_l.foldLeft(state0) { (state, item) =>
+						val amount = Distribution.fromVolume(item._1.volume)
+						val aliquot0 = state.well_aliquot_m(item._1.well)
+						val aliquot1 = aliquot0.remove(amount).getOrElse(aliquot0) // FIXME: handle the error instead of using getOrElse
+						val state1 = state.copy(
+							well_aliquot_m = state.well_aliquot_m + (item._1.well -> aliquot1)
+						)
+						state1
+					}
+				case "Dispense" => state0
+			}
+			
 			TranslationResult(
 				List(TranslationItem(cmd, List(siteE -> labwareModelE))),
-				state0
+				state1
 			)
 		}
 	}

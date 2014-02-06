@@ -9,6 +9,10 @@
 - [x] TitrationSeries: fix hack for stepToList_l in TitrationSeriesSub()
 - [x] TitrationSeries: allow for alternative fillers
 - [ ] Print out liquid usage for source wells, so I know how much we need to put in
+  - [ ] Create table with these columns: ...
+- [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
+- [ ] EvowareClientScriptBuilder: update well state in spirate_checked
+- [ ] EvowareClientScriptBuilder: add well events in spirate_checked
 - [ ] TitrationSeries: let user explicitly specify number of replicates
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)

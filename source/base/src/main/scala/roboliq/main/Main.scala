@@ -63,7 +63,7 @@ object Main extends App {
 			plan_l = planOutput.drop(2).reverse.drop(2).reverse
 			plan = plan_l.mkString("\n")
 			
-			result <- JshopTranslator.translate(protocol, plan)
+			state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
 			val builder_l = protocol.agentToBuilder_m.values.toSet
@@ -73,6 +73,10 @@ object Main extends App {
 				//println("scriptBuilder: " + scriptBuilder)
 				scriptBuilder.saveScripts(basename2)
 			}
+			state.well_aliquot_m.foreach(pair => {
+				val (well, aliquot) = pair
+				println(s"${well.label}: ${aliquot.mixture.toShortString} ${aliquot.distribution.bestGuess}")
+			})
 		}
 
 		val error_l = x.getErrors

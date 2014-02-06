@@ -25,25 +25,25 @@ object JshopTranslator {
 	def translate(
 		protocol: Protocol,
 		solution: String
-	): RqResult[Unit] = {
+	): RqResult[WorldState] = {
 		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
 		val l = solution.split("\r?\n").toList
 		val state0 = protocol.state0.toImmutable
 		logger.debug(s"l: $l")
-		def translateStep(line_l: List[String], state: WorldState): RsResult[Unit] = {
+		def translateStep(line_l: List[String], state: WorldState): RsResult[WorldState] = {
 			line_l match {
-				case Nil => RsSuccess(())
+				case Nil => RsSuccess(state)
 				case line :: rest =>
 					translateLine(protocol, agentToBuilder_m, state, line.trim()).flatMap(state => translateStep(rest, state))
 			}
 		}
 
 		for {
-			_ <- translateStep(l, state0)
+			state1 <- translateStep(l, state0)
 		} yield {
 			// Let the builders know that we're done building
 			agentToBuilder_m.values.foreach(_.end())
-			()
+			state1
 		}
 	}
 	
