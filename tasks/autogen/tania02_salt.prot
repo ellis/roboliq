@@ -15,8 +15,8 @@ reagents:
   p1200: sourcePlate2(A03)
   p1201: sourcePlate2(A04)
   p1205: sourcePlate2(A05)
-  salt_ph55: sourcePlate2(A06)
-  salt_ph70: sourcePlate2(A07)
+  salt_pH55: sourcePlate2(A06)
+  salt_pH70: sourcePlate2(A07)
 
 protocol:
   - titrationSeries:
@@ -36,5 +36,5 @@ protocol:
           sterilizeBetween: thorough
           sterilizeAfter: thorough
           pipettePolicy: Water_C_50
-      destination: mixPlate(A01|P08)
+      destination: mixPlate(A01|P24)
       volume: 100ul

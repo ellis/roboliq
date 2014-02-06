@@ -884,12 +884,16 @@ class Protocol {
 			//println("len: "+stepToList_l.map(_._2.length))
 			stepToList_l.map(pair => {
 				val (step, sourceToVolume_l) = pair
-				val (source_l, volume_l) = sourceToVolume_l.unzip
+				// Remove items with empty volumes
+				val l1 = (destinations.l zip sourceToVolume_l).filterNot(_._2._2.isEmpty)
+				val (destination_l, l2) = l1.unzip
+				val (source_l, volume_l) = l2.unzip
+				val keep_l = volume_l.map(!_.isEmpty)
 				assert(source_l.forall(s => !s.l.isEmpty))
 				//println("volume_l: "+volume_l)
 				PipetteSpec(
 					PipetteSources(source_l),
-					destinations,
+					PipetteDestinations(destination_l),
 					volume_l,
 					step.pipettePolicy_?,
 					step.sterilize_?,
