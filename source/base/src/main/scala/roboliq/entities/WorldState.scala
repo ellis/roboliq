@@ -14,7 +14,13 @@ case class WellPosition(
 	index: Int,
 	row: Int,
 	col: Int
-)
+) {
+	def toString(eb: EntityBase): String = {
+		val labwareName = eb.getIdent(parent).getOrElse("ERROR")
+		val wellName = WellIdentParser.wellIndexName(parentModel.rows, parentModel.cols, row, col)
+		s"$labwareName($wellName)"
+	}
+}
 
 case class WorldState(
 	//truth: Set[Rel],

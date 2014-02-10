@@ -9,7 +9,9 @@
 - [x] TitrationSeries: fix hack for stepToList_l in TitrationSeriesSub()
 - [x] TitrationSeries: allow for alternative fillers
 - [ ] Print out liquid usage for source wells, so I know how much we need to put in
-  - [ ] Create table with these columns: ...
+  - [ ] print a table sorted by plate name, column, row
+  - [ ] for reagents, print a table with these columns: plate, column, row, well index name, initial volume, final volume, volume change, dead volume, min volume recommended
+  - [ ] Create csv with these columns: well name, row, col, tip, pipette sequence number, multipipette sequence number, volume, liquid class, reagent, labware model, site, [plate name], [experiment name]
 - [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [ ] EvowareClientScriptBuilder: update well state in spirate_checked
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
@@ -17,6 +19,10 @@
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
 
+- [ ] let user specify initial volume for a reagent
+- [ ] add 'deadVolume' property to labwareModel, indicated the extra volume required in a well for aspiration
+- [ ] keep track of minimum and maximum volumes in a well, and warn or produce errors when these are out of bounds
+- [ ] TitrationSeries: allow use of more than one target plate
 - [ ] TitrationSeries: create better data structure that supports recursive components and alternatives, and allows for different total volumes 
 - [ ] pipetting: should sterilize tips before first aspirate (see tania01 without the sterilizeBefore spec)
 - [ ] tania??: uria will require a thorough post-cleaning

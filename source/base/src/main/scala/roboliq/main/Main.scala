@@ -74,15 +74,23 @@ object Main extends App {
 				//println("scriptBuilder: " + scriptBuilder)
 				scriptBuilder.saveScripts(basename2)
 			}
-			state.well_aliquot_m.foreach(pair => {
+			val l1 = state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
+				val wellPosition = state.getWellPosition(well).toOption.get
+				val labwareIdent = protocol.eb.getIdent(wellPosition.parent).getOrElse("ERROR")
+				val wellIdent = wellPosition.toString(protocol.eb)
+				(labwareIdent, wellPosition.col, wellPosition.row) -> (wellIdent, aliquot)
+			})
+			val l2 = l1.sortBy(_._1)
+			l2.foreach(pair => {
+				val (wellIdent, aliquot) = pair._2
 				val amount = {
 					if (aliquot.distribution.bestGuess.units == roboliq.entities.SubstanceUnits.Liter)
 						LiquidVolume.l(aliquot.distribution.bestGuess.amount).toString
 					else
 						aliquot.distribution.bestGuess.toString
 				}
-				println(s"${well.label}: ${aliquot.mixture.toShortString} ${amount}")
+				println(s"$wellIdent: ${aliquot.mixture.toShortString} ${amount}")
 			})
 		}
 
