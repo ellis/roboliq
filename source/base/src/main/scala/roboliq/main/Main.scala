@@ -14,6 +14,7 @@ import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.entities.ClientScriptBuilder
 import roboliq.translator.jshop.JshopTranslator
+import roboliq.entities.LiquidVolume
 
 case class Opt(
 	configFile: File = null,
@@ -75,7 +76,13 @@ object Main extends App {
 			}
 			state.well_aliquot_m.foreach(pair => {
 				val (well, aliquot) = pair
-				println(s"${well.label}: ${aliquot.mixture.toShortString} ${aliquot.distribution.bestGuess}")
+				val amount = {
+					if (aliquot.distribution.bestGuess.units == roboliq.entities.SubstanceUnits.Liter)
+						LiquidVolume.l(aliquot.distribution.bestGuess.amount).toString
+					else
+						aliquot.distribution.bestGuess.toString
+				}
+				println(s"${well.label}: ${aliquot.mixture.toShortString} ${amount}")
 			})
 		}
 
