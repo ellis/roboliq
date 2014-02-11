@@ -9,9 +9,10 @@
 - [x] TitrationSeries: fix hack for stepToList_l in TitrationSeriesSub()
 - [x] TitrationSeries: allow for alternative fillers
 - [ ] Print out liquid usage for source wells, so I know how much we need to put in
-  - [ ] print a table sorted by plate name, column, row
+  - [x] print a table sorted by plate name, column, row
   - [ ] for reagents, print a table with these columns: plate, column, row, well index name, initial volume, final volume, volume change, dead volume, min volume recommended
   - [ ] Create csv with these columns: well name, row, col, tip, pipette sequence number, multipipette sequence number, volume, liquid class, reagent, labware model, site, [plate name], [experiment name]
+- [ ] TitrationSeries: allow for combinations of liquids (e.g. salt_ph55+buffer_ph55 and salt_ph70+buffer_ph70, but not salt_ph55+buffer_ph70)
 - [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [ ] EvowareClientScriptBuilder: update well state in spirate_checked
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
