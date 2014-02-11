@@ -11,7 +11,7 @@
 - [ ] Print out liquid usage for source wells, so I know how much we need to put in
   - [x] print a table sorted by plate name, column, row
   - [ ] for reagents, print a table with these columns: plate, column, row, well index name, initial volume, final volume, volume change, dead volume, min volume recommended
-  - [ ] Create csv with these columns: well name, row, col, tip, pipette sequence number, multipipette sequence number, volume, liquid class, reagent, labware model, site, [plate name], [experiment name]
+  - [ ] Create csv with these columns for destination wells: well name, row, col, tip, pipette sequence number, multipipette sequence number, volume, liquid class, reagent, labware model, site, [plate name], [experiment name]
 - [ ] TitrationSeries: allow for combinations of liquids (e.g. salt_ph55+buffer_ph55 and salt_ph70+buffer_ph70, but not salt_ph55+buffer_ph70)
 - [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [ ] EvowareClientScriptBuilder: update well state in spirate_checked
@@ -20,7 +20,9 @@
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
 
-- [ ] let user specify initial volume for a reagent
+- [ ] Create nice HTML/SVG instructions for the user to prepare source plates
+- [ ] Implement smart mixing planner that figures out how to mix, which plates to use, which wells to use, and considers dead volumes, plate costs, and reagent costs.
+- [ ] let user specify initial volume for a source well
 - [ ] add 'deadVolume' property to labwareModel, indicated the extra volume required in a well for aspiration
 - [ ] keep track of minimum and maximum volumes in a well, and warn or produce errors when these are out of bounds
 - [ ] TitrationSeries: allow use of more than one target plate
