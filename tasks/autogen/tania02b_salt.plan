@@ -1,0 +1,21 @@
+[Plan cost: 17.0
+
+(!agent-activate user)
+(!transporter-run user userarm sourceplate2 m003 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 sourceplate2 m003 r1_hotel_245x1 r1_bench_010x4 r1_transporterspec0)
+(!agent-deactivate r1)
+(!agent-activate user)
+(!transporter-run user userarm mixplate m002 offsite r1_bench_010x2 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter1 mixplate m002 r1_bench_010x2 r1_bench_017x2 r1_transporterspec0)
+(!agent-deactivate r1)
+(!agent-activate user)
+(!transporter-run user userarm sourceplate1 m001 offsite r1_bench_010x2 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+--------------------
+]

@@ -8,8 +8,8 @@ labware:
 # Reagents used in this protocol
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
 reagents:
-  buffer_pH55: sourcePlate1(A01|H08)
-  #buffer_pH70: sourcePlate1(A07|H12)
+  #buffer_pH55: sourcePlate1(A01|H08)
+  buffer_pH70: sourcePlate1(A01|H08)
   #sfGFP: sourcePlate2(A01) # we've run out of sfGFP
   Assam: sourcePlate2(A02)
   p1200: sourcePlate2(A03)
@@ -23,11 +23,12 @@ protocol:
       steps:
         - source: [salt_pH55, salt_pH70]
           volume: [0ul, 0.5ul, 1ul, 1.5ul, 2.0ul, 2.5ul, 3.0ul, 3.5ul, 4.0ul, 4.5ul, 5.0ul]
+          #volume: [0ul, 1ul, 2.0ul, 3.0ul, 4.0ul, 5.0ul]
           sterilizeBefore: thorough
           sterilizeBetween: none
           pipettePolicy: Water_C_50
         #- source: [buffer_pH55, buffer_pH70]
-        - source: [buffer_pH55]
+        - source: [buffer_pH70]
           sterilizeBefore: thorough
           sterilizeBetween: none
           pipettePolicy: Water_A_1000

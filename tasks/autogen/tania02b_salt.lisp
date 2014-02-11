@@ -1,4 +1,4 @@
-(defproblem tania02a_salt domain
+(defproblem tania02b_salt domain
  ; initial conditions
  (
   (is-agent r1)
