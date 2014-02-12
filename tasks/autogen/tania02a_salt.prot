@@ -13,7 +13,6 @@ labware:
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
 reagents:
   buffer_pH55: sourcePlate1(A01|H04)
-  #buffer_pH70: sourcePlate1(A07|H12)
   #sfGFP: sourcePlate2(A01) # we've run out of sfGFP
   Assam: sourcePlate2(A02)
   p1200: sourcePlate2(A03)
@@ -29,12 +28,10 @@ protocol:
           sterilizeBefore: thorough
           sterilizeBetween: none
           pipettePolicy: Water_C_50
-        #- source: [buffer_pH55, buffer_pH70]
         - source: [buffer_pH55]
           sterilizeBefore: thorough
           sterilizeBetween: none
           pipettePolicy: Water_A_1000
-        #- source: [sfGFP, Assam, p1200, p1201, p1205]
         - source: [Assam, p1200, p1201, p1205]
           volume: .25ul
           sterilizeBefore: thorough
