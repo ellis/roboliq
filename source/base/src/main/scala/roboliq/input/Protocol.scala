@@ -821,6 +821,26 @@ class Protocol {
 				println(x.flatten.mkString(", "))
 			}
 		}
+		def printDestinationMixtureCsv(ll: List[((Labware, RowCol), List[(LiquidSource, LiquidVolume)])]): Unit = {
+			var i = 1
+			for (((labware, rowcol), l) <- ll) {
+				val x = for ((source, volume) <- l) yield {
+					val y = for {
+						well <- state0.getWell(source.l.head)
+						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
+					} yield {
+						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
+					}
+					y match {
+						case RqSuccess(l, _) => l
+						case RqError(_, _) => List("\"ERROR\"", "0")
+					}
+				}
+				val labwareName = "\"" + eb.getIdent(labware).getOrElse("ERROR") + "\""
+				val wellName = "\"" + rowcol.toString + "\""
+				println((labwareName :: wellName :: x.flatten).mkString(", "))
+			}
+		}
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
@@ -885,11 +905,12 @@ class Protocol {
                 }
 			})*/
 			stepToList_l = cmd.steps zip l3.transpose
-			_ = printMixtureCsv(l3)
-			_ = println("----------------")
-			_ = printMixtureCsv(stepToList_l.map(_._2))
 		} yield {
+			//printMixtureCsv(l3)
+			//println("----------------")
+			//printMixtureCsv(stepToList_l.map(_._2))
 			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
+			printDestinationMixtureCsv(destinations.l zip l3)
 			//println("len: "+stepToList_l.map(_._2.length))
 			stepToList_l.map(pair => {
 				val (step, sourceToVolume_l) = pair
