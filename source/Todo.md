@@ -39,3 +39,8 @@
 - [ ] Consider making paths in config file relative to the config file itself
 - [ ] Refactor the Converter code, and make more use of parsers
 - [ ] Commands should be able to each produce their own reports, e.g. for TitrationSeries, showing a table with the contents of the wells
+
+## Someday
+- I-X source code: http://i-x.info/release/current/
+- from Austin Tate and Gerhard: try I-X, do a demo in it, then re-implement the algorithms you need; highly recommend the INCA ontology!  You might want to then get back to I-X for industrial application after PhD is done.
+
