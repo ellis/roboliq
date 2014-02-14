@@ -16,6 +16,7 @@
 - [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [ ] EvowareClientScriptBuilder: update well state in spirate_checked
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
+- [ ] When generating files from protocol, create a new directory that will hold all output files -- let each command create as multiple output files
 - [ ] TitrationSeries: let user explicitly specify number of replicates
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
