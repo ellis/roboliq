@@ -1,6 +1,12 @@
 plates:
 - name: P1
   location: Shelf 32Pos Microplate ...
+- name: culture
+  location: shaker
+- name: reaction
+  location: shelf -> lid
+- name: dilution
+  location: shelf -> downholder
 
 programs:
 - name: measure1
@@ -64,27 +70,14 @@ protocol:
       volume: 10ul
       premix: 150ul
       postSterilize: decontaminate
-- group: Main culture growth
-  commands:
-  - open InfiniteM200
-  - move P1 InfiniteM200
-  - close InfiniteM200
-  - run InfiniteM200 measure2
-  - open InfiniteM200
-  - move P1 shaker (?)
-  - close InfiniteM200
+- // Main culture growth
+- readFluorescence_InfiniteM200 InfiniteM200 P1 measure2
 - group: Add IPTG
   commands:
   - distribute reagent/iptg plate/P1(E01 x H12)
   - Wash(15,1,1,1,0,"2.0",500,"4.0",500,10,70,30,1,0,1000,0);
-- group: Main culture expression
-  - open InfiniteM200
-  - move P1 InfiniteM200
-  - close InfiniteM200
-  - run device/InfiniteM200 program/measure3
-  - open device/InfiniteM200
-  - move P1 shaker (?)
-  - close InfiniteM200
+- // Main culture expression
+- readFluorescence_InfiniteM200 device/InfiniteM200 plate/P1 program/measure3
 - group: Add lysis buffer
   commands:
     - distribute reagent/lysisBuffer plate/P1(E01 x H12) 20ul
@@ -94,21 +87,13 @@ protocol:
   name: shake
   object: plate/P1
   program: program/shake1
-Group("Mix and lyse");
-BeginLoop("int_max_columns","Inoculate");
-Mix(15,"Water_C_1000","150","150","150","150",0,0,0,0,0,0,0,0,10,3,1,"0C08 1000000000000",8,1,"Inoculate",0,1,0);
-Wash(15,1,1,1,0,"2.0",500,"4.0",500,10,70,30,1,0,1000,0);
-Mix(15,"Water_A_1000","800","800","800","800",0,0,0,0,0,0,0,0,3,2,1,"0108?0",3,0,0);
-Wash(15,1,1,1,0,"2.0",500,"4.0",500,10,70,30,1,0,1000,0);
-Wash(15,1,1,1,2,"8.0",500,"32.0",500,10,70,30,1,0,1000,0);
-EndLoop();
-GroupEnd();
-Group("Get dilution plate");
-Transfer_Rack("11","9",0,1,0,1,1,"11","Ellis Nunc F96 MicroWell","Narrow","","","Shelf 32Pos Microplate","Shelf 32Pos Microplate","Downholder","2","2","3");
-GroupEnd();
-Group("Get reaction plate");
-Transfer_Rack("11","10",0,0,0,1,1,"","D-BSSE 384 Well Plate White","Narrow","","","Shelf 32Pos Microplate","","MP 2Pos H+P Shake","3","(Not defined)","2");
-GroupEnd();
+- group: Mix and lyse
+  commands:
+    - mix_pipetter plate/culture(E01 x H${int_max_columns}) 150ul sanitize=NDD
+- // Get dilution plate
+- move plate.diluation location.downholder lid=shelfX
+- // Get reaction plate
+- move plate.reaction location.lid
 Group("Add buffer dilution plate");
 BeginLoop("2","yBlock");
 BeginLoop("2","xBlock");
