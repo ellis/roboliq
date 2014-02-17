@@ -883,6 +883,7 @@ class Protocol {
 				case None => RqSuccess(Nil)
 				case Some(volumeTotal) =>
 					val l = wellVolumeBeforeFill_l.map(volumeTotal - _)
+					//println("wellVolumeBeforeFill_l: "+wellVolumeBeforeFill_l)
 					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
 					else RqSuccess(l)
 			}

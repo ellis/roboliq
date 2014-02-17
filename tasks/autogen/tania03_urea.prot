@@ -1,0 +1,44 @@
+# Labware used in this protocol
+# labware_name: labware_model
+labware:
+  sourcePlate1: D-BSSE 96 Well DWP
+  sourcePlate2:
+    model: Thermocycler Plate
+    location: r1_bench_017x1
+  mixPlate:
+    model: "384 Well Plate"
+    location: r1_bench_010x4
+
+# Reagents used in this protocol
+# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
+reagents:
+  urea_pH55: sourcePlate1(A01|H01)
+  urea_pH70: sourcePlate1(A02|H02)
+  buffer_pH55: sourcePlate1(A03|H03)
+  buffer_pH70: sourcePlate1(A04|H04)
+  #sfGFP: sourcePlate2(A01) # we've run out of sfGFP
+  Assam: sourcePlate2(A02)
+  p1200: sourcePlate2(A03)
+  p1201: sourcePlate2(A04)
+  p1205: sourcePlate2(A05)
+
+protocol:
+  - titrationSeries:
+      steps:
+        - source: [urea_pH55, urea_pH70]
+          volume: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
+          sterilizeBefore: thorough
+          sterilizeBetween: none
+          pipettePolicy: Water_C_1000
+        - source: [buffer_pH55, buffer_pH70]
+          sterilizeBefore: thorough
+          sterilizeBetween: none
+          pipettePolicy: Water_A_1000
+        - source: [Assam, p1200, p1201, p1205]
+          volume: .25ul
+          sterilizeBefore: thorough
+          sterilizeBetween: thorough
+          sterilizeAfter: thorough
+          pipettePolicy: Water_C_50
+      destination: mixPlate(A13|P24)
+      volume: 100ul
