@@ -19,6 +19,7 @@ import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.input.commands.TitrationSeriesParser
 import roboliq.input.commands.TitrationStep
+import roboliq.input.commands.TitrationItem
 
 case class ReagentBean(
 	id: String,
@@ -764,13 +765,13 @@ class Protocol {
 	): RsResult[List[PipetteSpec]] = {
 		// Return a list of source+volume for each well, except for the filler step
 		def createWellMixtures(
-			step_l: List[TitrationStep],
+			item_l: List[TitrationItem],
 			replicateCount: Int,
 			well_l: List[(LiquidSource, LiquidVolume)],
 			plate_r: List[List[(LiquidSource, LiquidVolume)]]
-		): List[List[(LiquidSource, LiquidVolume)]] = step_l match {
+		): List[List[(LiquidSource, LiquidVolume)]] = item_l match {
 			case Nil => (List.fill(replicateCount)(well_l) ++ plate_r).reverse
-			case step :: rest =>
+			case item :: rest =>
 				step.volume_? match {
 					case None =>
 						createWellMixtures(rest, replicateCount, well_l, plate_r)
