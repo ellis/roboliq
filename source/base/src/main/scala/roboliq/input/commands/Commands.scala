@@ -31,7 +31,8 @@ case class TitrationSource(
 case class TitrationSeries(
 	steps: List[TitrationStep],
 	destination: PipetteDestinations,
-	volume_? : Option[LiquidVolume]
+	volume_? : Option[LiquidVolume],
+	replicates_? : Option[Int]
 ) extends Command {
 	def getItems: RqResult[List[TitrationItem]] = {
 		RqResult.toResultOfList(steps.map(_.getItem)).map(_.flatten)
@@ -43,8 +44,8 @@ case class TitrationStep(
 	or: List[TitrationStep],
 	source_? : Option[PipetteSources],
 	volume_? : Option[List[LiquidVolume]],
-	min_? : Option[LiquidVolume],
-	max_? : Option[LiquidVolume],
+	//min_? : Option[LiquidVolume],
+	//max_? : Option[LiquidVolume],
 	contact_? : Option[PipettePosition.Value],
 	sterilize_? : Option[CleanIntensity.Value],
 	sterilizeBefore_? : Option[CleanIntensity.Value],

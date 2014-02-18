@@ -20,6 +20,10 @@ import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.input.commands.TitrationSeriesParser
 import roboliq.input.commands.TitrationStep
 import roboliq.input.commands.TitrationItem
+import roboliq.input.commands.TitrationItem_And
+import roboliq.input.commands.TitrationItem_Or
+import roboliq.input.commands.TitrationItem_SourceVolume
+import roboliq.input.commands.TitrationItem_SourceVolume
 
 case class ReagentBean(
 	id: String,
@@ -767,41 +771,35 @@ class Protocol {
 		def createWellMixtures(
 			item_l: List[TitrationItem],
 			replicateCount: Int,
-			well_l: List[(LiquidSource, LiquidVolume)],
-			plate_r: List[List[(LiquidSource, LiquidVolume)]]
-		): List[List[(LiquidSource, LiquidVolume)]] = item_l match {
+			well_l: List[(LiquidSource, Option[LiquidVolume])],
+			plate_r: List[List[(LiquidSource, Option[LiquidVolume])]]
+		): List[List[(LiquidSource, Option[LiquidVolume])]] = item_l match {
 			case Nil => (List.fill(replicateCount)(well_l) ++ plate_r).reverse
 			case item :: rest =>
-				step.volume_? match {
-					case None =>
-						createWellMixtures(rest, replicateCount, well_l, plate_r)
-					case Some(volumes) =>
-						//val groupCount2 = groupCount / step.source.sources.length / volumes.length
-						(for {
-							source <- step.source.sources
-							volume <- volumes
-						} yield {
-							val well2_l = well_l ++ List((source, volume))
-							createWellMixtures(rest, replicateCount, well2_l, plate_r)
-						}).flatten
+				item match {
+					case TitrationItem_And(l) =>
+						createWellMixtures(l, replicateCount, well_l, plate_r)
+					case TitrationItem_Or(l) =>
+						l.flatMap(item => createWellMixtures(List(item), replicateCount, well_l, plate_r))
+					case TitrationItem_SourceVolume(step, src, volume_?) =>
+						val well2_l = well_l ++ List((src, volume_?))
+						createWellMixtures(rest, replicateCount, well2_l, plate_r)
 				}
 		}
 		def addFillVolume(
-			step_l: List[TitrationStep],
-			mixture_ll: List[List[(LiquidSource, LiquidVolume)]],
+			mixture_ll: List[List[(LiquidSource, Option[LiquidVolume])]],
 			fillVolume_l: List[LiquidVolume]
 		): List[List[(LiquidSource, LiquidVolume)]] = {
-			val i = step_l.indexWhere(step => step.volume_?.isEmpty)
-			if (i == -1) {
-				mixture_ll
-			}
-			else {
-				assert(mixture_ll.length == fillVolume_l.length)
-				val step = step_l(i)
-				for {
-					(mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
-					source <- step.source.sources
-				} yield mixture_l.take(i) ++ List((source, fillVolume)) ++ mixture_l.drop(i)
+			assert(mixture_ll.length == fillVolume_l.length)
+			for {
+		        (mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
+			} yield {
+				mixture_l.map { mixture =>
+					mixture._2 match {
+						case None => (mixture._1, fillVolume)
+						case Some(volume) => (mixture._1, volume)
+					}
+				}
 			}
 		}
 		def printMixtureCsv(ll: List[List[(LiquidSource, LiquidVolume)]]): Unit = {
@@ -845,21 +843,24 @@ class Protocol {
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
+			// Turn the user-specified steps into simpler individual and/or/source items
+			item_l <- RqResult.toResultOfList(cmd.steps.map(_.getItem)).map(_.flatten)
+			itemTop = TitrationItem_And(item_l)
+			// Number of wells required if we only use a single replicate
+			mixture1_l = createWellMixtures(item_l, 1, Nil, Nil)
+			wellCountMin = mixture1_l.length
+			_ <- RqResult.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
+			// Maximum number of wells available to us
+			wellCountMax = cmd.destination.l.length
+			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells.  The titration series requires at least $wellCountMin wells, and you have only supplied $wellCountMax wells.")
+			// Check replicate count
+			replicateCountMax = wellCountMax / wellCountMin
+			replicateCount = cmd.replicates_?.getOrElse(replicateCountMax)
+			wellCount = wellCountMin * replicateCount
+			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			//_ = println("cmd: "+cmd)
-			// Number of groups is the product of the number of unique sources and volumes for each step
-			groupCount = cmd.steps.map(step => {
-				step.source.sources.length * step.volume_?.map(_.length).getOrElse(1)
-			}).foldLeft(if (cmd.steps.isEmpty) 0 else 1){_ * _}
-			_ <- RqResult.assert(groupCount > 0, "A titration series must specify steps with reagents and volumes")
-			wellsPerGroup = cmd.destination.l.length / groupCount
-			_ <- RqResult.assert(wellsPerGroup > 0, "You must allocate more destination wells")
-			stepFiller_l = cmd.steps.filter(step => step.volume_?.isEmpty && step.min_?.isEmpty)
-			stepFiller_? <- stepFiller_l match {
-				case Nil => RqSuccess(None)
-				case step :: Nil => RqSuccess(Some(step))
-				case _ => RqError("Only one step may have an unspecified volume")
-			}
-			wellCount = wellsPerGroup * groupCount
+			tooManyFillers_l = mixture1_l.filter(mixture => mixture.filter(_._2.isEmpty).size > 1)
+			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well")
 			//_ = println("wellsPerGroup: "+wellsPerGroup)
 			//_ = println("groupCount: "+groupCount)
 			//_ = println("wellCount: "+wellCount)
@@ -876,10 +877,10 @@ class Protocol {
 						Some(source_l zip volume_l)
                 }
 			})*/
-			l2 = createWellMixtures(cmd.steps, wellsPerGroup, Nil, Nil)
+			l2 = createWellMixtures(item_l, replicateCount, Nil, Nil)
 			//_ = println(l1.map(_.length))
 			//l2 = l1.transpose
-			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){_ + _})
+			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){(acc, volume_?) => acc + volume_?.getOrElse(LiquidVolume.empty)})
 			fillVolume_l <- cmd.volume_? match {
 				case None => RqSuccess(Nil)
 				case Some(volumeTotal) =>
@@ -888,7 +889,7 @@ class Protocol {
 					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
 					else RqSuccess(l)
 			}
-			l3 = addFillVolume(cmd.steps, l2, fillVolume_l)
+			l3 = addFillVolume(l2, fillVolume_l)
 			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
 			/*stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
 				// If this is the filler step:
