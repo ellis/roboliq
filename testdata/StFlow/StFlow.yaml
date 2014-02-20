@@ -1,12 +1,11 @@
 plates:
-- name: P1
-  location: Shelf 32Pos Microplate ...
 - name: culture
-  location: shaker
+  location: shelf(1) -> shaker
 - name: reaction
   location: shelf -> lid
+  lid: true
 - name: dilution
-  location: shelf -> downholder
+  location: shelf(2) -> downholder
 
 programs:
 - name: measure1
@@ -28,72 +27,59 @@ programs:
   data: |
     'FACTS("HPShaker","HPShaker_HP__ShakeForTime","*271|5*30*30*30*30|2|*30|1|*30|1,2*30*30*30|127*27","0","");'
 
+reagents:
+  media: falcon50(1)
+  iptg: eppendorf(1)
+
 protocol:
 - comment: Preculture 12h, Main 2h, Main 4h, Recation 30min
 - group: Init
   commands:
   - Variable(int_max_columns,"12",1,"Maximal number of columns to be treated.",0,1.000000,10.000000,0,2,1,0);
   - Wash(255,1,1,1,0,"8.0",500,"32.0",500,10,70,30,1,0,1000,0);
-- comment: Get culture plate
-  command: move
-  source: P1
-  destination: shaker (?)
-- comment: Add media
-  command: distribute
-  source: "010810"
-  volume: 200ul
-  destination: P1(A01 x D12)
+- // Get culture plate
+- move plate/culture site/shaker lidDestination=shelf(1)
+- // Add media to upper rows
+- distribute reagent/media plate/culture(A01 x D12) 200ul
 - group: Inoculate by operator
   commands:
-  - Transfer_Rack("10","55",0,1,0,1,0,"11","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","Shelf 32Pos Microplate","Hotel 5Pos SPE","4","1","1");
+  - cover plate/culter
+  - move plate/culture location/hotel55(1)
   - prompt "Please inculate plate."
-  - Transfer_Rack("55","61",0,0,0,1,0,"","Ellis Nunc F96 MicroWell","Narrow","","","Hotel 5Pos SPE","","ReGrip Station","1","(Not defined)","1");
-- group: Pre culture
-  commands:
-  - open InfiniteM200
-  - move P1 InfiniteM200
-  - close InfiniteM200
-  - run InfiniteM200 measure1
-  - open InfiniteM200
-  - move P1 shaker (?)
-  - close InfiniteM200
-- group: Add media
-  command: distribute
-  source: "010810"
-  volume: 190ul
-  destination: P1(E01 x H12)
+- // Pre culture
+- readFluorescence_InfiniteM200 device/InfiniteM200 plate/culture measure1
+- // Add media to lower rows
+- distribute reagent/media plate/culture(E01 x H12) 190ul
 - group: Inoculate
   commands:
     - command: transfer
-      source: P1(A01 x D${int_max_columns})
-      destination: P1(E01 x H${int_max_columns})
+      source: plate/culture(A01 x D${int_max_columns})
+      destination: plate/culture(E01 x H${int_max_columns})
       volume: 10ul
-      premix: 150ul
-      postSterilize: decontaminate
+      mixBefore: 150ul
+      sterilizeAfter: decontaminate
 - // Main culture growth
-- readFluorescence_InfiniteM200 InfiniteM200 P1 measure2
-- group: Add IPTG
-  commands:
-  - distribute reagent/iptg plate/P1(E01 x H12)
-  - Wash(15,1,1,1,0,"2.0",500,"4.0",500,10,70,30,1,0,1000,0);
+- readFluorescence_InfiniteM200 InfiniteM200 plate/culture measure2
+- // Add IPTG
+- distribute reagent/iptg plate/culture(E01 x H12) 10ul sterilize=NNT
 - // Main culture expression
-- readFluorescence_InfiniteM200 device/InfiniteM200 plate/P1 program/measure3
+- readFluorescence_InfiniteM200 device/InfiniteM200 plate/culture program/measure3
 - group: Add lysis buffer
   commands:
-    - distribute reagent/lysisBuffer plate/P1(E01 x H12) 20ul
+    - distribute reagent/lysisBuffer plate/culture(E01 x H12) 20ul
     - Wash(15,1,1,1,0,"2.0",500,"4.0",500,10,70,30,1,0,1000,0);
 - command:
   comment: Shake
   name: shake
-  object: plate/P1
+  object: plate/Culture
   program: program/shake1
 - group: Mix and lyse
   commands:
     - mix_pipetter plate/culture(E01 x H${int_max_columns}) 150ul sanitize=NDD
 - // Get dilution plate
-- move plate.diluation location.downholder lid=shelfX
+- move plate/diluation location/downholder lid=shelfX
 - // Get reaction plate
-- move plate.reaction location.lid
+- move plate/reaction location/lid
 Group("Add buffer dilution plate");
 BeginLoop("2","yBlock");
 BeginLoop("2","xBlock");

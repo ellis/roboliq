@@ -37,6 +37,7 @@
 
 - [ ] Better figuring out of labware positions
 - [ ] Have user place plates at beginning of script rather than just when needed
+- [ ] If a command changes the state of a plate (e.g. takes off lid or move to a different position), the state should be restored at the end of the command unless it gets modified again later by another command -- but at latest by the end of the script, restore the state
 
 ## Next
 
