@@ -8,20 +8,38 @@
 - [x] Speed up pipetting algorithm -- need to get it fast enough to handle 384 well plate
 - [x] TitrationSeries: fix hack for stepToList_l in TitrationSeriesSub()
 - [x] TitrationSeries: allow for alternative fillers
+- [x] TitrationSeries: allow for combinations of liquids (e.g. salt_ph55+buffer_ph55 and salt_ph70+buffer_ph70, but not salt_ph55+buffer_ph70)
+- [x] TitrationSeries: let user explicitly specify number of replicates
+- [ ] BUG: TitrationSeries: tania03_urea: why is no Assam reagent used, according to table printed at end of execution?
+- [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
+- [ ] EvowareClientScriptBuilder: update well state in spirate_checked
+- [ ] EvowareClientScriptBuilder: add well events in spirate_checked
+- [ ] TitrationSeries: randomize dispenses, with a randomSeed property
+- [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
+
+## Priorities for user friendliness
+
+- [ ] When generating files from protocol, create a new directory that will hold all output files -- let each command create as multiple output files
 - [ ] Print out liquid usage for source wells, so I know how much we need to put in
   - [x] print a table sorted by plate name, column, row
   - [ ] for reagents, print a table with these columns: plate, column, row, well index name, initial volume, final volume, volume change, dead volume, min volume recommended
   - [ ] Create csv with these columns for destination wells: well name, row, col, tip, pipette sequence number, multipipette sequence number, volume, liquid class, reagent, labware model, site, [plate name], [experiment name]
-- [ ] TitrationSeries: allow for combinations of liquids (e.g. salt_ph55+buffer_ph55 and salt_ph70+buffer_ph70, but not salt_ph55+buffer_ph70)
-- [ ] EvowareClientScriptBuilder: update tip state in spirate_checked
-- [ ] EvowareClientScriptBuilder: update well state in spirate_checked
-- [ ] EvowareClientScriptBuilder: add well events in spirate_checked
-- [ ] When generating files from protocol, create a new directory that will hold all output files -- let each command create as multiple output files
-- [ ] TitrationSeries: let user explicitly specify number of replicates
-- [ ] TitrationSeries: randomize dispenses, with a randomSeed property
-- [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
-
 - [ ] Create nice HTML/SVG instructions for the user to prepare source plates
+- [ ] Titrate: Web form for entering titration series
+- [ ] Server program to control evoware
+
+## Priorities for script language
+
+- [ ] TitrationSeries: Automatically figure out sterilization and liquid class again, so user doesn't need to specify it
+- [ ] Allow for use of tubes
+
+## Priorities for planning
+
+- [ ] Better figuring out of labware positions
+- [ ] Have user place plates at beginning of script rather than just when needed
+
+## Next
+
 - [ ] Implement smart mixing planner that figures out how to mix, which plates to use, which wells to use, and considers dead volumes, plate costs, and reagent costs.
 - [ ] let user specify initial volume for a source well
 - [ ] add 'deadVolume' property to labwareModel, indicated the extra volume required in a well for aspiration
