@@ -767,25 +767,60 @@ class Protocol {
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[List[PipetteSpec]] = {
-		// Return a list of source+volume for each well, except for the filler step
-		def createWellMixtures(
-			item_l: List[TitrationItem],
-			replicateCount: Int,
-			well_l: List[(LiquidSource, Option[LiquidVolume])],
-			plate_r: List[List[(LiquidSource, Option[LiquidVolume])]]
-		): List[List[(LiquidSource, Option[LiquidVolume])]] = item_l match {
-			case Nil => (List.fill(replicateCount)(well_l) ++ plate_r).reverse
-			case item :: rest =>
-				item match {
-					case TitrationItem_And(l) =>
-						createWellMixtures(l, replicateCount, well_l, plate_r)
-					case TitrationItem_Or(l) =>
-						l.flatMap(item => createWellMixtures(List(item), replicateCount, well_l, plate_r))
-					case TitrationItem_SourceVolume(step, src, volume_?) =>
-						val well2_l = well_l ++ List((src, volume_?))
-						createWellMixtures(rest, replicateCount, well2_l, plate_r)
-				}
+		// Combine two lists by crossing all items from list 1 with all items from list 2
+		// Each list can be thought of as being in DNF (disjunctive normal form)
+		// and we combine two with the AND operation and produce a new list in DNF.
+		def mixLists_And(
+			mixture1_l: List[List[(LiquidSource, Option[LiquidVolume])]],
+			mixture2_l: List[List[(LiquidSource, Option[LiquidVolume])]]
+		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			for {
+				mixture1 <- mixture1_l
+				mixture2 <- mixture2_l
+			} yield mixture1 ++ mixture2
 		}
+		def mixManyLists_And(
+			mixture_ll: List[List[List[(LiquidSource, Option[LiquidVolume])]]]
+		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			mixture_ll.filterNot(_.isEmpty) match {
+				case Nil => Nil
+				case first :: rest =>
+					rest.foldLeft(first){ (acc, next) => mixLists_And(acc, next) }
+			}
+		}
+		// ORing two lists in DNF just involves concatenating the two lists.
+		def mixManyLists_Or(
+			mixture_ll: List[List[List[(LiquidSource, Option[LiquidVolume])]]]
+		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			mixture_ll.flatten
+		}
+		// Return a list of source+volume for each well
+		def createWellMixtures(
+			item: TitrationItem,
+			mixture_l: List[List[(LiquidSource, Option[LiquidVolume])]]
+		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			println("item: ")
+			item.printShortHierarchy(eb, "  ")
+			println("mixture_l:")
+			mixture_l.foreach(mixture => println(mixture.map(_._2).mkString("+")))
+			item match {
+				case TitrationItem_And(l) =>
+					val l2 = l.map(item => createWellMixtures(item, Nil))
+					println("l2: "+l2.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
+					val l3 = mixManyLists_And(mixture_l :: l2)
+					println("l3: "+l3.map(_.map(_._2).mkString("+")).mkString(","))
+					l3
+				case TitrationItem_Or(l) =>
+					val l4 = l.map(item => createWellMixtures(item, Nil))
+					println("l4: "+l4.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
+					val l5 = mixManyLists_Or(mixture_l :: l4)
+					println("l5: "+l5.map(_.map(_._2).mkString("+")).mkString(","))
+					l5
+				case TitrationItem_SourceVolume(step, src, volume_?) =>
+					List(List((src, volume_?)))
+			}
+		}
+		// Replace any missing volumes with fill volumes
 		def addFillVolume(
 			mixture_ll: List[List[(LiquidSource, Option[LiquidVolume])]],
 			fillVolume_l: List[LiquidVolume]
@@ -822,6 +857,8 @@ class Protocol {
 		}
 		def printDestinationMixtureCsv(ll: List[((Labware, RowCol), List[(LiquidSource, LiquidVolume)])]): Unit = {
 			var i = 1
+			val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
+			println(header)
 			for (((labware, rowcol), l) <- ll) {
 				val x = for ((source, volume) <- l) yield {
 					val y = for {
@@ -837,7 +874,7 @@ class Protocol {
 				}
 				val labwareName = "\"" + eb.getIdent(labware).getOrElse("ERROR") + "\""
 				val wellName = "\"" + rowcol.toString + "\""
-				println((labwareName :: wellName :: x.flatten).mkString(", "))
+				println((labwareName :: wellName :: x.flatten).mkString(","))
 			}
 		}
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
@@ -846,8 +883,10 @@ class Protocol {
 			// Turn the user-specified steps into simpler individual and/or/source items
 			item_l <- RqResult.toResultOfList(cmd.steps.map(_.getItem)).map(_.flatten)
 			itemTop = TitrationItem_And(item_l)
+			_ = itemTop.printShortHierarchy(eb, "")
 			// Number of wells required if we only use a single replicate
-			mixture1_l = createWellMixtures(item_l, 1, Nil, Nil)
+			mixture1_l = createWellMixtures(itemTop, Nil)
+			_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
 			wellCountMin = mixture1_l.length
 			_ <- RqResult.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
 			// Maximum number of wells available to us
@@ -860,7 +899,7 @@ class Protocol {
 			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			//_ = println("cmd: "+cmd)
 			tooManyFillers_l = mixture1_l.filter(mixture => mixture.filter(_._2.isEmpty).size > 1)
-			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well")
+			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_._2)))
 			//_ = println("wellsPerGroup: "+wellsPerGroup)
 			//_ = println("groupCount: "+groupCount)
 			//_ = println("wellCount: "+wellCount)
@@ -877,7 +916,7 @@ class Protocol {
 						Some(source_l zip volume_l)
                 }
 			})*/
-			l2 = createWellMixtures(item_l, replicateCount, Nil, Nil)
+			l2 = mixture1_l.flatMap(mixture => List.fill(replicateCount)(mixture))
 			//_ = println(l1.map(_.length))
 			//l2 = l1.transpose
 			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){(acc, volume_?) => acc + volume_?.getOrElse(LiquidVolume.empty)})

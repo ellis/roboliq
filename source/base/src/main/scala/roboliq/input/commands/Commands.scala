@@ -69,17 +69,34 @@ case class TitrationStep(
 						case Some(volume_l) => volume_l.map(volume => TitrationItem_SourceVolume(this, src, Some(volume)))
 					}
 				})
-				RqSuccess(l)
+				val l2 = if (l.size == 1) l else List(TitrationItem_Or(l))
+				RqSuccess(l2)
 			}
 		}
 	}
 }
 
-sealed trait TitrationItem
-case class TitrationItem_And(l: List[TitrationItem]) extends TitrationItem
-case class TitrationItem_Or(l: List[TitrationItem]) extends TitrationItem
+sealed trait TitrationItem {
+	def printShortHierarchy(eb: EntityBase, indent: String)
+}
+case class TitrationItem_And(l: List[TitrationItem]) extends TitrationItem {
+	def printShortHierarchy(eb: EntityBase, indent: String) {
+		println(indent + "and:")
+		l.foreach(_.printShortHierarchy(eb, indent+"  "))
+	}
+}
+case class TitrationItem_Or(l: List[TitrationItem]) extends TitrationItem {
+	def printShortHierarchy(eb: EntityBase, indent: String) {
+		println(indent + "or:")
+		l.foreach(_.printShortHierarchy(eb, indent+"  "))
+	}
+}
 case class TitrationItem_SourceVolume(
 	step: TitrationStep,
 	source: LiquidSource,
 	volume_? : Option[LiquidVolume]
-) extends TitrationItem
+) extends TitrationItem {
+	def printShortHierarchy(eb: EntityBase, indent: String) {
+		println(indent + source.l.head + " " + volume_?)
+	}
+}

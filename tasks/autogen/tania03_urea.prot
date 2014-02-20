@@ -25,20 +25,33 @@ reagents:
 protocol:
   - titrationSeries:
       steps:
-        - source: [urea_pH55, urea_pH70]
-          volume: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
-          sterilizeBefore: thorough
-          sterilizeBetween: none
-          pipettePolicy: Water_C_1000
-        - source: [buffer_pH55, buffer_pH70]
-          sterilizeBefore: thorough
-          sterilizeBetween: none
-          pipettePolicy: Water_A_1000
+        - or:
+          - and:
+            - source: urea_pH55
+              volume: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
+              sterilizeBefore: thorough
+              sterilizeBetween: none
+              pipettePolicy: Water_C_1000
+            - source: buffer_pH55
+              sterilizeBefore: thorough
+              sterilizeBetween: none
+              pipettePolicy: Water_A_1000
+          - and:
+            - source: urea_pH70
+              volume: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
+              sterilizeBefore: thorough
+              sterilizeBetween: none
+              pipettePolicy: Water_C_1000
+            - source: buffer_pH70
+              sterilizeBefore: thorough
+              sterilizeBetween: none
+              pipettePolicy: Water_A_1000
         - source: [Assam, p1200, p1201, p1205]
           volume: .25ul
           sterilizeBefore: thorough
           sterilizeBetween: thorough
           sterilizeAfter: thorough
           pipettePolicy: Water_C_50
-      destination: mixPlate(A13|P24)
+      destination: mixPlate(A01xP24)
+      replicates: 4
       volume: 100ul
