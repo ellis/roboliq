@@ -24,6 +24,8 @@ import roboliq.input.commands.TitrationItem_And
 import roboliq.input.commands.TitrationItem_Or
 import roboliq.input.commands.TitrationItem_SourceVolume
 import roboliq.input.commands.TitrationItem_SourceVolume
+import roboliq.input.commands.TitrationItem_SourceVolume
+import roboliq.input.commands.TitrationItem_SourceVolume
 
 case class ReagentBean(
 	id: String,
@@ -767,21 +769,22 @@ class Protocol {
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[List[PipetteSpec]] = {
+		type XO = (TitrationItem_SourceVolume, Option[LiquidVolume])
 		// Combine two lists by crossing all items from list 1 with all items from list 2
 		// Each list can be thought of as being in DNF (disjunctive normal form)
 		// and we combine two with the AND operation and produce a new list in DNF.
 		def mixLists_And(
-			mixture1_l: List[List[(LiquidSource, Option[LiquidVolume])]],
-			mixture2_l: List[List[(LiquidSource, Option[LiquidVolume])]]
-		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			mixture1_l: List[List[XO]],
+			mixture2_l: List[List[XO]]
+		): List[List[XO]] = {
 			for {
 				mixture1 <- mixture1_l
 				mixture2 <- mixture2_l
 			} yield mixture1 ++ mixture2
 		}
 		def mixManyLists_And(
-			mixture_ll: List[List[List[(LiquidSource, Option[LiquidVolume])]]]
-		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			mixture_ll: List[List[List[XO]]]
+		): List[List[XO]] = {
 			mixture_ll.filterNot(_.isEmpty) match {
 				case Nil => Nil
 				case first :: rest =>
@@ -790,41 +793,41 @@ class Protocol {
 		}
 		// ORing two lists in DNF just involves concatenating the two lists.
 		def mixManyLists_Or(
-			mixture_ll: List[List[List[(LiquidSource, Option[LiquidVolume])]]]
-		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
+			mixture_ll: List[List[List[XO]]]
+		): List[List[XO]] = {
 			mixture_ll.flatten
 		}
 		// Return a list of source+volume for each well
 		def createWellMixtures(
 			item: TitrationItem,
-			mixture_l: List[List[(LiquidSource, Option[LiquidVolume])]]
-		): List[List[(LiquidSource, Option[LiquidVolume])]] = {
-			println("item: ")
+			mixture_l: List[List[XO]]
+		): List[List[XO]] = {
+			//println("item: ")
 			item.printShortHierarchy(eb, "  ")
-			println("mixture_l:")
+			//println("mixture_l:")
 			mixture_l.foreach(mixture => println(mixture.map(_._2).mkString("+")))
 			item match {
 				case TitrationItem_And(l) =>
 					val l2 = l.map(item => createWellMixtures(item, Nil))
-					println("l2: "+l2.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
+					//println("l2: "+l2.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
 					val l3 = mixManyLists_And(mixture_l :: l2)
-					println("l3: "+l3.map(_.map(_._2).mkString("+")).mkString(","))
+					//println("l3: "+l3.map(_.map(_._2).mkString("+")).mkString(","))
 					l3
 				case TitrationItem_Or(l) =>
 					val l4 = l.map(item => createWellMixtures(item, Nil))
-					println("l4: "+l4.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
+					//println("l4: "+l4.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
 					val l5 = mixManyLists_Or(mixture_l :: l4)
-					println("l5: "+l5.map(_.map(_._2).mkString("+")).mkString(","))
+					//println("l5: "+l5.map(_.map(_._2).mkString("+")).mkString(","))
 					l5
-				case TitrationItem_SourceVolume(step, src, volume_?) =>
-					List(List((src, volume_?)))
+				case sv: TitrationItem_SourceVolume =>
+					List(List((sv, sv.volume_?)))
 			}
 		}
 		// Replace any missing volumes with fill volumes
 		def addFillVolume(
-			mixture_ll: List[List[(LiquidSource, Option[LiquidVolume])]],
+			mixture_ll: List[List[XO]],
 			fillVolume_l: List[LiquidVolume]
-		): List[List[(LiquidSource, LiquidVolume)]] = {
+		): List[List[(TitrationItem_SourceVolume, LiquidVolume)]] = {
 			assert(mixture_ll.length == fillVolume_l.length)
 			for {
 		        (mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
@@ -837,12 +840,12 @@ class Protocol {
 				}
 			}
 		}
-		def printMixtureCsv(ll: List[List[(LiquidSource, LiquidVolume)]]): Unit = {
+		def printMixtureCsv(ll: List[List[(TitrationItem_SourceVolume, LiquidVolume)]]): Unit = {
 			var i = 1
 			for (l <- ll) {
-				val x = for ((source, volume) <- l) yield {
+				val x = for ((sv, volume) <- l) yield {
 					val y = for {
-						well <- state0.getWell(source.l.head)
+						well <- state0.getWell(sv.source.l.head)
 						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
 					} yield {
 						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
@@ -855,14 +858,14 @@ class Protocol {
 				println(x.flatten.mkString(", "))
 			}
 		}
-		def printDestinationMixtureCsv(ll: List[((Labware, RowCol), List[(LiquidSource, LiquidVolume)])]): Unit = {
+		def printDestinationMixtureCsv(ll: List[((Labware, RowCol), List[(TitrationItem_SourceVolume, LiquidVolume)])]): Unit = {
 			var i = 1
 			val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
 			println(header)
 			for (((labware, rowcol), l) <- ll) {
-				val x = for ((source, volume) <- l) yield {
+				val x = for ((sv, volume) <- l) yield {
 					val y = for {
-						well <- state0.getWell(source.l.head)
+						well <- state0.getWell(sv.source.l.head)
 						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
 					} yield {
 						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
@@ -875,6 +878,13 @@ class Protocol {
 				val labwareName = "\"" + eb.getIdent(labware).getOrElse("ERROR") + "\""
 				val wellName = "\"" + rowcol.toString + "\""
 				println((labwareName :: wellName :: x.flatten).mkString(","))
+			}
+		}
+		def flattenSteps(item: TitrationItem): List[TitrationStep] = {
+			item match {
+				case TitrationItem_And(l) => l.flatMap(flattenSteps).distinct
+				case TitrationItem_Or(l) => l.flatMap(flattenSteps).distinct
+				case TitrationItem_SourceVolume(step, _, _) => List(step)
 			}
 		}
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
@@ -946,18 +956,31 @@ class Protocol {
 						l
                 }
 			})*/
-			stepToList_l = cmd.steps zip l3.transpose
+			stepOrder_l = flattenSteps(itemTop)
+			//stepToList_l = cmd.steps zip l3.transpose
 		} yield {
 			//printMixtureCsv(l3)
 			//println("----------------")
 			//printMixtureCsv(stepToList_l.map(_._2))
 			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
-			printDestinationMixtureCsv(destinations.l zip l3)
+			val destinationToMixture_l = destinations.l zip l3
+			printDestinationMixtureCsv(destinationToMixture_l)
 			//println("len: "+stepToList_l.map(_._2.length))
-			stepToList_l.map(pair => {
+			stepOrder_l.map(step => {
+				val l1: List[((Labware, RowCol), List[(TitrationItem_SourceVolume, LiquidVolume)])]
+					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(pair => (pair._1.step eq step) && (!pair._2.isEmpty)))
+				assert(l1.forall(_._2.size == 1))
+				val l2: List[((Labware, RowCol), (TitrationItem_SourceVolume, LiquidVolume))]
+					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
+				<< CONTINUE HERE >>
+				val (destination_l, l2) = l1.unzip
+				val (source_l, volume_l) = l2.unzip
+				val keep_l = volume_l.map(!_.isEmpty)
+				assert(source_l.forall(s => !s.l.isEmpty))
+				
 				val (step, sourceToVolume_l) = pair
 				// Remove items with empty volumes
-				val l1 = (destinations.l zip sourceToVolume_l).filterNot(_._2._2.isEmpty)
+				//val l1 = (destinations.l zip sourceToVolume_l).filterNot(_._2._2.isEmpty)
 				val (destination_l, l2) = l1.unzip
 				val (source_l, volume_l) = l2.unzip
 				val keep_l = volume_l.map(!_.isEmpty)
