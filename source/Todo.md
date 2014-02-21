@@ -16,6 +16,8 @@
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
+- [ ] Dilute: create command
+- [ ] List of user variables should be read in from a separate file, to make lab customization possible without modifying the original script
 
 ## Priorities for user friendliness
 
@@ -25,6 +27,7 @@
   - [ ] for reagents, print a table with these columns: plate, column, row, well index name, initial volume, final volume, volume change, dead volume, min volume recommended
   - [ ] Create csv with these columns for destination wells: well name, row, col, tip, pipette sequence number, multipipette sequence number, volume, liquid class, reagent, labware model, site, [plate name], [experiment name]
 - [ ] Create nice HTML/SVG instructions for the user to prepare source plates
+- [ ] Create nice HTML/SVG instructions for the user to setup the table
 - [ ] Titrate: Web form for entering titration series
 - [ ] Server program to control evoware
 
@@ -38,6 +41,7 @@
 - [ ] Better figuring out of labware positions
 - [ ] Have user place plates at beginning of script rather than just when needed
 - [ ] If a command changes the state of a plate (e.g. takes off lid or move to a different position), the state should be restored at the end of the command unless it gets modified again later by another command -- but at latest by the end of the script, restore the state
+- [ ] Sometimes, we prefer to use different sites for different plates, but sometimes we want to reuse sites...
 
 ## Next
 
