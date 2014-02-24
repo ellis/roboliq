@@ -580,9 +580,47 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		val iGrid = config.table.mapCarrierToGrid(siteE.carrier)
 		val sPlateMask = encodeWells(labwareModelE.nRows, labwareModelE.nCols, well_li)
 		//logger.debug("well_li: "+well_li)
+		
+		def getState(state: WorldState, item: TipWellVolumePolicy): RqResult[WorldState] = {
+            val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
+            val tipState0 = state.tip_state_m(item.tip)
+            val amount = Distribution.fromVolume(item.volume)
+			sFunc match {
+				case "Aspirate" =>
+					for {
+						wellAliquot1 <- wellAliquot0.remove(amount)
+						tipEvent = TipAspirateEvent(item.tip, item.well, wellAliquot0.mixture, item.volume)
+						tipState1 <- new TipAspirateEventHandler().handleEvent(tipState0, tipEvent)
+					} yield {
+						state.copy(
+							well_aliquot_m = state.well_aliquot_m + (item.well -> wellAliquot1),
+							tip_state_m = state.tip_state_m + (item.tip -> tipState1)
+						)
+					}
+				case "Dispense" =>
+					val aliquot = Aliquot(wellAliquot0.mixture, amount)
+					val pos = PipettePosition.getPositionFromPolicyNameHack(sLiquidClass)
+					for {
+						wellAliquot1 <- wellAliquot0.add(aliquot)
+						tipEvent = TipDispenseEvent(item.tip, wellAliquot0.mixture, item.volume, pos)
+						tipState1 <- new TipDispenseEventHandler().handleEvent(tipState0, tipEvent)
+					} yield {
+						state.copy(
+							well_aliquot_m = state.well_aliquot_m + (item.well -> wellAliquot1),
+							tip_state_m = state.tip_state_m + (item.tip -> tipState1)
+						)
+					}
+			}
+		}
+		
+		def foldState(): RqResult[WorldState] = {
+			item_l.map(_._1).foldLeft(RqSuccess(state0) : RqResult[WorldState]) { (acc, item) =>
+				acc.flatMap(state => getState(state, item))
+			}
+		}
 
 		for {
-			_ <- RsResult.zero
+			state1 <- foldState()
 		} yield {
 			val cmd = L0C_Spirate(
 				sFunc, 
@@ -593,19 +631,6 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				siteE, labwareModelE
 			)
 			
-			val state1 = sFunc match {
-				case "Aspirate" =>
-					item_l.foldLeft(state0) { (state, item) =>
-						val amount = Distribution.fromVolume(item._1.volume)
-						val aliquot0 = state.well_aliquot_m(item._1.well)
-						val aliquot1 = aliquot0.remove(amount).getOrElse(aliquot0) // FIXME: handle the error instead of using getOrElse
-						val state1 = state.copy(
-							well_aliquot_m = state.well_aliquot_m + (item._1.well -> aliquot1)
-						)
-						state1
-					}
-				case "Dispense" => state0
-			}
 			
 			TranslationResult(
 				List(TranslationItem(cmd, List(siteE -> labwareModelE))),

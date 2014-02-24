@@ -1,15 +1,14 @@
 labware:
   sourcePlate1: D-BSSE 96 Well DWP
-  sourcePlate2:
+  culture:
     model: Thermocycler Plate
-    location: r1_bench_017x1
   mixPlate:
     model: "384 Well Plate"
-    location: r1_bench_010x4
 
 reagents:
-  media: sourcePlate1(A01)
-  reactionBuffer: sourcePlate1(A02)
+  media: sourcePlate1(A01|H02)
+  iptg: sourcePlate1(A03)
+  reactionBuffer: sourcePlate1(A04)
 
 protocol:
 - distribute media culture(A01xD12) 200ul
@@ -19,16 +18,16 @@ protocol:
 #  - prompt "Please inculate plate."
 #  - move plate.culture location.shaker
 #- // Add media to lower rows
-#- distribute reagent.media plate.culture(E01 x H12) 190ul
+- distribute media culture(E01xH12) 190ul
 #- // Inoculate
-#- command: transfer
-#  source: plate/culture(A01 x D12)
-#  destination: plate/culture(E01 x H12)
-#  volume: 10ul
+- transfer:
+    source: culture(A01xD12)
+    destination: culture(E01xH12)
+    volume: 10ul
 #  mixBefore: 150ul
 #  sterilizeAfter: decontaminate
 #- // Add IPTG
-#- distribute reagent/iptg plate/culture(E01 x H12) 10ul contact=air sterilize=NNT
+- distribute iptg culture(E01xH12) 10ul #contact=air sterilize=NNT
 #- // Add lysis buffer
 #- distribute reagent/lysisBuffer plate/culture(E01 x H12) 20ul contact=air sterilize=NNT
 #- // Shake

@@ -100,3 +100,16 @@ case class TitrationItem_SourceVolume(
 		println(indent + source.l.head + " " + volume_?)
 	}
 }
+
+case class Transfer(
+	source: PipetteDestinations,
+	destination: PipetteDestinations,
+	volume: List[LiquidVolume],
+	contact_? : Option[PipettePosition.Value],
+	sterilize_? : Option[CleanIntensity.Value],
+	sterilizeBefore_? : Option[CleanIntensity.Value],
+	sterilizeBetween_? : Option[CleanIntensity.Value],
+	sterilizeAfter_? : Option[CleanIntensity.Value],
+	tipModel_? : Option[String],
+	pipettePolicy_? : Option[String]
+) extends Command

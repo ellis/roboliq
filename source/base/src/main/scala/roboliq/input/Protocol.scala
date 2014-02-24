@@ -391,7 +391,7 @@ class Protocol {
 				if (cmd_m.size == 0)
 					RsSuccess(None)
 				else if (cmd_m.size > 1)
-					RsError("expected single field with command name")
+					RsError("expected single field with command name: "+cmd_m)
 				else {
 					val (cmd, jsval) = cmd_m.head
 					for {
@@ -560,6 +560,8 @@ class Protocol {
 									cmd match {
 										case "distribute" =>
 											loadJsonProtocol_DistributeSub(nameToVal_l).map(Option(_))
+										case "transfer" =>
+											loadJsonProtocol_TransferSub(nameToVal_l).map(Option(_))
 										case _ =>
 											RsError("unrecognized pipette sub-command: $command")
 									}
@@ -583,6 +585,8 @@ class Protocol {
 				loadJsonProtocol_Distribute(nameVal_l)
 			case "titrationSeries" =>
 				loadJsonProtocol_TitrationSeries(nameVal_l)
+			case "transfer" =>
+				loadJsonProtocol_Transfer(nameVal_l)
 			case _ =>
 				RsSuccess(())
 		}
@@ -739,6 +743,50 @@ class Protocol {
 				PipetteSources(List(LiquidSource(src))),
 				dst,
 				List(cmd.volume),
+				cmd.pipettePolicy_?,
+				cmd.sterilize_?,
+				cmd.sterilizeBefore_?,
+				cmd.sterilizeBetween_?,
+				cmd.sterilizeAfter_?,
+				tipModel_?
+			)
+		}
+	}
+	private def loadJsonProtocol_Transfer(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[Unit] = {
+		for {
+			spec <- loadJsonProtocol_TransferSub(nameToVal_l)
+			labware_l = (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_._1).distinct
+			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
+		} yield {
+			val agentIdent = f"?a$nvar%04d"
+			val deviceIdent = f"?d$nvar%04d"
+			val n = labware_l.size
+			val specIdent = f"spec$nvar%04d"
+			idToObject(specIdent) = spec
+			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+		}
+	}
+	
+	private def loadJsonProtocol_TransferSub(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[PipetteSpec] = {
+		for {
+			cmd <- Converter.convCommandAs[commands.Transfer](nameToVal_l, eb, state0.toImmutable)
+			tipModel_? <- cmd.tipModel_? match {
+				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
+				case _ => RsSuccess(None)
+			}
+			_ <- RqResult.assert(cmd.source.l.size == cmd.destination.l.size, "Must specify an equal number of source and destination wells")
+			_ <- RqResult.assert(cmd.volume.size == 1 || cmd.volume.size == cmd.destination.l.size, "Must specify a single volume or an equal number of volumes and destination wells")
+		} yield {
+			val l = cmd.source.l zip cmd.destination.l
+			val src = PipetteSources(cmd.source.l.map(well => LiquidSource(List(well))))
+			PipetteSpec(
+				src,
+				cmd.destination,
+				cmd.volume,
 				cmd.pipettePolicy_?,
 				cmd.sterilize_?,
 				cmd.sterilizeBefore_?,
