@@ -769,7 +769,9 @@ class Protocol {
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[List[PipetteSpec]] = {
+		type LabwareRowCol = (Labware, RowCol)
 		type XO = (TitrationItem_SourceVolume, Option[LiquidVolume])
+		type X = (TitrationItem_SourceVolume, LiquidVolume)
 		// Combine two lists by crossing all items from list 1 with all items from list 2
 		// Each list can be thought of as being in DNF (disjunctive normal form)
 		// and we combine two with the AND operation and produce a new list in DNF.
@@ -827,7 +829,7 @@ class Protocol {
 		def addFillVolume(
 			mixture_ll: List[List[XO]],
 			fillVolume_l: List[LiquidVolume]
-		): List[List[(TitrationItem_SourceVolume, LiquidVolume)]] = {
+		): List[List[X]] = {
 			assert(mixture_ll.length == fillVolume_l.length)
 			for {
 		        (mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
@@ -840,7 +842,7 @@ class Protocol {
 				}
 			}
 		}
-		def printMixtureCsv(ll: List[List[(TitrationItem_SourceVolume, LiquidVolume)]]): Unit = {
+		def printMixtureCsv(ll: List[List[X]]): Unit = {
 			var i = 1
 			for (l <- ll) {
 				val x = for ((sv, volume) <- l) yield {
@@ -858,7 +860,7 @@ class Protocol {
 				println(x.flatten.mkString(", "))
 			}
 		}
-		def printDestinationMixtureCsv(ll: List[((Labware, RowCol), List[(TitrationItem_SourceVolume, LiquidVolume)])]): Unit = {
+		def printDestinationMixtureCsv(ll: List[(LabwareRowCol, List[X])]): Unit = {
 			var i = 1
 			val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
 			println(header)
@@ -967,24 +969,21 @@ class Protocol {
 			printDestinationMixtureCsv(destinationToMixture_l)
 			//println("len: "+stepToList_l.map(_._2.length))
 			stepOrder_l.map(step => {
-				val l1: List[((Labware, RowCol), List[(TitrationItem_SourceVolume, LiquidVolume)])]
+				// Get items corresponding to this step
+				val l1: List[(LabwareRowCol, List[X])]
 					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(pair => (pair._1.step eq step) && (!pair._2.isEmpty)))
-				assert(l1.forall(_._2.size == 1))
-				val l2: List[((Labware, RowCol), (TitrationItem_SourceVolume, LiquidVolume))]
+				// There should be at most one item per destination
+				assert(l1.forall(_._2.size <= 1))
+				// Keep the destinations with exactly one item
+				val l2: List[(LabwareRowCol, X)]
 					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
-				<< CONTINUE HERE >>
-				val (destination_l, l2) = l1.unzip
-				val (source_l, volume_l) = l2.unzip
+				val (destination_l, l3) = l2.unzip
+				val (sv_l, volume_l) = l3.unzip
+				val source_l = sv_l.map(_.source)
 				val keep_l = volume_l.map(!_.isEmpty)
 				assert(source_l.forall(s => !s.l.isEmpty))
-				
-				val (step, sourceToVolume_l) = pair
 				// Remove items with empty volumes
 				//val l1 = (destinations.l zip sourceToVolume_l).filterNot(_._2._2.isEmpty)
-				val (destination_l, l2) = l1.unzip
-				val (source_l, volume_l) = l2.unzip
-				val keep_l = volume_l.map(!_.isEmpty)
-				assert(source_l.forall(s => !s.l.isEmpty))
 				//println("volume_l: "+volume_l)
 				PipetteSpec(
 					PipetteSources(source_l),
