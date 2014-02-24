@@ -1,0 +1,67 @@
+labware:
+  sourcePlate1: D-BSSE 96 Well DWP
+  sourcePlate2:
+    model: Thermocycler Plate
+    location: r1_bench_017x1
+  mixPlate:
+    model: "384 Well Plate"
+    location: r1_bench_010x4
+
+reagents:
+  media: sourcePlate1(A01)
+  reactionBuffer: sourcePlate1(A02)
+
+protocol:
+- distribute media culture(A01xD12) 200ul
+#- group: Inoculate by operator
+#  commands:
+#  - move plate.culture location.hotel55(1)
+#  - prompt "Please inculate plate."
+#  - move plate.culture location.shaker
+#- // Add media to lower rows
+#- distribute reagent.media plate.culture(E01 x H12) 190ul
+#- // Inoculate
+#- command: transfer
+#  source: plate/culture(A01 x D12)
+#  destination: plate/culture(E01 x H12)
+#  volume: 10ul
+#  mixBefore: 150ul
+#  sterilizeAfter: decontaminate
+#- // Add IPTG
+#- distribute reagent/iptg plate/culture(E01 x H12) 10ul contact=air sterilize=NNT
+#- // Add lysis buffer
+#- distribute reagent/lysisBuffer plate/culture(E01 x H12) 20ul contact=air sterilize=NNT
+#- // Shake
+#- shake plate/culture program/shake1
+#- // Mix and lyse
+#- mix_pipetter plate/culture(E01 x H${int_max_columns}) 150ul sanitize=NDD
+#- // Create dilutions from culture plate to dilution plate
+#- command: dilute
+#  allOf:
+#  - source: reagent/reactionBuffer
+#  - oneOf:
+#    - source: plate/culture(E01 - E12)
+#      destination: plate/dilution(A01 - A12)
+#      factor: 1
+#    - source: plate/culture(F01 - F12)
+#      destination: plate/dilution(B01 - B12)
+#      factor: 10
+#    - source: plate/culture(G01 - G12)
+#      destination: plate/dilution(C01 - D12)
+#      factor: [10, 100]
+#    - source: plate/culture(H01 - H12)
+#      destination: plate/dilution(E01 - G12)
+#      factor: [10, 100, 1000]
+#  volume: 160ul
+#  mixBefore: true
+#  sanitize: thorough
+#- // Create titration series from dilution plate to reaction plate
+#- command: titrate
+#  allOf:
+#  - source: reagent/reactionBuffer
+#    volume: 41.6ul
+#  - source: plate/dilution(A01-A12, B01-B12, D01-D12, G01-G12)
+#    volume: 8ul
+#  - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
+#    volume: 30.4ul
+#  destination: plate/reaction
