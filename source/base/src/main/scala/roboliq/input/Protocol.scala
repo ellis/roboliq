@@ -980,15 +980,14 @@ class Protocol {
 			//_ = println(l1.map(_.length))
 			//l2 = l1.transpose
 			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){(acc, volume_?) => acc + volume_?.getOrElse(LiquidVolume.empty)})
-			fillVolume_l <- cmd.volume_? match {
+			l3 <- cmd.volume_? match {
 				case None => RqSuccess(Nil)
 				case Some(volumeTotal) =>
-					val l = wellVolumeBeforeFill_l.map(volumeTotal - _)
+					val fillVolume_l = wellVolumeBeforeFill_l.map(volumeTotal - _)
 					//println("wellVolumeBeforeFill_l: "+wellVolumeBeforeFill_l)
-					if (l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
-					else RqSuccess(l)
+					if (fillVolume_l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
+					else RqSuccess(addFillVolume(l2, fillVolume_l))
 			}
-			l3 = addFillVolume(l2, fillVolume_l)
 			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
 			/*stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
 				// If this is the filler step:

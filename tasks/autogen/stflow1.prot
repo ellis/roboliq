@@ -2,7 +2,9 @@ labware:
   sourcePlate1: D-BSSE 96 Well DWP
   culture:
     model: Thermocycler Plate
-  mixPlate:
+  dilution:
+    model: Thermocycler Plate
+  reaction:
     model: "384 Well Plate"
 
 reagents:
@@ -10,6 +12,14 @@ reagents:
   iptg: sourcePlate1(A03)
   lysisBuffer: sourcePlate1(A04)
   reactionBuffer: sourcePlate1(A05)
+  substrate4MUGlu: sourcePlate1(A12)
+  substrate4MUGal: sourcePlate1(B12)
+  substrate4MUSul: sourcePlate1(C12)
+  substrate4MUNag: sourcePlate1(D12)
+  substrate4MUPho: sourcePlate1(E12)
+  substrate4MUBut: sourcePlate1(F12)
+  substrateFree: sourcePlate1(G12)
+  substrate4MUXyl: sourcePlate1(H12)
 
 protocol:
 - distribute media culture(A01xD12) 200ul
@@ -56,12 +66,13 @@ protocol:
 #  mixBefore: true
 #  sanitize: thorough
 #- // Create titration series from dilution plate to reaction plate
-#- command: titrate
-#  allOf:
-#  - source: reagent/reactionBuffer
-#    volume: 41.6ul
-#  - source: plate/dilution(A01-A12, B01-B12, D01-D12, G01-G12)
-#    volume: 8ul
-#  - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
-#    volume: 30.4ul
-#  destination: plate/reaction
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+      volume: 41.6ul
+    - source: dilution(A01-A12+B01-B12+D01-D12+G01-G12)
+      volume: 8ul
+    - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
+      volume: 30.4ul
+    replicates: 1
+    destination: reaction(A01xP24)
