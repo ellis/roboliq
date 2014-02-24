@@ -8,7 +8,8 @@ labware:
 reagents:
   media: sourcePlate1(A01|H02)
   iptg: sourcePlate1(A03)
-  reactionBuffer: sourcePlate1(A04)
+  lysisBuffer: sourcePlate1(A04)
+  reactionBuffer: sourcePlate1(A05)
 
 protocol:
 - distribute media culture(A01xD12) 200ul
@@ -29,7 +30,7 @@ protocol:
 #- // Add IPTG
 - distribute iptg culture(E01xH12) 10ul #contact=air sterilize=NNT
 #- // Add lysis buffer
-#- distribute reagent/lysisBuffer plate/culture(E01 x H12) 20ul contact=air sterilize=NNT
+- distribute lysisBuffer culture(E01xH12) 20ul #contact=air sterilize=NNT
 #- // Shake
 #- shake plate/culture program/shake1
 #- // Mix and lyse
