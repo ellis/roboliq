@@ -6,8 +6,8 @@ import roboliq.entities._
 trait Command
 
 case class Distribute(
-	source: String,
-	destination: String,
+	source: PipetteSources,
+	destination: PipetteDestinations,
 	volume: LiquidVolume,
 	contact_? : Option[PipettePosition.Value],
 	sterilize_? : Option[CleanIntensity.Value],

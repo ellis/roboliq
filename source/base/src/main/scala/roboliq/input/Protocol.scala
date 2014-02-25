@@ -29,7 +29,7 @@ import roboliq.input.commands.TitrationItem_SourceVolume
 
 case class ReagentBean(
 	id: String,
-	wells: String,
+	wells: PipetteDestinations,
 	contaminants : Set[String],
 	viscosity_? : Option[String],
 	sterilize_? : Option[String],
@@ -197,7 +197,7 @@ class Protocol {
 					//println("jsval: "+jsval)
 					//println(Converter.convAs[Set[ReagentBean]](jsval, eb, None))
 					for {
-						reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, None)
+						reagentBean_l <- Converter.convAs[Set[ReagentBean]](jsval, eb, Some(state0.toImmutable))
 						//_ = println("reagentBean_l: "+reagentBean_l)
 						substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
 							val key = bean.key_?.getOrElse(gid)
@@ -212,8 +212,6 @@ class Protocol {
 									case "replace" => RsSuccess(TipCleanPolicy.DD)
 									case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
 								}
-								l <- eb.lookupLiquidSource(bean.wells, state0.toImmutable)
-								well_l <- RsResult.toResultOfList(l.map(state0.getWell))
 							} yield {
 								val substance = Substance(
 									key = key,
@@ -232,6 +230,7 @@ class Protocol {
 								//println("substance: "+substance)
 								//println("well_l: "+well_l)
 								nameToSubstance_m(name) = substance
+								val well_l = bean.wells.l.map(_.well)
 								eb.reagentToWells_m(name) = well_l
 								val mixture = Mixture(Left(substance))
 								val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
@@ -333,11 +332,10 @@ class Protocol {
 						val contents_s = m("contents")
 						for {
 							aliquot <- AliquotParser.parseAliquot(contents_s, nameToSubstance_m.toMap)
-							l <- eb.lookupLiquidSource(wellIdent, state0.toImmutable)
-							well_l <- RsResult.toResultOfList(l.map(state0.getWell))
+							dst_l <- eb.lookupLiquidDestinations(wellIdent, state0.toImmutable)
 						} yield {
-							for (well <- well_l) {
-								state0.well_aliquot_m(well) = aliquot
+							for (wellInfo <- dst_l.l) {
+								state0.well_aliquot_m(wellInfo.well) = aliquot
 							}
 						}
 					}))
@@ -567,13 +565,12 @@ class Protocol {
 									}
 								}))
 								item_l = l2.flatten
-								labware_l: List[Labware] = item_l.flatMap(item => item.sources.sources.flatMap(_.l) ++ item.destinations.l).map(_._1).distinct
-								labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 							} yield {
+								val labwareIdent_l = item_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
 								val agentIdent = f"?a$nvar%04d"
 								val deviceIdent = f"?d$nvar%04d"
 								val specIdent = f"spec$nvar%04d"
-								val n = labware_l.size
+								val n = labwareIdent_l.size
 								val spec = PipetteSpecList(item_l)
 								idToObject(specIdent) = spec
 								tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
@@ -715,12 +712,11 @@ class Protocol {
 	): RsResult[Unit] = {
 		for {
 			spec <- loadJsonProtocol_DistributeSub(nameToVal_l)
-			labware_l = (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_._1).distinct
-			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
+			val labwareIdent_l = (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName).distinct
 			val agentIdent = f"?a$nvar%04d"
 			val deviceIdent = f"?d$nvar%04d"
-			val n = labware_l.size
+			val n = labwareIdent_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = spec
 			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
@@ -732,16 +728,14 @@ class Protocol {
 	): RsResult[PipetteSpec] = {
 		for {
 			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb, state0.toImmutable)
-			src <- eb.lookupLiquidSource(cmd.source, state0.toImmutable)
-			dst <- eb.lookupPipetteDestinations(cmd.destination)
 			tipModel_? <- cmd.tipModel_? match {
 				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
 				case _ => RsSuccess(None)
 			}
 		} yield {
 			PipetteSpec(
-				PipetteSources(List(LiquidSource(src))),
-				dst,
+				cmd.source,
+				cmd.destination,
 				List(cmd.volume),
 				cmd.pipettePolicy_?,
 				cmd.sterilize_?,
@@ -757,12 +751,11 @@ class Protocol {
 	): RsResult[Unit] = {
 		for {
 			spec <- loadJsonProtocol_TransferSub(nameToVal_l)
-			labware_l = (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_._1).distinct
-			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
+			val labwareIdent_l = (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName).distinct
 			val agentIdent = f"?a$nvar%04d"
 			val deviceIdent = f"?d$nvar%04d"
-			val n = labware_l.size
+			val n = labwareIdent_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = spec
 			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
@@ -802,12 +795,11 @@ class Protocol {
 	): RsResult[Unit] = {
 		for {
 			spec_l <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
-			labware_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_._1)).distinct
-			labwareIdent_l <- RsResult.toResultOfList(labware_l.map(eb.getIdent))
 		} yield {
+			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
 			val agentIdent = f"?a$nvar%04d"
 			val deviceIdent = f"?d$nvar%04d"
-			val n = labware_l.size
+			val n = labwareIdent_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = PipetteSpecList(spec_l)
 			tasks += Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
@@ -817,7 +809,6 @@ class Protocol {
 	private def loadJsonProtocol_TitrationSeriesSub(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[List[PipetteSpec]] = {
-		type LabwareRowCol = (Labware, RowCol)
 		type XO = (TitrationItem_SourceVolume, Option[LiquidVolume])
 		type X = (TitrationItem_SourceVolume, LiquidVolume)
 		// Combine two lists by crossing all items from list 1 with all items from list 2
@@ -894,8 +885,8 @@ class Protocol {
 			var i = 1
 			for (l <- ll) {
 				val x = for ((sv, volume) <- l) yield {
+					val well = sv.source.l.head.well
 					val y = for {
-						well <- state0.getWell(sv.source.l.head)
 						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
 					} yield {
 						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
@@ -908,14 +899,14 @@ class Protocol {
 				println(x.flatten.mkString(", "))
 			}
 		}
-		def printDestinationMixtureCsv(ll: List[(LabwareRowCol, List[X])]): Unit = {
+		def printDestinationMixtureCsv(ll: List[(WellInfo, List[X])]): Unit = {
 			var i = 1
 			val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
 			println(header)
-			for (((labware, rowcol), l) <- ll) {
+			for ((wellInfo, l) <- ll) {
 				val x = for ((sv, volume) <- l) yield {
+					val well = sv.source.l.head.well
 					val y = for {
-						well <- state0.getWell(sv.source.l.head)
 						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
 					} yield {
 						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
@@ -925,9 +916,8 @@ class Protocol {
 						case RqError(_, _) => List("\"ERROR\"", "0")
 					}
 				}
-				val labwareName = "\"" + eb.getIdent(labware).getOrElse("ERROR") + "\""
-				val wellName = "\"" + rowcol.toString + "\""
-				println((labwareName :: wellName :: x.flatten).mkString(","))
+				val wellName = "\"" + wellInfo.rowcol.toString + "\""
+				println((wellInfo.labwareName :: wellName :: x.flatten).mkString(","))
 			}
 		}
 		def flattenSteps(item: TitrationItem): List[TitrationStep] = {
@@ -1017,12 +1007,12 @@ class Protocol {
 			//println("len: "+stepToList_l.map(_._2.length))
 			stepOrder_l.map(step => {
 				// Get items corresponding to this step
-				val l1: List[(LabwareRowCol, List[X])]
+				val l1: List[(WellInfo, List[X])]
 					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(pair => (pair._1.step eq step) && (!pair._2.isEmpty)))
 				// There should be at most one item per destination
 				assert(l1.forall(_._2.size <= 1))
 				// Keep the destinations with exactly one item
-				val l2: List[(LabwareRowCol, X)]
+				val l2: List[(WellInfo, X)]
 					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
 				val (destination_l, l3) = l2.unzip
 				val (sv_l, volume_l) = l3.unzip

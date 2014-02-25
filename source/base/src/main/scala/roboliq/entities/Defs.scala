@@ -172,8 +172,14 @@ object PipettePolicy {
 	}
 }
 
-case class LiquidSource(l: List[(Labware, RowCol)])
+case class WellInfo(labware: Labware, labwareName: String, well: Well, rowcol: RowCol) {
+	override def toString: String = {
+		labwareName+"("+rowcol.toString+")"
+	}
+}
+
+case class LiquidSource(l: List[WellInfo])
 
 case class PipetteSources(sources: List[LiquidSource])
 
-case class PipetteDestinations(l: List[(Labware, RowCol)])
+case class PipetteDestinations(l: List[WellInfo])

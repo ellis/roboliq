@@ -292,7 +292,7 @@ object Converter {
 			else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
 			else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
 			else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
-			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb)
+			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 			//else if (typ <:< typeOf[Substance]) toSubstance(jsval)
 			else if (typ <:< typeOf[Option[_]]) {
@@ -788,9 +788,9 @@ object Converter {
 			case Some(state) =>
 				jsval match {
 					case JsString(s) =>
-						for {
-							l <- eb.lookupLiquidSource(s, state)
-						} yield PipetteSources(List(LiquidSource(l)))
+						val x = eb.lookupLiquidSources(s, state)
+						println("toPipetteSources: "+s+" -> "+x)
+						x
 					case JsArray(l) =>
 						val l2 = RqResult.toResultOfList(l.map(jsval => toPipetteSources(jsval, eb, state_?)))
 						l2.map(l => PipetteSources(l.flatMap(_.sources)))
@@ -801,15 +801,20 @@ object Converter {
 
 	def toPipetteDestinations(
 		jsval: JsValue,
-		eb: EntityBase
+		eb: EntityBase,
+		state_? : Option[WorldState]
 	): RqResult[PipetteDestinations] = {
-		jsval match {
-			case JsString(s) =>
-				eb.lookupPipetteDestinations(s)
-			case JsArray(l) =>
-				val l2 = RqResult.toResultOfList(l.map(jsval => toPipetteDestinations(jsval, eb)))
-				l2.map(l => PipetteDestinations(l.flatMap(_.l)))
-			case _ => RqError("expected JsString in liquid source")
+		state_? match {
+			case None => RqError("require world state information for liquid source")
+			case Some(state) =>
+				jsval match {
+					case JsString(s) =>
+						eb.lookupLiquidDestinations(s, state)
+					case JsArray(l) =>
+						val l2 = RqResult.toResultOfList(l.map(jsval => toPipetteDestinations(jsval, eb, state_?)))
+						l2.map(l => PipetteDestinations(l.flatMap(_.l)))
+					case _ => RqError("expected JsString in liquid source")
+				}
 		}
 	}
 }

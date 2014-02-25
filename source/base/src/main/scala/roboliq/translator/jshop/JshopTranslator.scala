@@ -258,22 +258,17 @@ object JshopTranslator {
 			
 			// Create list of items for TransferPlanner
 			item_l <- RsResult.toResultOfList((spec.destinations.l, source_l, volume_l).zipped.toList.map(tuple => {
-				val (dstKey, srcKey, volume) = tuple
-				for {
-					dst <- state.getWell(dstKey)
-					src_l <- RqResult.toResultOfList(srcKey.l.map(state.getWell))
-				} yield {
-					// FIXME: for debug only
-					if (src_l.isEmpty) {
-						println("src_l empty:")
-						println(spec.destinations.l.length)
-						println(source_l)
-						println(volume_l)
-						assert(!src_l.isEmpty)
-					}
-					// ENDFIX
-					Item(src_l, dst, volume)
+				val (dst, src, volume) = tuple
+				// FIXME: for debug only
+				if (src.l.isEmpty) {
+					println("src_l empty:")
+					println(spec.destinations.l.length)
+					println(source_l)
+					println(volume_l)
+					assert(!src.l.isEmpty)
 				}
+				// ENDFIX
+				RqSuccess(Item(src.l.map(_.well), dst.well, volume))
 			}))
 			
 			// Map of item to its source mixture

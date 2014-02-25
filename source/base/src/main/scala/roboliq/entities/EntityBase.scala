@@ -240,130 +240,116 @@ class EntityBase {
 		l2.mkString("\n")
 	}
 	
-	def lookupPipetteDestinations(sourceIdent: String): RqResult[PipetteDestinations] = {
+	def lookupLiquidSource(text: String, state: WorldState): RsResult[PipetteSources] = {
 		for {
-			parsed_l <- WellIdentParser.parse(sourceIdent)
-			ll_? : List[RsResult[List[(Labware, RowCol)]]] = parsed_l.map(pair => {
-				val (entityIdent, index_l) = pair
-				getEntity(entityIdent) match {
-					// For plates and tubes
-					case Some(labware: Labware) =>
-						for {
-							// Get labware model
-							model <- labwareToModel_m.get(labware).asRs(s"model not set for labware `$entityIdent`")
-							// Get number of rows and cols on labware
-							rowsCols <- model match {
-								case m: PlateModel => RsSuccess((m.rows, m.cols))
-								case m: TubeModel => RsSuccess((1, 1))
-								case _ => RsError(s"model of labware `$entityIdent` must be a plate or tube")
-							}
-						} yield {
-							// TODO: check that the RowCol values are valid for the labware model
-							val l: List[(Labware, RowCol)] = index_l.flatMap(_ match {
-								case WellIdentOne(rc) =>
-									List((labware, rc))
-								case WellIdentVertical(rc0, rc1) =>
-									(for {
-										col_i <- rc0.col to rc1.col
-										row_i <- (if (col_i == rc0.col) rc0.row else 0) to (if (col_i == rc1.col) rc1.row else rowsCols._1 - 1)
-									} yield {
-										(labware, RowCol(row_i, col_i))
-									}).toList
-								case WellIdentHorizontal(rc0, rc1) =>
-									(for {
-										row_i <- rc0.row to rc1.row
-										col_i <- (if (row_i == rc0.row) rc0.col else 0) to (if (row_i == rc1.row) rc1.col else rowsCols._2 - 1)
-									} yield {
-										(labware, RowCol(row_i, col_i))
-									}).toList
-								case WellIdentMatrix(rc0, rc1) =>
-									(for {
-										row_i <- rc0.row to rc1.row
-										col_i <- rc0.col to rc1.col
-									} yield {
-										(labware, RowCol(row_i, col_i))
-									}).toList
-							})
-							l
-						}
-
-					case None =>
-						RsError(s"entity not found: `$entityIdent`")
-					
-					case _ => RsError(s"require a labware entity: `$entityIdent`")
-				}
-			})
-			ll /*: List[List[(Labware, RowCol)]]*/ <- RsResult.toResultOfList(ll_?)
-		} yield PipetteDestinations(ll.flatten)
+			sources <- lookupLiquidSources(text, state)
+			_ <- RqResult.assert(sources.sources.size <= 1, "only one liquid source may be specified in this context")
+		} yield sources
 	}
 	
-	def lookupLiquidSource(sourceIdent: String, state: WorldState): RsResult[List[(Labware, RowCol)]] = {
+	def lookupLiquidSources(text: String, state: WorldState): RsResult[PipetteSources] = {
 		for {
-			parsed_l <- WellIdentParser.parse(sourceIdent)
-			ll_? : List[RsResult[List[(Labware, RowCol)]]] = parsed_l.map(pair => {
-				val (entityIdent, index_l) = pair
-				getEntity(entityIdent) match {
-					// For plates and tubes
-					case Some(labware: Labware) =>
-						for {
-							// Get labware model
-							model <- labwareToModel_m.get(labware).asRs(s"model not set for labware `$entityIdent`")
-							// Get number of rows and cols on labware
-							rowsCols <- model match {
-								case m: PlateModel => RsSuccess((m.rows, m.cols))
-								case m: TubeModel => RsSuccess((1, 1))
-								case _ => RsError(s"model of labware `$entityIdent` must be a plate or tube")
-							}
-						} yield {
-							// TODO: check that the RowCol values are valid for the labware model
-							val l: List[(Labware, RowCol)] = index_l.flatMap(_ match {
-								case WellIdentOne(rc) =>
-									List((labware, rc))
-								case WellIdentVertical(rc0, rc1) =>
-									(for {
-										col_i <- rc0.col to rc1.col
-										row_i <- (if (col_i == rc0.col) rc0.row else 0) to (if (col_i == rc1.col) rc1.row else rowsCols._1 - 1)
-									} yield {
-										(labware, RowCol(row_i, col_i))
-									}).toList
-								case WellIdentHorizontal(rc0, rc1) =>
-									(for {
-										row_i <- rc0.row to rc1.row
-										col_i <- (if (row_i == rc0.row) rc0.col else 0) to (if (row_i == rc1.row) rc1.col else rowsCols._2 - 1)
-									} yield {
-										(labware, RowCol(row_i, col_i))
-									}).toList
-								case WellIdentMatrix(rc0, rc1) =>
-									(for {
-										row_i <- rc0.row to rc1.row
-										col_i <- rc0.col to rc1.col
-									} yield {
-										(labware, RowCol(row_i, col_i))
-									}).toList
-							})
-							l
-						}
-
-					case None =>
-						reagentToWells_m.get(entityIdent) match {
-							case Some(well_l) =>
-								RsResult.toResultOfList(well_l.map(well => {
-									state.getWellPosition(well).map(pos =>
-										(pos.parent, RowCol(pos.row, pos.col))
-									)
-								}))
-							case None =>
-								RsError(s"entity not found: `$entityIdent`")
-						}
-					
-					case _ => RsError(s"require a labware entity: `$entityIdent`")
-				}
-			})
-			ll /*: List[List[(Labware, RowCol)]]*/ <- RsResult.toResultOfList(ll_?)
-			_ <- RqResult.assert(!ll.flatten.isEmpty, s"No wells found for `${sourceIdent}`")
+			wellInfo_ll <- lookupWellInfo(text, state)
+		} yield PipetteSources(wellInfo_ll.map(LiquidSource))
+	}
+	
+	def lookupLiquidDestinations(text: String, state: WorldState): RsResult[PipetteDestinations] = {
+		for {
+			wellInfo_ll <- lookupWellInfo(text, state)
+		} yield PipetteDestinations(wellInfo_ll.flatten)
+	}
+	
+	private def lookupWellInfo(text: String, state: WorldState): RqResult[List[List[WellInfo]]] = {
+		for {
+			parsed_l <- WellIdentParser.parse(text)
+			ll <- RqResult.toResultOfList(parsed_l.map(pair => {
+				val (entityIdent, wellIdent_l) = pair
+				wellIdentParserResultToWellInfo(state, entityIdent, wellIdent_l)
+			})).map(_.flatten)
+			_ <- RqResult.assert(!ll.isEmpty, s"No wells found for `${text}`")
+		} yield ll
+	}
+	
+	private def wellIdentParserResultToWellInfo(
+		state: WorldState,
+		entityIdent: String,
+		wellIdent_l: List[WellIdent]
+	): RqResult[List[List[WellInfo]]] = {
+		getEntity(entityIdent) match {
+			// For plates and tubes
+			case Some(labware: Labware) =>
+				for {
+					wellInfo_l <- wellIdentsToWellInfo(state, entityIdent, labware, wellIdent_l)
+				} yield wellInfo_l.map(x => List(x))
+			case None =>
+				for {
+					well_l <- reagentToWells_m.get(entityIdent).asRs(s"entity not found: `$entityIdent`")
+					l1 <- RsResult.toResultOfList(well_l.map(well => wellToWellInfo(state, well)))
+				} yield List(l1)
+			case _ => RsError(s"require a labware entity or reagent: `$entityIdent`")
+		}
+	}
+		
+	private def wellIdentsToWellInfo(state: WorldState, labwareName: String, labware: Labware, wellIdent_l: List[WellIdent]): RqResult[List[WellInfo]] = {
+		for {
+			rowcol_l <- RqResult.toResultOfList(wellIdent_l.map(x => wellIdentToRowCol(labwareName, labware, x))).map(_.flatten)
+			well_l <- RqResult.toResultOfList(rowcol_l.map(rowcol => wellAt(state, labwareName, labware, rowcol)))
 		} yield {
-			assert(!ll.flatten.isEmpty)
-			ll.flatten
+			(well_l zip rowcol_l).map(pair => WellInfo(labware, labwareName, pair._1, pair._2))
+		}
+	}
+
+	private def wellIdentToRowCol(labwareName: String, labware: Labware, wellIdent: WellIdent): RqResult[List[RowCol]] = {
+		for {
+			// Get labware model
+			model <- labwareToModel_m.get(labware).asRs(s"model not set for labware `$labwareName`")
+			// Get number of rows and cols on labware
+			rowsCols <- model match {
+				case m: PlateModel => RsSuccess((m.rows, m.cols))
+				case m: TubeModel => RsSuccess((1, 1))
+				case _ => RsError(s"model of labware `$labwareName` must be a plate or tube")
+			}
+		} yield {
+			// TODO: check that the RowCol values are valid for the labware model
+			wellIdent match {
+				case WellIdentOne(rc) =>
+					List(rc)
+				case WellIdentVertical(rc0, rc1) =>
+					(for {
+						col_i <- rc0.col to rc1.col
+						row_i <- (if (col_i == rc0.col) rc0.row else 0) to (if (col_i == rc1.col) rc1.row else rowsCols._1 - 1)
+					} yield {
+						RowCol(row_i, col_i)
+					}).toList
+				case WellIdentHorizontal(rc0, rc1) =>
+					(for {
+						row_i <- rc0.row to rc1.row
+						col_i <- (if (row_i == rc0.row) rc0.col else 0) to (if (row_i == rc1.row) rc1.col else rowsCols._2 - 1)
+					} yield {
+						RowCol(row_i, col_i)
+					}).toList
+				case WellIdentMatrix(rc0, rc1) =>
+					(for {
+						row_i <- rc0.row to rc1.row
+						col_i <- rc0.col to rc1.col
+					} yield {
+						RowCol(row_i, col_i)
+					}).toList
+			}
+		}
+	}
+	
+	private def wellAt(state: WorldState, labwareName: String, labware: Labware, rowcol: RowCol): RqResult[Well] = {
+		state.labwareRowCol_well_m.get(labware, rowcol).asRs(s"labware `$labwareName` doesn't have a well at $rowcol")
+	}
+	
+	private def wellToWellInfo(state: WorldState, well: Well): RqResult[WellInfo] = {
+		for {
+			labware <- state.well_labware_m.get(well).asRs("INTERNAL: Well is missing labware information")
+			labwareName <- getIdent(labware)
+			rowcol <- state.well_rowcol_m.get(well).asRs("INTERNAL: well is missing row/col infomation")
+		} yield {
+			WellInfo(labware, labwareName, well, rowcol)
 		}
 	}
 }

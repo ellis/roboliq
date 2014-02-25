@@ -34,6 +34,7 @@ case class WorldState(
 	labwareRowCol_well_m: Map[(Labware, RowCol), Well],
 	well_labware_m: Map[Well, Labware],
 	well_index_m: Map[Well, Int],
+	well_rowcol_m: Map[Well, RowCol],
 	well_isSource_l: Set[Well],
 	well_history_m: Map[Well, WellHistory],
 	well_aliquot_m: Map[Well, Aliquot],
@@ -97,6 +98,7 @@ case class WorldState(
 			labwareRowCol_well_m ++= self.labwareRowCol_well_m
 			well_labware_m ++= self.well_labware_m
 			well_index_m ++= self.well_index_m
+			well_rowcol_m ++= self.well_rowcol_m
 			well_isSource_l ++= self.well_isSource_l
 			well_history_m ++= self.well_history_m
 			well_aliquot_m ++= self.well_aliquot_m
@@ -114,6 +116,7 @@ class WorldStateBuilder {
 	val labwareRowCol_well_m = new HashMap[(Labware, RowCol), Well]
 	val well_labware_m = new HashMap[Well, Labware]
 	val well_index_m = new HashMap[Well, Int]
+	val well_rowcol_m = new HashMap[Well, RowCol]
 	val well_isSource_l = new HashSet[Well]
 	val well_history_m = new HashMap[Well, WellHistory]
 	val well_aliquot_m = new HashMap[Well, Aliquot]
@@ -123,6 +126,7 @@ class WorldStateBuilder {
 		labwareRowCol_well_m((labware, rowcol)) = well
 		well_labware_m(well) = labware
 		well_index_m(well) = index
+		well_rowcol_m(well) = rowcol
 	}
 	
 	def getWell(key: (Labware, RowCol)): RsResult[Well] = {
@@ -149,6 +153,7 @@ class WorldStateBuilder {
 			labwareRowCol_well_m.toMap,
 			well_labware_m.toMap,
 			well_index_m.toMap,
+			well_rowcol_m.toMap,
 			well_isSource_l.toSet,
 			well_history_m.toMap,
 			well_aliquot_m.toMap,
