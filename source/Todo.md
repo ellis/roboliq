@@ -15,6 +15,11 @@
 - [x] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [x] EvowareClientScriptBuilder: update well state in spirate_checked
 - [x] in stflow1.prot, second step of titration command needs to be expanded to TitrationItem_Or (see toPipetteSources in Converter)
+- [ ] TitrationSeries: rename to titrate
+- [ ] TitrationSeries: put code in separate file
+- [ ] TitrationSeries: use PipetteAmount instead of LiquidVolume for sources
+- [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
+- [ ] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?
 - [ ] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
@@ -57,7 +62,6 @@
 - [ ] pipetting: should sterilize tips before first aspirate (see tania01 without the sterilizeBefore spec)
 - [ ] tania??: uria will require a thorough post-cleaning
 - [ ] A '.' in a reagent name causes eb.lookupLiquidSource not to work for that reagent
-- [ ] Ask Fabian about a verb for the TitrationSeries command: titrate
 - [ ] TitrationSeries: filter out 0-volume dispenses
 - [ ] TitrationSeries/PipetteSpec: allow for a list of volumes rather than just a single volume
 - [ ] TitrationSeries: handle min/max reagent, ranging the volume over the available wells
