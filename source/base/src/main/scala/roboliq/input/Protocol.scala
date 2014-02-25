@@ -844,9 +844,9 @@ class Protocol {
 			mixture_l: List[List[XO]]
 		): List[List[XO]] = {
 			//println("item: ")
-			item.printShortHierarchy(eb, "  ")
+			//item.printShortHierarchy(eb, "  ")
 			//println("mixture_l:")
-			mixture_l.foreach(mixture => println(mixture.map(_._2).mkString("+")))
+			//mixture_l.foreach(mixture => println(mixture.map(_._2).mkString("+")))
 			item match {
 				case TitrationItem_And(l) =>
 					val l2 = l.map(item => createWellMixtures(item, Nil))
@@ -881,7 +881,7 @@ class Protocol {
 				}
 			}
 		}
-		def printMixtureCsv(ll: List[List[X]]): Unit = {
+		/*def printMixtureCsv(ll: List[List[X]]): Unit = {
 			var i = 1
 			for (l <- ll) {
 				val x = for ((sv, volume) <- l) yield {
@@ -898,8 +898,9 @@ class Protocol {
 				}
 				println(x.flatten.mkString(", "))
 			}
-		}
+		}*/
 		def printDestinationMixtureCsv(ll: List[(WellInfo, List[X])]): Unit = {
+			if (ll.isEmpty) return
 			var i = 1
 			val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
 			println(header)
@@ -936,7 +937,7 @@ class Protocol {
 			_ = itemTop.printShortHierarchy(eb, "")
 			// Number of wells required if we only use a single replicate
 			mixture1_l = createWellMixtures(itemTop, Nil)
-			_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
+			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
 			wellCountMin = mixture1_l.length
 			_ <- RqResult.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
 			// Maximum number of wells available to us
@@ -971,7 +972,13 @@ class Protocol {
 			//l2 = l1.transpose
 			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){(acc, volume_?) => acc + volume_?.getOrElse(LiquidVolume.empty)})
 			l3 <- cmd.volume_? match {
-				case None => RqSuccess(Nil)
+				case None =>
+					val l3 = l2.map(_.map(pair => {
+						for {
+							volume <- pair._2.asRs("Missing volume")
+						} yield pair._1 -> volume
+					}))
+					RqResult.toResultOfList(l3.map(RqResult.toResultOfList))
 				case Some(volumeTotal) =>
 					val fillVolume_l = wellVolumeBeforeFill_l.map(volumeTotal - _)
 					//println("wellVolumeBeforeFill_l: "+wellVolumeBeforeFill_l)
@@ -999,9 +1006,12 @@ class Protocol {
 			//stepToList_l = cmd.steps zip l3.transpose
 		} yield {
 			//printMixtureCsv(l3)
-			//println("----------------")
+			println("----------------")
+			println("l3")
+			println(l3)
 			//printMixtureCsv(stepToList_l.map(_._2))
 			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
+			println("destinations: "+destinations)
 			val destinationToMixture_l = destinations.l zip l3
 			printDestinationMixtureCsv(destinationToMixture_l)
 			//println("len: "+stepToList_l.map(_._2.length))

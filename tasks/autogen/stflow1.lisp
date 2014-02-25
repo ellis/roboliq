@@ -4,7 +4,7 @@
   (is-agent r1)
   (is-agent user) ; user
   (is-labware culture)
-  (is-labware mixPlate)
+  (is-labware dilution)
   (is-labware offsite) ; offsite
   (is-labware r1_bench_001x1) ; r1 bench Wash Station Clean site 1
   (is-labware r1_bench_001x2) ; r1 bench Wash Station Clean site 2
@@ -90,6 +90,7 @@
   (is-labware r1_hotel_85x3) ; r1 hotel Hotel 5Pos DeepWell site 3
   (is-labware r1_hotel_85x4) ; r1 hotel Hotel 5Pos DeepWell site 4
   (is-labware r1_hotel_85x5) ; r1 hotel Hotel 5Pos DeepWell site 5
+  (is-labware reaction)
   (is-labware sourcePlate1)
   (is-model m001) ; D-BSSE 96 Well DWP
   (is-model m002) ; D-BSSE 384 Well Plate White
@@ -105,7 +106,8 @@
   (is-peelerSpec peelerSpec1)
   (is-pipetter r1_pipetter1) ; r1 LiHa
   (is-plate culture)
-  (is-plate mixPlate)
+  (is-plate dilution)
+  (is-plate reaction)
   (is-plate sourcePlate1)
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 384 Well Plate White
@@ -259,7 +261,7 @@
   (stackable sm5 m002)
   (stackable sm6 m002)
   (model culture m003)
-  (model mixPlate m002)
+  (model dilution m003)
   (model r1_bench_009x1 sm3)
   (model r1_bench_009x2 sm6)
   (model r1_bench_010x1 sm3)
@@ -321,9 +323,11 @@
   (model r1_hotel_85x3 sm5)
   (model r1_hotel_85x4 sm5)
   (model r1_hotel_85x5 sm5)
+  (model reaction m002)
   (model sourcePlate1 m001)
   (location culture offsite)
-  (location mixPlate offsite)
+  (location dilution offsite)
+  (location reaction offsite)
   (location sourcePlate1 offsite)
   (device-can-site r1_pipetter1 r1_bench_010x2)
   (device-can-site r1_pipetter1 r1_bench_010x4)
@@ -449,5 +453,13 @@
   (distribute1 ?a0007 ?d0008 spec0009 culture)
   (distribute2 ?a0010 ?d0011 spec0012 sourcePlate1 culture)
   (distribute2 ?a0013 ?d0014 spec0015 sourcePlate1 culture)
+  (titrationSeries2 ?a0016 ?d0017 spec0018 culture dilution)
+  (titrationSeries3 ?a0019 ?d0020 spec0021 sourcePlate1 dilution culture)
+  (titrationSeries3 ?a0022 ?d0023 spec0024 sourcePlate1 dilution culture)
+  (titrationSeries2 ?a0025 ?d0026 spec0027 sourcePlate1 dilution)
+  (titrationSeries3 ?a0028 ?d0029 spec0030 sourcePlate1 dilution culture)
+  (titrationSeries2 ?a0031 ?d0032 spec0033 sourcePlate1 dilution)
+  (titrationSeries2 ?a0034 ?d0035 spec0036 sourcePlate1 dilution)
+  (titrationSeries3 ?a0037 ?d0038 spec0039 sourcePlate1 reaction dilution)
  )
 )

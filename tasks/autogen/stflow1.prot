@@ -65,6 +65,55 @@ protocol:
 #  volume: 160ul
 #  mixBefore: true
 #  sanitize: thorough
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: culture(E01-E12)
+      volume: 160ul
+    destination: dilution(A01-A12)
+    volume: 160ul
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: culture(F01-F12)
+      volume: 16ul
+    destination: dilution(B01-B12)
+    volume: 160ul
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: culture(G01-G12)
+      volume: 16ul
+    destination: dilution(C01-C12)
+    volume: 160ul
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: dilution(C01-C12)
+      volume: 16ul
+    destination: dilution(D01-D12)
+    volume: 160ul
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: culture(H01-H12)
+      volume: 16ul
+    destination: dilution(E01-E12)
+    volume: 160ul
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: dilution(E01-E12)
+      volume: 16ul
+    destination: dilution(F01-F12)
+    volume: 160ul
+- titrationSeries:
+    steps:
+    - source: reactionBuffer
+    - source: dilution(F01-F12)
+      volume: 16ul
+    destination: dilution(G01-G12)
+    volume: 160ul
 #- // Create titration series from dilution plate to reaction plate
 - titrationSeries:
     steps:

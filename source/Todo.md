@@ -14,7 +14,8 @@
 - [x] Transfer: create command
 - [x] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [x] EvowareClientScriptBuilder: update well state in spirate_checked
-- [ ] in stflow1.prot, second step of titration command needs to be expanded to TitrationItem_Or (see toPipetteSources in Converter)
+- [x] in stflow1.prot, second step of titration command needs to be expanded to TitrationItem_Or (see toPipetteSources in Converter)
+- [ ] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
