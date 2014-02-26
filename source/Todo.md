@@ -71,6 +71,7 @@
 - [ ] Commands should be able to each produce their own reports, e.g. for TitrationSeries, showing a table with the contents of the wells
 
 ## Someday
+- [ ] PipetteAmountParser: allow for '.25ul' (not just '0.25ul')
 - I-X source code: http://i-x.info/release/current/
 - from Austin Tate and Gerhard: try I-X, do a demo in it, then re-implement the algorithms you need; highly recommend the INCA ontology!  You might want to then get back to I-X for industrial application after PhD is done.
 

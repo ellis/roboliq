@@ -215,12 +215,14 @@ class TitrateMethod(
 			for {
 				volumeFiller <- empty_l match {
 					case Nil => RqSuccess(LiquidVolume.empty)
-					case empty :: Nil => RqSuccess(volumeNonfiller)
+					case empty :: Nil => RqSuccess(volumeTotal - volumeNonfiller)
 					case _ => RqError("Mixtures may have at most one filler component (one without a specified amount)")
 				}
 				_ <- RqResult.assert(numWell <= denWell, "Invalid dilutions, exceed 1:1")
 				_ <- RqResult.assert(volumeWell <= volumeTotal, "Sum of component volumes exceeds total volume")
 			} yield {
+				println("titrate:", volumeTotal, volumeNonfiller, volumeFiller, volumeDilutions, volumeWell)
+				println()
 				mixture.map { pair =>
 					val (sv, amount_?) = pair
 					amount_? match {
