@@ -16,6 +16,7 @@ import roboliq.pipette.planners.PipetteHelper
 import roboliq.entities.TipHandlingOverrides
 import roboliq.pipette.planners.TransferSimplestPlanner
 import roboliq.pipette.planners.TipModelSearcher0
+import roboliq.pipette.planners.PipetteDevice
 
 object JshopTranslator {
 	
@@ -27,18 +28,19 @@ object JshopTranslator {
 	): RqResult[WorldState] = {
 		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
 		val l = solution.split("\r?\n").toList
-		val state0 = protocol.state0.toImmutable
+		val path0 = new PlanPath(Nil, protocol.state0.toImmutable)
+		//val state0 = protocol.state0.toImmutable
 		logger.debug(s"l: $l")
-		def translateStep(line_l: List[String], state: WorldState): RsResult[WorldState] = {
+		def translateAll(line_l: List[String], path: PlanPath): RsResult[WorldState] = {
 			line_l match {
-				case Nil => RsSuccess(state)
+				case Nil => RsSuccess(path.state)
 				case line :: rest =>
-					translateLine(protocol, agentToBuilder_m, state, line.trim()).flatMap(state => translateStep(rest, state))
+					translateLine(protocol, agentToBuilder_m, path, line.trim()).flatMap(path1 => translateAll(rest, path1))
 			}
 		}
 
 		for {
-			state1 <- translateStep(l, state0)
+			state1 <- translateAll(l, path0)
 		} yield {
 			// Let the builders know that we're done building
 			agentToBuilder_m.values.foreach(_.end())
@@ -48,25 +50,34 @@ object JshopTranslator {
 	
 	val RxOperator = """\(!(.*)\)""".r
 	
-	private def translateLine(protocol: Protocol, agentToBuilder_m: Map[String, ClientScriptBuilder], state0: WorldState, line: String): RsResult[WorldState] = {
+	private def translateLine(
+		protocol: Protocol,
+		agentToBuilder_m: Map[String, ClientScriptBuilder],
+		path0: PlanPath,
+		line: String
+	): RqResult[PlanPath] = {
 		line match {
-			case "" => RsSuccess(state0)
+			case "" => RsSuccess(path0)
 			case RxOperator(s) =>
 				println("s: "+s)
 				s.split(' ').toList match {
 					case "nop" :: specIdent :: Nil =>
 	                    protocol.idToObject(specIdent) match {
                             case spec: commands.SetReagents =>
-                            	handleOperator_SetReagents(protocol, agentToBuilder_m, state0, spec)
+                            	handleOperator_SetReagents(protocol, agentToBuilder_m, path0, spec)
                             case _ =>
                             	RsError("invalid SetReagents")
                         }
 					case operator :: agentIdent :: arg_l =>
 						val builder = agentToBuilder_m(agentIdent)
-						def doit(
-							state0: WorldState,
+						/*def doit(
+							path: PlanPath,
 							commandToState_l: List[(Command, List[WorldStateEvent])]
-						): RsResult[WorldState] = {
+						): RsResult[PlanPath] = {
+							commandToState_l match {
+								case Nil => RqSuccess(path)
+								case (command, )
+							}
 							commandToState_l.foldLeft(RsSuccess(state0) : RsResult[WorldState]) { (state0_?, pair) =>
 								val (command, event1_l) = pair
 								for {
@@ -80,11 +91,11 @@ object JshopTranslator {
 									state2 <- WorldStateEvent.update(event1_l, state1)
 								} yield state2
 							}
-						}
+						}*/
 						for {
-							commandToEvents_l <- handleOperator(protocol, agentToBuilder_m, state0, operator, agentIdent, arg_l)
-							state1 <- doit(state0, commandToEvents_l)
-						} yield state1
+							path1 <- handleOperator(protocol, agentToBuilder_m, path0, operator, agentIdent, arg_l)
+							//state1 <- doit(state0, commandToEvents_l)
+						} yield path1
 					
 					case _ =>
 						RsError(s"invalid operation line: $line")
@@ -100,18 +111,18 @@ object JshopTranslator {
 	private def handleOperator(
 		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		state0: WorldState,
+		path0: PlanPath,
 		operator: String,
 		agentIdent: String,
 		arg_l: List[String]
-	): RsResult[List[(Command, List[WorldStateEvent])]] = {
+	): RsResult[PlanPath] = {
 		operator match {
-			case "agent-activate" => RsSuccess(List(AgentActivate() -> Nil))
-			case "agent-deactivate" => RsSuccess(List(AgentDeactivate() -> Nil))
+			case "agent-activate" => path0.add(AgentActivate())
+			case "agent-deactivate" => path0.add(AgentDeactivate())
 			case "log" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				RsSuccess(List(Log(text) -> Nil))
+				path0.add(Log(text))
 			
 			case "peeler-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -120,9 +131,8 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[PeelerSpec](specIdent)
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
-				} yield {
-					List(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent) -> Nil)
-				}
+					path1 <- path0.add(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
+				} yield path1
 
 			case "pipetter-run" =>
 				// TODO: the details of how to handle pipetting depends on the agent.
@@ -133,12 +143,22 @@ object JshopTranslator {
 					case spec: PipetteSpecList => {
 						//println("spec list:")
 						//spec.step_l.foreach(println)
-						for {
-							commandToEvents_ll <- RsResult.toResultOfList(spec.step_l.map(spec2 => handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec2, arg_l)))
-						} yield combineTipsRefreshCommands(commandToEvents_ll.flatten)
+						def step(step_l: List[PipetteSpec], path: PlanPath): RqResult[PlanPath] = {
+							step_l match {
+								case Nil => RqSuccess(path)
+								case spec :: rest =>
+									for {
+										path1 <- handleOperator_PipetteSpec(protocol, agentToBuilder_m, path0, spec, arg_l)
+										//.map(combineTipsRefreshCommands)
+										path2 <- step(rest, path1)
+									} yield path2
+							}
+						}
+						step(spec.step_l, path0)
 					}
 					case spec: PipetteSpec =>
-						handleOperator_PipetteSpec(protocol, agentToBuilder_m, state0, spec, arg_l).map(combineTipsRefreshCommands)
+						handleOperator_PipetteSpec(protocol, agentToBuilder_m, path0, spec, arg_l)
+						//.map(combineTipsRefreshCommands)
 					case _ =>
 						RsError("invalid PipetteSpec")
 				}
@@ -146,7 +166,7 @@ object JshopTranslator {
 			case "prompt" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				RsSuccess(List(Prompt(text) -> Nil))
+				path0.add(Prompt(text))
 			
 			case "sealer-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -155,9 +175,8 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[SealerSpec](specIdent)
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
-				} yield {
-					List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent) -> Nil)
-				}
+					path1 <- path0.add(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
+				} yield path1
 				
 			case "shaker-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -166,25 +185,22 @@ object JshopTranslator {
 					spec <- protocol.eb.getEntityByIdent[ShakerSpec](specIdent)
 					labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
 					site <- protocol.eb.getEntityByIdent[Site](siteIdent)
-				} yield {
-					List(ShakerRun(device, spec, List(labware -> site)) -> Nil)
-				}
+					path1 <- path0.add(ShakerRun(device, spec, List(labware -> site)))
+				} yield path1
 			
 			case "thermocycler-close" =>
 				val List(deviceIdent) = arg_l
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
-				} yield {
-					List(ThermocyclerClose(deviceIdent) -> Nil)
-				}
+					path1 <- path0.add(ThermocyclerClose(deviceIdent))
+				} yield path1
 				
 			case "thermocycler-open" =>
 				val List(deviceIdent) = arg_l
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
-				} yield {
-					List(ThermocyclerOpen(deviceIdent) -> Nil)
-				}
+					path1 <- path0.add(ThermocyclerOpen(deviceIdent))
+				} yield path1
 				
 			case "thermocycler-run" =>
 				//val List(deviceIdent, specIdent, plateIdent) = arg_l
@@ -193,21 +209,18 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
 					_ <- protocol.eb.getEntityByIdent[ThermocyclerSpec](specIdent)
 					//_ <- protocol.eb.getEntityByIdent[Plate](plateIdent)
-				} yield {
-					List(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/) -> Nil)
-				}
+					path1 <- path0.add(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/))
+				} yield path1
 				
 			case "transporter-run" =>
-				// FIXME: update the state
-				val state1 = state0
-				RsSuccess(List(TransporterRun(
+				path0.add(TransporterRun(
 					deviceIdent = arg_l(0),
 					labwareIdent = arg_l(1),
 					modelIdent = arg_l(2),
 					originIdent = arg_l(3),
 					destinationIdent = arg_l(4),
 					vectorIdent = arg_l(5)
-				) -> Nil))
+				))
 
 			case _ =>
 				RsError(s"unknown operator: $operator")
@@ -217,10 +230,10 @@ object JshopTranslator {
 	private def handleOperator_SetReagents(
 		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		state0: WorldState,
+		path0: PlanPath,
 		spec: commands.SetReagents
-	): RqResult[WorldState] = {
-		val builder = state0.toMutable
+	): RqResult[PlanPath] = {
+		val builder = path0.state.toMutable
 		val l = for ((wellInfo, reagentName) <- (spec.wells.l zip spec.reagents)) yield {
 			val aliquot0 = builder.well_aliquot_m.getOrElse(wellInfo.well, Aliquot.empty)
 			val substance = Substance(
@@ -242,45 +255,43 @@ object JshopTranslator {
 			builder.well_aliquot_m(wellInfo.well) = aliquot
 		}
 		builder.well_aliquot_m.foreach(println)
-		RqSuccess(builder.toImmutable)
+		RqSuccess(new PlanPath(path0.action_r, builder.toImmutable))
 	}
 	
 	private def handleOperator_PipetteSpec(
 		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		state0: WorldState,
+		path0: PlanPath,
 		spec: PipetteSpec,
 		arg_l: List[String]
-	): RqResult[List[(Command, List[WorldStateEvent])]] = {
-		val builder = state0.toMutable
+	): RqResult[PlanPath] = {
 		val spec_l = spec.split
 		def step(
-			spec_l: List[PipetteSpec]
-		): RsResult[List[(Command, List[WorldStateEvent])]] = {
+			spec_l: List[PipetteSpec],
+			path: PlanPath
+		): RsResult[PlanPath] = {
 			spec_l match {
-				case Nil => RqSuccess(Nil)
+				case Nil => RqSuccess(path)
 				case spec :: rest =>
 					for {
-						commandToEvents1_l <- handleOperator_PipetteSpecSub(protocol, agentToBuilder_m, builder, spec, arg_l)
-						commandToEvents2_l <- step(rest)
-					} yield {
-						commandToEvents1_l ++ commandToEvents2_l
-					}
+						path1 <- handleOperator_PipetteSpecSub(protocol, agentToBuilder_m, path, spec, arg_l)
+						path2 <- step(rest, path1)
+					} yield path2
 			}
 		}
-		val x = step(spec_l)
-		println("pipetteSpecState:")
-		state0.well_aliquot_m.filter(_._1.label.get.contains("C12")).foreach(println)
+		val x = step(spec_l, path0)
+		//println("pipetteSpecState:")
+		//x.state.well_aliquot_m.filter(_._1.label.get.contains("C12")).foreach(println)
 		x
 	}
 	
 	private def handleOperator_PipetteSpecSub(
 		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		state: WorldStateBuilder,
+		path0: PlanPath,
 		spec: PipetteSpec,
 		arg_l: List[String]
-	): RsResult[List[(Command, List[WorldStateEvent])]] = {
+	): RqResult[PlanPath] = {
 		import roboliq.pipette.planners.TransferPlanner.{Item,BatchItem,Batch}
 		
 		// from the deviceIdent, we need to get a list of tips and tip models
@@ -304,7 +315,9 @@ object JshopTranslator {
 			case x :: Nil => List.fill(spec.destinations.l.length)(x)
 			case x => x
 		}
-		
+
+		var path = path0
+
 		for {
 			_ <- RqSuccess(()) // Dummy to let compile know that this should be an RqResult monad
 			// sources for the liquid we want to transfer
@@ -332,7 +345,7 @@ object JshopTranslator {
 			
 			// Map of item to its source mixture
 			itemToMixture_l <- RsResult.toResultOfList(item_l.map(item => {
-				state.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs(s"no liquid specified in source well: ${item.src_l.head}")
+				path0.state.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs(s"no liquid specified in source well: ${item.src_l.head}")
 			}))
 			itemToMixture_m = itemToMixture_l.toMap
 			// TODO: need to track liquids in wells as we go along in case
@@ -364,15 +377,15 @@ object JshopTranslator {
 			// Run transfer planner to get pippetting batches
 			batch_l <- TransferSimplestPlanner.searchGraph(
 				device,
-				state.toImmutable,
+				path0.state,
 				SortedSet(tipCandidate_l : _*),
 				tipModel, //itemToTipModel_m.head._2,
 				pipettePolicy,
 				item_l
 			)
-		} yield {
+			
 			// Refresh command before pipetting starts
-			val refreshBefore_l = {
+			refreshBefore_l = {
 				spec.cleanBefore_?.orElse(spec.sterilize_?) match {
 					case Some(intensity) if intensity != CleanIntensity.None =>
 						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
@@ -382,83 +395,78 @@ object JshopTranslator {
 					case _ => Nil
 				}
 			}
-			// use the Batch list to create clean, aspirate, dispense commands
-			logger.debug("batch_l: "+batch_l)
-			val aspdis_l = batch_l.flatMap(batch => {
-				val state0 = state.toImmutable
-				val tipOverridesAsp = TipHandlingOverrides(None, spec.sterilizeBetween_?.orElse(spec.sterilize_?), None, None, None)
-				val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {
-					val mixtureSrc = state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
-					val mixtureDst = state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
-					val tipState = state.getTipState(item.tip)
-					val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, mixtureSrc, tipState)
-					val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverridesAsp, mixtureSrc, mixtureDst, tipState)
-					val washSpec = washSpecAsp + washSpecDis
-					
-					// Update tip state after refresh
-					val event = TipCleanEvent(item.tip, washSpec.washIntensity)
-					val tipState_~ = new TipCleanEventHandler().handleEvent(tipState, event)
-					state.tip_state_m(item.tip) = tipState_~.toOption.get
-					logger.debug(s"refresh tipState: ${tipState} -> ${washSpec.washIntensity} -> ${tipState_~}")
-					
-					(item.tip, washSpec.washIntensity, Some(tipModel))
-				}))
-				val twvpAspToEvents0_l = batch.item_l.map(item => {
-					// Update tip state after aspiration
-					val mixtureSrc = state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
-					val event = TipAspirateEvent(item.tip, item.src, mixtureSrc, item.volume)
-					val tipState = state.getTipState(item.tip)
-					val tipState_~ = new TipAspirateEventHandler().handleEvent(tipState, event)
-					state.tip_state_m(item.tip) = tipState_~.toOption.get
-					logger.debug(s"asp tipState: ${tipState} -> ${tipState_~}")
-					val twvp = TipWellVolumePolicy(item.tip, item.src, item.volume, pipettePolicy)
-					val event_l = List(WellAspirateEvent(item.src, item.volume))
-					twvp -> event_l
-				})
-				val twvpAspToEvents0_m = twvpAspToEvents0_l.toMap
-				val twvpAsp_ll = device.groupSpirateItems(twvpAspToEvents0_l.map(_._1), state0)
-				val asp_l: List[(Command, List[WorldStateEvent])] =
-					twvpAsp_ll.map(twvp_l => PipetterAspirate(twvp_l) -> twvp_l.flatMap(twvpAspToEvents0_m))
+			path1 <- path0.add(refreshBefore_l)
+	
+			path2 <- getAspDis(path1, spec, pipetter, device, tipModel, pipettePolicy, batch_l)
 
-				val twvpDisToEvents0_l = batch.item_l.map(item => {
-					// Update tip state after dispense
-					val mixtureDst = state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
-					val event = TipDispenseEvent(item.tip, mixtureDst, item.volume, pipettePolicy.pos)
-					val tipState = state.getTipState(item.tip)
-					val tipState_~ = new TipDispenseEventHandler().handleEvent(tipState, event)
-					state.tip_state_m(item.tip) = tipState_~.toOption.get
-					logger.debug(s"dis tipState: ${tipState} -> ${tipState_~}")
-					
-					val twvp = TipWellVolumePolicy(item.tip, item.dst, item.volume, pipettePolicy)
-					val aliquot = Aliquot(tipState.content.mixture, Distribution.fromVolume(item.volume))
-					val event_l = List(WellDispenseEvent(item.dst, aliquot))
-					twvp -> event_l
-				})
-				val twvpDisToEvents0_m = twvpDisToEvents0_l.toMap
-				val twvpDis_ll = device.groupSpirateItems(twvpDisToEvents0_l.map(_._1), state0)
-				val dis_l: List[(Command, List[WorldStateEvent])] =
-					twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l) -> twvp_l.flatMap(twvpDisToEvents0_m))
-				
-				(refresh -> Nil) :: asp_l ++ dis_l
-			})
-
-			val refreshAfter_l = {
+			refreshAfter_l = {
 				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.sterilize_?), None, None, None)
 				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
-					val tipState = state.getTipState(tip)
+					val tipState = path2.state.getTipState(tip)
 					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, Mixture.empty, tipState)
 					(tip, washSpec.washIntensity, None)
 				})) :: Nil
 			}
-			
-			val event_l = aspdis_l.flatMap(_._2)
-			WorldStateEvent.update(event_l, state)
-			// TODO: add a PipetterTipsRefresh command at the end
-			refreshBefore_l.map(_ -> Nil) ++ aspdis_l ++ refreshAfter_l.map(_ -> Nil)
-		}
+			path3 <- path2.add(refreshAfter_l)
+		} yield path3
 	}
+
+	private def getAspDis(
+		path0: PlanPath,
+		spec: PipetteSpec,
+		pipetter: Pipetter,
+		device: PipetteDevice,
+		tipModel: TipModel,
+		pipettePolicy: PipettePolicy,
+		batch_l: List[roboliq.pipette.planners.TransferSimplestPlanner.Batch]
+	): RqResult[PlanPath] = {
+		var path = path0
+		// use the Batch list to create clean, aspirate, dispense commands
+		logger.debug("batch_l: "+batch_l)
+		batch_l.foreach(batch => {
+			val tipOverridesAsp = TipHandlingOverrides(None, spec.sterilizeBetween_?.orElse(spec.sterilize_?), None, None, None)
+			val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {
+				val mixtureSrc = path.state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
+				val mixtureDst = path.state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
+				val tipState = path.state.getTipState(item.tip)
+				val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, mixtureSrc, tipState)
+				val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverridesAsp, mixtureSrc, mixtureDst, tipState)
+				val washSpec = washSpecAsp + washSpecDis
+				//logger.debug(s"refresh tipState: ${tipState} -> ${washSpec.washIntensity} -> ${tipState_~}")
+				(item.tip, washSpec.washIntensity, Some(tipModel))
+			}))
+			path = path.add(refresh) match {
+				case RqError(e, w) => return RqError(e, w)
+				case RqSuccess(x, _) => x
+			}
+			
+			val twvpAspToEvents0_l = batch.item_l.map(item => {
+				TipWellVolumePolicy(item.tip, item.src, item.volume, pipettePolicy)
+			})
+			val twvpAsp_ll = device.groupSpirateItems(twvpAspToEvents0_l, path.state)
+			val asp_l = twvpAsp_ll.map(PipetterAspirate)
+			path = path.add(asp_l) match {
+				case RqError(e, w) => return RqError(e, w)
+				case RqSuccess(x, _) => x
+			}
+
+			val twvpDisToEvents0_l = batch.item_l.map(item => {
+				TipWellVolumePolicy(item.tip, item.dst, item.volume, pipettePolicy)
+			})
+			val twvpDis_ll = device.groupSpirateItems(twvpDisToEvents0_l, path.state)
+			val dis_l = twvpDis_ll.map(PipetterDispense)
+			path = path.add(dis_l) match {
+				case RqError(e, w) => return RqError(e, w)
+				case RqSuccess(x, _) => x
+			}
+		})
+		
+		RqSuccess(path)
+	}	
 	
-	private def combineTipsRefreshCommands(commandToState_l: List[(Command, List[WorldStateEvent])]): List[(Command, List[WorldStateEvent])] = {
+	/*private def combineTipsRefreshCommands(
+		commandToState_l: List[(Command, List[WorldStateEvent])]
+	): List[(Command, List[WorldStateEvent])] = {
 		def doit(
 			l: List[(Command, List[WorldStateEvent])],
 			acc_r: List[(Command, List[WorldStateEvent])]
@@ -478,5 +486,5 @@ object JshopTranslator {
 			}
 		}
 		doit(commandToState_l, Nil)
-	}
+	}*/
 }

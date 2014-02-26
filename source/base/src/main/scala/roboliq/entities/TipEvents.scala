@@ -148,7 +148,7 @@ case class TipCleanEvent(
 }
 
 class TipCleanEventHandler extends EventHandlerAB[TipState, TipCleanEvent]("tip.clean") {
-	def handleEvent(state0: TipState, event: TipCleanEvent) = {
+	def handleEvent(state0: TipState, event: TipCleanEvent): RqResult[TipState] = {
 		//val w = event.washProgram
 		val s = state0
 		RqSuccess(s.copy(

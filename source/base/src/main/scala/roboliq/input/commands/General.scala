@@ -1,26 +1,87 @@
 package roboliq.input.commands
 
+import roboliq.core._
 import roboliq.entities._
 import scala.collection.mutable.SortedSet
 
-case class AgentActivate() extends Command
-case class AgentDeactivate() extends Command
-case class EvowareSubroutine(path: String) extends Command
-case class Log(text: String) extends Command
+case class AgentActivate() extends Command with Action {
+	val effects = Nil
+}
+case class AgentDeactivate() extends Command with Action {
+	val effects = Nil
+}
+case class EvowareSubroutine(path: String) extends Command with Action {
+	val effects = Nil
+}
+case class Log(text: String) extends Command with Action {
+	val effects = Nil
+}
 
 case class PipetterAspirate(
 	val item_l: List[TipWellVolumePolicy]
-) extends Command
+) extends Command with Action {
+	val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			for (item <- item_l) {
+				val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
+	            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+	            val amount = Distribution.fromVolume(item.volume)
+				val tipEvent = TipAspirateEvent(item.tip, item.well, wellAliquot0.mixture, item.volume)
+				val tipState1_? = new TipAspirateEventHandler().handleEvent(tipState0, tipEvent)
+				tipState1_? match {
+					case RqError(e, w) => return RqError(e, w)
+					case RqSuccess(tipState, _) =>
+						state.tip_state_m(item.tip) = tipState
+				}
+			}
+			RqSuccess(())
+		}
+	})
+}
 
 case class PipetterDispense(
 	val item_l: List[TipWellVolumePolicy]
-) extends Command
+) extends Command with Action {
+	val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			for (item <- item_l) {
+				val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
+	            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+	            val amount = Distribution.fromVolume(item.volume)
+				val tipEvent = TipDispenseEvent(item.tip, wellAliquot0.mixture, item.volume, item.policy.pos)
+				val tipState1_? = new TipDispenseEventHandler().handleEvent(tipState0, tipEvent)
+				tipState1_? match {
+					case RqError(e, w) => return RqError(e, w)
+					case RqSuccess(tipState, _) =>
+						state.tip_state_m(item.tip) = tipState
+				}
+			}
+			RqSuccess(())
+		}
+	})
+}
 
 case class PipetterTipsRefresh(
 	device: Pipetter,
 	// tip, clean intensity, tipModel_?
 	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
-) extends Command
+) extends Command with Action {
+	val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			for (item <- item_l) {
+				val event = TipCleanEvent(item._1, item._2)
+				val tipState0 = state.getTipState(item._1)
+				val tipState_? = new TipCleanEventHandler().handleEvent(tipState0, event)
+				tipState_? match {
+					case RqError(e, w) => return RqError(e, w)
+					case RqSuccess(tipState, _) =>
+						state.tip_state_m(item._1) = tipState
+				}
+			}
+			RqSuccess(())
+		}
+	})
+}
 
 object PipetterTipsRefresh {
 	def combine(l: List[PipetterTipsRefresh]): List[PipetterTipsRefresh] = {
@@ -51,16 +112,22 @@ case class PeelerRun(
 	specIdent: String,
 	labwareIdent: String,
 	siteIdent: String
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
 
-case class Prompt(text: String) extends Command
+case class Prompt(text: String) extends Command with Action {
+	val effects = Nil
+}
 
 case class SealerRun(
 	deviceIdent: String,
 	specIdent: String,
 	labwareIdent: String,
 	siteIdent: String
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
 
 /**
  * @param object_l [(labwareIdent, siteIdent)]
@@ -69,21 +136,29 @@ case class ShakerRun(
 	device: Shaker,
 	spec: ShakerSpec,
 	labwareToSite_l: List[(Labware, Site)]
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
 
 case class ThermocyclerClose(
 	deviceIdent: String
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
 
 case class ThermocyclerOpen(
 	deviceIdent: String
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
 
 case class ThermocyclerRun(
 	deviceIdent: String,
 	specIdent: String/*,
 	plateIdent: String*/
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
 
 case class TransporterRun(
 	deviceIdent: String,
@@ -92,4 +167,6 @@ case class TransporterRun(
 	originIdent: String,
 	destinationIdent: String,
 	vectorIdent: String
-) extends Command
+) extends Command with Action {
+	val effects = Nil
+}
