@@ -574,6 +574,8 @@ class Protocol {
 				} yield ()
 			case "distribute" =>
 				loadJsonProtocol_Distribute(nameVal_l)
+			case "setReagents" =>
+				loadJsonProtocol_SetReagents(nameVal_l)
 			case "titrate" =>
 				loadJsonProtocol_Titrate(nameVal_l)
 			case "transfer" =>
@@ -781,6 +783,18 @@ class Protocol {
 				cmd.sterilizeAfter_?,
 				tipModel_?
 			))
+		}
+	}
+	
+	private def loadJsonProtocol_SetReagents(
+		nameToVal_l: List[(Option[String], JsValue)]
+	): RsResult[Unit] = {
+		for {
+			cmd <- Converter.convCommandAs[commands.SetReagents](nameToVal_l, eb, state0.toImmutable)
+		} yield {
+			val specIdent = f"spec$nvar%04d"
+			idToObject(specIdent) = cmd
+			tasks += Rel(s"nop", specIdent :: Nil)
 		}
 	}
 	

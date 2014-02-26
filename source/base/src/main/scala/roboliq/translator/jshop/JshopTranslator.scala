@@ -5,6 +5,7 @@ import grizzled.slf4j.Logger
 import roboliq.core._
 import roboliq.entities._
 import roboliq.input.commands._
+import roboliq.input.commands
 import roboliq.input.Protocol
 import roboliq.evoware.translator.EvowareScriptBuilder
 import roboliq.pipette.planners.TransferPlanner
@@ -67,19 +68,6 @@ object JshopTranslator {
 								} yield state1
 							}
 						}
-						/*def doit(state0: WorldState, command_l: List[Command]): RsResult[WorldState] = {
-							command_l match {
-								case Nil => RsSuccess(state0)
-								case command :: rest =>
-									val state1_? = builder.addCommand(
-										protocol,
-										state0,
-										agentIdent,
-										command
-									)
-									state1_?.flatMap(state1 => doit(state1, rest))
-							}
-						}*/
 						for {
 							command_l <- handleOperator(protocol, agentToBuilder_m, state0, operator, agentIdent, arg_l)
 							state1 <- doit(state0, command_l)
@@ -111,6 +99,15 @@ object JshopTranslator {
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
 				RsSuccess(List(Log(text)))
+			
+			case "nop" =>
+				val List(specIdent) = arg_l
+				protocol.idToObject(specIdent) match {
+					case spec: commands.SetReagents => {
+						handleOperator_SetReagents(protocol, agentToBuilder_m, state0, spec)
+					case _ =>
+						RsError("invalid SetReagents")
+				}
 			
 			case "peeler-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -208,6 +205,17 @@ object JshopTranslator {
 
 			case _ =>
 				RsError(s"unknown operator: $operator")
+		}
+	}
+	
+	private def handleOperator_SetReagents(
+		protocol: Protocol,
+		agentToBuilder_m: Map[String, ClientScriptBuilder],
+		state0: WorldState,
+		spec: commands.SetReagents
+	): RqResult[List[Command]] = {
+		for ((wellInfo, reagentName) <- (spec.wells.l zip spec.reagents)) {
+			
 		}
 	}
 	

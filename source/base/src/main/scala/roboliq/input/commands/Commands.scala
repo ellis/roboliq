@@ -18,6 +18,11 @@ case class Distribute(
 	pipettePolicy_? : Option[String]
 ) extends Command
 
+case class SetReagents(
+	wells: PipetteDestinations,
+	reagents: List[String]
+) extends Command
+
 sealed trait TitrateAmount
 case class TitrateAmount_Volume(volume: LiquidVolume) extends TitrateAmount
 case class TitrateAmount_Range(min: LiquidVolume, max: LiquidVolume) extends TitrateAmount
