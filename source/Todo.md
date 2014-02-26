@@ -17,15 +17,15 @@
 - [x] in stflow1.prot, second step of titration command needs to be expanded to TitrationItem_Or (see toPipetteSources in Converter)
 - [x] TitrationSeries: put code in separate file
 - [x] TitrationSeries: rename to titrate
-- [ ] TitrationSeries: use PipetteAmount instead of LiquidVolume for sources
-- [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
-- [ ] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?
+- [x] TitrationSeries: use PipetteAmount instead of LiquidVolume for sources
+- [x] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?
 - [ ] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
-- [ ] EvowareClientScriptBuilder: add well events in spirate_checked
+- [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
 - [ ] Dilute: create command
 - [ ] List of user variables should be read in from a separate file, to make lab customization possible without modifying the original script
+- [ ] EvowareClientScriptBuilder: add well events in spirate_checked
 
 ## Priorities for user friendliness
 

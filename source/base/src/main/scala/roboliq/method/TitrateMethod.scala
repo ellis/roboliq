@@ -18,7 +18,7 @@ class TitrateMethod(
 			// Turn the user-specified steps into simpler individual and/or/source items
 			item_l <- RqResult.toResultOfList(cmd.steps.map(_.getItem)).map(_.flatten)
 			itemTop = TitrateItem_And(item_l)
-			_ = itemTop.printShortHierarchy(eb, "")
+			//_ = itemTop.printShortHierarchy(eb, "")
 			// Number of wells required if we only use a single replicate
 			mixtureAmount1_l = createWellMixtures(itemTop, Nil)
 			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
@@ -74,12 +74,12 @@ class TitrateMethod(
 			//stepToList_l = cmd.steps zip l3.transpose
 		} yield {
 			//printMixtureCsv(l3)
-			println("----------------")
-			println("l3")
-			println(l3)
+			//println("----------------")
+			//println("l3")
+			//println(l3)
 			//printMixtureCsv(stepToList_l.map(_._2))
 			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
-			println("destinations: "+destinations)
+			//println("destinations: "+destinations)
 			val destinationToMixture_l = destinations.l zip l3
 			printDestinationMixtureCsv(destinationToMixture_l)
 			//println("len: "+stepToList_l.map(_._2.length))
@@ -221,8 +221,8 @@ class TitrateMethod(
 				_ <- RqResult.assert(numWell <= denWell, "Invalid dilutions, exceed 1:1")
 				_ <- RqResult.assert(volumeWell <= volumeTotal, "Sum of component volumes exceeds total volume")
 			} yield {
-				println("titrate:", volumeTotal, volumeNonfiller, volumeFiller, volumeDilutions, volumeWell)
-				println()
+				//println("titrate:", volumeTotal, volumeNonfiller, volumeFiller, volumeDilutions, volumeWell)
+				//println()
 				mixture.map { pair =>
 					val (sv, amount_?) = pair
 					amount_? match {

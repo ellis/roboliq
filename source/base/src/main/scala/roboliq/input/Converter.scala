@@ -341,7 +341,7 @@ object Converter {
 				}
 			}
 			else {
-				println("typ: "+typ)
+				//println("typ: "+typ)
 				val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 				val p0_l = ctor.paramss(0)
 				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
@@ -791,7 +791,7 @@ object Converter {
 				jsval match {
 					case JsString(s) =>
 						val x = eb.lookupLiquidSources(s, state)
-						println("toPipetteSources: "+s+" -> "+x)
+						//println("toPipetteSources: "+s+" -> "+x)
 						x
 					case JsArray(l) =>
 						val l2 = RqResult.toResultOfList(l.map(jsval => toPipetteSources(jsval, eb, state_?)))
@@ -806,7 +806,7 @@ object Converter {
 	): RqResult[PipetteAmount] = {
 		jsval match {
 			case JsString(s) =>
-				println("parse: "+PipetteAmountParser.parse(s))
+				//println("parse: "+PipetteAmountParser.parse(s))
 				PipetteAmountParser.parse(s)
 			case _ => RqError("expected JsString for amount")
 		}
