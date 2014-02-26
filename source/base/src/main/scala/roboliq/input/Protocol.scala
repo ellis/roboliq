@@ -572,8 +572,8 @@ class Protocol {
 				} yield ()
 			case "distribute" =>
 				loadJsonProtocol_Distribute(nameVal_l)
-			case "titrationSeries" =>
-				loadJsonProtocol_TitrationSeries(nameVal_l)
+			case "titrate" =>
+				loadJsonProtocol_Titrate(nameVal_l)
 			case "transfer" =>
 				loadJsonProtocol_Transfer(nameVal_l)
 			case _ =>
@@ -782,12 +782,12 @@ class Protocol {
 		}
 	}
 	
-	private def loadJsonProtocol_TitrationSeries(
+	private def loadJsonProtocol_Titrate(
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[Unit] = {
 		for {
-			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
-			spec_l <- new method.Titrate(eb, state0.toImmutable, cmd).run()
+			cmd <- Converter.convCommandAs[commands.Titrate](nameToVal_l, eb, state0.toImmutable)
+			spec_l <- new method.TitrateMethod(eb, state0.toImmutable, cmd).run()
 		} yield {
 			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
 			val agentIdent = f"?a$nvar%04d"
@@ -798,7 +798,6 @@ class Protocol {
 			tasks += Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
 		}
 	}
-	
 	
 	private def x(fields: Map[String, JsValue], id: String): String =
 		x(fields, id, f"?x$nvar%04d")

@@ -15,8 +15,8 @@
 - [x] EvowareClientScriptBuilder: update tip state in spirate_checked
 - [x] EvowareClientScriptBuilder: update well state in spirate_checked
 - [x] in stflow1.prot, second step of titration command needs to be expanded to TitrationItem_Or (see toPipetteSources in Converter)
-- [ ] TitrationSeries: rename to titrate
-- [ ] TitrationSeries: put code in separate file
+- [x] TitrationSeries: put code in separate file
+- [x] TitrationSeries: rename to titrate
 - [ ] TitrationSeries: use PipetteAmount instead of LiquidVolume for sources
 - [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
 - [ ] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?

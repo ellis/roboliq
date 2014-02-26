@@ -18,30 +18,30 @@ case class Distribute(
 	pipettePolicy_? : Option[String]
 ) extends Command
 
-sealed trait TitrationAmount
-case class TitrationAmount_Volume(volume: LiquidVolume) extends TitrationAmount
-case class TitrationAmount_Range(min: LiquidVolume, max: LiquidVolume) extends TitrationAmount
+sealed trait TitrateAmount
+case class TitrateAmount_Volume(volume: LiquidVolume) extends TitrateAmount
+case class TitrateAmount_Range(min: LiquidVolume, max: LiquidVolume) extends TitrateAmount
 
 // REFACTOR: delete this
-case class TitrationSource(
+case class TitrateSource(
 	source: String,
-	amount_? : Option[TitrationAmount]
+	amount_? : Option[TitrateAmount]
 )
 
-case class TitrationSeries(
-	steps: List[TitrationStep],
+case class Titrate(
+	steps: List[TitrateStep],
 	destination: PipetteDestinations,
 	volume_? : Option[LiquidVolume],
 	replicates_? : Option[Int]
 ) extends Command {
-	def getItems: RqResult[List[TitrationItem]] = {
+	def getItems: RqResult[List[TitrateItem]] = {
 		RqResult.toResultOfList(steps.map(_.getItem)).map(_.flatten)
 	}
 }
 
-case class TitrationStep(
-	and: List[TitrationStep],
-	or: List[TitrationStep],
+case class TitrateStep(
+	and: List[TitrateStep],
+	or: List[TitrateStep],
 	source_? : Option[PipetteSources],
 	volume_? : Option[List[LiquidVolume]],
 	//min_? : Option[LiquidVolume],
@@ -54,48 +54,48 @@ case class TitrationStep(
 	tipModel_? : Option[String],
 	pipettePolicy_? : Option[String]
 ) extends Command {
-	def getItem: RqResult[List[TitrationItem]] = {
+	def getItem: RqResult[List[TitrateItem]] = {
 		val n = 0 + (if (and.isEmpty) 0 else 1) + (if (or.isEmpty) 0 else 1) + (if (source_?.isEmpty) 0 else 1)
 		if (n != 1) {
 			RqError("Each titration step must specify exactly one of: `and`, `or`, or `source`")
 		}
 		else {
-			if (!and.isEmpty) RqResult.toResultOfList(and.map(_.getItem)).map(l => List(TitrationItem_And(l.flatten)))
-			else if (!or.isEmpty) RqResult.toResultOfList(or.map(_.getItem)).map(l => List(TitrationItem_Or(l.flatten)))
+			if (!and.isEmpty) RqResult.toResultOfList(and.map(_.getItem)).map(l => List(TitrateItem_And(l.flatten)))
+			else if (!or.isEmpty) RqResult.toResultOfList(or.map(_.getItem)).map(l => List(TitrateItem_Or(l.flatten)))
 			else {
-				val l: List[TitrationItem_SourceVolume] = source_?.get.sources.flatMap(src => {
+				val l: List[TitrateItem_SourceVolume] = source_?.get.sources.flatMap(src => {
 					volume_? match {
-						case None => List(TitrationItem_SourceVolume(this, src, None))
-						case Some(volume_l) => volume_l.map(volume => TitrationItem_SourceVolume(this, src, Some(volume)))
+						case None => List(TitrateItem_SourceVolume(this, src, None))
+						case Some(volume_l) => volume_l.map(volume => TitrateItem_SourceVolume(this, src, Some(volume)))
 					}
 				})
-				val l2 = if (l.size == 1) l else List(TitrationItem_Or(l))
+				val l2 = if (l.size == 1) l else List(TitrateItem_Or(l))
 				RqSuccess(l2)
 			}
 		}
 	}
 }
 
-sealed trait TitrationItem {
+sealed trait TitrateItem {
 	def printShortHierarchy(eb: EntityBase, indent: String)
 }
-case class TitrationItem_And(l: List[TitrationItem]) extends TitrationItem {
+case class TitrateItem_And(l: List[TitrateItem]) extends TitrateItem {
 	def printShortHierarchy(eb: EntityBase, indent: String) {
 		println(indent + "and:")
 		l.foreach(_.printShortHierarchy(eb, indent+"  "))
 	}
 }
-case class TitrationItem_Or(l: List[TitrationItem]) extends TitrationItem {
+case class TitrateItem_Or(l: List[TitrateItem]) extends TitrateItem {
 	def printShortHierarchy(eb: EntityBase, indent: String) {
 		println(indent + "or:")
 		l.foreach(_.printShortHierarchy(eb, indent+"  "))
 	}
 }
-case class TitrationItem_SourceVolume(
-	step: TitrationStep,
+case class TitrateItem_SourceVolume(
+	step: TitrateStep,
 	source: LiquidSource,
 	volume_? : Option[LiquidVolume]
-) extends TitrationItem {
+) extends TitrateItem {
 	def printShortHierarchy(eb: EntityBase, indent: String) {
 		println(indent + source.l.head + " " + volume_?)
 	}

@@ -4,20 +4,20 @@ import roboliq.core._
 import roboliq.entities._
 import roboliq.input.commands._
 
-class Titrate(
+class TitrateMethod(
 	eb: EntityBase,
 	state0: WorldState,
-	cmd: TitrationSeries
+	cmd: Titrate
 ) {
-    type XO = (TitrationItem_SourceVolume, Option[LiquidVolume])
-    type X = (TitrationItem_SourceVolume, LiquidVolume)
+    type XO = (TitrateItem_SourceVolume, Option[LiquidVolume])
+    type X = (TitrateItem_SourceVolume, LiquidVolume)
 
 	def run(): RsResult[List[PipetteSpec]] = {
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			// Turn the user-specified steps into simpler individual and/or/source items
 			item_l <- RqResult.toResultOfList(cmd.steps.map(_.getItem)).map(_.flatten)
-			itemTop = TitrationItem_And(item_l)
+			itemTop = TitrateItem_And(item_l)
 			_ = itemTop.printShortHierarchy(eb, "")
 			// Number of wells required if we only use a single replicate
 			mixture1_l = createWellMixtures(itemTop, Nil)
@@ -70,7 +70,7 @@ class Titrate(
 					else RqSuccess(addFillVolume(l2, fillVolume_l))
 			}
 			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
-			/*stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
+			/*stepToList_l: List[(TitrateStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
 				// If this is the filler step:
 				step.volume_? match {
 					case None => val l = step -> fillVolume_l.map(step.source.sources.head -> _)
@@ -163,7 +163,7 @@ class Titrate(
 	
 	// Return a list of source+volume for each well
 	private def createWellMixtures(
-		item: TitrationItem,
+		item: TitrateItem,
 		mixture_l: List[List[XO]]
 	): List[List[XO]] = {
 		//println("item: ")
@@ -171,19 +171,19 @@ class Titrate(
 		//println("mixture_l:")
 		//mixture_l.foreach(mixture => println(mixture.map(_._2).mkString("+")))
 		item match {
-			case TitrationItem_And(l) =>
+			case TitrateItem_And(l) =>
 				val l2 = l.map(item => createWellMixtures(item, Nil))
 				//println("l2: "+l2.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
 				val l3 = mixManyLists_And(mixture_l :: l2)
 				//println("l3: "+l3.map(_.map(_._2).mkString("+")).mkString(","))
 				l3
-			case TitrationItem_Or(l) =>
+			case TitrateItem_Or(l) =>
 				val l4 = l.map(item => createWellMixtures(item, Nil))
 				//println("l4: "+l4.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
 				val l5 = mixManyLists_Or(mixture_l :: l4)
 				//println("l5: "+l5.map(_.map(_._2).mkString("+")).mkString(","))
 				l5
-			case sv: TitrationItem_SourceVolume =>
+			case sv: TitrateItem_SourceVolume =>
 				List(List((sv, sv.volume_?)))
 		}
 	}
@@ -248,11 +248,11 @@ class Titrate(
 		}
 	}
 	
-	private def flattenSteps(item: TitrationItem): List[TitrationStep] = {
+	private def flattenSteps(item: TitrateItem): List[TitrateStep] = {
 		item match {
-			case TitrationItem_And(l) => l.flatMap(flattenSteps).distinct
-			case TitrationItem_Or(l) => l.flatMap(flattenSteps).distinct
-			case TitrationItem_SourceVolume(step, _, _) => List(step)
+			case TitrateItem_And(l) => l.flatMap(flattenSteps).distinct
+			case TitrateItem_Or(l) => l.flatMap(flattenSteps).distinct
+			case TitrateItem_SourceVolume(step, _, _) => List(step)
 		}
 	}
 
