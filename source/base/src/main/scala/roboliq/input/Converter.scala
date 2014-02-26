@@ -292,6 +292,7 @@ object Converter {
 			else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
 			else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
 			else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
+			else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(jsval)
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 			//else if (typ <:< typeOf[Substance]) toSubstance(jsval)
@@ -340,6 +341,7 @@ object Converter {
 				}
 			}
 			else {
+				println("typ: "+typ)
 				val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 				val p0_l = ctor.paramss(0)
 				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
@@ -796,6 +798,17 @@ object Converter {
 						l2.map(l => PipetteSources(l.flatMap(_.sources)))
 					case _ => RqError("expected JsString in liquid source")
 				}
+		}
+	}
+
+	def toPipetteAmount(
+		jsval: JsValue
+	): RqResult[PipetteAmount] = {
+		jsval match {
+			case JsString(s) =>
+				println("parse: "+PipetteAmountParser.parse(s))
+				PipetteAmountParser.parse(s)
+			case _ => RqError("expected JsString for amount")
 		}
 	}
 

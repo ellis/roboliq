@@ -43,7 +43,7 @@ case class TitrateStep(
 	and: List[TitrateStep],
 	or: List[TitrateStep],
 	source_? : Option[PipetteSources],
-	volume_? : Option[List[LiquidVolume]],
+	amount_? : Option[List[PipetteAmount]],
 	//min_? : Option[LiquidVolume],
 	//max_? : Option[LiquidVolume],
 	contact_? : Option[PipettePosition.Value],
@@ -64,9 +64,9 @@ case class TitrateStep(
 			else if (!or.isEmpty) RqResult.toResultOfList(or.map(_.getItem)).map(l => List(TitrateItem_Or(l.flatten)))
 			else {
 				val l: List[TitrateItem_SourceVolume] = source_?.get.sources.flatMap(src => {
-					volume_? match {
+					amount_? match {
 						case None => List(TitrateItem_SourceVolume(this, src, None))
-						case Some(volume_l) => volume_l.map(volume => TitrateItem_SourceVolume(this, src, Some(volume)))
+						case Some(amount_l) => amount_l.map(amount => TitrateItem_SourceVolume(this, src, Some(amount)))
 					}
 				})
 				val l2 = if (l.size == 1) l else List(TitrateItem_Or(l))
@@ -94,10 +94,10 @@ case class TitrateItem_Or(l: List[TitrateItem]) extends TitrateItem {
 case class TitrateItem_SourceVolume(
 	step: TitrateStep,
 	source: LiquidSource,
-	volume_? : Option[LiquidVolume]
+	amount_? : Option[PipetteAmount]
 ) extends TitrateItem {
 	def printShortHierarchy(eb: EntityBase, indent: String) {
-		println(indent + source.l.head + " " + volume_?)
+		println(indent + source.l.head + " " + amount_?)
 	}
 }
 

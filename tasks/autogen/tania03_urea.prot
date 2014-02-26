@@ -23,12 +23,12 @@ reagents:
   p1205: sourcePlate2(A05)
 
 protocol:
-  - titrationSeries:
+  - titrate:
       steps:
         - or:
           - and:
             - source: urea_pH55
-              volume: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
+              amount: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
               sterilizeBefore: thorough
               sterilizeBetween: none
               pipettePolicy: Water_C_1000
@@ -38,7 +38,7 @@ protocol:
               pipettePolicy: Water_A_1000
           - and:
             - source: urea_pH70
-              volume: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
+              amount: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
               sterilizeBefore: thorough
               sterilizeBetween: none
               pipettePolicy: Water_C_1000
@@ -47,7 +47,7 @@ protocol:
               sterilizeBetween: none
               pipettePolicy: Water_A_1000
         - source: [Assam, p1200, p1201, p1205]
-          volume: .25ul
+          amount: 0.25ul
           sterilizeBefore: thorough
           sterilizeBetween: thorough
           sterilizeAfter: thorough
