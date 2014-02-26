@@ -29,19 +29,19 @@ case class TitrateSource(
 )
 
 case class Titrate(
-	steps: List[TitrateStep],
+	allOf: List[TitrateStep],
 	destination: PipetteDestinations,
 	volume_? : Option[LiquidVolume],
 	replicates_? : Option[Int]
 ) extends Command {
 	def getItems: RqResult[List[TitrateItem]] = {
-		RqResult.toResultOfList(steps.map(_.getItem)).map(_.flatten)
+		RqResult.toResultOfList(allOf.map(_.getItem)).map(_.flatten)
 	}
 }
 
 case class TitrateStep(
-	and: List[TitrateStep],
-	or: List[TitrateStep],
+	allOf: List[TitrateStep],
+	oneOf: List[TitrateStep],
 	source_? : Option[PipetteSources],
 	amount_? : Option[List[PipetteAmount]],
 	//min_? : Option[LiquidVolume],
@@ -55,13 +55,13 @@ case class TitrateStep(
 	pipettePolicy_? : Option[String]
 ) extends Command {
 	def getItem: RqResult[List[TitrateItem]] = {
-		val n = 0 + (if (and.isEmpty) 0 else 1) + (if (or.isEmpty) 0 else 1) + (if (source_?.isEmpty) 0 else 1)
+		val n = 0 + (if (allOf.isEmpty) 0 else 1) + (if (oneOf.isEmpty) 0 else 1) + (if (source_?.isEmpty) 0 else 1)
 		if (n != 1) {
 			RqError("Each titration step must specify exactly one of: `and`, `or`, or `source`")
 		}
 		else {
-			if (!and.isEmpty) RqResult.toResultOfList(and.map(_.getItem)).map(l => List(TitrateItem_And(l.flatten)))
-			else if (!or.isEmpty) RqResult.toResultOfList(or.map(_.getItem)).map(l => List(TitrateItem_Or(l.flatten)))
+			if (!allOf.isEmpty) RqResult.toResultOfList(allOf.map(_.getItem)).map(l => List(TitrateItem_And(l.flatten)))
+			else if (!oneOf.isEmpty) RqResult.toResultOfList(oneOf.map(_.getItem)).map(l => List(TitrateItem_Or(l.flatten)))
 			else {
 				val l: List[TitrateItem_SourceVolume] = source_?.get.sources.flatMap(src => {
 					amount_? match {

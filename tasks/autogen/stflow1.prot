@@ -20,27 +20,36 @@ reagents:
   substrate4MUBut: sourcePlate1(F12)
   substrateFree: sourcePlate1(G12)
   substrate4MUXyl: sourcePlate1(H12)
+  A: culture(A01-A12)
 
 protocol:
-- distribute media culture(A01xD12) 200ul
+#- distribute media culture(A01xD12) 200ul
+- titrate:
+    allOf:
+    - source: media
+      amount: 200ul
+    replicates: 48
+    destination: culture(A01xD12)
 #- group: Inoculate by operator
 #  commands:
 #  - move plate.culture location.hotel55(1)
 #  - prompt "Please inculate plate."
 #  - move plate.culture location.shaker
 #- // Add media to lower rows
-- distribute media culture(E01xH12) 190ul
 #- // Inoculate
-- transfer:
-    source: culture(A01xD12)
+- titrate:
+    allOf:
+    - source: media
+      amount: 190ul
+    - source: culture(A01xD12)
+      amount: 10ul
     destination: culture(E01xH12)
-    amount: 10ul
-#  mixBefore: 150ul
+#  mixBefore: ?x150ul
 #  sterilizeAfter: decontaminate
 #- // Add IPTG
-- distribute iptg culture(E01xH12) 10ul #contact=air sterilize=NNT
+#- distribute iptg culture(E01xH12) 10ul #contact=air sterilize=NNT
 #- // Add lysis buffer
-- distribute lysisBuffer culture(E01xH12) 20ul #contact=air sterilize=NNT
+#- distribute lysisBuffer culture(E01xH12) 20ul #contact=air sterilize=NNT
 #- // Shake
 #- shake plate/culture program/shake1
 #- // Mix and lyse
@@ -65,65 +74,65 @@ protocol:
 #  amount: 160ul
 #  mixBefore: true
 #  sanitize: thorough
-- pipette:
-    steps:
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: culture(E01-E12)
-          amount: 160ul
-        destination: dilution(A01-A12)
-        amount: 160ul
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: culture(F01-F12)
-          amount: 16ul
-        destination: dilution(B01-B12)
-        amount: 160ul
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: culture(G01-G12)
-          amount: 16ul
-        destination: dilution(C01-C12)
-        amount: 160ul
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: dilution(C01-C12)
-          amount: 16ul
-        destination: dilution(D01-D12)
-        amount: 160ul
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: culture(H01-H12)
-          amount: 16ul
-        destination: dilution(E01-E12)
-        amount: 160ul
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: dilution(E01-E12)
-          amount: 16ul
-        destination: dilution(F01-F12)
-        amount: 160ul
-    - titrate:
-        steps:
-        - source: reactionBuffer
-        - source: dilution(F01-F12)
-          amount: 16ul
-        destination: dilution(G01-G12)
-        amount: 160ul
+#- pipette:
+#    steps:
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: culture(E01-E12)
+#          amount: 160ul
+#        destination: dilution(A01-A12)
+#        amount: 160ul
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: culture(F01-F12)
+#          amount: 16ul
+#        destination: dilution(B01-B12)
+#        amount: 160ul
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: culture(G01-G12)
+#          amount: 16ul
+#        destination: dilution(C01-C12)
+#        amount: 160ul
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: dilution(C01-C12)
+#          amount: 16ul
+#        destination: dilution(D01-D12)
+#        amount: 160ul
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: culture(H01-H12)
+#          amount: 16ul
+#        destination: dilution(E01-E12)
+#        amount: 160ul
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: dilution(E01-E12)
+#          amount: 16ul
+#        destination: dilution(F01-F12)
+#        amount: 160ul
+#    - titrate:
+#        steps:
+#        - source: reactionBuffer
+#        - source: dilution(F01-F12)
+#          amount: 16ul
+#        destination: dilution(G01-G12)
+#        amount: 160ul
 #- // Create titration series from dilution plate to reaction plate
-- titrate:
-    steps:
-    - source: reactionBuffer
-      amount: 41.6ul
-    - source: dilution(A01-A12+B01-B12+D01-D12+G01-G12)
-      amount: 8ul
-    - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
-      amount: 30.4ul
-    replicates: 1
-    destination: reaction(A01xP24)
+#- titrate:
+#    steps:
+#    - source: reactionBuffer
+#      amount: 41.6ul
+#    - source: dilution(A01-A12+B01-B12+D01-D12+G01-G12)
+#      amount: 8ul
+#    - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
+#      amount: 30.4ul
+#    replicates: 1
+#    destination: reaction(A01xP24)

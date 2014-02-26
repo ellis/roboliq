@@ -16,7 +16,7 @@ class TitrateMethod(
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			// Turn the user-specified steps into simpler individual and/or/source items
-			item_l <- RqResult.toResultOfList(cmd.steps.map(_.getItem)).map(_.flatten)
+			item_l <- RqResult.toResultOfList(cmd.allOf.map(_.getItem)).map(_.flatten)
 			itemTop = TitrateItem_And(item_l)
 			//_ = itemTop.printShortHierarchy(eb, "")
 			// Number of wells required if we only use a single replicate

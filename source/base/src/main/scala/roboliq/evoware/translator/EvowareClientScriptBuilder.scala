@@ -592,19 +592,22 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						tipEvent = TipAspirateEvent(item.tip, item.well, wellAliquot0.mixture, item.volume)
 						tipState1 <- new TipAspirateEventHandler().handleEvent(tipState0, tipEvent)
 					} yield {
+						println("tipState1: "+tipState1.content)
 						state.copy(
 							well_aliquot_m = state.well_aliquot_m + (item.well -> wellAliquot1),
 							tip_state_m = state.tip_state_m + (item.tip -> tipState1)
 						)
 					}
 				case "Dispense" =>
-					val aliquot = Aliquot(wellAliquot0.mixture, amount)
 					val pos = PipettePosition.getPositionFromPolicyNameHack(sLiquidClass)
+					val tipEvent = TipDispenseEvent(item.tip, wellAliquot0.mixture, item.volume, pos)
 					for {
-						wellAliquot1 <- wellAliquot0.add(aliquot)
-						tipEvent = TipDispenseEvent(item.tip, wellAliquot0.mixture, item.volume, pos)
 						tipState1 <- new TipDispenseEventHandler().handleEvent(tipState0, tipEvent)
+						aliquot = Aliquot(tipState0.content.mixture, amount)
+						wellAliquot1 <- wellAliquot0.add(aliquot)
 					} yield {
+						println("aliquot: "+aliquot)
+						//println("wellAliquot: "+wellAliquot1)
 						state.copy(
 							well_aliquot_m = state.well_aliquot_m + (item.well -> wellAliquot1),
 							tip_state_m = state.tip_state_m + (item.tip -> tipState1)

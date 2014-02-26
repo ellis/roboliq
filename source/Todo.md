@@ -19,6 +19,7 @@
 - [x] TitrationSeries: rename to titrate
 - [x] TitrationSeries: use PipetteAmount instead of LiquidVolume for sources
 - [x] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?
+- [ ] Create 'setReagents' command
 - [ ] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
 - [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
