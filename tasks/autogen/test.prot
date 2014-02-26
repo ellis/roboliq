@@ -1,0 +1,39 @@
+labware:
+  sourcePlate1: D-BSSE 96 Well DWP
+  culture:
+    model: Thermocycler Plate
+  dilution:
+    model: Thermocycler Plate
+  reaction:
+    model: "384 Well Plate"
+
+reagents:
+  media: sourcePlate1(A01|H02)
+  iptg: sourcePlate1(A03)
+  lysisBuffer: sourcePlate1(A04)
+  reactionBuffer: sourcePlate1(A05)
+  substrate4MUGlu: sourcePlate1(A12)
+  substrate4MUGal: sourcePlate1(B12)
+  substrate4MUSul: sourcePlate1(C12)
+  substrate4MUNag: sourcePlate1(D12)
+  substrate4MUPho: sourcePlate1(E12)
+  substrate4MUBut: sourcePlate1(F12)
+  substrateFree: sourcePlate1(G12)
+  substrate4MUXyl: sourcePlate1(H12)
+
+protocol:
+- distribute media culture(A01) 200ul
+- titrate:
+    allOf:
+    - source: media
+      amount: 190ul
+    - source: culture(A01)
+      amount: 10ul
+    destination: culture(B01)
+- titrate:
+    allOf:
+    - source: media
+      amount: 190ul
+    - source: culture(B01)
+      amount: 10ul
+    destination: culture(C01)

@@ -1,0 +1,13 @@
+[Plan cost: 9.0
+
+(!agent-activate user)
+(!transporter-run user userarm sourceplate1 m001 offsite r1_bench_010x2 userarmspec)
+(!transporter-run user userarm culture m003 offsite r1_hotel_245x1 userarmspec)
+(!agent-deactivate user)
+(!agent-activate r1)
+(!transporter-run r1 r1_transporter2 culture m003 r1_hotel_245x1 r1_bench_010x4 r1_transporterspec0)
+(!pipetter-run r1 r1_pipetter1 spec0003)
+(!pipetter-run r1 r1_pipetter1 spec0006)
+(!pipetter-run r1 r1_pipetter1 spec0009)
+--------------------
+]

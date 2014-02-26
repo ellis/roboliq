@@ -92,13 +92,13 @@ protocol:
           amount: 16ul
         destination: dilution(C01-C12)
         volume: 160ul
-#    - titrate:
-#        allOf:
-#        - source: reactionBuffer
-#        - source: dilution(C01-C12)
-#          amount: 16ul
-#        destination: dilution(D01-D12)
-#        volume: 160ul
+    - titrate:
+        allOf:
+        - source: reactionBuffer
+        - source: dilution(C01-C12)
+          amount: 16ul
+        destination: dilution(D01-D12)
+        volume: 160ul
 #    - titrate:
 #        allOf:
 #        - source: reactionBuffer
