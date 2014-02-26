@@ -21,7 +21,7 @@
 - [x] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?
 - [x] Create 'setReagents' command
 - [x] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
-- [ ] BUG: Titrate: filler not being filled in
+- [x] BUG: Titrate: filler not being filled in
 - [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)

@@ -111,7 +111,7 @@ class TitrateMethod(
 					step.sterilizeAfter_?,
 					None // FIXME: handle tipModel_?
 				)
-			})
+			}).filterNot(_.sources.sources.isEmpty)
 		}
 	}
     
