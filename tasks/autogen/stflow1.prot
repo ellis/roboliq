@@ -66,7 +66,7 @@ protocol:
 #    - source: plate/culture(H01 - H12)
 #      destination: plate/dilution(E01 - G12)
 #      amount: [1:10, 1:100, 1:1000]
-#  amount: 160ul
+#  volume: 160ul
 #  mixBefore: true
 #  sanitize: thorough
 - pipette:
@@ -77,50 +77,49 @@ protocol:
         - source: culture(E01-E12)
           amount: 160ul
         destination: dilution(A01-A12)
-        amount: 160ul
+        volume: 160ul
     - titrate:
         allOf:
         - source: reactionBuffer
-          amount: 144ul
         - source: culture(F01-F12)
           amount: 16ul
         destination: dilution(B01-B12)
-        amount: 160ul
+        volume: 160ul
 #    - titrate:
 #        allOf:
 #        - source: reactionBuffer
 #        - source: culture(G01-G12)
 #          amount: 16ul
 #        destination: dilution(C01-C12)
-#        amount: 160ul
+#        volume: 160ul
 #    - titrate:
 #        allOf:
 #        - source: reactionBuffer
 #        - source: dilution(C01-C12)
 #          amount: 16ul
 #        destination: dilution(D01-D12)
-#        amount: 160ul
+#        volume: 160ul
 #    - titrate:
 #        allOf:
 #        - source: reactionBuffer
 #        - source: culture(H01-H12)
 #          amount: 16ul
 #        destination: dilution(E01-E12)
-#        amount: 160ul
+#        volume: 160ul
 #    - titrate:
 #        allOf:
 #        - source: reactionBuffer
 #        - source: dilution(E01-E12)
 #          amount: 16ul
 #        destination: dilution(F01-F12)
-#        amount: 160ul
+#        volume: 160ul
 #    - titrate:
 #        allOf:
 #        - source: reactionBuffer
 #        - source: dilution(F01-F12)
 #          amount: 16ul
 #        destination: dilution(G01-G12)
-#        amount: 160ul
+#        volume: 160ul
 #- // Create titration series from dilution plate to reaction plate
 #- titrate:
 #    steps:
