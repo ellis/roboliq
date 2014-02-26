@@ -450,5 +450,6 @@
  (
   (titrationSeries2 ?a0001 ?d0002 spec0003 sourcePlate1 culture)
   (!nop spec0004)
+  (titrationSeries2 ?a0005 ?d0006 spec0007 sourcePlate1 culture)
  )
 )
