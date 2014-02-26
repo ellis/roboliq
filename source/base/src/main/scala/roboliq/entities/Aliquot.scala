@@ -4,46 +4,6 @@ import scalaz._
 import Scalaz._
 import roboliq.core._
 
-sealed trait WellEvent
-
-case class WellEvent_TipDetectVolume(
-	time: java.util.Date,
-	tipIndex: Int,
-	tipModel: String,
-	site: String,
-	labwareModel: String,
-	row: Int,
-	col: Int,
-	measurement: BigDecimal
-) extends WellEvent
-
-case class WellEvent_Aspriate(
-	time: java.util.Date,
-	spec: String,
-	tipIndex: Int,
-	tipModel: String,
-	site: String,
-	labwareModel: String,
-	row: Int,
-	col: Int,
-	volume: LiquidVolume
-) extends WellEvent
-
-case class WellEvent_Dispense(
-	time: java.util.Date,
-	spec: String,
-	tipIndex: Int,
-	tipModel: String,
-	tipVolume0: LiquidVolume,
-	tipVolume: LiquidVolume,
-	site: String,
-	labwareModel: String,
-	row: Int,
-	col: Int,
-	multipipetteStep: Int,
-	volume: LiquidVolume
-) extends WellEvent
-
 /**
  * An aliquot is an amount of a mixture.
  * A mixture tells us the ratios of the contained substances:

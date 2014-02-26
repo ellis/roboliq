@@ -163,3 +163,25 @@ class TipCleanEventHandler extends EventHandlerAB[TipState, TipCleanEvent]("tip.
 		))
 	}
 }
+
+case class TipAspirateEvent2(event: TipAspirateEvent) extends WorldStateEvent {
+	def update(state: WorldStateBuilder): RqResult[Unit] = {
+		val tipState0 = state.tip_state_m.getOrElse(event.tip, TipState.createEmpty(event.tip))
+		for {
+			tipState1 <- new TipAspirateEventHandler().handleEvent(tipState0, event)
+		} yield {
+			state.tip_state_m(event.tip) = tipState1
+		}
+	}
+}
+
+case class TipDispenseEvent2(event: TipDispenseEvent) extends WorldStateEvent {
+	def update(state: WorldStateBuilder): RqResult[Unit] = {
+		val tipState0 = state.tip_state_m.getOrElse(event.tip, TipState.createEmpty(event.tip))
+		for {
+			tipState1 <- new TipDispenseEventHandler().handleEvent(tipState0, event)
+		} yield {
+			state.tip_state_m(event.tip) = tipState1
+		}
+	}
+}
