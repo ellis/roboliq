@@ -794,7 +794,7 @@ class Protocol {
 		} yield {
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = cmd
-			tasks += Rel(s"nop", specIdent :: Nil)
+			tasks += Rel(s"!nop", specIdent :: Nil)
 		}
 	}
 	

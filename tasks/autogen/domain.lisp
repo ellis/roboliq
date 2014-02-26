@@ -610,8 +610,10 @@
   ((move-labware ?p1 ?s1) (move-labware ?p2 ?s2) (move-labware ?p3 ?s3) (agent-activate ?a) (!pipetter-run ?a ?d ?spec))
  )
 
- (:method (nop ?spec)
+ (:operator (!nop ?spec)
   ; preconditions
+  ()
+  ; delete list
   ()
   ; task list
   ()

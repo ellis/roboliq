@@ -52,11 +52,20 @@ object JshopTranslator {
 		line match {
 			case "" => RsSuccess(state0)
 			case RxOperator(s) =>
+				println("s: "+s)
 				s.split(' ').toList match {
+					case "nop" :: specIdent :: Nil =>
+	                    protocol.idToObject(specIdent) match {
+                            case spec: commands.SetReagents =>
+                            	handleOperator_SetReagents(protocol, agentToBuilder_m, state0, spec)
+                            case _ =>
+                            	RsError("invalid SetReagents")
+                        }
 					case operator :: agentIdent :: arg_l =>
 						val builder = agentToBuilder_m(agentIdent)
-						def doit(state0: WorldState, command_l: List[Command]): RsResult[WorldState] = {
-							command_l.foldLeft(RsSuccess(state0) : RsResult[WorldState]) { (state0_?, command) =>
+						def doit(state0: WorldState, commandToState_l: List[(Command, WorldState)]): RsResult[WorldState] = {
+							commandToState_l.foldLeft(RsSuccess(state0) : RsResult[WorldState]) { (state0_?, pair) =>
+								val (command, state1) = pair
 								for {
 									state0 <- state0_?
 									state1 <- builder.addCommand(
@@ -69,8 +78,8 @@ object JshopTranslator {
 							}
 						}
 						for {
-							command_l <- handleOperator(protocol, agentToBuilder_m, state0, operator, agentIdent, arg_l)
-							state1 <- doit(state0, command_l)
+							commandToState_l <- handleOperator(protocol, agentToBuilder_m, state0, operator, agentIdent, arg_l)
+							state1 <- doit(state0, commandToState_l)
 						} yield state1
 					
 					case _ =>
@@ -91,23 +100,14 @@ object JshopTranslator {
 		operator: String,
 		agentIdent: String,
 		arg_l: List[String]
-	): RsResult[List[Command]] = {
+	): RsResult[List[(Command, WorldState)]] = {
 		operator match {
-			case "agent-activate" => RsSuccess(List(AgentActivate()))
-			case "agent-deactivate" => RsSuccess(List(AgentDeactivate()))
+			case "agent-activate" => RsSuccess(List(AgentActivate() -> state0))
+			case "agent-deactivate" => RsSuccess(List(AgentDeactivate() -> state0))
 			case "log" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				RsSuccess(List(Log(text)))
-			
-			case "nop" =>
-				val List(specIdent) = arg_l
-				protocol.idToObject(specIdent) match {
-					case spec: commands.SetReagents => {
-						handleOperator_SetReagents(protocol, agentToBuilder_m, state0, spec)
-					case _ =>
-						RsError("invalid SetReagents")
-				}
+				RsSuccess(List(Log(text) -> state0))
 			
 			case "peeler-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -117,7 +117,7 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
 				} yield {
-					List(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
+					List(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent) -> state0)
 				}
 
 			case "pipetter-run" =>
@@ -142,7 +142,7 @@ object JshopTranslator {
 			case "prompt" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				RsSuccess(List(Prompt(text)))
+				RsSuccess(List(Prompt(text) -> state0))
 			
 			case "sealer-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -152,7 +152,7 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
 				} yield {
-					List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
+					List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent) -> state0)
 				}
 				
 			case "shaker-run" =>
@@ -163,7 +163,7 @@ object JshopTranslator {
 					labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
 					site <- protocol.eb.getEntityByIdent[Site](siteIdent)
 				} yield {
-					List(ShakerRun(device, spec, List(labware -> site)))
+					List(ShakerRun(device, spec, List(labware -> site)) -> state0)
 				}
 			
 			case "thermocycler-close" =>
@@ -171,7 +171,7 @@ object JshopTranslator {
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
 				} yield {
-					List(ThermocyclerClose(deviceIdent))
+					List(ThermocyclerClose(deviceIdent) -> state0)
 				}
 				
 			case "thermocycler-open" =>
@@ -179,7 +179,7 @@ object JshopTranslator {
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
 				} yield {
-					List(ThermocyclerOpen(deviceIdent))
+					List(ThermocyclerOpen(deviceIdent) -> state0)
 				}
 				
 			case "thermocycler-run" =>
@@ -190,10 +190,12 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[ThermocyclerSpec](specIdent)
 					//_ <- protocol.eb.getEntityByIdent[Plate](plateIdent)
 				} yield {
-					List(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/))
+					List(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/) -> state0)
 				}
 				
 			case "transporter-run" =>
+				// FIXME: update the state
+				val state1 = state0
 				RsSuccess(List(TransporterRun(
 					deviceIdent = arg_l(0),
 					labwareIdent = arg_l(1),
@@ -201,7 +203,7 @@ object JshopTranslator {
 					originIdent = arg_l(3),
 					destinationIdent = arg_l(4),
 					vectorIdent = arg_l(5)
-				)))
+				) -> state1))
 
 			case _ =>
 				RsError(s"unknown operator: $operator")
@@ -213,10 +215,30 @@ object JshopTranslator {
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
 		state0: WorldState,
 		spec: commands.SetReagents
-	): RqResult[List[Command]] = {
-		for ((wellInfo, reagentName) <- (spec.wells.l zip spec.reagents)) {
-			
+	): RqResult[WorldState] = {
+		val builder = state0.toMutable
+		val l = for ((wellInfo, reagentName) <- (spec.wells.l zip spec.reagents)) yield {
+			val aliquot0 = builder.well_aliquot_m.getOrElse(wellInfo.well, Aliquot.empty)
+			val substance = Substance(
+				key = reagentName,
+				label = Some(reagentName),
+				description = None,
+				kind = SubstanceKind.Liquid,
+				tipCleanPolicy = TipCleanPolicy.TT,
+				contaminants = Set(),
+				costPerUnit_? = None,
+				valuePerUnit_? = None,
+				molarity_? = None,
+				gramPerMole_? = None,
+				celciusAndConcToViscosity = Nil,
+				sequence_? = None
+			)
+			val mixture = Mixture(Left(substance))
+			val aliquot = Aliquot(mixture, aliquot0.distribution)
+			builder.well_aliquot_m(wellInfo.well) = aliquot
 		}
+		builder.well_aliquot_m.foreach(println)
+		RqSuccess(builder.toImmutable)
 	}
 	
 	private def handleOperator_PipetteSpec(
@@ -225,7 +247,7 @@ object JshopTranslator {
 		state0: WorldState,
 		spec: PipetteSpec,
 		arg_l: List[String]
-	): RsResult[List[Command]] = {
+	): RsResult[List[(Command, WorldState)]] = {
 		import roboliq.pipette.planners.TransferPlanner.{Item,BatchItem,Batch}
 		
 		// from the deviceIdent, we need to get a list of tips and tip models
@@ -279,7 +301,7 @@ object JshopTranslator {
 			
 			// Map of item to its source mixture
 			itemToMixture_l <- RsResult.toResultOfList(item_l.map(item => {
-				state.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs("no liquid specified in source well")
+				state.well_aliquot_m.get(item.src_l.head).map(item -> _.mixture).asRs(s"no liquid specified in source well: ${item.src_l.head}")
 			}))
 			itemToMixture_m = itemToMixture_l.toMap
 			// TODO: need to track liquids in wells as we go along in case
@@ -390,13 +412,14 @@ object JshopTranslator {
 			}
 			
 			// TODO: add a PipetterTipsRefresh command at the end
-			refreshBefore_l ++ aspdis_l ++ refreshAfter_l
+			// FIXME: update state
+			(refreshBefore_l ++ aspdis_l ++ refreshAfter_l).map(_ -> state0)
 		}
 	}
 	
-	private def combineTipsRefreshCommands(command_l: List[Command]): List[Command] = {
-		def doit(l: List[Command], acc_r: List[Command]): List[Command] = {
-			l.span(_.isInstanceOf[PipetterTipsRefresh]) match {
+	private def combineTipsRefreshCommands(commandToState_l: List[(Command, WorldState)]): List[(Command, WorldState)] = {
+		def doit(l: List[(Command, WorldState)], acc_r: List[(Command, WorldState)]): List[(Command, WorldState)] = {
+			l.span(_._1.isInstanceOf[PipetterTipsRefresh]) match {
 				case (Nil, Nil) =>
 					acc_r.reverse
 				case (Nil, x :: rest) =>
@@ -404,11 +427,12 @@ object JshopTranslator {
 				case (x :: Nil, rest) =>
 					doit(rest, x :: acc_r)
 				case (l1, rest) =>
-					val l2 = l1.asInstanceOf[List[PipetterTipsRefresh]]
-					val l3 = PipetterTipsRefresh.combine(l2)
-					doit(rest, l3.reverse ++ acc_r)
+					val (l2, state_l) = l1.unzip
+					val l3 = l2.asInstanceOf[List[PipetterTipsRefresh]]
+					val l4 = PipetterTipsRefresh.combine(l3)
+					doit(rest, (l4 zip state_l).reverse ++ acc_r)
 			}
 		}
-		doit(command_l, Nil)
+		doit(commandToState_l, Nil)
 	}
 }

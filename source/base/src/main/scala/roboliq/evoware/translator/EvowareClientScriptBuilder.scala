@@ -334,7 +334,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			location <- state.labware_location_m.get(labware).asRs("labware has not been placed anywhere yet")
 			site <- if (location.isInstanceOf[Site]) RsSuccess(location.asInstanceOf[Site]) else RsError("expected labware to be on a site")
 			siteIdent <- protocol.eb.getIdent(site)
-			siteE <- identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs("no evoware site corresponds to site")
+			siteE <- identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs(s"no evoware site corresponds to site: $site")
 		} yield siteE
 	}
 	
@@ -583,7 +583,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		
 		def getState(state: WorldState, item: TipWellVolumePolicy): RqResult[WorldState] = {
             val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
-            val tipState0 = state.tip_state_m(item.tip)
+            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
             val amount = Distribution.fromVolume(item.volume)
 			sFunc match {
 				case "Aspirate" =>

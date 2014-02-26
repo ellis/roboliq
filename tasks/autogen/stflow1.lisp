@@ -449,6 +449,6 @@
  ; tasks
  (
   (titrationSeries2 ?a0001 ?d0002 spec0003 sourcePlate1 culture)
-  (titrationSeries2 ?a0004 ?d0005 spec0006 sourcePlate1 culture)
+  (!nop spec0004)
  )
 )

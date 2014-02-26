@@ -7,6 +7,6 @@
 (!agent-activate r1)
 (!transporter-run r1 r1_transporter2 culture m003 r1_hotel_245x1 r1_bench_010x4 r1_transporterspec0)
 (!pipetter-run r1 r1_pipetter1 spec0003)
-(!pipetter-run r1 r1_pipetter1 spec0006)
+(!nop spec0004)
 --------------------
 ]
