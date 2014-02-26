@@ -448,8 +448,9 @@
  )
  ; tasks
  (
-  (titrationSeries2 ?a0001 ?d0002 spec0003 sourcePlate1 culture)
+  (distribute2 ?a0001 ?d0002 spec0003 sourcePlate1 culture)
   (!nop spec0004)
   (titrationSeries2 ?a0005 ?d0006 spec0007 sourcePlate1 culture)
+  (distribute3 ?a0008 ?d0009 spec0010 culture dilution sourcePlate1)
  )
 )

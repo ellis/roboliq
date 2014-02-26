@@ -22,36 +22,29 @@ reagents:
   substrate4MUXyl: sourcePlate1(H12)
 
 protocol:
-#- distribute media culture(A01xD12) 200ul
-- titrate:
-    allOf:
-    - source: media
-      amount: 200ul
-    replicates: 48
-    destination: culture(A01xD12)
+- distribute media culture(A01xD12) 200ul
 #- group: Inoculate by operator
 #  commands:
 #  - move plate.culture location.hotel55(1)
 #  - prompt "Please inculate plate."
 #  - move plate.culture location.shaker
-#- // Add media to lower rows
-#- // Inoculate
 - setReagents:
     wells: culture(A01-D12)
     reagents: ["A1","A2","A3","A4","A5","A6","A7","A8","A9","A10","A11","A12","B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12","C1","C2","C3","C4","C5","C6","C7","C8","C9","C10","C11","C12","D1","D2","D3","D4","D5","D6","D7","D8","D9","D10","D11","D12"]
+#- // Add media to lower rows
+#- // Inoculate
+#- // Add IPTG
 - titrate:
     allOf:
     - source: media
       amount: 190ul
     - source: culture(A01xD12)
       amount: 10ul
+    - source: iptg
+      amount: 10ul
+    - source: lysisBuffer
+      amount: 20ul
     destination: culture(E01xH12)
-#  mixBefore: ?x150ul
-#  sterilizeAfter: decontaminate
-#- // Add IPTG
-#- distribute iptg culture(E01xH12) 10ul #contact=air sterilize=NNT
-#- // Add lysis buffer
-#- distribute lysisBuffer culture(E01xH12) 20ul #contact=air sterilize=NNT
 #- // Shake
 #- shake plate/culture program/shake1
 #- // Mix and lyse
@@ -76,52 +69,53 @@ protocol:
 #  amount: 160ul
 #  mixBefore: true
 #  sanitize: thorough
-#- pipette:
-#    steps:
-#    - titrate:
-#        steps:
+- pipette:
+    steps:
+    - titrate:
+        allOf:
 #        - source: reactionBuffer
-#        - source: culture(E01-E12)
-#          amount: 160ul
-#        destination: dilution(A01-A12)
-#        amount: 160ul
+        - source: culture(E01-E12)
+          amount: 160ul
+        destination: dilution(A01-A12)
+        amount: 160ul
+    - titrate:
+        allOf:
+        - source: reactionBuffer
+          amount: 144ul
+        - source: culture(F01-F12)
+          amount: 16ul
+        destination: dilution(B01-B12)
+        amount: 160ul
 #    - titrate:
-#        steps:
-#        - source: reactionBuffer
-#        - source: culture(F01-F12)
-#          amount: 16ul
-#        destination: dilution(B01-B12)
-#        amount: 160ul
-#    - titrate:
-#        steps:
+#        allOf:
 #        - source: reactionBuffer
 #        - source: culture(G01-G12)
 #          amount: 16ul
 #        destination: dilution(C01-C12)
 #        amount: 160ul
 #    - titrate:
-#        steps:
+#        allOf:
 #        - source: reactionBuffer
 #        - source: dilution(C01-C12)
 #          amount: 16ul
 #        destination: dilution(D01-D12)
 #        amount: 160ul
 #    - titrate:
-#        steps:
+#        allOf:
 #        - source: reactionBuffer
 #        - source: culture(H01-H12)
 #          amount: 16ul
 #        destination: dilution(E01-E12)
 #        amount: 160ul
 #    - titrate:
-#        steps:
+#        allOf:
 #        - source: reactionBuffer
 #        - source: dilution(E01-E12)
 #          amount: 16ul
 #        destination: dilution(F01-F12)
 #        amount: 160ul
 #    - titrate:
-#        steps:
+#        allOf:
 #        - source: reactionBuffer
 #        - source: dilution(F01-F12)
 #          amount: 16ul
