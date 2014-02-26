@@ -1,4 +1,4 @@
-package roboliq.input
+package roboliq.input.commands
 
 import roboliq.core._
 import roboliq.entities._

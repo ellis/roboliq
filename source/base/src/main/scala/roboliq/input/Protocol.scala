@@ -3,11 +3,12 @@ package roboliq.input
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 import grizzled.slf4j.Logger
-import roboliq.entities.Entity
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import roboliq.core._
 import roboliq.entities._
+import roboliq.input.commands._
+import roboliq.method
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
@@ -17,15 +18,6 @@ import java.io.File
 import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
-import roboliq.input.commands.TitrationSeriesParser
-import roboliq.input.commands.TitrationStep
-import roboliq.input.commands.TitrationItem
-import roboliq.input.commands.TitrationItem_And
-import roboliq.input.commands.TitrationItem_Or
-import roboliq.input.commands.TitrationItem_SourceVolume
-import roboliq.input.commands.TitrationItem_SourceVolume
-import roboliq.input.commands.TitrationItem_SourceVolume
-import roboliq.input.commands.TitrationItem_SourceVolume
 
 case class ReagentBean(
 	id: String,
@@ -794,7 +786,8 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)]
 	): RsResult[Unit] = {
 		for {
-			spec_l <- loadJsonProtocol_TitrationSeriesSub(nameToVal_l)
+			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
+			spec_l <- new method.Titrate(eb, state0.toImmutable, cmd).run()
 		} yield {
 			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
 			val agentIdent = f"?a$nvar%04d"
@@ -806,246 +799,6 @@ class Protocol {
 		}
 	}
 	
-	private def loadJsonProtocol_TitrationSeriesSub(
-		nameToVal_l: List[(Option[String], JsValue)]
-	): RsResult[List[PipetteSpec]] = {
-		type XO = (TitrationItem_SourceVolume, Option[LiquidVolume])
-		type X = (TitrationItem_SourceVolume, LiquidVolume)
-		// Combine two lists by crossing all items from list 1 with all items from list 2
-		// Each list can be thought of as being in DNF (disjunctive normal form)
-		// and we combine two with the AND operation and produce a new list in DNF.
-		def mixLists_And(
-			mixture1_l: List[List[XO]],
-			mixture2_l: List[List[XO]]
-		): List[List[XO]] = {
-			for {
-				mixture1 <- mixture1_l
-				mixture2 <- mixture2_l
-			} yield mixture1 ++ mixture2
-		}
-		def mixManyLists_And(
-			mixture_ll: List[List[List[XO]]]
-		): List[List[XO]] = {
-			mixture_ll.filterNot(_.isEmpty) match {
-				case Nil => Nil
-				case first :: rest =>
-					rest.foldLeft(first){ (acc, next) => mixLists_And(acc, next) }
-			}
-		}
-		// ORing two lists in DNF just involves concatenating the two lists.
-		def mixManyLists_Or(
-			mixture_ll: List[List[List[XO]]]
-		): List[List[XO]] = {
-			mixture_ll.flatten
-		}
-		// Return a list of source+volume for each well
-		def createWellMixtures(
-			item: TitrationItem,
-			mixture_l: List[List[XO]]
-		): List[List[XO]] = {
-			//println("item: ")
-			//item.printShortHierarchy(eb, "  ")
-			//println("mixture_l:")
-			//mixture_l.foreach(mixture => println(mixture.map(_._2).mkString("+")))
-			item match {
-				case TitrationItem_And(l) =>
-					val l2 = l.map(item => createWellMixtures(item, Nil))
-					//println("l2: "+l2.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
-					val l3 = mixManyLists_And(mixture_l :: l2)
-					//println("l3: "+l3.map(_.map(_._2).mkString("+")).mkString(","))
-					l3
-				case TitrationItem_Or(l) =>
-					val l4 = l.map(item => createWellMixtures(item, Nil))
-					//println("l4: "+l4.map(_.map(_.map(_._2).mkString("+")).mkString(",")))
-					val l5 = mixManyLists_Or(mixture_l :: l4)
-					//println("l5: "+l5.map(_.map(_._2).mkString("+")).mkString(","))
-					l5
-				case sv: TitrationItem_SourceVolume =>
-					List(List((sv, sv.volume_?)))
-			}
-		}
-		// Replace any missing volumes with fill volumes
-		def addFillVolume(
-			mixture_ll: List[List[XO]],
-			fillVolume_l: List[LiquidVolume]
-		): List[List[X]] = {
-			assert(mixture_ll.length == fillVolume_l.length)
-			for {
-		        (mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
-			} yield {
-				mixture_l.map { mixture =>
-					mixture._2 match {
-						case None => (mixture._1, fillVolume)
-						case Some(volume) => (mixture._1, volume)
-					}
-				}
-			}
-		}
-		/*def printMixtureCsv(ll: List[List[X]]): Unit = {
-			var i = 1
-			for (l <- ll) {
-				val x = for ((sv, volume) <- l) yield {
-					val well = sv.source.l.head.well
-					val y = for {
-						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
-					} yield {
-						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
-					}
-					y match {
-						case RqSuccess(l, _) => l
-						case RqError(_, _) => List("\"ERROR\"", "0")
-					}
-				}
-				println(x.flatten.mkString(", "))
-			}
-		}*/
-		def printDestinationMixtureCsv(ll: List[(WellInfo, List[X])]): Unit = {
-			if (ll.isEmpty) return
-			var i = 1
-			val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
-			println(header)
-			for ((wellInfo, l) <- ll) {
-				val x = for ((sv, volume) <- l) yield {
-					val well = sv.source.l.head.well
-					val y = for {
-						aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
-					} yield {
-						List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
-					}
-					y match {
-						case RqSuccess(l, _) => l
-						case RqError(_, _) => List("\"ERROR\"", "0")
-					}
-				}
-				val wellName = "\"" + wellInfo.rowcol.toString + "\""
-				println((wellInfo.labwareName :: wellName :: x.flatten).mkString(","))
-			}
-		}
-		def flattenSteps(item: TitrationItem): List[TitrationStep] = {
-			item match {
-				case TitrationItem_And(l) => l.flatMap(flattenSteps).distinct
-				case TitrationItem_Or(l) => l.flatMap(flattenSteps).distinct
-				case TitrationItem_SourceVolume(step, _, _) => List(step)
-			}
-		}
-		//println("reagentToWells_m: "+eb.reagentToWells_m)
-		for {
-			cmd <- Converter.convCommandAs[commands.TitrationSeries](nameToVal_l, eb, state0.toImmutable)
-			// Turn the user-specified steps into simpler individual and/or/source items
-			item_l <- RqResult.toResultOfList(cmd.steps.map(_.getItem)).map(_.flatten)
-			itemTop = TitrationItem_And(item_l)
-			_ = itemTop.printShortHierarchy(eb, "")
-			// Number of wells required if we only use a single replicate
-			mixture1_l = createWellMixtures(itemTop, Nil)
-			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
-			wellCountMin = mixture1_l.length
-			_ <- RqResult.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
-			// Maximum number of wells available to us
-			wellCountMax = cmd.destination.l.length
-			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells.  The titration series requires at least $wellCountMin wells, and you have only supplied $wellCountMax wells.")
-			// Check replicate count
-			replicateCountMax = wellCountMax / wellCountMin
-			replicateCount = cmd.replicates_?.getOrElse(replicateCountMax)
-			wellCount = wellCountMin * replicateCount
-			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
-			//_ = println("cmd: "+cmd)
-			tooManyFillers_l = mixture1_l.filter(mixture => mixture.filter(_._2.isEmpty).size > 1)
-			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_._2)))
-			//_ = println("wellsPerGroup: "+wellsPerGroup)
-			//_ = println("groupCount: "+groupCount)
-			//_ = println("wellCount: "+wellCount)
-			/*l1 = cmd.steps.flatMap(step => {
-				// If this is the filler step:
-				step.volume_? match {
-					case None => None
-					case Some(volume) =>
-						val wellsPerSource = wellCount / step.source.sources.length
-						val wellsPerVolume = wellsPerSource / volume.length
-						val source_l = step.source.sources.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(step.source.sources.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
-						//println("stuff:", wellsPerSource, wellsPerVolume, source_l.length, volume_l)
-						Some(source_l zip volume_l)
-                }
-			})*/
-			l2 = mixture1_l.flatMap(mixture => List.fill(replicateCount)(mixture))
-			//_ = println(l1.map(_.length))
-			//l2 = l1.transpose
-			wellVolumeBeforeFill_l = l2.map(l => l.map(_._2).foldLeft(LiquidVolume.empty){(acc, volume_?) => acc + volume_?.getOrElse(LiquidVolume.empty)})
-			l3 <- cmd.volume_? match {
-				case None =>
-					val l3 = l2.map(_.map(pair => {
-						for {
-							volume <- pair._2.asRs("Missing volume")
-						} yield pair._1 -> volume
-					}))
-					RqResult.toResultOfList(l3.map(RqResult.toResultOfList))
-				case Some(volumeTotal) =>
-					val fillVolume_l = wellVolumeBeforeFill_l.map(volumeTotal - _)
-					//println("wellVolumeBeforeFill_l: "+wellVolumeBeforeFill_l)
-					if (fillVolume_l.exists(_ < LiquidVolume.empty)) RqError("Total volume must be greater than or equal to sum of step volumes")
-					else RqSuccess(addFillVolume(l2, fillVolume_l))
-			}
-			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
-			/*stepToList_l: List[(TitrationStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {
-				// If this is the filler step:
-				step.volume_? match {
-					case None => val l = step -> fillVolume_l.map(step.source.sources.head -> _)
-						l
-					case Some(volume) =>
-						val wellsPerSource = wellCount / step.source.sources.length
-						val wellsPerVolume = wellsPerSource / volume.length
-						val source_l = step.source.sources.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(step.source.sources.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
-						//println("s x v: "+source_l.length+", "+volume_l.length)
-                        assert(source_l.forall(s => !s.l.isEmpty))
-						val l = step -> (source_l zip volume_l)
-						l
-                }
-			})*/
-			stepOrder_l = flattenSteps(itemTop)
-			//stepToList_l = cmd.steps zip l3.transpose
-		} yield {
-			//printMixtureCsv(l3)
-			println("----------------")
-			println("l3")
-			println(l3)
-			//printMixtureCsv(stepToList_l.map(_._2))
-			val destinations = PipetteDestinations(cmd.destination.l.take(wellCount))
-			println("destinations: "+destinations)
-			val destinationToMixture_l = destinations.l zip l3
-			printDestinationMixtureCsv(destinationToMixture_l)
-			//println("len: "+stepToList_l.map(_._2.length))
-			stepOrder_l.map(step => {
-				// Get items corresponding to this step
-				val l1: List[(WellInfo, List[X])]
-					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(pair => (pair._1.step eq step) && (!pair._2.isEmpty)))
-				// There should be at most one item per destination
-				assert(l1.forall(_._2.size <= 1))
-				// Keep the destinations with exactly one item
-				val l2: List[(WellInfo, X)]
-					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
-				val (destination_l, l3) = l2.unzip
-				val (sv_l, volume_l) = l3.unzip
-				val source_l = sv_l.map(_.source)
-				val keep_l = volume_l.map(!_.isEmpty)
-				assert(source_l.forall(s => !s.l.isEmpty))
-				// Remove items with empty volumes
-				//val l1 = (destinations.l zip sourceToVolume_l).filterNot(_._2._2.isEmpty)
-				//println("volume_l: "+volume_l)
-				PipetteSpec(
-					PipetteSources(source_l),
-					PipetteDestinations(destination_l),
-					volume_l,
-					step.pipettePolicy_?,
-					step.sterilize_?,
-					step.sterilizeBefore_?,
-					step.sterilizeBetween_?,
-					step.sterilizeAfter_?,
-					None // FIXME: handle tipModel_?
-				)
-			})
-		}
-	}
 	
 	private def x(fields: Map[String, JsValue], id: String): String =
 		x(fields, id, f"?x$nvar%04d")

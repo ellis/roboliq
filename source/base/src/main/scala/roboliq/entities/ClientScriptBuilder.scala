@@ -2,7 +2,7 @@ package roboliq.entities
 
 import roboliq.core._
 import roboliq.input.Protocol
-import roboliq.commands.Command
+import roboliq.input.commands.Command
 
 /**
  * @param agentName The name of the primary agent which this builder is associated with.  Used for naming script files.

@@ -2,7 +2,7 @@ package roboliq.evoware.translator
 
 import roboliq.core._
 import roboliq.entities._
-import roboliq.commands._
+import roboliq.input.commands._
 import roboliq.input.Protocol
 import grizzled.slf4j.Logger
 import scala.collection.mutable.ArrayBuffer

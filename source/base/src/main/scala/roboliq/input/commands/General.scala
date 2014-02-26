@@ -1,9 +1,7 @@
-package roboliq.commands
+package roboliq.input.commands
 
 import roboliq.entities._
 import scala.collection.mutable.SortedSet
-
-sealed trait Command
 
 case class AgentActivate() extends Command
 case class AgentDeactivate() extends Command

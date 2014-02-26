@@ -4,15 +4,13 @@ import scala.collection.immutable.SortedSet
 import grizzled.slf4j.Logger
 import roboliq.core._
 import roboliq.entities._
-import roboliq.commands._
+import roboliq.input.commands._
 import roboliq.input.Protocol
 import roboliq.evoware.translator.EvowareScriptBuilder
-import roboliq.input.PipetteSpec
 import roboliq.pipette.planners.TransferPlanner
 import roboliq.pipette.planners.PipetteDevice
 import roboliq.pipette.planners.TipModelSearcher1
-import roboliq.commands.PipetterAspirate
-import roboliq.input.PipetteSpecList
+import roboliq.input.commands.PipetteSpecList
 import roboliq.pipette.planners.PipetteHelper
 import roboliq.entities.TipHandlingOverrides
 import roboliq.pipette.planners.TransferSimplestPlanner
