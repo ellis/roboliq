@@ -27,4 +27,12 @@ class PlanPath(val action_r: List[Action], val state: WorldState) {
 				} yield path2
 		}
 	}
+	
+	def print {
+		println("PlanPath:")
+		println("actions:")
+		action_r.reverse.foreach(println)
+		println("state:")
+		println(state)
+	}
 }

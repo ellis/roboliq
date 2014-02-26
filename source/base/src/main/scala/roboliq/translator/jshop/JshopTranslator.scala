@@ -33,7 +33,9 @@ object JshopTranslator {
 		logger.debug(s"l: $l")
 		def translateAll(line_l: List[String], path: PlanPath): RsResult[WorldState] = {
 			line_l match {
-				case Nil => RsSuccess(path.state)
+				case Nil =>
+					//path.print
+					RsSuccess(path.state)
 				case line :: rest =>
 					translateLine(protocol, agentToBuilder_m, path, line.trim()).flatMap(path1 => translateAll(rest, path1))
 			}

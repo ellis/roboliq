@@ -27,11 +27,16 @@ case class PipetterAspirate(
 	            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
 	            val amount = Distribution.fromVolume(item.volume)
 				val tipEvent = TipAspirateEvent(item.tip, item.well, wellAliquot0.mixture, item.volume)
-				val tipState1_? = new TipAspirateEventHandler().handleEvent(tipState0, tipEvent)
-				tipState1_? match {
+				val x = for {
+					wellAliquot1 <- wellAliquot0.remove(amount)
+					tipState1 <- new TipAspirateEventHandler().handleEvent(tipState0, tipEvent)
+				} yield {
+					state.well_aliquot_m(item.well) = wellAliquot1
+					state.tip_state_m(item.tip) = tipState1
+				}
+				x match {
 					case RqError(e, w) => return RqError(e, w)
-					case RqSuccess(tipState, _) =>
-						state.tip_state_m(item.tip) = tipState
+					case _ =>
 				}
 			}
 			RqSuccess(())
@@ -49,11 +54,17 @@ case class PipetterDispense(
 	            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
 	            val amount = Distribution.fromVolume(item.volume)
 				val tipEvent = TipDispenseEvent(item.tip, wellAliquot0.mixture, item.volume, item.policy.pos)
-				val tipState1_? = new TipDispenseEventHandler().handleEvent(tipState0, tipEvent)
-				tipState1_? match {
+				val aliquot = Aliquot(tipState0.content.mixture, amount)
+				val x = for {
+					tipState1 <- new TipDispenseEventHandler().handleEvent(tipState0, tipEvent)
+					wellAliquot1 <- wellAliquot0.add(aliquot)
+				} yield {
+					state.well_aliquot_m(item.well) = wellAliquot1
+					state.tip_state_m(item.tip) = tipState1
+				}
+				x match {
 					case RqError(e, w) => return RqError(e, w)
-					case RqSuccess(tipState, _) =>
-						state.tip_state_m(item.tip) = tipState
+					case _ =>
 				}
 			}
 			RqSuccess(())
