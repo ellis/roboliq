@@ -126,7 +126,13 @@ case class PeelerRun(
 	labwareIdent: String,
 	siteIdent: String
 ) extends Command with Action {
-	val effects = Nil
+	val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			// FIXME:
+			//state1.labware_isSealed_l -= labware
+			RqSuccess(())
+		}
+	})
 }
 
 case class Prompt(text: String) extends Command with Action {
@@ -175,11 +181,16 @@ case class ThermocyclerRun(
 
 case class TransporterRun(
 	deviceIdent: String,
-	labwareIdent: String,
-	modelIdent: String,
-	originIdent: String,
-	destinationIdent: String,
+	labware: Labware,
+	model: LabwareModel,
+	origin: Site,
+	destination: Site,
 	vectorIdent: String
 ) extends Command with Action {
-	val effects = Nil
+	val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			state.labware_location_m(labware) = destination
+			RqSuccess(())
+		}
+	})
 }

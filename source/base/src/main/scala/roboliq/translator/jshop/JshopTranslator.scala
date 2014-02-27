@@ -71,7 +71,7 @@ object JshopTranslator {
                             	RsError("invalid SetReagents")
                         }
 					case operator :: agentIdent :: arg_l =>
-						val builder = agentToBuilder_m(agentIdent)
+						//val builder = agentToBuilder_m(agentIdent)
 						/*def doit(
 							path: PlanPath,
 							commandToState_l: List[(Command, List[WorldStateEvent])]
@@ -118,13 +118,13 @@ object JshopTranslator {
 		agentIdent: String,
 		arg_l: List[String]
 	): RsResult[PlanPath] = {
-		operator match {
-			case "agent-activate" => path0.add(AgentActivate())
-			case "agent-deactivate" => path0.add(AgentDeactivate())
+		val action_l: RqResult[List[Action]] = operator match {
+			case "agent-activate" => RqSuccess(List(AgentActivate()))
+			case "agent-deactivate" => RqSuccess(List(AgentDeactivate()))
 			case "log" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				path0.add(Log(text))
+				RqSuccess(List(Log(text)))
 			
 			case "peeler-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -133,8 +133,7 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[PeelerSpec](specIdent)
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
-					path1 <- path0.add(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
-				} yield path1
+				} yield List(PeelerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
 
 			case "pipetter-run" =>
 				// TODO: the details of how to handle pipetting depends on the agent.
@@ -156,10 +155,13 @@ object JshopTranslator {
 									} yield path2
 							}
 						}
-						step(spec.step_l, path0)
+						val pathEmpty = new PlanPath(Nil, path0.state)
+						step(spec.step_l, pathEmpty).map(_.action_r.reverse)
 					}
 					case spec: PipetteSpec =>
-						handleOperator_PipetteSpec(protocol, agentToBuilder_m, path0, spec, arg_l)
+						for {
+							path1 <- handleOperator_PipetteSpec(protocol, agentToBuilder_m, path0, spec, arg_l)
+						} yield path1.action_r.reverse
 						//.map(combineTipsRefreshCommands)
 					case _ =>
 						RsError("invalid PipetteSpec")
@@ -168,7 +170,7 @@ object JshopTranslator {
 			case "prompt" =>
 				val List(textIdent) = arg_l
 				val text = protocol.idToObject(textIdent).toString
-				path0.add(Prompt(text))
+				RqSuccess(List(Prompt(text)))
 			
 			case "sealer-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -177,8 +179,7 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[SealerSpec](specIdent)
 					_ <- protocol.eb.getEntityByIdent[Plate](labwareIdent)
 					_ <- protocol.eb.getEntityByIdent[Site](siteIdent)
-					path1 <- path0.add(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
-				} yield path1
+				} yield List(SealerRun(deviceIdent, specIdent, labwareIdent, siteIdent))
 				
 			case "shaker-run" =>
 				val List(deviceIdent, specIdent, labwareIdent, siteIdent) = arg_l
@@ -187,22 +188,19 @@ object JshopTranslator {
 					spec <- protocol.eb.getEntityByIdent[ShakerSpec](specIdent)
 					labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
 					site <- protocol.eb.getEntityByIdent[Site](siteIdent)
-					path1 <- path0.add(ShakerRun(device, spec, List(labware -> site)))
-				} yield path1
+				} yield List(ShakerRun(device, spec, List(labware -> site)))
 			
 			case "thermocycler-close" =>
 				val List(deviceIdent) = arg_l
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
-					path1 <- path0.add(ThermocyclerClose(deviceIdent))
-				} yield path1
+				} yield List(ThermocyclerClose(deviceIdent))
 				
 			case "thermocycler-open" =>
 				val List(deviceIdent) = arg_l
 				for {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
-					path1 <- path0.add(ThermocyclerOpen(deviceIdent))
-				} yield path1
+				} yield List(ThermocyclerOpen(deviceIdent))
 				
 			case "thermocycler-run" =>
 				//val List(deviceIdent, specIdent, plateIdent) = arg_l
@@ -211,22 +209,46 @@ object JshopTranslator {
 					_ <- protocol.eb.getEntityByIdent[Thermocycler](deviceIdent)
 					_ <- protocol.eb.getEntityByIdent[ThermocyclerSpec](specIdent)
 					//_ <- protocol.eb.getEntityByIdent[Plate](plateIdent)
-					path1 <- path0.add(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/))
-				} yield path1
+				} yield List(ThermocyclerRun(deviceIdent, specIdent/*, plateIdent*/))
 				
 			case "transporter-run" =>
-				path0.add(TransporterRun(
-					deviceIdent = arg_l(0),
-					labwareIdent = arg_l(1),
-					modelIdent = arg_l(2),
-					originIdent = arg_l(3),
-					destinationIdent = arg_l(4),
-					vectorIdent = arg_l(5)
-				))
+				val List(deviceIdent, labwareIdent, modelIdent, originIdent, destinationIdent, vectorIdent) = arg_l
+				for {
+					labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
+					labwareModel = protocol.eb.labwareToModel_m(labware)
+					origin <- protocol.eb.getEntityByIdent[Site](originIdent)
+					destination <- protocol.eb.getEntityByIdent[Site](destinationIdent)
+				} yield {
+					List(TransporterRun(
+						deviceIdent = deviceIdent,
+						labware = labware,
+						model = labwareModel,
+						origin = origin,
+						destination = destination,
+						vectorIdent = vectorIdent
+					))
+				}
 
 			case _ =>
 				RsError(s"unknown operator: $operator")
 		}
+		
+		val builder = agentToBuilder_m(agentIdent)
+
+		def step(action_l: List[Action], path0: PlanPath): RqResult[PlanPath] = {
+			action_l match {
+				case Nil => RqSuccess(path0)
+				case action :: rest =>
+					val command = action.asInstanceOf[Command]
+					for {
+						path1 <- path0.add(action)
+						_ <- builder.addCommand(protocol, path0.state, agentIdent, command)
+						path2 <- step(rest, path1)
+					} yield path2
+			}
+		}
+		
+		action_l.flatMap(action_l => step(action_l, path0))
 	}
 	
 	private def handleOperator_SetReagents(

@@ -24,9 +24,10 @@
 - [x] BUG: Titrate: filler not being filled in
 - [x] Protocol: need to keep track of well states while processing protocol commands
 - [x] BUG: test.prot: still have wrong volumes in wells at the end
-- [ ] simplify aliquot strings in user output
+- [x] simplify aliquot strings in user output
+- [x] update plate location in 'transporter-run' action
+- [x] JshopTranslator: output .esc at the end again
 - [ ] BUG: AliquotFlat.apply needs to proportionally adjust amounts in mixtures
-- [ ] JshopTranslator: output .esc at the end again
 - [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
