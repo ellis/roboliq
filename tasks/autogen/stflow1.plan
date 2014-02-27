@@ -15,6 +15,6 @@
 (!agent-deactivate user)
 (!agent-activate r1)
 (!transporter-run r1 r1_transporter2 dilution m003 r1_hotel_245x1 r1_bench_017x1 r1_transporterspec0)
-(!pipetter-run r1 r1_pipetter1 spec0010)
+(!pipetter-run r1 r1_pipetter1 spec0022)
 --------------------
 ]

@@ -23,7 +23,9 @@
 - [x] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
 - [x] BUG: Titrate: filler not being filled in
 - [x] Protocol: need to keep track of well states while processing protocol commands
-- [ ] BUG: test.prot: still have wrong volumes in wells at the end
+- [x] BUG: test.prot: still have wrong volumes in wells at the end
+- [ ] simplify aliquot strings in user output
+- [ ] BUG: AliquotFlat.apply needs to proportionally adjust amounts in mixtures
 - [ ] JshopTranslator: output .esc at the end again
 - [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property

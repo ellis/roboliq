@@ -51,12 +51,6 @@ object Aliquot {
 case class Mixture(
 	source: Either[Substance, List[Aliquot]]
 ) {
-	/*def flatten: Map[Substance, Amount] = {
-		source match {
-			case Left(substance) => substance :: Nil
-			case Right(aliquot_l) => aliquot_l.flatMap(_.mixture.flatten)
-		}
-	}*/
 	/** Tip cleaning policy when handling this substance with pipetter. */
 	val tipCleanPolicy: TipCleanPolicy = source match {
 		case Left(substance) => substance.tipCleanPolicy
@@ -85,9 +79,9 @@ object Mixture {
  * An estimate of amounts of substances in this mixture, as well as the total liquid volume of the mixture.
  */
 class AliquotFlat(
-	val content: Map[Substance, Amount],
-	val volume: LiquidVolume
+	val content: Map[Substance, Amount]
 ) {
+	val volume = LiquidVolume.l(content.values.filter(_.units == SubstanceUnits.Liter).map(_.amount).sum)
 	val substance_l = content.keys.toList
 	
 	/** Tip cleaning policy when handling this substance with pipetter. */
@@ -97,10 +91,49 @@ class AliquotFlat(
 	/** Value per unit (either liter or mol) of the substance (this can be on a different scale than costPerUnit) */
 	val valuePerUnit_? : Option[BigDecimal] = substance_l.map(_.valuePerUnit_?).concatenate
 
+	def toMixtureString: String = {
+		content.toList match {
+			case Nil => "EMPTY"
+			case (substance, amount) :: Nil =>
+				substance.label.getOrElse(substance.key)
+			case content_l =>
+				content_l.map(pair => {
+					val (substance, amount) = pair
+					s"${substance.label.getOrElse(substance.key)}@${amount.amount.toString}${SubstanceUnits.toShortString(amount.units)}"
+				}).mkString("+")
+		}
+	}
+
+	override def toString: String = {
+		content.toList.map(pair => {
+			val (substance, amount) = pair
+			s"${substance.label.getOrElse(substance.key)}@${amount.amount.toString}${SubstanceUnits.toShortString(amount.units)}"
+		}).mkString("+") + "@" + volume.toString
+	}
 }
 
 object AliquotFlat {
-	def empty = new AliquotFlat(Map(), LiquidVolume.empty)
+	def empty = new AliquotFlat(Map())
+
+	def apply(aliquot: Aliquot): AliquotFlat = {
+		val content: Map[Substance, Amount] = aliquot.mixture.source match {
+			case Left(substance) => Map(substance -> aliquot.distribution.bestGuess)
+			case Right(aliquot_l) =>
+				val flat_l = aliquot_l.map(AliquotFlat.apply)
+				val content_l = flat_l.flatMap(_.content.toList)
+				val m = content_l.groupBy(_._1)
+				m.map(pair => {
+					val (substance, content_l) = pair
+					val amount_l = content_l.map(_._2)
+					val amount = Amount(
+						units = amount_l.head.units,
+						amount = amount_l.map(_.amount).sum
+					)
+					substance -> amount
+				})
+		}
+		new AliquotFlat(content)
+	}
 }
 
 class WellHistory(

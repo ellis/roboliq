@@ -283,9 +283,10 @@ class TitrateMethod(
 			val x = for ((sv, volume) <- l) yield {
 				val well = sv.source.l.head.well
 				val y = for {
-					aliquote <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
+					aliquot <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
 				} yield {
-					List("\""+aliquote.mixture.toShortString+"\"", volume.ul.toString)
+					val flat = AliquotFlat(aliquot)
+					List("\""+flat.toMixtureString+"\"", volume.ul.toString)
 				}
 				y match {
 					case RqSuccess(l, _) => l

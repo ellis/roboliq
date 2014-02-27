@@ -15,6 +15,7 @@ import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.entities.ClientScriptBuilder
 import roboliq.translator.jshop.JshopTranslator
 import roboliq.entities.LiquidVolume
+import roboliq.entities.AliquotFlat
 
 case class Opt(
 	configFile: File = null,
@@ -90,7 +91,7 @@ object Main extends App {
 					else
 						aliquot.distribution.bestGuess.toString
 				}
-				println(s"$wellIdent: ${aliquot.mixture.toShortString} ${amount}")
+				println(s"$wellIdent: ${AliquotFlat(aliquot).toMixtureString} ${amount}")
 			})
 		}
 
