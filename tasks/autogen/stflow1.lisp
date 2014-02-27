@@ -451,6 +451,7 @@
   (distribute2 ?a0001 ?d0002 spec0003 sourcePlate1 culture)
   (!nop spec0004)
   (distribute2 ?a0005 ?d0006 spec0007 sourcePlate1 culture)
-  (distribute3 ?a0020 ?d0021 spec0022 culture dilution sourcePlate1)
+  (distribute3 ?a0029 ?d0030 spec0031 culture dilution sourcePlate1)
+  (distribute3 ?a0032 ?d0033 spec0034 sourcePlate1 reaction dilution)
  )
 )

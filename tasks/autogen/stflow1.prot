@@ -99,35 +99,35 @@ protocol:
           amount: 16ul
         destination: dilution(D01-D12)
         volume: 160ul
-#    - titrate:
-#        allOf:
-#        - source: reactionBuffer
-#        - source: culture(H01-H12)
-#          amount: 16ul
-#        destination: dilution(E01-E12)
-#        volume: 160ul
-#    - titrate:
-#        allOf:
-#        - source: reactionBuffer
-#        - source: dilution(E01-E12)
-#          amount: 16ul
-#        destination: dilution(F01-F12)
-#        volume: 160ul
-#    - titrate:
-#        allOf:
-#        - source: reactionBuffer
-#        - source: dilution(F01-F12)
-#          amount: 16ul
-#        destination: dilution(G01-G12)
-#        volume: 160ul
-#- // Create titration series from dilution plate to reaction plate
-#- titrate:
-#    steps:
-#    - source: reactionBuffer
-#      amount: 41.6ul
-#    - source: dilution(A01-A12+B01-B12+D01-D12+G01-G12)
-#      amount: 8ul
-#    - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
-#      amount: 30.4ul
-#    replicates: 1
-#    destination: reaction(A01xP24)
+    - titrate:
+        allOf:
+        - source: reactionBuffer
+        - source: culture(H01-H12)
+          amount: 16ul
+        destination: dilution(E01-E12)
+        volume: 160ul
+    - titrate:
+        allOf:
+        - source: reactionBuffer
+        - source: dilution(E01-E12)
+          amount: 16ul
+        destination: dilution(F01-F12)
+        volume: 160ul
+    - titrate:
+        allOf:
+        - source: reactionBuffer
+        - source: dilution(F01-F12)
+          amount: 16ul
+        destination: dilution(G01-G12)
+        volume: 160ul
+- // Create titration series from dilution plate to reaction plate
+- titrate:
+    allOf:
+    - source: reactionBuffer
+      amount: 41.6ul
+    - source: dilution(A01-A12+B01-B12+D01-D12+G01-G12)
+      amount: 8ul
+    - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
+      amount: 30.4ul
+    replicates: 1
+    destination: reaction(A01xP24)
