@@ -1,9 +1,9 @@
 labware:
   sourcePlate1: D-BSSE 96 Well DWP
   culture:
-    model: Thermocycler Plate
+    model: Ellis Nunc F96 MicroWell
   dilution:
-    model: Thermocycler Plate
+    model: Ellis Nunc F96 MicroWell
   reaction:
     model: "384 Well Plate"
 
@@ -11,7 +11,7 @@ reagents:
   media: sourcePlate1(A01|H02)
   iptg: sourcePlate1(A03)
   lysisBuffer: sourcePlate1(A04)
-  reactionBuffer: sourcePlate1(A05)
+  reactionBuffer: sourcePlate1(A05|H07)
   substrate4MUGlu: sourcePlate1(A12)
   substrate4MUGal: sourcePlate1(B12)
   substrate4MUSul: sourcePlate1(C12)
