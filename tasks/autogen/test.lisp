@@ -3,9 +3,8 @@
  (
   (is-agent r1)
   (is-agent user) ; user
-  (is-labware culture)
-  (is-labware dilution)
   (is-labware offsite) ; offsite
+  (is-labware plate1)
   (is-labware r1_bench_001x1) ; r1 bench Wash Station Clean site 1
   (is-labware r1_bench_001x2) ; r1 bench Wash Station Clean site 2
   (is-labware r1_bench_001x3) ; r1 bench Wash Station Clean site 3
@@ -90,7 +89,6 @@
   (is-labware r1_hotel_85x3) ; r1 hotel Hotel 5Pos DeepWell site 3
   (is-labware r1_hotel_85x4) ; r1 hotel Hotel 5Pos DeepWell site 4
   (is-labware r1_hotel_85x5) ; r1 hotel Hotel 5Pos DeepWell site 5
-  (is-labware reaction)
   (is-labware sourcePlate1)
   (is-model m001) ; D-BSSE 96 Well DWP
   (is-model m002) ; D-BSSE 384 Well Plate White
@@ -105,9 +103,7 @@
   (is-peeler r1_peeler) ; RoboPeel
   (is-peelerSpec peelerSpec1)
   (is-pipetter r1_pipetter1) ; r1 LiHa
-  (is-plate culture)
-  (is-plate dilution)
-  (is-plate reaction)
+  (is-plate plate1)
   (is-plate sourcePlate1)
   (is-plateModel m001) ; D-BSSE 96 Well DWP
   (is-plateModel m002) ; D-BSSE 384 Well Plate White
@@ -260,8 +256,7 @@
   (stackable sm5 m001)
   (stackable sm5 m002)
   (stackable sm6 m002)
-  (model culture m003)
-  (model dilution m003)
+  (model plate1 m003)
   (model r1_bench_009x1 sm3)
   (model r1_bench_009x2 sm6)
   (model r1_bench_010x1 sm3)
@@ -323,11 +318,8 @@
   (model r1_hotel_85x3 sm5)
   (model r1_hotel_85x4 sm5)
   (model r1_hotel_85x5 sm5)
-  (model reaction m002)
   (model sourcePlate1 m001)
-  (location culture offsite)
-  (location dilution offsite)
-  (location reaction offsite)
+  (location plate1 offsite)
   (location sourcePlate1 offsite)
   (device-can-site r1_pipetter1 r1_bench_010x2)
   (device-can-site r1_pipetter1 r1_bench_010x4)
@@ -448,8 +440,8 @@
  )
  ; tasks
  (
-  (distribute2 ?a0001 ?d0002 spec0003 sourcePlate1 culture)
-  (titrationSeries2 ?a0004 ?d0005 spec0006 sourcePlate1 culture)
-  (titrationSeries2 ?a0007 ?d0008 spec0009 sourcePlate1 culture)
+  (distribute1 ?a0001 ?d0002 spec0003 plate1)
+  (distribute1 ?a0004 ?d0005 spec0006 plate1)
+  (distribute1 ?a0007 ?d0008 spec0009 plate1)
  )
 )

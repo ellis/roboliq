@@ -33,6 +33,7 @@ case class PipetterAspirate(
 				} yield {
 					state.well_aliquot_m(item.well) = wellAliquot1
 					state.tip_state_m(item.tip) = tipState1
+					//println(s"aspirate: ${item.well.label} ${wellAliquot0} - ${amount} -> ${wellAliquot1}")
 				}
 				x match {
 					case RqError(e, w) => return RqError(e, w)
@@ -61,6 +62,7 @@ case class PipetterDispense(
 				} yield {
 					state.well_aliquot_m(item.well) = wellAliquot1
 					state.tip_state_m(item.tip) = tipState1
+					//println(s"dispense: ${item.well.label} ${wellAliquot0} + ${aliquot} -> ${wellAliquot1}")
 				}
 				x match {
 					case RqError(e, w) => return RqError(e, w)

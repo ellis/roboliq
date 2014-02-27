@@ -18,6 +18,7 @@ class TitrateMethod(
 			// Turn the user-specified steps into simpler individual and/or/source items
 			item_l <- RqResult.toResultOfList(cmd.allOf.map(_.getItem)).map(_.flatten)
 			itemTop = TitrateItem_And(item_l)
+			_ = println("itemTop:")
 			_ = itemTop.printShortHierarchy(eb, "")
 			// Number of wells required if we only use a single replicate
 			mixtureAmount1_l = createWellMixtures(itemTop, Nil)

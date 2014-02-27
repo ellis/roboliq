@@ -133,7 +133,12 @@ case class TitrateItem_SourceVolume(
 	amount_? : Option[PipetteAmount]
 ) extends TitrateItem {
 	def printShortHierarchy(eb: EntityBase, indent: String) {
-		println(indent + source.l.head + " " + amount_?)
+		val amount = amount_? match {
+			case None => "*"
+			case Some(PipetteAmount_Volume(x)) => x.toString
+			case Some(PipetteAmount_Dilution(num, den)) => s"$num:$den"
+		}
+		println(indent + source.l.head + " " + amount)
 	}
 }
 

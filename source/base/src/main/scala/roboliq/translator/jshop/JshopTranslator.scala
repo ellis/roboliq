@@ -145,9 +145,9 @@ object JshopTranslator {
 					case spec: PipetteSpecList => {
 						//println("spec list:")
 						//spec.step_l.foreach(println)
-						def step(step_l: List[PipetteSpec], path: PlanPath): RqResult[PlanPath] = {
+						def step(step_l: List[PipetteSpec], path0: PlanPath): RqResult[PlanPath] = {
 							step_l match {
-								case Nil => RqSuccess(path)
+								case Nil => RqSuccess(path0)
 								case spec :: rest =>
 									for {
 										path1 <- handleOperator_PipetteSpec(protocol, agentToBuilder_m, path0, spec, arg_l)

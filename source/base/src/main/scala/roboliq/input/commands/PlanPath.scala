@@ -10,10 +10,16 @@ trait Action {
 
 class PlanPath(val action_r: List[Action], val state: WorldState) {
 	def add(action: Action): RqResult[PlanPath] = {
+		//println("add")
+		//println("add: "+action)
 		for {
 			state1 <- WorldStateEvent.update(action.effects, state)
 		} yield {
-			new PlanPath(action :: action_r, state1)
+			val path1 = new PlanPath(action :: action_r, state1)
+			//println("added:")
+			//println(" " + path1.action_r.reverse.map(action => action.getClass().getSimpleName()).mkString(", "))
+			//path1.state.well_aliquot_m.filter(_._1.label.get.contains("A01")).foreach(pair => println(s"${pair._1.label.get}: ${pair._2}"))
+			path1
 		}
 	}
 

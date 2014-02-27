@@ -568,38 +568,42 @@ class Protocol {
 			case "pipette" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("steps"), nameVal_l)
-					task <- arg_l match {
+					path1 <- arg_l match {
 						case List(Some(JsArray(step_l))) =>
+							def handleSubCmds(
+								pair_l: List[(String, List[(Option[String], JsValue)])],
+								spec0_l: List[PipetteSpec],
+								path0: PlanPath
+							): RqResult[List[PipetteSpec]] = {
+								pair_l match {
+									case Nil => RqSuccess(spec0_l)
+									case (cmd, nameToVal_l) :: rest =>
+										for {
+											spec_l <- cmd match {
+												case "distribute" =>
+													loadJsonProtocol_DistributeSub(nameToVal_l, path0.state)
+												case "titrate" =>
+													loadJsonProtocol_TitrateSub(nameToVal_l, path0.state)
+												case "transfer" =>
+													loadJsonProtocol_TransferSub(nameToVal_l, path0.state)
+												case _ =>
+													RsError("unrecognized pipette sub-command: $command")
+											}
+											task = pipetteSpecsToTask(spec_l)
+											path1 <- path0.add(task)
+											spec1_l <- handleSubCmds(rest, spec0_l ++ spec_l, path1)
+										} yield spec1_l
+								}
+							}
 							for {
 								l0 <- RsResult.toResultOfList(step_l.map(loadJsonProtocol_Protocol_getCommand))
-								l1 = l0.flatten
-								l2 <- RsResult.toResultOfList(l1.map(pair => {
-									val (cmd, nameToVal_l) = pair
-									cmd match {
-										case "distribute" =>
-											loadJsonProtocol_DistributeSub(nameToVal_l).map(Option(_))
-										case "titrate" =>
-											loadJsonProtocol_TitrateSub(nameToVal_l).map(Option(_))
-										case "transfer" =>
-											loadJsonProtocol_TransferSub(nameToVal_l).map(Option(_))
-										case _ =>
-											RsError("unrecognized pipette sub-command: $command")
-									}
-								}))
-								spec_l = l2.flatten.flatten
-							} yield {
-								val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
-								val agentIdent = f"?a$nvar%04d"
-								val deviceIdent = f"?d$nvar%04d"
-								val specIdent = f"spec$nvar%04d"
-								val n = labwareIdent_l.size
-								val spec = PipetteSpecList(spec_l)
-								idToObject(specIdent) = spec
-								Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
-							}
+								pair_l = l0.flatten
+								spec_l <- handleSubCmds(pair_l, Nil, path0)
+								task = pipetteSpecsToTask(spec_l)
+								path1 <- path0.add(task)
+							} yield path1
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-					path1 <- path0.add(task)
 				} yield path1
 			case "distribute" =>
 				loadJsonProtocol_Distribute(nameVal_l, path0)
@@ -736,25 +740,19 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)],
 		path0: PlanPath
 	): RsResult[PlanPath] = {
-		val task_? = for {
-			spec_l <- loadJsonProtocol_DistributeSub(nameToVal_l)
-		} yield {
-			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
-			val agentIdent = f"?a$nvar%04d"
-			val deviceIdent = f"?d$nvar%04d"
-			val n = labwareIdent_l.size
-			val specIdent = f"spec$nvar%04d"
-			idToObject(specIdent) = PipetteSpecList(spec_l)
-			Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
-		}
-		task_?.flatMap(path0.add)
+		for {
+			spec_l <- loadJsonProtocol_DistributeSub(nameToVal_l, path0.state)
+			task = pipetteSpecsToTask(spec_l)
+			path1 <- path0.add(task)
+		} yield path1
 	}
 	
 	private def loadJsonProtocol_DistributeSub(
-		nameToVal_l: List[(Option[String], JsValue)]
+		nameToVal_l: List[(Option[String], JsValue)],
+		state0: WorldState
 	): RsResult[List[PipetteSpec]] = {
 		for {
-			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb, state0.toImmutable)
+			cmd <- Converter.convCommandAs[commands.Distribute](nameToVal_l, eb, state0)
 			tipModel_? <- cmd.tipModel_? match {
 				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
 				case _ => RsSuccess(None)
@@ -777,25 +775,19 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)],
 		path0: PlanPath
 	): RsResult[PlanPath] = {
-		val task_? = for {
-			spec_l <- loadJsonProtocol_TransferSub(nameToVal_l)
-		} yield {
-			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
-			val agentIdent = f"?a$nvar%04d"
-			val deviceIdent = f"?d$nvar%04d"
-			val n = labwareIdent_l.size
-			val specIdent = f"spec$nvar%04d"
-			idToObject(specIdent) = PipetteSpecList(spec_l)
-			Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
-		}
-		task_?.flatMap(path0.add)
+		for {
+			spec_l <- loadJsonProtocol_TransferSub(nameToVal_l, path0.state)
+			task = pipetteSpecsToTask(spec_l)
+			path1 <- path0.add(task)
+		} yield path1
 	}
 	
 	private def loadJsonProtocol_TransferSub(
-		nameToVal_l: List[(Option[String], JsValue)]
+		nameToVal_l: List[(Option[String], JsValue)],
+		state0: WorldState
 	): RsResult[List[PipetteSpec]] = {
 		for {
-			cmd <- Converter.convCommandAs[commands.Transfer](nameToVal_l, eb, state0.toImmutable)
+			cmd <- Converter.convCommandAs[commands.Transfer](nameToVal_l, eb, state0)
 			tipModel_? <- cmd.tipModel_? match {
 				case Some(key) => eb.getEntityAs[TipModel](key).map(Some(_))
 				case _ => RsSuccess(None)
@@ -824,7 +816,7 @@ class Protocol {
 		path0: PlanPath
 	): RsResult[PlanPath] = {
 		val task_? = for {
-			cmd <- Converter.convCommandAs[commands.SetReagents](nameToVal_l, eb, state0.toImmutable)
+			cmd <- Converter.convCommandAs[commands.SetReagents](nameToVal_l, eb, path0.state)
 		} yield {
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = cmd
@@ -837,28 +829,33 @@ class Protocol {
 		nameToVal_l: List[(Option[String], JsValue)],
 		path0: PlanPath
 	): RsResult[PlanPath] = {
-		val task_? = for {
-			cmd <- Converter.convCommandAs[commands.Titrate](nameToVal_l, eb, state0.toImmutable)
-			spec_l <- new method.TitrateMethod(eb, state0.toImmutable, cmd).run()
-		} yield {
-			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
-			val agentIdent = f"?a$nvar%04d"
-			val deviceIdent = f"?d$nvar%04d"
-			val n = labwareIdent_l.size
-			val specIdent = f"spec$nvar%04d"
-			idToObject(specIdent) = PipetteSpecList(spec_l)
-			Task(Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
-		}
-		task_?.flatMap(path0.add)
+		for {
+			cmd <- Converter.convCommandAs[commands.Titrate](nameToVal_l, eb, path0.state)
+			spec_l <- new method.TitrateMethod(eb, path0.state, cmd).run()
+			task = pipetteSpecsToTask(spec_l)
+			path1 <- path0.add(task)
+		} yield path1
 	}
 	
 	private def loadJsonProtocol_TitrateSub(
-		nameToVal_l: List[(Option[String], JsValue)]
+		nameToVal_l: List[(Option[String], JsValue)],
+		state0: WorldState
 	): RsResult[List[PipetteSpec]] = {
 		for {
-			cmd <- Converter.convCommandAs[commands.Titrate](nameToVal_l, eb, state0.toImmutable)
-			spec_l <- new method.TitrateMethod(eb, state0.toImmutable, cmd).run()
+			cmd <- Converter.convCommandAs[commands.Titrate](nameToVal_l, eb, state0)
+			spec_l <- new method.TitrateMethod(eb, state0, cmd).run()
 		} yield spec_l
+	}
+	
+	private def pipetteSpecsToTask(spec_l: List[PipetteSpec]): Task = {
+		val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
+		val agentIdent = f"?a$nvar%04d"
+		val deviceIdent = f"?d$nvar%04d"
+		val n = labwareIdent_l.size
+		val specIdent = f"spec$nvar%04d"
+		idToObject(specIdent) = PipetteSpecList(spec_l)
+		val event_l = spec_l.flatMap(_.getWellEvents)
+		Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), event_l)
 	}
 	
 	private def x(fields: Map[String, JsValue], id: String): String =
