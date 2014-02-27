@@ -29,6 +29,12 @@ case class ReagentBean(
 	key_? : Option[String]
 )
 
+private case class Task(
+	rel: Rel,
+	effects: List[WorldStateEvent]
+) extends Action {
+}
+
 class Protocol {
 	
 	private val logger = Logger[this.type]
@@ -343,19 +349,32 @@ class Protocol {
 	
 	private def loadJsonProtocol_Protocol(jsval: JsValue): RsResult[Unit] = {
 		logger.debug("parse `protocol`")
-		jsval match {
-			case JsArray(jscmd_l) =>
-				RsResult.toResultOfList(jscmd_l.map(jscmd => {
+		val path0 = new PlanPath(Nil, state0.toImmutable)
+		def step(jscmd_l: List[JsValue], path: PlanPath): RqResult[PlanPath] = {
+			jscmd_l match {
+				case Nil => RqSuccess(path)
+				case jscmd :: rest =>
 					for {
 						pair <- loadJsonProtocol_Protocol_getCommand(jscmd)
 						//_ = println("pair: "+pair)
-						res <- pair match {
+						path1 <- pair match {
+							case None => RsSuccess(path)
 							case Some((cmd, nameToVal_l)) =>
-								loadJsonProtocol_ProtocolCommand(cmd, nameToVal_l)
-							case None => RsSuccess(())
+								loadJsonProtocol_ProtocolCommand(cmd, nameToVal_l, path)
 						}
-					} yield res
-				})).map(_ => ())
+						path2 <- step(rest, path1)
+					} yield path2
+			}
+		}
+		jsval match {
+			case JsArray(jscmd_l) =>
+				for {
+					path1 <- step(jscmd_l, path0)
+				} yield {
+					val action_l = path1.action_r.reverse
+					val task_l = action_l.map(_.asInstanceOf[Task])
+					tasks ++= task_l.map(_.rel)
+				}
 			case _ =>
 				RsError("unrecognized format for `protocol` section")
 		}
@@ -420,41 +439,45 @@ class Protocol {
 		}
 	}
 
-	private def loadJsonProtocol_ProtocolCommand(cmd: String, nameVal_l: List[(Option[String], JsValue)]): RsResult[Unit] = {
+	private def loadJsonProtocol_ProtocolCommand(
+		cmd: String, nameVal_l: List[(Option[String], JsValue)],
+		path0: PlanPath
+	): RsResult[PlanPath] = {
 		cmd match {
 			case "log" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("text"), nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(JsString(text))) =>
 							val agentIdent = f"?a$nvar%04d"
 							val textIdent = f"text$nvar%04d"
 							idToObject(textIdent) = text
-							tasks += Rel("!log", List(agentIdent, textIdent))
-							RsSuccess(())
+							val task = Task(Rel("!log", List(agentIdent, textIdent)), Nil)
+							RsSuccess(task)
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "move" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object", "destination"), nameVal_l)
-					_ <- arg_l match {
+					path1 <- arg_l match {
 						case List(Some(JsString(objectRef)), Some(JsString(dstRef))) =>
 							for {
 								labware <- eb.getEntityAs[Labware](objectRef)
 								dst <- eb.getEntityAs[Labware](dstRef)
 								labwareIdent <- eb.getIdent(labware)
 								dstIdent <- eb.getIdent(dst)
-							} yield {
-								tasks += Rel("move-labware", List(labwareIdent, dstIdent))
-							}
+								task = Task(Rel("move-labware", List(labwareIdent, dstIdent)), Nil)
+								path1 <- path0.add(task)
+							} yield path1
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+				} yield path1
 			case "peel" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object"), nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(JsString(objectRef))) =>
 							for {
 								labware <- eb.getEntityAs[Labware](objectRef)
@@ -464,28 +487,30 @@ class Protocol {
 								val deviceIdent = f"?d$nvar%04d"
 								val specIdent = f"?spec$nvar%04d"
 								val siteIdent = f"?s$nvar%04d"
-								tasks += Rel("peeler-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+								Task(Rel("peeler-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent)), Nil)
 							}
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "prompt" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("text"), nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(JsString(text))) =>
 							val agentIdent = f"?a$nvar%04d"
 							val textIdent = f"text$nvar%04d"
 							idToObject(textIdent) = text
-							tasks += Rel("!prompt", List(agentIdent, textIdent))
-							RsSuccess(())
+							val task = Task(Rel("!prompt", List(agentIdent, textIdent)), Nil)
+							RsSuccess(task)
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "seal" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object"), nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(JsString(objectRef))) =>
 							for {
 								labware <- eb.getEntityAs[Labware](objectRef)
@@ -495,15 +520,16 @@ class Protocol {
 								val deviceIdent = f"?d$nvar%04d"
 								val specIdent = f"?spec$nvar%04d"
 								val siteIdent = f"?s$nvar%04d"
-								tasks += Rel("sealer-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+								Task(Rel("sealer-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent)), Nil)
 							}
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "shake" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object", "spec"), nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(JsString(objectRef)), Some(JsString(specIdent))) =>
 							for {
 								labware <- eb.getEntityAs[Labware](objectRef)
@@ -512,11 +538,12 @@ class Protocol {
 								val agentIdent = f"?a$nvar%04d"
 								val deviceIdent = f"?d$nvar%04d"
 								val siteIdent = f"?s$nvar%04d"
-								tasks += Rel("shaker-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+								Task(Rel("shaker-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent)), Nil)
 							}
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "thermocycle" =>
 				val argSpec_l = List(
 					("object", true, jsvalToEntity[Labware] _),
@@ -524,7 +551,7 @@ class Protocol {
 				)
 				for {
 					arg_l <- parseArgList(argSpec_l, nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(labware: Labware), Some(specIdent: String)) =>
 							for {
 								labwareIdent <- eb.getIdent(labware)
@@ -532,15 +559,16 @@ class Protocol {
 								val agentIdent = f"?a$nvar%04d"
 								val deviceIdent = f"?d$nvar%04d"
 								val siteIdent = f"?s$nvar%04d"
-								tasks += Rel("thermocycle-plate", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent))
+								Task(Rel("thermocycle-plate", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent)), Nil)
 							}
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "pipette" =>
 				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("steps"), nameVal_l)
-					_ <- arg_l match {
+					task <- arg_l match {
 						case List(Some(JsArray(step_l))) =>
 							for {
 								l0 <- RsResult.toResultOfList(step_l.map(loadJsonProtocol_Protocol_getCommand))
@@ -567,21 +595,22 @@ class Protocol {
 								val n = labwareIdent_l.size
 								val spec = PipetteSpecList(spec_l)
 								idToObject(specIdent) = spec
-								tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+								Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
 							}
 						case _ => RsError(s"bad arguments to `$cmd`")
 					}
-				} yield ()
+					path1 <- path0.add(task)
+				} yield path1
 			case "distribute" =>
-				loadJsonProtocol_Distribute(nameVal_l)
+				loadJsonProtocol_Distribute(nameVal_l, path0)
 			case "setReagents" =>
-				loadJsonProtocol_SetReagents(nameVal_l)
+				loadJsonProtocol_SetReagents(nameVal_l, path0)
 			case "titrate" =>
-				loadJsonProtocol_Titrate(nameVal_l)
+				loadJsonProtocol_Titrate(nameVal_l, path0)
 			case "transfer" =>
-				loadJsonProtocol_Transfer(nameVal_l)
+				loadJsonProtocol_Transfer(nameVal_l, path0)
 			case _ =>
-				RsSuccess(())
+				RsSuccess(path0)
 		}
 	}
 	
@@ -704,9 +733,10 @@ class Protocol {
 	}
 	
 	private def loadJsonProtocol_Distribute(
-		nameToVal_l: List[(Option[String], JsValue)]
-	): RsResult[Unit] = {
-		for {
+		nameToVal_l: List[(Option[String], JsValue)],
+		path0: PlanPath
+	): RsResult[PlanPath] = {
+		val task_? = for {
 			spec_l <- loadJsonProtocol_DistributeSub(nameToVal_l)
 		} yield {
 			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
@@ -715,8 +745,9 @@ class Protocol {
 			val n = labwareIdent_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = PipetteSpecList(spec_l)
-			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+			Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
 		}
+		task_?.flatMap(path0.add)
 	}
 	
 	private def loadJsonProtocol_DistributeSub(
@@ -743,9 +774,10 @@ class Protocol {
 		}
 	}
 	private def loadJsonProtocol_Transfer(
-		nameToVal_l: List[(Option[String], JsValue)]
-	): RsResult[Unit] = {
-		for {
+		nameToVal_l: List[(Option[String], JsValue)],
+		path0: PlanPath
+	): RsResult[PlanPath] = {
+		val task_? = for {
 			spec_l <- loadJsonProtocol_TransferSub(nameToVal_l)
 		} yield {
 			val labwareIdent_l = spec_l.flatMap(spec => (spec.sources.sources.flatMap(_.l) ++ spec.destinations.l).map(_.labwareName)).distinct
@@ -754,8 +786,9 @@ class Protocol {
 			val n = labwareIdent_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = PipetteSpecList(spec_l)
-			tasks += Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+			Task(Rel(s"distribute$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
 		}
+		task_?.flatMap(path0.add)
 	}
 	
 	private def loadJsonProtocol_TransferSub(
@@ -787,21 +820,24 @@ class Protocol {
 	}
 	
 	private def loadJsonProtocol_SetReagents(
-		nameToVal_l: List[(Option[String], JsValue)]
-	): RsResult[Unit] = {
-		for {
+		nameToVal_l: List[(Option[String], JsValue)],
+		path0: PlanPath
+	): RsResult[PlanPath] = {
+		val task_? = for {
 			cmd <- Converter.convCommandAs[commands.SetReagents](nameToVal_l, eb, state0.toImmutable)
 		} yield {
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = cmd
-			tasks += Rel(s"!nop", specIdent :: Nil)
+			Task(Rel(s"!nop", specIdent :: Nil), Nil)
 		}
+		task_?.flatMap(path0.add)
 	}
 	
 	private def loadJsonProtocol_Titrate(
-		nameToVal_l: List[(Option[String], JsValue)]
-	): RsResult[Unit] = {
-		for {
+		nameToVal_l: List[(Option[String], JsValue)],
+		path0: PlanPath
+	): RsResult[PlanPath] = {
+		val task_? = for {
 			cmd <- Converter.convCommandAs[commands.Titrate](nameToVal_l, eb, state0.toImmutable)
 			spec_l <- new method.TitrateMethod(eb, state0.toImmutable, cmd).run()
 		} yield {
@@ -811,8 +847,9 @@ class Protocol {
 			val n = labwareIdent_l.size
 			val specIdent = f"spec$nvar%04d"
 			idToObject(specIdent) = PipetteSpecList(spec_l)
-			tasks += Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l)
+			Task(Rel(s"titrationSeries$n", agentIdent :: deviceIdent :: specIdent :: labwareIdent_l), Nil)
 		}
+		task_?.flatMap(path0.add)
 	}
 	
 	private def loadJsonProtocol_TitrateSub(
