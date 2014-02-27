@@ -24,9 +24,9 @@ reagents:
 
 protocol:
   - titrate:
-      steps:
-        - or:
-          - and:
+      allOf:
+        - oneOf:
+          - allOf:
             - source: urea_pH55
               amount: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
               sterilizeBefore: thorough
@@ -36,7 +36,7 @@ protocol:
               sterilizeBefore: thorough
               sterilizeBetween: none
               pipettePolicy: Water_A_1000
-          - and:
+          - allOf:
             - source: urea_pH70
               amount: [0ul, 11.36ul, 28.41ul, 39.77ul, 45.45ul, 56.91ul, 68.18ul, 79.55ul, 90.9ul, 99.75ul]
               sterilizeBefore: thorough

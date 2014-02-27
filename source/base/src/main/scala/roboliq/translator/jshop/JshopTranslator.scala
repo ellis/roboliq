@@ -118,7 +118,7 @@ object JshopTranslator {
 		agentIdent: String,
 		arg_l: List[String]
 	): RsResult[PlanPath] = {
-		val action_l: RqResult[List[Action]] = operator match {
+		val action_l_? : RqResult[List[Action]] = operator match {
 			case "agent-activate" => RqSuccess(List(AgentActivate()))
 			case "agent-deactivate" => RqSuccess(List(AgentDeactivate()))
 			case "log" =>
@@ -236,19 +236,17 @@ object JshopTranslator {
 		val builder = agentToBuilder_m(agentIdent)
 
 		def step(action_l: List[Action], path0: PlanPath): RqResult[PlanPath] = {
-			action_l match {
-				case Nil => RqSuccess(path0)
-				case action :: rest =>
-					val command = action.asInstanceOf[Command]
-					for {
-						path1 <- path0.add(action)
-						_ <- builder.addCommand(protocol, path0.state, agentIdent, command)
-						path2 <- step(rest, path1)
-					} yield path2
+			action_l.foldLeft(RqSuccess(path0) : RqResult[PlanPath]) { (path0_?, action) =>
+				val command = action.asInstanceOf[Command]
+				for {
+					path0 <- path0_?
+					path1 <- path0.add(action)
+					_ <- builder.addCommand(protocol, path0.state, agentIdent, command)
+				} yield path1
 			}
 		}
 		
-		action_l.flatMap(action_l => step(action_l, path0))
+		action_l_?.flatMap(action_l => step(action_l, path0))
 	}
 	
 	private def handleOperator_SetReagents(

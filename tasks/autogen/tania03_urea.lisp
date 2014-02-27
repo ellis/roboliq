@@ -444,6 +444,6 @@
  )
  ; tasks
  (
-  (titrationSeries3 ?a0001 ?d0002 spec0003 sourcePlate1 mixPlate sourcePlate2)
+  (distribute3 ?a0001 ?d0002 spec0003 sourcePlate1 mixPlate sourcePlate2)
  )
 )
