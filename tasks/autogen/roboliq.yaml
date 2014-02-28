@@ -25,6 +25,10 @@ evowareAgents:
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
   "384 Well Plate": D-BSSE 384 Well Plate White
+  PA3P: r1_bench_017x1
+  PA1: r1_bench_009x3
+  PB1: r1_bench_010x2
+  PC1: r1_bench_010x4
 
 logic:
   - transporter-can userArm r1_hotel_245x1 userArmSpec

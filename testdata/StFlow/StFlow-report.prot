@@ -1,0 +1,99 @@
+labware:
+  sourcePlate1:
+    model: "96 Deep Well Plate"
+  culture:
+    model: "Nunc F96 MicroWell"
+  dilution:
+    model: "Nunc F96 MicroWell"
+  reaction:
+    model: "384 Well Plate"
+
+reagents:
+  media: sourcePlate1(A01|H02)
+  iptg: sourcePlate1(A03)
+  lysisBuffer: sourcePlate1(A04)
+  reactionBuffer: sourcePlate1(A05|H07)
+  substrate4MUGlu: sourcePlate1(A12)
+  substrate4MUGal: sourcePlate1(B12)
+  substrate4MUSul: sourcePlate1(C12)
+  substrate4MUNag: sourcePlate1(D12)
+  substrate4MUPho: sourcePlate1(E12)
+  substrate4MUBut: sourcePlate1(F12)
+  substrateFree: sourcePlate1(G12)
+  substrate4MUXyl: sourcePlate1(H12)
+
+programs:
+  readerProgram1:
+    description: |
+      Grow pre-culture in Tecan plate reader M200 (12 h, 37 C, 220 rpm).
+      Growth curve data point every 15 minutes.
+  readerProgram2:
+    description: |
+      Culture in Tecan plate reader M200 (2 h, 37 C, 220 rpm).
+      Growth curve data point every 15 minutes.
+  readerProgram3:
+    description: |
+      Incubation in Tecan plate reader M200 (4 h, 37 C, 220 rpm).
+      Growth curve data point every 15 minutes.
+  readerProgram4:
+    description: |
+      Detection of fluorescence in Tecan plate reader M200 (λEx 365nm, λEm 445nm).
+  shakerProgram1:
+    description: |
+      Incubation on shaker (RT, 10 min, 220 rpm)
+
+protocol:
+- // Add media to upper rows
+- distribute reagent.media labware.culture(A01xD12) 200ul
+- // Inoculate by operator
+- prompt "Please inculate culture plate."
+- // Pre culture
+- readPlate readerProgram1 labware.culture
+- // Add media to lower rows
+- distribute reagent.media labware.culture(E01xH12) 190ul
+- // Inoculate
+- transfer labware.culture(A01xD12) labware.culture(E01xH12) 10ul mixBefore=4x150ul
+- // Main culture growth
+- readPlate readerProgram2 labware.culture
+- // Add IPTG
+- distribute reagent.iptg labware.culture(E01xH12) 10ul
+- // Main culture expression
+- readPlate readerProgram3 labware.culture
+- // Add lysis buffer
+- distribute reagent.lysisBuffer labware.culture(E01xH12) 20ul
+- // Shake
+- shakePlate shakerProgram1 labware.culture
+- // Mix and lyse
+- mixWithPipetter labware.culture(E01xH12) 4x150ul
+- // Create dilutions from culture plate to dilution plate
+- dilute
+    allOf:
+    - source: reagent.reactionBuffer
+    - oneOf:
+      - source: labware.culture(E01-E12)
+        destination: labware.dilution(A01-A12)
+        factor: 1
+      - source: labware.culture(F01-F12)
+        destination: labware.dilution(B01-B12)
+        factor: 10
+      - source: labware.culture(G01-G12)
+        destination: labware.dilution(C01-D12)
+        factor: [10, 100]
+      - source: labware.culture(H01-H12)
+        destination: labware.dilution(E01-G12)
+        factor: [10, 100, 1000]
+    volume: 160ul
+    mixBefore: true
+- // Create titration series from dilution plate to reaction plate
+- titrate:
+    allOf:
+    - source: reactionBuffer
+      amount: 41.6ul
+    - source: dilution(A01-A12+B01-B12+D01-D12+G01-G12)
+      amount: 8ul
+    - source: [substrate4MUGlu, substrate4MUGal, substrate4MUSul, substrate4MUNag, substrate4MUPho, substrate4MUBut, substrateFree, substrate4MUXyl]
+      amount: 30.4ul
+    replicates: 1
+    destination: reaction(A01xP24)
+- // Main culture growth
+- readPlate readerProgram4 labware.reaction

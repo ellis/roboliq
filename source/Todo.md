@@ -27,12 +27,27 @@
 - [x] simplify aliquot strings in user output
 - [x] update plate location in 'transporter-run' action
 - [x] JshopTranslator: output .esc at the end again
+
+## For stflow to run water test
+
+- [ ] manually choose initial locations for plates
+- [ ] separate titration commands which should be separated and see if JSHOP can still handle it
+- [ ] mix command
+- [ ] add shaker
+- [ ] add the user prompt to script
+- [ ] comments
+- [ ] Add evoware "Group"s to ESC files
+- [ ] Dilute: create command
+- [ ] reader commands
+
+- [ ] Figure out site naming scheme for our table
+- [ ] Allow for site naming
+
 - [ ] BUG: AliquotFlat.apply needs to proportionally adjust amounts in mixtures
 - [ ] TitrationSeries: let user specify destination well for individual steps rather than overall (but then check that every well has a destination)
+- [ ] List of user variables should be read in from a separate file, to make lab customization possible without modifying the original script
 - [ ] TitrationSeries: randomize dispenses, with a randomSeed property
 - [ ] TitrationSeries: allow user to specify the sort order (e.g., the third component could be the primary grouping)
-- [ ] Dilute: create command
-- [ ] List of user variables should be read in from a separate file, to make lab customization possible without modifying the original script
 - [ ] EvowareClientScriptBuilder: add well events in spirate_checked
 
 ## Priorities for user friendliness

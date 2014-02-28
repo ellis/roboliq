@@ -55,8 +55,6 @@ protocol:
   commands:
   - Variable(int_max_columns,"12",1,"Maximal number of columns to be treated.",0,1.000000,10.000000,0,2,1,0);
   - Wash(255,1,1,1,0,"8.0",500,"32.0",500,10,70,30,1,0,1000,0);
-- // Get culture plate
-- move plate/culture site/shaker lidDestination=shelf(1)
 - // Add media to upper rows
 - distribute reagent/media plate/culture(A01 x D12) 200ul
 - group: Inoculate by operator
@@ -88,10 +86,6 @@ protocol:
 - shake plate/culture program/shake1
 - // Mix and lyse
 - mix_pipetter plate/culture(E01 x H${int_max_columns}) 150ul sanitize=NDD
-- // Get dilution plate
-- move plate/dilution location/downholder lidDestination=shelf(3)
-- // Get reaction plate
-- move plate/reaction location/lid
 - // Create dilutions from culture plate to dilution plate
 - command: dilute
   allOf:
