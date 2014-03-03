@@ -1,32 +1,21 @@
 # TODOs for roboliq
 
-- [x] Create titationSeries command
-- [x] TitrationSeries: handle multiple volumes for a given step, for grouping
-- [x] TitrationSeries: handle reagent without volume, to use as filler
-- [x] TitrationSeries: handle multiple reagents for a given step, for grouping
-- [x] TitrationSeries: BUG: for the multi-source step, all aspirations are happening from a single well
-- [x] Speed up pipetting algorithm -- need to get it fast enough to handle 384 well plate
-- [x] TitrationSeries: fix hack for stepToList_l in TitrationSeriesSub()
-- [x] TitrationSeries: allow for alternative fillers
-- [x] TitrationSeries: allow for combinations of liquids (e.g. salt_ph55+buffer_ph55 and salt_ph70+buffer_ph70, but not salt_ph55+buffer_ph70)
-- [x] TitrationSeries: let user explicitly specify number of replicates
-- [x] BUG: TitrationSeries: tania03_urea: why is no Assam reagent used, according to table printed at end of execution?
-- [x] Transfer: create command
-- [x] EvowareClientScriptBuilder: update tip state in spirate_checked
-- [x] EvowareClientScriptBuilder: update well state in spirate_checked
-- [x] in stflow1.prot, second step of titration command needs to be expanded to TitrationItem_Or (see toPipetteSources in Converter)
-- [x] TitrationSeries: put code in separate file
-- [x] TitrationSeries: rename to titrate
-- [x] TitrationSeries: use PipetteAmount instead of LiquidVolume for sources
-- [x] TitrationSeries: intelligently handle PipetteAmount (as volume, dilution, or concentration), considering totalVolume_?
-- [x] Create 'setReagents' command
-- [x] for stflow1.prot, see whether titration command can be made a subcommand of pipette, so that JSHOP2 doesn't crash
-- [x] BUG: Titrate: filler not being filled in
-- [x] Protocol: need to keep track of well states while processing protocol commands
-- [x] BUG: test.prot: still have wrong volumes in wells at the end
-- [x] simplify aliquot strings in user output
-- [x] update plate location in 'transporter-run' action
-- [x] JshopTranslator: output .esc at the end again
+## For next CADMAD meeting
+
+- [ ] better 'shaker' command
+- [ ] 'reader' command
+- [ ] user-defined names for sites
+- [ ] make sure alternative stflow protocol runs on our Tecan
+
+- [ ] load additional file with user settings to complement the generic protocol
+- [ ] 'dilute' command
+- [ ] make sure stflow protocol runs on our Tecan
+
+- [ ] integrate own planner
+- [ ] redefine sites to fix problem I had with the Weizmann table definition
+- [ ] make sure stflow protocol runs on Weizmann Tecan
+- [ ] post code for CADMAD participants
+- [ ] get it to run on windows
 
 ## For stflow to run water test
 
