@@ -51,7 +51,7 @@ protocol:
       amount: 20ul
     destination: culture(E01xH12)
 #- // Shake
-#- shake plate/culture program/shake1
+- shake plate/culture program/shake1
 #- // Mix and lyse
 #- mix_pipetter plate/culture(E01 x H${int_max_columns}) 150ul sanitize=NDD
 #- // Create dilutions from culture plate to dilution plate

@@ -2,7 +2,8 @@
 
 ## For next CADMAD meeting
 
-- [ ] better 'shaker' command
+- [ ] '//' comments in protocol
+- [ ] better 'shaker' command, better ShakerSpec
 - [ ] 'reader' command
 - [ ] user-defined names for sites
 - [ ] make sure alternative stflow protocol runs on our Tecan
@@ -16,6 +17,101 @@
 - [ ] make sure stflow protocol runs on Weizmann Tecan
 - [ ] post code for CADMAD participants
 - [ ] get it to run on windows
+
+## AI Planning
+
+- for single plate commands: agent,device,spec,model1,site1
+- for moving plate, both site1 and site2 are accessible, assume that plate can be moved between them:
+  - agent,device,spec,model,?site
+- for user moving plate, assume user can move any model, so we only need to know which sites the user can access.
+ 
+How to arrange plates initially?
+- Fastest is when the user puts the plates onto the bench directly
+- Alternatively, plates are put in hotels intially
+  - This is a problem if the plates need to be cooled
+  - Wouldn't work for tubes
+- Might want to have a "home" site for each plate
+  - Problem: this would limit flexibility in the plan
+  - Perhaps only assign a "home" site to some plates
+  - if a plate has a home, that should be its initial site if possible,
+    and once the plate is no longer needed, it should be moved back to home.
+  - the concept would need to be extended to allow for use on multiple robots, and
+    what about hotel vs table homes?
+- So instead of home sites, perhaps add a penalty for every plate placed on a site,
+  in order to make it more likely that a plate will be placed back onto the same site.
+- When user doesn't specify an initial site, some deterministic preference for
+  sites should be used so that multiple translations of the same protocol lead to the
+  same site assignments.
+
+CMD1: pipette
+    pre: plate1 -> site1
+    pre: plate2 -> site2
+    pre: plate1 unsealed
+    pre: plate2 uncovered
+    action: pipette with plate1 and plate2
+    post: restore plate1 sealed
+    post: restore plate2 covered
+    post: plate1 -> prior site
+    post: plate2 -> prior site
+CMD2: thermocycle plate1
+    pre: plate1 sealed
+    effect: plate1 sealed (ensures that plate doesn't get automatically unsealed later)
+    action: open thermocycler
+    action: move plate1 to siteForThermocycler
+    effect: ~(plate at previous site)
+    effect: plate1 at siteForThermocycler
+    action: close thermocycler
+    action: run thermocycler
+    action: open thermocycler
+    action: move plate1 to ?siteNext
+    effect: ~(plate at siteForThermocycler)
+    effect: plate1 at ?siteNext
+    action: close thermocycler
+
+Step2:
+    initial plate1.site = site1
+    initial plate2.site = site3
+    initial plate2.covered = true
+    // CMD1: pipette
+    -- pre: plate1 -> site1
+    pre: plate2 -> site2
+    action01a: move plate2 to site2
+    effect: ~(plate2.site = site3)
+    effect: plate2.site = site2
+    -- pre: plate1 unsealed
+    pre: plate2 uncovered
+    action01b: move plate2.lid to site3
+    effect: plate2.lid.site = site3
+    effect: ~(plate2.covered = true)
+    action01: pipette with plate1 and plate2
+    -- post: restore plate1 sealed
+    post: restore plate2 covered
+    action01A: move plate2.lid to plate2
+    effect: ~(plate2.lid.site = site3)
+    effect: plate2.covered = true
+    -- post: plate1 -> prior site
+    post: plate2 -> prior site
+    action01B: move plate2 to site3
+    effect: ~(plate2.site = site2)
+    effect: plate2.site = site3
+    // CMD2: thermocycle plate1
+    pre: plate1 sealed
+    effect: plate1 sealed (ensures that plate doesn't get automatically unsealed later)
+    action: open thermocycler
+    action: move plate1 to siteForThermocycler
+    effect: ~(plate at previous site)
+    effect: plate1 at siteForThermocycler
+    action: close thermocycler
+    action: run thermocycler
+    action: open thermocycler
+    action: move plate1 to ?siteNext
+    effect: ~(plate at siteForThermocycler)
+    effect: plate1 at ?siteNext
+    action: close thermocycler
+
+In general, post-conditions get deleted if there are any later effects which overwrite the given value.
+However, with plate sites, we need to handle this differently and keep a stack.
+
 
 ## For stflow to run water test
 
@@ -53,6 +149,7 @@
 
 ## Priorities for script language
 
+- [ ] for evoware script, each protocol command should be an evoware Group
 - [ ] TitrationSeries: Automatically figure out sterilization and liquid class again, so user doesn't need to specify it
 - [ ] Allow for use of tubes
 
