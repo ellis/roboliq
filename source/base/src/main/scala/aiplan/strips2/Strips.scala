@@ -400,6 +400,14 @@ object Strips {
 				link_l = link_l
 			)
 		}
+		
+		def isThreat(action: Operator, link: CausalLink): Boolean = {
+			
+		}
+		
+		def isConsistent(ordering: (Int, Int)): Boolean = {
+			null
+		}
 	}
 	
 	object PartialPlan {
