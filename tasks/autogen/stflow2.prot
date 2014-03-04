@@ -26,6 +26,12 @@ reagents:
   substrateFree: sourcePlate1(G12)
   substrate4MUXyl: sourcePlate1(H12)
 
+shakerPrograms:
+  shakerProgram1:
+    description: Incubation on shaker (RT, 10 min, 220 rpm)
+    duration: 600
+    frequency: 220
+
 protocol:
 - distribute media culture(A01xD12) 200ul
 #- group: Inoculate by operator
@@ -51,7 +57,7 @@ protocol:
       amount: 20ul
     destination: culture(E01xH12)
 #- // Shake
-#- shake plate/culture program/shake1
+- shake shakerProgplate/culture program/shake1
 #- // Mix and lyse
 #- mix_pipetter plate/culture(E01 x H${int_max_columns}) 150ul sanitize=NDD
 #- // Create dilutions from culture plate to dilution plate

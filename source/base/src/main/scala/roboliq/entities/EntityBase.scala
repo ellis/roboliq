@@ -199,6 +199,11 @@ class EntityBase {
 	def addLabware(e: Labware, name: String) {
 		addEntity(e, name)
 	}
+	
+	def addUserProgram(program: Entity, ident: String) {
+		addEntity(program, ident)
+		... add to a list or something ...
+	}
 
 	def setLocation(l: Labware, e: Entity) {
 		assert(entityToIdent_m.contains(l))

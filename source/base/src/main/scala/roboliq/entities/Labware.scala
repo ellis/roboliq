@@ -57,7 +57,14 @@ case class Shaker(key: String, label: Option[String] = None, description: Option
 	def typeNames = List("shaker")
 }
 
-case class ShakerSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+case class ShakerSpec(
+	key: String,
+	label: Option[String] = None,
+	description: Option[String] = None,
+	duration: Option[Int] = None,
+	rpm: Option[Int] = None,
+	amplitude: Option[Int] = None
+) extends Entity {
 	def typeNames = List("shakerSpec")
 }
 

@@ -180,7 +180,7 @@ import ch.ethz.reactivesim.RsPimper
  * 
  * 
  */
-package object core extends RsPimper {
+package object core extends ch.ethz.reactivesim.RsPimper {
 	type RsResult[A] = ch.ethz.reactivesim.RsResult[A]
 	type RsSuccess[A] = ch.ethz.reactivesim.RsSuccess[A]
 	type RsError[A] = ch.ethz.reactivesim.RsError[A]
