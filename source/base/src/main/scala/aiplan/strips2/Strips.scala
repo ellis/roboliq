@@ -357,4 +357,71 @@ object Strips {
 			Problem(domain.relaxed, object_l, state0, goals)
 		}
 	}
+	
+	//sealed trait BindingConstraint
+	//case class BindingEq(a: String, b: String) extends BindingConstraint
+	//case class BindingNe(a: String, b: String) extends BindingConstraint
+	//case class BindingIn(a: String, l: Set[String]) extends BindingConstraint
+	case class Binding(eq: Option[String], ne: Option[String], in: Set[String])
+	/**
+	 * Represents a causal link.
+	 * a and b are indexes of actions, and p is a proposition in b which is an effect of a.
+	 * The proposition should be protected so that no actions are placed between a and b which negate the effect.
+	 */
+	case class CausalLink(a: Int, p: (Atom, Boolean), b: Int)
+	
+	/**
+	 * @param action_l Set of partially instantiated operators
+	 * @param ordering_l Ordering constraints
+	 * @param binding_m Map of variable bindings
+	 * @param link_l Causal links between actions
+	 */
+	class PartialPlan(
+		val action_l: Vector[Operator],
+		val ordering_l: Set[(Int, Int)],
+		val binding_m: Map[String, Binding],
+		val link_l: Set[CausalLink]
+	) {
+		def addAction(op: Operator): PartialPlan = {
+			val i = action_l.size
+			val paramName_l = op.paramName_l.map(s => s"${s}_${i}")
+			val action = Operator(
+				name = op.name,
+				paramName_l = paramName_l,
+				paramTyp_l = op.paramTyp_l,
+				preconds = op.preconds,
+				effects = op.effects
+			)
+			val action2_l: Vector[Operator] = action_l :+ action
+			new PartialPlan(
+				action_l = action2_l,
+				ordering_l = ordering_l,
+				binding_m = binding_m,
+				link_l = link_l
+			)
+		}
+	}
+	
+	object PartialPlan {
+		def fromProblem(problem: Problem): PartialPlan = {
+			val action0 = Operator(
+				name = "__initialState",
+				paramName_l = Nil,
+				paramTyp_l = Nil,
+				preconds = Literals.empty,
+				effects = Literals(pos = problem.state0.atoms, neg = Set())
+			)
+			val action1 = Operator(
+				name = "__finalState",
+				paramName_l = Nil,
+				paramTyp_l = Nil,
+				preconds = problem.goals,
+				effects = Literals.empty
+			)
+			val ordering_l = Set((0, 1))
+			new PartialPlan(
+				Vector(action0, action1), ordering_l, Map(), Set()
+			)
+		}
+	}
 }
