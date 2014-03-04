@@ -341,45 +341,14 @@ class Protocol {
 			}
 
 			_ <- jsobj.fields.get("shakerPrograms") match {
-				case Some(JsObject(map)) =>
-					RqResult.toResultOfList(map.toList.map(pair => {
-						val (name,jsobj) = pair
-						def make(modelRef: String, locationRef: String): RqResult[Unit] = {
-							// REFACTOR: duplicates lots of code from the `plates` section below
-							val key = gid
-							//logger.debug("modelKey: "+modelKey)
-							//println("eb.nameToEntity: "+eb.nameToEntity)
-							//println("eb.idToEntity: "+eb.idToEntity)
-							//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
-							//logger.debug("eb.aliases: "+eb.aliases)
-							val model = eb.getEntityAs[PlateModel](modelRef).toOption.get
-							val plate = new Plate(key)
-							eb.addLabware(plate, name)
-							eb.setModel(plate, model)
-							state0.labware_model_m(plate) = model
-							// Create plate wells
-							for (row <- 0 until model.rows; col <- 0 until model.cols) {
-								val index = row + col * model.rows
-								val ident = WellIdentParser.wellId(plate, model, row, col)
-								val well = new Well(gid, Some(ident))
-								state0.addWell(well, plate, RowCol(row, col), index)
-							}
-							val site = eb.getEntity(locationRef).get
-							eb.setLocation(plate, site)
-							state0.labware_location_m(plate) = site
-							RqSuccess(())
+				case Some(jsval) =>
+					for {
+						m <- Converter.convAs[Map[String, ShakerSpec]](jsval, eb, None)
+					} yield {
+						for ((name, program) <- m) {
+							eb.addUserShakerProgram(program, name)
 						}
-						jsobj match {
-							case JsString(modelRef) => make(modelRef, "offsite")
-							case JsObject(map) =>
-								(map.get("model"), map.get("location")) match {
-									case (Some(JsString(modelRef)), Some(JsString(locationRef))) => make(modelRef, locationRef)
-									case (Some(JsString(modelRef)), None) => make(modelRef, "offsite")
-									case _ => RqError("Expected values for `model` and `location`")
-								}
-							case _ => RqError("Expected a string for model reference")
-						}
-					}))
+					}
 				case _ => RqSuccess(())
 			}
 		

@@ -4,7 +4,7 @@
 
 - [ ] '//' comments in protocol
 - [ ] better 'shaker' command, better ShakerSpec
-- [ ] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
+- [?] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
 - [ ] shaker: make parser for duration (with 'min' and 's' units)
 - [ ] shaker: make parser for frequency (with 'rpm' units)
 - [ ] 'reader' command

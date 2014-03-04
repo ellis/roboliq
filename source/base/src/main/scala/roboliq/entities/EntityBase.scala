@@ -200,9 +200,9 @@ class EntityBase {
 		addEntity(e, name)
 	}
 	
-	def addUserProgram(program: Entity, ident: String) {
-		addEntity(program, ident)
-		... add to a list or something ...
+	def addUserShakerProgram(program: Entity, ident: String) {
+		val device_l = entityToIdent_m.keys.toList.filter(_.isInstanceOf[Shaker])
+		device_l.foreach(device => addDeviceSpec(device.asInstanceOf[Shaker], program, ident))
 	}
 
 	def setLocation(l: Labware, e: Entity) {
