@@ -199,6 +199,11 @@ class EntityBase {
 	def addLabware(e: Labware, name: String) {
 		addEntity(e, name)
 	}
+	
+	def addUserShakerProgram(program: Entity, ident: String) {
+		val device_l = entityToIdent_m.keys.toList.collect({case x: Shaker => x})
+		device_l.foreach(device => addDeviceSpec(device, program, ident))
+	}
 
 	def setLocation(l: Labware, e: Entity) {
 		assert(entityToIdent_m.contains(l))

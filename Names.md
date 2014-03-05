@@ -1,5 +1,13 @@
 # Names for project
 
+Keywords:
+
+- liquid handling robot
+- automation/planning
+- intelligence
+- easy/simple/quick/powerful
+- multiple agents
+
 Possible names for the project:
 
 - roboease
@@ -7,6 +15,55 @@ Possible names for the project:
 - robo-ez
 - RoboEase
 
-- robolic
-- roboliq
-- robolique
+liquid:
+
+- Liquid
+
+liquid+robot:
+
+- LiquidBot
+- LiquorBot
+- Liquor
+- Roboliq
+- Robolique
+- Robolic
+- RoboQuid
+
+liquid+automation:
+
+- LiquidAutomation
+- LiquidAuto
+- LiquidAutoma
+- AutoLiquid
+- AutoLiq
+- AutoLique
+- LiquidPlan
+- LiquidPlanner
+
+liquid+intelligence:
+
+- Liquigence
+- Liquigent
+- Liquidence
+- Liquident
+- LiquidSmart
+- LiquidSmarts
+- IntellLiquid
+- IntelLiquid
+- InteLiquid
+- SmartLiquid
+
+liquid+easy:
+
+- LiquidEase
+- LiquidPower
+- LiquidQuick
+- LiQuick
+- SimpleLiquid
+- QuickLiquid
+- PowerLiquid
+
+liquid+agents:
+
+- AgentLiquid
+- LiquidAgent

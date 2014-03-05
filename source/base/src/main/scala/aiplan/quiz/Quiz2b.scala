@@ -26,7 +26,7 @@ object Quiz2b7 {
   (:goal (and (R B B))))
 """
 		
-	def main(args: Array[String]) {
+	def run() {
 		for {
 			domain <- aiplan.strips2.PddlParser.parseDomain(domainText).right
 			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText).right
@@ -49,7 +49,7 @@ object Quiz2b7 {
 
 object Quiz2b8 {
 		
-	def main(args: Array[String]) {
+	def run() {
 		for {
 			domain <- aiplan.strips2.PddlParser.parseDomain(Quiz2b7.domainText).right
 			problem <- aiplan.strips2.PddlParser.parseProblem(domain, Quiz2b7.problemText).right
@@ -71,7 +71,7 @@ object Quiz2b8 {
 
 object Quiz2b10 {
 		
-	def main(args: Array[String]) {
+	def run() {
 		for {
 			domain <- aiplan.strips2.PddlParser.parseDomain(Quiz2b7.domainText).right
 			problem <- aiplan.strips2.PddlParser.parseProblem(domain, Quiz2b7.problemText).right

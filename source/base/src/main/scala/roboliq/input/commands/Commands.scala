@@ -54,6 +54,11 @@ case class SetReagents(
 	}
 }
 
+case class ShakePlate(
+	program: ShakerSpec,
+	plate: Plate
+) extends Command
+
 sealed trait TitrateAmount
 case class TitrateAmount_Volume(volume: LiquidVolume) extends TitrateAmount
 case class TitrateAmount_Range(min: LiquidVolume, max: LiquidVolume) extends TitrateAmount
