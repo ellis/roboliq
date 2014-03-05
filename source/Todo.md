@@ -5,6 +5,7 @@
 - [ ] '//' comments in protocol
 - [?] better 'shaker' command, better ShakerSpec
 - [?] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
+- [ ] shaker: currently looking at Converter, why Map[String, ShakerSpec] isn't working
 - [ ] shaker: make parser for duration (with 'min' and 's' units)
 - [ ] shaker: make parser for frequency (with 'rpm' units)
 - [ ] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec

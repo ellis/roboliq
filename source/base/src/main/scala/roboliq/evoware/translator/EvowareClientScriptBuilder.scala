@@ -424,7 +424,8 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	): RsResult[TranslationResult] = {
 		for {
 			specIdent <- protocol.eb.getIdent(cmd.spec)
-			internal_s <- identToAgentObject_m.get(specIdent.toLowerCase).asRs(s"missing internal value for specIdent `$specIdent`")
+			//internal_s <- identToAgentObject_m.get(specIdent.toLowerCase).asRs(s"missing internal value for specIdent `$specIdent`")
+			duration <- cmd.spec.duration.asRs(s"Shaker program `$specIdent` must specify duration")
 		} yield {
 			val token_l = {
 				if (cmd.device.label == Some("MP 2Pos H+P Shake")) {
@@ -437,7 +438,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						L0C_Facts("Shaker", "Shaker_Init", ""),
 						L0C_Facts("Shaker", "Shaker_Start","1"),
 						L0C_StartTimer(1),
-						L0C_WaitTimer(1, Integer.parseInt(internal_s.toString)),
+						L0C_WaitTimer(1, duration),
 						L0C_Facts("Shaker", "Shaker_Stop","")
 					)
 				}
