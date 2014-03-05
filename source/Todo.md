@@ -3,10 +3,11 @@
 ## For next CADMAD meeting
 
 - [ ] '//' comments in protocol
-- [ ] better 'shaker' command, better ShakerSpec
+- [?] better 'shaker' command, better ShakerSpec
 - [?] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
 - [ ] shaker: make parser for duration (with 'min' and 's' units)
 - [ ] shaker: make parser for frequency (with 'rpm' units)
+- [ ] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec
 - [ ] 'reader' command
 - [ ] user-defined names for sites
 - [ ] make sure alternative stflow protocol runs on our Tecan

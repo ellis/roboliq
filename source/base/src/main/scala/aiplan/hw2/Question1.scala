@@ -112,7 +112,7 @@ object Question1 {
 		)
 	)
 	
-	def main(args: Array[String]) {
+	def run() {
 		println(domain)
 		val action_l = domain.getApplicableActions(problem.state0)
 		//action_l.foreach(println)

@@ -323,6 +323,7 @@ object Converter {
 			else if (typ <:< typeOf[Map[_, _]]) {
 				jsval match {
 					case jsobj @ JsObject(fields) =>
+						println("fields: " + fields)
 						val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
 						val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 						val name_l = fields.toList.map(_._1)
