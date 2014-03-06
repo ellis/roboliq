@@ -16,6 +16,7 @@ object Strips {
 		def getSignatureString = name + (paramName_l zip paramTyp_l).map(pair => s"${pair._1}:${pair._2}").mkString("(", " ", ")")
 		override def toString = getSignatureString
 	}
+	
 	object Signature {
 		def apply(s: String): Signature = {
 			val l = s.split(" ").toList
@@ -42,21 +43,40 @@ object Strips {
 		implicit def stringToAtom(s: String): Atom = apply(s)
 	}
 	
-	/*case class Literal(atom: Atom, pos: Boolean) {
+	case class Literal(atom: Atom, pos: Boolean) {
 		def !(literal: Literal): Literal = literal.copy(pos = !literal.pos)
 		override def toString = (if (pos) "" else "!") ++ atom.toString
 	}
 	
-	object Literal {
+	/*object Literal {
 		def apply(s: String, pos: Boolean = true): Literal = {
 			Literal(Atom.apply(s), pos)
 		}
 		implicit def stringToLiteral(s: String): Literal = apply(s, true)
 	}*/
-	case class Literals(pos: Set[Atom], neg: Set[Atom])
+	
+	class Literals private (val l: Unique[Literal], val pos: Set[Atom], val neg: Set[Atom]) {
+		//def ++(that: Literals) = Literals(pos ++ that.pos, neg ++ that.neg)
+		def removePos(atom: Atom): Literals = {
+			val lit = Literal(atom, true)
+			new Literals(l - lit, pos - atom, neg)
+		}
+		def removeNeg(atom: Atom): Literals = {
+			val lit = Literal(atom, false)
+			new Literals(l - lit, pos, neg - atom)
+		}
+		def removeNegs(atoms: Set[Atom]): Literals = {
+			val l2 = l.filterNot(contains)
+		}
+	}
 	
 	object Literals {
-		val empty = Literals(Set(), Set())
+		val empty = new Literals(Unique(), Unique(), Unique())
+		def apply(l: Unique[Literal]): Literals = {
+			val pos: Unique[Atom] = l.collect { case Literal(atom, true) => atom }
+			val neg: Unique[Atom] = l.collect { case Literal(atom, false) => atom }
+			new Literals(l, pos, neg)
+		}
 	}
 	
 	case class State(atoms: Set[Atom]) {
@@ -125,8 +145,8 @@ object Strips {
 				sig.name,
 				sig.paramName_l,
 				sig.paramTyp_l,
-				Literals(preconds_+.toSet, preconds_-.toSet),
-				Literals(effects_+.toSet, effects_-.toSet)
+				Literals(preconds_+, preconds_-),
+				Literals(effects_+, effects_-)
 			)
 		}
 	}
@@ -315,7 +335,7 @@ object Strips {
 					o.paramName_l,
 					o.paramTyp_l,
 					o.preconds,
-					Literals(o.effects.pos, Set())
+					Literals(o.effects.pos, Nil)
 				)
 			})
 			new Domain(
@@ -376,11 +396,12 @@ object Strips {
 	 * @param binding_m Map of variable bindings
 	 * @param link_l Causal links between actions
 	 */
-	class PartialPlan(
+	class PartialPlan private (
 		val action_l: Vector[Operator],
 		val ordering_l: Set[(Int, Int)],
 		val binding_m: Map[String, Binding],
-		val link_l: Set[CausalLink]
+		val link_l: Set[CausalLink],
+		val openGoals: Unique[Literal]
 	) {
 		def addAction(op: Operator): PartialPlan = {
 			val i = action_l.size
@@ -393,21 +414,23 @@ object Strips {
 				effects = op.effects
 			)
 			val action2_l: Vector[Operator] = action_l :+ action
+			val openGoals2 = openGoals ++ action.preconds
 			new PartialPlan(
 				action_l = action2_l,
 				ordering_l = ordering_l,
 				binding_m = binding_m,
-				link_l = link_l
+				link_l = link_l,
+				openGoals = openGoals2 
 			)
 		}
-		
+		/*
 		def isThreat(action: Operator, link: CausalLink): Boolean = {
 			
 		}
 		
 		def isConsistent(ordering: (Int, Int)): Boolean = {
 			null
-		}
+		}*/
 	}
 	
 	object PartialPlan {
@@ -417,7 +440,7 @@ object Strips {
 				paramName_l = Nil,
 				paramTyp_l = Nil,
 				preconds = Literals.empty,
-				effects = Literals(pos = problem.state0.atoms, neg = Set())
+				effects = Literals(pos = problem.state0.atoms, neg = Unique())
 			)
 			val action1 = Operator(
 				name = "__finalState",
@@ -427,8 +450,9 @@ object Strips {
 				effects = Literals.empty
 			)
 			val ordering_l = Set((0, 1))
+			val goals = problem.goals
 			new PartialPlan(
-				Vector(action0, action1), ordering_l, Map(), Set()
+				Vector(action0, action1), ordering_l, Map(), Set(), goals
 			)
 		}
 	}
