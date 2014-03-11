@@ -124,7 +124,7 @@ object PddlParser {
 				literal_l <- l.map(elem => getLiteral(elem, true)).sequenceU.right
 			} yield {
 				val (pos_l, neg_l) = literal_l.partition(_._2)
-				Strips.Literals(pos_l.map(_._1).toSet, neg_l.map(_._1).toSet)
+				Strips.Literals(pos_l.map(_._1), neg_l.map(_._1))
 			}
 		case _ => Left("unrecognized literals: "+elem)
 	}

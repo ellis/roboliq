@@ -65,9 +65,20 @@ object Strips {
 			val lit = Literal(atom, false)
 			new Literals(l - lit, pos, neg - atom)
 		}
-		def removeNegs(atoms: Set[Atom]): Literals = {
-			val l2 = l.filterNot(contains)
+		def removeNegs(atom_l: Set[Atom]): Literals = {
+			val lit_l = atom_l.map(atom => Literal(atom, false))
+			new Literals(l -- lit_l, pos, neg -- atom_l)
 		}
+		/**
+		 * Remove all negative literals
+		 */
+		def removeNegs(): Literals = {
+			val l2 = l.filter(_.pos)
+			new Literals(l2, pos, Set())
+		}
+		
+		def ++(that: Literals): Literals =
+			new Literals(l ++ that.l, pos ++ that.pos, neg ++ that.neg)
 	}
 	
 	object Literals {
@@ -76,6 +87,12 @@ object Strips {
 			val pos: Unique[Atom] = l.collect { case Literal(atom, true) => atom }
 			val neg: Unique[Atom] = l.collect { case Literal(atom, false) => atom }
 			new Literals(l, pos, neg)
+		}
+		def apply(pos: List[Atom], neg: List[Atom]): Literals = {
+			val pos1 = pos.map(atom => Literal(atom, true))
+			val neg1 = neg.map(atom => Literal(atom, false))
+			val l = Unique((pos1 ++ neg1) : _*)
+			new Literals(l, pos.toSet, neg.toSet)
 		}
 	}
 	
@@ -129,7 +146,7 @@ object Strips {
 		): Operator = {
 			// We need to make sure that none of the positive effects are in effects_-,
 			// or else we get problems with backwards search.
-			val effects2 = effects.copy(pos = effects.pos, neg = effects.neg -- effects.pos)
+			val effects2 = effects.removeNegs(effects.pos)
 			new Operator(
 				name, paramName_l, paramTyp_l, preconds, effects2
 			)
@@ -167,19 +184,27 @@ object Strips {
 			assert(op.paramName_l.length == param_l.length)
 
 			val bindings = (op.paramName_l zip param_l).toMap
-			def bind(atom_l: Set[Atom]): Set[Atom] = {
+			/*def bind(atom_l: Set[Atom]): Set[Atom] = {
 				atom_l.map(atom => {
 					val params2 = atom.params.map(s => bindings.getOrElse(s, s))
 					atom.copy(params = params2)
 				})
+			}*/
+			def bind(lits: Literals): Literals = {
+				val l0 = lits.l
+				val l1 = lits.l.map { lit =>
+					val params2 = lit.atom.params.map(s => bindings.getOrElse(s, s))
+					Literal(lit.atom.copy(params = params2), lit.pos)
+				}
+				Literals(l1)
 			}
 			
 			Operator(
 				name = op.name,
 				paramName_l = param_l,
 				paramTyp_l = op.paramTyp_l,
-				preconds = Literals(bind(op.preconds.pos), bind(op.preconds.neg)),
-				effects = Literals(bind(op.effects.pos), bind(op.effects.neg))
+				preconds = bind(op.preconds),
+				effects = bind(op.effects)
 			)
 		}
 	
@@ -222,7 +247,7 @@ object Strips {
 				s.atoms.toList.filter(_.name == pp.name).foldLeft(acc) { (acc, sp) =>
 					extendBindings(σ, sp, pp) match {
 						case Some(σ2) =>
-							val preconds2 = Literals(preconds.pos - pp, preconds.neg)
+							val preconds2 = preconds.removeNeg(pp)
 							addApplicables(acc, op, preconds2, σ2, s)
 						case _ => acc
 					}
@@ -335,7 +360,7 @@ object Strips {
 					o.paramName_l,
 					o.paramTyp_l,
 					o.preconds,
-					Literals(o.effects.pos, Nil)
+					Literals(o.effects.l.filter(_.pos))
 				)
 			})
 			new Domain(
@@ -401,7 +426,7 @@ object Strips {
 		val ordering_l: Set[(Int, Int)],
 		val binding_m: Map[String, Binding],
 		val link_l: Set[CausalLink],
-		val openGoals: Unique[Literal]
+		val openGoals: Literals
 	) {
 		def addAction(op: Operator): PartialPlan = {
 			val i = action_l.size
@@ -440,7 +465,7 @@ object Strips {
 				paramName_l = Nil,
 				paramTyp_l = Nil,
 				preconds = Literals.empty,
-				effects = Literals(pos = problem.state0.atoms, neg = Unique())
+				effects = Literals(pos = problem.state0.atoms.toList, neg = Nil)
 			)
 			val action1 = Operator(
 				name = "__finalState",

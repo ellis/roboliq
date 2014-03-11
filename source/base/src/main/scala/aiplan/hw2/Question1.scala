@@ -100,7 +100,7 @@ object Question1 {
 			"empty k2"
 		)),
 		goals = Literals(
-			pos = Set(
+			pos = List(
 				"in ca p2",
 		        "in cb q2",
 		        "in cc p2",
@@ -108,7 +108,7 @@ object Question1 {
 		        "in ce q2",
 		        "in cf q2"
 			),
-			neg = Set()
+			neg = Nil
 		)
 	)
 	
