@@ -37,20 +37,31 @@ case class Pipetter(key: String, label: Option[String] = None, description: Opti
 	def typeNames = List("pipetter")
 }
 
-case class Sealer(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
-	def typeNames = List("sealer")
-}
-
-case class SealerSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
-	def typeNames = List("sealerSpec")
-}
-
 case class Peeler(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
 	def typeNames = List("peeler")
 }
 
 case class PeelerSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
 	def typeNames = List("peelerSpec")
+}
+
+case class ReaderProgram(
+	key: String,
+	label: Option[String] = None,
+	description: Option[String] = None,
+	duration: Option[Int] = None,
+	rpm: Option[Int] = None,
+	amplitude: Option[Int] = None
+) extends Entity {
+	def typeNames = List("shakerSpec")
+}
+
+case class Sealer(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
+	def typeNames = List("sealer")
+}
+
+case class SealerSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+	def typeNames = List("sealerSpec")
 }
 
 case class Shaker(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {

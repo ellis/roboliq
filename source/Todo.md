@@ -3,10 +3,12 @@
 ## For next CADMAD meeting
 
 - [ ] '//' comments in protocol
-- [ ] better 'shaker' command, better ShakerSpec
-- [?] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
+- [x] better 'shaker' command, better ShakerSpec
+- [x] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
+- [x] shaker: currently looking at Converter, why Map[String, ShakerSpec] isn't working
 - [ ] shaker: make parser for duration (with 'min' and 's' units)
 - [ ] shaker: make parser for frequency (with 'rpm' units)
+- [x] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec
 - [ ] 'reader' command
 - [ ] user-defined names for sites
 - [ ] make sure alternative stflow protocol runs on our Tecan
@@ -46,6 +48,7 @@ How to arrange plates initially?
   sites should be used so that multiple translations of the same protocol lead to the
   same site assignments.
 
+Step 1 -- create a partially ordered plan from the protocol
 CMD1: pipette
     pre: plate1 -> site1
     pre: plate2 -> site2
@@ -71,7 +74,7 @@ CMD2: thermocycle plate1
     effect: plate1 at ?siteNext
     action: close thermocycler
 
-Step2:
+Step2 -- create a partially ordered plan to satisfy the pre-conditions
     initial plate1.site = site1
     initial plate2.site = site3
     initial plate2.covered = true
@@ -88,7 +91,7 @@ Step2:
     effect: ~(plate2.covered = true)
     action01: pipette with plate1 and plate2
     -- post: restore plate1 sealed
-    post: restore plate2 covered
+    post: plate2.covered = true
     action01A: move plate2.lid to plate2
     effect: ~(plate2.lid.site = site3)
     effect: plate2.covered = true
@@ -112,8 +115,56 @@ Step2:
     effect: plate1 at ?siteNext
     action: close thermocycler
 
+Step3 -- create a partially ordered plan to satisfy the post-conditions
+    initial plate1.site = site1
+    initial plate2.site = site3
+    initial plate2.covered = true
+    // CMD1: pipette
+    -- pre: plate1 -> site1
+    pre: plate2 -> site2
+    action01a: move plate2 to site2
+    effect: ~(plate2.site = site3)
+    effect: plate2.site = site2
+    -- pre: plate1 unsealed
+    pre: plate2 uncovered
+    action01b: move plate2.lid to site3
+    effect: plate2.lid.site = site3
+    effect: ~(plate2.covered = true)
+    action01: pipette with plate1 and plate2
+    -- post: restore plate1 sealed
+    post: plate2.covered = true
+    action01A: move plate2.lid to plate2
+    effect: ~(plate2.lid.site = site3)
+    effect: plate2.covered = true
+    -- post: plate1 -> prior site
+    post: plate2 -> prior site
+    action01B: move plate2 to site3
+    effect: ~(plate2.site = site2)
+    effect: plate2.site = site3
+    // CMD2: thermocycle plate1
+    pre: plate1 sealed
+    effect: plate1 sealed (ensures that plate doesn't get automatically unsealed later)
+    action: open thermocycler
+    action: move plate1 to siteForThermocycler
+    effect: ~(plate at previous site)
+    effect: plate1 at siteForThermocycler
+    action: close thermocycler
+    action: run thermocycler
+    action: open thermocycler
+    action: move plate1 to ?siteNext
+    effect: ~(plate at siteForThermocycler)
+    effect: plate1 at ?siteNext
+    action: close thermocycler
+
+Step 4 -- calculate movement plans and pipetting plans
+
+Post-conditions are optional.  The user should be able to remove them if they don't want them.
+
 In general, post-conditions get deleted if there are any later effects which overwrite the given value.
-However, with plate sites, we need to handle this differently and keep a stack.
+However, with plate sites, we need to handle this differently.
+Also consider that at some point, a plate may want to stay cool, meaning that it shouldn't be moved back to an uncooled position unless necessary.
+If the user explicitly moves a plate with a move command, then the stack should be reset.
+What we could do is propogate the desired post-condition value through commands, and commands can either pass that value on or overwrite it.
 
 
 ## For stflow to run water test

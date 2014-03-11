@@ -19,6 +19,11 @@ case class Distribute(
 	effects: List[WorldStateEvent]
 ) extends Command
 
+case class ReadPlate(
+	program: ReaderProgram,
+	plate: Plate
+) extends Command
+
 case class SetReagents(
 	wells: PipetteDestinations,
 	reagents: List[String]
@@ -53,6 +58,11 @@ case class SetReagents(
 		List(event)
 	}
 }
+
+case class ShakePlate(
+	program: ShakerSpec,
+	plate: Plate
+) extends Command
 
 sealed trait TitrateAmount
 case class TitrateAmount_Volume(volume: LiquidVolume) extends TitrateAmount

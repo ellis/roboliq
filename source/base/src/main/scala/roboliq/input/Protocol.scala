@@ -538,8 +538,20 @@ class Protocol {
 					}
 					path1 <- path0.add(task)
 				} yield path1
-			case "shake" =>
+			case "shakePlate" =>
+				println("shakePlate:")
+				nameVal_l.foreach(println)
 				for {
+					cmd <- Converter.convCommandAs[ShakePlate](nameVal_l, eb, path0.state)
+					specIdent <- eb.getIdent(cmd.program)
+					labwareIdent <- eb.getIdent(cmd.plate)
+					agentIdent = f"?a$nvar%04d"
+					deviceIdent = f"?d$nvar%04d"
+					siteIdent = f"?s$nvar%04d"
+					task = Task(Rel("shaker-run", List(agentIdent, deviceIdent, specIdent, labwareIdent, siteIdent)), Nil)
+					path1 <- path0.add(task)
+				} yield path1
+/*				for {
 					arg_l <- loadJsonProtocol_ProtocolCommand_getArgList(List("object", "spec"), nameVal_l)
 					task <- arg_l match {
 						case List(Some(JsString(objectRef)), Some(JsString(specIdent))) =>
@@ -556,6 +568,7 @@ class Protocol {
 					}
 					path1 <- path0.add(task)
 				} yield path1
+*/
 			case "thermocycle" =>
 				val argSpec_l = List(
 					("object", true, jsvalToEntity[Labware] _),
@@ -1195,20 +1208,6 @@ class Protocol {
 						}
 					}
 
-					// Add user-defined specs for this device
-					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
-						// Get or create the spec for specIdent
-						val spec: ShakerSpec = eb.getEntity(specIdent) match {
-							case Some(spec) => spec.asInstanceOf[ShakerSpec]
-							case None =>
-								// Store the evoware string for this spec
-								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent.toLowerCase) = internal
-								ShakerSpec(gid, None, Some(internal))
-						}
-						// Register the spec
-						eb.addDeviceSpec(device, spec, specIdent)
-					}
 				case "RoboPeel" =>
 					val deviceIdent = agentIdent+"_peeler"
 					val device = addPeeler(deviceIdent, carrierE)

@@ -323,6 +323,7 @@ object Converter {
 			else if (typ <:< typeOf[Map[_, _]]) {
 				jsval match {
 					case jsobj @ JsObject(fields) =>
+						println("fields: " + fields)
 						val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
 						val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 						val name_l = fields.toList.map(_._1)
@@ -528,6 +529,12 @@ object Converter {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
+		
+		println("convMap: ")
+		println(path_r)
+		println(jsobj)
+		println(typKey)
+		println(nameToType_l)
 
 		// Handle keys if they need to be looked up
 		val (errK_l, wK, convK_l, key_l):
@@ -563,6 +570,8 @@ object Converter {
 						// If this is the special ID field, and an ID was passed:
 						if (name == "id" && id_?.isDefined)
 							RsSuccess(ConvObject(id_?.get))
+						else if (name == "key" && typ2 =:= typeOf[String])
+							RsSuccess(ConvObject(java.util.UUID.randomUUID().toString()))
 						// Else try using JsNull
 						else
 							convOrRequire(path2_r, JsNull, typ2, eb, state_?, Some(name))
