@@ -429,6 +429,7 @@ object Strips {
 		val openGoals: Literals
 	) {
 		def addAction(op: Operator): PartialPlan = {
+			// Create a new action with uniquely numbered parameter names
 			val i = action_l.size
 			val paramName_l = op.paramName_l.map(s => s"${s}_${i}")
 			val action = Operator(
@@ -439,6 +440,7 @@ object Strips {
 				effects = op.effects
 			)
 			val action2_l: Vector[Operator] = action_l :+ action
+			// Add the action's preconditions to the list of open goals
 			val openGoals2 = openGoals ++ action.preconds
 			new PartialPlan(
 				action_l = action2_l,
