@@ -410,10 +410,10 @@ object Strips {
 	case class Binding(eq: Option[String], ne: Option[String], in: Set[String])
 	/**
 	 * Represents a causal link.
-	 * a and b are indexes of actions, and p is a proposition in b which is an effect of a.
+	 * a and b are indexes of actions, and p is the index of a precondition in b.
 	 * The proposition should be protected so that no actions are placed between a and b which negate the effect.
 	 */
-	case class CausalLink(a: Int, p: (Atom, Boolean), b: Int)
+	case class CausalLink(provider_i: Int, consumer_i: Int, precond_i: Int)
 	
 	/**
 	 * @param action_l Set of partially instantiated operators
@@ -448,6 +448,26 @@ object Strips {
 				binding_m = binding_m,
 				link_l = link_l,
 				openGoals = openGoals2 
+			)
+		}
+		
+		def addOrdering(before_i: Int, after_i: Int): PartialPlan = {
+			new PartialPlan(
+				action_l = action_l,
+				ordering_l = ordering_l + (before_i -> after_i),
+				binding_m = binding_m,
+				link_l = link_l,
+				openGoals = openGoals 
+			)
+		}
+		
+		def addLink(link: CausalLink): PartialPlan = {
+			new PartialPlan(
+				action_l = action_l,
+				ordering_l = ordering_l,
+				binding_m = binding_m,
+				link_l = link_l + link,
+				openGoals = openGoals 
 			)
 		}
 		/*
