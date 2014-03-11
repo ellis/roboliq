@@ -8,7 +8,7 @@
 - [x] shaker: currently looking at Converter, why Map[String, ShakerSpec] isn't working
 - [ ] shaker: make parser for duration (with 'min' and 's' units)
 - [ ] shaker: make parser for frequency (with 'rpm' units)
-- [ ] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec
+- [x] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec
 - [ ] 'reader' command
 - [ ] user-defined names for sites
 - [ ] make sure alternative stflow protocol runs on our Tecan
