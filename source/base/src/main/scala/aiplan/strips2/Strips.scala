@@ -408,6 +408,33 @@ object Strips {
 	//case class BindingNe(a: String, b: String) extends BindingConstraint
 	//case class BindingIn(a: String, l: Set[String]) extends BindingConstraint
 	case class Binding(eq: Option[String], ne: Option[String], in: Set[String])
+	
+	class Bindings(
+		equality_m: Map[String, String],
+		inequality_l: Set[(String, String)],
+		options_m: Map[String, List[String]]
+	) {
+		CONTINUE HERE
+		def setVariableValues(a: String, b: Set[String]): Option[Bindings] = {
+			map.get(a) match {
+				case None => Some(new Bindings(map + (a -> Binding(None, None, b))))
+				case _ => None
+			}
+		}
+		
+		/**
+		 * When variables are set to be equal, collapse one into the other.
+		 */
+		def setVariablesEqual(a: String, b: String): Option[Bindings] = {
+			val List(x, y) = List(a, b).sorted
+			(map.get(x), map.get(y)) match {
+				case (Some(bindingA), Some(bindingB)) =>
+				case _ => None
+			}
+		}
+	}
+	
+	
 	/**
 	 * Represents a causal link.
 	 * a and b are indexes of actions, and p is the index of a precondition in b.
@@ -426,9 +453,19 @@ object Strips {
 		val ordering_l: Set[(Int, Int)],
 		val binding_m: Map[String, Binding],
 		val link_l: Set[CausalLink],
-		val openGoals: Literals
+		val openGoal_l: Set[(Int, Int)],
+		val possibleLink_l: List[(CausalLink, Map[String, String])]
+		//val openGoals: Literals
 	) {
-		def addAction(op: Operator): PartialPlan = {
+		/**
+		 * Add an action with the given link and bindings.
+		 * This will increase the number of orderings.
+		 * It may increase the number of bindings, open goals.
+		 * The new bindings may eliminate some of the of possible links.
+		 * The action's effects may become possible links for open precondition.
+		 * The action's preconditions may become possible links for other action effects. 
+		 */
+		def addAction(op: Operator, link: CausalLink, bindings: Map[String, Binding]): PartialPlan = {
 			// Create a new action with uniquely numbered parameter names
 			val i = action_l.size
 			val paramName_l = op.paramName_l.map(s => s"${s}_${i}")
@@ -441,35 +478,109 @@ object Strips {
 			)
 			val action2_l: Vector[Operator] = action_l :+ action
 			// Add the action's preconditions to the list of open goals
-			val openGoals2 = openGoals ++ action.preconds
+			//val openGoals2 = openGoals ++ action.preconds
+			val ordering2_l = ordering_l + ((link.provider_i, link.consumer_i))
+			val binding2_m = binding_m ++ bindings
+			val openGoal2_l = openGoal_l ++ action.preconds.l.zipWithIndex.map(i -> _._2)
+			val possibleLink2_l = possibleLink_l.filter(pair => {
+				val (link, map) = pair
+				binding2_m
+				true
+			})
 			new PartialPlan(
 				action_l = action2_l,
-				ordering_l = ordering_l,
-				binding_m = binding_m,
+				ordering_l = ordering2_l,
+				binding_m = binding2_m,
 				link_l = link_l,
-				openGoals = openGoals2 
+				openGoal_l = openGoal2_l,
+				possibleLink_l = possibleLink2_l
 			)
 		}
 		
+		/**
+		 * Add an ordering.
+		 * This will reduce the number of possible links.
+		 */
 		def addOrdering(before_i: Int, after_i: Int): PartialPlan = {
 			new PartialPlan(
 				action_l = action_l,
 				ordering_l = ordering_l + (before_i -> after_i),
 				binding_m = binding_m,
 				link_l = link_l,
-				openGoals = openGoals 
+				openGoal_l = openGoal_l,
+				possibleLink_l = possibleLink_l
 			)
 		}
 		
+		/**
+		 * Add an causal link.
+		 * This may add a new ordering.
+		 * The link will be removed from list of possible links.  
+		 */
 		def addLink(link: CausalLink): PartialPlan = {
 			new PartialPlan(
 				action_l = action_l,
 				ordering_l = ordering_l,
 				binding_m = binding_m,
 				link_l = link_l + link,
-				openGoals = openGoals 
+				openGoal_l = openGoal_l,
+				possibleLink_l = possibleLink_l
 			)
 		}
+
+		def getExistingProviders(consumer_i: Int, precond_i: Int): Unit = {
+			val precond = action_l(consumer_i).preconds.l(precond_i)
+			
+			// Get indexes of actions which may be before consumer_i
+			val provider_li = (0 until action_l.size).filter(provider_i =>
+				consumer_i != provider_i && !ordering_l.contains((consumer_i, provider_i))
+			)
+			for (provider_i <- provider_li) {
+				val action = action_l(provider_i)
+				// If this is a positive preconditions
+				if (precond.pos) {
+					// Search for valid action/poseffect/binding combinations
+					for ((effect, effect_i) <- action.effects.pos.zipWithIndex if effect.name == precond.atom.name) {
+						val l0 = effect.params zip precond.atom.params
+						val l1 = l0.map(pair => )
+					}
+				}
+				// Else this is a negative precondition
+				else {
+					// Search for valid action/negeffect/binding combinations
+					// This will involve bindings for the negeffect,
+					// but we also need to check that the binding doesn't create a poseffect
+					// that negates the negative precondition.
+				}
+			}
+		}
+		
+		def getBoundValue(name: String): Binding = {
+			//CONTINUE HERE
+			binding_m.get(name) match {
+				case None => Binding(None, None, Set())
+				case Some(binding) =>
+					binding.eq match {
+						case None => binding
+						case Some(s) => getBoundValue(s)
+					}
+			}
+		}
+		
+		
+		def extendBindings(bindings: Map[String, String], sp: Atom, pp: Atom): Option[Map[String, String]] = {
+			assert(sp.name == pp.name)
+			val l = pp.params zip sp.params
+			val valid = l.forall(pair => {
+				bindings.get(pair._1) match {
+					case None => true
+					case Some(x) => x == pair._2
+				}
+			})
+			if (valid) Some(bindings ++ l)
+			else None
+		}
+		
 		/*
 		def isThreat(action: Operator, link: CausalLink): Boolean = {
 			
@@ -497,9 +608,10 @@ object Strips {
 				effects = Literals.empty
 			)
 			val ordering_l = Set((0, 1))
-			val goals = problem.goals
+			//val goals = problem.goals
+			val openGoal_l = problem.goals.l.zipWithIndex.map(1 -> _._2).toSet
 			new PartialPlan(
-				Vector(action0, action1), ordering_l, Map(), Set(), goals
+				Vector(action0, action1), ordering_l, Map(), Set(), openGoal_l, Nil
 			)
 		}
 	}
