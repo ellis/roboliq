@@ -408,30 +408,195 @@ object Strips {
 	//case class BindingNe(a: String, b: String) extends BindingConstraint
 	//case class BindingIn(a: String, l: Set[String]) extends BindingConstraint
 	case class Binding(eq: Option[String], ne: Option[String], in: Set[String])
+
+	/**
+	 * @param option_l Set of objects that the variable may use
+	 * @param ne_l Set of variables which the variable shall be equal to
+	 */
+	case class B(option_l: Set[String] = Set(), ne_l: Set[String] = Set())
 	
+	/**
+	 * @param variable_m map of variables to possible object values
+	 * @param equality_m map of variable to another variable
+	 * @param assignment_m map of variables to either another variable or the chosen object value
+	 * @param impossible_m map of impossible variables to description of the problem
+	 * 
+	 * Invariants:
+	 * - A variable with a single possible value is held in assignment_m, not variable_m
+	 * - A variable with no possible values is held in impossible_m and nowhere else
+	 * - A variable with multiple possible values is held in variable_m
+	 * - A variable which is not equal to an object does not have that object in it's options set 
+	 * - Any variable that is a key for assignment_m or impossible_m, is not a key in any other map
+	 * - Any variable that is a key for assignment_m or impossible_m, is not a value in any map
+	 * - When a variable is assigned to another variable, add the equality to assignment_m and remove references to one of the variables from all other maps
+	 * - If x is in y's inequality set, then y is in x's inequality set:w
+	 * 
+	 */
 	class Bindings(
-		equality_m: Map[String, String],
-		inequality_l: Set[(String, String)],
-		options_m: Map[String, List[String]]
+		variable_m: Map[String, B],
+		assignment_m: Map[String, String],
+		//inequality1_m: Map[String, Set[String]],
+		//inequality2_m: Map[String, Set[String]],
+		impossible_m: Map[String, String]
 	) {
-		CONTINUE HERE
-		def setVariableValues(a: String, b: Set[String]): Option[Bindings] = {
-			map.get(a) match {
-				case None => Some(new Bindings(map + (a -> Binding(None, None, b))))
-				case _ => None
+		def copy(
+			variable_m: Map[String, B] = variable_m,
+			assignment_m: Map[String, String] = assignment_m,
+			//inequality1_m: Map[String, Set[String]] = inequality1_m,
+			//inequality2_m: Map[String, Set[String]] = inequality2_m,
+			impossible_m: Map[String, String] = impossible_m
+		): Bindings = new Bindings(
+			variable_m,
+			assignment_m,
+			//inequality1_m,
+			//inequality2_m,
+			impossible_m
+		)
+		
+		def getCanonicalName(name: String): String = {
+			assignment_m.get(name) match {
+				case None => name
+				case Some(name2) => getCanonicalName(name2)
+			}
+		}
+			
+		/**
+		 * Add a variable and it's possible values to the bindings.
+		 * This function should be called before that variable is referenced.
+		 */
+		def addVariable(name: String, option_l: Set[String]): Option[Bindings] = {
+			// This should only be called once per variable
+			assert(!variable_m.contains(name))
+
+			setVariableOptions(name, option_l)
+		}
+		
+		private def isVariableName(name: String): Boolean = name.contains(':')
+		
+		private def setImpossible(name: String, reason: String): Bindings = {
+			new Bindings(
+				(variable_m - name).mapValues(b => b.copy(ne_l = b.ne_l - name)),
+				assignment_m - name,
+				impossible_m + (name -> reason)
+			)
+		}
+		
+		private def substitute(name1: String, name2: String): Bindings = {
+			assert(isVariableName(name1))
+			assert(!assignment_m.contains(name1))
+			assert(!assignment_m.contains(name2))
+			assert(!impossible_m.contains(name1))
+			new Bindings(
+				(variable_m - name1).mapValues(b => b.copy(ne_l = b.ne_l.map(s => if (s == name1) name2 else s))),
+				assignment_m + (name1 -> name2),
+				impossible_m
+			)
+		}
+		
+		private def setVariableOptions(name: String, option_l: Set[String]): Option[Bindings] = {
+			assert(isVariableName(name))
+			assert(!assignment_m.contains(name))
+			assert(!impossible_m.contains(name))
+			
+			if (option_l.isEmpty) {
+				Some(setImpossible(name, "empty set of possible values"))
+			}
+			else if (option_l.size == 1) {
+				assign(name, option_l.head)
+			}
+			else {
+				val b = variable_m.getOrElse(name, B())
+				Some(copy(
+					variable_m = variable_m + (name -> b.copy(option_l = option_l))
+				))
 			}
 		}
 		
-		/**
-		 * When variables are set to be equal, collapse one into the other.
-		 */
-		def setVariablesEqual(a: String, b: String): Option[Bindings] = {
-			val List(x, y) = List(a, b).sorted
-			(map.get(x), map.get(y)) match {
-				case (Some(bindingA), Some(bindingB)) =>
-				case _ => None
+		def assign(assignee: String, value: String): Option[Bindings] = {
+			val List(x, y) = List(getCanonicalName(assignee), getCanonicalName(value)).sorted
+			if (x == y) return Some(this)
+			
+			(variable_m.get(x), variable_m.get(y)) match {
+				// Both are variables
+				case (Some(bX), Some(bY)) =>
+					setVariableEquality(x, bX, y, bY)
+				// One is a variable and the other is an object
+				case (Some(b), None) =>
+					Some(substitute(x, y))
+				case (None, Some(b)) =>
+					Some(substitute(y, x))
+				//case (None, None) =>
 			}
 		}
+
+		/**
+		 * set name1 = name2, replacing references to name1 in assignment and inequality values
+		 * When variables are set to be equal, collapse one into the other.
+		 * a and b get sorted, and the alphanumerically larger one gets collapsed into the smaller one.
+		 */
+		private def setVariableEquality(name1: String, b1: B, name2: String, b2: B): Option[Bindings] = {
+			// Make sure that x and y are not already set to non-equal
+			assert(!b1.ne_l.contains(name2))
+
+			// Take intersection of x & y options for x, and remove y entry
+			val option_l = b1.option_l intersect b2.option_l
+			for {
+				bindings1 <- this.setVariableOptions(name2, option_l)
+				name2b = bindings1.getCanonicalName(name2)
+				bindings2 = bindings1.substitute(name1, name2b)
+			} yield bindings2
+		}
+
+		/*
+		/**
+		 * Add y inequalities to x inequalities,
+		 * Remove y entry,
+		 * Replace occurrences of y by x.
+		 */
+		private def updateInequality1(x: String, y: String): Map[String, Set[String]] = {
+			val inequality = inequality1_m.getOrElse(x, Set()) ++ inequality1_m.getOrElse(y, Set())
+			val m1 = inequality1_m + (x -> inequality)
+			val m2 = m1 - y
+			val m3 = m2.mapValues(_.map(name => if (name == y) x else y))
+			m3
+		}
+		*/
+		
+		def exclude(name: String, value: String): Option[Bindings] = {
+			CONTINUE HERE
+		}
+		
+		def setVariableInequality(a: String, b: String): Option[Bindings] = {
+			val List(x, y) = List(getCanonicalName(a), getCanonicalName(b)).sorted
+			// Make sure that x and y are not already set to equal
+			assert(x != y)
+			// Check whether x and y are already set to non-equal
+			if (inequality1_m.getOrElse(x, Set()).contains(y)) return Some(this)
+			
+			// Add variables to each other's inequality sets
+			val inequalityX = inequality1_m.getOrElse(x, Set()) + y 
+			val inequalityY = inequality1_m.getOrElse(y, Set()) + x 
+			val inequality12_m = inequality1_m + (x -> inequalityX) + (y -> inequalityY)
+			
+			// Remove 
+			
+			Some(copy(inequality1_m = inequality12_m))
+		}
+		
+		/*private def removeInequalityRow(inequality_m: Map[String, Set[String]], name: String): Map[String, Set[String]] =
+			inequality_m - name
+		
+		private def removeInequalityCol(inequality_m: Map[String, Set[String]], name: String): Map[String, Set[String]] =
+			inequality_m.mapValues(_ - name)
+		
+		private def replaceInequalityValue(inequality_m: Map[String, Set[String]], name: String, value_l: Set[String]): Map[String, Set[String]] = {
+			// Remove entry for name
+			val m2 = inequality_m - name
+			// Replace all instances of name with value_l
+			val m3 = m2.mapValues(l => { if (l.contains(name)) l - name ++ value_l else l })
+			m3
+		}*/
+		
 	}
 	
 	
