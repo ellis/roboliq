@@ -62,6 +62,20 @@ class Bindings(
 		setVariableOptions(name, option_l)
 	}
 	
+	def addVariables(map: Map[String, Set[String]]): Either[String, Bindings] = {
+		def step(l: List[(String, Set[String])], acc: Bindings): Either[String, Bindings] = {
+			l match {
+				case Nil => Right(acc)
+				case (name, value_l) :: rest =>
+					for {
+						acc2 <- acc.addVariable(name, value_l).right
+						acc3 <- step(rest, acc2).right
+					} yield acc3
+			}
+		}
+		step(map.toList, this)
+	}
+	
 	private def isVariableName(name: String): Boolean = name.contains(':')
 	
 	private def substitute(name1: String, name2: String): Bindings = {
@@ -107,6 +121,20 @@ class Bindings(
 				Right(substitute(y, x))
 			//case (None, None) =>
 		}
+	}
+	
+	def assign(map: Map[String, String]): Either[String, Bindings] = {
+		def step(l: List[(String, String)], acc: Bindings): Either[String, Bindings] = {
+			l match {
+				case Nil => Right(acc)
+				case (name, value) :: rest =>
+					for {
+						acc2 <- acc.assign(name, value).right
+						acc3 <- step(rest, acc2).right
+					} yield acc3
+			}
+		}
+		step(map.toList, this)
 	}
 
 	/**
@@ -178,10 +206,28 @@ class Bindings(
 				}
 		}
 	}
+	
+	def exclude(map: Map[String, Set[String]]): Either[String, Bindings] = {
+		def step(l: List[(String, String)], acc: Bindings): Either[String, Bindings] = {
+			l match {
+				case Nil => Right(acc)
+				case (name, value) :: rest =>
+					for {
+						acc2 <- acc.exclude(name, value).right
+						acc3 <- step(rest, acc2).right
+					} yield acc3
+			}
+		}
+		val l = map.toList.flatMap(pair => pair._2.toList.map(pair._1 -> _))
+		step(l, this)
+	}
 }
 
+/**
+ * @param map Map from action index to the set of indexes that are ordered after that action.
+ */
 class Orderings(
-	map: Map[Int, Set[Int]]
+	val map: Map[Int, Set[Int]]
 ) {
 	def add(before_i: Int, after_i: Int): Either[String, Orderings] = {
 		// Make sure the constraints are not violated.
@@ -227,10 +273,62 @@ class PartialPlan private (
 	val orderings: Orderings,
 	val bindings: Bindings,
 	val link_l: Set[CausalLink],
-	val openGoal_l: Set[(Int, Int)],
-	val possibleLink_l: List[(CausalLink, Map[String, String])]
-	//val openGoals: Literals
+	val openGoal_l: Set[(Int, Int)]
+	//val possibleLink_l: List[(CausalLink, Map[String, String])]
 ) {
+	private def copy(
+		action_l: Vector[Operator] = action_l,
+		orderings: Orderings = orderings,
+		bindings: Bindings = bindings,
+		link_l: Set[CausalLink] = link_l,
+		openGoal_l: Set[(Int, Int)] = openGoal_l
+		//possibleLink_l: List[(CausalLink, Map[String, String])] = possibleLink_l
+	): PartialPlan = {
+		new PartialPlan(
+			action_l,
+			orderings,
+			bindings,
+			link_l = link_l,
+			openGoal_l
+			//possibleLink_l
+		)
+	}
+	
+	/**
+	 * Add an action.
+	 * This will create unique parameter names for the action's parameters.
+	 * The parameters will be added to the bindings using possible values for the given type.
+	 */
+	def addAction(problem: Problem, op: Operator): Either[String, PartialPlan] = {
+		// Create a new action with uniquely numbered parameter names
+		val i = action_l.size
+		val paramName_l = op.paramName_l.map(s => s"${i-1}:${s}")
+		val action = Operator(
+			name = op.name,
+			paramName_l = paramName_l,
+			paramTyp_l = op.paramTyp_l,
+			preconds = op.preconds,
+			effects = op.effects
+		)
+		val action2_l: Vector[Operator] = action_l :+ action
+		
+		// Get list of parameters and their possible objects
+		val typeToObjects_m: Map[String, List[String]] =
+			problem.object_l.groupBy(_._1).mapValues(_.map(_._2))
+		val variableToOptions_m: Map[String, Set[String]] =
+			(paramName_l zip op.paramTyp_l).toMap.mapValues(typ => typeToObjects_m.getOrElse(typ, Nil).toSet)
+		
+		for {
+			bindings2 <- bindings.addVariables(variableToOptions_m).right
+		} yield {
+			val openGoal2_l = openGoal_l ++ action.preconds.l.zipWithIndex.map(i -> _._2)
+			copy(
+				action_l = action2_l,
+				bindings = bindings2,
+				openGoal_l = openGoal2_l
+			)
+		}
+	}
 	/**
 	 * Add an action with the given link and bindings.
 	 * This will increase the number of orderings.
@@ -279,14 +377,7 @@ class PartialPlan private (
 		for {
 			orderings2 <- orderings.add(before_i, after_i).right
 		} yield {
-			new PartialPlan(
-				action_l = action_l,
-				orderings = orderings2,
-				bindings = bindings,
-				link_l = link_l,
-				openGoal_l = openGoal_l,
-				possibleLink_l = possibleLink_l
-			)
+			copy(orderings = orderings2)
 		}
 	}
 	
@@ -294,14 +385,7 @@ class PartialPlan private (
 		for {
 			bindings2 <- bindings.assign(name, value).right
 		} yield {
-			new PartialPlan(
-				action_l = action_l,
-				orderings = orderings,
-				bindings = bindings2,
-				link_l = link_l,
-				openGoal_l = openGoal_l,
-				possibleLink_l = possibleLink_l
-			)
+			copy(bindings = bindings2)
 		}
 	}
 	
@@ -309,14 +393,7 @@ class PartialPlan private (
 		for {
 			bindings2 <- bindings.exclude(name, value).right
 		} yield {
-			new PartialPlan(
-				action_l = action_l,
-				orderings = orderings,
-				bindings = bindings2,
-				link_l = link_l,
-				openGoal_l = openGoal_l,
-				possibleLink_l = possibleLink_l
-			)
+			copy(bindings = bindings2)
 		}
 	}
 	
@@ -324,49 +401,55 @@ class PartialPlan private (
 	 * Add an causal link.
 	 * This may add a new ordering.
 	 * The precondition will be removed from the open goals.
+	 * Bindings will be added.
 	 * The link will be removed from list of possible links.  
 	 */
 	def addLink(link: CausalLink, eq_m: Map[String, String], ne_m: Map[String, Set[String]]): Either[String, PartialPlan] = {
 		for {
 			orderings2 <- orderings.add(link.provider_i, link.consumer_i).right
+			bindings2 <- bindings.assign(eq_m).right
+			bindings3 <- bindings2.exclude(ne_m).right
 		} yield {
-			new PartialPlan(
-				action_l = action_l,
-				orderings = orderings,
-				bindings = bindings,
+			copy(
+				orderings = orderings2,
+				bindings = bindings3,
 				link_l = link_l + link,
-				openGoal_l = openGoal_l - (link.consumer_i -> link.precond_i),
-				possibleLink_l = possibleLink_l.filter(_ != link)
+				openGoal_l = openGoal_l - (link.consumer_i -> link.precond_i)
 			)
 		}
 	}
 
-	/*def getExistingProviders(consumer_i: Int, precond_i: Int): Unit = {
+	def getExistingProviders(consumer_i: Int, precond_i: Int): Unit = {
 		val precond = action_l(consumer_i).preconds.l(precond_i)
 		
 		// Get indexes of actions which may be before consumer_i
-		val provider_li = (0 until action_l.size).filter(provider_i =>
-			consumer_i != provider_i && !ordering_l.contains((consumer_i, provider_i))
-		)
-		for (provider_i <- provider_li) {
-			val action = action_l(provider_i)
-			// If this is a positive preconditions
-			if (precond.pos) {
+		val after_li = orderings.map.getOrElse(consumer_i, Set())
+		val before_li = ((0 until action_l.size).toSet -- after_li).toList.sorted
+
+		// If this is a positive preconditions
+		if (precond.pos) {
+			before_li.flatMap(before_i => {
+				val action = action_l(before_i)
 				// Search for valid action/poseffect/binding combinations
-				for ((effect, effect_i) <- action.effects.pos.zipWithIndex if effect.name == precond.atom.name) {
-					val l0 = effect.params zip precond.atom.params
-					val l1 = l0.map(pair => )
+				val l0 = for ((effect, effect_i) <- action.effects.pos.toList.zipWithIndex if effect.name == precond.atom.name) yield {
+					val eq_m = (effect.params zip precond.atom.params).toMap
+					bindings.assign(eq_m) match {
+						case Left(_) => None
+						case Right(_) => Some(CausalLink(before_i, consumer_i, precond_i) -> eq_m)
+					}
 				}
-			}
-			// Else this is a negative precondition
-			else {
-				// Search for valid action/negeffect/binding combinations
-				// This will involve bindings for the negeffect,
-				// but we also need to check that the binding doesn't create a poseffect
-				// that negates the negative precondition.
-			}
+				l0.flatten
+			})
+		}
+		// Else this is a negative precondition
+		else {
+			// Search for valid action/negeffect/binding combinations
+			// This will involve bindings for the negeffect,
+			// but we also need to check that the binding doesn't create a poseffect
+			// that negates the negative precondition.
 		}
 	}
+	/*
 	
 	def getBoundValue(name: String): Binding = {
 		//CONTINUE HERE
@@ -403,6 +486,20 @@ class PartialPlan private (
 	def isConsistent(ordering: (Int, Int)): Boolean = {
 		null
 	}*/
+	
+	/*def toDot(): String = {
+		val header = List[String](
+			"rankdir=LR",
+			"node [shape=record]"
+		)
+		val actionLine_l: List[String] = action_l.zipWithIndex.map(pair => {
+			val (op, i) = pair
+			val name = s"${i-1}:${op.name}"
+			val precondText = 
+			s"$name|{$precondText|$effectText}"
+		})
+		l.mkString("digraph partialPlan {\n", ";\n\t", ";\n}")
+	}*/
 }
 
 object PartialPlan {
@@ -425,7 +522,28 @@ object PartialPlan {
 		//val goals = problem.goals
 		val openGoal_l = problem.goals.l.zipWithIndex.map(1 -> _._2).toSet
 		new PartialPlan(
-			Vector(action0, action1), ordering_l, Map(), Set(), openGoal_l, Nil
+			action_l = Vector(action0, action1),
+			orderings = new Orderings(Map()),
+			bindings = new Bindings(Map(), Map()),
+			link_l = Set(),
+			openGoal_l
 		)
+	}
+	
+	def main(args: Array[String]) {
+		for {
+			domain <- aiplan.strips2.PddlParser.parseDomain(aiplan.quiz.Quiz2b7.domainText).right
+			problem <- aiplan.strips2.PddlParser.parseProblem(domain, aiplan.quiz.Quiz2b7.problemText).right
+		} {
+			val plan0 = fromProblem(problem)
+			println("domain:")
+			println(domain)
+			println()
+			println("problem:")
+			println(problem)
+			println()
+			
+			println()
+		}
 	}
 }
