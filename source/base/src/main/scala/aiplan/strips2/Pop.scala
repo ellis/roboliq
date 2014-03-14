@@ -4,7 +4,7 @@ import Strips._
 import grizzled.slf4j.Logger
 import scalaz._
 import Scalaz._
-
+/*
 class Pop {
 	type Agenda = List[(Int, Int)]
 	
@@ -44,3 +44,4 @@ class Pop {
 		null
 	}
 }
+*/

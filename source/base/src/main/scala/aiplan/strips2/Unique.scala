@@ -6,8 +6,8 @@ import scala.collection.immutable.IndexedSeq
 import scala.collection.SetLike
 
 class Unique[A](
-	list: Vector[A],
-	set: Set[A]
+	val list: Vector[A],
+	val set: Set[A]
 //) extends IndexedSeq[A] /*with SetLike[A, Unique[A]]*/ {
 ) extends Set[A] with SetLike[A, Unique[A]] {
 

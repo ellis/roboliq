@@ -119,7 +119,8 @@ class Bindings(
 				Right(substitute(x, y))
 			case (None, Some(b)) =>
 				Right(substitute(y, x))
-			//case (None, None) =>
+			case (None, None) =>
+				Left(s"Cannot assign an object to another object: $assignee and $value")
 		}
 	}
 	
@@ -487,19 +488,21 @@ class PartialPlan private (
 		null
 	}*/
 	
-	/*def toDot(): String = {
-		val header = List[String](
+	def toDot(): String = {
+		val header_l = List[String](
 			"rankdir=LR",
 			"node [shape=record]"
 		)
-		val actionLine_l: List[String] = action_l.zipWithIndex.map(pair => {
+		val actionLine_l: List[String] = action_l.toList.zipWithIndex.map(pair => {
 			val (op, i) = pair
 			val name = s"${i-1}:${op.name}"
-			val precondText = 
-			s"$name|{$precondText|$effectText}"
+			val header = (name :: op.paramName_l).mkString(" ")
+			val preconds = op.preconds.l.list.toList.map(_.toString).mkString("|")
+			val effects = op.effects.l.list.toList.map(_.toString).mkString("|")
+			s"""action$i [label="${header}|{{$preconds}|{$effects}}"]"""
 		})
-		l.mkString("digraph partialPlan {\n", ";\n\t", ";\n}")
-	}*/
+		(header_l ++ actionLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
+	}
 }
 
 object PartialPlan {
@@ -542,7 +545,7 @@ object PartialPlan {
 			println("problem:")
 			println(problem)
 			println()
-			
+			println(plan0.toDot)
 			println()
 		}
 	}
