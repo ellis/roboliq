@@ -225,6 +225,8 @@ class Bindings(
 }
 
 /**
+ * A complete map of all orderings.  If A < B < C, then the map will hold
+ * {A < B, A < C, B < C}.  
  * @param map Map from action index to the set of indexes that are ordered after that action.
  */
 class Orderings(
@@ -252,6 +254,21 @@ class Orderings(
 			}
 			Right(new Orderings(map2))
 		}
+	}
+	
+	/**
+	 * Get an ordering map which removes all implied orderings.
+	 */
+	def getMinimalMap: Map[Int, Set[Int]] = {
+		def step(before_i: Int, after_l: List[Int], acc: Set[Int]): (Int, Set[Int]) = {
+			after_l match {
+				case Nil => (before_i -> acc)
+				case after_i :: rest =>
+					val acc2 = acc -- map.getOrElse(after_i, Set())
+					step(before_i, rest, acc2)
+			}
+		}
+		map.map(pair => step(pair._1, pair._2.toList, pair._2))
 	}
 }
 
@@ -501,7 +518,11 @@ class PartialPlan private (
 			val effects = op.effects.l.list.toList.map(_.toString).mkString("|")
 			s"""action$i [label="${header}|{{$preconds}|{$effects}}"]"""
 		})
-		(header_l ++ actionLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
+		val orderLine_l: List[String] = orderings.getMinimalMap.toList.flatMap(pair => {
+			val (before_i, after_l) = pair
+			after_l.map(after_i => s"""action${before_i} -> action${after_i}""")
+		})
+		(header_l ++ actionLine_l ++ orderLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
 	}
 }
 
@@ -521,12 +542,11 @@ object PartialPlan {
 			preconds = problem.goals,
 			effects = Literals.empty
 		)
-		val ordering_l = Set((0, 1))
 		//val goals = problem.goals
 		val openGoal_l = problem.goals.l.zipWithIndex.map(1 -> _._2).toSet
 		new PartialPlan(
 			action_l = Vector(action0, action1),
-			orderings = new Orderings(Map()),
+			orderings = new Orderings(Map(0 -> Set(1))),
 			bindings = new Bindings(Map(), Map()),
 			link_l = Set(),
 			openGoal_l
