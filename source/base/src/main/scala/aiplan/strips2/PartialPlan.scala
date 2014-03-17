@@ -263,6 +263,7 @@ class Orderings(
 			
 			val before_li = map.getOrElse(before_i, Set()) + before_i
 			// 
+			CONTINUE HERE: make sure (2, 1) gets inserted into map2
 			val map2 = for (pair@(i, li) <- map) yield {
 				// before_i is before after_i
 				if (i == before_i)
@@ -274,6 +275,7 @@ class Orderings(
 				else
 					pair
 			}
+			println(s"Orderings.add(${before_i}, ${after_i}) => $map2")
 			Right(new Orderings(map2))
 		}
 	}
@@ -355,11 +357,16 @@ class PartialPlan private (
 			(action.paramName_l zip op.paramTyp_l).toMap.mapValues(typ => typeToObjects_m.getOrElse(typ, Nil).toSet)
 		
 		for {
+			orderings1 <- orderings.add(0, i).right
+			orderings2 <- orderings1.add(i, 1).right
 			bindings2 <- bindings.addVariables(variableToOptions_m).right
 		} yield {
+			println("orderings1: "+orderings1.map)
+			println("orderings2: "+orderings2.map)
 			val openGoal2_l = openGoal_l ++ action.preconds.l.zipWithIndex.map(i -> _._2)
 			copy(
 				action_l = action2_l,
+				orderings = orderings2,
 				bindings = bindings2,
 				openGoal_l = openGoal2_l
 			)
@@ -643,6 +650,8 @@ object PartialPlan {
 			println()
 			println(plan0.getExistingProviders(1, 0))
 			println(plan0.getNewProviders(1, 0))
+			println()
+			println(Pop.pop(plan0).right.map(_.toDot))
 		}
 	}
 }

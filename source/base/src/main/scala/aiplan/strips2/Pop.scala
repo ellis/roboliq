@@ -4,46 +4,38 @@ import Strips._
 import grizzled.slf4j.Logger
 import scalaz._
 import Scalaz._
-/*
-class Pop {
-	type Agenda = List[(Int, Int)]
-	
-	def pop(problem: Problem, plan0: PartialPlan): Option[PartialPlan] = {
+
+object Pop {
+	def pop(plan0: PartialPlan): Either[String, PartialPlan] = {
 		if (plan0.openGoal_l.isEmpty) {
-			Some(plan0)
+			Right(plan0)
 		}
 		else {
 			val (consumer_i, precond_i) = plan0.openGoal_l.head
 			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
-			val provider2_l = plan0.getNewProviders(problem.domain, consumer_i, precond_i)
+			val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
+			
+			def chooseAction(
+				l: List[(Either[Operator, Int], Map[String, String])]
+			): Either[String, PartialPlan] = l match {
+				case Nil =>
+					Left(s"Couldn't find an action to fulfill ${consumer_i}/${precond_i}")
+				case (either, binding_m) :: rest =>
+					either match {
+						case Left(op) =>
+							for {
+								plan1 <- plan0.addAction(op)
+								provider_i = plan1.action_l.size - 1
+								plan2 <- plan1.addLink(CausalLink(provider_i, consumer_i, precond_i), binding_m, Map())
+							} yield plan2
+						case Right(provider_i) =>
+							for {
+								plan1 <- plan0.addLink(CausalLink(provider_i, consumer_i, precond_i), binding_m, Map())
+							} yield plan1
+					}
+			}
+			
+			chooseAction(provider1_l ++ provider2_l)
 		}
-	}
-	
-	private def popWithAction(
-		plan0: PartialPlan,
-		agenda0: Agenda,
-		consumer_i: Int,
-		precond_i: Int,
-		relevant: Either[Int, Operator],
-		bindings: Map[String, String]
-	): Option[(PartialPlan, Agenda)] = {
-		val (provider_i, plan1, agenda1) = relevant match {
-			case Right(action) =>
-				val provider_i = plan0.action_l.size
-				val plan1 = plan0.addAction(action).addOrdering(provider_i, consumer_i)
-				val agendaNew = (0 until action.preconds.l.length).toList.map(provider_i -> _)
-				val agenda1 = agenda0 ++ agendaNew
-				(provider_i, plan1, agenda1)
-			case Left(provider_i) =>
-				(provider_i, plan0, agenda0)
-		}
-		val link = CausalLink(provider_i, consumer_i, precond_i)
-		val plan2 = plan1.addLink(link)
-		Some((plan2, agenda1))
-	}
-	
-	def getProviders(plan: PartialPlan, action_i: Int, precond_i: Int): List[Either[Int, Operator]] = {
-		null
 	}
 }
-*/
