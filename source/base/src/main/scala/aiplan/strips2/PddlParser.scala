@@ -76,9 +76,18 @@ object PddlParser {
 					init_l <- initDef_l.map(getAtom).sequenceU.right
 					goal_l <- goalDef_l.map(elem => getLiterals(elem)).sequenceU.right
 				} yield {
+					val object_l = (init_l ++ goal_l.flatMap(_.l.map(_.atom))).flatMap(atom => {
+						domain.predicate_l.find(_.name == atom.name) match {
+							case Some(sig) =>
+								sig.paramTyp_l zip atom.params
+							case None =>
+								atom.params.map("any" -> _)
+						}
+					}).toSet.toList
+					println("object_l: "+object_l)
 					Strips.Problem(
 						domain = domain,
-						object_l = Nil,
+						object_l = object_l,
 						state0 = Strips.State(init_l.toSet),
 						goals = goal_l.head
 					)

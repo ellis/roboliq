@@ -222,6 +222,28 @@ class Bindings(
 		val l = map.toList.flatMap(pair => pair._2.toList.map(pair._1 -> _))
 		step(l, this)
 	}
+	
+	def bind(atom: Atom): Atom = {
+		atom.copy(params = atom.params.map(s => assignment_m.getOrElse(s, s)))
+	}
+	
+	def bind(lit: Literal): Literal = {
+		lit.copy(atom = bind(lit.atom))
+	}
+	
+	def bind(l: Literals): Literals = {
+		Literals(l.l.map(bind))
+	}
+	
+	def bind(op: Operator): Operator = {
+		Operator(
+			name = op.name,
+			paramName_l = op.paramName_l.map(s => assignment_m.getOrElse(s, s)),
+			paramTyp_l = op.paramTyp_l,
+			preconds = bind(op.preconds),
+			effects = bind(op.effects)
+		)
+	}
 }
 
 /**
@@ -287,6 +309,7 @@ case class CausalLink(provider_i: Int, consumer_i: Int, precond_i: Int)
  * @param link_l Causal links between actions
  */
 class PartialPlan private (
+	val problem: Problem,
 	val action_l: Vector[Operator],
 	val orderings: Orderings,
 	val bindings: Bindings,
@@ -303,6 +326,7 @@ class PartialPlan private (
 		//possibleLink_l: List[(CausalLink, Map[String, String])] = possibleLink_l
 	): PartialPlan = {
 		new PartialPlan(
+			problem,
 			action_l,
 			orderings,
 			bindings,
@@ -317,24 +341,18 @@ class PartialPlan private (
 	 * This will create unique parameter names for the action's parameters.
 	 * The parameters will be added to the bindings using possible values for the given type.
 	 */
-	def addAction(problem: Problem, op: Operator): Either[String, PartialPlan] = {
+	def addAction(op: Operator): Either[String, PartialPlan] = {
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
-		val paramName_l = op.paramName_l.map(s => s"${i-1}:${s}")
-		val action = Operator(
-			name = op.name,
-			paramName_l = paramName_l,
-			paramTyp_l = op.paramTyp_l,
-			preconds = op.preconds,
-			effects = op.effects
-		)
+		val paramName_m = op.paramName_l.map(s => s -> s"${i-1}:${s}").toMap
+		val action = op.bind(paramName_m)
 		val action2_l: Vector[Operator] = action_l :+ action
 		
 		// Get list of parameters and their possible objects
 		val typeToObjects_m: Map[String, List[String]] =
 			problem.object_l.groupBy(_._1).mapValues(_.map(_._2))
 		val variableToOptions_m: Map[String, Set[String]] =
-			(paramName_l zip op.paramTyp_l).toMap.mapValues(typ => typeToObjects_m.getOrElse(typ, Nil).toSet)
+			(action.paramName_l zip op.paramTyp_l).toMap.mapValues(typ => typeToObjects_m.getOrElse(typ, Nil).toSet)
 		
 		for {
 			bindings2 <- bindings.addVariables(variableToOptions_m).right
@@ -437,38 +455,93 @@ class PartialPlan private (
 		}
 	}
 
-	def getExistingProviders(consumer_i: Int, precond_i: Int): Unit = {
+	private def createEffectToPrecondMap(effect: Literal, precond: Literal): Either[String, Map[String, String]] = {
+		val l1 = effect.atom.params zip precond.atom.params
+		val m1 = l1.groupBy(_._1).mapValues(_.map(_._2))
+		def step(l: List[(String, Seq[String])], acc: Map[String, String]): Either[String, Map[String, String]] = {
+			l match {
+				case Nil => Right(acc)
+				case (key, value :: Nil) :: rest => step(rest, acc + (key -> value))
+				case (key, value_l) :: rest => Left(s"would need to map $key to multiple values: "+value_l.mkString(","))
+			}
+		}
+		step(m1.toList, Map())
+	}
+	
+	private def getProvidersFromList(
+		provider_l: List[(Option[Int], Operator)],
+		consumer_i: Int,
+		precond_i: Int
+	): List[(Either[Operator, Int], Map[String, String])] = {
 		val precond = action_l(consumer_i).preconds.l(precond_i)
 		
+		val l = provider_l.flatMap(pair => {
+			val (before_i_?, action) = pair
+			// Search for valid action/poseffect/binding combinations
+			val l0 = for ((effect, effect_i) <- action.effects.l.zipWithIndex if effect.atom.name == precond.atom.name) yield {
+				for {
+					plan2 <- addAction(action) match {
+						case Left(msg) => println("addAction error: "+msg); None
+						case Right(x) => Some(x)
+					}
+					_ = println("added action")
+					action2 = plan2.action_l.last
+					_ = println("action2: "+action2)
+					effect2 = action2.effects.l(effect_i)
+					_ = println("effect2: "+effect2)
+					eq_m <- createEffectToPrecondMap(effect2, precond) match {
+						case Left(msg) => None
+						case Right(x) => Some(x)
+					}
+					_ = println("eq_m: "+eq_m)
+					bindings2 <- plan2.bindings.assign(eq_m) match {
+						case Left(msg) =>
+							println("assign error: "+msg)
+							None
+						case Right(x) => Some(x)
+					}
+					// Check that the assignment doesn't create a positive effect that negates the precondition
+					_ <- {
+						if (precond.pos) {
+							Some(())
+						}
+						else {
+							val pos_l = action.effects.pos.map(bindings2.bind)
+							if (pos_l.contains(precond.atom)) None
+							else Some(())
+						}
+					}
+				} yield {
+					// FIXME: also need to find which values need to be excluded!
+					before_i_? match {
+						case Some(before_i) => Right(before_i) -> eq_m
+						case None => Left(action) -> eq_m
+					}
+				}
+			}
+			l0.flatten
+		})
+		l
+	}
+	
+	
+	def getExistingProviders(consumer_i: Int, precond_i: Int): List[(Either[Operator, Int], Map[String, String])] = {
+		val precond = action_l(consumer_i).preconds.l(precond_i)
 		// Get indexes of actions which may be before consumer_i
 		val after_li = orderings.map.getOrElse(consumer_i, Set())
 		val before_li = ((0 until action_l.size).toSet -- after_li).toList.sorted
-
-		// If this is a positive preconditions
-		if (precond.pos) {
-			before_li.flatMap(before_i => {
-				val action = action_l(before_i)
-				// Search for valid action/poseffect/binding combinations
-				val l0 = for ((effect, effect_i) <- action.effects.pos.toList.zipWithIndex if effect.name == precond.atom.name) yield {
-					val eq_m = (effect.params zip precond.atom.params).toMap
-					bindings.assign(eq_m) match {
-						case Left(_) => None
-						case Right(_) => Some(CausalLink(before_i, consumer_i, precond_i) -> eq_m)
-					}
-				}
-				l0.flatten
-			})
-		}
-		// Else this is a negative precondition
-		else {
-			// Search for valid action/negeffect/binding combinations
-			// This will involve bindings for the negeffect,
-			// but we also need to check that the binding doesn't create a poseffect
-			// that negates the negative precondition.
-		}
+		val provider_l = before_li.map(i => Some(i) -> action_l(i))
+		getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
-	/*
 	
+	def getNewProviders(consumer_i: Int, precond_i: Int): List[(Either[Operator, Int], Map[String, String])] = {
+		val precond = action_l(consumer_i).preconds.l(precond_i)
+		val op_l = problem.domain.operator_l.filter(op => op.effects.l.exists(effect => effect.atom.name == precond.atom.name))
+		val provider_l = op_l.map(op => None -> op)
+		getProvidersFromList(provider_l, consumer_i, precond_i)
+	}
+	
+	/*
 	def getBoundValue(name: String): Binding = {
 		//CONTINUE HERE
 		binding_m.get(name) match {
@@ -545,6 +618,7 @@ object PartialPlan {
 		//val goals = problem.goals
 		val openGoal_l = problem.goals.l.zipWithIndex.map(1 -> _._2).toSet
 		new PartialPlan(
+			problem = problem,
 			action_l = Vector(action0, action1),
 			orderings = new Orderings(Map(0 -> Set(1))),
 			bindings = new Bindings(Map(), Map()),
@@ -567,6 +641,8 @@ object PartialPlan {
 			println()
 			println(plan0.toDot)
 			println()
+			println(plan0.getExistingProviders(1, 0))
+			println(plan0.getNewProviders(1, 0))
 		}
 	}
 }

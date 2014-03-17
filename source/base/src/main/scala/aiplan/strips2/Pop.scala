@@ -8,12 +8,14 @@ import Scalaz._
 class Pop {
 	type Agenda = List[(Int, Int)]
 	
-	def pop(plan0: PartialPlan, agenda0: Agenda): Option[PartialPlan] = {
-		agenda0 match {
-			case Nil => Some(plan0)
-			case (action_i, precond_i) :: rest =>
-				val relevant_l = getProviders(plan0, action_i, precond_i)
-				
+	def pop(problem: Problem, plan0: PartialPlan): Option[PartialPlan] = {
+		if (plan0.openGoal_l.isEmpty) {
+			Some(plan0)
+		}
+		else {
+			val (consumer_i, precond_i) = plan0.openGoal_l.head
+			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
+			val provider2_l = plan0.getNewProviders(problem.domain, consumer_i, precond_i)
 		}
 	}
 	

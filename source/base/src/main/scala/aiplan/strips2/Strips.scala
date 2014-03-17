@@ -32,6 +32,8 @@ object Strips {
 	}
 	
 	case class Atom(name: String, params: Seq[String]) {
+		def bind(map: Map[String, String]): Atom =
+			copy(params = params.map(s => map.getOrElse(s, s)))
 		override def toString = (name :: params.toList).mkString(" ")
 	}
 	
@@ -44,6 +46,8 @@ object Strips {
 	}
 	
 	case class Literal(atom: Atom, pos: Boolean) {
+		def bind(map: Map[String, String]): Literal =
+			copy(atom = atom.bind(map))
 		def !(literal: Literal): Literal = literal.copy(pos = !literal.pos)
 		override def toString = (if (pos) "" else "!") ++ atom.toString
 	}
@@ -79,6 +83,9 @@ object Strips {
 		
 		def ++(that: Literals): Literals =
 			new Literals(l ++ that.l, pos ++ that.pos, neg ++ that.neg)
+		
+		def bind(map: Map[String, String]): Literals =
+			Literals(l.map(_.bind(map)))
 	}
 	
 	object Literals {
@@ -133,6 +140,16 @@ object Strips {
 
 		def getOperatorString = {
 			getSignatureString + "\n  preconds: " + preconds.toString + "\n  effects: " + effects.toString
+		}
+		
+		def bind(map: Map[String, String]): Operator = {
+			Operator(
+				name = name,
+				paramName_l = paramName_l.map(s => map.getOrElse(s, s)),
+				paramTyp_l = paramTyp_l,
+				preconds = preconds.bind(map),
+				effects = effects.bind(map)
+			)
 		}
 	}
 	
