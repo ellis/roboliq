@@ -304,10 +304,13 @@ class Orderings(
 case class CausalLink(provider_i: Int, consumer_i: Int, precond_i: Int)
 
 /**
+ * @param problem The problem this plan should solve
  * @param action_l Set of partially instantiated operators
- * @param ordering_l Ordering constraints
- * @param binding_m Map of variable bindings
+ * @param orderings Ordering constraints
+ * @param bindings Binding constraints
  * @param link_l Causal links between actions
+ * @param openGoal_l Set of open goals, represented as tuples (action_i, precond_i)
+ * @param threat_l Set of threats to causal links
  */
 class PartialPlan private (
 	val problem: Problem,
@@ -315,7 +318,8 @@ class PartialPlan private (
 	val orderings: Orderings,
 	val bindings: Bindings,
 	val link_l: Set[CausalLink],
-	val openGoal_l: Set[(Int, Int)]
+	val openGoal_l: Set[(Int, Int)],
+	val threat_l: Set[(Int, CausalLink)]
 	//val possibleLink_l: List[(CausalLink, Map[String, String])]
 ) {
 	private def copy(
@@ -323,7 +327,8 @@ class PartialPlan private (
 		orderings: Orderings = orderings,
 		bindings: Bindings = bindings,
 		link_l: Set[CausalLink] = link_l,
-		openGoal_l: Set[(Int, Int)] = openGoal_l
+		openGoal_l: Set[(Int, Int)] = openGoal_l,
+		threat_l: Set[(Int, CausalLink)] = threat_l
 		//possibleLink_l: List[(CausalLink, Map[String, String])] = possibleLink_l
 	): PartialPlan = {
 		new PartialPlan(
@@ -331,9 +336,9 @@ class PartialPlan private (
 			action_l,
 			orderings,
 			bindings,
-			link_l = link_l,
-			openGoal_l
-			//possibleLink_l
+			link_l,
+			openGoal_l,
+			threat_l
 		)
 	}
 	
@@ -552,6 +557,36 @@ class PartialPlan private (
 		getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
 	
+	// TODO: It'd be better to calculate the threats incrementally,
+	// but that'll be complicated and take me some time to figure out
+	// how to do correctly.
+	def findThreats(): Set[(Int, CausalLink)] = {
+		val l = for {
+			action_i <- (0 until action_l.size).toList
+			link <- link_l
+			res <- if (isThreat(action_i, link)) List(action_i -> link) else Nil
+		} yield res
+		l.toSet
+	}
+	
+	CONTINUE HERE
+	def getResolvers(action_i: Int, link: CausalLink): List[Unit] = {
+		// See whether we can resolve using ordering constraints 
+		val lt_? = orderings.add(action_i, link.provider_i) match {
+			case Right(x) => Some((action_i, link.provider_i))
+			case _ => None
+		}
+		val gt_? = orderings.add(link.consumer_i, action_i) match {
+			case Right(x) => Some((link.consumer_i, action_i))
+			case _ => None
+		}
+		// Try to resolve with bindings
+		val action = action_l(action_i)
+		val precond = action_l(link.consumer_i).preconds.l(link.precond_i)
+		// Find all variables
+		if ()
+	}
+	
 	private def isThreat(action_i: Int, link: CausalLink): Boolean = {
 		// Get precondition
 		val precond = action_l(link.consumer_i).preconds.l(link.precond_i)
@@ -661,7 +696,8 @@ object PartialPlan {
 			orderings = new Orderings(Map(0 -> Set(1))),
 			bindings = new Bindings(Map(), Map()),
 			link_l = Set(),
-			openGoal_l
+			openGoal_l = openGoal_l,
+			threat_l = Set()
 		)
 	}
 	
