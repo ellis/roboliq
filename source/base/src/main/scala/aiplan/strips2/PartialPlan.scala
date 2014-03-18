@@ -621,7 +621,7 @@ class PartialPlan private (
 		})
 		// draw dotted lines for causal links
 		val linkLine_l: List[String] = link_l.toList.map(link => {
-			s"""action${link.provider_i} -> action${link.consumer_i}:${link.precond_i} [style=dotted]"""
+			s"""action${link.provider_i} -> action${link.consumer_i}:${link.precond_i} [style=dotted arrowhead=diamond]"""
 		})
 		(header_l ++ actionLine_l ++ orderLine_l ++ linkLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
 	}
