@@ -602,7 +602,10 @@ class PartialPlan private (
 			// color unbound variables red
 			val param_l = op.paramName_l.map(s => if (s.contains(":")) s"""<font color="red">$s</font>""" else s)
 			val header = (name :: param_l).mkString(" ")
-			val preconds_l = op.preconds.l.list.toList.zipWithIndex.map(pair => s"""<td port="${pair._2}">${pair._1.toString}</td>""")
+			val preconds_l = op.preconds.l.list.toList.zipWithIndex.map(pair => {
+				val color = if (openGoal_l.contains((i, pair._2))) "red" else "green"
+				s"""<td port="${pair._2}" bgcolor="$color">${pair._1.toString}</td>"""
+			})
 			val preconds = if (preconds_l.isEmpty) "" else preconds_l.mkString("""<table border="0"><tr>""", "</tr><tr>", "</tr></table>")
 			val effects = op.effects.l.list.toList.map(_.toString).mkString("<br/>")
 			s"""action$i [label=<<table border="0" cellborder="1"><tr><td colspan="2">$header</td></tr><tr><td>$preconds</td><td>$effects</td></tr></table>>]"""
