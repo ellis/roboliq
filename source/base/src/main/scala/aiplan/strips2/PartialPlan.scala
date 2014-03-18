@@ -536,7 +536,6 @@ class PartialPlan private (
 		l
 	}
 	
-	
 	def getExistingProviders(consumer_i: Int, precond_i: Int): List[(Either[Operator, Int], Map[String, String])] = {
 		val precond = action_l(consumer_i).preconds.l(precond_i)
 		// Get indexes of actions which may be before consumer_i
@@ -553,42 +552,53 @@ class PartialPlan private (
 		getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
 	
-	/*
-	def getBoundValue(name: String): Binding = {
-		//CONTINUE HERE
-		binding_m.get(name) match {
-			case None => Binding(None, None, Set())
-			case Some(binding) =>
-				binding.eq match {
-					case None => binding
-					case Some(s) => getBoundValue(s)
-				}
+	private def isThreat(action_i: Int, link: CausalLink): Boolean = {
+		// Get precondition
+		val precond = action_l(link.consumer_i).preconds.l(link.precond_i)
+		// Get list of effect which might negate the precondition
+		val action = action_l(action_i)
+		val effect_l = action.effects.l.filter(effect => effect.pos != precond.pos && effect.atom.name == precond.atom.name)
+
+		// If there are no potentially conflicting effects, then the action isn't a threat
+		if (effect_l.isEmpty)
+			return false
+
+		// Check whether action_i can be ordered between the provider and consumer
+		(for {
+			orderings1 <- orderings.add(link.provider_i, action_i).right
+			orderings2 <- orderings1.add(action_i, link.consumer_i).right
+		} yield {
+			()
+		}) match {
+			// If the ordering isn't valid, then the action isn't a threat
+			case Left(_) => return false
+			case _ =>
 		}
-	}
-	
-	
-	def extendBindings(bindings: Map[String, String], sp: Atom, pp: Atom): Option[Map[String, String]] = {
-		assert(sp.name == pp.name)
-		val l = pp.params zip sp.params
-		val valid = l.forall(pair => {
-			bindings.get(pair._1) match {
-				case None => true
-				case Some(x) => x == pair._2
-			}
-		})
-		if (valid) Some(bindings ++ l)
-		else None
-	}
-	*/
-	
-	/*
-	def isThreat(action: Operator, link: CausalLink): Boolean = {
 		
+		// Negated precondition
+		val neg = precond.copy(pos = !precond.pos)
+		// Check whether any of the effects negate the precondition
+		for (effect <- effect_l) {
+			for {
+				eq_m <- createEffectToPrecondMap(effect, precond).right
+				bindings2 <- bindings.assign(eq_m).right
+			} {
+				val action2 = bindings2.bind(action)
+				if (precond.pos) {
+					if (action2.effects.l.contains(neg)) {
+						if (!action2.effects.l.contains(precond))
+							return true
+					}
+				}
+				else {
+					if (action2.effects.l.contains(neg))
+						return true
+				}
+			}
+		}
+		
+		false
 	}
-	
-	def isConsistent(ordering: (Int, Int)): Boolean = {
-		null
-	}*/
 	
 	def toDot(): String = {
 		// TODOS:
