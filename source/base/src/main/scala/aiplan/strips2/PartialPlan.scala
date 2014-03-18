@@ -260,10 +260,7 @@ class Orderings(
 		if (map.getOrElse(after_i, Set()).contains(before_i))
 			Left(s"New ordering constraint violates preexising constraints: ${before_i} -> ${after_i}")
 		else {
-			
-			val before_li = map.getOrElse(before_i, Set()) + before_i
-			// 
-			CONTINUE HERE: make sure (2, 1) gets inserted into map2
+			// Update orderings map
 			val map2 = for (pair@(i, li) <- map) yield {
 				// before_i is before after_i
 				if (i == before_i)
@@ -275,8 +272,10 @@ class Orderings(
 				else
 					pair
 			}
-			println(s"Orderings.add(${before_i}, ${after_i}) => $map2")
-			Right(new Orderings(map2))
+			// Make sure the ordering before_i < after_i is in the map
+			val map3 = if (map2.contains(before_i)) map2 else map2 + (before_i -> Set(after_i))
+			println(s"Orderings.add(${before_i}, ${after_i}) => $map3")
+			Right(new Orderings(map3))
 		}
 	}
 	
@@ -651,7 +650,13 @@ object PartialPlan {
 			println(plan0.getExistingProviders(1, 0))
 			println(plan0.getNewProviders(1, 0))
 			println()
-			println(Pop.pop(plan0).right.map(_.toDot))
+			Pop.pop(plan0) match {
+				case Left(msg) => println("ERROR: "+msg)
+				case Right(plan1) =>
+					val dot = plan1.toDot
+					println(dot)
+				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
+			}
 		}
 	}
 }
