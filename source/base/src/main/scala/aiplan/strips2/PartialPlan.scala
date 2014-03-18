@@ -585,23 +585,35 @@ class PartialPlan private (
 	}*/
 	
 	def toDot(): String = {
+		// TODOS:
+		// - draw dotted lines for causal links
+		// - create nodes for preconditions so that causal links can be drawn directly to them
+		// - color whether preconditions are supported
+		// - remove """[0-9]+:""" from parameter names
 		val header_l = List[String](
 			"rankdir=LR",
-			"node [shape=record]"
+			"node [shape=plaintext]"
 		)
 		val actionLine_l: List[String] = action_l.toList.zipWithIndex.map(pair => {
-			val (op, i) = pair
+			val (op0, i) = pair
+			// substitute assigned values for parameters
+			val op = bindings.bind(op0)
 			val name = s"${i-1}:${op.name}"
-			val header = (name :: op.paramName_l).mkString(" ")
-			val preconds = op.preconds.l.list.toList.map(_.toString).mkString("|")
-			val effects = op.effects.l.list.toList.map(_.toString).mkString("|")
-			s"""action$i [label="${header}|{{$preconds}|{$effects}}"]"""
+			// color unbound variables red
+			val param_l = op.paramName_l.map(s => if (s.contains(":")) s"""<font color="red">$s</font>""" else s)
+			val header = (name :: param_l).mkString(" ")
+			val preconds = op.preconds.l.list.toList.map(_.toString).mkString("<br/>")
+			val effects = op.effects.l.list.toList.map(_.toString).mkString("<br/>")
+			s"""action$i [label=<<table border="1"><tr><td colspan="2">$header</td></tr><tr><td>$preconds</td><td>$effects</td></tr></table>>]"""
 		})
 		val orderLine_l: List[String] = orderings.getMinimalMap.toList.flatMap(pair => {
 			val (before_i, after_l) = pair
 			after_l.map(after_i => s"""action${before_i} -> action${after_i}""")
 		})
-		(header_l ++ actionLine_l ++ orderLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
+		val linkLine_l: List[String] = link_l.toList.map(link => {
+			s"""action${link.provider_i} -> action${link.consumer_i} [style=dotted]"""
+		})
+		(header_l ++ actionLine_l ++ orderLine_l ++ linkLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
 	}
 }
 
