@@ -345,16 +345,22 @@ class PartialPlan private (
 	def addAction(op: Operator): Either[String, PartialPlan] = {
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
-		val paramName_m = op.paramName_l.map(s => s -> s"${i-1}:${s}").toMap
+		// Get a list of param name/typ for parameters which are still variables 
+		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(_._1.startsWith("?"))
+		val paramName_m = varNameToTyp_l.map(pair => pair._1 -> s"${i-1}:${pair._1}").toMap
 		val action = op.bind(paramName_m)
 		val action2_l: Vector[Operator] = action_l :+ action
 		
 		// Get list of parameters and their possible objects
-		val typeToObjects_m: Map[String, List[String]] =
-			problem.object_l.groupBy(_._1).mapValues(_.map(_._2))
 		val variableToOptions_m: Map[String, Set[String]] =
-			(action.paramName_l zip op.paramTyp_l).toMap.mapValues(typ => typeToObjects_m.getOrElse(typ, Nil).toSet)
+			varNameToTyp_l.map(pair => {
+				val (name0, typ) = pair
+				val name = paramName_m.getOrElse(name0, name0)
+				val options = problem.typToObjects_m.getOrElse(typ, Nil).toSet
+				name -> options
+			}).toMap
 		
+		println("variableToOptions_m: "+variableToOptions_m)
 		for {
 			orderings1 <- orderings.add(0, i).right
 			orderings2 <- orderings1.add(i, 1).right
@@ -649,11 +655,31 @@ object PartialPlan {
 		)
 	}
 	
+	val domainText = """
+(define (domain random-domain)
+  (:requirements :strips)
+  (:action op1
+    :parameters (?x)
+    :precondition (and (S B))
+    :effect (and (R ?x) (not (S B)))
+  )
+)
+"""
+		
+	val problemText = """
+(define (problem random-pbl1)
+  (:domain random-domain)
+  (:init
+     (S A) (S B)
+  )
+  (:goal (and (R A) (R B))))
+"""
+	
 	def main(args: Array[String]) {
-		for {
-			domain <- aiplan.strips2.PddlParser.parseDomain(aiplan.quiz.Quiz2b7.domainText).right
-			problem <- aiplan.strips2.PddlParser.parseProblem(domain, aiplan.quiz.Quiz2b7.problemText).right
-		} {
+		val res = for {
+			domain <- aiplan.strips2.PddlParser.parseDomain(domainText).right
+			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText).right
+		} yield {
 			val plan0 = fromProblem(problem)
 			println("domain:")
 			println(domain)
@@ -673,6 +699,10 @@ object PartialPlan {
 					println(dot)
 				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
 			}
+		}
+		res match {
+			case Left(msg) => println("ERROR: "+msg)
+			case _ =>
 		}
 	}
 }

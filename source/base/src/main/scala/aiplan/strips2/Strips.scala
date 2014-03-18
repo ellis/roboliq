@@ -264,7 +264,7 @@ object Strips {
 				s.atoms.toList.filter(_.name == pp.name).foldLeft(acc) { (acc, sp) =>
 					extendBindings(σ, sp, pp) match {
 						case Some(σ2) =>
-							val preconds2 = preconds.removeNeg(pp)
+							val preconds2 = preconds.removePos(pp)
 							addApplicables(acc, op, preconds2, σ2, s)
 						case _ => acc
 					}
@@ -412,6 +412,10 @@ object Strips {
 		state0: State,
 		goals: Literals
 	) {
+		// Map of parameter type to object set
+		val typToObjects_m: Map[String, List[String]] =
+			object_l.groupBy(_._1).mapValues(_.map(_._2))
+
 		/**
 		 * Get the relaxed problem in which the negative effects of operators are removed.
 		 */
