@@ -44,6 +44,8 @@ class Bindings(
 		assignment_m
 	)
 	
+	def isVariable(name: String): Boolean = variable_m.contains(name)
+	
 	def getCanonicalName(name: String): String = {
 		assignment_m.get(name) match {
 			case None => name
@@ -302,6 +304,10 @@ class Orderings(
  * The proposition should be protected so that no actions are placed between a and b which negate the effect.
  */
 case class CausalLink(provider_i: Int, consumer_i: Int, precond_i: Int)
+
+sealed trait Resolver
+case class Resolver_Ordering(before_i: Int, after_i: Int) extends Resolver
+case class Resolver_Inequality(name1: String, name2: String) extends Resolver
 
 /**
  * @param problem The problem this plan should solve
@@ -569,22 +575,50 @@ class PartialPlan private (
 		l.toSet
 	}
 	
-	CONTINUE HERE
-	def getResolvers(action_i: Int, link: CausalLink): List[Unit] = {
+	// REFACTOR: this function duplicates a lot of the code in isThreat
+	def getResolvers(action_i: Int, link: CausalLink): List[Resolver] = {
 		// See whether we can resolve using ordering constraints 
 		val lt_? = orderings.add(action_i, link.provider_i) match {
-			case Right(x) => Some((action_i, link.provider_i))
+			case Right(x) => Some(Resolver_Ordering(action_i, link.provider_i))
 			case _ => None
 		}
 		val gt_? = orderings.add(link.consumer_i, action_i) match {
-			case Right(x) => Some((link.consumer_i, action_i))
+			case Right(x) => Some(Resolver_Ordering(link.consumer_i, action_i))
 			case _ => None
 		}
 		// Try to resolve with bindings
-		val action = action_l(action_i)
 		val precond = action_l(link.consumer_i).preconds.l(link.precond_i)
-		// Find all variables
-		if ()
+		val neg = !precond
+		val action = action_l(action_i)
+		// Find which of the actions effects represent threats to the link
+		val effect0_l = action.effects.l.filter(effect => effect.pos != precond.pos && effect.atom.name == precond.atom.name)
+		val effect_l = effect0_l.filter(effect => {
+			val isThreat_? = for {
+				eq_m <- createEffectToPrecondMap(effect, precond).right
+				bindings2 <- bindings.assign(eq_m).right
+			} yield {
+				val action2 = bindings2.bind(action)
+				if (precond.pos) {
+					if (action2.effects.l.contains(neg) && !action2.effects.l.contains(precond))
+						true
+					else
+						false
+				}
+				else if (action2.effects.l.contains(neg))
+					true
+				else
+					false
+			}
+			isThreat_? == Right(true)
+		})
+		val ne_l = effect_l.toList.flatMap(effect => {
+			// Get list of not-equal mappings involving one or more variables
+			val ne_l = (effect.atom.params zip precond.atom.params).filter(pair => bindings.isVariable(pair._1) || bindings.isVariable(pair._2))
+			// Find which ones are consistent with our bindings
+			ne_l.filter(pair => bindings.exclude(pair._1, pair._2).isRight).map(pair => Some(Resolver_Inequality(pair._1, pair._2)))
+		})
+		
+		(lt_? :: gt_? :: ne_l).flatten
 	}
 	
 	private def isThreat(action_i: Int, link: CausalLink): Boolean = {
@@ -611,7 +645,7 @@ class PartialPlan private (
 		}
 		
 		// Negated precondition
-		val neg = precond.copy(pos = !precond.pos)
+		val neg = !precond
 		// Check whether any of the effects negate the precondition
 		for (effect <- effect_l) {
 			for {

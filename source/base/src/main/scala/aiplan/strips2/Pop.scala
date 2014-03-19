@@ -32,23 +32,62 @@ object Pop {
 						Left(s"Couldn't find an action to fulfill ${consumer_i}/${precond_i}")
 					case (either, binding_m) :: rest =>
 						println(s"${indent}try $either with ${binding_m}")
-						either match {
-							case Left(op) =>
+						for {
+							res <- (either match {
+								case Left(op) =>
+									for {
+										plan1 <- plan0.addAction(op)
+									} yield (plan1, plan1.action_l.size - 1)
+								case Right(provider_i) => Right(plan0, provider_i)
+							})
+							(plan1, provider_i) = res
+							link = CausalLink(provider_i, consumer_i, precond_i)
+							plan2 <- plan1.addLink(link, binding_m, Map())
+							planX <- handleX(plan2, link)
+							plan3 <- (pop(plan2, indentLevel + 1) match {
+								case Right(x) => Right(x)
+								case Left(msg) => chooseAction(rest)
+							}).right
+						} yield plan3
+				}
+			}
+			
+			def handleX(plan0: PartialPlan, link: CausalLink): Either[String, PartialPlan] = {
+				// Find threats on the link or created by the provider
+				val threat0_l = plan0.findThreats
+				val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
+				threat_l.foldLeft(Right(plan0) : Either[String, PartialPlan]) { (plan_?, threat) =>
+					val (action_i, link) = threat
+					for {
+						plan <- plan_?
+						resolver_l = plan.getResolvers(action_i, link)
+						plan1 <- chooseResolver(plan, resolver_l)
+					} yield plan1
+				}
+			}
+			
+			def chooseResolver(
+				plan0: PartialPlan,
+				resolver_l: List[Resolver]
+			): Either[String, PartialPlan] = {
+				resolver_l match {
+					case Nil => Right(plan0)
+					case resolver :: rest =>
+						resolver match {
+							case Resolver_Ordering(before_i, after_i) =>
 								for {
-									plan1 <- plan0.addAction(op)
-									provider_i = plan1.action_l.size - 1
-									plan2 <- plan1.addLink(CausalLink(provider_i, consumer_i, precond_i), binding_m, Map())
-									plan3 <- (pop(plan2, indentLevel + 1) match {
-										case Right(x) => Right(x)
-										case Left(msg) => chooseAction(rest)
-									}).right
-								} yield plan3
-							case Right(provider_i) =>
-								for {
-									plan1 <- plan0.addLink(CausalLink(provider_i, consumer_i, precond_i), binding_m, Map())
+									plan1 <- plan0.addOrdering(before_i, after_i).right
 									plan2 <- (pop(plan1, indentLevel + 1) match {
 										case Right(x) => Right(x)
-										case Left(msg) => chooseAction(rest)
+										case Left(msg) => chooseResolver(plan0, rest)
+									}).right
+								} yield plan2
+							case Resolver_Inequality(name1, name2) =>
+								for {
+									plan1 <- plan0.addBindingNe(name1, name2).right
+									plan2 <- (pop(plan1, indentLevel + 1) match {
+										case Right(x) => Right(x)
+										case Left(msg) => chooseResolver(plan0, rest)
 									}).right
 								} yield plan2
 						}

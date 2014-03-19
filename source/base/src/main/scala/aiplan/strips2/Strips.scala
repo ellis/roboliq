@@ -48,7 +48,7 @@ object Strips {
 	case class Literal(atom: Atom, pos: Boolean) {
 		def bind(map: Map[String, String]): Literal =
 			copy(atom = atom.bind(map))
-		def !(literal: Literal): Literal = literal.copy(pos = !literal.pos)
+		def unary_! : Literal = copy(pos = !pos)
 		override def toString = (if (pos) "" else "!") ++ atom.toString
 	}
 	
