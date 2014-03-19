@@ -29,6 +29,7 @@
 - [x] PddlParser: handle `types` field in domain
 - [x] PddlParser: handle `predicates` field in domain
 - [x] PddlParser: handle `objects` field in problem
+- [ ] continue with domain: action tecan_pipette1
 - [ ] create PDDL for domain with `movePlate` and `distribute` commands
 - [ ] PartialPlan: toDot: show inequalities
 - [ ] PartialPlan: incrementally calculate threats

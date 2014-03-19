@@ -801,11 +801,24 @@ object PartialPlan {
     :precondition (and (location ?labware ?site1))
     :effect (and (not (location ?labware ?site1)) (location ?labware ?site2))
   )
-  (:action pipette1
-    :parameters (?labware - labware ?site - site)
-    :precondition (and (location ?labware ?site))
+  (:action tecan_pipette1
+    :parameters (?a - tecan ?d - pipetter ?p - program ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
+    :precondition (and
+      (agent-has-device ?a ?d)
+      (model ?l1 ?m1)
+      (device-can-site ?d ?s1)
+      (is-site ?s1)
+      (model ?s1 ?sm1) ; site model
+      (stackable ?sm1 ?m1) ; site model accepts m1
+    )
     :effect ()
   )
+  ; task list
+  ;((!pipetter-run ?a ?d ?spec))
+  ((move-labware ?p1 ?s1) (agent-activate ?a) (!pipetter-run ?a ?d ?spec))
+ )
+
+
 )
 """
 		
