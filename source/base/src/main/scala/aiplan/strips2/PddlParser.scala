@@ -79,7 +79,7 @@ object PddlParser {
 				val goalDef_l = rest.collect({ case LispList(List(LispString(":goal"), rest)) => rest })
 				println("objectDef_l: "+objectDef_l)
 				for {
-					object_l <- getParams(objectDef_l).right
+					objectToTyp_l <- getParams(objectDef_l).right
 					init_l <- initDef_l.map(getAtom).sequenceU.right
 					goal_l <- goalDef_l.map(elem => getLiterals(elem)).sequenceU.right
 				} yield {
@@ -91,10 +91,10 @@ object PddlParser {
 								atom.params.map("any" -> _)
 						}
 					}).toSet.toList
-					println("object_l: "+object_l)
+					println("object_l: "+objectToTyp_l)
 					Strips.Problem(
 						domain = domain,
-						object_l = object_l ++ object2_l,
+						typToObject_l = objectToTyp_l.map(_.swap) ++ object2_l,
 						state0 = Strips.State(init_l.toSet),
 						goals = goal_l.head
 					)

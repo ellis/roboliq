@@ -195,6 +195,9 @@ object Strips {
 		
 		val nameToPredicate_m = predicate_l.map(x => x.name -> x).toMap
 		val nameToOperator_m = operator_l.map(x => x.name -> x).toMap
+		
+		def getOperator(name: String): Either[String, Operator] =
+			nameToOperator_m.get(name).toRight(s"could not find operator `$name`")
 
 		def makeAction(name: String, param_l: List[String]): Operator = {
 			val op = nameToOperator_m(name)
@@ -408,19 +411,19 @@ object Strips {
 	
 	case class Problem(
 		domain: Domain,
-		object_l: List[(String, String)],
+		typToObject_l: List[(String, String)],
 		state0: State,
 		goals: Literals
 	) {
 		// Map of parameter type to object set
 		val typToObjects_m: Map[String, List[String]] =
-			object_l.groupBy(_._1).mapValues(_.map(_._2))
+			typToObject_l.groupBy(_._1).mapValues(_.map(_._2))
 
 		/**
 		 * Get the relaxed problem in which the negative effects of operators are removed.
 		 */
 		def relaxed: Problem = {
-			Problem(domain.relaxed, object_l, state0, goals)
+			Problem(domain.relaxed, typToObject_l, state0, goals)
 		}
 	}
 }

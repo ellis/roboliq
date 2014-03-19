@@ -29,11 +29,11 @@
 - [x] PddlParser: handle `types` field in domain
 - [x] PddlParser: handle `predicates` field in domain
 - [x] PddlParser: handle `objects` field in problem
-- [ ] PddlParser: handle comments
 - [ ] create PDDL for domain with `movePlate` and `distribute` commands
 - [ ] PartialPlan: toDot: show inequalities
 - [ ] PartialPlan: incrementally calculate threats
 - [ ] PartialPlan: toDot: show threats
+- [ ] PddlParser: handle comments
 - [ ] PddlParser: handle domain constants
 
 ## AI Planning

@@ -828,8 +828,11 @@ object PartialPlan {
 		val res = for {
 			domain <- aiplan.strips2.PddlParser.parseDomain(domainText).right
 			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText).right
+			_ <- Right(println("typToObjects_m: "+ problem.typToObjects_m)).right
+			plan0 <- Right(fromProblem(problem)).right
+			op <- domain.getOperator("moveLabware").right
+			plan1 <- plan0.addAction(op).right
 		} yield {
-			val plan0 = fromProblem(problem)
 			println("domain:")
 			println(domain)
 			println()
@@ -838,10 +841,12 @@ object PartialPlan {
 			println()
 			println(plan0.toDot)
 			println()
+			println(plan1.toDot)
+			println()
 			//println(plan0.getExistingProviders(1, 0))
 			//println(plan0.getNewProviders(1, 0))
 			//println()
-			Pop.pop(plan0) match {
+			Pop.pop(plan1) match {
 				case Left(msg) => println("ERROR: "+msg)
 				case Right(plan1) =>
 					val dot = plan1.toDot

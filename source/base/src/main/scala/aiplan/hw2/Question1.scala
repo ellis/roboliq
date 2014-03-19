@@ -42,7 +42,7 @@ object Question1 {
 	
 	val problem = Problem(
 		domain = domain,
-		object_l = List(
+		typToObject_l = List(
 			"r1" -> "robot",
 			"l1" -> "location",
 			"l2" -> "location",
