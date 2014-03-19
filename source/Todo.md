@@ -25,7 +25,11 @@
 
 ## AI PoP planner
 
-- [ ] PddlParser: handle types
+- [x] PddlParser: handle types in operators
+- [x] PddlParser: handle `types` field in domain
+- [x] PddlParser: handle `predicates` field in domain
+- [x] PddlParser: handle `objects` field in problem
+- [ ] PddlParser: handle comments
 - [ ] create PDDL for domain with `movePlate` and `distribute` commands
 - [ ] PartialPlan: toDot: show inequalities
 - [ ] PartialPlan: incrementally calculate threats

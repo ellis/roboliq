@@ -755,9 +755,47 @@ object PartialPlan {
   (:goal (and (R A) (R B))))
 """
 	
+	def main0(args: Array[String]) {
+		val res = for {
+			domain <- aiplan.strips2.PddlParser.parseDomain(domainText0).right
+			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText0).right
+		} yield {
+			val plan0 = fromProblem(problem)
+			println("domain:")
+			println(domain)
+			println()
+			println("problem:")
+			println(problem)
+			println()
+			println(plan0.toDot)
+			println()
+			println(plan0.getExistingProviders(1, 0))
+			println(plan0.getNewProviders(1, 0))
+			println()
+			Pop.pop(plan0) match {
+				case Left(msg) => println("ERROR: "+msg)
+				case Right(plan1) =>
+					val dot = plan1.toDot
+					println(dot)
+				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
+			}
+		}
+		res match {
+			case Left(msg) => println("ERROR: "+msg)
+			case _ =>
+		}
+	}
+	
 	val domainText = """
 (define (domain tecan)
-  (:requirements :strips)
+  (:requirements :strips :typing)
+  (:types
+    labware
+    site
+  )
+  (:predicates
+    (location ?labware ?site)
+  )
   (:action moveLabware
     :parameters (?labware - labware ?site1 - site ?site2 - site)
     :precondition (and (location ?labware ?site1))
@@ -766,7 +804,7 @@ object PartialPlan {
   (:action pipette1
     :parameters (?labware - labware ?site - site)
     :precondition (and (location ?labware ?site))
-    :effect (and )
+    :effect ()
   )
 )
 """
@@ -774,10 +812,16 @@ object PartialPlan {
 	val problemText = """
 (define (problem random-pbl1)
   (:domain random-domain)
-  (:init
-     (S A) (S B)
+  (:objects
+    siteA - site
+    siteB - site
+	plateA - labware
+	plateB - labware
   )
-  (:goal (and (R A) (R B))))
+  (:init
+    (location plateA siteA)
+  )
+  (:goal ()))
 """
 	
 	def main(args: Array[String]) {
@@ -794,9 +838,9 @@ object PartialPlan {
 			println()
 			println(plan0.toDot)
 			println()
-			println(plan0.getExistingProviders(1, 0))
-			println(plan0.getNewProviders(1, 0))
-			println()
+			//println(plan0.getExistingProviders(1, 0))
+			//println(plan0.getNewProviders(1, 0))
+			//println()
 			Pop.pop(plan0) match {
 				case Left(msg) => println("ERROR: "+msg)
 				case Right(plan1) =>

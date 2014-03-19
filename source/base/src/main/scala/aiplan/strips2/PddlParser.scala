@@ -48,8 +48,12 @@ object PddlParser {
 	def elemToDomain(elem: LispElem): Either[String, Strips.Domain] = {
 		elem match {
 			case LispList(LispString("define") :: LispList(List(LispString("domain"), LispString(domainName))) :: rest) =>
+				val typeDef_l = rest.collect({ case LispList(LispString(":types") :: rest) => rest }).flatten
+				val predicateDef_l = rest.collect({ case LispList(LispString(":predicates") :: rest) => rest }).flatten
 				val actionDef_l = rest.collect({ case LispList(LispString(":action") :: LispString(actionName) :: rest) => (actionName, rest) })
 				for {
+					typ_l <- parseTypes(typeDef_l).right
+					predicate_l <- parsePredicates(predicateDef_l).right
 					operator_l <- actionDef_l.map(pair => {
 						val (name, l) = pair
 						val op0 = Strips.Operator(name, Nil, Nil, Strips.Literals.empty, Strips.Literals.empty)
@@ -57,9 +61,9 @@ object PddlParser {
 					}).sequenceU.right
 				} yield {
 					Strips.Domain(
-						type_l = Set(),
+						type_l = typ_l.toSet,
 						constantToType_m = Map(),
-						predicate_l = Nil,
+						predicate_l = predicate_l,
 						operator_l = operator_l
 					)
 				}
@@ -70,13 +74,16 @@ object PddlParser {
 	def elemToProblem(domain: Strips.Domain, elem: LispElem): Either[String, Strips.Problem] = {
 		elem match {
 			case LispList(LispString("define") :: LispList(List(LispString("problem"), LispString(problemName))) :: LispList(List(LispString(":domain"), LispString(domainName))) :: rest) =>
+				val objectDef_l = rest.collect({ case LispList(LispString(":objects") ::rest) => rest }).flatten
 				val initDef_l = rest.collect({ case LispList(LispString(":init") :: rest) => rest }).flatten
 				val goalDef_l = rest.collect({ case LispList(List(LispString(":goal"), rest)) => rest })
+				println("objectDef_l: "+objectDef_l)
 				for {
+					object_l <- getParams(objectDef_l).right
 					init_l <- initDef_l.map(getAtom).sequenceU.right
 					goal_l <- goalDef_l.map(elem => getLiterals(elem)).sequenceU.right
 				} yield {
-					val object_l = (init_l ++ goal_l.flatMap(_.l.map(_.atom))).flatMap(atom => {
+					val object2_l = (init_l ++ goal_l.flatMap(_.l.map(_.atom))).flatMap(atom => {
 						domain.predicate_l.find(_.name == atom.name) match {
 							case Some(sig) =>
 								sig.paramTyp_l zip atom.params
@@ -87,13 +94,39 @@ object PddlParser {
 					println("object_l: "+object_l)
 					Strips.Problem(
 						domain = domain,
-						object_l = object_l,
+						object_l = object_l ++ object2_l,
 						state0 = Strips.State(init_l.toSet),
 						goals = goal_l.head
 					)
 				}
 			case _ => Left("Unrecognized token in domain: "+elem)
 		}
+	}
+	
+	private def toStringList(l: List[LispElem]): Either[String, List[String]] = {
+		val l2 = l.map(_ match {
+			case LispString(s) => s
+			case x => return Left("expected a string, received: "+x)
+		})
+		Right(l2)
+	}
+	
+	private def parseTypes(l: List[LispElem]): Either[String, List[String]] = {
+		toStringList(l)
+	}
+	
+	private def parsePredicates(l: List[LispElem]): Either[String, List[Strips.Signature]] = {
+		val l2: List[Strips.Signature] = l.map(_ match {
+			case LispList(LispString(name) :: params) =>
+				toStringList(params) match {
+					case Left(msg) => return Left(msg)
+					case Right(param_l) =>
+					    val (name_l, typ_l) = parseParamList(param_l).unzip
+						new Strips.Signature(name, name_l, typ_l)
+				}
+			case x => return Left("predicate expects a list, received: "+x)
+		})
+		Right(l2)
 	}
 	
 	private def parseParamList(l: List[String]): List[(String, String)] = {
@@ -169,6 +202,18 @@ object PddlParser {
 			case LispList(LispString(name) :: l) if l.forall(_.isInstanceOf[LispString]) =>
 				Right(Strips.Atom(name, l.map(_.asInstanceOf[LispString].s)))
 			case _ => Left("unrecognized atom: "+elem)
+		}
+	}
+	
+	private def getParams(elem_l: List[LispElem]): Either[String, List[(String, String)]] = {
+		toStringList(elem_l).right.map(parseParamList)
+	}
+	
+	private def getParams(elem: LispElem): Either[String, List[(String, String)]] = {
+		elem match {
+			case LispList(Nil) => Right(Nil)
+			case LispList(l) => getParams(l)
+			case x => Left("expected a typed list, received: "+x)
 		}
 	}
 	
