@@ -735,13 +735,38 @@ object PartialPlan {
 		)
 	}
 	
-	val domainText = """
+	val domainText0 = """
 (define (domain random-domain)
   (:requirements :strips)
   (:action op1
     :parameters (?x)
     :precondition (and (S B))
     :effect (and (R ?x) (not (S B)))
+  )
+)
+"""
+		
+	val problemText0 = """
+(define (problem random-pbl1)
+  (:domain random-domain)
+  (:init
+     (S A) (S B)
+  )
+  (:goal (and (R A) (R B))))
+"""
+	
+	val domainText = """
+(define (domain tecan)
+  (:requirements :strips)
+  (:action moveLabware
+    :parameters (?labware - labware ?site1 - site ?site2 - site)
+    :precondition (and (location ?labware ?site1))
+    :effect (and (not (location ?labware ?site1)) (location ?labware ?site2))
+  )
+  (:action pipette1
+    :parameters (?labware - labware ?site - site)
+    :precondition (and (location ?labware ?site))
+    :effect (and )
   )
 )
 """

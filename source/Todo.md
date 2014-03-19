@@ -23,6 +23,15 @@
 - [ ] post code for CADMAD participants
 - [ ] get it to run on windows
 
+## AI PoP planner
+
+- [ ] PddlParser: handle types
+- [ ] create PDDL for domain with `movePlate` and `distribute` commands
+- [ ] PartialPlan: toDot: show inequalities
+- [ ] PartialPlan: incrementally calculate threats
+- [ ] PartialPlan: toDot: show threats
+- [ ] PddlParser: handle domain constants
+
 ## AI Planning
 
 - for single plate commands: agent,device,spec,model1,site1

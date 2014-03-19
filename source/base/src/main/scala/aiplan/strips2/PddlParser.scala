@@ -96,15 +96,28 @@ object PddlParser {
 		}
 	}
 	
+	private def parseParamList(l: List[String]): List[(String, String)] = {
+		def step(l: List[String], typ0: String, acc: List[(String, String)]): List[(String, String)] = {
+			l match {
+				case Nil => acc
+				case typ :: "-" :: param :: rest =>
+					step(rest, typ, (param, typ) :: acc)
+				case param :: rest =>
+					step(rest, typ0, (param, typ0) :: acc)
+			}
+		}
+		step(l.reverse, "any", Nil)
+	}
+	
 	private def updateOperator(l: List[LispElem], acc: Strips.Operator): Either[String, Strips.Operator] = {
 		l match {
 			case Nil => Right(acc)
 			case LispString(":parameters") :: LispList(l2) :: rest =>
-				val paramName_l = l2.map(_.asInstanceOf[LispString]).map(_.s)
+				val (paramName_l, paramTyp_l) = parseParamList(l2.map(_.asInstanceOf[LispString]).map(_.s)).unzip
 				val acc2 = Strips.Operator(
 					name = acc.name,
 					paramName_l = paramName_l,
-					paramTyp_l = paramName_l.map(x => "any"),
+					paramTyp_l = paramTyp_l,
 					preconds = acc.preconds,
 					effects = acc.effects
 				)
@@ -170,11 +183,12 @@ private object LispParser0 extends JavaTokenParsers {
 
 	def toLispString(p: Parser[String]): Parser[LispElem] = p ^^ { s => LispString(s) }
 	
+	def dash: Parser[LispElem] = toLispString("-".r)
 	def lident: Parser[LispElem] = toLispString("""[a-zA-Z?][a-zA-Z0-9_-]*""".r)
 	def keyword: Parser[LispElem] = toLispString(""":[a-zA-Z][a-zA-Z0-9_-]*""".r)
 	def string: Parser[LispElem] = toLispString(stringLiteral)
 	
-	def elem: Parser[LispElem] = string | keyword | lident | list 
+	def elem: Parser[LispElem] = string | keyword | lident | dash | list 
 
 	def parse(input: String): Either[String, LispElem] = {
 		parseAll(elem, input) match {
