@@ -9,7 +9,13 @@ object Pop {
 	def pop(plan0: PartialPlan, indentLevel: Int = 0): Either[String, PartialPlan] = {
 		val indent = "  " * indentLevel
 		println()
+		println(s"${indent}actions:")
+		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
 		println(indent+"openGoals: "+plan0.openGoal_l)
+		println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
+		println(s"${indent}variables: ${plan0.bindings.variable_m}")
+		println("${indent}toDot:")
+		plan0.toDot.split("\n").foreach(s => println(indent+s))
 		if (plan0.openGoal_l.isEmpty) {
 			println("FOUND")
 			//println(plan0.toDot)
@@ -19,11 +25,16 @@ object Pop {
 			val (consumer_i, precond_i) = plan0.openGoal_l.head
 			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
 			val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
+			val provider_l = provider1_l ++ provider2_l
 			
 			println(indent+"providers:")
-			provider1_l.foreach(s => println(indent+"  "+s))
-			provider2_l.foreach(s => println(indent+"  "+s))
-			println()
+			provider_l.foreach(pair => {
+				val op_s = pair._1 match {
+					case Left(op) => op.toString
+					case Right(i) => s"$i:${plan0.action_l(i).toString}"
+				}
+				println(s"$indent| ${op_s} using ${pair._2}")
+			})
 			def chooseAction(
 				l: List[(Either[Operator, Int], Map[String, String])]
 			): Either[String, PartialPlan] = {
@@ -95,7 +106,7 @@ object Pop {
 				}
 			}
 			
-			chooseAction(provider1_l ++ provider2_l)
+			chooseAction(provider_l)
 		}
 	}
 }

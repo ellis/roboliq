@@ -33,8 +33,8 @@ case class B(option_l: Set[String] = Set(), ne_l: Set[String] = Set())
  * 
  */
 class Bindings(
-	variable_m: Map[String, B],
-	assignment_m: Map[String, String]
+	val variable_m: Map[String, B],
+	val assignment_m: Map[String, String]
 ) {
 	private def copy(
 		variable_m: Map[String, B] = variable_m,
@@ -113,7 +113,9 @@ class Bindings(
 	}
 	
 	def assign(assignee: String, value: String): Either[String, Bindings] = {
-		val List(x, y) = List(getCanonicalName(assignee), getCanonicalName(value)).sorted
+		val name1 = getCanonicalName(assignee)
+		val name2 = getCanonicalName(value)
+		val List(x, y) = List(name1, name2).sorted
 		if (x == y) return Right(this)
 		
 		(variable_m.get(x), variable_m.get(y)) match {
@@ -126,7 +128,9 @@ class Bindings(
 			case (None, Some(b)) =>
 				Right(substitute(y, x))
 			case (None, None) =>
-				Left(s"Cannot assign an object to another object: $assignee and $value")
+				val a = if (assignee == name1) assignee else s"$assignee(=$name1)"
+				val b = if (value == name2) value else s"$value(=$name2)"
+				Left(s"Cannot assign an object to another object: $a and $b")
 		}
 	}
 	
@@ -509,7 +513,7 @@ class PartialPlan private (
 			val (before_i_?, action) = pair
 			// Search for valid action/poseffect/binding combinations
 			val l0 = for ((effect, effect_i) <- action.effects.l.zipWithIndex if effect.atom.name == precond.atom.name) yield {
-				println("action.effects: "+action.effects.l)
+				//println("action.effects: "+action.effects.l)
 				for {
 					res <- {
 						if (before_i_?.isEmpty) {
@@ -523,15 +527,15 @@ class PartialPlan private (
 						}
 					}
 					(plan2, action2) = res
-					_ = println("action2: "+action2)
-					_ = println("action2.effects: "+action2.effects.l)
+					//_ = println("action2: "+action2)
+					//_ = println("action2.effects: "+action2.effects.l)
 					effect2 = action2.effects.l(effect_i)
-					_ = println("effect2: "+effect2)
+					//_ = println("effect2: "+effect2)
 					eq_m <- createEffectToPrecondMap(effect2, precond) match {
 						case Left(msg) => None
 						case Right(x) => Some(x)
 					}
-					_ = println("eq_m: "+eq_m)
+					//_ = println("eq_m: "+eq_m)
 					bindings2 <- plan2.bindings.assign(eq_m) match {
 						case Left(msg) =>
 							println("assign error: "+msg)
@@ -682,6 +686,15 @@ class PartialPlan private (
 		}
 		
 		false
+	}
+	
+	def getActionText(action_i: Int): String = {
+		val op0 = action_l(action_i)
+		val i = action_i
+		// substitute assigned values for parameters
+		val op = bindings.bind(op0)
+		val name = s"${i-1}:${op.name}"
+		(name :: op.paramName_l).mkString(" ")
 	}
 	
 	def toDot(): String = {
@@ -862,6 +875,7 @@ object PartialPlan {
     (model plateA m001)
     (device-can-site r1_pipetter siteB)
     (model siteA sm001)
+    (model siteB sm001)
     (stackable sm001 m001)
   )
   (:goal ()))
@@ -875,7 +889,7 @@ object PartialPlan {
 			plan0 <- Right(fromProblem(problem)).right
 			//op <- domain.getOperator("moveLabware").right
 			op0 <- domain.getOperator("tecan_pipette1").right
-			op <- Right(op0.bind(Map("a" -> "r1", "d" -> "r1_pipetter", "p" -> "prog001", "l" -> "plateA"))).right
+			op <- Right(op0.bind(Map("?a" -> "r1", "?d" -> "r1_pipetter", "?p" -> "prog001", "?l1" -> "plateA"))).right
 			plan1 <- plan0.addAction(op).right
 		} yield {
 			println("domain:")
