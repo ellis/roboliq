@@ -91,6 +91,7 @@ class Bindings(
 	}
 	
 	private def setVariableOptions(name: String, option_l: Set[String]): Either[String, Bindings] = {
+		println(s"setVariableOptions($name, ${option_l})")
 		assert(isVariableName(name))
 		assert(!assignment_m.contains(name))
 		
@@ -98,7 +99,10 @@ class Bindings(
 			Left(s"empty set of possible values for $name")
 		}
 		else if (option_l.size == 1) {
-			assign(name, option_l.head)
+			// Need to add the variable to the variable map before calling `assign`
+			val variable2_m = variable_m + (name -> B(option_l, Set()))
+			val bindings2 = copy(variable_m = variable2_m)
+			bindings2.assign(name, option_l.head)
 		}
 		else {
 			val b = variable_m.getOrElse(name, B())
@@ -358,8 +362,10 @@ class PartialPlan private (
 		val i = action_l.size
 		// Get a list of param name/typ for parameters which are still variables 
 		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(_._1.startsWith("?"))
+		println("op.effects.l: "+op.effects.l)
 		val paramName_m = varNameToTyp_l.map(pair => pair._1 -> s"${i-1}:${pair._1}").toMap
 		val action = op.bind(paramName_m)
+		println("action.effects.l: "+action.effects.l)
 		val action2_l: Vector[Operator] = action_l :+ action
 		
 		// Get list of parameters and their possible objects
@@ -488,7 +494,9 @@ class PartialPlan private (
 				case (key, value_l) :: rest => Left(s"would need to map $key to multiple values: "+value_l.mkString(","))
 			}
 		}
-		step(m1.toList, Map())
+		val x = step(m1.toList, Map())
+		println(s"createEffectToPrecondMap($effect, $precond) = $x")
+		x
 	}
 	
 	private def getProvidersFromList(
@@ -502,6 +510,7 @@ class PartialPlan private (
 			val (before_i_?, action) = pair
 			// Search for valid action/poseffect/binding combinations
 			val l0 = for ((effect, effect_i) <- action.effects.l.zipWithIndex if effect.atom.name == precond.atom.name) yield {
+				println("action.effects: "+action.effects.l)
 				for {
 					plan2 <- addAction(action) match {
 						case Left(msg) => println("addAction error: "+msg); None
@@ -510,6 +519,7 @@ class PartialPlan private (
 					_ = println("added action")
 					action2 = plan2.action_l.last
 					_ = println("action2: "+action2)
+					_ = println("action2.effects: "+action2.effects.l)
 					effect2 = action2.effects.l(effect_i)
 					_ = println("effect2: "+effect2)
 					eq_m <- createEffectToPrecondMap(effect2, precond) match {
@@ -684,14 +694,14 @@ class PartialPlan private (
 			// color unbound variables red
 			val param_l = op.paramName_l.map(s => if (s.contains(":")) s"""<font color="red">$s</font>""" else s)
 			val header = (name :: param_l).mkString(" ")
-			val preconds_l = op.preconds.l.list.toList.zipWithIndex.map(pair => {
+			val preconds_l = op.preconds.l.toList.zipWithIndex.map(pair => {
 				// color whether preconditions are supported
 				val color = if (openGoal_l.contains((i, pair._2))) "#ff8080" else "#80ff80"
 				// create "ports" for preconditions so that causal links can be drawn directly to them
 				s"""<td port="${pair._2}" bgcolor="$color">${pair._1.toString}</td>"""
 			})
 			val preconds = if (preconds_l.isEmpty) "" else preconds_l.mkString("""<table border="0"><tr>""", "</tr><tr>", "</tr></table>")
-			val effects = op.effects.l.list.toList.map(_.toString).mkString("<br/>")
+			val effects = op.effects.l.toList.map(_.toString).mkString("<br/>")
 			s"""action$i [label=<<table border="0" cellborder="1"><tr><td colspan="2">$header</td></tr><tr><td>$preconds</td><td>$effects</td></tr></table>>]"""
 		})
 		val orderLine_l: List[String] = orderings.getMinimalMap.toList.flatMap(pair => {
@@ -791,10 +801,21 @@ object PartialPlan {
   (:requirements :strips :typing)
   (:types
     labware
+    model
     site
+    siteModel
+
+    tecan
+
+    pipetter
+    pipetterProgram
   )
   (:predicates
+    (agent-has-device ?agent ?device)
+    (device-can-site ?device ?site)
     (location ?labware ?site)
+	(model ?labware ?model)
+    (stackable ?sm - siteModel ?m - model)
   )
   (:action moveLabware
     :parameters (?labware - labware ?site1 - site ?site2 - site)
@@ -802,23 +823,16 @@ object PartialPlan {
     :effect (and (not (location ?labware ?site1)) (location ?labware ?site2))
   )
   (:action tecan_pipette1
-    :parameters (?a - tecan ?d - pipetter ?p - program ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
+    :parameters (?a - tecan ?d - pipetter ?p - pipetterProgram ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
     :precondition (and
       (agent-has-device ?a ?d)
       (model ?l1 ?m1)
       (device-can-site ?d ?s1)
-      (is-site ?s1)
-      (model ?s1 ?sm1) ; site model
-      (stackable ?sm1 ?m1) ; site model accepts m1
+      (model ?s1 ?sm1)
+      (stackable ?sm1 ?m1)
     )
     :effect ()
   )
-  ; task list
-  ;((!pipetter-run ?a ?d ?spec))
-  ((move-labware ?p1 ?s1) (agent-activate ?a) (!pipetter-run ?a ?d ?spec))
- )
-
-
 )
 """
 		
@@ -826,13 +840,24 @@ object PartialPlan {
 (define (problem random-pbl1)
   (:domain random-domain)
   (:objects
+    r1 - tecan
+    r1_pipetter - pipetter
+    m001 - model
+    sm001 - siteModel
+    r1 - tecan
     siteA - site
     siteB - site
 	plateA - labware
 	plateB - labware
+    prog001 - pipetterProgram
   )
   (:init
     (location plateA siteA)
+    (agent-has-device r1 r1_pipetter)
+    (model plateA m001)
+    (device-can-site r1_pipetter siteB)
+    (model siteA sm001)
+    (stackable sm001 m001)
   )
   (:goal ()))
 """
@@ -843,7 +868,9 @@ object PartialPlan {
 			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText).right
 			_ <- Right(println("typToObjects_m: "+ problem.typToObjects_m)).right
 			plan0 <- Right(fromProblem(problem)).right
-			op <- domain.getOperator("moveLabware").right
+			//op <- domain.getOperator("moveLabware").right
+			op0 <- domain.getOperator("tecan_pipette1").right
+			op <- Right(op0.bind(Map("a" -> "r1", "d" -> "r1_pipetter", "p" -> "prog001", "l" -> "plateA"))).right
 			plan1 <- plan0.addAction(op).right
 		} yield {
 			println("domain:")

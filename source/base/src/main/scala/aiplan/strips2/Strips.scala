@@ -89,11 +89,11 @@ object Strips {
 	}
 	
 	object Literals {
-		val empty = new Literals(Unique(), Unique(), Unique())
+		val empty = new Literals(Unique(), Set(), Set())
 		def apply(l: Unique[Literal]): Literals = {
 			val pos: Unique[Atom] = l.collect { case Literal(atom, true) => atom }
 			val neg: Unique[Atom] = l.collect { case Literal(atom, false) => atom }
-			new Literals(l, pos, neg)
+			new Literals(l, pos.toSet, neg.toSet)
 		}
 		def apply(pos: List[Atom], neg: List[Atom]): Literals = {
 			val pos1 = pos.map(atom => Literal(atom, true))
