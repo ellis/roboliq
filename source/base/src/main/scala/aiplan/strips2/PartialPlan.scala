@@ -234,7 +234,7 @@ class Bindings(
 	}
 	
 	def bind(atom: Atom): Atom = {
-		atom.copy(params = atom.params.map(s => assignment_m.getOrElse(s, s)))
+		atom.copy(params = atom.params.map(s => getCanonicalName(s)))
 	}
 	
 	def bind(lit: Literal): Literal = {
@@ -248,7 +248,7 @@ class Bindings(
 	def bind(op: Operator): Operator = {
 		Operator(
 			name = op.name,
-			paramName_l = op.paramName_l.map(s => assignment_m.getOrElse(s, s)),
+			paramName_l = op.paramName_l.map(s => getCanonicalName(s)),
 			paramTyp_l = op.paramTyp_l,
 			preconds = bind(op.preconds),
 			effects = bind(op.effects)
@@ -844,10 +844,11 @@ object PartialPlan {
     :parameters (?a - tecan ?d - pipetter ?p - pipetterProgram ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
     :precondition (and
       (agent-has-device ?a ?d)
-      (model ?l1 ?m1)
       (device-can-site ?d ?s1)
       (model ?s1 ?sm1)
       (stackable ?sm1 ?m1)
+      (model ?l1 ?m1)
+      (location ?l1 ?s1)
     )
     :effect ()
   )

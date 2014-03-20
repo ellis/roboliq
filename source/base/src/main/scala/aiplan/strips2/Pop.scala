@@ -14,7 +14,7 @@ object Pop {
 		println(indent+"openGoals: "+plan0.openGoal_l)
 		println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
 		println(s"${indent}variables: ${plan0.bindings.variable_m}")
-		println("${indent}toDot:")
+		println(s"${indent}toDot:")
 		plan0.toDot.split("\n").foreach(s => println(indent+s))
 		if (plan0.openGoal_l.isEmpty) {
 			println("FOUND")
