@@ -83,6 +83,11 @@ object PddlParser {
 					init_l <- initDef_l.map(getAtom).sequenceU.right
 					goal_l <- goalDef_l.map(elem => getLiterals(elem)).sequenceU.right
 				} yield {
+					// FIXME: for debug only
+					//println("map: "+Unique(3, 1, 3, 2, 3).map(x => x + 1))
+					//val x = goal_l.flatMap(_.l.map(_.atom))
+					//println("x: "+x)
+					// ENDFIX
 					val object2_l = (init_l ++ goal_l.flatMap(_.l.map(_.atom))).flatMap(atom => {
 						domain.predicate_l.find(_.name == atom.name) match {
 							case Some(sig) =>

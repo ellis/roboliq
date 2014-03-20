@@ -17,102 +17,14 @@ import scala.collection.generic.TraversableFactory
 import scala.collection.TraversableLike
 
 /*
-class Unique[A](
-	val list: Vector[A],
-	val set: Set[A]
-//) extends IndexedSeq[A] /*with SetLike[A, Unique[A]]*/ {
-//) extends Set[A] with SetLike[A, Unique[A]] {
-//) extends SetLike[A, Unique[A]] {
-//) extends IterableLike[A, Unique[A]] {
-) extends IndexedSeqLike[A, Unique[A]] {
-
-	// IndexedSeq
-	def apply(idx: Int): A = list(idx)
-	def length: Int = list.length
-	def map[B](fn: A => B): Unique[B] = list.map(fn)
-	//override def map[B](f: A => B)(implicit bf: scala.collection.generic.CanBuildFrom[aiplan.strips2.Unique[A],B,Unique[B]]): Unique[B] = Unique(list.map(f) : _*)
-	//override def map[B](f: A => B)(implicit bf: scala.collection.generic.CanBuildFrom[aiplan.strips2.Unique[A],B,Unique[B]]): Unique[B] = Unique(list.map(f) : _*)
-
-	// Members declared in scala.collection.GenSetLike
-	//def seq: scala.collection.Set[A] = set
-	def seq: scala.collection.IndexedSeq[A] = list.seq
-	override def iterator: Iterator[A] = list.iterator
-	
-	// Members declared in scala.collection.TraversableLike
-	//protected[this] def newBuilder: scala.collection.mutable.Builder[A,aiplan.strips2.Unique[A]] = ???
-	
-	/*  
-	The method that builds the new collection.  This is a simple implementation
-	but it works.  There are other implementations to assist with implementation if
-	needed
-	*/
-	protected[this] def newBuilder: scala.collection.mutable.Builder[A,aiplan.strips2.Unique[A]] = {
-	//def newBuilder[A] = new scala.collection.mutable.LazyBuilder[A,Unique[A]] {
-		new scala.collection.mutable.LazyBuilder[A,Unique[A]] {
-			def result = {
-				val data = parts.foldLeft(List[A]()){(l,n) => l ++ n}
-				Unique(data : _*)
-			}
-		}
-	}
-	
-	// Members declared in scala.collection.SetLike
-	//override def empty: Unique[A] = new Unique(Vector(), Set())
-	def -(elem: A): Unique[A] = {
-		if (set.contains(elem)) new Unique(list.filterNot(_ == elem), set - elem)
-		else this
-	}
-	def +(elem: A): Unique[A] = {
-		if (set.contains(elem)) this
-		else new Unique(list :+ elem, set + elem)
-	}
-	def contains(elem: A): Boolean = set.contains(elem)
-	
-	override def toString = list.toString
-}
-*/
-
 sealed class Unique[A] private ( values : IndexedSeq[A], valueSet : Set[A] )
-    //extends IndexedSeqLike[A,Unique[A]]
-    //with IndexedSeq[A]
 	extends Traversable[A]
 	with TraversableLike[A, Unique[A]]
     with GenericTraversableTemplate[A,Unique]
 {
 	def apply( idx : Int ) : A = values( idx )
 
-	//override def iterator = values.iterator
-
-	//def length = values.length
-	
 	override def seq = values.seq
-
-	/*override def companion: GenericCompanion[Unique] = new GenericCompanion[Unique]() 
-	{
-		def newBuilder[A]: Builder[A, Unique[A]] = new Builder[A, Unique[A]] 
-		{
-			var elems = Vector[A]()
-			def +=(a:A) = { elems :+ a; this } 
-			def clear() { Vector[A]() }
-			def result(): Unique[A] = new Unique[A](elems, elems.toSet)
-		}
-	}*/
-
-	/*def newBuilder[A]: Builder[A, Unique[A]] = new Builder[A, Unique[A]] 
-	{
-		var elems = Vector[A]()
-		def +=(a:A) = { elems :+ a; this } 
-		def clear() { Vector[A]() }
-		def result(): Unique[A] = new Unique[A](elems, elems.toSet)
-	}*/
-	/*
-	def newBuilder: Builder[A, Unique[A]] = new LazyBuilder[A, Unique[A]] 
-	{
-		def result: Unique[A] = {
-			val data = parts.foldLeft(List[A]()){(l,n) => l ++ n}
-			Unique(data:_*)
-		}
-	}*/
 
 	def + ( elem : A ) : Unique[A] = valueSet.contains( elem ) match
 		{
@@ -138,24 +50,6 @@ sealed class Unique[A] private ( values : IndexedSeq[A], valueSet : Set[A] )
 		new Unique[A](values2, values2.toSet)
 	}
 	
-	// Method in TraversableOnce
-	//override def toSet[B >: A]: scala.collection.immutable.Set[B] = valueSet.toSet
-	
-	/*override def map[B](fn: A => B): Unique[B] = {
-		val values2 = values.map(fn)
-		new Unique[B](values2, values2.toSet)
-	}*/
-	/*override def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Unique[A], B, That]): That = {
-		def builder = { // extracted to keep method size under 35 bytes, so that it can be JIT-inlined
-			val b = bf(this)
-			b.sizeHint(this)
-			b
-		}
-		val b = builder
-		for (x <- this) b += f(x)
-		b.result
-	}*/
-
 	def contains(elem: A): Boolean = valueSet.contains(elem)
 
 	override def companion: GenericCompanion[Unique] = Unique
@@ -186,4 +80,79 @@ object Unique extends TraversableFactory[Unique] {
 	
 	implicit def seqToUnique[A](l: Iterable[A]): Unique[A] =
 		apply(l.toList : _*)
+}
+*/
+
+import collection.TraversableLike
+import collection.generic.{CanBuildFrom, GenericCompanion, GenericTraversableTemplate, TraversableFactory}
+import collection.mutable.{Builder, ListBuffer}
+import scala.collection.mutable.HashSet
+
+class Unique[A] private (list: List[A], set: Set[A]) extends Traversable[A]
+	with TraversableLike[A, Unique[A]]
+	with GenericTraversableTemplate[A, Unique]
+{
+	def apply(index: Int): A = list(index)
+	override def companion: GenericCompanion[Unique] = Unique
+	def foreach[U](f: A => U) { list foreach f }
+	override def seq = list
+
+	def + ( elem : A ) : Unique[A] = set.contains( elem ) match
+		{
+		case true => this
+		case false => new Unique[A]( list ++ List(elem), set + elem )
+		}
+
+	def - ( elem : A ) : Unique[A] = set.contains( elem ) match
+		{
+		case true => new Unique[A]( list.filter( _ != elem ), set - elem )
+		case false => this
+		}
+	
+	def --(elems: Traversable[A]): Unique[A] = {
+		val set = elems.toSet
+		val values2 = list.filterNot(set.contains)
+		new Unique[A](values2, values2.toSet)
+	}
+	
+	def ++(elems: Traversable[A]): Unique[A] = {
+		val list2 = elems.filterNot(set.contains)
+		val values2 = list ++ list2
+		new Unique[A](values2, values2.toSet)
+	}
+	
+	def contains(elem: A): Boolean = set.contains(elem)
+
+	def zipWithIndex: Traversable[(A, Int)] = list.zipWithIndex
+}
+
+object Unique extends TraversableFactory[Unique] {
+	def newBuilder[A] = new UniqueBuilder[A]
+	
+	implicit def canBuildFrom[A]: CanBuildFrom[Coll, A, Unique[A]] = {
+	    new CanBuildFrom[Coll, A, Unique[A]] {
+	       def apply(): Builder[A, Unique[A]] = new UniqueBuilder()
+	       def apply(from: Coll): Builder[A, Unique[A]] = apply()
+	    }
+	}
+
+	class UniqueBuilder[A] extends Builder[A, Unique[A]] {
+		private val list = new ListBuffer[A]()
+		private val set = new HashSet[A]()
+		
+		def += (elem: A): this.type = {
+			if (!set.contains(elem)) {
+				set += elem
+				list += elem
+			}
+			this
+		}
+		
+		def clear() {
+			set.clear()
+			list.clear()
+		}
+		
+		def result(): Unique[A] = new Unique(list.result(), set.toSet)
+	}
 }
