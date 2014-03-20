@@ -358,14 +358,13 @@ class PartialPlan private (
 	 * The parameters will be added to the bindings using possible values for the given type.
 	 */
 	def addAction(op: Operator): Either[String, PartialPlan] = {
+		println(s"addAction($op)")
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
 		// Get a list of param name/typ for parameters which are still variables 
 		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(_._1.startsWith("?"))
-		println("op.effects.l: "+op.effects.l)
 		val paramName_m = varNameToTyp_l.map(pair => pair._1 -> s"${i-1}:${pair._1}").toMap
 		val action = op.bind(paramName_m)
-		println("action.effects.l: "+action.effects.l)
 		val action2_l: Vector[Operator] = action_l :+ action
 		
 		// Get list of parameters and their possible objects
@@ -512,12 +511,18 @@ class PartialPlan private (
 			val l0 = for ((effect, effect_i) <- action.effects.l.zipWithIndex if effect.atom.name == precond.atom.name) yield {
 				println("action.effects: "+action.effects.l)
 				for {
-					plan2 <- addAction(action) match {
-						case Left(msg) => println("addAction error: "+msg); None
-						case Right(x) => Some(x)
+					res <- {
+						if (before_i_?.isEmpty) {
+							addAction(action) match {
+								case Left(msg) => println("addAction error: "+msg); None
+								case Right(plan2) => Some((plan2, plan2.action_l.last))
+							}
+						}
+						else {
+							Some((this, action))
+						}
 					}
-					_ = println("added action")
-					action2 = plan2.action_l.last
+					(plan2, action2) = res
 					_ = println("action2: "+action2)
 					_ = println("action2.effects: "+action2.effects.l)
 					effect2 = action2.effects.l(effect_i)

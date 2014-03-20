@@ -12,7 +12,7 @@ object Pop {
 		println(indent+"openGoals: "+plan0.openGoal_l)
 		if (plan0.openGoal_l.isEmpty) {
 			println("FOUND")
-			println(plan0.toDot)
+			//println(plan0.toDot)
 			Right(plan0)
 		}
 		else {
@@ -35,6 +35,7 @@ object Pop {
 						for {
 							res <- (either match {
 								case Left(op) =>
+									println(indent+"op: "+op)
 									for {
 										plan1 <- plan0.addAction(op)
 									} yield (plan1, plan1.action_l.size - 1)
