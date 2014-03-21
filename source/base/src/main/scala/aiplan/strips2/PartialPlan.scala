@@ -348,9 +348,9 @@ class Orderings(
 					step(before_i, rest, acc2)
 			}
 		}
-		println("before: "+map)
+		//println("before: "+map)
 		val x = map.map(pair => step(pair._1, pair._2.toList, pair._2))
-		println("after:  "+x)
+		//println("after:  "+x)
 		x
 	}
 }
@@ -962,13 +962,24 @@ object PartialPlan {
 			//println(plan0.getExistingProviders(1, 0))
 			//println(plan0.getNewProviders(1, 0))
 			//println()
-			Pop.pop(plan1) match {
+			val step0 = PopState_SelectGoal(plan1, 0)
+			for {
+				step1 <- Pop.step(step0).right
+				step2 <- Pop.step(step1).right
+				step3 <- Pop.step(step2).right
+				step4 <- Pop.step(step3).right
+				step5 <- Pop.step(step4).right
+				step6 <- Pop.step(step5).right
+			} yield {
+				()
+			}
+			/*Pop.pop(plan1) match {
 				case Left(msg) => println("ERROR: "+msg)
 				case Right(plan1) =>
 					val dot = plan1.toDot
 					println(dot)
 				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
-			}
+			}*/
 		}
 		res match {
 			case Left(msg) => println("ERROR: "+msg)

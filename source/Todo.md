@@ -219,6 +219,7 @@ What we could do is propogate the desired post-condition value through commands,
 
 ## Priorities for script language
 
+- [ ] Fabian says: clean, mix, ensureWellMixed
 - [ ] for evoware script, each protocol command should be an evoware Group
 - [ ] TitrationSeries: Automatically figure out sterilization and liquid class again, so user doesn't need to specify it
 - [ ] Allow for use of tubes
