@@ -879,7 +879,8 @@ object PartialPlan {
     (model siteB sm001)
     (stackable sm001 m001)
   )
-  (:goal ()))
+  (:goal (and (location plateA siteA)))
+)
 """
 	
 	def main(args: Array[String]) {
