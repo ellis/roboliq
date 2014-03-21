@@ -31,7 +31,7 @@ object Pop {
 			provider_l.foreach(pair => {
 				val op_s = pair._1 match {
 					case Left(op) => op.toString
-					case Right(i) => s"$i:${plan0.action_l(i).toString}"
+					case Right(i) => s"${plan0.getActionText(i)}"
 				}
 				println(s"$indent| ${op_s} using ${pair._2}")
 			})
@@ -55,7 +55,7 @@ object Pop {
 							(plan1, provider_i) = res
 							link = CausalLink(provider_i, consumer_i, precond_i)
 							plan2 <- plan1.addLink(link, binding_m, Map())
-							planX <- handleX(plan2, link)
+							planX <- handleThreats(plan2, link)
 							plan3 <- (pop(plan2, indentLevel + 1) match {
 								case Right(x) => Right(x)
 								case Left(msg) => chooseAction(rest)
@@ -64,15 +64,18 @@ object Pop {
 				}
 			}
 			
-			def handleX(plan0: PartialPlan, link: CausalLink): Either[String, PartialPlan] = {
+			def handleThreats(plan0: PartialPlan, link: CausalLink): Either[String, PartialPlan] = {
 				// Find threats on the link or created by the provider
 				val threat0_l = plan0.findThreats
 				val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
+				println(s"${indent}  threats on link ${link} or from action")
+				threat_l.foreach(pair => println(s"${indent}  | ${pair}"))
 				threat_l.foldLeft(Right(plan0) : Either[String, PartialPlan]) { (plan_?, threat) =>
 					val (action_i, link) = threat
 					for {
 						plan <- plan_?
 						resolver_l = plan.getResolvers(action_i, link)
+						_ = println(s"${indent}  resolvers: ${resolver_l}")
 						plan1 <- chooseResolver(plan, resolver_l)
 					} yield plan1
 				}
@@ -83,7 +86,7 @@ object Pop {
 				resolver_l: List[Resolver]
 			): Either[String, PartialPlan] = {
 				resolver_l match {
-					case Nil => Right(plan0)
+					case Nil => Left("No resolver found for the threat")
 					case resolver :: rest =>
 						resolver match {
 							case Resolver_Ordering(before_i, after_i) =>

@@ -31,6 +31,8 @@
 - [x] PddlParser: handle `objects` field in problem
 - [x] continue with domain: action tecan_pipette1
 - [x] create PDDL for domain with `movePlate` and `distribute` commands
+- [ ] `3:moveLabware` should not be a provider for `location plateA siteA`
+- [ ] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
 - [ ] PartialPlan: toDot: show inequalities
 - [ ] PartialPlan: incrementally calculate threats
 - [ ] PartialPlan: toDot: show threats

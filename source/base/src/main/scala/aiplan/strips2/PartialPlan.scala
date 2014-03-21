@@ -1,6 +1,7 @@
 package aiplan.strips2
 
 import Strips._
+import scala.collection.mutable.ArrayBuffer
 
 	
 	//sealed trait BindingConstraint
@@ -264,14 +265,59 @@ class Bindings(
 class Orderings(
 	val map: Map[Int, Set[Int]]
 ) {
+	assert(map.isEmpty || !getMinimalMap.getOrElse(0, Set()).isEmpty)
 	def add(before_i: Int, after_i: Int): Either[String, Orderings] = {
+		assert(before_i != after_i)
+		// If the mapping is already present, just return this ordering
+		if (map.getOrElse(before_i, Set()).contains(after_i))
+			Right(this)
 		// Make sure the constraints are not violated.
 		// In other words, make sure before_i is not already after after_i.
-		if (map.getOrElse(after_i, Set()).contains(before_i))
+		else if (map.getOrElse(after_i, Set()).contains(before_i))
 			Left(s"New ordering constraint violates preexising constraints: ${before_i} -> ${after_i}")
 		else {
+			// Update set of actions which are after before_i with after_i and all it's afters
+			val newset = map.getOrElse(before_i, Set()) ++ map.getOrElse(after_i, Set()) + after_i
+			if (newset.contains(before_i))
+				return Left(s"New ordering constraint indirectly violates preexising constraints: ${before_i} -> ${after_i}")
+			val map2 = scala.collection.mutable.HashMap[Int, Set[Int]](map.toSeq : _*)
+			map2(before_i) = newset
+			
+			/*
+			val before_li = map2.keys
+			val q = scala.collection.mutable.Queue[(Int, Int)]((before_i, after_i))
+			// Get the list of actions which are before before_i
+			val beforeBefore_l = map.filter(_._2.contains(before_i)).keys.toList
+			q ++= beforeBefore_l.flatMap(i => newset.toList.map(i -> _))
+			while (!q.isEmpty) {
+				val (before_i, after_i) = q.dequeue
+				if (before_i == after_i)
+					return Left("Ordering constraint violation")
+				
+			}
+			*/
+			
+			// Get the list of actions which are before before_i
+			val beforeBefore_l = map.filter(_._2.contains(before_i)).keys.toList
+			val l = beforeBefore_l.flatMap(i => newset.toList.map(i -> _))
+			val x = l.foldLeft(Right(new Orderings(map2.toMap)) : Either[String, Orderings]) { (orderings_?, pair) =>
+				orderings_? match {
+					case Right(orderings) =>
+						orderings.add(pair._1, pair._2)
+					case x => return x
+				}
+			}
+			
+			println(s"Orderings.add(${before_i}, ${after_i})")
+			println("before: "+map)
+			x match {
+				case Right(y) => println("after:  "+y.map)
+				case _ =>
+			}
+			x
+			/*
 			// Update orderings map
-			val map2 = for (pair@(i, li) <- map) yield {
+			for (pair@(i, li) <- map) {
 				// before_i is before after_i
 				if (i == before_i)
 					i -> (li + after_i)
@@ -286,6 +332,7 @@ class Orderings(
 			val map3 = if (map2.contains(before_i)) map2 else map2 + (before_i -> Set(after_i))
 			println(s"Orderings.add(${before_i}, ${after_i}) => $map3")
 			Right(new Orderings(map3))
+			*/
 		}
 	}
 	
@@ -301,7 +348,10 @@ class Orderings(
 					step(before_i, rest, acc2)
 			}
 		}
-		map.map(pair => step(pair._1, pair._2.toList, pair._2))
+		println("before: "+map)
+		val x = map.map(pair => step(pair._1, pair._2.toList, pair._2))
+		println("after:  "+x)
+		x
 	}
 }
 
@@ -570,7 +620,7 @@ class PartialPlan private (
 		val precond = action_l(consumer_i).preconds.l(precond_i)
 		// Get indexes of actions which may be before consumer_i
 		val after_li = orderings.map.getOrElse(consumer_i, Set())
-		val before_li = ((0 until action_l.size).toSet -- after_li).toList.sorted
+		val before_li = ((0 until action_l.size).toSet -- after_li - consumer_i).toList.sorted
 		val provider_l = before_li.map(i => Some(i) -> action_l(i))
 		getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
@@ -641,6 +691,11 @@ class PartialPlan private (
 	}
 	
 	private def isThreat(action_i: Int, link: CausalLink): Boolean = {
+		println(s"isThreat(${action_i}, $link)")
+		// The actions of a link are not threats to the link
+		if (action_i == link.provider_i || action_i == link.consumer_i)
+			return false
+			
 		// Get precondition
 		val precond = action_l(link.consumer_i).preconds.l(link.precond_i)
 		// Get list of effect which might negate the precondition
@@ -693,7 +748,7 @@ class PartialPlan private (
 		val i = action_i
 		// substitute assigned values for parameters
 		val op = bindings.bind(op0)
-		val name = s"${i-1}:${op.name}"
+		val name = s"${i}:${op.name}"
 		(name :: op.paramName_l).mkString(" ")
 	}
 	
