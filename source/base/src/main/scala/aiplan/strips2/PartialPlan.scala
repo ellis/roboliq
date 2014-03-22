@@ -562,7 +562,7 @@ class PartialPlan private (
 		val l = provider_l.flatMap(pair => {
 			val (before_i_?, action) = pair
 			// Search for valid action/poseffect/binding combinations
-			val l0 = for ((effect, effect_i) <- action.effects.l.zipWithIndex if effect.atom.name == precond.atom.name) yield {
+			val l0 = for ((effect, effect_i) <- action.effects.l.zipWithIndex if effect.atom.name == precond.atom.name && effect.pos == precond.pos) yield {
 				//println("action.effects: "+action.effects.l)
 				for {
 					res <- {
@@ -691,7 +691,12 @@ class PartialPlan private (
 	}
 	
 	private def isThreat(action_i: Int, link: CausalLink): Boolean = {
-		println(s"isThreat(${action_i}, $link)")
+		// FIXME: for debug only
+		val test = action_i == 4 && link == CausalLink(3,2,5)
+		if (test)
+			()
+		// ENDFIX
+		//println(s"isThreat(${action_i}, $link)")
 		// The actions of a link are not threats to the link
 		if (action_i == link.provider_i || action_i == link.consumer_i)
 			return false
@@ -706,6 +711,7 @@ class PartialPlan private (
 		if (effect_l.isEmpty)
 			return false
 
+		println(s"isThreat(${action_i}, $link)")
 		// Check whether action_i can be ordered between the provider and consumer
 		(for {
 			orderings1 <- orderings.add(link.provider_i, action_i).right
@@ -718,18 +724,27 @@ class PartialPlan private (
 			case _ =>
 		}
 		
-		// Negated precondition
-		val neg = !precond
 		// Check whether any of the effects negate the precondition
 		for (effect <- effect_l) {
 			for {
 				eq_m <- createEffectToPrecondMap(effect, precond).right
 				bindings2 <- bindings.assign(eq_m).right
 			} {
+				val precond2 = bindings2.bind(precond)
+				// Negated precondition
+				val neg = !precond2
 				val action2 = bindings2.bind(action)
-				if (precond.pos) {
+				// FIXME: for debug only
+				if (test) {
+					println(s"action2: ${action2}")
+					println(s"precond2: $precond2")
+					println(s"neg: $neg")
+					println(s"action2.effects.l: ${action2.effects.l}")
+				}
+				// ENDFIX
+				if (precond2.pos) {
 					if (action2.effects.l.contains(neg)) {
-						if (!action2.effects.l.contains(precond))
+						if (!action2.effects.l.contains(precond2))
 							return true
 					}
 				}
@@ -963,7 +978,7 @@ object PartialPlan {
 			//println(plan0.getNewProviders(1, 0))
 			//println()
 			val step0 = PopState_SelectGoal(plan1, 0)
-			for {
+			/*for {
 				step1 <- Pop.step(step0).right
 				step2 <- Pop.step(step1).right
 				step3 <- Pop.step(step2).right
@@ -972,6 +987,14 @@ object PartialPlan {
 				step6 <- Pop.step(step5).right
 			} yield {
 				()
+			}
+			*/
+			Pop.stepToEnd(step0) match {
+				case Left(msg) => println("ERROR: "+msg)
+				case Right(plan1) =>
+					val dot = plan1.toDot
+					println(dot)
+				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
 			}
 			/*Pop.pop(plan1) match {
 				case Left(msg) => println("ERROR: "+msg)

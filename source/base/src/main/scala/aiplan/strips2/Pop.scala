@@ -95,9 +95,14 @@ object Pop {
 			def handleThreats(plan0: PartialPlan, link: CausalLink): Either[String, PartialPlan] = {
 				// Find threats on the link or created by the provider
 				val threat0_l = plan0.findThreats
-				val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
+				val (threat_l, threatOther_l) = threat0_l.toList.span(pair => pair._1 == link.provider_i || pair._2 == link)
+				//val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
+				
 				println(s"${indent}  threats on link ${link} or from action")
 				threat_l.foreach(pair => println(s"${indent}  | ${pair}"))
+				println(s"${indent}  other threats")
+				threatOther_l.foreach(pair => println(s"${indent}  | ${pair}"))
+
 				threat_l.foldLeft(Right(plan0) : Either[String, PartialPlan]) { (plan_?, threat) =>
 					val (action_i, link) = threat
 					for {
@@ -155,6 +160,7 @@ object Pop {
 		val indent = "  " * x.indentLevel
 		val plan0 = x.plan
 		println()
+		println(s"${indent}SelectGoal")
 		println(s"${indent}actions:")
 		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
 		println(indent+"openGoals: "+plan0.openGoal_l)
@@ -168,21 +174,33 @@ object Pop {
 			Right(PopState_Done(plan0))
 		}
 		else {
-			Right(PopState_HandleGoal(plan0, plan0.openGoal_l.head, x.indentLevel + 1))
+			// Sort the goals so that actions earlier in the ordering get handled first
+			val goal_l = plan0.openGoal_l.toList.sortWith((a, b) => {
+				if (a._1 == b._1) a._2 < b._2
+				else if (plan0.orderings.map.getOrElse(a._1, Set()).contains(b._1)) true
+				else if (plan0.orderings.map.getOrElse(b._1, Set()).contains(a._1)) false
+				else a._1 < b._1
+			})
+			Right(PopState_HandleGoal(plan0, goal_l.head, x.indentLevel))
 		}
 	}
 	
 	def stepHandleGoal(x: PopState_HandleGoal): Either[String, PopState] = {
+		val indent = "  " * x.indentLevel
+		println(s"${indent}HandleGoal(${x.goal})")
 		val plan0 = x.plan
 		val (consumer_i, precond_i) = x.goal
 		val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
 		val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
 		val provider_l = provider1_l ++ provider2_l
-		Right(PopState_ChooseAction(x.plan, x.goal, provider_l, x.indentLevel + 1))
+		Right(PopState_ChooseAction(x.plan, x.goal, provider_l, x.indentLevel))
 	}
 	
 	def stepChooseAction(x: PopState_ChooseAction): Either[String, PopState] = {
 		val indent = "  " * x.indentLevel
+		println(s"${indent}ChooseAction")
+		println(s"${indent}providers:")
+		x.provider_l.foreach(pair => println(s"${indent}| $pair"))
 		x.provider_l match {
 			case Nil =>
 				Left(s"Couldn't find an action to fulfill ${x.goal}")
@@ -196,14 +214,20 @@ object Pop {
 		val indent = "  " * x.indentLevel
 		val (consumer_i, precond_i) = x.goal
 		val (either, binding_m) = x.provider
+		println(s"${indent}HandleAction")
 		println(s"${indent}try $either with ${binding_m}")
 
 		def handleThreats(plan0: PartialPlan, link: CausalLink): Either[String, PartialPlan] = {
 			// Find threats on the link or created by the provider
 			val threat0_l = plan0.findThreats
-			val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
+			val (threat_l, threatOther_l) = threat0_l.toList.span(pair => pair._1 == link.provider_i || pair._2 == link)
+			//val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
+			
 			println(s"${indent}  threats on link ${link} or from action")
 			threat_l.foreach(pair => println(s"${indent}  | ${pair}"))
+			println(s"${indent}  other threats")
+			threatOther_l.foreach(pair => println(s"${indent}  | ${pair}"))
+
 			threat_l.foldLeft(Right(plan0) : Either[String, PartialPlan]) { (plan_?, threat) =>
 				val (action_i, link) = threat
 				for {
@@ -248,7 +272,15 @@ object Pop {
 		
 		plan1_? match {
 			case Right(plan1) => Right(PopState_SelectGoal(plan1, x.indentLevel + 1))
-			case Left(msg) => Right(PopState_ChooseAction(x.plan, x.goal, x.provider_l, x.indentLevel - 3))
+			case Left(msg) => Right(PopState_ChooseAction(x.plan, x.goal, x.provider_l, x.indentLevel - 1))
+		}
+	}
+	
+	def stepToEnd(x: PopState): Either[String, PartialPlan] = {
+		step(x) match {
+			case Left(msg) => Left(msg)
+			case Right(PopState_Done(plan)) => Right(plan)
+			case Right(step1) => stepToEnd(step1)
 		}
 	}
 }
