@@ -33,11 +33,51 @@
 - [x] create PDDL for domain with `movePlate` and `distribute` commands
 - [x] `3:moveLabware` should not be a provider for `location plateA siteA`
 - [x] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
-- [ ] PartialPlan: toDot: show inequalities
+- [ ] PartialPlan: toDot: show variable options and inequalities
 - [ ] PartialPlan: incrementally calculate threats
 - [ ] PartialPlan: toDot: show threats
 - [ ] PddlParser: handle comments
 - [ ] PddlParser: handle domain constants
+
+## AI planning flow
+
+Command types: task, procedure, method, action
+
+* A task gets decomposed into a list of possible methods for achieving the task.
+* A procedure gets decomposed into a list of imperatives (recursion not allowed for now).
+* A method gets decomposed into a list of methods and actions (recursion not allowed for now).
+* A method may also need to use task, but in order to do so, it must request the method for that task in advance in order to avoid additional user interaction.
+* Actions get passed to the planner.
+* With a concrete plan, actions are turned into operators, which are passed to the translator.
+
+More:
+
+* So first we decompose the command list into an action list.
+* The user is given the opportunity to set predicates in the initial state (e.g. intial positions).
+* The actions are then added to our partial plan one at a time, and we see whether a solution can be found.
+* If not, we inform the user.  We can try to figure out where the problem occurred by planning for all subsets of the action's pre-requisites and finding the first one that fails.
+* If a solution is found to the partial plan with all actions, the user is given the opportunity to add additional bindings and orderings.
+* The user now selects which post-conditions to add to the plan.
+* We try to find a solution to the partial plan with post-conditions in the goal state.
+* If a solution is found, the user is given the opportunity to add additional bindings and orderings.
+* We try to find a grounded, completely ordered plan.
+
+A complication is labware placement and movement.
+Moving labware from site A to B may require multiple agents (e.g. centrifuge a plate at the start of a protocol).
+We can have a list of all possible pair-wise movements for a given labware model...
+
+## Feedback loops
+
+Loops:
+
+* Script is created up until looping condition.
+* Once the looping condition is reached, if the condition is true, a new script is created just for the loop segment,
+where the initial state contains the state at the condition check.
+
+Conditional branches:
+
+* For each branch of a conditional block, set the tested state to true and continue planning for the particular branch.
+* To continue planning, create a dummy action whose effects are the intersection of all final effects for each branch.
 
 ## AI Planning
 
