@@ -735,12 +735,12 @@ class PartialPlan private (
 				val neg = !precond2
 				val action2 = bindings2.bind(action)
 				// FIXME: for debug only
-				if (test) {
-					println(s"action2: ${action2}")
-					println(s"precond2: $precond2")
-					println(s"neg: $neg")
-					println(s"action2.effects.l: ${action2.effects.l}")
-				}
+				//if (test) {
+					//println(s"action2: ${action2}")
+					//println(s"precond2: $precond2")
+					//println(s"neg: $neg")
+					//println(s"action2.effects.l: ${action2.effects.l}")
+				//}
 				// ENDFIX
 				if (precond2.pos) {
 					if (action2.effects.l.contains(neg)) {

@@ -67,3 +67,16 @@ liquid+agents:
 
 - AgentLiquid
 - LiquidAgent
+
+---------------------
+
+"Smart Liquid Handling Automation"
+
+AgentLiquid
+LiquiBot
+LiQuick
+Liquigence
+Liquimation
+Piper
+Roboliq
+Siliqua

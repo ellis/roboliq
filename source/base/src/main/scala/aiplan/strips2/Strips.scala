@@ -52,6 +52,10 @@ object Strips {
 		override def toString = (if (pos) "" else "!") ++ atom.toString
 	}
 	
+	object Literal {
+		def apply(pos: Boolean, name: String, params: String*): Literal =
+			Literal(Atom(name, params.toSeq), pos)
+	}
 	/*object Literal {
 		def apply(s: String, pos: Boolean = true): Literal = {
 			Literal(Atom.apply(s), pos)

@@ -41,21 +41,29 @@
 
 ## AI planning flow
 
-Command types: task, procedure, method, action
+Command types: task, procedure, method, action, operator
 
-* A task gets decomposed into a list of possible methods for achieving the task.
-* A procedure gets decomposed into a list of imperatives (recursion not allowed for now).
-* A method gets decomposed into a list of methods and actions (recursion not allowed for now).
+A sequence of calls gets transformed into a command tree with a root node, and the call items are transformed into command nodes.
+The command tree is iteratively expanded as follows:
+
+* A task gets expanded into a list of possible commands for achieving the task.  A task is established by a map of task name to a list of command names.
+  If the task has more than one possible method, the user will need to choose which one to use.
+* A procedure gets expanded into a list of commands (recursion not allowed for now).  Procedures are generally user-defined, have parameters, and a list of commands.
+* A method gets expanded into a list of methods and actions (recursion not allowed for now).
+  A method differs from the other command types insofar as it is composed of code, and can therefore make decisions about how to expand based on its parameters;
+  It can also request more information from the user before proceeding.
 * A method may also need to use task, but in order to do so, it must request the method for that task in advance in order to avoid additional user interaction.
-* Actions get passed to the planner.
+* Once the leafs of the command tree are all actions or operators, the expansion process is done and no more user interaction is required.
+* The actions and operators get passed to the planner.
 * With a concrete plan, actions are turned into operators, which are passed to the translator.
 
 More:
 
-* So first we decompose the command list into an action list.
 * The user is given the opportunity to set predicates in the initial state (e.g. intial positions).
-* The actions are then added to our partial plan one at a time, and we see whether a solution can be found.
-* If not, we inform the user.  We can try to figure out where the problem occurred by planning for all subsets of the action's pre-requisites and finding the first one that fails.
+* During planning, the actions are added to our partial plan one at a time, and we see whether a solution can be found.
+* If not, first retry planning with a new partial plan of all actions up to that point.
+  If that also doesn't work, we inform the user.
+  We can try to figure out where the problem occurred by planning for all subsets of the action's pre-requisites and finding the first one that fails.
 * If a solution is found to the partial plan with all actions, the user is given the opportunity to add additional bindings and orderings.
 * The user now selects which post-conditions to add to the plan.
 * We try to find a solution to the partial plan with post-conditions in the goal state.
@@ -72,12 +80,15 @@ Loops:
 
 * Script is created up until looping condition.
 * Once the looping condition is reached, if the condition is true, a new script is created just for the loop segment,
-where the initial state contains the state at the condition check.
+  where the initial state contains the state at the condition check.
+
+Alternatively, set a maximum number of loops allowed and unroll the loop that many times.
 
 Conditional branches:
 
 * For each branch of a conditional block, set the tested state to true and continue planning for the particular branch.
 * To continue planning, create a dummy action whose effects are the intersection of all final effects for each branch.
+
 
 ## AI Planning
 
