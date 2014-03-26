@@ -41,18 +41,17 @@
 
 ## AI planning flow
 
-Command types: task, procedure, method, action, operator
+Command types: task, procedure, function, action, operator
 
 A sequence of calls gets transformed into a command tree with a root node, and the call items are transformed into command nodes.
 The command tree is iteratively expanded as follows:
 
 * A task gets expanded into a list of possible commands for achieving the task.  A task is established by a map of task name to a list of command names.
   If the task has more than one possible method, the user will need to choose which one to use.
+* A method is a way to convert a task call into another command call, and there may be multiple such conversions per task.
 * A procedure gets expanded into a list of commands (recursion not allowed for now).  Procedures are generally user-defined, have parameters, and a list of commands.
-* A method gets expanded into a list of methods and actions (recursion not allowed for now).
-  A method differs from the other command types insofar as it is composed of code, and can therefore make decisions about how to expand based on its parameters;
-  It can also request more information from the user before proceeding.
-* A method may also need to use task, but in order to do so, it must request the method for that task in advance in order to avoid additional user interaction.
+* A function gets expanded into a list of commands; it differs from the other command types insofar as it is composed of code, and can therefore make decisions about how to expand based on its parameters; It can also request more information from the user before proceeding.
+* A function may also need to use task, but in order to do so, it must request the method for that task in advance in order to avoid additional user interaction.
 * Once the leafs of the command tree are all actions or operators, the expansion process is done and no more user interaction is required.
 * The actions and operators get passed to the planner.
 * With a concrete plan, actions are turned into operators, which are passed to the translator.
@@ -73,6 +72,12 @@ More:
 A complication is labware placement and movement.
 Moving labware from site A to B may require multiple agents (e.g. centrifuge a plate at the start of a protocol).
 We can have a list of all possible pair-wise movements for a given labware model...
+
+2) convert action calls to plan actions
+3) plan
+4) convert action call to operator calls using merger of original parameters and planned parameters
+5) convert operator calls to operators
+6) translate
 
 ## Feedback loops
 

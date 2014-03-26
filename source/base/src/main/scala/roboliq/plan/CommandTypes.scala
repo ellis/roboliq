@@ -1,28 +1,28 @@
 package roboliq.plan
 
-import spray.json.JsValue
+import spray.json._
 import roboliq.core._
 import aiplan.strips2.Strips
-import spray.json.JsNull
 import aiplan.strips2.Unique
 import aiplan.strips2.Strips.Literal
 
 
-sealed trait Command
+class Call(
+	val name: String,
+	val args: List[(Option[String], JsValue)]
+)
 
-case class Call(
-	name: String,
-	args: List[(Option[String], JsValue)]
-) extends Command
+/*
+sealed trait Command
 
 case class Task(
 	call: Call,
 	list: List[Call]
 ) extends Command
 
-trait Procedure extends Command
+//trait Procedure extends Command
 
-trait Method extends Command
+//trait Method extends Command
 
 trait Action extends Command {
 	def getDomainOperator(id: List[Int]): RqResult[aiplan.strips2.Strips.Operator]
@@ -47,25 +47,36 @@ case class UnknownAction(
 		RqSuccess(Map())
 	}
 }
+*/
+
+case class ActionPlanInfo(
+	domainOperator: Strips.Operator,
+	problemAction: Strips.Operator,
+	problemObjects: List[(String, String)] = Nil,
+	problemState: List[Strips.Atom] = Nil
+)
 
 trait ActionHandler {
-	def getDomainOperator(id: List[Int]): RqResult[aiplan.strips2.Strips.Operator]
-	def getProblemParamMap(id: List[Int], jsval_l: List[JsValue]): RqResult[Map[String, String]]
-}
-
-class ActionHandlerAction(
-	handler: ActionHandler
-) extends Action {
-	def getDomainOperator(id: List[Int]): RqResult[aiplan.strips2.Strips.Operator] =
-		handler.getDomainOperator(id)
-		
-	def getProblemParamMap(id: List[Int], jsval_l: List[JsValue]): RqResult[Map[String, String]] =
-		handler.getProblemParamMap(id, jsval_l)
+	def getSignature: Strips.Signature
+	
+	def getActionPlanInfo(
+		id: List[Int],
+		paramToJsval_l: List[(String, JsValue)]
+	): RqResult[ActionPlanInfo]
 }
 
 class ActionHandler_ShakePlate extends ActionHandler {
-	def getDomainOperator(id: List[Int]): RqResult[aiplan.strips2.Strips.Operator] = {
-		RqSuccess(aiplan.strips2.Strips.Operator(
+	def getSignature: Strips.Signature = new Strips.Signature(
+		name = "shakePlate",
+		paramName_l = List("agent", "device", "program", "object", "site"),
+		paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "site")
+	)
+	
+	def getActionPlanInfo(
+		id: List[Int],
+		paramToJsval_l: List[(String, JsValue)]
+	): RqResult[ActionPlanInfo] = {
+		val domainOperator = Strips.Operator(
 			name = "action_"+id.mkString("_"),
 			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
 			paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "model", "site"),
@@ -76,13 +87,42 @@ class ActionHandler_ShakePlate extends ActionHandler {
 				Strips.Literal(Strips.Atom("location", List("?plate", "?site")), true)
 			)),
 			effects = aiplan.strips2.Strips.Literals.empty
-		))
-	}	
+		)
 
-	//def getProblemParamMap(id: List[Int], jsval_l: List[JsValue]): RqResult[Map[String, String]] =
-		//handler.getProblemParamMap(id, jsval_l)
+		val m0 = paramToJsval_l.toMap
+		val (programName, programObject_?) = m0.get("program") match {
+			case None => ("?program", None)
+			case Some(JsNull) => ("?program", None)
+			case Some(JsString(s)) => (s, None)
+			case Some(JsObject(obj)) =>
+				val programName = id.mkString("_")+"_program"
+				(programName, Some(programName -> "shakerProgram"))
+		}
+
+		// Create planner objects if program was defined inside this command
+		val problemObjects = List[Option[(String, String)]](
+			programObject_?
+		).flatten
+		
+		// TODO: require labware, otherwise the action doesn't make sense
+		// TODO: possibly lookup labwareModel of labware
+		val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
+		val binding = Map(
+			"?agent" -> m.getOrElse("agent", "?agent"),
+			"?device" -> m.getOrElse("agent", "?device"),
+			"?program" -> programName,
+			"?labware" -> m.getOrElse("agent", "?labware"),
+			"?model" -> m.getOrElse("agent", "?model"),
+			"?site" -> m.getOrElse("agent", "?site")
+		)
+		
+		val programAction = domainOperator.bind(binding)
+		
+		RqSuccess(ActionPlanInfo(domainOperator, programAction, problemObjects))
+	}
 }
 
+/*
 trait Operator extends Command
 
 sealed trait CommandNode {
@@ -95,7 +135,9 @@ case class CommandNode_Procedure(call: Call, child_l: List[CommandNode]) extends
 case class CommandNode_Method(call: Call, child_l: List[CommandNode]) extends CommandNode
 case class CommandNode_Action(call: Call, child_l: List[CommandNode]) extends CommandNode
 case class CommandNode_Operator(call: Call, child_l: List[CommandNode]) extends CommandNode
+*/
 
+/*
 class Signature(val name: String, val paramName_l: List[String], val paramTyp_l: List[String]) {
 	assert(paramTyp_l.length == paramName_l.length)
 	
@@ -103,36 +145,63 @@ class Signature(val name: String, val paramName_l: List[String], val paramTyp_l:
 	override def toString = getSignatureString
 }
 
-case class TaskSpec(
-	signature: Signature
-)
-
 case class ProcedureSpec(
 	signature: Signature,
 	cmd_l: List[Call]
-)
+)*/
 
 class CommandSet(
-	val nameToHandler_m: Map[String, CommandHandler],
-	val nameToArgs_m: Map[String, List[String]],
-	val nameToTaskSpec_l: Map[String, TaskSpec],
-	val nameToProcedureSpec_l: Map[String, ProcedureSpec]
+	val nameToActionHandler_m: Map[String, ActionHandler],
+	val nameToMethods_m: Map[String, List[Call => RqResult[Call]]]
 )
 
-case class CommandTree(
+sealed trait CallExpandResult
+
+case class CallExpandResult_Children(
+	child_l: List[Call]
+) extends CallExpandResult
+
+case class CallExpandResult_Inputs(
+	input_l: List[(String, List[String])]
+) extends CallExpandResult
+
+/*
+trait CallHandler {
+	def expand(
+		cs: CommandSet,
+		id: List[Int],
+		call: Call,
+		variable_m: Map[String, String]
+	): RqResult[CallExpandResult]
+}
+
+class CallHandler_Action {
+	def expand(
+		cs: CommandSet,
+		id: List[Int],
+		call: Call,
+		variable_m: Map[String, String]
+	): RqResult[CallExpandResult] = {
+		RqSuccess(CallExpandResult_Children(Nil))
+	}
+}*/
+
+case class CallTree(
 	val top_l: List[Call],
-	val frontier_l: Set[Command],
-	val parent_m: Map[Command, Command],
-	val children_m: Map[Command, List[Command]],
-	val idToCommand_m: Map[List[Int], Command],
-	val commandToId_m: Map[Command, List[Int]],
-	val taskToCall_m: Map[Task, Call]
+	val frontier_l: Set[Call],
+	val parent_m: Map[Call, Call],
+	val children_m: Map[Call, List[Call]],
+	val idToCommand_m: Map[List[Int], Call],
+	val callToId_m: Map[Call, List[Int]],
+	val callToInputs_m: Map[Call, List[(String, List[String])]],
+	val callToVariables_m: Map[Call, Map[String, String]]
+	//val taskToCall_m: Map[Task, Call]
 ) {
-	def getId(cmd: Command): RqResult[List[Int]] = {
-		commandToId_m.get(cmd).asRs(s"getId: no ID registered for command: $cmd")
+	def getId(cmd: Call): RqResult[List[Int]] = {
+		callToId_m.get(cmd).asRs(s"getId: no ID registered for command: $cmd")
 	}
 	
-	def expand(cmd: Command, child_l: List[Command]): RqResult[CommandTree] = {
+	def expand(cmd: Call, child_l: List[Call]): RqResult[CallTree] = {
 		for {
 			_ <- RqResult.assert(frontier_l.contains(cmd), s"Tried to expand command that's not in frontier: $cmd")
 			id <- getId(cmd)
@@ -143,49 +212,78 @@ case class CommandTree(
 				parent_m = parent_m ++ child_l.map(_ -> cmd),
 				children_m = children_m + (cmd -> child_l),
 				idToCommand_m = idToCommand_m ++ (id_l zip child_l),
-				commandToId_m = commandToId_m ++ (child_l zip id_l)
+				callToId_m = callToId_m ++ (child_l zip id_l)
 			)
 		}
 	}
-}
-
-trait CommandHandler {
-	def getArgNames: List[String]
-	def expandCall(jsval_l: List[JsValue]): RqResult[Command] = {
-		
+	
+	def setCallExpandResult(call: Call, result: CallExpandResult): RqResult[CallTree] = {
+		result match {
+			case CallExpandResult_Children(child_l) => expand(call, child_l)
+			case CallExpandResult_Inputs(input_l) =>
+				RqSuccess(copy(
+					callToInputs_m = callToInputs_m + (call -> input_l)
+				))
+		}
+	}
+	
+	def getLeafs: List[Call] = {
+		// TODO: annotate as recursive
+		def step(l: List[Call]): List[Call] = {
+			l.flatMap { call =>
+				children_m.get(call) match {
+					case None => List(call)
+					case Some(Nil) => List(call)
+					case Some(child_l) => step(child_l)
+				}
+			}
+		}
+		step(top_l)
 	}
 }
 
-trait ProcedureHandler extends CommandHandler {
-	def decompose(call: Call): RqResult[List[Command]]
-}
-
-object X {
-	def expandTree(cs: CommandSet, tree: CommandTree) {
-		tree.frontier_l.toList.foldLeft(RqSuccess(tree) : RqResult[CommandTree]) { (tree_?, cmd) =>
+object CallTree {
+	def expandTree(cs: CommandSet, tree: CallTree): RqResult[CallTree] = {
+		tree.frontier_l.toList.foldLeft(RqSuccess(tree) : RqResult[CallTree]) { (tree_?, call) =>
 			tree_?.flatMap(tree => {
-				cmd match {
-					case x: Call =>
-						for {
-							child <- expandCall(cs, tree, x)
-							tree1 <- tree.expand(x, List(child))
-						} yield tree1
-					case x: Task =>
-						tree.taskToCall_m.get(x) match {
-							case Some(call) => tree.expand(x, List(call))
-							case None => RqSuccess(tree)
-						}
-					//case x: Procedure =>
-					case x: Action => RqSuccess(tree.copy(frontier_l = tree.frontier_l - x))
-					case x: Operator => RqSuccess(tree.copy(frontier_l = tree.frontier_l - x))
+				if (cs.nameToActionHandler_m.contains(call.name)) {
+					RqSuccess(tree.copy(frontier_l = tree.frontier_l - call))
+				}
+				else if (cs.nameToMethods_m.contains(call.name)) {
+					val method_l = cs.nameToMethods_m(call.name)
+					for {
+						result <- expandTask(call, method_l, tree.callToVariables_m.getOrElse(call, Map()))
+						tree1 <- tree.setCallExpandResult(call, result)
+					} yield tree1
+				}
+				else {
+					RqError(s"Unknown command `${call.name}`")
 				}
 			})
 		}
 		//tree.frontier_l.toList.map(cmd => cmd -> expandCommand(cmd))
 	}
 
+	def getActionPlanInfo(cs: CommandSet, tree: CallTree): RqResult[List[ActionPlanInfo]] = {
+		val call_l = tree.getLeafs
+		val x = call_l.map(call => {
+			for {
+				id <- tree.getId(call)
+				handler <- cs.nameToActionHandler_m.get(call.name).asRs(s"Command `${call.name}` is not an action")
+				argName_l = handler.getSignature.paramName_l
+				jsval_l <- getParams(argName_l, call.args)
+				paramToJsval_l = argName_l zip jsval_l
+				planInfo <- handler.getActionPlanInfo(id, paramToJsval_l)
+			} yield planInfo
+			
+		})
+		for {
+			planInfo_l <- RqResult.toResultOfList(x)
+		} yield planInfo_l
+	}
 	
-	def expandCall(cs: CommandSet, tree: CommandTree, call: Call): RqResult[Command] = {
+	/*
+	def expandCall(cs: CommandSet, tree: CallTree, call: Call): RqResult[Call] = {
 		cs.nameToHandler_m.get(call.name) match {
 			// Unknown calls become unknown actions for a human operator to interpret
 			case None =>
@@ -197,11 +295,11 @@ object X {
 				val argName_l = handler.getArgNames
 				for {
 					jsval_l <- getParams(argName_l, call.args)
-				} yield {
-					()
-				}
+					cmd <- handler.expandCall(jsval_l)
+				} yield cmd
 		}
 	}
+	*/
 	
 	private def getParams(
 		argName_l: List[String],
@@ -248,17 +346,48 @@ object X {
 		doit(argName_l, jsval_l, nameToVal_m, Nil)
 	}
 	
-	def expandTask(tree: CommandTree, task: Task): RqResult[Unit] = {
-		
-	}
-	
-	def decomposeTask(task: String, taskToCommand_m: Map[String, List[Command]]): List[Command] = {
-		taskToCommand_m.get(task) match {
-			
+	def expandTask(
+		call: Call,
+		method_l: List[Call => RqResult[Call]],
+		variable_m: Map[String, String]
+	): RqResult[CallExpandResult] = {
+		method_l match {
+			case Nil =>
+				// TODO: Instead of returning an error, create an `unknown` call, sort of like this idea:
+				//val cmd = UnknownAction(call)
+				//RqSuccess(cmd, List(s"unrecognized command `${call.name}`"))
+				RqError(s"No methods for task `${call.name}`")
+			// If only one method is available, go ahead and use it
+			case method :: Nil =>
+				for {
+					call2 <- method(call)
+				} yield CallExpandResult_Children(List(call2))
+			// If multiple methods are available:
+			case _ =>
+				val call_l_? = RsResult.toResultOfList(method_l.map(method => method(call)))
+				variable_m.get("method") match {
+					// If no method has been selected yet
+					case None =>
+						// Return a list of possible method names
+						for {
+							call_l <- call_l_?
+						} yield CallExpandResult_Inputs(List("method" -> call_l.map(_.name)))
+					case Some(name) =>
+						// The selected method will be the child call
+						for {
+							call_l <- call_l_?
+							call2 <- call_l.find(_.name == name).asRs(s"For task `${call.name}`, the selected method `${name}` is not one of the available methods")
+						} yield CallExpandResult_Children(List(call2))
+				}
 		}
 	}
-	
-	def registerHandler(handler: CommandHandler) {
-		
+
+	def expandAction(
+		cs: CommandSet,
+		id: List[Int],
+		call: Call,
+		variable_m: Map[String, String]
+	): RqResult[CallExpandResult] = {
+		RqSuccess(CallExpandResult_Children(Nil))
 	}
 }
