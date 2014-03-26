@@ -14,10 +14,18 @@ object Strips {
 		assert(paramTyp_l.length == paramName_l.length)
 		
 		def getSignatureString = name + (paramName_l zip paramTyp_l).map(pair => s"${pair._1}:${pair._2}").mkString("(", " ", ")")
+		def toStripsText: String = {
+			(name :: (paramName_l zip paramTyp_l).map(pair => pair._1 + " - " + pair._2)).mkString(" ")
+		}
 		override def toString = getSignatureString
 	}
 	
 	object Signature {
+		def apply(name: String, nameToTyp_l: (String, String)*): Signature = {
+			val (paramName_l, paramTyp_l) = nameToTyp_l.toList.unzip
+			new Signature(name, paramName_l, paramTyp_l)
+		}
+		
 		def apply(s: String): Signature = {
 			val l = s.split(" ").toList
 			val name = l.head
@@ -195,7 +203,9 @@ object Strips {
 		predicate_l: List[Signature],
 		operator_l: List[Operator]
 	) {
-		private val logger = Logger[this.type]
+		// FIXME: For some reason, Logger is taking many seconds to instantiate
+		//private val logger = Logger("aiplan.strips2.Strips.Domain")
+		//private val logger = Logger[this.type]
 		
 		val nameToPredicate_m = predicate_l.map(x => x.name -> x).toMap
 		val nameToOperator_m = operator_l.map(x => x.name -> x).toMap
@@ -301,7 +311,7 @@ object Strips {
 			goals: Literals,
 			objects_? : Option[Set[String]]
 		): List[Operator] = {
-			logger.debug(acc, op, effects, σ, goals)
+			//logger.debug(acc, op, effects, σ, goals)
 			// If the actions effects contribute to the goal
 			val contributingEffects = goals.pos.exists(op.effects.pos.contains) || goals.neg.exists(op.effects.neg.contains)
 			val seen_l = mutable.Set[String]()
@@ -394,19 +404,44 @@ object Strips {
 				operator2_l
 			)
 		}
+		
+		def toStripsText: String = {
+			val s = List(
+					"(define (domain X)",
+					"  (:requirements :strips :typing)"
+				).mkString("", "\n", "\n") +
+				type_l.toList.sorted.mkString("  (:types\n    ", "\n    ", "\n  )\n") +
+				predicate_l.map(_.toStripsText).sorted.mkString("  (:predicates\n    ", "\n    ", "\n  )\n") +
+/*				operator_l.map(_.toStripsText).
+"  (:action tecan_pipette1
+    :parameters (?a - tecan ?d - pipetter ?p - pipetterProgram ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
+    :precondition (and
+      (agent-has-device ?a ?d)
+      (device-can-site ?d ?s1)
+      (model ?s1 ?sm1)
+      (stackable ?sm1 ?m1)
+      (model ?l1 ?m1)
+      (location ?l1 ?s1)
+"    )
+"    :effect ()
+*/
+				")"
+			s
+		}
 	}
 	
 	object Domain {
 		def apply(
 			type_l: List[String],
-			constant_l: List[(String, String)],
+			constantToType_l: List[(String, String)],
 			predicate_l: List[Signature],
 			operator_l: List[Operator]
 		): Domain = {
+			println("Domain.apply")
 			// TODO: error if there are duplicate names
 			new Domain(
 				type_l.toSet,
-				constant_l.toMap,
+				constantToType_l.toMap,
 				predicate_l,
 				operator_l
 			)

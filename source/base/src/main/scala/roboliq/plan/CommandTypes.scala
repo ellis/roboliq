@@ -421,6 +421,45 @@ object CallTree {
 		RqSuccess(CallExpandResult_Children(Nil))
 	}
 	
+	def makeDomain(planInfo_l: List[ActionPlanInfo]): RqResult[Strips.Domain] = {
+		val operator0_l = List[Strips.Operator](
+			Strips.Operator(
+				"moveLabware",
+				List("?labware", "?site1", "?site2"),
+				List("labware", "site", "site"),
+				preconds = Strips.Literals(Unique(Strips.Literal(true, "location", "?labware", "?site1"))),
+				effects = Strips.Literals(Unique(Strips.Literal(false, "location", "?labware", "?site1"), Strips.Literal(true, "location", "?labware", "?site2")))
+			)
+		)
+
+		RqSuccess(Strips.Domain(
+			type_l = List(
+				"labware",
+				"model",
+				"site",
+				"siteModel",
+				
+				"agent",
+				"tecan",
+				
+				"pipetter",
+				"pipetterProgram",
+				
+				"shaker",
+				"shakerProgram"
+			),
+			constantToType_l = Nil,
+			predicate_l = List[Strips.Signature](
+				Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
+				Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
+				Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
+				Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
+				Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
+			),
+			operator_l = operator0_l ++ planInfo_l.map(_.domainOperator)
+		))
+	}
+	
 	def main(args: Array[String]) {
 		val tecan_shakePlate_handler = new ActionHandler_ShakePlate
 		def shakePlate_to_tecan_shakePlate(call: Call): RqResult[Call] = {
@@ -442,9 +481,18 @@ object CallTree {
 			tree1 <- CallTree.expandTree(cs, tree0)
 			tree2 <- CallTree.expandTree(cs, tree1)
 			planInfo_l <- CallTree.getActionPlanInfo(cs, tree2)
+			_ = println("planInfo_l:")
+			_ = println(planInfo_l)
+			_ = println("domain:")
+			domain <- makeDomain(planInfo_l)
+			_ = println(domain.toStripsText)
 		} yield {
-			println("planInfo_l:")
-			println(planInfo_l)
+		}
+		x match {
+			case RqError(e, w) =>
+				println("ERRORS: "+e)
+				println("WARNINGS: "+w)
+			case _ =>
 		}
 	}
 }
