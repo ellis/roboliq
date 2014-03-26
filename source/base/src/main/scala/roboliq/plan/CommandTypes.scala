@@ -10,7 +10,14 @@ import aiplan.strips2.Strips.Literal
 class Call(
 	val name: String,
 	val args: List[(Option[String], JsValue)]
-)
+) {
+	def copy(
+		name: String = name,
+		args: List[(Option[String], JsValue)] = args
+	): Call = {
+		new Call(name, args)
+	}
+}
 
 /*
 sealed trait Command
@@ -97,6 +104,9 @@ class ActionHandler_ShakePlate extends ActionHandler {
 			case Some(JsObject(obj)) =>
 				val programName = id.mkString("_")+"_program"
 				(programName, Some(programName -> "shakerProgram"))
+			case x =>
+				// TODO, should return an error here
+				return RqError(s"Unexpected data for `program`: ${x}")
 		}
 
 		// Create planner objects if program was defined inside this command
@@ -109,14 +119,20 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
 		val binding = Map(
 			"?agent" -> m.getOrElse("agent", "?agent"),
-			"?device" -> m.getOrElse("agent", "?device"),
+			"?device" -> m.getOrElse("device", "?device"),
 			"?program" -> programName,
-			"?labware" -> m.getOrElse("agent", "?labware"),
-			"?model" -> m.getOrElse("agent", "?model"),
-			"?site" -> m.getOrElse("agent", "?site")
+			"?labware" -> m.getOrElse("object", "?labware"),
+			//"?model" -> m.getOrElse("model", "?model"),
+			"?site" -> m.getOrElse("site", "?site")
 		)
 		
 		val programAction = domainOperator.bind(binding)
+		
+		println(s"getActionPlanInfo(${id}, ${paramToJsval_l}):")
+		println(m0)
+		println(programName, programObject_?)
+		println(m)
+		println(binding)
 		
 		RqSuccess(ActionPlanInfo(domainOperator, programAction, problemObjects))
 	}
@@ -191,7 +207,7 @@ case class CallTree(
 	val frontier_l: Set[Call],
 	val parent_m: Map[Call, Call],
 	val children_m: Map[Call, List[Call]],
-	val idToCommand_m: Map[List[Int], Call],
+	val idToCall_m: Map[List[Int], Call],
 	val callToId_m: Map[Call, List[Int]],
 	val callToInputs_m: Map[Call, List[(String, List[String])]],
 	val callToVariables_m: Map[Call, Map[String, String]]
@@ -201,17 +217,17 @@ case class CallTree(
 		callToId_m.get(cmd).asRs(s"getId: no ID registered for command: $cmd")
 	}
 	
-	def expand(cmd: Call, child_l: List[Call]): RqResult[CallTree] = {
+	def expand(call: Call, child_l: List[Call]): RqResult[CallTree] = {
 		for {
-			_ <- RqResult.assert(frontier_l.contains(cmd), s"Tried to expand command that's not in frontier: $cmd")
-			id <- getId(cmd)
+			_ <- RqResult.assert(frontier_l.contains(call), s"Tried to expand command that's not in frontier: call")
+			id <- getId(call)
 		} yield {
 			val id_l = child_l.zipWithIndex.map(pair => id ++ List(pair._2 + 1))
 			copy(
-				frontier_l = frontier_l - cmd ++ child_l,
-				parent_m = parent_m ++ child_l.map(_ -> cmd),
-				children_m = children_m + (cmd -> child_l),
-				idToCommand_m = idToCommand_m ++ (id_l zip child_l),
+				frontier_l = frontier_l - call ++ child_l,
+				parent_m = parent_m ++ child_l.map(_ -> call),
+				children_m = children_m + (call -> child_l),
+				idToCall_m = idToCall_m ++ (id_l zip child_l),
 				callToId_m = callToId_m ++ (child_l zip id_l)
 			)
 		}
@@ -243,6 +259,20 @@ case class CallTree(
 }
 
 object CallTree {
+	def apply(top_l: List[Call]): CallTree = {
+		val callToId_l = top_l.zipWithIndex.map(pair => (pair._1, List(pair._2 + 1)))
+		CallTree(
+			top_l = top_l,
+			frontier_l = top_l.toSet,
+			parent_m = Map(),
+			children_m = Map(),
+			idToCall_m = callToId_l.map(_.swap).toMap,
+			callToId_m = callToId_l.toMap,
+			callToInputs_m = Map(),
+			callToVariables_m = Map()
+		)
+	}
+	
 	def expandTree(cs: CommandSet, tree: CallTree): RqResult[CallTree] = {
 		tree.frontier_l.toList.foldLeft(RqSuccess(tree) : RqResult[CallTree]) { (tree_?, call) =>
 			tree_?.flatMap(tree => {
@@ -389,5 +419,32 @@ object CallTree {
 		variable_m: Map[String, String]
 	): RqResult[CallExpandResult] = {
 		RqSuccess(CallExpandResult_Children(Nil))
+	}
+	
+	def main(args: Array[String]) {
+		val tecan_shakePlate_handler = new ActionHandler_ShakePlate
+		def shakePlate_to_tecan_shakePlate(call: Call): RqResult[Call] = {
+			RqSuccess(call.copy(name = "tecan_shakePlate"))
+		}
+		val cs = new CommandSet(
+			nameToActionHandler_m = Map("tecan_shakePlate" -> tecan_shakePlate_handler),
+			nameToMethods_m = Map("shakePlate" -> List(shakePlate_to_tecan_shakePlate))
+		)
+		val top_l = List(
+			new Call("shakePlate", List(
+				Some("object") -> JsString("plateA"),
+				Some("program") -> JsObject(Map("rpm" -> JsNumber(200)))
+			))
+		)
+		val tree0 = CallTree(top_l)
+		
+		val x = for {
+			tree1 <- CallTree.expandTree(cs, tree0)
+			tree2 <- CallTree.expandTree(cs, tree1)
+			planInfo_l <- CallTree.getActionPlanInfo(cs, tree2)
+		} yield {
+			println("planInfo_l:")
+			println(planInfo_l)
+		}
 	}
 }
