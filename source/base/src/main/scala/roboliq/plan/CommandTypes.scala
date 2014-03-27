@@ -59,9 +59,9 @@ case class UnknownAction(
 
 case class ActionPlanInfo(
 	domainOperator: Strips.Operator,
-	problemAction: Strips.Operator,
-	problemObjects: List[(String, String)] = Nil,
-	problemState: List[Strips.Atom] = Nil
+	problemObjectToTyp_l: List[(String, String)],
+	problemState_l: List[Strips.Atom],
+	planAction: Strips.Operator
 )
 
 trait ActionHandler {
@@ -111,7 +111,7 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		}
 
 		// Create planner objects if program was defined inside this command
-		val problemObjects = List[Option[(String, String)]](
+		val problemObjectToTyp_l = List[Option[(String, String)]](
 			programObject_?
 		).flatten
 		
@@ -127,7 +127,7 @@ class ActionHandler_ShakePlate extends ActionHandler {
 			"?site" -> m.getOrElse("site", "?site")
 		)
 		
-		val programAction = domainOperator.bind(binding)
+		val planAction = domainOperator.bind(binding)
 		
 		println(s"getActionPlanInfo(${id}, ${paramToJsval_l}):")
 		println(m0)
@@ -135,7 +135,7 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		println(m)
 		println(binding)
 		
-		RqSuccess(ActionPlanInfo(domainOperator, programAction, problemObjects))
+		RqSuccess(ActionPlanInfo(domainOperator, problemObjectToTyp_l, Nil, planAction))
 	}
 }
 
@@ -422,7 +422,7 @@ object CallTree {
 		RqSuccess(CallExpandResult_Children(Nil))
 	}
 	
-	def makeDomain(planInfo_l: List[ActionPlanInfo]): RqResult[Strips.Domain] = {
+	def createDomain(planInfo_l: List[ActionPlanInfo]): RqResult[Strips.Domain] = {
 		val operator0_l = List[Strips.Operator](
 			Strips.Operator(
 				"moveLabware",
@@ -461,11 +461,39 @@ object CallTree {
 		))
 	}
 
-	//def makeProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
+	def createProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
+		val typToObject_l: List[(String, String)] = List(
+			"tecan" -> "r1",
+			"pipetter" -> "r1_pipetter",
+			"shaker" -> "r1_shaker",
+			"model" -> "m001",
+			"siteModel" -> "sm001",
+			"site" -> "siteA",
+			"site" -> "siteB",
+			"labware" -> "plateA",
+			"labware" -> "plateB"
+		) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
+		val state0 = Strips.State(Set[Strips.Atom](
+			Strips.Atom("location", "plateA", "siteA"),
+			Strips.Atom("agent-has-device", "r1", "r1_pipetter"),
+			Strips.Atom("agent-has-device", "r1", "r1_shaker"),
+			Strips.Atom("model plateA", "m001"),
+			Strips.Atom("device-can-site", "r1_pipetter", "siteB"),
+			Strips.Atom("device-can-site", "r1_shaker", "siteB"),
+			Strips.Atom("model", "siteA", "sm001"),
+			Strips.Atom("model", "siteB", "sm001"),
+			Strips.Atom("stackable", "sm001", "m001")
+		) ++ planInfo_l.flatMap(_.problemState_l))
 		
-	//}
+		RqSuccess(Strips.Problem(
+			domain = domain,
+			typToObject_l = typToObject_l,
+			state0 = state0,
+			goals = Strips.Literals.empty
+		))
+	}
 	
-	//def makePartialPlan(planInfo_l: List[ActionPlanInfo], problem: Strips.Problem): RqResult[PartialPlan] = {
+	//def createPartialPlan(planInfo_l: List[ActionPlanInfo], problem: Strips.Problem): RqResult[PartialPlan] = {
 		
 	//}
 	
@@ -493,8 +521,10 @@ object CallTree {
 			_ = println("planInfo_l:")
 			_ = println(planInfo_l)
 			_ = println("domain:")
-			domain <- makeDomain(planInfo_l)
+			domain <- createDomain(planInfo_l)
 			_ = println(domain.toStripsText)
+			problem <- createProblem(planInfo_l, domain)
+			_ = println(problem.toStripsText)
 		} yield {
 		}
 		x match {

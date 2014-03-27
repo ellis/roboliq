@@ -48,11 +48,15 @@ object Strips {
 	}
 	
 	object Atom {
-		def apply(s: String): Atom = {
+		def apply(ss: String*): Atom = {
+			new Atom(ss.head, ss.tail.toSeq)
+		}
+		
+		def parse(s: String): Atom = {
 			val l = s.split(" ")
 			new Atom(l.head, l.tail)
 		}
-		implicit def stringToAtom(s: String): Atom = apply(s)
+		implicit def stringToAtom(s: String): Atom = parse(s)
 	}
 	
 	case class Literal(atom: Atom, pos: Boolean) {
@@ -447,7 +451,7 @@ object Strips {
 				type_l.toList.sorted.mkString("  (:types\n    ", "\n    ", "\n  )\n") +
 				predicate_l.map(_.toStripsText).sorted.mkString("  (:predicates\n    ", "\n    ", "\n  )\n") +
 				operator_l.map(_.toStripsText("  ")).mkString("\n") +
-				")"
+				"\n)"
 			s
 		}
 	}
@@ -485,6 +489,28 @@ object Strips {
 		 */
 		def relaxed: Problem = {
 			Problem(domain.relaxed, typToObject_l, state0, goals)
+		}
+		
+		def toStripsText: String = {
+			val l = new ListBuffer[String]
+			l += "(define (problem X-problem)"
+			l += "  (:domain X)"
+			
+			l += "  (:objects"
+			l ++= typToObject_l.sorted.map(pair => s"    ${pair._2} - ${pair._1}").sorted
+			l += "  )"
+			
+			l += "  (:init"
+			l ++= state0.atoms.toList.map("    " + _.toStripsText).sorted
+			l += "  )"
+			
+			l += "  (:goals (and"
+			l ++= goals.l.toList.map("    " + _.toStripsText)
+			l += "  ))"
+			
+			l += ")"
+			
+			l.result.mkString("\n")
 		}
 	}
 }
