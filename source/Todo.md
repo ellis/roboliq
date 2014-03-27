@@ -44,7 +44,14 @@
 - [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
 - [x] extract planned variables from partial plan and use them to expand CallTree actions into operators
 - [x] translate planned actions to tokens for Evoware translation
-- [ ] handle more than one command
+- [.] handle more than one command
+- [x] ActionHandler: should be able to return a list of operators, rather than just one
+- [ ] TransportGraph: use scala-graph-core to build a graph of sites and possible transport links
+- [ ] MoveLabware: for each labware model, build graph with sites as nodes and arrows as agent/device/program
+- [ ] MoveLabware: generate list of all possible (model, site1, site2) transportations for the planner
+- [ ] MoveLabware: find a path through the graph in order to generate operators
+- [ ] Domain: don't accept multiple operators with the same name
+- [ ] create handle move operators from move command
 - [ ] how to read in additional operators from plan?
 - [ ] figure out how to order the operators like in the partial plan
 - [ ] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)

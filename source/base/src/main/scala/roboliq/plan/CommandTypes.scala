@@ -78,7 +78,7 @@ trait ActionHandler {
 		planInfo: ActionPlanInfo,
 		planned: Strips.Operator,
 		eb: roboliq.entities.EntityBase
-	): RqResult[roboliq.input.commands.Command]
+	): RqResult[List[roboliq.input.commands.Command]]
 }
 
 /*

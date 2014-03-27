@@ -75,6 +75,8 @@ object Test {
 			val op = handler.getOperator(planInfo, planned, eb)
 			println("op:")
 			println(op)
+			val additionalAction_l = plan2.action_l.toList.drop(2 + planInfo_l.size)
+			println("additionalAction_l: "+additionalAction_l)
 		}
 		x match {
 			case RqError(e, w) =>

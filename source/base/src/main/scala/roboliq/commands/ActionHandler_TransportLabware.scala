@@ -22,11 +22,9 @@ import roboliq.entities.Site
 import roboliq.input.commands.Command
 
 
-class ActionHandler_ShakePlate extends ActionHandler {
-	def getSignature: Strips.Signature = new Strips.Signature(
-		name = "shakePlate",
-		paramName_l = List("agent", "device", "program", "object", "site"),
-		paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "site")
+class ActionHandler_TransportLabware extends ActionHandler {
+	def getSignature: Strips.Signature = Strips.Signature(
+		"transportLabware", "object" -> "labware", "destination" -> "site"
 	)
 	
 	def getActionPlanInfo(
@@ -34,16 +32,19 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		paramToJsval_l: List[(String, JsValue)]
 	): RqResult[ActionPlanInfo] = {
 		val domainOperator = Strips.Operator(
-			name = "shakePlate",
-			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
-			paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "model", "site"),
+			name = "transportLabware",
+			paramName_l = List("?labware", "?model", "?site1", "?site2"),
+			paramTyp_l = List("labware", "model", "site", "site"),
 			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
-				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),
-				Strips.Literal(Strips.Atom("model", List("?labware", "?model")), true),
-				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
+				Strips.Literal(true, "location", "?labware", "?site1"),
+				Strips.Literal(true, "model", "?labware", "?model"),
+				Strips.Literal(true, "site-can-model", "?site2", "?model"),
+				Strips.Literal(true, "transport-possible", "?model", "?site1", "?site2")
 			)),
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = Strips.Literals(Unique(
+				Strips.Literal(false, "location", "?labware", "?site1"),
+				Strips.Literal(true, "location", "?labware", "?site2")
+			))
 		)
 
 		val m0 = paramToJsval_l.toMap
@@ -64,16 +65,12 @@ class ActionHandler_ShakePlate extends ActionHandler {
 			programObject_?
 		).flatten
 		
-		// TODO: require labware, otherwise the action doesn't make sense
+		// TODO: require object and destination, otherwise the action doesn't make sense
 		// TODO: possibly lookup labwareModel of labware
 		val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
 		val binding = Map(
-			"?agent" -> m.getOrElse("agent", "?agent"),
-			"?device" -> m.getOrElse("device", "?device"),
-			"?program" -> programName,
 			"?labware" -> m.getOrElse("object", "?labware"),
-			//"?model" -> m.getOrElse("model", "?model"),
-			"?site" -> m.getOrElse("site", "?site")
+			"?site2" -> m.getOrElse("destination", "?site")
 		)
 		
 		val planAction = domainOperator.bind(binding)
