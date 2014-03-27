@@ -44,7 +44,9 @@
 - [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
 - [x] extract planned variables from partial plan and use them to expand CallTree actions into operators
 - [x] translate planned actions to tokens for Evoware translation
+- [ ] handle more than one command
 - [ ] how to read in additional operators from plan?
+- [ ] figure out how to order the operators like in the partial plan
 - [ ] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
 - [ ] Protocol: adapt to create a CallTree
 - [ ] Protocol: createDomain

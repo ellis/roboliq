@@ -447,6 +447,27 @@ class PartialPlan private (
 			)
 		}
 	}
+	
+	/**
+	 * Add a sequence of actions which are ordered one after the other
+	 */
+	def addActionSequence(op_l: List[Operator]): Either[String, PartialPlan] = {
+		val x = op_l.foldLeft(Right(this, None) : Either[String, (PartialPlan, Option[Int])]) { (pair_?, op) =>
+			for {
+				pair <- pair_?.right
+				plan0 <- Right(pair._1).right
+				before_i_? <- Right(pair._2).right
+				i <- Right(plan0.action_l.size).right
+				plan1 <- plan0.addAction(op).right
+				plan2 <- (before_i_? match {
+					case None => Right(plan1)
+					case Some(before_i) => plan1.addOrdering(before_i, i)
+				}).right
+			} yield (plan2, Some(i))
+		}
+		x.right.map(_._1)
+	}
+	
 	/**
 	 * Add an action with the given link and bindings.
 	 * This will increase the number of orderings.

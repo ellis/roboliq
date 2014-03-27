@@ -64,8 +64,7 @@ object Test {
 			problem <- CallTree.createProblem(planInfo_l, domain)
 			_ = println(problem.toStripsText)
 			plan0 = PartialPlan.fromProblem(problem)
-			// FIXME: Add all actions, not just the first
-			plan1 <- plan0.addAction(planInfo_l.head.planAction).asRs
+			plan1 <- plan0.addActionSequence(planInfo_l.map(_.planAction)).asRs
 			step0 = aiplan.strips2.PopState_SelectGoal(plan1, 0)
 			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
 			_ = println(plan2.toDot)
