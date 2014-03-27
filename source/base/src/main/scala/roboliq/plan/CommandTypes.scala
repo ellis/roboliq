@@ -5,6 +5,7 @@ import roboliq.core._
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import aiplan.strips2.Strips.Literal
+import aiplan.strips2.PartialPlan
 
 
 class Call(
@@ -459,6 +460,14 @@ object CallTree {
 			operator_l = operator0_l ++ planInfo_l.map(_.domainOperator)
 		))
 	}
+
+	//def makeProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
+		
+	//}
+	
+	//def makePartialPlan(planInfo_l: List[ActionPlanInfo], problem: Strips.Problem): RqResult[PartialPlan] = {
+		
+	//}
 	
 	def main(args: Array[String]) {
 		val tecan_shakePlate_handler = new ActionHandler_ShakePlate

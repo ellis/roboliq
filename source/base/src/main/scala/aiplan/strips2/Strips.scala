@@ -5,6 +5,7 @@ import scala.collection.mutable
 import grizzled.slf4j.Logger
 import scalaz._
 import Scalaz._
+import scala.collection.mutable.ListBuffer
 
 object Strips {
 	type Typ = String
@@ -15,7 +16,7 @@ object Strips {
 		
 		def getSignatureString = name + (paramName_l zip paramTyp_l).map(pair => s"${pair._1}:${pair._2}").mkString("(", " ", ")")
 		def toStripsText: String = {
-			(name :: (paramName_l zip paramTyp_l).map(pair => pair._1 + " - " + pair._2)).mkString(" ")
+			(name :: (paramName_l zip paramTyp_l).map(pair => pair._1 + " - " + pair._2)).mkString("(", " ", ")")
 		}
 		override def toString = getSignatureString
 	}
@@ -43,6 +44,7 @@ object Strips {
 		def bind(map: Map[String, String]): Atom =
 			copy(params = params.map(s => map.getOrElse(s, s)))
 		override def toString = (name :: params.toList).mkString(" ")
+		def toStripsText: String = s"(${toString})"
 	}
 	
 	object Atom {
@@ -58,6 +60,7 @@ object Strips {
 			copy(atom = atom.bind(map))
 		def unary_! : Literal = copy(pos = !pos)
 		override def toString = (if (pos) "" else "!") ++ atom.toString
+		def toStripsText: String = if (pos) atom.toStripsText else s"(not ${atom.toStripsText})" 
 	}
 	
 	object Literal {
@@ -163,6 +166,37 @@ object Strips {
 				effects = effects.bind(map)
 			)
 		}
+
+		def toStripsLines(indent: String = ""): List[String] = {
+			val l = new ListBuffer[String]
+			l += s"(:action $name"
+			l += s"  :parameters ("
+			l ++= (paramName_l zip paramTyp_l).map(pair => s"    ${pair._1} - ${pair._2}")
+			l += s"  )"
+			l += s"  :precondition (and"
+			l ++= preconds.l.map(literal => s"    ${literal.toStripsText}")
+			l += s"  )"
+			l += s"  :effect (and"
+			l ++= effects.l.map(literal => s"    ${literal.toStripsText}")
+			l += s"  )"
+			l += s")"
+			l.result.map(indent + _)
+		}
+		
+		def toStripsText(indent: String = ""): String =
+			toStripsLines(indent).mkString("\n")
+
+/*		"  (:action tecan_pipette1
+    :parameters (?a - tecan ?d - pipetter ?p - pipetterProgram ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
+    :precondition (and
+      (agent-has-device ?a ?d)
+      (device-can-site ?d ?s1)
+      (model ?s1 ?sm1)
+      (stackable ?sm1 ?m1)
+      (model ?l1 ?m1)
+      (location ?l1 ?s1)
+"    )
+*/
 	}
 	
 	object Operator {
@@ -412,19 +446,7 @@ object Strips {
 				).mkString("", "\n", "\n") +
 				type_l.toList.sorted.mkString("  (:types\n    ", "\n    ", "\n  )\n") +
 				predicate_l.map(_.toStripsText).sorted.mkString("  (:predicates\n    ", "\n    ", "\n  )\n") +
-/*				operator_l.map(_.toStripsText).
-"  (:action tecan_pipette1
-    :parameters (?a - tecan ?d - pipetter ?p - pipetterProgram ?l1 - labware ?m1 - model ?s1 - site ?sm1 - siteModel)
-    :precondition (and
-      (agent-has-device ?a ?d)
-      (device-can-site ?d ?s1)
-      (model ?s1 ?sm1)
-      (stackable ?sm1 ?m1)
-      (model ?l1 ?m1)
-      (location ?l1 ?s1)
-"    )
-"    :effect ()
-*/
+				operator_l.map(_.toStripsText("  ")).mkString("\n") +
 				")"
 			s
 		}
