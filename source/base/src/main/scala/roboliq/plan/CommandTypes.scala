@@ -441,7 +441,6 @@ object CallTree {
 				"siteModel",
 				
 				"agent",
-				"tecan",
 				
 				"pipetter",
 				"pipetterProgram",
@@ -463,7 +462,7 @@ object CallTree {
 
 	def createProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
 		val typToObject_l: List[(String, String)] = List(
-			"tecan" -> "r1",
+			"agent" -> "r1",
 			"pipetter" -> "r1_pipetter",
 			"shaker" -> "r1_shaker",
 			"model" -> "m001",
@@ -525,6 +524,11 @@ object CallTree {
 			_ = println(domain.toStripsText)
 			problem <- createProblem(planInfo_l, domain)
 			_ = println(problem.toStripsText)
+			plan0 = PartialPlan.fromProblem(problem)
+			plan1 <- plan0.addAction(planInfo_l.head.planAction).asRs
+			step0 = aiplan.strips2.PopState_SelectGoal(plan1, 0)
+			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
+			_ = println(plan2.toDot)
 		} yield {
 		}
 		x match {

@@ -144,8 +144,24 @@ class RsOptionW[A](opt: Option[A]) {
 	}
 }
 
+class RsEither1W[A](either: Either[String, A]) {
+	def asRs: RsResult[A] = either match {
+		case Right(x) => RsSuccess(x)
+		case Left(msg) => RsError(msg)
+	}
+}
+
+class RsEitherNW[A](either: Either[List[String], A]) {
+	def asRs: RsResult[A] = either match {
+		case Right(x) => RsSuccess(x)
+		case Left(msg_l) => RsError(msg_l)
+	}
+}
+
 trait RsPimper {
 	implicit def pimpedOption[A](opt: Option[A]) = new RsOptionW(opt)
+	implicit def pimpedEither1[A](either: Either[String, A]) = new RsEither1W(either)
+	implicit def pimpedEitherN[A](either: Either[List[String], A]) = new RsEitherNW(either)
 	
 	implicit def resultMonad: Monad[RsResult] = new Monad[RsResult] {
 		def bind[A, B](fa: RsResult[A])(f: (A) => RsResult[B]) = fa.flatMap(f)
