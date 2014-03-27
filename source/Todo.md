@@ -41,6 +41,22 @@
 
 ## AI planning flow
 
+- [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
+- [x] extract planned variables from partial plan and use them to expand CallTree actions into operators
+- [x] translate planned actions to tokens for Evoware translation
+- [ ] how to read in additional operators from plan?
+- [ ] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
+- [ ] Protocol: adapt to create a CallTree
+- [ ] Protocol: createDomain
+- [ ] Protocol: createProblem
+- [ ] Protocol: createPartialPlan
+- [ ] Protocol: createOperatorSequence
+- [ ] PddlParser: parse for type hierarchies
+- [ ] Domain and Problem: handle type hierarchies
+- [ ] Look into whether EntityBase and WorldState can be given a simpler PDDL-like representation
+- [ ] aiplan.strip2: use RsResult instead of Either
+- [ ] rename `toStripsText` to `toPddlString`
+
 Command types: task, procedure, function, action, operator
 
 A sequence of calls gets transformed into a command tree with a root node, and the call items are transformed into command nodes.

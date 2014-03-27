@@ -153,7 +153,7 @@ case class Tip(
 	val row: Int,
 	val col: Int,
 	val permanent_? : Option[TipModel]
-) extends Entity with Ordered[Tip]{
+) extends Entity with Ordered[Tip] {
 	def typeNames = List("tip")
 	override def compare(that: Tip): Int = (index - that.index)
 }

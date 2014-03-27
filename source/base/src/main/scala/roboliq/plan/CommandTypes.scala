@@ -58,6 +58,8 @@ case class UnknownAction(
 */
 
 case class ActionPlanInfo(
+	id: List[Int],
+	paramToJsval_l: List[(String, JsValue)],
 	domainOperator: Strips.Operator,
 	problemObjectToTyp_l: List[(String, String)],
 	problemState_l: List[Strips.Atom],
@@ -71,72 +73,12 @@ trait ActionHandler {
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)]
 	): RqResult[ActionPlanInfo]
-}
-
-class ActionHandler_ShakePlate extends ActionHandler {
-	def getSignature: Strips.Signature = new Strips.Signature(
-		name = "shakePlate",
-		paramName_l = List("agent", "device", "program", "object", "site"),
-		paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "site")
-	)
 	
-	def getActionPlanInfo(
-		id: List[Int],
-		paramToJsval_l: List[(String, JsValue)]
-	): RqResult[ActionPlanInfo] = {
-		val domainOperator = Strips.Operator(
-			name = "action_"+id.mkString("_"),
-			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
-			paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "model", "site"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
-				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),
-				Strips.Literal(Strips.Atom("model", List("?labware", "?model")), true),
-				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
-			)),
-			effects = aiplan.strips2.Strips.Literals.empty
-		)
-
-		val m0 = paramToJsval_l.toMap
-		val (programName, programObject_?) = m0.get("program") match {
-			case None => ("?program", None)
-			case Some(JsNull) => ("?program", None)
-			case Some(JsString(s)) => (s, None)
-			case Some(JsObject(obj)) =>
-				val programName = id.mkString("_")+"_program"
-				(programName, Some(programName -> "shakerProgram"))
-			case x =>
-				// TODO, should return an error here
-				return RqError(s"Unexpected data for `program`: ${x}")
-		}
-
-		// Create planner objects if program was defined inside this command
-		val problemObjectToTyp_l = List[Option[(String, String)]](
-			programObject_?
-		).flatten
-		
-		// TODO: require labware, otherwise the action doesn't make sense
-		// TODO: possibly lookup labwareModel of labware
-		val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
-		val binding = Map(
-			"?agent" -> m.getOrElse("agent", "?agent"),
-			"?device" -> m.getOrElse("device", "?device"),
-			"?program" -> programName,
-			"?labware" -> m.getOrElse("object", "?labware"),
-			//"?model" -> m.getOrElse("model", "?model"),
-			"?site" -> m.getOrElse("site", "?site")
-		)
-		
-		val planAction = domainOperator.bind(binding)
-		
-		println(s"getActionPlanInfo(${id}, ${paramToJsval_l}):")
-		println(m0)
-		println(programName, programObject_?)
-		println(m)
-		println(binding)
-		
-		RqSuccess(ActionPlanInfo(domainOperator, problemObjectToTyp_l, Nil, planAction))
-	}
+	def getOperator(
+		planInfo: ActionPlanInfo,
+		planned: Strips.Operator,
+		eb: roboliq.entities.EntityBase
+	): RqResult[roboliq.input.commands.Command]
 }
 
 /*
@@ -495,47 +437,4 @@ object CallTree {
 	//def createPartialPlan(planInfo_l: List[ActionPlanInfo], problem: Strips.Problem): RqResult[PartialPlan] = {
 		
 	//}
-	
-	def main(args: Array[String]) {
-		val tecan_shakePlate_handler = new ActionHandler_ShakePlate
-		def shakePlate_to_tecan_shakePlate(call: Call): RqResult[Call] = {
-			RqSuccess(call.copy(name = "tecan_shakePlate"))
-		}
-		val cs = new CommandSet(
-			nameToActionHandler_m = Map("tecan_shakePlate" -> tecan_shakePlate_handler),
-			nameToMethods_m = Map("shakePlate" -> List(shakePlate_to_tecan_shakePlate))
-		)
-		val top_l = List(
-			new Call("shakePlate", List(
-				Some("object") -> JsString("plateA"),
-				Some("program") -> JsObject(Map("rpm" -> JsNumber(200)))
-			))
-		)
-		val tree0 = CallTree(top_l)
-		
-		val x = for {
-			tree1 <- CallTree.expandTree(cs, tree0)
-			tree2 <- CallTree.expandTree(cs, tree1)
-			planInfo_l <- CallTree.getActionPlanInfo(cs, tree2)
-			_ = println("planInfo_l:")
-			_ = println(planInfo_l)
-			_ = println("domain:")
-			domain <- createDomain(planInfo_l)
-			_ = println(domain.toStripsText)
-			problem <- createProblem(planInfo_l, domain)
-			_ = println(problem.toStripsText)
-			plan0 = PartialPlan.fromProblem(problem)
-			plan1 <- plan0.addAction(planInfo_l.head.planAction).asRs
-			step0 = aiplan.strips2.PopState_SelectGoal(plan1, 0)
-			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
-			_ = println(plan2.toDot)
-		} yield {
-		}
-		x match {
-			case RqError(e, w) =>
-				println("ERRORS: "+e)
-				println("WARNINGS: "+w)
-			case _ =>
-		}
-	}
 }
