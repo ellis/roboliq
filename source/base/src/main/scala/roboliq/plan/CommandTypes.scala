@@ -91,8 +91,8 @@ class ActionHandler_ShakePlate extends ActionHandler {
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
 				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),
-				Strips.Literal(Strips.Atom("model", List("?plate", "?model")), true),
-				Strips.Literal(Strips.Atom("location", List("?plate", "?site")), true)
+				Strips.Literal(Strips.Atom("model", List("?labware", "?model")), true),
+				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
 			)),
 			effects = aiplan.strips2.Strips.Literals.empty
 		)
@@ -476,7 +476,7 @@ object CallTree {
 			Strips.Atom("location", "plateA", "siteA"),
 			Strips.Atom("agent-has-device", "r1", "r1_pipetter"),
 			Strips.Atom("agent-has-device", "r1", "r1_shaker"),
-			Strips.Atom("model plateA", "m001"),
+			Strips.Atom("model", "plateA", "m001"),
 			Strips.Atom("device-can-site", "r1_pipetter", "siteB"),
 			Strips.Atom("device-can-site", "r1_shaker", "siteB"),
 			Strips.Atom("model", "siteA", "sm001"),

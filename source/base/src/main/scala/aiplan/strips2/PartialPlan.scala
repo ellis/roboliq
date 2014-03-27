@@ -543,7 +543,7 @@ class PartialPlan private (
 		def step(l: List[(String, Seq[String])], acc: Map[String, String]): Either[String, Map[String, String]] = {
 			l match {
 				case Nil => Right(acc)
-				case (key, value :: Nil) :: rest => step(rest, acc + (key -> value))
+				case (key, Seq(value)) :: rest => step(rest, acc + (key -> value))
 				case (key, value_l) :: rest => Left(s"would need to map $key to multiple values: "+value_l.mkString(","))
 			}
 		}
