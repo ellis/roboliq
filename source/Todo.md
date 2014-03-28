@@ -48,16 +48,16 @@
 - [x] AutoActionHandler: create method for handling actions that were added by the planner
 - [x] need to put `transportLabware` operator into domain
 - [x] handle more than one command
+- [x] TransportLabware: make sure that site is not occupied before moving plate to it
+- [x] For now, no transport graph while planning.  But use the transport graph when generating the operators, and hope a path is found.
+- [x] TransportLabware: handle move operators from move command
+- [x] ActionHandler: should have `name: String` method
 - [ ] Protocol: use scala-graph-core to build a graph of sites and possible transport links
-- [ ] For now, no transport graph while planning.  But use the transport graph when generating the operators, and hope a path is found.
 - [ ] Domain: don't accept multiple operators with the same name
-- [ ] TransportLabware: handle move operators from move command
-- [ ] TransportLabware: need multiple operators in domain to handle various conditions -- also, make sure that site is not occupied before moving plate to it
-- [.] ActionHandler: should have `name: String` method, and `methods: List[Call => RqResult[Call]]` method
 - [ ] CommandSet: construct by taking a list of ActionHandlers, and using them to construct the CommandSet maps
-- [ ] how to read in additional operators from plan?
 - [ ] figure out how to order the operators like in the partial plan
 - [ ] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
+- [ ] ActionHandler: should have `methods: List[Call => RqResult[Call]]` method
 - [ ] Protocol: adapt to create a CallTree
 - [ ] Protocol: createDomain
 - [ ] Protocol: createProblem
@@ -68,6 +68,7 @@
 - [ ] Look into whether EntityBase and WorldState can be given a simpler PDDL-like representation
 - [ ] aiplan.strip2: use RsResult instead of Either
 - [ ] rename `toStripsText` to `toPddlString`
+- [ ] TransportLabware: consider creating multiple transporation AutoActions to handle various conditions
 
 Command types: task, procedure, function, action, instruction
 

@@ -20,6 +20,7 @@ import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareClientScriptBuilder
 import scalax.collection.Graph
 import scalax.collection.edge.LHyperEdge
+import scalax.collection.edge.LkUnDiEdge
 
 case class ReagentBean(
 	id: String,
@@ -1119,7 +1120,7 @@ class Protocol {
 			}
 		}
 		
-		val test_m = new HashMap[(String, Int, String), List[Site]]
+		val test_m = new HashMap[(String, String, String), List[Site]]
 		// Find which sites the transporters can access
 		for ((carrierE, vector_l) <- carrierData.mapCarrierToVectors) {
 			for (site_i <- 0 until carrierE.nSites) {
@@ -1127,10 +1128,11 @@ class Protocol {
 				siteIdToSite_m.get(siteId).foreach { site =>
 					for (vector <- vector_l) {
 						val transporter = roma_m(vector.iRoma)
+						val deviceIdent = eb.entityToIdent_m(transporter)
 						val spec = transporterSpec_m(vector.sClass)
-						val key = (agentIdent, vector.iRoma, vector.sClass)
+						val key = (agentIdent, deviceIdent, vector.sClass)
 						test_m(key) = site :: test_m.getOrElse(key, Nil)
-						eb.addRel(Rel("transporter-can", List(eb.entityToIdent_m(transporter), eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
+						eb.addRel(Rel("transporter-can", List(deviceIdent, eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
 					}
 				}
 			}
@@ -1142,9 +1144,9 @@ class Protocol {
 			import scalax.collection.edge.LHyperEdge
 			val edge_l = test_m.toList.flatMap(pair => {
 				val (key, site_l) = pair
-				site_l.combinations(2).map(l => LHyperEdge(l(0), l(1))(key))
+				site_l.combinations(2).map(l => LkUnDiEdge(l(0), l(1))(key))
 			})
-			Graph[Site, LHyperEdge](edge_l : _*)
+			Graph[Site, LkUnDiEdge](edge_l : _*)
 		}
 		println("graph: "+graph.size)
 		graph.take(5).foreach(println)

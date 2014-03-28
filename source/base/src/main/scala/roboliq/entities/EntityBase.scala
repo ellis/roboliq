@@ -1,12 +1,21 @@
 package roboliq.entities
 
-import scala.collection._
-import scala.collection.mutable.HashMap
+import scala.annotation.elidable
+import scala.annotation.elidable.ASSERTION
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
-import roboliq.core._
+import scala.reflect.runtime.universe
+
+import roboliq.core.RqResult
+import roboliq.core.RsError
+import roboliq.core.RsResult
+import roboliq.core.RsSuccess
+import roboliq.core.pimpedOption
 import scalax.collection.Graph
-import scalax.collection.edge.LHyperEdge
+import scalax.collection.Graph.apply$default$3
+import scalax.collection.edge.LkUnDiEdge
 
 class EntityBase {
 	val aliases = new HashMap[String, String]
@@ -74,7 +83,7 @@ class EntityBase {
 	 * Transport graphs.
 	 * Contains site nodes with edges between sites where direct transportation is possible.
 	 */
-	var transportGraph = Graph[Site, LHyperEdge]()
+	var transportGraph = Graph[Site, LkUnDiEdge]()
 	
 	def addAlias(from: String, to: String) {
 		// TODO: Check for loops

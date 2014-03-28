@@ -22,6 +22,7 @@ import roboliq.entities.Site
 import roboliq.input.commands.Command
 import roboliq.plan.AutoActionHandler
 import roboliq.entities.LabwareModel
+import roboliq.input.commands.TransporterRun
 
 
 class AutoActionHandler_TransportLabware extends AutoActionHandler {
@@ -54,6 +55,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 	): RqResult[List[roboliq.input.commands.Command]] = {
 		val g = eb.transportGraph
 		val List(labwareName, modelName, site1Name, site2Name, _) = planned.paramName_l
+		
 		for {
 			labware <- eb.getEntityAs[Labware](labwareName)
 			model <- eb.getEntityAs[LabwareModel](modelName)
@@ -62,9 +64,19 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 			node1 <- g.find(site1).asRs(s"Site `$site1Name` is not in transport graph")
 			node2 <- g.find(site2).asRs(s"Site `$site2Name` is not in transport graph")
 			path <- node1.shortestPathTo(node2).asRs(s"No path in transport graph from `$site1Name` to `$site2Name`")
-		} yield {
-			println("path: "+path)
-		}
-		RqError("Not implemented yet")
+			_ = println("path: "+path.edges)
+			op_l <- RqResult.toResultOfList((path.nodes.toList zip path.edges.toList).map(pair => {
+				val (node1, edge) = pair
+				val site1 = node1.value
+				val site2 = if (site1 == edge._1) edge._2.value else edge._1.value
+				println(s"Move from $site1 to $site2")
+				edge.label match {
+					case (agentName: String, deviceName: String, programName: String) =>
+						RqSuccess(TransporterRun(deviceName, labware, model, site1, site2, programName))
+					case x =>
+						RqError("unrecognized transport edge label: "+edge.label)
+				}
+			}))
+		} yield op_l
 	}
 }

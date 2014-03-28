@@ -18,6 +18,7 @@ import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import scalax.collection.Graph
 import scalax.collection.edge.LHyperEdge
+import scalax.collection.edge.LkUnDiEdge
 
 object Test {
 	def main(args: Array[String]) {
@@ -39,7 +40,7 @@ object Test {
 			eb.addDeviceSite(shaker, siteB)
 			eb.addModel(m001, m001.key)
 			eb.addLabware(plateA, plateA.key)
-			eb.transportGraph = Graph[Site, LHyperEdge](LHyperEdge(siteA, siteB)(("user", 0, 0)))
+			eb.transportGraph = Graph[Site, LkUnDiEdge](LkUnDiEdge(siteA, siteB)(("user", "", "")))
 			eb
 		}
 		
@@ -105,9 +106,6 @@ object Test {
 				println(op)
 				op
 			})
-			val planInfo = planInfo_l.head
-			val additionalAction_l = plan2.action_l.toList.drop(2 + planInfo_l.size)
-			println("additionalAction_l: "+additionalAction_l)
 		}
 		x match {
 			case RqError(e, w) =>
