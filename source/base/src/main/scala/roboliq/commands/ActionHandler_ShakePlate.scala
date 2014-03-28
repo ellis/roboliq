@@ -23,8 +23,11 @@ import roboliq.input.commands.Command
 
 
 class ActionHandler_ShakePlate extends ActionHandler {
+	
+	def getName = "shakePlate"
+
 	def getSignature: Strips.Signature = new Strips.Signature(
-		name = "shakePlate",
+		name = getName,
 		paramName_l = List("agent", "device", "program", "object", "site"),
 		paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "site")
 	)
@@ -34,7 +37,7 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		paramToJsval_l: List[(String, JsValue)]
 	): RqResult[ActionPlanInfo] = {
 		val domainOperator = Strips.Operator(
-			name = "shakePlate",
+			name = getName,
 			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
 			paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "model", "site"),
 			preconds = Strips.Literals(Unique(

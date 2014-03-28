@@ -12,6 +12,12 @@ import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsString
 import roboliq.entities.EntityBase
+import roboliq.plan.ActionHandler
+import roboliq.plan.ActionPlanInfo
+import aiplan.strips2.Strips
+import aiplan.strips2.Unique
+import scalax.collection.Graph
+import scalax.collection.edge.LHyperEdge
 
 object Test {
 	def main(args: Array[String]) {
@@ -33,16 +39,25 @@ object Test {
 			eb.addDeviceSite(shaker, siteB)
 			eb.addModel(m001, m001.key)
 			eb.addLabware(plateA, plateA.key)
+			eb.transportGraph = Graph[Site, LHyperEdge](LHyperEdge(siteA, siteB)(("user", 0, 0)))
 			eb
 		}
 		
-		val tecan_shakePlate_handler = new ActionHandler_ShakePlate
-		def shakePlate_to_tecan_shakePlate(call: Call): RqResult[Call] = {
-			RqSuccess(call.copy(name = "tecan_shakePlate"))
-		}
+		val autoHandler_l = List[AutoActionHandler_TransportLabware](
+			new AutoActionHandler_TransportLabware
+		)
+		val handler_l = List[ActionHandler](
+			new ActionHandler_ShakePlate
+		)
 		val cs = new CommandSet(
-			nameToActionHandler_m = Map("shakePlate" -> tecan_shakePlate_handler),
-			nameToMethods_m = Map("shakePlate" -> List(shakePlate_to_tecan_shakePlate))
+			nameToAutoActionHandler_m = autoHandler_l.map(h => h.getName -> h).toMap,
+			nameToActionHandler_m = handler_l.map(h => h.getName -> h).toMap,
+			nameToMethods_m = Map(
+				/*"shakePlate" -> List(
+					shakePlate_to_tecan_shakePlate,
+					(call: Call) => RqSuccess(call.copy(name = "tecan_shakePlate")
+				)*/
+			)
 		)
 		val top_l = List(
 			new Call("shakePlate", List(
@@ -59,9 +74,9 @@ object Test {
 			_ = println("planInfo_l:")
 			_ = println(planInfo_l)
 			_ = println("domain:")
-			domain <- CallTree.createDomain(planInfo_l)
+			domain <- createDomain(cs, planInfo_l)
 			_ = println(domain.toStripsText)
-			problem <- CallTree.createProblem(planInfo_l, domain)
+			problem <- createProblem(planInfo_l, domain)
 			_ = println(problem.toStripsText)
 			plan0 = PartialPlan.fromProblem(problem)
 			plan1 <- plan0.addActionSequence(planInfo_l.map(_.planAction)).asRs
@@ -85,5 +100,68 @@ object Test {
 			case _ =>
 		}
 	}
+	
+	def createDomain(cs: CommandSet, planInfo_l: List[ActionPlanInfo]): RqResult[Strips.Domain] = {
+		val operator_l = cs.nameToAutoActionHandler_m.values.map(_.getDomainOperator).toList ++ planInfo_l.map(_.domainOperator)
 
+		RqSuccess(Strips.Domain(
+			type_l = List(
+				"labware",
+				"model",
+				"site",
+				"siteModel",
+				
+				"agent",
+				
+				"pipetter",
+				"pipetterProgram",
+				
+				"shaker",
+				"shakerProgram"
+			),
+			constantToType_l = Nil,
+			predicate_l = List[Strips.Signature](
+				Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
+				Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
+				Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
+				Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
+				Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
+			),
+			operator_l = operator_l
+		))
+	}
+
+
+	def createProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
+		val typToObject_l: List[(String, String)] = List(
+			"agent" -> "r1",
+			"pipetter" -> "r1_pipetter",
+			"shaker" -> "r1_shaker",
+			"model" -> "m001",
+			"siteModel" -> "sm001",
+			"site" -> "siteA",
+			"site" -> "siteB",
+			"labware" -> "plateA",
+			"labware" -> "plateB"
+		) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
+		val state0 = Strips.State(Set[Strips.Atom](
+			Strips.Atom("location", "plateA", "siteA"),
+			Strips.Atom("site-blocked", "siteA"),
+			Strips.Atom("agent-has-device", "r1", "r1_pipetter"),
+			Strips.Atom("agent-has-device", "r1", "r1_shaker"),
+			Strips.Atom("model", "plateA", "m001"),
+			Strips.Atom("device-can-site", "r1_pipetter", "siteB"),
+			Strips.Atom("device-can-site", "r1_shaker", "siteB"),
+			Strips.Atom("model", "siteA", "sm001"),
+			Strips.Atom("model", "siteB", "sm001"),
+			Strips.Atom("stackable", "sm001", "m001")
+		) ++ planInfo_l.flatMap(_.problemState_l))
+		
+		RqSuccess(Strips.Problem(
+			domain = domain,
+			typToObject_l = typToObject_l,
+			state0 = state0,
+			goals = Strips.Literals.empty
+		))
+	}
 }

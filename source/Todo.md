@@ -46,12 +46,16 @@
 - [x] translate planned actions to tokens for Evoware translation
 - [.] handle more than one command
 - [x] ActionHandler: should be able to return a list of operators, rather than just one
-- [ ] TransportGraph: use scala-graph-core to build a graph of sites and possible transport links
-- [ ] MoveLabware: for each labware model, build graph with sites as nodes and arrows as agent/device/program
-- [ ] MoveLabware: generate list of all possible (model, site1, site2) transportations for the planner
-- [ ] MoveLabware: find a path through the graph in order to generate operators
+- [ ] ActionHandler: create method for handling actions that were added by the planner
+- [ ] ActionHandler: return a list of zero or more domain operators, rather than exactly one
+- [ ] need to put `transportLabware` operator into domain
+- [ ] Protocol: use scala-graph-core to build a graph of sites and possible transport links
+- [ ] For now, no transport graph while planning.  But use the transport graph when generating the operators, and hope a path is found.
 - [ ] Domain: don't accept multiple operators with the same name
-- [ ] create handle move operators from move command
+- [ ] TransportLabware: handle move operators from move command
+- [ ] TransportLabware: need multiple operators in domain to handle various conditions -- also, make sure that site is not occupied before moving plate to it
+- [.] ActionHandler: should have `name: String` method, and `methods: List[Call => RqResult[Call]]` method
+- [ ] CommandSet: construct by taking a list of ActionHandlers, and using them to construct the CommandSet maps
 - [ ] how to read in additional operators from plan?
 - [ ] figure out how to order the operators like in the partial plan
 - [ ] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
@@ -66,7 +70,7 @@
 - [ ] aiplan.strip2: use RsResult instead of Either
 - [ ] rename `toStripsText` to `toPddlString`
 
-Command types: task, procedure, function, action, operator
+Command types: task, procedure, function, action, instruction
 
 A sequence of calls gets transformed into a command tree with a root node, and the call items are transformed into command nodes.
 The command tree is iteratively expanded as follows:

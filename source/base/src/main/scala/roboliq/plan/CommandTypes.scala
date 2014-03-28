@@ -66,7 +66,18 @@ case class ActionPlanInfo(
 	planAction: Strips.Operator
 )
 
+trait AutoActionHandler {
+	def getName: String
+	def getDomainOperator: Strips.Operator
+	def getInstruction(
+		planned: Strips.Operator,
+		eb: roboliq.entities.EntityBase
+	): RqResult[List[roboliq.input.commands.Command]]
+}
+
 trait ActionHandler {
+	def getName: String
+	
 	def getSignature: Strips.Signature
 	
 	def getActionPlanInfo(
@@ -110,6 +121,7 @@ case class ProcedureSpec(
 )*/
 
 class CommandSet(
+	val nameToAutoActionHandler_m: Map[String, AutoActionHandler],
 	val nameToActionHandler_m: Map[String, ActionHandler],
 	val nameToMethods_m: Map[String, List[Call => RqResult[Call]]]
 )
@@ -362,76 +374,6 @@ object CallTree {
 		variable_m: Map[String, String]
 	): RqResult[CallExpandResult] = {
 		RqSuccess(CallExpandResult_Children(Nil))
-	}
-	
-	def createDomain(planInfo_l: List[ActionPlanInfo]): RqResult[Strips.Domain] = {
-		val operator0_l = List[Strips.Operator](
-			Strips.Operator(
-				"moveLabware",
-				List("?labware", "?site1", "?site2"),
-				List("labware", "site", "site"),
-				preconds = Strips.Literals(Unique(Strips.Literal(true, "location", "?labware", "?site1"))),
-				effects = Strips.Literals(Unique(Strips.Literal(false, "location", "?labware", "?site1"), Strips.Literal(true, "location", "?labware", "?site2")))
-			)
-		)
-
-		RqSuccess(Strips.Domain(
-			type_l = List(
-				"labware",
-				"model",
-				"site",
-				"siteModel",
-				
-				"agent",
-				
-				"pipetter",
-				"pipetterProgram",
-				
-				"shaker",
-				"shakerProgram"
-			),
-			constantToType_l = Nil,
-			predicate_l = List[Strips.Signature](
-				Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
-				Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
-				Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
-				Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
-				Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
-			),
-			operator_l = operator0_l ++ planInfo_l.map(_.domainOperator)
-		))
-	}
-
-	def createProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
-		val typToObject_l: List[(String, String)] = List(
-			"agent" -> "r1",
-			"pipetter" -> "r1_pipetter",
-			"shaker" -> "r1_shaker",
-			"model" -> "m001",
-			"siteModel" -> "sm001",
-			"site" -> "siteA",
-			"site" -> "siteB",
-			"labware" -> "plateA",
-			"labware" -> "plateB"
-		) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
-		val state0 = Strips.State(Set[Strips.Atom](
-			Strips.Atom("location", "plateA", "siteA"),
-			Strips.Atom("agent-has-device", "r1", "r1_pipetter"),
-			Strips.Atom("agent-has-device", "r1", "r1_shaker"),
-			Strips.Atom("model", "plateA", "m001"),
-			Strips.Atom("device-can-site", "r1_pipetter", "siteB"),
-			Strips.Atom("device-can-site", "r1_shaker", "siteB"),
-			Strips.Atom("model", "siteA", "sm001"),
-			Strips.Atom("model", "siteB", "sm001"),
-			Strips.Atom("stackable", "sm001", "m001")
-		) ++ planInfo_l.flatMap(_.problemState_l))
-		
-		RqSuccess(Strips.Problem(
-			domain = domain,
-			typToObject_l = typToObject_l,
-			state0 = state0,
-			goals = Strips.Literals.empty
-		))
 	}
 	
 	//def createPartialPlan(planInfo_l: List[ActionPlanInfo], problem: Strips.Problem): RqResult[PartialPlan] = {

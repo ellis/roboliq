@@ -5,6 +5,8 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.MultiMap
 import roboliq.core._
+import scalax.collection.Graph
+import scalax.collection.edge.LHyperEdge
 
 class EntityBase {
 	val aliases = new HashMap[String, String]
@@ -68,6 +70,11 @@ class EntityBase {
 	 * List of custom Relations
 	 */
 	val rel_l = new ArrayBuffer[Rel]
+	/**
+	 * Transport graphs.
+	 * Contains site nodes with edges between sites where direct transportation is possible.
+	 */
+	var transportGraph = Graph[Site, LHyperEdge]()
 	
 	def addAlias(from: String, to: String) {
 		// TODO: Check for loops
