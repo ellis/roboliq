@@ -438,6 +438,7 @@ class PartialPlan private (
 		} yield {
 			println("orderings1: "+orderings1.map)
 			println("orderings2: "+orderings2.map)
+			// Add preconditions to open goals
 			val openGoal2_l = openGoal_l ++ action.preconds.l.zipWithIndex.map(i -> _._2)
 			copy(
 				action_l = action2_l,
@@ -643,7 +644,15 @@ class PartialPlan private (
 		val after_li = orderings.map.getOrElse(consumer_i, Set())
 		val before_li = ((0 until action_l.size).toSet -- after_li - consumer_i).toList.sorted
 		val provider_l = before_li.map(i => Some(i) -> action_l(i))
-		getProvidersFromList(provider_l, consumer_i, precond_i)
+		// Negative preconditions can always be satisfied by the initial state
+		// if the initial state doesn't contain !precond
+		val default_l: List[(Either[Operator, Int], Map[String, String])] = {
+			if (!precond.pos && !action_l.isEmpty && !action_l.head.effects.pos.contains(precond.atom))
+				List((Right(0), Map()))
+			else
+				Nil
+		}
+		default_l ++ getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
 	
 	def getNewProviders(consumer_i: Int, precond_i: Int): List[(Either[Operator, Int], Map[String, String])] = {

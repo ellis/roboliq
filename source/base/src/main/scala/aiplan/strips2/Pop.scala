@@ -163,7 +163,15 @@ object Pop {
 		println(s"${indent}SelectGoal")
 		println(s"${indent}actions:")
 		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
-		println(indent+"openGoals: "+plan0.openGoal_l)
+		println(s"${indent}openGoals:")
+		// Sort the goals so that actions earlier in the ordering get handled first
+		val goal_l = plan0.openGoal_l.toList.sortWith((a, b) => {
+			if (a._1 == b._1) a._2 < b._2
+			else if (plan0.orderings.map.getOrElse(a._1, Set()).contains(b._1)) true
+			else if (plan0.orderings.map.getOrElse(b._1, Set()).contains(a._1)) false
+			else a._1 < b._1
+		})
+		goal_l.foreach(goal => println(s"${indent}| ${goal} "+plan0.bindings.bind(plan0.action_l(goal._1).preconds.l(goal._2))))
 		println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
 		println(s"${indent}variables: ${plan0.bindings.variable_m}")
 		println(s"${indent}toDot:")
@@ -174,13 +182,6 @@ object Pop {
 			Right(PopState_Done(plan0))
 		}
 		else {
-			// Sort the goals so that actions earlier in the ordering get handled first
-			val goal_l = plan0.openGoal_l.toList.sortWith((a, b) => {
-				if (a._1 == b._1) a._2 < b._2
-				else if (plan0.orderings.map.getOrElse(a._1, Set()).contains(b._1)) true
-				else if (plan0.orderings.map.getOrElse(b._1, Set()).contains(a._1)) false
-				else a._1 < b._1
-			})
 			Right(PopState_HandleGoal(plan0, goal_l.head, x.indentLevel))
 		}
 	}

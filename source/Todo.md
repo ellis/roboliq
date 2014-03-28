@@ -33,6 +33,7 @@
 - [x] create PDDL for domain with `movePlate` and `distribute` commands
 - [x] `3:moveLabware` should not be a provider for `location plateA siteA`
 - [x] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
+- [ ] Negative preconditions should always be satisfiable by the initial state if the initial state doesn't conflict
 - [ ] PartialPlan: toDot: show variable options and inequalities
 - [ ] PartialPlan: incrementally calculate threats
 - [ ] PartialPlan: toDot: show threats

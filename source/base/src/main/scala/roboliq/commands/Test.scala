@@ -84,6 +84,7 @@ object Test {
 			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
 			_ = println(plan2.toDot)
 		} yield {
+			roboliq.utils.FileUtils.writeToFile("test.dot", plan2.toDot)
 			val planInfo = planInfo_l.head
 			val planned = plan2.bindings.bind(plan2.action_l(2))
 			val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
