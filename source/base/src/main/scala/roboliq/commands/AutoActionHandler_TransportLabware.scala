@@ -53,7 +53,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 		eb: roboliq.entities.EntityBase
 	): RqResult[List[roboliq.input.commands.Command]] = {
 		val g = eb.transportGraph
-		val List(labwareName, modelName, site1Name, site2Name) = planned.paramName_l
+		val List(labwareName, modelName, site1Name, site2Name, _) = planned.paramName_l
 		for {
 			labware <- eb.getEntityAs[Labware](labwareName)
 			model <- eb.getEntityAs[LabwareModel](modelName)

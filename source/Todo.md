@@ -33,7 +33,7 @@
 - [x] create PDDL for domain with `movePlate` and `distribute` commands
 - [x] `3:moveLabware` should not be a provider for `location plateA siteA`
 - [x] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
-- [ ] Negative preconditions should always be satisfiable by the initial state if the initial state doesn't conflict
+- [x] Negative preconditions should always be satisfiable by the initial state if the initial state doesn't conflict
 - [ ] PartialPlan: toDot: show variable options and inequalities
 - [ ] PartialPlan: incrementally calculate threats
 - [ ] PartialPlan: toDot: show threats
@@ -45,11 +45,9 @@
 - [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
 - [x] extract planned variables from partial plan and use them to expand CallTree actions into operators
 - [x] translate planned actions to tokens for Evoware translation
-- [.] handle more than one command
-- [x] ActionHandler: should be able to return a list of operators, rather than just one
-- [ ] ActionHandler: create method for handling actions that were added by the planner
-- [ ] ActionHandler: return a list of zero or more domain operators, rather than exactly one
-- [ ] need to put `transportLabware` operator into domain
+- [x] AutoActionHandler: create method for handling actions that were added by the planner
+- [x] need to put `transportLabware` operator into domain
+- [x] handle more than one command
 - [ ] Protocol: use scala-graph-core to build a graph of sites and possible transport links
 - [ ] For now, no transport graph while planning.  But use the transport graph when generating the operators, and hope a path is found.
 - [ ] Domain: don't accept multiple operators with the same name

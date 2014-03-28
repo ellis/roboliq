@@ -85,12 +85,27 @@ object Test {
 			_ = println(plan2.toDot)
 		} yield {
 			roboliq.utils.FileUtils.writeToFile("test.dot", plan2.toDot)
+			val actionOrig_l = planInfo_l zip plan2.action_l.drop(2)
+			actionOrig_l.map(pair => {
+				val (planInfo, action) = pair
+				val planned = plan2.bindings.bind(action)
+				val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
+				val op = handler.getOperator(planInfo, planned, eb)
+				println("op:")
+				println(op)
+				op
+			})
+			// Additional actions added by the planner
+			val actionAuto_l = plan2.action_l.toList.drop(2 + planInfo_l.size)
+			actionAuto_l.map(action => {
+				val planned = plan2.bindings.bind(action)
+				val handler = cs.nameToAutoActionHandler_m(action.name)
+				val op = handler.getInstruction(planned, eb)
+				println("op:")
+				println(op)
+				op
+			})
 			val planInfo = planInfo_l.head
-			val planned = plan2.bindings.bind(plan2.action_l(2))
-			val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-			val op = handler.getOperator(planInfo, planned, eb)
-			println("op:")
-			println(op)
 			val additionalAction_l = plan2.action_l.toList.drop(2 + planInfo_l.size)
 			println("additionalAction_l: "+additionalAction_l)
 		}
