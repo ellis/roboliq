@@ -31,6 +31,23 @@ case class PopState_HandleAction(
 	provider_l: List[(Either[Operator, Int], Map[String, String])],
 	indentLevel: Int
 ) extends PopState
+case class PopState_SelectVariable(
+	plan: PartialPlan,
+	indentLevel: Int
+)
+case class PopState_HandleVariable(
+	plan: PartialPlan,
+	name: String,
+	indentLevel: Int
+)
+case class PopState_ChooseUnordered(
+	plan: PartialPlan,
+	indentLevel: Int
+)
+case class PopState_HandleOrdering(
+	plan: PartialPlan,
+	indentLevel: Int
+)
 //case class PopState_SelectThreat()
 
 object Pop {
@@ -284,4 +301,6 @@ object Pop {
 			case Right(step1) => stepToEnd(step1)
 		}
 	}
+	
+	def groundPlan(x: PopState)
 }
