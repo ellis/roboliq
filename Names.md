@@ -80,3 +80,8 @@ Liquimation
 Piper
 Roboliq
 Siliqua
+
+---------------------
+
+Ofir: likes LiquiBot, Piper, Roboliq
+Tuval likes: Piper, then Liquigence.  Doesn't like AgentLiquid, LiQuick, Roboliq
