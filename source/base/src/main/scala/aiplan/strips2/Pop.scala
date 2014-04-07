@@ -4,6 +4,7 @@ import Strips._
 import grizzled.slf4j.Logger
 import scalaz._
 import Scalaz._
+import scala.annotation.tailrec
 
 sealed trait PopState
 case class PopState_Done(
@@ -31,24 +32,34 @@ case class PopState_HandleAction(
 	provider_l: List[(Either[Operator, Int], Map[String, String])],
 	indentLevel: Int
 ) extends PopState
-case class PopState_SelectVariable(
+
+sealed trait GroundState
+case class GroundState_SelectVariable(
 	plan: PartialPlan,
 	indentLevel: Int
-)
-case class PopState_HandleVariable(
+) extends GroundState
+case class GroundState_HandleVariable(
 	plan: PartialPlan,
 	name: String,
 	indentLevel: Int
-)
-case class PopState_ChooseUnordered(
+) extends GroundState
+case class GroundState_ChooseVariableBinding(
+	plan: PartialPlan,
+	name: String,
+	value_l: List[String],
+	indentLevel: Int
+) extends GroundState
+case class GroundState_ChooseUnordered(
 	plan: PartialPlan,
 	indentLevel: Int
-)
-case class PopState_HandleOrdering(
+) extends GroundState
+case class GroundState_HandleOrdering(
 	plan: PartialPlan,
 	indentLevel: Int
-)
-//case class PopState_SelectThreat()
+) extends GroundState
+case class GroundState_Done(
+	plan: PartialPlan
+) extends GroundState
 
 object Pop {
 	def pop(plan0: PartialPlan, indentLevel: Int = 0): Either[String, PartialPlan] = {
@@ -301,6 +312,86 @@ object Pop {
 			case Right(step1) => stepToEnd(step1)
 		}
 	}
+
+	case class GroundNode(plan: PartialPlan, orderingsMinMap: Map[Int, Set[Int]])
+	case class GroundAction(newplan: PartialPlan)
 	
-	def groundPlan(x: PopState)
+	class GroundProblem(plan0: PartialPlan) extends ailib.ch03.Problem[GroundNode, GroundAction, GroundNode] {
+		val state0 = GroundNode(plan0, plan0.orderings.getMinimalMap)
+		
+		def root = state0
+		
+		def goalTest(node: GroundNode): Boolean = {
+			node.plan.bindings.variable_m.isEmpty && node.orderingsMinMap.forall(_._2.size == 1)
+		}
+		
+		def actions(node: GroundNode): Iterable[GroundAction] = {
+			val binding0_l = node.plan.bindings.variable_m.toList.flatMap(pair => pair._2.option_l.map(pair._1 -> _))
+			val bindingAction_l = binding0_l.flatMap { pair =>
+				val (name, value) = pair
+				node.plan.addBindingEq(name, value) match {
+					case Left(_) => None
+					case Right(plan1) => Some(GroundAction(plan1))
+				}
+			}
+			val ordering0_l = node.orderingsMinMap.toList.filter(_._2.size > 1).flatMap(pair => pair._2.toList.map(pair._1 -> _))
+			val orderingAction_l = ordering0_l.flatMap { pair =>
+				val (before_i, after_i) = pair
+				node.plan.addOrdering(before_i, after_i) match {
+					case Left(_) => None
+					case Right(plan1) => Some(GroundAction(plan1))
+				}
+			}
+			bindingAction_l ++ orderingAction_l
+		}
+		
+		def childNode(parent: GroundNode, action: GroundAction): GroundNode =
+			GroundNode(action.newplan, action.newplan.orderings.getMinimalMap)
+	}
+	
+	CONTINUE HERE, create function to do tree search using GroundProblem
+	
+	/*
+	def groundStep(gs: GroundState): Either[String, GroundState] = {
+		gs match {
+			case x: GroundState_Done => Right(x)
+			case x: GroundState_SelectVariable => stepSelectVariable(x)
+			case x: GroundState_ChooseVariableBinding => stepChooseVariableBinding(x)
+			case x: GroundState_HandleVariable => stepHandleVariable(x)
+			case x: GroundState_ChooseUnordered => stepChooseUnordered(x)
+			case x: GroundState_HandleOrdering => stepHandleOrdering(x)
+		}
+	}
+	
+	def stepSelectVariable(x: GroundState_SelectVariable): Either[String, GroundState] = {
+		x.plan.bindings.variable_m.headOption match {
+			case None =>
+				Right(GroundState_ChooseUnordered(x.plan, x.indentLevel))
+			case Some((name, b)) => 
+				Right(GroundState_ChooseVariableBinding(x.plan, name, b.option_l.toList.sorted, x.indentLevel + 1))
+		}
+	}
+	
+	def stepChooseVariableBinding(x: GroundState_ChooseVariableBinding): Either[String, GroundState] = {
+		x.value_l match {
+			case Nil => Left(s"Unable to find value for `${x.name}`")
+			case value :: rest =>
+				for {
+					plan1 <- x.plan.addBindingEq(x.name, value).right
+				} yield GroundState_SelectVariable(x.plan, x.indentLevel + 1)
+				x.plan
+		}
+	}
+	
+	def groundPlan(plan: PartialPlan): Either[String, PartialPlan] = {
+		@tailrec
+		def loop(gs: GroundState): Either[String, PartialPlan] = {
+			groundStep(gs) match {
+				case Left(msg) => Left(msg)
+				case Right(GroundState_Done(plan)) => Right(plan)
+				case Right(step1) => loop(step1)
+			}
+		}
+		loop(GroundState_SelectVariable(plan, 0))
+	}*/
 }
