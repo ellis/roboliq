@@ -83,13 +83,17 @@ object Test {
 			plan1 <- plan0.addActionSequence(planInfo_l.map(_.planAction)).asRs
 			step0 = aiplan.strips2.PopState_SelectGoal(plan1, 0)
 			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
+			_ = println("plan2:")
 			_ = println(plan2.toDot)
+			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
+			_ = println("plan3:")
+			_ = println(plan3.toDot)
 		} yield {
-			roboliq.utils.FileUtils.writeToFile("test.dot", plan2.toDot)
-			val actionOrig_l = planInfo_l zip plan2.action_l.drop(2)
+			roboliq.utils.FileUtils.writeToFile("test.dot", plan3.toDot)
+			val actionOrig_l = planInfo_l zip plan3.action_l.drop(2)
 			actionOrig_l.map(pair => {
 				val (planInfo, action) = pair
-				val planned = plan2.bindings.bind(action)
+				val planned = plan3.bindings.bind(action)
 				val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
 				val op = handler.getOperator(planInfo, planned, eb)
 				println("op:")
@@ -97,9 +101,9 @@ object Test {
 				op
 			})
 			// Additional actions added by the planner
-			val actionAuto_l = plan2.action_l.toList.drop(2 + planInfo_l.size)
+			val actionAuto_l = plan3.action_l.toList.drop(2 + planInfo_l.size)
 			actionAuto_l.map(action => {
-				val planned = plan2.bindings.bind(action)
+				val planned = plan3.bindings.bind(action)
 				val handler = cs.nameToAutoActionHandler_m(action.name)
 				val op = handler.getInstruction(planned, eb)
 				println("op:")

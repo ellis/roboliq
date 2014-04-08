@@ -313,31 +313,37 @@ object Pop {
 		}
 	}
 
-	case class GroundNode(plan: PartialPlan, orderingsMinMap: Map[Int, Set[Int]])
+	case class GroundNode(
+		state: PartialPlan,
+		parentOpt: Option[GroundNode],
+		orderingsMinMap: Map[Int, Set[Int]]
+	) extends ailib.ch03.Node[PartialPlan] {
+		def plan = state
+	}
 	case class GroundAction(newplan: PartialPlan)
 	
-	class GroundProblem(plan0: PartialPlan) extends ailib.ch03.Problem[GroundNode, GroundAction, GroundNode] {
-		val state0 = GroundNode(plan0, plan0.orderings.getMinimalMap)
+	class GroundProblem(plan0: PartialPlan) extends ailib.ch03.Problem[PartialPlan, GroundAction, GroundNode] {
+		val state0 = plan0
+		val root = GroundNode(plan0, None, plan0.orderings.getMinimalMap)
 		
-		def root = state0
-		
-		def goalTest(node: GroundNode): Boolean = {
-			node.plan.bindings.variable_m.isEmpty && node.orderingsMinMap.forall(_._2.size == 1)
+		def goalTest(plan: PartialPlan): Boolean = {
+			plan.bindings.variable_m.isEmpty && plan.orderings.getMinimalMap.forall(_._2.size == 1)
 		}
 		
-		def actions(node: GroundNode): Iterable[GroundAction] = {
-			val binding0_l = node.plan.bindings.variable_m.toList.flatMap(pair => pair._2.option_l.map(pair._1 -> _))
+		def actions(plan: PartialPlan): Iterable[GroundAction] = {
+			val binding0_l = plan.bindings.variable_m.toList.flatMap(pair => pair._2.option_l.map(pair._1 -> _))
 			val bindingAction_l = binding0_l.flatMap { pair =>
 				val (name, value) = pair
-				node.plan.addBindingEq(name, value) match {
+				plan.addBindingEq(name, value) match {
 					case Left(_) => None
 					case Right(plan1) => Some(GroundAction(plan1))
 				}
 			}
-			val ordering0_l = node.orderingsMinMap.toList.filter(_._2.size > 1).flatMap(pair => pair._2.toList.map(pair._1 -> _))
+			val orderingsMinMap = plan.orderings.getMinimalMap
+			val ordering0_l = orderingsMinMap.toList.filter(_._2.size > 1).flatMap(pair => pair._2.toList.map(pair._1 -> _))
 			val orderingAction_l = ordering0_l.flatMap { pair =>
 				val (before_i, after_i) = pair
-				node.plan.addOrdering(before_i, after_i) match {
+				plan.addOrdering(before_i, after_i) match {
 					case Left(_) => None
 					case Right(plan1) => Some(GroundAction(plan1))
 				}
@@ -346,11 +352,21 @@ object Pop {
 		}
 		
 		def childNode(parent: GroundNode, action: GroundAction): GroundNode =
-			GroundNode(action.newplan, action.newplan.orderings.getMinimalMap)
+			GroundNode(action.newplan, Some(parent), action.newplan.orderings.getMinimalMap)
 	}
 	
-	CONTINUE HERE, create function to do tree search using GroundProblem
-	
+	//CONTINUE HERE, create function to do tree search using GroundProblem
+		
+	def groundPlan(plan: PartialPlan): Either[String, PartialPlan] = {
+		val search = new ailib.ch03.TreeSearch[PartialPlan, GroundAction, GroundNode]
+		val problem = new GroundProblem(plan)
+		val frontier = new ailib.ch03.DepthFirstFrontier[PartialPlan, GroundNode]
+		search.run(problem, frontier) match {
+			case None => Left("Couldn't find ground plan")
+			case Some(node) => Right(node.plan)
+		}
+	}
+
 	/*
 	def groundStep(gs: GroundState): Either[String, GroundState] = {
 		gs match {

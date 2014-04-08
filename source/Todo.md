@@ -52,11 +52,11 @@
 - [x] For now, no transport graph while planning.  But use the transport graph when generating the operators, and hope a path is found.
 - [x] TransportLabware: handle move operators from move command
 - [x] ActionHandler: should have `name: String` method
+- [x] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
 - [ ] Protocol: use scala-graph-core to build a graph of sites and possible transport links
 - [ ] Domain: don't accept multiple operators with the same name
 - [ ] CommandSet: construct by taking a list of ActionHandlers, and using them to construct the CommandSet maps
 - [ ] figure out how to order the operators like in the partial plan
-- [ ] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
 - [ ] ActionHandler: should have `methods: List[Call => RqResult[Call]]` method
 - [ ] Protocol: adapt to create a CallTree
 - [ ] Protocol: createDomain
