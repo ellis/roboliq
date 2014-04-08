@@ -1,0 +1,30 @@
+Plates:
+P1-P9 for the plates (one of those is the shaker, one is the regrip station)
+P1PCR-P9PCR for plates with PCR adapter
+
+Tubes:
+T1A-H
+T2A-H
+T3A1-D5
+
+Troughs:
+R1A-C
+R2 (white cooled)
+R3A-C
+
+Hotels:
+HOTELMICRO_A1-D8
+HOTELDWP_A1-C5
+HOTEL55_A-E
+
+Devices:
+ROBOSEAL
+ROBOPEEL
+TROBOT1
+TROBOT2
+READER
+VACUUM
+VACCUM_PART_2?
+WASTE
+CENTRIFUGE
+

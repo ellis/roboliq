@@ -1148,8 +1148,9 @@ class Protocol {
 			})
 			Graph[Site, LkUnDiEdge](edge_l : _*)
 		}
-		println("graph: "+graph.size)
-		graph.take(5).foreach(println)
+		eb.transportGraph = graph
+		//println("graph: "+graph.size)
+		//graph.take(5).foreach(println)
 		
 		def addDevice0(
 			device: Device,

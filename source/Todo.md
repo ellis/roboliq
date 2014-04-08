@@ -1,45 +1,5 @@
 # TODOs for roboliq
 
-## For next CADMAD meeting
-
-- [ ] '//' comments in protocol
-- [x] better 'shaker' command, better ShakerSpec
-- [x] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
-- [x] shaker: currently looking at Converter, why Map[String, ShakerSpec] isn't working
-- [ ] shaker: make parser for duration (with 'min' and 's' units)
-- [ ] shaker: make parser for frequency (with 'rpm' units)
-- [x] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec
-- [ ] 'reader' command
-- [ ] user-defined names for sites
-- [ ] make sure alternative stflow protocol runs on our Tecan
-
-- [ ] load additional file with user settings to complement the generic protocol
-- [ ] 'dilute' command
-- [ ] make sure stflow protocol runs on our Tecan
-
-- [ ] integrate own planner
-- [ ] redefine sites to fix problem I had with the Weizmann table definition
-- [ ] make sure stflow protocol runs on Weizmann Tecan
-- [ ] post code for CADMAD participants
-- [ ] get it to run on windows
-
-## AI PoP planner
-
-- [x] PddlParser: handle types in operators
-- [x] PddlParser: handle `types` field in domain
-- [x] PddlParser: handle `predicates` field in domain
-- [x] PddlParser: handle `objects` field in problem
-- [x] continue with domain: action tecan_pipette1
-- [x] create PDDL for domain with `movePlate` and `distribute` commands
-- [x] `3:moveLabware` should not be a provider for `location plateA siteA`
-- [x] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
-- [x] Negative preconditions should always be satisfiable by the initial state if the initial state doesn't conflict
-- [ ] PartialPlan: toDot: show variable options and inequalities
-- [ ] PartialPlan: incrementally calculate threats
-- [ ] PartialPlan: toDot: show threats
-- [ ] PddlParser: handle comments
-- [ ] PddlParser: handle domain constants
-
 ## AI planning flow
 
 - [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
@@ -53,16 +13,16 @@
 - [x] TransportLabware: handle move operators from move command
 - [x] ActionHandler: should have `name: String` method
 - [x] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
-- [ ] Protocol: use scala-graph-core to build a graph of sites and possible transport links
-- [ ] Domain: don't accept multiple operators with the same name
-- [ ] CommandSet: construct by taking a list of ActionHandlers, and using them to construct the CommandSet maps
-- [ ] figure out how to order the operators like in the partial plan
-- [ ] ActionHandler: should have `methods: List[Call => RqResult[Call]]` method
-- [ ] Protocol: adapt to create a CallTree
+- [x] Protocol: use scala-graph-core to build a graph of sites and possible transport links
+- [ ] Protocol: adapt to create a CallTree, see loadJsonProtocol_Protocol
 - [ ] Protocol: createDomain
 - [ ] Protocol: createProblem
 - [ ] Protocol: createPartialPlan
 - [ ] Protocol: createOperatorSequence
+- [ ] Domain: don't accept multiple operators with the same name
+- [ ] CommandSet: construct by taking a list of ActionHandlers, and using them to construct the CommandSet maps
+- [ ] make sure that the order the operators is the same as in the partial plan
+- [ ] ActionHandler: should have `methods: List[Call => RqResult[Call]]` method
 - [ ] PddlParser: parse for type hierarchies
 - [ ] Domain and Problem: handle type hierarchies
 - [ ] Look into whether EntityBase and WorldState can be given a simpler PDDL-like representation
@@ -107,6 +67,46 @@ We can have a list of all possible pair-wise movements for a given labware model
 4) convert action call to operator calls using merger of original parameters and planned parameters
 5) convert operator calls to operators
 6) translate
+
+## For next CADMAD meeting
+
+- [ ] '//' comments in protocol
+- [x] better 'shaker' command, better ShakerSpec
+- [x] shaker: figure out how to add a user-defined program to eb.addDeviceSpec(shaker, ...) in Protocol.loadEvoware()
+- [x] shaker: currently looking at Converter, why Map[String, ShakerSpec] isn't working
+- [ ] shaker: make parser for duration (with 'min' and 's' units)
+- [ ] shaker: make parser for frequency (with 'rpm' units)
+- [x] shaker: figure out Evoware parameters for our shaker, and then generate them from ShakerSpec
+- [ ] 'reader' command
+- [ ] user-defined names for sites
+- [ ] make sure alternative stflow protocol runs on our Tecan
+
+- [ ] load additional file with user settings to complement the generic protocol
+- [ ] 'dilute' command
+- [ ] make sure stflow protocol runs on our Tecan
+
+- [ ] integrate own planner
+- [ ] redefine sites to fix problem I had with the Weizmann table definition
+- [ ] make sure stflow protocol runs on Weizmann Tecan
+- [ ] post code for CADMAD participants
+- [ ] get it to run on windows
+
+## AI PoP planner
+
+- [x] PddlParser: handle types in operators
+- [x] PddlParser: handle `types` field in domain
+- [x] PddlParser: handle `predicates` field in domain
+- [x] PddlParser: handle `objects` field in problem
+- [x] continue with domain: action tecan_pipette1
+- [x] create PDDL for domain with `movePlate` and `distribute` commands
+- [x] `3:moveLabware` should not be a provider for `location plateA siteA`
+- [x] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
+- [x] Negative preconditions should always be satisfiable by the initial state if the initial state doesn't conflict
+- [ ] PartialPlan: toDot: show variable options and inequalities
+- [ ] PartialPlan: incrementally calculate threats
+- [ ] PartialPlan: toDot: show threats
+- [ ] PddlParser: handle comments
+- [ ] PddlParser: handle domain constants
 
 ## Feedback loops
 
