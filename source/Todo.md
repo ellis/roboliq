@@ -14,7 +14,8 @@
 - [x] ActionHandler: should have `name: String` method
 - [x] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
 - [x] Protocol: use scala-graph-core to build a graph of sites and possible transport links
-- [ ] Protocol: adapt to create a CallTree, see loadJsonProtocol_Protocol
+- [x] Protocol: adapt to create a CallTree, see loadJsonProtocol_Protocol
+- [x] Protocol: remove variable `tasks`
 - [ ] Protocol: createDomain
 - [ ] Protocol: createProblem
 - [ ] Protocol: createPartialPlan

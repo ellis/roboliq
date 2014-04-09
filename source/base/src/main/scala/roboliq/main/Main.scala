@@ -1,21 +1,23 @@
 package roboliq.main
 
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
+
 import com.google.gson.Gson
+
+import roboliq.core._
+import roboliq.entities.ClientScriptBuilder
+import roboliq.evoware.translator.EvowareClientScriptBuilder
+import roboliq.evoware.translator.EvowareConfig
+import roboliq.input.ConfigBean
+import roboliq.input.Protocol
+import roboliq.plan.CallTree
 import spray.json.JsObject
 import spray.json.pimpString
-import roboliq.core._
-import roboliq.input.Protocol
-import roboliq.input.ConfigBean
-import roboliq.evoware.translator.EvowareConfigData
-import roboliq.evoware.translator.EvowareConfig
-import roboliq.evoware.translator.EvowareClientScriptBuilder
-import roboliq.entities.ClientScriptBuilder
-import roboliq.translator.jshop.JshopTranslator
-import roboliq.entities.LiquidVolume
-import roboliq.entities.AliquotFlat
 
 case class Opt(
 	configFile: File = null,
@@ -49,25 +51,58 @@ object Main extends App {
 		val x = for {
 			configBean <- loadConfigBean(opt.configFile.getPath())
 			//_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
+			cs <- protocol.loadCommandSet()
 			_ <- protocol.loadConfigBean(configBean)
 
 			jsobj <- loadProtocolJson(opt.protocolFile)
 			_ <- protocol.loadJson(jsobj)
 			
-			dir = opt.protocolFile.getParentFile()
 			basename = FilenameUtils.getBaseName(opt.protocolFile.getPath())
-			_ = protocol.saveProblem(new File(dir, basename+".lisp").getPath, "")
-
-			filePlan = new File(dir, basename+".plan")
-			_ = Seq("bash", "-c", s"source tasks/classpath.sh; make -C ${filePlan.getParent} ${filePlan.getName}").!!
-			planOutput = scala.io.Source.fromFile(filePlan.getPath).getLines.toList
-			_ <- RsResult.assert(planOutput.size > 4, "JSON planner did not find a plan")
-			plan_l = planOutput.drop(2).reverse.drop(2).reverse
-			plan = plan_l.mkString("\n")
-			
-			state <- JshopTranslator.translate(protocol, plan)
+			dirFile = opt.protocolFile.getParentFile()
+			dateString = new SimpleDateFormat("ddMyyyy-hhmmss").format(new Date())
+			dirOutput = new File(dirFile, s"roboliq--$basename--$dateString")
+			_ = dirOutput.mkdir()
+			pair <- protocol.createPlan()
+			(planInfo_l, plan0) = pair
+			filenameDomain = new File(dirOutput, "domain.pddl").getPath
+			filenameProblem = new File(dirOutput, "problem.pddl").getPath
+			filenamePlan0 = new File(dirOutput, "plan0.dot").getPath
+			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
+			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
+			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot)
+			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
+			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
+			_ = println("plan2:")
+			_ = println(plan2.toDot)
+			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
+			_ = println("plan3:")
+			_ = println(plan3.toDot)
+			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
+			roboliq.utils.FileUtils.writeToFile("test.dot", plan3.toDot)
+			val actionOrig_l = planInfo_l zip plan3.action_l.drop(2)
+			actionOrig_l.map(pair => {
+				val (planInfo, action) = pair
+				val planned = plan3.bindings.bind(action)
+				val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
+				val op = handler.getOperator(planInfo, planned, protocol.eb)
+				println("op:")
+				println(op)
+				op
+			})
+			// Additional actions added by the planner
+			val actionAuto_l = plan3.action_l.toList.drop(2 + planInfo_l.size)
+			actionAuto_l.map(action => {
+				val planned = plan3.bindings.bind(action)
+				val handler = cs.nameToAutoActionHandler_m(action.name)
+				val op = handler.getInstruction(planned, protocol.eb)
+				println("op:")
+				println(op)
+				op
+			})
+
+			/*
 			val builder_l = protocol.agentToBuilder_m.values.toSet
 			for (scriptBuilder <- builder_l) {
 				val basename2 = new File(dir, basename + "_" + scriptBuilder.agentName).getPath
@@ -93,6 +128,8 @@ object Main extends App {
 				}
 				println(s"$wellIdent: ${AliquotFlat(aliquot).toMixtureString} ${amount}")
 			})
+			* 
+			*/
 		}
 
 		val error_l = x.getErrors
