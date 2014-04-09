@@ -1,0 +1,10 @@
+labware:
+  sourcePlate1: D-BSSE 96 Well DWP
+  plate1:
+    model: Thermocycler Plate
+
+protocol:
+- shakePlate:
+    object: plate1
+    program:
+      rpm: 200

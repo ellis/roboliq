@@ -1447,6 +1447,7 @@ class Protocol {
 			"labware" -> "plateA",
 			"labware" -> "plateB"
 		) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
+		
 		val state0 = Strips.State(Set[Strips.Atom](
 			Strips.Atom("location", "plateA", "siteA"),
 			Strips.Atom("site-blocked", "siteA"),
@@ -1458,7 +1459,7 @@ class Protocol {
 			Strips.Atom("model", "siteA", "sm001"),
 			Strips.Atom("model", "siteB", "sm001"),
 			Strips.Atom("stackable", "sm001", "m001")
-		) ++ planInfo_l.flatMap(_.problemState_l))
+		) ++ planInfo_l.flatMap(_.problemState_l) ++ eb.makeInitialConditionsList.map(rel => Strips.Atom(rel.name, rel.args)))
 		
 		RqSuccess(Strips.Problem(
 			domain = domain,

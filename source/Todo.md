@@ -16,8 +16,10 @@
 - [x] Protocol: use scala-graph-core to build a graph of sites and possible transport links
 - [x] Protocol: adapt to create a CallTree, see loadJsonProtocol_Protocol
 - [x] Protocol: remove variable `tasks`
+- [x] Main: let user specify output directory
+- [ ] Protocol: createProblem: get objects from eb
+- [ ] Protocol: createProblem: get relations from eb
 - [ ] Protocol: createDomain
-- [ ] Protocol: createProblem
 - [ ] Protocol: createPartialPlan
 - [ ] Protocol: createOperatorSequence
 - [ ] Domain: don't accept multiple operators with the same name

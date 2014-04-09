@@ -21,7 +21,8 @@ import spray.json.pimpString
 
 case class Opt(
 	configFile: File = null,
-	protocolFile: File = null
+	protocolFile: File = null,
+	outputDir: File = null
 )
 
 case class EvowareOpt(
@@ -38,6 +39,8 @@ object Main extends App {
 			o.copy(configFile = x) } text("configuration file")
 		opt[File]("protocol") required() valueName("<file>") action { (x, o) =>
 			o.copy(protocolFile = x) } text("protocol file")
+		opt[File]("output") valueName("<dir>") action { (x, o) =>
+			o.copy(outputDir = x) } text("output directory")
 	}
 	parser.parse(args, Opt()) map { opt =>
 		run(opt)
@@ -59,9 +62,9 @@ object Main extends App {
 			
 			basename = FilenameUtils.getBaseName(opt.protocolFile.getPath())
 			dirFile = opt.protocolFile.getParentFile()
-			dateString = new SimpleDateFormat("ddMyyyy-hhmmss").format(new Date())
-			dirOutput = new File(dirFile, s"roboliq--$basename--$dateString")
-			_ = dirOutput.mkdir()
+			dateString = new SimpleDateFormat("yyyyMMdd-hhmmss").format(new Date())
+			dirOutput = if (opt.outputDir != null) opt.outputDir else new File(dirFile, s"roboliq--$basename--$dateString")
+			_ = dirOutput.mkdirs()
 			pair <- protocol.createPlan()
 			(planInfo_l, plan0) = pair
 			filenameDomain = new File(dirOutput, "domain.pddl").getPath
