@@ -21,6 +21,8 @@ import roboliq.evoware.translator.EvowareClientScriptBuilder
 import scalax.collection.Graph
 import scalax.collection.edge.LHyperEdge
 import scalax.collection.edge.LkUnDiEdge
+import roboliq.plan.CallTree
+import roboliq.plan.Call
 
 case class ReagentBean(
 	id: String,
@@ -44,6 +46,7 @@ class Protocol {
 
 	val eb = new EntityBase
 	val state0 = new WorldStateBuilder
+	private var tree: CallTree = null
 	private var tasks = new ArrayBuffer[Rel]
 	private var var_i = 0
 
@@ -356,40 +359,32 @@ class Protocol {
 			}
 		
 			_ <- jsobj.fields.get("protocol") match {
-				case Some(jsval) => loadJsonProtocol_Protocol(jsval)
+				case Some(jsval) => loadJsonProtocol_Protocol(jsval).map(tree => { this.tree = tree; () })
 				case _ => RsSuccess(())
 			}
 		} yield ()
 	}
 	
-	private def loadJsonProtocol_Protocol(jsval: JsValue): RsResult[Unit] = {
+	private def loadJsonProtocol_Protocol(jsval: JsValue): RsResult[CallTree] = {
 		logger.debug("parse `protocol`")
 		val path0 = new PlanPath(Nil, state0.toImmutable)
-		def step(jscmd_l: List[JsValue], path: PlanPath): RqResult[PlanPath] = {
+		def step(jscmd_l: List[JsValue], top_r: List[Call]): RqResult[CallTree] = {
 			jscmd_l match {
-				case Nil => RqSuccess(path)
+				case Nil => RqSuccess(CallTree(top_r.reverse))
 				case jscmd :: rest =>
-					for {
-						pair <- loadJsonProtocol_Protocol_getCommand(jscmd)
-						//_ = println("pair: "+pair)
-						path1 <- pair match {
-							case None => RsSuccess(path)
+					loadJsonProtocol_Protocol_getCommand(jscmd).flatMap(pair_? => {
+						val top_r2 = pair_? match {
+							case None => top_r
 							case Some((cmd, nameToVal_l)) =>
-								loadJsonProtocol_ProtocolCommand(cmd, nameToVal_l, path)
+								new Call(cmd, nameToVal_l) :: top_r
 						}
-						path2 <- step(rest, path1)
-					} yield path2
+						step(rest, top_r2)
+					})
 			}
 		}
 		jsval match {
 			case JsArray(jscmd_l) =>
-				for {
-					path1 <- step(jscmd_l, path0)
-				} yield {
-					val action_l = path1.action_r.reverse
-					val task_l = action_l.map(_.asInstanceOf[Task])
-					tasks ++= task_l.map(_.rel)
-				}
+				step(jscmd_l, Nil)
 			case _ =>
 				RsError("unrecognized format for `protocol` section")
 		}
