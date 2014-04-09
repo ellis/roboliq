@@ -17,8 +17,9 @@
 - [x] Protocol: adapt to create a CallTree, see loadJsonProtocol_Protocol
 - [x] Protocol: remove variable `tasks`
 - [x] Main: let user specify output directory
-- [ ] Protocol: createProblem: get objects from eb
-- [ ] Protocol: createProblem: get relations from eb
+- [x] Protocol: createProblem: get objects from eb
+- [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
+- [ ] Allow for comments in Strips.Atom?
 - [ ] Protocol: createDomain
 - [ ] Protocol: createPartialPlan
 - [ ] Protocol: createOperatorSequence

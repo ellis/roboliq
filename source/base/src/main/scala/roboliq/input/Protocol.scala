@@ -1436,7 +1436,7 @@ class Protocol {
 
 
 	def createProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
-		val typToObject_l: List[(String, String)] = List(
+		val typToObject_l: List[(String, String)] = /*List(
 			"agent" -> "r1",
 			"pipetter" -> "r1_pipetter",
 			"shaker" -> "r1_shaker",
@@ -1446,7 +1446,7 @@ class Protocol {
 			"site" -> "siteB",
 			"labware" -> "plateA",
 			"labware" -> "plateB"
-		) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
+		)*/ eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
 		
 		val state0 = Strips.State(Set[Strips.Atom](
 			Strips.Atom("location", "plateA", "siteA"),
@@ -1459,7 +1459,7 @@ class Protocol {
 			Strips.Atom("model", "siteA", "sm001"),
 			Strips.Atom("model", "siteB", "sm001"),
 			Strips.Atom("stackable", "sm001", "m001")
-		) ++ planInfo_l.flatMap(_.problemState_l) ++ eb.makeInitialConditionsList.map(rel => Strips.Atom(rel.name, rel.args)))
+		) ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => Strips.Atom(rel.name, rel.args)))
 		
 		RqSuccess(Strips.Problem(
 			domain = domain,

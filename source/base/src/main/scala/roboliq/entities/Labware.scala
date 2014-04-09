@@ -92,11 +92,11 @@ trait LabwareModel extends Entity
 trait Labware extends Entity
 
 case class SiteModel(key: String, label: Option[String] = None, description: Option[String] = None) extends LabwareModel {
-	def typeNames = List("model", "siteModel")
+	def typeNames = List("siteModel", "model")
 }
 
 case class Site(key: String, label: Option[String] = None, description: Option[String] = None) extends Labware {
-	def typeNames = List("labware", "site")
+	def typeNames = List("site", "labware")
 }
 
 case class Liquid(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {

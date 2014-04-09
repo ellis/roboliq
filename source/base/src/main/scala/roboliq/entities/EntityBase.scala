@@ -233,6 +233,34 @@ class EntityBase {
 	
 	def getIdent(e: Entity): RsResult[String] = entityToIdent_m.get(e).asRs(s"missing identifier for entity $e")
 	
+	/**
+	 * Create list of (object, type) tuples for the problem definition
+	 */
+	def createProblemObjects: List[(String, String)] = {
+		entityToIdent_m.toList.map(pair => pair._2 -> pair._1.typeNames.head)
+	}
+	
+	def createProblemState: List[Rel] = {
+		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
+			Rel(s"agent-has-device", List(entityToIdent_m(pair._1), entityToIdent_m(device)))
+		})).toList.sortBy(_.toString) ++
+		deviceToModels_m.flatMap(pair => pair._2.map(model => {
+			Rel(s"device-can-model", List(entityToIdent_m(pair._1), entityToIdent_m(model)))
+		})).toList.sortBy(_.toString) ++
+		deviceToSites_m.flatMap(pair => pair._2.map(site => {
+			Rel(s"device-can-site", List(entityToIdent_m(pair._1), entityToIdent_m(site)))
+		})).toList.sortBy(_.toString) ++
+		deviceToSpecs_m.flatMap(pair => pair._2.toList.map(spec => {
+			Rel(s"device-can-spec", List(entityToIdent_m(pair._1), entityToIdent_m(spec)))
+		})).toList.sortBy(_.toString) ++
+		stackables_m.flatMap(pair => pair._2.map(model => {
+			Rel(s"stackable", List(entityToIdent_m(pair._1), entityToIdent_m(model)))
+		})).toList.sortBy(_.toString) ++
+		labwareToModel_m.map(pair => Rel(s"model", List(entityToIdent_m(pair._1), entityToIdent_m(pair._2)))).toList.sortBy(_.toString) ++
+		labwareToLocation_m.map(pair => Rel(s"location", List(entityToIdent_m(pair._1), entityToIdent_m(pair._2)))).toList.sortBy(_.toString) ++
+		rel_l.toList.sortBy(_.toString)
+	}
+	
 	def makeInitialConditionsList(): List[Rel] = {
 		entityToIdent_m.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.label.getOrElse(null)))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
