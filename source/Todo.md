@@ -19,12 +19,13 @@
 - [x] Main: let user specify output directory
 - [x] Protocol: createProblem: get objects from eb
 - [x] PartialPlan.toDot: optionally don't display initial state, because it may be too large
+- [ ] Main: figure out what to do with operator sequence to let it be translated to evoware
+- [ ] Protocol: createOperatorSequence
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
 - [ ] Allow for comments in Strips.Atom?
 - [ ] Protocol: createDomain
 - [ ] Protocol: createPartialPlan
-- [ ] Protocol: createOperatorSequence
 - [ ] Domain: don't accept multiple operators with the same name
 - [ ] CommandSet: construct by taking a list of ActionHandlers, and using them to construct the CommandSet maps
 - [ ] make sure that the order the operators is the same as in the partial plan

@@ -80,28 +80,31 @@ object Main extends App {
 			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
 			_ = println("plan3:")
 			_ = println(plan3.toDot(showInitialState=false))
+			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)
+			ordering_l <- plan3.orderings.getSequence.asRs.map(_.filter(_ >= 2))
+			originalActionCount = planInfo_l.size
+			// Oerators
+			operator_ll <- RsResult.toResultOfList(ordering_l.map(i => {
+				val action = plan3.action_l(i)
+				if (i - 2 < originalActionCount) {
+					val planInfo = planInfo_l(i - 2)
+					val planned = plan3.bindings.bind(action)
+					val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
+					handler.getOperator(planInfo, planned, protocol.eb)
+				}
+				else {
+					val planned = plan3.bindings.bind(action)
+					val handler = cs.nameToAutoActionHandler_m(action.name)
+					handler.getInstruction(planned, protocol.eb)
+				}
+			}))
 			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
-			val actionOrig_l = planInfo_l zip plan3.action_l.drop(2)
-			actionOrig_l.map(pair => {
-				val (planInfo, action) = pair
-				val planned = plan3.bindings.bind(action)
-				val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-				val op = handler.getOperator(planInfo, planned, protocol.eb)
-				println("op:")
+			val operator_l = operator_ll.flatten
+			println("operators:")
+			operator_l.foreach(op => {
 				println(op)
-				op
-			})
-			// Additional actions added by the planner
-			val actionAuto_l = plan3.action_l.toList.drop(2 + planInfo_l.size)
-			actionAuto_l.map(action => {
-				val planned = plan3.bindings.bind(action)
-				val handler = cs.nameToAutoActionHandler_m(action.name)
-				val op = handler.getInstruction(planned, protocol.eb)
-				println("op:")
-				println(op)
-				op
 			})
 
 			/*

@@ -353,6 +353,26 @@ class Orderings(
 		//println("after:  "+x)
 		x
 	}
+	
+	/**
+	 * Return the linear sequence of action indexes, if possible, starting with 0.
+	 */
+	def getSequence: Either[String, List[Int]] = {
+		val m = getMinimalMap
+		def step(i: Int, r: List[Int]): Either[String, List[Int]] = {
+			m.get(i) match {
+				case None => Right((i :: r).reverse)
+				case Some(set) =>
+					set.size match {
+						case 0 => Left(s"getSequence: empty set for index `$i`")
+						case 1 => step(set.head, i :: r)
+						case _ => Left(s"getSequence: multiple values for index `$i`")
+					}
+						
+			}
+		}
+		step(0, Nil)
+	}
 }
 
 
