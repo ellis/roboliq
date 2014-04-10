@@ -72,18 +72,17 @@ object Main extends App {
 			filenamePlan0 = new File(dirOutput, "plan0.dot").getPath
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
-			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot)
+			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
 			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
 			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
 			_ = println("plan2:")
-			_ = println(plan2.toDot)
+			_ = println(plan2.toDot(showInitialState=false))
 			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
 			_ = println("plan3:")
-			_ = println(plan3.toDot)
+			_ = println(plan3.toDot(showInitialState=false))
 			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
-			roboliq.utils.FileUtils.writeToFile("test.dot", plan3.toDot)
 			val actionOrig_l = planInfo_l zip plan3.action_l.drop(2)
 			actionOrig_l.map(pair => {
 				val (planInfo, action) = pair

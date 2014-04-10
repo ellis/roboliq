@@ -797,7 +797,7 @@ class PartialPlan private (
 		(name :: op.paramName_l).mkString(" ")
 	}
 	
-	def toDot(): String = {
+	def toDot(showInitialState: Boolean = true): String = {
 		// TODOS:
 		// - remove """[0-9]+:""" from parameter names
 		val header_l = List[String](
@@ -819,7 +819,12 @@ class PartialPlan private (
 				s"""<td port="${pair._2}" bgcolor="$color">${pair._1.toString}</td>"""
 			})
 			val preconds = if (preconds_l.isEmpty) "" else preconds_l.mkString("""<table border="0"><tr>""", "</tr><tr>", "</tr></table>")
-			val effects = op.effects.l.toList.map(_.toString).mkString("<br/>")
+			val effects = {
+				if (i > 0 || showInitialState)
+					op.effects.l.toList.map(_.toString).mkString("<br/>")
+				else
+					""
+			}
 			s"""action$i [label=<<table border="0" cellborder="1"><tr><td colspan="2">$header</td></tr><tr><td>$preconds</td><td>$effects</td></tr></table>>]"""
 		})
 		val orderLine_l: List[String] = orderings.getMinimalMap.toList.flatMap(pair => {
@@ -895,7 +900,7 @@ object PartialPlan {
 			println("problem:")
 			println(problem)
 			println()
-			println(plan0.toDot)
+			println(plan0.toDot())
 			println()
 			println(plan0.getExistingProviders(1, 0))
 			println(plan0.getNewProviders(1, 0))
@@ -903,7 +908,7 @@ object PartialPlan {
 			Pop.pop(plan0) match {
 				case Left(msg) => println("ERROR: "+msg)
 				case Right(plan1) =>
-					val dot = plan1.toDot
+					val dot = plan1.toDot()
 					println(dot)
 				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
 			}
@@ -1000,9 +1005,9 @@ object PartialPlan {
 			println("problem:")
 			println(problem)
 			println()
-			println(plan0.toDot)
+			println(plan0.toDot())
 			println()
-			println(plan1.toDot)
+			println(plan1.toDot())
 			println()
 			//println(plan0.getExistingProviders(1, 0))
 			//println(plan0.getNewProviders(1, 0))
@@ -1022,7 +1027,7 @@ object PartialPlan {
 			Pop.stepToEnd(step0) match {
 				case Left(msg) => println("ERROR: "+msg)
 				case Right(plan1) =>
-					val dot = plan1.toDot
+					val dot = plan1.toDot()
 					println(dot)
 				roboliq.utils.FileUtils.writeToFile("test.dot", dot)
 			}

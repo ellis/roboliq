@@ -1164,8 +1164,7 @@ class Protocol {
 
 		val graph = {
 			// FIXME: this is a hack to get user sites in, needs to be done in configuration file
-			val offsite = Site("offsite", Some("offsite"))
-			eb.addSite(offsite, offsite.key)
+			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
 			val siteB = eb.getEntityAs[Site]("r1_bench_010x4").getOrElse(null)
 			test_m(("user", "", "")) = List(offsite, siteB)
 			// ENDFIX
@@ -1350,27 +1349,6 @@ class Protocol {
 		// TODO: Return real warnings and errors
 		RsSuccess(())
 	}
-	
-	/*def saveProblem(path: String, userInitialConditions: String = "") {
-		val file = new java.io.File(path)
-		val name = FilenameUtils.getBaseName(file.getName())
-		FileUtils.printToFile(file) { p =>
-			p.println(s"(defproblem $name domain")
-			p.println(" ; initial conditions")
-			p.println(" (")
-			p.println(eb.makeInitialConditions)
-			if (userInitialConditions != null && !userInitialConditions.isEmpty()) {
-				p.println(" ; user initial conditions")
-				p.println(userInitialConditions)
-			}
-			p.println(" )")
-			p.println(" ; tasks")
-			p.println(" (")
-			tasks.foreach(r => p.println("  "+r))
-			p.println(" )")
-			p.println(")")
-		}
-	}*/
 
 	def createPlan(): RqResult[(List[ActionPlanInfo], PartialPlan)] = {
 		/*val eb = {
