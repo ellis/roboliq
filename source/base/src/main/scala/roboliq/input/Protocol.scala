@@ -1163,6 +1163,12 @@ class Protocol {
 		}
 
 		val graph = {
+			// FIXME: this is a hack to get user sites in, needs to be done in configuration file
+			val offsite = Site("offsite", Some("offsite"))
+			eb.addSite(offsite, offsite.key)
+			val siteB = eb.getEntityAs[Site]("r1_bench_010x4").getOrElse(null)
+			test_m(("user", "", "")) = List(offsite, siteB)
+			// ENDFIX
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
 			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 			import scalax.collection.edge.LHyperEdge
@@ -1172,6 +1178,7 @@ class Protocol {
 			})
 			Graph[Site, LkUnDiEdge](edge_l : _*)
 		}
+		// FIXME: should add to transportGraph, not replace it
 		eb.transportGraph = graph
 		//println("graph: "+graph.size)
 		//graph.take(5).foreach(println)
@@ -1449,6 +1456,7 @@ class Protocol {
 		)*/ eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
 		
 		val state0 = Strips.State(Set[Strips.Atom](
+			/*
 			Strips.Atom("location", "plateA", "siteA"),
 			Strips.Atom("site-blocked", "siteA"),
 			Strips.Atom("agent-has-device", "r1", "r1_pipetter"),
@@ -1458,7 +1466,7 @@ class Protocol {
 			Strips.Atom("device-can-site", "r1_shaker", "siteB"),
 			Strips.Atom("model", "siteA", "sm001"),
 			Strips.Atom("model", "siteB", "sm001"),
-			Strips.Atom("stackable", "sm001", "m001")
+			Strips.Atom("stackable", "sm001", "m001")*/
 		) ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => Strips.Atom(rel.name, rel.args)))
 		
 		RqSuccess(Strips.Problem(
