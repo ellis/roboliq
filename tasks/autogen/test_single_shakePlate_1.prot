@@ -8,3 +8,4 @@ protocol:
     object: plate1
     program:
       rpm: 200
+      duration: 10

@@ -20,9 +20,6 @@
 - [x] Protocol: createProblem: get objects from eb
 - [x] PartialPlan.toDot: optionally don't display initial state, because it may be too large
 - [ ] Main: figure out what to do with operator sequence to let it be translated to evoware
-- [ ] REFACTOR: rename roboliq.input.commands.Command to Operator?
-- [ ] Operator: required field: agent 
-- [ ] Protocol: createOperatorSequence
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
 - [ ] Allow for comments in Strips.Atom?

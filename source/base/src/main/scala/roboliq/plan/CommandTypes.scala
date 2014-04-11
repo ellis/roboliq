@@ -60,7 +60,7 @@ case class UnknownAction(
 
 case class Instruction(
 	val agent: Agent,
-	val command: roboliq.input.commands.Command
+	val operator: roboliq.input.commands.Action
 )
 
 case class ActionPlanInfo(

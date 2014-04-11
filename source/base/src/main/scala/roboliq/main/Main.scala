@@ -3,12 +3,9 @@ package roboliq.main
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
-
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
-
 import com.google.gson.Gson
-
 import roboliq.core._
 import roboliq.entities.ClientScriptBuilder
 import roboliq.evoware.translator.EvowareClientScriptBuilder
@@ -18,6 +15,12 @@ import roboliq.input.Protocol
 import roboliq.plan.CallTree
 import spray.json.JsObject
 import spray.json.pimpString
+import grizzled.slf4j.Logger
+import roboliq.plan.Instruction
+import roboliq.entities.WorldState
+import roboliq.input.commands.PlanPath
+import roboliq.entities.LiquidVolume
+import roboliq.entities.AliquotFlat
 
 case class Opt(
 	configFile: File = null,
@@ -33,6 +36,8 @@ case class EvowareOpt(
 )
 
 object Main extends App {
+	private val logger = Logger[this.type]
+
 	val parser = new scopt.OptionParser[Opt]("roboliq") {
 		head("roboliq", "0.1pre1")
 		opt[File]("config") required() valueName("<file>") action { (x, o) =>
@@ -98,14 +103,13 @@ object Main extends App {
 					handler.getInstruction(planned, protocol.eb)
 				}
 			}))
+			instruction_l = instruction_ll.flatten
+			_ = println("instructions:")
+			_ = instruction_l.foreach(op => { println(op) })
+			state <- translate(protocol, instruction_l)
 			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
-			val instruction_l = instruction_ll.flatten
-			println("instructions:")
-			instruction_l.foreach(op => {
-				println(op)
-			})
 
 			/*
 			val builder_l = protocol.agentToBuilder_m.values.toSet
@@ -114,7 +118,7 @@ object Main extends App {
 				println("basename: " + basename2)
 				//println("scriptBuilder: " + scriptBuilder)
 				scriptBuilder.saveScripts(basename2)
-			}
+			}*/
 			val l1 = state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
 				val wellPosition = state.getWellPosition(well).toOption.get
@@ -133,8 +137,6 @@ object Main extends App {
 				}
 				println(s"$wellIdent: ${AliquotFlat(aliquot).toMixtureString} ${amount}")
 			})
-			* 
-			*/
 		}
 
 		val error_l = x.getErrors
@@ -194,4 +196,41 @@ object Main extends App {
 			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
 		} yield input.asJson.asJsObject
 	}
+	
+	private def translate(
+		protocol: Protocol,
+		instruction_l: List[Instruction]
+	): RqResult[WorldState] = {
+		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
+		val path0 = new PlanPath(Nil, protocol.state0.toImmutable)
+		
+		var path = path0
+		for (instruction <- instruction_l) {
+			translateInstruction(protocol, agentToBuilder_m, path, instruction) match {
+				case RsError(e, w) => return RsError(e, w)
+				case RsSuccess(path1, _) => path = path1
+			}
+		}
+
+		// Let the builders know that we're done building
+		agentToBuilder_m.values.foreach(_.end())
+		
+		RsSuccess(path.state)
+	}
+	
+	private def translateInstruction(
+		protocol: Protocol,
+		agentToBuilder_m: Map[String, ClientScriptBuilder],
+		path0: PlanPath,
+		instruction: Instruction
+	): RsResult[PlanPath] = {
+		for {
+			agentIdent <- protocol.eb.getIdent(instruction.agent)
+			path1 <- path0.add(instruction.operator)
+			builder = agentToBuilder_m(agentIdent)
+			command = instruction.operator.asInstanceOf[roboliq.input.commands.Command]
+			_ <- builder.addCommand(protocol, path0.state, agentIdent, command)
+		} yield path1
+	}
+
 }
