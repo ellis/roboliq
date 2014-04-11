@@ -422,29 +422,36 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		identToAgentObject_m: Map[String, Object],
 		cmd: ShakerRun
 	): RsResult[TranslationResult] = {
-		for {
-			//specIdent <- protocol.eb.getIdent(cmd.spec)
-			//internal_s <- identToAgentObject_m.get(specIdent.toLowerCase).asRs(s"missing internal value for specIdent `$specIdent`")
-			duration <- cmd.spec.duration.asRs(s"Shaker program must specify duration")
-		} yield {
-			val token_l = {
-				if (cmd.device.label == Some("MP 2Pos H+P Shake")) {
-					List(
-						L0C_Facts("HPShaker", "HPShaker_HP__ShakeForTime", "*271|8*30*30*30*30|2|*30|1|*30|1,5*30*30|255*27")
-					)
-				}
-				else {
-					List(
-						L0C_Facts("Shaker", "Shaker_Init", ""),
-						L0C_Facts("Shaker", "Shaker_Start","1"),
-						L0C_StartTimer(1),
-						L0C_WaitTimer(1, duration),
-						L0C_Facts("Shaker", "Shaker_Stop","")
-					)
-				}
+		if (cmd.device.label == Some("MP 2Pos H+P Shake")) {
+			for {
+				duration <- cmd.spec.duration.asRs(s"Shaker program must specify `duration`")
+				rpm <- cmd.spec.rpm.asRs(s"Shaker program must specify `rpm`")
+			} yield {
+				val s0 = "*27${shakerNo}|${60000000/rpm}|${mode1}|${steps1}|${mode2}|${steps2}|${rpm*min}|${255*power/100}*27"
+				val s1 = s0.replace("0", "*30")
+				// then split string into 32 char parts, then rebind them, separted by commas
+
+				val token_l = List(
+					L0C_Facts("HPShaker", "HPShaker_HP__ShakeForTime", "*271|8*30*30*30*30|2|*30|1|*30|1,5*30*30|255*27")
+				)
+				val item_l = token_l.map(token => TranslationItem(token, Nil))
+				TranslationResult(item_l, state0)
+			}	
+		}
+		else {
+			for {
+				duration <- cmd.spec.duration.asRs(s"Shaker program must specify `duration`")
+			} yield {
+				val token_l = List(
+					L0C_Facts("Shaker", "Shaker_Init", ""),
+					L0C_Facts("Shaker", "Shaker_Start","1"),
+					L0C_StartTimer(1),
+					L0C_WaitTimer(1, duration),
+					L0C_Facts("Shaker", "Shaker_Stop","")
+				)
+				val item_l = token_l.map(token => TranslationItem(token, Nil))
+				TranslationResult(item_l, state0)
 			}
-			val item_l = token_l.map(token => TranslationItem(token, Nil))
-			TranslationResult(item_l, state0)
 		}
 	}
 	

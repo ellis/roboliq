@@ -110,15 +110,14 @@ object Main extends App {
 			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
-
-			/*
 			val builder_l = protocol.agentToBuilder_m.values.toSet
 			for (scriptBuilder <- builder_l) {
-				val basename2 = new File(dir, basename + "_" + scriptBuilder.agentName).getPath
+				val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath
 				println("basename: " + basename2)
 				//println("scriptBuilder: " + scriptBuilder)
 				scriptBuilder.saveScripts(basename2)
-			}*/
+			}
+
 			val l1 = state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
 				val wellPosition = state.getWellPosition(well).toOption.get
