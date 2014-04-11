@@ -21,6 +21,10 @@
 - [x] PartialPlan.toDot: optionally don't display initial state, because it may be too large
 - [x] Main: figure out what to do with operator sequence to let it be translated to evoware
 - [ ] Shaker: EvowareScriptBuilder:430, properly format shaker command
+- [ ] RsResult: function for conveniently folding over a list, but abort if RsError
+- [ ] RsResult: function to get value from an Option if there is one, or return a default vaule and a warning if there's None
+- [ ] ActionHandler.getInstruction should be passed the world state
+- [ ] Main: update world state while creating instructions from actions
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
 - [ ] Allow for comments in Strips.Atom?
