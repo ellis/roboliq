@@ -6,6 +6,7 @@ import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import aiplan.strips2.Strips.Literal
 import aiplan.strips2.PartialPlan
+import roboliq.entities.Agent
 
 
 class Call(
@@ -57,6 +58,11 @@ case class UnknownAction(
 }
 */
 
+case class Instruction(
+	val agent: Agent,
+	val command: roboliq.input.commands.Command
+)
+
 case class ActionPlanInfo(
 	id: List[Int],
 	paramToJsval_l: List[(String, JsValue)],
@@ -72,7 +78,7 @@ trait AutoActionHandler {
 	def getInstruction(
 		planned: Strips.Operator,
 		eb: roboliq.entities.EntityBase
-	): RqResult[List[roboliq.input.commands.Command]]
+	): RqResult[List[Instruction]]
 }
 
 trait ActionHandler {
@@ -85,11 +91,11 @@ trait ActionHandler {
 		paramToJsval_l: List[(String, JsValue)]
 	): RqResult[ActionPlanInfo]
 	
-	def getOperator(
+	def getInstruction(
 		planInfo: ActionPlanInfo,
 		planned: Strips.Operator,
 		eb: roboliq.entities.EntityBase
-	): RqResult[List[roboliq.input.commands.Command]]
+	): RqResult[List[Instruction]]
 }
 
 /*

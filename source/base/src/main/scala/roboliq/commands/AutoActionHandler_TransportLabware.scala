@@ -23,6 +23,8 @@ import roboliq.input.commands.Command
 import roboliq.plan.AutoActionHandler
 import roboliq.entities.LabwareModel
 import roboliq.input.commands.TransporterRun
+import roboliq.plan.Instruction
+import roboliq.entities.Agent
 
 
 class AutoActionHandler_TransportLabware extends AutoActionHandler {
@@ -52,7 +54,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 	def getInstruction(
 		planned: Strips.Operator,
 		eb: roboliq.entities.EntityBase
-	): RqResult[List[roboliq.input.commands.Command]] = {
+	): RqResult[List[Instruction]] = {
 		val g = eb.transportGraph
 		val List(labwareName, modelName, site1Name, site2Name, _) = planned.paramName_l
 		
@@ -72,7 +74,11 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 				println(s"Move from $site1 to $site2")
 				edge.label match {
 					case (agentName: String, deviceName: String, programName: String) =>
-						RqSuccess(TransporterRun(deviceName, labware, model, site1, site2, programName))
+						for {
+							agent <- eb.getEntityAs[Agent](agentName)
+						} yield {
+							Instruction(agent, TransporterRun(deviceName, labware, model, site1, site2, programName))
+						}
 					case x =>
 						RqError("unrecognized transport edge label: "+edge.label)
 				}

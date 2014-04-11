@@ -84,13 +84,13 @@ object Main extends App {
 			ordering_l <- plan3.orderings.getSequence.asRs.map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
 			// Oerators
-			operator_ll <- RsResult.toResultOfList(ordering_l.map(i => {
+			instruction_ll <- RsResult.toResultOfList(ordering_l.map(i => {
 				val action = plan3.action_l(i)
 				if (i - 2 < originalActionCount) {
 					val planInfo = planInfo_l(i - 2)
 					val planned = plan3.bindings.bind(action)
 					val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-					handler.getOperator(planInfo, planned, protocol.eb)
+					handler.getInstruction(planInfo, planned, protocol.eb)
 				}
 				else {
 					val planned = plan3.bindings.bind(action)
@@ -101,9 +101,9 @@ object Main extends App {
 			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
-			val operator_l = operator_ll.flatten
-			println("operators:")
-			operator_l.foreach(op => {
+			val instruction_l = instruction_ll.flatten
+			println("instructions:")
+			instruction_l.foreach(op => {
 				println(op)
 			})
 

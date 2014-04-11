@@ -95,7 +95,7 @@ object Test {
 				val (planInfo, action) = pair
 				val planned = plan3.bindings.bind(action)
 				val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-				val op = handler.getOperator(planInfo, planned, eb)
+				val op = handler.getInstruction(planInfo, planned, eb)
 				println("op:")
 				println(op)
 				op

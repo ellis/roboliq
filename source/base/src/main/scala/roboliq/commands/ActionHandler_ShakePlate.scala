@@ -20,6 +20,8 @@ import roboliq.entities.ShakerSpec
 import roboliq.entities.Labware
 import roboliq.entities.Site
 import roboliq.input.commands.Command
+import roboliq.plan.Instruction
+import roboliq.entities.Agent
 
 
 class ActionHandler_ShakePlate extends ActionHandler {
@@ -90,14 +92,15 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		RqSuccess(ActionPlanInfo(id, paramToJsval_l, domainOperator, problemObjectToTyp_l, Nil, planAction))
 	}
 	
-	def getOperator(
+	def getInstruction(
 		planInfo: ActionPlanInfo,
 		planned: Strips.Operator,
 		eb: EntityBase
-	): RqResult[List[Command]] = {
+	): RqResult[List[Instruction]] = {
 		val m0 = planInfo.paramToJsval_l.toMap
 
 		for {
+			agent <- eb.getEntityAs[Agent](planned.paramName_l(0))
 			device <- eb.getEntityAs[Shaker](planned.paramName_l(1))
 			program <- m0.get("program") match {
 				case Some(x@JsObject(obj)) =>
@@ -111,11 +114,11 @@ class ActionHandler_ShakePlate extends ActionHandler {
 			siteName = planned.paramName_l(5)
 			site <- eb.getEntityAs[Site](siteName)
 		} yield {
-			List(ShakerRun(
+			List(Instruction(agent, ShakerRun(
 				device,
 				program,
 				List((labware, site))
-			))
+			)))
 		}
 	}
 }

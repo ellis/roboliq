@@ -20,6 +20,8 @@
 - [x] Protocol: createProblem: get objects from eb
 - [x] PartialPlan.toDot: optionally don't display initial state, because it may be too large
 - [ ] Main: figure out what to do with operator sequence to let it be translated to evoware
+- [ ] REFACTOR: rename roboliq.input.commands.Command to Operator?
+- [ ] Operator: required field: agent 
 - [ ] Protocol: createOperatorSequence
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
@@ -47,10 +49,10 @@ The command tree is iteratively expanded as follows:
 * A method is a way to convert a task call into another command call, and there may be multiple such conversions per task.
 * A procedure gets expanded into a list of commands (recursion not allowed for now).  Procedures are generally user-defined, have parameters, and a list of commands.
 * A function gets expanded into a list of commands; it differs from the other command types insofar as it is composed of code, and can therefore make decisions about how to expand based on its parameters; It can also request more information from the user before proceeding.
-* A function may also need to use task, but in order to do so, it must request the method for that task in advance in order to avoid additional user interaction.
-* Once the leafs of the command tree are all actions or operators, the expansion process is done and no more user interaction is required.
-* The actions and operators get passed to the planner.
-* With a concrete plan, actions are turned into operators, which are passed to the translator.
+* A function may also need to use tasks, but in order to do so, it must request the methods for those tasks in advance in order to avoid additional user interaction.
+* Once the leafs of the command tree are all actions or instructions, the expansion process is done and no more user interaction is required.
+* The actions and instructions get passed to the planner.
+* With a concrete plan, actions are turned into instructions, which are passed to the translator.
 
 More:
 
