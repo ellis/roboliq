@@ -19,9 +19,10 @@ along with reactive-sim.  If not, see <http://www.gnu.org/licenses/>
 
 package ch.ethz.reactivesim
 
+import scala.language.higherKinds
 import scala.language.implicitConversions
-
 import scalaz.Monad
+import scala.annotation.tailrec
 
 
 sealed trait RsResult[+A] {
@@ -90,6 +91,52 @@ object RsResult {
 		tuple match {
 			case (RsSuccess(a, wa), RsSuccess(b, wb)) => RsSuccess((a, b), wa ++ wb)
 			case (a, b) => RsError(a.getErrors ++ b.getErrors, a.getWarnings ++ b.getWarnings)
+		}
+	}
+	
+	def from[A](opt: Option[A], error: => String): RsResult[A] = opt match {
+		case Some(x) => RsSuccess(x)
+		case None => RsError(error)
+	}
+	
+	def fromOrElse[A](opt: Option[A], default: => A): RsResult[A] = opt match {
+		case Some(x) => RsSuccess(x)
+		case None => RsSuccess(default)
+	}
+	
+	def fromWithWarning[A](opt: Option[A], default: => A, warning: => String): RsResult[A] = opt match {
+		case Some(x) => RsSuccess(x)
+		case None => RsSuccess(default, List(warning))
+	}
+	
+	/**
+	 * Drop any errors
+	 */
+	def sequenceDrop[A, L[_], C <: L[RsResult[A]]](
+		l: C
+	)(implicit
+		c2i: C => Iterable[RsResult[A]],
+		cbf: collection.generic.CanBuildFrom[C,A,L[A]]
+	): L[A] = {
+		val builder = cbf()
+		for (x <- c2i(l)) {
+			x match {
+				case RsSuccess(a, _) => builder += a
+				case _ =>
+			} 
+		}
+		builder.result()
+	}
+
+def fn[A, L[_], C <: L[RsResult[A]]]( l: C)(implicit c2i: C => Iterable[RsResult[A]], cbf: collection.generic.CanBuildFrom[C,A,L[A]]): L[A] = { println(c2i(l)); val builder = cbf(); builder.result() }
+def fn[A, C[_]](l: C[RsResult[A]])(implicit c2i: C[RsResult[A]] => Iterable[RsResult[A]], cbf: collection.generic.CanBuildFrom[C[RsResult[A]],A,C[A]]): C[A] = { println(c2i(l)); val builder = cbf(); builder.result() }
+
+	def sequenceDrop0[A](l: List[RsResult[A]]): List[A] = {
+		l.foldRight(List[A]()) { (x, acc) =>
+			x match {
+				case RsSuccess(a, _) => a :: acc
+				case _ => acc
+			} 
 		}
 	}
 }

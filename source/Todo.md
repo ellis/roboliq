@@ -21,8 +21,13 @@
 - [x] PartialPlan.toDot: optionally don't display initial state, because it may be too large
 - [x] Main: figure out what to do with operator sequence to let it be translated to evoware
 - [x] Shaker: EvowareScriptBuilder:430, properly format shaker command
-- [ ] RsResult: function for conveniently folding over a list, but abort if RsError
-- [ ] RsResult: function to get value from an Option if there is one, or return a default vaule and a warning if there's None
+- [x] RsResult: function to get value from an Option if there is one, or return a default value and a warning if there's None
+- [ ] RsResult: create a sequence function that works on List[RsResult[A]] or Seq[RsResult[A]] or other collections
+- [ ] RsResult: sequence: drop RsErrors, accumulate warnings
+- [ ] RsResult: sequence: return first Error if any errors, accumulate warnings
+- [ ] RsResult: sequence: return all Errors if any errors, accumulate warnings
+- [ ] RsResult: removeWarnings
+- [ ] RsResult: function for conveniently folding over a list, but abort if RsError; lookup `sequence`
 - [ ] ActionHandler.getInstruction should be passed the world state
 - [ ] Main: update world state while creating instructions from actions
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
