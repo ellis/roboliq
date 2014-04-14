@@ -427,12 +427,24 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				duration <- cmd.spec.duration.asRs(s"Shaker program must specify `duration`")
 				rpm <- cmd.spec.rpm.asRs(s"Shaker program must specify `rpm`")
 			} yield {
-				val s0 = "*27${shakerNo}|${60000000/rpm}|${mode1}|${steps1}|${mode2}|${steps2}|${rpm*min}|${255*power/100}*27"
+				// FIXME: need to find shaker index, in case there are multiple shakers
+				// FIXME: if there are multiple shakers, but they don't have unique indexes specified in a config file, then issue an error here
+				val shakerNo = 1
+				// FIXME: Let the user specify mode1, steps1, mode2, steps2, power
+				val mode1 = 2
+				val steps1 = 0
+				val mode2 = 1
+				val steps2 = 0
+				val cycles: Int = rpm * duration / 60
+				val power = 50
+				val s0 = s"*27${shakerNo}|${60000000/rpm}|${mode1}|${steps1}|${mode2}|${steps2}|${cycles}|${255*power/100}*27"
+				// Replace all occurences of '0' with "*30"
 				val s1 = s0.replace("0", "*30")
-				// then split string into 32 char parts, then rebind them, separted by commas
+				// Finally, split string into 32 char parts, then rebind them, separated by commas
+				val s2 = s1.grouped(32).mkString(",")
 
 				val token_l = List(
-					L0C_Facts("HPShaker", "HPShaker_HP__ShakeForTime", "*271|8*30*30*30*30|2|*30|1|*30|1,5*30*30|255*27")
+					L0C_Facts("HPShaker", "HPShaker_HP__ShakeForTime", s2)
 				)
 				val item_l = token_l.map(token => TranslationItem(token, Nil))
 				TranslationResult(item_l, state0)
@@ -444,7 +456,10 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			} yield {
 				val token_l = List(
 					L0C_Facts("Shaker", "Shaker_Init", ""),
-					L0C_Facts("Shaker", "Shaker_Start","1"),
+					// FIXME: need to find shaker index, in case there are multiple shakers
+					// FIXME: if there are multiple shakers, but they don't have unique indexes specified in a config file, then issue an error here
+					L0C_Facts("Shaker", "Shaker_Start", "1"),
+					// FIXME: need to keep track of timers in use so that we don't take a timer that's being used
 					L0C_StartTimer(1),
 					L0C_WaitTimer(1, duration),
 					L0C_Facts("Shaker", "Shaker_Stop","")

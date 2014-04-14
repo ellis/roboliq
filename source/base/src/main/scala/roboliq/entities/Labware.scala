@@ -75,6 +75,7 @@ case class ShakerSpec(
 	duration: Option[Int] = None,
 	rpm: Option[Int] = None,
 	amplitude: Option[Int] = None
+	// FIXME: For one of our shakers, we need to let the user specify mode1, steps1, mode2, steps2; these extra parameters should go in an extra map in the ShakerSpec 
 ) extends Entity {
 	def typeNames = List("shakerSpec")
 }

@@ -1242,14 +1242,13 @@ class Protocol {
 			carrierE.sName match {
 				case "MP 2Pos H+P Shake" =>
 					val deviceIdent = agentIdent+"_shaker"
-					
-					// REFACTOR: duplicates addShaker() because only one of the sites can be used for shaking
+					// REFACTOR: duplicates addShaker(), because for this device, only the second site can actually be used for shaking
 					val device = new Shaker(gid, Some(carrierE.sName))
 					// Add device
 					eb.addDevice(agent, device, deviceIdent)
 					identToAgentObject(deviceIdent) = carrierE
 					// Add device sites
-					// HACK: only use last site for shaking, this is truely a bad hack!  Things like this should be performed via configuration overrides.
+					// HACK: only use last site for shaking, this is truly a bad hack!  Things like this should be performed via configuration overrides.
 					for (site_i <- List(carrierE.nSites - 1)) {
 						val siteId = (carrierE.id, site_i)
 						val site: Site = siteIdToSite_m(siteId)
