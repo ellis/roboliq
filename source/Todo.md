@@ -1,5 +1,17 @@
 # TODOs for roboliq
 
+## Server
+
+Two kinds of servers to begin with:
+
+* controller: controls Evoware on the computer with Evoware installed
+* master: controls the controllers
+
+For now, I'll focus on the evoware controller.
+The controller functions can be run either from the command line or via a web interface.
+
+See http://jawinproject.sourceforge.net/jawin.html#callingScript for java interface to COM.
+
 ## AI planning flow
 
 - [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
