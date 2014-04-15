@@ -22,6 +22,13 @@ Protocol processing steps:
 
 ## AI planning flow
 
+Test RsResult functions with:
+import scala.language.higherKinds
+import scala.collection.generic.CanBuildFrom
+import ch.ethz.reactivesim._
+val l1 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsSuccess(3))
+val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
+
 - [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
 - [x] extract planned variables from partial plan and use them to expand CallTree actions into operators
 - [x] translate planned actions to tokens for Evoware translation
@@ -42,10 +49,11 @@ Protocol processing steps:
 - [x] Main: figure out what to do with operator sequence to let it be translated to evoware
 - [x] Shaker: EvowareScriptBuilder:430, properly format shaker command
 - [x] RsResult: function to get value from an Option if there is one, or return a default value and a warning if there's None
-- [ ] RsResult: create a sequence function that works on List[RsResult[A]] or Seq[RsResult[A]] or other collections
-- [ ] RsResult: sequence: drop RsErrors, accumulate warnings
-- [ ] RsResult: sequence: return first Error if any errors, accumulate warnings
-- [ ] RsResult: sequence: return all Errors if any errors, accumulate warnings
+- [x] RsResult: create a sequence function that works on List[RsResult[A]] or Seq[RsResult[A]] or other collections
+- [x] RsResult.flatten: drop RsErrors
+- [?] RsResult: sequenceDrop: drop RsErrors, accumulate warnings
+- [ ] RsResult: sequenceFirst: return first Error if any errors, accumulate warnings
+- [ ] RsResult: sequenceAll: return all Errors if any errors, accumulate warnings
 - [ ] RsResult: removeWarnings
 - [ ] RsResult: function for conveniently folding over a list, but abort if RsError; lookup `sequence`
 - [ ] ActionHandler.getInstruction should be passed the world state

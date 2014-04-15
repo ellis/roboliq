@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Ellis Whitehead
+Copyright 2013,2014 Ellis Whitehead
 
 This file is part of reactive-sim.
 
@@ -19,10 +19,12 @@ along with reactive-sim.  If not, see <http://www.gnu.org/licenses/>
 
 package ch.ethz.reactivesim
 
+import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 import scala.language.implicitConversions
 import scalaz.Monad
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 
 sealed trait RsResult[+A] {
@@ -110,14 +112,14 @@ object RsResult {
 	}
 	
 	/**
-	 * Drop any errors
+	 * Flatten a sequence of RsResults by just keeping the success values
 	 */
-	def sequenceDrop[A, L[_], C <: L[RsResult[A]]](
-		l: C
+	def flatten[A, C[_]](
+		l: C[RsResult[A]]
 	)(implicit
-		c2i: C => Iterable[RsResult[A]],
-		cbf: collection.generic.CanBuildFrom[C,A,L[A]]
-	): L[A] = {
+		c2i: C[RsResult[A]] => Iterable[RsResult[A]],
+		cbf: CanBuildFrom[C[RsResult[A]], A, C[A]]
+	): C[A] = {
 		val builder = cbf()
 		for (x <- c2i(l)) {
 			x match {
@@ -127,17 +129,27 @@ object RsResult {
 		}
 		builder.result()
 	}
-
-def fn[A, L[_], C <: L[RsResult[A]]]( l: C)(implicit c2i: C => Iterable[RsResult[A]], cbf: collection.generic.CanBuildFrom[C,A,L[A]]): L[A] = { println(c2i(l)); val builder = cbf(); builder.result() }
-def fn[A, C[_]](l: C[RsResult[A]])(implicit c2i: C[RsResult[A]] => Iterable[RsResult[A]], cbf: collection.generic.CanBuildFrom[C[RsResult[A]],A,C[A]]): C[A] = { println(c2i(l)); val builder = cbf(); builder.result() }
-
-	def sequenceDrop0[A](l: List[RsResult[A]]): List[A] = {
-		l.foldRight(List[A]()) { (x, acc) =>
+	
+	/**
+	 * Transform a list of results to a result of success, dropping any errors but accumulating warnings
+	 */
+	def sequenceDrop[A, C[_]](
+		l: C[RsResult[A]]
+	)(implicit
+		c2i: C[RsResult[A]] => Iterable[RsResult[A]],
+		cbf: CanBuildFrom[C[RsResult[A]], A, C[A]]
+	): RsResult[C[A]] = {
+		val w_l = new ArrayBuffer[String]
+		val builder = cbf()
+		for (x <- c2i(l)) {
 			x match {
-				case RsSuccess(a, _) => a :: acc
-				case _ => acc
+				case RsSuccess(a, w) =>
+					w_l ++= w
+					builder += a
+				case _ =>
 			} 
 		}
+		RsSuccess(builder.result(), w_l.toList)
 	}
 }
 
