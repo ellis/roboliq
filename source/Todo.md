@@ -1,6 +1,6 @@
 # TODOs for roboliq
 
-## Server
+## Executables/Servers
 
 Two kinds of servers to begin with:
 
@@ -11,6 +11,14 @@ For now, I'll focus on the evoware controller.
 The controller functions can be run either from the command line or via a web interface.
 
 See http://jawinproject.sourceforge.net/jawin.html#callingScript for java interface to COM.
+
+Protocol processing steps:
+1) Step 1
+  * load files: configuration, protocol, customization
+  * find extra variables that user will need to specify (labware models, task methods, explicit protocol variables, additional action user variables)
+  * display list of variables to user (preferably with possible values or ranges)
+  * let the user assign values to the variables
+  CONTINUE HERE
 
 ## AI planning flow
 
