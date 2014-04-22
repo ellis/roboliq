@@ -4,10 +4,15 @@
 
 Two kinds of servers to begin with:
 
-* controller: controls Evoware on the computer with Evoware installed
-* master: controls the controllers
+* relay: interacts with an agent, e.g. the technician or Evoware on the computer with Evoware installed
+* manager: controls the relays
 
-For now, I'll focus on the evoware controller.
+To begin with, I'll create a technician relay and the manager (since these don't require me to be on the Evoware computer).
+The relay and manager interact by sending each other messages via GETs.
+Later there should also be the option for the relay to receive messages from the manager
+via an open socket or something, so that the manager doesn't need to contact the relay server;
+this way the relay doesn't need to be server and can be communicated with through a firewall.
+
 The controller functions can be run either from the command line or via a web interface.
 
 See http://jawinproject.sourceforge.net/jawin.html#callingScript for java interface to COM.
