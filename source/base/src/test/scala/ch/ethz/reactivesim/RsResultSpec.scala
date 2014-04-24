@@ -12,5 +12,13 @@ class RsResultSpec extends FunSpec {
 			assert(RsResult.sequenceDrop(List[RsResult[Int]](RsError("a"), RsError("b"), RsError("c"))) === RsSuccess(List(), List()))
 			assert(RsResult.sequenceDrop(List[RsResult[Int]](RsSuccess(1), RsError(List("woops"), List("warning 2a", "warning 2b")), RsSuccess(3, List("warning 3a", "warning 3b")))) === RsSuccess(List(1, 3), List("warning 3a", "warning 3b")))
 		}
+		it("RsResult.sequenceFirst() should return first error or list of successes with accumulated warnings") {
+			assert(
+				RsResult.sequenceFirst(List[RsResult[Int]](RsError("a"), RsError("b"), RsError("c"))) ===
+				RsError(List("a"), List())
+			)
+			assert(
+				RsResult.sequenceFirst(List[RsResult[Int]](RsSuccess(1), RsError(List("woops"), List("warning 2a", "warning 2b")), RsSuccess(3, List("warning 3a", "warning 3b")))) === RsError(List("woops"), List("warning 2a", "warning 2b")))
+		}
 	}
 }

@@ -147,9 +147,73 @@ object RsResult {
 					w_l ++= w
 					builder += a
 				case _ =>
-			} 
+			}
 		}
 		RsSuccess(builder.result(), w_l.toList)
+	}
+	
+	/**
+	 * Transform a list of results to a result of the successful values while accumulating success warnings, but return first error if any
+	 */
+	def sequenceFirst[A, C[_]](
+		l: C[RsResult[A]]
+	)(implicit
+		c2i: C[RsResult[A]] => Iterable[RsResult[A]],
+		cbf: CanBuildFrom[C[RsResult[A]], A, C[A]]
+	): RsResult[C[A]] = {
+		val w_l = new ArrayBuffer[String]
+		val builder = cbf()
+		for (x <- c2i(l)) {
+			x match {
+				case RsSuccess(a, w) =>
+					w_l ++= w
+					builder += a
+				case RsError(e, w) =>
+					return RsError(e, w)
+			}
+		}
+		RsSuccess(builder.result(), w_l.toList)
+	}
+	
+	/**
+	 * Transform a list of results to a result of the successful values while accumulating success warnings,
+	 * but if there are any errors, return them all instead.
+	 */
+	def sequenceAll[A, C[_]](
+		l: C[RsResult[A]]
+	)(implicit
+		c2i: C[RsResult[A]] => Iterable[RsResult[A]],
+		cbf: CanBuildFrom[C[RsResult[A]], A, C[A]]
+	): RsResult[C[A]] = {
+		val e_l = new ArrayBuffer[String]
+		val w_l = new ArrayBuffer[String]
+		val builder = cbf()
+		for (x <- c2i(l)) {
+			x match {
+				case RsSuccess(a, w) =>
+					w_l ++= w
+					builder += a
+				case RsError(e, w) =>
+					return sequenceToError(l)
+			}
+		}
+		RsSuccess(builder.result(), w_l.toList)
+	}
+	
+	private def sequenceToError[A, C[_]](
+		l: Iterable[RsResult[A]]
+	): RsResult[C[A]] = {
+		val e_l = new ArrayBuffer[String]
+		val w_l = new ArrayBuffer[String]
+		for (x <- l) {
+			x match {
+				case RsError(e, w) =>
+					e_l ++= e
+					w_l ++= w
+				case _ =>
+			}
+		}
+		RsError(e_l.toList, w_l.toList)
 	}
 }
 
