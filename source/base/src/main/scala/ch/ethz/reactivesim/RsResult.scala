@@ -131,7 +131,7 @@ object RsResult {
 	}
 	
 	/**
-	 * Transform a list of results to a result of success, dropping any errors but accumulating warnings
+	 * Transform a list of results to a result of the successful values, dropping any errors but accumulating warnings
 	 */
 	def sequenceDrop[A, C[_]](
 		l: C[RsResult[A]]

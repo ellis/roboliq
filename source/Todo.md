@@ -56,7 +56,7 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [x] RsResult: function to get value from an Option if there is one, or return a default value and a warning if there's None
 - [x] RsResult: create a sequence function that works on List[RsResult[A]] or Seq[RsResult[A]] or other collections
 - [x] RsResult.flatten: drop RsErrors
-- [?] RsResult: sequenceDrop: drop RsErrors, accumulate warnings
+- [x] RsResult: sequenceDrop: drop RsErrors, accumulate warnings
 - [ ] RsResult: sequenceFirst: return first Error if any errors, accumulate warnings
 - [ ] RsResult: sequenceAll: return all Errors if any errors, accumulate warnings
 - [ ] RsResult: removeWarnings
