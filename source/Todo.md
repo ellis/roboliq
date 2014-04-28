@@ -57,9 +57,9 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [x] RsResult: create a sequence function that works on List[RsResult[A]] or Seq[RsResult[A]] or other collections
 - [x] RsResult.flatten: drop RsErrors
 - [x] RsResult: sequenceDrop: drop RsErrors, accumulate warnings
-- [?] RsResult: sequenceFirst: return first Error if any errors, accumulate warnings
-- [?] RsResult: sequenceAll: return all Errors if any errors, accumulate warnings
-- [ ] RsResult: write more tests for sequenceFirst/All
+- [x] RsResult: sequenceFirst: return first Error if any errors, accumulate warnings
+- [x] RsResult: sequenceAll: return all Errors if any errors, accumulate warnings
+- [x] RsResult: write more tests for sequenceFirst/All
 - [ ] RsResult: removeWarnings
 - [ ] RsResult: function for conveniently folding over a list, but abort if RsError; lookup `sequence`
 - [ ] ActionHandler.getInstruction should be passed the world state
