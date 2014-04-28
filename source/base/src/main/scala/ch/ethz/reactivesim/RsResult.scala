@@ -215,6 +215,76 @@ object RsResult {
 		}
 		RsError(e_l.toList, w_l.toList)
 	}
+
+	/**
+	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
+	 */
+	def mapFirst[A, B, C[_]](
+		l: C[A]
+	)(
+		fn: A => RsResult[B]
+	)(implicit
+		c2i: C[A] => Iterable[A],
+		cbf: CanBuildFrom[C[A], B, C[B]]
+	): RsResult[C[B]] = {
+		val w_l = new ArrayBuffer[String]
+		val builder = cbf()
+		for (x <- c2i(l)) {
+			fn(x) match {
+				case RsSuccess(a, w) =>
+					w_l ++= w
+					builder += a
+				case RsError(e, w) =>
+					return RsError(e, w)
+			}
+		}
+		RsSuccess(builder.result(), w_l.toList)
+	}
+	
+	/*
+	def mapAll[A, B, C[_]](
+		l: C[A]
+	)(
+		fn: A => RsResult[B]
+	)(implicit
+		ca2i: C[A] => Iterable[A],
+		cb2i: C[RsResult[B]] => Iterable[RsResult[B]],
+		cbf: CanBuildFrom[C[RsResult[B]], B, C[B]]
+	): RsResult[C[B]] = {
+		val l2 = l.map(fn)
+		sequenceAll(l2)(cb2i, cbf)
+	}
+	*/
+
+	/*
+	def foldFirst[A, B, C[_]](
+		l: C[A],
+		zero: B
+	)(
+		fn: (B, A) => RsResult[B]
+	)(implicit
+		c2i: C[A] => Iterable[A],
+		cbf: CanBuildFrom[C[A], B, C[B]]
+	): RsResult[C[B]] = {
+		val w_l = new ArrayBuffer[String]
+		val builder = cbf()
+		var acc = zero
+		for (x <- c2i(l)) {
+			fn(acc, x) match {
+				case RsSuccess(a, w) =>
+					w_l ++= w
+					builder += a
+				case RsError(e, w) =>
+					return RsError(e, w)
+			}
+		}
+		RsSuccess(builder.result(), w_l.toList)
+	}
+	
+	def foldFirst[B](zero: B)(fn: (B, A) => RsResult[B]): RsResult[B] = {
+		var res = zero
+		
+	}*/
 }
 
 sealed case class RsSuccess[+A](res: A, warning_r: List[String] = Nil) extends RsResult[A] {

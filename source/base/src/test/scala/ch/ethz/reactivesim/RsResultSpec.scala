@@ -30,8 +30,11 @@ class RsResultSpec extends FunSpec {
 			assert(RsResult.flatten(eee) === List())
 		}
 		it("RsResult.sequenceDrop() should drop errors but keep warnings from successes") {
-			assert(RsResult.sequenceDrop(List[RsResult[Int]](RsError("a"), RsError("b"), RsError("c"))) === RsSuccess(List(), List()))
-			assert(RsResult.sequenceDrop(List[RsResult[Int]](RsSuccess(1), RsError(List("woops"), List("warning 2a", "warning 2b")), RsSuccess(3, List("warning 3a", "warning 3b")))) === RsSuccess(List(1, 3), List("warning 3a", "warning 3b")))
+			assert(RsResult.sequenceDrop(sss) === RsSuccess(List(1, 2, 3), List()))
+			assert(RsResult.sequenceDrop(sww) === RsSuccess(List(1, 2, 3), List("warning 2", "warning 3a", "warning 3b")))
+			assert(RsResult.sequenceDrop(swe) === RsSuccess(List(1, 2), List("warning 2")))
+			assert(RsResult.sequenceDrop(ews) === RsSuccess(List(2, 3), List("warning 2")))
+			assert(RsResult.sequenceDrop(eee) === RsSuccess(List(), List()))
 		}
 		it("RsResult.sequenceFirst() should return first error or list of successes with accumulated warnings") {
 			assert(RsResult.sequenceFirst(sss) === RsSuccess(List(1, 2, 3), List()))
@@ -46,6 +49,19 @@ class RsResultSpec extends FunSpec {
 			assert(RsResult.sequenceAll(swe) === e3)
 			assert(RsResult.sequenceAll(ews) === e1)
 			assert(RsResult.sequenceAll(eee) === RsError(List("error 1", "error 2", "error 3"), List("warning 2", "warning 3a", "warning 3b")))
+		}
+		
+		it("RsResult.mapFirst() should map until the first error, returing a list of successes with accumulated warnings") {
+			val l = List(1, 2, 3)
+			def fn1(n: Int): RsResult[String] = RsSuccess(n.toString)
+			def fn2(n: Int): RsResult[String] = RsSuccess(n.toString, List(s"warning $n"))
+			def fn3(n: Int): RsResult[String] = RsError(s"error $n")
+			def fn4(n: Int): RsResult[String] = if (n == 3) RsError(s"error $n") else RsSuccess(n.toString) 
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn1) === RsSuccess(List("1", "2", "3"), List()))
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn2) === RsSuccess(List("1", "2", "3"), List("warning 1", "warning 2", "warning 3")))
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn3) === RsError(List("error 1"), List()))
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn3) === RsError(List("error 1"), List()))
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn4) === RsError(List("error 3"), List()))
 		}
 	}
 }
