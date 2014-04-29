@@ -67,7 +67,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 			node2 <- g.find(site2).asRs(s"Site `$site2Name` is not in transport graph")
 			path <- node1.shortestPathTo(node2).asRs(s"No path in transport graph from `$site1Name` to `$site2Name`")
 			_ = println("path: "+path.edges)
-			op_l <- RqResult.toResultOfList((path.nodes.toList zip path.edges.toList).map(pair => {
+			op_l <- RqResult.mapAll(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
 				val site1 = node1.value
 				val site2 = if (site1 == edge._1) edge._2.value else edge._1.value
@@ -82,7 +82,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 					case x =>
 						RqError("unrecognized transport edge label: "+edge.label)
 				}
-			}))
+			}
 		} yield op_l
 	}
 }
