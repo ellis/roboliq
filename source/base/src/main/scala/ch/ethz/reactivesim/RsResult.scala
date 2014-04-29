@@ -272,22 +272,29 @@ object RsResult {
 		else
 			RsError(e_l.toList, ew_l.toList)
 	}
-	
-	/*
-	def mapAll[A, B, C[_]](
+
+	def fold[A, B, C[_]](
+		zero: B,
 		l: C[A]
 	)(
-		fn: A => RsResult[B]
+		fn: (B, A) => RsResult[B]
 	)(implicit
-		ca2i: C[A] => Iterable[A],
-		cb2i: C[RsResult[B]] => Iterable[RsResult[B]],
-		cbf: CanBuildFrom[C[RsResult[B]], B, C[B]]
-	): RsResult[C[B]] = {
-		val l2 = l.map(fn)
-		sequenceAll(l2)(cb2i, cbf)
+		c2i: C[A] => Iterable[A]
+	): RsResult[B] = {
+		var b = zero
+		val w_l = new ArrayBuffer[String]
+		for (a <- c2i(l)) {
+			fn(b, a) match {
+				case RsSuccess(b2, w) =>
+					w_l ++= w
+					b = b2
+				case err =>
+					return err
+			}
+		}
+		RsSuccess(b, w_l.toList)
 	}
-	*/
-
+	
 	/*
 	def foldFirst[A, B, C[_]](
 		l: C[A],

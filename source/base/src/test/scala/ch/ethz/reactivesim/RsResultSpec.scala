@@ -48,7 +48,7 @@ class RsResultSpec extends FunSpec {
 		}
 	}
 
-	describe("RsResult maps") {
+	describe("RsResult map") {
 		val l = List(1, 2, 3)
 		def fn1(n: Int): RsResult[String] = RsSuccess(n.toString)
 		def fn2(n: Int): RsResult[String] = RsSuccess(n.toString, List(s"warning $n"))
@@ -67,6 +67,21 @@ class RsResultSpec extends FunSpec {
 			assert(RsResult.mapAll(List(1, 2, 3))(fn2) === RsSuccess(List("1", "2", "3"), List("warning 1", "warning 2", "warning 3")))
 			assert(RsResult.mapAll(List(1, 2, 3))(fn3) === RsError(List("error 1", "error 2", "error 3"), List("warning 1", "warning 2", "warning 3")))
 			assert(RsResult.mapAll(List(1, 2, 3))(fn4) === RsError(List("error 3"), List("warning 3")))
+		}
+	}
+
+	describe("RsResult fold") {
+		val l = List(1, 2, 3)
+		def fn1(sum: Int, n: Int): RsResult[Int] = RsSuccess(sum + n)
+		def fn2(sum: Int, n: Int): RsResult[Int] = RsSuccess(sum + n, List(s"warning $n"))
+		def fn3(sum: Int, n: Int): RsResult[Int] = RsError(List(s"error $n"), List(s"warning $n"))
+		def fn4(sum: Int, n: Int): RsResult[Int] = if (n == 3) RsError(List(s"error $n"), List(s"warning $n")) else RsSuccess(sum + n) 
+
+		it("RsResult.fold() should fold and return a successful with accumulated warnings, or else the first error") {
+			assert(RsResult.fold(0, List(1, 2, 3))(fn1) === RsSuccess(6, List()))
+			assert(RsResult.fold(0, List(1, 2, 3))(fn2) === RsSuccess(6, List("warning 1", "warning 2", "warning 3")))
+			assert(RsResult.fold(0, List(1, 2, 3))(fn3) === RsError(List("error 1"), List("warning 1")))
+			assert(RsResult.fold(0, List(1, 2, 3))(fn4) === RsError(List("error 3"), List("warning 3")))
 		}
 	}
 }
