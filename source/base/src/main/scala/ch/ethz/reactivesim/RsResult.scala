@@ -185,7 +185,6 @@ object RsResult {
 		c2i: C[RsResult[A]] => Iterable[RsResult[A]],
 		cbf: CanBuildFrom[C[RsResult[A]], A, C[A]]
 	): RsResult[C[A]] = {
-		val e_l = new ArrayBuffer[String]
 		val w_l = new ArrayBuffer[String]
 		val builder = cbf()
 		for (x <- c2i(l)) {
@@ -239,6 +238,39 @@ object RsResult {
 			}
 		}
 		RsSuccess(builder.result(), w_l.toList)
+	}
+	
+	/**
+	 * Transform a list of results to a result of the successful values while accumulating success warnings,
+	 * but if there are any errors, return them all instead.
+	 */
+	def mapAll[A, B, C[_]](
+		l: C[A]
+	)(
+		fn: A => RsResult[B]
+	)(implicit
+		c2i: C[A] => Iterable[A],
+		cbf: CanBuildFrom[C[A], B, C[B]]
+	): RsResult[C[B]] = {
+		val e_l = new ArrayBuffer[String]
+		val ew_l = new ArrayBuffer[String]
+		val w_l = new ArrayBuffer[String]
+		val builder = cbf()
+		for (a <- c2i(l)) {
+			fn(a) match {
+				case RsSuccess(b, w) =>
+					w_l ++= w
+					builder += b
+				case RsError(e, w) =>
+					e_l ++= e
+					ew_l ++= w
+			}
+		}
+		
+		if (e_l.isEmpty && ew_l.isEmpty)
+			RsSuccess(builder.result(), w_l.toList)
+		else
+			RsError(e_l.toList, ew_l.toList)
 	}
 	
 	/*

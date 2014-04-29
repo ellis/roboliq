@@ -3,9 +3,7 @@ package ch.ethz.reactivesim
 import org.scalatest.FunSpec
 
 class RsResultSpec extends FunSpec {
-	describe("RsResult") {
-		def w(n: Int): RsResult[Int] = RsSuccess(n, List(s"warning $n"))
-		
+	describe("RsResult flatten/sequence") {
 		val s1 = RsSuccess(1)
 		val s2 = RsSuccess(2)
 		val s3 = RsSuccess(3)
@@ -19,9 +17,7 @@ class RsResultSpec extends FunSpec {
 		val swe = List[RsResult[Int]](s1, w2, e3)
 		val ews = List[RsResult[Int]](e1, w2, s3)
 		val eee = List[RsResult[Int]](e1, e2, e3)
-		// sss
-		// w1w2w3
-		// eee
+		
 		it("RsResult.flatten() should drop errors") {
 			assert(RsResult.flatten(sss) === List(1, 2, 3))
 			assert(RsResult.flatten(sww) === List(1, 2, 3))
@@ -50,18 +46,27 @@ class RsResultSpec extends FunSpec {
 			assert(RsResult.sequenceAll(ews) === e1)
 			assert(RsResult.sequenceAll(eee) === RsError(List("error 1", "error 2", "error 3"), List("warning 2", "warning 3a", "warning 3b")))
 		}
-		
-		it("RsResult.mapFirst() should map until the first error, returing a list of successes with accumulated warnings") {
-			val l = List(1, 2, 3)
-			def fn1(n: Int): RsResult[String] = RsSuccess(n.toString)
-			def fn2(n: Int): RsResult[String] = RsSuccess(n.toString, List(s"warning $n"))
-			def fn3(n: Int): RsResult[String] = RsError(s"error $n")
-			def fn4(n: Int): RsResult[String] = if (n == 3) RsError(s"error $n") else RsSuccess(n.toString) 
+	}
+
+	describe("RsResult maps") {
+		val l = List(1, 2, 3)
+		def fn1(n: Int): RsResult[String] = RsSuccess(n.toString)
+		def fn2(n: Int): RsResult[String] = RsSuccess(n.toString, List(s"warning $n"))
+		def fn3(n: Int): RsResult[String] = RsError(List(s"error $n"), List(s"warning $n"))
+		def fn4(n: Int): RsResult[String] = if (n == 3) RsError(List(s"error $n"), List(s"warning $n")) else RsSuccess(n.toString) 
+
+		it("RsResult.mapFirst() should map until the first error, returning a list of successes with accumulated warnings") {
 			assert(RsResult.mapFirst(List(1, 2, 3))(fn1) === RsSuccess(List("1", "2", "3"), List()))
 			assert(RsResult.mapFirst(List(1, 2, 3))(fn2) === RsSuccess(List("1", "2", "3"), List("warning 1", "warning 2", "warning 3")))
-			assert(RsResult.mapFirst(List(1, 2, 3))(fn3) === RsError(List("error 1"), List()))
-			assert(RsResult.mapFirst(List(1, 2, 3))(fn3) === RsError(List("error 1"), List()))
-			assert(RsResult.mapFirst(List(1, 2, 3))(fn4) === RsError(List("error 3"), List()))
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn3) === RsError(List("error 1"), List("warning 1")))
+			assert(RsResult.mapFirst(List(1, 2, 3))(fn4) === RsError(List("error 3"), List("warning 3")))
+		}
+		
+		it("RsResult.mapAll() should return a list of success values with accumulated warnings, but if there were errors it should return the accumulated errors") {
+			assert(RsResult.mapAll(List(1, 2, 3))(fn1) === RsSuccess(List("1", "2", "3"), List()))
+			assert(RsResult.mapAll(List(1, 2, 3))(fn2) === RsSuccess(List("1", "2", "3"), List("warning 1", "warning 2", "warning 3")))
+			assert(RsResult.mapAll(List(1, 2, 3))(fn3) === RsError(List("error 1", "error 2", "error 3"), List("warning 1", "warning 2", "warning 3")))
+			assert(RsResult.mapAll(List(1, 2, 3))(fn4) === RsError(List("error 3"), List("warning 3")))
 		}
 	}
 }
