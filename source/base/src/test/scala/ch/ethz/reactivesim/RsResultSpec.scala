@@ -3,6 +3,16 @@ package ch.ethz.reactivesim
 import org.scalatest.FunSpec
 
 class RsResultSpec extends FunSpec {
+	describe("RsResult class") {
+		it("RsResult.dropWarnings should drop warnings from successes") {
+			val s = RsSuccess(1)
+			val w = RsSuccess(1, List("warning 1"))
+			val e = RsError[Int](List("error 1"), List("warning 1"))
+			assert(s.dropWarnings === s)
+			assert(w.dropWarnings === s)
+			assert(e.dropWarnings === e)
+		}
+	}
 	describe("RsResult flatten/sequence") {
 		val s1 = RsSuccess(1)
 		val s2 = RsSuccess(2)

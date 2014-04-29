@@ -34,6 +34,8 @@ sealed trait RsResult[+A] {
 	def foreach(f: A => Unit): Unit
 	//def append[B](that: RsResult[B]): RsResult[B] = this.flatMap(_ => that)
 	def getWarnings: List[String] = warning_r.reverse
+	/** Drop the warnings from a success (but not from an error) */
+	def dropWarnings: RsResult[A]
 	def getErrors: List[String]
 	
 	def isError: Boolean
@@ -273,6 +275,9 @@ object RsResult {
 			RsError(e_l.toList, ew_l.toList)
 	}
 
+	/**
+	 * Fold over l and return either the successful result with accumulated warnings, or else the first error
+	 */
 	def fold[A, B, C[_]](
 		zero: B,
 		l: C[A]
@@ -294,36 +299,6 @@ object RsResult {
 		}
 		RsSuccess(b, w_l.toList)
 	}
-	
-	/*
-	def foldFirst[A, B, C[_]](
-		l: C[A],
-		zero: B
-	)(
-		fn: (B, A) => RsResult[B]
-	)(implicit
-		c2i: C[A] => Iterable[A],
-		cbf: CanBuildFrom[C[A], B, C[B]]
-	): RsResult[C[B]] = {
-		val w_l = new ArrayBuffer[String]
-		val builder = cbf()
-		var acc = zero
-		for (x <- c2i(l)) {
-			fn(acc, x) match {
-				case RsSuccess(a, w) =>
-					w_l ++= w
-					builder += a
-				case RsError(e, w) =>
-					return RsError(e, w)
-			}
-		}
-		RsSuccess(builder.result(), w_l.toList)
-	}
-	
-	def foldFirst[B](zero: B)(fn: (B, A) => RsResult[B]): RsResult[B] = {
-		var res = zero
-		
-	}*/
 }
 
 sealed case class RsSuccess[+A](res: A, warning_r: List[String] = Nil) extends RsResult[A] {
@@ -335,6 +310,8 @@ sealed case class RsSuccess[+A](res: A, warning_r: List[String] = Nil) extends R
 		}
 	} 
 	def foreach(f: A => Unit): Unit = f(res)
+
+	def dropWarnings: RsResult[A] = RsSuccess(res)
 
 	def getErrors: List[String] = Nil
 
@@ -352,6 +329,8 @@ sealed case class RsError[+A](error_l: List[String], warning_r: List[String] = N
 	def map[B](f: A => B): RsResult[B] = RsError[B](error_l, warning_r)
 	def flatMap[B](f: A => RsResult[B]): RsResult[B] = RsError[B](error_l, warning_r)
 	def foreach(f: A => Unit): Unit = ()
+
+	def dropWarnings: RsResult[A] = this
 
 	def getErrors: List[String] = error_l
 

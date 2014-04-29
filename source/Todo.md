@@ -62,8 +62,7 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [x] RsResult: write more tests for sequenceFirst/All
 - [x] RsResult: mapAll
 - [x] RsResult: fold
-- [ ] RsResult: removeWarnings
-- [ ] RsResult: function for conveniently folding over a list, but abort if RsError; lookup `sequence`
+- [x] RsResult: removeWarnings
 - [ ] ActionHandler.getInstruction should be passed the world state
 - [ ] Main: update world state while creating instructions from actions
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
