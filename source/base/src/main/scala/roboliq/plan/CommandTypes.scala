@@ -7,6 +7,7 @@ import aiplan.strips2.Unique
 import aiplan.strips2.Strips.Literal
 import aiplan.strips2.PartialPlan
 import roboliq.entities.Agent
+import roboliq.entities.WorldState
 
 
 class Call(
@@ -77,7 +78,8 @@ trait AutoActionHandler {
 	def getDomainOperator: Strips.Operator
 	def getInstruction(
 		planned: Strips.Operator,
-		eb: roboliq.entities.EntityBase
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
 	): RqResult[List[Instruction]]
 }
 
@@ -94,7 +96,8 @@ trait ActionHandler {
 	def getInstruction(
 		planInfo: ActionPlanInfo,
 		planned: Strips.Operator,
-		eb: roboliq.entities.EntityBase
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
 	): RqResult[List[Instruction]]
 }
 

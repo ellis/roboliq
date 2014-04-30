@@ -19,7 +19,7 @@ import aiplan.strips2.Unique
 import scalax.collection.Graph
 import scalax.collection.edge.LHyperEdge
 import scalax.collection.edge.LkUnDiEdge
-
+/*
 object Test {
 	def main(args: Array[String]) {
 		val eb = {
@@ -183,3 +183,4 @@ object Test {
 		))
 	}
 }
+*/

@@ -21,6 +21,8 @@ import roboliq.entities.WorldState
 import roboliq.input.commands.PlanPath
 import roboliq.entities.LiquidVolume
 import roboliq.entities.AliquotFlat
+import roboliq.plan.ActionPlanInfo
+import roboliq.plan.CommandSet
 
 case class Opt(
 	configFile: File = null,
@@ -89,7 +91,7 @@ object Main extends App {
 			ordering_l <- plan3.orderings.getSequence.asRs.map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
 			// Oerators
-			instruction_ll <- RsResult.toResultOfList(ordering_l.map(i => {
+			instruction_ll <- RsResult.mapAll(ordering_l) { i =>
 				val action = plan3.action_l(i)
 				if (i - 2 < originalActionCount) {
 					val planInfo = planInfo_l(i - 2)
@@ -102,7 +104,7 @@ object Main extends App {
 					val handler = cs.nameToAutoActionHandler_m(action.name)
 					handler.getInstruction(planned, protocol.eb)
 				}
-			}))
+			}
 			instruction_l = instruction_ll.flatten
 			_ = println("instructions:")
 			_ = instruction_l.foreach(op => { println(op) })
@@ -146,6 +148,35 @@ object Main extends App {
 			warning_l.foreach(println)
 			println()
 		}
+	}
+	
+	private def getInstructions(
+		protocol: Protocol,
+		cs: CommandSet,
+		plan: aiplan.strips2.PartialPlan,
+		originalActionCount: Int,
+		planInfo_l: List[ActionPlanInfo],
+		ordering_l: List[Int]
+	): RsResult[List[Instruction]] = {
+		var state = protocol.state0
+		for {
+			instruction_ll <- RsResult.mapAll(ordering_l) { i =>
+				val action = plan.action_l(i)
+				if (i - 2 < originalActionCount) {
+					val planInfo = planInfo_l(i - 2)
+					val planned = plan.bindings.bind(action)
+					val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
+					val l = handler.getInstruction(planInfo, planned, protocol.eb, state.toImmutable)
+					CONTINUE HERE: process any world stat events in l
+				}
+				else {
+					val planned = plan.bindings.bind(action)
+					val handler = cs.nameToAutoActionHandler_m(action.name)
+					handler.getInstruction(planned, protocol.eb, state.toImmutable)
+					CONTINUE HERE: process any world stat events in l
+				}
+			}
+		} yield instruction_ll.flatten
 	}
 	
 	private def loadConfigBean(path: String): RsResult[ConfigBean] = {

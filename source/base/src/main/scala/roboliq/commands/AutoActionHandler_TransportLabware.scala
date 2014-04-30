@@ -25,6 +25,7 @@ import roboliq.entities.LabwareModel
 import roboliq.input.commands.TransporterRun
 import roboliq.plan.Instruction
 import roboliq.entities.Agent
+import roboliq.entities.WorldState
 
 
 class AutoActionHandler_TransportLabware extends AutoActionHandler {
@@ -53,7 +54,8 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 	
 	def getInstruction(
 		planned: Strips.Operator,
-		eb: roboliq.entities.EntityBase
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
 	): RqResult[List[Instruction]] = {
 		val g = eb.transportGraph
 		val List(labwareName, modelName, site1Name, site2Name, _) = planned.paramName_l
