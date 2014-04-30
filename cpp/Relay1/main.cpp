@@ -60,7 +60,7 @@ void testExcel() {
         {
             for(j=1; j <= 15; j++)
             {
-                VARIANT tmp = {0};
+                VARIANT tmp = {};
                 long indices[2];
 
                 indices[0] = i;  /* Index of first dimension */
@@ -129,10 +129,20 @@ public:
         }
     }
 
+    /// Logoff of evoware
+    void logoff() {
+        try {
+            dhCheck(dhCallMethod(evosys, L".Logoff()"));
+        }
+        catch (string errstr) {
+            cerr << "Fatal error details:" << endl << errstr << endl;
+        }
+    }
+
     /// Tell evoware to initialize the robot
     void initialize() {
         try {
-            dhCheck(dhCallMethod(evosys, L".Initialize"));
+            dhCheck(dhCallMethod(evosys, L".Initialize()"));
         }
         catch (string errstr) {
             cerr << "Fatal error details:" << endl << errstr << endl;
@@ -140,7 +150,7 @@ public:
     }
 
     bool isReady() {
-        int status;
+        long status;
         try {
             dhCheck(dhGetValue(L"%d", &status, evosys, L".GetStatus"));
             return !(
@@ -162,6 +172,20 @@ public:
             wc.wait(&mutex, 300);
     }
 
+    int prepareScript(const QString& filename) {
+        // TODO: remove recovery files to ignore previous failures
+        // os.system('del /F "C:\Program Files\TECAN\EVOware\database\scripts\*.rec"')
+        long scriptId = -1;
+        try {
+            QByteArray filenameData = filename.toLatin1();
+            const char* szFilename = filenameData.constData();
+            dhCheck(dhGetValue(L"%d", &scriptId, evosys, L".PrepareScript(%s)", szFilename));
+        }
+        catch (string errstr) {
+            cerr << "Fatal error details:" << endl << errstr << endl;
+        }
+        return scriptId;
+    }
 };
 
 
@@ -179,6 +203,8 @@ int main(int argc, char *argv[])
     evoware.logon();
     evoware.waitTillReady();
     //evoware.initialize();
+    evoware.prepareScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc");
+    evoware.logoff();
 
     return app.exec();
 }
