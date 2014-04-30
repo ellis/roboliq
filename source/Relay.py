@@ -67,5 +67,5 @@ def PrepareScript(scriptname): # load a script in evoware
 
 __init__()
 Logon()
-PrepareScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc")
-evosys.Initialize()
+#PrepareScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc")
+#evosys.Initialize()

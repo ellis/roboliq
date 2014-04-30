@@ -164,12 +164,16 @@ public:
         return false;
     }
 
-    void waitTillReady() {
+    void sleep(int msec) {
         QWaitCondition wc;
         QMutex mutex;
         QMutexLocker locker(&mutex);
+        wc.wait(&mutex, msec);
+    }
+
+    void waitTillReady() {
         while (!isReady())
-            wc.wait(&mutex, 300);
+            sleep(300);
     }
 
     int prepareScript(const QString& filename) {
@@ -186,6 +190,29 @@ public:
         }
         return scriptId;
     }
+
+    bool startScript(const QString& filename) {
+        bool result = true;
+        int scriptId = prepareScript(filename);
+        if (scriptId > -1) {
+            try {
+                dhCheck(dhCallMethod(evosys, L".StartScript(%d,%d,%d)", scriptId, 0, 0));
+            }
+            catch (string errstr) {
+                cerr << "Fatal error details:" << endl << errstr << endl;
+            }
+        }
+    }
+
+    void tryit() {
+        try {
+            dhCheck(dhCreateObject(L"evoapilib.script", NULL, &evodb));
+            dhCheck(dhCreateObject(L"evoapi.system", NULL, &evosys));
+        }
+        catch (string errstr) {
+            cerr << "Fatal error details:" << endl << errstr << endl;
+        }
+    }
 };
 
 
@@ -197,14 +224,38 @@ int main(int argc, char *argv[])
     viewer.setMainQmlFile(QStringLiteral("qml/Relay1/main.qml"));
     viewer.show();
 
+    {
+        CDhInitialize init; // Required for the constructor and destructor
+        CDispPtr evoscript;
+        try {
+            dhCheck(dhCreateObject(L"EVOAPILib.Script", NULL, &evoscript));
+            cout << "A";
+        }
+        catch (string errstr) {
+            cerr << "Fatal error details:" << endl << errstr << endl;
+        }
+        try {
+            dhCheck(dhCreateObject(L"EVOAPILib.ScriptClass", NULL, &evoscript));
+            cout << "A";
+        }
+        catch (string errstr) {
+            cerr << "Fatal error details:" << endl << errstr << endl;
+        }
+    }
+
+    /*
     //test();
     Evoware evoware;
     evoware.connect();
     evoware.logon();
     evoware.waitTillReady();
-    //evoware.initialize();
-    evoware.prepareScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc");
+    evoware.initialize();
+    //evoware.prepareScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc");
+    //evoware.startScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc");
+    //evoware.prepareScript("W:\\roboliq\\tania01_ph_r1.esc");
     evoware.logoff();
+    */
 
-    return app.exec();
+    //return app.exec();
+    return 0;
 }
