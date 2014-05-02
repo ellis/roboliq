@@ -1,8 +1,12 @@
 #include "qtquick2controlsapplicationviewer.h"
 
-#include <QWaitCondition>
+#include <QColor>
+#include <QFile>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QTextStream>
+#include <QVector>
+#include <QWaitCondition>
 
 #include "disphelper.h"
 #include <iostream>
@@ -142,7 +146,9 @@ public:
     /// Tell evoware to initialize the robot
     void initialize() {
         try {
-            dhCheck(dhCallMethod(evosys, L".Initialize()"));
+            //dhCheck(dhCallMethod(evosys, L".Initialize()"));
+            // NOTE: Removed dhCheck because Initialize always returns an error...
+            dhCallMethod(evosys, L".Initialize()");
         }
         catch (string errstr) {
             cerr << "Fatal error details:" << endl << errstr << endl;
@@ -215,6 +221,47 @@ public:
     }
 };
 
+void saveWorklist(const QVector<QColor>& color_l) {
+    QFile file("C:\\Ellis\\openhouse.gwl");
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    QTextStream out(&file);
+    int aspirate[4];
+    QString dispense[4];
+
+    for (int i = 0; i < 4; i++)
+        aspirate[i] = 0;
+
+    for (int i = 0; i < color_l.size(); i++) {
+        const int tip_i = i % 4;
+        const int tip_n = tip_i + 1;
+        const int well_n = i + 1;
+        const int volume = (255 - qGray(color_l[i].rgb())) * 100 / 255;
+        if (aspirate[tip_i] + volume > 900) {
+            for (int tip_i = 0; tip_i < 4; tip_i++) {
+                out << "A;T2;;;8;;" << aspirate[tip_i] << ";Water free dispense;;" << tip_n << endl;
+                out << dispense[tip_i];
+                out << "W1;" << endl;
+                aspirate[tip_i] = 0;
+                dispense[tip_i].clear();
+            }
+        }
+        aspirate[tip_i] += volume;
+        if (volume > 0) {
+            QTextStream out2(&dispense[tip_i]);
+            out2 << "D;plate;;;" << well_n << ";;" << volume << ";Water free dispense;;" << tip_n << endl;
+        }
+    }
+    for (int tip_i = 0; tip_i < 4; tip_i++) {
+        const int tip_n = tip_i + 1;
+        out << "A;T2;;;8;;" << aspirate[tip_i] << ";Water free dispense;;" << tip_n << endl;
+        out << dispense[tip_i];
+        out << "W1;" << endl;
+        aspirate[tip_i] = 0;
+        dispense[tip_i].clear();
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -224,6 +271,7 @@ int main(int argc, char *argv[])
     viewer.setMainQmlFile(QStringLiteral("qml/Relay1/main.qml"));
     viewer.show();
 
+    /*
     {
         CDhInitialize init; // Required for the constructor and destructor
         CDispPtr evoscript;
@@ -242,14 +290,31 @@ int main(int argc, char *argv[])
             cerr << "Fatal error details:" << endl << errstr << endl;
         }
     }
+    */
+
+    QVector<QColor> color_l(96);
+    for (int i = 0; i < 96; i++)
+        color_l[i] = QColor(255, 255, 255);
+    color_l[4] = QColor(0, 0, 0);
+    color_l[5] = QColor(0, 0, 0);
+    color_l[6] = QColor(0, 0, 0);
+    color_l[11] = QColor(0, 0, 0);
+    color_l[12] = QColor(0, 0, 0);
+    color_l[16] = QColor(0, 0, 0);
+    color_l[18] = QColor(0, 0, 0);
+    color_l[19] = QColor(0, 0, 0);
+    color_l[20] = QColor(0, 0, 0);
+    color_l[21] = QColor(0, 0, 0);
+    color_l[22] = QColor(0, 0, 0);
+    saveWorklist(color_l);
 
     /*
-    //test();
     Evoware evoware;
     evoware.connect();
     evoware.logon();
     evoware.waitTillReady();
     evoware.initialize();
+    evoware.startScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Ellis\\worklisttest.esc");
     //evoware.prepareScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc");
     //evoware.startScript("C:\\Program Files\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Light_1000.esc");
     //evoware.prepareScript("W:\\roboliq\\tania01_ph_r1.esc");
