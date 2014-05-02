@@ -321,6 +321,6 @@ int main(int argc, char *argv[])
     evoware.logoff();
     */
 
-    //return app.exec();
+    return app.exec();
     return 0;
 }
