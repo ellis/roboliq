@@ -262,12 +262,34 @@ void saveWorklist(const QVector<QColor>& color_l) {
     }
 }
 
+class Interface2 : public QObject {
+    Q_OBJECT
+
+private:
+    QVector<QColor> color_l;
+
+public:
+    Interface2()
+        : color_l(96)
+    {
+        for (int i = 0; i < 96; i++)
+            color_l[i] = QColor(255, 255, 255);
+    }
+
+    Q_INVOKABLE void setColor(const int row, const int col, const int r, const int g, const int b) {
+        const int i = col * 8 + row;
+        color_l[i] = QColor(r, g, b);
+    }
+};
+
 
 int main(int argc, char *argv[])
 {
     Application app(argc, argv);
 
+
     QtQuick2ControlsApplicationViewer viewer;
+    //viewer.setInterface(interface);
     viewer.setMainQmlFile(QStringLiteral("qml/Relay1/main.qml"));
     viewer.show();
 
