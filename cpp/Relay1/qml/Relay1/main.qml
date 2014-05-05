@@ -1,5 +1,6 @@
 import QtQuick 2.1
 import QtQuick.Controls 1.1
+import QtQuick.Dialogs 1.0
 import QtQuick.Layouts 1.0
 
 ApplicationWindow {
@@ -14,7 +15,12 @@ ApplicationWindow {
         Menu {
             title: qsTr("File")
             MenuItem {
+                text: qsTr("Open")
+                onTriggered: fileOpenDialog.visible = true;
+            }
+            MenuItem {
                 text: qsTr("Save")
+                //onTriggered: backend.saveImage("image.png");
                 onTriggered: backend.saveImage("image.png");
             }
             MenuItem {
@@ -42,6 +48,20 @@ ApplicationWindow {
                 text: "red"
                 onClicked: app.color = "#ff0000"
             }
+        }
+    }
+
+    FileDialog {
+        id: fileOpenDialog
+        title: "Please choose a file"
+        selectExisting: true
+        selectMultiple: false
+        nameFilters: [ "Image files (*.png *.jpg *.gif)", "All files (*)" ]
+        selectedNameFilter: "Image files (*.png *.jpg *.gif)"
+        onAccepted: {
+            backend.openImage(fileOpenDialog.fileUrl);
+        }
+        onRejected: {
         }
     }
 

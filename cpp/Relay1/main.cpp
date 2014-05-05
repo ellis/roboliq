@@ -6,11 +6,18 @@
 #include "backend.h"
 
 
-
+#include <QImage>
+#include <QUrl>
 int main(int argc, char *argv[])
 {
     Application app(argc, argv);
 
+    QImage img;
+    img.load("/home/ellisw/Downloads/IMG_20140409_134904.jpg");
+    img.load("/home/ellisw/.local/share/icons/hicolor/16x16/apps/QtProject-qtcreator.png");
+    img.load("/home/ellisw/src/roboliq/cpp/build-Relay1-Desktop_Qt_5_2_1_GCC_64bit-Debug/image.png");
+    QUrl url("file:///home/ellisw/src/roboliq/cpp/build-Relay1-Desktop_Qt_5_2_1_GCC_64bit-Debug/image.png");
+    img.load(url.toLocalFile());
 
     QtQuick2ControlsApplicationViewer viewer;
     Backend* backend = new Backend();

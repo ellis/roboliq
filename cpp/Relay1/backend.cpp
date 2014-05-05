@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QImage>
 #include <QTextStream>
+#include <QUrl>
 
 
 Backend::Backend(QObject *parent) :
@@ -24,8 +25,10 @@ void Backend::setColor(const int row, const int col, const QString& colorName) {
     color_l[i] = color;
 }
 
-void Backend::openImage(const QString& filename) {
-    const QImage image = QImage(filename);
+void Backend::openImage(const QString& url) {
+    const QUrl qurl(url);
+    const QString filename = qurl.toLocalFile();
+    QImage image(filename);
 
     int i = 0;
     for (int col = 0; col < 12; col++) {
