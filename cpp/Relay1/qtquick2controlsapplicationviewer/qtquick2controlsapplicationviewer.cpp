@@ -70,6 +70,11 @@ QtQuick2ControlsApplicationViewer::~QtQuick2ControlsApplicationViewer()
     delete d;
 }
 
+void QtQuick2ControlsApplicationViewer::setInterface(class Interface* interface)
+{
+    d->engine
+}
+
 void QtQuick2ControlsApplicationViewer::setMainQmlFile(const QString &file)
 {
     d->mainQmlFile = QtQuick2ApplicationViewerPrivate::adjustPath(file);
