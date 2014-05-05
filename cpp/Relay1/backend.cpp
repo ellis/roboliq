@@ -10,13 +10,30 @@ Backend::Backend(QObject *parent) :
     QObject(parent)
   , color_l(96)
 {
-  for (int i = 0; i < 96; i++)
-      color_l[i] = QColor(255, 255, 255);
 }
 
 QString Backend::getFillStyle(const int row, const int col) {
     const int i = col * 8 + row;
     return color_l[i].name();
+}
+
+void Backend::setSize(int rowCount, int colCount) {
+    //if (m_rowCount != rowCount || m_colCount != colCount)
+    m_rowCount = rowCount;
+    m_colCount = colCount;
+    color_l.resize(m_rowCount * m_colCount);
+    for (int i = 0; i < m_rowCount * m_colCount; i++)
+          color_l[i] = QColor(255, 255, 255);
+    emit rowCountChanged(m_rowCount);
+    emit colCountChanged(m_colCount);
+}
+
+void Backend::setSize96() {
+
+}
+
+void Backend::setSize384() {
+
 }
 
 void Backend::setColor(const int row, const int col, const QString& colorName) {

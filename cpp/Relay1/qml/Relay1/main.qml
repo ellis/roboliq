@@ -32,6 +32,26 @@ ApplicationWindow {
                 onTriggered: Qt.quit();
             }
         }
+        Menu {
+            title: qsTr("Robot")
+            MenuItem {
+                text: qsTr("96 Well Plate")
+                onTriggered: backend.
+            }
+            MenuItem {
+                text: qsTr("Save")
+                //onTriggered: backend.saveImage("image.png");
+                onTriggered: backend.saveImage("image.png");
+            }
+            MenuItem {
+                text: qsTr("Save Worklist")
+                onTriggered: backend.saveWorklist()
+            }
+            MenuItem {
+                text: qsTr("Exit")
+                onTriggered: Qt.quit();
+            }
+        }
     }
 
     toolBar: ToolBar {
@@ -68,8 +88,8 @@ ApplicationWindow {
     Rectangle {
         id: plate
         color: "white";
-        width: 120;
-        height: 80;
+        width: backend.colCount * 10;
+        height: backend.rowCount * 10;
         anchors.centerIn: parent
         border.color: "black"
 
