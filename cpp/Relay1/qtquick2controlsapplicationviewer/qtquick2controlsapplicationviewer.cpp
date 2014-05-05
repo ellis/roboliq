@@ -70,9 +70,9 @@ QtQuick2ControlsApplicationViewer::~QtQuick2ControlsApplicationViewer()
     delete d;
 }
 
-void QtQuick2ControlsApplicationViewer::setInterface(class Interface* interface)
+QQmlEngine& QtQuick2ControlsApplicationViewer::getEngine()
 {
-    d->engine
+    return d->engine;
 }
 
 void QtQuick2ControlsApplicationViewer::setMainQmlFile(const QString &file)

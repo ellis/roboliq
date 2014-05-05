@@ -25,7 +25,7 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
-class Interface2;
+class QQmlEngine;
 
 class QtQuick2ControlsApplicationViewer
 {
@@ -33,7 +33,7 @@ public:
     explicit QtQuick2ControlsApplicationViewer();
     virtual ~QtQuick2ControlsApplicationViewer();
 
-    void setInterface(Interface2* interface);
+    QQmlEngine& getEngine();
     void setMainQmlFile(const QString &file);
     void addImportPath(const QString &path);
     void show();

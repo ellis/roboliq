@@ -1,6 +1,6 @@
-#include <QWaitCondition>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QWaitCondition>
 
 #include "disphelper.h"
 #include <iostream>
@@ -142,7 +142,9 @@ public:
     /// Tell evoware to initialize the robot
     void initialize() {
         try {
-            dhCheck(dhCallMethod(evosys, L".Initialize()"));
+            //dhCheck(dhCallMethod(evosys, L".Initialize()"));
+            // NOTE: Removed dhCheck because Initialize always returns an error...
+            dhCallMethod(evosys, L".Initialize()");
         }
         catch (string errstr) {
             cerr << "Fatal error details:" << endl << errstr << endl;
