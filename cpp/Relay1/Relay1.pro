@@ -6,11 +6,13 @@ DEPLOYMENTFOLDERS = folder_01
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
 
-SOURCES += main.cpp disphelper.c
+SOURCES += main.cpp
 
-HEADERS += disphelper.h
-
-LIBS += -lole32 -loleaut32 -luuid
+win32 {
+    SOURCES += disphelper.c Evoware.cpp
+    HEADERS += disphelper.h
+    LIBS += -lole32 -loleaut32 -luuid
+}
 
 # Installation path
 # target.path =
