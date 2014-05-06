@@ -36,7 +36,11 @@ ApplicationWindow {
             title: qsTr("Robot")
             MenuItem {
                 text: qsTr("96 Well Plate")
-                onTriggered: backend.
+                onTriggered: backend.setSize96()
+            }
+            MenuItem {
+                text: qsTr("384 Well Plate")
+                onTriggered: backend.setSize384()
             }
             MenuItem {
                 text: qsTr("Save")
@@ -80,6 +84,10 @@ ApplicationWindow {
         selectedNameFilter: "Image files (*.png *.jpg *.gif)"
         onAccepted: {
             backend.openImage(fileOpenDialog.fileUrl);
+            canvas.requestPaint();
+            console.log(backend.rowCount)
+            plate.width = backend.colCount * 10
+            plate.height = backend.rowCount * 10
         }
         onRejected: {
         }
@@ -103,8 +111,8 @@ ApplicationWindow {
 
             onPaint: {
                 var ctx = getContext('2d')
-                for (var row = 0; row < 8; row++) {
-                    for (var col = 0; col < 12; col++) {
+                for (var row = 0; row < backend.rowCount; row++) {
+                    for (var col = 0; col < backend.colCount; col++) {
                         var x, y;
                         x = col * 10;
                         y = row * 10;
@@ -122,7 +130,7 @@ ApplicationWindow {
                     var imageRow, imageCol;
                     imageRow = Math.floor(mouseY / 10);
                     imageCol = Math.floor(mouseX / 10);
-                    if (imageRow >= 0 && imageRow < 8 && imageCol >= 0 && imageCol < 12) {
+                    if (imageRow >= 0 && imageRow < backend.rowCount && imageCol >= 0 && imageCol < backend.colCount) {
                         backend.setColor(imageRow, imageCol, app.color)
                         canvas.requestPaint();
                     }

@@ -8,12 +8,12 @@
 
 Backend::Backend(QObject *parent) :
     QObject(parent)
-  , color_l(96)
 {
+    setSize(8, 12);
 }
 
 QString Backend::getFillStyle(const int row, const int col) {
-    const int i = col * 8 + row;
+    const int i = col * m_rowCount + row;
     return color_l[i].name();
 }
 
@@ -28,17 +28,42 @@ void Backend::setSize(int rowCount, int colCount) {
     emit colCountChanged(m_colCount);
 }
 
-void Backend::setSize96() {
+void Backend::setPlate(int plate_i) {
+    switch (plate_i) {
+    // 386 well very low volume
+    case 2:
+        m_volume = 20;
+        setSize384();
+        break;
+    // 386 well standard, use low volume
+    case 3:
+        m_volume = 20;
+        setSize384();
+        break;
+    // 386 well standard, use high volume
+    case 4:
+        m_volume = 80;
+        setSize384();
+        break;
+    // 96 well, 100ul
+    default:
+        m_volume = 100;
+        setSize96();
+        break;
+    }
+}
 
+void Backend::setSize96() {
+    setSize(8, 12);
 }
 
 void Backend::setSize384() {
-
+    setSize(16, 24);
 }
 
 void Backend::setColor(const int row, const int col, const QString& colorName) {
     const QColor color(colorName);
-    const int i = col * 8 + row;
+    const int i = col * m_rowCount + row;
     color_l[i] = color;
 }
 
@@ -47,9 +72,11 @@ void Backend::openImage(const QString& url) {
     const QString filename = qurl.toLocalFile();
     QImage image(filename);
 
+    setSize(image.size().height(), image.size().width());
+
     int i = 0;
-    for (int col = 0; col < 12; col++) {
-        for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < m_colCount; col++) {
+        for (int row = 0; row < m_rowCount; row++) {
             const QRgb rgb = image.pixel(col, row);
             color_l[i++] = QColor(rgb);
         }
@@ -57,11 +84,11 @@ void Backend::openImage(const QString& url) {
 }
 
 void Backend::saveImage(const QString& filename) {
-    QImage image(12, 8, QImage::Format_RGB32);
+    QImage image(m_colCount, m_rowCount, QImage::Format_RGB32);
 
     int i = 0;
-    for (int col = 0; col < 12; col++) {
-        for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < m_colCount; col++) {
+        for (int row = 0; row < m_rowCount; row++) {
             image.setPixel(col, row, color_l[i++].rgb());
         }
     }
