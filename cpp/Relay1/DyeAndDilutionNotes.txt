@@ -50,3 +50,39 @@ A5: 50ul 1:16, 100ul water
 A6: 50ul 1:16, 150ul water
 
 A4, A5, A6 all look the same, and look about like A7 on the 384 well square white plate (when on a white background).
+
+## HSV of R/G/B
+
+First just consider R in the white square 384 well plate
+
+HSV (0,0,100): 0ul
+
+Find HSV (0,100,100): 5ul Red 1:16
+Find HSV (0,50,100): Maybe 2.5ul Red 1:16
+Find HSV (0,100,50): Try 5ul Red 1:16
+
+RGB (120,0,40) = HSV (340,100,47.5)
+RGB (150,0,50) = HSV (340,100,58.8)
+
+5ul R 1:16 = (0, -1, -1)
+10ul R 1:16 = (-0.1, -1, -1)
+20ul R 1:16 = (-0.2, -1, -1)
+40ul R 1:16 = (-0.4, -1, -1)
+80ul R 1:16 = (-0.8, -1, -1)
+
+RGB (1,0,0) = (1,1,1) - (0,1,1)
+RGB (1,0,1) ~= (1,1,1) - (0,0.5,0.5) - (0.5,0,0.5)
+
+RGB (a,b,0): 1:1 mix of RG, range of saturation now only from 0 to 0.5.
+
+
+1:1, 1:2, 2:1 -- 1ul, 2ul, 3ul, 3ul
+
+
+## Color mixing
+
+Next experiment: 1:1s, 1ul, 2ul, 3ul, 4ul
+
+A: RG1, RG2, RG3, RG5
+B: RB1, RB2, RB3, RB5
+C: GB1, GB2, GB3, GB5
