@@ -1,12 +1,16 @@
-#include <QMutex>
-#include <QMutexLocker>
-#include <QWaitCondition>
-
-#include "disphelper.h"
 #include <iostream>
 #include <string>
 
+#include <QByteArray>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QString>
+#include <QWaitCondition>
+
+#include "disphelper.h"
+
 using namespace std;
+
 
 void testExcel() {
     CDhInitialize init; // Required for the constructor and destructor

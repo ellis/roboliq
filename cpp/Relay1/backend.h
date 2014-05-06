@@ -24,7 +24,9 @@ public:
     Q_INVOKABLE void setColor(const int row, const int col, const QString& colorName);
     Q_INVOKABLE void openImage(const QString& filename);
     Q_INVOKABLE void saveImage(const QString& filename);
-    Q_INVOKABLE void saveWorklist();
+    Q_INVOKABLE void saveWorklistSepia();
+    Q_INVOKABLE void saveWorklistColor3();
+    Q_INVOKABLE void saveWorklistColor3LargeTips();
 
 
 signals:
@@ -34,10 +36,21 @@ signals:
 public slots:
 
 private:
+    void printWorklistItems(
+            class QTextStream& out,
+            const int n,
+            double aspirate[],
+            const int tipWell[],
+            const QString tipSite[],
+            const QString tipLiquidClass[8],
+            QString dispense[]);
+
+private:
     QVector<QColor> color_l;
     int m_rowCount;
     int m_colCount;
-    int m_volume;
+    int m_volumeSaturated;
+    int m_volumeTotal;
 };
 
 #endif // __BACKEND_H

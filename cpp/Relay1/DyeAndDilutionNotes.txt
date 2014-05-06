@@ -1,0 +1,52 @@
+## Eppendorfs
+
+### Red/Green/Blue
+
+A1: Red, undiluted
+B1: Green
+C1: Blue
+
+A2: Red diluted 16x, 30ul from A1 stock, 450ul water => 480ul
+
+## Plate 384 white square
+
+A1: 10ul 1:16
+A2: 20ul 1:16
+A3: 40ul 1:16
+A4: 80ul 1:16
+
+A1 looks best.
+
+A5: 10ul 1:16, 10ul water, looks the same as A1
+
+A6: 10ul 1:16, 70ul water, looks the same as A1
+
+A7: 5ul 1:16, 75ul water, looks even better than A1, A5, A6!
+
+### Purple
+
+Row D: Purple
+
+D1: 1ul blue 1:16, 3ul red 1:16, 28ul water
+
+D1 is way too dark.
+
+D2-D5 are a dilution series.  D2 looks the same as D1, too dark.
+D4 and D5 are the same.
+D3 is a bit too light, and more pink than purple.
+
+## Plate 96 Nunc transparent round
+
+### Red/Green/Blue
+
+A1: 20ul 1:16
+A2: 40ul 1:16
+A3: 80ul 1:16
+
+80 was a bit dark, 40 was a bit too light.
+
+A4: 50ul 1:16, 50ul water
+A5: 50ul 1:16, 100ul water
+A6: 50ul 1:16, 150ul water
+
+A4, A5, A6 all look the same, and look about like A7 on the 384 well square white plate (when on a white background).

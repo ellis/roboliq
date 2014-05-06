@@ -24,8 +24,12 @@ ApplicationWindow {
                 onTriggered: backend.saveImage("image.png");
             }
             MenuItem {
-                text: qsTr("Save Worklist")
-                onTriggered: backend.saveWorklist()
+                text: qsTr("Save Worklist Sepia")
+                onTriggered: backend.saveWorklistSepia()
+            }
+            MenuItem {
+                text: qsTr("Save Worklist Color")
+                onTriggered: backend.saveWorklistColor3()
             }
             MenuItem {
                 text: qsTr("Exit")
@@ -41,15 +45,6 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("384 Well Plate")
                 onTriggered: backend.setSize384()
-            }
-            MenuItem {
-                text: qsTr("Save")
-                //onTriggered: backend.saveImage("image.png");
-                onTriggered: backend.saveImage("image.png");
-            }
-            MenuItem {
-                text: qsTr("Save Worklist")
-                onTriggered: backend.saveWorklist()
             }
             MenuItem {
                 text: qsTr("Exit")
