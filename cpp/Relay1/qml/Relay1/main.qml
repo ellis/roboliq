@@ -51,6 +51,24 @@ ApplicationWindow {
                 onTriggered: Qt.quit();
             }
         }
+        Menu {
+            title: qsTr("Image")
+            MenuItem {
+                text: qsTr("Colorize Sepia")
+                onTriggered: {
+                    backend.colorizeMonochrome();
+                    canvas.requestPaint();
+                }
+            }
+            MenuItem {
+                text: qsTr("384 Well Plate")
+                onTriggered: backend.setSize384()
+            }
+            MenuItem {
+                text: qsTr("Exit")
+                onTriggered: Qt.quit();
+            }
+        }
     }
 
     toolBar: ToolBar {

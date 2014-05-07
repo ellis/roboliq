@@ -2,6 +2,7 @@
 #define __BACKEND_H
 
 #include <QColor>
+#include <QImage>
 #include <QObject>
 #include <QVector>
 
@@ -15,8 +16,8 @@ public:
     explicit Backend(QObject *parent = 0);
 
     Q_INVOKABLE QString getFillStyle(const int row, const int col);
-    int rowCount() const { return m_rowCount; }
-    int colCount() const { return m_colCount; }
+	int rowCount() const { return m_image.height(); }
+	int colCount() const { return m_image.width(); }
     void setSize(int rowCount, int colCount);
     Q_INVOKABLE void setPlate(int plate_i);
     Q_INVOKABLE void setSize96();
@@ -26,8 +27,10 @@ public:
     Q_INVOKABLE void saveImage(const QString& filename);
     Q_INVOKABLE void saveWorklistSepia();
     Q_INVOKABLE void saveWorklistColor3();
-    Q_INVOKABLE void saveWorklistColor3LargeTips();
-
+	Q_INVOKABLE void saveWorklistColor3LargeTips();
+	Q_INVOKABLE void colorizeMonochrome();
+	Q_INVOKABLE void colorizeHues3();
+	Q_INVOKABLE void colorizeHues6();
 
 signals:
     void rowCountChanged(int);
@@ -46,7 +49,9 @@ private:
             QString dispense[]);
 
 private:
-    QVector<QColor> color_l;
+	//QVector<QColor> color_l;
+	QImage m_image;
+	QImage m_image2;
     int m_rowCount;
     int m_colCount;
     int m_volumeSaturated;
