@@ -5,12 +5,26 @@
 
 #include "backend.h"
 
-
+#include <QtDebug>
 #include <QImage>
 #include <QUrl>
+
+extern QRgb ryb2rgb(qreal R, qreal Y, qreal B);
+extern QRgb rgb2ryb(const QColor& color);
+
+
 int main(int argc, char *argv[])
 {
     Application app(argc, argv);
+
+	qDebug() << QColor(Qt::white);
+	qDebug() << QColor(rgb2ryb(Qt::white)).name();
+	qDebug() << QColor(rgb2ryb(Qt::black)).name();
+	qDebug() << QColor(rgb2ryb(Qt::red)).name();
+	qDebug() << QColor(rgb2ryb(Qt::green)).name();
+	qDebug() << QColor(rgb2ryb(Qt::blue)).name();
+	qDebug() << QColor(rgb2ryb(Qt::yellow)).name();
+	return 0;
 
     QImage img;
     img.load("/home/ellisw/Downloads/IMG_20140409_134904.jpg");

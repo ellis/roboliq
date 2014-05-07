@@ -85,6 +85,62 @@ static QColor interpolate(const QColor& a, const QColor& b, float t)
 	return final.toRgb();
 }
 
+QRgb ryb2rgb(qreal R, qreal Y, qreal B) {
+  R = R*R*(3-R-R);
+  Y = Y*Y*(3-Y-Y);
+  B = B*B*(3-B-B);
+  return qRgb(1.0 + B * ( R * (0.337 + Y * -0.137) + (-0.837 + Y * -0.163) ),
+	1.0 + B * ( -0.627 + Y * 0.287) + R * (-1.0 + Y * (0.5 + B * -0.693) - B * (-0.627) ),
+	1.0 + B * (-0.4 + Y * 0.6) - Y + R * ( -1.0 + B * (0.9 + Y * -1.1) + Y ));
+}
+
+QRgb rgb2ryb(const QColor& color) {
+	qreal r = color.redF(),
+		g = color.greenF(),
+		b = color.blueF();
+	// Remove the whiteness from the color.
+	const qreal w = qMin(qMin(r, g), b);
+	r -= w;
+	g -= w;
+	b -= w;
+
+	const qreal mg = qMax(qMax(r, g), b);
+
+	// Get the yellow out of the red+green.
+	qreal y = qMin(r, g);
+	r -= y;
+	g -= y;
+
+	// If this unfortunate conversion combines blue and green, then cut each in
+	// half to preserve the value's maximum range.
+	if (b > 0 && g > 0) {
+		b /= 2;
+		g /= 2;
+	}
+
+	// Redistribute the remaining green.
+	y += g;
+	b += g;
+
+	// Normalize to values.
+	const qreal my = qMax(qMax(r, y), b);
+	if (my > 0) {
+		qreal n = mg / my;
+		r *= n;
+		y *= n;
+		b *= n;
+	}
+
+	// Add the white back in.
+	r += w;
+	y += w;
+	b += w;
+
+	// And return back the ryb typed accordingly.
+	//return qRgb(255 * r, 255 * y, 255 * b);
+	return QColor::fromRgbF(1-r, 1-y, 1-b).rgb();
+}
+
 void Backend::colorizeMonochrome() {
 	const QColor sepia(112, 66, 20);
 	const QColor white = Qt::white;
@@ -100,7 +156,14 @@ void Backend::colorizeMonochrome() {
 }
 
 void Backend::colorizeHues3() {
-
+	for (int col = 0; col < m_image.width(); col++) {
+		for (int row = 0; row < m_image.height(); row++) {
+			const QColor color0 = m_image.pixel(col, row);
+			const QRgb ryb = rgb2ryb(color0);
+			const QRgb rgb = ryb2rgb(qRed(ryb), qGreen(ryb), qBlue(ryb));
+			m_image.setPixel(col, row, rgb);
+		}
+	}
 }
 
 void Backend::colorizeHues6() {

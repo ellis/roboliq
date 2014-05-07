@@ -61,6 +61,13 @@ ApplicationWindow {
                 }
             }
             MenuItem {
+                text: qsTr("Colorize RYB")
+                onTriggered: {
+                    backend.colorizeHues3();
+                    canvas.requestPaint();
+                }
+            }
+            MenuItem {
                 text: qsTr("384 Well Plate")
                 onTriggered: backend.setSize384()
             }
