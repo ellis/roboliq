@@ -89,12 +89,12 @@ QRgb ryb2rgb(qreal R, qreal Y, qreal B) {
   R = R*R*(3-R-R);
   Y = Y*Y*(3-Y-Y);
   B = B*B*(3-B-B);
-  return qRgb(1.0 + B * ( R * (0.337 + Y * -0.137) + (-0.837 + Y * -0.163) ),
+  return QColor::fromRgbF(1.0 + B * ( R * (0.337 + Y * -0.137) + (-0.837 + Y * -0.163) ),
 	1.0 + B * ( -0.627 + Y * 0.287) + R * (-1.0 + Y * (0.5 + B * -0.693) - B * (-0.627) ),
-	1.0 + B * (-0.4 + Y * 0.6) - Y + R * ( -1.0 + B * (0.9 + Y * -1.1) + Y ));
+    1.0 + B * (-0.4 + Y * 0.6) - Y + R * ( -1.0 + B * (0.9 + Y * -1.1) + Y )).rgb();
 }
 
-QRgb rgb2ryb(const QColor& color) {
+QRgb rgb2ryb0(const QColor& color) {
 	qreal r = color.redF(),
 		g = color.greenF(),
 		b = color.blueF();
@@ -141,6 +141,106 @@ QRgb rgb2ryb(const QColor& color) {
 	return QColor::fromRgbF(1-r, 1-y, 1-b).rgb();
 }
 
+int distHue(int hueTarget, int hueActual) {
+    return ((hueTarget + 360) - hueActual) % 360;
+}
+
+QRgb rgb2ryb(const QColor& color) {
+    const int hue = color.hslHue();
+    const int dRed = distHue(0, hue);
+    const int dYellow = distHue(60, hue);
+    const int dGreen = distHue(120, hue);
+    const int dBlue = distHue(240, hue);
+    const int dPurple = distHue(300, hue);
+
+    const int dMin = qMin(dRed, qMin(dYellow, qMin(dGreen, qMin(dBlue, dPurple))));
+    if (dRed == dMin) {
+
+    }
+    const QColor
+            C000 = QColor::fromRgbF(1.0, 1.0, 1.0), // White
+            C100 = QColor::fromRgbF(1.0, 0.0, 0.0), // Red
+            C010 = QColor::fromRgbF(1.0, 1.0, 0.0), // Yellow
+            C001 = QColor::fromRgbF(1.0, 1.0, 1.0), // Blue
+            C110 = QColor::fromRgbF(1.0, 0.5, 0.0), // Orange
+            C101 = QColor::fromRgbF(0.5, 0.5, 1.0), // Purple
+            C011 = QColor::fromRgbF(0.0, 0.0, 0.0); // Black
+    qreal r = color.redF(),
+        g = color.greenF(),
+        b = color.blueF();
+    // Remove the whiteness from the color.
+    const qreal w = qMin(qMin(r, g), b);
+    r -= w;
+    g -= w;
+    b -= w;
+
+    const qreal mg = qMax(qMax(r, g), b);
+
+    // Get the yellow out of the red+green.
+    qreal y = qMin(r, g);
+    r -= y;
+    g -= y;
+
+    // If this unfortunate conversion combines blue and green, then cut each in
+    // half to preserve the value's maximum range.
+    if (b > 0 && g > 0) {
+        b /= 2;
+        g /= 2;
+    }
+
+    // Redistribute the remaining green.
+    y += g;
+    b += g;
+
+    // Normalize to values.
+    const qreal my = qMax(qMax(r, y), b);
+    if (my > 0) {
+        qreal n = mg / my;
+        r *= n;
+        y *= n;
+        b *= n;
+    }
+
+    // Add the white back in.
+    r += w;
+    y += w;
+    b += w;
+
+    // And return back the ryb typed accordingly.
+    //return qRgb(255 * r, 255 * y, 255 * b);
+    return QColor::fromRgbF(1-r, 1-y, 1-b).rgb();
+}
+
+QColor reduceColor(const QColor& color) {
+    const int hue = color.hslHue();
+    const int dRed = distHue(0, hue);
+    const int dYellow = distHue(60, hue);
+    const int dGreen = distHue(120, hue);
+    const int dBlue = distHue(240, hue);
+    const int dPurple = distHue(300, hue);
+
+    const int dMin = qMin(dRed, qMin(dYellow, qMin(dGreen, qMin(dBlue, dPurple))));
+    QColor color2;
+    if (dRed == dMin)
+        color2 = QColor::fromRgb(0xcc, 0, 0); // 30ul R
+    else if (dYellow == dMin)
+        color2 = QColor::fromRgb(0xeb, 0xd3, 0); // 30ul Y
+    else if (dGreen == dMin)
+        color2 = QColor::fromRgb(0, 0x9b, 0x0f); // 10ul Y, 10ul B
+    else if (dBlue == dMin)
+        color2 = QColor::fromRgb(0,0x79, 0xc6); // 30ul B
+    else
+        color2 = QColor::fromRgb(0x80, 0x45, 0x9a); // 5ul R, 5ul B
+    const int hue2 = color2.hslHue();
+
+    const int saturation2 = color2.hslSaturation();
+    //const int saturation2 = qMin(color.hslSaturation(), color2.hslSaturation());
+
+    const int lightness2 = (color.lightness() > color2.lightness()) ? color.lightness() : color2.lightness();
+
+    return QColor::fromHsl(hue2, saturation2, lightness2);
+}
+
 void Backend::colorizeMonochrome() {
 	const QColor sepia(112, 66, 20);
 	const QColor white = Qt::white;
@@ -156,14 +256,15 @@ void Backend::colorizeMonochrome() {
 }
 
 void Backend::colorizeHues3() {
-	for (int col = 0; col < m_image.width(); col++) {
+    for (int col = 0; col < m_image.width(); col++) {
 		for (int row = 0; row < m_image.height(); row++) {
 			const QColor color0 = m_image.pixel(col, row);
-			const QRgb ryb = rgb2ryb(color0);
-			const QRgb rgb = ryb2rgb(qRed(ryb), qGreen(ryb), qBlue(ryb));
+            //const QRgb ryb = rgb2ryb(color0);
+            //const QRgb rgb = ryb2rgb(qRed(ryb), qGreen(ryb), qBlue(ryb));
+            const QRgb rgb = reduceColor(color0).rgb();
 			m_image.setPixel(col, row, rgb);
 		}
-	}
+    }
 }
 
 void Backend::colorizeHues6() {

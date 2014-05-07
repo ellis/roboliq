@@ -86,3 +86,66 @@ Next experiment: 1:1s, 1ul, 2ul, 3ul, 4ul
 A: RG1, RG2, RG3, RG5
 B: RB1, RB2, RB3, RB5
 C: GB1, GB2, GB3, GB5
+
+## Color chart
+
+RYB now instead of RGB.
+
+30ul 1:96 R = #ff0020
+30ul 1:96 Y = #ffd900
+30ul 1:96 B = #006dff
+
+1:96 dilutions.
+
+RYB.
+
+Pure mixtures:
+RYB(30, 0, 0) = #cc0404 -> R
+RYB(0, 30, 0) = #ebd301 -> RG 1:1
+RYB(0, 0, 30) = #0079c6 -> GB 3:5 [HSL 203 100 39]
+RYB(0, 0, 5)  = #3ebcd5 -> GB 5:6 1.2 [HSL 190 64 54]
+RYB(0, 0, 10) = #00a7d4 -> GB 4:5 1.25 [HSL 193 100 42]
+RYB(0, 0, 15) = #039fdc -> [HSL 197 97 44]
+RYB(0, 0, 20) = #007cc9 -> GB 5:8 1.6 [HSL 203 100 39]
+RYB(0, 0, 25) = #0071c8 -> [HSL 206 100 39]
+RYB(0, 0, 30) = #0067c3 -> [HSL 208 100 38]
+RYB(0, 0, 40) = #0058c3 -> GB 5:11 2.2 [HSL 213 100 38]
+RYB(0, 0, 45) = #0050bc -> [HSL 214 100 37]
+RYB(0, 0, 50) = #0042a9 -> [HSL 217 100 33]
+
+RYB(0,  5, 0) = #fcf664
+RYB(0, 10, 0) = #fffd54
+RYB(0, 20, 0) = #ffcf2f
+RYB(0, 50, 0) = #fdd024
+
+1:1 mixtures:
+RYB(15, 0, 15) = #21043c -> RB 1:2
+RYB(15, 15, 0) = #d70100 -> R [HSL 0 100 42]
+RYB(0, 15, 15) = #018807 -> G
+
+RYB(10, 0, 10) = #2f0149 -> RB 2:3
+RYB(10, 10, 0) = #da0402 -> R
+RYB(0, 10, 10) = #009b0f -> G
+
+RYB(5, 0, 5) = #80459a -> RB 3:4
+RYB(5, 5, 0) = #e43717 -> RG 6:1
+RYB(0, 5, 5) = #42b63b -> G
+
+1:1:1 mixtures:
+RYB(3, 3, 3) = #78352c (dark brown)
+RYB(5, 5, 5) = #681714 (even darker brown)
+
+15ul 1:96 R + 15ul 1:96 B = #000000
+15ul 1:96 R + 15ul 1:96 Y = #ff0000
+15ul 1:96 Y + 15ul 1:96 B = #009000
+
+10ul 1:96 R + 10ul 1:96 B = #200040
+10ul 1:96 R + 10ul 1:96 Y = #ff2800?
+10ul 1:96 Y + 10ul 1:96 B = #009000?
+
+5ul 1:96 R + 5ul 1:96 B = #500080
+5ul 1:96 R + 5ul 1:96 Y = #ff0000?
+5ul 1:96 Y + 5ul 1:96 B = #009000?
+
+Orange and brown:
+30ul 1:96 Y + 2ul 1:96 R = #f07702 (a redish orange)

@@ -17,21 +17,20 @@ int main(int argc, char *argv[])
 {
     Application app(argc, argv);
 
-	qDebug() << QColor(Qt::white);
+    /*qDebug() << QColor(Qt::white);
 	qDebug() << QColor(rgb2ryb(Qt::white)).name();
 	qDebug() << QColor(rgb2ryb(Qt::black)).name();
 	qDebug() << QColor(rgb2ryb(Qt::red)).name();
 	qDebug() << QColor(rgb2ryb(Qt::green)).name();
 	qDebug() << QColor(rgb2ryb(Qt::blue)).name();
-	qDebug() << QColor(rgb2ryb(Qt::yellow)).name();
-	return 0;
-
-    QImage img;
-    img.load("/home/ellisw/Downloads/IMG_20140409_134904.jpg");
-    img.load("/home/ellisw/.local/share/icons/hicolor/16x16/apps/QtProject-qtcreator.png");
-    img.load("/home/ellisw/src/roboliq/cpp/build-Relay1-Desktop_Qt_5_2_1_GCC_64bit-Debug/image.png");
-    QUrl url("file:///home/ellisw/src/roboliq/cpp/build-Relay1-Desktop_Qt_5_2_1_GCC_64bit-Debug/image.png");
-    img.load(url.toLocalFile());
+    qDebug() << QColor(rgb2ryb(Qt::yellow)).name();*/
+    qDebug() << QColor(ryb2rgb(1, 0, 0)).name();
+    qDebug() << QColor(ryb2rgb(0, 1, 0)).name();
+    qDebug() << QColor(ryb2rgb(0, 0, 1)).name();
+    qDebug() << QColor(ryb2rgb(.5, .5, 0)).name();
+    qDebug() << QColor(ryb2rgb(.5, 0, .5)).name();
+    qDebug() << QColor(ryb2rgb(0, .5, .5)).name();
+    //return 0;
 
     QtQuick2ControlsApplicationViewer viewer;
     Backend* backend = new Backend();
