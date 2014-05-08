@@ -1,0 +1,35 @@
+# Color palette
+
+```{r}
+library(ggplot2)
+library(reshape2)
+```
+
+## Blue
+
+```{r}
+B = c(5, 10, 15, 20, 25, 30, 40, 45, 50)
+r = c(62, rep(0, length(B)-1))
+g = c(188, 167, 159, 124, 113, 103, 88, 80, 66)
+b = c(213, 212, 220, 201, 200, 195, 195, 188, 169)
+df = data.frame(R=0, Y=0, B, r, b, g)
+df = melt(df, id.vars=c("R", "Y", "B"))
+ggplot(data=df, aes(x=B, y=value, color=variable)) + geom_line() + ggtitle("Pure Blue")
+```
+
+## 1:1 mixtures
+
+R+B
+
+```{r}
+amount = c(5, 10, 15)
+r = c(128, 47, 33)
+g = c(69, 1, 4)
+b = c(154, 73, 60)
+df = data.frame(R=amount, Y=0, B=amount, r=r, g=g, b=b)
+df = melt(df, id.vars=c("R", "Y", "B"))
+ggplot(data=df, aes(x=R, y=value, color=variable)) + geom_line() + ggtitle("R+B 1:1")
+```
+
+```{r}
+amount
