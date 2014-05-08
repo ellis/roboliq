@@ -142,7 +142,10 @@ QRgb rgb2ryb0(const QColor& color) {
 }
 
 int distHue(int hueTarget, int hueActual) {
-    return ((hueTarget + 360) - hueActual) % 360;
+    int d = ((hueTarget + 360) - hueActual) % 360;
+    if (d > 180)
+        d = 360 - d;
+    return d;
 }
 
 QRgb rgb2ryb(const QColor& color) {
@@ -157,14 +160,14 @@ QRgb rgb2ryb(const QColor& color) {
     if (dRed == dMin) {
 
     }
-    const QColor
+    /*const QColor
             C000 = QColor::fromRgbF(1.0, 1.0, 1.0), // White
             C100 = QColor::fromRgbF(1.0, 0.0, 0.0), // Red
             C010 = QColor::fromRgbF(1.0, 1.0, 0.0), // Yellow
             C001 = QColor::fromRgbF(1.0, 1.0, 1.0), // Blue
             C110 = QColor::fromRgbF(1.0, 0.5, 0.0), // Orange
             C101 = QColor::fromRgbF(0.5, 0.5, 1.0), // Purple
-            C011 = QColor::fromRgbF(0.0, 0.0, 0.0); // Black
+            C011 = QColor::fromRgbF(0.0, 0.0, 0.0); // Black*/
     qreal r = color.redF(),
         g = color.greenF(),
         b = color.blueF();
@@ -211,6 +214,49 @@ QRgb rgb2ryb(const QColor& color) {
     return QColor::fromRgbF(1-r, 1-y, 1-b).rgb();
 }
 
+struct ColorInfo {
+    QColor color;
+    qreal R;
+    qreal Y;
+    qreal B;
+};
+
+QVector<ColorInfo> colorInfo {
+    { QColor("#d20313"), 20.0/96, 0, 0 }, // red hue=355
+    { QColor("#fffd54"), 0, 10.0/96, 0 }, // yellow
+    { QColor("#0067c3"), 0, 0, 30.0/96 }, // blue
+    { QColor("#018807"), 0, 15.0/96, 15.0/96 }, // green
+    { QColor("#f07702"), 2.0/96, 30.0/96, 0 }, // redish-orange hue=29
+};
+
+QColor reduceColor(const QColor& color) {
+    const QColor color1 = color.toHsv();
+    if (color1.saturation() < 10) {
+        return Qt::white;
+    }
+    const int hue = color1.hue();
+    int dMin = distHue(colorInfo[0].color.hue(), hue);
+    const ColorInfo* ci = &colorInfo[0];
+    for (const ColorInfo& ci_ : colorInfo) {
+        const int d = distHue(ci_.color.hue(), hue);
+        qDebug() << "distHue(" << ci_.color.hue() << ", " << hue << ") = " << d;
+        if (d < dMin) {
+            dMin = d;
+            ci = &ci_;
+        }
+    }
+    const QColor color2 = ci->color.toHsv();
+    const int hue2 = color2.hue();
+
+    //const int saturation2 = color2.hslSaturation();
+    const int saturation2 = qMin(color.hsvSaturation(), color2.hsvSaturation());
+
+    const int value2 = qMin(color.value(), color2.value());
+
+    return QColor::fromHsv(hue2, saturation2, value2);
+}
+
+/*
 QColor reduceColor(const QColor& color) {
     const int hue = color.hslHue();
     const int dRed = distHue(0, hue);
@@ -218,6 +264,9 @@ QColor reduceColor(const QColor& color) {
     const int dGreen = distHue(120, hue);
     const int dBlue = distHue(240, hue);
     const int dPurple = distHue(300, hue);
+
+    B10 = [-100, -2.6, -0.9]
+
 
     const int dMin = qMin(dRed, qMin(dYellow, qMin(dGreen, qMin(dBlue, dPurple))));
     QColor color2;
@@ -240,6 +289,7 @@ QColor reduceColor(const QColor& color) {
 
     return QColor::fromHsl(hue2, saturation2, lightness2);
 }
+*/
 
 void Backend::colorizeMonochrome() {
 	const QColor sepia(112, 66, 20);
