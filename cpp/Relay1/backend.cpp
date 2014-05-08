@@ -465,6 +465,7 @@ void Backend::printWorklistPipetteItems(
             else if (src.plate == "T3") rowCount = 4;
 
             const int srcWell_n = 1 + src.row + src.col * rowCount;
+            //qDebug() << srcWell_n << src.row << src.col << rowCount;
             out << "A;" << src.plate << ";;;" << srcWell_n << ";;" << src.volume << ";"
                    << src.policy << ";;" << tip_mask << endl;
             for (const TipWellVolumePolicy& dst : pipette.dst_l) {
@@ -519,83 +520,148 @@ void Backend::saveWorklistColor3() {
         }
     }
 
-    // For each well, dispense all its colors
-    for (int col = 0; col < m_image.width(); col++) {
-        for (int row = 0; row < m_image.height(); row++) {
+    // Row sequence for 384 well plates, interlaced for greater efficiency
+    const int rowSequence384[] = { 0,2,4,6, 1,3,5,7, 8,10,12,14, 9,11,13,15 };
+
+    // Dispense water
+    // Initialize the pipetting instructions
+    for (int tip_i = 0; tip_i < 4; tip_i++) {
+        pipette_l[tip_i].src.tip = tip_i;
+        pipette_l[tip_i].src.plate = "System";
+        pipette_l[tip_i].src.col = 2;
+        pipette_l[tip_i].src.row = tip_i;
+        pipette_l[tip_i].src.policy = "Water_A_1000";
+        pipette_l[tip_i].src.volume = 0;
+        pipette_l[tip_i].dst_l.clear();
+    }
+    for (int row0 = 0; row0 < m_image.height(); row0++) {
+        // Following an interlaced row sequence for the 384 well plate
+        int row = row0;
+        const int tip_i = (row0 % 4);
+        if (m_image.height() == 16) {
+            row = rowSequence384[row0];
+        }
+        for (int col = 0; col < m_image.width(); col++) {
             const int i = col * m_image.height() + row;
             qreal volume = 0;
             const QVector<SourceVolume>& sources = sources_l[i];
 
             // Water
-            for (int j = 0; j < 4; j++) {
-                volume += sources[j].volume;
+            for (auto sv : sources) {
+                volume += sv.volume;
             }
             if (volume > 0 && volume < 25) {
                 const qreal volumeWater = qMax(30 - volume, 5.0);
-                pipette_l[0].src.tip = 3;
-                pipette_l[0].src.plate = "water";
-                pipette_l[0].src.col = 0;
-                pipette_l[0].src.row = 0;
-                pipette_l[0].src.policy = "Water_A_1000";
-                pipette_l[0].src.volume = volumeWater;
-                pipette_l[0].dst_l.clear();
-                pipette_l[0].dst_l.resize(1);
-                pipette_l[0].dst_l[0].tip = 3;
-                pipette_l[0].dst_l[0].plate = "plate";
-                pipette_l[0].dst_l[0].col = col;
-                pipette_l[0].dst_l[0].row = row;
-                pipette_l[0].dst_l[0].policy = "Water_A_1000";
-                pipette_l[0].dst_l[0].volume = volumeWater;
-                out << "B;" << endl;
-                printWorklistPipetteItems(out, pipette_l);
-                out << "B;" << endl;
-            }
+                qDebug() << row << col << volume << volumeWater;
+                if (pipette_l[tip_i].src.volume + volumeWater > 900)
+                    printWorklistPipetteItems(out, pipette_l);
+                pipette_l[tip_i].src.volume += volumeWater;
 
-            // Volumes >= 3ul
-            for (int j = 0; j < 3; j++) {
-                const SourceVolume& sv = sources[j];
+                TipWellVolumePolicy dst;
+                dst.tip = tip_i;
+                dst.plate = "plate";
+                dst.col = col;
+                dst.row = row;
+                dst.policy = "Water_A_1000";
+                dst.volume = volumeWater;
+                pipette_l[tip_i].dst_l += dst;
+            }
+        }
+    }
+    printWorklistPipetteItems(out, pipette_l);
+    out << "B;" << endl;
+
+    qDebug() << "volumes >= 3";
+    // For each source, volumes >= 3
+    for (int source_i = 0; source_i < 4; source_i++) {
+        // Initialize the pipetting instructions
+        for (int tip_i = 0; tip_i < 4; tip_i++) {
+            pipette_l[tip_i].src.tip = tip_i;
+            pipette_l[tip_i].src.plate = "T3";
+            pipette_l[tip_i].src.col = 2;
+            pipette_l[tip_i].src.row = source_i;
+            pipette_l[tip_i].src.policy = "Water_A_1000";
+            pipette_l[tip_i].src.volume = 0;
+            pipette_l[tip_i].dst_l.clear();
+        }
+
+        // For each well
+        for (int row0 = 0; row0 < m_image.height(); row0++) {
+            // Following an interlaced row sequence for the 384 well plate
+            int row = row0;
+            if (m_image.height() == 16) {
+                row = rowSequence384[row0];
+            }
+            for (int col = 0; col < m_image.width(); col++) {
+                const int i = col * m_image.height() + row;
+                const QVector<SourceVolume>& sources = sources_l[i];
+                const SourceVolume& sv = sources[source_i];
+
                 if (sv.volume >= 3) {
-                    const int tip_i = j;
-                    pipette_l[j].src.tip = tip_i;
-                    pipette_l[j].src.plate = sv.plate;
-                    pipette_l[j].src.col = sv.col;
-                    pipette_l[j].src.row = sv.row;
-                    pipette_l[j].src.policy = "Water_A_1000";
-                    pipette_l[j].src.volume = sv.volume;
-                    pipette_l[j].dst_l.clear();
-                    pipette_l[j].dst_l.resize(1);
-                    pipette_l[j].dst_l[0].tip = tip_i;
-                    pipette_l[j].dst_l[0].plate = "plate";
-                    pipette_l[j].dst_l[0].col = col;
-                    pipette_l[j].dst_l[0].row = row;
-                    pipette_l[j].dst_l[0].policy = "Water_A_1000";
-                    pipette_l[j].dst_l[0].volume = sv.volume;
-                }
-            }
-            printWorklistPipetteItems(out, pipette_l);
+                    const int tip_i = (row % 4);
+                    if (pipette_l[tip_i].src.volume + sv.volume > 900)
+                        printWorklistPipetteItems(out, pipette_l);
+                    pipette_l[tip_i].src.volume += sv.volume;
 
-            // Volumes < 3ul
-            for (int j = 0; j < 3; j++) {
-                const SourceVolume& sv = sources[j];
-                if (sv.volume < 3) {
-                    const int tip_i = j + 4;
-                    pipette_l[j].src.tip = tip_i;
-                    pipette_l[j].src.plate = sv.plate;
-                    pipette_l[j].src.col = sv.col;
-                    pipette_l[j].src.row = sv.row;
-                    pipette_l[j].src.policy = "Water_C_50";
-                    pipette_l[j].src.volume = sv.volume;
-                    pipette_l[j].dst_l.clear();
-                    pipette_l[j].dst_l.resize(1);
-                    pipette_l[j].dst_l[0].tip = tip_i;
-                    pipette_l[j].dst_l[0].plate = "plate";
-                    pipette_l[j].dst_l[0].col = col;
-                    pipette_l[j].dst_l[0].row = row;
-                    pipette_l[j].dst_l[0].policy = "Water_C_50";
-                    pipette_l[j].dst_l[0].volume = sv.volume;
+                    TipWellVolumePolicy dst;
+                    dst.tip = tip_i;
+                    dst.plate = "plate";
+                    dst.col = col;
+                    dst.row = row;
+                    dst.policy = "Water_A_1000";
+                    dst.volume = sv.volume;
+                    pipette_l[tip_i].dst_l += dst;
                 }
             }
         }
+        printWorklistPipetteItems(out, pipette_l);
+        out << "B;" << endl;
+    }
+
+    qDebug() << "volumes < 3";
+    // For each source, volumes < 3
+    for (int source_i = 0; source_i < 4; source_i++) {
+        // Initialize the pipetting instructions
+        for (int tip_i = 4; tip_i < 8; tip_i++) {
+            pipette_l[tip_i].src.tip = tip_i;
+            pipette_l[tip_i].src.plate = "T3";
+            pipette_l[tip_i].src.col = 2;
+            pipette_l[tip_i].src.row = source_i;
+            pipette_l[tip_i].src.policy = "Water_C_50";
+            pipette_l[tip_i].src.volume = 0;
+            pipette_l[tip_i].dst_l.clear();
+        }
+
+        // For each well
+        for (int row0 = 0; row0 < m_image.height(); row0++) {
+            // Following an interlaced row sequence for the 384 well plate
+            int row = row0;
+            if (m_image.height() == 16) {
+                row = rowSequence384[row0];
+            }
+            for (int col = 0; col < m_image.width(); col++) {
+                const int i = col * m_image.height() + row;
+                const QVector<SourceVolume>& sources = sources_l[i];
+                const SourceVolume& sv = sources[source_i];
+
+                if (sv.volume > 1 && sv.volume < 3) {
+                    const int tip_i = (row % 4) + 4;
+                    if (pipette_l[tip_i].src.volume > 0)
+                        printWorklistPipetteItems(out, pipette_l);
+                    pipette_l[tip_i].src.volume += sv.volume;
+
+                    TipWellVolumePolicy dst;
+                    dst.tip = tip_i;
+                    dst.plate = "plate";
+                    dst.col = col;
+                    dst.row = row;
+                    dst.policy = "Water_C_50";
+                    dst.volume = sv.volume;
+                    pipette_l[tip_i].dst_l += dst;
+                }
+            }
+        }
+        printWorklistPipetteItems(out, pipette_l);
     }
 }
 

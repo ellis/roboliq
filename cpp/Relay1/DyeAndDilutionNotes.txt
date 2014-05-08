@@ -141,5 +141,50 @@ RYB(0, 5, 5) = #42b63b -> G
 RYB(3, 3, 3) = #78352c (dark brown)
 RYB(5, 5, 5) = #681714 (even darker brown)
 
-Orange and brown:
+Orange:
 30ul 1:96 Y + 2ul 1:96 R = #f07702 (a redish orange)
+30ul 1:96 Y + 1ul 1:96 R = #ff6f00 (nice orange)
+
+Brown:
+30ul 1:96 Y + 1ul 1:96 R + 0.7ul 1:96 K = #ce791f
+30ul 1:96 Y + 2ul 1:96 R + 1.2ul 1:96 K = #aa601a (not this one)
+
+## 384-well transparent color dilutions
+
+1:16 dilutions:
+R 1:16 3ul  = #d74977
+R 1:16 6ul  = #e71429
+
+R 1:16 6ul + 3ul K 1:96  = #bf041d
+R 1:16 6ul + 6ul K 1:96  = #850b23
+R 1:16 6ul + 12ul K 1:96 = #500f28
+R 1:16 6ul + 24ul K 1:96 = #310e1e
+
+Y 1:16 3ul = #e3ea4a
+
+Y 1:16 3ul + 3ul K 1:96  = #b9ac12
+Y 1:16 3ul + 6ul K 1:96  = #a69212
+Y 1:16 3ul + 12ul K 1:96 = #500f28
+Y 1:16 3ul + 24ul K 1:96 = #310e1e
+
+## Concentrations for optimal color (subjective)
+
+### 384-well white
+
+R: 20ul 1:96 R = 0.21ul
+Y: 10ul 1:96 Y = 0.10ul
+B: 30ul 1:96 B = 0.31ul
+K: ?
+
+### 384-well transparent
+
+R: 6ul 1:16 R = 0.38ul
+Y: 3ul 1:16 Y = 0.19ul
+B: 12ul 1:16 B = 0.75ul
+K: 24ul 1:96 K = 0.25ul
+
+### 96-well transparent
+
+R: 50ul 1:16 R = 3.1ul
+Y: ?
+B: 50ul 1:16 B
