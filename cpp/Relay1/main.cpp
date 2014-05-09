@@ -42,6 +42,10 @@ int main(int argc, char *argv[])
 
     QtQuick2ControlsApplicationViewer viewer;
     Backend* backend = new Backend();
+
+    backend->saveWorklistColorchart384();
+    return 0;
+
     //viewer.setInterface(interface);
     viewer.getEngine().rootContext()->setContextProperty("backend", backend);
     viewer.setMainQmlFile(QStringLiteral("qml/Relay1/main.qml"));

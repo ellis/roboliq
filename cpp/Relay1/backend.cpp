@@ -7,6 +7,29 @@
 #include <QtDebug>
 
 
+QVector<RYBK> colorInfo {
+    RYBK(0, 0, 0, 0, QColor("#ffffff")), // white
+    RYBK(24.0/29, 0, 0, 0, QColor("#d20313")), // red hue=355
+    RYBK(0, 24.0/30, 0, 0, QColor("#fffd54")), // yellow
+    RYBK(0, 0, 24.0/20, 0, QColor("#0067c3")), // blue
+    RYBK(0, 0, 0, 24.0/47, QColor("#000000")), // black
+    RYBK(0, 12.0/30, 12.0/20, 0, QColor("#018807")), // green
+    RYBK(1.0/96, 30.0/96, 0, 0, QColor("#ff6f00")), // orange
+    RYBK(1.0/96, 30.0/96, 0, 0.7/96, QColor("#78352c")), // brown
+};
+
+QVector<const Source*> allSources_l {
+    new Source(0, "Red", "T3", 0, 1, RYBK(1.0/29, 0, 0, 0)),
+    new Source(1, "Red2", "T3", 0, 2, RYBK(1.0/75, 0, 0, 0)),
+    new Source(2, "Yellow", "T3", 1, 1, RYBK(0, 1.0/30, 0, 0)),
+    new Source(3, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/5, 0, 0)),
+    new Source(4, "Blue", "T3", 2, 1, RYBK(0, 0, 1.0/20, 0)),
+    new Source(5, "Black", "T3", 3, 1, RYBK(0, 0, 0, 1.0/47)),
+    //new Source(6, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/205))
+    new Source(6, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/370))
+};
+
+
 Backend::Backend(QObject *parent) :
     QObject(parent)
 {
@@ -241,27 +264,6 @@ QRgb rgb2ryb(const QColor& color) {
     return QColor::fromRgbF(1-r, 1-y, 1-b).rgb();
 }
 
-
-QVector<RYBK> colorInfo {
-    RYBK(0, 0, 0, 0, QColor("#ffffff")), // white
-    RYBK(24.0/29, 0, 0, 0, QColor("#d20313")), // red hue=355
-    RYBK(0, 24.0/30, 0, 0, QColor("#fffd54")), // yellow
-    RYBK(0, 0, 24.0/20, 0, QColor("#0067c3")), // blue
-    RYBK(0, 0, 0, 24.0/47, QColor("#000000")), // black
-    RYBK(0, 12.0/30, 12.0/20, 0, QColor("#018807")), // green
-    RYBK(1.0/96, 30.0/96, 0, 0, QColor("#ff6f00")), // orange
-    RYBK(1.0/96, 30.0/96, 0, 0.7/96, QColor("#78352c")), // brown
-};
-
-QVector<const Source*> allSources_l {
-    new Source(0, "Red", "T3", 0, 1, RYBK(1.0/29, 0, 0, 0)),
-    new Source(0, "Red2", "T3", 0, 2, RYBK(1.0/75, 0, 0, 0)),
-    new Source(0, "Yellow", "T3", 1, 1, RYBK(0, 1.0/30, 0, 0)),
-    new Source(0, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/5, 0, 0)),
-    new Source(0, "Blue", "T3", 2, 1, RYBK(0, 0, 1.0/20, 0)),
-    new Source(0, "Black", "T3", 3, 1, RYBK(0, 0, 0, 1.0/47))
-};
-
 RYBK convertColorByDist(const QColor& color) {
     qreal dMin = distDeltaE(colorInfo[0].colorExpected, color);
     const RYBK* ci = &colorInfo[0];
@@ -319,6 +321,10 @@ RYBK convertColorByHue(const QColor& color) {
 QColor reduceColor(const QColor& color) {
     const RYBK rybk = convertColorByDist(color);
     return rybk.colorExpected;
+}
+
+QString toString(const RYBK& rybk) {
+    return QString("RYBK(%1, %2, %3, %4)").arg(rybk.R).arg(rybk.Y).arg(rybk.B).arg(rybk.K);
 }
 
 /*
@@ -402,7 +408,38 @@ void Backend::saveImage(const QString& filename) {
 }
 
 void Backend::saveWorklistColorchart384() {
+    const qreal R = 24.0/29;
+    const qreal Y = 24.0/30;
+    const qreal B = 24.0/20;
+    const qreal K = 24.0/47;
+    QVector<RYBK> rybk_l(m_image.width() * m_image.height());
 
+    qDebug() << "saveWorklistColorchart384" << "width:" << m_image.width() << "height:" << m_image.height();
+
+    auto fn = [&] (int row, qreal amount) {
+        for (int col = 0; col < 4; col++) {
+            const int i = col * m_image.height() + row;
+            const int factor = 1 << col;
+            rybk_l[i].setComponent(row, amount / factor);
+        }
+    };
+
+    //fn(0, R);
+    //fn(1, Y);
+    //fn(2, B);
+    //fn(3, K);
+
+    rybk_l[wellIndex(4, 0)] = RYBK(1.0/96*8, 30.0/96*8, 0, 0); // Orange
+    rybk_l[wellIndex(4, 1)] = RYBK(1.0/96/2*8, 30.0/96/2*8, 0, 0); // Orange
+
+    rybk_l[wellIndex(4, 2)] = RYBK(1.0/96*8, 30.0/96*8, 0, 0.7/96*8); // Brown
+
+    rybk_l[wellIndex(4, 3)] = RYBK(10.0/600*8, 0, 5.0/155*8, 0); // Purple
+
+    auto wellToSources_ll = rybkListToSourceVolumeList(rybk_l);
+    debug(rybk_l);
+    debug(wellToSources_ll);
+    saveWorklistColor4(wellToSources_ll);
 }
 
 void Backend::saveWorklistSepia() {
@@ -505,8 +542,8 @@ QVector<SourceVolume> Backend::rybkToSourceVolumes(const RYBK& rybk) const {
             qreal v = 0;
             for (const Source* source : allSources_l) {
                 if (source->conc.component(i) > 0) {
-                    const qreal volume = rybk.component(i) / source->conc.component(i);
-                    if (volume > 3) {
+                    const qreal volume = round(rybk.component(i) / source->conc.component(i) * 10) / 10;
+                    if (volume >= 3) {
                         if (s == NULL || volume < v) {
                             s = source;
                             v = volume;
@@ -530,9 +567,14 @@ QVector<SourceVolume> Backend::rybkToSourceVolumes(const RYBK& rybk) const {
 }
 
 QVector<QVector<SourceVolume>> Backend::rybkListToSourceVolumeList(const QVector<RYBK>& rybk_l) const {
+    qDebug() << "rybkListToSourceVolumeList";
     QVector<QVector<SourceVolume>> ll;
+    int i = 0;
     for (const RYBK& rybk : rybk_l) {
-        ll += rybkToSourceVolumes(rybk);
+        auto l = rybkToSourceVolumes(rybk);
+        for (auto sv : l) { qDebug() << i << sv.source->sourceId << sv.volume; }
+        ll += l;
+        i++;
     }
     return ll;
 }
@@ -731,7 +773,6 @@ void Backend::saveWorklistColor3() {
     auto rybk_l = imageToRYBK();
     auto wellToSources_ll = rybkListToSourceVolumeList(rybk_l);
     saveWorklistColor4(wellToSources_ll);
-
 }
 
 void Backend::saveWorklistColor3LargeTips() {
@@ -794,5 +835,43 @@ void Backend::saveWorklistColor3LargeTips() {
         out << "W1;" << endl;
         aspirate[tip_i] = 0;
         dispense[tip_i].clear();
+    }
+}
+
+void Backend::debug(const QVector<RYBK>& l) {
+    qDebug() << "[RYBK]";
+    for (int col = 0; col < m_image.width(); col++) {
+        for (int row = 0; row < m_image.height(); row++) {
+            int i = col * m_image.height() + row;
+            if (!l[i].isEmpty()) {
+                qDebug() << "  row:" << row << "col:" << col << toString(l[i]);
+            }
+        }
+    }
+}
+
+void Backend::debug(const QVector<SourceVolume>& l) {
+    for (int col = 0; col < m_image.width(); col++) {
+        for (int row = 0; row < m_image.height(); row++) {
+            int i = col * m_image.height() + row;
+            const SourceVolume& x = l[i];
+            qDebug() << "  row:" << row << "col:" << col << x.source->description << x.volume;
+        }
+    }
+}
+
+void Backend::debug(const QVector<QVector<SourceVolume>>& ll) {
+    qDebug() << "[[SourceVolume]]";
+    for (int col = 0; col < m_image.width(); col++) {
+        for (int row = 0; row < m_image.height(); row++) {
+            int i = col * m_image.height() + row;
+            const QVector<SourceVolume>& l = ll[i];
+            if (!l.isEmpty()) {
+                qDebug() << "  row:" << row << "col:" << col;
+                for (const SourceVolume& x : l) {
+                    qDebug() << "    " << x.source->description << x.volume;
+                }
+            }
+        }
     }
 }

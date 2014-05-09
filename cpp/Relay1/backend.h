@@ -19,6 +19,10 @@ struct RYBK {
     {
     }
 
+    bool isEmpty() const {
+        return R == 0 && Y == 0 && B == 0 && K == 0;
+    }
+
     qreal component(int index) const {
         switch (index) {
         case 0: return R;
@@ -26,6 +30,16 @@ struct RYBK {
         case 2: return B;
         case 3: return K;
         default: return 0;
+        }
+    }
+
+    void setComponent(int index, qreal amount) {
+        switch (index) {
+        case 0: R = amount; break;
+        case 1: Y = amount; break;
+        case 2: B = amount; break;
+        case 3: K = amount; break;
+        default: break;
         }
     }
 };
@@ -126,6 +140,10 @@ private:
         QTextStream& out,
         QVector<Pipette>& pipette_l
     );
+    int wellIndex(int row, int col) { return col * m_image.height() + row; }
+    void debug(const QVector<RYBK>& l);
+    void debug(const QVector<SourceVolume>& l);
+    void debug(const QVector<QVector<SourceVolume>>& ll);
 
 private:
 	//QVector<QColor> color_l;
