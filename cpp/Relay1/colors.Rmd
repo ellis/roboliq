@@ -5,7 +5,13 @@ library(ggplot2)
 library(reshape2)
 ```
 
+## White
+
+
+
 ## Blue
+
+1:96 dilution of B.
 
 ```{r}
 B = c(5, 10, 15, 20, 25, 30, 40, 45, 50)
@@ -16,6 +22,21 @@ df = data.frame(R=0, Y=0, B, r, b, g)
 df = melt(df, id.vars=c("R", "Y", "B"))
 ggplot(data=df, aes(x=B, y=value, color=variable)) + geom_line() + ggtitle("Pure Blue")
 ```
+
+Linear deltas:
+
+```{r}
+dB = ((50-5)/96)
+B_dr = (0-255) / ((10-0)/96)
+B_dg = (66-188) / dB
+B_db = (169-213) / dB
+B_d = c(B_dr, B_dg, B_db)
+```
+
+1ul of B reduces rgb values by:
+* r ``B_dr`` / 1ul B
+* g ``B_dg`` / 1ul B
+* b ``B_db`` / 1ul B
 
 ## 1:1 mixtures
 
@@ -31,5 +52,14 @@ df = melt(df, id.vars=c("R", "Y", "B"))
 ggplot(data=df, aes(x=R, y=value, color=variable)) + geom_line() + ggtitle("R+B 1:1")
 ```
 
+Y+K
+
 ```{r}
-amount
+Y=3/16
+K=c(0,3,6,12,24)/96
+r = c(227,185,166,80,49)
+g = c(234,172,146,15,14)
+df = data.frame(R=0, Y, B=0, K, r, g, b=0)
+df = melt(df, id.vars=c("R", "Y", "B", "K"))
+ggplot(data=df, aes(x=K, y=value, color=variable)) + geom_line() + ggtitle("Y+K")
+```
