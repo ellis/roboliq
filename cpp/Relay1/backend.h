@@ -7,6 +7,29 @@
 #include <QVector>
 
 
+struct RYBK {
+    qreal R;
+    qreal Y;
+    qreal B;
+    qreal K;
+    QColor colorExpected;
+
+    RYBK(qreal R = 0, qreal Y = 0, qreal B = 0, qreal K = 0, const QColor& colorExpected = Qt::white)
+        : R(R), Y(Y), B(B), K(K), colorExpected(colorExpected)
+    {
+    }
+
+    qreal component(int index) const {
+        switch (index) {
+        case 0: return R;
+        case 1: return Y;
+        case 2: return B;
+        case 3: return K;
+        default: return 0;
+        }
+    }
+};
+
 struct TipWellVolumePolicy {
     int tip;
     QString plate;
@@ -20,11 +43,31 @@ struct TipWellVolumePolicy {
     {}
 };
 
-struct SourceVolume {
+struct Source {
+    int sourceId;
+    QString description;
     QString plate;
     int row;
     int col;
+    RYBK conc; // RYBK concentration per ul
+
+    Source(
+        int sourceId,
+        const QString& description,
+        const QString& plate,
+        int row,
+        int col,
+        const RYBK& conc
+    ) : sourceId(sourceId), description(description), plate(plate), row(row), col(col), conc(conc)
+    { }
+};
+
+struct SourceVolume {
+    const Source* source;
     qreal volume;
+
+    SourceVolume() : source(NULL), volume(0) {}
+    SourceVolume(const Source* source, qreal volume) : source(source), volume(volume) {}
 };
 
 struct Pipette {
@@ -51,12 +94,15 @@ public:
     Q_INVOKABLE void setColor(const int row, const int col, const QString& colorName);
     Q_INVOKABLE void openImage(const QString& filename);
     Q_INVOKABLE void saveImage(const QString& filename);
+    Q_INVOKABLE void saveWorklistColorchart384();
     Q_INVOKABLE void saveWorklistSepia();
     Q_INVOKABLE void saveWorklistColor3();
 	Q_INVOKABLE void saveWorklistColor3LargeTips();
 	Q_INVOKABLE void colorizeMonochrome();
 	Q_INVOKABLE void colorizeHues3();
 	Q_INVOKABLE void colorizeHues6();
+
+    void saveWorklistColor4(const QVector<QVector<SourceVolume>>& wellToSources_ll);
 
 signals:
     void rowCountChanged(int);
@@ -65,6 +111,9 @@ signals:
 public slots:
 
 private:
+    QVector<RYBK> imageToRYBK() const;
+    QVector<SourceVolume> rybkToSourceVolumes(const RYBK& rybk) const;
+    QVector<QVector<SourceVolume>> rybkListToSourceVolumeList(const QVector<RYBK>& rybk_l) const;
     void printWorklistItems(
             class QTextStream& out,
             const int n,

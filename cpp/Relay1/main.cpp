@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     qDebug() << QColor(reduceColor(Qt::green)).name();
     qDebug() << QColor(reduceColor(Qt::blue)).name();
     qDebug() << QColor(reduceColor(Qt::yellow)).name();
-    //return 0;
+    return 0;
 
     QtQuick2ControlsApplicationViewer viewer;
     Backend* backend = new Backend();
