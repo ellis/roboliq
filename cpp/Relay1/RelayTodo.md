@@ -45,21 +45,20 @@ Experiments:
 - [x] Get another couple white 384 plates from the lab and some more eppendorfs
 - [x] Create script for chosen dilutions using eppendorfs
 - [x] Find best purple
-- [ ] Create script for color chart
+- [x] Create script for color chart
 	- [x] light yellow/yellow/orange/brown/dark brown
-	- [ ] 3 levels of green?
-	- [ ] purples?
-1- [ ] Halve the concentrations for 384 white except yellow, double them for 384 transparent, so transparent is 8x more concentrated
-- [ ] Run black series and mixtures on white 384 plate too
-- [ ] Test impact of black dye on various colors
+	- [x] 3 levels of green
+	- [x] purples?
+- [x] Halve the concentrations for 384 white except yellow, double them for 384 transparent, so transparent is 8x more concentrated
+- [x] Run black series and mixtures on white 384 plate too
+- [x] Test impact of black dye on various colors
 	- [x] Create script testing dilutions of primary colors with four dilutions of black (3,6,12,24ul 1:16 K)
 	- [x] Photo of dilution series
-	- [ ] Record RGB values of dilutions
-- [ ] Record cyan value (low volume blue)
-- [ ] Run the series on a 96 well plate too
+	- [-] Record RGB values of dilutions
+- [ ] Record RGB values for color chart
 - [ ] Does it look better to have larger water volume in the transparent 384 plate?
-- [ ] might reduce saturation by removing liquid from a well?
-- [ ] might want to dilute red-for-orange another 2-8 times in order to get saturations of orange?
+- [ ] Print at least 5 different pictures
+- [ ] Run the series on a 96 well plate too
 
 Coordination:
 - [x] Email everyone about times to show up
@@ -69,7 +68,7 @@ Coordination:
 
 Evoware:
 - [-] Try to get the sealer to work
-3- [ ] Test whether Aspirate and Dispense commands can go into gwl files
+*- [ ] Test whether Aspirate and Dispense commands can go into gwl files
 
 Manual lab work:
 - [-] Test sealer with our plates
@@ -80,7 +79,7 @@ Manual lab work:
 - [ ] Get some blank white printer paper to lay transparent plates on for viewing
 
 Basic Functionality:
-2- [ ] Create function to create color chart worklist (with about 21 colors)
+- [ ] Create function to create color chart worklist (with about 21 colors)
 - [ ] Given the measurements, build a list of colors we can mix
 - [ ] Round volumes to 0.1 ul
 - [ ] Decide on dye dilutions to use
