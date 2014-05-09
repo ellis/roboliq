@@ -104,6 +104,16 @@ RYB(30, 0, 0) = #cc0404 -> R
 RYB(0, 30, 0) = #ebd301 -> RG 1:1
 RYB(0, 0, 30) = #0079c6 -> GB 3:5 [HSL 203 100 39]
 
+Red:
+RYB(20, 0, 0) = #d20313
+
+Yellow:
+RYB(0,  5, 0) = #fcf664
+RYB(0, 10, 0) = #fffd54
+RYB(0, 20, 0) = #ffcf2f
+RYB(0, 50, 0) = #fdd024
+
+Blue:
 RYB(0, 0, 5)  = #3ebcd5 -> GB 5:6 1.2 [HSL 190 64 54]
 RYB(0, 0, 10) = #00a7d4 -> GB 4:5 1.25 [HSL 193 100 42]
 RYB(0, 0, 15) = #039fdc -> [HSL 197 97 44]
@@ -113,11 +123,6 @@ RYB(0, 0, 30) = #0067c3 -> [HSL 208 100 38]
 RYB(0, 0, 40) = #0058c3 -> GB 5:11 2.2 [HSL 213 100 38]
 RYB(0, 0, 45) = #0050bc -> [HSL 214 100 37]
 RYB(0, 0, 50) = #0042a9 -> [HSL 217 100 33]
-
-RYB(0,  5, 0) = #fcf664
-RYB(0, 10, 0) = #fffd54
-RYB(0, 20, 0) = #ffcf2f
-RYB(0, 50, 0) = #fdd024
 
 1:1 mixtures:
 RYB(15, 0, 15) = #21043c -> RB 1:2
@@ -136,5 +141,50 @@ RYB(0, 5, 5) = #42b63b -> G
 RYB(3, 3, 3) = #78352c (dark brown)
 RYB(5, 5, 5) = #681714 (even darker brown)
 
-Orange and brown:
+Orange:
 30ul 1:96 Y + 2ul 1:96 R = #f07702 (a redish orange)
+30ul 1:96 Y + 1ul 1:96 R = #ff6f00 (nice orange)
+
+Brown:
+30ul 1:96 Y + 1ul 1:96 R + 0.7ul 1:96 K = #ce791f
+30ul 1:96 Y + 2ul 1:96 R + 1.2ul 1:96 K = #aa601a (not this one)
+
+## 384-well transparent color dilutions
+
+1:16 dilutions:
+R 1:16 3ul  = #d74977
+R 1:16 6ul  = #e71429
+
+R 1:16 6ul + 3ul K 1:96  = #bf041d
+R 1:16 6ul + 6ul K 1:96  = #850b23
+R 1:16 6ul + 12ul K 1:96 = #500f28
+R 1:16 6ul + 24ul K 1:96 = #310e1e
+
+Y 1:16 3ul = #e3ea4a
+
+Y 1:16 3ul + 3ul K 1:96  = #b9ac12
+Y 1:16 3ul + 6ul K 1:96  = #a69212
+Y 1:16 3ul + 12ul K 1:96 = #500f28
+Y 1:16 3ul + 24ul K 1:96 = #310e1e
+
+## Concentrations for optimal color (subjective)
+
+### 384-well white
+
+R: 20ul 1:96 R = 0.21ul
+Y: 10ul 1:96 Y = 0.10ul
+B: 30ul 1:96 B = 0.31ul
+K: ?
+
+### 384-well transparent
+
+R: 6ul 1:16 R = 0.38ul
+Y: 3ul 1:16 Y = 0.19ul
+B: 12ul 1:16 B = 0.75ul
+K: 24ul 1:96 K = 0.25ul
+
+### 96-well transparent
+
+R: 50ul 1:16 R = 3.1ul
+Y: ?
+B: 50ul 1:16 B

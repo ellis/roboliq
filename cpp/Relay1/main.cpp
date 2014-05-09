@@ -11,25 +11,18 @@
 
 extern QRgb ryb2rgb(qreal R, qreal Y, qreal B);
 extern QRgb rgb2ryb(const QColor& color);
-
+extern QColor reduceColor(const QColor& color);
 
 int main(int argc, char *argv[])
 {
     Application app(argc, argv);
 
-    /*qDebug() << QColor(Qt::white);
-	qDebug() << QColor(rgb2ryb(Qt::white)).name();
-	qDebug() << QColor(rgb2ryb(Qt::black)).name();
-	qDebug() << QColor(rgb2ryb(Qt::red)).name();
-	qDebug() << QColor(rgb2ryb(Qt::green)).name();
-	qDebug() << QColor(rgb2ryb(Qt::blue)).name();
-    qDebug() << QColor(rgb2ryb(Qt::yellow)).name();*/
-    qDebug() << QColor(ryb2rgb(1, 0, 0)).name();
-    qDebug() << QColor(ryb2rgb(0, 1, 0)).name();
-    qDebug() << QColor(ryb2rgb(0, 0, 1)).name();
-    qDebug() << QColor(ryb2rgb(.5, .5, 0)).name();
-    qDebug() << QColor(ryb2rgb(.5, 0, .5)).name();
-    qDebug() << QColor(ryb2rgb(0, .5, .5)).name();
+    qDebug() << QColor(reduceColor(Qt::white)).name();
+    qDebug() << QColor(reduceColor(Qt::black)).name();
+    qDebug() << QColor(reduceColor(Qt::red)).name();
+    qDebug() << QColor(reduceColor(Qt::green)).name();
+    qDebug() << QColor(reduceColor(Qt::blue)).name();
+    qDebug() << QColor(reduceColor(Qt::yellow)).name();
     //return 0;
 
     QtQuick2ControlsApplicationViewer viewer;

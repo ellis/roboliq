@@ -6,6 +6,32 @@
 #include <QObject>
 #include <QVector>
 
+
+struct TipWellVolumePolicy {
+    int tip;
+    QString plate;
+    int row;
+    int col;
+    qreal volume;
+    QString policy;
+
+    TipWellVolumePolicy()
+        : tip(0), row(0), col(0), volume(0.0)
+    {}
+};
+
+struct SourceVolume {
+    QString plate;
+    int row;
+    int col;
+    qreal volume;
+};
+
+struct Pipette {
+    TipWellVolumePolicy src;
+    QVector<TipWellVolumePolicy> dst_l;
+};
+
 class Backend : public QObject
 {
     Q_OBJECT
@@ -47,6 +73,10 @@ private:
             const QString tipSite[],
             const QString tipLiquidClass[8],
             QString dispense[]);
+    void printWorklistPipetteItems(
+        QTextStream& out,
+        QVector<Pipette>& pipette_l
+    );
 
 private:
 	//QVector<QColor> color_l;

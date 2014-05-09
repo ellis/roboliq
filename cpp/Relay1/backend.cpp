@@ -142,7 +142,10 @@ QRgb rgb2ryb0(const QColor& color) {
 }
 
 int distHue(int hueTarget, int hueActual) {
-    return ((hueTarget + 360) - hueActual) % 360;
+    int d = ((hueTarget + 360) - hueActual) % 360;
+    if (d > 180)
+        d = 360 - d;
+    return d;
 }
 
 QRgb rgb2ryb(const QColor& color) {
@@ -157,14 +160,14 @@ QRgb rgb2ryb(const QColor& color) {
     if (dRed == dMin) {
 
     }
-    const QColor
+    /*const QColor
             C000 = QColor::fromRgbF(1.0, 1.0, 1.0), // White
             C100 = QColor::fromRgbF(1.0, 0.0, 0.0), // Red
             C010 = QColor::fromRgbF(1.0, 1.0, 0.0), // Yellow
             C001 = QColor::fromRgbF(1.0, 1.0, 1.0), // Blue
             C110 = QColor::fromRgbF(1.0, 0.5, 0.0), // Orange
             C101 = QColor::fromRgbF(0.5, 0.5, 1.0), // Purple
-            C011 = QColor::fromRgbF(0.0, 0.0, 0.0); // Black
+            C011 = QColor::fromRgbF(0.0, 0.0, 0.0); // Black*/
     qreal r = color.redF(),
         g = color.greenF(),
         b = color.blueF();
@@ -211,6 +214,74 @@ QRgb rgb2ryb(const QColor& color) {
     return QColor::fromRgbF(1-r, 1-y, 1-b).rgb();
 }
 
+
+struct RYBK {
+    qreal R;
+    qreal Y;
+    qreal B;
+    qreal K;
+    QColor colorExpected;
+
+    RYBK(qreal R = 0, qreal Y = 0, qreal B = 0, qreal K = 0, const QColor& colorExpected = Qt::white)
+        : R(R), Y(Y), B(B), K(K), colorExpected(colorExpected)
+    {
+    }
+};
+
+QVector<RYBK> colorInfo {
+    RYBK(20.0/96, 0, 0, 0, QColor("#d20313")), // red hue=355
+    RYBK(0, 10.0/96, 0, 0, QColor("#fffd54")), // yellow
+    RYBK(0, 0, 30.0/96, 0, QColor("#0067c3")), // blue
+    RYBK(0, 15.0/96, 15.0/96, 0, QColor("#018807")), // green
+    RYBK(2.0/96, 30.0/96, 0, 0, QColor("#f07702")), // redish-orange hue=29
+};
+
+RYBK convertColor(const QColor& color) {
+    const QColor color1 = color.toHsv();
+    if (color1.saturation() < 10) {
+        // FIXME: handle shades of grey
+        return RYBK(0, 0, 0, 0, Qt::white);
+    }
+    const int hue = color1.hue();
+    int dMin = distHue(colorInfo[0].colorExpected.hue(), hue);
+    const RYBK* ci = &colorInfo[0];
+    for (const RYBK& ci_ : colorInfo) {
+        const int d = distHue(ci_.colorExpected.hue(), hue);
+        //qDebug() << "distHue(" << ci_.colorExpected.hue() << ", " << hue << ") = " << d;
+        if (d < dMin) {
+            dMin = d;
+            ci = &ci_;
+        }
+    }
+    RYBK rybk = *ci;
+    const QColor color2 = ci->colorExpected.toHsv();
+
+    const int hue2 = color2.hue();
+    const int saturation2 = qMin(color.hsvSaturation(), color2.hsvSaturation());
+    if (color.saturation() < color2.saturation()) {
+        qreal factor = color.saturationF() / color2.saturationF();
+        rybk.R *= factor;
+        rybk.Y *= factor;
+        rybk.B *= factor;
+        rybk.K *= factor;
+    }
+    //const int value2 = qMin(color.value(), color2.value());
+    const int value2 = color2.value();
+    //if (color.value() < color2.value()) {
+        // TODO: Add black ink
+    //}
+    //qDebug() << "rybk" << rybk.R << rybk.Y << rybk.B << rybk.K;
+
+    rybk.colorExpected = QColor::fromHsv(hue2, saturation2, value2);
+    return rybk;
+}
+
+QColor reduceColor(const QColor& color) {
+    const RYBK rybk = convertColor(color);
+    return rybk.colorExpected;
+}
+
+/*
 QColor reduceColor(const QColor& color) {
     const int hue = color.hslHue();
     const int dRed = distHue(0, hue);
@@ -218,6 +289,9 @@ QColor reduceColor(const QColor& color) {
     const int dGreen = distHue(120, hue);
     const int dBlue = distHue(240, hue);
     const int dPurple = distHue(300, hue);
+
+    B10 = [-100, -2.6, -0.9]
+
 
     const int dMin = qMin(dRed, qMin(dYellow, qMin(dGreen, qMin(dBlue, dPurple))));
     QColor color2;
@@ -240,6 +314,7 @@ QColor reduceColor(const QColor& color) {
 
     return QColor::fromHsl(hue2, saturation2, lightness2);
 }
+*/
 
 void Backend::colorizeMonochrome() {
 	const QColor sepia(112, 66, 20);
@@ -358,66 +433,236 @@ const QString tipSite[8] = { "water", "water", "water", "water", "T3", "T3", "T3
 const QString tipLiquidClass[8] = { "Water free dispense", "Water free dispense", "Water free dispense", "Water free dispense",
                                     "Water_C_50", "Water_C_50", "Water_C_50", "Water_C_50" };
 
+void setupSourceVolumeColor(SourceVolume& sv, qreal amount, int row) {
+    sv.plate = "T3";
+    sv.row = row;
+
+    if (amount * 96 < 1) {
+        sv.col = -1;
+        sv.volume = 0;
+    }
+    else {
+        sv.col = 2;
+        sv.volume = amount * 96;
+    }
+    if (sv.volume > 30) {
+        qDebug() << "Large amount " << sv.volume;
+    }
+}
+
+void Backend::printWorklistPipetteItems(
+    QTextStream& out,
+    QVector<Pipette>& pipette_l
+) {
+    for (int i = 0; i < pipette_l.size(); i++) {
+        Pipette& pipette = pipette_l[i];
+        const TipWellVolumePolicy& src = pipette.src;
+        if (src.volume > 0) {
+            const int tip_mask = 1 << src.tip;
+            // Number of rows on source plate
+            int rowCount = 0;
+            if (src.plate == "water") rowCount = 8;
+            else if (src.plate == "T3") rowCount = 4;
+
+            const int srcWell_n = 1 + src.row + src.col * rowCount;
+            //qDebug() << srcWell_n << src.row << src.col << rowCount;
+            out << "A;" << src.plate << ";;;" << srcWell_n << ";;" << src.volume << ";"
+                   << src.policy << ";;" << tip_mask << endl;
+            for (const TipWellVolumePolicy& dst : pipette.dst_l) {
+                const int dstWell_n = 1 + dst.row + dst.col * m_image.height();
+                out << "D;" << dst.plate << ";;;" << dstWell_n << ";;" << dst.volume << ";"
+                       << dst.policy << ";;" << tip_mask << endl;
+            }
+            out << "W1;" << endl;
+        }
+        pipette.src.volume = 0;
+        pipette.dst_l.clear();
+    }
+}
+
 void Backend::saveWorklistColor3() {
     //QFile file("C:\\Ellis\\openhouse.gwl");
     QFile file("openhouse.gwl");
     file.open(QIODevice::WriteOnly | QIODevice::Text);
 
     QTextStream out(&file);
-    double aspirate[8];
-    QString dispense[8];
+    QVector<Pipette> pipette_l(8);
+    for (int i = 0; i < pipette_l.size(); i++)
+        pipette_l[i].src.tip = i;
+    //QVector<RYBK> rybk_l(m_image.width() * m_image.height());
+    QVector<QVector<SourceVolume>> sources_l(m_image.width() * m_image.height());
+    //QVector<SourceVolume>> sources_l(m_image.width() * m_image.height());
 
-    for (int i = 0; i < 8; i++)
-        aspirate[i] = 0;
-
+    // Get RYBK quantites for each well
 	for (int col = 0; col < m_image.width(); col++) {
 		for (int row = 0; row < m_image.height(); row++) {
 			const int i = col * m_image.height() + row;
-			const int well_n = i + 1;
 
 			// Simplify the color, only use one of red, green, OR blue
 			const QColor& color0 = m_image.pixel(col, row);
-			QColor color = color0;
-			const int tipWater_i = i % 4;
-			int tipColor_i = 0;
-			if (color.red() >= color.blue() && color.red() >= color.green()) {
-				color.setRgb(color.red(), 0, 0);
-				tipColor_i = 4;
-			}
-			else if (color.green() >= color.blue()) {
-				color.setRgb(0, color.green(), 0);
-				tipColor_i = 5;
-			}
-			else {
-				color.setRgb(0, 0, color.blue());
-				tipColor_i = 6;
-			}
+            const RYBK rybk = convertColor(color0);
+            //rybk_l[i] = rybk;
 
-			double volumeColor = ((double) ((int) (m_volumeSaturated * color0.saturationF() * 10))) / 10;
-			qDebug() << i << color0 << color << volumeColor;
-			if (volumeColor < 0.5)
-				volumeColor = 0;
-			if (volumeColor > 0) {
-				double volumeWater = m_volumeTotal - volumeColor;
-				if (volumeWater < 3)
-					volumeWater = 0;
-
-				if (aspirate[tipWater_i] + volumeWater > 950 || aspirate[tipColor_i] > 0) {
-					printWorklistItems(out, 8, aspirate, tipWell, tipSite, tipLiquidClass, dispense);
-				}
-				aspirate[tipWater_i] += volumeWater;
-				aspirate[tipColor_i] += volumeColor;
-
-				if (volumeWater > 0) {
-					QTextStream outWater(&dispense[tipWater_i]);
-					outWater << "D;plate;;;" << well_n << ";;" << volumeWater << ";" << tipLiquidClass[tipWater_i] << ";;" << (1 << tipWater_i) << endl;
-				}
-				QTextStream outColor(&dispense[tipColor_i]);
-				outColor << "D;plate;;;" << well_n << ";;" << volumeColor << ";" << tipLiquidClass[tipColor_i] << ";;" << (1 << tipColor_i) << endl;
-			}
-		}
+            QVector<SourceVolume> sv_l = QVector<SourceVolume>(4);
+            //qDebug() << "rybk" << rybk.R << rybk.Y << rybk.B << rybk.K;
+            setupSourceVolumeColor(sv_l[0], rybk.R, 0);
+            setupSourceVolumeColor(sv_l[1], rybk.Y, 1);
+            setupSourceVolumeColor(sv_l[2], rybk.B, 2);
+            setupSourceVolumeColor(sv_l[3], rybk.K, 3);
+            sources_l[i] = sv_l;
+            // FOR DEBUG ONLY
+            /*if (col == 2) {
+                QVector<int> v(4);
+                for (int j = 0; j < 4; j++)
+                    v[j] = sv_l[j].volume;
+                qDebug() << col << row << v;
+            }*/
+        }
     }
-    printWorklistItems(out, 8, aspirate, tipWell, tipSite, tipLiquidClass, dispense);
+
+    // Row sequence for 384 well plates, interlaced for greater efficiency
+    const int rowSequence384[] = { 0,2,4,6, 1,3,5,7, 8,10,12,14, 9,11,13,15 };
+
+    // Dispense water
+    // Initialize the pipetting instructions
+    for (int tip_i = 0; tip_i < 4; tip_i++) {
+        pipette_l[tip_i].src.tip = tip_i;
+        pipette_l[tip_i].src.plate = "System";
+        pipette_l[tip_i].src.col = 2;
+        pipette_l[tip_i].src.row = tip_i;
+        pipette_l[tip_i].src.policy = "Water_A_1000";
+        pipette_l[tip_i].src.volume = 0;
+        pipette_l[tip_i].dst_l.clear();
+    }
+    for (int row0 = 0; row0 < m_image.height(); row0++) {
+        // Following an interlaced row sequence for the 384 well plate
+        int row = row0;
+        const int tip_i = (row0 % 4);
+        if (m_image.height() == 16) {
+            row = rowSequence384[row0];
+        }
+        for (int col = 0; col < m_image.width(); col++) {
+            const int i = col * m_image.height() + row;
+            qreal volume = 0;
+            const QVector<SourceVolume>& sources = sources_l[i];
+
+            // Water
+            for (auto sv : sources) {
+                volume += sv.volume;
+            }
+            if (volume > 0 && volume < 25) {
+                const qreal volumeWater = qMax(30 - volume, 5.0);
+                qDebug() << row << col << volume << volumeWater;
+                if (pipette_l[tip_i].src.volume + volumeWater > 900)
+                    printWorklistPipetteItems(out, pipette_l);
+                pipette_l[tip_i].src.volume += volumeWater;
+
+                TipWellVolumePolicy dst;
+                dst.tip = tip_i;
+                dst.plate = "plate";
+                dst.col = col;
+                dst.row = row;
+                dst.policy = "Water_A_1000";
+                dst.volume = volumeWater;
+                pipette_l[tip_i].dst_l += dst;
+            }
+        }
+    }
+    printWorklistPipetteItems(out, pipette_l);
+    out << "B;" << endl;
+
+    qDebug() << "volumes >= 3";
+    // For each source, volumes >= 3
+    for (int source_i = 0; source_i < 4; source_i++) {
+        // Initialize the pipetting instructions
+        for (int tip_i = 0; tip_i < 4; tip_i++) {
+            pipette_l[tip_i].src.tip = tip_i;
+            pipette_l[tip_i].src.plate = "T3";
+            pipette_l[tip_i].src.col = 2;
+            pipette_l[tip_i].src.row = source_i;
+            pipette_l[tip_i].src.policy = "Water_A_1000";
+            pipette_l[tip_i].src.volume = 0;
+            pipette_l[tip_i].dst_l.clear();
+        }
+
+        // For each well
+        for (int row0 = 0; row0 < m_image.height(); row0++) {
+            // Following an interlaced row sequence for the 384 well plate
+            int row = row0;
+            if (m_image.height() == 16) {
+                row = rowSequence384[row0];
+            }
+            for (int col = 0; col < m_image.width(); col++) {
+                const int i = col * m_image.height() + row;
+                const QVector<SourceVolume>& sources = sources_l[i];
+                const SourceVolume& sv = sources[source_i];
+
+                if (sv.volume >= 3) {
+                    const int tip_i = (row % 4);
+                    if (pipette_l[tip_i].src.volume + sv.volume > 900)
+                        printWorklistPipetteItems(out, pipette_l);
+                    pipette_l[tip_i].src.volume += sv.volume;
+
+                    TipWellVolumePolicy dst;
+                    dst.tip = tip_i;
+                    dst.plate = "plate";
+                    dst.col = col;
+                    dst.row = row;
+                    dst.policy = "Water_A_1000";
+                    dst.volume = sv.volume;
+                    pipette_l[tip_i].dst_l += dst;
+                }
+            }
+        }
+        printWorklistPipetteItems(out, pipette_l);
+        out << "B;" << endl;
+    }
+
+    qDebug() << "volumes < 3";
+    // For each source, volumes < 3
+    for (int source_i = 0; source_i < 4; source_i++) {
+        // Initialize the pipetting instructions
+        for (int tip_i = 4; tip_i < 8; tip_i++) {
+            pipette_l[tip_i].src.tip = tip_i;
+            pipette_l[tip_i].src.plate = "T3";
+            pipette_l[tip_i].src.col = 2;
+            pipette_l[tip_i].src.row = source_i;
+            pipette_l[tip_i].src.policy = "Water_C_50";
+            pipette_l[tip_i].src.volume = 0;
+            pipette_l[tip_i].dst_l.clear();
+        }
+
+        // For each well
+        for (int row0 = 0; row0 < m_image.height(); row0++) {
+            // Following an interlaced row sequence for the 384 well plate
+            int row = row0;
+            if (m_image.height() == 16) {
+                row = rowSequence384[row0];
+            }
+            for (int col = 0; col < m_image.width(); col++) {
+                const int i = col * m_image.height() + row;
+                const QVector<SourceVolume>& sources = sources_l[i];
+                const SourceVolume& sv = sources[source_i];
+
+                if (sv.volume > 1 && sv.volume < 3) {
+                    const int tip_i = (row % 4) + 4;
+                    if (pipette_l[tip_i].src.volume > 0)
+                        printWorklistPipetteItems(out, pipette_l);
+                    pipette_l[tip_i].src.volume += sv.volume;
+
+                    TipWellVolumePolicy dst;
+                    dst.tip = tip_i;
+                    dst.plate = "plate";
+                    dst.col = col;
+                    dst.row = row;
+                    dst.policy = "Water_C_50";
+                    dst.volume = sv.volume;
+                    pipette_l[tip_i].dst_l += dst;
+                }
+            }
+        }
+        printWorklistPipetteItems(out, pipette_l);
+    }
 }
 
 void Backend::saveWorklistColor3LargeTips() {
