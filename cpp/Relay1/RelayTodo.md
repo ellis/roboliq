@@ -55,9 +55,9 @@ Experiments:
 	- [x] Create script testing dilutions of primary colors with four dilutions of black (3,6,12,24ul 1:16 K)
 	- [x] Photo of dilution series
 	- [-] Record RGB values of dilutions
-!*- [ ] Do test run with troughs
-!*- [ ] Record RGB values for color chart
-!*- [ ] Print at least 5 different pictures
+- [x] Do test run with troughs
+- [x] Record RGB values for color chart
+!*- [ ] Print at least 5 different pictures for display
 - [ ] Does it look better to have larger water volume in the transparent 384 plate?
 - [ ] Print at least 5 different pictures
 - [ ] Run the series on a 96 well plate too
@@ -85,8 +85,9 @@ Basic Functionality:
 - [x] Decide on dye dilutions to use
 - [x] Use of small tips is too slow.  Use a more diluted solution.
 - [x] Create function to create color chart worklist (with about 24 colors)
-!*- [ ] Reprogram to use the troughs
-!*- [ ] Given the measurements, build a list of colors we can mix
+- [x] Reprogram to use the troughs
+- [x] Given the measurements, build a list of colors we can mix
+- [ ] Why does flower1 crash?
 *- [ ] Decide on best final well volume
 - [ ] Calculate how much of each source is used for each script
 - [ ] Reduce colors by converting to mixtures, then back to RGB.
@@ -99,8 +100,8 @@ UI:
 *- [ ] Let user pick colors
 *- [ ] Create a sidebar scrollable list of pictures
 - [ ] Create a better drawing interface!
-- [ ] More pictures
 - [ ] Even more pictures!
+
 - [ ] Let user pick which color layers to show (RYBK)
 - [ ] Let users write letters (with what colors or gradients?)
 - [ ] Overlapping color picker?  With white/black slide too?
@@ -112,3 +113,13 @@ Maaruthy:
 Gintas:
 - [x] clean plates
 - [x] look for low-res pictures
+
+Before openhouse:
+- [ ] test sealer
+- [ ] clean up: wash color off of black light table
+- [ ] clean up: table with sealer
+- [ ] clean up: computer table
+- [ ] clean up: drawers next to robot
+- [ ] clean up: make place for plates to wash
+- [ ] clean up: make place for plate to display
+- [ ] tape up posters
