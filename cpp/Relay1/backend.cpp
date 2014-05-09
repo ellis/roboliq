@@ -19,14 +19,31 @@ QVector<RYBK> colorInfo {
 };
 
 QVector<const Source*> allSources_l {
-    new Source(0, "Red", "T3", 0, 1, RYBK(1.0/29, 0, 0, 0)),
-    new Source(1, "Red2", "T3", 0, 2, RYBK(1.0/75, 0, 0, 0)),
-    new Source(2, "Yellow", "T3", 1, 1, RYBK(0, 1.0/30, 0, 0)),
-    new Source(3, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/5, 0, 0)),
-    new Source(4, "Blue", "T3", 2, 1, RYBK(0, 0, 1.0/20, 0)),
-    new Source(5, "Black", "T3", 3, 1, RYBK(0, 0, 0, 1.0/47)),
+    // RED
+    new Source(11, "Red1", "T3", 0, 1, RYBK(1.0/29, 0, 0, 0)),
+    //new Source(1, "Red2", "T3", 0, 2, RYBK(1.0/75, 0, 0, 0)), // TESTING
+    new Source(12, "Red2", "T3", 0, 2, RYBK(1.0/232, 0, 0, 0)),
+    new Source(13, "Red3", "T3", 0, 3, RYBK(1.0/1856, 0, 0, 0)),
+
+    // YELLOW
+    new Source(21, "Yellow1", "T3", 1, 1, RYBK(0, 1.0/30, 0, 0)),
+    //new Source(3, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/5, 0, 0)), // Currently, it's really x5, just trying out x3
+    new Source(22, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/240, 0, 0)),
+    new Source(24, "Yellow0", "T3", 1, 4, RYBK(0, 1.0/3, 0, 0)),
+
+    // BLUE
+    new Source(31, "Blue1", "T3", 2, 1, RYBK(0, 0, 1.0/20, 0)),
+    new Source(32, "Blue2", "T3", 2, 2, RYBK(0, 0, 1.0/160, 0)),
+
+    // BLACK
+    new Source(41, "Black1", "T3", 3, 1, RYBK(0, 0, 0, 1.0/47)),
     //new Source(6, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/205))
-    new Source(6, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/370))
+    new Source(42, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/376)),
+    new Source(43, "Black3", "T3", 3, 3, RYBK(0, 0, 0, 1.0/3008))
+//            R: 1:29 (transparent), 1:75 (transparent orange), 1:230 (white), 1:600 (orange and brown)
+//            Y: 1:30 (transparent), 1:5 (transparent orange), 1:240 (white), 1:39 (orange and brown)
+//            B: 1:20 (transparent), 1:155 (white)
+//            K: 1:47 (transparent), 1:205 (transparent brown), 1:370 (white), 1:1644 (brown)
 };
 
 
@@ -424,17 +441,23 @@ void Backend::saveWorklistColorchart384() {
         }
     };
 
-    //fn(0, R);
-    //fn(1, Y);
-    //fn(2, B);
-    //fn(3, K);
+    fn(0, R);
+    fn(1, Y);
+    fn(2, B);
+    fn(3, K);
 
     rybk_l[wellIndex(4, 0)] = RYBK(1.0/96*8, 30.0/96*8, 0, 0); // Orange
     rybk_l[wellIndex(4, 1)] = RYBK(1.0/96/2*8, 30.0/96/2*8, 0, 0); // Orange
 
-    rybk_l[wellIndex(4, 2)] = RYBK(1.0/96*8, 30.0/96*8, 0, 0.7/96*8); // Brown
+    rybk_l[wellIndex(5, 0)] = RYBK(1.0/12, 30.0/12, 0, 0.7/12); // Brown
+    rybk_l[wellIndex(5, 1)] = RYBK(1.0/12/2, 30.0/12/2, 0, 0.7/12/2); // Brown
 
-    rybk_l[wellIndex(4, 3)] = RYBK(10.0/600*8, 0, 5.0/155*8, 0); // Purple
+    rybk_l[wellIndex(6, 0)] = RYBK(10.0/600*8, 0, 5.0/155*8, 0); // Purple
+
+    rybk_l[wellIndex(7, 0)] = RYBK(0, 12.0/30, 12.0/20, 0); // Green
+    rybk_l[wellIndex(7, 1)] = RYBK(0, 6.0/30, 6.0/20, 0); // Green
+    rybk_l[wellIndex(7, 2)] = RYBK(0, 3.0/30, 3.0/20, 0); // Green
+    //rybk_l[wellIndex(4, 2)] = RYBK(1.0/29, 30.0/30, 0, 0.7/96*8); // Brown
 
     auto wellToSources_ll = rybkListToSourceVolumeList(rybk_l);
     debug(rybk_l);

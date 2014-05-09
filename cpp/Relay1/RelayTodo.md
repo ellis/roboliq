@@ -30,6 +30,10 @@ Y: 1:30 (transparent), 1:5 (transparent orange), 1:240 (white), 1:39 (orange and
 B: 1:20 (transparent), 1:155 (white)
 K: 1:47 (transparent), 1:205 (transparent brown), 1:370 (white), 1:1644 (brown)
 
+Maybe instead:
+Y: 1:3, 1:30, 1:240
+K: 1:47, 1:370, (remove 1:1644?)
+
 Experiments:
 - [x] Find best orange
 - [x] Try to get brown by darkening the orange
@@ -40,6 +44,7 @@ Experiments:
 	- [-] Record RGB values of dilutions
 - [x] Get another couple white 384 plates from the lab and some more eppendorfs
 - [x] Create script for chosen dilutions using eppendorfs
+- [x] Find best purple
 - [ ] Create script for color chart
 	- [x] light yellow/yellow/orange/brown/dark brown
 	- [ ] 3 levels of green?
@@ -50,7 +55,6 @@ Experiments:
 	- [x] Create script testing dilutions of primary colors with four dilutions of black (3,6,12,24ul 1:16 K)
 	- [x] Photo of dilution series
 	- [ ] Record RGB values of dilutions
-- [ ] Find best purple
 - [ ] Record cyan value (low volume blue)
 - [ ] Run the series on a 96 well plate too
 - [ ] Does it look better to have larger water volume in the transparent 384 plate?
@@ -60,7 +64,8 @@ Experiments:
 Coordination:
 - [x] Email everyone about times to show up
 - [x] Ask Urs about screws for door locks
-- [ ] Email Lena to ask her to find printouts about RYB mixing
+- [-] Email Lena to ask her to find printouts about RYB mixing
+- [ ] Print some printouts about RYB mixing
 
 Evoware:
 - [-] Try to get the sealer to work
@@ -99,5 +104,5 @@ UI:
 
 Maaruthy:
 - [ ] look for low-res pictures
-- [ ] good purple
-- [ ] clean plates
+- [x] good purple
+- [x] clean plates
