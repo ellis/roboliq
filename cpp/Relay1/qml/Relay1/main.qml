@@ -1,7 +1,7 @@
 import QtQuick 2.1
 import QtQuick.Controls 1.1
 import QtQuick.Dialogs 1.0
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.1
 
 ApplicationWindow {
     id: app
@@ -117,59 +117,91 @@ ApplicationWindow {
         }
     }
 
-    Rectangle {
-        id: plate
-        color: "white";
-        width: backend.colCount * plate.zoom;
-        height: backend.rowCount * plate.zoom;
-        anchors.centerIn: parent
-        border.color: "black"
+    ColumnLayout {
+        id: plateLayout
+        anchors.fill: parent
+        spacing: plate.zoom
 
-        property int zoom: 20
-        property int xpos
-        property int ypos
-        property Image image
+        Rectangle {
+            id: plate
+            color: "white";
+            width: backend.colCount * plate.zoom + 2;
+            height: backend.rowCount * plate.zoom + 2;
+            anchors.centerIn: parent
+            border.color: "black"
 
-        Canvas {
-            id: canvas
-            anchors.fill: parent
+            property int zoom: 20
+            property int xpos
+            property int ypos
+            property Image image
 
-            onPaint: {
-                var ctx = getContext('2d')
-                for (var row = 0; row < backend.rowCount; row++) {
-                    for (var col = 0; col < backend.colCount; col++) {
-                        var x, y;
-                        x = col * plate.zoom;
-                        y = row * plate.zoom;
-                        ctx.fillStyle = backend.getFillStyle(row, col);
-                        ctx.fillRect(x, y, plate.zoom, plate.zoom);
+            Canvas {
+                id: canvas
+                anchors.fill: parent
+
+                onPaint: {
+                    var ctx = getContext('2d')
+                    for (var row = 0; row < backend.rowCount; row++) {
+                        for (var col = 0; col < backend.colCount; col++) {
+                            var x, y;
+                            x = col * plate.zoom;
+                            y = row * plate.zoom;
+                            ctx.fillStyle = backend.getFillStyle(row, col);
+                            ctx.fillRect(x, y, plate.zoom, plate.zoom);
+                        }
+                    }
+                }
+
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+
+                    function handleMouse(mouseX, mouseY) {
+                        var imageRow, imageCol;
+                        imageRow = Math.floor(mouseY / plate.zoom);
+                        imageCol = Math.floor(mouseX / plate.zoom);
+                        if (imageRow >= 0 && imageRow < backend.rowCount && imageCol >= 0 && imageCol < backend.colCount) {
+                            backend.setColor(imageRow, imageCol, app.color)
+                            canvas.requestPaint();
+                        }
+                    }
+
+                    onPressed: {
+                        handleMouse(mouseX, mouseY);
+                    }
+                    onMouseXChanged: {
+                        handleMouse(mouseX, mouseY);
+                    }
+                    onMouseYChanged: {
+                        handleMouse(mouseX, mouseY);
                     }
                 }
             }
+        }
 
-            MouseArea {
-                id: mouseArea
-                anchors.fill: parent
+        RowLayout {
+            id: colorsLayout
+            spacing: 0
+            Layout.fillWidth: true
+            Layout.preferredHeight: plate.zoom
+            Layout.maximumHeight: plate.zoom
 
-                function handleMouse(mouseX, mouseY) {
-                    var imageRow, imageCol;
-                    imageRow = Math.floor(mouseY / plate.zoom);
-                    imageCol = Math.floor(mouseX / plate.zoom);
-                    if (imageRow >= 0 && imageRow < backend.rowCount && imageCol >= 0 && imageCol < backend.colCount) {
-                        backend.setColor(imageRow, imageCol, app.color)
-                        canvas.requestPaint();
-                    }
-                }
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.minimumWidth: plate.zoom
+                Layout.preferredWidth: plate.zoom
+                Layout.maximumWidth: plate.zoom
+                Layout.minimumHeight: plate.zoom
+                color: "#ff00ff";
+            }
 
-                onPressed: {
-                    handleMouse(mouseX, mouseY);
-                }
-                onMouseXChanged: {
-                    handleMouse(mouseX, mouseY);
-                }
-                onMouseYChanged: {
-                    handleMouse(mouseX, mouseY);
-                }
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.minimumWidth: plate.zoom
+                Layout.preferredWidth: plate.zoom
+                Layout.maximumWidth: plate.zoom
+                Layout.minimumHeight: plate.zoom
+                color: "plum"
             }
         }
     }

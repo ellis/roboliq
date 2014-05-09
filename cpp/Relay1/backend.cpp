@@ -9,41 +9,51 @@
 
 QVector<RYBK> colorInfo {
     RYBK(0, 0, 0, 0, QColor("#ffffff")), // white
-    RYBK(24.0/29, 0, 0, 0, QColor("#d20313")), // red hue=355
-    RYBK(0, 24.0/30, 0, 0, QColor("#fffd54")), // yellow
-    RYBK(0, 0, 24.0/20, 0, QColor("#0067c3")), // blue
-    RYBK(0, 0, 0, 24.0/47, QColor("#000000")), // black
-    RYBK(0, 12.0/30, 12.0/20, 0, QColor("#018807")), // green
-    RYBK(1.0/96, 30.0/96, 0, 0, QColor("#ff6f00")), // orange
-    RYBK(1.0/96, 30.0/96, 0, 0.7/96, QColor("#78352c")), // brown
+    RYBK(0.827586, 0, 0, 0, QColor("#dc1424")), // red
+    RYBK(0.413793, 0, 0, 0, QColor("#e7254a")), // red/2
+    RYBK(0.206897, 0, 0, 0, QColor("#ff4e6b")), // red/4
+    RYBK(0.103448, 0, 0, 0, QColor("#ff7990")), // red/8
+    RYBK(0, 0.8, 0, 0, QColor("#f8db17")), // yellow
+    RYBK(0, 0.4, 0, 0, QColor("#f1f24f")), // yellow/2
+    RYBK(0, 0.2, 0, 0, QColor("#f1e869")), // yellow/4
+    RYBK(0, 0.1, 0, 0, QColor("#fffa73")), // yellow/8
+    RYBK(0, 0, 1.2, 0, QColor("#0067a2")), // blue
+    RYBK(0, 0, 0.6, 0, QColor("#059cc2")), // blue/2
+    RYBK(0, 0, 0.3, 0, QColor("#2dc6d4")), // blue/4
+    RYBK(0, 0, 0.15, 0, QColor("#58c9cb")), // blue/8
+    RYBK(0, 0, 0, 0.510638, QColor("#000000")), // black
+    RYBK(0, 0, 0, 0.255319, QColor("#5a5958")), // black/2
+    RYBK(0, 0, 0, 0.12766, QColor("#797774")), // black/4
+    RYBK(0, 0, 0, 0.0638298, QColor("#a0a0a0")), // black/8
+    RYBK(0.0833333, 2.5, 0, 0, QColor("#f3441e")), // orange
+    RYBK(0.0416667, 1.25, 0, 0, QColor("#ff8507")), // orange/2
+    RYBK(0.0833333, 2.5, 0, 0.0583333, QColor("#f3441e")), // brown
+    RYBK(0.0416667, 1.25, 0, 0.0291667, QColor("#cf6625")), // brown/2
+    RYBK(0.133333, 0, 0.258065, 0, QColor("#886fa6")), // purple
+    RYBK(0, 0.4, 0.6, 0, QColor("#0fb022")), // green
+    RYBK(0, 0.2, 0.3, 0, QColor("#02b26e")), // green/2
+    RYBK(0, 0.1, 0.15, 0, QColor("#59c99b")), // green/4
 };
 
 QVector<const Source*> allSources_l {
     // RED
-    new Source(11, "Red1", "T3", 0, 1, RYBK(1.0/29, 0, 0, 0)),
-    //new Source(1, "Red2", "T3", 0, 2, RYBK(1.0/75, 0, 0, 0)), // TESTING
-    new Source(12, "Red2", "T3", 0, 2, RYBK(1.0/232, 0, 0, 0)),
-    new Source(13, "Red3", "T3", 0, 3, RYBK(1.0/1856, 0, 0, 0)),
+    new Source(11, "Red1", "Red1", 0, 1, RYBK(1.0/29, 0, 0, 0)),
+    new Source(12, "Red2", "Red2", 0, 2, RYBK(1.0/232, 0, 0, 0)),
+    //new Source(13, "Red3", "T3", 0, 3, RYBK(1.0/1856, 0, 0, 0)),
 
     // YELLOW
-    new Source(21, "Yellow1", "T3", 1, 1, RYBK(0, 1.0/30, 0, 0)),
-    //new Source(3, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/5, 0, 0)), // Currently, it's really x5, just trying out x3
-    new Source(22, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/240, 0, 0)),
+    new Source(21, "Yellow1", "Yellow1", 1, 1, RYBK(0, 1.0/30, 0, 0)),
+    //new Source(22, "Yellow2", "T3", 1, 2, RYBK(0, 1.0/240, 0, 0)),
     new Source(24, "Yellow0", "T3", 1, 4, RYBK(0, 1.0/3, 0, 0)),
 
     // BLUE
-    new Source(31, "Blue1", "T3", 2, 1, RYBK(0, 0, 1.0/20, 0)),
-    new Source(32, "Blue2", "T3", 2, 2, RYBK(0, 0, 1.0/160, 0)),
+    new Source(31, "Blue1", "Blue1", 2, 1, RYBK(0, 0, 1.0/20, 0)),
+    //new Source(32, "Blue2", "T3", 2, 2, RYBK(0, 0, 1.0/160, 0)),
 
     // BLACK
-    new Source(41, "Black1", "T3", 3, 1, RYBK(0, 0, 0, 1.0/47)),
-    //new Source(6, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/205))
-    new Source(42, "Black2", "T3", 3, 2, RYBK(0, 0, 0, 1.0/376)),
-    new Source(43, "Black3", "T3", 3, 3, RYBK(0, 0, 0, 1.0/3008))
-//            R: 1:29 (transparent), 1:75 (transparent orange), 1:230 (white), 1:600 (orange and brown)
-//            Y: 1:30 (transparent), 1:5 (transparent orange), 1:240 (white), 1:39 (orange and brown)
-//            B: 1:20 (transparent), 1:155 (white)
-//            K: 1:47 (transparent), 1:205 (transparent brown), 1:370 (white), 1:1644 (brown)
+    new Source(41, "Black1", "T2", 6, 0, RYBK(0, 0, 0, 1.0/47)),
+    new Source(42, "Black2", "T2", 7, 0, RYBK(0, 0, 0, 1.0/376)),
+    //new Source(43, "Black3", "T3", 3, 3, RYBK(0, 0, 0, 1.0/3008))
 };
 
 

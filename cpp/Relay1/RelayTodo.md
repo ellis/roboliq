@@ -55,7 +55,9 @@ Experiments:
 	- [x] Create script testing dilutions of primary colors with four dilutions of black (3,6,12,24ul 1:16 K)
 	- [x] Photo of dilution series
 	- [-] Record RGB values of dilutions
-- [ ] Record RGB values for color chart
+!*- [ ] Do test run with troughs
+!*- [ ] Record RGB values for color chart
+!*- [ ] Print at least 5 different pictures
 - [ ] Does it look better to have larger water volume in the transparent 384 plate?
 - [ ] Print at least 5 different pictures
 - [ ] Run the series on a 96 well plate too
@@ -64,36 +66,38 @@ Coordination:
 - [x] Email everyone about times to show up
 - [x] Ask Urs about screws for door locks
 - [-] Email Lena to ask her to find printouts about RYB mixing
-- [ ] Print some printouts about RYB mixing
+- [x] Print some printouts about RYB mixing
 
 Evoware:
 - [-] Try to get the sealer to work
-*- [ ] Test whether Aspirate and Dispense commands can go into gwl files
+- [ ] Test whether Aspirate and Dispense commands can go into gwl files
 
 Manual lab work:
 - [-] Test sealer with our plates
 - [x] Get 6 troughs
 - [x] Take tape off of safety sensors
 - [x] Screw in the door locks
-- [ ] Mix dilutions of dye in the troughs
 - [ ] Get some blank white printer paper to lay transparent plates on for viewing
+- [ ] Fill up system liquid
 
 Basic Functionality:
-- [ ] Create function to create color chart worklist (with about 21 colors)
-- [ ] Given the measurements, build a list of colors we can mix
-- [ ] Round volumes to 0.1 ul
-- [ ] Decide on dye dilutions to use
-- [ ] Decide on best final well volume
-- [ ] Use of small tips is too slow.  Use a more diluted solution.
-- [ ] Reprogram to use the troughs
+- [x] Round volumes to 0.1 ul
+- [x] Decide on dye dilutions to use
+- [x] Use of small tips is too slow.  Use a more diluted solution.
+- [x] Create function to create color chart worklist (with about 24 colors)
+!*- [ ] Reprogram to use the troughs
+!*- [ ] Given the measurements, build a list of colors we can mix
+*- [ ] Decide on best final well volume
 - [ ] Calculate how much of each source is used for each script
-- [ ] Program it to work on 96 well plates too
-- [ ] Seal the plate
-- [ ] Estimate time to print?
-- [ ] Adjust concentrations based on the plate type (*2 for transparent, *7 for 96-well)
 - [ ] Reduce colors by converting to mixtures, then back to RGB.
 
+- [ ] Program it to work on 96 well plates too?
+- [ ] Estimate time to print?
+- [ ] Adjust concentrations based on the plate type (*2 for transparent, *7 for 96-well)
+
 UI:
+*- [ ] Let user pick colors
+*- [ ] Create a sidebar scrollable list of pictures
 - [ ] Create a better drawing interface!
 - [ ] More pictures
 - [ ] Even more pictures!
@@ -102,6 +106,9 @@ UI:
 - [ ] Overlapping color picker?  With white/black slide too?
 
 Maaruthy:
-- [ ] look for low-res pictures
 - [x] good purple
+- [x] Mix dilutions of dye in the troughs
+
+Gintas:
 - [x] clean plates
+- [x] look for low-res pictures
