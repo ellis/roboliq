@@ -1,28 +1,34 @@
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/photo/photo.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/photo/photo.hpp>
 #include <math.h>
+#include <QColor>
+#include <QVector3D>
+#include <QtDebug>
 
-using namespace cv;
+//using namespace cv;
 using namespace std;
 
+#define CV_PI 3.14159265
 #define REF_X 95.047; // Observer= 2°, Illuminant= D65
 #define REF_Y 100.000;
 #define REF_Z 108.883;
 
-void bgr2xyz( const Vec3b& BGR, Vec3d& XYZ );
+typedef QVector3D Vec3d;
+
+void bgr2xyz( const QRgb& BGR, Vec3d& XYZ );
 void xyz2lab( const Vec3d& XYZ, Vec3d& Lab );
 void lab2lch( const Vec3d& Lab, Vec3d& LCH );
-double deltaE2000( const Vec3b& bgr1, const Vec3b& bgr2 );
+double deltaE2000( const QRgb& bgr1, const QRgb& bgr2 );
 double deltaE2000( const Vec3d& lch1, const Vec3d& lch2 );
 
 
-void bgr2xyz( const Vec3b& BGR, Vec3d& XYZ )
+void bgr2xyz( const QRgb& BGR, Vec3d& XYZ )
 {
-    double r = (double)BGR[2] / 255.0;
-    double g = (double)BGR[1] / 255.0;
-    double b = (double)BGR[0] / 255.0;
+    double r = (double)qRed(BGR) / 255.0;
+    double g = (double)qGreen(BGR) / 255.0;
+    double b = (double)qBlue(BGR) / 255.0;
     if( r > 0.04045 )
         r = pow( ( r + 0.055 ) / 1.055, 2.4 );
     else
@@ -72,7 +78,12 @@ void lab2lch( const Vec3d& Lab, Vec3d& LCH )
     LCH[2] = atan2( Lab[2], Lab[1] );
 }
 
-double deltaE2000( const Vec3b& bgr1, const Vec3b& bgr2 )
+double deltaE2000( const QColor& color1, const QColor& color2 )
+{
+    return deltaE2000(color1.rgb(), color2.rgb());
+}
+
+double deltaE2000( const QRgb& bgr1, const QRgb& bgr2 )
 {
     Vec3d xyz1, xyz2, lab1, lab2, lch1, lch2;
     bgr2xyz( bgr1, xyz1 );
@@ -82,6 +93,23 @@ double deltaE2000( const Vec3b& bgr1, const Vec3b& bgr2 )
     lab2lch( lab1, lch1 );
     lab2lch( lab2, lch2 );
     return deltaE2000( lch1, lch2 );
+}
+
+double deltaE1976(const QColor& color1, const QColor& color2) {
+    Vec3d xyz1, xyz2, lab1, lab2;
+    bgr2xyz(color1.rgb(), xyz1);
+    bgr2xyz(color2.rgb(), xyz2);
+    xyz2lab(xyz1, lab1);
+    xyz2lab(xyz2, lab2);
+    qreal L1 = lab1[0];
+    qreal a1 = lab1[1];
+    qreal b1 = lab1[2];
+    qreal L2 = lab2[0];
+    qreal a2 = lab2[1];
+    qreal b2 = lab2[2];
+    qreal deltaE = sqrt(pow(L2 - L1, 2) + pow(a2 - a1, 2) + pow(b2 - b1, 2));
+    //qDebug() << color1 << color2 << xyz1 << xyz2 << lab1 << lab2 << deltaE;
+    return deltaE;
 }
 
 double deltaE2000( const Vec3d& lch1, const Vec3d& lch2 )

@@ -149,6 +149,9 @@ Brown:
 30ul 1:96 Y + 1ul 1:96 R + 0.7ul 1:96 K = #ce791f
 30ul 1:96 Y + 2ul 1:96 R + 1.2ul 1:96 K = #aa601a (not this one)
 
+Purple:
+5ul 1:155 B + 10ul 1:600 R
+
 ## 384-well transparent color dilutions
 
 1:16 dilutions:

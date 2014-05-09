@@ -24,6 +24,10 @@ ApplicationWindow {
                 onTriggered: backend.saveImage("image.png");
             }
             MenuItem {
+                text: qsTr("Save Worklist Color Chart 384")
+                onTriggered: backend.saveWorklistColorchart384()
+            }
+            MenuItem {
                 text: qsTr("Save Worklist Sepia")
                 onTriggered: backend.saveWorklistSepia()
             }
