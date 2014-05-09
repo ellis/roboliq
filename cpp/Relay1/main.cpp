@@ -12,10 +12,19 @@
 extern QRgb ryb2rgb(qreal R, qreal Y, qreal B);
 extern QRgb rgb2ryb(const QColor& color);
 extern QColor reduceColor(const QColor& color);
+extern double deltaE2000( const QColor& bgr1, const QColor& bgr2 );
+extern double deltaE1976(const QColor& color1, const QColor& color2);
 
 int main(int argc, char *argv[])
 {
     Application app(argc, argv);
+
+    qDebug() << deltaE1976(Qt::white, QColor("#ffffff"));
+    qDebug() << deltaE1976(Qt::white, QColor("#0067c3"));
+    // #ffffff => XYZ 95.05, 100, 108.9 -- Lab 100, 0.005, -0.01
+    // #0067c3 => XYZ 14.701, 13.641, 53.488 -- Lab 43.713, 11.007, -54.854
+
+    //return 0;
 
     qDebug() << QColor(reduceColor(Qt::white)).name();
     qDebug() << QColor(reduceColor(Qt::black)).name();
@@ -23,7 +32,13 @@ int main(int argc, char *argv[])
     qDebug() << QColor(reduceColor(Qt::green)).name();
     qDebug() << QColor(reduceColor(Qt::blue)).name();
     qDebug() << QColor(reduceColor(Qt::yellow)).name();
-    return 0;
+    qDebug() << QColor(reduceColor(QColor("#ff8000"))).name();
+    qDebug() << QColor(reduceColor(QColor("#808000"))).name();
+
+    qDebug() << deltaE1976(Qt::white, QColor("#ffffff"));
+    qDebug() << deltaE1976(Qt::white, QColor("#0067c3"));
+
+    //return 0;
 
     QtQuick2ControlsApplicationViewer viewer;
     Backend* backend = new Backend();

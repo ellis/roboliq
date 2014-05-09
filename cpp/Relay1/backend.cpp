@@ -148,14 +148,31 @@ int distHue(int hueTarget, int hueActual) {
     return d;
 }
 
-qreal distHsv(const QColor& a, const QColor& b) {
-    //const QColor a2 = a.toHsv();
-    //const QColor b2 = b.toHsv();
-    const qreal dh = distHue(a.hueF(), b.hueF()) / 255.0;
-    const qreal ds = a.saturationF() - b.saturationF();
-    const qreal dv = a.valueF() - b.valueF();
-    const qreal d = (dh*dh) + (ds*ds) + (dv*dv);
-    return d;
+/*
+QColor rgbToXyz(const QColor& color) {
+    return QColor(
+        color.redF() * 0.412453 + color.greenF() * 0.357580 + color.blueF() * 0.180423,
+        color.redF() * 0.212671 + color.greenF() * 0.715160 + color.blueF() * 0.072169,
+        color.redF() * 0.019334 + color.greenF() * 0.119193 + color.blueF() * 0.950227
+    );
+}
+
+QColor xyzToLab(const QColor& color) {
+    qreal L =
+    return QColor(
+        color.redF() * 0.412453 + color.greenF() * 0.357580 + color.blueF() * 0.180423,
+        color.redF() * 0.212671 + color.greenF() * 0.715160 + color.blueF() * 0.072169,
+        color.redF() * 0.019334 + color.greenF() * 0.119193 + color.blueF() * 0.950227
+    );
+}
+*/
+
+extern double deltaE2000( const QColor& bgr1, const QColor& bgr2 );
+double deltaE1976(const QColor& color1, const QColor& color2);
+
+qreal distDeltaE(const QColor& a, const QColor& b) {
+    //return deltaE2000(a, b);
+    return deltaE1976(a, b);
 }
 
 QRgb rgb2ryb(const QColor& color) {
@@ -226,6 +243,7 @@ QRgb rgb2ryb(const QColor& color) {
 
 
 QVector<RYBK> colorInfo {
+    RYBK(0, 0, 0, 0, QColor("#ffffff")), // white
     RYBK(24.0/29, 0, 0, 0, QColor("#d20313")), // red hue=355
     RYBK(0, 24.0/30, 0, 0, QColor("#fffd54")), // yellow
     RYBK(0, 0, 24.0/20, 0, QColor("#0067c3")), // blue
@@ -244,17 +262,11 @@ QVector<const Source*> allSources_l {
     new Source(0, "Black", "T3", 3, 1, RYBK(0, 0, 0, 1.0/47))
 };
 
-const RYBK& convertColorByDist(const QColor& color) {
-    const QColor color1 = color.toHsv();
-    if (color1.saturation() < 10) {
-        // FIXME: handle shades of grey
-        return RYBK(0, 0, 0, 0, Qt::white);
-    }
-    const int hue = color1.hue();
-    qreal dMin = distHsv(colorInfo[0].colorExpected.hue(), hue);
+RYBK convertColorByDist(const QColor& color) {
+    qreal dMin = distDeltaE(colorInfo[0].colorExpected, color);
     const RYBK* ci = &colorInfo[0];
     for (const RYBK& ci_ : colorInfo) {
-        const qreal d = distHsv(ci_.colorExpected.hue(), hue);
+        const qreal d = distDeltaE(ci_.colorExpected, color);
         //qDebug() << "distHue(" << ci_.colorExpected.hue() << ", " << hue << ") = " << d;
         if (d < dMin) {
             dMin = d;

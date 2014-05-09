@@ -9,7 +9,8 @@ CONFIG += c++11
 QML_IMPORT_PATH =
 
 SOURCES += main.cpp \
-    backend.cpp
+    backend.cpp \
+    deltae.cpp
 
 win32 {
     SOURCES += disphelper.c Evoware.cpp
