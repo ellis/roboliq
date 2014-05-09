@@ -110,8 +110,8 @@ ApplicationWindow {
             backend.openImage(fileOpenDialog.fileUrl);
             canvas.requestPaint();
             console.log(backend.rowCount)
-            plate.width = backend.colCount * 10
-            plate.height = backend.rowCount * 10
+            plate.width = backend.colCount * plate.zoom
+            plate.height = backend.rowCount * plate.zoom
         }
         onRejected: {
         }
@@ -120,11 +120,12 @@ ApplicationWindow {
     Rectangle {
         id: plate
         color: "white";
-        width: backend.colCount * 10;
-        height: backend.rowCount * 10;
+        width: backend.colCount * plate.zoom;
+        height: backend.rowCount * plate.zoom;
         anchors.centerIn: parent
         border.color: "black"
 
+        property int zoom: 20
         property int xpos
         property int ypos
         property Image image
@@ -138,10 +139,10 @@ ApplicationWindow {
                 for (var row = 0; row < backend.rowCount; row++) {
                     for (var col = 0; col < backend.colCount; col++) {
                         var x, y;
-                        x = col * 10;
-                        y = row * 10;
+                        x = col * plate.zoom;
+                        y = row * plate.zoom;
                         ctx.fillStyle = backend.getFillStyle(row, col);
-                        ctx.fillRect(x, y, 10, 10);
+                        ctx.fillRect(x, y, plate.zoom, plate.zoom);
                     }
                 }
             }
@@ -152,8 +153,8 @@ ApplicationWindow {
 
                 function handleMouse(mouseX, mouseY) {
                     var imageRow, imageCol;
-                    imageRow = Math.floor(mouseY / 10);
-                    imageCol = Math.floor(mouseX / 10);
+                    imageRow = Math.floor(mouseY / plate.zoom);
+                    imageCol = Math.floor(mouseX / plate.zoom);
                     if (imageRow >= 0 && imageRow < backend.rowCount && imageCol >= 0 && imageCol < backend.colCount) {
                         backend.setColor(imageRow, imageCol, app.color)
                         canvas.requestPaint();
