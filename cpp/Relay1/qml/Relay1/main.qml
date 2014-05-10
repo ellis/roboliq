@@ -87,7 +87,7 @@ ApplicationWindow {
             Rectangle {
                 width: 20
                 height: 20
-                color: red
+                color: "red"
             }
         }
     }
@@ -110,17 +110,19 @@ ApplicationWindow {
         }
     }
 
-    ColumnLayout {
-        id: plateLayout
-        anchors.fill: parent
-        spacing: plate.zoom
+    Item {
+        id: plateHolder
+        anchors.centerIn: parent
+        width: backend.colCount * plate.zoom + 2;
+        height: (backend.rowCount + 2) * plate.zoom + 2;
 
         Rectangle {
             id: plate
             color: "white";
-            width: backend.colCount * plate.zoom + 2;
-            height: backend.rowCount * plate.zoom + 2;
-            anchors.centerIn: parent
+            x: 0
+            y: 0
+            width: backend.colCount * plate.zoom + 3;
+            height: backend.rowCount * plate.zoom + 3;
             border.color: "black"
 
             property int zoom: 20
@@ -130,10 +132,10 @@ ApplicationWindow {
 
             Canvas {
                 id: canvas
-                //anchors.top: true
+                x: 1
+                y: 1
                 width: backend.colCount * plate.zoom
                 height: backend.rowCount * plate.zoom
-                anchors.centerIn: parent
 
                 onPaint: {
                     var ctx = getContext('2d')
@@ -143,6 +145,7 @@ ApplicationWindow {
                             x = col * plate.zoom;
                             y = row * plate.zoom;
                             ctx.fillStyle = backend.getFillStyle(row, col);
+                            ctx.s
                             ctx.fillRect(x, y, plate.zoom, plate.zoom);
                         }
                     }
@@ -175,30 +178,38 @@ ApplicationWindow {
             }
         }
 
-        RowLayout {
-            id: colorsLayout
+        Row {
+            x: 0
+            y: (backend.rowCount + 1) * plate.zoom + 2
+            width: backend.colCount * plate.zoom + 2
+            height: plate.zoom
             spacing: 0
-            Layout.fillWidth: true
-            Layout.preferredHeight: plate.zoom
-            Layout.maximumHeight: plate.zoom
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.minimumWidth: plate.zoom
-                Layout.preferredWidth: plate.zoom
-                Layout.maximumWidth: plate.zoom
-                Layout.minimumHeight: plate.zoom
-                color: "#ff00ff";
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.minimumWidth: plate.zoom
-                Layout.preferredWidth: plate.zoom
-                Layout.maximumWidth: plate.zoom
-                Layout.minimumHeight: plate.zoom
-                color: "plum"
-            }
+            ColorRect { color: "#ffffff" }
+            ColorRect { color: "#dc1424" }
+            ColorRect { color: "#e7254a" }
+            ColorRect { color: "#ff4e6b" }
+            ColorRect { color: "#ff7990" }
+            ColorRect { color: "#f8db17" }
+            ColorRect { color: "#f1f24f" }
+            ColorRect { color: "#f1e869" }
+            ColorRect { color: "#fffa73" }
+            ColorRect { color: "#0067a2" }
+            ColorRect { color: "#059cc2" }
+            ColorRect { color: "#2dc6d4" }
+            ColorRect { color: "#58c9cb" }
+            ColorRect { color: "#000000" }
+            ColorRect { color: "#5a5958" }
+            ColorRect { color: "#797774" }
+            ColorRect { color: "#a0a0a0" }
+            ColorRect { color: "#f3441e" }
+            ColorRect { color: "#ff8507" }
+            ColorRect { color: "#f3441e" }
+            ColorRect { color: "#cf6625" }
+            ColorRect { color: "#886fa6" }
+            ColorRect { color: "#0fb022" }
+            ColorRect { color: "#02b26e" }
+            ColorRect { color: "#59c99b" }
         }
     }
 }

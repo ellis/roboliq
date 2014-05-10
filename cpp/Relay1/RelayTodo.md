@@ -101,6 +101,7 @@ UI:
 *- [ ] Create a sidebar scrollable list of pictures
 - [ ] Create a better drawing interface!
 - [ ] Even more pictures!
+- [ ] Button to start robot...
 
 - [ ] Let user pick which color layers to show (RYBK)
 - [ ] Let users write letters (with what colors or gradients?)
