@@ -41,7 +41,7 @@ ApplicationWindow {
             }
         }
         Menu {
-            title: qsTr("Robot")
+            title: qsTr("Plate")
             MenuItem {
                 text: qsTr("96 Well Plate")
                 onTriggered: backend.setSize96()
@@ -49,10 +49,6 @@ ApplicationWindow {
             MenuItem {
                 text: qsTr("384 Well Plate")
                 onTriggered: backend.setSize384()
-            }
-            MenuItem {
-                text: qsTr("Exit")
-                onTriggered: Qt.quit();
             }
         }
         Menu {
@@ -71,14 +67,6 @@ ApplicationWindow {
                     canvas.requestPaint();
                 }
             }
-            MenuItem {
-                text: qsTr("384 Well Plate")
-                onTriggered: backend.setSize384()
-            }
-            MenuItem {
-                text: qsTr("Exit")
-                onTriggered: Qt.quit();
-            }
         }
     }
 
@@ -95,6 +83,11 @@ ApplicationWindow {
             ToolButton {
                 text: "red"
                 onClicked: app.color = "#ff0000"
+            }
+            Rectangle {
+                width: 20
+                height: 20
+                color: red
             }
         }
     }
@@ -137,7 +130,10 @@ ApplicationWindow {
 
             Canvas {
                 id: canvas
-                anchors.fill: parent
+                //anchors.top: true
+                width: backend.colCount * plate.zoom
+                height: backend.rowCount * plate.zoom
+                anchors.centerIn: parent
 
                 onPaint: {
                     var ctx = getContext('2d')
