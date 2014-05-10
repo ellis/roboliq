@@ -97,7 +97,7 @@ Basic Functionality:
 - [ ] Adjust concentrations based on the plate type (*2 for transparent, *7 for 96-well)
 
 UI:
-*- [ ] Let user pick colors
+- [x] Let user pick colors
 *- [ ] Create a sidebar scrollable list of pictures
 - [ ] Create a better drawing interface!
 - [ ] Even more pictures!
@@ -124,3 +124,22 @@ Before openhouse:
 - [ ] clean up: make place for plates to wash
 - [ ] clean up: make place for plate to display
 - [ ] tape up posters
+
+Times:
+- flower 2: 9min
+
+Todo:
+- [x] Gintas' new pictures
+- [ ] Fix colors that are off in the color bar
+- [ ] Replace old files from Gintas with his new ones
+- [ ] put white to the right of the color bar
+- [ ] remove items on toolbar, add item for saving
+- [ ] Fill up system liquid
+- [ ] Print at least 5 different pictures for display
+- [ ] Does it look better to have larger water volume in the transparent 384 plate?
+- [ ] Print at least 5 different pictures
+- [ ] Test whether Aspirate and Dispense commands can go into gwl files
+- [ ] Decide on best final well volume
+- [ ] Calculate how much of each source is used for each script
+- [ ] Create a sidebar scrollable list of pictures
+- [ ] Button to start the robot

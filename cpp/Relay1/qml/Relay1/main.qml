@@ -9,7 +9,7 @@ ApplicationWindow {
     width: 640
     height: 480
 
-    property string color: "#ff0000"
+    property string color: "#dc1424"
 
     menuBar: MenuBar {
         Menu {
@@ -72,22 +72,10 @@ ApplicationWindow {
 
     toolBar: ToolBar {
         RowLayout {
-            ToolButton {
-                text: "white"
-                onClicked: app.color = "#ffffff"
-            }
-            ToolButton {
-                text: "black"
-                onClicked: app.color = "#000000"
-            }
-            ToolButton {
-                text: "red"
-                onClicked: app.color = "#ff0000"
-            }
             Rectangle {
                 width: 20
                 height: 20
-                color: "red"
+                color: app.color
             }
         }
     }
@@ -185,31 +173,31 @@ ApplicationWindow {
             height: plate.zoom
             spacing: 0
 
-            ColorRect { color: "#ffffff" }
             ColorRect { color: "#dc1424" }
             ColorRect { color: "#e7254a" }
             ColorRect { color: "#ff4e6b" }
             ColorRect { color: "#ff7990" }
-            ColorRect { color: "#f8db17" }
-            ColorRect { color: "#f1f24f" }
-            ColorRect { color: "#f1e869" }
-            ColorRect { color: "#fffa73" }
+            ColorRect { color: "#ffe536" } // yellow
+            ColorRect { color: "#fff24f" }
+            ColorRect { color: "#fff569" }
+            ColorRect { color: "#fff792" } // yellow/8
             ColorRect { color: "#0067a2" }
             ColorRect { color: "#059cc2" }
             ColorRect { color: "#2dc6d4" }
             ColorRect { color: "#58c9cb" }
-            ColorRect { color: "#000000" }
+            ColorRect { color: "#000000" } // black
             ColorRect { color: "#5a5958" }
             ColorRect { color: "#797774" }
-            ColorRect { color: "#a0a0a0" }
-            ColorRect { color: "#f3441e" }
-            ColorRect { color: "#ff8507" }
-            ColorRect { color: "#f3441e" }
-            ColorRect { color: "#cf6625" }
+            ColorRect { color: "#a0a0a0" } // black/8
+            ColorRect { color: "#cd5c0a" } // brown
+            ColorRect { color: "#d06d06" } // brown/2
+            ColorRect { color: "#ff5507" } // orange
+            ColorRect { color: "#ff8507" } // orange/2
             ColorRect { color: "#886fa6" }
-            ColorRect { color: "#0fb022" }
-            ColorRect { color: "#02b26e" }
-            ColorRect { color: "#59c99b" }
+            ColorRect { color: "#15ae27" } // green
+            ColorRect { color: "#4ece5d" } // green/2
+            ColorRect { color: "#6fe37c" } // green/4
+            ColorRect { color: "#ffffff" }
         }
     }
 }

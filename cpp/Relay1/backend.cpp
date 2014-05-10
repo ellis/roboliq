@@ -13,10 +13,10 @@ QVector<RYBK> colorInfo {
     RYBK(0.413793, 0, 0, 0, QColor("#e7254a")), // red/2
     RYBK(0.206897, 0, 0, 0, QColor("#ff4e6b")), // red/4
     RYBK(0.103448, 0, 0, 0, QColor("#ff7990")), // red/8
-    RYBK(0, 0.8, 0, 0, QColor("#f8db17")), // yellow
-    RYBK(0, 0.4, 0, 0, QColor("#f1f24f")), // yellow/2
-    RYBK(0, 0.2, 0, 0, QColor("#f1e869")), // yellow/4
-    RYBK(0, 0.1, 0, 0, QColor("#fffa73")), // yellow/8
+    RYBK(0, 0.8, 0, 0, QColor("#ffe536")), // yellow
+    RYBK(0, 0.4, 0, 0, QColor("#fff24f")), // yellow/2
+    RYBK(0, 0.2, 0, 0, QColor("#fff569")), // yellow/4
+    RYBK(0, 0.1, 0, 0, QColor("#fff792")), // yellow/8
     RYBK(0, 0, 1.2, 0, QColor("#0067a2")), // blue
     RYBK(0, 0, 0.6, 0, QColor("#059cc2")), // blue/2
     RYBK(0, 0, 0.3, 0, QColor("#2dc6d4")), // blue/4
@@ -25,14 +25,14 @@ QVector<RYBK> colorInfo {
     RYBK(0, 0, 0, 0.255319, QColor("#5a5958")), // black/2
     RYBK(0, 0, 0, 0.12766, QColor("#797774")), // black/4
     RYBK(0, 0, 0, 0.0638298, QColor("#a0a0a0")), // black/8
-    RYBK(0.0833333, 2.5, 0, 0, QColor("#f3441e")), // orange
+    RYBK(0.0833333, 2.5, 0, 0, QColor("#ff5507")), // orange
     RYBK(0.0416667, 1.25, 0, 0, QColor("#ff8507")), // orange/2
-    RYBK(0.0833333, 2.5, 0, 0.0583333, QColor("#f3441e")), // brown
-    RYBK(0.0416667, 1.25, 0, 0.0291667, QColor("#cf6625")), // brown/2
+    RYBK(0.0833333, 2.5, 0, 0.0583333, QColor("#cd5c0a")), // brown
+    RYBK(0.0416667, 1.25, 0, 0.0291667, QColor("#e97637")), // brown/2
     RYBK(0.133333, 0, 0.258065, 0, QColor("#886fa6")), // purple
-    RYBK(0, 0.4, 0.6, 0, QColor("#0fb022")), // green
-    RYBK(0, 0.2, 0.3, 0, QColor("#02b26e")), // green/2
-    RYBK(0, 0.1, 0.15, 0, QColor("#59c99b")), // green/4
+    RYBK(0, 0.4, 0.6, 0, QColor("#15ae27")), // green
+    RYBK(0, 0.2, 0.3, 0, QColor("#4ece5d")), // green/2
+    RYBK(0, 0.1, 0.15, 0, QColor("#6fe37c")), // green/4
 };
 
 QVector<const Source*> allSources_l {
@@ -681,8 +681,8 @@ void Backend::saveWorklistColor4(const QVector<QVector<SourceVolume>>& wellToSou
             for (auto sv : sources) {
                 volume += sv.volume;
             }
-            if (volume > 0 && volume < 25) {
-                const qreal volumeWater = qMax(30 - volume, 5.0);
+            if (volume > 0 && volume < 40) {
+                const qreal volumeWater = 50 - volume;
                 qDebug() << row << col << volume << volumeWater;
                 if (pipette_l[tip_i].src.volume + volumeWater > 900)
                     printWorklistPipetteItems(out, pipette_l);
