@@ -38,5 +38,7 @@ object RoboliqSettings {
 		val json_gson = "com.google.code.gson" % "gson" % "2.2.1"
 		val json_spray = "io.spray" % "spray-json_2.10" % "1.2.3"
 		val scala_graph_core = "com.assembla.scala-incubator" % "graph-core_2.10" % "1.8.0"
+		val saddle = "org.scala-saddle" %% "saddle-core" % "1.3.+"
+		val saddle_hdf5 = "org.scala-saddle" %% "saddle-hdf5" % "1.3.+"
 	}
 }

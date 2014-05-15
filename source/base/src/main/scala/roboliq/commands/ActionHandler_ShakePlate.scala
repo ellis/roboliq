@@ -22,6 +22,7 @@ import roboliq.entities.Site
 import roboliq.input.commands.Command
 import roboliq.plan.Instruction
 import roboliq.entities.Agent
+import roboliq.entities.WorldState
 
 
 class ActionHandler_ShakePlate extends ActionHandler {
@@ -95,7 +96,8 @@ class ActionHandler_ShakePlate extends ActionHandler {
 	def getInstruction(
 		planInfo: ActionPlanInfo,
 		planned: Strips.Operator,
-		eb: EntityBase
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
 	): RqResult[List[Instruction]] = {
 		val m0 = planInfo.paramToJsval_l.toMap
 

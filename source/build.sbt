@@ -12,7 +12,7 @@ lazy val root =
 lazy val base = project
 	.settings(roboliqSettings: _*)
 	.settings(assemblySettings: _*)
-	.settings(libraryDependencies ++= Seq(RoboliqDeps.scalatest, RoboliqDeps.scopt, RoboliqDeps.json_gson, RoboliqDeps.scala_graph_core))
+	.settings(libraryDependencies ++= Seq(RoboliqDeps.scalatest, RoboliqDeps.scopt, RoboliqDeps.json_gson, RoboliqDeps.scala_graph_core, RoboliqDeps.saddle, RoboliqDeps.saddle_hdf5))
 	.settings(initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._""")
 	.settings(mainClass in assembly := Some("roboliq.main.Main"))
 	//.dependsOn(reactivesim)

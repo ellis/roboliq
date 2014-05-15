@@ -23,6 +23,8 @@ import roboliq.entities.LiquidVolume
 import roboliq.entities.AliquotFlat
 import roboliq.plan.ActionPlanInfo
 import roboliq.plan.CommandSet
+import roboliq.entities.WorldStateEvent
+import roboliq.entities.AliquotFlat
 
 case class Opt(
 	configFile: File = null,
@@ -90,22 +92,8 @@ object Main extends App {
 			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)
 			ordering_l <- plan3.orderings.getSequence.asRs.map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
-			// Oerators
-			instruction_ll <- RsResult.mapAll(ordering_l) { i =>
-				val action = plan3.action_l(i)
-				if (i - 2 < originalActionCount) {
-					val planInfo = planInfo_l(i - 2)
-					val planned = plan3.bindings.bind(action)
-					val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-					handler.getInstruction(planInfo, planned, protocol.eb)
-				}
-				else {
-					val planned = plan3.bindings.bind(action)
-					val handler = cs.nameToAutoActionHandler_m(action.name)
-					handler.getInstruction(planned, protocol.eb)
-				}
-			}
-			instruction_l = instruction_ll.flatten
+			// Instructions
+			instruction_l <- getInstructions(protocol, cs, plan3, originalActionCount, planInfo_l, ordering_l)
 			_ = println("instructions:")
 			_ = instruction_l.foreach(op => { println(op) })
 			state <- translate(protocol, instruction_l)
@@ -160,23 +148,44 @@ object Main extends App {
 	): RsResult[List[Instruction]] = {
 		var state = protocol.state0
 		for {
-			instruction_ll <- RsResult.mapAll(ordering_l) { i =>
-				val action = plan.action_l(i)
-				if (i - 2 < originalActionCount) {
-					val planInfo = planInfo_l(i - 2)
+			pair <- RsResult.fold((List[Instruction](), protocol.state0.toImmutable), ordering_l) { (acc, action_i) =>
+				val (l, state) = acc
+				for {
+					pair <- getInstructionStep(protocol, cs, plan, originalActionCount, planInfo_l, action_i, state)
+				} yield (l ++ pair._1, pair._2)
+			}
+		} yield pair._1
+	}
+	
+	private def getInstructionStep(
+		protocol: Protocol,
+		cs: CommandSet,
+		plan: aiplan.strips2.PartialPlan,
+		originalActionCount: Int,
+		planInfo_l: List[ActionPlanInfo],
+		action_i: Int,
+		state0: WorldState
+	): RsResult[(List[Instruction], WorldState)] = {
+		val action = plan.action_l(action_i)
+		for {
+			instruction_l <- {
+				if (action_i - 2 < originalActionCount) {
+					val planInfo = planInfo_l(action_i - 2)
 					val planned = plan.bindings.bind(action)
 					val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-					val l = handler.getInstruction(planInfo, planned, protocol.eb, state.toImmutable)
-					CONTINUE HERE: process any world stat events in l
+					handler.getInstruction(planInfo, planned, protocol.eb, state0)
 				}
 				else {
 					val planned = plan.bindings.bind(action)
 					val handler = cs.nameToAutoActionHandler_m(action.name)
-					handler.getInstruction(planned, protocol.eb, state.toImmutable)
-					CONTINUE HERE: process any world stat events in l
+					handler.getInstruction(planned, protocol.eb, state0)
 				}
 			}
-		} yield instruction_ll.flatten
+			// Process any world state events in instruction_l
+			state1 <- RsResult.fold(state0, instruction_l)((state, instruction) => {
+				WorldStateEvent.update(instruction.operator.effects, state)
+			})
+		} yield (instruction_l, state1)
 	}
 	
 	private def loadConfigBean(path: String): RsResult[ConfigBean] = {
