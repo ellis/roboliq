@@ -6,15 +6,26 @@ https://github.com/saddle/saddle/blob/master/saddle-hdf5/src/main/scala/org/sadd
 import org.saddle.io._
 java.lang.Runtime.getRuntime.load("/home/ellisw/src/roboliq/source/base/lib/libjhdf5.so")
 val h = H5Store.openFile("/home/ellisw/tmp/temp.h5")
+H5Store.readFrame[Int, String, Any](h, "people")
+
+DEBUG!:
+
+import org.saddle._
+val df6 = Panel(Vec("string", "anotherString", "unrelated"), vec.randi(3), vec.rand(3))
+H5Store.writeFrame(h, "df6", df6)
+
+now at: org.saddle.io.H5Store$.createNode(H5Store.scala:358)
 
 
 http://www.hdfgroup.org/products/java/hdf-java-html/javadocs/ncsa/hdf/hdf5lib/H5.html
 import ncsa.hdf.hdf5lib.H5
 import ncsa.hdf.hdf5lib.HDF5Constants
-val fid = H5.H5Fopen("/home/ellisw/tmp/temp.h5", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT)
+val fname = "/home/ellisw/tmp/temp.h5"
+val file_id = H5.H5Fopen(fname, HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT)
+val dataset_id = H5.H5Dopen(file_id, "people", HDF5Constants.H5P_DEFAULT)
 
-The HDF Object Java code looks a lot nicer than the JNI
-
+The HDF Object Java code looks a lot nicer than the JNI.  Examples here:
+/home/public/src/roboliq/source/hdf-java-2.10/HDF-JAVA-2.10.0-Linux/HDFJavaExamples-0.1.1-Source/jnative/h5
 
 ## Executables/Servers
 
