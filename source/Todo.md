@@ -1,5 +1,21 @@
 # TODOs for roboliq
 
+## HDF5
+
+https://github.com/saddle/saddle/blob/master/saddle-hdf5/src/main/scala/org/saddle/io/H5Store.scala
+import org.saddle.io._
+java.lang.Runtime.getRuntime.load("/home/ellisw/src/roboliq/source/base/lib/libjhdf5.so")
+val h = H5Store.openFile("/home/ellisw/tmp/temp.h5")
+
+
+http://www.hdfgroup.org/products/java/hdf-java-html/javadocs/ncsa/hdf/hdf5lib/H5.html
+import ncsa.hdf.hdf5lib.H5
+import ncsa.hdf.hdf5lib.HDF5Constants
+val fid = H5.H5Fopen("/home/ellisw/tmp/temp.h5", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT)
+
+The HDF Object Java code looks a lot nicer than the JNI
+
+
 ## Executables/Servers
 
 Two kinds of servers to begin with:
