@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.1
 
 ApplicationWindow {
     id: app
-    title: qsTr("Hello World")
+    title: qsTr("Roboterprinter")
     width: 640
     height: 480
 
@@ -15,13 +15,12 @@ ApplicationWindow {
         Menu {
             title: qsTr("File")
             MenuItem {
-                text: qsTr("Open")
+                text: qsTr("Open...")
                 onTriggered: fileOpenDialog.visible = true;
             }
             MenuItem {
-                text: qsTr("Save")
-                //onTriggered: backend.saveImage("image.png");
-                onTriggered: backend.saveImage("image.png");
+                text: qsTr("Save As...")
+                onTriggered: fileSaveAsDialog.visible = true;
             }
             MenuItem {
                 text: qsTr("Save Worklist Color Chart 384")
@@ -72,6 +71,11 @@ ApplicationWindow {
 
     toolBar: ToolBar {
         RowLayout {
+            ToolButton {
+                text: "Save"
+                action: backend.saveWorklistColor3()
+            }
+
             Rectangle {
                 width: 20
                 height: 20
@@ -93,6 +97,20 @@ ApplicationWindow {
             console.log(backend.rowCount)
             plate.width = backend.colCount * plate.zoom
             plate.height = backend.rowCount * plate.zoom
+        }
+        onRejected: {
+        }
+    }
+
+    FileDialog {
+        id: fileSaveAsDialog
+        title: "Please enter a filename"
+        selectExisting: false
+        selectMultiple: false
+        nameFilters: [ "Image files (*.png)", "All files (*)" ]
+        selectedNameFilter: "Image files (*.png)"
+        onAccepted: {
+            backend.saveImage(this.fileUrl);
         }
         onRejected: {
         }
@@ -173,18 +191,18 @@ ApplicationWindow {
             height: plate.zoom
             spacing: 0
 
-            ColorRect { color: "#dc1424" }
-            ColorRect { color: "#e7254a" }
+            ColorRect { color: "#ff1424" }
+            ColorRect { color: "#ff254a" }
             ColorRect { color: "#ff4e6b" }
             ColorRect { color: "#ff7990" }
             ColorRect { color: "#ffe536" } // yellow
             ColorRect { color: "#fff24f" }
             ColorRect { color: "#fff569" }
             ColorRect { color: "#fff792" } // yellow/8
-            ColorRect { color: "#0067a2" }
-            ColorRect { color: "#059cc2" }
-            ColorRect { color: "#2dc6d4" }
-            ColorRect { color: "#58c9cb" }
+            ColorRect { color: "#006ffb" } // blue
+            ColorRect { color: "#1c8aff" } // blue/2
+            ColorRect { color: "#5facf9" } // blue/4
+            ColorRect { color: "#76caf9" } // blue/8
             ColorRect { color: "#000000" } // black
             ColorRect { color: "#5a5958" }
             ColorRect { color: "#797774" }
