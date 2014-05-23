@@ -42,6 +42,17 @@ val group1_id = H5.H5Gcreate(file_id, "/group1", HDF5Constants.H5P_DEFAULT, HDF5
 For compound data types, see:
 ``/home/public/src/roboliq/sourceH5Ex_T_Compound.java``
 
+case class MyData1(int a, int b)
+val memtype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8)
+H5.H5Tinsert(memtype_id, "a", 0, HDF5Constants.H5T_NATIVE_INT)
+H5.H5Tinsert(memtype_id, "b", 4, HDF5Constants.H5T_NATIVE_INT)
+val filetype_id = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8)
+H5.H5Tinsert(filetype_id, "a", 0, HDF5Constants.H5T_STD_I32BE)
+H5.H5Tinsert(filetype_id, "b", 4, HDF5Constants.H5T_STD_I32BE) 
+val dataspace_id = H5.H5Screate_simple(1, Array(2), null)
+val dataset_id = H5.H5Dcreate(file_id, "/data1", filetype_id, dataspace_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+
+
 ## Executables/Servers
 
 Two kinds of servers to begin with:
