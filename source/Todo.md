@@ -28,6 +28,7 @@ val group1_id = H5.H5Gcreate(file_id, "/group1", HDF5Constants.H5P_DEFAULT, HDF5
 The HDF Object Java code looks a lot nicer than the JNI.  Examples here:
 /home/public/src/roboliq/source/hdf-java-2.10/HDF-JAVA-2.10.0-Linux/HDFJavaExamples-0.1.1-Source/jnative/h5
 
+Based on this tutorial: http://beige.ucs.indiana.edu/I590/node121.html
 
 import ncsa.hdf.hdf5lib.H5
 import ncsa.hdf.hdf5lib.HDF5Constants
@@ -37,6 +38,9 @@ val dataspace_id = H5.H5Screate_simple(2, Array[Long](4, 6), null)
 val dataset_id = H5.H5Dcreate(file_id, "/dset", HDF5Constants.H5T_STD_I32BE, dataspace_id, HDF5Constants.H5P_DEFAUL, HDF5Constants.H5P_DEFAULTT, HDF5Constants.H5P_DEFAULT)
 val dataset_id = H5.H5Dopen(file_id, "people", HDF5Constants.H5P_DEFAULT)
 val group1_id = H5.H5Gcreate(file_id, "/group1", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT)
+
+For compound data types, see:
+``/home/public/src/roboliq/sourceH5Ex_T_Compound.java``
 
 ## Executables/Servers
 
