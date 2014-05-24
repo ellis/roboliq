@@ -4,6 +4,8 @@
 
 ## HDF5
 
+* Try CISD's JHDF5: http://svncisd.ethz.ch/doc/hdf5/hdf5-13.06/
+
 https://github.com/saddle/saddle/blob/master/saddle-hdf5/src/main/scala/org/saddle/io/H5Store.scala
 import org.saddle.io._
 java.lang.Runtime.getRuntime.load("/home/ellisw/src/roboliq/source/base/lib/libjhdf5.so")
