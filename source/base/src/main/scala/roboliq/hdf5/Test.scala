@@ -77,10 +77,9 @@ object Test extends App {
 	
 	val cmd1 = new CommandEntry("A", 1, "move")
 	val cmd2 = new CommandEntry("A", 2, "groove")
-	val cmd_l = Array[Object](cmd1, cmd2)
+	val cmd_l = Array(cmd1, cmd2)
 	val typ = CommandEntry.getHDF5Type(hdf5Writer.compound())
-	val l = new JavaTest().make(cmd1, cmd2)
-	hdf5Writer.compound().writeArray("commands", typ, l)
+	hdf5Writer.compound().writeArray("commands", typ, cmd_l)
 
 	// Close the HDF5 writer
 	hdf5Writer.close()
