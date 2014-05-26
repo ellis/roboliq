@@ -117,8 +117,8 @@ Gintas:
 
 Before openhouse:
 - [ ] test sealer
-- [ ] clean up: wash color off of black light table
-- [ ] clean up: table with sealer
+- [x] clean up: wash color off of black light table
+- [x] clean up: table with sealer
 - [ ] clean up: computer table
 - [ ] clean up: drawers next to robot
 - [ ] clean up: make place for plates to wash
@@ -127,14 +127,19 @@ Before openhouse:
 
 Times:
 - flower 2: 9min
+- mario: 9:48 with 50ul water
 
 Todo:
 - [x] Gintas' new pictures
-- [ ] Fix colors that are off in the color bar
-- [ ] Replace old files from Gintas with his new ones
-- [ ] put white to the right of the color bar
-- [ ] remove items on toolbar, add item for saving
-- [ ] Fill up system liquid
+- [x] Fix colors that are off in the color bar
+- [x] Replace old files from Gintas with his new ones
+- [x] put white to the right of the color bar
+- [x] remove items on toolbar, add item for saving
+- [x] Fill up system liquid
+- [x] Go get tshirt
+- [x] Go get badge
+- [x] Get plates from lab
+- [ ] Water last in wells?
 - [ ] Print at least 5 different pictures for display
 - [ ] Does it look better to have larger water volume in the transparent 384 plate?
 - [ ] Print at least 5 different pictures
