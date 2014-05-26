@@ -2,6 +2,15 @@
 
 ## HDF5
 
+- [ ] main: create an HDF5 file
+- [ ] main: put commands in HDF5 file
+- [ ] main: HDF5: substance
+- [ ] main: HDF5: source mixture
+- [ ] main: HDF5: source well
+- [ ] main: HDF5: source well usage
+- [ ] main: HDF5: aspirate/dispense/clean
+- [ ] main: HDF5: well mixture
+
 ## Executables/Servers
 
 Two kinds of servers to begin with:
