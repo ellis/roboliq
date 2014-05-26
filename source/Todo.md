@@ -75,7 +75,9 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [x] RsResult: fold
 - [x] RsResult: removeWarnings
 - [x] ActionHandler.getInstruction should be passed the world state
-- [ ] Main: update world state while creating instructions from actions (see Main.getInstruction)
+- [?] Main: update world state while creating instructions from actions (see Main.getInstruction)
+- [ ] ActionHandler_Distribute
+- [ ] ActionHandler: getSignature -> getSignatures?
 - [ ] RsResult: sequence/map: when returning an error, should also accumulate the warnings from successes, since the error might be due to a prior warning
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
