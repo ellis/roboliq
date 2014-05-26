@@ -20,7 +20,7 @@ case class CommandEntry(
 object CommandEntry {
 	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[CommandEntry] = {
 		import HDF5CompoundMemberMapping.mapping
-		reader.getType(classOf[CommandEntry], mapping("scriptId").length(50), mapping("cmdIndex"), mapping("description").length(255))
+		reader.getType("Command", classOf[CommandEntry], mapping("scriptId").length(50), mapping("cmdIndex"), mapping("description").length(255))
 	}
 }
 
