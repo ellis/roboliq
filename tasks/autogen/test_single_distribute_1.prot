@@ -1,0 +1,11 @@
+labware:
+  plate1: Thermocycler Plate
+
+reagents:
+  water: plate1(A01)
+
+protocol:
+- distribute1:
+    source: plate1(A01)
+    destination: plate1(B01)
+    volume: 20ul

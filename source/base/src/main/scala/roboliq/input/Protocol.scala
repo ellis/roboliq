@@ -31,6 +31,7 @@ import aiplan.strips2.PartialPlan
 import roboliq.commands.AutoActionHandler_TransportLabware
 import roboliq.plan.ActionHandler
 import roboliq.commands.ActionHandler_ShakePlate
+import roboliq.commands.ActionHandler_Distribute
 
 case class ReagentBean(
 	id: String,
@@ -90,6 +91,7 @@ class Protocol {
 			new AutoActionHandler_TransportLabware
 		)
 		val handler_l = List[ActionHandler](
+			new ActionHandler_Distribute,
 			new ActionHandler_ShakePlate
 		)
 		cs = new CommandSet(

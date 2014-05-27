@@ -49,10 +49,7 @@ import roboliq.pipette.planners.TransferSimplestPlanner
 import scala.collection.immutable.SortedSet
 
 
-class ActionHandler_Distribute extends ActionHandler {
-
-	private val logger = Logger[this.type]
-	
+object ActionHandler_Distribute {
 	case class ActionParams(
 		agent_? : Option[String],
 		device_? : Option[String],
@@ -74,6 +71,12 @@ class ActionHandler_Distribute extends ActionHandler {
 		tipModel_? : Option[TipModel],
 		pipettePolicy_? : Option[String]
 	)
+}
+
+class ActionHandler_Distribute extends ActionHandler {
+	import ActionHandler_Distribute._
+
+	private val logger = Logger[this.type]
 	
 	def getActionName = "distribute1"
 
@@ -82,7 +85,7 @@ class ActionHandler_Distribute extends ActionHandler {
 	private def getDomainOperator(n: Int): Strips.Operator = {
 		val name = s"distribute$n"
 		val paramName_l = "?agent" :: "?device" :: (1 to n).flatMap(i => List(s"?labware$i", s"?model$i", s"?site$i", s"?siteModel$i")).toList
-		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "model")).flatten
+		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "siteModel")).flatten
 		val preconds =
 			Strips.Literal(true, "agent-has-device", "?agent", "?device") ::
 			Strips.Literal(true, "device-can-site", "?device", "?site1") ::
@@ -123,7 +126,7 @@ class ActionHandler_Distribute extends ActionHandler {
 			val binding_l = {
 				"?agent" -> m.getOrElse("agent", "?agent") ::
 				"?device" -> m.getOrElse("device", "?device") ::
-				labwareIdent_l.zipWithIndex.map(pair => s"?labware${pair._2 + 1}" -> s"${pair._1}${pair._2 + 1}")
+				labwareIdent_l.zipWithIndex.map(pair => s"?labware${pair._2 + 1}" -> s"${pair._1}")
 			}
 			val binding = binding_l.toMap
 			val planAction = domainOperator.bind(binding)
@@ -144,7 +147,7 @@ class ActionHandler_Distribute extends ActionHandler {
 		for {
 			agent <- eb.getEntityAs[Agent](planned.paramName_l(0))
 			device <- eb.getEntityAs[Pipetter](planned.paramName_l(1))
-			params <- Converter.convActionAs[InstructionParams](planInfo.paramToJsval_l, eb)
+			params <- Converter.convInstructionAs[InstructionParams](planInfo.paramToJsval_l, eb, state0)
 			spec = PipetteSpec(
 				params.source,
 				params.destination,
