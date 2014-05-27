@@ -84,9 +84,9 @@ trait AutoActionHandler {
 }
 
 trait ActionHandler {
-	def getName: String
+	def getActionName: String
 	
-	def getSignature: Strips.Signature
+	def getActionParamNames: List[String]
 	
 	def getActionPlanInfo(
 		id: List[Int],
@@ -264,9 +264,9 @@ object CallTree {
 			for {
 				id <- tree.getId(call)
 				handler <- cs.nameToActionHandler_m.get(call.name).asRs(s"Command `${call.name}` is not an action")
-				argName_l = handler.getSignature.paramName_l
-				jsval_l <- getParams(argName_l, call.args)
-				paramToJsval_l = argName_l zip jsval_l
+				paramName_l = handler.getActionParamNames
+				jsval_l <- getParams(paramName_l, call.args)
+				paramToJsval_l = paramName_l zip jsval_l
 				planInfo <- handler.getActionPlanInfo(id, paramToJsval_l)
 			} yield planInfo
 			

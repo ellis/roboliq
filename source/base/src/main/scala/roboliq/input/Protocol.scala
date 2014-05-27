@@ -94,7 +94,7 @@ class Protocol {
 		)
 		cs = new CommandSet(
 			nameToAutoActionHandler_m = autoHandler_l.map(h => h.getName -> h).toMap,
-			nameToActionHandler_m = handler_l.map(h => h.getName -> h).toMap,
+			nameToActionHandler_m = handler_l.map(h => h.getActionName -> h).toMap,
 			nameToMethods_m = Map(
 				/*"shakePlate" -> List(
 					shakePlate_to_tecan_shakePlate,

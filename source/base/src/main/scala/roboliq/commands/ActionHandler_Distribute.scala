@@ -27,20 +27,16 @@ import roboliq.entities.WorldState
 
 class ActionHandler_Distribute extends ActionHandler {
 	
-	def getName = "distribute1"
+	def getActionName = "distribute"
 
-	def getSignature: Strips.Signature = new Strips.Signature(
-		name = getName,
-		paramName_l = List("agent", "device", "labware"),
-		paramTyp_l = List("agent", "pipetter", "labware")
-	)
+	def getActionParamNames = List("agent", "device", "labware")
 	
 	def getActionPlanInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)]
 	): RqResult[ActionPlanInfo] = {
 		val domainOperator = Strips.Operator(
-			name = getName,
+			name = getActionName,
 			paramName_l = List("?agent", "?device", "?labware", "?model", "?site"),
 			paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "model", "site"),
 			preconds = Strips.Literals(Unique(

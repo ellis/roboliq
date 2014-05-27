@@ -27,20 +27,16 @@ import roboliq.entities.WorldState
 
 class ActionHandler_ShakePlate extends ActionHandler {
 	
-	def getName = "shakePlate"
+	def getActionName = "shakePlate"
 
-	def getSignature: Strips.Signature = new Strips.Signature(
-		name = getName,
-		paramName_l = List("agent", "device", "program", "object", "site"),
-		paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "site")
-	)
+	def getActionParamNames = List("agent", "device", "program", "object", "site")
 	
 	def getActionPlanInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)]
 	): RqResult[ActionPlanInfo] = {
 		val domainOperator = Strips.Operator(
-			name = getName,
+			name = getActionName,
 			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
 			paramTyp_l = List("agent", "shaker", "shakerProgram", "labware", "model", "site"),
 			preconds = Strips.Literals(Unique(
