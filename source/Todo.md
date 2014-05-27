@@ -11,30 +11,14 @@
 - [ ] main: HDF5: aspirate/dispense/clean
 - [ ] main: HDF5: well mixture
 
-## Executables/Servers
+## Tests
 
-Two kinds of servers to begin with:
+### ``test_single_distribute_1``
 
-* relay: interacts with an agent, e.g. the technician or Evoware on the computer with Evoware installed
-* manager: controls the relays
-
-To begin with, I'll create a technician relay and the manager (since these don't require me to be on the Evoware computer).
-The relay and manager interact by sending each other messages via GETs.
-Later there should also be the option for the relay to receive messages from the manager
-via an open socket or something, so that the manager doesn't need to contact the relay server;
-this way the relay doesn't need to be server and can be communicated with through a firewall.
-
-The controller functions can be run either from the command line or via a web interface.
-
-See http://jawinproject.sourceforge.net/jawin.html#callingScript for java interface to COM.
-
-Protocol processing steps:
-1) Step 1
-  * load files: configuration, protocol, customization
-  * find extra variables that user will need to specify (labware models, task methods, explicit protocol variables, additional action user variables)
-  * display list of variables to user (preferably with possible values or ranges)
-  * let the user assign values to the variables
-  CONTINUE HERE
+- [ ] How are the final 6 digits of output directory name generated?
+- [ ] BUG: prompts user to move plate from `offsite` to `offsite`
+- [ ] BUG: uses robot to move plate, even though plate might be offsite
+- [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
 
 ## AI planning flow
 
@@ -132,6 +116,31 @@ We can have a list of all possible pair-wise movements for a given labware model
 4) convert action call to operator calls using merger of original parameters and planned parameters
 5) convert operator calls to operators
 6) translate
+
+## Executables/Servers
+
+Two kinds of servers to begin with:
+
+* relay: interacts with an agent, e.g. the technician or Evoware on the computer with Evoware installed
+* manager: controls the relays
+
+To begin with, I'll create a technician relay and the manager (since these don't require me to be on the Evoware computer).
+The relay and manager interact by sending each other messages via GETs.
+Later there should also be the option for the relay to receive messages from the manager
+via an open socket or something, so that the manager doesn't need to contact the relay server;
+this way the relay doesn't need to be server and can be communicated with through a firewall.
+
+The controller functions can be run either from the command line or via a web interface.
+
+See http://jawinproject.sourceforge.net/jawin.html#callingScript for java interface to COM.
+
+Protocol processing steps:
+1) Step 1
+  * load files: configuration, protocol, customization
+  * find extra variables that user will need to specify (labware models, task methods, explicit protocol variables, additional action user variables)
+  * display list of variables to user (preferably with possible values or ranges)
+  * let the user assign values to the variables
+  CONTINUE HERE
 
 ## For next CADMAD meeting
 

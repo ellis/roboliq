@@ -121,7 +121,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
 					val originE = originE_?.get
 					val destinationE = destinationE_?.get
-					val vectorClass = identToAgentObject_m(vectorIdent).toString
+					val vectorClass = identToAgentObject_m.getOrElse(vectorIdent.toLowerCase, vectorIdent).toString
 					val carrierSrc = originE.carrier
 					val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
 					val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)

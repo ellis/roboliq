@@ -1040,7 +1040,7 @@ class Protocol {
 				val siteId = (carrierE.id, site_i)
 				val site = Site(gid, Some(s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}"))
 				val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
-				agentToIdentToInternalObject(agentIdent)
+				//agentToIdentToInternalObject(agentIdent)
 				siteIdToSite_m(siteId) = site
 				identToAgentObject(siteIdent.toLowerCase) = siteE
 				eb.addSite(site, siteIdent)
@@ -1138,6 +1138,7 @@ class Protocol {
 				val spec = TransporterSpec(gid, Some(s"${agentIdent} ${vectorClass}"))
 				val ident = s"${agentIdent}_transporterSpec${vector_i}"
 				identToAgentObject(ident.toLowerCase) = vectorClass
+				//println(ident.toLowerCase)
 				transporterSpec_m(vectorClass) = spec
 				for (roma <- roma_m.values) {
 					vector_i += 1
