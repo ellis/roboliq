@@ -311,10 +311,10 @@ class EntityBase {
 	private def lookupWellInfo(text: String, state: WorldState): RqResult[List[List[WellInfo]]] = {
 		for {
 			parsed_l <- WellIdentParser.parse(text)
-			ll <- RqResult.toResultOfList(parsed_l.map(pair => {
+			ll <- RqResult.mapAll(parsed_l)(pair => {
 				val (entityIdent, wellIdent_l) = pair
 				wellIdentParserResultToWellInfo(state, entityIdent, wellIdent_l)
-			})).map(_.flatten)
+			}).map(_.flatten)
 			_ <- RqResult.assert(!ll.isEmpty, s"No wells found for `${text}`")
 		} yield ll
 	}
@@ -333,7 +333,7 @@ class EntityBase {
 			case None =>
 				for {
 					well_l <- reagentToWells_m.get(entityIdent).asRs(s"entity not found: `$entityIdent`")
-					l1 <- RsResult.toResultOfList(well_l.map(well => wellToWellInfo(state, well)))
+					l1 <- RsResult.mapAll(well_l)(well => wellToWellInfo(state, well))
 				} yield List(l1)
 			case _ => RsError(s"require a labware entity or reagent: `$entityIdent`")
 		}
@@ -341,8 +341,8 @@ class EntityBase {
 		
 	private def wellIdentsToWellInfo(state: WorldState, labwareName: String, labware: Labware, wellIdent_l: List[WellIdent]): RqResult[List[WellInfo]] = {
 		for {
-			rowcol_l <- RqResult.toResultOfList(wellIdent_l.map(x => wellIdentToRowCol(labwareName, labware, x))).map(_.flatten)
-			well_l <- RqResult.toResultOfList(rowcol_l.map(rowcol => wellAt(state, labwareName, labware, rowcol)))
+			rowcol_l <- RqResult.mapAll(wellIdent_l)(x => wellIdentToRowCol(labwareName, labware, x)).map(_.flatten)
+			well_l <- RqResult.mapAll(rowcol_l)(rowcol => wellAt(state, labwareName, labware, rowcol))
 		} yield {
 			(well_l zip rowcol_l).map(pair => WellInfo(labware, labwareName, pair._1, pair._2))
 		}

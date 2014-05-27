@@ -1373,7 +1373,7 @@ class Protocol {
 		}*/
 		
 		for {
-			planInfo_l <- CallTree.getActionPlanInfo(cs, tree)
+			planInfo_l <- CallTree.getActionPlanInfo(cs, tree, eb)
 			_ = println("planInfo_l:")
 			_ = println(planInfo_l)
 			_ = println("domain:")

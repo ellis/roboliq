@@ -33,7 +33,8 @@ class ActionHandler_ShakePlate extends ActionHandler {
 	
 	def getActionPlanInfo(
 		id: List[Int],
-		paramToJsval_l: List[(String, JsValue)]
+		paramToJsval_l: List[(String, JsValue)],
+		eb: EntityBase
 	): RqResult[ActionPlanInfo] = {
 		val domainOperator = Strips.Operator(
 			name = getActionName,

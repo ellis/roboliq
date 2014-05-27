@@ -8,6 +8,7 @@ import aiplan.strips2.Strips.Literal
 import aiplan.strips2.PartialPlan
 import roboliq.entities.Agent
 import roboliq.entities.WorldState
+import roboliq.entities.EntityBase
 
 
 class Call(
@@ -90,7 +91,8 @@ trait ActionHandler {
 	
 	def getActionPlanInfo(
 		id: List[Int],
-		paramToJsval_l: List[(String, JsValue)]
+		paramToJsval_l: List[(String, JsValue)],
+		eb: roboliq.entities.EntityBase
 	): RqResult[ActionPlanInfo]
 	
 	def getInstruction(
@@ -258,7 +260,11 @@ object CallTree {
 		//tree.frontier_l.toList.map(cmd => cmd -> expandCommand(cmd))
 	}
 
-	def getActionPlanInfo(cs: CommandSet, tree: CallTree): RqResult[List[ActionPlanInfo]] = {
+	def getActionPlanInfo(
+		cs: CommandSet,
+		tree: CallTree,
+		eb: EntityBase
+	): RqResult[List[ActionPlanInfo]] = {
 		val call_l = tree.getLeafs
 		val x = call_l.map(call => {
 			for {
@@ -267,7 +273,7 @@ object CallTree {
 				paramName_l = handler.getActionParamNames
 				jsval_l <- getParams(paramName_l, call.args)
 				paramToJsval_l = paramName_l zip jsval_l
-				planInfo <- handler.getActionPlanInfo(id, paramToJsval_l)
+				planInfo <- handler.getActionPlanInfo(id, paramToJsval_l, eb)
 			} yield planInfo
 			
 		})

@@ -148,6 +148,19 @@ object Converter {
 		} yield res.asInstanceOf[A]
 	}
 	
+	def convActionAs[A: TypeTag](
+		paramToJsval_l: List[(String, JsValue)],
+		eb: EntityBase
+	): RqResult[A] = {
+		import scala.reflect.runtime.universe._
+
+		val nameToVal_l = paramToJsval_l.map(pair => Some(pair._1) -> pair._2)
+		val typ = ru.typeTag[A].tpe
+		for {
+			res <- convArgs(nameToVal_l, typ, eb, None)
+		} yield res.asInstanceOf[A]
+	}
+	
 	def convArgs(
 		nameToVal_l: List[(Option[String], JsValue)],
 		typ: ru.Type,
@@ -295,6 +308,8 @@ object Converter {
 			else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(jsval)
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
+			else if (typ =:= typeOf[Pipetter]) toEntityByRef[Pipetter](jsval, eb)
+			else if (typ =:= typeOf[TipModel]) toEntityByRef[TipModel](jsval, eb)
 			//else if (typ <:< typeOf[Substance]) toSubstance(jsval)
 			else if (typ <:< typeOf[Option[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
@@ -837,6 +852,16 @@ object Converter {
 						l2.map(l => PipetteDestinations(l.flatMap(_.l)))
 					case _ => RqError("expected JsString in liquid source")
 				}
+		}
+	}
+	
+	def toEntityByRef[A <: Entity : Manifest](
+		jsval: JsValue,
+		eb: EntityBase
+	): RqResult[A] = {
+		jsval match {
+			case JsString(s) => eb.getEntityAs[A](s)
+			case _ => RqError("expected JsString as reference")
 		}
 	}
 }
