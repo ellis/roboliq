@@ -7,7 +7,7 @@ import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.plan.ActionHandler
-import roboliq.plan.ActionPlanInfo
+import roboliq.plan.OperatorInfo
 import spray.json.JsNull
 import spray.json.JsObject
 import spray.json.JsString
@@ -20,7 +20,7 @@ import roboliq.entities.ShakerSpec
 import roboliq.entities.Labware
 import roboliq.entities.Site
 import roboliq.input.commands.Command
-import roboliq.plan.Instruction
+import roboliq.plan.AgentInstruction
 import roboliq.entities.Agent
 import roboliq.entities.WorldState
 
@@ -31,11 +31,11 @@ class ActionHandler_ShakePlate extends ActionHandler {
 
 	def getActionParamNames = List("agent", "device", "program", "object", "site")
 	
-	def getActionPlanInfo(
+	def getOperatorInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)],
 		eb: EntityBase
-	): RqResult[ActionPlanInfo] = {
+	): RqResult[OperatorInfo] = {
 		val domainOperator = Strips.Operator(
 			name = getActionName,
 			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
@@ -81,21 +81,21 @@ class ActionHandler_ShakePlate extends ActionHandler {
 		
 		val planAction = domainOperator.bind(binding)
 		
-		println(s"getActionPlanInfo(${id}, ${paramToJsval_l}):")
+		println(s"getOperatorInfo(${id}, ${paramToJsval_l}):")
 		println(m0)
 		println(programName, programObject_?)
 		println(m)
 		println(binding)
 		
-		RqSuccess(ActionPlanInfo(id, paramToJsval_l, domainOperator, problemObjectToTyp_l, Nil, planAction))
+		RqSuccess(OperatorInfo(id, paramToJsval_l, domainOperator, problemObjectToTyp_l, Nil, planAction))
 	}
 	
-	def getInstruction(
-		planInfo: ActionPlanInfo,
+	def getAgentInstruction(
+		planInfo: OperatorInfo,
 		planned: Strips.Operator,
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[List[Instruction]] = {
+	): RqResult[List[AgentInstruction]] = {
 		val m0 = planInfo.paramToJsval_l.toMap
 
 		for {
@@ -113,7 +113,7 @@ class ActionHandler_ShakePlate extends ActionHandler {
 			siteName = planned.paramName_l(5)
 			site <- eb.getEntityAs[Site](siteName)
 		} yield {
-			List(Instruction(agent, ShakerRun(
+			List(AgentInstruction(agent, ShakerRun(
 				device,
 				program,
 				List((labware, site))

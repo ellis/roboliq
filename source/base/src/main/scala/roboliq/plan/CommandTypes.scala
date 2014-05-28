@@ -60,47 +60,47 @@ case class UnknownAction(
 }
 */
 
-case class Instruction(
+case class AgentInstruction(
 	val agent: Agent,
-	val operator: roboliq.input.commands.Action
+	val instruction: roboliq.input.commands.Action
 )
 
-case class ActionPlanInfo(
+/**
+ * @param domainOperator The domain operator on which this operator is based (will be inserted into the domain if its not there yet)
+ * @param problemObjectToTyp_l A list of objects and their types for any new objects that this action needs to insert into the problem
+ * @param problemState_l Any state atoms to insert into the problem
+ * @param operatorBinding_m Bindings for this operator (i.e. any settings for the domain operators parameters)
+ * @param instructionParam_m Any parameters settings required to later generate the instruction from the planned operator
+ */
+case class OperatorInfo(
 	id: List[Int],
-	paramToJsval_l: List[(String, JsValue)],
-	domainOperator: Strips.Operator,
 	problemObjectToTyp_l: List[(String, String)],
 	problemState_l: List[Strips.Atom],
-	planAction: Strips.Operator
+	operatorName: String,
+	operatorBinding_m: Map[String, String],
+	instructionParam_m: Map[String, JsValue]
 )
-
-trait AutoActionHandler {
-	def getName: String
-	def getDomainOperator: Strips.Operator
-	def getInstruction(
-		planned: Strips.Operator,
-		eb: roboliq.entities.EntityBase,
-		state0: WorldState
-	): RqResult[List[Instruction]]
-}
 
 trait ActionHandler {
 	def getActionName: String
 	
 	def getActionParamNames: List[String]
 	
-	def getActionPlanInfo(
+	def getOperatorInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)],
 		eb: roboliq.entities.EntityBase
-	): RqResult[ActionPlanInfo]
-	
+	): RqResult[OperatorInfo]
+}
+
+trait OperatorHandler {
+	def getDomainOperator: Strips.Operator
 	def getInstruction(
-		planInfo: ActionPlanInfo,
-		planned: Strips.Operator,
+		operator: Strips.Operator,
+		instructionParam_m: Map[String, JsValue],
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[List[Instruction]]
+	): RqResult[List[AgentInstruction]]
 }
 
 /*
@@ -132,8 +132,9 @@ case class ProcedureSpec(
 )*/
 
 class CommandSet(
-	val nameToAutoActionHandler_m: Map[String, AutoActionHandler],
 	val nameToActionHandler_m: Map[String, ActionHandler],
+	val nameToAutoOperatorHandler_m: Map[String, OperatorHandler],
+	val nameToOperatorHandler_m: Map[String, OperatorHandler],
 	val nameToMethods_m: Map[String, List[Call => RqResult[Call]]]
 )
 
@@ -264,7 +265,7 @@ object CallTree {
 		cs: CommandSet,
 		tree: CallTree,
 		eb: EntityBase
-	): RqResult[List[ActionPlanInfo]] = {
+	): RqResult[List[OperatorInfo]] = {
 		val call_l = tree.getLeafs
 		val x = call_l.map(call => {
 			for {

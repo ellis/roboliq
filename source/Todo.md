@@ -62,6 +62,8 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [x] ActionHandler_Distribute: for the first version, for pipetting using a single piece of labware
 - [ ] ActionHandler_Distribute: for the second version, for pipetting between two pieces of labware
 - [ ] ActionHandler: getSignature -> getSignatures?
+- [ ] REFACTOR: merge roboliq.input.commands.Command and roboliq.input.commands.Action to a single trait Instruction
+- [ ] REFACTOR: rename roboliq.plan.Instruction to AgentInstruction
 - [ ] RsResult: sequence/map: when returning an error, should also accumulate the warnings from successes, since the error might be due to a prior warning
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)

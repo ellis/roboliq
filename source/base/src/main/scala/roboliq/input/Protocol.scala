@@ -26,12 +26,13 @@ import roboliq.plan.Call
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.plan.CommandSet
-import roboliq.plan.ActionPlanInfo
+import roboliq.plan.OperatorInfo
 import aiplan.strips2.PartialPlan
-import roboliq.commands.AutoActionHandler_TransportLabware
+import roboliq.commands.OperatorHandler_TransportLabware
 import roboliq.plan.ActionHandler
 import roboliq.commands.ActionHandler_ShakePlate
 import roboliq.commands.ActionHandler_Distribute
+import roboliq.plan.OperatorHandler
 
 case class ReagentBean(
 	id: String,
@@ -87,16 +88,17 @@ class Protocol {
 	val agentToBuilder_m = new HashMap[String, ClientScriptBuilder]
 
 	def loadCommandSet(): RsResult[CommandSet] = {
-		val autoHandler_l = List[AutoActionHandler_TransportLabware](
-			new AutoActionHandler_TransportLabware
+		val autoHandler_l = List[OperatorHandler](
+			new OperatorHandler_TransportLabware
 		)
-		val handler_l = List[ActionHandler](
+		val actionHandler_l = List[ActionHandler](
 			new ActionHandler_Distribute,
 			new ActionHandler_ShakePlate
 		)
 		cs = new CommandSet(
-			nameToAutoActionHandler_m = autoHandler_l.map(h => h.getName -> h).toMap,
-			nameToActionHandler_m = handler_l.map(h => h.getActionName -> h).toMap,
+			nameToActionHandler_m = actionHandler_l.map(h => h.getActionName -> h).toMap,
+			nameToAutoOperatorHandler_m = autoHandler_l.map(h => h.getDomainOperator.name -> h).toMap,
+			nameToOperatorHandler_m = autoHandler_l.map(h => h.getDomainOperator.name -> h).toMap,
 			nameToMethods_m = Map(
 				/*"shakePlate" -> List(
 					shakePlate_to_tecan_shakePlate,

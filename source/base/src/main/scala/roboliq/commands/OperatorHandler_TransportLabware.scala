@@ -6,8 +6,8 @@ import aiplan.strips2.Unique
 import roboliq.core._
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
-import roboliq.plan.ActionHandler
-import roboliq.plan.ActionPlanInfo
+import roboliq.plan.OperatorHandler
+import roboliq.plan.OperatorInfo
 import spray.json.JsNull
 import spray.json.JsObject
 import spray.json.JsString
@@ -20,17 +20,14 @@ import roboliq.entities.ShakerSpec
 import roboliq.entities.Labware
 import roboliq.entities.Site
 import roboliq.input.commands.Command
-import roboliq.plan.AutoActionHandler
 import roboliq.entities.LabwareModel
 import roboliq.input.commands.TransporterRun
-import roboliq.plan.Instruction
+import roboliq.plan.AgentInstruction
 import roboliq.entities.Agent
 import roboliq.entities.WorldState
 
 
-class AutoActionHandler_TransportLabware extends AutoActionHandler {
-	def getName = "transportLabware"
-	
+class OperatorHandler_TransportLabware extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
 			name = "transportLabware",
@@ -53,12 +50,13 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 	}
 	
 	def getInstruction(
-		planned: Strips.Operator,
+		operator: Strips.Operator,
+		instructionParam_m: Map[String, JsValue],
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[List[Instruction]] = {
+	): RqResult[List[AgentInstruction]] = {
 		val g = eb.transportGraph
-		val List(labwareName, modelName, site1Name, site2Name, _) = planned.paramName_l
+		val List(labwareName, modelName, site1Name, site2Name, _) = operator.paramName_l
 		
 		for {
 			labware <- eb.getEntityAs[Labware](labwareName)
@@ -79,7 +77,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 						for {
 							agent <- eb.getEntityAs[Agent](agentName)
 						} yield {
-							Instruction(agent, TransporterRun(deviceName, labware, model, site1, site2, programName))
+							AgentInstruction(agent, TransporterRun(deviceName, labware, model, site1, site2, programName))
 						}
 					case x =>
 						RqError("unrecognized transport edge label: "+edge.label)

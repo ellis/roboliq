@@ -16,15 +16,15 @@ import roboliq.plan.CallTree
 import spray.json.JsObject
 import spray.json.pimpString
 import grizzled.slf4j.Logger
-import roboliq.plan.Instruction
 import roboliq.entities.WorldState
 import roboliq.input.commands.PlanPath
 import roboliq.entities.LiquidVolume
 import roboliq.entities.AliquotFlat
-import roboliq.plan.ActionPlanInfo
 import roboliq.plan.CommandSet
 import roboliq.entities.WorldStateEvent
 import roboliq.entities.AliquotFlat
+import roboliq.plan.OperatorInfo
+import roboliq.plan.AgentInstruction
 
 case class Opt(
 	configFile: File = null,
@@ -143,12 +143,12 @@ object Main extends App {
 		cs: CommandSet,
 		plan: aiplan.strips2.PartialPlan,
 		originalActionCount: Int,
-		planInfo_l: List[ActionPlanInfo],
+		planInfo_l: List[OperatorInfo],
 		ordering_l: List[Int]
-	): RsResult[List[Instruction]] = {
+	): RsResult[List[AgentInstruction]] = {
 		var state = protocol.state0
 		for {
-			pair <- RsResult.fold((List[Instruction](), protocol.state0.toImmutable), ordering_l) { (acc, action_i) =>
+			pair <- RsResult.fold((List[AgentInstruction](), protocol.state0.toImmutable), ordering_l) { (acc, action_i) =>
 				val (l, state) = acc
 				for {
 					pair <- getInstructionStep(protocol, cs, plan, originalActionCount, planInfo_l, action_i, state)
@@ -162,28 +162,28 @@ object Main extends App {
 		cs: CommandSet,
 		plan: aiplan.strips2.PartialPlan,
 		originalActionCount: Int,
-		planInfo_l: List[ActionPlanInfo],
+		operatorInfo_l: List[OperatorInfo],
 		action_i: Int,
 		state0: WorldState
-	): RsResult[(List[Instruction], WorldState)] = {
+	): RsResult[(List[AgentInstruction], WorldState)] = {
 		val action = plan.action_l(action_i)
 		for {
 			instruction_l <- {
 				if (action_i - 2 < originalActionCount) {
-					val planInfo = planInfo_l(action_i - 2)
-					val planned = plan.bindings.bind(action)
-					val handler = cs.nameToActionHandler_m(planInfo.planAction.name)
-					handler.getInstruction(planInfo, planned, protocol.eb, state0)
+					val operatorInfo = operatorInfo_l(action_i - 2)
+					val operator = plan.bindings.bind(action)
+					val handler = cs.nameToOperatorHandler_m(operatorInfo.domainOperator.name)
+					handler.getInstruction(operator, operatorInfo.instructionParam_m, protocol.eb, state0)
 				}
 				else {
 					val planned = plan.bindings.bind(action)
-					val handler = cs.nameToAutoActionHandler_m(action.name)
-					handler.getInstruction(planned, protocol.eb, state0)
+					val handler = cs.nameToAutoOperatorHandler_m(action.name)
+					handler.getInstruction(planned, Map(), protocol.eb, state0)
 				}
 			}
 			// Process any world state events in instruction_l
 			state1 <- RsResult.fold(state0, instruction_l)((state, instruction) => {
-				WorldStateEvent.update(instruction.operator.effects, state)
+				WorldStateEvent.update(instruction.instruction.effects, state)
 			})
 		} yield (instruction_l, state1)
 	}
@@ -238,7 +238,7 @@ object Main extends App {
 	
 	private def translate(
 		protocol: Protocol,
-		instruction_l: List[Instruction]
+		instruction_l: List[AgentInstruction]
 	): RqResult[WorldState] = {
 		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
 		val path0 = new PlanPath(Nil, protocol.state0.toImmutable)
@@ -261,13 +261,13 @@ object Main extends App {
 		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
 		path0: PlanPath,
-		instruction: Instruction
+		instruction: AgentInstruction
 	): RsResult[PlanPath] = {
 		for {
 			agentIdent <- protocol.eb.getIdent(instruction.agent)
-			path1 <- path0.add(instruction.operator)
+			path1 <- path0.add(instruction.instruction)
 			builder = agentToBuilder_m(agentIdent)
-			command = instruction.operator.asInstanceOf[roboliq.input.commands.Command]
+			command = instruction.instruction.asInstanceOf[roboliq.input.commands.Command]
 			_ <- builder.addCommand(protocol, path0.state, agentIdent, command)
 		} yield path1
 	}

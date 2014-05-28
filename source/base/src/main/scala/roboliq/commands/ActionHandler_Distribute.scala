@@ -8,7 +8,7 @@ import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.plan.ActionHandler
-import roboliq.plan.ActionPlanInfo
+import roboliq.plan.OperatorInfo
 import spray.json.JsNull
 import spray.json.JsObject
 import spray.json.JsString
@@ -21,7 +21,7 @@ import roboliq.entities.ShakerSpec
 import roboliq.entities.Labware
 import roboliq.entities.Site
 import roboliq.input.commands.Command
-import roboliq.plan.Instruction
+import roboliq.plan.AgentInstruction
 import roboliq.entities.Agent
 import roboliq.entities.WorldState
 import roboliq.input.commands.Distribute
@@ -47,6 +47,7 @@ import roboliq.entities.Mixture
 import roboliq.entities.PipettePolicy
 import roboliq.pipette.planners.TransferSimplestPlanner
 import scala.collection.immutable.SortedSet
+import roboliq.plan.OperatorHandler
 
 
 object ActionHandler_Distribute {
@@ -56,7 +57,9 @@ object ActionHandler_Distribute {
 		source: String,
 		destination: String
 	)
-	
+}
+
+object OperatorHandler_Distribute {
 	case class InstructionParams(
 		agent_? : Option[String],
 		device_? : Option[String],
@@ -73,16 +76,10 @@ object ActionHandler_Distribute {
 	)
 }
 
-class ActionHandler_Distribute extends ActionHandler {
-	import ActionHandler_Distribute._
-
+class OperatorHandler_Distribute(n: Int) extends OperatorHandler {
 	private val logger = Logger[this.type]
 	
-	def getActionName = "distribute1"
-
-	def getActionParamNames = List("agent", "device", "source", "destination", "volume")
-
-	private def getDomainOperator(n: Int): Strips.Operator = {
+	def getDomainOperator: Strips.Operator = {
 		val name = s"distribute$n"
 		val paramName_l = "?agent" :: "?device" :: (1 to n).flatMap(i => List(s"?labware$i", s"?model$i", s"?site$i", s"?siteModel$i")).toList
 		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "siteModel")).flatten
@@ -105,49 +102,18 @@ class ActionHandler_Distribute extends ActionHandler {
 		)
 	}
 	
-	def getActionPlanInfo(
-		id: List[Int],
-		paramToJsval_l: List[(String, JsValue)],
-		eb: roboliq.entities.EntityBase
-	): RqResult[ActionPlanInfo] = {
-		for {
-			params <- Converter.convActionAs[ActionParams](paramToJsval_l, eb)
-			// TODO: handle reagent sources (in addition to these labware sources)
-			parsedSource_l <- WellIdentParser.parse(params.source)
-			parsedDestination_l <- WellIdentParser.parse(params.destination)
-		} yield {
-			val sourceLabware_l = parsedSource_l.map(_._1)
-			val destinationLabware_l = parsedDestination_l.map(_._1)
-			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
-			val n = labwareIdent_l.size
-			val domainOperator = getDomainOperator(n)
-
-			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
-			val binding_l = {
-				"?agent" -> m.getOrElse("agent", "?agent") ::
-				"?device" -> m.getOrElse("device", "?device") ::
-				labwareIdent_l.zipWithIndex.map(pair => s"?labware${pair._2 + 1}" -> s"${pair._1}")
-			}
-			val binding = binding_l.toMap
-			val planAction = domainOperator.bind(binding)
-
-			ActionPlanInfo(id, paramToJsval_l, domainOperator, Nil, Nil, planAction)
-		}
-	}
-	
 	def getInstruction(
-		planInfo: ActionPlanInfo,
-		planned: Strips.Operator,
+		operator: Strips.Operator,
+		instructionParam_m: Map[String, JsValue],
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[List[Instruction]] = {
-		val m0 = planInfo.paramToJsval_l.toMap
-
-
+	): RqResult[List[AgentInstruction]] = {
+		import OperatorHandler_Distribute.InstructionParams
+		
 		for {
-			agent <- eb.getEntityAs[Agent](planned.paramName_l(0))
-			device <- eb.getEntityAs[Pipetter](planned.paramName_l(1))
-			params <- Converter.convInstructionAs[InstructionParams](planInfo.paramToJsval_l, eb, state0)
+			agent <- eb.getEntityAs[Agent](operator.paramName_l(0))
+			device <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
+			params <- Converter.convInstructionAs[InstructionParams](instructionParam_m, eb, state0)
 			spec = PipetteSpec(
 				params.source,
 				params.destination,
@@ -161,7 +127,7 @@ class ActionHandler_Distribute extends ActionHandler {
 			)
 			path <- handlePipetteSpec(eb, state0, spec, device)
 		} yield {
-			path.action_r.reverse.map(x => Instruction(agent, x))
+			path.action_r.reverse.map(x => AgentInstruction(agent, x))
 		}
 	}
 
@@ -366,4 +332,63 @@ class ActionHandler_Distribute extends ActionHandler {
 		
 		RqSuccess(path)
 	}	
+}
+
+class ActionHandler_Distribute extends ActionHandler {
+	import ActionHandler_Distribute._
+
+	def getActionName = "distribute"
+
+	def getActionParamNames = List("agent", "device", "source", "destination", "volume")
+
+	private def getDomainOperator(n: Int): Strips.Operator = {
+		val name = s"distribute$n"
+		val paramName_l = "?agent" :: "?device" :: (1 to n).flatMap(i => List(s"?labware$i", s"?model$i", s"?site$i", s"?siteModel$i")).toList
+		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "siteModel")).flatten
+		val preconds =
+			Strips.Literal(true, "agent-has-device", "?agent", "?device") ::
+			Strips.Literal(true, "device-can-site", "?device", "?site1") ::
+			(1 to n).flatMap(i => List(
+				Strips.Literal(true, "model", s"?labware$i", s"?model$i"),
+				Strips.Literal(true, "location", s"?labware$i", s"?site$i"),
+				Strips.Literal(true, "model", s"?site$i", s"?siteModel$i"),
+				Strips.Literal(true, "stackable", s"?siteModel$i", s"?model$i")
+			)).toList
+
+		Strips.Operator(
+			name = name,
+			paramName_l = paramName_l,
+			paramTyp_l = paramTyp_l,
+			preconds = Strips.Literals(Unique(preconds : _*)),
+			effects = aiplan.strips2.Strips.Literals.empty
+		)
+	}
+	
+	def getOperatorInfo(
+		id: List[Int],
+		paramToJsval_l: List[(String, JsValue)],
+		eb: roboliq.entities.EntityBase
+	): RqResult[OperatorInfo] = {
+		for {
+			params <- Converter.convActionAs[ActionParams](paramToJsval_l, eb)
+			// TODO: handle reagent sources (in addition to these labware sources)
+			parsedSource_l <- WellIdentParser.parse(params.source)
+			parsedDestination_l <- WellIdentParser.parse(params.destination)
+		} yield {
+			val sourceLabware_l = parsedSource_l.map(_._1)
+			val destinationLabware_l = parsedDestination_l.map(_._1)
+			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
+			val n = labwareIdent_l.size
+
+			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
+			val binding_l = {
+				"?agent" -> m.getOrElse("agent", "?agent") ::
+				"?device" -> m.getOrElse("device", "?device") ::
+				labwareIdent_l.zipWithIndex.map(pair => s"?labware${pair._2 + 1}" -> s"${pair._1}")
+			}
+			val binding = binding_l.toMap
+
+			OperatorInfo(id, Nil, Nil, s"distribute$n", binding, paramToJsval_l.toMap)
+		}
+	}
 }
