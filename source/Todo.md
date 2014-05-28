@@ -15,9 +15,8 @@
 
 ### ``test_single_distribute_1``
 
-- [?] Fix the final 6 digits of output directory name generated
-- [ ] BUG: prompts user to move plate from `offsite` to `offsite`
-- [ ] BUG: uses robot to move plate, even though plate might be offsite
+- [x] Fix the final 6 digits of output directory name generated
+- [x] BUG: prompts user to move plate from `offsite` to `offsite`
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
 
 ## AI planning flow
@@ -60,7 +59,8 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [x] RsResult: removeWarnings
 - [x] ActionHandler.getInstruction should be passed the world state
 - [?] Main: update world state while creating instructions from actions (see Main.getInstruction)
-- [ ] ActionHandler_Distribute
+- [x] ActionHandler_Distribute: for the first version, for pipetting using a single piece of labware
+- [ ] ActionHandler_Distribute: for the second version, for pipetting between two pieces of labware
 - [ ] ActionHandler: getSignature -> getSignatures?
 - [ ] RsResult: sequence/map: when returning an error, should also accumulate the warnings from successes, since the error might be due to a prior warning
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
