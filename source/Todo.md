@@ -79,7 +79,7 @@ val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
 - [ ] rename `toStripsText` to `toPddlString`
 - [ ] TransportLabware: consider creating multiple transporation AutoActions to handle various conditions
 
-Command types: task, procedure, function, action, instruction
+Command types: task, procedure, function, action, operator, instruction
 
 A sequence of calls gets transformed into a command tree with a root node, and the call items are transformed into command nodes.
 The command tree is iteratively expanded as follows:
@@ -90,9 +90,10 @@ The command tree is iteratively expanded as follows:
 * A procedure gets expanded into a list of commands (recursion not allowed for now).  Procedures are generally user-defined, have parameters, and a list of commands.
 * A function gets expanded into a list of commands; it differs from the other command types insofar as it is composed of code, and can therefore make decisions about how to expand based on its parameters; It can also request more information from the user before proceeding.
 * A function may also need to use tasks, but in order to do so, it must request the methods for those tasks in advance in order to avoid additional user interaction.
-* Once the leafs of the command tree are all actions or instructions, the expansion process is done and no more user interaction is required.
-* The actions and instructions get passed to the planner.
-* With a concrete plan, actions are turned into instructions, which are passed to the translator.
+* An action is a command that can be turned into a list of planner operators (for each operator, we also have a map of additional command variable which weren't involved in planning)
+* Once the leafs of the command tree are all actions, the expansion process is done and no more user interaction is required.
+* The operators are passed to the planner.
+* After planning, the final operators are turned into instructions, which are passed to the translator.
 
 More:
 
