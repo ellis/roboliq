@@ -15,7 +15,7 @@
 
 ### ``test_single_distribute_1``
 
-- [ ] How are the final 6 digits of output directory name generated?
+- [?] Fix the final 6 digits of output directory name generated
 - [ ] BUG: prompts user to move plate from `offsite` to `offsite`
 - [ ] BUG: uses robot to move plate, even though plate might be offsite
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable

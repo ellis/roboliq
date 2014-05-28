@@ -71,7 +71,7 @@ object Main extends App {
 			
 			basename = FilenameUtils.getBaseName(opt.protocolFile.getPath())
 			dirFile = opt.protocolFile.getParentFile()
-			dateString = new SimpleDateFormat("yyyyMMdd-hhmmss").format(new Date())
+			dateString = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date())
 			dirOutput = if (opt.outputDir != null) opt.outputDir else new File(dirFile, s"roboliq--$basename--$dateString")
 			_ = dirOutput.mkdirs()
 			pair <- protocol.createPlan()
