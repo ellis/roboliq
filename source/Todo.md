@@ -16,8 +16,7 @@
 ### ``test_single_distribute_1``
 
 - [?] Fix the final 6 digits of output directory name generated
-- [ ] BUG: prompts user to move plate from `offsite` to `offsite`
-- [ ] BUG: uses robot to move plate, even though plate might be offsite
+- [x] BUG: prompts user to move plate from `offsite` to `offsite`
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
 
 ## AI planning flow

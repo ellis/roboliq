@@ -72,7 +72,7 @@ class AutoActionHandler_TransportLabware extends AutoActionHandler {
 			op_l <- RqResult.mapAll(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
 				val site1 = node1.value
-				val site2 = if (site1 == edge._1) edge._2.value else edge._1.value
+				val site2 = if (site1 == edge._1.value) edge._2.value else edge._1.value
 				println(s"Move from $site1 to $site2")
 				edge.label match {
 					case (agentName: String, deviceName: String, programName: String) =>
