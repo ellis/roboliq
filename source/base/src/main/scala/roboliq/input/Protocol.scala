@@ -30,9 +30,10 @@ import roboliq.plan.OperatorInfo
 import aiplan.strips2.PartialPlan
 import roboliq.commands.OperatorHandler_TransportLabware
 import roboliq.plan.ActionHandler
-import roboliq.commands.ActionHandler_ShakePlate
-import roboliq.commands.ActionHandler_Distribute
+import roboliq.commands._
 import roboliq.plan.OperatorHandler
+import roboliq.commands.ShakePlateOperatorHandler
+import roboliq.commands.ShakePlateActionHandler
 
 case class ReagentBean(
 	id: String,
@@ -88,17 +89,23 @@ class Protocol {
 	val agentToBuilder_m = new HashMap[String, ClientScriptBuilder]
 
 	def loadCommandSet(): RsResult[CommandSet] = {
-		val autoHandler_l = List[OperatorHandler](
+		val actionHandler_l = List[ActionHandler](
+			new DistributeActionHandler,
+			new ShakePlateActionHandler
+		)
+		val operatorHandler_l = List[OperatorHandler](
+			new DistributeOperatorHandler(1),
+			new DistributeOperatorHandler(2),
+			new DistributeOperatorHandler(3),
+			new DistributeOperatorHandler(4),
+			new ShakePlateOperatorHandler,
 			new OperatorHandler_TransportLabware
 		)
-		val actionHandler_l = List[ActionHandler](
-			new ActionHandler_Distribute,
-			new ActionHandler_ShakePlate
-		)
+		val autoHandler_l = List("transportLabware")
 		cs = new CommandSet(
 			nameToActionHandler_m = actionHandler_l.map(h => h.getActionName -> h).toMap,
-			nameToAutoOperatorHandler_m = autoHandler_l.map(h => h.getDomainOperator.name -> h).toMap,
-			nameToOperatorHandler_m = autoHandler_l.map(h => h.getDomainOperator.name -> h).toMap,
+			nameToOperatorHandler_m = operatorHandler_l.map(h => h.getDomainOperator.name -> h).toMap,
+			nameToAutoOperator_l = autoHandler_l,
 			nameToMethods_m = Map(
 				/*"shakePlate" -> List(
 					shakePlate_to_tecan_shakePlate,
@@ -1354,7 +1361,7 @@ class Protocol {
 		RsSuccess(())
 	}
 
-	def createPlan(): RqResult[(List[ActionPlanInfo], PartialPlan)] = {
+	def createPlan(): RqResult[(List[OperatorInfo], PartialPlan)] = {
 		/*val eb = {
 			import roboliq.entities._
 			val r1 = Agent("r1", Some("r1"))
@@ -1387,6 +1394,10 @@ class Protocol {
 			problem <- createProblem(planInfo_l, domain)
 			_ = println(problem.toStripsText)
 			plan0 = PartialPlan.fromProblem(problem)
+			operator_l <- RsResult.mapAll(planInfo_l)(planInfo => {
+				cs.nameToOperatorHandler_m
+				planInfo.operatorName
+			})
 			plan1 <- plan0.addActionSequence(planInfo_l.map(_.planAction)).asRs
 		} yield {
 			(planInfo_l, plan1)

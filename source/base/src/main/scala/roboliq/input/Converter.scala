@@ -322,7 +322,10 @@ object Converter {
 			else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(jsval)
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
+			// Lookups
+			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](jsval, eb)
 			else if (typ =:= typeOf[Pipetter]) toEntityByRef[Pipetter](jsval, eb)
+			else if (typ =:= typeOf[Shaker]) toEntityByRef[Shaker](jsval, eb)
 			else if (typ =:= typeOf[TipModel]) toEntityByRef[TipModel](jsval, eb)
 			//else if (typ <:< typeOf[Substance]) toSubstance(jsval)
 			else if (typ <:< typeOf[Option[_]]) {
@@ -381,12 +384,18 @@ object Converter {
 					case JsArray(jsval_l) =>
 						convListToObject(path_r, jsval_l, nameToType_l, eb, state_?, id_?)
 					case JsString(s) =>
-						for {
-							nameToVal_l <- parseStringToArgs(s)
-							//_ = println("nameToVal_l: "+nameToVal_l.toString)
-							res <- convArgsToMap(path_r, nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
-							//_ = println("res: "+res.toString)
-						} yield res
+						eb.getEntity(s) match {
+							case Some(obj) =>
+								// FIXME: need to check type rather than just assuming that it's correct!
+								RsSuccess(Left(ConvObject(obj)))
+							case None =>
+								for {
+									nameToVal_l <- parseStringToArgs(s)
+									//_ = println("nameToVal_l: "+nameToVal_l.toString)
+									res <- convArgsToMap(path_r, nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
+									//_ = println("res: "+res.toString)
+								} yield res
+						}
 					case _ =>
 						convListToObject(path_r, List(jsval), nameToType_l, eb, state_?, id_?)
 					//case _ =>

@@ -131,10 +131,13 @@ case class ProcedureSpec(
 	cmd_l: List[Call]
 )*/
 
+/**
+ * @param nameToAutoOperator_l List of operator names which should be automatically added to the domain
+ */
 class CommandSet(
 	val nameToActionHandler_m: Map[String, ActionHandler],
-	val nameToAutoOperatorHandler_m: Map[String, OperatorHandler],
 	val nameToOperatorHandler_m: Map[String, OperatorHandler],
+	val nameToAutoOperator_l: List[String],
 	val nameToMethods_m: Map[String, List[Call => RqResult[Call]]]
 )
 
