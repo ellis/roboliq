@@ -5,7 +5,7 @@ reagents:
   water: plate1(A01)
 
 protocol:
-- distribute1:
+- distribute:
     source: plate1(A01)
     destination: plate1(B01)
     volume: 20ul

@@ -13,10 +13,16 @@
 
 ## Tests
 
+* distribute between two plates
+* distribute from water trough to entire plate
+* distribute from tube to tube
+* titrate
+
 ### ``test_single_distribute_1``
 
 - [x] Fix the final 6 digits of output directory name generated
 - [x] BUG: prompts user to move plate from `offsite` to `offsite`
+- [ ] BUG: distribute1 is missing from domain.pddl
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
 
 ## AI planning flow

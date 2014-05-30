@@ -83,7 +83,8 @@ runId, cmd#, object, variable, value
 
 object Test extends App {
 	// Open "singleVoltageMeasurement.h5" for writing
-	val hdf5Writer = HDF5Factory.open("test.h5")
+	//val hdf5Writer = HDF5Factory.open("test.h5")
+	val hdf5Writer = HDF5Factory.open("test2.h5")
 	
 	// Write a measurement
 	//hdf5Writer.writeCompoundArray[CommandEntry]("commands", java.util.Arrays.asList(new CommandEntry("A", 1, "move"), new CommandEntry("A", 2, "groove")).toArray)
@@ -93,8 +94,13 @@ object Test extends App {
 	val cmd1 = new CommandEntry("A", 1, "move")
 	val cmd2 = new CommandEntry("A", 2, "groove")
 	val cmd_l = Array(cmd1, cmd2)
-	val typ = CommandEntry.getHDF5Type(hdf5Writer.compound())
-	hdf5Writer.compound().writeArray("commands", typ, cmd_l)
+	
+	// WORKS:
+	//val typ = CommandEntry.getHDF5Type(hdf5Writer.compound())
+	//hdf5Writer.compound().writeArray("commands", typ, cmd_l)
+	
+	// DOESN'T WORK:
+	hdf5Writer.compound().writeArray("commands", cmd_l)
 
 	// Close the HDF5 writer
 	hdf5Writer.close()
