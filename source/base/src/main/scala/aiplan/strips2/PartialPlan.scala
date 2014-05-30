@@ -590,7 +590,7 @@ class PartialPlan private (
 			}
 		}
 		val x = step(m1.toList, Map())
-		println(s"createEffectToPrecondMap($effect, $precond) = $x")
+		//println(s"createEffectToPrecondMap($effect, $precond) = $x")
 		x
 	}
 	
@@ -630,7 +630,7 @@ class PartialPlan private (
 					//_ = println("eq_m: "+eq_m)
 					bindings2 <- plan2.bindings.assign(eq_m) match {
 						case Left(msg) =>
-							println("assign error: "+msg)
+							//println("assign error: "+msg)
 							None
 						case Right(x) => Some(x)
 					}

@@ -1,0 +1,15 @@
+description: |
+  Distribute the contents of well plate1(A01) to plate2(A01|H01)
+
+labware:
+  plate1: Thermocycler Plate
+  plate2: Thermocycler Plate
+
+reagents:
+  water: plate1(A01)
+
+protocol:
+- distribute:
+    source: plate1(A01)
+    destination: plate2(A01|H01)
+    volume: 20ul
