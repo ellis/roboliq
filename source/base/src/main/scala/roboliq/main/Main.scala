@@ -80,9 +80,11 @@ object Main extends App {
 			filenameDomain = new File(dirOutput, "domain.pddl").getPath
 			filenameProblem = new File(dirOutput, "problem.pddl").getPath
 			filenamePlan0 = new File(dirOutput, "plan0.dot").getPath
+			filenameActions0 = new File(dirOutput, "actions0.lst").getPath
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
+			_ = roboliq.utils.FileUtils.writeToFile(filenameActions0, plan0.action_l.mkString("\n"))
 			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
 			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
 			_ = println("plan2:")

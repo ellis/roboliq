@@ -1408,36 +1408,39 @@ class Protocol {
 		}
 	}
 	
-	def createDomain(cs: CommandSet, planInfo_l: List[OperatorInfo]): RqResult[Strips.Domain] = {
-		for {
-			operatorHandler_l <- RsResult.mapAll(cs.nameToAutoOperator_l)(name => RsResult.from(cs.nameToOperatorHandler_m.get(name), s"createDomain: Unknown operator `${name}`"))
-		} yield {
-			val operator_l = operatorHandler_l.map(_.getDomainOperator)
-			Strips.Domain(
-				type_l = List(
-					"labware",
-					"model",
-					"site",
-					"siteModel",
-					
-					"agent",
-					
-					"pipetter",
-					"pipetterProgram",
-					
-					"shaker",
-					"shakerProgram"
-				),
-				constantToType_l = Nil,
-				predicate_l = List[Strips.Signature](
-					Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
-					Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
-					Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
-					Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
-					Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
-				),
-				operator_l = operator_l
-			)
+	def createDomain(cs: CommandSet, operatorInfo_l: List[OperatorInfo]): RqResult[Strips.Domain] = {
+		RsResult.prependError("createDomain:") {
+			val name_l = (cs.nameToAutoOperator_l ++ operatorInfo_l.map(_.operatorName)).distinct.sorted
+			for {
+				operatorHandler_l <- RsResult.mapAll(name_l)(cs.getOperatorHandler)
+			} yield {
+				val operator_l = operatorHandler_l.map(_.getDomainOperator)
+				Strips.Domain(
+					type_l = List(
+						"labware",
+						"model",
+						"site",
+						"siteModel",
+						
+						"agent",
+						
+						"pipetter",
+						"pipetterProgram",
+						
+						"shaker",
+						"shakerProgram"
+					),
+					constantToType_l = Nil,
+					predicate_l = List[Strips.Signature](
+						Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
+						Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
+						Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
+						Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
+						Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
+					),
+					operator_l = operator_l
+				)
+			}
 		}
 	}
 

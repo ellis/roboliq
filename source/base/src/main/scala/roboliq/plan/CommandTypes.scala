@@ -139,7 +139,10 @@ class CommandSet(
 	val nameToOperatorHandler_m: Map[String, OperatorHandler],
 	val nameToAutoOperator_l: List[String],
 	val nameToMethods_m: Map[String, List[Call => RqResult[Call]]]
-)
+) {
+	def getOperatorHandler(name: String): RsResult[OperatorHandler] =
+		RsResult.from(nameToOperatorHandler_m.get(name), s"unknown operator `${name}`")
+}
 
 sealed trait CallExpandResult
 
