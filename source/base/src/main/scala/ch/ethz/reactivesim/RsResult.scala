@@ -25,6 +25,7 @@ import scala.language.implicitConversions
 import scalaz.Monad
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import com.sun.xml.internal.bind.v2.model.runtime.RuntimeClassInfo
 
 
 sealed trait RsResult[+A] {
@@ -60,6 +61,11 @@ sealed trait RsResult[+A] {
 	def flatten[B](implicit ev: A <:< RsResult[B]): RsResult[B]
 	
 	def toOption: Option[A]
+
+	def prependError(error: => String): RsResult[A] = this match {
+		case RsError(e, w) => RsError(error :: e, w)
+		case _ => this
+	}
 }
 
 object RsResult {
@@ -79,7 +85,7 @@ object RsResult {
 	def asInstanceOf[A : Manifest](that: AnyRef): RsResult[A] =
 		that match {
 			case a : A => RsSuccess(a)
-			case _ => RsError(s"expected instance of ${manifest[A].erasure.getName()}: $that")
+			case _ => RsError(s"expected instance of ${manifest[A].runtimeClass.getName}: $that")
 		}
 	
 	def assert(b: Boolean, error: => String): RsResult[Unit] =
@@ -112,6 +118,8 @@ object RsResult {
 		case Some(x) => RsSuccess(x)
 		case None => RsSuccess(default, List(warning))
 	}
+	
+	def prependError[A](error: => String)(res: RsResult[A]): RsResult[A] = res.prependError(error)
 	
 	/**
 	 * Flatten a sequence of RsResults by just keeping the success values

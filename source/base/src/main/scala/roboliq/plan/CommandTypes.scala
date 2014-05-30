@@ -264,7 +264,7 @@ object CallTree {
 		//tree.frontier_l.toList.map(cmd => cmd -> expandCommand(cmd))
 	}
 
-	def getActionPlanInfo(
+	def getOperatorInfo(
 		cs: CommandSet,
 		tree: CallTree,
 		eb: EntityBase
@@ -277,7 +277,7 @@ object CallTree {
 				paramName_l = handler.getActionParamNames
 				jsval_l <- getParams(paramName_l, call.args)
 				paramToJsval_l = paramName_l zip jsval_l
-				planInfo <- handler.getActionPlanInfo(id, paramToJsval_l, eb)
+				planInfo <- handler.getOperatorInfo(id, paramToJsval_l, eb)
 			} yield planInfo
 			
 		})

@@ -324,6 +324,7 @@ object Converter {
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 			// Lookups
 			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](jsval, eb)
+			else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](jsval, eb)
 			else if (typ =:= typeOf[Pipetter]) toEntityByRef[Pipetter](jsval, eb)
 			else if (typ =:= typeOf[Shaker]) toEntityByRef[Shaker](jsval, eb)
 			else if (typ =:= typeOf[TipModel]) toEntityByRef[TipModel](jsval, eb)
@@ -374,7 +375,7 @@ object Converter {
 				}
 			}
 			else {
-				//println("typ: "+typ)
+				println("typ: "+typ)
 				val ctor = typ.member(nme.CONSTRUCTOR).asMethod
 				val p0_l = ctor.paramss(0)
 				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)

@@ -25,6 +25,7 @@ import roboliq.entities.WorldStateEvent
 import roboliq.entities.AliquotFlat
 import roboliq.plan.OperatorInfo
 import roboliq.plan.AgentInstruction
+import spray.json.JsValue
 
 case class Opt(
 	configFile: File = null,
@@ -167,20 +168,11 @@ object Main extends App {
 		state0: WorldState
 	): RsResult[(List[AgentInstruction], WorldState)] = {
 		val action = plan.action_l(action_i)
+		val operator = plan.bindings.bind(action)
+		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
 		for {
-			instruction_l <- {
-				if (action_i - 2 < originalActionCount) {
-					val operatorInfo = operatorInfo_l(action_i - 2)
-					val operator = plan.bindings.bind(action)
-					val handler = cs.nameToOperatorHandler_m(operatorInfo.domainOperator.name)
-					handler.getInstruction(operator, operatorInfo.instructionParam_m, protocol.eb, state0)
-				}
-				else {
-					val planned = plan.bindings.bind(action)
-					val handler = cs.nameToAutoOperatorHandler_m(action.name)
-					handler.getInstruction(planned, Map(), protocol.eb, state0)
-				}
-			}
+			handler <- RsResult.from(cs.nameToOperatorHandler_m.get(action.name), s"getInstructionStep: unknown operator `${action.name}`")
+			instruction_l <- handler.getInstruction(operator, instructionParam_m, protocol.eb, state0)
 			// Process any world state events in instruction_l
 			state1 <- RsResult.fold(state0, instruction_l)((state, instruction) => {
 				WorldStateEvent.update(instruction.instruction.effects, state)

@@ -146,9 +146,9 @@ private object WellIdentParser0 extends JavaTokenParsers {
 		if (lWellIdent.isEmpty)
 			return RsSuccess(List(idPlate))
 		
-		val l = lWellIdent.flatMap(_ match {
+		RsResult.mapFirst(lWellIdent)({
 			case WellIdentOne(rc) =>
-				List(idPlate + "(" + rc + ")")
+				RsSuccess(List(idPlate + "(" + rc + ")"))
 			/*case WellIdentVertical(rc0, rc1) =>
 				(for {
 					row_i <- rc0.row to rc1.row
@@ -171,11 +171,12 @@ private object WellIdentParser0 extends JavaTokenParsers {
 					idPlate + "(" + RowCol(row, col) + ")"
 				}).toList*/
 			case WellIdentMatrix(rc0, rc1) =>
-				(for (col <- rc0.col to rc1.col; row <- rc0.row to rc1.row) yield {
+				RsSuccess((for (col <- rc0.col to rc1.col; row <- rc0.row to rc1.row) yield {
 					idPlate + "(" + RowCol(row, col) + ")"
-				}).toList
-		})
-		RsSuccess(l)
+				}).toList)
+			case x =>
+				RsError(s"entryToIds($idPlate): unable to get identifier for $x")
+		}).map(_.flatten)
 	}
 }
 

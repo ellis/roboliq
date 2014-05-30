@@ -30,7 +30,7 @@ case class ShakePlateActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
 	program: ShakerSpec,
-	labware: Labware,
+	`object`: Labware,
 	site_? : Option[Site]
 )
 
@@ -88,7 +88,7 @@ class ShakePlateActionHandler extends ActionHandler {
 		*/
 		for {
 			params <- Converter.convActionAs[ShakePlateActionParams](paramToJsval_l, eb)
-			labwareName <- eb.getIdent(params.labware)
+			labwareName <- eb.getIdent(params.`object`)
 			siteName_? <- params.site_? match {
 				case None => RqSuccess(None)
 				case Some(site) => eb.getIdent(site).map(Some(_))
@@ -138,9 +138,9 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
 	): RqResult[List[AgentInstruction]] = {
-		val List(agentName, deviceName, labwareName, modelName, siteName) = operator.paramName_l
+		val List(agentName, deviceName, labwareName, _, siteName) = operator.paramName_l
 		
-		for {
+		(for {
 			agent <- eb.getEntityAs[Agent](agentName)
 			device <- eb.getEntityAs[Shaker](deviceName)
 			program <- instructionParam_m.get("program") match {
@@ -151,9 +151,7 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 					eb.getEntityAs[ShakerSpec](programName)
 				case _ => RqError("Expected identifier or shaker program")
 			}
-			labwareName = operator.paramName_l(3)
 			labware <- eb.getEntityAs[Labware](labwareName)
-			siteName = operator.paramName_l(5)
 			site <- eb.getEntityAs[Site](siteName)
 		} yield {
 			List(AgentInstruction(agent, ShakerRun(
@@ -161,6 +159,6 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 				program,
 				List((labware, site))
 			)))
-		}
+		}).prependError("ShakePlate.getInstruction:")
 	}
 }

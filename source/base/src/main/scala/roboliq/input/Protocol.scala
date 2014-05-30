@@ -1385,57 +1385,64 @@ class Protocol {
 		}*/
 		
 		for {
-			planInfo_l <- CallTree.getActionPlanInfo(cs, tree, eb)
+			operatorInfo_l <- CallTree.getOperatorInfo(cs, tree, eb)
 			_ = println("planInfo_l:")
-			_ = println(planInfo_l)
+			_ = println(operatorInfo_l)
 			_ = println("domain:")
-			domain <- createDomain(cs, planInfo_l)
+			domain <- createDomain(cs, operatorInfo_l)
 			_ = println(domain.toStripsText)
-			problem <- createProblem(planInfo_l, domain)
+			problem <- createProblem(operatorInfo_l, domain)
 			_ = println(problem.toStripsText)
 			plan0 = PartialPlan.fromProblem(problem)
-			operator_l <- RsResult.mapAll(planInfo_l)(planInfo => {
-				cs.nameToOperatorHandler_m
-				planInfo.operatorName
+			operator_l <- RsResult.mapAll(operatorInfo_l)(operatorInfo => {
+				for {
+					handler <- RsResult.from(cs.nameToOperatorHandler_m.get(operatorInfo.operatorName), s"createPlan: Unknown operator `${operatorInfo.operatorName}`")
+				} yield {
+					val domainOperator = handler.getDomainOperator
+					domainOperator.bind(operatorInfo.operatorBinding_m)
+				}
 			})
-			plan1 <- plan0.addActionSequence(planInfo_l.map(_.planAction)).asRs
+			plan1 <- plan0.addActionSequence(operator_l).asRs
 		} yield {
-			(planInfo_l, plan1)
+			(operatorInfo_l, plan1)
 		}
 	}
 	
-	def createDomain(cs: CommandSet, planInfo_l: List[ActionPlanInfo]): RqResult[Strips.Domain] = {
-		val operator_l = cs.nameToAutoActionHandler_m.values.map(_.getDomainOperator).toList ++ planInfo_l.map(_.domainOperator)
-
-		RqSuccess(Strips.Domain(
-			type_l = List(
-				"labware",
-				"model",
-				"site",
-				"siteModel",
-				
-				"agent",
-				
-				"pipetter",
-				"pipetterProgram",
-				
-				"shaker",
-				"shakerProgram"
-			),
-			constantToType_l = Nil,
-			predicate_l = List[Strips.Signature](
-				Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
-				Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
-				Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
-				Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
-				Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
-			),
-			operator_l = operator_l
-		))
+	def createDomain(cs: CommandSet, planInfo_l: List[OperatorInfo]): RqResult[Strips.Domain] = {
+		for {
+			operatorHandler_l <- RsResult.mapAll(cs.nameToAutoOperator_l)(name => RsResult.from(cs.nameToOperatorHandler_m.get(name), s"createDomain: Unknown operator `${name}`"))
+		} yield {
+			val operator_l = operatorHandler_l.map(_.getDomainOperator)
+			Strips.Domain(
+				type_l = List(
+					"labware",
+					"model",
+					"site",
+					"siteModel",
+					
+					"agent",
+					
+					"pipetter",
+					"pipetterProgram",
+					
+					"shaker",
+					"shakerProgram"
+				),
+				constantToType_l = Nil,
+				predicate_l = List[Strips.Signature](
+					Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
+					Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
+					Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
+					Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
+					Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
+				),
+				operator_l = operator_l
+			)
+		}
 	}
 
 
-	def createProblem(planInfo_l: List[ActionPlanInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
+	def createProblem(planInfo_l: List[OperatorInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
 		val typToObject_l: List[(String, String)] = /*List(
 			"agent" -> "r1",
 			"pipetter" -> "r1_pipetter",

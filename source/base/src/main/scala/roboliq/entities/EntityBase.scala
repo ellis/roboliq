@@ -123,7 +123,7 @@ class EntityBase {
 	
 	def getEntityAs[A <: Entity : Manifest](key: String): RsResult[A] = {
 		val lower = key.toLowerCase
-		identToEntity_m.get(lower) match {
+		(identToEntity_m.get(lower) match {
 			case Some(entity) =>
 				RsResult.asInstanceOf(entity)
 			case None =>
@@ -136,7 +136,7 @@ class EntityBase {
 							case None => RsError(s"missing entity with key `$key`")
 						}
 				}
-		}
+		}).prependError(s"error looking up entity `$key`")
 	}
 	
 	def getEntityByIdent[A <: Entity : Manifest](ident0: String): RsResult[A] = {
