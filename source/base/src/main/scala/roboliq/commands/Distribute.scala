@@ -57,29 +57,6 @@ class DistributeActionHandler extends ActionHandler {
 	def getActionName = "distribute"
 
 	def getActionParamNames = List("agent", "device", "source", "destination", "volume")
-
-	private def getDomainOperator(n: Int): Strips.Operator = {
-		val name = s"distribute$n"
-		val paramName_l = "?agent" :: "?device" :: (1 to n).flatMap(i => List(s"?labware$i", s"?model$i", s"?site$i", s"?siteModel$i")).toList
-		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "siteModel")).flatten
-		val preconds =
-			Strips.Literal(true, "agent-has-device", "?agent", "?device") ::
-			Strips.Literal(true, "device-can-site", "?device", "?site1") ::
-			(1 to n).flatMap(i => List(
-				Strips.Literal(true, "model", s"?labware$i", s"?model$i"),
-				Strips.Literal(true, "location", s"?labware$i", s"?site$i"),
-				Strips.Literal(true, "model", s"?site$i", s"?siteModel$i"),
-				Strips.Literal(true, "stackable", s"?siteModel$i", s"?model$i")
-			)).toList
-
-		Strips.Operator(
-			name = name,
-			paramName_l = paramName_l,
-			paramTyp_l = paramTyp_l,
-			preconds = Strips.Literals(Unique(preconds : _*)),
-			effects = aiplan.strips2.Strips.Literals.empty
-		)
-	}
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -135,8 +112,9 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "siteModel")).flatten
 		val preconds =
 			Strips.Literal(true, "agent-has-device", "?agent", "?device") ::
-			Strips.Literal(true, "device-can-site", "?device", "?site1") ::
+			Strips.Literal(Strips.Atom("ne", (1 to n).map(i => s"?site$i")), true) ::
 			(1 to n).flatMap(i => List(
+				Strips.Literal(true, "device-can-site", "?device", s"?site$i"),
 				Strips.Literal(true, "model", s"?labware$i", s"?model$i"),
 				Strips.Literal(true, "location", s"?labware$i", s"?site$i"),
 				Strips.Literal(true, "model", s"?site$i", s"?siteModel$i"),

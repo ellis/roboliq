@@ -92,7 +92,7 @@ class Bindings(
 	}
 	
 	private def setVariableOptions(name: String, option_l: Set[String]): Either[String, Bindings] = {
-		println(s"setVariableOptions($name, ${option_l})")
+		//println(s"setVariableOptions($name, ${option_l})")
 		assert(isVariableName(name))
 		assert(!assignment_m.contains(name))
 		
@@ -308,31 +308,13 @@ class Orderings(
 				}
 			}
 			
-			println(s"Orderings.add(${before_i}, ${after_i})")
+			/*println(s"Orderings.add(${before_i}, ${after_i})")
 			println("before: "+map)
 			x match {
 				case Right(y) => println("after:  "+y.map)
 				case _ =>
-			}
+			}*/
 			x
-			/*
-			// Update orderings map
-			for (pair@(i, li) <- map) {
-				// before_i is before after_i
-				if (i == before_i)
-					i -> (li + after_i)
-				// Any index which is before before_i is now also before after_i
-				else if (li.contains(i))
-					i -> (li + after_i)
-				// Leave the others as they were
-				else
-					pair
-			}
-			// Make sure the ordering before_i < after_i is in the map
-			val map3 = if (map2.contains(before_i)) map2 else map2 + (before_i -> Set(after_i))
-			println(s"Orderings.add(${before_i}, ${after_i}) => $map3")
-			Right(new Orderings(map3))
-			*/
 		}
 	}
 	
@@ -406,6 +388,7 @@ class PartialPlan private (
 	val threat_l: Set[(Int, CausalLink)]
 	//val possibleLink_l: List[(CausalLink, Map[String, String])]
 ) {
+	// 
 	private def copy(
 		action_l: Vector[Operator] = action_l,
 		orderings: Orderings = orderings,
@@ -432,14 +415,21 @@ class PartialPlan private (
 	 * The parameters will be added to the bindings using possible values for the given type.
 	 */
 	def addAction(op: Operator): Either[String, PartialPlan] = {
-		println(s"addAction($op)")
+		//println(s"addAction($op)")
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
 		// Get a list of param name/typ for parameters which are still variables 
 		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(_._1.startsWith("?"))
 		val paramName_m = varNameToTyp_l.map(pair => pair._1 -> s"${i-1}:${pair._1}").toMap
-		val action = op.bind(paramName_m)
+		val action0 = op.bind(paramName_m)
+		val (eq_l, action) = action0.removeEqualityPreconds()
 		val action2_l: Vector[Operator] = action_l :+ action
+
+		val eq_m = eq_l.filter(_.atom.name == "eq").flatMap(_.atom.params.combinations(2).map(l => l.head -> l.tail.head)).toMap
+		val ne_m = eq_l.filter(_.atom.name == "ne").flatMap(p => {
+			val s = p.atom.params.toSet
+			p.atom.params.map(name => name -> (s - name))
+		}).toMap
 		
 		// Get list of parameters and their possible objects
 		val variableToOptions_m: Map[String, Set[String]] =
@@ -450,20 +440,22 @@ class PartialPlan private (
 				name -> options
 			}).toMap
 		
-		println("variableToOptions_m: "+variableToOptions_m)
+		//println("variableToOptions_m: "+variableToOptions_m)
 		for {
 			orderings1 <- orderings.add(0, i).right
 			orderings2 <- orderings1.add(i, 1).right
 			bindings2 <- bindings.addVariables(variableToOptions_m).right
+			bindings3 <- bindings2.assign(eq_m).right
+			bindings4 <- bindings3.exclude(ne_m).right
 		} yield {
-			println("orderings1: "+orderings1.map)
-			println("orderings2: "+orderings2.map)
+			//println("orderings1: "+orderings1.map)
+			//println("orderings2: "+orderings2.map)
 			// Add preconditions to open goals
 			val openGoal2_l = openGoal_l ++ action.preconds.l.zipWithIndex.map(i -> _._2)
 			copy(
 				action_l = action2_l,
 				orderings = orderings2,
-				bindings = bindings2,
+				bindings = bindings4,
 				openGoal_l = openGoal2_l
 			)
 		}

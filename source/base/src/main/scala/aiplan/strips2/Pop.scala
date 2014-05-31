@@ -29,7 +29,6 @@ case class PopState_HandleAction(
 	plan: PartialPlan,
 	goal: (Int, Int),
 	provider: (Either[Operator, Int], Map[String, String]),
-	provider_l: List[(Either[Operator, Int], Map[String, String])],
 	indentLevel: Int
 ) extends PopState
 
@@ -174,13 +173,31 @@ object Pop {
 		}
 	}
 	
-	def step(ps: PopState): Either[String, PopState] = {
-		ps match {
-			case x: PopState_Done => Right(x)
-			case x: PopState_SelectGoal => stepSelectGoal(x)
-			case x: PopState_HandleGoal => stepHandleGoal(x)
-			case x: PopState_ChooseAction => stepChooseAction(x)
-			case x: PopState_HandleAction => stepHandleAction(x)
+	def step(stack_r: List[PopState]): Either[String, List[PopState]] = {
+		val ps = stack_r.head
+		//println("ps: "+ps)
+		val next_? : Either[String, Option[PopState]] = ps match {
+			case x: PopState_Done => Right(None)
+			case x: PopState_SelectGoal => stepSelectGoal(x).right.map(Some(_))
+			case x: PopState_HandleGoal => stepHandleGoal(x).right.map(Some(_))
+			case x: PopState_ChooseAction => stepChooseAction(x).right.map(Some(_))
+			case x: PopState_HandleAction => stepHandleAction(x).right.map(Some(_))
+		}
+		//println("next_?: "+next_?)
+		next_? match {
+			case Right(None) => Right(stack_r)
+			case Right(Some(next)) => Right(next :: stack_r)
+			case Left(s) =>
+				val stack2_r = stack_r.dropWhile {
+					case PopState_ChooseAction(plan, goal, _ :: provider_l, indentLevel) => false
+					case _ => true
+				}
+				stack2_r match {
+					case PopState_ChooseAction(plan, goal, _ :: provider_l, indentLevel) :: rest =>
+						val ps2 = PopState_ChooseAction(plan, goal, provider_l, indentLevel)
+						Right(ps2 :: rest)
+					case _ => Left(s)
+				}
 		}
 	}
 	
@@ -200,12 +217,12 @@ object Pop {
 			else a._1 < b._1
 		})
 		goal_l.foreach(goal => println(s"${indent}| ${goal} "+plan0.bindings.bind(plan0.action_l(goal._1).preconds.l(goal._2))))
-		println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
-		println(s"${indent}variables: ${plan0.bindings.variable_m}")
-		println(s"${indent}toDot:")
-		plan0.toDot(showInitialState=false).split("\n").foreach(s => println(indent+s))
+		//println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
+		//println(s"${indent}variables: ${plan0.bindings.variable_m}")
+		//println(s"${indent}toDot:")
+		//plan0.toDot(showInitialState=false).split("\n").foreach(s => println(indent+s))
 		if (plan0.openGoal_l.isEmpty) {
-			println("FOUND")
+			//println("FOUND")
 			//println(plan0.toDot)
 			Right(PopState_Done(plan0))
 		}
@@ -216,9 +233,10 @@ object Pop {
 	
 	def stepHandleGoal(x: PopState_HandleGoal): Either[String, PopState] = {
 		val indent = "  " * x.indentLevel
-		println(s"${indent}HandleGoal(${x.goal})")
 		val plan0 = x.plan
 		val (consumer_i, precond_i) = x.goal
+		val goalAction = plan0.bindings.bind(plan0.action_l(consumer_i).preconds.l(precond_i))
+		println(s"${indent}HandleGoal ${x.goal} ${goalAction}")
 		val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
 		val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
 		val provider_l = provider1_l ++ provider2_l
@@ -233,9 +251,9 @@ object Pop {
 		x.provider_l match {
 			case Nil =>
 				Left(s"Couldn't find an action to fulfill ${x.goal}")
-			case provider :: rest =>
+			case provider :: _ =>
 				println(s"${indent}try $provider")
-				Right(PopState_HandleAction(x.plan, x.goal, provider, rest, x.indentLevel + 1))
+				Right(PopState_HandleAction(x.plan, x.goal, provider, x.indentLevel + 1))
 		}
 	}
 	
@@ -301,16 +319,23 @@ object Pop {
 		
 		plan1_? match {
 			case Right(plan1) => Right(PopState_SelectGoal(plan1, x.indentLevel + 1))
-			case Left(msg) => Right(PopState_ChooseAction(x.plan, x.goal, x.provider_l, x.indentLevel - 1))
+			//case Left(msg) => Right(PopState_ChooseAction(x.plan, x.goal, x.provider_l, x.indentLevel - 1))
+			case Left(msg) => Left(msg)
 		}
 	}
 	
 	def stepToEnd(x: PopState): Either[String, PartialPlan] = {
-		step(x) match {
-			case Left(msg) => Left(msg)
-			case Right(PopState_Done(plan)) => Right(plan)
-			case Right(step1) => stepToEnd(step1)
+		@tailrec
+		def loop(stack_r: List[PopState], n: Int): Either[String, PartialPlan] = {
+			if (n >= 50) return Left("end")
+			//println(s"stepToEnd: step $n: ${stack_r}")
+			step(stack_r) match {
+				case Left(msg) => Left(msg)
+				case Right(PopState_Done(plan) :: _) => Right(plan)
+				case Right(stack2_r) => loop(stack2_r, n + 1)
+			}
 		}
+		loop(List(x), 1)
 	}
 
 	case class GroundNode(

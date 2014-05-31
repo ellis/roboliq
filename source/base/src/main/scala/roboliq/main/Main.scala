@@ -81,6 +81,7 @@ object Main extends App {
 			filenameProblem = new File(dirOutput, "problem.pddl").getPath
 			filenamePlan0 = new File(dirOutput, "plan0.dot").getPath
 			filenameActions0 = new File(dirOutput, "actions0.lst").getPath
+			filenamePlan = new File(dirOutput, "plan.dot").getPath
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
@@ -90,6 +91,7 @@ object Main extends App {
 			_ = println("plan2:")
 			_ = println(plan2.toDot(showInitialState=false))
 			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
+			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan, plan3.toDot(showInitialState=true))
 			_ = println("plan3:")
 			_ = println(plan3.toDot(showInitialState=false))
 			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)

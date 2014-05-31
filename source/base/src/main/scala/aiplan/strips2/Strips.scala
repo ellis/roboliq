@@ -170,6 +170,21 @@ object Strips {
 				effects = effects.bind(map)
 			)
 		}
+		
+		/**
+		 * Returns a list of this operator's eq/ne literal preconditions and a new operator without any such preconditions 
+		 */
+		def removeEqualityPreconds(): (List[Literal], Operator) = {
+			val (eq_l, preconds2) = preconds.l.partition(lit => List("eq", "ne").contains(lit.atom.name))
+			val op2 = Operator(
+				name = name,
+				paramName_l = paramName_l,
+				paramTyp_l = paramTyp_l,
+				preconds = Literals(preconds2),
+				effects = effects
+			)
+			(eq_l.toList, op2)
+		}
 
 		def toStripsLines(indent: String = ""): List[String] = {
 			val l = new ListBuffer[String]
