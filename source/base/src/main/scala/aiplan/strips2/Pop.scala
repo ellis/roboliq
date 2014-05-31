@@ -327,7 +327,7 @@ object Pop {
 	def stepToEnd(x: PopState): Either[String, PartialPlan] = {
 		@tailrec
 		def loop(stack_r: List[PopState], n: Int): Either[String, PartialPlan] = {
-			if (n >= 50) return Left("end")
+			if (n >= 5000) return Left("end")
 			//println(s"stepToEnd: step $n: ${stack_r}")
 			step(stack_r) match {
 				case Left(msg) => Left(msg)

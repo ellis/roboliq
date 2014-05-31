@@ -27,9 +27,10 @@
 
 ### ``test_single_distribute_3``
 
+- [ ] Bindings.substitute needs to check whether any ne_l's are now invalid, i.e contain the variable name itself (and return an Either)
 - [ ] BUG: takes too long to find solution with two plates (or no solution is found?)
 - [ ] distribute2: should have a condition to ensure that the sites are not equal
-- [ ] selectGoal: should choose goal based on how many providers there are -- if any goal has 0 providers, failure, all goals with 1 provider, set immediately, then choose goal with fewest providers next
+- [ ] Pop.stepSelectGoal: should choose goal based on how many providers there are -- if any goal has 0 providers, failure, all goals with 1 provider, set immediately, then choose goal with fewest providers next
 
 ## AI planning flow
 

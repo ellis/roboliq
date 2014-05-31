@@ -185,7 +185,7 @@ class Bindings(
 	
 	/**
 	 * For the named variable, exclude the given value as a possible assignment.
-	 * The given value may be either an object or another value.
+	 * The given value may be either an object or another variable.
 	 * If it is an object, that object is removed from the variable's list of options.
 	 * If it is a variable, then ...
 	 */
