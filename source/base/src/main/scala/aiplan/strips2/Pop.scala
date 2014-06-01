@@ -68,7 +68,8 @@ object Pop {
 		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
 		println(indent+"openGoals: "+plan0.openGoal_l)
 		println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
-		println(s"${indent}variables: ${plan0.bindings.variable_m}")
+		println(s"${indent}options: ${plan0.bindings.option_m}")
+		println(s"${indent}nes: ${plan0.bindings.ne_m}")
 		println(s"${indent}toDot:")
 		plan0.toDot(showInitialState=false).split("\n").foreach(s => println(indent+s))
 		if (plan0.openGoal_l.isEmpty) {
@@ -352,11 +353,13 @@ object Pop {
 		val root = GroundNode(plan0, None, plan0.orderings.getMinimalMap)
 		
 		def goalTest(plan: PartialPlan): Boolean = {
-			plan.bindings.variable_m.isEmpty && plan.orderings.getMinimalMap.forall(_._2.size == 1)
+			val variable_m = plan.bindings.option_m.filter(pair => pair._2.size > 1)
+			variable_m.isEmpty && plan.orderings.getMinimalMap.forall(_._2.size == 1)
 		}
 		
 		def actions(plan: PartialPlan): Iterable[GroundAction] = {
-			val binding0_l = plan.bindings.variable_m.toList.flatMap(pair => pair._2.option_l.map(pair._1 -> _))
+			val variable_m = plan.bindings.option_m.filter(pair => pair._2.size > 1)
+			val binding0_l = variable_m.toList.flatMap(pair => pair._2.map(pair._1 -> _))
 			val bindingAction_l = binding0_l.flatMap { pair =>
 				val (name, value) = pair
 				plan.addBindingEq(name, value) match {
