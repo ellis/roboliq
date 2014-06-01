@@ -27,7 +27,7 @@ import scala.collection.mutable.ArrayBuffer
  * - If x is in y's inequality set, then y is in x's inequality set:w
  * 
  */
-class Bindings(
+case class Bindings(
 	val option_m: Map[String, Set[String]],
 	val ne_m: Map[String, Set[String]],
 	val assignment_m: Map[String, String]
@@ -86,13 +86,10 @@ class Bindings(
 		
 		(isVariable(x), isVariable(y)) match {
 			// Both are variables
-			case (true, true) =>
-				setVariableEquality(x, y)
+			case (true, true) => setVariableEquality(x, y)
 			// One is a variable and the other is an object
-			case (true, false) =>
-				substitute(x, y)
-			case (false, true) =>
-				substitute(y, x)
+			case (true, false) => setVariableValue(x, y)
+			case (false, true) => setVariableValue(y, x)
 			case (false, false) =>
 				val a = if (assignee == name1) assignee else s"$assignee(=$name1)"
 				val b = if (value == name2) value else s"$value(=$name2)"
@@ -117,11 +114,11 @@ class Bindings(
 	/**
 	 * For the named variable, exclude the given value as a possible assignment.
 	 * The given value may be either an object or another variable.
-	 * If it is an object, that object is removed from the variable's list of options.
+	 * If it is an object, that object is removed from the variable's list of options (error if the option list is now empty)
 	 * If it is a variable, then ...
 	 */
 	def exclude(name: String, value: String): Either[String, Bindings] = {
-		assert(option_m.contains(name))
+		assert(isVariable(name))
 		val option_l = option_m(name)
 		option_m.get(value) match {
 			// Value is an object:
@@ -169,7 +166,7 @@ class Bindings(
 	/**
 	 * Replace all instances of `name1` with `name2` in option_m and ne_m values
 	 */
-	private def substitute(name1: String, value: String): Either[String, Bindings] = {
+	/*private def substitute(name1: String, value: String): Either[String, Bindings] = {
 		assert(isVariable(name1))
 		assert(!assignment_m.contains(name1))
 		// Make sure that the assignment is one of the variable's options
@@ -177,7 +174,9 @@ class Bindings(
 		// Reduce variable's options to `name2`
 		// And replace instances of name1 with value in options
 		val option2_m = option_m.mapValues(_.map(name => if (name == name1) value else name)) + (name1 -> Set(value))
-		val ne2_m = ne_m.mapValues(_.map(name => if (name == name1) value else name))
+		val ne_l = ne_m.getOrElse(name1, Set())
+		// Remove `value` from all options of variables in ne_l
+		val ne2_m = ne_m ++ ne_l.mapValues(_.map(name => if (name == name1) value else name))
 		val valid = ne2_m.forall(pair => {
 			val (name, ne_l) = pair
 			!ne_l.contains(name)
@@ -192,6 +191,29 @@ class Bindings(
 		else {
 			Left("violation of non-equality constraints")
 		}
+	}*/
+	
+	private def setVariableValue(name: String, value: String): Either[String, Bindings] = {
+		assert(isVariable(name))
+		assert(!isVariable(value))
+		assert(!assignment_m.contains(name))
+		// Make sure that the assignment is one of the variable's options
+		assert(option_m(name).contains(value))
+		
+		// Reduce variable's options to simply `name2`
+		val assignment2_m = assignment_m + (name -> value)
+		val option2_m = option_m + (name -> Set(value))
+		val ne_l = ne_m.getOrElse(name, Set())
+		val exclude_m = ne_l.toList.map(name2 => name2 -> Set(value)).toMap
+		// Remove `name` from all ne_m keys and from ne_m values, dropping any elements which are now empty
+		val ne2_m = (ne_m - name).mapValues(_.filter(_ != name)).filter(!_._2.isEmpty)
+		/*val valid = ne2_m.forall(pair => {
+			val (name, ne_l) = pair
+			!ne_l.contains(name)
+		})*/
+		for {
+			binding2 <- copy(option_m = option2_m, ne_m = ne2_m, assignment_m = assignment2_m).exclude(exclude_m).right
+		} yield binding2
 	}
 	
 	private def setVariableOptions(name: String, option_l: Set[String]): Either[String, Bindings] = {
@@ -237,7 +259,7 @@ class Bindings(
 			bindings1 <- this.setVariableOptions(name1, Set(name2)).right
 			bindings2 <- bindings1.setVariableOptions(name2, option_l).right
 			name2b <- Right(bindings2.getCanonicalName(name2)).right
-			bindings3 <- bindings2.substitute(name1, name2b).right
+			bindings3 <- bindings2.setVariableVariable(name1, name2b).right
 		} yield bindings3
 	}
 	
@@ -258,21 +280,18 @@ class Bindings(
 			case (false, false) => name1 == name2
 		}
 	}
-
-	/*
-	/**
-	 * Add y inequalities to x inequalities,
-	 * Remove y entry,
-	 * Replace occurrences of y by x.
-	 */
-	private def updateInequality1(x: String, y: String): Map[String, Set[String]] = {
-		val inequality = inequality1_m.getOrElse(x, Set()) ++ inequality1_m.getOrElse(y, Set())
-		val m1 = inequality1_m + (x -> inequality)
-		val m2 = m1 - y
-		val m3 = m2.mapValues(_.map(name => if (name == y) x else y))
-		m3
+	
+	private def setVariableVariable(name1: String, name2: String): Either[String, Bindings] = {
+		assert(isVariable(name1))
+		assert(isVariable(name2))
+		assert(!assignment_m.contains(name1))
+		val assignment2_m = assignment_m + (name1 -> name2)
+		val ne1_l = ne_m.getOrElse(name1, Set())
+		val ne2_m = (ne_m - name1)
+		for {
+			bindings2 <- copy(assignment_m = assignment2_m, ne_m = ne2_m).exclude(Map(name2 -> ne1_l)).right
+		} yield bindings2
 	}
-	*/
 	
 	def bind(atom: Atom): Atom = {
 		atom.copy(params = atom.params.map(s => getCanonicalName(s)))
