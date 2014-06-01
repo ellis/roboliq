@@ -5,6 +5,7 @@ import grizzled.slf4j.Logger
 import scalaz._
 import Scalaz._
 import scala.annotation.tailrec
+import ailib.ch03.DebugSpec
 
 sealed trait PopState
 case class PopState_Done(
@@ -61,6 +62,8 @@ case class GroundState_Done(
 ) extends GroundState
 
 object Pop {
+	private val logger = Logger("Pop")
+
 	def pop(plan0: PartialPlan, indentLevel: Int = 0): Either[String, PartialPlan] = {
 		val indent = "  " * indentLevel
 		println()
@@ -358,24 +361,28 @@ object Pop {
 		}
 		
 		def actions(plan: PartialPlan): Iterable[GroundAction] = {
+			val out = new scala.collection.mutable.ArrayBuffer[String]
 			val variable_m = plan.bindings.option_m.filter(pair => pair._2.size > 1)
 			val binding0_l = variable_m.toList.flatMap(pair => pair._2.map(pair._1 -> _))
 			val bindingAction_l = binding0_l.flatMap { pair =>
 				val (name, value) = pair
 				plan.addBindingEq(name, value) match {
 					case Left(_) => None
-					case Right(plan1) => Some(GroundAction(plan1))
+					case Right(plan1) => out += s"$name = $value"; Some(GroundAction(plan1))
 				}
 			}
 			val orderingsMinMap = plan.orderings.getMinimalMap
-			val ordering0_l = orderingsMinMap.toList.filter(_._2.size > 1).flatMap(pair => pair._2.toList.map(pair._1 -> _))
+			// The underdetermined ordering pairs are all pairs within any orderingsMinMap value of size > 1
+			val underdetermined_l = orderingsMinMap.values.toList.filter(_.size > 1).flatMap(greater_l => greater_l.toList.combinations(2).toList)
+			val ordering0_l = underdetermined_l.flatMap(l => List(l.head -> l.tail.head, l.tail.head -> l.head))
 			val orderingAction_l = ordering0_l.flatMap { pair =>
 				val (before_i, after_i) = pair
 				plan.addOrdering(before_i, after_i) match {
 					case Left(_) => None
-					case Right(plan1) => Some(GroundAction(plan1))
+					case Right(plan1) => out += s"${before_i} < ${after_i}"; Some(GroundAction(plan1))
 				}
 			}
+			logger.debug(plan.toString + " " + out.toList.mkString(", "))
 			bindingAction_l ++ orderingAction_l
 		}
 		
@@ -383,13 +390,15 @@ object Pop {
 			GroundNode(action.newplan, Some(parent), action.newplan.orderings.getMinimalMap)
 	}
 	
-	//CONTINUE HERE, create function to do tree search using GroundProblem
-		
+	/**
+	 * Find a fully grounded plan, i.e. all variables assigned and fully ordered actions
+	 */
 	def groundPlan(plan: PartialPlan): Either[String, PartialPlan] = {
 		val search = new ailib.ch03.TreeSearch[PartialPlan, GroundAction, GroundNode]
 		val problem = new GroundProblem(plan)
 		val frontier = new ailib.ch03.DepthFirstFrontier[PartialPlan, GroundNode]
-		search.run(problem, frontier) match {
+		val debug = new DebugSpec(true, false, false)
+		search.run(problem, frontier, debug) match {
 			case None => Left("Couldn't find ground plan")
 			case Some(node) => Right(node.plan)
 		}

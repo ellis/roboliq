@@ -81,6 +81,7 @@ object Main extends App {
 			filenameProblem = new File(dirOutput, "problem.pddl").getPath
 			filenamePlan0 = new File(dirOutput, "plan0.dot").getPath
 			filenameActions0 = new File(dirOutput, "actions0.lst").getPath
+			filenamePlan1 = new File(dirOutput, "plan1.dot").getPath
 			filenamePlan = new File(dirOutput, "plan.dot").getPath
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
@@ -88,8 +89,10 @@ object Main extends App {
 			_ = roboliq.utils.FileUtils.writeToFile(filenameActions0, plan0.action_l.mkString("\n"))
 			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
 			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
+			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan1, plan2.toDot(showInitialState=true))
 			_ = println("plan2:")
 			_ = println(plan2.toDot(showInitialState=false))
+			_ = println("orderings: "+plan2.orderings.getMinimalMap)
 			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan, plan3.toDot(showInitialState=true))
 			_ = println("plan3:")

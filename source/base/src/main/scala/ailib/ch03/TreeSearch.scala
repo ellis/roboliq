@@ -27,7 +27,8 @@ class TreeSearch[State, Action, Node <: ch03.Node[State]] {
 		run2(problem, frontier, debug)
 	}
 	
-	def run2(problem: Problem, frontier: Frontier, debug: DebugSpec): Option[Node] = {
+	@tailrec
+	final def run2(problem: Problem, frontier: Frontier, debug: DebugSpec): Option[Node] = {
 		if (frontier.isEmpty) {
 			None
 		}

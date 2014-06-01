@@ -86,7 +86,7 @@ case class Bindings(
 		
 		(isVariable(x), isVariable(y)) match {
 			// Both are variables
-			case (true, true) => setVariableEquality(x, y)
+			case (true, true) => setVariableVariable(x, y)
 			// One is a variable and the other is an object
 			case (true, false) => setVariableValue(x, y)
 			case (false, true) => setVariableValue(y, x)
@@ -197,8 +197,11 @@ case class Bindings(
 		assert(isVariable(name))
 		assert(!isVariable(value))
 		assert(!assignment_m.contains(name))
+		
 		// Make sure that the assignment is one of the variable's options
-		assert(option_m(name).contains(value))
+		if (!option_m(name).contains(value)) {
+			return Left(s"cannot let `$name := $value`, because it is not one of the options ${option_m(name)}")
+		}
 		
 		// Reduce variable's options to simply `name2`
 		val assignment2_m = assignment_m + (name -> value)
@@ -245,24 +248,30 @@ case class Bindings(
 	 * When variables are set to be equal, collapse one into the other.
 	 * a and b get sorted, and the alphanumerically larger one gets collapsed into the smaller one.
 	 */
-	private def setVariableEquality(name1: String, name2: String): Either[String, Bindings] = {
+	/*private def setVariableEquality(name1: String, name2: String): Either[String, Bindings] = {
 		// Make sure that x and y are not already set to non-equal
 		assert(isVariable(name1))
 		assert(isVariable(name2))
-		assert(canAssign(name1, name2))
 
 		// Take intersection of x & y options for x, and remove y entry
 		val option1_l = option_m(name1)
 		val option2_l = option_m(name2)
 		val option_l = option1_l intersect option2_l
+		if (ne_m.getOrElse(name1, Set()).contains(name2)) {
+			return Left(s"cannot let `$name1 == $name2`, because of a previous inequality constraint")
+		}
+		if (option_l.isEmpty) {
+			return Left(s"cannot let `$name1 == $name2`, because they share no common values: ${option1_l} and ${option2_l}")
+		}
 		for {
 			bindings1 <- this.setVariableOptions(name1, Set(name2)).right
 			bindings2 <- bindings1.setVariableOptions(name2, option_l).right
 			name2b <- Right(bindings2.getCanonicalName(name2)).right
 			bindings3 <- bindings2.setVariableVariable(name1, name2b).right
 		} yield bindings3
-	}
+	}*/
 	
+	/*
 	private def canAssign(name1: String, name2: String): Boolean = {
 		def varVal(name: String, value: String): Boolean = {
 			assignment_m.get(name1) match {
@@ -280,16 +289,33 @@ case class Bindings(
 			case (false, false) => name1 == name2
 		}
 	}
+	*/
 	
+	/**
+	 * Assign variable `name2` to `name1`, keeping `name1` as the primary variable and replacing relevant occurrences of `name2` with `name1`
+	 */
 	private def setVariableVariable(name1: String, name2: String): Either[String, Bindings] = {
 		assert(isVariable(name1))
 		assert(isVariable(name2))
 		assert(!assignment_m.contains(name1))
-		val assignment2_m = assignment_m + (name1 -> name2)
+		
+		if (ne_m.getOrElse(name1, Set()).contains(name2)) {
+			return Left(s"cannot let `$name1 == $name2`, because of a previous inequality constraint")
+		}
+
+		val option1_l = option_m(name1)
+		val option2_l = option_m(name2)
+		val option_l = option1_l intersect option2_l
+		if (option_l.isEmpty) {
+			return Left(s"cannot let `$name1 == $name2`, because they share no common values: ${option1_l} and ${option2_l}")
+		}
+		
+		val option2_m = option_m + (name1 -> option_l) + (name2 -> Set(name1))
+		val assignment2_m = assignment_m + (name2 -> name1)
 		val ne1_l = ne_m.getOrElse(name1, Set())
 		val ne2_m = (ne_m - name1)
 		for {
-			bindings2 <- copy(assignment_m = assignment2_m, ne_m = ne2_m).exclude(Map(name2 -> ne1_l)).right
+			bindings2 <- copy(option_m = option2_m, ne_m = ne2_m, assignment_m = assignment2_m).exclude(Map(name2 -> ne1_l)).right
 		} yield bindings2
 	}
 	
