@@ -81,14 +81,25 @@ class Bindings(
 	
 	private def isVariableName(name: String): Boolean = name.contains(':')
 	
-	private def substitute(name1: String, name2: String): Bindings = {
+	private def substitute(name1: String, name2: String): Either[String, Bindings] = {
 		assert(isVariableName(name1))
 		assert(!assignment_m.contains(name1))
 		assert(!assignment_m.contains(name2))
-		new Bindings(
-			(variable_m - name1).mapValues(b => b.copy(ne_l = b.ne_l.map(s => if (s == name1) name2 else s))),
-			assignment_m + (name1 -> name2)
-		)
+		//val name2 = bindings.getCanonicalName(name2)
+		val variable2_m = (variable_m - name1).mapValues(b => b.copy(ne_l = b.ne_l.map(s => if (s == name1) name2 else s)))
+		val valid = variable2_m.forall(pair => {
+			val (name, b) = pair
+			!b.ne_l.contains(name)
+		})
+		if (valid) {
+			Right(new Bindings(
+				variable2_m,
+				assignment_m + (name1 -> name2)
+			))
+		}
+		else {
+			Left("violation of non-equality constraints")
+		}
 	}
 	
 	private def setVariableOptions(name: String, option_l: Set[String]): Either[String, Bindings] = {
@@ -125,9 +136,9 @@ class Bindings(
 				setVariableEquality(x, bX, y, bY)
 			// One is a variable and the other is an object
 			case (Some(b), None) =>
-				Right(substitute(x, y))
+				substitute(x, y)
 			case (None, Some(b)) =>
-				Right(substitute(y, x))
+				substitute(y, x)
 			case (None, None) =>
 				val a = if (assignee == name1) assignee else s"$assignee(=$name1)"
 				val b = if (value == name2) value else s"$value(=$name2)"
@@ -162,10 +173,9 @@ class Bindings(
 		val option_l = b1.option_l intersect b2.option_l
 		for {
 			bindings1 <- this.setVariableOptions(name2, option_l).right
-		} yield {
-			val name2b = bindings1.getCanonicalName(name2)
-			bindings1.substitute(name1, name2b)
-		}
+			name2b <- Right(bindings1.getCanonicalName(name2)).right
+			bindings2 <- bindings1.substitute(name1, name2b).right
+		} yield bindings2
 	}
 
 	/*
@@ -254,6 +264,10 @@ class Bindings(
 			preconds = bind(op.preconds),
 			effects = bind(op.effects)
 		)
+	}
+	
+	override def toString: String = {
+		s"Bindings(variables: ${variable_m}, assignments: ${assignment_m})"
 	}
 }
 
