@@ -1,0 +1,26 @@
+; Column 1
+A;T2;;;3;;0.1;Roboliq_Water_Wet_0050;;16
+D;plate;;;1;;0.1;Roboliq_Water_Wet_0050;;16
+W1;
+A;T2;;;4;;0.1;Roboliq_Water_Wet_0050;;32
+D;plate;;;2;;0.1;Roboliq_Water_Wet_0050;;32
+W1;
+A;T2;;;5;;0.1;Roboliq_Water_Wet_0050;;64
+D;plate;;;3;;0.1;Roboliq_Water_Wet_0050;;64
+W1;
+A;T2;;;6;;0.1;Roboliq_Water_Wet_0050;;128
+D;plate;;;4;;0.1;Roboliq_Water_Wet_0050;;128
+W1;
+A;T2;;;3;;0.1;Roboliq_Water_Wet_0050;;16
+D;plate;;;5;;0.1;Roboliq_Water_Wet_0050;;16
+W1;
+A;T2;;;4;;0.1;Roboliq_Water_Wet_0050;;32
+D;plate;;;6;;0.1;Roboliq_Water_Wet_0050;;32
+W1;
+A;T2;;;5;;0.1;Roboliq_Water_Wet_0050;;64
+D;plate;;;7;;0.1;Roboliq_Water_Wet_0050;;64
+W1;
+A;T2;;;6;;0.1;Roboliq_Water_Wet_0050;;128
+D;plate;;;8;;0.1;Roboliq_Water_Wet_0050;;128
+W1;
+

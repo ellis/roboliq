@@ -27,10 +27,16 @@
 
 ### ``test_single_distribute_3``
 
-- [ ] Bindings.substitute needs to check whether any ne_l's are now invalid, i.e contain the variable name itself (and return an Either)
-- [ ] BUG: takes too long to find solution with two plates (or no solution is found?)
-- [ ] distribute2: should have a condition to ensure that the sites are not equal
+- [x] Bindings.substitute needs to check whether any ne_l's are now invalid, i.e contain the variable name itself (and return an Either)
+- [x] BUG: takes too long to find solution with two plates (or no solution is found?)
+- [x] distribute2: should have a condition to ensure that the sites are not equal
+- [ ] BUG: produces bad transport commands, since it doesn't consider that one plate is already on the bench
 - [ ] Pop.stepSelectGoal: should choose goal based on how many providers there are -- if any goal has 0 providers, failure, all goals with 1 provider, set immediately, then choose goal with fewest providers next
+- [ ] aiplan.strips2: refactor Either[String, A] with RsResult[A]
+
+### ``test_single_distribute_4``
+
+- [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 
 ## AI planning flow
 

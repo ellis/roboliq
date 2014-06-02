@@ -194,7 +194,7 @@ class Protocol {
 		for {
 			_ <- jsobj.fields.get("labware") match {
 				case Some(JsObject(map)) =>
-					RqResult.toResultOfList(map.toList.map(pair => {
+					RqResult.mapAll(map.toList)(pair => {
 						val (name,jsobj) = pair
 						def make(modelRef: String, locationRef: String): RqResult[Unit] = {
 							// REFACTOR: duplicates lots of code from the `plates` section below
@@ -204,22 +204,25 @@ class Protocol {
 							//println("eb.idToEntity: "+eb.idToEntity)
 							//println("eb.idToEntity.get(\"Thermocycler Plate\"): "+eb.idToEntity.get("Thermocycler Plate"))
 							//logger.debug("eb.aliases: "+eb.aliases)
-							val model = eb.getEntityAs[PlateModel](modelRef).toOption.get
-							val plate = new Plate(key)
-							eb.addLabware(plate, name)
-							eb.setModel(plate, model)
-							state0.labware_model_m(plate) = model
-							// Create plate wells
-							for (row <- 0 until model.rows; col <- 0 until model.cols) {
-								val index = row + col * model.rows
-								val ident = WellIdentParser.wellId(plate, model, row, col)
-								val well = new Well(gid, Some(ident))
-								state0.addWell(well, plate, RowCol(row, col), index)
+							for {
+								model <- eb.getEntityAs[PlateModel](modelRef)
+							} yield {
+								val plate = new Plate(key)
+								eb.addLabware(plate, name)
+								eb.setModel(plate, model)
+								state0.labware_model_m(plate) = model
+								// Create plate wells
+								for (row <- 0 until model.rows; col <- 0 until model.cols) {
+									val index = row + col * model.rows
+									val ident = WellIdentParser.wellId(plate, model, row, col)
+									val well = new Well(gid, Some(ident))
+									state0.addWell(well, plate, RowCol(row, col), index)
+								}
+								val site = eb.getEntity(locationRef).get
+								eb.setLocation(plate, site)
+								state0.labware_location_m(plate) = site
+								()
 							}
-							val site = eb.getEntity(locationRef).get
-							eb.setLocation(plate, site)
-							state0.labware_location_m(plate) = site
-							RqSuccess(())
 						}
 						jsobj match {
 							case JsString(modelRef) => make(modelRef, "offsite")
@@ -231,7 +234,7 @@ class Protocol {
 								}
 							case _ => RqError("Expected a string for model reference")
 						}
-					}))
+					})
 				case _ => RqSuccess(())
 			}
 			
@@ -1011,13 +1014,13 @@ class Protocol {
 		
 		// Add labware on the table definition to the list of labware we're interested in
 		labwareNamesOfInterest_l ++= tableData.mapSiteToLabwareModel.values.map(_.sName)
-		//logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
+		logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
 
 		// Create PlateModels
 		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
 		val idToModel_m = new HashMap[String, LabwareModel]
 		for (mE <- labwareModelEs) {
-			if (mE.sName.contains("Plate") || mE.sName.contains("96")) {
+			if (mE.sName.contains("Plate") || mE.sName.contains("96") || mE.sName.contains("Trough")) {
 				val m = PlateModel(mE.sName, Some(mE.sName), None, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
 				val ident = f"m${idToModel_m.size + 1}%03d"
 				idToModel_m(mE.sName) = m

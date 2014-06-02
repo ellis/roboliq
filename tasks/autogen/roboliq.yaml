@@ -7,6 +7,7 @@ evowareAgents:
       - D-BSSE 96 Well DWP
       - D-BSSE 384 Well Plate White
       - Ellis Nunc F96 MicroWell
+      - Trough 100ml
 
     tipModels:
       Standard 50ul: { min: 0.1, max: 45 }
@@ -33,6 +34,9 @@ aliases:
 logic:
   - transporter-can userArm r1_hotel_245x1 userArmSpec
   - transporter-can userArm r1_hotel_245x2 userArmSpec
+  - transporter-can userArm r1_bench_003x1 userArmSpec
+  - transporter-can userArm r1_bench_003x2 userArmSpec
+  - transporter-can userArm r1_bench_003x3 userArmSpec
   - transporter-can userArm r1_bench_010x2 userArmSpec
 #  - device-can-site r1_pipetter1 r1_bench_010x1
   - device-can-site r1_pipetter1 r1_bench_010x2

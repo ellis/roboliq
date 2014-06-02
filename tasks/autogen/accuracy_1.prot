@@ -1,0 +1,23 @@
+description: |
+  Accuracy tests for small tips
+  Read empty plate
+  Fill wells to 100ul with light dye to reach minimum absorbance
+  Read plate
+  Start adding dye to well with a low volume (e.g. 0.1ul); for low volumes, use dark dye
+  In each column, add the same volume, using all four small tips
+  In each column, increase the volume by some factor (e.g x1.5, giving volumes from 0.1ul to 12.975ul over twelve columns)
+
+labware:
+  trough1: Trough 100ml
+  trough2: Trough 100ml
+  plate: Thermocycler Plate
+
+reagents:
+  dye1: trough1(A01|H01)
+  dye2: trough2(A01|H01)
+
+protocol:
+- distribute:
+    source: trough1(A01)
+    destination: plate(A01xH12)
+    volume: 100ul
