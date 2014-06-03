@@ -6,6 +6,9 @@ description: |
   Start adding dye to well with a low volume (e.g. 0.1ul); for low volumes, use dark dye
   In each column, add the same volume, using all four small tips
   In each column, increase the volume by some factor (e.g x1.5, giving volumes from 0.1ul to 12.975ul over twelve columns)
+  
+  At 30ul with 0.08g/L, the 384 well readout is about 1.  It seems that the good range is from 0.2 to 2, if I remember correctly.
+  
 
 labware:
   trough1: Trough 100ml
