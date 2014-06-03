@@ -214,13 +214,23 @@ object Pop {
 		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
 		println(s"${indent}openGoals:")
 		// Sort the goals so that actions earlier in the ordering get handled first
-		val goal_l = plan0.openGoal_l.toList.sortWith((a, b) => {
+		val goal0_l = plan0.openGoal_l.toList.sortWith((a, b) => {
 			if (a._1 == b._1) a._2 < b._2
 			else if (plan0.orderings.map.getOrElse(a._1, Set()).contains(b._1)) true
 			else if (plan0.orderings.map.getOrElse(b._1, Set()).contains(a._1)) false
 			else a._1 < b._1
 		})
-		goal_l.foreach(goal => println(s"${indent}| ${goal} "+plan0.bindings.bind(plan0.action_l(goal._1).preconds.l(goal._2))))
+		val goalToProviders_l = goal0_l.map(goal => {
+			val (consumer_i, precond_i) = goal
+			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
+			val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
+			(goal, provider1_l ++ provider2_l)
+		}).sortBy(_._2.length)
+		val goal_l = goalToProviders_l.map(_._1)
+		goalToProviders_l.foreach(pair => {
+			val (goal, provider_l) = pair
+			println(s"${indent}| ${goal} "+plan0.bindings.bind(plan0.action_l(goal._1).preconds.l(goal._2))+s" (${provider_l.length})")
+		})
 		//println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
 		//println(s"${indent}variables: ${plan0.bindings.variable_m}")
 		//println(s"${indent}toDot:")
@@ -331,7 +341,7 @@ object Pop {
 	def stepToEnd(x: PopState): Either[String, PartialPlan] = {
 		@tailrec
 		def loop(stack_r: List[PopState], n: Int): Either[String, PartialPlan] = {
-			if (n >= 5000) return Left("end")
+			if (n >= 5) return Left("debugger end at step ${n}")
 			//println(s"stepToEnd: step $n: ${stack_r}")
 			step(stack_r) match {
 				case Left(msg) => Left(msg)
