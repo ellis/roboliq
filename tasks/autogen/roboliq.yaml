@@ -18,9 +18,9 @@ evowareAgents:
       - { row: 2, permanentModel: Standard 1000ul }
       - { row: 3, permanentModel: Standard 1000ul }
       - { row: 4, permanentModel: Standard 1000ul }
-#      - { row: 5, permanentModel: Standard 50ul }
-#      - { row: 6, permanentModel: Standard 50ul }
-#      - { row: 7, permanentModel: Standard 50ul }
+      - { row: 5, permanentModel: Standard 50ul }
+      - { row: 6, permanentModel: Standard 50ul }
+      - { row: 7, permanentModel: Standard 50ul }
       - { row: 8, permanentModel: Standard 50ul }
 
 aliases:

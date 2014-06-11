@@ -1,5 +1,13 @@
 # TODOs for roboliq
 
+## Big issues
+
+- [ ] convenient naming for sites (see NamesForSites.txt)
+- [ ] handle tubes
+- [ ] smarter pipette policy and tip choices
+- [ ] siteId needs to include grid, since two carriers can be at the same grid
+- [ ] we need a separate search algorithm for organizing plates and it needs to be run before the action planner
+
 ## HDF5
 
 - [ ] main: create an HDF5 file
@@ -30,8 +38,8 @@
 - [x] Bindings.substitute needs to check whether any ne_l's are now invalid, i.e contain the variable name itself (and return an Either)
 - [x] BUG: takes too long to find solution with two plates (or no solution is found?)
 - [x] distribute2: should have a condition to ensure that the sites are not equal
+- [x] Pop.stepSelectGoal: should choose goal based on how many providers there are -- if any goal has 0 providers, failure, all goals with 1 provider, set immediately, then choose goal with fewest providers next
 - [ ] BUG: produces bad transport commands, since it doesn't consider that one plate is already on the bench
-- [ ] Pop.stepSelectGoal: should choose goal based on how many providers there are -- if any goal has 0 providers, failure, all goals with 1 provider, set immediately, then choose goal with fewest providers next
 - [ ] aiplan.strips2: refactor Either[String, A] with RsResult[A]
 
 ### ``test_single_distribute_4``
