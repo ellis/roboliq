@@ -23,6 +23,19 @@ evowareAgents:
       - { row: 7, permanentModel: Standard 50ul }
       - { row: 8, permanentModel: Standard 50ul }
 
+    tableSetups:
+      default:
+        tableFile: testdata/bsse-robot1/config/table-01.esc
+        sites:
+          P1: { grid: 9, site: 3 }
+          P2: { grid: 10, site: 2 }
+          P3: { grid: 10, site: 4 }
+          R1A: { grid: 3, site: 1 }
+          R1B: { grid: 3, site: 2 }
+          R1C: { grid: 3, site: 3 }
+          ROBOSEAL: { carrier: "RoboSeal" }
+#          T1A: { grid: 5
+
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
   "384 Well Plate": D-BSSE 384 Well Plate White
