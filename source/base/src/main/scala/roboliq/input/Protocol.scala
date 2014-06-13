@@ -116,7 +116,7 @@ class Protocol {
 		RqSuccess(cs)
 	}
 	
-	def loadConfigBean(configBean: ConfigBean): RsResult[Unit] = {
+	def loadConfigBean(configBean: ConfigBean, table_l: List[String]): RsResult[Unit] = {
 		import roboliq.entities._
 		
 		val user = Agent(gid, Some("user"))
@@ -171,8 +171,10 @@ class Protocol {
 			RsSuccess(())
 		}
 		else {
-			RsResult.mapAll(configBean.evowareAgents.toList){pair =>
+			RsResult.mapAll(configBean.evowareAgents.toList)(pair => {
 				val (name, agent) = pair
+				val tableNameDefault = s"${name}_default"
+				val tableSetup_m = agent.tableSetups.toMap.map(pair => s"${name}_${pair._1}" -> pair._2)
 				for {
 					// Load carrier file
 					evowarePath <- RsResult(agent.evowareDir, "evowareDir must be set")
@@ -180,15 +182,23 @@ class Protocol {
 					// FIXME: for debug only
 					//_ = carrierData.printCarriersById
 					// ENDIF
-					_ <- RsResult.mapAll(agent.tableSetups.toList){ pair =>
-						// Load table file
-						tableFile <- RsResult(agent.tableFile, "tableFile must be set")
-						tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
-						RsSuccess(())
+					// Choose a table
+					tableName <- table_l.filter(tableSetup_m.contains) match {
+						case Nil =>
+							if (tableSetup_m.contains(tableNameDefault))
+								RsSuccess(tableNameDefault)
+							else
+								RsError(s"No table specified for agent `$name`")
+						case s :: Nil => RsSuccess(s)
+						case l => RsError(s"Agent `$name` can only be assigned one table, but multiple tables were specified: $l")
 					}
-					_ <- loadEvoware(name, carrierData, tableData, agent)
+					tableSetup = tableSetup_m(tableName)
+					// Load table file
+					tableFile <- RsResult(tableSetup.tableFile, s"tableFile property must be set on tableSetup `$tableName`")
+					tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
+					_ <- loadEvoware(name, carrierData, tableData, agent, tableSetup)
 				} yield ()
-			}
+			}).map(_ => ())
 		}
 	}
 
@@ -949,7 +959,8 @@ class Protocol {
 		agentIdent: String,
 		carrierData: roboliq.evoware.parser.EvowareCarrierData,
 		tableData: roboliq.evoware.parser.EvowareTableData,
-		agentBean: EvowareAgentBean
+		agentBean: EvowareAgentBean,
+		tableSetupBean: TableSetupBean
 	): RsResult[Unit] = {
 		import roboliq.entities._
 		
@@ -1044,20 +1055,29 @@ class Protocol {
 		val siteIdToSite_m = new HashMap[(Int, Int), Site]
 		val carriersSeen_l = new HashSet[Int]
 		
+		def addSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, site: Site) {
+			val grid_i = tableData.mapCarrierToGrid(carrierE)
+			// TODO: should adapt CarrierSite to require grid_i as a parameter 
+			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
+			val siteId = (carrierE.id, site_i)
+			findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i) match {
+				case Some(siteIdent) =>
+					siteIdToSite_m(siteId) = site
+					identToAgentObject(siteIdent.toLowerCase) = siteE
+					eb.addSite(site, siteIdent)
+				case None =>
+			}
+		}
+		
 		// Create Hotel Sites
 		for (o <- tableData.lHotelObject) {
 			val carrierE = o.parent
 			carriersSeen_l += carrierE.id
 			//println("carrier: "+carrierE)
 			for (site_i <- 0 until carrierE.nSites) {
-				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
-				val siteId = (carrierE.id, site_i)
 				val site = Site(gid, Some(s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}"))
-				val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
-				//agentToIdentToInternalObject(agentIdent)
-				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent.toLowerCase) = siteE
-				eb.addSite(site, siteIdent)
+				//val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
+				addSite(carrierE, site_i, site)
 			}
 		}
 		
@@ -1066,30 +1086,20 @@ class Protocol {
 			val carrierE = o.carrier
 			carriersSeen_l += carrierE.id
 			for (site_i <- 0 until carrierE.nSites) {
-				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
-				val siteId = (carrierE.id, site_i)
 				val site = Site(gid, Some(s"${agentIdent} device ${carrierE.sName} site ${site_i+1}"))
-				val siteIdent = s"${agentIdent}_device_${carrierE.id}x${site_i+1}"
-				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent.toLowerCase) = siteE
-				eb.addSite(site, siteIdent)
+				addSite(carrierE, site_i, site)
 			}
 		}
 		
 		// Create on-bench Sites for Plates
 		for ((carrierE, grid_i) <- tableData.mapCarrierToGrid if !carriersSeen_l.contains(carrierE.id)) {
 			for (site_i <- 0 until carrierE.nSites) {
-				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
-				val siteId = (carrierE.id, site_i)
 				val site = Site(gid, Some(s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}"))
-				val siteIdent = f"${agentIdent}_bench_${grid_i}%03dx${site_i+1}"
-				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent.toLowerCase) = siteE
-				eb.addSite(site, siteIdent)
+				addSite(carrierE, site_i, site)
 			}
 		}
 		
-		// TODO: Create on-bench Sites and SiteModels for Tubes
+		// TODO: For tubes, create their on-bench Sites and SiteModels
 		// TODO: Let userArm handle tube models
 		// TODO: Let userArm access all sites that the robot arms can't
 		
@@ -1364,6 +1374,17 @@ class Protocol {
 
 		// TODO: Return real warnings and errors
 		RsSuccess(())
+	}
+
+	def findSiteIdent(tableSetupBean: TableSetupBean, carrierName: String, grid: Int, site: Int): Option[String] = {
+		def ok[A](a: A, b: A): Boolean = (a == null || a == b)
+		def okInt(a: Integer, b: Int): Boolean = (a == null || a == b)
+		def matches(siteBean: SiteBean): Boolean = ok(siteBean.carrier, carrierName) && okInt(siteBean.grid, grid)
+		for ((ident, bean) <- tableSetupBean.sites.toMap) {
+			if (matches(bean))
+				return Some(ident)
+		}
+		None
 	}
 
 	def createPlan(): RqResult[(List[OperatorInfo], PartialPlan)] = {
