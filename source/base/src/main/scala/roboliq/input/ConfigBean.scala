@@ -24,14 +24,14 @@ class EvowareAgentBean {
 	@BeanProperty var ident: String = null
 	/** Evoware data directory */
 	@BeanProperty var evowareDir: String = null
-	/** Path to table file */
-	@BeanProperty var tableFile: String = null
 	/** Labware that this robot can use */
 	@BeanProperty var labware: java.util.ArrayList[String] = null
 	/** Tip models that this robot can use */
 	@BeanProperty var tipModels: java.util.HashMap[String, TipModelBean] = null
 	/** This robot's tips */
 	@BeanProperty var tips: java.util.ArrayList[TipBean] = null
+	/** Table setups for this robot */
+	@BeanProperty var tableSetups: java.util.HashMap[String, TableSetupBean] = null
 }
 
 class TipModelBean {
@@ -44,4 +44,19 @@ class TipBean {
 	@BeanProperty var row: Integer = null
 	@BeanProperty var permanentModel: String = null
 	@BeanProperty var models: java.util.ArrayList[String] = null
+}
+
+class TableSetupBean {
+	/** Path to evoware table file */
+	@BeanProperty var tableFile: String = null
+	/** Site definitions */
+	@BeanProperty var sites: java.util.HashMap[String, SiteBean] = null
+	/** List of sites the user can directly access */
+	@BeanProperty var userSites: java.util.ArrayList[String] = null
+}
+
+class SiteBean {
+	@BeanProperty var carrier: String = null
+	@BeanProperty var grid: Integer = null
+	@BeanProperty var site: Integer = null
 }

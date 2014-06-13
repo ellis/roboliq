@@ -1,7 +1,14 @@
+plateModels:
+  "D-BSSE 96 Well PCR Plate":
+  "D-BSSE 96 Well DWP":
+  "D-BSSE 384 Well Plate White":
+  "Ellis Nunc F96 MicroWell":
+  "Trough 100ml":
+
 evowareAgents:
   r1:
     evowareDir: testdata/bsse-robot1/config
-    tableFile: testdata/bsse-robot1/config/table-01.esc
+    #tableFile: testdata/bsse-robot1/config/table-01.esc
     labware:
       - D-BSSE 96 Well PCR Plate
       - D-BSSE 96 Well DWP
@@ -35,6 +42,7 @@ evowareAgents:
           R1C: { grid: 3, site: 3 }
           ROBOSEAL: { carrier: "RoboSeal" }
 #          T1A: { grid: 5
+        userSites: [P1, P2, P3]
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
@@ -62,12 +70,12 @@ logic:
 specs:
   peelerSpec1: C:\Programme\HJBioanalytikGmbH\RoboPeel3\RoboPeel_PlateParameters\4titude_PCR_blue.bcf
   sealerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
-  shakerSpec1: "60"
+  #shakerSpec1: "60"
   thermocyclerSpec1: "1.0"
 
 deviceToSpec:
   - [r1_thermocycler1, thermocyclerSpec1]
-  - [r1_shaker, shakerSpec1]
+  #- [r1_shaker, shakerSpec1]
 
 deviceToModelToSpec:
   - [r1_sealer, "D-BSSE 96 Well PCR Plate", sealerSpec1]

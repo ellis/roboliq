@@ -7,6 +7,17 @@
 - [ ] smarter pipette policy and tip choices
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
 - [ ] we need a separate search algorithm for organizing plates and it needs to be run before the action planner
+- [ ] handle interactively setting variables and guiding planning with extra settings file
+
+## Sites
+
+- [ ] pass table choices along to loadConfig()
+- [ ] create a SettingsBean, which has for example table choices
+- [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them
+- [ ] load a settings file along with config and protocol
+- [ ] in loadEvoware(), check whether the user-defined plateModels agree with the evoware-defined models
+- [ ] when loading a protocol, the user should choose which tables are available; but automatically choose the 'default' table for any agent
+- [ ] should be able to define user tables (not just evoware tables)
 
 ## HDF5
 
