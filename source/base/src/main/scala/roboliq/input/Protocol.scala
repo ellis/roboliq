@@ -171,7 +171,7 @@ class Protocol {
 			RsSuccess(())
 		}
 		else {
-			RsResult.toResultOfList(configBean.evowareAgents.toList.map(pair => {
+			RsResult.mapAll(configBean.evowareAgents.toList){pair =>
 				val (name, agent) = pair
 				for {
 					// Load carrier file
@@ -180,13 +180,15 @@ class Protocol {
 					// FIXME: for debug only
 					//_ = carrierData.printCarriersById
 					// ENDIF
-					// Load table file
-					tableFile <- RsResult(agent.tableFile, "tableFile must be set")
-					tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
-					
+					_ <- RsResult.mapAll(agent.tableSetups.toList){ pair =>
+						// Load table file
+						tableFile <- RsResult(agent.tableFile, "tableFile must be set")
+						tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
+						RsSuccess(())
+					}
 					_ <- loadEvoware(name, carrierData, tableData, agent)
 				} yield ()
-			})).map(_ => ())
+			}
 		}
 	}
 
