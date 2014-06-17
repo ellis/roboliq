@@ -15,6 +15,10 @@
 - [?] when loading a protocol, the user should choose which tables are available; but automatically choose the 'default' table for any agent
 - [?] loadEvoware: use site names in tableSetupBean, and only make the sites available for tranport which are defined by the tableSetup
 - [?] make sure that sites in `userSites` are denoted as user-accessible for transport
+- [ ] Protocol:1058: create the Site object in 'addSite()', will need to pass description string
+- [ ] restructure how plates are specified in protocol so I can manually place the plates
+- [ ] Why is P1 not recognized?
+- [ ] Pop: why does it quit after a single printout when threshold is set to step<=5?
 - [ ] Pop: for all open goals with only one providers, handle them all at the same time
 - [ ] Pop: for all open goals with only one variable, find the values that can be assigned to those variables; if any can only have one value, set the variables
 - [ ] Pop: for all open goals with only two variables, find the values that can be assigned to those variables; if any can only have one value, set the variables

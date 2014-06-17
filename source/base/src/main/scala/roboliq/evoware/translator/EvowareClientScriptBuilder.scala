@@ -329,10 +329,10 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		// tube adapter to be labware.
 		//def makeLocationChain(labware: Labware, acc: List[])
 		for {
-			location <- state.labware_location_m.get(labware).asRs("labware has not been placed anywhere yet")
+			location <- RsResult.from(state.labware_location_m.get(labware), "labware has not been placed anywhere yet")
 			site <- if (location.isInstanceOf[Site]) RsSuccess(location.asInstanceOf[Site]) else RsError("expected labware to be on a site")
 			siteIdent <- protocol.eb.getIdent(site)
-			siteE <- identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs(s"no evoware site corresponds to site: $site")
+			siteE <- identToAgentObject_m.get(siteIdent.toLowerCase).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs(s"no evoware site corresponds to site: $site")
 		} yield siteE
 	}
 	

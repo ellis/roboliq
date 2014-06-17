@@ -1055,13 +1055,14 @@ class Protocol {
 		val siteIdToSite_m = new HashMap[(Int, Int), Site]
 		val carriersSeen_l = new HashSet[Int]
 		
-		def addSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, site: Site) {
+		def addSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String) {
 			val grid_i = tableData.mapCarrierToGrid(carrierE)
 			// TODO: should adapt CarrierSite to require grid_i as a parameter 
 			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 			val siteId = (carrierE.id, site_i)
 			findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i + 1) match {
 				case Some(siteIdent) =>
+					val site = Site(gid, Some(siteIdent), Some(description))
 					siteIdToSite_m(siteId) = site
 					identToAgentObject(siteIdent.toLowerCase) = siteE
 					eb.addSite(site, siteIdent)
@@ -1083,9 +1084,7 @@ class Protocol {
 			carriersSeen_l += carrierE.id
 			//println("carrier: "+carrierE)
 			for (site_i <- 0 until carrierE.nSites) {
-				val site = Site(gid, Some(s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}"))
-				//val siteIdent = s"${agentIdent}_hotel_${carrierE.id}x${site_i+1}"
-				addSite(carrierE, site_i, site)
+				addSite(carrierE, site_i, s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}")
 			}
 		}
 		
@@ -1094,16 +1093,14 @@ class Protocol {
 			val carrierE = o.carrier
 			carriersSeen_l += carrierE.id
 			for (site_i <- 0 until carrierE.nSites) {
-				val site = Site(gid, Some(s"${agentIdent} device ${carrierE.sName} site ${site_i+1}"))
-				addSite(carrierE, site_i, site)
+				addSite(carrierE, site_i, s"${agentIdent} device ${carrierE.sName} site ${site_i+1}")
 			}
 		}
 		
 		// Create on-bench Sites for Plates
 		for ((carrierE, grid_i) <- tableData.mapCarrierToGrid if !carriersSeen_l.contains(carrierE.id)) {
 			for (site_i <- 0 until carrierE.nSites) {
-				val site = Site(gid, Some(s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}"))
-				addSite(carrierE, site_i, site)
+				addSite(carrierE, site_i, s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}")
 			}
 		}
 		
@@ -1198,11 +1195,10 @@ class Protocol {
 		}
 
 		val graph = {
-			// FIXME: this is a hack to get user sites in, needs to be done in configuration file
+			// Add user-accessible sites into the graph
 			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
-			val siteB = eb.getEntityAs[Site]("r1_bench_010x4").getOrElse(null)
-			test_m(("user", "", "")) = List(offsite, siteB)
-			// ENDFIX
+			test_m(("user", "", "")) = offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site]))
+			// Populate graph from entries in test_m
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
 			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 			import scalax.collection.edge.LHyperEdge
@@ -1214,8 +1210,9 @@ class Protocol {
 		}
 		// FIXME: should append to transportGraph (not replace it) so that we can have multiple evoware agents
 		eb.transportGraph = graph
-		//println("graph: "+graph.size)
+		println("graph: "+graph.size)
 		//graph.take(5).foreach(println)
+		graph.foreach(println)
 		
 		def addDevice0(
 			device: Device,

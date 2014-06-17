@@ -63,9 +63,9 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 			model <- eb.getEntityAs[LabwareModel](modelName)
 			site1 <- eb.getEntityAs[Site](site1Name)
 			site2 <- eb.getEntityAs[Site](site2Name)
-			node1 <- g.find(site1).asRs(s"Site `$site1Name` is not in transport graph")
-			node2 <- g.find(site2).asRs(s"Site `$site2Name` is not in transport graph")
-			path <- node1.shortestPathTo(node2).asRs(s"No path in transport graph from `$site1Name` to `$site2Name`")
+			node1 <- RqResult.from(g.find(site1), s"Site `$site1Name` is not in transport graph")
+			node2 <- RqResult.from(g.find(site2), s"Site `$site2Name` is not in transport graph")
+			path <- RqResult.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name`")
 			_ = println("path: "+path.edges)
 			op_l <- RqResult.mapAll(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
