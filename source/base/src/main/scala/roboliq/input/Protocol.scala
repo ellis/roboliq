@@ -1060,11 +1060,15 @@ class Protocol {
 			// TODO: should adapt CarrierSite to require grid_i as a parameter 
 			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 			val siteId = (carrierE.id, site_i)
-			findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i) match {
+			findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i + 1) match {
 				case Some(siteIdent) =>
 					siteIdToSite_m(siteId) = site
 					identToAgentObject(siteIdent.toLowerCase) = siteE
 					eb.addSite(site, siteIdent)
+					// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
+					if (tableSetupBean.pipetterSites.contains(siteIdent)) {
+						eb.addRel(Rel("device-can-site", List(pipetterIdent, siteIdent)))
+					}
 					// Make site user-accessible if it's listed in the table setup's `userSites`
 					if (tableSetupBean.userSites.contains(siteIdent)) {
 						eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))

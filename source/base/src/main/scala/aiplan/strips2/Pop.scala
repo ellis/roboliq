@@ -341,7 +341,7 @@ object Pop {
 	def stepToEnd(x: PopState): Either[String, PartialPlan] = {
 		@tailrec
 		def loop(stack_r: List[PopState], n: Int): Either[String, PartialPlan] = {
-			if (n >= 5) return Left("debugger end at step ${n}")
+			if (n >= 100) return Left(s"debugger end at step ${n}")
 			//println(s"stepToEnd: step $n: ${stack_r}")
 			step(stack_r) match {
 				case Left(msg) => Left(msg)

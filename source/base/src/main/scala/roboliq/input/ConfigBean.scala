@@ -51,6 +51,8 @@ class TableSetupBean {
 	@BeanProperty var tableFile: String = null
 	/** Site definitions */
 	@BeanProperty var sites: java.util.HashMap[String, SiteBean] = null
+	/** List of sites the pipetter can access */
+	@BeanProperty var pipetterSites: java.util.ArrayList[String] = null
 	/** List of sites the user can directly access */
 	@BeanProperty var userSites: java.util.ArrayList[String] = null
 }

@@ -15,6 +15,9 @@
 - [?] when loading a protocol, the user should choose which tables are available; but automatically choose the 'default' table for any agent
 - [?] loadEvoware: use site names in tableSetupBean, and only make the sites available for tranport which are defined by the tableSetup
 - [?] make sure that sites in `userSites` are denoted as user-accessible for transport
+- [ ] Pop: for all open goals with only one providers, handle them all at the same time
+- [ ] Pop: for all open goals with only one variable, find the values that can be assigned to those variables; if any can only have one value, set the variables
+- [ ] Pop: for all open goals with only two variables, find the values that can be assigned to those variables; if any can only have one value, set the variables
 - [ ] create a SettingsBean, which has for example table choices
 - [ ] main: pass table choices along to loadConfig()
 - [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
