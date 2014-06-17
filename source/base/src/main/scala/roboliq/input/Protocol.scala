@@ -1065,6 +1065,10 @@ class Protocol {
 					siteIdToSite_m(siteId) = site
 					identToAgentObject(siteIdent.toLowerCase) = siteE
 					eb.addSite(site, siteIdent)
+					// Make site user-accessible if it's listed in the table setup's `userSites`
+					if (tableSetupBean.userSites.contains(siteIdent)) {
+						eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))
+					}
 				case None =>
 			}
 		}
@@ -1204,7 +1208,7 @@ class Protocol {
 			})
 			Graph[Site, LkUnDiEdge](edge_l : _*)
 		}
-		// FIXME: should add to transportGraph, not replace it
+		// FIXME: should append to transportGraph (not replace it) so that we can have multiple evoware agents
 		eb.transportGraph = graph
 		//println("graph: "+graph.size)
 		//graph.take(5).foreach(println)
@@ -1221,10 +1225,14 @@ class Protocol {
 			// Add device sites
 			for (site_i <- 0 until carrierE.nSites) {
 				val siteId = (carrierE.id, site_i)
-				val site: Site = siteIdToSite_m(siteId)
-				siteIdToModels_m.get(siteId).map { model_l =>
-					eb.addDeviceSite(device, site)
-					model_l.foreach(m => eb.addDeviceModel(device, m))
+				
+				siteIdToSite_m.get(siteId) match {
+					case Some(site: Site) =>
+						siteIdToModels_m.get(siteId).map { model_l =>
+							eb.addDeviceSite(device, site)
+							model_l.foreach(m => eb.addDeviceModel(device, m))
+						}
+					case None =>
 				}
 			}
 			
@@ -1278,10 +1286,13 @@ class Protocol {
 					// HACK: only use last site for shaking, this is truly a bad hack!  Things like this should be performed via configuration overrides.
 					for (site_i <- List(carrierE.nSites - 1)) {
 						val siteId = (carrierE.id, site_i)
-						val site: Site = siteIdToSite_m(siteId)
-						siteIdToModels_m.get(siteId).map { model_l =>
-							eb.addDeviceSite(device, site)
-							model_l.foreach(m => eb.addDeviceModel(device, m))
+						siteIdToSite_m.get(siteId) match {
+							case Some(site) =>
+								siteIdToModels_m.get(siteId).map { model_l =>
+									eb.addDeviceSite(device, site)
+									model_l.foreach(m => eb.addDeviceModel(device, m))
+								}
+							case None =>
 						}
 					}
 
@@ -1379,7 +1390,10 @@ class Protocol {
 	def findSiteIdent(tableSetupBean: TableSetupBean, carrierName: String, grid: Int, site: Int): Option[String] = {
 		def ok[A](a: A, b: A): Boolean = (a == null || a == b)
 		def okInt(a: Integer, b: Int): Boolean = (a == null || a == b)
-		def matches(siteBean: SiteBean): Boolean = ok(siteBean.carrier, carrierName) && okInt(siteBean.grid, grid)
+		def matches(siteBean: SiteBean): Boolean =
+			ok(siteBean.carrier, carrierName) &&
+			okInt(siteBean.grid, grid) &&
+			okInt(siteBean.site, site)
 		for ((ident, bean) <- tableSetupBean.sites.toMap) {
 			if (matches(bean))
 				return Some(ident)

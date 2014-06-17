@@ -65,7 +65,7 @@ object Main extends App {
 			configBean <- loadConfigBean(opt.configFile.getPath())
 			//_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
 			cs <- protocol.loadCommandSet()
-			_ <- protocol.loadConfigBean(configBean)
+			_ <- protocol.loadConfigBean(configBean, Nil)
 
 			jsobj <- loadProtocolJson(opt.protocolFile)
 			_ <- protocol.loadJson(jsobj)
@@ -194,17 +194,22 @@ object Main extends App {
 		
 		val text = scala.io.Source.fromFile(path).mkString
 		
+		val descriptionTableSetup = new TypeDescription(classOf[TableSetupBean])
+		descriptionTableSetup.putMapPropertyType("sites", classOf[String], classOf[SiteBean])
+		
 		val descriptionEvoware = new TypeDescription(classOf[EvowareAgentBean])
 		descriptionEvoware.putMapPropertyType("tipModels", classOf[String], classOf[TipModelBean])
 		descriptionEvoware.putListPropertyType("tips", classOf[TipBean])
-		val constructorEvoware = new Constructor(classOf[EvowareAgentBean])
-		constructorEvoware.addTypeDescription(descriptionEvoware);
+		descriptionEvoware.putMapPropertyType("tableSetups", classOf[String], classOf[TableSetupBean])
+		//val constructorEvoware = new Constructor(classOf[EvowareAgentBean])
+		//constructorEvoware.addTypeDescription(descriptionEvoware);
 
 		val descriptionConfig = new TypeDescription(classOf[ConfigBean])
 		descriptionConfig.putMapPropertyType("evowareAgents", classOf[String], classOf[EvowareAgentBean])
 		val constructorConfig = new Constructor(classOf[ConfigBean])
 		constructorConfig.addTypeDescription(descriptionConfig)
 		constructorConfig.addTypeDescription(descriptionEvoware)
+		constructorConfig.addTypeDescription(descriptionTableSetup)
 		
 		val yaml = new Yaml(constructorConfig)
 		val configBean = yaml.load(text).asInstanceOf[ConfigBean]

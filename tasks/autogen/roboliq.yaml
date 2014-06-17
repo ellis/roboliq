@@ -1,9 +1,9 @@
-plateModels:
-  "D-BSSE 96 Well PCR Plate":
-  "D-BSSE 96 Well DWP":
-  "D-BSSE 384 Well Plate White":
-  "Ellis Nunc F96 MicroWell":
-  "Trough 100ml":
+#plateModels:
+#  "D-BSSE 96 Well PCR Plate":
+#  "D-BSSE 96 Well DWP":
+#  "D-BSSE 384 Well Plate White":
+#  "Ellis Nunc F96 MicroWell":
+#  "Trough 100ml":
 
 evowareAgents:
   r1:
@@ -42,7 +42,8 @@ evowareAgents:
           R1C: { grid: 3, site: 3 }
           ROBOSEAL: { carrier: "RoboSeal" }
 #          T1A: { grid: 5
-        userSites: [P1, P2, P3]
+        pipetterSites: [P1, P2, P3, R1A, R1B, R1C]
+        userSites: [P1, P2, P3, R1A, R1B, R1C]
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
@@ -53,12 +54,12 @@ aliases:
   PC1: r1_bench_010x4
 
 logic:
-  - transporter-can userArm r1_hotel_245x1 userArmSpec
-  - transporter-can userArm r1_hotel_245x2 userArmSpec
-  - transporter-can userArm r1_bench_003x1 userArmSpec
-  - transporter-can userArm r1_bench_003x2 userArmSpec
-  - transporter-can userArm r1_bench_003x3 userArmSpec
-  - transporter-can userArm r1_bench_010x2 userArmSpec
+#  - transporter-can userArm r1_hotel_245x1 userArmSpec
+#  - transporter-can userArm r1_hotel_245x2 userArmSpec
+#  - transporter-can userArm r1_bench_003x1 userArmSpec
+#  - transporter-can userArm r1_bench_003x2 userArmSpec
+#  - transporter-can userArm r1_bench_003x3 userArmSpec
+#  - transporter-can userArm r1_bench_010x2 userArmSpec
 #  - device-can-site r1_pipetter1 r1_bench_010x1
   - device-can-site r1_pipetter1 r1_bench_010x2
   - device-can-site r1_pipetter1 r1_bench_010x4
