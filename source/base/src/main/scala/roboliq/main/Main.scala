@@ -198,6 +198,7 @@ object Main extends App {
 		descriptionTableSetup.putMapPropertyType("sites", classOf[String], classOf[SiteBean])
 		
 		val descriptionEvoware = new TypeDescription(classOf[EvowareAgentBean])
+		descriptionEvoware.putListPropertyType("labwareModels", classOf[LabwareModelBean])
 		descriptionEvoware.putMapPropertyType("tipModels", classOf[String], classOf[TipModelBean])
 		descriptionEvoware.putListPropertyType("tips", classOf[TipBean])
 		descriptionEvoware.putMapPropertyType("tableSetups", classOf[String], classOf[TableSetupBean])

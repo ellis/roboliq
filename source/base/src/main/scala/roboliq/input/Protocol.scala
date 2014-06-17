@@ -978,8 +978,8 @@ class Protocol {
 
 		def loadAgentBean(): RsResult[Unit] = {
 			// Labware to be used
-			if (agentBean.labware != null) {
-				labwareNamesOfInterest_l ++= agentBean.labware
+			if (agentBean.labwareModels != null) {
+				labwareNamesOfInterest_l ++= agentBean.labwareModels.toList.map(_.evowareName)
 			}
 			
 			// Tip models
@@ -1032,18 +1032,21 @@ class Protocol {
 		// Create PlateModels
 		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
 		val idToModel_m = new HashMap[String, LabwareModel]
+		val labwareModelEvowareNameToName_m = agentBean.labwareModels.toList.map(x => x.evowareName -> x.name).toMap
 		for (mE <- labwareModelEs) {
-			if (mE.sName.contains("Plate") || mE.sName.contains("96") || mE.sName.contains("Trough")) {
-				val m = PlateModel(mE.sName, Some(mE.sName), None, mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
-				val ident = f"m${idToModel_m.size + 1}%03d"
-				idToModel_m(mE.sName) = m
-				eb.addModel(m, ident)
-				// All models can be offsite
-				eb.addStackable(offsiteModel, m)
-				// The user arm can handle all models
-				eb.addDeviceModel(userArm, m)
-				//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
-				identToAgentObject(ident.toLowerCase) = mE
+			//if (mE.sName.contains("Plate") || mE.sName.contains("96") || mE.sName.contains("Trough")) {
+			labwareModelEvowareNameToName_m.get(mE.sName) match {
+				case Some(ident) =>
+					val m = PlateModel(ident, Some(ident), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+					idToModel_m(mE.sName) = m
+					eb.addModel(m, ident)
+					// All models can be offsite
+					eb.addStackable(offsiteModel, m)
+					// The user arm can handle all models
+					eb.addDeviceModel(userArm, m)
+					//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
+					identToAgentObject(ident.toLowerCase) = mE
+				case _ =>
 			}
 		}
 		

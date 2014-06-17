@@ -12,10 +12,14 @@
 
 ## Sites
 
-- [?] when loading a protocol, the user should choose which tables are available; but automatically choose the 'default' table for any agent
-- [?] loadEvoware: use site names in tableSetupBean, and only make the sites available for tranport which are defined by the tableSetup
-- [?] make sure that sites in `userSites` are denoted as user-accessible for transport
-- [ ] Protocol:1058: create the Site object in 'addSite()', will need to pass description string
+- [x] when loading a protocol, the user should choose which tables are available; but automatically choose the 'default' table for any agent
+- [x] loadEvoware: use site names in tableSetupBean, and only make the sites available for tranport which are defined by the tableSetup
+- [x] make sure that sites in `userSites` are denoted as user-accessible for transport
+- [x] Protocol:1058: create the Site object in 'addSite()', will need to pass description string
+- [?] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
+- [ ] debug "could not find equivalent evoware labware model ..."
+- [ ] use plateModel names in problem instead of the generated mXXX identifiers
+- [ ] BUG: test_single_distribute_2_r1: can't place plate on site P2
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
 - [ ] Why is P1 not recognized?
 - [ ] Pop: why does it quit after a single printout when threshold is set to step<=5?
@@ -24,7 +28,6 @@
 - [ ] Pop: for all open goals with only two variables, find the values that can be assigned to those variables; if any can only have one value, set the variables
 - [ ] create a SettingsBean, which has for example table choices
 - [ ] main: pass table choices along to loadConfig()
-- [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
 - [ ] load a settings file along with config and protocol
 - [ ] in loadEvoware(), check whether the user-defined plateModels agree with the evoware-defined models
 - [ ] should be able to define user tables (not just evoware tables)

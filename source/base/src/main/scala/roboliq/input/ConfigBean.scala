@@ -25,13 +25,18 @@ class EvowareAgentBean {
 	/** Evoware data directory */
 	@BeanProperty var evowareDir: String = null
 	/** Labware that this robot can use */
-	@BeanProperty var labware: java.util.ArrayList[String] = null
+	@BeanProperty var labwareModels: java.util.ArrayList[LabwareModelBean] = null
 	/** Tip models that this robot can use */
 	@BeanProperty var tipModels: java.util.HashMap[String, TipModelBean] = null
 	/** This robot's tips */
 	@BeanProperty var tips: java.util.ArrayList[TipBean] = null
 	/** Table setups for this robot */
 	@BeanProperty var tableSetups: java.util.HashMap[String, TableSetupBean] = null
+}
+
+class LabwareModelBean {
+	@BeanProperty var name: String = null
+	@BeanProperty var evowareName: String = null
 }
 
 class TipModelBean {

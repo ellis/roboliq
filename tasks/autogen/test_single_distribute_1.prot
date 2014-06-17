@@ -1,5 +1,5 @@
 labware:
-  plate1: Thermocycler Plate
+  plate1: plateModel_96_nunc_transparent
 
 reagents:
   water: plate1(A01)
