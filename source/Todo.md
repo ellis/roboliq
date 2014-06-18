@@ -16,6 +16,8 @@
 
 ## Pipetting accuracy
 
+- [ ] Add a `name` field to Entity?
+- [ ] Update an AtomBase in EntityBase
 - [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [ ] get test_single_distribute_4 to run
 

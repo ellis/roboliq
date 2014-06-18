@@ -18,6 +18,7 @@ import scalax.collection.Graph.apply$default$3
 import scalax.collection.edge.LkUnDiEdge
 
 class EntityBase {
+	var atoms = AtomBase(Set())
 	val aliases = new HashMap[String, String]
 	/**
 	 * Map from entity to its JSHOP identifier
@@ -152,15 +153,22 @@ class EntityBase {
 		}
 	}
 	
+	private def addAtom(ss: String*) {
+		atoms = atoms.add(ss : _*)
+	}
+	
 	def addAgent(e: Agent, name: String) {
+		addAtom("agent", name)
 		addEntity(e, name)
 	}
 	
 	def addModel(e: LabwareModel, name: String) {
+		addAtom("model", name)
 		addEntity(e, name)
 	}
 	
 	def addSite(e: Site, name: String) {
+		addAtom("site", name)
 		addEntity(e, name)
 	}
 	
@@ -199,6 +207,7 @@ class EntityBase {
 	def addStackable(bot: LabwareModel, top: LabwareModel) {
 		assert(entityToIdent_m.contains(bot))
 		assert(entityToIdent_m.contains(top))
+		addAtom("stackable", bot.)
 		stackables_m.addBinding(bot, top)
 	}
 	
