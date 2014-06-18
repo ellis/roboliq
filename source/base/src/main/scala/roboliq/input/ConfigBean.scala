@@ -36,6 +36,7 @@ class EvowareAgentBean {
 
 class LabwareModelBean {
 	@BeanProperty var name: String = null
+	@BeanProperty var label: String = null
 	@BeanProperty var evowareName: String = null
 }
 

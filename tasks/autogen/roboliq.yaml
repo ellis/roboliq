@@ -12,14 +12,19 @@ evowareAgents:
     #tableFile: testdata/bsse-robot1/config/table-01.esc
     labwareModels:
       - name: plateModel_96_pcr
+        label: 96 well PCR plate
         evowareName: D-BSSE 96 Well PCR Plate
       - name: plateModel_96_dwp
+        label: 96 well deep-well plate
         evowareName: D-BSSE 96 Well DWP
       - name: plateModel_384_square
+        label: 384 square-well white plate
         evowareName: D-BSSE 384 Well Plate White
       - name: plateModel_96_nunc_transparent
+        label: 96 square-well transparent Nunc plate
         evowareName: Ellis Nunc F96 MicroWell
       - name: troughModel_100ml
+        label: Trough 100ml
         evowareName: Trough 100ml
 
     tipModels:

@@ -16,12 +16,13 @@
 - [x] loadEvoware: use site names in tableSetupBean, and only make the sites available for tranport which are defined by the tableSetup
 - [x] make sure that sites in `userSites` are denoted as user-accessible for transport
 - [x] Protocol:1058: create the Site object in 'addSite()', will need to pass description string
-- [?] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
-- [ ] debug "could not find equivalent evoware labware model ..."
-- [ ] use plateModel names in problem instead of the generated mXXX identifiers
+- [x] use plateModel names in problem instead of the generated mXXX identifiers
+- [x] debug "could not find equivalent evoware labware model ..."
+- [ ] give plate models good labels for UserPrompt in esc file
 - [ ] BUG: test_single_distribute_2_r1: can't place plate on site P2
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
 - [ ] Why is P1 not recognized?
+- [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
 - [ ] Pop: why does it quit after a single printout when threshold is set to step<=5?
 - [ ] Pop: for all open goals with only one providers, handle them all at the same time
 - [ ] Pop: for all open goals with only one variable, find the values that can be assigned to those variables; if any can only have one value, set the variables

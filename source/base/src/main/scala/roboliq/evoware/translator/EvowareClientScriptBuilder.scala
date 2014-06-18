@@ -523,7 +523,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			siteE = tuple_l.head._3
 			plateModel = tuple_l.head._2.parentModel
 			plateModelIdent <- protocol.eb.getIdent(plateModel)
-			plateModelE <- identToAgentObject_m.get(plateModelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]).asRs(s"could not find equivalent evoware labware model for $plateModel")
+			plateModelE <- identToAgentObject_m.get(plateModelIdent.toLowerCase).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]).asRs(s"could not find equivalent evoware labware model for $plateModel")
 			// List of items and their well indexes
 			item_l = tuple_l.map(tuple => tuple._1 -> tuple._2.index)
 			// Check item validity and get liquid class

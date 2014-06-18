@@ -1033,7 +1033,9 @@ class Protocol {
 		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
 		val idToModel_m = new HashMap[String, LabwareModel]
 		val labwareModelEvowareNameToName_m = agentBean.labwareModels.toList.map(x => x.evowareName -> x.name).toMap
+		//println("labwareModelEvowareNameToName_m: "+labwareModelEvowareNameToName_m)
 		for (mE <- labwareModelEs) {
+			//println("mE.sName: "+mE.sName)
 			//if (mE.sName.contains("Plate") || mE.sName.contains("96") || mE.sName.contains("Trough")) {
 			labwareModelEvowareNameToName_m.get(mE.sName) match {
 				case Some(ident) =>
