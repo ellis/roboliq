@@ -20,11 +20,6 @@ case class PopState_HandleGoal(
 	goal: (Int, Int),
 	indentLevel: Int
 ) extends PopState
-case class PopState_HandleGoals1(
-	plan: PartialPlan,
-	goals: List[(Int, Int)],
-	indentLevel: Int
-) extends PopState
 case class PopState_ChooseAction(
 	plan: PartialPlan,
 	goal: (Int, Int),
@@ -35,6 +30,11 @@ case class PopState_HandleAction(
 	plan: PartialPlan,
 	goal: (Int, Int),
 	provider: (Either[Operator, Int], Map[String, String]),
+	indentLevel: Int
+) extends PopState
+case class PopState_HandleActions1(
+	plan: PartialPlan,
+	goalToProvider_l: List[((Int, Int), (Either[Operator, Int], Map[String, String]))],
 	indentLevel: Int
 ) extends PopState
 
@@ -188,10 +188,10 @@ object Pop {
 		val next_? : Either[String, Option[PopState]] = ps match {
 			case x: PopState_Done => Right(None)
 			case x: PopState_SelectGoal => stepSelectGoal(x).right.map(Some(_))
-			case x: PopState_HandleGoals1 => stepHandleGoals1(x).right.map(Some(_))
 			case x: PopState_HandleGoal => stepHandleGoal(x).right.map(Some(_))
 			case x: PopState_ChooseAction => stepChooseAction(x).right.map(Some(_))
 			case x: PopState_HandleAction => stepHandleAction(x).right.map(Some(_))
+			case x: PopState_HandleActions1 => stepHandleActions1(x).right.map(Some(_))
 		}
 		//println("next_?: "+next_?)
 		next_? match {
@@ -248,8 +248,11 @@ object Pop {
 		}
 		else {
 			goalToProviders_l.takeWhile(_._2.size == 1) match {
-				case Nil => Right(PopState_HandleGoal(plan0, goal_l.head, x.indentLevel))
-				case goalWithSingleOption_l => Right(PopState_HandleGoals1(plan0, goalWithSingleOption_l.map(_._1), x.indentLevel))
+				case Nil =>
+					Right(PopState_HandleGoal(plan0, goal_l.head, x.indentLevel))
+				case l =>
+					val l2 = l.map { case (goal, List(provider)) => (goal, provider) }
+					Right(PopState_HandleActions1(plan0, l2, x.indentLevel))
 			}
 		}
 	}
@@ -257,19 +260,6 @@ object Pop {
 	def stepHandleGoal(x: PopState_HandleGoal): Either[String, PopState] = {
 		val indent = "  " * x.indentLevel
 		val plan0 = x.plan
-		val (consumer_i, precond_i) = x.goal
-		val goalAction = plan0.bindings.bind(plan0.action_l(consumer_i).preconds.l(precond_i))
-		println(s"${indent}HandleGoal ${x.goal} ${goalAction}")
-		val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
-		val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
-		val provider_l = provider1_l ++ provider2_l
-		Right(PopState_ChooseAction(x.plan, x.goal, provider_l, x.indentLevel))
-	}
-	
-	def stepHandleGoals1(x: PopState_HandleGoals1): Either[String, PopState] = {
-		val indent = "  " * x.indentLevel
-		val plan0 = x.plan
-		for ()
 		val (consumer_i, precond_i) = x.goal
 		val goalAction = plan0.bindings.bind(plan0.action_l(consumer_i).preconds.l(precond_i))
 		println(s"${indent}HandleGoal ${x.goal} ${goalAction}")
@@ -358,6 +348,23 @@ object Pop {
 			//case Left(msg) => Right(PopState_ChooseAction(x.plan, x.goal, x.provider_l, x.indentLevel - 1))
 			case Left(msg) => Left(msg)
 		}
+	}
+
+	
+	def stepHandleActions1(x: PopState_HandleActions1): Either[String, PopState] = {
+		def step(goalToProvider_l: List[((Int, Int), (Either[Operator, Int], Map[String, String]))], plan: PartialPlan): Either[String, PopState] = {
+			goalToProvider_l match {
+				case Nil => Right(PopState_SelectGoal(plan, x.indentLevel + 1))
+				case ((goal, provider)) :: rest =>
+					val x2 = PopState_HandleAction(plan, goal, provider, x.indentLevel)
+					stepHandleAction(x2) match {
+						case Left(msg) => Left(msg)
+						case Right(PopState_SelectGoal(plan2, _)) => step(rest, plan2)
+						case _ => Left("stepHandleActions1: internal error")
+					}
+			}
+		}
+		step(x.goalToProvider_l, x.plan)
 	}
 	
 	def stepToEnd(x: PopState): Either[String, PartialPlan] = {

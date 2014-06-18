@@ -20,7 +20,7 @@
 - [x] debug "could not find equivalent evoware labware model ..."
 - [x] give plate models good labels for UserPrompt in esc file
 - [x] BUG: test_single_distribute_2_r1: can't place plate on site P2
-- [ ] Pop: for all open goals with only one providers, handle them all at the same time
+- [x] Pop: for all open goals with only one providers, handle them all at the same time
 - [ ] HACK: don't allow transportLabware to be a provider for itself
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
 - [ ] Why is P1 not recognized?
