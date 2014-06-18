@@ -975,11 +975,14 @@ class Protocol {
 		eb.addDevice(agent, pipetter, pipetterIdent)
 
 		val labwareNamesOfInterest_l = new HashSet[String]
+		
+		val labwareModel_l = agentBean.labwareModels.toList
+		val labwareModel_m = labwareModel_l.map(x => x.name -> x).toMap
 
 		def loadAgentBean(): RsResult[Unit] = {
 			// Labware to be used
 			if (agentBean.labwareModels != null) {
-				labwareNamesOfInterest_l ++= agentBean.labwareModels.toList.map(_.evowareName)
+				labwareNamesOfInterest_l ++= labwareModel_l.map(_.evowareName)
 			}
 			
 			// Tip models
@@ -1032,22 +1035,22 @@ class Protocol {
 		// Create PlateModels
 		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
 		val idToModel_m = new HashMap[String, LabwareModel]
-		val labwareModelEvowareNameToName_m = agentBean.labwareModels.toList.map(x => x.evowareName -> x.name).toMap
+		val evowareNameToLabwareModel_m = labwareModel_l.map(x => x.evowareName -> x).toMap
 		//println("labwareModelEvowareNameToName_m: "+labwareModelEvowareNameToName_m)
 		for (mE <- labwareModelEs) {
 			//println("mE.sName: "+mE.sName)
 			//if (mE.sName.contains("Plate") || mE.sName.contains("96") || mE.sName.contains("Trough")) {
-			labwareModelEvowareNameToName_m.get(mE.sName) match {
-				case Some(ident) =>
-					val m = PlateModel(ident, Some(ident), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+			evowareNameToLabwareModel_m.get(mE.sName) match {
+				case Some(model) =>
+					val m = PlateModel(model.name, Option(model.label), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
 					idToModel_m(mE.sName) = m
-					eb.addModel(m, ident)
+					eb.addModel(m, model.name)
 					// All models can be offsite
 					eb.addStackable(offsiteModel, m)
 					// The user arm can handle all models
 					eb.addDeviceModel(userArm, m)
 					//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
-					identToAgentObject(ident.toLowerCase) = mE
+					identToAgentObject(model.name.toLowerCase) = mE
 				case _ =>
 			}
 		}
