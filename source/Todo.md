@@ -2,38 +2,17 @@
 
 ## Big issues
 
-- [ ] convenient naming for sites (see NamesForSites.txt)
 - [ ] handle tubes
 - [ ] smarter pipette policy and tip choices
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
 - [ ] we need a separate search algorithm for organizing plates and it needs to be run before the action planner
 - [ ] handle interactively setting variables and guiding planning with extra settings file
+- [ ] web interface for interactive planning
 - [ ] refactor loadEvoware() to make devices pluggable somehow
 
-## Sites
+## Current goal
 
-- [x] when loading a protocol, the user should choose which tables are available; but automatically choose the 'default' table for any agent
-- [x] loadEvoware: use site names in tableSetupBean, and only make the sites available for tranport which are defined by the tableSetup
-- [x] make sure that sites in `userSites` are denoted as user-accessible for transport
-- [x] Protocol:1058: create the Site object in 'addSite()', will need to pass description string
-- [x] use plateModel names in problem instead of the generated mXXX identifiers
-- [x] debug "could not find equivalent evoware labware model ..."
-- [x] give plate models good labels for UserPrompt in esc file
-- [x] BUG: test_single_distribute_2_r1: can't place plate on site P2
-- [x] Pop: for all open goals with only one providers, handle them all at the same time
-- [ ] HACK: don't allow transportLabware to be a provider for itself
-- [ ] restructure how plates are specified in protocol so I can manually place the plates
-- [ ] Why is P1 not recognized?
-- [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
-- [ ] Pop: why does it quit after a single printout when threshold is set to step<=5?
-- [ ] Pop: for all open goals with only one variable, find the values that can be assigned to those variables; if any can only have one value, set the variables
-- [ ] Pop: for all open goals with only two variables, find the values that can be assigned to those variables; if any can only have one value, set the variables
-- [ ] create a SettingsBean, which has for example table choices
-- [ ] main: pass table choices along to loadConfig()
-- [ ] load a settings file along with config and protocol
-- [ ] in loadEvoware(), check whether the user-defined plateModels agree with the evoware-defined models
-- [ ] should be able to define user tables (not just evoware tables)
-- [ ] SettingsBean.agents: let user select which agents to include for planning
+- [ ] pipetting accuracy protocols
 
 ## HDF5
 
@@ -55,65 +34,37 @@
 
 ### ``test_single_distribute_1``
 
-- [x] Fix the final 6 digits of output directory name generated
-- [x] BUG: prompts user to move plate from `offsite` to `offsite`
-- [x] BUG: distribute1 is missing from domain.pddl
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
+- [ ] Why is P1 not recognized?
 
 ### ``test_single_distribute_3``
 
-- [x] Bindings.substitute needs to check whether any ne_l's are now invalid, i.e contain the variable name itself (and return an Either)
-- [x] BUG: takes too long to find solution with two plates (or no solution is found?)
-- [x] distribute2: should have a condition to ensure that the sites are not equal
-- [x] Pop.stepSelectGoal: should choose goal based on how many providers there are -- if any goal has 0 providers, failure, all goals with 1 provider, set immediately, then choose goal with fewest providers next
 - [ ] BUG: produces bad transport commands, since it doesn't consider that one plate is already on the bench
-- [ ] aiplan.strips2: refactor Either[String, A] with RsResult[A]
 
 ### ``test_single_distribute_4``
 
 - [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 
+## Config file
+
+- [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
+- [ ] create a SettingsBean, which has for example table choices
+- [ ] main: pass table choices along to loadConfig()
+- [ ] load a settings file along with config and protocol
+- [ ] should be able to define user tables (not just evoware tables)
+- [ ] in loadEvoware(), check whether the user-defined plateModels agree with the evoware-defined models
+
+## Settings file
+
+- [ ] SettingsBean.agents: let user select which agents to include for planning
+
+## Protocol file
+
+- [ ] restructure how plates are specified in protocol so I can manually place the plates
+
 ## AI planning flow
 
-Test RsResult functions with:
-import scala.language.higherKinds
-import scala.collection.generic.CanBuildFrom
-import ch.ethz.reactivesim._
-val l1 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsSuccess(3))
-val l2 = List[RsResult[Int]](RsSuccess(1), RsSuccess(2), RsError("nope"))
-
-- [x] move ActionHandler_ShakePlate to it's own package, which will import both roboliq.plan and roboliq.evoware
-- [x] extract planned variables from partial plan and use them to expand CallTree actions into operators
-- [x] translate planned actions to tokens for Evoware translation
-- [x] AutoActionHandler: create method for handling actions that were added by the planner
-- [x] need to put `transportLabware` operator into domain
-- [x] handle more than one command
-- [x] TransportLabware: make sure that site is not occupied before moving plate to it
-- [x] For now, no transport graph while planning.  But use the transport graph when generating the operators, and hope a path is found.
-- [x] TransportLabware: handle move operators from move command
-- [x] ActionHandler: should have `name: String` method
-- [x] PartialPlan: write a function to make it concrete (completely ordered and with grounded variables)
-- [x] Protocol: use scala-graph-core to build a graph of sites and possible transport links
-- [x] Protocol: adapt to create a CallTree, see loadJsonProtocol_Protocol
-- [x] Protocol: remove variable `tasks`
-- [x] Main: let user specify output directory
-- [x] Protocol: createProblem: get objects from eb
-- [x] PartialPlan.toDot: optionally don't display initial state, because it may be too large
-- [x] Main: figure out what to do with operator sequence to let it be translated to evoware
-- [x] Shaker: EvowareScriptBuilder:430, properly format shaker command
-- [x] RsResult: function to get value from an Option if there is one, or return a default value and a warning if there's None
-- [x] RsResult: create a sequence function that works on List[RsResult[A]] or Seq[RsResult[A]] or other collections
-- [x] RsResult.flatten: drop RsErrors
-- [x] RsResult: sequenceDrop: drop RsErrors, accumulate warnings
-- [x] RsResult: sequenceFirst: return first Error if any errors, accumulate warnings
-- [x] RsResult: sequenceAll: return all Errors if any errors, accumulate warnings
-- [x] RsResult: write more tests for sequenceFirst/All
-- [x] RsResult: mapAll
-- [x] RsResult: fold
-- [x] RsResult: removeWarnings
-- [x] ActionHandler.getInstruction should be passed the world state
 - [?] Main: update world state while creating instructions from actions (see Main.getInstruction)
-- [x] ActionHandler_Distribute: for the first version, for pipetting using a single piece of labware
 - [ ] ActionHandler_Distribute: for the second version, for pipetting between two pieces of labware
 - [ ] ActionHandler: getSignature -> getSignatures?
 - [ ] REFACTOR: merge roboliq.input.commands.Command and roboliq.input.commands.Action to a single trait Instruction
@@ -224,15 +175,11 @@ Protocol processing steps:
 
 ## AI PoP planner
 
-- [x] PddlParser: handle types in operators
-- [x] PddlParser: handle `types` field in domain
-- [x] PddlParser: handle `predicates` field in domain
-- [x] PddlParser: handle `objects` field in problem
-- [x] continue with domain: action tecan_pipette1
-- [x] create PDDL for domain with `movePlate` and `distribute` commands
-- [x] `3:moveLabware` should not be a provider for `location plateA siteA`
-- [x] Why is `moveLabware(?labware:labware ?site1:site ?site2:site) using Map(3:?site1 -> siteA, 3:?labware -> plateA)` a provider?
-- [x] Negative preconditions should always be satisfiable by the initial state if the initial state doesn't conflict
+- [ ] planning: don't allow transportLabware to be a provider for itself; probably we should specify which operators can be added as providers, and perhaps have a user-defined function to evaluate whether a given operator can be added in the current context
+- [ ] REFACTOR: aiplan.strips2: refactor Either[String, A] with RsResult[A]
+- [ ] Pop: why does it quit after a single printout when threshold is set to step<=5?
+- [ ] Pop: for all open goals with only one variable, find the values that can be assigned to those variables; if any can only have one value, set the variables
+- [ ] Pop: for all open goals with only two variables, find the values that can be assigned to those variables; if any can only have one value, set the variables
 - [ ] PartialPlan: toDot: show variable options and inequalities
 - [ ] PartialPlan: incrementally calculate threats
 - [ ] PartialPlan: toDot: show threats
