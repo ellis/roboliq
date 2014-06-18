@@ -18,8 +18,9 @@
 - [x] Protocol:1058: create the Site object in 'addSite()', will need to pass description string
 - [x] use plateModel names in problem instead of the generated mXXX identifiers
 - [x] debug "could not find equivalent evoware labware model ..."
-- [ ] give plate models good labels for UserPrompt in esc file
-- [ ] BUG: test_single_distribute_2_r1: can't place plate on site P2
+- [x] give plate models good labels for UserPrompt in esc file
+- [x] BUG: test_single_distribute_2_r1: can't place plate on site P2
+- [ ] HACK: don't allow transportLabware to be a provider for itself
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
 - [ ] Why is P1 not recognized?
 - [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware

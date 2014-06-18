@@ -47,7 +47,7 @@ evowareAgents:
         sites:
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
-          #P3: { grid: 10, site: 4 }
+          P3: { grid: 10, site: 4 }
           R1A: { grid: 3, site: 1 }
           R1B: { grid: 3, site: 2 }
           R1C: { grid: 3, site: 3 }
