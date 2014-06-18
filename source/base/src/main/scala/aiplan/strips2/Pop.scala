@@ -20,6 +20,11 @@ case class PopState_HandleGoal(
 	goal: (Int, Int),
 	indentLevel: Int
 ) extends PopState
+case class PopState_HandleGoals1(
+	plan: PartialPlan,
+	goals: List[(Int, Int)],
+	indentLevel: Int
+) extends PopState
 case class PopState_ChooseAction(
 	plan: PartialPlan,
 	goal: (Int, Int),
@@ -183,6 +188,7 @@ object Pop {
 		val next_? : Either[String, Option[PopState]] = ps match {
 			case x: PopState_Done => Right(None)
 			case x: PopState_SelectGoal => stepSelectGoal(x).right.map(Some(_))
+			case x: PopState_HandleGoals1 => stepHandleGoals1(x).right.map(Some(_))
 			case x: PopState_HandleGoal => stepHandleGoal(x).right.map(Some(_))
 			case x: PopState_ChooseAction => stepChooseAction(x).right.map(Some(_))
 			case x: PopState_HandleAction => stepHandleAction(x).right.map(Some(_))
@@ -241,13 +247,29 @@ object Pop {
 			Right(PopState_Done(plan0))
 		}
 		else {
-			Right(PopState_HandleGoal(plan0, goal_l.head, x.indentLevel))
+			goalToProviders_l.takeWhile(_._2.size == 1) match {
+				case Nil => Right(PopState_HandleGoal(plan0, goal_l.head, x.indentLevel))
+				case goalWithSingleOption_l => Right(PopState_HandleGoals1(plan0, goalWithSingleOption_l.map(_._1), x.indentLevel))
+			}
 		}
 	}
 	
 	def stepHandleGoal(x: PopState_HandleGoal): Either[String, PopState] = {
 		val indent = "  " * x.indentLevel
 		val plan0 = x.plan
+		val (consumer_i, precond_i) = x.goal
+		val goalAction = plan0.bindings.bind(plan0.action_l(consumer_i).preconds.l(precond_i))
+		println(s"${indent}HandleGoal ${x.goal} ${goalAction}")
+		val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
+		val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
+		val provider_l = provider1_l ++ provider2_l
+		Right(PopState_ChooseAction(x.plan, x.goal, provider_l, x.indentLevel))
+	}
+	
+	def stepHandleGoals1(x: PopState_HandleGoals1): Either[String, PopState] = {
+		val indent = "  " * x.indentLevel
+		val plan0 = x.plan
+		for ()
 		val (consumer_i, precond_i) = x.goal
 		val goalAction = plan0.bindings.bind(plan0.action_l(consumer_i).preconds.l(precond_i))
 		println(s"${indent}HandleGoal ${x.goal} ${goalAction}")

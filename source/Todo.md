@@ -20,12 +20,12 @@
 - [x] debug "could not find equivalent evoware labware model ..."
 - [x] give plate models good labels for UserPrompt in esc file
 - [x] BUG: test_single_distribute_2_r1: can't place plate on site P2
+- [ ] Pop: for all open goals with only one providers, handle them all at the same time
 - [ ] HACK: don't allow transportLabware to be a provider for itself
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
 - [ ] Why is P1 not recognized?
 - [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
 - [ ] Pop: why does it quit after a single printout when threshold is set to step<=5?
-- [ ] Pop: for all open goals with only one providers, handle them all at the same time
 - [ ] Pop: for all open goals with only one variable, find the values that can be assigned to those variables; if any can only have one value, set the variables
 - [ ] Pop: for all open goals with only two variables, find the values that can be assigned to those variables; if any can only have one value, set the variables
 - [ ] create a SettingsBean, which has for example table choices
