@@ -1,0 +1,15 @@
+description: |
+  Distribute water (found in multiple wells) to plate2(A01|H01)
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+  plate2: plateModel_96_nunc_transparent
+
+reagents:
+  water: plate1(A01|D01)
+
+protocol:
+- distribute:
+    source: water
+    destination: plate2(A01|H01)
+    volume: 20ul
