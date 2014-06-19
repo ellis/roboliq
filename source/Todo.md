@@ -16,9 +16,9 @@
 
 ## Pipetting accuracy
 
-- [ ] Update an AtomBase in EntityBase
-- [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
-- [ ] get test_single_distribute_4 to run
+- [x] Update an AtomBase in EntityBase
+- [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
+- [x] get test_single_distribute_4 to run
 
 ## HDF5
 
@@ -49,7 +49,7 @@
 
 ### ``test_single_distribute_4``
 
-- [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
+- [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [ ] Both plan1.dot and plan.dot are produced -- only create one of them
 
 ## Config file

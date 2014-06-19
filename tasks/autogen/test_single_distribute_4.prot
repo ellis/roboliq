@@ -2,11 +2,11 @@ description: |
   Distribute water to plate2(A01|H01)
 
 labware:
-  plate1: Thermocycler Plate
-  plate2: Thermocycler Plate
+  plate1: plateModel_96_nunc_transparent
+  plate2: plateModel_96_nunc_transparent
 
 reagents:
-  water: plate1(A01|D01)
+  water: plate1(A01)
 
 protocol:
 - distribute:
