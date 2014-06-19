@@ -219,7 +219,7 @@ class Protocol {
 							for {
 								model <- eb.getEntityAs[PlateModel](modelRef)
 							} yield {
-								val plate = new Plate(key)
+								val plate = new Plate(key, Some(name))
 								eb.addLabware(plate, name)
 								eb.setModel(plate, model)
 								state0.labware_model_m(plate) = model
@@ -964,7 +964,7 @@ class Protocol {
 	): RsResult[Unit] = {
 		import roboliq.entities._
 		
-		val agent = Agent(gid)
+		val agent = Agent(gid, Some(agentIdent))
 		eb.addAgent(agent, agentIdent)
 		
 		val identToAgentObject = new HashMap[String, Object]
@@ -1434,7 +1434,7 @@ class Protocol {
 		}*/
 		
 		for {
-			operatorInfo_l <- CallTree.getOperatorInfo(cs, tree, eb)
+			operatorInfo_l <- CallTree.getOperatorInfo(cs, tree, eb, state0.toImmutable)
 			_ = println("planInfo_l:")
 			_ = println(operatorInfo_l)
 			_ = println("domain:")

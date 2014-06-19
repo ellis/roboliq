@@ -158,17 +158,14 @@ class EntityBase {
 	}
 	
 	def addAgent(e: Agent, name: String) {
-		addAtom("agent", name)
 		addEntity(e, name)
 	}
 	
 	def addModel(e: LabwareModel, name: String) {
-		addAtom("model", name)
 		addEntity(e, name)
 	}
 	
 	def addSite(e: Site, name: String) {
-		addAtom("site", name)
 		addEntity(e, name)
 	}
 	
@@ -207,7 +204,7 @@ class EntityBase {
 	def addStackable(bot: LabwareModel, top: LabwareModel) {
 		assert(entityToIdent_m.contains(bot))
 		assert(entityToIdent_m.contains(top))
-		addAtom("stackable", bot.)
+		addAtom("stackable", bot.getName, top.getName)
 		stackables_m.addBinding(bot, top)
 	}
 	
@@ -218,6 +215,7 @@ class EntityBase {
 	def setModel(l: Labware, m: LabwareModel) {
 		assert(entityToIdent_m.contains(l))
 		assert(entityToIdent_m.contains(m))
+		addAtom("model", l.getName, m.getName)
 		labwareToModel_m(l) = m
 	}
 	
@@ -233,10 +231,12 @@ class EntityBase {
 	def setLocation(l: Labware, e: Entity) {
 		assert(entityToIdent_m.contains(l))
 		assert(entityToIdent_m.contains(e))
+		addAtom("location", l.getName, e.getName)
 		labwareToLocation_m(l) = e
 	}
 	
 	def addRel(rel: Rel) {
+		addAtom((rel.name :: rel.args) : _*)
 		rel_l += rel
 	}
 	

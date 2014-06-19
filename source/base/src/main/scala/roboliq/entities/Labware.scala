@@ -11,10 +11,13 @@ trait Entity {
 	val description: Option[String]
 	
 	def typeNames: List[String]
+	
+	def getName: String = label.getOrElse(key)
 }
 
 case class Agent(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
 	def typeNames = List("agent")
+	override def toString = s"Agent($getName)"
 }
 
 trait DeviceModel extends Entity {
@@ -98,6 +101,7 @@ case class SiteModel(key: String, label: Option[String] = None, description: Opt
 
 case class Site(key: String, label: Option[String] = None, description: Option[String] = None) extends Labware {
 	def typeNames = List("site", "labware")
+	override def toString = s"Site($getName)"
 }
 
 case class Liquid(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
@@ -127,6 +131,7 @@ case class PlateModel(
 
 case class Plate(key: String, label: Option[String] = None, description: Option[String] = None) extends Labware {
 	def typeNames = List("labware", "plate")
+	override def toString = s"Plate($getName)"
 }
 
 case class TubeModel(

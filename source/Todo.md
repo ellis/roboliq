@@ -16,7 +16,6 @@
 
 ## Pipetting accuracy
 
-- [ ] Add a `name` field to Entity?
 - [ ] Update an AtomBase in EntityBase
 - [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [ ] get test_single_distribute_4 to run
@@ -51,6 +50,7 @@
 ### ``test_single_distribute_4``
 
 - [ ] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
+- [ ] Both plan1.dot and plan.dot are produced -- only create one of them
 
 ## Config file
 
@@ -403,6 +403,8 @@ What we could do is propogate the desired post-condition value through commands,
 
 ## Next
 
+- [ ] REFACTOR: merge EntityBase, AtomBase, and WorldState into WorldState, using atoms as much as possible
+- [ ] REFACTOR: Add a `name` field to Entity, and make the database key optional
 - [ ] Implement smart mixing planner that figures out how to mix, which plates to use, which wells to use, and considers dead volumes, plate costs, and reagent costs.
 - [ ] let user specify initial volume for a source well
 - [ ] add 'deadVolume' property to labwareModel, indicated the extra volume required in a well for aspiration

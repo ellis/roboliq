@@ -56,6 +56,15 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			else
 				addCommandRobot(protocol, state0, agentIdent, command)
 		}
+		result_? match {
+			case RsError(e, w) =>
+				logger.debug("Errors: " + e)
+				if (!w.isEmpty)
+					logger.debug("Warnings: " + w)
+			case RsSuccess(_, w) =>
+				if (!w.isEmpty)
+					logger.debug("Warnings: " + w)
+		}
 		for {
 			result <- result_?
 		} yield {

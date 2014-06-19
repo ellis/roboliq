@@ -43,7 +43,8 @@ class ShakePlateActionHandler extends ActionHandler {
 	def getOperatorInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)],
-		eb: EntityBase
+		eb: EntityBase,
+		state0: WorldState
 	): RqResult[OperatorInfo] = {
 		/*
 		val m0 = paramToJsval_l.toMap

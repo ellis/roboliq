@@ -61,16 +61,16 @@ class DistributeActionHandler extends ActionHandler {
 	def getOperatorInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)],
-		eb: roboliq.entities.EntityBase
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
 	): RqResult[OperatorInfo] = {
 		for {
 			params <- Converter.convActionAs[DistributeActionParams](paramToJsval_l, eb)
-			// TODO: handle reagent sources (in addition to these labware sources)
-			parsedSource_l <- WellIdentParser.parse(params.source)
-			parsedDestination_l <- WellIdentParser.parse(params.destination)
+			sources <- eb.lookupLiquidSources(params.source, state0)
+			destinations <- eb.lookupLiquidDestinations(params.destination, state0)
 		} yield {
-			val sourceLabware_l = parsedSource_l.map(_._1)
-			val destinationLabware_l = parsedDestination_l.map(_._1)
+			val sourceLabware_l = sources.sources.flatMap(_.l.map(_.labwareName))
+			val destinationLabware_l = destinations.l.map(_.labwareName)
 			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
 			val n = labwareIdent_l.size
 

@@ -89,7 +89,8 @@ trait ActionHandler {
 	def getOperatorInfo(
 		id: List[Int],
 		paramToJsval_l: List[(String, JsValue)],
-		eb: roboliq.entities.EntityBase
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
 	): RqResult[OperatorInfo]
 }
 
@@ -187,7 +188,7 @@ case class CallTree(
 	//val taskToCall_m: Map[Task, Call]
 ) {
 	def getId(cmd: Call): RqResult[List[Int]] = {
-		callToId_m.get(cmd).asRs(s"getId: no ID registered for command: $cmd")
+		RsResult.from(callToId_m.get(cmd), s"getId: no ID registered for command: $cmd")
 	}
 	
 	def expand(call: Call, child_l: List[Call]): RqResult[CallTree] = {
@@ -270,17 +271,18 @@ object CallTree {
 	def getOperatorInfo(
 		cs: CommandSet,
 		tree: CallTree,
-		eb: EntityBase
+		eb: EntityBase,
+		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		val call_l = tree.getLeafs
 		val x = call_l.map(call => {
 			for {
 				id <- tree.getId(call)
-				handler <- cs.nameToActionHandler_m.get(call.name).asRs(s"Command `${call.name}` is not an action")
+				handler <- RsResult.from(cs.nameToActionHandler_m.get(call.name), s"Command `${call.name}` is not an action")
 				paramName_l = handler.getActionParamNames
 				jsval_l <- getParams(paramName_l, call.args)
 				paramToJsval_l = paramName_l zip jsval_l
-				planInfo <- handler.getOperatorInfo(id, paramToJsval_l, eb)
+				planInfo <- handler.getOperatorInfo(id, paramToJsval_l, eb, state0)
 			} yield planInfo
 			
 		})
@@ -383,7 +385,7 @@ object CallTree {
 						// The selected method will be the child call
 						for {
 							call_l <- call_l_?
-							call2 <- call_l.find(_.name == name).asRs(s"For task `${call.name}`, the selected method `${name}` is not one of the available methods")
+							call2 <- RsResult.from(call_l.find(_.name == name), s"For task `${call.name}`, the selected method `${name}` is not one of the available methods")
 						} yield CallExpandResult_Children(List(call2))
 				}
 		}
