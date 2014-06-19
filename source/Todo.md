@@ -19,6 +19,16 @@
 - [x] Update an AtomBase in EntityBase
 - [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [x] get test_single_distribute_4 to run
+- [ ] create test protocol to make sure we can use troughs
+- [ ] create quality control command for simple pipetting dilution series
+- [ ] generate HDF5 file with all relevant data for statistical tests
+- [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
+- [ ] randomize well positions
+- [ ] analyze reader variance
+- [ ] calibrate reader
+- [ ] create reader command
+- [ ] create command to run the R code?
+- [ ] create the more complicated accuracy tests that involve weighing and stuff
 
 ## HDF5
 
