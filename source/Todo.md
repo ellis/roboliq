@@ -19,7 +19,7 @@
 - [x] Update an AtomBase in EntityBase
 - [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [x] get test_single_distribute_4 to run
-- [ ] create test protocol to make sure we can use troughs
+- [x] create test protocol to make sure we can use troughs
 - [ ] create quality control command for simple pipetting dilution series
 - [ ] generate HDF5 file with all relevant data for statistical tests
 - [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
@@ -55,12 +55,16 @@
 
 ### ``test_single_distribute_3``
 
-- [ ] BUG: produces bad transport commands, since it doesn't consider that one plate is already on the bench
+- [ ] BUG: can produce bad transport commands, since it doesn't consider that one plate is already on the bench
 
 ### ``test_single_distribute_4``
 
 - [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [ ] Both plan1.dot and plan.dot are produced -- only create one of them
+
+### ``test_single_distribute_4``
+
+- [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing th volume used in the whole trough.
 
 ## Config file
 
@@ -431,6 +435,25 @@ What we could do is propogate the desired post-condition value through commands,
 - [ ] Consider making paths in config file relative to the config file itself
 - [ ] Refactor the Converter code, and make more use of parsers
 - [ ] Commands should be able to each produce their own reports, e.g. for TitrationSeries, showing a table with the contents of the wells
+
+## Entities
+
+Try to design a better data structure for entities (sites/plates/troughs/tubes/wells/spotsInWells).
+Maybe use instead the idea of containers composed of sites, with variable location referencing a site where the container is located.  A site can either accept another container, 
+
+- [ ] A plate has populated well sites, an optional sealing site, and an option lid site
+- [ ] Wells contain reagents and one or more pipetting sites
+- [ ] A tube is an independent well, usually with a single pipetting site and an optional lid site
+- [ ] A trough is an independent well, usually with multiple pipetting sites
+- [ ] A carrier has sites for other containers, various models may be allowed
+- [ ] An adapter has one or more sites for other containers
+- [ ] Lids and sealings are "containers" that don't contain anything
+
+Sites for: other entities, pipetting
+Entity contents: reagents, fixed wells, other entities
+
+The software should know that the volume of a trough is impacted as a total, no
+matter which pipetting site is aspirated from.
 
 ## Someday
 - [ ] PipetteAmountParser: allow for '.25ul' (not just '0.25ul')
