@@ -22,6 +22,9 @@
 - [x] create test protocol to make sure we can use troughs
 - [x] create test protocol for distributing various volumes
 - [ ] create test protocol for distributing various volumes using specific tips, pipettingPolicy, and cleaningPolicy
+- [ ] create command for transfer
+- [ ] create command for titration series
+- [ ] create command for dilution series
 - [ ] create quality control command for simple pipetting dilution series
 - [ ] generate HDF5 file with all relevant data for statistical tests
 - [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
