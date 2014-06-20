@@ -441,19 +441,27 @@ What we could do is propogate the desired post-condition value through commands,
 Try to design a better data structure for entities (sites/plates/troughs/tubes/wells/spotsInWells).
 Maybe use instead the idea of containers composed of sites, with variable location referencing a site where the container is located.  A site can either accept another container, 
 
-- [ ] A plate has populated well sites, an optional sealing site, and an option lid site
-- [ ] Wells contain reagents and one or more pipetting sites
-- [ ] A tube is an independent well, usually with a single pipetting site and an optional lid site
-- [ ] A trough is an independent well, usually with multiple pipetting sites
-- [ ] A carrier has sites for other containers, various models may be allowed
-- [ ] An adapter has one or more sites for other containers
-- [ ] Lids and sealings are "containers" that don't contain anything
+- A plate has populated well sites, an optional sealing site, and an option lid site
+- Wells contain reagents and one or more pipetting sites
+- A tube is an independent well, usually with a single pipetting site and an optional lid site
+- A trough is an independent well, usually with multiple pipetting sites
+- A carrier has sites for other containers, various models may be allowed
+- An adapter has one or more sites for other containers
+- Lids and sealings are "containers" that don't contain anything
 
 Sites for: other entities, pipetting
 Entity contents: reagents, fixed wells, other entities
 
 The software should know that the volume of a trough is impacted as a total, no
 matter which pipetting site is aspirated from.
+
+Complications:
+- Some containers can hold reagents, but also have multiple pipetting sites
+- A seal shouldn't be an entity, since it's either on the plate or in the trash, so it's just a boolean variable on a plate
+- The lid, on the other hand, is a separate entity which may need to be tracked
+- The mapping from containers to evoware labware and sites may not be easy
+- How to handle "wells" where we grow multiple cultures in different positions, but the whole well also gets filled with growth medium?
+- What about dynamically defining sites of interest on a large well surface?
 
 ## Someday
 - [ ] PipetteAmountParser: allow for '.25ul' (not just '0.25ul')
