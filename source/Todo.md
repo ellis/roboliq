@@ -20,6 +20,8 @@
 - [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [x] get test_single_distribute_4 to run
 - [x] create test protocol to make sure we can use troughs
+- [x] create test protocol for distributing various volumes
+- [ ] create test protocol for distributing various volumes using specific tips, pipettingPolicy, and cleaningPolicy
 - [ ] create quality control command for simple pipetting dilution series
 - [ ] generate HDF5 file with all relevant data for statistical tests
 - [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
