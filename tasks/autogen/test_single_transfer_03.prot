@@ -1,0 +1,14 @@
+description: |
+  Transfer from plate1(A01) to plate1(A02|B02)
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+reagents:
+  water: plate1(A01)
+
+protocol:
+- transfer:
+    steps:
+    - { s: plate1(A01), d: plate1(A02), v: 20ul }
+    - { s: plate1(A01), d: plate1(B02), v: 20ul }

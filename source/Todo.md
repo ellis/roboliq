@@ -23,7 +23,7 @@
 - [x] create test protocol to make sure we can use troughs
 - [x] create test protocol for distributing various volumes
 - [x] create test protocol for distributing using a specific tip model, pipettingPolicy, and cleaningPolicy
-- [ ] (start feature branch) create command for transfer (working on test_single_transfer_02.prot)
+- [ ] create command for transfer (working on test_single_transfer_03.prot)
 - [ ] create command for titration series
 - [ ] create command for dilution series
 - [ ] create quality control command for simple pipetting dilution series
@@ -92,6 +92,8 @@
 ## Protocol file
 
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
+- [ ] rename 'protocol' section to 'instructions'?
+- [ ] instead of '- transfer:\n    source: ...', use '- name: transfer\n  source: ...'?
 
 ## AI planning flow
 

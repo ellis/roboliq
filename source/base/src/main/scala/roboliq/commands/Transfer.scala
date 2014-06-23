@@ -48,8 +48,9 @@ import spray.json.JsValue
 case class TransferActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	source: PipetteSources,
-	destination: PipetteDestinations
+	source_? : Option[PipetteSources],
+	destination_? : Option[PipetteDestinations],
+	steps: List[TransferStepParams]
 )
 
 class TransferActionHandler extends ActionHandler {
@@ -67,8 +68,8 @@ class TransferActionHandler extends ActionHandler {
 		for {
 			params <- Converter.convActionAs[TransferActionParams](paramToJsval_l, eb, state0)
 		} yield {
-			val sourceLabware_l = params.source.sources.flatMap(_.l.map(_.labwareName))
-			val destinationLabware_l = params.destination.l.map(_.labwareName)
+			val sourceLabware_l = params.source_?.getOrElse(PipetteSources(Nil)).sources.flatMap(_.l.map(_.labwareName)) ++ params.steps.flatMap(_.s_?.map(_.sources.flatMap(_.l.map(_.labwareName))).getOrElse(Nil))
+			val destinationLabware_l = params.destination_?.getOrElse(PipetteDestinations(Nil)).l.map(_.labwareName) ++ params.steps.flatMap(_.d_?.map(_.l.map(_.labwareName)).getOrElse(Nil))
 			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
 			val n = labwareIdent_l.size
 
@@ -92,9 +93,9 @@ class TransferActionHandler extends ActionHandler {
 case class TransferInstructionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	source: PipetteSources,
-	destination: PipetteDestinations,
-	volume: List[LiquidVolume],
+	source_? : Option[PipetteSources],
+	destination_? : Option[PipetteDestinations],
+	volume : List[LiquidVolume],
 	steps: List[TransferStepParams],
 	contact_? : Option[PipettePosition.Value],
 	clean_? : Option[CleanIntensity.Value],
@@ -153,6 +154,7 @@ class TransferOperatorHandler(n: Int) extends OperatorHandler {
 			agent <- eb.getEntityAs[Agent](operator.paramName_l(0))
 			device <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
 			params <- Converter.convInstructionAs[TransferInstructionParams](instructionParam_m, eb, state0)
+			source_l = CONTINUE HERE
 			spec = PipetteSpec(
 				params.source,
 				params.destination,
