@@ -1,0 +1,14 @@
+description: |
+  Transfer from plate1(A01) to plate1(B01)
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+reagents:
+  water: plate1(A01)
+
+protocol:
+- transfer:
+    source: plate1(A01)
+    destination: plate1(B01)
+    volume: 20ul

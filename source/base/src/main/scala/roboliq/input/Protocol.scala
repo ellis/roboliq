@@ -91,7 +91,8 @@ class Protocol {
 	def loadCommandSet(): RsResult[CommandSet] = {
 		val actionHandler_l = List[ActionHandler](
 			new DistributeActionHandler,
-			new ShakePlateActionHandler
+			new ShakePlateActionHandler,
+			new TransferActionHandler
 		)
 		val operatorHandler_l = List[OperatorHandler](
 			new DistributeOperatorHandler(1),
@@ -99,6 +100,10 @@ class Protocol {
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
 			new ShakePlateOperatorHandler,
+			new TransferOperatorHandler(1),
+			new TransferOperatorHandler(2),
+			new TransferOperatorHandler(3),
+			new TransferOperatorHandler(4),
 			new OperatorHandler_TransportLabware
 		)
 		val autoHandler_l = List("transportLabware")

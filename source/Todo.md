@@ -9,6 +9,7 @@
 - [ ] handle interactively setting variables and guiding planning with extra settings file
 - [ ] web interface for interactive planning
 - [ ] refactor loadEvoware() to make devices pluggable somehow
+- [ ] load handle classes via config file, and generally let program be run in different labs
 
 ## Current goal
 
@@ -22,7 +23,7 @@
 - [x] create test protocol to make sure we can use troughs
 - [x] create test protocol for distributing various volumes
 - [x] create test protocol for distributing using a specific tip model, pipettingPolicy, and cleaningPolicy
-- [ ] create command for transfer
+- [ ] create command for transfer (working on test_single_transfer_02.prot)
 - [ ] create command for titration series
 - [ ] create command for dilution series
 - [ ] create quality control command for simple pipetting dilution series
@@ -50,8 +51,6 @@
 
 ## Tests
 
-* distribute between two plates
-* distribute from water trough to entire plate
 * distribute from tube to tube
 * titrate
 
@@ -69,7 +68,7 @@
 - [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
 - [ ] Both plan1.dot and plan.dot are produced -- only create one of them
 
-### ``test_single_distribute_4``
+### ``test_single_distribute_6``
 
 - [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing th volume used in the whole trough.
 
