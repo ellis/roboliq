@@ -150,14 +150,15 @@ object Converter {
 	
 	def convActionAs[A: TypeTag](
 		paramToJsval_l: List[(String, JsValue)],
-		eb: EntityBase
+		eb: EntityBase,
+		state: WorldState
 	): RqResult[A] = {
 		import scala.reflect.runtime.universe._
 
 		val nameToVal_l = paramToJsval_l.map(pair => Some(pair._1) -> pair._2)
 		val typ = ru.typeTag[A].tpe
 		for {
-			res <- convArgs(nameToVal_l, typ, eb, None)
+			res <- convArgs(nameToVal_l, typ, eb, Some(state))
 		} yield res.asInstanceOf[A]
 	}
 	

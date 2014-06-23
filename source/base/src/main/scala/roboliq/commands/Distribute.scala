@@ -65,7 +65,7 @@ class DistributeActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[OperatorInfo] = {
 		for {
-			params <- Converter.convActionAs[DistributeActionParams](paramToJsval_l, eb)
+			params <- Converter.convActionAs[DistributeActionParams](paramToJsval_l, eb, state0)
 			sources <- eb.lookupLiquidSources(params.source, state0)
 			destinations <- eb.lookupLiquidDestinations(params.destination, state0)
 		} yield {

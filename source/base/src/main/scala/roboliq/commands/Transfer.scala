@@ -48,8 +48,8 @@ import spray.json.JsValue
 case class TransferActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	source: String,
-	destination: String
+	source: PipetteSources,
+	destination: PipetteDestinations
 )
 
 class TransferActionHandler extends ActionHandler {
@@ -65,12 +65,10 @@ class TransferActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[OperatorInfo] = {
 		for {
-			params <- Converter.convActionAs[TransferActionParams](paramToJsval_l, eb)
-			sources <- eb.lookupLiquidSources(params.source, state0)
-			destinations <- eb.lookupLiquidDestinations(params.destination, state0)
+			params <- Converter.convActionAs[TransferActionParams](paramToJsval_l, eb, state0)
 		} yield {
-			val sourceLabware_l = sources.sources.flatMap(_.l.map(_.labwareName))
-			val destinationLabware_l = destinations.l.map(_.labwareName)
+			val sourceLabware_l = params.source.sources.flatMap(_.l.map(_.labwareName))
+			val destinationLabware_l = params.destination.l.map(_.labwareName)
 			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
 			val n = labwareIdent_l.size
 

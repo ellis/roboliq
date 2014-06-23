@@ -88,7 +88,7 @@ class ShakePlateActionHandler extends ActionHandler {
 		RqSuccess(OperatorInfo(id, paramToJsval_l, domainOperator, problemObjectToTyp_l, Nil, planAction))
 		*/
 		for {
-			params <- Converter.convActionAs[ShakePlateActionParams](paramToJsval_l, eb)
+			params <- Converter.convActionAs[ShakePlateActionParams](paramToJsval_l, eb, state0)
 			labwareName <- eb.getIdent(params.`object`)
 			siteName_? <- params.site_? match {
 				case None => RqSuccess(None)
