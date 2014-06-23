@@ -5,3 +5,7 @@ test.svg
 temp
 hdf-java-*
 cisd-jhdf5
+*.h5
+FullVoltageMeasurementCompoundExample.java
+H5ObjectEx_T_Compound.java
+SimpleVoltageMeasurementCompoundExample.java
