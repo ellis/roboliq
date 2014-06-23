@@ -1,5 +1,5 @@
 description: |
-  Distribute water from trough to plate2(A01|H01) using a user-specified tip model
+  Distribute water from trough to plate2(A01|H01) using user-specified cleaning policies
 
 labware:
   plate1: troughModel_100ml
@@ -13,4 +13,6 @@ protocol:
     source: water
     destination: plate2(A01|H01)
     volume: 20ul
-    tipModel: "Standard 50ul"
+    cleanBefore: decontaminate
+    cleanBetween: none
+    cleanAfter: light

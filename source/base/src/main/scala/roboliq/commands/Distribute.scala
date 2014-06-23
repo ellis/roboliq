@@ -56,7 +56,7 @@ class DistributeActionHandler extends ActionHandler {
 
 	def getActionName = "distribute"
 
-	def getActionParamNames = List("agent", "device", "source", "destination", "volume", "tipModel", "pipettePolicy")
+	def getActionParamNames = List("agent", "device", "source", "destination", "volume", "clean", "cleanBefore", "cleanBetween", "cleanAfter", "tipModel", "pipettePolicy")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -95,10 +95,10 @@ case class DistributeInstructionParams(
 	destination: PipetteDestinations,
 	volume: List[LiquidVolume],
 	contact_? : Option[PipettePosition.Value],
-	sterilize_? : Option[CleanIntensity.Value],
-	sterilizeBefore_? : Option[CleanIntensity.Value],
-	sterilizeBetween_? : Option[CleanIntensity.Value],
-	sterilizeAfter_? : Option[CleanIntensity.Value],
+	clean_? : Option[CleanIntensity.Value],
+	cleanBefore_? : Option[CleanIntensity.Value],
+	cleanBetween_? : Option[CleanIntensity.Value],
+	cleanAfter_? : Option[CleanIntensity.Value],
 	tipModel_? : Option[TipModel],
 	pipettePolicy_? : Option[String]
 )
@@ -145,10 +145,10 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 				params.destination,
 				params.volume,
 				params.pipettePolicy_?,
-				params.sterilize_?,
-				params.sterilizeBefore_?,
-				params.sterilizeBetween_?,
-				params.sterilizeAfter_?,
+				params.clean_?,
+				params.cleanBefore_?,
+				params.cleanBetween_?,
+				params.cleanAfter_?,
 				params.tipModel_?
 			)
 			path <- handlePipetteSpec(eb, state0, spec, device)
@@ -284,7 +284,7 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 			
 			// Refresh command before pipetting starts
 			refreshBefore_l = {
-				spec.cleanBefore_?.orElse(spec.sterilize_?) match {
+				spec.cleanBefore_?.orElse(spec.clean_?) match {
 					case Some(intensity) if intensity != CleanIntensity.None =>
 						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
 						PipetterTipsRefresh(pipetter, tip_l.map(tip => {
@@ -298,10 +298,10 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 			path2 <- getAspDis(path1, spec, pipetter, device, tipModel, pipettePolicy, batch_l)
 
 			refreshAfter_l = {
-				val tipOverridesAsp = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.sterilize_?), None, None, None)
+				val tipOverrides = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.clean_?), None, None, None)
 				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
 					val tipState = path2.state.getTipState(tip)
-					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, Mixture.empty, tipState)
+					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState)
 					(tip, washSpec.washIntensity, None)
 				})) :: Nil
 			}
@@ -322,13 +322,13 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 		// use the Batch list to create clean, aspirate, dispense commands
 		logger.debug("batch_l: "+batch_l)
 		batch_l.foreach(batch => {
-			val tipOverridesAsp = TipHandlingOverrides(None, spec.sterilizeBetween_?.orElse(spec.sterilize_?), None, None, None)
+			val tipOverrides = TipHandlingOverrides(None, spec.cleanBetween_?.orElse(spec.clean_?), None, None, None)
 			val refresh = PipetterTipsRefresh(pipetter, batch.item_l.map(item => {
 				val mixtureSrc = path.state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
 				val mixtureDst = path.state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
 				val tipState = path.state.getTipState(item.tip)
-				val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverridesAsp, mixtureSrc, tipState)
-				val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverridesAsp, mixtureSrc, mixtureDst, tipState)
+				val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, mixtureSrc, tipState)
+				val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverrides, mixtureSrc, mixtureDst, tipState)
 				val washSpec = washSpecAsp + washSpecDis
 				//logger.debug(s"refresh tipState: ${tipState} -> ${washSpec.washIntensity} -> ${tipState_~}")
 				(item.tip, washSpec.washIntensity, Some(tipModel))

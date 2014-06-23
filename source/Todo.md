@@ -21,7 +21,7 @@
 - [x] get test_single_distribute_4 to run
 - [x] create test protocol to make sure we can use troughs
 - [x] create test protocol for distributing various volumes
-- [ ] create test protocol for distributing specific tip model, pipettingPolicy, and cleaningPolicy
+- [x] create test protocol for distributing using a specific tip model, pipettingPolicy, and cleaningPolicy
 - [ ] create command for transfer
 - [ ] create command for titration series
 - [ ] create command for dilution series
@@ -34,6 +34,8 @@
 - [ ] create reader command
 - [ ] create command to run the R code?
 - [ ] create the more complicated accuracy tests that involve weighing and stuff
+- [ ] create test to execute all test_*.prot files and compare current output to previously accepted output
+- [ ] rather than printing Pop search to the console, construct a search tree object and then write a dot file (even in case of error)
 
 ## HDF5
 
