@@ -73,6 +73,10 @@
 
 - [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing th volume used in the whole trough.
 
+### ``test_single_distribute_10``
+
+- [ ] BUG: shouldn't produce extra cleaning commands at the beginning and end
+
 ## Config file
 
 - [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
