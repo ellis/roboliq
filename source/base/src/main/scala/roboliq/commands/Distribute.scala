@@ -56,7 +56,7 @@ class DistributeActionHandler extends ActionHandler {
 
 	def getActionName = "distribute"
 
-	def getActionParamNames = List("agent", "device", "source", "destination", "volume")
+	def getActionParamNames = List("agent", "device", "source", "destination", "volume", "tipModel", "pipettePolicy")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -193,7 +193,10 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 		import roboliq.pipette.planners.TransferPlanner.{Item,BatchItem,Batch}
 		
 		val tip_l = eb.pipetterToTips_m(pipetter)
-		val tipModel_l = tip_l.flatMap(eb.tipToTipModels_m).distinct
+		val tipModel_l = spec.tipModel_? match {
+			case Some(tipModel) => List(tipModel)
+			case _ => tip_l.flatMap(eb.tipToTipModels_m).distinct
+		}
 		
 		val device = new PipetteDevice
 		//val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]

@@ -21,7 +21,7 @@
 - [x] get test_single_distribute_4 to run
 - [x] create test protocol to make sure we can use troughs
 - [x] create test protocol for distributing various volumes
-- [ ] create test protocol for distributing various volumes using specific tips, pipettingPolicy, and cleaningPolicy
+- [ ] create test protocol for distributing specific tip model, pipettingPolicy, and cleaningPolicy
 - [ ] create command for transfer
 - [ ] create command for titration series
 - [ ] create command for dilution series
