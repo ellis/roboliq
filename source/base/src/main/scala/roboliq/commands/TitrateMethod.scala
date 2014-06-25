@@ -52,7 +52,7 @@ class TitrateMethod(
 						Some(source_l zip volume_l)
                 }
 			})*/
-			mixtureVolume1_l <- amountsToVolumes(mixtureAmount1_l, cmd.volume_?)
+			mixtureVolume1_l <- amountsToVolumes(mixtureAmount1_l, cmd.amount_?)
 			l3 = mixtureVolume1_l.flatMap(mixture => List.fill(replicateCount)(mixture))
 			//l3 = dox(cmd.steps, wellsPerGroup, Nil, Nil)
 			/*stepToList_l: List[(TitrateStep, List[(LiquidSource, LiquidVolume)])] = cmd.steps.map(step => {

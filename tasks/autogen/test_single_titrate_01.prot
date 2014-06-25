@@ -1,0 +1,24 @@
+description: |
+  Titrate to plate2 using sources on plate1
+
+labware:
+  plate1: plateModel_96_dwp
+  plate2: plateModel_96_nunc_transparent
+
+reagents:
+  reagent1: plate1(A01)
+  reagent2: plate1(A02)
+  reagent3: plate1(A03)
+  reagent4: plate1(A04)
+  reagent5: plate1(A05)
+  reagent6: plate1(A06)
+
+protocol:
+- titrate:
+    allOf:
+    - source: [reagent1, reagent2, reagent3]
+      amount: 99ul
+    - source: [reagent4, reagent5, reagent6]
+      amount: 1ul
+    destination: plate2(A01|A02)
+    replicates: 1

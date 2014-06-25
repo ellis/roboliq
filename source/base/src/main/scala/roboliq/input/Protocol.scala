@@ -92,6 +92,7 @@ class Protocol {
 		val actionHandler_l = List[ActionHandler](
 			new DistributeActionHandler,
 			new ShakePlateActionHandler,
+			new TitrateActionHandler,
 			new TransferActionHandler
 		)
 		val operatorHandler_l = List[OperatorHandler](
@@ -100,6 +101,10 @@ class Protocol {
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
 			new ShakePlateOperatorHandler,
+			new TitrateOperatorHandler(1),
+			new TitrateOperatorHandler(2),
+			new TitrateOperatorHandler(3),
+			new TitrateOperatorHandler(4),
 			new TransferOperatorHandler(1),
 			new TransferOperatorHandler(2),
 			new TransferOperatorHandler(3),

@@ -95,6 +95,7 @@
 - [ ] restructure how plates are specified in protocol so I can manually place the plates
 - [ ] rename 'protocol' section to 'instructions'?
 - [ ] instead of '- transfer:\n    source: ...', use '- name: transfer\n  source: ...'?
+- [ ] for action params, consider using 'amount' instead of 'volume', and perhaps also PipetteAmount instead of LiquidVolume.
 
 ## AI planning flow
 

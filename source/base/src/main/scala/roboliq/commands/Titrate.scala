@@ -52,8 +52,8 @@ case class TitrateActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
 	allOf: List[TitrateStep],
-	destination_? : Option[PipetteDestinations],
-	volume_? : Option[LiquidVolume],
+	destination: PipetteDestinations,
+	amount_? : Option[LiquidVolume],
 	replicates_? : Option[Int]
 ) {
 	def getItems: RqResult[List[TitrateItem]] = {
@@ -64,7 +64,7 @@ case class TitrateActionParams(
 case class TitrateStep(
 	allOf: List[TitrateStep],
 	oneOf: List[TitrateStep],
-	source_? : Option[LiquidSource],
+	source: List[LiquidSource],
 	amount_? : Option[List[PipetteAmount]],
 	//min_? : Option[LiquidVolume],
 	//max_? : Option[LiquidVolume],
@@ -77,24 +77,25 @@ case class TitrateStep(
 	pipettePolicy_? : Option[String]
 ) {
 	def getSourceLabwares: List[String] = {
-		source_?.toList.flatMap(_.l.map(_.labwareName)) ++ allOf.flatMap(_.getSourceLabwares) ++ oneOf.flatMap(_.getSourceLabwares)
+		source.flatMap(_.l.map(_.labwareName)) ++ allOf.flatMap(_.getSourceLabwares) ++ oneOf.flatMap(_.getSourceLabwares)
 	}
 	
 	def getItem: RqResult[List[TitrateItem]] = {
-		(allOf, oneOf, source_?) match {
-			case (l, Nil, None) if !l.isEmpty =>
+		(allOf, oneOf, source) match {
+			case (l, Nil, Nil) if !l.isEmpty =>
 				RqResult.toResultOfList(allOf.map(_.getItem)).map(l => List(TitrateItem_And(l.flatten)))
-			case (Nil, l, None) if !l.isEmpty =>
+			case (Nil, l, Nil) if !l.isEmpty =>
 				RqResult.toResultOfList(oneOf.map(_.getItem)).map(l => List(TitrateItem_Or(l.flatten)))
-			case (Nil, Nil, Some(source)) =>
-				val l: List[TitrateItem_SourceVolume] =
+			case (Nil, Nil, source) if !source.isEmpty =>
+				val l: List[TitrateItem_SourceVolume] = source.flatMap(src => {
 					amount_? match {
-						case None => List(TitrateItem_SourceVolume(this, source, None))
-						case Some(amount_l) => amount_l.map(amount => TitrateItem_SourceVolume(this, source, Some(amount)))
+						case None => List(TitrateItem_SourceVolume(this, src, None))
+						case Some(amount_l) => amount_l.map(amount => TitrateItem_SourceVolume(this, src, Some(amount)))
 					}
+				})
 				val l2 = if (l.size == 1) l else List(TitrateItem_Or(l))
 				RqSuccess(l2)
-			case (Nil, Nil, None) =>
+			case _ =>
 				RqError("Each titration step must specify exactly one of: `allOf`, `oneOf`, or `source`")
 		}
 	}
@@ -134,7 +135,7 @@ class TitrateActionHandler extends ActionHandler {
 
 	def getActionName = "titrate"
 
-	def getActionParamNames = List("agent", "device", "allOf", "destination", "volume", "replicates"/*, "clean", "cleanBefore", "cleanBetween", "cleanAfter", "tipModel", "pipettePolicy"*/)
+	def getActionParamNames = List("agent", "device", "allOf", "destination", "amount", "replicates"/*, "clean", "cleanBefore", "cleanBetween", "cleanAfter", "tipModel", "pipettePolicy"*/)
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -146,7 +147,7 @@ class TitrateActionHandler extends ActionHandler {
 			params <- Converter.convActionAs[TitrateActionParams](paramToJsval_l, eb, state0)
 		} yield {
 			val sourceLabware_l = params.allOf.flatMap(_.getSourceLabwares)
-			val destinationLabware_l = params.destination_?.getOrElse(PipetteDestinations(Nil)).l.map(_.labwareName)
+			val destinationLabware_l = params.destination.l.map(_.labwareName)
 			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
 			val n = labwareIdent_l.size
 
