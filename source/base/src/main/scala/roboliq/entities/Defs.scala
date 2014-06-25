@@ -182,4 +182,6 @@ case class LiquidSource(l: List[WellInfo])
 
 case class PipetteSources(sources: List[LiquidSource])
 
+case class PipetteDestination(wellInfo: WellInfo)
+
 case class PipetteDestinations(l: List[WellInfo])

@@ -319,8 +319,10 @@ object Converter {
 			else if (typ =:= typeOf[Boolean]) toBoolean(jsval)//.map(_.asInstanceOf[Boolean])
 			else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
 			else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
+			else if (typ =:= typeOf[LiquidSource]) toLiquidSource(jsval, eb, state_?)
 			else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
 			else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(jsval)
+			else if (typ =:= typeOf[PipetteDestination]) toPipetteDestination(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 			// Lookups
@@ -839,12 +841,29 @@ object Converter {
 			case Some(state) =>
 				jsval match {
 					case JsString(s) =>
-						val x = eb.lookupLiquidSources(s, state)
-						//println("toPipetteSources: "+s+" -> "+x)
-						x
+						eb.lookupLiquidSources(s, state)
 					case JsArray(l) =>
 						val l2 = RqResult.toResultOfList(l.map(jsval => toPipetteSources(jsval, eb, state_?)))
 						l2.map(l => PipetteSources(l.flatMap(_.sources)))
+					case _ => RqError("expected JsString or JsArray in liquid source")
+				}
+		}
+	}
+
+	def toLiquidSource(
+		jsval: JsValue,
+		eb: EntityBase,
+		state_? : Option[WorldState]
+	): RqResult[LiquidSource] = {
+		state_? match {
+			case None => RqError("require world state information for liquid source")
+			case Some(state) =>
+				jsval match {
+					case JsString(s) =>
+						for {
+							x <- eb.lookupLiquidSources(s, state)
+							_ <- RqResult.assert(x.sources.size == 1, "only one source may be supplied here")
+						} yield x.sources.head
 					case _ => RqError("expected JsString in liquid source")
 				}
 		}
@@ -861,13 +880,32 @@ object Converter {
 		}
 	}
 
+	def toPipetteDestination(
+		jsval: JsValue,
+		eb: EntityBase,
+		state_? : Option[WorldState]
+	): RqResult[PipetteDestination] = {
+		state_? match {
+			case None => RqError("require world state information for liquid destination")
+			case Some(state) =>
+				jsval match {
+					case JsString(s) =>
+						for {
+							destinations <- eb.lookupLiquidDestinations(s, state)
+							_ <- RsResult.assert(destinations.l.size == 1, "only one destination well may be supplied here")
+						} yield PipetteDestination(destinations.l.head)
+					case _ => RqError("expected JsString in liquid destination")
+				}
+		}
+	}
+
 	def toPipetteDestinations(
 		jsval: JsValue,
 		eb: EntityBase,
 		state_? : Option[WorldState]
 	): RqResult[PipetteDestinations] = {
 		state_? match {
-			case None => RqError("require world state information for liquid source")
+			case None => RqError("require world state information for liquid destination")
 			case Some(state) =>
 				jsval match {
 					case JsString(s) =>
@@ -875,7 +913,7 @@ object Converter {
 					case JsArray(l) =>
 						val l2 = RqResult.toResultOfList(l.map(jsval => toPipetteDestinations(jsval, eb, state_?)))
 						l2.map(l => PipetteDestinations(l.flatMap(_.l)))
-					case _ => RqError("expected JsString in liquid source")
+					case _ => RqError("expected JsString or JsArray in liquid destination")
 				}
 		}
 	}

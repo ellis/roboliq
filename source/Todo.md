@@ -23,7 +23,7 @@
 - [x] create test protocol to make sure we can use troughs
 - [x] create test protocol for distributing various volumes
 - [x] create test protocol for distributing using a specific tip model, pipettingPolicy, and cleaningPolicy
-- [ ] create command for transfer (working on test_single_transfer_03.prot)
+- [x] create command for transfer
 - [ ] create command for titration series
 - [ ] create command for dilution series
 - [ ] create quality control command for simple pipetting dilution series
