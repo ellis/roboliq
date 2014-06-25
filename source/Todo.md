@@ -33,6 +33,7 @@
 - [ ] analyze reader variance
 - [ ] calibrate reader
 - [ ] create reader command
+- [ ] extend pipetting commands to allow for inserting reader commands between pipetting layers
 - [ ] create command to run the R code?
 - [ ] create the more complicated accuracy tests that involve weighing and stuff
 - [ ] create test to execute all test_*.prot files and compare current output to previously accepted output
