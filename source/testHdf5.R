@@ -1,0 +1,8 @@
+source("http://bioconductor.org/biocLite.R")
+biocLite("rhdf5")
+library(rhdf5)
+df = data.frame(name=c("Me", "You"), age=c(40, 20), iq=c(3.5, 2.7), stringsAsFactors=F)
+h5createFile("/home/ellisw/tmp/temp.h5")
+h5write(df, "/home/ellisw/tmp/temp.h5", "people")
+h5ls("/home/ellisw/tmp/temp.h5")
+h5read("/home/ellisw/tmp/temp.h5", "people")

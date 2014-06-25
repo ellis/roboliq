@@ -9,3 +9,4 @@ cisd-jhdf5
 FullVoltageMeasurementCompoundExample.java
 H5ObjectEx_T_Compound.java
 SimpleVoltageMeasurementCompoundExample.java
+*.zip
