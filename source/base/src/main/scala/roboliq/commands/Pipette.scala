@@ -20,6 +20,9 @@ import roboliq.entities.WorldState
 import roboliq.entities.Pipetter
 import roboliq.pipette.planners.PipetteDevice
 import roboliq.entities.EntityBase
+import roboliq.pipette.planners.TipModelSearcher0
+import roboliq.entities.Mixture
+import roboliq.entities.Tip
 
 case class PipetteActionParams(
 	destination_? : Option[PipetteDestinations],
@@ -50,8 +53,8 @@ sealed abstract trait StepA
 sealed abstract trait StepB
 
 case class StepA_Pipette(
-	d: WellInfo,
 	s: LiquidSource,
+	d: WellInfo,
 	v: LiquidVolume,
 	tipModel_? : Option[TipModel],
 	pipettePolicy_? : Option[String],
@@ -65,8 +68,8 @@ case class StepA_Clean(
 ) extends StepA with StepB
 
 case class StepB_Pipette(
-	d: WellInfo,
 	s: List[WellInfo],
+	d: WellInfo,
 	v: LiquidVolume,
 	tipModel: TipModel,
 	pipettePolicy: String,
@@ -76,8 +79,8 @@ case class StepB_Pipette(
 ) extends StepB
 
 case class PipetteStepC(
-	d: WellInfo,
 	s: WellInfo,
+	d: WellInfo,
 	v: LiquidVolume,
 	tipModel: TipModel,
 	pipettePolicy: String,
@@ -146,8 +149,8 @@ class Pipette {
 					}
 				} yield {
 					StepA_Pipette(
-						d,
 						s,
+						d,
 						v,
 						step_?.flatMap(_.tipModel_?).orElse(params.tipModel_?),
 						step_?.flatMap(_.pipettePolicy_?).orElse(params.pipettePolicy_?),
@@ -216,8 +219,10 @@ class Pipette {
 	 *   - for any remaining sources which couldn't be assigned a single tipModel, assign as best as possible
 	 * - choose pipettePolicy
 	 * - assign cleanBefore, cleanAfter, and tip set
+	 * @param index0 this represents the index of stepA_l.head within the complete list of steps specified in the action
 	 */
 	def aToB2(
+		index0: Int,
 		stepA_l: List[StepA],
 		eb: EntityBase,
 		state0: WorldState,
@@ -225,12 +230,16 @@ class Pipette {
 	): RsResult[List[StepB]] = {
 		val device = new PipetteDevice
 		val tipAll_l = eb.pipetterToTips_m(pipetter)
+		val tipModelAll_l = tipAll_l.flatMap(eb.tipToTipModels_m).distinct
 		val step1_l = stepA_l.collect { case x: StepA_Pipette => x }
-		// Get
-		val stepToTipModels = RsResult.mapAll(step1_l)(step => {
+		
+		// Get the available tipModels for the given step
+		def getTipModels(step: StepA_Pipette, i0: Int): RsResult[(StepA_Pipette, (Mixture, List[Tip], List[TipModel]))] = {
+			val index = index0 + i0 + 1
 			val well = step.s.l.head.well
 			for {
-				mixture <- RsResult.from(state0.well_aliquot_m.get(well).map(_.mixture), s"no liquid specified in source well: ${well}")
+				mixture <- RsResult.from(state0.well_aliquot_m.get(well).map(_.mixture), s"step $index: no liquid specified in source well: ${well}")
+				// If a tip is explicitly assigned, use it, otherwise consider all available tips 
 				tip_l <- step.tip_? match {
 					case None => RsSuccess(tipAll_l)
 					case Some(tip_i) =>
@@ -239,26 +248,101 @@ class Pipette {
 							case Some(tip) => RsSuccess(List(tip))
 						}
 				}
-			} yield {
-				val tipModelPossible_l = step.tipModel_? match {
+				_ <- RsResult.assert(!tip_l.isEmpty, s"step $index: no tips available")
+				// Get tip models for the selected tips
+				tipModelPossible_l = step.tipModel_? match {
 					case None => tip_l.flatMap(eb.tipToTipModels_m).distinct
 					case Some(tipModel) => List(tipModel)
 				}
-				// Get the valid tip models for this item's source mixture and volume
-				val tipModel_l = device.getDispenseAllowableTipModels(tipModelPossible_l, mixture, step.v)
-				step -> tipModel_l
+				// Get the subset valid tip models for this item's source mixture and volume
+				tipModel_l = device.getDispenseAllowableTipModels(tipModelPossible_l, mixture, step.v)
+				_ <- RsResult.assert(!tipModel_l.isEmpty, s"step $index: no tip models available")
+			} yield {
+				step -> ((mixture, tip_l, tipModel_l))
 			}
-		}).map(_.toMap)
+		}
 		
-		CONTINUE HERE
-		
-		val source_l = step_l.map(_.s).toSet
-		val sourceToMixture_m = RsResult.mapAll(source_l.toList)(s =>
-			RsResult.from(state0.well_aliquot_m.get(s.l.head.well).map(s -> _.mixture), s"no liquid specified in source well: ${s.l.head.well}")
-		).map(_.toMap)
-		val stepToTipModels_m = stepA_l.map(step => step -> device.getDispenseAllowableTipModels(tipModel_l, mixture, item.volume))
+		for {
+			// Get possible tip models for each step
+			stepToMixtureTipsModels_m <- RsResult.mapAll(step1_l.zipWithIndex)(pair => getTipModels(pair._1, pair._2)).map(_.toMap)
+			stepToTipModels_m = stepToMixtureTipsModels_m.mapValues(_._3)
+			// Choose tip model for each step
+			stepToTipModel_m <- chooseTipModel(tipModelAll_l, stepToTipModels_m)
+			// Assign pipette policy for each step
+			// TODO: Need to choose pipette policy intelligently
+			stepToPolicy_m = stepToTipModel_m.map(pair => pair._1 -> pair._1.pipettePolicy_?.getOrElse("POLICY"))
+
+			// cleanBefore, cleanAfter
+			
+			// COPIED FROM PipetteMethod:
+			
+			// Run transfer planner to get pippetting batches
+			batch_l <- TransferSimplestPlanner.searchGraph(
+				device,
+				path0.state,
+				SortedSet(tipCandidate_l : _*),
+				tipModel, //itemToTipModel_m.head._2,
+				pipettePolicy,
+				item_l
+			)
+			
+			// Refresh command before pipetting starts
+			refreshBefore_l = {
+				spec.cleanBefore_?.orElse(spec.clean_?) match {
+					case Some(intensity) if intensity != CleanIntensity.None =>
+						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
+						PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+							(tip, intensity, Some(tipModel))
+						})) :: Nil
+					case _ => Nil
+				}
+			}
+			path1 <- path0.add(refreshBefore_l)
+	
+			path2 <- getAspDis(path1, spec, pipetter, device, tipModel, pipettePolicy, batch_l)
+
+			refreshAfter_l = {
+				val tipOverrides = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.clean_?), None, None, None)
+				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+					val tipState = path2.state.getTipState(tip)
+					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState)
+					(tip, washSpec.washIntensity, None)
+				})) :: Nil
+			}
+			path3 <- path2.add(refreshAfter_l)
+		} yield {
+			
+		}
 	}
 
+	/*
+	 * - see if any tip model can be used for
+	 *   - all steps
+	 *   - all steps without explicit tipModel
+	 *   - split steps by source, and try to assign tip model to each source
+	 *   - for any remaining sources which couldn't be assigned a single tipModel, assign as best as possible
+	 */
+	private def chooseTipModel(
+		tipModelAll_l: List[TipModel],
+		stepToTipModels_m: Map[StepA_Pipette, List[TipModel]]
+	): RsResult[Map[StepA_Pipette, TipModel]] = {
+		// See whether any tipModels can be used for all steps
+		val tipModelSearcher = new TipModelSearcher0[StepA_Pipette, TipModel]
+		tipModelSearcher.searchGraph(tipModelAll_l, stepToTipModels_m) match {
+			case RsSuccess(tipModel, _) => RsSuccess(stepToTipModels_m.mapValues(_ => tipModel))
+			case _ =>
+				val m = stepToTipModels_m.mapValues(_.head)
+				RsSuccess(m, List("INTERNAL: not yet implemented to have more than one tip model per pipetting set, so setting the tip model individually for each step"))
+		}
+	}
+	
+	private def choosePolicyAndClean(
+		stepToMixtureTipsModels_m: Map[StepA_Pipette, (Mixture, List[Tip], List[TipModel])],
+		stepToTipModel_m: Map[StepA_Pipette, TipModel]
+	): Unit = {
+		
+	}
+	
 	/*
 	def getWellEvents(): List[WorldStateEvent] = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
