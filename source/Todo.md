@@ -3,13 +3,18 @@
 ## Big issues
 
 - [ ] handle tubes
-- [ ] smarter pipette policy and tip choices
+- [ ] smarter pipette policy and tip choices (and manage large dispense which require multiple aspirations)
+- [ ] `measureAbsorbance` command
+- [ ] `dilute` command for stflow
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
 - [ ] we need a separate search algorithm for organizing plates and it needs to be run before the action planner
 - [ ] handle interactively setting variables and guiding planning with extra settings file
 - [ ] web interface for interactive planning
 - [ ] refactor loadEvoware() to make devices pluggable somehow
-- [ ] load handle classes via config file, and generally let program be run in different labs
+- [ ] load handler classes via config file, and generally let program be run in different labs
+- [ ] allow for control of roboliq via an high-level language such as R
+- [ ] `mix` command
+- [ ] input files need to have version number of language, so that later old versions can be read in (can optionally also pass version to an individual command?)
 
 ## Current goal
 
@@ -24,9 +29,9 @@
 - [x] create test protocol for distributing various volumes
 - [x] create test protocol for distributing using a specific tip model, pipettingPolicy, and cleaningPolicy
 - [x] create command for transfer
-- [ ] create command for titration series
-- [ ] create command for dilution series
-- [ ] create quality control command for simple pipetting dilution series
+- [x] create command for titration series
+- [ ] create quality control command for simple pipetting titration series
+- [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] generate HDF5 file with all relevant data for statistical tests
 - [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
 - [ ] randomize well positions
@@ -38,6 +43,38 @@
 - [ ] create the more complicated accuracy tests that involve weighing and stuff
 - [ ] create test to execute all test_*.prot files and compare current output to previously accepted output
 - [ ] rather than printing Pop search to the console, construct a search tree object and then write a dot file (even in case of error)
+
+## Pipetting, dilution, mixtures, etc
+
+mix:
+  source: [a, b, c]
+  steps:
+  - plate2(A01): [0ul, 1ul, 99ul]
+  - plate2(B01): [1ul, 2ul, 97ul]
+  - {d: plate2(C01), a: [1ul, 2ul, 97ul]}
+
+mix order: each destination well with all sources, or each source into the relevant destination wells
+possible extensions:
+- instead of sources, mix substances, and figure out which sources to mix
+- instead of absolute volumes, use a variable so that it's easier to change the total volume
+- instead of volumes, use concentrations and a total volume
+
+pipette:
+  steps:
+  - {d: plate1(A01), s: dye1, a: 40ul, tip: 1, cleanBefore: thorough, pipettePolicy: XXX, tipModel: tipModel_1000ul}
+  - {clean: thorough}
+
+pipette order:
+- by source reagents (the desired order of reagents can be passed to pipette) (becomes a series of distributes)
+- by destination well (each well must be finished before any other is even started)
+- by destination well (but progress may be made on multiple wells simultaneously)
+
+qualityControl1:
+  tip: [1,2,3,4]
+  volume: [20ul, 25ul, 30ul, 35ul, 40ul, 45ul, 50ul, 55ul, 60ul]
+  source: dyeLight
+  destination: plate1(...)
+  replicates: 2
 
 ## HDF5
 

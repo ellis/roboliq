@@ -11,7 +11,7 @@ import ch.ethz.reactivesim.RsSuccess
 import grizzled.slf4j.Logger
 
 
-class TipModelSearcher0[Item, Mixture, TipModel <: AnyRef] {
+class TipModelSearcher0[Item, TipModel <: AnyRef] {
 	
 	private val logger = Logger[this.type]
 
