@@ -1,0 +1,20 @@
+description: |
+  Pipette from column 1 to column2 on on plate1
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+reagents:
+  reagent1: plate1(A01|H01)
+
+protocol:
+- pipette:
+    steps:
+    - {s: plate1(A01), d: plate1(A02), a: 20ul}
+    - {s: plate1(B01), d: plate1(B02), a: 20ul}
+    - {s: plate1(C01), d: plate1(C02), a: 20ul}
+    - {s: plate1(D01), d: plate1(D02), a: 20ul}
+    - {s: plate1(E01), d: plate1(E02), a: 20ul}
+    - {s: plate1(F01), d: plate1(F02), a: 20ul}
+    - {s: plate1(G01), d: plate1(G02), a: 20ul}
+    - {s: plate1(H01), d: plate1(H02), a: 20ul}

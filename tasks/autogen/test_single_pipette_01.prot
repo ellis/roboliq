@@ -1,5 +1,5 @@
 description: |
-  Pipette between wells on plate1
+  Pipette between two wells on plate1
 
 labware:
   plate1: plateModel_96_nunc_transparent
