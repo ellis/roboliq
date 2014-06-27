@@ -224,13 +224,14 @@ object Converter {
 		val nameToVals_l: List[(String, List[JsValue])] = nameToVals_m.toList.map(pair => pair._1 -> pair._2.map(_._2))
 		
 		for {
-			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
+			nameToVal3_l <- RsResult.mapAll(nameToVals_l){ pair =>
 				val (name, jsval_l) = pair
 				jsval_l match {
+					case Nil => RsError(s"missing value for argument `$name`") 
 					case jsval :: Nil => RsSuccess((name, jsval))
-					case _ => RsError(s"too many values supplied for argument `$name`")
+					case _ => RsError(s"too many values supplied for argument `$name`: ${jsval_l}")
 				}
-			}))
+			}
 			nameToVal_m = nameToVal3_l.toMap
 			l <- doit(nameToType_l, jsval_l, nameToVal_m, Nil)
 			res <- conv(JsArray(l), typ, eb, state_?)
@@ -716,13 +717,14 @@ object Converter {
 		}
 		
 		for {
-			nameToVal3_l <- RsResult.toResultOfList(nameToVals_l.map(pair => {
+			nameToVal3_l <- RsResult.mapAll(nameToVals_l){ pair =>
 				val (name, jsval_l) = pair
 				jsval_l match {
+					case Nil => RsError(s"missing value for argument `$name`") 
 					case jsval :: Nil => RsSuccess((name, jsval))
-					case _ => RsError(s"too many values supplied for argument `$name`")
+					case _ => RsError(s"too many values supplied for argument `$name`: ${jsval_l}")
 				}
-			}))
+			}
 			nameToVal_m = nameToVal3_l.toMap
 			map <- doit(nameToType2_l, jsval_l, nameToVal_m, map0)
 			//_ = println("map: "+map)

@@ -138,7 +138,7 @@ class PipetteActionHandler extends ActionHandler {
 
 	def getActionName = "pipette"
 
-	def getActionParamNames = List("agent", "device", "destination", "source", "amount", "clean", "cleanBegin", "cleanBetween", "cleanEnd", "tipModel", "pipettePolicy", "tipModel", "tip", "steps")
+	def getActionParamNames = List("agent", "device", "destination", "source", "amount", "clean", "cleanBegin", "cleanBetween", "cleanEnd", "pipettePolicy", "tipModel", "tip", "steps")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -147,10 +147,12 @@ class PipetteActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[OperatorInfo] = {
 		for {
-			params <- Converter.convActionAs[TitrateActionParams](paramToJsval_l, eb, state0)
+			params <- Converter.convActionAs[PipetteActionParams](paramToJsval_l, eb, state0)
 		} yield {
-			val sourceLabware_l = params.allOf.flatMap(_.getSourceLabwares)
-			val destinationLabware_l = params.destination.l.map(_.labwareName)
+			val sourceLabware_l = (params.source_?.map(_.sources).getOrElse(Nil) ++ params.steps.flatMap(_.s_?)).flatMap(_.l.map(_.labwareName)) 
+			val destinationLabware_l = (params.destination_?.map(_.l).getOrElse(Nil) ++ params.steps.flatMap(_.d_?).map(_.wellInfo)).map(_.labwareName)
+			//println("sourceLabware_l: "+sourceLabware_l)
+			//println("destinationLabware_l: "+destinationLabware_l)
 			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
 			val n = labwareIdent_l.size
 
@@ -162,7 +164,7 @@ class PipetteActionHandler extends ActionHandler {
 			}
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, s"titrate$n", binding, paramToJsval_l.toMap)
+			OperatorInfo(id, Nil, Nil, s"pipette$n", binding, paramToJsval_l.toMap)
 		}
 	}
 }
@@ -210,6 +212,9 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 			device = new PipetteDevice
 			instruction_l <- cToInstruction(state0, params, pipetter, device, stepC_ll)
 		} yield {
+			//println("stepA_l: "+stepA_l)
+			//println("stepB_l: "+stepB_l)
+			//println("stepC_ll: "+stepC_ll)
 			instruction_l.map(instruction => AgentInstruction(agent, instruction))
 		}
 	}
@@ -225,19 +230,19 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 		val n = n_l.max
 
 		val d_l: List[Option[WellInfo]] = params.destination_? match {
-			case None => List.make(n, None)
+			case None => List.fill(n)(None)
 			case Some(x) => x.l.map(Some(_))
 		}
 		val s_l: List[Option[LiquidSource]] = params.source_? match {
-			case None => List.make(n, None)
+			case None => List.fill(n)(None)
 			case Some(x) => x.sources.map(Some(_))
 		}
 		val a_l: List[Option[PipetteAmount]] = params.amount match {
-			case Nil => List.make(n, None)
+			case Nil => List.fill(n)(None)
 			case x => x.map(Some(_))
 		}
 		val step_l: List[Option[PipetteStepParams]] = params.steps match {
-			case Nil => List.make(n, None)
+			case Nil => List.fill(n)(None)
 			case x => x.map(Some(_))
 		}
 		
@@ -340,6 +345,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 					if (!x.s.l.map(_.well).toSet.intersect(destSeen_l).isEmpty)
 						return i
 					destSeen_l += x.d.well
+				case _ =>
 			}
 		}
 		-1
@@ -414,7 +420,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 				val src = step.s.l.head.well
 				val x = for {
 					mixtureSrc <- RsResult.from(state.well_aliquot_m.get(src).map(_.mixture), s"step ${step_i + 1}: no liquid specified in source well: ${step.s.l.head}")
-					mixtureDst <- RsResult.from(state.well_aliquot_m.get(step.d.well).map(_.mixture), s"step ${step_i + 1}: no liquid specified in source well: ${step.d}")
+					mixtureDst = state.well_aliquot_m.get(step.d.well).map(_.mixture).getOrElse(Mixture.empty)
 					// If a tip is explicitly assigned, use it, otherwise consider all available tips 
 					tip_l <- step.tip_? match {
 						case None => RsSuccess(tipAll_l)
@@ -508,7 +514,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 		stepToTipModel_m: Map[StepA_Pipette, TipModel],
 		stepToPolicy_m: Map[StepA_Pipette, PipettePolicy]
 	): RsResult[Map[StepA_Pipette, StepB_Pipette]] = {
-		stepToInfo1_m.map { case (stepA, (mixtureSrc, mixtureDst, tip_l, _)) =>
+		val stepAToStepB_m = stepToInfo1_m.map { case (stepA, (mixtureSrc, mixtureDst, tip_l, _)) =>
 			val tipModel = stepToTipModel_m(stepA)
 			val pipettePolicy = stepToPolicy_m(stepA)
 			val cleanBefore = stepA.cleanBefore_?.getOrElse(CleanIntensity.max(mixtureSrc.tipCleanPolicy.enter, mixtureDst.tipCleanPolicy.enter))
@@ -531,7 +537,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 			)
 			stepA -> stepB
 		}
-		RsError("x")
+		RsSuccess(stepAToStepB_m)
 	}
 	
 	def bToC(

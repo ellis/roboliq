@@ -10,4 +10,4 @@ reagents:
 protocol:
 - pipette:
     steps:
-    - {s: plate1(A01), d: plate1(A01), v: 20ul}
+    - {s: plate1(A01), d: plate1(A02), a: 20ul}
