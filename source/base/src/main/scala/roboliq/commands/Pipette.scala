@@ -612,12 +612,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 			step_?.foreach(stepC_l += _)
 		}
 		
-		// Simple grouping: Group steps together until a cleaning is required.
-		// A cleaning is required when:
-		// - an explicit clean command is encountered
-		// - a tip is re-used and the user explicitly specifies `cleanBetween` as some value other than None
-		// - a tip is re-used, `cleanBetween` is undefined, and previous tip dispense was wet contact
-		// - a tip is re-used, `cleanBetween` is undefined, and previous tip aspirate was from a different mixture
+		// Simple grouping: Group steps together until an explicit cleaning or a tip is reused.
 		stepB_l.foreach {
 			case stepB: StepB_Pipette =>
 				val src = pickNextSource(stepB.s)
@@ -628,6 +623,15 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 				tipUsed_l.dequeueFirst(_.eq(tip))
 				tipUsed_l += tip
 				
+				/*
+				 * THIS IS NOT CURRENTLY USED:
+				// A cleaning is required when:
+				// - an explicit clean command is encountered
+				// - a tip is re-used and the user explicitly specifies `cleanBetween` as some value other than None
+				// - a tip is re-used, `cleanBetween` is undefined, and previous tip dispense was wet contact
+				// - a tip is re-used, `cleanBetween` is undefined, and previous tip aspirate was from a different mixture
+				*/
+				/*
 				val clean: Boolean = tipToCleanRequired_m.get(tip) match {
 					case None => false
 					case Some(CleanIntensity.None) => false
@@ -642,6 +646,8 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 							tipHadWetDispense_l.contains(tip) || stepB.mixtureSrc != tipToMixture_m(tip)
 						}
 				}
+				*/
+				val clean = tipToCleanRequired_m.contains(tip)
 				
 				if (clean) {
 					doClean(None)
@@ -711,6 +717,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 						List(refresh)
 					}
 				}
+				// Otherwise, the cleaning should be handled in the standard manner:
 				else {
 					val tipOverrides = TipHandlingOverrides(None, params.cleanBetween_?.orElse(params.clean_?), None, None, None)
 					// TODO: FIXME: need to handle explicit StepA_Clean steps -- right now they are just ignored
@@ -730,6 +737,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 				case RqError(e, w) => return RqError(e, w)
 				case RqSuccess(x, _) => x
 			}
+			
 			
 			val twvpAspToEvents0_l = pipetteC_l.map(stepC => {
 				TipWellVolumePolicy(stepC.tip, stepC.s.well, stepC.v, stepC.pipettePolicy)

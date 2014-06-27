@@ -16,6 +16,8 @@
 - [ ] `mix` command
 - [ ] manage large dispense which require multiple aspirations
 - [ ] input files need to have version number of language, so that later old versions can be read in (can optionally also pass version to an individual command?)
+- [ ] support multi-dispense
+- [ ] support multi-aspirate
 
 ## Current goal
 

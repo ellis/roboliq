@@ -1,5 +1,5 @@
 description: |
-  Distribute source in single well using the pipette command
+  Distribute source from single well to entire column using the pipette command
 
 labware:
   plate1: plateModel_96_nunc_transparent
