@@ -261,8 +261,6 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 		val all_l: List[((Option[WellInfo], Option[LiquidSource], Option[PipetteAmount]), Option[PipetteStepParams])] =
 			(d_l, s_l, a_l).zipped.toList zip step_l
 		
-		println("s_l: "+s_l)
-		println("step_l: "+step_l)
 		for {
 			// TODO: construct better error messages
 			_ <- RsResult.assert(step_l.size == n, s"expected $n steps, but only ${step_l.size} steps are specified")
