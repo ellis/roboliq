@@ -23,6 +23,16 @@ import roboliq.entities.EntityBase
 import roboliq.pipette.planners.TipModelSearcher0
 import roboliq.entities.Mixture
 import roboliq.entities.Tip
+import roboliq.entities.PipettePolicy
+import roboliq.entities.PipettePosition
+import roboliq.pipette.planners.TransferSimplestPlanner
+import roboliq.core.RqSuccess
+import roboliq.core.RqResult
+import roboliq.entities.WorldStateBuilder
+import roboliq.entities.WorldStateEvent
+import roboliq.core.RqError
+import roboliq.entities.Aliquot
+import roboliq.entities.Distribution
 
 case class PipetteActionParams(
 	destination_? : Option[PipetteDestinations],
@@ -72,10 +82,10 @@ case class StepB_Pipette(
 	d: WellInfo,
 	v: LiquidVolume,
 	tipModel: TipModel,
-	pipettePolicy: String,
+	pipettePolicy: PipettePolicy,
 	cleanBefore: CleanIntensity.Value,
 	cleanAfter: CleanIntensity.Value,
-	tips: List[Int]
+	tips: List[Tip]
 ) extends StepB
 
 case class PipetteStepC(
@@ -122,6 +132,43 @@ class Pipette {
 			// TODO: construct better error messages
 			_ <- RsResult.mapFirst(n_l){x => RsResult.assert(x == 0 || x == 1 || x == n, "`destination`, `source`, `amount`, and `steps` lists must have compatible sizes")}
 			stepA_l <- sub(params, d_l, s_l, a_l, step_l, 0, Nil)
+			
+			// COPIED FROM PipetteMethod:
+			
+			// Run transfer planner to get pippetting batches
+			batch_l <- TransferSimplestPlanner.searchGraph(
+				device,
+				path0.state,
+				SortedSet(tipCandidate_l : _*),
+				tipModel, //itemToTipModel_m.head._2,
+				pipettePolicy,
+				item_l
+			)
+			
+			// Refresh command before pipetting starts
+			refreshBefore_l = {
+				spec.cleanBefore_?.orElse(spec.clean_?) match {
+					case Some(intensity) if intensity != CleanIntensity.None =>
+						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
+						PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+							(tip, intensity, Some(tipModel))
+						})) :: Nil
+					case _ => Nil
+				}
+			}
+			path1 <- path0.add(refreshBefore_l)
+	
+			path2 <- getAspDis(path1, spec, pipetter, device, tipModel, pipettePolicy, batch_l)
+
+			refreshAfter_l = {
+				val tipOverrides = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.clean_?), None, None, None)
+				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
+					val tipState = path2.state.getTipState(tip)
+					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState)
+					(tip, washSpec.washIntensity, None)
+				})) :: Nil
+			}
+			path3 <- path2.add(refreshAfter_l)
 		} yield ()
 		Nil
 	}
@@ -167,7 +214,12 @@ class Pipette {
 		}
 	}
 	
-	def aToB(stepA_l: List[StepA]): RsResult[List[StepB]] = {
+	def aToB(
+		stepA_l: List[StepA],
+		eb: EntityBase,
+		state0: WorldState,
+		pipetter: Pipetter
+	): RsResult[List[StepB]] = {
 		/*
 		 * - split the data as necessary, then for each split
 		 * - for all pipette steps for which no tipModel is assigned, get the possible tipModels for that step
@@ -179,8 +231,20 @@ class Pipette {
 		 * - choose pipettePolicy
 		 * - assign cleanBefore, cleanAfter, and tip set
 		 */
+		def next(stepA_ll: List[List[StepA]], step_i: Int): RsResult[List[StepB]] = {
+			stepA_ll match {
+				case Nil => RsSuccess(Nil)
+				case l :: rest =>
+					for {
+						l2 <- aToB2(step_i, l, eb, state0, pipetter)
+						l3 <- next(rest, step_i + l.size)
+					} yield {
+						l2 ++ l3
+					}
+			}
+		}
 		val stepA_ll = splitA(stepA_l)
-		RsResult.mapAll(stepA_ll)(aToB2).map(_.flatten)
+		next(stepA_ll, 0)
 	}
 
 	/**
@@ -221,7 +285,7 @@ class Pipette {
 	 * - assign cleanBefore, cleanAfter, and tip set
 	 * @param index0 this represents the index of stepA_l.head within the complete list of steps specified in the action
 	 */
-	def aToB2(
+	private def aToB2(
 		index0: Int,
 		stepA_l: List[StepA],
 		eb: EntityBase,
@@ -233,88 +297,114 @@ class Pipette {
 		val tipModelAll_l = tipAll_l.flatMap(eb.tipToTipModels_m).distinct
 		val step1_l = stepA_l.collect { case x: StepA_Pipette => x }
 		
-		// Get the available tipModels for the given step
-		def getTipModels(step: StepA_Pipette, i0: Int): RsResult[(StepA_Pipette, (Mixture, List[Tip], List[TipModel]))] = {
-			val index = index0 + i0 + 1
-			val well = step.s.l.head.well
-			for {
-				mixture <- RsResult.from(state0.well_aliquot_m.get(well).map(_.mixture), s"step $index: no liquid specified in source well: ${well}")
-				// If a tip is explicitly assigned, use it, otherwise consider all available tips 
-				tip_l <- step.tip_? match {
-					case None => RsSuccess(tipAll_l)
-					case Some(tip_i) =>
-						tipAll_l.find(_.index == tip_i) match {
-							case None => RsError(s"invalid tip index ${tip_i}")
-							case Some(tip) => RsSuccess(List(tip))
-						}
-				}
-				_ <- RsResult.assert(!tip_l.isEmpty, s"step $index: no tips available")
-				// Get tip models for the selected tips
-				tipModelPossible_l = step.tipModel_? match {
-					case None => tip_l.flatMap(eb.tipToTipModels_m).distinct
-					case Some(tipModel) => List(tipModel)
-				}
-				// Get the subset valid tip models for this item's source mixture and volume
-				tipModel_l = device.getDispenseAllowableTipModels(tipModelPossible_l, mixture, step.v)
-				_ <- RsResult.assert(!tipModel_l.isEmpty, s"step $index: no tip models available")
-			} yield {
-				step -> ((mixture, tip_l, tipModel_l))
+		// TODO: FIXME: HACK: This is a temporary hack for 'getPolicy' -- need to define pipette policies in config file
+		def getPolicy(step: StepA_Pipette, tipModel: TipModel): RsResult[PipettePolicy] = {
+			step.pipettePolicy_? match {
+				case Some(name) => RsSuccess(PipettePolicy(name, PipettePosition.getPositionFromPolicyNameHack(name)))
+				case None => val name = "POLICY"; RsSuccess(PipettePolicy(name, PipettePosition.getPositionFromPolicyNameHack(name)))
 			}
 		}
 		
 		for {
 			// Get possible tip models for each step
-			stepToMixtureTipsModels_m <- RsResult.mapAll(step1_l.zipWithIndex)(pair => getTipModels(pair._1, pair._2)).map(_.toMap)
-			stepToTipModels_m = stepToMixtureTipsModels_m.mapValues(_._3)
+			stepToInfo1_m <- processStepA1(eb, state0, tipAll_l, device, stepA_l, 0, Nil)
+			stepToTipModels_m = stepToInfo1_m.mapValues(_._4)
 			// Choose tip model for each step
 			stepToTipModel_m <- chooseTipModel(tipModelAll_l, stepToTipModels_m)
 			// Assign pipette policy for each step
-			// TODO: Need to choose pipette policy intelligently
-			stepToPolicy_m = stepToTipModel_m.map(pair => pair._1 -> pair._1.pipettePolicy_?.getOrElse("POLICY"))
-
-			// cleanBefore, cleanAfter
-			
-			// COPIED FROM PipetteMethod:
-			
-			// Run transfer planner to get pippetting batches
-			batch_l <- TransferSimplestPlanner.searchGraph(
-				device,
-				path0.state,
-				SortedSet(tipCandidate_l : _*),
-				tipModel, //itemToTipModel_m.head._2,
-				pipettePolicy,
-				item_l
-			)
-			
-			// Refresh command before pipetting starts
-			refreshBefore_l = {
-				spec.cleanBefore_?.orElse(spec.clean_?) match {
-					case Some(intensity) if intensity != CleanIntensity.None =>
-						val tip_l = batch_l.flatMap(_.item_l.map(_.tip))
-						PipetterTipsRefresh(pipetter, tip_l.map(tip => {
-							(tip, intensity, Some(tipModel))
-						})) :: Nil
-					case _ => Nil
-				}
-			}
-			path1 <- path0.add(refreshBefore_l)
-	
-			path2 <- getAspDis(path1, spec, pipetter, device, tipModel, pipettePolicy, batch_l)
-
-			refreshAfter_l = {
-				val tipOverrides = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.clean_?), None, None, None)
-				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
-					val tipState = path2.state.getTipState(tip)
-					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState)
-					(tip, washSpec.washIntensity, None)
-				})) :: Nil
-			}
-			path3 <- path2.add(refreshAfter_l)
+			stepToPolicy_m <- RsResult.mapAll(stepToTipModel_m)(pair => getPolicy(pair._1, pair._2).map(pair._1 -> _)).map(_.toMap)
+			// Now get StepB objects with pipettePolicy, cleanBefore, cleanAfter, tip set
+			stepAToStepB_m <- processStepA2(eb, stepToInfo1_m, stepToTipModel_m, stepToPolicy_m)
 		} yield {
-			
+			stepA_l.map {
+				case x: StepA_Pipette => stepAToStepB_m(x)
+				case x: StepA_Clean => x
+			}
 		}
 	}
 
+	// Go through stepA_l and for each pipetting step, find the 4-tuple (source mixture, destination mixture (before dispense), possible tips, possible tip models)
+	@tailrec
+	private def processStepA1(
+		eb: EntityBase,
+		state: WorldState,
+		tipAll_l: List[Tip],
+		device: PipetteDevice,
+		stepA_l: List[StepA],
+		step_i: Int,
+		acc_r: List[(StepA_Pipette, (Mixture, Mixture, List[Tip], List[TipModel]))]
+	): RsResult[Map[StepA_Pipette, (Mixture, Mixture, List[Tip], List[TipModel])]] = {
+		val (state2, acc2_r) = stepA_l match {
+			case Nil =>
+				return RsSuccess(acc_r.toMap)
+			case (step: StepA_Pipette) :: _ =>
+				val src = step.s.l.head.well
+				val x = for {
+					mixtureSrc <- RsResult.from(state.well_aliquot_m.get(src).map(_.mixture), s"step ${step_i + 1}: no liquid specified in source well: ${step.s.l.head}")
+					mixtureDst <- RsResult.from(state.well_aliquot_m.get(step.d.well).map(_.mixture), s"step ${step_i + 1}: no liquid specified in source well: ${step.d}")
+					// If a tip is explicitly assigned, use it, otherwise consider all available tips 
+					tip_l <- step.tip_? match {
+						case None => RsSuccess(tipAll_l)
+						case Some(tip_i) =>
+							tipAll_l.find(_.index == tip_i) match {
+								case None => RsError(s"invalid tip index ${tip_i}")
+								case Some(tip) => RsSuccess(List(tip))
+							}
+					}
+					_ <- RsResult.assert(!tip_l.isEmpty, s"step ${step_i + 1}: no tips available")
+					// Get tip models for the selected tips
+					tipModelPossible_l = step.tipModel_? match {
+						case None => tip_l.flatMap(eb.tipToTipModels_m).distinct
+						case Some(tipModel) => List(tipModel)
+					}
+					// Get the subset valid tip models for this item's source mixture and volume
+					tipModel_l = device.getDispenseAllowableTipModels(tipModelPossible_l, mixtureSrc, step.v)
+					_ <- RsResult.assert(!tipModel_l.isEmpty, s"step ${step_i + 1}: no valid tip models founds")
+					// Update state
+					event_l = getWellEventsA(step)
+					state1 <- WorldStateEvent.update(event_l, state)
+				} yield {
+					val item = step -> ((mixtureSrc, mixtureDst, tip_l, tipModel_l))
+					(state1, item :: acc_r)
+				}
+				x match {
+					case RsSuccess(y, _) => y
+					case RsError(e, w) => return RsError(e, w)
+				}
+			case _ =>
+				(state, acc_r)
+		}
+		processStepA1(eb, state2, tipAll_l, device, stepA_l.tail, step_i + 1, acc2_r)
+	}
+	
+	private class WorldStateEventStepA(step: StepA_Pipette) extends WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = updateWorldStateA(step, state)
+	}
+	
+	private def getWellEventsA(step: StepA_Pipette): List[WorldStateEvent] = List(new WorldStateEventStepA(step))
+
+	private def updateWorldStateA(step: StepA_Pipette, state: WorldStateBuilder): RqResult[Unit] = {
+		// Add liquid to destination
+		val dst = step.d
+		val src = step.s
+		val volume = step.v
+		val srcAliquot = state.well_aliquot_m.getOrElse(src.l.head.well, Aliquot.empty)
+		val dstAliquot0 = state.well_aliquot_m.getOrElse(dst.well, Aliquot.empty)
+		val amount = Distribution.fromVolume(volume)
+		val aliquot = Aliquot(srcAliquot.mixture, amount)
+		val x = for {
+			dstAliquot1 <- dstAliquot0.add(aliquot)
+		} yield {
+			//println(s"update: ${dst.well.label} ${dstAliquot0} + ${aliquot} -> ${dstAliquot1}")
+			state.well_aliquot_m(dst.well) = dstAliquot1
+		}
+		x match {
+			case RqError(e, w) => return RqError(e, w)
+			case _ =>
+		}
+		RqSuccess(())
+	}
+	
 	/*
 	 * - see if any tip model can be used for
 	 *   - all steps
@@ -334,6 +424,39 @@ class Pipette {
 				val m = stepToTipModels_m.mapValues(_.head)
 				RsSuccess(m, List("INTERNAL: not yet implemented to have more than one tip model per pipetting set, so setting the tip model individually for each step"))
 		}
+	}
+	
+	/**
+	 * Using all the decisions we've gathered for each StepA so far, create the equivalent StepB objects
+	 */
+	private def processStepA2(
+		eb: EntityBase,
+		stepToInfo1_m: Map[StepA_Pipette, (Mixture, Mixture, List[Tip], List[TipModel])],
+		stepToTipModel_m: Map[StepA_Pipette, TipModel],
+		stepToPolicy_m: Map[StepA_Pipette, PipettePolicy]
+	): RsResult[Map[StepA_Pipette, StepB_Pipette]] = {
+		stepToInfo1_m.map { case (stepA, (mixtureSrc, mixtureDst, tip_l, _)) =>
+			val tipModel = stepToTipModel_m(stepA)
+			val pipettePolicy = stepToPolicy_m(stepA)
+			val cleanBefore = stepA.cleanBefore_?.getOrElse(CleanIntensity.max(mixtureSrc.tipCleanPolicy.enter, mixtureDst.tipCleanPolicy.enter))
+			val cleanAfter = stepA.cleanAfter_?.getOrElse(
+				if (pipettePolicy.pos == PipettePosition.Free) mixtureSrc.tipCleanPolicy.exit
+				else CleanIntensity.max(mixtureSrc.tipCleanPolicy.exit, mixtureDst.tipCleanPolicy.exit)
+			)
+			val tip2_l = tip_l.filter(eb.tipToTipModels_m(_).contains(tipModel))
+			val stepB = StepB_Pipette(
+				stepA.s.l,
+				stepA.d,
+				stepA.v,
+				tipModel,
+				pipettePolicy,
+				cleanBefore,
+				cleanAfter,
+				tip2_l
+			)
+			stepA -> stepB
+		}
+		RsError("x")
 	}
 	
 	private def choosePolicyAndClean(

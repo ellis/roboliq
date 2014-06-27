@@ -3,7 +3,7 @@
 ## Big issues
 
 - [ ] handle tubes
-- [ ] smarter pipette policy and tip choices (and manage large dispense which require multiple aspirations)
+- [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
 - [ ] `measureAbsorbance` command
 - [ ] `dilute` command for stflow
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
@@ -14,6 +14,7 @@
 - [ ] load handler classes via config file, and generally let program be run in different labs
 - [ ] allow for control of roboliq via an high-level language such as R
 - [ ] `mix` command
+- [ ] manage large dispense which require multiple aspirations
 - [ ] input files need to have version number of language, so that later old versions can be read in (can optionally also pass version to an individual command?)
 
 ## Current goal
