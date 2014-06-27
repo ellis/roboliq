@@ -54,6 +54,9 @@ import roboliq.entities.Agent
 import aiplan.strips2.Unique
 import roboliq.input.Converter
 import roboliq.plan.AgentInstruction
+import roboliq.plan.OperatorInfo
+import spray.json.JsString
+import roboliq.plan.ActionHandler
 
 /**
  * @param cleanBegin_? Clean before pipetting starts
@@ -64,11 +67,11 @@ case class PipetteActionParams(
 	destination_? : Option[PipetteDestinations],
 	source_? : Option[PipetteSources],
 	amount: List[PipetteAmount],
-	pipettePolicy_? : Option[String],
 	clean_? : Option[CleanIntensity.Value],
 	cleanBegin_? : Option[CleanIntensity.Value],
 	cleanBetween_? : Option[CleanIntensity.Value],
 	cleanEnd_? : Option[CleanIntensity.Value],
+	pipettePolicy_? : Option[String],
 	tipModel_? : Option[TipModel],
 	tip_? : Option[Int],
 	steps: List[PipetteStepParams]
@@ -131,11 +134,44 @@ case class StepC_Pipette(
 	mixtureDst: Mixture
 ) extends StepC
 
+class PipetteActionHandler extends ActionHandler {
+
+	def getActionName = "pipette"
+
+	def getActionParamNames = List("agent", "device", "destination", "source", "amount", "clean", "cleanBegin", "cleanBetween", "cleanEnd", "tipModel", "pipettePolicy", "tipModel", "tip", "steps")
+	
+	def getOperatorInfo(
+		id: List[Int],
+		paramToJsval_l: List[(String, JsValue)],
+		eb: roboliq.entities.EntityBase,
+		state0: WorldState
+	): RqResult[OperatorInfo] = {
+		for {
+			params <- Converter.convActionAs[TitrateActionParams](paramToJsval_l, eb, state0)
+		} yield {
+			val sourceLabware_l = params.allOf.flatMap(_.getSourceLabwares)
+			val destinationLabware_l = params.destination.l.map(_.labwareName)
+			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
+			val n = labwareIdent_l.size
+
+			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
+			val binding_l = {
+				"?agent" -> m.getOrElse("agent", "?agent") ::
+				"?device" -> m.getOrElse("device", "?device") ::
+				labwareIdent_l.zipWithIndex.map(pair => s"?labware${pair._2 + 1}" -> s"${pair._1}")
+			}
+			val binding = binding_l.toMap
+
+			OperatorInfo(id, Nil, Nil, s"titrate$n", binding, paramToJsval_l.toMap)
+		}
+	}
+}
+
 class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 	private val logger = Logger[this.type]
 	
 	def getDomainOperator: Strips.Operator = {
-		val name = s"titrate$n"
+		val name = s"pipette$n"
 		val paramName_l = "?agent" :: "?device" :: (1 to n).flatMap(i => List(s"?labware$i", s"?model$i", s"?site$i", s"?siteModel$i")).toList
 		val paramTyp_l = "agent" :: "pipetter" :: List.fill(n)(List("labware", "model", "site", "siteModel")).flatten
 		val preconds =

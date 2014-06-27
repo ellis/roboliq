@@ -324,7 +324,7 @@ object JshopTranslator {
 		
 		val device = new PipetteDevice
 		//val tipModelSearcher = new TipModelSearcher1[Item, Mixture, TipModel]
-		val tipModelSearcher = new TipModelSearcher0[Item, Mixture, TipModel]
+		val tipModelSearcher = new TipModelSearcher0[Item, TipModel]
 		
 		val source_l = spec.sources.sources match {
 			case Nil => Nil

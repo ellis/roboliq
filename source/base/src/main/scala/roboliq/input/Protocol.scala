@@ -91,6 +91,7 @@ class Protocol {
 	def loadCommandSet(): RsResult[CommandSet] = {
 		val actionHandler_l = List[ActionHandler](
 			new DistributeActionHandler,
+			new PipetteActionHandler,
 			new ShakePlateActionHandler,
 			new TitrateActionHandler,
 			new TransferActionHandler
@@ -100,6 +101,10 @@ class Protocol {
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
+			new PipetteOperatorHandler(1),
+			new PipetteOperatorHandler(2),
+			new PipetteOperatorHandler(3),
+			new PipetteOperatorHandler(4),
 			new ShakePlateOperatorHandler,
 			new TitrateOperatorHandler(1),
 			new TitrateOperatorHandler(2),

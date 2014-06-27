@@ -1,0 +1,13 @@
+description: |
+  Pipette between wells on plate1
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+reagents:
+  reagent1: plate1(A01)
+
+protocol:
+- pipette:
+    steps:
+    - {s: plate1(A01), d: plate1(A01), v: 20ul}
