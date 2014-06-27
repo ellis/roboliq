@@ -1,0 +1,14 @@
+description: |
+  Distribute source in single well using the pipette command
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+reagents:
+  reagent1: plate1(A01)
+
+protocol:
+- pipette:
+    source: plate1(A01)
+    destination: plate1(A02|H02)
+    amount: 20ul

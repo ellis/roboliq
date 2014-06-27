@@ -231,15 +231,27 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 
 		val d_l: List[Option[WellInfo]] = params.destination_? match {
 			case None => List.fill(n)(None)
-			case Some(x) => x.l.map(Some(_))
+			case Some(x) => x.l match {
+				case Nil => List.fill(n)(None)
+				case y :: Nil => List.fill(n)(Some(y))
+				case l => l.map(Some(_))
+			}
 		}
 		val s_l: List[Option[LiquidSource]] = params.source_? match {
 			case None => List.fill(n)(None)
-			case Some(x) => x.sources.map(Some(_))
+			case Some(x) => x.sources match {
+				case Nil => List.fill(n)(None)
+				case y :: Nil => List.fill(n)(Some(y))
+				case l => l.map(Some(_))
+			}
 		}
 		val a_l: List[Option[PipetteAmount]] = params.amount match {
 			case Nil => List.fill(n)(None)
-			case x => x.map(Some(_))
+			case x => x match {
+				case Nil => List.fill(n)(None)
+				case y :: Nil => List.fill(n)(Some(y))
+				case l => l.map(Some(_))
+			}
 		}
 		val step_l: List[Option[PipetteStepParams]] = params.steps match {
 			case Nil => List.fill(n)(None)
@@ -249,8 +261,11 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 		val all_l: List[((Option[WellInfo], Option[LiquidSource], Option[PipetteAmount]), Option[PipetteStepParams])] =
 			(d_l, s_l, a_l).zipped.toList zip step_l
 		
+		println("s_l: "+s_l)
+		println("step_l: "+step_l)
 		for {
 			// TODO: construct better error messages
+			_ <- RsResult.assert(step_l.size == n, s"expected $n steps, but only ${step_l.size} steps are specified")
 			_ <- RsResult.mapFirst(n_l){x => RsResult.assert(x == 0 || x == 1 || x == n, "`destination`, `source`, `amount`, and `steps` lists must have compatible sizes")}
 			stepA_l <- sub(params, d_l, s_l, a_l, step_l, 0, Nil)
 		} yield stepA_l
