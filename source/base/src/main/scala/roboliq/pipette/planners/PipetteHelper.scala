@@ -4,7 +4,7 @@ import roboliq.entities._
 
 object PipetteHelper {
 	
-	def choosePreAspirateWashSpec(tipOverrides: TipHandlingOverrides, liquidSrc: Mixture, tipState: TipState): WashSpec = {
+	def choosePreAspirateWashSpec(tipOverrides: TipHandlingOverrides, liquidSrc: Mixture, tipState: TipState, cleanBetweenSameSource_? : Option[CleanIntensity.Value]): WashSpec = {
 		chooseWashSpec(
 			tipOverrides,
 			liquidSrc,

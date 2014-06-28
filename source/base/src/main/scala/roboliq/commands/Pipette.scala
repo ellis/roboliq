@@ -70,6 +70,7 @@ case class PipetteActionParams(
 	clean_? : Option[CleanIntensity.Value],
 	cleanBegin_? : Option[CleanIntensity.Value],
 	cleanBetween_? : Option[CleanIntensity.Value],
+	cleanBetweenSameSource_? : Option[CleanIntensity.Value],
 	cleanEnd_? : Option[CleanIntensity.Value],
 	pipettePolicy_? : Option[String],
 	tipModel_? : Option[TipModel],
@@ -680,6 +681,11 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 		RsSuccess(stepC_ll.toList)
 	}
 	
+	/**
+	 * Turn each List[StepC] into a series of instructions: an optional clean, aspirates, and dispenses.
+	 * For the first clean command, special processing takes place.
+	 * After all the other commands, there may be a final clean command that takes care of any dirty tips.
+	 */
 	private def cToInstruction(
 		state0: WorldState,
 		params: PipetteActionParams,
@@ -723,9 +729,16 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 					// TODO: FIXME: need to handle explicit StepA_Clean steps -- right now they are just ignored
 					val refresh = PipetterTipsRefresh(pipetter, pipetteC_l.map(stepC => {
 						val tipState = path.state.getTipState(stepC.tip)
-						val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, stepC.mixtureSrc, tipState)
-						val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverrides, stepC.mixtureSrc, stepC.mixtureDst, tipState)
-						val washSpec = washSpecAsp + washSpecDis
+						val washSpec = {
+							val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, stepC.mixtureSrc, tipState)
+							if (stepC.pipettePolicy.pos == PipettePosition.Free) {
+								washSpecAsp
+							}
+							else {
+								val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverrides, stepC.mixtureSrc, stepC.mixtureDst, tipState)
+								washSpecAsp + washSpecDis
+							}
+						}
 						//logger.debug(s"refresh tipState: ${tipState} -> ${washSpec.washIntensity} -> ${tipState_~}")
 						(stepC.tip, washSpec.washIntensity, Some(stepC.tipModel))
 					}))
