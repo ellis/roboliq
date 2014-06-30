@@ -777,8 +777,8 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 			val tipOverrides = TipHandlingOverrides(None, params.cleanEnd_?.orElse(params.clean_?), None, None, None)
 			PipetterTipsRefresh(pipetter, tip_l.map(tip => {
 				val tipState = path.state.getTipState(tip)
-				val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState, params.cleanBetweenSameSource_?)
-				(tip, washSpec.washIntensity, None)
+				val clean = params.cleanEnd_?.orElse(params.clean_?).getOrElse(tipState.cleanDegreePending)
+				(tip, clean, None)
 			})) :: Nil
 		}
 		

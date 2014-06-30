@@ -32,15 +32,18 @@ object PipetteHelper {
 		cleanBetweenSameSource_? : Option[CleanIntensity.Value]
 	): WashSpec = {
 		val intensity = {
-			val bDifferentLiquid = liquids.exists(_ ne liquid0)
+			val bSameLiquid = !liquids.isEmpty && liquids.forall(_ eq liquid0)
 			// If same liquids and a cleaning intensity is specified for same source operations:
-			if (!bDifferentLiquid && cleanBetweenSameSource_?.isDefined)
+			if (bSameLiquid && cleanBetweenSameSource_?.isDefined) {
+				println("chooseWashSpec: SAME: ", liquid0.toShortString, liquids.map(_.toShortString), cleanBetweenSameSource_?)
 				cleanBetweenSameSource_?.get
+			}
 			else {
 				tipOverrides.washIntensity_?.getOrElse {
 					val policy = liquid0.tipCleanPolicy
+					println("chooseWashSpec: DIFF: ", liquid0.toShortString, policy, tipState.cleanDegreePrev, tipState.cleanDegreePending)
 					if (tipState.cleanDegreePrev == CleanIntensity.None) policy.enter
-					else CleanIntensity.None
+					else CleanIntensity.max(policy.enter, tipState.cleanDegreePending)
 				}
 			}
 		}

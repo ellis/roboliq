@@ -33,7 +33,8 @@
 - [x] create test protocol for distributing using a specific tip model, pipettingPolicy, and cleaningPolicy
 - [x] create command for transfer
 - [x] create command for titration series
-- [ ] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
+- [x] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
+- [ ] main: write `actions.lst` with final ground actions in sequence
 - [ ] create quality control command for simple pipetting titration series
 - [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] generate HDF5 file with all relevant data for statistical tests
