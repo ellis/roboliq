@@ -139,7 +139,7 @@ class PipetteActionHandler extends ActionHandler {
 
 	def getActionName = "pipette"
 
-	def getActionParamNames = List("agent", "device", "destination", "source", "amount", "clean", "cleanBegin", "cleanBetween", "cleanEnd", "pipettePolicy", "tipModel", "tip", "steps")
+	def getActionParamNames = List("agent", "device", "destination", "source", "amount", "clean", "cleanBegin", "cleanBetween", "cleanBetweenSameSource", "cleanEnd", "pipettePolicy", "tipModel", "tip", "steps")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -730,7 +730,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 					val refresh = PipetterTipsRefresh(pipetter, pipetteC_l.map(stepC => {
 						val tipState = path.state.getTipState(stepC.tip)
 						val washSpec = {
-							val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, stepC.mixtureSrc, tipState)
+							val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, stepC.mixtureSrc, tipState, params.cleanBetweenSameSource_?)
 							if (stepC.pipettePolicy.pos == PipettePosition.Free) {
 								washSpecAsp
 							}
@@ -777,7 +777,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 			val tipOverrides = TipHandlingOverrides(None, params.cleanEnd_?.orElse(params.clean_?), None, None, None)
 			PipetterTipsRefresh(pipetter, tip_l.map(tip => {
 				val tipState = path.state.getTipState(tip)
-				val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState)
+				val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState, params.cleanBetweenSameSource_?)
 				(tip, washSpec.washIntensity, None)
 			})) :: Nil
 		}

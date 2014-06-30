@@ -194,7 +194,7 @@ class PipetteMethod {
 				val tipOverrides = TipHandlingOverrides(None, spec.cleanAfter_?.orElse(spec.clean_?), None, None, None)
 				PipetterTipsRefresh(pipetter, tip_l.map(tip => {
 					val tipState = path2.state.getTipState(tip)
-					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState)
+					val washSpec = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, Mixture.empty, tipState, None)
 					(tip, washSpec.washIntensity, None)
 				})) :: Nil
 			}
@@ -220,7 +220,7 @@ class PipetteMethod {
 				val mixtureSrc = path.state.well_aliquot_m.get(item.src).map(_.mixture).getOrElse(Mixture.empty)
 				val mixtureDst = path.state.well_aliquot_m.get(item.dst).map(_.mixture).getOrElse(Mixture.empty)
 				val tipState = path.state.getTipState(item.tip)
-				val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, mixtureSrc, tipState)
+				val washSpecAsp = PipetteHelper.choosePreAspirateWashSpec(tipOverrides, mixtureSrc, tipState, None)
 				val washSpecDis = PipetteHelper.choosePreDispenseWashSpec(tipOverrides, mixtureSrc, mixtureDst, tipState)
 				val washSpec = washSpecAsp + washSpecDis
 				//logger.debug(s"refresh tipState: ${tipState} -> ${washSpec.washIntensity} -> ${tipState_~}")

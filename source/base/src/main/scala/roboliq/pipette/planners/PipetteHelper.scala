@@ -9,7 +9,8 @@ object PipetteHelper {
 			tipOverrides,
 			liquidSrc,
 			tipState.destsEntered ++ tipState.srcsEntered,
-			tipState
+			tipState,
+			cleanBetweenSameSource_?
 		)
 	}
 	
@@ -18,17 +19,30 @@ object PipetteHelper {
 			tipOverrides,
 			liquidDest,
 			tipState.destsEntered ++ tipState.srcsEntered,
-			tipState
+			tipState,
+			None
 		)
 	}
 	
-	private def chooseWashSpec(tipOverrides: TipHandlingOverrides, liquid0: Mixture, liquids: Iterable[Mixture], tipState: TipState): WashSpec = {
-		val intensity = tipOverrides.washIntensity_?.getOrElse {
+	private def chooseWashSpec(
+		tipOverrides: TipHandlingOverrides,
+		liquid0: Mixture,
+		liquids: Iterable[Mixture],
+		tipState: TipState,
+		cleanBetweenSameSource_? : Option[CleanIntensity.Value]
+	): WashSpec = {
+		val intensity = {
 			val bDifferentLiquid = liquids.exists(_ ne liquid0)
-			val policy = liquid0.tipCleanPolicy
-			if (tipState.cleanDegreePrev == CleanIntensity.None) policy.enter
-			else if (bDifferentLiquid) CleanIntensity.max(policy.enter, tipState.cleanDegreePending)
-			else CleanIntensity.None
+			// If same liquids and a cleaning intensity is specified for same source operations:
+			if (!bDifferentLiquid && cleanBetweenSameSource_?.isDefined)
+				cleanBetweenSameSource_?.get
+			else {
+				tipOverrides.washIntensity_?.getOrElse {
+					val policy = liquid0.tipCleanPolicy
+					if (tipState.cleanDegreePrev == CleanIntensity.None) policy.enter
+					else CleanIntensity.None
+				}
+			}
 		}
 		val contamInside = tipOverrides.contamInside_? match { case Some(v) => v; case None => tipState.contamInside }
 		val contamOutside = tipOverrides.contamOutside_? match { case Some(v) => v; case None => tipState.contamOutside }
