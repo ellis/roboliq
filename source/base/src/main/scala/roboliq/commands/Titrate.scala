@@ -47,7 +47,7 @@ case class TitrateActionParams(
 	cleanEnd_? : Option[CleanIntensity.Value],
 	pipettePolicy_? : Option[String],
 	tipModel_? : Option[TipModel],
-	tip_? : Option[Int]
+	tip: List[Int]
 ) {
 	def getItems: RqResult[List[TitrateItem]] = {
 		RqResult.toResultOfList(allOf.map(_.getItem)).map(_.flatten)
@@ -69,7 +69,7 @@ case class TitrateStepParams(
 	cleanBetween_? : Option[CleanIntensity.Value],
 	cleanAfter_? : Option[CleanIntensity.Value],
 	tipModel_? : Option[TipModel],
-	tip_? : Option[Int]
+	tip: List[Int]
 ) {
 	def getSourceLabwares: List[String] = {
 		source.flatMap(_.l.map(_.labwareName)) ++ allOf.flatMap(_.getSourceLabwares) ++ oneOf.flatMap(_.getSourceLabwares)

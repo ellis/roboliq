@@ -35,7 +35,7 @@
 - [x] create command for titration series
 - [x] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
 - [x] titrate: adapt titrate command to use new pipette methods
-- [ ] titrate: add ability to combine based on tips too
+- [ ] titrate: add ability to combine based on tips too (in TitrateMethod.scala, add Option[Tip] to XO and X)
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] create quality control command for simple pipetting titration series
 - [ ] create commands for measuring absorbance, fluorescence, weight
