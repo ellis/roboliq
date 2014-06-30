@@ -96,6 +96,14 @@ qualityControl1:
   destination: plate1(...)
   replicates: 2
 
+Here are some sample volumes for doing liquid level detection:
+    [10,11,13,14,
+    16,18,20,23,
+    26,29,32,37,
+    41,46,52,58,
+    66,74,83,94,
+    110,120,130,150]
+
 ## HDF5
 
 - [ ] main: create an HDF5 file
