@@ -41,13 +41,6 @@ sealed trait TitrateAmount
 case class TitrateAmount_Volume(volume: LiquidVolume) extends TitrateAmount
 case class TitrateAmount_Range(min: LiquidVolume, max: LiquidVolume) extends TitrateAmount
 
-/* REFACTOR: delete this
-case class TitrateSource(
-	source: String,
-	amount_? : Option[TitrateAmount]
-)*/
-
-
 case class TitrateActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],

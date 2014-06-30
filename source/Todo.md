@@ -34,6 +34,8 @@
 - [x] create command for transfer
 - [x] create command for titration series
 - [x] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
+- [ ] titrate: adapt titrate command to use new pipette methods
+- [ ] titrate: add ability to combine based on tips too
 - [ ] create quality control command for simple pipetting titration series
 - [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] generate HDF5 file with all relevant data for statistical tests
@@ -73,6 +75,18 @@ pipette order:
 - by source reagents (the desired order of reagents can be passed to pipette) (becomes a series of distributes)
 - by destination well (each well must be finished before any other is even started)
 - by destination well (but progress may be made on multiple wells simultaneously)
+
+
+prepareDilution: creates a dilution from stock which may require use of temporary wells
+
+perpareMixture: creates a mixture which may require use of temporary wells
+
+## Quality control
+
+* may need to prepare dilutions too
+* test tips and medium dispense volumes: dispense various volumes to destination wells, using a single source liquid (this is only a first prototype, then do next step too)
+* test tips and medium dispense volumes: dispense various volumes to destination wells, using one source substance but possibly multiple dilutions, whereby we decide which source to use based on min/max/optimal substance concentration specifications
+* test tips and small dispense volumes: dispense a "base" amount (ideally half well volume and min concentration), optionally dispense additional water, measure, dispense various small volumes to destination wells, using one source substance but possibly multiple dilutions, whereby we decide which source to use based on min/max/optimal substance concentration specifications
 
 qualityControl1:
   tip: [1,2,3,4]

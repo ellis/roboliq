@@ -3,7 +3,6 @@
 import scala.collection.immutable.SortedSet
 import scala.reflect.runtime.universe
 import scala.runtime.ZippedTraversable3.zippedTraversable3ToTraversable
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Strips._
 import aiplan.strips2.Unique
@@ -43,19 +42,25 @@ import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.entities.LiquidSource
+import roboliq.entities.PipetteDestination
+import roboliq.entities.PipetteAmount
 
 
 case class QualityControl1ActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	source: String,
-	destination: String
+	source: LiquidSource,
+	destination: PipetteDestination,
+	tip: List[Int],
+	amount: List[PipetteAmount],
+	replicates_? : Option[Int]
 )
 
 class QualityControl1ActionHandler extends ActionHandler {
 	def getActionName = "qualityControl1"
 
-	def getActionParamNames = List("agent", "device", "source", "destination", "volume")
+	def getActionParamNames = List("agent", "device", "source", "destination", "tip", "amount", "replicates")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -64,9 +69,7 @@ class QualityControl1ActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[OperatorInfo] = {
 		for {
-			params <- Converter.convActionAs[DistributeActionParams](paramToJsval_l, eb)
-			sources <- eb.lookupLiquidSources(params.source, state0)
-			destinations <- eb.lookupLiquidDestinations(params.destination, state0)
+			params <- Converter.convActionAs[QualityControl1ActionParams](paramToJsval_l, eb, state0)
 		} yield {
 			val sourceLabware_l = sources.sources.flatMap(_.l.map(_.labwareName))
 			val destinationLabware_l = destinations.l.map(_.labwareName)
@@ -81,7 +84,7 @@ class QualityControl1ActionHandler extends ActionHandler {
 			}
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, s"distribute$n", binding, paramToJsval_l.toMap)
+			OperatorInfo(id, Nil, Nil, s"qualityControl1_$n", binding, paramToJsval_l.toMap)
 		}
 	}
 }
