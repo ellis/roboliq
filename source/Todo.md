@@ -34,8 +34,9 @@
 - [x] create command for transfer
 - [x] create command for titration series
 - [x] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
-- [ ] titrate: adapt titrate command to use new pipette methods
+- [x] titrate: adapt titrate command to use new pipette methods
 - [ ] titrate: add ability to combine based on tips too
+- [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] create quality control command for simple pipetting titration series
 - [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] generate HDF5 file with all relevant data for statistical tests

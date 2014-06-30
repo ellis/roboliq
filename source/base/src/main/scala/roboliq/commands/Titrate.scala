@@ -1,40 +1,32 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
+
 import aiplan.strips2.Strips
-import aiplan.strips2.Strips._
 import aiplan.strips2.Unique
 import grizzled.slf4j.Logger
+import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.entities.Agent
 import roboliq.entities.CleanIntensity
+import roboliq.entities.EntityBase
 import roboliq.entities.LiquidSource
 import roboliq.entities.LiquidVolume
-import roboliq.entities.PipetteDestination
+import roboliq.entities.PipetteAmount
+import roboliq.entities.PipetteAmount_Dilution
+import roboliq.entities.PipetteAmount_Volume
 import roboliq.entities.PipetteDestinations
-import roboliq.entities.PipettePosition
-import roboliq.entities.PipetteSources
 import roboliq.entities.Pipetter
 import roboliq.entities.TipModel
-import roboliq.entities.WellInfo
 import roboliq.entities.WorldState
 import roboliq.input.Converter
-import roboliq.input.commands.PipetteSpec
-import roboliq.method.PipetteMethod
 import roboliq.plan.ActionHandler
 import roboliq.plan.AgentInstruction
 import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
-import roboliq.entities.PipetteAmount
-import roboliq.core.RqError
-import roboliq.entities.PipetteAmount_Dilution
-import roboliq.entities.EntityBase
-import roboliq.entities.PipetteAmount_Volume
-import roboliq.entities.PipetteSources
-import roboliq.entities.LiquidSource
 
 
 sealed trait TitrateAmount
@@ -44,30 +36,40 @@ case class TitrateAmount_Range(min: LiquidVolume, max: LiquidVolume) extends Tit
 case class TitrateActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	allOf: List[TitrateStep],
+	allOf: List[TitrateStepParams],
 	destination: PipetteDestinations,
 	amount_? : Option[LiquidVolume],
-	replicates_? : Option[Int]
+	replicates_? : Option[Int],
+	clean_? : Option[CleanIntensity.Value],
+	cleanBegin_? : Option[CleanIntensity.Value],
+	cleanBetween_? : Option[CleanIntensity.Value],
+	cleanBetweenSameSource_? : Option[CleanIntensity.Value],
+	cleanEnd_? : Option[CleanIntensity.Value],
+	pipettePolicy_? : Option[String],
+	tipModel_? : Option[TipModel],
+	tip_? : Option[Int]
 ) {
 	def getItems: RqResult[List[TitrateItem]] = {
 		RqResult.toResultOfList(allOf.map(_.getItem)).map(_.flatten)
 	}
 }
 
-case class TitrateStep(
-	allOf: List[TitrateStep],
-	oneOf: List[TitrateStep],
+// TODO: Need to clarify meaning of cleanBefore and cleanAfter, since these are flags, not commands, in PipetteStepParams.
+// in order to perform a clean at the beginning/end of the TitrateStep, we will need a different parameter, which
+// might then become an explicit StepA_Clean pipette step.
+case class TitrateStepParams(
+	allOf: List[TitrateStepParams],
+	oneOf: List[TitrateStepParams],
 	source: List[LiquidSource],
 	amount_? : Option[List[PipetteAmount]],
-	//min_? : Option[LiquidVolume],
-	//max_? : Option[LiquidVolume],
-	contact_? : Option[PipettePosition.Value],
-	sterilize_? : Option[CleanIntensity.Value],
-	sterilizeBefore_? : Option[CleanIntensity.Value],
-	sterilizeBetween_? : Option[CleanIntensity.Value],
-	sterilizeAfter_? : Option[CleanIntensity.Value],
-	tipModel_? : Option[String],
-	pipettePolicy_? : Option[String]
+	//contact_? : Option[PipettePosition.Value],
+	pipettePolicy_? : Option[String],
+	clean_? : Option[CleanIntensity.Value],
+	cleanBefore_? : Option[CleanIntensity.Value],
+	cleanBetween_? : Option[CleanIntensity.Value],
+	cleanAfter_? : Option[CleanIntensity.Value],
+	tipModel_? : Option[TipModel],
+	tip_? : Option[Int]
 ) {
 	def getSourceLabwares: List[String] = {
 		source.flatMap(_.l.map(_.labwareName)) ++ allOf.flatMap(_.getSourceLabwares) ++ oneOf.flatMap(_.getSourceLabwares)
@@ -110,7 +112,7 @@ case class TitrateItem_Or(l: List[TitrateItem]) extends TitrateItem {
 	}
 }
 case class TitrateItem_SourceVolume(
-	step: TitrateStep,
+	step: TitrateStepParams,
 	source: LiquidSource,
 	amount_? : Option[PipetteAmount]
 ) extends TitrateItem {
@@ -128,7 +130,7 @@ class TitrateActionHandler extends ActionHandler {
 
 	def getActionName = "titrate"
 
-	def getActionParamNames = List("agent", "device", "allOf", "destination", "amount", "replicates"/*, "clean", "cleanBefore", "cleanBetween", "cleanAfter", "tipModel", "pipettePolicy"*/)
+	def getActionParamNames = List("agent", "device", "allOf", "destination", "amount", "replicates", "clean", "cleanBegin", "cleanBetween", "cleanBetweenSameSource", "cleanEnd", "pipettePolicy", "tipModel", "tip")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -192,12 +194,12 @@ class TitrateOperatorHandler(n: Int) extends OperatorHandler {
 	): RqResult[List[AgentInstruction]] = {
 		for {
 			agent <- eb.getEntityAs[Agent](operator.paramName_l(0))
-			device <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
+			pipetter <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
 			params <- Converter.convInstructionAs[TitrateActionParams](instructionParam_m, eb, state0)
-			spec_l <- new TitrateMethod(eb, state0, params).run()
-			action_ll <- RqResult.mapFirst(spec_l) { spec => new PipetteMethod().run(eb, state0, spec, device) }
-		} yield {
-			action_ll.flatten.map(x => AgentInstruction(agent, x))
-		}
+			//spec_l <- new TitrateMethod(eb, state0, params).run()
+			//action_ll <- RqResult.mapFirst(spec_l) { spec => new PipetteMethod().run(eb, state0, spec, device) }
+			pipetteActionParams <- new TitrateMethod(eb, state0, params).createPipetteActionParams()
+			instruction_l <- new PipetteMethod().run(agent, pipetter, pipetteActionParams, eb, state0)
+		} yield instruction_l
 	}
 }
