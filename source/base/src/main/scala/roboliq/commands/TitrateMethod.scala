@@ -5,13 +5,13 @@ import roboliq.entities._
 import roboliq.input.commands.PipetteSpec
 
 
-private case class XO(
+private case class SourceAmountTip(
 	sv: TitrateItem_SourceVolume,
 	amount_? : Option[PipetteAmount],
 	tip_? : Option[Int]
 )
 
-private case class X(
+private case class SourceVolumeTip(
 	sv: TitrateItem_SourceVolume,
 	volume: LiquidVolume,
 	tip_? : Option[Int]
@@ -28,12 +28,17 @@ class TitrateMethod(
 			// Turn the user-specified steps into simpler individual and/or/source items
 			item_l <- RqResult.toResultOfList(params.allOf.map(_.getItem)).map(_.flatten)
 			itemTop = TitrateItem_And(item_l)
-			_ = println("itemTop:")
-			_ = itemTop.printShortHierarchy(eb, "")
-			// Number of wells required if we only use a single replicate
-			mixtureAmount1_l = createWellMixtures(itemTop, Nil)
+			//_ = println("itemTop:")
+			//_ = itemTop.printShortHierarchy(eb, "")
+			// A list of wells, each holding a list of what goes in that well
+			sat1_ll = createWellMixtures(itemTop, Nil)
+			tooManyFillers_l = sat1_ll.filter(sat1_l => sat1_l.filter(_.amount_?.isEmpty).size > 1)
+			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_.amount_?)))
+			svt1_ll <- amountsToVolumes(sat1_ll, params.amount_?)
+			svt2_ll = combineWithTips(svt1_ll, params.tip)
 			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
-			wellCountMin = mixtureAmount1_l.length
+			// Number of wells required if we only use a single replicate
+			wellCountMin = svt2_ll.length
 			_ <- RqResult.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
 			// Maximum number of wells available to us
 			wellCountMax = params.destination.l.length
@@ -43,47 +48,13 @@ class TitrateMethod(
 			replicateCount = params.replicates_?.getOrElse(replicateCountMax)
 			wellCount = wellCountMin * replicateCount
 			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
-			//_ = println("params: "+params)
-			tooManyFillers_l = mixtureAmount1_l.filter(mixture => mixture.filter(_.amount_?.isEmpty).size > 1)
-			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_.amount_?)))
-			//_ = println("wellsPerGroup: "+wellsPerGroup)
-			//_ = println("groupCount: "+groupCount)
-			//_ = println("wellCount: "+wellCount)
-			/*l1 = params.steps.flatMap(step => {
-				// If this is the filler step:
-				step.volume_? match {
-					case None => None
-					case Some(volume) =>
-						val wellsPerSource = wellCount / step.source.sources.length
-						val wellsPerVolume = wellsPerSource / volume.length
-						val source_l = step.source.sources.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(step.source.sources.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
-						//println("stuff:", wellsPerSource, wellsPerVolume, source_l.length, volume_l)
-						Some(source_l zip volume_l)
-				}
-			})*/
-			mixtureVolume1_l <- amountsToVolumes(mixtureAmount1_l, params.amount_?)
-			l3 = mixtureVolume1_l.flatMap(mixture => List.fill(replicateCount)(mixture))
-			//l3 = dox(params.steps, wellsPerGroup, Nil, Nil)
-			/*stepToList_l: List[(TitrateStepParams, List[(LiquidSource, LiquidVolume)])] = params.steps.map(step => {
-				// If this is the filler step:
-				step.volume_? match {
-					case None => val l = step -> fillVolume_l.map(step.source.sources.head -> _)
-						l
-					case Some(volume) =>
-						val wellsPerSource = wellCount / step.source.sources.length
-						val wellsPerVolume = wellsPerSource / volume.length
-						val source_l = step.source.sources.flatMap(x => List.fill(wellsPerSource)(x))
-						val volume_l = List.fill(step.source.sources.length)(volume.flatMap(x => List.fill(wellsPerVolume)(x))).flatten
-						//println("s x v: "+source_l.length+", "+volume_l.length)
-						assert(source_l.forall(s => !s.l.isEmpty))
-						val l = step -> (source_l zip volume_l)
-						l
-				}
-			})*/
-			stepOrder_l = flattenSteps(itemTop)
-			//stepToList_l = params.steps zip l3.transpose
+			svt3_ll = svt2_ll.flatMap(x => List.fill(replicateCount)(x))
+			//_ = println("svt1_ll:\n"+svt1_ll)
+			//_ = println("svt2_ll:\n"+svt2_ll)
+			//_ = println("svt3_ll:\n"+svt3_ll)
+			//_ = 1/0
 		} yield {
+			val stepOrder_l = flattenSteps(itemTop)
 			//printMixtureCsv(l3)
 			//println("----------------")
 			//println("l3")
@@ -91,17 +62,17 @@ class TitrateMethod(
 			//printMixtureCsv(stepToList_l.map(_._2))
 			val destinations = PipetteDestinations(params.destination.l.take(wellCount))
 			//println("destinations: "+destinations)
-			val destinationToMixture_l = destinations.l zip l3
+			val destinationToMixture_l = destinations.l zip svt3_ll
 			printDestinationMixtureCsv(destinationToMixture_l)
 			//println("len: "+stepToList_l.map(_._2.length))
 			val pipetteStep_l = stepOrder_l.flatMap(step => {
 				// Get items corresponding to this step
-				val l1: List[(WellInfo, List[X])]
+				val l1: List[(WellInfo, List[SourceVolumeTip])]
 					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(x => (x.sv.step eq step) && (!x.volume.isEmpty)))
 				// There should be at most one item per destination
 				assert(l1.forall(_._2.size <= 1))
 				// Keep the destinations with exactly one item
-				val l2: List[(WellInfo, X)]
+				val l2: List[(WellInfo, SourceVolumeTip)]
 					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
 				val (destination_l, x_l) = l2.unzip
 				val sv_l = x_l.map(_.sv)
@@ -219,12 +190,12 @@ class TitrateMethod(
 			//println("len: "+stepToList_l.map(_._2.length))
 			stepOrder_l.map(step => {
 				// Get items corresponding to this step
-				val l1: List[(WellInfo, List[X])]
+				val l1: List[(WellInfo, List[SourceVolumeTip])]
 					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(pair => (pair._1.step eq step) && (!pair._2.isEmpty)))
 				// There should be at most one item per destination
 				assert(l1.forall(_._2.size <= 1))
 				// Keep the destinations with exactly one item
-				val l2: List[(WellInfo, X)]
+				val l2: List[(WellInfo, SourceVolumeTip)]
 					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
 				val (destination_l, l3) = l2.unzip
 				val (sv_l, volume_l) = l3.unzip
@@ -243,7 +214,7 @@ class TitrateMethod(
 					step.cleanBefore_?,
 					step.cleanBetween_?.orElse(params.cleanBetween_?),
 					step.cleanAfter_?,
-					None // FIXME: handle tipModel_?
+					None // FISourceVolumeTipME: handle tipModel_?
 				)
 			}).filterNot(_.sources.sources.isEmpty)
 		}
@@ -254,9 +225,9 @@ class TitrateMethod(
 	// Each list can be thought of as being in DNF (disjunctive normal form)
 	// and we combine two with the AND operation and produce a new list in DNF.
 	private def mixLists_And(
-		mixture1_l: List[List[XO]],
-		mixture2_l: List[List[XO]]
-	): List[List[XO]] = {
+		mixture1_l: List[List[SourceAmountTip]],
+		mixture2_l: List[List[SourceAmountTip]]
+	): List[List[SourceAmountTip]] = {
 		for {
 			mixture1 <- mixture1_l
 			mixture2 <- mixture2_l
@@ -264,8 +235,8 @@ class TitrateMethod(
 	}
 	
 	private def mixManyLists_And(
-		mixture_ll: List[List[List[XO]]]
-	): List[List[XO]] = {
+		mixture_ll: List[List[List[SourceAmountTip]]]
+	): List[List[SourceAmountTip]] = {
 		mixture_ll.filterNot(_.isEmpty) match {
 			case Nil => Nil
 			case first :: rest =>
@@ -275,16 +246,16 @@ class TitrateMethod(
 	
 	// ORing two lists in DNF just involves concatenating the two lists.
 	private def mixManyLists_Or(
-		mixture_ll: List[List[List[XO]]]
-	): List[List[XO]] = {
+		mixture_ll: List[List[List[SourceAmountTip]]]
+	): List[List[SourceAmountTip]] = {
 		mixture_ll.flatten
 	}
 	
 	// Return a list of source+volume for each well
 	private def createWellMixtures(
 		item: TitrateItem,
-		mixture_l: List[List[XO]]
-	): List[List[XO]] = {
+		mixture_l: List[List[SourceAmountTip]]
+	): List[List[SourceAmountTip]] = {
 		//println("item: ")
 		//item.printShortHierarchy(eb, "  ")
 		//println("mixture_l:")
@@ -304,22 +275,22 @@ class TitrateMethod(
 				l5
 			case sv: TitrateItem_SourceVolume =>
 				sv.step.tip match {
-					case Nil => List(List(XO(sv, sv.amount_?, None)))
-					case tip_l => tip_l.map(tip_i => List(XO(sv, sv.amount_?, Some(tip_i))))
+					case Nil => List(List(SourceAmountTip(sv, sv.amount_?, None)))
+					case tip_l => tip_l.map(tip_i => List(SourceAmountTip(sv, sv.amount_?, Some(tip_i))))
 				}
 		}
 	}
 	
 	private def amountsToVolumes(
-		mixtureAmount_l: List[List[XO]],
+		mixtureAmount_l: List[List[SourceAmountTip]],
 		volumeTotal_? : Option[LiquidVolume]
-	): RqResult[List[List[X]]] = {
+	): RqResult[List[List[SourceVolumeTip]]] = {
 		RqResult.toResultOfList(mixtureAmount_l.map { mixture =>
 			val (empty_l, nonempty_l) = mixture.partition(pair => pair.amount_?.isEmpty)
 			var volumeWell = LiquidVolume.empty
 			var numWell = BigDecimal(0)
 			var denWell = BigDecimal(1)
-			for (XO(_, amount_?, _) <- nonempty_l) {
+			for (SourceAmountTip(_, amount_?, _) <- nonempty_l) {
 				amount_? match {
 					case None =>
 					case Some(PipetteAmount_Volume(volume)) => volumeWell += volume
@@ -363,21 +334,42 @@ class TitrateMethod(
 				//println()
 				mixture.map { xo =>
 					xo.amount_? match {
-						case None => X(xo.sv, volumeFiller, xo.tip_?)
-						case Some(PipetteAmount_Volume(volume)) => X(xo.sv, volume, xo.tip_?)
-						case Some(PipetteAmount_Dilution(c, d)) => X(xo.sv, volumeTotal * c / d, xo.tip_?)
+						case None => SourceVolumeTip(xo.sv, volumeFiller, xo.tip_?)
+						case Some(PipetteAmount_Volume(volume)) => SourceVolumeTip(xo.sv, volume, xo.tip_?)
+						case Some(PipetteAmount_Dilution(c, d)) => SourceVolumeTip(xo.sv, volumeTotal * c / d, xo.tip_?)
 					}
 				}
 			}
 		})
 	}
+	
+	// For each well, make copies of that well for each tip in tip_l
+	private def combineWithTips(
+		svt0_ll: List[List[SourceVolumeTip]],
+		tip_l: List[Int]
+	): List[List[SourceVolumeTip]] = {
+		if (tip_l.isEmpty)
+			return svt0_ll
+		
+		// 
+		svt0_ll.flatMap { svt0_l =>
+			// If there are any unset tips in this well:
+			if (svt0_l.exists(_.tip_?.isEmpty)) {
+				tip_l.map(tip_i => svt0_l.map(_.copy(tip_? = Some(tip_i))))
+			}
+			// Otherwise, all tips have already been set by the steps, so don't make any new combinations
+			else {
+				List(svt0_l)
+			}
+		}
+	}
 
 	/*
 	// Replace any missing volumes with fill volumes
 	private def addFillVolume(
-		mixture_ll: List[List[XO]],
+		mixture_ll: List[List[SourceAmount]],
 		fillVolume_l: List[LiquidVolume]
-	): List[List[X]] = {
+	): List[List[SourceVolumeTip]] = {
 		assert(mixture_ll.length == fillVolume_l.length)
 		for {
 			(mixture_l, fillVolume) <- (mixture_ll zip fillVolume_l)
@@ -391,7 +383,7 @@ class TitrateMethod(
 		}
 	}*/
 	
-	/*def printMixtureCsv(ll: List[List[X]]): Unit = {
+	/*def printMixtureCsv(ll: List[List[SourceVolumeTip]]): Unit = {
 		var i = 1
 		for (l <- ll) {
 			val x = for ((sv, volume) <- l) yield {
@@ -410,16 +402,16 @@ class TitrateMethod(
 		}
 	}*/
 	
-	private def printDestinationMixtureCsv(ll: List[(WellInfo, List[X])]): Unit = {
+	private def printDestinationMixtureCsv(ll: List[(WellInfo, List[SourceVolumeTip])]): Unit = {
 		if (ll.isEmpty) return
 		var i = 1
 		val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\",\"tip"+n+"\"").mkString(""""plate","well","tip",""", ",", "")
 		println(header)
 		for ((wellInfo, l) <- ll) {
-			val x = for (X(sv, volume, tip_?) <- l) yield {
+			val x = for (SourceVolumeTip(sv, volume, tip_?) <- l) yield {
 				val well = sv.source.l.head.well
 				val y = for {
-					aliquot <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
+					aliquot <- RsResult.from(state0.well_aliquot_m.get(well), "no liquid found in source")
 				} yield {
 					val flat = AliquotFlat(aliquot)
 					val tip_s = tip_?.map(_.toString).getOrElse("")
