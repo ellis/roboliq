@@ -4,14 +4,24 @@ import roboliq.core._
 import roboliq.entities._
 import roboliq.input.commands.PipetteSpec
 
+
+private case class XO(
+	sv: TitrateItem_SourceVolume,
+	amount_? : Option[PipetteAmount],
+	tip_? : Option[Int]
+)
+
+private case class X(
+	sv: TitrateItem_SourceVolume,
+	volume: LiquidVolume,
+	tip_? : Option[Int]
+)
+
 class TitrateMethod(
 	eb: EntityBase,
 	state0: WorldState,
 	params: TitrateActionParams
 ) {
-	type XO = (TitrateItem_SourceVolume, Option[PipetteAmount])
-	type X = (TitrateItem_SourceVolume, LiquidVolume)
-	
 	def createPipetteActionParams(): RsResult[PipetteActionParams] = {
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
@@ -34,8 +44,8 @@ class TitrateMethod(
 			wellCount = wellCountMin * replicateCount
 			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			//_ = println("params: "+params)
-			tooManyFillers_l = mixtureAmount1_l.filter(mixture => mixture.filter(_._2.isEmpty).size > 1)
-			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_._2)))
+			tooManyFillers_l = mixtureAmount1_l.filter(mixture => mixture.filter(_.amount_?.isEmpty).size > 1)
+			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_.amount_?)))
 			//_ = println("wellsPerGroup: "+wellsPerGroup)
 			//_ = println("groupCount: "+groupCount)
 			//_ = println("wellCount: "+wellCount)
@@ -87,14 +97,15 @@ class TitrateMethod(
 			val pipetteStep_l = stepOrder_l.flatMap(step => {
 				// Get items corresponding to this step
 				val l1: List[(WellInfo, List[X])]
-					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(pair => (pair._1.step eq step) && (!pair._2.isEmpty)))
+					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(x => (x.sv.step eq step) && (!x.volume.isEmpty)))
 				// There should be at most one item per destination
 				assert(l1.forall(_._2.size <= 1))
 				// Keep the destinations with exactly one item
 				val l2: List[(WellInfo, X)]
 					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
-				val (destination_l, l3) = l2.unzip
-				val (sv_l, volume_l) = l3.unzip
+				val (destination_l, x_l) = l2.unzip
+				val sv_l = x_l.map(_.sv)
+				val volume_l = x_l.map(_.volume)
 				val source_l = sv_l.map(_.source)
 				val keep_l = volume_l.map(!_.isEmpty)
 				assert(source_l.forall(s => !s.l.isEmpty))
@@ -292,7 +303,10 @@ class TitrateMethod(
 				//println("l5: "+l5.map(_.map(_._2).mkString("+")).mkString(","))
 				l5
 			case sv: TitrateItem_SourceVolume =>
-				List(List((sv, sv.amount_?)))
+				sv.step.tip match {
+					case Nil => List(List(XO(sv, sv.amount_?, None)))
+					case tip_l => List(tip_l.map(tip_i => XO(sv, sv.amount_?, Some(tip_i))))
+				}
 		}
 	}
 	
@@ -301,11 +315,11 @@ class TitrateMethod(
 		volumeTotal_? : Option[LiquidVolume]
 	): RqResult[List[List[X]]] = {
 		RqResult.toResultOfList(mixtureAmount_l.map { mixture =>
-			val (empty_l, nonempty_l) = mixture.partition(pair => pair._2.isEmpty)
+			val (empty_l, nonempty_l) = mixture.partition(pair => pair.amount_?.isEmpty)
 			var volumeWell = LiquidVolume.empty
 			var numWell = BigDecimal(0)
 			var denWell = BigDecimal(1)
-			for ((sv, amount_?) <- nonempty_l) {
+			for (XO(_, amount_?, _) <- nonempty_l) {
 				amount_? match {
 					case None =>
 					case Some(PipetteAmount_Volume(volume)) => volumeWell += volume
@@ -347,12 +361,11 @@ class TitrateMethod(
 			} yield {
 				//println("titrate:", volumeTotal, volumeNonfiller, volumeFiller, volumeDilutions, volumeWell)
 				//println()
-				mixture.map { pair =>
-					val (sv, amount_?) = pair
-					amount_? match {
-						case None => sv -> volumeFiller
-						case Some(PipetteAmount_Volume(volume)) => sv -> volume
-						case Some(PipetteAmount_Dilution(c, d)) => sv -> volumeTotal * c / d
+				mixture.map { xo =>
+					xo.amount_? match {
+						case None => X(xo.sv, volumeFiller, xo.tip_?)
+						case Some(PipetteAmount_Volume(volume)) => X(xo.sv, volume, xo.tip_?)
+						case Some(PipetteAmount_Dilution(c, d)) => X(xo.sv, volumeTotal * c / d, xo.tip_?)
 					}
 				}
 			}
@@ -400,16 +413,17 @@ class TitrateMethod(
 	private def printDestinationMixtureCsv(ll: List[(WellInfo, List[X])]): Unit = {
 		if (ll.isEmpty) return
 		var i = 1
-		val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\"").mkString(""""plate","well",""", ",", "")
+		val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\",\"tip"+n+"\"").mkString(""""plate","well","tip",""", ",", "")
 		println(header)
 		for ((wellInfo, l) <- ll) {
-			val x = for ((sv, volume) <- l) yield {
+			val x = for (X(sv, volume, tip_?) <- l) yield {
 				val well = sv.source.l.head.well
 				val y = for {
 					aliquot <- state0.well_aliquot_m.get(well).asRs("no liquid found in source")
 				} yield {
 					val flat = AliquotFlat(aliquot)
-					List("\""+flat.toMixtureString+"\"", volume.ul.toString)
+					val tip_s = tip_?.map(_.toString).getOrElse("")
+					List("\""+flat.toMixtureString+"\"", volume.ul.toString, tip_s)
 				}
 				y match {
 					case RqSuccess(l, _) => l

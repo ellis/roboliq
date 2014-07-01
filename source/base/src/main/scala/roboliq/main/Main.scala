@@ -140,8 +140,8 @@ object Main extends App {
 		val warning_l = x.getWarnings
 		if (!error_l.isEmpty || !warning_l.isEmpty) {
 			println("Warnings and Errors:")
-			error_l.foreach(println)
-			warning_l.foreach(println)
+			error_l.foreach(s => println("ERROR: "+s))
+			warning_l.foreach(s => println("WARNING: "+s))
 			println()
 		}
 	}
