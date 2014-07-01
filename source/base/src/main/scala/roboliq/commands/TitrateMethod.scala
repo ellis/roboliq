@@ -15,7 +15,9 @@ private case class SourceVolumeTip(
 	sv: TitrateItem_SourceVolume,
 	volume: LiquidVolume,
 	tip_? : Option[Int]
-)
+) {
+	override def toString = s"SVT($volume, ${tip_?})"
+}
 
 class TitrateMethod(
 	eb: EntityBase,
@@ -35,7 +37,7 @@ class TitrateMethod(
 			tooManyFillers_l = sat1_ll.filter(sat1_l => sat1_l.filter(_.amount_?.isEmpty).size > 1)
 			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_.amount_?)))
 			svt1_ll <- amountsToVolumes(sat1_ll, params.amount_?)
-			svt2_ll = combineWithTips(svt1_ll, params.tip)
+			svt2_ll = combineWithTips(svt1_ll, params.tip, 1)
 			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
 			// Number of wells required if we only use a single replicate
 			wellCountMin = svt2_ll.length
@@ -48,10 +50,11 @@ class TitrateMethod(
 			replicateCount = params.replicates_?.getOrElse(replicateCountMax)
 			wellCount = wellCountMin * replicateCount
 			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
-			svt3_ll = svt2_ll.flatMap(x => List.fill(replicateCount)(x))
+			svt3_ll = combineWithTips(svt1_ll, params.tip, replicateCount)
 			//_ = println("svt1_ll:\n"+svt1_ll)
 			//_ = println("svt2_ll:\n"+svt2_ll)
 			//_ = println("svt3_ll:\n"+svt3_ll)
+			//_ = println(replicateCount, wellCount, svt2_ll.size, svt2_ll.length, wellCountMin, wellCountMax, replicateCountMax)
 			//_ = 1/0
 		} yield {
 			val stepOrder_l = flattenSteps(itemTop)
@@ -340,10 +343,14 @@ class TitrateMethod(
 		})
 	}
 	
-	// For each well, make copies of that well for each tip in tip_l
+	/**
+	 * For each well, make copies of that well for each tip in tip_l.
+	 * If we should make replicates, iterate through tips first, then replicate that list.
+	 */
 	private def combineWithTips(
 		svt0_ll: List[List[SourceVolumeTip]],
-		tip_l: List[Int]
+		tip_l: List[Int],
+		replicateCount: Int
 	): List[List[SourceVolumeTip]] = {
 		if (tip_l.isEmpty)
 			return svt0_ll
@@ -352,11 +359,11 @@ class TitrateMethod(
 		svt0_ll.flatMap { svt0_l =>
 			// If there are any unset tips in this well:
 			if (svt0_l.exists(_.tip_?.isEmpty)) {
-				tip_l.map(tip_i => svt0_l.map(_.copy(tip_? = Some(tip_i))))
+				List.fill(replicateCount)(tip_l.map(tip_i => svt0_l.map(_.copy(tip_? = Some(tip_i))))).flatten
 			}
 			// Otherwise, all tips have already been set by the steps, so don't make any new combinations
 			else {
-				List(svt0_l)
+				svt0_l.map(svt => List.fill(replicateCount)(svt))
 			}
 		}
 	}
