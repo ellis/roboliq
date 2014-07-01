@@ -1,0 +1,17 @@
+description: |
+  Titrate to plate2 using sources on plate1, repeat for 3 tip, 4 replicates
+
+labware:
+  trough1: troughModel_100ml
+  plate1: plateModel_384_square
+
+reagents:
+  dyeLight: trough1(A01|H01)
+
+protocol:
+- titrate:
+    allOf:
+    - source: dyeLight
+      amount: [10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul, 45ul, 50ul, 55ul, 60ul, 65ul, 70ul, 75ul]
+    destination: plate1(A01|H12)
+    tip: [1, 2, 3, 4]

@@ -36,9 +36,9 @@
 - [x] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
 - [x] titrate: adapt titrate command to use new pipette methods
 - [x] titrate: add ability to combine based on tips too (in TitrateMethod.scala, add Option[Tip] to XO and X)
+- [ ] create quality control command for simple pipetting titration series
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] pipette: consider moving first washing of tips before first aspirate, even if user doesn't specify `cleanBegin`
-- [ ] create quality control command for simple pipetting titration series
 - [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] generate HDF5 file with all relevant data for statistical tests
 - [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
@@ -143,6 +143,10 @@ Here are some sample volumes for doing liquid level detection:
 ### ``test_single_distribute_10``
 
 - [ ] BUG: shouldn't produce extra cleaning commands at the beginning and end
+
+### `` test_script_qc_01``
+
+- [ ] BUG: trying to pipette 10-80ul, and once we get to 50ul, it says it can't find a valid tip model at step 100
 
 ## Config file
 
