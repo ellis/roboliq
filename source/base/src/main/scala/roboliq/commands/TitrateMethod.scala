@@ -62,39 +62,36 @@ class TitrateMethod(
 			//printMixtureCsv(stepToList_l.map(_._2))
 			val destinations = PipetteDestinations(params.destination.l.take(wellCount))
 			//println("destinations: "+destinations)
-			val destinationToMixture_l = destinations.l zip svt3_ll
-			printDestinationMixtureCsv(destinationToMixture_l)
+			val destinationToSvts_l = destinations.l zip svt3_ll
+			printDestinationMixtureCsv(destinationToSvts_l)
 			//println("len: "+stepToList_l.map(_._2.length))
 			val pipetteStep_l = stepOrder_l.flatMap(step => {
 				// Get items corresponding to this step
-				val l1: List[(WellInfo, List[SourceVolumeTip])]
-					= destinationToMixture_l.map(pair => pair._1 -> pair._2.filter(x => (x.sv.step eq step) && (!x.volume.isEmpty)))
-				// There should be at most one item per destination
-				assert(l1.forall(_._2.size <= 1))
-				// Keep the destinations with exactly one item
-				val l2: List[(WellInfo, SourceVolumeTip)]
-					= l1.filterNot(_._2.isEmpty).map(pair => pair._1 -> pair._2.head)
-				val (destination_l, x_l) = l2.unzip
-				val sv_l = x_l.map(_.sv)
-				val volume_l = x_l.map(_.volume)
+				val wellToSvt_l: List[(WellInfo, SourceVolumeTip)] = destinationToSvts_l.flatMap { case (well, svt_l) =>
+					svt_l.find(svt => svt.sv.step == step && !svt.volume.isEmpty).map(well -> _)
+				}
+				/*val (destination_l, svt_l) = l2.unzip
+				val sv_l = svt_l.map(_.sv)
+				val volume_l = svt_l.map(_.volume)
 				val source_l = sv_l.map(_.source)
 				val keep_l = volume_l.map(!_.isEmpty)
 				assert(source_l.forall(s => !s.l.isEmpty))
 				val sdv0_l = (sv_l, destination_l, volume_l).zipped.toList
 				// Remove empty volumes
-				val sdv_l = sdv0_l.filterNot({x => x._3.isEmpty})
-				sdv_l.map { case (sv, destination, volume) =>
+				//val sdv_l = sdv0_l.filterNot({x => x._3.isEmpty})
+				val sdv_l = sdv0_l.filterNot({x => x._3.isEmpty})*/
+				wellToSvt_l.map { case (destination, svt) =>
 					PipetteStepParams(
-						Some(sv.source),
+						Some(svt.sv.source),
 						Some(PipetteDestination(destination)),
-						Some(PipetteAmount_Volume(volume)),
+						Some(PipetteAmount_Volume(svt.volume)),
 						step.pipettePolicy_?,
 						// I'm not sure how to set the cleaning params here, since the titrate step contains an entire group of pipetting steps.
 						None, // clean_?
 						step.cleanBefore_?, // cleanBefore_?
 						step.cleanBetween_?, // cleanAfter_?
 						step.tipModel_?,
-						None
+						svt.tip_?
 					)
 				}
 			}) //.filterNot(_.sources.sources.isEmpty)
