@@ -1,0 +1,18 @@
+description: |
+  Titrate to plate2 using sources on plate1, repeat for each tip
+
+labware:
+  plate1: plateModel_96_dwp
+  plate2: plateModel_96_nunc_transparent
+
+reagents:
+  reagent1: plate1(A01)
+
+protocol:
+- titrate:
+    allOf:
+    - source: [reagent1]
+      tip: [1, 2, 3, 4]
+      amount: 20ul
+    destination: plate2(A01|H12)
+    replicates: 1

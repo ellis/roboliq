@@ -305,7 +305,7 @@ class TitrateMethod(
 			case sv: TitrateItem_SourceVolume =>
 				sv.step.tip match {
 					case Nil => List(List(XO(sv, sv.amount_?, None)))
-					case tip_l => List(tip_l.map(tip_i => XO(sv, sv.amount_?, Some(tip_i))))
+					case tip_l => tip_l.map(tip_i => List(XO(sv, sv.amount_?, Some(tip_i))))
 				}
 		}
 	}
