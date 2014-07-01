@@ -302,6 +302,7 @@ class PipetteMethod {
 					}
 					// Get the subset valid tip models for this item's source mixture and volume
 					tipModel_l = device.getDispenseAllowableTipModels(tipModelPossible_l, mixtureSrc, step.v)
+					_ = println("tipModel_l: "+tipModel_l)
 					_ <- RsResult.assert(!tipModel_l.isEmpty, s"step ${step_i + 1}: no valid tip models founds")
 					// Update state
 					event_l = getWellEventsA(step)
