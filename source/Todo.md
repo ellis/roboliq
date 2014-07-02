@@ -37,6 +37,7 @@
 - [x] titrate: adapt titrate command to use new pipette methods
 - [x] titrate: add ability to combine based on tips too (in TitrateMethod.scala, add Option[Tip] to XO and X)
 - [x] pipetteMethod: decrement tip indices so that we get the right tips!
+- [ ] continue testing from test_single_pipette_07.prot
 - [ ] create quality control command for simple pipetting titration series
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] pipette: consider moving first washing of tips before first aspirate, even if user doesn't specify `cleanBegin`

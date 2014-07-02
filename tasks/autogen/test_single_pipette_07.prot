@@ -1,5 +1,5 @@
 description: |
-  Distribute source from single well to entire column using the pipette command; override `clean: none`
+  Distribute source from single well to entire column using the pipette command; override `clean: thorough`
 
 labware:
   plate1: plateModel_96_nunc_transparent
@@ -12,4 +12,4 @@ protocol:
     source: plate1(A01)
     destination: plate1(A02|H02)
     amount: 20ul
-    clean: none
+    clean: thorough
