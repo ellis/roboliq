@@ -12,5 +12,5 @@ protocol:
     source: plate1(A01)
     destination: plate1(A02|H02)
     amount: 20ul
-    pipettePolicy: "Roboliq_Water_Air_1000"
+    pipettePolicy: "Roboliq_Water_Wet_1000"
     cleanBetweenSameSource: none

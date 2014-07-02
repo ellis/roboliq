@@ -1,16 +1,33 @@
 description: |
-  Distribute source from single well to entire column using the pipette command; override `pipettePolicy` and `cleanBetweenSameSource`
+  Distribute source from two sources to two columns using the pipette command; override `pipettePolicy` and `cleanBetweenSameSource`
 
 labware:
   plate1: plateModel_96_nunc_transparent
 
 reagents:
-  reagent1: plate1(A01)
+  reagent1: plate1(A01|D01)
+  reagent2: plate1(E01|H01)
 
 protocol:
 - pipette:
-    source: plate1(A01)
-    destination: plate1(A02|H02)
+    steps:
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent1}
+    - {s: reagent2}
+    - {s: reagent2}
+    - {s: reagent2}
+    - {s: reagent2}
+    - {s: reagent2}
+    - {s: reagent2}
+    - {s: reagent2}
+    - {s: reagent2}
+    destination: plate1(A02|H03)
     amount: 20ul
     pipettePolicy: "Roboliq_Water_Air_1000"
     cleanBetweenSameSource: none

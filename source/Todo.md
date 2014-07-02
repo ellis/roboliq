@@ -37,7 +37,8 @@
 - [x] titrate: adapt titrate command to use new pipette methods
 - [x] titrate: add ability to combine based on tips too (in TitrateMethod.scala, add Option[Tip] to XO and X)
 - [x] pipetteMethod: decrement tip indices so that we get the right tips!
-- [ ] continue testing from test_single_pipette_07.prot
+- [ ] continue testing from test_single_pipette_11.prot
+- [ ] distribute: change to use new pipetting method
 - [ ] create quality control command for simple pipetting titration series
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] pipette: consider moving first washing of tips before first aspirate, even if user doesn't specify `cleanBegin`
@@ -129,15 +130,11 @@ Here are some sample volumes for doing liquid level detection:
 
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
 - [ ] Why is P1 not recognized?
+- [ ] Both plan1.dot and plan.dot are produced -- only create one of them
 
 ### ``test_single_distribute_3``
 
 - [ ] BUG: can produce bad transport commands, since it doesn't consider that one plate is already on the bench
-
-### ``test_single_distribute_4``
-
-- [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
-- [ ] Both plan1.dot and plan.dot are produced -- only create one of them
 
 ### ``test_single_distribute_6``
 
