@@ -36,7 +36,7 @@
 - [x] PipetteHelper.choosePreAspirateWashSpec and cToInstruction for letting user specify cleanBetweenSameSource
 - [x] titrate: adapt titrate command to use new pipette methods
 - [x] titrate: add ability to combine based on tips too (in TitrateMethod.scala, add Option[Tip] to XO and X)
-- [ ] pipetteMethod: decrement tip indices so that we get the right tips!
+- [x] pipetteMethod: decrement tip indices so that we get the right tips!
 - [ ] create quality control command for simple pipetting titration series
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] pipette: consider moving first washing of tips before first aspirate, even if user doesn't specify `cleanBegin`
@@ -54,6 +54,7 @@
 - [ ] create test to execute all test_*.prot files and compare current output to previously accepted output
 - [ ] rather than printing Pop search to the console, construct a search tree object and then write a dot file (even in case of error)
 - [ ] titrate: order pipette steps either by destination or by source (default to source)
+- [ ] PipetteAmount parser: allow for function: step vs count, linear vs exponential; rangeStepLin(from, to, size), rangeStepExp(from, to, size, multipleOf), rangeCountLin(from, to, count, multipleOf), rangeCountExp(from, to, count, multipleOf)
 
 ## Pipetting, dilution, mixtures, etc
 
@@ -147,7 +148,7 @@ Here are some sample volumes for doing liquid level detection:
 
 ### `` test_script_qc_01``
 
-- [ ] BUG: trying to pipette 10-80ul, and once we get to 50ul, it says it can't find a valid tip model at step 100
+- [ ] BUG: missing initial wash
 
 ## Config file
 
@@ -168,6 +169,7 @@ Here are some sample volumes for doing liquid level detection:
 - [ ] rename 'protocol' section to 'instructions'?
 - [ ] instead of '- transfer:\n    source: ...', use '- name: transfer\n  source: ...'?
 - [ ] for action params, consider using 'amount' instead of 'volume', and perhaps also PipetteAmount instead of LiquidVolume.
+- [ ] Converter: CleanIntensity: should produce an error instead of crashing when provided with an unrecognized value
 
 ## AI planning flow
 

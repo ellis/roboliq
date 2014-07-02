@@ -289,7 +289,7 @@ class PipetteMethod {
 					tip_l <- step.tip_? match {
 						case None => RsSuccess(tipAll_l)
 						case Some(tip_i) =>
-							tipAll_l.find(_.index == tip_i) match {
+							tipAll_l.find(_.index == tip_i - 1) match {
 								case None => RsError(s"invalid tip index ${tip_i}")
 								case Some(tip) => RsSuccess(List(tip))
 							}
