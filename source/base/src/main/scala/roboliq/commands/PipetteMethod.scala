@@ -576,7 +576,9 @@ class PipetteMethod {
 				}
 				// Otherwise, the cleaning should be handled in the standard manner:
 				else {
-					val tipOverrides = TipHandlingOverrides(None, params.cleanBetween_?.orElse(params.clean_?), None, None, None)
+					// Override cleaning; if this is the first instruction, then only check params.clean_?; otherwise check both cleanBetween_? and clean_?
+					val cleanOverride_? = if (path.action_r.isEmpty) params.clean_? else params.cleanBetween_?.orElse(params.clean_?)
+					val tipOverrides = TipHandlingOverrides(None, cleanOverride_?, None, None, None)
 					// TODO: FIXME: need to handle explicit StepA_Clean steps -- right now they are just ignored
 					val refresh = PipetterTipsRefresh(pipetter, pipetteC_l.map(stepC => {
 						val tipState = path.state.getTipState(stepC.tip)

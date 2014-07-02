@@ -149,11 +149,7 @@ Here are some sample volumes for doing liquid level detection:
 
 ### ``test_single_pipette_10``
 
-- [ ] BUG: missing initial wash
-
-### `` test_script_qc_01``
-
-- [ ] BUG: missing initial wash
+- [x] BUG: missing initial wash
 
 ## Config file
 
