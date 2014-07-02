@@ -1,5 +1,5 @@
 description: |
-  Distribute source from single well to entire column using the pipette command; override `pipettePolicy` and `cleanBetweenSameSource`
+  Distribute source from single well to entire column using the pipette command; override `cleanEnd`
 
 labware:
   plate1: plateModel_96_nunc_transparent
@@ -13,4 +13,4 @@ protocol:
     destination: plate1(A02|H02)
     amount: 20ul
     pipettePolicy: "Roboliq_Water_Air_1000"
-    cleanBetweenSameSource: none
+    cleanEnd: none

@@ -147,6 +147,10 @@ Here are some sample volumes for doing liquid level detection:
 
 - [ ] BUG: shouldn't produce extra cleaning commands at the beginning and end
 
+### ``test_single_pipette_10``
+
+- [ ] BUG: missing initial wash
+
 ### `` test_script_qc_01``
 
 - [ ] BUG: missing initial wash
