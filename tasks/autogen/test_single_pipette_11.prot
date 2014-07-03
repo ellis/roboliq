@@ -1,5 +1,5 @@
 description: |
-  Distribute source from single well to entire column using the pipette command; override `pipettePolicy` and `cleanBetweenSameSource`
+  Distribute source from single well to entire column using the pipette command; override `pipettePolicy` and `cleanBetweenSameSource`; the cleanBetweenSameSource should have no impact, because we're not doing air dispense
 
 labware:
   plate1: plateModel_96_nunc_transparent

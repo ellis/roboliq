@@ -4,6 +4,7 @@
 
 - [ ] handle tubes
 - [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
+- [ ] configurable cleaning logic (really not sure how to do this best)
 - [ ] `measureAbsorbance` command
 - [ ] `dilute` command for stflow
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
@@ -18,6 +19,7 @@
 - [ ] input files need to have version number of language, so that later old versions can be read in (can optionally also pass version to an individual command?)
 - [ ] support multi-dispense
 - [ ] support multi-aspirate
+- [ ] read in data file about pipetting accuracy, and produce confidence intervals about various volumes dispensed in a well
 
 ## Current goal
 
@@ -37,7 +39,7 @@
 - [x] titrate: adapt titrate command to use new pipette methods
 - [x] titrate: add ability to combine based on tips too (in TitrateMethod.scala, add Option[Tip] to XO and X)
 - [x] pipetteMethod: decrement tip indices so that we get the right tips!
-- [ ] continue testing from test_single_pipette_11.prot
+- [x] continue testing from test_single_pipette_11.prot
 - [ ] distribute: change to use new pipetting method
 - [ ] create quality control command for simple pipetting titration series
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
