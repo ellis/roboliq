@@ -23,10 +23,25 @@
 - [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too (e.g., start with `loop` command, but also embedded measurement commands during pipetting)
 - [ ] conditional branching and feedback loops
 - [ ] improve error and warning output, so that the user knows which command or config entry is causing the problem
+- [ ] REFACTOR: merge EntityBase, AtomBase, and WorldState into WorldState, using atoms as much as possible
+- [ ] add execution capability to time the execution of different commands, which can then be used to predict duration of operations too
 
 ## Current goal
 
+- [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+
+## HDF5
+
+- [x] main: create an HDF5 file
+- [ ] main: put commands in HDF5 file
+- [ ] main: HDF5: substance
+- [ ] main: HDF5: source mixture
+- [ ] main: HDF5: source well
+- [ ] main: HDF5: source well usage
+- [ ] main: HDF5: aspirate/dispense/clean
+- [ ] main: HDF5: well mixture
+- [ ] during execution, record start and end times of commands
 
 ## Pipetting accuracy
 
@@ -114,17 +129,6 @@ Here are some sample volumes for doing liquid level detection:
     66,74,83,94,
     110,120,130,150]
 
-## HDF5
-
-- [ ] main: create an HDF5 file
-- [ ] main: put commands in HDF5 file
-- [ ] main: HDF5: substance
-- [ ] main: HDF5: source mixture
-- [ ] main: HDF5: source well
-- [ ] main: HDF5: source well usage
-- [ ] main: HDF5: aspirate/dispense/clean
-- [ ] main: HDF5: well mixture
-
 ## Tests
 
 * distribute from tube to tube
@@ -134,7 +138,6 @@ Here are some sample volumes for doing liquid level detection:
 
 - [ ] Pipetting uses "POLICY"; use a real policy instead, preferably configurable
 - [ ] Why is P1 not recognized?
-- [ ] Both plan1.dot and plan.dot are produced -- only create one of them
 
 ### ``test_single_distribute_3``
 
@@ -167,7 +170,7 @@ Here are some sample volumes for doing liquid level detection:
 
 ## AI planning flow
 
-- [?] Main: update world state while creating instructions from actions (see Main.getInstruction)
+- [x] Main: update world state while creating instructions from actions (see Main.getInstruction)
 - [ ] ActionHandler_Distribute: for the second version, for pipetting between two pieces of labware
 - [ ] ActionHandler: getSignature -> getSignatures?
 - [ ] REFACTOR: merge roboliq.input.commands.Command and roboliq.input.commands.Action to a single trait Instruction

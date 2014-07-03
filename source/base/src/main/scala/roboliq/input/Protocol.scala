@@ -93,8 +93,7 @@ class Protocol {
 			new DistributeActionHandler,
 			new PipetteActionHandler,
 			new ShakePlateActionHandler,
-			new TitrateActionHandler,
-			new TransferActionHandler
+			new TitrateActionHandler
 		)
 		val operatorHandler_l = List[OperatorHandler](
 			new DistributeOperatorHandler(1),
@@ -110,10 +109,6 @@ class Protocol {
 			new TitrateOperatorHandler(2),
 			new TitrateOperatorHandler(3),
 			new TitrateOperatorHandler(4),
-			new TransferOperatorHandler(1),
-			new TransferOperatorHandler(2),
-			new TransferOperatorHandler(3),
-			new TransferOperatorHandler(4),
 			new OperatorHandler_TransportLabware
 		)
 		val autoHandler_l = List("transportLabware")

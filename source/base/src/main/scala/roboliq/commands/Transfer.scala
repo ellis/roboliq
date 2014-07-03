@@ -1,4 +1,4 @@
-package roboliq.commands
+/*package roboliq.commands
 
 import scala.reflect.runtime.universe
 
@@ -22,7 +22,6 @@ import roboliq.entities.WellInfo
 import roboliq.entities.WorldState
 import roboliq.input.Converter
 import roboliq.input.commands.PipetteSpec
-import roboliq.method.PipetteMethod
 import roboliq.plan.ActionHandler
 import roboliq.plan.AgentInstruction
 import roboliq.plan.OperatorHandler
@@ -250,3 +249,4 @@ class TransferOperatorHandler(n: Int) extends OperatorHandler {
 	}
 	
 }
+*/

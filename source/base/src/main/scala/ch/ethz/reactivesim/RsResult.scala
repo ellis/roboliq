@@ -104,6 +104,11 @@ object RsResult {
 		}
 	}
 	
+	def from[ERR, A](either: Either[ERR, A]): RsResult[A] = either match {
+		case Right(a) => RsSuccess(a)
+		case Left(err) => RsError(err.toString)
+	}
+	
 	def from[A](opt: Option[A], error: => String): RsResult[A] = opt match {
 		case Some(x) => RsSuccess(x)
 		case None => RsError(error)

@@ -26,6 +26,7 @@ import roboliq.entities.AliquotFlat
 import roboliq.plan.OperatorInfo
 import roboliq.plan.AgentInstruction
 import spray.json.JsValue
+import roboliq.hdf5.Hdf5
 
 case class Opt(
 	configFile: File = null,
@@ -83,22 +84,24 @@ object Main extends App {
 			filenameActions0 = new File(dirOutput, "actions0.lst").getPath
 			filenamePlan1 = new File(dirOutput, "plan1.dot").getPath
 			filenamePlan = new File(dirOutput, "plan.dot").getPath
+			filenameHdf5 = new File(dirOutput, "data.hdf5").getPath
+			hdf5 = new Hdf5(filenameHdf5)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
 			_ = roboliq.utils.FileUtils.writeToFile(filenameActions0, plan0.action_l.mkString("\n"))
 			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
-			plan2 <- aiplan.strips2.Pop.stepToEnd(step0).asRs
+			plan2 <- RsResult.from(aiplan.strips2.Pop.stepToEnd(step0))
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan1, plan2.toDot(showInitialState=true))
-			_ = println("plan2:")
-			_ = println(plan2.toDot(showInitialState=false))
-			_ = println("orderings: "+plan2.orderings.getMinimalMap)
-			plan3 <- aiplan.strips2.Pop.groundPlan(plan2).asRs
+			//_ = println("plan2:")
+			//_ = println(plan2.toDot(showInitialState=false))
+			//_ = println("orderings: "+plan2.orderings.getMinimalMap)
+			plan3 <- RsResult.from(aiplan.strips2.Pop.groundPlan(plan2))
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan, plan3.toDot(showInitialState=true))
-			_ = println("plan3:")
-			_ = println(plan3.toDot(showInitialState=false))
+			//_ = println("plan3:")
+			//_ = println(plan3.toDot(showInitialState=false))
 			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)
-			ordering_l <- plan3.orderings.getSequence.asRs.map(_.filter(_ >= 2))
+			ordering_l <- RsResult.from(plan3.orderings.getSequence).map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
 			// Instructions
 			instruction_l <- getInstructions(protocol, cs, plan3, originalActionCount, planInfo_l, ordering_l)
@@ -154,7 +157,6 @@ object Main extends App {
 		planInfo_l: List[OperatorInfo],
 		ordering_l: List[Int]
 	): RsResult[List[AgentInstruction]] = {
-		var state = protocol.state0
 		for {
 			pair <- RsResult.fold((List[AgentInstruction](), protocol.state0.toImmutable), ordering_l) { (acc, action_i) =>
 				val (l, state) = acc
