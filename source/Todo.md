@@ -4,7 +4,7 @@
 
 - [ ] handle tubes
 - [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
-- [ ] configurable cleaning logic (really not sure how to do this best)
+- [ ] configurable cleaning logic (really not sure how to do this best; don't use current approach of calling a sub-routine)
 - [ ] `measureAbsorbance` command
 - [ ] `dilute` command for stflow
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
@@ -20,6 +20,9 @@
 - [ ] support multi-dispense
 - [ ] support multi-aspirate
 - [ ] read in data file about pipetting accuracy, and produce confidence intervals about various volumes dispensed in a well
+- [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too (e.g., start with `loop` command, but also embedded measurement commands during pipetting)
+- [ ] conditional branching and feedback loops
+- [ ] improve error and warning output, so that the user knows which command or config entry is causing the problem
 
 ## Current goal
 
@@ -41,16 +44,15 @@
 - [x] pipetteMethod: decrement tip indices so that we get the right tips!
 - [x] continue testing from test_single_pipette_11.prot
 - [x] distribute: change to use new pipetting method
-- [ ] create quality control command for simple pipetting titration series
+- [ ] generate HDF5 file with all relevant data for statistical tests
+- [ ] randomize well positions
+- [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] pipette: consider moving first washing of tips before first aspirate, even if user doesn't specify `cleanBegin`
-- [ ] create commands for measuring absorbance, fluorescence, weight
-- [ ] generate HDF5 file with all relevant data for statistical tests
+- [ ] create quality control command for simple pipetting titration series
 - [ ] create R file to analyze pipetting accuracy and precision based on HDF5 and readouts
-- [ ] randomize well positions
 - [ ] analyze reader variance
 - [ ] calibrate reader
-- [ ] create reader command
 - [ ] extend pipetting commands to allow for inserting reader commands between pipetting layers
 - [ ] create command to run the R code?
 - [ ] create the more complicated accuracy tests that involve weighing and stuff
@@ -141,14 +143,6 @@ Here are some sample volumes for doing liquid level detection:
 ### ``test_single_distribute_6``
 
 - [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing th volume used in the whole trough.
-
-### ``test_single_distribute_10``
-
-- [ ] BUG: shouldn't produce extra cleaning commands at the beginning and end
-
-### ``test_single_pipette_10``
-
-- [x] BUG: missing initial wash
 
 ## Config file
 
