@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Strips._
 import aiplan.strips2.Unique
@@ -9,36 +8,43 @@ import grizzled.slf4j.Logger
 import roboliq.core.RqResult
 import roboliq.entities.Agent
 import roboliq.entities.CleanIntensity
-import roboliq.entities.LiquidVolume
+import roboliq.entities.LiquidSource
+import roboliq.entities.PipetteAmount
 import roboliq.entities.PipetteDestinations
-import roboliq.entities.PipettePosition
-import roboliq.entities.PipetteSources
 import roboliq.entities.Pipetter
 import roboliq.entities.TipModel
 import roboliq.entities.WorldState
 import roboliq.input.Converter
-import roboliq.input.commands.PipetteSpec
-import roboliq.method.PipetteMethod
 import roboliq.plan.ActionHandler
 import roboliq.plan.AgentInstruction
 import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.entities.PipetteSources
 
 
 case class DistributeActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	source: String,
-	destination: String
+	source: LiquidSource,
+	destination: PipetteDestinations,
+	amount: PipetteAmount,
+	clean_? : Option[CleanIntensity.Value],
+	cleanBegin_? : Option[CleanIntensity.Value],
+	cleanBetween_? : Option[CleanIntensity.Value],
+	cleanBetweenSameSource_? : Option[CleanIntensity.Value],
+	cleanEnd_? : Option[CleanIntensity.Value],
+	pipettePolicy_? : Option[String],
+	tipModel_? : Option[TipModel],
+	tip_? : Option[Int]
 )
 
 class DistributeActionHandler extends ActionHandler {
 
 	def getActionName = "distribute"
 
-	def getActionParamNames = List("agent", "device", "source", "destination", "volume", "clean", "cleanBefore", "cleanBetween", "cleanAfter", "tipModel", "pipettePolicy")
+	def getActionParamNames = List("agent", "device", "source", "destination", "amount", "clean", "cleanBegin", "cleanBetween", "cleanBetweenSameSource", "cleanEnd", "pipettePolicy", "tipModel", "tip")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -48,11 +54,9 @@ class DistributeActionHandler extends ActionHandler {
 	): RqResult[OperatorInfo] = {
 		for {
 			params <- Converter.convActionAs[DistributeActionParams](paramToJsval_l, eb, state0)
-			sources <- eb.lookupLiquidSources(params.source, state0)
-			destinations <- eb.lookupLiquidDestinations(params.destination, state0)
 		} yield {
-			val sourceLabware_l = sources.sources.flatMap(_.l.map(_.labwareName))
-			val destinationLabware_l = destinations.l.map(_.labwareName)
+			val sourceLabware_l = params.source.l.map(_.labwareName)
+			val destinationLabware_l = params.destination.l.map(_.labwareName)
 			val labwareIdent_l = (sourceLabware_l ++ destinationLabware_l).distinct
 			val n = labwareIdent_l.size
 
@@ -69,21 +73,6 @@ class DistributeActionHandler extends ActionHandler {
 	}
 }
 
-
-case class DistributeInstructionParams(
-	agent_? : Option[String],
-	device_? : Option[String],
-	source: PipetteSources,
-	destination: PipetteDestinations,
-	volume: List[LiquidVolume],
-	contact_? : Option[PipettePosition.Value],
-	clean_? : Option[CleanIntensity.Value],
-	cleanBefore_? : Option[CleanIntensity.Value],
-	cleanBetween_? : Option[CleanIntensity.Value],
-	cleanAfter_? : Option[CleanIntensity.Value],
-	tipModel_? : Option[TipModel],
-	pipettePolicy_? : Option[String]
-)
 
 class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 	private val logger = Logger[this.type]
@@ -120,22 +109,23 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 	): RqResult[List[AgentInstruction]] = {
 		for {
 			agent <- eb.getEntityAs[Agent](operator.paramName_l(0))
-			device <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
-			params <- Converter.convInstructionAs[DistributeInstructionParams](instructionParam_m, eb, state0)
-			spec = PipetteSpec(
-				params.source,
-				params.destination,
-				params.volume,
-				params.pipettePolicy_?,
-				params.clean_?,
-				params.cleanBefore_?,
-				params.cleanBetween_?,
-				params.cleanAfter_?,
-				params.tipModel_?
+			pipetter <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
+			params <- Converter.convInstructionAs[DistributeActionParams](instructionParam_m, eb, state0)
+			pipetteActionParams = PipetteActionParams(
+				source_? = Some(PipetteSources(List(params.source))),
+				destination_? = Some(params.destination),
+				amount = List(params.amount),
+				clean_? = params.clean_?,
+				cleanBegin_? = params.cleanBegin_?,
+				cleanBetween_? = params.cleanBetween_?,
+				cleanBetweenSameSource_? = params.cleanBetweenSameSource_?,
+				cleanEnd_? = params.cleanEnd_?,
+				pipettePolicy_? = params.pipettePolicy_?,
+				tipModel_? = params.tipModel_?,
+				tip_? = params.tip_?,
+				steps = Nil
 			)
-			action_l <- new PipetteMethod().run(eb, state0, spec, device)
-		} yield {
-			action_l.map(x => AgentInstruction(agent, x))
-		}
+			instruction_l <- new PipetteMethod().run(agent, pipetter, pipetteActionParams, eb, state0)
+		} yield instruction_l
 	}
 }

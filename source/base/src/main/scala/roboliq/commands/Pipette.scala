@@ -36,8 +36,8 @@ import spray.json.JsValue
  * @param cleanEnd_? Clean after pipetting ends
  */
 case class PipetteActionParams(
-	destination_? : Option[PipetteDestinations],
 	source_? : Option[PipetteSources],
+	destination_? : Option[PipetteDestinations],
 	amount: List[PipetteAmount],
 	clean_? : Option[CleanIntensity.Value],
 	cleanBegin_? : Option[CleanIntensity.Value],

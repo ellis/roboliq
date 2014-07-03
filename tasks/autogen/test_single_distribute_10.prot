@@ -12,5 +12,5 @@ protocol:
 - distribute:
     source: water
     destination: plate2(A01|H01)
-    volume: 20ul
+    amount: 20ul
     clean: light

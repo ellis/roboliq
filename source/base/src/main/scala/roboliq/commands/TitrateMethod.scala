@@ -99,8 +99,8 @@ class TitrateMethod(
 				}
 			}) //.filterNot(_.sources.sources.isEmpty)
 			PipetteActionParams(
-				destination_? = None,
 				source_? = None,
+				destination_? = None,
 				amount = Nil,
 				clean_? = params.clean_?,
 				cleanBegin_? = params.cleanBegin_?,
