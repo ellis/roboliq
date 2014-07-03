@@ -29,7 +29,7 @@ case class DistributeActionParams(
 	device_? : Option[String],
 	source: LiquidSource,
 	destination: PipetteDestinations,
-	amount: PipetteAmount,
+	amount: List[PipetteAmount],
 	clean_? : Option[CleanIntensity.Value],
 	cleanBegin_? : Option[CleanIntensity.Value],
 	cleanBetween_? : Option[CleanIntensity.Value],
@@ -114,7 +114,7 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 			pipetteActionParams = PipetteActionParams(
 				source_? = Some(PipetteSources(List(params.source))),
 				destination_? = Some(params.destination),
-				amount = List(params.amount),
+				amount = params.amount,
 				clean_? = params.clean_?,
 				cleanBegin_? = params.cleanBegin_?,
 				cleanBetween_? = params.cleanBetween_?,
