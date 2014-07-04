@@ -15,13 +15,19 @@ case class InstructionEntry(
 	def this() = this("", 0, "", "")
 }
 
-
 object InstructionEntry {
 	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[InstructionEntry] = {
 		import HDF5CompoundMemberMapping.mapping
 		reader.getType("Instruction", classOf[InstructionEntry], mapping("scriptId").length(50), mapping("instructionIndex"), mapping("agent").length(25), mapping("description").length(255))
 	}
 }
+
+case class DispenseEntry(
+	
+) {
+	
+}
+
 
 class Hdf5(
 	filename: String
