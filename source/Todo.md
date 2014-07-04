@@ -67,6 +67,9 @@ scriptId, sourceName, amount
 Aspirate/Dispense/Clean table:
 scriptId, cmd#, tip, A(sp)/D(is)/C(lean), wells
 
+Well dispense table:
+scriptId, cmd#, well, substance, amount, tip
+
 Well mixture table:
 scriptId, cmd#, well, substance, amount
 
@@ -100,8 +103,12 @@ See my notes in bsse-ver/lab/qc/PipettingTest.md
 - [x] pipetteMethod: decrement tip indices so that we get the right tips!
 - [x] continue testing from test_single_pipette_11.prot
 - [x] distribute: change to use new pipetting method
+- [ ] test_script_qc_2: rename trough positions to R1-R6
+- [ ] test_script_qc_2: explicitly set labware positions
+- [ ] test_script_qc_2: get better table file that has troughs next to P2
 - [ ] generate HDF5 file with all relevant data for statistical tests
 - [ ] randomize well positions
+- [ ] titrate: allow for pipettePolicy combinations too
 - [ ] create commands for measuring absorbance, fluorescence, weight
 - [ ] pipette: should wash tips immediately after use, don't wait till end of pipetting procedure (though doing so might reduce number of washes in some cases)
 - [ ] pipette: consider moving first washing of tips before first aspirate, even if user doesn't specify `cleanBegin`
