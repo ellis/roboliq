@@ -35,12 +35,13 @@
 
 - [x] main: create an HDF5 file
 - [x] main: put instructions in HDF5 file
+- [ ] main: HDF5: well mixture (version 1)
 - [ ] main: HDF5: substance
 - [ ] main: HDF5: source mixture
 - [ ] main: HDF5: source well
 - [ ] main: HDF5: source well usage
 - [ ] main: HDF5: aspirate/dispense/clean
-- [ ] main: HDF5: well mixture
+- [ ] main: HDF5: well mixture (version 2)
 - [ ] during execution, record start and end times of commands
 
 scriptId: should probably be an MD5 hash of the input files
