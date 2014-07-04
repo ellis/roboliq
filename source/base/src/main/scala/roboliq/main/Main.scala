@@ -111,6 +111,7 @@ object Main extends App {
 			//state <- JshopTranslator.translate(protocol, plan)
 			//_ = println("result: " + result)
 		} yield {
+			hdf5.addInstructions(opt.protocolFile.getName(), instruction_l)
 			val builder_l = protocol.agentToBuilder_m.values.toSet
 			for (scriptBuilder <- builder_l) {
 				val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath

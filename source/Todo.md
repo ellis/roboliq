@@ -34,7 +34,7 @@
 ## HDF5
 
 - [x] main: create an HDF5 file
-- [ ] main: put commands in HDF5 file
+- [x] main: put instructions in HDF5 file
 - [ ] main: HDF5: substance
 - [ ] main: HDF5: source mixture
 - [ ] main: HDF5: source well
@@ -43,7 +43,47 @@
 - [ ] main: HDF5: well mixture
 - [ ] during execution, record start and end times of commands
 
+scriptId: should probably be an MD5 hash of the input files
+
+Instruction table:
+scriptId, cmd#, agent, description
+
+Substance table:
+scriptId, substance
+
+SourceMixture table:
+scriptId, sourceName, substance, amount
+
+SourceWell table:
+scriptId, well, sourceName, amount
+
+SourceWellUsage table:
+scriptId, well, amount
+
+Source usage table: (do we want this?  It's duplicated information that could be queried from the SourceWell and SourceWellUsage tables)
+scriptId, sourceName, amount
+
+Aspirate/Dispense/Clean table:
+scriptId, cmd#, tip, A(sp)/D(is)/C(lean), wells
+
+Well mixture table:
+scriptId, cmd#, well, substance, amount
+
+Run -> Script (each run gets its own id and has a parent script id)
+runId, scriptId
+
+Aspirate/Dispense times table:
+runId, cmd#, time
+
+Measurement table:
+runId, cmd#, object, variable, value
+
+Files:
+should also store copies of the input files
+
 ## Pipetting accuracy
+
+See my notes in bsse-ver/lab/qc/PipettingTest.md
 
 - [x] Update an AtomBase in EntityBase
 - [x] Need to let Distribute accept a reagent as the source, but requires knowing which labware the reagent is in, which is State information instead of EntityBase
