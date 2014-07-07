@@ -71,7 +71,7 @@ Well dispense table:
 scriptId, cmd#, well, substance, amount, tip
 
 Well mixture table:
-scriptId, cmd#, well, substance, amount
+scriptId, cmd#, well, mixture, amount
 
 Run -> Script (each run gets its own id and has a parent script id)
 runId, scriptId
