@@ -1,0 +1,266 @@
+package roboliq.input
+
+import scala.collection.generic.CanBuildFrom
+import scala.language.higherKinds
+
+import ch.ethz.reactivesim.RsError
+import ch.ethz.reactivesim.RsResult
+import ch.ethz.reactivesim.RsSuccess
+import roboliq.entities.Aliquot
+import roboliq.entities.Entity
+import roboliq.entities.EntityBase
+import roboliq.entities.Labware
+import roboliq.entities.LabwareModel
+import roboliq.entities.Well
+import roboliq.entities.WorldState
+import roboliq.entities.WorldStateBuilder
+
+
+/**
+ * ProtocolState should carry the eb, current world state, current command, current instruction, warnings and errors, and various HDF5 arrays
+ */
+case class ProtocolData(
+	protocol: Protocol,
+	eb: EntityBase,
+	state: WorldState,
+	command: List[Int],
+	instruction: List[Int],
+	warning_r: List[String],
+	error_r: List[String],
+	well_aliquot_r: List[(List[Int], Well, Aliquot)]
+) {
+	def setState(state: WorldState): ProtocolData =
+		copy(state = state)
+	
+	def setCommand(idx: List[Int]): ProtocolData =
+		copy(command = idx, instruction = Nil)
+
+	def setInstruction(idx: List[Int]): ProtocolData =
+		copy(instruction = idx)
+	
+	def log[A](res: RsResult[A]): ProtocolData = {
+		res match {
+			case RsSuccess(_, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r)
+			case RsError(error_l, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r, error_r = error_l.reverse.map(prefixMessage) ++ this.error_r)
+		}
+	}
+	
+	def logWarning(s: String): ProtocolData = {
+		copy(warning_r = prefixMessage(s) :: warning_r)
+	}
+	
+	def logError(s: String): ProtocolData = {
+		copy(error_r = prefixMessage(s) :: error_r)
+	}
+	
+	def prefixMessage(s: String): String = {
+		(command, instruction) match {
+			case (Nil, Nil) => s
+			case (c, Nil) => s"Command ${c.mkString(".")}: $s" 
+			case (Nil, i) => s"Instruction ${i.mkString(".")}: $s" 
+			case (c, i) => s"Command ${c.mkString(".")}: Instruction ${i.mkString(".")}: $s" 
+		}
+	}
+}
+
+/*
+sealed trait Context[+A] {
+	def run(data: ProtocolData): (ProtocolData, A)
+	
+	def map[B](f: A => B): Context[B] = {
+		Context { data =>
+			val (data1, a) = run(data)
+			(data1, f(a))
+		}
+	}
+	
+	def flatMap[B](f: A => Context[B]): Context[B] = {
+		Context { data =>
+			val (data1, a) = run(data)
+			f(a).run(data1)
+		}
+	}
+}
+*/
+sealed trait Context[+A] {
+	def run(data: ProtocolData): (ProtocolData, Option[A])
+	
+	def map[B](f: A => B): Context[B] = {
+		Context { data =>
+			if (data.error_r.isEmpty) {
+				val (data1, optA) = run(data)
+				val optB = optA.map(f)
+				(data1, optB)
+			}
+			else {
+				(data, None)
+			}
+		}
+	}
+	
+	def flatMap[B](f: A => Context[B]): Context[B] = {
+		Context { data =>
+			if (data.error_r.isEmpty) {
+				val (data1, optA) = run(data)
+				optA match {
+					case None => (data1, None)
+					case Some(a) => f(a).run(data1)
+				}
+			}
+			else {
+				(data, None)
+			}
+		}
+	}
+	
+	/*private def pair[A](data: ProtocolData, res: RsResult[A]): (ProtocolData, RsResult[A]) = {
+		(data.log(res), res)
+	}*/
+}
+
+object Context {
+	def apply[A](f: ProtocolData => (ProtocolData, Option[A])): Context[A] = {
+		new Context[A] {
+			def run(data: ProtocolData) = f(data)
+		}
+	}
+	
+	def from[A](res: RsResult[A]): Context[A] = {
+		Context { data =>
+			val data1 = data.log(res)
+			(data1, res.toOption)
+		}
+	}
+	
+	def from[A](opt: Option[A], error: => String): Context[A] = {
+		Context { data =>
+			val data1 = opt match {
+				case None => data.logError(error)
+				case _ => data
+			}
+			(data1, opt)
+		}
+	}
+	
+	def unit[A](a: A): Context[A] =
+		Context { data => (data, Some(a)) }
+	
+	def get: Context[ProtocolData] =
+		Context { data => (data, Some(data)) }
+	
+	def gets[A](f: ProtocolData => A): Context[A] =
+		Context { data => (data, Some(f(data))) }
+	
+	def getsResult[A](f: ProtocolData => RsResult[A]): Context[A] = {
+		Context { data =>
+			val res = f(data)
+			val data1 = data.log(res)
+			(data1, res.toOption)
+		}
+	}
+	
+	def getsOption[A](f: ProtocolData => Option[A], error: => String): Context[A] = {
+		Context { data =>
+			f(data) match {
+				case None => (data.logError(error), None)
+				case Some(a) => (data, Some(a))
+			}
+		}
+	}
+	
+	def put(data: ProtocolData): Context[Unit] =
+		Context { _ => (data, Some(())) }
+	
+	def modify(f: ProtocolData => ProtocolData): Context[Unit] =
+		Context { data => (f(data), Some(())) }
+	
+	def modifyState(f: WorldStateBuilder => Unit): Context[Unit] = {
+		Context { data => 
+			// Update state
+			var state1 = data.state.toMutable
+			f(state1)
+			(data.setState(state1.toImmutable), Some(()))
+		}
+	}
+	
+	def assert(condition: Boolean, msg: => String): Context[Unit] = {
+		if (condition) unit(())
+		else error(msg)
+	}
+	
+	def error[A](s: String): Context[A] = {
+		Context { data => (data.logError(s), None) }
+	}
+	
+	//def getResult(a: A): Context[A] =
+	//	RsError(data.error_r, data.warning_r)
+	
+	def getEntityIdent(e: Entity): Context[String] =
+		getsResult[String](_.eb.getIdent(e))
+		
+	def getEntityByIdent[A](ident: String): Context[A] =
+		getsResult[A](_.eb.getEntityByIdent(ident))
+	
+	def getLabwareModel(labware: Labware): Context[LabwareModel] = {
+		getsResult[LabwareModel]{ data =>
+			for {
+				labwareIdent <- data.eb.getIdent(labware)
+				model <- RsResult.from(data.eb.labwareToModel_m.get(labware), s"missing model for labware `$labwareIdent`")
+			} yield model
+		}
+	}
+
+
+	/**
+	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
+	 */
+	def mapFirst[A, B, C[_]](
+		l: C[A]
+	)(
+		fn: A => Context[B]
+	)(implicit
+		c2i: C[A] => Iterable[A],
+		cbf: CanBuildFrom[C[A], B, C[B]]
+	): Context[C[B]] = {
+		Context { data0 =>
+			var data = data0
+			val builder = cbf()
+			for (x <- c2i(l)) {
+				if (data.error_r.isEmpty) {
+					val ctx1 = fn(x)
+					val (data1, opt) = ctx1.run(data)
+					if (data1.error_r.isEmpty && opt.isDefined) {
+						builder += opt.get
+					}
+					data = data1
+				}
+			}
+			if (data.error_r.isEmpty) (data, Some(builder.result()))
+			else (data, None)
+		}
+	}
+
+	/**
+	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
+	 */
+	def foreachFirst[A, C[_]](
+		l: C[A]
+	)(
+		fn: A => Context[Any]
+	)(implicit
+		c2i: C[A] => Iterable[A]
+	): Context[Unit] = {
+		Context { data0 =>
+			var data = data0
+			for (x <- c2i(l)) {
+				if (data.error_r.isEmpty) {
+					val ctx1 = fn(x)
+					val (data1, opt) = ctx1.run(data)
+					data = data1
+				}
+			}
+			if (data.error_r.isEmpty) (data, Some(()))
+			else (data, None)
+		}
+	}
+}

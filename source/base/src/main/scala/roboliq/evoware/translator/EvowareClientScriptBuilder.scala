@@ -11,6 +11,7 @@ import scala.collection.mutable.HashMap
 import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.Carrier
+import roboliq.input.Context
 
 case class EvowareScript2(
 	index: Int,
@@ -44,251 +45,258 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	val siteToModel_m = new HashMap[CarrierSite, EvowareLabwareModel]
 	
 	def addCommand(
-		protocol: Protocol,
-		state0: WorldState,
 		agentIdent: String,
 		command: Command
-	): RsResult[WorldState] = {
+	): Context[Unit] = {
 		logger.debug(s"addCommand: $agentIdent, $command")
-		val result_? = {
-			if (agentIdent == "user")
-				addCommandUser(protocol, state0, agentIdent, command)
-			else
-				addCommandRobot(protocol, state0, agentIdent, command)
-		}
-		result_? match {
-			case RsError(e, w) =>
-				logger.debug("Errors: " + e)
-				if (!w.isEmpty)
-					logger.debug("Warnings: " + w)
-			case RsSuccess(_, w) =>
-				if (!w.isEmpty)
-					logger.debug("Warnings: " + w)
-		}
 		for {
-			result <- result_?
+			item_l <- {
+				if (agentIdent == "user")
+					addCommandUser(agentIdent, command)
+				else
+					addCommandRobot(agentIdent, command)
+			}
 		} yield {
-			handleTranslationResult(result)
+			handleTranslationResult(item_l)
 		}
 	}
 
 	private def addCommandRobot(
-		protocol: Protocol,
-		state0: WorldState,
 		agentIdent: String,
 		command: Command
-	): RsResult[TranslationResult] = {
-		val identToAgentObject_m: Map[String, Object] = protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
-		command match {
-			case AgentActivate() => RsSuccess(TranslationResult.empty(state0))
-			case AgentDeactivate() => RsSuccess(TranslationResult.empty(state0))
-			
-			case Log(text) =>
-				val item = TranslationItem(L0C_Comment(text), Nil)
-				RsSuccess(TranslationResult(List(item), state0))
-			
-			case EvowareSubroutine(path) =>
-				val item = TranslationItem(L0C_Subroutine(path), Nil)
-				RsSuccess(TranslationResult(List(item), state0))
-				
-			case cmd: PeelerRun =>
-				for {
-					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
-					filepath <- identToAgentObject_m.get(cmd.specIdent).asRs(s"missing evoware data for spec `${cmd.specIdent}`").flatMap(RsResult.asInstanceOf[String])
-					// List of site/labware mappings for those labware and sites which evoware has equivalences for
-					siteToModel_l <- siteLabwareEntry(protocol, state0, identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
-					labware <- protocol.eb.getEntityByIdent[Labware](cmd.labwareIdent)
-				} yield {
-					// Token
-					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Peel", filepath)
-					// Update state
-					var state1 = state0.toMutable
-					state1.labware_isSealed_l -= labware
-					// Return
-					val item = TranslationItem(token, siteToModel_l)
-					TranslationResult(List(item), state1.toImmutable)
-				}
-			
-			case Prompt(text) =>
-				val item = TranslationItem(L0C_Prompt(text), Nil)
-				RsSuccess(TranslationResult(List(item), state0))
-			
-			case cmd: ShakerRun =>
-				shakerRun(protocol, state0, identToAgentObject_m, cmd)
-
-			case TransporterRun(deviceIdent, labware, model, origin, destination, vectorIdent) =>
-				// REFACTOR: lots of duplication with TransporterRun for user
-				val modelIdent = protocol.eb.entityToIdent_m(model)
-				val labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
-				val originIdent = protocol.eb.entityToIdent_m(origin)
-				val originE_? = identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
-				val destinationIdent = protocol.eb.entityToIdent_m(destination)
-				val destinationE_? = identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
-				//val state = state0.toMutable
-				val cmd = {
-					val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
-					val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
-					val originE = originE_?.get
-					val destinationE = destinationE_?.get
-					val vectorClass = identToAgentObject_m.getOrElse(vectorIdent.toLowerCase, vectorIdent).toString
-					val carrierSrc = originE.carrier
-					val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
-					val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
-			
-					val carrierDest = destinationE.carrier
-					val iGridDest = config.table.mapCarrierToGrid(carrierDest)
-					val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
-			
-					L0C_Transfer_Rack(
-						roma_i,
-						vectorClass,
-						//c.sPlateModel,
-						//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
-						//iGridDest, siteDest.iSite, siteDest.carrier.sName,
-						model,
-						iGridSrc, originE,
-						iGridDest, destinationE,
-						LidHandling.NoLid, //c.lidHandling,
-						iGridLid = 0,
-						iSiteLid = 0,
-						sCarrierLid = ""
-					)
-				}
-				// Move labware to new location
-				var state1 = state0.toMutable
-				state1.labware_location_m(labware) = destination
-				
-				// List of site/labware mappings for those labware and sites which evoware has equivalences for
-				val siteToModel_l = labwareModel_? match {
-					case None => Nil
-					case Some(labwareModel) => List(originE_?, destinationE_?).flatten.map(_ -> labwareModel)
-				}
-				
-				// Finish up
-				val item = TranslationItem(cmd, siteToModel_l)
-				RsSuccess(TranslationResult(List(item), state1.toImmutable))
-				
-			case cmd: PipetterAspirate =>
-				aspirate(protocol, state0, identToAgentObject_m, cmd.item_l)
-				
-			case cmd: PipetterDispense =>
-				dispense(protocol, state0, identToAgentObject_m, cmd.item_l)
-				
-			case cmd: PipetterTipsRefresh =>
-				pipetterTipsRefresh(protocol, state0, identToAgentObject_m, cmd)
-				
-			case cmd: SealerRun =>
-				for {
-					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
-					filepath <- identToAgentObject_m.get(cmd.specIdent).asRs(s"missing evoware data for spec `${cmd.specIdent}`").flatMap(RsResult.asInstanceOf[String])
-					// List of site/labware mappings for those labware and sites which evoware has equivalences for
-					siteToModel_l <- siteLabwareEntry(protocol, state0, identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
-					labware <- protocol.eb.getEntityByIdent[Labware](cmd.labwareIdent)
-				} yield {
-					// Token
-					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
-					// Update state
-					var state1 = state0.toMutable
-					state1.labware_isSealed_l += labware
-					// Return
-					val item = TranslationItem(token, siteToModel_l)
-					TranslationResult(List(item), state1.toImmutable)
-				}
-			
-			case cmd: ThermocyclerClose =>
-				for {
-					device <- protocol.eb.getEntityByIdent[Thermocycler](cmd.deviceIdent)
-					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
-				} yield {
-					// Token
-					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidClose", "")
-					// Update state
-					var state1 = state0.toMutable
-					state1.device_isOpen_l -= device
-					// Return
-					val item = TranslationItem(token, Nil)
-					TranslationResult(List(item), state1.toImmutable)
-				}
-			
-			case cmd: ThermocyclerOpen =>
-				for {
-					device <- protocol.eb.getEntityByIdent[Thermocycler](cmd.deviceIdent)
-					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
-				} yield {
-					// Token
-					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidOpen", "")
-					// Update state
-					var state1 = state0.toMutable
-					state1.device_isOpen_l += device
-					// Return
-					val item = TranslationItem(token, Nil)
-					TranslationResult(List(item), state1.toImmutable)
-				}
-			
-			case cmd: ThermocyclerRun =>
-				for {
-					device <- protocol.eb.getEntityByIdent[Thermocycler](cmd.deviceIdent)
-					carrierE <- identToAgentObject_m.get(cmd.deviceIdent).asRs(s"missing evoware carrier for device `${cmd.deviceIdent}`").flatMap(RsResult.asInstanceOf[Carrier])
-					value <- identToAgentObject_m.get(cmd.specIdent).asRs(s"missing evoware data for spec `${cmd.specIdent}`").flatMap(RsResult.asInstanceOf[String])
-				} yield {
-					// Token
-					val token = L0C_Facts(carrierE.sName, carrierE.sName+"_RunProgram", value)
-					// Return
-					val item = TranslationItem(token, Nil)
-					TranslationResult(List(item), state0)
-				}
-				
-			case _ =>
-				RsError(s"unknown command `$command`")
+	): Context[List[TranslationItem]] = {
+		for {
+			data0 <- Context.get
+			identToAgentObject_m: Map[String, Object] = data0.protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
+			ret <- addCommandRobot(agentIdent, command, identToAgentObject_m)
+		} yield ret
+	}
+	
+	private def addCommandRobot(
+		agentIdent: String,
+		command: Command,
+		identToAgentObject_m: Map[String, Object]
+	): Context[List[TranslationItem]] = {
+		def getAgentObject[A](ident: String, error: => String): Context[A] = {
+			Context.from(identToAgentObject_m.get(ident).map(_.asInstanceOf[A]), error)
 		}
+		for {
+			x <- command match {
+				case AgentActivate() => Context.unit(Nil)
+				case AgentDeactivate() => Context.unit(Nil)
+				
+				case Log(text) =>
+					val item = TranslationItem(L0C_Comment(text), Nil)
+					Context.unit(List(item))
+				
+				case EvowareSubroutine(path) =>
+					val item = TranslationItem(L0C_Subroutine(path), Nil)
+					Context.unit(List(item))
+					
+				case cmd: PeelerRun =>
+					for {
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						filepath <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
+						// List of site/labware mappings for those labware and sites which evoware has equivalences for
+						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
+						labware <- Context.getEntityByIdent[Labware](cmd.labwareIdent)
+						// Update state
+						_ <- Context.modifyState(_.labware_isSealed_l -= labware)
+					} yield {
+						// Token
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Peel", filepath)
+						// Return
+						val item = TranslationItem(token, siteToModel_l)
+						List(item)
+					}
+				
+				case Prompt(text) =>
+					val item = TranslationItem(L0C_Prompt(text), Nil)
+					Context.unit(List(item))
+				
+				case cmd: ShakerRun =>
+					shakerRun(identToAgentObject_m, cmd)
+	
+				case TransporterRun(deviceIdent, labware, model, origin, destination, vectorIdent) =>
+					// REFACTOR: lots of duplication with TransporterRun for user
+					for {
+						modelIdent <- Context.getEntityIdent(model)
+						labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
+						originIdent <- Context.getEntityIdent(origin)
+						originE <- Context.from(identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]), s"missing agent data for `$originIdent`")
+						destinationIdent <- Context.getEntityIdent(destination)
+						destinationE <- Context.from(identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]), s"missing agent data for `$originIdent`")
+						// Move labware to new location
+						_ <- Context.modifyState(_.labware_location_m(labware) = destination)
+					} yield {
+						val cmd = {
+							val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
+							val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
+							val vectorClass = identToAgentObject_m.getOrElse(vectorIdent.toLowerCase, vectorIdent).toString
+							val carrierSrc = originE.carrier
+							val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
+							val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
+					
+							val carrierDest = destinationE.carrier
+							val iGridDest = config.table.mapCarrierToGrid(carrierDest)
+							val lVectorDest = config.table.configFile.mapCarrierToVectors(carrierDest)
+					
+							L0C_Transfer_Rack(
+								roma_i,
+								vectorClass,
+								//c.sPlateModel,
+								//iGridSrc, siteSrc.iSite, siteSrc.carrier.sName,
+								//iGridDest, siteDest.iSite, siteDest.carrier.sName,
+								model,
+								iGridSrc, originE,
+								iGridDest, destinationE,
+								LidHandling.NoLid, //c.lidHandling,
+								iGridLid = 0,
+								iSiteLid = 0,
+								sCarrierLid = ""
+							)
+						}
+					
+						// List of site/labware mappings for those labware and sites which evoware has equivalences for
+						val siteToModel_l = labwareModel_? match {
+							case None => Nil
+							case Some(labwareModel) => List(originE, destinationE).map(_ -> labwareModel)
+						}
+						
+						// Finish up
+						val item = TranslationItem(cmd, siteToModel_l)
+						List(item)
+					}
+					
+				case cmd: PipetterAspirate =>
+					aspirate(identToAgentObject_m, cmd.item_l)
+					
+				case cmd: PipetterDispense =>
+					dispense(identToAgentObject_m, cmd.item_l)
+					
+				case cmd: PipetterTipsRefresh =>
+					pipetterTipsRefresh(identToAgentObject_m, cmd)
+					
+				case cmd: SealerRun =>
+					for {
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						filepath <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
+						// List of site/labware mappings for those labware and sites which evoware has equivalences for
+						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
+						labware <- Context.getEntityByIdent[Labware](cmd.labwareIdent)
+						// Update state
+						_ <- Context.modifyState(_.labware_isSealed_l += labware)
+					} yield {
+						// Token
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
+						val item = TranslationItem(token, siteToModel_l)
+						List(item)
+					}
+				
+				case cmd: ThermocyclerClose =>
+					for {
+						device <- Context.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						// Update state
+						_ <- Context.modifyState(_.device_isOpen_l -= device)
+					} yield {
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidClose", "")
+						val item = TranslationItem(token, Nil)
+						List(item)
+					}
+				
+				case cmd: ThermocyclerOpen =>
+					for {
+						device <- Context.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						// Update state
+						_ <- Context.modifyState(_.device_isOpen_l += device)
+					} yield {
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidOpen", "")
+						val item = TranslationItem(token, Nil)
+						List(item)
+					}
+				
+				case cmd: ThermocyclerRun =>
+					for {
+						device <- Context.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						value <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
+					} yield {
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_RunProgram", value)
+						val item = TranslationItem(token, Nil)
+						List(item)
+					}
+					
+				case _ =>
+					for {
+						_ <- Context.error(s"unknown command `$command`")
+					} yield Nil
+			}
+		} yield x
 	}
 
 	private def addCommandUser(
-		protocol: Protocol,
-		state0: WorldState,
 		agentIdent: String,
 		command: Command
-	): RsResult[TranslationResult] = {
-		val identToAgentObject_m: Map[String, Object] = protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
-		
-		def promptUnknown(): RsResult[TranslationResult] = {
-			val item = TranslationItem(L0C_Prompt(s"Please perform this command: $command"), Nil)
-			RsSuccess(TranslationResult(List(item), state0))
+	): Context[List[TranslationItem]] = {
+		for {
+			data0 <- Context.get
+			identToAgentObject_m: Map[String, Object] = data0.protocol.agentToIdentToInternalObject.get(agentIdent).map(_.toMap).getOrElse(Map())
+			ret <- addCommandUser(agentIdent, command, identToAgentObject_m)
+		} yield ret
+	}
+	
+	private def addCommandUser(
+		agentIdent: String,
+		command: Command,
+		identToAgentObject_m: Map[String, Object]
+	): Context[List[TranslationItem]] = {
+		def promptUnknown(): Context[List[TranslationItem]] = {
+			Context.unit(List(TranslationItem(L0C_Prompt(s"Please perform this command: $command"), Nil)))
 		}
 		
-		def prompt(text: String, state1: WorldState): RsResult[TranslationResult] = {
+		def prompt(text: String, state1: WorldState): Context[List[TranslationItem]] = {
 			val item = TranslationItem(L0C_Prompt(text), Nil)
-			RsSuccess(TranslationResult(List(item), state1))
+			for {
+				_ <- Context.modify(_.setState(state1))
+			} yield List(item)
 		}
 		
 		command match {
-			case AgentActivate() => RsSuccess(TranslationResult.empty(state0))
-			case AgentDeactivate() => RsSuccess(TranslationResult.empty(state0))
+			case AgentActivate() => Context.unit(Nil)
+			case AgentDeactivate() => Context.unit(Nil)
 			
 			case Log(text) =>
-				val item = TranslationItem(L0C_Comment(text), Nil)
-				RsSuccess(TranslationResult(List(item), state0))
+				Context.unit(List(TranslationItem(L0C_Comment(text), Nil)))
 			
 			case Prompt(text) =>
-				val item = TranslationItem(L0C_Prompt(text), Nil)
-				RsSuccess(TranslationResult(List(item), state0))
+				Context.unit(List(TranslationItem(L0C_Prompt(text), Nil)))
 
 			case TransporterRun(deviceIdent, labware, model, origin, destination, vectorIdent) =>
 				for {
-					labwareIdent <- protocol.eb.getIdent(labware)
-					modelIdent <- protocol.eb.getIdent(model)
-					originIdent <- protocol.eb.getIdent(origin)
-					destinationIdent <- protocol.eb.getIdent(destination)
+					modelIdent <- Context.getEntityIdent(model)
+					labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
+					originIdent <- Context.getEntityIdent(origin)
+					originE <- Context.from(identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]), s"missing agent data for `$originIdent`")
+					destinationIdent <- Context.getEntityIdent(destination)
+					destinationE <- Context.from(identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]), s"missing agent data for `$originIdent`")
+					// Move labware to new location
+					_ <- Context.modifyState(_.labware_location_m(labware) = destination)
+				} yield ()
+				for {
+					labwareIdent <- Context.getEntityIdent(labware)
+					modelIdent <- Context.getEntityIdent(model)
+					originIdent <- Context.getEntityIdent(origin)
+					destinationIdent <- Context.getEntityIdent(destination)
+					// Move labware to new location
+					_ <- Context.modifyState(_.labware_location_m(labware) = destination)
 				} yield {
 					val modelLabel = model.label.getOrElse(model.key)
 					val originLabel = origin.label.getOrElse(origin.key)
 					val destinationLabel = destination.label.getOrElse(destination.key)
 					val text = s"Please move labware `${labwareIdent}` model `${modelLabel}` from `${originLabel}` to `${destinationLabel}`"
 
-					// Move labware to new location
-					var state1 = state0.toMutable
-					state1.labware_location_m(labware) = destination
-					
 					// List of site/labware mappings for those labware and sites which evoware has equivalences for
 					val labwareModel_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel])
 					val originE_? = identToAgentObject_m.get(originIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite])
@@ -299,8 +307,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					}
 					
 					// Finish up
-					val item = TranslationItem(L0C_Prompt(text), siteToModel_l)
-					TranslationResult(List(item), state1.toImmutable)
+					List(TranslationItem(L0C_Prompt(text), siteToModel_l))
 				}
 				
 			case cmd: PipetterAspirate => promptUnknown()
@@ -308,7 +315,6 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			case cmd: SealerRun => promptUnknown()
 				
 			case _ => promptUnknown()
-				//RsError(s"unknown command `$command`")
 		}
 	}
 
@@ -317,20 +323,17 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		RsSuccess(())
 	}
 	
-	private def handleTranslationResult(result: TranslationResult): WorldState = {
-		for (item <- result.item_l) {
+	private def handleTranslationResult(item_l: List[TranslationItem]) {
+		for (item <- item_l) {
 			setSiteModels(item.siteToModel_l)
 			cmds += item.token
 		}
-		result.state1
 	}
 	
 	private def getCarrierSite(
-		protocol: Protocol,
-		state: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		labware: Labware
-	): RsResult[CarrierSite] = {
+	): Context[CarrierSite] = {
 		// TODO: Allow for labware to be on top of other labware (e.g. stacked plates), and figure out the proper site index
 		// TODO: For tubes, the site needs to map to a well on an evoware-labware at a site
 		// TODO: What we actually need to do here is get the chain of labware (labware may be on other labware) until we reach a 
@@ -338,13 +341,21 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		// tube adapter to be labware.
 		//def makeLocationChain(labware: Labware, acc: List[])
 		for {
-			location <- RsResult.from(state.labware_location_m.get(labware), "labware has not been placed anywhere yet")
-			site <- if (location.isInstanceOf[Site]) RsSuccess(location.asInstanceOf[Site]) else RsError("expected labware to be on a site")
-			siteIdent <- protocol.eb.getIdent(site)
-			siteE <- identToAgentObject_m.get(siteIdent.toLowerCase).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]).asRs(s"no evoware site corresponds to site: $site")
+			location <- Context.getsOption(_.state.labware_location_m.get(labware), "labware has not been placed anywhere yet")
+			_ <- Context.assert(location.isInstanceOf[Site], "expected labware to be on a site")
+			site = location.asInstanceOf[Site]
+			siteIdent <- Context.getEntityIdent(site)
+			siteE <- getAgentObject[CarrierSite](identToAgentObject_m, siteIdent, s"no evoware site corresponds to site: $site")
 		} yield siteE
 	}
 	
+	def getAgentObject[A](
+		identToAgentObject_m: Map[String, Object],
+		ident: String,
+		error: => String
+	): Context[A] = {
+		Context.from(identToAgentObject_m.get(ident.toLowerCase).map(_.asInstanceOf[A]), error)
+	}
 	/*private def setModelSites(model: EvowareLabwareModel, sites: List[CarrierSite]) {
 		// The assignment of labware to sites is compatible with the current
 		// table setup iff none of the sites have already been assigned to a different labware model.
@@ -426,15 +437,13 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	}
 	
 	private def shakerRun(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		cmd: ShakerRun
-	): RsResult[TranslationResult] = {
+	): Context[List[TranslationItem]] = {
 		if (cmd.device.label == Some("MP 2Pos H+P Shake")) {
 			for {
-				duration <- cmd.spec.duration.asRs(s"Shaker program must specify `duration`")
-				rpm <- cmd.spec.rpm.asRs(s"Shaker program must specify `rpm`")
+				duration <- Context.from(cmd.spec.duration, s"Shaker program must specify `duration`")
+				rpm <- Context.from(cmd.spec.rpm, s"Shaker program must specify `rpm`")
 			} yield {
 				// FIXME: need to find shaker index, in case there are multiple shakers
 				// FIXME: if there are multiple shakers, but they don't have unique indexes specified in a config file, then issue an error here
@@ -455,13 +464,12 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				val token_l = List(
 					L0C_Facts("HPShaker", "HPShaker_HP__ShakeForTime", s2)
 				)
-				val item_l = token_l.map(token => TranslationItem(token, Nil))
-				TranslationResult(item_l, state0)
+				token_l.map(token => TranslationItem(token, Nil))
 			}	
 		}
 		else {
 			for {
-				duration <- cmd.spec.duration.asRs(s"Shaker program must specify `duration`")
+				duration <- Context.from(cmd.spec.duration, s"Shaker program must specify `duration`")
 			} yield {
 				val token_l = List(
 					L0C_Facts("Shaker", "Shaker_Init", ""),
@@ -473,38 +481,31 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					L0C_WaitTimer(1, duration),
 					L0C_Facts("Shaker", "Shaker_Stop","")
 				)
-				val item_l = token_l.map(token => TranslationItem(token, Nil))
-				TranslationResult(item_l, state0)
+				token_l.map(token => TranslationItem(token, Nil))
 			}
 		}
 	}
 	
 	private def aspirate(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		twvp_l: List[TipWellVolumePolicy]
-	): RqResult[TranslationResult] = {
-		spirate(protocol, state0, identToAgentObject_m, twvp_l, "Aspirate")
+	): Context[List[TranslationItem]] = {
+		spirate(identToAgentObject_m, twvp_l, "Aspirate")
 	}
 	
 	private def dispense(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		twvp_l: List[TipWellVolumePolicy]
-	): RqResult[TranslationResult] = {
-		spirate(protocol, state0, identToAgentObject_m, twvp_l, "Dispense")
+	): Context[List[TranslationItem]] = {
+		spirate(identToAgentObject_m, twvp_l, "Dispense")
 	}
 
 	private def spirate(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		twvp_l: List[TipWellVolumePolicy],
 		func_s: String
-	): RqResult[TranslationResult] = {
-		if (twvp_l.isEmpty) return RsSuccess(TranslationResult.empty(state0))
+	): Context[List[TranslationItem]] = {
+		if (twvp_l.isEmpty) return Context.unit(Nil)
 		
 		// TODO: Track volumes aspirated, like here:
 		/*for (item <- cmd.item_l) {
@@ -517,28 +518,28 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		}*/
 		for {
 			// Get WellPosition and CarrierSite for each item
-			tuple_l <- RsResult.toResultOfList(twvp_l.map { item =>
+			tuple_l <- Context.mapFirst(twvp_l) { item =>
 				for {
-					wellPosition <- state0.getWellPosition(item.well)
-					siteE <- getCarrierSite(protocol, state0, identToAgentObject_m, wellPosition.parent)
+					wellPosition <- Context.getsResult(_.state.getWellPosition(item.well))
+					siteE <- getCarrierSite(identToAgentObject_m, wellPosition.parent)
 				} yield {
 					(item, wellPosition, siteE)
 				}
-			})
+			}
 			// Make sure that the items are all on the same site
 			siteToItem_m = tuple_l.groupBy(_._3)
-			_ <- RsResult.assert(siteToItem_m.size == 1, "aspirate command expected all items to be on the same carrier and site")
+			_ <- Context.assert(siteToItem_m.size == 1, "aspirate command expected all items to be on the same carrier and site")
 			// Get site and plate model (they're the same for all items)
 			siteE = tuple_l.head._3
 			plateModel = tuple_l.head._2.parentModel
-			plateModelIdent <- protocol.eb.getIdent(plateModel)
-			plateModelE <- identToAgentObject_m.get(plateModelIdent.toLowerCase).map(_.asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]).asRs(s"could not find equivalent evoware labware model for $plateModel")
+			plateModelIdent <- Context.getEntityIdent(plateModel)
+			plateModelE <- getAgentObject[roboliq.evoware.parser.EvowareLabwareModel](identToAgentObject_m, plateModelIdent, s"could not find equivalent evoware labware model for $plateModel")
 			// List of items and their well indexes
 			item_l = tuple_l.map(tuple => tuple._1 -> tuple._2.index)
 			// Check item validity and get liquid class
-			sLiquidClass <- checkTipWellPolicyItems(protocol, state0, tuple_l.map(tuple => tuple._1 -> tuple._2))
+			sLiquidClass <- checkTipWellPolicyItems(tuple_l.map(tuple => tuple._1 -> tuple._2))
 			// Translate items into evoware commands
-			result <- spirateChecked(protocol, state0, identToAgentObject_m, siteE, plateModelE, item_l, func_s, sLiquidClass)
+			result <- spirateChecked(identToAgentObject_m, siteE, plateModelE, item_l, func_s, sLiquidClass)
 		} yield result
 	}
 	
@@ -548,12 +549,10 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 
 	/** Return name of liquid class */
 	private def checkTipWellPolicyItems(
-		protocol: Protocol,
-		state0: WorldState,
 		item_l: List[(HasTip with HasWell with HasPolicy, WellPosition)]
-	): RqResult[String] = {
+	): Context[String] = {
 		item_l match {
-			case Seq() => RqError("INTERNAL: items empty")
+			case Seq() => Context.error("INTERNAL: items empty")
 			case Seq(item0, rest @ _*) =>
 				// Get the liquid class
 				val policy = item0._1.policy
@@ -565,7 +564,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				//}
 				// ENDFIX
 				if (!rest.forall(twvp => twvp._1.policy.equals(policy))) {
-					return RqError("INTERNAL: policy should be the same for all spirate items: "+item_l)
+					return Context.error("INTERNAL: policy should be the same for all spirate items: "+item_l)
 				}
 				
 				// Assert that all tips are of the same kind
@@ -577,22 +576,20 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				val bEquidistant = TipWell.equidistant(item_l)
 				val bSameWell = item_l.forall(item => item._1.well eq item0._1.well)
 				if (!bEquidistant && !bSameWell)
-					return RqError("INTERNAL: not equidistant, "+item_l.map(_._1.tip.index)+" -> "+item_l.map(_._2.index))
+					return Context.error("INTERNAL: not equidistant, "+item_l.map(_._1.tip.index)+" -> "+item_l.map(_._2.index))
 				
-				RqSuccess(policy.id)
+				Context.unit(policy.id)
 		}
 	}
 
 	private def spirateChecked(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		siteE: CarrierSite,
 		labwareModelE: EvowareLabwareModel,
 		item_l: List[(TipWellVolumePolicy, Int)],
 		sFunc: String,
 		sLiquidClass: String
-	): RqResult[TranslationResult] = {
+	): Context[List[TranslationItem]] = {
 		val tip_l = item_l.map(_._1.tip)
 		val well_li = item_l.map(_._2)
 		
@@ -646,14 +643,13 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			}
 		}
 		
-		def foldState(): RqResult[WorldState] = {
-			item_l.map(_._1).foldLeft(RqSuccess(state0) : RqResult[WorldState]) { (acc, item) =>
-				acc.flatMap(state => getState(state, item))
-			}
-		}
-
 		for {
-			state1 <- foldState()
+			_ <- Context.foreachFirst(item_l) { case (item, _) =>
+				for {
+					state <- Context.gets(_.state)
+					_ <- Context.from(getState(state, item))
+				} yield ()
+			}
 		} yield {
 			val cmd = L0C_Spirate(
 				sFunc, 
@@ -663,41 +659,29 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				sPlateMask,
 				siteE, labwareModelE
 			)
-			
-			
-			TranslationResult(
-				List(TranslationItem(cmd, List(siteE -> labwareModelE))),
-				state1
-			)
+			List(TranslationItem(cmd, List(siteE -> labwareModelE)))
 		}
 	}
 
 	private def pipetterTipsRefresh(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		cmd: PipetterTipsRefresh
-	): RqResult[TranslationResult] = {
-		pipetterTipsRefresh_BSSE(protocol, state0, identToAgentObject_m, cmd)
+	): Context[List[TranslationItem]] = {
+		pipetterTipsRefresh_BSSE(identToAgentObject_m, cmd)
 	}
 
 	// FIXME: This is a BSSE-specific HACK.  The function for handling this command should be loaded from a config file.
 	private def pipetterTipsRefresh_BSSE(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		cmd: PipetterTipsRefresh
-	): RqResult[TranslationResult] = {
-		val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1))
-		val tip1000_l = tipAll_l.filter(_.index < 4)
-		val tip0050_l = tipAll_l.filter(_.index >= 4)
-		val item1000_l = cmd.item_l.filter(_._1.index < 4)
-		val item0050_l = cmd.item_l.filter(_._1.index >= 4)
-		
-		val state = state0.toMutable
-		def doit(item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])], tip_l: List[Tip], suffix: String): Option[TranslationItem] = {
+	): Context[List[TranslationItem]] = {
+		def doit(
+			item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])],
+			tip_l: List[Tip],
+			suffix: String
+		): Context[Option[TranslationItem]] = {
 			item_l match {
-				case Nil => None
+				case Nil => Context.unit(None)
 				case item0 :: rest =>
 					val intensity: CleanIntensity.Value = rest.foldLeft(item0._2){(acc, item) => CleanIntensity.max(acc, item._2)}
 					val intensity_s_? = intensity match {
@@ -707,119 +691,139 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						case CleanIntensity.Thorough => Some("Thorough")
 						case CleanIntensity.Decontaminate => Some("Decontaminate")
 					}
-					intensity_s_?.map { intensity_s =>
-						// Set tip state to clean for the four tips that are being washed
-						tip_l.foreach { tip =>
-							val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-							val event = TipCleanEvent(tip, intensity)
-							state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
-						}
-						// Call the appropriate subroutine for cleaning
-						val path = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+intensity_s+"_"+suffix+".esc"
-						TranslationItem(L0C_Subroutine(path), Nil)
+					intensity_s_? match {
+						case None => Context.unit(None)
+						case Some(intensity_s) =>
+							// Set tip state to clean for the four tips that are being washed
+							for {
+								_ <- Context.foreachFirst(tip_l) { tip =>
+									for {
+										_ <- Context.modifyState { state =>
+											val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+											val event = TipCleanEvent(tip, intensity)
+											state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
+										}
+									} yield ()
+								}
+							} yield {
+								// Call the appropriate subroutine for cleaning
+								val path = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+intensity_s+"_"+suffix+".esc"
+								Some(TranslationItem(L0C_Subroutine(path), Nil))
+							}
 					}
 			}
 		}
-		
-		val translationItem_l = List(doit(item1000_l, tip1000_l, "1000"), doit(item0050_l, tip0050_l, "0050")).flatten
-		RsSuccess(TranslationResult(translationItem_l, state.toImmutable))
+			
+		for {
+			tipAll_l <- Context.gets(_.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1)))
+			tip1000_l = tipAll_l.filter(_.index < 4)
+			tip0050_l = tipAll_l.filter(_.index >= 4)
+			item1000_l = cmd.item_l.filter(_._1.index < 4)
+			item0050_l = cmd.item_l.filter(_._1.index >= 4)
+			token1000_? <- doit(item1000_l, tip1000_l, "1000")
+			token0050_? <- doit(item1000_l, tip1000_l, "1000")
+		} yield {
+			List(token1000_?, token0050_?).flatten
+		}
 	}
 
 	// FIXME: This is a WIS-specific HACK.  The function for handling this command should be loaded from a config file.
 	private def pipetterTipsRefresh_WIS(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		cmd: PipetterTipsRefresh
-	): RqResult[TranslationResult] = {
-		val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1)).toSet
-		val tipAll_m = encodeTips(tipAll_l)
+	): Context[List[TranslationItem]] = {
+		//val tipAll_l = protocol.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1)).toSet
 		
-		val state = state0.toMutable
-		def doit(item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]): List[TranslationItem] = {
+		def doit(item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]): Context[List[TranslationItem]] = {
 			item_l match {
-				case Nil => Nil
+				case Nil => Context.unit(Nil)
 				case item0 :: rest =>
 					val tip_l = item_l.map(_._1).toSet
 					//tip_l.foreach(tip => println("state.tip_model_m(tip): "+state.tip_model_m.get(tip)))
 					val intensity: CleanIntensity.Value = rest.foldLeft(item0._2){(acc, item) => CleanIntensity.max(acc, item._2)}
 					val tipModel_? : Option[TipModel] = rest.foldLeft(item0._3){(acc, item) => acc.orElse(item._3)}
-					val tipState_l = tip_l.map(tip => state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip)))
+					for {
+						tipAll_l <- Context.gets(_.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1)).toSet)
+						val tipAll_m = encodeTips(tipAll_l)
+						state <- Context.gets(_.state)
+						val tipState_l = tip_l.map(tip => state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip)))
+						
+						// If tips are currently attached and either the cleanIntensity >= Thorough or we're changing tip models, then drop old tips
+						val tipDrop1_l = item_l.filter(tuple => {
+							val (tip, _, tipModel_?) = tuple
+							val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+							//println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
+							(tipState.model_?.isDefined && (intensity >= CleanIntensity.Thorough || tipState.model_? != tipModel_?))
+						}).map(_._1)
+						// Also dropped any tips which weren't mentioned but are attached
+						val tipDrop2_l = tipAll_l.filter(tip => {
+							val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+							!tip_l.contains(tip) && tipState.model_?.isDefined
+						})
+						// If we need to drop any tips, drop all of them
+						val tipDrop_l: Set[Tip] = {
+							if (!tipDrop2_l.isEmpty || !tipDrop1_l.isEmpty)
+								tipAll_l.filter(tip => {
+									val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+									tipState.model_?.isDefined
+								})
+							else
+								Set()
+						}
+						val tipDrop_m = encodeTips(tipDrop_l)
+						
+						// If we need new tips and either didn't have any before or are dropping our previous ones
+						val tipGet_l = item_l.filter(tuple => {
+							val (tip, _, tipModel_?) = tuple
+							val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+							(tipModel_?.isDefined && (tipState.model_? == None || tipDrop_l.contains(tip)))
+						}).map(_._1).toSet
+						val tipGet_m = encodeTips(tipGet_l)
 					
-					// If tips are currently attached and either the cleanIntensity >= Thorough or we're changing tip models, then drop old tips
-					val tipDrop1_l = item_l.filter(tuple => {
-						val (tip, _, tipModel_?) = tuple
-						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						//println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
-						(tipState.model_?.isDefined && (intensity >= CleanIntensity.Thorough || tipState.model_? != tipModel_?))
-					}).map(_._1)
-					// Also dropped any tips which weren't mentioned but are attached
-					val tipDrop2_l = tipAll_l.filter(tip => {
-						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						!tip_l.contains(tip) && tipState.model_?.isDefined
-					})
-					// If we need to drop any tips, drop all of them
-					val tipDrop_l: Set[Tip] = {
-						if (!tipDrop2_l.isEmpty || !tipDrop1_l.isEmpty)
-							tipAll_l.filter(tip => {
-								val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-								tipState.model_?.isDefined
-							})
-						else
-							Set()
+						// If tip state has no clean state, do a pre-wash
+						val prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
+						//_ <- logger.debug(("prewash_b:", prewash_b, tipGet_m > 0, tipState_l.map(s => (s.conf.index, s.cleanDegreePrev))))
+						
+						val token_ll = List[List[L0C_Command]](
+							if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
+							if (prewash_b) {
+								List(
+									L0C_Wash(tipAll_m, 1,1,1,0,50,500,1,500,20,70,30,true,true),
+									L0C_Wash(tipAll_m,1,1,1,0,4,500,1,500,20,70,30,false,true)
+								)
+							} else Nil,
+							if (tipGet_m > 0) {
+								List(
+									L0C_Wash(tipAll_m,1,1,1,0,2.0,500,1.0,500,20,70,30,true,true),
+									L0C_GetDITI2(tipGet_m, tipModel_?.get.key)
+								)
+							} else Nil
+						)
+						
+						// Update tip states
+						_ <- Context.modifyState { state =>
+							val tipClean_l = if (prewash_b) tipAll_l else tipGet_l ++ tipDrop_l
+							val tipToModel_l: List[(Tip, Option[TipModel])] = (tipDrop_l.toList.map(_ -> None) ++ tipGet_l.toList.map(_ -> tipModel_?))
+							for (tip <- tipClean_l) {
+								val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+								val event = TipCleanEvent(tip, CleanIntensity.Decontaminate)
+								state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
+							}
+							for ((tip, tipModel_?) <- tipToModel_l) {
+								val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
+								state.tip_state_m(tip) = tipState0.copy(model_? = tipModel_?)
+							}
+						}
+					} yield {
+						val x = token_ll.flatten.map(token => TranslationItem(token, Nil))
+						logger.debug("x: "+x)
+						logger.debug()
+						x
 					}
-					val tipDrop_m = encodeTips(tipDrop_l)
-					
-					// If we need new tips and either didn't have any before or are dropping our previous ones
-					val tipGet_l = item_l.filter(tuple => {
-						val (tip, _, tipModel_?) = tuple
-						val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						(tipModel_?.isDefined && (tipState.model_? == None || tipDrop_l.contains(tip)))
-					}).map(_._1).toSet
-					val tipGet_m = encodeTips(tipGet_l)
-				
-					// If tip state has no clean state, do a pre-wash
-					val prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
-					logger.debug(("prewash_b:", prewash_b, tipGet_m > 0, tipState_l.map(s => (s.conf.index, s.cleanDegreePrev))))
-					
-					val token_ll = List[List[L0C_Command]](
-						if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
-						if (prewash_b) {
-							List(
-								L0C_Wash(tipAll_m, 1,1,1,0,50,500,1,500,20,70,30,true,true),
-								L0C_Wash(tipAll_m,1,1,1,0,4,500,1,500,20,70,30,false,true)
-							)
-						} else Nil,
-						if (tipGet_m > 0) {
-							List(
-								L0C_Wash(tipAll_m,1,1,1,0,2.0,500,1.0,500,20,70,30,true,true),
-								L0C_GetDITI2(tipGet_m, tipModel_?.get.key)
-							)
-						} else Nil
-					)
-					
-					// Update tip states
-					val tipClean_l = if (prewash_b) tipAll_l else tipGet_l ++ tipDrop_l
-					val tipToModel_l: List[(Tip, Option[TipModel])] = (tipDrop_l.toList.map(_ -> None) ++ tipGet_l.toList.map(_ -> tipModel_?))
-					for (tip <- tipClean_l) {
-						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						val event = TipCleanEvent(tip, CleanIntensity.Decontaminate)
-						state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
-					}
-					for ((tip, tipModel_?) <- tipToModel_l) {
-						val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
-						state.tip_state_m(tip) = tipState0.copy(model_? = tipModel_?)
-					}
-
-					val x = token_ll.flatten.map(token => TranslationItem(token, Nil))
-					logger.debug("x: "+x)
-					logger.debug()
-					x
 			}
 		}
 		
-		val translationItem_l = doit(cmd.item_l)
-		RsSuccess(TranslationResult(translationItem_l, state.toImmutable))
+		doit(cmd.item_l)
 	}
 	
 	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
@@ -849,46 +853,40 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	}
 	
 	private def siteLabwareEntry(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		siteIdent: String,
 		labwareIdent: String
-	): RsResult[Option[(CarrierSite, EvowareLabwareModel)]] = {
+	): Context[Option[(CarrierSite, EvowareLabwareModel)]] = {
 		for {
-			labware <- protocol.eb.getEntityByIdent[Labware](labwareIdent)
-			model <- protocol.eb.labwareToModel_m.get(labware).asRs(s"missing model for labware `$labwareIdent`")
-			modelIdent <- protocol.eb.getIdent(model)
-		} yield {
-			val modelE_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[EvowareLabwareModel])
-			val siteE_? = identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[CarrierSite])
-
-			(siteE_?, modelE_?) match {
-				case (Some(siteE), Some(modelE)) => Some(siteE -> modelE)
-				case _ => None
-			}
-		}
+			labware <- Context.getEntityByIdent[Labware](labwareIdent)
+			model <- Context.getLabwareModel(labware)
+			modelIdent <- Context.getEntityIdent(model)
+		} yield siteLabwareEntrySub(identToAgentObject_m, siteIdent, modelIdent)
 	}
 	
 	private def siteLabwareEntry(
-		protocol: Protocol,
-		state0: WorldState,
 		identToAgentObject_m: Map[String, Object],
 		site: Site,
 		labware: Labware
-	): RsResult[Option[(CarrierSite, EvowareLabwareModel)]] = {
+	): Context[Option[(CarrierSite, EvowareLabwareModel)]] = {
 		for {
-			siteIdent <- protocol.eb.getIdent(site)
-			model <- protocol.eb.labwareToModel_m.get(labware).asRs(s"missing model for labware `$labware`")
-			modelIdent <- protocol.eb.getIdent(model)
-		} yield {
-			val modelE_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[EvowareLabwareModel])
-			val siteE_? = identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[CarrierSite])
+			siteIdent <- Context.getEntityIdent(site)
+			model <- Context.getLabwareModel(labware)
+			modelIdent <- Context.getEntityIdent(model)
+		} yield siteLabwareEntrySub(identToAgentObject_m, siteIdent, modelIdent)
+	}
+	
+	private def siteLabwareEntrySub(
+		identToAgentObject_m: Map[String, Object],
+		siteIdent: String,
+		modelIdent: String
+	): Option[(CarrierSite, EvowareLabwareModel)] = {
+		val modelE_? = identToAgentObject_m.get(modelIdent).map(_.asInstanceOf[EvowareLabwareModel])
+		val siteE_? = identToAgentObject_m.get(siteIdent).map(_.asInstanceOf[CarrierSite])
 
-			(siteE_?, modelE_?) match {
-				case (Some(siteE), Some(modelE)) => Some(siteE -> modelE)
-				case _ => None
-			}
+		(siteE_?, modelE_?) match {
+			case (Some(siteE), Some(modelE)) => Some(siteE -> modelE)
+			case _ => None
 		}
 	}
 }
