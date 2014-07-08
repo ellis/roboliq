@@ -3,11 +3,20 @@ package roboliq.input.commands
 import roboliq.entities.WorldStateEvent
 import roboliq.entities.WorldState
 import roboliq.core._
+import roboliq.input.Context
 
 trait Action {
 	def effects: List[WorldStateEvent]
+	
+	def updateState: Context[Unit] = {
+		for {
+			state0 <- Context.gets(_.state)
+			_ <- Context.from(WorldStateEvent.update(effects, state0))
+		} yield ()
+	}
 }
 
+// REFACTOR: Remove class PlanPath
 class PlanPath(val action_r: List[Action], val state: WorldState) {
 	def add(action: Action): RqResult[PlanPath] = {
 		//println("add")

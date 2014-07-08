@@ -27,6 +27,7 @@ import roboliq.plan.OperatorInfo
 import roboliq.plan.AgentInstruction
 import spray.json.JsValue
 import roboliq.hdf5.Hdf5
+import roboliq.input.Context
 
 case class Opt(
 	configFile: File = null,
@@ -266,18 +267,17 @@ object Main extends App {
 	}
 	
 	private def translateInstruction(
-		protocol: Protocol,
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
 		path0: PlanPath,
 		instruction: AgentInstruction
-	): RsResult[PlanPath] = {
+	): Context[Unit] = {
 		for {
-			agentIdent <- protocol.eb.getIdent(instruction.agent)
-			path1 <- path0.add(instruction.instruction)
+			agentIdent <- Context.getEntityIdent(instruction.agent)
+			_ <- instruction.instruction.updateState
 			builder = agentToBuilder_m(agentIdent)
 			command = instruction.instruction.asInstanceOf[roboliq.input.commands.Command]
-			_ <- builder.addCommand(protocol, path0.state, agentIdent, command)
-		} yield path1
+			_ <- builder.addCommand(agentIdent, command)
+		} yield ()
 	}
 
 }
