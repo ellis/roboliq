@@ -721,7 +721,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			item1000_l = cmd.item_l.filter(_._1.index < 4)
 			item0050_l = cmd.item_l.filter(_._1.index >= 4)
 			token1000_? <- doit(item1000_l, tip1000_l, "1000")
-			token0050_? <- doit(item1000_l, tip1000_l, "1000")
+			token0050_? <- doit(item0050_l, tip0050_l, "0050")
 		} yield {
 			List(token1000_?, token0050_?).flatten
 		}

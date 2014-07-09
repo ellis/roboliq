@@ -28,6 +28,7 @@ import roboliq.plan.AgentInstruction
 import spray.json.JsValue
 import roboliq.hdf5.Hdf5
 import roboliq.input.Context
+import roboliq.input.ProtocolData
 
 case class Opt(
 	configFile: File = null,
@@ -106,12 +107,22 @@ object Main extends App {
 			originalActionCount = planInfo_l.size
 			// Instructions
 			instruction_l <- getInstructions(protocol, cs, plan3, originalActionCount, planInfo_l, ordering_l)
-			_ = println("instructions:")
-			_ = instruction_l.foreach(op => { println(op) })
-			state <- translate(protocol, instruction_l)
-			//state <- JshopTranslator.translate(protocol, plan)
-			//_ = println("result: " + result)
 		} yield {
+			println("instructions:")
+			instruction_l.foreach(op => { println(op) })
+			val data0 = ProtocolData(
+				protocol,
+				protocol.eb,
+				protocol.state0.toImmutable,
+				command = Nil,
+				instruction = Nil,
+				warning_r = Nil,
+				error_r = Nil,
+				well_aliquot_r = Nil
+			)
+			val ctx0 = translate(instruction_l)
+			val (data1, _) = ctx0.run(data0)
+
 			hdf5.addInstructions(opt.protocolFile.getName(), instruction_l)
 			val builder_l = protocol.agentToBuilder_m.values.toSet
 			for (scriptBuilder <- builder_l) {
@@ -121,9 +132,9 @@ object Main extends App {
 				scriptBuilder.saveScripts(basename2)
 			}
 
-			val l1 = state.well_aliquot_m.toList.map(pair => {
+			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
-				val wellPosition = state.getWellPosition(well).toOption.get
+				val wellPosition = data1.state.getWellPosition(well).toOption.get
 				val labwareIdent = protocol.eb.getIdent(wellPosition.parent).getOrElse("ERROR")
 				val wellIdent = wellPosition.toString(protocol.eb)
 				(labwareIdent, wellPosition.col, wellPosition.row) -> (wellIdent, aliquot)
@@ -139,6 +150,9 @@ object Main extends App {
 				}
 				println(s"$wellIdent: ${AliquotFlat(aliquot).toMixtureString} ${amount}")
 			})
+			
+			data1.error_r.reverse.foreach(println)
+			data1.warning_r.reverse.foreach(println)
 		}
 
 		val error_l = x.getErrors
@@ -246,29 +260,19 @@ object Main extends App {
 	}
 	
 	private def translate(
-		protocol: Protocol,
 		instruction_l: List[AgentInstruction]
-	): RqResult[WorldState] = {
-		val agentToBuilder_m = protocol.agentToBuilder_m.toMap
-		val path0 = new PlanPath(Nil, protocol.state0.toImmutable)
-		
-		var path = path0
-		for (instruction <- instruction_l) {
-			translateInstruction(protocol, agentToBuilder_m, path, instruction) match {
-				case RsError(e, w) => return RsError(e, w)
-				case RsSuccess(path1, _) => path = path1
-			}
+	): Context[Unit] = {
+		for {
+			agentToBuilder_m <- Context.gets(_.protocol.agentToBuilder_m.toMap)
+			_ <- Context.foreachFirst(instruction_l) { instruction => translateInstruction(agentToBuilder_m, instruction) }
+		} yield {
+			// Let the builders know that we're done building
+			agentToBuilder_m.values.foreach(_.end())
 		}
-
-		// Let the builders know that we're done building
-		agentToBuilder_m.values.foreach(_.end())
-		
-		RsSuccess(path.state)
 	}
 	
 	private def translateInstruction(
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		path0: PlanPath,
 		instruction: AgentInstruction
 	): Context[Unit] = {
 		for {

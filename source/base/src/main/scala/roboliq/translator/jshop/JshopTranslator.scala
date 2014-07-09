@@ -1,4 +1,4 @@
-package roboliq.translator.jshop
+/*package roboliq.translator.jshop
 
 import scala.collection.immutable.SortedSet
 import grizzled.slf4j.Logger
@@ -510,3 +510,4 @@ object JshopTranslator {
 		doit(commandToState_l, Nil)
 	}*/
 }
+*/
