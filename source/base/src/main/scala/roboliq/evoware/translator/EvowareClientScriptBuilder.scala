@@ -609,9 +609,9 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		//logger.debug("well_li: "+well_li)
 		
 		def getState(state: WorldState, item: TipWellVolumePolicy): RqResult[WorldState] = {
-            val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
-            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
-            val amount = Distribution.fromVolume(item.volume)
+			val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
+			val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+			val amount = Distribution.fromVolume(item.volume)
 			sFunc match {
 				case "Aspirate" =>
 					for {
@@ -646,8 +646,9 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		for {
 			_ <- Context.foreachFirst(item_l) { case (item, _) =>
 				for {
-					state <- Context.gets(_.state)
-					_ <- Context.from(getState(state, item))
+					state0 <- Context.gets(_.state)
+					state1 <- Context.from(getState(state0, item))
+					_ <- Context.modify(_.setState(state1))
 				} yield ()
 			}
 		} yield {
