@@ -2,7 +2,6 @@ package roboliq.commands
 
 import scala.Option.option2Iterable
 import scala.reflect.runtime.universe
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import grizzled.slf4j.Logger
@@ -29,6 +28,7 @@ import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.input.Context
 
 /**
  * @param cleanBegin_? Clean before pipetting starts
@@ -171,15 +171,13 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 	
 	def getInstruction(
 		operator: Strips.Operator,
-		instructionParam_m: Map[String, JsValue],
-		eb: roboliq.entities.EntityBase,
-		state0: WorldState
-	): RqResult[List[AgentInstruction]] = {
+		instructionParam_m: Map[String, JsValue]
+	): Context[List[AgentInstruction]] = {
 		for {
-			agent <- eb.getEntityAs[Agent](operator.paramName_l(0))
-			pipetter <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
-			params <- Converter.convInstructionAs[PipetteActionParams](instructionParam_m, eb, state0)
-			instruction_l <- new PipetteMethod().run(agent, pipetter, params, eb, state0)
+			agent <- Context.getEntityAs[Agent](operator.paramName_l(0))
+			pipetter <- Context.getEntityAs[Pipetter](operator.paramName_l(1))
+			params <- Converter.convInstructionParamsAs[PipetteActionParams](instructionParam_m)
+			instruction_l <- new PipetteMethod().run(agent, pipetter, params)
 		} yield instruction_l
 	}
 }

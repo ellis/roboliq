@@ -8,7 +8,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.reflect.runtime.universe
 import scala.runtime.ZippedTraversable3.zippedTraversable3ToTraversable
-
 import aiplan.strips2.Strips
 import roboliq.core.RqError
 import roboliq.core.RqResult
@@ -47,9 +46,21 @@ import roboliq.pipette.planners.PipetteHelper
 import roboliq.pipette.planners.TipModelSearcher0
 import roboliq.plan.AgentInstruction
 import spray.json.JsValue
+import roboliq.input.Context
 
 class PipetteMethod {
 	def run(
+		agent: Agent,
+		pipetter: Pipetter,
+		params: PipetteActionParams
+	): Context[List[AgentInstruction]] = {
+		for {
+			data <- Context.get
+			l <- Context.from(runOld(agent, pipetter, params, data.eb, data.state))
+		} yield l
+	}
+	
+	private def runOld(
 		agent: Agent,
 		pipetter: Pipetter,
 		params: PipetteActionParams,

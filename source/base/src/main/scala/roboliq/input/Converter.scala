@@ -162,7 +162,7 @@ object Converter {
 		} yield res.asInstanceOf[A]
 	}
 	
-	def convInstructionAs[A: TypeTag](
+	private def convInstructionAs[A: TypeTag](
 		paramToJsval_m: Map[String, JsValue],
 		eb: EntityBase,
 		state: WorldState
@@ -176,6 +176,16 @@ object Converter {
 		} yield res.asInstanceOf[A]
 	}
 	
+	
+	def convInstructionParamsAs[A: TypeTag](
+		instructionParam_m: Map[String, JsValue]
+	): Context[A] = {
+		for {
+			data <- Context.get
+			a <- Context.from(convInstructionAs[A](instructionParam_m, data.eb, data.state))
+		} yield a
+	}
+
 	def convArgs(
 		nameToVal_l: List[(Option[String], JsValue)],
 		typ: ru.Type,

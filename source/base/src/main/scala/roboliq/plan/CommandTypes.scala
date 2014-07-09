@@ -1,14 +1,17 @@
 package roboliq.plan
 
-import spray.json._
-import roboliq.core._
 import aiplan.strips2.Strips
-import aiplan.strips2.Unique
-import aiplan.strips2.Strips.Literal
-import aiplan.strips2.PartialPlan
+import roboliq.core.RqError
+import roboliq.core.RqResult
+import roboliq.core.RqSuccess
+import roboliq.core.RsResult
+import roboliq.core.RsSuccess
 import roboliq.entities.Agent
-import roboliq.entities.WorldState
 import roboliq.entities.EntityBase
+import roboliq.entities.WorldState
+import roboliq.input.Context
+import spray.json.JsNull
+import spray.json.JsValue
 
 
 class Call(
@@ -98,10 +101,8 @@ trait OperatorHandler {
 	def getDomainOperator: Strips.Operator
 	def getInstruction(
 		operator: Strips.Operator,
-		instructionParam_m: Map[String, JsValue],
-		eb: roboliq.entities.EntityBase,
-		state0: WorldState
-	): RqResult[List[AgentInstruction]]
+		instructionParam_m: Map[String, JsValue]
+	): Context[List[AgentInstruction]]
 }
 
 /*

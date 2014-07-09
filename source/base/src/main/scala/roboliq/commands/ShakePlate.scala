@@ -24,6 +24,7 @@ import roboliq.plan.AgentInstruction
 import roboliq.entities.Agent
 import roboliq.entities.WorldState
 import roboliq.plan.OperatorHandler
+import roboliq.input.Context
 
 
 case class ShakePlateActionParams(
@@ -46,47 +47,6 @@ class ShakePlateActionHandler extends ActionHandler {
 		eb: EntityBase,
 		state0: WorldState
 	): RqResult[OperatorInfo] = {
-		/*
-		val m0 = paramToJsval_l.toMap
-		val (programName, programObject_?) = m0.get("program") match {
-			case None => ("?program", None)
-			case Some(JsNull) => ("?program", None)
-			case Some(JsString(s)) => (s, None)
-			case Some(JsObject(obj)) =>
-				val programName = id.mkString("_")+"_program"
-				(programName, Some(programName -> "shakerProgram"))
-			case x =>
-				// TODO, should return an error here
-				return RqError(s"Unexpected data for `program`: ${x}")
-		}
-
-		// Create planner objects if program was defined inside this command
-		val problemObjectToTyp_l = List[Option[(String, String)]](
-			programObject_?
-		).flatten
-		
-		// TODO: require labware, otherwise the action doesn't make sense
-		// TODO: possibly lookup labwareModel of labware
-		val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
-		val binding = Map(
-			"?agent" -> m.getOrElse("agent", "?agent"),
-			"?device" -> m.getOrElse("device", "?device"),
-			"?program" -> programName,
-			"?labware" -> m.getOrElse("object", "?labware"),
-			//"?model" -> m.getOrElse("model", "?model"),
-			"?site" -> m.getOrElse("site", "?site")
-		)
-		
-		val planAction = domainOperator.bind(binding)
-		
-		println(s"getOperatorInfo(${id}, ${paramToJsval_l}):")
-		println(m0)
-		println(programName, programObject_?)
-		println(m)
-		println(binding)
-		
-		RqSuccess(OperatorInfo(id, paramToJsval_l, domainOperator, problemObjectToTyp_l, Nil, planAction))
-		*/
 		for {
 			params <- Converter.convActionAs[ShakePlateActionParams](paramToJsval_l, eb, state0)
 			labwareName <- eb.getIdent(params.`object`)
@@ -109,14 +69,6 @@ class ShakePlateActionHandler extends ActionHandler {
 	}
 }
 
-/*case class ShakePlateInstructionParams(
-	agent: Agent,
-	device: Shaker,
-	program: ShakerSpec,
-	labware: Labware,
-	site: Site
-)*/
-
 class ShakePlateOperatorHandler extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
@@ -135,31 +87,29 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 	
 	def getInstruction(
 		operator: Strips.Operator,
-		instructionParam_m: Map[String, JsValue],
-		eb: roboliq.entities.EntityBase,
-		state0: WorldState
-	): RqResult[List[AgentInstruction]] = {
+		instructionParam_m: Map[String, JsValue]
+	): Context[List[AgentInstruction]] = {
 		val List(agentName, deviceName, labwareName, _, siteName) = operator.paramName_l
 		
-		(for {
-			agent <- eb.getEntityAs[Agent](agentName)
-			device <- eb.getEntityAs[Shaker](deviceName)
+		for {
+			agent <- Context.getEntityAs[Agent](agentName)
+			device <- Context.getEntityAs[Shaker](deviceName)
 			program <- instructionParam_m.get("program") match {
 				case Some(x@JsObject(obj)) =>
-					Converter.convAs[ShakerSpec](x, eb, None)
+					Context.getEntityAs[ShakerSpec](x)
 				case Some(JsString(s)) =>
 					val programName = operator.paramName_l(2)
-					eb.getEntityAs[ShakerSpec](programName)
-				case _ => RqError("Expected identifier or shaker program")
+					Context.getEntityAs[ShakerSpec](programName)
+				case _ => Context.error("Expected identifier or shaker program")
 			}
-			labware <- eb.getEntityAs[Labware](labwareName)
-			site <- eb.getEntityAs[Site](siteName)
+			labware <- Context.getEntityAs[Labware](labwareName)
+			site <- Context.getEntityAs[Site](siteName)
 		} yield {
 			List(AgentInstruction(agent, ShakerRun(
 				device,
 				program,
 				List((labware, site))
 			)))
-		}).prependError("ShakePlate.getInstruction:")
+		}
 	}
 }

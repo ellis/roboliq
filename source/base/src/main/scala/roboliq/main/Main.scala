@@ -105,11 +105,8 @@ object Main extends App {
 			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)
 			ordering_l <- RsResult.from(plan3.orderings.getSequence).map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
-			// Instructions
-			instruction_l <- getInstructions(protocol, cs, plan3, originalActionCount, planInfo_l, ordering_l)
 		} yield {
 			println("instructions:")
-			instruction_l.foreach(op => { println(op) })
 			val data0 = ProtocolData(
 				protocol,
 				protocol.eb,
@@ -120,17 +117,22 @@ object Main extends App {
 				error_r = Nil,
 				well_aliquot_r = Nil
 			)
-			val ctx0 = translate(instruction_l)
-			val (data1, _) = ctx0.run(data0)
-
-			hdf5.addInstructions(opt.protocolFile.getName(), instruction_l)
-			val builder_l = protocol.agentToBuilder_m.values.toSet
-			for (scriptBuilder <- builder_l) {
-				val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath
-				println("basename: " + basename2)
-				//println("scriptBuilder: " + scriptBuilder)
-				scriptBuilder.saveScripts(basename2)
+			val ctx0 = for {
+				// Instructions
+				instruction_l <- getInstructions(cs, plan3, originalActionCount, planInfo_l, ordering_l)
+				_ = instruction_l.foreach(op => { println(op) })
+				_ = hdf5.addInstructions(opt.protocolFile.getName(), instruction_l)
+				_ <- translate(instruction_l)
+			} yield {
+				val builder_l = protocol.agentToBuilder_m.values.toSet
+				for (scriptBuilder <- builder_l) {
+					val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath
+					println("basename: " + basename2)
+					//println("scriptBuilder: " + scriptBuilder)
+					scriptBuilder.saveScripts(basename2)
+				}
 			}
+			val (data1, _) = ctx0.run(data0)
 
 			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
@@ -166,43 +168,35 @@ object Main extends App {
 	}
 	
 	private def getInstructions(
-		protocol: Protocol,
 		cs: CommandSet,
 		plan: aiplan.strips2.PartialPlan,
 		originalActionCount: Int,
 		planInfo_l: List[OperatorInfo],
 		ordering_l: List[Int]
-	): RsResult[List[AgentInstruction]] = {
+	): Context[List[AgentInstruction]] = {
 		for {
-			pair <- RsResult.fold((List[AgentInstruction](), protocol.state0.toImmutable), ordering_l) { (acc, action_i) =>
-				val (l, state) = acc
-				for {
-					pair <- getInstructionStep(protocol, cs, plan, originalActionCount, planInfo_l, action_i, state)
-				} yield (l ++ pair._1, pair._2)
+			instruction_ll <- Context.mapFirst(ordering_l) { action_i =>
+				getInstructionStep(cs, plan, originalActionCount, planInfo_l, action_i)
 			}
-		} yield pair._1
+		} yield instruction_ll.flatten
 	}
 	
 	private def getInstructionStep(
-		protocol: Protocol,
 		cs: CommandSet,
 		plan: aiplan.strips2.PartialPlan,
 		originalActionCount: Int,
 		operatorInfo_l: List[OperatorInfo],
-		action_i: Int,
-		state0: WorldState
-	): RsResult[(List[AgentInstruction], WorldState)] = {
+		action_i: Int
+	): Context[List[AgentInstruction]] = {
 		val action = plan.action_l(action_i)
 		val operator = plan.bindings.bind(action)
 		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
 		for {
-			handler <- RsResult.from(cs.nameToOperatorHandler_m.get(action.name), s"getInstructionStep: unknown operator `${action.name}`")
-			instruction_l <- handler.getInstruction(operator, instructionParam_m, protocol.eb, state0)
+			handler <- Context.from(cs.nameToOperatorHandler_m.get(action.name), s"getInstructionStep: unknown operator `${action.name}`")
+			instruction_l <- handler.getInstruction(operator, instructionParam_m)
 			// Process any world state events in instruction_l
-			state1 <- RsResult.fold(state0, instruction_l)((state, instruction) => {
-				WorldStateEvent.update(instruction.instruction.effects, state)
-			})
-		} yield (instruction_l, state1)
+			_ <- Context.foreachFirst(instruction_l)(_.instruction.updateState)
+		} yield instruction_l
 	}
 	
 	private def loadConfigBean(path: String): RsResult[ConfigBean] = {

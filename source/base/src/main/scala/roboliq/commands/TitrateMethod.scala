@@ -3,6 +3,7 @@ package roboliq.commands
 import roboliq.core._
 import roboliq.entities._
 import roboliq.input.commands.PipetteSpec
+import roboliq.input.Context
 
 
 private case class SourceAmountTip(
@@ -20,53 +21,51 @@ private case class SourceVolumeTip(
 }
 
 class TitrateMethod(
-	eb: EntityBase,
-	state0: WorldState,
 	params: TitrateActionParams
 ) {
-	def createPipetteActionParams(): RsResult[PipetteActionParams] = {
+	def createPipetteActionParams(): Context[PipetteActionParams] = {
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			// Turn the user-specified steps into simpler individual and/or/source items
-			item_l <- RqResult.toResultOfList(params.allOf.map(_.getItem)).map(_.flatten)
+			item_l <- Context.from(RqResult.mapFirst(params.allOf)(_.getItem).map(_.flatten))
 			itemTop = TitrateItem_And(item_l)
 			//_ = println("itemTop:")
 			//_ = itemTop.printShortHierarchy(eb, "")
 			// A list of wells, each holding a list of what goes in that well
 			sat1_ll = createWellMixtures(itemTop, Nil)
 			tooManyFillers_l = sat1_ll.filter(sat1_l => sat1_l.filter(_.amount_?.isEmpty).size > 1)
-			_ <- RqResult.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_.amount_?)))
-			svt1_ll <- amountsToVolumes(sat1_ll, params.amount_?)
+			_ <- Context.assert(tooManyFillers_l.isEmpty, "Only one source may have an unspecified volume per well: "+tooManyFillers_l.map(_.map(_.amount_?)))
+			svt1_ll <- Context.from(amountsToVolumes(sat1_ll, params.amount_?))
 			svt2_ll = combineWithTips(svt1_ll, params.tip, 1)
 			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
 			// Number of wells required if we only use a single replicate
 			wellCountMin = svt2_ll.length
-			_ <- RqResult.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
+			_ <- Context.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
 			// Maximum number of wells available to us
 			wellCountMax = params.destination.l.length
-			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells.  The titration series requires at least $wellCountMin wells, and you have only supplied $wellCountMax wells.")
+			_ <- Context.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells.  The titration series requires at least $wellCountMin wells, and you have only supplied $wellCountMax wells.")
 			// Check replicate count
 			replicateCountMax = wellCountMax / wellCountMin
 			replicateCount = params.replicates_?.getOrElse(replicateCountMax)
 			wellCount = wellCountMin * replicateCount
-			_ <- RqResult.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
+			_ <- Context.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			svt3_ll = combineWithTips(svt1_ll, params.tip, replicateCount)
 			//_ = println("svt1_ll:\n"+svt1_ll)
 			//_ = println("svt2_ll:\n"+svt2_ll)
 			//_ = println("svt3_ll:\n"+svt3_ll)
 			//_ = println(replicateCount, wellCount, svt2_ll.size, svt2_ll.length, wellCountMin, wellCountMax, replicateCountMax)
 			//_ = 1/0
-		} yield {
-			val stepOrder_l = flattenSteps(itemTop)
+			stepOrder_l = flattenSteps(itemTop)
 			//printMixtureCsv(l3)
 			//println("----------------")
 			//println("l3")
 			//println(l3)
 			//printMixtureCsv(stepToList_l.map(_._2))
-			val destinations = PipetteDestinations(params.destination.l.take(wellCount))
+			destinations = PipetteDestinations(params.destination.l.take(wellCount))
 			//println("destinations: "+destinations)
-			val destinationToSvts_l = destinations.l zip svt3_ll
-			printDestinationMixtureCsv(destinationToSvts_l)
+			destinationToSvts_l = destinations.l zip svt3_ll
+			_ <- printDestinationMixtureCsv(destinationToSvts_l)
+		} yield {
 			//println("len: "+stepToList_l.map(_._2.length))
 			val pipetteStep_l = stepOrder_l.flatMap(step => {
 				// Get items corresponding to this step
@@ -406,28 +405,32 @@ class TitrateMethod(
 		}
 	}*/
 	
-	private def printDestinationMixtureCsv(ll: List[(WellInfo, List[SourceVolumeTip])]): Unit = {
-		if (ll.isEmpty) return
+	private def printDestinationMixtureCsv(ll: List[(WellInfo, List[SourceVolumeTip])]): Context[Unit] = {
+		if (ll.isEmpty) return Context.unit(())
 		var i = 1
 		val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\",\"tip"+n+"\"").mkString(""""plate","well","tip",""", ",", "")
 		println(header)
-		for ((wellInfo, l) <- ll) {
-			val x = for (SourceVolumeTip(sv, volume, tip_?) <- l) yield {
-				val well = sv.source.l.head.well
-				val y = for {
-					aliquot <- RsResult.from(state0.well_aliquot_m.get(well), "no liquid found in source")
-				} yield {
-					val flat = AliquotFlat(aliquot)
-					val tip_s = tip_?.map(_.toString).getOrElse("")
-					List("\""+flat.toMixtureString+"\"", volume.ul.toString, tip_s)
+		for {
+			state0 <- Context.gets(_.state)
+		} yield {
+			for ((wellInfo, l) <- ll) {
+				val x = for (SourceVolumeTip(sv, volume, tip_?) <- l) yield {
+					val well = sv.source.l.head.well
+					val y = for {
+						aliquot <- RsResult.from(state0.well_aliquot_m.get(well), "no liquid found in source")
+					} yield {
+						val flat = AliquotFlat(aliquot)
+						val tip_s = tip_?.map(_.toString).getOrElse("")
+						List("\""+flat.toMixtureString+"\"", volume.ul.toString, tip_s)
+					}
+					y match {
+						case RqSuccess(l, _) => l
+						case RqError(_, _) => List("\"ERROR\"", "0")
+					}
 				}
-				y match {
-					case RqSuccess(l, _) => l
-					case RqError(_, _) => List("\"ERROR\"", "0")
-				}
+				val wellName = "\"" + wellInfo.rowcol.toString + "\""
+				println((wellInfo.labwareName :: wellName :: x.flatten).mkString(","))
 			}
-			val wellName = "\"" + wellInfo.rowcol.toString + "\""
-			println((wellInfo.labwareName :: wellName :: x.flatten).mkString(","))
 		}
 	}
 	

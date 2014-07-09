@@ -2,7 +2,6 @@ package roboliq.input
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
-
 import ch.ethz.reactivesim.RsError
 import ch.ethz.reactivesim.RsResult
 import ch.ethz.reactivesim.RsSuccess
@@ -14,6 +13,8 @@ import roboliq.entities.LabwareModel
 import roboliq.entities.Well
 import roboliq.entities.WorldState
 import roboliq.entities.WorldStateBuilder
+import spray.json.JsValue
+import scala.reflect.runtime.universe.TypeTag
 
 
 /**
@@ -198,8 +199,8 @@ object Context {
 	def getEntityIdent(e: Entity): Context[String] =
 		getsResult[String](_.eb.getIdent(e))
 		
-	def getEntityByIdent[A](ident: String): Context[A] =
-		getsResult[A](_.eb.getEntityByIdent(ident))
+	def getEntityAs[A](ident: String): Context[A] =
+		getsResult[A](_.eb.getEntityAs(ident))
 	
 	def getLabwareModel(labware: Labware): Context[LabwareModel] = {
 		getsResult[LabwareModel]{ data =>
@@ -210,7 +211,13 @@ object Context {
 		}
 	}
 
-
+	def getEntityAs[A: TypeTag](json: JsValue): Context[A] = {
+		for {
+			data <- Context.get
+			a <- Context.from(Converter.convAs[A](json, data.eb, Some(data.state)))
+		} yield a
+	}
+	
 	/**
 	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
 	 */

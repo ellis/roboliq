@@ -25,6 +25,7 @@ import roboliq.input.commands.TransporterRun
 import roboliq.plan.AgentInstruction
 import roboliq.entities.Agent
 import roboliq.entities.WorldState
+import roboliq.input.Context
 
 
 class OperatorHandler_TransportLabware extends OperatorHandler {
@@ -51,23 +52,22 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 	
 	def getInstruction(
 		operator: Strips.Operator,
-		instructionParam_m: Map[String, JsValue],
-		eb: roboliq.entities.EntityBase,
-		state0: WorldState
-	): RqResult[List[AgentInstruction]] = {
-		val g = eb.transportGraph
+		instructionParam_m: Map[String, JsValue]
+	): Context[List[AgentInstruction]] = {
 		val List(labwareName, modelName, site1Name, site2Name, _) = operator.paramName_l
 		
 		for {
-			labware <- eb.getEntityAs[Labware](labwareName)
-			model <- eb.getEntityAs[LabwareModel](modelName)
-			site1 <- eb.getEntityAs[Site](site1Name)
-			site2 <- eb.getEntityAs[Site](site2Name)
-			node1 <- RqResult.from(g.find(site1), s"Site `$site1Name` is not in transport graph")
-			node2 <- RqResult.from(g.find(site2), s"Site `$site2Name` is not in transport graph")
-			path <- RqResult.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name`")
+			data0 <- Context.get
+			g = data0.eb.transportGraph
+			labware <- Context.getEntityAs[Labware](labwareName)
+			model <- Context.getEntityAs[LabwareModel](modelName)
+			site1 <- Context.getEntityAs[Site](site1Name)
+			site2 <- Context.getEntityAs[Site](site2Name)
+			node1 <- Context.from(g.find(site1), s"Site `$site1Name` is not in transport graph")
+			node2 <- Context.from(g.find(site2), s"Site `$site2Name` is not in transport graph")
+			path <- Context.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name`")
 			_ = println("path: "+path.edges)
-			op_l <- RqResult.mapAll(path.nodes.toList zip path.edges.toList) { pair =>
+			op_l <- Context.mapFirst(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
 				val site1 = node1.value
 				val site2 = if (site1 == edge._1.value) edge._2.value else edge._1.value
@@ -75,12 +75,12 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 				edge.label match {
 					case (agentName: String, deviceName: String, programName: String) =>
 						for {
-							agent <- eb.getEntityAs[Agent](agentName)
+							agent <- Context.getEntityAs[Agent](agentName)
 						} yield {
 							AgentInstruction(agent, TransporterRun(deviceName, labware, model, site1, site2, programName))
 						}
 					case x =>
-						RqError("unrecognized transport edge label: "+edge.label)
+						Context.error("unrecognized transport edge label: "+edge.label)
 				}
 			}
 		} yield op_l

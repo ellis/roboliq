@@ -22,6 +22,7 @@ import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
 import roboliq.entities.PipetteSources
+import roboliq.input.Context
 
 
 case class DistributeActionParams(
@@ -103,14 +104,12 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 	
 	def getInstruction(
 		operator: Strips.Operator,
-		instructionParam_m: Map[String, JsValue],
-		eb: roboliq.entities.EntityBase,
-		state0: WorldState
-	): RqResult[List[AgentInstruction]] = {
+		instructionParam_m: Map[String, JsValue]
+	): Context[List[AgentInstruction]] = {
 		for {
-			agent <- eb.getEntityAs[Agent](operator.paramName_l(0))
-			pipetter <- eb.getEntityAs[Pipetter](operator.paramName_l(1))
-			params <- Converter.convInstructionAs[DistributeActionParams](instructionParam_m, eb, state0)
+			agent <- Context.getEntityAs[Agent](operator.paramName_l(0))
+			pipetter <- Context.getEntityAs[Pipetter](operator.paramName_l(1))
+			params <- Converter.convInstructionParamsAs[DistributeActionParams](instructionParam_m)
 			pipetteActionParams = PipetteActionParams(
 				source_? = Some(PipetteSources(List(params.source))),
 				destination_? = Some(params.destination),
@@ -125,7 +124,7 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 				tip_? = params.tip_?,
 				steps = Nil
 			)
-			instruction_l <- new PipetteMethod().run(agent, pipetter, pipetteActionParams, eb, state0)
+			instruction_l <- new PipetteMethod().run(agent, pipetter, pipetteActionParams)
 		} yield instruction_l
 	}
 }

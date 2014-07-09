@@ -99,7 +99,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						filepath <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
 						// List of site/labware mappings for those labware and sites which evoware has equivalences for
 						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
-						labware <- Context.getEntityByIdent[Labware](cmd.labwareIdent)
+						labware <- Context.getEntityAs[Labware](cmd.labwareIdent)
 						// Update state
 						_ <- Context.modifyState(_.labware_isSealed_l -= labware)
 					} yield {
@@ -183,7 +183,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						filepath <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
 						// List of site/labware mappings for those labware and sites which evoware has equivalences for
 						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
-						labware <- Context.getEntityByIdent[Labware](cmd.labwareIdent)
+						labware <- Context.getEntityAs[Labware](cmd.labwareIdent)
 						// Update state
 						_ <- Context.modifyState(_.labware_isSealed_l += labware)
 					} yield {
@@ -195,7 +195,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				
 				case cmd: ThermocyclerClose =>
 					for {
-						device <- Context.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
 						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
 						// Update state
 						_ <- Context.modifyState(_.device_isOpen_l -= device)
@@ -207,7 +207,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				
 				case cmd: ThermocyclerOpen =>
 					for {
-						device <- Context.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
 						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
 						// Update state
 						_ <- Context.modifyState(_.device_isOpen_l += device)
@@ -219,7 +219,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				
 				case cmd: ThermocyclerRun =>
 					for {
-						device <- Context.getEntityByIdent[Thermocycler](cmd.deviceIdent)
+						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
 						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
 						value <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
 					} yield {
@@ -859,7 +859,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		labwareIdent: String
 	): Context[Option[(CarrierSite, EvowareLabwareModel)]] = {
 		for {
-			labware <- Context.getEntityByIdent[Labware](labwareIdent)
+			labware <- Context.getEntityAs[Labware](labwareIdent)
 			model <- Context.getLabwareModel(labware)
 			modelIdent <- Context.getEntityIdent(model)
 		} yield siteLabwareEntrySub(identToAgentObject_m, siteIdent, modelIdent)

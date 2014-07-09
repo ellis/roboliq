@@ -28,8 +28,13 @@
 
 ## Current goal
 
+- [ ] Refactor using Context
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+
+## Context monad
+
+- [ ] OperatorHandler.getInstruction
 
 ## HDF5
 
@@ -193,7 +198,7 @@ Here are some sample volumes for doing liquid level detection:
 
 ### ``test_single_distribute_6``
 
-- [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing th volume used in the whole trough.
+- [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing the volume used in the whole trough.
 
 ## Config file
 
