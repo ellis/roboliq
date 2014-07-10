@@ -97,7 +97,7 @@ trait OperatorHandler {
 	def getInstruction(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
-	): Context[List[AgentInstruction]]
+	): Context[Unit]
 }
 
 /*

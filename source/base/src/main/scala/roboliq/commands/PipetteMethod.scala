@@ -100,7 +100,7 @@ class PipetteMethod {
 		agent: Agent,
 		pipetter: Pipetter,
 		params: PipetteActionParams
-	): Context[List[AgentInstruction]] = {
+	): Context[Unit] = {
 		for {
 			data <- Context.get
 			stepA_l <- Context.from(paramsToA(params))
@@ -108,7 +108,7 @@ class PipetteMethod {
 			stepC_ll <- Context.from(bToC(params, stepB_l))
 			device = new PipetteDevice
 			_ <- cToInstruction(agent, params, pipetter, device, stepC_ll)
-		} yield Nil
+		} yield ()
 	}
 	
 	private def paramsToA(

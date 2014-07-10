@@ -29,6 +29,9 @@ import spray.json.JsValue
 import roboliq.hdf5.Hdf5
 import roboliq.input.Context
 import roboliq.input.ProtocolData
+import roboliq.commands.PipetterDispense
+import roboliq.input.WellDispenseEntry
+import roboliq.entities.Distribution
 
 case class Opt(
 	configFile: File = null,
@@ -114,11 +117,12 @@ object Main extends App {
 			val indexToOperator_l = ordering_l.map(action_i => (action_i, plan3.bindings.bind(plan3.action_l(action_i))))
 			val ctx0 = for {
 				// Instructions
-				instruction_l <- getInstructions(cs, planInfo_l, originalActionCount, indexToOperator_l)
+				_ <- getInstructions(cs, planInfo_l, originalActionCount, indexToOperator_l)
 				_ = println("instructions:")
-				_ = instruction_l.foreach(op => { println(op) })
-				_ = hdf5.addInstructions(opt.protocolFile.getName(), instruction_l)
-				_ <- translate(instruction_l)
+				ai_l <- Context.gets(_.agentInstruction_l.toList)
+				_ = ai_l.foreach(op => { println(op) })
+				_ = hdf5.addInstructions(opt.protocolFile.getName(), ai_l)
+				_ <- translate(ai_l)
 			} yield {
 				val builder_l = protocol.agentToBuilder_m.values.toSet
 				for (scriptBuilder <- builder_l) {
@@ -168,15 +172,13 @@ object Main extends App {
 		planInfo_l: List[OperatorInfo],
 		originalActionCount: Int,
 		indexToOperator_l: List[(Int, aiplan.strips2.Strips.Operator)]
-	): Context[List[AgentInstruction]] = {
-		for {
-			ai_ll <- Context.mapFirst(indexToOperator_l.zipWithIndex) { case ((action_i, operator), instructionIdx) =>
-				for {
-					_ <- Context.modify(_.setCommand(List(action_i)))
-					ai_l <- getInstructionStep(cs, planInfo_l, originalActionCount, action_i, operator)
-				} yield ai_l
-			}
-		} yield ai_ll.flatten
+	): Context[Unit] = {
+		Context.foreachFirst(indexToOperator_l.zipWithIndex) { case ((action_i, operator), instructionIdx) =>
+			for {
+				_ <- Context.modify(_.setCommand(List(action_i)))
+				_ <- getInstructionStep(cs, planInfo_l, originalActionCount, action_i, operator)
+			} yield ()
+		}
 	}
 	
 	private def getInstructionStep(
@@ -185,15 +187,13 @@ object Main extends App {
 		originalActionCount: Int,
 		action_i: Int,
 		operator: aiplan.strips2.Strips.Operator
-	): Context[List[AgentInstruction]] = {
+	): Context[Unit] = {
 		//println("action: "+operator)
 		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
 		for {
 			handler <- Context.from(cs.nameToOperatorHandler_m.get(operator.name), s"getInstructionStep: unknown operator `${operator.name}`")
 			instruction_l <- handler.getInstruction(operator, instructionParam_m)
-			// Process any world state events in instruction_l
-			_ <- Context.foreachFirst(instruction_l)(_.instruction.updateState)
-		} yield instruction_l
+		} yield ()
 	}
 	
 	private def loadConfigBean(path: String): RsResult[ConfigBean] = {
@@ -273,13 +273,13 @@ object Main extends App {
 	
 	private def translateInstruction(
 		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		instruction: AgentInstruction
+		agentInstruction: AgentInstruction
 	): Context[Unit] = {
 		for {
-			agentIdent <- Context.getEntityIdent(instruction.agent)
-			_ <- instruction.instruction.updateState
+			agentIdent <- Context.getEntityIdent(agentInstruction.agent)
+			_ <- agentInstruction.instruction.updateState
 			builder = agentToBuilder_m(agentIdent)
-			_ <- builder.addCommand(agentIdent, instruction.instruction)
+			_ <- builder.addCommand(agentIdent, agentInstruction.instruction)
 		} yield ()
 	}
 

@@ -309,6 +309,9 @@ object Context {
 		} yield ()
 	}
 	
+	def addInstruction(agent: Agent, instruction: Instruction): Context[Unit] =
+		addInstruction(AgentInstruction(agent, instruction))
+	
 	def addInstructions(agent: Agent, instruction_l: List[Instruction]): Context[Unit] = {
 		Context.foreachFirst(instruction_l)(instruction => Context.addInstruction(AgentInstruction(agent, instruction)))
 	}

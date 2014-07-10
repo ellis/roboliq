@@ -105,7 +105,7 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 	def getInstruction(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
-	): Context[List[AgentInstruction]] = {
+	): Context[Unit] = {
 		for {
 			agent <- Context.getEntityAs[Agent](operator.paramName_l(0))
 			pipetter <- Context.getEntityAs[Pipetter](operator.paramName_l(1))
@@ -124,7 +124,7 @@ class DistributeOperatorHandler(n: Int) extends OperatorHandler {
 				tip_? = params.tip_?,
 				steps = Nil
 			)
-			instruction_l <- new PipetteMethod().run(agent, pipetter, pipetteActionParams)
-		} yield instruction_l
+			_ <- new PipetteMethod().run(agent, pipetter, pipetteActionParams)
+		} yield ()
 	}
 }

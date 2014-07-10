@@ -2,33 +2,30 @@ package roboliq.commands
 
 import scala.Option.option2Iterable
 import scala.reflect.runtime.universe
+
 import aiplan.strips2.Strips
+import aiplan.strips2.Strips._
 import aiplan.strips2.Unique
 import grizzled.slf4j.Logger
 import roboliq.core.RqResult
 import roboliq.entities.Agent
 import roboliq.entities.CleanIntensity
 import roboliq.entities.LiquidSource
-import roboliq.entities.LiquidVolume
-import roboliq.entities.Mixture
 import roboliq.entities.PipetteAmount
 import roboliq.entities.PipetteDestination
 import roboliq.entities.PipetteDestinations
-import roboliq.entities.PipettePolicy
 import roboliq.entities.PipetteSources
 import roboliq.entities.Pipetter
-import roboliq.entities.Tip
 import roboliq.entities.TipModel
-import roboliq.entities.WellInfo
 import roboliq.entities.WorldState
 import roboliq.input.AgentInstruction
+import roboliq.input.Context
 import roboliq.input.Converter
 import roboliq.plan.ActionHandler
 import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
-import roboliq.input.Context
 
 /**
  * @param cleanBegin_? Clean before pipetting starts
@@ -127,12 +124,12 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 	def getInstruction(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
-	): Context[List[AgentInstruction]] = {
+	): Context[Unit] = {
 		for {
 			agent <- Context.getEntityAs[Agent](operator.paramName_l(0))
 			pipetter <- Context.getEntityAs[Pipetter](operator.paramName_l(1))
 			params <- Converter.convInstructionParamsAs[PipetteActionParams](instructionParam_m)
-			instruction_l <- new PipetteMethod().run(agent, pipetter, params)
-		} yield instruction_l
+			_ <- new PipetteMethod().run(agent, pipetter, params)
+		} yield ()
 	}
 }

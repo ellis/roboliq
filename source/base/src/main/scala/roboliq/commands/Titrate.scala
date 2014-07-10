@@ -189,13 +189,13 @@ class TitrateOperatorHandler(n: Int) extends OperatorHandler {
 	def getInstruction(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
-	): Context[List[AgentInstruction]] = {
+	): Context[Unit] = {
 		for {
 			agent <- Context.getEntityAs[Agent](operator.paramName_l(0))
 			pipetter <- Context.getEntityAs[Pipetter](operator.paramName_l(1))
 			params <- Converter.convInstructionParamsAs[TitrateActionParams](instructionParam_m)
 			pipetteActionParams <- new TitrateMethod(params).createPipetteActionParams()
-			instruction_l <- new PipetteMethod().run(agent, pipetter, pipetteActionParams)
-		} yield instruction_l
+			_ <- new PipetteMethod().run(agent, pipetter, pipetteActionParams)
+		} yield ()
 	}
 }

@@ -86,7 +86,7 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 	def getInstruction(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
-	): Context[List[AgentInstruction]] = {
+	): Context[Unit] = {
 		val List(agentName, deviceName, labwareName, _, siteName) = operator.paramName_l
 		
 		for {
@@ -102,12 +102,12 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 			}
 			labware <- Context.getEntityAs[Labware](labwareName)
 			site <- Context.getEntityAs[Site](siteName)
-		} yield {
-			List(AgentInstruction(agent, ShakerRun(
+			instruction = ShakerRun(
 				device,
 				program,
 				List((labware, site))
-			)))
-		}
+			)
+			_ <- Context.addInstruction(agent, instruction)
+		} yield ()
 	}
 }
