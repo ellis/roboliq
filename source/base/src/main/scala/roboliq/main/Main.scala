@@ -110,12 +110,7 @@ object Main extends App {
 			val data0 = ProtocolData(
 				protocol,
 				protocol.eb,
-				protocol.state0.toImmutable,
-				command = Nil,
-				instruction = Nil,
-				warning_r = Nil,
-				error_r = Nil,
-				well_aliquot_r = Nil
+				protocol.state0.toImmutable
 			)
 			val ctx0 = for {
 				// Instructions

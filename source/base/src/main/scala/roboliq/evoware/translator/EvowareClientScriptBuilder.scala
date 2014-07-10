@@ -745,24 +745,24 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					val tipModel_? : Option[TipModel] = rest.foldLeft(item0._3){(acc, item) => acc.orElse(item._3)}
 					for {
 						tipAll_l <- Context.gets(_.eb.pipetterToTips_m.getOrElse(cmd.device, cmd.item_l.map(_._1)).toSet)
-						val tipAll_m = encodeTips(tipAll_l)
+						tipAll_m = encodeTips(tipAll_l)
 						state <- Context.gets(_.state)
-						val tipState_l = tip_l.map(tip => state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip)))
+						tipState_l = tip_l.map(tip => state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip)))
 						
 						// If tips are currently attached and either the cleanIntensity >= Thorough or we're changing tip models, then drop old tips
-						val tipDrop1_l = item_l.filter(tuple => {
+						tipDrop1_l = item_l.filter(tuple => {
 							val (tip, _, tipModel_?) = tuple
 							val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 							//println("stuff:", tip, tipState, (intensity >= CleanIntensity.Thorough), tipState.model_? != tipModel_?)
 							(tipState.model_?.isDefined && (intensity >= CleanIntensity.Thorough || tipState.model_? != tipModel_?))
 						}).map(_._1)
 						// Also dropped any tips which weren't mentioned but are attached
-						val tipDrop2_l = tipAll_l.filter(tip => {
+						tipDrop2_l = tipAll_l.filter(tip => {
 							val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 							!tip_l.contains(tip) && tipState.model_?.isDefined
 						})
 						// If we need to drop any tips, drop all of them
-						val tipDrop_l: Set[Tip] = {
+						tipDrop_l: Set[Tip] = {
 							if (!tipDrop2_l.isEmpty || !tipDrop1_l.isEmpty)
 								tipAll_l.filter(tip => {
 									val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
@@ -771,21 +771,21 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 							else
 								Set()
 						}
-						val tipDrop_m = encodeTips(tipDrop_l)
+						tipDrop_m = encodeTips(tipDrop_l)
 						
 						// If we need new tips and either didn't have any before or are dropping our previous ones
-						val tipGet_l = item_l.filter(tuple => {
+						tipGet_l = item_l.filter(tuple => {
 							val (tip, _, tipModel_?) = tuple
 							val tipState = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 							(tipModel_?.isDefined && (tipState.model_? == None || tipDrop_l.contains(tip)))
 						}).map(_._1).toSet
-						val tipGet_m = encodeTips(tipGet_l)
+						tipGet_m = encodeTips(tipGet_l)
 					
 						// If tip state has no clean state, do a pre-wash
-						val prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
+						prewash_b = tipGet_m > 0 && tipState_l.exists(_.cleanDegreePrev == CleanIntensity.None)
 						//_ <- logger.debug(("prewash_b:", prewash_b, tipGet_m > 0, tipState_l.map(s => (s.conf.index, s.cleanDegreePrev))))
 						
-						val token_ll = List[List[L0C_Command]](
+						token_ll = List[List[L0C_Command]](
 							if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
 							if (prewash_b) {
 								List(

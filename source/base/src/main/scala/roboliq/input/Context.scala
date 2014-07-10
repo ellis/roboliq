@@ -16,6 +16,15 @@ import roboliq.entities.WorldStateBuilder
 import spray.json.JsValue
 import scala.reflect.runtime.universe.TypeTag
 
+case class WellDispenseEntry(
+	scriptId: String,
+	instructionIndex: Int,
+	well: String,
+	substance: String,
+	amount: String,
+	agent: String,
+	tip: Option[Int]
+)
 
 /**
  * ProtocolState should carry the eb, current world state, current command, current instruction, warnings and errors, and various HDF5 arrays
@@ -24,19 +33,20 @@ case class ProtocolData(
 	protocol: Protocol,
 	eb: EntityBase,
 	state: WorldState,
-	command: List[Int],
-	instruction: List[Int],
-	warning_r: List[String],
-	error_r: List[String],
-	well_aliquot_r: List[(List[Int], Well, Aliquot)]
+	command: List[Int] = Nil,
+	instruction: Option[Int] = None,
+	warning_r: List[String] = Nil,
+	error_r: List[String] = Nil,
+	well_aliquot_r: List[(List[Int], Well, Aliquot)] = Nil,
+	wellDispenseEntry_r: List[WellDispenseEntry] = Nil
 ) {
 	def setState(state: WorldState): ProtocolData =
 		copy(state = state)
 	
 	def setCommand(idx: List[Int]): ProtocolData =
-		copy(command = idx, instruction = Nil)
+		copy(command = idx, instruction = None)
 
-	def setInstruction(idx: List[Int]): ProtocolData =
+	def setInstruction(idx: Option[Int]): ProtocolData =
 		copy(instruction = idx)
 	
 	def log[A](res: RsResult[A]): ProtocolData = {
@@ -56,10 +66,10 @@ case class ProtocolData(
 	
 	def prefixMessage(s: String): String = {
 		(command, instruction) match {
-			case (Nil, Nil) => s
-			case (c, Nil) => s"Command ${c.mkString(".")}: $s" 
-			case (Nil, i) => s"Instruction ${i.mkString(".")}: $s" 
-			case (c, i) => s"Command ${c.mkString(".")}: Instruction ${i.mkString(".")}: $s" 
+			case (Nil, None) => s
+			case (c, None) => s"Command ${c.mkString(".")}: $s" 
+			case (Nil, Some(i)) => s"Instruction ${i}: $s" 
+			case (c, Some(i)) => s"Command ${c.mkString(".")}: Instruction ${i}: $s" 
 		}
 	}
 }

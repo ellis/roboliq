@@ -28,13 +28,17 @@
 
 ## Current goal
 
-- [ ] Refactor using Context
+- [x] Refactor using Context
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 
 ## Context monad
 
-- [ ] OperatorHandler.getInstruction
+- [x] OperatorHandler.getInstruction
+- [ ] main: set instruction indices for better error and warning reporting
+- [ ] allow commands to add HDF5 table entries about pipetting and whatnot
+- [ ] main: set command indices for better error and warning reporting
+- [ ] allow commands to add file content to be saved to disk/HDF5
 
 ## HDF5
 
