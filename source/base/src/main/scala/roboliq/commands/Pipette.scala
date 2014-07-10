@@ -62,51 +62,6 @@ case class PipetteStepParams(
 	tip_? : Option[Int]
 )
 
-sealed abstract trait StepA
-sealed abstract trait StepB
-sealed abstract trait StepC
-
-case class StepA_Pipette(
-	s: LiquidSource,
-	d: WellInfo,
-	v: LiquidVolume,
-	tipModel_? : Option[TipModel],
-	pipettePolicy_? : Option[String],
-	cleanBefore_? : Option[CleanIntensity.Value],
-	cleanAfter_? : Option[CleanIntensity.Value],
-	tip_? : Option[Int]
-) extends StepA
-
-case class StepA_Clean(
-	clean: CleanIntensity.Value
-) extends StepA with StepB with StepC
-
-case class StepB_Pipette(
-	s: List[WellInfo],
-	d: WellInfo,
-	v: LiquidVolume,
-	tipModel: TipModel,
-	pipettePolicy: PipettePolicy,
-	cleanBefore: CleanIntensity.Value,
-	cleanAfter: CleanIntensity.Value,
-	tip_l: List[Tip],
-	mixtureSrc: Mixture,
-	mixtureDst: Mixture
-) extends StepB
-
-case class StepC_Pipette(
-	s: WellInfo,
-	d: WellInfo,
-	v: LiquidVolume,
-	tipModel: TipModel,
-	pipettePolicy: PipettePolicy,
-	cleanBefore: CleanIntensity.Value,
-	cleanAfter: CleanIntensity.Value,
-	tip: Tip,
-	mixtureSrc: Mixture,
-	mixtureDst: Mixture
-) extends StepC
-
 class PipetteActionHandler extends ActionHandler {
 
 	def getActionName = "pipette"
