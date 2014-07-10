@@ -50,11 +50,11 @@ import roboliq.entities.LiquidVolume
 import roboliq.entities.AliquotFlat
 
 
-sealed abstract trait StepA
-sealed abstract trait StepB
-sealed abstract trait StepC
+private sealed abstract trait StepA
+private sealed abstract trait StepB
+private sealed abstract trait StepC
 
-case class StepA_Pipette(
+private case class StepA_Pipette(
 	s: LiquidSource,
 	d: WellInfo,
 	v: LiquidVolume,
@@ -65,11 +65,11 @@ case class StepA_Pipette(
 	tip_? : Option[Int]
 ) extends StepA
 
-case class StepA_Clean(
+private case class StepA_Clean(
 	clean: CleanIntensity.Value
 ) extends StepA with StepB with StepC
 
-case class StepB_Pipette(
+private case class StepB_Pipette(
 	s: List[WellInfo],
 	d: WellInfo,
 	v: LiquidVolume,
@@ -82,7 +82,7 @@ case class StepB_Pipette(
 	mixtureDst: Mixture
 ) extends StepB
 
-case class StepC_Pipette(
+private case class StepC_Pipette(
 	s: WellInfo,
 	d: WellInfo,
 	v: LiquidVolume,
@@ -446,7 +446,7 @@ class PipetteMethod {
 		RsSuccess(stepAToStepB_m)
 	}
 	
-	def bToC(
+	private def bToC(
 		params: PipetteActionParams,
 		stepB_l: List[StepB]
 	): RsResult[List[List[StepC]]] = {
