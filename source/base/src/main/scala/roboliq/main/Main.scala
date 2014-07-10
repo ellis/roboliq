@@ -119,11 +119,11 @@ object Main extends App {
 				// Instructions
 				_ <- getInstructions(cs, planInfo_l, originalActionCount, indexToOperator_l)
 				_ = println("instructions:")
-				ai_l <- Context.gets(_.agentInstruction_l.toList)
-				_ = ai_l.foreach(op => { println(op) })
-				_ = hdf5.addInstructions(opt.protocolFile.getName(), ai_l)
-				_ <- translate(ai_l)
+				ai_l <- Context.gets(_.instruction_l.toList)
+				_ = ai_l.foreach(x => { println(x._1) })
+				_ = hdf5.addInstructions(opt.protocolFile.getName(), ai_l.map(_._1))
 			} yield {
+				protocol.agentToBuilder_m.values.foreach(_.end())
 				val builder_l = protocol.agentToBuilder_m.values.toSet
 				for (scriptBuilder <- builder_l) {
 					val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath
@@ -192,7 +192,7 @@ object Main extends App {
 		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
 		for {
 			handler <- Context.from(cs.nameToOperatorHandler_m.get(operator.name), s"getInstructionStep: unknown operator `${operator.name}`")
-			instruction_l <- handler.getInstruction(operator, instructionParam_m)
+			_ <- handler.getInstruction(operator, instructionParam_m)
 		} yield ()
 	}
 	
@@ -249,38 +249,4 @@ object Main extends App {
 			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
 		} yield input.asJson.asJsObject
 	}
-	
-	private def translate(
-		instruction_l: List[AgentInstruction]
-	): Context[Unit] = {
-		for {
-			// Make sure that no command is set
-			_ <- Context.modify(_.setCommand(Nil))
-			agentToBuilder_m <- Context.gets(_.protocol.agentToBuilder_m.toMap)
-			_ <- Context.foreachFirst(instruction_l.zipWithIndex) { case (instruction, index) =>
-				for {
-					// Set the instruction index we're trying to translate
-					_ <- Context.modify(_.setInstruction(Some(index + 1)))
-					// Translate the instruction
-					_ <- translateInstruction(agentToBuilder_m, instruction)
-				} yield ()
-			}
-		} yield {
-			// Let the builders know that we're done building
-			agentToBuilder_m.values.foreach(_.end())
-		}
-	}
-	
-	private def translateInstruction(
-		agentToBuilder_m: Map[String, ClientScriptBuilder],
-		agentInstruction: AgentInstruction
-	): Context[Unit] = {
-		for {
-			agentIdent <- Context.getEntityIdent(agentInstruction.agent)
-			_ <- agentInstruction.instruction.updateState
-			builder = agentToBuilder_m(agentIdent)
-			_ <- builder.addCommand(agentIdent, agentInstruction.instruction)
-		} yield ()
-	}
-
 }

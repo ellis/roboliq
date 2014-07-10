@@ -17,6 +17,7 @@ import spray.json.JsValue
 import scala.reflect.runtime.universe.TypeTag
 import roboliq.entities.WellInfo
 import roboliq.entities.Agent
+import roboliq.entities.WorldStateEvent
 
 case class WellDispenseEntry(
 	well: String,
@@ -37,7 +38,7 @@ case class ProtocolData(
 	instruction: Option[Int] = None,
 	warning_r: List[String] = Nil,
 	error_r: List[String] = Nil,
-	agentInstruction_l: Seq[AgentInstruction] = Nil,
+	instruction_l: Seq[(AgentInstruction, WorldState, WorldState)] = Nil,
 	well_aliquot_r: List[(List[Int], Well, Aliquot)] = Nil,
 	wellDispenseEntry_r: List[WellDispenseEntry] = Nil
 ) {
@@ -301,11 +302,13 @@ object Context {
 	
 	def addInstruction(agentInstruction: AgentInstruction): Context[Unit] = {
 		for {
-			_ <- agentInstruction.instruction.updateState
+			state0 <- Context.gets(_.state)
+			state2 <- Context.getsResult(data => WorldStateEvent.update(agentInstruction.instruction.effects, data.state))
 			_ <- Context.modify { data => 
-				val agentInstruction2_l = data.agentInstruction_l :+ agentInstruction
-				data.copy(agentInstruction_l = agentInstruction2_l, instruction = Some(agentInstruction2_l.size))
+				val instruction2_l = data.instruction_l :+ (agentInstruction, state0, state2)
+				data.copy(state = state2, instruction_l = instruction2_l, instruction = Some(instruction2_l.size))
 			}
+			_ <- translate(agentInstruction)
 		} yield ()
 	}
 	
@@ -314,5 +317,14 @@ object Context {
 	
 	def addInstructions(agent: Agent, instruction_l: List[Instruction]): Context[Unit] = {
 		Context.foreachFirst(instruction_l)(instruction => Context.addInstruction(AgentInstruction(agent, instruction)))
+	}
+	
+	private def translate(agentInstruction: AgentInstruction): Context[Unit] = {
+		for {
+			agentToBuilder_m <- Context.gets(_.protocol.agentToBuilder_m.toMap)
+			agentIdent <- Context.getEntityIdent(agentInstruction.agent)
+			builder = agentToBuilder_m(agentIdent)
+			_ <- builder.addCommand(agentIdent, agentInstruction.instruction)
+		} yield ()
 	}
 }

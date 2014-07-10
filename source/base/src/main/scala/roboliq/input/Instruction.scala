@@ -8,10 +8,6 @@ trait Instruction {
 	def effects: List[WorldStateEvent]
 	
 	def data: List[Object]
-	
-	def updateState: Context[Unit] = {
-		Context.modifyStateResult(x => WorldStateEvent.update(effects, x))
-	}
 }
 
 case class AgentInstruction(
