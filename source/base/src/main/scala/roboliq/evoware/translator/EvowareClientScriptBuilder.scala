@@ -649,6 +649,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		val sPlateMask = encodeWells(labwareModelE.nRows, labwareModelE.nCols, well_li)
 		//logger.debug("well_li: "+well_li)
 		
+		/*
 		def getState(state: WorldState, item: TipWellVolumePolicy): RqResult[WorldState] = {
 			val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
 			val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
@@ -692,7 +693,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					_ <- Context.modify(_.setState(state1))
 				} yield ()
 			}
-		} yield {
+		} yield {*/
 			val cmd = L0C_Spirate(
 				sFunc, 
 				mTips, sLiquidClass,
@@ -701,8 +702,8 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				sPlateMask,
 				siteE, labwareModelE
 			)
-			List(TranslationItem(cmd, List(siteE -> labwareModelE)))
-		}
+			Context.unit(List(TranslationItem(cmd, List(siteE -> labwareModelE))))
+		//}
 	}
 
 	private def pipetterTipsRefresh(
