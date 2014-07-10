@@ -45,6 +45,7 @@ import spray.json.JsValue
 import roboliq.input.Context
 import roboliq.input.commands.PlanPath
 import roboliq.input.Instruction
+import roboliq.input.WellDispenseEntry
 
 class PipetteMethod {
 	def run(
@@ -54,8 +55,24 @@ class PipetteMethod {
 	): Context[List[AgentInstruction]] = {
 		for {
 			data <- Context.get
-			l <- Context.from(runOld(agent, pipetter, params, data.eb, data.state))
-		} yield l
+			stepA_l <- Context.from(paramsToA(params))
+			stepB_l <- Context.from(aToB(stepA_l, data.eb, data.state, pipetter))
+			stepC_ll <- Context.from(bToC(params, stepB_l))
+			device = new PipetteDevice
+			instruction_l <- Context.from(cToInstruction(data.state, params, pipetter, device, stepC_ll))
+			/*_ <- Context.foreachFirst(ai_l) { _.instruction match {
+					case x: PipetterDispense =>
+						val l = x.item_l.map(item => {
+							WellDispenseEntry()
+							item.well
+						})
+						Context.modify(data => data.copy(wellDispenseEntry_r = Nil ++ data.wellDispenseEntry_r))
+					case _ => Context.unit(())
+				}
+			}*/
+		} yield {
+			instruction_l.map(instruction => AgentInstruction(agent, instruction))
+		}
 	}
 	
 	private def runOld(
