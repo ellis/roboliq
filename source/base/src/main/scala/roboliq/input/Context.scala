@@ -209,8 +209,8 @@ object Context {
 	def getEntityIdent(e: Entity): Context[String] =
 		getsResult[String](_.eb.getIdent(e))
 		
-	def getEntityAs[A](ident: String): Context[A] =
-		getsResult[A](_.eb.getEntityAs(ident))
+	def getEntityAs[A <: Entity : Manifest](ident: String): Context[A] =
+		getsResult[A](_.eb.getEntityAs[A](ident))
 	
 	def getLabwareModel(labware: Labware): Context[LabwareModel] = {
 		getsResult[LabwareModel]{ data =>

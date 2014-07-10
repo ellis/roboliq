@@ -58,12 +58,12 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 			node1 <- Context.from(g.find(site1), s"Site `$site1Name` is not in transport graph")
 			node2 <- Context.from(g.find(site2), s"Site `$site2Name` is not in transport graph")
 			path <- Context.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name`")
-			_ = println("path: "+path.edges)
+			//_ = println("path: "+path.edges)
 			op_l <- Context.mapFirst(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
 				val site1 = node1.value
 				val site2 = if (site1 == edge._1.value) edge._2.value else edge._1.value
-				println(s"Move from $site1 to $site2")
+				//println(s"Move from $site1 to $site2")
 				edge.label match {
 					case (agentName: String, deviceName: String, programName: String) =>
 						for {

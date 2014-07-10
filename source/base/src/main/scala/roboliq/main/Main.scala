@@ -106,15 +106,16 @@ object Main extends App {
 			ordering_l <- RsResult.from(plan3.orderings.getSequence).map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
 		} yield {
-			println("instructions:")
 			val data0 = ProtocolData(
 				protocol,
 				protocol.eb,
 				protocol.state0.toImmutable
 			)
+			val indexToOperator_l = ordering_l.map(action_i => (action_i, plan3.bindings.bind(plan3.action_l(action_i))))
 			val ctx0 = for {
 				// Instructions
-				instruction_l <- getInstructions(cs, plan3, originalActionCount, planInfo_l, ordering_l)
+				instruction_l <- getInstructions(cs, planInfo_l, originalActionCount, indexToOperator_l)
+				_ = println("instructions:")
 				_ = instruction_l.foreach(op => { println(op) })
 				_ = hdf5.addInstructions(opt.protocolFile.getName(), instruction_l)
 				_ <- translate(instruction_l)
@@ -164,30 +165,31 @@ object Main extends App {
 	
 	private def getInstructions(
 		cs: CommandSet,
-		plan: aiplan.strips2.PartialPlan,
-		originalActionCount: Int,
 		planInfo_l: List[OperatorInfo],
-		ordering_l: List[Int]
+		originalActionCount: Int,
+		indexToOperator_l: List[(Int, aiplan.strips2.Strips.Operator)]
 	): Context[List[AgentInstruction]] = {
 		for {
-			instruction_ll <- Context.mapFirst(ordering_l) { action_i =>
-				getInstructionStep(cs, plan, originalActionCount, planInfo_l, action_i)
+			ai_ll <- Context.mapFirst(indexToOperator_l.zipWithIndex) { case ((action_i, operator), instructionIdx) =>
+				for {
+					_ <- Context.modify(_.setCommand(List(action_i)))
+					ai_l <- getInstructionStep(cs, planInfo_l, originalActionCount, action_i, operator)
+				} yield ai_l
 			}
-		} yield instruction_ll.flatten
+		} yield ai_ll.flatten
 	}
 	
 	private def getInstructionStep(
 		cs: CommandSet,
-		plan: aiplan.strips2.PartialPlan,
-		originalActionCount: Int,
 		operatorInfo_l: List[OperatorInfo],
-		action_i: Int
+		originalActionCount: Int,
+		action_i: Int,
+		operator: aiplan.strips2.Strips.Operator
 	): Context[List[AgentInstruction]] = {
-		val action = plan.action_l(action_i)
-		val operator = plan.bindings.bind(action)
+		//println("action: "+operator)
 		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
 		for {
-			handler <- Context.from(cs.nameToOperatorHandler_m.get(action.name), s"getInstructionStep: unknown operator `${action.name}`")
+			handler <- Context.from(cs.nameToOperatorHandler_m.get(operator.name), s"getInstructionStep: unknown operator `${operator.name}`")
 			instruction_l <- handler.getInstruction(operator, instructionParam_m)
 			// Process any world state events in instruction_l
 			_ <- Context.foreachFirst(instruction_l)(_.instruction.updateState)
