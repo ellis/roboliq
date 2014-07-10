@@ -36,17 +36,15 @@ import roboliq.entities.WellInfo
 import roboliq.entities.WorldState
 import roboliq.entities.WorldStateBuilder
 import roboliq.entities.WorldStateEvent
+import roboliq.input.AgentInstruction
 import roboliq.input.Converter
-import roboliq.input.commands.PipetterAspirate
-import roboliq.input.commands.PipetterDispense
-import roboliq.input.commands.PipetterTipsRefresh
-import roboliq.input.commands.PlanPath
 import roboliq.pipette.planners.PipetteDevice
 import roboliq.pipette.planners.PipetteHelper
 import roboliq.pipette.planners.TipModelSearcher0
-import roboliq.plan.AgentInstruction
 import spray.json.JsValue
 import roboliq.input.Context
+import roboliq.input.commands.PlanPath
+import roboliq.input.Instruction
 
 class PipetteMethod {
 	def run(
@@ -554,7 +552,7 @@ class PipetteMethod {
 		pipetter: Pipetter,
 		device: PipetteDevice,
 		stepC_ll: List[List[StepC]]
-	): RqResult[List[roboliq.input.commands.Action]] = {
+	): RqResult[List[Instruction]] = {
 		var path = new PlanPath(Nil, state0)
 		//var state = state0
 		//var instruction_l = new ArrayBuffer[roboliq.input.commands.Action]

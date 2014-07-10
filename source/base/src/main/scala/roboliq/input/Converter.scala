@@ -135,7 +135,7 @@ object Converter {
 		})
 	}
 	
-	def convCommandAs[A <: commands.Command : TypeTag](
+	/*def convCommandAs[A <: commands.Command : TypeTag](
 		nameToVal_l: List[(Option[String], JsValue)],
 		eb: EntityBase,
 		state: WorldState
@@ -146,7 +146,7 @@ object Converter {
 		for {
 			res <- convArgs(nameToVal_l, typ, eb, Some(state))
 		} yield res.asInstanceOf[A]
-	}
+	}*/
 	
 	def convActionAs[A: TypeTag](
 		paramToJsval_l: List[(String, JsValue)],

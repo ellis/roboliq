@@ -1,4 +1,4 @@
-package roboliq.method
+/*package roboliq.method
 
 import scala.collection.immutable.SortedSet
 import roboliq.input.commands.PipetterTipsRefresh
@@ -255,4 +255,4 @@ class PipetteMethod {
 		RqSuccess(path)
 	}	
 
-}
+}*/

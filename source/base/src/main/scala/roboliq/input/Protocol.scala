@@ -8,7 +8,6 @@ import scala.collection.mutable.ArrayBuffer
 import roboliq.core._
 import roboliq.entities._
 import roboliq.input.commands._
-import roboliq.method
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.MultiMap
@@ -48,7 +47,7 @@ case class ReagentBean(
 private case class Task(
 	rel: Rel,
 	effects: List[WorldStateEvent]
-) extends Action {
+) extends Instruction {
 }
 
 class Protocol {
@@ -514,6 +513,7 @@ class Protocol {
 		}
 	}
 
+	/*
 	private def loadJsonProtocol_ProtocolCommand(
 		cmd: String, nameVal_l: List[(Option[String], JsValue)],
 		path0: PlanPath
@@ -705,6 +705,7 @@ class Protocol {
 				RsSuccess(path0)
 		}
 	}
+	*/
 	
 	private def jsvalToString(argname: String, jsval: JsValue): RsResult[String] = {
 		jsval match {
@@ -826,6 +827,7 @@ class Protocol {
 		} yield l
 	}
 	
+	/*
 	private def loadJsonProtocol_Distribute(
 		nameToVal_l: List[(Option[String], JsValue)],
 		path0: PlanPath
@@ -957,6 +959,7 @@ class Protocol {
 			case _ => default
 		}
 	}
+	*/
 	
 	/**
 	 * Challenges when reading in Evoware configuration files:

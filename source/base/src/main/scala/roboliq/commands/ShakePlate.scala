@@ -1,30 +1,28 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
+
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
+import roboliq.entities.Agent
+import roboliq.entities.EntityBase
+import roboliq.entities.Labware
+import roboliq.entities.Shaker
+import roboliq.entities.ShakerSpec
+import roboliq.entities.Site
+import roboliq.entities.WorldState
+import roboliq.input.AgentInstruction
+import roboliq.input.Context
+import roboliq.input.Converter
 import roboliq.plan.ActionHandler
+import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
-import spray.json.JsNull
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
-import roboliq.input.commands.ShakerRun
-import roboliq.entities.EntityBase
-import roboliq.entities.Shaker
-import roboliq.input.Converter
-import roboliq.entities.ShakerSpec
-import roboliq.entities.Labware
-import roboliq.entities.Site
-import roboliq.input.commands.Command
-import roboliq.plan.AgentInstruction
-import roboliq.entities.Agent
-import roboliq.entities.WorldState
-import roboliq.plan.OperatorHandler
-import roboliq.input.Context
 
 
 case class ShakePlateActionParams(

@@ -1,9 +1,8 @@
 package roboliq.entities
 
-import roboliq.core._
-import roboliq.input.Protocol
-import roboliq.input.commands.Command
+import roboliq.core.RsResult
 import roboliq.input.Context
+import roboliq.input.Instruction
 
 /**
  * @param agentName The name of the primary agent which this builder is associated with.  Used for naming script files.
@@ -11,7 +10,7 @@ import roboliq.input.Context
 abstract class ClientScriptBuilder(val agentName: String) {
 	def addCommand(
 		agentIdent: String,
-		command: Command
+		instruction: Instruction
 	): Context[Unit]
 	
 	/**

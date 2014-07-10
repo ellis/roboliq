@@ -6,9 +6,9 @@ import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.core.RsResult
 import roboliq.core.RsSuccess
-import roboliq.entities.Agent
 import roboliq.entities.EntityBase
 import roboliq.entities.WorldState
+import roboliq.input.AgentInstruction
 import roboliq.input.Context
 import spray.json.JsNull
 import spray.json.JsValue
@@ -62,11 +62,6 @@ case class UnknownAction(
 	}
 }
 */
-
-case class AgentInstruction(
-	val agent: Agent,
-	val instruction: roboliq.input.commands.Action
-)
 
 /**
  * @param domainOperator The domain operator on which this operator is based (will be inserted into the domain if its not there yet)

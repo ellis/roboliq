@@ -24,7 +24,7 @@ import roboliq.plan.CommandSet
 import roboliq.entities.WorldStateEvent
 import roboliq.entities.AliquotFlat
 import roboliq.plan.OperatorInfo
-import roboliq.plan.AgentInstruction
+import roboliq.input.AgentInstruction
 import spray.json.JsValue
 import roboliq.hdf5.Hdf5
 import roboliq.input.Context
@@ -268,8 +268,7 @@ object Main extends App {
 			agentIdent <- Context.getEntityIdent(instruction.agent)
 			_ <- instruction.instruction.updateState
 			builder = agentToBuilder_m(agentIdent)
-			command = instruction.instruction.asInstanceOf[roboliq.input.commands.Command]
-			_ <- builder.addCommand(agentIdent, command)
+			_ <- builder.addCommand(agentIdent, instruction.instruction)
 		} yield ()
 	}
 

@@ -28,7 +28,7 @@
 
 ## Current goal
 
-- [x] Refactor using Context
+- [ ] Refactor using Context
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 

@@ -4,7 +4,7 @@ import ch.systemsx.cisd.hdf5._
 import ch.systemsx.cisd.hdf5.HDF5Writer
 import ch.systemsx.cisd.hdf5.HDF5CompoundMemberMapping
 import ch.systemsx.cisd.hdf5.HDF5CompoundWriter
-import roboliq.plan.AgentInstruction
+import roboliq.input.AgentInstruction
 
 case class InstructionEntry(
 	var scriptId: String,

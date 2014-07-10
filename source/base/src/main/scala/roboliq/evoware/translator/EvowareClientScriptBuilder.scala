@@ -1,17 +1,58 @@
 package roboliq.evoware.translator
 
-import roboliq.core._
-import roboliq.entities._
-import roboliq.input.commands._
-import roboliq.input.Protocol
-import grizzled.slf4j.Logger
+import scala.Array.canBuildFrom
+import scala.Option.option2Iterable
 import scala.collection.mutable.ArrayBuffer
-import roboliq.tokens._
 import scala.collection.mutable.HashMap
+
+import grizzled.slf4j.Logger
+import roboliq.commands.AgentActivate
+import roboliq.commands.AgentDeactivate
+import roboliq.commands.EvowareSubroutine
+import roboliq.commands.Log
+import roboliq.commands.PeelerRun
+import roboliq.commands.PipetterAspirate
+import roboliq.commands.PipetterDispense
+import roboliq.commands.PipetterTipsRefresh
+import roboliq.commands.Prompt
+import roboliq.commands.SealerRun
+import roboliq.commands.ShakerRun
+import roboliq.commands.ThermocyclerClose
+import roboliq.commands.ThermocyclerOpen
+import roboliq.commands.ThermocyclerRun
+import roboliq.commands.TransporterRun
+import roboliq.core.RqResult
+import roboliq.core.RsResult
+import roboliq.core.RsSuccess
+import roboliq.entities.Aliquot
+import roboliq.entities.CleanIntensity
+import roboliq.entities.ClientScriptBuilder
+import roboliq.entities.Distribution
+import roboliq.entities.HasPolicy
+import roboliq.entities.HasTip
+import roboliq.entities.HasWell
+import roboliq.entities.Labware
+import roboliq.entities.PipettePosition
+import roboliq.entities.Site
+import roboliq.entities.Thermocycler
+import roboliq.entities.Tip
+import roboliq.entities.TipAspirateEvent
+import roboliq.entities.TipAspirateEventHandler
+import roboliq.entities.TipCleanEvent
+import roboliq.entities.TipCleanEventHandler
+import roboliq.entities.TipDispenseEvent
+import roboliq.entities.TipDispenseEventHandler
+import roboliq.entities.TipModel
+import roboliq.entities.TipState
+import roboliq.entities.TipWell
+import roboliq.entities.TipWellVolumePolicy
+import roboliq.entities.WellPosition
+import roboliq.entities.WorldState
+import roboliq.evoware.parser.Carrier
 import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.EvowareLabwareModel
-import roboliq.evoware.parser.Carrier
 import roboliq.input.Context
+import roboliq.input.Instruction
 
 case class EvowareScript2(
 	index: Int,
@@ -46,7 +87,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	
 	def addCommand(
 		agentIdent: String,
-		command: Command
+		command: Instruction
 	): Context[Unit] = {
 		logger.debug(s"addCommand: $agentIdent, $command")
 		for {
@@ -63,7 +104,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 
 	private def addCommandRobot(
 		agentIdent: String,
-		command: Command
+		command: Instruction
 	): Context[List[TranslationItem]] = {
 		for {
 			data0 <- Context.get
@@ -74,7 +115,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	
 	private def addCommandRobot(
 		agentIdent: String,
-		command: Command,
+		command: Instruction,
 		identToAgentObject_m: Map[String, Object]
 	): Context[List[TranslationItem]] = {
 		def getAgentObject[A](ident: String, error: => String): Context[A] = {
@@ -238,7 +279,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 
 	private def addCommandUser(
 		agentIdent: String,
-		command: Command
+		command: Instruction
 	): Context[List[TranslationItem]] = {
 		for {
 			data0 <- Context.get
@@ -249,7 +290,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	
 	private def addCommandUser(
 		agentIdent: String,
-		command: Command,
+		command: Instruction,
 		identToAgentObject_m: Map[String, Object]
 	): Context[List[TranslationItem]] = {
 		def promptUnknown(): Context[List[TranslationItem]] = {

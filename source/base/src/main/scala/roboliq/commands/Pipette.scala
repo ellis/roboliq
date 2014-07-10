@@ -21,9 +21,9 @@ import roboliq.entities.Tip
 import roboliq.entities.TipModel
 import roboliq.entities.WellInfo
 import roboliq.entities.WorldState
+import roboliq.input.AgentInstruction
 import roboliq.input.Converter
 import roboliq.plan.ActionHandler
-import roboliq.plan.AgentInstruction
 import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString

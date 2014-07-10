@@ -4,21 +4,11 @@ import roboliq.entities.WorldStateEvent
 import roboliq.entities.WorldState
 import roboliq.core._
 import roboliq.input.Context
-
-trait Action {
-	def effects: List[WorldStateEvent]
-	
-	def updateState: Context[Unit] = {
-		for {
-			state0 <- Context.gets(_.state)
-			_ <- Context.from(WorldStateEvent.update(effects, state0))
-		} yield ()
-	}
-}
+import roboliq.input.Instruction
 
 // REFACTOR: Remove class PlanPath
-class PlanPath(val action_r: List[Action], val state: WorldState) {
-	def add(action: Action): RqResult[PlanPath] = {
+class PlanPath(val action_r: List[Instruction], val state: WorldState) {
+	def add(action: Instruction): RqResult[PlanPath] = {
 		//println("add")
 		//println("add: "+action)
 		for {
@@ -32,7 +22,7 @@ class PlanPath(val action_r: List[Action], val state: WorldState) {
 		}
 	}
 
-	def add(action_l: List[Action]): RqResult[PlanPath] = {
+	def add(action_l: List[Instruction]): RqResult[PlanPath] = {
 		action_l match {
 			case Nil => RqSuccess(this)
 			case action :: rest =>

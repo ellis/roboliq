@@ -1,25 +1,26 @@
-package roboliq.input.commands
+/*package roboliq.input.commands
 
 import roboliq.core._
 import roboliq.entities._
 import scala.collection.mutable.SortedSet
+import roboliq.input.Instruction
 
-case class AgentActivate() extends Command with Action {
+case class AgentActivate() extends Instruction {
 	val effects = Nil
 }
-case class AgentDeactivate() extends Command with Action {
+case class AgentDeactivate() extends Instruction {
 	val effects = Nil
 }
-case class EvowareSubroutine(path: String) extends Command with Action {
+case class EvowareSubroutine(path: String) extends Instruction {
 	val effects = Nil
 }
-case class Log(text: String) extends Command with Action {
+case class Log(text: String) extends Instruction {
 	val effects = Nil
 }
 
 case class PipetterAspirate(
 	val item_l: List[TipWellVolumePolicy]
-) extends Command with Action {
+) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			for (item <- item_l) {
@@ -47,7 +48,7 @@ case class PipetterAspirate(
 
 case class PipetterDispense(
 	val item_l: List[TipWellVolumePolicy]
-) extends Command with Action {
+) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			for (item <- item_l) {
@@ -78,7 +79,7 @@ case class PipetterTipsRefresh(
 	device: Pipetter,
 	// tip, clean intensity, tipModel_?
 	item_l: List[(Tip, CleanIntensity.Value, Option[TipModel])]
-) extends Command with Action {
+) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			for (item <- item_l) {
@@ -125,7 +126,7 @@ case class PeelerRun(
 	specIdent: String,
 	labwareIdent: String,
 	siteIdent: String
-) extends Command with Action {
+) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			// FIXME:
@@ -135,7 +136,7 @@ case class PeelerRun(
 	})
 }
 
-case class Prompt(text: String) extends Command with Action {
+case class Prompt(text: String) extends Instruction {
 	val effects = Nil
 }
 
@@ -144,7 +145,7 @@ case class SealerRun(
 	specIdent: String,
 	labwareIdent: String,
 	siteIdent: String
-) extends Command with Action {
+) extends Instruction {
 	val effects = Nil
 }
 
@@ -155,19 +156,19 @@ case class ShakerRun(
 	device: Shaker,
 	spec: ShakerSpec,
 	labwareToSite_l: List[(Labware, Site)]
-) extends Command with Action {
+) extends Instruction {
 	val effects = Nil
 }
 
 case class ThermocyclerClose(
 	deviceIdent: String
-) extends Command with Action {
+) extends Instruction {
 	val effects = Nil
 }
 
 case class ThermocyclerOpen(
 	deviceIdent: String
-) extends Command with Action {
+) extends Instruction {
 	val effects = Nil
 }
 
@@ -175,7 +176,7 @@ case class ThermocyclerRun(
 	deviceIdent: String,
 	specIdent: String/*,
 	plateIdent: String*/
-) extends Command with Action {
+) extends Instruction {
 	val effects = Nil
 }
 
@@ -186,7 +187,7 @@ case class TransporterRun(
 	origin: Site,
 	destination: Site,
 	vectorIdent: String
-) extends Command with Action {
+) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			state.labware_location_m(labware) = destination
@@ -194,3 +195,4 @@ case class TransporterRun(
 		}
 	})
 }
+*/
