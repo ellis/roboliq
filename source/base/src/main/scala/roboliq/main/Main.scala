@@ -254,8 +254,17 @@ object Main extends App {
 		instruction_l: List[AgentInstruction]
 	): Context[Unit] = {
 		for {
+			// Make sure that no command is set
+			_ <- Context.modify(_.setCommand(Nil))
 			agentToBuilder_m <- Context.gets(_.protocol.agentToBuilder_m.toMap)
-			_ <- Context.foreachFirst(instruction_l) { instruction => translateInstruction(agentToBuilder_m, instruction) }
+			_ <- Context.foreachFirst(instruction_l.zipWithIndex) { case (instruction, index) =>
+				for {
+					// Set the instruction index we're trying to translate
+					_ <- Context.modify(_.setInstruction(Some(index + 1)))
+					// Translate the instruction
+					_ <- translateInstruction(agentToBuilder_m, instruction)
+				} yield ()
+			}
 		} yield {
 			// Let the builders know that we're done building
 			agentToBuilder_m.values.foreach(_.end())

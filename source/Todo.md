@@ -35,9 +35,9 @@
 ## Context monad
 
 - [x] OperatorHandler.getInstruction
-- [ ] main: set instruction indices for better error and warning reporting
+- [x] main: set command indices for better error and warning reporting
+- [x] main: set instruction indices for better error and warning reporting
 - [ ] allow commands to add HDF5 table entries about pipetting and whatnot
-- [ ] main: set command indices for better error and warning reporting
 - [ ] allow commands to add file content to be saved to disk/HDF5
 
 ## HDF5
@@ -228,10 +228,10 @@ Here are some sample volumes for doing liquid level detection:
 ## AI planning flow
 
 - [x] Main: update world state while creating instructions from actions (see Main.getInstruction)
+- [x] REFACTOR: merge roboliq.input.commands.Command and roboliq.input.commands.Action to a single trait Instruction
+- [x] REFACTOR: rename roboliq.plan.Instruction to AgentInstruction
 - [ ] ActionHandler_Distribute: for the second version, for pipetting between two pieces of labware
 - [ ] ActionHandler: getSignature -> getSignatures?
-- [ ] REFACTOR: merge roboliq.input.commands.Command and roboliq.input.commands.Action to a single trait Instruction
-- [ ] REFACTOR: rename roboliq.plan.Instruction to AgentInstruction
 - [ ] RsResult: sequence/map: when returning an error, should also accumulate the warnings from successes, since the error might be due to a prior warning
 - [ ] Protocol: load from config file which sites user can access (besides `offsite`)
 - [ ] Protocol: createProblem: get relations from eb (in Protocol.createProblem, remove my hard-coded state atoms)
