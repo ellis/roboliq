@@ -401,7 +401,7 @@ class EntityBase {
 		state.labwareRowCol_well_m.get(labware, rowcol).asRs(s"labware `$labwareName` doesn't have a well at $rowcol")
 	}
 	
-	private def wellToWellInfo(state: WorldState, well: Well): RqResult[WellInfo] = {
+	def wellToWellInfo(state: WorldState, well: Well): RqResult[WellInfo] = {
 		for {
 			labware <- state.well_labware_m.get(well).asRs("INTERNAL: Well is missing labware information")
 			labwareName <- getIdent(labware)

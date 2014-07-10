@@ -45,6 +45,9 @@ case class Aliquot(
 }
 
 object Aliquot {
+	def apply(mixture: Mixture, volume: LiquidVolume): Aliquot =
+		Aliquot(mixture, Distribution.fromVolume(volume))
+
 	def empty = new Aliquot(Mixture.empty, Distribution_Empty())
 }
 
