@@ -1,13 +1,14 @@
+/*
 package roboliq.input.commands
 
 import roboliq.core._
 import roboliq.entities._
 import roboliq.input.Instruction
 
-/*case class ReadPlate(
+case class ReadPlate(
 	program: ReaderProgram,
 	plate: Plate
-) extends Instruction*/
+) extends Instruction
 
 case class SetReagents(
 	wells: PipetteDestinations,
@@ -43,3 +44,4 @@ case class SetReagents(
 		List(event)
 	}
 }
+*/

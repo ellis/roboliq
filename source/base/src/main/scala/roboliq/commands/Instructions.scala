@@ -7,15 +7,19 @@ import roboliq.input.Instruction
 
 case class AgentActivate() extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 case class AgentDeactivate() extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 case class EvowareSubroutine(path: String) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 case class Log(text: String) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 case class PipetterAspirate(
@@ -44,10 +48,12 @@ case class PipetterAspirate(
 			RqSuccess(())
 		}
 	})
+	val data = Nil
 }
 
 case class PipetterDispense(
-	val item_l: List[TipWellVolumePolicy]
+	item_l: List[TipWellVolumePolicy],
+	data: List[Object]
 ) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
@@ -95,6 +101,7 @@ case class PipetterTipsRefresh(
 			RqSuccess(())
 		}
 	})
+	val data = Nil
 }
 
 object PipetterTipsRefresh {
@@ -134,10 +141,12 @@ case class PeelerRun(
 			RqSuccess(())
 		}
 	})
+	val data = Nil
 }
 
 case class Prompt(text: String) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 case class SealerRun(
@@ -147,6 +156,7 @@ case class SealerRun(
 	siteIdent: String
 ) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 /**
@@ -158,18 +168,21 @@ case class ShakerRun(
 	labwareToSite_l: List[(Labware, Site)]
 ) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 case class ThermocyclerClose(
 	deviceIdent: String
 ) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 case class ThermocyclerOpen(
 	deviceIdent: String
 ) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 case class ThermocyclerRun(
@@ -178,6 +191,7 @@ case class ThermocyclerRun(
 	plateIdent: String*/
 ) extends Instruction {
 	val effects = Nil
+	val data = Nil
 }
 
 case class TransporterRun(
@@ -194,4 +208,5 @@ case class TransporterRun(
 			RqSuccess(())
 		}
 	})
+	val data = Nil
 }

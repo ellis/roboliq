@@ -142,7 +142,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
 						labware <- Context.getEntityAs[Labware](cmd.labwareIdent)
 						// Update state
-						_ <- Context.modifyState(_.labware_isSealed_l -= labware)
+						_ <- Context.modifyStateBuilder(_.labware_isSealed_l -= labware)
 					} yield {
 						// Token
 						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Peel", filepath)
@@ -168,7 +168,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						destinationIdent <- Context.getEntityIdent(destination)
 						destinationE <- Context.from(identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]), s"missing agent data for `$originIdent`")
 						// Move labware to new location
-						_ <- Context.modifyState(_.labware_location_m(labware) = destination)
+						_ <- Context.modifyStateBuilder(_.labware_location_m(labware) = destination)
 					} yield {
 						val cmd = {
 							val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
@@ -226,7 +226,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
 						labware <- Context.getEntityAs[Labware](cmd.labwareIdent)
 						// Update state
-						_ <- Context.modifyState(_.labware_isSealed_l += labware)
+						_ <- Context.modifyStateBuilder(_.labware_isSealed_l += labware)
 					} yield {
 						// Token
 						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
@@ -239,7 +239,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
 						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
 						// Update state
-						_ <- Context.modifyState(_.device_isOpen_l -= device)
+						_ <- Context.modifyStateBuilder(_.device_isOpen_l -= device)
 					} yield {
 						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidClose", "")
 						val item = TranslationItem(token, Nil)
@@ -251,7 +251,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
 						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
 						// Update state
-						_ <- Context.modifyState(_.device_isOpen_l += device)
+						_ <- Context.modifyStateBuilder(_.device_isOpen_l += device)
 					} yield {
 						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidOpen", "")
 						val item = TranslationItem(token, Nil)
@@ -323,7 +323,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					destinationIdent <- Context.getEntityIdent(destination)
 					destinationE <- Context.from(identToAgentObject_m.get(destinationIdent).map(_.asInstanceOf[roboliq.evoware.parser.CarrierSite]), s"missing agent data for `$originIdent`")
 					// Move labware to new location
-					_ <- Context.modifyState(_.labware_location_m(labware) = destination)
+					_ <- Context.modifyStateBuilder(_.labware_location_m(labware) = destination)
 				} yield ()
 				for {
 					labwareIdent <- Context.getEntityIdent(labware)
@@ -331,7 +331,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					originIdent <- Context.getEntityIdent(origin)
 					destinationIdent <- Context.getEntityIdent(destination)
 					// Move labware to new location
-					_ <- Context.modifyState(_.labware_location_m(labware) = destination)
+					_ <- Context.modifyStateBuilder(_.labware_location_m(labware) = destination)
 				} yield {
 					val modelLabel = model.label.getOrElse(model.key)
 					val originLabel = origin.label.getOrElse(origin.key)
@@ -740,7 +740,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 							for {
 								_ <- Context.foreachFirst(tip_l) { tip =>
 									for {
-										_ <- Context.modifyState { state =>
+										_ <- Context.modifyStateBuilder { state =>
 											val tipState0 = state.tip_state_m.getOrElse(tip, TipState.createEmpty(tip))
 											val event = TipCleanEvent(tip, intensity)
 											state.tip_state_m(tip) = new TipCleanEventHandler().handleEvent(tipState0, event).toOption.get
@@ -843,7 +843,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						)
 						
 						// Update tip states
-						_ <- Context.modifyState { state =>
+						_ <- Context.modifyStateBuilder { state =>
 							val tipClean_l = if (prewash_b) tipAll_l else tipGet_l ++ tipDrop_l
 							val tipToModel_l: List[(Tip, Option[TipModel])] = (tipDrop_l.toList.map(_ -> None) ++ tipGet_l.toList.map(_ -> tipModel_?))
 							for (tip <- tipClean_l) {

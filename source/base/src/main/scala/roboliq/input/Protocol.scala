@@ -44,12 +44,6 @@ case class ReagentBean(
 	key_? : Option[String]
 )
 
-private case class Task(
-	rel: Rel,
-	effects: List[WorldStateEvent]
-) extends Instruction {
-}
-
 class Protocol {
 	
 	private val logger = Logger[this.type]

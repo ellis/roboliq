@@ -645,7 +645,7 @@ class PipetteMethod {
 				TipWellVolumePolicy(stepC.tip, stepC.d.well, stepC.v, stepC.pipettePolicy)
 			})
 			val twvpDis_ll = device.groupSpirateItems(twvpDisToEvents0_l, path.state)
-			val dis_l = twvpDis_ll.map(PipetterDispense)
+			val dis_l = twvpDis_ll.map(twvp_l => PipetterDispense(twvp_l, Nil))
 			path = path.add(dis_l) match {
 				case RqError(e, w) => return RqError(e, w)
 				case RqSuccess(x, _) => x

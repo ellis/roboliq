@@ -15,10 +15,10 @@ import roboliq.entities.WorldState
 import roboliq.entities.WorldStateBuilder
 import spray.json.JsValue
 import scala.reflect.runtime.universe.TypeTag
+import roboliq.entities.WellInfo
+import roboliq.entities.Agent
 
 case class WellDispenseEntry(
-	scriptId: String,
-	instructionIndex: Int,
 	well: String,
 	substance: String,
 	amount: String,
@@ -37,6 +37,7 @@ case class ProtocolData(
 	instruction: Option[Int] = None,
 	warning_r: List[String] = Nil,
 	error_r: List[String] = Nil,
+	agentInstruction_l: Seq[AgentInstruction] = Nil,
 	well_aliquot_r: List[(List[Int], Well, Aliquot)] = Nil,
 	wellDispenseEntry_r: List[WellDispenseEntry] = Nil
 ) {
@@ -185,13 +186,27 @@ object Context {
 	def modify(f: ProtocolData => ProtocolData): Context[Unit] =
 		Context { data => (f(data), Some(())) }
 	
-	def modifyState(f: WorldStateBuilder => Unit): Context[Unit] = {
+	def modifyStateBuilder(f: WorldStateBuilder => Unit): Context[Unit] = {
 		Context { data => 
 			// Update state
 			var state1 = data.state.toMutable
 			f(state1)
 			(data.setState(state1.toImmutable), Some(()))
 		}
+	}
+	
+	def modifyState(f: WorldState => WorldState): Context[Unit] = {
+		Context { data =>
+			(data.setState(f(data.state)), Some(()))
+		}
+	}
+	
+	def modifyStateResult(f: WorldState => RsResult[WorldState]): Context[Unit] = {
+		for {
+			state0 <- Context.gets(_.state)
+			state1 <- Context.from(f(state0))
+			_ <- Context.modify(_.setState(state1))
+		} yield ()
 	}
 	
 	def assert(condition: Boolean, msg: => String): Context[Unit] = {
@@ -206,12 +221,19 @@ object Context {
 	//def getResult(a: A): Context[A] =
 	//	RsError(data.error_r, data.warning_r)
 	
+	def getEntityAs[A <: Entity : Manifest](ident: String): Context[A] =
+		getsResult[A](_.eb.getEntityAs[A](ident))
+
+	def getEntityAs[A: TypeTag](json: JsValue): Context[A] = {
+		for {
+			data <- Context.get
+			a <- Context.from(Converter.convAs[A](json, data.eb, Some(data.state)))
+		} yield a
+	}
+	
 	def getEntityIdent(e: Entity): Context[String] =
 		getsResult[String](_.eb.getIdent(e))
 		
-	def getEntityAs[A <: Entity : Manifest](ident: String): Context[A] =
-		getsResult[A](_.eb.getEntityAs[A](ident))
-	
 	def getLabwareModel(labware: Labware): Context[LabwareModel] = {
 		getsResult[LabwareModel]{ data =>
 			for {
@@ -220,13 +242,9 @@ object Context {
 			} yield model
 		}
 	}
-
-	def getEntityAs[A: TypeTag](json: JsValue): Context[A] = {
-		for {
-			data <- Context.get
-			a <- Context.from(Converter.convAs[A](json, data.eb, Some(data.state)))
-		} yield a
-	}
+	
+	//def getWellInfo(well: Well): Context[WellInfo] =
+	//	getsResult[WellInfo](data => data.eb.wellToWellInfo(data.state, well))
 	
 	/**
 	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
@@ -279,5 +297,19 @@ object Context {
 			if (data.error_r.isEmpty) (data, Some(()))
 			else (data, None)
 		}
+	}
+	
+	def addInstruction(agentInstruction: AgentInstruction): Context[Unit] = {
+		for {
+			_ <- agentInstruction.instruction.updateState
+			_ <- Context.modify { data => 
+				val agentInstruction2_l = data.agentInstruction_l :+ agentInstruction
+				data.copy(agentInstruction_l = agentInstruction2_l, instruction = Some(agentInstruction2_l.size))
+			}
+		} yield ()
+	}
+	
+	def addInstructions(agent: Agent, instruction_l: List[Instruction]): Context[Unit] = {
+		Context.foreachFirst(instruction_l)(instruction => Context.addInstruction(AgentInstruction(agent, instruction)))
 	}
 }
