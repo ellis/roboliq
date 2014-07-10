@@ -18,11 +18,12 @@ import scala.reflect.runtime.universe.TypeTag
 import roboliq.entities.WellInfo
 import roboliq.entities.Agent
 import roboliq.entities.WorldStateEvent
+import roboliq.entities.Amount
 
 case class WellDispenseEntry(
 	well: String,
 	substance: String,
-	amount: String,
+	amount: Amount,
 	agent: String,
 	tip: Option[Int]
 )

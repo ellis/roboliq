@@ -155,7 +155,7 @@ object SubstanceUnits extends Enumeration {
 	}
 }
 
-case class Amount(units: SubstanceUnits.Value, amount: BigDecimal)
+case class Amount(units: SubstanceUnits.Value, amount: BigDecimal) 
 object Amount {
 	def empty = Amount(SubstanceUnits.None, 0)
 }

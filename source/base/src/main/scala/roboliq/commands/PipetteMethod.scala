@@ -717,7 +717,7 @@ class PipetteMethod {
 					WellDispenseEntry(
 						well = stepC.d.toString(),
 						substance = substance.toString,
-						amount = amount.toString,
+						amount = amount,
 						agent = agent.getName,
 						tip = Some(stepC.tip.index + 1)
 					)

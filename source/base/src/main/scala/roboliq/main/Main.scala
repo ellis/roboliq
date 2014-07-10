@@ -133,6 +133,8 @@ object Main extends App {
 				}
 			}
 			val (data1, _) = ctx0.run(data0)
+			
+			hdf5.addInstructionData(opt.protocolFile.getName(), data1.instruction_l.map(_._1).toList)
 
 			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
