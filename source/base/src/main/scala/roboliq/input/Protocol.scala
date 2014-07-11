@@ -34,6 +34,22 @@ import roboliq.plan.OperatorHandler
 import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
 
+case class SourceSubstanceBean(
+	name: String,
+	amount_? : Option[PipetteAmount],
+	description_? : Option[String],
+	type_? : Option[SubstanceKind.Value],
+	tipCleanPolicy_? : Option[TipCleanPolicy],
+	contaminants: Set[String]
+)
+
+case class SourceBean(
+	name: List[String],
+	well: PipetteDestinations,
+	substance: List[SourceSubstanceBean],
+	amount_? : Option[LiquidVolume]
+)
+
 case class ReagentBean(
 	id: String,
 	wells: PipetteDestinations,
@@ -253,6 +269,139 @@ class Protocol {
 				case _ => RqSuccess(())
 			}
 			
+			_ <- jsobj.fields.get("substances") match {
+				case Some(js) =>
+					val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
+					RqResult.toResultOfList(inputs.map(m => {
+						val key = m.getOrElse("id", gid)
+						val name = m.getOrElse("name", key)
+						val kind = m("kind") match {
+							case "Liquid" => SubstanceKind.Liquid
+							case "Dna" => SubstanceKind.Dna
+						}
+						val tipCleanPolicy = m.getOrElse("tipCleanPolicy", "Thorough").toLowerCase match {
+							case "none" => TipCleanPolicy.NN
+							case "thoroughnone" => TipCleanPolicy.TN
+							case "thoroughlight" => TipCleanPolicy.TL
+							case "thorough" => TipCleanPolicy.TT
+							case "decontaminate" => TipCleanPolicy.DD
+						}
+						val substance = Substance(key, Some(name), None, kind, tipCleanPolicy, Set(), None, None, None, None, Nil, None)
+						nameToSubstance_m(name) = substance
+						RqSuccess(())
+					}))
+				case _ => RqSuccess(())
+			}
+			
+			//println(jsobj.fields.get("source"))
+			_ <- jsobj.fields.get("source") match {
+				case Some(jsval) =>
+					//println("jsval: "+jsval)
+					//println(Converter.convAs[List[SourceBean]](jsval, eb, None))
+					for {
+						sourceBean_l <- Converter.convAs[List[SourceBean]](jsval, eb, Some(state0.toImmutable))
+						_ <- RsResult.mapFirst(sourceBean_l.zipWithIndex) { case (sourceBean, i) =>
+							val well_l = sourceBean.well.l.map(_.well)
+							for {
+								_ <- (sourceBean.name.size, sourceBean.well.l.size) match {
+									case (0, _) => RsError(s"`name` must be supplied for source ${i+1}")
+									case (_, 0) => RsError(s"`well` must be supplied for source ${i+1}")
+									case (1, _) => RsSuccess(())
+									case (a, b) if a != b => RsError(s"`name` and `well` lists must have the same size for source ${i+1}")
+									case _ => RsSuccess(())
+								}
+								nameToWell_l <- sourceBean.name match {
+									case Nil => RsError(s"`name` must be supplied for source ${i+1}")
+									case l => RsSuccess(l.zip(sourceBean.well.l).map { case (s, wellInfo) => s.replace("{{WELL}}", wellInfo.rowcol.toString) -> wellInfo })
+								}
+								// TODO: check that `well` and `name` lengths are compatible
+								_ <- {
+									val nameToWells_m: Map[String, List[WellInfo]] = nameToWell_l.groupBy(_._1).mapValues(l => l.map(_._2))
+									if (nameToWells_m.isEmpty) {
+										RsError(s"`name` and `well` must be supplied for source ${i+1}")
+									}
+									// There is exactly one name
+									else if (nameToWells_m.size == 1) {
+										
+									}
+									else {
+										
+									}
+								}
+								_ <- RsResult.mapAll(nameToWells_m.toList) { case (name, well_l) =>
+									
+								}
+							} yield ()
+							
+							// If name contains "{{WELL}}"
+							eb.reagentToWells_m(sourceBean.name) = well_l
+
+							nameToSubstance_m(name) = substance
+							val substance = Substance(
+								key = gid,
+								label = Some(bean.id),
+								description = None,
+								kind = SubstanceKind.Liquid,
+								tipCleanPolicy = tipCleanPolicy,
+								contaminants = bean.contaminants,
+								costPerUnit_? = None,
+								valuePerUnit_? = None,
+								molarity_? = None,
+								gramPerMole_? = None,
+								celciusAndConcToViscosity = Nil,
+								sequence_? = None
+							)
+							for {
+								
+							} yield ()
+						}
+						//_ = println("reagentBean_l: "+reagentBean_l)
+						substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
+							val key = bean.key_?.getOrElse(gid)
+							val name = bean.id
+							val kind = SubstanceKind.Liquid
+							for {
+								tipCleanPolicy <- bean.sterilize_?.getOrElse("rinse").toLowerCase match {
+									case "keep" => RsSuccess(TipCleanPolicy.NN)
+									case "rinse/none" => RsSuccess(TipCleanPolicy.TN)
+									case "rinse/light" => RsSuccess(TipCleanPolicy.TL)
+									case "rinse" => RsSuccess(TipCleanPolicy.TT)
+									case "replace" => RsSuccess(TipCleanPolicy.DD)
+									case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
+								}
+							} yield {
+								val substance = Substance(
+									key = key,
+									label = Some(bean.id),
+									description = None,
+									kind = SubstanceKind.Liquid,
+									tipCleanPolicy = tipCleanPolicy,
+									contaminants = bean.contaminants,
+									costPerUnit_? = None,
+									valuePerUnit_? = None,
+									molarity_? = None,
+									gramPerMole_? = None,
+									celciusAndConcToViscosity = Nil,
+									sequence_? = None
+								)
+								//println("substance: "+substance)
+								//println("well_l: "+well_l)
+								nameToSubstance_m(name) = substance
+								val well_l = bean.wells.l.map(_.well)
+								eb.reagentToWells_m(name) = well_l
+								val mixture = Mixture(Left(substance))
+								val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
+								// Add aliquot to all referenced wells
+								for (well <- well_l) {
+									state0.well_aliquot_m(well) = aliquot
+								}
+								//println(eb.lookupLiquidSource(bean.id, state0.toImmutable))
+							}
+						}))
+					} yield ()
+				case _ => RqSuccess(())
+			}
+			
 			//println(jsobj.fields.get("reagents"))
 			_ <- jsobj.fields.get("reagents") match {
 				case Some(jsval) =>
@@ -304,30 +453,6 @@ class Protocol {
 							}
 						}))
 					} yield ()
-				case _ => RqSuccess(())
-			}
-			
-			_ <- jsobj.fields.get("substances") match {
-				case Some(js) =>
-					val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
-					RqResult.toResultOfList(inputs.map(m => {
-						val key = m.getOrElse("id", gid)
-						val name = m.getOrElse("name", key)
-						val kind = m("kind") match {
-							case "Liquid" => SubstanceKind.Liquid
-							case "Dna" => SubstanceKind.Dna
-						}
-						val tipCleanPolicy = m.getOrElse("tipCleanPolicy", "Thorough") match {
-							case "None" => TipCleanPolicy.NN
-							case "ThoroughNone" => TipCleanPolicy.TN
-							case "ThoroughLight" => TipCleanPolicy.TL
-							case "Thorough" => TipCleanPolicy.TT
-							case "Decontaminate" => TipCleanPolicy.DD
-						}
-						val substance = Substance(key, Some(name), None, kind, tipCleanPolicy, Set(), None, None, None, None, Nil, None)
-						nameToSubstance_m(name) = substance
-						RqSuccess(())
-					}))
 				case _ => RqSuccess(())
 			}
 			

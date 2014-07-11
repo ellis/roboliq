@@ -25,12 +25,51 @@
 - [ ] improve error and warning output, so that the user knows which command or config entry is causing the problem
 - [ ] REFACTOR: merge EntityBase, AtomBase, and WorldState into WorldState, using atoms as much as possible
 - [ ] add execution capability to time the execution of different commands, which can then be used to predict duration of operations too
+- [ ] allow for more differentiation of TipCleanPolicy in substance definition, so that washing and replacement can be specified independently (and perhaps also the option to store tips for later use?)
 
 ## Current goal
 
-- [ ] Refactor using Context
+- [x] Refactor using Context
+- [ ] figure out how to integrate substances vs sources in the protocol file
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+
+## Substances
+
+- We want to name the substances used in the protocol.
+- If a well is used as a source, but not named by the user, then the substance gets the name of the well.
+- We may also want to refer to a mixture by name; currently we use the EntityBase.reagentToWells_m map, but perhaps
+  we should use the concept of a "well group" instead?
+- For convenience, allow for the definition of substances in the source definition
+
+    substance:
+    - name: water
+      tipCleanPolicy: thoroughNone
+    - name: buffer
+    - name: dntp
+      tipCleanPolicy: decontaminate
+    - name: template
+      type: dna
+      tipCleanPolicy: decontaminate
+
+    source:
+    - name: water
+      well: plate1(A01|H01)
+      substance: water
+    - name: buffer
+      well: plate1(A02|H02)
+      substance:
+      - name: buffer
+        amount: 10x
+      - name: water
+    - name: template{{WELL}}
+      well: plate2(A01|H01)
+
+    wellContent:
+    - well: ...
+      substance: ...
+
+    command:
 
 ## Context monad
 
