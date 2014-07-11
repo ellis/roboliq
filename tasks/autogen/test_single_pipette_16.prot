@@ -1,0 +1,22 @@
+description: |
+  Pipette mixture1 between two wells on plate1, where mixture1 is composed of dye diluted in water
+
+substance:
+- name: dye
+- name: water
+
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+source:
+- name: mixture1
+  well: plate1(A01)
+  substance:
+  - name: dye
+    amount: 1/10
+  - name: water
+
+protocol:
+- pipette:
+    steps:
+    - {s: plate1(A01), d: plate1(A02), a: 20ul}

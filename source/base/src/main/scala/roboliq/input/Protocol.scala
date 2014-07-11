@@ -34,7 +34,15 @@ import roboliq.plan.OperatorHandler
 import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
 
-case class SourceSubstanceBean(
+case class SubstanceBean(
+	name: String,
+	description_? : Option[String],
+	type_? : Option[SubstanceKind.Value],
+	tipCleanPolicy_? : Option[TipCleanPolicy],
+	contaminants: Set[String]
+)
+
+private case class SourceSubstanceBean(
 	name: String,
 	amount_? : Option[AmountSpec],
 	description_? : Option[String],
@@ -43,14 +51,14 @@ case class SourceSubstanceBean(
 	contaminants: Set[String]
 )
 
-case class SourceBean(
+private case class SourceBean(
 	name: List[String],
 	well: PipetteDestinations,
 	substance: List[SourceSubstanceBean],
 	amount_? : Option[LiquidVolume]
 )
 
-case class ReagentBean(
+private case class ReagentBean(
 	id: String,
 	wells: PipetteDestinations,
 	contaminants : Set[String],
@@ -269,6 +277,7 @@ class Protocol {
 				case _ => RqSuccess(())
 			}
 			
+			// TODO: FIXME: Remove this
 			_ <- jsobj.fields.get("substances") match {
 				case Some(js) =>
 					val inputs: List[Map[String, String]] = js.convertTo[List[Map[String, String]]]
@@ -290,6 +299,32 @@ class Protocol {
 						nameToSubstance_m(name) = substance
 						RqSuccess(())
 					}))
+				case _ => RqSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("substance") match {
+				case Some(jsval) =>
+					for {
+						substanceBean_l <- Converter.convAs[List[SubstanceBean]](jsval, eb, Some(state0.toImmutable))
+						_ <- RqResult.mapAll(substanceBean_l) { bean =>
+							val substance = Substance(
+								key = gid,
+								label = Some(bean.name),
+								description = bean.description_?,
+								kind = bean.type_?.getOrElse(SubstanceKind.Liquid),
+								tipCleanPolicy = bean.tipCleanPolicy_?.getOrElse(TipCleanPolicy.TT),
+								contaminants = bean.contaminants,
+								costPerUnit_? = None,
+								valuePerUnit_? = None,
+								molarity_? = None,
+								gramPerMole_? = None,
+								celciusAndConcToViscosity = Nil,
+								sequence_? = None
+							)
+							nameToSubstance_m(bean.name) = substance
+							RqSuccess(())
+						}
+					} yield ()
 				case _ => RqSuccess(())
 			}
 			
@@ -328,12 +363,12 @@ class Protocol {
 									}
 									// List of substances and their optional amounts
 									val mixtureToAmount_l = substance_l.map(substanceBean => {
-										val substance = nameToSubstance_m.get(name) match {
+										val substance = nameToSubstance_m.get(substanceBean.name) match {
 											case Some(substance) => substance
 											case None =>
 												val substance = Substance(
 													key = gid,
-													label = Some(name),
+													label = Some(substanceBean.name),
 													description = substanceBean.description_?,
 													kind = SubstanceKind.Liquid,
 													tipCleanPolicy = substanceBean.tipCleanPolicy_?.getOrElse(TipCleanPolicy.TT),
@@ -345,7 +380,7 @@ class Protocol {
 													celciusAndConcToViscosity = Nil,
 													sequence_? = None
 												)
-												nameToSubstance_m(name) = substance
+												nameToSubstance_m(substanceBean.name) = substance
 												substance
 										}
 										(Mixture(Left(substance)), substanceBean.amount_?)
@@ -369,6 +404,7 @@ class Protocol {
 				case _ => RqSuccess(())
 			}
 			
+			// TODO: FIXME: Remove this
 			//println(jsobj.fields.get("reagents"))
 			_ <- jsobj.fields.get("reagents") match {
 				case Some(jsval) =>

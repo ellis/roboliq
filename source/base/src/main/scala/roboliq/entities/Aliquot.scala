@@ -85,7 +85,7 @@ object Mixture {
 	def fromMixtureAmountList(l: List[(Mixture, Option[AmountSpec])]): RsResult[Mixture] = {
 		var volumeExplicit = BigDecimal(0)
 		var dilutedNum = BigDecimal(0)
-		var dilutedDen = BigDecimal(0)
+		var dilutedDen = BigDecimal(1)
 		var filler_? : Option[Mixture] = None
 		for ((mixture, amount_?) <- l) {
 			amount_? match {
@@ -100,13 +100,6 @@ object Mixture {
 					//  (1*20+3*10)/(10*20) = 30/200
 					dilutedNum = dilutedNum * den + dilutedDen * num
 					dilutedDen *= den
-			}
-		}
-		
-		def mixtureFromAliquots(aliquot_l: List[Aliquot]): Mixture = {
-			aliquot_l match {
-				case List(Aliquot(Mixture(Left(substance)), _)) => Mixture(Left(substance))
-				case _ => Mixture(Right(aliquot_l))
 			}
 		}
 		
@@ -128,13 +121,18 @@ object Mixture {
 					case (mixture, Some(Amount_x(num, den))) => RsSuccess(Aliquot(mixture, LiquidVolume.l(volumeTotal * num / den)))
 					case _ => RsError("INTERNAL: fromMixtureAmountList: #1")
 				}
-			} yield mixtureFromAliquots(aliquot_l)
+			} yield {
+				aliquot_l match {
+					case List(Aliquot(Mixture(Left(substance)), _)) => Mixture(Left(substance))
+					case _ => Mixture(Right(aliquot_l))
+				}
+			}
 		}
 	
 		(filler_?, volumeExplicit > 0, dilutedNum > 0) match {
 			// Dilutions, but no volumes
 			case (_, false, true) =>
-				calcMixture(LiquidVolume.ul(1).l)
+				calcMixture(1)
 			// Explicit volumes, but no dilutions
 			case (_, true, false) =>
 				calcMixture(volumeExplicit)
