@@ -5,8 +5,9 @@ labware:
   trough1: troughModel_100ml
   plate1: plateModel_384_square
 
-reagents:
-  dyeLight: trough1(A01|H01)
+source:
+- name: dyeLight
+  well: trough1(A01|H01)
 
 protocol:
 - titrate:
