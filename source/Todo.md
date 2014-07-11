@@ -36,6 +36,8 @@
 
 ## Substances
 
+- [ ] Error if source has same name as a substance IF the source contains more than one substance.
+
 - We want to name the substances used in the protocol.
 - If a well is used as a source, but not named by the user, then the substance gets the name of the well.
 - We may also want to refer to a mixture by name; currently we use the EntityBase.reagentToWells_m map, but perhaps

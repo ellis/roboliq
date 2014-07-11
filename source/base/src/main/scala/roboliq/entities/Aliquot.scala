@@ -187,7 +187,7 @@ class AliquotFlat(
 		content.toList.map(pair => {
 			val (substance, amount) = pair
 			s"${substance.label.getOrElse(substance.key)}@${amount.amount.toString}${SubstanceUnits.toShortString(amount.units)}"
-		}).mkString("+") + "@" + volume.toString
+		}).mkString("(", "+", ")") + "@" + volume.toString
 	}
 }
 
@@ -195,7 +195,7 @@ object AliquotFlat {
 	def empty = new AliquotFlat(Map())
 
 	def apply(aliquot: Aliquot): AliquotFlat = {
-		val content: Map[Substance, Amount] = aliquot.mixture.source match {
+		val content0: Map[Substance, Amount] = aliquot.mixture.source match {
 			case Left(substance) => Map(substance -> aliquot.distribution.bestGuess)
 			case Right(aliquot_l) =>
 				val flat_l = aliquot_l.map(AliquotFlat.apply)
@@ -211,7 +211,11 @@ object AliquotFlat {
 					substance -> amount
 				})
 		}
-		new AliquotFlat(content)
+		// FIXME: need to also handle other units besides just liters
+		val amountContent0 = content0.map(_._2 match { case Amount(SubstanceUnits.Liter, n) => n }).sum
+		val amountFraction = aliquot.distribution.bestGuess.amount / amountContent0 
+		val content1 = content0.map { case (substance, amount0) => (substance, amount0.copy(amount = amount0.amount * amountFraction)) }
+		new AliquotFlat(content1)
 	}
 }
 

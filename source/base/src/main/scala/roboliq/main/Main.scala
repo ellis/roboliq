@@ -155,10 +155,9 @@ object Main extends App {
 				println(s"$wellIdent: ${AliquotFlat(aliquot).toMixtureString} ${amount}")
 			})
 			
-			// FIXME: for debug only
-			println("well_aliquot_m:")
-			data1.state.well_aliquot_m.foreach(println)
-			// ENDFIX
+			// Consider creating an HDF5 table for the final well aliquots:
+			//println("well_aliquot_m:")
+			//data1.state.well_aliquot_m.foreach(println)
 			
 			data1.error_r.reverse.foreach(println)
 			data1.warning_r.reverse.foreach(println)
