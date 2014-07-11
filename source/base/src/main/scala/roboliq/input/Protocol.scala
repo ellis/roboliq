@@ -315,8 +315,19 @@ class Protocol {
 								nameToWell_l = name_l.zip(sourceBean.well.l).map { case (s, wellInfo) => s.replace("{{WELL}}", wellInfo.rowcol.toString) -> wellInfo }
 								nameToWells_m: Map[String, List[WellInfo]] = nameToWell_l.groupBy(_._1).mapValues(l => l.map(_._2))
 								_ <- RsResult.mapAll(nameToWells_m.toList) { case (name, well_l) =>
+									val substance_l = sourceBean.substance match {
+										case Nil => List(SourceSubstanceBean(
+												name = name,
+												amount_? = None,
+												description_? = None,
+												type_? = None,
+												tipCleanPolicy_? = None,
+												contaminants = Set()
+											))
+										case _ => sourceBean.substance
+									}
 									// List of substances and their optional amounts
-									val mixtureToAmount_l = sourceBean.substance.map(substanceBean => {
+									val mixtureToAmount_l = substance_l.map(substanceBean => {
 										val substance = nameToSubstance_m.get(name) match {
 											case Some(substance) => substance
 											case None =>

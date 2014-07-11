@@ -4,8 +4,9 @@ description: |
 labware:
   plate1: plateModel_96_nunc_transparent
 
-reagents:
-  reagent1: plate1(A01)
+source:
+- name: reagent1
+  well: plate1(A01)
 
 protocol:
 - pipette:

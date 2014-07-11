@@ -716,7 +716,7 @@ class PipetteMethod {
 				aliquotFlat.content.toList.map { case (substance, amount) =>
 					WellDispenseEntry(
 						well = stepC.d.toString(),
-						substance = substance.toString,
+						substance = substance.label.getOrElse(substance.key),
 						amount = amount,
 						agent = agent.getName,
 						tip = Some(stepC.tip.index + 1)
