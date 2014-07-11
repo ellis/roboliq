@@ -76,6 +76,86 @@ case class Mixture(
 
 object Mixture {
 	def empty = new Mixture(Right(Nil))
+	/**
+	 * Example 1:
+	 * - 20ul
+	 * - 10x
+	 * - 10x
+	 */
+	def fromMixtureAmountList(l: List[(Mixture, Option[AmountSpec])]): RsResult[Mixture] = {
+		var volumeExplicit = BigDecimal(0)
+		var dilutedNum = BigDecimal(0)
+		var dilutedDen = BigDecimal(0)
+		var filler_? : Option[Mixture] = None
+		for ((mixture, amount_?) <- l) {
+			amount_? match {
+				case None =>
+					if (filler_?.isDefined) return RsError("at most one mixture may be specified without an amount")
+					else filler_? = Some(mixture)
+				case Some(Amount_l(n)) =>
+					volumeExplicit += n
+				case Some(Amount_x(num, den)) =>
+					// Cross multiple dilutedNum/dilutedDen and 1/n, then sum them together.  Example:
+					// 1/10 + 3/20 =>
+					//  (1*20+3*10)/(10*20) = 30/200
+					dilutedNum = dilutedNum * den + dilutedDen * num
+					dilutedDen *= den
+			}
+		}
+		
+		def mixtureFromAliquots(aliquot_l: List[Aliquot]): Mixture = {
+			aliquot_l match {
+				case List(Aliquot(Mixture(Left(substance)), _)) => Mixture(Left(substance))
+				case _ => Mixture(Right(aliquot_l))
+			}
+		}
+		
+		def calcMixture(volumeTotal: BigDecimal): RsResult[Mixture] = {
+			val volumeDiluted = volumeTotal * dilutedNum / dilutedDen
+			val volumeFiller = volumeTotal - volumeExplicit - volumeDiluted
+			if (volumeFiller > 0 && filler_?.isEmpty) {
+				return RsError("This given list of substances amounts does not add up.  You may wish to provide a diluent solution without an amount specified to act as a filler.")
+			}
+			else if (volumeFiller < 0) {
+				RsError("INTERNAL: fromMixtureAmountList: volumeFiller < 0")
+			}
+			
+			for {
+				aliquot_l <- RsResult.mapFirst(l) {
+					// TODO: Add a warning if volumeFiller == 0
+					case (mixture, None) => RsSuccess(Aliquot(mixture, LiquidVolume.l(volumeFiller)))
+					case (mixture, Some(Amount_l(n))) => RsSuccess(Aliquot(mixture, LiquidVolume.l(n)))
+					case (mixture, Some(Amount_x(num, den))) => RsSuccess(Aliquot(mixture, LiquidVolume.l(volumeTotal * num / den)))
+					case _ => RsError("INTERNAL: fromMixtureAmountList: #1")
+				}
+			} yield mixtureFromAliquots(aliquot_l)
+		}
+	
+		(filler_?, volumeExplicit > 0, dilutedNum > 0) match {
+			// Dilutions, but no volumes
+			case (_, false, true) =>
+				calcMixture(LiquidVolume.ul(1).l)
+			// Explicit volumes, but no dilutions
+			case (_, true, false) =>
+				calcMixture(volumeExplicit)
+			// Explicit volumes and dilutions
+			case (_, true, true) =>
+				// Example:
+				//  volumeExplicit = 4ul
+				//  dilutionFraction = 0.6
+				//  volumeTotal = 4ul / (1 - 0.6) = 10ul
+				//  volumeExplicit / (1 - dilutedNum / dilutedDen) = dilutedDen * volumeExplicit / (dilutedDen - dilutedNum)
+				calcMixture(dilutedDen * volumeExplicit / (dilutedDen - dilutedNum))
+			// Nothing
+			case (None, false, false) =>
+				RsSuccess(Mixture.empty)
+			// Only a substance without amount
+			case (Some(mixture), false, false) =>
+				RsSuccess(mixture)
+			case (Some(_), true, false) =>
+				RsError("when multiple substances are listed and one of them has no amount specified, at least one other substance must have an amount specified as a dilution")
+		}
+	}
 }
 
 /**
@@ -159,3 +239,9 @@ case class Amount(units: SubstanceUnits.Value, amount: BigDecimal)
 object Amount {
 	def empty = Amount(SubstanceUnits.None, 0)
 }
+
+sealed trait AmountSpec
+case class Amount_l(n: BigDecimal) extends AmountSpec
+//case class Amount_mol(n: BigDecimal) extends AmountSpec
+//case class Amount_g(n: BigDecimal) extends AmountSpec
+case class Amount_x(num: BigDecimal, den: BigDecimal) extends AmountSpec

@@ -36,7 +36,7 @@ import roboliq.commands.ShakePlateActionHandler
 
 case class SourceSubstanceBean(
 	name: String,
-	amount_? : Option[PipetteAmount],
+	amount_? : Option[AmountSpec],
 	description_? : Option[String],
 	type_? : Option[SubstanceKind.Value],
 	tipCleanPolicy_? : Option[TipCleanPolicy],
@@ -301,103 +301,59 @@ class Protocol {
 					for {
 						sourceBean_l <- Converter.convAs[List[SourceBean]](jsval, eb, Some(state0.toImmutable))
 						_ <- RsResult.mapFirst(sourceBean_l.zipWithIndex) { case (sourceBean, i) =>
-							val well_l = sourceBean.well.l.map(_.well)
+							//val well_l = sourceBean.well.l.map(_.well)
 							for {
-								_ <- (sourceBean.name.size, sourceBean.well.l.size) match {
-									case (0, _) => RsError(s"`name` must be supplied for source ${i+1}")
-									case (_, 0) => RsError(s"`well` must be supplied for source ${i+1}")
-									case (1, _) => RsSuccess(())
+								// TODO: check that array sizes for `name` and `well` are compatible
+								name_l <- (sourceBean.name.size, sourceBean.well.l.size) match {
+									case (0, _) => RsError(s"source ${i+1}: `name` must be supplied")
+									case (_, 0) => RsError(s"source ${i+1}: `well` must be supplied")
+									case (1, n) => RsSuccess(List.fill(n)(sourceBean.name.head))
 									case (a, b) if a != b => RsError(s"`name` and `well` lists must have the same size for source ${i+1}")
-									case _ => RsSuccess(())
+									case _ => RsSuccess(sourceBean.name)
 								}
-								nameToWell_l <- sourceBean.name match {
-									case Nil => RsError(s"`name` must be supplied for source ${i+1}")
-									case l => RsSuccess(l.zip(sourceBean.well.l).map { case (s, wellInfo) => s.replace("{{WELL}}", wellInfo.rowcol.toString) -> wellInfo })
-								}
-								// TODO: check that `well` and `name` lengths are compatible
-								_ <- {
-									val nameToWells_m: Map[String, List[WellInfo]] = nameToWell_l.groupBy(_._1).mapValues(l => l.map(_._2))
-									if (nameToWells_m.isEmpty) {
-										RsError(s"`name` and `well` must be supplied for source ${i+1}")
-									}
-									// There is exactly one name
-									else if (nameToWells_m.size == 1) {
-										
-									}
-									else {
-										
-									}
-								}
+								// Replace any occurrences of "{{WELL}}" in the name with the well position
+								nameToWell_l = name_l.zip(sourceBean.well.l).map { case (s, wellInfo) => s.replace("{{WELL}}", wellInfo.rowcol.toString) -> wellInfo }
+								nameToWells_m: Map[String, List[WellInfo]] = nameToWell_l.groupBy(_._1).mapValues(l => l.map(_._2))
 								_ <- RsResult.mapAll(nameToWells_m.toList) { case (name, well_l) =>
-									
+									// List of substances and their optional amounts
+									val mixtureToAmount_l = sourceBean.substance.map(substanceBean => {
+										val substance = nameToSubstance_m.get(name) match {
+											case Some(substance) => substance
+											case None =>
+												val substance = Substance(
+													key = gid,
+													label = Some(name),
+													description = substanceBean.description_?,
+													kind = SubstanceKind.Liquid,
+													tipCleanPolicy = substanceBean.tipCleanPolicy_?.getOrElse(TipCleanPolicy.TT),
+													contaminants = substanceBean.contaminants,
+													costPerUnit_? = None,
+													valuePerUnit_? = None,
+													molarity_? = None,
+													gramPerMole_? = None,
+													celciusAndConcToViscosity = Nil,
+													sequence_? = None
+												)
+												nameToSubstance_m(name) = substance
+												substance
+										}
+										(Mixture(Left(substance)), substanceBean.amount_?)
+									})
+									// Get the mixture for the substance+amount list
+									for {
+										mixture <- Mixture.fromMixtureAmountList(mixtureToAmount_l)
+									} yield {
+										// Map the source name to the list of wells
+										eb.reagentToWells_m(name) = well_l.map(_.well)
+										// Add the mixture to the wells
+										val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
+										for (well <- well_l) {
+											state0.well_aliquot_m(well.well) = aliquot
+										}
+									}
 								}
-							} yield ()
-							
-							// If name contains "{{WELL}}"
-							eb.reagentToWells_m(sourceBean.name) = well_l
-
-							nameToSubstance_m(name) = substance
-							val substance = Substance(
-								key = gid,
-								label = Some(bean.id),
-								description = None,
-								kind = SubstanceKind.Liquid,
-								tipCleanPolicy = tipCleanPolicy,
-								contaminants = bean.contaminants,
-								costPerUnit_? = None,
-								valuePerUnit_? = None,
-								molarity_? = None,
-								gramPerMole_? = None,
-								celciusAndConcToViscosity = Nil,
-								sequence_? = None
-							)
-							for {
-								
 							} yield ()
 						}
-						//_ = println("reagentBean_l: "+reagentBean_l)
-						substance_l <- RsResult.toResultOfList(reagentBean_l.toList.map(bean => {
-							val key = bean.key_?.getOrElse(gid)
-							val name = bean.id
-							val kind = SubstanceKind.Liquid
-							for {
-								tipCleanPolicy <- bean.sterilize_?.getOrElse("rinse").toLowerCase match {
-									case "keep" => RsSuccess(TipCleanPolicy.NN)
-									case "rinse/none" => RsSuccess(TipCleanPolicy.TN)
-									case "rinse/light" => RsSuccess(TipCleanPolicy.TL)
-									case "rinse" => RsSuccess(TipCleanPolicy.TT)
-									case "replace" => RsSuccess(TipCleanPolicy.DD)
-									case s => RsError(s"`tipPolicy`: unrecognized value for `$s`")
-								}
-							} yield {
-								val substance = Substance(
-									key = key,
-									label = Some(bean.id),
-									description = None,
-									kind = SubstanceKind.Liquid,
-									tipCleanPolicy = tipCleanPolicy,
-									contaminants = bean.contaminants,
-									costPerUnit_? = None,
-									valuePerUnit_? = None,
-									molarity_? = None,
-									gramPerMole_? = None,
-									celciusAndConcToViscosity = Nil,
-									sequence_? = None
-								)
-								//println("substance: "+substance)
-								//println("well_l: "+well_l)
-								nameToSubstance_m(name) = substance
-								val well_l = bean.wells.l.map(_.well)
-								eb.reagentToWells_m(name) = well_l
-								val mixture = Mixture(Left(substance))
-								val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))
-								// Add aliquot to all referenced wells
-								for (well <- well_l) {
-									state0.well_aliquot_m(well) = aliquot
-								}
-								//println(eb.lookupLiquidSource(bean.id, state0.toImmutable))
-							}
-						}))
 					} yield ()
 				case _ => RqSuccess(())
 			}

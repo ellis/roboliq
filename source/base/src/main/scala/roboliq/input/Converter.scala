@@ -330,6 +330,7 @@ object Converter {
 			else if (typ =:= typeOf[Boolean]) toBoolean(jsval)//.map(_.asInstanceOf[Boolean])
 			else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
 			else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
+			else if (typ =:= typeOf[AmountSpec]) toAmountSpec(jsval)
 			else if (typ =:= typeOf[LiquidSource]) toLiquidSource(jsval, eb, state_?)
 			else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
 			else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(jsval)
@@ -824,6 +825,17 @@ object Converter {
 		}
 	}
 	
+	def toAmountSpec(
+		jsval: JsValue
+	): RqResult[AmountSpec] = {
+		jsval match {
+			case JsString(s) =>
+				//println("parse: "+PipetteAmountParser.parse(s))
+				PipetteAmountParser.parse(s)
+			case _ => RqError("expected JsString for amount")
+		}
+	}
+
 	private val RxVolume = """([0-9]*)(\.[0-9]*)? ?([mun]?l)""".r
 	def toVolume(jsval: JsValue): RqResult[LiquidVolume] = {
 		jsval match {
