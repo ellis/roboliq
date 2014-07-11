@@ -152,8 +152,6 @@ object Mixture {
 			// Only a substance without amount
 			case (Some(mixture), false, false) =>
 				RsSuccess(mixture)
-			case (Some(_), true, false) =>
-				RsError("when multiple substances are listed and one of them has no amount specified, at least one other substance must have an amount specified as a dilution")
 		}
 	}
 }

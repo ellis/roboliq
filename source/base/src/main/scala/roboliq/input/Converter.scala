@@ -831,7 +831,7 @@ object Converter {
 		jsval match {
 			case JsString(s) =>
 				//println("parse: "+PipetteAmountParser.parse(s))
-				PipetteAmountParser.parse(s)
+				AmountSpecParser.parse(s)
 			case _ => RqError("expected JsString for amount")
 		}
 	}
