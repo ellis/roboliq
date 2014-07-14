@@ -749,9 +749,46 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 									} yield ()
 								}
 							} yield {
-								// Call the appropriate subroutine for cleaning
-								val path = """C:\Program Files\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+intensity_s+"_"+suffix+".esc"
-								Some(TranslationItem(L0C_Subroutine(path), Nil))
+								val tip_m = encodeTips(tip_l)
+								if (intensity == CleanIntensity.Flush) {
+									val wash = L0C_Wash(
+										mTips = tip_m,
+										iWasteGrid = 1, iWasteSite = 1,
+										iCleanerGrid = 1, iCleanerSite = 0,
+										nWasteVolume = 1,
+										nWasteDelay = 500,
+										nCleanerVolume = 1,
+										nCleanerDelay = 500,
+										nAirgapVolume = 10,
+										nAirgapSpeed = 70,
+										nRetractSpeed = 30,
+										bFastWash = false,
+										bUNKNOWN1 = false
+									)
+									Some(TranslationItem(wash, Nil))
+								}
+								else if (intensity == CleanIntensity.Light) {
+									val wash = L0C_Wash(
+										mTips = tip_m,
+										iWasteGrid = 1, iWasteSite = 1,
+										iCleanerGrid = 1, iCleanerSite = 0,
+										nWasteVolume = 4,
+										nWasteDelay = 500,
+										nCleanerVolume = 2,
+										nCleanerDelay = 500,
+										nAirgapVolume = 10,
+										nAirgapSpeed = 70,
+										nRetractSpeed = 30,
+										bFastWash = false,
+										bUNKNOWN1 = false
+									)
+									Some(TranslationItem(wash, Nil))
+								}
+								else {
+									// Call the appropriate subroutine for cleaning
+									val path = """C:\ProgramData\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_"""+intensity_s+"_"+suffix+".esc"
+									Some(TranslationItem(L0C_Subroutine(path), Nil))
+								}
 							}
 					}
 			}

@@ -25,4 +25,4 @@ protocol:
     destination: plate1(A01|H12)
     tip: [1, 2, 3, 4]
     pipettePolicy: Roboliq_Water_Air_1000
-    cleanBetween: light
+    cleanBetween: flush
