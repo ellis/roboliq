@@ -1,0 +1,323 @@
+[Mpo]
+Flowrate=100
+LicosActive=0
+WasteLevel=90
+SystemLevel=10
+TrolleySensorsActive=0
+
+[PosId]
+StringCount=0
+
+[LihaMachine]
+TipCount=8
+InstrumentWidth=200
+ZTravel=0
+BrokenTips=0;0;0;0;0;0;0;0
+LowVolume=0;0;0;0;0;0;0;0
+TipType=0;0;0;0;0;0;0;0
+TipOffset=391;393;391;394;-266;-261;-265;-263
+DilutorVolume=1000;1000;1000;1000;50;50;50;50
+Sysvolume=3500;3500;3500;3500;3500;3500;3500;3500
+PipMaxSpeed=900;900;900;900;45;45;45;45
+WashMaxSpeed=900;900;900;900;45;45;45;45
+Voltage=60;60;60;60;60;60;60;60
+Frequency=100;100;100;100;100;100;100;100
+PulseWidth=140;140;140;140;140;140;140;140
+DiluterSteps=3000;3000;3000;3000;3000;3000;3000;3000
+PumpType=0;0;0;0;0;0;0;0
+PMPOption=0;0;0;0;0;0;0;0
+TubingLength=3200;3200;3200;3200;3100;3100;3100;3100
+TubingDiameter=150;150;150;150;100;100;100;100
+LVDMOption=0;0;0;0;0;0;0;0
+DilutorCalFactor=1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000
+DilutorCalOfs=0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000
+;SecurityDistance=0
+
+[LihaSimulation]
+TipCount=8
+InstrumentWidth=200
+ZTravel=0
+BrokenTips=0;0;0;0;0;0;0;0
+LowVolume=0;0;0;0;0;0;0;0
+TipType=0;0;0;0;0;0;0;0
+TipOffset=390;390;390;390;390;390;390;390
+DilutorVolume=1000;1000;1000;1000;1000;1000;1000;1000
+Sysvolume=3500;3500;3500;3500;3500;3500;3500;3500
+PipMaxSpeed=900;900;900;900;900;900;900;900
+WashMaxSpeed=900;900;900;900;900;900;900;900
+Voltage=60;60;60;60;60;60;60;60
+Frequency=100;100;100;100;100;100;100;100
+PulseWidth=140;140;140;140;140;140;140;140
+DiluterSteps=3000;3000;3000;3000;3000;3000;3000;3000
+PumpType=0;0;0;0;0;0;0;0
+PMPOption=0;0;0;0;0;0;0;0
+TubingLength=3200;3200;3200;3200;3200;3200;3200;3200
+TubingDiameter=100;100;100;100;100;100;100;100
+LVDMOption=0;0;0;0;0;0;0;0
+DilutorCalFactor=1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000
+DilutorCalOfs=0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000
+
+[ChemSystem]
+LiquidCount=8
+Liquid1=System
+Liquid2=System
+Liquid3=System
+Liquid4=System
+Liquid5=System
+Liquid6=System
+Liquid7=System
+Liquid8=System
+
+[Doorlocks]
+Lock1=1
+Lock2=1
+Lock3=0
+Lock4=5
+
+[Liha2Machine]
+TipCount=8
+InstrumentWidth=200
+ZTravel=0
+BrokenTips=0;0;0;0;0;0;0;0
+LowVolume=0;0;0;0;0;0;0;0
+TipType=0;0;0;0;0;0;0;0
+TipOffset=390;390;390;390;390;390;390;390
+DilutorVolume=1000;1000;1000;1000;1000;1000;1000;1000
+Sysvolume=3500;3500;3500;3500;3500;3500;3500;3500
+PipMaxSpeed=900;900;900;900;900;900;900;900
+WashMaxSpeed=900;900;900;900;900;900;900;900
+Voltage=60;60;60;60;60;60;60;60
+Frequency=100;100;100;100;100;100;100;100
+PulseWidth=140;140;140;140;140;140;140;140
+DiluterSteps=3000;3000;3000;3000;3000;3000;3000;3000
+PumpType=0;0;0;0;0;0;0;0
+PMPOption=0;0;0;0;0;0;0;0
+TubingLength=3200;3200;3200;3200;3200;3200;3200;3200
+TubingDiameter=100;100;100;100;100;100;100;100
+LVDMOption=0;0;0;0;0;0;0;0
+DilutorCalFactor=1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000
+DilutorCalOfs=0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000
+;SecurityDistance=0
+
+[Liha2Simulation]
+TipCount=8
+InstrumentWidth=150
+ZTravel=0
+BrokenTips=0;0;0;0;0;0;0;0
+LowVolume=0;0;0;0;0;0;0;0
+TipType=0;0;0;0;0;0;0;0
+TipOffset=390;390;390;390;390;390;390;390
+DilutorVolume=1000;1000;1000;1000;1000;1000;1000;1000
+Sysvolume=3500;3500;3500;3500;3500;3500;3500;3500
+PipMaxSpeed=900;900;900;900;900;900;900;900
+WashMaxSpeed=900;900;900;900;900;900;900;900
+Voltage=60;60;60;60;60;60;60;60
+Frequency=100;100;100;100;100;100;100;100
+PulseWidth=140;140;140;140;140;140;140;140
+DiluterSteps=3000;3000;3000;3000;3000;3000;3000;3000
+PumpType=0;0;0;0;0;0;0;0
+PMPOption=0;0;0;0;0;0;0;0
+TubingLength=3200;3200;3200;3200;3200;3200;3200;3200
+TubingDiameter=100;100;100;100;100;100;100;100
+LVDMOption=0;0;0;0;0;0;0;0
+DilutorCalFactor=1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000;1.000000
+DilutorCalOfs=0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000
+
+[Mpo2]
+Flowrate=100
+LicosActive=0
+WasteLevel=90
+SystemLevel=10
+TrolleySensorsActive=0
+
+[ROMA]
+;SecurityDistance=0
+
+[ROMA2]
+;SecurityDistance=0
+
+[PNP]
+;SecurityDistance=0
+
+[PNP2]
+;SecurityDistance=0
+
+[MCA]
+TipsSim=96
+TipsMach=96
+ZTravelSim=0
+ZTravelMach=0
+MaxPipSpeedSim=500
+MaxPipSpeedMach=500
+WasherAddrSim=O7
+WasherAddrMach=O7
+XOfs=498
+YOfs=305
+ZTransform=2105
+ParkOverWasher=1
+StdLC=Water
+GripperTypeSim=1
+GripperTypeMach=1
+GripperIDSim=1
+GripperIDMach=1
+HasGripper=0
+WashValues=STD,HP,DITI50,DITI100,DITI100F,DITI200,DITI200F
+WashPreSelect=HP
+ObstacleDistance=100
+;SecurityDistance=10
+
+[MCA2]
+TipsSim=96
+TipsMach=96
+ZTravelSim=0
+ZTravelMach=0
+MaxPipSpeedSim=500
+MaxPipSpeedMach=500
+WasherAddrSim=O6
+WasherAddrMach=O6
+XOfs=498
+YOfs=305
+ZTransform=2105
+ParkOverWasher=1
+StdLC=Water
+HasGripper=0
+GripperTypeSim=1
+GripperTypeMach=1
+WashValues=STD,HP,DITI50,DITI100,DITI100F,DITI200,DITI200F
+WashPreSelect=HP
+GripperIDSim=1
+GripperIDMach=1
+ObstacleDistance=100
+;SecurityDistance=10
+
+[MultiChannelValve]
+LiquidCount=0
+
+[LargeVolume]
+PumpRatio=1000
+MultiValvePresent=0
+
+[LargeVolume2]
+PumpRatio=1000
+MultiValvePresent=0
+
+[MCA_STD]
+TipType=Tipblock Std MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:191;Cycles:2;Change:10;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[MCA_HP]
+TipType=Tipblock HP MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:40;Cycles:2;Change:5;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[MCA_DITI50]
+TipType=DiTi 50ul MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:53;Cycles:2;Change:5;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[MCA_DITI100]
+TipType=DiTi 100ul MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:95;Cycles:2;Change:10;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[MCA_DITI100F]
+TipType=DiTi 100ul Filter MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:74;Cycles:2;Change:10;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[MCA_DITI200]
+TipType=DiTi 200ul MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:185;Cycles:2;Change:10;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[MCA_DITI200F]
+TipType=DiTi 200ul Filter MCA96
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 2 Dip in;Volume:130;Cycles:2;Change:10;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2
+
+[TeMO]
+Tips=384
+ZTravel=0
+WashValues96=STD,HP,DITI50,DITI100,DITI100F,DITI200,DITI200F
+WashPreSelect96=HP
+WashDefault96=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:1;Change:0;Postflush:0.0
+
+[TeMO96_STD]
+TipType=Standard Tipblock
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:191;Cycles:2;Change:10;Postflush:1
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+[TeMO96_HP]
+TipType=HP Tipblock
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1.0
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1.0
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:40;Cycles:2;Change:5;Postflush:1.0
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+[TeMO96_DITI50]
+TipType=DiTi 50
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1.0
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1.0
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:53;Cycles:2;Change:5;Postflush:1.0
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+[TeMO96_DITI100]
+TipType=DiTi 100
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1.0
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1.0
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:95;Cycles:2;Change:10;Postflush:1.0
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+[TeMO96_DITI100F]
+TipType=DiTi 100 with filter
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1.0
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1.0
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:74;Cycles:2;Change:10;Postflush:1.0
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+[TeMO96_DITI200]
+TipType=DiTi 200
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1.0
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1.0
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:185;Cycles:2;Change:10;Postflush:1.0
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+[TeMO96_DITI200F]
+TipType=DiTi 200 with filter
+WashSteps=4
+Step1=WashLC:1;Flowthrough:50;Preflush:1.0;Soak:1;LC:WRC step 1 Empty tips;Volume:0;Cycles:0;Change:0;Postflush:1.0
+Step2=WashLC:1;Flowthrough:80;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:5;Cycles:2;Change:5;Postflush:1.0
+Step3=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 2 Dip in;Volume:130;Cycles:2;Change:10;Postflush:1.0
+Step4=WashLC:1;Flowthrough:50;Preflush:0.0;Soak:1;LC:WRC step 3 Blow out underwater;Volume:0;Cycles:1;Change:0;Postflush:2.0
+
+:001197972195

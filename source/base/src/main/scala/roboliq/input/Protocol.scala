@@ -205,7 +205,7 @@ class Protocol {
 				for {
 					// Load carrier file
 					evowarePath <- RsResult(agent.evowareDir, "evowareDir must be set")
-					carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "carrier.cfg").getPath)
+					carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "Carrier.cfg").getPath)
 					// FIXME: for debug only
 					//_ = carrierData.printCarriersById
 					// ENDIF

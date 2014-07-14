@@ -8,8 +8,7 @@
 
 evowareAgents:
   r1:
-    evowareDir: testdata/bsse-robot1/config
-    #tableFile: testdata/bsse-robot1/config/table-01.esc
+    evowareDir: testdata/bsse-mario
     labwareModels:
       - name: plateModel_96_pcr
         label: 96 well PCR plate
@@ -43,7 +42,7 @@ evowareAgents:
 
     tableSetups:
       default:
-        tableFile: testdata/bsse-robot1/config/table-01.esc
+        tableFile: testdata/bsse-mario/Template.ewt
         sites:
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
