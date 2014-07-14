@@ -30,68 +30,21 @@
 ## Current goal
 
 - [x] Refactor using Context
-- [ ] figure out how to integrate substances vs sources in the protocol file
+- [x] figure out how to integrate substances vs sources in the protocol file
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
-
-## Substances
-
-- [ ] Error if source has same name as a substance IF the source contains more than one substance.
-
-- We want to name the substances used in the protocol.
-- If a well is used as a source, but not named by the user, then the substance gets the name of the well.
-- We may also want to refer to a mixture by name; currently we use the EntityBase.reagentToWells_m map, but perhaps
-  we should use the concept of a "well group" instead?
-- For convenience, allow for the definition of substances in the source definition
-
-    substance:
-    - name: water
-      tipCleanPolicy: thoroughNone
-    - name: buffer
-    - name: dntp
-      tipCleanPolicy: decontaminate
-    - name: template
-      type: dna
-      tipCleanPolicy: decontaminate
-
-    source:
-    - name: water
-      well: plate1(A01|H01)
-      substance: water
-    - name: buffer
-      well: plate1(A02|H02)
-      substance:
-      - name: buffer
-        amount: 10x
-      - name: water
-    - name: template{{WELL}}
-      well: plate2(A01|H01)
-
-    wellContent:
-    - well: ...
-      substance: ...
-
-    command:
-
-## Context monad
-
-- [x] OperatorHandler.getInstruction
-- [x] main: set command indices for better error and warning reporting
-- [x] main: set instruction indices for better error and warning reporting
-- [ ] allow commands to add HDF5 table entries about pipetting and whatnot
-- [ ] allow commands to add file content to be saved to disk/HDF5
 
 ## HDF5
 
 - [x] main: create an HDF5 file
 - [x] main: put instructions in HDF5 file
-- [ ] main: HDF5: well mixture (version 1)
+- [x] main: HDF5: well dispense substance
+- [ ] main: HDF5: well mixture
 - [ ] main: HDF5: substance
 - [ ] main: HDF5: source mixture
 - [ ] main: HDF5: source well
 - [ ] main: HDF5: source well usage
 - [ ] main: HDF5: aspirate/dispense/clean
-- [ ] main: HDF5: well mixture (version 2)
 - [ ] during execution, record start and end times of commands
 
 scriptId: should probably be an MD5 hash of the input files
@@ -226,6 +179,18 @@ Here are some sample volumes for doing liquid level detection:
     41,46,52,58,
     66,74,83,94,
     110,120,130,150]
+
+## Substances
+
+- [ ] Error if source has same name as a substance IF the source contains more than one substance.
+
+## Context monad
+
+- [x] OperatorHandler.getInstruction
+- [x] main: set command indices for better error and warning reporting
+- [x] main: set instruction indices for better error and warning reporting
+- [x] allow commands to add HDF5 table entries about pipetting and whatnot
+- [ ] allow commands to add file content to be saved to disk/HDF5
 
 ## Tests
 
