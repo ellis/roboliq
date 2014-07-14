@@ -7,7 +7,7 @@
 #  "Trough 100ml":
 
 evowareAgents:
-  r1:
+  mario:
     evowareDir: testdata/bsse-mario
     labwareModels:
       - name: plateModel_96_pcr
@@ -47,13 +47,16 @@ evowareAgents:
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
           P3: { grid: 10, site: 4 }
-          R1A: { grid: 3, site: 1 }
-          R1B: { grid: 3, site: 2 }
-          R1C: { grid: 3, site: 3 }
+          R1: { grid: 3, site: 1 }
+          R2: { grid: 3, site: 2 }
+          R3: { grid: 3, site: 3 }
+          R4: { grid: 8, site: 1 }
+          R5: { grid: 8, site: 2 }
+          R6: { grid: 8, site: 3 }
           ROBOSEAL: { carrier: "RoboSeal" }
 #          T1A: { grid: 5
-        pipetterSites: [P1, P2, P3, R1A, R1B, R1C]
-        userSites: [P1, P2, P3, R1A, R1B, R1C]
+        pipetterSites: [P1, P2, P3, R1, R2, R3, R4, R5, R6]
+        userSites: [P1, P2, P3, R1, R2, R3, R4, R5, R6]
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate

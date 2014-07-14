@@ -210,6 +210,11 @@ Here are some sample volumes for doing liquid level detection:
 
 - [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing the volume used in the whole trough.
 
+### ``test_script_qc_03``
+
+- [ ] Need to create a notice to ask user to place the labware, even though it's explicitly placed in the protocol
+- [ ] Should use user's site name for sites rather than the generated C???S? name
+
 ## Config file
 
 - [ ] plateModels should be defined in the ConfigBean; maybe give them regular variable names instead of the Evoware names with spaces in them; remove EvowareAgentBean.labware
