@@ -1,0 +1,22 @@
+{
+  "name": "roboliq",
+  "version": "0.1",
+  "authors": [
+    "Ellis Whitehead <ellis.whitehead@bsse.ethz.ch>"
+  ],
+  "description": "Roboliq",
+  "license": "GPL3",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.3.4",
+    "core-elements": "Polymer/core-elements#~0.3.4",
+    "paper-elements": "Polymer/paper-elements#~0.3.4",
+    "angular": "~1.2.20"
+  }
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html ng-app>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="bower_components/platform/platform.js"></script>
+  <link rel="import" href="bower_components/font-roboto/roboto.html">
+
+  <link rel="import" href="bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="post-list.html">
+<link rel="import" href="bower_components/core-scaffold/core-scaffold.html">
+<link rel="import" href="bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="bower_components/core-menu/core-menu.html">
+<link rel="import" href="bower_components/core-item/core-item.html">
+<link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+<link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="bower_components/core-menu/core-submenu.html">
+
+  <style>
+  html,body {
+    height: 100%;
+    margin: 0;
+    background-color: #E5E5E5;
+    font-family: 'RobotoDraft', sans-serif;
+  }
+  .container {
+    width: 80%;
+    margin: 50px auto;
+  }
+  @media (min-width: 481px) {
+    #tabs {
+      width: 200px;
+    }
+    .container {
+      width: 400px;
+    }
+  }
+  core-header-panel {
+  height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; 
+}
+core-toolbar {
+  background: #03a9f4;
+  color: white;
+}
+#tabs {
+  width: 100%;
+  margin: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+  </style>
+</head>
+
+<body unresolved touch-action="auto">
+
+    <core-scaffold id="core_scaffold">
+      <core-header-panel mode="waterfall" id="core_header_panel" navigation flex>
+        <core-toolbar id="core_toolbar">Roboliq Protocol</core-toolbar>
+        <core-menu selected="Variables" valueattr="label" selectedindex="0" id="core_menu" theme="core-light-theme">
+          <core-item label="Variables" icon="settings" size="24" id="core_item" horizontal center layout active></core-item>
+          <core-item label="Substances" icon="settings" size="24" id="core_item" horizontal center layout></core-item>
+          <core-item label="Labware" icon="settings" size="24" id="core_item1" horizontal center layout></core-item>
+          <core-item label="Sources" icon="settings" size="24" id="core_item1" horizontal center layout></core-item>
+          <core-item label="Device programs" icon="settings" size="24" id="core_item" horizontal center layout></core-item>
+          <core-item label="Commands" icon="settings" size="24" id="core_item1" horizontal center layout></core-item>
+        </core-menu>
+      </core-header-panel>
+      <div id="div" tool>Roboliq</div>
+      <paper-input label="Protocol description" floatinglabel id="paper_input"></paper-input>
+      <section id="varaible_section">Variables</section>
+      <section id="substance_section">Substances</section>
+      <section id="labware_section">Labware</section>
+      <section id="source_section">Sources</section>
+      <section id="program_section">Device programs</section>
+      <section id="command_section">Commands</section>
+    </core-scaffold>
+
+<script>
+</script>
+</head>
+<body>
+</body>
+</html>

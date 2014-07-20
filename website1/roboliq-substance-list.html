@@ -1,0 +1,46 @@
+<link rel="import" href="../components/polymer/polymer.html">
+
+<polymer-element name="roboliq-substance-list">
+
+  <template>
+    <style>    
+      :host {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+      }
+    </style>
+    <table>
+      <tbody>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Clean</th>
+        </tr>
+        <template repeat="{{x in substances}}"></template>
+        <tr>
+          <td>{{ x.name }}</td>
+          <td>{{ x.type }}</td>
+          <td>thorough/none</td>
+        </tr>
+      </tbody>
+    </table>
+  </template>
+
+  <script>
+
+    Polymer('roboliq-substance-list', {
+      substances: [
+        {
+          "name": "water",
+          "type": "liquid",
+          "cleanBefore": "thorough",
+          "cleanAfter": "none"
+        }
+      ]
+    });
+
+  </script>
+
+</polymer-element>
