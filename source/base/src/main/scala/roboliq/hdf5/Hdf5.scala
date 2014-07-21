@@ -22,7 +22,12 @@ case class InstructionEntry(
 object InstructionEntry {
 	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[InstructionEntry] = {
 		import HDF5CompoundMemberMapping.mapping
-		reader.getType("Instruction", classOf[InstructionEntry], mapping("scriptId").length(33), mapping("instructionIndex"), mapping("agent").length(25), mapping("description").length(256))
+		reader.getAnonType(classOf[InstructionEntry],
+			mapping("scriptId").length(33),
+			mapping("instructionIndex"),
+			mapping("agent").length(25),
+			mapping("description").length(256)
+		)
 	}
 }
 
