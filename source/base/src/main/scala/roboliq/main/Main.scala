@@ -64,6 +64,13 @@ object Main extends App {
 		// arguments are bad, usage message will have been displayed
 	}
 	
+	private def getInputHash(opt: Opt): String = {
+		val content1 = scala.io.Source.fromFile(opt.configFile).mkString
+		val content2 = scala.io.Source.fromFile(opt.protocolFile).mkString
+		
+		roboliq.utils.MiscUtils.md5Hash(content1 ++ content2)
+	}
+	
 	def run(opt: Opt) {
 		import scala.sys.process._
 		val protocol = new Protocol
@@ -75,6 +82,8 @@ object Main extends App {
 
 			jsobj <- loadProtocolJson(opt.protocolFile)
 			_ <- protocol.loadJson(jsobj)
+			
+			scriptId = getInputHash(opt)
 			
 			basename = FilenameUtils.getBaseName(opt.protocolFile.getPath())
 			dirFile = opt.protocolFile.getParentFile()
@@ -91,7 +100,12 @@ object Main extends App {
 			filenamePlan = new File(dirOutput, "plan.dot").getPath
 			filenameHdf5 = new File(dirOutput, "data.hdf5").getPath
 			hdf5 = new Hdf5(filenameHdf5)
-			_ = hdf5.copyFile(opt.protocolFile.getName(), "protocol.prot", opt.protocolFile)
+			_ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
+			_ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
+			_ = hdf5.addFileText(scriptId, filenameDomain, plan0.problem.domain.toStripsText)
+			_ = hdf5.addFileText(scriptId, filenameProblem, plan0.problem.toStripsText)
+			_ = hdf5.addFileText(scriptId, filenamePlan0, plan0.toDot(showInitialState=true))
+			_ = hdf5.addFileText(scriptId, filenameActions0, plan0.action_l.mkString("\n"))
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
@@ -103,6 +117,7 @@ object Main extends App {
 			//_ = println(plan2.toDot(showInitialState=false))
 			//_ = println("orderings: "+plan2.orderings.getMinimalMap)
 			plan3 <- RsResult.from(aiplan.strips2.Pop.groundPlan(plan2))
+			_ = hdf5.addFileText(scriptId, filenamePlan, plan3.toDot(showInitialState=true))
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan, plan3.toDot(showInitialState=true))
 			//_ = println("plan3:")
 			//_ = println(plan3.toDot(showInitialState=false))
@@ -122,7 +137,7 @@ object Main extends App {
 				_ = println("instructions:")
 				ai_l <- Context.gets(_.instruction_l.toList)
 				_ = ai_l.foreach(x => { println(x._1) })
-				_ = hdf5.addInstructions(opt.protocolFile.getName(), ai_l.map(_._1))
+				_ = hdf5.addInstructions(scriptId, ai_l.map(_._1))
 			} yield {
 				protocol.agentToBuilder_m.values.foreach(_.end())
 				val builder_l = protocol.agentToBuilder_m.values.toSet
@@ -135,7 +150,7 @@ object Main extends App {
 			}
 			val (data1, _) = ctx0.run(data0)
 			
-			hdf5.addInstructionData(opt.protocolFile.getName(), data1.instruction_l.map(_._1).toList)
+			hdf5.addInstructionData(scriptId, data1.instruction_l.map(_._1).toList)
 
 			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair

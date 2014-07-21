@@ -39,7 +39,8 @@
 - [x] main: create an HDF5 file
 - [x] main: put instructions in HDF5 file
 - [x] main: HDF5: well dispense substance
-- [ ] main: HDF5: save input files
+- [x] main: HDF5: save input files
+- [ ] main: HDF5: save output files
 - [ ] main: HDF5: substance
 - [ ] main: HDF5: well mixture
 - [ ] main: HDF5: source mixture
