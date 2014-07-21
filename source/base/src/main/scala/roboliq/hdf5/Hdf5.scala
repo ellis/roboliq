@@ -7,6 +7,7 @@ import ch.systemsx.cisd.hdf5.HDF5CompoundWriter
 import roboliq.input.AgentInstruction
 import roboliq.entities.WorldState
 import roboliq.entities.SubstanceUnits
+import java.io.File
 
 case class InstructionEntry(
 	var scriptId: String,
@@ -72,6 +73,15 @@ class Hdf5(
 	filename: String
 ) {
 	private val hdf5Writer = HDF5Factory.open(filename)
+	
+	def addFileText(scriptId: String, filename: String, content: String) {
+		hdf5Writer.writeString(s"$scriptId/$filename", content)
+	}
+	
+	def copyFile(scriptId: String, filename: String, file: File) {
+		val content = scala.io.Source.fromFile(file).mkString
+		addFileText(scriptId, filename, content)
+	}
 	
 	def addInstructions(scriptId: String, instruction_l: List[AgentInstruction]) {
 		val entry_l = Array(instruction_l.zipWithIndex.map { case (x, i) =>

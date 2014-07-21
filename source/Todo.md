@@ -14,7 +14,7 @@
 - [ ] refactor loadEvoware() to make devices pluggable somehow
 - [ ] load handler classes via config file, and generally let program be run in different labs
 - [ ] allow for control of roboliq via an high-level language such as R
-- [ ] `mix` command
+- [ ] `mix` command for preparing mixtures
 - [ ] manage large dispense which require multiple aspirations
 - [ ] input files need to have version number of language, so that later old versions can be read in (can optionally also pass version to an individual command?)
 - [ ] support multi-dispense
@@ -39,8 +39,9 @@
 - [x] main: create an HDF5 file
 - [x] main: put instructions in HDF5 file
 - [x] main: HDF5: well dispense substance
-- [ ] main: HDF5: well mixture
+- [ ] main: HDF5: save input files
 - [ ] main: HDF5: substance
+- [ ] main: HDF5: well mixture
 - [ ] main: HDF5: source mixture
 - [ ] main: HDF5: source well
 - [ ] main: HDF5: source well usage

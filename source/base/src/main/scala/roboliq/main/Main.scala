@@ -91,6 +91,7 @@ object Main extends App {
 			filenamePlan = new File(dirOutput, "plan.dot").getPath
 			filenameHdf5 = new File(dirOutput, "data.hdf5").getPath
 			hdf5 = new Hdf5(filenameHdf5)
+			_ = hdf5.copyFile(opt.protocolFile.getName(), "protocol.prot", opt.protocolFile)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
 			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
