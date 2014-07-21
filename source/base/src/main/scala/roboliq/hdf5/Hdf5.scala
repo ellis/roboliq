@@ -114,9 +114,20 @@ class Hdf5(
         H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
 		val data1 = H5.H5Dcreate(file, "data1", HDF5Constants.H5T_STD_I32LE, space1, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
 		H5.H5Dwrite_int(data1, HDF5Constants.H5T_NATIVE_INT32, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, Array(1, 2, 3))
+		val type2 = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 8);
+		H5.H5Tinsert(type2, "a", 0, HDF5Constants.H5T_STD_I32LE)
+		H5.H5Tinsert(type2, "b", 4, HDF5Constants.H5T_STD_I32LE)
+		val space2 = H5.H5Screate_simple(1, Array(2L), Array(2L))
+		val data2 = H5.H5Dcreate(file, "data2", type2, space2, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+		H5.H5Dwrite(data2, type2, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, Array[Byte](1, 0, 0, 0,  0, 1, 0, 0,  2, 0, 0, 0,  0, 0, 1, 0))
+
 		H5.H5Dclose(data1)
+		H5.H5Dclose(data2)
+		H5.H5Pclose(dataSetCreationPropertyListId)
 		H5.H5Pclose(linkCreationPropertyList)
+		H5.H5Tclose(type2)
 		H5.H5Sclose(space1)
+		H5.H5Sclose(space2)
 		H5.H5Fclose(file)
 	}
 	
