@@ -8,6 +8,7 @@ import roboliq.input.AgentInstruction
 import roboliq.entities.WorldState
 import roboliq.entities.SubstanceUnits
 import java.io.File
+import ch.systemsx.cisd.hdf5.HDF5GenericStorageFeatures
 
 case class InstructionEntry(
 	var scriptId: String,
@@ -21,7 +22,7 @@ case class InstructionEntry(
 object InstructionEntry {
 	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[InstructionEntry] = {
 		import HDF5CompoundMemberMapping.mapping
-		reader.getType("Instruction", classOf[InstructionEntry], mapping("scriptId").length(50), mapping("instructionIndex"), mapping("agent").length(25), mapping("description").length(255))
+		reader.getType("Instruction", classOf[InstructionEntry], mapping("scriptId").length(33), mapping("instructionIndex"), mapping("agent").length(25), mapping("description").length(256))
 	}
 }
 
@@ -89,11 +90,34 @@ class Hdf5(
 	
 	def addInstructions(scriptId: String, instruction_l: List[AgentInstruction]) {
 		val entry_l = Array(instruction_l.zipWithIndex.map { case (x, i) =>
-			InstructionEntry(scriptId, i + 1, x.agent.getName, x.instruction.toString.take(255))
+			InstructionEntry(scriptId, i + 1, x.agent.getName, x.instruction.toString.take(256))
 		} : _*)
 		val typ = InstructionEntry.getHDF5Type(hdf5Writer.compound())
-		hdf5Writer.compound().writeArray("instructions", typ, entry_l)
-		
+		val features = HDF5GenericStorageFeatures.createDeflation(7)
+		//hdf5Writer.compound().writeArray("instructions", typ, entry_l, features)
+		hdf5Writer.compound().writeArray("instructions", typ, Array(InstructionEntry("a", 1, "mario", "hi")), features)
+		//hdf5Writer.compound().writeArray("instructions", Array(InstructionEntry("a", 1, "mario", "hi")), features)
+		//writeStringArray("test", Array("hi", "there", "world"), features)
+		// FIXME: for debug only
+		//val content = entry_l.toList.map(x => List(x.scriptId, x.instructionIndex, x.agent, "\""+x.description+"\"").mkString(",")).mkString("\n")
+		//println("instructions:")
+		//println(content)
+		// ENDFIX
+		import ncsa.hdf.hdf5lib.H5
+		import ncsa.hdf.hdf5lib.HDF5Constants
+		val file = H5.H5Fcreate(filename+"X", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT)
+		val space1 = H5.H5Screate_simple(1, Array(2L), Array(2L))
+		val linkCreationPropertyList = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
+		H5.H5Pset_create_intermediate_group(linkCreationPropertyList, true)
+		H5.H5Pset_char_encoding(linkCreationPropertyList, HDF5Constants.H5T_CSET_UTF8)
+        val dataSetCreationPropertyListId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
+		val data1 = H5.H5Dcreate(file, "data1", HDF5Constants.H5T_STD_I32LE, space1, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+		H5.H5Dwrite_int(data1, HDF5Constants.H5T_NATIVE_INT32, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, Array(1, 2, 3))
+		H5.H5Dclose(data1)
+		H5.H5Pclose(linkCreationPropertyList)
+		H5.H5Sclose(space1)
+		H5.H5Fclose(file)
 	}
 	
 	/*def addWellMixtures(scriptId: String, instruction_l: List[AgentInstruction]) {

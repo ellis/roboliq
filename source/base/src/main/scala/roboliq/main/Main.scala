@@ -73,7 +73,7 @@ object Main extends App {
 	
 	private def save(hdf5: Hdf5, scriptId: String, dir: File, filename: String, content: String) {
 		// Save to HDF5
-		hdf5.addFileText(scriptId, filename, content)
+		// FIXME: hdf5.addFileText(scriptId, filename, content)
 		// Save to file system
 		val path = new File(dir, filename).getPath
 		roboliq.utils.FileUtils.writeToFile(path, content)
@@ -81,7 +81,7 @@ object Main extends App {
 	
 	private def saveBytes(hdf5: Hdf5, scriptId: String, dir: File, filename: String, content: Array[Byte]) {
 		// Save to HDF5
-		hdf5.addFileBytes(scriptId, filename, content)
+		// FIXME: hdf5.addFileBytes(scriptId, filename, content)
 		// Save to file system
 		val path = new File(dir, filename).getPath
 		val os = new java.io.FileOutputStream(path)
@@ -112,8 +112,8 @@ object Main extends App {
 			(planInfo_l, plan0) = pair
 			filenameHdf5 = new File(dirOutput, "data.h5").getPath
 			hdf5 = new Hdf5(filenameHdf5)
-			_ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
-			_ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
+			// FIXME: _ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
+			// FIXME: _ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
 			_ = save(hdf5, scriptId, dirOutput, "domain.pddl", plan0.problem.domain.toStripsText)
 			_ = save(hdf5, scriptId, dirOutput, "problem.pddl", plan0.problem.toStripsText)
 			_ = save(hdf5, scriptId, dirOutput, "plan0.dot", plan0.toDot(showInitialState=true))
@@ -144,7 +144,7 @@ object Main extends App {
 				_ = println("instructions:")
 				ai_l <- Context.gets(_.instruction_l.toList)
 				_ = ai_l.foreach(x => { println(x._1) })
-				//_ = hdf5.addInstructions(scriptId, ai_l.map(_._1))
+				_ = hdf5.addInstructions(scriptId, ai_l.map(_._1))
 			} yield {
 				protocol.agentToBuilder_m.values.foreach(_.end())
 				val builder_l = protocol.agentToBuilder_m.values.toSet
