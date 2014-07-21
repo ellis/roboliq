@@ -444,16 +444,16 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		cmds.clear
 	}
 
-	def saveScripts(basename: String): RsResult[Unit] = {
-		for ((script, index) <- script_l.zipWithIndex) {
+	def generateScripts(basename: String): RsResult[List[(String, Array[Byte])]] = {
+		val l = script_l.toList.zipWithIndex.map { case (script, index) =>
 			val filename = basename + (if (scriptIndex <= 1) "" else f"_$index%02d") + ".esc"
-			logger.debug("filename: "+filename)
-			saveWithHeader(script, filename)
+			logger.debug("generateScripts: filename: "+filename)
+			filename -> generateWithHeader(script)
 		}
-		RsSuccess(())
+		RsSuccess(l)
 	}
 	
-	private def saveWithHeader(script: EvowareScript2, sFilename: String) {
+	private def generateWithHeader(script: EvowareScript2): Array[Byte] = {
 		val siteToLabel_m = script.siteToModel_m.map(pair => {
 			val (site, _) = pair
 			val id0 = f"C${site.carrier.id}%03dS${site.iSite+1}"
@@ -462,13 +462,13 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		})
 		val sHeader = config.table.toStringWithLabware(siteToLabel_m, script.siteToModel_m)
 		val sCmds = script.cmd_l.mkString("\n")
-		val fos = new java.io.FileOutputStream(sFilename)
-		writeLines(fos, sHeader)
-		writeLines(fos, sCmds);
-		fos.close();
+		val os = new java.io.ByteArrayOutputStream()
+		writeLines(os, sHeader)
+		writeLines(os, sCmds);
+		os.toByteArray()
 	}
 	
-	private def writeLines(output: java.io.FileOutputStream, s: String) {
+	private def writeLines(output: java.io.OutputStream, s: String) {
 		val as = s.split("\r?\n")
 		for (sLine <- as if !s.isEmpty) {
 			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray

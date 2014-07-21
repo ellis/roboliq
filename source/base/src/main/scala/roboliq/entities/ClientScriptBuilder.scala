@@ -21,5 +21,5 @@ abstract class ClientScriptBuilder(val agentName: String) {
 	/**
 	 * Save script files which were built
 	 */
-	def saveScripts(basename: String): RsResult[Unit]
+	def generateScripts(basename: String): RsResult[List[(String, Array[Byte])]]
 }

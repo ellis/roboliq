@@ -71,6 +71,24 @@ object Main extends App {
 		roboliq.utils.MiscUtils.md5Hash(content1 ++ content2)
 	}
 	
+	private def save(hdf5: Hdf5, scriptId: String, dir: File, filename: String, content: String) {
+		// Save to HDF5
+		hdf5.addFileText(scriptId, filename, content)
+		// Save to file system
+		val path = new File(dir, filename).getPath
+		roboliq.utils.FileUtils.writeToFile(path, content)
+	}
+	
+	private def saveBytes(hdf5: Hdf5, scriptId: String, dir: File, filename: String, content: Array[Byte]) {
+		// Save to HDF5
+		hdf5.addFileBytes(scriptId, filename, content)
+		// Save to file system
+		val path = new File(dir, filename).getPath
+		val os = new java.io.FileOutputStream(path)
+		os.write(content)
+		os.close()
+	}
+	
 	def run(opt: Opt) {
 		import scala.sys.process._
 		val protocol = new Protocol
@@ -92,33 +110,22 @@ object Main extends App {
 			_ = dirOutput.mkdirs()
 			pair <- protocol.createPlan()
 			(planInfo_l, plan0) = pair
-			filenameDomain = new File(dirOutput, "domain.pddl").getPath
-			filenameProblem = new File(dirOutput, "problem.pddl").getPath
-			filenamePlan0 = new File(dirOutput, "plan0.dot").getPath
-			filenameActions0 = new File(dirOutput, "actions0.lst").getPath
-			filenamePlan1 = new File(dirOutput, "plan1.dot").getPath
-			filenamePlan = new File(dirOutput, "plan.dot").getPath
-			filenameHdf5 = new File(dirOutput, "data.hdf5").getPath
+			filenameHdf5 = new File(dirOutput, "data.h5").getPath
 			hdf5 = new Hdf5(filenameHdf5)
 			_ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
 			_ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
-			_ = hdf5.addFileText(scriptId, filenameDomain, plan0.problem.domain.toStripsText)
-			_ = hdf5.addFileText(scriptId, filenameProblem, plan0.problem.toStripsText)
-			_ = hdf5.addFileText(scriptId, filenamePlan0, plan0.toDot(showInitialState=true))
-			_ = hdf5.addFileText(scriptId, filenameActions0, plan0.action_l.mkString("\n"))
-			_ = roboliq.utils.FileUtils.writeToFile(filenameDomain, plan0.problem.domain.toStripsText)
-			_ = roboliq.utils.FileUtils.writeToFile(filenameProblem, plan0.problem.toStripsText)
-			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan0, plan0.toDot(showInitialState=true))
-			_ = roboliq.utils.FileUtils.writeToFile(filenameActions0, plan0.action_l.mkString("\n"))
+			_ = save(hdf5, scriptId, dirOutput, "domain.pddl", plan0.problem.domain.toStripsText)
+			_ = save(hdf5, scriptId, dirOutput, "problem.pddl", plan0.problem.toStripsText)
+			_ = save(hdf5, scriptId, dirOutput, "plan0.dot", plan0.toDot(showInitialState=true))
+			_ = save(hdf5, scriptId, dirOutput, "actions0.lst", plan0.action_l.drop(2).mkString("\n"))
 			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
 			plan2 <- RsResult.from(aiplan.strips2.Pop.stepToEnd(step0))
-			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan1, plan2.toDot(showInitialState=true))
+			_ = save(hdf5, scriptId, dirOutput, "plan1.dot", plan2.toDot(showInitialState=true))
 			//_ = println("plan2:")
 			//_ = println(plan2.toDot(showInitialState=false))
 			//_ = println("orderings: "+plan2.orderings.getMinimalMap)
 			plan3 <- RsResult.from(aiplan.strips2.Pop.groundPlan(plan2))
-			_ = hdf5.addFileText(scriptId, filenamePlan, plan3.toDot(showInitialState=true))
-			_ = roboliq.utils.FileUtils.writeToFile(filenamePlan, plan3.toDot(showInitialState=true))
+			_ = save(hdf5, scriptId, dirOutput, "plan.dot", plan3.toDot(showInitialState=true))
 			//_ = println("plan3:")
 			//_ = println(plan3.toDot(showInitialState=false))
 			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)
@@ -141,11 +148,16 @@ object Main extends App {
 			} yield {
 				protocol.agentToBuilder_m.values.foreach(_.end())
 				val builder_l = protocol.agentToBuilder_m.values.toSet
-				for (scriptBuilder <- builder_l) {
-					val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath
-					println("basename: " + basename2)
-					//println("scriptBuilder: " + scriptBuilder)
-					scriptBuilder.saveScripts(basename2)
+				for {
+					filenameToData_ll <- RsResult.mapAll(builder_l) { scriptBuilder =>
+						//val basename2 = new File(dirOutput, basename + "_" + scriptBuilder.agentName).getPath
+						val basename2 = basename + "_" + scriptBuilder.agentName
+						scriptBuilder.generateScripts(basename2)
+					}
+				} {
+					for ((filename, byte_l) <- filenameToData_ll.flatten) {
+						saveBytes(hdf5, scriptId, dirOutput, filename, byte_l)
+					}
 				}
 			}
 			val (data1, _) = ctx0.run(data0)

@@ -78,6 +78,10 @@ class Hdf5(
 		hdf5Writer.writeString(s"$scriptId/$filename", content)
 	}
 	
+	def addFileBytes(scriptId: String, filename: String, content: Array[Byte]) {
+		hdf5Writer.writeByteArray(s"$scriptId/$filename", content)
+	}
+	
 	def copyFile(scriptId: String, filename: String, file: File) {
 		val content = scala.io.Source.fromFile(file).mkString
 		addFileText(scriptId, filename, content)
