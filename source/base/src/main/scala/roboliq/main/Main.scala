@@ -144,7 +144,7 @@ object Main extends App {
 				_ = println("instructions:")
 				ai_l <- Context.gets(_.instruction_l.toList)
 				_ = ai_l.foreach(x => { println(x._1) })
-				_ = hdf5.addInstructions(scriptId, ai_l.map(_._1))
+				//_ = hdf5.addInstructions(scriptId, ai_l.map(_._1))
 			} yield {
 				protocol.agentToBuilder_m.values.foreach(_.end())
 				val builder_l = protocol.agentToBuilder_m.values.toSet
@@ -162,7 +162,7 @@ object Main extends App {
 			}
 			val (data1, _) = ctx0.run(data0)
 			
-			hdf5.addInstructionData(scriptId, data1.instruction_l.map(_._1).toList)
+			//hdf5.addInstructionData(scriptId, data1.instruction_l.map(_._1).toList)
 
 			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
