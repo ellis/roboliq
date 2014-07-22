@@ -216,7 +216,7 @@ class Hdf5(
 		
 		val (type4, created4) = InstructionEntry.createHdf5Type()
 		val space4 = H5.H5Screate_simple(1, Array[Long](entry_l.length), Array[Long](entry_l.length))
-		val data4 = H5.H5Dcreate(file, "instructions", type4, space4, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+		val data4 = H5.H5Dcreate(file, scriptId+"/instructions", type4, space4, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
 		val byte4_l = InstructionEntry.createByteArray(entry_l)
 		H5.H5Dwrite(data4, type4, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte4_l)
 
