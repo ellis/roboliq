@@ -9,6 +9,7 @@ import roboliq.entities.WorldState
 import roboliq.entities.SubstanceUnits
 import java.io.File
 import ch.systemsx.cisd.hdf5.HDF5GenericStorageFeatures
+import java.io.ByteArrayOutputStream
 
 case class InstructionEntry(
 	var scriptId: String,
@@ -40,7 +41,11 @@ case class WellDispenseEntry(
 	var unit: String,
 	var agent: String,
 	var tip: Int
-)
+) {
+	def streamToBytes(os: ByteArrayOutputStream) {
+		os.write(x$1)
+	}
+}
 
 object WellDispenseEntry {
 	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[WellDispenseEntry] = {
