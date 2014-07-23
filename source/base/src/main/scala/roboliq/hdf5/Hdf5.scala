@@ -228,6 +228,34 @@ class Hdf5(
 		H5.H5Fclose(file)
 	}
 	
+	
+	private def writeArray(scriptId: String, instruction_l: List[AgentInstruction]) {
+		import ncsa.hdf.hdf5lib.H5
+		import ncsa.hdf.hdf5lib.HDF5Constants
+		
+		val file = H5.H5Fcreate(filename+"X", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT)
+		
+		val linkCreationPropertyList = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
+		H5.H5Pset_create_intermediate_group(linkCreationPropertyList, true)
+		H5.H5Pset_char_encoding(linkCreationPropertyList, HDF5Constants.H5T_CSET_UTF8)
+        
+		val dataSetCreationPropertyListId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
+		
+		val (type4, created4) = InstructionEntry.createHdf5Type()
+		val space4 = H5.H5Screate_simple(1, Array[Long](entry_l.length), Array[Long](entry_l.length))
+		val data4 = H5.H5Dcreate(file, scriptId+"/instructions", type4, space4, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+		val byte4_l = InstructionEntry.createByteArray(entry_l)
+		H5.H5Dwrite(data4, type4, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte4_l)
+
+		created4.foreach(H5.H5Tclose)
+		H5.H5Sclose(space4)
+		H5.H5Dclose(data4)
+		H5.H5Pclose(dataSetCreationPropertyListId)
+		H5.H5Pclose(linkCreationPropertyList)
+		H5.H5Fclose(file)
+	}
+	
 	/*def addWellMixtures(scriptId: String, instruction_l: List[AgentInstruction]) {
 		val entry_l = Array(instruction_l.zipWithIndex.map { case (x, i) =>
 			InstructionEntry(scriptId, i + 1, x.agent.getName, x.instruction.toString.take(255))
