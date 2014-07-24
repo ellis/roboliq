@@ -1,3 +1,7 @@
+From the command line:
+   ln -s ../tasks tasks
+   ln -s ../testdata testdata
+
 From within sbt:
 
     project base
