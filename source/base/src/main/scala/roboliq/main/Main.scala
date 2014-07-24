@@ -73,7 +73,7 @@ object Main extends App {
 	
 	private def save(hdf5: Hdf5, scriptId: String, dir: File, filename: String, content: String) {
 		// Save to HDF5
-		// FIXME: hdf5.addFileText(scriptId, filename, content)
+		hdf5.addFileText(scriptId, filename, content)
 		// Save to file system
 		val path = new File(dir, filename).getPath
 		roboliq.utils.FileUtils.writeToFile(path, content)
@@ -186,6 +186,8 @@ object Main extends App {
 			// Consider creating an HDF5 table for the final well aliquots:
 			//println("well_aliquot_m:")
 			//data1.state.well_aliquot_m.foreach(println)
+			
+			hdf5.close()
 			
 			data1.error_r.reverse.foreach(println)
 			data1.warning_r.reverse.foreach(println)
