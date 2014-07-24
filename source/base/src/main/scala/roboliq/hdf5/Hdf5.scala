@@ -81,8 +81,7 @@ class Hdf5(
 	import ncsa.hdf.hdf5lib.H5
 	import ncsa.hdf.hdf5lib.HDF5Constants
 
-	private val hdf5Writer = HDF5Factory.open(filename)
-	private val fileId = H5.H5Fcreate(filename+"X", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT)
+	private val fileId = H5.H5Fcreate(filename, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT)
 	private val linkCreationPropertyList = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE)
 	H5.H5Pset_create_intermediate_group(linkCreationPropertyList, true)
 	H5.H5Pset_char_encoding(linkCreationPropertyList, HDF5Constants.H5T_CSET_UTF8)
