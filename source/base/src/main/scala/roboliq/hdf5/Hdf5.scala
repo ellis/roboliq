@@ -136,6 +136,7 @@ class Hdf5(
 	
 	def addFileBytes(scriptId: String, filename: String, content: Array[Byte]) {
 		hdf5Writer.writeByteArray(s"$scriptId/$filename", content)
+		writeAscii(scriptId, filename, content)
 	}
 	
 	def copyFile(scriptId: String, filename: String, file: File) {
@@ -171,6 +172,26 @@ class Hdf5(
 		val typeId = H5.H5Tcreate(HDF5Constants.H5T_STRING, byte_l.size)
 		H5.H5Tset_strpad(typeId, HDF5Constants.H5T_STR_NULLTERM)
 		H5.H5Tset_cset(typeId, HDF5Constants.H5T_CSET_UTF8)
+		
+		val spaceId = H5.H5Screate_simple(1, Array[Long](1), Array[Long](1))
+		val dataId = H5.H5Dcreate(fileId, scriptId+"/"+path, typeId, spaceId, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+
+		H5.H5Dwrite(dataId, typeId, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte_l)
+
+		H5.H5Tclose(typeId)
+		H5.H5Dclose(dataId)
+		H5.H5Sclose(spaceId)
+	}
+
+	private def writeAscii(scriptId: String, path: String, content: Array[Byte]) {
+		val bs = new ByteArrayOutputStream()
+		bs.write(content)
+		bs.write(0)
+		val byte_l = bs.toByteArray()
+
+		val typeId = H5.H5Tcreate(HDF5Constants.H5T_STRING, byte_l.size)
+		H5.H5Tset_strpad(typeId, HDF5Constants.H5T_STR_NULLTERM)
+		H5.H5Tset_cset(typeId, HDF5Constants.H5T_CSET_ASCII)
 		
 		val spaceId = H5.H5Screate_simple(1, Array[Long](1), Array[Long](1))
 		val dataId = H5.H5Dcreate(fileId, scriptId+"/"+path, typeId, spaceId, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)

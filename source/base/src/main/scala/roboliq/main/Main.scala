@@ -81,7 +81,7 @@ object Main extends App {
 	
 	private def saveBytes(hdf5: Hdf5, scriptId: String, dir: File, filename: String, content: Array[Byte]) {
 		// Save to HDF5
-		// FIXME: hdf5.addFileBytes(scriptId, filename, content)
+		hdf5.addFileBytes(scriptId, filename, content)
 		// Save to file system
 		val path = new File(dir, filename).getPath
 		val os = new java.io.FileOutputStream(path)
