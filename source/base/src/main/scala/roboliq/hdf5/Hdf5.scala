@@ -2,7 +2,6 @@ package roboliq.hdf5
 
 import java.io.ByteArrayOutputStream
 import java.io.File
-
 import ch.systemsx.cisd.hdf5.HDF5CompoundMemberMapping
 import ch.systemsx.cisd.hdf5.HDF5CompoundType
 import ch.systemsx.cisd.hdf5.HDF5Factory
@@ -12,12 +11,13 @@ import ncsa.hdf.hdf5lib.H5
 import ncsa.hdf.hdf5lib.HDF5Constants
 import roboliq.entities.SubstanceUnits
 import roboliq.input.AgentInstruction
+import roboliq.entities.Substance
 
 case class InstructionEntry(
-	var scriptId: String,
-	var instructionIndex: Int,
-	var agent: String,
-	var description: String
+	scriptId: String,
+	instructionIndex: Int,
+	agent: String,
+	description: String
 )
 
 object InstructionEntry {
@@ -31,17 +31,40 @@ object InstructionEntry {
 	}
 }
 
-case class WellDispenseEntry(
-	var scriptId: String,
-	var instructionIndex: Int,
-	var well: String,
-	var substance: String,
-	var amount: String,
-	var unit: String,
-	var agent: String,
-	var tip: Int
-) {
+object SubstanceEntry {
+	def createTypeBuilder(): Hdf5TypeBuilder[Substance] = {
+		Hdf5TypeBuilder(List(
+			"substance" -> Hdf5Type_Ascii((x: Substance) => x.label.getOrElse(x.key), 25)
+		))
+	}
 }
+/*
+case class SourceMixtureEntry(
+	var scriptId: String,
+	var sourceName: String,
+	var substance: String,
+	var amount: String
+) {
+	def this() = this("", "", "", "")
+}
+
+object SourceMixtureEntry {
+	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[SourceMixtureEntry] = {
+		import HDF5CompoundMemberMapping.mapping
+		reader.getType("Substance", classOf[SourceMixtureEntry], mapping("scriptId").length(50), mapping("sourceName").length(50), mapping("substance").length(50), mapping("amount").length(30))
+	}
+}
+*/
+case class WellDispenseEntry(
+	scriptId: String,
+	instructionIndex: Int,
+	well: String,
+	substance: String,
+	amount: String,
+	unit: String,
+	agent: String,
+	tip: Int
+)
 
 object WellDispenseEntry {
 	def createTypeBuilder(): Hdf5TypeBuilder[WellDispenseEntry] = {
@@ -102,7 +125,7 @@ class Hdf5(
 		addFileText(scriptId, filename, content)
 	}
 	
-	def addInstructions(scriptId: String, instruction_l: List[AgentInstruction]) {
+	def saveInstructions(scriptId: String, instruction_l: List[AgentInstruction]) {
 		val entry_l = Array(instruction_l.zipWithIndex.map { case (x, i) =>
 			InstructionEntry(scriptId, i + 1, x.agent.getName, x.instruction.toString.take(256))
 		} : _*)
@@ -110,7 +133,11 @@ class Hdf5(
 		writeArray(scriptId, "instructions", builder, entry_l)
 	}
 	
-	def addInstructionData(scriptId: String, agentInstruction_l: List[AgentInstruction]) {
+	def saveSubstances(scriptId: String, substance_l: List[Substance]) {
+		writeArray(scriptId, "substances", SubstanceEntry.createTypeBuilder(), substance_l)
+	}
+	
+	def saveInstructionData(scriptId: String, agentInstruction_l: List[AgentInstruction]) {
 		val l: List[(Object, Int)] = agentInstruction_l.zipWithIndex.flatMap(pair => pair._1.instruction.data.map(_ -> pair._2))
 		
 		l.collect({ case (x: roboliq.input.WellDispenseEntry, i) => (x, i) }) match {
