@@ -31,53 +31,13 @@ object InstructionEntry {
 		)
 	}
 	
-	def createHdf5Type(): (Int, List[Int]) = {
-		val builder = Hdf5TypeBuilder(List(
-			"scriptId" -> Hdf5Type_Ascii(33),
-			"instructionIndex" -> Hdf5Type_Int(),
-			"agent" -> Hdf5Type_Utf8(25),
-			"description" -> Hdf5Type_Utf8(255)
+	def createTypeBuilder(): Hdf5TypeBuilder[InstructionEntry] = {
+		Hdf5TypeBuilder(List(
+			"scriptId" -> Hdf5Type_Ascii((x: InstructionEntry) => x.scriptId, 33),
+			"instructionIndex" -> Hdf5Type_Int((x: InstructionEntry) => x.instructionIndex),
+			"agent" -> Hdf5Type_Utf8((x: InstructionEntry) => x.agent, 25),
+			"description" -> Hdf5Type_Utf8((x: InstructionEntry) => x.description, 255)
 		))
-		/*
-		import ncsa.hdf.hdf5lib.H5
-		import ncsa.hdf.hdf5lib.HDF5Constants
-		
-		val typeCompound = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 34+4+26+256);
-		val typeString1 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 34);
-		val typeString2 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 26);
-		val typeString3 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 256);
-		
-		H5.H5Tset_strpad(typeString1, HDF5Constants.H5T_STR_NULLTERM)
-		H5.H5Tset_cset(typeString1, HDF5Constants.H5T_CSET_ASCII)
-
-		H5.H5Tset_strpad(typeString2, HDF5Constants.H5T_STR_NULLTERM)
-		H5.H5Tset_cset(typeString2, HDF5Constants.H5T_CSET_UTF8)
-
-		H5.H5Tset_strpad(typeString3, HDF5Constants.H5T_STR_NULLTERM)
-		H5.H5Tset_cset(typeString3, HDF5Constants.H5T_CSET_UTF8)
-
-		H5.H5Tinsert(typeCompound, "scriptId", 0, typeString1)
-		H5.H5Tinsert(typeCompound, "instructionIndex", 0+34, HDF5Constants.H5T_STD_I32LE)
-		H5.H5Tinsert(typeCompound, "agent", 0+34+4, typeString2)
-		H5.H5Tinsert(typeCompound, "description", 0+34+4+26, typeString3)
-		
-		(typeCompound, List(typeString1, typeString2, typeString3))
-		*/
-		(builder.compoundType, builder.createdType_l)
-	}
-
-	def createByteArray(entry_l: Iterable[InstructionEntry]): Array[Byte] = {
-		val bs = new ByteArrayOutputStream((34+4+26+256) * entry_l.size)
-		val hs = new Hdf5Stream(bs)
-		entry_l.foreach(entry => saveToStream(entry, hs))
-		bs.toByteArray()
-	}
-	
-	def saveToStream(entry: InstructionEntry, hs: Hdf5Stream) {
-		hs.putAscii(entry.scriptId, 34)
-		hs.putInt32(entry.instructionIndex)
-		hs.putUtf8(entry.agent, 26)
-		hs.putUtf8(entry.description, 256)
 	}
 }
 
@@ -108,33 +68,18 @@ object WellDispenseEntry {
 		)
 	}
 	
-	def createHdf5Type(): (Int, List[Int]) = {
-		import ncsa.hdf.hdf5lib.H5
-		import ncsa.hdf.hdf5lib.HDF5Constants
-		
-		val typeCompound = H5.H5Tcreate(HDF5Constants.H5T_COMPOUND, 34+4+26+26+26+6+26+4);
-		val typeString1 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 34);
-		val typeString2 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 26);
-		val typeString3 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 26);
-		val typeString4 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 26);
-		val typeString5 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 6);
-		val typeString6 = H5.H5Tcreate(HDF5Constants.H5T_STRING, 26);
-		
-		H5.H5Tset_strpad(typeString1, HDF5Constants.H5T_STR_NULLTERM)
-		H5.H5Tset_cset(typeString1, HDF5Constants.H5T_CSET_ASCII)
-
-		H5.H5Tset_strpad(typeString2, HDF5Constants.H5T_STR_NULLTERM)
-		H5.H5Tset_cset(typeString2, HDF5Constants.H5T_CSET_UTF8)
-
-		H5.H5Tset_strpad(typeString3, HDF5Constants.H5T_STR_NULLTERM)
-		H5.H5Tset_cset(typeString3, HDF5Constants.H5T_CSET_UTF8)
-
-		H5.H5Tinsert(typeCompound, "scriptId", 0, typeString1)
-		H5.H5Tinsert(typeCompound, "instructionIndex", 0+34, HDF5Constants.H5T_STD_I32LE)
-		H5.H5Tinsert(typeCompound, "agent", 0+34+4, typeString2)
-		H5.H5Tinsert(typeCompound, "description", 0+34+4+26, typeString3)
-		
-		(typeCompound, List(typeString1, typeString2, typeString3))
+	/*def createHdf5Type(): (Int, List[Int]) = {
+		val builder = Hdf5TypeBuilder(List(
+			"scriptId" -> Hdf5Type_Ascii(33),
+			"instructionIndex" -> Hdf5Type_Int(),
+			"well" -> Hdf5Type_Utf8(25),
+			"substance" -> Hdf5Type_Utf8(25),
+			"amount" -> Hdf5Type_Utf8(25),
+			"unit" -> Hdf5Type_Utf8(5),
+			"agent" -> Hdf5Type_Utf8(25),
+			"tip" -> Hdf5Type_Int()
+		))
+		(builder.compoundType, builder.createdType_l)
 	}
 
 	def createByteArray(entry_l: Iterable[InstructionEntry]): Array[Byte] = {
@@ -149,7 +94,7 @@ object WellDispenseEntry {
 		hs.putInt32(entry.instructionIndex)
 		hs.putUtf8(entry.agent, 26)
 		hs.putUtf8(entry.description, 256)
-	}
+	}*/
 }
 
 case class WellMixtureEntry(
@@ -196,12 +141,11 @@ class Hdf5(
 		//hdf5Writer.compound().writeArray("instructions", typ, entry_l, features)
 		hdf5Writer.compound().writeArray("instructions", typ, Array(InstructionEntry("a", 1, "mario", "hi")), features)
 
-		val (typeId, typeCreated_l) = InstructionEntry.createHdf5Type()
-		val byte_l = InstructionEntry.createByteArray(entry_l)
-		writeArray(scriptId, typeId, typeCreated_l, entry_l.size, byte_l)
+		val builder = InstructionEntry.createTypeBuilder()
+		writeArray(scriptId, builder, entry_l)
 	}
-	
-	private def writeArray(scriptId: String, typeId: Int, typeCreated_l: List[Int], length: Int, byte_l: Array[Byte]) {
+
+	private def writeArray[A](scriptId: String, builder: Hdf5TypeBuilder[A], entry_l: Iterable[A]) {
 		import ncsa.hdf.hdf5lib.H5
 		import ncsa.hdf.hdf5lib.HDF5Constants
 		
@@ -214,11 +158,13 @@ class Hdf5(
 		val dataSetCreationPropertyListId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
 		H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
 		
+		val length = entry_l.size
 		val spaceId = H5.H5Screate_simple(1, Array[Long](length), Array[Long](length))
-		val dataId = H5.H5Dcreate(file, scriptId+"/instructions", typeId, spaceId, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
-		H5.H5Dwrite(dataId, typeId, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte_l)
+		val dataId = H5.H5Dcreate(file, scriptId+"/instructions", builder.compoundType, spaceId, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+		val byte_l = builder.createByteArray(entry_l)
+		H5.H5Dwrite(dataId, builder.compoundType, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte_l)
 
-		typeCreated_l.foreach(H5.H5Tclose)
+		builder.createdType_l.foreach(H5.H5Tclose)
 		H5.H5Dclose(dataId)
 		H5.H5Sclose(spaceId)
 		H5.H5Pclose(dataSetCreationPropertyListId)
