@@ -195,41 +195,13 @@ class Hdf5(
 		val features = HDF5GenericStorageFeatures.createDeflation(7)
 		//hdf5Writer.compound().writeArray("instructions", typ, entry_l, features)
 		hdf5Writer.compound().writeArray("instructions", typ, Array(InstructionEntry("a", 1, "mario", "hi")), features)
-		//hdf5Writer.compound().writeArray("instructions", Array(InstructionEntry("a", 1, "mario", "hi")), features)
-		//writeStringArray("test", Array("hi", "there", "world"), features)
-		// FIXME: for debug only
-		//val content = entry_l.toList.map(x => List(x.scriptId, x.instructionIndex, x.agent, "\""+x.description+"\"").mkString(",")).mkString("\n")
-		//println("instructions:")
-		//println(content)
-		// ENDFIX
-		import ncsa.hdf.hdf5lib.H5
-		import ncsa.hdf.hdf5lib.HDF5Constants
-		
-		val file = H5.H5Fcreate(filename+"X", HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT)
-		
-		val linkCreationPropertyList = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
-		H5.H5Pset_create_intermediate_group(linkCreationPropertyList, true)
-		H5.H5Pset_char_encoding(linkCreationPropertyList, HDF5Constants.H5T_CSET_UTF8)
-        
-		val dataSetCreationPropertyListId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
-        H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
-		
-		val (type4, created4) = InstructionEntry.createHdf5Type()
-		val space4 = H5.H5Screate_simple(1, Array[Long](entry_l.length), Array[Long](entry_l.length))
-		val data4 = H5.H5Dcreate(file, scriptId+"/instructions", type4, space4, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
-		val byte4_l = InstructionEntry.createByteArray(entry_l)
-		H5.H5Dwrite(data4, type4, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte4_l)
 
-		created4.foreach(H5.H5Tclose)
-		H5.H5Sclose(space4)
-		H5.H5Dclose(data4)
-		H5.H5Pclose(dataSetCreationPropertyListId)
-		H5.H5Pclose(linkCreationPropertyList)
-		H5.H5Fclose(file)
+		val (typeId, typeCreated_l) = InstructionEntry.createHdf5Type()
+		val byte_l = InstructionEntry.createByteArray(entry_l)
+		writeArray(scriptId, typeId, typeCreated_l, entry_l.size, byte_l)
 	}
 	
-	
-	private def writeArray(scriptId: String, instruction_l: List[AgentInstruction]) {
+	private def writeArray(scriptId: String, typeId: Int, typeCreated_l: List[Int], length: Int, byte_l: Array[Byte]) {
 		import ncsa.hdf.hdf5lib.H5
 		import ncsa.hdf.hdf5lib.HDF5Constants
 		
@@ -238,19 +210,17 @@ class Hdf5(
 		val linkCreationPropertyList = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
 		H5.H5Pset_create_intermediate_group(linkCreationPropertyList, true)
 		H5.H5Pset_char_encoding(linkCreationPropertyList, HDF5Constants.H5T_CSET_UTF8)
-        
-		val dataSetCreationPropertyListId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
-        H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
-		
-		val (type4, created4) = InstructionEntry.createHdf5Type()
-		val space4 = H5.H5Screate_simple(1, Array[Long](entry_l.length), Array[Long](entry_l.length))
-		val data4 = H5.H5Dcreate(file, scriptId+"/instructions", type4, space4, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
-		val byte4_l = InstructionEntry.createByteArray(entry_l)
-		H5.H5Dwrite(data4, type4, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte4_l)
 
-		created4.foreach(H5.H5Tclose)
-		H5.H5Sclose(space4)
-		H5.H5Dclose(data4)
+		val dataSetCreationPropertyListId = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+		H5.H5Pset_fill_time(dataSetCreationPropertyListId, HDF5Constants.H5D_FILL_TIME_ALLOC);
+		
+		val spaceId = H5.H5Screate_simple(1, Array[Long](length), Array[Long](length))
+		val dataId = H5.H5Dcreate(file, scriptId+"/instructions", typeId, spaceId, linkCreationPropertyList, dataSetCreationPropertyListId, HDF5Constants.H5P_DEFAULT)
+		H5.H5Dwrite(dataId, typeId, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, byte_l)
+
+		typeCreated_l.foreach(H5.H5Tclose)
+		H5.H5Dclose(dataId)
+		H5.H5Sclose(spaceId)
 		H5.H5Pclose(dataSetCreationPropertyListId)
 		H5.H5Pclose(linkCreationPropertyList)
 		H5.H5Fclose(file)
