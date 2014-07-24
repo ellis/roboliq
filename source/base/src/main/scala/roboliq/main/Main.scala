@@ -112,8 +112,8 @@ object Main extends App {
 			(planInfo_l, plan0) = pair
 			filenameHdf5 = new File(dirOutput, "data.h5").getPath
 			hdf5 = new Hdf5(filenameHdf5)
-			// FIXME: _ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
-			// FIXME: _ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
+			_ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
+			_ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
 			_ = save(hdf5, scriptId, dirOutput, "domain.pddl", plan0.problem.domain.toStripsText)
 			_ = save(hdf5, scriptId, dirOutput, "problem.pddl", plan0.problem.toStripsText)
 			_ = save(hdf5, scriptId, dirOutput, "plan0.dot", plan0.toDot(showInitialState=true))
@@ -162,7 +162,7 @@ object Main extends App {
 			}
 			val (data1, _) = ctx0.run(data0)
 			
-			//hdf5.addInstructionData(scriptId, data1.instruction_l.map(_._1).toList)
+			hdf5.addInstructionData(scriptId, data1.instruction_l.map(_._1).toList)
 
 			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
