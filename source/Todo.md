@@ -26,6 +26,7 @@
 - [ ] REFACTOR: merge EntityBase, AtomBase, and WorldState into WorldState, using atoms as much as possible
 - [ ] add execution capability to time the execution of different commands, which can then be used to predict duration of operations too
 - [ ] allow for more differentiation of TipCleanPolicy in substance definition, so that washing and replacement can be specified independently (and perhaps also the option to store tips for later use?)
+- [ ] import well contents from a previous experiment
 
 ## Current goal
 
@@ -41,6 +42,7 @@
 - [x] main: HDF5: well dispense substance
 - [x] main: HDF5: save input files
 - [x] main: HDF5: save output files
+- [x] BUG: R can't read our HDF5 file (next: try saving a compound with two integers)
 - [ ] main: HDF5: substance
 - [ ] main: HDF5: well mixture
 - [ ] main: HDF5: source mixture
@@ -48,8 +50,6 @@
 - [ ] main: HDF5: source well usage
 - [ ] main: HDF5: aspirate/dispense/clean
 - [ ] during execution, record start and end times of commands
-
-scriptId: should probably be an MD5 hash of the input files
 
 Instruction table:
 scriptId, cmd#, agent, description

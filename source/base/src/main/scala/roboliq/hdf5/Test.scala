@@ -24,37 +24,6 @@ object CommandEntry {
 	}
 }
 
-case class SubstanceEntry(
-	var scriptId: String,
-	var substance: String,
-	var description: String
-) {
-	def this() = this("", "", "")
-}
-
-object SubstanceEntry {
-	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[SubstanceEntry] = {
-		import HDF5CompoundMemberMapping.mapping
-		reader.getType("Substance", classOf[SubstanceEntry], mapping("scriptId").length(50), mapping("substance").length(50), mapping("description").length(255))
-	}
-}
-
-case class SourceMixtureEntry(
-	var scriptId: String,
-	var sourceName: String,
-	var substance: String,
-	var amount: String
-) {
-	def this() = this("", "", "", "")
-}
-
-object SourceMixtureEntry {
-	def getHDF5Type(reader: IHDF5CompoundWriter): HDF5CompoundType[SourceMixtureEntry] = {
-		import HDF5CompoundMemberMapping.mapping
-		reader.getType("Substance", classOf[SourceMixtureEntry], mapping("scriptId").length(50), mapping("sourceName").length(50), mapping("substance").length(50), mapping("amount").length(30))
-	}
-}
-
 /*
 SourceWell table:
 scriptId, well, sourceName, amount

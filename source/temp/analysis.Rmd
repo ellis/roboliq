@@ -1,0 +1,15 @@
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("rhdf5")
+
+```{r}
+library(ggplot2)
+library(rhdf5)
+```
+
+```{r}
+file = "data.h5"
+x = h5ls(file)
+scriptId = subset(x, x$group == '/')$name
+h5read(file, paste0("/", scriptId, "/instructions"))
+h5read(file, paste0("/", scriptId, "/wellDispenses"))
+```
