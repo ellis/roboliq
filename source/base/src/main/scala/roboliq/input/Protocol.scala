@@ -389,7 +389,8 @@ class Protocol {
 									for {
 										mixture <- Mixture.fromMixtureAmountList(mixtureToAmount_l)
 									} yield {
-										// Map the source name to the list of wells
+										// Map the source name to the mixture and list of wells
+										eb.sourceToMixture_m(name) = mixture
 										eb.reagentToWells_m(name) = well_l.map(_.well)
 										// Add the mixture to the wells
 										val aliquot = Aliquot(mixture, Distribution.fromVolume(LiquidVolume.empty))

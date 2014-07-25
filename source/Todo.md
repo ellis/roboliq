@@ -32,6 +32,8 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
+- [ ] run pipetting accuracy protocol for 384 round plate
+- [ ] create titration script for Tania
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 
@@ -43,11 +45,12 @@
 - [x] main: HDF5: save input files
 - [x] main: HDF5: save output files
 - [x] BUG: R can't read our HDF5 file (next: try saving a compound with two integers)
-- [ ] main: HDF5: substance
-- [ ] main: HDF5: well mixture
-- [ ] main: HDF5: source mixture
+- [x] main: HDF5: substance
+- [x] main: HDF5: source mixture
 - [ ] main: HDF5: source well
 - [ ] main: HDF5: source well usage
+- [ ] main: HDF5: well mixture initial
+- [ ] main: HDF5: well mixture final
 - [ ] main: HDF5: aspirate/dispense/clean
 - [ ] during execution, record start and end times of commands
 
@@ -55,13 +58,14 @@ Instruction table:
 scriptId, cmd#, agent, description
 
 Substance table:
-scriptId, substance
+substance
 
 SourceMixture table:
-scriptId, sourceName, substance, amount
+source, mixture (THE LINE BELOW IS PROBABLY BETTER)
+source, substance, amount
 
 SourceWell table:
-scriptId, well, sourceName, amount
+scriptId, source, well, amount
 
 SourceWellUsage table:
 scriptId, well, amount

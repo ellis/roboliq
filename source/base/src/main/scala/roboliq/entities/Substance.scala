@@ -43,6 +43,7 @@ case class Substance(
 	val isEmpty: Boolean = (kind == SubstanceKind.None)
 	val isLiquid: Boolean = (kind == SubstanceKind.Liquid) 
 	def molarity: BigDecimal = molarity_?.getOrElse(0)
+	def getName: String = label.getOrElse(key)
 }
 
 object Substance {

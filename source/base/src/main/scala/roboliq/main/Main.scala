@@ -119,6 +119,7 @@ object Main extends App {
 			_ = save(hdf5, scriptId, dirOutput, "plan0.dot", plan0.toDot(showInitialState=true))
 			_ = save(hdf5, scriptId, dirOutput, "actions0.lst", plan0.action_l.drop(2).mkString("\n"))
 			_ = hdf5.saveSubstances(scriptId, protocol.nameToSubstance_m.toList.sortBy(_._1).map(_._2))
+			_ = hdf5.saveSourceMixtures(scriptId, protocol.eb.sourceToMixture_m.toList.sortBy(_._1))
 			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
 			plan2 <- RsResult.from(aiplan.strips2.Pop.stepToEnd(step0))
 			_ = save(hdf5, scriptId, dirOutput, "plan1.dot", plan2.toDot(showInitialState=true))
@@ -145,8 +146,8 @@ object Main extends App {
 				_ = println("instructions:")
 				ai_l <- Context.gets(_.instruction_l.toList)
 				_ = ai_l.foreach(x => { println(x._1) })
-				_ = hdf5.saveInstructions(scriptId, ai_l.map(_._1))
 			} yield {
+				hdf5.saveInstructions(scriptId, ai_l.map(_._1))
 				protocol.agentToBuilder_m.values.foreach(_.end())
 				val builder_l = protocol.agentToBuilder_m.values.toSet
 				for {
@@ -165,6 +166,7 @@ object Main extends App {
 			
 			hdf5.saveInstructionData(scriptId, data1.instruction_l.map(_._1).toList)
 
+			// Print final aliquots in all wells
 			val l1 = data1.state.well_aliquot_m.toList.map(pair => {
 				val (well, aliquot) = pair
 				val wellPosition = data1.state.getWellPosition(well).toOption.get

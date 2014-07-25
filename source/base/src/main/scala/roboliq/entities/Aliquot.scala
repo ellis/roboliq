@@ -72,6 +72,22 @@ case class Mixture(
 			case Right(aliquot_l) => aliquot_l.map(_.toShortString).mkString("(", "+", ")")
 		}
 	}
+	
+	def toSubstanceAmountMap: Map[Substance, Amount] = {
+		val aliquot = Aliquot(this, Distribution.fromVolume(LiquidVolume.l(1)))
+		val flat = AliquotFlat(aliquot)
+		for ((substance, amount) <- flat.content) yield {
+			val amount2 = {
+				if (substance.isLiquid) {
+					amount.copy(units = SubstanceUnits.None) // TODO: change this to fraction
+				}
+				else {
+					amount // TODO: change units from mole to molarity
+				}
+			}
+			(substance, amount2)
+		}
+	}
 }
 
 object Mixture {
@@ -224,6 +240,7 @@ class WellHistory(
 	val events: List[WellEvent]
 )
 
+// For units, we also need: molarity, fraction
 object SubstanceUnits extends Enumeration {
 	val None, Liter, Mol, Gram = Value
 	
@@ -235,7 +252,11 @@ object SubstanceUnits extends Enumeration {
 	}
 }
 
-case class Amount(units: SubstanceUnits.Value, amount: BigDecimal) 
+case class Amount(units: SubstanceUnits.Value, amount: BigDecimal) {
+	override def toString: String = {
+		amount.bigDecimal.toEngineeringString + SubstanceUnits.toShortString(units)
+	}
+}
 object Amount {
 	def empty = Amount(SubstanceUnits.None, 0)
 }

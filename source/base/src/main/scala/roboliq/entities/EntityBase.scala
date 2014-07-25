@@ -73,7 +73,12 @@ class EntityBase {
 	 */
 	val tipToTipModels_m = new HashMap[Tip, List[TipModel]]
 	/**
+	 * Map of source name to mixture
+	 */
+	val sourceToMixture_m = new HashMap[String, Mixture]
+	/**
 	 * Map of reagent name to source wells
+	 * REFACTOR: Rename sourceToWells_m
 	 */
 	val reagentToWells_m = new HashMap[String, List[Well]]
 	/**
