@@ -34,6 +34,7 @@
 - [x] figure out how to integrate substances vs sources in the protocol file
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
+- [ ] reader command for absorbtion
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 
