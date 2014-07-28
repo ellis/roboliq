@@ -32,12 +32,22 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
-- [ ] create accuracy protocol for small volumes and small tips
+- [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
-- [ ] reader command for absorbtion
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+
+## MeasureAbsorbance
+
+- [ ] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
+- [ ] Test openDeviceSite
+- [ ] Which Evoware plate model to use for plateModel_384_round?
+- [ ] create accuracy protocol for small volumes and small tips
+- [ ] planner: allow for setting '?' variables that need to be shared between operators, such as the '?device' variable for readers which need to be opened before they run
+- [ ] command: deviceOpen
+- [ ] command: deviceClose
+- [ ] command: deviceRun
 
 ## HDF5
 

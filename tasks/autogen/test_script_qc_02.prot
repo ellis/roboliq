@@ -36,7 +36,7 @@ protocol:
     amount: 30ul
     pipettePolicy: Roboliq_Water_Air_1000
 - measureAbsorbance:
-    labware: plate1
+    object: plate1
     programFile: "xxx"
 - titrate:
     allOf:

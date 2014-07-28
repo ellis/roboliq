@@ -52,7 +52,7 @@ class DistributeActionHandler extends ActionHandler {
 		paramToJsval_l: List[(String, JsValue)],
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[OperatorInfo] = {
+	): RqResult[List[OperatorInfo]] = {
 		for {
 			params <- Converter.convActionAs[DistributeActionParams](paramToJsval_l, eb, state0)
 		} yield {
@@ -69,7 +69,7 @@ class DistributeActionHandler extends ActionHandler {
 			}
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, s"distribute$n", binding, paramToJsval_l.toMap)
+			OperatorInfo(id, Nil, Nil, s"distribute$n", binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }

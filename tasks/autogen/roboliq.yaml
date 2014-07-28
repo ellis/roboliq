@@ -16,6 +16,9 @@ evowareAgents:
       - name: plateModel_96_dwp
         label: 96 well deep-well plate
         evowareName: D-BSSE 96 Well DWP
+      - name: plateModel_384_round
+        label: 384 round-well plate
+        evowareName: D-BSSE 384 Well Plate White
       - name: plateModel_384_square
         label: 384 square-well white plate
         evowareName: D-BSSE 384 Well Plate White

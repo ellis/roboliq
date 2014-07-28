@@ -25,19 +25,19 @@ import spray.json.JsString
 import spray.json.JsValue
 
 
-case class ShakePlateActionParams(
+case class MeasureAbsorbanceActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	program: ShakerSpec,
+	programFile_? : Option[String],
 	`object`: Labware,
 	site_? : Option[Site]
 )
 
-class ShakePlateActionHandler extends ActionHandler {
+class MeasureAbsorbanceActionHandler extends ActionHandler {
 	
-	def getActionName = "shakePlate"
+	def getActionName = "measureAbsorbance"
 
-	def getActionParamNames = List("agent", "device", "program", "object", "site")
+	def getActionParamNames = List("agent", "device", "programFile", "object", "site")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -46,7 +46,7 @@ class ShakePlateActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		for {
-			params <- Converter.convActionAs[ShakePlateActionParams](paramToJsval_l, eb, state0)
+			params <- Converter.convActionAs[MeasureAbsorbanceActionParams](paramToJsval_l, eb, state0)
 			labwareName <- eb.getIdent(params.`object`)
 			siteName_? <- params.site_? match {
 				case None => RqSuccess(None)
@@ -62,17 +62,25 @@ class ShakePlateActionHandler extends ActionHandler {
 			)
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "shakePlate", binding, paramToJsval_l.toMap) :: Nil
+			List(
+				OperatorInfo(id ++ List(1), Nil, Nil, "openDeviceSite", binding, Map()),
+				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", binding, Map()),
+				OperatorInfo(id ++ List(3), Nil, Nil, "closeDeviceSite", binding, Map()),
+				OperatorInfo(id ++ List(4), Nil, Nil, "measureAbsorbance", binding, paramToJsval_l.toMap),
+				OperatorInfo(id ++ List(5), Nil, Nil, "openDeviceSite", binding, Map()),
+				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", binding, Map()),
+				OperatorInfo(id ++ List(7), Nil, Nil, "closeDeviceSite", binding, Map())
+			)
 		}
 	}
 }
 
-class ShakePlateOperatorHandler extends OperatorHandler {
+class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
-			name = "shakePlate",
+			name = "measureAbsorbance",
 			paramName_l = List("?agent", "?device", "?labware", "?model", "?site"),
-			paramTyp_l = List("agent", "shaker", "labware", "model", "site"),
+			paramTyp_l = List("agent", "reader", "labware", "model", "site"),
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
 				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),

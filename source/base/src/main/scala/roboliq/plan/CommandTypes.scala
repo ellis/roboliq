@@ -64,9 +64,10 @@ case class UnknownAction(
 */
 
 /**
- * @param domainOperator The domain operator on which this operator is based (will be inserted into the domain if its not there yet)
+ * @param id A command id for the operator
  * @param problemObjectToTyp_l A list of objects and their types for any new objects that this action needs to insert into the problem
  * @param problemState_l Any state atoms to insert into the problem
+ * @param operatorName Name of the operator to lookup
  * @param operatorBinding_m Bindings for this operator (i.e. any settings for the domain operators parameters)
  * @param instructionParam_m Any parameters settings required to later generate the instruction from the planned operator
  */
@@ -89,7 +90,7 @@ trait ActionHandler {
 		paramToJsval_l: List[(String, JsValue)],
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[OperatorInfo]
+	): RqResult[List[OperatorInfo]]
 }
 
 trait OperatorHandler {
@@ -284,7 +285,7 @@ object CallTree {
 		})
 		for {
 			planInfo_l <- RqResult.toResultOfList(x)
-		} yield planInfo_l
+		} yield planInfo_l.flatten
 	}
 	
 	/*
