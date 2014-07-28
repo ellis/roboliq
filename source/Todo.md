@@ -32,6 +32,7 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
+- [ ] create accuracy protocol for small volumes and small tips
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
 - [ ] reader command for absorbtion
