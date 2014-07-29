@@ -147,7 +147,7 @@ object EvowareTableParser {
 			val sName = l(2)
 			val carrier =
 				if (n1 == 0) mapNameToCarrier(sName)
-				else new Carrier(sName, -1, 1)
+				else new Carrier(sName, -1, 1, None, None)
 			ExternalObject(n1, n2, carrier)
 		})
 		(lObject, lsLine.drop(1 + nObjects))

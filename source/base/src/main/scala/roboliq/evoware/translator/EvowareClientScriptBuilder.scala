@@ -4,7 +4,6 @@ import scala.Array.canBuildFrom
 import scala.Option.option2Iterable
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
-
 import grizzled.slf4j.Logger
 import roboliq.commands.AgentActivate
 import roboliq.commands.AgentDeactivate
@@ -53,6 +52,8 @@ import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.input.Context
 import roboliq.input.Instruction
+import roboliq.commands.DeviceSiteOpen
+import roboliq.entities.Device
 
 case class EvowareScript2(
 	index: Int,
@@ -60,7 +61,7 @@ case class EvowareScript2(
 	cmd_l: List[L0C_Command]
 )
 
-private case class TranslationItem(
+case class TranslationItem(
 	token: L0C_Command,
 	siteToModel_l: List[(CarrierSite, EvowareLabwareModel)]
 )
@@ -126,6 +127,12 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				case AgentActivate() => Context.unit(Nil)
 				case AgentDeactivate() => Context.unit(Nil)
 				
+				case DeviceSiteOpen(device, site) =>
+					for {
+						handler <- getAgentObject[EvowareDeviceInstructionHandler](device.getName, s"missing instruction handler for device `${device.getName}`")
+						item_l <- handler.handleInstruction(command, identToAgentObject_m)
+					} yield item_l
+					
 				case Log(text) =>
 					val item = TranslationItem(L0C_Comment(text), Nil)
 					Context.unit(List(item))

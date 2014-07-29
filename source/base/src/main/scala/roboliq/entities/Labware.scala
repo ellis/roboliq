@@ -48,17 +48,9 @@ case class PeelerSpec(key: String, label: Option[String] = None, description: Op
 	def typeNames = List("peelerSpec")
 }
 
-case class ReaderProgram(
-	key: String,
-	label: Option[String] = None,
-	description: Option[String] = None,
-	duration: Option[Int] = None,
-	rpm: Option[Int] = None,
-	amplitude: Option[Int] = None
-) extends Entity {
-	def typeNames = List("shakerSpec")
+case class Reader(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
+	def typeNames = List("reader", "device")
 }
-
 case class Sealer(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
 	def typeNames = List("sealer")
 }

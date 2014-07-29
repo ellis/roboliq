@@ -33,6 +33,7 @@ import roboliq.commands._
 import roboliq.plan.OperatorHandler
 import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
+import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
 
 case class SubstanceBean(
 	name: String,
@@ -1366,7 +1367,7 @@ class Protocol {
 			device: Device,
 			deviceIdent: String,
 			carrierE: roboliq.evoware.parser.Carrier
-		): Device = {
+		) {
 			// Add device
 			eb.addDevice(agent, device, deviceIdent)
 			identToAgentObject(deviceIdent) = carrierE
@@ -1384,8 +1385,6 @@ class Protocol {
 					case None =>
 				}
 			}
-			
-			device
 		}
 		
 		def addDevice(
@@ -1396,6 +1395,7 @@ class Protocol {
 			// Add device
 			val device = new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(typeName) }
 			addDevice0(device, deviceName, carrierE)
+			device
 		}
 		
 		def addPeeler(
@@ -1404,6 +1404,7 @@ class Protocol {
 		): Device = {
 			val device = new Peeler(gid, Some(carrierE.sName))
 			addDevice0(device, deviceName, carrierE)
+			device
 		}
 		
 		def addSealer(
@@ -1412,6 +1413,7 @@ class Protocol {
 		): Device = {
 			val device = new Sealer(gid, Some(carrierE.sName))
 			addDevice0(device, deviceName, carrierE)
+			device
 		}
 		
 		def addShaker(
@@ -1420,12 +1422,24 @@ class Protocol {
 		): Device = {
 			val device = new Shaker(gid, Some(carrierE.sName))
 			addDevice0(device, deviceName, carrierE)
+			device
+		}
+		
+		def createDeviceIdent(carrierE: roboliq.evoware.parser.Carrier): String = {
+			agentIdent + "__" ++ carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
 		
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
-			carrierE.sName match {
+			carrierE.partNo_?.getOrElse(carrierE.sName) match {
+				// Infinit M200
+				case "Tecan part no. 30016056 or 30029757" =>
+					val deviceIdent = createDeviceIdent(carrierE)
+					val handler = new EvowareInfiniteM200InstructionHandler(carrierE)
+					addDevice0(new Reader(gid, Some(carrierE.sName)), deviceIdent, carrierE)
+					identToAgentObject(deviceIdent) = handler
+
 				case "MP 2Pos H+P Shake" =>
-					val deviceIdent = agentIdent+"_shaker"
+					val deviceIdent = createDeviceIdent(carrierE)
 					// REFACTOR: duplicates addShaker(), because for this device, only the second site can actually be used for shaking
 					val device = new Shaker(gid, Some(carrierE.sName))
 					// Add device
@@ -1446,7 +1460,7 @@ class Protocol {
 					}
 
 				case "RoboPeel" =>
-					val deviceIdent = agentIdent+"_peeler"
+					val deviceIdent = createDeviceIdent(carrierE)
 					val device = addPeeler(deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
@@ -1467,7 +1481,7 @@ class Protocol {
 						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
 					}
 				case "RoboSeal" =>
-					val deviceIdent = agentIdent+"_sealer"
+					val deviceIdent = createDeviceIdent(carrierE)
 					val device = addSealer(deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, plateModelId, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
@@ -1487,9 +1501,12 @@ class Protocol {
 						val plateModelIdent = eb.getIdent(plateModel).toOption.get
 						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
 					}
-				case "Te-Shake 2Pos" =>
-					val deviceIdent = agentIdent+"_shaker"
-					val device = addDevice0(new Shaker(gid, Some(carrierE.sName)), deviceIdent, carrierE)
+					
+				// Te-Shake 2Pos
+				case "Tecan part no. 10760722 with 10760725" =>
+					val deviceIdent = createDeviceIdent(carrierE)
+					val device = new Shaker(gid, Some(carrierE.sName))
+					addDevice0(device, deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
 						// Get or create the spec for specIdent
@@ -1504,9 +1521,11 @@ class Protocol {
 						// Register the spec
 						eb.addDeviceSpec(device, spec, specIdent)
 					}
+					
 				case "TRobot1" =>
-					val deviceIdent = agentIdent+"_thermocycler1"
-					val device = addDevice0(new Thermocycler(gid, Some(carrierE.sName)), deviceIdent, carrierE)
+					val deviceIdent = createDeviceIdent(carrierE)
+					val device = new Thermocycler(gid, Some(carrierE.sName))
+					addDevice0(device, deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
 						// Get or create the spec for specIdent
