@@ -1,0 +1,6 @@
+description: |
+  Close reader device
+
+protocol:
+- closeDeviceSite:
+    device: mario__Infinite_M200

@@ -1,8 +1,9 @@
 package roboliq.evoware.translator
 
-import roboliq.input.Instruction
-import roboliq.input.Context
+import roboliq.commands.DeviceSiteClose
 import roboliq.commands.DeviceSiteOpen
+import roboliq.input.Context
+import roboliq.input.Instruction
 
 trait EvowareDeviceInstructionHandler {
 	def handleInstruction(
@@ -23,6 +24,8 @@ class EvowareInfiniteM200InstructionHandler(carrierE: roboliq.evoware.parser.Car
 		for {
 			deviceName <- Context.from(carrierE.deviceName_?, s"Evoware device name missing for carrier `${carrierE.sName}`")
 			l <- instruction match {
+				case DeviceSiteClose(_, _) =>
+					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Close", ""), Nil)))
 				case DeviceSiteOpen(_, _) =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Open", ""), Nil)))
 			}
