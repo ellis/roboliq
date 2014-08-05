@@ -40,8 +40,9 @@
 
 ## MeasureAbsorbance
 
+- [x] Why isn't an InfiniteM200 device created in Protocol?
 - [?] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
-- [ ] Why isn't an InfiniteM200 device created in Protocol?
+- [ ] when loading InfiniteM200 carrier, add atom for device-can-open-site
 - [ ] Test openDeviceSite
 - [ ] wrong names: mario_pipetter1, r1_transporter[12]
 - [ ] Which Evoware plate model to use for plateModel_384_round?

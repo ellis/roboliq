@@ -1111,7 +1111,8 @@ class Protocol {
 		val identToAgentObject = new HashMap[String, Object]
 		agentToIdentToInternalObject(agentIdent) = identToAgentObject
 
-		val pipetterIdent = agentIdent+"_pipetter1"
+		// FIXME: this should not be hard-coded -- some robots have no pipetters, some have more than one...
+		val pipetterIdent = agentIdent+"__pipetter1"
 		val pipetter = new Pipetter(gid, Some(agentIdent+" LiHa"))
 		eb.addDevice(agent, pipetter, pipetterIdent)
 
@@ -1238,10 +1239,12 @@ class Protocol {
 		}
 		
 		// Create Device Sites
+		tableData.lExternalObject.foreach(o => println(o.carrier))
 		for (o <- tableData.lExternalObject if !carriersSeen_l.contains(o.carrier.id)) {
 			val carrierE = o.carrier
 			carriersSeen_l += carrierE.id
 			for (site_i <- 0 until carrierE.nSites) {
+				println("addSite: "+site_i+" on "+carrierE)
 				addSite(carrierE, site_i, s"${agentIdent} device ${carrierE.sName} site ${site_i+1}")
 			}
 		}
@@ -1297,7 +1300,7 @@ class Protocol {
 			val roma_li = carrierData.mapCarrierToVectors.values.flatMap(_.map(_.iRoma)).toSet
 			// Add transporter device for each RoMa
 			for (roma_i <- roma_li) {
-				val ident = s"r1_transporter${roma_i + 1}"
+				val ident = s"${agentIdent}__transporter${roma_i + 1}"
 				val roma = Transporter(gid)
 				identToAgentObject(ident.toLowerCase) = roma_i.asInstanceOf[Integer]
 				roma_m(roma_i) = roma
@@ -1314,7 +1317,7 @@ class Protocol {
 			var vector_i = 0
 			for (vectorClass <- vectorClass_l) {
 				val spec = TransporterSpec(gid, Some(s"${agentIdent} ${vectorClass}"))
-				val ident = s"${agentIdent}_transporterSpec${vector_i}"
+				val ident = s"${agentIdent}__transporterSpec${vector_i}"
 				identToAgentObject(ident.toLowerCase) = vectorClass
 				//println(ident.toLowerCase)
 				transporterSpec_m(vectorClass) = spec
@@ -1359,11 +1362,37 @@ class Protocol {
 		}
 		// FIXME: should append to transportGraph (not replace it) so that we can have multiple evoware agents
 		eb.transportGraph = graph
-		println("graph: "+graph.size)
+		//println("graph: "+graph.size)
 		//graph.take(5).foreach(println)
-		graph.foreach(println)
+		//graph.foreach(println)
 		
-		def addDevice0(
+		def getDeviceSitesAndModels(
+			carrierE: roboliq.evoware.parser.Carrier
+		): List[(Site, Set[LabwareModel])] = {
+			//val l = new ArrayBuffer[(Site, List[LabwareModel])]
+			for {
+				site_i <- (0 until carrierE.nSites).toList
+				siteId = (carrierE.id, site_i)
+				site <- siteIdToSite_m.get(siteId) match {
+					case Some(site: Site) => List(site)
+					case None => Nil
+				}
+				model_l <- siteIdToModels_m.get(siteId).toList
+			} yield (site, model_l.toSet)
+		}
+		
+		/*def addDeviceSitesAndModels(
+			device: Device,
+			carrierE: roboliq.evoware.parser.Carrier
+		) {
+			// Add device sites
+			getDeviceSitesAndModels(carrierE).foreach { case (site, model_l) =>
+				eb.addDeviceSite(device, site)
+				model_l.foreach(m => eb.addDeviceModel(device, m))
+			}
+		}*/
+		
+		def addDeviceOnly(
 			device: Device,
 			deviceIdent: String,
 			carrierE: roboliq.evoware.parser.Carrier
@@ -1371,19 +1400,19 @@ class Protocol {
 			// Add device
 			eb.addDevice(agent, device, deviceIdent)
 			identToAgentObject(deviceIdent) = carrierE
+		}
+		
+		def addDeviceAndSitesAndModels(
+			device: Device,
+			deviceIdent: String,
+			carrierE: roboliq.evoware.parser.Carrier
+		) {
+			addDeviceOnly(device, deviceIdent, carrierE)
 	
 			// Add device sites
-			for (site_i <- 0 until carrierE.nSites) {
-				val siteId = (carrierE.id, site_i)
-				
-				siteIdToSite_m.get(siteId) match {
-					case Some(site: Site) =>
-						siteIdToModels_m.get(siteId).map { model_l =>
-							eb.addDeviceSite(device, site)
-							model_l.foreach(m => eb.addDeviceModel(device, m))
-						}
-					case None =>
-				}
+			getDeviceSitesAndModels(carrierE).foreach { case (site, model_l) =>
+				eb.addDeviceSite(device, site)
+				model_l.foreach(m => eb.addDeviceModel(device, m))
 			}
 		}
 		
@@ -1394,7 +1423,7 @@ class Protocol {
 		): Device = {
 			// Add device
 			val device = new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(typeName) }
-			addDevice0(device, deviceName, carrierE)
+			addDeviceAndSitesAndModels(device, deviceName, carrierE)
 			device
 		}
 		
@@ -1403,7 +1432,7 @@ class Protocol {
 			carrierE: roboliq.evoware.parser.Carrier
 		): Device = {
 			val device = new Peeler(gid, Some(carrierE.sName))
-			addDevice0(device, deviceName, carrierE)
+			addDeviceAndSitesAndModels(device, deviceName, carrierE)
 			device
 		}
 		
@@ -1412,7 +1441,7 @@ class Protocol {
 			carrierE: roboliq.evoware.parser.Carrier
 		): Device = {
 			val device = new Sealer(gid, Some(carrierE.sName))
-			addDevice0(device, deviceName, carrierE)
+			addDeviceAndSitesAndModels(device, deviceName, carrierE)
 			device
 		}
 		
@@ -1421,7 +1450,7 @@ class Protocol {
 			carrierE: roboliq.evoware.parser.Carrier
 		): Device = {
 			val device = new Shaker(gid, Some(carrierE.sName))
-			addDevice0(device, deviceName, carrierE)
+			addDeviceAndSitesAndModels(device, deviceName, carrierE)
 			device
 		}
 		
@@ -1429,14 +1458,44 @@ class Protocol {
 			agentIdent + "__" ++ carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
 		
+		//println("Carriers: " + tableData.mapCarrierToGrid.keys.mkString("\n"))
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
 			carrierE.partNo_?.getOrElse(carrierE.sName) match {
-				// Infinit M200
+				// Infinite M200
 				case "Tecan part no. 30016056 or 30029757" =>
 					val deviceIdent = createDeviceIdent(carrierE)
 					val handler = new EvowareInfiniteM200InstructionHandler(carrierE)
-					addDevice0(new Reader(gid, Some(carrierE.sName)), deviceIdent, carrierE)
+					val device = new Reader(gid, Some(carrierE.sName))
+					
+					eb.addDevice(agent, device, deviceIdent)
+					// Bind deviceIdent to the handler instead of to the carrier
 					identToAgentObject(deviceIdent) = handler
+					// FIXME: for debug only
+					println()
+					println("getDeviceSitesAndModels(carrierE)")
+					getDeviceSitesAndModels(carrierE).foreach(println)
+					println()
+					for {
+						site_i <- (0 until carrierE.nSites).toList
+						_ = println(site_i)
+						siteId = (carrierE.id, site_i)
+						_ = println(siteId)
+						_ = println(siteIdToSite_m.get(siteId))
+						site <- siteIdToSite_m.get(siteId) match {
+							case Some(site: Site) => List(site)
+							case None => Nil
+						}
+						model_l <- siteIdToModels_m.get(siteId).toList
+					} yield (site, model_l.toSet)
+					println()
+					// ENDFIX
+					// Add device sites
+					getDeviceSitesAndModels(carrierE).foreach { case (site, model_l) =>
+						val siteIdent = eb.getIdent(site).toOption.get
+						eb.addDeviceSite(device, site)
+						model_l.foreach(m => eb.addDeviceModel(device, m))
+						eb.addRel(Rel("device-can-open-site", List(deviceIdent, siteIdent)))
+					}
 
 				case "MP 2Pos H+P Shake" =>
 					val deviceIdent = createDeviceIdent(carrierE)
@@ -1506,7 +1565,7 @@ class Protocol {
 				case "Tecan part no. 10760722 with 10760725" =>
 					val deviceIdent = createDeviceIdent(carrierE)
 					val device = new Shaker(gid, Some(carrierE.sName))
-					addDevice0(device, deviceIdent, carrierE)
+					addDeviceAndSitesAndModels(device, deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
 						// Get or create the spec for specIdent
@@ -1525,7 +1584,7 @@ class Protocol {
 				case "TRobot1" =>
 					val deviceIdent = createDeviceIdent(carrierE)
 					val device = new Thermocycler(gid, Some(carrierE.sName))
-					addDevice0(device, deviceIdent, carrierE)
+					addDeviceAndSitesAndModels(device, deviceIdent, carrierE)
 					// Add user-defined specs for this device
 					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
 						// Get or create the spec for specIdent

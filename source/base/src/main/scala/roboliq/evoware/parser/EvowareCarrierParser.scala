@@ -142,6 +142,18 @@ object EvowareCarrierParser {
 			case x :: Nil => Some(x)
 			case _ => None
 		}
+		/*
+		if (sName == "Infinite M200") {
+			println("parse13:")
+			println(l)
+			lsLine.take(nSites + 6).foreach(println)
+			println(sName, sId, id, nSites, deviceName_?, partNo_?)
+			println()
+			println("lsLine(nSites + 1): " + parse998(lsLine(nSites + 1)))
+			println("lsLine(nSites + 3): " + parse998(lsLine(nSites + 3)))
+			println()
+		}
+		*/
 		(Some(Carrier(sName, id, nSites, deviceName_?, partNo_?)), lsLine.drop(nSites + 6))
 	}
 	
@@ -209,7 +221,7 @@ object EvowareCarrierParser {
 	
 	def parse998(s: String): List[String] = {
 		EvowareFormat.splitSemicolons(s) match {
-			case (n, l) => assert(n == 998); l
+			case (n, l) => assert(n == 998); l.init
 		}
 	}
 }
