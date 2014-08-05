@@ -41,10 +41,11 @@
 ## MeasureAbsorbance
 
 - [x] Why isn't an InfiniteM200 device created in Protocol?
-- [?] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
-- [ ] when loading InfiniteM200 carrier, add atom for device-can-open-site
-- [ ] Test openDeviceSite
-- [ ] wrong names: mario_pipetter1, r1_transporter[12]
+- [x] wrong names: mario_pipetter1, r1_transporter[12]
+- [x] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
+- [x] when loading InfiniteM200 carrier, add atom for device-can-open-site
+- [x] Test openDeviceSite
+- [ ] Test openDeviceSite on robot
 - [ ] Which Evoware plate model to use for plateModel_384_round?
 - [ ] create accuracy protocol for small volumes and small tips
 - [ ] planner: allow for setting '?' variables that need to be shared between operators, such as the '?device' variable for readers which need to be opened before they run
