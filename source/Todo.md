@@ -32,11 +32,26 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
+- [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
-- [ ] reader command for absorbtion
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+
+## MeasureAbsorbance
+
+- [x] Why isn't an InfiniteM200 device created in Protocol?
+- [x] wrong names: mario_pipetter1, r1_transporter[12]
+- [x] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
+- [x] when loading InfiniteM200 carrier, add atom for device-can-open-site
+- [x] Test openDeviceSite
+- [ ] Test openDeviceSite on robot
+- [ ] Which Evoware plate model to use for plateModel_384_round?
+- [ ] create accuracy protocol for small volumes and small tips
+- [ ] planner: allow for setting '?' variables that need to be shared between operators, such as the '?device' variable for readers which need to be opened before they run
+- [ ] command: deviceOpen
+- [ ] command: deviceClose
+- [ ] command: deviceRun
 
 ## HDF5
 

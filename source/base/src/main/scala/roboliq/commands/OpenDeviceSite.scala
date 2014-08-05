@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqError
@@ -23,21 +22,20 @@ import roboliq.plan.OperatorInfo
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.entities.Reader
 
 
-case class ShakePlateActionParams(
+case class OpenDeviceSiteActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	program: ShakerSpec,
-	`object`: Labware,
 	site_? : Option[Site]
 )
 
-class ShakePlateActionHandler extends ActionHandler {
+class OpenDeviceSiteActionHandler extends ActionHandler {
 	
-	def getActionName = "shakePlate"
+	def getActionName = "openDeviceSite"
 
-	def getActionParamNames = List("agent", "device", "program", "object", "site")
+	def getActionParamNames = List("agent", "device", "site")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -46,8 +44,7 @@ class ShakePlateActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		for {
-			params <- Converter.convActionAs[ShakePlateActionParams](paramToJsval_l, eb, state0)
-			labwareName <- eb.getIdent(params.`object`)
+			params <- Converter.convActionAs[OpenDeviceSiteActionParams](paramToJsval_l, eb, state0)
 			siteName_? <- params.site_? match {
 				case None => RqSuccess(None)
 				case Some(site) => eb.getIdent(site).map(Some(_))
@@ -57,29 +54,28 @@ class ShakePlateActionHandler extends ActionHandler {
 			val binding_l = List(
 				"?agent" -> params.agent_?.getOrElse("?agent"),
 				"?device" -> params.device_?.getOrElse("?device"),
-				"?labware" -> labwareName,
 				"?site" -> siteName_?.getOrElse("?site")
 			)
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "shakePlate", binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "openDeviceSite", binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
 
-class ShakePlateOperatorHandler extends OperatorHandler {
+class OpenDeviceSiteOperatorHandler extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
-			name = "shakePlate",
-			paramName_l = List("?agent", "?device", "?labware", "?model", "?site"),
-			paramTyp_l = List("agent", "shaker", "labware", "model", "site"),
+			name = "openDeviceSite",
+			paramName_l = List("?agent", "?device", "?site"),
+			paramTyp_l = List("agent", "device", "site"),
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
-				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),
-				Strips.Literal(Strips.Atom("model", List("?labware", "?model")), true),
-				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
+				Strips.Literal(true, "device-can-open-site", "?device", "?site")
 			)),
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = Strips.Literals(Unique(
+				Strips.Literal(false, "is-site-closed", "?site")
+			))
 		)
 	}
 	
@@ -87,25 +83,15 @@ class ShakePlateOperatorHandler extends OperatorHandler {
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
-		val List(agentName, deviceName, labwareName, _, siteName) = operator.paramName_l
+		val List(agentName, deviceName, siteName) = operator.paramName_l
 		
 		for {
 			agent <- Context.getEntityAs[Agent](agentName)
-			device <- Context.getEntityAs[Shaker](deviceName)
-			program <- instructionParam_m.get("program") match {
-				case Some(x@JsObject(obj)) =>
-					Context.getEntityAs[ShakerSpec](x)
-				case Some(JsString(s)) =>
-					val programName = operator.paramName_l(2)
-					Context.getEntityAs[ShakerSpec](programName)
-				case _ => Context.error("Expected identifier or shaker program")
-			}
-			labware <- Context.getEntityAs[Labware](labwareName)
+			device <- Context.getEntityAs[Reader](deviceName)
 			site <- Context.getEntityAs[Site](siteName)
-			instruction = ShakerRun(
+			instruction = DeviceSiteOpen(
 				device,
-				program,
-				List((labware, site))
+				site
 			)
 			_ <- Context.addInstruction(agent, instruction)
 		} yield ()

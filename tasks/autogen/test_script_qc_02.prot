@@ -1,9 +1,17 @@
 description: |
-  Titrate a range of volumes of light dye using tips 1 to 4, keeping track of both dye and water in each well
+  Test small volumes in small tips.
+  Distribute 30ul of diluted dye, measure absorbance, then titrate various small volumes of dye using the small tips.
 
 labware:
-  trough1: troughModel_100ml
-  plate1: plateModel_384_square
+  trough1:
+    model: troughModel_100ml
+    location: R5
+  trough2:
+    model: troughModel_100ml
+    location: R6
+  plate1:
+    model: plateModel_384_round
+    location: P3
 
 substance:
 - name: dye
@@ -16,13 +24,25 @@ source:
   - name: dye
     amount: 1/10
   - name: water
+- name: dyeDark
+  well: trough2(A01|H01)
+  substance:
+  - name: dye
 
 protocol:
+- distribute:
+    source: dyeLight
+    destination: plate1(A01|H12)
+    amount: 30ul
+    pipettePolicy: Roboliq_Water_Air_1000
+- measureAbsorbance:
+    object: plate1
+    programFile: "xxx"
 - titrate:
     allOf:
-    - source: dyeLight
-      amount: [10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul, 45ul, 50ul, 55ul, 60ul, 65ul, 70ul, 75ul]
+    - source: dyeDark
+      amount: [0.10ul, 0.15ul, 0.20ul, 0.25ul, 0.30ul, 0.40ul, 0.50ul, 0.75ul, 1.0ul, 1.5ul, 2.0ul, 2.5ul, 3.0ul]
     destination: plate1(A01|H12)
-    tip: [1, 2, 3, 4]
-    pipettePolicy: Roboliq_Water_Air_1000
+    tip: [5, 6, 7, 8]
+    pipettePolicy: Roboliq_Water_Wet_0050
     cleanBetween: flush

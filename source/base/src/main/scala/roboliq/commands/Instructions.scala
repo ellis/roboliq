@@ -9,14 +9,33 @@ case class AgentActivate() extends Instruction {
 	val effects = Nil
 	val data = Nil
 }
+
 case class AgentDeactivate() extends Instruction {
 	val effects = Nil
 	val data = Nil
 }
+
+case class DeviceSiteClose(
+	device: Device,
+	site: Site
+) extends Instruction {
+	val effects = Nil
+	val data = Nil
+}
+
+case class DeviceSiteOpen(
+	device: Device,
+	site: Site
+) extends Instruction {
+	val effects = Nil
+	val data = Nil
+}
+
 case class EvowareSubroutine(path: String) extends Instruction {
 	val effects = Nil
 	val data = Nil
 }
+
 case class Log(text: String) extends Instruction {
 	val effects = Nil
 	val data = Nil
@@ -29,8 +48,8 @@ case class PipetterAspirate(
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			for (item <- item_l) {
 				val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
-	            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
-	            val amount = Distribution.fromVolume(item.volume)
+				val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+				val amount = Distribution.fromVolume(item.volume)
 				val tipEvent = TipAspirateEvent(item.tip, item.well, wellAliquot0.mixture, item.volume)
 				val x = for {
 					wellAliquot1 <- wellAliquot0.remove(amount)
@@ -59,8 +78,8 @@ case class PipetterDispense(
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
 			for (item <- item_l) {
 				val wellAliquot0 = state.well_aliquot_m.getOrElse(item.well, Aliquot.empty)
-	            val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
-	            val amount = Distribution.fromVolume(item.volume)
+				val tipState0 = state.tip_state_m.getOrElse(item.tip, TipState.createEmpty(item.tip))
+				val amount = Distribution.fromVolume(item.volume)
 				val tipEvent = TipDispenseEvent(item.tip, wellAliquot0.mixture, item.volume, item.policy.pos)
 				val aliquot = Aliquot(tipState0.content.mixture, amount)
 				val x = for {

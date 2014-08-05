@@ -10,9 +10,11 @@ import ch.ethz.reactivesim.RsError
 sealed trait EvowareModel
 
 case class Carrier(
-	val sName: String,
-	val id: Int,
-	val nSites: Int
+	sName: String,
+	id: Int,
+	nSites: Int,
+	deviceName_? : Option[String],
+	partNo_? : Option[String]
 ) extends EvowareModel
 
 /**
@@ -38,7 +40,7 @@ case class CarrierSite(
 )
 
 object EvowareFormat {
-	def splitSemicolons(sLine: String): Tuple2[Int, List[String]] = {
+	def splitSemicolons(sLine: String): (Int, List[String]) = {
 		val l = sLine.split(";", -1).toList//.init
 		val sLineKind = l.head
 		val nLineKind = sLineKind.toInt
@@ -132,7 +134,27 @@ object EvowareCarrierParser {
 		//val sBarcode = l1(1)
 		val id = sId.toInt
 		val nSites = l(4).toInt
-		(Some(Carrier(sName, id, nSites)), lsLine.drop(6 + nSites))
+		val deviceName_? = parse998(lsLine(nSites + 1)) match {
+			case deviceName :: Nil => Some(deviceName)
+			case _ => None
+		}
+		val partNo_? = parse998(lsLine(nSites + 3)) match {
+			case x :: Nil => Some(x)
+			case _ => None
+		}
+		/*
+		if (sName == "Infinite M200") {
+			println("parse13:")
+			println(l)
+			lsLine.take(nSites + 6).foreach(println)
+			println(sName, sId, id, nSites, deviceName_?, partNo_?)
+			println()
+			println("lsLine(nSites + 1): " + parse998(lsLine(nSites + 1)))
+			println("lsLine(nSites + 3): " + parse998(lsLine(nSites + 3)))
+			println()
+		}
+		*/
+		(Some(Carrier(sName, id, nSites, deviceName_?, partNo_?)), lsLine.drop(nSites + 6))
 	}
 	
 	/**
@@ -195,5 +217,11 @@ object EvowareCarrierParser {
 		val nSteps = l(3).toInt
 		val idCarrier = l(4).toInt
 		((if (nSteps > 2) Some(Vector(idCarrier, sClass, iRoma)) else None), lsLine.drop(nSteps))
+	}
+	
+	def parse998(s: String): List[String] = {
+		EvowareFormat.splitSemicolons(s) match {
+			case (n, l) => assert(n == 998); l.init
+		}
 	}
 }

@@ -1,0 +1,6 @@
+description: |
+  Open reader device
+
+protocol:
+- openDeviceSite:
+    device: mario__Infinite_M200

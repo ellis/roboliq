@@ -70,7 +70,7 @@ class PipetteActionHandler extends ActionHandler {
 		paramToJsval_l: List[(String, JsValue)],
 		eb: roboliq.entities.EntityBase,
 		state0: WorldState
-	): RqResult[OperatorInfo] = {
+	): RqResult[List[OperatorInfo]] = {
 		for {
 			params <- Converter.convActionAs[PipetteActionParams](paramToJsval_l, eb, state0)
 		} yield {
@@ -89,7 +89,7 @@ class PipetteActionHandler extends ActionHandler {
 			}
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, s"pipette$n", binding, paramToJsval_l.toMap)
+			OperatorInfo(id, Nil, Nil, s"pipette$n", binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
