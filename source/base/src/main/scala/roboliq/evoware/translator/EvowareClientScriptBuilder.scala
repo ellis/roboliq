@@ -129,7 +129,8 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				
 				case DeviceSiteOpen(device, site) =>
 					for {
-						handler <- getAgentObject[EvowareDeviceInstructionHandler](device.getName, s"missing instruction handler for device `${device.getName}`")
+						deviceIdent <- Context.getEntityIdent(device)
+						handler <- getAgentObject[EvowareDeviceInstructionHandler](deviceIdent, s"missing instruction handler for device `${device.getName}`")
 						item_l <- handler.handleInstruction(command, identToAgentObject_m)
 					} yield item_l
 					

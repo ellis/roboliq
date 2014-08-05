@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqError
@@ -23,6 +22,7 @@ import roboliq.plan.OperatorInfo
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.entities.Reader
 
 
 case class OpenDeviceSiteActionParams(
@@ -87,7 +87,7 @@ class OpenDeviceSiteOperatorHandler extends OperatorHandler {
 		
 		for {
 			agent <- Context.getEntityAs[Agent](agentName)
-			device <- Context.getEntityAs[Shaker](deviceName)
+			device <- Context.getEntityAs[Reader](deviceName)
 			site <- Context.getEntityAs[Site](siteName)
 			instruction = DeviceSiteOpen(
 				device,

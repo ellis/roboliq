@@ -1175,7 +1175,8 @@ class Protocol {
 		logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
 
 		// Create PlateModels
-		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
+		// Start with gathering list of all available labware models whose names are either in the config or table template, as well as the "portrait" variants
+		val labwareModelEs = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) || labwareNamesOfInterest_l.contains(m.sName.replace(" portrait", "")) => m})
 		val idToModel_m = new HashMap[String, LabwareModel]
 		val evowareNameToLabwareModel_m = labwareModel_l.map(x => x.evowareName -> x).toMap
 		//println("labwareModelEvowareNameToName_m: "+labwareModelEvowareNameToName_m)
@@ -1239,12 +1240,10 @@ class Protocol {
 		}
 		
 		// Create Device Sites
-		tableData.lExternalObject.foreach(o => println(o.carrier))
 		for (o <- tableData.lExternalObject if !carriersSeen_l.contains(o.carrier.id)) {
 			val carrierE = o.carrier
 			carriersSeen_l += carrierE.id
 			for (site_i <- 0 until carrierE.nSites) {
-				println("addSite: "+site_i+" on "+carrierE)
 				addSite(carrierE, site_i, s"${agentIdent} device ${carrierE.sName} site ${site_i+1}")
 			}
 		}
@@ -1265,11 +1264,15 @@ class Protocol {
 		
 		{
 			// First gather map of all relevant labware models that can be placed on each site 
-			for (mE <- labwareModelEs if idToModel_m.contains(mE.sName)) {
-				val m = idToModel_m(mE.sName)
-				for (siteId <- mE.sites if siteIdToSite_m.contains(siteId)) {
-					val site = siteIdToSite_m(siteId)
-					siteIdToModels_m.addBinding(siteId, m)
+			for (mE <- labwareModelEs) {
+				//println("mE: "+mE+" "+idToModel_m.get(mE.sName.replace(" portrait", "")))
+				idToModel_m.get(mE.sName.replace(" portrait", "")) match {
+					case Some(m) =>
+						for (siteId <- mE.sites if siteIdToSite_m.contains(siteId)) {
+							val site = siteIdToSite_m(siteId)
+							siteIdToModels_m.addBinding(siteId, m)
+						}
+					case None =>
 				}
 			}
 			// Find all unique sets of labware models
@@ -1377,8 +1380,7 @@ class Protocol {
 					case Some(site: Site) => List(site)
 					case None => Nil
 				}
-				model_l <- siteIdToModels_m.get(siteId).toList
-			} yield (site, model_l.toSet)
+			} yield (site, siteIdToModels_m.get(siteId).map(_.toSet).getOrElse(Set()))
 		}
 		
 		/*def addDeviceSitesAndModels(
@@ -1470,25 +1472,6 @@ class Protocol {
 					eb.addDevice(agent, device, deviceIdent)
 					// Bind deviceIdent to the handler instead of to the carrier
 					identToAgentObject(deviceIdent) = handler
-					// FIXME: for debug only
-					println()
-					println("getDeviceSitesAndModels(carrierE)")
-					getDeviceSitesAndModels(carrierE).foreach(println)
-					println()
-					for {
-						site_i <- (0 until carrierE.nSites).toList
-						_ = println(site_i)
-						siteId = (carrierE.id, site_i)
-						_ = println(siteId)
-						_ = println(siteIdToSite_m.get(siteId))
-						site <- siteIdToSite_m.get(siteId) match {
-							case Some(site: Site) => List(site)
-							case None => Nil
-						}
-						model_l <- siteIdToModels_m.get(siteId).toList
-					} yield (site, model_l.toSet)
-					println()
-					// ENDFIX
 					// Add device sites
 					getDeviceSitesAndModels(carrierE).foreach { case (site, model_l) =>
 						val siteIdent = eb.getIdent(site).toOption.get
