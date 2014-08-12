@@ -14,6 +14,9 @@ case class Aliquot(
 	mixture: Mixture,
 	distribution: Distribution
 ) {
+	def isEmpty = mixture.isEmpty
+	def hasVolume = !distribution.isEmpty
+	
 	def add(that: Aliquot): RsResult[Aliquot] = {
 		for {
 			distribution_~ <- distribution.add(that.distribution)
@@ -35,7 +38,7 @@ case class Aliquot(
 	}
 	
 	def toShortString: String = {
-		if (distribution.isEmpty) "EMPTY"
+		if (isEmpty) "EMPTY"
 		else {
 			mixture.toShortString+"@"+distribution.toShortString
 		}
@@ -54,6 +57,11 @@ object Aliquot {
 case class Mixture(
 	source: Either[Substance, List[Aliquot]]
 ) {
+	def isEmpty: Boolean = source match {
+		case Right(Nil) => true
+		case _ => false
+	}
+	
 	/** Tip cleaning policy when handling this substance with pipetter. */
 	val tipCleanPolicy: TipCleanPolicy = source match {
 		case Left(substance) => substance.tipCleanPolicy
@@ -230,10 +238,6 @@ object AliquotFlat {
 		// FIXME: need to also handle other units besides just liters
 		val amountContent0 = content0.map(_._2 match { case Amount(SubstanceUnits.Liter, n) => n }).sum
 		if (amountContent0 == 0) {
-			// FIXME: for debug only
-			println("ERROR: AliquotFlat")
-			println(content0)
-			// ENDFIX
 			empty
 		}
 		else {

@@ -41,8 +41,12 @@
 
 ## Vatsi and Tanya
 
-- [?] command: promptOperator
-- [ ] create accuracy protocol for small volumes and small tips
+- [x] command: promptOperator
+- [x] create accuracy protocol for small volumes and small tips
+- [ ] test promptOperator on robot
+- [ ] create script for Vatsi's PCR protocol
+- [ ] let protocol load an external CSV file of well contents (or embed the contents in the protocol)
+- [ ] let 'dilute' command dilute to a given concentration
 
 ## MeasureAbsorbance
 

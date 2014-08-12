@@ -408,7 +408,7 @@ class TitrateMethod(
 	private def printDestinationMixtureCsv(ll: List[(WellInfo, List[SourceVolumeTip])]): Context[Unit] = {
 		if (ll.isEmpty) return Context.unit(())
 		var i = 1
-		val header = (1 to ll.head._2.length).toList.map(n => "\"reagent"+n+"\",\"volume"+n+"\",\"tip"+n+"\"").mkString(""""plate","well","tip",""", ",", "")
+		val header = (1 to ll.head._2.length).toList.map(n => "\"mixture"+n+"\",\"volume"+n+"\",\"tip"+n+"\"").mkString(""""plate","well","tip",""", ",", "")
 		println(header)
 		for {
 			state0 <- Context.gets(_.state)
@@ -418,8 +418,10 @@ class TitrateMethod(
 					val well = sv.source.l.head.well
 					val y = for {
 						aliquot <- RsResult.from(state0.well_aliquot_m.get(well), "no liquid found in source")
+						_ <- RsResult.assert(!aliquot.isEmpty, "no mixture found in source")
 					} yield {
-						val flat = AliquotFlat(aliquot)
+						val aliquot2 = if (aliquot.hasVolume) aliquot else Aliquot(aliquot.mixture, Distribution.fromVolume(LiquidVolume.l(1)))
+						val flat = AliquotFlat(aliquot2)
 						val tip_s = tip_?.map(_.toString).getOrElse("")
 						List("\""+flat.toMixtureString+"\"", volume.ul.toString, tip_s)
 					}
