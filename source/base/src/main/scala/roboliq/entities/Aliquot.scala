@@ -229,9 +229,18 @@ object AliquotFlat {
 		}
 		// FIXME: need to also handle other units besides just liters
 		val amountContent0 = content0.map(_._2 match { case Amount(SubstanceUnits.Liter, n) => n }).sum
-		val amountFraction = aliquot.distribution.bestGuess.amount / amountContent0 
-		val content1 = content0.map { case (substance, amount0) => (substance, amount0.copy(amount = amount0.amount * amountFraction)) }
-		new AliquotFlat(content1)
+		if (amountContent0 == 0) {
+			// FIXME: for debug only
+			println("ERROR: AliquotFlat")
+			println(content0)
+			// ENDFIX
+			empty
+		}
+		else {
+			val amountFraction = aliquot.distribution.bestGuess.amount / amountContent0 
+			val content1 = content0.map { case (substance, amount0) => (substance, amount0.copy(amount = amount0.amount * amountFraction)) }
+			new AliquotFlat(content1)
+		}
 	}
 }
 

@@ -32,11 +32,17 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
+- [ ] vatsi and tanya: create accuracy protocol for small volumes and small tips
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+
+## Vatsi and Tanya
+
+- [?] command: promptOperator
+- [ ] create accuracy protocol for small volumes and small tips
 
 ## MeasureAbsorbance
 
@@ -47,7 +53,7 @@
 - [x] Test openDeviceSite
 - [ ] Test openDeviceSite on robot
 - [ ] Which Evoware plate model to use for plateModel_384_round?
-- [ ] create accuracy protocol for small volumes and small tips
+- [ ] create accuracy protocol for small volumes and small tips using absorbance reader
 - [ ] planner: allow for setting '?' variables that need to be shared between operators, such as the '?device' variable for readers which need to be opened before they run
 - [ ] command: deviceOpen
 - [ ] command: deviceClose
@@ -232,10 +238,14 @@ Here are some sample volumes for doing liquid level detection:
 
 - [ ] The volume for each pipetting position in the trough is printed, rather than summing these together and printing the volume used in the whole trough.
 
-### ``test_script_qc_03``
+### ``test_script_qc_01``
 
 - [ ] Need to create a notice to ask user to place the labware, even though it's explicitly placed in the protocol
-- [ ] Should use user's site name for sites rather than the generated C???S? name
+- [?] Should use user's site name for sites rather than the generated C???S? name
+
+### ``test_script_qc_02``
+
+- [ ] Why can't plate1's model be set to `plateModel_384_square`?
 
 ## Config file
 

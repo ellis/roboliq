@@ -10,7 +10,7 @@ labware:
     model: troughModel_100ml
     location: R6
   plate1:
-    model: plateModel_384_round
+    model: plateModel_384_square
     location: P3
 
 substance:
@@ -35,9 +35,11 @@ protocol:
     destination: plate1(A01|H12)
     amount: 30ul
     pipettePolicy: Roboliq_Water_Air_1000
-- measureAbsorbance:
-    object: plate1
-    programFile: "xxx"
+#- measureAbsorbance:
+#    object: plate1
+#    programFile: "xxx"
+- promptOperator:
+    text: Please perform absorbance measurement
 - titrate:
     allOf:
     - source: dyeDark
