@@ -1,0 +1,6 @@
+description: |
+  Display a prompt to the operator
+
+protocol:
+- promptOperator:
+    text: Hello, World!
