@@ -8,7 +8,7 @@
 
 evowareAgents:
   mario:
-    evowareDir: testdata/bsse-mario
+    evowareDir: ../testdata/bsse-mario
     labwareModels:
       - name: plateModel_96_pcr
         label: 96 well PCR plate
@@ -45,7 +45,7 @@ evowareAgents:
 
     tableSetups:
       default:
-        tableFile: testdata/bsse-mario/Template.ewt
+        tableFile: ../testdata/bsse-mario/Template.ewt
         sites:
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
