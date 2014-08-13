@@ -44,8 +44,12 @@
 - [x] command: promptOperator
 - [x] create accuracy protocol for small volumes and small tips
 - [x] test promptOperator on robot
+- [ ] reduce light wash volume for small tips
 - [ ] run quality control test for small volumes
 - [ ] analyze qc test for small volumes
+- [ ] create script to test volumes for Vatsi's PCR protocol
+- [ ] run quality control test for Vatsi's volumes
+- [ ] analyze qc test for Vatsi's volumes
 - [ ] create script for Vatsi's PCR protocol
 - [ ] let protocol load an external CSV file of well contents (or embed the contents in the protocol)
 - [ ] let 'dilute' command dilute to a given concentration
@@ -66,7 +70,7 @@
 - [ ] planner: allow for setting '?' variables that need to be shared between operators, such as the '?device' variable for readers which need to be opened before they run
 - [ ] command: deviceRun
 - [ ] transport shouldn't be done to closed sites
-- [ ] mark reader sites as closed in the initial state
+- [ ] mark reader sites as closed in the initial states
 - [ ] planner should figure out that reader needs to be opened
 - [ ] manage to transport plate to reader via regrip station, despite change of the evoware plate models to the "portrait" variant
 

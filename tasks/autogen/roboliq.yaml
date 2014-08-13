@@ -28,6 +28,9 @@ evowareAgents:
       - name: troughModel_100ml
         label: Trough 100ml
         evowareName: Trough 100ml
+      - name: troughModel_100ml_lowvol_tips
+        label: Trough 100ml LowVol Tips
+        evowareName: Trough 100ml LowVol Tips
 
     tipModels:
       Standard 50ul: { min: 0.1, max: 45 }

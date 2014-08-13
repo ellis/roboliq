@@ -7,7 +7,7 @@ labware:
     model: troughModel_100ml
     location: R5
   trough2:
-    model: troughModel_100ml
+    model: troughModel_100ml_lowvol_tips
     location: R6
   plate1:
     model: plateModel_384_square
@@ -32,9 +32,10 @@ source:
 protocol:
 - distribute:
     source: dyeLight
-    destination: plate1(A01|H12)
+    destination: plate1(A01|P06)
     amount: 30ul
     pipettePolicy: Roboliq_Water_Air_1000
+    cleanBetween: none
 #- measureAbsorbance:
 #    object: plate1
 #    programFile: "xxx"
@@ -44,7 +45,7 @@ protocol:
     allOf:
     - source: dyeDark
       amount: [0.10ul, 0.15ul, 0.20ul, 0.25ul, 0.30ul, 0.40ul, 0.50ul, 0.75ul, 1.0ul, 1.5ul, 2.0ul, 2.5ul, 3.0ul]
-    destination: plate1(A01|H12)
+    destination: plate1(A01|P06)
     tip: [5, 6, 7, 8]
     pipettePolicy: Roboliq_Water_Wet_0050
     cleanBetween: flush
