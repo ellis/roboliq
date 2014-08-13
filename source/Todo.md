@@ -43,10 +43,13 @@
 
 - [x] command: promptOperator
 - [x] create accuracy protocol for small volumes and small tips
-- [ ] test promptOperator on robot
+- [x] test promptOperator on robot
+- [ ] run quality control test for small volumes
+- [ ] analyze qc test for small volumes
 - [ ] create script for Vatsi's PCR protocol
 - [ ] let protocol load an external CSV file of well contents (or embed the contents in the protocol)
 - [ ] let 'dilute' command dilute to a given concentration
+- [ ] promptOperator: add parameter for optional audio alarm
 
 ## MeasureAbsorbance
 
@@ -56,7 +59,7 @@
 - [x] when loading InfiniteM200 carrier, add atom for device-can-open-site
 - [x] Test openDeviceSite
 - [x] command: closeDeviceSite
-- [ ] Test openDeviceSite and closeDeviceSite on robot
+- [x] Test openDeviceSite and closeDeviceSite on robot
 - [ ] create properly named "portrait" plate models in Evoware for the regrip and reader sites
 - [ ] Which Evoware plate model to use for plateModel_384_round?
 - [ ] create accuracy protocol for small volumes and small tips using absorbance reader
