@@ -20,15 +20,16 @@ import spray.json.JsString
 import spray.json.JsValue
 
 
-case class OpenDeviceSiteActionParams(
+case class CloseDeviceSiteActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
 	site_? : Option[Site]
 )
 
-class OpenDeviceSiteActionHandler extends ActionHandler {
+// REFACTOR: This entire file is practically a duplicate of OpenDeviceSite.scala
+class CloseDeviceSiteActionHandler extends ActionHandler {
 	
-	def getActionName = "openDeviceSite"
+	def getActionName = "closeDeviceSite"
 
 	def getActionParamNames = List("agent", "device", "site")
 	
@@ -39,7 +40,7 @@ class OpenDeviceSiteActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		for {
-			params <- Converter.convActionAs[OpenDeviceSiteActionParams](paramToJsval_l, eb, state0)
+			params <- Converter.convActionAs[CloseDeviceSiteActionParams](paramToJsval_l, eb, state0)
 			siteName_? <- params.site_? match {
 				case None => RqSuccess(None)
 				case Some(site) => eb.getIdent(site).map(Some(_))
@@ -53,15 +54,15 @@ class OpenDeviceSiteActionHandler extends ActionHandler {
 			)
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "openDeviceSite", binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "closeDeviceSite", binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
 
-class OpenDeviceSiteOperatorHandler extends OperatorHandler {
+class CloseDeviceSiteOperatorHandler extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
-			name = "openDeviceSite",
+			name = "closeDeviceSite",
 			paramName_l = List("?agent", "?device", "?site"),
 			paramTyp_l = List("agent", "device", "site"),
 			preconds = Strips.Literals(Unique(
@@ -84,7 +85,7 @@ class OpenDeviceSiteOperatorHandler extends OperatorHandler {
 			agent <- Context.getEntityAs[Agent](agentName)
 			device <- Context.getEntityAs[Reader](deviceName)
 			site <- Context.getEntityAs[Site](siteName)
-			instruction = DeviceSiteOpen(
+			instruction = DeviceSiteClose(
 				device,
 				site
 			)

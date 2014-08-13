@@ -84,8 +84,8 @@ class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
 				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),
-				Strips.Literal(Strips.Atom("model", List("?labware", "?model")), true),
 				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
+				// TODO: device site should be closed
 			)),
 			effects = aiplan.strips2.Strips.Literals.empty
 		)

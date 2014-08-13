@@ -54,6 +54,7 @@ import roboliq.input.Context
 import roboliq.input.Instruction
 import roboliq.commands.DeviceSiteOpen
 import roboliq.entities.Device
+import roboliq.commands.DeviceSiteClose
 
 case class EvowareScript2(
 	index: Int,
@@ -127,6 +128,13 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				case AgentActivate() => Context.unit(Nil)
 				case AgentDeactivate() => Context.unit(Nil)
 				
+				case DeviceSiteClose(device, site) =>
+					for {
+						deviceIdent <- Context.getEntityIdent(device)
+						handler <- getAgentObject[EvowareDeviceInstructionHandler](deviceIdent, s"missing instruction handler for device `${device.getName}`")
+						item_l <- handler.handleInstruction(command, identToAgentObject_m)
+					} yield item_l
+					
 				case DeviceSiteOpen(device, site) =>
 					for {
 						deviceIdent <- Context.getEntityIdent(device)
