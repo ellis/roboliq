@@ -32,7 +32,9 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
-- [ ] vatsi and tanya: create accuracy protocol for small volumes and small tips
+- [ ] vatsi: create and run dilution script
+- [ ] vatsi: create and run PCR script
+- [ ] vatsi and tanya: create dilution 
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
@@ -44,8 +46,9 @@
 - [x] command: promptOperator
 - [x] create accuracy protocol for small volumes and small tips
 - [x] test promptOperator on robot
-- [ ] reduce light wash volume for small tips
-- [ ] run quality control test for small volumes
+- [x] reduce light wash volume for small tips
+- [x] run quality control test for small volumes
+- [x] figure out absorbance values for 96 well round U-bottom greiner
 - [ ] analyze qc test for small volumes
 - [ ] create script to test volumes for Vatsi's PCR protocol
 - [ ] run quality control test for Vatsi's volumes

@@ -766,14 +766,18 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 								}
 							} yield {
 								val tip_m = encodeTips(tip_l)
-								if (intensity == CleanIntensity.Flush) {
+								if (tip_l.isEmpty) {
+									None
+								}
+								else if (intensity == CleanIntensity.Flush) {
+									val volume = if (tip_l.head.index >= 4) 0.05 else 1.0
 									val wash = L0C_Wash(
 										mTips = tip_m,
 										iWasteGrid = 1, iWasteSite = 1,
 										iCleanerGrid = 1, iCleanerSite = 0,
-										nWasteVolume = 1,
+										nWasteVolume = volume,
 										nWasteDelay = 500,
-										nCleanerVolume = 1,
+										nCleanerVolume = volume,
 										nCleanerDelay = 500,
 										nAirgapVolume = 10,
 										nAirgapSpeed = 70,
@@ -913,7 +917,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					} yield {
 						val x = token_ll.flatten.map(token => TranslationItem(token, Nil))
 						logger.debug("x: "+x)
-						logger.debug()
+						logger.debug("")
 						x
 					}
 			}
