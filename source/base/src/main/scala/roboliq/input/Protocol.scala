@@ -252,6 +252,7 @@ class Protocol {
 							//logger.debug("eb.aliases: "+eb.aliases)
 							for {
 								model <- eb.getEntityAs[PlateModel](modelRef)
+								site <- RsResult.from(eb.getEntity(locationRef), s"Unknown location `$locationRef`")
 							} yield {
 								val plate = new Plate(key, Some(name))
 								eb.addLabware(plate, name)
@@ -264,7 +265,6 @@ class Protocol {
 									val well = new Well(gid, Some(ident))
 									state0.addWell(well, plate, RowCol(row, col), index)
 								}
-								val site = eb.getEntity(locationRef).get
 								eb.setLocation(plate, site)
 								state0.labware_location_m(plate) = site
 								()

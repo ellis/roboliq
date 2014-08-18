@@ -48,6 +48,7 @@ class TitrateMethod(
 			replicateCountMax = wellCountMax / wellCountMin
 			replicateCount = params.replicates_?.getOrElse(replicateCountMax)
 			wellCount = wellCountMin * replicateCount
+			_ = println("INFO: ", wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
 			_ <- Context.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			svt3_ll = combineWithTips(svt1_ll, params.tip, replicateCount)
 			//_ = println("svt1_ll:\n"+svt1_ll)

@@ -1,0 +1,37 @@
+description: |
+  Try to PCR using 25ul master mix, 25ul forward primer, 25ul backward primer, 25ul template
+
+labware:
+  plate1:
+    model: plateModel_96_pcr
+    location: P4PCR
+  plate2:
+    model: plateModel_96_pcr
+    location: P5PCR
+
+substance:
+- name: water
+
+source:
+- name: masterMix
+  well: plate1(A01)
+- name: forwardPrimer
+  well: plate1(A02)
+- name: backwardPrimer
+  well: plate1(A03)
+- name: template
+  well: plate1(A04)
+
+protocol:
+- titrate:
+    allOf:
+    - source: masterMix
+      amount: 25ul
+    - source: forwardPrimer
+      amount: 25ul
+    - source: backwardPrimer
+      amount: 25ul
+    - source: template
+      amount: 25ul
+    destination: plate2(A01|H12)
+    replicates: 2
