@@ -48,7 +48,6 @@ class TitrateMethod(
 			replicateCountMax = wellCountMax / wellCountMin
 			replicateCount = params.replicates_?.getOrElse(replicateCountMax)
 			wellCount = wellCountMin * replicateCount
-			_ = println("INFO: ", wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
 			_ <- Context.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			svt3_ll = combineWithTips(svt1_ll, params.tip, replicateCount)
 			//_ = println("svt1_ll:\n"+svt1_ll)
@@ -63,7 +62,11 @@ class TitrateMethod(
 			//println(l3)
 			//printMixtureCsv(stepToList_l.map(_._2))
 			destinations = PipetteDestinations(params.destination.l.take(wellCount))
-			//println("destinations: "+destinations)
+			_ = println()
+			_ = println("INFO: ", wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
+			_ = println("destinations: "+destinations)
+			_ = println("svt3_ll:\n"+svt3_ll)
+			_ = println()
 			destinationToSvts_l = destinations.l zip svt3_ll
 			_ <- printDestinationMixtureCsv(destinationToSvts_l)
 		} yield {
