@@ -65,6 +65,7 @@ class TitrateMethod(
 			_ = println()
 			_ = println("INFO: ", wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
 			_ = println("destinations: "+destinations)
+			_ = println("svt1_ll:\n"+svt1_ll)
 			_ = println("svt3_ll:\n"+svt3_ll)
 			_ = println()
 			destinationToSvts_l = destinations.l zip svt3_ll
@@ -355,18 +356,19 @@ class TitrateMethod(
 		tip_l: List[Int],
 		replicateCount: Int
 	): List[List[SourceVolumeTip]] = {
-		if (tip_l.isEmpty)
-			return svt0_ll
-		
-		// 
-		svt0_ll.flatMap { svt0_l =>
-			// If there are any unset tips in this well:
-			if (svt0_l.exists(_.tip_?.isEmpty)) {
-				List.fill(replicateCount)(tip_l.map(tip_i => svt0_l.map(_.copy(tip_? = Some(tip_i))))).flatten
-			}
-			// Otherwise, all tips have already been set by the steps, so don't make any new combinations
-			else {
-				svt0_l.map(svt => List.fill(replicateCount)(svt))
+		if (tip_l.isEmpty) {
+			return svt0_ll.flatMap(svt => List.fill(replicateCount)(svt))
+		}
+		else {
+			svt0_ll.flatMap { svt0_l =>
+				// If there are any unset tips in this well:
+				if (svt0_l.exists(_.tip_?.isEmpty)) {
+					List.fill(replicateCount)(tip_l.map(tip_i => svt0_l.map(_.copy(tip_? = Some(tip_i))))).flatten
+				}
+				// Otherwise, all tips have already been set by the steps, so don't make any new combinations
+				else {
+					svt0_l.map(svt => List.fill(replicateCount)(svt))
+				}
 			}
 		}
 	}

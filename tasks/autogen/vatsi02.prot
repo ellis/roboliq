@@ -35,4 +35,3 @@ protocol:
       amount: 25ul
     destination: plate2(A01|H12)
     replicates: 2
-    tip: 1
