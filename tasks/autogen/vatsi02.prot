@@ -16,11 +16,11 @@ source:
 - name: masterMix
   well: plate1(A01)
 - name: forwardPrimer
-  well: plate1(A02)
+  well: plate1(B01)
 - name: backwardPrimer
-  well: plate1(A03)
+  well: plate1(C01)
 - name: template
-  well: plate1(A04)
+  well: plate1(D01)
 
 protocol:
 - titrate:
@@ -36,3 +36,5 @@ protocol:
     destination: plate2(A01|H12)
     replicates: 2
     tip: 1
+    pipettePolicy: Roboliq_Water_Air_1000
+    clean: decontaminate
