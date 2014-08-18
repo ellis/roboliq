@@ -6,7 +6,7 @@ labware:
     model: troughModel_100ml
     location: R6
   plate1:
-    model: plateModel_384_square
+    model: plateModel_96_nunc_transparent
     location: P3
 
 substance:
@@ -15,7 +15,7 @@ substance:
 
 source:
 - name: dyeLight
-  well: trough1(A01|H01)
+  well: trough1(C01|F01)
   substance:
   - name: dye
     amount: 1/10
@@ -25,7 +25,7 @@ protocol:
 - titrate:
     allOf:
     - source: dyeLight
-      amount: [28, 35, 43, 54, 67, 83, 103, 128, 158, 200]
+      amount: [30ul, 40ul, 50ul, 65ul, 90ul, 120ul, 150ul, 200ul]
     destination: plate1(A01|H12)
     tip: [1, 2, 3, 4]
     pipettePolicy: Roboliq_Water_Air_1000

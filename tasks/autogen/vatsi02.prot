@@ -33,8 +33,7 @@ protocol:
       amount: 25ul
     - source: template
       amount: 25ul
-    destination: plate2(A01|H12)
+    destination: plate2(A01|B01)
     replicates: 2
-    tip: 1
     pipettePolicy: Roboliq_Water_Air_1000
     clean: decontaminate

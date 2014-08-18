@@ -54,7 +54,11 @@
 - [ ] create script to test volumes for Vatsi's PCR protocol in 96-well plates
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] run quality control test for Vatsi's volumes
+- [ ] evoware: change R3 labware in Template to LowVol
+- [ ] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
 - [ ] analyze qc test for Vatsi's volumes
+- [ ] see why protocol file isn't being released on windows until sbt exits
+- [ ] allow for running scripts from within eclipse for easier usage on windows
 - [ ] create script for Vatsi's PCR protocol
 - [ ] let protocol load an external CSV file of well contents (or embed the contents in the protocol)
 - [ ] let 'dilute' command dilute to a given concentration
