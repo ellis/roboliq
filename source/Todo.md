@@ -50,7 +50,7 @@
 - [x] run quality control test for small volumes
 - [x] figure out absorbance values for 96 well round U-bottom greiner
 - [x] analyze qc test for small volumes
-- [ ] create script to test volumes for Vatsi's dilution protocol in 96-well plates
+- [x] create script to test volumes for Vatsi's dilution protocol in 96-well plates
 - [ ] create script to test volumes for Vatsi's PCR protocol in 96-well plates
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] run quality control test for Vatsi's volumes
@@ -270,6 +270,10 @@ Here are some sample volumes for doing liquid level detection:
 ### ``test_script_qc_02``
 
 - [ ] Why can't plate1's model be set to `plateModel_384_square`?
+
+### ``vatsi03``
+
+- [ ] BUG: large tips get a thorough washing twice in a row, once before user prompt, and once after
 
 ## Config file
 
