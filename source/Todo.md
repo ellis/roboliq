@@ -33,8 +33,6 @@
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
 - [ ] vatsi: create and run dilution script
-- [ ] vatsi: create and run PCR script
-- [ ] vatsi and tanya: create dilution 
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 round plate
 - [ ] create titration script for Tania
@@ -51,9 +49,8 @@
 - [x] figure out absorbance values for 96 well round U-bottom greiner
 - [x] analyze qc test for small volumes
 - [x] create script to test volumes for Vatsi's dilution protocol in 96-well plates
-- [ ] create script to test volumes for Vatsi's PCR protocol in 96-well plates
+- [x] create script to test volumes for Vatsi's PCR protocol in 96-well plates
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
-- [ ] run quality control test for Vatsi's volumes
 - [ ] evoware: change R3 labware in Template to LowVol
 - [ ] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
 - [ ] analyze qc test for Vatsi's volumes
