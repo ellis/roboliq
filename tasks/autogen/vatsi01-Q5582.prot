@@ -8,7 +8,7 @@ labware:
     model: troughModel_100ml
     location: R6
   Q5582:
-    model: plateModel_96
+    model: plateModel_96_nunc_transparent
     location: P3
 
 substance:
