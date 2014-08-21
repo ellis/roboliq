@@ -1,7 +1,10 @@
 description: |
   Dilute primers in plate Q5579 to final concentration of 150uM.
 
-  println(scala.io.Source.fromFile("vatsi01-Q5582-volumes.lst").getLines.toList.map(BigDecimal(_)).map(n => f"$n%.1ful").mkString("[", ", ", "]"))
+  val l0 = scala.io.Source.fromFile("vatsi01-Q5582-volumes.lst").getLines.toList.map(BigDecimal(_)).map(n => f"$n%.1ful")
+  val l1 = for { row <- 1 to 8; col <- 1 to 12 } yield { (col, row) }
+  val l2 = l0.zip(l1)
+  println(l2.sortBy(_._2).map(_._1).mkString("[", ", ", "]"))
 
 labware:
   trough1:
@@ -22,6 +25,6 @@ protocol:
 - distribute:
     source: water
     destination: Q5582(A01|H12)
-    amount: [62.4ul, 65.4ul, 94.3ul, 57.6ul, 73.7ul, 74.9ul, 99.5ul, 94.8ul, 90.6ul, 60.8ul, 64.3ul, 72.9ul, 65.1ul, 62.6ul, 105.5ul, 104.2ul, 111.9ul, 112.7ul, 99.4ul, 72.1ul, 113.2ul, 104.2ul, 79.3ul, 109.0ul, 110.5ul, 109.4ul, 111.2ul, 85.8ul, 95.0ul, 107.8ul, 102.4ul, 85.6ul, 106.7ul, 106.5ul, 75.5ul, 89.4ul, 81.6ul, 83.7ul, 88.5ul, 81.4ul, 83.7ul, 76.6ul, 86.0ul, 78.6ul, 92.1ul, 105.0ul, 67.8ul, 94.1ul, 96.6ul, 107.3ul, 77.0ul, 85.7ul, 119.9ul, 44.4ul, 82.0ul, 125.6ul, 42.5ul, 105.2ul, 101.5ul, 92.2ul, 183.9ul, 93.8ul, 95.0ul, 99.0ul, 110.1ul, 173.5ul, 132.8ul, 115.7ul, 103.0ul, 104.9ul, 50.9ul, 121.0ul, 84.8ul, 82.4ul, 73.2ul, 91.5ul, 108.5ul, 91.1ul, 82.9ul, 95.8ul, 94.1ul, 80.3ul, 113.2ul, 129.4ul, 102.7ul, 123.1ul, 97.4ul, 80.6ul, 89.1ul, 78.0ul, 0.0ul, 0.0ul, 94.0ul, 135.0ul]
+    amount: [62.4ul, 65.1ul, 110.5ul, 81.6ul, 96.6ul, 183.9ul, 84.8ul, 102.7ul, 65.4ul, 62.6ul, 109.4ul, 83.7ul, 107.3ul, 93.8ul, 82.4ul, 123.1ul, 94.3ul, 105.5ul, 111.2ul, 88.5ul, 77.0ul, 95.0ul, 73.2ul, 97.4ul, 57.6ul, 104.2ul, 85.8ul, 81.4ul, 85.7ul, 99.0ul, 91.5ul, 80.6ul, 73.7ul, 111.9ul, 95.0ul, 83.7ul, 119.9ul, 110.1ul, 108.5ul, 89.1ul, 74.9ul, 112.7ul, 107.8ul, 76.6ul, 44.4ul, 173.5ul, 91.1ul, 78.0ul, 99.5ul, 99.4ul, 102.4ul, 86.0ul, 82.0ul, 132.8ul, 82.9ul, 0.0ul, 94.8ul, 72.1ul, 85.6ul, 78.6ul, 125.6ul, 115.7ul, 95.8ul, 0.0ul, 90.6ul, 113.2ul, 106.7ul, 92.1ul, 42.5ul, 103.0ul, 94.1ul, 94.0ul, 60.8ul, 104.2ul, 106.5ul, 105.0ul, 105.2ul, 104.9ul, 80.3ul, 135.0ul, 64.3ul, 79.3ul, 75.5ul, 67.8ul, 101.5ul, 50.9ul, 113.2ul, 72.9ul, 109.0ul, 89.4ul, 94.1ul, 92.2ul, 121.0ul, 129.4ul]
     pipettePolicy: Roboliq_Water_Air_1000
     cleanBetween: flush
