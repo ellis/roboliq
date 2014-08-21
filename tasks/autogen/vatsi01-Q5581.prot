@@ -1,0 +1,27 @@
+description: |
+  Dilute primers in plate Q5579 to final concentration of 150uM.
+
+  println(scala.io.Source.fromFile("vatsi01-Q5581-volumes.lst").getLines.toList.map(BigDecimal(_)).map(n => f"$n%.1ful").mkString("[", ", ", "]"))
+
+labware:
+  trough1:
+    model: troughModel_100ml
+    location: R6
+  Q5581:
+    model: plateModel_96
+    location: P3
+
+substance:
+- name: water
+
+source:
+- name: water
+  well: trough1(A01|H01)
+
+protocol:
+- distribute:
+    source: water
+    destination: Q5581(A01|H12)
+    amount: [33.2ul, 51.2ul, 52.0ul, 56.9ul, 82.1ul, 67.2ul, 88.8ul, 60.9ul, 85.5ul, 92.0ul, 83.8ul, 82.5ul, 55.8ul, 60.3ul, 59.3ul, 53.5ul, 58.8ul, 59.0ul, 47.9ul, 178.0ul, 84.9ul, 85.0ul, 53.2ul, 69.5ul, 37.2ul, 55.2ul, 61.7ul, 134.6ul, 142.5ul, 201.8ul, 53.6ul, 146.1ul, 52.7ul, 148.6ul, 69.0ul, 51.8ul, 49.2ul, 120.4ul, 57.1ul, 108.7ul, 28.8ul, 34.5ul, 93.2ul, 107.0ul, 50.1ul, 55.5ul, 71.3ul, 101.8ul, 42.8ul, 84.0ul, 51.4ul, 54.2ul, 64.2ul, 58.1ul, 64.6ul, 64.2ul, 58.4ul, 66.5ul, 65.5ul, 71.7ul, 47.7ul, 66.1ul, 67.7ul, 64.7ul, 65.0ul, 80.2ul, 67.0ul, 74.0ul, 70.4ul, 89.3ul, 60.2ul, 62.9ul, 62.4ul, 75.7ul, 71.3ul, 70.3ul, 109.7ul, 58.0ul, 64.2ul, 126.4ul, 107.1ul, 84.0ul, 60.8ul, 106.0ul, 88.6ul, 83.5ul, 48.5ul, 100.7ul, 79.8ul, 101.2ul, 65.0ul, 62.9ul, 68.6ul, 145.2ul, 79.1ul, 69.2ul]
+    pipettePolicy: Roboliq_Water_Air_1000
+    cleanBetween: flush
