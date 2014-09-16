@@ -1,0 +1,58 @@
+description: |
+  Tania's Assam protocol for testing a range of pHs
+
+labware:
+  sourcePlate1:
+    model: plateModel_96_dwp
+    location: P2
+  sourcePlate2:
+    model: plateModel_96_pcr
+    location: P5PCR
+  #mixPlate: plateModel_384_round
+  mixPlate:
+    model: plateModel_384_square
+    location: P3
+  #mixPlate: plateModel_96_pcr
+
+# Reagents used in this protocol
+# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
+reagents:
+  buffer_pH400: sourcePlate1(A01|D01)
+  buffer_pH425: sourcePlate1(E01|H01)
+  buffer_pH450: sourcePlate1(A02|D02)
+  buffer_pH475: sourcePlate1(E02|H02)
+
+  buffer_pH500: sourcePlate1(A03|D03)
+  buffer_pH525: sourcePlate1(E03|H03)
+  buffer_pH550: sourcePlate1(A04|D04)
+  buffer_pH575: sourcePlate1(E04|H04)
+
+  buffer_pH600: sourcePlate1(A05|D05)
+  buffer_pH625: sourcePlate1(E05|H05)
+  buffer_pH650: sourcePlate1(A06|D06)
+  buffer_pH675: sourcePlate1(E06|H06)
+
+  buffer_pH700: sourcePlate1(A07|D07)
+  buffer_pH725: sourcePlate1(E07|H07)
+  buffer_pH750: sourcePlate1(A08|D08)
+
+  sfGFP: sourcePlate2(A01)
+  Assam: sourcePlate2(A02)
+  "p1200": sourcePlate2(A03)
+  "p1201": sourcePlate2(A04)
+  "p1205": sourcePlate2(A05)
+
+protocol:
+- titrate:
+    allOf:
+      - source: [buffer_pH400, buffer_pH425, buffer_pH450, buffer_pH475, buffer_pH500, buffer_pH525, buffer_pH550, buffer_pH575, buffer_pH600, buffer_pH625, buffer_pH650, buffer_pH675, buffer_pH700, buffer_pH725, buffer_pH750]
+        amount: 99.75ul
+        pipettePolicy: Roboliq_Water_Dry_1000
+        cleanBefore: thorough
+        cleanBetween: none
+        cleanAfter: thorough
+      - source: [sfGFP, Assam, "p1200", "p1201", "p1205"]
+        amount: 0.25ul
+        clean: thorough
+        pipettePolicy: Water_C_50
+    destination: mixPlate(A01|P08)

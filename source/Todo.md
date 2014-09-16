@@ -32,10 +32,11 @@
 
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
-- [ ] vatsi: create and run dilution script
+- [x] vatsi: create and run dilution script
+- [ ] create titration script for Tania
+- [ ] tania: create accuracy test on 384-well round bottom plates using fluorescence
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 round plate
-- [ ] create titration script for Tania
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 
@@ -50,14 +51,17 @@
 - [x] analyze qc test for small volumes
 - [x] create script to test volumes for Vatsi's dilution protocol in 96-well plates
 - [x] create script to test volumes for Vatsi's PCR protocol in 96-well plates
+- [x] analyze qc test for Vatsi's volumes
+- [x] create script for Vatsi's PCR protocol
+- [ ] titrate: split up pipetting sets better by default, and give some options for how to split it up manually
+- [ ] BUG: "Command 2: INTERNAL: not yet implemented to have more than one tip model per pipetting set, so setting the tip model individually for each step"
+- [ ] BUG: tania04_ph: why is there cleaning between buffer dispenses?
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] evoware: change R3 labware in Template to LowVol
 - [ ] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
-- [ ] analyze qc test for Vatsi's volumes
 - [ ] see why protocol file isn't being released on windows until sbt exits
 - [ ] allow for running scripts from within eclipse for easier usage on windows
-- [ ] create script for Vatsi's PCR protocol
-- [ ] let protocol load an external CSV file of well contents (or embed the contents in the protocol)
+- [ ] vatsi: let protocol load an external CSV file of well contents (or embed the contents in the protocol)
 - [ ] let 'dilute' command dilute to a given concentration
 - [ ] promptOperator: add parameter for optional audio alarm
 
@@ -271,6 +275,13 @@ Here are some sample volumes for doing liquid level detection:
 ### ``vatsi03``
 
 - [ ] BUG: large tips get a thorough washing twice in a row, once before user prompt, and once after
+
+### ``tania04_ph``
+
+- [ ] BUG: apparently, while assigning plate names to Evoware names, the evoware names can only be used once; in any case, plateModel_384_round doesn't work, but _square does.
+- [ ] BUG: "Command 2: INTERNAL: not yet implemented to have more than one tip model per pipetting set, so setting the tip model individually for each step"
+- [ ] BUG: why is there cleaning between buffer dispenses?
+* [ ] problem: didn't find a solution within 100 steps unless I specified where to put the plates
 
 ## Config file
 
