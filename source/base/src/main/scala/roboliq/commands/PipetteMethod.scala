@@ -103,17 +103,21 @@ class PipetteMethod {
 	): Context[Unit] = {
 		for {
 			data <- Context.get
-			stepA_l <- Context.from(paramsToA(params))
-			stepB_l <- Context.from(aToB(stepA_l, data.eb, data.state, pipetter))
-			stepC_ll <- Context.from(bToC(params, stepB_l))
-			device = new PipetteDevice
-			_ <- cToInstruction(agent, params, pipetter, device, stepC_ll)
+			stepA_ll <- Context.from(paramsToA(params))
+			_ <- Context.foreachFirst(stepA_ll) { stepA_l =>
+				for {
+					stepB_l <- Context.from(aToB(stepA_l, data.eb, data.state, pipetter))
+					stepC_ll <- Context.from(bToC(params, stepB_l))
+					device = new PipetteDevice
+					_ <- cToInstruction(agent, params, pipetter, device, stepC_ll)
+				} yield ()
+			}
 		} yield ()
 	}
 	
 	private def paramsToA(
 		params: PipetteActionParams
-	): RsResult[List[StepA]] = {
+	): RsResult[List[List[StepA]]] = {
 		val dn = params.destination_?.map(_.l.size).getOrElse(0)
 		val sn = params.source_?.map(_.sources.size).getOrElse(0)
 		val an = params.amount.size
@@ -145,7 +149,12 @@ class PipetteMethod {
 				case l => l.map(Some(_))
 			}
 		}
-		val step_l: List[Option[PipetteStepParams]] = params.steps match {
+		// Find any steps which are just for cleaning, but no pipetting
+		val stepIsCleaning_l: List[Boolean] = params.steps.map { step =>
+			step.clean_?.isDefined && step.s_?.isEmpty && step.d_?.isEmpty && step.a_?.isEmpty
+		}
+		val stepNotCleaning_l = (stepIsCleaning_l zip params.steps).filterNot(_._1).map(_._2)
+		val step_l: List[Option[PipetteStepParams]] = stepNotCleaning_l match {
 			case Nil => List.fill(n)(None)
 			case x => x.map(Some(_))
 		}
@@ -153,12 +162,25 @@ class PipetteMethod {
 		val all_l: List[((Option[WellInfo], Option[LiquidSource], Option[PipetteAmount]), Option[PipetteStepParams])] =
 			(d_l, s_l, a_l).zipped.toList zip step_l
 		
+		// Split up the stepA list whenever there is an explicit cleaning step
+		@tailrec
+		def group(stepIsCleaning_l: List[Boolean], stepA_l: List[StepA], stepA_rl: List[List[StepA]]): List[List[StepA]] = {
+			stepIsCleaning_l match {
+				case Nil => stepA_rl.reverse
+				case _ =>
+					val n = stepIsCleaning_l.takeWhile(_ == false).length
+					group(stepIsCleaning_l.drop(n).dropWhile(_ == true), stepA_l.drop(n), stepA_l.take(n) :: stepA_rl)
+			}
+		}
+		
 		for {
 			// TODO: construct better error messages
 			_ <- RsResult.assert(step_l.size == n, s"expected $n steps, but only ${step_l.size} steps are specified")
 			_ <- RsResult.mapFirst(n_l){x => RsResult.assert(x == 0 || x == 1 || x == n, "`destination`, `source`, `amount`, and `steps` lists must have compatible sizes")}
 			stepA_l <- sub(params, d_l, s_l, a_l, step_l, 0, Nil)
-		} yield stepA_l
+		} yield {
+			group(stepIsCleaning_l, stepA_l, Nil)
+		}
 	}
 	
 	@tailrec

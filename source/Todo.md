@@ -53,8 +53,8 @@
 - [x] create script to test volumes for Vatsi's PCR protocol in 96-well plates
 - [x] analyze qc test for Vatsi's volumes
 - [x] create script for Vatsi's PCR protocol
+- [ ] Made changes to PipetteMethod, so re-check the test scripts
 - [ ] titrate: split up pipetting sets better by default, and give some options for how to split it up manually
-- [ ] BUG: "Command 2: INTERNAL: not yet implemented to have more than one tip model per pipetting set, so setting the tip model individually for each step"
 - [ ] BUG: tania04_ph: why is there cleaning between buffer dispenses?
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] evoware: change R3 labware in Template to LowVol
@@ -279,7 +279,6 @@ Here are some sample volumes for doing liquid level detection:
 ### ``tania04_ph``
 
 - [ ] BUG: apparently, while assigning plate names to Evoware names, the evoware names can only be used once; in any case, plateModel_384_round doesn't work, but _square does.
-- [ ] BUG: "Command 2: INTERNAL: not yet implemented to have more than one tip model per pipetting set, so setting the tip model individually for each step"
 - [ ] BUG: why is there cleaning between buffer dispenses?
 * [ ] problem: didn't find a solution within 100 steps unless I specified where to put the plates
 

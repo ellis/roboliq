@@ -194,8 +194,8 @@ class TitrateOperatorHandler(n: Int) extends OperatorHandler {
 			agent <- Context.getEntityAs[Agent](operator.paramName_l(0))
 			pipetter <- Context.getEntityAs[Pipetter](operator.paramName_l(1))
 			params <- Converter.convInstructionParamsAs[TitrateActionParams](instructionParam_m)
-			pipetteActionParams <- new TitrateMethod(params).createPipetteActionParams()
-			_ <- new PipetteMethod().run(agent, pipetter, pipetteActionParams)
+			pipetteActionParams_l <- new TitrateMethod(params).createPipetteActionParams()
+			_ <- Context.foreachFirst(pipetteActionParams_l)(pipetteActionParams => new PipetteMethod().run(agent, pipetter, pipetteActionParams))
 		} yield ()
 	}
 }

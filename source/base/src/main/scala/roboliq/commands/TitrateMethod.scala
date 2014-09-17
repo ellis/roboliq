@@ -23,7 +23,7 @@ private case class SourceVolumeTip(
 class TitrateMethod(
 	params: TitrateActionParams
 ) {
-	def createPipetteActionParams(): Context[PipetteActionParams] = {
+	def createPipetteActionParams(): Context[List[PipetteActionParams]] = {
 		//println("reagentToWells_m: "+eb.reagentToWells_m)
 		for {
 			// Turn the user-specified steps into simpler individual and/or/source items
@@ -72,7 +72,7 @@ class TitrateMethod(
 			_ <- printDestinationMixtureCsv(destinationToSvts_l)
 		} yield {
 			//println("len: "+stepToList_l.map(_._2.length))
-			val pipetteStep_l = stepOrder_l.flatMap(step => {
+			val pipetteStep_ll = stepOrder_l.map(step => {
 				// Get items corresponding to this step
 				val wellToSvt_l: List[(WellInfo, SourceVolumeTip)] = destinationToSvts_l.flatMap { case (well, svt_l) =>
 					svt_l.find(svt => svt.sv.step == step && !svt.volume.isEmpty).map(well -> _)
@@ -93,7 +93,7 @@ class TitrateMethod(
 						Some(PipetteDestination(destination)),
 						Some(PipetteAmount_Volume(svt.volume)),
 						step.pipettePolicy_?,
-						// I'm not sure how to set the cleaning params here, since the titrate step contains an entire group of pipetting steps.
+						// FIXME: I'm not sure how to set the cleaning params here, since the titrate step contains an entire group of pipetting steps.
 						None, // clean_?
 						step.cleanBefore_?, // cleanBefore_?
 						step.cleanBetween_?, // cleanAfter_?
@@ -102,19 +102,21 @@ class TitrateMethod(
 					)
 				}
 			}) //.filterNot(_.sources.sources.isEmpty)
-			PipetteActionParams(
-				source_? = None,
-				destination_? = None,
-				amount = Nil,
-				clean_? = params.clean_?,
-				cleanBegin_? = params.cleanBegin_?,
-				cleanBetween_? = params.cleanBetween_?,
-				cleanBetweenSameSource_? = params.cleanBetweenSameSource_?,
-				cleanEnd_? = params.cleanEnd_?,
-				pipettePolicy_? = params.pipettePolicy_?,
-				tipModel_? = params.tipModel_?,
-				tip_? = None,
-				steps = pipetteStep_l
+			pipetteStep_ll.map(pipetteStep_l =>
+				PipetteActionParams(
+					source_? = None,
+					destination_? = None,
+					amount = Nil,
+					clean_? = params.clean_?,
+					cleanBegin_? = params.cleanBegin_?,
+					cleanBetween_? = params.cleanBetween_?,
+					cleanBetweenSameSource_? = params.cleanBetweenSameSource_?,
+					cleanEnd_? = params.cleanEnd_?,
+					pipettePolicy_? = params.pipettePolicy_?,
+					tipModel_? = params.tipModel_?,
+					tip_? = None,
+					steps = pipetteStep_l
+				)
 			)
 		}
 	}
