@@ -46,7 +46,7 @@ case class EvowareOpt(
 	robotConfigFile: String = ""
 )
 
-object Main extends App {
+class Runner(args: Array[String]) {
 	private val logger = Logger[this.type]
 
 	val parser = new scopt.OptionParser[Opt]("roboliq") {
@@ -286,6 +286,10 @@ object Main extends App {
 			}
 			input0 = FileUtils.readFileToString(file)
 			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
-		} yield input.asJson.asJsObject
+		} yield input.parseJson.asJsObject
 	}
+}
+
+object Main extends App {
+	new Runner(args)
 }

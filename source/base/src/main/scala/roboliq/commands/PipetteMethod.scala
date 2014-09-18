@@ -149,14 +149,19 @@ class PipetteMethod {
 				case l => l.map(Some(_))
 			}
 		}
-		// Find any steps which are just for cleaning, but no pipetting
-		val stepIsCleaning_l: List[Boolean] = params.steps.map { step =>
-			step.clean_?.isDefined && step.s_?.isEmpty && step.d_?.isEmpty && step.a_?.isEmpty
-		}
-		val stepNotCleaning_l = (stepIsCleaning_l zip params.steps).filterNot(_._1).map(_._2)
-		val step_l: List[Option[PipetteStepParams]] = stepNotCleaning_l match {
-			case Nil => List.fill(n)(None)
-			case x => x.map(Some(_))
+		
+		val (step_l, stepIsCleaning_l) = params.steps match {
+			case Nil =>
+				val step_l = List.fill(n)(None)
+				val stepIsCleaning_l = List.fill(n)(false)
+				(step_l, stepIsCleaning_l)
+			case _ =>
+				val stepIsCleaning_l: List[Boolean] = params.steps.map { step =>
+					step.clean_?.isDefined && step.s_?.isEmpty && step.d_?.isEmpty && step.a_?.isEmpty
+				}
+				val stepNotCleaning_l = (stepIsCleaning_l zip params.steps).filterNot(_._1).map(_._2)
+				val step_l: List[Option[PipetteStepParams]] = params.steps.map(Some(_))
+				(step_l, stepIsCleaning_l)
 		}
 		
 		val all_l: List[((Option[WellInfo], Option[LiquidSource], Option[PipetteAmount]), Option[PipetteStepParams])] =
@@ -165,6 +170,7 @@ class PipetteMethod {
 		// Split up the stepA list whenever there is an explicit cleaning step
 		@tailrec
 		def group(stepIsCleaning_l: List[Boolean], stepA_l: List[StepA], stepA_rl: List[List[StepA]]): List[List[StepA]] = {
+			//println(s"group(${stepIsCleaning_l}, ${stepA_l}, ${stepA_rl})")
 			stepIsCleaning_l match {
 				case Nil => stepA_rl.reverse
 				case _ =>
@@ -179,6 +185,8 @@ class PipetteMethod {
 			_ <- RsResult.mapFirst(n_l){x => RsResult.assert(x == 0 || x == 1 || x == n, "`destination`, `source`, `amount`, and `steps` lists must have compatible sizes")}
 			stepA_l <- sub(params, d_l, s_l, a_l, step_l, 0, Nil)
 		} yield {
+			//println("stepA_l: "+stepA_l)
+			//println("stepA_ll: "+group(stepIsCleaning_l, stepA_l, Nil))
 			group(stepIsCleaning_l, stepA_l, Nil)
 		}
 	}
