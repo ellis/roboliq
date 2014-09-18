@@ -53,7 +53,9 @@
 - [x] create script to test volumes for Vatsi's PCR protocol in 96-well plates
 - [x] analyze qc test for Vatsi's volumes
 - [x] create script for Vatsi's PCR protocol
+- [ ] tania04_ph: why aren't correct source volume usages being shown?
 - [ ] Made changes to PipetteMethod, so re-check the test scripts
+- [ ] titrate: allow for explicit cleaning steps
 - [ ] titrate: split up pipetting sets better by default, and give some options for how to split it up manually
 - [ ] BUG: tania04_ph: why is there cleaning between buffer dispenses?
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring

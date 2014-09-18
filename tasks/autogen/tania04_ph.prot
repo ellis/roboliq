@@ -8,51 +8,78 @@ labware:
   sourcePlate2:
     model: plateModel_96_pcr
     location: P5PCR
-  #mixPlate: plateModel_384_round
   mixPlate:
     model: plateModel_384_square
     location: P3
-  #mixPlate: plateModel_96_pcr
 
 # Reagents used in this protocol
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
 reagents:
-  buffer_pH400: sourcePlate1(A01|D01)
-  buffer_pH425: sourcePlate1(E01|H01)
-  buffer_pH450: sourcePlate1(A02|D02)
-  buffer_pH475: sourcePlate1(E02|H02)
+  water: sourcePlate1(A09|H09)
+  salt: sourcePlate1(A10|H10)
 
-  buffer_pH500: sourcePlate1(A03|D03)
-  buffer_pH525: sourcePlate1(E03|H03)
-  buffer_pH550: sourcePlate1(A04|D04)
-  buffer_pH575: sourcePlate1(E04|H04)
-
-  buffer_pH600: sourcePlate1(A05|D05)
-  buffer_pH625: sourcePlate1(E05|H05)
-  buffer_pH650: sourcePlate1(A06|D06)
-  buffer_pH675: sourcePlate1(E06|H06)
-
-  buffer_pH700: sourcePlate1(A07|D07)
-  buffer_pH725: sourcePlate1(E07|H07)
-  buffer_pH750: sourcePlate1(A08|D08)
+  # buffers
+  hepes_850: sourcePlate1(A01|D01)
+  hepes_650: sourcePlate1(A02|D02)
+  pipes_775: sourcePlate1(A03|D03)
+  pipes_675: sourcePlate1(A04|D04)
+  mes_710: sourcePlate1(A05|D05)
+  mes_510: sourcePlate1(A06|D06)
+  acetate_575: sourcePlate1(A07|D07)
+  acetate_375: sourcePlate1(A08|D08)
 
   sfGFP: sourcePlate2(A01)
-  Assam: sourcePlate2(A02)
-  "p1200": sourcePlate2(A03)
-  "p1201": sourcePlate2(A04)
-  "p1205": sourcePlate2(A05)
+  Q204H_N149Y: sourcePlate2(A02)
+  taGFP: sourcePlate2(A03)
+  V206A: sourcePlate2(A04)
 
 protocol:
 - titrate:
     allOf:
-      - source: [buffer_pH400, buffer_pH425, buffer_pH450, buffer_pH475, buffer_pH500, buffer_pH525, buffer_pH550, buffer_pH575, buffer_pH600, buffer_pH625, buffer_pH650, buffer_pH675, buffer_pH700, buffer_pH725, buffer_pH750]
-        amount: 99.75ul
-        pipettePolicy: Roboliq_Water_Dry_1000
-        cleanBefore: thorough
-        cleanBetween: none
-        cleanAfter: thorough
-      - source: [sfGFP, Assam, "p1200", "p1201", "p1205"]
-        amount: 0.25ul
+      - source: water
+        amount: 25ul
+
+      - source: salt
+        amount: 15ul
+
+      # Buffers
+      - oneOf:
+        - allOf: [{source: hepes_850, amount: 30ul}, {source: hepes_650, amount: 0ul}]
+        - allOf: [{source: hepes_850, amount: 25ul}, {source: hepes_650, amount: 5ul}]
+        - allOf: [{source: hepes_850, amount: 20ul}, {source: hepes_650, amount: 10ul}]
+        - allOf: [{source: hepes_850, amount: 15ul}, {source: hepes_650, amount: 15ul}]
+        - allOf: [{source: hepes_850, amount: 10ul}, {source: hepes_650, amount: 20ul}]
+        - allOf: [{source: hepes_850, amount: 5ul}, {source: hepes_650, amount: 25ul}]
+        - allOf: [{source: hepes_850, amount: 0ul}, {source: hepes_650, amount: 30ul}]
+
+        - allOf: [{source: pipes_775, amount: 30ul}, {source: pipes_675, amount: 0ul}]
+        - allOf: [{source: pipes_775, amount: 25ul}, {source: pipes_675, amount: 5ul}]
+        - allOf: [{source: pipes_775, amount: 20ul}, {source: pipes_675, amount: 10ul}]
+        - allOf: [{source: pipes_775, amount: 15ul}, {source: pipes_675, amount: 15ul}]
+        - allOf: [{source: pipes_775, amount: 10ul}, {source: pipes_675, amount: 20ul}]
+        - allOf: [{source: pipes_775, amount: 5ul}, {source: pipes_675, amount: 25ul}]
+        - allOf: [{source: pipes_775, amount: 0ul}, {source: pipes_675, amount: 30ul}]
+
+        - allOf: [{source: mes_710, amount: 30ul}, {source: mes_510, amount: 0ul}]
+        - allOf: [{source: mes_710, amount: 25ul}, {source: mes_510, amount: 5ul}]
+        - allOf: [{source: mes_710, amount: 20ul}, {source: mes_510, amount: 10ul}]
+        - allOf: [{source: mes_710, amount: 15ul}, {source: mes_510, amount: 15ul}]
+        - allOf: [{source: mes_710, amount: 10ul}, {source: mes_510, amount: 20ul}]
+        - allOf: [{source: mes_710, amount: 5ul}, {source: mes_510, amount: 25ul}]
+        - allOf: [{source: mes_710, amount: 0ul}, {source: mes_510, amount: 30ul}]
+
+        - allOf: [{source: acetate_575, amount: 30ul}, {source: acetate_375, amount: 0ul}]
+        - allOf: [{source: acetate_575, amount: 25ul}, {source: acetate_375, amount: 5ul}]
+        - allOf: [{source: acetate_575, amount: 20ul}, {source: acetate_375, amount: 10ul}]
+        - allOf: [{source: acetate_575, amount: 15ul}, {source: acetate_375, amount: 15ul}]
+        - allOf: [{source: acetate_575, amount: 10ul}, {source: acetate_375, amount: 20ul}]
+        - allOf: [{source: acetate_575, amount: 5ul}, {source: acetate_375, amount: 25ul}]
+        - allOf: [{source: acetate_575, amount: 0ul}, {source: acetate_375, amount: 30ul}]
+
+      - source: [sfGFP, Q204H_N149Y, taGFP, V206A]
+        amount: 5ul
         clean: thorough
-        pipettePolicy: Water_C_50
+        pipettePolicy: Roboliq_Water_Wet_1000
+
     destination: mixPlate(A01|P08)
+    replicates: 3
