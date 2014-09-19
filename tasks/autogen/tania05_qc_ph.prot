@@ -1,0 +1,40 @@
+description: |
+  Titrate a range of volumes of GFP using tips 1 to 4 into 384 well round-bottom plate, total volume of 75ul
+
+labware:
+  sourcePlate1:
+    model: plateModel_96_dwp
+    location: P2
+  sourcePlate2:
+    model: plateModel_96_pcr
+    location: P5PCR
+  mixPlate:
+    model: plateModel_384_square
+    location: P3
+
+substance:
+- name: water
+- name: gfp
+
+source:
+- name: water
+  well: sourcePlate1(A01|H01)
+- name: gfpDilution
+  well: sourcePlate2(A01|D01)
+  substance:
+  - name: gfp
+    amount: 1/10
+  - name: water
+
+protocol:
+- titrate:
+    allOf:
+    - source: water
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: gfpDilution
+      amount: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul]
+      pipettePolicy: Roboliq_Water_Wet_1000
+    destination: mixPlate(A01|H12)
+    amount: 75ul
+    tip: [1, 2, 3, 4]
+    cleanBetween: flush

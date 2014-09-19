@@ -15,8 +15,8 @@ labware:
 # Reagents used in this protocol
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
 reagents:
-  water: sourcePlate1(A09|H09)
-  salt: sourcePlate1(A10|H10)
+  water: sourcePlate1(A09|H10)
+  salt: sourcePlate1(A11|H11)
 
   # buffers
   hepes_850: sourcePlate1(A01|D01)
@@ -81,5 +81,5 @@ protocol:
         clean: thorough
         pipettePolicy: Roboliq_Water_Wet_1000
 
-    destination: mixPlate(A01|P08)
+    destination: mixPlate(A01|P24)
     replicates: 3

@@ -291,5 +291,6 @@ class Runner(args: Array[String]) {
 }
 
 object Main extends App {
+	args
 	new Runner(args)
 }

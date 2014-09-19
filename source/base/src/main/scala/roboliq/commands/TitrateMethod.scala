@@ -39,16 +39,19 @@ class TitrateMethod(
 			svt2_ll = combineWithTips(svt1_ll, params.tip, 1)
 			//_ = mixture1_l.foreach(mixture => println(mixture.map(_._2)))
 			// Number of wells required if we only use a single replicate
-			wellCountMin = svt2_ll.length
+			wellCountReplicate1 = svt2_ll.length
+			wellCountMin = wellCountReplicate1 * params.replicates_?.getOrElse(1)
 			_ <- Context.assert(wellCountMin > 0, "A titration series must specify steps with sources and volumes")
 			// Maximum number of wells available to us
 			wellCountMax = params.destination.l.length
-			_ <- Context.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells.  The titration series requires at least $wellCountMin wells, and you have only supplied $wellCountMax wells.")
+			_ <- Context.assert(wellCountReplicate1 <= wellCountMax, s"You must allocate more destination wells.  The titration series requires at least $wellCountMin wells, and you have only supplied $wellCountMax wells.")
 			// Check replicate count
-			replicateCountMax = wellCountMax / wellCountMin
+			replicateCountMax = wellCountMax / wellCountReplicate1
 			replicateCount = params.replicates_?.getOrElse(replicateCountMax)
-			wellCount = wellCountMin * replicateCount
-			_ <- Context.assert(wellCountMin <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
+			wellCount = wellCountReplicate1 * replicateCount
+			//_ = println("counts: ", wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
+			//_ = 1 / 0
+			_ <- Context.assert(wellCount <= wellCountMax, s"You must allocate more destination wells in order to accommodate $replicateCount replicates.  You have supplied $wellCountMax wells, which can accommodate $replicateCountMax replicates.  For $replicateCount replicates you will need to supply ${wellCount} wells.")
 			svt3_ll = combineWithTips(svt1_ll, params.tip, replicateCount)
 			//_ = println("svt1_ll:\n"+svt1_ll)
 			//_ = println("svt2_ll:\n"+svt2_ll)
@@ -63,7 +66,7 @@ class TitrateMethod(
 			//printMixtureCsv(stepToList_l.map(_._2))
 			destinations = PipetteDestinations(params.destination.l.take(wellCount))
 			_ = println()
-			_ = println("INFO: ", wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
+			_ = println("INFO: ", wellCountReplicate1, wellCountMin, wellCountMax, replicateCountMax, replicateCount, wellCount)
 			_ = println("destinations: "+destinations)
 			_ = println("svt1_ll:\n"+svt1_ll)
 			_ = println("svt3_ll:\n"+svt3_ll)
