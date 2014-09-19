@@ -33,10 +33,11 @@
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
 - [x] vatsi: create and run dilution script
+- [.] tania: create accuracy test on 384-well flat bottom plates using fluorescence
+- [ ] tubes
 - [ ] create titration script for Tania
-- [ ] tania: create accuracy test on 384-well round bottom plates using fluorescence
 - [ ] reader command for absorbtion
-- [ ] run pipetting accuracy protocol for 384 round plate
+- [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 
@@ -53,16 +54,16 @@
 - [x] create script to test volumes for Vatsi's PCR protocol in 96-well plates
 - [x] analyze qc test for Vatsi's volumes
 - [x] create script for Vatsi's PCR protocol
-- [ ] tania04_ph: why aren't correct source volume usages being shown?
+- [x] allow for running scripts from within eclipse for easier usage on windows
 - [ ] Made changes to PipetteMethod, so re-check the test scripts
 - [ ] titrate: allow for explicit cleaning steps
 - [ ] titrate: split up pipetting sets better by default, and give some options for how to split it up manually
 - [ ] BUG: tania04_ph: why is there cleaning between buffer dispenses?
+- [ ] BUG: tania04_ph: why are there double cleanings between steps?
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] evoware: change R3 labware in Template to LowVol
 - [ ] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
 - [ ] see why protocol file isn't being released on windows until sbt exits
-- [ ] allow for running scripts from within eclipse for easier usage on windows
 - [ ] vatsi: let protocol load an external CSV file of well contents (or embed the contents in the protocol)
 - [ ] let 'dilute' command dilute to a given concentration
 - [ ] promptOperator: add parameter for optional audio alarm

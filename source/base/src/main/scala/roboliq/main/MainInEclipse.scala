@@ -3,10 +3,10 @@ package roboliq.main
 object MainInEclipse extends App {
 	def run(name: String) {
 		new Runner(Array(
-			"--config", "tasks/autogen/roboliq.yaml",
+			"--config", "../tasks/autogen/roboliq.yaml",
 			"--output", s"testoutput/$name/current",
 			//"--protocol", "tasks/autogen/tania04_ph.prot"
-			"--protocol", s"tasks/autogen/$name.prot"
+			"--protocol", s"../tasks/autogen/$name.prot"
 		))
 	}
 	
