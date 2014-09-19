@@ -182,7 +182,7 @@ class PipetteMethod {
 		for {
 			// TODO: construct better error messages
 			_ <- RsResult.assert(step_l.size == n, s"expected $n steps, but only ${step_l.size} steps are specified")
-			_ <- RsResult.mapFirst(n_l){x => RsResult.assert(x == 0 || x == 1 || x == n, "`destination`, `source`, `amount`, and `steps` lists must have compatible sizes")}
+			_ <- RsResult.mapFirst(n_l){x => RsResult.assert(x == 0 || x == 1 || x == n, s"`destination` (size=$dn), `source` (size=$sn), `amount`  (size=$an), and `steps` (size=$stepn) lists must have compatible sizes")}
 			stepA_l <- sub(params, d_l, s_l, a_l, step_l, 0, Nil)
 		} yield {
 			//println("stepA_l: "+stepA_l)

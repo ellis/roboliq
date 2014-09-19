@@ -274,6 +274,11 @@ Here are some sample volumes for doing liquid level detection:
 
 - [ ] Why can't plate1's model be set to `plateModel_384_square`?
 
+### ``vatsi01-Q5582``
+
+- [ ] I should change the destinations to A01|F12, and remove the 0ul/30ul for G12 and H12 -- then see if same script is generated
+- [ ] does it properly handle volumes of 0?  I added in dummy volumes of 30ul.
+
 ### ``vatsi03``
 
 - [ ] BUG: large tips get a thorough washing twice in a row, once before user prompt, and once after
