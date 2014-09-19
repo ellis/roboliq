@@ -31,6 +31,9 @@ evowareAgents:
       - name: troughModel_100ml_lowvol_tips
         label: Trough 100ml LowVol Tips
         evowareName: Trough 100ml LowVol Tips
+      - name: tubeHolderModel_1500ul
+        label: 20 tube block 1.5ml
+        evowareName: Block 20Pos 1.5 ml Eppendorf
 
     tipModels:
       Standard 50ul: { min: 0.1, max: 45 }
@@ -67,6 +70,7 @@ evowareAgents:
           ROBOSEAL: { carrier: "RoboSeal" }
           READER: { carrier: "Infinite M200" }
 #          T1A: { grid: 5
+#T3: { grid: 
         pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6]
         userSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER]
 
