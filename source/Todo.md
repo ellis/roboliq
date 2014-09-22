@@ -27,6 +27,9 @@
 - [ ] add execution capability to time the execution of different commands, which can then be used to predict duration of operations too
 - [ ] allow for more differentiation of TipCleanPolicy in substance definition, so that washing and replacement can be specified independently (and perhaps also the option to store tips for later use?)
 - [ ] import well contents from a previous experiment
+- [ ] allow for running an abstract protocol where the labware has not yet been unspecified, so imaginary wells are used in order to get information about source
+usage.
+- [ ] more abstract "well" concept that allows for treating a well with 8 pipette positions as a single container, and that allows for pipetting to multiple distinct positions in a single large culture well
 
 ## Current goal
 
@@ -98,6 +101,7 @@
 - [x] main: HDF5: source mixture
 - [ ] main: HDF5: source well
 - [ ] main: HDF5: source well usage
+- [ ] main: HDF5: source usage
 - [ ] main: HDF5: well mixture initial
 - [ ] main: HDF5: well mixture final
 - [ ] main: HDF5: aspirate/dispense/clean

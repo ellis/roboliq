@@ -4,7 +4,7 @@ description: |
 labware:
   tubes1:
     model: tubeHolderModel_1500ul
-    location: R5
+    location: T3
 
 source:
 - name: water
