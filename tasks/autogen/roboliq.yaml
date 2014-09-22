@@ -70,9 +70,9 @@ evowareAgents:
           ROBOSEAL: { carrier: "RoboSeal" }
           READER: { carrier: "Infinite M200" }
 #          T1A: { grid: 5
-#T3: { grid: 
-        pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6]
-        userSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER]
+          T3: { grid: 16, site: 1 }
+        pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, T3]
+        userSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER, T3]
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate

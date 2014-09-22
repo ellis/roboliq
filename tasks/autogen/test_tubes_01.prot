@@ -1,53 +1,17 @@
 description: |
-  Test using a tube labware "plate".
+  Test tubes using a tube holder rather than individual tubes
 
 labware:
   tubes1:
-    model: plateModel_100ml
+    model: tubeHolderModel_1500ul
     location: R5
-  trough2:
-    model: troughModel_100ml_lowvol_tips
-    location: R6
-  plate1:
-    model: plateModel_96_nunc_transparent
-    location: P3
-
-substance:
-- name: dye
-- name: water
 
 source:
 - name: water
-  well: trough1(C01|F01)
-- name: dyeDark
-  well: trough2(C01|F01)
-  substance:
-  - name: dye
+  well: tubes1(A01)
 
 protocol:
-- distribute:
+- pipette:
     source: water
-    destination: plate1(A01|H12)
-    amount: 100ul
-    pipettePolicy: Roboliq_Water_Air_1000
-    cleanBetween: none
-- promptOperator:
-    text: Please perform absorbance measurement
-- titrate:
-    allOf:
-    - source: dyeDark
-      amount: [10ul, 20ul]
-    destination: plate1(A01|H06)
-    tip: [1, 2, 3, 4]
-    pipettePolicy: Roboliq_Water_Wet_1000
-    cleanBetween: flush
-- titrate:
-    allOf:
-    - source: dyeDark
-      amount: [0.2ul, 0.5ul]
-    destination: plate1(A07|H12)
-    tip: [5, 6, 7, 8]
-    pipettePolicy: Roboliq_Water_Wet_0050
-    cleanBetween: flush
-- promptOperator:
-    text: Please perform absorbance measurement
+    destination: tubes1(B01)
+    amount: 50ul
