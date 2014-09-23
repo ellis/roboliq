@@ -1,0 +1,23 @@
+description: |
+  Test `wellGroup` using pipette command, wellGroups contain multiple wells
+
+labware:
+  plate1:
+    model: plateModel_96_nunc_transparent
+    location: P1
+
+wellGroup:
+- name: wellGroup1
+  well: plate1(A01|H01)
+- name: wellGroup2
+  well: plate1(A02|H02)
+
+source:
+- name: reagent1
+  well: wellGroup1
+
+protocol:
+- pipette:
+    source: wellGroup1
+    destination: wellGroup2
+    amount: 20ul

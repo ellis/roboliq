@@ -18,7 +18,8 @@ object MainInEclipse extends App {
 	run("test_single_pipette_06")
 	run("test_single_pipette_07")
 	run("test_single_pipette_08")*/
-	run("test_script_wellGroup_01")
+	//run("test_script_wellGroup_01")
+	run("test_script_wellGroup_02")
 	//run("tania04_ph")
 	//run("test_tubes_01")
 }
