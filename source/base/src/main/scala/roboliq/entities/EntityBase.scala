@@ -17,6 +17,7 @@ import scalax.collection.Graph
 import scalax.collection.Graph.apply$default$3
 import scalax.collection.edge.LkUnDiEdge
 
+// TODO: need to check for naming conflict between entities and non-entities (e.g. wellGroupToWells_m) -- in general, all names should be tracked in a central location so that naming conflicts can be detected and/or resolved.
 class EntityBase {
 	var atoms = AtomBase(Set())
 	val aliases = new HashMap[String, String]
@@ -76,6 +77,11 @@ class EntityBase {
 	 * Map of source name to mixture
 	 */
 	val sourceToMixture_m = new HashMap[String, Mixture]
+	/**
+	 * Map of reagent name to source wells
+	 * REFACTOR: Rename sourceToWells_m
+	 */
+	val wellGroupToWells_m = new HashMap[String, List[WellInfo]]
 	/**
 	 * Map of reagent name to source wells
 	 * REFACTOR: Rename sourceToWells_m
@@ -345,10 +351,19 @@ class EntityBase {
 					wellInfo_l <- wellIdentsToWellInfo(state, entityIdent, labware, wellIdent_l)
 				} yield wellInfo_l.map(x => List(x))
 			case None =>
-				for {
-					well_l <- reagentToWells_m.get(entityIdent).asRs(s"entity not found: `$entityIdent`")
-					l1 <- RsResult.mapAll(well_l)(well => wellToWellInfo(state, well))
-				} yield List(l1)
+				reagentToWells_m.get(entityIdent).asRs(s"entity not found: `$entityIdent`")
+				if (reagentToWells_m.contains(entityIdent)) {
+					for {
+						well_l <- reagentToWells_m.get(entityIdent).asRs(s"entity not found: `$entityIdent`")
+						l1 <- RsResult.mapAll(well_l)(well => wellToWellInfo(state, well))
+					} yield List(l1)
+				}
+				else if (wellGroupToWells_m.contains(entityIdent)) {
+					RsSuccess(wellGroupToWells_m(entityIdent).map(List(_)))
+				}
+				else {
+					RsError(s"entity not found: `$entityIdent`")
+				}
 			case _ => RsError(s"require a labware entity or reagent: `$entityIdent`")
 		}
 	}

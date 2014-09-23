@@ -2,7 +2,6 @@
 
 ## Big issues
 
-- [ ] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
 - [ ] `measureFluorescence` command
 - [ ] `measureAbsorbance` command
 - [ ] handle tubes
@@ -39,6 +38,9 @@ usage.
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
 - [x] vatsi: create and run dilution script
+- [ ] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
+- [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
+- [ ] fix compiler warnings
 - [ ] create titration script for Tania
 - [ ] tania: create accuracy test on 384-well round bottom plates using fluorescence
 - [ ] reader command for absorbtion

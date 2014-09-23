@@ -35,6 +35,12 @@ import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
 import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
 
+case class WellGroupBean(
+	name: String,
+	description_? : Option[String],
+	well: PipetteDestinations
+)
+
 case class SubstanceBean(
 	name: String,
 	description_? : Option[String],
@@ -281,6 +287,19 @@ class Protocol {
 							case _ => RqError("Expected a string for model reference")
 						}
 					})
+				case _ => RqSuccess(())
+			}
+			
+			_ <- jsobj.fields.get("wellGroup") match {
+				case Some(jsval) =>
+					for {
+						wellGroupBean_l <- Converter.convAs[List[WellGroupBean]](jsval, eb, Some(state0.toImmutable))
+						_ <- RqResult.mapAll(wellGroupBean_l) { bean =>
+							// TODO: need to check for naming conflict, also with entities -- in general, all names should be tracked in a central location so that naming conflicts can be detected and/or resolved.
+							eb.wellGroupToWells_m (bean.name) = bean.well.l
+							RqSuccess(())
+						}
+					} yield ()
 				case _ => RqSuccess(())
 			}
 			

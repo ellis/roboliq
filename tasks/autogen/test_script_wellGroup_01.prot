@@ -1,0 +1,22 @@
+description: |
+  Test `wellGroup` using pipette command
+
+labware:
+  plate1:
+    model: plateModel_96_nunc_transparent
+    location: P1
+
+wellGroup:
+- name: wellGroup1
+  well: plate1(A01)
+- name: wellGroup2
+  well: plate1(A02)
+
+source:
+- name: reagent1
+  well: wellGroup1
+
+protocol:
+- pipette:
+    steps:
+    - {s: wellGroup1, d: wellGroup2, a: 20ul}
