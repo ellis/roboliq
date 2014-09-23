@@ -194,9 +194,9 @@ object Converter {
 	): RqResult[Any] = {
 		import scala.reflect.runtime.universe._
 
-		val ctor = typ.member(nme.CONSTRUCTOR).asMethod
-		val p0_l = ctor.paramss(0)
-		val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
+		val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+		val p0_l = ctor.paramLists(0)
+		val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
 
 		def doit(
 			nameToType_l: List[(String, Type)],
@@ -391,9 +391,9 @@ object Converter {
 			}
 			else {
 				println("typ: "+typ)
-				val ctor = typ.member(nme.CONSTRUCTOR).asMethod
-				val p0_l = ctor.paramss(0)
-				val nameToType_l = p0_l.map(p => p.name.decoded.replace("_?", "") -> p.typeSignature)
+				val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+				val p0_l = ctor.paramLists(0)
+				val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
 				val res = jsval match {
 					case jsobj: JsObject =>
 						convMapString(path_r, jsobj, nameToType_l, eb, state_?, id_?)

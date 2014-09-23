@@ -2,10 +2,10 @@ package roboliq.pipette.planners
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import roboliq.core._
 
-class TipModelSearcher1Spec extends FunSpec with ShouldMatchers with BeforeAndAfter {
+class TipModelSearcher1Spec extends FunSpec with Matchers with BeforeAndAfter {
 	val searcher = new TipModelSearcher1[String, String, String]
 	val itemAll_l = (0 until 8).toList.map(i => s"Item$i")
 	val item1 = itemAll_l(0)
