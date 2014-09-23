@@ -1,0 +1,43 @@
+description: |
+  Titrate a range of volumes of GFP using tips 1 to 4 into a 384 well flat-bottom plate, total volume of 75ul
+
+labware:
+  tubes1:
+    model: tubeHolderModel_1500ul
+    location: T3
+  trough1:
+    model: troughModel_100ml
+    location: R6
+  mixPlate:
+    model: plateModel_384_square
+    location: P3
+
+wellGroup:
+- name: destGroup1
+  well: mixPlate(A1+C1+E1+G1+A2+C2+E2+G2+A3+C3+E3+G3+A4+C4+E4+G4+A5+C5+E5+G5+A6+C6+E6+G6+A7+C7+E7+G7+A8+C8+E8+G8+A9+C9+E9+G9+A10+C10+E10+G10+A11+C11+E11+G11+A12+C12+E12+G12+A13+C13+E13+G13+A14+C14+E14+G14+A15+C15+E15+G15+A16+C16+E16+G16)
+
+substance:
+- name: water
+- name: gfp_water
+- name: gfp_glycerol
+
+source:
+- name: water
+  well: trough1(C01|F01)
+- name: gfp_water
+  well: tubes1(A1)
+- name: gfp_glycerol
+  well: tubes1(B1)
+
+protocol:
+- titrate:
+    allOf:
+    - source: water
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: gfp_water
+      amount: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul]
+      pipettePolicy: Roboliq_Water_Wet_1000
+    destination: destGroup1
+    amount: 75ul
+    tip: [1, 2, 3, 4]
+    cleanBetween: flush

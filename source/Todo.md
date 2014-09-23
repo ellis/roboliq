@@ -38,19 +38,16 @@ usage.
 - [x] Refactor using Context
 - [x] figure out how to integrate substances vs sources in the protocol file
 - [x] vatsi: create and run dilution script
-<<<<<<< HEAD
-- [ ] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
-- [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
-- [ ] fix compiler warnings
-=======
-- [.] tania: create accuracy test on 384-well flat bottom plates using fluorescence
-- [ ] tubes
->>>>>>> 8952e2f6555c53db2040b98c20f548c37c4dd4c4
+- [x] tania: create accuracy test on 384-well flat bottom plates using fluorescence
+- [x] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
+- [x] fix compiler warnings
+- [ ] work on getting tania06_qc_ph to do the same thing as the manual script
 - [ ] create titration script for Tania
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
+- [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
 
 ## Vatsi and Tanya
 

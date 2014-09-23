@@ -47,7 +47,7 @@ private object WellIdentParser0 extends JavaTokenParsers {
 	val row: Parser[Int] = """[A-Z]""".r ^^ { case s => s.charAt(0) - 'A' }
 	val col: Parser[Int] = """[0-9]+""".r ^^ { case s => s.toInt - 1 }
 	
-	val well: Parser[WellIdentOne] = """[A-Z][0-9][0-9]""".r ^^ {
+	val well: Parser[WellIdentOne] = """[A-Z][0-9]+""".r ^^ {
 		case s => WellIdentOne(RowCol(s.charAt(0) - 'A', s.drop(1).toInt - 1))
 	}
 	
