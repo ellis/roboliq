@@ -2,10 +2,12 @@
 
 ## Big issues
 
+- [ ] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
+- [ ] `measureFluorescence` command
+- [ ] `measureAbsorbance` command
 - [ ] handle tubes
 - [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
 - [ ] configurable cleaning logic (really not sure how to do this best; don't use current approach of calling a sub-routine)
-- [ ] `measureAbsorbance` command
 - [ ] `dilute` command for stflow
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
 - [ ] we need a separate search algorithm for organizing plates and it needs to be run before the action planner
@@ -30,6 +32,7 @@
 - [ ] allow for running an abstract protocol where the labware has not yet been unspecified, so imaginary wells are used in order to get information about source
 usage.
 - [ ] more abstract "well" concept that allows for treating a well with 8 pipette positions as a single container, and that allows for pipetting to multiple distinct positions in a single large culture well
+- [ ] possibly create a general approach to combinatorial variables that can be used for any command, not just in the titrate command.
 
 ## Current goal
 
