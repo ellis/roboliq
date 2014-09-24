@@ -75,7 +75,7 @@ class TitrateMethod(
 			_ <- printDestinationMixtureCsv(destinationToSvts_l)
 		} yield {
 			//println("len: "+stepToList_l.map(_._2.length))
-			val pipetteStep_ll = stepOrder_l.map(step => {
+			stepOrder_l.map(step => {
 				// Get items corresponding to this step
 				val wellToSvt_l: List[(WellInfo, SourceVolumeTip)] = destinationToSvts_l.flatMap { case (well, svt_l) =>
 					svt_l.find(svt => svt.sv.step == step && !svt.volume.isEmpty).map(well -> _)
@@ -90,7 +90,7 @@ class TitrateMethod(
 				// Remove empty volumes
 				//val sdv_l = sdv0_l.filterNot({x => x._3.isEmpty})
 				val sdv_l = sdv0_l.filterNot({x => x._3.isEmpty})*/
-				wellToSvt_l.map { case (destination, svt) =>
+				val pipetteStep_l = wellToSvt_l.map { case (destination, svt) =>
 					PipetteStepParams(
 						Some(svt.sv.source),
 						Some(PipetteDestination(destination)),
@@ -98,29 +98,27 @@ class TitrateMethod(
 						step.pipettePolicy_?,
 						// FIXME: I'm not sure how to set the cleaning params here, since the titrate step contains an entire group of pipetting steps.
 						None, // clean_?
-						step.cleanBefore_?, // cleanBefore_?
-						step.cleanBetween_?, // cleanAfter_?
+						None, // cleanBefore_?
+						None, // cleanAfter_?
 						step.tipModel_?,
 						svt.tip_?
 					)
 				}
-			}) //.filterNot(_.sources.sources.isEmpty)
-			pipetteStep_ll.map(pipetteStep_l =>
 				PipetteActionParams(
 					source_? = None,
 					destination_? = None,
 					amount = Nil,
-					clean_? = params.clean_?,
-					cleanBegin_? = params.cleanBegin_?,
-					cleanBetween_? = params.cleanBetween_?,
-					cleanBetweenSameSource_? = params.cleanBetweenSameSource_?,
-					cleanEnd_? = params.cleanEnd_?,
+					clean_? = step.clean_? orElse params.clean_?,
+					cleanBegin_? = step.clean_? orElse params.cleanBegin_?,
+					cleanBetween_? = step.cleanBetween_? orElse params.cleanBetween_?,
+					cleanBetweenSameSource_? = step.cleanBetweenSameSource_? orElse params.cleanBetweenSameSource_?,
+					cleanEnd_? = step.cleanEnd_? orElse params.cleanEnd_?,
 					pipettePolicy_? = params.pipettePolicy_?,
 					tipModel_? = params.tipModel_?,
 					tip_? = None,
 					steps = pipetteStep_l
 				)
-			)
+			}) //.filterNot(_.sources.sources.isEmpty)
 		}
 	}
 

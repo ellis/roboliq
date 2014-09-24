@@ -65,9 +65,10 @@ case class TitrateStepParams(
 	//contact_? : Option[PipettePosition.Value],
 	pipettePolicy_? : Option[String],
 	clean_? : Option[CleanIntensity.Value],
-	cleanBefore_? : Option[CleanIntensity.Value],
+	cleanBegin_? : Option[CleanIntensity.Value],
 	cleanBetween_? : Option[CleanIntensity.Value],
-	cleanAfter_? : Option[CleanIntensity.Value],
+	cleanBetweenSameSource_? : Option[CleanIntensity.Value],
+	cleanEnd_? : Option[CleanIntensity.Value],
 	tipModel_? : Option[TipModel],
 	tip: List[Int]
 ) {

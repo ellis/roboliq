@@ -51,8 +51,46 @@ usage.
 
 ## tania06_qc_ph
 
-- [ ] don't wash between water dispenses
+- [x] don't wash between water dispenses
 - [ ] single dispense for the 384 wells that are 2 wells apart
+
+```
+- titrate:
+    allOf:
+    - source: water
+      pipettePolicy: Roboliq_Water_Dry_1000
+      cleanBeginStep:
+      cleanBeforeSource:
+      cleanBetween: none
+      cleanBetweenSameSource:
+    - source: gfp_water
+      var: { name: amount, value: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul] }
+      pipettePolicy: Roboliq_Water_Wet_1000
+    destination: destGroup1
+    amount: 75ul
+    replicates: 2
+    tip: [1, 2, 3, 4]
+    cleanBetween: flush
+    cleanBegin
+
+- for:
+    variable:
+    - name: source2
+      value: [a, b, c]
+    - name: source3
+      value: [d, e, f]
+    yield:
+    - name: 
+```
+
+```
+csv: |
+  well,source1,amount1,tip1,source2,amount2,tip2
+  plate1(A01),water,50ul,1,dye,20ul,1
+default:
+- { name: source1, value: water }
+order: step|source|well
+```
 
 ## Vatsi and Tanya
 
