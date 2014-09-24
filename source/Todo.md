@@ -52,6 +52,7 @@ usage.
 ## tania06_qc_ph
 
 - [x] don't wash between water dispenses
+- [ ] don't clean tips twice in a row.  See PipetteMethod.cToInstructionRefresh (line 654)
 - [ ] single dispense for the 384 wells that are 2 wells apart
 
 ```

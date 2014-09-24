@@ -150,6 +150,8 @@ class PipetteMethod {
 			}
 		}
 		
+		// Some params.steps may be cleaning steps.  step_l filters out the cleaning steps,
+		// and stepIsCleaning_l a boolean indicating whether the given params.steps items is a cleaning step.
 		val (step_l, stepIsCleaning_l) = params.steps match {
 			case Nil =>
 				val step_l = List.fill(n)(None)
@@ -160,7 +162,7 @@ class PipetteMethod {
 					step.clean_?.isDefined && step.s_?.isEmpty && step.d_?.isEmpty && step.a_?.isEmpty
 				}
 				val stepNotCleaning_l = (stepIsCleaning_l zip params.steps).filterNot(_._1).map(_._2)
-				val step_l: List[Option[PipetteStepParams]] = params.steps.map(Some(_))
+				val step_l: List[Option[PipetteStepParams]] = stepNotCleaning_l.map(Some(_))
 				(step_l, stepIsCleaning_l)
 		}
 		
