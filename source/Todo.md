@@ -49,6 +49,11 @@ usage.
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
 
+## tania06_qc_ph
+
+- [ ] don't wash between water dispenses
+- [ ] single dispense for the 384 wells that are 2 wells apart
+
 ## Vatsi and Tanya
 
 - [x] command: promptOperator
