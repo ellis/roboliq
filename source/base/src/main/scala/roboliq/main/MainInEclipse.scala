@@ -10,6 +10,15 @@ object MainInEclipse extends App {
 		))
 	}
 	
+	def runTemp(name: String) {
+		new Runner(Array(
+			"--config", "../tasks/autogen/roboliq.yaml",
+			"--output", s"temp",
+			//"--protocol", "tasks/autogen/tania04_ph.prot"
+			"--protocol", s"../tasks/autogen/$name.prot"
+		))
+	}
+	
 	//run("test_single_pipette_01")
 	//run("test_single_pipette_02")
 	//run("test_single_pipette_03")
@@ -19,7 +28,8 @@ object MainInEclipse extends App {
 	run("test_single_pipette_07")
 	run("test_single_pipette_08")*/
 	//run("test_script_wellGroup_01")
-	run("test_script_wellGroup_02")
-	//run("tania04_ph")
+	//run("test_script_wellGroup_02")
 	//run("test_tubes_01")
+	//run("tania04_ph")
+	runTemp("tania06_qc_ph")
 }

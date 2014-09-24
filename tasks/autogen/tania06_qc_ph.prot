@@ -14,7 +14,9 @@ labware:
 
 wellGroup:
 - name: destGroup1
-  well: mixPlate(A1+C1+E1+G1+A2+C2+E2+G2+A3+C3+E3+G3+A4+C4+E4+G4+A5+C5+E5+G5+A6+C6+E6+G6+A7+C7+E7+G7+A8+C8+E8+G8+A9+C9+E9+G9+A10+C10+E10+G10+A11+C11+E11+G11+A12+C12+E12+G12+A13+C13+E13+G13+A14+C14+E14+G14+A15+C15+E15+G15+A16+C16+E16+G16)
+  well: mixPlate(A1+C1+E1+G1+A2+C2+E2+G2+A3+C3+E3+G3+A4+C4+E4+G4+A5+C5+E5+G5+A6+C6+E6+G6+A7+C7+E7+G7+A8+C8+E8+G8+A9+C9+E9+G9+A10+C10+E10+G10+A11+C11+E11+G11+A12+C12+E12+G12)
+- name: destGroup2
+  well: mixPlate(A13+C13+E13+G13+A14+C14+E14+G14+A15+C15+E15+G15+A16+C16+E16+G16)
 
 substance:
 - name: water
@@ -39,5 +41,18 @@ protocol:
       pipettePolicy: Roboliq_Water_Wet_1000
     destination: destGroup1
     amount: 75ul
+    replicates: 2
+    tip: [1, 2, 3, 4]
+    cleanBetween: flush
+- titrate:
+    allOf:
+    - source: water
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: gfp_glycerol
+      amount: 15ul
+      pipettePolicy: Roboliq_Water_Wet_1000
+    destination: destGroup2
+    amount: 75ul
+    replicates: 4
     tip: [1, 2, 3, 4]
     cleanBetween: flush
