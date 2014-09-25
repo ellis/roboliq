@@ -114,6 +114,7 @@ case class PipetterTipsRefresh(
 				tipState_? match {
 					case RqError(e, w) => return RqError(e, w)
 					case RqSuccess(tipState, _) =>
+						//println(s"PipetterTipsRefresh: tip ${tipState0.index}, intensity: ${event.intensity}, state0: $tipState0, state1: $tipState")
 						state.tip_state_m(item._1) = tipState
 				}
 			}

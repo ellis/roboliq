@@ -143,9 +143,9 @@ class Runner(args: Array[String]) {
 			val ctx0 = for {
 				// Instructions
 				_ <- getInstructions(cs, planInfo_l, originalActionCount, indexToOperator_l)
-				_ = println("instructions:")
+				//_ = println("instructions:")
 				ai_l <- Context.gets(_.instruction_l.toList)
-				_ = ai_l.foreach(x => { println(x._1) })
+				//_ = ai_l.foreach(x => { println(x._1) })
 			} yield {
 				hdf5.saveInstructions(scriptId, ai_l.map(_._1))
 				protocol.agentToBuilder_m.values.foreach(_.end())

@@ -10,7 +10,8 @@ object PipetteHelper {
 			liquidSrc,
 			tipState.destsEntered ++ tipState.srcsEntered,
 			tipState,
-			cleanBetweenSameSource_?
+			cleanBetweenSameSource_?,
+			"Aspirate"
 		)
 	}
 	
@@ -20,7 +21,8 @@ object PipetteHelper {
 			liquidDest,
 			tipState.destsEntered ++ tipState.srcsEntered,
 			tipState,
-			None
+			None,
+			"Dispense"
 		)
 	}
 	
@@ -29,21 +31,27 @@ object PipetteHelper {
 		liquid0: Mixture,
 		liquids: Iterable[Mixture],
 		tipState: TipState,
-		cleanBetweenSameSource_? : Option[CleanIntensity.Value]
+		cleanBetweenSameSource_? : Option[CleanIntensity.Value],
+		label: String
 	): WashSpec = {
 		val intensity = {
 			val bSameLiquid = !liquids.isEmpty && liquids.forall(_ eq liquid0)
 			// If same liquids and a cleaning intensity is specified for same source operations:
 			if (bSameLiquid && cleanBetweenSameSource_?.isDefined) {
-				println("chooseWashSpec: SAME: ", liquid0.toShortString, liquids.map(_.toShortString), cleanBetweenSameSource_?)
+				//println(s"choosePre${label}WashSpec: SAME: ", liquid0.toShortString, liquids.map(_.toShortString), cleanBetweenSameSource_?)
 				cleanBetweenSameSource_?.get
 			}
 			else {
 				tipOverrides.washIntensity_?.getOrElse {
 					val policy = liquid0.tipCleanPolicy
-					println("chooseWashSpec: DIFF: ", liquid0.toShortString, policy, tipState.cleanDegreePrev, tipState.cleanDegreePending)
+					val intensity = CleanIntensity.max(policy.enter, tipState.cleanDegreePending)
+					//println(s"choosePre${label}WashSpec: DIFF: ", liquid0.toShortString, policy, tipState.cleanDegreePrev, tipState.cleanDegreePending)
+					// If no cleaning has been performed yet at all
 					if (tipState.cleanDegreePrev == CleanIntensity.None) policy.enter
-					else CleanIntensity.max(policy.enter, tipState.cleanDegreePending)
+					// If tip is not as clean as it needs to be
+					else if (tipState.cleanDegree < intensity) intensity
+					// Otherwise, tip is already sufficiently clean, so no cleaning required
+					else CleanIntensity.None
 				}
 			}
 		}

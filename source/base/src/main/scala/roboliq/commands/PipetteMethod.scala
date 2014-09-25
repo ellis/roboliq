@@ -667,7 +667,7 @@ class PipetteMethod {
 		for {
 			state0 <- Context.gets(_.state)
 			refresh_l = {
-				// If this is the first instruction and the user specified cleanBegin or clean:
+				// If this is the first instruction and the user specified cleanBegin:
 				if (first && cleanBegin_?.isDefined) {
 					if (cleanBegin_? == CleanIntensity.None) {
 						Nil
@@ -711,6 +711,7 @@ class PipetteMethod {
 			}
 			// Add refresh instructions to context
 			_ <- Context.addInstructions(agent, refresh_l)
+			state1 <- Context.gets(_.state)
 		} yield !refresh_l.isEmpty
 	}
 	
