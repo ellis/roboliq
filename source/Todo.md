@@ -237,6 +237,17 @@ See my notes in bsse-ver/lab/qc/PipettingTest.md
 - [ ] titrate: order pipette steps either by destination or by source (default to source)
 - [ ] PipetteAmount parser: allow for function: step vs count, linear vs exponential; rangeStepLin(from, to, size), rangeStepExp(from, to, size, multipleOf), rangeCountLin(from, to, count, multipleOf), rangeCountExp(from, to, count, multipleOf)
 
+## Possible new way to expand commands and parameter lists
+
+We can have a list of lines.  Can also have scopes (perhaps indicated by indentation or BEGIN/END blocks).
+Each line can be a 'set', 'scope', 'for', or 'add' type.
+'set' sets a variable's value for the remaining lines, until overriden or the scope ends.  It also somehow needs to be able to set a list, which would create a new sub-scope.
+'for' represents a for-loop, and gets expanded to a sequence of scopes.
+'add' creates a real item, consisting of all values defined in the 'add' directive plus all previous 'set' variables that are in scope.
+
+The resulting list of items can be sorted, grouped, filtered, merged, expanded and reprocessed -- in any sequence required.
+For example, we could use this to create titration lists and complex macro commands.
+
 ## Pipetting, dilution, mixtures, etc
 
 mix:
