@@ -2,7 +2,16 @@ description: |
   Tania's Assam protocol for testing a range of pHs
 
 labware:
+  tubes1:
+    description: GFP eppendorf tubes
+    model: tubeHolderModel_1500ul
+    location: T3
+  trough1:
+    description: trough for water/glycerol/salt mix
+    model: troughModel_100ml
+    location: R6
   sourcePlate1:
+    description: buffer plate
     model: plateModel_96_dwp
     location: P2
   sourcePlate2:
@@ -14,33 +23,45 @@ labware:
 
 # Reagents used in this protocol
 # reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
-reagents:
-  water: sourcePlate1(A09|H10)
-  salt: sourcePlate1(A11|H11)
+source:
+- name: saltwater
+  well: trough1(C01|F01)
 
-  # buffers
-  hepes_850: sourcePlate1(A01|D01)
-  hepes_650: sourcePlate1(A02|D02)
-  pipes_775: sourcePlate1(A03|D03)
-  pipes_675: sourcePlate1(A04|D04)
-  mes_710: sourcePlate1(A05|D05)
-  mes_510: sourcePlate1(A06|D06)
-  acetate_575: sourcePlate1(A07|D07)
-  acetate_375: sourcePlate1(A08|D08)
+# buffers
+- name: hepes_850
+  well: sourcePlate1(A01|D01)
+- name: hepes_650
+  well: sourcePlate1(A02|D02)
+- name: pipes_775
+  well: sourcePlate1(A03|D03)
+- name: pipes_675
+  well: sourcePlate1(A04|D04)
+- name: mes_710
+  well: sourcePlate1(A05|D05)
+- name: mes_510
+  well: sourcePlate1(A06|D06)
+- name: acetate_575
+  well: sourcePlate1(A07|D07)
+- name: acetate_375
+  well: sourcePlate1(A08|D08)
 
-  sfGFP: sourcePlate2(A01)
-  Q204H_N149Y: sourcePlate2(A02)
-  taGFP: sourcePlate2(A03)
-  V206A: sourcePlate2(A04)
+# GFPs
+- name: sfGFP
+  well: tubes1(A01)
+- name: Q204H_N149Y
+  well: tubes1(B01)
+- name: taGFP
+  well: tubes1(C01)
+- name: V206A
+  well: tubes1(D01)
 
 protocol:
 - titrate:
     allOf:
-      - source: water
-        amount: 25ul
-
-      - source: salt
-        amount: 15ul
+      - source: saltwater
+        amount: 40ul
+        cleanBetween: none
+        #tip: 1
 
       # Buffers
       - oneOf:
@@ -79,7 +100,9 @@ protocol:
       - source: [sfGFP, Q204H_N149Y, taGFP, V206A]
         amount: 5ul
         clean: thorough
+        cleanBetweenSameSource: none
         pipettePolicy: Roboliq_Water_Wet_1000
+        #tip: 4
 
     destination: mixPlate(A01|P24)
     replicates: 3

@@ -30,6 +30,6 @@ object MainInEclipse extends App {
 	//run("test_script_wellGroup_01")
 	//run("test_script_wellGroup_02")
 	//run("test_tubes_01")
-	//run("tania04_ph")
-	runTemp("tania06_qc_ph")
+	runTemp("tania04_ph")
+	//runTemp("tania06_qc_ph")
 }

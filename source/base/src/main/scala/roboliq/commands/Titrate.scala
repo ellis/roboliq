@@ -54,9 +54,6 @@ case class TitrateActionParams(
 	}
 }
 
-// TODO: Need to clarify meaning of cleanBefore and cleanAfter, since these are flags, not commands, in PipetteStepParams.
-// in order to perform a clean at the beginning/end of the TitrateStep, we will need a different parameter, which
-// might then become an explicit StepA_Clean pipette step.
 case class TitrateStepParams(
 	allOf: List[TitrateStepParams],
 	oneOf: List[TitrateStepParams],
