@@ -245,6 +245,9 @@ Each line can be a 'set', 'scope', 'for', or 'add' type.
 'for' represents a for-loop, and gets expanded to a sequence of scopes.
 'add' creates a real item, consisting of all values defined in the 'add' directive plus all previous 'set' variables that are in scope.
 
+(Sometimes I have the idea to only have the 'set' type as a part of a scope, so that variables are always set for an entire scope --
+but that might not work well for making flat lists... First try only allowing variables in scopes, and see how it works out.)
+
 The resulting list of items can be sorted, grouped, filtered, merged, expanded and reprocessed -- in any sequence required.
 For example, we could use this to create titration lists and complex macro commands.
 
