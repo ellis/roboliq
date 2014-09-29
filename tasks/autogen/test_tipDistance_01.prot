@@ -1,0 +1,17 @@
+description: |
+  (Equidistance = 1) Test that pipetting from and into equidistant wells produces pipette commands that are grouped together
+
+labware:
+  plate1:
+    model: plateModel_96_nunc_transparent
+    location: P3
+
+source:
+- name: water
+  well: plate1(A01|D01)
+
+protocol:
+- pipette:
+    source: water
+    destination: plate1(A02|D02)
+    amount: 20ul

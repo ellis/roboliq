@@ -61,12 +61,13 @@ protocol:
       - source: saltwater
         amount: 40ul
         cleanBetween: none
+        cleanBetweenSameSource: none
         #tip: 1
 
       # Buffers
       - oneOf:
-        - allOf: [{source: hepes_850, amount: 30ul}, {source: hepes_650, amount: 0ul}]
-        - allOf: [{source: hepes_850, amount: 25ul}, {source: hepes_650, amount: 5ul}]
+        - allOf: [{source: hepes_850, amount: 30ul, cleanBetween: flush}, {source: hepes_650, amount: 0ul}]
+        - allOf: [{source: hepes_850, amount: 25ul, cleanBetween: flush}, {source: hepes_650, amount: 5ul}]
         - allOf: [{source: hepes_850, amount: 20ul}, {source: hepes_650, amount: 10ul}]
         - allOf: [{source: hepes_850, amount: 15ul}, {source: hepes_650, amount: 15ul}]
         - allOf: [{source: hepes_850, amount: 10ul}, {source: hepes_650, amount: 20ul}]
@@ -106,3 +107,4 @@ protocol:
 
     destination: mixPlate(A01|P24)
     replicates: 3
+    cleanBetweenSameSource: flush
