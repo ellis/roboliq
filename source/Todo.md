@@ -41,8 +41,8 @@ usage.
 - [x] tania: create accuracy test on 384-well flat bottom plates using fluorescence
 - [x] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
 - [x] fix compiler warnings
-- [ ] work on getting tania06_qc_ph to do the same thing as the manual script
-- [ ] create titration script for Tania
+- [.] work on getting tania06_qc_ph to do the same thing as the manual script
+- [.] create titration script for Tania
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] HDF5 for pipetting accuracy protocols
@@ -53,45 +53,15 @@ usage.
 
 - [x] don't wash between water dispenses
 - [x] don't clean tips twice in a row.  See PipetteMethod.cToInstructionRefresh (line 654)
-- [ ] single dispense for the 384 wells that are 2 wells apart
+- [x] single dispense for the 384 wells that are 2 wells apart
 
-```
-- titrate:
-    allOf:
-    - source: water
-      pipettePolicy: Roboliq_Water_Dry_1000
-      cleanBeginStep:
-      cleanBeforeSource:
-      cleanBetween: none
-      cleanBetweenSameSource:
-    - source: gfp_water
-      var: { name: amount, value: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul] }
-      pipettePolicy: Roboliq_Water_Wet_1000
-    destination: destGroup1
-    amount: 75ul
-    replicates: 2
-    tip: [1, 2, 3, 4]
-    cleanBetween: flush
-    cleanBegin
+## tania07_qc_ph
 
-- for:
-    variable:
-    - name: source2
-      value: [a, b, c]
-    - name: source3
-      value: [d, e, f]
-    yield:
-    - name: 
-```
+Create a quality control script to test:
+various volumes for water-like dispense of dye into empty well, using following variations: air, dry, different washes before dispense
+various volumes for water-like dispense of dye into non-empty well, using following variations: air, wet, different washes before dispense, various volumes in well before
 
-```
-csv: |
-  well,source1,amount1,tip1,source2,amount2,tip2
-  plate1(A01),water,50ul,1,dye,20ul,1
-default:
-- { name: source1, value: water }
-order: step|source|well
-```
+Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP source might be of interest.  Or various color dyes...
 
 ## Vatsi and Tanya
 
@@ -107,11 +77,11 @@ order: step|source|well
 - [x] analyze qc test for Vatsi's volumes
 - [x] create script for Vatsi's PCR protocol
 - [x] allow for running scripts from within eclipse for easier usage on windows
-- [ ] Made changes to PipetteMethod, so re-check the test scripts
+- [x] BUG: tania04_ph: why is there cleaning between buffer dispenses?
+- [x] BUG: tania04_ph: why are there double cleanings between steps?
+- [.] Made changes to PipetteMethod, so re-check the test scripts
 - [ ] titrate: allow for explicit cleaning steps
 - [ ] titrate: split up pipetting sets better by default, and give some options for how to split it up manually
-- [ ] BUG: tania04_ph: why is there cleaning between buffer dispenses?
-- [ ] BUG: tania04_ph: why are there double cleanings between steps?
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] evoware: change R3 labware in Template to LowVol
 - [ ] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
@@ -354,7 +324,7 @@ Here are some sample volumes for doing liquid level detection:
 ### ``tania04_ph``
 
 - [ ] BUG: apparently, while assigning plate names to Evoware names, the evoware names can only be used once; in any case, plateModel_384_round doesn't work, but _square does.
-- [ ] BUG: why is there cleaning between buffer dispenses?
+- [x] BUG: why is there cleaning between buffer dispenses?
 * [ ] problem: didn't find a solution within 100 steps unless I specified where to put the plates
 
 ## Config file
