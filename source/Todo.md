@@ -43,6 +43,7 @@ usage.
 - [x] fix compiler warnings
 - [.] work on getting tania06_qc_ph to do the same thing as the manual script
 - [.] create titration script for Tania
+- [ ] run test of tania04_ph using water
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] HDF5 for pipetting accuracy protocols

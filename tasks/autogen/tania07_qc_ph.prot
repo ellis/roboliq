@@ -1,0 +1,92 @@
+description: |
+  Titrate a range of volumes of GFP using tips 1 to 4 into a 384 well flat-bottom plate, total volume of 75ul
+
+labware:
+  trough1:
+    model: troughModel_100ml
+    location: R5
+  trough2:
+    model: troughModel_100ml
+    location: R6
+  mixPlate:
+    model: plateModel_384_square
+    location: P3
+
+wellGroup:
+- name: destGroup1
+  well: mixPlate(C01+F04+H14+A20+J23+L03+G11+I04+I15+G10+D08+D10+G09+G23+A19+B22+P08+H24+F09+B12+N16+J21+I18+C13+M07+B02+G19+M20+B08+L13+J14+J01+C20+P20+G03+B01+J02+A15+J17+M02+D16+E19+G07+I16+C04+O11+I24+K03+O14+B19+N18+F08+N04+D01+O24+C15+N24+O03+H06+H12+H05+C06+A02+A09+C10+M17+A06+K10+B13+N14+F22+D05+K08+D18+K07+L05+I21+A10+K20+C14+I12+K05+C05+M13+I13+K12+L12+P14+A24+M12+O20+F13+L11+I10+O05+L22)
+- name: destGroup2
+  well: mixPlate(P01+A22+B18+F01+P18+A08+I11+D06+M05+N01+O10+K17+A12+K14+L23+P11+E06+I08+P16+G14+J10+L02+E01+A11+K19+I07+D23+L18+A17+K09+P13+N05+K16+E08+A16+E02+M22+D12+H04+F03+N11+P15+P03+N23+M03+F06+I09+N10+L14+J15+M21+B17+P21+P05+B15+O15+L09+I20+I01+N08+G12+N19+A13+B16+O02+F11+B07+E11+H19+D03+P17+G15+N15+C16+J03+H09+G18+D13+M11+J06+H15+I06+L06+O22+K06+N13+C22+G05+C18+M04+C09+O21+A14+O18+N09+I14)
+- name: destGroup3
+  well: mixPlate(J24+O08+I22+O06+F21+M10+C11+K15+D15+L01+L19+P07+P10+F07+J08+C08+F24+G16+K13+D21+F14+M24+B21+E24+E07+N06+E23+L21+E10+B20+K04+G06+A03+H17+J16+P24+J22+L16+D14+C02+M06+H13+G21+O09+I05+O16+E13+N17+D02+A04+L15+E16+O17+O07+H08+M01+I03+N21+B10+O04+E20+C07+O19+H07+F17+G02+E05+H21+E03+C17+C12+A18+P09+B14+M14+I19+L20+J11+B03+M16+D22+M09+L10+H23+A21+B09+D04+I02+F16+H22+K02+L08+D07+P02+A01+D19)
+- name: destGroup4
+  well: mixPlate(B05+L24+N22+E18+O12+E15+M08+J09+F23+B24+F18+G17+B23+E21+O01+J20+C19+E14+F15+P12+H11+G01+F20+D24+G08+A05+M23+J13+D09+F05+C24+C03+L04+J04+D17+G22+H02+K23+E12+H20+L17+F12+P04+M18+G04+C23+F02+A23+K01+K22+G24+A07+B06+I17+K21+F19+J07+P23+P06+F10+H01+D11+N12+E04+N20+P22+N07+N03+M19+H18+M15+K11+E22+H03+D20+K24+K18+G20+H16+J12+B11+J19+J05+B04+O13+J18+N02+P19+O23+C21+H10+L07+G13+E09+E17+I23)
+
+substance:
+- name: water
+- name: dyeLight
+  description: OrangeG 0.08g/L
+
+source:
+- name: water
+  well: trough1(C01|F01)
+- name: dyeLight
+  well: trough2(C01|F01)
+
+protocol:
+# first water, then dye with flush between, wet dispense
+- titrate:
+    allOf:
+    - source: water
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: dyeLight
+      amount: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul]
+      cleanBetween: flush
+      pipettePolicy: Roboliq_Water_Wet_1000
+    destination: destGroup1
+    amount: 75ul
+    replicates: 3
+    tip: [1, 2, 3, 4]
+# first water, then dye without flush between, wet dispense
+- titrate:
+    allOf:
+    - source: water
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: dyeLight
+      amount: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul]
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Wet_1000
+    destination: destGroup2
+    amount: 75ul
+    replicates: 3
+    tip: [1, 2, 3, 4]
+# first water, then dye with flush between, air dispense
+- titrate:
+    allOf:
+    - source: water
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: dyeLight
+      amount: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul]
+      cleanBetween: flush
+      pipettePolicy: Roboliq_Water_Air_1000
+    destination: destGroup3
+    amount: 75ul
+    replicates: 2
+    tip: [1, 2, 3, 4]
+# first water, then dye without flush between, air dispense
+- titrate:
+    allOf:
+    - source: water
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - source: dyeLight
+      amount: [5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul]
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Air_1000
+    destination: destGroup4
+    amount: 75ul
+    replicates: 2
+    tip: [1, 2, 3, 4]
