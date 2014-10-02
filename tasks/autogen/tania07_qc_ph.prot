@@ -74,7 +74,7 @@ protocol:
       pipettePolicy: Roboliq_Water_Air_1000
     destination: destGroup3
     amount: 75ul
-    replicates: 2
+    replicates: 3
     tip: [1, 2, 3, 4]
 # first water, then dye without flush between, air dispense
 - titrate:
@@ -88,5 +88,5 @@ protocol:
       pipettePolicy: Roboliq_Water_Air_1000
     destination: destGroup4
     amount: 75ul
-    replicates: 2
+    replicates: 3
     tip: [1, 2, 3, 4]
