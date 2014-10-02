@@ -594,9 +594,10 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			// List of items and their well indexes
 			item_l = tuple_l.map(tuple => tuple._1 -> tuple._2.index)
 			// Check item validity and get liquid class
-			sLiquidClass <- checkTipWellPolicyItems(tuple_l.map(tuple => tuple._1 -> tuple._2))
+			pair <- checkTipWellPolicyItems(tuple_l.map(tuple => tuple._1 -> tuple._2))
+			(sLiquidClass, tipSpacing) = pair
 			// Translate items into evoware commands
-			result <- spirateChecked(identToAgentObject_m, siteE, plateModelE, item_l, func_s, sLiquidClass)
+			result <- spirateChecked(identToAgentObject_m, siteE, plateModelE, item_l, func_s, sLiquidClass, tipSpacing)
 		} yield result
 	}
 	
@@ -607,7 +608,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 	/** Return name of liquid class */
 	private def checkTipWellPolicyItems(
 		item_l: List[(HasTip with HasWell with HasPolicy, WellPosition)]
-	): Context[String] = {
+	): Context[(String, Int)] = {
 		item_l match {
 			case Seq() => Context.error("INTERNAL: items empty")
 			case Seq(item0, rest @ _*) =>
@@ -630,12 +631,13 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				//assert(items.forall(twvp => robot.getTipKind(twvp.tip) eq tipKind))
 				
 				// All tip/well pairs are equidistant or all tips are going to the same well
-				val bEquidistant = TipWell.equidistant(item_l)
+				val tipDistance_? = TipWell.equidistance(item_l)
+				val bEquidistant = tipDistance_?.isDefined
 				val bSameWell = item_l.forall(item => item._1.well eq item0._1.well)
 				if (!bEquidistant && !bSameWell)
 					return Context.error("INTERNAL: not equidistant, "+item_l.map(_._1.tip.index)+" -> "+item_l.map(_._2.index))
 				
-				Context.unit(policy.id)
+				Context.unit((policy.id, tipDistance_?.getOrElse(1)))
 		}
 	}
 
@@ -645,7 +647,8 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		labwareModelE: EvowareLabwareModel,
 		item_l: List[(TipWellVolumePolicy, Int)],
 		sFunc: String,
-		sLiquidClass: String
+		sLiquidClass: String,
+		tipSpacing: Int
 	): Context[List[TranslationItem]] = {
 		val tip_l = item_l.map(_._1.tip)
 		val well_li = item_l.map(_._2)
@@ -715,6 +718,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				mTips, sLiquidClass,
 				asVolumes,
 				iGrid, siteE.iSite,
+				tipSpacing,
 				sPlateMask,
 				siteE, labwareModelE
 			)
@@ -888,7 +892,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 							if (tipDrop_m > 0) List(L0C_DropDITI(tipDrop_m, 1, 6)) else Nil,
 							if (prewash_b) {
 								List(
-									L0C_Wash(tipAll_m, 1,1,1,0,50,500,1,500,20,70,30,true,true),
+									L0C_Wash(tipAll_m,1,1,1,0,50,500,1,500,20,70,30,true,true),
 									L0C_Wash(tipAll_m,1,1,1,0,4,500,1,500,20,70,30,false,true)
 								)
 							} else Nil,

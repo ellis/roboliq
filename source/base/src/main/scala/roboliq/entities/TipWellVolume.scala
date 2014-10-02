@@ -59,8 +59,10 @@ object TipWell {
 	}
 	
 	// Test all adjacent items for equidistance
-	def equidistant(tws: Seq[(HasTip, WellPosition)]): Boolean = {
-		equidistant(tws, 1) || equidistant(tws, 2)
+	def equidistance(tws: Seq[(HasTip, WellPosition)]): Option[Int] = {
+		if (equidistant(tws, 1)) Some(1)
+		else if (equidistant(tws, 2)) Some(2)
+		else None
 	}
 	
 	@tailrec

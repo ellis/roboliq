@@ -19,6 +19,9 @@ object MainInEclipse extends App {
 		))
 	}
 	
+	// Select first odd rows then even rows on a 384 well plate
+	//println((for { col <- 1 to 24; row <- (0 until 16).toList.map(n => ('A' + n).asInstanceOf[Char]).grouped(2).toList.transpose.flatten } yield { f"$row$col%02d" }).mkString("+"))
+	
 	//run("test_single_pipette_01")
 	//run("test_single_pipette_02")
 	//run("test_single_pipette_03")
@@ -30,9 +33,9 @@ object MainInEclipse extends App {
 	//run("test_script_wellGroup_01")
 	//run("test_script_wellGroup_02")
 	//run("test_tubes_01")
-	//runTemp("tania04_ph")
+	runTemp("tania04_ph")
 	//runTemp("tania06_qc_ph")
-	runTemp("tania07_qc_ph")
+	//runTemp("tania07_qc_ph")
 	//run("test_tipDistance_01")
 	//run("test_tipDistance_02")
 }

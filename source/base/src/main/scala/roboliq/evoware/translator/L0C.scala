@@ -117,6 +117,9 @@ case class L0C_Mix(
 	}
 }
 
+/**
+ * @param tipSpacing 1 if the tips go to adjacent wells, 2 if they are separated by 1 well, and so on -- 0 is probably not valid.
+ */
 case class L0C_Spirate(
 	val sFunc: String,
 	val mTips: Int,
@@ -124,6 +127,7 @@ case class L0C_Spirate(
 	val asVolumes: Seq[String],
 	val iGrid: Int,
 	val iSite: Int,
+	val tipSpacing: Int,
 	val sPlateMask: String,
 	val site: CarrierSite,
 	val labwareModel: EvowareLabwareModel
@@ -137,7 +141,7 @@ case class L0C_Spirate(
 			'"'+sLiquidClass+'"',
 			asVolumes.mkString(","),
 			iGrid, iSite,
-			1,
+			tipSpacing,
 			'"'+sPlateMask+'"',
 			0,
 			0
