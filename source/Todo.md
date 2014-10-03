@@ -41,14 +41,20 @@ usage.
 - [x] tania: create accuracy test on 384-well flat bottom plates using fluorescence
 - [x] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
 - [x] fix compiler warnings
-- [.] work on getting tania06_qc_ph to do the same thing as the manual script
-- [.] create titration script for Tania
-- [ ] run test of tania04_ph using water
+- [x] work on getting tania06_qc_ph to do the same thing as the manual script
+- [x] create titration script for Tania
+- [x] run test of tania04_ph using water
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
+
+## tania04_ph
+
+- [ ] verify washing steps are appropriate (esp. don't need to decontaminate)
+- [ ] seal
+- [ ] reader for fluorescence
 
 ## tania06_qc_ph
 
