@@ -149,15 +149,13 @@ object PipetterTipsRefresh {
 ) extends Command*/
 
 case class PeelerRun(
-	deviceIdent: String,
-	specIdent: String,
-	labwareIdent: String,
-	siteIdent: String
+	device: Peeler,
+	spec: PeelerSpec,
+	labwareToSite_l: List[(Labware, Site)]
 ) extends Instruction {
 	val effects = List(new WorldStateEvent {
 		def update(state: WorldStateBuilder): RqResult[Unit] = {
-			// FIXME:
-			//state1.labware_isSealed_l -= labware
+			state.labware_isSealed_l --= labwareToSite_l.map(_._1)
 			RqSuccess(())
 		}
 	})
@@ -170,12 +168,16 @@ case class Prompt(text: String) extends Instruction {
 }
 
 case class SealerRun(
-	deviceIdent: String,
-	specIdent: String,
-	labwareIdent: String,
-	siteIdent: String
+	device: Sealer,
+	program_? : Option[SealerSpec],
+	labwareToSite_l: List[(Labware, Site)]
 ) extends Instruction {
-	val effects = Nil
+	val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			state.labware_isSealed_l ++= labwareToSite_l.map(_._1)
+			RqSuccess(())
+		}
+	})
 	val data = Nil
 }
 

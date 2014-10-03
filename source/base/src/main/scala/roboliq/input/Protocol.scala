@@ -119,6 +119,7 @@ class Protocol {
 			new OpenDeviceSiteActionHandler,
 			new PipetteActionHandler,
 			new PromptOperatorActionHandler,
+			new SealPlateActionHandler,
 			new ShakePlateActionHandler,
 			new TitrateActionHandler
 		)
@@ -134,6 +135,7 @@ class Protocol {
 			new PipetteOperatorHandler(3),
 			new PipetteOperatorHandler(4),
 			new PromptOperatorOperatorHandler,
+			new SealPlateOperatorHandler,
 			new ShakePlateOperatorHandler,
 			new TitrateOperatorHandler(1),
 			new TitrateOperatorHandler(2),

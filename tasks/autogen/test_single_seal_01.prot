@@ -1,0 +1,8 @@
+labware:
+  plate1:
+    model: plateModel_96_pcr
+    location: P1
+
+protocol:
+- sealPlate:
+    object: plate1

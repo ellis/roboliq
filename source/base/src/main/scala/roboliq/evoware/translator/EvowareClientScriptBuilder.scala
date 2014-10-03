@@ -150,29 +150,74 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					val item = TranslationItem(L0C_Subroutine(path), Nil)
 					Context.unit(List(item))
 					
-				case cmd: PeelerRun =>
+				/*case cmd: PeelerRun =>
 					for {
-						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						deviceIdent <- Context.getEntityIdent(cmd.device)
+						carrierE <- getAgentObject[Carrier](deviceIdent, s"missing evoware carrier for device `${deviceIdent}`")
 						filepath <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
 						// List of site/labware mappings for those labware and sites which evoware has equivalences for
 						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
-						labware <- Context.getEntityAs[Labware](cmd.labwareIdent)
-						// Update state
-						_ <- Context.modifyStateBuilder(_.labware_isSealed_l -= labware)
 					} yield {
 						// Token
 						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Peel", filepath)
 						// Return
 						val item = TranslationItem(token, siteToModel_l)
 						List(item)
-					}
+					}*/
 				
 				case Prompt(text) =>
 					val item = TranslationItem(L0C_Prompt(text), Nil)
 					Context.unit(List(item))
+					
+				case cmd: PipetterAspirate =>
+					aspirate(identToAgentObject_m, cmd.item_l)
+					
+				case cmd: PipetterDispense =>
+					dispense(identToAgentObject_m, cmd.item_l)
+					
+				case cmd: PipetterTipsRefresh =>
+					pipetterTipsRefresh(identToAgentObject_m, cmd)
+					
+				case cmd: SealerRun =>
+					sealerRun(identToAgentObject_m, cmd)
 				
 				case cmd: ShakerRun =>
 					shakerRun(identToAgentObject_m, cmd)
+				
+				case cmd: ThermocyclerClose =>
+					for {
+						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						// Update state
+						_ <- Context.modifyStateBuilder(_.device_isOpen_l -= device)
+					} yield {
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidClose", "")
+						val item = TranslationItem(token, Nil)
+						List(item)
+					}
+				
+				case cmd: ThermocyclerOpen =>
+					for {
+						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						// Update state
+						_ <- Context.modifyStateBuilder(_.device_isOpen_l += device)
+					} yield {
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidOpen", "")
+						val item = TranslationItem(token, Nil)
+						List(item)
+					}
+				
+				case cmd: ThermocyclerRun =>
+					for {
+						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
+						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
+						value <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
+					} yield {
+						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_RunProgram", value)
+						val item = TranslationItem(token, Nil)
+						List(item)
+					}
 	
 				case TransporterRun(deviceIdent, labware, model, origin, destination, vectorIdent) =>
 					// REFACTOR: lots of duplication with TransporterRun for user
@@ -222,66 +267,6 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						
 						// Finish up
 						val item = TranslationItem(cmd, siteToModel_l)
-						List(item)
-					}
-					
-				case cmd: PipetterAspirate =>
-					aspirate(identToAgentObject_m, cmd.item_l)
-					
-				case cmd: PipetterDispense =>
-					dispense(identToAgentObject_m, cmd.item_l)
-					
-				case cmd: PipetterTipsRefresh =>
-					pipetterTipsRefresh(identToAgentObject_m, cmd)
-					
-				case cmd: SealerRun =>
-					for {
-						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
-						filepath <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
-						// List of site/labware mappings for those labware and sites which evoware has equivalences for
-						siteToModel_l <- siteLabwareEntry(identToAgentObject_m, cmd.siteIdent, cmd.labwareIdent).map(_.toList)
-						labware <- Context.getEntityAs[Labware](cmd.labwareIdent)
-						// Update state
-						_ <- Context.modifyStateBuilder(_.labware_isSealed_l += labware)
-					} yield {
-						// Token
-						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
-						val item = TranslationItem(token, siteToModel_l)
-						List(item)
-					}
-				
-				case cmd: ThermocyclerClose =>
-					for {
-						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
-						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
-						// Update state
-						_ <- Context.modifyStateBuilder(_.device_isOpen_l -= device)
-					} yield {
-						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidClose", "")
-						val item = TranslationItem(token, Nil)
-						List(item)
-					}
-				
-				case cmd: ThermocyclerOpen =>
-					for {
-						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
-						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
-						// Update state
-						_ <- Context.modifyStateBuilder(_.device_isOpen_l += device)
-					} yield {
-						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_LidOpen", "")
-						val item = TranslationItem(token, Nil)
-						List(item)
-					}
-				
-				case cmd: ThermocyclerRun =>
-					for {
-						device <- Context.getEntityAs[Thermocycler](cmd.deviceIdent)
-						carrierE <- getAgentObject[Carrier](cmd.deviceIdent, s"missing evoware carrier for device `${cmd.deviceIdent}`")
-						value <- getAgentObject[String](cmd.specIdent, s"missing evoware data for spec `${cmd.specIdent}`")
-					} yield {
-						val token = L0C_Facts(carrierE.sName, carrierE.sName+"_RunProgram", value)
-						val item = TranslationItem(token, Nil)
 						List(item)
 					}
 					
@@ -490,6 +475,35 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
 			output.write(bytes)
 			output.write("\r\n".getBytes())
+		}
+	}
+	
+	private def sealerRun(
+		identToAgentObject_m: Map[String, Object],
+		cmd: SealerRun
+	): Context[List[TranslationItem]] = {
+		def getAgentObject[A](ident: String, error: => String): Context[A] = {
+			Context.from(identToAgentObject_m.get(ident).map(_.asInstanceOf[A]), error)
+		}
+		for {
+			deviceIdent <- Context.getEntityIdent(cmd.device)
+			specIdent <- Context.getEntityIdent(cmd.spec)
+			carrierE <- getAgentObject[Carrier](deviceIdent, s"missing evoware carrier for device `${deviceIdent}`")
+			filepath <- getAgentObject[String](specIdent, s"missing evoware data for spec `${specIdent}`")
+			// List of site/labware mappings for those labware and sites which evoware has equivalences for
+			siteToModel_l <- Context.mapFirst(cmd.labwareToSite_l) { case (labware, site) =>
+				for {
+					labwareIdent <- Context.getEntityIdent(labware)
+					siteIdent <- Context.getEntityIdent(site)
+					siteToModel <- siteLabwareEntry(identToAgentObject_m, siteIdent, labwareIdent)
+				} yield siteToModel
+			}
+		} yield {
+			// Token
+			val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
+			// Return
+			val item = TranslationItem(token, siteToModel_l.flatten)
+			List(item)
 		}
 	}
 	
