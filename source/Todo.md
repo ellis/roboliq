@@ -44,6 +44,7 @@ usage.
 - [x] work on getting tania06_qc_ph to do the same thing as the manual script
 - [x] create titration script for Tania
 - [x] run test of tania04_ph using water
+- [ ] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] HDF5 for pipetting accuracy protocols
