@@ -34,6 +34,7 @@ import roboliq.plan.OperatorHandler
 import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
 import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
+import roboliq.evoware.translator.EvowareSealerProgram
 
 case class WellGroupBean(
 	name: String,
@@ -1218,7 +1219,7 @@ class Protocol {
 					// The user arm can handle all models
 					eb.addDeviceModel(userArm, m)
 					//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
-					identToAgentObject(model.name.toLowerCase) = mE
+					identToAgentObject(model.name) = mE
 				case _ =>
 			}
 		}
@@ -1240,7 +1241,7 @@ class Protocol {
 				case Some(siteIdent) =>
 					val site = Site(gid, Some(siteIdent), Some(description))
 					siteIdToSite_m(siteId) = site
-					identToAgentObject(siteIdent.toLowerCase) = siteE
+					identToAgentObject(siteIdent) = siteE
 					eb.addSite(site, siteIdent)
 					// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
 					if (tableSetupBean.pipetterSites.contains(siteIdent)) {
@@ -1330,7 +1331,7 @@ class Protocol {
 			for (roma_i <- roma_li) {
 				val ident = s"${agentIdent}__transporter${roma_i + 1}"
 				val roma = Transporter(gid)
-				identToAgentObject(ident.toLowerCase) = roma_i.asInstanceOf[Integer]
+				identToAgentObject(ident) = roma_i.asInstanceOf[Integer]
 				roma_m(roma_i) = roma
 				eb.addDevice(agent, roma, ident)
 			}
@@ -1346,8 +1347,8 @@ class Protocol {
 			for (vectorClass <- vectorClass_l) {
 				val spec = TransporterSpec(gid, Some(s"${agentIdent} ${vectorClass}"))
 				val ident = s"${agentIdent}__transporterSpec${vector_i}"
-				identToAgentObject(ident.toLowerCase) = vectorClass
-				//println(ident.toLowerCase)
+				identToAgentObject(ident) = vectorClass
+				//println(ident)
 				transporterSpec_m(vectorClass) = spec
 				for (roma <- roma_m.values) {
 					vector_i += 1
@@ -1487,6 +1488,7 @@ class Protocol {
 		
 		//println("Carriers: " + tableData.mapCarrierToGrid.keys.mkString("\n"))
 		for ((carrierE, iGrid) <- tableData.mapCarrierToGrid) {
+			//println(s"carrier: $iGrid, ${carrierE.sName}, ${carrierE.partNo_?}")
 			carrierE.partNo_?.getOrElse(carrierE.sName) match {
 				// Infinite M200
 				case "Tecan part no. 30016056 or 30029757" =>
@@ -1537,7 +1539,7 @@ class Protocol {
 							case None =>
 								// Store the evoware string for this spec
 								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent.toLowerCase) = internal
+								identToAgentObject(specIdent) = internal
 								PeelerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
@@ -1558,7 +1560,7 @@ class Protocol {
 							case None =>
 								// Store the evoware string for this spec
 								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent.toLowerCase) = internal
+								identToAgentObject(specIdent) = internal
 								SealerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
@@ -1582,7 +1584,7 @@ class Protocol {
 							case None =>
 								// Store the evoware string for this spec
 								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent.toLowerCase) = internal
+								identToAgentObject(specIdent) = internal
 								ShakerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
@@ -1601,7 +1603,7 @@ class Protocol {
 							case None =>
 								// Store the evoware string for this spec
 								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent.toLowerCase) = internal
+								identToAgentObject(specIdent) = internal
 								ThermocyclerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
@@ -1611,15 +1613,34 @@ class Protocol {
 			}
 		}
 		
-		val configData = EvowareConfigData(Map("G009S1" -> "pipette2hi"))
-		val config = new EvowareConfig(carrierData, tableData, configData)
-		val scriptBuilder = new EvowareClientScriptBuilder(agentIdent, config)
-		agentToBuilder_m += agentIdent -> scriptBuilder
-		if (!agentToBuilder_m.contains("user"))
-			agentToBuilder_m += "user" -> scriptBuilder
-
-		// TODO: Return real warnings and errors
-		RsSuccess(())
+		for {
+			sealerProgram_l <- {
+				if (agentBean.sealerProgram != null) {
+					for {
+						sealerProgram_l <- RsResult.mapFirst(agentBean.sealerProgram.toList) { bean =>
+							for {
+								_ <- RsResult.assert(bean.model != null, "`model` parameter missing: a labware model must be supplied for the sealer program")
+								_ <- RsResult.assert(bean.filename != null, "`filename` parameter missing: a filename must be supplied for the sealer program")
+								model <- eb.getEntityAs[LabwareModel](bean.model)
+							} yield {
+								EvowareSealerProgram(model, bean.filename)
+							}
+						}
+					} yield sealerProgram_l
+				}
+				else RsSuccess(List())
+			}
+		} yield {
+			val configData = EvowareConfigData(Map())
+			val config = new EvowareConfig(carrierData, tableData, configData, sealerProgram_l)
+			val scriptBuilder = new EvowareClientScriptBuilder(agentIdent, config)
+			agentToBuilder_m += agentIdent -> scriptBuilder
+			if (!agentToBuilder_m.contains("user"))
+				agentToBuilder_m += "user" -> scriptBuilder
+			//println("identToAgentObject:")
+			//identToAgentObject.foreach(println)
+			()
+		}
 	}
 
 	def findSiteIdent(tableSetupBean: TableSetupBean, carrierName: String, grid: Int, site: Int): Option[String] = {

@@ -234,7 +234,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 						val cmd = {
 							val roma_i: Int = identToAgentObject_m(deviceIdent).asInstanceOf[Integer]
 							val model = identToAgentObject_m(modelIdent).asInstanceOf[roboliq.evoware.parser.EvowareLabwareModel]
-							val vectorClass = identToAgentObject_m.getOrElse(vectorIdent.toLowerCase, vectorIdent).toString
+							val vectorClass = identToAgentObject_m.getOrElse(vectorIdent, vectorIdent).toString
 							val carrierSrc = originE.carrier
 							val iGridSrc = config.table.mapCarrierToGrid(carrierSrc)
 							val lVectorSrc = config.table.configFile.mapCarrierToVectors(carrierSrc)
@@ -396,7 +396,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		ident: String,
 		error: => String
 	): Context[A] = {
-		Context.from(identToAgentObject_m.get(ident.toLowerCase).map(_.asInstanceOf[A]), error)
+		Context.from(identToAgentObject_m.get(ident).map(_.asInstanceOf[A]), error)
 	}
 	/*private def setModelSites(model: EvowareLabwareModel, sites: List[CarrierSite]) {
 		// The assignment of labware to sites is compatible with the current
@@ -487,9 +487,21 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 		}
 		for {
 			deviceIdent <- Context.getEntityIdent(cmd.device)
-			specIdent <- Context.getEntityIdent(cmd.spec)
 			carrierE <- getAgentObject[Carrier](deviceIdent, s"missing evoware carrier for device `${deviceIdent}`")
-			filepath <- getAgentObject[String](specIdent, s"missing evoware data for spec `${specIdent}`")
+			model <- cmd.labwareToSite_l match {
+				case (labware, site) :: Nil => Context.getLabwareModel(labware)
+				case _ => Context.error("must supply exactly one labware to seal")
+			}
+			filepath <- cmd.program_? match {
+				case Some(program) =>
+					program.filename match {
+						case Some(filename) => Context.unit(filename)
+						case None => Context.error("a filename must be specified for the sealer program")
+					}
+				case None =>
+					val filename_? = config.sealerProgram_l.find(program => program.model eq model).map(_.filename)
+					Context.from(filename_?, s"unable to find a sealer program for labware model ``")
+			}
 			// List of site/labware mappings for those labware and sites which evoware has equivalences for
 			siteToModel_l <- Context.mapFirst(cmd.labwareToSite_l) { case (labware, site) =>
 				for {

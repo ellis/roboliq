@@ -74,13 +74,13 @@ evowareAgents:
         pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, T3]
         userSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER, T3]
 
+    sealerProgram:
+    - model: plateModel_96_pcr
+      filename: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
   "384 Well Plate": D-BSSE 384 Well Plate White
-  PA3P: r1_bench_017x1
-  PA1: r1_bench_009x3
-  PB1: r1_bench_010x2
-  PC1: r1_bench_010x4
 
 logic:
 #  - transporter-can userArm r1_hotel_245x1 userArmSpec
@@ -108,6 +108,6 @@ deviceToSpec:
   #- [r1_shaker, shakerSpec1]
 
 deviceToModelToSpec:
-  - [r1_sealer, "D-BSSE 96 Well PCR Plate", sealerSpec1]
-  - [r1_peeler, "D-BSSE 96 Well PCR Plate", peelerSpec1]
+  - [mario_sealer, "D-BSSE 96 Well PCR Plate", sealerSpec1]
+  - [mario_peeler, "D-BSSE 96 Well PCR Plate", peelerSpec1]
 

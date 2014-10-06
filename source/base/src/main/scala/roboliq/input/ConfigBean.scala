@@ -32,6 +32,8 @@ class EvowareAgentBean {
 	@BeanProperty var tips: java.util.ArrayList[TipBean] = null
 	/** Table setups for this robot */
 	@BeanProperty var tableSetups: java.util.HashMap[String, TableSetupBean] = null
+	/** Sealer programs */
+	@BeanProperty var sealerProgram: java.util.ArrayList[SealerProgramBean] = null
 }
 
 class LabwareModelBean {
@@ -67,4 +69,11 @@ class SiteBean {
 	@BeanProperty var carrier: String = null
 	@BeanProperty var grid: Integer = null
 	@BeanProperty var site: Integer = null
+}
+
+class SealerProgramBean {
+	//@BeanProperty var name: String = null
+	//@BeanProperty var device: String = null
+	@BeanProperty var model: String = null
+	@BeanProperty var filename: String = null
 }

@@ -135,10 +135,12 @@ object EvowareCarrierParser {
 		val id = sId.toInt
 		val nSites = l(4).toInt
 		val deviceName_? = parse998(lsLine(nSites + 1)) match {
+			case "" :: Nil => None
 			case deviceName :: Nil => Some(deviceName)
 			case _ => None
 		}
 		val partNo_? = parse998(lsLine(nSites + 3)) match {
+			case "" :: Nil => None
 			case x :: Nil => Some(x)
 			case _ => None
 		}

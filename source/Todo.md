@@ -10,6 +10,7 @@
 - [ ] `dilute` command for stflow
 - [ ] siteId needs to include grid, since two carriers can be at the same grid
 - [ ] we need a separate search algorithm for organizing plates and it needs to be run before the action planner
+- [ ] redesign the commands/parameters for sort/filter/map/flatMap/process strategy
 - [ ] handle interactively setting variables and guiding planning with extra settings file
 - [ ] web interface for interactive planning
 - [ ] refactor loadEvoware() to make devices pluggable somehow
@@ -44,9 +45,12 @@ usage.
 - [x] work on getting tania06_qc_ph to do the same thing as the manual script
 - [x] create titration script for Tania
 - [x] run test of tania04_ph using water
-- [ ] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
+- [x] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
+- [ ] test sealer command on robot
+- [ ] `sealPlate` should move plate back to original position after its done sealing
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
+- [ ] let user specify tags for wells to put in HDF5 tables for later analysis
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate

@@ -28,7 +28,7 @@ import spray.json.JsValue
 case class SealPlateActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	program_? : SealerSpec,
+	program_? : Option[SealerSpec],
 	`object`: Labware,
 	site_? : Option[Site]
 )
@@ -71,7 +71,7 @@ class SealPlateOperatorHandler extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
 			name = "sealPlate",
-			paramName_l = List("?agent", "?device", "?program", "?labware", "?model", "?site"),
+			paramName_l = List("?agent", "?device", "?labware", "?model", "?site"),
 			paramTyp_l = List("agent", "sealer", "labware", "model", "site"),
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device"),

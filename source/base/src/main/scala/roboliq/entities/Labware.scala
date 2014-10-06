@@ -58,7 +58,8 @@ case class Sealer(key: String, label: Option[String] = None, description: Option
 case class SealerSpec(
 	key: String,
 	label: Option[String] = None,
-	description: Option[String] = None
+	description: Option[String] = None,
+	filename: Option[String] = None
 ) extends Entity {
 	def typeNames = List("sealerSpec")
 }

@@ -8,7 +8,8 @@ import roboliq.evoware.parser._
 class EvowareConfig(
 	val carrier: EvowareCarrierData,
 	val table: EvowareTableData,
-	val config: EvowareConfigData
+	val config: EvowareConfigData,
+	val sealerProgram_l: List[EvowareSealerProgram]
 ) {
 	val idToSite_m: Map[String, CarrierSite] = {
 		val gridToCarrier_m = table.mapCarrierToGrid.map(pair => pair._2 -> pair._1)
