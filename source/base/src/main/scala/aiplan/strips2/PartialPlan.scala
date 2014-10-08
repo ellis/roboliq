@@ -502,6 +502,8 @@ class PartialPlan private (
 	 * Add an action.
 	 * This will create unique parameter names for the action's parameters.
 	 * The parameters will be added to the bindings using possible values for the given type.
+	 * Free parameters should have names that begin with a '?'.
+	 * Parameters which must be bound to the parameter of another action should begin with '$' and have a globally unique name. 
 	 */
 	def addAction(op: Operator): Either[String, PartialPlan] = {
 		//println(s"addAction($op)")
@@ -509,6 +511,7 @@ class PartialPlan private (
 		val i = action_l.size
 		// Get a list of param name/typ for parameters which are still variables 
 		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(_._1.startsWith("?"))
+		CONTINUE HERE with '$' parameters
 		val paramName_m = varNameToTyp_l.map(pair => pair._1 -> s"${i-1}:${pair._1}").toMap
 		val action0 = op.bind(paramName_m)
 		val (eq_l, action) = action0.removeEqualityPreconds()

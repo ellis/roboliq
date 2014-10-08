@@ -272,7 +272,7 @@ object CallTree {
 		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		val call_l = tree.getLeafs
-		val x = call_l.map(call => {
+		RqResult.mapAll(call_l)(call => {
 			for {
 				id <- tree.getId(call)
 				handler <- RsResult.from(cs.nameToActionHandler_m.get(call.name), s"Command `${call.name}` is not an action")
@@ -281,11 +281,7 @@ object CallTree {
 				paramToJsval_l = paramName_l zip jsval_l
 				planInfo <- handler.getOperatorInfo(id, paramToJsval_l, eb, state0)
 			} yield planInfo
-			
-		})
-		for {
-			planInfo_l <- RqResult.toResultOfList(x)
-		} yield planInfo_l.flatten
+		}).map(_.flatten)
 	}
 	
 	/*

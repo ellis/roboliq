@@ -46,6 +46,7 @@ usage.
 - [x] create titration script for Tania
 - [x] run test of tania04_ph using water
 - [x] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
+- [ ] continue with `$` parameters in PartialPlan.scala
 - [ ] test `sealPlate` command on robot
 - [ ] `sealPlate` should move plate back to original position after its done sealing
   - [ ] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
