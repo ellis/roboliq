@@ -77,6 +77,8 @@ evowareAgents:
     sealerProgram:
     - model: plateModel_96_pcr
       filename: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+    - model: plateModel_384_square
+      filename: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate

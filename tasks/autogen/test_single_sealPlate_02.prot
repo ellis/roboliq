@@ -1,0 +1,8 @@
+labware:
+  plate1:
+    model: plateModel_384_square
+    location: P3
+
+protocol:
+- sealPlate:
+    object: plate1
