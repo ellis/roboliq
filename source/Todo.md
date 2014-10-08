@@ -46,8 +46,9 @@ usage.
 - [x] create titration script for Tania
 - [x] run test of tania04_ph using water
 - [x] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
-- [ ] test sealer command on robot
+- [ ] test `sealPlate` command on robot
 - [ ] `sealPlate` should move plate back to original position after its done sealing
+  - [ ] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] let user specify tags for wells to put in HDF5 tables for later analysis
