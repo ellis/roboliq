@@ -54,15 +54,37 @@ class SealPlateActionHandler extends ActionHandler {
 			}
 		} yield {
 			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
-			val binding_l = List(
+			
+			val suffix = id.mkString("__", "_", "")
+			val modelName = "$model"+suffix
+			val site2Name = siteName_?.getOrElse("$site2"+suffix)
+			
+			// Bindings for transfer to sealer
+			val binding1_l = List[(String, String)](
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site1" -> ("$site1"+suffix),
+				"?site2" -> site2Name
+			)
+			// Bindings for transfer to sealer
+			val binding2_l = List(
 				"?agent" -> params.agent_?.getOrElse("?agent"),
 				"?device" -> params.device_?.getOrElse("?device"),
 				"?labware" -> labwareName,
-				"?site" -> siteName_?.getOrElse("?site")
+				"?model" -> modelName,
+				"?site" -> site2Name
 			)
-			val binding = binding_l.toMap
+			// Bindings for transfer from sealer
+			val binding3_l = List(
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site1" -> site2Name,
+				"?site2" -> ("$site1"+suffix)
+			)
 
-			OperatorInfo(id, Nil, Nil, "sealPlate", binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id ++ List(1), Nil, Nil, "transportLabware", binding1_l.toMap, Map()) ::
+			OperatorInfo(id ++ List(2), Nil, Nil, "sealPlate", binding2_l.toMap, paramToJsval_l.toMap) ::
+			OperatorInfo(id ++ List(3), Nil, Nil, "transportLabware", binding3_l.toMap, Map()) :: Nil
 		}
 	}
 }

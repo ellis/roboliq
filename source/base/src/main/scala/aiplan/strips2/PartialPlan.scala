@@ -462,6 +462,7 @@ case class Resolver_Inequality(name1: String, name2: String) extends Resolver
  * @param problem The problem this plan should solve
  * @param action_l Set of partially instantiated operators
  * @param orderings Ordering constraints
+ * @param global_m Map of global variables (i.e. '$'-variables which won't be given an action-specific name when the action is added) to the variable it should be bound to
  * @param bindings Binding constraints
  * @param link_l Causal links between actions
  * @param openGoal_l Set of open goals, represented as tuples (action_i, precond_i)
@@ -470,6 +471,7 @@ case class Resolver_Inequality(name1: String, name2: String) extends Resolver
 class PartialPlan private (
 	val problem: Problem,
 	val action_l: Vector[Operator],
+	val global_m: Map[String, String],
 	val orderings: Orderings,
 	val bindings: Bindings,
 	val link_l: Set[CausalLink],
@@ -480,6 +482,7 @@ class PartialPlan private (
 	// 
 	private def copy(
 		action_l: Vector[Operator] = action_l,
+		global_m: Map[String, String] = global_m,
 		orderings: Orderings = orderings,
 		bindings: Bindings = bindings,
 		link_l: Set[CausalLink] = link_l,
@@ -490,6 +493,7 @@ class PartialPlan private (
 		new PartialPlan(
 			problem,
 			action_l,
+			global_m,
 			orderings,
 			bindings,
 			link_l,
@@ -509,10 +513,29 @@ class PartialPlan private (
 		//println(s"addAction($op)")
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
+		// Variables can be one of two types: ones that start with '?' are local to this action, whereas ones that start with '$' are global and need to have the same value for all actions
 		// Get a list of param name/typ for parameters which are still variables 
-		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(_._1.startsWith("?"))
-		CONTINUE HERE with '$' parameters
-		val paramName_m = varNameToTyp_l.map(pair => pair._1 -> s"${i-1}:${pair._1}").toMap
+		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(pair => pair._1.startsWith("?") || pair._1.startsWith("$"))
+		// Need to handle "global" variables, i.e. ones which start with '$'
+		var global2_m = global_m
+		var bindToGlobal_m = Map[String, String]()
+		val paramName_m = varNameToTyp_l.map(pair => {
+			val name = pair._1
+			if (name.startsWith("$")) {
+				val name2 = global2_m.get(name) match {
+					case None =>
+						val name2 = s"${i-1}:?${name.tail}"
+						global2_m += (name -> name2)
+						name2
+					case Some(name3) =>
+						//bindToGlobal_m += (name2 -> name3)
+						name3
+				}
+				name -> name2
+			}
+			else
+				name -> s"${i-1}:$name"
+		}).toMap
 		val action0 = op.bind(paramName_m)
 		val (eq_l, action) = action0.removeEqualityPreconds()
 		val action2_l: Vector[Operator] = action_l :+ action
@@ -522,6 +545,21 @@ class PartialPlan private (
 			val s = p.atom.params.toSet
 			p.atom.params.map(name => name -> (s - name))
 		}).toMap
+
+		// FIXME: for debug only
+		if (!bindToGlobal_m.isEmpty) {
+			println("DEBUG")
+			println("varNameToTyp_l:")
+			varNameToTyp_l.foreach(println)
+			println("paramName_m:")
+			paramName_m.foreach(println)
+			println("eq_m:")
+			eq_m.foreach(println)
+			println("bindToGlobal_m:")
+			bindToGlobal_m.foreach(println)
+			//1/ 0
+		}
+		// ENDFIX
 		
 		// Get list of parameters and their possible objects
 		val variableToOptions_m: Map[String, Set[String]] =
@@ -537,7 +575,7 @@ class PartialPlan private (
 			orderings1 <- orderings.add(0, i).right
 			orderings2 <- orderings1.add(i, 1).right
 			bindings2 <- bindings.addVariables(variableToOptions_m).right
-			bindings3 <- bindings2.assign(eq_m).right
+			bindings3 <- bindings2.assign(eq_m ++ bindToGlobal_m).right
 			bindings4 <- bindings3.exclude(ne_m).right
 		} yield {
 			//println("orderings1: "+orderings1.map)
@@ -546,6 +584,7 @@ class PartialPlan private (
 			val openGoal2_l = openGoal_l ++ action.preconds.l.zipWithIndex.map(i -> _._2)
 			copy(
 				action_l = action2_l,
+				global_m = global2_m,
 				orderings = orderings2,
 				bindings = bindings4,
 				openGoal_l = openGoal2_l
@@ -964,6 +1003,7 @@ object PartialPlan {
 		new PartialPlan(
 			problem = problem,
 			action_l = Vector(action0, action1),
+			global_m = Map(),
 			orderings = new Orderings(Map(0 -> Set(1))),
 			bindings = new Bindings(Map(), Map(), Map()),
 			link_l = Set(),
