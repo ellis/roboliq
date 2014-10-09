@@ -56,6 +56,7 @@ usage.
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
+- [ ] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55
 
 ## tania04_ph
 
