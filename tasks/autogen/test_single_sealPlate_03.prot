@@ -1,0 +1,8 @@
+labware:
+  plate1:
+    model: plateModel_96_nunc_transparent
+    location: P2
+
+protocol:
+- sealPlate:
+    object: plate1

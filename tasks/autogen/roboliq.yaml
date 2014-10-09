@@ -76,9 +76,11 @@ evowareAgents:
 
     sealerProgram:
     - model: plateModel_96_pcr
-      filename: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+      filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
     - model: plateModel_384_square
-      filename: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+      filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\Greiner_384_schwarz.bcf
+    - model: plateModel_96_nunc_transparent
+      filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\PerkinElmer_weiss.bcf
 
 aliases:
   Thermocycler Plate: D-BSSE 96 Well PCR Plate
@@ -100,8 +102,8 @@ logic:
   - device-can-site r1_pipetter1 r1_bench_017x4
 
 specs:
-  peelerSpec1: C:\Programme\HJBioanalytikGmbH\RoboPeel3\RoboPeel_PlateParameters\4titude_PCR_blue.bcf
-  sealerSpec1: C:\Programme\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
+  peelerSpec1: C:\HJBioanalytikGmbH\RoboPeel3\RoboPeel_PlateParameters\4titude_PCR_blue.bcf
+  sealerSpec1: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
   #shakerSpec1: "60"
   thermocyclerSpec1: "1.0"
 
