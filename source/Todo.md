@@ -48,7 +48,7 @@ usage.
 - [x] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
 - [x] `sealPlate` should move plate back to original position after its done sealing
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
-- [ ] test `sealPlate` command on robot
+- [x] test `sealPlate` command on robot
 - [ ] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
