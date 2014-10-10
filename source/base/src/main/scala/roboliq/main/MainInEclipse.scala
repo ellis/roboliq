@@ -32,7 +32,8 @@ object MainInEclipse extends App {
 	run("test_single_pipette_08")*/
 	//run("test_single_sealPlate_01")
 	//run("test_single_sealPlate_02")
-	run("test_single_sealPlate_03")
+	//run("test_single_sealPlate_03")
+	run("test_single_sealPlate_04")
 	//run("test_script_wellGroup_01")
 	//run("test_script_wellGroup_02")
 	//run("test_tubes_01")

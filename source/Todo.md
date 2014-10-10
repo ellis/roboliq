@@ -49,7 +49,9 @@ usage.
 - [x] `sealPlate` should move plate back to original position after its done sealing
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [x] test `sealPlate` command on robot
-- [ ] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
+- [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
+- [ ] run test_single_sealPlate_03 on robot
+- [ ] run test_single_sealPlate_04 on robot
 - [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] let user specify tags for wells to put in HDF5 tables for later analysis
@@ -745,6 +747,7 @@ Complications:
 
 ## Someday
 - [ ] PipetteAmountParser: allow for '.25ul' (not just '0.25ul')
+- [ ] `sealPlate` command: handle list of objects, rather than just a single object, expanding into multiple `sealPlate` actions.
 - I-X source code: http://i-x.info/release/current/
 - from Austin Tate and Gerhard: try I-X, do a demo in it, then re-implement the algorithms you need; highly recommend the INCA ontology!  You might want to then get back to I-X for industrial application after PhD is done.
 
