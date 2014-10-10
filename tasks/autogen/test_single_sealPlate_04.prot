@@ -1,0 +1,18 @@
+labware:
+  plate1:
+    model: plateModel_96_pcr
+    location: P5PCR
+  plate2:
+    model: plateModel_384_square
+    location: P3
+  plate3:
+    model: plateModel_96_nunc_transparent
+    location: P2
+
+protocol:
+- sealPlate:
+    object: plate1
+- sealPlate:
+    object: plate2
+- sealPlate:
+    object: plate3
