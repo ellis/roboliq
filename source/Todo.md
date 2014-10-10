@@ -50,6 +50,8 @@ usage.
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [x] test `sealPlate` command on robot
 - [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
+- [ ] create tania08_salt script
+- [ ] create measureFluorescence command
 - [ ] run test_single_sealPlate_03 on robot
 - [ ] run test_single_sealPlate_04 on robot
 - [ ] reader command for absorbtion
@@ -60,18 +62,6 @@ usage.
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
 - [ ] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55
 
-## tania04_ph
-
-- [ ] verify washing steps are appropriate (esp. don't need to decontaminate)
-- [ ] seal
-- [ ] reader for fluorescence
-
-## tania06_qc_ph
-
-- [x] don't wash between water dispenses
-- [x] don't clean tips twice in a row.  See PipetteMethod.cToInstructionRefresh (line 654)
-- [x] single dispense for the 384 wells that are 2 wells apart
-
 ## tania07_qc_ph
 
 Create a quality control script to test:
@@ -79,6 +69,61 @@ various volumes for water-like dispense of dye into empty well, using following 
 various volumes for water-like dispense of dye into non-empty well, using following variations: air, wet, different washes before dispense, various volumes in well before
 
 Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP source might be of interest.  Or various color dyes...
+
+## tania08_salt
+
+Salt Stability (@pH = 5.5 and pH = 7.0):
+Sample = Protein in PBS (ie. sfGFP, pHstableGFP, Venus,…)
+Sample Volume = 0.25 uL (??)
+Condition #1
+Buffer = 5M NaCl, pH 5.5
+Final Salt concentrations (mM) = 0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250)
+Water to 100 uL
+Condition #2
+Buffer = 5M NaCl, pH7.5
+Sample Volume = 0.25 uL (??)
+Final Salt concentrations (mM) = 0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250)
+Water to 100 uL
+
+
+- [ ] create script
+- [ ] create balance plate
+- [ ] put balance plate in centrifuge
+- [ ] set centrifuge temperature for incubation
+- [ ] titration
+- [ ] mix after pipetting?
+- [ ] seal
+- [ ] move plate to reader
+- [ ] measure fluorescence
+- [ ] move plate to centrifuge
+- [ ] wait about 3.8 hours
+- [ ] centrifuge for 5 minutes at 3000rpm
+- [ ] repeat from "move plate to reader" for 48 or more hours, measuring every 4 hours
+
+## Measure Absorbance/Fluorescence
+
+- [x] Why isn't an InfiniteM200 device created in Protocol?
+- [x] wrong names: mario_pipetter1, r1_transporter[12]
+- [x] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
+- [x] when loading InfiniteM200 carrier, add atom for device-can-open-site
+- [x] Test openDeviceSite
+- [x] command: closeDeviceSite
+- [x] Test openDeviceSite and closeDeviceSite on robot
+- [ ] create measureFluorescence command which expands to transfer, open, transfer, close, run, open, transfer, close actions
+- [ ] figure out parameters for measureFluorescence
+- [ ] allow for titrate command to set wellGroup for use in later measure commands?
+- [ ] create properly named "portrait" plate models in Evoware for the regrip and reader sites
+- [ ] Which Evoware plate model to use for plateModel_384_round?
+- [ ] create accuracy protocol for small volumes and small tips using absorbance reader
+- [ ] command: deviceRun
+- [ ] transport shouldn't be done to closed sites
+- [ ] mark reader sites as closed in the initial states
+- [ ] planner should figure out that reader needs to be opened
+- [ ] manage to transport plate to reader via regrip station, despite change of the evoware plate models to the "portrait" variant
+
+## Centrifuge
+
+- [ ]
 
 ## Vatsi and Tanya
 
@@ -96,35 +141,16 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 - [x] allow for running scripts from within eclipse for easier usage on windows
 - [x] BUG: tania04_ph: why is there cleaning between buffer dispenses?
 - [x] BUG: tania04_ph: why are there double cleanings between steps?
+- [x] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
 - [.] Made changes to PipetteMethod, so re-check the test scripts
 - [ ] titrate: allow for explicit cleaning steps
 - [ ] titrate: split up pipetting sets better by default, and give some options for how to split it up manually
 - [ ] re-run absorbance tests for small volumes in 384 well plates, but using an initial base of 50ul water, and mix before measuring
 - [ ] evoware: change R3 labware in Template to LowVol
-- [ ] evoware: try to fix the warning about RoboSeal and RoboPeel on Grid 1
 - [ ] see why protocol file isn't being released on windows until sbt exits
 - [ ] vatsi: let protocol load an external CSV file of well contents (or embed the contents in the protocol)
 - [ ] let 'dilute' command dilute to a given concentration
 - [ ] promptOperator: add parameter for optional audio alarm
-
-## MeasureAbsorbance
-
-- [x] Why isn't an InfiniteM200 device created in Protocol?
-- [x] wrong names: mario_pipetter1, r1_transporter[12]
-- [x] Implement DeviceSiteOpen for Evoware (rename to OpenDeviceSiteInstruction?)
-- [x] when loading InfiniteM200 carrier, add atom for device-can-open-site
-- [x] Test openDeviceSite
-- [x] command: closeDeviceSite
-- [x] Test openDeviceSite and closeDeviceSite on robot
-- [ ] create properly named "portrait" plate models in Evoware for the regrip and reader sites
-- [ ] Which Evoware plate model to use for plateModel_384_round?
-- [ ] create accuracy protocol for small volumes and small tips using absorbance reader
-- [ ] planner: allow for setting '?' variables that need to be shared between operators, such as the '?device' variable for readers which need to be opened before they run
-- [ ] command: deviceRun
-- [ ] transport shouldn't be done to closed sites
-- [ ] mark reader sites as closed in the initial states
-- [ ] planner should figure out that reader needs to be opened
-- [ ] manage to transport plate to reader via regrip station, despite change of the evoware plate models to the "portrait" variant
 
 ## HDF5
 
