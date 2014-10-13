@@ -167,6 +167,15 @@ case class Prompt(text: String) extends Instruction {
 	val data = Nil
 }
 
+case class ReaderRun(
+	device: Reader,
+	programFile: String,
+	labwareToSite_l: List[(Labware, Site)]
+) extends Instruction {
+	val effects = Nil
+	val data = Nil
+}
+
 case class SealerRun(
 	device: Sealer,
 	program_? : Option[SealerSpec],
@@ -181,9 +190,6 @@ case class SealerRun(
 	val data = Nil
 }
 
-/**
- * @param object_l [(labwareIdent, siteIdent)]
- */
 case class ShakerRun(
 	device: Shaker,
 	spec: ShakerSpec,

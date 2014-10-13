@@ -55,6 +55,7 @@ import roboliq.input.Instruction
 import roboliq.commands.DeviceSiteOpen
 import roboliq.entities.Device
 import roboliq.commands.DeviceSiteClose
+import roboliq.commands.ReaderRun
 
 case class EvowareScript2(
 	index: Int,
@@ -178,6 +179,9 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 				case cmd: PipetterTipsRefresh =>
 					pipetterTipsRefresh(identToAgentObject_m, cmd)
 					
+				case cmd: ReaderRun =>
+					readerRun(identToAgentObject_m, cmd)
+				
 				case cmd: SealerRun =>
 					sealerRun(identToAgentObject_m, cmd)
 				
@@ -475,6 +479,47 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
 			output.write(bytes)
 			output.write("\r\n".getBytes())
+		}
+	}
+	
+	private def readerRun(
+		identToAgentObject_m: Map[String, Object],
+		cmd: ReaderRun
+	): Context[List[TranslationItem]] = {
+		def getAgentObject[A](ident: String, error: => String): Context[A] = {
+			Context.from(identToAgentObject_m.get(ident).map(_.asInstanceOf[A]), error)
+		}
+		for {
+			deviceIdent <- Context.getEntityIdent(cmd.device)
+			carrierE <- getAgentObject[Carrier](deviceIdent, s"missing evoware carrier for device `${deviceIdent}`")
+			model <- cmd.labwareToSite_l match {
+				case (labware, site) :: Nil => Context.getLabwareModel(labware)
+				case _ => Context.error("must supply exactly one labware to seal")
+			}
+			filepath <- cmd.program_? match {
+				case Some(program) =>
+					program.filename match {
+						case Some(filename) => Context.unit(filename)
+						case None => Context.error("a filename must be specified for the sealer program")
+					}
+				case None =>
+					val filename_? = config.sealerProgram_l.find(program => program.model eq model).map(_.filename)
+					Context.from(filename_?, s"unable to find a sealer program for labware model ``")
+			}
+			// List of site/labware mappings for those labware and sites which evoware has equivalences for
+			siteToModel_l <- Context.mapFirst(cmd.labwareToSite_l) { case (labware, site) =>
+				for {
+					labwareIdent <- Context.getEntityIdent(labware)
+					siteIdent <- Context.getEntityIdent(site)
+					siteToModel <- siteLabwareEntry(identToAgentObject_m, siteIdent, labwareIdent)
+				} yield siteToModel
+			}
+		} yield {
+			// Token
+			val token = L0C_Facts(carrierE.sName, carrierE.sName+"_Seal", filepath)
+			// Return
+			val item = TranslationItem(token, siteToModel_l.flatten)
+			List(item)
 		}
 	}
 	

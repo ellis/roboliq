@@ -50,6 +50,7 @@ usage.
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [x] test `sealPlate` command on robot
 - [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
+- [ ] create tania08_salt qa script
 - [ ] create tania08_salt script
 - [ ] create measureFluorescence command
 - [ ] run test_single_sealPlate_03 on robot
@@ -86,6 +87,7 @@ Final Salt concentrations (mM) = 0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 25
 Water to 100 uL
 
 
+- [ ] create qc script
 - [ ] create script
 - [ ] create balance plate
 - [ ] put balance plate in centrifuge
@@ -99,6 +101,7 @@ Water to 100 uL
 - [ ] wait about 3.8 hours
 - [ ] centrifuge for 5 minutes at 3000rpm
 - [ ] repeat from "move plate to reader" for 48 or more hours, measuring every 4 hours
+- [ ] allow for specifing amount by molarity
 
 ## Measure Absorbance/Fluorescence
 
@@ -123,7 +126,11 @@ Water to 100 uL
 
 ## Centrifuge
 
-- [ ]
+- [ ] create commands that can be used as a quick HACK to control the centrifuge at a low level
+- [ ] for the high-level command, need to keep track of balance plate and put it in the centrifuge as needed
+- [ ] remove the balance plate by the end of the script at latest
+- [ ] possibly create a balance plate
+- [ ] possibly adjust the volumes in a balance plate
 
 ## Vatsi and Tanya
 

@@ -53,8 +53,6 @@ class SealPlateActionHandler extends ActionHandler {
 				case Some(site) => eb.getIdent(site).map(Some(_))
 			}
 		} yield {
-			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
-			
 			val suffix = id.mkString("__", "_", "")
 			val modelName = "$model"+suffix
 			val site2Name = siteName_?.getOrElse("$site2"+suffix)

@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqError
@@ -23,12 +22,13 @@ import roboliq.plan.OperatorInfo
 import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.entities.Reader
 
 
 case class MeasureAbsorbanceActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	programFile_? : Option[String],
+	programFile: String,
 	`object`: Labware,
 	site_? : Option[Site]
 )
@@ -53,23 +53,51 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 				case Some(site) => eb.getIdent(site).map(Some(_))
 			}
 		} yield {
-			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
-			val binding_l = List(
-				"?agent" -> params.agent_?.getOrElse("?agent"),
-				"?device" -> params.device_?.getOrElse("?device"),
-				"?labware" -> labwareName,
-				"?site" -> siteName_?.getOrElse("?site")
-			)
-			val binding = binding_l.toMap
 
+			
+			val suffix = id.mkString("__", "_", "")
+			val agentName = params.agent_?.getOrElse("$agent"+suffix)
+			val deviceName = params.device_?.getOrElse("$device"+suffix)
+			val siteName = siteName_?.getOrElse("$site2"+suffix)
+			val modelName = "$model"+suffix
+			val site1Name = "$site1"+suffix
+			val site3Name = site1Name // Could allow this to be different from site1...
+			
+			// Bindings for transfer to sealer
+			val bindingOpenClose_m = Map[String, String](
+				"?agent" -> agentName,
+				"?device" -> deviceName,
+				"?site" -> siteName
+			)
+			// Bindings for transfer to sealer
+			val bindingTransportBefore_m = Map(
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site" -> site1Name
+			)
+			// Bindings for transfer to sealer
+			val bindingTransportAfter_m = Map(
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site" -> site3Name
+			)
+			// Binding for the actual measurement
+			val bindingMeasure_m = Map(
+				"?agent" -> agentName,
+				"?device" -> deviceName,
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site" -> siteName
+			)
+			
 			List(
-				OperatorInfo(id ++ List(1), Nil, Nil, "openDeviceSite", binding, Map()),
-				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", binding, Map()),
-				OperatorInfo(id ++ List(3), Nil, Nil, "closeDeviceSite", binding, Map()),
-				OperatorInfo(id ++ List(4), Nil, Nil, "measureAbsorbance", binding, paramToJsval_l.toMap),
-				OperatorInfo(id ++ List(5), Nil, Nil, "openDeviceSite", binding, Map()),
-				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", binding, Map()),
-				OperatorInfo(id ++ List(7), Nil, Nil, "closeDeviceSite", binding, Map())
+				OperatorInfo(id ++ List(1), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
+				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", bindingTransportBefore_m, Map()),
+				OperatorInfo(id ++ List(3), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
+				OperatorInfo(id ++ List(4), Nil, Nil, "measureAbsorbance", bindingMeasure_m, paramToJsval_l.toMap),
+				OperatorInfo(id ++ List(5), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
+				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", bindingTransportAfter_m, Map()),
+				OperatorInfo(id ++ List(7), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map())
 			)
 		}
 	}
@@ -98,21 +126,14 @@ class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 		val List(agentName, deviceName, labwareName, _, siteName) = operator.paramName_l
 		
 		for {
+			params <- Converter.convInstructionParamsAs[MeasureAbsorbanceActionParams](instructionParam_m)
 			agent <- Context.getEntityAs[Agent](agentName)
-			device <- Context.getEntityAs[Shaker](deviceName)
-			program <- instructionParam_m.get("program") match {
-				case Some(x@JsObject(obj)) =>
-					Context.getEntityAs[ShakerSpec](x)
-				case Some(JsString(s)) =>
-					val programName = operator.paramName_l(2)
-					Context.getEntityAs[ShakerSpec](programName)
-				case _ => Context.error("Expected identifier or shaker program")
-			}
+			device <- Context.getEntityAs[Reader](deviceName)
 			labware <- Context.getEntityAs[Labware](labwareName)
 			site <- Context.getEntityAs[Site](siteName)
-			instruction = ShakerRun(
+			instruction = ReaderRun(
 				device,
-				program,
+				params.programFile,
 				List((labware, site))
 			)
 			_ <- Context.addInstruction(agent, instruction)
