@@ -170,6 +170,7 @@ case class Prompt(text: String) extends Instruction {
 case class ReaderRun(
 	device: Reader,
 	programFile: String,
+	outputFile: String,
 	labwareToSite_l: List[(Labware, Site)]
 ) extends Instruction {
 	val effects = Nil

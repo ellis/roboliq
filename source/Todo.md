@@ -50,6 +50,7 @@ usage.
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [x] test `sealPlate` command on robot
 - [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
+- [ ] continue with Evoware's readerRun()
 - [ ] create tania08_salt qa script
 - [ ] create tania08_salt script
 - [ ] create measureFluorescence command

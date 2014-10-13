@@ -29,6 +29,7 @@ case class MeasureAbsorbanceActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
 	programFile: String,
+	outputFile: String,
 	`object`: Labware,
 	site_? : Option[Site]
 )
@@ -134,6 +135,7 @@ class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 			instruction = ReaderRun(
 				device,
 				params.programFile,
+				params.outputFile,
 				List((labware, site))
 			)
 			_ <- Context.addInstruction(agent, instruction)
