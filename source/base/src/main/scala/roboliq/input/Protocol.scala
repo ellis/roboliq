@@ -1671,6 +1671,7 @@ class Protocol {
 			_ = println(problem.toStripsText)
 			plan0 = PartialPlan.fromProblem(problem)
 			operator_l <- RsResult.mapAll(operatorInfo_l)(operatorInfo => {
+				//println("operatorInfo: "+operatorInfo)
 				for {
 					handler <- RsResult.from(cs.nameToOperatorHandler_m.get(operatorInfo.operatorName), s"createPlan: Unknown operator `${operatorInfo.operatorName}`")
 				} yield {
