@@ -251,7 +251,7 @@ object Strips {
 	}
 	
 	case class Domain(
-		type_l: Set[String],
+		type_m: Map[String, String],
 		constantToType_m: Map[String, String],
 		predicate_l: List[Signature],
 		operator_l: List[Operator]
@@ -262,6 +262,20 @@ object Strips {
 		
 		val nameToPredicate_m = predicate_l.map(x => x.name -> x).toMap
 		val nameToOperator_m = operator_l.map(x => x.name -> x).toMap
+		
+		// Get the chain of types from the given type up to `any` (but not including `any`)
+		def getTypeChain(typ: String): List[String] = {
+			if (typ == "any") Nil
+			else typ :: getTypeParents(typ)
+		}
+		
+		// Get the chain of types from the given type up to `any`, but not including the given type or `any`
+		def getTypeParents(typ: String): List[String] = {
+			type_m.get(typ) match {
+				case Some(parent) => getTypeChain(parent)
+				case None => Nil
+			}
+		}
 		
 		def getOperator(name: String): Either[String, Operator] =
 			nameToOperator_m.get(name).toRight(s"could not find operator `$name`")
@@ -451,7 +465,7 @@ object Strips {
 				)
 			})
 			new Domain(
-				type_l,
+				type_m,
 				constantToType_m,
 				predicate_l,
 				operator2_l
@@ -463,7 +477,7 @@ object Strips {
 					"(define (domain X)",
 					"  (:requirements :strips :typing)"
 				).mkString("", "\n", "\n") +
-				type_l.toList.sorted.mkString("  (:types\n    ", "\n    ", "\n  )\n") +
+				type_m.toList.sorted.map(pair => s"${pair._1} - ${pair._2}").mkString("  (:types\n    ", "\n    ", "\n  )\n") +
 				predicate_l.map(_.toStripsText).sorted.mkString("  (:predicates\n    ", "\n    ", "\n  )\n") +
 				operator_l.map(_.toStripsText("  ")).mkString("\n") +
 				"\n)"
@@ -473,7 +487,7 @@ object Strips {
 	
 	object Domain {
 		def apply(
-			type_l: List[String],
+			type_m: Map[String, String],
 			constantToType_l: List[(String, String)],
 			predicate_l: List[Signature],
 			operator_l: List[Operator]
@@ -481,7 +495,7 @@ object Strips {
 			println("Domain.apply")
 			// TODO: error if there are duplicate names
 			new Domain(
-				type_l.toSet,
+				type_m,
 				constantToType_l.toMap,
 				predicate_l,
 				operator_l
@@ -496,8 +510,18 @@ object Strips {
 		goals: Literals
 	) {
 		// Map of parameter type to object set
-		val typToObjects_m: Map[String, List[String]] =
-			typToObject_l.groupBy(_._1).mapValues(_.map(_._2))
+		val typToObjects_m: Map[String, List[String]] = {
+			// Get extended type -> object list that includes all super-types
+			// I.e. 'reader' is a type of 'device', so ('reader', 'mario__reader') => [('reader', 'mario__reader'), ('device', 'mario__reader')]
+			val l = typToObject_l.flatMap { case (typ, obj) =>
+				println("domain.getTypeChain("+typ+"): "+domain.getTypeChain(typ))
+				domain.getTypeChain(typ).map(typ => typ -> obj)
+			}
+			println("l: "); l.sorted.foreach(println)
+			l.groupBy(_._1).mapValues(_.map(_._2))
+		}
+		println("typToObject_l: "+typToObject_l)
+		println("typToObjects_m:"); typToObjects_m.foreach(println)
 
 		/**
 		 * Get the relaxed problem in which the negative effects of operators are removed.

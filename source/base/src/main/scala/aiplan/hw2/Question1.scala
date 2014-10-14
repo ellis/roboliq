@@ -5,7 +5,7 @@ import aiplan.strips2.BasicPlanningGraph
 
 object Question1 {
 	val domain = Domain(
-		type_l = List("location", "pile", "robot", "crane", "container"),
+		type_m = Map("location" -> "any", "pile" -> "any", "robot" -> "any", "crane" -> "any", "container" -> "any"),
 		constantToType_l = List("pallet" -> "container"),
 		predicate_l = List(
 			"adjacent ?l1:location ?l2:location",

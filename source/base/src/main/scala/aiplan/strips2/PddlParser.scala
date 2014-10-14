@@ -61,7 +61,7 @@ object PddlParser {
 					}).sequenceU.right
 				} yield {
 					Strips.Domain(
-						type_l = typ_l.toSet,
+						type_m = typ_l.toMap,
 						constantToType_m = Map(),
 						predicate_l = predicate_l,
 						operator_l = operator_l
@@ -116,8 +116,13 @@ object PddlParser {
 		Right(l2)
 	}
 	
-	private def parseTypes(l: List[LispElem]): Either[String, List[String]] = {
-		toStringList(l)
+	private def parseTypes(l: List[LispElem]): Either[String, List[(String, String)]] = {
+		toStringList(l) match {
+			case Left(msg) => return Left(msg)
+			case Right(param_l) =>
+			    val l2 = parseParamList(param_l)
+			    Right(l2)
+		}
 	}
 	
 	private def parsePredicates(l: List[LispElem]): Either[String, List[Strips.Signature]] = {

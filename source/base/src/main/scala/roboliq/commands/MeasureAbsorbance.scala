@@ -75,13 +75,14 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 			val bindingTransportBefore_m = Map(
 				"?labware" -> labwareName,
 				"?model" -> modelName,
-				"?site" -> site1Name
+				"?site2" -> siteName
 			)
 			// Bindings for transfer to sealer
 			val bindingTransportAfter_m = Map(
 				"?labware" -> labwareName,
 				"?model" -> modelName,
-				"?site" -> site3Name
+				"?site1" -> siteName,
+				"?site2" -> site3Name
 			)
 			// Binding for the actual measurement
 			val bindingMeasure_m = Map(

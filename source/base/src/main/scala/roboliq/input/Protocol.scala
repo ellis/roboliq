@@ -1692,21 +1692,24 @@ class Protocol {
 				operatorHandler_l <- RsResult.mapAll(name_l)(cs.getOperatorHandler)
 			} yield {
 				val operator_l = operatorHandler_l.map(_.getDomainOperator)
+
+				// FIXME: HACK: need to programmatically figure out the parent classes of type -- this is here as a hack 
+				val type0_m = Map(
+					"peeler" -> "device",
+					"pipetter" -> "device",
+					"reader" -> "device",
+					"sealer" -> "device",
+					"shaker" -> "device",
+					"thermocycler" -> "device",
+					"transporter" -> "device"
+				)
+				// Get types used, and have them all inherit from 'any'
+				val type1_m = operator_l.flatMap(_.paramTyp_l.map(_ -> "any")).toMap
+				// The type0 types take precedence
+				val type_m = type1_m ++ type0_m
+				
 				Strips.Domain(
-					type_l = List(
-						"labware",
-						"model",
-						"site",
-						"siteModel",
-						
-						"agent",
-						
-						"pipetter",
-						"pipetterProgram",
-						
-						"shaker",
-						"shakerProgram"
-					),
+					type_m = type_m,
 					constantToType_l = Nil,
 					predicate_l = List[Strips.Signature](
 						Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),

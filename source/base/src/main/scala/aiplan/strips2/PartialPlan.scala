@@ -163,36 +163,6 @@ case class Bindings(
 		step(l, this)
 	}
 	
-	/**
-	 * Replace all instances of `name1` with `name2` in option_m and ne_m values
-	 */
-	/*private def substitute(name1: String, value: String): Either[String, Bindings] = {
-		assert(isVariable(name1))
-		assert(!assignment_m.contains(name1))
-		// Make sure that the assignment is one of the variable's options
-		assert(option_m(name1).contains(value))
-		// Reduce variable's options to `name2`
-		// And replace instances of name1 with value in options
-		val option2_m = option_m.mapValues(_.map(name => if (name == name1) value else name)) + (name1 -> Set(value))
-		val ne_l = ne_m.getOrElse(name1, Set())
-		// Remove `value` from all options of variables in ne_l
-		val ne2_m = ne_m ++ ne_l.mapValues(_.map(name => if (name == name1) value else name))
-		val valid = ne2_m.forall(pair => {
-			val (name, ne_l) = pair
-			!ne_l.contains(name)
-		})
-		if (valid) {
-			Right(new Bindings(
-				option2_m,
-				ne2_m,
-				assignment_m + (name1 -> value)
-			))
-		}
-		else {
-			Left("violation of non-equality constraints")
-		}
-	}*/
-	
 	private def setVariableValue(name: String, value: String): Either[String, Bindings] = {
 		assert(isVariable(name))
 		assert(!isVariable(value))
@@ -221,9 +191,18 @@ case class Bindings(
 	
 	private def setVariableOptions(name: String, option_l: Set[String]): Either[String, Bindings] = {
 		//println(s"setVariableOptions($name, ${option_l})")
-		assert(isVariable(name))
-		assert(!assignment_m.contains(name))
-		setVariableOptionsChecked(name, option_l)
+		if (!isVariable(name))
+			return Left(s"tried to set options for variable `$name`, but the variable has not yet been declared")
+		
+		assignment_m.get(name) match {
+			case Some(s) =>
+				if (option_l.contains(s))
+					Left(s"variable `$name` already set to `$s`, but tried to exclude the options `${option_l}`")
+				else
+					Right(this)
+			case None =>
+				setVariableOptionsChecked(name, option_l)
+		}
 	}
 	
 	private def setVariableOptionsChecked(name: String, option_l: Set[String]): Either[String, Bindings] = {
@@ -242,54 +221,6 @@ case class Bindings(
 			))
 		}
 	}
-
-	/**
-	 * set name1 = name2, replacing references to name1 in assignment and inequality values
-	 * When variables are set to be equal, collapse one into the other.
-	 * a and b get sorted, and the alphanumerically larger one gets collapsed into the smaller one.
-	 */
-	/*private def setVariableEquality(name1: String, name2: String): Either[String, Bindings] = {
-		// Make sure that x and y are not already set to non-equal
-		assert(isVariable(name1))
-		assert(isVariable(name2))
-
-		// Take intersection of x & y options for x, and remove y entry
-		val option1_l = option_m(name1)
-		val option2_l = option_m(name2)
-		val option_l = option1_l intersect option2_l
-		if (ne_m.getOrElse(name1, Set()).contains(name2)) {
-			return Left(s"cannot let `$name1 == $name2`, because of a previous inequality constraint")
-		}
-		if (option_l.isEmpty) {
-			return Left(s"cannot let `$name1 == $name2`, because they share no common values: ${option1_l} and ${option2_l}")
-		}
-		for {
-			bindings1 <- this.setVariableOptions(name1, Set(name2)).right
-			bindings2 <- bindings1.setVariableOptions(name2, option_l).right
-			name2b <- Right(bindings2.getCanonicalName(name2)).right
-			bindings3 <- bindings2.setVariableVariable(name1, name2b).right
-		} yield bindings3
-	}*/
-	
-	/*
-	private def canAssign(name1: String, name2: String): Boolean = {
-		def varVal(name: String, value: String): Boolean = {
-			assignment_m.get(name1) match {
-				case Some(x) if x == name2 => false
-				case Some(_) => true
-				case None =>
-					!option_m.getOrElse(name1, Set()).contains(name2)
-			}
-		}
-		
-		(isVariable(name1), isVariable(name2)) match {
-			case (true, true) => !ne_m.getOrElse(name1, Set()).contains(name2)
-			case (true, false) => varVal(name1, name2)
-			case (false, true) => varVal(name2, name1)
-			case (false, false) => name1 == name2
-		}
-	}
-	*/
 	
 	/**
 	 * Assign variable `name2` to `name1`, keeping `name1` as the primary variable and replacing relevant occurrences of `name2` with `name1`
@@ -510,7 +441,7 @@ class PartialPlan private (
 	 * Parameters which must be bound to the parameter of another action should begin with '$' and have a globally unique name. 
 	 */
 	def addAction(op: Operator): Either[String, PartialPlan] = {
-		//println(s"addAction($op)")
+		println(s"addAction($op)")
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
 		// Variables can be one of two types: ones that start with '?' are local to this action, whereas ones that start with '$' are global and need to have the same value for all actions
@@ -518,7 +449,8 @@ class PartialPlan private (
 		val varNameToTyp_l = (op.paramName_l zip op.paramTyp_l).filter(pair => pair._1.startsWith("?") || pair._1.startsWith("$"))
 		// Need to handle "global" variables, i.e. ones which start with '$'
 		var global2_m = global_m
-		var bindToGlobal_m = Map[String, String]()
+		// For tracking global variables which already existed, so we don't try to set their options (i.e. possible values) again
+		var preexistingGlobal_l = Set[String]()
 		val paramName_m = varNameToTyp_l.map(pair => {
 			val name = pair._1
 			if (name.startsWith("$")) {
@@ -528,7 +460,7 @@ class PartialPlan private (
 						global2_m += (name -> name2)
 						name2
 					case Some(name3) =>
-						//bindToGlobal_m += (name2 -> name3)
+						preexistingGlobal_l += name3
 						name3
 				}
 				name -> name2
@@ -546,7 +478,8 @@ class PartialPlan private (
 			p.atom.params.map(name => name -> (s - name))
 		}).toMap
 
-		// FIXME: for debug only
+		/*
+		// for debug only
 		if (!bindToGlobal_m.isEmpty) {
 			println("DEBUG")
 			println("varNameToTyp_l:")
@@ -559,24 +492,37 @@ class PartialPlan private (
 			bindToGlobal_m.foreach(println)
 			//1/ 0
 		}
-		// ENDFIX
+		*/
 		
 		// Get list of parameters and their possible objects
-		val variableToOptions_m: Map[String, Set[String]] =
+		val variableToOptions0_m: Map[String, Set[String]] =
 			varNameToTyp_l.map(pair => {
 				val (name0, typ) = pair
 				val name = paramName_m.getOrElse(name0, name0)
 				val options = problem.typToObjects_m.getOrElse(typ, Nil).toSet
 				name -> options
 			}).toMap
+			
+		// Extract the new variables
+		val variableToOptions_m: Map[String, Set[String]] =
+			variableToOptions0_m.filter(pair => !preexistingGlobal_l.contains(pair._1))
 		
-		//println("variableToOptions_m: "+variableToOptions_m)
+		// For global variables, we may need to reduce the option list, so create a list of the options to remove
+		val neForGlobals_l = preexistingGlobal_l.toList.map { name =>
+			val option_l = variableToOptions0_m(name)
+			val remove_l = bindings.option_m(name) -- option_l
+			name -> remove_l
+		} 
+		
+		//println("varNameToTyp_l: "+varNameToTyp_l)
+		//println("variableToOptions_m:"); variableToOptions_m.foreach(println)
+		//println("neForGlobals_l:"); variableToOptions_m.foreach(println)
 		for {
 			orderings1 <- orderings.add(0, i).right
 			orderings2 <- orderings1.add(i, 1).right
 			bindings2 <- bindings.addVariables(variableToOptions_m).right
-			bindings3 <- bindings2.assign(eq_m ++ bindToGlobal_m).right
-			bindings4 <- bindings3.exclude(ne_m).right
+			bindings3 <- bindings2.assign(eq_m).right
+			bindings4 <- bindings3.exclude(ne_m ++ neForGlobals_l).right
 		} yield {
 			//println("orderings1: "+orderings1.map)
 			//println("orderings2: "+orderings2.map)
