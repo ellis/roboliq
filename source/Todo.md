@@ -13,7 +13,7 @@
 - [ ] redesign the commands/parameters for sort/filter/map/flatMap/process strategy
 - [ ] handle interactively setting variables and guiding planning with extra settings file
 - [ ] web interface for interactive planning
-- [ ] refactor loadEvoware() to make devices pluggable somehow
+- [ ] refactor loadEvoware() to make devices pluggable somehow (see EvowareInfiniteM200InstructionHandler for an initial idea)
 - [ ] load handler classes via config file, and generally let program be run in different labs
 - [ ] allow for control of roboliq via an high-level language such as R
 - [ ] `mix` command for preparing mixtures
@@ -51,19 +51,21 @@ usage.
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [x] test `sealPlate` command on robot
 - [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
-- [ ] continue with Evoware's readerRun()
+- [ ] Don't let RoMa2 try to transport plate from P3 using wide grip, because it can't do it correctly
+- [ ] reader command for absorbtion
 - [ ] create tania08_salt qa script
 - [ ] create tania08_salt script
 - [ ] create measureFluorescence command
 - [ ] run test_single_sealPlate_03 on robot
 - [ ] run test_single_sealPlate_04 on robot
-- [ ] reader command for absorbtion
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] let user specify tags for wells to put in HDF5 tables for later analysis
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
 - [ ] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55
+- [ ] Don't let RoMa2 try to transport plate from P3 using wide grip, because it can't do it correctly
+- [ ] Don't let RoMa2 try to transport plates among the P# positions using wide grip, because it also grabs plate the neighboring plate!
 
 ## tania07_qc_ph
 

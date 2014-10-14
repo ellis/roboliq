@@ -66,13 +66,13 @@ evowareAgents:
           R4: { grid: 8, site: 1 }
           R5: { grid: 8, site: 2 }
           R6: { grid: 8, site: 3 }
-#          REGRIP: { grid: 
-          ROBOSEAL: { carrier: "RoboSeal" }
           READER: { carrier: "Infinite M200" }
+          REGRIP: { grid: 61, site: 1 }
+          ROBOSEAL: { carrier: "RoboSeal" }
 #          T1A: { grid: 5
           T3: { grid: 16, site: 1 }
         pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, T3]
-        userSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER, T3]
+        userSites:     [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER, REGRIP, T3]
 
     sealerProgram:
     - model: plateModel_96_pcr

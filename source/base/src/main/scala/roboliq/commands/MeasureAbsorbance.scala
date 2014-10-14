@@ -72,16 +72,30 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 				"?site" -> siteName
 			)
 			// Bindings for transfer to sealer
-			val bindingTransportBefore_m = Map(
+			val bindingTransportBefore1_m = Map(
 				"?labware" -> labwareName,
 				"?model" -> modelName,
+				"?site2" -> "REGRIP"
+			)
+			// Bindings for transfer to sealer
+			val bindingTransportBefore2_m = Map(
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site1" -> "REGRIP",
 				"?site2" -> siteName
 			)
 			// Bindings for transfer to sealer
-			val bindingTransportAfter_m = Map(
+			val bindingTransportAfter1_m = Map(
 				"?labware" -> labwareName,
 				"?model" -> modelName,
 				"?site1" -> siteName,
+				"?site2" -> "REGRIP"
+			)
+			// Bindings for transfer to sealer
+			val bindingTransportAfter2_m = Map(
+				"?labware" -> labwareName,
+				"?model" -> modelName,
+				"?site1" -> "REGRIP",
 				"?site2" -> site3Name
 			)
 			// Binding for the actual measurement
@@ -95,11 +109,13 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 			
 			List(
 				OperatorInfo(id ++ List(1), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", bindingTransportBefore_m, Map()),
+				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", bindingTransportBefore1_m, Map()),
+				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", bindingTransportBefore2_m, Map()),
 				OperatorInfo(id ++ List(3), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
 				OperatorInfo(id ++ List(4), Nil, Nil, "measureAbsorbance", bindingMeasure_m, paramToJsval_l.toMap),
 				OperatorInfo(id ++ List(5), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", bindingTransportAfter_m, Map()),
+				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", bindingTransportAfter1_m, Map()),
+				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", bindingTransportAfter2_m, Map()),
 				OperatorInfo(id ++ List(7), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map())
 			)
 		}
