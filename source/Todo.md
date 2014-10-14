@@ -33,6 +33,7 @@
 usage.
 - [ ] more abstract "well" concept that allows for treating a well with 8 pipette positions as a single container, and that allows for pipetting to multiple distinct positions in a single large culture well
 - [ ] possibly create a general approach to combinatorial variables that can be used for any command, not just in the titrate command.
+- [ ] all external data referenced by a protocol needs to be pulled into the HDF5 file and included as part of the input hash
 
 ## Current goal
 

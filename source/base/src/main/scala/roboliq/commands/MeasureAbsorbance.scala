@@ -23,6 +23,7 @@ import spray.json.JsObject
 import spray.json.JsString
 import spray.json.JsValue
 import roboliq.entities.Reader
+import java.io.File
 
 
 case class MeasureAbsorbanceActionParams(
@@ -38,7 +39,7 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 	
 	def getActionName = "measureAbsorbance"
 
-	def getActionParamNames = List("agent", "device", "programFile", "object", "site")
+	def getActionParamNames = List("agent", "device", "programFile", "outputFile", "object", "site")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -132,9 +133,11 @@ class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 			device <- Context.getEntityAs[Reader](deviceName)
 			labware <- Context.getEntityAs[Labware](labwareName)
 			site <- Context.getEntityAs[Site](siteName)
+			programFile = new File(params.programFile)
+			_ <- Context.assert(programFile.exists(), s"file not found: ${params.programFile}")
 			instruction = ReaderRun(
 				device,
-				params.programFile,
+				programFile,
 				params.outputFile,
 				List((labware, site))
 			)

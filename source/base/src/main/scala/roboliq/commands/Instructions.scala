@@ -4,6 +4,7 @@ import roboliq.core._
 import roboliq.entities._
 import scala.collection.mutable.SortedSet
 import roboliq.input.Instruction
+import java.io.File
 
 case class AgentActivate() extends Instruction {
 	val effects = Nil
@@ -169,8 +170,8 @@ case class Prompt(text: String) extends Instruction {
 
 case class ReaderRun(
 	device: Reader,
-	programFile: String,
-	outputFile: String,
+	programFile: File,
+	outputFilename: String,
 	labwareToSite_l: List[(Labware, Site)]
 ) extends Instruction {
 	val effects = Nil

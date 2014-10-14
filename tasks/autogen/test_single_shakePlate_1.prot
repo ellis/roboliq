@@ -1,5 +1,4 @@
 labware:
-  sourcePlate1: D-BSSE 96 Well DWP
   plate1:
     model: Thermocycler Plate
 

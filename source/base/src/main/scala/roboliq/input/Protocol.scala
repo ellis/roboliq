@@ -117,6 +117,7 @@ class Protocol {
 		val actionHandler_l = List[ActionHandler](
 			new CloseDeviceSiteActionHandler,
 			new DistributeActionHandler,
+			new MeasureAbsorbanceActionHandler,
 			new OpenDeviceSiteActionHandler,
 			new PipetteActionHandler,
 			new PromptOperatorActionHandler,
@@ -130,6 +131,7 @@ class Protocol {
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
+			new MeasureAbsorbanceOperatorHandler,
 			new OpenDeviceSiteOperatorHandler,
 			new PipetteOperatorHandler(1),
 			new PipetteOperatorHandler(2),
@@ -1658,28 +1660,6 @@ class Protocol {
 	}
 
 	def createPlan(): RqResult[(List[OperatorInfo], PartialPlan)] = {
-		/*val eb = {
-			import roboliq.entities._
-			val r1 = Agent("r1", Some("r1"))
-			val sm001 = SiteModel("sm001", Some("sm001"), None)
-			val siteA = Site("siteA", Some("siteA"))
-			val siteB = Site("siteB", Some("siteB"))
-			val shaker = Shaker("r1_shaker", Some("r1_shaker"))
-			val m001 = PlateModel("m001", Some("m001"), None, 8, 12, LiquidVolume.ul(300))
-			val plateA = Plate("plateA", Some("plateA"))
-			val eb = new EntityBase
-			eb.addAgent(r1, r1.key)
-			eb.addModel(sm001, sm001.key)
-			eb.addSite(siteA, siteA.key)
-			eb.addSite(siteB, siteB.key)
-			eb.addDevice(r1, shaker, shaker.key)
-			eb.addDeviceSite(shaker, siteB)
-			eb.addModel(m001, m001.key)
-			eb.addLabware(plateA, plateA.key)
-			eb.transportGraph = Graph[Site, LkUnDiEdge](LkUnDiEdge(siteA, siteB)(("user", "", "")))
-			eb
-		}*/
-		
 		for {
 			operatorInfo_l <- CallTree.getOperatorInfo(cs, tree, eb, state0.toImmutable)
 			_ = println("planInfo_l:")
