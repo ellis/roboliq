@@ -35,6 +35,7 @@ import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
 import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
 import roboliq.evoware.translator.EvowareSealerProgram
+import roboliq.evoware.commands.OperatorHandler_EvowareTransportLabware
 
 case class WellGroupBean(
 	name: String,
@@ -144,6 +145,7 @@ class Protocol {
 			new TitrateOperatorHandler(2),
 			new TitrateOperatorHandler(3),
 			new TitrateOperatorHandler(4),
+			new OperatorHandler_EvowareTransportLabware,
 			new OperatorHandler_TransportLabware
 		)
 		val autoHandler_l = List("transportLabware")
@@ -1359,7 +1361,7 @@ class Protocol {
 			}
 		}
 		
-		val test_m = new HashMap[(String, String, String), List[Site]]
+		val agentRomaVectorToSite_m = new HashMap[(String, String, String), List[Site]]
 		// Find which sites the transporters can access
 		for ((carrierE, vector_l) <- carrierData.mapCarrierToVectors) {
 			for (site_i <- 0 until carrierE.nSites) {
@@ -1370,7 +1372,7 @@ class Protocol {
 						val deviceIdent = eb.entityToIdent_m(transporter)
 						val spec = transporterSpec_m(vector.sClass)
 						val key = (agentIdent, deviceIdent, vector.sClass)
-						test_m(key) = site :: test_m.getOrElse(key, Nil)
+						agentRomaVectorToSite_m(key) = site :: agentRomaVectorToSite_m.getOrElse(key, Nil)
 						eb.addRel(Rel("transporter-can", List(deviceIdent, eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
 					}
 				}
@@ -1380,15 +1382,16 @@ class Protocol {
 		val graph = {
 			// Add user-accessible sites into the graph
 			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
-			test_m(("user", "", "")) = offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site]))
+			agentRomaVectorToSite_m(("user", "", "")) = offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site]))
 			// Populate graph from entries in test_m
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
 			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 			import scalax.collection.edge.LHyperEdge
-			val edge_l = test_m.toList.flatMap(pair => {
+			val edge_l = agentRomaVectorToSite_m.toList.flatMap(pair => {
 				val (key, site_l) = pair
 				site_l.combinations(2).map(l => LkUnDiEdge(l(0), l(1))(key))
 			})
+			//edge_l.take(5).foreach(println)
 			Graph[Site, LkUnDiEdge](edge_l : _*)
 		}
 		// FIXME: should append to transportGraph (not replace it) so that we can have multiple evoware agents

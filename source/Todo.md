@@ -52,6 +52,8 @@ usage.
 - [x] test `sealPlate` command on robot
 - [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
 - [ ] Don't let RoMa2 try to transport plate from P3 using wide grip, because it can't do it correctly
+- [ ] Working on OperatorHandler_EvowareTransportLabware
+- [ ] test_single_measureAbsorbance_01: Put mdfx in the test directory
 - [ ] reader command for absorbtion
 - [ ] create tania08_salt qa script
 - [ ] create tania08_salt script
@@ -464,6 +466,30 @@ We can have a list of all possible pair-wise movements for a given labware model
 4) convert action call to operator calls using merger of original parameters and planned parameters
 5) convert operator calls to operators
 6) translate
+
+Procedure syntax:
+
+```
+{ $agent, $device, $labware, $model, $site, $programFile, $outputFile }:
+- command: "!openDeviceSite"
+  args: { agent: $agent, device: $device, site: $site }
+- command: "!evoware.transportLabware"
+  args: { labware: $labware, model: $model, site1: $site1, site2: REGRIP, RoMa: 1 }
+- command: "!evoware.transportLabware"
+  args: { labware: $labware, model: $model, site1: REGRIP, site2: $site }
+- command: "!closeDeviceSite"
+  args: { agent: $agent, device: $device, site: $site }
+- command: "!measureAbsorbance"
+  args: { agent: $agent, device: $device, labware: $labware, model: $model, site: $site, programFile: "C:\\...", outputFile: "C:\\..." }
+- command: "!openDeviceSite"
+  args: { agent: $agent, device: $device, site: $site }
+- command: "!evoware.transportLabware"
+  args: { labware: $labware, model: $model, site1: $site, site2: REGRIP, RoMa: 1 }
+- command: "!evoware.transportLabware"
+  args: { labware: $labware, model: $model, site1: REGRIP, site2: $site1, RoMa: 1 }
+- command: "!closeDeviceSite"
+  args: { agent: $agent, device: $device, site: $site }
+```
 
 ## Executables/Servers
 
