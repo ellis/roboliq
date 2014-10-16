@@ -6,7 +6,5 @@ labware:
 protocol:
 - measureAbsorbance:
     object: plate1
-    #programFile: C:\Users\localadmin\Desktop\Ellis\reader_orangeG_384.mdfx
-    #programFile: /home/ellisw/.fasd
-    programFile: test_single_measureAbsorbance_01.prot
+    programFile: test_single_measureAbsorbance_01.mdfx
     outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ.xml
