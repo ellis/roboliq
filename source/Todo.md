@@ -52,9 +52,9 @@ usage.
 - [x] test `sealPlate` command on robot
 - [x] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
 - [x] Created OperatorHandler_EvowareTransportLabware for specifying evoware-specific parameters
+- [x] Context.findFile: have context search some paths for a file
 - [ ] Can we remove RoMa2 wide vector for most positions, because it can't lead to dangerous mistakes
 - [ ] test_single_measureAbsorbance_01: Put mdfx in the test directory
-- [ ] Context.findFile: have context search some paths for a file
 - [ ] reader command for absorbtion: read the mdfx file in so that it's in the correct format (strip the XML header, strip extra spaces)
 - [ ] create tania08_denature qa script
 - [ ] create tania08_denature script

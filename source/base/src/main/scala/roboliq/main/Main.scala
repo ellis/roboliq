@@ -134,10 +134,12 @@ class Runner(args: Array[String]) {
 			ordering_l <- RsResult.from(plan3.orderings.getSequence).map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
 		} yield {
+			val searchPath_l = List[File](opt.protocolFile.getAbsoluteFile().getParentFile(), opt.configFile.getAbsoluteFile().getParentFile())
 			val data0 = ProtocolData(
 				protocol,
 				protocol.eb,
-				protocol.state0.toImmutable
+				protocol.state0.toImmutable,
+				searchPath_l
 			)
 			val indexToOperator_l = ordering_l.map(action_i => (action_i, plan3.bindings.bind(plan3.action_l(action_i))))
 			val ctx0 = for {

@@ -151,7 +151,7 @@ class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 			device <- Context.getEntityAs[Reader](deviceName)
 			labware <- Context.getEntityAs[Labware](labwareName)
 			site <- Context.getEntityAs[Site](siteName)
-			programFile = new File(params.programFile)
+			programFile <- Context.findFile(params.programFile)
 			_ <- Context.assert(programFile.exists(), s"file not found: ${params.programFile}")
 			instruction = ReaderRun(
 				device,

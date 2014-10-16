@@ -19,6 +19,7 @@ import roboliq.entities.WellInfo
 import roboliq.entities.Agent
 import roboliq.entities.WorldStateEvent
 import roboliq.entities.Amount
+import java.io.File
 
 case class WellDispenseEntry(
 	well: String,
@@ -35,6 +36,7 @@ case class ProtocolData(
 	protocol: Protocol,
 	eb: EntityBase,
 	state: WorldState,
+	searchPath_l: List[File],
 	command: List[Int] = Nil,
 	instruction: Option[Int] = None,
 	warning_r: List[String] = Nil,
@@ -327,5 +329,17 @@ object Context {
 			builder = agentToBuilder_m(agentIdent)
 			_ <- builder.addCommand(agentIdent, agentInstruction.instruction)
 		} yield ()
+	}
+	
+	def findFile(filename: String): Context[File] = {
+		val file0 = new File(filename)
+		if (file0.exists)
+			return Context.unit(file0)
+			
+		for {
+			searchPath_l <- Context.gets(_.searchPath_l)
+			dir_? = searchPath_l.find(dir => new File(dir, filename).exists())
+			dir <- Context.from(dir_?, s"Could not find file: $filename")
+		} yield new File(dir, filename)
 	}
 }
