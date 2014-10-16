@@ -59,7 +59,7 @@ usage.
 - [x] evoware.timer.start/wait/sleep: create timer command
 - [x] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55 (moved Centrifuge to 54, removed Hotel 5POS)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
-- [ ] create centrifuge command
+- [ ] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [ ] create tania08_urea qa script
 - [ ] create tania08_urea script
 - [ ] create generic runDevice command
@@ -136,6 +136,13 @@ Water to 100 uL
 - [ ] manage to transport plate to reader via regrip station, despite change of the evoware plate models to the "portrait" variant
 
 ## Centrifuge
+
+FACTS("Centrifuge","Centrifuge_Init","","0","");
+FACTS("Centrifuge","Centrifuge_Open","","0","");
+FACTS("Centrifuge","Centrifuge_MoveToPos","2","0","");
+FACTS("Centrifuge","Centrifuge_MoveToPos","4","0","");
+FACTS("Centrifuge","Centrifuge_Close","","0","");
+FACTS("Centrifuge","Centrifuge_Execute1","3000,30,9,9,20","0","");
 
 - [ ] create commands that can be used as a quick HACK to control the centrifuge at a low level
 - [ ] for the high-level command, need to keep track of balance plate and put it in the centrifuge as needed
