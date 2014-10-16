@@ -1,0 +1,4 @@
+protocol:
+- evoware.timer.sleep:
+    id: 1
+    duration: 30

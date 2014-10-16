@@ -338,7 +338,10 @@ object Context {
 			
 		for {
 			searchPath_l <- Context.gets(_.searchPath_l)
-			dir_? = searchPath_l.find(dir => new File(dir, filename).exists())
+			dir_? = searchPath_l.find(dir => {
+				val file = new File(dir, filename)
+				file.exists()
+			})
 			dir <- Context.from(dir_?, s"Could not find file: $filename")
 		} yield new File(dir, filename)
 	}

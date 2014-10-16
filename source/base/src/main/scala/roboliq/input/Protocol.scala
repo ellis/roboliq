@@ -36,6 +36,11 @@ import roboliq.commands.ShakePlateActionHandler
 import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
 import roboliq.evoware.translator.EvowareSealerProgram
 import roboliq.evoware.commands.OperatorHandler_EvowareTransportLabware
+import roboliq.evoware.commands.EvowareTimerWaitOperatorHandler
+import roboliq.evoware.commands.EvowareTimerStartActionHandler
+import roboliq.evoware.commands.EvowareTimerWaitActionHandler
+import roboliq.evoware.commands.EvowareTimerSleepActionHandler
+import roboliq.evoware.commands.EvowareTimerStartOperatorHandler
 
 case class WellGroupBean(
 	name: String,
@@ -118,6 +123,9 @@ class Protocol {
 		val actionHandler_l = List[ActionHandler](
 			new CloseDeviceSiteActionHandler,
 			new DistributeActionHandler,
+			new EvowareTimerSleepActionHandler,
+			new EvowareTimerStartActionHandler,
+			new EvowareTimerWaitActionHandler,
 			new MeasureAbsorbanceActionHandler,
 			new OpenDeviceSiteActionHandler,
 			new PipetteActionHandler,
@@ -132,6 +140,8 @@ class Protocol {
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
+			new EvowareTimerStartOperatorHandler,
+			new EvowareTimerWaitOperatorHandler,
 			new MeasureAbsorbanceOperatorHandler,
 			new OpenDeviceSiteOperatorHandler,
 			new PipetteOperatorHandler(1),

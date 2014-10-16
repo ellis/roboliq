@@ -53,22 +53,26 @@ usage.
 - [x] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
 - [x] Created OperatorHandler_EvowareTransportLabware for specifying evoware-specific parameters
 - [x] Context.findFile: have context search some paths for a file
-- [ ] Can we remove RoMa2 wide vector for most positions, because it can't lead to dangerous mistakes
-- [ ] test_single_measureAbsorbance_01: Put mdfx in the test directory
-- [ ] reader command for absorbtion: read the mdfx file in so that it's in the correct format (strip the XML header, strip extra spaces)
-- [ ] create tania08_denature qa script
-- [ ] create tania08_denature script
+- [x] Q: Can we remove RoMa2 wide vector for most positions, because it can't lead to dangerous mistakes. A: Urs used it for speed purposes, so maybe we'll need to keep it?
+- [x] test_single_measureAbsorbance_01: Put mdfx in the test directory
+- [x] reader command for absorbtion: read the mdfx file in so that it's in the correct format (strip the XML header, strip extra spaces)
+- [x] evoware.timer.start/wait/sleep: create timer command
+- [x] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55 (moved Centrifuge to 54, removed Hotel 5POS)
+- [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
+- [ ] create centrifuge command
+- [ ] create tania08_urea qa script
+- [ ] create tania08_urea script
+- [ ] create generic runDevice command
 - [ ] create measureFluorescence command
 - [ ] run test_single_sealPlate_03 on robot
 - [ ] run test_single_sealPlate_04 on robot
+- [ ] Template.ewt: fix grid overlap for Centrifuge and Hotel 3POS at grid 54
+- [ ] transportLabware: allow user to specify device and then comment out OperatorHandler_EvowareTransportLabware?
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] let user specify tags for wells to put in HDF5 tables for later analysis
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
-- [ ] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55
-- [ ] Don't let RoMa2 try to transport plate from P3 using wide grip, because it can't do it correctly
-- [ ] Don't let RoMa2 try to transport plates among the P# positions using wide grip, because it also grabs plate the neighboring plate!
 
 ## tania07_qc_ph
 
@@ -814,5 +818,5 @@ Complications:
 - [ ] `sealPlate` command: handle list of objects, rather than just a single object, expanding into multiple `sealPlate` actions.
 - I-X source code: http://i-x.info/release/current/
 - from Austin Tate and Gerhard: try I-X, do a demo in it, then re-implement the algorithms you need; highly recommend the INCA ontology!  You might want to then get back to I-X for industrial application after PhD is done.
-- [ ] Created OperatorHandler_EvowareTransportLabware for specifying evoware-specific parameters, but these parameters could mostly be specified for the normal transport command
+- [ ] Might want to uncomment OperatorHandler_EvowareTransportLabware again and add more evoware-specific parameters (e.g. speed) that are in the normal transport command
 

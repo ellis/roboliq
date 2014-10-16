@@ -32,11 +32,6 @@ case class DeviceSiteOpen(
 	val data = Nil
 }
 
-case class EvowareSubroutine(path: String) extends Instruction {
-	val effects = Nil
-	val data = Nil
-}
-
 case class Log(text: String) extends Instruction {
 	val effects = Nil
 	val data = Nil
