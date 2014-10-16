@@ -50,13 +50,14 @@ usage.
 - [x] `sealPlate` should move plate back to original position after its done sealing
   - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
 - [x] test `sealPlate` command on robot
-- [?] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
-- [ ] Don't let RoMa2 try to transport plate from P3 using wide grip, because it can't do it correctly
-- [ ] Working on OperatorHandler_EvowareTransportLabware
+- [x] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
+- [x] Created OperatorHandler_EvowareTransportLabware for specifying evoware-specific parameters
+- [ ] Can we remove RoMa2 wide vector for most positions, because it can't lead to dangerous mistakes
 - [ ] test_single_measureAbsorbance_01: Put mdfx in the test directory
-- [ ] reader command for absorbtion
-- [ ] create tania08_salt qa script
-- [ ] create tania08_salt script
+- [ ] Context.findFile: have context search some paths for a file
+- [ ] reader command for absorbtion: read the mdfx file in so that it's in the correct format (strip the XML header, strip extra spaces)
+- [ ] create tania08_denature qa script
+- [ ] create tania08_denature script
 - [ ] create measureFluorescence command
 - [ ] run test_single_sealPlate_03 on robot
 - [ ] run test_single_sealPlate_04 on robot
@@ -813,4 +814,5 @@ Complications:
 - [ ] `sealPlate` command: handle list of objects, rather than just a single object, expanding into multiple `sealPlate` actions.
 - I-X source code: http://i-x.info/release/current/
 - from Austin Tate and Gerhard: try I-X, do a demo in it, then re-implement the algorithms you need; highly recommend the INCA ontology!  You might want to then get back to I-X for industrial application after PhD is done.
+- [ ] Created OperatorHandler_EvowareTransportLabware for specifying evoware-specific parameters, but these parameters could mostly be specified for the normal transport command
 
