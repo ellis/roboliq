@@ -7,7 +7,6 @@ import scala.collection.mutable.HashMap
 import grizzled.slf4j.Logger
 import roboliq.commands.AgentActivate
 import roboliq.commands.AgentDeactivate
-import roboliq.commands.EvowareSubroutine
 import roboliq.commands.Log
 import roboliq.commands.PeelerRun
 import roboliq.commands.PipetterAspirate
@@ -58,6 +57,8 @@ import roboliq.commands.DeviceSiteClose
 import roboliq.commands.ReaderRun
 import org.apache.commons.io.FileUtils
 import java.io.File
+import roboliq.evoware.commands.EvowareInstruction
+import roboliq.evoware.commands.EvowareSubroutine
 
 case class EvowareScript2(
 	index: Int,
@@ -151,6 +152,10 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					val item = TranslationItem(L0C_Comment(text), Nil)
 					Context.unit(List(item))
 				
+				case EvowareInstruction(l0c) =>
+					val item = TranslationItem(l0c, Nil)
+					Context.unit(List(item))
+					
 				case EvowareSubroutine(path) =>
 					val item = TranslationItem(L0C_Subroutine(path), Nil)
 					Context.unit(List(item))

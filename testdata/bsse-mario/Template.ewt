@@ -1,5 +1,5 @@
-ED4EC7DA
-20141007_134004 Admin           
+D9FE2211
+20141016_133742 Admin           
 Worktable link                                                                                                                  
 Administrator                                                                                                                   
 --{ RES }--
@@ -121,23 +121,21 @@ V;200
 998;0;
 998;0;
 998;0;
-998;5;
+998;4;
 998;315;11;
-998;93;55;
 998;318;54;
 998;251;59;
 998;253;64;
-998;13;
+998;12;
 998;4;0;System;
 998;0;4;Centrifuge;
-998;0;11;Infinite M200;
+998;0;10;Infinite M200;
 998;0;5;RoboPeel;
 998;0;6;RoboSeal;
 998;0;0;Symbol954;
 998;0;2;TRobot1;
 998;0;3;TRobot2;
 998;0;1;Shelf 32Pos Microplate;
-998;0;10;Hotel 5Pos SPE;
 998;0;7;Hotel 3Pos DWP;
 998;0;8;Hotel 4Pos DWP 1;
 998;0;9;Hotel 4Pos DWP 2;
@@ -146,7 +144,7 @@ V;200
 998;234;D-BSSE 96 Well PCR Plate;
 998;235;D-BSSE 96 Well PCR Plate;
 998;1;
-998;55;
+998;54;
 998;68;
 998;12;
 998;35;
@@ -154,7 +152,6 @@ V;200
 998;40;
 998;47;
 998;11;
-998;55;
 998;54;
 998;59;
 998;64;
