@@ -2,9 +2,9 @@
 
 ## Big issues
 
+- [x] handle tubes as wells on plates
 - [ ] `measureFluorescence` command
 - [ ] `measureAbsorbance` command
-- [ ] handle tubes
 - [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
 - [ ] configurable cleaning logic (really not sure how to do this best; don't use current approach of calling a sub-routine)
 - [ ] `dilute` command for stflow
@@ -33,7 +33,9 @@
 usage.
 - [ ] more abstract "well" concept that allows for treating a well with 8 pipette positions as a single container, and that allows for pipetting to multiple distinct positions in a single large culture well
 - [ ] possibly create a general approach to combinatorial variables that can be used for any command, not just in the titrate command.
+- [ ] need to be able to specify programs (e.g. centrifuge programs) in the protocol and then use them in the commands
 - [ ] all external data referenced by a protocol needs to be pulled into the HDF5 file and included as part of the input hash
+- [ ] handle tubes as individual labware items
 
 ## Current goal
 
@@ -146,9 +148,13 @@ FACTS("Centrifuge","Centrifuge_Execute1","3000,30,9,9,20","0","");
 
 - [ ] create commands that can be used as a quick HACK to control the centrifuge at a low level
 - [ ] for the high-level command, need to keep track of balance plate and put it in the centrifuge as needed
+- [ ] how to manage the four centrigue sites and the one site on the bench?
+- [ ] in the domain logic, we may need to create four operators to open the four sites and consequently close the other three
+- [ ] for evoware transport, regardless of whether which bay we want to put a plate it, we need to search for the centrifuge site on the bench
 - [ ] remove the balance plate by the end of the script at latest
 - [ ] possibly create a balance plate
 - [ ] possibly adjust the volumes in a balance plate
+- [ ] make sure we can't run the centrifuge without balances
 
 ## Vatsi and Tanya
 

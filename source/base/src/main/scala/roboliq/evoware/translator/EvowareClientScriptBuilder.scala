@@ -59,6 +59,7 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import roboliq.evoware.commands.EvowareInstruction
 import roboliq.evoware.commands.EvowareSubroutine
+import roboliq.input.DeviceInstruction
 
 case class EvowareScript2(
 	index: Int,
@@ -133,15 +134,9 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 			x <- command match {
 				case AgentActivate() => Context.unit(Nil)
 				case AgentDeactivate() => Context.unit(Nil)
-				
-				case DeviceSiteClose(device, site) =>
-					for {
-						deviceIdent <- Context.getEntityIdent(device)
-						handler <- getAgentObject[EvowareDeviceInstructionHandler](deviceIdent, s"missing instruction handler for device `${device.getName}`")
-						item_l <- handler.handleInstruction(command, identToAgentObject_m)
-					} yield item_l
-					
-				case DeviceSiteOpen(device, site) =>
+
+				case deviceInstruction: DeviceInstruction =>
+					val device = deviceInstruction.device
 					for {
 						deviceIdent <- Context.getEntityIdent(device)
 						handler <- getAgentObject[EvowareDeviceInstructionHandler](deviceIdent, s"missing instruction handler for device `${device.getName}`")

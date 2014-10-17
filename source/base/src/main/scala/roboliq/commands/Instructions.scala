@@ -5,6 +5,7 @@ import roboliq.entities._
 import scala.collection.mutable.SortedSet
 import roboliq.input.Instruction
 import java.io.File
+import roboliq.input.DeviceInstruction
 
 case class AgentActivate() extends Instruction {
 	val effects = Nil
@@ -16,18 +17,48 @@ case class AgentDeactivate() extends Instruction {
 	val data = Nil
 }
 
+case class CentrifugeRun(
+	device: Centrifuge,
+	program: CentrifugeProgram,
+	labwareToSite_l: List[(Labware, Site)]
+) extends Instruction {
+	val effects = Nil
+	val data = Nil
+}
+
+case class DeviceCarouselProvide(
+	device: Device,
+	id: String
+) extends DeviceInstruction {
+	val effects = Nil
+	val data = Nil
+}
+
+case class DeviceInitialize(
+	device: Device
+) extends DeviceInstruction {
+	val effects = Nil
+	val data = Nil
+}
+
 case class DeviceSiteClose(
 	device: Device,
 	site: Site
-) extends Instruction {
+) extends DeviceInstruction {
 	val effects = Nil
+	// TODO: need to get the device's identifier in order to set state.value_m(List(deviceIdent, "open")) = Js...
+	/*val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			state.value_m()
+		}
+	})*/
 	val data = Nil
 }
 
 case class DeviceSiteOpen(
 	device: Device,
 	site: Site
-) extends Instruction {
+) extends DeviceInstruction {
 	val effects = Nil
 	val data = Nil
 }
