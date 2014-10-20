@@ -20,15 +20,15 @@ import spray.json.JsString
 import spray.json.JsValue
 
 
-case class OpenDeviceSiteActionParams(
+case class CarouselOpenSiteActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
 	site_? : Option[Site]
 )
 
-class OpenDeviceSiteActionHandler extends ActionHandler {
+class CarouselOpenSiteActionHandler extends ActionHandler {
 	
-	def getActionName = "openDeviceSite"
+	def getActionName = "carousel.openSite"
 
 	def getActionParamNames = List("agent", "device", "site")
 	
@@ -39,7 +39,7 @@ class OpenDeviceSiteActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		for {
-			params <- Converter.convActionAs[OpenDeviceSiteActionParams](paramToJsval_l, eb, state0)
+			params <- Converter.convActionAs[CarouselOpenSiteActionParams](paramToJsval_l, eb, state0)
 			siteName_? <- params.site_? match {
 				case None => RqSuccess(None)
 				case Some(site) => eb.getIdent(site).map(Some(_))
@@ -53,24 +53,33 @@ class OpenDeviceSiteActionHandler extends ActionHandler {
 			)
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "openDeviceSite", binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "carousel.openSite-", binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
 
-class OpenDeviceSiteOperatorHandler extends OperatorHandler {
+/**
+ * Rotate carousel to internal site 'internalSiteIdent' and open the device.
+ * 
+ * This operator assumes that there is only one external opening.
+ * 
+ * The effect are: the specified site is open and the other internal sites are closed.
+ */
+class CarouselOpenSiteOperatorHandler(
+	agentIdent: String,
+	deviceIdent: String,
+	internalSiteIdent: String,
+	internalSiteIdent_l: List[String]
+) extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
-			name = "openDeviceSite",
-			paramName_l = List("?agent", "?device", "?site"),
-			paramTyp_l = List("agent", "device", "site"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
-				Strips.Literal(true, "device-can-open-site", "?device", "?site")
-			)),
-			effects = Strips.Literals(Unique(
-				Strips.Literal(false, "site-closed", "?site")
-			))
+			name = "carousel.openSite-"+internalSiteIdent, // The `id` refers to an internal site
+			paramName_l = Nil, // This is the external site on the robot bench, not one of the internal sites.
+			paramTyp_l = Nil,
+			preconds = Strips.Literals(Unique()),
+			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
+				Strips.Literal(ident != internalSiteIdent, "site-closed", ident)
+			) : _*))
 		)
 	}
 	
@@ -84,6 +93,7 @@ class OpenDeviceSiteOperatorHandler extends OperatorHandler {
 			agent <- Context.getEntityAs[Agent](agentName)
 			device <- Context.getEntityAs[Reader](deviceName)
 			site <- Context.getEntityAs[Site](siteName)
+			// TODO: Carousel rotate to ident
 			instruction = DeviceSiteOpen(
 				device,
 				site

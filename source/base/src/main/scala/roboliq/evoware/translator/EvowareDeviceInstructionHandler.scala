@@ -147,8 +147,8 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Close", ""), Nil)))
 				case _: DeviceSiteOpen =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Open", ""), Nil)))
-				case inst: DeviceRun =>
-					run(identToAgentObject_m, cmd, deviceName)
+				//case inst: DeviceRun =>
+					//run(identToAgentObject_m, cmd, deviceName)
 			}
 		} yield l
 	}
