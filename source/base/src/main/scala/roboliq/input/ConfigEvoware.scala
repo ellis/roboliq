@@ -179,13 +179,13 @@ class ConfigEvoware(
 		val labwareNamesOfInterest_l: Set[String] = (labwareModel_l.map(_.evowareName) ++ tableData.mapSiteToLabwareModel.values.map(_.sName)).toSet
 		logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
 		
-		// Start with gathering list of all available labware models whose names are either in the config or table template, as well as the "portrait" variants
-		val labwareModelE_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) || labwareNamesOfInterest_l.contains(m.sName.replace(" portrait", "")) => m})
-		//val idToModel_m = new HashMap[String, LabwareModel]
+		// Start with gathering list of all available labware models whose names are either in the config or table template
+		val labwareModelE0_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) || labwareNamesOfInterest_l.contains(m.sName.replace(" portrait", "")) => m})
 		val evowareNameToLabwareModel_m = agentBean.labwareModels.toList.map(x => x.evowareName -> x).toMap
-		//println("labwareModelEvowareNameToName_m: "+labwareModelEvowareNameToName_m)
+		// Only keep the ones we have LabwareModels for (TODO: seems like a silly step -- should probably filter labwareNamesOfInterest_l to begin with)
+		val labwareModelE_l = labwareModelE0_l.filter(mE => evowareNameToLabwareModel_m.contains(mE.sName))
 		for {
-			modelEToModel_l <- RsResult.mapAll(labwareModelE_l) { mE =>
+			modelEToModel_l <- RsResult.mapAll(labwareModelE_l) { mE => 
 				for {
 					model <- RsResult.from(evowareNameToLabwareModel_m.get(mE.sName), s"evoware labware model not found: `${mE.sName}`")
 				} yield {
