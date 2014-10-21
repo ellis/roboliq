@@ -36,6 +36,8 @@ import roboliq.commands.ShakePlateActionHandler
 import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
 import roboliq.evoware.translator.EvowareSealerProgram
 import roboliq.evoware.commands.OperatorHandler_EvowareTransportLabware
+import roboliq.evoware.commands.EvowareCentrifugeRunActionHandler
+import roboliq.evoware.commands.EvowareCentrifugeRunOperatorHandler
 import roboliq.evoware.commands.EvowareTimerWaitOperatorHandler
 import roboliq.evoware.commands.EvowareTimerStartActionHandler
 import roboliq.evoware.commands.EvowareTimerWaitActionHandler
@@ -124,6 +126,7 @@ class Protocol {
 			new CarouselOpenSiteActionHandler,
 			new CloseDeviceSiteActionHandler,
 			new DistributeActionHandler,
+			new EvowareCentrifugeRunActionHandler,
 			new EvowareTimerSleepActionHandler,
 			new EvowareTimerStartActionHandler,
 			new EvowareTimerWaitActionHandler,
@@ -147,6 +150,7 @@ class Protocol {
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
+			new EvowareCentrifugeRunOperatorHandler,
 			new EvowareTimerStartOperatorHandler,
 			new EvowareTimerWaitOperatorHandler,
 			new MeasureAbsorbanceOperatorHandler,

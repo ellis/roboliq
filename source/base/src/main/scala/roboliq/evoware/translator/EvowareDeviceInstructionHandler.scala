@@ -1,7 +1,6 @@
 package roboliq.evoware.translator
 
 import org.apache.commons.io.FileUtils
-
 import roboliq.commands.DeviceCarouselMoveTo
 import roboliq.commands.DeviceInitialize
 import roboliq.commands.DeviceSiteClose
@@ -13,6 +12,7 @@ import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.input.Context
 import roboliq.input.Instruction
+import roboliq.commands.CentrifugeRun
 
 trait EvowareDeviceInstructionHandler {
 	def handleInstruction(
@@ -148,15 +148,15 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Close", ""), Nil)))
 				case _: DeviceSiteOpen =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Open", ""), Nil)))
-				//case inst: DeviceRun =>
-					//run(identToAgentObject_m, cmd, deviceName)
+				case inst: CentrifugeRun =>
+					run(identToAgentObject_m, inst, deviceName)
 			}
 		} yield l
 	}
 
 	private def run(
 		identToAgentObject_m: Map[String, Object],
-		cmd: ReaderRun,
+		cmd: CentrifugeRun,
 		deviceName: String
 	): Context[List[TranslationItem]] = {
 		for {
@@ -172,24 +172,19 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 					siteToModel <- siteLabwareEntry(identToAgentObject_m, siteIdent, labwareIdent)
 				} yield siteToModel
 			}
-			// Read in the mdfx file, which should be an XML file. 
-			programData0 = FileUtils.readFileToString(cmd.programFile)
-			// Check for the root XML element
-			start_i = programData0.indexOf("<TecanFile")
-			_ <- Context.assert(start_i >= 0, s"program file does not have expected contents: $cmd.progfile")
 		} yield {
-			val programData = programData0.substring(start_i).
-				replace("\r", "").
-				replace("\n", "").
-				replace("&", "&amp;"). // "&amp;" is probably not needed, since I didn't find it in the XML files
-				replace("=", "&equal;").
-				replace("\"", "&quote;").
-				replace("~", "&tilde;").
-				replaceAll(">[ \t]+<", "><")
+			val p = cmd.program
+			val x = List[Int](
+				p.rpm_?.getOrElse(3000),
+				p.duration_?.getOrElse(30),
+				p.spinUpTime_?.getOrElse(9),
+				p.spinDownTime_?.getOrElse(9),
+				p.temperature_?.getOrElse(25)
+			).mkString(",")
 			// Token
-			val token = L0C_Facts(deviceName, deviceName+"_Measure", cmd.outputFilename + "|" + programData)
+			val token = L0C_Facts(deviceName, deviceName+"_Execute1", x)
 			// Return
-			val item = TranslationItem(token, siteToModel_l.flatten)
+			val item = TranslationItem(token, Nil)
 			List(item)
 		}
 	}
