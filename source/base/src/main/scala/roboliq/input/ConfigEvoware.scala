@@ -126,10 +126,10 @@ class ConfigEvoware(
 			tuple1 <- loadAgentBean()
 			(labwareModel_l, tip_l, modelEToModel_l) = tuple1
 			
-			siteIdToSiteAndModels_m <- loadSites(agent, pipetterIdent, modelEToModel_l)
+			siteIdToSiteAndModels_m <- loadSitesAndDevices(agent, pipetterIdent, modelEToModel_l)
 			siteIdToSite_m = siteIdToSiteAndModels_m.mapValues(_._1)
 			_ <- loadTransporters(agent, siteIdToSite_m)
-			_ <- loadDevices(agent, siteIdToSiteAndModels_m)
+			//_ <- loadDevices(agent, siteIdToSiteAndModels_m)
 			sealerProgram_l <- loadSealerPrograms()
 		} yield {
 			eb.pipetterToTips_m(pipetter) = tip_l.toList
@@ -257,14 +257,14 @@ class ConfigEvoware(
 	/**
 	 * @returns Map from SiteID to its Site and the LabwareModels it can accept
 	 */
-	private def loadSites(
+	private def loadSitesAndDevices(
 		agent: Agent,
 		pipetterIdent: String,
 		modelEToModel_l: List[(EvowareLabwareModel, LabwareModel)]
 		//labwareModelE_l: List[roboliq.evoware.parser.EvowareLabwareModel],
 		//idToModel_m: HashMap[String, LabwareModel]
 	): RsResult[Map[(Int, Int), (Site, Set[LabwareModel])]] = {
-		val siteIdToSite_m = new HashMap[(Int, Int), Site]
+		//val siteIdToSite_m = new HashMap[(Int, Int), Site]
 		val carriersSeen_l = new HashSet[Int]
 
 		def createSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String): Option[(CarrierSite, Site)] = {
@@ -279,19 +279,6 @@ class ConfigEvoware(
 
 		def createDeviceIdent(carrierE: Carrier): String = {
 			agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
-		}
-
-		def addSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String) {
-			val grid_i = tableData.mapCarrierToGrid(carrierE)
-			// TODO: should adapt CarrierSite to require grid_i as a parameter 
-			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
-			val siteId = (carrierE.id, site_i)
-			findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i + 1).foreach { siteIdent =>
-				val site = Site(gid, Some(siteIdent), Some(description))
-				siteIdToSite_m(siteId) = site
-				identToAgentObject(siteIdent) = siteE
-				eb.addSite(site, siteIdent)
-			}
 		}
 		
 		// Create map from siteId to all labware models that can be placed that site 
@@ -349,6 +336,12 @@ class ConfigEvoware(
 			carriersSeen_l += carrierE.id
 			site
 		}
+
+		// Concatenate hotel, device, and bench sites
+		val site_l = {
+			val siteDevice_l = deviceConfig_l.flatMap(_.siteConfig_l.map(sc => (sc.siteE, sc.site)))
+			siteHotel_l ++ siteDevice_l ++ siteBench_l
+		}
 		
 		// TODO: For tubes, create their on-bench Sites and SiteModels
 		// TODO: Let userArm handle tube models
@@ -358,31 +351,33 @@ class ConfigEvoware(
 		{
 			// Find all unique sets of labware models
 			val unique = siteIdToModels_m.values.toSet
-			val modelsToSiteModel_m = new HashMap[Set[LabwareModel], SiteModel]
-			var i = 1
-			for (l <- unique) {
-				val sm = SiteModel(l.toString)
-				modelsToSiteModel_m(l) = sm
-				eb.addModel(sm, f"sm${i}")
+			// Create SiteModel for each unique set of labware models
+			val modelsToSiteModel_m: Map[Set[LabwareModel], SiteModel] =
+				unique.toList.map(l => l -> SiteModel(l.toString)).toMap
+
+			// Update EntitBase with the SiteModels and their stackable LabwareModels
+			for (((l, sm), i) <- modelsToSiteModel_m.toList.zipWithIndex) {
+				eb.addModel(sm, s"sm${i+1}")
 				eb.addStackables(sm, l.toList)
-				i += 1
 			}
 
-			// Assign SiteModels to Sites
-			for ((siteId, l) <- siteIdToModels_m) {
-				val site = siteIdToSite_m(siteId)
-				val sm = modelsToSiteModel_m(l)
-				eb.setModel(site, sm)
+			// Update EntityBase by assigning SiteModel to a site Sites
+			for ((siteE, site) <- site_l) {
+				val siteId = (siteE.carrier.id, siteE.iSite)
+				for {
+					l <- siteIdToModels_m.get(siteId)
+					sm <- modelsToSiteModel_m.get(l)
+				} {
+					eb.setModel(site, sm)
+				}
 			}
 		}
 		
 		// Update EntityBase with sites and logic
-		val siteDevice_l = deviceConfig_l.flatMap(_.siteConfig_l.map(sc => (sc.siteE, sc.site)))
-		val site_l = siteHotel_l ++ siteDevice_l ++ siteBench_l
+		// Update identToAgentObject map with evoware site data
 		for ((siteE, site) <- site_l) {
 			val siteIdent = site.label.get
 			val siteId = (siteE.carrier.id, siteE.iSite)
-			siteIdToSite_m(siteId) = site
 			identToAgentObject(siteIdent) = siteE
 			eb.addSite(site, siteIdent)
 
@@ -416,9 +411,10 @@ class ConfigEvoware(
 			}
 		}
 		
-		val siteIdToSiteAndModels_m = siteIdToSite_m.toMap.map { case (siteId, site) =>
+		val siteIdToSiteAndModels_m = site_l.map({ case (siteE, site) =>
+			val siteId = (siteE.carrier.id, siteE.iSite)
 			(siteId, (site, siteIdToModels_m.get(siteId).map(_.toSet).getOrElse(Set())))
-		}
+		}).toMap
 		RsSuccess(siteIdToSiteAndModels_m)
 	}
 
@@ -517,6 +513,7 @@ class ConfigEvoware(
 		RsSuccess(())
 	}
 	
+	/*
 	private def loadDevices(
 		agent: Agent,
 		siteIdToSiteAndModels_m: Map[(Int, Int), (Site, Set[LabwareModel])]
@@ -733,6 +730,7 @@ class ConfigEvoware(
 		
 		RsSuccess(())
 	}
+	*/
 	
 	/**
 	 * TODO: most of this should be loaded from 
