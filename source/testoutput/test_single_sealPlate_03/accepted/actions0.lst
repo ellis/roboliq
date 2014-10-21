@@ -1,0 +1,3 @@
+transportLabware(plate1:labware 1:?model__1:model 1:?site1__1:site 1:?site2__1:site 1:?siteModel2:siteModel)
+sealPlate(2:?agent:agent 2:?device:sealer plate1:labware 1:?model__1:model 1:?site2__1:site)
+transportLabware(plate1:labware 1:?model__1:model 1:?site2__1:site 1:?site1__1:site 3:?siteModel2:siteModel)
