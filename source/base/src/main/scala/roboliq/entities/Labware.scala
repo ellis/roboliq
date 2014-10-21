@@ -28,12 +28,8 @@ trait Device extends Entity {
 	
 }
 
-case class Transporter(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
-	def typeNames = List("transporter")
-}
-
-case class TransporterSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
-	def typeNames = List("transporterSpec")
+case class Centrifuge(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
+	def typeNames = List("centrifuge")
 }
 
 case class Pipetter(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
@@ -51,6 +47,7 @@ case class PeelerSpec(key: String, label: Option[String] = None, description: Op
 case class Reader(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
 	def typeNames = List("reader", "device")
 }
+
 case class Sealer(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
 	def typeNames = List("sealer")
 }
@@ -86,6 +83,14 @@ case class Thermocycler(key: String, label: Option[String] = None, description: 
 
 case class ThermocyclerSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
 	def typeNames = List("thermocyclerSpec")
+}
+
+case class Transporter(key: String, label: Option[String] = None, description: Option[String] = None) extends Device {
+	def typeNames = List("transporter")
+}
+
+case class TransporterSpec(key: String, label: Option[String] = None, description: Option[String] = None) extends Entity {
+	def typeNames = List("transporterSpec")
 }
 
 trait LabwareModel extends Entity

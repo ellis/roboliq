@@ -78,8 +78,8 @@ case class WellAspirateEvent(
 	volume: LiquidVolume
 ) extends WorldStateEvent {
 	def update(state: WorldStateBuilder): RqResult[Unit] = {
-        val wellAliquot0 = state.well_aliquot_m.getOrElse(well, Aliquot.empty)
-        val amount = Distribution.fromVolume(volume)
+		val wellAliquot0 = state.well_aliquot_m.getOrElse(well, Aliquot.empty)
+		val amount = Distribution.fromVolume(volume)
 		for {
 			wellAliquot1 <- wellAliquot0.remove(amount)
 		} yield {
@@ -93,7 +93,7 @@ case class WellDispenseEvent(
 	aliquot: Aliquot
 ) extends WorldStateEvent {
 	def update(state: WorldStateBuilder): RqResult[Unit] = {
-        val wellAliquot0 = state.well_aliquot_m.getOrElse(well, Aliquot.empty)
+		val wellAliquot0 = state.well_aliquot_m.getOrElse(well, Aliquot.empty)
 		for {
 			wellAliquot1 <- wellAliquot0.add(aliquot)
 		} yield {

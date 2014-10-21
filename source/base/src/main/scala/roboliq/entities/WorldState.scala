@@ -3,6 +3,7 @@ package roboliq.entities
 import roboliq.core._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import spray.json.JsValue
 
 object WorldProperty extends Enumeration {
 	val Tip_Model = Value
@@ -26,6 +27,7 @@ case class WorldState(
 	//truth: Set[Rel],
 	//properties: Map[WorldProperty.Value, Map[List[Object], Object]],
 	//tip_model_m: Map[Tip, TipModel],
+	value_m: Map[List[String], JsValue],
 	tip_state_m: Map[Tip, TipState],
 	labware_model_m: Map[Labware, LabwareModel],
 	// Labware can either be on a site or another piece of labware
@@ -95,6 +97,7 @@ case class WorldState(
 		val self = this
 		new WorldStateBuilder {
 			//tip_model_m ++= self.tip_model_m
+			value_m ++= self.value_m
 			tip_state_m ++= self.tip_state_m
 			labware_model_m ++= self.labware_model_m
 			labware_location_m ++= self.labware_location_m
@@ -113,6 +116,7 @@ case class WorldState(
 
 class WorldStateBuilder {
 	//val tip_model_m = new HashMap[Tip, TipModel]
+	val value_m = new HashMap[List[String], JsValue]
 	val tip_state_m = new HashMap[Tip, TipState]
 	val labware_model_m = new HashMap[Labware, LabwareModel]
 	val labware_location_m = new HashMap[Labware, Entity] 
@@ -149,6 +153,7 @@ class WorldStateBuilder {
 
 	def toImmutable = {
 		WorldState(
+			value_m.toMap,
 			//tip_model_m.toMap,
 			tip_state_m.toMap,
 			labware_model_m.toMap,

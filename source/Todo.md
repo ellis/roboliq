@@ -2,9 +2,9 @@
 
 ## Big issues
 
+- [x] handle tubes as wells on plates
 - [ ] `measureFluorescence` command
 - [ ] `measureAbsorbance` command
-- [ ] handle tubes
 - [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
 - [ ] configurable cleaning logic (really not sure how to do this best; don't use current approach of calling a sub-routine)
 - [ ] `dilute` command for stflow
@@ -33,7 +33,10 @@
 usage.
 - [ ] more abstract "well" concept that allows for treating a well with 8 pipette positions as a single container, and that allows for pipetting to multiple distinct positions in a single large culture well
 - [ ] possibly create a general approach to combinatorial variables that can be used for any command, not just in the titrate command.
+- [ ] need to be able to specify programs (e.g. centrifuge programs) in the protocol and then use them in the commands
 - [ ] all external data referenced by a protocol needs to be pulled into the HDF5 file and included as part of the input hash
+- [ ] handle tubes as individual labware items
+- [ ] most device configuration information should be loaded from a config file.  See ConfigEvoware.loadDevices()
 
 ## Current goal
 
@@ -59,6 +62,9 @@ usage.
 - [x] evoware.timer.start/wait/sleep: create timer command
 - [x] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55 (moved Centrifuge to 54, removed Hotel 5POS)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
+- [ ] working on carouselOpenSite handlers
+- [ ] working on Protocol for setting up evoware centrifuge, around line 1623
+- [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [ ] create tania08_urea qa script
 - [ ] create tania08_urea script
@@ -73,6 +79,8 @@ usage.
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
+- [ ] roboliq.yaml: replace the specs with program definitions in the agent section
+- [ ] ConfigEvoware.loadDevices(): Shaker: only shake on the second site
 
 ## tania07_qc_ph
 
@@ -82,25 +90,11 @@ various volumes for water-like dispense of dye into non-empty well, using follow
 
 Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP source might be of interest.  Or various color dyes...
 
-## tania08_salt
-
-Salt Stability (@pH = 5.5 and pH = 7.0):
-Sample = Protein in PBS (ie. sfGFP, pHstableGFP, Venus,…)
-Sample Volume = 0.25 uL (??)
-Condition #1
-Buffer = 5M NaCl, pH 5.5
-Final Salt concentrations (mM) = 0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250)
-Water to 100 uL
-Condition #2
-Buffer = 5M NaCl, pH7.5
-Sample Volume = 0.25 uL (??)
-Final Salt concentrations (mM) = 0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250)
-Water to 100 uL
-
+## tania08_urea
 
 - [ ] create qc script
 - [ ] create script
-- [ ] create balance plate
+- [ ] create balance plate and seal it
 - [ ] put balance plate in centrifuge
 - [ ] set centrifuge temperature for incubation
 - [ ] titration
@@ -133,7 +127,6 @@ Water to 100 uL
 - [ ] transport shouldn't be done to closed sites
 - [ ] mark reader sites as closed in the initial states
 - [ ] planner should figure out that reader needs to be opened
-- [ ] manage to transport plate to reader via regrip station, despite change of the evoware plate models to the "portrait" variant
 
 ## Centrifuge
 
@@ -145,10 +138,23 @@ FACTS("Centrifuge","Centrifuge_Close","","0","");
 FACTS("Centrifuge","Centrifuge_Execute1","3000,30,9,9,20","0","");
 
 - [ ] create commands that can be used as a quick HACK to control the centrifuge at a low level
+- [ ] how to manage the four centrigue sites and the one site on the bench?
+- [ ] in the domain logic, we may need to create four operators to open the four sites and consequently close the other three
+- [ ] for evoware transport, regardless of whether which bay we want to put a plate it, we need to search for the centrifuge site on the bench
 - [ ] for the high-level command, need to keep track of balance plate and put it in the centrifuge as needed
 - [ ] remove the balance plate by the end of the script at latest
 - [ ] possibly create a balance plate
 - [ ] possibly adjust the volumes in a balance plate
+- [ ] make sure we can't run the centrifuge without balances
+
+Carousel sites:
+A carousel has multiple internal sites, and generally one "gateway" where the robot can insert or remove plates.
+One way to deal with this might be to alias all of the internal sites with the gateway site, and normally have
+all of the internal sites closed.  To access an internal site, the carousel rotates to the
+appropriate position, opens the physical gateway site, and flags the internal site as open.
+When the carousel is closed, it closes all internal sites again.
+Then in the evoware script builder, we somehow need to lookup the alias of the internal sites and actually use
+the external site (perhaps we can simply assign the same grid+site to each of the internal sites).
 
 ## Vatsi and Tanya
 

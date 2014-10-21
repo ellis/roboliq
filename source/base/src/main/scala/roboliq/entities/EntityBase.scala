@@ -44,11 +44,11 @@ class EntityBase {
 	/**
 	 * LabwareModels that devices can use
 	 */
-	val deviceToModels_m = new HashMap[Device, mutable.Set[LabwareModel]] with MultiMap[Device, LabwareModel]
+	private val deviceToModels_m = new HashMap[Device, mutable.Set[LabwareModel]] with MultiMap[Device, LabwareModel]
 	/**
 	 * Sites that devices can access
 	 */
-	val deviceToSites_m = new HashMap[Device, mutable.Set[Site]] with MultiMap[Device, Site]
+	private val deviceToSites_m = new HashMap[Device, mutable.Set[Site]] with MultiMap[Device, Site]
 	/**
 	 * Specs that devices accept
 	 */
@@ -151,6 +151,10 @@ class EntityBase {
 		}).prependError(s"error looking up entity `$key`")
 	}
 	
+	def getAllEntitiesOf[A <: Entity : Manifest](): List[A] = {
+		entityToIdent_m.keys.toList.collect { case x: A => x }
+	} 
+	
 	def getEntityByIdent[A <: Entity : Manifest](ident0: String): RsResult[A] = {
 		val ident = ident0.toLowerCase
 		identToEntity_m.get(ident) match {
@@ -177,6 +181,7 @@ class EntityBase {
 	}
 	
 	def addSite(e: Site, name: String) {
+		//println(s"addSite($name)")
 		addEntity(e, name)
 	}
 	
@@ -281,7 +286,7 @@ class EntityBase {
 		rel_l.toList.sortBy(_.toString)
 	}
 	
-	def makeInitialConditionsList(): List[Rel] = {
+	/*private def makeInitialConditionsList(): List[Rel] = {
 		entityToIdent_m.toList.flatMap(pair => pair._1.typeNames.map(typeName => Rel(s"is-$typeName", List(pair._2), pair._1.label.getOrElse(null)))).toList.sortBy(_.toString) ++
 		agentToDevices_m.flatMap(pair => pair._2.toList.map(device => {
 			Rel(s"agent-has-device", List(entityToIdent_m(pair._1), entityToIdent_m(device)))
@@ -307,7 +312,7 @@ class EntityBase {
 		val l: List[Rel] = makeInitialConditionsList
 		val l2: List[String] = l.map(r => "  " + r.toStringWithComment)
 		l2.mkString("\n")
-	}
+	}*/
 	
 	def lookupLiquidSource(text: String, state: WorldState): RsResult[PipetteSources] = {
 		for {

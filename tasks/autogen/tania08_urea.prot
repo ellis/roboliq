@@ -1,0 +1,10 @@
+Urea stock solution = 8.8M urea in 50mM Tris buffer, pH = 7
+
+Mixtures:
+  5ul GFP
+  0 - 70ul urea buffer in 5ul steps
+  fill to 75ul with buffer (50mM Tris, pH = 7)
+
+put in reader,
+then in centrifuge
+cycle for at least 48 hours

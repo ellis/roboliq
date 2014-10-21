@@ -53,6 +53,7 @@ evowareAgents:
       default:
         tableFile: ../testdata/bsse-mario/Template.ewt
         sites:
+          CENTRIFUGE: { carrier: "Centrifuge" }
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
           P3: { grid: 10, site: 4 }
@@ -112,6 +113,6 @@ deviceToSpec:
   #- [r1_shaker, shakerSpec1]
 
 deviceToModelToSpec:
-  - [mario_sealer, "D-BSSE 96 Well PCR Plate", sealerSpec1]
-  - [mario_peeler, "D-BSSE 96 Well PCR Plate", peelerSpec1]
+  - [mario_sealer, plateModel_96_pcr, sealerSpec1]
+  - [mario_peeler, plateModel_96_pcr, peelerSpec1]
 

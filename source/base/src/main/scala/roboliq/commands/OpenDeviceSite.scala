@@ -69,7 +69,7 @@ class OpenDeviceSiteOperatorHandler extends OperatorHandler {
 				Strips.Literal(true, "device-can-open-site", "?device", "?site")
 			)),
 			effects = Strips.Literals(Unique(
-				Strips.Literal(false, "is-site-closed", "?site")
+				Strips.Literal(false, "site-closed", "?site")
 			))
 		)
 	}
