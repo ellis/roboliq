@@ -56,6 +56,7 @@ private case class DeviceConfigPre(
 	val deviceIdent_? : Option[String] = None,
 	val device_? : Option[Device] = None,
 	val handler_? : Option[EvowareDeviceInstructionHandler] = None,
+	val overrideCreateSites_? : Option[(Carrier, Map[(Int, Int), Set[LabwareModel]]) => List[DeviceSiteConfig]] = None,
 	val overrideSiteLogic_? : Option[DeviceConfig => RsResult[List[Rel]]] = None
 )
 
@@ -264,16 +265,6 @@ class ConfigEvoware(
 	): RsResult[List[(CarrierSite, Site)]] = {
 		val carriersSeen_l = new HashSet[Int]
 
-		def createSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String): Option[(CarrierSite, Site)] = {
-			val grid_i = tableData.mapCarrierToGrid(carrierE)
-			// TODO: should adapt CarrierSite to require grid_i as a parameter 
-			findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i + 1).map { siteIdent =>
-				val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
-				val site = Site(gid, Some(siteIdent), Some(description))
-				(siteE, site)
-			}
-		}
-
 		def createDeviceIdent(carrierE: Carrier): String = {
 			agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
@@ -305,14 +296,9 @@ class ConfigEvoware(
 		} yield {
 			val deviceIdent: String = dcp.deviceIdent_?.getOrElse(createDeviceIdent(carrierE))
 			val device = dcp.device_?.getOrElse(new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(dcp.typeName) })
-			val siteConfig_l = for {
-				site_i <- List.range(0, carrierE.nSites)
-				(siteE, site) <- createSite(carrierE, site_i, s"${agentIdent} device ${carrierE.sName} site ${site_i+1}").toList
-				siteId = (carrierE.id, site_i)
-				model_l <- siteIdToModels_m.get(siteId).toList
-			} yield {
-				DeviceSiteConfig(siteE, site, model_l.toList)
-			}
+			val fnCreateSites: (Carrier, Map[(Int, Int), Set[LabwareModel]]) => List[DeviceSiteConfig]
+				= dcp.overrideCreateSites_?.getOrElse(getDefaultDeviceSiteConfigs _)
+			val siteConfig_l = fnCreateSites(carrierE, siteIdToModels_m)
 			DeviceConfig(
 				carrierE,
 				dcp.typeName,
@@ -344,6 +330,24 @@ class ConfigEvoware(
 		// TODO: Let userArm handle tube models
 		// TODO: Let userArm access all sites that the robot arms can't
 		
+		// Update EntityBase with sites and logic
+		// Update identToAgentObject map with evoware site data
+		for ((siteE, site) <- site_l) {
+			val siteIdent = site.label.get
+			val siteId = (siteE.carrier.id, siteE.iSite)
+			identToAgentObject(siteIdent) = siteE
+			eb.addSite(site, siteIdent)
+
+			// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
+			if (tableSetupBean.pipetterSites.contains(siteIdent)) {
+				eb.addRel(Rel("device-can-site", List(pipetterIdent, siteIdent)))
+			}
+			// Make site user-accessible if it's listed in the table setup's `userSites`
+			if (tableSetupBean.userSites.contains(siteIdent)) {
+				eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))
+			}
+		}
+		
 		// Create SiteModels for for sites which hold Plates
 		{
 			// Find all unique sets of labware models
@@ -367,24 +371,6 @@ class ConfigEvoware(
 				} {
 					eb.setModel(site, sm)
 				}
-			}
-		}
-		
-		// Update EntityBase with sites and logic
-		// Update identToAgentObject map with evoware site data
-		for ((siteE, site) <- site_l) {
-			val siteIdent = site.label.get
-			val siteId = (siteE.carrier.id, siteE.iSite)
-			identToAgentObject(siteIdent) = siteE
-			eb.addSite(site, siteIdent)
-
-			// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
-			if (tableSetupBean.pipetterSites.contains(siteIdent)) {
-				eb.addRel(Rel("device-can-site", List(pipetterIdent, siteIdent)))
-			}
-			// Make site user-accessible if it's listed in the table setup's `userSites`
-			if (tableSetupBean.userSites.contains(siteIdent)) {
-				eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))
 			}
 		}
 
@@ -411,13 +397,37 @@ class ConfigEvoware(
 		RsSuccess(site_l)
 	}
 
-	def getDefaultSitesLogic(dc: DeviceConfig): RsResult[List[Rel]] = {
+	private def createSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String): Option[(CarrierSite, Site)] = {
+		val grid_i = tableData.mapCarrierToGrid(carrierE)
+		// TODO: should adapt CarrierSite to require grid_i as a parameter 
+		findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i + 1).map { siteIdent =>
+			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
+			val site = Site(gid, Some(siteIdent), Some(description))
+			(siteE, site)
+		}
+	}
+	
+	private def getDefaultDeviceSiteConfigs(
+		carrierE: Carrier,
+		siteIdToModels_m: Map[(Int, Int), Set[LabwareModel]]
+	): List[DeviceSiteConfig] = {
+		for {
+			site_i <- List.range(0, carrierE.nSites)
+			(siteE, site) <- createSite(carrierE, site_i, s"${agentIdent} device ${carrierE.sName} site ${site_i+1}").toList
+			siteId = (carrierE.id, site_i)
+			model_l <- siteIdToModels_m.get(siteId).toList
+		} yield {
+			DeviceSiteConfig(siteE, site, model_l.toList)
+		}
+	}
+	
+	private def getDefaultSitesLogic(dc: DeviceConfig): RsResult[List[Rel]] = {
 		for {
 			ll <- RsResult.mapAll(dc.siteConfig_l){ sc => getDefaultSiteLogic(dc, sc) }
 		} yield ll.flatten
 	}
 	
-	def getDefaultSiteLogic(dc: DeviceConfig, sc: DeviceSiteConfig): RsResult[List[Rel]] = {
+	private def getDefaultSiteLogic(dc: DeviceConfig, sc: DeviceSiteConfig): RsResult[List[Rel]] = {
 		val siteIdent = sc.site.label.get
 		val logic1 = Rel("device-can-site", List(dc.deviceIdent, sc.site.label.get))
 		val logic2_l = sc.labwareModel_l.map(m => Rel("device-can-model", List(dc.deviceIdent, eb.getIdent(m).toOption.get)))
@@ -587,13 +597,52 @@ class ConfigEvoware(
 					device_? = Some(new Thermocycler(gid, Some(carrierE.sName)))
 				))
 			
-			case "Hettich Centrifuge" => // TODO: FIXME: Get the correct ID or name
+			case "Centrifuge" => // TODO: FIXME: Get the correct ID or name
+				// Add the four internal sites, each pointing to the centrifuge's single external site
+				def overrideCreateSites(
+					carrierE: Carrier,
+					siteIdToModels_m: Map[(Int, Int), Set[LabwareModel]]
+				): List[DeviceSiteConfig] = {
+					val siteExternal_i = 0
+					val siteE = CarrierSite(carrierE, siteExternal_i)
+					val siteId = (carrierE.id, siteExternal_i)
+					val siteExternal_? = createSite(carrierE, siteExternal_i, "")
+					val siteExternalIdent_? = siteExternal_?.map(_._2.label.get)
+					
+					for {
+						siteIdentBase <- siteExternalIdent_?.toList
+						siteInternal_i <- List.range(0, 4)
+						site = Site(gid, Some(s"${siteIdentBase}_${siteInternal_i+1}"), Some(s"internal site ${siteInternal_i+1}"))
+						model_l <- siteIdToModels_m.get(siteId).toList
+					} yield {
+						//println("site: "+site)
+						DeviceSiteConfig(siteE, site, model_l.toList)
+					}
+				}
+
+				// let the device open its sites
+				// sites are closed by default
+				def overrideSiteLogic(dc: DeviceConfig): RsResult[List[Rel]] = {
+					for {
+						default_l <- getDefaultSitesLogic(dc)
+					} yield {
+						val l = dc.siteConfig_l.flatMap { sc =>
+							val siteIdent = sc.site.label.get
+							List(
+								Rel("device-can-open-site", List(dc.deviceIdent, siteIdent)),
+								Rel("site-closed", List(siteIdent))
+							)
+						}
+						default_l ++ l 
+					}
+				}
+
 				Some(new DeviceConfigPre(
 					"centrifuge",
-					device_? = Some(new Centrifuge(gid, Some(carrierE.sName)))
+					device_? = Some(new Centrifuge(gid, Some(carrierE.sName))),
+					overrideCreateSites_? = Some(overrideCreateSites),
+					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
-				// TODO: Add 4 sites, aliasing them to the device site's (grid,site)
-				// TODO: Remove the device site from 'eb' (probably necessary to prevent it from being added in the first place)
 				// TODO: Add operators for opening the sites and for closing the device
 				//...
 				

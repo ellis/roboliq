@@ -53,6 +53,7 @@ evowareAgents:
       default:
         tableFile: ../testdata/bsse-mario/Template.ewt
         sites:
+          CENTRIFUGE: { carrier: "Centrifuge" }
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
           P3: { grid: 10, site: 4 }

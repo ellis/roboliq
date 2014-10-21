@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqResult
@@ -18,12 +17,13 @@ import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.core.RsResult
 
 
 case class CarouselOpenSiteActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	site_? : Option[Site]
+	site: Site
 )
 
 class CarouselOpenSiteActionHandler extends ActionHandler {
@@ -40,20 +40,20 @@ class CarouselOpenSiteActionHandler extends ActionHandler {
 	): RqResult[List[OperatorInfo]] = {
 		for {
 			params <- Converter.convActionAs[CarouselOpenSiteActionParams](paramToJsval_l, eb, state0)
-			siteName_? <- params.site_? match {
-				case None => RqSuccess(None)
-				case Some(site) => eb.getIdent(site).map(Some(_))
-			}
+			siteIdent <- eb.getIdent(params.site)
+			i = siteIdent.lastIndexOf("_")
+			_ <- RsResult.assert(i > 0, s"couldn't extract carousel position from site name `$siteIdent`")
 		} yield {
+			val num = siteIdent.substring(i + 1)
 			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
 			val binding_l = List(
 				"?agent" -> params.agent_?.getOrElse("?agent"),
 				"?device" -> params.device_?.getOrElse("?device"),
-				"?site" -> siteName_?.getOrElse("?site")
+				"?site" -> siteIdent
 			)
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "carousel.openSite-", binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "carousel.openSite-"+num, binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
@@ -93,12 +93,17 @@ class CarouselOpenSiteOperatorHandler(
 			agent <- Context.getEntityAs[Agent](agentName)
 			device <- Context.getEntityAs[Reader](deviceName)
 			site <- Context.getEntityAs[Site](siteName)
-			// TODO: Carousel rotate to ident
-			instruction = DeviceSiteOpen(
-				device,
-				site
-			)
-			_ <- Context.addInstruction(agent, instruction)
+
+			// TODO: Extracting the position from the siteIdent is very awkward -- attach information to the site in some more direct way
+			siteIdent = site.label.get
+			i = siteIdent.lastIndexOf("_")
+			_ <- Context.assert(i > 0, s"couldn't extract carousel position from site name `$siteIdent`")
+			num = siteIdent.substring(i + 1)
+			
+			// Carousel rotate to ident
+			_ <- Context.addInstruction(agent, DeviceCarouselMoveTo(device, num))
+			// Open the external site
+			_ <- Context.addInstruction(agent, DeviceSiteOpen(device, site))
 		} yield ()
 	}
 }

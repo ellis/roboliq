@@ -1,17 +1,18 @@
 package roboliq.evoware.translator
 
+import org.apache.commons.io.FileUtils
+
+import roboliq.commands.DeviceCarouselMoveTo
+import roboliq.commands.DeviceInitialize
 import roboliq.commands.DeviceSiteClose
 import roboliq.commands.DeviceSiteOpen
-import roboliq.input.Context
-import roboliq.input.Instruction
 import roboliq.commands.ReaderRun
-import org.apache.commons.io.FileUtils
-import roboliq.evoware.parser.CarrierSite
-import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.entities.Labware
 import roboliq.entities.Site
-import roboliq.commands.DeviceInitialize
-import roboliq.commands.DeviceCarouselProvide
+import roboliq.evoware.parser.CarrierSite
+import roboliq.evoware.parser.EvowareLabwareModel
+import roboliq.input.Context
+import roboliq.input.Instruction
 
 trait EvowareDeviceInstructionHandler {
 	def handleInstruction(
@@ -139,7 +140,7 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 		for {
 			deviceName <- Context.from(carrierE.deviceName_?, s"Evoware device name missing for carrier `${carrierE.sName}`")
 			l <- instruction match {
-				case inst: DeviceCarouselProvide =>
+				case inst: DeviceCarouselMoveTo =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_MoveTo", inst.id), Nil)))
 				case _: DeviceInitialize =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Init", ""), Nil)))

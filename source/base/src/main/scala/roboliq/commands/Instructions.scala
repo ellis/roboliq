@@ -26,7 +26,7 @@ case class CentrifugeRun(
 	val data = Nil
 }
 
-case class DeviceCarouselProvide(
+case class DeviceCarouselMoveTo(
 	device: Device,
 	id: String
 ) extends DeviceInstruction {

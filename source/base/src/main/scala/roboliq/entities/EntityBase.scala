@@ -181,6 +181,7 @@ class EntityBase {
 	}
 	
 	def addSite(e: Site, name: String) {
+		//println(s"addSite($name)")
 		addEntity(e, name)
 	}
 	
