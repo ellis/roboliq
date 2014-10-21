@@ -136,7 +136,11 @@ class Protocol {
 			new TitrateActionHandler
 		)
 		val operatorHandler_l = List[OperatorHandler](
-			//new CarouselOpenSiteActionHandler,
+			// FIXME: HACK: need to add the operators from config somehow, not from here
+			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_1", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
+			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_2", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
+			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_3", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
+			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_4", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new CloseDeviceSiteOperatorHandler,
 			new DistributeOperatorHandler(1),
 			new DistributeOperatorHandler(2),

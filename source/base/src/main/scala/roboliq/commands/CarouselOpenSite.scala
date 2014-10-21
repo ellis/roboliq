@@ -1,13 +1,14 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
+
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqResult
-import roboliq.core.RqSuccess
+import roboliq.core.RsResult
 import roboliq.entities.Agent
+import roboliq.entities.Device
 import roboliq.entities.EntityBase
-import roboliq.entities.Reader
 import roboliq.entities.Site
 import roboliq.entities.WorldState
 import roboliq.input.Context
@@ -17,7 +18,6 @@ import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
-import roboliq.core.RsResult
 
 
 case class CarouselOpenSiteActionParams(
@@ -53,7 +53,7 @@ class CarouselOpenSiteActionHandler extends ActionHandler {
 			)
 			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "carousel.openSite-"+num, binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "carousel.openSite-"+siteIdent, binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
@@ -87,12 +87,10 @@ class CarouselOpenSiteOperatorHandler(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
-		val List(agentName, deviceName, siteName) = operator.paramName_l
-		
 		for {
-			agent <- Context.getEntityAs[Agent](agentName)
-			device <- Context.getEntityAs[Reader](deviceName)
-			site <- Context.getEntityAs[Site](siteName)
+			agent <- Context.getEntityAs[Agent](agentIdent)
+			device <- Context.getEntityAs[Device](deviceIdent)
+			site <- Context.getEntityAs[Site](internalSiteIdent)
 
 			// TODO: Extracting the position from the siteIdent is very awkward -- attach information to the site in some more direct way
 			siteIdent = site.label.get

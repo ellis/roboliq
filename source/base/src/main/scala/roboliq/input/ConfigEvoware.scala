@@ -47,6 +47,7 @@ import roboliq.evoware.parser.Carrier
 import roboliq.entities.Entity
 import roboliq.core.RsError
 import roboliq.entities.Centrifuge
+import roboliq.evoware.translator.EvowareHettichCentrifugeInstructionHandler
 
 /**
  * @param postProcess_? An option function to call after all sites have been created, which can be used for further handling of device configuration.
@@ -266,6 +267,7 @@ class ConfigEvoware(
 		val carriersSeen_l = new HashSet[Int]
 
 		def createDeviceIdent(carrierE: Carrier): String = {
+			//println("createDeviceIdent: "+agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_'))
 			agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
 		
@@ -640,12 +642,11 @@ class ConfigEvoware(
 				Some(new DeviceConfigPre(
 					"centrifuge",
 					device_? = Some(new Centrifuge(gid, Some(carrierE.sName))),
+					handler_? = new Some(new EvowareHettichCentrifugeInstructionHandler(carrierE)),
 					overrideCreateSites_? = Some(overrideCreateSites),
 					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
 				// TODO: Add operators for opening the sites and for closing the device
-				//...
-				
 				
 			case _ =>
 				None
