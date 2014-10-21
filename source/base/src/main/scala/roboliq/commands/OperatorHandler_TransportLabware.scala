@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqResult
@@ -18,7 +17,47 @@ import roboliq.input.AgentInstruction
 import roboliq.input.Context
 import roboliq.plan.OperatorHandler
 import spray.json.JsValue
+import roboliq.plan.OperatorInfo
+import roboliq.plan.ActionHandler
+import roboliq.input.Converter
 
+
+case class TransportLabwareActionParams(
+	agent_? : Option[String],
+	device_? : Option[String],
+	`object`: Labware,
+	site: Site
+)
+
+class TransportLabwareActionHandler extends ActionHandler {
+	
+	def getActionName = "transportLabware"
+
+	def getActionParamNames = List("agent", "device", "object", "site")
+	
+	def getOperatorInfo(
+		id: List[Int],
+		paramToJsval_l: List[(String, JsValue)],
+		eb: EntityBase,
+		state0: WorldState
+	): RqResult[List[OperatorInfo]] = {
+		for {
+			params <- Converter.convActionAs[TransportLabwareActionParams](paramToJsval_l, eb, state0)
+			labwareName <- eb.getIdent(params.`object`)
+			site2Name <- eb.getIdent(params.site)
+		} yield {
+			val suffix = id.mkString("__", "_", "")
+			
+			// Bindings for transfer to sealer
+			val binding_m = Map[String, String](
+				"?labware" -> labwareName,
+				"?site2" -> site2Name
+			)
+
+			OperatorInfo(id, Nil, Nil, "transportLabware", binding_m, Map()) :: Nil
+		}
+	}
+}
 
 class OperatorHandler_TransportLabware extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {

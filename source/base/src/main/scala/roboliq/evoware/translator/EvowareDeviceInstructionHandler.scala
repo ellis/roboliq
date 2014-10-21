@@ -141,7 +141,7 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 			deviceName <- Context.from(carrierE.deviceName_?, s"Evoware device name missing for carrier `${carrierE.sName}`")
 			l <- instruction match {
 				case inst: DeviceCarouselMoveTo =>
-					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_MoveTo", inst.id), Nil)))
+					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_MoveToPos", inst.id), Nil)))
 				case _: DeviceInitialize =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Init", ""), Nil)))
 				case _: DeviceSiteClose =>

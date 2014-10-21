@@ -133,7 +133,8 @@ class Protocol {
 			new PromptOperatorActionHandler,
 			new SealPlateActionHandler,
 			new ShakePlateActionHandler,
-			new TitrateActionHandler
+			new TitrateActionHandler,
+			new TransportLabwareActionHandler
 		)
 		val operatorHandler_l = List[OperatorHandler](
 			// FIXME: HACK: need to add the operators from config somehow, not from here

@@ -1,0 +1,11 @@
+labware:
+  plate1:
+    model: plateModel_384_square
+    location: P3
+
+protocol:
+- carousel.openSite:
+    site: CENTRIFUGE_1
+- transportLabware:
+    object: plate1
+    site: CENTRIFUGE_1
