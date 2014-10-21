@@ -36,6 +36,7 @@ usage.
 - [ ] need to be able to specify programs (e.g. centrifuge programs) in the protocol and then use them in the commands
 - [ ] all external data referenced by a protocol needs to be pulled into the HDF5 file and included as part of the input hash
 - [ ] handle tubes as individual labware items
+- [ ] most device configuration information should be loaded from a config file.  See ConfigEvoware.loadDevices()
 
 ## Current goal
 
@@ -63,6 +64,7 @@ usage.
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
 - [ ] working on carouselOpenSite handlers
 - [ ] working on Protocol for setting up evoware centrifuge, around line 1623
+- [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [ ] create tania08_urea qa script
 - [ ] create tania08_urea script
@@ -77,6 +79,8 @@ usage.
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
+- [ ] roboliq.yaml: replace the specs with program definitions in the agent section
+- [ ] ConfigEvoware.loadDevices(): Shaker: only shake on the second site
 
 ## tania07_qc_ph
 
