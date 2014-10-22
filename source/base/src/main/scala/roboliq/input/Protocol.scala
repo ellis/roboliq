@@ -855,6 +855,7 @@ class Protocol {
 
 				// FIXME: HACK: need to programmatically figure out the parent classes of type -- this is here as a hack 
 				val type0_m = Map(
+					"centrifuge" -> "device",
 					"peeler" -> "device",
 					"pipetter" -> "device",
 					"reader" -> "device",
@@ -886,31 +887,9 @@ class Protocol {
 
 
 	def createProblem(planInfo_l: List[OperatorInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
-		val typToObject_l: List[(String, String)] = /*List(
-			"agent" -> "r1",
-			"pipetter" -> "r1_pipetter",
-			"shaker" -> "r1_shaker",
-			"model" -> "m001",
-			"siteModel" -> "sm001",
-			"site" -> "siteA",
-			"site" -> "siteB",
-			"labware" -> "plateA",
-			"labware" -> "plateB"
-		)*/ eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
+		val typToObject_l: List[(String, String)] = eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
 		
-		val state0 = Strips.State(Set[Strips.Atom](
-			/*
-			Strips.Atom("location", "plateA", "siteA"),
-			Strips.Atom("site-blocked", "siteA"),
-			Strips.Atom("agent-has-device", "r1", "r1_pipetter"),
-			Strips.Atom("agent-has-device", "r1", "r1_shaker"),
-			Strips.Atom("model", "plateA", "m001"),
-			Strips.Atom("device-can-site", "r1_pipetter", "siteB"),
-			Strips.Atom("device-can-site", "r1_shaker", "siteB"),
-			Strips.Atom("model", "siteA", "sm001"),
-			Strips.Atom("model", "siteB", "sm001"),
-			Strips.Atom("stackable", "sm001", "m001")*/
-		) ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => Strips.Atom(rel.name, rel.args)))
+		val state0 = Strips.State(Set[Strips.Atom]() ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => Strips.Atom(rel.name, rel.args)))
 		
 		RqSuccess(Strips.Problem(
 			domain = domain,

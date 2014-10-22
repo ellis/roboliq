@@ -1,7 +1,6 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
-
 import aiplan.strips2.Strips
 import aiplan.strips2.Unique
 import roboliq.core.RqResult
@@ -18,6 +17,7 @@ import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
+import roboliq.entities.Device
 
 
 case class CloseDeviceSiteActionParams(
@@ -83,7 +83,7 @@ class CloseDeviceSiteOperatorHandler extends OperatorHandler {
 		
 		for {
 			agent <- Context.getEntityAs[Agent](agentName)
-			device <- Context.getEntityAs[Reader](deviceName)
+			device <- Context.getEntityAs[Device](deviceName)
 			site <- Context.getEntityAs[Site](siteName)
 			instruction = DeviceSiteClose(
 				device,

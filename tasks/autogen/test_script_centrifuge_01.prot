@@ -1,11 +1,24 @@
+# - put balance plate into centrifuge bay 4
+# - put mix plate into centrifuge bay 2
+# - run the centrifuge
 labware:
   plate1:
     model: plateModel_384_square
     location: P3
+  plate2:
+    model: plateModel_384_square
+    location: P2
 
 protocol:
 - carousel.openSite:
-    site: CENTRIFUGE_1
+    site: CENTRIFUGE_4
+- transportLabware:
+    object: plate2
+    site: CENTRIFUGE_4
+- carousel.openSite:
+    site: CENTRIFUGE_2
 - transportLabware:
     object: plate1
-    site: CENTRIFUGE_1
+    site: CENTRIFUGE_2
+- closeDeviceSite:
+    site: CENTRIFUGE_2
