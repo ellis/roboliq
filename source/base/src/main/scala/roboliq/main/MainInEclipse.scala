@@ -38,7 +38,7 @@ object MainInEclipse extends App {
 	//run("test_single_sealPlate_02")
 	//run("test_single_sealPlate_03")
 	//run("test_single_sealPlate_04")
-	run("test_script_centrifuge_01")
+	//run("test_script_centrifuge_01")
 	//run("test_script_wellGroup_01")
 	//run("test_script_wellGroup_02")
 	//run("test_tubes_01")
@@ -48,4 +48,5 @@ object MainInEclipse extends App {
 	//runTemp("tania04_ph")
 	//runTemp("tania06_qc_ph")
 	//runTemp("tania07_qc_ph")
+	runTemp("tania08_urea")
 }

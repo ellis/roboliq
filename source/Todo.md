@@ -61,17 +61,16 @@ usage.
 - [x] reader command for absorbtion: read the mdfx file in so that it's in the correct format (strip the XML header, strip extra spaces)
 - [x] evoware.timer.start/wait/sleep: create timer command
 - [x] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55 (moved Centrifuge to 54, removed Hotel 5POS)
+- [x] run test_single_sealPlate_03 on robot
+- [x] run test_single_sealPlate_04 on robot
+- [x] working on carouselOpenSite handlers
+- [x] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
-- [ ] working on carouselOpenSite handlers
-- [ ] working on Protocol for setting up evoware centrifuge, around line 1623
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
-- [ ] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [ ] create tania08_urea qa script
 - [ ] create tania08_urea script
 - [ ] create generic runDevice command
 - [ ] create measureFluorescence command
-- [ ] run test_single_sealPlate_03 on robot
-- [ ] run test_single_sealPlate_04 on robot
 - [ ] Template.ewt: fix grid overlap for Centrifuge and Hotel 3POS at grid 54
 - [ ] transportLabware: allow user to specify device and then comment out OperatorHandler_EvowareTransportLabware?
 - [ ] run pipetting accuracy protocol for 384 flat plate
@@ -155,6 +154,56 @@ appropriate position, opens the physical gateway site, and flags the internal si
 When the carousel is closed, it closes all internal sites again.
 Then in the evoware script builder, we somehow need to lookup the alias of the internal sites and actually use
 the external site (perhaps we can simply assign the same grid+site to each of the internal sites).
+
+## Command definition via YAML
+
+```{yaml}
+- name: carousel.close
+  options:
+  - carousel.close-mario__Centrifuge
+
+- name: carousel.close-mario__Centrifuge
+  logic:
+    effects:
+    - site-closed CENTRIFUGE_1
+    - site-closed CENTRIFUGE_2
+    - site-closed CENTRIFUGE_3
+    - site-closed CENTRIFUGE_4
+  output:
+  - agent: mario
+    instruction: DeviceClose
+    params: { device: mario__Centrifuge }
+
+- name: carousel.openSite
+
+- name: carousel.openSite-CENTRIFUGE_1
+  logic:
+    effects:
+    - !site-closed CENTRIFUGE_1
+    - site-closed CENTRIFUGE_2
+    - site-closed CENTRIFUGE_3
+    - site-closed CENTRIFUGE_4
+  output:
+  - agent: mario
+    instruction: DeviceCarouselMoveTo
+    params: { device: mario__Centrifuge, site: CENTRIFUGE_1 }
+  - agent: mario
+    instruction: DeviceSiteOpen
+    params: { device: mario__Centrifuge, site: CENTRIFUGE_1 }
+
+- name: device.closeSite
+  logic:
+    params: [?agent - agent, ?device - device, ?site - site]
+    preconds:
+    - agent-has-device ?agent ?device
+    - device-can-open-site ?device ?site
+    effects:
+    - site-closed ?site
+  output:
+  - agent: ?agent
+    instruction: DeviceSiteClose
+    params: { device: ?device, site: ?site }
+```
 
 ## Vatsi and Tanya
 

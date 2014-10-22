@@ -25,7 +25,7 @@ import roboliq.evoware.translator.L0C_StartTimer
 case class EvowareTimerWaitActionParams(
 	agent_? : Option[String],
 	id: Int,
-	duration: Int // time in seconds
+	till: Int // time in seconds
 )
 
 class EvowareTimerWaitActionHandler extends ActionHandler {
@@ -74,7 +74,7 @@ class EvowareTimerWaitOperatorHandler extends OperatorHandler {
 		for {
 			params <- Converter.convInstructionParamsAs[EvowareTimerWaitActionParams](instructionParam_m)
 			agent <- Context.getEntityAs[Agent](agentName)
-			instruction = EvowareInstruction(L0C_WaitTimer(params.id, params.duration))
+			instruction = EvowareInstruction(L0C_WaitTimer(params.id, params.till))
 			_ <- Context.addInstruction(agent, instruction)
 		} yield ()
 	}
