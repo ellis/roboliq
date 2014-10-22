@@ -71,6 +71,7 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 				Strips.Literal(true, "model", "?site2", "?siteModel2"),
 				Strips.Literal(true, "stackable", "?siteModel2", "?model"),
 				Strips.Literal(false, "site-blocked", "?site2"),
+				Strips.Literal(false, "site-closed", "?site1"),
 				Strips.Literal(false, "site-closed", "?site2")
 			)),
 			effects = Strips.Literals(Unique(

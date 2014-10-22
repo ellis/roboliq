@@ -1,6 +1,7 @@
 # - put balance plate into centrifuge bay 4
 # - put mix plate into centrifuge bay 2
 # - run the centrifuge
+# - move the plates back to their original position
 labware:
   plate1:
     model: plateModel_384_square
@@ -16,10 +17,18 @@ protocol:
 - transportLabware:
     object: plate1
     site: CENTRIFUGE_2
+# The 'close' command is probably not required
 - carousel.close:
     device: mario__Centrifuge
 - evoware.centrifuge.run:
+    device: mario__Centrifuge
     program:
       rpm: 3000
       duration: 300
       temperature: 25
+- transportLabware:
+    object: plate2
+    site: P2
+- transportLabware:
+    object: plate1
+    site: P3

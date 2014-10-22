@@ -152,7 +152,7 @@ class Protocol {
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
-			new EvowareCentrifugeRunOperatorHandler,
+			new EvowareCentrifugeRunOperatorHandler("mario__Centrifuge", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new EvowareTimerStartOperatorHandler,
 			new EvowareTimerWaitOperatorHandler,
 			new MeasureAbsorbanceOperatorHandler,

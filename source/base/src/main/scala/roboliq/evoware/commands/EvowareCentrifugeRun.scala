@@ -23,7 +23,7 @@ import aiplan.strips2.Unique
 
 case class EvowareCentrifugeRunActionParams(
 	agent_? : Option[String],
-	device_? : Option[String],
+	device: Centrifuge,
 	program: CentrifugeProgram
 )
 
@@ -41,28 +41,33 @@ class EvowareCentrifugeRunActionHandler extends ActionHandler {
 	): RqResult[List[OperatorInfo]] = {
 		for {
 			params <- Converter.convActionAs[EvowareCentrifugeRunActionParams](paramToJsval_l, eb, state0)
+			deviceName <- eb.getIdent(params.device)
 		} yield {
 			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
 			val binding_m = Map(
-				"?agent" -> params.agent_?.getOrElse("?agent"),
-				"?device" -> params.device_?.getOrElse("?device")
+				"?agent" -> params.agent_?.getOrElse("?agent")
 			)
 
-			OperatorInfo(id, Nil, Nil, "evoware.centrifuge.run", binding_m, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "evoware.centrifuge.run-"+deviceName, binding_m, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
 
-class EvowareCentrifugeRunOperatorHandler extends OperatorHandler {
+class EvowareCentrifugeRunOperatorHandler(
+	deviceName: String,
+	internalSiteIdent_l: List[String]
+) extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
-			name = "evoware.centrifuge.run",
+			name = "evoware.centrifuge.run-"+deviceName,
 			paramName_l = List("?agent", "?device"),
 			paramTyp_l = List("agent", "centrifuge"),
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device")
 			)),
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
+				Strips.Literal(true, "site-closed", ident)
+			) : _*))
 		)
 	}
 	
