@@ -123,6 +123,7 @@ class Protocol {
 
 	def loadCommandSet(): RsResult[CommandSet] = {
 		val actionHandler_l = List[ActionHandler](
+			new CarouselCloseActionHandler,
 			new CarouselOpenSiteActionHandler,
 			new CloseDeviceSiteActionHandler,
 			new DistributeActionHandler,
@@ -140,6 +141,7 @@ class Protocol {
 			new TransportLabwareActionHandler
 		)
 		val operatorHandler_l = List[OperatorHandler](
+			new CarouselCloseOperatorHandler("mario__Centrifuge", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			// FIXME: HACK: need to add the operators from config somehow, not from here
 			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_1", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_2", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
@@ -169,7 +171,11 @@ class Protocol {
 			new OperatorHandler_EvowareTransportLabware,
 			new OperatorHandler_TransportLabware
 		)
-		val autoHandler_l = List("transportLabware")
+		// TODO: HACK: the idea here was to only put the required operators in the domain,
+		// but since some actions depend on various operators, we'll need to pull in
+		// all of those dependencies for this to work.
+		// Set that up.  For now, I'm just including ALL operators.
+		val autoHandler_l = operatorHandler_l.map(_.getDomainOperator.name)
 		cs = new CommandSet(
 			nameToActionHandler_m = actionHandler_l.map(h => h.getActionName -> h).toMap,
 			nameToOperatorHandler_m = operatorHandler_l.map(h => h.getDomainOperator.name -> h).toMap,

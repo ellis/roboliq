@@ -13,6 +13,7 @@ import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.input.Context
 import roboliq.input.Instruction
 import roboliq.commands.CentrifugeRun
+import roboliq.commands.DeviceClose
 
 trait EvowareDeviceInstructionHandler {
 	def handleInstruction(
@@ -77,9 +78,11 @@ class EvowareInfiniteM200InstructionHandler(carrierE: roboliq.evoware.parser.Car
 		for {
 			deviceName <- Context.from(carrierE.deviceName_?, s"Evoware device name missing for carrier `${carrierE.sName}`")
 			l <- instruction match {
-				case DeviceSiteClose(_, _) =>
+				case _: DeviceClose =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Close", ""), Nil)))
-				case DeviceSiteOpen(_, _) =>
+				case _: DeviceSiteClose =>
+					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Close", ""), Nil)))
+				case _: DeviceSiteOpen =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Open", ""), Nil)))
 				case cmd: ReaderRun =>
 					readerRun_InfiniteM200(identToAgentObject_m, cmd, deviceName)
@@ -142,6 +145,8 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 			l <- instruction match {
 				case inst: DeviceCarouselMoveTo =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_MoveToPos", inst.id), Nil)))
+				case _: DeviceClose =>
+					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Close", ""), Nil)))
 				case _: DeviceInitialize =>
 					Context.unit(List(TranslationItem(L0C_Facts(deviceName, deviceName+"_Init", ""), Nil)))
 				case _: DeviceSiteClose =>

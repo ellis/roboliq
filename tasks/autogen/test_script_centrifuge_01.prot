@@ -10,15 +10,11 @@ labware:
     location: P2
 
 protocol:
-- carousel.openSite:
-    site: CENTRIFUGE_4
 - transportLabware:
     object: plate2
     site: CENTRIFUGE_4
-- carousel.openSite:
-    site: CENTRIFUGE_2
 - transportLabware:
     object: plate1
     site: CENTRIFUGE_2
-- closeDeviceSite:
-    site: CENTRIFUGE_2
+- carousel.close:
+    device: mario__Centrifuge

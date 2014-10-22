@@ -34,6 +34,19 @@ case class DeviceCarouselMoveTo(
 	val data = Nil
 }
 
+case class DeviceClose(
+	device: Device
+) extends DeviceInstruction {
+	val effects = Nil
+	// TODO: need to get the device's identifier in order to set state.value_m(List(deviceIdent, "open")) = Js...
+	/*val effects = List(new WorldStateEvent {
+		def update(state: WorldStateBuilder): RqResult[Unit] = {
+			state.value_m()
+		}
+	})*/
+	val data = Nil
+}
+
 case class DeviceInitialize(
 	device: Device
 ) extends DeviceInstruction {

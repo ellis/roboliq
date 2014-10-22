@@ -20,17 +20,16 @@ import spray.json.JsString
 import spray.json.JsValue
 
 
-case class CarouselOpenSiteActionParams(
+case class CarouselCloseActionParams(
 	agent_? : Option[String],
-	device_? : Option[String],
-	site: Site
+	device: Device
 )
 
-class CarouselOpenSiteActionHandler extends ActionHandler {
+class CarouselCloseActionHandler extends ActionHandler {
 	
-	def getActionName = "carousel.openSite"
+	def getActionName = "carousel.close"
 
-	def getActionParamNames = List("agent", "device", "site")
+	def getActionParamNames = List("agent", "device")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -39,12 +38,16 @@ class CarouselOpenSiteActionHandler extends ActionHandler {
 		state0: WorldState
 	): RqResult[List[OperatorInfo]] = {
 		for {
-			params <- Converter.convActionAs[CarouselOpenSiteActionParams](paramToJsval_l, eb, state0)
-			siteIdent <- eb.getIdent(params.site)
+			params <- Converter.convActionAs[CarouselCloseActionParams](paramToJsval_l, eb, state0)
+			deviceIdent <- eb.getIdent(params.device)
 		} yield {
 			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
+			val binding_l = List(
+				"?agent" -> params.agent_?.getOrElse("?agent")
+			)
+			val binding = binding_l.toMap
 
-			OperatorInfo(id, Nil, Nil, "carousel.openSite-"+siteIdent, Map(), paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "carousel.close-"+deviceIdent, binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
@@ -56,20 +59,18 @@ class CarouselOpenSiteActionHandler extends ActionHandler {
  * 
  * The effect are: the specified site is open and the other internal sites are closed.
  */
-class CarouselOpenSiteOperatorHandler(
-	agentIdent: String,
+class CarouselCloseOperatorHandler(
 	deviceIdent: String,
-	internalSiteIdent: String,
 	internalSiteIdent_l: List[String]
 ) extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
 		Strips.Operator(
-			name = "carousel.openSite-"+internalSiteIdent, // The `id` refers to an internal site
-			paramName_l = Nil, // This is the external site on the robot bench, not one of the internal sites.
-			paramTyp_l = Nil,
+			name = "carousel.close-"+deviceIdent, // The `id` refers to an internal site
+			paramName_l = List("?agent"), // This is the external site on the robot bench, not one of the internal sites.
+			paramTyp_l = List("agent"),
 			preconds = Strips.Literals(Unique()),
 			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
-				Strips.Literal(ident != internalSiteIdent, "site-closed", ident)
+				Strips.Literal(true, "site-closed", ident)
 			) : _*))
 		)
 	}
@@ -78,21 +79,14 @@ class CarouselOpenSiteOperatorHandler(
 		operator: Strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
+		val List(agentName) = operator.paramName_l
+		
 		for {
-			agent <- Context.getEntityAs[Agent](agentIdent)
+			agent <- Context.getEntityAs[Agent](agentName)
 			device <- Context.getEntityAs[Device](deviceIdent)
-			site <- Context.getEntityAs[Site](internalSiteIdent)
 
-			// TODO: Extracting the position from the siteIdent is very awkward -- attach information to the site in some more direct way
-			siteIdent = site.label.get
-			i = siteIdent.lastIndexOf("_")
-			_ <- Context.assert(i > 0, s"couldn't extract carousel position from site name `$siteIdent`")
-			num = siteIdent.substring(i + 1)
-			
-			// Carousel rotate to ident
-			_ <- Context.addInstruction(agent, DeviceCarouselMoveTo(device, num))
-			// Open the external site
-			_ <- Context.addInstruction(agent, DeviceSiteOpen(device, site))
+			// Close the device
+			_ <- Context.addInstruction(agent, DeviceClose(device))
 		} yield ()
 	}
 }
