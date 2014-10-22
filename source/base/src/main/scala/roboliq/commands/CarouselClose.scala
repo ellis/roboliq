@@ -68,7 +68,9 @@ class CarouselCloseOperatorHandler(
 			name = "carousel.close-"+deviceIdent, // The `id` refers to an internal site
 			paramName_l = List("?agent"), // This is the external site on the robot bench, not one of the internal sites.
 			paramTyp_l = List("agent"),
-			preconds = Strips.Literals(Unique()),
+			preconds = Strips.Literals(Unique(
+				Strips.Literal(true, "agent-has-device", "?agent", deviceIdent)
+			)),
 			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
 				Strips.Literal(true, "site-closed", ident)
 			) : _*))

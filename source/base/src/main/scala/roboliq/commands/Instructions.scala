@@ -19,9 +19,8 @@ case class AgentDeactivate() extends Instruction {
 
 case class CentrifugeRun(
 	device: Centrifuge,
-	program: CentrifugeProgram,
-	labwareToSite_l: List[(Labware, Site)]
-) extends Instruction {
+	program: CentrifugeProgram
+) extends DeviceInstruction {
 	val effects = Nil
 	val data = Nil
 }

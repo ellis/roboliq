@@ -165,18 +165,7 @@ class EvowareHettichCentrifugeInstructionHandler(carrierE: roboliq.evoware.parse
 		deviceName: String
 	): Context[List[TranslationItem]] = {
 		for {
-			model <- cmd.labwareToSite_l match {
-				case (labware, site) :: Nil => Context.getLabwareModel(labware)
-				case _ => Context.error("must supply exactly one labware to seal")
-			}
-			// List of site/labware mappings for those labware and sites which evoware has equivalences for
-			siteToModel_l <- Context.mapFirst(cmd.labwareToSite_l) { case (labware, site) =>
-				for {
-					labwareIdent <- Context.getEntityIdent(labware)
-					siteIdent <- Context.getEntityIdent(site)
-					siteToModel <- siteLabwareEntry(identToAgentObject_m, siteIdent, labwareIdent)
-				} yield siteToModel
-			}
+			_ <- Context.unit(0) // dummy statement -- might want to check program parameters here instead
 		} yield {
 			val p = cmd.program
 			val x = List[Int](

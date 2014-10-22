@@ -69,6 +69,7 @@ class CentrifugePlateActionHandler extends ActionHandler {
 			)
 			val binding = binding_l.toMap
 
+			// FIXME: A lot more needs to be done here...
 			OperatorInfo(id, Nil, Nil, "centrifugePlate", binding, paramToJsval_l.toMap) :: Nil
 		}
 	}
@@ -111,8 +112,8 @@ class CentrifugePlateOperatorHandler extends OperatorHandler {
 			site <- Context.getEntityAs[Site](siteName)
 			instruction = CentrifugeRun(
 				device,
-				program,
-				List((labware, site))
+				program/*,
+				List((labware, site))*/
 			)
 			_ <- Context.addInstruction(agent, instruction)
 		} yield ()

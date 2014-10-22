@@ -18,3 +18,8 @@ protocol:
     site: CENTRIFUGE_2
 - carousel.close:
     device: mario__Centrifuge
+- evoware.centrifuge.run:
+    program:
+      rpm: 3000
+      duration: 300
+      temperature: 25

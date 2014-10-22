@@ -18,6 +18,7 @@ import roboliq.entities.Centrifuge
 import roboliq.commands.CentrifugeRun
 import roboliq.commands.CentrifugeProgram
 import roboliq.evoware.translator.L0C_Facts
+import aiplan.strips2.Unique
 
 
 case class EvowareCentrifugeRunActionParams(
@@ -30,7 +31,7 @@ class EvowareCentrifugeRunActionHandler extends ActionHandler {
 	
 	def getActionName = "evoware.centrifuge.run"
 
-	def getActionParamNames = List("agent", "id", "duration")
+	def getActionParamNames = List("agent", "device", "program")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -58,7 +59,9 @@ class EvowareCentrifugeRunOperatorHandler extends OperatorHandler {
 			name = "evoware.centrifuge.run",
 			paramName_l = List("?agent", "?device"),
 			paramTyp_l = List("agent", "centrifuge"),
-			preconds = Strips.Literals.empty,
+			preconds = Strips.Literals(Unique(
+				Strips.Literal(true, "agent-has-device", "?agent", "?device")
+			)),
 			effects = aiplan.strips2.Strips.Literals.empty
 		)
 	}
@@ -73,7 +76,7 @@ class EvowareCentrifugeRunOperatorHandler extends OperatorHandler {
 			params <- Converter.convInstructionParamsAs[EvowareCentrifugeRunActionParams](instructionParam_m)
 			agent <- Context.getEntityAs[Agent](agentName)
 			device <- Context.getEntityAs[Centrifuge](deviceName)
-			instruction = CentrifugeRun(device, params.program, Nil)
+			instruction = CentrifugeRun(device, params.program)
 			_ <- Context.addInstruction(agent, instruction)
 		} yield ()
 	}
