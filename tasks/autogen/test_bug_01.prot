@@ -1,8 +1,5 @@
 description: |
-  Toubleshooting why a threat was no recognized
-  between centrifugeRun and readerRun
-  from tania08_urea_test, 22:transportLabware should have origin location = CENTRIFUGE_2, not P3
-  Why does 12:transportLabware not recognize that 10:transportLabware has moved mixPlate from REGRIP to CENTRIGUE_2?
+  This file was for toubleshooting why a threat was not recognized
 
 labware:
   mixPlate:
