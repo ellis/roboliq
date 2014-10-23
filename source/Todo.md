@@ -91,6 +91,10 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 
 ## tania08_urea
 
+Fabian: 
+- [ ] setup i-control for reading fluorescence
+- [ ] Verify labware (troughs for buffer and urea?)
+
 - [ ] create qc script
 - [ ] create script
 - [ ] create balance plate and seal it

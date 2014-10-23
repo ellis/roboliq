@@ -582,8 +582,8 @@ class ConfigEvoware(
 				
 			case "RoboSeal" =>
 				Some(new DeviceConfigPre(
-					"peeler",
-					device_? = Some(new Peeler(gid, Some(carrierE.sName)))
+					"sealer",
+					device_? = Some(new Sealer(gid, Some(carrierE.sName)))
 				))
 				
 			// Te-Shake 2Pos
