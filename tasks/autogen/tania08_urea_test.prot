@@ -109,6 +109,7 @@ protocol:
 
 - transportLabware:
     device: mario__transporter2
+    program: Narrow
     object: mixPlate
     site: REGRIP
 
@@ -143,6 +144,11 @@ protocol:
 - evoware.timer.wait:
     id: 1
     till: 300 # 5min
+
+- transportLabware:
+    device: mario__transporter1
+    object: mixPlate
+    site: REGRIP
 
 - measureAbsorbance:
     object: mixPlate

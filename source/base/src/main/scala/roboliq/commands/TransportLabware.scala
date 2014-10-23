@@ -20,11 +20,13 @@ import spray.json.JsValue
 import roboliq.plan.OperatorInfo
 import roboliq.plan.ActionHandler
 import roboliq.input.Converter
+import spray.json.JsNull
 
 
 case class TransportLabwareActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
+	program_? : Option[String],
 	`object`: Labware,
 	site: Site
 )
@@ -33,7 +35,7 @@ class TransportLabwareActionHandler extends ActionHandler {
 	
 	def getActionName = "transportLabware"
 
-	def getActionParamNames = List("agent", "device", "object", "site")
+	def getActionParamNames = List("agent", "device", "program", "object", "site")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -58,6 +60,12 @@ class TransportLabwareActionHandler extends ActionHandler {
 		}
 	}
 }
+
+private case class TransportLabwareOperatorParams(
+	agent_? : Option[String],
+	device_? : Option[String],
+	program_? : Option[String]
+)
 
 class OperatorHandler_TransportLabware extends OperatorHandler {
 	def getDomainOperator: Strips.Operator = {
@@ -89,23 +97,28 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 	): Context[Unit] = {
 		val List(labwareName, modelName, site1Name, site2Name, _) = operator.paramName_l
 		
+		if (site1Name == site2Name)
+			return Context.unit(())
+			
 		for {
-			params <- Converter.convInstructionParamsAs[TransportLabwareActionParams](instructionParam_m)
+			params <- Converter.convInstructionParamsAs[TransportLabwareOperatorParams](instructionParam_m)
 			data0 <- Context.get
 			g0 = data0.eb.transportGraph
 			g = g0.filter(g0.having(edge = _.label match {
 				case (agentName: String, deviceName: String, programName: String) =>
 					val agentOk = (params.agent_?.isEmpty || params.agent_? == Some(agentName))
 					val deviceOk = (params.device_?.isEmpty || params.device_? == Some(deviceName))
-					agentOk && deviceOk
+					val programOk = (params.program_?.isEmpty || params.program_? == Some(programName))
+					agentOk && deviceOk && programOk
 			}))
 			labware <- Context.getEntityAs[Labware](labwareName)
 			model <- Context.getEntityAs[LabwareModel](modelName)
 			site1 <- Context.getEntityAs[Site](site1Name)
 			site2 <- Context.getEntityAs[Site](site2Name)
-			node1 <- Context.from(g.find(site1), s"Site `$site1Name` is not in transport graph")
-			node2 <- Context.from(g.find(site2), s"Site `$site2Name` is not in transport graph")
-			path <- Context.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name`")
+			constraintInfo = s"for agent `${params.agent_?.getOrElse("any")}`, device `${params.device_?.getOrElse("any")}`, program `${params.program_?.getOrElse("any")}`"
+			node1 <- Context.from(g.find(site1), s"Origin site `$site1Name` is not in transport graph ${constraintInfo}")
+			node2 <- Context.from(g.find(site2), s"Destination site `$site2Name` is not in transport graph ${constraintInfo}")
+			path <- Context.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name` ${constraintInfo}")
 			//_ = println("path: "+path.edges)
 			_ <- Context.foreachFirst(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair

@@ -323,7 +323,11 @@ object CallTree {
 		): RqResult[List[JsValue]] = {
 			argName_l match {
 				case Nil =>
-					val warning_l = jsval_l.map(v => s"Extra argument: $v") ++ nameToVal_m.toList.map(pair => s"Extra argument: ${pair._1} = ${pair._2}")
+					val warning0_l = jsval_l.map(v => s"Extra argument: $v") ++ nameToVal_m.toList.map(pair => s"Extra argument: ${pair._1} = ${pair._2}")
+					val warning_l = warning0_l match {
+						case Nil => Nil
+						case l => s"Extra arguments in ${nameToVal_l}" :: warning0_l
+					}
 					RsSuccess(acc_r.reverse, warning_l)
 				case name :: argName_l_~ =>
 					// Check whether named parameter is provided

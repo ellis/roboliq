@@ -6,8 +6,11 @@ import scalaz._
 import Scalaz._
 import scala.annotation.tailrec
 import ailib.ch03.DebugSpec
+import java.io.File
 
-sealed trait PopState
+sealed trait PopState {
+	val plan: PartialPlan
+}
 case class PopState_Done(
 	plan: PartialPlan
 ) extends PopState
@@ -370,7 +373,12 @@ object Pop {
 	def stepToEnd(x: PopState): Either[String, PartialPlan] = {
 		@tailrec
 		def loop(stack_r: List[PopState], n: Int): Either[String, PartialPlan] = {
-			//if (n >= 100) return Left(s"debugger end at step ${n}")
+			// Save to file system
+			{
+				val path = new File("log-plan-step.dot").getPath
+				roboliq.utils.FileUtils.writeToFile(path, stack_r.head.plan.toDot(showInitialState=true))
+			}
+			if (n >= 1000) return Left(s"debugger end at step ${n}")
 			//println(s"stepToEnd: step $n: ${stack_r}")
 			step(stack_r) match {
 				case Left(msg) => Left(msg)

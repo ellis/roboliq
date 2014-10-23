@@ -67,6 +67,7 @@ usage.
 - [x] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
 - [?] transportLabware: allow user to specify device, and limit graph search to that device
+- [ ] Fix hack in MeasureAbsorbance, where I comment out the two transport commands to+away from REGRIP station -- need to prioritize a transportLabware-null over transportLabware if labware is already at site, maybe create an 'ensureLocation' operator, but that probably won't work, because we need to be able to pass ROMA and Vector constraints
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create tania08_urea qa script
 - [ ] create tania08_urea script

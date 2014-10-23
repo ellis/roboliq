@@ -12,3 +12,4 @@ SimpleVoltageMeasurementCompoundExample.java
 *.zip
 sbt-launch.jar
 .settings
+log-*

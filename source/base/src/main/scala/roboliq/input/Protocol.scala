@@ -833,9 +833,27 @@ class Protocol {
 			_ = println("domain:")
 			domain <- createDomain(cs, operatorInfo_l)
 			_ = println(domain.toStripsText)
+			// Save to file system
+			_ = {
+				val path = new File("log-domain.lisp").getPath
+				roboliq.utils.FileUtils.writeToFile(path, domain.toStripsText)
+			}
+			
 			problem <- createProblem(operatorInfo_l, domain)
 			_ = println(problem.toStripsText)
+			// Save to file system
+			_ = {
+				val path = new File("log-problem.lisp").getPath
+				roboliq.utils.FileUtils.writeToFile(path, domain.toStripsText)
+			}
+
 			plan0 = PartialPlan.fromProblem(problem)
+			// Save to file system
+			_ = {
+				val path = new File("log-plan0.dot").getPath
+				roboliq.utils.FileUtils.writeToFile(path, plan0.toDot(showInitialState=true))
+			}
+
 			operator_l <- RsResult.mapAll(operatorInfo_l)(operatorInfo => {
 				//println("operatorInfo: "+operatorInfo)
 				for {
@@ -846,6 +864,11 @@ class Protocol {
 				}
 			})
 			plan1 <- plan0.addActionSequence(operator_l).asRs
+			// Save to file system
+			_ = {
+				val path = new File("log-plan1.dot").getPath
+				roboliq.utils.FileUtils.writeToFile(path, plan1.toDot(showInitialState=true))
+			}
 		} yield {
 			(operatorInfo_l, plan1)
 		}

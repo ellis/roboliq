@@ -111,14 +111,14 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 			
 			List(
 				OperatorInfo(id ++ List(1), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(2), Nil, Nil, "evoware.transportLabware", bindingTransportBefore1_m, Map("roma" -> JsNumber(1))),
-				OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", bindingTransportBefore2_m, Map()),
-				OperatorInfo(id ++ List(3), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(4), Nil, Nil, "measureAbsorbance", bindingMeasure_m, paramToJsval_l.toMap),
-				OperatorInfo(id ++ List(5), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(6), Nil, Nil, "transportLabware", bindingTransportAfter1_m, Map()),
-				OperatorInfo(id ++ List(6), Nil, Nil, "evoware.transportLabware", bindingTransportAfter2_m, Map("roma" -> JsNumber(1))),
-				OperatorInfo(id ++ List(7), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map())
+				//OperatorInfo(id ++ List(2), Nil, Nil, "transportLabware", bindingTransportBefore1_m, Map("device" -> JsString("mario__transporter2"), "program" -> JsString("Narrow"))),
+				OperatorInfo(id ++ List(3), Nil, Nil, "transportLabware", bindingTransportBefore2_m, Map()),
+				OperatorInfo(id ++ List(4), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
+				OperatorInfo(id ++ List(5), Nil, Nil, "measureAbsorbance", bindingMeasure_m, paramToJsval_l.toMap),
+				OperatorInfo(id ++ List(6), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
+				OperatorInfo(id ++ List(7), Nil, Nil, "transportLabware", bindingTransportAfter1_m, Map()),
+				//OperatorInfo(id ++ List(8), Nil, Nil, "transportLabware", bindingTransportAfter2_m, Map("device" -> JsString("mario__transporter2"), "program" -> JsString("Narrow"))),
+				OperatorInfo(id ++ List(9), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map())
 			)
 		}
 	}

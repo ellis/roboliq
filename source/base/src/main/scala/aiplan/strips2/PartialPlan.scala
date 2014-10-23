@@ -441,7 +441,7 @@ class PartialPlan private (
 	 * Parameters which must be bound to the parameter of another action should begin with '$' and have a globally unique name. 
 	 */
 	def addAction(op: Operator): Either[String, PartialPlan] = {
-		println(s"addAction($op)")
+		//println(s"addAction($op)")
 		// Create a new action with uniquely numbered parameter names
 		val i = action_l.size
 		// Variables can be one of two types: ones that start with '?' are local to this action, whereas ones that start with '$' are global and need to have the same value for all actions
@@ -830,7 +830,7 @@ class PartialPlan private (
 		if (effect_l.isEmpty)
 			return false
 
-		println(s"isThreat(${action_i}, $link)")
+		//println(s"isThreat(${action_i}, $link)")
 		// Check whether action_i can be ordered between the provider and consumer
 		(for {
 			orderings1 <- orderings.add(link.provider_i, action_i).right
