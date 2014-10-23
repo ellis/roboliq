@@ -128,6 +128,7 @@ class Runner(args: Array[String]) {
 			//_ = println("orderings: "+plan2.orderings.getMinimalMap)
 			plan3 <- RsResult.from(aiplan.strips2.Pop.groundPlan(plan2))
 			_ = save(hdf5, scriptId, dirOutput, "plan.dot", plan3.toDot(showInitialState=true))
+			_ = save(hdf5, scriptId, dirOutput, "actions.lst", (0 until plan3.action_l.size).map(i => plan3.getActionText(i)).mkString("\n"))
 			//_ = println("plan3:")
 			//_ = println(plan3.toDot(showInitialState=false))
 			// List of action indexes in the ordered they've been planned (0 = initial state action, 1 = final goal action)

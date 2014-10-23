@@ -44,10 +44,11 @@ object MainInEclipse extends App {
 	//run("test_tubes_01")
 	//run("test_tipDistance_01")
 	//run("test_tipDistance_02")
+	run("test_bug_01")
 
 	//runTemp("tania04_ph")
 	//runTemp("tania06_qc_ph")
 	//runTemp("tania07_qc_ph")
-	runTemp("tania08_urea_test")
+	//runTemp("tania08_urea_test")
 	//runTemp("tania08_urea")
 }
