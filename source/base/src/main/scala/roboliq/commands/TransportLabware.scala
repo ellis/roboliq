@@ -21,6 +21,9 @@ import roboliq.plan.OperatorInfo
 import roboliq.plan.ActionHandler
 import roboliq.input.Converter
 import spray.json.JsNull
+import roboliq.input.Instruction
+import scalax.collection.Graph
+import scalax.collection.edge.LkUnDiEdge
 
 
 case class TransportLabwareActionParams(
@@ -101,9 +104,26 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 			return Context.unit(())
 			
 		for {
+			data0 <- Context.get
+			_ <- Context.or(
+				getInstructionSub(operator, instructionParam_m, labwareName, modelName, site1Name, site2Name, data0.eb.transportGraph),
+				getInstructionSub(operator, instructionParam_m, labwareName, modelName, site1Name, site2Name, data0.eb.transportUserGraph)
+			)
+		} yield ()
+	}
+	
+	private def getInstructionSub(
+		operator: Strips.Operator,
+		instructionParam_m: Map[String, JsValue],
+		labwareName: String,
+		modelName: String,
+		site1Name: String,
+		site2Name: String,
+		g0: Graph[Site, LkUnDiEdge]
+	): Context[Unit] = {
+		for {
 			params <- Converter.convInstructionParamsAs[TransportLabwareOperatorParams](instructionParam_m)
 			data0 <- Context.get
-			g0 = data0.eb.transportGraph
 			g = g0.filter(g0.having(edge = _.label match {
 				case (agentName: String, deviceName: String, programName: String) =>
 					val agentOk = (params.agent_?.isEmpty || params.agent_? == Some(agentName))
@@ -119,7 +139,7 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 			node1 <- Context.from(g.find(site1), s"Origin site `$site1Name` is not in transport graph ${constraintInfo}")
 			node2 <- Context.from(g.find(site2), s"Destination site `$site2Name` is not in transport graph ${constraintInfo}")
 			path <- Context.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name` ${constraintInfo}")
-			//_ = println("path: "+path.edges)
+			_ = println("path: "+path.edges)
 			_ <- Context.foreachFirst(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
 				val site1 = node1.value

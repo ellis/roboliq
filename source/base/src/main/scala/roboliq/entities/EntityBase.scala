@@ -96,6 +96,7 @@ class EntityBase {
 	 * Contains site nodes with edges between sites where direct transportation is possible.
 	 */
 	var transportGraph = Graph[Site, LkUnDiEdge]()
+	var transportUserGraph = Graph[Site, LkUnDiEdge]()
 	
 	def addAlias(from: String, to: String) {
 		// TODO: Check for loops

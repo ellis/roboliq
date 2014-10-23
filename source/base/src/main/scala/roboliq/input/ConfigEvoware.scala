@@ -505,10 +505,7 @@ class ConfigEvoware(
 		}
 
 		val graph = {
-			// Add user-accessible sites into the graph
-			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
-			agentRomaVectorToSite_m(("user", "", "")) = offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site]))
-			// Populate graph from entries in test_m
+			// Populate graph from entries in agentRomaVectorToSite_m
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
 			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 			import scalax.collection.edge.LHyperEdge
@@ -519,11 +516,31 @@ class ConfigEvoware(
 			//edge_l.take(5).foreach(println)
 			Graph[Site, LkUnDiEdge](edge_l : _*)
 		}
+
+		val userGraph = {
+			// Add user-accessible sites into the graph
+			agentRomaVectorToSite_m.clear()
+			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
+			agentRomaVectorToSite_m(("user", "", "")) = offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site]))
+			// Populate graph from entries in agentRomaVectorToSite_m
+			import scalax.collection.Graph // or scalax.collection.mutable.Graph
+			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
+			import scalax.collection.edge.LHyperEdge
+			val edge_l = agentRomaVectorToSite_m.toList.flatMap(pair => {
+				val (key, site_l) = pair
+				site_l.combinations(2).map(l => LkUnDiEdge(l(0), l(1))(key))
+			})
+			//edge_l.take(5).foreach(println)
+			Graph[Site, LkUnDiEdge](edge_l : _*)
+		}
+
 		// FIXME: should append to transportGraph (not replace it) so that we can have multiple evoware agents
 		eb.transportGraph = graph
+		eb.transportUserGraph = userGraph
 		//println("graph: "+graph.size)
 		//graph.take(5).foreach(println)
 		//graph.foreach(println)
+		
 		RsSuccess(())
 	}
 	

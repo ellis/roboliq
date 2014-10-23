@@ -105,6 +105,7 @@ protocol:
     object: mixPlate
 
 - evoware.timer.start:
+    agent: mario
     id: 1
 
 - transportLabware:
@@ -116,7 +117,7 @@ protocol:
 - measureAbsorbance:
     object: mixPlate
     programFile: tania09_urea_test.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\tania08--<YYYY-MM-DD HH-mm-ss>.xml
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania09--<YYYY-MM-DD HH-mm-ss>.xml
 
 - transportLabware:
     device: mario__transporter1
@@ -127,10 +128,11 @@ protocol:
     device: mario__Centrifuge
     program:
       rpm: 3000
-      duration: 0
+      duration: 1 # must set a duration of at least 1s
       temperature: 25
 
 - evoware.timer.wait:
+    agent: mario
     id: 1
     till: 180 # 3min
 
@@ -142,6 +144,7 @@ protocol:
       temperature: 25
 
 - evoware.timer.wait:
+    agent: mario
     id: 1
     till: 300 # 5min
 
@@ -153,7 +156,7 @@ protocol:
 - measureAbsorbance:
     object: mixPlate
     programFile: tania09_urea_test.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\tania08--<YYYY-MM-DD HH-mm-ss>.xml
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania09--<YYYY-MM-DD HH-mm-ss>.xml
 
 - transportLabware:
     object: mixPlate

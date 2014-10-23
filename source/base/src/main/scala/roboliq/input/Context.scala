@@ -303,6 +303,33 @@ object Context {
 		}
 	}
 	
+	
+	def or[B](f1: => Context[B], f2: => Context[B]): Context[B] = {
+		Context { data =>
+			if (data.error_r.isEmpty) {
+				val (data1, opt1) = f1.run(data)
+				if (data1.error_r.isEmpty) {
+					(data1, opt1)
+				}
+				else {
+					val (data2, opt2) = f2.run(data)
+					if (data2.error_r.isEmpty) {
+						(data2, opt2)
+					}
+					else {
+						val error_r = data2.error_r ++ data1.error_r
+						val warning_r = data2.warning_r ++ data2.warning_r ++ data.warning_r
+						val data3 = data.copy(warning_r = warning_r, error_r = error_r)
+						(data3, None)
+					}
+				}
+			}
+			else {
+				(data, None)
+			}
+		}
+	}
+	
 	def addInstruction(agentInstruction: AgentInstruction): Context[Unit] = {
 		for {
 			state0 <- Context.gets(_.state)
