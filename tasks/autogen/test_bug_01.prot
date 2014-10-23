@@ -2,7 +2,7 @@ description: |
   Toubleshooting why a threat was no recognized
   between centrifugeRun and readerRun
   from tania08_urea_test, 22:transportLabware should have origin location = CENTRIFUGE_2, not P3
-  With this protocol, we can see that 24:transportLabware satisfied "location mixPlate REGRIP" using an early move action, but that the mixPlate has been moved since.
+  Why does 12:transportLabware not recognize that 10:transportLabware has moved mixPlate from REGRIP to CENTRIGUE_2?
 
 labware:
   balancePlate:
@@ -15,18 +15,9 @@ labware:
     location: P3
 
 protocol:
-- sealPlate:
-    object: balancePlate
-
 - transportLabware:
     object: balancePlate
     site: CENTRIFUGE_4
-
-- sealPlate:
-    object: mixPlate
-
-- evoware.timer.start:
-    id: 1
 
 - transportLabware:
     device: mario__transporter2
@@ -50,21 +41,6 @@ protocol:
       rpm: 3000
       duration: 0
       temperature: 25
-
-- evoware.timer.wait:
-    id: 1
-    till: 180 # 3min
-
-- evoware.centrifuge.run:
-    device: mario__Centrifuge
-    program:
-      rpm: 3000
-      duration: 60 # 1min
-      temperature: 25
-
-- evoware.timer.wait:
-    id: 1
-    till: 300 # 5min
 
 - transportLabware:
     device: mario__transporter1
