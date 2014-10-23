@@ -115,8 +115,8 @@ protocol:
 
 - measureAbsorbance:
     object: mixPlate
-    programFile: tania08_urea_test.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ1.xml
+    programFile: tania09_urea_test.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania08--<YYYY-MM-DD HH-mm-ss>.xml
 
 - transportLabware:
     device: mario__transporter1
@@ -152,8 +152,8 @@ protocol:
 
 - measureAbsorbance:
     object: mixPlate
-    programFile: tania08_urea_test.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ2.xml
+    programFile: tania09_urea_test.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania08--<YYYY-MM-DD HH-mm-ss>.xml
 
 - transportLabware:
     object: mixPlate

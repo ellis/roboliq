@@ -96,7 +96,7 @@ protocol:
       cleanBetween: none
       pipettePolicy: Roboliq_Water_Wet_1000
 
-    - source: [sfGFP, Q204H_N149Y, taGFP, V206A]
+    - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
       amount: 5ul
       clean: thorough
       cleanBetweenSameSource: flush
@@ -124,6 +124,7 @@ protocol:
     site: CENTRIFUGE_2
 
 - evoware.centrifuge.run:
+    comment: take care of condensation
     device: mario__Centrifuge
     program:
       rpm: 3000
@@ -138,7 +139,7 @@ protocol:
     device: mario__Centrifuge
     program:
       rpm: 3000
-      duration: 300 # 5min
+      duration: 120 # 2min
       temperature: 25
 
 - evoware.timer.wait:

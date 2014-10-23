@@ -1,0 +1,15 @@
+- pipetting to 96 well PCR plate
+  - component 1: fluorescent protein stock solution
+  - component 2: buffer (urea, DTT, Tris)
+  - component 3: dithionite or water (exclusive or)
+  - replicate count = ~3
+- seal
+- put into TRobot
+- start a thermocycler program to heat to 95C for 5min
+- put PCR plate in downholder
+- loop over all wells
+	- pierce sealer and extract 4.5ul from one well to 384 well plate
+	- reader:
+	  - inject 85.5uL refolding solution
+	  - measure ...???
+	- three replicates per well
