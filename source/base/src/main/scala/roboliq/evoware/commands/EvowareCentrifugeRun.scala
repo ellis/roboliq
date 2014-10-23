@@ -44,11 +44,14 @@ class EvowareCentrifugeRunActionHandler extends ActionHandler {
 			deviceName <- eb.getIdent(params.device)
 		} yield {
 			val m = paramToJsval_l.collect({case (name, JsString(s)) => (name, s)}).toMap
+			val suffix = id.mkString("__", "_", "")
+			val agentName = params.agent_?.getOrElse("$agent-"+suffix)
 			val binding_m = Map(
-				"?agent" -> params.agent_?.getOrElse("?agent")
+				"?agent" -> agentName
 			)
 
-			OperatorInfo(id, Nil, Nil, "evoware.centrifuge.run-"+deviceName, binding_m, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id ++ List(1), Nil, Nil, "carousel.close-"+deviceName, binding_m, Map()) ::
+			OperatorInfo(id ++ List(2), Nil, Nil, "evoware.centrifuge.run-"+deviceName, binding_m, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
