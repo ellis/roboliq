@@ -113,7 +113,7 @@ protocol:
     outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ1.xml
 
 - transportLabware:
-    object: balancePlate
+    object: mixPlate
     site: CENTRIFUGE_2
 
 - evoware.centrifuge.run:
@@ -138,7 +138,15 @@ protocol:
     id: 1
     till: 300 # 5min
 
+- transportLabware:
+    object: mixPlate
+    site: P3
+
 - measureAbsorbance:
     object: mixPlate
     programFile: tania08_urea_test.mdfx
     outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ2.xml
+
+- transportLabware:
+    object: balancePlate
+    site: P2

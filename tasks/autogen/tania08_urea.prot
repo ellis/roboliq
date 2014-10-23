@@ -109,11 +109,11 @@ protocol:
 
 - measureAbsorbance:
     object: mixPlate
-    programFile: test_single_measureAbsorbance_01.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ.xml
+    programFile: tania08_urea.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ1.xml
 
 - transportLabware:
-    object: balancePlate
+    object: mixPlate
     site: CENTRIFUGE_2
 
 - evoware.centrifuge.run:
@@ -138,7 +138,15 @@ protocol:
     id: 1
     till: 14400 # 4h
 
+- transportLabware:
+    object: mixPlate
+    site: P3
+
 - measureAbsorbance:
     object: mixPlate
-    programFile: test_single_measureAbsorbance_01.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ.xml
+    programFile: tania08_urea.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ2.xml
+
+- transportLabware:
+    object: balancePlate
+    site: P2

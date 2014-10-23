@@ -94,6 +94,7 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 Fabian: 
 - [ ] setup i-control for reading fluorescence
 - [ ] Verify labware (troughs for buffer and urea?)
+- [ ] poor sealing
 
 - [ ] create qc script
 - [ ] create script
