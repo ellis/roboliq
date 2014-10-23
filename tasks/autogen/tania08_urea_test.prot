@@ -107,12 +107,18 @@ protocol:
 - evoware.timer.start:
     id: 1
 
+- transportLabware:
+    device: mario__transporter2
+    object: mixPlate
+    site: REGRIP
+
 - measureAbsorbance:
     object: mixPlate
     programFile: tania08_urea_test.mdfx
     outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ1.xml
 
 - transportLabware:
+    device: mario__transporter1
     object: mixPlate
     site: CENTRIFUGE_2
 
@@ -138,14 +144,14 @@ protocol:
     id: 1
     till: 300 # 5min
 
-- transportLabware:
-    object: mixPlate
-    site: P3
-
 - measureAbsorbance:
     object: mixPlate
     programFile: tania08_urea_test.mdfx
     outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ2.xml
+
+- transportLabware:
+    object: mixPlate
+    site: P3
 
 - transportLabware:
     object: balancePlate

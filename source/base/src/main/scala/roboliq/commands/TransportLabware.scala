@@ -54,7 +54,7 @@ class TransportLabwareActionHandler extends ActionHandler {
 				"?site2" -> site2Name
 			)
 
-			OperatorInfo(id, Nil, Nil, "transportLabware", binding_m, Map()) :: Nil
+			OperatorInfo(id, Nil, Nil, "transportLabware", binding_m, paramToJsval_l.toMap) :: Nil
 		}
 	}
 }
@@ -90,8 +90,15 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 		val List(labwareName, modelName, site1Name, site2Name, _) = operator.paramName_l
 		
 		for {
+			params <- Converter.convInstructionParamsAs[TransportLabwareActionParams](instructionParam_m)
 			data0 <- Context.get
-			g = data0.eb.transportGraph
+			g0 = data0.eb.transportGraph
+			g = g0.filter(g0.having(edge = _.label match {
+				case (agentName: String, deviceName: String, programName: String) =>
+					val agentOk = (params.agent_?.isEmpty || params.agent_? == Some(agentName))
+					val deviceOk = (params.device_?.isEmpty || params.device_? == Some(deviceName))
+					agentOk && deviceOk
+			}))
 			labware <- Context.getEntityAs[Labware](labwareName)
 			model <- Context.getEntityAs[LabwareModel](modelName)
 			site1 <- Context.getEntityAs[Site](site1Name)

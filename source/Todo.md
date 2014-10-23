@@ -66,13 +66,13 @@ usage.
 - [x] working on carouselOpenSite handlers
 - [x] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
+- [?] transportLabware: allow user to specify device, and limit graph search to that device
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create tania08_urea qa script
 - [ ] create tania08_urea script
 - [ ] create generic runDevice command
 - [ ] create measureFluorescence command
 - [ ] Template.ewt: fix grid overlap for Centrifuge and Hotel 3POS at grid 54
-- [ ] transportLabware: allow user to specify device and then comment out OperatorHandler_EvowareTransportLabware?
 - [ ] run pipetting accuracy protocol for 384 flat plate
 - [ ] let user specify tags for wells to put in HDF5 tables for later analysis
 - [ ] HDF5 for pipetting accuracy protocols
@@ -94,7 +94,8 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 Fabian: 
 - [ ] setup i-control for reading fluorescence
 - [ ] Verify labware (troughs for buffer and urea?)
-- [ ] poor sealing
+- [ ] poor sealing twice
+- [ ] ROMA1 misplaced plate when transporting from REGRIP to P3
 
 - [ ] create qc script
 - [ ] create script
