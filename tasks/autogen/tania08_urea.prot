@@ -52,13 +52,20 @@ source:
 
 # GFPs
 - name: sfGFP
+  description: wild type
   well: tubes1(A01)
 - name: Q204H_N149Y
+  description: double mutant
   well: tubes1(A02)
-- name: taGFP
+- name: tdGFP
+  description: fusion of double mutant
   well: tubes1(A03)
-- name: V206A
+- name: N149Y
+  description: single mutant
   well: tubes1(A04)
+- name: Q204H
+  description: single mutant
+  well: tubes1(A05)
 
 protocol:
 - titrate:
