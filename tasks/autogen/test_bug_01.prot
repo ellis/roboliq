@@ -5,10 +5,6 @@ description: |
   Why does 12:transportLabware not recognize that 10:transportLabware has moved mixPlate from REGRIP to CENTRIGUE_2?
 
 labware:
-  balancePlate:
-    description: balance plate for centrifuge
-    model: plateModel_384_square
-    location: P2
   mixPlate:
     description: plate for target mixtures
     model: plateModel_384_square
@@ -16,19 +12,10 @@ labware:
 
 protocol:
 - transportLabware:
-    object: balancePlate
-    site: CENTRIFUGE_4
-
-- transportLabware:
     device: mario__transporter2
     program: Narrow
     object: mixPlate
     site: REGRIP
-
-- measureAbsorbance:
-    object: mixPlate
-    programFile: tania08_urea_test.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\XYZ1.xml
 
 - transportLabware:
     device: mario__transporter1

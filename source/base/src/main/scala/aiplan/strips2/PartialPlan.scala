@@ -751,7 +751,7 @@ class PartialPlan private (
 		getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
 	
-	// TODO: It'd be better to calculate the threats incrementally,
+	// TODO: It would be more efficient to calculate the threats incrementally,
 	// but that'll be complicated and take me some time to figure out
 	// how to do correctly.
 	def findThreats(): Set[(Int, CausalLink)] = {
@@ -775,9 +775,9 @@ class PartialPlan private (
 			case _ => None
 		}
 		// Try to resolve with bindings
-		val precond = action_l(link.consumer_i).preconds.l(link.precond_i)
+		val precond = bindings.bind(action_l(link.consumer_i)).preconds.l(link.precond_i)
 		val neg = !precond
-		val action = action_l(action_i)
+		val action = bindings.bind(action_l(action_i))
 		// Find which of the actions effects represent threats to the link
 		val effect0_l = action.effects.l.filter(effect => effect.pos != precond.pos && effect.atom.name == precond.atom.name)
 		val effect_l = effect0_l.filter(effect => {
@@ -805,17 +805,32 @@ class PartialPlan private (
 			// Find which ones are consistent with our bindings
 			ne_l.filter(pair => bindings.exclude(pair._1, pair._2).isRight).map(pair => Some(Resolver_Inequality(pair._1, pair._2)))
 		})
+
+		/*// FIXME: for debug only
+		if (link == CausalLink(2, 7, 0)) {
+			println("getResolvers: for "+link)
+			println("precond: "+precond)
+			println("threatener: "+action)
+			println("            "+getActionText(action_i))
+			println("threatenee: "+getActionText(link.consumer_i))
+			println("effect0_l: "+effect0_l)
+			println("effect_l: "+effect_l)
+			println("ne_l: "+ne_l)
+		}*/
 		
 		(lt_? :: gt_? :: ne_l).flatten
 	}
 	
 	private def isThreat(action_i: Int, link: CausalLink): Boolean = {
-		// FIXME: for debug only
-		val test = action_i == 4 && link == CausalLink(3,2,5)
-		if (test)
-			()
-		// ENDFIX
-		//println(s"isThreat(${action_i}, $link)")
+		val b = isThreatSub(action_i, link)
+		/*// FIXME: for debug only
+		if (action_i == 3 && link == CausalLink(2,5,0))
+			println(s"$b isThreat(${getActionText(action_i)}, $link)")
+		// ENDFIX*/
+		b
+	}
+	
+	private def isThreatSub(action_i: Int, link: CausalLink): Boolean = {
 		// The actions of a link are not threats to the link
 		if (action_i == link.provider_i || action_i == link.consumer_i)
 			return false

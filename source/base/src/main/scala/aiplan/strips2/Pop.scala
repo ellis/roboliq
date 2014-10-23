@@ -187,13 +187,13 @@ object Pop {
 	
 	def step(stack_r: List[PopState]): Either[String, List[PopState]] = {
 		val ps = stack_r.head
-		// FIXME: for debug only
+		/*// FIXME: for debug only
 		if (ps.plan.action_l.size > 11) {
 			println("action11:")
 			println(ps.plan.action_l(11))
 			assert(ps.plan.action_l(11).effects.l.size == 4)
 		}
-		// ENDFIX
+		// ENDFIX*/
 		//println("ps: "+ps)
 		val next_? : Either[String, Option[PopState]] = ps match {
 			case x: PopState_Done => Right(None)
