@@ -127,10 +127,12 @@ class Protocol {
 			new CarouselOpenSiteActionHandler,
 			new CloseDeviceSiteActionHandler,
 			new DistributeActionHandler,
+			new EnsureLabwareLocationActionHandler,
 			new EvowareCentrifugeRunActionHandler,
 			new EvowareTimerSleepActionHandler,
 			new EvowareTimerStartActionHandler,
 			new EvowareTimerWaitActionHandler,
+			new GetLabwareLocationActionHandler,
 			new MeasureAbsorbanceActionHandler,
 			new OpenDeviceSiteActionHandler,
 			new PipetteActionHandler,
@@ -152,9 +154,11 @@ class Protocol {
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
+			new EnsureLabwareLocationOperatorHandler,
 			new EvowareCentrifugeRunOperatorHandler("mario__Centrifuge", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new EvowareTimerStartOperatorHandler,
 			new EvowareTimerWaitOperatorHandler,
+			new GetLabwareLocationOperatorHandler,
 			new MeasureAbsorbanceOperatorHandler,
 			new OpenDeviceSiteOperatorHandler,
 			new PipetteOperatorHandler(1),
@@ -874,6 +878,7 @@ class Protocol {
 		}
 	}
 	
+	// 'userActionCount' was used to let user actions have different providers, but it's not used currently
 	private def getPotentialNewProviders(userActionCount: Int)(plan: PartialPlan, consumer_i: Int): List[Strips.Operator] = {
 		val op0_l = plan.problem.domain.operator_l
 		val allow_l = Set(
@@ -889,9 +894,8 @@ class Protocol {
 		val op_l = op0_l.filter { op =>
 			// These operators are always allowed
 			val always = allow_l.contains(op.name)
-			// 'transportLabware' is allowed if the consumer is user-specified OR it's not a 'transportLabware' action
-			val isUserAction = consumer_i < userActionCount + 2
-			val transportOk = (op.name == "transportLabware") && (isUserAction || (consumer.name != "transportLabware" && consumer.name != "evoware.transportLabware"))
+			// 'transportLabware' is allowed if the consumer is not a 'transportLabware' action
+			val transportOk = (op.name == "transportLabware") && (consumer.name != "transportLabware" && consumer.name != "evoware.transportLabware" && consumer.name != "getLabwareLocation")
 			always || transportOk
 		}
 		/*if (consumer_i > 37 && consumer.name == "transportLabware") {

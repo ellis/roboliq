@@ -84,6 +84,8 @@ usage.
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
 - [ ] roboliq.yaml: replace the specs with program definitions in the agent section
 - [ ] ConfigEvoware.loadDevices(): Shaker: only shake on the second site
+- [ ] TransportLabware: need to also try a third option of robot+user edges, if neither works by itself
+- [ ] Take care of FIXME in Pop or PartialPlan regarding inequalities
 
 ## tania07_qc_ph
 
@@ -106,7 +108,7 @@ Vector training:
 - [ ] ROMA1, CENTRIFUGE (Roma1 missed correct placement of mixPlate in CENTRIFUGE_2 once)
 
 BUGS:
-- [ ] why is 35 before 14?
+- [ ] why is 38 before 18?, why does 24 have site1=ROBOSEAL?
 - [ ] bug: why is centrifuge moved to bay 4 instead of bay 2 to move mixPlate to REGRIP?
 - [ ] make sure bay 4 is opened before moving balancePlate back to P2
 

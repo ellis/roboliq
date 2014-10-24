@@ -91,7 +91,7 @@ object Pop {
 		}
 		else {
 			val (consumer_i, precond_i) = plan0.openGoal_l.head
-			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
+			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i).reverse
 			val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
 			val provider_l = provider1_l ++ provider2_l
 			
@@ -209,6 +209,12 @@ object Pop {
 			case Right(None) => Right(stack_r)
 			case Right(Some(next)) => Right(next :: stack_r)
 			case Left(s) =>
+				// Save to file system
+				{
+					val path = new File("log-plan-failed.dot").getPath
+					roboliq.utils.FileUtils.writeToFile(path, stack_r.head.plan.toDot(showInitialState=true))
+					//1/0
+				}
 				val stack2_r = stack_r.dropWhile {
 					case PopState_ChooseAction(plan, goal, _ :: provider_l, indentLevel) => false
 					case _ => true
@@ -231,18 +237,51 @@ object Pop {
 		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
 		println(s"${indent}openGoals:")
 		// Sort the goals so that actions earlier in the ordering get handled first
-		val goal0_l = plan0.openGoal_l.toList.sortWith((a, b) => {
+		def orderGoals(a: (Int, Int), b: (Int, Int)): Boolean = {
 			if (a._1 == b._1) a._2 < b._2
 			else if (plan0.orderings.map.getOrElse(a._1, Set()).contains(b._1)) true
 			else if (plan0.orderings.map.getOrElse(b._1, Set()).contains(a._1)) false
 			else a._1 < b._1
-		})
+		}
+		val goal0_l = plan0.openGoal_l.toList.sortWith(orderGoals)
 		val goalToProviders_l = goal0_l.map(goal => {
 			val (consumer_i, precond_i) = goal
-			val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
+			val provider1a_l = plan0.getExistingProviders(consumer_i, precond_i)
+			// Sort existing providers in two different ways:
+			// 1) for actions ordered before this action, choose the later actions first (the ones closest to this action)
+			// 2) for actions ordered at the same point or after this action, sort ascending by ordering
+			/*val successors_l = plan0.orderings.map.getOrElse(consumer_i, Set())
+			val provider1_l = provider1a_l.sortWith((pair1, pair2) => {
+				val (Right(action1_i), _) = pair1
+				val (Right(action2_i), _) = pair2
+				(successors_l.contains(action1_i), successors_l.contains(action2_i)) match {
+					case (true, false) => true
+					case (false, true) => false
+					case (true, true) =>
+						if (plan0.orderings.map.getOrElse(action1_i, Set()).contains(action2_i)) false
+						else if (plan0.orderings.map.getOrElse(action2_i, Set()).contains(action1_i)) true
+						else action1_i < action2_i
+					case (false, false) =>
+						if (plan0.orderings.map.getOrElse(action1_i, Set()).contains(action2_i)) true
+						else if (plan0.orderings.map.getOrElse(action2_i, Set()).contains(action1_i)) false
+						else action1_i < action2_i
+				}
+			})*/
+			val provider1_l = provider1a_l.reverse
 			val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
 			(goal, provider1_l ++ provider2_l)
-		}).sortBy(_._2.length)
+		}).sortWith((pair1, pair2) => {
+			val (a, provider1_l) = pair1
+			val (b, provider2_l) = pair2
+			(provider1_l.length, provider2_l.length) match {
+				case (l1, l2) if l1 == l2 => orderGoals(a, b)
+				case (0, _) => true
+				case (_, 0) => false
+				case (1, _) => true
+				case (_, 1) => false
+				case _ => orderGoals(a, b)
+			} 
+		})
 		val goal_l = goalToProviders_l.map(_._1)
 		goalToProviders_l.foreach(pair => {
 			val (goal, provider_l) = pair
@@ -274,7 +313,7 @@ object Pop {
 		val (consumer_i, precond_i) = x.goal
 		val goalAction = plan0.bindings.bind(plan0.action_l(consumer_i).preconds.l(precond_i))
 		println(s"${indent}HandleGoal ${x.goal} ${goalAction}")
-		val provider1_l = plan0.getExistingProviders(consumer_i, precond_i)
+		val provider1_l = plan0.getExistingProviders(consumer_i, precond_i).reverse
 		val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
 		val provider_l = provider1_l ++ provider2_l
 		Right(PopState_ChooseAction(x.plan, x.goal, provider_l, x.indentLevel))
@@ -398,17 +437,19 @@ object Pop {
 	}
 
 	case class GroundNode(
+		label: String,
 		state: PartialPlan,
 		parentOpt: Option[GroundNode],
 		orderingsMinMap: Map[Int, Set[Int]]
 	) extends ailib.ch03.Node[PartialPlan] {
 		def plan = state
+		override def toString = s"GroundNode($label)"
 	}
-	case class GroundAction(newplan: PartialPlan)
+	case class GroundAction(label: String, newplan: PartialPlan)
 	
 	class GroundProblem(plan0: PartialPlan) extends ailib.ch03.Problem[PartialPlan, GroundAction, GroundNode] {
 		val state0 = plan0
-		val root = GroundNode(plan0, None, plan0.orderings.getMinimalMap)
+		val root = GroundNode("ROOT", plan0, None, plan0.orderings.getMinimalMap)
 		
 		def goalTest(plan: PartialPlan): Boolean = {
 			val variable_m = plan.bindings.option_m.filter(pair => pair._2.size > 1)
@@ -423,9 +464,10 @@ object Pop {
 			val binding0_l = variable_m.toList.flatMap(pair => pair._2.map(pair._1 -> _))
 			val bindingAction_l = binding0_l.flatMap { pair =>
 				val (name, value) = pair
+				val label = s"$name = $value"
 				plan.addBindingEq(name, value) match {
 					case Left(_) => None
-					case Right(plan1) => out += s"$name = $value"; Some(GroundAction(plan1))
+					case Right(plan1) => out += label; Some(GroundAction(label, plan1))
 				}
 			}
 			
@@ -437,8 +479,8 @@ object Pop {
 			println()
 			println("START")
 			while (!actionQueue_l.isEmpty) {
-				println("actionOrdering_l: "+actionOrdering_l)
-				println("actionQueue_l: "+actionQueue_l)
+				//println("actionOrdering_l: "+actionOrdering_l)
+				//println("actionQueue_l: "+actionQueue_l)
 				val action_i = actionQueue_l.head
 				// Get list of providers for this action in the order of specified preconditions
 				val before_l = plan.link_l.filter(_.consumer_i == action_i).toList.sortBy(_.precond_i).map(_.provider_i).distinct
@@ -462,6 +504,7 @@ object Pop {
 
 			// Second, respect the ordering constraints:
 			val orderingsMinMap = plan.orderings.getMinimalMap
+			println("orderingsMinMap: "+orderingsMinMap.toList.sortBy(_._1))
 			// The underdetermined ordering pairs are all pairs within any orderingsMinMap value of size > 1
 			// orderingsMinMap.values gives us a list of lists of actions which may be either before or after each other
 			// We want all pair-wise combinations of these items
@@ -479,14 +522,14 @@ object Pop {
 			val ordering0_l = desired_l ++ undesired_l
 			val orderingAction_l = ordering0_l.flatMap { pair =>
 				val (before_i, after_i) = pair
+				val label = s"${before_i} < ${after_i}"
 				plan.addOrdering(before_i, after_i) match {
 					case Left(_) => None
-					case Right(plan1) => out += s"${before_i} < ${after_i}"; Some(GroundAction(plan1))
+					case Right(plan1) => out += label; Some(GroundAction(label, plan1))
 				}
 			}
 
-			println("out:")
-			println(out.toList.mkString(", "))
+			println("will try: "+out.toList.mkString(", "))
 			println()
 
 			logger.debug(plan.toString + " " + out.toList.mkString(", "))
@@ -494,7 +537,7 @@ object Pop {
 		}
 		
 		def childNode(parent: GroundNode, action: GroundAction): GroundNode =
-			GroundNode(action.newplan, Some(parent), action.newplan.orderings.getMinimalMap)
+			GroundNode(action.label, action.newplan, Some(parent), action.newplan.orderings.getMinimalMap)
 	}
 	
 	/**
@@ -504,7 +547,8 @@ object Pop {
 		val search = new ailib.ch03.TreeSearch[PartialPlan, GroundAction, GroundNode]
 		val problem = new GroundProblem(plan)
 		val frontier = new ailib.ch03.DepthFirstFrontier[PartialPlan, GroundNode]
-		val debug = new DebugSpec(true, false, false)
+		//val debug = new DebugSpec(true, false, false)
+		val debug = new DebugSpec(true, true, true)
 		search.run(problem, frontier, debug) match {
 			case None => Left("Couldn't find ground plan")
 			case Some(node) => Right(node.plan)

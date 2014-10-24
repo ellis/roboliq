@@ -12,6 +12,14 @@ trait Frontier[State, Node] {
 	def isEmpty: Boolean
 	def removeChoice(): Node
 	def add(node: Node)
+	/**
+	 * Adding a list may be different than addding a single node.
+	 * For depth-first search, for example, we have a LIFO (last-in, first-out) queue,
+	 * but we may want a sequence of child nodes to be added in FIFO order.  
+	 */
+	def addFIFO(nodes: Iterable[Node]) {
+		nodes.foreach(add)
+	}
 }
 
 class DepthFirstFrontier[State, Node] extends Frontier[State, Node] {
@@ -25,6 +33,9 @@ class DepthFirstFrontier[State, Node] extends Frontier[State, Node] {
 	}
 	def add(node: Node) {
 		l ::= node
+	}
+	override def addFIFO(nodes: Iterable[Node]) {
+		nodes.toList.reverse.foreach(add)
 	}
 }
 
