@@ -486,22 +486,45 @@ class ConfigEvoware(
 			}
 		}
 		
-		val agentRomaVectorToSite_m = new HashMap[(String, String, String), List[Site]]
-
 		// Find which sites the transporters can access
-		for {
-			(carrierE, vector_l) <- carrierData.mapCarrierToVectors.toList
-			site_i <- List.range(0, carrierE.nSites)
-			siteE = CarrierSite(carrierE, site_i)
-			site <- siteEToSites_m.getOrElse(siteE, Nil)
-			vector <- vector_l
-		} {
-			val transporter = roma_m(vector.iRoma)
-			val deviceIdent = eb.entityToIdent_m(transporter)
-			val spec = transporterSpec_m(vector.sClass)
-			val key = (agentIdent, deviceIdent, vector.sClass)
-			agentRomaVectorToSite_m(key) = site :: agentRomaVectorToSite_m.getOrElse(key, Nil)
-			eb.addRel(Rel("transporter-can", List(deviceIdent, eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
+		val agentRomaVectorToSite_m: Map[(String, String, String), List[Site]] = {
+			val transporterBlacklist_l = {
+				if (agentBean.transporterBlacklist == null)
+					Nil
+				else
+					agentBean.transporterBlacklist.toList
+			}
+			def isBlacklisted(roma: Int, vector: String, siteIdent: String): Boolean = {
+				transporterBlacklist_l.exists { item =>
+					val romaMatches = item.roma == null || item.roma == roma
+					val vectorMatches = item.vector == null || item.vector == vector
+					val siteMatches = item.site == null || item.site == siteIdent
+					romaMatches && vectorMatches && siteMatches
+				}
+			}
+			
+			val agentRomaVectorToSite_m = new HashMap[(String, String, String), List[Site]]
+			for {
+				(carrierE, vector_l) <- carrierData.mapCarrierToVectors.toList
+				site_i <- List.range(0, carrierE.nSites)
+				siteE = CarrierSite(carrierE, site_i)
+				site <- siteEToSites_m.getOrElse(siteE, Nil)
+				vector <- vector_l
+			} {
+				val transporter = roma_m(vector.iRoma)
+				val deviceIdent = eb.entityToIdent_m(transporter)
+				val siteIdent = eb.entityToIdent_m(site)
+				val spec = transporterSpec_m(vector.sClass)
+				val key = (agentIdent, deviceIdent, vector.sClass)
+				if (isBlacklisted(vector.iRoma + 1, vector.sClass, siteIdent)) {
+					logger.info(s"blacklisted vector $key for site $siteIdent")
+				}
+				else {
+					agentRomaVectorToSite_m(key) = site :: agentRomaVectorToSite_m.getOrElse(key, Nil)
+					eb.addRel(Rel("transporter-can", List(deviceIdent, eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
+				}
+			}
+			agentRomaVectorToSite_m.toMap
 		}
 
 		val graph = {
@@ -519,9 +542,10 @@ class ConfigEvoware(
 
 		val userGraph = {
 			// Add user-accessible sites into the graph
-			agentRomaVectorToSite_m.clear()
 			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
-			agentRomaVectorToSite_m(("user", "", "")) = offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site]))
+			val agentRomaVectorToSite_m: Map[(String, String, String), List[Site]] = Map( 
+				("user", "", "") -> (offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site])))
+			)
 			// Populate graph from entries in agentRomaVectorToSite_m
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
 			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._

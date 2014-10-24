@@ -66,7 +66,8 @@ usage.
 - [x] working on carouselOpenSite handlers
 - [x] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
-- [?] transportLabware: allow user to specify device, and limit graph search to that device
+- [x] transportLabware: allow user to specify device, and limit graph search to that device
+- [x] blacklist ``mario,mario__transporter2,Wide`` from P1,P2,P3
 - [ ] Fix hack in MeasureAbsorbance, where I comment out the two transport commands to+away from REGRIP station -- need to prioritize a transportLabware-null over transportLabware if labware is already at site, maybe create an 'ensureLocation' operator, but that probably won't work, because we need to be able to pass ROMA and Vector constraints
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create tania08_urea qa script
@@ -97,6 +98,14 @@ Fabian:
 - [ ] Verify labware (troughs for buffer and urea?)
 - [ ] poor sealing twice
 - [ ] ROMA1 misplaced plate when transporting from REGRIP to P3
+
+Vector training:
+- [ ] ROMA1, plate from REGRIP to P3
+- [ ] ROMA1, CENTRIFUGE (Roma1 missed correct placement of mixPlate in CENTRIFUGE_2 once)
+
+BUGS:
+- [ ] bug: why is centrifuge moved to bay 4 instead of bay 2 to move mixPlate to REGRIP?
+- [ ] make sure bay 4 is opened before moving balancePlate back to P2
 
 - [ ] create qc script
 - [ ] create script

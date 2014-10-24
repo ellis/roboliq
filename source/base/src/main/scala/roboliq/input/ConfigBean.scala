@@ -33,6 +33,8 @@ class EvowareAgentBean {
 	/** Table setups for this robot */
 	@BeanProperty var tableSetups: java.util.HashMap[String, TableSetupBean] = null
 	/** Sealer programs */
+	@BeanProperty var transporterBlacklist: java.util.ArrayList[TransporterBlacklistBean] = null
+	/** Sealer programs */
 	@BeanProperty var sealerProgram: java.util.ArrayList[SealerProgramBean] = null
 }
 
@@ -69,6 +71,12 @@ class SiteBean {
 	@BeanProperty var carrier: String = null
 	@BeanProperty var grid: Integer = null
 	@BeanProperty var site: Integer = null
+}
+
+class TransporterBlacklistBean {
+	@BeanProperty var roma: Integer = null
+	@BeanProperty var vector: String = null
+	@BeanProperty var site: String = null
 }
 
 class SealerProgramBean {

@@ -75,6 +75,19 @@ evowareAgents:
         pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, T3]
         userSites:     [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER, REGRIP, T3]
 
+    transporterBlacklist:
+    - { roma: 1, vector: Narrow, site: CENTRIFUGE_1 }
+    - { roma: 1, vector: Narrow, site: CENTRIFUGE_3 }
+    - { roma: 2, vector: Wide, site: P1 }
+    - { roma: 2, vector: Wide, site: P2 }
+    - { roma: 2, vector: Wide, site: P3 }
+    - { roma: 2, vector: Wide, site: P4 }
+    - { roma: 2, vector: Wide, site: P4PCR }
+    - { roma: 2, vector: Wide, site: P5 }
+    - { roma: 2, vector: Wide, site: P5PCR }
+    - { roma: 2, vector: Narrow, site: CENTRIFUGE_2 }
+    - { roma: 2, vector: Narrow, site: CENTRIFUGE_4 }
+
     sealerProgram:
     - model: plateModel_96_pcr
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
