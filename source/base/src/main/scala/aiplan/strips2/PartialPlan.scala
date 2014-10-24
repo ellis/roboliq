@@ -409,8 +409,8 @@ class PartialPlan private (
 	val bindings: Bindings,
 	val link_l: Set[CausalLink],
 	val openGoal_l: Set[(Int, Int)],
-	val threat_l: Set[(Int, CausalLink)]
-	//val possibleLink_l: List[(CausalLink, Map[String, String])]
+	val threat_l: Set[(Int, CausalLink)],
+	val fnPotentialNewProviders_? : Option[(PartialPlan, Int) => List[Operator]]
 ) {
 	// 
 	private def copy(
@@ -420,7 +420,8 @@ class PartialPlan private (
 		bindings: Bindings = bindings,
 		link_l: Set[CausalLink] = link_l,
 		openGoal_l: Set[(Int, Int)] = openGoal_l,
-		threat_l: Set[(Int, CausalLink)] = threat_l
+		threat_l: Set[(Int, CausalLink)] = threat_l,
+		fnPotentialNewProviders_? : Option[(PartialPlan, Int) => List[Operator]] = fnPotentialNewProviders_?
 		//possibleLink_l: List[(CausalLink, Map[String, String])] = possibleLink_l
 	): PartialPlan = {
 		new PartialPlan(
@@ -431,7 +432,8 @@ class PartialPlan private (
 			bindings,
 			link_l,
 			openGoal_l,
-			threat_l
+			threat_l,
+			fnPotentialNewProviders_?
 		)
 	}
 	
@@ -748,7 +750,8 @@ class PartialPlan private (
 	
 	def getNewProviders(consumer_i: Int, precond_i: Int): List[(Either[Operator, Int], Map[String, String])] = {
 		val precond = action_l(consumer_i).preconds.l(precond_i)
-		val op_l = problem.domain.operator_l.filter(op => op.effects.l.exists(effect => effect.atom.name == precond.atom.name))
+		val op0_l = fnPotentialNewProviders_?.map(fn => fn(this, consumer_i)).getOrElse(problem.domain.operator_l)
+		val op_l = op0_l.filter(op => op.effects.l.exists(effect => effect.atom.name == precond.atom.name))
 		val provider_l = op_l.map(op => None -> op)
 		getProvidersFromList(provider_l, consumer_i, precond_i)
 	}
@@ -946,7 +949,10 @@ class PartialPlan private (
 }
 
 object PartialPlan {
-	def fromProblem(problem: Problem): PartialPlan = {
+	def fromProblem(
+		problem: Problem,
+		fnPotentialNewProviders_? : Option[(PartialPlan, Int) => List[Operator]] = None
+	): PartialPlan = {
 		val action0 = Operator(
 			name = "__initialState",
 			paramName_l = Nil,
@@ -971,7 +977,8 @@ object PartialPlan {
 			bindings = new Bindings(Map(), Map(), Map()),
 			link_l = Set(),
 			openGoal_l = openGoal_l,
-			threat_l = Set()
+			threat_l = Set(),
+			fnPotentialNewProviders_? = fnPotentialNewProviders_?
 		)
 	}
 	

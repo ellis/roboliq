@@ -844,10 +844,10 @@ class Protocol {
 			// Save to file system
 			_ = {
 				val path = new File("log-problem.lisp").getPath
-				roboliq.utils.FileUtils.writeToFile(path, domain.toStripsText)
+				roboliq.utils.FileUtils.writeToFile(path, problem.toStripsText)
 			}
 
-			plan0 = PartialPlan.fromProblem(problem)
+			plan0 = PartialPlan.fromProblem(problem, Some(getPotentialNewProviders(operatorInfo_l.size)))
 			// Save to file system
 			_ = {
 				val path = new File("log-plan0.dot").getPath
@@ -872,6 +872,33 @@ class Protocol {
 		} yield {
 			(operatorInfo_l, plan1)
 		}
+	}
+	
+	private def getPotentialNewProviders(userActionCount: Int)(plan: PartialPlan, consumer_i: Int): List[Strips.Operator] = {
+		val op0_l = plan.problem.domain.operator_l
+		val allow_l = Set(
+			"carousel.close-mario__Centrifuge",
+			"carousel.openSite-CENTRIFUGE_1",
+			"carousel.openSite-CENTRIFUGE_2",
+			"carousel.openSite-CENTRIFUGE_3",
+			"carousel.openSite-CENTRIFUGE_4",
+			"closeDeviceSite",
+			"openDeviceSite"
+		)
+		val consumer = plan.action_l(consumer_i)
+		val op_l = op0_l.filter { op =>
+			// These operators are always allowed
+			val always = allow_l.contains(op.name)
+			// 'transportLabware' is allowed if the consumer is user-specified OR it's not a 'transportLabware' action
+			val isUserAction = consumer_i < userActionCount + 2
+			val transportOk = (op.name == "transportLabware") && (isUserAction || (consumer.name != "transportLabware" && consumer.name != "evoware.transportLabware"))
+			always || transportOk
+		}
+		/*if (consumer_i > 37 && consumer.name == "transportLabware") {
+			println(s"getPotentialNewProviders($userActionCount)(${consumer_i}): "+op_l.map(_.name))
+			1/0
+		}*/
+		op_l
 	}
 	
 	def createDomain(cs: CommandSet, operatorInfo_l: List[OperatorInfo]): RqResult[Strips.Domain] = {

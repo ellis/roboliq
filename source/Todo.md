@@ -69,6 +69,7 @@ usage.
 - [x] transportLabware: allow user to specify device, and limit graph search to that device
 - [x] blacklist ``mario,mario__transporter2,Wide`` from P1,P2,P3
 - [x] default ordering of actions should involve performing actions which fulfill a precond as late as possible -- right now it seems that chance is involved
+- [ ] for the planner, indicate which operators can be used as providers
 - [ ] Fix hack in MeasureAbsorbance, where I comment out the two transport commands to+away from REGRIP station -- need to prioritize a transportLabware-null over transportLabware if labware is already at site, maybe create an 'ensureLocation' operator, but that probably won't work, because we need to be able to pass ROMA and Vector constraints
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create tania08_urea qa script
@@ -101,10 +102,11 @@ Fabian:
 - [ ] ROMA1 misplaced plate when transporting from REGRIP to P3
 
 Vector training:
-- [ ] ROMA1, plate from REGRIP to P3
+- [ ] ROMA1, plate from REGRIP to P3 (also missed once)
 - [ ] ROMA1, CENTRIFUGE (Roma1 missed correct placement of mixPlate in CENTRIFUGE_2 once)
 
 BUGS:
+- [ ] why is 35 before 14?
 - [ ] bug: why is centrifuge moved to bay 4 instead of bay 2 to move mixPlate to REGRIP?
 - [ ] make sure bay 4 is opened before moving balancePlate back to P2
 

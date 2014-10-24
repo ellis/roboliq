@@ -433,7 +433,9 @@ object Pop {
 			// First, choose an ordering of actions so that preconditions are fulfilled in the order they were specified
 			// (This does not yet respecting the ordering constraints)
 			var actionOrdering_l = Vector[Int](0)
-			var actionQueue_l = Vector[Int](2)
+			var actionQueue_l = Vector.range(2, plan.action_l.size)
+			println()
+			println("START")
 			while (!actionQueue_l.isEmpty) {
 				println("actionOrdering_l: "+actionOrdering_l)
 				println("actionQueue_l: "+actionQueue_l)
@@ -442,9 +444,9 @@ object Pop {
 				val before_l = plan.link_l.filter(_.consumer_i == action_i).toList.sortBy(_.precond_i).map(_.provider_i).distinct
 				// Get list of providers which haven't already been ordered
 				val remaining_l = before_l.filterNot(actionOrdering_l.contains)
-				println(action_i)
-				println(before_l)
-				println(remaining_l)
+				//println(action_i)
+				//println(before_l)
+				//println(remaining_l)
 				// If the list is empty, we can now put this action in the ordering and remove it from the queue
 				if (remaining_l.isEmpty) {
 					actionOrdering_l = actionOrdering_l :+ action_i
@@ -452,9 +454,11 @@ object Pop {
 				}
 				// Otherwise, prepend the providers to the actionQueue
 				else {
-					actionQueue_l = remaining_l.toVector ++ actionQueue_l
+					actionQueue_l = remaining_l.toVector ++ actionQueue_l.filterNot(remaining_l.contains)
 				}
 			}
+			
+			println("actionOrdering_l: "+actionOrdering_l)
 
 			// Second, respect the ordering constraints:
 			val orderingsMinMap = plan.orderings.getMinimalMap
@@ -471,6 +475,7 @@ object Pop {
 				if (j1 < j2) pairOfPairs else pairOfPairs.swap
 			}).unzip
 			// We'll try the desired orderings first, then the undesired ones
+			println("desired_l: "+desired_l)
 			val ordering0_l = desired_l ++ undesired_l
 			val orderingAction_l = ordering0_l.flatMap { pair =>
 				val (before_i, after_i) = pair
@@ -479,6 +484,10 @@ object Pop {
 					case Right(plan1) => out += s"${before_i} < ${after_i}"; Some(GroundAction(plan1))
 				}
 			}
+
+			println("out:")
+			println(out.toList.mkString(", "))
+			println()
 
 			logger.debug(plan.toString + " " + out.toList.mkString(", "))
 			bindingAction_l ++ orderingAction_l

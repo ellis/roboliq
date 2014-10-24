@@ -669,12 +669,9 @@ class ConfigEvoware(
 					for {
 						default_l <- getDefaultSitesLogic(dc)
 					} yield {
-						val l = dc.siteConfig_l.flatMap { sc =>
+						val l = dc.siteConfig_l.map { sc =>
 							val siteIdent = sc.site.label.get
-							List(
-								Rel("device-can-open-site", List(dc.deviceIdent, siteIdent)),
-								Rel("site-closed", List(siteIdent))
-							)
+							Rel("site-closed", List(siteIdent))
 						}
 						default_l ++ l 
 					}

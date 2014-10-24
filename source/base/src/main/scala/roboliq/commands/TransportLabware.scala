@@ -139,7 +139,7 @@ class OperatorHandler_TransportLabware extends OperatorHandler {
 			node1 <- Context.from(g.find(site1), s"Origin site `$site1Name` is not in transport graph ${constraintInfo}")
 			node2 <- Context.from(g.find(site2), s"Destination site `$site2Name` is not in transport graph ${constraintInfo}")
 			path <- Context.from(node1.shortestPathTo(node2), s"No path in transport graph from `$site1Name` to `$site2Name` ${constraintInfo}")
-			_ = println("path: "+path.edges)
+			//_ = println("path: "+path.edges)
 			_ <- Context.foreachFirst(path.nodes.toList zip path.edges.toList) { pair =>
 				val (node1, edge) = pair
 				val site1 = node1.value

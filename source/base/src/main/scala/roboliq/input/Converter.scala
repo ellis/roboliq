@@ -390,7 +390,7 @@ object Converter {
 				}
 			}
 			else {
-				println("typ: "+typ)
+				//println("typ: "+typ)
 				val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
 				val p0_l = ctor.paramLists(0)
 				val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
@@ -584,11 +584,11 @@ object Converter {
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 		
-		println("convMap: ")
+		/*println("convMap: ")
 		println(path_r)
 		println(jsobj)
 		println(typKey)
-		println(nameToType_l)
+		println(nameToType_l)*/
 
 		// Handle keys if they need to be looked up
 		val (errK_l, wK, convK_l, key_l):
