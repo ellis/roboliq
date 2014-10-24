@@ -68,6 +68,7 @@ usage.
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
 - [x] transportLabware: allow user to specify device, and limit graph search to that device
 - [x] blacklist ``mario,mario__transporter2,Wide`` from P1,P2,P3
+- [x] default ordering of actions should involve performing actions which fulfill a precond as late as possible -- right now it seems that chance is involved
 - [ ] Fix hack in MeasureAbsorbance, where I comment out the two transport commands to+away from REGRIP station -- need to prioritize a transportLabware-null over transportLabware if labware is already at site, maybe create an 'ensureLocation' operator, but that probably won't work, because we need to be able to pass ROMA and Vector constraints
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
 - [ ] create tania08_urea qa script

@@ -339,7 +339,9 @@ class Orderings(
 	}
 	
 	/**
-	 * Get an ordering map which removes all implied orderings.
+	 * Get an ordering map which removes all orderings that are implied by other orderings.
+	 * In other words, if A < {B, C} and B < {C}, then we can just keep A < {B}, and B < {C},
+	 * because A < C is implied. 
 	 */
 	def getMinimalMap: Map[Int, Set[Int]] = {
 		def step(before_i: Int, after_l: List[Int], acc: Set[Int]): (Int, Set[Int]) = {

@@ -7,6 +7,7 @@ import Scalaz._
 import scala.annotation.tailrec
 import ailib.ch03.DebugSpec
 import java.io.File
+import scala.collection.immutable.Vector
 
 sealed trait PopState {
 	val plan: PartialPlan
@@ -416,6 +417,8 @@ object Pop {
 		
 		def actions(plan: PartialPlan): Iterable[GroundAction] = {
 			val out = new scala.collection.mutable.ArrayBuffer[String]
+
+			// Assign all unassigned variables
 			val variable_m = plan.bindings.option_m.filter(pair => pair._2.size > 1)
 			val binding0_l = variable_m.toList.flatMap(pair => pair._2.map(pair._1 -> _))
 			val bindingAction_l = binding0_l.flatMap { pair =>
@@ -425,10 +428,50 @@ object Pop {
 					case Right(plan1) => out += s"$name = $value"; Some(GroundAction(plan1))
 				}
 			}
+			
+			// Arrange actions in an complete ordering
+			// First, choose an ordering of actions so that preconditions are fulfilled in the order they were specified
+			// (This does not yet respecting the ordering constraints)
+			var actionOrdering_l = Vector[Int](0)
+			var actionQueue_l = Vector[Int](2)
+			while (!actionQueue_l.isEmpty) {
+				println("actionOrdering_l: "+actionOrdering_l)
+				println("actionQueue_l: "+actionQueue_l)
+				val action_i = actionQueue_l.head
+				// Get list of providers for this action in the order of specified preconditions
+				val before_l = plan.link_l.filter(_.consumer_i == action_i).toList.sortBy(_.precond_i).map(_.provider_i).distinct
+				// Get list of providers which haven't already been ordered
+				val remaining_l = before_l.filterNot(actionOrdering_l.contains)
+				println(action_i)
+				println(before_l)
+				println(remaining_l)
+				// If the list is empty, we can now put this action in the ordering and remove it from the queue
+				if (remaining_l.isEmpty) {
+					actionOrdering_l = actionOrdering_l :+ action_i
+					actionQueue_l = actionQueue_l.tail
+				}
+				// Otherwise, prepend the providers to the actionQueue
+				else {
+					actionQueue_l = remaining_l.toVector ++ actionQueue_l
+				}
+			}
+
+			// Second, respect the ordering constraints:
 			val orderingsMinMap = plan.orderings.getMinimalMap
 			// The underdetermined ordering pairs are all pairs within any orderingsMinMap value of size > 1
-			val underdetermined_l = orderingsMinMap.values.toList.filter(_.size > 1).flatMap(greater_l => greater_l.toList.combinations(2).toList)
-			val ordering0_l = underdetermined_l.flatMap(l => List(l.head -> l.tail.head, l.tail.head -> l.head))
+			// orderingsMinMap.values gives us a list of lists of actions which may be either before or after each other
+			// We want all pair-wise combinations of these items
+			val underdetermined_l = orderingsMinMap.values.toList.filter(_.size > 1).flatMap(greater_l => greater_l.toList.combinations(2).toList).map { case List(a, b) => (a, b) }
+			// For all pairs which may be before or after each other,
+			// get two lists: one whose orderings correspond to actionOrdering_l, and one that doesn't
+			val (desired_l, undesired_l) = underdetermined_l.map({ case is@(i1, i2) =>
+				val j1 = actionOrdering_l.indexOf(i1)
+				val j2 = actionOrdering_l.indexOf(i2)
+				val pairOfPairs = (is, is.swap)
+				if (j1 < j2) pairOfPairs else pairOfPairs.swap
+			}).unzip
+			// We'll try the desired orderings first, then the undesired ones
+			val ordering0_l = desired_l ++ undesired_l
 			val orderingAction_l = ordering0_l.flatMap { pair =>
 				val (before_i, after_i) = pair
 				plan.addOrdering(before_i, after_i) match {
@@ -436,6 +479,7 @@ object Pop {
 					case Right(plan1) => out += s"${before_i} < ${after_i}"; Some(GroundAction(plan1))
 				}
 			}
+
 			logger.debug(plan.toString + " " + out.toList.mkString(", "))
 			bindingAction_l ++ orderingAction_l
 		}
