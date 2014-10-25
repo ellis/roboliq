@@ -279,7 +279,12 @@ object Pop {
 				case (_, 0) => false
 				case (1, _) => true
 				case (_, 1) => false
-				case _ => orderGoals(a, b)
+				case (l1, l2) =>
+					// For open goals for a single action, sort by number of alternative solutions: 
+					if (a._1 == b._1 && l1 != l2)
+						l1 < l2
+					else
+						orderGoals(a, b)
 			} 
 		})
 		val goal_l = goalToProviders_l.map(_._1)
