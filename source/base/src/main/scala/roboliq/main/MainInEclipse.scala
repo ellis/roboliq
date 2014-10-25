@@ -50,7 +50,9 @@ object MainInEclipse extends App {
 	//runTemp("tania06_qc_ph")
 	//runTemp("tania07_qc_ph")
 	//runTemp("tania08_urea")
-	runTemp("tania08_urea_1_balancePlate")
+	//runTemp("tania08_urea_1_balancePlate")
 	//runTemp("tania08_urea_2_pipette")
+	runTemp("tania08_urea_3_measure")
 	//runTemp("tania09_urea_test")
+	//runTemp("tania09_urea_test_3_measure")
 }

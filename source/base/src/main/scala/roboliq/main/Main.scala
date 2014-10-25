@@ -195,8 +195,6 @@ class Runner(args: Array[String]) {
 			
 			hdf5.close()
 			
-			println("DONE")
-			
 			data1.error_r.reverse.foreach(println)
 			data1.warning_r.reverse.foreach(println)
 		}
@@ -209,9 +207,7 @@ class Runner(args: Array[String]) {
 			warning_l.foreach(s => println("WARNING: "+s))
 			println()
 		}
-		else {
-			println(".")
-		}
+		println("DONE")
 	}
 	
 	private def getInstructions(

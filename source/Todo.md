@@ -73,12 +73,20 @@ Now:
 - [x] Vector train CENTRIFUGE ROMA1
 - [x] Vector train REGRIP to P3 ROMA1
 - [x] for balancePlate script, use system liquid
-- [ ] run tania08_01_balancePlate script
-- [ ] create tania08_urea_3_measure script
-- [ ] test tania08_urea_3_measure 
+- [x] run tania08_01_balancePlate script
+- [x] create tania08_urea_3_measure script
+- [x] test tania08_urea_3_measure 
+- [x] empty waste container
 - [ ] manually add loop to generated script
 - [ ] analyze the data
-- [ ] empty waste container
+
+Email:
+- [ ] waste container, sealer off in container
+- [ ] script running, Jimyoung Kim
+- [ ] my script keeps running
+- [ ] gain 45
+- [ ] buffer on the robot
+- [ ] started measuring at 15:30, then once every hour (send Fabian the mdfx file?  Path is: C:\Users\localadmin\Desktop\Ellis\roboliq\tasks\autogen\tania08_urea.mdfx)
 
 Later:
 - [ ] create qc script
@@ -419,6 +427,10 @@ Here are some sample volumes for doing liquid level detection:
 - [ ] BUG: apparently, while assigning plate names to Evoware names, the evoware names can only be used once; in any case, plateModel_384_round doesn't work, but _square does.
 - [x] BUG: why is there cleaning between buffer dispenses?
 * [ ] problem: didn't find a solution within 100 steps unless I specified where to put the plates
+
+### ``tania09_urea_test_3_measure``
+
+- [ ] BUG: If I set the initial location of mixPlate = P3, planning fails
 
 ## Config file
 

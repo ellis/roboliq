@@ -281,8 +281,6 @@ class ConfigEvoware(
 		} yield site
 		
 		// System liquid
-		println("lExternalObject:")
-		tableData.lExternalObject.foreach(println)
 		val siteSystem_? = for {
 			o <- tableData.lExternalObject.find(_.carrier.sName == "System")
 			site <- createSite(o.carrier, -1, s"${agentIdent} System Liquid")
@@ -351,7 +349,6 @@ class ConfigEvoware(
 		
 		// Create system liquid labware
 		siteSystem_?.foreach { carrierToSite =>
-			println("A")
 			val site = carrierToSite._2
 			val name = "SystemLiquid"
 			val mE = EvowareLabwareModel(name, 8, 1, 1000, List((-1, -1)))
@@ -362,7 +359,6 @@ class ConfigEvoware(
 			eb.addStackables(sm, List(m))
 			eb.setModel(site, sm)
 			identToAgentObject(name) = mE
-			println("B")
 			carrierToSite
 		}		
 		
