@@ -13,10 +13,6 @@ description: |
   cycle for at least 48 hours
 
 labware:
-  waterSource:
-    description: water trough
-    model: troughModel_100ml
-    location: R4
   bufferSource:
     description: buffer trough
     model: troughModel_100ml
@@ -29,19 +25,12 @@ labware:
     description: GFP eppendorf tubes
     model: tubeHolderModel_1500ul
     location: T3
-  balancePlate:
-    description: balance plate for centrifuge
-    model: plateModel_384_square
-    location: P2
   mixPlate:
     description: plate for target mixtures
     model: plateModel_384_square
     location: P3
 
 source:
-
-- name: water
-  well: waterSource(C01|F01)
 
 - name: buffer
   description: 50mM Tris, pH 7
@@ -68,20 +57,6 @@ source:
   well: tubes1(A05)
 
 protocol:
-- distribute:
-    source: water
-    cleanBetween: none
-    pipettePolicy: Roboliq_Water_Air_1000
-    amount: 75ul
-    destination: balancePlate(A01+C01+E01+G01+I01+K01+M01+O01+B01+D01+F01+H01+J01+L01+N01+P01+A02+C02+E02+G02+I02+K02+M02+O02+B02+D02+F02+H02+J02+L02+N02+P02+A03+C03+E03+G03+I03+K03+M03+O03+B03+D03+F03+H03+J03+L03+N03+P03+A04+C04+E04+G04+I04+K04+M04+O04+B04+D04+F04+H04+J04+L04+N04+P04+A05+C05+E05+G05+I05+K05+M05+O05+B05+D05+F05+H05+J05+L05+N05+P05+A06+C06+E06+G06+I06+K06+M06+O06+B06+D06+F06+H06+J06+L06+N06+P06+A07+C07+E07+G07+I07+K07+M07+O07+B07+D07+F07+H07+J07+L07+N07+P07+A08+C08+E08+G08+I08+K08+M08+O08+B08+D08+F08+H08+J08+L08+N08+P08+A09+C09+E09+G09+I09+K09+M09+O09+B09+D09+F09+H09+J09+L09+N09+P09+A10+C10+E10+G10+I10+K10+M10+O10+B10+D10+F10+H10+J10+L10+N10+P10+A11+C11+E11+G11+I11+K11+M11+O11+B11+D11+F11+H11+J11+L11+N11+P11+A12+C12+E12+G12+I12+K12+M12+O12+B12+D12+F12+H12+J12+L12+N12+P12+A13+C13+E13+G13+I13+K13+M13+O13+B13+D13+F13+H13+J13+L13+N13+P13+A14+C14+E14+G14+I14+K14+M14+O14+B14+D14+F14+H14+J14+L14+N14+P14+A15)
-
-- sealPlate:
-    object: balancePlate
-
-- transportLabware:
-    object: balancePlate
-    site: CENTRIFUGE_4
-
 - titrate:
     allOf:
     - source: buffer
@@ -97,7 +72,7 @@ protocol:
       amount: 5ul
       clean: thorough
       cleanBetweenSameSource: flush
-      pipettePolicy: Roboliq_Water_Wet_1000
+      pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul
 
     # TODO: need to mix after the GFP dispense
 
@@ -107,65 +82,3 @@ protocol:
 
 - sealPlate:
     object: mixPlate
-
-- evoware.timer.start:
-    agent: mario
-    id: 1
-
-- transportLabware:
-    device: mario__transporter2
-    program: Narrow
-    object: mixPlate
-    site: REGRIP
-
-- measureAbsorbance:
-    object: mixPlate
-    programFile: tania08_urea.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\tania08--<YYYY-MM-DD HH-mm-ss>.xml
-
-- transportLabware:
-    device: mario__transporter1
-    object: mixPlate
-    site: CENTRIFUGE_2
-
-- evoware.centrifuge.run:
-    device: mario__Centrifuge
-    program:
-      rpm: 3000
-      duration: 1 # must set a duration of at least 1s
-      temperature: 25
-
-- evoware.timer.wait:
-    agent: mario
-    id: 1
-    till: 180 # 3min
-
-- evoware.centrifuge.run:
-    device: mario__Centrifuge
-    program:
-      rpm: 3000
-      duration: 60 # 1min
-      temperature: 25
-
-- evoware.timer.wait:
-    agent: mario
-    id: 1
-    till: 300 # 5min
-
-- transportLabware:
-    device: mario__transporter1
-    object: mixPlate
-    site: REGRIP
-
-- measureAbsorbance:
-    object: mixPlate
-    programFile: tania08_urea.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\tania08--<YYYY-MM-DD HH-mm-ss>.xml
-
-- transportLabware:
-    object: mixPlate
-    site: P3
-
-- transportLabware:
-    object: balancePlate
-    site: P2

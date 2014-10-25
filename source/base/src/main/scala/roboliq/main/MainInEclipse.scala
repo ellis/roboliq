@@ -13,7 +13,7 @@ object MainInEclipse extends App {
 	def runTemp(name: String) {
 		new Runner(Array(
 			"--config", "../tasks/autogen/roboliq.yaml",
-			"--output", s"temp",
+			"--output", s"temp/$name",
 			//"--protocol", "tasks/autogen/tania04_ph.prot"
 			"--protocol", s"../tasks/autogen/$name.prot"
 		))
@@ -50,5 +50,6 @@ object MainInEclipse extends App {
 	//runTemp("tania06_qc_ph")
 	//runTemp("tania07_qc_ph")
 	//runTemp("tania08_urea")
-	runTemp("tania09_urea_test")
+	runTemp("tania08_urea_2_pipette")
+	//runTemp("tania09_urea_test")
 }
