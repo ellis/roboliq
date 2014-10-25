@@ -70,9 +70,10 @@ evowareAgents:
           READER: { carrier: "Infinite M200" }
           REGRIP: { grid: 61, site: 1 }
           ROBOSEAL: { carrier: "RoboSeal" }
+          SYSTEM: { carrier: System }
 #          T1A: { grid: 5
           T3: { grid: 16, site: 1 }
-        pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, T3]
+        pipetterSites: [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, SYSTEM, T3]
         userSites:     [P1, P2, P3, P4PCR, P5PCR, R1, R2, R3, R4, R5, R6, READER, REGRIP, T3]
 
     transporterBlacklist:

@@ -37,42 +37,12 @@ usage.
 - [ ] all external data referenced by a protocol needs to be pulled into the HDF5 file and included as part of the input hash
 - [ ] handle tubes as individual labware items
 - [ ] most device configuration information should be loaded from a config file.  See ConfigEvoware.loadDevices()
+- [ ] strengthen the connection between commands and actions, so that all planning variables can be set by the user in the protocol
 
 ## Current goal
 
-- [x] Refactor using Context
-- [x] figure out how to integrate substances vs sources in the protocol file
-- [x] vatsi: create and run dilution script
-- [x] tania: create accuracy test on 384-well flat bottom plates using fluorescence
-- [x] create more abstract well groups that can be reassigned to arbitrary groups of wells on labware, and let the well group be used either as a well list and a labware list, depending on context
-- [x] fix compiler warnings
-- [x] work on getting tania06_qc_ph to do the same thing as the manual script
-- [x] create titration script for Tania
-- [x] run test of tania04_ph using water
-- [x] figure out how to specify sealer program, since we would normally want it to be picked automatically by the evoware translator, but we should let the user override the selection too
-- [x] `sealPlate` should move plate back to original position after its done sealing
-  - [x] consider adding `transferLabware` operators to `sealPlate` expansion, and figure out how to merge the `site` variables
-- [x] test `sealPlate` command on robot
-- [x] test two `sealPlate` commands in a row, since this probably won't work yet due to `id` variable being unset
-- [x] Created OperatorHandler_EvowareTransportLabware for specifying evoware-specific parameters
-- [x] Context.findFile: have context search some paths for a file
-- [x] Q: Can we remove RoMa2 wide vector for most positions, because it can't lead to dangerous mistakes. A: Urs used it for speed purposes, so maybe we'll need to keep it?
-- [x] test_single_measureAbsorbance_01: Put mdfx in the test directory
-- [x] reader command for absorbtion: read the mdfx file in so that it's in the correct format (strip the XML header, strip extra spaces)
-- [x] evoware.timer.start/wait/sleep: create timer command
-- [x] Template.ewt: fix grid overlap for Centrifuge, Symbol954, and Hotel 5POS SPE, all at grid 55 (moved Centrifuge to 54, removed Hotel 5POS)
-- [x] run test_single_sealPlate_03 on robot
-- [x] run test_single_sealPlate_04 on robot
-- [x] working on carouselOpenSite handlers
-- [x] create centrifuge command (see EvowareHettichCentrifugeInstructionHandler)
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
-- [x] transportLabware: allow user to specify device, and limit graph search to that device
-- [x] blacklist ``mario,mario__transporter2,Wide`` from P1,P2,P3
-- [x] default ordering of actions should involve performing actions which fulfill a precond as late as possible -- right now it seems that chance is involved
-- [x] for the planner, indicate which operators can be used as providers
-- [x] Fix hack in MeasureAbsorbance, where I comment out the two transport commands to+away from REGRIP station -- need to prioritize a transportLabware-null over transportLabware if labware is already at site, maybe create an 'ensureLocation' operator, but that probably won't work, because we need to be able to pass ROMA and Vector constraints
 - [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
-- [ ] create tania08_urea qa script
 - [ ] create tania08_urea script
 - [ ] create generic runDevice command
 - [ ] create measureFluorescence command
@@ -82,7 +52,7 @@ usage.
 - [ ] HDF5 for pipetting accuracy protocols
 - [ ] pipetting accuracy protocols
 - [ ] should be able to use plate name as titration destination, which would mean all wells on the plate
-- [ ] roboliq.yaml: replace the specs with program definitions in the agent section
+- [ ] roboliq.yaml: replace the various specs with program definitions in the agent section
 - [ ] ConfigEvoware.loadDevices(): Shaker: only shake on the second site
 - [ ] TransportLabware: need to also try a third option of robot+user edges, if neither works by itself
 - [ ] Take care of FIXME in Pop or PartialPlan regarding inequalities
@@ -97,39 +67,22 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 
 ## tania08_urea
 
-Fabian: 
-- [ ] setup i-control for reading fluorescence
-- [ ] Verify labware (troughs for buffer and urea?)
-- [ ] poor sealing twice
-- [ ] ROMA1 misplaced plate when transporting from REGRIP to P3
-
-Vector training:
-- [ ] ROMA1, plate from REGRIP to P3 (also missed once)
-- [ ] ROMA1, CENTRIFUGE (Roma1 missed correct placement of mixPlate in CENTRIFUGE_2 once)
-
 Now:
-- [ ] test run of tania09_urea_test
-- [ ] figure out which wells to fill on the balance plate (A01|A15)
-- [ ] create liquid class that mixes after dispensing GFP, and use that in the protocol
+- [x] figure out which wells to fill on the balance plate (A01|A15)
+- [x] create liquid class that mixes after dispensing GFP, and use that in the protocol
+- [x] Vector train CENTRIFUGE ROMA1
+- [x] Vector train REGRIP to P3 ROMA1
+- [x] for balancePlate script, use system liquid
+- [ ] run tania08_01_balancePlate script
+- [ ] create tania08_urea_3_measure script
+- [ ] test tania08_urea_3_measure 
 - [ ] manually add loop to generated script
-- [ ] Vector train CENTRIFUGE ROMA1
-- [ ] Vector train REGRIP to P3 ROMA1
+- [ ] analyze the data
+- [ ] empty waste container
 
+Later:
 - [ ] create qc script
-- [ ] create script
-- [ ] create balance plate and seal it
-- [ ] put balance plate in centrifuge
-- [ ] set centrifuge temperature for incubation
-- [ ] titration
-- [ ] mix after pipetting?
-- [ ] seal
-- [ ] move plate to reader
-- [ ] measure fluorescence
-- [ ] move plate to centrifuge
-- [ ] wait about 3.8 hours
-- [ ] centrifuge for 5 minutes at 3000rpm
-- [ ] repeat from "move plate to reader" for 48 or more hours, measuring every 4 hours
-- [ ] allow for specifing amount by molarity
+- [ ] mix after pipetting
 
 ## Measure Absorbance/Fluorescence
 
@@ -140,30 +93,23 @@ Now:
 - [x] Test openDeviceSite
 - [x] command: closeDeviceSite
 - [x] Test openDeviceSite and closeDeviceSite on robot
-- [ ] create measureFluorescence command which expands to transfer, open, transfer, close, run, open, transfer, close actions
+- [x] create measureAbsorbance command which expands to transfer, open, transfer, close, run, open, transfer, close actions
+- [x] transport shouldn't be done to closed sites
+- [x] planner should figure out that reader needs to be opened
+- [ ] mark reader sites as closed in the initial states
+- [ ] figure out parameters for measureAbsorbance
 - [ ] figure out parameters for measureFluorescence
 - [ ] allow for titrate command to set wellGroup for use in later measure commands?
-- [ ] create properly named "portrait" plate models in Evoware for the regrip and reader sites
 - [ ] Which Evoware plate model to use for plateModel_384_round?
 - [ ] create accuracy protocol for small volumes and small tips using absorbance reader
 - [ ] command: deviceRun
-- [ ] transport shouldn't be done to closed sites
-- [ ] mark reader sites as closed in the initial states
-- [ ] planner should figure out that reader needs to be opened
 
 ## Centrifuge
 
-FACTS("Centrifuge","Centrifuge_Init","","0","");
-FACTS("Centrifuge","Centrifuge_Open","","0","");
-FACTS("Centrifuge","Centrifuge_MoveToPos","2","0","");
-FACTS("Centrifuge","Centrifuge_MoveToPos","4","0","");
-FACTS("Centrifuge","Centrifuge_Close","","0","");
-FACTS("Centrifuge","Centrifuge_Execute1","3000,30,9,9,20","0","");
-
-- [ ] create commands that can be used as a quick HACK to control the centrifuge at a low level
-- [ ] how to manage the four centrigue sites and the one site on the bench?
-- [ ] in the domain logic, we may need to create four operators to open the four sites and consequently close the other three
-- [ ] for evoware transport, regardless of whether which bay we want to put a plate it, we need to search for the centrifuge site on the bench
+- [x] create commands that can be used as a quick HACK to control the centrifuge at a low level
+- [x] how to manage the four centrifuge sites and the one site on the bench?
+- [x] in the domain logic, we may need to create four operators to open the four sites and consequently close the other three
+- [x] for evoware transport, regardless of whether which bay we want to put a plate it, we need to search for the centrifuge site on the bench
 - [ ] for the high-level command, need to keep track of balance plate and put it in the centrifuge as needed
 - [ ] remove the balance plate by the end of the script at latest
 - [ ] possibly create a balance plate
@@ -871,6 +817,8 @@ What we could do is propogate the desired post-condition value through commands,
 - [ ] Consider making paths in config file relative to the config file itself
 - [ ] Refactor the Converter code, and make more use of parsers
 - [ ] Commands should be able to each produce their own reports, e.g. for TitrationSeries, showing a table with the contents of the wells
+- [ ] allow for specifying amount by molarity
+- [ ] allow for specifying time with time units of s, min, h and so on
 
 ## Entities
 

@@ -181,7 +181,8 @@ object EvowareTableParser {
 			val (external, sLine) = pair
 			val (n, l) = EvowareFormat.splitSemicolons(sLine)
 			assert(n == 998)
-			val iGrid = l(0).toInt
+			// We need to force the system liquid to be on grid -1
+			val iGrid = if (external.carrier.id == -1) -1 else l(0).toInt
 			external.carrier -> iGrid
 		}).toMap
 		(map, lsLine.drop(lExternalObject.length))

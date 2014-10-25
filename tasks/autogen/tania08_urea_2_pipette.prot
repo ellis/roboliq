@@ -59,20 +59,33 @@ source:
 protocol:
 - titrate:
     allOf:
-    - source: buffer
-      cleanBetween: none
-      pipettePolicy: Roboliq_Water_Dry_1000
 
-    - source: urea
-      amount: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul, 45ul, 50ul, 55ul, 60ul, 65ul, 70ul]
-      cleanBetween: none
-      pipettePolicy: Roboliq_Water_Wet_1000
+    - oneOf:
+      # First buffer, then urea
+      - allOf:
+        - source: buffer
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Dry_1000
+        - source: urea
+          amount: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul]
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Wet_1000
+      # First urea, then water
+      - allOf:
+        - source: urea
+          amount: [40ul, 45ul, 50ul, 55ul, 60ul, 65ul, 70ul]
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Dry_1000
+        - source: buffer
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Wet_1000
 
-    - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-      amount: 5ul
-      clean: thorough
-      cleanBetweenSameSource: flush
-      pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul
+    - oneOf:
+      - { source: sfGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: Q204H_N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: tdGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: Q204H, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
 
     # TODO: need to mix after the GFP dispense
 

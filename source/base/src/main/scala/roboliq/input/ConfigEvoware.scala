@@ -48,6 +48,7 @@ import roboliq.entities.Entity
 import roboliq.core.RsError
 import roboliq.entities.Centrifuge
 import roboliq.evoware.translator.EvowareHettichCentrifugeInstructionHandler
+import roboliq.entities.SiteModel
 
 /**
  * @param postProcess_? An option function to call after all sites have been created, which can be used for further handling of device configuration.
@@ -126,7 +127,7 @@ class ConfigEvoware(
 
 		for {
 			tuple1 <- loadAgentBean()
-			(labwareModel_l, tip_l, modelEToModel_l) = tuple1
+			(tip_l, modelEToModel_l) = tuple1
 			
 			siteEToSite_l <- loadSitesAndDevices(agent, pipetterIdent, modelEToModel_l)
 			_ <- loadTransporters(agent, siteEToSite_l)
@@ -146,7 +147,6 @@ class ConfigEvoware(
 	 */
 	private def loadAgentBean(
 	): RsResult[(
-		List[LabwareModelBean],
 		List[Tip],
 		List[(EvowareLabwareModel, LabwareModel)]
 	)] = {
@@ -157,7 +157,7 @@ class ConfigEvoware(
 			tipModel_l <- loadAgentTipModels()
 			tip_l <- loadAgentTips(tipModel_l)
 			modelEToModel_l <- loadAgentPlateModels(labwareModel_l)
-		} yield (labwareModel_l, tip_l, modelEToModel_l)
+		} yield (tip_l, modelEToModel_l)
 	}
 
 	private def loadAgentTipModels(
@@ -214,7 +214,8 @@ class ConfigEvoware(
 		logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
 		
 		// Start with gathering list of all available labware models whose names are either in the config or table template
-		val labwareModelE0_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) || labwareNamesOfInterest_l.contains(m.sName.replace(" portrait", "")) => m})
+		val labwareModelE0_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
+		//labwareModelE0_l.foreach(m => println(m.sName))
 		val evowareNameToLabwareModel_m = agentBean.labwareModels.toList.map(x => x.evowareName -> x).toMap
 		// Only keep the ones we have LabwareModels for (TODO: seems like a silly step -- should probably filter labwareNamesOfInterest_l to begin with)
 		val labwareModelE_l = labwareModelE0_l.filter(mE => evowareNameToLabwareModel_m.contains(mE.sName))
@@ -223,8 +224,13 @@ class ConfigEvoware(
 				for {
 					model <- RsResult.from(evowareNameToLabwareModel_m.get(mE.sName), s"evoware labware model not found: `${mE.sName}`")
 				} yield {
+					// FIXME: for debug only
+					if (mE.sName == "Systemliquid") {
+						println(mE)
+						println(mE)
+					}
+					// ENDFIX
 					//println("mE.sName: "+mE.sName)
-					//if (mE.sName.contains("Plate") || mE.sName.contains("96") || mE.sName.contains("Trough")) {
 					val m = PlateModel(model.name, Option(model.label), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
 					//idToModel_m(mE.sName) = m
 					eb.addModel(m, model.name)
@@ -232,26 +238,11 @@ class ConfigEvoware(
 					eb.addStackable(offsiteModel, m)
 					// The user arm can handle all models
 					eb.addDeviceModel(userArm, m)
-					//eb.addRel(Rel("transporter-can", List(eb.names(userArm), eb.names(m), "nil")))
 					identToAgentObject(model.name) = mE
 					(mE, m)
 				}
 			}
 		} yield modelEToModel_l
-	}
-
-	private def findSiteIdent(tableSetupBean: TableSetupBean, carrierName: String, grid: Int, site: Int): Option[String] = {
-		def ok[A](a: A, b: A): Boolean = (a == null || a == b)
-		def okInt(a: Integer, b: Int): Boolean = (a == null || a == b)
-		def matches(siteBean: SiteBean): Boolean =
-			ok(siteBean.carrier, carrierName) &&
-			okInt(siteBean.grid, grid) &&
-			okInt(siteBean.site, site)
-		for ((ident, bean) <- tableSetupBean.sites.toMap) {
-			if (matches(bean))
-				return Some(ident)
-		}
-		None
 	}
 	
 	/**
@@ -279,7 +270,7 @@ class ConfigEvoware(
 			} yield { siteId -> m }
 			l.groupBy(_._1).mapValues(_.map(_._2).toSet)
 		}
-			
+		
 		// Create Hotel Sites
 		val siteHotel_l = for {
 			o <- tableData.lHotelObject
@@ -289,6 +280,14 @@ class ConfigEvoware(
 			site <- createSite(carrierE, site_i, s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}").toList
 		} yield site
 		
+		// System liquid
+		println("lExternalObject:")
+		tableData.lExternalObject.foreach(println)
+		val siteSystem_? = for {
+			o <- tableData.lExternalObject.find(_.carrier.sName == "System")
+			site <- createSite(o.carrier, -1, s"${agentIdent} System Liquid")
+		} yield site
+			
 		// Create Device and their Sites
 		val deviceConfig_l = for {
 			o <- tableData.lExternalObject if !carriersSeen_l.contains(o.carrier.id)
@@ -325,7 +324,7 @@ class ConfigEvoware(
 		// Concatenate hotel, device, and bench sites
 		val site_l = {
 			val siteDevice_l = deviceConfig_l.flatMap(_.siteConfig_l.map(sc => (sc.siteE, sc.site)))
-			siteHotel_l ++ siteDevice_l ++ siteBench_l
+			siteSystem_?.toList ++ siteHotel_l ++ siteDevice_l ++ siteBench_l
 		}
 		
 		// TODO: For tubes, create their on-bench Sites and SiteModels
@@ -349,6 +348,23 @@ class ConfigEvoware(
 				eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))
 			}
 		}
+		
+		// Create system liquid labware
+		siteSystem_?.foreach { carrierToSite =>
+			println("A")
+			val site = carrierToSite._2
+			val name = "SystemLiquid"
+			val mE = EvowareLabwareModel(name, 8, 1, 1000, List((-1, -1)))
+			val m = PlateModel(name, Option(name), Some(name), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+			val sm = SiteModel("SystemLiquid")
+			eb.addModel(sm, s"sm0")
+			eb.addModel(m, "SystemLiquid")
+			eb.addStackables(sm, List(m))
+			eb.setModel(site, sm)
+			identToAgentObject(name) = mE
+			println("B")
+			carrierToSite
+		}		
 		
 		// Create SiteModels for for sites which hold Plates
 		{
@@ -407,6 +423,20 @@ class ConfigEvoware(
 			val site = Site(gid, Some(siteIdent), Some(description))
 			(siteE, site)
 		}
+	}
+
+	private def findSiteIdent(tableSetupBean: TableSetupBean, carrierName: String, grid: Int, site: Int): Option[String] = {
+		def ok[A](a: A, b: A): Boolean = (a == null || a == b)
+		def okInt(a: Integer, b: Int): Boolean = (a == null || a == b)
+		def matches(siteBean: SiteBean): Boolean =
+			ok(siteBean.carrier, carrierName) &&
+			okInt(siteBean.grid, grid) &&
+			okInt(siteBean.site, site)
+		for ((ident, bean) <- tableSetupBean.sites.toMap) {
+			if (matches(bean))
+				return Some(ident)
+		}
+		None
 	}
 	
 	private def getDefaultDeviceSiteConfigs(
@@ -578,6 +608,10 @@ class ConfigEvoware(
 		handler_? : Option[EvowareDeviceInstructionHandler],
 		site_l_? : Option[List[Site]]*/
 		carrierE.partNo_?.getOrElse(carrierE.sName) match {
+			// System liquid
+			case "System" =>
+				None
+				
 			// Infinite M200
 			case "Tecan part no. 30016056 or 30029757" =>
 				// In addition to the default logic, also let the device open its site
