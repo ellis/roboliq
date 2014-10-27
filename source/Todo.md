@@ -3,6 +3,7 @@
 ## Big issues
 
 - [x] handle tubes as wells on plates
+- [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too (e.g., start with `loop` command, but also embedded measurement commands during pipetting)
 - [ ] `measureFluorescence` command
 - [ ] `measureAbsorbance` command
 - [ ] smarter pipette policy and tip choices (create parser to allow for logic in config file)
@@ -22,7 +23,6 @@
 - [ ] support multi-dispense
 - [ ] support multi-aspirate
 - [ ] read in data file about pipetting accuracy, and produce confidence intervals about various volumes dispensed in a well
-- [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too (e.g., start with `loop` command, but also embedded measurement commands during pipetting)
 - [ ] conditional branching and feedback loops
 - [ ] improve error and warning output, so that the user knows which command or config entry is causing the problem
 - [ ] REFACTOR: merge EntityBase, AtomBase, and WorldState into WorldState, using atoms as much as possible
@@ -42,7 +42,11 @@ usage.
 ## Current goal
 
 - [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
-- [ ] handle shakerProgram in ConfigEvoware and roboliq.yaml
+- [ ] tania10_renaturation_1_pipette
+- [ ] create appropriate thermocycler program and upload it
+- [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too
+- [ ] create a 'loop' command
+- [ ] ConfigEvoware: handle the shakerProgram in ConfigEvoware, and move it to the agent section in roboliq.yaml
 - [ ] create tania08_urea script
 - [ ] create generic runDevice command
 - [ ] create measureFluorescence command
@@ -57,6 +61,8 @@ usage.
 - [ ] TransportLabware: need to also try a third option of robot+user edges, if neither works by itself
 - [ ] Take care of FIXME in Pop or PartialPlan regarding inequalities
 
+## ``tania10_renaturation``
+
 ## tania07_qc_ph
 
 Create a quality control script to test:
@@ -65,30 +71,9 @@ various volumes for water-like dispense of dye into non-empty well, using follow
 
 Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP source might be of interest.  Or various color dyes...
 
-## tania08_urea
+## ``tania08_urea``
 
-Now:
-- [x] figure out which wells to fill on the balance plate (A01|A15)
-- [x] create liquid class that mixes after dispensing GFP, and use that in the protocol
-- [x] Vector train CENTRIFUGE ROMA1
-- [x] Vector train REGRIP to P3 ROMA1
-- [x] for balancePlate script, use system liquid
-- [x] run tania08_01_balancePlate script
-- [x] create tania08_urea_3_measure script
-- [x] test tania08_urea_3_measure 
-- [x] empty waste container
-- [ ] manually add loop to generated script
 - [ ] analyze the data
-
-Email:
-- [ ] waste container, sealer off in container
-- [ ] script running, Jimyoung Kim
-- [ ] my script keeps running
-- [ ] gain 45
-- [ ] buffer on the robot
-- [ ] started measuring at 15:30, then once every hour (send Fabian the mdfx file?  Path is: C:\Users\localadmin\Desktop\Ellis\roboliq\tasks\autogen\tania08_urea.mdfx)
-
-Later:
 - [ ] create qc script
 - [ ] mix after pipetting
 
