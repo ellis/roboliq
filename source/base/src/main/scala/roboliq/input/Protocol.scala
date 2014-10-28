@@ -33,7 +33,7 @@ import roboliq.commands._
 import roboliq.plan.OperatorHandler
 import roboliq.commands.ShakePlateOperatorHandler
 import roboliq.commands.ShakePlateActionHandler
-import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
+import roboliq.evoware.handler.EvowareInfiniteM200InstructionHandler
 import roboliq.evoware.translator.EvowareSealerProgram
 import roboliq.evoware.commands.OperatorHandler_EvowareTransportLabware
 import roboliq.evoware.commands.EvowareCentrifugeRunActionHandler

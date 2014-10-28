@@ -11,13 +11,14 @@ description: |
   - loop over all wells
     - pierce sealer and extract 4.5ul from one well to 384 well plate
     - reader:
+      - do we need to measure fluorescence before injection?
       - inject 85.5uL refolding solution
       - measure (see tania09_renaturation.mdfx)
     - three replicates per well
 
   Q: What component volumes to use for the mix?  Keep in mind that we're in a 96-well plate now instead of 384
   Q: Does the plate go back in the thermocycler after piercing?; Can we find an alternative to the downholder if necessary?
-  Q: Where is the downholder?
+  Q: How should the downholder be mounted?
 
 labware:
   waterLabware:
@@ -79,7 +80,7 @@ protocol:
 
     - oneOf:
       # Maybe we don't need any clean between here?  Need to find the volume.
-      - { source: water, amount: ?ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000 }
+      - { source: water, amount: 10ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000 }
       #- { source: dithionite, amount: ?ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000 }
 
     - oneOf:
@@ -91,7 +92,7 @@ protocol:
 
     # TODO: need to mix after the GFP dispense
 
-    amount: ?ul
+    amount: 75ul
     destination: mixPlate(A01|H12)
     replicates: 1
 

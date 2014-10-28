@@ -4,7 +4,7 @@ import scala.collection.JavaConversions._
 import roboliq.evoware.translator.EvowareSealerProgram
 import scala.collection.mutable.ArrayBuffer
 import scalax.collection.edge.LkUnDiEdge
-import roboliq.evoware.translator.EvowareInfiniteM200InstructionHandler
+import roboliq.evoware.handler.EvowareInfiniteM200InstructionHandler
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareClientScriptBuilder
@@ -41,14 +41,15 @@ import roboliq.entities.Agent
 import roboliq.entities.Reader
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.entities.Device
-import roboliq.evoware.translator.EvowareDeviceInstructionHandler
+import roboliq.evoware.handler.EvowareDeviceInstructionHandler
 import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.Carrier
 import roboliq.entities.Entity
 import roboliq.core.RsError
 import roboliq.entities.Centrifuge
-import roboliq.evoware.translator.EvowareHettichCentrifugeInstructionHandler
+import roboliq.evoware.handler.EvowareHettichCentrifugeInstructionHandler
 import roboliq.entities.SiteModel
+import roboliq.evoware.handler.EvowareTRobotInstructionHandler
 
 /**
  * @param postProcess_? An option function to call after all sites have been created, which can be used for further handling of device configuration.
@@ -665,9 +666,23 @@ class ConfigEvoware(
 				))
 				
 			case "TRobot1" =>
+				// In addition to the default logic, also let the device open its site
+				def overrideSiteLogic(dc: DeviceConfig): RsResult[List[Rel]] = {
+					for {
+						default_l <- getDefaultSitesLogic(dc)
+					} yield {
+						val l = dc.siteConfig_l.map { sc =>
+							val siteIdent = sc.site.label.get
+							Rel("device-can-open-site", List(dc.deviceIdent, siteIdent))
+						}
+						default_l ++ l 
+					}
+				}
 				Some(new DeviceConfigPre(
 					"thermocycler",
-					device_? = Some(new Thermocycler(gid, Some(carrierE.sName)))
+					device_? = Some(new Thermocycler(gid, Some(carrierE.sName))),
+					handler_? = Some(new EvowareTRobotInstructionHandler(carrierE)),
+					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
 			
 			case "Centrifuge" => // TODO: FIXME: Get the correct ID or name

@@ -60,6 +60,7 @@ import java.io.File
 import roboliq.evoware.commands.EvowareInstruction
 import roboliq.evoware.commands.EvowareSubroutine
 import roboliq.input.DeviceInstruction
+import roboliq.evoware.handler.EvowareDeviceInstructionHandler
 
 case class EvowareScript2(
 	index: Int,
