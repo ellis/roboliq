@@ -322,6 +322,7 @@ object Converter {
 			val convInfo_? = convInfo_l.find(typ <:< _.typ)
 			val ret: RsResult[ConvResult] =
 			if (convInfo_?.isDefined) convInfo_?.get.fromJson(path_r, jsval, typ, eb)
+			else if (typ =:= typeOf[JsValue]) RqSuccess(ConvObject(jsval))
 			else if (typ =:= typeOf[String]) Converter.toString(jsval)
 			else if (typ =:= typeOf[Int]) toInt(jsval)
 			else if (typ =:= typeOf[Integer]) toInteger(jsval)

@@ -26,7 +26,7 @@ object MainInEclipse extends App {
 	//run("test_single_carouselOpenSite_01")
 	//run("test_single_evowareTimerSleep_01")
 	//run("test_single_measureAbsorbance_01")
-	run("test_single_openDeviceSite_02")
+	//run("test_single_openDeviceSite_02")
 	//run("test_single_pipette_01")
 	//run("test_single_pipette_02")
 	//run("test_single_pipette_03")
@@ -35,6 +35,7 @@ object MainInEclipse extends App {
 	run("test_single_pipette_06")
 	run("test_single_pipette_07")
 	run("test_single_pipette_08")*/
+	//run("test_single_runDevice_01")
 	//run("test_single_sealPlate_01")
 	//run("test_single_sealPlate_02")
 	//run("test_single_sealPlate_03")
@@ -57,4 +58,7 @@ object MainInEclipse extends App {
 	//runTemp("tania09_urea_test")
 	//runTemp("tania09_urea_test_3_measure")
 	//runTemp("tania10_renaturation")
+	//runTemp("tania11_renaturation_test")
+	//runTemp("tania12_denaturation_1_balancePlate")
+	runTemp("tania12_denaturation_2_pipette")
 }

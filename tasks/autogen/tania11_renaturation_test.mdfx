@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
-    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-23T11:32:35.5410937Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-28T13:33:02.0502406Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
     <TecanMeasurement id="1" class="">
         <MeasurementManualCycle id="2" number="1" type="Standard">
             <CyclePlate id="3" file="PE384fw_OptiPlate" plateWithCover="False">
-                <PlateRange id="4" range="A2:A2" auto="false">
+                <PlateRange id="4" range="A1:A1" auto="false">
                     <MeasurementAbsorbance id="5" mode="Normal" type="" name="ABS" longname="" description="">
                         <Well id="6" auto="false">
-                            <Injection id="8" command="" channels="1" volumes="90" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
+                            <Injection id="8" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
                             <InjectionReading id="9" name="">
-                                <Injection id="10" command="" channels="1" volumes="90" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Inject" maxPacketSize="1" readtimelikedispensetime="False" />
+                                <Injection id="10" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Inject" maxPacketSize="1" readtimelikedispensetime="False" />
                                 <MeasurementReading id="11" name="" beamDiameter="700" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
                                     <ReadingLabel id="12" name="Label1" scanType="ScanFixed" refID="0">
                                         <ReadingSettings number="25" rate="25000" />

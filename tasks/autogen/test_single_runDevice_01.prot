@@ -1,0 +1,7 @@
+description: |
+  Run thermocycler
+
+protocol:
+- runDevice:
+    device: mario__TRobot1
+    program: { dir: 1, program: 2 }

@@ -77,6 +77,13 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 - [ ] create qc script
 - [ ] mix after pipetting
 
+- [ ] the creation of the balance plate should happen before pipetting, but it needs to take information from the titration command about which wells were filled!
+- [ ] need to loop the measurement/centrifugation
+
+## ``tania10_renaturation``
+
+- [ ] need to generate a new reader script for each measurement, because we're measuring different wells
+
 ## Measure Absorbance/Fluorescence
 
 - [x] Why isn't an InfiniteM200 device created in Protocol?
@@ -117,6 +124,12 @@ appropriate position, opens the physical gateway site, and flags the internal si
 When the carousel is closed, it closes all internal sites again.
 Then in the evoware script builder, we somehow need to lookup the alias of the internal sites and actually use
 the external site (perhaps we can simply assign the same grid+site to each of the internal sites).
+
+## Thermocycler
+
+- [ ] Create ThermocyclePlate command
+- [ ] Create generic Bean for program definition
+- [ ] Generate the .tbp file, both for file system and data.h5 (See old TRobotProgram.scala)
 
 ## Command definition via YAML
 

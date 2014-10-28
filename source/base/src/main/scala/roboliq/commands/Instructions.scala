@@ -6,6 +6,7 @@ import scala.collection.mutable.SortedSet
 import roboliq.input.Instruction
 import java.io.File
 import roboliq.input.DeviceInstruction
+import spray.json.JsValue
 
 case class AgentActivate() extends Instruction {
 	val effects = Nil
@@ -48,6 +49,15 @@ case class DeviceClose(
 
 case class DeviceInitialize(
 	device: Device
+) extends DeviceInstruction {
+	val effects = Nil
+	val data = Nil
+}
+
+case class DeviceRun(
+	device: Device,
+	program_? : Option[JsValue],
+	programFile_? : Option[String]
 ) extends DeviceInstruction {
 	val effects = Nil
 	val data = Nil
