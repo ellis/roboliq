@@ -6,6 +6,10 @@ function getWellName0(row, col) {
 	return String.fromCharCode("A".charCodeAt(0)-1+row) + ('0'+col).slice(-2);
 }
 
+function getWellNames0(rowCol_l) {
+	return _.map(rowCol_l, function(rowCol) { return getWellName0(rowCol.row, rowCol.col) }).join("+");
+}
+
 function getWellName(row, col) {
 	return String.fromCharCode("A".charCodeAt(0)-1+row) + col;
 }
@@ -55,10 +59,18 @@ var protocolContents = {
 	  mixPlate: { model: "plateModel_96_pcr", location: "DOWNHOLDER" },
 	  renaturationPlate:  { model: "plateModel_384_square", location: "P2" }
 	},
+	source: [],
 	protocol: []
 };
 
-function setProtocol(rowCol_l) {
+function generateProtocol(rowCol_l) {
+	// Indicate that the mixWells will be used as sources
+	protocolContents.source = protocolContents.source.concat([{
+		name: "protein{{WELL}}",
+		well: getWellNames0(rowCol_l)
+	}]);
+
+	// Generate the command list
 	var ll = _.map(rowCol_l, function(rowCol) { return template(rowCol.row, rowCol.col) });
 	var l = _.flatten(ll);
 	protocolContents.protocol = l;
@@ -69,5 +81,5 @@ var sourceRowCol_l = [
 	{ row: 3, col: 1 }
 ];
 
-setProtocol(sourceRowCol_l);
+generateProtocol(sourceRowCol_l);
 console.log(JSON.stringify(protocolContents, null, '\t'))
