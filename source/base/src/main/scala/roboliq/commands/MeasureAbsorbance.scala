@@ -73,16 +73,16 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 				"?site" -> site1Name
 			)
 			// Bindings for transfer to sealer
-			val bindingOpenClose_m = Map[String, String](
-				"?agent" -> agentName,
-				"?device" -> deviceName,
-				"?site" -> siteName
-			)
-			// Bindings for transfer to sealer
 			val bindingTransportBefore1_m = Map(
 				"?labware" -> labwareName,
 				"?model" -> modelName,
 				"?site" -> "REGRIP"
+			)
+			// Bindings for transfer to sealer
+			val bindingOpenClose_m = Map[String, String](
+				"?agent" -> agentName,
+				"?device" -> deviceName,
+				"?site" -> siteName
 			)
 			// Bindings for transfer to sealer
 			val bindingTransportBefore2_m = Map(
@@ -114,16 +114,16 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 			)
 			
 			List(
-				OperatorInfo(id ++ List(1), Nil, Nil, "getLabwareLocation", bindingGetLocation_m, Map()),//Map("device" -> JsString("mario__transporter2"), "program" -> JsString("Narrow"))),
-				OperatorInfo(id ++ List(2), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(3), Nil, Nil, "ensureLabwareLocation", bindingTransportBefore1_m, Map()),//Map("device" -> JsString("mario__transporter2"), "program" -> JsString("Narrow"))),
+				OperatorInfo(id ++ List(1), Nil, Nil, "getLabwareLocation", bindingGetLocation_m, Map()),
+				OperatorInfo(id ++ List(2), Nil, Nil, "ensureLabwareLocation", bindingTransportBefore1_m, Map()),
+				OperatorInfo(id ++ List(3), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
 				OperatorInfo(id ++ List(4), Nil, Nil, "transportLabware", bindingTransportBefore2_m, Map()),
 				OperatorInfo(id ++ List(5), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
 				OperatorInfo(id ++ List(6), Nil, Nil, "measureAbsorbance", bindingMeasure_m, paramToJsval_l.toMap),
 				OperatorInfo(id ++ List(7), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
 				OperatorInfo(id ++ List(8), Nil, Nil, "transportLabware", bindingTransportAfter1_m, Map()),
-				OperatorInfo(id ++ List(9), Nil, Nil, "ensureLabwareLocation", bindingTransportAfter2_m, Map()),//Map("device" -> JsString("mario__transporter2"), "program" -> JsString("Narrow"))),
-				OperatorInfo(id ++ List(10), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map())
+				OperatorInfo(id ++ List(9), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
+				OperatorInfo(id ++ List(10), Nil, Nil, "ensureLabwareLocation", bindingTransportAfter2_m, Map())
 			)
 		}
 	}

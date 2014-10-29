@@ -4,7 +4,7 @@
     <TecanMeasurement id="1" class="">
         <MeasurementManualCycle id="2" number="1" type="Standard">
             <CyclePlate id="3" file="NUN384ft" plateWithCover="False">
-                <PlateRange id="4" range="A1:A1" auto="false">
+                <PlateRange id="4" range="A1:C1" auto="false">
                     <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
                         <Well id="6" auto="false">
                             <Injection id="7" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />

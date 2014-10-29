@@ -62,12 +62,19 @@ usage.
 
 ## ``tania10_renaturation``
 
+ALSO:
+- [x] Skype
+- [x] Email Debo
+
 - [x] figure out downholder site and pipetting
-- [ ] roboliq.yaml: figure out how to use TemplateWithRealDownholder.ewt
-- [ ] create test script for pipetting 4.5ul from downholder to 384 well with small tips
-- [ ] test small tips for 4.5ul volumes
+- [x] roboliq.yaml: figure out how to use TemplateWithRealDownholder.ewt
+- [x] replace thermocycling with waiting
+- [x] create test script for pipetting 4.5ul from downholder to 384 well with small tips
 - [ ] need to generate a new reader script for each measurement, because we're measuring different wells
+- [ ] test small tips for 4.5ul volumes
 - [ ] figure out downholder vectors
+- [ ] create a "sleep" command that somehow figures out which evoware timer IDs are available (shall we use logic to keep track of available timers?)
+- [ ] BUG: planning fails without explicit transportPlate to REGRIP station
 
 ## tania07_qc_ph
 
@@ -79,6 +86,7 @@ Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP s
 
 ## ``tania12_denaturation``
 
+- [ ] centrifuge before first measurement
 - [ ] need to loop the measurement/centrifugation
 - [ ] create qc script
 - [ ] mix after pipetting

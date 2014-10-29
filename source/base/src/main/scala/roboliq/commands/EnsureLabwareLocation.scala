@@ -70,7 +70,9 @@ class EnsureLabwareLocationOperatorHandler extends OperatorHandler {
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "location", "?labware", "?site")
 			)),
-			effects = Strips.Literals(Unique())
+			effects = Strips.Literals(Unique(
+				Strips.Literal(true, "location", "?labware", "?site")
+			))
 		)
 	}
 	

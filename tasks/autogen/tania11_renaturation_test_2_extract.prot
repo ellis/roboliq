@@ -79,30 +79,19 @@ protocol:
 - sealPlate:
     object: mixPlate
 
-#- thermocyclePlate:
-#    object: mixPlate
-#    program: { dir: 9, program: 0 }
-- openDeviceSite:
-    site: TROBOT1
-- transportLabware:
-    object: mixPlate
-    site: TROBOT1
-- closeDeviceSite:
-    site: TROBOT1
-#- runDevice:
-#    device: mario__TRobot1
-#    program: { dir: 9, program: 0 }
-- openDeviceSite:
-    site: TROBOT1
-- transportLabware:
-    object: mixPlate
-    site: P5PCR
-- closeDeviceSite:
-    site: TROBOT1
+- evoware.timer.start:
+    agent: mario
+    id: 1
+
 - transportLabware:
     agent: user
     object: mixPlate
     site: DOWNHOLDER
+
+- evoware.timer.wait:
+    agent: mario
+    id: 1
+    till: 60
 
 - distribute:
     source: mixPlate(A01)
@@ -112,6 +101,17 @@ protocol:
     tip: 5
     pipettePolicy: Roboliq_Water_Wet_0050
 
-#- measureAbsorbance:
-#    object: renaturationPlate
-#    programFile: tania11_renaturation_test.mdfx
+- transportLabware:
+    device: mario__transporter2
+    object: renaturationPlate
+    site: REGRIP
+
+- measureAbsorbance:
+    object: renaturationPlate
+    programFile: tania10_renaturation_test.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania11_renaturation_test--<YYYMMDD_HHmmss>.xml
+
+- transportLabware:
+    device: mario__transporter2
+    object: renaturationPlate
+    site: P2
