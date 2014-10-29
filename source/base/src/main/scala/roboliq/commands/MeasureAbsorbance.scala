@@ -25,12 +25,14 @@ import spray.json.JsValue
 import roboliq.entities.Reader
 import java.io.File
 import spray.json.JsNumber
+import org.apache.commons.io.FileUtils
 
 
 case class MeasureAbsorbanceActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
-	programFile: String,
+	programFile_? : Option[String],
+	programData_? : Option[String],
 	outputFile: String,
 	`object`: Labware,
 	site_? : Option[Site]
@@ -40,7 +42,7 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 	
 	def getActionName = "measureAbsorbance"
 
-	def getActionParamNames = List("agent", "device", "programFile", "outputFile", "object", "site")
+	def getActionParamNames = List("agent", "device", "programFile", "programData", "outputFile", "object", "site")
 	
 	def getOperatorInfo(
 		id: List[Int],
@@ -157,11 +159,19 @@ class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
 			device <- Context.getEntityAs[Reader](deviceName)
 			labware <- Context.getEntityAs[Labware](labwareName)
 			site <- Context.getEntityAs[Site](siteName)
-			programFile <- Context.findFile(params.programFile)
-			_ <- Context.assert(programFile.exists(), s"file not found: ${params.programFile}")
+			programData <- (params.programFile_?, params.programData_?) match {
+				case (None, None) => Context.error("requires either `programFile` or `programData`")
+				case (Some(filename), None) => 
+					for {
+						file <- Context.findFile(filename)
+					} yield FileUtils.readFileToString(file)
+				case (None, Some(programData)) =>
+					Context.unit(programData)
+				case (_, _) => Context.error("you must only specify either `programFile` or `programData`, but not both")
+			}
 			instruction = ReaderRun(
 				device,
-				programFile,
+				programData,
 				params.outputFile,
 				List((labware, site))
 			)

@@ -51,13 +51,11 @@ class EvowareInfiniteM200InstructionHandler(carrierE: roboliq.evoware.parser.Car
 					siteToModel <- siteLabwareEntry(identToAgentObject_m, siteIdent, labwareIdent)
 				} yield siteToModel
 			}
-			// Read in the mdfx file, which should be an XML file. 
-			programData0 = FileUtils.readFileToString(cmd.programFile)
 			// Check for the root XML element
-			start_i = programData0.indexOf("<TecanFile")
+			start_i = cmd.programData.indexOf("<TecanFile")
 			_ <- Context.assert(start_i >= 0, s"program file does not have expected contents: $cmd.progfile")
 		} yield {
-			val programData = programData0.substring(start_i).
+			val programData = cmd.programData.substring(start_i).
 				replace("\r", "").
 				replace("\n", "").
 				replace("&", "&amp;"). // "&amp;" is probably not needed, since I didn't find it in the XML files

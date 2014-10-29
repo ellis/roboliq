@@ -57,7 +57,8 @@ case class DeviceInitialize(
 case class DeviceRun(
 	device: Device,
 	program_? : Option[JsValue],
-	programFile_? : Option[String]
+	programFile_? : Option[String],
+	programData_? : Option[String]
 ) extends DeviceInstruction {
 	val effects = Nil
 	val data = Nil
@@ -218,7 +219,7 @@ case class Prompt(text: String) extends Instruction {
 
 case class ReaderRun(
 	device: Reader,
-	programFile: File,
+	programData: String,
 	outputFilename: String,
 	labwareToSite_l: List[(Labware, Site)]
 ) extends Instruction {

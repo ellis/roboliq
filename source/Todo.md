@@ -42,12 +42,9 @@ usage.
 ## Current goal
 
 - [ ] tania12_denaturation: create a single script for the whole thing so that Fabian can start it on Friday
-- [ ] create appropriate thermocycler program and upload it
 - [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too
 - [ ] create a 'loop' command
 - [ ] ConfigEvoware: handle the shakerProgram in ConfigEvoware, and move it to the agent section in roboliq.yaml
-- [ ] create tania08_urea script
-- [ ] create generic runDevice command
 - [ ] create measureFluorescence command
 - [ ] Template.ewt: fix grid overlap for Centrifuge and Hotel 3POS at grid 54
 - [ ] run pipetting accuracy protocol for 384 flat plate
@@ -59,18 +56,21 @@ usage.
 - [ ] ConfigEvoware.loadDevices(): Shaker: only shake on the second site
 - [ ] TransportLabware: need to also try a third option of robot+user edges, if neither works by itself
 - [ ] Take care of FIXME in Pop or PartialPlan regarding inequalities
+- [ ] create appropriate thermocycler program and upload it
 
 ## ``tania10_renaturation``
 
-ALSO:
-- [x] Skype
-- [x] Email Debo
+NOTE:
+- takes about 15 minutes to measure three wells on the renaturationPlate
 
 - [x] figure out downholder site and pipetting
 - [x] roboliq.yaml: figure out how to use TemplateWithRealDownholder.ewt
 - [x] replace thermocycling with waiting
 - [x] create test script for pipetting 4.5ul from downholder to 384 well with small tips
-- [ ] need to generate a new reader script for each measurement, because we're measuring different wells
+- [x] use nodejs to generate list of commands for extracting/measuring cycle
+- [x] need to generate a new reader script for each measurement, because we're measuring different wells
+- [x] generate test protocol (does it need to be yaml, or can roboliq already handle json protocols?)
+- [x] measureAbsorbance: have it accept `programData` as alternative to `programFile`
 - [ ] test small tips for 4.5ul volumes
 - [ ] figure out downholder vectors
 - [ ] create a "sleep" command that somehow figures out which evoware timer IDs are available (shall we use logic to keep track of available timers?)

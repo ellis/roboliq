@@ -330,6 +330,18 @@ object Context {
 		}
 	}
 	
+	def toOption[B](ctx: Context[B]): Context[Option[B]] = {
+		Context { data =>
+			val (data1, opt1) = ctx.run(data)
+			if (data1.error_r.isEmpty) {
+				(data, None)
+			}
+			else {
+				(data1, Some(opt1))
+			}
+		}
+	}
+	
 	def addInstruction(agentInstruction: AgentInstruction): Context[Unit] = {
 		for {
 			state0 <- Context.gets(_.state)

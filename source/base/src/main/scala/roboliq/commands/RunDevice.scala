@@ -24,7 +24,8 @@ case class RunDeviceActionParams(
 	agent_? : Option[String],
 	device_? : Option[String],
 	program_? : Option[JsValue],
-	programFile_? : Option[String]
+	programFile_? : Option[String],
+	programData_? : Option[String]
 )
 
 // REFACTOR: This entire file is practically a duplicate of OpenDeviceSite.scala
@@ -81,7 +82,8 @@ class RunDeviceOperatorHandler extends OperatorHandler {
 			instruction = DeviceRun(
 				device,
 				params.program_?,
-				params.programFile_?
+				params.programFile_?,
+				params.programData_?
 			)
 			_ <- Context.addInstruction(agent, instruction)
 		} yield ()

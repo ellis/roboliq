@@ -1,5 +1,7 @@
 package roboliq.main
 
+import java.io.File
+
 object MainInEclipse extends App {
 	def run(name: String, tableName_l: List[String] = Nil) {
 		new Runner(Array(
@@ -10,10 +12,13 @@ object MainInEclipse extends App {
 	}
 	
 	def runTemp(name: String, tableName_l: List[String] = Nil) {
+		val filename1 = s"../tasks/autogen/$name.prot"
+		val filename2 = s"../tasks/autogen/$name.json"
+		val filename = if (new File(filename1).exists) filename1 else filename2
 		new Runner(Array(
 			"--config", "../tasks/autogen/roboliq.yaml",
 			"--output", s"temp/$name",
-			"--protocol", s"../tasks/autogen/$name.prot"
+			"--protocol", filename
 		) ++ tableName_l.flatMap(List("--table", _)))
 	}
 	
@@ -56,7 +61,9 @@ object MainInEclipse extends App {
 	//runTemp("tania09_urea_test")
 	//runTemp("tania09_urea_test_3_measure")
 	//runTemp("tania10_renaturation")
-	runTemp("tania11_renaturation_test_2_extract", List("mario_withDownholder"))
+	//runTemp("tania10_renaturation")
+	runTemp("tania10_renaturation_2", List("mario_withDownholder"))
+	//runTemp("tania11_renaturation_test_2_extract", List("mario_withDownholder"))
 	//runTemp("tania12_denaturation_1_balancePlate")
 	//runTemp("tania12_denaturation_2_pipette")
 }
