@@ -1,22 +1,20 @@
 package roboliq.main
 
 object MainInEclipse extends App {
-	def run(name: String) {
+	def run(name: String, tableName_l: List[String] = Nil) {
 		new Runner(Array(
 			"--config", "../tasks/autogen/roboliq.yaml",
 			"--output", s"testoutput/$name/current",
-			//"--protocol", "tasks/autogen/tania04_ph.prot"
 			"--protocol", s"../tasks/autogen/$name.prot"
-		))
+		) ++ tableName_l.flatMap(List("--table", _)))
 	}
 	
-	def runTemp(name: String) {
+	def runTemp(name: String, tableName_l: List[String] = Nil) {
 		new Runner(Array(
 			"--config", "../tasks/autogen/roboliq.yaml",
 			"--output", s"temp/$name",
-			//"--protocol", "tasks/autogen/tania04_ph.prot"
 			"--protocol", s"../tasks/autogen/$name.prot"
-		))
+		) ++ tableName_l.flatMap(List("--table", _)))
 	}
 	
 	// Select first odd rows then even rows on a 384 well plate
@@ -58,7 +56,7 @@ object MainInEclipse extends App {
 	//runTemp("tania09_urea_test")
 	//runTemp("tania09_urea_test_3_measure")
 	//runTemp("tania10_renaturation")
-	//runTemp("tania11_renaturation_test")
+	runTemp("tania11_renaturation_test_2_extract", List("mario_withDownholder"))
 	//runTemp("tania12_denaturation_1_balancePlate")
-	runTemp("tania12_denaturation_2_pipette")
+	//runTemp("tania12_denaturation_2_pipette")
 }

@@ -36,14 +36,8 @@ import roboliq.entities.Distribution
 case class Opt(
 	configFile: File = null,
 	protocolFile: File = null,
-	outputDir: File = null
-)
-
-case class EvowareOpt(
-	robotName: String = "",
-	evowareDir: String = "",
-	tableFile: String = "",
-	robotConfigFile: String = ""
+	outputDir: File = null,
+	tableNames: Vector[String] = Vector()
 )
 
 class Runner(args: Array[String]) {
@@ -57,6 +51,8 @@ class Runner(args: Array[String]) {
 			o.copy(protocolFile = x) } text("protocol file")
 		opt[File]("output") valueName("<dir>") action { (x, o) =>
 			o.copy(outputDir = x) } text("output directory")
+		opt[String]("table") valueName("<name>") action { (x, o) =>
+			o.copy(tableNames = o.tableNames :+ x) } text("agentName_tableName")
 	}
 	parser.parse(args, Opt()) map { opt =>
 		run(opt)
@@ -96,7 +92,7 @@ class Runner(args: Array[String]) {
 			configBean <- loadConfigBean(opt.configFile.getPath())
 			//_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
 			cs <- protocol.loadCommandSet()
-			_ <- protocol.loadConfigBean(configBean, Nil)
+			_ <- protocol.loadConfigBean(configBean, opt.tableNames.toList)
 
 			jsobj <- loadProtocolJson(opt.protocolFile)
 			_ <- protocol.loadJson(jsobj)

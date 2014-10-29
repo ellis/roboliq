@@ -17,8 +17,7 @@ description: |
     - three replicates per well
 
   Q: What component volumes to use for the mix?  Keep in mind that we're in a 96-well plate now instead of 384
-  Q: Does the plate go back in the thermocycler after piercing?; Can we find an alternative to the downholder if necessary?
-  Q: How should the downholder be mounted?
+  Q: Heat lid to 95C?  Pre-heat?
 
 labware:
   waterLabware:
@@ -45,6 +44,9 @@ labware:
 
 source:
 
+- name: water
+  well: waterLabware(A01|D01)
+
 - name: buffer
   description: urea, DTT, Tris
   well: bufferLabware(C01|F01)
@@ -68,34 +70,12 @@ source:
 - name: Q204H
   description: single mutant
   well: gfpLabware(A05)
+  
+- name: protein{{WELL}}
+  well: mixPlate(A01)
 
 
 protocol:
-- titrate:
-    allOf:
-
-    - source: buffer
-      cleanBetween: none
-      pipettePolicy: Roboliq_Water_Dry_1000
-
-    - oneOf:
-      # Maybe we don't need any clean between here?  Need to find the volume.
-      - { source: water, amount: 10ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000 }
-      #- { source: dithionite, amount: ?ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000 }
-
-    - oneOf:
-      - { source: sfGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      #- { source: Q204H_N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      #- { source: tdGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      #- { source: N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      #- { source: Q204H, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-
-    # TODO: need to mix after the GFP dispense
-
-    amount: 75ul
-    destination: mixPlate(A01|H12)
-    replicates: 1
-
 - sealPlate:
     object: mixPlate
 
@@ -109,25 +89,29 @@ protocol:
     site: TROBOT1
 - closeDeviceSite:
     site: TROBOT1
-- runDevice:
-    device: mario_TRobot1
-    program: { dir: 9, program: 0 }
+#- runDevice:
+#    device: mario__TRobot1
+#    program: { dir: 9, program: 0 }
 - openDeviceSite:
     site: TROBOT1
 - transportLabware:
     object: mixPlate
-    site: P1
-
+    site: P5PCR
+- closeDeviceSite:
+    site: TROBOT1
 - transportLabware:
+    agent: user
     object: mixPlate
-    site: HOLDER
+    site: DOWNHOLDER
 
 - distribute:
     source: mixPlate(A01)
-    destination: renaturationPlate(A01,B01,C01)
+    destination: renaturationPlate(A01+B01+C01)
     amount: 4.5ul
-    tip: 1
+    cleanBetween: none
+    tip: 5
+    pipettePolicy: Roboliq_Water_Wet_0050
 
-- measureAbsorbance:
-    object: renaturationPlate
-    programFile: tania10_renaturation.mdfx
+#- measureAbsorbance:
+#    object: renaturationPlate
+#    programFile: tania11_renaturation_test.mdfx

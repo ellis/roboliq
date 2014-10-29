@@ -95,7 +95,7 @@ object EvowareTableParser {
 				val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 				val (n1, l1) = EvowareFormat.splitSemicolons(lsLine(1))
 				// FIME: for debug only
-				if (!(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)) {
+				if (l0(0).isEmpty || !(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)) {
 					logger.error("ERROR: parse14_getLabwareObjects:")
 					logger.error(carrier)
 					logger.error(lsLine.head)

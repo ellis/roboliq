@@ -41,8 +41,7 @@ usage.
 
 ## Current goal
 
-- [?] test_single_measureAbsorbance_01: why is plate put back at position P2 instead of P3?
-- [ ] tania10_renaturation_1_pipette
+- [ ] tania12_denaturation: create a single script for the whole thing so that Fabian can start it on Friday
 - [ ] create appropriate thermocycler program and upload it
 - [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too
 - [ ] create a 'loop' command
@@ -63,6 +62,13 @@ usage.
 
 ## ``tania10_renaturation``
 
+- [x] figure out downholder site and pipetting
+- [ ] roboliq.yaml: figure out how to use TemplateWithRealDownholder.ewt
+- [ ] create test script for pipetting 4.5ul from downholder to 384 well with small tips
+- [ ] test small tips for 4.5ul volumes
+- [ ] need to generate a new reader script for each measurement, because we're measuring different wells
+- [ ] figure out downholder vectors
+
 ## tania07_qc_ph
 
 Create a quality control script to test:
@@ -71,18 +77,13 @@ various volumes for water-like dispense of dye into non-empty well, using follow
 
 Could also consider mixing dye and GFP in various ways.  Also a single dye+GFP source might be of interest.  Or various color dyes...
 
-## ``tania08_urea``
+## ``tania12_denaturation``
 
-- [ ] analyze the data
+- [ ] need to loop the measurement/centrifugation
 - [ ] create qc script
 - [ ] mix after pipetting
 
 - [ ] the creation of the balance plate should happen before pipetting, but it needs to take information from the titration command about which wells were filled!
-- [ ] need to loop the measurement/centrifugation
-
-## ``tania10_renaturation``
-
-- [ ] need to generate a new reader script for each measurement, because we're measuring different wells
 
 ## Measure Absorbance/Fluorescence
 
