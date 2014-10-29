@@ -19,7 +19,7 @@ mdfxTemplate = _.template(fs.readFileSync("tania10_renaturation.mdfx.template").
 function template(row, col) {
 	var row1 = row, col1 = col,
 	    row2 = row, col2 = col + 12,
-	    row3 = row + 8, col3 = col + 12,
+	    row3 = row + 8, col3 = col,
 	    sourceWell = getWellName0(row, col),
 	    destinationWells = getWellName0(row1, col1) + '+' + getWellName(row2, col2) + '+' + getWellName(row3, col3),
 	    programData = mdfxTemplate({wells: getMdfxWells([{row: row1, col: col1}, {row: row2, col: col2}, {row: row3, col: col3}])});
@@ -58,10 +58,17 @@ var protocolContents = {
 	protocol: []
 };
 
-protocolContents.protocol = protocolContents.protocol.
-	concat(template(1, 1)).
-	concat(template(2, 1)).
-	concat(template(3, 1)).
-	concat(template(4, 1)).
-	concat(template(5, 1));
+function setProtocol(rowCol_l) {
+	var ll = _.map(rowCol_l, function(rowCol) { return template(rowCol.row, rowCol.col) });
+	_.each(ll, function(l) {
+		protocolContents.protocol = protocolContents.protocol.concat(l);
+	});
+}
+
+var sourceRowCol_l = [
+	{ row: 2, col: 1 },
+	{ row: 3, col: 1 }
+];
+
+setProtocol(sourceRowCol_l);
 console.log(JSON.stringify(protocolContents, null, '\t'))
