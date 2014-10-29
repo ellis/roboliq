@@ -60,9 +60,8 @@ var protocolContents = {
 
 function setProtocol(rowCol_l) {
 	var ll = _.map(rowCol_l, function(rowCol) { return template(rowCol.row, rowCol.col) });
-	_.each(ll, function(l) {
-		protocolContents.protocol = protocolContents.protocol.concat(l);
-	});
+	var l = _.flatten(ll);
+	protocolContents.protocol = l;
 }
 
 var sourceRowCol_l = [
