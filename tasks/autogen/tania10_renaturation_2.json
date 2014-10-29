@@ -12,7 +12,7 @@
 	"source": [
 		{
 			"name": "protein{{WELL}}",
-			"well": "B01+C01"
+			"well": "mixPlate(B01+C01)"
 		}
 	],
 	"protocol": [

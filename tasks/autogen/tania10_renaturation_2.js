@@ -67,7 +67,7 @@ function generateProtocol(rowCol_l) {
 	// Indicate that the mixWells will be used as sources
 	protocolContents.source = protocolContents.source.concat([{
 		name: "protein{{WELL}}",
-		well: getWellNames0(rowCol_l)
+		well: "mixPlate("+getWellNames0(rowCol_l)+")"
 	}]);
 
 	// Generate the command list
