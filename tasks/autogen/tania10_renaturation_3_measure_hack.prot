@@ -1,0 +1,76 @@
+description: |
+  - pipetting to 96 well PCR plate
+    - component 1: fluorescent protein stock solution
+    - component 2: buffer (urea, DTT, Tris)
+    - component 3: dithionite or water (exclusive or)
+    - replicate count = ~3
+  - seal
+  - put into TRobot
+  - start a thermocycler program to heat to 95C for 5min, then 25C for 5min -- lid temp is 95C
+  - put PCR plate in downholder
+  - loop over all wells
+    - pierce sealer and extract 4.5ul from one well to 384 well plate
+    - reader:
+      - do we need to measure fluorescence before injection?
+      - inject 85.5uL refolding solution
+      - measure (see tania09_renaturation.mdfx)
+    - three replicates per well
+
+  Q: What component volumes to use for the mix?  Keep in mind that we're in a 96-well plate now instead of 384
+  Q: Heat lid to 95C?  Pre-heat?
+
+labware:
+  buffer1Labware:
+    model: troughModel_100ml
+    location: R5
+  buffer2Labware:
+    model: troughModel_100ml
+    location: R6
+  gfpLabware:
+    description: GFP eppendorf tubes
+    model: tubeHolderModel_1500ul
+    location: T3
+  mixPlate:
+    description: plate for target mixtures
+    model: plateModel_96_pcr
+    location: P5PCR
+  renaturationPlate:
+    description: plate for renaturation of GFPs
+    model: plateModel_384_square
+    location: P2
+
+source:
+
+- name: buffer1
+  description: 7.5M ??? HCl
+  well: buffer1Labware(C01|F01)
+
+- name: buffer2
+  description: 7.5M ??? HCl + 1mM thionite
+  well: buffer2Labware(C01|F01)
+
+# GFPs
+- name: sfGFP
+  description: wild type
+  well: gfpLabware(A01)
+- name: Q204H_N149Y
+  description: double mutant
+  well: gfpLabware(A02)
+- name: tdGFP
+  description: fusion of double mutant
+  well: gfpLabware(A03)
+- name: N149Y
+  description: single mutant
+  well: gfpLabware(A04)
+- name: Q204H
+  description: single mutant
+  well: gfpLabware(A05)
+  
+- name: mix{{WELL}}
+  well: mixPlate(A01|F04)
+
+
+protocol:
+- hack01:
+    source: mixPlate(A01|F04)
+    destination: renaturationPlate(A01|P24)

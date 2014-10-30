@@ -118,7 +118,11 @@ case class Bindings(
 	 * If it is a variable, then ...
 	 */
 	def exclude(name: String, value: String): Either[String, Bindings] = {
-		assert(isVariable(name))
+		if (!isVariable(name)) {
+			System.err.println(s"WARNING: exclude($name, $value) called, but $name is anot a variable")
+			assert(name != value)
+			return Right(this)
+		}
 		val option_l = option_m(name)
 		option_m.get(value) match {
 			// Value is an object:

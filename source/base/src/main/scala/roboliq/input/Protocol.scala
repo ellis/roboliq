@@ -133,6 +133,7 @@ class Protocol {
 			new EvowareTimerStartActionHandler,
 			new EvowareTimerWaitActionHandler,
 			new GetLabwareLocationActionHandler,
+			new Hack01ActionHandler,
 			new MeasureAbsorbanceActionHandler,
 			new OpenDeviceSiteActionHandler,
 			new PipetteActionHandler,
@@ -861,7 +862,7 @@ class Protocol {
 			}
 
 			operator_l <- RsResult.mapAll(operatorInfo_l)(operatorInfo => {
-				//println("operatorInfo: "+operatorInfo)
+				println("operatorInfo: "+operatorInfo)
 				for {
 					handler <- RsResult.from(cs.nameToOperatorHandler_m.get(operatorInfo.operatorName), s"createPlan: Unknown operator `${operatorInfo.operatorName}`")
 				} yield {

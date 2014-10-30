@@ -60,6 +60,9 @@ usage.
 
 ## ``tania10_renaturation``
 
+IMPORTANT:
+- [ ] update script with new mdfx file!
+
 NOTE:
 - takes about 15 minutes to measure three wells on the renaturationPlate
 
@@ -71,6 +74,8 @@ NOTE:
 - [x] need to generate a new reader script for each measurement, because we're measuring different wells
 - [x] generate test protocol (does it need to be yaml, or can roboliq already handle json protocols?)
 - [x] measureAbsorbance: have it accept `programData` as alternative to `programFile`
+- [ ] try to run protocol with lots of loops and see whether it works...
+- [ ] add titration to the beginning of the test script, so that the correct well contents are in renaturationPlate
 - [ ] test small tips for 4.5ul volumes
 - [ ] figure out downholder vectors
 - [ ] create a "sleep" command that somehow figures out which evoware timer IDs are available (shall we use logic to keep track of available timers?)

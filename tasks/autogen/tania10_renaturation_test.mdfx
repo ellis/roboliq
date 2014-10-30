@@ -1,21 +1,21 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
-    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-23T11:11:48.603773Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-30T15:31:20.4665662Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
     <TecanMeasurement id="1" class="">
         <MeasurementManualCycle id="2" number="1" type="Standard">
             <CyclePlate id="3" file="NUN384ft" plateWithCover="False">
-                <PlateRange id="4" range="A1:C1" auto="false">
+                <PlateRange id="4" range="C1:C1" auto="false">
                     <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
                         <Well id="6" auto="false">
                             <Injection id="7" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
-                            <MeasurementWellKinetic id="8" loops="250" timeSpan="PT0.2S" maxDeviation="P10675199DT2H48M5.4775807S" duration="PT1M" useDuration="false">
+                            <MeasurementWellKinetic id="8" loops="1000" timeSpan="PT0.3S" maxDeviation="P10675199DT2H48M5.4775807S" duration="PT1M" useDuration="false">
                                 <Condition id="9" expression="CYCLE.CURRENT.8==10">
                                     <Injection id="10" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Inject" maxPacketSize="1" readtimelikedispensetime="False" />
                                 </Condition>
-                                <MeasurementReading id="11" name="" refID="8" refTimeMaxDeviation="PT0.2S" refName="KINETIC.RUN.CYCLE" beamDiameter="3000" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+                                <MeasurementReading id="11" name="" refID="8" refTimeMaxDeviation="PT0.3S" refName="KINETIC.RUN.CYCLE" beamDiameter="3000" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
                                     <ReadingLabel id="12" name="Label1" scanType="ScanFixed" refID="0">
-                                        <ReadingSettings number="25" rate="25000" />
-                                        <ReadingGain type="" gain="100" optimalGainPercentage="0" automaticGain="False" mode="Manual" />
+                                        <ReadingSettings number="2" rate="25000" />
+                                        <ReadingGain type="" gain="60" optimalGainPercentage="0" automaticGain="False" mode="Manual" />
                                         <ReadingTime integrationTime="20" lagTime="0" readDelay="0" flash="0" dark="0" excitationTime="0" />
                                         <ReadingFilter id="13" type="Ex" wavelength="4750" bandwidth="90" attenuation="0" usage="FI" />
                                         <ReadingFilter id="14" type="Em" wavelength="5100" bandwidth="200" attenuation="0" usage="FI" />
