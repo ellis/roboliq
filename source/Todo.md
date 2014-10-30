@@ -41,7 +41,27 @@ usage.
 
 ## Current goal
 
+- [x] tania10_renaturation: run pipetting
+- [x] tania10_renaturation: run first measurement
+- [ ] tania10_renaturation: check first results
+- [x] tania10_renaturation: create sub-scripts to run the remaining measurements
+  - A: A01|C01 -> D01|P01 (3)
+  - B: D01|H01 -> A02|P02 (5)
+  - C: A02|D02 -> A03|P03 (4)
+  - D: E02|H02 -> A04|P04 (4)
+  - E: A03|D03 -> A05|P05 (4)
+  - F: E03|H03 -> A06|P06 (4)
+  - G: A04|D04 -> A07|P07 (4)
+  - H: E04|F04 -> A08|P08 (2)
+- [x] tania10_renaturation: create script to run all the subscripts
+- [ ] tania10_renaturation: run remaining measurements
 - [ ] tania12_denaturation: create a single script for the whole thing so that Fabian can start it on Friday
+- [ ] tania12_denaturation: make sure we use the new tania12_denaturation.mdfx
+
+
+
+- [ ] tania13_ph: create an updated pH test script for Fabian to run on Monday
+
 - [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too
 - [ ] create a 'loop' command
 - [ ] ConfigEvoware: handle the shakerProgram in ConfigEvoware, and move it to the agent section in roboliq.yaml

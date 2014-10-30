@@ -1,5 +1,5 @@
 description: |
-  subscript to extract an measure a few wells: mixPlate(A01|C01) -> renaturationPlate(D01|P01)
+  subscript to extract an measure a few wells
 
 labware:
   buffer1Labware:
@@ -54,5 +54,5 @@ source:
 
 protocol:
 - hack01:
-    source: mixPlate(A01|C01)
-    destination: renaturationPlate(D01|P01)
+    source: mixPlate(D01|H01)
+    destination: renaturationPlate(A02|P02)

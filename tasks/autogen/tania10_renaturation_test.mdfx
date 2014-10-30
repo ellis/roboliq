@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
-    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-30T15:31:20.4665662Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-30T20:04:41.4187288Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
     <TecanMeasurement id="1" class="">
         <MeasurementManualCycle id="2" number="1" type="Standard">
-            <CyclePlate id="3" file="NUN384ft" plateWithCover="False">
-                <PlateRange id="4" range="C1:C1" auto="false">
+            <CyclePlate id="3" file="PE384fw_OptiPlate" plateWithCover="False">
+                <PlateRange id="4" range="D1:F1" auto="false">
                     <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
                         <Well id="6" auto="false">
                             <Injection id="7" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />

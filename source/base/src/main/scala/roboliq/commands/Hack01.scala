@@ -31,6 +31,7 @@ import roboliq.entities.PipetteDestinations
 import roboliq.entities.PipetteAmount_Volume
 import roboliq.entities.LiquidVolume
 import roboliq.entities.CleanIntensity
+import roboliq.entities.RowCol
 
 
 case class Hack01ActionParams(
@@ -46,7 +47,7 @@ class Hack01ActionHandler extends ActionHandler {
     <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-30T15:31:20.4665662Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
     <TecanMeasurement id="1" class="">
         <MeasurementManualCycle id="2" number="1" type="Standard">
-            <CyclePlate id="3" file="NUN384ft" plateWithCover="False">
+            <CyclePlate id="3" file="PE384fw_OptiPlate" plateWithCover="False">
                 <PlateRange id="4" range="{{WELLS}}" auto="false">
                     <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
                         <Well id="6" auto="false">
@@ -134,7 +135,7 @@ class Hack01ActionHandler extends ActionHandler {
 				val dst_l = dstAll_l.take(3)
 				dstAll_l = dstAll_l.drop(3)
 				val destinationName = dst_l.map(_.toString).mkString("+")
-				val destinationNameMdfx = dst_l.map(_.rowcol.toString).mkString("|")
+				val destinationNameMdfx = dst_l.map(x => rowcolToStringMdfx(x.rowcol)).mkString("|")
 				val oi1 = {
 					/*
 					val src = params.source.sources.head
@@ -236,7 +237,7 @@ class Hack01ActionHandler extends ActionHandler {
 					)
 					val paramMeasure_m = Map[String, JsValue](
 						"programData" -> JsString(mdfxTemplate.replace("{{WELLS}}", destinationNameMdfx)),
-						"outputFile" -> JsString("""C:\Users\localadmin\Desktop\Ellis\tania10_renaturation--<YYMMDD_HHmmss>.xml"""),
+						"outputFile" -> JsString("""C:\Users\localadmin\Desktop\Ellis\tania10_renaturation--<YYYYMMDD_HHmmss>.xls"""),
 						"object" -> JsString(plate2Name)
 					)
 					
@@ -271,4 +272,10 @@ class Hack01ActionHandler extends ActionHandler {
 			})
 		}
 	}
+
+	private def rowcolToStringMdfx(rowcol: RowCol): String = {
+		val s = (rowcol.row + 'A').asInstanceOf[Char].toString + (rowcol.col + 1)
+		s+":"+s
+	}
+
 }
