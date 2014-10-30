@@ -88,6 +88,7 @@ class Runner(args: Array[String]) {
 	def run(opt: Opt) {
 		import scala.sys.process._
 		val protocol = new Protocol
+		val time0 = System.currentTimeMillis()
 		val x = for {
 			configBean <- loadConfigBean(opt.configFile.getPath())
 			//_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
@@ -203,7 +204,8 @@ class Runner(args: Array[String]) {
 			warning_l.foreach(s => println("WARNING: "+s))
 			println()
 		}
-		println("DONE")
+		val time1 = System.currentTimeMillis()
+		println(s"DONE (${((time1 - time0)/1000).asInstanceOf[Int]} seconds)")
 	}
 	
 	private def getInstructions(

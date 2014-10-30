@@ -12,10 +12,41 @@
 	"source": [
 		{
 			"name": "protein{{WELL}}",
-			"well": "mixPlate(B01+C01)"
+			"well": "mixPlate(A01+B01+C01+D01+E01+F01+G01+H01+A02+B02)"
 		}
 	],
 	"protocol": [
+		{
+			"distribute": {
+				"source": "mixPlate(A01)",
+				"destination": "renaturationPlate(A01+A13+I1)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"A1|A13|I1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
 		{
 			"distribute": {
 				"source": "mixPlate(B01)",
@@ -68,6 +99,223 @@
 			"measureAbsorbance": {
 				"object": "renaturationPlate",
 				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"C1|C13|K1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(D01)",
+				"destination": "renaturationPlate(D01+D13+L1)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"D1|D13|L1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(E01)",
+				"destination": "renaturationPlate(E01+E13+M1)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"E1|E13|M1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(F01)",
+				"destination": "renaturationPlate(F01+F13+N1)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"F1|F13|N1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(G01)",
+				"destination": "renaturationPlate(G01+G13+O1)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"G1|G13|O1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(H01)",
+				"destination": "renaturationPlate(H01+H13+P1)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"H1|H13|P1\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(A02)",
+				"destination": "renaturationPlate(A02+A14+I2)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"A2|A14|I2\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
+				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "P2"
+			}
+		},
+		{
+			"distribute": {
+				"source": "mixPlate(B02)",
+				"destination": "renaturationPlate(B02+B14+J2)",
+				"amount": "4.5ul",
+				"cleanBetween": "none",
+				"tip": 5,
+				"pipettePolicy": "Roboliq_Water_Dry_0050"
+			}
+		},
+		{
+			"transportLabware": {
+				"device": "mario__transporter2",
+				"object": "renaturationPlate",
+				"site": "REGRIP"
+			}
+		},
+		{
+			"measureAbsorbance": {
+				"object": "renaturationPlate",
+				"programData": "﻿<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TecanFile xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"tecan.at.schema.documents Main.xsd\" fileformat=\"Tecan.At.Measurement\" fileversion=\"2.0\" xmlns=\"tecan.at.schema.documents\">\n    <FileInfo type=\"\" instrument=\"infinite 200Pro\" version=\"\" createdFrom=\"localadmin\" createdAt=\"2014-10-23T11:11:48.603773Z\" createdWith=\"Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor\" description=\"\" />\n    <TecanMeasurement id=\"1\" class=\"\">\n        <MeasurementManualCycle id=\"2\" number=\"1\" type=\"Standard\">\n            <CyclePlate id=\"3\" file=\"NUN384ft\" plateWithCover=\"False\">\n                <PlateRange id=\"4\" range=\"B2|B14|J2\" auto=\"false\">\n                    <MeasurementFluoInt readingMode=\"Top\" id=\"5\" mode=\"Normal\" type=\"\" name=\"FluoInt\" longname=\"\" description=\"\">\n                        <Well id=\"6\" auto=\"false\">\n                            <Injection id=\"7\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Refill\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                            <MeasurementWellKinetic id=\"8\" loops=\"250\" timeSpan=\"PT0.2S\" maxDeviation=\"P10675199DT2H48M5.4775807S\" duration=\"PT1M\" useDuration=\"false\">\n                                <Condition id=\"9\" expression=\"CYCLE.CURRENT.8==10\">\n                                    <Injection id=\"10\" command=\"\" channels=\"1\" volumes=\"86\" speeds=\"200\" refillspeeds=\"100\" refillvolumes=\"500\" injectionmode=\"StandardInjection\" injectiontype=\"Inject\" maxPacketSize=\"1\" readtimelikedispensetime=\"False\" />\n                                </Condition>\n                                <MeasurementReading id=\"11\" name=\"\" refID=\"8\" refTimeMaxDeviation=\"PT0.2S\" refName=\"KINETIC.RUN.CYCLE\" beamDiameter=\"3000\" beamGridType=\"Single\" beamGridSize=\"1\" beamEdgeDistance=\"auto\">\n                                    <ReadingLabel id=\"12\" name=\"Label1\" scanType=\"ScanFixed\" refID=\"0\">\n                                        <ReadingSettings number=\"25\" rate=\"25000\" />\n                                        <ReadingGain type=\"\" gain=\"100\" optimalGainPercentage=\"0\" automaticGain=\"False\" mode=\"Manual\" />\n                                        <ReadingTime integrationTime=\"20\" lagTime=\"0\" readDelay=\"0\" flash=\"0\" dark=\"0\" excitationTime=\"0\" />\n                                        <ReadingFilter id=\"13\" type=\"Ex\" wavelength=\"4750\" bandwidth=\"90\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingFilter id=\"14\" type=\"Em\" wavelength=\"5100\" bandwidth=\"200\" attenuation=\"0\" usage=\"FI\" />\n                                        <ReadingZPosition mode=\"Manual\" zPosition=\"20000\" />\n                                    </ReadingLabel>\n                                </MeasurementReading>\n                            </MeasurementWellKinetic>\n                        </Well>\n                    </MeasurementFluoInt>\n                </PlateRange>\n            </CyclePlate>\n        </MeasurementManualCycle>\n        <MeasurementInfo id=\"0\" description=\"\">\n            <ScriptTemplateSettings id=\"0\">\n                <ScriptTemplateGeneralSettings id=\"0\" Title=\"\" Group=\"\" Info=\"\" Image=\"\" />\n                <ScriptTemplateDescriptionSettings id=\"0\" Internal=\"\" External=\"\" IsExternal=\"False\" />\n            </ScriptTemplateSettings>\n        </MeasurementInfo>\n    </TecanMeasurement>\n</TecanFile>\n",
 				"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania10_renaturation_test--<YYYMMDD_HHmmss>.xml"
 			}
 		},

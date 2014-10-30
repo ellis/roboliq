@@ -76,10 +76,13 @@ function generateProtocol(rowCol_l) {
 	protocolContents.protocol = l;
 }
 
-var sourceRowCol_l = [
-	{ row: 2, col: 1 },
-	{ row: 3, col: 1 }
-];
+// 10 wells: 14s
+// 20 wells: 15s
+var sourceRowCol_l = _.map(_.range(10), function(i) {
+	var col = 1 + parseInt(i / 8);
+	var row = 1 + parseInt(i % 8);
+	return { row: row, col: col }
+});
 
 generateProtocol(sourceRowCol_l);
 console.log(JSON.stringify(protocolContents, null, '\t'))
