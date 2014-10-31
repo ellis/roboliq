@@ -43,6 +43,12 @@ import roboliq.evoware.commands.EvowareTimerStartActionHandler
 import roboliq.evoware.commands.EvowareTimerWaitActionHandler
 import roboliq.evoware.commands.EvowareTimerSleepActionHandler
 import roboliq.evoware.commands.EvowareTimerStartOperatorHandler
+import roboliq.commands.PromptOperatorOperatorHandler
+import roboliq.commands.PromptOperatorActionHandler
+import roboliq.evoware.commands.EvowareBeginLoopOperatorHandler
+import roboliq.evoware.commands.EvowareEndLoopOperatorHandler
+import roboliq.evoware.commands.EvowareBeginLoopActionHandler
+import roboliq.evoware.commands.EvowareEndLoopActionHandler
 
 case class WellGroupBean(
 	name: String,
@@ -126,9 +132,12 @@ class Protocol {
 			new CarouselCloseActionHandler,
 			new CarouselOpenSiteActionHandler,
 			new CloseDeviceSiteActionHandler,
+			new CommentActionHandler,
 			new DistributeActionHandler,
 			new EnsureLabwareLocationActionHandler,
+			new EvowareBeginLoopActionHandler,
 			new EvowareCentrifugeRunActionHandler,
+			new EvowareEndLoopActionHandler,
 			new EvowareTimerSleepActionHandler,
 			new EvowareTimerStartActionHandler,
 			new EvowareTimerWaitActionHandler,
@@ -152,11 +161,14 @@ class Protocol {
 			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_3", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new CarouselOpenSiteOperatorHandler("mario", "mario__Centrifuge", "CENTRIFUGE_4", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new CloseDeviceSiteOperatorHandler,
+			new CommentOperatorHandler,
 			new DistributeOperatorHandler(1),
 			new DistributeOperatorHandler(2),
 			new DistributeOperatorHandler(3),
 			new DistributeOperatorHandler(4),
 			new EnsureLabwareLocationOperatorHandler,
+			new EvowareBeginLoopOperatorHandler,
+			new EvowareEndLoopOperatorHandler,
 			new EvowareCentrifugeRunOperatorHandler("mario__Centrifuge", List("CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4")),
 			new EvowareTimerStartOperatorHandler,
 			new EvowareTimerWaitOperatorHandler,

@@ -66,14 +66,15 @@ object MainInEclipse extends App {
 	//runTemp("tania10_renaturation_2", List("mario_withDownholder"))
 	//runTemp("tania11_renaturation_test_2_extract", List("mario_withDownholder"))
 	//runTemp("tania10_renaturation_3_measure_hack", List("mario_withDownholder"))
-	runTemp("tania10_renaturation_3a_measure_hack", List("mario_withDownholder"))
+	/*runTemp("tania10_renaturation_3a_measure_hack", List("mario_withDownholder"))
 	runTemp("tania10_renaturation_3b_measure_hack", List("mario_withDownholder"))
 	runTemp("tania10_renaturation_3c_measure_hack", List("mario_withDownholder"))
 	runTemp("tania10_renaturation_3d_measure_hack", List("mario_withDownholder"))
 	runTemp("tania10_renaturation_3e_measure_hack", List("mario_withDownholder"))
 	runTemp("tania10_renaturation_3f_measure_hack", List("mario_withDownholder"))
 	runTemp("tania10_renaturation_3g_measure_hack", List("mario_withDownholder"))
-	runTemp("tania10_renaturation_3h_measure_hack", List("mario_withDownholder"))
+	runTemp("tania10_renaturation_3h_measure_hack", List("mario_withDownholder"))*/
 	//runTemp("tania12_denaturation_1_balancePlate")
 	//runTemp("tania12_denaturation_2_pipette")
+	runTemp("tania12_denaturation_4_pipette_and_measure")
 }

@@ -15,6 +15,18 @@ abstract class L0C_Command {
 	//def toEvowareString(file: File): String = toString
 }
 
+case class L0C_BeginLoop(
+	count: Int,
+	variable: String
+) extends L0C_Command {
+	override def toString = {
+		List(
+			'"'+count+'"',
+			'"'+variable+'"'
+		).mkString("BeginLoop(", ",", ");")
+	}
+}
+
 case class L0C_Comment(
 	s: String
 ) extends L0C_Command {
@@ -63,6 +75,14 @@ case class L0C_DropDITI(
 			iSite,
 			10, 70
 		).mkString("DropDITI(", ",", ");")
+	}
+}
+
+case class L0C_EndLoop(
+) extends L0C_Command {
+	override def toString = {
+		List(
+		).mkString("EndLoop(", ",", ");")
 	}
 }
 
