@@ -41,26 +41,27 @@ usage.
 
 ## Current goal
 
-- [x] tania10_renaturation: run pipetting
-- [x] tania10_renaturation: run first measurement
-- [ ] tania10_renaturation: check first results
-- [x] tania10_renaturation: create sub-scripts to run the remaining measurements
-  - A: A01|C01 -> D01|P01 (3)
-  - B: D01|H01 -> A02|P02 (5)
-  - C: A02|D02 -> A03|P03 (4)
-  - D: E02|H02 -> A04|P04 (4)
-  - E: A03|D03 -> A05|P05 (4)
-  - F: E03|H03 -> A06|P06 (4)
-  - G: A04|D04 -> A07|P07 (4)
-  - H: E04|F04 -> A08|P08 (2)
-- [x] tania10_renaturation: create script to run all the subscripts
-- [ ] tania10_renaturation: run remaining measurements
-- [ ] tania12_denaturation: create a single script for the whole thing so that Fabian can start it on Friday
-- [ ] tania12_denaturation: make sure we use the new tania12_denaturation.mdfx
-
-
-
+- [.] tania12_denaturation: re-run with gain=45
+- [ ] tania14_renaturation:
+  - [ ] setup bench, labware, reagents
+  - [ ] create scripts for C01, D01
+    - [ ] change to use 384 mixPlate on P3
+    - [ ] only put one replicates onto the renaturationPlate at a time
+    - [ ] create another command to 
+  - [ ] run those scripts after a tania12 measurement
+  - [ ] create scripts for remaining wells to F04
+  - [ ] figure out how to read the XML measurement files with their multiple measurements
+- [ ] coordinate alternating of tania14 and tania12
+- [ ] lunch
+- [ ] broom
 - [ ] tania13_ph: create an updated pH test script for Fabian to run on Monday
+- [ ] clean up lab
+  - [ ] remove labware from robot
+  - [ ] clear computer table
+  - [ ] clean up injector
+
+FABIAN:
+- [ ] the purple FrameStar PCR plates don't fit snugly on the PCR plate holders
 
 - [ ] support sub-commands, in which one command is embedded in another one, and yet it gets correctly planned too
 - [ ] create a 'loop' command

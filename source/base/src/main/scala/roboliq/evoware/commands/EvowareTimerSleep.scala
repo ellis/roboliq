@@ -14,6 +14,7 @@ import roboliq.plan.OperatorHandler
 import roboliq.plan.OperatorInfo
 import spray.json.JsString
 import spray.json.JsValue
+import spray.json.JsNumber
 
 
 case class EvowareTimerSleepActionParams(
@@ -44,7 +45,7 @@ class EvowareTimerSleepActionHandler extends ActionHandler {
 			val binding = binding_l.toMap
 
 			OperatorInfo(id, Nil, Nil, "evoware.timer.start", binding, paramToJsval_l.toMap) ::
-			OperatorInfo(id, Nil, Nil, "evoware.timer.wait", binding, paramToJsval_l.toMap) :: Nil
+			OperatorInfo(id, Nil, Nil, "evoware.timer.wait", binding, (("till" -> JsNumber(params.duration)) :: paramToJsval_l).toMap) :: Nil
 		}
 	}
 }

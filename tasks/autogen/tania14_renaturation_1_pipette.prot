@@ -1,0 +1,142 @@
+description: |
+  - pipetting to 96 well PCR plate
+    - component 1: fluorescent protein stock solution
+    - component 2: buffer (urea, DTT, Tris)
+    - component 3: dithionite or water (exclusive or)
+    - replicate count = ~3
+  - seal
+  - put into TRobot
+  - start a thermocycler program to heat to 95C for 5min, then 25C for 5min -- lid temp is 95C
+  - put PCR plate in downholder
+  - loop over all wells
+    - pierce sealer and extract 4.5ul from one well to 384 well plate
+    - reader:
+      - do we need to measure fluorescence before injection?
+      - inject 85.5uL refolding solution
+      - measure (see tania09_renaturation.mdfx)
+    - three replicates per well
+
+  Q: What component volumes to use for the mix?  Keep in mind that we're in a 96-well plate now instead of 384
+  Q: Does the plate go back in the thermocycler after piercing?; Can we find an alternative to the downholder if necessary?
+  Q: How should the downholder be mounted?
+
+labware:
+  buffer1Labware:
+    model: troughModel_100ml
+    location: R5
+  buffer2Labware:
+    model: troughModel_100ml
+    location: R6
+  gfpLabware:
+    description: GFP eppendorf tubes
+    model: tubeHolderModel_1500ul
+    location: T3
+  mixPlate:
+    description: plate for target mixtures
+    model: plateModel_96_pcr
+    location: P5PCR
+  renaturationPlate:
+    description: plate for renaturation of GFPs
+    model: plateModel_384_square
+    location: P2
+
+source:
+
+- name: buffer1
+  description: 7.5M ??? HCl
+  well: buffer1Labware(C01|F01)
+
+- name: buffer2
+  description: 7.5M ??? HCl + 1mM thionite
+  well: buffer2Labware(C01|F01)
+
+# GFPs
+- name: sfGFP
+  description: wild type
+  well: gfpLabware(A01)
+- name: Q204H_N149Y
+  description: double mutant
+  well: gfpLabware(A02)
+- name: tdGFP
+  description: fusion of double mutant
+  well: gfpLabware(A03)
+- name: N149Y
+  description: single mutant
+  well: gfpLabware(A04)
+- name: Q204H
+  description: single mutant
+  well: gfpLabware(A05)
+
+
+protocol:
+- titrate:
+    allOf:
+    - source: buffer1
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+    - { source: sfGFP, amount: 7ul, cleanBegin: none, cleanBetween: none, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+    amount: 75ul
+    destination: mixPlate(A01)
+
+- evoware.timer.sleep:
+    id: 1
+    duration: 300
+    
+- distribute:
+    source: mixPlate(A01)
+    destination: renaturationPlate(A01|C01)
+    volume: 4.5ul
+    pipettePolicy: Roboliq_Water_Dry_1000
+
+- transportLabware:
+    device: "mario__transporter2"
+    object: "renaturationPlate"
+    site: "REGRIP"
+
+- measureAbsorbance: {
+    object: "renaturationPlate"
+    programData: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+          <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2014-10-30T20:04:41.4187288Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+          <TecanMeasurement id="1" class="">
+              <MeasurementManualCycle id="2" number="1" type="Standard">
+                  <CyclePlate id="3" file="PE384fw_OptiPlate" plateWithCover="False">
+                      <PlateRange id="4" range="A1:C1" auto="false">
+                          <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
+                              <Well id="6" auto="false">
+                                  <Injection id="7" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
+                                  <MeasurementWellKinetic id="8" loops="1000" timeSpan="PT0.3S" maxDeviation="P10675199DT2H48M5.4775807S" duration="PT1M" useDuration="false">
+                                      <Condition id="9" expression="CYCLE.CURRENT.8==10">
+                                          <Injection id="10" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Inject" maxPacketSize="1" readtimelikedispensetime="False" />
+                                      </Condition>
+                                      <MeasurementReading id="11" name="" refID="8" refTimeMaxDeviation="PT0.3S" refName="KINETIC.RUN.CYCLE" beamDiameter="3000" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+                                          <ReadingLabel id="12" name="Label1" scanType="ScanFixed" refID="0">
+                                              <ReadingSettings number="2" rate="25000" />
+                                              <ReadingGain type="" gain="60" optimalGainPercentage="0" automaticGain="False" mode="Manual" />
+                                              <ReadingTime integrationTime="20" lagTime="0" readDelay="0" flash="0" dark="0" excitationTime="0" />
+                                              <ReadingFilter id="13" type="Ex" wavelength="4750" bandwidth="90" attenuation="0" usage="FI" />
+                                              <ReadingFilter id="14" type="Em" wavelength="5100" bandwidth="200" attenuation="0" usage="FI" />
+                                              <ReadingZPosition mode="Manual" zPosition="20000" />
+                                          </ReadingLabel>
+                                      </MeasurementReading>
+                                  </MeasurementWellKinetic>
+                              </Well>
+                          </MeasurementFluoInt>
+                      </PlateRange>
+                  </CyclePlate>
+              </MeasurementManualCycle>
+              <MeasurementInfo id="0" description="">
+                  <ScriptTemplateSettings id="0">
+                      <ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+                      <ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+                  </ScriptTemplateSettings>
+              </MeasurementInfo>
+          </TecanMeasurement>
+      </TecanFile>
+    outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania14_renaturation--<YYYYMMDD_HHmmss>.xml'
+
+- transportLabware:
+    device: "mario__transporter2"
+    object: "renaturationPlate"
+    site: "P2"
