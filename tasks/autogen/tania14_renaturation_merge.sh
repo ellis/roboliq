@@ -36,7 +36,7 @@ tania12 \
 ; do
   echo "Comment(\"`basename $file .esc`\")" >> $FILE
   if [[ "$file" == "tania12" ]]; then
-    echo "Subroutine(\"C:\\ProgramData\\Tecan\\EVOware\\database\\Scripts\\Ellis\\tania12_denaturation_5_loop_mario.esc\",0);" >> $FILE
+    echo "Subroutine(\"C:\\ProgramData\\Tecan\\EVOware\\database\\Scripts\\Ellis\\tania12_denaturation_5_once_mario.esc\",0);" >> $FILE
   else
     sed -n "/$RPG/,\$p" $file | grep -v -e "$RPG" >> $FILE
   fi
