@@ -41,13 +41,17 @@ usage.
 
 ## Current goal
 
+- [ ] remove injector
+- [ ] start denaturation script cycling through
+
 - [.] tania12_denaturation: re-run with gain=45
 - [ ] tania14_renaturation:
-  - [ ] setup bench, labware, reagents
+  - [x] setup bench, labware, reagents
   - [ ] create scripts for C01, D01
     - [ ] change to use 384 mixPlate on P3
     - [ ] only put one replicates onto the renaturationPlate at a time
     - [ ] create another command to 
+  - [ ] prime the injector again
   - [ ] run those scripts after a tania12 measurement
   - [ ] create scripts for remaining wells to F04
   - [ ] figure out how to read the XML measurement files with their multiple measurements
