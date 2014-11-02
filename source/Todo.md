@@ -41,6 +41,11 @@ usage.
 
 ## Current goal
 
+- [ ] print TRM exam
+- [ ] get food from fridge
+- [ ] fill water bottle
+- [ ] email Daniel, Fabian
+
 - [ ] remove injector
 - [ ] start denaturation script cycling through
 
