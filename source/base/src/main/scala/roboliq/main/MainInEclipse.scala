@@ -79,12 +79,11 @@ object MainInEclipse extends App {
 	//runTemp("tania12_denaturation_4_pipette_and_measure")
 	//runTemp("tania14_renaturation_A01")
 	//runTemp("tania14_renaturation_B01")
-	/*runTemp("tania14_renaturation_111")
+	runTemp("tania14_renaturation_111")
 	runTemp("tania14_renaturation_112")
 	runTemp("tania14_renaturation_113")
 	runTemp("tania14_renaturation_114")
 	runTemp("tania14_renaturation_115")
-	*/
 	runTemp("tania14_renaturation_131")
 	runTemp("tania14_renaturation_132")
 	runTemp("tania14_renaturation_133")
