@@ -137,7 +137,8 @@ V;200
 998;0;1;Shelf 32Pos Microplate;
 998;0;7;Hotel 4Pos DWP 1;
 998;0;8;Hotel 4Pos DWP 2;
-998;3;
+998;4;
+998;65;D-BSSE 384 Well Plate White;
 998;126;D-BSSE 384 Well Plate White;
 998;234;D-BSSE 96 Well PCR Plate;
 998;235;D-BSSE 96 Well PCR Plate;
@@ -176,7 +177,7 @@ Transfer_Rack("68","61",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Wide","","",
 FACTS("ReaderNETwork","ReaderNETwork_Close","","0","");
 Transfer_Rack("61","10",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Narrow","","","ReGrip Station","","MP 2Pos H+P Shake","1","(Not defined)","2");
 Comment("tania12")
-Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_loop_mario.esc",0);
+Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_once_mario.esc",0);
 Comment("tania14_renaturation_112_mario")
 Subroutine("C:\ProgramData\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_Thorough_1000.esc",0);
 Aspirate(1,"Roboliq_Water_Dry_1000","68",0,0,0,0,0,0,0,0,0,0,0,8,1,1,"010840",0,0);
@@ -262,7 +263,7 @@ Transfer_Rack("68","61",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Wide","","",
 FACTS("ReaderNETwork","ReaderNETwork_Close","","0","");
 Transfer_Rack("61","10",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Narrow","","","ReGrip Station","","MP 2Pos H+P Shake","1","(Not defined)","2");
 Comment("tania12")
-Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_loop_mario.esc",0);
+Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_once_mario.esc",0);
 Comment("tania14_renaturation_151_mario")
 Subroutine("C:\ProgramData\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_Thorough_1000.esc",0);
 Aspirate(1,"Roboliq_Water_Dry_1000","68",0,0,0,0,0,0,0,0,0,0,0,8,1,1,"010840",0,0);
@@ -348,7 +349,7 @@ Transfer_Rack("68","61",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Wide","","",
 FACTS("ReaderNETwork","ReaderNETwork_Close","","0","");
 Transfer_Rack("61","10",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Narrow","","","ReGrip Station","","MP 2Pos H+P Shake","1","(Not defined)","2");
 Comment("tania12")
-Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_loop_mario.esc",0);
+Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_once_mario.esc",0);
 Comment("tania14_renaturation_155_mario")
 Subroutine("C:\ProgramData\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_Thorough_1000.esc",0);
 Aspirate(1,"Roboliq_Water_Dry_1000","68",0,0,0,0,0,0,0,0,0,0,0,8,1,1,"010840",0,0);
@@ -434,7 +435,7 @@ Transfer_Rack("68","61",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Wide","","",
 FACTS("ReaderNETwork","ReaderNETwork_Close","","0","");
 Transfer_Rack("61","10",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Narrow","","","ReGrip Station","","MP 2Pos H+P Shake","1","(Not defined)","2");
 Comment("tania12")
-Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_loop_mario.esc",0);
+Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_once_mario.esc",0);
 Comment("tania14_renaturation_244_mario")
 Subroutine("C:\ProgramData\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_Thorough_1000.esc",0);
 Aspirate(1,"Roboliq_Water_Dry_1000","68",0,0,0,0,0,0,0,0,0,0,0,8,2,1,"010840",0,0);
@@ -520,7 +521,7 @@ Transfer_Rack("68","61",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Wide","","",
 FACTS("ReaderNETwork","ReaderNETwork_Close","","0","");
 Transfer_Rack("61","10",1,0,0,1,0,"","D-BSSE 384 Well Plate White","Narrow","","","ReGrip Station","","MP 2Pos H+P Shake","1","(Not defined)","2");
 Comment("tania12")
-Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_loop_mario.esc",0);
+Subroutine("C:\ProgramData\Tecan\EVOware\database\Scripts\Ellis\tania12_denaturation_5_once_mario.esc",0);
 Comment("tania14_renaturation_263_mario")
 Subroutine("C:\ProgramData\TECAN\EVOware\database\scripts\Roboliq\Roboliq_Clean_Thorough_1000.esc",0);
 Aspirate(1,"Roboliq_Water_Dry_1000","68",0,0,0,0,0,0,0,0,0,0,0,8,2,1,"010840",0,0);
