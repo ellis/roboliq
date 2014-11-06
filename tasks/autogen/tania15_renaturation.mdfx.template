@@ -7,7 +7,7 @@
                 <PlateRange id="4" range="<%= wells %>" auto="false">
                     <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
                         <Well id="6" auto="false">
-                            <Injection id="7" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
+                            <Injection id="7" command="" channels="1" volumes="83" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
                             <MeasurementWellKinetic id="8" loops="1000" timeSpan="PT0.3S" maxDeviation="P10675199DT2H48M5.4775807S" duration="PT1M" useDuration="false">
                                 <Condition id="9" expression="CYCLE.CURRENT.8==10">
                                     <Injection id="10" command="" channels="1" volumes="86" speeds="200" refillspeeds="100" refillvolumes="500" injectionmode="StandardInjection" injectiontype="Inject" maxPacketSize="1" readtimelikedispensetime="False" />
@@ -15,7 +15,7 @@
                                 <MeasurementReading id="11" name="" refID="8" refTimeMaxDeviation="PT0.3S" refName="KINETIC.RUN.CYCLE" beamDiameter="3000" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
                                     <ReadingLabel id="12" name="Label1" scanType="ScanFixed" refID="0">
                                         <ReadingSettings number="2" rate="25000" />
-                                        <ReadingGain type="" gain="60" optimalGainPercentage="0" automaticGain="False" mode="Manual" />
+                                        <ReadingGain type="" gain="50" optimalGainPercentage="0" automaticGain="False" mode="Manual" />
                                         <ReadingTime integrationTime="20" lagTime="0" readDelay="0" flash="0" dark="0" excitationTime="0" />
                                         <ReadingFilter id="13" type="Ex" wavelength="4750" bandwidth="90" attenuation="0" usage="FI" />
                                         <ReadingFilter id="14" type="Em" wavelength="5100" bandwidth="200" attenuation="0" usage="FI" />

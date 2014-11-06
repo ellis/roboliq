@@ -31,13 +31,13 @@ function template(row, col, bufferSource, gfpSource) {
 	return [
 		{ pipette: {
 			steps: [
-				{ s: bufferSource, a: "68ul", clean: "thorough", pipettePolicy: "Roboliq_Water_Dry_1000" },
-				{ s: gfpSource, a: "7ul", clean: "thorough", cleanBefore: "none", pipettePolicy: "Roboliq_Water_Wet_1000_mix3x50ul" }
+				{ s: bufferSource, a: "85.5ul", clean: "thorough", pipettePolicy: "Roboliq_Water_Dry_1000" },
+				{ s: gfpSource, a: "4.5ul", clean: "thorough", cleanBefore: "none", pipettePolicy: "Roboliq_Water_Wet_1000_mix3x50ul" }
 			],
 			destination: mixWell
 		} },
-		{ "evoware.timer.sleep": { agent: "mario", "id": 1, "duration": 900 } },
-		{ pipette: { source: mixWell, destination: renaturationWell, amount: "4.5ul", pipettePolicy: "Roboliq_Water_Dry_1000" } },
+		{ "evoware.timer.sleep": { agent: "mario", "id": 1, "duration": 420 } },
+		{ pipette: { source: mixWell, destination: renaturationWell, amount: "7ul", pipettePolicy: "Roboliq_Water_Dry_1000" } },
 		{ transportLabware: { device: "mario__transporter2", object: "mixPlate", site: "REGRIP" } },
 		{ measureAbsorbance: {
 			object: "mixPlate",
