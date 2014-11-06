@@ -41,13 +41,18 @@ usage.
 
 ## Current goal
 
-- [ ] print TRM exam
-- [ ] get food from fridge
-- [ ] fill water bottle
-- [ ] email Daniel, Fabian
+- [x] denaturation: just find which script for Fabian to run and get the table setup information for him
+- [ ] refolding script with 15 minute wait (we'll set this up more still), 5 gfps, 1 buffer (w/o thionite)
+  - [ ] need to generate this on the mac laptop, because of the node modules?  Or maybe I fixed it already...?
+  - [ ] Create instructions for how Fabian can generate the script
+- [ ] pH: (5 gfps) over the weekend, measure every 4 hours, three readout scripts, third readout script is on subset of wells (half-point of pH of each buffer, choose a single replicate)
+  - [ ] change pH steps: hepes 5, pipes 5, mes 7, acetate 8
+  - [ ] create pipetting script
+  - [ ] create repeating measurement script
+  - [ ] figure out which wells to run the third readout on
 
-- [ ] remove injector
-- [ ] start denaturation script cycling through
+- [ ] pack more blank paper
+- [ ] print TRM slides?
 
 - [.] tania12_denaturation: re-run with gain=45
 - [ ] tania14_renaturation:
