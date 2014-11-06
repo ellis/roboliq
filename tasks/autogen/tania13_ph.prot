@@ -36,7 +36,7 @@ source:
   well: sourcePlate1(A02|D02)
 - name: pipes_775
   well: sourcePlate1(A03|D03)
-- name: pipes_675
+- name: pipes_575
   well: sourcePlate1(A04|D04)
 - name: mes_710
   well: sourcePlate1(A05|D05)
@@ -49,13 +49,20 @@ source:
 
 # GFPs
 - name: sfGFP
+  description: wild type
   well: tubes1(A01)
 - name: Q204H_N149Y
+  description: double mutant
   well: tubes1(A02)
-- name: taGFP
+- name: tdGFP
+  description: fusion of double mutant
   well: tubes1(A03)
-- name: V206A
+- name: N149Y
+  description: single mutant
   well: tubes1(A04)
+- name: Q204H
+  description: single mutant
+  well: tubes1(A05)
 
 protocol:
 - titrate:
@@ -91,7 +98,7 @@ protocol:
         - allOf: [{source: acetate_575, amount: 5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
         - allOf: [{source: acetate_575, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
 
-      - source: [sfGFP, Q204H_N149Y, taGFP, V206A]
+      - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
         amount: 5ul
         clean: thorough
         cleanBetweenSameSource: flush
