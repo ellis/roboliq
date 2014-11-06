@@ -1,10 +1,5 @@
 description: |
   Tania's Assam protocol for testing a range of pHs
-  
-  We want to measure at the following pHs:
-  - 0, 3.5, and three inbetween
-  - 5.5, 6.0, 6.5, 7.0, 7.5 ... CONTINUE HERE
-  
 
 labware:
   tubes1:
@@ -75,12 +70,16 @@ protocol:
       # Buffers
       - oneOf:
         - allOf: [{source: hepes_850, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: hepes_850, amount: 25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: hepes_850, amount: 20ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 10ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: hepes_850, amount: 22.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 7.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
         - allOf: [{source: hepes_850, amount: 15ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 15ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: hepes_850, amount: 10ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 20ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: hepes_850, amount: 5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: hepes_850, amount: 7.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 22.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
         - allOf: [{source: hepes_850, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: hepes_650, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+
+        - allOf: [{source: pipes_775, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: pipes_575, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: pipes_775, amount: 22.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: pipes_575, amount: 7.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: pipes_775, amount: 15ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: pipes_575, amount: 15ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: pipes_775, amount: 7.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: pipes_575, amount: 22.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: pipes_775, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: pipes_575, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
 
         - allOf: [{source: mes_710, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: mes_510, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
         - allOf: [{source: mes_710, amount: 25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: mes_510, amount: 5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
@@ -91,11 +90,12 @@ protocol:
         - allOf: [{source: mes_710, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: mes_510, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
 
         - allOf: [{source: acetate_575, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: acetate_575, amount: 25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: acetate_575, amount: 20ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 10ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: acetate_575, amount: 15ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 15ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: acetate_575, amount: 10ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 20ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
-        - allOf: [{source: acetate_575, amount: 5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: acetate_575, amount: 25.75ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 4.25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: acetate_575, amount: 21.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 8.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: acetate_575, amount: 17.25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 12.75ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: acetate_575, amount: 13ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 17ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: acetate_575, amount: 8.75ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 21.25ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
+        - allOf: [{source: acetate_575, amount: 4.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 25.5ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
         - allOf: [{source: acetate_575, amount: 0ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}, {source: acetate_375, amount: 30ul, clean: flush, cleanBetween: none, cleanEnd: none, pipettePolicy: Roboliq_Water_Wet_1000}]
 
       - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
