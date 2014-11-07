@@ -109,7 +109,7 @@ object MainInEclipse extends App {
 	runTemp("tania14_renaturation_263")
 	runTemp("tania14_renaturation_264")
 	runTemp("tania14_renaturation_265")*/
-	runTemp("tania15_renaturation_11")
+	/*runTemp("tania15_renaturation_11")
 	runTemp("tania15_renaturation_12")
 	runTemp("tania15_renaturation_13")
 	runTemp("tania15_renaturation_14")
@@ -133,5 +133,8 @@ object MainInEclipse extends App {
 	runTemp("tania15_renaturation_52")
 	runTemp("tania15_renaturation_53")
 	runTemp("tania15_renaturation_54")
-	runTemp("tania15_renaturation_55")
+	runTemp("tania15_renaturation_55")*/
+	//runTemp("tania13_ph_1_balancePlate")
+	//runTemp("tania13_ph_2_pipette")
+	runTemp("tania13_ph_3_measure")
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+	<FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2013-02-07T12:31:51.4761147Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+	<TecanMeasurement id="1" class="">
+		<MeasurementManualCycle id="2" number="1" type="Standard">
+			<CyclePlate id="3" file="GRE384fw" plateWithCover="False">
+				<PlateRange id="5" range="A1:A8" auto="false">
+					<MeasurementFluoInt readingMode="Top" id="6" mode="Normal" type="" name="FluoInt" longname="" description="">
+						<Well id="7" auto="true">
+							<MeasurementReading id="8" name="" beamDiameter="3000" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+								<ReadingLabel id="9" name="Label1" scanType="ScanFixed" refID="0">
+									<ReadingSettings number="25" rate="25000" />
+									<ReadingGain type="" gain="0" optimalGainPercentage="100" automaticGain="False" mode="Optimal">
+										<PlateRange id="10" range="A1:A8" auto="false" />
+									</ReadingGain>
+									<ReadingTime integrationTime="20" lagTime="0" readDelay="0" flash="0" dark="0" />
+									<ReadingFilter id="11" type="Ex" wavelength="5020" bandwidth="90" attenuation="0" usage="FI" />
+									<ReadingFilter id="12" type="Em" wavelength="5230" bandwidth="200" attenuation="0" usage="FI" />
+									<ReadingZPosition mode="CalculateFrom">
+										<PlateRange id="0" range="A1" auto="false" />
+									</ReadingZPosition>
+								</ReadingLabel>
+							</MeasurementReading>
+						</Well>
+					</MeasurementFluoInt>
+				</PlateRange>
+			</CyclePlate>
+		</MeasurementManualCycle>
+		<MeasurementInfo id="0" description="">
+			<ScriptTemplateSettings id="0">
+				<ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+				<ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+			</ScriptTemplateSettings>
+		</MeasurementInfo>
+	</TecanMeasurement>
+</TecanFile>
