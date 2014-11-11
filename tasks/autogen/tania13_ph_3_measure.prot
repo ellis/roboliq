@@ -1,0 +1,74 @@
+description: |
+  repeat pH measurements
+
+labware:
+  mixPlate:
+    description: plate for target mixtures
+    model: plateModel_384_square
+    location: P3
+  balancePlate:
+    description: balance plate for centrifuge
+    model: plateModel_384_square
+    location: CENTRIFUGE_4
+
+protocol:
+- comment:
+    agent: mario
+    text: Move mixPlate from REGRIP to CENTRIFUGE_2
+
+- transportLabware:
+    agent: mario
+    device: mario__transporter1
+    object: mixPlate
+    site: CENTRIFUGE_2
+
+- comment:
+    agent: mario
+    text: Start measurement loop
+
+- evoware.beginLoop:
+    agent: mario
+    count: 48
+    variable: MEASURE
+
+- evoware.timer.start:
+    agent: mario
+    id: 1
+
+- evoware.centrifuge.run:
+    agent: mario
+    device: mario__Centrifuge
+    program:
+      rpm: 3000
+      duration: 120 # 2min
+      temperature: 25
+
+- transportLabware:
+    device: mario__transporter1
+    object: mixPlate
+    site: REGRIP
+
+- measureAbsorbance:
+    object: mixPlate
+    programFile: tania13_ph-temp.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+
+- transportLabware:
+    device: mario__transporter1
+    object: mixPlate
+    site: CENTRIFUGE_2
+
+- evoware.centrifuge.run:
+    device: mario__Centrifuge
+    program:
+      rpm: 3000
+      duration: 1 # must set a duration of at least 1s
+      temperature: 25
+
+- evoware.timer.wait:
+    agent: mario
+    id: 1
+    till: 14400 # 4hr
+
+- evoware.endLoop:
+    agent: mario

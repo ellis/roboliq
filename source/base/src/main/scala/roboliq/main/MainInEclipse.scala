@@ -77,7 +77,6 @@ object MainInEclipse extends App {
 	//runTemp("tania12_denaturation_1_balancePlate")
 	//runTemp("tania12_denaturation_2_pipette")
 	//runTemp("tania12_denaturation_4_pipette_and_measure")
-	runTemp("tania13_ph_1_pipette")
 	//runTemp("tania14_renaturation_A01")
 	//runTemp("tania14_renaturation_B01")
 	/*runTemp("tania14_renaturation_111")
@@ -135,4 +134,7 @@ object MainInEclipse extends App {
 	runTemp("tania15_renaturation_53")
 	runTemp("tania15_renaturation_54")
 	runTemp("tania15_renaturation_55")*/
+	//runTemp("tania13_ph_1_balancePlate")
+	//runTemp("tania13_ph_2_pipette")
+	//runTemp("tania13_ph_3_measure")
 }
