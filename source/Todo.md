@@ -95,12 +95,6 @@ FABIAN:
 
 ## ``tania10_renaturation``
 
-IMPORTANT:
-- [ ] update script with new mdfx file!
-
-NOTE:
-- takes about 15 minutes to measure three wells on the renaturationPlate
-
 - [x] figure out downholder site and pipetting
 - [x] roboliq.yaml: figure out how to use TemplateWithRealDownholder.ewt
 - [x] replace thermocycling with waiting
@@ -181,6 +175,28 @@ the external site (perhaps we can simply assign the same grid+site to each of th
 - [ ] Generate the .tbp file, both for file system and data.h5 (See old TRobotProgram.scala)
 
 ## Command definition via YAML
+
+A CommandDef has the following fields:
+- ``name: String``
+- ``type: String``: task, procedure, function?, action, operator, instruction
+- ``implements: String``: the name of a task which this command implements
+- ``description: String``
+- ``documentation: String``
+- ``params: List[ParamDef]``
+- ``preconds: List[Rel]``
+- ``effects: List[Rel]``
+- ``output: List[CommandCall]``
+- ``oneOf: List[NamedCommandCallList]``: a list of alternatives for how to run this command
+
+A ParamDef has the following fields:
+- ``name: String``
+- ``type: String``
+- ``input``: one of Required (default), Optional, Plannable
+
+Notes:
+- The operator can be automatically generated from the CommandDef, so we don't need the distinction between action and operator commands anymore.
+- Maybe we can also put code in the CommandDef to allow for functions to be defined?
+- Instructions need to be defined by the backend, not via CommandDef
 
 ```{yaml}
 - name: carousel.close
