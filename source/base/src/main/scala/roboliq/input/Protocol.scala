@@ -49,6 +49,7 @@ import roboliq.evoware.commands.EvowareBeginLoopOperatorHandler
 import roboliq.evoware.commands.EvowareEndLoopOperatorHandler
 import roboliq.evoware.commands.EvowareBeginLoopActionHandler
 import roboliq.evoware.commands.EvowareEndLoopActionHandler
+import com.google.gson.Gson
 
 case class WellGroupBean(
 	name: String,
@@ -100,6 +101,7 @@ class Protocol {
 	private var tree: CallTree = null
 	//private var tasks = new ArrayBuffer[Rel]
 	private var var_i = 0
+	private var commandDef_l: List[CommandDef] = Nil
 
 	// HACK: defined here so that loadConfig() and loadEvoware() both have access
 	private val offsiteModel = SiteModel(gid)
@@ -210,7 +212,11 @@ class Protocol {
 	}
 	
 	// TODO: This should probably be moved out of the Protocol class
-	def loadConfigBean(configBean: ConfigBean, table_l: List[String]): RsResult[Unit] = {
+	def loadConfigBean(
+		configBean: ConfigBean,
+		table_l: List[String],
+		searchPath_l: List[File]
+	): RsResult[Unit] = {
 		import roboliq.entities._
 		
 		val user = Agent(gid, Some("user"))
@@ -225,83 +231,141 @@ class Protocol {
 		// userArm can transport from offsite
 		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		
-		// Aliases
-		if (configBean.aliases != null) {
-			for ((key, value) <- configBean.aliases.toMap) {
-				eb.addAlias(key, value)
-			}
-		}
-		
-		// Logic
-		if (configBean.logic != null) {
-			for (s <- configBean.logic.toList) {
-				val l = s.split(" ").toList
-				eb.addRel(Rel(l.head, l.tail))
-			}
-		}
-
-		// Specs
-		if (configBean.specs != null) {
-			for ((key, value) <- configBean.specs.toMap) {
-				specToString_l += ((key, value))
-			}
-		}
-		
-		// device+spec combinations
-		if (configBean.deviceToSpec != null) {
-			for (l <- configBean.deviceToSpec.toList) {
-				deviceToSpec_l += ((l(0), l(1)))
-			}
-		}
-		
-		// device+model+spec combinations
-		if (configBean.deviceToModelToSpec != null) {
-			for (l <- configBean.deviceToModelToSpec.toList) {
-				deviceToModelToSpec_l += ((l(0), l(1), l(2)))
-			}
-		}
-		
-		if (configBean.evowareAgents == null) {
-			RsSuccess(())
-		}
-		else {
-			RsResult.mapAll(configBean.evowareAgents.toList)(pair => {
-				val (agentIdent, agentBean) = pair
-				val tableNameDefault = s"${agentIdent}_default"
-				val tableSetup_m = agentBean.tableSetups.toMap.map(pair => s"${agentIdent}_${pair._1}" -> pair._2)
-				for {
-					// Load carrier file
-					evowarePath <- RsResult(agentBean.evowareDir, "evowareDir must be set")
-					carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "Carrier.cfg").getPath)
-					// FIXME: for debug only
-					//_ = carrierData.printCarriersById
-					// ENDIF
-					// Choose a table
-					tableName <- table_l.filter(tableSetup_m.contains) match {
-						case Nil =>
-							if (tableSetup_m.contains(tableNameDefault))
-								RsSuccess(tableNameDefault)
-							else
-								RsError(s"No table specified for agent `$agentIdent`")
-						case s :: Nil => RsSuccess(s)
-						case l => RsError(s"Agent `$agentIdent` can only be assigned one table, but multiple tables were specified: $l")
+		for {
+			// Aliases
+			_ <- {
+				if (configBean.aliases != null) {
+					for ((key, value) <- configBean.aliases.toMap) {
+						eb.addAlias(key, value)
 					}
-					tableSetupBean = tableSetup_m(tableName)
-					// Load table file
-					tableFile <- RsResult(tableSetupBean.tableFile, s"tableFile property must be set on tableSetup `$tableName`")
-					tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
-					configEvoware = new ConfigEvoware(eb, agentIdent, carrierData, tableData,
-							agentBean, tableSetupBean, offsiteModel, userArm,
-							specToString_l.toList, deviceToSpec_l.toList, deviceToModelToSpec_l.toList)
-					scriptBuilder <- configEvoware.loadEvoware()
-				} yield {
-					agentToIdentToInternalObject(agentIdent) = configEvoware.identToAgentObject
-					agentToBuilder_m += agentIdent -> scriptBuilder
-					if (!agentToBuilder_m.contains("user"))
-						agentToBuilder_m += "user" -> scriptBuilder
 				}
-			}).map(_ => ())
-		}
+				RsSuccess(())
+			}
+			
+			_ <- {
+				// Logic
+				if (configBean.logic != null) {
+					for (s <- configBean.logic.toList) {
+						val l = s.split(" ").toList
+						eb.addRel(Rel(l.head, l.tail))
+					}
+				}
+				RsSuccess(())
+			}
+			
+			_ <- {
+				// Specs
+				if (configBean.specs != null) {
+					for ((key, value) <- configBean.specs.toMap) {
+						specToString_l += ((key, value))
+					}
+				}
+				
+				// device+spec combinations
+				if (configBean.deviceToSpec != null) {
+					for (l <- configBean.deviceToSpec.toList) {
+						deviceToSpec_l += ((l(0), l(1)))
+					}
+				}
+				
+				// device+model+spec combinations
+				if (configBean.deviceToModelToSpec != null) {
+					for (l <- configBean.deviceToModelToSpec.toList) {
+						deviceToModelToSpec_l += ((l(0), l(1), l(2)))
+					}
+				}
+				RsSuccess(())
+			}
+			
+			_ <- {
+				if (configBean.evowareAgents == null) {
+					RsSuccess(())
+				}
+				else {
+					RsResult.mapAll(configBean.evowareAgents.toList)(pair => {
+						val (agentIdent, agentBean) = pair
+						val tableNameDefault = s"${agentIdent}_default"
+						val tableSetup_m = agentBean.tableSetups.toMap.map(pair => s"${agentIdent}_${pair._1}" -> pair._2)
+						for {
+							// Load carrier file
+							evowarePath <- RsResult(agentBean.evowareDir, "evowareDir must be set")
+							carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "Carrier.cfg").getPath)
+							// FIXME: for debug only
+							//_ = carrierData.printCarriersById
+							// ENDIF
+							// Choose a table
+							tableName <- table_l.filter(tableSetup_m.contains) match {
+								case Nil =>
+									if (tableSetup_m.contains(tableNameDefault))
+										RsSuccess(tableNameDefault)
+									else
+										RsError(s"No table specified for agent `$agentIdent`")
+								case s :: Nil => RsSuccess(s)
+								case l => RsError(s"Agent `$agentIdent` can only be assigned one table, but multiple tables were specified: $l")
+							}
+							tableSetupBean = tableSetup_m(tableName)
+							// Load table file
+							tableFile <- RsResult(tableSetupBean.tableFile, s"tableFile property must be set on tableSetup `$tableName`")
+							tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
+							configEvoware = new ConfigEvoware(eb, agentIdent, carrierData, tableData,
+									agentBean, tableSetupBean, offsiteModel, userArm,
+									specToString_l.toList, deviceToSpec_l.toList, deviceToModelToSpec_l.toList)
+							scriptBuilder <- configEvoware.loadEvoware()
+						} yield {
+							agentToIdentToInternalObject(agentIdent) = configEvoware.identToAgentObject
+							agentToBuilder_m += agentIdent -> scriptBuilder
+							if (!agentToBuilder_m.contains("user"))
+								agentToBuilder_m += "user" -> scriptBuilder
+						}
+					}).map(_ => ())
+				}
+			}
+			
+			_ <- {
+				if (configBean.commandFiles == null) {
+					RsSuccess(())
+				}
+				else {
+					for {
+						commandDef_ll <- RsResult.mapAll(configBean.commandFiles.toList)(filename => {
+							for {
+								file <- roboliq.utils.FileUtils.findFile(filename, searchPath_l)
+								jsval <- loadJsonValue(file)
+								commandDef_l <- Converter.convAs[List[CommandDef]](jsval, eb, None)
+							} yield commandDef_l
+						})
+					} yield {
+						this.commandDef_l = commandDef_ll.flatten
+						println("commandDef_l:")
+						commandDef_l.foreach(println)
+					}
+				}
+			}
+		} yield ()
+	}
+
+	// REFACTOR: duplicated code from Runner
+	private def yamlToJson(s: String): RsResult[String] = {
+		import org.yaml.snakeyaml._
+		val yaml = new Yaml()
+		val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
+		val gson = new Gson
+		val s_~ = gson.toJson(o)
+		//println("gson: " + s_~)
+		RsSuccess(s_~)
+	}
+	
+	private def loadJsonValue(file: File): RsResult[JsValue] = {
+		for {
+			_ <- RsResult.assert(file.exists, s"File not found: ${file.getPath}")
+			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
+				case "json" => RsSuccess(false)
+				case "yaml" => RsSuccess(true)
+				case ext => RsError(s"unrecognized command file extension `$ext`.  Expected either json or yaml.")
+			}
+			input0 = org.apache.commons.io.FileUtils.readFileToString(file)
+			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
+		} yield input.parseJson
 	}
 
 	def loadJson(jsobj: JsObject): RsResult[Unit] = {

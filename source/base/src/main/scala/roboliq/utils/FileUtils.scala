@@ -1,6 +1,9 @@
 package roboliq.utils
 
 import java.io.File
+import roboliq.core.RsResult
+import roboliq.core.RsSuccess
+import roboliq.core.RsError
 
 object FileUtils {
 	def writeToFile(fileName: String, data: String) {
@@ -17,5 +20,22 @@ object FileUtils {
 	def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
 		val p = new java.io.PrintWriter(f)
 		try { op(p) } finally { p.close() }
+	}
+
+	def findFile(
+		filename: String,
+		searchPath_l: List[File]
+	): RsResult[File] = {
+		val file0 = new File(filename)
+		if (file0.exists)
+			return RsSuccess(file0)
+		
+		for (dir <- searchPath_l) {
+			val file = new File(dir, filename)
+			if (file.exists())
+				return RsSuccess(file)
+		}
+		
+		RsError(s"Could not find file: $filename")
 	}
 }

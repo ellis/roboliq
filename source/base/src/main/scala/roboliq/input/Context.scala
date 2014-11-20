@@ -371,17 +371,9 @@ object Context {
 	}
 	
 	def findFile(filename: String): Context[File] = {
-		val file0 = new File(filename)
-		if (file0.exists)
-			return Context.unit(file0)
-			
 		for {
 			searchPath_l <- Context.gets(_.searchPath_l)
-			dir_? = searchPath_l.find(dir => {
-				val file = new File(dir, filename)
-				file.exists()
-			})
-			dir <- Context.from(dir_?, s"Could not find file: $filename")
-		} yield new File(dir, filename)
+			file <- Context.from(roboliq.utils.FileUtils.findFile(filename, searchPath_l))
+		} yield file
 	}
 }

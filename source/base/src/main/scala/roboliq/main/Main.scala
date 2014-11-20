@@ -89,12 +89,13 @@ class Runner(args: Array[String]) {
 		import scala.sys.process._
 		val protocol = new Protocol
 		val time0 = System.currentTimeMillis()
+		val searchPath_l = List[File](opt.protocolFile.getAbsoluteFile().getParentFile(), opt.configFile.getAbsoluteFile().getParentFile())
 		val x = for {
 			configBean <- loadConfigBean(opt.configFile.getPath())
 			//_ = println("opt.configFile.getPath(): "+opt.configFile.getPath())
 			cs <- protocol.loadCommandSet()
-			_ <- protocol.loadConfigBean(configBean, opt.tableNames.toList)
-
+			_ <- protocol.loadConfigBean(configBean, opt.tableNames.toList, searchPath_l)
+			
 			jsobj <- loadProtocolJson(opt.protocolFile)
 			_ <- protocol.loadJson(jsobj)
 			
@@ -132,7 +133,6 @@ class Runner(args: Array[String]) {
 			ordering_l <- RsResult.from(plan3.orderings.getSequence).map(_.filter(_ >= 2))
 			originalActionCount = planInfo_l.size
 		} yield {
-			val searchPath_l = List[File](opt.protocolFile.getAbsoluteFile().getParentFile(), opt.configFile.getAbsoluteFile().getParentFile())
 			val data0 = ProtocolData(
 				protocol,
 				protocol.eb,
@@ -275,6 +275,19 @@ class Runner(args: Array[String]) {
 		val s_~ = gson.toJson(o)
 		//println("gson: " + s_~)
 		RsSuccess(s_~)
+	}
+	
+	private def loadCommandJson(file: File): RsResult[JsValue] = {
+		for {
+			_ <- RsResult.assert(file.exists, s"File not found: ${file.getPath}")
+			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
+				case "json" => RsSuccess(false)
+				case "yaml" => RsSuccess(true)
+				case ext => RsError(s"unrecognized command file extension `$ext`.  Expected either json or yaml.")
+			}
+			input0 = FileUtils.readFileToString(file)
+			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
+		} yield input.parseJson
 	}
 	
 	private def loadProtocolJson(file: File): RsResult[JsObject] = {

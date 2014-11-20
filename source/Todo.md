@@ -199,6 +199,25 @@ Notes:
 - Instructions need to be defined by the backend, not via CommandDef
 
 ```{yaml}
+- name: shakePlate
+  type: action
+  params:
+  - { name: agent, type: Agent, input: Plannable }
+  - { name: device, type: Device, input: Plannable }
+  - { name: program, type: Program, input: Required }
+  - { name: object, type: Labware, input: Required }
+  - { name: site, type: Site, input: Plannable }
+  preconds:
+  - agent-has-device $agent $device
+  - device-can-site $device $site
+  - model $labware $model
+  - location $labware $site
+  commands:
+  - name: instruction
+    params: { agent: $agent, command: ShakerRun, device: $device, program: $program, labware: $object, site: $site }
+```
+
+```{yaml}
 - name: carousel.close
   options:
   - carousel.close-mario__Centrifuge
@@ -245,6 +264,10 @@ Notes:
     instruction: DeviceSiteClose
     params: { device: ?device, site: ?site }
 ```
+
+Processing of commands:
+- processing depends on type
+- type==task: create a variable 
 
 ## Vatsi and Tanya
 
@@ -384,6 +407,42 @@ but that might not work well for making flat lists... First try only allowing va
 
 The resulting list of items can be sorted, grouped, filtered, merged, expanded and reprocessed -- in any sequence required.
 For example, we could use this to create titration lists and complex macro commands.
+
+```{yaml}
+type: expression
+children:
+- {type: var, name: x, value: 5}
+- {type: var, name: y, value: 20}
+- {type: var, name: z, ref: y}
+- {type: return, value: {action: myAction}}
+---
+# Result:
+{ action: myAction, x: 5, y: 20, z: 20 }
+```
+
+```{yaml}
+type: expression
+children:
+- {type: var, name: x, value: 5}
+- {type: var, name: y, value: 20}
+- {type: var, name: z, ref: y}
+- {type: add, value: {action: myItem1}}
+- {type: var, name: x, value: 6}
+- {type: add, value: {action: myItem2}}
+---
+# Result:
+- { action: myItem1, x: 5, y: 20, z: 20 }
+- { action: myItem2, x: 6, y: 20, z: 20 }
+```
+
+```{yaml}
+- type: scope
+  defaults:
+  - {name: x, value: 5}
+  - {name: y, value: 20}
+  commands:
+  - {...}
+```
 
 ## Pipetting, dilution, mixtures, etc
 

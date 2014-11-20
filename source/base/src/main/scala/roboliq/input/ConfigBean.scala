@@ -1,8 +1,5 @@
 package roboliq.input
 
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.Constructor
-import scala.collection.mutable.ListBuffer
 import scala.beans.BeanProperty
 
 class ConfigBean {
@@ -13,6 +10,7 @@ class ConfigBean {
 	@BeanProperty var deviceToSpec: java.util.ArrayList[java.util.ArrayList[String]] = null
 	@BeanProperty var deviceToModelToSpec: java.util.ArrayList[java.util.ArrayList[String]] = null
 	@BeanProperty var externalThermocyclers: java.util.ArrayList[String] = null
+	@BeanProperty var commandFiles: java.util.ArrayList[String] = null
 }
 
 class EvowareAgentBean {
