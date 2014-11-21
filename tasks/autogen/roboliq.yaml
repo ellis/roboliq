@@ -159,3 +159,5 @@ deviceToModelToSpec:
   - [mario_sealer, plateModel_96_pcr, sealerSpec1]
   - [mario_peeler, plateModel_96_pcr, peelerSpec1]
 
+commandFiles:
+  - commands.yaml

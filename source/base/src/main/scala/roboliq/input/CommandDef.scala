@@ -9,32 +9,33 @@ object ParamInput extends Enumeration {
 
 case class ParamDef(
 	name: String,
-	typ: String,
+	`type`: String,
 	input: ParamInput.Value
 )
 
 case class CommandCall(
 	name: String,
-	params: List[String]
+	param: Map[String, String]
 )
 
 case class LabeledCommandCallList(
 	label: String,
-	commands: List[CommandCall]
+	command: List[CommandCall]
 )
 
 object CommandType extends Enumeration {
-	val Task, Procedure, Function, Instruction = Value
+	val Task, Procedure, Function, Action, Operator, Instruction = Value
 }
 
 case class CommandDef(
 	name: String,
-	typ: CommandType.Value,
+	`type`: CommandType.Value,
 	implements_? : Option[String],
 	description_? : Option[String],
 	documentation_? : Option[String],
-	params: List[ParamDef],
-	effects: List[Rel],
-	commands: List[CommandCall],
+	param: List[ParamDef],
+	precond: List[Rel],
+	effect: List[Rel],
+	command: List[CommandCall],
 	oneOf: List[LabeledCommandCallList]
 )

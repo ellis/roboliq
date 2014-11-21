@@ -30,7 +30,7 @@ object MainInEclipse extends App {
 	//run("test_single_evowareTimerSleep_01")
 	//run("test_single_measureAbsorbance_01")
 	//run("test_single_openDeviceSite_02")
-	//run("test_single_pipette_01")
+	run("test_single_pipette_01")
 	//run("test_single_pipette_02")
 	//run("test_single_pipette_03")
 	/*run("test_single_pipette_04")
@@ -136,5 +136,5 @@ object MainInEclipse extends App {
 	runTemp("tania15_renaturation_55")*/
 	//runTemp("tania13_ph_1_balancePlate")
 	//runTemp("tania13_ph_2_pipette")
-	runTemp("tania13_ph_3_measure")
+	//runTemp("tania13_ph_3_measure")
 }

@@ -348,13 +348,14 @@ class Protocol {
 	private def yamlToJson(s: String): RsResult[String] = {
 		import org.yaml.snakeyaml._
 		val yaml = new Yaml()
-		val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
+		//val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
+		val o = yaml.load(s)
 		val gson = new Gson
 		val s_~ = gson.toJson(o)
 		//println("gson: " + s_~)
 		RsSuccess(s_~)
 	}
-	
+
 	private def loadJsonValue(file: File): RsResult[JsValue] = {
 		for {
 			_ <- RsResult.assert(file.exists, s"File not found: ${file.getPath}")
