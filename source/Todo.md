@@ -445,6 +445,50 @@ children:
 ```
 
 ```{yaml}
+TYPE: number
+VALUE: 12
+---
+TYPE: string
+VALUE: Hello, World
+---
+TYPE: set
+VALUE:
+  a: { TYPE: number, VALUE: 1 }
+  b: { TYPE: number, VALUE: 2 }
+  c: { TYPE: number, VALUE: 3 }
+---
+TYPE: list
+VALUE:
+- { TYPE: number, VALUE: 1 }
+- { TYPE: number, VALUE: 2 }
+- { TYPE: number, VALUE: 3 }
+---
+TYPE: call
+VALUE: add
+INPUT:
+  numbers:
+   - { TYPE: number, VALUE: 1 }
+   - { TYPE: number, VALUE: 2 }
+---
+TYPE: stringf
+VALUE: Hello, ${agent}
+---
+TYPE: ident
+VALUE: agent
+---
+TYPE: call
+VALUE: build
+INPUT:
+  elements:
+  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
+  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
+  transform:
+  - <sortfunction>
+  - <filterfunction>
+  - <whatever...>
+```
+
+```{yaml}
 CALL: add
 INPUT: {n1: 5, n2: 7}
 ---
@@ -452,19 +496,29 @@ VALUE: 12
 ---
 12
 ---
+VALUE: {a: 1, b: 2, c: 3}
+---
 {a: 1, b: 2, c: 3}
 ---
 S|Hello, World
 ---
-$|Hello, ${agent}
+$|Hello, ${agent} => S|Hello, mario
 ---
-x
+agent => mario
+---
+VALUE: [1, 2, 3]
 ---
 [1, 2, 3]
 ---
-LIST:
+CALL: build
+INPUT:
+  elements:
   - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
   - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
+  transform:
+  - <sortfunction>
+  - <filterfunction>
+  - <whatever...>
 ```
 
 ## Pipetting, dilution, mixtures, etc

@@ -759,40 +759,56 @@ object Converter {
 		RsSuccess(l)
 	}
 
-	def toJsValue(jsval: JsValue): RqResult[JsValue] =
-		RqSuccess(jsval)
+	def toJsValue(jsval: JsValue): RqResult[JsValue] = {
+		jsval match {
+			case JsObject(m) =>
+				(m.get("TYPE"), m.get("VALUE")) match {
+					case (Some(JsString("string")), Some(x: JsString)) => RsSuccess(x) 
+					case (Some(JsString("number")), Some(x: JsNumber)) => RsSuccess(x) 
+					case (Some(JsString("boolean")), Some(x: JsBoolean)) => RsSuccess(x)
+					case (_, Some(JsNull)) => RsSuccess(JsNull)
+					case _ =>
+						RqSuccess(jsval)
+				}
+			case _ =>
+				RqSuccess(jsval)
+		}
+	}
 	
 	def toString(jsval: JsValue): RqResult[String] = {
 		jsval match {
 			case JsString(text) => RqSuccess(text)
+			case JsObject(m) =>
+				for {
+					_ <- RqResult.assert(m.get("TYPE") == "string", s"expected JsString or TYPE=string")
+					jsval2 <- RsResult.from(m.get("VALUE"), s"expected VALUE for string")
+					x <- toString(jsval2)
+				} yield x
 			case _ => RqError("expected JsString")
 		}
 	}
 	
 	def toInt(jsval: JsValue): RqResult[Int] = {
-		jsval match {
-			case JsNumber(n) => RqSuccess(n.toInt)
-			case _ => RqError("expected JsNumber")
-		}
+		toBigDecimal(jsval).map(_.toInt)
 	}
 	
 	def toInteger(jsval: JsValue): RqResult[Integer] = {
-		jsval match {
-			case JsNumber(n) => RqSuccess(n.toInt)
-			case _ => RqError("expected JsNumber")
-		}
+		toBigDecimal(jsval).map(_.toInt)
 	}
 	
 	def toDouble(jsval: JsValue): RqResult[Double] = {
-		jsval match {
-			case JsNumber(n) => RqSuccess(n.toDouble)
-			case _ => RqError("expected JsNumber")
-		}
+		toBigDecimal(jsval).map(_.toDouble)
 	}
 	
 	def toBigDecimal(jsval: JsValue): RqResult[BigDecimal] = {
 		jsval match {
 			case JsNumber(n) => RqSuccess(n)
+			case JsObject(m) =>
+				for {
+					_ <- RqResult.assert(m.get("TYPE") == "number", s"expected JsNumber or TYPE=number")
+					jsval2 <- RsResult.from(m.get("VALUE"), s"expected VALUE for number")
+					x <- toBigDecimal(jsval2)
+				} yield x
 			case _ => RqError("expected JsNumber")
 		}
 	}
@@ -800,6 +816,12 @@ object Converter {
 	def toBoolean(jsval: JsValue): RqResult[java.lang.Boolean] = {
 		jsval match {
 			case JsBoolean(b) => RqSuccess(b)
+			case JsObject(m) =>
+				for {
+					_ <- RqResult.assert(m.get("TYPE") == "boolean", s"expected JsBoolean or TYPE=boolean")
+					jsval2 <- RsResult.from(m.get("VALUE"), s"expected VALUE for boolean")
+					x <- toBoolean(jsval2)
+				} yield x
 			case _ => RqError("expected JsBoolean")
 		}
 	}

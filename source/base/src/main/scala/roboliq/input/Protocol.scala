@@ -348,41 +348,6 @@ class Protocol {
 			}
 		} yield ()
 	}
-	
-	private def evaluate(jsval: JsValue, scope: Map[String, JsValue]): RsResult[JsObject] = {
-		jsval match {
-			case jsobj @ JsObject(m) =>
-				(m.get("CALL"), m.get("VALUE")) match {
-					// A function call
-					case (Some(JsString(name)), None) =>
-						m.get("INPUT") match {
-							case Some(JsObject(input)) =>
-								for {
-									input2 <- RsResult.mapAll(input.toList)({ case (name, jsval2) =>
-										evaluate(jsval2, scope).map(name -> _)
-									}).map(_.toMap)
-									scope2 = scope ++ input2
-								} yield {
-									
-								}
-							case _ =>
-								RsError(s"Invalid `input` in expression: $jsval")
-						}
-					// A value
-					case (None, Some(jsval2)) =>
-						evaluate(jsval2, scope)
-					case _ =>
-						RsError(s"Invalid expression: $jsval")
-				}
-			case JsNumber(n) =>
-				RsSuccess(JsObject("VALUE" -> n))
-			case JsBoolean(b) =>
-				RsSuccess(JsObject("VALUE" -> b))
-			// A value
-			case _ =>
-				RsSuccess(JsObject("VALUE" -> jsval))
-		}
-	}
 
 	// REFACTOR: duplicated code from Runner
 	private def yamlToJson(s: String): RsResult[String] = {

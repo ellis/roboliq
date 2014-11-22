@@ -334,10 +334,10 @@ object Context {
 		Context { data =>
 			val (data1, opt1) = ctx.run(data)
 			if (data1.error_r.isEmpty) {
-				(data, None)
+				(data1, Some(opt1))
 			}
 			else {
-				(data1, Some(opt1))
+				(data, None)
 			}
 		}
 	}
