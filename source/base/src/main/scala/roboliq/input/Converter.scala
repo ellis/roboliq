@@ -9,6 +9,7 @@ import grizzled.slf4j.Logger
 import spray.json._
 import roboliq.core._
 import roboliq.entities._
+import aiplan.strips2.Strips
 
 case class KeyClassOpt(
 	key: String,
@@ -338,6 +339,8 @@ object Converter {
 			else if (typ =:= typeOf[PipetteDestination]) toPipetteDestination(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
+			// Logic
+			else if (typ =:= typeOf[Strips.Literal]) toStripsLiteral(jsval)
 			// Lookups
 			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](jsval, eb)
 			else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](jsval, eb)
@@ -943,6 +946,29 @@ object Converter {
 		}
 	}
 	
+	def toStripsLiteral(
+		jsval: JsValue
+	): RqResult[Strips.Literal] = {
+		jsval match {
+			case JsString(s) =>
+				s.split(" ").toList.filterNot(_.isEmpty) match {
+					case Nil =>
+						RqError("expected a non-empty string for logical literal")
+					case l =>
+						val name0 = l.head
+						val pos = !name0.startsWith("~")
+						val name = if (pos) name0 else name0.substring(1)
+						if (name.isEmpty) {
+							RqError(s"expected a non-empty name for logical literal in: $s")
+						}
+						else {
+							RqSuccess(Strips.Literal(Strips.Atom(name, l.tail), pos))
+						}
+				}
+			case _ => RqError("expected JsString for logical literal")
+		}
+	}
+
 	def toEntityByRef[A <: Entity : Manifest](
 		jsval: JsValue,
 		eb: EntityBase

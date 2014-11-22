@@ -444,6 +444,29 @@ children:
   - {...}
 ```
 
+```{yaml}
+CALL: add
+INPUT: {n1: 5, n2: 7}
+---
+VALUE: 12
+---
+12
+---
+{a: 1, b: 2, c: 3}
+---
+S|Hello, World
+---
+$|Hello, ${agent}
+---
+x
+---
+[1, 2, 3]
+---
+LIST:
+  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
+  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
+```
+
 ## Pipetting, dilution, mixtures, etc
 
 mix:

@@ -1,17 +1,24 @@
 - name: shakePlate
   type: Action
-  param:
-  - { name: agent, type: Agent, input: Plannable }
-  - { name: device, type: Device, input: Plannable }
-  - { name: program, type: Program, input: Required }
-  - { name: object, type: Labware, input: Required }
-  - { name: site, type: Site, input: Plannable }
+  input:
+  - { name: agent, type: Agent, mode: Plannable }
+  - { name: device, type: Device, mode: Plannable }
+  - { name: program, type: Program, mode: Required }
+  - { name: plate, type: Labware, mode: Required }
+  - { name: model, type: LabwareModel, mode: Plannable }
+  - { name: site, type: Site, mode: Plannable }
   precond:
   - agent-has-device $agent $device
   - device-can-site $device $site
-  - model $labware $model
-  - location $labware $site
-  command:
-  - name: instruction
-    param: { agent: $agent, command: ShakerRun, device: $device, program: $program, labware: $object, site: $site }
+  - model $plate $model
+  - location $plate $site
+  output:
+  - CALL: instruction
+    INPUT:
+      agent: agent
+      command: ShakerRun
+      device: device
+      program: program
+      labware: plate
+      site: site
 
