@@ -25,6 +25,7 @@ trait ContextData {
 	val warning_r: List[String]
 	val error_r: List[String]
 	
+	def setErrorsAndWarnings(error_r: List[String], warning_r: List[String]): ContextData
 	def logWarning(s: String): ContextData
 	def logError(s: String): ContextData
 	def log[A](res: RsResult[A]): ContextData
@@ -38,15 +39,21 @@ case class ContextDataMinimal(
 	warning_r: List[String] = Nil,
 	error_r: List[String] = Nil
 ) extends ContextData {
+	def setErrorsAndWarnings(error_r: List[String], warning_r: List[String]): ContextData = {
+		copy(error_r = error_r, warning_r = warning_r)
+	}
+	
 	def logWarning(s: String): ContextData = {
 		copy(warning_r = prefixMessage(s) :: warning_r)
 	}
 	
 	def logError(s: String): ContextData = {
+		//println(s"logError($s): "+(prefixMessage(s) :: error_r))
 		copy(error_r = prefixMessage(s) :: error_r)
 	}
 	
 	def log[A](res: RsResult[A]): ContextData = {
+		//println(s"log($res)")
 		res match {
 			case RsSuccess(_, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r)
 			case RsError(error_l, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r, error_r = error_l.reverse.map(prefixMessage) ++ this.error_r)
@@ -54,10 +61,12 @@ case class ContextDataMinimal(
 	}
 	
 	def pushLabel(label: String): ContextData = {
+		//println(s"pushLabel($label) = ${label :: context_r}")
 		copy(context_r = label :: context_r)
 	}
 	
 	def popLabel(): ContextData = {
+		//println(s"popLabel()")
 		copy(context_r = context_r.tail)
 	}
 
@@ -85,7 +94,7 @@ sealed trait ContextT[+A] {
 	}
 }
 */
-sealed trait ContextT[+A] {
+trait ContextT[+A] {
 	def run(data: ContextData): (ContextData, Option[A])
 	
 	def map[B](f: A => B): ContextT[B] = {
@@ -284,7 +293,6 @@ object ContextT {
 		}
 	}
 	
-	
 	def or[B](f1: => ContextT[B], f2: => ContextT[B]): ContextT[B] = {
 		ContextT { data =>
 			if (data.error_r.isEmpty) {
@@ -298,10 +306,35 @@ object ContextT {
 						(data2, opt2)
 					}
 					else {
+						// TODO: should probably prefix the different warnings to distinguish between the alternatives that were tried
 						val error_r = data2.error_r ++ data1.error_r
-						val warning_r = data2.warning_r ++ data2.warning_r ++ data.warning_r
-						val data3 = data1.log(RsError[Unit](error_r, warning_r))
+						// TODO: this will duplicate all the warnings that were already in data -- avoid that
+						val warning_r = data2.warning_r ++ data1.warning_r
+						val data3 = data.setErrorsAndWarnings(error_r, warning_r)
 						(data3, None)
+					}
+				}
+			}
+			else {
+				(data, None)
+			}
+		}
+	}
+	
+	def orElse[B](f1: => ContextT[B], f2: => ContextT[B]): ContextT[B] = {
+		ContextT { data =>
+			if (data.error_r.isEmpty) {
+				val (data1, opt1) = f1.run(data)
+				if (data1.error_r.isEmpty) {
+					(data1, opt1)
+				}
+				else {
+					val (data2, opt2) = f2.run(data)
+					if (data2.error_r.isEmpty) {
+						(data2, opt2)
+					}
+					else {
+						(data2, None)
 					}
 				}
 			}

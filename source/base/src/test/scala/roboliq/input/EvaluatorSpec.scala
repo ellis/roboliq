@@ -7,48 +7,73 @@ import spray.json.JsNumber
 import spray.json.JsObject
 
 class EvaluatorSpec extends FunSpec {
+	val eb = new EntityBase
+	val evaluator = new Evaluator(eb);
+
+	private def check(l: (ContextT[JsObject], JsObject)*) {
+		val ctx = for {
+			res_l <- ContextT.map(l) { _._1 }
+		} yield {
+			for ((res, expected) <- res_l zip l.map(_._2))
+				assert(res == expected)
+		}
+		val data0 = ContextDataMinimal()
+		val (data1_~, _) = ctx.run(data0)
+		val data1 = data1_~.asInstanceOf[ContextDataMinimal]
+		if (!data1.error_r.isEmpty) {
+			println("ERRORS:")
+			data1.error_r.foreach(println)
+		}
+		assert(data1.error_r == Nil)
+	}
+	
 	describe("Evaluator") {
-		val eb = new EntityBase
-		val evaluator = new Evaluator(eb);
 		val js5 = Converter2.makeNumber(5)
 		val js7 = Converter2.makeNumber(7)
 		val js12 = Converter2.makeNumber(12)
 		val jsX = Converter2.makeSubst("x")
+		val jsList57 = Converter2.makeList(List(js5, js7))
+		val jsListX7 = Converter2.makeList(List(jsX, js7))
+		val jsAdd57 = Converter2.makeCall("add", Map("numbers" -> jsList57))
+		val jsAddX7 = Converter2.makeCall("add", Map("numbers" -> jsListX7))
 		
 		it("number") {
-			val ctx = for {
-				res1 <- evaluator.evaluate(js12, Map())
-				res2 <- evaluator.evaluate(JsNumber(12), Map())
-			} yield {
-				assert(res1 == js12)
-				assert(res2 == js12)
-			}
-			val data = ContextDataMinimal()
-			ctx.run(data)
-		}
-		
-		it("add") {
-			val jsAdd1 = Converter2.makeCall("add", Map("numbers" -> Converter2.makeList(List(js5, js7))))
-			val jsAdd2 = Converter2.makeCall("add", Map("numbers" -> Converter2.makeList(List(jsX, js7))))
-			val ctx = for {
-				res1 <- evaluator.evaluate(jsAdd1, Map())
-				res2 <- evaluator.evaluate(jsAdd2, Map("x" -> js5))
-			} yield {
-				assert(res1 == js12)
-				assert(res2 == js12)
-			}
-			val data = ContextDataMinimal()
-			ctx.run(data)
+			check(
+				evaluator.evaluate(js12, Map()) -> js12,
+				evaluator.evaluate(JsNumber(12), Map()) -> js12
+			)
 		}
 		
 		it("subst") {
-			val ctx = for {
-				res1 <- evaluator.evaluate(jsX, Map("x" -> js5))
-			} yield {
-				assert(res1 == js5)
-			}
-			val data = ContextDataMinimal()
-			ctx.run(data)
+			check(
+				evaluator.evaluate(jsX, Map("x" -> js5)) -> js5
+			)
+		}
+		
+		it("list") {
+			check(
+				evaluator.evaluate(jsList57, Map()) -> jsList57
+			)
+		}
+		
+		it("list with subst") {
+			check(
+				evaluator.evaluate(jsListX7, Map("x" -> js5)) -> jsList57
+			)
+		}
+		
+		it("list with call with subst") {
+			val jsList3 = Converter2.makeList(List(js5, jsAddX7))
+			check(
+				evaluator.evaluate(jsList3, Map("x" -> js5)) -> Converter2.makeList(List(js5, js12))
+			)
+		}
+
+		it("add") {
+			check(
+				evaluator.evaluate(jsAdd57, Map()) -> js12//,
+				//evaluator.evaluate(jsAddX7, Map("x" -> js5)) -> js5
+			)
 		}
 	}
 }

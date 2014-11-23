@@ -109,27 +109,29 @@ object Converter2 {
 	def fromJson[A: TypeTag](
 		jsval: JsValue
 	): ContextT[A] = {
+		//println(s"fromJson($jsval)")
 		val typ = ru.typeTag[A].tpe
 		for {
-			o <- conv(Nil, jsval, typ)
+			o <- conv(jsval, typ)
 			//_ <- ContextT.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$jsval` to `$o`")
 		} yield o.asInstanceOf[A]
 	}
 
 	private def conv(
-		path_r: List[String],
 		jsval: JsValue,
-		typ: Type
+		typ: Type,
+		path_? : Option[String] = None
 	): ContextT[Any] = {
+		//println(s"conv($jsval)")
 		import scala.reflect.runtime.universe._
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
-		val path = path_r.reverse.mkString(".")
-		val prefix = if (path_r.isEmpty) "" else path + ": "
-		logger.trace(s"conv(${path}, $jsval, $typ, eb)")
+		//val path = path_r.reverse.mkString(".")
+		//val prefix = if (path_r.isEmpty) "" else path + ": "
+		//logger.trace(s"conv(${path}, $jsval, $typ, eb)")
 
-		ContextT.context(path) {
+		val ctx = {
 			val ret: ContextT[Any] = {
 				if (typ =:= typeOf[JsValue]) ContextT.unit(jsval)
 				else if (typ =:= typeOf[String]) Converter2.toString(jsval)
@@ -161,22 +163,22 @@ object Converter2 {
 				else if (typ <:< typeOf[Option[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					if (jsval == JsNull) ContextT.unit(None)
-					else conv(path_r, jsval, typ2).map(_ match {
+					else conv(jsval, typ2).map(_ match {
 						case ConvObject(o) => ConvObject(Option(o))
 						case res => res
 					})
 				}
 				else if (typ <:< typeOf[List[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-					convList(path_r, jsval, typ2)
+					convList(jsval, typ2)
 				}
 				else if (typ <:< typeOf[Set[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					jsval match {
 						case jsobj @ JsObject(fields) =>
-							convSet(path_r, jsobj, typ2)
+							convSet(jsobj, typ2)
 						case _ =>
-							convList(path_r, jsval, typ2).map(l => Set(l : _*))
+							convList(jsval, typ2).map(l => Set(l : _*))
 					}
 				}
 				else if (typ <:< typeOf[Map[_, _]]) {
@@ -188,7 +190,7 @@ object Converter2 {
 							val name_l = fields.toList.map(_._1)
 							val nameToType_l = name_l.map(_ -> typVal)
 							for {
-								res <- convMap(path_r, jsobj, typKey, nameToType_l)
+								res <- convMap(jsobj, typKey, nameToType_l)
 							} yield res
 						case JsNull => ContextT.unit(Map())
 						case _ =>
@@ -203,9 +205,9 @@ object Converter2 {
 					for {
 						nameToObj_m <- jsval match {
 							case jsobj: JsObject =>
-								convMapString(path_r, jsobj, nameToType_l)
+								convMapString(jsobj, nameToType_l)
 							case JsArray(jsval_l) =>
-								convListToObject(path_r, jsval_l, nameToType_l)
+								convListToObject(jsval_l, nameToType_l)
 							/*case JsString(s) =>
 								eb.getEntity(s) match {
 									case Some(obj) =>
@@ -215,13 +217,13 @@ object Converter2 {
 										for {
 											nameToVal_l <- parseStringToArgs(s)
 											//_ = println("nameToVal_l: "+nameToVal_l.toString)
-											res <- convArgsToMap(path_r, nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
+											res <- convArgsToMap(nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
 											//_ = println("res: "+res.toString)
 										} yield res
 								}
 							*/
 							case _ =>
-								convListToObject(path_r, List(jsval), nameToType_l)
+								convListToObject(List(jsval), nameToType_l)
 							//case _ =>
 							//	ContextT.error(s"unhandled type or value. type=${typ}, value=${jsval}")
 						}
@@ -239,11 +241,14 @@ object Converter2 {
 			logger.debug(ret)
 			ret
 		}
+		path_? match {
+			case None => ctx
+			case Some(path) => ContextT.context(path)(ctx)
+		}
 	}
 
 		
 	private def convList(
-		path_r: List[String],
 		jsval: JsValue,
 		typ2: Type
 	): ContextT[List[Any]] = {
@@ -252,27 +257,32 @@ object Converter2 {
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		jsval match {
+			case JsObject(map) =>
+				(map.get("TYPE"), map.get("VALUE")) match {
+					case (Some(JsString("list")), Some(JsArray(v))) =>
+						ContextT.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
+							val i = i0 + 1
+							conv(jsval2, typ2, Some(s"[$i]"))
+						}
+					case _ =>
+						ContextT.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${jsval}")
+				}
 			case JsArray(v) =>
 				ContextT.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
 					val i = i0 + 1
-					val path2_r = path_r match {
-						case Nil => List(s"[$i]")
-						case head :: rest => (s"$head[$i]") :: rest
-					}
-					conv(path2_r, jsval2, typ2)
+					conv(jsval2, typ2, Some(s"[$i]"))
 				}
 			case JsNull =>
 				ContextT.unit(Nil)
 			case _ =>
 				ContextT.or(
-					conv(path_r, jsval, typ2).map(List(_)),
+					conv(jsval, typ2).map(List(_)),
 					ContextT.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${jsval}")
 				)
 		}
 	}
 	
 	private def convSet(
-		path_r: List[String],
 		jsobj: JsObject,
 		typ2: Type
 	): ContextT[Set[Any]] = {
@@ -282,12 +292,11 @@ object Converter2 {
 
 		// Try to convert each element of the array
 		ContextT.mapAll(jsobj.fields.toList) ({ case (id, jsval) =>
-			conv(id :: path_r, jsval, typ2)
+			conv(jsval, typ2, Some(id))
 		}).map(l => Set(l : _*))
 	}
 
 	private def convListToObject(
-		path_r: List[String],
 		jsval_l: List[JsValue],
 		nameToType_l: List[(String, ru.Type)]
 	): ContextT[Map[String, _]] = {
@@ -295,7 +304,6 @@ object Converter2 {
 	}
 
 	private def convMap(
-		path_r: List[String],
 		jsobj: JsObject,
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)]
@@ -316,11 +324,10 @@ object Converter2 {
 		// Try to convert each element of the object
 		for {
 			val_l <- ContextT.map(nameToType_l) { case (name, typ2) =>
-				val path2_r = name :: path_r
 				jsobj.fields.get(name) match {
-					case Some(jsval2) => conv(path2_r, jsval2, typ2)
+					case Some(jsval2) => conv(jsval2, typ2, Some(name))
 					// Field is missing, so try using JsNull
-					case None => conv(path2_r, JsNull, typ2)
+					case None => conv(JsNull, typ2, Some(name))
 				}
 			}
 		} yield {
@@ -329,12 +336,11 @@ object Converter2 {
 	}
 
 	private def convMapString(
-		path_r: List[String],
 		jsobj: JsObject,
 		nameToType_l: List[(String, ru.Type)]
 	): ContextT[Map[String, _]] = {
 		for {
-			map <- convMap(path_r, jsobj, typeOf[String], nameToType_l)
+			map <- convMap(jsobj, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]
 	}
 }

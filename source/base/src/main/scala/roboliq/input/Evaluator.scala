@@ -5,9 +5,24 @@ import spray.json.JsString
 import spray.json.JsNumber
 import spray.json.JsValue
 import roboliq.entities.EntityBase
+import spray.json.JsArray
 
 /*
-trait RjsValue
+object RjsType extends Enumeration {
+	val
+		RCall,
+		RIdent,
+		RList,
+		RMap,
+		RNumber,
+		RString,
+		RSubst
+		= Value
+}
+
+sealed abstract class RjsValue(val typ: RjsType.Value) {
+	def toJson: JsObject
+}
 case class RjsCall(name: String, input: Map[String, JsValue]) extends RjsValue
 case class RjsNumber(n: BigDecimal) extends RjsValue
 */
@@ -65,6 +80,16 @@ class Evaluator(
 
 	def evaluateType(typ: String, jsval: JsValue, scope: Map[String, JsObject]): ContextT[JsObject] = {
 		(typ, jsval) match {
+			case ("list", JsArray(l)) =>
+				for {
+					// TODO: need to push a context to a context 
+					l2 <- ContextT.map(l.zipWithIndex) { case (jsval2, i0) =>
+						val i = i0 + 1
+						ContextT.context(s"[$i]") {
+							evaluate(jsval2, scope)
+						}
+					}
+				} yield Converter2.makeList(l2)
 			case ("number", JsNumber(n)) =>
 				ContextT.unit(Converter2.makeNumber(n))
 			case ("subst", JsString(name)) =>
