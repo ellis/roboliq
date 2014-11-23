@@ -42,3 +42,12 @@ class BuiltinAdd {
 		}
 	}
 }
+
+case class BuiltinBuildItem(
+	: Map[]
+)
+
+case class BuiltinBuildInput(
+	item: List[Map[String, JsObject]],
+	transform: List[String]
+)

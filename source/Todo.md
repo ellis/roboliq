@@ -479,45 +479,12 @@ VALUE: agent
 TYPE: subst
 VALUE: x
 ---
-TYPE: call
-VALUE: build
-INPUT:
+TYPE: build
+VALUE:
   elements:
-  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
-  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
-  transform:
-  - <sortfunction>
-  - <filterfunction>
-  - <whatever...>
-```
-
-```{yaml}
-CALL: add
-INPUT: {n1: 5, n2: 7}
----
-VALUE: 12
----
-12
----
-VALUE: {a: 1, b: 2, c: 3}
----
-{a: 1, b: 2, c: 3}
----
-S|Hello, World
----
-$|Hello, ${agent} => S|Hello, mario
----
-agent => mario
----
-VALUE: [1, 2, 3]
----
-[1, 2, 3]
----
-CALL: build
-INPUT:
-  elements:
-  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
-  - ADD: { CALL: add, INPUT: {n1: 5, n2: 7} }
+  - VAR: { TYPE: number, NAME: x, VALUE: 5 }
+  - ADD: { TYPE: call, NAME: add, INPUT: {numbers: [5, 7]} }
+  - ADD: { TYPE: call, NAME: add, INPUT: {n1: 5, n2: 7} }
   transform:
   - <sortfunction>
   - <filterfunction>
