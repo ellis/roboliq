@@ -16,7 +16,7 @@ class Evaluator(
 	eb: EntityBase
 ) {
 	
-	def evaluate(jsval: JsValue, scope: Map[String, JsValue]): ContextT[JsObject] = {
+	def evaluate(jsval: JsValue, scope: Map[String, JsObject]): ContextT[JsObject] = {
 		jsval match {
 			// TODO: Add warnings for extra fields
 			case jsobj @ JsObject(m) =>
@@ -50,7 +50,7 @@ class Evaluator(
 		}
 	}
 	
-	def evaluateCall(nameFn: String, scope: Map[String, JsValue]): ContextT[JsObject] = {
+	def evaluateCall(nameFn: String, scope: Map[String, JsObject]): ContextT[JsObject] = {
 		for {
 			res <- nameFn match {
 				case "add" =>
@@ -63,10 +63,14 @@ class Evaluator(
 		} yield res
 	}
 
-	def evaluateType(typ: String, jsval: JsValue, scope: Map[String, JsValue]): ContextT[JsObject] = {
+	def evaluateType(typ: String, jsval: JsValue, scope: Map[String, JsObject]): ContextT[JsObject] = {
 		(typ, jsval) match {
-			case ("number", JsNumber(n)) => ContextT.unit(Converter2.makeNumber(n))
-			case _ => ContextT.error("evaluateType() not completely implemented")
+			case ("number", JsNumber(n)) =>
+				ContextT.unit(Converter2.makeNumber(n))
+			case ("subst", JsString(name)) =>
+				ContextT.from(scope.get(name), s"variable `$name` not in scope")
+			case _ =>
+				ContextT.error("evaluateType() not completely implemented")
 		}
 	}
 }

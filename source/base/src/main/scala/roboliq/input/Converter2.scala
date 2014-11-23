@@ -82,12 +82,38 @@ object Converter2 {
 		}
 	}
 	
+	def makeCall(name: String, input: Map[String, JsValue]): JsObject = {
+		JsObject(Map("TYPE" -> JsString("call"), "VALUE" -> JsString(name), "INPUT" -> JsObject(input)))
+	}
+
+	def makeList(l: List[JsValue]): JsObject = {
+		JsObject(Map("TYPE" -> JsString("list"), "VALUE" -> JsArray(l)))
+	}
+	
+	def makeMap(map: Map[String, JsValue]): JsObject = {
+		JsObject(Map("TYPE" -> JsString("map"), "VALUE" -> JsObject(map)))
+	}
+	
 	def makeNumber(n: BigDecimal): JsObject = {
 		JsObject(Map("TYPE" -> JsString("number"), "VALUE" -> JsNumber(n)))
 	}
 	
-	def makeCall(name: String, input: Map[String, JsValue]): JsObject = {
-		JsObject(Map("TYPE" -> JsString("call"), "VALUE" -> JsString(name), "INPUT" -> JsObject(input)))
+	def makeString(s: String): JsObject = {
+		JsObject(Map("TYPE" -> JsString("string"), "VALUE" -> JsString(s)))
+	}
+	
+	def makeSubst(name: String): JsObject = {
+		JsObject(Map("TYPE" -> JsString("subst"), "VALUE" -> JsString(name)))
+	}
+	
+	def fromJson[A: TypeTag](
+		jsval: JsValue
+	): ContextT[A] = {
+		val typ = ru.typeTag[A].tpe
+		for {
+			o <- conv(Nil, jsval, typ)
+			//_ <- ContextT.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$jsval` to `$o`")
+		} yield o.asInstanceOf[A]
 	}
 
 	private def conv(

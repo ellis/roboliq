@@ -451,7 +451,7 @@ VALUE: 12
 TYPE: string
 VALUE: Hello, World
 ---
-TYPE: set
+TYPE: map
 VALUE:
   a: { TYPE: number, VALUE: 1 }
   b: { TYPE: number, VALUE: 2 }
@@ -475,6 +475,9 @@ VALUE: Hello, ${agent}
 ---
 TYPE: ident
 VALUE: agent
+---
+TYPE: subst
+VALUE: x
 ---
 TYPE: call
 VALUE: build
