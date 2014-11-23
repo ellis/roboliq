@@ -28,11 +28,14 @@ class EvaluatorSpec extends FunSpec {
 		}
 		
 		it("add") {
-			val jsAdd = Converter2.makeCall("add", Map("numbers" -> Converter2.makeList(List(js5, js7))))
+			val jsAdd1 = Converter2.makeCall("add", Map("numbers" -> Converter2.makeList(List(js5, js7))))
+			val jsAdd2 = Converter2.makeCall("add", Map("numbers" -> Converter2.makeList(List(jsX, js7))))
 			val ctx = for {
-				res1 <- evaluator.evaluate(jsAdd, Map())
+				res1 <- evaluator.evaluate(jsAdd1, Map())
+				res2 <- evaluator.evaluate(jsAdd2, Map("x" -> js5))
 			} yield {
 				assert(res1 == js12)
+				assert(res2 == js12)
 			}
 			val data = ContextDataMinimal()
 			ctx.run(data)
