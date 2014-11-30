@@ -5,6 +5,8 @@ import roboliq.entities.EntityBase
 import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
+import spray.json.JsArray
+import spray.json.JsString
 
 class EvaluatorSpec extends FunSpec {
 	val eb = new EntityBase
@@ -76,6 +78,16 @@ class EvaluatorSpec extends FunSpec {
 			check(Map(),
 				evaluator.evaluate(jsAdd57) -> js12//,
 				//evaluator.evaluate(jsAddX7, Map("x" -> js5)) -> js5
+			)
+		}
+
+		it("build") {
+			val jsBuild1 = Converter2.makeBuild(List(
+				"VAR" -> JsObject(Map("NAME" -> JsString("a")) ++ js5.fields),
+				"ADD" -> Converter2.makeMap(Map("b" -> js7))
+			))
+			check(Map(),
+				evaluator.evaluate(jsBuild1) -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7))))
 			)
 		}
 	}

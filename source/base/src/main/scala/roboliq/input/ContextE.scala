@@ -356,8 +356,8 @@ object ContextE {
 		}
 	}
 	
-	def fromJson[A: TypeTag](jsobj: JsObject): ContextE[A] = {
-		Converter2.fromJson[A](jsobj)
+	def fromJson[A: TypeTag](jsval: JsValue): ContextE[A] = {
+		Converter2.fromJson[A](jsval)
 	}
 	
 	def fromScope[A: TypeTag](): ContextE[A] = {

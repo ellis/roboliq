@@ -480,15 +480,14 @@ TYPE: subst
 VALUE: x
 ---
 TYPE: build
-VALUE:
-  item:
-  - VAR: { TYPE: number, NAME: x, VALUE: 5 }
-  - ADD: { TYPE: call, NAME: add, INPUT: {numbers: [5, 7]} }
-  - ADD: { TYPE: call, NAME: add, INPUT: {n1: 5, n2: 7} }
-  transform:
-  - <sortfunction>
-  - <filterfunction>
-  - <whatever...>
+ITEM:
+- VAR: { TYPE: number, NAME: x, VALUE: 5 }
+- ADD: { TYPE: call, NAME: add, INPUT: {numbers: [5, 7]} }
+- ADD: { TYPE: call, NAME: add, INPUT: {n1: 5, n2: 7} }
+TRANSFORM:
+- <sortfunction>
+- <filterfunction>
+- <whatever...>
 ```
 
 ## Pipetting, dilution, mixtures, etc

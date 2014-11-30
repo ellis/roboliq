@@ -82,6 +82,11 @@ object Converter2 {
 		}
 	}
 	
+	def makeBuild(item_l: List[(String, JsObject)]): JsObject = {
+		val item1_l = item_l.map { case (op, jsobj) => JsObject(Map(op -> jsobj))}
+		JsObject(Map("TYPE" -> JsString("build"), "ITEM" -> JsArray(item1_l)))
+	}
+
 	def makeCall(name: String, input: Map[String, JsValue]): JsObject = {
 		JsObject(Map("TYPE" -> JsString("call"), "VALUE" -> JsString(name), "INPUT" -> JsObject(input)))
 	}
@@ -133,7 +138,7 @@ object Converter2 {
 
 		val ctx = {
 			val ret: ContextE[Any] = {
-				if (typ =:= typeOf[JsValue]) ContextE.unit(jsval)
+				if (typ <:< typeOf[JsObject]) ContextE.unit(jsval)
 				else if (typ =:= typeOf[String]) Converter2.toString(jsval)
 				else if (typ =:= typeOf[Int]) toInt(jsval)
 				else if (typ =:= typeOf[Integer]) toInteger(jsval)
@@ -184,7 +189,7 @@ object Converter2 {
 				else if (typ <:< typeOf[Map[_, _]]) {
 					jsval match {
 						case jsobj @ JsObject(fields) =>
-							println("fields: " + fields)
+							//println("fields: " + fields)
 							val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
 							val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 							val name_l = fields.toList.map(_._1)
