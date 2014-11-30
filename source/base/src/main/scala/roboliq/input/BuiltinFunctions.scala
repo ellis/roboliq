@@ -5,6 +5,7 @@ import roboliq.core.RsResult
 import spray.json.JsObject
 import roboliq.entities.EntityBase
 import spray.json.JsNumber
+import scala.collection.mutable.HashMap
 
 /*
 case class BuiltinAdd2Params(
@@ -32,10 +33,10 @@ case class BuiltinAddParams(
 )
 
 class BuiltinAdd {
-	def evaluate(scope: Map[String, JsValue], eb: EntityBase): ContextT[JsObject] = {
-		ContextT.context("add") {
+	def evaluate(): ContextE[JsObject] = {
+		ContextE.context("add") {
 			for {
-				params <- Converter2.fromJson[BuiltinAddParams](JsObject(scope))
+				params <- ContextE.fromScope[BuiltinAddParams]()
 			} yield {
 				Converter2.makeNumber(params.numbers.sum)
 			}
@@ -43,11 +44,31 @@ class BuiltinAdd {
 	}
 }
 
-case class BuiltinBuildItem(
-	: Map[]
-)
-
 case class BuiltinBuildInput(
 	item: List[Map[String, JsObject]],
 	transform: List[String]
 )
+
+class BuiltinBuild {
+	def evaluate(scope: Map[String, JsValue], eb: EntityBase): ContextE[JsObject] = {
+		ContextE.context("build") {
+			for {
+				input <- Converter2.fromJson[BuiltinBuildInput](JsObject(scope))
+			} yield {
+				null
+			}
+		}
+	}
+	
+	private def makeItems(item_l: List[Map[String, JsObject]]): ContextT[Unit] = {
+		val var_m = new HashMap[String, JsObject]
+		for (m <- item_l) {
+			m.toList match {
+				case List(("VAR", JsObject(m2))) =>
+					
+				case List(("ADD", JsObject(m2))) =>
+			}
+		}
+		ContextT.unit(())
+	}
+}

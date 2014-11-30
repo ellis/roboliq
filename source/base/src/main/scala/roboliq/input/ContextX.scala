@@ -20,32 +20,31 @@ import roboliq.entities.Agent
 import roboliq.entities.WorldStateEvent
 import roboliq.entities.Amount
 import java.io.File
-import spray.json.JsObject
 
-case class ContextEData(
-	state: EvaluatorState,
+case class ContextXData[State](
+	state: State,
 	context_r: List[String] = Nil,
 	warning_r: List[String] = Nil,
 	error_r: List[String] = Nil
 ) {
-	def setState(state: EvaluatorState): ContextEData = {
+	def setState(state: State): ContextXData[State] = {
 		copy(state = state)
 	}
 	
-	def setErrorsAndWarnings(error_r: List[String], warning_r: List[String]): ContextEData = {
+	def setErrorsAndWarnings(error_r: List[String], warning_r: List[String]): ContextXData[State] = {
 		copy(error_r = error_r, warning_r = warning_r)
 	}
 	
-	def logWarning(s: String): ContextEData = {
+	def logWarning(s: String): ContextXData[State] = {
 		copy(warning_r = prefixMessage(s) :: warning_r)
 	}
 	
-	def logError(s: String): ContextEData = {
+	def logError(s: String): ContextXData[State] = {
 		//println(s"logError($s): "+(prefixMessage(s) :: error_r))
 		copy(error_r = prefixMessage(s) :: error_r)
 	}
 	
-	def log[A](res: RsResult[A]): ContextEData = {
+	def log[A](res: RsResult[A]): ContextXData[State] = {
 		//println(s"log($res)")
 		res match {
 			case RsSuccess(_, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r)
@@ -53,12 +52,12 @@ case class ContextEData(
 		}
 	}
 	
-	def pushLabel(label: String): ContextEData = {
+	def pushLabel(label: String): ContextXData[State] = {
 		//println(s"pushLabel($label) = ${label :: context_r}")
 		copy(context_r = label :: context_r)
 	}
 	
-	def popLabel(): ContextEData = {
+	def popLabel(): ContextXData[State] = {
 		//println(s"popLabel()")
 		copy(context_r = context_r.tail)
 	}
@@ -68,11 +67,30 @@ case class ContextEData(
 	}
 }
 
-trait ContextE[+A] {
-	def run(data: ContextEData): (ContextEData, Option[A])
+/*
+sealed trait ContextX[+A] {
+	def run(data: ContextXData[State]): (ContextXData[State], A)
 	
-	def map[B](f: A => B): ContextE[B] = {
-		ContextE { data =>
+	def map[B](f: A => B): ContextX[State, B] = {
+		ContextX { data =>
+			val (data1, a) = run(data)
+			(data1, f(a))
+		}
+	}
+	
+	def flatMap[B](f: A => ContextX[State, B]): ContextX[State, B] = {
+		ContextX { data =>
+			val (data1, a) = run(data)
+			f(a).run(data1)
+		}
+	}
+}
+*/
+trait ContextX[State, +A] {
+	def run(data: ContextXData[State]): (ContextXData[State], Option[A])
+	
+	def map[B](f: A => B): ContextX[State, B] = {
+		ContextX { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, optA) = run(data)
 				val optB = optA.map(f)
@@ -84,8 +102,8 @@ trait ContextE[+A] {
 		}
 	}
 	
-	def flatMap[B](f: A => ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def flatMap[B](f: A => ContextX[State, B]): ContextX[State, B] = {
+		ContextX { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, optA) = run(data)
 				optA match {
@@ -98,24 +116,28 @@ trait ContextE[+A] {
 			}
 		}
 	}
+	
+	/*private def pair[A](data: ContextXData[State], res: RsResult[A]): (ContextXData[State], RsResult[A]) = {
+		(data.log(res), res)
+	}*/
 }
 
-object ContextE {
-	def apply[A](f: ContextEData => (ContextEData, Option[A])): ContextE[A] = {
-		new ContextE[A] {
-			def run(data: ContextEData) = f(data)
+class ContextXFunctions {
+	def apply[State, A](f: ContextXData[State] => (ContextXData[State], Option[A])): ContextX[State, A] = {
+		new ContextX[State, A] {
+			def run(data: ContextXData[State]) = f(data)
 		}
 	}
 	
-	def from[A](res: RsResult[A]): ContextE[A] = {
-		ContextE { data =>
+	def from[State, A](res: RsResult[A]): ContextX[State, A] = {
+		ContextX { data =>
 			val data1 = data.log(res)
 			(data1, res.toOption)
 		}
 	}
 	
-	def from[A](opt: Option[A], error: => String): ContextE[A] = {
-		ContextE { data =>
+	def from[State, A](opt: Option[A], error: => String): ContextX[State, A] = {
+		ContextX { data =>
 			val data1 = opt match {
 				case None => data.logError(error)
 				case _ => data
@@ -124,25 +146,25 @@ object ContextE {
 		}
 	}
 	
-	def unit[A](a: A): ContextE[A] =
-		ContextE { data => (data, Some(a)) }
+	def unit[State, A](a: A): ContextX[State, A] =
+		ContextX { data => (data, Some(a)) }
 	
-	def get: ContextE[ContextEData] =
-		ContextE { data => (data, Some(data)) }
+	def get[State]: ContextX[State, ContextXData[State]] =
+		ContextX { data => (data, Some(data)) }
 	
-	def gets[A](f: ContextEData => A): ContextE[A] =
-		ContextE { data => (data, Some(f(data))) }
+	def gets[State, A](f: ContextXData[State] => A): ContextX[State, A] =
+		ContextX { data => (data, Some(f(data))) }
 	
-	def getsResult[A](f: ContextEData => RsResult[A]): ContextE[A] = {
-		ContextE { data =>
+	def getsResult[State, A](f: ContextXData[State] => RsResult[A]): ContextX[State, A] = {
+		ContextX { data =>
 			val res = f(data)
 			val data1 = data.log(res)
 			(data1, res.toOption)
 		}
 	}
 	
-	def getsOption[A](f: ContextEData => Option[A], error: => String): ContextE[A] = {
-		ContextE { data =>
+	def getsOption[State, A](f: ContextXData[State] => Option[A], error: => String): ContextX[State, A] = {
+		ContextX { data =>
 			f(data) match {
 				case None => (data.logError(error), None)
 				case Some(a) => (data, Some(a))
@@ -150,36 +172,36 @@ object ContextE {
 		}
 	}
 	
-	def put(data: ContextEData): ContextE[Unit] =
-		ContextE { _ => (data, Some(())) }
+	def put[State](data: ContextXData[State]): ContextX[State, Unit] =
+		ContextX { _ => (data, Some(())) }
 	
-	def modify(f: ContextEData => ContextEData): ContextE[Unit] =
-		ContextE { data => (f(data), Some(())) }
+	def modify[State](f: ContextXData[State] => ContextXData[State]): ContextX[State, Unit] =
+		ContextX { data => (f(data), Some(())) }
 	
-	def assert(condition: Boolean, msg: => String): ContextE[Unit] = {
+	def assert[State](condition: Boolean, msg: => String): ContextX[State, Unit] = {
 		if (condition) unit(())
 		else error(msg)
 	}
 	
-	def error[A](s: String): ContextE[A] = {
-		ContextE { data => (data.logError(s), None) }
+	def error[State, A](s: String): ContextX[State, A] = {
+		ContextX { data => (data.logError(s), None) }
 	}
 	
-	//def getWellInfo(well: Well): ContextE[WellInfo] =
+	//def getWellInfo(well: Well): ContextX[WellInfo] =
 	//	getsResult[WellInfo](data => data.eb.wellToWellInfo(data.state, well))
 	
 	/**
 	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
 	 */
-	def map[A, B, C[_]](
+	def map[State, A, B, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[B]
+		fn: A => ContextX[State, B]
 	)(implicit
 		c2i: C[A] => Iterable[A],
 		cbf: CanBuildFrom[C[A], B, C[B]]
-	): ContextE[C[B]] = {
-		ContextE { data0 =>
+	): ContextX[State, C[B]] = {
+		ContextX { data0 =>
 			if (data0.error_r.isEmpty) {
 				var data = data0
 				val builder = cbf()
@@ -205,15 +227,15 @@ object ContextE {
 	/**
 	 * Map a function fn over the collection l.  Return either the all errors produced by fn, or a list of successes with accumulated warnings.
 	 */
-	def mapAll[A, B, C[_]](
+	def mapAll[State, A, B, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[B]
+		fn: A => ContextX[State, B]
 	)(implicit
 		c2i: C[A] => Iterable[A],
 		cbf: CanBuildFrom[C[A], B, C[B]]
-	): ContextE[C[B]] = {
-		ContextE { data0 =>
+	): ContextX[State, C[B]] = {
+		ContextX { data0 =>
 			if (data0.error_r.isEmpty) {
 				var data = data0
 				val builder = cbf()
@@ -237,14 +259,14 @@ object ContextE {
 	/**
 	 * Run a function fn over the collection l.  Abort on the first error produced by fn.
 	 */
-	def foreach[A, C[_]](
+	def foreach[State, A, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[Any]
+		fn: A => ContextX[State, Any]
 	)(implicit
 		c2i: C[A] => Iterable[A]
-	): ContextE[Unit] = {
-		ContextE { data0 =>
+	): ContextX[State, Unit] = {
+		ContextX { data0 =>
 			if (data0.error_r.isEmpty) {
 				var data = data0
 				for (x <- c2i(l)) {
@@ -263,8 +285,8 @@ object ContextE {
 		}
 	}
 	
-	def or[B](f1: => ContextE[B], f2: => ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def or[State, B](f1: => ContextX[State, B], f2: => ContextX[State, B]): ContextX[State, B] = {
+		ContextX { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, opt1) = f1.run(data)
 				if (data1.error_r.isEmpty) {
@@ -291,8 +313,8 @@ object ContextE {
 		}
 	}
 	
-	def orElse[B](f1: => ContextE[B], f2: => ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def orElse[State, B](f1: => ContextX[State, B], f2: => ContextX[State, B]): ContextX[State, B] = {
+		ContextX { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, opt1) = f1.run(data)
 				if (data1.error_r.isEmpty) {
@@ -314,8 +336,8 @@ object ContextE {
 		}
 	}
 	
-	def toOption[B](ctx: ContextE[B]): ContextE[Option[B]] = {
-		ContextE { data =>
+	def toOption[State, B](ctx: ContextX[State, B]): ContextX[State, Option[B]] = {
+		ContextX { data =>
 			val (data1, opt1) = ctx.run(data)
 			if (data1.error_r.isEmpty) {
 				(data1, Some(opt1))
@@ -326,8 +348,8 @@ object ContextE {
 		}
 	}
 	
-	def context[B](label: String)(ctx: ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def context[State, B](label: String)(ctx: ContextX[State, B]): ContextX[State, B] = {
+		ContextX { data =>
 			val data0 = data.pushLabel(label)
 			val (data1, opt1) = ctx.run(data0)
 			val data2 = data1.popLabel()
@@ -339,36 +361,6 @@ object ContextE {
 			}
 		}
 	}
-	
-	def getScope: ContextE[Map[String, JsObject]] = {
-		ContextE { data =>
-			(data, Some(data.state.scope))
-		}
-	}
-	
-	def addToScope(scope: Map[String, JsObject]): ContextE[Unit] = {
-		ContextE { data =>
-			val scope0 = data.state.scope
-			val scope1 = scope0 ++ scope
-			val state1 = data.state.copy(scope = scope1)
-			val data1 = data.copy(state = state1)
-			(data1, Some(()))
-		}
-	}
-	
-	def fromJson[A: TypeTag](jsobj: JsObject): ContextE[A] = {
-		Converter2.fromJson[A](jsobj)
-	}
-	
-	def fromScope[A: TypeTag](): ContextE[A] = {
-		for {
-			scope <- ContextE.getScope
-			x <- Converter2.fromJson[A](JsObject(scope))
-		} yield x
-	}
-	
-	def evaluate(jsobj: JsObject): ContextE[JsObject] = {
-		val evaluator = new Evaluator()
-		evaluator.evaluate(jsobj)
-	}
 }
+
+object ContextX extends ContextXFunctions

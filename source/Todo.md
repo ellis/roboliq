@@ -481,7 +481,7 @@ VALUE: x
 ---
 TYPE: build
 VALUE:
-  elements:
+  item:
   - VAR: { TYPE: number, NAME: x, VALUE: 5 }
   - ADD: { TYPE: call, NAME: add, INPUT: {numbers: [5, 7]} }
   - ADD: { TYPE: call, NAME: add, INPUT: {n1: 5, n2: 7} }

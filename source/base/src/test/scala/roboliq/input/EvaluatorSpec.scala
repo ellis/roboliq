@@ -8,18 +8,21 @@ import spray.json.JsObject
 
 class EvaluatorSpec extends FunSpec {
 	val eb = new EntityBase
-	val evaluator = new Evaluator(eb);
+	val data0 = ContextEData(EvaluatorState(eb, Map()))
+	val evaluator = new Evaluator();
 
-	private def check(l: (ContextT[JsObject], JsObject)*) {
-		val ctx = for {
-			res_l <- ContextT.map(l) { _._1 }
+	private def check(
+		scope: Map[String, JsObject],
+		l: (ContextE[JsObject], JsObject)*
+	) {
+		val ctx: ContextE[Unit] = for {
+			_ <- ContextE.addToScope(scope)
+			res_l <- ContextE.map(l) { _._1 }
 		} yield {
 			for ((res, expected) <- res_l zip l.map(_._2))
 				assert(res == expected)
 		}
-		val data0 = ContextDataMinimal()
-		val (data1_~, _) = ctx.run(data0)
-		val data1 = data1_~.asInstanceOf[ContextDataMinimal]
+		val (data1, _) = ctx.run(data0)
 		if (!data1.error_r.isEmpty) {
 			println("ERRORS:")
 			data1.error_r.foreach(println)
@@ -38,40 +41,40 @@ class EvaluatorSpec extends FunSpec {
 		val jsAddX7 = Converter2.makeCall("add", Map("numbers" -> jsListX7))
 		
 		it("number") {
-			check(
-				evaluator.evaluate(js12, Map()) -> js12,
-				evaluator.evaluate(JsNumber(12), Map()) -> js12
+			check(Map(),
+				evaluator.evaluate(js12) -> js12,
+				evaluator.evaluate(JsNumber(12)) -> js12
 			)
 		}
 		
 		it("subst") {
-			check(
-				evaluator.evaluate(jsX, Map("x" -> js5)) -> js5
+			check(Map("x" -> js5),
+				evaluator.evaluate(jsX) -> js5
 			)
 		}
 		
 		it("list") {
-			check(
-				evaluator.evaluate(jsList57, Map()) -> jsList57
+			check(Map(),
+				evaluator.evaluate(jsList57) -> jsList57
 			)
 		}
 		
 		it("list with subst") {
-			check(
-				evaluator.evaluate(jsListX7, Map("x" -> js5)) -> jsList57
+			check(Map("x" -> js5),
+				evaluator.evaluate(jsListX7) -> jsList57
 			)
 		}
 		
 		it("list with call with subst") {
 			val jsList3 = Converter2.makeList(List(js5, jsAddX7))
-			check(
-				evaluator.evaluate(jsList3, Map("x" -> js5)) -> Converter2.makeList(List(js5, js12))
+			check(Map("x" -> js5),
+				evaluator.evaluate(jsList3) -> Converter2.makeList(List(js5, js12))
 			)
 		}
 
 		it("add") {
-			check(
-				evaluator.evaluate(jsAdd57, Map()) -> js12//,
+			check(Map(),
+				evaluator.evaluate(jsAdd57) -> js12//,
 				//evaluator.evaluate(jsAddX7, Map("x" -> js5)) -> js5
 			)
 		}

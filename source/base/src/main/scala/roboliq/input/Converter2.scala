@@ -16,68 +16,68 @@ import spray.json.JsArray
 
 object Converter2 {
 	private val logger = Logger[this.type]
-
-	def toString(jsval: JsValue): ContextT[String] = {
-		ContextT.context("toString") {
+	
+	def toString(jsval: JsValue): ContextE[String] = {
+		ContextE.context("toString") {
 			jsval match {
-				case JsString(text) => ContextT.unit(text)
+				case JsString(text) => ContextE.unit(text)
 				case JsObject(m) =>
 					for {
-						_ <- ContextT.assert(m.get("TYPE") == "string", s"expected JsString or TYPE=string")
-						jsval2 <- ContextT.from(m.get("VALUE"), s"expected VALUE for string")
+						_ <- ContextE.assert(m.get("TYPE") == "string", s"expected JsString or TYPE=string")
+						jsval2 <- ContextE.from(m.get("VALUE"), s"expected VALUE for string")
 						x <- toString(jsval2)
 					} yield x
-				case _ => ContextT.error("expected JsString")
+				case _ => ContextE.error("expected JsString")
 			}
 		}
 	}
 	
-	def toInt(jsval: JsValue): ContextT[Int] = {
+	def toInt(jsval: JsValue): ContextE[Int] = {
 		toBigDecimal(jsval).map(_.toInt)
 	}
 	
-	def toInteger(jsval: JsValue): ContextT[Integer] = {
+	def toInteger(jsval: JsValue): ContextE[Integer] = {
 		toBigDecimal(jsval).map(_.toInt)
 	}
 	
-	def toDouble(jsval: JsValue): ContextT[Double] = {
+	def toDouble(jsval: JsValue): ContextE[Double] = {
 		toBigDecimal(jsval).map(_.toDouble)
 	}
 	
-	def toBigDecimal(jsval: JsValue): ContextT[BigDecimal] = {
-		ContextT.context("toBigDecimal") {
+	def toBigDecimal(jsval: JsValue): ContextE[BigDecimal] = {
+		ContextE.context("toBigDecimal") {
 			jsval match {
 				case JsObject(m) =>
 					(m.get("TYPE"), m.get("VALUE")) match {
 						case (Some(JsString("number")), Some(JsNumber(n))) =>
-							ContextT.unit(n)
+							ContextE.unit(n)
 						case _ =>
-							ContextT.error("Expected TYPE=number and VALUE of type JsNumber: "+jsval)
+							ContextE.error("Expected TYPE=number and VALUE of type JsNumber: "+jsval)
 					}
-				case JsNumber(n) => ContextT.unit(n)
-				case _ => ContextT.error("expected JsNumber or JsObject")
+				case JsNumber(n) => ContextE.unit(n)
+				case _ => ContextE.error("expected JsNumber or JsObject")
 			}
 		}
 	}
 	
-	def toBigDecimal(scope: Map[String, JsValue], name: String): ContextT[BigDecimal] = {
+	def toBigDecimal(scope: Map[String, JsValue], name: String): ContextE[BigDecimal] = {
 		scope.get(name) match {
-			case None => ContextT.error(s"variable `$name` missing from scope")
+			case None => ContextE.error(s"variable `$name` missing from scope")
 			case Some(jsval) => toBigDecimal(jsval)
 		}
 	}
 	
-	def toBoolean(jsval: JsValue): ContextT[java.lang.Boolean] = {
-		ContextT.context("toBoolean") {
+	def toBoolean(jsval: JsValue): ContextE[java.lang.Boolean] = {
+		ContextE.context("toBoolean") {
 			jsval match {
 				case JsObject(m) =>
 					for {
-						_ <- ContextT.assert(m.get("TYPE") == "boolean", s"expected JsBoolean or TYPE=boolean")
-						jsval2 <- ContextT.from(m.get("VALUE"), s"expected VALUE for boolean")
+						_ <- ContextE.assert(m.get("TYPE") == "boolean", s"expected JsBoolean or TYPE=boolean")
+						jsval2 <- ContextE.from(m.get("VALUE"), s"expected VALUE for boolean")
 						x <- toBoolean(jsval2)
 					} yield x
-				case JsBoolean(b) => ContextT.unit(b)
-				case _ => ContextT.error("expected JsBoolean")
+				case JsBoolean(b) => ContextE.unit(b)
+				case _ => ContextE.error("expected JsBoolean")
 			}
 		}
 	}
@@ -108,12 +108,12 @@ object Converter2 {
 	
 	def fromJson[A: TypeTag](
 		jsval: JsValue
-	): ContextT[A] = {
+	): ContextE[A] = {
 		//println(s"fromJson($jsval)")
 		val typ = ru.typeTag[A].tpe
 		for {
 			o <- conv(jsval, typ)
-			//_ <- ContextT.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$jsval` to `$o`")
+			//_ <- ContextE.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$jsval` to `$o`")
 		} yield o.asInstanceOf[A]
 	}
 
@@ -121,7 +121,7 @@ object Converter2 {
 		jsval: JsValue,
 		typ: Type,
 		path_? : Option[String] = None
-	): ContextT[Any] = {
+	): ContextE[Any] = {
 		//println(s"conv($jsval)")
 		import scala.reflect.runtime.universe._
 
@@ -132,8 +132,8 @@ object Converter2 {
 		//logger.trace(s"conv(${path}, $jsval, $typ, eb)")
 
 		val ctx = {
-			val ret: ContextT[Any] = {
-				if (typ =:= typeOf[JsValue]) ContextT.unit(jsval)
+			val ret: ContextE[Any] = {
+				if (typ =:= typeOf[JsValue]) ContextE.unit(jsval)
 				else if (typ =:= typeOf[String]) Converter2.toString(jsval)
 				else if (typ =:= typeOf[Int]) toInt(jsval)
 				else if (typ =:= typeOf[Integer]) toInteger(jsval)
@@ -162,7 +162,7 @@ object Converter2 {
 				*/
 				else if (typ <:< typeOf[Option[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-					if (jsval == JsNull) ContextT.unit(None)
+					if (jsval == JsNull) ContextE.unit(None)
 					else conv(jsval, typ2).map(_ match {
 						case ConvObject(o) => ConvObject(Option(o))
 						case res => res
@@ -192,9 +192,9 @@ object Converter2 {
 							for {
 								res <- convMap(jsobj, typKey, nameToType_l)
 							} yield res
-						case JsNull => ContextT.unit(Map())
+						case JsNull => ContextE.unit(Map())
 						case _ =>
-							ContextT.error("expected a JsObject")
+							ContextE.error("expected a JsObject")
 					}
 				}
 				else {
@@ -212,7 +212,7 @@ object Converter2 {
 								eb.getEntity(s) match {
 									case Some(obj) =>
 										// FIXME: need to check type rather than just assuming that it's correct!
-										ContextT.unit(Left(ConvObject(obj)))
+										ContextE.unit(Left(ConvObject(obj)))
 									case None =>
 										for {
 											nameToVal_l <- parseStringToArgs(s)
@@ -225,7 +225,7 @@ object Converter2 {
 							case _ =>
 								convListToObject(List(jsval), nameToType_l)
 							//case _ =>
-							//	ContextT.error(s"unhandled type or value. type=${typ}, value=${jsval}")
+							//	ContextE.error(s"unhandled type or value. type=${typ}, value=${jsval}")
 						}
 					} yield {
 						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
@@ -243,7 +243,7 @@ object Converter2 {
 		}
 		path_? match {
 			case None => ctx
-			case Some(path) => ContextT.context(path)(ctx)
+			case Some(path) => ContextE.context(path)(ctx)
 		}
 	}
 
@@ -251,7 +251,7 @@ object Converter2 {
 	private def convList(
 		jsval: JsValue,
 		typ2: Type
-	): ContextT[List[Any]] = {
+	): ContextE[List[Any]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -260,24 +260,24 @@ object Converter2 {
 			case JsObject(map) =>
 				(map.get("TYPE"), map.get("VALUE")) match {
 					case (Some(JsString("list")), Some(JsArray(v))) =>
-						ContextT.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
+						ContextE.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
 							val i = i0 + 1
 							conv(jsval2, typ2, Some(s"[$i]"))
 						}
 					case _ =>
-						ContextT.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${jsval}")
+						ContextE.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${jsval}")
 				}
 			case JsArray(v) =>
-				ContextT.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
+				ContextE.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
 					val i = i0 + 1
 					conv(jsval2, typ2, Some(s"[$i]"))
 				}
 			case JsNull =>
-				ContextT.unit(Nil)
+				ContextE.unit(Nil)
 			case _ =>
-				ContextT.or(
+				ContextE.or(
 					conv(jsval, typ2).map(List(_)),
-					ContextT.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${jsval}")
+					ContextE.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${jsval}")
 				)
 		}
 	}
@@ -285,13 +285,13 @@ object Converter2 {
 	private def convSet(
 		jsobj: JsObject,
 		typ2: Type
-	): ContextT[Set[Any]] = {
+	): ContextE[Set[Any]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		// Try to convert each element of the array
-		ContextT.mapAll(jsobj.fields.toList) ({ case (id, jsval) =>
+		ContextE.mapAll(jsobj.fields.toList) ({ case (id, jsval) =>
 			conv(jsval, typ2, Some(id))
 		}).map(l => Set(l : _*))
 	}
@@ -299,15 +299,15 @@ object Converter2 {
 	private def convListToObject(
 		jsval_l: List[JsValue],
 		nameToType_l: List[(String, ru.Type)]
-	): ContextT[Map[String, _]] = {
-		ContextT.error("convListToObject: not yet implemented")
+	): ContextE[Map[String, _]] = {
+		ContextE.error("convListToObject: not yet implemented")
 	}
 
 	private def convMap(
 		jsobj: JsObject,
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)]
-	): ContextT[Map[_, _]] = {
+	): ContextE[Map[_, _]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -323,7 +323,7 @@ object Converter2 {
 		
 		// Try to convert each element of the object
 		for {
-			val_l <- ContextT.map(nameToType_l) { case (name, typ2) =>
+			val_l <- ContextE.map(nameToType_l) { case (name, typ2) =>
 				jsobj.fields.get(name) match {
 					case Some(jsval2) => conv(jsval2, typ2, Some(name))
 					// Field is missing, so try using JsNull
@@ -338,7 +338,7 @@ object Converter2 {
 	private def convMapString(
 		jsobj: JsObject,
 		nameToType_l: List[(String, ru.Type)]
-	): ContextT[Map[String, _]] = {
+	): ContextE[Map[String, _]] = {
 		for {
 			map <- convMap(jsobj, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]

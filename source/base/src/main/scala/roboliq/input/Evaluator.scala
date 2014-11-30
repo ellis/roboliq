@@ -27,75 +27,81 @@ case class RjsCall(name: String, input: Map[String, JsValue]) extends RjsValue
 case class RjsNumber(n: BigDecimal) extends RjsValue
 */
 
-class Evaluator(
-	eb: EntityBase
-) {
+case class EvaluatorState(
+	eb: EntityBase,
+	scope: Map[String, JsObject]
+)
+
+class Evaluator() {
 	
-	def evaluate(jsval: JsValue, scope: Map[String, JsObject]): ContextT[JsObject] = {
+	def evaluate(jsval: JsValue): ContextE[JsObject] = {
 		jsval match {
 			// TODO: Add warnings for extra fields
 			case jsobj @ JsObject(m) =>
 				(m.get("TYPE"), m.get("VALUE")) match {
 					case (None, None) =>
-						ContextT.unit(JsObject(Map("TYPE" -> JsString("set"), "VALUE" -> jsval)))
+						ContextE.unit(JsObject(Map("TYPE" -> JsString("set"), "VALUE" -> jsval)))
 					case (Some(JsString("call")), Some(JsString(nameFn))) =>
+						val ctx: ContextE[Unit] = m.get("INPUT") match {
+							case None =>
+								ContextE.unit(())
+							case Some(JsObject(input)) =>
+								val l_? = ContextE.map(input.toList)({ case (name, jsval2) =>
+									evaluate(jsval2).map(name -> _)
+								})
+								l_?.flatMap(l => ContextE.addToScope(l.toMap))
+							case Some(input) =>
+								ContextE.error("Expected `INPUT` of type JsObject: "+input)
+						}
 						for {
-							scope2 <- m.get("INPUT") match {
-								case None =>
-									ContextT.unit(scope)
-								case Some(JsObject(input)) =>
-									ContextT.map(input.toList)({ case (name, jsval2) =>
-										evaluate(jsval2, scope).map(name -> _)
-									}).map(_.toMap).map(scope ++ _)
-								case Some(input) =>
-									ContextT.error("Expected `INPUT` of type JsObject: "+input)
-							}
-							res <- evaluateCall(nameFn, scope2)
+							_ <- ctx
+							res <- evaluateCall(nameFn)
 						} yield res
 					case (Some(JsString(typ)), Some(jsval2)) =>
-						evaluateType(typ, jsval2, scope)
+						evaluateType(typ, jsval2)
 					case _ =>
-						ContextT.error("Expected field `TYPE` of type JsString and field `VALUE`")
+						ContextE.error("Expected field `TYPE` of type JsString and field `VALUE`")
 				}
 			case JsNumber(n) =>
-				ContextT.unit(Converter2.makeNumber(n))
+				ContextE.unit(Converter2.makeNumber(n))
 			// A value
 			case _ =>
-				ContextT.error("Don't know how to evaluate: "+jsval)
+				ContextE.error("Don't know how to evaluate: "+jsval)
 		}
 	}
 	
-	def evaluateCall(nameFn: String, scope: Map[String, JsObject]): ContextT[JsObject] = {
+	def evaluateCall(nameFn: String): ContextE[JsObject] = {
 		for {
 			res <- nameFn match {
 				case "add" =>
-					for {
-						res <- new BuiltinAdd().evaluate(scope, eb)
-					} yield res
+					new BuiltinAdd().evaluate()
 				case _ =>
-					ContextT.error(s"Unknown function `$nameFn`")
+					ContextE.error(s"Unknown function `$nameFn`")
 			}
 		} yield res
 	}
 
-	def evaluateType(typ: String, jsval: JsValue, scope: Map[String, JsObject]): ContextT[JsObject] = {
+	def evaluateType(typ: String, jsval: JsValue): ContextE[JsObject] = {
 		(typ, jsval) match {
 			case ("list", JsArray(l)) =>
 				for {
 					// TODO: need to push a context to a context 
-					l2 <- ContextT.map(l.zipWithIndex) { case (jsval2, i0) =>
+					l2 <- ContextE.map(l.zipWithIndex) { case (jsval2, i0) =>
 						val i = i0 + 1
-						ContextT.context(s"[$i]") {
-							evaluate(jsval2, scope)
+						ContextE.context(s"[$i]") {
+							evaluate(jsval2)
 						}
 					}
 				} yield Converter2.makeList(l2)
 			case ("number", JsNumber(n)) =>
-				ContextT.unit(Converter2.makeNumber(n))
+				ContextE.unit(Converter2.makeNumber(n))
 			case ("subst", JsString(name)) =>
-				ContextT.from(scope.get(name), s"variable `$name` not in scope")
+				for {
+					scope <- ContextE.getScope
+					x <- ContextE.from(scope.get(name), s"variable `$name` not in scope")
+				} yield x
 			case _ =>
-				ContextT.error("evaluateType() not completely implemented")
+				ContextE.error("evaluateType() not completely implemented")
 		}
 	}
 }
