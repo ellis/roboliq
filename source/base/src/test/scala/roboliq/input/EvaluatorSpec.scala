@@ -86,8 +86,14 @@ class EvaluatorSpec extends FunSpec {
 				"VAR" -> JsObject(Map("NAME" -> JsString("a")) ++ js5.fields),
 				"ADD" -> Converter2.makeMap(Map("b" -> js7))
 			))
+			val jsBuild2 = Converter2.makeBuild(List(
+				"VAR" -> JsObject(Map("NAME" -> JsString("a")) ++ js5.fields),
+				"ADD" -> Converter2.makeMap(Map("b" -> js7)),
+				"ADD" -> Converter2.makeMap(Map("b" -> js12))
+			))
 			check(Map(),
-				evaluator.evaluate(jsBuild1) -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7))))
+				evaluator.evaluate(jsBuild1) -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7)))),
+				evaluator.evaluate(jsBuild2) -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7)), Converter2.makeMap(Map("a" -> js5, "b" -> js12))))
 			)
 		}
 	}
