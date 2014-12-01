@@ -61,6 +61,8 @@ class Evaluator() {
 						} yield res
 					case (Some(JsString("build")), None) =>
 						evaluateBuild(m)
+					//case (Some(JsString("lambda")), None) =>
+						//evaluateLambda(m)
 					case (Some(JsString(typ)), Some(jsval2)) =>
 						evaluateType(typ, jsval2)
 					case _ =>
