@@ -107,6 +107,10 @@ object Converter2 {
 		JsObject(Map("TYPE" -> JsString("string"), "VALUE" -> JsString(s)))
 	}
 	
+	def makeStringf(s: String): JsObject = {
+		JsObject(Map("TYPE" -> JsString("stringf"), "VALUE" -> JsString(s)))
+	}
+	
 	def makeSubst(name: String): JsObject = {
 		JsObject(Map("TYPE" -> JsString("subst"), "VALUE" -> JsString(name)))
 	}
@@ -347,5 +351,24 @@ object Converter2 {
 		for {
 			map <- convMap(jsobj, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]
+	}
+	
+	def valueToString(jsval: JsValue): ContextE[String] = {
+		jsval match {
+			case JsString(s) => ContextE.unit(s)
+			case JsNumber(n) => ContextE.unit(n.toString)
+			case JsObject(map) =>
+				(map.get("TYPE"), map.get("VALUE")) match {
+					case (Some(JsString("ident")), Some(JsString(s))) =>
+						ContextE.unit(s)
+					case (Some(JsString("number")), Some(JsNumber(n))) =>
+						ContextE.unit(n.toString)
+					case (Some(JsString("string")), Some(JsString(s))) =>
+						ContextE.unit(s)
+					case (_, Some(jsval2)) => valueToString(jsval2)
+					case _ => ContextE.unit(jsval.toString)
+				}
+			case _ => ContextE.unit(jsval.toString)
+		}
 	}
 }

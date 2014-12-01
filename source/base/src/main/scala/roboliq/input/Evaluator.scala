@@ -61,8 +61,10 @@ class Evaluator() {
 						} yield res
 					case (Some(JsString("build")), None) =>
 						evaluateBuild(m)
-					//case (Some(JsString("lambda")), None) =>
-						//evaluateLambda(m)
+					case (Some(JsString("lambda")), None) =>
+						evaluateLambda(m)
+					case (Some(JsString("stringf")), Some(JsString(format))) =>
+						evaluateStringf(format)
 					case (Some(JsString(typ)), Some(jsval2)) =>
 						evaluateType(typ, jsval2)
 					case _ =>
@@ -154,6 +156,18 @@ class Evaluator() {
 				}
 			}
 		} yield output0_l.flatten
+	}
+
+	def evaluateLambda(m: Map[String, JsValue]): ContextE[JsObject] = {
+		println(s"evaluateLambda($m)")
+		ContextE.error("evaluateLambda: not yet implemented")
+	}
+
+	def evaluateStringf(format: String): ContextE[JsObject] = {
+		println(s"evaluateStringf($format)")
+		for {
+			s <- StringfParser.parse(format)
+		} yield Converter2.makeString(s)
 	}
 
 	def evaluateType(typ: String, jsval: JsValue): ContextE[JsObject] = {

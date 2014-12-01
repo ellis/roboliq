@@ -41,6 +41,18 @@ usage.
 
 ## Current goal
 
+- [ ] Evaluator: handle lambda creation
+- [ ] Evaluator: handle lambda invocation
+- [ ] Evaluator: handle 'import' directive
+- [ ] Evaluator: import functions specfied in JSON format
+
+Lambda:
+```{yaml}
+
+```
+
+## Previous goal
+
 - [x] denaturation: just find which script for Fabian to run and get the table setup information for him
 - [ ] refolding script with 15 minute wait (we'll set this up more still), 5 gfps, 1 buffer (w/o thionite)
   - [ ] need to generate this on the mac laptop, because of the node modules?  Or maybe I fixed it already...?
@@ -488,6 +500,9 @@ TRANSFORM:
 - <sortfunction>
 - <filterfunction>
 - <whatever...>
+---
+TYPE: lambda
+VALUE:
 ```
 
 ## Pipetting, dilution, mixtures, etc
