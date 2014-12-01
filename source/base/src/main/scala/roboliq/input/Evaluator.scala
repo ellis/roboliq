@@ -87,8 +87,8 @@ class Evaluator() {
 					new BuiltinAdd().evaluate()
 				case "build" =>
 					new BuiltinBuild().evaluate()
-				case _ =>
-					ContextE.error(s"Unknown function `$nameFn`")
+				case name =>
+					evaluateLambdaCall(name)
 			}
 		} yield res
 	}
@@ -157,7 +157,25 @@ class Evaluator() {
 
 	def evaluateLambda(m: Map[String, JsValue]): ContextE[JsObject] = {
 		println(s"evaluateLambda($m)")
-		ContextE.error("evaluateLambda: not yet implemented")
+		ContextE.unit(JsObject(m))
+	}
+
+	def evaluateLambdaCall(name: String): ContextE[JsObject] = {
+		println(s"evaluateLambdaCall($name)")
+		for {
+			scope <- ContextE.getScope
+			res <- scope.get(name) match {
+				case Some(JsObject(m)) if (m.get("TYPE") == Some(JsString("lambda"))) =>
+					ContextE.context("EXPRESSION") { m.get("EXPRESSION") match {
+						case None => ContextE.error("missing field")
+						case Some(jsval) => ContextE.evaluate(jsval)
+					}}
+				case Some(jsval) =>
+					ContextE.error(s"invalid lambda `$name`: $jsval")
+				case None =>
+					ContextE.error(s"no lambda `$name` in scope")
+			}
+		} yield res
 	}
 
 	def evaluateLet(m: Map[String, JsValue]): ContextE[JsObject] = {

@@ -41,11 +41,12 @@ usage.
 
 ## Current goal
 
-- [ ] Evaluator: handle 'let' expressions
+- [x] Evaluator: handle 'let' expressions
 - [ ] Evaluator: handle lambda creation
 - [ ] Evaluator: handle lambda invocation
 - [ ] Evaluator: handle 'import' directive
 - [ ] Evaluator: import functions specfied in JSON format
+- [ ] Evaluator: handle 'instruction' type and create test to create a list of instructions
 
 Lambda:
 ```{yaml}
@@ -530,6 +531,7 @@ Shorter representation?
   ]
   in
     (add1 x=5)
+)
 ---
 let:
   var:

@@ -91,6 +91,10 @@ object Converter2 {
 		JsObject(Map("TYPE" -> JsString("call"), "VALUE" -> JsString(name), "INPUT" -> JsObject(input)))
 	}
 
+	def makeLambda(param: List[String], expression: JsValue): JsObject = {
+		JsObject(Map("TYPE" -> JsString("lambda"), "EXPRESSION" -> expression))
+	}
+
 	def makeLet(var_l: List[(String, JsValue)], expression: JsValue): JsObject = {
 		val var1_l = var_l.map { case (name, jsval) =>
 			JsObject(Map(name -> jsval))
