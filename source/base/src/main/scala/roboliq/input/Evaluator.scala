@@ -28,11 +28,6 @@ case class RjsCall(name: String, input: Map[String, JsValue]) extends RjsValue
 case class RjsNumber(n: BigDecimal) extends RjsValue
 */
 
-case class EvaluatorState(
-	eb: EntityBase,
-	scope: Map[String, JsObject]
-)
-
 class Evaluator() {
 	
 	def evaluate(jsval: JsValue): ContextE[JsObject] = {
@@ -63,6 +58,8 @@ class Evaluator() {
 						evaluateBuild(m)
 					case (Some(JsString("lambda")), None) =>
 						evaluateLambda(m)
+					case (Some(JsString("let")), None) =>
+						evaluateLet(m)
 					case (Some(JsString("stringf")), Some(JsString(format))) =>
 						evaluateStringf(format)
 					case (Some(JsString(typ)), Some(jsval2)) =>
@@ -161,6 +158,41 @@ class Evaluator() {
 	def evaluateLambda(m: Map[String, JsValue]): ContextE[JsObject] = {
 		println(s"evaluateLambda($m)")
 		ContextE.error("evaluateLambda: not yet implemented")
+	}
+
+	def evaluateLet(m: Map[String, JsValue]): ContextE[JsObject] = {
+		for {
+			_ <- ContextE.context("VAR") { m.get("VAR") match {
+				case None => ContextE.unit(())
+				case Some(JsArray(l)) =>
+					ContextE.foreach(l.zipWithIndex) { case (jsval, i) =>
+						ContextE.context(s"[${i+1}]") {
+							jsval match {
+								case JsObject(m) =>
+									m.toList match {
+										case (name, jsobj2@JsObject(_)) :: Nil =>
+											for {
+												value <- ContextE.evaluate(jsobj2)
+												_ <- ContextE.addToScope(Map(name -> value))
+											} yield ()
+										case Nil => ContextE.unit(())
+										case _ => ContextE.error("invalid item: "+jsval)
+									}
+								case _ =>
+									ContextE.error("Expected a JsObject: "+jsval)
+							}
+						}
+					}
+				case _ =>
+					ContextE.error("expected a JsArray")
+			}}
+			res <- ContextE.context("EXPRESSION") { m.get("EXPRESSION") match {
+				case Some(jsval) =>
+					ContextE.evaluate(jsval)
+				case None =>
+					ContextE.error("field missing")
+			}}
+		} yield res
 	}
 
 	def evaluateStringf(format: String): ContextE[JsObject] = {

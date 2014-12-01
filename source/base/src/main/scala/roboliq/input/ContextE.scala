@@ -22,6 +22,11 @@ import roboliq.entities.Amount
 import java.io.File
 import spray.json.JsObject
 
+case class EvaluatorState(
+	eb: EntityBase,
+	scope: Map[String, JsObject]
+)
+
 case class ContextEData(
 	state: EvaluatorState,
 	context_r: List[String] = Nil,
@@ -171,8 +176,9 @@ object ContextE {
 	/**
 	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
 	 */
-	def map[A, B, C[_]](
-		l: C[A]
+	private def mapSub[A, B, C[_]](
+		l: C[A],
+		sequenceState: Boolean = false
 	)(
 		fn: A => ContextE[B]
 	)(implicit
@@ -190,7 +196,11 @@ object ContextE {
 						if (data1.error_r.isEmpty && opt.isDefined) {
 							builder += opt.get
 						}
-						data = data1
+						data = {
+							// If state should not be sequenced, copy the original state back into the new context data
+							if (sequenceState) data1
+							else data1.copy(state = data0.state)
+						}
 					}
 				}
 				if (data.error_r.isEmpty) (data, Some(builder.result()))
@@ -200,6 +210,36 @@ object ContextE {
 				(data0, None)
 			}
 		}
+	}
+	
+	/**
+	 * Map a function fn over the collection l.  Return either the first error produced by fn, or a list of successes with accumulated warnings.
+	 */
+	def map[A, B, C[_]](
+		l: C[A]
+	)(
+		fn: A => ContextE[B]
+	)(implicit
+		c2i: C[A] => Iterable[A],
+		cbf: CanBuildFrom[C[A], B, C[B]]
+	): ContextE[C[B]] = {
+		mapSub(l, false)(fn)
+	}
+	
+	/**
+	 * Map a function fn over the collection l.
+	 * The context gets updated after each item.
+	 * @return Return either the first error produced by fn, or a list of successes with accumulated warnings.  The result is wrapped in the final context.
+	 */
+	def mapSequential[A, B, C[_]](
+		l: C[A]
+	)(
+		fn: A => ContextE[B]
+	)(implicit
+		c2i: C[A] => Iterable[A],
+		cbf: CanBuildFrom[C[A], B, C[B]]
+	): ContextE[C[B]] = {
+		mapSub(l, true)(fn)
 	}
 
 	/**
@@ -236,6 +276,8 @@ object ContextE {
 
 	/**
 	 * Run a function fn over the collection l.  Abort on the first error produced by fn.
+	 * The context gets updated after each item.
+	 * @return The final context
 	 */
 	def foreach[A, C[_]](
 		l: C[A]
@@ -250,7 +292,7 @@ object ContextE {
 				for (x <- c2i(l)) {
 					if (data.error_r.isEmpty) {
 						val ctx1 = fn(x)
-						val (data1, opt) = ctx1.run(data)
+						val (data1, _) = ctx1.run(data)
 						data = data1
 					}
 				}
@@ -262,7 +304,7 @@ object ContextE {
 			}
 		}
 	}
-	
+
 	def or[B](f1: => ContextE[B], f2: => ContextE[B]): ContextE[B] = {
 		ContextE { data =>
 			if (data.error_r.isEmpty) {
@@ -367,8 +409,8 @@ object ContextE {
 		} yield x
 	}
 	
-	def evaluate(jsobj: JsObject): ContextE[JsObject] = {
+	def evaluate(jsval: JsValue): ContextE[JsObject] = {
 		val evaluator = new Evaluator()
-		evaluator.evaluate(jsobj)
+		evaluator.evaluate(jsval)
 	}
 }

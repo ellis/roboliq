@@ -37,10 +37,13 @@ class EvaluatorSpec extends FunSpec {
 		val js7 = Converter2.makeNumber(7)
 		val js12 = Converter2.makeNumber(12)
 		val jsX = Converter2.makeSubst("x")
+		val jsY = Converter2.makeSubst("y")
 		val jsList57 = Converter2.makeList(List(js5, js7))
 		val jsListX7 = Converter2.makeList(List(jsX, js7))
+		val jsListXY = Converter2.makeList(List(jsX, jsY))
 		val jsAdd57 = Converter2.makeCall("add", Map("numbers" -> jsList57))
 		val jsAddX7 = Converter2.makeCall("add", Map("numbers" -> jsListX7))
+		val jsAddXY = Converter2.makeCall("add", Map("numbers" -> jsListXY))
 		val jsWorld = Converter2.makeString("World")
 		val jsHelloX = Converter2.makeStringf("Hello, ${x}")
 		
@@ -77,9 +80,19 @@ class EvaluatorSpec extends FunSpec {
 		}
 
 		it("add") {
+			check(Map("x" -> js5),
+				evaluator.evaluate(jsAdd57) -> js12,
+				evaluator.evaluate(jsAddX7) -> js12
+			)
+		}
+		
+		it("let") {
+			val jsLet1 = Converter2.makeLet(
+				List("x" -> js5, "y" -> js7),
+				jsAddXY
+			)
 			check(Map(),
-				evaluator.evaluate(jsAdd57) -> js12//,
-				//evaluator.evaluate(jsAddX7, Map("x" -> js5)) -> js5
+				evaluator.evaluate(jsLet1) -> js12
 			)
 		}
 

@@ -41,6 +41,7 @@ usage.
 
 ## Current goal
 
+- [ ] Evaluator: handle 'let' expressions
 - [ ] Evaluator: handle lambda creation
 - [ ] Evaluator: handle lambda invocation
 - [ ] Evaluator: handle 'import' directive
@@ -501,8 +502,44 @@ TRANSFORM:
 - <filterfunction>
 - <whatever...>
 ---
-TYPE: lambda
-VALUE:
+TYPE: let
+VAR:
+- x: { TYPE: number, VALUE: 5 }
+- add1:
+    TYPE: lambda
+    EXPRESSION:
+      TYPE: call
+      VALUE: add
+      INPUT:
+        numbers:
+         - { TYPE: subst, VALUE: x }
+         - { TYPE: number, VALUE: 1 }
+EXPRESSION:
+  TYPE: call
+  VALUE: add1
+  INPUT:
+    x: 5
+```
+
+Shorter representation?
+```
+(let
+  [
+    x = 5
+    add1 = (lambda (add numbers=[x, 1]))
+  ]
+  in
+    (add1 x=5)
+---
+let:
+  var:
+    x: 5
+    add1:
+      lambda:
+        "add()":
+          numbers: [x, 1]
+  expression:
+    "add1()": {}
 ```
 
 ## Pipetting, dilution, mixtures, etc
