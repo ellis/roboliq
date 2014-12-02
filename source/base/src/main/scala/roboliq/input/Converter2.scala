@@ -88,7 +88,15 @@ object Converter2 {
 	}
 
 	def makeCall(name: String, input: Map[String, JsValue]): JsObject = {
-		JsObject(Map("TYPE" -> JsString("call"), "VALUE" -> JsString(name), "INPUT" -> JsObject(input)))
+		JsObject(Map("TYPE" -> JsString("call"), "NAME" -> JsString(name), "INPUT" -> JsObject(input)))
+	}
+
+	def makeImport(name: String, version: String): JsObject = {
+		JsObject(Map("TYPE" -> JsString("import"), "NAME" -> JsString(name), "VERSION" -> JsString(version)))
+	}
+
+	def makeInclude(filename: String): JsObject = {
+		JsObject(Map("TYPE" -> JsString("include"), "FILENAME" -> JsString(filename)))
 	}
 
 	def makeLambda(param: List[String], expression: JsValue): JsObject = {
@@ -153,7 +161,7 @@ object Converter2 {
 
 		val ctx = {
 			val ret: ContextE[Any] = {
-				if (typ <:< typeOf[JsObject]) ContextE.unit(jsval)
+				if (typ <:< typeOf[JsValue]) ContextE.unit(jsval)
 				else if (typ =:= typeOf[String]) Converter2.toString(jsval)
 				else if (typ =:= typeOf[Int]) toInt(jsval)
 				else if (typ =:= typeOf[Integer]) toInteger(jsval)
@@ -183,10 +191,7 @@ object Converter2 {
 				else if (typ <:< typeOf[Option[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					if (jsval == JsNull) ContextE.unit(None)
-					else conv(jsval, typ2).map(_ match {
-						case ConvObject(o) => ConvObject(Option(o))
-						case res => res
-					})
+					else conv(jsval, typ2).map(o => Option(o))
 				}
 				else if (typ <:< typeOf[List[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head

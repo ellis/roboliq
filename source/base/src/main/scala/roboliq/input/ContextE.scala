@@ -21,10 +21,15 @@ import roboliq.entities.WorldStateEvent
 import roboliq.entities.Amount
 import java.io.File
 import spray.json.JsObject
+import org.apache.commons.io.FilenameUtils
+import com.google.gson.Gson
+import spray.json.JsNull
 
 case class EvaluatorState(
 	eb: EntityBase,
-	scope_r: List[Map[String, JsObject]]
+	scope_r: List[Map[String, JsObject]] = List(Map()),
+	searchPath_l: List[File] = Nil,
+	inputFile_l: List[File] = Nil
 ) {
 	def getScope: Map[String, JsObject] = {
 		scope_r.headOption.getOrElse(Map())
@@ -72,7 +77,29 @@ case class ContextEData(
 		copy(context_r = context_r.tail)
 	}
 
-	def prefixMessage(s: String): String = {
+	def modifyState(fn: EvaluatorState => EvaluatorState): ContextEData = {
+		val state1 = fn(state)
+		copy(state = state1)
+	}
+
+	def pushScope(scope: Map[String, JsObject] = Map()): ContextEData = {
+		modifyState { state =>
+			// create a new scope
+			val scope1_r = state.scope_r match {
+				case Nil => List(Map[String, JsObject]())
+				case x :: xs => (x ++ scope) :: x :: xs
+			}
+			state.copy(scope_r = scope1_r)
+		}
+	}
+	
+	def popScope(): ContextEData = {
+		modifyState { state =>
+			state.copy(scope_r = state.scope_r.tail)
+		}
+	}
+	
+	private def prefixMessage(s: String): String = {
 		(s :: context_r).reverse.mkString(": ")
 	}
 }
@@ -136,34 +163,40 @@ object ContextE {
 	def unit[A](a: A): ContextE[A] =
 		ContextE { data => (data, Some(a)) }
 	
-	def get: ContextE[ContextEData] =
-		ContextE { data => (data, Some(data)) }
+	def get: ContextE[EvaluatorState] =
+		ContextE { data => (data, Some(data.state)) }
 	
-	def gets[A](f: ContextEData => A): ContextE[A] =
-		ContextE { data => (data, Some(f(data))) }
+	def gets[A](f: EvaluatorState => A): ContextE[A] =
+		ContextE { data => (data, Some(f(data.state))) }
 	
-	def getsResult[A](f: ContextEData => RsResult[A]): ContextE[A] = {
+	def getsResult[A](f: EvaluatorState => RsResult[A]): ContextE[A] = {
 		ContextE { data =>
-			val res = f(data)
+			val res = f(data.state)
 			val data1 = data.log(res)
 			(data1, res.toOption)
 		}
 	}
 	
-	def getsOption[A](f: ContextEData => Option[A], error: => String): ContextE[A] = {
+	def getsOption[A](f: EvaluatorState => Option[A], error: => String): ContextE[A] = {
 		ContextE { data =>
-			f(data) match {
+			f(data.state) match {
 				case None => (data.logError(error), None)
 				case Some(a) => (data, Some(a))
 			}
 		}
 	}
 	
-	def put(data: ContextEData): ContextE[Unit] =
+	def putData(data: ContextEData): ContextE[Unit] =
 		ContextE { _ => (data, Some(())) }
 	
-	def modify(f: ContextEData => ContextEData): ContextE[Unit] =
+	def modifyData(f: ContextEData => ContextEData): ContextE[Unit] =
 		ContextE { data => (f(data), Some(())) }
+	
+	def put(state: EvaluatorState): ContextE[Unit] =
+		ContextE { data => (data.copy(state = state), Some(())) }
+	
+	def modify(f: EvaluatorState => EvaluatorState): ContextE[Unit] =
+		ContextE { data => (data.copy(state = f(data.state)), Some(())) }
 	
 	def assert(condition: Boolean, msg: => String): ContextE[Unit] = {
 		if (condition) unit(())
@@ -395,28 +428,55 @@ object ContextE {
 	/**
 	 * 
 	 */
-	def pushScope: ContextE[Unit] = {
+	def scope[B](ctx: ContextE[B]): ContextE[B] = {
 		ContextE { data =>
-			val scope0_r = data.state.scope_r
-			val scope1_r = data.state.getScope :: scope0_r
-			val state1 = data.state.copy(scope_r = scope1_r)
-			val data1 = data.copy(state = state1)
-			(data1, Some(()))
+			val data0 = data.pushScope()
+			val (data1, opt1) = ctx.run(data0)
+			val data2 = data1.popScope()
+			if (data2.error_r.isEmpty) {
+				(data2, opt1)
+			}
+			else {
+				(data2, None)
+			}
 		}
 	}
 	
 	def addToScope(scope: Map[String, JsObject]): ContextE[Unit] = {
-		ContextE { data =>
-			val scope0 = data.state.scope
-			val scope1 = scope0 ++ scope
-			val state1 = data.state.copy(scope = scope1)
-			val data1 = data.copy(state = state1)
-			(data1, Some(()))
+		ContextE.modify { state =>
+			val scope1_r = state.scope_r match {
+				case Nil => scope :: Nil
+				case x :: xs => (x ++ scope) :: xs
+			}
+			state.copy(scope_r = scope1_r)
+		}
+	}
+	
+	def removeFromScope(name: String): ContextE[Unit] = {
+		ContextE.modify { state =>
+			val scope1_r = state.scope_r match {
+				case Nil => Nil
+				case x :: xs => (x - name) :: xs
+			}
+			state.copy(scope_r = scope1_r)
 		}
 	}
 	
 	def fromJson[A: TypeTag](jsval: JsValue): ContextE[A] = {
 		Converter2.fromJson[A](jsval)
+	}
+	
+	def fromJson[A: TypeTag](map: Map[String, JsValue], field: String): ContextE[A] = {
+		ContextE.context(field) {
+			map.get(field) match {
+				case Some(jsval) => Converter2.fromJson[A](jsval)
+				case None =>
+					ContextE.orElse(
+						Converter2.fromJson[A](JsNull),
+						ContextE.error("value required")
+					)
+			}
+		}
 	}
 	
 	def fromScope[A: TypeTag](): ContextE[A] = {
@@ -429,5 +489,41 @@ object ContextE {
 	def evaluate(jsval: JsValue): ContextE[JsObject] = {
 		val evaluator = new Evaluator()
 		evaluator.evaluate(jsval)
+	}
+	
+	def findFile(filename: String): ContextE[File] = {
+		for {
+			searchPath_l <- ContextE.gets(_.searchPath_l)
+			file <- ContextE.from(roboliq.utils.FileUtils.findFile(filename, searchPath_l))
+			_ <- ContextE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
+		} yield file
+	}
+
+	def loadJsonFromFile(file: File): ContextE[JsValue] = {
+		for {
+			_ <- ContextE.assert(file.exists, s"File not found: ${file.getPath}")
+			_ <- ContextE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
+			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
+				case "json" => ContextE.unit(false)
+				case "yaml" => ContextE.unit(true)
+				case ext => ContextE.error(s"Unrecognized file extension `$ext`.  Expected either json or yaml.")
+			}
+			input0 = org.apache.commons.io.FileUtils.readFileToString(file)
+			input <- if (bYaml) yamlToJson(input0) else ContextE.unit(input0)
+		} yield {
+			import spray.json._
+			input.parseJson
+		}
+	}
+
+	private def yamlToJson(s: String): ContextE[String] = {
+		import org.yaml.snakeyaml._
+		val yaml = new Yaml()
+		//val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
+		val o = yaml.load(s)
+		val gson = new Gson
+		val s_~ = gson.toJson(o)
+		//println("gson: " + s_~)
+		ContextE.unit(s_~)
 	}
 }

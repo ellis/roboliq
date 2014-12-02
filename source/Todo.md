@@ -42,11 +42,18 @@ usage.
 ## Current goal
 
 - [x] Evaluator: handle 'let' expressions
-- [ ] Evaluator: handle lambda creation
-- [ ] Evaluator: handle lambda invocation
-- [ ] Evaluator: handle 'import' directive
-- [ ] Evaluator: import functions specfied in JSON format
+- [x] Evaluator: handle lambda creation
+- [x] Evaluator: handle lambda invocation
+- [x] Evaluator: handle 'define' directive
+- [x] Evaluator: handle 'include' directive
+- [x] Evaluator: handle 'import' directive
+- [ ] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
+- [ ] Evaluator: change 'call' directive so that its scope only contains its inputs and the scope that was active when the function was defined
 - [ ] Evaluator: handle 'instruction' type and create test to create a list of instructions
+- [ ] Evaluator: handle 'action' type
+- [ ] generate action output
+- [ ] ask for missing action inputs
+- [ ] perform planning for actions
 
 Lambda:
 ```{yaml}
@@ -481,7 +488,7 @@ VALUE:
 - { TYPE: number, VALUE: 3 }
 ---
 TYPE: call
-VALUE: add
+NAME: add
 INPUT:
   numbers:
    - { TYPE: number, VALUE: 1 }
@@ -513,16 +520,20 @@ VAR:
     TYPE: lambda
     EXPRESSION:
       TYPE: call
-      VALUE: add
+      NAME: add
       INPUT:
         numbers:
          - { TYPE: subst, VALUE: x }
          - { TYPE: number, VALUE: 1 }
 EXPRESSION:
   TYPE: call
-  VALUE: add1
+  NAME: add1
   INPUT:
     x: 5
+---
+TYPE: import
+NAME: roboliq
+VERSION: 1
 ```
 
 Shorter representation?

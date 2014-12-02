@@ -1,0 +1,11 @@
+TYPE: define
+NAME: inc
+VALUE:
+  TYPE: lambda
+  EXPRESSION:
+    TYPE: call
+    NAME: add
+    INPUT:
+      numbers:
+      - { TYPE: subst, VALUE: x }
+      - { TYPE: number, VALUE: 1 }

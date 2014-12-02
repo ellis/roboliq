@@ -10,7 +10,7 @@ import spray.json.JsString
 
 class StringfParserSpec extends FunSpec {
 	val eb = new EntityBase
-	val data0 = ContextEData(EvaluatorState(eb, Map()))
+	val data0 = ContextEData(EvaluatorState(eb))
 	val evaluator = new Evaluator();
 
 	private def check(

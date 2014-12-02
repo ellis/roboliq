@@ -5,6 +5,7 @@ import roboliq.entities.EntityBase
 import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
+import spray.json.JsNull
 
 private case class Example1(
 	a: Int,
@@ -17,7 +18,7 @@ class Converter2Spec extends FunSpec {
 
 	describe("Converter2") {
 		val eb = new EntityBase
-		val data0 = ContextEData(EvaluatorState(eb, Map()))
+		val data0 = ContextEData(EvaluatorState(eb))
 		val evaluator = new Evaluator();
 		val js5 = Converter2.makeNumber(5)
 		val js7 = Converter2.makeNumber(7)
@@ -58,6 +59,17 @@ class Converter2Spec extends FunSpec {
 				assert(res2 == 5)
 				assert(res3 == 5)
 				assert(res4 == 5)
+			}
+			ctx.run(data0)
+		}
+		
+		it("optional number") {
+			val ctx: ContextE[Unit] = for {
+				res1 <- Converter2.fromJson[Option[Int]](js5)
+				res2 <- Converter2.fromJson[Option[Int]](JsNull)
+			} yield {
+				assert(res1 == Some(5))
+				assert(res2 == None)
 			}
 			ctx.run(data0)
 		}

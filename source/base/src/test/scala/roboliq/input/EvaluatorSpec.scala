@@ -7,19 +7,21 @@ import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsArray
 import spray.json.JsString
+import spray.json.JsValue
+import java.io.File
 
 class EvaluatorSpec extends FunSpec {
 	val eb = new EntityBase
-	val data0 = ContextEData(EvaluatorState(eb, Map()))
+	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator();
 
 	private def check(
 		scope: Map[String, JsObject],
-		l: (ContextE[JsObject], JsObject)*
+		l: (JsValue, JsObject)*
 	) {
 		val ctx: ContextE[Unit] = for {
 			_ <- ContextE.addToScope(scope)
-			res_l <- ContextE.map(l) { _._1 }
+			res_l <- ContextE.map(l) { case (jsobj, _) => evaluator.evaluate(jsobj) }
 		} yield {
 			for ((res, expected) <- res_l zip l.map(_._2))
 				assert(res == expected)
@@ -52,49 +54,49 @@ class EvaluatorSpec extends FunSpec {
 		
 		it("number") {
 			check(Map(),
-				evaluator.evaluate(js12) -> js12,
-				evaluator.evaluate(JsNumber(12)) -> js12
+				js12 -> js12,
+				JsNumber(12) -> js12
 			)
 		}
 		
 		it("subst") {
 			check(Map("x" -> js5),
-				evaluator.evaluate(jsX) -> js5
+				jsX -> js5
 			)
 		}
 		
 		it("stringf") {
 			check(Map("x" -> jsWorld),
-				evaluator.evaluate(jsHelloX) -> Converter2.makeString("Hello, World")
+				jsHelloX -> Converter2.makeString("Hello, World")
 			)
 			check(Map("x" -> js5),
-				evaluator.evaluate(jsHelloX) -> Converter2.makeString("Hello, 5")
+				jsHelloX -> Converter2.makeString("Hello, 5")
 			)
 		}
 
 		it("list") {
 			check(Map(),
-				evaluator.evaluate(jsList57) -> jsList57
+				jsList57 -> jsList57
 			)
 		}
 		
 		it("list with subst") {
 			check(Map("x" -> js5),
-				evaluator.evaluate(jsListX7) -> jsList57
+				jsListX7 -> jsList57
 			)
 		}
 		
 		it("list with call with subst") {
 			val jsList3 = Converter2.makeList(List(js5, jsAddX7))
 			check(Map("x" -> js5),
-				evaluator.evaluate(jsList3) -> Converter2.makeList(List(js5, js12))
+				jsList3 -> Converter2.makeList(List(js5, js12))
 			)
 		}
 
 		it("add") {
 			check(Map("x" -> js5),
-				evaluator.evaluate(jsAdd57) -> js12,
-				evaluator.evaluate(jsAddX7) -> js12
+				jsAdd57 -> js12,
+				jsAddX7 -> js12
 			)
 		}
 		
@@ -104,16 +106,18 @@ class EvaluatorSpec extends FunSpec {
 				jsAddXY
 			)
 			check(Map(),
-				evaluator.evaluate(jsLet1) -> js12
+				jsLet1 -> js12
 			)
 		}
 		
 		it("lambda") {
+			// Lamba objects should remain unchanged
 			check(Map(),
-				evaluator.evaluate(jsLambdaInc) -> jsLambdaInc
+				jsLambdaInc -> jsLambdaInc
 			)
+			// Call a lambda
 			check(Map("x" -> js5, "inc" -> jsLambdaInc),
-				evaluator.evaluate(Converter2.makeCall("inc", Map())) -> js6
+				Converter2.makeCall("inc", Map()) -> js6
 			)
 		}
 
@@ -130,12 +134,27 @@ class EvaluatorSpec extends FunSpec {
 				"ADD" -> Converter2.makeMap(Map("b" -> js12))
 			))
 			check(Map(),
-				evaluator.evaluate(jsBuild1) -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7)))),
-				evaluator.evaluate(jsBuild2) -> Converter2.makeList(List(
+				jsBuild1 -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7)))),
+				jsBuild2 -> Converter2.makeList(List(
 					Converter2.makeMap(Map("a" -> js5, "b" -> js7)),
 					Converter2.makeMap(Map("a" -> js5, "b" -> js12)),
 					Converter2.makeMap(Map("a" -> js7, "b" -> js12))
 				))
+			)
+		}
+		
+		it("include") {
+			check(Map(),
+				Converter2.makeInclude("include1.yaml") -> js1
+			)
+		}
+		
+		it("import") {
+			check(Map(),
+				JsArray(
+					Converter2.makeImport("inc", "1.0"),
+					Converter2.makeCall("inc", Map("x" -> js5))
+				) -> Converter2.makeList(List(js6))
 			)
 		}
 	}
