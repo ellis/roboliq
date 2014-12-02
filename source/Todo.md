@@ -213,22 +213,25 @@ Notes:
 - Instructions need to be defined by the backend, not via CommandDef
 
 ```{yaml}
-- name: shakePlate
-  type: action
-  params:
-  - { name: agent, type: Agent, input: Plannable }
-  - { name: device, type: Device, input: Plannable }
-  - { name: program, type: Program, input: Required }
-  - { name: object, type: Labware, input: Required }
-  - { name: site, type: Site, input: Plannable }
-  preconds:
-  - agent-has-device $agent $device
-  - device-can-site $device $site
-  - model $labware $model
-  - location $labware $site
-  commands:
-  - name: instruction
-    params: { agent: $agent, command: ShakerRun, device: $device, program: $program, labware: $object, site: $site }
+- TYPE: define
+  NAME: shakePlate
+  VALUE:
+    TYPE: action
+    PARAM:
+    - { name: agent, type: Agent, input: Plannable }
+    - { name: device, type: Device, input: Plannable }
+    - { name: program, type: Program, input: Required }
+    - { name: object, type: Labware, input: Required }
+    - { name: site, type: Site, input: Plannable }
+    PRECOND:
+    - agent-has-device $agent $device
+    - device-can-site $device $site
+    - model $labware $model
+    - location $labware $site
+    OUTPUT:
+    - TYPE: instruction
+      NAME: ShakerRun
+      INPUT: { agent: $agent, device: $device, program: $program, labware: $object, site: $site }
 ```
 
 ```{yaml}

@@ -24,8 +24,12 @@ import spray.json.JsObject
 
 case class EvaluatorState(
 	eb: EntityBase,
-	scope: Map[String, JsObject]
-)
+	scope_r: List[Map[String, JsObject]]
+) {
+	def getScope: Map[String, JsObject] = {
+		scope_r.headOption.getOrElse(Map())
+	}
+}
 
 case class ContextEData(
 	state: EvaluatorState,
@@ -384,7 +388,20 @@ object ContextE {
 	
 	def getScope: ContextE[Map[String, JsObject]] = {
 		ContextE { data =>
-			(data, Some(data.state.scope))
+			(data, Some(data.state.getScope))
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	def pushScope: ContextE[Unit] = {
+		ContextE { data =>
+			val scope0_r = data.state.scope_r
+			val scope1_r = data.state.getScope :: scope0_r
+			val state1 = data.state.copy(scope_r = scope1_r)
+			val data1 = data.copy(state = state1)
+			(data1, Some(()))
 		}
 	}
 	
