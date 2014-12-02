@@ -47,13 +47,15 @@ usage.
 - [x] Evaluator: handle 'define' directive
 - [x] Evaluator: handle 'include' directive
 - [x] Evaluator: handle 'import' directive
-- [ ] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
+- [x] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
 - [ ] Evaluator: change 'call' directive so that its scope only contains its inputs and the scope that was active when the function was defined
 - [ ] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [ ] Evaluator: handle 'action' type
+- [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] generate action output
 - [ ] ask for missing action inputs
 - [ ] perform planning for actions
+- [ ] Evaluator: extend scope somehow to be recursive, so that a function can call functions defined after it in the same scope?
 
 Lambda:
 ```{yaml}

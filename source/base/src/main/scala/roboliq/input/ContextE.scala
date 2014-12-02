@@ -480,6 +480,19 @@ object ContextE {
 		ContextE.modify(_.addToScope(map))
 	}
 	
+	def withScope[B](scope: EvaluatorScope)(ctx: ContextE[B]): ContextE[B] = {
+		ContextE { data =>
+			val state0 = data.state
+			val scope0 = state0.scope
+			// Run ctx using the given scope
+			val data1 = data.copy(state = data.state.copy(scope = scope))
+			val (data2, opt2) = ctx.run(data1)
+			// Swap the original scope back in
+			val data3 = data2.copy(state = state0)
+			(data3, if (data3.error_r.isEmpty) opt2 else None)
+		}
+	}
+	
 	def fromJson[A: TypeTag](jsval: JsValue): ContextE[A] = {
 		Converter2.fromJson[A](jsval)
 	}
@@ -507,6 +520,19 @@ object ContextE {
 	def evaluate(jsval: JsValue): ContextE[JsObject] = {
 		val evaluator = new Evaluator()
 		evaluator.evaluate(jsval)
+	}
+	
+	/**
+	 * Evaluate jsval using a different scope
+	 */
+	def evaluate(jsval: JsValue, scope: EvaluatorScope): ContextE[JsObject] = {
+		// Temporarily set the given scope, evaluate jsval, then switch back to the current scope
+		for {
+			scope0 <- ContextE.getScope
+			_ <- ContextE.modify(_.copy(scope = scope))
+			res <- evaluate(jsval)
+			_ <- ContextE.modify(_.copy(scope = scope0))
+		} yield res
 	}
 	
 	def findFile(filename: String): ContextE[File] = {

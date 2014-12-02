@@ -116,8 +116,8 @@ class EvaluatorSpec extends FunSpec {
 				jsLambdaInc -> jsLambdaInc
 			)
 			// Call a lambda
-			check(Map("x" -> js5, "inc" -> jsLambdaInc),
-				Converter2.makeCall("inc", Map()) -> js6
+			check(Map("inc" -> jsLambdaInc),
+				Converter2.makeCall("inc", Map("x" -> js5)) -> js6
 			)
 		}
 

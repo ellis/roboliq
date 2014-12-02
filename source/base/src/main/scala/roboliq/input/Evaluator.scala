@@ -138,25 +138,48 @@ class Evaluator() {
 		println(s"evaluateCall($m)")
 		for {
 			name <- ContextE.fromJson[String](m, "NAME")
-			input_? <- ContextE.fromJson[Option[JsObject]](m, "INPUT")
-			_ <- input_? match {
-				case None => ContextE.unit(())
-				case Some(input) =>
-					ContextE.foreach(input.fields.toList) { case (name, jsval) =>
-						for {
-							res <- ContextE.evaluate(jsval)
-							_ <- ContextE.addToScope(Map(name -> res))
-						} yield ()
-					}
+			// Get non-evaluated input object
+			input0_? <- ContextE.fromJson[Option[JsObject]](m, "INPUT")
+			// Get non-evaluated input map 
+			input0_m = input0_?.map(_.fields).getOrElse(Map())
+			// Get evaluated input map
+			input_l <- ContextE.mapAll(input0_m.toList) { case (name, jsval) =>
+				for {
+					res <- ContextE.evaluate(jsval)
+				} yield (name, res)
 			}
-			res <- name match {
-				case "add" =>
-					new BuiltinAdd().evaluate()
-				case "build" =>
-					new BuiltinBuild().evaluate()
-				case name =>
-					evaluateLambdaCall(name)
+			input_m = input_l.toMap
+			scope0 <- ContextE.getScope
+			// Try to lookup the lambda, and also get the scope it was defined in
+			res <- scope0.getWithScope(name) match {
+				case None =>
+					evaluateCallBuiltin(name, input_m)
+				case Some((jsobj, scope)) =>
+					evaluateCallLambda(name, jsobj, scope, input_m)
 			}
+		} yield res
+	}
+		
+	def evaluateCallBuiltin(name: String, input_m: Map[String, JsObject]): ContextE[JsObject] = {
+		println(s"evaluateCallBuiltin($name, ${input_m})")
+		name match {
+			case "add" =>
+				for {
+					_ <- ContextE.modify(_.addToScope(input_m))
+					res <- new BuiltinAdd().evaluate()
+				} yield res
+			case _ =>
+				ContextE.error(s"unknown function `$name`")
+		}
+	}
+
+	def evaluateCallLambda(name: String, jsobj: JsObject, scope: EvaluatorScope, input_m: Map[String, JsObject]): ContextE[JsObject] = {
+		println(s"evaluateCallLambda($jsobj, $scope, ${input_m})")
+		val m = jsobj.fields
+		for {
+			_ <- ContextE.assert(m.get("TYPE") == Some(JsString("lambda")), s"cannot call `$name` because it is not a function: $jsobj")
+			jsExpression <- ContextE.fromJson[JsValue](m, "EXPRESSION")
+			res <- ContextE.evaluate(jsExpression, scope.add(input_m))
 		} yield res
 	}
 
@@ -218,24 +241,6 @@ class Evaluator() {
 	def evaluateLambda(m: Map[String, JsValue]): ContextE[JsObject] = {
 		println(s"evaluateLambda($m)")
 		ContextE.unit(JsObject(m))
-	}
-
-	def evaluateLambdaCall(name: String): ContextE[JsObject] = {
-		println(s"evaluateLambdaCall($name)")
-		for {
-			scope <- ContextE.getScope
-			res <- scope.get(name) match {
-				case Some(JsObject(m)) if (m.get("TYPE") == Some(JsString("lambda"))) =>
-					ContextE.context("EXPRESSION") { m.get("EXPRESSION") match {
-						case None => ContextE.error("missing field")
-						case Some(jsval) => ContextE.evaluate(jsval)
-					}}
-				case Some(jsval) =>
-					ContextE.error(s"invalid lambda `$name`: $jsval")
-				case None =>
-					ContextE.error(s"no lambda `$name` in scope")
-			}
-		} yield res
 	}
 
 	def evaluateLet(m: Map[String, JsValue]): ContextE[JsObject] = {
