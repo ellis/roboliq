@@ -25,14 +25,59 @@ import org.apache.commons.io.FilenameUtils
 import com.google.gson.Gson
 import spray.json.JsNull
 
+class EvaluatorScope(
+	val map: Map[String, JsObject] = Map(),
+	val parent_? : Option[EvaluatorScope] = None
+) {
+	/** First try lookup in own map, then in parent's map */
+	def get(name: String): Option[JsObject] = {
+		map.get(name).orElse(parent_?.flatMap(_.get(name)))
+	}
+	
+	/**
+	 * First try lookup in own map, then in parent's map.
+	 * Return both the object and the scope in which it was found.
+	 * This is required for lambdas, which should be called with their containing scope.
+	 */
+	def getWithScope(name: String): Option[(JsObject, EvaluatorScope)] = {
+		map.get(name) match {
+			case None => parent_?.flatMap(_.getWithScope(name))
+			case Some(jsobj) => Some((jsobj, this))
+		}
+	}
+	
+	def add(name: String, jsobj: JsObject): EvaluatorScope = {
+		new EvaluatorScope(map = map + (name -> jsobj), parent_?)
+	}
+	
+	def add(map: Map[String, JsObject]): EvaluatorScope = {
+		new EvaluatorScope(map = this.map ++ map, parent_?)
+	}
+	
+	def createChild(map: Map[String, JsObject] = Map()): EvaluatorScope =
+		new EvaluatorScope(map, Some(this))
+	
+	def toMap: Map[String, JsObject] = {
+		parent_?.map(_.toMap).getOrElse(Map()) ++ map
+	}
+}
+
 case class EvaluatorState(
 	eb: EntityBase,
-	scope_r: List[Map[String, JsObject]] = List(Map()),
+	scope: EvaluatorScope = new EvaluatorScope(),
 	searchPath_l: List[File] = Nil,
 	inputFile_l: List[File] = Nil
 ) {
-	def getScope: Map[String, JsObject] = {
-		scope_r.headOption.getOrElse(Map())
+	def pushScope(map: Map[String, JsObject] = Map()): EvaluatorState = {
+		copy(scope = scope.createChild(map))
+	}
+	
+	def popScope(): EvaluatorState = {
+		copy(scope = scope.parent_?.get)
+	}
+	
+	def addToScope(map: Map[String, JsObject]): EvaluatorState = {
+		copy(scope = scope.add(map))
 	}
 }
 
@@ -82,21 +127,12 @@ case class ContextEData(
 		copy(state = state1)
 	}
 
-	def pushScope(scope: Map[String, JsObject] = Map()): ContextEData = {
-		modifyState { state =>
-			// create a new scope
-			val scope1_r = state.scope_r match {
-				case Nil => List(Map[String, JsObject]())
-				case x :: xs => (x ++ scope) :: x :: xs
-			}
-			state.copy(scope_r = scope1_r)
-		}
+	def pushScope(map: Map[String, JsObject] = Map()): ContextEData = {
+		modifyState(_.pushScope(map))
 	}
 	
 	def popScope(): ContextEData = {
-		modifyState { state =>
-			state.copy(scope_r = state.scope_r.tail)
-		}
+		modifyState(_.popScope)
 	}
 	
 	private def prefixMessage(s: String): String = {
@@ -419,10 +455,8 @@ object ContextE {
 		}
 	}
 	
-	def getScope: ContextE[Map[String, JsObject]] = {
-		ContextE { data =>
-			(data, Some(data.state.getScope))
-		}
+	def getScope: ContextE[EvaluatorScope] = {
+		ContextE.gets(_.scope)
 	}
 	
 	/**
@@ -442,24 +476,8 @@ object ContextE {
 		}
 	}
 	
-	def addToScope(scope: Map[String, JsObject]): ContextE[Unit] = {
-		ContextE.modify { state =>
-			val scope1_r = state.scope_r match {
-				case Nil => scope :: Nil
-				case x :: xs => (x ++ scope) :: xs
-			}
-			state.copy(scope_r = scope1_r)
-		}
-	}
-	
-	def removeFromScope(name: String): ContextE[Unit] = {
-		ContextE.modify { state =>
-			val scope1_r = state.scope_r match {
-				case Nil => Nil
-				case x :: xs => (x - name) :: xs
-			}
-			state.copy(scope_r = scope1_r)
-		}
+	def addToScope(map: Map[String, JsObject]): ContextE[Unit] = {
+		ContextE.modify(_.addToScope(map))
 	}
 	
 	def fromJson[A: TypeTag](jsval: JsValue): ContextE[A] = {
@@ -482,7 +500,7 @@ object ContextE {
 	def fromScope[A: TypeTag](): ContextE[A] = {
 		for {
 			scope <- ContextE.getScope
-			x <- Converter2.fromJson[A](JsObject(scope))
+			x <- Converter2.fromJson[A](JsObject(scope.toMap))
 		} yield x
 	}
 	

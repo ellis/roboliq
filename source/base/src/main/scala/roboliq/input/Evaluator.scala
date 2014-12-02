@@ -167,15 +167,9 @@ class Evaluator() {
 		println(s"evaluateDefine($m)")
 		for {
 			name <- ContextE.fromJson[String](m, "NAME")
-			_ <- m.get("VALUE") match {
-				case None =>
-					ContextE.removeFromScope(name)
-				case Some(jsval) =>
-					for {
-						res <- ContextE.evaluate(jsval)
-						_ <- ContextE.addToScope(Map(name -> res))
-					} yield ()
-			}
+			jsval <- ContextE.fromJson[JsValue](m, "VALUE")
+			res <- ContextE.evaluate(jsval)
+			_ <- ContextE.addToScope(Map(name -> res))
 		} yield JsObject()
 	}
 
