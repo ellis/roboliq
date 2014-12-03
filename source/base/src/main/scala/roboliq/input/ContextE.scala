@@ -24,6 +24,7 @@ import spray.json.JsObject
 import org.apache.commons.io.FilenameUtils
 import com.google.gson.Gson
 import spray.json.JsNull
+import roboliq.utils.JsonUtils
 
 class EvaluatorScope(
 	val map: Map[String, JsObject] = Map(),
@@ -568,21 +569,10 @@ object ContextE {
 				case ext => ContextE.error(s"Unrecognized file extension `$ext`.  Expected either json or yaml.")
 			}
 			input0 = org.apache.commons.io.FileUtils.readFileToString(file)
-			input <- if (bYaml) yamlToJson(input0) else ContextE.unit(input0)
+			input = if (bYaml) JsonUtils.yamlToJsonText(input0) else input0
 		} yield {
 			import spray.json._
 			input.parseJson
 		}
-	}
-
-	private def yamlToJson(s: String): ContextE[String] = {
-		import org.yaml.snakeyaml._
-		val yaml = new Yaml()
-		//val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
-		val o = yaml.load(s)
-		val gson = new Gson
-		val s_~ = gson.toJson(o)
-		//println("gson: " + s_~)
-		ContextE.unit(s_~)
 	}
 }

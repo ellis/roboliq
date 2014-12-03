@@ -50,6 +50,7 @@ usage.
 - [x] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
+- [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: handle 'action' type
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
@@ -57,38 +58,76 @@ usage.
 - [ ] generate action output
 - [ ] ask for missing action inputs
 - [ ] perform planning for actions
-- [ ] Evaluator: extend scope somehow to be recursive, so that a function can call functions defined after it in the same scope?
+- [ ] Evaluator: extend scope somehow to be recursive, so that a function can call functions defined after it in the same scope?  Make evaluation lazy?
 
+ProtocolEvaluator:
+
+The protocol evaluator will accept a protocol such as this:
 
 ```{yaml}
-labware:
-  plate1: plateModel_96_nunc_transparent
+TYPE: protocol
+VALUE:
+  labware:
+    plate1:
+      model: plateModel_384_square
+      location: P3
 
-reagents:
-  water: plate1(A01)
+  substance:
+    water: {}
+    dye: {}
 
-protocol:
-- distribute:
-    source: plate1(A01)
-    destination: plate1(B01)
-    amount: 20ul
+  source:
+    dyeLight:
+      well: trough1(A01|H01)
+      substance:
+      - name: dye
+        amount: 1/10
+      - name: water
+
+  command:
+  - TYPE: action
+    NAME: distribute
+    INPUT:
+      source: dyeLight
+      destination: plate1(B01)
+      amount: 20ul
 ```
 
-Logic:
+From this, it creates a data object, such as this:
+
+Data ``data[0]``:
+```
+plate1:
+  type: labware
+  model: plateModel_384_square
+  location: P3
+"plate1(A01)":
+  type: well
+  content: water
+water:
+  type: reagent
+  source: plate1(A01)
+cmd:
+  "1":
+    command: distribute
+    input:
+      source: plate1(A01)
+      destination: plate1(B01)
+      amount: 20ul
+```
+
+And from that it generates logic `effect[0]`:
 ```
 labware plate1
+model plate1 plateModel_384_square
+location plate1 P3
 reagent water
 reagent-well water plate1(A01)
+content plate1(A01) water
 ```
 
-Data:
-```
-plate1.model: plateModel_96_nunc_transparent
-cmd[1].source: plate1(A01)
-cmd[1].destination: plate1(B01)
-cmd[1].amount: 20ul
+For each command, it looks for a command handler.  Using the handler data, it checks for missing parameters, checks the preconditions, and creates a new `effect[i]` object.  If the inputs are complete, the handler expands the action, and the result is appended to the command list with appropriate indexes.  Otherwise, the user is prompted for the necessary inputs (or given an error message).  Also need to handle adding commands to satisfy preconditions.
 
-```
 
 ## Previous goal
 

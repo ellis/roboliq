@@ -9,6 +9,7 @@ import spray.json.JsArray
 import spray.json.JsString
 import spray.json.JsValue
 import java.io.File
+import roboliq.utils.JsonUtils
 
 class EvaluatorSpec extends FunSpec {
 	val eb = new EntityBase
@@ -173,6 +174,37 @@ class EvaluatorSpec extends FunSpec {
 			check(Map(),
 				jsInstructionList -> jsInstructionList
 			)
+		}
+		
+		it("create protocol") {
+			val yaml = """
+labware:
+  plate1:
+    model: plateModel_384_square
+    location: P3
+
+substance:
+  water: {}
+  dye: {}
+
+source:
+  dyeLight:
+    well: trough1(A01|H01)
+    substance:
+    - name: dye
+      amount: 1/10
+    - name: water
+
+command:
+- TYPE: action
+  NAME: distribute
+  INPUT:
+    source: dyeLight
+    destination: plate1(B01)
+    amount: 20ul
+"""
+			val jsval = JsonUtils.yamlToJson(yaml)
+			println(jsval)
 		}
 	}
 }
