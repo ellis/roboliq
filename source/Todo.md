@@ -59,8 +59,34 @@ usage.
 - [ ] perform planning for actions
 - [ ] Evaluator: extend scope somehow to be recursive, so that a function can call functions defined after it in the same scope?
 
-Lambda:
+
 ```{yaml}
+labware:
+  plate1: plateModel_96_nunc_transparent
+
+reagents:
+  water: plate1(A01)
+
+protocol:
+- distribute:
+    source: plate1(A01)
+    destination: plate1(B01)
+    amount: 20ul
+```
+
+Logic:
+```
+labware plate1
+reagent water
+reagent-well water plate1(A01)
+```
+
+Data:
+```
+plate1.model: plateModel_96_nunc_transparent
+cmd[1].source: plate1(A01)
+cmd[1].destination: plate1(B01)
+cmd[1].amount: 20ul
 
 ```
 
