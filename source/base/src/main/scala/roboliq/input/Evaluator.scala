@@ -53,7 +53,7 @@ class Evaluator() {
 								case "let" => evaluateLet(m)
 								case "stringf" => evaluateStringf(m)
 								case "subst" => evaluateSubst(m)
-								case typ => evaluateType(typ, m)
+								case typ => evaluateType(jsobj, typ)
 							}
 					}
 				} yield res
@@ -299,28 +299,23 @@ class Evaluator() {
 		} yield x
 	}
 
-	def evaluateType(typ: String, m: Map[String, JsValue]): ContextE[JsObject] = {
-		println(s"evaluateType($typ, $m)")
-		for {
-			jsval <- ContextE.fromJson[JsValue](m, "VALUE")
-			res <- (typ, jsval) match {
-				case ("list", JsArray(l)) =>
-					for {
-						// TODO: need to push a context to a context 
-						l2 <- ContextE.map(l.zipWithIndex) { case (jsval2, i0) =>
-							val i = i0 + 1
-							ContextE.context(s"[$i]") {
-								evaluate(jsval2)
-							}
+	def evaluateType(jsobj: JsObject, typ: String): ContextE[JsObject] = {
+		println(s"evaluateType($jsobj, $typ)")
+		val m = jsobj.fields
+		
+		typ match {
+			case "list" =>
+				for {
+					l <- ContextE.fromJson[List[JsValue]](m, "VALUE")
+					// TODO: need to push a context to a context 
+					l2 <- ContextE.map(l.zipWithIndex) { case (jsval2, i0) =>
+						val i = i0 + 1
+						ContextE.context(s"[$i]") {
+							evaluate(jsval2)
 						}
-					} yield Converter2.makeList(l2)
-				case ("number", JsNumber(n)) =>
-					ContextE.unit(Converter2.makeNumber(n))
-				case ("string", JsString(s)) =>
-					ContextE.unit(Converter2.makeString(s))
-				case _ =>
-					ContextE.error(s"evaluateType() not completely implemented: $typ, $jsval")
-			}
-		} yield res
+					}
+				} yield Converter2.makeList(l2)
+			case _ => ContextE.unit(jsobj)
+		}
 	}
 }

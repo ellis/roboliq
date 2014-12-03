@@ -164,5 +164,15 @@ class EvaluatorSpec extends FunSpec {
 				) -> Converter2.makeList(List(js6))
 			)
 		}
+		
+		it("instruction list") {
+			val jsInstructionList = Converter2.makeList(List(
+				Converter2.makeInstruction("Instruction1", Map("agent" -> JsString("one"))),
+				Converter2.makeInstruction("Instruction2", Map("agent" -> JsString("two")))
+			))
+			check(Map(),
+				jsInstructionList -> jsInstructionList
+			)
+		}
 	}
 }

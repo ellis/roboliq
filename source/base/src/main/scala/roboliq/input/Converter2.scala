@@ -98,6 +98,13 @@ object Converter2 {
 	def makeInclude(filename: String): JsObject = {
 		JsObject(Map("TYPE" -> JsString("include"), "FILENAME" -> JsString(filename)))
 	}
+	
+	def makeInstruction(
+		name: String,
+		input: Map[String, JsValue]
+	): JsObject = {
+		JsObject(Map("TYPE" -> JsString("instruction"), "NAME" -> JsString(name), "INPUT" -> JsObject(input)))
+	}
 
 	def makeLambda(param: List[String], expression: JsValue): JsObject = {
 		JsObject(Map("TYPE" -> JsString("lambda"), "EXPRESSION" -> expression))

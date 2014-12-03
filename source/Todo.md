@@ -49,7 +49,7 @@ usage.
 - [x] Evaluator: handle 'import' directive
 - [x] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
-- [ ] Evaluator: handle 'instruction' type and create test to create a list of instructions
+- [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [ ] Evaluator: handle 'action' type
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
