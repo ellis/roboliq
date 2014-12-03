@@ -164,10 +164,9 @@ class Evaluator() {
 		println(s"evaluateCallBuiltin($name, ${input_m})")
 		name match {
 			case "add" =>
-				for {
-					_ <- ContextE.modify(_.addToScope(input_m))
-					res <- new BuiltinAdd().evaluate()
-				} yield res
+				ContextE.withScope(new EvaluatorScope(input_m)) {
+					new BuiltinAdd().evaluate()
+				}
 			case _ =>
 				ContextE.error(s"unknown function `$name`")
 		}
@@ -179,7 +178,9 @@ class Evaluator() {
 		for {
 			_ <- ContextE.assert(m.get("TYPE") == Some(JsString("lambda")), s"cannot call `$name` because it is not a function: $jsobj")
 			jsExpression <- ContextE.fromJson[JsValue](m, "EXPRESSION")
-			res <- ContextE.evaluate(jsExpression, scope.add(input_m))
+			res <- ContextE.withScope(scope.add(input_m)) {
+				ContextE.evaluate(jsExpression)
+			}
 		} yield res
 	}
 

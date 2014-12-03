@@ -522,6 +522,7 @@ object ContextE {
 		evaluator.evaluate(jsval)
 	}
 	
+	/*
 	/**
 	 * Evaluate jsval using a different scope
 	 */
@@ -533,7 +534,7 @@ object ContextE {
 			res <- evaluate(jsval)
 			_ <- ContextE.modify(_.copy(scope = scope0))
 		} yield res
-	}
+	}*/
 	
 	def findFile(filename: String): ContextE[File] = {
 		for {
