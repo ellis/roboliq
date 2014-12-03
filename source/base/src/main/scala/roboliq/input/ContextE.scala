@@ -509,11 +509,25 @@ object ContextE {
 			}
 		}
 	}
+
+	def getScopeValue(name: String): ContextE[JsObject] = {
+		for {
+			scope <- ContextE.getScope
+			jsobj <- ContextE.from(scope.get(name), s"unknown variable `$name`")
+		} yield jsobj
+	}
 	
 	def fromScope[A: TypeTag](): ContextE[A] = {
 		for {
 			scope <- ContextE.getScope
 			x <- Converter2.fromJson[A](JsObject(scope.toMap))
+		} yield x
+	}
+
+	def fromScope[A: TypeTag](name: String): ContextE[A] = {
+		for {
+			jsobj <- getScopeValue(name)
+			x <- Converter2.fromJson[A](jsobj)
 		} yield x
 	}
 	

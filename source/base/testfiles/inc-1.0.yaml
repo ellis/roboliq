@@ -7,5 +7,5 @@ VALUE:
     NAME: add
     INPUT:
       numbers:
-      - { TYPE: subst, VALUE: x }
+      - { TYPE: subst, NAME: x }
       - { TYPE: number, VALUE: 1 }

@@ -52,6 +52,8 @@ usage.
 - [ ] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [ ] Evaluator: handle 'action' type
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
+- [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
+- [ ] Evaluator: consider creation of namespaces
 - [ ] generate action output
 - [ ] ask for missing action inputs
 - [ ] perform planning for actions

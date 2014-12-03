@@ -131,7 +131,7 @@ object Converter2 {
 	}
 	
 	def makeSubst(name: String): JsObject = {
-		JsObject(Map("TYPE" -> JsString("subst"), "VALUE" -> JsString(name)))
+		JsObject(Map("TYPE" -> JsString("subst"), "NAME" -> JsString(name)))
 	}
 	
 	def fromJson[A: TypeTag](

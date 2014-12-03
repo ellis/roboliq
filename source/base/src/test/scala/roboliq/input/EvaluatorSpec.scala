@@ -59,6 +59,13 @@ class EvaluatorSpec extends FunSpec {
 			)
 		}
 		
+		it("string") {
+			check(Map(),
+				jsWorld -> jsWorld,
+				JsString("World") -> jsWorld
+			)
+		}
+		
 		it("subst") {
 			check(Map("x" -> js5),
 				jsX -> js5

@@ -52,12 +52,15 @@ class Evaluator() {
 								case "lambda" => evaluateLambda(m)
 								case "let" => evaluateLet(m)
 								case "stringf" => evaluateStringf(m)
+								case "subst" => evaluateSubst(m)
 								case typ => evaluateType(typ, m)
 							}
 					}
 				} yield res
 			case JsNumber(n) =>
 				ContextE.unit(Converter2.makeNumber(n))
+			case JsString(s) =>
+				ContextE.unit(Converter2.makeString(s))
 			case JsArray(l0) =>
 				for {
 					l <- ContextE.mapAll(l0) { item => evaluate(item) }
@@ -288,6 +291,14 @@ class Evaluator() {
 		} yield Converter2.makeString(s)
 	}
 
+	def evaluateSubst(m: Map[String, JsValue]): ContextE[JsObject] = {
+		println(s"evaluateSubst($m)")
+		for {
+			name <- ContextE.fromJson[String](m, "NAME")
+			x <- ContextE.getScopeValue(name)
+		} yield x
+	}
+
 	def evaluateType(typ: String, m: Map[String, JsValue]): ContextE[JsObject] = {
 		println(s"evaluateType($typ, $m)")
 		for {
@@ -305,11 +316,8 @@ class Evaluator() {
 					} yield Converter2.makeList(l2)
 				case ("number", JsNumber(n)) =>
 					ContextE.unit(Converter2.makeNumber(n))
-				case ("subst", JsString(name)) =>
-					for {
-						scope <- ContextE.getScope
-						x <- ContextE.from(scope.get(name), s"variable `$name` not in scope")
-					} yield x
+				case ("string", JsString(s)) =>
+					ContextE.unit(Converter2.makeString(s))
 				case _ =>
 					ContextE.error(s"evaluateType() not completely implemented: $typ, $jsval")
 			}
