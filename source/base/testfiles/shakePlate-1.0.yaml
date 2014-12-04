@@ -3,11 +3,11 @@
   VALUE:
     TYPE: action
     PARAM:
-    - { name: agent, type: Agent, input: Plannable }
-    - { name: device, type: Device, input: Plannable }
-    - { name: program, type: Program, input: Required }
-    - { name: object, type: Labware, input: Required }
-    - { name: site, type: Site, input: Plannable }
+    - { name: agent, type: Agent, mode: Plannable }
+    - { name: device, type: Device, mode: Plannable }
+    - { name: program, type: Program, mode: Required }
+    - { name: labware, type: Labware, mode: Required }
+    - { name: site, type: Site, mode: Plannable }
     PRECOND:
     - agent-has-device $agent $device
     - device-can-site $device $site

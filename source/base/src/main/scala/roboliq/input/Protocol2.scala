@@ -62,11 +62,14 @@ class Protocol2 {
 		val validation_l = new ArrayBuffer[CommandValidation]
 		ContextE.context(s"command[$id]") {
 			for {
-				m <- ContextE.fromJson[Map[String, JsValue]](data.fields, id)
-				commandName <- ContextE.fromJson[String](m, "command")
+				jsCommandSet <- ContextE.fromJson[JsObject](data.fields, "command")
+				command_m <- ContextE.fromJson[Map[String, JsValue]](jsCommandSet.fields, id)
+				_ = println(s"command_m: ${command_m}")
+				commandName <- ContextE.fromJson[String](command_m, "command")
 				commandDef <- lookupCommandDef(commandName)
+				commandInput_m <- ContextE.fromJson[Map[String, JsValue]](command_m, "input")
 				_ <- ContextE.foreach(commandDef.param) { param =>
-					m.get(param.name) match {
+					commandInput_m.get(param.name) match {
 						case None =>
 							validation_l += CommandValidation_Param(param.name)
 						case Some(jsvalInput) =>
@@ -77,6 +80,13 @@ class Protocol2 {
 				validation_l.toList
 			}
 		}
+	}
+	
+	def lookupCommandDef(name: String): ContextE[ActionDef] = {
+		for {
+			jsobj <- ContextE.getScopeValue(name)
+			actionDef <- jsToActionDef(name, jsobj)
+		} yield actionDef
 	}
 	
 	/*
@@ -99,6 +109,7 @@ class Protocol2 {
 	 * 
 	 */
 	def jsToActionDef(name: String, jsobj: JsObject): ContextE[ActionDef] = {
+		println(s"jsToActionDef($name, $jsobj)")
 		val m = jsobj.fields
 		for {
 			typ <- ContextE.fromJson[String](m, "TYPE")
@@ -118,12 +129,5 @@ class Protocol2 {
 			)
 		}
 		
-	}
-	
-	def lookupCommandDef(name: String): ContextE[ActionDef] = {
-		for {
-			jsobj <- ContextE.getScopeValue(name)
-			actionDef <- jsToActionDef(name, jsobj)
-		} yield actionDef
 	}
 }

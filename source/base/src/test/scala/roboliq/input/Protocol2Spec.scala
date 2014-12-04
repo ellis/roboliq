@@ -16,6 +16,7 @@ class Protocol2Spec extends FunSpec {
 	val protocol = new Protocol2
 	val eb = new EntityBase
 	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
+	val evaluator = new Evaluator();
 	
 	describe("Protocol2Spec") {
 		it("processData") {
@@ -68,29 +69,7 @@ cmd:
 		}
 		
 		it("processCommand") {
-			val yamlAction = """
-- TYPE: define
-  NAME: shakePlate
-  VALUE:
-    TYPE: action
-    PARAM:
-    - { name: agent, type: Agent, input: Plannable }
-    - { name: device, type: Device, input: Plannable }
-    - { name: program, type: Program, input: Required }
-    - { name: object, type: Labware, input: Required }
-    - { name: site, type: Site, input: Plannable }
-    PRECOND:
-    - agent-has-device $agent $device
-    - device-can-site $device $site
-    - model $labware $model
-    - location $labware $site
-    OUTPUT:
-    - TYPE: instruction
-      NAME: ShakerRun
-      INPUT: { agent: $agent, device: $device, program: $program, labware: $object, site: $site }
-"""
-				
-			val yaml = """
+			val yaml1 = """
 object:
   plate1:
     type: plate
@@ -108,17 +87,33 @@ command:
         rpm: 200
         duration: 10
 """
-			val jsobj = JsonUtils.yamlToJson(yaml).asInstanceOf[JsObject]
-			val ctx = protocol.processData(jsobj).map({ case (objectToType_m, state) =>
-				assert(objectToType_m == Map(
-					"plate1" -> "plate"
-				))
-				assert(state == Strips.State(Set[Strips.Atom](
-					Strips.Atom.parse("labware plate1"),
-					Strips.Atom.parse("model plate1 plateModel_384_square"),
-					Strips.Atom.parse("location plate1 P3")
-				)))
-			})
+			val yaml2 = """
+object:
+  plate1:
+    type: plate
+    model: plateModel_384_square
+    location: P3
+command:
+  "1":
+    command: shakePlate
+    input:
+      agent: mario
+      labware: plate1
+      site: P3
+      program:
+        rpm: 200
+        duration: 10
+"""
+			val jsobj1 = JsonUtils.yamlToJson(yaml1).asInstanceOf[JsObject]
+			val jsobj2 = JsonUtils.yamlToJson(yaml2).asInstanceOf[JsObject]
+			val ctx = for {
+				_ <- ContextE.evaluate(Converter2.makeImport("shakePlate", "1.0"))
+				validation1_l <- protocol.validateDataCommand(jsobj1, "1")
+				validation2_l <- protocol.validateDataCommand(jsobj2, "1")
+			} yield {
+				assert(validation1_l == Nil)
+				assert(validation2_l == List(CommandValidation_Param("device")))
+			}
 			val (data1, _) = ctx.run(data0)
 			if (!data1.error_r.isEmpty) {
 				println("ERRORS:")

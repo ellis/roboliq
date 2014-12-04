@@ -82,6 +82,31 @@ object Converter2 {
 		}
 	}
 	
+	def toEnum[A <: Enumeration#Value : TypeTag](jsval: JsValue): ContextE[A] = {
+		val typ = ru.typeTag[A].tpe
+		toEnum(jsval, typ).map(_.asInstanceOf[A])
+	}
+	
+	private def toEnum(jsval: JsValue, typ: ru.Type): ContextE[Any] = {
+		try {
+			//val mirror = clazz_?.map(clazz => ru.runtimeMirror(clazz.getClassLoader)).getOrElse(scala.reflect.runtime.currentMirror)
+			val mirror = ru.runtimeMirror(getClass.getClassLoader)
+			// Get enclosing enumeration (e.g. MyStatus.Value => MyStatus)
+			val enumType = typ.find(_ <:< typeOf[Enumeration]).get
+			val enumModule = enumType.termSymbol.asModule
+			val enumMirror = mirror.reflectModule(enumModule)
+			val enum = enumMirror.instance.asInstanceOf[Enumeration]
+			val value_l = enum.values
+			jsval match {
+				case JsString(s) =>
+					ContextE.from(value_l.find(_.toString == s), s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
+				case _ => ContextE.error("expected JsString")
+			}
+		} catch {
+			case e: Throwable => ContextE.error(s"type: $typ, jsval: $jsval, error: ${e.getMessage}")
+		}
+	}
+
 	def makeBuild(item_l: List[(String, JsObject)]): JsObject = {
 		val item1_l = item_l.map { case (op, jsobj) => JsObject(Map(op -> jsobj))}
 		JsObject(Map("TYPE" -> JsString("build"), "ITEM" -> JsArray(item1_l)))
@@ -176,8 +201,8 @@ object Converter2 {
 				else if (typ =:= typeOf[BigDecimal]) toBigDecimal(jsval)
 				else if (typ =:= typeOf[Boolean]) toBoolean(jsval)//.map(_.asInstanceOf[Boolean])
 				else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(jsval)
-				/*
 				else if (typ <:< typeOf[Enumeration#Value]) toEnum(jsval, typ)
+				/*
 				else if (typ =:= typeOf[AmountSpec]) toAmountSpec(jsval)
 				else if (typ =:= typeOf[LiquidSource]) toLiquidSource(jsval, eb, state_?)
 				else if (typ =:= typeOf[LiquidVolume]) toVolume(jsval)
@@ -264,13 +289,13 @@ object Converter2 {
 						val c = typ.typeSymbol.asClass
 						//println("arg_l: "+arg_l)
 						val mm = mirror.reflectClass(c).reflectConstructor(ctor)
-						logger.debug("arg_l: "+arg_l)
+						//logger.debug("arg_l: "+arg_l)
 						val obj = mm(arg_l : _*)
 						obj
 					}
 				}
 			}
-			logger.debug(ret)
+			//logger.debug(ret)
 			ret
 		}
 		path_? match {
