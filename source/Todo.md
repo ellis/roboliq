@@ -97,23 +97,33 @@ From this, it creates a data object, such as this:
 
 Data ``data[0]``:
 ```
-plate1:
-  type: labware
-  model: plateModel_384_square
-  location: P3
-"plate1(A01)":
-  type: well
-  content: water
-water:
-  type: reagent
-  source: plate1(A01)
+variable:
+  plate1:
+    type: plate
+    model: plateModel_384_square
+    location: P3
+  "plate1(A01)":
+    type: well
+    content: water
+  water:
+    type: substance
+  dye:
+    type: substance
+  dyeLight:
+    type: source
+    source: plate1(A01)
+    substance:
+      dye:
+        amount: 1/10
+      water:
+        amount: 9/10
 cmd:
-  "1":
-    command: distribute
-    input:
-      source: plate1(A01)
-      destination: plate1(B01)
-      amount: 20ul
+- index: [1]
+  command: distribute
+  input:
+    source: plate1(A01)
+    destination: plate1(B01)
+    amount: 20ul
 ```
 
 And from that it generates logic `effect[0]`:
@@ -121,9 +131,6 @@ And from that it generates logic `effect[0]`:
 labware plate1
 model plate1 plateModel_384_square
 location plate1 P3
-reagent water
-reagent-well water plate1(A01)
-content plate1(A01) water
 ```
 
 For each command, it looks for a command handler.  Using the handler data, it checks for missing parameters, checks the preconditions, and creates a new `effect[i]` object.  If the inputs are complete, the handler expands the action, and the result is appended to the command list with appropriate indexes.  Otherwise, the user is prompted for the necessary inputs (or given an error message).  Also need to handle adding commands to satisfy preconditions.
