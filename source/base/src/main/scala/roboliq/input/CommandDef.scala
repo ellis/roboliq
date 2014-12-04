@@ -31,6 +31,17 @@ object CommandType extends Enumeration {
 	val Task, Procedure, Function, Action, Operator, Instruction = Value
 }
 
+case class ActionDef(
+	name: String,
+	description_? : Option[String],
+	documentation_? : Option[String],
+	param: List[InputDef],
+	precond: List[Strips.Literal],
+	effect: List[Strips.Literal],
+	output: JsValue
+) {
+}
+
 case class CommandDef(
 	name: String,
 	`type`: CommandType.Value,

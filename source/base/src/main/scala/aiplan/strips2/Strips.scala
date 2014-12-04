@@ -70,6 +70,15 @@ object Strips {
 	object Literal {
 		def apply(pos: Boolean, name: String, params: String*): Literal =
 			Literal(Atom(name, params.toSeq), pos)
+		
+		def parse(text: String): Literal = {
+			val (pos, text1) = {
+				if (text.startsWith("!")) (false, text.tail)
+				else (true, text)
+			}
+			val l = text1.split(" ")
+			Literal(new Atom(l.head, l.tail), pos)
+		}
 	}
 	/*object Literal {
 		def apply(s: String, pos: Boolean = true): Literal = {

@@ -50,6 +50,7 @@ usage.
 - [x] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
+- [ ] CONTINUE: put shakePlate in file for import, in a Protocol2Spec test
 - [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: handle 'action' type
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
@@ -98,6 +99,7 @@ From this, it creates a data object, such as this:
 Data ``data[0]``:
 ```
 variable:
+object:
   plate1:
     type: plate
     model: plateModel_384_square
@@ -117,13 +119,16 @@ variable:
         amount: 1/10
       water:
         amount: 9/10
-cmd:
-- index: [1]
-  command: distribute
-  input:
-    source: plate1(A01)
-    destination: plate1(B01)
-    amount: 20ul
+command:
+  "1":
+    command: distribute
+    input:
+      source: plate1(A01)
+      destination: plate1(B01)
+      amount: 20ul
+    hash: xxx (hash over id, command name, inputs, and state)
+commandOrderContraint:
+  "1": []
 ```
 
 And from that it generates logic `effect[0]`:
@@ -135,6 +140,25 @@ location plate1 P3
 
 For each command, it looks for a command handler.  Using the handler data, it checks for missing parameters, checks the preconditions, and creates a new `effect[i]` object.  If the inputs are complete, the handler expands the action, and the result is appended to the command list with appropriate indexes.  Otherwise, the user is prompted for the necessary inputs (or given an error message).  Also need to handle adding commands to satisfy preconditions.
 
+Try this with the following protocol:
+```{yaml}
+object:
+  plate1:
+    type: plate
+    model: plateModel_384_square
+    location: P3
+command:
+  "1":
+    command: shakePlate
+    input:
+      agent: mario
+      device: mario__Shaker
+      labware: plate1
+      site: P3
+      program:
+        rpm: 200
+        duration: 10
+```
 
 ## Previous goal
 
