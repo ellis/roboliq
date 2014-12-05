@@ -51,9 +51,11 @@ usage.
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [x] Protocol2: validate preconditions
-- [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
-- [ ] Evaluator: handle 'action' type
+- [ ] Protocol2: generate action output
+- [ ] Protocol2: load objects and state from evoware configuration (see Protocol)
+- [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
+- [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
 - [ ] Evaluator: consider creation of namespaces
 - [ ] generate action output

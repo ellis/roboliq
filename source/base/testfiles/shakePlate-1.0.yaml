@@ -15,4 +15,9 @@
     OUTPUT:
     - TYPE: instruction
       NAME: ShakerRun
-      INPUT: { agent: $agent, device: $device, program: $program, labware: $object, site: $site }
+      INPUT:
+        agent: { TYPE: subst, VALUE: agent }
+        device: { TYPE: subst, VALUE: device }
+        program: { TYPE: subst, VALUE: program }
+        labware: { TYPE: subst, VALUE: labware }
+        site: { TYPE: subst, VALUE: site }

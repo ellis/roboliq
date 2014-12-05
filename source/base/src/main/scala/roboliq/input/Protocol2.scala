@@ -160,4 +160,26 @@ class Protocol2 {
 		}
 		
 	}
+
+	/*
+	def evaluateDataCommand(state: Strips.State, data: JsObject, id: String): ContextE[JsObject] = {
+		ContextE.context(s"command[$id]") {
+			for {
+				jsCommands <- ContextE.fromJson[JsObject](data.fields, "command")
+				jsCommandCall <- ContextE.fromJson[JsObject](jsCommands.fields, id)
+				_ = println(s"command_m: ${jsCommandCall}")
+				commandName <- ContextE.fromJson[String](jsCommandCall.fields, "command")
+				commandDef <- lookupCommandDef(commandName)
+				commandInput_m <- ContextE.fromJson[Map[String, JsValue]](jsCommandCall.fields, "input")
+				res <- ContextE.scope {
+					for {
+						_ <- ContextE.addToScope(commandInput_m)
+						res <- ContextE.evaluate(commandDef.output)
+					} res
+				}
+			} yield {
+				validation_l.toList
+			}
+		}
+	}*/
 }
