@@ -50,7 +50,7 @@ usage.
 - [x] Evaluator: lambda: figure out how to store the scope that was active when the lambda was defined
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
-- [ ] CONTINUE: put shakePlate in file for import, in a Protocol2Spec test
+- [x] Protocol2: validate preconditions
 - [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: handle 'action' type
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data

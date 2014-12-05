@@ -68,7 +68,8 @@ cmd:
 			assert(data1.error_r == Nil)
 		}
 		
-		it("processCommand") {
+		it("validateDataCommand") {
+			// Completely specify parameters
 			val yaml1 = """
 object:
   plate1:
@@ -87,6 +88,7 @@ command:
         rpm: 200
         duration: 10
 """
+			// Omit 'device' parameter
 			val yaml2 = """
 object:
   plate1:
@@ -108,11 +110,22 @@ command:
 			val jsobj2 = JsonUtils.yamlToJson(yaml2).asInstanceOf[JsObject]
 			val ctx = for {
 				_ <- ContextE.evaluate(Converter2.makeImport("shakePlate", "1.0"))
-				validation1_l <- protocol.validateDataCommand(jsobj1, "1")
-				validation2_l <- protocol.validateDataCommand(jsobj2, "1")
+				// Get state from protocol data
+				temp0 <- protocol.processData(jsobj1)
+				state0 = temp0._2
+				// Add a couple atoms to the state regarding the robot's setup
+				state1 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker") + Strips.Atom.parse("device-can-site mario__Shaker P3"))
+				// Leave out a necessary state value, in order to get a precondition error
+				state2 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker"))
+				validation1_l <- protocol.validateDataCommand(state1, jsobj1, "1")
+				validation2_l <- protocol.validateDataCommand(state1, jsobj2, "1")
+				validation3_l <- protocol.validateDataCommand(state2, jsobj1, "1")
+				validation4_l <- protocol.validateDataCommand(state2, jsobj2, "1")
 			} yield {
 				assert(validation1_l == Nil)
 				assert(validation2_l == List(CommandValidation_Param("device")))
+				assert(validation3_l == List(CommandValidation_Precond("device-can-site mario__Shaker P3")))
+				assert(validation4_l == List(CommandValidation_Param("device")))
 			}
 			val (data1, _) = ctx.run(data0)
 			if (!data1.error_r.isEmpty) {

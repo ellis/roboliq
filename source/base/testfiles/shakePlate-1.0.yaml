@@ -11,7 +11,6 @@
     PRECOND:
     - agent-has-device $agent $device
     - device-can-site $device $site
-    - model $labware $model
     - location $labware $site
     OUTPUT:
     - TYPE: instruction

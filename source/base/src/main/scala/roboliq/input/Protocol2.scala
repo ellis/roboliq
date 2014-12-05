@@ -58,7 +58,7 @@ class Protocol2 {
 		}
 	}
 	
-	def validateDataCommand(data: JsObject, id: String): ContextE[List[CommandValidation]] = {
+	def validateDataCommand(state: Strips.State, data: JsObject, id: String): ContextE[List[CommandValidation]] = {
 		val validation_l = new ArrayBuffer[CommandValidation]
 		ContextE.context(s"command[$id]") {
 			for {
@@ -75,6 +75,36 @@ class Protocol2 {
 						case Some(jsvalInput) =>
 					}
 					ContextE.unit(())
+				}
+				_ <- {
+					if (validation_l.isEmpty) {
+						ContextE.foreach(commandDef.precond) { precond =>
+							for {
+								binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
+									if (s.startsWith("$")) {
+										commandInput_m.get(s.tail) match {
+											case None =>
+												ContextE.error(s"unknown parameter `$s` in precondition $precond")
+											case Some(jsParam) =>
+												ContextE.fromJson[String](jsParam).map(s2 => Some(s -> s2))
+										}
+									}
+									else {
+										ContextE.unit(None)
+									}
+								}
+							} yield {
+								val binding = binding0_l.flatten.toList.toMap
+								val precond2 = precond.bind(binding)
+								if (state.holds(precond2.atom) != precond2.pos) {
+									validation_l += CommandValidation_Precond(precond2.toString)
+								}
+							}
+						}
+					}
+					else {
+						ContextE.unit(())
+					}
 				}
 			} yield {
 				validation_l.toList
