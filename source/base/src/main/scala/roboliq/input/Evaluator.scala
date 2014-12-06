@@ -9,26 +9,6 @@ import spray.json.JsArray
 import scala.collection.mutable.HashMap
 import spray.json.JsNull
 
-/*
-object RjsType extends Enumeration {
-	val
-		RCall,
-		RIdent,
-		RList,
-		RMap,
-		RNumber,
-		RString,
-		RSubst
-		= Value
-}
-
-sealed abstract class RjsValue(val typ: RjsType.Value) {
-	def toJson: JsObject
-}
-case class RjsCall(name: String, input: Map[String, JsValue]) extends RjsValue
-case class RjsNumber(n: BigDecimal) extends RjsValue
-*/
-
 class Evaluator() {
 	
 	def evaluate(jsval: JsValue): ContextE[JsObject] = {
