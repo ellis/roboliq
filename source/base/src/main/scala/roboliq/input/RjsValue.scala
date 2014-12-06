@@ -5,6 +5,9 @@ import spray.json.JsValue
 import spray.json.JsString
 import spray.json.JsNumber
 import spray.json.JsArray
+import spray.json.JsBoolean
+import spray.json.JsBoolean
+import spray.json.JsNull
 
 /*object RjsType extends Enumeration {
 	val
@@ -22,6 +25,9 @@ sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 	def toJson: JsValue
 }
 
+case class RjsBoolean(b: Boolean) extends RjsValue {
+	def toJson: JsValue = JsBoolean(b)
+}
 sealed trait RjsBuildItem {
 	def toJson: JsObject
 }
@@ -74,6 +80,10 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsValue {
 	def toJson: JsValue = JsObject(map.mapValues(_.toJson))
 }
 
+case object RjsNull extends RjsValue {
+	def toJson: JsValue = JsNull
+}
+
 case class RjsNumber(n: BigDecimal, unit: Option[String]) extends RjsValue {
 	def toJson: JsValue = unit match {
 		case None => JsNumber(n)
@@ -114,11 +124,19 @@ object RjsValue {
 			case JsNumber(n) =>
 				ContextE.unit(RjsNumber(n, None))
 			case JsArray(l) =>
-				ContextE.mapAll(l.zipWithIndex) { case (jsval2, i) =>
+				ContextE.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
 					ContextE.context(s"[${i+1}]") {
 						RjsValue.fromJson(jsval2)
 					}
-				}
+				}).map(RjsList)
+			case JsBoolean(b) =>
+				ContextE.unit(RjsBoolean(b))
+			case JsNull =>
+				ContextE.unit(RjsNull)
+			case JsObject(map) =>
+				ContextE.mapAll(map.toList)({ case (key, value) =>
+					fromJson(value).map(key -> _)
+				}).map(l => RjsMap(l.toMap))
 		}
 	}
 }
