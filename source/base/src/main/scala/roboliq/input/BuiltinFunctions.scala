@@ -36,76 +36,13 @@ case class BuiltinAddParams(
 )
 
 class BuiltinAdd {
-	def evaluate(): ContextE[JsObject] = {
+	def evaluate(): ContextE[RjsValue] = {
 		ContextE.context("add") {
 			for {
 				params <- ContextE.fromScope[BuiltinAddParams]()
 			} yield {
-				Converter2.makeNumber(params.numbers.sum)
+				RjsNumber(params.numbers.sum, None)
 			}
 		}
-	}
-}
-
-case class BuiltinBuildInput(
-	item: List[Map[String, JsObject]],
-	transform: List[String]
-)
-
-class BuiltinBuild {
-	def evaluate(): ContextE[JsObject] = {
-		ContextE.context("build") {
-			for {
-				input <- ContextE.fromScope[BuiltinBuildInput]()
-				output_l <- makeItems(input.item)
-			} yield Converter2.makeList(output_l)
-		}
-	}
-	
-	private def makeItems(item_l: List[Map[String, JsObject]]): ContextE[List[JsObject]] = {
-		val var_m = new HashMap[String, JsObject]
-		
-		def handleVAR(m: Map[String, JsValue]): ContextE[Unit] = {
-			m.get("NAME") match {
-				case Some(JsString(name)) =>
-					val jsobj = JsObject(m - "NAME")
-					for {
-						x <- ContextE.evaluate(jsobj)
-					} yield {
-						var_m(name) = x
-					}
-				case _ =>
-					ContextE.error("variable `NAME` must be supplied")
-			}
-		}
-
-		def handleADD(jsobj: JsObject): ContextE[Option[JsObject]] = {
-			jsobj.fields.get("TYPE") match {
-				case Some(JsString("map")) =>
-					jsobj.fields.get("VALUE") match {
-						case None =>
-							ContextE.unit(Some(Converter2.makeMap(var_m.toMap)))
-						case Some(JsObject(m3)) =>
-							ContextE.unit(Some(Converter2.makeMap(var_m.toMap ++ m3)))
-						case x =>
-							ContextE.error("invalid `VALUE`: "+x)
-					}
-				case _ =>
-					ContextE.evaluate(jsobj).map(x => Some(x))
-			}
-		}
-		
-		for {
-			output0_l <- ContextE.mapAll(item_l.zipWithIndex) { case (m, i) =>
-				ContextE.context("item["+(i+1)+"]") {
-					m.toList match {
-						case List(("VAR", JsObject(m2))) =>
-							handleVAR(m2).map(_ => None)
-						case List(("ADD", jsobj2@JsObject(m2))) =>
-							handleADD(jsobj2)
-					}
-				}
-			}
-		} yield output0_l.flatten
 	}
 }

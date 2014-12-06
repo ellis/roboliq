@@ -13,25 +13,23 @@ import roboliq.entities.LabwareModel
 import roboliq.entities.Well
 import roboliq.entities.WorldState
 import roboliq.entities.WorldStateBuilder
-import spray.json.JsValue
 import scala.reflect.runtime.universe.TypeTag
 import roboliq.entities.WellInfo
 import roboliq.entities.Agent
 import roboliq.entities.WorldStateEvent
 import roboliq.entities.Amount
 import java.io.File
-import spray.json.JsObject
 import org.apache.commons.io.FilenameUtils
 import com.google.gson.Gson
 import spray.json.JsNull
 import roboliq.utils.JsonUtils
 
 class EvaluatorScope(
-	val map: Map[String, JsObject] = Map(),
+	val map: RjsMap = RjsMap(),
 	val parent_? : Option[EvaluatorScope] = None
 ) {
 	/** First try lookup in own map, then in parent's map */
-	def get(name: String): Option[JsObject] = {
+	def get(name: String): Option[RjsValue] = {
 		map.get(name).orElse(parent_?.flatMap(_.get(name)))
 	}
 	
@@ -40,26 +38,30 @@ class EvaluatorScope(
 	 * Return both the object and the scope in which it was found.
 	 * This is required for lambdas, which should be called with their containing scope.
 	 */
-	def getWithScope(name: String): Option[(JsObject, EvaluatorScope)] = {
+	def getWithScope(name: String): Option[(RjsValue, EvaluatorScope)] = {
 		map.get(name) match {
 			case None => parent_?.flatMap(_.getWithScope(name))
-			case Some(jsobj) => Some((jsobj, this))
+			case Some(jsval) => Some((jsval, this))
 		}
 	}
 	
-	def add(name: String, jsobj: JsObject): EvaluatorScope = {
-		new EvaluatorScope(map = map + (name -> jsobj), parent_?)
+	def add(name: String, jsobj: RjsValue): EvaluatorScope = {
+		new EvaluatorScope(map = map.add(name, jsobj), parent_?)
 	}
 	
-	def add(map: Map[String, JsObject]): EvaluatorScope = {
-		new EvaluatorScope(map = this.map ++ map, parent_?)
+	def add(vars: Map[String, RjsValue]): EvaluatorScope = {
+		new EvaluatorScope(map = this.map.add(vars), parent_?)
 	}
 	
-	def createChild(map: Map[String, JsObject] = Map()): EvaluatorScope =
-		new EvaluatorScope(map, Some(this))
+	def add(map: RjsMap): EvaluatorScope = {
+		new EvaluatorScope(map = this.map.add(map), parent_?)
+	}
 	
-	def toMap: Map[String, JsObject] = {
-		parent_?.map(_.toMap).getOrElse(Map()) ++ map
+	def createChild(vars: RjsMap = RjsMap()): EvaluatorScope =
+		new EvaluatorScope(map.add(vars), Some(this))
+	
+	def toMap: Map[String, RjsValue] = {
+		parent_?.map(_.toMap).getOrElse(Map()) ++ map.map
 	}
 }
 
@@ -69,15 +71,19 @@ case class EvaluatorState(
 	searchPath_l: List[File] = Nil,
 	inputFile_l: List[File] = Nil
 ) {
-	def pushScope(map: Map[String, JsObject] = Map()): EvaluatorState = {
-		copy(scope = scope.createChild(map))
+	def pushScope(vars: RjsMap = RjsMap()): EvaluatorState = {
+		copy(scope = scope.createChild(vars))
 	}
 	
 	def popScope(): EvaluatorState = {
 		copy(scope = scope.parent_?.get)
 	}
 	
-	def addToScope(map: Map[String, JsObject]): EvaluatorState = {
+	def addToScope(name: String, value: RjsValue): EvaluatorState = {
+		copy(scope = scope.add(name, value))
+	}
+	
+	def addToScope(map: Map[String, RjsValue]): EvaluatorState = {
 		copy(scope = scope.add(map))
 	}
 }
@@ -128,8 +134,8 @@ case class ContextEData(
 		copy(state = state1)
 	}
 
-	def pushScope(map: Map[String, JsObject] = Map()): ContextEData = {
-		modifyState(_.pushScope(map))
+	def pushScope(vars: RjsMap = RjsMap()): ContextEData = {
+		modifyState(_.pushScope(vars))
 	}
 	
 	def popScope(): ContextEData = {
@@ -477,8 +483,16 @@ object ContextE {
 		}
 	}
 	
-	def addToScope(map: Map[String, JsObject]): ContextE[Unit] = {
+	def addToScope(name: String, value: RjsValue): ContextE[Unit] = {
+		ContextE.modify(_.addToScope(name, value))
+	}
+	
+	def addToScope(map: Map[String, RjsValue]): ContextE[Unit] = {
 		ContextE.modify(_.addToScope(map))
+	}
+	
+	def addToScope(map: RjsMap): ContextE[Unit] = {
+		ContextE.modify(_.addToScope(map.map))
 	}
 	
 	def withScope[B](scope: EvaluatorScope)(ctx: ContextE[B]): ContextE[B] = {
@@ -494,54 +508,57 @@ object ContextE {
 		}
 	}
 	
-	def fromJson[A: TypeTag](jsval: JsValue): ContextE[A] = {
-		Converter2.fromJson[A](jsval)
+	def fromRjs[A: TypeTag](rjsval: RjsValue): ContextE[A] = {
+		Converter3.fromRjs[A](rjsval)
 	}
 	
-	def fromJson[A: TypeTag](map: Map[String, JsValue], field: String): ContextE[A] = {
+	def fromRjs[A: TypeTag](map: RjsMap, field: String): ContextE[A] =
+		fromRjs[A](map.map, field)
+
+	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ContextE[A] = {
 		ContextE.context(field) {
 			map.get(field) match {
-				case Some(jsval) => Converter2.fromJson[A](jsval)
+				case Some(jsval) => Converter3.fromRjs[A](jsval)
 				case None =>
 					ContextE.orElse(
-						Converter2.fromJson[A](JsNull),
+						Converter3.fromRjs[A](RjsNull),
 						ContextE.error("value required")
 					)
 			}
 		}
 	}
 
-	def getScopeValue(name: String): ContextE[JsObject] = {
+	def getScopeValue(name: String): ContextE[RjsValue] = {
 		for {
 			scope <- ContextE.getScope
-			jsobj <- ContextE.from(scope.get(name), s"unknown variable `$name`")
-		} yield jsobj
+			rjsval <- ContextE.from(scope.get(name), s"unknown variable `$name`")
+		} yield rjsval
 	}
 	
 	def fromScope[A: TypeTag](): ContextE[A] = {
 		for {
 			scope <- ContextE.getScope
-			x <- Converter2.fromJson[A](JsObject(scope.toMap))
+			x <- Converter3.fromRjs[A](RjsMap(scope.toMap))
 		} yield x
 	}
 
 	def fromScope[A: TypeTag](name: String): ContextE[A] = {
 		for {
 			jsobj <- getScopeValue(name)
-			x <- Converter2.fromJson[A](jsobj)
+			x <- Converter3.fromRjs[A](jsobj)
 		} yield x
 	}
 	
-	def evaluate(jsval: JsValue): ContextE[JsObject] = {
+	def evaluate(rjsval: RjsValue): ContextE[RjsValue] = {
 		val evaluator = new Evaluator()
-		evaluator.evaluate(jsval)
+		evaluator.evaluate(rjsval)
 	}
 	
 	/*
 	/**
 	 * Evaluate jsval using a different scope
 	 */
-	def evaluate(jsval: JsValue, scope: EvaluatorScope): ContextE[JsObject] = {
+	def evaluate(jsval: RjsValue, scope: EvaluatorScope): ContextE[RjsMap] = {
 		// Temporarily set the given scope, evaluate jsval, then switch back to the current scope
 		for {
 			scope0 <- ContextE.getScope
@@ -559,7 +576,8 @@ object ContextE {
 		} yield file
 	}
 
-	def loadJsonFromFile(file: File): ContextE[JsValue] = {
+	def loadJsonFromFile(file: File): ContextE[RjsValue] = {
+		import spray.json._
 		for {
 			_ <- ContextE.assert(file.exists, s"File not found: ${file.getPath}")
 			_ <- ContextE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
@@ -570,9 +588,8 @@ object ContextE {
 			}
 			input0 = org.apache.commons.io.FileUtils.readFileToString(file)
 			input = if (bYaml) JsonUtils.yamlToJsonText(input0) else input0
-		} yield {
-			import spray.json._
-			input.parseJson
-		}
+			jsval = input.parseJson
+			res <- RjsValue.fromJson(jsval)
+		} yield res
 	}
 }

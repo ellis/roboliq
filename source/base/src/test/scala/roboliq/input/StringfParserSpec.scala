@@ -14,7 +14,7 @@ class StringfParserSpec extends FunSpec {
 	val evaluator = new Evaluator();
 
 	private def check(
-		scope: Map[String, JsObject],
+		scope: RjsMap,
 		l: (String, String)*
 	) {
 		val ctx: ContextE[Unit] = for {
@@ -36,37 +36,37 @@ class StringfParserSpec extends FunSpec {
 	}
 	
 	describe("StringfParser") {
-		val js5 = Converter2.makeNumber(5)
-		val jsWorld = Converter2.makeString("World")
+		val js5 = RjsNumber(5, None)
+		val jsWorld = RjsText("World")
 		
 		it("${x}") {
 			val format = "${x}"
-			check(Map("x" -> jsWorld), format -> "World")
-			check(Map("x" -> js5), format -> "5")
+			check(RjsMap("x" -> jsWorld), format -> "World")
+			check(RjsMap("x" -> js5), format -> "5")
 		}
 		
 		it("Hello, ${x}") {
 			val format = "Hello, ${x}"
-			check(Map("x" -> jsWorld), format -> "Hello, World")
-			check(Map("x" -> js5), format -> "Hello, 5")
+			check(RjsMap("x" -> jsWorld), format -> "Hello, World")
+			check(RjsMap("x" -> js5), format -> "Hello, 5")
 		}
 		
 		it("${x}, hello!") {
 			val format = "${x}, hello!"
-			check(Map("x" -> jsWorld), format -> "World, hello!")
-			check(Map("x" -> js5), format -> "5, hello!")
+			check(RjsMap("x" -> jsWorld), format -> "World, hello!")
+			check(RjsMap("x" -> js5), format -> "5, hello!")
 		}
 		
 		it("${x} -- ${x}") {
 			val format = "${x} -- ${x}"
-			check(Map("x" -> jsWorld), format -> "World -- World")
-			check(Map("x" -> js5), format -> "5 -- 5")
+			check(RjsMap("x" -> jsWorld), format -> "World -- World")
+			check(RjsMap("x" -> js5), format -> "5 -- 5")
 		}
 		
 		it("-- ${x} --") {
 			val format = "-- ${x} --"
-			check(Map("x" -> jsWorld), format -> "-- World --")
-			check(Map("x" -> js5), format -> "-- 5 --")
+			check(RjsMap("x" -> jsWorld), format -> "-- World --")
+			check(RjsMap("x" -> js5), format -> "-- 5 --")
 		}
 	}
 }

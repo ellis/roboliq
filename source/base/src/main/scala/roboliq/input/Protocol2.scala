@@ -17,29 +17,28 @@ case class MyPlate(
 
 class Protocol2 {
 	def processData(
-		data: JsObject
+		data: RjsMap
 	): ContextE[(Map[String, String], Strips.State)] = {
-		val m = data.fields
-		processDataObjects(m)
+		processDataObjects(data)
 	}
 	
 	def processDataObjects(
-		m: Map[String, JsValue]
+		m: RjsMap
 	): ContextE[(Map[String, String], Strips.State)] = {
 		val objectToType_m = new HashMap[String, String]
 		val atom_l = new ArrayBuffer[Strips.Atom]
 		ContextE.context("object") {
 			for {
-				object_m <- ContextE.fromJson[Map[String, JsValue]](m, "object")
-				_ <- ContextE.mapAll(object_m.toList) { case (name, jsval) =>
+				object_m <- ContextE.fromRjs[RjsMap](m, "object")
+				_ <- ContextE.mapAll(object_m.map.toList) { case (name, jsval) =>
 					ContextE.context(name) {
 						for {
-							m <- ContextE.fromJson[Map[String, JsValue]](jsval)
-							typ <- ContextE.fromJson[String](m, "type")
+							m <- ContextE.fromRjs[Map[String, RjsValue]](jsval)
+							typ <- ContextE.fromRjs[String](m, "type")
 							_ <- typ match {
 								case "plate" =>
 									for {
-										plate <- ContextE.fromJson[MyPlate](jsval)
+										plate <- ContextE.fromRjs[MyPlate](jsval)
 									} yield {
 										objectToType_m += (name -> typ)
 										atom_l += Strips.Atom("labware", Seq(name))
@@ -58,16 +57,16 @@ class Protocol2 {
 		}
 	}
 	
-	def validateDataCommand(state: Strips.State, data: JsObject, id: String): ContextE[List[CommandValidation]] = {
+	def validateDataCommand(state: Strips.State, data: RjsMap, id: String): ContextE[List[CommandValidation]] = {
 		val validation_l = new ArrayBuffer[CommandValidation]
 		ContextE.context(s"command[$id]") {
 			for {
-				jsCommandSet <- ContextE.fromJson[JsObject](data.fields, "command")
-				command_m <- ContextE.fromJson[Map[String, JsValue]](jsCommandSet.fields, id)
+				jsCommandSet <- ContextE.fromRjs[RjsMap](data, "command")
+				command_m <- ContextE.fromRjs[RjsMap](jsCommandSet, id)
 				_ = println(s"command_m: ${command_m}")
-				commandName <- ContextE.fromJson[String](command_m, "command")
+				commandName <- ContextE.fromRjs[String](command_m, "command")
 				commandDef <- lookupCommandDef(commandName)
-				commandInput_m <- ContextE.fromJson[Map[String, JsValue]](command_m, "input")
+				commandInput_m <- ContextE.fromRjs[RjsMap](command_m, "input")
 				_ <- ContextE.foreach(commandDef.param) { param =>
 					commandInput_m.get(param.name) match {
 						case None =>
@@ -86,7 +85,7 @@ class Protocol2 {
 											case None =>
 												ContextE.error(s"unknown parameter `$s` in precondition $precond")
 											case Some(jsParam) =>
-												ContextE.fromJson[String](jsParam).map(s2 => Some(s -> s2))
+												ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
 										}
 									}
 									else {
@@ -114,8 +113,8 @@ class Protocol2 {
 	
 	def lookupCommandDef(name: String): ContextE[ActionDef] = {
 		for {
-			jsobj <- ContextE.getScopeValue(name)
-			actionDef <- jsToActionDef(name, jsobj)
+			rjsval <- ContextE.getScopeValue(name)
+			actionDef <- jsToActionDef(name, rjsval)
 		} yield actionDef
 	}
 	
@@ -138,15 +137,15 @@ class Protocol2 {
       INPUT: { agent: $agent, device: $device, program: $program, labware: $object, site: $site }
 	 * 
 	 */
-	def jsToActionDef(name: String, jsobj: JsObject): ContextE[ActionDef] = {
-		println(s"jsToActionDef($name, $jsobj)")
-		val m = jsobj.fields
+	def jsToActionDef(name: String, rjsval: RjsValue): ContextE[ActionDef] = {
+		println(s"jsToActionDef($name, $rjsval)")
 		for {
-			typ <- ContextE.fromJson[String](m, "TYPE")
-			param_l <- ContextE.fromJson[List[InputDef]](m, "PARAM")
-			precond0_l <- ContextE.fromJson[List[String]](m, "PRECOND")
+			m <- ContextE.fromRjs[RjsMap](rjsval)
+			typ <- ContextE.fromRjs[String](m, "TYPE")
+			param_l <- ContextE.fromRjs[List[InputDef]](m, "PARAM")
+			precond0_l <- ContextE.fromRjs[List[String]](m, "PRECOND")
 			precond_l = precond0_l.map(s => Strips.Literal.parse(s))
-			jsOutput <- ContextE.fromJson[JsValue](m, "OUTPUT")
+			jsOutput <- ContextE.fromRjs[JsValue](m, "OUTPUT")
 		} yield {
 			ActionDef(
 				name = name,
@@ -158,19 +157,18 @@ class Protocol2 {
 				output = jsOutput
 			)
 		}
-		
 	}
 
 	/*
 	def evaluateDataCommand(state: Strips.State, data: JsObject, id: String): ContextE[JsObject] = {
 		ContextE.context(s"command[$id]") {
 			for {
-				jsCommands <- ContextE.fromJson[JsObject](data.fields, "command")
-				jsCommandCall <- ContextE.fromJson[JsObject](jsCommands.fields, id)
+				jsCommands <- ContextE.fromRjs[JsObject](data.fields, "command")
+				jsCommandCall <- ContextE.fromRjs[JsObject](jsCommands.fields, id)
 				_ = println(s"command_m: ${jsCommandCall}")
-				commandName <- ContextE.fromJson[String](jsCommandCall.fields, "command")
+				commandName <- ContextE.fromRjs[String](jsCommandCall.fields, "command")
 				commandDef <- lookupCommandDef(commandName)
-				commandInput_m <- ContextE.fromJson[Map[String, JsValue]](jsCommandCall.fields, "input")
+				commandInput_m <- ContextE.fromRjs[Map[String, JsValue]](jsCommandCall.fields, "input")
 				res <- ContextE.scope {
 					for {
 						_ <- ContextE.addToScope(commandInput_m)

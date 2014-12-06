@@ -25,7 +25,7 @@ object StringfParser {
 				for {
 					scope <- ContextE.getScope
 					jsval <- ContextE.from(scope.get(name), s"variable `$name` not in scope")
-					s <- Converter2.valueToString(jsval)
+					s = jsval.toText
 					acc1 = acc + prefix + s
 					res1 <- step(text1_l, match1_l, acc1)
 				} yield res1

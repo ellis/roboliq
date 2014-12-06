@@ -50,7 +50,8 @@ cmd:
     amount: 20ul
 """
 			val jsobj = JsonUtils.yamlToJson(yaml).asInstanceOf[JsObject]
-			val ctx = protocol.processData(jsobj).map({ case (objectToType_m, state) =>
+			val m = RjsValue.fromJson(jsobj).asInstanceOf[RjsMap]
+			val ctx = protocol.processData(m).map({ case (objectToType_m, state) =>
 				assert(objectToType_m == Map(
 					"plate1" -> "plate"
 				))
@@ -108,19 +109,21 @@ command:
 """
 			val jsobj1 = JsonUtils.yamlToJson(yaml1).asInstanceOf[JsObject]
 			val jsobj2 = JsonUtils.yamlToJson(yaml2).asInstanceOf[JsObject]
+			val m1 = RjsValue.fromJson(jsobj1).asInstanceOf[RjsMap]
+			val m2 = RjsValue.fromJson(jsobj2).asInstanceOf[RjsMap]
 			val ctx = for {
-				_ <- ContextE.evaluate(Converter2.makeImport("shakePlate", "1.0"))
+				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
 				// Get state from protocol data
-				temp0 <- protocol.processData(jsobj1)
+				temp0 <- protocol.processData(m1)
 				state0 = temp0._2
 				// Add a couple atoms to the state regarding the robot's setup
 				state1 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker") + Strips.Atom.parse("device-can-site mario__Shaker P3"))
 				// Leave out a necessary state value, in order to get a precondition error
 				state2 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker"))
-				validation1_l <- protocol.validateDataCommand(state1, jsobj1, "1")
-				validation2_l <- protocol.validateDataCommand(state1, jsobj2, "1")
-				validation3_l <- protocol.validateDataCommand(state2, jsobj1, "1")
-				validation4_l <- protocol.validateDataCommand(state2, jsobj2, "1")
+				validation1_l <- protocol.validateDataCommand(state1, m1, "1")
+				validation2_l <- protocol.validateDataCommand(state1, m2, "1")
+				validation3_l <- protocol.validateDataCommand(state2, m1, "1")
+				validation4_l <- protocol.validateDataCommand(state2, m2, "1")
 			} yield {
 				assert(validation1_l == Nil)
 				assert(validation2_l == List(CommandValidation_Param("device")))

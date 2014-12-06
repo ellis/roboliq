@@ -325,7 +325,7 @@ Notes:
 - TYPE: define
   NAME: shakePlate
   VALUE:
-    TYPE: action
+    TYPE: actionDef
     PARAM:
     - { name: agent, type: Agent, input: Plannable }
     - { name: device, type: Device, input: Plannable }

@@ -23,11 +23,14 @@ import spray.json.JsNull
 
 sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 	def toJson: JsValue
+	def toText: String = toString
 }
 
 case class RjsBoolean(b: Boolean) extends RjsValue {
 	def toJson: JsValue = JsBoolean(b)
+	override def toText: String = b.toString
 }
+
 sealed trait RjsBuildItem {
 	def toJson: JsObject
 }
@@ -44,8 +47,12 @@ case class RjsBuild(item_l: List[RjsBuildItem]) extends RjsValue {
 	def toJson: JsValue = JsObject(Map("TYPE" -> JsString("build"), "ITEM" -> JsArray(item_l.map(_.toJson))))
 }
 
-case class RjsCall(name: String, input: Map[String, RjsValue]) extends RjsValue {
-	def toJson: JsValue = Converter2.makeCall(name, input.mapValues(_.toJson))
+case class RjsCall(name: String, input: RjsMap) extends RjsValue {
+	def toJson: JsValue = Converter2.makeCall(name, input.map.mapValues(_.toJson))
+}
+
+case class RjsDefine(name: String, value: RjsValue) extends RjsValue {
+	def toJson: JsValue = JsObject(Map("TYPE" -> JsString("define"), "NAME" -> JsString(name), "VALUE" -> value.toJson))
 }
 
 case class RjsFormat(format: String) extends RjsValue {
@@ -60,16 +67,16 @@ case class RjsInclude(filename: String) extends RjsValue {
 	def toJson: JsValue = Converter2.makeInclude(filename)
 }
 
-case class RjsInstruction(name: String, input: Map[String, RjsValue]) extends RjsValue {
-	def toJson: JsValue = Converter2.makeInstruction(name, input.mapValues(_.toJson))
+case class RjsInstruction(name: String, input: RjsMap) extends RjsValue {
+	def toJson: JsValue = Converter2.makeInstruction(name, input.map.mapValues(_.toJson))
 }
 
 case class RjsLambda(param: List[String], expression: RjsValue) extends RjsValue {
 	def toJson: JsValue = Converter2.makeLambda(param, expression.toJson)
 }
 
-case class RjsLet(var_l: List[(String, RjsValue)], expression: RjsValue) extends RjsValue {
-	def toJson: JsValue = Converter2.makeLet(var_l.map(pair => pair.copy(_2 = pair._2.toJson)), expression.toJson)
+case class RjsLet(var_l: List[RjsDefine], expression: RjsValue) extends RjsValue {
+	def toJson: JsValue = Converter2.makeLet(var_l.map(nv => nv.name -> nv.value.toJson), expression.toJson)
 }
 
 case class RjsList(list: List[RjsValue]) extends RjsValue {
@@ -78,16 +85,32 @@ case class RjsList(list: List[RjsValue]) extends RjsValue {
 
 case class RjsMap(map: Map[String, RjsValue]) extends RjsValue {
 	def toJson: JsValue = JsObject(map.mapValues(_.toJson))
+	
+	def get(name: String): Option[RjsValue] = map.get(name)
+	def add(name: String, value: RjsValue): RjsMap = RjsMap(map + (name -> value))
+	def add(map: Map[String, RjsValue]): RjsMap = RjsMap(this.map ++ map)
+	def add(map: RjsMap): RjsMap = RjsMap(this.map ++ map.map)
+}
+
+object RjsMap {
+	def apply(nv_l: (String, RjsValue)*): RjsMap = {
+		RjsMap(Map(nv_l : _*))
+	}
 }
 
 case object RjsNull extends RjsValue {
 	def toJson: JsValue = JsNull
+	override def toText: String = "null"
 }
 
-case class RjsNumber(n: BigDecimal, unit: Option[String]) extends RjsValue {
+case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsValue {
 	def toJson: JsValue = unit match {
 		case None => JsNumber(n)
 		case Some(s) => JsString(n.toString+s)
+	}
+	override def toText: String = unit match {
+		case None => n.toString
+		case Some(s) => n.toString+s
 	}
 }
 
@@ -97,6 +120,7 @@ case class RjsNumber(n: BigDecimal, unit: Option[String]) extends RjsValue {
  */
 case class RjsString(s: String) extends RjsValue {
 	def toJson: JsValue = JsString(s)
+	override def toText: String = s
 }
 
 case class RjsSubst(name: String) extends RjsValue {
@@ -105,6 +129,7 @@ case class RjsSubst(name: String) extends RjsValue {
 
 case class RjsText(text: String) extends RjsValue {
 	def toJson: JsValue = JsString("\""+text+"\"")
+	override def toText: String = text
 }
 
 object RjsValue {

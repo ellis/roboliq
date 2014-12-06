@@ -17,8 +17,8 @@ class EvaluatorSpec extends FunSpec {
 	val evaluator = new Evaluator();
 
 	private def check(
-		scope: Map[String, JsObject],
-		l: (JsValue, JsObject)*
+		scope: RjsMap,
+		l: (RjsValue, RjsValue)*
 	) {
 		val ctx: ContextE[Unit] = for {
 			_ <- ContextE.addToScope(scope)
@@ -36,142 +36,142 @@ class EvaluatorSpec extends FunSpec {
 	}
 	
 	describe("Evaluator") {
-		val js1 = Converter2.makeNumber(1)
-		val js5 = Converter2.makeNumber(5)
-		val js6 = Converter2.makeNumber(6)
-		val js7 = Converter2.makeNumber(7)
-		val js12 = Converter2.makeNumber(12)
-		val jsX = Converter2.makeSubst("x")
-		val jsY = Converter2.makeSubst("y")
-		val jsList57 = Converter2.makeList(List(js5, js7))
-		val jsListX7 = Converter2.makeList(List(jsX, js7))
-		val jsListXY = Converter2.makeList(List(jsX, jsY))
-		val jsAdd57 = Converter2.makeCall("add", Map("numbers" -> jsList57))
-		val jsAddX7 = Converter2.makeCall("add", Map("numbers" -> jsListX7))
-		val jsAddXY = Converter2.makeCall("add", Map("numbers" -> jsListXY))
-		val jsWorld = Converter2.makeString("World")
-		val jsHelloX = Converter2.makeStringf("Hello, ${x}")
-		val jsLambdaInc = Converter2.makeLambda(List("x"), Converter2.makeCall("add", Map("numbers" -> Converter2.makeList(List(jsX, js1)))))
+		val js1 = RjsNumber(1)
+		val js5 = RjsNumber(5)
+		val js6 = RjsNumber(6)
+		val js7 = RjsNumber(7)
+		val js12 = RjsNumber(12)
+		val jsX = RjsSubst("x")
+		val jsY = RjsSubst("y")
+		val jsList57 = RjsList(List(js5, js7))
+		val jsListX7 = RjsList(List(jsX, js7))
+		val jsListXY = RjsList(List(jsX, jsY))
+		val jsAdd57 = RjsCall("add", RjsMap("numbers" -> jsList57))
+		val jsAddX7 = RjsCall("add", RjsMap("numbers" -> jsListX7))
+		val jsAddXY = RjsCall("add", RjsMap("numbers" -> jsListXY))
+		val jsWorld = RjsText("World")
+		val jsHelloX = RjsFormat("Hello, ${x}")
+		val jsLambdaInc = RjsLambda(List("x"), RjsCall("add", RjsMap("numbers" -> RjsList(List(jsX, js1)))))
 		
 		it("number") {
-			check(Map(),
+			check(RjsMap(),
 				js12 -> js12,
-				JsNumber(12) -> js12
+				RjsNumber(12) -> js12
 			)
 		}
 		
 		it("string") {
-			check(Map(),
+			check(RjsMap(),
 				jsWorld -> jsWorld,
-				JsString("World") -> jsWorld
+				RjsText("World") -> jsWorld
 			)
 		}
 		
 		it("subst") {
-			check(Map("x" -> js5),
+			check(RjsMap("x" -> js5),
 				jsX -> js5
 			)
 		}
 		
 		it("stringf") {
-			check(Map("x" -> jsWorld),
-				jsHelloX -> Converter2.makeString("Hello, World")
+			check(RjsMap("x" -> jsWorld),
+				jsHelloX -> RjsText("Hello, World")
 			)
-			check(Map("x" -> js5),
-				jsHelloX -> Converter2.makeString("Hello, 5")
+			check(RjsMap("x" -> js5),
+				jsHelloX -> RjsText("Hello, 5")
 			)
 		}
 
 		it("list") {
-			check(Map(),
+			check(RjsMap(),
 				jsList57 -> jsList57
 			)
 		}
 		
 		it("list with subst") {
-			check(Map("x" -> js5),
+			check(RjsMap("x" -> js5),
 				jsListX7 -> jsList57
 			)
 		}
 		
 		it("list with call with subst") {
-			val jsList3 = Converter2.makeList(List(js5, jsAddX7))
-			check(Map("x" -> js5),
-				jsList3 -> Converter2.makeList(List(js5, js12))
+			val jsList3 = RjsList(List(js5, jsAddX7))
+			check(RjsMap("x" -> js5),
+				jsList3 -> RjsList(List(js5, js12))
 			)
 		}
 
 		it("add") {
-			check(Map("x" -> js5),
+			check(RjsMap("x" -> js5),
 				jsAdd57 -> js12,
 				jsAddX7 -> js12
 			)
 		}
 		
 		it("let") {
-			val jsLet1 = Converter2.makeLet(
-				List("x" -> js5, "y" -> js7),
+			val jsLet1 = RjsLet(
+				List(RjsDefine("x", js5), RjsDefine("y", js7)),
 				jsAddXY
 			)
-			check(Map(),
+			check(RjsMap(),
 				jsLet1 -> js12
 			)
 		}
 		
 		it("lambda") {
 			// Lamba objects should remain unchanged
-			check(Map(),
+			check(RjsMap(),
 				jsLambdaInc -> jsLambdaInc
 			)
 			// Call a lambda
-			check(Map("inc" -> jsLambdaInc),
-				Converter2.makeCall("inc", Map("x" -> js5)) -> js6
+			check(RjsMap("inc" -> jsLambdaInc),
+				RjsCall("inc", RjsMap("x" -> js5)) -> js6
 			)
 		}
 
 		it("build") {
-			val jsBuild1 = Converter2.makeBuild(List(
-				"VAR" -> JsObject(Map("NAME" -> JsString("a")) ++ js5.fields),
-				"ADD" -> Converter2.makeMap(Map("b" -> js7))
+			val jsBuild1 = RjsBuild(List(
+				RjsBuildItem_VAR("a", js5),
+				RjsBuildItem_ADD(RjsMap("b" -> js7))
 			))
-			val jsBuild2 = Converter2.makeBuild(List(
-				"VAR" -> JsObject(Map("NAME" -> JsString("a")) ++ js5.fields),
-				"ADD" -> Converter2.makeMap(Map("b" -> js7)),
-				"ADD" -> Converter2.makeMap(Map("b" -> js12)),
-				"VAR" -> JsObject(Map("NAME" -> JsString("a")) ++ js7.fields),
-				"ADD" -> Converter2.makeMap(Map("b" -> js12))
+			val jsBuild2 = RjsBuild(List(
+				RjsBuildItem_VAR("a", js5),
+				RjsBuildItem_ADD(RjsMap("b" -> js7)),
+				RjsBuildItem_ADD(RjsMap("b" -> js12)),
+				RjsBuildItem_VAR("a", js7),
+				RjsBuildItem_ADD(RjsMap("b" -> js12))
 			))
-			check(Map(),
-				jsBuild1 -> Converter2.makeList(List(Converter2.makeMap(Map("a" -> js5, "b" -> js7)))),
-				jsBuild2 -> Converter2.makeList(List(
-					Converter2.makeMap(Map("a" -> js5, "b" -> js7)),
-					Converter2.makeMap(Map("a" -> js5, "b" -> js12)),
-					Converter2.makeMap(Map("a" -> js7, "b" -> js12))
+			check(RjsMap(),
+				jsBuild1 -> RjsList(List(RjsMap("a" -> js5, "b" -> js7))),
+				jsBuild2 -> RjsList(List(
+					RjsMap("a" -> js5, "b" -> js7),
+					RjsMap("a" -> js5, "b" -> js12),
+					RjsMap("a" -> js7, "b" -> js12)
 				))
 			)
 		}
 		
 		it("include") {
-			check(Map(),
-				Converter2.makeInclude("include1.yaml") -> js1
+			check(RjsMap(),
+				RjsInclude("include1.yaml") -> js1
 			)
 		}
 		
 		it("import") {
-			check(Map(),
-				JsArray(
-					Converter2.makeImport("inc", "1.0"),
-					Converter2.makeCall("inc", Map("x" -> js5))
-				) -> Converter2.makeList(List(js6))
+			check(RjsMap(),
+				RjsList(List(
+					RjsImport("inc", "1.0"),
+					RjsCall("inc", RjsMap("x" -> js5))
+				)) -> RjsList(List(js6))
 			)
 		}
 		
 		it("instruction list") {
-			val jsInstructionList = Converter2.makeList(List(
-				Converter2.makeInstruction("Instruction1", Map("agent" -> JsString("one"))),
-				Converter2.makeInstruction("Instruction2", Map("agent" -> JsString("two")))
+			val jsInstructionList = RjsList(List(
+				RjsInstruction("Instruction1", RjsMap("agent" -> RjsString("one"))),
+				RjsInstruction("Instruction2", RjsMap("agent" -> RjsString("two")))
 			))
-			check(Map(),
+			check(RjsMap(),
 				jsInstructionList -> jsInstructionList
 			)
 		}
