@@ -1,23 +1,23 @@
 - TYPE: define
   NAME: shakePlate
   VALUE:
-    TYPE: action
-    PARAM:
+    TYPE: actionDef
+    PARAMS:
     - { name: agent, type: Agent, mode: Plannable }
     - { name: device, type: Device, mode: Plannable }
     - { name: program, type: Program, mode: Required }
     - { name: labware, type: Labware, mode: Required }
     - { name: site, type: Site, mode: Plannable }
-    PRECOND:
+    PRECONDS:
     - agent-has-device $agent $device
     - device-can-site $device $site
     - location $labware $site
-    OUTPUT:
+    VALUE:
     - TYPE: instruction
       NAME: ShakerRun
       INPUT:
-        agent: { TYPE: subst, VALUE: agent }
-        device: { TYPE: subst, VALUE: device }
-        program: { TYPE: subst, VALUE: program }
-        labware: { TYPE: subst, VALUE: labware }
-        site: { TYPE: subst, VALUE: site }
+        agent: { TYPE: subst, NAME: agent }
+        device: { TYPE: subst, NAME: device }
+        program: { TYPE: subst, NAME: program }
+        labware: { TYPE: subst, NAME: labware }
+        site: { TYPE: subst, NAME: site }

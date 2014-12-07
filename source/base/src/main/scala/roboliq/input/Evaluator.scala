@@ -120,8 +120,11 @@ class Evaluator() {
 				ContextE.findFile(basename+".json"),
 				ContextE.findFile(basename+".yaml")
 			)
+			_ = println("A")
 			rjsval <- ContextE.loadJsonFromFile(file)
+			_ = println("B")
 			_ <- ContextE.evaluate(rjsval)
+			_ = println("C")
 		} yield RjsNull
 	}
 

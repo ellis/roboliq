@@ -66,6 +66,7 @@ class Protocol2 {
 				_ = println(s"command_m: ${command_m}")
 				commandName <- ContextE.fromRjs[String](command_m, "command")
 				commandDef <- lookupCommandDef(commandName)
+				actionDef <- ContextE.fromScope[RjsActionDef](commandName)
 				commandInput_m <- ContextE.fromRjs[RjsMap](command_m, "input")
 				_ <- ContextE.foreach(commandDef.param) { param =>
 					commandInput_m.get(param.name) match {
@@ -111,10 +112,8 @@ class Protocol2 {
 		}
 	}
 	
-	def lookupCommandDef(name: String): ContextE[ActionDef] = {
+	def lookupCommandDef(name: String): ContextE[RjsActionDef] = {
 		for {
-			rjsval <- ContextE.getScopeValue(name)
-			actionDef <- jsToActionDef(name, rjsval)
 		} yield actionDef
 	}
 	

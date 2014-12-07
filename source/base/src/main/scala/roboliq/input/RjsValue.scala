@@ -8,6 +8,7 @@ import spray.json.JsArray
 import spray.json.JsBoolean
 import spray.json.JsBoolean
 import spray.json.JsNull
+import aiplan.strips2.Strips
 
 /*object RjsType extends Enumeration {
 	val
@@ -24,6 +25,51 @@ import spray.json.JsNull
 sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 	def toJson: JsValue
 	def toText: String = toString
+}
+
+case class RjsAction(name: String, input: RjsMap) extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(Map[String, JsValue](
+			"TYPE" -> JsString("action"),
+			"NAME" -> JsString(name),
+			"INPUT" -> JsObject(input.map.mapValues(_.toJson))
+		))
+	}
+}
+
+case class RjsActionDefParam(
+	name: String,
+	`type`: String,
+	mode: InputMode.Value
+) {
+	def toJson: JsValue = {
+		JsObject(Map(
+			"name" -> JsString(name),
+			"type" -> JsString(`type`),
+			"mode" -> JsString(mode.toString)
+		))
+	}
+}
+
+case class RjsActionDef(
+	description_? : Option[String],
+	documentation_? : Option[String],
+	params: List[RjsActionDefParam],
+	preconds: List[Strips.Literal],
+	effects: List[Strips.Literal],
+	value: RjsValue
+) extends RjsValue {
+	def toJson: JsValue = {
+		val l = List[Option[(String, JsValue)]](
+			description_?.map(s => "DESCRIPTION" -> JsString(s)),
+			documentation_?.map(s => "DOCUMENTATION" -> JsString(s)),
+			Some("PARAMS" -> JsArray(params.map(_.toJson))),
+			Some("PRECONDS" -> JsArray(preconds.map(lit => JsString(lit.toString)))),
+			Some("EFFECTS" -> JsArray(effects.map(lit => JsString(lit.toString)))),
+			Some("VALUE" -> value.toJson)
+		)
+		JsObject(l.flatten.toMap)
+	}
 }
 
 case class RjsBoolean(b: Boolean) extends RjsValue {
@@ -158,6 +204,7 @@ case class RjsText(text: String) extends RjsValue {
 
 object RjsValue {
 	def fromJson(jsval: JsValue): ContextE[RjsValue] = {
+		println(s"RjsValue.fromJson($jsval)")
 		jsval match {
 			case JsBoolean(b) =>
 				ContextE.unit(RjsBoolean(b))
@@ -196,6 +243,26 @@ object RjsValue {
 	
 	private def fromJsObject(typ: String, jsobj: JsObject): ContextE[RjsValue] = {
 		typ match {
+			case "action" =>
+				for {
+					name <- Converter2.fromJson[String](jsobj, "NAME")
+					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
+					input_l <- ContextE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
+						RjsValue.fromJson(jsval).map(name -> _)
+					}
+				} yield RjsAction(name, RjsMap(input_l.toMap))
+			case "actionDef" =>
+				for {
+					description_? <- Converter2.fromJson[Option[String]](jsobj, "DESCRIPTION")
+					documentation_? <- Converter2.fromJson[Option[String]](jsobj, "DOCUMENTATION")
+					params <- Converter2.fromJson[List[RjsActionDefParam]](jsobj, "PARAMS")
+					preconds0 <- Converter2.fromJson[List[String]](jsobj, "PRECONDS")
+					preconds = preconds0.map { s => Strips.Literal.parse(s) }
+					effects0 <- Converter2.fromJson[List[String]](jsobj, "EFFECTS")
+					effects = effects0.map { s => Strips.Literal.parse(s) }
+					value0 <- Converter2.fromJson[JsValue](jsobj, "VALUE")
+					value <- RjsValue.fromJson(value0)
+				} yield RjsActionDef(description_?, documentation_?, params, preconds, effects, value)
 			case "call" =>
 				for {
 					name <- Converter2.fromJson[String](jsobj, "NAME")

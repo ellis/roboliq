@@ -199,8 +199,8 @@ object Converter3 {
 						nameToObj_m <- rjsval match {
 							case rjsobj: RjsMap =>
 								convMapString(rjsobj, nameToType_l)
-							case RjsList(jsval_l) =>
-								convListToObject(jsval_l, nameToType_l)
+							//case RjsList(jsval_l) =>
+							//	convListToObject(jsval_l, nameToType_l)
 							/*case RjsString(s) =>
 								eb.getEntity(s) match {
 									case Some(obj) =>
@@ -215,10 +215,10 @@ object Converter3 {
 										} yield res
 								}
 							*/
-							case _ =>
-								convListToObject(List(rjsval), nameToType_l)
 							//case _ =>
-							//	ContextE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
+							//	convListToObject(List(rjsval), nameToType_l)
+							case _ =>
+								ContextE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
 						}
 					} yield {
 						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
