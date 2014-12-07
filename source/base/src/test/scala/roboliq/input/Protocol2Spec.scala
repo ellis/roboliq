@@ -121,14 +121,17 @@ command:
 				m1 = rjsval1.asInstanceOf[RjsMap]
 				m2 = rjsval2.asInstanceOf[RjsMap]
 				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
+				_ = println("A")
 				// Get state from protocol data
 				temp0 <- protocol.processData(m1)
+				_ = println("B")
 				state0 = temp0._2
 				// Add a couple atoms to the state regarding the robot's setup
 				state1 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker") + Strips.Atom.parse("device-can-site mario__Shaker P3"))
 				// Leave out a necessary state value, in order to get a precondition error
 				state2 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker"))
 				validation1_l <- protocol.validateDataCommand(state1, m1, "1")
+				_ = println("C")
 				validation2_l <- protocol.validateDataCommand(state1, m2, "1")
 				validation3_l <- protocol.validateDataCommand(state2, m1, "1")
 				validation4_l <- protocol.validateDataCommand(state2, m2, "1")

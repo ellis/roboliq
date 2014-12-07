@@ -57,7 +57,11 @@ class Protocol2 {
 		}
 	}
 	
-	def validateDataCommand(state: Strips.State, data: RjsMap, id: String): ContextE[List[CommandValidation]] = {
+	def validateDataCommand(
+		state: Strips.State,
+		data: RjsMap,
+		id: String
+	): ContextE[List[CommandValidation]] = {
 		val validation_l = new ArrayBuffer[CommandValidation]
 		ContextE.context(s"command[$id]") {
 			for {
@@ -65,10 +69,9 @@ class Protocol2 {
 				command_m <- ContextE.fromRjs[RjsMap](jsCommandSet, id)
 				_ = println(s"command_m: ${command_m}")
 				commandName <- ContextE.fromRjs[String](command_m, "command")
-				commandDef <- lookupCommandDef(commandName)
 				actionDef <- ContextE.fromScope[RjsActionDef](commandName)
 				commandInput_m <- ContextE.fromRjs[RjsMap](command_m, "input")
-				_ <- ContextE.foreach(commandDef.param) { param =>
+				_ <- ContextE.foreach(actionDef.params) { param =>
 					commandInput_m.get(param.name) match {
 						case None =>
 							validation_l += CommandValidation_Param(param.name)
@@ -78,7 +81,7 @@ class Protocol2 {
 				}
 				_ <- {
 					if (validation_l.isEmpty) {
-						ContextE.foreach(commandDef.precond) { precond =>
+						ContextE.foreach(actionDef.preconds) { precond =>
 							for {
 								binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
 									if (s.startsWith("$")) {
@@ -109,52 +112,6 @@ class Protocol2 {
 			} yield {
 				validation_l.toList
 			}
-		}
-	}
-	
-	def lookupCommandDef(name: String): ContextE[RjsActionDef] = {
-		for {
-		} yield actionDef
-	}
-	
-	/*
-	 *     TYPE: action
-    PARAM:
-    - { name: agent, type: Agent, input: Plannable }
-    - { name: device, type: Device, input: Plannable }
-    - { name: program, type: Program, input: Required }
-    - { name: object, type: Labware, input: Required }
-    - { name: site, type: Site, input: Plannable }
-    PRECOND:
-    - agent-has-device $agent $device
-    - device-can-site $device $site
-    - model $labware $model
-    - location $labware $site
-    OUTPUT:
-    - TYPE: instruction
-      NAME: ShakerRun
-      INPUT: { agent: $agent, device: $device, program: $program, labware: $object, site: $site }
-	 * 
-	 */
-	def jsToActionDef(name: String, rjsval: RjsValue): ContextE[ActionDef] = {
-		println(s"jsToActionDef($name, $rjsval)")
-		for {
-			m <- ContextE.fromRjs[RjsMap](rjsval)
-			typ <- ContextE.fromRjs[String](m, "TYPE")
-			param_l <- ContextE.fromRjs[List[InputDef]](m, "PARAM")
-			precond0_l <- ContextE.fromRjs[List[String]](m, "PRECOND")
-			precond_l = precond0_l.map(s => Strips.Literal.parse(s))
-			jsOutput <- ContextE.fromRjs[JsValue](m, "OUTPUT")
-		} yield {
-			ActionDef(
-				name = name,
-				description_? = None,
-				documentation_? = None,
-				param = param_l,
-				precond = precond_l,
-				effect = Nil,
-				output = jsOutput
-			)
 		}
 	}
 

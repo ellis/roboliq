@@ -544,8 +544,8 @@ object ContextE {
 
 	def fromScope[A: TypeTag](name: String): ContextE[A] = {
 		for {
-			jsobj <- getScopeValue(name)
-			x <- Converter3.fromRjs[A](jsobj)
+			rjsval <- getScopeValue(name)
+			x <- Converter3.fromRjs[A](rjsval)
 		} yield x
 	}
 	

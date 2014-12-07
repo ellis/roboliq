@@ -122,117 +122,115 @@ object Converter3 {
 		//val prefix = if (path_r.isEmpty) "" else path + ": "
 		//logger.trace(s"conv(${path}, $rjsval, $typ, eb)")
 
-		val ctx = {
-			val ret: ContextE[Any] = {
-				if (typ =:= typeOf[RjsValue]) ContextE.unit(rjsval)
-				else if (typ =:= typeOf[RjsMap] && rjsval.isInstanceOf[RjsMap]) ContextE.unit(rjsval)
-				else if (typ =:= typeOf[RjsNumber] && rjsval.isInstanceOf[RjsNumber]) ContextE.unit(rjsval)
-				else if (typ =:= typeOf[RjsText]) toRjsText(rjsval)
-				else if (typ =:= typeOf[RjsList]) toRjsList(rjsval)
-				
-				else if (typ =:= typeOf[String]) Converter3.toString(rjsval)
-				else if (typ =:= typeOf[Int]) toInt(rjsval)
-				else if (typ =:= typeOf[Integer]) toInteger(rjsval)
-				else if (typ =:= typeOf[Double]) toDouble(rjsval)
-				else if (typ =:= typeOf[BigDecimal]) toBigDecimal(rjsval)
-				else if (typ =:= typeOf[Boolean]) toBoolean(rjsval)//.map(_.asInstanceOf[Boolean])
-				else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(rjsval)
-				else if (typ <:< typeOf[Enumeration#Value]) toEnum(rjsval, typ)
-				/*
-				else if (typ =:= typeOf[AmountSpec]) toAmountSpec(rjsval)
-				else if (typ =:= typeOf[LiquidSource]) toLiquidSource(rjsval, eb, state_?)
-				else if (typ =:= typeOf[LiquidVolume]) toVolume(rjsval)
-				else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(rjsval)
-				else if (typ =:= typeOf[PipetteDestination]) toPipetteDestination(rjsval, eb, state_?)
-				else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(rjsval, eb, state_?)
-				else if (typ =:= typeOf[PipetteSources]) toPipetteSources(rjsval, eb, state_?)
-				// Logic
-				else if (typ =:= typeOf[Strips.Literal]) toStripsLiteral(rjsval)
-				// Lookups
-				else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](rjsval, eb)
-				else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](rjsval, eb)
-				else if (typ =:= typeOf[Pipetter]) toEntityByRef[Pipetter](rjsval, eb)
-				else if (typ =:= typeOf[Shaker]) toEntityByRef[Shaker](rjsval, eb)
-				else if (typ =:= typeOf[TipModel]) toEntityByRef[TipModel](rjsval, eb)
-				//else if (typ <:< typeOf[Substance]) toSubstance(rjsval)
-				*/
-				else if (typ <:< typeOf[Option[_]]) {
-					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-					if (rjsval == RjsNull) ContextE.unit(None)
-					else conv(rjsval, typ2).map(o => Option(o))
-				}
-				else if (typ <:< typeOf[List[_]]) {
-					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-					convList(rjsval, typ2)
-				}
-				else if (typ <:< typeOf[Set[_]]) {
-					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-					rjsval match {
-						case rjsobj @ RjsMap(fields) =>
-							convSet(rjsobj, typ2)
-						case _ =>
-							convList(rjsval, typ2).map(l => Set(l : _*))
-					}
-				}
-				else if (typ <:< typeOf[Map[_, _]]) {
-					rjsval match {
-						case rjsobj @ RjsMap(fields) =>
-							//println("fields: " + fields)
-							val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
-							val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
-							val name_l = fields.toList.map(_._1)
-							val nameToType_l = name_l.map(_ -> typVal)
-							for {
-								res <- convMap(rjsobj, typKey, nameToType_l)
-							} yield res
-						case RjsNull => ContextE.unit(Map())
-						case _ =>
-							ContextE.error("expected a RjsMap")
-					}
-				}
-				else {
-					//println("typ: "+typ)
-					val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
-					val p0_l = ctor.paramLists(0)
-					val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
-					for {
-						nameToObj_m <- rjsval match {
-							case rjsobj: RjsMap =>
-								convMapString(rjsobj, nameToType_l)
-							//case RjsList(jsval_l) =>
-							//	convListToObject(jsval_l, nameToType_l)
-							/*case RjsString(s) =>
-								eb.getEntity(s) match {
-									case Some(obj) =>
-										// FIXME: need to check type rather than just assuming that it's correct!
-										ContextE.unit(Left(ConvObject(obj)))
-									case None =>
-										for {
-											nameToVal_l <- parseStringToArgs(s)
-											//_ = println("nameToVal_l: "+nameToVal_l.toString)
-											res <- convArgsToMap(nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
-											//_ = println("res: "+res.toString)
-										} yield res
-								}
-							*/
-							//case _ =>
-							//	convListToObject(List(rjsval), nameToType_l)
-							case _ =>
-								ContextE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
-						}
-					} yield {
-						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
-						val c = typ.typeSymbol.asClass
-						//println("arg_l: "+arg_l)
-						val mm = mirror.reflectClass(c).reflectConstructor(ctor)
-						//logger.debug("arg_l: "+arg_l)
-						val obj = mm(arg_l : _*)
-						obj
-					}
+		val ctx: ContextE[Any] = {
+			val c = typ.typeSymbol.asClass
+			val clazz = rjsval.getClass()
+			val m = ru.runtimeMirror(this.getClass.getClassLoader)
+			if (m.reflect(rjsval).symbol.toType <:< typ) ContextE.unit(rjsval)
+			else if (typ =:= typeOf[RjsMap] && rjsval.isInstanceOf[RjsMap]) ContextE.unit(rjsval)
+			else if (typ =:= typeOf[RjsNumber] && rjsval.isInstanceOf[RjsNumber]) ContextE.unit(rjsval)
+			else if (typ =:= typeOf[RjsText]) toRjsText(rjsval)
+			else if (typ =:= typeOf[RjsList]) toRjsList(rjsval)
+			
+			else if (typ =:= typeOf[String]) Converter3.toString(rjsval)
+			else if (typ =:= typeOf[Int]) toInt(rjsval)
+			else if (typ =:= typeOf[Integer]) toInteger(rjsval)
+			else if (typ =:= typeOf[Double]) toDouble(rjsval)
+			else if (typ =:= typeOf[BigDecimal]) toBigDecimal(rjsval)
+			else if (typ =:= typeOf[Boolean]) toBoolean(rjsval)//.map(_.asInstanceOf[Boolean])
+			else if (typ =:= typeOf[java.lang.Boolean]) toBoolean(rjsval)
+			else if (typ <:< typeOf[Enumeration#Value]) toEnum(rjsval, typ)
+			/*
+			else if (typ =:= typeOf[AmountSpec]) toAmountSpec(rjsval)
+			else if (typ =:= typeOf[LiquidSource]) toLiquidSource(rjsval, eb, state_?)
+			else if (typ =:= typeOf[LiquidVolume]) toVolume(rjsval)
+			else if (typ =:= typeOf[PipetteAmount]) toPipetteAmount(rjsval)
+			else if (typ =:= typeOf[PipetteDestination]) toPipetteDestination(rjsval, eb, state_?)
+			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(rjsval, eb, state_?)
+			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(rjsval, eb, state_?)
+			// Logic
+			else if (typ =:= typeOf[Strips.Literal]) toStripsLiteral(rjsval)
+			// Lookups
+			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](rjsval, eb)
+			else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](rjsval, eb)
+			else if (typ =:= typeOf[Pipetter]) toEntityByRef[Pipetter](rjsval, eb)
+			else if (typ =:= typeOf[Shaker]) toEntityByRef[Shaker](rjsval, eb)
+			else if (typ =:= typeOf[TipModel]) toEntityByRef[TipModel](rjsval, eb)
+			//else if (typ <:< typeOf[Substance]) toSubstance(rjsval)
+			*/
+			else if (typ <:< typeOf[Option[_]]) {
+				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+				if (rjsval == RjsNull) ContextE.unit(None)
+				else conv(rjsval, typ2).map(o => Option(o))
+			}
+			else if (typ <:< typeOf[List[_]]) {
+				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+				convList(rjsval, typ2)
+			}
+			else if (typ <:< typeOf[Set[_]]) {
+				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+				rjsval match {
+					case rjsobj @ RjsMap(fields) =>
+						convSet(rjsobj, typ2)
+					case _ =>
+						convList(rjsval, typ2).map(l => Set(l : _*))
 				}
 			}
-			//logger.debug(ret)
-			ret
+			else if (typ <:< typeOf[Map[_, _]]) {
+				rjsval match {
+					case rjsobj @ RjsMap(fields) =>
+						//println("fields: " + fields)
+						val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
+						val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
+						val name_l = fields.toList.map(_._1)
+						val nameToType_l = name_l.map(_ -> typVal)
+						for {
+							res <- convMap(rjsobj, typKey, nameToType_l)
+						} yield res
+					case RjsNull => ContextE.unit(Map())
+					case _ =>
+						ContextE.error("expected a RjsMap")
+				}
+			}
+			else {
+				//println("typ: "+typ)
+				val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+				val p0_l = ctor.paramLists(0)
+				val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
+				for {
+					nameToObj_m <- rjsval match {
+						case rjsobj: RjsMap =>
+							convMapString(rjsobj, nameToType_l)
+						//case RjsList(jsval_l) =>
+						//	convListToObject(jsval_l, nameToType_l)
+						/*case RjsString(s) =>
+							eb.getEntity(s) match {
+								case Some(obj) =>
+									// FIXME: need to check type rather than just assuming that it's correct!
+									ContextE.unit(Left(ConvObject(obj)))
+								case None =>
+									for {
+										nameToVal_l <- parseStringToArgs(s)
+										//_ = println("nameToVal_l: "+nameToVal_l.toString)
+										res <- convArgsToMap(nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
+										//_ = println("res: "+res.toString)
+									} yield res
+							}
+						*/
+						//case _ =>
+						//	convListToObject(List(rjsval), nameToType_l)
+						case _ =>
+							ContextE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
+					}
+				} yield {
+					val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
+					//println("arg_l: "+arg_l)
+					val mm = mirror.reflectClass(c).reflectConstructor(ctor)
+					//logger.debug("arg_l: "+arg_l)
+					val obj = mm(arg_l : _*)
+					obj
+				}
+			}
 		}
 		path_? match {
 			case None => ctx
