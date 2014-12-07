@@ -605,11 +605,11 @@ VALUE: agent
 TYPE: subst
 VALUE: x
 ---
-TYPE: build
-ITEM:
-- VAR: { TYPE: number, NAME: x, VALUE: 5 }
-- ADD: { TYPE: call, NAME: add, INPUT: {numbers: [5, 7]} }
-- ADD: { TYPE: call, NAME: add, INPUT: {n1: 5, n2: 7} }
+TYPE: buildListOfMaps
+BODY:
+- { TYPE: default, NAME: x, VALUE: { TYPE: number, VALUE: 5 } }
+- { TYPE: push, VALUE: { TYPE: call, NAME: add, INPUT: {numbers: [5, 7]} } }
+- { TYPE: push, VALUE: { TYPE: call, NAME: add, INPUT: {n1: 5, n2: 7} } }
 TRANSFORM:
 - <sortfunction>
 - <filterfunction>

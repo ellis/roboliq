@@ -13,6 +13,8 @@ import roboliq.utils.JsonUtils
 import aiplan.strips2.Strips
 
 class Protocol2Spec extends FunSpec {
+	import ContextValueWrapper._
+
 	val protocol = new Protocol2
 	val eb = new EntityBase
 	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
@@ -50,8 +52,12 @@ cmd:
     amount: 20ul
 """
 			val jsobj = JsonUtils.yamlToJson(yaml).asInstanceOf[JsObject]
-			val m = RjsValue.fromJson(jsobj).asInstanceOf[RjsMap]
-			val ctx = protocol.processData(m).map({ case (objectToType_m, state) =>
+			val ctx = for {
+				rjsval <- RjsValue.fromJson(jsobj)
+				m = rjsval.asInstanceOf[RjsMap]
+				temp1 <- protocol.processData(m)
+				(objectToType_m, state) = temp1
+			} yield {
 				assert(objectToType_m == Map(
 					"plate1" -> "plate"
 				))
@@ -60,7 +66,7 @@ cmd:
 					Strips.Atom.parse("model plate1 plateModel_384_square"),
 					Strips.Atom.parse("location plate1 P3")
 				)))
-			})
+			}
 			val (data1, _) = ctx.run(data0)
 			if (!data1.error_r.isEmpty) {
 				println("ERRORS:")
@@ -109,9 +115,11 @@ command:
 """
 			val jsobj1 = JsonUtils.yamlToJson(yaml1).asInstanceOf[JsObject]
 			val jsobj2 = JsonUtils.yamlToJson(yaml2).asInstanceOf[JsObject]
-			val m1 = RjsValue.fromJson(jsobj1).asInstanceOf[RjsMap]
-			val m2 = RjsValue.fromJson(jsobj2).asInstanceOf[RjsMap]
 			val ctx = for {
+				rjsval1 <- RjsValue.fromJson(jsobj1)
+				rjsval2 <- RjsValue.fromJson(jsobj2)
+				m1 = rjsval1.asInstanceOf[RjsMap]
+				m2 = rjsval2.asInstanceOf[RjsMap]
 				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
 				// Get state from protocol data
 				temp0 <- protocol.processData(m1)

@@ -162,11 +162,11 @@ class EvaluatorSpec extends FunSpec {
 		}
 		
 		it("import") {
-			assert(evaluate(RjsInclude("include1.yaml")).value == js1)
-				/*RjsScope(List(
-					RjsImport("inc", "1.0"),
-					RjsCall("inc", RjsMap("x" -> js5))
-				)) -> RjsList(List(js6))*/
+			val section = RjsSection(List(
+				RjsImport("inc", "1.0"),
+				RjsCall("inc", RjsMap("x" -> js5))
+			))
+			assert(evaluate(section).value == js6)
 		}
 		
 		it("instruction list") {
