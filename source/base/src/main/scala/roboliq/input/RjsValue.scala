@@ -159,9 +159,22 @@ object RjsValue {
 			case JsNull =>
 				ContextE.unit(RjsNull)
 			case JsObject(map) =>
-				ContextE.mapAll(map.toList)({ case (key, value) =>
-					fromJson(value).map(key -> _)
-				}).map(l => RjsMap(l.toMap))
+				map.get("TYPE") match {
+					case Some(JsString(typ)) =>
+						typ match {
+							case "number" =>
+								map.get("VALUE") match {
+									case Some(JsNumber(n)) => ContextE.unit(RjsNumber(n))
+									case _ => ContextE.error(s"expected numeric `VALUE`")
+								}
+							case _ =>
+								ContextE.error(s"unable to load JSON value with TYPE = $typ")
+						}
+					case _ =>
+						ContextE.mapAll(map.toList)({ case (key, value) =>
+							fromJson(value).map(key -> _)
+						}).map(l => RjsMap(l.toMap))
+				}
 		}
 	}
 }

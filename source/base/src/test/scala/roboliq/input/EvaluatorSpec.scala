@@ -12,6 +12,8 @@ import java.io.File
 import roboliq.utils.JsonUtils
 
 class EvaluatorSpec extends FunSpec {
+	import ContextValueWrapper._
+
 	val eb = new EntityBase
 	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator();
@@ -34,6 +36,17 @@ class EvaluatorSpec extends FunSpec {
 		}
 		assert(data1.error_r == Nil)
 	}
+
+	def evaluate(
+		rjsval: RjsValue,
+		scope: RjsMap = RjsMap()
+	): (ContextEData, Option[RjsValue]) = {
+		val ctx: ContextE[RjsValue] = for {
+			_ <- ContextE.addToScope(scope)
+			res <- ContextE.evaluate(rjsval)
+		} yield res
+		ctx.run(data0)
+	}
 	
 	describe("Evaluator") {
 		val js1 = RjsNumber(1)
@@ -54,23 +67,15 @@ class EvaluatorSpec extends FunSpec {
 		val jsLambdaInc = RjsLambda(List("x"), RjsCall("add", RjsMap("numbers" -> RjsList(List(jsX, js1)))))
 		
 		it("number") {
-			check(RjsMap(),
-				js12 -> js12,
-				RjsNumber(12) -> js12
-			)
+			assert(evaluate(js12).value == js12)
 		}
 		
 		it("string") {
-			check(RjsMap(),
-				jsWorld -> jsWorld,
-				RjsText("World") -> jsWorld
-			)
+			assert(evaluate(jsWorld).value == jsWorld)
 		}
 		
 		it("subst") {
-			check(RjsMap("x" -> js5),
-				jsX -> js5
-			)
+			assert(evaluate(jsX, RjsMap("x" -> js5)).value == js5)
 		}
 		
 		it("stringf") {
@@ -152,12 +157,11 @@ class EvaluatorSpec extends FunSpec {
 		}
 		
 		it("include") {
-			check(RjsMap(),
-				RjsInclude("include1.yaml") -> js1
-			)
+			assert(evaluate(RjsInclude("include1.yaml")).value == js1)
 		}
 		
 		it("import") {
+			assert(evaluate(RjsInclude("include1.yaml")).value == js1)
 			check(RjsMap(),
 				RjsList(List(
 					RjsImport("inc", "1.0"),

@@ -10,6 +10,17 @@ import roboliq.core.RsError
 object Converter3 {
 	private val logger = Logger[this.type]
 	
+	def toRjsList(rjsval: RjsValue): ContextE[RjsList] = {
+		rjsval match {
+			case x: RjsList => ContextE.unit(x)
+			case _ => ContextE.error(s"cannot convert to list: $rjsval")
+		}
+	}
+	
+	def toRjsText(rjsval: RjsValue): ContextE[RjsText] = {
+		ContextE.unit(RjsText(rjsval.toText))
+	}
+	
 	def toString(rjsval: RjsValue): ContextE[String] = {
 		ContextE.context("toString") {
 			rjsval match {
@@ -115,6 +126,10 @@ object Converter3 {
 			val ret: ContextE[Any] = {
 				if (typ =:= typeOf[RjsValue]) ContextE.unit(rjsval)
 				else if (typ =:= typeOf[RjsMap] && rjsval.isInstanceOf[RjsMap]) ContextE.unit(rjsval)
+				else if (typ =:= typeOf[RjsNumber] && rjsval.isInstanceOf[RjsNumber]) ContextE.unit(rjsval)
+				else if (typ =:= typeOf[RjsText]) toRjsText(rjsval)
+				else if (typ =:= typeOf[RjsList]) toRjsList(rjsval)
+				
 				else if (typ =:= typeOf[String]) Converter3.toString(rjsval)
 				else if (typ =:= typeOf[Int]) toInt(rjsval)
 				else if (typ =:= typeOf[Integer]) toInteger(rjsval)
