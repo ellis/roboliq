@@ -14,9 +14,9 @@ class Evaluator() {
 			case x: RjsFormat => evaluateFormat(x)
 			case x: RjsImport => evaluateImport(x)
 			case x: RjsInclude => evaluateInclude(x)
-			case x: RjsLet => evaluateLet(x)
 			case x: RjsList => evaluateList(x)
 			case x: RjsMap => evaluateMap(x)
+			case x: RjsSection => evaluateSection(x)
 			case x: RjsSubst => evaluateSubst(x)
 			case x => ContextE.unit(x)
 		}
@@ -136,23 +136,6 @@ class Evaluator() {
 			jsobj <- ContextE.evaluate(jsfile)
 		} yield jsobj
 	}
-
-	def evaluateLet(x: RjsLet): ContextE[RjsValue] = {
-		println(s"evaluateLet($x)")
-		for {
-			_ <- ContextE.foreach(x.var_l.zipWithIndex) { case (nv, i) =>
-				ContextE.context(s"VAR[${i+1}]") {
-					for {
-						value <- ContextE.evaluate(nv.value)
-						_ <- ContextE.addToScope(Map(nv.name -> value))
-					} yield ()
-				}
-			}
-			res <- ContextE.context("EXPRESSION") {
-				ContextE.evaluate(x.expression)
-			}
-		} yield res
-	}
 	
 	def evaluateList(x: RjsList): ContextE[RjsList] = {
 		println(s"evaluateList($x)")
@@ -168,6 +151,23 @@ class Evaluator() {
 				res <- ContextE.evaluate(xs)
 			} yield (name, res)
 		}).map(l => RjsMap(l.toMap))
+	}
+
+	def evaluateSection(x: RjsSection): ContextE[RjsValue] = {
+		println(s"evaluateSection($x)")
+		var resFinal: RjsValue = RjsNull
+		for {
+			// TODO: add warnings about values which evaluate to something other than RjsNull, unless they are the final expression 
+			_ <- ContextE.foreach(x.body.zipWithIndex) { case (rjsval0, i) =>
+				ContextE.context(s"[${i+1}]") {
+					for {
+						res <- ContextE.evaluate(rjsval0)
+					} yield {
+						resFinal = res
+					}
+				}
+			}
+		} yield resFinal
 	}
 
 	def evaluateSubst(x: RjsSubst): ContextE[RjsValue] = {

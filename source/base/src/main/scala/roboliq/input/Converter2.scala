@@ -177,6 +177,22 @@ object Converter2 {
 		} yield o.asInstanceOf[A]
 	}
 
+	def fromJson[A: TypeTag](
+		jsobj: JsObject,
+		field: String
+	): ContextE[A] = {
+		ContextE.context(field) {
+			jsobj.fields.get(field) match {
+				case Some(jsval) => Converter2.fromJson[A](jsval)
+				case None =>
+					ContextE.orElse(
+						Converter2.fromJson[A](JsNull),
+						ContextE.error("value required")
+					)
+			}
+		}
+	}
+
 	private def conv(
 		jsval: JsValue,
 		typ: Type,

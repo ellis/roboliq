@@ -615,10 +615,12 @@ TRANSFORM:
 - <filterfunction>
 - <whatever...>
 ---
-TYPE: let
-VAR:
-- x: { TYPE: number, VALUE: 5 }
-- add1:
+TYPE: scope
+BODY:
+- { TYPE: define, NAME: x, VALUE: { TYPE: number, VALUE: 5 } }
+- TYPE: define
+  NAME: add1
+  VALUE:
     TYPE: lambda
     EXPRESSION:
       TYPE: call
@@ -627,8 +629,7 @@ VAR:
         numbers:
          - { TYPE: subst, VALUE: x }
          - { TYPE: number, VALUE: 1 }
-EXPRESSION:
-  TYPE: call
+- TYPE: call
   NAME: add1
   INPUT:
     x: 5

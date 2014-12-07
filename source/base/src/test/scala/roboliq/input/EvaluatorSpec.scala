@@ -113,11 +113,12 @@ class EvaluatorSpec extends FunSpec {
 			)
 		}
 		
-		it("let") {
-			val jsLet1 = RjsLet(
-				List(RjsDefine("x", js5), RjsDefine("y", js7)),
+		it("scope") {
+			val jsLet1 = RjsSection(List(
+				RjsDefine("x", js5),
+				RjsDefine("y", js7),
 				jsAddXY
-			)
+			))
 			check(RjsMap(),
 				jsLet1 -> js12
 			)
@@ -162,12 +163,10 @@ class EvaluatorSpec extends FunSpec {
 		
 		it("import") {
 			assert(evaluate(RjsInclude("include1.yaml")).value == js1)
-			check(RjsMap(),
-				RjsList(List(
+				/*RjsScope(List(
 					RjsImport("inc", "1.0"),
 					RjsCall("inc", RjsMap("x" -> js5))
-				)) -> RjsList(List(js6))
-			)
+				)) -> RjsList(List(js6))*/
 		}
 		
 		it("instruction list") {

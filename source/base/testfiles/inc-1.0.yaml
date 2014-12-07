@@ -8,4 +8,4 @@ VALUE:
     INPUT:
       numbers:
       - { TYPE: subst, NAME: x }
-      - { TYPE: number, VALUE: 1 }
+      - 1

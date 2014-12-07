@@ -48,7 +48,13 @@ case class RjsBuild(item_l: List[RjsBuildItem]) extends RjsValue {
 }
 
 case class RjsCall(name: String, input: RjsMap) extends RjsValue {
-	def toJson: JsValue = Converter2.makeCall(name, input.map.mapValues(_.toJson))
+	def toJson: JsValue = {
+		JsObject(Map[String, JsValue](
+			"TYPE" -> JsString("call"),
+			"NAME" -> JsString(name),
+			"INPUT" -> JsObject(input.map.mapValues(_.toJson))
+		))
+	}
 }
 
 case class RjsDefine(name: String, value: RjsValue) extends RjsValue {
@@ -60,7 +66,13 @@ case class RjsFormat(format: String) extends RjsValue {
 }
 
 case class RjsImport(name: String, version: String) extends RjsValue {
-	def toJson: JsValue = Converter2.makeImport(name, version)
+	def toJson: JsValue = {
+		JsObject(Map(
+			"TYPE" -> JsString("import"), 
+			"NAME" -> JsString(name),
+			"VERSION" -> JsString(version)
+		))
+	}
 }
 
 case class RjsInclude(filename: String) extends RjsValue {
@@ -68,15 +80,18 @@ case class RjsInclude(filename: String) extends RjsValue {
 }
 
 case class RjsInstruction(name: String, input: RjsMap) extends RjsValue {
-	def toJson: JsValue = Converter2.makeInstruction(name, input.map.mapValues(_.toJson))
+	def toJson: JsValue = {
+		JsObject(Map(
+			"TYPE" -> JsString("instruction"),
+			"NAME" -> JsString(name),
+			"INPUT" -> JsObject(input.map.mapValues(_.toJson))
+		))
+	}
 }
 
 case class RjsLambda(param: List[String], expression: RjsValue) extends RjsValue {
-	def toJson: JsValue = Converter2.makeLambda(param, expression.toJson)
-}
-
-case class RjsLet(var_l: List[RjsDefine], expression: RjsValue) extends RjsValue {
-	def toJson: JsValue = Converter2.makeLet(var_l.map(nv => nv.name -> nv.value.toJson), expression.toJson)
+	def toJson: JsValue =
+		JsObject(Map("TYPE" -> JsString("lambda"), "EXPRESSION" -> expression.toJson))
 }
 
 case class RjsList(list: List[RjsValue]) extends RjsValue {
@@ -114,6 +129,15 @@ case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsValu
 	}
 }
 
+case class RjsSection(body: List[RjsValue]) extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(Map(
+			"TYPE" -> JsString("scope"),
+			"BODY" -> JsArray(body.map(_.toJson))
+		))
+	}
+}
+
 /**
  * This is a string which can represent anything that can be encoded as a string.
  * It is not meant as text to be displayed -- for that see RjsText.
@@ -135,6 +159,18 @@ case class RjsText(text: String) extends RjsValue {
 object RjsValue {
 	def fromJson(jsval: JsValue): ContextE[RjsValue] = {
 		jsval match {
+			case JsBoolean(b) =>
+				ContextE.unit(RjsBoolean(b))
+			case JsArray(l) =>
+				ContextE.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
+					ContextE.context(s"[${i+1}]") {
+						RjsValue.fromJson(jsval2)
+					}
+				}).map(RjsList)
+			case JsNumber(n) =>
+				ContextE.unit(RjsNumber(n, None))
+			case JsNull =>
+				ContextE.unit(RjsNull)
 			case JsString(s) =>
 				if (s.startsWith("\"") && s.endsWith("\"")) {
 					ContextE.unit(RjsText(s.substring(1, s.length - 1)))
@@ -146,35 +182,67 @@ object RjsValue {
 				else {
 					ContextE.unit(RjsString(s))
 				}
-			case JsNumber(n) =>
-				ContextE.unit(RjsNumber(n, None))
-			case JsArray(l) =>
-				ContextE.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
-					ContextE.context(s"[${i+1}]") {
-						RjsValue.fromJson(jsval2)
-					}
-				}).map(RjsList)
-			case JsBoolean(b) =>
-				ContextE.unit(RjsBoolean(b))
-			case JsNull =>
-				ContextE.unit(RjsNull)
-			case JsObject(map) =>
-				map.get("TYPE") match {
+			case jsobj: JsObject =>
+				jsobj.fields.get("TYPE") match {
 					case Some(JsString(typ)) =>
-						typ match {
-							case "number" =>
-								map.get("VALUE") match {
-									case Some(JsNumber(n)) => ContextE.unit(RjsNumber(n))
-									case _ => ContextE.error(s"expected numeric `VALUE`")
-								}
-							case _ =>
-								ContextE.error(s"unable to load JSON value with TYPE = $typ")
-						}
+						fromJsObject(typ, jsobj)
 					case _ =>
-						ContextE.mapAll(map.toList)({ case (key, value) =>
+						ContextE.mapAll(jsobj.fields.toList)({ case (key, value) =>
 							fromJson(value).map(key -> _)
 						}).map(l => RjsMap(l.toMap))
 				}
+		}
+	}
+	
+	private def fromJsObject(typ: String, jsobj: JsObject): ContextE[RjsValue] = {
+		typ match {
+			case "call" =>
+				for {
+					name <- Converter2.fromJson[String](jsobj, "NAME")
+					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
+					input_l <- ContextE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
+						RjsValue.fromJson(jsval).map(name -> _)
+					}
+				} yield RjsCall(name, RjsMap(input_l.toMap))
+			case "define" =>
+				for {
+					name <- Converter2.fromJson[String](jsobj, "NAME")
+					jsval <- Converter2.fromJson[JsValue](jsobj, "VALUE")
+					value <- RjsValue.fromJson(jsval)
+				} yield RjsDefine(name, value)
+			case "import" =>
+				for {
+					name <- Converter2.fromJson[String](jsobj, "NAME")
+					version <- Converter2.fromJson[String](jsobj, "VERSION")
+				} yield RjsImport(name, version)
+			case "include" =>
+				for {
+					filename <- Converter2.fromJson[String](jsobj, "FILENAME")
+				} yield RjsInclude(filename)
+			case "instruction" =>
+				for {
+					name <- Converter2.fromJson[String](jsobj, "NAME")
+					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
+					input_l <- ContextE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
+						RjsValue.fromJson(jsval).map(name -> _)
+					}
+				} yield RjsInstruction(name, RjsMap(input_l.toMap))
+			case "lambda" =>
+				for {
+					jsval <- Converter2.fromJson[JsValue](jsobj, "EXPRESSION")
+					expression <- RjsValue.fromJson(jsval)
+				} yield RjsLambda(Nil, expression)
+			case "section" =>
+				for {
+					jsBody_l <- Converter2.fromJson[List[JsValue]](jsobj, "BODY")
+					body_l <- ContextE.mapAll(jsBody_l)(RjsValue.fromJson(_))
+				} yield RjsSection(body_l)
+			case "subst" =>
+				for {
+					name <- Converter2.fromJson[String](jsobj, "NAME")
+				} yield RjsSubst(name)
+			case _ =>
+				ContextE.error(s"conversion for TYPE=$typ not implemented.")
 		}
 	}
 }
