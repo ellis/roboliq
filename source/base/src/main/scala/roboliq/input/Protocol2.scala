@@ -15,46 +15,64 @@ case class MyPlate(
 	location_? : Option[String]
 )
 
+class Protocol2DataA(
+	val objects: RjsMap,
+	val commands: RjsMap,
+	val commandOrderingConstraints: List[List[String]],
+	val commandOrder: List[String],
+	val planningDomainObjects: Map[String, String],
+	val planningProblemState: Strips.State
+)
+
+class Protocol2DataB(
+	val dataA: Protocol2DataA,
+	val validations: Map[String, CommandValidation]
+)
+
 class Protocol2 {
-	def processData(
-		data: RjsMap
-	): ContextE[(Map[String, String], Strips.State)] = {
-		processDataObjects(data)
+	def extractDataA(protocol: RjsProtocol): Protocol2DataA = {
+		val object_m: Map[String, RjsValue] =
+			protocol.labwares.asInstanceOf[Map[String, RjsValue]] ++
+			protocol.substances.asInstanceOf[Map[String, RjsValue]] ++
+			protocol.sources.asInstanceOf[Map[String, RjsValue]]
+		val objects = RjsMap(object_m)
+		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
+			(i+1).toString -> rjsval
+		}
+		val n = command_l.size
+		val commandOrderingConstraint_l =
+			(1 to n).toList.map(i => i.toString :: (if (i < n) List((i+1).toString) else Nil))
+		val commandOrder_l =
+			(1 to n).toList.map(_.toString)
+		val (planningDomainObjects, planningProblemState) = processDataObjects(objects)
+		new Protocol2DataA(
+			objects = objects,
+			commands = RjsMap(command_l.toMap),
+			commandOrderingConstraints = commandOrderingConstraint_l,
+			commandOrder = commandOrder_l,
+			planningDomainObjects = planningDomainObjects,
+			planningProblemState = planningProblemState
+		)
 	}
 	
-	def processDataObjects(
-		m: RjsMap
-	): ContextE[(Map[String, String], Strips.State)] = {
+	private def processDataObjects(
+		object_m: RjsMap
+	): (Map[String, String], Strips.State) = {
 		val objectToType_m = new HashMap[String, String]
 		val atom_l = new ArrayBuffer[Strips.Atom]
-		ContextE.context("object") {
-			for {
-				object_m <- ContextE.fromRjs[RjsMap](m, "object")
-				_ <- ContextE.mapAll(object_m.map.toList) { case (name, jsval) =>
-					ContextE.context(name) {
-						for {
-							m <- ContextE.fromRjs[Map[String, RjsValue]](jsval)
-							typ <- ContextE.fromRjs[String](m, "type")
-							_ <- typ match {
-								case "plate" =>
-									for {
-										plate <- ContextE.fromRjs[MyPlate](jsval)
-									} yield {
-										objectToType_m += (name -> typ)
-										atom_l += Strips.Atom("labware", Seq(name))
-										plate.model_?.foreach(model => atom_l += Strips.Atom("model", Seq(name, model)))
-										plate.location_?.foreach(location => atom_l += Strips.Atom("location", Seq(name, location)))
-									}
-								case _ =>
-									ContextE.unit(())
-							}
-						} yield ()
-					}
-				}
-			} yield {
-				(objectToType_m.toMap, Strips.State(atom_l.toSet))
+		for ((name, rjsval) <- object_m.map) {
+			rjsval match {
+				case plate: RjsProtocolLabware =>
+					objectToType_m += (name -> "plate")
+					atom_l += Strips.Atom("labware", Seq(name))
+					plate.model_?.foreach(model => atom_l += Strips.Atom("model", Seq(name, model)))
+					plate.location_?.foreach(location => atom_l += Strips.Atom("location", Seq(name, location)))
+					ContextE.unit(())
+				case _ =>
+					ContextE.unit(())
 			}
 		}
+		(objectToType_m.toMap, Strips.State(atom_l.toSet))
 	}
 	
 	def validateDataCommand(
@@ -115,25 +133,23 @@ class Protocol2 {
 		}
 	}
 
-	/*
-	def evaluateDataCommand(state: Strips.State, data: JsObject, id: String): ContextE[JsObject] = {
+	def evaluateDataCommand(state: Strips.State, data: RjsMap, id: String): ContextE[RjsValue] = {
 		ContextE.context(s"command[$id]") {
 			for {
-				jsCommands <- ContextE.fromRjs[JsObject](data.fields, "command")
-				jsCommandCall <- ContextE.fromRjs[JsObject](jsCommands.fields, id)
-				_ = println(s"command_m: ${jsCommandCall}")
-				commandName <- ContextE.fromRjs[String](jsCommandCall.fields, "command")
-				commandDef <- lookupCommandDef(commandName)
-				commandInput_m <- ContextE.fromRjs[Map[String, JsValue]](jsCommandCall.fields, "input")
+				jsCommandSet <- ContextE.fromRjs[RjsMap](data, "command")
+				command_m <- ContextE.fromRjs[RjsMap](jsCommandSet, id)
+				_ = println(s"command_m: ${command_m}")
+				commandName <- ContextE.fromRjs[String](command_m, "command")
+				actionDef <- ContextE.fromScope[RjsActionDef](commandName)
+				commandInput_m <- ContextE.fromRjs[RjsMap](command_m, "input")
+				// TODO: we should start a clean scope that only has commandInput_m variables
 				res <- ContextE.scope {
 					for {
 						_ <- ContextE.addToScope(commandInput_m)
-						res <- ContextE.evaluate(commandDef.output)
-					} res
+						res <- ContextE.evaluate(actionDef.value)
+					} yield res
 				}
-			} yield {
-				validation_l.toList
-			}
+			} yield res
 		}
-	}*/
+	}
 }

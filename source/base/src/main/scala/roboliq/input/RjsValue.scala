@@ -175,6 +175,68 @@ case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsValu
 	}
 }
 
+case class RjsProtocolLabware(
+	model_? : Option[String] = None,
+	location_? : Option[String] = None
+) extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(List[Option[(String, JsValue)]](
+			model_?.map("model" -> JsString(_)),
+			location_?.map("location" -> JsString(_))
+		).flatten.toMap)
+	}
+}
+
+case class RjsProtocolSubstance() extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(List[Option[(String, JsValue)]](
+		).flatten.toMap)
+	}
+}
+
+case class RjsProtocolSourceSubstance(
+	name: String,
+	amount_? : Option[String] = None
+) extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(List[Option[(String, JsValue)]](
+			Some("name" -> JsString(name)),
+			amount_?.map("amount" -> JsString(_))
+		).flatten.toMap)
+	}
+}
+
+case class RjsProtocolSource(
+	well: String,
+	substances: List[RjsProtocolSourceSubstance] = Nil
+) extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(List[Option[(String, JsValue)]](
+			Some("well" -> JsString(well)),
+			if (substance.isEmpty) None else Some("substance" -> JsArray(substance.map(_.toJson)))
+		).flatten.toMap)
+	}
+}
+
+case class RjsProtocol(
+	labwares: Map[String, RjsProtocolLabware],
+	substances: Map[String, RjsProtocolSubstance],
+	sources: Map[String, RjsProtocolSource],
+	commands: List[RjsValue]
+) extends RjsValue {
+	def toJson: JsValue = {
+		JsObject(Map(
+			"TYPE" -> JsString("protocol"),
+			"VALUE" -> JsObject(List[Option[(String, JsValue)]](
+				if (labwares.isEmpty) None else Some("labwares" -> JsObject(labwares.mapValues(_.toJson))),
+				if (substances.isEmpty) None else Some("substances" -> JsObject(substances.mapValues(_.toJson))),
+				if (sources.isEmpty) None else Some("sources" -> JsObject(sources.mapValues(_.toJson))),
+				if (commands.isEmpty) None else Some("commands" -> JsArray(commands.map(_.toJson)))
+			).flatten.toMap)
+		))
+	}
+}
+
 case class RjsSection(body: List[RjsValue]) extends RjsValue {
 	def toJson: JsValue = {
 		JsObject(Map(

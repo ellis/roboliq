@@ -20,6 +20,18 @@ class Protocol2Spec extends FunSpec {
 	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator();
 	
+	val protocol1 = RjsProtocol(
+		labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
+		substances = Map("water" -> RjsProtocolSubstance(), "dye" -> RjsProtocolSubstance()),
+		sources = Map("dyeLight" -> RjsProtocolSource(well = "plate1(A01)", substances = List(
+			RjsProtocolSourceSubstance(name = "dye", amount_? = Some("1/10")),
+			RjsProtocolSourceSubstance(name = "water")
+		))),
+		commands = List(
+			RjsAction("distribute", RjsMap())
+		)
+	)
+	
 	describe("Protocol2Spec") {
 		it("processData") {
 			val yaml = """

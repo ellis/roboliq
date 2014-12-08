@@ -51,7 +51,11 @@ usage.
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [x] Protocol2: validate preconditions
+- [ ] Protocol2DataA: value for initial state and map for effects
 - [ ] Protocol2: generate action output
+- [ ] RjsProtocol: allow for loading from JSON (should extend Converter2 to load RjsValues)
+- [ ] RjsProtocol: create and use in Protocol2
+- [ ] Protocol2Data: create and use in Protocol2
 - [ ] Protocol2: load objects and state from evoware configuration (see Protocol)
 - [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
@@ -100,8 +104,8 @@ From this, it creates a data object, such as this:
 
 Data ``data[0]``:
 ```
-variable:
-object:
+variables:
+objects:
   plate1:
     type: plate
     model: plateModel_384_square
@@ -121,7 +125,7 @@ object:
         amount: 1/10
       water:
         amount: 9/10
-command:
+commands:
   "1":
     command: distribute
     input:
@@ -129,7 +133,7 @@ command:
       destination: plate1(B01)
       amount: 20ul
     hash: xxx (hash over id, command name, inputs, and state)
-commandOrderContraint:
+commandOrderingContraints:
   "1": []
 ```
 
