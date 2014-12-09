@@ -15,26 +15,14 @@ import aiplan.strips2.Strips
 class Protocol2Spec extends FunSpec {
 	import ContextValueWrapper._
 
-	val protocol = new Protocol2
+	val protocolEvaluator = new Protocol2
 	val eb = new EntityBase
 	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
-	val evaluator = new Evaluator();
-	
-	val protocol1 = RjsProtocol(
-		labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
-		substances = Map("water" -> RjsProtocolSubstance(), "dye" -> RjsProtocolSubstance()),
-		sources = Map("dyeLight" -> RjsProtocolSource(well = "plate1(A01)", substances = List(
-			RjsProtocolSourceSubstance(name = "dye", amount_? = Some("1/10")),
-			RjsProtocolSourceSubstance(name = "water")
-		))),
-		commands = List(
-			RjsAction("distribute", RjsMap())
-		)
-	)
+	val evaluator = new Evaluator()
 	
 	describe("Protocol2Spec") {
-		it("processData") {
-			val yaml = """
+		/*it("processData") {
+/*			val yaml = """
 object:
   plate1:
     type: plate
@@ -62,33 +50,68 @@ cmd:
     source: plate1(A01)
     destination: plate1(B01)
     amount: 20ul
-"""
-			val jsobj = JsonUtils.yamlToJson(yaml).asInstanceOf[JsObject]
-			val ctx = for {
-				rjsval <- RjsValue.fromJson(jsobj)
-				m = rjsval.asInstanceOf[RjsMap]
-				temp1 <- protocol.processData(m)
-				(objectToType_m, state) = temp1
-			} yield {
-				assert(objectToType_m == Map(
-					"plate1" -> "plate"
-				))
-				assert(state == Strips.State(Set[Strips.Atom](
-					Strips.Atom.parse("labware plate1"),
-					Strips.Atom.parse("model plate1 plateModel_384_square"),
-					Strips.Atom.parse("location plate1 P3")
-				)))
-			}
-			val (data1, _) = ctx.run(data0)
-			if (!data1.error_r.isEmpty) {
-				println("ERRORS:")
-				data1.error_r.foreach(println)
-			}
-			assert(data1.error_r == Nil)
-		}
+"""*/
+			val protocol1 = RjsProtocol(
+				labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
+				substances = Map("water" -> RjsProtocolSubstance(), "dye" -> RjsProtocolSubstance()),
+				sources = Map("dyeLight" -> RjsProtocolSource(well = "plate1(A01)", substances = List(
+					RjsProtocolSourceSubstance(name = "dye", amount_? = Some("1/10")),
+					RjsProtocolSourceSubstance(name = "water")
+				))),
+				commands = List(
+					RjsAction("distribute", RjsMap(
+						"source" -> RjsString("dyeLight"),
+						"destination" -> RjsString("plate1(B01)"),
+						"amount" -> RjsString("20ul")
+					))
+				)
+			)
 		
-		it("validateDataCommand") {
-			// Completely specify parameters
+			val dataA = protocol.extractDataA(protocol1)
+			assert(dataA.planningDomainObjects == Map(
+				"plate1" -> "plate"
+			))
+			assert(dataA.planningProblemState == Strips.State(Set[Strips.Atom](
+				Strips.Atom.parse("labware plate1"),
+				Strips.Atom.parse("model plate1 plateModel_384_square"),
+				Strips.Atom.parse("location plate1 P3")
+			)))
+		}*/
+		
+		it("test protocol 1") {
+			val protocol = RjsProtocol(
+				labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
+				substances = Map(),
+				sources = Map(),
+				commands = List(
+					RjsAction("shakePlate", RjsMap(
+						"agent" -> RjsString("mario"),
+						"device" -> RjsString("mario__Shaker"),
+						"labware" -> RjsString("plate1"),
+						"site" -> RjsString("P3"),
+						"program" -> RjsMap(
+							"rpm" -> RjsNumber(200),
+							"duration" -> RjsNumber(10)
+						)
+					))
+				)
+			)
+			
+			val dataA = protocolEvaluator.extractDataA(protocol)
+			assert(dataA.planningDomainObjects == Map(
+				"plate1" -> "plate"
+			))
+			assert(dataA.planningInitialState == Strips.State(Set[Strips.Atom](
+				Strips.Atom.parse("labware plate1"),
+				Strips.Atom.parse("model plate1 plateModel_384_square"),
+				Strips.Atom.parse("location plate1 P3")
+			)))
+			
+			for {
+				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
+				_ <- protocolEvaluator
+			} yield ()
+			/*// Completely specify parameters
 			val yaml1 = """
 object:
   plate1:
@@ -159,6 +182,7 @@ command:
 				data1.error_r.foreach(println)
 			}
 			assert(data1.error_r == Nil)
+			*/
 		}
 	}
 }

@@ -213,7 +213,7 @@ case class RjsProtocolSource(
 	def toJson: JsValue = {
 		JsObject(List[Option[(String, JsValue)]](
 			Some("well" -> JsString(well)),
-			if (substance.isEmpty) None else Some("substance" -> JsArray(substance.map(_.toJson)))
+			if (substances.isEmpty) None else Some("substances" -> JsArray(substances.map(_.toJson)))
 		).flatten.toMap)
 	}
 }

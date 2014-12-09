@@ -21,7 +21,7 @@ class Protocol2DataA(
 	val commandOrderingConstraints: List[List[String]],
 	val commandOrder: List[String],
 	val planningDomainObjects: Map[String, String],
-	val planningProblemState: Strips.State
+	val planningInitialState: Strips.State
 )
 
 class Protocol2DataB(
@@ -44,14 +44,14 @@ class Protocol2 {
 			(1 to n).toList.map(i => i.toString :: (if (i < n) List((i+1).toString) else Nil))
 		val commandOrder_l =
 			(1 to n).toList.map(_.toString)
-		val (planningDomainObjects, planningProblemState) = processDataObjects(objects)
+		val (planningDomainObjects, planningInitialState) = processDataObjects(objects)
 		new Protocol2DataA(
 			objects = objects,
 			commands = RjsMap(command_l.toMap),
 			commandOrderingConstraints = commandOrderingConstraint_l,
 			commandOrder = commandOrder_l,
 			planningDomainObjects = planningDomainObjects,
-			planningProblemState = planningProblemState
+			planningInitialState = planningInitialState
 		)
 	}
 	
@@ -73,6 +73,78 @@ class Protocol2 {
 			}
 		}
 		(objectToType_m.toMap, Strips.State(atom_l.toSet))
+	}
+	
+	def stepB(
+		dataA: Protocol2DataA
+	): ContextE[Protocol2DataB] = {
+		var state = dataA.planningInitialState
+		def step(command_l: List[RjsValue]) {
+			command_l match {
+				case Nil =>
+				case rjsval :: res =>
+			}
+		}
+	}
+	
+	def validateDataCommand(
+		dataA: Protocol2DataA,
+		id: String,
+		rjsval: RjsValue,
+		state: Strips.State
+	): ContextE[List[CommandValidation]] = {
+		val validation_l = new ArrayBuffer[CommandValidation]
+		ContextE.context(s"command[$id]") {
+			for {
+				rjsval2 <- ContextE.evaluate(rjsval)
+				_ <- rjsval2 match {
+					case action: RjsAction =>
+						for {
+							actionDef <- ContextE.fromScope[RjsActionDef](action.name)
+						} yield ()
+				}
+				_ <- ContextE.foreach(actionDef.params) { param =>
+					commandInput_m.get(param.name) match {
+						case None =>
+							validation_l += CommandValidation_Param(param.name)
+						case Some(jsvalInput) =>
+					}
+					ContextE.unit(())
+				}
+				_ <- {
+					if (validation_l.isEmpty) {
+						ContextE.foreach(actionDef.preconds) { precond =>
+							for {
+								binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
+									if (s.startsWith("$")) {
+										commandInput_m.get(s.tail) match {
+											case None =>
+												ContextE.error(s"unknown parameter `$s` in precondition $precond")
+											case Some(jsParam) =>
+												ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
+										}
+									}
+									else {
+										ContextE.unit(None)
+									}
+								}
+							} yield {
+								val binding = binding0_l.flatten.toList.toMap
+								val precond2 = precond.bind(binding)
+								if (state.holds(precond2.atom) != precond2.pos) {
+									validation_l += CommandValidation_Precond(precond2.toString)
+								}
+							}
+						}
+					}
+					else {
+						ContextE.unit(())
+					}
+				}
+			} yield {
+				validation_l.toList
+			}
+		}
 	}
 	
 	def validateDataCommand(
