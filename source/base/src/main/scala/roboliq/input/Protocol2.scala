@@ -5,6 +5,8 @@ import spray.json.JsValue
 import scala.collection.mutable.ArrayBuffer
 import aiplan.strips2.Strips
 import scala.collection.mutable.HashMap
+import scala.math.Ordering.Implicits._
+import scala.annotation.tailrec
 
 sealed trait CommandValidation
 case class CommandValidation_Param(name: String) extends CommandValidation
@@ -26,7 +28,7 @@ class Protocol2DataA(
 
 class Protocol2DataB(
 	val dataA: Protocol2DataA,
-	val validations: Map[String, CommandValidation]
+	val validations: Map[String, List[CommandValidation]]
 )
 
 class Protocol2 {
@@ -78,12 +80,54 @@ class Protocol2 {
 	def stepB(
 		dataA: Protocol2DataA
 	): ContextE[Protocol2DataB] = {
-		var state = dataA.planningInitialState
-		def step(command_l: List[RjsValue]) {
-			command_l match {
-				case Nil =>
-				case rjsval :: res =>
+		// First sort the command keys by id
+		val l0 = dataA.commands.map.keys.map(_.split('.').toList.map(_.toInt)).toList.sorted
+		
+		@tailrec
+		def removeParents(l: List[List[Int]], acc_r: List[List[Int]]): List[List[Int]] = {
+			l match {
+				case Nil => acc_r.reverse
+				case a :: rest =>
+					val acc_r_~ = rest match {
+						// Drop 'a' if 'b' is it's child
+						case b :: _ if (a == b.take(a.size)) =>
+							acc_r
+						case _ =>
+							a :: acc_r
+					}
+					removeParents(rest, acc_r_~)
 			}
+		}
+		
+		// Now remove any commands which have already been expanded
+		val l1 = removeParents(l0, Nil)
+		
+		// TODO: sort stably using dataA.commandOrderingConstraints
+		
+		var state = dataA.planningInitialState
+		val idToValidation0_m = new HashMap[String, List[CommandValidation]]
+		def step(idToCommand_l: List[(String, RjsValue)]): ContextE[Map[String, List[CommandValidation]]] = {
+			idToCommand_l match {
+				case Nil => ContextE.unit(idToValidation0_m.toMap)
+				case (id, rjsval) :: res =>
+					for {
+						validation <- validateDataCommand(dataA, id, rjsval, state)
+						_ = idToValidation0_m(id) = validation
+						res <- step(idToCommand_l.tail)
+					} yield res
+			}
+		}
+		
+		// Convert List[Int] back to String
+		val id_l = l1.map(_.mkString("."))
+		val idToCommand_l = id_l.map(id => id -> dataA.commands.get(id).get)
+		for {
+			validations <- step(idToCommand_l)
+		} yield {
+			new Protocol2DataB(
+				dataA = dataA,
+				validations = validations
+			)
 		}
 	}
 	
@@ -101,45 +145,45 @@ class Protocol2 {
 					case action: RjsAction =>
 						for {
 							actionDef <- ContextE.fromScope[RjsActionDef](action.name)
-						} yield ()
-				}
-				_ <- ContextE.foreach(actionDef.params) { param =>
-					commandInput_m.get(param.name) match {
-						case None =>
-							validation_l += CommandValidation_Param(param.name)
-						case Some(jsvalInput) =>
-					}
-					ContextE.unit(())
-				}
-				_ <- {
-					if (validation_l.isEmpty) {
-						ContextE.foreach(actionDef.preconds) { precond =>
-							for {
-								binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
-									if (s.startsWith("$")) {
-										commandInput_m.get(s.tail) match {
-											case None =>
-												ContextE.error(s"unknown parameter `$s` in precondition $precond")
-											case Some(jsParam) =>
-												ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
+							_ <- ContextE.foreach(actionDef.params) { param =>
+								action.input.get(param.name) match {
+									case None =>
+										validation_l += CommandValidation_Param(param.name)
+									case Some(jsvalInput) =>
+								}
+								ContextE.unit(())
+							}
+							_ <- {
+								if (validation_l.isEmpty) {
+									ContextE.foreach(actionDef.preconds) { precond =>
+										for {
+											binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
+												if (s.startsWith("$")) {
+													action.input.get(s.tail) match {
+														case None =>
+															ContextE.error(s"unknown parameter `$s` in precondition $precond")
+														case Some(jsParam) =>
+															ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
+													}
+												}
+												else {
+													ContextE.unit(None)
+												}
+											}
+										} yield {
+											val binding = binding0_l.flatten.toList.toMap
+											val precond2 = precond.bind(binding)
+											if (state.holds(precond2.atom) != precond2.pos) {
+												validation_l += CommandValidation_Precond(precond2.toString)
+											}
 										}
 									}
-									else {
-										ContextE.unit(None)
-									}
 								}
-							} yield {
-								val binding = binding0_l.flatten.toList.toMap
-								val precond2 = precond.bind(binding)
-								if (state.holds(precond2.atom) != precond2.pos) {
-									validation_l += CommandValidation_Precond(precond2.toString)
+								else {
+									ContextE.unit(())
 								}
 							}
-						}
-					}
-					else {
-						ContextE.unit(())
-					}
+						} yield ()
 				}
 			} yield {
 				validation_l.toList
