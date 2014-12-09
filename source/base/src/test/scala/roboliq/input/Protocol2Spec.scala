@@ -107,12 +107,20 @@ cmd:
 				Strips.Atom.parse("location plate1 P3")
 			)))
 			
-			val ctxval = (for {
+			val ctxval1 = (for {
 				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
 				dataB <- protocolEvaluator.stepB(dataA)
 			} yield dataB).run(data0)
 			
-			assert(ctxval.value.validations == Map("1" -> Nil))
+			assert(ctxval1.value.validations == Map("1" -> Nil))
+
+			val dataA1 = new ProtocolDataA()
+			val ctxval1 = (for {
+				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
+				dataB <- protocolEvaluator.stepB(dataA)
+			} yield dataB).run(data0)
+			
+			assert(ctxval1.value.validations == Map("1" -> Nil))
 			/*// Completely specify parameters
 			val yaml1 = """
 object:

@@ -52,6 +52,7 @@ usage.
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [x] Protocol2: validate preconditions
 - [ ] Protocol2DataA: value for initial state and map for effects
+- [ ] Protocol2: how to handle initial state of lab?  Should the initial state of protocol and lab be literals instead, so that state values can be negated?
 - [ ] Protocol2: generate action output
 - [ ] RjsProtocol: allow for loading from JSON (should extend Converter2 to load RjsValues)
 - [ ] RjsProtocol: create and use in Protocol2
@@ -66,6 +67,23 @@ usage.
 - [ ] ask for missing action inputs
 - [ ] perform planning for actions
 - [ ] Evaluator: extend scope somehow to be recursive, so that a function can call functions defined after it in the same scope?  Make evaluation lazy?
+
+Data for customizing/evaluating/handling protocols:
+- lab:
+    - planning objects
+    - planning initial state literals
+- protocol:
+    - objects
+    - commands
+    - command ordering constraints
+    - planning objects
+    - planning initial state literals
+- user customization:
+    - objects
+    - commands
+    - command ordering constraints
+    - planning objects
+    - planning initial state literals
 
 ProtocolEvaluator:
 

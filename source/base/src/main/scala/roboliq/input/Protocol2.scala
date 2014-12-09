@@ -31,6 +31,19 @@ class Protocol2DataB(
 	val validations: Map[String, List[CommandValidation]]
 )
 
+/**
+ * What can be done with commands?
+ * 
+ * Can expand some commands
+ * How shall we specify what should be planned? And get the planning to happen automatically?
+ * 
+ */
+
+class Protocol2DataC(
+	val dataA: Protocol2DataA,
+	val validations: Map[String, List[CommandValidation]]
+)
+
 class Protocol2 {
 	def extractDataA(protocol: RjsProtocol): Protocol2DataA = {
 		val object_m: Map[String, RjsValue] =
