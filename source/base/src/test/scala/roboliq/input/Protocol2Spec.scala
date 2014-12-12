@@ -110,17 +110,15 @@ cmd:
 			val ctxval1 = (for {
 				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
 				dataB <- protocolEvaluator.stepB(dataA)
-			} yield dataB).run(data0)
+			} yield dataB.commandExpansions).run(data0)
 			
-			assert(ctxval1.value.validations == Map("1" -> Nil))
-
-			val dataA1 = new ProtocolDataA()
-			val ctxval1 = (for {
-				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
-				dataB <- protocolEvaluator.stepB(dataA)
-			} yield dataB).run(data0)
-			
-			assert(ctxval1.value.validations == Map("1" -> Nil))
+			val expected = Map(
+				"1" -> ProtocolCommandResult(
+					effects = Strips.Literals.empty,
+					validation_l = Nil
+				)
+			)
+			assert(ctxval1 == expected)
 			/*// Completely specify parameters
 			val yaml1 = """
 object:

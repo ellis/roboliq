@@ -38,13 +38,11 @@ case class RjsAction(name: String, input: RjsMap) extends RjsValue {
 }
 
 case class RjsActionDefParam(
-	name: String,
 	`type`: String,
 	mode: InputMode.Value
 ) {
 	def toJson: JsValue = {
 		JsObject(Map(
-			"name" -> JsString(name),
 			"type" -> JsString(`type`),
 			"mode" -> JsString(mode.toString)
 		))
@@ -54,7 +52,7 @@ case class RjsActionDefParam(
 case class RjsActionDef(
 	description_? : Option[String],
 	documentation_? : Option[String],
-	params: List[RjsActionDefParam],
+	params: Map[String, RjsActionDefParam],
 	preconds: List[Strips.Literal],
 	effects: List[Strips.Literal],
 	value: RjsValue
@@ -63,7 +61,7 @@ case class RjsActionDef(
 		val l = List[Option[(String, JsValue)]](
 			description_?.map(s => "DESCRIPTION" -> JsString(s)),
 			documentation_?.map(s => "DOCUMENTATION" -> JsString(s)),
-			Some("PARAMS" -> JsArray(params.map(_.toJson))),
+			Some("PARAMS" -> JsObject(params.mapValues(_.toJson))),
 			Some("PRECONDS" -> JsArray(preconds.map(lit => JsString(lit.toString)))),
 			Some("EFFECTS" -> JsArray(effects.map(lit => JsString(lit.toString)))),
 			Some("VALUE" -> value.toJson)
@@ -317,7 +315,7 @@ object RjsValue {
 				for {
 					description_? <- Converter2.fromJson[Option[String]](jsobj, "DESCRIPTION")
 					documentation_? <- Converter2.fromJson[Option[String]](jsobj, "DOCUMENTATION")
-					params <- Converter2.fromJson[List[RjsActionDefParam]](jsobj, "PARAMS")
+					params <- Converter2.fromJson[Map[String, RjsActionDefParam]](jsobj, "PARAMS")
 					preconds0 <- Converter2.fromJson[List[String]](jsobj, "PRECONDS")
 					preconds = preconds0.map { s => Strips.Literal.parse(s) }
 					effects0 <- Converter2.fromJson[List[String]](jsobj, "EFFECTS")

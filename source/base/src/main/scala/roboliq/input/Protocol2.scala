@@ -7,6 +7,7 @@ import aiplan.strips2.Strips
 import scala.collection.mutable.HashMap
 import scala.math.Ordering.Implicits._
 import scala.annotation.tailrec
+import aiplan.strips2.Unique
 
 sealed trait CommandValidation
 case class CommandValidation_Param(name: String) extends CommandValidation
@@ -26,16 +27,23 @@ class Protocol2DataA(
 	val planningInitialState: Strips.State
 )
 
+case class ProtocolCommandResult(
+	effects: Strips.Literals,
+	validation_l: List[CommandValidation]
+)
+
 class Protocol2DataB(
 	val dataA: Protocol2DataA,
-	val validations: Map[String, List[CommandValidation]]
+	val commandExpansions: Map[String, ProtocolCommandResult]
 )
 
 /**
  * What can be done with commands?
  * 
- * Can expand some commands
+ * Can expand commands that have already properly validated
+ * Need to have JSON that passes commands to Roboliq, such that user sets a variable value, and a properly modified JSON is returned
  * How shall we specify what should be planned? And get the planning to happen automatically?
+ * Some planning should happen automatically: check possible variable values, put those in the JSON output, and when there's only one choice, automatically choose it
  * 
  */
 
@@ -93,8 +101,44 @@ class Protocol2 {
 	def stepB(
 		dataA: Protocol2DataA
 	): ContextE[Protocol2DataB] = {
+		var state = dataA.planningInitialState
+		val idToResult0_m = new HashMap[String, ProtocolCommandResult]
+		def step(idToCommand_l: List[(String, RjsValue)]): ContextE[Map[String, ProtocolCommandResult]] = {
+			idToCommand_l match {
+				case Nil => ContextE.unit(idToResult0_m.toMap)
+				case (id, rjsval) :: res =>
+					for {
+						pair <- expandCommand(id, rjsval, state)
+						(res_m, effects) = pair
+						_ = state ++= effects
+						_ = idToResult0_m ++= res_m
+						res <- step(idToCommand_l.tail)
+					} yield res
+			}
+		}
+		
+		// Convert List[Int] back to String
+		val id_l = getCommandOrdering(dataA.commands.map.keys.toList)
+		val idToCommand_l = id_l.map(id => id -> dataA.commands.get(id).get)
+		for {
+			idToResult_m <- step(idToCommand_l)
+		} yield {
+			new Protocol2DataB(
+				dataA = dataA,
+				commandExpansions = idToResult_m
+			)
+		}
+	}
+	
+	/**
+	 * Return a command list ordering.
+	 * This will filter out any command ids which have already been expanded.
+	 */
+	private def getCommandOrdering(
+		key_l: List[String]
+	): List[String] = {
 		// First sort the command keys by id
-		val l0 = dataA.commands.map.keys.map(_.split('.').toList.map(_.toInt)).toList.sorted
+		val l0 = key_l.map(_.split('.').toList.map(_.toInt)).toList.sorted
 		
 		@tailrec
 		def removeParents(l: List[List[Int]], acc_r: List[List[Int]]): List[List[Int]] = {
@@ -115,170 +159,194 @@ class Protocol2 {
 		// Now remove any commands which have already been expanded
 		val l1 = removeParents(l0, Nil)
 		
-		// TODO: sort stably using dataA.commandOrderingConstraints
-		
-		var state = dataA.planningInitialState
-		val idToValidation0_m = new HashMap[String, List[CommandValidation]]
-		def step(idToCommand_l: List[(String, RjsValue)]): ContextE[Map[String, List[CommandValidation]]] = {
-			idToCommand_l match {
-				case Nil => ContextE.unit(idToValidation0_m.toMap)
-				case (id, rjsval) :: res =>
-					for {
-						validation <- validateDataCommand(dataA, id, rjsval, state)
-						_ = idToValidation0_m(id) = validation
-						res <- step(idToCommand_l.tail)
-					} yield res
-			}
-		}
+		// TODO: sort `l1` stably using dataA.commandOrderingConstraints
 		
 		// Convert List[Int] back to String
-		val id_l = l1.map(_.mkString("."))
-		val idToCommand_l = id_l.map(id => id -> dataA.commands.get(id).get)
-		for {
-			validations <- step(idToCommand_l)
-		} yield {
-			new Protocol2DataB(
-				dataA = dataA,
-				validations = validations
-			)
-		}
+		l1.map(_.mkString("."))
 	}
 	
-	def validateDataCommand(
-		dataA: Protocol2DataA,
+	/**
+	 * 1) Check that parameters are all provided
+	 * 2) Check that preconditions are all met
+	 * 3) Expand command
+	 * Return tuple of (map of command IDs to expansion results, cumulative effects)
+	 */
+	private def expandCommand(
 		id: String,
 		rjsval: RjsValue,
 		state: Strips.State
-	): ContextE[List[CommandValidation]] = {
-		val validation_l = new ArrayBuffer[CommandValidation]
-		ContextE.context(s"command[$id]") {
-			for {
-				rjsval2 <- ContextE.evaluate(rjsval)
-				_ <- rjsval2 match {
-					case action: RjsAction =>
-						for {
-							actionDef <- ContextE.fromScope[RjsActionDef](action.name)
-							_ <- ContextE.foreach(actionDef.params) { param =>
-								action.input.get(param.name) match {
-									case None =>
-										validation_l += CommandValidation_Param(param.name)
-									case Some(jsvalInput) =>
-								}
-								ContextE.unit(())
-							}
-							_ <- {
-								if (validation_l.isEmpty) {
-									ContextE.foreach(actionDef.preconds) { precond =>
-										for {
-											binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
-												if (s.startsWith("$")) {
-													action.input.get(s.tail) match {
-														case None =>
-															ContextE.error(s"unknown parameter `$s` in precondition $precond")
-														case Some(jsParam) =>
-															ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
-													}
-												}
-												else {
-													ContextE.unit(None)
-												}
-											}
-										} yield {
-											val binding = binding0_l.flatten.toList.toMap
-											val precond2 = precond.bind(binding)
-											if (state.holds(precond2.atom) != precond2.pos) {
-												validation_l += CommandValidation_Precond(precond2.toString)
-											}
-										}
-									}
-								}
-								else {
-									ContextE.unit(())
-								}
-							}
-						} yield ()
-				}
-			} yield {
-				validation_l.toList
+	): ContextE[(Map[String, ProtocolCommandResult], Strips.Literals)] = {
+		val result_m = new HashMap[String, ProtocolCommandResult]
+		ContextE.context(s"expandCommand($id)") {
+			ContextE.evaluate(rjsval).flatMap {
+				case RjsNull =>
+					ContextE.unit((Map[String, ProtocolCommandResult](), Strips.Literals(Unique[Strips.Literal]())))
+				case action: RjsAction =>
+					expandAction(id, action, state)
+				case instruction: RjsInstruction =>
+					ContextE.unit((Map[String, ProtocolCommandResult](), Strips.Literals(Unique[Strips.Literal]())))
 			}
 		}
 	}
 	
-	def validateDataCommand(
-		state: Strips.State,
-		data: RjsMap,
-		id: String
-	): ContextE[List[CommandValidation]] = {
-		val validation_l = new ArrayBuffer[CommandValidation]
-		ContextE.context(s"command[$id]") {
-			for {
-				jsCommandSet <- ContextE.fromRjs[RjsMap](data, "command")
-				command_m <- ContextE.fromRjs[RjsMap](jsCommandSet, id)
-				_ = println(s"command_m: ${command_m}")
-				commandName <- ContextE.fromRjs[String](command_m, "command")
-				actionDef <- ContextE.fromScope[RjsActionDef](commandName)
-				commandInput_m <- ContextE.fromRjs[RjsMap](command_m, "input")
-				_ <- ContextE.foreach(actionDef.params) { param =>
-					commandInput_m.get(param.name) match {
-						case None =>
-							validation_l += CommandValidation_Param(param.name)
-						case Some(jsvalInput) =>
-					}
-					ContextE.unit(())
-				}
-				_ <- {
-					if (validation_l.isEmpty) {
-						ContextE.foreach(actionDef.preconds) { precond =>
-							for {
-								binding0_l <- ContextE.mapAll(precond.atom.params) { s =>
-									if (s.startsWith("$")) {
-										commandInput_m.get(s.tail) match {
-											case None =>
-												ContextE.error(s"unknown parameter `$s` in precondition $precond")
-											case Some(jsParam) =>
-												ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
-										}
-									}
-									else {
-										ContextE.unit(None)
-									}
-								}
-							} yield {
-								val binding = binding0_l.flatten.toList.toMap
-								val precond2 = precond.bind(binding)
-								if (state.holds(precond2.atom) != precond2.pos) {
-									validation_l += CommandValidation_Precond(precond2.toString)
-								}
-							}
-						}
-					}
-					else {
-						ContextE.unit(())
-					}
-				}
-			} yield {
-				validation_l.toList
+	private def checkActionInput(
+		action: RjsAction,
+		actionDef: RjsActionDef
+	): List[CommandValidation] = {
+		// Check that all parameters are provided
+		actionDef.params.toList.flatMap { case (name, param) =>
+			action.input.get(name) match {
+				// If it's missing, return a validation object noting that problem
+				case None =>
+					Some(CommandValidation_Param(name))
+				// Otherwise, we have a value, so return nothing
+				case Some(jsvalInput) =>
+					None
 			}
 		}
 	}
-
-	def evaluateDataCommand(state: Strips.State, data: RjsMap, id: String): ContextE[RjsValue] = {
-		ContextE.context(s"command[$id]") {
-			for {
-				jsCommandSet <- ContextE.fromRjs[RjsMap](data, "command")
-				command_m <- ContextE.fromRjs[RjsMap](jsCommandSet, id)
-				_ = println(s"command_m: ${command_m}")
-				commandName <- ContextE.fromRjs[String](command_m, "command")
-				actionDef <- ContextE.fromScope[RjsActionDef](commandName)
-				commandInput_m <- ContextE.fromRjs[RjsMap](command_m, "input")
-				// TODO: we should start a clean scope that only has commandInput_m variables
-				res <- ContextE.scope {
-					for {
-						_ <- ContextE.addToScope(commandInput_m)
-						res <- ContextE.evaluate(actionDef.value)
-					} yield res
+	
+	private def checkActionPreconds(
+		action: RjsAction,
+		actionDef: RjsActionDef,
+		state0: Strips.State
+	): ContextE[List[CommandValidation]] = {
+		for {
+			precond_l <- bindActionLogic(actionDef.preconds, true, action, actionDef)
+		} yield {
+			precond_l.flatMap { precond => 
+				if (state0.holds(precond.atom) != precond.pos) {
+					Some(CommandValidation_Precond(precond.toString))
 				}
-			} yield res
+				else {
+					None
+				}
+			}
+		}
+	}
+	
+	private def getActionEffects(
+		action: RjsAction,
+		actionDef: RjsActionDef,
+		state0: Strips.State
+	): ContextE[Strips.Literals] = {
+		for {
+			effect_l <- bindActionLogic(actionDef.effects, false, action, actionDef)
+		} yield Strips.Literals(Unique(effect_l : _*))
+	}
+	
+	/**
+	 * Substitute action input into the list of literals, replace $vars with the corresponding input values.
+	 */
+	private def bindActionLogic(
+		literal_l: List[Strips.Literal],
+		isPrecond: Boolean,
+		action: RjsAction,
+		actionDef: RjsActionDef
+	): ContextE[List[Strips.Literal]] = {
+		ContextE.mapAll(literal_l) { literal =>
+			for {
+				binding0_l <- ContextE.mapAll(literal.atom.params) { s =>
+					if (s.startsWith("$")) {
+						val name = s.tail
+						(actionDef.params.get(name), action.input.get(name)) match {
+							case (Some(param), Some(jsParam)) =>
+								ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
+							case (None, _) =>
+								ContextE.error(s"invalid parameter `$s` in ${if (isPrecond) "precondition" else "effect"}: $literal")
+							case (_, None) =>
+								// Don't need to produce an error here, because the missing input will have already been noted while checking the inputs
+								ContextE.unit(None)
+						}
+					}
+					else {
+						ContextE.unit(None)
+					}
+				}
+			} yield {
+				val bindings = binding0_l.flatten.toList.toMap
+				literal.bind(bindings)
+			}
+		}
+	}
+	
+	/**
+	 * 1) check inputs
+	 * 2) check preconditions
+	 * 3) if no errors:
+	 * 3.1) evaluate actionDef's 'value' field
+	 * 3.2) extract list of child commands
+	 * 3.3) call expandAction() on child commands
+	 * 3.4) accumulate and return results
+	 * 4) else:
+	 * 4.1) return errors and effects
+	 */
+	private def expandAction(
+		id: String,
+		action: RjsAction,
+		state0: Strips.State
+	): ContextE[(Map[String, ProtocolCommandResult], Strips.Literals)] = {
+		val validation_l = new ArrayBuffer[CommandValidation]
+		val child_m = new HashMap[String, RjsValue]
+		var effectsCumulative = Strips.Literals(Unique[Strips.Literal]())
+		val result_m = new HashMap[String, ProtocolCommandResult]
+		for {
+			actionDef <- ContextE.fromScope[RjsActionDef](action.name)
+			// Check inputs
+			_ = validation_l ++= checkActionInput(action, actionDef)
+			// Check that all preconditions are fulfilled
+			validation2_l <- checkActionPreconds(action, actionDef, state0)
+			_ = validation_l ++= validation2_l
+			effects <- bindActionLogic(actionDef.effects, false, action, actionDef)
+			_ <- {
+				if (!validation_l.isEmpty) {
+					ContextE.unit(())
+				}
+				// If there were no input or precond errors
+				else {
+					// TODO: we should start a clean scope that only has commandInput_m variables
+					ContextE.scope {
+						for {
+							_ <- ContextE.addToScope(action.input)
+							// evaluate actionDef's 'value' field
+							// extract list of child commands
+							res <- ContextE.evaluate(actionDef.value).map {
+								case RjsNull =>
+									val idChild = id + ".0"
+									child_m(idChild) = RjsNull
+									ContextE.unit(())
+								case RjsList(Nil) =>
+									val idChild = id + ".0"
+									child_m(idChild) = RjsNull
+									ContextE.unit(())
+								case RjsList(l) =>
+									ContextE.foreach(l.zipWithIndex) { case (rjsChild, i) =>
+										val idChild = s"$id.${i+1}"
+										child_m(idChild) = rjsChild
+										var state = state0
+										for {
+											pair <- expandCommand(idChild, rjsChild, state)
+										} yield {
+											val (resChild_m, effectsChild) = pair
+											result_m ++= resChild_m
+											effectsCumulative ++= effectsChild
+											state = state ++ effectsChild
+										}
+									}
+								case res =>
+									ContextE.error(s"actionDef `${action.name}` should either return `null` or a list of commands.  Actual result: "+res)
+							}
+						} yield res
+					}
+				}
+			}
+		} yield {
+			effectsCumulative ++= Strips.Literals(Unique(effects : _*))
+			result_m(id) = ProtocolCommandResult(
+				effects = Strips.Literals(Unique(effects : _*)),
+				validation_l = validation_l.toList
+			)
+			(result_m.toMap, effectsCumulative)
 		}
 	}
 }

@@ -8,9 +8,6 @@ import Scalaz._
 import scala.collection.mutable.ListBuffer
 
 object Strips {
-	type Typ = String
-	type Call = List[String]
-	
 	class Signature(val name: String, val paramName_l: List[String], val paramTyp_l: List[String]) {
 		assert(paramTyp_l.length == paramName_l.length)
 		
@@ -109,8 +106,12 @@ object Strips {
 			new Literals(l2, pos, Set())
 		}
 		
-		def ++(that: Literals): Literals =
-			new Literals(l ++ that.l, pos ++ that.pos, neg ++ that.neg)
+		def ++(that: Literals): Literals = {
+			// TODO: consider removing superfluous values from l
+			//val removePos = pos intersect that.neg
+			//val removeNeg = neg intersect that.pos
+			new Literals(l ++ that.l, pos -- that.neg ++ that.pos, neg ++ that.neg -- that.pos)
+		}
 		
 		def bind(map: Map[String, String]): Literals =
 			Literals(l.map(_.bind(map)))
@@ -121,13 +122,19 @@ object Strips {
 		def apply(l: Unique[Literal]): Literals = {
 			val pos: Unique[Atom] = l.collect { case Literal(atom, true) => atom }
 			val neg: Unique[Atom] = l.collect { case Literal(atom, false) => atom }
+			// TODO: consider removing pos from neg
+			// TODO: consider removing duplicates from l, as well as negatives for which there is a positive
 			new Literals(l, pos.toSet, neg.toSet)
 		}
 		def apply(pos: List[Atom], neg: List[Atom]): Literals = {
 			val pos1 = pos.map(atom => Literal(atom, true))
 			val neg1 = neg.map(atom => Literal(atom, false))
+			// TODO: consider removing pos1 from neg1
 			val l = Unique((pos1 ++ neg1) : _*)
 			new Literals(l, pos.toSet, neg.toSet)
+		}
+		def apply(state: State): Literals = {
+			apply(state.atoms.toList, Nil)
 		}
 	}
 	
@@ -135,6 +142,15 @@ object Strips {
 		def holds(atom: Atom): Boolean = atoms.contains(atom)
 		def satisfied(literals: Literals): Boolean = {
 			literals.pos.forall(atoms.contains) && literals.neg.forall(atom => !atoms.contains(atom))
+		}
+		def ++(literals: Literals): State = {
+			State(atoms -- literals.neg ++ literals.pos)
+		}
+	}
+	
+	object State {
+		def apply(literals: Literals): State = {
+			State(literals.pos)
 		}
 	}
 	
