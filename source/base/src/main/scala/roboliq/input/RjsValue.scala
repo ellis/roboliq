@@ -149,6 +149,7 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsValue {
 	def add(name: String, value: RjsValue): RjsMap = RjsMap(map + (name -> value))
 	def add(map: Map[String, RjsValue]): RjsMap = RjsMap(this.map ++ map)
 	def add(map: RjsMap): RjsMap = RjsMap(this.map ++ map.map)
+	def ++(that: RjsMap): RjsMap = this.add(that)
 }
 
 object RjsMap {

@@ -84,6 +84,18 @@ object Literal {
 }*/
 
 class Literals private (val l: Unique[Literal], val pos: Set[Atom], val neg: Set[Atom]) {
+	/**
+	 * Check whether the given literal holds among the literals.
+	 * If the literal is positive, 'holding' means that the set of positive atom contains the literal's atom.
+	 * Otherwise, 'holding' means that the set of positive atoms does not contain the literal's atom.
+	 */
+	def holds(literal: Literal): Boolean = {
+		if (literal.pos)
+			pos.contains(literal.atom)
+		else
+			!pos.contains(literal.atom)
+	}
+	
 	//def ++(that: Literals) = Literals(pos ++ that.pos, neg ++ that.neg)
 	def removePos(atom: Atom): Literals = {
 		val lit = Literal(atom, true)
@@ -150,6 +162,9 @@ case class State(atoms: Set[Atom]) {
 	def holds(atom: Atom): Boolean = atoms.contains(atom)
 	def satisfied(literals: Literals): Boolean = {
 		literals.pos.forall(atoms.contains) && literals.neg.forall(atom => !atoms.contains(atom))
+	}
+	def ++(that: State): State = {
+		State(atoms ++ that.atoms)
 	}
 	def ++(literals: Literals): State = {
 		State(atoms -- literals.neg ++ literals.pos)

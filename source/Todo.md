@@ -51,12 +51,13 @@ usage.
 - [x] Evaluator: change 'call' directive so that the call's scope only contains its inputs and the scope that was active when the function was defined
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [x] Protocol2: validate preconditions
-- [ ] Protocol2DataA: value for initial state and map for effects
+- [x] Protocol2DataA: value for initial state and map for effects
 - [ ] Protocol2: how to handle initial state of lab?  Should the initial state of protocol and lab be literals instead, so that state values can be negated?
 - [ ] Protocol2: generate action output
-- [ ] RjsProtocol: allow for loading from JSON (should extend Converter2 to load RjsValues)
+- [ ] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2
 - [ ] Protocol2Data: create and use in Protocol2
+- [ ] Converter2:  extend to load RjsValues
 - [ ] Protocol2: load objects and state from evoware configuration (see Protocol)
 - [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
 - [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data

@@ -24,8 +24,19 @@ class Protocol2DataA(
 	val commandOrderingConstraints: List[List[String]],
 	val commandOrder: List[String],
 	val planningDomainObjects: Map[String, String],
-	val planningInitialState: strips.State
-)
+	val planningInitialState: strips.Literals
+) {
+	def ++(that: Protocol2DataA): Protocol2DataA = {
+		new Protocol2DataA(
+			objects = this.objects ++ that.objects,
+			commands = this.commands ++ that.commands,
+			commandOrderingConstraints = this.commandOrderingConstraints ++ that.commandOrderingConstraints,
+			commandOrder = this.commandOrder ++ that.commandOrder,
+			planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
+			planningInitialState = this.planningInitialState ++ that.planningInitialState
+		)
+	}
+}
 
 case class ProtocolCommandResult(
 	effects: strips.Literals,
@@ -80,7 +91,7 @@ class Protocol2 {
 	
 	private def processDataObjects(
 		object_m: RjsMap
-	): (Map[String, String], strips.State) = {
+	): (Map[String, String], strips.Literals) = {
 		val objectToType_m = new HashMap[String, String]
 		val atom_l = new ArrayBuffer[strips.Atom]
 		for ((name, rjsval) <- object_m.map) {
@@ -95,7 +106,7 @@ class Protocol2 {
 					ContextE.unit(())
 			}
 		}
-		(objectToType_m.toMap, strips.State(atom_l.toSet))
+		(objectToType_m.toMap, strips.Literals(atom_l.toList, Nil))
 	}
 	
 	def stepB(
@@ -174,7 +185,7 @@ class Protocol2 {
 	private def expandCommand(
 		id: String,
 		rjsval: RjsValue,
-		state: strips.State
+		state: strips.Literals
 	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
 		val result_m = new HashMap[String, ProtocolCommandResult]
 		ContextE.context(s"expandCommand($id)") {
@@ -212,13 +223,13 @@ class Protocol2 {
 	private def checkActionPreconds(
 		action: RjsAction,
 		actionDef: RjsActionDef,
-		state0: strips.State
+		state0: strips.Literals
 	): ContextE[List[CommandValidation]] = {
 		for {
 			precond_l <- bindActionLogic(actionDef.preconds, true, action, actionDef)
 		} yield {
 			precond_l.flatMap { precond => 
-				if (state0.holds(precond.atom) != precond.pos) {
+				if (!state0.holds(precond)) {
 					Some(CommandValidation_Precond(precond.toString))
 				}
 				else {
@@ -287,7 +298,7 @@ class Protocol2 {
 	private def expandAction(
 		id: String,
 		action: RjsAction,
-		state0: strips.State
+		state0: strips.Literals
 	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
 		val validation_l = new ArrayBuffer[CommandValidation]
 		val child_m = new HashMap[String, RjsValue]
