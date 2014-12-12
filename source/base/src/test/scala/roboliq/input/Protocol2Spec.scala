@@ -118,7 +118,7 @@ cmd:
 					validation_l = Nil
 				)
 			)
-			assert(ctxval1 == expected)
+			assert(ctxval1.value == expected)
 			/*// Completely specify parameters
 			val yaml1 = """
 object:
