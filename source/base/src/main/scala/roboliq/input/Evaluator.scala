@@ -14,6 +14,7 @@ class Evaluator() {
 			case x: RjsFormat => evaluateFormat(x)
 			case x: RjsImport => evaluateImport(x)
 			case x: RjsInclude => evaluateInclude(x)
+			case x: RjsInstruction => evaluateInstruction(x)
 			case x: RjsList => evaluateList(x)
 			case x: RjsMap => evaluateMap(x)
 			case x: RjsSection => evaluateSection(x)
@@ -135,6 +136,15 @@ class Evaluator() {
 			jsfile <- ContextE.loadJsonFromFile(file)
 			jsobj <- ContextE.evaluate(jsfile)
 		} yield jsobj
+	}
+	
+	def evaluateInstruction(x: RjsInstruction): ContextE[RjsInstruction] = {
+		println(s"evaluateInstruction($x)")
+		for {
+			input <- evaluateMap(x.input)
+		} yield {
+			RjsInstruction(x.name, input)
+		}
 	}
 	
 	def evaluateList(x: RjsList): ContextE[RjsList] = {

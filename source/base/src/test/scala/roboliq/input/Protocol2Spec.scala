@@ -21,22 +21,32 @@ class Protocol2Spec extends FunSpec {
 	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator()
 
+	val action1 = RjsAction("shakePlate", RjsMap(
+		"agent" -> RjsString("mario"),
+		"device" -> RjsString("mario__Shaker"),
+		"labware" -> RjsString("plate1"),
+		"site" -> RjsString("P3"),
+		"program" -> RjsMap(
+			"rpm" -> RjsNumber(200),
+			"duration" -> RjsNumber(10)
+		)
+	))
+	val instruction1 = RjsInstruction("ShakerRun", RjsMap(
+		"agent" -> RjsString("mario"),
+		"device" -> RjsString("mario__Shaker"),
+		"program" -> RjsMap(
+			"rpm" -> RjsNumber(200),
+			"duration" -> RjsNumber(10)
+		),
+		"labware" -> RjsString("plate1"),
+		"site" -> RjsString("P3")
+	))
+
 	val protocol1 = RjsProtocol(
 		labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
 		substances = Map(),
 		sources = Map(),
-		commands = List(
-			RjsAction("shakePlate", RjsMap(
-				"agent" -> RjsString("mario"),
-				"device" -> RjsString("mario__Shaker"),
-				"labware" -> RjsString("plate1"),
-				"site" -> RjsString("P3"),
-				"program" -> RjsMap(
-					"rpm" -> RjsNumber(200),
-					"duration" -> RjsNumber(10)
-				)
-			))
-		)
+		commands = List(action1)
 	)
 	val dataA1 = protocolEvaluator.extractDataA(protocol1)
 	
@@ -116,6 +126,7 @@ cmd:
 			// strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3")
 			val expected1 = Map(
 				"1" -> ProtocolCommandResult(
+					action1,
 					effects = strips.Literals.empty,
 					validation_l = List(
 						CommandValidation_Precond("agent-has-device mario mario__Shaker"),
@@ -147,11 +158,19 @@ cmd:
 			// strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3")
 			val expected2 = Map(
 				"1" -> ProtocolCommandResult(
+					action1,
+					effects = strips.Literals.empty,
+					validation_l = Nil
+				),
+				"1.1" -> ProtocolCommandResult(
+					instruction1,
 					effects = strips.Literals.empty,
 					validation_l = Nil
 				)
 			)
-			assert(ctxval2.value == expected2)
+			assert(ctxval2.value("1") == expected2("1"))
+			assert(ctxval2.value("1.1") == expected2("1.1"))
+			//assert(ctxval2.value == expected2)
 			
 			/*// Completely specify parameters
 			val yaml1 = """

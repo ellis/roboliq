@@ -39,8 +39,9 @@ class Protocol2DataA(
 }
 
 case class ProtocolCommandResult(
-	effects: strips.Literals,
-	validation_l: List[CommandValidation]
+	command: RjsValue,
+	effects: strips.Literals = strips.Literals.empty,
+	validation_l: List[CommandValidation] = Nil
 )
 
 class Protocol2DataB(
@@ -115,6 +116,7 @@ class Protocol2 {
 		var state = dataA.planningInitialState
 		val idToResult0_m = new HashMap[String, ProtocolCommandResult]
 		def step(idToCommand_l: List[(String, RjsValue)]): ContextE[Map[String, ProtocolCommandResult]] = {
+			println("step")
 			idToCommand_l match {
 				case Nil => ContextE.unit(idToResult0_m.toMap)
 				case (id, rjsval) :: res =>
@@ -187,15 +189,22 @@ class Protocol2 {
 		rjsval: RjsValue,
 		state: strips.Literals
 	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
+		println(s"expandCommand($id, $rjsval)")
 		val result_m = new HashMap[String, ProtocolCommandResult]
 		ContextE.context(s"expandCommand($id)") {
 			ContextE.evaluate(rjsval).flatMap {
-				case RjsNull =>
-					ContextE.unit((Map(), strips.Literals.empty))
 				case action: RjsAction =>
 					expandAction(id, action, state)
 				case instruction: RjsInstruction =>
-					ContextE.unit((Map(), strips.Literals.empty))
+					ContextE.unit((
+						Map(id -> ProtocolCommandResult(instruction)),
+						strips.Literals.empty
+					))
+				case RjsNull =>
+					ContextE.unit((
+						Map(id -> ProtocolCommandResult(RjsNull)),
+						strips.Literals.empty
+					))
 				case _ =>
 					// TODO: should perhaps log a warning here instead
 					ContextE.error(s"don't know how to expand command: $rjsval")
@@ -300,8 +309,9 @@ class Protocol2 {
 		action: RjsAction,
 		state0: strips.Literals
 	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
+		println(s"expandAction($id)")
 		val validation_l = new ArrayBuffer[CommandValidation]
-		val child_m = new HashMap[String, RjsValue]
+		//val child_m = new HashMap[String, RjsValue]
 		var effectsCumulative = strips.Literals(Unique[strips.Literal]())
 		val result_m = new HashMap[String, ProtocolCommandResult]
 		for {
@@ -324,19 +334,19 @@ class Protocol2 {
 							_ <- ContextE.addToScope(action.input)
 							// evaluate actionDef's 'value' field
 							// extract list of child commands
-							res <- ContextE.evaluate(actionDef.value).map {
+							res <- ContextE.evaluate(actionDef.value).flatMap {
 								case RjsNull =>
 									val idChild = id + ".0"
-									child_m(idChild) = RjsNull
+									//child_m(idChild) = RjsNull
 									ContextE.unit(())
 								case RjsList(Nil) =>
 									val idChild = id + ".0"
-									child_m(idChild) = RjsNull
+									//child_m(idChild) = RjsNull
 									ContextE.unit(())
 								case RjsList(l) =>
 									ContextE.foreach(l.zipWithIndex) { case (rjsChild, i) =>
 										val idChild = s"$id.${i+1}"
-										child_m(idChild) = rjsChild
+										//child_m(idChild) = rjsChild
 										var state = state0
 										for {
 											pair <- expandCommand(idChild, rjsChild, state)
@@ -344,7 +354,7 @@ class Protocol2 {
 											val (resChild_m, effectsChild) = pair
 											result_m ++= resChild_m
 											effectsCumulative ++= effectsChild
-											state = state ++ effectsChild
+											state ++= effectsChild
 										}
 									}
 								case res =>
@@ -357,6 +367,7 @@ class Protocol2 {
 		} yield {
 			effectsCumulative ++= strips.Literals(Unique(effects : _*))
 			result_m(id) = ProtocolCommandResult(
+				action,
 				effects = strips.Literals(Unique(effects : _*)),
 				validation_l = validation_l.toList
 			)
