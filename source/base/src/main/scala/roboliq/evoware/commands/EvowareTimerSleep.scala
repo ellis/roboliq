@@ -1,6 +1,6 @@
 package roboliq.evoware.commands
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.entities.Agent

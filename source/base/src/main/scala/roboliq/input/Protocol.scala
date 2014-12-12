@@ -22,7 +22,7 @@ import scalax.collection.edge.LHyperEdge
 import scalax.collection.edge.LkUnDiEdge
 import roboliq.plan.CallTree
 import roboliq.plan.Call
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.plan.CommandSet
 import roboliq.plan.OperatorInfo
@@ -921,19 +921,19 @@ class Protocol {
 			_ = println(operatorInfo_l)
 			_ = println("domain:")
 			domain <- createDomain(cs, operatorInfo_l)
-			_ = println(domain.toStripsText)
+			_ = println(domain.tostripsText)
 			// Save to file system
 			_ = {
 				val path = new File("log-domain.lisp").getPath
-				roboliq.utils.FileUtils.writeToFile(path, domain.toStripsText)
+				roboliq.utils.FileUtils.writeToFile(path, domain.tostripsText)
 			}
 			
 			problem <- createProblem(operatorInfo_l, domain)
-			_ = println(problem.toStripsText)
+			_ = println(problem.tostripsText)
 			// Save to file system
 			_ = {
 				val path = new File("log-problem.lisp").getPath
-				roboliq.utils.FileUtils.writeToFile(path, problem.toStripsText)
+				roboliq.utils.FileUtils.writeToFile(path, problem.tostripsText)
 			}
 
 			plan0 = PartialPlan.fromProblem(problem, Some(getPotentialNewProviders(operatorInfo_l.size)))
@@ -964,7 +964,7 @@ class Protocol {
 	}
 	
 	// 'userActionCount' was used to let user actions have different providers, but it's not used currently
-	private def getPotentialNewProviders(userActionCount: Int)(plan: PartialPlan, consumer_i: Int): List[Strips.Operator] = {
+	private def getPotentialNewProviders(userActionCount: Int)(plan: PartialPlan, consumer_i: Int): List[strips.Operator] = {
 		val op0_l = plan.problem.domain.operator_l
 		val allow_l = Set(
 			"carousel.close-mario__Centrifuge",
@@ -990,7 +990,7 @@ class Protocol {
 		op_l
 	}
 	
-	def createDomain(cs: CommandSet, operatorInfo_l: List[OperatorInfo]): RqResult[Strips.Domain] = {
+	def createDomain(cs: CommandSet, operatorInfo_l: List[OperatorInfo]): RqResult[strips.Domain] = {
 		RsResult.prependError("createDomain:") {
 			val name_l = (cs.nameToAutoOperator_l ++ operatorInfo_l.map(_.operatorName)).distinct.sorted
 			for {
@@ -1014,15 +1014,15 @@ class Protocol {
 				// The type0 types take precedence
 				val type_m = type1_m ++ type0_m
 				
-				Strips.Domain(
+				strips.Domain(
 					type_m = type_m,
 					constantToType_l = Nil,
-					predicate_l = List[Strips.Signature](
-						Strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
-						Strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
-						Strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
-						Strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
-						Strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
+					predicate_l = List[strips.Signature](
+						strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
+						strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
+						strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
+						strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
+						strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
 					),
 					operator_l = operator_l
 				)
@@ -1031,16 +1031,16 @@ class Protocol {
 	}
 
 
-	def createProblem(planInfo_l: List[OperatorInfo], domain: Strips.Domain): RqResult[Strips.Problem] = {
+	def createProblem(planInfo_l: List[OperatorInfo], domain: strips.Domain): RqResult[strips.Problem] = {
 		val typToObject_l: List[(String, String)] = eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
 		
-		val state0 = Strips.State(Set[Strips.Atom]() ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => Strips.Atom(rel.name, rel.args)))
+		val state0 = strips.State(Set[strips.Atom]() ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => strips.Atom(rel.name, rel.args)))
 		
-		RqSuccess(Strips.Problem(
+		RqSuccess(strips.Problem(
 			domain = domain,
 			typToObject_l = typToObject_l,
 			state0 = state0,
-			goals = Strips.Literals.empty
+			goals = strips.Literals.empty
 		))
 	}
 

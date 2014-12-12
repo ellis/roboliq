@@ -1,7 +1,7 @@
 package roboliq.evoware.commands
 
 import scala.reflect.runtime.universe
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -55,18 +55,18 @@ class EvowareTimerWaitActionHandler extends ActionHandler {
 }
 
 class EvowareTimerWaitOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "evoware.timer.wait",
 			paramName_l = List("?agent"),
 			paramTyp_l = List("agent"),
-			preconds = Strips.Literals.empty,
-			effects = roboliq.ai.plan.Strips.Literals.empty
+			preconds = strips.Literals.empty,
+			effects = roboliq.ai.strips.Literals.empty
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName) = operator.paramName_l

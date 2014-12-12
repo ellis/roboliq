@@ -149,7 +149,7 @@ object Converter3 {
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(rjsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(rjsval, eb, state_?)
 			// Logic
-			else if (typ =:= typeOf[Strips.Literal]) toStripsLiteral(rjsval)
+			else if (typ =:= typeOf[strips.Literal]) tostripsLiteral(rjsval)
 			// Lookups
 			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](rjsval, eb)
 			else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](rjsval, eb)

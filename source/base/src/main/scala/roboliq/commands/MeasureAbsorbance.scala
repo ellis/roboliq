@@ -1,7 +1,7 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqError
 import roboliq.core.RqResult
@@ -132,23 +132,23 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 }
 
 class MeasureAbsorbanceOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "measureAbsorbance",
 			paramName_l = List("?agent", "?device", "?labware", "?model", "?site"),
 			paramTyp_l = List("agent", "reader", "labware", "model", "site"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
-				Strips.Literal(Strips.Atom("device-can-site", List("?device", "?site")), true),
-				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "agent-has-device", "?agent", "?device"),
+				strips.Literal(strips.Atom("device-can-site", List("?device", "?site")), true),
+				strips.Literal(strips.Atom("location", List("?labware", "?site")), true)
 				// TODO: device site should be closed
 			)),
-			effects = roboliq.ai.plan.Strips.Literals.empty
+			effects = roboliq.ai.strips.Literals.empty
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName, deviceName, labwareName, _, siteName) = operator.paramName_l

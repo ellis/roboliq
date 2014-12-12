@@ -1,6 +1,6 @@
 package roboliq.ai.plan
 
-import Strips._
+import roboliq.ai.strips._
 import scala.collection.mutable.ArrayBuffer
 
 	

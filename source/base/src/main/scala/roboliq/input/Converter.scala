@@ -9,7 +9,7 @@ import grizzled.slf4j.Logger
 import spray.json._
 import roboliq.core._
 import roboliq.entities._
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 
 case class KeyClassOpt(
 	key: String,
@@ -340,7 +340,7 @@ object Converter {
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 			// Logic
-			else if (typ =:= typeOf[Strips.Literal]) toStripsLiteral(jsval)
+			else if (typ =:= typeOf[strips.Literal]) tostripsLiteral(jsval)
 			// Lookups
 			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](jsval, eb)
 			else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](jsval, eb)
@@ -968,9 +968,9 @@ object Converter {
 		}
 	}
 	
-	def toStripsLiteral(
+	def tostripsLiteral(
 		jsval: JsValue
-	): RqResult[Strips.Literal] = {
+	): RqResult[strips.Literal] = {
 		jsval match {
 			case JsString(s) =>
 				s.split(" ").toList.filterNot(_.isEmpty) match {
@@ -984,7 +984,7 @@ object Converter {
 							RqError(s"expected a non-empty name for logical literal in: $s")
 						}
 						else {
-							RqSuccess(Strips.Literal(Strips.Atom(name, l.tail), pos))
+							RqSuccess(strips.Literal(strips.Atom(name, l.tail), pos))
 						}
 				}
 			case _ => RqError("expected JsString for logical literal")

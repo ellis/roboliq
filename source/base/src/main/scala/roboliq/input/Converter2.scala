@@ -227,7 +227,7 @@ object Converter2 {
 				else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 				else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 				// Logic
-				else if (typ =:= typeOf[Strips.Literal]) toStripsLiteral(jsval)
+				else if (typ =:= typeOf[strips.Literal]) tostripsLiteral(jsval)
 				// Lookups
 				else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](jsval, eb)
 				else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](jsval, eb)

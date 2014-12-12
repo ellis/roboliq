@@ -1,6 +1,6 @@
 package roboliq.plan
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -39,7 +39,7 @@ case class Task(
 //trait Method extends Command
 
 trait Action extends Command {
-	def getDomainOperator(id: List[Int]): RqResult[roboliq.ai.plan.Strips.Operator]
+	def getDomainOperator(id: List[Int]): RqResult[roboliq.ai.strips.Operator]
 	def getProblemParamMap(id: List[Int], jsval_l: List[JsValue]): RqResult[Map[String, String]]
 	//def getOperators(id: List[Int], jsval_l: List[JsValue], )
 }
@@ -47,13 +47,13 @@ trait Action extends Command {
 case class UnknownAction(
 	call: Call
 ) extends Action {
-	def getDomainOperator(id: List[Int]): RqResult[roboliq.ai.plan.Strips.Operator] = {
-		RqSuccess(roboliq.ai.plan.Strips.Operator(
+	def getDomainOperator(id: List[Int]): RqResult[roboliq.ai.strips.Operator] = {
+		RqSuccess(roboliq.ai.strips.Operator(
 			name = "action_"+id.mkString("_"),
 			paramName_l = Nil,
 			paramTyp_l = Nil,
-			preconds = roboliq.ai.plan.Strips.Literals.empty,
-			effects = roboliq.ai.plan.Strips.Literals.empty
+			preconds = roboliq.ai.strips.Literals.empty,
+			effects = roboliq.ai.strips.Literals.empty
 		))
 	}
 
@@ -74,7 +74,7 @@ case class UnknownAction(
 case class OperatorInfo(
 	id: List[Int],
 	problemObjectToTyp_l: List[(String, String)],
-	problemState_l: List[Strips.Atom],
+	problemState_l: List[strips.Atom],
 	operatorName: String,
 	operatorBinding_m: Map[String, String],
 	instructionParam_m: Map[String, JsValue]
@@ -94,9 +94,9 @@ trait ActionHandler {
 }
 
 trait OperatorHandler {
-	def getDomainOperator: Strips.Operator
+	def getDomainOperator: strips.Operator
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit]
 }
@@ -397,7 +397,7 @@ object CallTree {
 		RqSuccess(CallExpandResult_Children(Nil))
 	}
 	
-	//def createPartialPlan(planInfo_l: List[ActionPlanInfo], problem: Strips.Problem): RqResult[PartialPlan] = {
+	//def createPartialPlan(planInfo_l: List[ActionPlanInfo], problem: strips.Problem): RqResult[PartialPlan] = {
 		
 	//}
 }

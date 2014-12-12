@@ -2,7 +2,7 @@ package roboliq.commands
 
 import scala.Option.option2Iterable
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqError
 import roboliq.core.RqResult
@@ -57,18 +57,18 @@ class PromptOperatorActionHandler extends ActionHandler {
 }
 
 class PromptOperatorOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "promptOperator",
 			paramName_l = List("?agent"),
 			paramTyp_l = List("agent"),
-			preconds = Strips.Literals.empty,
-			effects = roboliq.ai.plan.Strips.Literals.empty
+			preconds = strips.Literals.empty,
+			effects = roboliq.ai.strips.Literals.empty
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName) = operator.paramName_l

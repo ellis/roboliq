@@ -8,7 +8,7 @@ import spray.json.JsArray
 import spray.json.JsBoolean
 import spray.json.JsBoolean
 import spray.json.JsNull
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 
 /*object RjsType extends Enumeration {
 	val
@@ -53,8 +53,8 @@ case class RjsActionDef(
 	description_? : Option[String],
 	documentation_? : Option[String],
 	params: Map[String, RjsActionDefParam],
-	preconds: List[Strips.Literal],
-	effects: List[Strips.Literal],
+	preconds: List[strips.Literal],
+	effects: List[strips.Literal],
 	value: RjsValue
 ) extends RjsValue {
 	def toJson: JsValue = {
@@ -317,9 +317,9 @@ object RjsValue {
 					documentation_? <- Converter2.fromJson[Option[String]](jsobj, "DOCUMENTATION")
 					params <- Converter2.fromJson[Map[String, RjsActionDefParam]](jsobj, "PARAMS")
 					preconds0 <- Converter2.fromJson[List[String]](jsobj, "PRECONDS")
-					preconds = preconds0.map { s => Strips.Literal.parse(s) }
+					preconds = preconds0.map { s => strips.Literal.parse(s) }
 					effects0 <- Converter2.fromJson[List[String]](jsobj, "EFFECTS")
-					effects = effects0.map { s => Strips.Literal.parse(s) }
+					effects = effects0.map { s => strips.Literal.parse(s) }
 					value0 <- Converter2.fromJson[JsValue](jsobj, "VALUE")
 					value <- RjsValue.fromJson(value0)
 				} yield RjsActionDef(description_?, documentation_?, params, preconds, effects, value)

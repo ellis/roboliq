@@ -3,7 +3,7 @@ package roboliq.input
 import spray.json.JsObject
 import spray.json.JsValue
 import scala.collection.mutable.ArrayBuffer
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import scala.collection.mutable.HashMap
 import scala.math.Ordering.Implicits._
 import scala.annotation.tailrec
@@ -24,11 +24,11 @@ class Protocol2DataA(
 	val commandOrderingConstraints: List[List[String]],
 	val commandOrder: List[String],
 	val planningDomainObjects: Map[String, String],
-	val planningInitialState: Strips.State
+	val planningInitialState: strips.State
 )
 
 case class ProtocolCommandResult(
-	effects: Strips.Literals,
+	effects: strips.Literals,
 	validation_l: List[CommandValidation]
 )
 
@@ -80,22 +80,22 @@ class Protocol2 {
 	
 	private def processDataObjects(
 		object_m: RjsMap
-	): (Map[String, String], Strips.State) = {
+	): (Map[String, String], strips.State) = {
 		val objectToType_m = new HashMap[String, String]
-		val atom_l = new ArrayBuffer[Strips.Atom]
+		val atom_l = new ArrayBuffer[strips.Atom]
 		for ((name, rjsval) <- object_m.map) {
 			rjsval match {
 				case plate: RjsProtocolLabware =>
 					objectToType_m += (name -> "plate")
-					atom_l += Strips.Atom("labware", Seq(name))
-					plate.model_?.foreach(model => atom_l += Strips.Atom("model", Seq(name, model)))
-					plate.location_?.foreach(location => atom_l += Strips.Atom("location", Seq(name, location)))
+					atom_l += strips.Atom("labware", Seq(name))
+					plate.model_?.foreach(model => atom_l += strips.Atom("model", Seq(name, model)))
+					plate.location_?.foreach(location => atom_l += strips.Atom("location", Seq(name, location)))
 					ContextE.unit(())
 				case _ =>
 					ContextE.unit(())
 			}
 		}
-		(objectToType_m.toMap, Strips.State(atom_l.toSet))
+		(objectToType_m.toMap, strips.State(atom_l.toSet))
 	}
 	
 	def stepB(
@@ -174,17 +174,17 @@ class Protocol2 {
 	private def expandCommand(
 		id: String,
 		rjsval: RjsValue,
-		state: Strips.State
-	): ContextE[(Map[String, ProtocolCommandResult], Strips.Literals)] = {
+		state: strips.State
+	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
 		val result_m = new HashMap[String, ProtocolCommandResult]
 		ContextE.context(s"expandCommand($id)") {
 			ContextE.evaluate(rjsval).flatMap {
 				case RjsNull =>
-					ContextE.unit((Map(), Strips.Literals.empty))
+					ContextE.unit((Map(), strips.Literals.empty))
 				case action: RjsAction =>
 					expandAction(id, action, state)
 				case instruction: RjsInstruction =>
-					ContextE.unit((Map(), Strips.Literals.empty))
+					ContextE.unit((Map(), strips.Literals.empty))
 				case _ =>
 					// TODO: should perhaps log a warning here instead
 					ContextE.error(s"don't know how to expand command: $rjsval")
@@ -212,7 +212,7 @@ class Protocol2 {
 	private def checkActionPreconds(
 		action: RjsAction,
 		actionDef: RjsActionDef,
-		state0: Strips.State
+		state0: strips.State
 	): ContextE[List[CommandValidation]] = {
 		for {
 			precond_l <- bindActionLogic(actionDef.preconds, true, action, actionDef)
@@ -231,22 +231,22 @@ class Protocol2 {
 	private def getActionEffects(
 		action: RjsAction,
 		actionDef: RjsActionDef,
-		state0: Strips.State
-	): ContextE[Strips.Literals] = {
+		state0: strips.State
+	): ContextE[strips.Literals] = {
 		for {
 			effect_l <- bindActionLogic(actionDef.effects, false, action, actionDef)
-		} yield Strips.Literals(Unique(effect_l : _*))
+		} yield strips.Literals(Unique(effect_l : _*))
 	}
 	
 	/**
 	 * Substitute action input into the list of literals, replace $vars with the corresponding input values.
 	 */
 	private def bindActionLogic(
-		literal_l: List[Strips.Literal],
+		literal_l: List[strips.Literal],
 		isPrecond: Boolean,
 		action: RjsAction,
 		actionDef: RjsActionDef
-	): ContextE[List[Strips.Literal]] = {
+	): ContextE[List[strips.Literal]] = {
 		ContextE.mapAll(literal_l) { literal =>
 			for {
 				binding0_l <- ContextE.mapAll(literal.atom.params) { s =>
@@ -287,11 +287,11 @@ class Protocol2 {
 	private def expandAction(
 		id: String,
 		action: RjsAction,
-		state0: Strips.State
-	): ContextE[(Map[String, ProtocolCommandResult], Strips.Literals)] = {
+		state0: strips.State
+	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
 		val validation_l = new ArrayBuffer[CommandValidation]
 		val child_m = new HashMap[String, RjsValue]
-		var effectsCumulative = Strips.Literals(Unique[Strips.Literal]())
+		var effectsCumulative = strips.Literals(Unique[strips.Literal]())
 		val result_m = new HashMap[String, ProtocolCommandResult]
 		for {
 			actionDef <- ContextE.fromScope[RjsActionDef](action.name)
@@ -344,9 +344,9 @@ class Protocol2 {
 				}
 			}
 		} yield {
-			effectsCumulative ++= Strips.Literals(Unique(effects : _*))
+			effectsCumulative ++= strips.Literals(Unique(effects : _*))
 			result_m(id) = ProtocolCommandResult(
-				effects = Strips.Literals(Unique(effects : _*)),
+				effects = strips.Literals(Unique(effects : _*)),
 				validation_l = validation_l.toList
 			)
 			(result_m.toMap, effectsCumulative)

@@ -2,7 +2,7 @@ package roboliq.commands
 
 import scala.reflect.runtime.universe
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.core.RqResult
 import roboliq.entities.Agent
 import roboliq.entities.EntityBase
@@ -48,18 +48,18 @@ class CommentActionHandler extends ActionHandler {
 }
 
 class CommentOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "comment",
 			paramName_l = List("?agent"),
 			paramTyp_l = List("agent"),
-			preconds = Strips.Literals.empty,
-			effects = roboliq.ai.plan.Strips.Literals.empty
+			preconds = strips.Literals.empty,
+			effects = roboliq.ai.strips.Literals.empty
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName) = operator.paramName_l

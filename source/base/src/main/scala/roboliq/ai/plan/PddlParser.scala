@@ -3,6 +3,7 @@ package roboliq.ai.plan
 import scala.util.parsing.combinator.JavaTokenParsers
 import scalaz._
 import Scalaz._
+import roboliq.ai.strips
 
 
 sealed trait LispElem
@@ -27,7 +28,7 @@ object PddlParser {
 	type L = LispList
 	type S = LispString
 	
-	def parseDomain(input: String): Either[String, Strips.Domain] = {
+	def parseDomain(input: String): Either[String, strips.Domain] = {
 		LispParser0.parse(input) match {
 			case Left(msg) => Left(msg)
 			case Right(elem) =>
@@ -36,7 +37,7 @@ object PddlParser {
 		}
 	}
 	
-	def parseProblem(domain: Strips.Domain, input: String): Either[String, Strips.Problem] = {
+	def parseProblem(domain: strips.Domain, input: String): Either[String, strips.Problem] = {
 		LispParser0.parse(input) match {
 			case Left(msg) => Left(msg)
 			case Right(elem) =>
@@ -45,7 +46,7 @@ object PddlParser {
 		}
 	}
 	
-	def elemToDomain(elem: LispElem): Either[String, Strips.Domain] = {
+	def elemToDomain(elem: LispElem): Either[String, strips.Domain] = {
 		elem match {
 			case LispList(LispString("define") :: LispList(List(LispString("domain"), LispString(domainName))) :: rest) =>
 				val typeDef_l = rest.collect({ case LispList(LispString(":types") :: rest) => rest }).flatten
@@ -56,11 +57,11 @@ object PddlParser {
 					predicate_l <- parsePredicates(predicateDef_l).right
 					operator_l <- actionDef_l.map(pair => {
 						val (name, l) = pair
-						val op0 = Strips.Operator(name, Nil, Nil, Strips.Literals.empty, Strips.Literals.empty)
+						val op0 = strips.Operator(name, Nil, Nil, strips.Literals.empty, strips.Literals.empty)
 						updateOperator(l, op0)
 					}).sequenceU.right
 				} yield {
-					Strips.Domain(
+					strips.Domain(
 						type_m = typ_l.toMap,
 						constantToType_m = Map(),
 						predicate_l = predicate_l,
@@ -71,7 +72,7 @@ object PddlParser {
 		}
 	}
 	
-	def elemToProblem(domain: Strips.Domain, elem: LispElem): Either[String, Strips.Problem] = {
+	def elemToProblem(domain: strips.Domain, elem: LispElem): Either[String, strips.Problem] = {
 		elem match {
 			case LispList(LispString("define") :: LispList(List(LispString("problem"), LispString(problemName))) :: LispList(List(LispString(":domain"), LispString(domainName))) :: rest) =>
 				val objectDef_l = rest.collect({ case LispList(LispString(":objects") ::rest) => rest }).flatten
@@ -97,10 +98,10 @@ object PddlParser {
 						}
 					}).toSet.toList
 					println("object_l: "+objectToTyp_l)
-					Strips.Problem(
+					strips.Problem(
 						domain = domain,
 						typToObject_l = objectToTyp_l.map(_.swap) ++ object2_l,
-						state0 = Strips.State(init_l.toSet),
+						state0 = strips.State(init_l.toSet),
 						goals = goal_l.head
 					)
 				}
@@ -125,14 +126,14 @@ object PddlParser {
 		}
 	}
 	
-	private def parsePredicates(l: List[LispElem]): Either[String, List[Strips.Signature]] = {
-		val l2: List[Strips.Signature] = l.map(_ match {
+	private def parsePredicates(l: List[LispElem]): Either[String, List[strips.Signature]] = {
+		val l2: List[strips.Signature] = l.map(_ match {
 			case LispList(LispString(name) :: params) =>
 				toStringList(params) match {
 					case Left(msg) => return Left(msg)
 					case Right(param_l) =>
 					    val (name_l, typ_l) = parseParamList(param_l).unzip
-						new Strips.Signature(name, name_l, typ_l)
+						new strips.Signature(name, name_l, typ_l)
 				}
 			case x => return Left("predicate expects a list, received: "+x)
 		})
@@ -152,12 +153,12 @@ object PddlParser {
 		step(l.reverse, "any", Nil)
 	}
 	
-	private def updateOperator(l: List[LispElem], acc: Strips.Operator): Either[String, Strips.Operator] = {
+	private def updateOperator(l: List[LispElem], acc: strips.Operator): Either[String, strips.Operator] = {
 		l match {
 			case Nil => Right(acc)
 			case LispString(":parameters") :: LispList(l2) :: rest =>
 				val (paramName_l, paramTyp_l) = parseParamList(l2.map(_.asInstanceOf[LispString]).map(_.s)).unzip
-				val acc2 = Strips.Operator(
+				val acc2 = strips.Operator(
 					name = acc.name,
 					paramName_l = paramName_l,
 					paramTyp_l = paramTyp_l,
@@ -169,27 +170,27 @@ object PddlParser {
 				val preconds_? = getLiterals(elem).right;
 				for {
 					preconds <- preconds_?
-					acc3 <- updateOperator(rest, Strips.Operator(acc.name, acc.paramName_l, acc.paramTyp_l, preconds, acc.effects)).right
+					acc3 <- updateOperator(rest, strips.Operator(acc.name, acc.paramName_l, acc.paramTyp_l, preconds, acc.effects)).right
 				} yield acc3
 			case LispString(":effect") :: elem :: rest =>
 				for {
 					effects <- getLiterals(elem).right
-					acc3 <- updateOperator(rest, Strips.Operator(acc.name, acc.paramName_l, acc.paramTyp_l, acc.preconds, effects)).right
+					acc3 <- updateOperator(rest, strips.Operator(acc.name, acc.paramName_l, acc.paramTyp_l, acc.preconds, effects)).right
 				} yield acc3
 			case _ => Left("Unrecognized tokens in operator: "+l)
 		}
 	}
 	
-	private type Literal = (Strips.Atom, Boolean)
+	private type Literal = (strips.Atom, Boolean)
 	
-	private def getLiterals(elem: LispElem): Either[String, Strips.Literals] = elem match {
-		case LispList(Nil) => Right(Strips.Literals.empty)
+	private def getLiterals(elem: LispElem): Either[String, strips.Literals] = elem match {
+		case LispList(Nil) => Right(strips.Literals.empty)
 		case LispList(LispString("and") :: l) =>
 			for {
 				literal_l <- l.map(elem => getLiteral(elem, true)).sequenceU.right
 			} yield {
 				val (pos_l, neg_l) = literal_l.partition(_._2)
-				Strips.Literals(pos_l.map(_._1), neg_l.map(_._1))
+				strips.Literals(pos_l.map(_._1), neg_l.map(_._1))
 			}
 		case _ => Left("unrecognized literals: "+elem)
 	}
@@ -200,17 +201,17 @@ object PddlParser {
 			case LispList(LispString("not") :: elem2 :: Nil) =>
 				getLiteral(elem2, !pos)
 			case LispList(LispString(name) :: l) if l.forall(_.isInstanceOf[LispString]) =>
-				val atom = Strips.Atom(name, l.map(_.asInstanceOf[LispString].s))
+				val atom = strips.Atom(name, l.map(_.asInstanceOf[LispString].s))
 				Right((atom, pos))
 			case _ => Left("unrecognized literal: "+elem)
 		}
 	}
 	
-	private def getAtom(elem: LispElem): Either[String, Strips.Atom] = {
+	private def getAtom(elem: LispElem): Either[String, strips.Atom] = {
 		elem match {
 			case LispList(Nil) => Left("Empty atom not allowed")
 			case LispList(LispString(name) :: l) if l.forall(_.isInstanceOf[LispString]) =>
-				Right(Strips.Atom(name, l.map(_.asInstanceOf[LispString].s)))
+				Right(strips.Atom(name, l.map(_.asInstanceOf[LispString].s)))
 			case _ => Left("unrecognized atom: "+elem)
 		}
 	}
@@ -255,7 +256,7 @@ private object LispParser0 extends JavaTokenParsers {
 
 /*
 private object LispParser1 extends JavaTokenParsers {
-	import Strips._
+	import roboliq.ai.strips._
 	
 	def parens[A](a: Parser[A]): Parser[A] = "(" ~ a ~ ")" ^^ {
 		case _ ~ x ~ _ => x
@@ -304,7 +305,7 @@ private object PddlParser0 extends JavaTokenParsers {
 	
 	def vari: Parser[String] = """[?][a-zA-Z][a-zA-Z0-9_-]*""".r ^^ { s => s }
 	
-	def domain: Parser[Strips.Domain] =
+	def domain: Parser[strips.Domain] =
 		"(define (domain" ~ ident ~ opt(requirements) ~ rep1(action) ^^ {
 		case _ ~ name ~ _ ~ action_l =>
 		
@@ -316,7 +317,7 @@ private object PddlParser0 extends JavaTokenParsers {
 	
 	def requirements: Parser[Unit] = "(:requirements" ~ """[^)]*)""".r ^^ { _ => () }
 	
-	def action: Parser[Strips.Operator] = parens({
+	def action: Parser[strips.Operator] = parens({
 		":action" ~ ident ~ ":parameters" ~ parens(rep(vari)) ^^
 	})
 	
@@ -329,7 +330,7 @@ private object PddlParser0 extends JavaTokenParsers {
 		}
 	}
 	
-	def parseDomain(input: String): Either[String, Strips.Domain] = {
+	def parseDomain(input: String): Either[String, strips.Domain] = {
 		parseAll(domain, input) match {
 			case Success(x, _) => Right(x)
 			case NoSuccess(msg, _) => Left(msg)

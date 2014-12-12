@@ -1,7 +1,7 @@
 package roboliq.evoware.commands
 
 import scala.Option.option2Iterable
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -28,31 +28,31 @@ private case class EvowareTransportLabwareExtraParams(
 )
 
 class OperatorHandler_EvowareTransportLabware extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "evoware.transportLabware",
 			paramName_l = List("?labware", "?model", "?site1", "?site2", "?siteModel2"),
 			paramTyp_l = List("labware", "model", "site", "site", "siteModel"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "location", "?labware", "?site1"),
-				Strips.Literal(true, "model", "?labware", "?model"),
-				Strips.Literal(true, "model", "?site2", "?siteModel2"),
-				Strips.Literal(true, "stackable", "?siteModel2", "?model"),
-				Strips.Literal(false, "site-blocked", "?site2"),
-				Strips.Literal(false, "site-closed", "?site1"),
-				Strips.Literal(false, "site-closed", "?site2")
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "location", "?labware", "?site1"),
+				strips.Literal(true, "model", "?labware", "?model"),
+				strips.Literal(true, "model", "?site2", "?siteModel2"),
+				strips.Literal(true, "stackable", "?siteModel2", "?model"),
+				strips.Literal(false, "site-blocked", "?site2"),
+				strips.Literal(false, "site-closed", "?site1"),
+				strips.Literal(false, "site-closed", "?site2")
 			)),
-			effects = Strips.Literals(Unique(
-				Strips.Literal(false, "location", "?labware", "?site1"),
-				Strips.Literal(false, "site-blocked", "?site1"),
-				Strips.Literal(true, "location", "?labware", "?site2"),
-				Strips.Literal(true, "site-blocked", "?site2")
+			effects = strips.Literals(Unique(
+				strips.Literal(false, "location", "?labware", "?site1"),
+				strips.Literal(false, "site-blocked", "?site1"),
+				strips.Literal(true, "location", "?labware", "?site2"),
+				strips.Literal(true, "site-blocked", "?site2")
 			))
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(labwareName, modelName, site1Name, site2Name, _) = operator.paramName_l

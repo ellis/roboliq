@@ -1,7 +1,7 @@
 package roboliq.ai.plan
 
 import scala.language.postfixOps
-import Strips._
+import roboliq.ai.strips._
 
 case class BasicPlanningGraph(
 	problem: Problem,

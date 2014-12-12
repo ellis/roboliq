@@ -2,7 +2,7 @@ package roboliq.commands
 
 import scala.reflect.runtime.universe
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RsResult
@@ -63,22 +63,22 @@ class CarouselCloseOperatorHandler(
 	deviceIdent: String,
 	internalSiteIdent_l: List[String]
 ) extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "carousel.close-"+deviceIdent, // The `id` refers to an internal site
 			paramName_l = List("?agent"), // This is the external site on the robot bench, not one of the internal sites.
 			paramTyp_l = List("agent"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", deviceIdent)
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "agent-has-device", "?agent", deviceIdent)
 			)),
-			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
-				Strips.Literal(true, "site-closed", ident)
+			effects = strips.Literals(Unique(internalSiteIdent_l.map(ident => 
+				strips.Literal(true, "site-closed", ident)
 			) : _*))
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName) = operator.paramName_l

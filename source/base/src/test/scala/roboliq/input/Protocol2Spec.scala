@@ -10,7 +10,7 @@ import spray.json.JsString
 import spray.json.JsValue
 import java.io.File
 import roboliq.utils.JsonUtils
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 
 class Protocol2Spec extends FunSpec {
 	import ContextValueWrapper._
@@ -71,10 +71,10 @@ cmd:
 			assert(dataA.planningDomainObjects == Map(
 				"plate1" -> "plate"
 			))
-			assert(dataA.planningProblemState == Strips.State(Set[Strips.Atom](
-				Strips.Atom.parse("labware plate1"),
-				Strips.Atom.parse("model plate1 plateModel_384_square"),
-				Strips.Atom.parse("location plate1 P3")
+			assert(dataA.planningProblemState == strips.State(Set[strips.Atom](
+				strips.Atom.parse("labware plate1"),
+				strips.Atom.parse("model plate1 plateModel_384_square"),
+				strips.Atom.parse("location plate1 P3")
 			)))
 		}*/
 		
@@ -101,10 +101,10 @@ cmd:
 			assert(dataA.planningDomainObjects == Map(
 				"plate1" -> "plate"
 			))
-			assert(dataA.planningInitialState == Strips.State(Set[Strips.Atom](
-				Strips.Atom.parse("labware plate1"),
-				Strips.Atom.parse("model plate1 plateModel_384_square"),
-				Strips.Atom.parse("location plate1 P3")
+			assert(dataA.planningInitialState == strips.State(Set[strips.Atom](
+				strips.Atom.parse("labware plate1"),
+				strips.Atom.parse("model plate1 plateModel_384_square"),
+				strips.Atom.parse("location plate1 P3")
 			)))
 			
 			val ctxval1 = (for {
@@ -112,10 +112,14 @@ cmd:
 				dataB <- protocolEvaluator.stepB(dataA)
 			} yield dataB.commandExpansions).run(data0)
 			
+			// strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3")
 			val expected = Map(
 				"1" -> ProtocolCommandResult(
-					effects = Strips.Literals.empty,
-					validation_l = Nil
+					effects = strips.Literals.empty,
+					validation_l = List(
+						CommandValidation_Precond("agent-has-device mario mario__Shaker"),
+						CommandValidation_Precond("device-can-site mario__Shaker P3")
+					)
 				)
 			)
 			assert(ctxval1.value == expected)
@@ -170,9 +174,9 @@ command:
 				_ = println("B")
 				state0 = temp0._2
 				// Add a couple atoms to the state regarding the robot's setup
-				state1 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker") + Strips.Atom.parse("device-can-site mario__Shaker P3"))
+				state1 = strips.State(state0.atoms + strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3"))
 				// Leave out a necessary state value, in order to get a precondition error
-				state2 = Strips.State(state0.atoms + Strips.Atom.parse("agent-has-device mario mario__Shaker"))
+				state2 = strips.State(state0.atoms + strips.Atom.parse("agent-has-device mario mario__Shaker"))
 				validation1_l <- protocol.validateDataCommand(state1, m1, "1")
 				_ = println("C")
 				validation2_l <- protocol.validateDataCommand(state1, m2, "1")

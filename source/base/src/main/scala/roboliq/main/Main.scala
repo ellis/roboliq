@@ -112,8 +112,8 @@ class Runner(args: Array[String]) {
 			hdf5 = new Hdf5(filenameHdf5)
 			_ = hdf5.copyFile(scriptId, "config.yaml", opt.configFile)
 			_ = hdf5.copyFile(scriptId, "protocol.prot", opt.protocolFile)
-			_ = save(hdf5, scriptId, dirOutput, "domain.pddl", plan0.problem.domain.toStripsText)
-			_ = save(hdf5, scriptId, dirOutput, "problem.pddl", plan0.problem.toStripsText)
+			_ = save(hdf5, scriptId, dirOutput, "domain.pddl", plan0.problem.domain.tostripsText)
+			_ = save(hdf5, scriptId, dirOutput, "problem.pddl", plan0.problem.tostripsText)
 			_ = save(hdf5, scriptId, dirOutput, "plan0.dot", plan0.toDot(showInitialState=true))
 			_ = save(hdf5, scriptId, dirOutput, "actions0.lst", plan0.action_l.drop(2).mkString("\n"))
 			_ = hdf5.saveSubstances(scriptId, protocol.nameToSubstance_m.toList.sortBy(_._1).map(_._2))
@@ -212,7 +212,7 @@ class Runner(args: Array[String]) {
 		cs: CommandSet,
 		planInfo_l: List[OperatorInfo],
 		originalActionCount: Int,
-		indexToOperator_l: List[(Int, roboliq.ai.plan.Strips.Operator)]
+		indexToOperator_l: List[(Int, roboliq.ai.strips.Operator)]
 	): Context[Unit] = {
 		Context.foreachFirst(indexToOperator_l.zipWithIndex) { case ((action_i, operator), instructionIdx) =>
 			for {
@@ -227,7 +227,7 @@ class Runner(args: Array[String]) {
 		operatorInfo_l: List[OperatorInfo],
 		originalActionCount: Int,
 		action_i: Int,
-		operator: roboliq.ai.plan.Strips.Operator
+		operator: roboliq.ai.strips.Operator
 	): Context[Unit] = {
 		//println("action: "+operator)
 		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()

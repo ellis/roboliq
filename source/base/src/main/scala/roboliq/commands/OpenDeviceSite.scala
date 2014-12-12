@@ -1,7 +1,7 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -59,23 +59,23 @@ class OpenDeviceSiteActionHandler extends ActionHandler {
 }
 
 class OpenDeviceSiteOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "openDeviceSite",
 			paramName_l = List("?agent", "?device", "?site"),
 			paramTyp_l = List("agent", "device", "site"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device"),
-				Strips.Literal(true, "device-can-open-site", "?device", "?site")
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "agent-has-device", "?agent", "?device"),
+				strips.Literal(true, "device-can-open-site", "?device", "?site")
 			)),
-			effects = Strips.Literals(Unique(
-				Strips.Literal(false, "site-closed", "?site")
+			effects = strips.Literals(Unique(
+				strips.Literal(false, "site-closed", "?site")
 			))
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName, deviceName, siteName) = operator.paramName_l

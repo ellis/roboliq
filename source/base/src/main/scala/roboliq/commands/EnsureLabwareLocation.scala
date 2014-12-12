@@ -1,7 +1,7 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -62,22 +62,22 @@ class EnsureLabwareLocationActionHandler extends ActionHandler {
 }
 
 class EnsureLabwareLocationOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "ensureLabwareLocation",
 			paramName_l = List("?labware", "?site"),
 			paramTyp_l = List("labware", "site"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "location", "?labware", "?site")
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "location", "?labware", "?site")
 			)),
-			effects = Strips.Literals(Unique(
-				Strips.Literal(true, "location", "?labware", "?site")
+			effects = strips.Literals(Unique(
+				strips.Literal(true, "location", "?labware", "?site")
 			))
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		Context.unit(())

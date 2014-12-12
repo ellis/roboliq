@@ -1,7 +1,7 @@
 package roboliq.commands
 
 import scala.reflect.runtime.universe
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -57,20 +57,20 @@ class RunDeviceActionHandler extends ActionHandler {
 }
 
 class RunDeviceOperatorHandler extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "runDevice",
 			paramName_l = List("?agent", "?device"),
 			paramTyp_l = List("agent", "device"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device")
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "agent-has-device", "?agent", "?device")
 			)),
-			effects = Strips.Literals.empty
+			effects = strips.Literals.empty
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName, deviceName) = operator.paramName_l

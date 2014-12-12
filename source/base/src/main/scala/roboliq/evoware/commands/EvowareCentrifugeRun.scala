@@ -1,6 +1,6 @@
 package roboliq.evoware.commands
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.entities.Agent
@@ -60,22 +60,22 @@ class EvowareCentrifugeRunOperatorHandler(
 	deviceName: String,
 	internalSiteIdent_l: List[String]
 ) extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "evoware.centrifuge.run-"+deviceName,
 			paramName_l = List("?agent", "?device"),
 			paramTyp_l = List("agent", "centrifuge"),
-			preconds = Strips.Literals(Unique(
-				Strips.Literal(true, "agent-has-device", "?agent", "?device")
+			preconds = strips.Literals(Unique(
+				strips.Literal(true, "agent-has-device", "?agent", "?device")
 			)),
-			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
-				Strips.Literal(true, "site-closed", ident)
+			effects = strips.Literals(Unique(internalSiteIdent_l.map(ident => 
+				strips.Literal(true, "site-closed", ident)
 			) : _*))
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		val List(agentName, deviceName) = operator.paramName_l

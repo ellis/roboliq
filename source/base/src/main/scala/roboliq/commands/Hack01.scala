@@ -1,7 +1,7 @@
 package roboliq.commands
 
 import scala.Option.option2Iterable
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqError
 import roboliq.core.RqResult

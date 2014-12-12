@@ -2,7 +2,7 @@ package roboliq.commands
 
 import scala.reflect.runtime.universe
 
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RsResult
@@ -62,20 +62,20 @@ class CarouselOpenSiteOperatorHandler(
 	internalSiteIdent: String,
 	internalSiteIdent_l: List[String]
 ) extends OperatorHandler {
-	def getDomainOperator: Strips.Operator = {
-		Strips.Operator(
+	def getDomainOperator: strips.Operator = {
+		strips.Operator(
 			name = "carousel.openSite-"+internalSiteIdent, // The `id` refers to an internal site
 			paramName_l = Nil, // This is the external site on the robot bench, not one of the internal sites.
 			paramTyp_l = Nil,
-			preconds = Strips.Literals.empty,
-			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
-				Strips.Literal(ident != internalSiteIdent, "site-closed", ident)
+			preconds = strips.Literals.empty,
+			effects = strips.Literals(Unique(internalSiteIdent_l.map(ident => 
+				strips.Literal(ident != internalSiteIdent, "site-closed", ident)
 			) : _*))
 		)
 	}
 	
 	def getInstruction(
-		operator: Strips.Operator,
+		operator: strips.Operator,
 		instructionParam_m: Map[String, JsValue]
 	): Context[Unit] = {
 		for {

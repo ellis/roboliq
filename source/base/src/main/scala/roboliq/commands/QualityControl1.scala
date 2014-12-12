@@ -3,8 +3,8 @@
 import scala.collection.immutable.SortedSet
 import scala.reflect.runtime.universe
 import scala.runtime.ZippedTraversable3.zippedTraversable3ToTraversable
-import roboliq.ai.plan.Strips
-import roboliq.ai.plan.Strips._
+import roboliq.ai.strips
+import roboliq.ai.strips._
 import roboliq.ai.plan.Unique
 import grizzled.slf4j.Logger
 import roboliq.core.RqError

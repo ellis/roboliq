@@ -2,7 +2,7 @@ package roboliq.input
 
 import scala.beans.BeanProperty
 import roboliq.entities.Rel
-import roboliq.ai.plan.Strips
+import roboliq.ai.strips
 import roboliq.core.RsResult
 import roboliq.ai.plan.Unique
 import spray.json.JsValue
@@ -36,8 +36,8 @@ case class ActionDef(
 	description_? : Option[String],
 	documentation_? : Option[String],
 	param: List[InputDef],
-	precond: List[Strips.Literal],
-	effect: List[Strips.Literal],
+	precond: List[strips.Literal],
+	effect: List[strips.Literal],
 	output: JsValue
 ) {
 }
@@ -49,12 +49,12 @@ case class CommandDef(
 	description_? : Option[String],
 	documentation_? : Option[String],
 	input: List[InputDef],
-	precond: List[Strips.Literal],
-	effect: List[Strips.Literal],
+	precond: List[strips.Literal],
+	effect: List[strips.Literal],
 	output: List[CommandCall],
 	oneOf: List[LabeledCommandCallList]
 ) {
-	def createOperator(): RsResult[Strips.Operator] = {
+	def createOperator(): RsResult[strips.Operator] = {
 		//println("A:")
 		//println((precond ++ effect).flatMap(literal => literal.atom.params.filter(_.startsWith("$"))))
 		val logicParam_l = (precond ++ effect).flatMap(literal => literal.atom.params.filter(_.startsWith("$"))).map(_.substring(1)).distinct
@@ -67,12 +67,12 @@ case class CommandDef(
 			_ <- RsResult.assert(unnecessaryPlannableParam_l.isEmpty, s"'Plannable' parameters must be used in a 'precond' or and 'effect': "+unnecessaryPlannableParam_l.mkString(", "))
 			_ <- RsResult.assert(param_l.size == use_l.size, "The following variables were used in 'precond' or 'effect', but not defined in 'input': "+(use_l -- param_l.map(_.name)).mkString(", "))
 		} yield {
-			Strips.Operator(
+			strips.Operator(
 				name = name,
 				paramName_l = param_l.map(_.name),
 				paramTyp_l = param_l.map(_.`type`),
-				preconds = Strips.Literals(Unique(precond :_ *)),
-				effects = Strips.Literals(Unique(effect :_ *))
+				preconds = strips.Literals(Unique(precond :_ *)),
+				effects = strips.Literals(Unique(effect :_ *))
 			)
 		}
 	}
