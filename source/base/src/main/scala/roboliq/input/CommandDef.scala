@@ -2,9 +2,9 @@ package roboliq.input
 
 import scala.beans.BeanProperty
 import roboliq.entities.Rel
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 import roboliq.core.RsResult
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Unique
 import spray.json.JsValue
 
 object InputMode extends Enumeration {

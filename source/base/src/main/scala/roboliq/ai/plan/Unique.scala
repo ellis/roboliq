@@ -1,4 +1,4 @@
-package aiplan.strips2
+package roboliq.ai.plan
 
 import collection.TraversableLike
 import collection.generic.{CanBuildFrom, GenericCompanion, GenericTraversableTemplate, TraversableFactory}

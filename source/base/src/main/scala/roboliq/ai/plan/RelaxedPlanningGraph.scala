@@ -1,4 +1,4 @@
-package aiplan.strips2
+package roboliq.ai.plan
 
 import Strips._
 import scala.collection.mutable.ArrayBuffer

@@ -1,6 +1,6 @@
 package roboliq.evoware.commands
 
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.entities.Agent
@@ -18,7 +18,7 @@ import roboliq.entities.Centrifuge
 import roboliq.commands.CentrifugeRun
 import roboliq.commands.CentrifugeProgram
 import roboliq.evoware.translator.L0C_Facts
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Unique
 
 
 case class EvowareCentrifugeRunActionParams(

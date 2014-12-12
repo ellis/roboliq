@@ -2,8 +2,8 @@ package roboliq.commands
 
 import scala.reflect.runtime.universe
 
-import aiplan.strips2.Strips
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Strips
+import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RsResult
 import roboliq.entities.Agent

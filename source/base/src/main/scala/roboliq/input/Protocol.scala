@@ -22,11 +22,11 @@ import scalax.collection.edge.LHyperEdge
 import scalax.collection.edge.LkUnDiEdge
 import roboliq.plan.CallTree
 import roboliq.plan.Call
-import aiplan.strips2.Strips
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Strips
+import roboliq.ai.plan.Unique
 import roboliq.plan.CommandSet
 import roboliq.plan.OperatorInfo
-import aiplan.strips2.PartialPlan
+import roboliq.ai.plan.PartialPlan
 import roboliq.commands.OperatorHandler_TransportLabware
 import roboliq.plan.ActionHandler
 import roboliq.commands._

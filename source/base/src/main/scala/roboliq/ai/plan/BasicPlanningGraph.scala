@@ -1,4 +1,4 @@
-package aiplan.strips2
+package roboliq.ai.plan
 
 import scala.language.postfixOps
 import Strips._

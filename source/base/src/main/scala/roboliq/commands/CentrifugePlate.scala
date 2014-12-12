@@ -2,8 +2,8 @@ package roboliq.commands
 
 import scala.Option.option2Iterable
 
-import aiplan.strips2.Strips
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Strips
+import roboliq.ai.plan.Unique
 import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -87,7 +87,7 @@ class CentrifugePlateOperatorHandler extends OperatorHandler {
 				Strips.Literal(Strips.Atom("model", List("?labware", "?model")), true),
 				Strips.Literal(Strips.Atom("location", List("?labware", "?site")), true)
 			)),
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = roboliq.ai.plan.Strips.Literals.empty
 		)
 	}
 	

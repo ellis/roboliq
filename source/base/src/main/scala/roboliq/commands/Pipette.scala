@@ -3,9 +3,9 @@ package roboliq.commands
 import scala.Option.option2Iterable
 import scala.reflect.runtime.universe
 
-import aiplan.strips2.Strips
-import aiplan.strips2.Strips._
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Strips
+import roboliq.ai.plan.Strips._
+import roboliq.ai.plan.Unique
 import grizzled.slf4j.Logger
 import roboliq.core.RqResult
 import roboliq.entities.Agent
@@ -117,7 +117,7 @@ class PipetteOperatorHandler(n: Int) extends OperatorHandler {
 			paramName_l = paramName_l,
 			paramTyp_l = paramTyp_l,
 			preconds = Strips.Literals(Unique(preconds : _*)),
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = roboliq.ai.plan.Strips.Literals.empty
 		)
 	}
 	

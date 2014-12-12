@@ -10,7 +10,7 @@ import spray.json.JsString
 import spray.json.JsValue
 import java.io.File
 import roboliq.utils.JsonUtils
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 
 class Protocol2Spec extends FunSpec {
 	import ContextValueWrapper._

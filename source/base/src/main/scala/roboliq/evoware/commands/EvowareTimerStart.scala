@@ -1,8 +1,8 @@
 package roboliq.evoware.commands
 
 import scala.reflect.runtime.universe
-import aiplan.strips2.Strips
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Strips
+import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.entities.Agent
@@ -59,7 +59,7 @@ class EvowareTimerStartOperatorHandler extends OperatorHandler {
 			paramName_l = List("?agent"),
 			paramTyp_l = List("agent"),
 			preconds = Strips.Literals.empty,
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = roboliq.ai.plan.Strips.Literals.empty
 		)
 	}
 	

@@ -1,6 +1,6 @@
 package roboliq.entities
 
-import aiplan.strips2.Strips.Atom
+import roboliq.ai.plan.Strips.Atom
 
 case class AtomBase(
 	val atom_l: Set[Atom]

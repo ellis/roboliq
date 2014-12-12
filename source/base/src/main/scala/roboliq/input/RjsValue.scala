@@ -8,7 +8,7 @@ import spray.json.JsArray
 import spray.json.JsBoolean
 import spray.json.JsBoolean
 import spray.json.JsNull
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 
 /*object RjsType extends Enumeration {
 	val

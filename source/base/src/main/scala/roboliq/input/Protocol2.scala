@@ -3,11 +3,11 @@ package roboliq.input
 import spray.json.JsObject
 import spray.json.JsValue
 import scala.collection.mutable.ArrayBuffer
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 import scala.collection.mutable.HashMap
 import scala.math.Ordering.Implicits._
 import scala.annotation.tailrec
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Unique
 
 sealed trait CommandValidation
 case class CommandValidation_Param(name: String) extends CommandValidation
@@ -185,6 +185,9 @@ class Protocol2 {
 					expandAction(id, action, state)
 				case instruction: RjsInstruction =>
 					ContextE.unit((Map[String, ProtocolCommandResult](), Strips.Literals(Unique[Strips.Literal]())))
+				case _ =>
+					// TODO: should perhaps log a warning here instead
+					ContextE.error(s"don't know how to expand command: $rjsval")
 			}
 		}
 	}

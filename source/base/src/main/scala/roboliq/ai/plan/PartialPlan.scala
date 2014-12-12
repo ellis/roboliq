@@ -1,4 +1,4 @@
-package aiplan.strips2
+package roboliq.ai.plan
 
 import Strips._
 import scala.collection.mutable.ArrayBuffer
@@ -1008,8 +1008,8 @@ object PartialPlan {
 	
 	def main0(args: Array[String]) {
 		val res = for {
-			domain <- aiplan.strips2.PddlParser.parseDomain(domainText0).right
-			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText0).right
+			domain <- PddlParser.parseDomain(domainText0).right
+			problem <- PddlParser.parseProblem(domain, problemText0).right
 		} yield {
 			val plan0 = fromProblem(problem)
 			println("domain:")
@@ -1108,8 +1108,8 @@ object PartialPlan {
 	
 	def main(args: Array[String]) {
 		val res = for {
-			domain <- aiplan.strips2.PddlParser.parseDomain(domainText).right
-			problem <- aiplan.strips2.PddlParser.parseProblem(domain, problemText).right
+			domain <- roboliq.ai.plan.PddlParser.parseDomain(domainText).right
+			problem <- roboliq.ai.plan.PddlParser.parseProblem(domain, problemText).right
 			_ <- Right(println("typToObjects_m: "+ problem.typToObjects_m)).right
 			plan0 <- Right(fromProblem(problem)).right
 			//op <- domain.getOperator("moveLabware").right

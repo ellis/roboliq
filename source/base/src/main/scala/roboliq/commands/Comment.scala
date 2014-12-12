@@ -2,7 +2,7 @@ package roboliq.commands
 
 import scala.reflect.runtime.universe
 
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 import roboliq.core.RqResult
 import roboliq.entities.Agent
 import roboliq.entities.EntityBase
@@ -54,7 +54,7 @@ class CommentOperatorHandler extends OperatorHandler {
 			paramName_l = List("?agent"),
 			paramTyp_l = List("agent"),
 			preconds = Strips.Literals.empty,
-			effects = aiplan.strips2.Strips.Literals.empty
+			effects = roboliq.ai.plan.Strips.Literals.empty
 		)
 	}
 	

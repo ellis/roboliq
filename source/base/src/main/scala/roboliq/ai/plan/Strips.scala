@@ -1,4 +1,4 @@
-package aiplan.strips2
+package roboliq.ai.plan
 
 import scala.language.implicitConversions
 import scala.collection.mutable
@@ -282,7 +282,7 @@ object Strips {
 		operator_l: List[Operator]
 	) {
 		// FIXME: For some reason, Logger is taking many seconds to instantiate
-		//private val logger = Logger("aiplan.strips2.Strips.Domain")
+		//private val logger = Logger("roboliq.ai.plan.Strips.Domain")
 		//private val logger = Logger[this.type]
 		
 		val nameToPredicate_m = predicate_l.map(x => x.name -> x).toMap

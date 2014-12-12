@@ -1,6 +1,6 @@
 package roboliq.plan
 
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
@@ -39,7 +39,7 @@ case class Task(
 //trait Method extends Command
 
 trait Action extends Command {
-	def getDomainOperator(id: List[Int]): RqResult[aiplan.strips2.Strips.Operator]
+	def getDomainOperator(id: List[Int]): RqResult[roboliq.ai.plan.Strips.Operator]
 	def getProblemParamMap(id: List[Int], jsval_l: List[JsValue]): RqResult[Map[String, String]]
 	//def getOperators(id: List[Int], jsval_l: List[JsValue], )
 }
@@ -47,13 +47,13 @@ trait Action extends Command {
 case class UnknownAction(
 	call: Call
 ) extends Action {
-	def getDomainOperator(id: List[Int]): RqResult[aiplan.strips2.Strips.Operator] = {
-		RqSuccess(aiplan.strips2.Strips.Operator(
+	def getDomainOperator(id: List[Int]): RqResult[roboliq.ai.plan.Strips.Operator] = {
+		RqSuccess(roboliq.ai.plan.Strips.Operator(
 			name = "action_"+id.mkString("_"),
 			paramName_l = Nil,
 			paramTyp_l = Nil,
-			preconds = aiplan.strips2.Strips.Literals.empty,
-			effects = aiplan.strips2.Strips.Literals.empty
+			preconds = roboliq.ai.plan.Strips.Literals.empty,
+			effects = roboliq.ai.plan.Strips.Literals.empty
 		))
 	}
 

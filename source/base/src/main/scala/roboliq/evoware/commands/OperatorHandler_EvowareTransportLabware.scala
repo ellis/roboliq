@@ -1,8 +1,8 @@
 package roboliq.evoware.commands
 
 import scala.Option.option2Iterable
-import aiplan.strips2.Strips
-import aiplan.strips2.Unique
+import roboliq.ai.plan.Strips
+import roboliq.ai.plan.Unique
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess
 import roboliq.entities.Agent

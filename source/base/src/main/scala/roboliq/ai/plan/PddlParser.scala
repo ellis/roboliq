@@ -1,4 +1,4 @@
-package aiplan.strips2
+package roboliq.ai.plan
 
 import scala.util.parsing.combinator.JavaTokenParsers
 import scalaz._

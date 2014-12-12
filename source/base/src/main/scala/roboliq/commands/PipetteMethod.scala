@@ -8,7 +8,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.reflect.runtime.universe
 import scala.runtime.ZippedTraversable3.zippedTraversable3ToTraversable
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 import roboliq.core.RqError
 import roboliq.core.RqResult
 import roboliq.core.RqSuccess

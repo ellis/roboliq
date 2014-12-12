@@ -9,7 +9,7 @@ import grizzled.slf4j.Logger
 import spray.json._
 import roboliq.core._
 import roboliq.entities._
-import aiplan.strips2.Strips
+import roboliq.ai.plan.Strips
 
 case class KeyClassOpt(
 	key: String,

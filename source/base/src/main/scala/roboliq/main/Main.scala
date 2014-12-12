@@ -118,13 +118,13 @@ class Runner(args: Array[String]) {
 			_ = save(hdf5, scriptId, dirOutput, "actions0.lst", plan0.action_l.drop(2).mkString("\n"))
 			_ = hdf5.saveSubstances(scriptId, protocol.nameToSubstance_m.toList.sortBy(_._1).map(_._2))
 			_ = hdf5.saveSourceMixtures(scriptId, protocol.eb.sourceToMixture_m.toList.sortBy(_._1))
-			step0 = aiplan.strips2.PopState_SelectGoal(plan0, 0)
-			plan2 <- RsResult.from(aiplan.strips2.Pop.stepToEnd(step0))
+			step0 = roboliq.ai.plan.PopState_SelectGoal(plan0, 0)
+			plan2 <- RsResult.from(roboliq.ai.plan.Pop.stepToEnd(step0))
 			_ = save(hdf5, scriptId, dirOutput, "plan1.dot", plan2.toDot(showInitialState=true))
 			//_ = println("plan2:")
 			//_ = println(plan2.toDot(showInitialState=false))
 			//_ = println("orderings: "+plan2.orderings.getMinimalMap)
-			plan3 <- RsResult.from(aiplan.strips2.Pop.groundPlan(plan2))
+			plan3 <- RsResult.from(roboliq.ai.plan.Pop.groundPlan(plan2))
 			_ = save(hdf5, scriptId, dirOutput, "plan.dot", plan3.toDot(showInitialState=true))
 			_ = save(hdf5, scriptId, dirOutput, "actions.lst", (0 until plan3.action_l.size).map(i => plan3.getActionText(i)).mkString("\n"))
 			//_ = println("plan3:")
@@ -212,7 +212,7 @@ class Runner(args: Array[String]) {
 		cs: CommandSet,
 		planInfo_l: List[OperatorInfo],
 		originalActionCount: Int,
-		indexToOperator_l: List[(Int, aiplan.strips2.Strips.Operator)]
+		indexToOperator_l: List[(Int, roboliq.ai.plan.Strips.Operator)]
 	): Context[Unit] = {
 		Context.foreachFirst(indexToOperator_l.zipWithIndex) { case ((action_i, operator), instructionIdx) =>
 			for {
@@ -227,7 +227,7 @@ class Runner(args: Array[String]) {
 		operatorInfo_l: List[OperatorInfo],
 		originalActionCount: Int,
 		action_i: Int,
-		operator: aiplan.strips2.Strips.Operator
+		operator: roboliq.ai.plan.Strips.Operator
 	): Context[Unit] = {
 		//println("action: "+operator)
 		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
