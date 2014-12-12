@@ -52,8 +52,8 @@ usage.
 - [x] Evaluator: handle 'instruction' type and create test to create a list of instructions
 - [x] Protocol2: validate preconditions
 - [x] Protocol2DataA: value for initial state and map for effects
-- [ ] Protocol2: how to handle initial state of lab?  Should the initial state of protocol and lab be literals instead, so that state values can be negated?
-- [ ] Protocol2: generate action output
+- [x] Protocol2: how to handle initial state of lab?  Should the initial state of protocol and lab be literals instead, so that state values can be negated?
+- [x] Protocol2: generate action output
 - [ ] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2
 - [ ] Protocol2Data: create and use in Protocol2
@@ -192,8 +192,8 @@ command:
 - `Either[List[String], A]`
 - ResultW: can return warnings along with the result
 - ResultC: also keeps track of a stack of contexts, so that it's noted where the warnings and errors take place
-- ResultE: also keeps track of evaluation data, such as variable scopes
-- ResultP: also keeps track of protocol stuff, such as objects, values, logic
+- ResultE: also keeps track of evaluation data, such as variable scopes (remove EntityBase; this sould be for Evaluator and Converter classes)
+- ResultP: also keeps track of protocol stuff, such as objects, values, logic (perhaps add equivalent of EntityBase here?)
 
 ## Previous goal
 

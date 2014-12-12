@@ -22,12 +22,19 @@ import roboliq.ai.strips
 		= Value
 }*/
 
+case class RjsJsonType(typ: String) extends scala.annotation.StaticAnnotation
+case class RjsJsonName(name: String) extends scala.annotation.StaticAnnotation
+
 sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 	def toJson: JsValue
 	def toText: String = toString
 }
 
-case class RjsAction(name: String, input: RjsMap) extends RjsValue {
+@RjsJsonType("action")
+case class RjsAction(
+	@RjsJsonName("NAME") name: String,
+	@RjsJsonName("INPUT") input: RjsMap
+) extends RjsValue {
 	def toJson: JsValue = {
 		JsObject(Map[String, JsValue](
 			"TYPE" -> JsString("action"),
@@ -373,4 +380,154 @@ object RjsValue {
 				ContextE.error(s"conversion for TYPE=$typ not implemented.")
 		}
 	}
+
+import scala.reflect.runtime.{universe => ru}
+import scala.reflect.runtime.universe.Type
+import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.runtime.universe.typeOf
+
+/*
+import spray.json._
+import scala.reflect.runtime.{universe => ru}
+import roboliq.input._
+val jsobj = JsObject("TYPE" -> JsString("action"), "NAME" -> JsString("someaction"), "INPUT" -> JsObject("a" -> JsNumber(1)))
+
+val eb = new roboliq.entities.EntityBase
+val data0 = ContextEData(EvaluatorState(eb))
+
+RjsValue.fromJsObjectToRjs(jsobj, ru.typeOf[RjsAction]).run(data0)
+*/
+
+	def fromJsObjectToRjs(
+		jsobj: JsObject,
+		typ: Type
+	): ContextE[Any] = {
+		val ctor = typ.member(ru.termNames.CONSTRUCTOR).asMethod
+		val p0_l = ctor.paramLists(0)
+		val typA = ru.typeOf[RjsJsonName]
+		val nameToType_l = p0_l.map { p =>
+			val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typA)
+			val name_? : Option[String] = nameAnnotation_?.flatMap { a =>
+				val args = a.tree.children.tail
+				val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
+				values match {
+					case List(name: String) => Some(name)
+					case _ => None
+				}
+			}
+			val name: String = name_?.getOrElse(p.name.decodedName.toString.replace("_?", ""))
+			name -> p.typeSignature
+		}
+		
+		for {
+			nameToObj_m <- Converter2.convMapString(jsobj, nameToType_l)
+		} yield {
+			val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
+			val c = typ.typeSymbol.asClass
+			//println("arg_l: "+arg_l)
+			val mirror = ru.runtimeMirror(this.getClass.getClassLoader)
+			val mm = mirror.reflectClass(c).reflectConstructor(ctor)
+			//logger.debug("arg_l: "+arg_l)
+			val obj = mm(arg_l : _*)
+			obj
+		}
+	}
+/*
+import scala.reflect.runtime.{universe => ru}
+import scala.reflect.runtime.universe.Type
+import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.runtime.universe.typeOf
+import scala.reflect.runtime.universe._
+case class A(name: String) extends scala.annotation.StaticAnnotation
+case class X(@A("STRING") string: String)
+val typ = typeOf[X]
+val typClass = typ.typeSymbol.asClass
+val typA = ru.typeOf[A]
+
+val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+val p0_l = ctor.paramLists(0)
+val p = p0_l.head
+
+val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typA)
+
+val mirror = runtimeMirror(this.getClass.getClassLoader)
+
+val typAnnotation_? = typClass.annotations.find(a => a.tree.tpe == typA)
+val jsTyp_? : Option[(String, JsValue)] = typAnnotation_?.flatMap { a =>
+	val args = a.tree.children.tail
+	val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
+	values match {
+		case List(typ: String) => Some("TYPE" -> JsString(typ))
+		case _ => None
+	}
+	}
+*/
+
+	/*
+	def x(
+		jsval: JsValue,
+		typ: Type
+	) {
+		import scala.reflect.runtime.universe._
+
+		val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+		val p0_l = ctor.paramLists(0)
+		val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
+		for {
+			nameToObj_m <- jsval match {
+				case jsobj: JsObject =>
+					convMapString(jsobj, nameToType_l)
+				case _ =>
+					ContextE.error(s"unhandled type or value. type=${typ}, value=${jsval}")
+			}
+		} yield {
+			val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
+			val c = typ.typeSymbol.asClass
+			val mirror = runtimeMirror(this.getClass.getClassLoader)
+			val mm = mirror.reflectClass(c).reflectConstructor(ctor)
+			val obj = mm(arg_l : _*)
+			obj
+		}
+		
+	}*/
+	
+	/*
+	def toJson(
+		rjsval: RjsValue,
+		typ: Type
+	) {
+		import scala.reflect.runtime.universe._
+
+		// Get 'TYPE' field value, if annotated
+		val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]
+		val typJsonNameAnnotation = ru.typeOf[RjsJsonName]
+		val typClass = typ.typeSymbol.asClass
+		val typAnnotation_? = typClass.annotations.find(a => a.tree.tpe == typJsonTypeAnnotation)
+		val jsTyp_? : Option[(String, JsValue)] = typAnnotation_?.flatMap { a =>
+			val args = a.tree.children.tail
+			val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
+			values match {
+				case List(typ: String) => Some("TYPE" -> JsString(typ))
+				case _ => None
+			}
+		}
+
+		val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+		val p0_l = ctor.paramLists(0)
+		p0_l.flatMap { p =>
+			val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typJsonNameAnnotation)
+			val jsNameToParam_? : Option[(String, JsValue)] = nameAnnotation_?.flatMap { a =>
+				val args = a.tree.children.tail
+				val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
+				values match {
+					case List(name: String) =>
+						typ.mem
+						Some(name -> JsString(typ))
+					case _ => None
+				}
+			}
+		}
+		val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
+	}
+	*/
 }

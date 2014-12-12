@@ -14,8 +14,6 @@ private case class Example1(
 )
 
 class Converter2Spec extends FunSpec {
-	type ContextEData = ContextXData[EvaluatorState]
-
 	describe("Converter2") {
 		val eb = new EntityBase
 		val data0 = ContextEData(EvaluatorState(eb))

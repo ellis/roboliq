@@ -279,24 +279,6 @@ object Converter2 {
 						nameToObj_m <- jsval match {
 							case jsobj: JsObject =>
 								convMapString(jsobj, nameToType_l)
-							//case JsArray(jsval_l) =>
-							//	convListToObject(jsval_l, nameToType_l)
-							/*case JsString(s) =>
-								eb.getEntity(s) match {
-									case Some(obj) =>
-										// FIXME: need to check type rather than just assuming that it's correct!
-										ContextE.unit(Left(ConvObject(obj)))
-									case None =>
-										for {
-											nameToVal_l <- parseStringToArgs(s)
-											//_ = println("nameToVal_l: "+nameToVal_l.toString)
-											res <- convArgsToMap(nameToVal_l, typ, nameToType_l, eb, state_?, id_?)
-											//_ = println("res: "+res.toString)
-										} yield res
-								}
-							*/
-							//case _ =>
-							//	convListToObject(List(jsval), nameToType_l)
 							case _ =>
 								ContextE.error(s"unhandled type or value. type=${typ}, value=${jsval}")
 						}
@@ -376,7 +358,7 @@ object Converter2 {
 		ContextE.error("convListToObject: not yet implemented")
 	}
 
-	private def convMap(
+	def convMap(
 		jsobj: JsObject,
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)]
@@ -408,31 +390,12 @@ object Converter2 {
 		}
 	}
 
-	private def convMapString(
+	def convMapString(
 		jsobj: JsObject,
 		nameToType_l: List[(String, ru.Type)]
 	): ContextE[Map[String, _]] = {
 		for {
 			map <- convMap(jsobj, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]
-	}
-	
-	def valueToString(jsval: JsValue): ContextE[String] = {
-		jsval match {
-			case JsString(s) => ContextE.unit(s)
-			case JsNumber(n) => ContextE.unit(n.toString)
-			case JsObject(map) =>
-				(map.get("TYPE"), map.get("VALUE")) match {
-					case (Some(JsString("ident")), Some(JsString(s))) =>
-						ContextE.unit(s)
-					case (Some(JsString("number")), Some(JsNumber(n))) =>
-						ContextE.unit(n.toString)
-					case (Some(JsString("string")), Some(JsString(s))) =>
-						ContextE.unit(s)
-					case (_, Some(jsval2)) => valueToString(jsval2)
-					case _ => ContextE.unit(jsval.toString)
-				}
-			case _ => ContextE.unit(jsval.toString)
-		}
 	}
 }
