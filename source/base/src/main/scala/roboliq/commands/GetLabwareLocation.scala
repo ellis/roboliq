@@ -72,7 +72,7 @@ class GetLabwareLocationOperatorHandler extends OperatorHandler {
 				Strips.Literal(true, "model", "?labware", "?model"),
 				Strips.Literal(true, "model", "?site", "?siteModel")
 			)),
-			effects = Strips.Literals(Unique())
+			effects = Strips.Literals.empty
 		)
 	}
 	

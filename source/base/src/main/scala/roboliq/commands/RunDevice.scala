@@ -65,7 +65,7 @@ class RunDeviceOperatorHandler extends OperatorHandler {
 			preconds = Strips.Literals(Unique(
 				Strips.Literal(true, "agent-has-device", "?agent", "?device")
 			)),
-			effects = Strips.Literals(Unique())
+			effects = Strips.Literals.empty
 		)
 	}
 	

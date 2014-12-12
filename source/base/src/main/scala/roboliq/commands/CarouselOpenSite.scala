@@ -67,7 +67,7 @@ class CarouselOpenSiteOperatorHandler(
 			name = "carousel.openSite-"+internalSiteIdent, // The `id` refers to an internal site
 			paramName_l = Nil, // This is the external site on the robot bench, not one of the internal sites.
 			paramTyp_l = Nil,
-			preconds = Strips.Literals(Unique()),
+			preconds = Strips.Literals.empty,
 			effects = Strips.Literals(Unique(internalSiteIdent_l.map(ident => 
 				Strips.Literal(ident != internalSiteIdent, "site-closed", ident)
 			) : _*))

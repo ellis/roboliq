@@ -184,6 +184,16 @@ command:
         duration: 10
 ```
 
+## Result monads
+
+- `Option`
+- `Either[String, A]`
+- `Either[List[String], A]`
+- ResultW: can return warnings along with the result
+- ResultC: also keeps track of a stack of contexts, so that it's noted where the warnings and errors take place
+- ResultE: also keeps track of evaluation data, such as variable scopes
+- ResultP: also keeps track of protocol stuff, such as objects, values, logic
+
 ## Previous goal
 
 - [x] denaturation: just find which script for Fabian to run and get the table setup information for him
