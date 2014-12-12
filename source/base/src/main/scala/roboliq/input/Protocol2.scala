@@ -180,11 +180,11 @@ class Protocol2 {
 		ContextE.context(s"expandCommand($id)") {
 			ContextE.evaluate(rjsval).flatMap {
 				case RjsNull =>
-					ContextE.unit((Map[String, ProtocolCommandResult](), Strips.Literals(Unique[Strips.Literal]())))
+					ContextE.unit((Map(), Strips.Literals.empty))
 				case action: RjsAction =>
 					expandAction(id, action, state)
 				case instruction: RjsInstruction =>
-					ContextE.unit((Map[String, ProtocolCommandResult](), Strips.Literals(Unique[Strips.Literal]())))
+					ContextE.unit((Map(), Strips.Literals.empty))
 				case _ =>
 					// TODO: should perhaps log a warning here instead
 					ContextE.error(s"don't know how to expand command: $rjsval")
