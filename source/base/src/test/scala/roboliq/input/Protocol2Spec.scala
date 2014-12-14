@@ -1,8 +1,6 @@
 package roboliq.input
 
 import org.scalatest.FunSpec
-import roboliq.entities.EntityBase
-import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsArray
@@ -17,8 +15,7 @@ class Protocol2Spec extends FunSpec {
 	import ContextValueWrapper._
 
 	val protocolEvaluator = new Protocol2
-	val eb = new EntityBase
-	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
+	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator()
 
 	val action1 = RjsAction("shakePlate", RjsMap(
@@ -119,7 +116,7 @@ cmd:
 			)))
 			
 			val ctxval1 = (for {
-				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
+				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
 				dataB <- protocolEvaluator.stepB(dataA1)
 			} yield dataB.commandExpansions).run(data0)
 			
@@ -151,7 +148,7 @@ cmd:
 			)
 			val dataA2 = dataALab ++ dataA1
 			val ctxval2 = (for {
-				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
+				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
 				dataB <- protocolEvaluator.stepB(dataA2)
 			} yield dataB.commandExpansions).run(data0)
 			
@@ -216,7 +213,7 @@ command:
 				rjsval2 <- RjsValue.fromJson(jsobj2)
 				m1 = rjsval1.asInstanceOf[RjsMap]
 				m2 = rjsval2.asInstanceOf[RjsMap]
-				_ <- ContextE.evaluate(RjsImport("shakePlate", "1.0"))
+				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
 				_ = println("A")
 				// Get state from protocol data
 				temp0 <- protocol.processData(m1)

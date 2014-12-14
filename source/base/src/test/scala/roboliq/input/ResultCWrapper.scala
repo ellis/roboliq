@@ -2,8 +2,9 @@ package roboliq.input
 
 import scala.language.implicitConversions
 import org.scalatest.exceptions.TestFailedException
+import roboliq.core.ResultCData
 
-class ContextValueWrapper[A](res: (ResultEData, Option[A])) {
+class ResultCWrapper[A](res: (ResultCData, Option[A])) {
 	def value: A = {
 		val data = res._1
 		if (!data.error_r.isEmpty) {
@@ -30,10 +31,10 @@ class ContextValueWrapper[A](res: (ResultEData, Option[A])) {
 	}
 }
 
-object ContextValueWrapper {
-	implicit def toContextValueWrapper[A](
-		res: (ResultEData, Option[A])
-	): ContextValueWrapper[A] = {
-		new ContextValueWrapper(res)
+object ResultCWrapper {
+	implicit def toResultCWrapper[A](
+		res: (ResultCData, Option[A])
+	): ResultCWrapper[A] = {
+		new ResultCWrapper(res)
 	}
 }

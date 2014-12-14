@@ -102,9 +102,9 @@ class Protocol2 {
 					atom_l += strips.Atom("labware", Seq(name))
 					plate.model_?.foreach(model => atom_l += strips.Atom("model", Seq(name, model)))
 					plate.location_?.foreach(location => atom_l += strips.Atom("location", Seq(name, location)))
-					ContextE.unit(())
+					ResultE.unit(())
 				case _ =>
-					ContextE.unit(())
+					ResultE.unit(())
 			}
 		}
 		(objectToType_m.toMap, strips.Literals(atom_l.toList, Nil))
@@ -112,13 +112,13 @@ class Protocol2 {
 	
 	def stepB(
 		dataA: Protocol2DataA
-	): ContextE[Protocol2DataB] = {
+	): ResultE[Protocol2DataB] = {
 		var state = dataA.planningInitialState
 		val idToResult0_m = new HashMap[String, ProtocolCommandResult]
-		def step(idToCommand_l: List[(String, RjsValue)]): ContextE[Map[String, ProtocolCommandResult]] = {
+		def step(idToCommand_l: List[(String, RjsValue)]): ResultE[Map[String, ProtocolCommandResult]] = {
 			println("step")
 			idToCommand_l match {
-				case Nil => ContextE.unit(idToResult0_m.toMap)
+				case Nil => ResultE.unit(idToResult0_m.toMap)
 				case (id, rjsval) :: res =>
 					for {
 						pair <- expandCommand(id, rjsval, state)
@@ -188,26 +188,26 @@ class Protocol2 {
 		id: String,
 		rjsval: RjsValue,
 		state: strips.Literals
-	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
+	): ResultE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
 		println(s"expandCommand($id, $rjsval)")
 		val result_m = new HashMap[String, ProtocolCommandResult]
-		ContextE.context(s"expandCommand($id)") {
-			ContextE.evaluate(rjsval).flatMap {
+		ResultE.context(s"expandCommand($id)") {
+			ResultE.evaluate(rjsval).flatMap {
 				case action: RjsAction =>
 					expandAction(id, action, state)
 				case instruction: RjsInstruction =>
-					ContextE.unit((
+					ResultE.unit((
 						Map(id -> ProtocolCommandResult(instruction)),
 						strips.Literals.empty
 					))
 				case RjsNull =>
-					ContextE.unit((
+					ResultE.unit((
 						Map(id -> ProtocolCommandResult(RjsNull)),
 						strips.Literals.empty
 					))
 				case _ =>
 					// TODO: should perhaps log a warning here instead
-					ContextE.error(s"don't know how to expand command: $rjsval")
+					ResultE.error(s"don't know how to expand command: $rjsval")
 			}
 		}
 	}
@@ -233,7 +233,7 @@ class Protocol2 {
 		action: RjsAction,
 		actionDef: RjsActionDef,
 		state0: strips.Literals
-	): ContextE[List[CommandValidation]] = {
+	): ResultE[List[CommandValidation]] = {
 		for {
 			precond_l <- bindActionLogic(actionDef.preconds, true, action, actionDef)
 		} yield {
@@ -252,7 +252,7 @@ class Protocol2 {
 		action: RjsAction,
 		actionDef: RjsActionDef,
 		state0: strips.State
-	): ContextE[strips.Literals] = {
+	): ResultE[strips.Literals] = {
 		for {
 			effect_l <- bindActionLogic(actionDef.effects, false, action, actionDef)
 		} yield strips.Literals(Unique(effect_l : _*))
@@ -266,24 +266,24 @@ class Protocol2 {
 		isPrecond: Boolean,
 		action: RjsAction,
 		actionDef: RjsActionDef
-	): ContextE[List[strips.Literal]] = {
-		ContextE.mapAll(literal_l) { literal =>
+	): ResultE[List[strips.Literal]] = {
+		ResultE.mapAll(literal_l) { literal =>
 			for {
-				binding0_l <- ContextE.mapAll(literal.atom.params) { s =>
+				binding0_l <- ResultE.mapAll(literal.atom.params) { s =>
 					if (s.startsWith("$")) {
 						val name = s.tail
 						(actionDef.params.get(name), action.input.get(name)) match {
 							case (Some(param), Some(jsParam)) =>
-								ContextE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
+								ResultE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
 							case (None, _) =>
-								ContextE.error(s"invalid parameter `$s` in ${if (isPrecond) "precondition" else "effect"}: $literal")
+								ResultE.error(s"invalid parameter `$s` in ${if (isPrecond) "precondition" else "effect"}: $literal")
 							case (_, None) =>
 								// Don't need to produce an error here, because the missing input will have already been noted while checking the inputs
-								ContextE.unit(None)
+								ResultE.unit(None)
 						}
 					}
 					else {
-						ContextE.unit(None)
+						ResultE.unit(None)
 					}
 				}
 			} yield {
@@ -308,14 +308,14 @@ class Protocol2 {
 		id: String,
 		action: RjsAction,
 		state0: strips.Literals
-	): ContextE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
+	): ResultE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
 		println(s"expandAction($id)")
 		val validation_l = new ArrayBuffer[CommandValidation]
 		//val child_m = new HashMap[String, RjsValue]
 		var effectsCumulative = strips.Literals(Unique[strips.Literal]())
 		val result_m = new HashMap[String, ProtocolCommandResult]
 		for {
-			actionDef <- ContextE.fromScope[RjsActionDef](action.name)
+			actionDef <- ResultE.fromScope[RjsActionDef](action.name)
 			// Check inputs
 			_ = validation_l ++= checkActionInput(action, actionDef)
 			// Check that all preconditions are fulfilled
@@ -324,27 +324,27 @@ class Protocol2 {
 			effects <- bindActionLogic(actionDef.effects, false, action, actionDef)
 			_ <- {
 				if (!validation_l.isEmpty) {
-					ContextE.unit(())
+					ResultE.unit(())
 				}
 				// If there were no input or precond errors
 				else {
 					// TODO: we should start a clean scope that only has commandInput_m variables
-					ContextE.scope {
+					ResultE.scope {
 						for {
-							_ <- ContextE.addToScope(action.input)
+							_ <- ResultE.addToScope(action.input)
 							// evaluate actionDef's 'value' field
 							// extract list of child commands
-							res <- ContextE.evaluate(actionDef.value).flatMap {
+							res <- ResultE.evaluate(actionDef.value).flatMap {
 								case RjsNull =>
 									val idChild = id + ".0"
 									//child_m(idChild) = RjsNull
-									ContextE.unit(())
+									ResultE.unit(())
 								case RjsList(Nil) =>
 									val idChild = id + ".0"
 									//child_m(idChild) = RjsNull
-									ContextE.unit(())
+									ResultE.unit(())
 								case RjsList(l) =>
-									ContextE.foreach(l.zipWithIndex) { case (rjsChild, i) =>
+									ResultE.foreach(l.zipWithIndex) { case (rjsChild, i) =>
 										val idChild = s"$id.${i+1}"
 										//child_m(idChild) = rjsChild
 										var state = state0
@@ -358,7 +358,7 @@ class Protocol2 {
 										}
 									}
 								case res =>
-									ContextE.error(s"actionDef `${action.name}` should either return `null` or a list of commands.  Actual result: "+res)
+									ResultE.error(s"actionDef `${action.name}` should either return `null` or a list of commands.  Actual result: "+res)
 							}
 						} yield res
 					}

@@ -24,94 +24,30 @@ import com.google.gson.Gson
 import spray.json.JsNull
 import roboliq.utils.JsonUtils
 
-class EvaluatorScope(
-	val map: RjsMap = RjsMap(),
-	val parent_? : Option[EvaluatorScope] = None
-) {
-	/** First try lookup in own map, then in parent's map */
-	def get(name: String): Option[RjsValue] = {
-		map.get(name).orElse(parent_?.flatMap(_.get(name)))
-	}
-	
-	/**
-	 * First try lookup in own map, then in parent's map.
-	 * Return both the object and the scope in which it was found.
-	 * This is required for lambdas, which should be called with their containing scope.
-	 */
-	def getWithScope(name: String): Option[(RjsValue, EvaluatorScope)] = {
-		map.get(name) match {
-			case None => parent_?.flatMap(_.getWithScope(name))
-			case Some(jsval) => Some((jsval, this))
-		}
-	}
-	
-	def add(name: String, jsobj: RjsValue): EvaluatorScope = {
-		new EvaluatorScope(map = map.add(name, jsobj), parent_?)
-	}
-	
-	def add(vars: Map[String, RjsValue]): EvaluatorScope = {
-		new EvaluatorScope(map = this.map.add(vars), parent_?)
-	}
-	
-	def add(map: RjsMap): EvaluatorScope = {
-		new EvaluatorScope(map = this.map.add(map), parent_?)
-	}
-	
-	def createChild(vars: RjsMap = RjsMap()): EvaluatorScope =
-		new EvaluatorScope(map.add(vars), Some(this))
-	
-	def toMap: Map[String, RjsValue] = {
-		parent_?.map(_.toMap).getOrElse(Map()) ++ map.map
-	}
-}
-
-case class EvaluatorState(
-	eb: EntityBase,
-	scope: EvaluatorScope = new EvaluatorScope(),
-	searchPath_l: List[File] = Nil,
-	inputFile_l: List[File] = Nil
-) {
-	def pushScope(vars: RjsMap = RjsMap()): EvaluatorState = {
-		copy(scope = scope.createChild(vars))
-	}
-	
-	def popScope(): EvaluatorState = {
-		copy(scope = scope.parent_?.get)
-	}
-	
-	def addToScope(name: String, value: RjsValue): EvaluatorState = {
-		copy(scope = scope.add(name, value))
-	}
-	
-	def addToScope(map: Map[String, RjsValue]): EvaluatorState = {
-		copy(scope = scope.add(map))
-	}
-}
-
-case class ContextEData(
-	state: EvaluatorState,
+case class ResultEData(
+	state: EvaluatorState = EvaluatorState(),
 	context_r: List[String] = Nil,
 	warning_r: List[String] = Nil,
 	error_r: List[String] = Nil
 ) {
-	def setState(state: EvaluatorState): ContextEData = {
+	def setState(state: EvaluatorState): ResultEData = {
 		copy(state = state)
 	}
 	
-	def setErrorsAndWarnings(error_r: List[String], warning_r: List[String]): ContextEData = {
+	def setErrorsAndWarnings(error_r: List[String], warning_r: List[String]): ResultEData = {
 		copy(error_r = error_r, warning_r = warning_r)
 	}
 	
-	def logWarning(s: String): ContextEData = {
+	def logWarning(s: String): ResultEData = {
 		copy(warning_r = prefixMessage(s) :: warning_r)
 	}
 	
-	def logError(s: String): ContextEData = {
+	def logError(s: String): ResultEData = {
 		//println(s"logError($s): "+(prefixMessage(s) :: error_r))
 		copy(error_r = prefixMessage(s) :: error_r)
 	}
 	
-	def log[A](res: RsResult[A]): ContextEData = {
+	def log[A](res: RsResult[A]): ResultEData = {
 		//println(s"log($res)")
 		res match {
 			case RsSuccess(_, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r)
@@ -119,26 +55,26 @@ case class ContextEData(
 		}
 	}
 	
-	def pushLabel(label: String): ContextEData = {
+	def pushLabel(label: String): ResultEData = {
 		//println(s"pushLabel($label) = ${label :: context_r}")
 		copy(context_r = label :: context_r)
 	}
 	
-	def popLabel(): ContextEData = {
+	def popLabel(): ResultEData = {
 		//println(s"popLabel()")
 		copy(context_r = context_r.tail)
 	}
 
-	def modifyState(fn: EvaluatorState => EvaluatorState): ContextEData = {
+	def modifyState(fn: EvaluatorState => EvaluatorState): ResultEData = {
 		val state1 = fn(state)
 		copy(state = state1)
 	}
 
-	def pushScope(vars: RjsMap = RjsMap()): ContextEData = {
+	def pushScope(vars: RjsMap = RjsMap()): ResultEData = {
 		modifyState(_.pushScope(vars))
 	}
 	
-	def popScope(): ContextEData = {
+	def popScope(): ResultEData = {
 		modifyState(_.popScope)
 	}
 	
@@ -147,11 +83,11 @@ case class ContextEData(
 	}
 }
 
-trait ContextE[+A] {
-	def run(data: ContextEData): (ContextEData, Option[A])
+trait ResultE[+A] {
+	def run(data: ResultEData = ResultEData()): (ResultEData, Option[A])
 	
-	def map[B](f: A => B): ContextE[B] = {
-		ContextE { data =>
+	def map[B](f: A => B): ResultE[B] = {
+		ResultE { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, optA) = run(data)
 				val optB = optA.map(f)
@@ -163,8 +99,8 @@ trait ContextE[+A] {
 		}
 	}
 	
-	def flatMap[B](f: A => ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def flatMap[B](f: A => ResultE[B]): ResultE[B] = {
+		ResultE { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, optA) = run(data)
 				optA match {
@@ -179,22 +115,22 @@ trait ContextE[+A] {
 	}
 }
 
-object ContextE {
-	def apply[A](f: ContextEData => (ContextEData, Option[A])): ContextE[A] = {
-		new ContextE[A] {
-			def run(data: ContextEData) = f(data)
+object ResultE {
+	def apply[A](f: ResultEData => (ResultEData, Option[A])): ResultE[A] = {
+		new ResultE[A] {
+			def run(data: ResultEData) = f(data)
 		}
 	}
 	
-	def from[A](res: RsResult[A]): ContextE[A] = {
-		ContextE { data =>
+	def from[A](res: RsResult[A]): ResultE[A] = {
+		ResultE { data =>
 			val data1 = data.log(res)
 			(data1, res.toOption)
 		}
 	}
 	
-	def from[A](opt: Option[A], error: => String): ContextE[A] = {
-		ContextE { data =>
+	def from[A](opt: Option[A], error: => String): ResultE[A] = {
+		ResultE { data =>
 			val data1 = opt match {
 				case None => data.logError(error)
 				case _ => data
@@ -203,25 +139,25 @@ object ContextE {
 		}
 	}
 	
-	def unit[A](a: A): ContextE[A] =
-		ContextE { data => (data, Some(a)) }
+	def unit[A](a: A): ResultE[A] =
+		ResultE { data => (data, Some(a)) }
 	
-	def get: ContextE[EvaluatorState] =
-		ContextE { data => (data, Some(data.state)) }
+	def get: ResultE[EvaluatorState] =
+		ResultE { data => (data, Some(data.state)) }
 	
-	def gets[A](f: EvaluatorState => A): ContextE[A] =
-		ContextE { data => (data, Some(f(data.state))) }
+	def gets[A](f: EvaluatorState => A): ResultE[A] =
+		ResultE { data => (data, Some(f(data.state))) }
 	
-	def getsResult[A](f: EvaluatorState => RsResult[A]): ContextE[A] = {
-		ContextE { data =>
+	def getsResult[A](f: EvaluatorState => RsResult[A]): ResultE[A] = {
+		ResultE { data =>
 			val res = f(data.state)
 			val data1 = data.log(res)
 			(data1, res.toOption)
 		}
 	}
 	
-	def getsOption[A](f: EvaluatorState => Option[A], error: => String): ContextE[A] = {
-		ContextE { data =>
+	def getsOption[A](f: EvaluatorState => Option[A], error: => String): ResultE[A] = {
+		ResultE { data =>
 			f(data.state) match {
 				case None => (data.logError(error), None)
 				case Some(a) => (data, Some(a))
@@ -229,28 +165,28 @@ object ContextE {
 		}
 	}
 	
-	def putData(data: ContextEData): ContextE[Unit] =
-		ContextE { _ => (data, Some(())) }
+	def putData(data: ResultEData): ResultE[Unit] =
+		ResultE { _ => (data, Some(())) }
 	
-	def modifyData(f: ContextEData => ContextEData): ContextE[Unit] =
-		ContextE { data => (f(data), Some(())) }
+	def modifyData(f: ResultEData => ResultEData): ResultE[Unit] =
+		ResultE { data => (f(data), Some(())) }
 	
-	def put(state: EvaluatorState): ContextE[Unit] =
-		ContextE { data => (data.copy(state = state), Some(())) }
+	def put(state: EvaluatorState): ResultE[Unit] =
+		ResultE { data => (data.copy(state = state), Some(())) }
 	
-	def modify(f: EvaluatorState => EvaluatorState): ContextE[Unit] =
-		ContextE { data => (data.copy(state = f(data.state)), Some(())) }
+	def modify(f: EvaluatorState => EvaluatorState): ResultE[Unit] =
+		ResultE { data => (data.copy(state = f(data.state)), Some(())) }
 	
-	def assert(condition: Boolean, msg: => String): ContextE[Unit] = {
+	def assert(condition: Boolean, msg: => String): ResultE[Unit] = {
 		if (condition) unit(())
 		else error(msg)
 	}
 	
-	def error[A](s: String): ContextE[A] = {
-		ContextE { data => (data.logError(s), None) }
+	def error[A](s: String): ResultE[A] = {
+		ResultE { data => (data.logError(s), None) }
 	}
 	
-	//def getWellInfo(well: Well): ContextE[WellInfo] =
+	//def getWellInfo(well: Well): ResultE[WellInfo] =
 	//	getsResult[WellInfo](data => data.eb.wellToWellInfo(data.state, well))
 	
 	/**
@@ -260,12 +196,12 @@ object ContextE {
 		l: C[A],
 		sequenceState: Boolean = false
 	)(
-		fn: A => ContextE[B]
+		fn: A => ResultE[B]
 	)(implicit
 		c2i: C[A] => Iterable[A],
 		cbf: CanBuildFrom[C[A], B, C[B]]
-	): ContextE[C[B]] = {
-		ContextE { data0 =>
+	): ResultE[C[B]] = {
+		ResultE { data0 =>
 			if (data0.error_r.isEmpty) {
 				var data = data0
 				val builder = cbf()
@@ -298,11 +234,11 @@ object ContextE {
 	def map[A, B, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[B]
+		fn: A => ResultE[B]
 	)(implicit
 		c2i: C[A] => Iterable[A],
 		cbf: CanBuildFrom[C[A], B, C[B]]
-	): ContextE[C[B]] = {
+	): ResultE[C[B]] = {
 		mapSub(l, false)(fn)
 	}
 	
@@ -314,11 +250,11 @@ object ContextE {
 	def mapSequential[A, B, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[B]
+		fn: A => ResultE[B]
 	)(implicit
 		c2i: C[A] => Iterable[A],
 		cbf: CanBuildFrom[C[A], B, C[B]]
-	): ContextE[C[B]] = {
+	): ResultE[C[B]] = {
 		mapSub(l, true)(fn)
 	}
 
@@ -328,12 +264,12 @@ object ContextE {
 	def mapAll[A, B, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[B]
+		fn: A => ResultE[B]
 	)(implicit
 		c2i: C[A] => Iterable[A],
 		cbf: CanBuildFrom[C[A], B, C[B]]
-	): ContextE[C[B]] = {
-		ContextE { data0 =>
+	): ResultE[C[B]] = {
+		ResultE { data0 =>
 			if (data0.error_r.isEmpty) {
 				var data = data0
 				val builder = cbf()
@@ -362,11 +298,11 @@ object ContextE {
 	def foreach[A, C[_]](
 		l: C[A]
 	)(
-		fn: A => ContextE[Any]
+		fn: A => ResultE[Any]
 	)(implicit
 		c2i: C[A] => Iterable[A]
-	): ContextE[Unit] = {
-		ContextE { data0 =>
+	): ResultE[Unit] = {
+		ResultE { data0 =>
 			if (data0.error_r.isEmpty) {
 				var data = data0
 				for (x <- c2i(l)) {
@@ -385,8 +321,8 @@ object ContextE {
 		}
 	}
 
-	def or[B](f1: => ContextE[B], f2: => ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def or[B](f1: => ResultE[B], f2: => ResultE[B]): ResultE[B] = {
+		ResultE { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, opt1) = f1.run(data)
 				if (data1.error_r.isEmpty) {
@@ -413,8 +349,8 @@ object ContextE {
 		}
 	}
 	
-	def orElse[B](f1: => ContextE[B], f2: => ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def orElse[B](f1: => ResultE[B], f2: => ResultE[B]): ResultE[B] = {
+		ResultE { data =>
 			if (data.error_r.isEmpty) {
 				val (data1, opt1) = f1.run(data)
 				if (data1.error_r.isEmpty) {
@@ -436,8 +372,8 @@ object ContextE {
 		}
 	}
 	
-	def toOption[B](ctx: ContextE[B]): ContextE[Option[B]] = {
-		ContextE { data =>
+	def toOption[B](ctx: ResultE[B]): ResultE[Option[B]] = {
+		ResultE { data =>
 			val (data1, opt1) = ctx.run(data)
 			if (data1.error_r.isEmpty) {
 				(data1, Some(opt1))
@@ -448,8 +384,8 @@ object ContextE {
 		}
 	}
 	
-	def context[B](label: String)(ctx: ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def context[B](label: String)(ctx: ResultE[B]): ResultE[B] = {
+		ResultE { data =>
 			val data0 = data.pushLabel(label)
 			val (data1, opt1) = ctx.run(data0)
 			val data2 = data1.popLabel()
@@ -462,15 +398,15 @@ object ContextE {
 		}
 	}
 	
-	def getScope: ContextE[EvaluatorScope] = {
-		ContextE.gets(_.scope)
+	def getScope: ResultE[EvaluatorScope] = {
+		ResultE.gets(_.scope)
 	}
 	
 	/**
 	 * 
 	 */
-	def scope[B](ctx: ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def scope[B](ctx: ResultE[B]): ResultE[B] = {
+		ResultE { data =>
 			val data0 = data.pushScope()
 			val (data1, opt1) = ctx.run(data0)
 			val data2 = data1.popScope()
@@ -483,20 +419,20 @@ object ContextE {
 		}
 	}
 	
-	def addToScope(name: String, value: RjsValue): ContextE[Unit] = {
-		ContextE.modify(_.addToScope(name, value))
+	def addToScope(name: String, value: RjsValue): ResultE[Unit] = {
+		ResultE.modify(_.addToScope(name, value))
 	}
 	
-	def addToScope(map: Map[String, RjsValue]): ContextE[Unit] = {
-		ContextE.modify(_.addToScope(map))
+	def addToScope(map: Map[String, RjsValue]): ResultE[Unit] = {
+		ResultE.modify(_.addToScope(map))
 	}
 	
-	def addToScope(map: RjsMap): ContextE[Unit] = {
-		ContextE.modify(_.addToScope(map.map))
+	def addToScope(map: RjsMap): ResultE[Unit] = {
+		ResultE.modify(_.addToScope(map.map))
 	}
 	
-	def withScope[B](scope: EvaluatorScope)(ctx: ContextE[B]): ContextE[B] = {
-		ContextE { data =>
+	def withScope[B](scope: EvaluatorScope)(ctx: ResultE[B]): ResultE[B] = {
+		ResultE { data =>
 			val state0 = data.state
 			val scope0 = state0.scope
 			// Run ctx using the given scope
@@ -508,48 +444,48 @@ object ContextE {
 		}
 	}
 	
-	def fromRjs[A: TypeTag](rjsval: RjsValue): ContextE[A] = {
+	def fromRjs[A: TypeTag](rjsval: RjsValue): ResultE[A] = {
 		Converter3.fromRjs[A](rjsval)
 	}
 	
-	def fromRjs[A: TypeTag](map: RjsMap, field: String): ContextE[A] =
+	def fromRjs[A: TypeTag](map: RjsMap, field: String): ResultE[A] =
 		fromRjs[A](map.map, field)
 
-	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ContextE[A] = {
-		ContextE.context(field) {
+	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ResultE[A] = {
+		ResultE.context(field) {
 			map.get(field) match {
 				case Some(jsval) => Converter3.fromRjs[A](jsval)
 				case None =>
-					ContextE.orElse(
+					ResultE.orElse(
 						Converter3.fromRjs[A](RjsNull),
-						ContextE.error("value required")
+						ResultE.error("value required")
 					)
 			}
 		}
 	}
 
-	def getScopeValue(name: String): ContextE[RjsValue] = {
+	def getScopeValue(name: String): ResultE[RjsValue] = {
 		for {
-			scope <- ContextE.getScope
-			rjsval <- ContextE.from(scope.get(name), s"unknown variable `$name`")
+			scope <- ResultE.getScope
+			rjsval <- ResultE.from(scope.get(name), s"unknown variable `$name`")
 		} yield rjsval
 	}
 	
-	def fromScope[A: TypeTag](): ContextE[A] = {
+	def fromScope[A: TypeTag](): ResultE[A] = {
 		for {
-			scope <- ContextE.getScope
+			scope <- ResultE.getScope
 			x <- Converter3.fromRjs[A](RjsMap(scope.toMap))
 		} yield x
 	}
 
-	def fromScope[A: TypeTag](name: String): ContextE[A] = {
+	def fromScope[A: TypeTag](name: String): ResultE[A] = {
 		for {
 			rjsval <- getScopeValue(name)
 			x <- Converter3.fromRjs[A](rjsval)
 		} yield x
 	}
 	
-	def evaluate(rjsval: RjsValue): ContextE[RjsValue] = {
+	def evaluate(rjsval: RjsValue): ResultE[RjsValue] = {
 		val evaluator = new Evaluator()
 		evaluator.evaluate(rjsval)
 	}
@@ -558,33 +494,33 @@ object ContextE {
 	/**
 	 * Evaluate jsval using a different scope
 	 */
-	def evaluate(jsval: RjsValue, scope: EvaluatorScope): ContextE[RjsMap] = {
+	def evaluate(jsval: RjsValue, scope: EvaluatorScope): ResultE[RjsMap] = {
 		// Temporarily set the given scope, evaluate jsval, then switch back to the current scope
 		for {
-			scope0 <- ContextE.getScope
-			_ <- ContextE.modify(_.copy(scope = scope))
+			scope0 <- ResultE.getScope
+			_ <- ResultE.modify(_.copy(scope = scope))
 			res <- evaluate(jsval)
-			_ <- ContextE.modify(_.copy(scope = scope0))
+			_ <- ResultE.modify(_.copy(scope = scope0))
 		} yield res
 	}*/
 	
-	def findFile(filename: String): ContextE[File] = {
+	def findFile(filename: String): ResultE[File] = {
 		for {
-			searchPath_l <- ContextE.gets(_.searchPath_l)
-			file <- ContextE.from(roboliq.utils.FileUtils.findFile(filename, searchPath_l))
-			_ <- ContextE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
+			searchPath_l <- ResultE.gets(_.searchPath_l)
+			file <- ResultE.from(roboliq.utils.FileUtils.findFile(filename, searchPath_l))
+			_ <- ResultE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
 		} yield file
 	}
 
-	def loadJsonFromFile(file: File): ContextE[RjsValue] = {
+	def loadJsonFromFile(file: File): ResultE[RjsValue] = {
 		import spray.json._
 		for {
-			_ <- ContextE.assert(file.exists, s"File not found: ${file.getPath}")
-			_ <- ContextE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
+			_ <- ResultE.assert(file.exists, s"File not found: ${file.getPath}")
+			_ <- ResultE.modify(state => state.copy(inputFile_l = file :: state.inputFile_l))
 			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
-				case "json" => ContextE.unit(false)
-				case "yaml" => ContextE.unit(true)
-				case ext => ContextE.error(s"Unrecognized file extension `$ext`.  Expected either json or yaml.")
+				case "json" => ResultE.unit(false)
+				case "yaml" => ResultE.unit(true)
+				case ext => ResultE.error(s"Unrecognized file extension `$ext`.  Expected either json or yaml.")
 			}
 			input0 = org.apache.commons.io.FileUtils.readFileToString(file)
 			input = if (bYaml) JsonUtils.yamlToJsonText(input0) else input0

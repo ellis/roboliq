@@ -2,7 +2,6 @@ package roboliq.input
 
 import org.scalatest.FunSpec
 import roboliq.entities.EntityBase
-import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsNull
@@ -19,8 +18,7 @@ class Converter3Spec extends FunSpec {
 	import ContextValueWrapper._
 	
 	describe("Converter3") {
-		val eb = new EntityBase
-		val data0 = ContextEData(EvaluatorState(eb))
+		val data0 = ResultEData(EvaluatorState())
 		val evaluator = new Evaluator();
 		val js5 = RjsNumber(5)
 		val js7 = RjsNumber(7)
@@ -31,7 +29,7 @@ class Converter3Spec extends FunSpec {
 		
 		def fromRjs[A: TypeTag](
 			rjsval: RjsValue
-		): (ContextEData, Option[A]) = {
+		): (ResultEData, Option[A]) = {
 			Converter3.fromRjs[A](rjsval).run(data0)
 		}
 
@@ -61,7 +59,7 @@ class Converter3Spec extends FunSpec {
 		}
 		
 		it("number") {
-			val ctx: ContextE[Unit] = for {
+			val ctx: ResultE[Unit] = for {
 				res1 <- Converter3.fromRjs[Int](js5)
 				res2 <- Converter3.fromRjs[Integer](js5)
 				res3 <- Converter3.fromRjs[Double](js5)
@@ -76,7 +74,7 @@ class Converter3Spec extends FunSpec {
 		}
 		
 		it("optional number") {
-			val ctx: ContextE[Unit] = for {
+			val ctx: ResultE[Unit] = for {
 				res1 <- Converter3.fromRjs[Option[Int]](js5)
 				res2 <- Converter3.fromRjs[Option[Int]](RjsNull)
 			} yield {

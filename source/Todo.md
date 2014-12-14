@@ -54,6 +54,7 @@ usage.
 - [x] Protocol2DataA: value for initial state and map for effects
 - [x] Protocol2: how to handle initial state of lab?  Should the initial state of protocol and lab be literals instead, so that state values can be negated?
 - [x] Protocol2: generate action output
+- [ ] RjsValue.fromJson: when converting a substitution (like RjsSubst) JSON to String, evaluate the RjsValue to get the real value
 - [ ] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2
 - [ ] Protocol2Data: create and use in Protocol2
@@ -190,7 +191,6 @@ command:
 - `Option`
 - `Either[String, A]`
 - `Either[List[String], A]`
-- ResultW: can return warnings along with the result
 - ResultC: also keeps track of a stack of contexts, so that it's noted where the warnings and errors take place
 - ResultE: also keeps track of evaluation data, such as variable scopes (remove EntityBase; this sould be for Evaluator and Converter classes)
 - ResultP: also keeps track of protocol stuff, such as objects, values, logic (perhaps add equivalent of EntityBase here?)

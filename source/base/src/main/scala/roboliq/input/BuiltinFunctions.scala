@@ -36,10 +36,10 @@ case class BuiltinAddParams(
 )
 
 class BuiltinAdd {
-	def evaluate(): ContextE[RjsValue] = {
-		ContextE.context("add") {
+	def evaluate(): ResultE[RjsValue] = {
+		ResultE.context("add") {
 			for {
-				params <- ContextE.fromScope[BuiltinAddParams]()
+				params <- ResultE.fromScope[BuiltinAddParams]()
 			} yield {
 				RjsNumber(params.numbers.sum, None)
 			}

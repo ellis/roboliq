@@ -1,5 +1,6 @@
 package roboliq.input
 
+import scala.reflect.runtime.{universe => ru}
 import spray.json.JsObject
 import spray.json.JsValue
 import spray.json.JsString
@@ -9,6 +10,7 @@ import spray.json.JsBoolean
 import spray.json.JsBoolean
 import spray.json.JsNull
 import roboliq.ai.strips
+import roboliq.core.ResultC
 
 /*object RjsType extends Enumeration {
 	val
@@ -26,7 +28,7 @@ case class RjsJsonType(typ: String) extends scala.annotation.StaticAnnotation
 case class RjsJsonName(name: String) extends scala.annotation.StaticAnnotation
 
 sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
-	def toJson: JsValue
+	def toJson: ResultC[JsValue]
 	def toText: String = toString
 }
 
@@ -35,13 +37,7 @@ case class RjsAction(
 	@RjsJsonName("NAME") name: String,
 	@RjsJsonName("INPUT") input: RjsMap
 ) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(Map[String, JsValue](
-			"TYPE" -> JsString("action"),
-			"NAME" -> JsString(name),
-			"INPUT" -> JsObject(input.map.mapValues(_.toJson))
-		))
-	}
+	def toJson = RjsValue.toJson(this)
 }
 
 case class RjsActionDefParam(
@@ -56,101 +52,141 @@ case class RjsActionDefParam(
 	}
 }
 
+@RjsJsonType("actionDef")
 case class RjsActionDef(
-	description_? : Option[String],
-	documentation_? : Option[String],
-	params: Map[String, RjsActionDefParam],
-	preconds: List[strips.Literal],
-	effects: List[strips.Literal],
-	value: RjsValue
+	@RjsJsonName("DESCRIPTION") description_? : Option[String],
+	@RjsJsonName("DOCUMENTATION") documentation_? : Option[String],
+	@RjsJsonName("PARAMS") params: Map[String, RjsActionDefParam],
+	@RjsJsonName("PRECONDS") preconds: List[strips.Literal],
+	@RjsJsonName("EFFECTS") effects: List[strips.Literal],
+	@RjsJsonName("VALUE") value: RjsValue
 ) extends RjsValue {
-	def toJson: JsValue = {
-		val l = List[Option[(String, JsValue)]](
-			description_?.map(s => "DESCRIPTION" -> JsString(s)),
-			documentation_?.map(s => "DOCUMENTATION" -> JsString(s)),
-			Some("PARAMS" -> JsObject(params.mapValues(_.toJson))),
-			Some("PRECONDS" -> JsArray(preconds.map(lit => JsString(lit.toString)))),
-			Some("EFFECTS" -> JsArray(effects.map(lit => JsString(lit.toString)))),
-			Some("VALUE" -> value.toJson)
-		)
-		JsObject(l.flatten.toMap)
+	//def toJson = RjsValue.toJson(this)
+	def toJson: ResultC[JsValue] = {
+		for {
+			jsValue <- value.toJson
+		} yield {
+			val l = List[Option[(String, JsValue)]](
+				description_?.map(s => "DESCRIPTION" -> JsString(s)),
+				documentation_?.map(s => "DOCUMENTATION" -> JsString(s)),
+				Some("PARAMS" -> JsObject(params.mapValues(_.toJson))),
+				Some("PRECONDS" -> JsArray(preconds.map(lit => JsString(lit.toString)))),
+				Some("EFFECTS" -> JsArray(effects.map(lit => JsString(lit.toString)))),
+				Some("VALUE" -> jsValue)
+			)
+			JsObject(l.flatten.toMap)
+		}
 	}
 }
 
 case class RjsBoolean(b: Boolean) extends RjsValue {
-	def toJson: JsValue = JsBoolean(b)
+	def toJson: ResultC[JsValue] = ResultC.unit(JsBoolean(b))
 	override def toText: String = b.toString
 }
 
 sealed trait RjsBuildItem {
-	def toJson: JsObject
+	def toJson: ResultC[JsObject]
 }
 
 case class RjsBuildItem_VAR(name: String, value: RjsValue) extends RjsBuildItem {
-	def toJson: JsObject = JsObject(Map("VAR" -> JsObject(Map("NAME" -> JsString(name), "VALUE" -> value.toJson))))
+	def toJson: ResultC[JsObject] = {
+		for {
+			jsValue <- value.toJson
+		} yield {
+			JsObject(Map("VAR" -> JsObject(Map("NAME" -> JsString(name), "VALUE" -> jsValue))))
+		}
+	}
 }
 
 case class RjsBuildItem_ADD(value: RjsValue) extends RjsBuildItem {
-	def toJson: JsObject = JsObject(Map("ADD" -> value.toJson))
+	def toJson: ResultC[JsObject] = {
+		for {
+			jsValue <- value.toJson
+		} yield {
+			JsObject(Map("ADD" -> jsValue))
+		}
+	}
 }
 
 case class RjsBuild(item_l: List[RjsBuildItem]) extends RjsValue {
-	def toJson: JsValue = JsObject(Map("TYPE" -> JsString("build"), "ITEM" -> JsArray(item_l.map(_.toJson))))
-}
-
-case class RjsCall(name: String, input: RjsMap) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(Map[String, JsValue](
-			"TYPE" -> JsString("call"),
-			"NAME" -> JsString(name),
-			"INPUT" -> JsObject(input.map.mapValues(_.toJson))
-		))
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(item_l) { _.toJson }
+		} yield {
+			JsObject(Map("TYPE" -> JsString("build"), "ITEM" -> JsArray(l)))
+		}
 	}
 }
 
-case class RjsDefine(name: String, value: RjsValue) extends RjsValue {
-	def toJson: JsValue = JsObject(Map("TYPE" -> JsString("define"), "NAME" -> JsString(name), "VALUE" -> value.toJson))
+@RjsJsonType("call")
+case class RjsCall(
+	@RjsJsonName("NAME") name: String,
+	@RjsJsonName("INPUT") input: RjsMap
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
+}
+
+@RjsJsonType("define")
+case class RjsDefine(
+	@RjsJsonName("NAME") name: String,
+	@RjsJsonName("VALUE") value: RjsValue
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
 }
 
 case class RjsFormat(format: String) extends RjsValue {
-	def toJson: JsValue = JsString("f\""+format+"\"")
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString("f\""+format+"\""))
 }
 
-case class RjsImport(name: String, version: String) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(Map(
-			"TYPE" -> JsString("import"), 
-			"NAME" -> JsString(name),
-			"VERSION" -> JsString(version)
-		))
-	}
+@RjsJsonType("import")
+case class RjsImport(
+	@RjsJsonName("NAME") name: String,
+	@RjsJsonName("VERSION") version: String
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsInclude(filename: String) extends RjsValue {
-	def toJson: JsValue = Converter2.makeInclude(filename)
+@RjsJsonType("include")
+case class RjsInclude(
+	@RjsJsonName("FILENAME") filename: String
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsInstruction(name: String, input: RjsMap) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(Map(
-			"TYPE" -> JsString("instruction"),
-			"NAME" -> JsString(name),
-			"INPUT" -> JsObject(input.map.mapValues(_.toJson))
-		))
-	}
+@RjsJsonType("instruction")
+case class RjsInstruction(
+	@RjsJsonName("NAME") name: String,
+	@RjsJsonName("INPUT") input: RjsMap
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsLambda(param: List[String], expression: RjsValue) extends RjsValue {
-	def toJson: JsValue =
-		JsObject(Map("TYPE" -> JsString("lambda"), "EXPRESSION" -> expression.toJson))
+@RjsJsonType("lambda")
+case class RjsLambda(
+	@RjsJsonName("PARAMS") param: List[String],
+	@RjsJsonName("EXPRESSION") expression: RjsValue
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
 }
 
 case class RjsList(list: List[RjsValue]) extends RjsValue {
-	def toJson: JsValue = JsArray(list.map(_.toJson))
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(list) { _.toJson }
+		} yield {
+			JsArray(l)
+		}
+	}
 }
 
 case class RjsMap(map: Map[String, RjsValue]) extends RjsValue {
-	def toJson: JsValue = JsObject(map.mapValues(_.toJson))
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(map.toList) { case (name, value) =>
+				value.toJson.map(name -> _)
+			}
+		} yield JsObject(l.toMap)
+	}
 	
 	def get(name: String): Option[RjsValue] = map.get(name)
 	def add(name: String, value: RjsValue): RjsMap = RjsMap(map + (name -> value))
@@ -166,14 +202,14 @@ object RjsMap {
 }
 
 case object RjsNull extends RjsValue {
-	def toJson: JsValue = JsNull
+	def toJson: ResultC[JsValue] = ResultC.unit(JsNull)
 	override def toText: String = "null"
 }
 
 case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsValue {
-	def toJson: JsValue = unit match {
-		case None => JsNumber(n)
-		case Some(s) => JsString(n.toString+s)
+	def toJson: ResultC[JsValue] = unit match {
+		case None => ResultC.unit(JsNumber(n))
+		case Some(s) => ResultC.unit(JsString(n.toString+s))
 	}
 	override def toText: String = unit match {
 		case None => n.toString
@@ -185,18 +221,18 @@ case class RjsProtocolLabware(
 	model_? : Option[String] = None,
 	location_? : Option[String] = None
 ) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(List[Option[(String, JsValue)]](
+	def toJson: ResultC[JsValue] = {
+		ResultC.unit(JsObject(List[Option[(String, JsValue)]](
 			model_?.map("model" -> JsString(_)),
 			location_?.map("location" -> JsString(_))
-		).flatten.toMap)
+		).flatten.toMap))
 	}
 }
 
 case class RjsProtocolSubstance() extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(List[Option[(String, JsValue)]](
-		).flatten.toMap)
+	def toJson: ResultC[JsValue] = {
+		ResultC.unit(JsObject(List[Option[(String, JsValue)]](
+		).flatten.toMap))
 	}
 }
 
@@ -204,11 +240,11 @@ case class RjsProtocolSourceSubstance(
 	name: String,
 	amount_? : Option[String] = None
 ) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(List[Option[(String, JsValue)]](
+	def toJson: ResultC[JsValue] = {
+		ResultC.unit(JsObject(List[Option[(String, JsValue)]](
 			Some("name" -> JsString(name)),
 			amount_?.map("amount" -> JsString(_))
-		).flatten.toMap)
+		).flatten.toMap))
 	}
 }
 
@@ -216,40 +252,33 @@ case class RjsProtocolSource(
 	well: String,
 	substances: List[RjsProtocolSourceSubstance] = Nil
 ) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(List[Option[(String, JsValue)]](
-			Some("well" -> JsString(well)),
-			if (substances.isEmpty) None else Some("substances" -> JsArray(substances.map(_.toJson)))
-		).flatten.toMap)
+	def toJson: ResultC[JsValue] = {
+		for {
+			jsSubstances <- ResultC.map(substances)(_.toJson)
+		} yield {
+			JsObject(List[Option[(String, JsValue)]](
+				Some("well" -> JsString(well)),
+				if (substances.isEmpty) None else Some("substances" -> JsArray(jsSubstances))
+			).flatten.toMap)
+		}
 	}
 }
 
+@RjsJsonType("protocol")
 case class RjsProtocol(
 	labwares: Map[String, RjsProtocolLabware],
 	substances: Map[String, RjsProtocolSubstance],
 	sources: Map[String, RjsProtocolSource],
 	commands: List[RjsValue]
 ) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(Map(
-			"TYPE" -> JsString("protocol"),
-			"VALUE" -> JsObject(List[Option[(String, JsValue)]](
-				if (labwares.isEmpty) None else Some("labwares" -> JsObject(labwares.mapValues(_.toJson))),
-				if (substances.isEmpty) None else Some("substances" -> JsObject(substances.mapValues(_.toJson))),
-				if (sources.isEmpty) None else Some("sources" -> JsObject(sources.mapValues(_.toJson))),
-				if (commands.isEmpty) None else Some("commands" -> JsArray(commands.map(_.toJson)))
-			).flatten.toMap)
-		))
-	}
+	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsSection(body: List[RjsValue]) extends RjsValue {
-	def toJson: JsValue = {
-		JsObject(Map(
-			"TYPE" -> JsString("scope"),
-			"BODY" -> JsArray(body.map(_.toJson))
-		))
-	}
+@RjsJsonType("section")
+case class RjsSection(
+	@RjsJsonName("BODY") body: List[RjsValue]
+) extends RjsValue {
+	def toJson = RjsValue.toJson(this)
 }
 
 /**
@@ -257,65 +286,86 @@ case class RjsSection(body: List[RjsValue]) extends RjsValue {
  * It is not meant as text to be displayed -- for that see RjsText.
  */
 case class RjsString(s: String) extends RjsValue {
-	def toJson: JsValue = JsString(s)
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString(s))
 	override def toText: String = s
 }
 
 case class RjsSubst(name: String) extends RjsValue {
-	def toJson: JsValue = Converter2.makeSubst(name)
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString("$"+name))
 }
 
 case class RjsText(text: String) extends RjsValue {
-	def toJson: JsValue = JsString("\""+text+"\"")
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString("\""+text+"\""))
 	override def toText: String = text
 }
 
 object RjsValue {
-	def fromJson(jsval: JsValue): ContextE[RjsValue] = {
+	def fromJson(jsval: JsValue): ResultE[RjsValue] = {
 		println(s"RjsValue.fromJson($jsval)")
 		jsval match {
 			case JsBoolean(b) =>
-				ContextE.unit(RjsBoolean(b))
+				ResultE.unit(RjsBoolean(b))
 			case JsArray(l) =>
-				ContextE.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
-					ContextE.context(s"[${i+1}]") {
+				ResultE.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
+					ResultE.context(s"[${i+1}]") {
 						RjsValue.fromJson(jsval2)
 					}
 				}).map(RjsList)
 			case JsNumber(n) =>
-				ContextE.unit(RjsNumber(n, None))
+				ResultE.unit(RjsNumber(n, None))
 			case JsNull =>
-				ContextE.unit(RjsNull)
+				ResultE.unit(RjsNull)
 			case JsString(s) =>
+				// TODO: should use regular expressions for matching strings, or parsers
 				if (s.startsWith("\"") && s.endsWith("\"")) {
-					ContextE.unit(RjsText(s.substring(1, s.length - 1)))
+					ResultE.unit(RjsText(s.substring(1, s.length - 1)))
 				}
 				else if (s.startsWith("f\"") && s.endsWith("\"")) {
-					ContextE.unit(RjsFormat(s.substring(2, s.length - 1)))
+					ResultE.unit(RjsFormat(s.substring(2, s.length - 1)))
+				}
+				else if (s.startsWith("$")) {
+					ResultE.unit(RjsSubst(s.tail))
 				}
 				// TODO: handle numbers and numbers with units
 				else {
-					ContextE.unit(RjsString(s))
+					ResultE.unit(RjsString(s))
 				}
 			case jsobj: JsObject =>
 				jsobj.fields.get("TYPE") match {
 					case Some(JsString(typ)) =>
 						fromJsObject(typ, jsobj)
 					case _ =>
-						ContextE.mapAll(jsobj.fields.toList)({ case (key, value) =>
+						ResultE.mapAll(jsobj.fields.toList)({ case (key, value) =>
 							fromJson(value).map(key -> _)
 						}).map(l => RjsMap(l.toMap))
 				}
 		}
 	}
 	
-	private def fromJsObject(typ: String, jsobj: JsObject): ContextE[RjsValue] = {
+	private def fromJsObject(typ: String, jsobj: JsObject): ResultE[RjsValue] = {
+		typ match {
+			case "action" => fromJsObjectToRjsValue[RjsAction](jsobj)
+			case "actionDef" => fromJsObjectToRjsValue[RjsActionDef](jsobj)
+			case "call" => fromJsObjectToRjsValue[RjsCall](jsobj)
+			case "define" => fromJsObjectToRjsValue[RjsDefine](jsobj)
+			case "import" => fromJsObjectToRjsValue[RjsImport](jsobj)
+			case "include" => fromJsObjectToRjsValue[RjsInclude](jsobj)
+			case "instruction" => fromJsObjectToRjsValue[RjsInstruction](jsobj)
+			case "lambda" => fromJsObjectToRjsValue[RjsLambda](jsobj)
+			case "section" => fromJsObjectToRjsValue[RjsSection](jsobj)
+			case _ =>
+				ResultE.error(s"conversion for TYPE=$typ not implemented.")
+		}
+	}
+	
+	/*
+	private def fromJsObject(typ: String, jsobj: JsObject): ResultE[RjsValue] = {
 		typ match {
 			case "action" =>
 				for {
 					name <- Converter2.fromJson[String](jsobj, "NAME")
 					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
-					input_l <- ContextE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
+					input_l <- ResultE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
 						RjsValue.fromJson(jsval).map(name -> _)
 					}
 				} yield RjsAction(name, RjsMap(input_l.toMap))
@@ -335,7 +385,7 @@ object RjsValue {
 				for {
 					name <- Converter2.fromJson[String](jsobj, "NAME")
 					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
-					input_l <- ContextE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
+					input_l <- ResultE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
 						RjsValue.fromJson(jsval).map(name -> _)
 					}
 				} yield RjsCall(name, RjsMap(input_l.toMap))
@@ -358,7 +408,7 @@ object RjsValue {
 				for {
 					name <- Converter2.fromJson[String](jsobj, "NAME")
 					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
-					input_l <- ContextE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
+					input_l <- ResultE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
 						RjsValue.fromJson(jsval).map(name -> _)
 					}
 				} yield RjsInstruction(name, RjsMap(input_l.toMap))
@@ -370,38 +420,32 @@ object RjsValue {
 			case "section" =>
 				for {
 					jsBody_l <- Converter2.fromJson[List[JsValue]](jsobj, "BODY")
-					body_l <- ContextE.mapAll(jsBody_l)(RjsValue.fromJson(_))
+					body_l <- ResultE.mapAll(jsBody_l)(RjsValue.fromJson(_))
 				} yield RjsSection(body_l)
-			case "subst" =>
+			/*case "subst" =>
 				for {
 					name <- Converter2.fromJson[String](jsobj, "NAME")
-				} yield RjsSubst(name)
+				} yield RjsSubst(name)*/
 			case _ =>
-				ContextE.error(s"conversion for TYPE=$typ not implemented.")
+				ResultE.error(s"conversion for TYPE=$typ not implemented.")
 		}
+	}*/
+
+	import scala.reflect.runtime.{universe => ru}
+	import scala.reflect.runtime.universe.Type
+	import scala.reflect.runtime.universe.TypeTag
+	import scala.reflect.runtime.universe.typeOf
+
+	def fromJsObjectToRjsValue[A <: RjsValue : TypeTag](
+		jsobj: JsObject
+	): ResultE[A] = {
+		fromJsObjectToRjs(jsobj, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
 	}
-
-import scala.reflect.runtime.{universe => ru}
-import scala.reflect.runtime.universe.Type
-import scala.reflect.runtime.universe.TypeTag
-import scala.reflect.runtime.universe.typeOf
-
-/*
-import spray.json._
-import scala.reflect.runtime.{universe => ru}
-import roboliq.input._
-val jsobj = JsObject("TYPE" -> JsString("action"), "NAME" -> JsString("someaction"), "INPUT" -> JsObject("a" -> JsNumber(1)))
-
-val eb = new roboliq.entities.EntityBase
-val data0 = ContextEData(EvaluatorState(eb))
-
-RjsValue.fromJsObjectToRjs(jsobj, ru.typeOf[RjsAction]).run(data0)
-*/
-
+	
 	def fromJsObjectToRjs(
 		jsobj: JsObject,
 		typ: Type
-	): ContextE[Any] = {
+	): ResultE[Any] = {
 		val ctor = typ.member(ru.termNames.CONSTRUCTOR).asMethod
 		val p0_l = ctor.paramLists(0)
 		val typA = ru.typeOf[RjsJsonName]
@@ -432,102 +476,100 @@ RjsValue.fromJsObjectToRjs(jsobj, ru.typeOf[RjsAction]).run(data0)
 			obj
 		}
 	}
-/*
-import scala.reflect.runtime.{universe => ru}
-import scala.reflect.runtime.universe.Type
-import scala.reflect.runtime.universe.TypeTag
-import scala.reflect.runtime.universe.typeOf
-import scala.reflect.runtime.universe._
-case class A(name: String) extends scala.annotation.StaticAnnotation
-case class X(@A("STRING") string: String)
-val typ = typeOf[X]
-val typClass = typ.typeSymbol.asClass
-val typA = ru.typeOf[A]
 
-val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
-val p0_l = ctor.paramLists(0)
-val p = p0_l.head
-
-val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typA)
-
-val mirror = runtimeMirror(this.getClass.getClassLoader)
-
-val typAnnotation_? = typClass.annotations.find(a => a.tree.tpe == typA)
-val jsTyp_? : Option[(String, JsValue)] = typAnnotation_?.flatMap { a =>
-	val args = a.tree.children.tail
-	val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
-	values match {
-		case List(typ: String) => Some("TYPE" -> JsString(typ))
-		case _ => None
+	def toJson[A <: RjsValue : TypeTag](
+		rjsval: A
+	): ResultC[JsValue] = {
+		val typ = ru.typeTag[A].tpe
+		toJson(rjsval, typ)
 	}
-	}
-*/
-
-	/*
-	def x(
-		jsval: JsValue,
-		typ: Type
-	) {
-		import scala.reflect.runtime.universe._
-
-		val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
-		val p0_l = ctor.paramLists(0)
-		val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
-		for {
-			nameToObj_m <- jsval match {
-				case jsobj: JsObject =>
-					convMapString(jsobj, nameToType_l)
-				case _ =>
-					ContextE.error(s"unhandled type or value. type=${typ}, value=${jsval}")
-			}
-		} yield {
-			val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
-			val c = typ.typeSymbol.asClass
-			val mirror = runtimeMirror(this.getClass.getClassLoader)
-			val mm = mirror.reflectClass(c).reflectConstructor(ctor)
-			val obj = mm(arg_l : _*)
-			obj
-		}
-		
-	}*/
 	
-	/*
 	def toJson(
-		rjsval: RjsValue,
+		x: Any,
 		typ: Type
-	) {
+	): ResultC[JsValue] = {
 		import scala.reflect.runtime.universe._
 
-		// Get 'TYPE' field value, if annotated
-		val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]
-		val typJsonNameAnnotation = ru.typeOf[RjsJsonName]
-		val typClass = typ.typeSymbol.asClass
-		val typAnnotation_? = typClass.annotations.find(a => a.tree.tpe == typJsonTypeAnnotation)
-		val jsTyp_? : Option[(String, JsValue)] = typAnnotation_?.flatMap { a =>
-			val args = a.tree.children.tail
-			val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
-			values match {
-				case List(typ: String) => Some("TYPE" -> JsString(typ))
-				case _ => None
+		if (typ =:= typeOf[String]) ResultC.unit(JsString(x.asInstanceOf[String]))
+		else if (typ =:= typeOf[Int]) ResultC.unit(JsNumber(x.asInstanceOf[Int]))
+		else if (typ =:= typeOf[Integer]) ResultC.unit(JsNumber(x.asInstanceOf[Integer]))
+		else if (typ =:= typeOf[Float]) ResultC.unit(JsNumber(x.asInstanceOf[Float]))
+		else if (typ =:= typeOf[Double]) ResultC.unit(JsNumber(x.asInstanceOf[Double]))
+		else if (typ =:= typeOf[BigDecimal]) ResultC.unit(JsNumber(x.asInstanceOf[BigDecimal]))
+		else if (typ =:= typeOf[Boolean]) ResultC.unit(JsBoolean(x.asInstanceOf[Boolean]))
+		else if (typ =:= typeOf[java.lang.Boolean]) ResultC.unit(JsBoolean(x.asInstanceOf[java.lang.Boolean]))
+		else if (typ <:< typeOf[Enumeration#Value]) ResultC.unit(JsString(x.toString))
+		else if (typ <:< typeOf[Option[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			x.asInstanceOf[Option[_]] match {
+				case None => ResultC.unit(JsNull)
+				case Some(x2) => toJson(x2, typ2)
 			}
 		}
-
-		val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
-		val p0_l = ctor.paramLists(0)
-		p0_l.flatMap { p =>
-			val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typJsonNameAnnotation)
-			val jsNameToParam_? : Option[(String, JsValue)] = nameAnnotation_?.flatMap { a =>
+		else if (typ <:< typeOf[Map[String, _]]) {
+			//val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
+			val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
+			val m0 = x.asInstanceOf[Map[String, _]]
+			for {
+				l <- ResultC.map(m0.toList) { case (name, v) =>
+					toJson(v, typVal).map(name -> _)
+				}
+			} yield JsObject(l.toMap)
+		}
+		else if (typ <:< typeOf[Iterable[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			val l0 = x.asInstanceOf[Iterable[_]]
+			for {
+				l <- ResultC.map(l0) { x2 => toJson(x2, typ2) }
+			} yield JsArray(l.toList)
+		}
+		else {
+			// Get 'TYPE' field value, if annotated
+			val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]
+			val typJsonNameAnnotation = ru.typeOf[RjsJsonName]
+			val typClass = typ.typeSymbol.asClass
+			val typAnnotation_? = typClass.annotations.find(a => a.tree.tpe == typJsonTypeAnnotation)
+			val jsTyp_? : Option[(String, JsValue)] = typAnnotation_?.flatMap { a =>
 				val args = a.tree.children.tail
 				val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
 				values match {
-					case List(name: String) =>
-						typ.mem
-						Some(name -> JsString(typ))
+					case List(typ: String) => Some("TYPE" -> JsString(typ))
 					case _ => None
 				}
 			}
+	
+			val mirror = runtimeMirror(this.getClass.getClassLoader)
+			val im = mirror.reflect(x)
+	
+			val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+			val p0_l = ctor.paramLists(0)
+			for {
+				field_l <- ResultC.mapAll(p0_l) { p =>
+					val fm = im.reflectField(typ.decl(p.asTerm.name).asTerm)
+					val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typJsonNameAnnotation)
+					val name_? = nameAnnotation_?.flatMap { a =>
+						val args = a.tree.children.tail
+						val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
+						values match {
+							case List(name: String) => Some(name)
+							case _ => None
+						}
+					}
+					val name = name_?.getOrElse(p.name.toString)
+					val x = fm.get
+					for {
+						jsval <- x match {
+							case s: String => ResultC.unit(JsString(s))
+							case rjsval2: RjsValue => rjsval2.toJson
+						}
+					} yield {
+						name -> jsval
+					}
+				}
+			} yield {
+				val map = (jsTyp_?.toList ++ field_l).toMap
+				JsObject(map)
+			}
 		}
-		val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
 	}
-	*/
 }

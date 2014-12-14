@@ -1,8 +1,6 @@
 package roboliq.input
 
 import org.scalatest.FunSpec
-import roboliq.entities.EntityBase
-import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsArray
@@ -14,17 +12,16 @@ import roboliq.utils.JsonUtils
 class EvaluatorSpec extends FunSpec {
 	import ContextValueWrapper._
 
-	val eb = new EntityBase
-	val data0 = ContextEData(EvaluatorState(eb, searchPath_l = List(new File("testfiles"))))
+	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator();
 
 	private def check(
 		scope: RjsMap,
 		l: (RjsValue, RjsValue)*
 	) {
-		val ctx: ContextE[Unit] = for {
-			_ <- ContextE.addToScope(scope)
-			res_l <- ContextE.map(l) { case (jsobj, _) => evaluator.evaluate(jsobj) }
+		val ctx: ResultE[Unit] = for {
+			_ <- ResultE.addToScope(scope)
+			res_l <- ResultE.map(l) { case (jsobj, _) => evaluator.evaluate(jsobj) }
 		} yield {
 			for ((res, expected) <- res_l zip l.map(_._2))
 				assert(res == expected)
@@ -40,10 +37,10 @@ class EvaluatorSpec extends FunSpec {
 	def evaluate(
 		rjsval: RjsValue,
 		scope: RjsMap = RjsMap()
-	): (ContextEData, Option[RjsValue]) = {
-		val ctx: ContextE[RjsValue] = for {
-			_ <- ContextE.addToScope(scope)
-			res <- ContextE.evaluate(rjsval)
+	): (ResultEData, Option[RjsValue]) = {
+		val ctx: ResultE[RjsValue] = for {
+			_ <- ResultE.addToScope(scope)
+			res <- ResultE.evaluate(rjsval)
 		} yield res
 		ctx.run(data0)
 	}

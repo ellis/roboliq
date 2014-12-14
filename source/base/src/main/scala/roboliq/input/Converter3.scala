@@ -10,74 +10,74 @@ import roboliq.core.RsError
 object Converter3 {
 	private val logger = Logger[this.type]
 	
-	def toRjsList(rjsval: RjsValue): ContextE[RjsList] = {
+	def toRjsList(rjsval: RjsValue): ResultE[RjsList] = {
 		rjsval match {
-			case x: RjsList => ContextE.unit(x)
-			case _ => ContextE.error(s"cannot convert to list: $rjsval")
+			case x: RjsList => ResultE.unit(x)
+			case _ => ResultE.error(s"cannot convert to list: $rjsval")
 		}
 	}
 	
-	def toRjsText(rjsval: RjsValue): ContextE[RjsText] = {
-		ContextE.unit(RjsText(rjsval.toText))
+	def toRjsText(rjsval: RjsValue): ResultE[RjsText] = {
+		ResultE.unit(RjsText(rjsval.toText))
 	}
 	
-	def toString(rjsval: RjsValue): ContextE[String] = {
-		ContextE.context("toString") {
+	def toString(rjsval: RjsValue): ResultE[String] = {
+		ResultE.context("toString") {
 			rjsval match {
-				case RjsString(text) => ContextE.unit(text)
+				case RjsString(text) => ResultE.unit(text)
 				case RjsMap(m) =>
 					for {
-						_ <- ContextE.assert(m.get("TYPE") == "string", s"expected RjsString or TYPE=string")
-						jsval2 <- ContextE.from(m.get("VALUE"), s"expected VALUE for string")
+						_ <- ResultE.assert(m.get("TYPE") == "string", s"expected RjsString or TYPE=string")
+						jsval2 <- ResultE.from(m.get("VALUE"), s"expected VALUE for string")
 						x <- toString(jsval2)
 					} yield x
-				case _ => ContextE.error("expected RjsString")
+				case _ => ResultE.error("expected RjsString")
 			}
 		}
 	}
 	
-	def toInt(rjsval: RjsValue): ContextE[Int] = {
+	def toInt(rjsval: RjsValue): ResultE[Int] = {
 		toBigDecimal(rjsval).map(_.toInt)
 	}
 	
-	def toInteger(rjsval: RjsValue): ContextE[Integer] = {
+	def toInteger(rjsval: RjsValue): ResultE[Integer] = {
 		toBigDecimal(rjsval).map(_.toInt)
 	}
 	
-	def toDouble(rjsval: RjsValue): ContextE[Double] = {
+	def toDouble(rjsval: RjsValue): ResultE[Double] = {
 		toBigDecimal(rjsval).map(_.toDouble)
 	}
 	
-	def toBigDecimal(rjsval: RjsValue): ContextE[BigDecimal] = {
-		ContextE.context("toBigDecimal") {
+	def toBigDecimal(rjsval: RjsValue): ResultE[BigDecimal] = {
+		ResultE.context("toBigDecimal") {
 			rjsval match {
-				case RjsNumber(n, None) => ContextE.unit(n)
-				case _ => ContextE.error("expected RjsNumber without units")
+				case RjsNumber(n, None) => ResultE.unit(n)
+				case _ => ResultE.error("expected RjsNumber without units")
 			}
 		}
 	}
 	
-	def toBoolean(rjsval: RjsValue): ContextE[java.lang.Boolean] = {
-		ContextE.context("toBoolean") {
+	def toBoolean(rjsval: RjsValue): ResultE[java.lang.Boolean] = {
+		ResultE.context("toBoolean") {
 			rjsval match {
 				case RjsMap(m) =>
 					for {
-						_ <- ContextE.assert(m.get("TYPE") == "boolean", s"expected RjsBoolean or TYPE=boolean")
-						jsval2 <- ContextE.from(m.get("VALUE"), s"expected VALUE for boolean")
+						_ <- ResultE.assert(m.get("TYPE") == "boolean", s"expected RjsBoolean or TYPE=boolean")
+						jsval2 <- ResultE.from(m.get("VALUE"), s"expected VALUE for boolean")
 						x <- toBoolean(jsval2)
 					} yield x
-				case RjsBoolean(b) => ContextE.unit(b)
-				case _ => ContextE.error("expected RjsBoolean")
+				case RjsBoolean(b) => ResultE.unit(b)
+				case _ => ResultE.error("expected RjsBoolean")
 			}
 		}
 	}
 	
-	def toEnum[A <: Enumeration#Value : TypeTag](rjsval: RjsValue): ContextE[A] = {
+	def toEnum[A <: Enumeration#Value : TypeTag](rjsval: RjsValue): ResultE[A] = {
 		val typ = ru.typeTag[A].tpe
 		toEnum(rjsval, typ).map(_.asInstanceOf[A])
 	}
 	
-	private def toEnum(rjsval: RjsValue, typ: ru.Type): ContextE[Any] = {
+	private def toEnum(rjsval: RjsValue, typ: ru.Type): ResultE[Any] = {
 		try {
 			//val mirror = clazz_?.map(clazz => ru.runtimeMirror(clazz.getClassLoader)).getOrElse(scala.reflect.runtime.currentMirror)
 			val mirror = ru.runtimeMirror(getClass.getClassLoader)
@@ -89,22 +89,22 @@ object Converter3 {
 			val value_l = enum.values
 			rjsval match {
 				case RjsString(s) =>
-					ContextE.from(value_l.find(_.toString == s), s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
-				case _ => ContextE.error("expected RjsString")
+					ResultE.from(value_l.find(_.toString == s), s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
+				case _ => ResultE.error("expected RjsString")
 			}
 		} catch {
-			case e: Throwable => ContextE.error(s"type: $typ, rjsval: $rjsval, error: ${e.getMessage}")
+			case e: Throwable => ResultE.error(s"type: $typ, rjsval: $rjsval, error: ${e.getMessage}")
 		}
 	}
 	
 	def fromRjs[A: TypeTag](
 		rjsval: RjsValue
-	): ContextE[A] = {
+	): ResultE[A] = {
 		//println(s"fromRjson($rjsval)")
 		val typ = ru.typeTag[A].tpe
 		for {
 			o <- conv(rjsval, typ)
-			//_ <- ContextE.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
+			//_ <- ResultE.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
 		} yield o.asInstanceOf[A]
 	}
 
@@ -112,7 +112,7 @@ object Converter3 {
 		rjsval: RjsValue,
 		typ: Type,
 		path_? : Option[String] = None
-	): ContextE[Any] = {
+	): ResultE[Any] = {
 		//println(s"conv($rjsval)")
 		import scala.reflect.runtime.universe._
 
@@ -122,13 +122,13 @@ object Converter3 {
 		//val prefix = if (path_r.isEmpty) "" else path + ": "
 		//logger.trace(s"conv(${path}, $rjsval, $typ, eb)")
 
-		val ctx: ContextE[Any] = {
+		val ctx: ResultE[Any] = {
 			val c = typ.typeSymbol.asClass
 			val clazz = rjsval.getClass()
 			val m = ru.runtimeMirror(this.getClass.getClassLoader)
-			if (m.reflect(rjsval).symbol.toType <:< typ) ContextE.unit(rjsval)
-			else if (typ =:= typeOf[RjsMap] && rjsval.isInstanceOf[RjsMap]) ContextE.unit(rjsval)
-			else if (typ =:= typeOf[RjsNumber] && rjsval.isInstanceOf[RjsNumber]) ContextE.unit(rjsval)
+			if (m.reflect(rjsval).symbol.toType <:< typ) ResultE.unit(rjsval)
+			else if (typ =:= typeOf[RjsMap] && rjsval.isInstanceOf[RjsMap]) ResultE.unit(rjsval)
+			else if (typ =:= typeOf[RjsNumber] && rjsval.isInstanceOf[RjsNumber]) ResultE.unit(rjsval)
 			else if (typ =:= typeOf[RjsText]) toRjsText(rjsval)
 			else if (typ =:= typeOf[RjsList]) toRjsList(rjsval)
 			
@@ -160,7 +160,7 @@ object Converter3 {
 			*/
 			else if (typ <:< typeOf[Option[_]]) {
 				val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-				if (rjsval == RjsNull) ContextE.unit(None)
+				if (rjsval == RjsNull) ResultE.unit(None)
 				else conv(rjsval, typ2).map(o => Option(o))
 			}
 			else if (typ <:< typeOf[List[_]]) {
@@ -187,9 +187,9 @@ object Converter3 {
 						for {
 							res <- convMap(rjsobj, typKey, nameToType_l)
 						} yield res
-					case RjsNull => ContextE.unit(Map())
+					case RjsNull => ResultE.unit(Map())
 					case _ =>
-						ContextE.error("expected a RjsMap")
+						ResultE.error("expected a RjsMap")
 				}
 			}
 			else {
@@ -207,7 +207,7 @@ object Converter3 {
 							eb.getEntity(s) match {
 								case Some(obj) =>
 									// FIXME: need to check type rather than just assuming that it's correct!
-									ContextE.unit(Left(ConvObject(obj)))
+									ResultE.unit(Left(ConvObject(obj)))
 								case None =>
 									for {
 										nameToVal_l <- parseStringToArgs(s)
@@ -220,7 +220,7 @@ object Converter3 {
 						//case _ =>
 						//	convListToObject(List(rjsval), nameToType_l)
 						case _ =>
-							ContextE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
+							ResultE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
 					}
 				} yield {
 					val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
@@ -234,7 +234,7 @@ object Converter3 {
 		}
 		path_? match {
 			case None => ctx
-			case Some(path) => ContextE.context(path)(ctx)
+			case Some(path) => ResultE.context(path)(ctx)
 		}
 	}
 
@@ -242,23 +242,23 @@ object Converter3 {
 	private def convList(
 		rjsval: RjsValue,
 		typ2: Type
-	): ContextE[List[Any]] = {
+	): ResultE[List[Any]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		rjsval match {
 			case RjsList(v) =>
-				ContextE.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
+				ResultE.mapAll(v.zipWithIndex) { case (jsval2, i0) =>
 					val i = i0 + 1
 					conv(jsval2, typ2, Some(s"[$i]"))
 				}
 			case RjsNull =>
-				ContextE.unit(Nil)
+				ResultE.unit(Nil)
 			case _ =>
-				ContextE.or(
+				ResultE.or(
 					conv(rjsval, typ2).map(List(_)),
-					ContextE.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${rjsval}")
+					ResultE.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${rjsval}")
 				)
 		}
 	}
@@ -266,13 +266,13 @@ object Converter3 {
 	private def convSet(
 		rjsobj: RjsMap,
 		typ2: Type
-	): ContextE[Set[Any]] = {
+	): ResultE[Set[Any]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		// Try to convert each element of the array
-		ContextE.mapAll(rjsobj.map.toList) ({ case (id, rjsval) =>
+		ResultE.mapAll(rjsobj.map.toList) ({ case (id, rjsval) =>
 			conv(rjsval, typ2, Some(id))
 		}).map(l => Set(l : _*))
 	}
@@ -280,15 +280,15 @@ object Converter3 {
 	private def convListToObject(
 		jsval_l: List[RjsValue],
 		nameToType_l: List[(String, ru.Type)]
-	): ContextE[Map[String, _]] = {
-		ContextE.error("convListToObject: not yet implemented")
+	): ResultE[Map[String, _]] = {
+		ResultE.error("convListToObject: not yet implemented")
 	}
 
 	private def convMap(
 		rjsobj: RjsMap,
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)]
-	): ContextE[Map[_, _]] = {
+	): ResultE[Map[_, _]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -304,7 +304,7 @@ object Converter3 {
 		
 		// Try to convert each element of the object
 		for {
-			val_l <- ContextE.map(nameToType_l) { case (name, typ2) =>
+			val_l <- ResultE.map(nameToType_l) { case (name, typ2) =>
 				rjsobj.get(name) match {
 					case Some(jsval2) => conv(jsval2, typ2, Some(name))
 					// Field is missing, so try using RjsNull
@@ -319,16 +319,16 @@ object Converter3 {
 	private def convMapString(
 		rjsobj: RjsMap,
 		nameToType_l: List[(String, ru.Type)]
-	): ContextE[Map[String, _]] = {
+	): ResultE[Map[String, _]] = {
 		for {
 			map <- convMap(rjsobj, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]
 	}
 	
-	def valueToString(rjsval: RjsValue): ContextE[String] = {
+	def valueToString(rjsval: RjsValue): ResultE[String] = {
 		rjsval match {
-			case RjsString(s) => ContextE.unit(s)
-			case _ => ContextE.unit(rjsval.toString)
+			case RjsString(s) => ResultE.unit(s)
+			case _ => ResultE.unit(rjsval.toString)
 		}
 	}
 }

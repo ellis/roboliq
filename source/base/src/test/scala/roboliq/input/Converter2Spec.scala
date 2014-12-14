@@ -2,7 +2,6 @@ package roboliq.input
 
 import org.scalatest.FunSpec
 import roboliq.entities.EntityBase
-import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsNull
@@ -15,8 +14,7 @@ private case class Example1(
 
 class Converter2Spec extends FunSpec {
 	describe("Converter2") {
-		val eb = new EntityBase
-		val data0 = ContextEData(EvaluatorState(eb))
+		val data0 = ResultEData(EvaluatorState())
 		val evaluator = new Evaluator();
 		val js5 = Converter2.makeNumber(5)
 		val js7 = Converter2.makeNumber(7)
@@ -25,7 +23,7 @@ class Converter2Spec extends FunSpec {
 		val jsList1 = Converter2.makeList(List(js5, js7, js12))
 		
 		it("list") {
-			val ctx: ContextE[Unit] = for {
+			val ctx: ResultE[Unit] = for {
 				res1 <- Converter2.fromJson[List[Int]](jsList1)
 				res2 <- Converter2.fromJson[List[BigDecimal]](jsList1)
 			} yield {
@@ -36,7 +34,7 @@ class Converter2Spec extends FunSpec {
 		}
 		
 		it("map") {
-			val ctx: ContextE[Unit] = for {
+			val ctx: ResultE[Unit] = for {
 				res1 <- Converter2.fromJson[Map[String, Int]](jsSet1)
 				res2 <- Converter2.fromJson[Example1](jsSet1)
 			} yield {
@@ -47,7 +45,7 @@ class Converter2Spec extends FunSpec {
 		}
 		
 		it("number") {
-			val ctx: ContextE[Unit] = for {
+			val ctx: ResultE[Unit] = for {
 				res1 <- Converter2.fromJson[Int](js5)
 				res2 <- Converter2.fromJson[Integer](js5)
 				res3 <- Converter2.fromJson[Double](js5)
@@ -62,7 +60,7 @@ class Converter2Spec extends FunSpec {
 		}
 		
 		it("optional number") {
-			val ctx: ContextE[Unit] = for {
+			val ctx: ResultE[Unit] = for {
 				res1 <- Converter2.fromJson[Option[Int]](js5)
 				res2 <- Converter2.fromJson[Option[Int]](JsNull)
 			} yield {

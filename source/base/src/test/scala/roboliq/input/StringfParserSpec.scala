@@ -1,25 +1,22 @@
 package roboliq.input
 
 import org.scalatest.FunSpec
-import roboliq.entities.EntityBase
-import roboliq.core.RsSuccess
 import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsArray
 import spray.json.JsString
 
 class StringfParserSpec extends FunSpec {
-	val eb = new EntityBase
-	val data0 = ContextEData(EvaluatorState(eb))
+	val data0 = ResultEData(EvaluatorState())
 	val evaluator = new Evaluator();
 
 	private def check(
 		scope: RjsMap,
 		l: (String, String)*
 	) {
-		val ctx: ContextE[Unit] = for {
-			_ <- ContextE.addToScope(scope)
-			res_l <- ContextE.mapAll(l) { case (format, _) =>
+		val ctx: ResultE[Unit] = for {
+			_ <- ResultE.addToScope(scope)
+			res_l <- ResultE.mapAll(l) { case (format, _) =>
 				StringfParser.parse(format)
 			}
 		} yield {
