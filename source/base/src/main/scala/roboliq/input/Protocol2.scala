@@ -274,7 +274,7 @@ class Protocol2 {
 						val name = s.tail
 						(actionDef.params.get(name), action.input.get(name)) match {
 							case (Some(param), Some(jsParam)) =>
-								ResultE.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
+								RjsConverter.fromRjs[String](jsParam).map(s2 => Some(s -> s2))
 							case (None, _) =>
 								ResultE.error(s"invalid parameter `$s` in ${if (isPrecond) "precondition" else "effect"}: $literal")
 							case (_, None) =>

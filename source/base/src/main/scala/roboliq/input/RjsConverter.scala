@@ -127,12 +127,12 @@ object RjsConverter {
 		} yield o.asInstanceOf[A]
 	}
 
-	def fromRjs[A: TypeTag](
-		m: RjsMap,
-		field: String
-	): ResultE[A] = {
+	def fromRjs[A: TypeTag](map: RjsMap, field: String): ResultE[A] =
+		fromRjs[A](map.map, field)
+
+	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ResultE[A] = {
 		ResultE.context(field) {
-			m.map.get(field) match {
+			map.get(field) match {
 				case Some(rjsval) => fromRjs[A](rjsval)
 				case None =>
 					ResultE.orElse(

@@ -460,26 +460,6 @@ object ResultE {
 		}
 	}
 	
-	def fromRjs[A: TypeTag](rjsval: RjsValue): ResultE[A] = {
-		Converter3.fromRjs[A](rjsval)
-	}
-	
-	def fromRjs[A: TypeTag](map: RjsMap, field: String): ResultE[A] =
-		fromRjs[A](map.map, field)
-
-	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ResultE[A] = {
-		ResultE.context(field) {
-			map.get(field) match {
-				case Some(jsval) => Converter3.fromRjs[A](jsval)
-				case None =>
-					ResultE.orElse(
-						Converter3.fromRjs[A](RjsNull),
-						ResultE.error("value required")
-					)
-			}
-		}
-	}
-
 	def getScopeValue(name: String): ResultE[RjsValue] = {
 		for {
 			scope <- ResultE.getScope
@@ -490,14 +470,14 @@ object ResultE {
 	def fromScope[A: TypeTag](): ResultE[A] = {
 		for {
 			scope <- ResultE.getScope
-			x <- Converter3.fromRjs[A](RjsMap(scope.toMap))
+			x <- RjsConverter.fromRjs[A](RjsMap(scope.toMap))
 		} yield x
 	}
 
 	def fromScope[A: TypeTag](name: String): ResultE[A] = {
 		for {
 			rjsval <- getScopeValue(name)
-			x <- Converter3.fromRjs[A](rjsval)
+			x <- RjsConverter.fromRjs[A](rjsval)
 		} yield x
 	}
 	

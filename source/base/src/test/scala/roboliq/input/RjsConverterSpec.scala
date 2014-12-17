@@ -8,7 +8,7 @@ import spray.json.JsNull
 import scala.reflect.runtime.universe.TypeTag
 import org.scalatest.exceptions.TestFailedException
 
-private case class Example1C(
+private case class RjsConverterSpecExample(
 	a: Int,
 	b: Double,
 	c: BigDecimal
@@ -56,7 +56,7 @@ class RjsConverterSpec extends FunSpec {
 		
 		it("map") {
 			assert(fromRjs[Map[String, Int]](jsMap1).value == Map("a" -> 5, "b" -> 7, "c" -> 12))
-			assert(fromRjs[Example1B](jsMap1).value == Example1B(5, 7, 12))
+			assert(fromRjs[RjsConverterSpecExample](jsMap1).value == RjsConverterSpecExample(5, 7, 12))
 		}
 		
 		it("number") {
