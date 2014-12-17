@@ -56,14 +56,13 @@ usage.
 - [x] Protocol2: generate action output
 - [x] RjsValue: create trait for Basic types
 - [x] RjsValue.fromJson: when converting a substitution (like RjsSubst) JSON to String, evaluate the RjsValue to get the real value
-- [ ] Delete Converter2, Converter3, ContextT, ContextX
+- [x] Delete Converter2, Converter3, ContextT, ContextX
 - [ ] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2
 - [ ] Protocol2Data: create and use in Protocol2
-- [ ] Converter2:  extend to load RjsValues
 - [ ] Protocol2: load objects and state from evoware configuration (see Protocol)
 - [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
-- [ ] ContextE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
+- [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
 - [ ] Evaluator: consider creation of namespaces
