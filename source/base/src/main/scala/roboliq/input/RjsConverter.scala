@@ -32,6 +32,10 @@ object RjsConverter {
 		toBigDecimal(rjsval).map(_.toInt)
 	}
 	
+	def toFloat(rjsval: RjsValue): ResultE[Float] = {
+		toBigDecimal(rjsval).map(_.toFloat)
+	}
+	
 	def toDouble(rjsval: RjsValue): ResultE[Double] = {
 		toBigDecimal(rjsval).map(_.toDouble)
 	}
@@ -158,6 +162,7 @@ object RjsConverter {
 				if (typ =:= typeOf[String]) RjsConverter.toString(rjsval)
 				else if (typ =:= typeOf[Int]) toInt(rjsval)
 				else if (typ =:= typeOf[Integer]) toInteger(rjsval)
+				else if (typ =:= typeOf[Float]) toFloat(rjsval)
 				else if (typ =:= typeOf[Double]) toDouble(rjsval)
 				else if (typ =:= typeOf[BigDecimal]) toBigDecimal(rjsval)
 				else if (typ =:= typeOf[Boolean]) toBoolean(rjsval)//.map(_.asInstanceOf[Boolean])
@@ -238,7 +243,7 @@ object RjsConverter {
 							ResultE.error("expected a RjsMap")
 					}
 				}
-				else if (typ <:< typeOf[Iterable[_]]) {
+				else if (typ <:< typeOf[List[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					convList(rjsval, typ2)
 				}

@@ -26,6 +26,7 @@ class RjsConverterSpec extends FunSpec {
 		val jsWorld = RjsText("World")
 		val jsMap1 = RjsMap(Map("a" -> js5, "b" -> js7, "c" -> js12))
 		val jsList1 = RjsList(List(js5, js7, js12))
+		val jsSubstX = RjsSubst("x")
 		
 		def fromRjs[A: TypeTag](
 			rjsval: RjsValue
@@ -59,29 +60,24 @@ class RjsConverterSpec extends FunSpec {
 		}
 		
 		it("number") {
-			val ctx: ResultE[Unit] = for {
-				res1 <- RjsConverter.fromRjs[Int](js5)
-				res2 <- RjsConverter.fromRjs[Integer](js5)
-				res3 <- RjsConverter.fromRjs[Double](js5)
-				res4 <- RjsConverter.fromRjs[BigDecimal](js5)
-			} yield {
-				assert(res1 == 5)
-				assert(res2 == 5)
-				assert(res3 == 5)
-				assert(res4 == 5)
-			}
-			ctx.run(data0)
+			assert(fromRjs[Int](js5).value == 5)
+			assert(fromRjs[Integer](js5).value == 5)
+			assert(fromRjs[Float](js5).value == 5.0f)
+			assert(fromRjs[Double](js5).value == 5.0)
+			assert(fromRjs[BigDecimal](js5).value == 5)
 		}
 		
 		it("optional number") {
-			val ctx: ResultE[Unit] = for {
-				res1 <- RjsConverter.fromRjs[Option[Int]](js5)
-				res2 <- RjsConverter.fromRjs[Option[Int]](RjsNull)
-			} yield {
-				assert(res1 == Some(5))
-				assert(res2 == None)
-			}
-			ctx.run(data0)
+			assert(fromRjs[Option[Int]](js5).value == Some(5))
+			assert(fromRjs[Option[Int]](RjsNull).value == None)
+		}
+		
+		it("RjsSubst -> String") {
+			val res = for {
+				_ <- ResultE.addToScope("x", jsWorld)
+				s <- RjsConverter.fromRjs[String](jsSubstX)
+			} yield s
+			assert(res.run().value == "World")
 		}
 	}
 }
