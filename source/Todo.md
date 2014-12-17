@@ -56,6 +56,7 @@ usage.
 - [x] Protocol2: generate action output
 - [x] RjsValue: create trait for Basic types
 - [ ] RjsValue.fromJson: when converting a substitution (like RjsSubst) JSON to String, evaluate the RjsValue to get the real value
+- [ ] Delete Converter2 and Converter3
 - [ ] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2
 - [ ] Protocol2Data: create and use in Protocol2
