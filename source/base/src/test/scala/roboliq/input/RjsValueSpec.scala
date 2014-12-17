@@ -32,15 +32,32 @@ class RjsValueSpec extends FunSpec {
 			assert(RjsValue.fromJson(jsText).run().value == text)
 			assert(RjsValue.fromJson(jsFormat).run().value == format)
 			assert(RjsValue.fromJson(jsSubst).run().value == subst)
-			assert(RjsValue.fromJson(jsAction).run().value == action)
+			assert((for {
+				rjsval0 <- ResultE.from(RjsValue.fromJson(jsAction))
+				tm = rjsval0.asInstanceOf[RjsTypedMap]
+				rjsval1 <- RjsValue.evaluateTypedMap(tm)
+			} yield rjsval1).run().value == action)
 		}
-		it("rjsvalu.toJson") {
+		it("rjsvalue.toJson") {
 			assert(number.toJson.run().value == jsNumber)
 			assert(string.toJson.run().value == jsString)
 			assert(text.toJson.run().value == jsText)
 			assert(format.toJson.run().value == jsFormat)
 			assert(subst.toJson.run().value == jsSubst)
 			assert(action.toJson.run().value == jsAction)
+		}
+		it("RjsValue.evaluateTypedMap") {
+			val tmLambda = RjsTypedMap("lambda", Map(
+				"EXPRESSION" -> RjsTypedMap("call", Map(
+					"NAME" -> RjsString("add"),
+					"INPUT" -> RjsMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
+				))
+			))
+			val lambda = RjsLambda(Nil, RjsTypedMap("call", Map(
+				"NAME" -> RjsString("add"),
+				"INPUT" -> RjsMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
+			)))
+			assert(RjsValue.evaluateTypedMap(tmLambda).run().value == lambda)
 		}
 	}
 }

@@ -19,6 +19,7 @@ class Evaluator() {
 			case x: RjsMap => evaluateMap(x)
 			case x: RjsSection => evaluateSection(x)
 			case x: RjsSubst => evaluateSubst(x)
+			case x: RjsTypedMap => evaluateTypedMap(x)
 			case x => ResultE.unit(x)
 		}
 	}
@@ -183,5 +184,13 @@ class Evaluator() {
 	def evaluateSubst(x: RjsSubst): ResultE[RjsValue] = {
 		println(s"evaluateSubst($x)")
 		ResultE.getScopeValue(x.name)
+	}
+	
+	def evaluateTypedMap(x: RjsTypedMap): ResultE[RjsValue] = {
+		println(s"evaluateTypedMap($x)")
+		for {
+			rjsval <- RjsValue.evaluateTypedMap(x)
+			rjsval2 <- evaluate(rjsval)
+		} yield rjsval2
 	}
 }

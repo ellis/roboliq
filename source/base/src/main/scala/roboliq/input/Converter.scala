@@ -340,7 +340,7 @@ object Converter {
 			else if (typ =:= typeOf[PipetteDestinations]) toPipetteDestinations(jsval, eb, state_?)
 			else if (typ =:= typeOf[PipetteSources]) toPipetteSources(jsval, eb, state_?)
 			// Logic
-			else if (typ =:= typeOf[strips.Literal]) tostripsLiteral(jsval)
+			else if (typ =:= typeOf[strips.Literal]) toStripsLiteral(jsval)
 			// Lookups
 			else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](jsval, eb)
 			else if (typ =:= typeOf[Labware]) toEntityByRef[Labware](jsval, eb)
@@ -968,7 +968,7 @@ object Converter {
 		}
 	}
 	
-	def tostripsLiteral(
+	def toStripsLiteral(
 		jsval: JsValue
 	): RqResult[strips.Literal] = {
 		jsval match {

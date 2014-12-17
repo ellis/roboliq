@@ -54,6 +54,7 @@ usage.
 - [x] Protocol2DataA: value for initial state and map for effects
 - [x] Protocol2: how to handle initial state of lab?  Should the initial state of protocol and lab be literals instead, so that state values can be negated?
 - [x] Protocol2: generate action output
+- [x] RjsValue: create trait for Basic types
 - [ ] RjsValue.fromJson: when converting a substitution (like RjsSubst) JSON to String, evaluate the RjsValue to get the real value
 - [ ] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2

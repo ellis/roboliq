@@ -11,6 +11,8 @@ import spray.json.JsBoolean
 import spray.json.JsNull
 import roboliq.ai.strips
 import roboliq.core.ResultC
+import spray.json.DefaultJsonProtocol
+import spray.json.RootJsonFormat
 
 /*object RjsType extends Enumeration {
 	val
@@ -31,6 +33,8 @@ sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 	def toJson: ResultC[JsValue]
 	def toText: String = toString
 }
+
+sealed trait RjsBasicValue extends RjsValue
 
 @RjsJsonType("action")
 case class RjsAction(
@@ -79,7 +83,7 @@ case class RjsActionDef(
 	}
 }
 
-case class RjsBoolean(b: Boolean) extends RjsValue {
+case class RjsBoolean(b: Boolean) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsBoolean(b))
 	override def toText: String = b.toString
 }
@@ -134,7 +138,7 @@ case class RjsDefine(
 	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsFormat(format: String) extends RjsValue {
+case class RjsFormat(format: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString("f\""+format+"\""))
 }
 
@@ -169,7 +173,7 @@ case class RjsLambda(
 	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsList(list: List[RjsValue]) extends RjsValue {
+case class RjsList(list: List[RjsValue]) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = {
 		for {
 			l <- ResultC.map(list) { _.toJson }
@@ -179,7 +183,7 @@ case class RjsList(list: List[RjsValue]) extends RjsValue {
 	}
 }
 
-case class RjsMap(map: Map[String, RjsValue]) extends RjsValue {
+case class RjsMap(map: Map[String, RjsValue]) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = {
 		for {
 			l <- ResultC.map(map.toList) { case (name, value) =>
@@ -201,12 +205,12 @@ object RjsMap {
 	}
 }
 
-case object RjsNull extends RjsValue {
+case object RjsNull extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsNull)
 	override def toText: String = "null"
 }
 
-case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsValue {
+case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = unit match {
 		case None => ResultC.unit(JsNumber(n))
 		case Some(s) => ResultC.unit(JsString(n.toString+s))
@@ -285,76 +289,92 @@ case class RjsSection(
  * This is a string which can represent anything that can be encoded as a string.
  * It is not meant as text to be displayed -- for that see RjsText.
  */
-case class RjsString(s: String) extends RjsValue {
+case class RjsString(s: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString(s))
 	override def toText: String = s
 }
 
-case class RjsSubst(name: String) extends RjsValue {
+case class RjsSubst(name: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString("$"+name))
 }
 
-case class RjsText(text: String) extends RjsValue {
+case class RjsText(text: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString("\""+text+"\""))
 	override def toText: String = text
 }
 
+case class RjsTypedMap(typ: String, map: Map[String, RjsValue]) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(map.toList) { case (name, value) =>
+				value.toJson.map(name -> _)
+			}
+		} yield JsObject((("TYPE" -> JsString(typ)) :: l).toMap)
+	}
+}
+
 object RjsValue {
-	def fromJson(jsval: JsValue): ResultE[RjsValue] = {
+	/**
+	 * Convert a JSON object to a basic RjsValue, one of: Boolean, List, Number, Null, Text, Format, Subst, String, Map, or TypedMap.
+	 * An error can occur if the text of a JsString is not properly formatted.
+	 */
+	def fromJson(jsval: JsValue): ResultC[RjsBasicValue] = {
 		println(s"RjsValue.fromJson($jsval)")
 		jsval match {
 			case JsBoolean(b) =>
-				ResultE.unit(RjsBoolean(b))
+				ResultC.unit(RjsBoolean(b))
 			case JsArray(l) =>
-				ResultE.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
-					ResultE.context(s"[${i+1}]") {
-						RjsValue.fromJson(jsval2)
+				ResultC.mapAll(l.zipWithIndex)({ case (jsval2, i) =>
+					ResultC.context(s"[${i+1}]") {
+						fromJson(jsval2)
 					}
 				}).map(RjsList)
 			case JsNumber(n) =>
-				ResultE.unit(RjsNumber(n, None))
+				ResultC.unit(RjsNumber(n, None))
 			case JsNull =>
-				ResultE.unit(RjsNull)
+				ResultC.unit(RjsNull)
 			case JsString(s) =>
 				// TODO: should use regular expressions for matching strings, or parsers
 				if (s.startsWith("\"") && s.endsWith("\"")) {
-					ResultE.unit(RjsText(s.substring(1, s.length - 1)))
+					ResultC.unit(RjsText(s.substring(1, s.length - 1)))
 				}
 				else if (s.startsWith("f\"") && s.endsWith("\"")) {
-					ResultE.unit(RjsFormat(s.substring(2, s.length - 1)))
+					ResultC.unit(RjsFormat(s.substring(2, s.length - 1)))
 				}
 				else if (s.startsWith("$")) {
-					ResultE.unit(RjsSubst(s.tail))
+					ResultC.unit(RjsSubst(s.tail))
 				}
 				// TODO: handle numbers and numbers with units
 				else {
-					ResultE.unit(RjsString(s))
+					ResultC.unit(RjsString(s))
 				}
 			case jsobj: JsObject =>
 				jsobj.fields.get("TYPE") match {
 					case Some(JsString(typ)) =>
-						fromJsObject(typ, jsobj)
+						ResultC.mapAll((jsobj.fields - "TYPE").toList)({ case (key, value) =>
+							fromJson(value).map(key -> _)
+						}).map(l => RjsTypedMap(typ, l.toMap))
 					case _ =>
-						ResultE.mapAll(jsobj.fields.toList)({ case (key, value) =>
+						ResultC.mapAll(jsobj.fields.toList)({ case (key, value) =>
 							fromJson(value).map(key -> _)
 						}).map(l => RjsMap(l.toMap))
 				}
 		}
 	}
 	
-	private def fromJsObject(typ: String, jsobj: JsObject): ResultE[RjsValue] = {
-		typ match {
-			case "action" => fromJsObjectToRjsValue[RjsAction](jsobj)
-			case "actionDef" => fromJsObjectToRjsValue[RjsActionDef](jsobj)
-			case "call" => fromJsObjectToRjsValue[RjsCall](jsobj)
-			case "define" => fromJsObjectToRjsValue[RjsDefine](jsobj)
-			case "import" => fromJsObjectToRjsValue[RjsImport](jsobj)
-			case "include" => fromJsObjectToRjsValue[RjsInclude](jsobj)
-			case "instruction" => fromJsObjectToRjsValue[RjsInstruction](jsobj)
-			case "lambda" => fromJsObjectToRjsValue[RjsLambda](jsobj)
-			case "section" => fromJsObjectToRjsValue[RjsSection](jsobj)
+	def evaluateTypedMap(tm: RjsTypedMap): ResultE[RjsValue] = {
+		tm.typ match {
+			case "action" => fromRjsTypedMap[RjsAction](tm)
+			case "actionDef" => fromRjsTypedMap[RjsActionDef](tm)
+			case "call" => fromRjsTypedMap[RjsCall](tm)
+			case "define" => fromRjsTypedMap[RjsDefine](tm)
+			case "import" => fromRjsTypedMap[RjsImport](tm)
+			case "include" => fromRjsTypedMap[RjsInclude](tm)
+			case "instruction" => fromRjsTypedMap[RjsInstruction](tm)
+			case "lambda" => fromRjsTypedMap[RjsLambda](tm)
+			case "section" => fromRjsTypedMap[RjsSection](tm)
 			case _ =>
-				ResultE.error(s"conversion for TYPE=$typ not implemented.")
+				ResultE.error(s"unable to convert from RjsTypedMap to TYPE=${tm.typ}.")
 		}
 	}
 	
@@ -436,14 +456,14 @@ object RjsValue {
 	import scala.reflect.runtime.universe.TypeTag
 	import scala.reflect.runtime.universe.typeOf
 
-	def fromJsObjectToRjsValue[A <: RjsValue : TypeTag](
-		jsobj: JsObject
+	def fromRjsTypedMap[A <: RjsValue : TypeTag](
+		tm: RjsTypedMap
 	): ResultE[A] = {
-		fromJsObjectToRjs(jsobj, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
+		fromRjsTypedMap(tm, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
 	}
 	
-	def fromJsObjectToRjs(
-		jsobj: JsObject,
+	def fromRjsTypedMap(
+		tm: RjsTypedMap,
 		typ: Type
 	): ResultE[Any] = {
 		val ctor = typ.member(ru.termNames.CONSTRUCTOR).asMethod
@@ -464,7 +484,7 @@ object RjsValue {
 		}
 		
 		for {
-			nameToObj_m <- Converter2.convMapString(jsobj, nameToType_l)
+			nameToObj_m <- RjsConverter.convMapString(RjsMap(tm.map), nameToType_l)
 		} yield {
 			val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
 			val c = typ.typeSymbol.asClass
@@ -483,7 +503,15 @@ object RjsValue {
 		val typ = ru.typeTag[A].tpe
 		toJson(rjsval, typ)
 	}
-	
+
+/*
+import scala.reflect.runtime.universe._
+val typ = typeOf[Option[Int]]
+val x = Some(1)
+val mirror = runtimeMirror(this.getClass.getClassLoader)
+val im = mirror.reflect(x)
+*/	
+
 	def toJson(
 		x: Any,
 		typ: Type
@@ -537,7 +565,7 @@ object RjsValue {
 					case _ => None
 				}
 			}
-	
+			
 			val mirror = runtimeMirror(this.getClass.getClassLoader)
 			val im = mirror.reflect(x)
 	

@@ -16,8 +16,8 @@
     - TYPE: instruction
       NAME: ShakerRun
       INPUT:
-        agent: { TYPE: subst, NAME: agent }
-        device: { TYPE: subst, NAME: device }
-        program: { TYPE: subst, NAME: program }
-        labware: { TYPE: subst, NAME: labware }
-        site: { TYPE: subst, NAME: site }
+        agent: $agent
+        device: $device
+        program: $program
+        labware: $labware
+        site: $site

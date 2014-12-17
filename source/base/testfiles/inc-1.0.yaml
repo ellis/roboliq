@@ -6,6 +6,4 @@ VALUE:
     TYPE: call
     NAME: add
     INPUT:
-      numbers:
-      - { TYPE: subst, NAME: x }
-      - 1
+      numbers: [$x, 1]

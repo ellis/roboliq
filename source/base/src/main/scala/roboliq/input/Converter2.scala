@@ -236,9 +236,9 @@ object Converter2 {
 				else if (typ =:= typeOf[TipModel]) toEntityByRef[TipModel](jsval, eb)
 				//else if (typ <:< typeOf[Substance]) toSubstance(jsval)
 				*/
-				else if (typ <:< typeOf[RjsValue]) {
-					RjsValue.fromJson(jsval)
-				}
+				//else if (typ <:< typeOf[RjsValue]) {
+				//	RjsValue.fromJson(jsval)
+				//}
 				else if (typ <:< typeOf[Option[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					if (jsval == JsNull) ResultE.unit(None)

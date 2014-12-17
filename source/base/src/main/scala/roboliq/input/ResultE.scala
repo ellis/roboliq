@@ -23,6 +23,8 @@ import org.apache.commons.io.FilenameUtils
 import com.google.gson.Gson
 import spray.json.JsNull
 import roboliq.utils.JsonUtils
+import roboliq.core.ResultC
+import roboliq.core.ResultCData
 
 case class ResultEData(
 	state: EvaluatorState = EvaluatorState(),
@@ -136,6 +138,20 @@ object ResultE {
 				case _ => data
 			}
 			(data1, opt)
+		}
+	}
+	
+	def from[A](res: ResultC[A]): ResultE[A] = {
+		ResultE { data =>
+			if (data.error_r.isEmpty) {
+				val dataC0 = ResultCData(data.context_r, data.warning_r, data.error_r)
+				val (dataC1, ret_?) = res.run(dataC0)
+				val data1 = ResultEData(data.state, dataC1.context_r, dataC1.warning_r, dataC1.error_r)
+				(data1, ret_?)
+			}
+			else {
+				(data, None)
+			}
 		}
 	}
 	
@@ -512,7 +528,7 @@ object ResultE {
 		} yield file
 	}
 
-	def loadJsonFromFile(file: File): ResultE[RjsValue] = {
+	def loadJsonFromFile(file: File): ResultE[RjsBasicValue] = {
 		import spray.json._
 		for {
 			_ <- ResultE.assert(file.exists, s"File not found: ${file.getPath}")
@@ -525,7 +541,7 @@ object ResultE {
 			input0 = org.apache.commons.io.FileUtils.readFileToString(file)
 			input = if (bYaml) JsonUtils.yamlToJsonText(input0) else input0
 			jsval = input.parseJson
-			res <- RjsValue.fromJson(jsval)
+			res <- from(RjsValue.fromJson(jsval))
 		} yield res
 	}
 }
