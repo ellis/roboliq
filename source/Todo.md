@@ -60,9 +60,9 @@ usage.
 - [x] RjsProtocol: allow for loading from JSON
 - [x] RjsProtocol: create and use in Protocol2
 - [x] Protocol2Data: create and use in Protocol2
-- [ ] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
+- [x] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
 - [ ] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
-- [ ] ProtocolHandlerSpec: test a protocol with only instruction commands
+- [ ] ProtocolHandlerSpec: test a protocol that only contains instruction commands
 - [ ] RoboliqSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
 - [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
 - [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data

@@ -18,7 +18,7 @@ case class MyPlate(
 	location_? : Option[String]
 )
 
-class Protocol2DataA(
+class ProtocolDataA(
 	val objects: RjsMap,
 	val commands: RjsMap,
 	val commandOrderingConstraints: List[List[String]],
@@ -26,8 +26,8 @@ class Protocol2DataA(
 	val planningDomainObjects: Map[String, String],
 	val planningInitialState: strips.Literals
 ) {
-	def ++(that: Protocol2DataA): Protocol2DataA = {
-		new Protocol2DataA(
+	def ++(that: ProtocolDataA): ProtocolDataA = {
+		new ProtocolDataA(
 			objects = this.objects ++ that.objects,
 			commands = this.commands ++ that.commands,
 			commandOrderingConstraints = this.commandOrderingConstraints ++ that.commandOrderingConstraints,
@@ -44,8 +44,8 @@ case class ProtocolCommandResult(
 	validation_l: List[CommandValidation] = Nil
 )
 
-class Protocol2DataB(
-	val dataA: Protocol2DataA,
+class ProtocolDataB(
+	val dataA: ProtocolDataA,
 	val commandExpansions: Map[String, ProtocolCommandResult]
 )
 
@@ -59,13 +59,13 @@ class Protocol2DataB(
  * 
  */
 
-class Protocol2DataC(
-	val dataA: Protocol2DataA,
+class ProtocolDataC(
+	val dataA: ProtocolDataA,
 	val validations: Map[String, List[CommandValidation]]
 )
 
-class Protocol2 {
-	def extractDataA(protocol: RjsProtocol): Protocol2DataA = {
+class ProtocolHandler {
+	def extractDataA(protocol: RjsProtocol): ProtocolDataA = {
 		val object_m: Map[String, RjsValue] =
 			protocol.labwares.asInstanceOf[Map[String, RjsValue]] ++
 			protocol.substances.asInstanceOf[Map[String, RjsValue]] ++
@@ -80,7 +80,7 @@ class Protocol2 {
 		val commandOrder_l =
 			(1 to n).toList.map(_.toString)
 		val (planningDomainObjects, planningInitialState) = processDataObjects(objects)
-		new Protocol2DataA(
+		new ProtocolDataA(
 			objects = objects,
 			commands = RjsMap(command_l.toMap),
 			commandOrderingConstraints = commandOrderingConstraint_l,
@@ -111,8 +111,8 @@ class Protocol2 {
 	}
 	
 	def stepB(
-		dataA: Protocol2DataA
-	): ResultE[Protocol2DataB] = {
+		dataA: ProtocolDataA
+	): ResultE[ProtocolDataB] = {
 		var state = dataA.planningInitialState
 		val idToResult0_m = new HashMap[String, ProtocolCommandResult]
 		def step(idToCommand_l: List[(String, RjsValue)]): ResultE[Map[String, ProtocolCommandResult]] = {
@@ -136,7 +136,7 @@ class Protocol2 {
 		for {
 			idToResult_m <- step(idToCommand_l)
 		} yield {
-			new Protocol2DataB(
+			new ProtocolDataB(
 				dataA = dataA,
 				commandExpansions = idToResult_m
 			)

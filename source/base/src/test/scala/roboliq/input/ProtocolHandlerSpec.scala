@@ -11,10 +11,10 @@ import roboliq.utils.JsonUtils
 import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 
-class Protocol2Spec extends FunSpec {
+class ProtocolHandlerSpec extends FunSpec {
 	import ContextValueWrapper._
 
-	val protocolEvaluator = new Protocol2
+	val protocolEvaluator = new ProtocolHandler
 	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"))))
 	val evaluator = new Evaluator()
 
@@ -47,7 +47,7 @@ class Protocol2Spec extends FunSpec {
 	)
 	val dataA1 = protocolEvaluator.extractDataA(protocol1)
 	
-	describe("Protocol2Spec") {
+	describe("ProtocolHandlerSpec") {
 		/*it("processData") {
 /*			val yaml = """
 object:
@@ -135,7 +135,7 @@ cmd:
 		}
 		
 		it("test protocol 1 with lab info") {
-			val dataALab = new Protocol2DataA(
+			val dataALab = new ProtocolDataA(
 				objects = RjsMap(),
 				commands = RjsMap(),
 				commandOrderingConstraints = Nil,
