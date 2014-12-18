@@ -57,7 +57,7 @@ usage.
 - [x] RjsValue: create trait for Basic types
 - [x] RjsValue.fromJson: when converting a substitution (like RjsSubst) JSON to String, evaluate the RjsValue to get the real value
 - [x] Delete Converter2, Converter3, ContextT, ContextX
-- [ ] RjsProtocol: allow for loading from JSON
+- [x] RjsProtocol: allow for loading from JSON
 - [ ] RjsProtocol: create and use in Protocol2
 - [ ] Protocol2Data: create and use in Protocol2
 - [ ] Protocol2: load objects and state from evoware configuration (see Protocol)
@@ -94,31 +94,30 @@ The protocol evaluator will accept a protocol such as this:
 
 ```{yaml}
 TYPE: protocol
-VALUE:
-  labware:
-    plate1:
-      model: plateModel_384_square
-      location: P3
+labware:
+  plate1:
+    model: plateModel_384_square
+    location: P3
 
-  substance:
-    water: {}
-    dye: {}
+substance:
+  water: {}
+  dye: {}
 
-  source:
-    dyeLight:
-      well: trough1(A01|H01)
-      substance:
-      - name: dye
-        amount: 1/10
-      - name: water
+source:
+  dyeLight:
+    well: trough1(A01|H01)
+    substance:
+    - name: dye
+      amount: 1/10
+    - name: water
 
-  command:
-  - TYPE: action
-    NAME: distribute
-    INPUT:
-      source: dyeLight
-      destination: plate1(B01)
-      amount: 20ul
+command:
+- TYPE: action
+  NAME: distribute
+  INPUT:
+    source: dyeLight
+    destination: plate1(B01)
+    amount: 20ul
 ```
 
 From this, it creates a data object, such as this:

@@ -45,7 +45,7 @@ class RjsConverterSpec extends FunSpec {
 			assert(fromRjs[RjsList](jsList1).value == jsList1)
 			assert(fromRjs[RjsInclude](js5).errors.isEmpty == false)
 			assert(fromRjs[RjsInclude](jsWorld).errors.isEmpty == false)
-			assert(fromRjs[RjsInclude](jsMap1).errors.isEmpty == false)
+			assert(fromRjs[RjsInclude](jsMap1).errors != Nil)
 			assert(fromRjs[RjsInclude](jsList1).errors.isEmpty == false)
 		}
 		
@@ -78,6 +78,10 @@ class RjsConverterSpec extends FunSpec {
 				s <- RjsConverter.fromRjs[String](jsSubstX)
 			} yield s
 			assert(res.run().value == "World")
+		}
+		
+		it("RjsProtocol") {
+			assert(RjsConverter.yamlStringToRjs[RjsProtocol](YamlContent.protocol1Text).run().value == YamlContent.protocol1)
 		}
 	}
 }

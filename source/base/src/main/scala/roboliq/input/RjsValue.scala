@@ -364,15 +364,16 @@ object RjsValue {
 	
 	def evaluateTypedMap(tm: RjsTypedMap): ResultE[RjsValue] = {
 		tm.typ match {
-			case "action" => fromRjsTypedMap[RjsAction](tm)
-			case "actionDef" => fromRjsTypedMap[RjsActionDef](tm)
-			case "call" => fromRjsTypedMap[RjsCall](tm)
-			case "define" => fromRjsTypedMap[RjsDefine](tm)
-			case "import" => fromRjsTypedMap[RjsImport](tm)
-			case "include" => fromRjsTypedMap[RjsInclude](tm)
-			case "instruction" => fromRjsTypedMap[RjsInstruction](tm)
-			case "lambda" => fromRjsTypedMap[RjsLambda](tm)
-			case "section" => fromRjsTypedMap[RjsSection](tm)
+			case "action" => convertMapAs[RjsAction](tm)
+			case "actionDef" => convertMapAs[RjsActionDef](tm)
+			case "call" => convertMapAs[RjsCall](tm)
+			case "define" => convertMapAs[RjsDefine](tm)
+			case "import" => convertMapAs[RjsImport](tm)
+			case "include" => convertMapAs[RjsInclude](tm)
+			case "instruction" => convertMapAs[RjsInstruction](tm)
+			case "lambda" => convertMapAs[RjsLambda](tm)
+			case "protocol" => convertMapAs[RjsProtocol](tm)
+			case "section" => convertMapAs[RjsSection](tm)
 			case _ =>
 				ResultE.error(s"unable to convert from RjsTypedMap to TYPE=${tm.typ}.")
 		}
@@ -456,14 +457,20 @@ object RjsValue {
 	import scala.reflect.runtime.universe.TypeTag
 	import scala.reflect.runtime.universe.typeOf
 
-	def fromRjsTypedMap[A <: RjsValue : TypeTag](
-		tm: RjsTypedMap
+	def convertMapAs[A <: RjsValue : TypeTag](
+		m: RjsMap
 	): ResultE[A] = {
-		fromRjsTypedMap(tm, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
+		convertMap(m.map, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
 	}
 	
-	def fromRjsTypedMap(
-		tm: RjsTypedMap,
+	def convertMapAs[A <: RjsValue : TypeTag](
+		tm: RjsTypedMap
+	): ResultE[A] = {
+		convertMap(tm.map, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
+	}
+	
+	def convertMap(
+		map: Map[String, RjsValue],
 		typ: Type
 	): ResultE[Any] = {
 		val ctor = typ.member(ru.termNames.CONSTRUCTOR).asMethod
@@ -484,7 +491,7 @@ object RjsValue {
 		}
 		
 		for {
-			nameToObj_m <- RjsConverter.convMapString(RjsMap(tm.map), nameToType_l)
+			nameToObj_m <- RjsConverter.convMapString(RjsMap(map), nameToType_l)
 		} yield {
 			val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
 			val c = typ.typeSymbol.asClass

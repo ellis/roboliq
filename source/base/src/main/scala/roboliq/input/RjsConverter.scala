@@ -6,20 +6,35 @@ import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe.typeOf
 import grizzled.slf4j.Logger
 import roboliq.ai.strips
+import roboliq.utils.JsonUtils
+import roboliq.core.ResultC
 
 object RjsConverter {
 	private val logger = Logger[this.type]
 	
 	def toString(rjsval: RjsValue): ResultE[String] = {
+		
+		def evalAndRetry(): ResultE[String] = {
+			for {
+				rjsval2 <- ResultE.evaluate(rjsval)
+				s <- toString(rjsval2)
+			} yield s
+		}
+		
 		ResultE.context("toString") {
 			rjsval match {
-				case x: RjsSubst =>
+				case x: RjsString => ResultE.unit(x.s)
+				case x: RjsText => ResultE.unit(x.text)
+				case x: RjsFormat => evalAndRetry()
+				case x: RjsSubst => evalAndRetry()
+				case x: RjsCall => evalAndRetry()
+				case x: RjsTypedMap =>
 					for {
-						rjsval2 <- ResultE.evaluate(rjsval)
+						rjsval2 <- RjsValue.evaluateTypedMap(x)
 						s <- toString(rjsval2)
 					} yield s
 				case _ =>
-					ResultE.unit(rjsval.toText)
+					ResultE.error(s"cannot convert to String: $rjsval")
 			}
 		}
 	}
@@ -198,8 +213,8 @@ object RjsConverter {
 					else if (rjsval.isInstanceOf[RjsTypedMap]) {
 						val tm = rjsval.asInstanceOf[RjsTypedMap]
 						for {
-							rjsval2 <- RjsValue.fromRjsTypedMap(tm, typ)
-							_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from ${tm.typ}")
+							rjsval2 <- RjsValue.convertMap(tm.map, typ)
+							_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from typed map ${tm}")
 						} yield rjsval2
 						/*
 						// As an alternative approach, consider creating a fromRjsValue companion method for those
@@ -208,6 +223,13 @@ object RjsConverter {
 						val cs = typ.typeSymbol.companionSymbol
 						cs.typeSignature.members.find(m => m.name.toString == "fromRjsValue")
 						*/
+					}
+					else if (rjsval.isInstanceOf[RjsMap]) {
+						val m = rjsval.asInstanceOf[RjsMap]
+						for {
+							rjsval2 <- RjsValue.convertMap(m.map, typ)
+							_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from map ${m}")
+						} yield rjsval2
 					}
 					else {
 						ResultE.error(s"Could not convert to TYPE=$typ from $rjsval")
@@ -363,5 +385,19 @@ object RjsConverter {
 		for {
 			map <- convMap(m, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]
+	}
+	
+	def yamlStringToRjsBasicValue(yaml: String): ResultC[RjsBasicValue] = {
+		import spray.json._
+		val json = JsonUtils.yamlToJsonText(yaml)
+		val jsval = json.parseJson
+		RjsValue.fromJson(jsval)
+	}
+	
+	def yamlStringToRjs[A <: RjsValue : TypeTag](yaml: String): ResultE[RjsValue] = {
+		for {
+			rjsval0 <- ResultE.from(yamlStringToRjsBasicValue(yaml))
+			rjsval <- fromRjs[A](rjsval0)
+		} yield rjsval
 	}
 }
