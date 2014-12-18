@@ -58,9 +58,12 @@ usage.
 - [x] RjsValue.fromJson: when converting a substitution (like RjsSubst) JSON to String, evaluate the RjsValue to get the real value
 - [x] Delete Converter2, Converter3, ContextT, ContextX
 - [x] RjsProtocol: allow for loading from JSON
-- [ ] RjsProtocol: create and use in Protocol2
-- [ ] Protocol2Data: create and use in Protocol2
-- [ ] Protocol2: load objects and state from evoware configuration (see Protocol)
+- [x] RjsProtocol: create and use in Protocol2
+- [x] Protocol2Data: create and use in Protocol2
+- [ ] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
+- [ ] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
+- [ ] ProtocolHandlerSpec: test a protocol with only instruction commands
+- [ ] RoboliqSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
 - [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
 - [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
