@@ -51,6 +51,7 @@ import roboliq.evoware.commands.EvowareBeginLoopActionHandler
 import roboliq.evoware.commands.EvowareEndLoopActionHandler
 import com.google.gson.Gson
 import roboliq.input.EvowareAgentBean
+import roboliq.input.ProtocolDataA
 
 case class WellGroupBean(
 	name: String,
@@ -130,12 +131,12 @@ class EvowareProtocolDataGenerator {
 	val agentToBuilder_m = new HashMap[String, ClientScriptBuilder]
 
 	// TODO: This should probably be moved out of the Protocol class
-	def loadEvowareAgentBean(
+	def createProtocolData(
 		agentIdent: String,
 		agentBean: EvowareAgentBean,
 		table_l: List[String],
 		searchPath_l: List[File]
-	): RsResult[Unit] = {
+	): ResultC[ProtocolDataA] = {
 		import roboliq.entities._
 		
 		val user = Agent(gid, Some("user"))
@@ -143,19 +144,13 @@ class EvowareProtocolDataGenerator {
 		
 		// TODO: put these into a for-comprehension in order to return warnings and errors
 		eb.addAgent(user, "user")
-		eb.addModel(offsiteModel, "offsiteModel")
-		eb.addSite(offsite, "offsite")
-		eb.addDevice(user, userArm, "userArm")
-		eb.addDeviceSpec(userArm, userArmSpec, "userArmSpec")
-		// userArm can transport from offsite
-		eb.addRel(Rel("transporter-can", List("userArm", "offsite", "userArmSpec")))
 		
 		val tableNameDefault = s"${agentIdent}_default"
 		val tableSetup_m = agentBean.tableSetups.toMap.map(pair => s"${agentIdent}_${pair._1}" -> pair._2)
 		for {
 			// Load carrier file
-			evowarePath <- RsResult(agentBean.evowareDir, "evowareDir must be set")
-			carrierData <- roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "Carrier.cfg").getPath)
+			evowarePath <- ResultC.from(Option(agentBean.evowareDir), "evowareDir must be set")
+			carrierData <- ResultC.from(roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "Carrier.cfg").getPath))
 			// FIXME: for debug only
 			//_ = carrierData.printCarriersById
 			// ENDIF
@@ -163,70 +158,40 @@ class EvowareProtocolDataGenerator {
 			tableName <- table_l.filter(tableSetup_m.contains) match {
 				case Nil =>
 					if (tableSetup_m.contains(tableNameDefault))
-						RsSuccess(tableNameDefault)
+						ResultC.unit(tableNameDefault)
 					else
-						RsError(s"No table specified for agent `$agentIdent`")
-				case s :: Nil => RsSuccess(s)
-				case l => RsError(s"Agent `$agentIdent` can only be assigned one table, but multiple tables were specified: $l")
+						ResultC.error(s"No table specified for agent `$agentIdent`")
+				case s :: Nil => ResultC.unit(s)
+				case l => ResultC.error(s"Agent `$agentIdent` can only be assigned one table, but multiple tables were specified: $l")
 			}
 			tableSetupBean = tableSetup_m(tableName)
 			// Load table file
-			tableFile <- RsResult(tableSetupBean.tableFile, s"tableFile property must be set on tableSetup `$tableName`")
-			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile)
+			tableFile <- ResultC.from(Option(tableSetupBean.tableFile), s"tableFile property must be set on tableSetup `$tableName`")
+			tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile))
 			configEvoware = new ConfigEvoware(eb, agentIdent, carrierData, tableData,
 					agentBean, tableSetupBean, offsiteModel, userArm,
 					specToString_l.toList, deviceToSpec_l.toList, deviceToModelToSpec_l.toList)
-			scriptBuilder <- configEvoware.loadEvoware()
+			scriptBuilder <- ResultC.from(configEvoware.loadEvoware())
 		} yield {
 			agentToIdentToInternalObject(agentIdent) = configEvoware.identToAgentObject
 			agentToBuilder_m += agentIdent -> scriptBuilder
 			if (!agentToBuilder_m.contains("user"))
 				agentToBuilder_m += "user" -> scriptBuilder
+			new ProtocolDataA(
+				objects = RjsMap(),
+				val commands: RjsMap,
+				val commandOrderingConstraints: List[List[String]],
+				val commandOrder: List[String],
+				val planningDomainObjects: Map[String, String],
+				val planningInitialState: strips.Literals
+			)
 		}
 	}
 	
-	def createDomain(cs: CommandSet, operatorInfo_l: List[OperatorInfo]): RqResult[strips.Domain] = {
-		RsResult.prependError("createDomain:") {
-			val name_l = (cs.nameToAutoOperator_l ++ operatorInfo_l.map(_.operatorName)).distinct.sorted
-			for {
-				operatorHandler_l <- RsResult.mapAll(name_l)(cs.getOperatorHandler)
-			} yield {
-				val operator_l = operatorHandler_l.map(_.getDomainOperator)
-
-				// FIXME: HACK: need to programmatically figure out the parent classes of type -- this is here as a hack 
-				val type0_m = Map(
-					"centrifuge" -> "device",
-					"peeler" -> "device",
-					"pipetter" -> "device",
-					"reader" -> "device",
-					"sealer" -> "device",
-					"shaker" -> "device",
-					"thermocycler" -> "device",
-					"transporter" -> "device"
-				)
-				// Get types used, and have them all inherit from 'any'
-				val type1_m = operator_l.flatMap(_.paramTyp_l.map(_ -> "any")).toMap
-				// The type0 types take precedence
-				val type_m = type1_m ++ type0_m
-				
-				strips.Domain(
-					type_m = type_m,
-					constantToType_l = Nil,
-					predicate_l = List[strips.Signature](
-						strips.Signature("agent-has-device", "?agent" -> "agent", "?device" -> "device"),
-						strips.Signature("device-can-site", "?device" -> "device", "?site" -> "site"),
-						strips.Signature("location", "?labware" -> "labware", "?site" -> "site"),
-						strips.Signature("model", "?labware" -> "labware", "?model" -> "model"),
-						strips.Signature("stackable", "?sm" -> "siteModel", "?m" -> "model")
-					),
-					operator_l = operator_l
-				)
-			}
-		}
-	}
-
-
-	def createProblem(planInfo_l: List[OperatorInfo], domain: strips.Domain): RqResult[strips.Problem] = {
+	def createProblem(
+		planInfo_l: List[OperatorInfo],
+		domain: strips.Domain
+	): RqResult[strips.Problem] = {
 		val typToObject_l: List[(String, String)] = eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
 		
 		val state0 = strips.State(Set[strips.Atom]() ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => strips.Atom(rel.name, rel.args)))

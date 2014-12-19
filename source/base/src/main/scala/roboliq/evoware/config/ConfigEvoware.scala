@@ -54,6 +54,12 @@ import roboliq.input.EvowareAgentBean
 import roboliq.input.TableSetupBean
 import roboliq.input.LabwareModelBean
 import roboliq.input.SiteBean
+import roboliq.input.RjsMap
+import roboliq.input.RjsNumber
+import roboliq.ai.strips
+import roboliq.input.RjsText
+import roboliq.core.ResultC
+import roboliq.input.ProtocolDataA
 
 /**
  * @param postProcess_? An option function to call after all sites have been created, which can be used for further handling of device configuration.
@@ -87,7 +93,7 @@ private case class DeviceConfig(
  * Load evoware configuration
  */
 class ConfigEvoware(
-	eb: EntityBase,
+	//eb: EntityBase,
 	agentIdent: String,
 	carrierData: roboliq.evoware.parser.EvowareCarrierData,
 	tableData: roboliq.evoware.parser.EvowareTableData,
@@ -119,7 +125,7 @@ class ConfigEvoware(
 	 * We want to use site models, but these are not declared in Evoware, so we'll need to extract them indirectly. 
 	 */
 	def loadEvoware(
-	): RsResult[ClientScriptBuilder] = {
+	): ResultC[ProtocolDataA] = {
 		val agent = Agent(gid, Some(agentIdent))
 		eb.addAgent(agent, agentIdent)
 		
@@ -138,12 +144,8 @@ class ConfigEvoware(
 			_ <- loadTransporters(agent, siteEToSite_l)
 			sealerProgram_l <- loadSealerPrograms()
 		} yield {
-			eb.pipetterToTips_m(pipetter) = tip_l.toList
-			
-			val configData = EvowareConfigData(Map())
-			val config = new EvowareConfig(carrierData, tableData, configData, sealerProgram_l)
-			val scriptBuilder = new EvowareClientScriptBuilder(agentIdent, config)
-			scriptBuilder
+			val data0 = new ProtocolDataA(objects = RjsMap(agentIdent -> "agent"))
+			data0
 		}
 	}
 
@@ -151,7 +153,7 @@ class ConfigEvoware(
 	 * @returns tuple of list of labware models, list of tips, list of pairs of EvowareLabwareModel and LabwareModelS
 	 */
 	private def loadAgentBean(
-	): RsResult[(
+	): ResultC[(
 		List[Tip],
 		List[(EvowareLabwareModel, LabwareModel)]
 	)] = {
@@ -259,7 +261,7 @@ class ConfigEvoware(
 		modelEToModel_l: List[(EvowareLabwareModel, LabwareModel)]
 		//labwareModelE_l: List[roboliq.evoware.parser.EvowareLabwareModel],
 		//idToModel_m: HashMap[String, LabwareModel]
-	): RsResult[List[(CarrierSite, Site)]] = {
+	): ResultC[List[(CarrierSite, Site)]] = {
 		val carriersSeen_l = new HashSet[Int]
 
 		def createDeviceIdent(carrierE: Carrier): String = {
@@ -481,39 +483,42 @@ class ConfigEvoware(
 				.toMap
 		}
 		
-		// Create transporters
-		val roma_m = new HashMap[Int, Transporter]()
+		val objectToType_m = new HashMap[String, String]
+		val agentData_m = new HashMap[String, RjsMap]
+		val literal_l = new ArrayBuffer[strips.Literal]
 		
+		val romaIdToIdent_m = new HashMap[Int, String]
+		val vectorIdToIdent_m = new HashMap[String, String]
+		
+		// Create transporters
 		{
 			// List of RoMa indexes
 			val roma_li = carrierData.mapCarrierToVectors.values.flatMap(_.map(_.iRoma)).toSet
 			// Add transporter device for each RoMa
 			for (roma_i <- roma_li) {
 				val ident = s"${agentIdent}__transporter${roma_i + 1}"
-				val roma = Transporter(gid)
-				identToAgentObject(ident) = roma_i.asInstanceOf[Integer]
-				roma_m(roma_i) = roma
-				eb.addDevice(agent, roma, ident)
+				romaIdToIdent_m(roma_i) = ident
+				objectToType_m(ident) = "transporter"
+				agentData_m(ident) = RjsMap("roma" -> RjsNumber(roma_i))
 			}
 		}
 		
 		// Create transporter specs
-		// Map vector class to transporter spec
-		val transporterSpec_m = new HashMap[String, TransporterSpec]()
 		
 		{
 			val vectorClass_l: List[String] = carrierData.mapCarrierToVectors.toList.flatMap(_._2).map(_.sClass).toSet.toList.sorted
 			var vector_i = 0
 			for (vectorClass <- vectorClass_l) {
-				val spec = TransporterSpec(gid, Some(s"${agentIdent} ${vectorClass}"))
 				val ident = s"${agentIdent}__transporterSpec${vector_i}"
-				identToAgentObject(ident) = vectorClass
+				vectorIdToIdent_m(vectorClass) = ident
+				objectToType_m(ident) = "transporterSpec"
+				agentData_m(ident) = RjsMap("vectorClass" -> RjsText(vectorClass))
 				//println(ident)
-				transporterSpec_m(vectorClass) = spec
-				for (roma <- roma_m.values) {
-					vector_i += 1
-					eb.addDeviceSpec(roma, spec, ident)
+				for (romaIdent <- romaIdToIdent_m.values) {
+					literal_l += strips.Literal(true, "device-can-spec", romaIdent, ident)
 				}
+				if (!romaIdToIdent_m.isEmpty)
+					vector_i += 1
 			}
 		}
 		
@@ -542,17 +547,16 @@ class ConfigEvoware(
 				site <- siteEToSites_m.getOrElse(siteE, Nil)
 				vector <- vector_l
 			} {
-				val transporter = roma_m(vector.iRoma)
-				val deviceIdent = eb.entityToIdent_m(transporter)
+				val deviceIdent = romaIdToIdent_m(vector.iRoma)
 				val siteIdent = eb.entityToIdent_m(site)
-				val spec = transporterSpec_m(vector.sClass)
+				val specIdent = vectorIdToIdent_m(vector.sClass)
 				val key = (agentIdent, deviceIdent, vector.sClass)
 				if (isBlacklisted(vector.iRoma + 1, vector.sClass, siteIdent)) {
 					logger.info(s"blacklisted vector $key for site $siteIdent")
 				}
 				else {
 					agentRomaVectorToSite_m(key) = site :: agentRomaVectorToSite_m.getOrElse(key, Nil)
-					eb.addRel(Rel("transporter-can", List(deviceIdent, eb.entityToIdent_m(site), eb.entityToIdent_m(spec))))
+					literal_l += strips.Literal(true, "transporter-can", deviceIdent, siteIdent, specIdent)
 				}
 			}
 			agentRomaVectorToSite_m.toMap

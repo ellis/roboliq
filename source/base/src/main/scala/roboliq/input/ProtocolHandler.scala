@@ -19,12 +19,12 @@ case class MyPlate(
 )
 
 class ProtocolDataA(
-	val objects: RjsMap,
-	val commands: RjsMap,
-	val commandOrderingConstraints: List[List[String]],
-	val commandOrder: List[String],
-	val planningDomainObjects: Map[String, String],
-	val planningInitialState: strips.Literals
+	val objects: RjsMap = RjsMap(),
+	val commands: RjsMap = RjsMap(),
+	val commandOrderingConstraints: List[List[String]] = Nil,
+	val commandOrder: List[String] = Nil,
+	val planningDomainObjects: Map[String, String] = Map(),
+	val planningInitialState: strips.Literals = strips.Literals.empty
 ) {
 	def ++(that: ProtocolDataA): ProtocolDataA = {
 		new ProtocolDataA(
