@@ -118,6 +118,18 @@ object ResultC {
 		ResultC { data => (data.logError(s), None) }
 	}
 	
+	def warning(s: String): ResultC[Unit] = {
+		ResultC { data => (data.logWarning(s), None) }
+	}
+	
+	/**
+	 * Issues a warning if the condition is not met
+	 */
+	def check(condition: Boolean, s: => String): ResultC[Unit] = {
+		if (condition) unit(())
+		else warning(s)
+	}
+	
 	//def getWellInfo(well: Well): ResultC[WellInfo] =
 	//	getsResult[WellInfo](data => data.eb.wellToWellInfo(data.state, well))
 	

@@ -8,6 +8,7 @@ import scala.collection.mutable.HashMap
 import scala.math.Ordering.Implicits._
 import scala.annotation.tailrec
 import roboliq.ai.plan.Unique
+import roboliq.core.ResultC
 
 sealed trait CommandValidation
 case class CommandValidation_Param(name: String) extends CommandValidation
@@ -26,15 +27,55 @@ class ProtocolDataA(
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty
 ) {
-	def ++(that: ProtocolDataA): ProtocolDataA = {
+	def merge(that: ProtocolDataA): ResultC[ProtocolDataA] = {
+		for {
+			objects <- this.objects merge that.objects
+			commands <- this.commands merge that.commands
+		} yield {
+			new ProtocolDataA(
+				objects = objects,
+				commands = commands,
+				commandOrderingConstraints = this.commandOrderingConstraints ++ that.commandOrderingConstraints,
+				commandOrder = this.commandOrder ++ that.commandOrder,
+				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
+				planningInitialState = this.planningInitialState ++ that.planningInitialState
+			)
+		}
+	}
+}
+
+class ProtocolDataABuilder {
+	private val objects = new HashMap[String, RjsValue]
+	private val planningDomainObjects = new HashMap[String, String]
+	private val planningInitialState = new ArrayBuffer[strips.Literal]
+	
+	def get: ProtocolDataA = {
 		new ProtocolDataA(
-			objects = this.objects ++ that.objects,
-			commands = this.commands ++ that.commands,
-			commandOrderingConstraints = this.commandOrderingConstraints ++ that.commandOrderingConstraints,
-			commandOrder = this.commandOrder ++ that.commandOrder,
-			planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
-			planningInitialState = this.planningInitialState ++ that.planningInitialState
+			objects = RjsMap(objects.toMap),
+			planningDomainObjects = planningDomainObjects.toMap
 		)
+	}
+	
+	def addObject(name: String, value: RjsValue) {
+		objects(name) = value
+	}
+	
+	def addPlanningDomainObject(name: String, typ: String) {
+		planningDomainObjects(name) = typ
+	}
+	
+	/**
+	 * Indicates that the 'top' model can be stacked on top of the 'bottom' model
+	 */
+	def addStackable(modelNameBottom: String, modelNameTop: String) {
+		planningInitialState += strips.Literal(true, "stackable", modelNameBottom, modelNameTop)
+	}
+	
+	/**
+	 * Indicates that given device can handle the given model
+	 */
+	def addDeviceModel(deviceName: String, modelName: String) {
+		planningInitialState += strips.Literal(true, "device-can-model", deviceName, modelName)
 	}
 }
 

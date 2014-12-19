@@ -50,16 +50,89 @@ import roboliq.entities.Centrifuge
 import roboliq.evoware.handler.EvowareHettichCentrifugeInstructionHandler
 import roboliq.entities.SiteModel
 import roboliq.evoware.handler.EvowareTRobotInstructionHandler
-import roboliq.input.EvowareAgentBean
-import roboliq.input.TableSetupBean
-import roboliq.input.LabwareModelBean
-import roboliq.input.SiteBean
 import roboliq.input.RjsMap
 import roboliq.input.RjsNumber
 import roboliq.ai.strips
 import roboliq.input.RjsText
 import roboliq.core.ResultC
 import roboliq.input.ProtocolDataA
+import roboliq.input.RjsString
+import roboliq.input.RjsTypedMap
+import roboliq.input.ProtocolDataABuilder
+
+
+
+
+
+case class LabwareModelConfig(
+	label_? : Option[String],
+	evowareName: String
+)
+
+case class TipModelConfig(
+	min: java.lang.Double,
+	max: java.lang.Double
+)
+
+case class TipConfig(
+	row: Integer,
+	permanentModel_? : Option[String],
+	models: List[String]
+)
+
+/**
+ * @param tableFile Path to evoware table file
+ * @param sites Site definitions
+ * @param pipetterSites List of sites the pipetter can access
+ * @param userSites List of sites the user can directly access
+ */
+case class TableSetupConfig(
+	tableFile: String,
+	sites: Map[String, SiteConfig],
+	pipetterSites: List[String],
+	userSites: List[String]
+)
+
+case class SiteConfig(
+	carrier: String,
+	grid: Integer,
+	site: Integer
+)
+
+case class TransporterBlacklistConfig(
+	roma_? : Option[Integer],
+	vector_? : Option[String],
+	site_? : Option[String]
+)
+
+case class SealerProgramConfig(
+	//@ConfigProperty var name: String = null
+	//@ConfigProperty var device: String = null
+	model: String,
+	filename: String
+)
+
+/**
+ * @param evowareDir Evoware data directory
+ * @param labwareModels Labware that this robot can use
+ * @param tipModels Tip models that this robot can use
+ * @param tips This robot's tips
+ * @param tableSetups Table setups for this robot
+ * @param transporterBlacklist list of source/vector/destination combinations which should not be used when moving labware with robotic transporters
+ * @param sealerPrograms Sealer programs
+ */
+case class EvowareAgentConfig(
+	evowareDir: String,
+	labwareModels: Map[String, LabwareModelConfig],
+	tipModels: Map[String, TipModelConfig],
+	tips: List[TipConfig],
+	tableSetups: Map[String, TableSetupConfig],
+	transporterBlacklist: List[TransporterBlacklistConfig],
+	sealerPrograms: List[SealerProgramConfig]
+)
+
+
+
 
 /**
  * @param postProcess_? An option function to call after all sites have been created, which can be used for further handling of device configuration.
@@ -97,8 +170,8 @@ class ConfigEvoware(
 	agentIdent: String,
 	carrierData: roboliq.evoware.parser.EvowareCarrierData,
 	tableData: roboliq.evoware.parser.EvowareTableData,
-	agentBean: EvowareAgentBean,
-	tableSetupBean: TableSetupBean,
+	agentConfig: EvowareAgentConfig,
+	tableSetupConfig: TableSetupConfig,
 	offsiteModel: SiteModel,
 	userArm: Transporter,
 	//userArmSpec = TransporterSpec("userArmSpec")
@@ -111,10 +184,6 @@ class ConfigEvoware(
 	// FIXME: can we build this up immutably instead and return it from loadEvoware()?
 	val identToAgentObject = new HashMap[String, Object]
 
-	// Generate a UUID for an entity
-	// TODO: This doesn't belong here
-	private def gid: String = java.util.UUID.randomUUID().toString()
-	
 	/**
 	 * Challenges when reading in Evoware configuration files:
 	 * 
@@ -126,130 +195,71 @@ class ConfigEvoware(
 	 */
 	def loadEvoware(
 	): ResultC[ProtocolDataA] = {
-		val agent = Agent(gid, Some(agentIdent))
-		eb.addAgent(agent, agentIdent)
-		
 		val identToAgentObject = new HashMap[String, Object]
 
 		// FIXME: this should not be hard-coded -- some robots have no pipetters, some have more than one...
 		val pipetterIdent = agentIdent+"__pipetter1"
-		val pipetter = new Pipetter(gid, Some(agentIdent+" LiHa"))
-		eb.addDevice(agent, pipetter, pipetterIdent)
+
+		val labwareModel_l = if (agentConfig.labwareModels == null) Nil else agentConfig.labwareModels.toList
 
 		for {
-			tuple1 <- loadAgentBean()
-			(tip_l, modelEToModel_l) = tuple1
+			modelEToModel_l <- loadAgentPlateModels(labwareModel_l)
 			
-			siteEToSite_l <- loadSitesAndDevices(agent, pipetterIdent, modelEToModel_l)
-			_ <- loadTransporters(agent, siteEToSite_l)
+			siteEToSite_l <- loadSitesAndDevices(agentIdent, pipetterIdent, modelEToModel_l)
+			_ <- loadTransporters(agentIdent, siteEToSite_l)
 			sealerProgram_l <- loadSealerPrograms()
 		} yield {
-			val data0 = new ProtocolDataA(objects = RjsMap(agentIdent -> "agent"))
+			val data0 = new ProtocolDataA(planningDomainObjects = Map(
+				agentIdent -> "agent",
+				// FIXME: this should not be hard-coded -- some robots have no pipetters, some have more than one...
+				pipetterIdent -> "pipetter"
+			))
 			data0
 		}
 	}
 
-	/**
-	 * @returns tuple of list of labware models, list of tips, list of pairs of EvowareLabwareModel and LabwareModelS
-	 */
-	private def loadAgentBean(
-	): ResultC[(
-		List[Tip],
-		List[(EvowareLabwareModel, LabwareModel)]
-	)] = {
-		val labwareModel_l = if (agentBean.labwareModels == null) Nil else agentBean.labwareModels.toList
-
-		// Tip models
-		for {
-			tipModel_l <- loadAgentTipModels()
-			tip_l <- loadAgentTips(tipModel_l)
-			modelEToModel_l <- loadAgentPlateModels(labwareModel_l)
-		} yield (tip_l, modelEToModel_l)
-	}
-
-	private def loadAgentTipModels(
-	): RsResult[List[TipModel]] = {
-		// Tip models
-		val tipModel_l = new ArrayBuffer[TipModel]
-		if (agentBean.tipModels != null) {
-			for ((id, tipModelBean) <- agentBean.tipModels.toMap) {
-				val tipModel = TipModel(id, None, None, LiquidVolume.ul(BigDecimal(tipModelBean.max)), LiquidVolume.ul(BigDecimal(tipModelBean.min)), Map())
-				tipModel_l += tipModel
-				eb.addEntityWithoutIdent(tipModel)
-			}
-		}
-		RsSuccess(tipModel_l.toList)
-	}
-	
-	private def loadAgentTips(
-		tipModel_l: List[TipModel]
-	): RsResult[List[Tip]] = {
-		// Tips
-		val tip_l = new ArrayBuffer[Tip]
-		val tipBean_l = if (agentBean.tips != null) agentBean.tips.toList else Nil
-		for {
-			_ <- RsResult.toResultOfList(tipBean_l.zipWithIndex.map { pair =>
-				val (tipBean, index_) = pair
-				val row: Int = if (tipBean.row == 0) index_ else tipBean.row
-				// HACK: use the row as index instead, need to figure out a more general solution,
-				//  such as specifying that a tip cannot be used -- ellis, 2014-02-06
-				val index = row - 1
-				val col = 0
-				for {
-					permanentTipModel_? <- if (tipBean.permanentModel == null) RsSuccess(None) else eb.getEntityAs[TipModel](tipBean.permanentModel).map(Option(_))
-					tipModel2_l <- (permanentTipModel_?, tipBean.models) match {
-						case (Some(tipModel), _) => RsSuccess(List(tipModel))
-						case (_, null) => RsSuccess(tipModel_l.toList)
-						case _ => RsResult.toResultOfList(tipBean.models.toList.map(eb.getEntityAs[TipModel](_)))
-					}
-				} yield {
-					val tip = Tip("tip"+(index + 1), None, None, index, row, col, permanentTipModel_?)
-					tip_l += tip
-					eb.tipToTipModels_m(tip) = tipModel2_l.toList
-				}
-			})
-		} yield tip_l.toList
-	}
-	
 	// Load PlateModels
 	private def loadAgentPlateModels(
-		labwareModel_l: List[LabwareModelBean]
-	): RsResult[List[(EvowareLabwareModel, LabwareModel)]] = {
+		labwareModel_m: Map[String, LabwareModelConfig]
+	): ResultC[ProtocolDataA] = {
+		val builder = new ProtocolDataABuilder
+		
 		// Get the list of evoware labwares that we're interested in
 		// Add labware on the table definition to the list of labware we're interested in
-		val labwareNamesOfInterest_l: Set[String] = (labwareModel_l.map(_.evowareName) ++ tableData.mapSiteToLabwareModel.values.map(_.sName)).toSet
+		val labwareNamesOfInterest_l: Set[String] = (labwareModel_m.values.map(_.evowareName) ++ tableData.mapSiteToLabwareModel.values.map(_.sName)).toSet
 		logger.debug("labwareNamesOfInterest_l: "+labwareNamesOfInterest_l)
 		
 		// Start with gathering list of all available labware models whose names are either in the config or table template
 		val labwareModelE0_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
 		//labwareModelE0_l.foreach(m => println(m.sName))
-		val evowareNameToLabwareModel_m = agentBean.labwareModels.toList.map(x => x.evowareName -> x).toMap
+		val evowareNameToLabwareModel_m = agentConfig.labwareModels.map(kv => kv._2.evowareName -> kv).toMap
 		// Only keep the ones we have LabwareModels for (TODO: seems like a silly step -- should probably filter labwareNamesOfInterest_l to begin with)
 		val labwareModelE_l = labwareModelE0_l.filter(mE => evowareNameToLabwareModel_m.contains(mE.sName))
 		for {
-			modelEToModel_l <- RsResult.mapAll(labwareModelE_l) { mE => 
-				for {
-					model <- RsResult.from(evowareNameToLabwareModel_m.get(mE.sName), s"evoware labware model not found: `${mE.sName}`")
-				} yield {
-					// FIXME: for debug only
-					if (mE.sName == "Systemliquid") {
-						println(mE)
-						println(mE)
-					}
-					// ENDFIX
-					//println("mE.sName: "+mE.sName)
-					val m = PlateModel(model.name, Option(model.label), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
-					//idToModel_m(mE.sName) = m
-					eb.addModel(m, model.name)
-					// All models can be offsite
-					eb.addStackable(offsiteModel, m)
-					// The user arm can handle all models
-					eb.addDeviceModel(userArm, m)
-					identToAgentObject(model.name) = mE
-					(mE, m)
+			_ <- ResultC.foreach(labwareModelE_l) { mE => 
+				val modelKV = evowareNameToLabwareModel_m(mE.sName)
+				val modelName = modelKV._1
+				// FIXME: for debug only
+				if (mE.sName == "Systemliquid") {
+					println("mE: "+mE)
 				}
+				// ENDFIX
+				//println("mE.sName: "+mE.sName)
+				//val m = PlateModel(model.name, Option(model.label), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+				val rjsPlateModel = RjsTypedMap("PlateModel", modelKV._2.label_?.map(s => "label" -> RjsString(s)).toList.toMap ++ Map(
+					"evowareName" -> RjsString(mE.sName),
+					"rowCount" -> RjsNumber(mE.nRows),
+					"colCount" -> RjsNumber(mE.nCols),
+					"maxVolume" -> RjsNumber(mE.ul, Some("ul"))
+				))
+				builder.addObject(modelName, rjsPlateModel)
+				// All models can be offsite
+				builder.addStackable("offsite", modelName)
+				// The user arm can handle all models
+				builder.addDeviceModel("userArm", modelName)
+				ResultC.unit(())
 			}
-		} yield modelEToModel_l
+		} yield builder.get
 	}
 	
 	/**
@@ -345,11 +355,11 @@ class ConfigEvoware(
 			eb.addSite(site, siteIdent)
 
 			// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
-			if (tableSetupBean.pipetterSites.contains(siteIdent)) {
+			if (tableSetupConfig.pipetterSites.contains(siteIdent)) {
 				eb.addRel(Rel("device-can-site", List(pipetterIdent, siteIdent)))
 			}
 			// Make site user-accessible if it's listed in the table setup's `userSites`
-			if (tableSetupBean.userSites.contains(siteIdent)) {
+			if (tableSetupConfig.userSites.contains(siteIdent)) {
 				eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))
 			}
 		}
@@ -421,21 +431,21 @@ class ConfigEvoware(
 	private def createSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String): Option[(CarrierSite, Site)] = {
 		val grid_i = tableData.mapCarrierToGrid(carrierE)
 		// TODO: should adapt CarrierSite to require grid_i as a parameter 
-		findSiteIdent(tableSetupBean, carrierE.sName, grid_i, site_i + 1).map { siteIdent =>
+		findSiteIdent(tableSetupConfig, carrierE.sName, grid_i, site_i + 1).map { siteIdent =>
 			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
 			val site = Site(gid, Some(siteIdent), Some(description))
 			(siteE, site)
 		}
 	}
 
-	private def findSiteIdent(tableSetupBean: TableSetupBean, carrierName: String, grid: Int, site: Int): Option[String] = {
+	private def findSiteIdent(tableSetupConfig: TableSetupConfig, carrierName: String, grid: Int, site: Int): Option[String] = {
 		def ok[A](a: A, b: A): Boolean = (a == null || a == b)
 		def okInt(a: Integer, b: Int): Boolean = (a == null || a == b)
-		def matches(siteBean: SiteBean): Boolean =
-			ok(siteBean.carrier, carrierName) &&
-			okInt(siteBean.grid, grid) &&
-			okInt(siteBean.site, site)
-		for ((ident, bean) <- tableSetupBean.sites.toMap) {
+		def matches(siteConfig: SiteConfig): Boolean =
+			ok(siteConfig.carrier, carrierName) &&
+			okInt(siteConfig.grid, grid) &&
+			okInt(siteConfig.site, site)
+		for ((ident, bean) <- tableSetupConfig.sites.toMap) {
 			if (matches(bean))
 				return Some(ident)
 		}
@@ -525,10 +535,10 @@ class ConfigEvoware(
 		// Find which sites the transporters can access
 		val agentRomaVectorToSite_m: Map[(String, String, String), List[Site]] = {
 			val transporterBlacklist_l = {
-				if (agentBean.transporterBlacklist == null)
+				if (agentConfig.transporterBlacklist == null)
 					Nil
 				else
-					agentBean.transporterBlacklist.toList
+					agentConfig.transporterBlacklist.toList
 			}
 			def isBlacklisted(roma: Int, vector: String, siteIdent: String): Boolean = {
 				transporterBlacklist_l.exists { item =>
@@ -579,7 +589,7 @@ class ConfigEvoware(
 			// Add user-accessible sites into the graph
 			val offsite = eb.getEntityAs[Site]("offsite").getOrElse(null)
 			val agentRomaVectorToSite_m: Map[(String, String, String), List[Site]] = Map( 
-				("user", "", "") -> (offsite :: RqResult.flatten(tableSetupBean.userSites.toList.map(eb.getEntityAs[Site])))
+				("user", "", "") -> (offsite :: RqResult.flatten(tableSetupConfig.userSites.toList.map(eb.getEntityAs[Site])))
 			)
 			// Populate graph from entries in agentRomaVectorToSite_m
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
@@ -747,9 +757,9 @@ class ConfigEvoware(
 	def loadSealerPrograms(): RsResult[List[EvowareSealerProgram]] = {
 		for {
 			sealerProgram_l <- {
-				if (agentBean.sealerProgram != null) {
+				if (agentConfig.sealerProgram != null) {
 					for {
-						sealerProgram_l <- RsResult.mapFirst(agentBean.sealerProgram.toList) { bean =>
+						sealerProgram_l <- RsResult.mapFirst(agentConfig.sealerProgram.toList) { bean =>
 							for {
 								_ <- RsResult.assert(bean.model != null, "`model` parameter missing: a labware model must be supplied for the sealer program")
 								_ <- RsResult.assert(bean.filename != null, "`filename` parameter missing: a filename must be supplied for the sealer program")

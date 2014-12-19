@@ -202,6 +202,10 @@ object ResultE {
 		ResultE { data => (data.logError(s), None) }
 	}
 	
+	def warning[A](s: String): ResultE[A] = {
+		ResultE { data => (data.logWarning(s), None) }
+	}
+	
 	//def getWellInfo(well: Well): ResultE[WellInfo] =
 	//	getsResult[WellInfo](data => data.eb.wellToWellInfo(data.state, well))
 	

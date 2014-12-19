@@ -197,6 +197,41 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsBasicValue {
 	def add(map: Map[String, RjsValue]): RjsMap = RjsMap(this.map ++ map)
 	def add(map: RjsMap): RjsMap = RjsMap(this.map ++ map.map)
 	def ++(that: RjsMap): RjsMap = this.add(that)
+	
+	def toTypedMap(typ: String): RjsTypedMap = RjsTypedMap(typ, map)
+	
+	def merge(that: RjsMap): ResultC[RjsMap] = {
+		val key_l = map.keySet ++ that.map.keySet
+		for {
+			merged_l <- ResultC.map(key_l) { key =>
+				val value_? : ResultC[RjsValue] = (map.get(key), that.map.get(key)) match {
+					case (None, None) => ResultC.error(s"internal merge error on key $key") // Won't happen
+					case (Some(a), None) => ResultC.unit(a)
+					case (None, Some(b)) => ResultC.unit(b)
+					case (Some(a), Some(b)) =>
+						(a, b) match {
+							case (ma: RjsMap, mb: RjsMap) => ma merge mb
+							case (ma: RjsMap, tmb: RjsTypedMap) =>
+								for {
+									mc <- ma merge tmb.toUntypedMap
+								} yield mc.toTypedMap(tmb.typ)
+							case (tma: RjsTypedMap, mb: RjsMap) =>
+								for {
+									mc <- tma.toUntypedMap merge mb
+								} yield mc.toTypedMap(tma.typ)
+							case (tma: RjsTypedMap, tmb: RjsTypedMap) =>
+								for {
+									_ <- ResultC.check(tma.typ == tmb.typ, s"Changing TYPE from ${tma.typ} to ${tmb.typ}")
+									mc <- tma.toUntypedMap merge tmb.toUntypedMap
+								} yield mc.toTypedMap(tmb.typ)
+							case _ =>
+								ResultC.unit(b)
+						}
+				}
+				value_?.map(key -> _)
+			}
+		} yield RjsMap(merged_l.toMap)
+	}
 }
 
 object RjsMap {
@@ -311,6 +346,8 @@ case class RjsTypedMap(typ: String, map: Map[String, RjsValue]) extends RjsBasic
 			}
 		} yield JsObject((("TYPE" -> JsString(typ)) :: l).toMap)
 	}
+	
+	def toUntypedMap: RjsMap = RjsMap(map)
 }
 
 object RjsValue {
