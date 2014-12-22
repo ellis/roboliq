@@ -128,7 +128,7 @@ case class EvowareAgentConfig(
 	tips: List[TipConfig],
 	tableSetups: Map[String, TableSetupConfig],
 	transporterBlacklist: List[TransporterBlacklistConfig],
-	sealerPrograms: List[SealerProgramConfig]
+	sealerPrograms: Map[String, SealerProgramConfig]
 )
 
 
@@ -139,9 +139,8 @@ case class EvowareAgentConfig(
  */
 private case class DeviceConfigPre(
 	val typeName: String,
-	val deviceIdent_? : Option[String] = None,
-	val device_? : Option[Device] = None,
-	val handler_? : Option[EvowareDeviceInstructionHandler] = None,
+	val deviceName_? : Option[String] = None,
+	val device_? : Option[RjsTypedMap] = None,
 	val overrideCreateSites_? : Option[(Carrier, Map[(Int, Int), Set[LabwareModel]]) => List[DeviceSiteConfig]] = None,
 	val overrideSiteLogic_? : Option[DeviceConfig => RsResult[List[Rel]]] = None
 )
@@ -155,7 +154,7 @@ private case class DeviceSiteConfig(
 private case class DeviceConfig(
 	carrierE: Carrier,
 	typeName: String,
-	deviceIdent: String,
+	deviceName: String,
 	device: Device,
 	handler_? : Option[EvowareDeviceInstructionHandler],
 	siteConfig_l: List[DeviceSiteConfig],
@@ -167,7 +166,7 @@ private case class DeviceConfig(
  */
 class ConfigEvoware(
 	//eb: EntityBase,
-	agentIdent: String,
+	agentName: String,
 	carrierData: roboliq.evoware.parser.EvowareCarrierData,
 	tableData: roboliq.evoware.parser.EvowareTableData,
 	agentConfig: EvowareAgentConfig,
@@ -198,26 +197,40 @@ class ConfigEvoware(
 		val identToAgentObject = new HashMap[String, Object]
 
 		// FIXME: this should not be hard-coded -- some robots have no pipetters, some have more than one...
-		val pipetterIdent = agentIdent+"__pipetter1"
+		val pipetterName = agentName+"__pipetter1"
 
-		val labwareModel_l = if (agentConfig.labwareModels == null) Nil else agentConfig.labwareModels.toList
+		val labwareModel_m: Map[String, LabwareModelConfig]
+			= if (agentConfig.labwareModels == null) Map() else agentConfig.labwareModels.toList.toMap
 
 		for {
-			modelEToModel_l <- loadAgentPlateModels(labwareModel_l)
+			data1 <- loadAgentPlateModels(labwareModel_m)
 			
-			siteEToSite_l <- loadSitesAndDevices(agentIdent, pipetterIdent, modelEToModel_l)
-			_ <- loadTransporters(agentIdent, siteEToSite_l)
+			siteEToSite_l <- loadSitesAndDevices(agentName, pipetterName, data1)
+			_ <- loadTransporters(agentName, siteEToSite_l)
 			sealerProgram_l <- loadSealerPrograms()
 		} yield {
 			val data0 = new ProtocolDataA(planningDomainObjects = Map(
-				agentIdent -> "agent",
+				agentName -> "agent",
 				// FIXME: this should not be hard-coded -- some robots have no pipetters, some have more than one...
-				pipetterIdent -> "pipetter"
+				pipetterName -> "pipetter"
 			))
 			data0
 		}
 	}
 
+	private def plateModelEToRjs(
+		label_? : Option[String],
+		mE: EvowareLabwareModel
+	): RjsTypedMap = {
+		val rjsPlateModel = RjsTypedMap("PlateModel", label_?.map(s => "label" -> RjsString(s)).toList.toMap ++ Map(
+			"evowareName" -> RjsString(mE.sName),
+			"rowCount" -> RjsNumber(mE.nRows),
+			"colCount" -> RjsNumber(mE.nCols),
+			"maxVolume" -> RjsNumber(mE.ul, Some("ul"))
+		))
+		rjsPlateModel
+	}
+	
 	// Load PlateModels
 	private def loadAgentPlateModels(
 		labwareModel_m: Map[String, LabwareModelConfig]
@@ -246,17 +259,12 @@ class ConfigEvoware(
 				// ENDFIX
 				//println("mE.sName: "+mE.sName)
 				//val m = PlateModel(model.name, Option(model.label), Some(mE.sName), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
-				val rjsPlateModel = RjsTypedMap("PlateModel", modelKV._2.label_?.map(s => "label" -> RjsString(s)).toList.toMap ++ Map(
-					"evowareName" -> RjsString(mE.sName),
-					"rowCount" -> RjsNumber(mE.nRows),
-					"colCount" -> RjsNumber(mE.nCols),
-					"maxVolume" -> RjsNumber(mE.ul, Some("ul"))
-				))
+				val rjsPlateModel = plateModelEToRjs(modelKV._2.label_?, mE)
 				builder.addObject(modelName, rjsPlateModel)
 				// All models can be offsite
-				builder.addStackable("offsite", modelName)
+				builder.appendStackable("offsite", modelName)
 				// The user arm can handle all models
-				builder.addDeviceModel("userArm", modelName)
+				builder.appendDeviceModel("userArm", modelName)
 				ResultC.unit(())
 			}
 		} yield builder.get
@@ -266,19 +274,30 @@ class ConfigEvoware(
 	 * @returns Map from SiteID to its Site and the LabwareModels it can accept
 	 */
 	private def loadSitesAndDevices(
-		agent: Agent,
-		pipetterIdent: String,
-		modelEToModel_l: List[(EvowareLabwareModel, LabwareModel)]
+		agentName: String,
+		pipetterName: String,
+		data0: ProtocolDataA
+		//modelEToModel_l: List[(EvowareLabwareModel, LabwareModel)]
 		//labwareModelE_l: List[roboliq.evoware.parser.EvowareLabwareModel],
 		//idToModel_m: HashMap[String, LabwareModel]
-	): ResultC[List[(CarrierSite, Site)]] = {
+	): ResultC[ProtocolDataA] = {
+		val builder = new ProtocolDataABuilder
 		val carriersSeen_l = new HashSet[Int]
 
-		def createDeviceIdent(carrierE: Carrier): String = {
-			//println("createDeviceIdent: "+agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_'))
-			agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
+		def createDeviceName(carrierE: Carrier): String = {
+			//println("createDeviceName: "+agentName + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_'))
+			agentName + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
 		
+		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, tm: RjsTypedMap) if tm.type == "PlateModel" && tm.map.contains("evowareName") => name -> tm.map("evowareName") })
+		val evowareNameToModelName_l = modelNameToEvowareName_l.map(_.swap)
+		// Start with gathering list of all available labware models whose names are either in the config or table template
+		val labwareModelE0_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
+		//labwareModelE0_l.foreach(m => println(m.sName))
+		val evowareNameToLabwareModel_m = agentConfig.labwareModels.map(kv => kv._2.evowareName -> kv).toMap
+		// Only keep the ones we have LabwareModels for (TODO: seems like a silly step -- should probably filter labwareNamesOfInterest_l to begin with)
+		val labwareModelE_l = labwareModelE0_l.filter(mE => evowareNameToLabwareModel_m.contains(mE.sName))
+
 		// Create map from siteId to all labware models that can be placed that site 
 		val siteIdToModels_m: Map[(Int, Int), Set[LabwareModel]] = {
 			val l = for {
@@ -294,13 +313,13 @@ class ConfigEvoware(
 			carrierE = o.parent
 			_ = carriersSeen_l += carrierE.id
 			site_i <- List.range(0, carrierE.nSites)
-			site <- createSite(carrierE, site_i, s"${agentIdent} hotel ${carrierE.sName} site ${site_i+1}").toList
+			site <- createSite(carrierE, site_i, s"${agentName} hotel ${carrierE.sName} site ${site_i+1}").toList
 		} yield site
 		
 		// System liquid
 		val siteSystem_? = for {
 			o <- tableData.lExternalObject.find(_.carrier.sName == "System")
-			site <- createSite(o.carrier, -1, s"${agentIdent} System Liquid")
+			site <- createSite(o.carrier, -1, s"${agentName} System Liquid")
 		} yield site
 			
 		// Create Device and their Sites
@@ -310,7 +329,7 @@ class ConfigEvoware(
 			_ = carriersSeen_l += carrierE.id
 			dcp <- loadDevice(carrierE).toList
 		} yield {
-			val deviceIdent: String = dcp.deviceIdent_?.getOrElse(createDeviceIdent(carrierE))
+			val deviceName: String = dcp.deviceName_?.getOrElse(createDeviceName(carrierE))
 			val device = dcp.device_?.getOrElse(new Device { val key = gid; val label = Some(carrierE.sName); val description = None; val typeNames = List(dcp.typeName) })
 			val fnCreateSites: (Carrier, Map[(Int, Int), Set[LabwareModel]]) => List[DeviceSiteConfig]
 				= dcp.overrideCreateSites_?.getOrElse(getDefaultDeviceSiteConfigs _)
@@ -318,7 +337,7 @@ class ConfigEvoware(
 			DeviceConfig(
 				carrierE,
 				dcp.typeName,
-				deviceIdent,
+				deviceName,
 				device,
 				dcp.handler_?,
 				siteConfig_l,
@@ -330,7 +349,7 @@ class ConfigEvoware(
 		val siteBench_l = for {
 			(carrierE, grid_i) <- tableData.mapCarrierToGrid.toList if !carriersSeen_l.contains(carrierE.id)
 			site_i <- List.range(0, carrierE.nSites)
-			site <- createSite(carrierE, site_i, s"${agentIdent} bench ${carrierE.sName} site ${site_i+1}").toList
+			site <- createSite(carrierE, site_i, s"${agentName} bench ${carrierE.sName} site ${site_i+1}").toList
 		} yield {
 			carriersSeen_l += carrierE.id
 			site
@@ -349,34 +368,33 @@ class ConfigEvoware(
 		// Update EntityBase with sites and logic
 		// Update identToAgentObject map with evoware site data
 		for ((siteE, site) <- site_l) {
-			val siteIdent = site.label.get
+			val siteName = site.label.get
 			val siteId = (siteE.carrier.id, siteE.iSite)
-			identToAgentObject(siteIdent) = siteE
-			eb.addSite(site, siteIdent)
+			identToAgentObject(siteName) = siteE
+			builder.addSite(siteName)
 
 			// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
-			if (tableSetupConfig.pipetterSites.contains(siteIdent)) {
-				eb.addRel(Rel("device-can-site", List(pipetterIdent, siteIdent)))
+			if (tableSetupConfig.pipetterSites.contains(siteName)) {
+				builder.addDeviceSite(pipetterName, siteName)
 			}
 			// Make site user-accessible if it's listed in the table setup's `userSites`
-			if (tableSetupConfig.userSites.contains(siteIdent)) {
-				eb.addRel(Rel("transporter-can", List("userArm", siteIdent, "userArmSpec")))
+			if (tableSetupConfig.userSites.contains(siteName)) {
+				builder.addTransporterCan("userArm", siteName, "userArmSpec")
 			}
 		}
 		
 		// Create system liquid labware
 		siteSystem_?.foreach { carrierToSite =>
 			val site = carrierToSite._2
-			val name = "SystemLiquid"
-			val mE = EvowareLabwareModel(name, 8, 1, 1000, List((-1, -1)))
-			val m = PlateModel(name, Option(name), Some(name), mE.nRows, mE.nCols, LiquidVolume.ul(mE.ul))
+			val siteModelName = "sm0"
+			val plateModelName = "SystemLiquid"
+			val mE = EvowareLabwareModel(plateModelName, 8, 1, 1000, List((-1, -1)))
+			val rjsPlateModel = plateModelEToRjs(None, mE)
 			val sm = SiteModel("SystemLiquid")
-			eb.addModel(sm, s"sm0")
-			eb.addModel(m, "SystemLiquid")
-			eb.addStackables(sm, List(m))
-			eb.setModel(site, sm)
-			identToAgentObject(name) = mE
-			carrierToSite
+			builder.addPlateModel(plateModelName, rjsPlateModel)
+			builder.addSiteModel(siteModelName)
+			builder.appendStackable(siteModelName, plateModelName)
+			builder.setModel(site, siteModelName)
 		}		
 		
 		// Create SiteModels for for sites which hold Plates
@@ -389,8 +407,9 @@ class ConfigEvoware(
 
 			// Update EntitBase with the SiteModels and their stackable LabwareModels
 			for (((l, sm), i) <- modelsToSiteModel_m.toList.zipWithIndex) {
-				eb.addModel(sm, s"sm${i+1}")
-				eb.addStackables(sm, l.toList)
+				val siteModelName = s"sm${i+1}"
+				builder.addSiteModel(siteModelName)
+				builder.appendStackables(siteModelName, l.toList)
 			}
 
 			// Update EntityBase by assigning SiteModel to a site Sites
@@ -400,21 +419,21 @@ class ConfigEvoware(
 					l <- siteIdToModels_m.get(siteId)
 					sm <- modelsToSiteModel_m.get(l)
 				} {
-					eb.setModel(site, sm)
+					builder.setModel(site, sm)
 				}
 			}
 		}
 
 		// Update EntityBase with devices and some additional logic regarding their sites
 		for (dc <- deviceConfig_l) {
-			eb.addDevice(agent, dc.device, dc.deviceIdent)
+			builder.addDevice(agentName, dc.device, dc.deviceName)
 			dc.handler_? match {
 				case Some(handler) => 
-					// Bind deviceIdent to the handler instead of to the carrier
-					identToAgentObject(dc.deviceIdent) = handler
+					// Bind deviceName to the handler instead of to the carrier
+					identToAgentObject(dc.deviceName) = handler
 				case _ =>
-					// Bind deviceIdent to the carrier
-					identToAgentObject(dc.deviceIdent) = dc.carrierE
+					// Bind deviceName to the carrier
+					identToAgentObject(dc.deviceName) = dc.carrierE
 			}
 			
 			// Add device sites
@@ -431,14 +450,14 @@ class ConfigEvoware(
 	private def createSite(carrierE: roboliq.evoware.parser.Carrier, site_i: Int, description: String): Option[(CarrierSite, Site)] = {
 		val grid_i = tableData.mapCarrierToGrid(carrierE)
 		// TODO: should adapt CarrierSite to require grid_i as a parameter 
-		findSiteIdent(tableSetupConfig, carrierE.sName, grid_i, site_i + 1).map { siteIdent =>
+		findSiteName(tableSetupConfig, carrierE.sName, grid_i, site_i + 1).map { siteName =>
 			val siteE = roboliq.evoware.parser.CarrierSite(carrierE, site_i)
-			val site = Site(gid, Some(siteIdent), Some(description))
+			val site = Site(gid, Some(siteName), Some(description))
 			(siteE, site)
 		}
 	}
 
-	private def findSiteIdent(tableSetupConfig: TableSetupConfig, carrierName: String, grid: Int, site: Int): Option[String] = {
+	private def findSiteName(tableSetupConfig: TableSetupConfig, carrierName: String, grid: Int, site: Int): Option[String] = {
 		def ok[A](a: A, b: A): Boolean = (a == null || a == b)
 		def okInt(a: Integer, b: Int): Boolean = (a == null || a == b)
 		def matches(siteConfig: SiteConfig): Boolean =
@@ -458,7 +477,7 @@ class ConfigEvoware(
 	): List[DeviceSiteConfig] = {
 		for {
 			site_i <- List.range(0, carrierE.nSites)
-			(siteE, site) <- createSite(carrierE, site_i, s"${agentIdent} device ${carrierE.sName} site ${site_i+1}").toList
+			(siteE, site) <- createSite(carrierE, site_i, s"${agentName} device ${carrierE.sName} site ${site_i+1}").toList
 			siteId = (carrierE.id, site_i)
 			model_l <- siteIdToModels_m.get(siteId).toList
 		} yield {
@@ -473,14 +492,14 @@ class ConfigEvoware(
 	}
 	
 	private def getDefaultSiteLogic(dc: DeviceConfig, sc: DeviceSiteConfig): RsResult[List[Rel]] = {
-		val siteIdent = sc.site.label.get
-		val logic1 = Rel("device-can-site", List(dc.deviceIdent, sc.site.label.get))
-		val logic2_l = sc.labwareModel_l.map(m => Rel("device-can-model", List(dc.deviceIdent, eb.getIdent(m).toOption.get)))
+		val siteName = sc.site.label.get
+		val logic1 = Rel("device-can-site", List(dc.deviceName, sc.site.label.get))
+		val logic2_l = sc.labwareModel_l.map(m => Rel("device-can-model", List(dc.deviceName, eb.getName(m).toOption.get)))
 		RsSuccess(logic1 :: logic2_l)
 	}
 	
 	private def loadTransporters(
-		agent: Agent,
+		agentName: String,
 		siteEToSite_l: List[(CarrierSite, Site)]
 	): RqResult[Unit] = {
 
@@ -497,8 +516,8 @@ class ConfigEvoware(
 		val agentData_m = new HashMap[String, RjsMap]
 		val literal_l = new ArrayBuffer[strips.Literal]
 		
-		val romaIdToIdent_m = new HashMap[Int, String]
-		val vectorIdToIdent_m = new HashMap[String, String]
+		val romaIdToName_m = new HashMap[Int, String]
+		val vectorIdToName_m = new HashMap[String, String]
 		
 		// Create transporters
 		{
@@ -506,8 +525,8 @@ class ConfigEvoware(
 			val roma_li = carrierData.mapCarrierToVectors.values.flatMap(_.map(_.iRoma)).toSet
 			// Add transporter device for each RoMa
 			for (roma_i <- roma_li) {
-				val ident = s"${agentIdent}__transporter${roma_i + 1}"
-				romaIdToIdent_m(roma_i) = ident
+				val ident = s"${agentName}__transporter${roma_i + 1}"
+				romaIdToName_m(roma_i) = ident
 				objectToType_m(ident) = "transporter"
 				agentData_m(ident) = RjsMap("roma" -> RjsNumber(roma_i))
 			}
@@ -519,15 +538,15 @@ class ConfigEvoware(
 			val vectorClass_l: List[String] = carrierData.mapCarrierToVectors.toList.flatMap(_._2).map(_.sClass).toSet.toList.sorted
 			var vector_i = 0
 			for (vectorClass <- vectorClass_l) {
-				val ident = s"${agentIdent}__transporterSpec${vector_i}"
-				vectorIdToIdent_m(vectorClass) = ident
+				val ident = s"${agentName}__transporterSpec${vector_i}"
+				vectorIdToName_m(vectorClass) = ident
 				objectToType_m(ident) = "transporterSpec"
 				agentData_m(ident) = RjsMap("vectorClass" -> RjsText(vectorClass))
 				//println(ident)
-				for (romaIdent <- romaIdToIdent_m.values) {
-					literal_l += strips.Literal(true, "device-can-spec", romaIdent, ident)
+				for (romaName <- romaIdToName_m.values) {
+					literal_l += strips.Literal(true, "device-can-spec", romaName, ident)
 				}
-				if (!romaIdToIdent_m.isEmpty)
+				if (!romaIdToName_m.isEmpty)
 					vector_i += 1
 			}
 		}
@@ -540,11 +559,11 @@ class ConfigEvoware(
 				else
 					agentConfig.transporterBlacklist.toList
 			}
-			def isBlacklisted(roma: Int, vector: String, siteIdent: String): Boolean = {
+			def isBlacklisted(roma: Int, vector: String, siteName: String): Boolean = {
 				transporterBlacklist_l.exists { item =>
 					val romaMatches = item.roma == null || item.roma == roma
 					val vectorMatches = item.vector == null || item.vector == vector
-					val siteMatches = item.site == null || item.site == siteIdent
+					val siteMatches = item.site == null || item.site == siteName
 					romaMatches && vectorMatches && siteMatches
 				}
 			}
@@ -557,16 +576,16 @@ class ConfigEvoware(
 				site <- siteEToSites_m.getOrElse(siteE, Nil)
 				vector <- vector_l
 			} {
-				val deviceIdent = romaIdToIdent_m(vector.iRoma)
-				val siteIdent = eb.entityToIdent_m(site)
-				val specIdent = vectorIdToIdent_m(vector.sClass)
-				val key = (agentIdent, deviceIdent, vector.sClass)
-				if (isBlacklisted(vector.iRoma + 1, vector.sClass, siteIdent)) {
-					logger.info(s"blacklisted vector $key for site $siteIdent")
+				val deviceName = romaIdToName_m(vector.iRoma)
+				val siteName = eb.entityToName_m(site)
+				val specName = vectorIdToName_m(vector.sClass)
+				val key = (agentName, deviceName, vector.sClass)
+				if (isBlacklisted(vector.iRoma + 1, vector.sClass, siteName)) {
+					logger.info(s"blacklisted vector $key for site $siteName")
 				}
 				else {
 					agentRomaVectorToSite_m(key) = site :: agentRomaVectorToSite_m.getOrElse(key, Nil)
-					literal_l += strips.Literal(true, "transporter-can", deviceIdent, siteIdent, specIdent)
+					literal_l += strips.Literal(true, "transporter-can", deviceName, siteName, specName)
 				}
 			}
 			agentRomaVectorToSite_m.toMap
@@ -618,7 +637,7 @@ class ConfigEvoware(
 	 */
 	private def loadDevice(carrierE: Carrier): Option[DeviceConfigPre] = {
 		/*typeName: String,
-		deviceIdent_? : Option[String],
+		deviceName_? : Option[String],
 		device_? : Option[Device],
 		handler_? : Option[EvowareDeviceInstructionHandler],
 		site_l_? : Option[List[Site]]*/
@@ -635,8 +654,8 @@ class ConfigEvoware(
 						default_l <- getDefaultSitesLogic(dc)
 					} yield {
 						val l = dc.siteConfig_l.map { sc =>
-							val siteIdent = sc.site.label.get
-							Rel("device-can-open-site", List(dc.deviceIdent, siteIdent))
+							val siteName = sc.site.label.get
+							Rel("device-can-open-site", List(dc.deviceName, siteName))
 						}
 						default_l ++ l 
 					}
@@ -644,7 +663,6 @@ class ConfigEvoware(
 				Some(new DeviceConfigPre(
 					"reader",
 					device_? = Some(new Reader(gid, Some(carrierE.sName))),
-					handler_? = Some(new EvowareInfiniteM200InstructionHandler(carrierE)),
 					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
 
@@ -690,8 +708,8 @@ class ConfigEvoware(
 						default_l <- getDefaultSitesLogic(dc)
 					} yield {
 						val l = dc.siteConfig_l.map { sc =>
-							val siteIdent = sc.site.label.get
-							Rel("device-can-open-site", List(dc.deviceIdent, siteIdent))
+							val siteName = sc.site.label.get
+							Rel("device-can-open-site", List(dc.deviceName, siteName))
 						}
 						default_l ++ l 
 					}
@@ -713,12 +731,12 @@ class ConfigEvoware(
 					val siteE = CarrierSite(carrierE, siteExternal_i)
 					val siteId = (carrierE.id, siteExternal_i)
 					val siteExternal_? = createSite(carrierE, siteExternal_i, "")
-					val siteExternalIdent_? = siteExternal_?.map(_._2.label.get)
+					val siteExternalName_? = siteExternal_?.map(_._2.label.get)
 					
 					for {
-						siteIdentBase <- siteExternalIdent_?.toList
+						siteNameBase <- siteExternalName_?.toList
 						siteInternal_i <- List.range(0, 4)
-						site = Site(gid, Some(s"${siteIdentBase}_${siteInternal_i+1}"), Some(s"internal site ${siteInternal_i+1}"))
+						site = Site(gid, Some(s"${siteNameBase}_${siteInternal_i+1}"), Some(s"internal site ${siteInternal_i+1}"))
 						model_l <- siteIdToModels_m.get(siteId).toList
 					} yield {
 						//println("site: "+site)
@@ -733,17 +751,15 @@ class ConfigEvoware(
 						default_l <- getDefaultSitesLogic(dc)
 					} yield {
 						val l = dc.siteConfig_l.map { sc =>
-							val siteIdent = sc.site.label.get
-							Rel("site-closed", List(siteIdent))
+							val siteName = sc.site.label.get
+							Rel("site-closed", List(siteName))
 						}
 						default_l ++ l 
 					}
 				}
 
 				Some(new DeviceConfigPre(
-					"centrifuge",
-					device_? = Some(new Centrifuge(gid, Some(carrierE.sName))),
-					handler_? = new Some(new EvowareHettichCentrifugeInstructionHandler(carrierE)),
+					"Centrifuge",
 					overrideCreateSites_? = Some(overrideCreateSites),
 					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
@@ -754,25 +770,16 @@ class ConfigEvoware(
 		}
 	}
 	
-	def loadSealerPrograms(): RsResult[List[EvowareSealerProgram]] = {
-		for {
-			sealerProgram_l <- {
-				if (agentConfig.sealerProgram != null) {
-					for {
-						sealerProgram_l <- RsResult.mapFirst(agentConfig.sealerProgram.toList) { bean =>
-							for {
-								_ <- RsResult.assert(bean.model != null, "`model` parameter missing: a labware model must be supplied for the sealer program")
-								_ <- RsResult.assert(bean.filename != null, "`filename` parameter missing: a filename must be supplied for the sealer program")
-								model <- eb.getEntityAs[LabwareModel](bean.model)
-							} yield {
-								EvowareSealerProgram(model, bean.filename)
-							}
-						}
-					} yield sealerProgram_l
-				}
-				else RsSuccess(List())
-			}
-		} yield sealerProgram_l
+	def buildSealerPrograms(builder: ProtocolDataABuilder): ResultC[Unit] = {
+		for ((name, sealerConfig) <- agentConfig.sealerPrograms) {
+			val rjsSealerProgram = RjsTypedMap("SealerProgram", Map(
+				"model" -> RjsString(sealerConfig.model),
+				"filename" -> RjsString(sealerConfig.filename)
+			))
+			builder.addObject(name, rjsSealerProgram)
+			builder.addPlanningDomainObject(name, "SealerProgram")
+		}
+		ResultC.unit(())
 	}
 	
 	/*
@@ -796,20 +803,20 @@ class ConfigEvoware(
 		
 		def addDeviceOnly(
 			device: Device,
-			deviceIdent: String,
+			deviceName: String,
 			carrierE: roboliq.evoware.parser.Carrier
 		) {
 			// Add device
-			eb.addDevice(agent, device, deviceIdent)
-			identToAgentObject(deviceIdent) = carrierE
+			eb.addDevice(agent, device, deviceName)
+			identToAgentObject(deviceName) = carrierE
 		}
 		
 		def addDeviceAndSitesAndModels(
 			device: Device,
-			deviceIdent: String,
+			deviceName: String,
 			carrierE: roboliq.evoware.parser.Carrier
 		) {
-			addDeviceOnly(device, deviceIdent, carrierE)
+			addDeviceOnly(device, deviceName, carrierE)
 	
 			// Add device sites
 			getDeviceSitesAndModels(carrierE).foreach { case (site, model_l) =>
@@ -856,8 +863,8 @@ class ConfigEvoware(
 			device
 		}
 		
-		def createDeviceIdent(carrierE: roboliq.evoware.parser.Carrier): String = {
-			agentIdent + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
+		def createDeviceName(carrierE: roboliq.evoware.parser.Carrier): String = {
+			agentName + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
 		
 		//println("Carriers: " + tableData.mapCarrierToGrid.keys.mkString("\n"))
@@ -866,28 +873,28 @@ class ConfigEvoware(
 			carrierE.partNo_?.getOrElse(carrierE.sName) match {
 				// Infinite M200
 				case "Tecan part no. 30016056 or 30029757" =>
-					val deviceIdent = createDeviceIdent(carrierE)
+					val deviceName = createDeviceName(carrierE)
 					val handler = new EvowareInfiniteM200InstructionHandler(carrierE)
 					val device = new Reader(gid, Some(carrierE.sName))
 					
-					eb.addDevice(agent, device, deviceIdent)
-					// Bind deviceIdent to the handler instead of to the carrier
-					identToAgentObject(deviceIdent) = handler
+					eb.addDevice(agent, device, deviceName)
+					// Bind deviceName to the handler instead of to the carrier
+					identToAgentObject(deviceName) = handler
 					// Add device sites
 					getDeviceSitesAndModels(carrierE).foreach { case (site, model_l) =>
-						val siteIdent = eb.getIdent(site).toOption.get
+						val siteName = eb.getName(site).toOption.get
 						eb.addDeviceSite(device, site)
 						model_l.foreach(m => eb.addDeviceModel(device, m))
-						eb.addRel(Rel("device-can-open-site", List(deviceIdent, siteIdent)))
+						eb.addRel(Rel("device-can-open-site", List(deviceName, siteName)))
 					}
 
 				case "MP 2Pos H+P Shake" =>
-					val deviceIdent = createDeviceIdent(carrierE)
+					val deviceName = createDeviceName(carrierE)
 					// REFACTOR: duplicates addShaker(), because for this device, only the second site can actually be used for shaking
 					val device = new Shaker(gid, Some(carrierE.sName))
 					// Add device
-					eb.addDevice(agent, device, deviceIdent)
-					identToAgentObject(deviceIdent) = carrierE
+					eb.addDevice(agent, device, deviceName)
+					identToAgentObject(deviceName) = carrierE
 					// Add device sites
 					// HACK: only use last site for shaking, this is truly a bad hack!  Things like this should be performed via configuration overrides.
 					for (site_i <- List(carrierE.nSites - 1)) {
@@ -901,82 +908,82 @@ class ConfigEvoware(
 					}
 
 				case "RoboPeel" =>
-					val deviceIdent = createDeviceIdent(carrierE)
-					val device = addPeeler(deviceIdent, carrierE)
+					val deviceName = createDeviceName(carrierE)
+					val device = addPeeler(deviceName, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, plateModelIdent, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
-						// Get or create the sealer spec for specIdent
-						val spec: PeelerSpec = eb.getEntity(specIdent) match {
+					for ((deviceName2, plateModelName, specName) <- deviceToModelToSpec_l if deviceName2 == deviceName) {
+						// Get or create the sealer spec for specName
+						val spec: PeelerSpec = eb.getEntity(specName) match {
 							case Some(spec) => spec.asInstanceOf[PeelerSpec]
 							case None =>
 								// Store the evoware string for this spec
-								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent) = internal
+								val internal = specToString_l.find(_._1 == specName).get._2
+								identToAgentObject(specName) = internal
 								PeelerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
-						eb.addDeviceSpec(device, spec, specIdent)
+						eb.addDeviceSpec(device, spec, specName)
 						// Let entity base know that that the spec can be used for the plate model
-						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
+						eb.addRel(Rel("device-spec-can-model", List(deviceName, specName, plateModelName)))
 					}
 					
 				case "RoboSeal" =>
-					val deviceIdent = createDeviceIdent(carrierE)
-					val device = addSealer(deviceIdent, carrierE)
+					val deviceName = createDeviceName(carrierE)
+					val device = addSealer(deviceName, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, plateModelIdent, specIdent) <- deviceToModelToSpec_l if deviceIdent2 == deviceIdent) {
-						// Get or create the sealer spec for specIdent
-						val spec: SealerSpec = eb.getEntity(specIdent) match {
+					for ((deviceName2, plateModelName, specName) <- deviceToModelToSpec_l if deviceName2 == deviceName) {
+						// Get or create the sealer spec for specName
+						val spec: SealerSpec = eb.getEntity(specName) match {
 							case Some(spec) => spec.asInstanceOf[SealerSpec]
 							case None =>
 								// Store the evoware string for this spec
-								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent) = internal
+								val internal = specToString_l.find(_._1 == specName).get._2
+								identToAgentObject(specName) = internal
 								SealerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
-						eb.addDeviceSpec(device, spec, specIdent)
+						eb.addDeviceSpec(device, spec, specName)
 						// Let entity base know that that the spec can be used for the plate model
-						eb.addRel(Rel("device-spec-can-model", List(deviceIdent, specIdent, plateModelIdent)))
+						eb.addRel(Rel("device-spec-can-model", List(deviceName, specName, plateModelName)))
 					}
 					
 				// Te-Shake 2Pos
 				case "Tecan part no. 10760722 with 10760725" =>
-					val deviceIdent = createDeviceIdent(carrierE)
+					val deviceName = createDeviceName(carrierE)
 					val device = new Shaker(gid, Some(carrierE.sName))
-					addDeviceAndSitesAndModels(device, deviceIdent, carrierE)
+					addDeviceAndSitesAndModels(device, deviceName, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
-						// Get or create the spec for specIdent
-						val spec: ShakerSpec = eb.getEntity(specIdent) match {
+					for ((deviceName2, specName) <- deviceToSpec_l if deviceName2 == deviceName) {
+						// Get or create the spec for specName
+						val spec: ShakerSpec = eb.getEntity(specName) match {
 							case Some(spec) => spec.asInstanceOf[ShakerSpec]
 							case None =>
 								// Store the evoware string for this spec
-								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent) = internal
+								val internal = specToString_l.find(_._1 == specName).get._2
+								identToAgentObject(specName) = internal
 								ShakerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
-						eb.addDeviceSpec(device, spec, specIdent)
+						eb.addDeviceSpec(device, spec, specName)
 					}
 					
 				case "TRobot1" =>
-					val deviceIdent = createDeviceIdent(carrierE)
+					val deviceName = createDeviceName(carrierE)
 					val device = new Thermocycler(gid, Some(carrierE.sName))
-					addDeviceAndSitesAndModels(device, deviceIdent, carrierE)
+					addDeviceAndSitesAndModels(device, deviceName, carrierE)
 					// Add user-defined specs for this device
-					for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
-						// Get or create the spec for specIdent
-						val spec: ThermocyclerSpec = eb.getEntity(specIdent) match {
+					for ((deviceName2, specName) <- deviceToSpec_l if deviceName2 == deviceName) {
+						// Get or create the spec for specName
+						val spec: ThermocyclerSpec = eb.getEntity(specName) match {
 							case Some(spec) => spec.asInstanceOf[ThermocyclerSpec]
 							case None =>
 								// Store the evoware string for this spec
-								val internal = specToString_l.find(_._1 == specIdent).get._2
-								identToAgentObject(specIdent) = internal
+								val internal = specToString_l.find(_._1 == specName).get._2
+								identToAgentObject(specName) = internal
 								ThermocyclerSpec(gid, None, Some(internal))
 						}
 						// Register the spec
-						eb.addDeviceSpec(device, spec, specIdent)
+						eb.addDeviceSpec(device, spec, specName)
 					}
 				
 				case "Hettich Centrifuge" => // TODO: FIXME: Get the correct ID or name
@@ -998,36 +1005,36 @@ class ConfigEvoware(
 	 * TODO: need to handle shaker programs
 	def loadShakerPrograms(): RsResult[List[EvowareShakerProgram]] = {
 				// Add user-defined specs for this device
-				for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
-					// Get or create the spec for specIdent
-					val spec: ShakerSpec = eb.getEntity(specIdent) match {
+				for ((deviceName2, specName) <- deviceToSpec_l if deviceName2 == deviceName) {
+					// Get or create the spec for specName
+					val spec: ShakerSpec = eb.getEntity(specName) match {
 						case Some(spec) => spec.asInstanceOf[ShakerSpec]
 						case None =>
 							// Store the evoware string for this spec
-							val internal = specToString_l.find(_._1 == specIdent).get._2
-							identToAgentObject(specIdent) = internal
+							val internal = specToString_l.find(_._1 == specName).get._2
+							identToAgentObject(specName) = internal
 							ShakerSpec(gid, None, Some(internal))
 					}
 					// Register the spec
-					eb.addDeviceSpec(device, spec, specIdent)
+					eb.addDeviceSpec(device, spec, specName)
 				}
 	}
 	*/
 
 	/* TODO: need to handle thermocycler programs
 				// Add user-defined specs for this device
-				for ((deviceIdent2, specIdent) <- deviceToSpec_l if deviceIdent2 == deviceIdent) {
-					// Get or create the spec for specIdent
-					val spec: ThermocyclerSpec = eb.getEntity(specIdent) match {
+				for ((deviceName2, specName) <- deviceToSpec_l if deviceName2 == deviceName) {
+					// Get or create the spec for specName
+					val spec: ThermocyclerSpec = eb.getEntity(specName) match {
 						case Some(spec) => spec.asInstanceOf[ThermocyclerSpec]
 						case None =>
 							// Store the evoware string for this spec
-							val internal = specToString_l.find(_._1 == specIdent).get._2
-							identToAgentObject(specIdent) = internal
+							val internal = specToString_l.find(_._1 == specName).get._2
+							identToAgentObject(specName) = internal
 							ThermocyclerSpec(gid, None, Some(internal))
 					}
 					// Register the spec
-					eb.addDeviceSpec(device, spec, specIdent)
+					eb.addDeviceSpec(device, spec, specName)
 				}
 	*/
 }

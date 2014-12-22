@@ -64,18 +64,58 @@ class ProtocolDataABuilder {
 		planningDomainObjects(name) = typ
 	}
 	
+	def addPlateModel(plateModelName: String, rjsPlateModel: RjsTypedMap) {
+		addObject(plateModelName, rjsPlateModel)
+		addPlanningDomainObject(plateModelName, rjsPlateModel.typ)
+	}
+	
+	def addSiteModel(siteModelName: String) {
+		planningDomainObjects(siteModelName) = "SiteModel"
+	}
+	
+	def addSite(siteName: String) {
+		planningDomainObjects(siteName) = "Site"
+	}
+	
 	/**
 	 * Indicates that the 'top' model can be stacked on top of the 'bottom' model
 	 */
-	def addStackable(modelNameBottom: String, modelNameTop: String) {
+	def appendStackable(modelNameBottom: String, modelNameTop: String) {
 		planningInitialState += strips.Literal(true, "stackable", modelNameBottom, modelNameTop)
+	}
+	
+	/**
+	 * Indicates that the 'top' model can be stacked on top of the 'bottom' model
+	 */
+	def appendStackables(modelNameBottom: String, modelNameTop_l: Iterable[String]) {
+		modelNameTop_l.foreach { modelNameTop =>
+			planningInitialState += strips.Literal(true, "stackable", modelNameBottom, modelNameTop)
+		}
 	}
 	
 	/**
 	 * Indicates that given device can handle the given model
 	 */
-	def addDeviceModel(deviceName: String, modelName: String) {
+	def appendDeviceModel(deviceName: String, modelName: String) {
 		planningInitialState += strips.Literal(true, "device-can-model", deviceName, modelName)
+	}
+	
+	/**
+	 * Indicates that given device can handle the given site
+	 */
+	def appendDeviceSite(deviceName: String, siteName: String) {
+		planningInitialState += strips.Literal(true, "device-can-site", deviceName, siteName)
+	}
+	
+	/**
+	 * Indicates that transporter can handle the given site using the given program
+	 */
+	def appendTransporterCan(deviceName: String, siteName: String, programName: String) {
+		planningInitialState += strips.Literal(true, "transporter-can", deviceName, siteName, programName)
+	}
+	
+	def setModel(elementName: String, modelName: String) {
+		planningInitialState += strips.Literal(true, "model", elementName, modelName)
 	}
 }
 

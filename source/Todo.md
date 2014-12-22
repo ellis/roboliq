@@ -63,6 +63,7 @@ usage.
 - [x] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
 - [ ] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
 - [ ] ProtocolHandlerSpec: test a protocol that only contains instruction commands
+- [ ] RjsValue: should add a 'toBasicValue' method, and perhaps a RjsBasicMap that has RjsBasicValues
 - [ ] RoboliqSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
 - [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
 - [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
