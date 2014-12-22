@@ -53,46 +53,6 @@ import com.google.gson.Gson
 import roboliq.input.EvowareAgentBean
 import roboliq.input.ProtocolDataA
 
-case class WellGroupBean(
-	name: String,
-	description_? : Option[String],
-	well: PipetteDestinations
-)
-
-case class SubstanceBean(
-	name: String,
-	description_? : Option[String],
-	type_? : Option[SubstanceKind.Value],
-	tipCleanPolicy_? : Option[TipCleanPolicy],
-	contaminants: Set[String]
-)
-
-private case class SourceSubstanceBean(
-	name: String,
-	amount_? : Option[AmountSpec],
-	description_? : Option[String],
-	type_? : Option[SubstanceKind.Value],
-	tipCleanPolicy_? : Option[TipCleanPolicy],
-	contaminants: Set[String]
-)
-
-private case class SourceBean(
-	name: List[String],
-	well: PipetteDestinations,
-	substance: List[SourceSubstanceBean],
-	amount_? : Option[LiquidVolume]
-)
-
-private case class ReagentBean(
-	id: String,
-	wells: PipetteDestinations,
-	contaminants : Set[String],
-	viscosity_? : Option[String],
-	sterilize_? : Option[String],
-	pipettePolicy_? : Option[String],
-	key_? : Option[String]
-)
-
 class EvowareProtocolDataGenerator {
 	
 	private val logger = Logger[this.type]

@@ -8,12 +8,9 @@ import roboliq.evoware.handler.EvowareInfiniteM200InstructionHandler
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.evoware.translator.EvowareConfigData
 import roboliq.evoware.translator.EvowareClientScriptBuilder
-import roboliq.core.RsResult
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.MultiMap
-import roboliq.core.RsSuccess
-import roboliq.core.RqResult
 import roboliq.entities.EntityBase
 import grizzled.slf4j.Logger
 import roboliq.entities.SiteModel
@@ -45,7 +42,6 @@ import roboliq.evoware.handler.EvowareDeviceInstructionHandler
 import roboliq.evoware.parser.CarrierSite
 import roboliq.evoware.parser.Carrier
 import roboliq.entities.Entity
-import roboliq.core.RsError
 import roboliq.entities.Centrifuge
 import roboliq.evoware.handler.EvowareHettichCentrifugeInstructionHandler
 import roboliq.entities.SiteModel
@@ -64,76 +60,6 @@ import roboliq.input.ProtocolDataABuilder
 
 
 
-case class LabwareModelConfig(
-	label_? : Option[String],
-	evowareName: String
-)
-
-case class TipModelConfig(
-	min: java.lang.Double,
-	max: java.lang.Double
-)
-
-case class TipConfig(
-	row: Integer,
-	permanentModel_? : Option[String],
-	models: List[String]
-)
-
-/**
- * @param tableFile Path to evoware table file
- * @param sites Site definitions
- * @param pipetterSites List of sites the pipetter can access
- * @param userSites List of sites the user can directly access
- */
-case class TableSetupConfig(
-	tableFile: String,
-	sites: Map[String, SiteConfig],
-	pipetterSites: List[String],
-	userSites: List[String]
-)
-
-case class SiteConfig(
-	carrier: String,
-	grid: Integer,
-	site: Integer
-)
-
-case class TransporterBlacklistConfig(
-	roma_? : Option[Integer],
-	vector_? : Option[String],
-	site_? : Option[String]
-)
-
-case class SealerProgramConfig(
-	//@ConfigProperty var name: String = null
-	//@ConfigProperty var device: String = null
-	model: String,
-	filename: String
-)
-
-/**
- * @param evowareDir Evoware data directory
- * @param labwareModels Labware that this robot can use
- * @param tipModels Tip models that this robot can use
- * @param tips This robot's tips
- * @param tableSetups Table setups for this robot
- * @param transporterBlacklist list of source/vector/destination combinations which should not be used when moving labware with robotic transporters
- * @param sealerPrograms Sealer programs
- */
-case class EvowareAgentConfig(
-	evowareDir: String,
-	labwareModels: Map[String, LabwareModelConfig],
-	tipModels: Map[String, TipModelConfig],
-	tips: List[TipConfig],
-	tableSetups: Map[String, TableSetupConfig],
-	transporterBlacklist: List[TransporterBlacklistConfig],
-	sealerPrograms: Map[String, SealerProgramConfig]
-)
-
-
-
-
 /**
  * @param postProcess_? An option function to call after all sites have been created, which can be used for further handling of device configuration.
  */
@@ -142,7 +68,7 @@ private case class DeviceConfigPre(
 	val deviceName_? : Option[String] = None,
 	val device_? : Option[RjsTypedMap] = None,
 	val overrideCreateSites_? : Option[(Carrier, Map[(Int, Int), Set[LabwareModel]]) => List[DeviceSiteConfig]] = None,
-	val overrideSiteLogic_? : Option[DeviceConfig => RsResult[List[Rel]]] = None
+	val overrideSiteLogic_? : Option[DeviceConfig => ResultC[strips.Literals]] = None
 )
 
 private case class DeviceSiteConfig(
@@ -155,10 +81,10 @@ private case class DeviceConfig(
 	carrierE: Carrier,
 	typeName: String,
 	deviceName: String,
-	device: Device,
+	device_? : Option[RjsTypedMap],
 	handler_? : Option[EvowareDeviceInstructionHandler],
 	siteConfig_l: List[DeviceSiteConfig],
-	overrideSiteLogic_? : Option[DeviceConfig => RsResult[List[Rel]]]
+	overrideSiteLogic_? : Option[DeviceConfig => ResultC[strips.Literals]]
 )
 
 /**
@@ -194,6 +120,7 @@ class ConfigEvoware(
 	 */
 	def loadEvoware(
 	): ResultC[ProtocolDataA] = {
+		val builder = new ProtocolDataABuilder
 		val identToAgentObject = new HashMap[String, Object]
 
 		// FIXME: this should not be hard-coded -- some robots have no pipetters, some have more than one...
@@ -203,11 +130,10 @@ class ConfigEvoware(
 			= if (agentConfig.labwareModels == null) Map() else agentConfig.labwareModels.toList.toMap
 
 		for {
-			data1 <- loadAgentPlateModels(labwareModel_m)
-			
-			siteEToSite_l <- loadSitesAndDevices(agentName, pipetterName, data1)
-			_ <- loadTransporters(agentName, siteEToSite_l)
-			sealerProgram_l <- loadSealerPrograms()
+			_ <- buildAgentPlateModels(builder, labwareModel_m)
+			_ <- buildSitesAndDevices(builder, agentName, pipetterName)
+			_ <- buildTransporters(builder, agentName)
+			_ <- buildSealerPrograms(builder)
 		} yield {
 			val data0 = new ProtocolDataA(planningDomainObjects = Map(
 				agentName -> "agent",
@@ -232,10 +158,10 @@ class ConfigEvoware(
 	}
 	
 	// Load PlateModels
-	private def loadAgentPlateModels(
+	private def buildAgentPlateModels(
+		builder: ProtocolDataABuilder,
 		labwareModel_m: Map[String, LabwareModelConfig]
-	): ResultC[ProtocolDataA] = {
-		val builder = new ProtocolDataABuilder
+	): ResultC[Unit] = {
 		
 		// Get the list of evoware labwares that we're interested in
 		// Add labware on the table definition to the list of labware we're interested in
@@ -273,15 +199,14 @@ class ConfigEvoware(
 	/**
 	 * @returns Map from SiteID to its Site and the LabwareModels it can accept
 	 */
-	private def loadSitesAndDevices(
+	private def buildSitesAndDevices(
+		builder: ProtocolDataABuilder,
 		agentName: String,
-		pipetterName: String,
-		data0: ProtocolDataA
+		pipetterName: String
 		//modelEToModel_l: List[(EvowareLabwareModel, LabwareModel)]
 		//labwareModelE_l: List[roboliq.evoware.parser.EvowareLabwareModel],
 		//idToModel_m: HashMap[String, LabwareModel]
 	): ResultC[ProtocolDataA] = {
-		val builder = new ProtocolDataABuilder
 		val carriersSeen_l = new HashSet[Int]
 
 		def createDeviceName(carrierE: Carrier): String = {
@@ -289,7 +214,8 @@ class ConfigEvoware(
 			agentName + "__" + carrierE.sName.map(c => if (c.isLetterOrDigit) c else '_')
 		}
 		
-		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, tm: RjsTypedMap) if tm.type == "PlateModel" && tm.map.contains("evowareName") => name -> tm.map("evowareName") })
+		val data0 = builder.get
+		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, tm: RjsTypedMap) if tm.typ == "PlateModel" && tm.map.contains("evowareName") => name -> tm.map("evowareName").toText })
 		val evowareNameToModelName_l = modelNameToEvowareName_l.map(_.swap)
 		// Start with gathering list of all available labware models whose names are either in the config or table template
 		val labwareModelE0_l = carrierData.models.collect({case m: roboliq.evoware.parser.EvowareLabwareModel if labwareNamesOfInterest_l.contains(m.sName) => m})
@@ -298,7 +224,7 @@ class ConfigEvoware(
 		// Only keep the ones we have LabwareModels for (TODO: seems like a silly step -- should probably filter labwareNamesOfInterest_l to begin with)
 		val labwareModelE_l = labwareModelE0_l.filter(mE => evowareNameToLabwareModel_m.contains(mE.sName))
 
-		// Create map from siteId to all labware models that can be placed that site 
+		// Create map from siteId to all labware models that can be placed on that site
 		val siteIdToModels_m: Map[(Int, Int), Set[LabwareModel]] = {
 			val l = for {
 				(mE, m) <- modelEToModel_l
@@ -375,11 +301,11 @@ class ConfigEvoware(
 
 			// Make site pipetter-accessible if it's listed in the table setup's `pipetterSites`
 			if (tableSetupConfig.pipetterSites.contains(siteName)) {
-				builder.addDeviceSite(pipetterName, siteName)
+				builder.appendDeviceSite(pipetterName, siteName)
 			}
 			// Make site user-accessible if it's listed in the table setup's `userSites`
 			if (tableSetupConfig.userSites.contains(siteName)) {
-				builder.addTransporterCan("userArm", siteName, "userArmSpec")
+				builder.appendTransporterCan("userArm", siteName, "userArmSpec")
 			}
 		}
 		
@@ -491,7 +417,7 @@ class ConfigEvoware(
 		} yield ll.flatten
 	}
 	
-	private def getDefaultSiteLogic(dc: DeviceConfig, sc: DeviceSiteConfig): RsResult[List[Rel]] = {
+	private def getDefaultSiteLogic(dc: DeviceConfig, sc: DeviceSiteConfig): ResultC[strips.Literals] = {
 		val siteName = sc.site.label.get
 		val logic1 = Rel("device-can-site", List(dc.deviceName, sc.site.label.get))
 		val logic2_l = sc.labwareModel_l.map(m => Rel("device-can-model", List(dc.deviceName, eb.getName(m).toOption.get)))
@@ -649,7 +575,7 @@ class ConfigEvoware(
 			// Infinite M200
 			case "Tecan part no. 30016056 or 30029757" =>
 				// In addition to the default logic, also let the device open its site
-				def overrideSiteLogic(dc: DeviceConfig): RsResult[List[Rel]] = {
+				def overrideSiteLogic(dc: DeviceConfig): ResultC[strips.Literals] = {
 					for {
 						default_l <- getDefaultSitesLogic(dc)
 					} yield {
@@ -661,8 +587,7 @@ class ConfigEvoware(
 					}
 				}
 				Some(new DeviceConfigPre(
-					"reader",
-					device_? = Some(new Reader(gid, Some(carrierE.sName))),
+					"Reader",
 					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
 
@@ -676,29 +601,24 @@ class ConfigEvoware(
 					} yield logic2_l
 				}
 				Some(DeviceConfigPre(
-					"shaker",
-					device_? = Some(new Shaker(gid, Some(carrierE.sName))),
+					"Shaker",
 					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
 
 			case "RoboPeel" =>
 				Some(new DeviceConfigPre(
-					"peeler",
-					device_? = Some(new Peeler(gid, Some(carrierE.sName)))
+					"Peeler"
 				))
-				
 				
 			case "RoboSeal" =>
 				Some(new DeviceConfigPre(
-					"sealer",
-					device_? = Some(new Sealer(gid, Some(carrierE.sName)))
+					"Sealer"
 				))
 				
 			// Te-Shake 2Pos
 			case "Tecan part no. 10760722 with 10760725" =>
 				Some(new DeviceConfigPre(
-					"shaker",
-					device_? = Some(new Shaker(gid, Some(carrierE.sName)))
+					"Shaker"
 				))
 				
 			case "TRobot1" =>
@@ -715,9 +635,7 @@ class ConfigEvoware(
 					}
 				}
 				Some(new DeviceConfigPre(
-					"thermocycler",
-					device_? = Some(new Thermocycler(gid, Some(carrierE.sName))),
-					handler_? = Some(new EvowareTRobotInstructionHandler(carrierE)),
+					"Thermocycler",
 					overrideSiteLogic_? = Some(overrideSiteLogic)
 				))
 			
