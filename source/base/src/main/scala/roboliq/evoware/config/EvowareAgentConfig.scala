@@ -1,5 +1,7 @@
 package roboliq.evoware.config
 
+import roboliq.input.ProtocolDataA
+
 /**
  * @param evowareDir Evoware data directory
  * @param labwareModels Labware that this robot can use
@@ -11,28 +13,37 @@ package roboliq.evoware.config
  */
 case class EvowareAgentConfig(
 	evowareDir: String,
-	labwareModels: Map[String, LabwareModelConfig],
-	tipModels: Map[String, TipModelConfig],
-	tips: List[TipConfig],
-	tableSetups: Map[String, TableSetupConfig],
-	transporterBlacklist: List[TransporterBlacklistConfig],
-	sealerPrograms: Map[String, SealerProgramConfig]
+	protocolData_? : Option[ProtocolDataA],
+	evowareProtocolData_? : Option[EvowareProtocolData],
+	tableSetups: Map[String, EvowareTableSetupConfig]
 )
 
-case class LabwareModelConfig(
-	label_? : Option[String],
-	evowareName: String
+case class EvowareProtocolData(
+	sites: Map[String, EvowareSiteConfig],
+	devices: Map[String, EvowareDeviceConfig],
+	transporterBlacklist: List[EvowareTransporterBlacklistConfig]
 )
 
-case class TipModelConfig(
-	min: java.lang.Double,
-	max: java.lang.Double
+object EvowareProtocolData {
+	val empty = EvowareProtocolData(Map(), Map(), Nil)
+}
+
+case class EvowareSiteConfig(
+	carrier_? : Option[String],
+	grid_? : Option[Int],
+	site_? : Option[Int]
 )
 
-case class TipConfig(
-	row: Integer,
-	permanentModel_? : Option[String],
-	models: List[String]
+case class EvowareDeviceConfig(
+	`type`: String,
+	evowareName: String,
+	sitesOverride: List[String]
+)
+
+case class EvowareTransporterBlacklistConfig(
+	roma_? : Option[Integer],
+	vector_? : Option[String],
+	site_? : Option[String]
 )
 
 /**
@@ -41,28 +52,8 @@ case class TipConfig(
  * @param pipetterSites List of sites the pipetter can access
  * @param userSites List of sites the user can directly access
  */
-case class TableSetupConfig(
+case class EvowareTableSetupConfig(
 	tableFile: String,
-	sites: Map[String, SiteConfig],
-	pipetterSites: List[String],
-	userSites: List[String]
-)
-
-case class SiteConfig(
-	carrier: String,
-	grid: Integer,
-	site: Integer
-)
-
-case class TransporterBlacklistConfig(
-	roma_? : Option[Integer],
-	vector_? : Option[String],
-	site_? : Option[String]
-)
-
-case class SealerProgramConfig(
-	//@ConfigProperty var name: String = null
-	//@ConfigProperty var device: String = null
-	model: String,
-	filename: String
+	protocolData_? : Option[ProtocolDataA],
+	evowareProtocolData_? : Option[EvowareProtocolData]
 )

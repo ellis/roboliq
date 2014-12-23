@@ -77,6 +77,13 @@ class ProtocolDataABuilder {
 		planningDomainObjects(siteName) = "Site"
 	}
 	
+	def addSite(name: String, value: RjsMap) {
+		val typ = "Site"
+		val value2 = value.add("type", RjsString(typ))
+		addObject(name, value2)
+		planningDomainObjects(name) = typ
+	}
+	
 	/**
 	 * Indicates that the 'top' model can be stacked on top of the 'bottom' model
 	 */
