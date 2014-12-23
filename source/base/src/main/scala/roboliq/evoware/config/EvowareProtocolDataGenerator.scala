@@ -171,7 +171,27 @@ object EvowareProtocolDataGenerator {
 							case _ =>
 								ResultC.error("you must either supply `carrient` and optionally `site` OR both `grid` and `site`")
 						}
-						ResultC.unit(())
+					}
+				}
+			}
+			
+			// Build the devices
+			_ <- ResultC.context("devices") {
+				ResultC.foreach(evowareProtocolData.devices) { case (deviceNameOrPart, deviceConfig) =>
+					for {
+						pair <- carrierData.mapNameToCarrier.get(deviceNameOrPart) match {
+								case Some(carrierE) => ResultC.unit(deviceNameOrPart -> carrierE)
+								case None =>
+									carrierData.carrierData, s"unknown device: $deviceName")
+							}
+						)
+						(deviceName, carrierE) = pair
+						gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"device is missing from the given table: $deviceName")
+					} yield {
+						val rjsDevice = RjsMap(
+							"type" -> RjsString(deviceConfig.`type`)
+						)
+						builder.addObject(deviceName, rjsDevice)
 					}
 				}
 			}
