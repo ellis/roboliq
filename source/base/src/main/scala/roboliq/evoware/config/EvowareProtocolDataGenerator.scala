@@ -93,18 +93,23 @@ object EvowareProtocolDataGenerator {
 			protocolData0 = agentConfig.protocolData_?.getOrElse(new ProtocolDataA())
 			// Merge agent's evowareProtocolData into agent's protocolData
 			evowareProtocolData1 = agentConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
-			protocolData1a <- convertEvowareProtocolData(protocolData0, evowareProtocolData1, carrierData, tableData)
+			protocolData1a <- convertEvowareProtocolData(agentIdent, protocolData0, evowareProtocolData1, carrierData, tableData)
 			protocolData1 <- protocolData0 merge protocolData1a
 			// Merge table's protocolData
 			protocolData2 <- protocolData1 merge tableSetupConfig.protocolData_?.getOrElse(new ProtocolDataA())
 			// Merge table's evowareProtocolData
 			evowareProtocolData3 = tableSetupConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
-			protocolData3a <- convertEvowareProtocolData(protocolData2, evowareProtocolData3, carrierData, tableData)
+			protocolData3a <- convertEvowareProtocolData(agentIdent, protocolData2, evowareProtocolData3, carrierData, tableData)
 			protocolData3 <- protocolData2 merge protocolData3a
 		} yield protocolData3
 	}
 	
+	NEED TO CONSTRUCT A LIST OF STUFF TO DO,
+	BECAUSE WE MAKE TWO CALLS TO convertEvowareProtocolData()
+	AND WE NEED THE SITEMODEL NAMES TO BE CONSISTENT
+	
 	private def convertEvowareProtocolData(
+		agentName: String,
 		data0: ProtocolDataA,
 		evowareProtocolData: EvowareProtocolData,
 		carrierData: EvowareCarrierData,
@@ -118,6 +123,7 @@ object EvowareProtocolDataGenerator {
 		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, tm: RjsTypedMap) if tm.typ == "PlateModel" && tm.map.contains("evowareName") => name -> tm.map("evowareName").toText })
 		
 		val builder = new ProtocolDataABuilder
+		val siteIdToSiteName_m = new HashMap[(Int, Int), String]
 		for {
 			// Find the evoware labware models
 			modelNameToEvowareModel_l <- ResultC.mapAll(modelNameToEvowareName_l) { case (modelName, evowareName) =>
@@ -127,6 +133,7 @@ object EvowareProtocolDataGenerator {
 					} yield modelName -> mE
 				}
 			}
+			
 			// Create map from siteId to all labware model names that can be placed on that site
 			siteIdToModelNames_m: Map[(Int, Int), Set[String]] = {
 				val l = for {
@@ -135,9 +142,34 @@ object EvowareProtocolDataGenerator {
 				} yield { siteId -> modelName }
 				l.groupBy(_._1).mapValues(_.map(_._2).toSet)
 			}
+
+			// TODO: create System Liquid site, siteModel, and labware
+			
+			// Get map of sites we'll need plus their evoware siteId
+			siteNameToSiteId_m <- getSiteNameToSiteIdMap(evowareProtocolData, carrierData, tableData)
+			
+			// Construct map of labware models that the sites should hold
+			siteNameToModelNames_m =
+				siteNameToSiteId_m.flatMap { case (siteName, siteId) =>
+					siteIdToModelNames_m.get(siteId).map { modelName_l =>
+						siteName -> modelName_l
+					}
+				}
+			
+			// Create the site models and get a map from set of labware models to corresponding site model name
+			modelNamesToSiteModelName_m = {
+				val modelName_ll = siteNameToModelNames_m.values.toSet
+				val modelsToSiteModelName_l = for ((modelName_l, i) <- modelName_ll.zipWithIndex) yield {
+					val siteModelName = s"${agentName}.sm${i}"
+					builder.addSiteModel(siteModelName)
+					builder.appendStackables(siteModelName, modelName_l)
+					modelName_l -> siteModelName
+				}
+				modelsToSiteModelName_l.toMap
+			}
 			
 			// Build the sites
-			_ <- ResultC.context("sites") {
+			_ = {
 				def buildSite(
 					siteName: String,
 					gridIndex: Int,
@@ -153,11 +185,62 @@ object EvowareProtocolDataGenerator {
 					// Indicate which labware models can go on the site
 					val siteId = (gridIndex, siteIndex - 1)
 					val modelName_l = siteIdToModelNames_m.getOrElse(siteId, Set())
-					builder.appendStackables(siteName, modelName_l)
+					val siteModelName = modelNamesToSiteModelName_m(modelName_l)
+					builder.setModel(siteName, siteModelName)
 					ResultC.unit(())
 				}
 
-				ResultC.foreach(evowareProtocolData.sites) { case (siteName, siteConfig) =>
+				for ((siteName, siteId) <- siteNameToSiteId_m) {
+					val siteConfig = evowareProtocolData.sites(siteName)
+					buildSite(siteName, siteId._1, siteId._2 + 1)
+				}
+			}
+			
+			// Build the devices
+			_ <- ResultC.context("devices") {
+				val partToCarrier_m = carrierData.mapNameToCarrier.values.flatMap(c => c.partNo_?.map(_ -> c)).toMap
+				ResultC.foreach(evowareProtocolData.devices) { case (deviceName, deviceConfig) =>
+					ResultC.context(deviceName) {
+						for {
+							carrierE <- ResultC.from(
+								carrierData.mapNameToCarrier.get(deviceConfig.evowareName)
+									.orElse(partToCarrier_m.get(deviceConfig.evowareName)),
+								s"unknown Evoware device: ${deviceConfig.evowareName}"
+							)
+							gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"device is missing from the specified table: ${deviceConfig.evowareName}")
+						} yield {
+							val rjsDevice = RjsMap(
+								"type" -> RjsString(deviceConfig.`type`),
+								"evowareName" -> RjsString(carrierE.sName)
+							)
+							builder.addObject(deviceName, rjsDevice)
+							builder.addPlanningDomainObject(deviceName, deviceConfig.`type`)
+							
+							// Find sites for this device
+							val siteIdToSiteName_l = deviceConfig.sitesOverride match {
+								case Nil =>
+									siteIdToSiteName_m.toList.filter(kv => kv._1._1 == gridIndex)
+								case l => l
+							}
+							for ((siteId, siteName) <- siteIdToSiteName_l) {
+								builder.appendDeviceSite(deviceName, siteName)
+								builder
+							}
+						}
+					}
+				}
+			}
+		} yield builder.get
+	}
+
+	private def getSiteNameToSiteIdMap(
+		evowareProtocolData: EvowareProtocolData,
+		carrierData: EvowareCarrierData,
+		tableData: EvowareTableData
+	): ResultC[Map[String, (Int, Int)]] = {
+		ResultC.context("sites") {
+			for {
+				l <- ResultC.mapAll(evowareProtocolData.sites) { case (siteName, siteConfig) =>
 					ResultC.context(siteName) {
 						siteConfig match {
 							case EvowareSiteConfig(Some(carrierName), None, siteIndex_?) =>
@@ -165,39 +248,17 @@ object EvowareProtocolDataGenerator {
 									carrierE <- ResultC.from(carrierData.mapNameToCarrier.get(carrierName), s"unknown carrier: $carrierName")
 									gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"carrier is missing from the given table: $carrierName")
 									siteIndex = siteIndex_?.getOrElse(1)
-								} yield buildSite(siteName, gridIndex, siteIndex)
+								} yield siteName -> (gridIndex, siteIndex)
 							case EvowareSiteConfig(None, Some(gridIndex), Some(siteIndex)) =>
-								buildSite(siteName, gridIndex, siteIndex)
+								ResultC.unit(siteName -> (gridIndex, siteIndex))
 							case _ =>
-								ResultC.error("you must either supply `carrient` and optionally `site` OR both `grid` and `site`")
+								ResultC.error("you must either supply `carrier` (and optionally `site`) OR both `grid` and `site`")
 						}
 					}
 				}
-			}
-			
-			// Build the devices
-			_ <- ResultC.context("devices") {
-				ResultC.foreach(evowareProtocolData.devices) { case (deviceNameOrPart, deviceConfig) =>
-					for {
-						pair <- carrierData.mapNameToCarrier.get(deviceNameOrPart) match {
-								case Some(carrierE) => ResultC.unit(deviceNameOrPart -> carrierE)
-								case None =>
-									carrierData.carrierData, s"unknown device: $deviceName")
-							}
-						)
-						(deviceName, carrierE) = pair
-						gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"device is missing from the given table: $deviceName")
-					} yield {
-						val rjsDevice = RjsMap(
-							"type" -> RjsString(deviceConfig.`type`)
-						)
-						builder.addObject(deviceName, rjsDevice)
-					}
-				}
-			}
-		} yield builder.get
+			} yield l.toMap
+		}
 	}
-
 
 }
 /*	
