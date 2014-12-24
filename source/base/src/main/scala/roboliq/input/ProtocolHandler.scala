@@ -19,7 +19,7 @@ case class MyPlate(
 	location_? : Option[String]
 )
 
-class ProtocolDataA(
+case class ProtocolDataA(
 	val objects: RjsMap = RjsMap(),
 	val commands: RjsMap = RjsMap(),
 	val commandOrderingConstraints: List[List[String]] = Nil,

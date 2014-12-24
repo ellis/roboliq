@@ -232,6 +232,10 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsBasicValue {
 			}
 		} yield RjsMap(merged_l.toMap)
 	}
+	
+	override def toString: String = {
+		map.toList.sortBy(_._1).map(kv => "\""+kv._1+"\" -> "+kv._2).mkString("RjsMap(", ", ", ")")
+	}
 }
 
 object RjsMap {
@@ -327,15 +331,18 @@ case class RjsSection(
 case class RjsString(s: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString(s))
 	override def toText: String = s
+	override def toString: String = "RjsString(\""+s+"\")"
 }
 
 case class RjsSubst(name: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString("$"+name))
+	override def toString: String = "RjsString(\""+name+"\")"
 }
 
 case class RjsText(text: String) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsString("\""+text+"\""))
 	override def toText: String = text
+	override def toString: String = "RjsString(\""+text+"\")"
 }
 
 case class RjsTypedMap(typ: String, map: Map[String, RjsValue]) extends RjsBasicValue {

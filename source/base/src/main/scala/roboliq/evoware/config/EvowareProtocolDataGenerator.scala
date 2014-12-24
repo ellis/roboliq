@@ -90,23 +90,25 @@ object EvowareProtocolDataGenerator {
 			// Load table file
 			tableFile <- ResultC.from(Option(tableSetupConfig.tableFile), s"tableFile property must be set on tableSetup `$tableName`")
 			tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile))
-			protocolData0 = agentConfig.protocolData_?.getOrElse(new ProtocolDataA())
-			// Merge agent's evowareProtocolData into agent's protocolData
-			evowareProtocolData1 = agentConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
-			protocolData1a <- convertEvowareProtocolData(agentIdent, protocolData0, evowareProtocolData1, carrierData, tableData)
-			protocolData1 <- protocolData0 merge protocolData1a
-			// Merge table's protocolData
-			protocolData2 <- protocolData1 merge tableSetupConfig.protocolData_?.getOrElse(new ProtocolDataA())
-			// Merge table's evowareProtocolData
-			evowareProtocolData3 = tableSetupConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
-			protocolData3a <- convertEvowareProtocolData(agentIdent, protocolData2, evowareProtocolData3, carrierData, tableData)
-			protocolData3 <- protocolData2 merge protocolData3a
-		} yield protocolData3
+			// Merge protocolData of agent and table
+			protocolDataA = agentConfig.protocolData_?.getOrElse(new ProtocolDataA())
+			protocolDataB = tableSetupConfig.protocolData_?.getOrElse(new ProtocolDataA())
+			protocolData0 <- protocolDataA merge protocolDataB
+			//_ = println("protocolDataA:\n"+protocolDataA)
+			//_ = println("protocolDataB:\n"+protocolDataB)
+			//_ = println("protocolData0:\n"+protocolData0)
+			// Merge evowareProtocolData of agent and table
+			evowareProtocolDataA = agentConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
+			evowareProtocolDataB = tableSetupConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
+			evowareProtocolData0 = evowareProtocolDataA merge evowareProtocolDataB
+			// Convert evowareProtocolData0 to ProtocolData
+			protocolData1 <- convertEvowareProtocolData(agentIdent, protocolData0, evowareProtocolData0, carrierData, tableData)
+			_ = println("protocolData1:\n"+protocolData1)
+			// Merge protocolDatas
+			protocolData2 <- protocolData0 merge protocolData1
+			_ = println("protocolData2:\n"+protocolData2)
+		} yield protocolData2
 	}
-	
-	NEED TO CONSTRUCT A LIST OF STUFF TO DO,
-	BECAUSE WE MAKE TWO CALLS TO convertEvowareProtocolData()
-	AND WE NEED THE SITEMODEL NAMES TO BE CONSISTENT
 	
 	private def convertEvowareProtocolData(
 		agentName: String,
@@ -185,8 +187,10 @@ object EvowareProtocolDataGenerator {
 					// Indicate which labware models can go on the site
 					val siteId = (gridIndex, siteIndex - 1)
 					val modelName_l = siteIdToModelNames_m.getOrElse(siteId, Set())
-					val siteModelName = modelNamesToSiteModelName_m(modelName_l)
-					builder.setModel(siteName, siteModelName)
+					if (!modelName_l.isEmpty) {
+						val siteModelName = modelNamesToSiteModelName_m(modelName_l)
+						builder.setModel(siteName, siteModelName)
+					}
 					ResultC.unit(())
 				}
 
@@ -208,6 +212,19 @@ object EvowareProtocolDataGenerator {
 								s"unknown Evoware device: ${deviceConfig.evowareName}"
 							)
 							gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"device is missing from the specified table: ${deviceConfig.evowareName}")
+							// Find sites for this device
+							siteName_l <- {
+								deviceConfig.sitesOverride match {
+									case Nil =>
+										ResultC.unit(siteIdToSiteName_m.toList.filter(kv => kv._1._1 == gridIndex).map(_._2))
+									case l =>
+										ResultC.map(l) { siteName =>
+											for {
+												_ <- ResultC.assert(siteNameToSiteId_m.contains(siteName), s"unknown site: $siteName")
+											} yield siteName
+										}
+								}
+							}
 						} yield {
 							val rjsDevice = RjsMap(
 								"type" -> RjsString(deviceConfig.`type`),
@@ -216,15 +233,13 @@ object EvowareProtocolDataGenerator {
 							builder.addObject(deviceName, rjsDevice)
 							builder.addPlanningDomainObject(deviceName, deviceConfig.`type`)
 							
-							// Find sites for this device
-							val siteIdToSiteName_l = deviceConfig.sitesOverride match {
-								case Nil =>
-									siteIdToSiteName_m.toList.filter(kv => kv._1._1 == gridIndex)
-								case l => l
-							}
-							for ((siteId, siteName) <- siteIdToSiteName_l) {
+							for (siteName <- siteName_l) {
 								builder.appendDeviceSite(deviceName, siteName)
-								builder
+							}
+							
+							val modelName_l = siteName_l.flatMap(siteName => siteNameToModelNames_m.getOrElse(siteName, Nil)) 
+							for (modelName <- modelName_l) {
+								builder.appendDeviceModel(deviceName, modelName)
 							}
 						}
 					}

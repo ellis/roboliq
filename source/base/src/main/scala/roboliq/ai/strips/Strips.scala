@@ -156,6 +156,10 @@ object Literals {
 	def apply(state: State): Literals = {
 		apply(state.atoms.toList, Nil)
 	}
+	def fromStrings(l: String*): Literals = {
+		val l2 = Unique[Literal](l.map(Literal.parse) : _*)
+		apply(l2)
+	}
 }
 
 case class State(atoms: Set[Atom]) {

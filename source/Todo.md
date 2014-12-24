@@ -61,6 +61,9 @@ usage.
 - [x] RjsProtocol: create and use in Protocol2
 - [x] Protocol2Data: create and use in Protocol2
 - [x] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
+- [ ] EvowareProtocolDataGenerator: should objects be created with "{agentName}." prefix? Would need to handle this in logic too, which might make it harder to address global variables with the same name as a local object
+- [ ] EvowareProtocolDataGenerator: generate transport graph
+- [ ] EvowareProtocolDataGenerator: 'pipetterSites' should probably be moved to explicit creation of pipetter device
 - [ ] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
 - [ ] ProtocolHandlerSpec: test a protocol that only contains instruction commands
 - [ ] RjsValue: should add a 'toBasicValue' method, and perhaps a RjsBasicMap that has RjsBasicValues

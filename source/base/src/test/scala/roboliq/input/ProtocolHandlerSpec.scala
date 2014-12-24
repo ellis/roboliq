@@ -146,8 +146,8 @@ cmd:
 					strips.Literal.parse("device-can-site mario__Shaker P3")
 				))
 			)
-			val dataA2 = dataALab ++ dataA1
 			val ctxval2 = (for {
+				dataA2 <- ResultE.from(dataALab merge dataA1)
 				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
 				dataB <- protocolEvaluator.stepB(dataA2)
 			} yield dataB.commandExpansions).run(data0)

@@ -21,17 +21,27 @@ case class EvowareAgentConfig(
 case class EvowareProtocolData(
 	sites: Map[String, EvowareSiteConfig],
 	devices: Map[String, EvowareDeviceConfig],
-	transporterBlacklist: List[EvowareTransporterBlacklistConfig]
-)
+	transporterBlacklist: List[EvowareTransporterBlacklistConfig],
+	userSites: List[String]
+) {
+	def merge(that: EvowareProtocolData): EvowareProtocolData = {
+		EvowareProtocolData(
+			sites = sites ++ that.sites,
+			devices = devices ++ that.devices,
+			transporterBlacklist = (transporterBlacklist ++ that.transporterBlacklist).distinct,
+			userSites = (userSites ++ that.userSites).distinct
+		)
+	}
+}
 
 object EvowareProtocolData {
-	val empty = EvowareProtocolData(Map(), Map(), Nil)
+	val empty = EvowareProtocolData(Map(), Map(), Nil, Nil)
 }
 
 case class EvowareSiteConfig(
-	carrier_? : Option[String],
-	grid_? : Option[Int],
-	site_? : Option[Int]
+	carrier_? : Option[String] = None,
+	grid_? : Option[Int] = None,
+	site_? : Option[Int] = None
 )
 
 case class EvowareDeviceConfig(

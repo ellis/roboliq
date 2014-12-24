@@ -95,27 +95,27 @@ evowareAgents:
         TROBOT1: { carrier: TRobot1 }
         TROBOT2: { carrier: TRobot2 }
       devices:
-        mario_centrifuge:
+        mario.centrifuge:
           type: Centrifuge
           evowareName: Centrifuge
           sitesOverride: [CENTRIFUGE, CENTRIFUGE1, CENTRIFUGE2, CENTRIFUGE3, CENTRIFUGE4]
-        mario_shaker:
+        mario.shaker:
           type: Shaker
           evowareName: "MP 2Pos H+P Shake"
           sitesOverride: [P3]
-        mario_sealer:
+        mario.sealer:
           type: Seeler
           evowareName: RoboSeal
-        mario_peeler:
+        mario.peeler:
           type: Peeler
           evowareName: RoboPeel
-        mario_thermocycler1:
+        mario.thermocycler1:
           type: Thermocycler
           evowareName: TRobot1
-        mario_thermocycler2:
+        mario.thermocycler2:
           type: Thermocycler
           evowareName: TRobot2
-        mario_reader:
+        mario.reader:
           type: Reader
           evowareName: "Tecan part no. 30016056 or 30029757"
       transporterBlacklist:
