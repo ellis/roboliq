@@ -36,6 +36,149 @@ sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 
 sealed trait RjsBasicValue extends RjsValue
 
+case class RjsBoolean(b: Boolean) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsBoolean(b))
+	override def toText: String = b.toString
+}
+
+case class RjsFormat(format: String) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString("f\""+format+"\""))
+}
+
+case class RjsList(list: List[RjsValue]) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(list) { _.toJson }
+		} yield {
+			JsArray(l)
+		}
+	}
+}
+
+trait RjsAbstractMap {
+	val typ_? : Option[String]
+	def getValueMap: Map[String, RjsValue]
+}
+
+case class RjsBasicMap(map: Map[String, RjsBasicValue]) extends RjsBasicValue with RjsAbstractMap {
+	val typ_? : Option[String] = {
+		map.get("TYPE") match {
+			case Some(RjsString(typ)) => Some(typ)
+			case _ => None
+		}
+	}
+
+	def getValueMap: Map[String, RjsValue] = map
+	
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(map.toList) { case (name, value) =>
+				value.toJson.map(name -> _)
+			}
+		} yield JsObject(l.toMap)
+	}
+	
+	def get(name: String): Option[RjsBasicValue] = map.get(name)
+	def add(name: String, value: RjsBasicValue): RjsBasicMap = RjsBasicMap(map + (name -> value))
+	def add(map: Map[String, RjsBasicValue]): RjsBasicMap = RjsBasicMap(this.map ++ map)
+	def add(map: RjsBasicMap): RjsBasicMap = RjsBasicMap(this.map ++ map.map)
+	def ++(that: RjsBasicMap): RjsBasicMap = this.add(that)
+	
+	def toTypedMap(typ: String): RjsBasicMap = RjsBasicMap(typ, map)
+	
+	def merge(that: RjsBasicMap): ResultC[RjsBasicMap] = {
+		val key_l = map.keySet ++ that.map.keySet
+		for {
+			merged_l <- ResultC.map(key_l) { key =>
+				val value_? : ResultC[RjsBasicValue] = (map.get(key), that.map.get(key)) match {
+					case (None, None) => ResultC.error(s"internal merge error on key $key") // Won't happen
+					case (Some(a), None) => ResultC.unit(a)
+					case (None, Some(b)) => ResultC.unit(b)
+					case (Some(a), Some(b)) =>
+						(a, b) match {
+							case (ma: RjsBasicMap, mb: RjsBasicMap) =>
+								for {
+									_ <- ResultC.check(ma.typ_? == mb.typ_?, s"Changing TYPE from ${ma.typ_?} to ${mb.typ_?}")
+									mc <- ma merge mb
+								} yield mc
+							case _ =>
+								ResultC.unit(b)
+						}
+				}
+				value_?.map(key -> _)
+			}
+		} yield RjsBasicMap(merged_l.toMap)
+	}
+	
+	override def toString: String = {
+		map.toList.sortBy(_._1).map(kv => "\""+kv._1+"\" -> "+kv._2).mkString("RjsBasicMap(", ", ", ")")
+	}
+}
+
+object RjsBasicMap {
+	def apply(nv_l: (String, RjsBasicValue)*): RjsBasicMap = {
+		RjsBasicMap(Map(nv_l : _*))
+	}
+	def apply(typ: String, nv_l: (String, RjsBasicValue)*): RjsBasicMap = {
+		val map = Map(nv_l : _*) + ("TYPE" -> RjsString(typ))
+		RjsBasicMap(map)
+	}
+	def apply(typ: String, map: Map[String, RjsBasicValue]): RjsBasicMap = {
+		RjsBasicMap(map + ("TYPE" -> RjsString(typ)))
+	}
+}
+
+case object RjsNull extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsNull)
+	override def toText: String = "null"
+}
+
+case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = unit match {
+		case None => ResultC.unit(JsNumber(n))
+		case Some(s) => ResultC.unit(JsString(n.toString+s))
+	}
+	override def toText: String = unit match {
+		case None => n.toString
+		case Some(s) => n.toString+s
+	}
+}
+
+/**
+ * This is a string which can represent anything that can be encoded as a string.
+ * It is not meant as text to be displayed -- for that see RjsText.
+ */
+case class RjsString(s: String) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString(s))
+	override def toText: String = s
+	override def toString: String = "RjsString(\""+s+"\")"
+}
+
+case class RjsSubst(name: String) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString("$"+name))
+	override def toString: String = "RjsString(\""+name+"\")"
+}
+
+case class RjsText(text: String) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsString("\""+text+"\""))
+	override def toText: String = text
+	override def toString: String = "RjsString(\""+text+"\")"
+}
+
+/*
+case class RjsTypedMap(typ: String, map: Map[String, RjsValue]) extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(map.toList) { case (name, value) =>
+				value.toJson.map(name -> _)
+			}
+		} yield JsObject((("TYPE" -> JsString(typ)) :: l).toMap)
+	}
+	
+	def toUntypedMap: RjsMap = RjsMap(map)
+}
+*/
+
 @RjsJsonType("action")
 case class RjsAction(
 	@RjsJsonName("NAME") name: String,
@@ -81,11 +224,6 @@ case class RjsActionDef(
 			JsObject(l.flatten.toMap)
 		}
 	}
-}
-
-case class RjsBoolean(b: Boolean) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = ResultC.unit(JsBoolean(b))
-	override def toText: String = b.toString
 }
 
 sealed trait RjsBuildItem {
@@ -138,10 +276,6 @@ case class RjsDefine(
 	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsFormat(format: String) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = ResultC.unit(JsString("f\""+format+"\""))
-}
-
 @RjsJsonType("import")
 case class RjsImport(
 	@RjsJsonName("NAME") name: String,
@@ -173,17 +307,16 @@ case class RjsLambda(
 	def toJson = RjsValue.toJson(this)
 }
 
-case class RjsList(list: List[RjsValue]) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = {
-		for {
-			l <- ResultC.map(list) { _.toJson }
-		} yield {
-			JsArray(l)
+case class RjsMap(map: Map[String, RjsValue]) extends RjsValue with RjsAbstractMap {
+	val typ_? : Option[String] = {
+		map.get("TYPE") match {
+			case Some(RjsString(typ)) => Some(typ)
+			case _ => None
 		}
 	}
-}
-
-case class RjsMap(map: Map[String, RjsValue]) extends RjsBasicValue {
+	
+	def getValueMap: Map[String, RjsValue] = map
+	
 	def toJson: ResultC[JsValue] = {
 		for {
 			l <- ResultC.map(map.toList) { case (name, value) =>
@@ -198,7 +331,7 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsBasicValue {
 	def add(map: RjsMap): RjsMap = RjsMap(this.map ++ map.map)
 	def ++(that: RjsMap): RjsMap = this.add(that)
 	
-	def toTypedMap(typ: String): RjsTypedMap = RjsTypedMap(typ, map)
+	def toTypedMap(typ: String): RjsMap = RjsMap(typ, map)
 	
 	def merge(that: RjsMap): ResultC[RjsMap] = {
 		val key_l = map.keySet ++ that.map.keySet
@@ -210,20 +343,11 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsBasicValue {
 					case (None, Some(b)) => ResultC.unit(b)
 					case (Some(a), Some(b)) =>
 						(a, b) match {
-							case (ma: RjsMap, mb: RjsMap) => ma merge mb
-							case (ma: RjsMap, tmb: RjsTypedMap) =>
+							case (ma: RjsMap, mb: RjsMap) =>
 								for {
-									mc <- ma merge tmb.toUntypedMap
-								} yield mc.toTypedMap(tmb.typ)
-							case (tma: RjsTypedMap, mb: RjsMap) =>
-								for {
-									mc <- tma.toUntypedMap merge mb
-								} yield mc.toTypedMap(tma.typ)
-							case (tma: RjsTypedMap, tmb: RjsTypedMap) =>
-								for {
-									_ <- ResultC.check(tma.typ == tmb.typ, s"Changing TYPE from ${tma.typ} to ${tmb.typ}")
-									mc <- tma.toUntypedMap merge tmb.toUntypedMap
-								} yield mc.toTypedMap(tmb.typ)
+									_ <- ResultC.check(ma.typ_? == mb.typ_?, s"Changing TYPE from ${ma.typ_?} to ${mb.typ_?}")
+									mc <- ma merge mb
+								} yield mc
 							case _ =>
 								ResultC.unit(b)
 						}
@@ -242,21 +366,8 @@ object RjsMap {
 	def apply(nv_l: (String, RjsValue)*): RjsMap = {
 		RjsMap(Map(nv_l : _*))
 	}
-}
-
-case object RjsNull extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = ResultC.unit(JsNull)
-	override def toText: String = "null"
-}
-
-case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = unit match {
-		case None => ResultC.unit(JsNumber(n))
-		case Some(s) => ResultC.unit(JsString(n.toString+s))
-	}
-	override def toText: String = unit match {
-		case None => n.toString
-		case Some(s) => n.toString+s
+	def apply(typ: String, map: Map[String, RjsValue]): RjsMap = {
+		RjsMap(map + ("TYPE" -> RjsString(typ)))
 	}
 }
 
@@ -324,39 +435,6 @@ case class RjsSection(
 	def toJson = RjsValue.toJson(this)
 }
 
-/**
- * This is a string which can represent anything that can be encoded as a string.
- * It is not meant as text to be displayed -- for that see RjsText.
- */
-case class RjsString(s: String) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = ResultC.unit(JsString(s))
-	override def toText: String = s
-	override def toString: String = "RjsString(\""+s+"\")"
-}
-
-case class RjsSubst(name: String) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = ResultC.unit(JsString("$"+name))
-	override def toString: String = "RjsString(\""+name+"\")"
-}
-
-case class RjsText(text: String) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = ResultC.unit(JsString("\""+text+"\""))
-	override def toText: String = text
-	override def toString: String = "RjsString(\""+text+"\")"
-}
-
-case class RjsTypedMap(typ: String, map: Map[String, RjsValue]) extends RjsBasicValue {
-	def toJson: ResultC[JsValue] = {
-		for {
-			l <- ResultC.map(map.toList) { case (name, value) =>
-				value.toJson.map(name -> _)
-			}
-		} yield JsObject((("TYPE" -> JsString(typ)) :: l).toMap)
-	}
-	
-	def toUntypedMap: RjsMap = RjsMap(map)
-}
-
 object RjsValue {
 	/**
 	 * Convert a JSON object to a basic RjsValue, one of: Boolean, List, Number, Null, Text, Format, Subst, String, Map, or TypedMap.
@@ -393,124 +471,57 @@ object RjsValue {
 					ResultC.unit(RjsString(s))
 				}
 			case jsobj: JsObject =>
-				jsobj.fields.get("TYPE") match {
-					case Some(JsString(typ)) =>
-						ResultC.mapAll((jsobj.fields - "TYPE").toList)({ case (key, value) =>
-							fromJson(value).map(key -> _)
-						}).map(l => RjsTypedMap(typ, l.toMap))
-					case _ =>
-						ResultC.mapAll(jsobj.fields.toList)({ case (key, value) =>
-							fromJson(value).map(key -> _)
-						}).map(l => RjsMap(l.toMap))
-				}
+				ResultC.mapAll(jsobj.fields.toList)({ case (key, value) =>
+					fromJson(value).map(key -> _)
+				}).map(l => RjsBasicMap(l.toMap))
 		}
 	}
-	
-	def evaluateTypedMap(tm: RjsTypedMap): ResultE[RjsValue] = {
-		tm.typ match {
-			case "action" => convertMapAs[RjsAction](tm)
-			case "actionDef" => convertMapAs[RjsActionDef](tm)
-			case "call" => convertMapAs[RjsCall](tm)
-			case "define" => convertMapAs[RjsDefine](tm)
-			case "import" => convertMapAs[RjsImport](tm)
-			case "include" => convertMapAs[RjsInclude](tm)
-			case "instruction" => convertMapAs[RjsInstruction](tm)
-			case "lambda" => convertMapAs[RjsLambda](tm)
-			case "protocol" => convertMapAs[RjsProtocol](tm)
-			case "section" => convertMapAs[RjsSection](tm)
-			case _ =>
-				ResultE.error(s"unable to convert from RjsTypedMap to TYPE=${tm.typ}.")
-		}
-	}
-	
-	/*
-	private def fromJsObject(typ: String, jsobj: JsObject): ResultE[RjsValue] = {
-		typ match {
-			case "action" =>
-				for {
-					name <- Converter2.fromJson[String](jsobj, "NAME")
-					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
-					input_l <- ResultE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
-						RjsValue.fromJson(jsval).map(name -> _)
-					}
-				} yield RjsAction(name, RjsMap(input_l.toMap))
-			case "actionDef" =>
-				for {
-					description_? <- Converter2.fromJson[Option[String]](jsobj, "DESCRIPTION")
-					documentation_? <- Converter2.fromJson[Option[String]](jsobj, "DOCUMENTATION")
-					params <- Converter2.fromJson[Map[String, RjsActionDefParam]](jsobj, "PARAMS")
-					preconds0 <- Converter2.fromJson[List[String]](jsobj, "PRECONDS")
-					preconds = preconds0.map { s => strips.Literal.parse(s) }
-					effects0 <- Converter2.fromJson[List[String]](jsobj, "EFFECTS")
-					effects = effects0.map { s => strips.Literal.parse(s) }
-					value0 <- Converter2.fromJson[JsValue](jsobj, "VALUE")
-					value <- RjsValue.fromJson(value0)
-				} yield RjsActionDef(description_?, documentation_?, params, preconds, effects, value)
-			case "call" =>
-				for {
-					name <- Converter2.fromJson[String](jsobj, "NAME")
-					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
-					input_l <- ResultE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
-						RjsValue.fromJson(jsval).map(name -> _)
-					}
-				} yield RjsCall(name, RjsMap(input_l.toMap))
-			case "define" =>
-				for {
-					name <- Converter2.fromJson[String](jsobj, "NAME")
-					jsval <- Converter2.fromJson[JsValue](jsobj, "VALUE")
-					value <- RjsValue.fromJson(jsval)
-				} yield RjsDefine(name, value)
-			case "import" =>
-				for {
-					name <- Converter2.fromJson[String](jsobj, "NAME")
-					version <- Converter2.fromJson[String](jsobj, "VERSION")
-				} yield RjsImport(name, version)
-			case "include" =>
-				for {
-					filename <- Converter2.fromJson[String](jsobj, "FILENAME")
-				} yield RjsInclude(filename)
-			case "instruction" =>
-				for {
-					name <- Converter2.fromJson[String](jsobj, "NAME")
-					jsInput <- Converter2.fromJson[JsObject](jsobj, "INPUT")
-					input_l <- ResultE.mapAll(jsInput.fields.toList) { case (name, jsval) =>
-						RjsValue.fromJson(jsval).map(name -> _)
-					}
-				} yield RjsInstruction(name, RjsMap(input_l.toMap))
-			case "lambda" =>
-				for {
-					jsval <- Converter2.fromJson[JsValue](jsobj, "EXPRESSION")
-					expression <- RjsValue.fromJson(jsval)
-				} yield RjsLambda(Nil, expression)
-			case "section" =>
-				for {
-					jsBody_l <- Converter2.fromJson[List[JsValue]](jsobj, "BODY")
-					body_l <- ResultE.mapAll(jsBody_l)(RjsValue.fromJson(_))
-				} yield RjsSection(body_l)
-			/*case "subst" =>
-				for {
-					name <- Converter2.fromJson[String](jsobj, "NAME")
-				} yield RjsSubst(name)*/
-			case _ =>
-				ResultE.error(s"conversion for TYPE=$typ not implemented.")
-		}
-	}*/
 
+	def evaluateTypedMap(m: RjsAbstractMap): ResultE[RjsValue] = {
+		m.typ_? match {
+			case Some(typ) => evaluateTypedMap(typ, m.getValueMap)
+			case None => ResultE.error("tried to evaluate an untyped map")
+		}
+	}
+	
+	def evaluateTypedMap(typ: String, map: Map[String, RjsValue]): ResultE[RjsValue] = {
+		typ match {
+			case "action" => convertMapAs[RjsAction](map)
+			case "actionDef" => convertMapAs[RjsActionDef](map)
+			case "call" => convertMapAs[RjsCall](map)
+			case "define" => convertMapAs[RjsDefine](map)
+			case "import" => convertMapAs[RjsImport](map)
+			case "include" => convertMapAs[RjsInclude](map)
+			case "instruction" => convertMapAs[RjsInstruction](map)
+			case "lambda" => convertMapAs[RjsLambda](map)
+			case "protocol" => convertMapAs[RjsProtocol](map)
+			case "section" => convertMapAs[RjsSection](map)
+			case _ =>
+				ResultE.error(s"unable to convert from RjsMap to TYPE=${typ}.")
+		}
+	}
+	
 	import scala.reflect.runtime.{universe => ru}
 	import scala.reflect.runtime.universe.Type
 	import scala.reflect.runtime.universe.TypeTag
 	import scala.reflect.runtime.universe.typeOf
 
 	def convertMapAs[A <: RjsValue : TypeTag](
-		m: RjsMap
+		map: Map[String, RjsValue]
 	): ResultE[A] = {
-		convertMap(m.map, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
+		convertMap(map, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
 	}
 	
 	def convertMapAs[A <: RjsValue : TypeTag](
-		tm: RjsTypedMap
+		m: RjsBasicMap
 	): ResultE[A] = {
-		convertMap(tm.map, ru.typeTag[A].tpe).map(_.asInstanceOf[A])
+		convertMapAs[A](m.map)
+	}
+	
+	def convertMapAs[A <: RjsValue : TypeTag](
+		m: RjsMap
+	): ResultE[A] = {
+		convertMapAs[A](m.map)
 	}
 	
 	def convertMap(
@@ -650,5 +661,28 @@ val im = mirror.reflect(x)
 				JsObject(map)
 			}
 		}
+	}
+	
+	def toBasicValue(rjsval: RjsValue): ResultC[RjsBasicValue] = {
+		rjsval match {
+			case x: RjsBasicValue => ResultC.unit(x)
+			case _ =>
+				for {
+					jsval <- rjsval.toJson
+					basic <- fromJson(jsval)
+				} yield basic
+		}
+	}
+	
+	def merge(a: RjsValue, b: RjsValue): ResultC[RjsBasicValue] = {
+		for {
+			basic1 <- toBasicValue(a)
+			basic2 <- toBasicValue(b)
+			res <- (basic1, basic2) match {
+				case (a: RjsBasicMap, b: RjsBasicMap) =>
+					a merge b
+				case _ => ResultC.unit(basic2)
+			}
+		} yield res
 	}
 }

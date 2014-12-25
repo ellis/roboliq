@@ -16,10 +16,13 @@ class Evaluator() {
 			case x: RjsInclude => evaluateInclude(x)
 			case x: RjsInstruction => evaluateInstruction(x)
 			case x: RjsList => evaluateList(x)
-			case x: RjsMap => evaluateMap(x)
 			case x: RjsSection => evaluateSection(x)
 			case x: RjsSubst => evaluateSubst(x)
-			case x: RjsTypedMap => evaluateTypedMap(x)
+			case x: RjsAbstractMap =>
+				x.typ_? match {
+					case Some(_) => evaluateTypedMap(x)
+					case _ => evaluateMap(x)
+				}
 			case x => ResultE.unit(x)
 		}
 	}
@@ -122,7 +125,7 @@ class Evaluator() {
 				ResultE.findFile(basename+".json"),
 				ResultE.findFile(basename+".yaml")
 			)
-			rjsval <- ResultE.loadJsonFromFile(file)
+			rjsval <- ResultE.loadRjsFromFile(file)
 			_ <- ResultE.evaluate(rjsval)
 		} yield RjsNull
 	}
@@ -134,7 +137,7 @@ class Evaluator() {
 		println(s"evaluateInclude($x)")
 		for {
 			file <- ResultE.findFile(x.filename)
-			jsfile <- ResultE.loadJsonFromFile(file)
+			jsfile <- ResultE.loadRjsFromFile(file)
 			jsobj <- ResultE.evaluate(jsfile)
 		} yield jsobj
 	}
@@ -155,9 +158,9 @@ class Evaluator() {
 		).map(l => RjsList(l))
 	}
 	
-	def evaluateMap(x: RjsMap): ResultE[RjsMap] = {
+	def evaluateMap(x: RjsAbstractMap): ResultE[RjsMap] = {
 		println(s"evaluateMap($x)")
-		ResultE.mapAll(x.map.toList)({ case (name, xs) =>
+		ResultE.mapAll(x.getValueMap.toList)({ case (name, xs) =>
 			for {
 				res <- ResultE.evaluate(xs)
 			} yield (name, res)
@@ -186,7 +189,7 @@ class Evaluator() {
 		ResultE.getScopeValue(x.name)
 	}
 	
-	def evaluateTypedMap(x: RjsTypedMap): ResultE[RjsValue] = {
+	def evaluateTypedMap(x: RjsAbstractMap): ResultE[RjsValue] = {
 		println(s"evaluateTypedMap($x)")
 		for {
 			rjsval <- RjsValue.evaluateTypedMap(x)

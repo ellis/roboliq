@@ -65,9 +65,9 @@ class ProtocolDataABuilder {
 		planningDomainObjects(name) = typ
 	}
 	
-	def addPlateModel(plateModelName: String, rjsPlateModel: RjsTypedMap) {
+	def addPlateModel(plateModelName: String, rjsPlateModel: RjsBasicMap) {
 		addObject(plateModelName, rjsPlateModel)
-		addPlanningDomainObject(plateModelName, rjsPlateModel.typ)
+		addPlanningDomainObject(plateModelName, rjsPlateModel.typ_?.get)
 	}
 	
 	def addSiteModel(siteModelName: String) {

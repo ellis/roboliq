@@ -18,6 +18,7 @@ class RjsValueSpec extends FunSpec {
 	val text = RjsText("john"); val jsText = JsString("\"john\"")
 	val format = RjsFormat("${john}"); val jsFormat = JsString("f\"${john}\"")
 	val subst = RjsSubst("john"); val jsSubst = JsString("$john")
+	val map = RjsBasicMap("a" -> RjsNumber(1), "b" -> RjsString("hi")); val jsMap = JsObject("a" -> JsNumber(1), "b" -> JsString("hi"))
 
 	val action = RjsAction("someaction", RjsMap("a" -> RjsNumber(1)))
 	val jsAction = JsObject("TYPE" -> JsString("action"), "NAME" -> JsString("someaction"), "INPUT" -> JsObject("a" -> JsNumber(1)))
@@ -32,9 +33,10 @@ class RjsValueSpec extends FunSpec {
 			assert(RjsValue.fromJson(jsText).run().value == text)
 			assert(RjsValue.fromJson(jsFormat).run().value == format)
 			assert(RjsValue.fromJson(jsSubst).run().value == subst)
+			assert(RjsValue.fromJson(jsMap).run().value == map)
 			assert((for {
 				rjsval0 <- ResultE.from(RjsValue.fromJson(jsAction))
-				tm = rjsval0.asInstanceOf[RjsTypedMap]
+				tm = rjsval0.asInstanceOf[RjsBasicMap]
 				rjsval1 <- RjsValue.evaluateTypedMap(tm)
 			} yield rjsval1).run().value == action)
 		}
@@ -47,15 +49,15 @@ class RjsValueSpec extends FunSpec {
 			assert(action.toJson.run().value == jsAction)
 		}
 		it("RjsValue.evaluateTypedMap") {
-			val tmLambda = RjsTypedMap("lambda", Map(
-				"EXPRESSION" -> RjsTypedMap("call", Map(
+			val tmLambda = RjsBasicMap("lambda", Map(
+				"EXPRESSION" -> RjsBasicMap("call", Map(
 					"NAME" -> RjsString("add"),
-					"INPUT" -> RjsMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
+					"INPUT" -> RjsBasicMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
 				))
 			))
-			val lambda = RjsLambda(Nil, RjsTypedMap("call", Map(
+			val lambda = RjsLambda(Nil, RjsBasicMap("call", Map(
 				"NAME" -> RjsString("add"),
-				"INPUT" -> RjsMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
+				"INPUT" -> RjsBasicMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
 			)))
 			assert(RjsValue.evaluateTypedMap(tmLambda).run().value == lambda)
 		}

@@ -32,9 +32,9 @@ commands:
 		labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
 		substances = Map("water" -> RjsProtocolSubstance(), "dye" -> RjsProtocolSubstance()),
 		sources = Map("dyeLight" -> RjsProtocolSource("trough1(A01|H01)", List(RjsProtocolSourceSubstance("dye", amount_? = Some("1/10")), RjsProtocolSourceSubstance("water", None)))),
-		commands = List(RjsTypedMap("action", Map(
+		commands = List(RjsBasicMap("action", Map(
 			"NAME" -> RjsString("distribute"),
-			"INPUT" -> RjsMap(Map(
+			"INPUT" -> RjsBasicMap(Map(
 				"source" -> RjsString("dyeLight"),
 				"destination" -> RjsString("plate1(B01)"),
 				"amount" -> RjsString("20ul")

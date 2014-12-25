@@ -60,20 +60,20 @@ evowareAgents:
           filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\Greiner_384_schwarz.bcf
       planningInitialState:
       - site-closed CENTRIFUGE
-      - site-closed CENTRIFUGE1
-      - site-closed CENTRIFUGE2
-      - site-closed CENTRIFUGE3
-      - site-closed CENTRIFUGE4
+      - site-closed CENTRIFUGE_1
+      - site-closed CENTRIFUGE_2
+      - site-closed CENTRIFUGE_3
+      - site-closed CENTRIFUGE_4
       - site-closed TROBOT1
       - site-closed TROBOT2
 
     evowareProtocolData:
       sites:
         CENTRIFUGE: { carrier: Centrifuge }
-        CENTRIFUGE1: { carrier: Centrifuge, site: 1, internal: true }
-        CENTRIFUGE2: { carrier: Centrifuge, site: 1, internal: true }
-        CENTRIFUGE3: { carrier: Centrifuge, site: 1, internal: true }
-        CENTRIFUGE4: { carrier: Centrifuge, site: 1, internal: true }
+        CENTRIFUGE_1: { carrier: Centrifuge, site: 1, internal: true }
+        CENTRIFUGE_2: { carrier: Centrifuge, site: 1, internal: true }
+        CENTRIFUGE_3: { carrier: Centrifuge, site: 1, internal: true }
+        CENTRIFUGE_4: { carrier: Centrifuge, site: 1, internal: true }
         #P1/DOWNHOLDER
         P2: { grid: 10, site: 2 }
         P3: { grid: 10, site: 4 }
@@ -98,7 +98,7 @@ evowareAgents:
         mario.centrifuge:
           type: Centrifuge
           evowareName: Centrifuge
-          sitesOverride: [CENTRIFUGE, CENTRIFUGE1, CENTRIFUGE2, CENTRIFUGE3, CENTRIFUGE4]
+          sitesOverride: [CENTRIFUGE, CENTRIFUGE_1, CENTRIFUGE_2, CENTRIFUGE_3, CENTRIFUGE_4]
         mario.shaker:
           type: Shaker
           evowareName: "MP 2Pos H+P Shake"

@@ -28,7 +28,7 @@ object RjsConverter {
 				case x: RjsFormat => evalAndRetry()
 				case x: RjsSubst => evalAndRetry()
 				case x: RjsCall => evalAndRetry()
-				case x: RjsTypedMap =>
+				case x: RjsAbstractMap if x.typ_?.isDefined =>
 					for {
 						rjsval2 <- RjsValue.evaluateTypedMap(x)
 						s <- toString(rjsval2)
@@ -142,8 +142,8 @@ object RjsConverter {
 		} yield o.asInstanceOf[A]
 	}
 
-	def fromRjs[A: TypeTag](map: RjsMap, field: String): ResultE[A] =
-		fromRjs[A](map.map, field)
+	def fromRjs[A: TypeTag](map: RjsAbstractMap, field: String): ResultE[A] =
+		fromRjs[A](map.getValueMap, field)
 
 	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ResultE[A] = {
 		ResultE.context(field) {
@@ -210,26 +210,33 @@ object RjsConverter {
 					if (mirror.runtimeClass(typ).isInstance(rjsval)) {
 						ResultE.unit(rjsval)
 					}
-					else if (rjsval.isInstanceOf[RjsTypedMap]) {
-						val tm = rjsval.asInstanceOf[RjsTypedMap]
-						for {
-							rjsval2 <- RjsValue.convertMap(tm.map, typ)
-							_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from typed map ${tm}")
-						} yield rjsval2
-						/*
-						// As an alternative approach, consider creating a fromRjsValue companion method for those
-						// types which can be converted from others 
-						// If companion object has method 'fromRjsValue'
-						val cs = typ.typeSymbol.companionSymbol
-						cs.typeSignature.members.find(m => m.name.toString == "fromRjsValue")
-						*/
-					}
-					else if (rjsval.isInstanceOf[RjsMap]) {
-						val m = rjsval.asInstanceOf[RjsMap]
-						for {
-							rjsval2 <- RjsValue.convertMap(m.map, typ)
-							_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from map ${m}")
-						} yield rjsval2
+					else if (rjsval.isInstanceOf[RjsAbstractMap]) {
+						val m = rjsval.asInstanceOf[RjsAbstractMap]
+						if (typ =:= typeOf[RjsMap]) {
+							ResultE.unit(RjsMap(m.getValueMap))
+						}
+						else if (typ =:= typeOf[RjsBasicMap]) {
+							for {
+								map <- ResultE.map(m.getValueMap.toList) { case (name, rjsval) =>
+									for {
+										basic <- ResultE.from(RjsValue.toBasicValue(rjsval))
+									} yield name -> basic
+								}
+							} yield RjsBasicMap(map.toMap)
+						}
+						else {
+							for {
+								rjsval2 <- RjsValue.convertMap(m.getValueMap, typ)
+								_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from map ${m}")
+							} yield rjsval2
+							/*
+							// As an alternative approach, consider creating a fromRjsValue companion method for those
+							// types which can be converted from others 
+							// If companion object has method 'fromRjsValue'
+							val cs = typ.typeSymbol.companionSymbol
+							cs.typeSignature.members.find(m => m.name.toString == "fromRjsValue")
+							*/
+						}
 					}
 					else {
 						ResultE.error(s"Could not convert to TYPE=$typ from $rjsval")
@@ -243,7 +250,7 @@ object RjsConverter {
 				else if (typ <:< typeOf[Set[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					rjsval match {
-						case m @ RjsMap(fields) =>
+						case m: RjsAbstractMap =>
 							convSet(m, typ2)
 						case _ =>
 							convList(rjsval, typ2).map(l => Set(l : _*))
@@ -251,11 +258,11 @@ object RjsConverter {
 				}
 				else if (typ <:< typeOf[Map[_, _]]) {
 					rjsval match {
-						case m @ RjsMap(fields) =>
+						case m: RjsAbstractMap =>
 							//println("fields: " + fields)
 							val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
 							val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
-							val name_l = fields.toList.map(_._1)
+							val name_l = m.getValueMap.keys.toList
 							val nameToType_l = name_l.map(_ -> typVal)
 							for {
 								res <- convMap(m, typKey, nameToType_l)
@@ -276,7 +283,7 @@ object RjsConverter {
 					val nameToType_l = p0_l.map(p => p.name.decodedName.toString.replace("_?", "") -> p.typeSignature)
 					for {
 						nameToObj_m <- rjsval match {
-							case m: RjsMap =>
+							case m: RjsAbstractMap =>
 								convMapString(m, nameToType_l)
 							case _ =>
 								ResultE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
@@ -326,7 +333,7 @@ object RjsConverter {
 	}
 	
 	private def convSet(
-		m: RjsMap,
+		m: RjsAbstractMap,
 		typ2: Type
 	): ResultE[Set[Any]] = {
 		import scala.reflect.runtime.universe._
@@ -334,7 +341,7 @@ object RjsConverter {
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		// Try to convert each element of the array
-		ResultE.mapAll(m.map.toList) ({ case (id, rjsval) =>
+		ResultE.mapAll(m.getValueMap.toList) ({ case (id, rjsval) =>
 			conv(rjsval, typ2, Some(id))
 		}).map(l => Set(l : _*))
 	}
@@ -347,7 +354,7 @@ object RjsConverter {
 	}
 
 	def convMap(
-		m: RjsMap,
+		m: RjsAbstractMap,
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)]
 	): ResultE[Map[_, _]] = {
@@ -363,11 +370,12 @@ object RjsConverter {
 
 		// TODO: Handle keys if they need to be looked up -- this just uses strings
 		val key_l = nameToType_l.map(_._1)
+		val map = m.getValueMap
 		
 		// Try to convert each element of the object
 		for {
 			val_l <- ResultE.map(nameToType_l) { case (name, typ2) =>
-				m.map.get(name) match {
+				map.get(name) match {
 					case Some(rjsval2) => conv(rjsval2, typ2, Some(name))
 					// Field is missing, so try using RjsNull
 					case None => conv(RjsNull, typ2, Some(name))
@@ -379,7 +387,7 @@ object RjsConverter {
 	}
 
 	def convMapString(
-		m: RjsMap,
+		m: RjsAbstractMap,
 		nameToType_l: List[(String, ru.Type)]
 	): ResultE[Map[String, _]] = {
 		for {

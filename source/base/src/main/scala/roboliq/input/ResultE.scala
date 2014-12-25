@@ -512,7 +512,7 @@ object ResultE {
 		} yield file
 	}
 
-	def loadJsonFromFile(file: File): ResultE[RjsBasicValue] = {
+	def loadRjsFromFile(file: File): ResultE[RjsBasicValue] = {
 		import spray.json._
 		for {
 			_ <- ResultE.assert(file.exists, s"File not found: ${file.getPath}")

@@ -61,22 +61,29 @@ usage.
 - [x] RjsProtocol: create and use in Protocol2
 - [x] Protocol2Data: create and use in Protocol2
 - [x] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
-- [ ] EvowareProtocolDataGenerator: should objects be created with "{agentName}." prefix? Would need to handle this in logic too, which might make it harder to address global variables with the same name as a local object
-- [ ] EvowareProtocolDataGenerator: generate transport graph
-- [ ] EvowareProtocolDataGenerator: 'pipetterSites' should probably be moved to explicit creation of pipetter device
-- [ ] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
+- [x] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
+- [x] RjsValue: should add a 'toBasicValue' method, and perhaps a RjsBasicMap that has RjsBasicValues
+- [ ] RoboliqRunner: args to specify expressions to load (files, strings, stdin, JSON or YAML)
+- [ ] RoboliqRunner: args to specify search paths
+- [ ] RoboliqRunner: args to specify evoware agent to load
+- [ ] RoboliqRunner: args to specify evoware agent table load
+- [ ] RoboliqRunner: merge the expression results
+- [ ] RoboliqRunner: command for what to do with merged result
+- [ ] RoboliqRunnerSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
 - [ ] ProtocolHandlerSpec: test a protocol that only contains instruction commands
-- [ ] RjsValue: should add a 'toBasicValue' method, and perhaps a RjsBasicMap that has RjsBasicValues
-- [ ] RoboliqSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
-- [ ] Protocol2Spec: generate an evoware script that simply runs `shakePlate`
+- [ ] ProtocolHandlerSpec: generate an evoware script that simply runs `shakePlate`
 - [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
 - [ ] Evaluator: consider creation of namespaces
 - [ ] generate action output
 - [ ] ask for missing action inputs
+- [ ] EvowareProtocolDataGenerator: generate transport graph
+- [ ] EvowareProtocolDataGenerator: 'pipetterSites' should probably be moved to explicit creation of pipetter device
 - [ ] perform planning for actions
 - [ ] Evaluator: extend scope somehow to be recursive, so that a function can call functions defined after it in the same scope?  Make evaluation lazy?
+- [ ] EvowareProtocolDataGenerator: should objects be created with "{agentName}." prefix? Would need to handle this in logic too, which might make it harder to address global variables with the same name as a local object
+- [ ] EvowareProtocolDataGenerator: allow for loading of multiple table setups, but if no tables are specified, try to load the default -- if that doesn't exist, however, no error should be shown.
 
 Data for customizing/evaluating/handling protocols:
 - lab:

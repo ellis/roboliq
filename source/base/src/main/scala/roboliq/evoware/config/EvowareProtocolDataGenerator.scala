@@ -53,7 +53,6 @@ import com.google.gson.Gson
 import roboliq.input.EvowareAgentBean
 import roboliq.input.ProtocolDataA
 import roboliq.input.ProtocolDataABuilder
-import roboliq.input.RjsTypedMap
 import roboliq.evoware.parser.EvowareCarrierData
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.EvowareTableData
