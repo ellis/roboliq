@@ -42,5 +42,15 @@ class RoboliqRunnerSpec extends FunSpec {
 			val expected2 = RjsValue.fromYamlText("""{a: 1, b: after, c: true, d: [1, 2], e: {x: 1, y: 2}}""")
 			assert(RoboliqRunner.process(opt2).run().value == expected2.run().value)
 		}
+		
+		it("call a builtin function") {
+			val opt1 = RoboliqOpt(
+				expression_l = Vector(
+					RoboliqOptExpression_Yaml("{TYPE: call, NAME: add, INPUT: {numbers: [1, 2]}}")
+				)
+			)
+			val expected1 = RjsNumber(3)
+			assert(RoboliqRunner.process(opt1).run().value == expected1)
+		}
 	}
 }
