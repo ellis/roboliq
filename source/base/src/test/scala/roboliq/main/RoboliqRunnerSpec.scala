@@ -7,12 +7,14 @@ import roboliq.input.RjsBasicMap
 import roboliq.input.RjsNumber
 import roboliq.input.RjsBoolean
 import roboliq.input.RjsList
+import roboliq.input.RjsValue
 
 class RoboliqRunnerSpec extends FunSpec {
+	import roboliq.input.ResultCWrapper._
 	import roboliq.input.ResultEWrapper._
 	
 	describe("RoboliqRunner") {
-		it("try1") {
+		it("merge several basic YAML expressions") {
 			val map1 = RjsBasicMap(
 				"a" -> RjsNumber(1),
 				"b" -> RjsString("before")
@@ -37,14 +39,8 @@ class RoboliqRunnerSpec extends FunSpec {
 					RoboliqOptExpression_Yaml("{e: {y: 2}}")
 				)
 			)
-			val expected2 = RjsBasicMap(
-				"a" -> RjsNumber(1),
-				"b" -> RjsString("after"),
-				"c" -> RjsBoolean(true),
-				"d" -> RjsList(RjsNumber(1), RjsNumber(2)),
-				"e" -> RjsBasicMap("x" -> RjsNumber(1), "y" -> RjsNumber(2))
-			)
-			assert(RoboliqRunner.process(opt2).run().value == expected2)
+			val expected2 = RjsValue.fromYamlText("""{a: 1, b: after, c: true, d: [1, 2], e: {x: 1, y: 2}}""")
+			assert(RoboliqRunner.process(opt2).run().value == expected2.run().value)
 		}
 	}
 }

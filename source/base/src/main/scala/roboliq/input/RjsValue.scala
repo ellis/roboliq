@@ -13,6 +13,7 @@ import roboliq.ai.strips
 import roboliq.core.ResultC
 import spray.json.DefaultJsonProtocol
 import spray.json.RootJsonFormat
+import roboliq.utils.JsonUtils
 
 /*object RjsType extends Enumeration {
 	val
@@ -465,6 +466,16 @@ object RjsValue {
 					fromJson(value).map(key -> _)
 				}).map(l => RjsBasicMap(l.toMap))
 		}
+	}
+	
+	def fromJsonText(json: String): ResultC[RjsBasicValue] = {
+		val jsval = JsonUtils.textToJson(json)
+		fromJson(jsval)
+	}
+
+	def fromYamlText(yaml: String): ResultC[RjsBasicValue] = {
+		val jsval = JsonUtils.yamlToJson(yaml)
+		fromJson(jsval)
 	}
 
 	def evaluateTypedMap(m: RjsAbstractMap): ResultE[RjsValue] = {
