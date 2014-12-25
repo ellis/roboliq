@@ -138,20 +138,10 @@ class ProtocolDataB(
 	val commandExpansions: Map[String, ProtocolCommandResult]
 )
 
-/**
- * What can be done with commands?
- * 
- * Can expand commands that have already properly validated
- * Need to have JSON that passes commands to Roboliq, such that user sets a variable value, and a properly modified JSON is returned
- * How shall we specify what should be planned? And get the planning to happen automatically?
- * Some planning should happen automatically: check possible variable values, put those in the JSON output, and when there's only one choice, automatically choose it
- * 
- */
-
-class ProtocolDataC(
+/*class ProtocolDataC(
 	val dataA: ProtocolDataA,
 	val validations: Map[String, List[CommandValidation]]
-)
+)*/
 
 class ProtocolHandler {
 	def extractDataA(protocol: RjsProtocol): ResultC[ProtocolDataA] = {

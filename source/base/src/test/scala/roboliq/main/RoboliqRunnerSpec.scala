@@ -24,19 +24,19 @@ class RoboliqRunnerSpec extends FunSpec {
 				"c" -> RjsBoolean(true)
 			)
 			val opt1 = RoboliqOpt(
-				expression_l = Vector(
-					RoboliqOptExpression_Yaml("OK")
+				step_l = Vector(
+					RoboliqOptStep_Yaml("OK")
 				)
 			)
 			assert(RoboliqRunner.process(opt1).run().value == RjsString("OK"))
 
 			val opt2 = RoboliqOpt(
-				expression_l = Vector(
-					RoboliqOptExpression_Yaml("{a: 1, b: before}"),
-					RoboliqOptExpression_Yaml("{b: after, c: false}"),
-					RoboliqOptExpression_Yaml("{c: true, d: [1]}"),
-					RoboliqOptExpression_Yaml("{d: [2], e: {x: 1}}"),
-					RoboliqOptExpression_Yaml("{e: {y: 2}}")
+				step_l = Vector(
+					RoboliqOptStep_Yaml("{a: 1, b: before}"),
+					RoboliqOptStep_Yaml("{b: after, c: false}"),
+					RoboliqOptStep_Yaml("{c: true, d: [1]}"),
+					RoboliqOptStep_Yaml("{d: [2], e: {x: 1}}"),
+					RoboliqOptStep_Yaml("{e: {y: 2}}")
 				)
 			)
 			val expected2 = RjsValue.fromYamlText("""{a: 1, b: after, c: true, d: [1, 2], e: {x: 1, y: 2}}""")
@@ -45,12 +45,24 @@ class RoboliqRunnerSpec extends FunSpec {
 		
 		it("call a builtin function") {
 			val opt1 = RoboliqOpt(
-				expression_l = Vector(
-					RoboliqOptExpression_Yaml("{TYPE: call, NAME: add, INPUT: {numbers: [1, 2]}}")
+				step_l = Vector(
+					RoboliqOptStep_Yaml("{TYPE: call, NAME: add, INPUT: {numbers: [1, 2]}}")
 				)
 			)
 			val expected1 = RjsNumber(3)
 			assert(RoboliqRunner.process(opt1).run().value == expected1)
+		}
+		
+		it("check") {
+			val opt1 = RoboliqOpt(
+				step_l = Vector(
+					RoboliqOptStep_Yaml("{TYPE: call, NAME: add, INPUT: {numbers: [1, 2]}}")
+				)
+			)
+			val ctxval1 = (for {
+				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
+				dataB <- protocolEvaluator.stepB(dataA1)
+			} yield dataB.commandExpansions).run(data0)
 		}
 	}
 }

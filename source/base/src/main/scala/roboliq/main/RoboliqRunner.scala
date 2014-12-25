@@ -35,52 +35,65 @@ import roboliq.entities.Distribution
 import roboliq.input.ResultE
 import roboliq.utils.JsonUtils
 import roboliq.input.RjsValue
+import roboliq.input.RjsConverter
+import roboliq.input.ProtocolDataA
+import roboliq.input.ProtocolHandler
+import roboliq.input.RjsNull
 
 case class RoboliqOpt(
-	expression_l: Vector[RoboliqOptExpression] = Vector()
+	step_l: Vector[RoboliqOptStep] = Vector()
 )
 
-sealed trait RoboliqOptExpression
-case class RoboliqOptExpression_File(file: File) extends RoboliqOptExpression
-//case class RoboliqOptExpression_Stdin() extends RoboliqOptExpression
-case class RoboliqOptExpression_Json(json: String) extends RoboliqOptExpression
-case class RoboliqOptExpression_Yaml(yaml: String) extends RoboliqOptExpression
+sealed trait RoboliqOptStep
+case class RoboliqOptStep_File(file: File) extends RoboliqOptStep
+//case class RoboliqOptStep_Stdin() extends RoboliqOptExpression
+case class RoboliqOptStep_Json(json: String) extends RoboliqOptStep
+case class RoboliqOptStep_Yaml(yaml: String) extends RoboliqOptStep
+case class RoboliqOptStep_Check() extends RoboliqOptStep
+
 
 object RoboliqRunner {
 	def getOptParser: scopt.OptionParser[RoboliqOpt] = new scopt.OptionParser[RoboliqOpt]("roboliq") {
 		head("roboliq", "0.1pre1")
-		opt[File]("file")
+		opt[File]('f', "file")
 			.valueName("<file>")
 			.action { (x, o) =>
-				o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_File(x)) 
+				o.copy(step_l = o.step_l :+ RoboliqOptStep_File(x)) 
 			}
 			.text("expression file")
-		opt[String]("json")
+		opt[String]('j', "json")
 			.valueName("<JSON>")
 			.action { (x, o) =>
-				o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_Json(x)) 
+				o.copy(step_l = o.step_l :+ RoboliqOptStep_Json(x)) 
 			}
 			.text("JSON expression")
-		opt[String]("yaml")
+		opt[String]('y', "yaml")
 			.valueName("<YAML>")
 			.action { (x, o) =>
-				o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_Yaml(x)) 
+				o.copy(step_l = o.step_l :+ RoboliqOptStep_Yaml(x)) 
 			}
 			.text("YAML expression")
+		opt[Unit]("check")
+			.action { (_, o) =>
+				o.copy(step_l = o.step_l :+ RoboliqOptStep_Check())
+			}
+			.text("check the protocol data")
 	}
 
 	
 	private def getInputHash(opt: RoboliqOpt): String = {
 		// TODO: should probably use ResultE.findFile here, to take advantage of search paths
-		val contentExpression_l = opt.expression_l.toList.map {
-			case RoboliqOptExpression_File(file) =>
-				scala.io.Source.fromFile(file).mkString
-			case RoboliqOptExpression_Json(s) =>
-				s
-			case RoboliqOptExpression_Yaml(s) =>
-				s
+		val contentStep_l = opt.step_l.toList.flatMap {
+			case RoboliqOptStep_File(file) =>
+				Some(scala.io.Source.fromFile(file).mkString)
+			case RoboliqOptStep_Json(s) =>
+				Some(s)
+			case RoboliqOptStep_Yaml(s) =>
+				Some(s)
+			case _ =>
+				None
 		}
-		val content = contentExpression_l.mkString
+		val content = contentStep_l.mkString
 		roboliq.utils.MiscUtils.md5Hash(content)
 	}
 	
@@ -121,27 +134,66 @@ object RoboliqRunner {
 	}
 	
 	def process(opt: RoboliqOpt): ResultE[RjsValue] = {
-		val searchPath_l = opt.expression_l.flatMap {
-			case RoboliqOptExpression_File(file) => Some(file.getAbsoluteFile().getParentFile())
+		val searchPath_l = opt.step_l.flatMap {
+			case RoboliqOptStep_File(file) => Some(file.getAbsoluteFile().getParentFile())
 			case _ => None
 		}
-		
+		// FIXME: add search path to ResultE
 		for {
-			rjsval_l <- ResultE.map(opt.expression_l.toList) {
-				case RoboliqOptExpression_File(file) =>
-					ResultE.loadRjsFromFile(file)
-				case RoboliqOptExpression_Json(s) =>
-					val jsval = JsonUtils.textToJson(s)
-					ResultE.from(RjsValue.fromJson(jsval))
-				case RoboliqOptExpression_Yaml(s) =>
-					val jsval = JsonUtils.yamlToJson(s)
-					ResultE.from(RjsValue.fromJson(jsval))
-			}
-			result_l <- ResultE.map(rjsval_l) { rjsval =>
-				ResultE.evaluate(rjsval)
-			}
-			res <- ResultE.from(RjsValue.merge(result_l))
+			res <- processStep(RjsNull, opt.step_l)
 		} yield res
+	}
+	
+	private def processStep(
+		res0: RjsValue,
+		step_l: Vector[RoboliqOptStep]
+	): ResultE[RjsValue] = {
+		step_l match {
+			case step +: rest =>
+				for {
+					res1 <- processStep(res0, step)
+					res2 <- processStep(res1, rest)
+				} yield res2
+			case _ =>
+				ResultE.unit(res0)
+		}
+	}
+	
+	private def processStep(
+		res0: RjsValue,
+		step: RoboliqOptStep
+	): ResultE[RjsValue] = {
+		step match {
+			case RoboliqOptStep_File(file) =>
+				for {
+					rjsval <- ResultE.loadRjsFromFile(file)
+					res1 <- ResultE.evaluate(rjsval)
+					res2 <- ResultE.from(RjsValue.merge(res0, res1))
+				} yield res2
+			case RoboliqOptStep_Json(s) =>
+				val jsval = JsonUtils.textToJson(s)
+				for {
+					rjsval <- ResultE.from(RjsValue.fromJson(jsval))
+					res1 <- ResultE.evaluate(rjsval)
+					res2 <- ResultE.from(RjsValue.merge(res0, res1))
+				} yield res2
+			case RoboliqOptStep_Yaml(s) =>
+				val jsval = JsonUtils.yamlToJson(s)
+				for {
+					rjsval <- ResultE.from(RjsValue.fromJson(jsval))
+					res1 <- ResultE.evaluate(rjsval)
+					res2 <- ResultE.from(RjsValue.merge(res0, res1))
+				} yield res2
+			case RoboliqOptStep_Check() =>
+				for {
+					dataA <- RjsConverter.fromRjs[ProtocolDataA](res0)
+					dataB <- new ProtocolHandler().stepB(dataA)
+				} yield {
+					println("check:")
+					println(dataB)
+					RjsNull
+				} 
+		}
 	}
 }
 

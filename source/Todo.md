@@ -85,6 +85,21 @@ usage.
 - [ ] EvowareProtocolDataGenerator: should objects be created with "{agentName}." prefix? Would need to handle this in logic too, which might make it harder to address global variables with the same name as a local object
 - [ ] EvowareProtocolDataGenerator: allow for loading of multiple table setups, but if no tables are specified, try to load the default -- if that doesn't exist, however, no error should be shown.
 
+```
+TYPE: ProtocolData
+IMPORTS:
+DATA:
+VALIDATIONS:
+EXPANSIONS:
+...
+```
+
+* What can be done with commands?
+* Can expand commands that have already properly validated
+* Need to have JSON that passes commands to Roboliq, such that user sets a variable value, and a properly modified JSON is returned
+* How shall we specify what should be planned? And get the planning to happen automatically?
+* Some planning should happen automatically: check possible variable values, put those in the JSON output, and when there's only one choice, automatically choose it
+
 Data for customizing/evaluating/handling protocols:
 - lab:
     - planning objects
