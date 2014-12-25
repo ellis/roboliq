@@ -52,7 +52,8 @@ class ProtocolDataABuilder {
 	def get: ProtocolDataA = {
 		new ProtocolDataA(
 			objects = RjsMap(objects.toMap),
-			planningDomainObjects = planningDomainObjects.toMap
+			planningDomainObjects = planningDomainObjects.toMap,
+			planningInitialState = strips.Literals(Unique(planningInitialState.toList : _*))
 		)
 	}
 	

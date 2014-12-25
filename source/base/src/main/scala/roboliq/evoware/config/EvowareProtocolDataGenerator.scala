@@ -103,10 +103,10 @@ object EvowareProtocolDataGenerator {
 			evowareProtocolData0 = evowareProtocolDataA merge evowareProtocolDataB
 			// Convert evowareProtocolData0 to ProtocolData
 			protocolData1 <- convertEvowareProtocolData(agentIdent, protocolData0, evowareProtocolData0, carrierData, tableData)
-			_ = println("protocolData1:\n"+protocolData1)
+			//_ = println("protocolData1:\n"+protocolData1)
 			// Merge protocolDatas
 			protocolData2 <- protocolData0 merge protocolData1
-			_ = println("protocolData2:\n"+protocolData2)
+			//_ = println("protocolData2:\n"+protocolData2)
 		} yield protocolData2
 	}
 	
@@ -122,7 +122,9 @@ object EvowareProtocolDataGenerator {
 		//transporterBlacklist: List[EvowareTransporterBlacklistConfig]
 
 		// Gather list of all available labware models referenced in data0
-		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, tm: RjsTypedMap) if tm.typ == "PlateModel" && tm.map.contains("evowareName") => name -> tm.map("evowareName").toText })
+		//println("data0.objects.map.toList: "+data0.objects.map.toList)
+		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsMap) if m.get("type") == Some(RjsString("PlateModel")) && m.map.contains("evowareName") => name -> m.map("evowareName").toText })
+		//println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
 		
 		val builder = new ProtocolDataABuilder
 		val siteIdToSiteName_m = new HashMap[(Int, Int), String]

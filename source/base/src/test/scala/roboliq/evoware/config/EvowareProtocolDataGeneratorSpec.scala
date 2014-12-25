@@ -22,10 +22,10 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 		it("") {
 			val protocolData0 = new ProtocolDataA(
 				objects = RjsMap(
-					"plateModel_96_pcr" -> RjsMap(
+					"plateModel_384_square" -> RjsMap(
 						"type" -> RjsString("PlateModel"),
-						"label" -> RjsString("96 well PCR plate"),
-						"evowareName" -> RjsString("D-BSSE 96 Well PCR Plate")
+						"label" -> RjsString("384 square-well white plate"),
+						"evowareName" -> RjsString("D-BSSE 384 Well Plate White")
 					)
 				),
 				planningInitialState = strips.Literals(Unique[strips.Literal](strips.Literal.parse("site-closed CENTRIFUGE")))
@@ -65,26 +65,35 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 					"CENTRIFUGE" -> RjsMap(
 						"evowareGrid" -> RjsNumber(54,None),
 						"evowareSite" -> RjsNumber(2,None),
-						"type" -> RjsString("Site")),
+						"type" -> RjsString("Site")
+					),
 					"P1" -> RjsMap(
 						"evowareGrid" -> RjsNumber(9,None),
 						"evowareSite" -> RjsNumber(4,None),
-						"type" -> RjsString("Site")),
+						"type" -> RjsString("Site")
+					),
 					"mario.centrifuge" -> RjsMap(
 						"evowareName" -> RjsString("Centrifuge"),
-						"type" -> RjsString("Centrifuge")),
-					"plateModel_96_pcr" -> RjsMap(
-						"evowareName" -> RjsString("D-BSSE 96 Well PCR Plate"),
-						"label" -> RjsString("96 well PCR plate"),
-						"type" -> RjsString("PlateModel"))
+						"type" -> RjsString("Centrifuge")
+					),
+					"plateModel_384_square" -> RjsMap(
+						"evowareName" -> RjsString("D-BSSE 384 Well Plate White"),
+						"label" -> RjsString("384 square-well white plate"),
+						"type" -> RjsString("PlateModel")
+					)
 				),
 				planningDomainObjects = Map(
 					"CENTRIFUGE" -> "Site",
+					"mario.sm0" -> "SiteModel",
 					"P1" -> "Site",
 					"mario.centrifuge" -> "Centrifuge"
 				),
 				planningInitialState = strips.Literals.fromStrings(
-					"site-closed CENTRIFUGE"
+					"site-closed CENTRIFUGE",
+					"stackable mario.sm0 plateModel_384_square",
+					"model CENTRIFUGE mario.sm0",
+					"device-can-site mario.centrifuge CENTRIFUGE",
+					"device-can-model mario.centrifuge plateModel_384_square"
 				)
 			)
 
