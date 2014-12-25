@@ -685,4 +685,17 @@ val im = mirror.reflect(x)
 			}
 		} yield res
 	}
+	
+	def merge(value_l: Iterable[RjsValue]): ResultC[RjsBasicValue] = {
+		var a: RjsBasicValue = RjsNull
+		for {
+			_ <- ResultC.foreach(value_l) { b =>
+				for {
+					c <- merge(a, b)
+				} yield {
+					a = c
+				}
+			}
+		} yield a
+	}
 }

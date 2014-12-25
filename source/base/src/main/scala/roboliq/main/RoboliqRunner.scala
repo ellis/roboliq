@@ -51,8 +51,24 @@ class RoboliqRunner(args: Array[String]) {
 
 	private val parser = new scopt.OptionParser[RoboliqOpt]("roboliq") {
 		head("roboliq", "0.1pre1")
-		opt[File]("file") valueName("<file>") action { (x, o) =>
-			o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_File(x)) } text("expression file")
+		opt[File]("file")
+			.valueName("<file>")
+			.action { (x, o) =>
+				o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_File(x)) 
+			}
+			.text("expression file")
+		opt[String]("json")
+			.valueName("<JSON>")
+			.action { (x, o) =>
+				o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_Json(x)) 
+			}
+			.text("JSON expression")
+		opt[String]("yaml")
+			.valueName("<YAML>")
+			.action { (x, o) =>
+				o.copy(expression_l = o.expression_l :+ RoboliqOptExpression_Yaml(x)) 
+			}
+			.text("YAML expression")
 	}
 	parser.parse(args, RoboliqOpt()) map { opt =>
 		run(opt)
@@ -112,12 +128,11 @@ class RoboliqRunner(args: Array[String]) {
 					val jsval = JsonUtils.yamlToJson(s)
 					ResultE.from(RjsValue.fromJson(jsval))
 			}
-			result_l = ResultE.map(rjsval_l) { rjsval =>
+			result_l <- ResultE.map(rjsval_l) { rjsval =>
 				ResultE.evaluate(rjsval)
 			}
-		} yield {
-			()
-		}
+			res <- ResultE.from(RjsValue.merge(result_l))
+		} yield res
 
 		/*val error_l = x.getErrors
 		val warning_l = x.getWarnings
