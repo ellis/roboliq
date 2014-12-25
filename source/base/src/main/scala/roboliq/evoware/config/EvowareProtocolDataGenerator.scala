@@ -56,9 +56,10 @@ import roboliq.input.ProtocolDataABuilder
 import roboliq.evoware.parser.EvowareCarrierData
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.EvowareTableData
-import roboliq.input.RjsMap
 import roboliq.input.RjsString
 import roboliq.input.RjsNumber
+import roboliq.input.RjsBasicMap
+import roboliq.input.RjsAbstractMap
 
 object EvowareProtocolDataGenerator {
 	def createProtocolData(
@@ -122,8 +123,8 @@ object EvowareProtocolDataGenerator {
 
 		// Gather list of all available labware models referenced in data0
 		//println("data0.objects.map.toList: "+data0.objects.map.toList)
-		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsMap) if m.get("type") == Some(RjsString("PlateModel")) && m.map.contains("evowareName") => name -> m.map("evowareName").toText })
-		//println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
+		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
+		println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
 		
 		val builder = new ProtocolDataABuilder
 		val siteIdToSiteName_m = new HashMap[(Int, Int), String]
@@ -179,7 +180,7 @@ object EvowareProtocolDataGenerator {
 					siteIndex: Int
 				): ResultC[Unit] = {
 					// Create the site
-					val rjsSite = RjsMap(
+					val rjsSite = RjsBasicMap(
 						"evowareGrid" -> RjsNumber(gridIndex),
 						"evowareSite" -> RjsNumber(siteIndex)
 					)
@@ -227,7 +228,7 @@ object EvowareProtocolDataGenerator {
 								}
 							}
 						} yield {
-							val rjsDevice = RjsMap(
+							val rjsDevice = RjsBasicMap(
 								"type" -> RjsString(deviceConfig.`type`),
 								"evowareName" -> RjsString(carrierE.sName)
 							)
@@ -277,114 +278,3 @@ object EvowareProtocolDataGenerator {
 	}
 
 }
-/*	
-	private val logger = Logger[this.type]
-
-	val eb = new EntityBase
-	val state0 = new WorldStateBuilder
-	private var cs: CommandSet = null
-	private var tree: CallTree = null
-	//private var tasks = new ArrayBuffer[Rel]
-	private var var_i = 0
-
-	// HACK: defined here so that loadConfig() and loadEvoware() both have access
-	private val offsiteModel = SiteModel(gid)
-	private val userArm = Transporter(gid)
-	private val userArmSpec = TransporterSpec("userArmSpec")
-
-	private def gid: String = java.util.UUID.randomUUID().toString()
-	private def nvar: Int = { var_i += 1; var_i }
-	
-	/** Specs which consists of a single string.  This is a list of tuples (specIdent, string) */
-	val specToString_l = new ArrayBuffer[(String, String)]
-	/** Valid device+spec combinations.  List of tuples (deviceIdent, specIdent) */
-	val deviceToSpec_l = new ArrayBuffer[(String, String)]
-	/** Valid device+model+spec combinations.  List of tuples (deviceIdent, evoware plate model ID, specIdent) */
-	val deviceToModelToSpec_l = new ArrayBuffer[(String, String, String)]
-	
-	val nameToSubstance_m = new HashMap[String, Substance]
-	/**
-	 * Map of task variable identifier to an internal object -- for example, the name of a text variable to the actual text.
-	 */
-	val idToObject = new HashMap[String, Object]
-	/**
-	 * Individual agents may need to map identifiers to internal objects
-	 */
-	val agentToIdentToInternalObject = new HashMap[String, HashMap[String, Object]]
-	val agentToBuilder_m = new HashMap[String, ClientScriptBuilder]
-
-	// TODO: This should probably be moved out of the Protocol class
-	def createProtocolData(
-		agentIdent: String,
-		agentBean: EvowareAgentBean,
-		table_l: List[String],
-		searchPath_l: List[File]
-	): ResultC[ProtocolDataA] = {
-		import roboliq.entities._
-		
-		val user = Agent(gid, Some("user"))
-		val offsite = Site(gid, Some("offsite"))
-		
-		// TODO: put these into a for-comprehension in order to return warnings and errors
-		eb.addAgent(user, "user")
-		
-		val tableNameDefault = s"${agentIdent}_default"
-		val tableSetup_m = agentBean.tableSetups.toMap.map(pair => s"${agentIdent}_${pair._1}" -> pair._2)
-		for {
-			// Load carrier file
-			evowarePath <- ResultC.from(Option(agentBean.evowareDir), "evowareDir must be set")
-			carrierData <- ResultC.from(roboliq.evoware.parser.EvowareCarrierData.loadFile(new File(evowarePath, "Carrier.cfg").getPath))
-			// FIXME: for debug only
-			//_ = carrierData.printCarriersById
-			// ENDIF
-			// Choose a table
-			tableName <- table_l.filter(tableSetup_m.contains) match {
-				case Nil =>
-					if (tableSetup_m.contains(tableNameDefault))
-						ResultC.unit(tableNameDefault)
-					else
-						ResultC.error(s"No table specified for agent `$agentIdent`")
-				case s :: Nil => ResultC.unit(s)
-				case l => ResultC.error(s"Agent `$agentIdent` can only be assigned one table, but multiple tables were specified: $l")
-			}
-			tableSetupBean = tableSetup_m(tableName)
-			// Load table file
-			tableFile <- ResultC.from(Option(tableSetupBean.tableFile), s"tableFile property must be set on tableSetup `$tableName`")
-			tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile))
-			configEvoware = new ConfigEvoware(eb, agentIdent, carrierData, tableData,
-					agentBean, tableSetupBean, offsiteModel, userArm,
-					specToString_l.toList, deviceToSpec_l.toList, deviceToModelToSpec_l.toList)
-			scriptBuilder <- ResultC.from(configEvoware.loadEvoware())
-		} yield {
-			agentToIdentToInternalObject(agentIdent) = configEvoware.identToAgentObject
-			agentToBuilder_m += agentIdent -> scriptBuilder
-			if (!agentToBuilder_m.contains("user"))
-				agentToBuilder_m += "user" -> scriptBuilder
-			new ProtocolDataA(
-				objects = RjsMap(),
-				val commands: RjsMap,
-				val commandOrderingConstraints: List[List[String]],
-				val commandOrder: List[String],
-				val planningDomainObjects: Map[String, String],
-				val planningInitialState: strips.Literals
-			)
-		}
-	}
-	
-	def createProblem(
-		planInfo_l: List[OperatorInfo],
-		domain: strips.Domain
-	): RqResult[strips.Problem] = {
-		val typToObject_l: List[(String, String)] = eb.createProblemObjects.map(_.swap) ++ planInfo_l.flatMap(_.problemObjectToTyp_l).map(_.swap)
-		
-		val state0 = strips.State(Set[strips.Atom]() ++ planInfo_l.flatMap(_.problemState_l) ++ eb.createProblemState.map(rel => strips.Atom(rel.name, rel.args)))
-		
-		RqSuccess(strips.Problem(
-			domain = domain,
-			typToObject_l = typToObject_l,
-			state0 = state0,
-			goals = strips.Literals.empty
-		))
-	}
-
-}*/

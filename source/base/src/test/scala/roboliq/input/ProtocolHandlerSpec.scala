@@ -13,9 +13,10 @@ import roboliq.ai.plan.Unique
 
 class ProtocolHandlerSpec extends FunSpec {
 	import ContextValueWrapper._
+	import ResultCWrapper._
 
 	val protocolEvaluator = new ProtocolHandler
-	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"))))
+	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 	val evaluator = new Evaluator()
 
 	val action1 = RjsAction("shakePlate", RjsMap(
@@ -23,7 +24,7 @@ class ProtocolHandlerSpec extends FunSpec {
 		"device" -> RjsString("mario__Shaker"),
 		"labware" -> RjsString("plate1"),
 		"site" -> RjsString("P3"),
-		"program" -> RjsMap(
+		"program" -> RjsBasicMap(
 			"rpm" -> RjsNumber(200),
 			"duration" -> RjsNumber(10)
 		)
@@ -45,66 +46,9 @@ class ProtocolHandlerSpec extends FunSpec {
 		sources = Map(),
 		commands = List(action1)
 	)
-	val dataA1 = protocolEvaluator.extractDataA(protocol1)
+	val dataA1 = protocolEvaluator.extractDataA(protocol1).run().value
 	
 	describe("ProtocolHandlerSpec") {
-		/*it("processData") {
-/*			val yaml = """
-object:
-  plate1:
-    type: plate
-    model: plateModel_384_square
-    location: P3
-  "plate1(A01)":
-    type: well
-    content: water
-  water:
-    type: substance
-  dye:
-    type: substance
-  dyeLight:
-    type: source
-    source: plate1(A01)
-    substance:
-      dye:
-        amount: 1/10
-      water:
-        amount: 9/10
-cmd:
-- index: [1]
-  command: distribute
-  input:
-    source: plate1(A01)
-    destination: plate1(B01)
-    amount: 20ul
-"""*/
-			val protocol1 = RjsProtocol(
-				labwares = Map("plate1" -> RjsProtocolLabware(model_? = Some("plateModel_384_square"), location_? = Some("P3"))),
-				substances = Map("water" -> RjsProtocolSubstance(), "dye" -> RjsProtocolSubstance()),
-				sources = Map("dyeLight" -> RjsProtocolSource(well = "plate1(A01)", substances = List(
-					RjsProtocolSourceSubstance(name = "dye", amount_? = Some("1/10")),
-					RjsProtocolSourceSubstance(name = "water")
-				))),
-				commands = List(
-					RjsAction("distribute", RjsMap(
-						"source" -> RjsString("dyeLight"),
-						"destination" -> RjsString("plate1(B01)"),
-						"amount" -> RjsString("20ul")
-					))
-				)
-			)
-		
-			val dataA = protocol.extractDataA(protocol1)
-			assert(dataA.planningDomainObjects == Map(
-				"plate1" -> "plate"
-			))
-			assert(dataA.planningProblemState == strips.State(Set[strips.Atom](
-				strips.Atom.parse("labware plate1"),
-				strips.Atom.parse("model plate1 plateModel_384_square"),
-				strips.Atom.parse("location plate1 P3")
-			)))
-		}*/
-		
 		it("test protocol 1 without lab info") {
 			assert(dataA1.planningDomainObjects == Map(
 				"plate1" -> "plate"
@@ -136,10 +80,6 @@ cmd:
 		
 		it("test protocol 1 with lab info") {
 			val dataALab = new ProtocolDataA(
-				objects = RjsMap(),
-				commands = RjsMap(),
-				commandOrderingConstraints = Nil,
-				commandOrder = Nil,
 				planningDomainObjects = Map("mario" -> "agent", "mario__Shaker" -> "shaker"),
 				planningInitialState = strips.Literals(Unique(
 					strips.Literal.parse("agent-has-device mario mario__Shaker"),
@@ -167,80 +107,6 @@ cmd:
 			)
 			assert(ctxval2.value("1") == expected2("1"))
 			assert(ctxval2.value("1.1") == expected2("1.1"))
-			//assert(ctxval2.value == expected2)
-			
-			/*// Completely specify parameters
-			val yaml1 = """
-object:
-  plate1:
-    type: plate
-    model: plateModel_384_square
-    location: P3
-command:
-  "1":
-    command: shakePlate
-    input:
-      agent: mario
-      device: mario__Shaker
-      labware: plate1
-      site: P3
-      program:
-        rpm: 200
-        duration: 10
-"""
-			// Omit 'device' parameter
-			val yaml2 = """
-object:
-  plate1:
-    type: plate
-    model: plateModel_384_square
-    location: P3
-command:
-  "1":
-    command: shakePlate
-    input:
-      agent: mario
-      labware: plate1
-      site: P3
-      program:
-        rpm: 200
-        duration: 10
-"""
-			val jsobj1 = JsonUtils.yamlToJson(yaml1).asInstanceOf[JsObject]
-			val jsobj2 = JsonUtils.yamlToJson(yaml2).asInstanceOf[JsObject]
-			val ctx = for {
-				rjsval1 <- RjsValue.fromJson(jsobj1)
-				rjsval2 <- RjsValue.fromJson(jsobj2)
-				m1 = rjsval1.asInstanceOf[RjsMap]
-				m2 = rjsval2.asInstanceOf[RjsMap]
-				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
-				_ = println("A")
-				// Get state from protocol data
-				temp0 <- protocol.processData(m1)
-				_ = println("B")
-				state0 = temp0._2
-				// Add a couple atoms to the state regarding the robot's setup
-				state1 = strips.State(state0.atoms + strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3"))
-				// Leave out a necessary state value, in order to get a precondition error
-				state2 = strips.State(state0.atoms + strips.Atom.parse("agent-has-device mario mario__Shaker"))
-				validation1_l <- protocol.validateDataCommand(state1, m1, "1")
-				_ = println("C")
-				validation2_l <- protocol.validateDataCommand(state1, m2, "1")
-				validation3_l <- protocol.validateDataCommand(state2, m1, "1")
-				validation4_l <- protocol.validateDataCommand(state2, m2, "1")
-			} yield {
-				assert(validation1_l == Nil)
-				assert(validation2_l == List(CommandValidation_Param("device")))
-				assert(validation3_l == List(CommandValidation_Precond("device-can-site mario__Shaker P3")))
-				assert(validation4_l == List(CommandValidation_Param("device")))
-			}
-			val (data1, _) = ctx.run(data0)
-			if (!data1.error_r.isEmpty) {
-				println("ERRORS:")
-				data1.error_r.foreach(println)
-			}
-			assert(data1.error_r == Nil)
-			*/
 		}
 	}
 }

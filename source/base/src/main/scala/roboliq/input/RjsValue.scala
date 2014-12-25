@@ -55,9 +55,16 @@ case class RjsList(list: List[RjsValue]) extends RjsBasicValue {
 	}
 }
 
+object RjsList {
+	def apply(l: RjsValue*): RjsList = {
+		RjsList(List(l : _*))
+	}
+}
+
 trait RjsAbstractMap {
 	val typ_? : Option[String]
 	def getValueMap: Map[String, RjsValue]
+	def getValue(name: String): Option[RjsValue]
 }
 
 case class RjsBasicMap(map: Map[String, RjsBasicValue]) extends RjsBasicValue with RjsAbstractMap {
@@ -69,6 +76,7 @@ case class RjsBasicMap(map: Map[String, RjsBasicValue]) extends RjsBasicValue wi
 	}
 
 	def getValueMap: Map[String, RjsValue] = map
+	def getValue(name: String): Option[RjsValue] = map.get(name)
 	
 	def toJson: ResultC[JsValue] = {
 		for {
@@ -87,27 +95,7 @@ case class RjsBasicMap(map: Map[String, RjsBasicValue]) extends RjsBasicValue wi
 	def toTypedMap(typ: String): RjsBasicMap = RjsBasicMap(typ, map)
 	
 	def merge(that: RjsBasicMap): ResultC[RjsBasicMap] = {
-		val key_l = map.keySet ++ that.map.keySet
-		for {
-			merged_l <- ResultC.map(key_l) { key =>
-				val value_? : ResultC[RjsBasicValue] = (map.get(key), that.map.get(key)) match {
-					case (None, None) => ResultC.error(s"internal merge error on key $key") // Won't happen
-					case (Some(a), None) => ResultC.unit(a)
-					case (None, Some(b)) => ResultC.unit(b)
-					case (Some(a), Some(b)) =>
-						(a, b) match {
-							case (ma: RjsBasicMap, mb: RjsBasicMap) =>
-								for {
-									_ <- ResultC.check(ma.typ_? == mb.typ_?, s"Changing TYPE from ${ma.typ_?} to ${mb.typ_?}")
-									mc <- ma merge mb
-								} yield mc
-							case _ =>
-								ResultC.unit(b)
-						}
-				}
-				value_?.map(key -> _)
-			}
-		} yield RjsBasicMap(merged_l.toMap)
+		RjsValue.mergeMaps(this, that)
 	}
 	
 	override def toString: String = {
@@ -316,6 +304,7 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsValue with RjsAbstractM
 	}
 	
 	def getValueMap: Map[String, RjsValue] = map
+	def getValue(name: String): Option[RjsValue] = map.get(name)
 	
 	def toJson: ResultC[JsValue] = {
 		for {
@@ -333,6 +322,7 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsValue with RjsAbstractM
 	
 	def toTypedMap(typ: String): RjsMap = RjsMap(typ, map)
 	
+	/*
 	def merge(that: RjsMap): ResultC[RjsMap] = {
 		val key_l = map.keySet ++ that.map.keySet
 		for {
@@ -355,7 +345,7 @@ case class RjsMap(map: Map[String, RjsValue]) extends RjsValue with RjsAbstractM
 				value_?.map(key -> _)
 			}
 		} yield RjsMap(merged_l.toMap)
-	}
+	}*/
 	
 	override def toString: String = {
 		map.toList.sortBy(_._1).map(kv => "\""+kv._1+"\" -> "+kv._2).mkString("RjsMap(", ", ", ")")
@@ -450,7 +440,7 @@ object RjsValue {
 					ResultC.context(s"[${i+1}]") {
 						fromJson(jsval2)
 					}
-				}).map(RjsList)
+				}).map(RjsList(_))
 			case JsNumber(n) =>
 				ResultC.unit(RjsNumber(n, None))
 			case JsNull =>
@@ -679,11 +669,37 @@ val im = mirror.reflect(x)
 			basic1 <- toBasicValue(a)
 			basic2 <- toBasicValue(b)
 			res <- (basic1, basic2) match {
-				case (a: RjsBasicMap, b: RjsBasicMap) =>
-					a merge b
+				case (m1: RjsBasicMap, m2: RjsBasicMap) =>
+					mergeMaps(m1, m2)
+				case (a: RjsList, b: RjsList) =>
+					ResultC.unit(RjsList(a.list ++ b.list))
 				case _ => ResultC.unit(basic2)
 			}
 		} yield res
+	}
+	
+	def mergeMaps(m1: RjsBasicMap, m2: RjsBasicMap): ResultC[RjsBasicMap] = {
+		val key_l = m1.map.keySet ++ m2.map.keySet
+		for {
+			merged_l <- ResultC.map(key_l) { key =>
+				val value_? : ResultC[RjsBasicValue] = (m1.map.get(key), m2.map.get(key)) match {
+					case (None, None) => ResultC.error(s"internal merge error on key $key") // Won't happen
+					case (Some(a), None) => ResultC.unit(a)
+					case (None, Some(b)) => ResultC.unit(b)
+					case (Some(a), Some(b)) =>
+						(a, b) match {
+							case (ma: RjsBasicMap, mb: RjsBasicMap) =>
+								for {
+									_ <- ResultC.check(ma.typ_? == mb.typ_?, s"Changing TYPE from ${ma.typ_?} to ${mb.typ_?}")
+									mc <- ma merge mb
+								} yield mc
+							case _ =>
+								RjsValue.merge(a, b)
+						}
+				}
+				value_?.map(key -> _)
+			}
+		} yield RjsBasicMap(merged_l.toMap)
 	}
 	
 	def merge(value_l: Iterable[RjsValue]): ResultC[RjsBasicValue] = {

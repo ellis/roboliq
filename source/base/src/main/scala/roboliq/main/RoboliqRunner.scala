@@ -36,20 +36,18 @@ import roboliq.input.ResultE
 import roboliq.utils.JsonUtils
 import roboliq.input.RjsValue
 
-private case class RoboliqOpt(
+case class RoboliqOpt(
 	expression_l: Vector[RoboliqOptExpression] = Vector()
 )
 
-private sealed trait RoboliqOptExpression
-private case class RoboliqOptExpression_File(file: File) extends RoboliqOptExpression
-//private case class RoboliqOptExpression_Stdin() extends RoboliqOptExpression
-private case class RoboliqOptExpression_Json(json: String) extends RoboliqOptExpression
-private case class RoboliqOptExpression_Yaml(yaml: String) extends RoboliqOptExpression
+sealed trait RoboliqOptExpression
+case class RoboliqOptExpression_File(file: File) extends RoboliqOptExpression
+//case class RoboliqOptExpression_Stdin() extends RoboliqOptExpression
+case class RoboliqOptExpression_Json(json: String) extends RoboliqOptExpression
+case class RoboliqOptExpression_Yaml(yaml: String) extends RoboliqOptExpression
 
-class RoboliqRunner(args: Array[String]) {
-	private val logger = Logger[this.type]
-
-	private val parser = new scopt.OptionParser[RoboliqOpt]("roboliq") {
+object RoboliqRunner {
+	def getOptParser: scopt.OptionParser[RoboliqOpt] = new scopt.OptionParser[RoboliqOpt]("roboliq") {
 		head("roboliq", "0.1pre1")
 		opt[File]("file")
 			.valueName("<file>")
@@ -70,11 +68,7 @@ class RoboliqRunner(args: Array[String]) {
 			}
 			.text("YAML expression")
 	}
-	parser.parse(args, RoboliqOpt()) map { opt =>
-		run(opt)
-	} getOrElse {
-		// arguments are bad, usage message will have been displayed
-	}
+
 	
 	private def getInputHash(opt: RoboliqOpt): String = {
 		// TODO: should probably use ResultE.findFile here, to take advantage of search paths
@@ -110,14 +104,29 @@ class RoboliqRunner(args: Array[String]) {
 	
 	def run(opt: RoboliqOpt) {
 		import scala.sys.process._
-		val protocol = new Protocol
 		val time0 = System.currentTimeMillis()
+		
+		val res = process(opt)
+
+		/*val error_l = x.getErrors
+		val warning_l = x.getWarnings
+		if (!error_l.isEmpty || !warning_l.isEmpty) {
+			println("Warnings and Errors:")
+			error_l.foreach(s => println("ERROR: "+s))
+			warning_l.foreach(s => println("WARNING: "+s))
+			println()
+		}*/
+		val time1 = System.currentTimeMillis()
+		println(s"DONE (${((time1 - time0)/1000).asInstanceOf[Int]} seconds)")
+	}
+	
+	def process(opt: RoboliqOpt): ResultE[RjsValue] = {
 		val searchPath_l = opt.expression_l.flatMap {
 			case RoboliqOptExpression_File(file) => Some(file.getAbsoluteFile().getParentFile())
 			case _ => None
 		}
 		
-		val res = for {
+		for {
 			rjsval_l <- ResultE.map(opt.expression_l.toList) {
 				case RoboliqOptExpression_File(file) =>
 					ResultE.loadRjsFromFile(file)
@@ -133,112 +142,17 @@ class RoboliqRunner(args: Array[String]) {
 			}
 			res <- ResultE.from(RjsValue.merge(result_l))
 		} yield res
+	}
+}
 
-		/*val error_l = x.getErrors
-		val warning_l = x.getWarnings
-		if (!error_l.isEmpty || !warning_l.isEmpty) {
-			println("Warnings and Errors:")
-			error_l.foreach(s => println("ERROR: "+s))
-			warning_l.foreach(s => println("WARNING: "+s))
-			println()
-		}*/
-		val time1 = System.currentTimeMillis()
-		println(s"DONE (${((time1 - time0)/1000).asInstanceOf[Int]} seconds)")
-	}
-	
-	private def getInstructions(
-		cs: CommandSet,
-		planInfo_l: List[OperatorInfo],
-		originalActionCount: Int,
-		indexToOperator_l: List[(Int, roboliq.ai.strips.Operator)]
-	): Context[Unit] = {
-		Context.foreachFirst(indexToOperator_l.zipWithIndex) { case ((action_i, operator), instructionIdx) =>
-			for {
-				_ <- Context.modify(_.setCommand(List(action_i)))
-				_ <- getInstructionStep(cs, planInfo_l, originalActionCount, action_i, operator)
-			} yield ()
-		}
-	}
-	
-	private def getInstructionStep(
-		cs: CommandSet,
-		operatorInfo_l: List[OperatorInfo],
-		originalActionCount: Int,
-		action_i: Int,
-		operator: roboliq.ai.strips.Operator
-	): Context[Unit] = {
-		//println("action: "+operator)
-		val instructionParam_m: Map[String, JsValue] = if (action_i - 2 < originalActionCount) operatorInfo_l(action_i - 2).instructionParam_m else Map()
-		for {
-			handler <- Context.from(cs.nameToOperatorHandler_m.get(operator.name), s"getInstructionStep: unknown operator `${operator.name}`")
-			_ <- handler.getInstruction(operator, instructionParam_m)
-		} yield ()
-	}
-	
-	private def loadConfigBean(path: String): RsResult[ConfigBean] = {
-		import org.yaml.snakeyaml._
-		import org.yaml.snakeyaml.constructor.Constructor
-		import roboliq.input._
-		
-		val text = scala.io.Source.fromFile(path).mkString
-		
-		val descriptionTableSetup = new TypeDescription(classOf[TableSetupBean])
-		descriptionTableSetup.putMapPropertyType("sites", classOf[String], classOf[SiteBean])
-		
-		val descriptionEvoware = new TypeDescription(classOf[EvowareAgentBean])
-		descriptionEvoware.putListPropertyType("labwareModels", classOf[LabwareModelBean])
-		descriptionEvoware.putMapPropertyType("tipModels", classOf[String], classOf[TipModelBean])
-		descriptionEvoware.putListPropertyType("tips", classOf[TipBean])
-		descriptionEvoware.putMapPropertyType("tableSetups", classOf[String], classOf[TableSetupBean])
-		//val constructorEvoware = new Constructor(classOf[EvowareAgentBean])
-		//constructorEvoware.addTypeDescription(descriptionEvoware);
+class RoboliqRunner(args: Array[String]) {
+	private val logger = Logger[this.type]
 
-		val descriptionConfig = new TypeDescription(classOf[ConfigBean])
-		descriptionConfig.putMapPropertyType("evowareAgents", classOf[String], classOf[EvowareAgentBean])
-		val constructorConfig = new Constructor(classOf[ConfigBean])
-		constructorConfig.addTypeDescription(descriptionConfig)
-		constructorConfig.addTypeDescription(descriptionEvoware)
-		constructorConfig.addTypeDescription(descriptionTableSetup)
-		
-		val yaml = new Yaml(constructorConfig)
-		val configBean = yaml.load(text).asInstanceOf[ConfigBean]
-		RsSuccess(configBean)
-	}
+	val parser = RoboliqRunner.getOptParser
 	
-	private def yamlToJson(s: String): RsResult[String] = {
-		import org.yaml.snakeyaml._
-		val yaml = new Yaml()
-		val o = yaml.load(s).asInstanceOf[java.util.Map[String, Object]]
-		val gson = new Gson
-		val s_~ = gson.toJson(o)
-		//println("gson: " + s_~)
-		RsSuccess(s_~)
-	}
-	
-	private def loadCommandJson(file: File): RsResult[JsValue] = {
-		for {
-			_ <- RsResult.assert(file.exists, s"File not found: ${file.getPath}")
-			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
-				case "json" => RsSuccess(false)
-				case "yaml" => RsSuccess(true)
-				case ext => RsError(s"unrecognized command file extension `$ext`.  Expected either json or yaml.")
-			}
-			input0 = FileUtils.readFileToString(file)
-			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
-		} yield input.parseJson
-	}
-	
-	private def loadProtocolJson(file: File): RsResult[JsObject] = {
-		for {
-			_ <- RsResult.assert(file.exists, s"File not found: ${file.getPath}")
-			bYaml <- FilenameUtils.getExtension(file.getPath).toLowerCase match {
-				case "json" => RsSuccess(false)
-				case "yaml" => RsSuccess(true)
-				case "prot" => RsSuccess(true)
-				case ext => RsError(s"unrecognized protocol file extension `$ext`")
-			}
-			input0 = FileUtils.readFileToString(file)
-			input <- if (bYaml) yamlToJson(input0) else RsSuccess(input0) 
-		} yield input.parseJson.asJsObject
+	parser.parse(args, RoboliqOpt()) map { opt =>
+		RoboliqRunner.run(opt)
+	} getOrElse {
+		// arguments are bad, usage message will have been displayed
 	}
 }

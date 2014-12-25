@@ -19,7 +19,7 @@ class RjsConverterSpec extends FunSpec {
 	
 	describe("RjsConverter") {
 		val data0 = ResultEData(EvaluatorState())
-		val evaluator = new Evaluator();
+		val evaluator = new Evaluator()
 		val js5 = RjsNumber(5)
 		val js7 = RjsNumber(7)
 		val js12 = RjsNumber(12)

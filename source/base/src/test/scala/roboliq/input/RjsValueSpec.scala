@@ -61,5 +61,11 @@ class RjsValueSpec extends FunSpec {
 			)))
 			assert(RjsValue.evaluateTypedMap(tmLambda).run().value == lambda)
 		}
+		it("RjsValue.merge") {
+			val l1 = RjsList(number)
+			val l2 = RjsList(string)
+			val map1 = RjsBasicMap("a")
+			assert(RjsValue.merge(l1, l2).run().value == RjsList(number, string))
+		}
 	}
 }

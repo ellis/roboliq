@@ -14,6 +14,7 @@ import roboliq.input.RjsString
 import roboliq.ai.plan.Unique
 import roboliq.ai.strips
 import roboliq.input.RjsNumber
+import roboliq.input.RjsBasicMap
 
 class EvowareProtocolDataGeneratorSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -21,8 +22,8 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 	describe("EvowareProtocolDataGenerator") {
 		it("") {
 			val protocolData0 = new ProtocolDataA(
-				objects = RjsMap(
-					"plateModel_384_square" -> RjsMap(
+				objects = RjsBasicMap(
+					"plateModel_384_square" -> RjsBasicMap(
 						"type" -> RjsString("PlateModel"),
 						"label" -> RjsString("384 square-well white plate"),
 						"evowareName" -> RjsString("D-BSSE 384 Well Plate White")
@@ -61,22 +62,22 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 			)
 			
 			val expected = ProtocolDataA(
-				objects = RjsMap(
-					"CENTRIFUGE" -> RjsMap(
+				objects = RjsBasicMap(
+					"CENTRIFUGE" -> RjsBasicMap(
 						"evowareGrid" -> RjsNumber(54,None),
 						"evowareSite" -> RjsNumber(2,None),
 						"type" -> RjsString("Site")
 					),
-					"P1" -> RjsMap(
+					"P1" -> RjsBasicMap(
 						"evowareGrid" -> RjsNumber(9,None),
 						"evowareSite" -> RjsNumber(4,None),
 						"type" -> RjsString("Site")
 					),
-					"mario.centrifuge" -> RjsMap(
+					"mario.centrifuge" -> RjsBasicMap(
 						"evowareName" -> RjsString("Centrifuge"),
 						"type" -> RjsString("Centrifuge")
 					),
-					"plateModel_384_square" -> RjsMap(
+					"plateModel_384_square" -> RjsBasicMap(
 						"evowareName" -> RjsString("D-BSSE 384 Well Plate White"),
 						"label" -> RjsString("384 square-well white plate"),
 						"type" -> RjsString("PlateModel")

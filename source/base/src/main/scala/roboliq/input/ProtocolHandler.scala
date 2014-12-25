@@ -20,8 +20,8 @@ case class MyPlate(
 )
 
 case class ProtocolDataA(
-	val objects: RjsMap = RjsMap(),
-	val commands: RjsMap = RjsMap(),
+	val objects: RjsBasicMap = RjsBasicMap(),
+	val commands: RjsBasicMap = RjsBasicMap(),
 	val commandOrderingConstraints: List[List[String]] = Nil,
 	val commandOrder: List[String] = Nil,
 	val planningDomainObjects: Map[String, String] = Map(),
@@ -45,19 +45,19 @@ case class ProtocolDataA(
 }
 
 class ProtocolDataABuilder {
-	private val objects = new HashMap[String, RjsValue]
+	private val objects = new HashMap[String, RjsBasicValue]
 	private val planningDomainObjects = new HashMap[String, String]
 	private val planningInitialState = new ArrayBuffer[strips.Literal]
 	
 	def get: ProtocolDataA = {
 		new ProtocolDataA(
-			objects = RjsMap(objects.toMap),
+			objects = RjsBasicMap(objects.toMap),
 			planningDomainObjects = planningDomainObjects.toMap,
 			planningInitialState = strips.Literals(Unique(planningInitialState.toList : _*))
 		)
 	}
 	
-	def addObject(name: String, value: RjsValue) {
+	def addObject(name: String, value: RjsBasicValue) {
 		objects(name) = value
 	}
 	
@@ -78,7 +78,7 @@ class ProtocolDataABuilder {
 		planningDomainObjects(siteName) = "Site"
 	}
 	
-	def addSite(name: String, value: RjsMap) {
+	def addSite(name: String, value: RjsBasicMap) {
 		val typ = "Site"
 		val value2 = value.add("type", RjsString(typ))
 		addObject(name, value2)
@@ -154,12 +154,7 @@ class ProtocolDataC(
 )
 
 class ProtocolHandler {
-	def extractDataA(protocol: RjsProtocol): ProtocolDataA = {
-		val object_m: Map[String, RjsValue] =
-			protocol.labwares.asInstanceOf[Map[String, RjsValue]] ++
-			protocol.substances.asInstanceOf[Map[String, RjsValue]] ++
-			protocol.sources.asInstanceOf[Map[String, RjsValue]]
-		val objects = RjsMap(object_m)
+	def extractDataA(protocol: RjsProtocol): ResultC[ProtocolDataA] = {
 		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
 			(i+1).toString -> rjsval
 		}
@@ -168,33 +163,46 @@ class ProtocolHandler {
 			(1 to n).toList.map(i => i.toString :: (if (i < n) List((i+1).toString) else Nil))
 		val commandOrder_l =
 			(1 to n).toList.map(_.toString)
-		val (planningDomainObjects, planningInitialState) = processDataObjects(objects)
-		new ProtocolDataA(
-			objects = objects,
-			commands = RjsMap(command_l.toMap),
-			commandOrderingConstraints = commandOrderingConstraint_l,
-			commandOrder = commandOrder_l,
-			planningDomainObjects = planningDomainObjects,
-			planningInitialState = planningInitialState
-		)
+		def convMapToBasic[A <: RjsValue](map: Map[String, A]): ResultC[Map[String, RjsBasicValue]] = {
+			for {
+				l <- ResultC.map(map.toList) { case (name, rjsval) =>
+					RjsValue.toBasicValue(rjsval).map(name -> _)
+				}
+			} yield l.toMap
+		}
+		for {
+			labware_m <- convMapToBasic(protocol.labwares)
+			substance_m <- convMapToBasic(protocol.substances)
+			source_m <- convMapToBasic(protocol.sources)
+			command2_l <- ResultC.map(command_l.toList) { case (name, rjsval) =>
+				RjsValue.toBasicValue(rjsval).map(name -> _)
+			}
+		} yield {
+			val objects = RjsBasicMap(labware_m ++ substance_m ++ source_m)
+			println("objects: "+objects)
+			val (planningDomainObjects, planningInitialState) = processLabware(protocol.labwares)
+			println("planningDomainObjects: "+planningDomainObjects)
+			new ProtocolDataA(
+				objects = objects,
+				commands = RjsBasicMap(command2_l.toMap),
+				commandOrderingConstraints = commandOrderingConstraint_l,
+				commandOrder = commandOrder_l,
+				planningDomainObjects = planningDomainObjects,
+				planningInitialState = planningInitialState
+			)
+		}
 	}
 	
-	private def processDataObjects(
-		object_m: RjsMap
+	private def processLabware(
+		labware_m: Map[String, RjsProtocolLabware]
 	): (Map[String, String], strips.Literals) = {
 		val objectToType_m = new HashMap[String, String]
 		val atom_l = new ArrayBuffer[strips.Atom]
-		for ((name, rjsval) <- object_m.map) {
-			rjsval match {
-				case plate: RjsProtocolLabware =>
-					objectToType_m += (name -> "plate")
-					atom_l += strips.Atom("labware", Seq(name))
-					plate.model_?.foreach(model => atom_l += strips.Atom("model", Seq(name, model)))
-					plate.location_?.foreach(location => atom_l += strips.Atom("location", Seq(name, location)))
-					ResultE.unit(())
-				case _ =>
-					ResultE.unit(())
-			}
+		for ((name, plate) <- labware_m) {
+			objectToType_m += (name -> "plate")
+			atom_l += strips.Atom("labware", Seq(name))
+			plate.model_?.foreach(model => atom_l += strips.Atom("model", Seq(name, model)))
+			plate.location_?.foreach(location => atom_l += strips.Atom("location", Seq(name, location)))
 		}
 		(objectToType_m.toMap, strips.Literals(atom_l.toList, Nil))
 	}

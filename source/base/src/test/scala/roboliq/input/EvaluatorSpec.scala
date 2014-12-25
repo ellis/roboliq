@@ -12,7 +12,7 @@ import roboliq.utils.JsonUtils
 class EvaluatorSpec extends FunSpec {
 	import ContextValueWrapper._
 
-	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"))))
+	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 	val evaluator = new Evaluator();
 
 	private def check(
