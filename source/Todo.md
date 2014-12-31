@@ -85,6 +85,13 @@ usage.
 - [ ] EvowareProtocolDataGenerator: should objects be created with "{agentName}." prefix? Would need to handle this in logic too, which might make it harder to address global variables with the same name as a local object
 - [ ] EvowareProtocolDataGenerator: allow for loading of multiple table setups, but if no tables are specified, try to load the default -- if that doesn't exist, however, no error should be shown.
 
+For RoboliqRunner:
+- one script input
+- ProtocolData as input (possibly multiple, then they get merged)
+- the output of the script should be an RjsProtocol
+- the next step receives both the RjsProtocol along with it's evaluator context (for available commands and variables) and the ProtocolData
+
+
 ```
 TYPE: ProtocolData
 IMPORTS:

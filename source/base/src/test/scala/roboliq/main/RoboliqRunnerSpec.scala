@@ -8,6 +8,11 @@ import roboliq.input.RjsNumber
 import roboliq.input.RjsBoolean
 import roboliq.input.RjsList
 import roboliq.input.RjsValue
+import roboliq.input.YamlContent
+import roboliq.input.RjsNull
+import roboliq.input.ResultEData
+import roboliq.input.EvaluatorState
+import java.io.File
 
 class RoboliqRunnerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -53,16 +58,14 @@ class RoboliqRunnerSpec extends FunSpec {
 			assert(RoboliqRunner.process(opt1).run().value == expected1)
 		}
 		
-		it("check") {
+		it("check protocol without extra data") {
+			val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 			val opt1 = RoboliqOpt(
 				step_l = Vector(
-					RoboliqOptStep_Yaml("{TYPE: call, NAME: add, INPUT: {numbers: [1, 2]}}")
+					RoboliqOptStep_Yaml(YamlContent.protocol2Text)
 				)
 			)
-			val ctxval1 = (for {
-				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
-				dataB <- protocolEvaluator.stepB(dataA1)
-			} yield dataB.commandExpansions).run(data0)
+			assert(RoboliqRunner.process(opt1).run(data0).value == RjsNull)
 		}
 	}
 }

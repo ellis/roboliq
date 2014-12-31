@@ -1,6 +1,6 @@
 package roboliq.input
 
-private object YamlContent {
+object YamlContent {
 val protocol1Text = """
 TYPE: protocol
 labwares:
@@ -41,4 +41,26 @@ commands:
 			))
 		)))
 	)
+	
+	val protocol2Text = """
+TYPE: section
+BODY:
+- TYPE: import
+  NAME: shakePlate
+  VERSION: "1.0"
+- TYPE: protocol
+  labwares:
+    plate1: { model: plateModel_384_square, location: P3 }
+  commands:
+  - TYPE: action
+    NAME: shakePlate
+    INPUT:
+      agent: mario
+      device: mario.shaker
+      labware: plate1
+      site: P3
+      program:
+        rpm: 200
+        duration: 10
+"""
 }

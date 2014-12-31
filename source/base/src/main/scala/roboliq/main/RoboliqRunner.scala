@@ -39,6 +39,8 @@ import roboliq.input.RjsConverter
 import roboliq.input.ProtocolDataA
 import roboliq.input.ProtocolHandler
 import roboliq.input.RjsNull
+import roboliq.input.EvaluatorState
+import roboliq.input.RjsProtocol
 
 case class RoboliqOpt(
 	step_l: Vector[RoboliqOptStep] = Vector()
@@ -51,6 +53,10 @@ case class RoboliqOptStep_Json(json: String) extends RoboliqOptStep
 case class RoboliqOptStep_Yaml(yaml: String) extends RoboliqOptStep
 case class RoboliqOptStep_Check() extends RoboliqOptStep
 
+private case class StepResult(
+	protocol_? : Option[(RjsProtocol, EvaluatorState)] = None,
+	data: RjsValue = RjsNull
+)
 
 object RoboliqRunner {
 	def getOptParser: scopt.OptionParser[RoboliqOpt] = new scopt.OptionParser[RoboliqOpt]("roboliq") {
@@ -140,60 +146,89 @@ object RoboliqRunner {
 		}
 		// FIXME: add search path to ResultE
 		for {
-			res <- processStep(RjsNull, opt.step_l)
-		} yield res
+			result <- processSteps(StepResult(), opt.step_l)
+		} yield result.data
 	}
 	
-	private def processStep(
-		res0: RjsValue,
+	private def processSteps(
+		result0: StepResult,
 		step_l: Vector[RoboliqOptStep]
-	): ResultE[RjsValue] = {
+	): ResultE[StepResult] = {
 		step_l match {
 			case step +: rest =>
 				for {
-					res1 <- processStep(res0, step)
-					res2 <- processStep(res1, rest)
-				} yield res2
+					result1 <- processStep(result0, step)
+					result2 <- processSteps(result1, rest)
+				} yield result2
 			case _ =>
-				ResultE.unit(res0)
+				ResultE.unit(result0)
 		}
 	}
 	
 	private def processStep(
-		res0: RjsValue,
+		result0: StepResult,
 		step: RoboliqOptStep
-	): ResultE[RjsValue] = {
+	): ResultE[StepResult] = {
 		step match {
 			case RoboliqOptStep_File(file) =>
 				for {
 					rjsval <- ResultE.loadRjsFromFile(file)
-					res1 <- ResultE.evaluate(rjsval)
-					res2 <- ResultE.from(RjsValue.merge(res0, res1))
-				} yield res2
+					result1 <- processStepRjs(result0, rjsval)
+				} yield result1
 			case RoboliqOptStep_Json(s) =>
 				val jsval = JsonUtils.textToJson(s)
 				for {
 					rjsval <- ResultE.from(RjsValue.fromJson(jsval))
-					res1 <- ResultE.evaluate(rjsval)
-					res2 <- ResultE.from(RjsValue.merge(res0, res1))
-				} yield res2
+					result1 <- processStepRjs(result0, rjsval)
+				} yield result1
 			case RoboliqOptStep_Yaml(s) =>
 				val jsval = JsonUtils.yamlToJson(s)
 				for {
 					rjsval <- ResultE.from(RjsValue.fromJson(jsval))
-					res1 <- ResultE.evaluate(rjsval)
-					res2 <- ResultE.from(RjsValue.merge(res0, res1))
-				} yield res2
+					result1 <- processStepRjs(result0, rjsval)
+				} yield result1
 			case RoboliqOptStep_Check() =>
-				for {
-					dataA <- RjsConverter.fromRjs[ProtocolDataA](res0)
-					dataB <- new ProtocolHandler().stepB(dataA)
-				} yield {
-					println("check:")
-					println(dataB)
-					RjsNull
-				} 
+				processStepCheck(result0)
 		}
+	}
+	
+	private def processStepRjs(
+		result0: StepResult,
+		rjsval: RjsValue
+	): ResultE[StepResult] = {
+		for {
+			res1 <- ResultE.evaluate(rjsval)
+			result1 <- res1 match {
+				case x: RjsProtocol =>
+					for {
+						state <- ResultE.get
+					} yield result0.copy(protocol_? = Some((x, state)))
+				case _ =>
+					for {
+						data <- ResultE.from(RjsValue.merge(result0.data, res1))
+					} yield result0.copy(data = data)
+			}
+		} yield result1
+	}
+	
+	private def processStepCheck(
+		result: StepResult
+	): ResultE[StepResult] = {
+	//protocol_? : Option[(RjsProtocol, EvaluatorState)] = None,
+	//data: RjsValue = RjsNull
+		val protocolHandler = new ProtocolHandler
+		for {
+			pair <- ResultE.from(result.protocol_?, s"")
+			(protocol, state) = pair
+			dataA0 <- ResultE.from(protocolHandler.extractDataA(protocol))
+			dataA1 <- RjsConverter.fromRjs[ProtocolDataA](result.data)
+			dataA <- ResultE.from(dataA0 merge dataA1)
+			dataB <- new ProtocolHandler().stepB(dataA)
+		} yield {
+			println("check:")
+			println(dataB)
+			StepResult(None, RjsNull)
+		} 
 	}
 }
 
