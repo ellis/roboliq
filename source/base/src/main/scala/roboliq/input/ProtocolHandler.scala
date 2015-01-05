@@ -133,7 +133,7 @@ case class ProtocolCommandResult(
 	validation_l: List[CommandValidation] = Nil
 )
 
-class ProtocolDataB(
+case class ProtocolDataB(
 	val dataA: ProtocolDataA,
 	val commandExpansions: Map[String, ProtocolCommandResult]
 )

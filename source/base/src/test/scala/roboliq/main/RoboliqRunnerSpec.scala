@@ -66,6 +66,38 @@ class RoboliqRunnerSpec extends FunSpec {
 					RoboliqOptStep_Check()
 				)
 			)
+			val expected = ProtocolDataB(
+				ProtocolDataA(
+					RjsBasicMap(
+						"plate1" -> RjsBasicMap(
+							"location" -> RjsString("P3"),
+							"model" -> RjsString("plateModel_384_square")
+						)
+					),
+					RjsBasicMap(
+						"1" -> RjsBasicMap(
+							"INPUT" -> RjsBasicMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3")
+							),
+							"NAME" -> RjsString("shakePlate"),
+							"TYPE" -> RjsString("action")
+						)
+					),
+					List(List(1)),
+					List(1),
+					Map("plate1" -> "plate"),
+					Literals("labware plate1", "model plate1 plateModel_384_square", "location plate1 P3")
+				),
+				Map(
+					1 -> ProtocolCommandResult(
+						RjsAction("shakePlate", RjsMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3"))),Literals(),
+						List(
+							CommandValidation_Precond("agent-has-device mario mario.shaker"),
+							CommandValidation_Precond("device-can-site mario.shaker P3")
+						)
+					)
+				)
+			)
+
 			assert(RoboliqRunner.process(opt1).run(data0).value == RjsNull)
 		}
 	}
