@@ -140,12 +140,18 @@ object RoboliqRunner {
 	}
 	
 	def process(opt: RoboliqOpt): ResultE[RjsValue] = {
+		println(s"process($opt)")
+		// Get directories of loaded files
 		val searchPath_l = opt.step_l.flatMap {
 			case RoboliqOptStep_File(file) => Some(file.getAbsoluteFile().getParentFile())
 			case _ => None
 		}
-		// FIXME: add search path to ResultE
 		for {
+			// add directories of loaded files to ResultE search path
+			_ <- ResultE.modify(state => {
+				val l = (state.searchPath_l ++ searchPath_l).distinct
+				state.copy(searchPath_l = l) 
+			})
 			result <- processSteps(StepResult(), opt.step_l)
 		} yield result.data
 	}
@@ -154,6 +160,7 @@ object RoboliqRunner {
 		result0: StepResult,
 		step_l: Vector[RoboliqOptStep]
 	): ResultE[StepResult] = {
+		println(s"processSteps(${step_l}):")
 		step_l match {
 			case step +: rest =>
 				for {
@@ -169,6 +176,7 @@ object RoboliqRunner {
 		result0: StepResult,
 		step: RoboliqOptStep
 	): ResultE[StepResult] = {
+		println(s"processStep($step):")
 		step match {
 			case RoboliqOptStep_File(file) =>
 				for {
@@ -196,6 +204,7 @@ object RoboliqRunner {
 		result0: StepResult,
 		rjsval: RjsValue
 	): ResultE[StepResult] = {
+		println(s"processStepRjs($rjsval):")
 		for {
 			res1 <- ResultE.evaluate(rjsval)
 			result1 <- res1 match {
@@ -214,8 +223,7 @@ object RoboliqRunner {
 	private def processStepCheck(
 		result: StepResult
 	): ResultE[StepResult] = {
-	//protocol_? : Option[(RjsProtocol, EvaluatorState)] = None,
-	//data: RjsValue = RjsNull
+		println(s"processStepCheck($result):")
 		val protocolHandler = new ProtocolHandler
 		for {
 			pair <- ResultE.from(result.protocol_?, s"")

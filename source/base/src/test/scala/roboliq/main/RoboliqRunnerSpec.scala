@@ -62,7 +62,8 @@ class RoboliqRunnerSpec extends FunSpec {
 			val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 			val opt1 = RoboliqOpt(
 				step_l = Vector(
-					RoboliqOptStep_Yaml(YamlContent.protocol2Text)
+					RoboliqOptStep_Yaml(YamlContent.protocol2Text),
+					RoboliqOptStep_Check()
 				)
 			)
 			assert(RoboliqRunner.process(opt1).run(data0).value == RjsNull)

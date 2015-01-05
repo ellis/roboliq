@@ -131,6 +131,14 @@ object RjsConverter {
 		} yield lit
 	}
 	
+	def toStripsLiterals(
+		rjsval: RjsValue
+	): ResultE[strips.Literals] = {
+		for {
+			l <- fromRjs[List[strips.Literal]](rjsval)
+		} yield strips.Literals(roboliq.ai.plan.Unique(l : _*))
+	}
+	
 	def fromRjs[A: TypeTag](
 		rjsval: RjsValue
 	): ResultE[A] = {
@@ -194,6 +202,7 @@ object RjsConverter {
 				*/
 				// Logic
 				else if (typ =:= typeOf[strips.Literal]) toStripsLiteral(rjsval)
+				else if (typ =:= typeOf[strips.Literals]) toStripsLiterals(rjsval)
 				/*
 				// Lookups
 				else if (typ =:= typeOf[Agent]) toEntityByRef[Agent](rjsval, eb)
@@ -209,6 +218,12 @@ object RjsConverter {
 				else if (typ <:< typeOf[RjsValue]) {
 					if (mirror.runtimeClass(typ).isInstance(rjsval)) {
 						ResultE.unit(rjsval)
+					}
+					else if (rjsval == RjsNull) {
+						if (typ =:= typeOf[RjsBasicMap]) ResultE.unit(RjsBasicMap())
+						else if (typ =:= typeOf[RjsMap]) ResultE.unit(RjsMap())
+						else if (typ =:= typeOf[RjsList]) ResultE.unit(RjsList())
+						else ResultE.error(s"Could not convert RjsNull to TYPE=$typ")
 					}
 					else if (rjsval.isInstanceOf[RjsAbstractMap]) {
 						val m = rjsval.asInstanceOf[RjsAbstractMap]
@@ -250,6 +265,8 @@ object RjsConverter {
 				else if (typ <:< typeOf[Set[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					rjsval match {
+						case RjsNull =>
+							ResultE.unit(Set())
 						case m: RjsAbstractMap =>
 							convSet(m, typ2)
 						case _ =>
@@ -285,6 +302,8 @@ object RjsConverter {
 						nameToObj_m <- rjsval match {
 							case m: RjsAbstractMap =>
 								convMapString(m, nameToType_l)
+							case RjsNull =>
+								convMapString(RjsBasicMap(), nameToType_l)
 							case _ =>
 								ResultE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
 						}
