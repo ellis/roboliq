@@ -184,15 +184,13 @@ object RoboliqRunner {
 					result1 <- processStepRjs(result0, rjsval)
 				} yield result1
 			case RoboliqOptStep_Json(s) =>
-				val jsval = JsonUtils.textToJson(s)
 				for {
-					rjsval <- ResultE.from(RjsValue.fromJson(jsval))
+					rjsval <- ResultE.from(RjsValue.fromJsonText(s))
 					result1 <- processStepRjs(result0, rjsval)
 				} yield result1
 			case RoboliqOptStep_Yaml(s) =>
-				val jsval = JsonUtils.yamlToJson(s)
 				for {
-					rjsval <- ResultE.from(RjsValue.fromJson(jsval))
+					rjsval <- ResultE.from(RjsValue.fromYamlText(s))
 					result1 <- processStepRjs(result0, rjsval)
 				} yield result1
 			case RoboliqOptStep_Check() =>

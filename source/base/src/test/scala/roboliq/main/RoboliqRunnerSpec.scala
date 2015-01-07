@@ -2,6 +2,7 @@ package roboliq.main
 
 import org.scalatest.FunSpec
 import scala.Vector
+import roboliq.ai.strips
 import roboliq.input.RjsString
 import roboliq.input.RjsBasicMap
 import roboliq.input.RjsNumber
@@ -13,6 +14,10 @@ import roboliq.input.RjsNull
 import roboliq.input.ResultEData
 import roboliq.input.EvaluatorState
 import java.io.File
+import roboliq.input.ProtocolCommandResult
+import roboliq.input.RjsAction
+import roboliq.input.RjsMap
+import roboliq.input.CommandValidation_Precond
 
 class RoboliqRunnerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -66,34 +71,12 @@ class RoboliqRunnerSpec extends FunSpec {
 					RoboliqOptStep_Check()
 				)
 			)
-			val expected = ProtocolDataB(
-				ProtocolDataA(
-					RjsBasicMap(
-						"plate1" -> RjsBasicMap(
-							"location" -> RjsString("P3"),
-							"model" -> RjsString("plateModel_384_square")
-						)
-					),
-					RjsBasicMap(
-						"1" -> RjsBasicMap(
-							"INPUT" -> RjsBasicMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3")
-							),
-							"NAME" -> RjsString("shakePlate"),
-							"TYPE" -> RjsString("action")
-						)
-					),
-					List(List(1)),
-					List(1),
-					Map("plate1" -> "plate"),
-					Literals("labware plate1", "model plate1 plateModel_384_square", "location plate1 P3")
-				),
-				Map(
-					1 -> ProtocolCommandResult(
-						RjsAction("shakePlate", RjsMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3"))),Literals(),
-						List(
-							CommandValidation_Precond("agent-has-device mario mario.shaker"),
-							CommandValidation_Precond("device-can-site mario.shaker P3")
-						)
+			val expected = Map(
+				1 -> ProtocolCommandResult(
+					RjsAction("shakePlate", RjsMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3"))),strips.Literals.empty,
+					List(
+						CommandValidation_Precond("agent-has-device mario mario.shaker"),
+						CommandValidation_Precond("device-can-site mario.shaker P3")
 					)
 				)
 			)
