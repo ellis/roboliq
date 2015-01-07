@@ -432,7 +432,7 @@ object RjsValue {
 	 * An error can occur if the text of a JsString is not properly formatted.
 	 */
 	def fromJson(jsval: JsValue): ResultC[RjsBasicValue] = {
-		println(s"RjsValue.fromJson($jsval)")
+		//println(s"RjsValue.fromJson($jsval)")
 		jsval match {
 			case JsBoolean(b) =>
 				ResultC.unit(RjsBoolean(b))
@@ -580,6 +580,7 @@ val im = mirror.reflect(x)
 		typ: Type
 	): ResultC[JsValue] = {
 		import scala.reflect.runtime.universe._
+		println(s"toJson($x, $typ)")
 
 		if (typ =:= typeOf[String]) ResultC.unit(JsString(x.asInstanceOf[String]))
 		else if (typ =:= typeOf[Int]) ResultC.unit(JsNumber(x.asInstanceOf[Int]))
@@ -652,6 +653,7 @@ val im = mirror.reflect(x)
 						jsval <- x match {
 							case s: String => ResultC.unit(JsString(s))
 							case rjsval2: RjsValue => rjsval2.toJson
+							case _ => toJson(x, p.typeSignature)
 						}
 					} yield {
 						name -> jsval
@@ -664,7 +666,22 @@ val im = mirror.reflect(x)
 		}
 	}
 	
-	def toBasicValue(rjsval: RjsValue): ResultC[RjsBasicValue] = {
+	def toBasicValue[A : TypeTag](
+		a: A
+	): ResultC[RjsBasicValue] = {
+		val typ = ru.typeTag[A].tpe
+		a match {
+			case rjsval: RjsValue =>
+				fromValueToBasicValue(rjsval)
+			case _ =>
+				for {
+					jsval <- toJson(a, typ)
+					basic <- fromJson(jsval)
+				} yield basic
+		}
+	}
+	
+	def fromValueToBasicValue(rjsval: RjsValue): ResultC[RjsBasicValue] = {
 		rjsval match {
 			case x: RjsBasicValue => ResultC.unit(x)
 			case _ =>

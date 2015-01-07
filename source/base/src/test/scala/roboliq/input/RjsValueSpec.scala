@@ -9,6 +9,11 @@ import scala.reflect.runtime.universe.TypeTag
 import org.scalatest.exceptions.TestFailedException
 import spray.json.JsString
 
+case class RjsValueSpecCaseClass1(
+	a: String,
+	b: Int
+)
+
 class RjsValueSpec extends FunSpec {
 	import ResultCWrapper._
 	import ResultEWrapper._
@@ -66,6 +71,13 @@ class RjsValueSpec extends FunSpec {
 			val l2 = RjsList(string)
 			val map1 = RjsBasicMap("a")
 			assert(RjsValue.merge(l1, l2).run().value == RjsList(number, string))
+		}
+		it("RjsValue.toBasicValue") {
+			assert(RjsValue.toBasicValue(1).run().value == RjsNumber(1))
+			assert(RjsValue.toBasicValue(Map[String, String]("a" -> "1", "b" -> "2")).run().value == RjsBasicMap("a" -> RjsString("1"), "b" -> RjsString("2")))
+			assert(RjsValue.toBasicValue(RjsNumber(1)).run().value == RjsNumber(1))
+			assert(RjsValue.toBasicValue(RjsNumber(1)).run().value == RjsNumber(1))
+			assert(RjsValue.toBasicValue(RjsValueSpecCaseClass1("one", 2)).run().value == RjsBasicMap("a" -> RjsString("one"), "b" -> RjsNumber(2)))
 		}
 	}
 }

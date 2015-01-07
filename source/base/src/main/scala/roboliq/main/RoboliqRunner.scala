@@ -230,10 +230,11 @@ object RoboliqRunner {
 			dataA1 <- RjsConverter.fromRjs[ProtocolDataA](result.data)
 			dataA <- ResultE.from(dataA0 merge dataA1)
 			dataB <- new ProtocolHandler().stepB(dataA)
+			resultData <- ResultE.from(RjsValue.toBasicValue(dataB.commandExpansions))
 		} yield {
 			println("check:")
 			println(dataB)
-			StepResult(None, RjsNull)
+			StepResult(None, resultData)
 		} 
 	}
 }

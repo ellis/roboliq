@@ -156,7 +156,7 @@ class ProtocolHandler {
 		def convMapToBasic[A <: RjsValue](map: Map[String, A]): ResultC[Map[String, RjsBasicValue]] = {
 			for {
 				l <- ResultC.map(map.toList) { case (name, rjsval) =>
-					RjsValue.toBasicValue(rjsval).map(name -> _)
+					RjsValue.fromValueToBasicValue(rjsval).map(name -> _)
 				}
 			} yield l.toMap
 		}
