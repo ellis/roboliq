@@ -616,11 +616,24 @@ val im = mirror.reflect(x)
 			} yield JsArray(l.toList)
 		}
 		else {
+			val mirror = runtimeMirror(this.getClass.getClassLoader)
+			val typClass0 = typ.typeSymbol.asClass
+			val clazz = x.getClass
+			// 'typ' might be a base class of the object 'x': try to get the real class
+			val (typClass2, typ2) = {
+				if (typClass0.fullName == clazz.getName) {
+					(typClass0, typ)
+				}
+				else {
+					val typClass2 = mirror.staticClass(clazz.getName)
+					(typClass2, typClass2.toType)
+				}
+			}
+			
 			// Get 'TYPE' field value, if annotated
 			val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]
 			val typJsonNameAnnotation = ru.typeOf[RjsJsonName]
-			val typClass = typ.typeSymbol.asClass
-			val typAnnotation_? = typClass.annotations.find(a => a.tree.tpe == typJsonTypeAnnotation)
+			val typAnnotation_? = typClass2.annotations.find(a => a.tree.tpe == typJsonTypeAnnotation)
 			val jsTyp_? : Option[(String, JsValue)] = typAnnotation_?.flatMap { a =>
 				val args = a.tree.children.tail
 				val values = args.map(a => a.productElement(0).asInstanceOf[ru.Constant].value)
@@ -630,14 +643,13 @@ val im = mirror.reflect(x)
 				}
 			}
 			
-			val mirror = runtimeMirror(this.getClass.getClassLoader)
 			val im = mirror.reflect(x)
 	
-			val ctor = typ.member(termNames.CONSTRUCTOR).asMethod
+			val ctor = typ2.member(termNames.CONSTRUCTOR).asMethod
 			val p0_l = ctor.paramLists(0)
 			for {
 				field_l <- ResultC.mapAll(p0_l) { p =>
-					val fm = im.reflectField(typ.decl(p.asTerm.name).asTerm)
+					val fm = im.reflectField(typ2.decl(p.asTerm.name).asTerm)
 					val nameAnnotation_? = p.annotations.find(a => a.tree.tpe == typJsonNameAnnotation)
 					val name_? = nameAnnotation_?.flatMap { a =>
 						val args = a.tree.children.tail
@@ -670,6 +682,7 @@ val im = mirror.reflect(x)
 		a: A
 	): ResultC[RjsBasicValue] = {
 		val typ = ru.typeTag[A].tpe
+		println(s"toBasicValue($a, $typ)")
 		a match {
 			case rjsval: RjsValue =>
 				fromValueToBasicValue(rjsval)

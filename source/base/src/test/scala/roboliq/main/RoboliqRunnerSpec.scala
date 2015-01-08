@@ -80,8 +80,14 @@ class RoboliqRunnerSpec extends FunSpec {
 					)
 				)
 			)
+			val expected_? = RjsValue.toBasicValue(expected)
 
-			assert(RoboliqRunner.process(opt1).run(data0).value == RjsNull)
+			val x1 = RoboliqRunner.process(opt1).run(data0).value
+			println("x1: "+x1)
+			println("A: "+expected_?)
+			println("B: "+expected_?.run())
+			println("C: "+expected_?.run().value)
+			assert(RoboliqRunner.process(opt1).run(data0).value == expected_?.run().value)
 		}
 	}
 }
