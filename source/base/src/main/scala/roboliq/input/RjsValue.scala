@@ -602,15 +602,20 @@ val im = mirror.reflect(x)
 			//val typKey = typ.asInstanceOf[ru.TypeRefApi].args(0)
 			val typVal = typ.asInstanceOf[ru.TypeRefApi].args(1)
 			val m0 = x.asInstanceOf[Map[String, _]]
+			//println("IN_MAP")
 			for {
 				l <- ResultC.map(m0.toList) { case (name, v) =>
 					toJson(v, typVal).map(name -> _)
 				}
 			} yield JsObject(l.toMap)
 		}
+		else if (typ <:< typeOf[Map[_, _]]) {
+			ResultC.error("Cannot convert maps with non-String keys: "+typ)
+		}
 		else if (typ <:< typeOf[Iterable[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			val l0 = x.asInstanceOf[Iterable[_]]
+			//println("IN_ITERABLE")
 			for {
 				l <- ResultC.map(l0) { x2 => toJson(x2, typ2) }
 			} yield JsArray(l.toList)
@@ -629,6 +634,7 @@ val im = mirror.reflect(x)
 					(typClass2, typClass2.toType)
 				}
 			}
+			//println("Q:", typClass0, clazz, typClass2, typ2)
 			
 			// Get 'TYPE' field value, if annotated
 			val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]

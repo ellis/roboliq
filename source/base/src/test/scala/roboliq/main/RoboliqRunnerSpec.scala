@@ -72,7 +72,7 @@ class RoboliqRunnerSpec extends FunSpec {
 				)
 			)
 			val expected = Map(
-				1 -> ProtocolCommandResult(
+				"1" -> ProtocolCommandResult(
 					RjsAction("shakePlate", RjsMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3"))),strips.Literals.empty,
 					List(
 						CommandValidation_Precond("agent-has-device mario mario.shaker"),
@@ -82,11 +82,6 @@ class RoboliqRunnerSpec extends FunSpec {
 			)
 			val expected_? = RjsValue.toBasicValue(expected)
 
-			val x1 = RoboliqRunner.process(opt1).run(data0).value
-			println("x1: "+x1)
-			println("A: "+expected_?)
-			println("B: "+expected_?.run())
-			println("C: "+expected_?.run().value)
 			assert(RoboliqRunner.process(opt1).run(data0).value == expected_?.run().value)
 		}
 	}
