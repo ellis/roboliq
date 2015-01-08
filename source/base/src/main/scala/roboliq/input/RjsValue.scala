@@ -590,6 +590,8 @@ val im = mirror.reflect(x)
 		else if (typ =:= typeOf[BigDecimal]) ResultC.unit(JsNumber(x.asInstanceOf[BigDecimal]))
 		else if (typ =:= typeOf[Boolean]) ResultC.unit(JsBoolean(x.asInstanceOf[Boolean]))
 		else if (typ =:= typeOf[java.lang.Boolean]) ResultC.unit(JsBoolean(x.asInstanceOf[java.lang.Boolean]))
+		else if (typ =:= typeOf[strips.Literals]) ResultC.unit(JsArray(x.asInstanceOf[strips.Literals].l.toList.map(lit => JsString(lit.toString)) : _*))
+		else if (typ =:= typeOf[strips.Literal]) ResultC.unit(JsString(x.toString))
 		else if (typ <:< typeOf[Enumeration#Value]) ResultC.unit(JsString(x.toString))
 		else if (typ <:< typeOf[Option[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head

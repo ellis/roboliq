@@ -63,4 +63,12 @@ BODY:
         rpm: 200
         duration: 10
 """
+	val protocol2DataText = """
+planningDomainObjects:
+  mario: agent
+  mario.shaker: shaker
+planningInitialState:
+- agent-has-device mario mario.shaker
+- device-can-site mario.shaker P3
+"""
 }

@@ -11,7 +11,7 @@ class Signature(val name: String, val paramName_l: List[String], val paramTyp_l:
 	assert(paramTyp_l.length == paramName_l.length)
 	
 	def getSignatureString = name + (paramName_l zip paramTyp_l).map(pair => s"${pair._1}:${pair._2}").mkString("(", " ", ")")
-	def tostripsText: String = {
+	def toStripsText: String = {
 		(name :: (paramName_l zip paramTyp_l).map(pair => pair._1 + " - " + pair._2)).mkString("(", " ", ")")
 	}
 	override def toString = getSignatureString
@@ -40,7 +40,7 @@ case class Atom(name: String, params: Seq[String]) {
 	def bind(map: Map[String, String]): Atom =
 		copy(params = params.map(s => map.getOrElse(s, s)))
 	override def toString = (name :: params.toList).mkString(" ")
-	def tostripsText: String = s"(${toString})"
+	def toStripsText: String = s"(${toString})"
 }
 
 object Atom {
@@ -60,7 +60,7 @@ case class Literal(atom: Atom, pos: Boolean) {
 		copy(atom = atom.bind(map))
 	def unary_! : Literal = copy(pos = !pos)
 	override def toString = (if (pos) "" else "!") ++ atom.toString
-	def tostripsText: String = if (pos) atom.tostripsText else s"(not ${atom.tostripsText})" 
+	def toStripsText: String = if (pos) atom.toStripsText else s"(not ${atom.toStripsText})" 
 }
 
 object Literal {
@@ -245,16 +245,16 @@ class Operator private(
 		l ++= (paramName_l zip paramTyp_l).map(pair => s"    ${pair._1} - ${pair._2}")
 		l += s"  )"
 		l += s"  :precondition (and"
-		l ++= preconds.l.map(literal => s"    ${literal.tostripsText}")
+		l ++= preconds.l.map(literal => s"    ${literal.toStripsText}")
 		l += s"  )"
 		l += s"  :effect (and"
-		l ++= effects.l.map(literal => s"    ${literal.tostripsText}")
+		l ++= effects.l.map(literal => s"    ${literal.toStripsText}")
 		l += s"  )"
 		l += s")"
 		l.result.map(indent + _)
 	}
 	
-	def tostripsText(indent: String = ""): String =
+	def toStripsText(indent: String = ""): String =
 		tostripsLines(indent).mkString("\n")
 
 /*		"  (:action tecan_pipette1
@@ -524,14 +524,14 @@ case class Domain(
 		)
 	}
 	
-	def tostripsText: String = {
+	def toStripsText: String = {
 		val s = List(
 				"(define (domain X)",
 				"  (:requirements :strips :typing)"
 			).mkString("", "\n", "\n") +
 			type_m.toList.sorted.map(pair => s"${pair._1} - ${pair._2}").mkString("  (:types\n    ", "\n    ", "\n  )\n") +
-			predicate_l.map(_.tostripsText).sorted.mkString("  (:predicates\n    ", "\n    ", "\n  )\n") +
-			operator_l.map(_.tostripsText("  ")).mkString("\n") +
+			predicate_l.map(_.toStripsText).sorted.mkString("  (:predicates\n    ", "\n    ", "\n  )\n") +
+			operator_l.map(_.toStripsText("  ")).mkString("\n") +
 			"\n)"
 		s
 	}
@@ -582,7 +582,7 @@ case class Problem(
 		Problem(domain.relaxed, typToObject_l, state0, goals)
 	}
 	
-	def tostripsText: String = {
+	def toStripsText: String = {
 		val l = new ListBuffer[String]
 		l += "(define (problem X-problem)"
 		l += "  (:domain X)"
@@ -592,11 +592,11 @@ case class Problem(
 		l += "  )"
 		
 		l += "  (:init"
-		l ++= state0.atoms.toList.map("    " + _.tostripsText).sorted
+		l ++= state0.atoms.toList.map("    " + _.toStripsText).sorted
 		l += "  )"
 		
 		l += "  (:goals (and"
-		l ++= goals.l.toList.map("    " + _.tostripsText)
+		l ++= goals.l.toList.map("    " + _.toStripsText)
 		l += "  ))"
 		
 		l += ")"

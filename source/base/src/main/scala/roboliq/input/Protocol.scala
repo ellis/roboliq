@@ -921,19 +921,19 @@ class Protocol {
 			_ = println(operatorInfo_l)
 			_ = println("domain:")
 			domain <- createDomain(cs, operatorInfo_l)
-			_ = println(domain.tostripsText)
+			_ = println(domain.toStripsText)
 			// Save to file system
 			_ = {
 				val path = new File("log-domain.lisp").getPath
-				roboliq.utils.FileUtils.writeToFile(path, domain.tostripsText)
+				roboliq.utils.FileUtils.writeToFile(path, domain.toStripsText)
 			}
 			
 			problem <- createProblem(operatorInfo_l, domain)
-			_ = println(problem.tostripsText)
+			_ = println(problem.toStripsText)
 			// Save to file system
 			_ = {
 				val path = new File("log-problem.lisp").getPath
-				roboliq.utils.FileUtils.writeToFile(path, problem.tostripsText)
+				roboliq.utils.FileUtils.writeToFile(path, problem.toStripsText)
 			}
 
 			plan0 = PartialPlan.fromProblem(problem, Some(getPotentialNewProviders(operatorInfo_l.size)))
