@@ -71,4 +71,7 @@ planningInitialState:
 - agent-has-device mario mario.shaker
 - device-can-site mario.shaker P3
 """
+
+	val evowareAgentConfig1 = """
+"""
 }

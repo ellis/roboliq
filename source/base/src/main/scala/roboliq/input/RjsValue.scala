@@ -265,6 +265,17 @@ case class RjsDefine(
 	def toJson = RjsValue.toJson(this)
 }
 
+@RjsJsonType("function")
+case class RjsFunction(
+	fn: RjsAbstractMap => ResultE[RjsValue]
+) extends RjsValue {
+	def toJson: ResultC[JsValue] = {
+		ResultC.unit(JsObject(
+			"TYPE" -> JsString("function")
+		))
+	}
+}
+
 @RjsJsonType("import")
 case class RjsImport(
 	@RjsJsonName("NAME") name: String,
@@ -498,7 +509,21 @@ object RjsValue {
 			case "protocol" => convertMapAs[RjsProtocol](map)
 			case "section" => convertMapAs[RjsSection](map)
 			case _ =>
-				ResultE.error(s"unable to convert from RjsMap to TYPE=${typ}.")
+				for {
+					kv_l <- ResultE.mapAll(map.toList) { case (name, rjsval) =>
+						ResultE.evaluate(rjsval).map(name -> _)
+					}
+				} yield {
+					val isBasic = kv_l.forall(_._2.isInstanceOf[RjsBasicValue])
+					if (isBasic) {
+						val map2 = kv_l.map(pair => pair.copy(_2 = pair._2.asInstanceOf[RjsBasicValue])).toMap
+						RjsBasicMap(typ, map2)
+					}
+					else {
+						RjsMap(typ, kv_l.toMap)
+					}
+				}
+				//ResultE.error(s"unable to convert from RjsMap to TYPE=${typ}.")
 		}
 	}
 	

@@ -41,6 +41,7 @@ import roboliq.input.RjsNull
 import roboliq.input.EvaluatorState
 import roboliq.input.RjsProtocol
 import roboliq.input.ProtocolDetails
+import roboliq.input.RjsAbstractMap
 
 case class RoboliqOpt(
 	step_l: Vector[RoboliqOptStep] = Vector()
@@ -206,6 +207,21 @@ object RoboliqRunner {
 		for {
 			res1 <- ResultE.evaluate(rjsval)
 			result1 <- res1 match {
+				case m0: RjsAbstractMap =>
+					m0.typ_? match {
+						case None =>
+							for {
+								data <- ResultE.from(RjsValue.merge(result0.data, res1))
+							} yield result0.copy(data = data)
+						case Some(typ) =>
+							typ match {
+								case "protocol" =>
+									for {
+										protocol <- RjsConverter.fromRjs[RjsProtocol](m0)
+										state <- ResultE.get
+									} yield result0.copy(protocol_? = Some((protocol, state)))
+							}
+					}
 				case x: RjsProtocol =>
 					for {
 						state <- ResultE.get
@@ -224,7 +240,7 @@ object RoboliqRunner {
 		println(s"processStepCheck($result):")
 		val protocolHandler = new ProtocolHandler
 		for {
-			pair <- ResultE.from(result.protocol_?, s"")
+			pair <- ResultE.from(result.protocol_?, s"You must supply a protocol")
 			(protocol, state) = pair
 			details0 <- ResultE.from(protocolHandler.extractDetails(protocol))
 			details1 <- RjsConverter.fromRjs[ProtocolDetails](result.data)

@@ -71,6 +71,8 @@ class Evaluator() {
 					evaluateCallBuiltin(x.name, input)
 				case Some((lambda: RjsLambda, scope)) =>
 					evaluateCallLambda(x.name, input, lambda, scope)
+				case Some((function: RjsFunction, _)) =>
+					evaluateCallFunction(x.name, input, function)
 				case Some((x2, _)) =>
 					ResultE.error(s"expected `${x.name}` to be a lambda")
 			}
@@ -94,6 +96,11 @@ class Evaluator() {
 		ResultE.withScope(scope.add(input)) {
 			ResultE.evaluate(lambda.expression)
 		}
+	}
+
+	def evaluateCallFunction(name: String, input: RjsMap, function: RjsFunction): ResultE[RjsValue] = {
+		println(s"evaluateCallFunction($name, $input)")
+		function.fn(input)
 	}
 
 	/**
