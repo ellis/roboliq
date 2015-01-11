@@ -36,11 +36,11 @@ import roboliq.input.ResultE
 import roboliq.utils.JsonUtils
 import roboliq.input.RjsValue
 import roboliq.input.RjsConverter
-import roboliq.input.ProtocolDataA
 import roboliq.input.ProtocolHandler
 import roboliq.input.RjsNull
 import roboliq.input.EvaluatorState
 import roboliq.input.RjsProtocol
+import roboliq.input.ProtocolDetails
 
 case class RoboliqOpt(
 	step_l: Vector[RoboliqOptStep] = Vector()
@@ -226,16 +226,16 @@ object RoboliqRunner {
 		for {
 			pair <- ResultE.from(result.protocol_?, s"")
 			(protocol, state) = pair
-			dataA0 <- ResultE.from(protocolHandler.extractDataA(protocol))
-			dataA1 <- RjsConverter.fromRjs[ProtocolDataA](result.data)
-			dataA <- ResultE.from(dataA0 merge dataA1)
-			dataB <- new ProtocolHandler().stepB(dataA)
+			details0 <- ResultE.from(protocolHandler.extractDetails(protocol))
+			details1 <- RjsConverter.fromRjs[ProtocolDetails](result.data)
+			details2 <- ResultE.from(details0 merge details1)
+			details3 <- new ProtocolHandler().expandCommands(details2)
 			//_ = println("dataB.commandExpansions: "+dataB.commandExpansions)
-			resultData <- ResultE.from(RjsValue.toBasicValue(dataB.commandExpansions))
+			result <- ResultE.from(RjsValue.toBasicValue(details3))
 		} yield {
 			//println("check:")
 			//println(dataB)
-			StepResult(None, resultData)
+			StepResult(None, result)
 		} 
 	}
 }

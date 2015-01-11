@@ -10,6 +10,43 @@ import scala.annotation.tailrec
 import roboliq.ai.plan.Unique
 import roboliq.core.ResultC
 
+case class CommandValidation(
+	message: String,
+	param_? : Option[String] = None,
+	precond_? : Option[Int] = None
+)
+
+case class CommandInfo(
+	command: RjsValue,
+	successors: List[String] = Nil,
+	validations: List[CommandValidation] = Nil,
+	effects: strips.Literals = strips.Literals.empty
+)
+
+@RjsJsonType("protocolDetails")
+case class ProtocolDetails(
+	val objects: RjsBasicMap = RjsBasicMap(),
+	val commands: Map[String, CommandInfo] = Map(),
+	val commandOrder: List[String] = Nil,
+	val planningDomainObjects: Map[String, String] = Map(),
+	val planningInitialState: strips.Literals = strips.Literals.empty
+) {
+	def merge(that: ProtocolDetails): ResultC[ProtocolDetails] = {
+		for {
+			objects <- this.objects merge that.objects
+		} yield {
+			new ProtocolDetails(
+				objects = objects,
+				commands = this.commands ++ that.commands,
+				commandOrder = this.commandOrder ++ that.commandOrder,
+				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
+				planningInitialState = this.planningInitialState ++ that.planningInitialState
+			)
+		}
+	}
+}
+
+/*
 sealed trait CommandValidation
 case class CommandValidation_Param(name: String) extends CommandValidation
 case class CommandValidation_Precond(description: String) extends CommandValidation
@@ -43,14 +80,15 @@ case class ProtocolDataA(
 		}
 	}
 }
+*/
 
-class ProtocolDataABuilder {
+class ProtocolDetailsBuilder {
 	private val objects = new HashMap[String, RjsBasicValue]
 	private val planningDomainObjects = new HashMap[String, String]
 	private val planningInitialState = new ArrayBuffer[strips.Literal]
 	
-	def get: ProtocolDataA = {
-		new ProtocolDataA(
+	def get: ProtocolDetails = {
+		new ProtocolDetails(
 			objects = RjsBasicMap(objects.toMap),
 			planningDomainObjects = planningDomainObjects.toMap,
 			planningInitialState = strips.Literals(Unique(planningInitialState.toList : _*))
@@ -127,6 +165,7 @@ class ProtocolDataABuilder {
 	}
 }
 
+/*
 case class ProtocolCommandResult(
 	command: RjsValue,
 	effects: strips.Literals = strips.Literals.empty,
@@ -136,15 +175,10 @@ case class ProtocolCommandResult(
 case class ProtocolDataB(
 	val dataA: ProtocolDataA,
 	val commandExpansions: Map[String, ProtocolCommandResult]
-)
-
-/*class ProtocolDataC(
-	val dataA: ProtocolDataA,
-	val validations: Map[String, List[CommandValidation]]
 )*/
 
 class ProtocolHandler {
-	def extractDataA(protocol: RjsProtocol): ResultC[ProtocolDataA] = {
+	def extractDetails(protocol: RjsProtocol): ResultC[ProtocolDetails] = {
 		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
 			(i+1).toString -> rjsval
 		}
@@ -172,10 +206,19 @@ class ProtocolHandler {
 			println("objects: "+objects)
 			val (planningDomainObjects, planningInitialState) = processLabware(protocol.labwares)
 			println("planningDomainObjects: "+planningDomainObjects)
-			new ProtocolDataA(
+			val commandInfo_l = command2_l.zipWithIndex.map { case ((name, command), i0) =>
+				val i = i0 + 1
+				val commandInfo = CommandInfo(
+					command = command,
+					successors = if (i < n) List(i.toString) else Nil,
+					validations = Nil,
+					effects = strips.Literals.empty
+				)
+				name -> commandInfo
+			}
+			ProtocolDetails(
 				objects = objects,
-				commands = RjsBasicMap(command2_l.toMap),
-				commandOrderingConstraints = commandOrderingConstraint_l,
+				commands = commandInfo_l.toMap,
 				commandOrder = commandOrder_l,
 				planningDomainObjects = planningDomainObjects,
 				planningInitialState = planningInitialState
@@ -197,35 +240,34 @@ class ProtocolHandler {
 		(objectToType_m.toMap, strips.Literals(atom_l.toList, Nil))
 	}
 	
-	def stepB(
-		dataA: ProtocolDataA
-	): ResultE[ProtocolDataB] = {
-		var state = dataA.planningInitialState
-		val idToResult0_m = new HashMap[String, ProtocolCommandResult]
-		def step(idToCommand_l: List[(String, RjsValue)]): ResultE[Map[String, ProtocolCommandResult]] = {
+	def expandCommands(
+		details0: ProtocolDetails
+	): ResultE[ProtocolDetails] = {
+		var state = details0.planningInitialState
+		val idToInfo0_m = new HashMap[String, CommandInfo]
+		def step(idToCommand_l: List[(String, RjsValue)]): ResultE[Map[String, CommandInfo]] = {
 			println("step")
 			idToCommand_l match {
-				case Nil => ResultE.unit(idToResult0_m.toMap)
+				case Nil => ResultE.unit(idToInfo0_m.toMap)
 				case (id, rjsval) :: res =>
 					for {
 						pair <- expandCommand(id, rjsval, state)
 						(res_m, effects) = pair
 						_ = state ++= effects
-						_ = idToResult0_m ++= res_m
+						_ = idToInfo0_m ++= res_m
 						res <- step(idToCommand_l.tail)
 					} yield res
 			}
 		}
 		
 		// Convert List[Int] back to String
-		val id_l = getCommandOrdering(dataA.commands.map.keys.toList)
-		val idToCommand_l = id_l.map(id => id -> dataA.commands.get(id).get)
+		val id_l = getCommandOrdering(details0.commands.keys.toList)
+		val idToCommand_l = id_l.map(id => id -> details0.commands(id).command)
 		for {
-			idToResult_m <- step(idToCommand_l)
+			idToInfo_m <- step(idToCommand_l)
 		} yield {
-			new ProtocolDataB(
-				dataA = dataA,
-				commandExpansions = idToResult_m
+			details0.copy(
+				commands = idToInfo_m
 			)
 		}
 	}
@@ -275,21 +317,21 @@ class ProtocolHandler {
 		id: String,
 		rjsval: RjsValue,
 		state: strips.Literals
-	): ResultE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
+	): ResultE[(Map[String, CommandInfo], strips.Literals)] = {
 		println(s"expandCommand($id, $rjsval)")
-		val result_m = new HashMap[String, ProtocolCommandResult]
+		val result_m = new HashMap[String, CommandInfo]
 		ResultE.context(s"expandCommand($id)") {
 			ResultE.evaluate(rjsval).flatMap {
 				case action: RjsAction =>
 					expandAction(id, action, state)
 				case instruction: RjsInstruction =>
 					ResultE.unit((
-						Map(id -> ProtocolCommandResult(instruction)),
+						Map(id -> CommandInfo(instruction)),
 						strips.Literals.empty
 					))
 				case RjsNull =>
 					ResultE.unit((
-						Map(id -> ProtocolCommandResult(RjsNull)),
+						Map(id -> CommandInfo(RjsNull)),
 						strips.Literals.empty
 					))
 				case _ =>
@@ -308,7 +350,7 @@ class ProtocolHandler {
 			action.input.get(name) match {
 				// If it's missing, return a validation object noting that problem
 				case None =>
-					Some(CommandValidation_Param(name))
+					Some(CommandValidation("missing parameter value", param_? = Some(name)))
 				// Otherwise, we have a value, so return nothing
 				case Some(jsvalInput) =>
 					None
@@ -324,9 +366,9 @@ class ProtocolHandler {
 		for {
 			precond_l <- bindActionLogic(actionDef.preconds, true, action, actionDef)
 		} yield {
-			precond_l.flatMap { precond => 
+			precond_l.zipWithIndex flatMap { case (precond, i) => 
 				if (!state0.holds(precond)) {
-					Some(CommandValidation_Precond(precond.toString))
+					Some(CommandValidation(precond.toString, precond_? = Some(i+1)))
 				}
 				else {
 					None
@@ -395,12 +437,12 @@ class ProtocolHandler {
 		id: String,
 		action: RjsAction,
 		state0: strips.Literals
-	): ResultE[(Map[String, ProtocolCommandResult], strips.Literals)] = {
+	): ResultE[(Map[String, CommandInfo], strips.Literals)] = {
 		println(s"expandAction($id)")
 		val validation_l = new ArrayBuffer[CommandValidation]
 		//val child_m = new HashMap[String, RjsValue]
 		var effectsCumulative = strips.Literals(Unique[strips.Literal]())
-		val result_m = new HashMap[String, ProtocolCommandResult]
+		val info_m = new HashMap[String, CommandInfo]
 		for {
 			actionDef <- ResultE.fromScope[RjsActionDef](action.name)
 			// Check inputs
@@ -439,7 +481,7 @@ class ProtocolHandler {
 											pair <- expandCommand(idChild, rjsChild, state)
 										} yield {
 											val (resChild_m, effectsChild) = pair
-											result_m ++= resChild_m
+											info_m ++= resChild_m
 											effectsCumulative ++= effectsChild
 											state ++= effectsChild
 										}
@@ -453,12 +495,12 @@ class ProtocolHandler {
 			}
 		} yield {
 			effectsCumulative ++= strips.Literals(Unique(effects : _*))
-			result_m(id) = ProtocolCommandResult(
+			info_m(id) = CommandInfo(
 				action,
 				effects = strips.Literals(Unique(effects : _*)),
-				validation_l = validation_l.toList
+				validations = validation_l.toList
 			)
-			(result_m.toMap, effectsCumulative)
+			(info_m.toMap, effectsCumulative)
 		}
 	}
 }

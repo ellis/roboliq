@@ -8,7 +8,7 @@ import spray.json.JsString
 import spray.json.JsValue
 import java.io.File
 import roboliq.utils.JsonUtils
-import roboliq.input.ProtocolDataA
+import roboliq.input.ProtocolDetails
 import roboliq.input.RjsMap
 import roboliq.input.RjsString
 import roboliq.ai.plan.Unique
@@ -21,7 +21,7 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 
 	describe("EvowareProtocolDataGenerator") {
 		it("") {
-			val protocolData0 = new ProtocolDataA(
+			val protocolData0 = new ProtocolDetails(
 				objects = RjsBasicMap(
 					"plateModel_384_square" -> RjsBasicMap(
 						"type" -> RjsString("PlateModel"),
@@ -45,12 +45,12 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 			)
 			val evowareTableSetupConfig = EvowareTableSetupConfig(
 				tableFile = "../testdata/bsse-mario/Template.ewt",
-				protocolData_? = None,
+				protocolDetails_? = None,
 				evowareProtocolData_? = Some(evowareProtocolData1)
 			)
 			val evowareAgentConfig = EvowareAgentConfig(
 				evowareDir = "../testdata/bsse-mario",
-				protocolData_? = Some(protocolData0),
+				protocolDetails_? = Some(protocolData0),
 				evowareProtocolData_? = Some(evowareProtocolData0),
 				tableSetups = Map("default"  -> evowareTableSetupConfig)
 			)
@@ -61,7 +61,7 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 				searchPath_l = List()
 			)
 			
-			val expected = ProtocolDataA(
+			val expected = ProtocolDetails(
 				objects = RjsBasicMap(
 					"CENTRIFUGE" -> RjsBasicMap(
 						"evowareGrid" -> RjsNumber(54,None),

@@ -63,7 +63,7 @@ usage.
 - [x] Rename Protocol2 to ProtocolHandler, Protocol2Spec to ProtocolHandlerSpec
 - [x] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
 - [x] RjsValue: should add a 'toBasicValue' method, and perhaps a RjsBasicMap that has RjsBasicValues
-- [ ] RoboliqRunner: args to specify expressions to load (files, strings, stdin, JSON or YAML)
+- [x] RoboliqRunner: args to specify expressions to load (files, strings, stdin, JSON or YAML)
 - [ ] RoboliqRunner: args to specify search paths
 - [ ] RoboliqRunner: args to specify evoware agent to load
 - [ ] RoboliqRunner: args to specify evoware agent table load

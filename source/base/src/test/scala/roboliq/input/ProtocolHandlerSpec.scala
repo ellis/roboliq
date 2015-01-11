@@ -46,67 +46,65 @@ class ProtocolHandlerSpec extends FunSpec {
 		sources = Map(),
 		commands = List(action1)
 	)
-	val dataA1 = protocolEvaluator.extractDataA(protocol1).run().value
+	val details1 = protocolEvaluator.extractDetails(protocol1).run().value
 	
 	describe("ProtocolHandlerSpec") {
 		it("test protocol 1 without lab info") {
-			assert(dataA1.planningDomainObjects == Map(
+			assert(details1.planningDomainObjects == Map(
 				"plate1" -> "plate"
 			))
-			assert(dataA1.planningInitialState == strips.Literals(Unique[strips.Literal](
+			assert(details1.planningInitialState == strips.Literals(Unique[strips.Literal](
 				strips.Literal.parse("labware plate1"),
 				strips.Literal.parse("model plate1 plateModel_384_square"),
 				strips.Literal.parse("location plate1 P3")
 			)))
 			
-			val ctxval1 = (for {
+			val ctxval1 = for {
 				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
-				dataB <- protocolEvaluator.stepB(dataA1)
-			} yield dataB.commandExpansions).run(data0)
+				details2 <- protocolEvaluator.expandCommands(details1)
+			} yield details2
 			
 			// strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3")
 			val expected1 = Map(
-				"1" -> ProtocolCommandResult(
+				"1" -> CommandInfo(
 					action1,
 					effects = strips.Literals.empty,
-					validation_l = List(
-						CommandValidation_Precond("agent-has-device mario mario__Shaker"),
-						CommandValidation_Precond("device-can-site mario__Shaker P3")
+					validations = List(
+						CommandValidation("agent-has-device mario mario__Shaker", precond_? = Some(1)),
+						CommandValidation("device-can-site mario__Shaker P3", precond_? = Some(2))
 					)
 				)
 			)
-			assert(ctxval1.value == expected1)
+			assert(ctxval1.run(data0).value.commands == expected1)
 		}
 		
 		it("test protocol 1 with lab info") {
-			val dataALab = new ProtocolDataA(
+			val dataALab = new ProtocolDetails(
 				planningDomainObjects = Map("mario" -> "agent", "mario__Shaker" -> "shaker"),
 				planningInitialState = strips.Literals(Unique(
 					strips.Literal.parse("agent-has-device mario mario__Shaker"),
 					strips.Literal.parse("device-can-site mario__Shaker P3")
 				))
 			)
-			val ctxval2 = (for {
-				dataA2 <- ResultE.from(dataALab merge dataA1)
+			val ctxval2 = for {
+				details2 <- ResultE.from(dataALab merge details1)
 				_ <- ResultE.evaluate(RjsImport("shakePlate", "1.0"))
-				dataB <- protocolEvaluator.stepB(dataA2)
-			} yield dataB.commandExpansions).run(data0)
+				details3 <- protocolEvaluator.expandCommands(details2)
+			} yield details3
 			
 			// strips.Atom.parse("agent-has-device mario mario__Shaker") + strips.Atom.parse("device-can-site mario__Shaker P3")
 			val expected2 = Map(
-				"1" -> ProtocolCommandResult(
+				"1" -> CommandInfo(
 					action1,
-					effects = strips.Literals.empty,
-					validation_l = Nil
+					effects = strips.Literals.empty
 				),
-				"1.1" -> ProtocolCommandResult(
+				"1.1" -> CommandInfo(
 					instruction1,
-					effects = strips.Literals.empty,
-					validation_l = Nil
+					effects = strips.Literals.empty
 				)
 			)
-			assert(ctxval2.value("1") == expected2("1"))
-			assert(ctxval2.value("1.1") == expected2("1.1"))
+			assert(ctxval2.run(data0).value.commands("1") == expected2("1"))
+			assert(ctxval2.run(data0).value.commands("1.1") == expected2("1.1"))
 		}
 	}
 }

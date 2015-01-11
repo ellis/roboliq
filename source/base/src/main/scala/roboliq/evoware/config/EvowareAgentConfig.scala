@@ -1,6 +1,6 @@
 package roboliq.evoware.config
 
-import roboliq.input.ProtocolDataA
+import roboliq.input.ProtocolDetails
 
 /**
  * @param evowareDir Evoware data directory
@@ -13,7 +13,7 @@ import roboliq.input.ProtocolDataA
  */
 case class EvowareAgentConfig(
 	evowareDir: String,
-	protocolData_? : Option[ProtocolDataA],
+	protocolDetails_? : Option[ProtocolDetails],
 	evowareProtocolData_? : Option[EvowareProtocolData],
 	tableSetups: Map[String, EvowareTableSetupConfig]
 )
@@ -64,6 +64,6 @@ case class EvowareTransporterBlacklistConfig(
  */
 case class EvowareTableSetupConfig(
 	tableFile: String,
-	protocolData_? : Option[ProtocolDataA],
+	protocolDetails_? : Option[ProtocolDetails],
 	evowareProtocolData_? : Option[EvowareProtocolData]
 )

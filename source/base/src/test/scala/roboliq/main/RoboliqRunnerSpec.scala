@@ -14,10 +14,11 @@ import roboliq.input.RjsNull
 import roboliq.input.ResultEData
 import roboliq.input.EvaluatorState
 import java.io.File
-import roboliq.input.ProtocolCommandResult
+import roboliq.input.CommandInfo
 import roboliq.input.RjsAction
 import roboliq.input.RjsMap
-import roboliq.input.CommandValidation_Precond
+import roboliq.input.CommandValidation
+import roboliq.input.RjsConverter
 
 class RoboliqRunnerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -71,19 +72,25 @@ class RoboliqRunnerSpec extends FunSpec {
 					RoboliqOptStep_Check()
 				)
 			)
+
+			val result = for {
+				result0 <- RoboliqRunner.process(opt1)
+				map <- RjsConverter.fromRjs[RjsBasicMap](result0)
+				_ = println("map: "+map)
+			} yield map.map("commands")
+
 			val expected = Map(
-				"1" -> ProtocolCommandResult(
+				"1" -> CommandInfo(
 					RjsAction("shakePlate", RjsMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3"))),
-					strips.Literals.empty,
-					List(
-						CommandValidation_Precond("agent-has-device mario mario.shaker"),
-						CommandValidation_Precond("device-can-site mario.shaker P3")
+					validations = List(
+						CommandValidation("agent-has-device mario mario.shaker", precond_? = Some(1)),
+						CommandValidation("device-can-site mario.shaker P3", precond_? = Some(2))
 					)
 				)
 			)
 			val expected_? = RjsValue.toBasicValue(expected)
 
-			assert(RoboliqRunner.process(opt1).run(data0).value == expected_?.run().value)
+			assert(result.run(data0).value == expected_?.run().value)
 		}
 		
 		it("check protocol with lab info") {
@@ -108,7 +115,12 @@ class RoboliqRunnerSpec extends FunSpec {
 				)
 			)
 
-			assert(RoboliqRunner.process(opt1).run(data0).value == expected)
+			val result = for {
+				result0 <- RoboliqRunner.process(opt1)
+				map <- RjsConverter.fromRjs[RjsBasicMap](result0)
+			} yield map.map("commands")
+			
+			assert(result.run(data0).value == expected)
 		}
 	}
 }

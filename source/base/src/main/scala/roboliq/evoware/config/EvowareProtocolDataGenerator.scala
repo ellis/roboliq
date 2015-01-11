@@ -51,8 +51,8 @@ import roboliq.evoware.commands.EvowareBeginLoopActionHandler
 import roboliq.evoware.commands.EvowareEndLoopActionHandler
 import com.google.gson.Gson
 import roboliq.input.EvowareAgentBean
-import roboliq.input.ProtocolDataA
-import roboliq.input.ProtocolDataABuilder
+import roboliq.input.ProtocolDetails
+import roboliq.input.ProtocolDetailsBuilder
 import roboliq.evoware.parser.EvowareCarrierData
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.EvowareTableData
@@ -67,7 +67,7 @@ object EvowareProtocolDataGenerator {
 		agentConfig: EvowareAgentConfig,
 		table_l: List[String],
 		searchPath_l: List[File]
-	): ResultC[ProtocolDataA] = {
+	): ResultC[ProtocolDetails] = {
 		val tableNameDefault = s"${agentIdent}.default"
 		val tableSetup_m = agentConfig.tableSetups.toMap.map(pair => s"${agentIdent}.${pair._1}" -> pair._2)
 		for {
@@ -91,16 +91,16 @@ object EvowareProtocolDataGenerator {
 			tableFile <- ResultC.from(Option(tableSetupConfig.tableFile), s"tableFile property must be set on tableSetup `$tableName`")
 			tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile))
 			// Merge protocolData of agent and table
-			protocolDataA = agentConfig.protocolData_?.getOrElse(new ProtocolDataA())
-			protocolDataB = tableSetupConfig.protocolData_?.getOrElse(new ProtocolDataA())
+			protocolDataA = agentConfig.protocolDetails_?.getOrElse(new ProtocolDetails())
+			protocolDataB = tableSetupConfig.protocolDetails_?.getOrElse(new ProtocolDetails())
 			protocolData0 <- protocolDataA merge protocolDataB
 			//_ = println("protocolDataA:\n"+protocolDataA)
 			//_ = println("protocolDataB:\n"+protocolDataB)
 			//_ = println("protocolData0:\n"+protocolData0)
 			// Merge evowareProtocolData of agent and table
-			evowareProtocolDataA = agentConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
+			evowareProtocolDetails = agentConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
 			evowareProtocolDataB = tableSetupConfig.evowareProtocolData_?.getOrElse(EvowareProtocolData.empty)
-			evowareProtocolData0 = evowareProtocolDataA merge evowareProtocolDataB
+			evowareProtocolData0 = evowareProtocolDetails merge evowareProtocolDataB
 			// Convert evowareProtocolData0 to ProtocolData
 			protocolData1 <- convertEvowareProtocolData(agentIdent, protocolData0, evowareProtocolData0, carrierData, tableData)
 			//_ = println("protocolData1:\n"+protocolData1)
@@ -112,11 +112,11 @@ object EvowareProtocolDataGenerator {
 	
 	private def convertEvowareProtocolData(
 		agentName: String,
-		data0: ProtocolDataA,
+		data0: ProtocolDetails,
 		evowareProtocolData: EvowareProtocolData,
 		carrierData: EvowareCarrierData,
 		tableData: EvowareTableData
-	): ResultC[ProtocolDataA] = {
+	): ResultC[ProtocolDetails] = {
 		//sites: Map[String, EvowareSiteConfig],
 		//devices: Map[String, EvowareDeviceConfig],
 		//transporterBlacklist: List[EvowareTransporterBlacklistConfig]
@@ -126,7 +126,7 @@ object EvowareProtocolDataGenerator {
 		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
 		println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
 		
-		val builder = new ProtocolDataABuilder
+		val builder = new ProtocolDetailsBuilder
 		val siteIdToSiteName_m = new HashMap[(Int, Int), String]
 		for {
 			// Find the evoware labware models
