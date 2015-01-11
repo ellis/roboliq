@@ -106,12 +106,14 @@ class RoboliqRunnerSpec extends FunSpec {
 				"1" -> RjsBasicMap(
 					"command" -> RjsBasicMap("INPUT" -> RjsBasicMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3")), "NAME" -> RjsString("shakePlate"), "TYPE" -> RjsString("action")),
 					"effects" -> RjsList(List()),
-					"validation_l" -> RjsList(List())
+					"successors" -> RjsList(List()),
+					"validations" -> RjsList(List())
 				),
 				"1.1" -> RjsBasicMap(
 					"command" -> RjsBasicMap("INPUT" -> RjsBasicMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3")), "NAME" -> RjsString("ShakerRun"), "TYPE" -> RjsString("instruction")),
 					"effects" -> RjsList(List()),
-					"validation_l" -> RjsList(List())
+					"successors" -> RjsList(List()),
+					"validations" -> RjsList(List())
 				)
 			)
 
