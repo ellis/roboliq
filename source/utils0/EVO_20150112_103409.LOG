@@ -1,0 +1,922 @@
+06E4CEC6
+20150112_103409 No user logged in
+                                                                                                                                
+                                                                                                                                
+              Freedom EVOware, Version 2, 6, 17, 0
+              HLM_LOGIN Result:0
+A 10:34:10    HLM_LOGIN Result:15
+              dongle type EVO+ found
+              Hardlock serial number: 346870173
+              reading options file
+              reading configuration file
+A 10:34:11    reading liquid-classes file
+D 10:34:11    Password for user "Admin, Administrator" (level 1) entered correctly
+A 10:34:11    Named Pipe 1 opened
+A 10:34:12    Named Pipe 2 opened
+              Connected to instrument via USB
+              MCA96: TipOfs=0
+              MCA96: TipOfs=0
+              loading Genesis driver
+              checking connection to instrument
+F 10:34:12    > M1,RFV2
+              - M1,0,711005266
+              > M1,RFV0
+              - M1,0,TECU-V1.40-12/2007
+              > M1,_Cache_on
+              - M1,0,
+              > M1,RSS
+              - M1,0,ACDEIMOPQSTW
+              > M1,RGD30
+              - M1,0,17250
+              > M1,RSD0,1
+              - M1,0,0
+              > M1,RSD7,0
+              - M1,0,0
+              > M1,RMA
+              * M1,2,
+              > M1,RSD4,1
+              - M1,0,0
+E 10:34:12    Scanning for and configuring ZaapMotionAxes ...
+A 10:34:12    Named Pipe 3 opened
+E 10:34:13    Scan completed - 0 Air LiHa arms found on instrument.
+F 10:34:13    > M1,RSD1,0
+              - M1,0,63
+              > C1,RFV
+              - C1,0,ROMACU-V2.21-09/2007
+A 10:34:13    RoMa 1 Round moves are disabled because there is no configuration entry.
+F 10:34:13    > C1,RSM
+              - C1,0,0
+              > C1,RPX4
+              - C1,0,20
+              > C1,RPX5
+              - C1,0,15965
+              > C1,RPY4
+              - C1,0,10
+              > C1,RPY5
+              - C1,0,3243
+              > C1,RPZ4
+              - C1,0,10
+              > C1,RPZ5
+              - C1,0,2013
+              > C1,RPX7
+              - C1,0,1259
+              > C1,RPY7
+              - C1,0,-606
+              > C1,RHW
+              - C1,0,5
+              > C1,RPG7
+              - C1,0,560
+              > C1,ROD
+              - C1,0,800
+              > C1,REE
+              - C1,0,GGGGG
+              > C1,RPR2
+              - C1,0,2000
+              > C1,RHW
+              - C1,0,5
+              > C1,RPY5
+              - C1,0,3243
+              > C1,RPZ5
+              - C1,0,2013
+              > C1,RPR5
+              - C1,0,3640
+              > C1,RPG5
+              - C1,0,1390
+              > C1,RPY4
+              - C1,0,10
+              > C1,RPY7
+              - C1,0,-606
+              > C1,RPZ4
+              - C1,0,10
+              > C1,RPZ7
+              - C1,0,-4047
+              > C1,RPR4
+              - C1,0,50
+              > C1,RPR7
+              - C1,0,858
+              > C1,RPG4
+              - C1,0,20
+              > C1,RPG7
+              - C1,0,560
+              > C1,RPZ2
+              - C1,0,1300
+              > C1,RPY2
+              - C1,0,3500
+              > C1,RPX2
+              - C1,0,10000
+              > C1,RPX1
+              - C1,0,1600
+              > C2,RFV
+              - C2,0,ROMACU-V2.21-09/2007
+              > C3,RFV
+              - C3,0,ROMACU-V2.21-09/2007
+A 10:34:13    RoMa 2 Round moves are disabled because there is no configuration entry.
+F 10:34:13    > C3,RSM
+              - C3,0,0
+              > C3,RPX4
+              - C3,0,30
+              > C3,RPX5
+              - C3,0,17272
+              > C3,RPY4
+              - C3,0,10
+              > C3,RPY5
+              - C3,0,3245
+              > C3,RPZ4
+              - C3,0,10
+              > C3,RPZ5
+              - C3,0,2546
+              > C3,RPX7
+              - C3,0,2560
+              > C3,RPY7
+              - C3,0,-609
+              > C3,RHW
+              - C3,0,2
+              > C3,RPG7
+              - C3,0,560
+              > C3,ROD
+              - C3,0,1850
+              > C3,REE
+              - C3,0,GGGGG
+              > C3,RPR2
+              - C3,0,2000
+              > C3,RHW
+              - C3,0,2
+              > C3,RPY5
+              - C3,0,3245
+              > C3,RPZ5
+              - C3,0,2546
+              > C3,RPR5
+              - C3,0,2737
+              > C3,RPG5
+              - C3,0,1390
+              > C3,RPY4
+              - C3,0,10
+              > C3,RPY7
+              - C3,0,-609
+              > C3,RPZ4
+              - C3,0,10
+              > C3,RPZ7
+              - C3,0,-3514
+              > C3,RPR4
+              - C3,0,60
+              > C3,RPR7
+              - C3,0,0
+              > C3,RPG4
+              - C3,0,20
+              > C3,RPG7
+              - C3,0,560
+              > C3,RPZ2
+              - C3,0,1300
+              > C3,RPY2
+              - C3,0,3500
+              > C3,RPX2
+              - C3,0,10000
+              > C3,RPX1
+              - C3,0,1600
+              > C4,RFV
+              - C4,0,ROMACU-V2.21-09/2007
+              > C5,RFV
+              - C5,0,LIHACU-V1.60-02/2010
+              > C5,T30RFV15
+              - C5,0,320
+              > C5,RFV8
+              - C5,0,0
+              > C5,RYS
+              - C5,0,90
+              > C5,RSD
+              - C5,0,0
+              > C5,RSL
+              - C5,0,0
+              > C5,RDA2,0
+              - C5,0,255
+              > C5,T20RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T20RSD1
+              - C5,0,0
+              > C5,T20RIS
+              - C5,0,0
+              > C5,T20RPP7
+              - C5,0,900
+              > C5,T20RPP10
+              - C5,0,7
+              > C5,T21RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T21RSD1
+              - C5,0,0
+              > C5,T21RIS
+              - C5,0,0
+              > C5,T21RPP7
+              - C5,0,900
+              > C5,T21RPP10
+              - C5,0,7
+              > C5,T22RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T22RSD1
+              - C5,0,0
+              > C5,T22RIS
+              - C5,0,0
+              > C5,T22RPP7
+              - C5,0,900
+              > C5,T22RPP10
+              - C5,0,7
+              > C5,T23RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T23RSD1
+A 10:34:13    Named Pipe 4 opened
+F 10:34:13    - C5,0,0
+              > C5,T23RIS
+              - C5,0,0
+              > C5,T23RPP7
+              - C5,0,900
+              > C5,T23RPP10
+              - C5,0,7
+              > C5,T24RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T24RSD1
+              - C5,0,0
+              > C5,T24RIS
+              - C5,0,0
+              > C5,T24RPP7
+              - C5,0,900
+              > C5,T24RPP10
+              - C5,0,7
+              > C5,T25RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T25RSD1
+              - C5,0,0
+              > C5,T25RIS
+              - C5,0,0
+              > C5,T25RPP7
+              - C5,0,900
+              > C5,T25RPP10
+              - C5,0,7
+              > C5,T26RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T26RSD1
+              - C5,0,0
+              > C5,T26RIS
+              - C5,0,0
+              > C5,T26RPP7
+              - C5,0,900
+              > C5,T26RPP10
+              - C5,0,7
+              > C5,T27RFV0
+              - C5,0,XP2000-V1.10-03/2006
+              > C5,T27RSD1
+              - C5,0,0
+              > C5,T27RIS
+              - C5,0,0
+              > C5,T27RPP7
+              - C5,0,900
+              > C5,T27RPP10
+              - C5,0,7
+              > C5,T20RFV2
+              - C5,0,710003920
+              > C5,T21RFV2
+              - C5,0,710003921
+              > C5,T22RFV2
+              - C5,0,710003922
+              > C5,T23RFV2
+              - C5,0,710006802
+              > C5,T24RFV2
+              - C5,0,710006803
+              > C5,T25RFV2
+              - C5,0,710006804
+              > C5,T26RFV2
+              - C5,0,710006805
+              > C5,T27RFV2
+              - C5,0,710006806
+              > C5,T36RFV
+              * C5,5,
+              > C5,RGD3
+              - C5,0,0
+              > C5,T32RFV0
+              * C5,5,
+              > C5,RGD58
+              - C5,0,0
+              > C5,RGD59
+              - C5,0,0
+              > C5,RNT0
+              - C5,0,255
+              > C5,RNT1
+              - C5,0,8
+              > C5,RPZ7
+              - C5,0,0,0,0,0,0,0,0,0
+              > C5,REE
+              - C5,0,GGGGGGGGGGG
+              > C5,RPZ5
+              - C5,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C5,RPX4
+              - C5,0,10
+              > C5,RPX5
+              - C5,0,14527
+              > C5,RPY4
+              - C5,0,10,10
+              > C5,RPY5
+              - C5,0,2844,2844
+              > C5,RPZ4
+              - C5,0,66,66,66,66,70,70,70,70
+              > C5,RPX7
+              - C5,0,-184
+              > C5,RPY7
+F 10:34:14    - C5,0,-883,-883
+              > C5,RPX1
+              - C5,0,1600
+              > C5,RPX2
+              - C5,0,10000
+              > C5,RPY1
+              - C5,0,2400,2400
+              > C5,RPY2
+              - C5,0,3500,3500
+              > C5,RPZ1
+              - C5,0,2000,2000,2000,2000,2000,2000,2000,2000
+              > C5,RPZ2
+              - C5,0,4000,4000,4000,4000,4000,4000,4000,4000
+              > C5,RSM
+              - C5,0,0
+              > C5,RPX8
+              - C5,0,9998
+              > C5,RPX10
+              - C5,0,-1250
+              > C5,RPY8
+              - C5,0,10007,10011
+              > C5,RPY10
+              - C5,0,1389,1389
+              > C5,SFP0
+              - C5,0,
+              > C6,RFV
+              - C6,0,LIHACU-V1.60-02/2010
+              > M1,RSD10,0
+              - M1,0,0
+              > M1,RSD11,0
+              - M1,0,0
+              > M1,RSD6,0
+              - M1,0,17
+              > O1,RFV
+              - O1,0,SAFY-V1.30-04/2008
+              > O1,RSL1
+              - O1,0,0
+              > O1,RSL2
+              - O1,0,0
+              > O1,RFV
+              - O1,0,SAFY-V1.30-04/2008
+              > O1,RLO1
+              - O1,0,0
+              > O1,RLS
+              - O1,0,0
+              > O1,SLO1,0
+              - O1,0,
+              > O1,SLO2,0
+              - O1,0,
+              > O1,SLO3,0
+              - O1,0,
+              > O1,SLO4,0
+              - O1,0,
+              > O5,RFV
+              - O5,0,SPE-V2.10-12/01
+              > O5,RWM
+              - O5,0,128
+              > M1,RSD8,0
+              - M1,0,0
+              > M1,RSD9,0
+              - M1,0,0
+A 10:34:14    Communication over USB
+              MCA96: TipOfs=0
+D 10:35:11    Loading program "C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\chao001.esc"
+F 10:35:14    > O1,ALO1,1
+              - O1,0,
+              > O1,ALO2,1
+F 10:35:15    > O1,RSL2
+              - O1,0,
+              - O1,0,0
+              > O1,SSL1,1
+              - O1,0,
+G 10:35:15    Named Pipe 3 Command "IsInitialized"
+              Named Pipe 3 Answer  "0;0"
+              Named Pipe 3 Command "IsInitialized"
+              Named Pipe 3 Answer  "0;0"
+              Named Pipe 3 Command "COMMAND;M1RFV2"
+F 10:35:15    > M1,RFV2
+              - M1,0,711005266
+G 10:35:15    Named Pipe 3 Answer  "0;711005266"
+              Named Pipe 3 Command "COMMAND;M1RFV"
+F 10:35:15    > M1,RFV
+              - M1,0,TECU-V1.40-12/2007
+G 10:35:15    Named Pipe 3 Answer  "0;TECU-V1.40-12/2007"
+              Named Pipe 3 Command "COMMAND;C5RFV2"
+F 10:35:15    > C5,RFV2
+              - C5,0,711005262
+G 10:35:15    Named Pipe 3 Answer  "0;711005262"
+              Named Pipe 3 Command "COMMAND;C5RFV"
+F 10:35:15    > C5,RFV
+              - C5,0,LIHACU-V1.60-02/2010
+G 10:35:15    Named Pipe 3 Answer  "0;LIHACU-V1.60-02/2010"
+              Named Pipe 3 Command "INIT_RSP"
+A 10:35:15    initializing instrument
+              LiHa1(C5): Right size = 721
+              RoMa1(C1): Left size = 721
+              RoMa1(C1): Right size = 650
+              RoMa2(C3): Left size = 650
+F 10:35:15    > O1,SPN
+              - O1,0,
+              > O1,SPS3
+              - O1,0,
+              > C5,PIA
+F 10:35:29    - C5,0,
+              > C5,BMX2
+              - C5,0,
+              > C1,PIA
+F 10:36:00    - C1,0,
+              > C1,PIX
+F 10:36:01    - C1,0,
+              > C1,RHW
+              - C1,0,5
+              > C2,RPX0
+              - C2,0,1263
+              > C2,RPY0
+              - C2,0,-606
+              > C2,RPZ0
+              - C2,0,2013
+              > C2,RPR0
+              - C2,0,3600
+              > C2,RPG0
+              - C2,0,560
+              > C1,BMX2
+              - C1,0,
+              > C3,PIA
+F 10:37:08    - C3,0,
+              > C3,PIX
+F 10:37:10    - C3,0,
+              > C3,RHW
+              - C3,0,2
+              > C4,RPX0
+              - C4,0,2563
+              > C4,RPY0
+              - C4,0,-609
+              > C4,RPZ0
+              - C4,0,2546
+              > C4,RPR0
+              - C4,0,-1
+              > C4,RPG0
+              - C4,0,560
+              > C4,RPX0
+              - C4,0,2563
+              > C4,RPY0
+              - C4,0,-609
+              > C4,RPZ0
+              - C4,0,2546
+              > C4,RPR0
+              - C4,0,-1
+              > C4,RPG0
+              - C4,0,560
+              > C1,PIX
+F 10:37:11    - C1,0,
+              > C2,RPX0
+              - C2,0,1263
+              > C2,RPY0
+              - C2,0,-606
+              > C2,RPZ0
+              - C2,0,2013
+              > C2,RPR0
+              - C2,0,3600
+              > C2,RPG0
+              - C2,0,560
+              > C5,PIX
+F 10:37:12    - C5,0,
+              > C6,RPX0
+              - C6,0,-186
+              > C6,RPY0
+              - C6,0,-883,90
+              > C6,RPZ0
+              - C6,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C4,RPX0
+              - C4,0,2563
+              > C4,RPY0
+              - C4,0,-609
+              > C4,RPZ0
+              - C4,0,2546
+              > C4,RPR0
+              - C4,0,-1
+              > C4,RPG0
+              - C4,0,560
+              > C3,PRX0
+              - C3,0,
+              > C1,PRX0
+              - C1,0,
+              > C3,SRA
+              - C3,0,
+              > C3,REE
+              - C3,0,@@@@@
+              > C3,RPR0
+              - C3,0,-1
+              > C3,RPG0
+              - C3,0,560
+              > C3,PAG900
+F 10:37:13    - C3,0,
+              > C4,RPX0
+              - C4,0,2559
+              > C4,RPY0
+              - C4,0,-609
+              > C4,RPZ0
+              - C4,0,2546
+              > C4,RPR0
+              - C4,0,-1
+              > C4,RPG0
+              - C4,0,900
+              > C3,SFX10000
+              - C3,0,
+              > C3,SFY5000,1500
+              - C3,0,
+              > C3,SFZ1300
+              - C3,0,
+              > C3,SFR5000,1500
+              - C3,0,
+              > C4,RPG0
+              - C4,0,900
+              > C4,RPR0
+              - C4,0,-1
+              > C3,SAA1,15995,880,2446,1800,,1
+              - C3,0,
+              > C3,RPR0
+              - C3,0,-1
+              > C3,RPG0
+              - C3,0,900
+              > C2,RPX0
+              - C2,0,1259
+              > C2,RPR0
+              - C2,0,3600
+              > C3,SSM1
+              - C3,0,
+              > C3,AAA
+F 10:37:15    - C3,0,
+              > C4,RPX0
+              - C4,0,15993
+              > C4,RPY0
+              - C4,0,880
+              > C4,RPZ0
+              - C4,0,2446
+              > C4,RPR0
+              - C4,0,1800
+              > C4,RPG0
+              - C4,0,900
+              > C3,SSM0
+              - C3,0,
+              > C4,RPX0
+              - C4,0,15993
+              > C3,SFX10000
+              - C3,0,
+              > C3,SFY3500,1000
+              - C3,0,
+              > C3,SFZ1300
+              - C3,0,
+              > C3,SFR2000,600
+F 10:37:16    - C3,0,
+              > C1,SRA
+              - C1,0,
+              > C1,REE
+              - C1,0,@@@@@
+              > C1,RPR0
+              - C1,0,3600
+              > C1,RPG0
+              - C1,0,560
+              > C1,PAG900
+F 10:37:17    - C1,0,
+              > C2,RPX0
+              - C2,0,1259
+              > C2,RPY0
+              - C2,0,-606
+              > C2,RPZ0
+              - C2,0,2013
+              > C2,RPR0
+              - C2,0,3600
+              > C2,RPG0
+              - C2,0,900
+              > C1,SFX10000
+              - C1,0,
+              > C1,SFY5000,1500
+              - C1,0,
+              > C1,SFZ1300
+              - C1,0,
+              > C1,SFR5000,1500
+              - C1,0,
+              > C2,RPG0
+              - C2,0,900
+              > C2,RPR0
+              - C2,0,3600
+              > C1,SAA1,8500,-400,2013,900,,1
+              - C1,0,
+              > C1,RPR0
+              - C1,0,3600
+              > C1,RPG0
+              - C1,0,900
+              > C6,RPX0
+              - C6,0,-184
+              > C4,RPX0
+              - C4,0,15993
+              > C4,RPR0
+              - C4,0,1800
+              > C1,SSM1
+              - C1,0,
+              > C1,AAA
+F 10:37:18    - C1,0,
+              > C2,RPX0
+              - C2,0,8498
+              > C2,RPY0
+              - C2,0,-400
+              > C2,RPZ0
+              - C2,0,2013
+              > C2,RPR0
+              - C2,0,900
+              > C2,RPG0
+              - C2,0,900
+              > C1,SSM0
+              - C1,0,
+              > C2,RPX0
+              - C2,0,8498
+              > C1,SFX10000
+              - C1,0,
+              > C1,SFY3500,1000
+              - C1,0,
+              > C1,SFZ1300
+              - C1,0,
+              > C1,SFR2000,600
+              - C1,0,
+              > C2,RPX0
+              - C2,0,8498
+              > C2,RPR0
+              - C2,0,900
+              > C5,SSM1
+              - C5,0,
+              > C5,RPX0
+              - C5,0,-184
+              > C5,RPY0
+              - C5,0,-883,90
+              > C5,SSM1
+              - C5,0,
+              > C5,SHZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,PAA45,1031,90,1201,1203,1201,1204,544,549,545,547
+F 10:37:20    - C5,0,
+              > C5,SSM0
+              - C5,0,
+              > C6,RPX0
+              - C6,0,45
+              > C6,RPY0
+              - C6,0,1031,90
+              > C6,RPX0
+
+E 10:37:20    Performing dilutor initialization
+F 10:37:20    > C5,PID255
+              - C6,0,45
+              > C6,RPY0
+              - C6,0,1031,90
+F 10:37:57    - C5,0,
+              > C6,RDS
+              - C6,0,0,0,0,0,0,0,0,0
+              > C5,PVL1,1,1,1,1,1,1,1
+              - C5,0,
+              > C5,PPR100,100,100,100,100,100,100,100
+F 10:37:58    - C5,0,
+              > C5,PVL0,0,0,0,0,0,0,0
+              - C5,0,
+              > C5,SEP1800,1800,1800,1800,1800,1800,1800,1800
+              - C5,0,
+              > C5,PVL0,0,0,0,0,0,0,0
+              - C5,0,
+              > C5,PPR-100,-100,-100,-100,-100,-100,-100,-100
+              - C5,0,
+
+              > O1,SPS0
+              - O1,0,
+              > C5,RPZ5
+              - C5,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C5,PAZ2100,2100,2100,2100,2100,2100,2100,2100
+F 10:37:59    - C5,0,
+G 10:37:59    Named Pipe 3 Answer  "0"
+              Named Pipe 3 Command "LIHA_PARK;0"
+F 10:37:59    > C5,RPZ5
+              - C5,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C5,PAZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,SHZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C2,RPX0
+              - C2,0,8498
+              > C2,RPR0
+              - C2,0,900
+              > C5,SSM1
+              - C5,0,
+              > C5,RPX0
+              - C5,0,45
+              > C5,RPY0
+              - C5,0,1031,90
+              > C5,SSM1
+              - C5,0,
+              > C5,PAA45,1031,90,2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,SSM0
+              - C5,0,
+              > C6,RPX0
+              - C6,0,45
+              > C6,RPY0
+              - C6,0,1031,90
+              > C6,RPX0
+F 10:38:00    - C6,0,45
+              > C6,RPY0
+              - C6,0,1031,90
+G 10:38:00    Named Pipe 3 Answer  "0"
+              Named Pipe 3 Command "IsInitialized"
+              Named Pipe 3 Answer  "0;1"
+              Named Pipe 2 Command "GET_VERSION"
+              Named Pipe 2 Answer  "0;Version 2, 6, 17, 0;STD"
+              Named Pipe 3 Command "IsInitialized"
+              Named Pipe 3 Answer  "0;1"
+              Named Pipe 2 Command "SET_ROMANO;0"
+              Named Pipe 2 Answer  "0"
+              Named Pipe 2 Command "ROMA_PARK;1"
+F 10:38:00    > C1,SRA
+              - C1,0,
+              > C1,REE
+              - C1,0,@@@@@
+              > C1,RPR0
+              - C1,0,900
+              > C1,RPG0
+              - C1,0,900
+              > C1,PAG900
+              - C1,0,
+              > C2,RPX0
+              - C2,0,8498
+              > C2,RPY0
+              - C2,0,-400
+              > C2,RPZ0
+              - C2,0,2013
+              > C2,RPR0
+              - C2,0,900
+              > C2,RPG0
+              - C2,0,900
+              > C1,SFX10000
+              - C1,0,
+              > C1,SFY5000,1500
+              - C1,0,
+              > C1,SFZ1300
+              - C1,0,
+              > C1,SFR5000,1500
+              - C1,0,
+              > C2,RPG0
+              - C2,0,900
+              > C2,RPR0
+              - C2,0,900
+              > C1,SAA1,8500,-400,2013,900,,1
+              - C1,0,
+              > C1,RPR0
+              - C1,0,900
+              > C1,RPG0
+              - C1,0,900
+              > C6,RPX0
+              - C6,0,45
+              > C4,RPX0
+              - C4,0,15993
+              > C4,RPR0
+              - C4,0,1800
+              > C1,SSM1
+              - C1,0,
+              > C1,AAA
+              - C1,0,
+              > C2,RPX0
+              - C2,0,8500
+              > C2,RPY0
+              - C2,0,-400
+              > C2,RPZ0
+              - C2,0,2013
+              > C2,RPR0
+              - C2,0,900
+              > C2,RPG0
+              - C2,0,900
+              > C1,SSM0
+              - C1,0,
+              > C2,RPX0
+              - C2,0,8500
+              > C1,SFX10000
+              - C1,0,
+              > C1,SFY3500,1000
+              - C1,0,
+              > C1,SFZ1300
+              - C1,0,
+              > C1,SFR2000,600
+              - C1,0,
+G 10:38:00    Named Pipe 2 Answer  "0"
+              Named Pipe 1 Command "GET_VERSION"
+              Named Pipe 1 Answer  "0;Version 2, 6, 17, 0;STD"
+              Named Pipe 1 Command "SET_ROMANO;1"
+              Named Pipe 1 Answer  "0"
+              Named Pipe 1 Command "ROMA_PARK;1"
+F 10:38:00    > C3,SRA
+              - C3,0,
+              > C3,REE
+              - C3,0,@@@@@
+              > C3,RPR0
+              - C3,0,1800
+              > C3,RPG0
+              - C3,0,900
+              > C3,PAG900
+              - C3,0,
+              > C4,RPX0
+              - C4,0,15993
+              > C4,RPY0
+              - C4,0,880
+              > C4,RPZ0
+              - C4,0,2446
+              > C4,RPR0
+              - C4,0,1800
+              > C4,RPG0
+              - C4,0,900
+              > C3,SFX10000
+              - C3,0,
+              > C3,SFY5000,1500
+              - C3,0,
+              > C3,SFZ1300
+              - C3,0,
+              > C3,SFR5000,1500
+              - C3,0,
+              > C4,RPG0
+              - C4,0,900
+              > C4,RPR0
+              - C4,0,1800
+              > C3,SAA1,15995,880,2446,1800,,1
+              - C3,0,
+              > C3,RPR0
+              - C3,0,1800
+              > C3,RPG0
+              - C3,0,900
+              > C2,RPX0
+              - C2,0,8500
+              > C2,RPR0
+              - C2,0,900
+              > C3,SSM1
+              - C3,0,
+              > C3,AAA
+              - C3,0,
+              > C4,RPX0
+              - C4,0,15995
+              > C4,RPY0
+              - C4,0,880
+              > C4,RPZ0
+              - C4,0,2446
+              > C4,RPR0
+              - C4,0,1800
+              > C4,RPG0
+              - C4,0,900
+              > C3,SSM0
+              - C3,0,
+              > C4,RPX0
+              - C4,0,15995
+              > C3,SFX10000
+              - C3,0,
+              > C3,SFY3500,1000
+              - C3,0,
+              > C3,SFZ1300
+              - C3,0,
+              > C3,SFR2000,600
+              - C3,0,
+G 10:38:00    Named Pipe 1 Answer  "0"
+              Named Pipe 4 Command "Te-VacS;O5;6;19;0"
+F 10:38:00    > O5,RDI1
+              - O5,0,1
+G 10:38:00    Named Pipe 4 Answer  "0;1"
+              Named Pipe 3 Command "IsInitialized"
+              Named Pipe 3 Answer  "0;1"
+F 10:38:00    > O1,ALO1,0
+              > O1,ALO2,0
+              - O1,0,
+              > O1,RSL1
+              - O1,0,
+              > O1,SSL1,0
+              - O1,0,1
+              > O1,RSL2
+              - O1,0,
+              - O1,0,0
+D 11:54:15    Loading program "C:\ProgramData\Tecan\EVOware\database\scripts\Misc\RemoveAirFromTips.esc"
+D 11:54:44    Loading program "C:\ProgramData\Tecan\EVOware\database\WT_Templates\Template.ewt"
+C 11:55:41    Script is saved before execution!
+D 11:55:46    button OK has been pressed
+A 11:56:11    HLM_LOGIN Result:0
+              HLM_LOGIN Result:0
+A 11:56:12    HLM_LOGIN Result:15
+A 11:56:17    HLM_LOGIN Result:0
+A 11:56:19    HLM_LOGIN Result:15
+              HLM_LOGIN Result:0
+F 11:56:19    > O1,ALO1,1
+              - O1,0,
+              > O1,ALO2,1
+F 11:56:20    - O1,0,
+              > O1,RSL2
+              - O1,0,0
+              > O1,SSL1,1
+              - O1,0,
+G 11:56:20    Named Pipe 3 Command "IsInitialized"
+              Named Pipe 3 Answer  "0;1"
+F 11:56:20    > O1,SPN
+              - O1,0,
+              > O1,SPS3
+              - O1,0,
+A 11:56:20    closing log-file
