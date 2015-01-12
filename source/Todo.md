@@ -41,11 +41,11 @@ usage.
 
 ## Level detection with Chao
 
-- [ ] Teach plate
-- [ ] Get more black transparent plates
+- [x] Run a thorough rinse of the system
+- [x] Figure out why pipetting is working so badly with the transparent plates
+- [x] Get more black transparent plates
+- [x] Teach plate
 - [ ] Create program for extracting level info from logs
-- [ ] Run a thorough rinse of the system
-- [ ] Figure out why pipetting is working so badly with the transpartent plates
 
 Experiments:
 
