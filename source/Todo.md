@@ -39,6 +39,20 @@ usage.
 - [ ] most device configuration information should be loaded from a config file.  See ConfigEvoware.loadDevices()
 - [ ] strengthen the connection between commands and actions, so that all planning variables can be set by the user in the protocol
 
+## Level detection with Chao
+
+- [ ] Teach plate
+- [ ] Get more black transparent plates
+- [ ] Create program for extracting level info from logs
+- [ ] Run a thorough rinse of the system
+- [ ] Figure out why pipetting is working so badly with the transpartent plates
+
+Experiments:
+
+- [ ] calibrate reader/volume using dye
+- [ ] calibrate reader/volume/level (use previous plate, in two steps, detect half of levels, readout, detect other half, readout)
+- [ ] try the same level detection, but pipette using pure water, in order to see how well level detection works with pure water
+
 ## Current goal
 
 - [x] Evaluator: handle 'let' expressions
