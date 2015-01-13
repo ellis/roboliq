@@ -65,6 +65,20 @@ class RjsValueSpec extends FunSpec {
 				"INPUT" -> RjsBasicMap(Map("numbers" -> RjsList(List(RjsSubst("x"), RjsNumber(1,None)))))
 			)))
 			assert(RjsValue.evaluateTypedMap(tmLambda).run().value == lambda)
+
+			val tmCustom1Basic = RjsBasicMap("CustomType1", Map(
+				"a" -> RjsString("Hello"),
+				"b" -> RjsNumber(42)
+			))
+			assert(RjsValue.evaluateTypedMap(tmCustom1Basic).run().value == tmCustom1Basic)
+
+			val tmCustom2Basic = RjsBasicMap("CustomType2", Map(
+				"myLambda" -> tmLambda
+			))
+			val tmCustom2 = RjsMap("CustomType2", Map(
+				"myLambda" -> lambda
+			))
+			assert(RjsValue.evaluateTypedMap(tmCustom2Basic).run().value == tmCustom2)
 		}
 		it("RjsValue.merge") {
 			val l1 = RjsList(number)
