@@ -1,0 +1,200 @@
+B253C4F8
+20150113_135736 Admin           
+                                                                                                                                
+                                                                                                                                
+              Freedom EVOware, Version 2, 6, 17, 0
+D 13:57:36    Starting program "chao002" (lines 1 to 3)
+F 13:57:36  0 > C5,RPZ5
+              - C5,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C5,PAZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+
+E 13:57:36  0 Line    1 : Comment
+              Liquid detect using a single tip, then using 2 tips
+
+              Line    2 : Detect Liquid
+              tip 1 : detect  1, 1 D-BSSE 384 Well Plate Transp [10,4]
+                              "Roboliq_Water_Wet_1000" 
+F 13:57:36  0 > C6,RPZ0
+              - C6,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C6,RPX0
+              - C6,0,45
+F 13:57:37  0 > C6,RPX0
+              - C6,0,45
+              > C5,SHZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,RPX0
+              - C5,0,45
+              > C5,RPY0
+              - C5,0,1031,90
+              > C2,RPX0
+              - C2,0,8500
+              > C2,RPR0
+              - C2,0,900
+              > C5,SSM1
+              - C5,0,
+              > C5,PAA2352,2018,90,1448,2100,2100,2100,2100,2100,2100,2100
+F 13:57:38    - C5,0,
+              > C5,SSM0
+              - C5,0,
+              > C6,RPX0
+              - C6,0,2351
+              > C6,RPY0
+              - C6,0,2018,90
+              > C5,SDM7,1
+              - C5,0,
+              > C5,SSL600,,,,,,,
+              - C5,0,
+              > C5,SDL40,,,,,,,
+              - C5,0,
+              > C5,STL1448,,,,,,,
+              - C5,0,
+              > C5,SML1319,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,SBL0,,,,,,,
+              - C5,0,
+E 13:57:38  0 tip 1 : DITI is being re-used - no PMP evaluation will be performed for this pipetting step
+F 13:57:38  0 > C5,RPZ12
+              - C5,0,2100,2100,2100,2100,2100,2100,2100,2100
+              > C5,SHZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,MDT1,,,,0,0,0,0,0,0,0,0
+F 13:57:39    - C5,0,
+              > C5,REE
+              - C5,0,@@@@@@@@@@@
+              > C5,SHZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,RVZ1
+              - C5,0,1370,0,0,0,0,0,0,0
+              > C5,RPZ0
+              - C5,0,1359,2100,2100,2100,2100,2100,2100,2100
+              > C5,RPZ0
+              - C5,0,1359,2100,2100,2100,2100,2100,2100,2100
+              > C5,SSZ600,,,,,,,
+              - C5,0,
+              > C5,MAZ1448,,,,,,,
+              - C5,0,
+
+E 13:57:39  0 detected_volume_1 = 62
+
+              detected_volume_2 = -1
+
+              detected_volume_3 = -1
+
+              detected_volume_4 = -1
+
+              detected_volume_5 = -1
+
+              detected_volume_6 = -1
+
+              detected_volume_7 = -1
+
+              detected_volume_8 = -1
+
+              Line    3 : Detect Liquid
+              tip 1 : detect  1, 1 D-BSSE 384 Well Plate Transp [10,4]
+                              "Roboliq_Water_Wet_1000" 
+              tip 2 : detect  1, 3 D-BSSE 384 Well Plate Transp [10,4]
+                              "Roboliq_Water_Wet_1000" 
+F 13:57:39  0 > C6,RPZ0
+              - C6,0,1448,2100,2100,2100,2100,2100,2100,2100
+              > C6,RPX0
+              - C6,0,2352
+              > C6,RPX0
+              - C6,0,2352
+              > C6,RPY0
+              - C6,0,2018,90
+              > C6,RPY0
+              - C6,0,2018,90
+              > C6,RPZ0
+F 13:57:40    - C6,0,1448,2100,2100,2100,2100,2100,2100,2100
+              > C5,SHZ1448,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,RPX0
+              - C5,0,2352
+              > C5,RPY0
+              - C5,0,2018,90
+              > C5,SSM1
+              - C5,0,
+              > C5,PAA2352,2018,90,1448,1450,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,SSM0
+              - C5,0,
+              > C6,RPX0
+              - C6,0,2352
+              > C6,RPY0
+              - C6,0,2018,90
+              > C5,SDM7,1
+              - C5,0,
+              > C5,SSL600,600,,,,,,
+              - C5,0,
+              > C5,SDL40,40,,,,,,
+              - C5,0,
+              > C5,STL1448,1450,,,,,,
+              - C5,0,
+              > C5,SML1319,1321,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,SBL0,0,,,,,,
+              - C5,0,
+E 13:57:40  0 tip 1 : DITI is being re-used - no PMP evaluation will be performed for this pipetting step
+              tip 2 : DITI is being re-used - no PMP evaluation will be performed for this pipetting step
+F 13:57:40  0 > C5,RPZ12
+              - C5,0,1448,2100,2100,2100,2100,2100,2100,2100
+              > C5,SHZ2100,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,MDT3,,,,0,0,0,0,0,0,0,0
+F 13:57:42    - C5,0,
+              > C5,REE
+              - C5,0,@@@@@@@@@@@
+              > C5,SHZ1448,2100,2100,2100,2100,2100,2100,2100
+              - C5,0,
+              > C5,RVZ1
+              - C5,0,1370,1387,0,0,0,0,0,0
+              > C5,RPZ0
+              - C5,0,1360,1377,2100,2100,2100,2100,2100,2100
+              > C5,RPZ0
+              - C5,0,1360,1377,2100,2100,2100,2100,2100,2100
+              > C5,SSZ600,600,,,,,,
+              - C5,0,
+              > C5,MAZ1448,1450,,,,,,
+              - C5,0,
+
+E 13:57:42  0 detected_volume_1 = 62
+
+              detected_volume_2 = 81
+
+              detected_volume_3 = -1
+
+              detected_volume_4 = -1
+
+              detected_volume_5 = -1
+
+              detected_volume_6 = -1
+
+              detected_volume_7 = -1
+
+              detected_volume_8 = -1
+F 13:57:42  0 > O1,ALO1,1
+F 13:57:43    - O1,0,
+              > O1,ALO2,1
+              - O1,0,
+              > O1,RSL2
+              - O1,0,0
+              > O1,SSL1,1
+              - O1,0,
+              > O1,ALO1,0
+              - O1,0,
+              > O1,ALO2,0
+              - O1,0,
+              > O1,RSL1
+              - O1,0,1
+              > O1,SSL1,0
+              - O1,0,
+              > O1,RSL2
+              - O1,0,0
+              > O1,SPS0
+              - O1,0,
+F 13:57:50    > O1,RSL1
+              - O1,0,0
+              > O1,RSL2
+              - O1,0,0
