@@ -200,7 +200,12 @@ class Evaluator() {
 		println(s"evaluateTypedMap($x)")
 		for {
 			rjsval <- RjsValue.evaluateTypedMap(x)
-			rjsval2 <- evaluate(rjsval)
+			rjsval2 <- rjsval match {
+				case x2: RjsAbstractMap if x.typ_? == x2.typ_? =>
+					ResultE.unit(rjsval)
+				case _ =>
+					evaluate(rjsval)
+			}
 		} yield rjsval2
 	}
 }

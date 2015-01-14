@@ -245,7 +245,6 @@ object RoboliqRunner {
 		println(s"processStepRjs_EvowareAgent(${m0}):")
 		for {
 			evowareAgentConfig <- RjsConverter.fromRjs[EvowareAgentConfig](m0)
-			_ = println("A")
 			searchPath_l <- ResultE.gets(_.searchPath_l)
 			_ = println("B")
 			details <- ResultE.from(EvowareProtocolDataGenerator.createProtocolData(
