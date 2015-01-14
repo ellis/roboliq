@@ -84,6 +84,8 @@ Experiments:
 - [ ] RoboliqRunner: merge the expression results
 - [ ] RoboliqRunner: command for what to do with merged result
 - [ ] RoboliqRunnerSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
+- [ ] RjsProcotol: rename it, and don't derive it from RjsValue
+- [ ] EvowareProtocolDataGenerator: rename ProtocolData to ProtocolDetails
 - [ ] ProtocolHandlerSpec: test a protocol that only contains instruction commands
 - [ ] ProtocolHandlerSpec: generate an evoware script that simply runs `shakePlate`
 - [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data

@@ -10,7 +10,8 @@ import java.io.File
 import roboliq.utils.JsonUtils
 
 class EvaluatorSpec extends FunSpec {
-	import ContextValueWrapper._
+	import ResultCWrapper._
+	import ResultEWrapper._
 
 	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 	val evaluator = new Evaluator();
@@ -176,6 +177,14 @@ class EvaluatorSpec extends FunSpec {
 			)
 		}
 		
+		it("custom typed mapped") {
+			val customMap = RjsMap("MyCustomType", Map("a" -> RjsString("hello")))
+			val res = for {
+				res <- ResultE.evaluate(customMap)
+			} yield res
+			assert(res.run().value !== customMap)
+		}
+/*		
 		it("create protocol") {
 			val yaml = """
 labware:
@@ -206,5 +215,6 @@ command:
 			val jsval = JsonUtils.yamlToJson(yaml)
 			println(jsval)
 		}
+*/
 	}
 }

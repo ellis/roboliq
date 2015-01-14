@@ -42,6 +42,8 @@ import roboliq.input.EvaluatorState
 import roboliq.input.RjsProtocol
 import roboliq.input.ProtocolDetails
 import roboliq.input.RjsAbstractMap
+import roboliq.evoware.config.EvowareAgentConfig
+import roboliq.evoware.config.EvowareProtocolDataGenerator
 
 case class RoboliqOpt(
 	step_l: Vector[RoboliqOptStep] = Vector()
@@ -220,6 +222,8 @@ object RoboliqRunner {
 										protocol <- RjsConverter.fromRjs[RjsProtocol](m0)
 										state <- ResultE.get
 									} yield result0.copy(protocol_? = Some((protocol, state)))
+								case "EvowareAgent" =>
+									processStepRjs_EvowareAgent(result0, m0)
 							}
 					}
 				case x: RjsProtocol =>
@@ -232,6 +236,31 @@ object RoboliqRunner {
 					} yield result0.copy(data = data)
 			}
 		} yield result1
+	}
+	
+	private def processStepRjs_EvowareAgent(
+		result0: StepResult,
+		m0: RjsValue with RjsAbstractMap
+	): ResultE[StepResult] = {
+		println(s"processStepRjs_EvowareAgent(${m0}):")
+		for {
+			evowareAgentConfig <- RjsConverter.fromRjs[EvowareAgentConfig](m0)
+			searchPath_l <- ResultE.gets(_.searchPath_l)
+			_ = println("B")
+			details <- ResultE.from(EvowareProtocolDataGenerator.createProtocolData(
+				agentIdent = "mario",
+				agentConfig = evowareAgentConfig,
+				table_l = List("mario.default"),
+				searchPath_l = searchPath_l
+			))
+			_ = println("C")
+			result <- ResultE.from(RjsValue.toBasicValue(details))
+			_ = println("D")
+			data <- ResultE.from(RjsValue.merge(result0.data, result))
+			_ = println("E")
+		} yield {
+			result0.copy(data = data)
+		}
 	}
 	
 	private def processStepCheck(

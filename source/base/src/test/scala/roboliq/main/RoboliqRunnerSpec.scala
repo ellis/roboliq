@@ -124,5 +124,37 @@ class RoboliqRunnerSpec extends FunSpec {
 			
 			assert(result.run(data0).value == expected)
 		}
+		
+		it("check protocol with evoware agent info") {
+			val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
+			val opt1 = RoboliqOpt(
+				step_l = Vector(
+					RoboliqOptStep_Yaml(YamlContent.evowareAgentConfig1Text),
+					RoboliqOptStep_Yaml(YamlContent.protocol2Text),
+					RoboliqOptStep_Check()
+				)
+			)
+			val expected = RjsBasicMap(
+				"1" -> RjsBasicMap(
+					"command" -> RjsBasicMap("INPUT" -> RjsBasicMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3")), "NAME" -> RjsString("shakePlate"), "TYPE" -> RjsString("action")),
+					"effects" -> RjsList(List()),
+					"successors" -> RjsList(List()),
+					"validations" -> RjsList(List())
+				),
+				"1.1" -> RjsBasicMap(
+					"command" -> RjsBasicMap("INPUT" -> RjsBasicMap("agent" -> RjsString("mario"), "device" -> RjsString("mario.shaker"), "labware" -> RjsString("plate1"), "program" -> RjsBasicMap("duration" -> RjsNumber(10,None), "rpm" -> RjsNumber(200,None)), "site" -> RjsString("P3")), "NAME" -> RjsString("ShakerRun"), "TYPE" -> RjsString("instruction")),
+					"effects" -> RjsList(List()),
+					"successors" -> RjsList(List()),
+					"validations" -> RjsList(List())
+				)
+			)
+
+			val result = for {
+				result0 <- RoboliqRunner.process(opt1)
+				map <- RjsConverter.fromRjs[RjsBasicMap](result0)
+			} yield map.map("commands")
+			
+			assert(result.run(data0).value == expected)
+		}
 	}
 }
