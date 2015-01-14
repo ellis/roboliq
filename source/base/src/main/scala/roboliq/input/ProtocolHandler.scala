@@ -140,6 +140,13 @@ class ProtocolDetailsBuilder {
 	}
 	
 	/**
+	 * Indicates that given agent can operate the given device
+	 */
+	def appendAgentDevice(agentName: String, deviceName: String) {
+		planningInitialState += strips.Literal(true, "agent-has-device", agentName, deviceName)
+	}
+	
+	/**
 	 * Indicates that given device can handle the given model
 	 */
 	def appendDeviceModel(deviceName: String, modelName: String) {

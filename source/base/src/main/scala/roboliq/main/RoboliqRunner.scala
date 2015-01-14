@@ -246,15 +246,18 @@ object RoboliqRunner {
 		for {
 			evowareAgentConfig <- RjsConverter.fromRjs[EvowareAgentConfig](m0)
 			searchPath_l <- ResultE.gets(_.searchPath_l)
-			_ = println("B")
 			details <- ResultE.from(EvowareProtocolDataGenerator.createProtocolData(
 				agentIdent = "mario",
 				agentConfig = evowareAgentConfig,
 				table_l = List("mario.default"),
 				searchPath_l = searchPath_l
 			))
-			_ = println("C")
 			result <- ResultE.from(RjsValue.toBasicValue(details))
+			//
+			jsResult <- ResultE.from(result.toJson)
+			_ = println("DATA:")
+			_ = println(JsonUtils.jsonToPrettyText(jsResult))
+			//
 			_ = println("D")
 			data <- ResultE.from(RjsValue.merge(result0.data, result))
 			_ = println("E")

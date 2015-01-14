@@ -147,7 +147,11 @@ object EvowareProtocolDataGenerator {
 				l.groupBy(_._1).mapValues(_.map(_._2).toSet)
 			}
 
-			// TODO: create System Liquid site, siteModel, and labware
+			/*// TODO: create System Liquid site, siteModel, and labware
+			val siteSystem_? = for {
+				o <- tableData.lExternalObject.find(_.carrier.sName == "System")
+				site <- createSite(o.carrier, -1, s"${agentIdent} System Liquid")
+			} yield site*/
 			
 			// Get map of sites we'll need plus their evoware siteId
 			siteNameToSiteId_m <- getSiteNameToSiteIdMap(evowareProtocolData, carrierData, tableData)
@@ -204,16 +208,18 @@ object EvowareProtocolDataGenerator {
 			
 			// Build the devices
 			_ <- ResultC.context("devices") {
-				val partToCarrier_m = carrierData.mapNameToCarrier.values.flatMap(c => c.partNo_?.map(_ -> c)).toMap
+				val carrier_l = tableData.mapCarrierToGrid.keys.toList
+				val nameToCarrier_m = carrier_l.map(c => c.sName -> c).toMap
+				val partToCarrier_m = carrier_l.flatMap(c => c.partNo_?.map(_ -> c)).toMap
 				ResultC.foreach(evowareProtocolData.devices) { case (deviceName, deviceConfig) =>
 					ResultC.context(deviceName) {
 						for {
 							carrierE <- ResultC.from(
-								carrierData.mapNameToCarrier.get(deviceConfig.evowareName)
+								nameToCarrier_m.get(deviceConfig.evowareName)
 									.orElse(partToCarrier_m.get(deviceConfig.evowareName)),
 								s"unknown Evoware device: ${deviceConfig.evowareName}"
 							)
-							gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"device is missing from the specified table: ${deviceConfig.evowareName}")
+							gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"device is missing from the specified table: ${carrierE}\n" + tableData.mapCarrierToGrid.keys.toList.mkString("\n"))
 							// Find sites for this device
 							siteName_l <- {
 								deviceConfig.sitesOverride match {
@@ -234,6 +240,7 @@ object EvowareProtocolDataGenerator {
 							)
 							builder.addObject(deviceName, rjsDevice)
 							builder.addPlanningDomainObject(deviceName, deviceConfig.`type`)
+							builder.appendAgentDevice(agentName, deviceName)
 							
 							for (siteName <- siteName_l) {
 								builder.appendDeviceSite(deviceName, siteName)
@@ -262,8 +269,17 @@ object EvowareProtocolDataGenerator {
 						siteConfig match {
 							case EvowareSiteConfig(Some(carrierName), None, siteIndex_?) =>
 								for {
-									carrierE <- ResultC.from(carrierData.mapNameToCarrier.get(carrierName), s"unknown carrier: $carrierName")
-									gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"carrier is missing from the given table: $carrierName")
+									gridIndex <- {
+										if (carrierName == "System") {
+											ResultC.unit(-1)
+										}
+										else {
+											for {
+												carrierE <- ResultC.from(carrierData.mapNameToCarrier.get(carrierName), s"unknown carrier: $carrierName")
+												gridIndex <- ResultC.from(tableData.mapCarrierToGrid.get(carrierE), s"carrier is missing from the given table: $carrierName")
+											} yield gridIndex
+										}
+									}
 									siteIndex = siteIndex_?.getOrElse(1)
 								} yield siteName -> (gridIndex, siteIndex)
 							case EvowareSiteConfig(None, Some(gridIndex), Some(siteIndex)) =>

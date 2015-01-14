@@ -24,4 +24,8 @@ object JsonUtils {
 		//println("gson: " + s_~)
 		s_~
 	}
+	
+	def jsonToPrettyText(jsval: JsValue): String = {
+		jsval.prettyPrint
+	}
 }
