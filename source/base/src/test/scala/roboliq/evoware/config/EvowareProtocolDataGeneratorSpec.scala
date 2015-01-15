@@ -93,9 +93,11 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 					"site-closed CENTRIFUGE",
 					"stackable mario.sm0 plateModel_384_square",
 					"model CENTRIFUGE mario.sm0",
+					"agent-has-device mario mario.centrifuge",
 					"device-can-site mario.centrifuge CENTRIFUGE",
 					"device-can-model mario.centrifuge plateModel_384_square"
 				)
+
 			)
 
 			assert(data_?.run().value == expected)
