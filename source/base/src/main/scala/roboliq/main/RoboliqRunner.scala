@@ -46,10 +46,12 @@ import roboliq.evoware.config.EvowareAgentConfig
 import roboliq.evoware.config.EvowareProtocolDataGenerator
 
 case class RoboliqOpt(
-	step_l: Vector[RoboliqOptStep] = Vector()
+	step_l: Vector[RoboliqOptStep] = Vector(),
+	table_l: Vector[String] = Vector()
 )
 
 sealed trait RoboliqOptStep
+case class RoboliqOptStep_Tables(table_l: List[String]) extends RoboliqOptStep
 case class RoboliqOptStep_File(file: File) extends RoboliqOptStep
 //case class RoboliqOptStep_Stdin() extends RoboliqOptExpression
 case class RoboliqOptStep_Json(json: String) extends RoboliqOptStep
@@ -64,6 +66,13 @@ private case class StepResult(
 object RoboliqRunner {
 	def getOptParser: scopt.OptionParser[RoboliqOpt] = new scopt.OptionParser[RoboliqOpt]("roboliq") {
 		head("roboliq", "0.1pre1")
+		opt[String]('t', "tables")
+			.valueName("table1[,table2,...tableN]")
+			.action { (x, o) =>
+				val table_l = x.split(",")
+				o.copy(table_l = o.table_l ++ table_l) 
+			}
+			.text("expression file")
 		opt[File]('f', "file")
 			.valueName("<file>")
 			.action { (x, o) =>
@@ -155,11 +164,12 @@ object RoboliqRunner {
 				val l = (state.searchPath_l ++ searchPath_l).distinct
 				state.copy(searchPath_l = l) 
 			})
-			result <- processSteps(StepResult(), opt.step_l)
+			result <- processSteps(opt, StepResult(), opt.step_l)
 		} yield result.data
 	}
 	
 	private def processSteps(
+		opt: RoboliqOpt,
 		result0: StepResult,
 		step_l: Vector[RoboliqOptStep]
 	): ResultE[StepResult] = {
@@ -167,8 +177,8 @@ object RoboliqRunner {
 		step_l match {
 			case step +: rest =>
 				for {
-					result1 <- processStep(result0, step)
-					result2 <- processSteps(result1, rest)
+					result1 <- processStep(opt, result0, step)
+					result2 <- processSteps(opt, result1, rest)
 				} yield result2
 			case _ =>
 				ResultE.unit(result0)
@@ -176,25 +186,28 @@ object RoboliqRunner {
 	}
 	
 	private def processStep(
+		opt: RoboliqOpt,
 		result0: StepResult,
 		step: RoboliqOptStep
 	): ResultE[StepResult] = {
 		println(s"processStep($step):")
 		step match {
+			case RoboliqOptStep_Tables(_) =>
+				ResultE.unit(result0)
 			case RoboliqOptStep_File(file) =>
 				for {
 					rjsval <- ResultE.loadRjsFromFile(file)
-					result1 <- processStepRjs(result0, rjsval)
+					result1 <- processStepRjs(opt, result0, rjsval)
 				} yield result1
 			case RoboliqOptStep_Json(s) =>
 				for {
 					rjsval <- ResultE.from(RjsValue.fromJsonText(s))
-					result1 <- processStepRjs(result0, rjsval)
+					result1 <- processStepRjs(opt, result0, rjsval)
 				} yield result1
 			case RoboliqOptStep_Yaml(s) =>
 				for {
 					rjsval <- ResultE.from(RjsValue.fromYamlText(s))
-					result1 <- processStepRjs(result0, rjsval)
+					result1 <- processStepRjs(opt, result0, rjsval)
 				} yield result1
 			case RoboliqOptStep_Check() =>
 				processStepCheck(result0)
@@ -202,6 +215,7 @@ object RoboliqRunner {
 	}
 	
 	private def processStepRjs(
+		opt: RoboliqOpt,
 		result0: StepResult,
 		rjsval: RjsValue
 	): ResultE[StepResult] = {
@@ -223,7 +237,7 @@ object RoboliqRunner {
 										state <- ResultE.get
 									} yield result0.copy(protocol_? = Some((protocol, state)))
 								case "EvowareAgent" =>
-									processStepRjs_EvowareAgent(result0, m0)
+									processStepRjs_EvowareAgent(opt, result0, m0)
 							}
 					}
 				case x: RjsProtocol =>
@@ -239,6 +253,7 @@ object RoboliqRunner {
 	}
 	
 	private def processStepRjs_EvowareAgent(
+		opt: RoboliqOpt,
 		result0: StepResult,
 		m0: RjsValue with RjsAbstractMap
 	): ResultE[StepResult] = {
@@ -247,9 +262,8 @@ object RoboliqRunner {
 			evowareAgentConfig <- RjsConverter.fromRjs[EvowareAgentConfig](m0)
 			searchPath_l <- ResultE.gets(_.searchPath_l)
 			details <- ResultE.from(EvowareProtocolDataGenerator.createProtocolData(
-				agentIdent = "mario",
 				agentConfig = evowareAgentConfig,
-				table_l = List("mario.default"),
+				table_l = opt.table_l.toList,
 				searchPath_l = searchPath_l
 			))
 			result <- ResultE.from(RjsValue.toBasicValue(details))

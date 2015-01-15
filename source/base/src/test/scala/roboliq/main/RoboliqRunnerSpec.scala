@@ -129,6 +129,7 @@ class RoboliqRunnerSpec extends FunSpec {
 			val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 			val opt1 = RoboliqOpt(
 				step_l = Vector(
+					RoboliqOptStep_Tables(List("mario.default")),
 					RoboliqOptStep_Yaml(YamlContent.evowareAgentConfig1Text),
 					RoboliqOptStep_Yaml(YamlContent.protocol2Text),
 					RoboliqOptStep_Check()

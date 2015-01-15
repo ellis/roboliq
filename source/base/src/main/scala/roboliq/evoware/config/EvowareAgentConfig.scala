@@ -12,6 +12,7 @@ import roboliq.input.ProtocolDetails
  * @param sealerPrograms Sealer programs
  */
 case class EvowareAgentConfig(
+	name: String,
 	evowareDir: String,
 	protocolDetails_? : Option[ProtocolDetails],
 	evowareProtocolData_? : Option[EvowareProtocolData],

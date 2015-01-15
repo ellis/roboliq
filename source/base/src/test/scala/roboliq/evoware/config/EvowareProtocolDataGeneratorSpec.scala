@@ -49,13 +49,13 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 				evowareProtocolData_? = Some(evowareProtocolData1)
 			)
 			val evowareAgentConfig = EvowareAgentConfig(
+				name = "mario",
 				evowareDir = "../testdata/bsse-mario",
 				protocolDetails_? = Some(protocolData0),
 				evowareProtocolData_? = Some(evowareProtocolData0),
 				tableSetups = Map("default"  -> evowareTableSetupConfig)
 			)
 			val data_? = EvowareProtocolDataGenerator.createProtocolData(
-				agentIdent = "mario",
 				agentConfig = evowareAgentConfig,
 				table_l = List("mario.default"),
 				searchPath_l = List()

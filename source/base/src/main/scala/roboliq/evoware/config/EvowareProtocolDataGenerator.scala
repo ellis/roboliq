@@ -63,11 +63,11 @@ import roboliq.input.RjsAbstractMap
 
 object EvowareProtocolDataGenerator {
 	def createProtocolData(
-		agentIdent: String,
 		agentConfig: EvowareAgentConfig,
 		table_l: List[String],
 		searchPath_l: List[File]
 	): ResultC[ProtocolDetails] = {
+		val agentIdent = agentConfig.name
 		val tableNameDefault = s"${agentIdent}.default"
 		val tableSetup_m = agentConfig.tableSetups.toMap.map(pair => s"${agentIdent}.${pair._1}" -> pair._2)
 		for {
