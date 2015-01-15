@@ -78,22 +78,24 @@ Experiments:
 - [x] EvowareProtocolDataGenerator: load objects and state from evoware configuration (see Protocol)
 - [x] RjsValue: should add a 'toBasicValue' method, and perhaps a RjsBasicMap that has RjsBasicValues
 - [x] RoboliqRunner: args to specify expressions to load (files, strings, stdin, JSON or YAML)
+- [x] RoboliqRunner: args to specify evoware agent to load
+- [x] RoboliqRunner: args to specify evoware agent table load
+- [x] RoboliqRunner: merge the expression results
+- [x] RoboliqRunner: command for what to do with merged result
+- [x] RoboliqRunnerSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
+- [ ] generate evoware script from evoware agent config and list of instructions
 - [ ] RoboliqRunner: args to specify search paths
-- [ ] RoboliqRunner: args to specify evoware agent to load
-- [ ] RoboliqRunner: args to specify evoware agent table load
-- [ ] RoboliqRunner: merge the expression results
-- [ ] RoboliqRunner: command for what to do with merged result
-- [ ] RoboliqRunnerSpec: create a test for command line stuff, such as checking a protocol, validating it, expanding it, etc
+- [ ] RoboliqRunnerSpec: test a protocol that only contains instruction commands
+- [ ] RoboliqRunnerSpec: generate an evoware script that simply runs `shakePlate`
 - [ ] RjsProcotol: rename it, and don't derive it from RjsValue
 - [ ] EvowareProtocolDataGenerator: rename ProtocolData to ProtocolDetails
-- [ ] ProtocolHandlerSpec: test a protocol that only contains instruction commands
-- [ ] ProtocolHandlerSpec: generate an evoware script that simply runs `shakePlate`
 - [ ] ResultE: fix functions like withScope and scope, so that errors and warnings are better propogated back to the original data
 - [ ] EvaluatorSpec: generate a protocol with fields: labware, substance, source, command
 - [ ] Evaluator: create 'module' directive that starts an empty scope, requires version information, and exports symbols
 - [ ] Evaluator: consider creation of namespaces
 - [ ] generate action output
 - [ ] ask for missing action inputs
+- [ ] put a software version on the protocol and protocol details somehow
 - [ ] EvowareProtocolDataGenerator: generate transport graph
 - [ ] EvowareProtocolDataGenerator: 'pipetterSites' should probably be moved to explicit creation of pipetter device
 - [ ] perform planning for actions

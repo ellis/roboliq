@@ -5,7 +5,8 @@ import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.HashMap
 
 object LiquidLevelExtractor {
-	val Line = """Line .... : (.*)""".r
+	val StartingProgram = """Starting program "([^"]+)" \(lines .*""".r
+	val Line = """Line (....) : (.*)""".r
 	val Detect = """tip ([0-9]+) : detect +([0-9]+), ([0-9]+) .+ \[(.*)\]""".r
 	val Dispense1 = """tip ([0-9]+) : dispense [0-9.]+.l +([0-9]+), ([0-9]+) .+ \[(.*)\]""".r
 	val Dispense2 = """([0-9.]+).l.+""".r
@@ -35,6 +36,7 @@ object LiquidLevelExtractor {
 		dz: Integer
 	)
 	
+	/*
 	// Want to output csv lines: tip,loc,row,col,z
 	def process(filename: String) {
 		var bDetect = false
@@ -161,7 +163,7 @@ object LiquidLevelExtractor {
 			}
 		}
 	}
-	
+	*/
 	
 	// Want to output csv lines: tip,loc,row,col,z
 	def process2(filename: String) {
@@ -169,6 +171,8 @@ object LiquidLevelExtractor {
 		val tw_m = new LinkedHashMap[Int, WellId]
 		val wellData_m = new HashMap[WellId, WellData]
 		val wellZPrev_m = new HashMap[WellId, Int]
+		var sProgram = ""
+		var iLine = 0
 		var sC5 = ""
 		var sCmd = ""
 		var expect = Expect.None
@@ -236,7 +240,11 @@ object LiquidLevelExtractor {
 						println(line)
 			}*/
 			line match {
-				case Line(cmd) =>
+				case StartingProgram(filename) =>
+					sProgram = filename
+					
+				case Line(lineNum, cmd) =>
+					iLine = lineNum.trim.toInt
 					sCmd = cmd;
 					
 					if (bDetect) {
