@@ -303,6 +303,10 @@ FABIAN:
 - [ ] Take care of FIXME in Pop or PartialPlan regarding inequalities
 - [ ] create appropriate thermocycler program and upload it
 
+## ``chao01_dye``
+
+- [ ] BUG: in roboliq.yaml, having both labwareModels `plateModel_384_square` and `plateModel_384_square_transparent_greiner` leads to error for sealer program for `plateModel_384_square`
+
 ## ``tania10_renaturation``
 
 - [x] figure out downholder site and pipetting

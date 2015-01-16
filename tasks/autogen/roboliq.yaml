@@ -22,6 +22,9 @@ evowareAgents:
       - name: plateModel_384_square
         label: 384 square-well white plate
         evowareName: D-BSSE 384 Well Plate White
+      - name: plateModel_384_square_transparent_greiner
+        label: 384 Sqr Flat Trans Greiner
+        evowareName: D-BSSE 384 Well Plate White
       - name: plateModel_96_nunc_transparent
         label: 96 square-well transparent Nunc plate
         evowareName: Ellis Nunc F96 MicroWell
@@ -121,7 +124,7 @@ evowareAgents:
     sealerProgram:
     - model: plateModel_96_pcr
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
-    - model: plateModel_384_square
+    - model: plateModel_384_square_transparent_greiner
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\Greiner_384_schwarz.bcf
     - model: plateModel_96_nunc_transparent
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\PerkinElmer_weiss.bcf
