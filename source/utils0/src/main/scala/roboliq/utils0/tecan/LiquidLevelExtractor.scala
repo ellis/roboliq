@@ -6,14 +6,14 @@ import scala.collection.mutable.HashMap
 
 object LiquidLevelExtractor {
 	val StartingProgram = """Starting program "([^"]+)" \(lines .*""".r
-	val Line = """Line (....) : (.*)""".r
-	val Detect1 = """tip ([0-9]+) : detect +([0-9]+), ([0-9]+) (.+) \[(.*)\]""".r
-	val Detect2 = "\"(.+)\"".r
-	val Dispense1 = """tip ([0-9]+) : dispense [0-9.]+.l +([0-9]+), ([0-9]+) .+ \[(.*)\]""".r
-	val Dispense2 = """([0-9.]+).l.+""".r
+	val Line = """Line +([^:]+) +: (.*)""".r
+	val DetectTip1 = """tip ([0-9]+) : detect +([0-9]+), ([0-9]+) (.+) \[(.*)\]""".r
+	val DetectTip2 = "\"(.+)\"".r
+	val DispenseTip1 = """tip ([0-9]+) : dispense [0-9.]+.l +([0-9]+), ([0-9]+) (.+) \[(.*)\]""".r
+	val DispenseTip2 = """([0-9.]+).l "([^"]+)".+""".r
 	
 	object Expect extends Enumeration {
-		val None, C5, Dispense2 = Value
+		val None, C5, Dispense2, DetectTip2 = Value
 	}
 	
 	case class WellId(loc: String, row: Int, col: Int)
@@ -37,14 +37,24 @@ object LiquidLevelExtractor {
 		dz: Integer
 	)
 	
-	case class DetectData(
+	case class DetectHeader(
 		tip: Int,
 		row: Int,
 		col: Int,
 		labwareModel: String,
 		loc: String,
 		liquidClass: String,
-		z: Integer
+		wellVol: BigDecimal
+	)
+	
+	case class DispenseHeader(
+		tip: Int,
+		row: Int,
+		col: Int,
+		labwareModel: String,
+		loc: String,
+		vol: BigDecimal,
+		liquidClass: String
 	)
 	
 	/*
@@ -179,18 +189,22 @@ object LiquidLevelExtractor {
 	// Want to output csv lines: tip,loc,row,col,z
 	def process2(filename: String) {
 		var bDetect = false
-		val tw_m = new LinkedHashMap[Int, WellId]
-		val wellData_m = new HashMap[WellId, WellData]
-		val wellZPrev_m = new HashMap[WellId, Int]
-		val tipToDetectData_m = new HashMap[Int, DetectData]
+		//val tw_m = new LinkedHashMap[Int, WellId]
+		//val wellData_m = new HashMap[WellId, WellData]
+		//val wellZPrev_m = new HashMap[WellId, Int]
+		val tipToDetectHeader_m = new LinkedHashMap[Int, DetectHeader]
+		val tipToDispenseHeader_m = new LinkedHashMap[Int, DispenseHeader]
+		val tipToZ_m = new LinkedHashMap[Int, Int]
+		val wellToVolume_m = new LinkedHashMap[WellId, BigDecimal]
+		var tipCached = 0
 		var sProgram = ""
 		var iLine = 0
 		var sC5 = ""
 		var sCmd = ""
 		var expect = Expect.None
-		var wellIdTemp_? : Option[WellId] = None
+		//var wellIdTemp_? : Option[WellId] = None
 		
-		def getWellData(wellId: WellId): WellData = {
+		/*def getWellData(wellId: WellId): WellData = {
 			wellData_m.get(wellId) match {
 				case Some(wd) => wd
 				case None =>
@@ -237,73 +251,86 @@ object LiquidLevelExtractor {
 					// We're not interested in this tip
 			}
 		}
+		*/
 		
-		println(List("tip", "loc", "row", "col", "step", "z", "vol", "dz", "dvol").mkString("\t"))
+		println(List("tip", "loc", "row", "col", "z", "vol").mkString("\t"))
 		for (line0 <- io.Source.fromFile(filename).getLines) {
 			// drop first 14 chars
 			val line = line0.drop(14).trim
-			/*line match {
-				case Detect(well, loc) =>
-					println("hmm", well, loc)
-				case _ =>
-					if (line.contains(" detect "))
-						println("baa", line)
-					else
-						println(line)
-			}*/
 			line match {
 				case StartingProgram(filename) =>
 					sProgram = filename
 					
-				case Line(lineNum, cmd) =>
+				case Line(lineNums, cmd) =>
+					if (bDetect) {
+						tipToDetectHeader_m.foreach { case (tip, data) =>
+							println(List(
+									tip, data.loc, data.row, data.col, tipToZ_m(tip), data.wellVol
+								).mkString("\t"))
+						}
+						/*tipToDispenseHeader_m.foreach { case (tip, data) =>
+							println(List(
+									tip, data.loc, data.row, data.col, tipToZ_m(tip), -1, -1, -1
+								).mkString("\t"))
+						}*/
+					}
+					
+					tipToDetectHeader_m.clear()
+					tipToDispenseHeader_m.clear()
+					tipToZ_m.clear()
+					tipCached = 0
+					bDetect = false
+
+					println("line: "+line)
+					val lineNum_l = lineNums.split("/")
+					val lineNum = lineNum_l.last
 					iLine = lineNum.trim.toInt
 					sCmd = cmd
 					
-					if (bDetect) {
-						tw_m.foreach(pair => {
-							val (tip, wellId) = pair
-							printLine(tip, wellId)
-							//wellZPrev_m += wellId -> wd.z
-						})
-					}
-					
-					bDetect = (sCmd == "Detect Liquid")
-					tw_m.clear
-					
-				case Dispense1(_, col_s, row_s, loc) =>
+				case DetectTip1(tip_s, col_s, row_s, labwareModel, loc) =>
+					val (tip, row, col) = (tip_s.toInt, row_s.toInt, col_s.toInt)
+					val wellId = WellId(loc, row, col)
+					tipToDetectHeader_m(tip) = DetectHeader(tip, row, col, labwareModel, loc, "", wellToVolume_m.getOrElse(wellId, BigDecimal(0)))
+					//println(List(tip, row, col, loc).mkString("\t"))
+					tipCached = tip
+					expect = Expect.DetectTip2
+				
+				case DetectTip2(liquidClass) if expect == Expect.DetectTip2 =>
+					tipToDetectHeader_m(tipCached) = tipToDetectHeader_m(tipCached).copy(liquidClass = liquidClass)
+					expect = Expect.None
+					bDetect = true
+				
+				case DispenseTip1(tip_s, col_s, row_s, labwareModel, loc) =>
 					println("Dispense1")
-					val (row, col) = (row_s.toInt, col_s.toInt)
-					wellIdTemp_? = Some(WellId(loc, row, col))
+					val (tip, row, col) = (tip_s.toInt, row_s.toInt, col_s.toInt)
+					tipToDispenseHeader_m(tip) = DispenseHeader(tip, row, col, labwareModel, loc, 0, "")
+					tipCached = tip
 					expect = Expect.Dispense2
 				
-				case Dispense2(vol_s) if expect == Expect.Dispense2 =>
+				case DispenseTip2(vol_s, liquidClass) if expect == Expect.Dispense2 =>
 					println("Dispense2")
-					val vol = BigDecimal(vol_s)
-					dispense(wellIdTemp_?.get, vol)
-					wellIdTemp_? = None
+					val header = tipToDispenseHeader_m(tipCached)
+					val dvol = BigDecimal(vol_s)
+					val wellId = WellId(header.loc, header.row, header.col)
+					val vol = wellToVolume_m.getOrElse(wellId, BigDecimal(0)) + dvol
+					wellToVolume_m(wellId) = vol
+					tipToDispenseHeader_m(tipCached) = tipToDispenseHeader_m(tipCached).copy(vol = vol, liquidClass = liquidClass)
+					tipToDetectHeader_m(tipCached) = DetectHeader(header.tip, header.row, header.col, header.labwareModel, header.loc, liquidClass, vol)
 					expect = Expect.None
+					bDetect = true
 					
-				case Detect1(tip_s, col_s, row_s, labwareModel, loc) =>
-					val (tip, row, col) = (tip_s.toInt, row_s.toInt, col_s.toInt)
-					handleDetectLineForTip(tip, row, col, labwareModel, loc)
-					println(List(tip, row, col, loc).mkString("\t"))
-					expect = Expect.Detect2
-				
-				case Detect2(liquidClass) if expect == Expect.Detect2
-					expect = Expect.None
-				
 				case "> C5,RPZ0" if bDetect =>
 					expect = Expect.C5
 					
 				case _ if expect == Expect.C5 =>
 					// NOTE: this check is here because multiple commands may be sent at once without first waiting for a response
 					// from the robot.  This makes sure that we only try to process a response message.
-					if (line.startsWith("-")) {
+					if (line.startsWith("- C5,0,")) {
 						val l = line.split(",").drop(2).toList
 						for ((z, tip_i) <- l.zipWithIndex) {
 							val tip = tip_i + 1
-							println("z: ", line, l, tip_i, z)
-							handleTipLevel(tip, z.toInt)
+							//println("z: ", line, l, tip_i, z)
+							tipToZ_m(tip) = z.toInt
 						}
 						expect = Expect.None
 					}

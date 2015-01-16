@@ -17,13 +17,8 @@ source:
 protocol:
 - pipette:
     source: dyeLight
+    cleanBetween: none
+    pipettePolicy: Roboliq_Water_Dry_1000
     steps:
     - {d: plate1(A02), a: 20ul, tip: 2}
     - {d: plate1(B02), a: 20ul, tip: 1}
-    - {d: plate1(C02), a: 20ul}
-    - {d: plate1(D02), a: 20ul}
-    - {d: plate1(E02), a: 20ul}
-    - {d: plate1(F02), a: 20ul}
-    - {d: plate1(G02), a: 20ul}
-    - {d: plate1(H02), a: 20ul}
-    cleanBetween: none
