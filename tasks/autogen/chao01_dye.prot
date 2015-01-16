@@ -1,0 +1,29 @@
+description: |
+  Dispense varying amounts of dye into a 384-well plate for calibrating readouts with dispense volumes
+
+labware:
+  plate1:
+    model: plateModel_384_square
+    location: P3
+
+  dyeLightLabware:
+    model: troughModel_100ml
+    location: R6
+
+source:
+- name: dyeLight
+  well: dyeLightLabware(C01|F01)
+
+protocol:
+- pipette:
+    source: dyeLight
+    steps:
+    - {d: plate1(A02), a: 20ul, tip: 2}
+    - {d: plate1(B02), a: 20ul, tip: 1}
+    - {d: plate1(C02), a: 20ul}
+    - {d: plate1(D02), a: 20ul}
+    - {d: plate1(E02), a: 20ul}
+    - {d: plate1(F02), a: 20ul}
+    - {d: plate1(G02), a: 20ul}
+    - {d: plate1(H02), a: 20ul}
+    cleanBetween: none

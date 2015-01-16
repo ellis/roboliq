@@ -7,7 +7,8 @@ import scala.collection.mutable.HashMap
 object LiquidLevelExtractor {
 	val StartingProgram = """Starting program "([^"]+)" \(lines .*""".r
 	val Line = """Line (....) : (.*)""".r
-	val Detect = """tip ([0-9]+) : detect +([0-9]+), ([0-9]+) .+ \[(.*)\]""".r
+	val Detect1 = """tip ([0-9]+) : detect +([0-9]+), ([0-9]+) (.+) \[(.*)\]""".r
+	val Detect2 = "\"(.+)\"".r
 	val Dispense1 = """tip ([0-9]+) : dispense [0-9.]+.l +([0-9]+), ([0-9]+) .+ \[(.*)\]""".r
 	val Dispense2 = """([0-9.]+).l.+""".r
 	
@@ -34,6 +35,16 @@ object LiquidLevelExtractor {
 		vol: BigDecimal,
 		z: Integer,
 		dz: Integer
+	)
+	
+	case class DetectData(
+		tip: Int,
+		row: Int,
+		col: Int,
+		labwareModel: String,
+		loc: String,
+		liquidClass: String,
+		z: Integer
 	)
 	
 	/*
@@ -171,6 +182,7 @@ object LiquidLevelExtractor {
 		val tw_m = new LinkedHashMap[Int, WellId]
 		val wellData_m = new HashMap[WellId, WellData]
 		val wellZPrev_m = new HashMap[WellId, Int]
+		val tipToDetectData_m = new HashMap[Int, DetectData]
 		var sProgram = ""
 		var iLine = 0
 		var sC5 = ""
@@ -194,7 +206,7 @@ object LiquidLevelExtractor {
 			wellData_m += wellId -> wd
 		}
 		
-		def handleDetectLineForTip(tip: Int, row: Int, col: Int, loc: String) {
+		def handleDetectLineForTip(tip: Int, row: Int, col: Int, labwareModel: String, loc: String) {
 			val wellId = WellId(loc, row, col)
 			tw_m += tip -> wellId
 		}
@@ -245,7 +257,7 @@ object LiquidLevelExtractor {
 					
 				case Line(lineNum, cmd) =>
 					iLine = lineNum.trim.toInt
-					sCmd = cmd;
+					sCmd = cmd
 					
 					if (bDetect) {
 						tw_m.foreach(pair => {
@@ -271,10 +283,14 @@ object LiquidLevelExtractor {
 					wellIdTemp_? = None
 					expect = Expect.None
 					
-				case Detect(tip_s, col_s, row_s, loc) =>
+				case Detect1(tip_s, col_s, row_s, labwareModel, loc) =>
 					val (tip, row, col) = (tip_s.toInt, row_s.toInt, col_s.toInt)
-					handleDetectLineForTip(tip, row, col, loc)
+					handleDetectLineForTip(tip, row, col, labwareModel, loc)
 					println(List(tip, row, col, loc).mkString("\t"))
+					expect = Expect.Detect2
+				
+				case Detect2(liquidClass) if expect == Expect.Detect2
+					expect = Expect.None
 				
 				case "> C5,RPZ0" if bDetect =>
 					expect = Expect.C5
@@ -299,7 +315,7 @@ object LiquidLevelExtractor {
 	}
 
 	def main(args: Array[String]) {
-		process("""C:\ProgramData\Tecan\EVOware\AuditTrail\log\EVO_20150112_131614.LOG""")
+		process2("""C:\ProgramData\Tecan\EVOware\AuditTrail\log\EVO_20150112_131614.LOG""")
 		//process(args(0))
 	}
 }
