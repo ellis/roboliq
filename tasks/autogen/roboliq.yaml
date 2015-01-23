@@ -23,8 +23,8 @@ evowareAgents:
         label: 384 square-well white plate
         evowareName: D-BSSE 384 Well Plate White
       - name: plateModel_384_square_transparent_greiner
-        label: 384 Sqr Flat Trans Greiner
-        evowareName: D-BSSE 384 Well Plate White
+        label: 384 square-flat-well transparent Greiner
+        evowareName: 384 Sqr Flat Trans Greiner
       - name: plateModel_96_nunc_transparent
         label: 96 square-well transparent Nunc plate
         evowareName: Ellis Nunc F96 MicroWell

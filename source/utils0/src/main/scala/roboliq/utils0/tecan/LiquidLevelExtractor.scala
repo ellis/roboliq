@@ -367,7 +367,7 @@ object LiquidLevelExtractor {
 					expect = Expect.Dispense2
 				
 				case DispenseTip2(vol_s, liquidClass) if expect == Expect.Dispense2 =>
-					println("Dispense2")
+					//println("Dispense2")
 					val header = tipToDispenseHeader_m(tipCached)
 					val dvol = BigDecimal(vol_s)
 					val wellId = WellId(header.loc, header.row, header.col)
@@ -415,7 +415,9 @@ object LiquidLevelExtractor {
 	def main(args: Array[String]) {
 		//process3("""C:\ProgramData\Tecan\EVOware\AuditTrail\log\EVO_20150112_131614.LOG""")
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150116--chao01_dye\EVO_20150116_142604--zlevel_bottom.log""")
-		process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150116--chao01_dye\EVO_20150116_141247--zlevel_top.log""")
+		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150116--chao01_dye\EVO_20150116_141247--zlevel_top.log""")
+		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_121617--25_to_60ul.log""")
+		process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_125817--zlevel_top.log""")
 		//process(args(0))
 	}
 }
