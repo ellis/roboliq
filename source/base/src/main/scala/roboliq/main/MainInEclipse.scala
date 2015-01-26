@@ -138,6 +138,7 @@ object MainInEclipse extends App {
 	//runTemp("tania13_ph_2_pipette")
 	//runTemp("tania13_ph_3_measure")
 	//runTemp("chao01_dye")
-	//runTemp("chao04_2nd_dispense")
-	runTemp("chao05_adjusted_d")
+	//runTemp("chao04_2nd_dispense_A")
+	runTemp("chao04_2nd_dispense_B")
+	//runTemp("chao05_adjusted_d")
 }
