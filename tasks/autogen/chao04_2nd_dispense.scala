@@ -28,10 +28,10 @@ def step(l1: List[Int], l2: List[Int], l3: List[Int], l4: List[Int], wellToVol: 
       val a2 = wellToVol(w2)
       val a3 = wellToVol(w3)
       val a4 = wellToVol(w4)
-      println(s"    - { d: plate1(${getWellName(w1)}), a: $a1, tip: 1 }")
-      println(s"    - { d: plate1(${getWellName(w2)}), a: $a2, tip: 2 }")
-      println(s"    - { d: plate1(${getWellName(w3)}), a: $a3, tip: 3 }")
-      println(s"    - { d: plate1(${getWellName(w4)}), a: $a4, tip: 4 }")
+      println(s"    - { d: plate1(${getWellName(w1)}), a: ${a1}ul, tip: 1 }")
+      println(s"    - { d: plate1(${getWellName(w2)}), a: ${a2}ul, tip: 2 }")
+      println(s"    - { d: plate1(${getWellName(w3)}), a: ${a3}ul, tip: 3 }")
+      println(s"    - { d: plate1(${getWellName(w4)}), a: ${a4}ul, tip: 4 }")
       step(r1, r2, r3, r4, wellToVol)
     case _ =>
   }
