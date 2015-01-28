@@ -9,7 +9,7 @@ object LiquidLevelExtractor {
 	val Line = """Line +([^:]+) +: (.*)""".r
 	val DetectTip1 = """tip ([0-9]+) : detect +([0-9]+), *([0-9]+) (.+) \[(.*)\]""".r
 	val DetectTip2 = "\"(.+)\"".r
-	val DispenseTip1 = """tip ([0-9]+) : dispense [0-9.]+.l +([0-9]+), ([0-9]+) (.+) \[(.*)\]""".r
+	val DispenseTip1 = """tip ([0-9]+) : dispense [0-9.]+.l +([0-9]+), *([0-9]+) (.+) \[(.*)\]""".r
 	val DispenseTip2 = """([0-9.]+).l "([^"]+)".+""".r
 	val DetectedVolume = """detected_volume_(.) = ([-0-9]+)""".r
 	
@@ -417,7 +417,9 @@ object LiquidLevelExtractor {
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150116--chao01_dye\EVO_20150116_142604--zlevel_bottom.log""")
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150116--chao01_dye\EVO_20150116_141247--zlevel_top.log""")
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_121617--25_to_60ul.log""")
-		process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_125817--zlevel_top.log""")
+		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_125817--zlevel_top.log""")
+		process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150127--chao04_2nd_dispense\EVO_20150127_111922--layer2.log""")
+		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150127--chao04_2nd_dispense\EVO_20150127_120611.LOG""")
 		//process(args(0))
 	}
 }

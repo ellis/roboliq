@@ -1,0 +1,50 @@
+description: |
+  Dispense varying amounts of dye into a 384-well plate for calibrating readouts with dispense volumes
+
+labware:
+  plate1:
+    model: plateModel_384_square_transparent_greiner
+    location: P3
+
+  dyeLightLabware:
+    model: troughModel_100ml
+    location: R6
+
+  waterLabware:
+    model: troughModel_100ml
+    location: R5
+
+source:
+- name: dyeLight
+  well: dyeLightLabware(C01|F01)
+- name: water
+  well: waterLabware(C01|F01)
+
+protocol:
+- titrate:
+    allOf:
+    - source: dyeLight
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+      amount: [80ul, 40ul, 20ul, 10ul, 5ul]
+    tip: [1,2,3,4]
+    destination: plate1(A01+C01+E01+G01+A02+C02+E02+G02+A03+C03+E03+G03+A04+C04+E04+G04+A05+C05+E05+G05)
+
+- titrate:
+    allOf:
+    - source: dyeLight
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Dry_1000
+      amount: [80ul, 40ul, 20ul, 10ul, 5ul]
+    - source: water
+      cleanBetween: none
+      pipettePolicy: Roboliq_Water_Wet_1000
+    amount: 80ul
+    tip: [1,2,3,4]
+    destination: plate1(B01+D01+F01+H01+B02+D02+F02+H02+B03+D03+F03+H03+B04+D04+F04+H04+B05+D05+F05+H05)
+
+- transportLabware:
+    agent: mario
+    device: "mario__transporter2"
+    object: plate1
+    site: "REGRIP"
