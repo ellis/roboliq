@@ -1,0 +1,39 @@
+digraph Roboliq {
+	Parser [ shape="box" ];
+	Evaluator [ shape="box" ];
+
+	EvowareConfigProcessor [ shape="box" ];
+	ProtocolProcessor [ shape="box" ];
+	ProtocolMerger [ shape="box" ];
+	ExpandCommands [
+		shape = none
+		label = <<table border="0" cellspacing="0">
+					<tr><td port="port1" border="1">Expand Tasks</td></tr>
+					<tr><td port="port2" border="1">Expand Methods</td></tr>
+				</table>>
+	]
+	PlanSpacePlanner [ shape="box" ];
+	ExpandActions [ shape="box" ];
+	EvowareCompiler [ shape="box" ];
+
+	Alternatives1 [ label="PlanningAlternatives", style="dashed" ];
+	Alternatives2 [ label="PlanningAlternatives", style="dashed" ];
+	EvowareConfig2 [ label="EvowareConfig", style="dashed" ];
+
+	JSON -> Parser -> Rjs -> Evaluator;
+
+	EvowareConfig -> EvowareConfigProcessor -> LabProtocolData -> ProtocolMerger;
+	GenericProtocol -> ProtocolProcessor -> GenericProtocolData -> ProtocolMerger;
+	PlanningAlternatives -> AssistedPlanner -> PlannedProtocolData -> ProtocolMerger;
+
+	ProtocolMerger -> ProtocolData -> ExpandCommands -> ActionSet -> PlanSpacePlanner -> ActionList -> ExpandActions ->
+		InstructionList -> EvowareCompiler -> EvowareScript;
+	
+	EvowareConfig2 -> EvowareCompiler;
+	ExpandCommands -> Alternatives1 [ label=" missing " ];
+	PlanSpacePlanner -> Alternatives2 [ label=" missing " ];
+
+	{ rank=same ExpandCommands Alternatives1 };
+	{ rank=same PlanSpacePlanner Alternatives2 };
+	{ rank=same EvowareCompiler EvowareConfig2 };
+}
