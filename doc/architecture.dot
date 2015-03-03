@@ -4,6 +4,7 @@ digraph Roboliq {
 
 	EvowareConfigProcessor [ shape="box" ];
 	ProtocolProcessor [ shape="box" ];
+	AssistedPlanner [ shape="box" ];
 	ProtocolMerger [ shape="box" ];
 	ExpandCommands [
 		shape = none
@@ -12,28 +13,45 @@ digraph Roboliq {
 					<tr><td port="port2" border="1">Expand Methods</td></tr>
 				</table>>
 	]
-	PlanSpacePlanner [ shape="box" ];
+	LogicCompiler [ shape="box" ];
+	PartialOrderPlanner [ shape="box" ];
+	PlanChecker [ shape="box" ];
+	PlanIntegrator [ shape="box" ];
 	ExpandActions [ shape="box" ];
 	EvowareCompiler [ shape="box" ];
 
 	Alternatives1 [ label="PlanningAlternatives", style="dashed" ];
 	Alternatives2 [ label="PlanningAlternatives", style="dashed" ];
+	Alternatives3 [ label="PlanningAlternatives", style="dashed" ];
+	ProtocolData1 [ label="ProtocolData", style="dashed" ];
+	ProtocolData2 [ label="ProtocolData", style="dashed" ];
 	EvowareConfig2 [ label="EvowareConfig", style="dashed" ];
 
 	JSON -> Parser -> Rjs -> Evaluator;
 
 	EvowareConfig -> EvowareConfigProcessor -> LabProtocolData -> ProtocolMerger;
 	GenericProtocol -> ProtocolProcessor -> GenericProtocolData -> ProtocolMerger;
-	PlanningAlternatives -> AssistedPlanner -> PlannedProtocolData -> ProtocolMerger;
+	PlanningAlternatives -> AssistedPlanner -> PlannedProtocolData1 -> ProtocolMerger;
 
-	ProtocolMerger -> ProtocolData -> ExpandCommands -> ActionSet -> PlanSpacePlanner -> ActionList -> ExpandActions ->
+	ProtocolMerger -> ProtocolData -> ExpandCommands;
+	ExpandCommands -> LogicCompiler [ style="dashed" ];
+	LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan -> PlanChecker;
+	PlanChecker -> PlanIntegrator [ style="dashed" ];
+	PlanIntegrator ->
+	ExpandActions ->
 		InstructionList -> EvowareCompiler -> EvowareScript;
 	
 	EvowareConfig2 -> EvowareCompiler;
 	ExpandCommands -> Alternatives1 [ label=" missing " ];
-	PlanSpacePlanner -> Alternatives2 [ label=" missing " ];
+	ProtocolData1 -> LogicCompiler;
+	ProtocolData2 -> PlanIntegrator;
+	PartialOrderPlanner -> Alternatives2 [ label=" missing " ];
+	PlanChecker -> Alternatives3 [ label=" missing " ];
 
 	{ rank=same ExpandCommands Alternatives1 };
-	{ rank=same PlanSpacePlanner Alternatives2 };
+	{ rank=same ProtocolData1 LogicCompiler };
+	{ rank=same ProtocolData2 PlanIntegrator };
+	{ rank=same PartialOrderPlanner Alternatives2 };
+	{ rank=same PlanChecker Alternatives3 };
 	{ rank=same EvowareCompiler EvowareConfig2 };
 }
