@@ -30,23 +30,25 @@ digraph Roboliq {
 	Alternatives1 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
 
 	CheckPoint1 -> ExpandCommands [ arrowhead="none" ];
-	CheckPoint1 -> LogicCompiler;
+	CheckPoint1 -> Split1;
 
 	subgraph cluster_1 {
 		label = "Planning";
 
-		
+		Split1 [ shape="point" ];
 		LogicCompiler [ shape="box" ];
 		PartialOrderPlanner [ shape="box" ];
 		PlanChecker [ shape="box" ];
 		PlanIntegrator [ shape="box" ];
 		Alternatives2 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
 
+		Split1 -> LogicCompiler;
 		LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan;
 		PartialOrderPlan -> CheckPoint2 [ arrowhead="none" ];
 
 		CheckPoint2 -> PlanChecker [ arrowhead="none" ];
 		CheckPoint2 -> PlanIntegrator;
+		Split1 -> PlanIntegrator;
 		PlanChecker -> Alternatives2 [ label=" missing " ];
 
 		{ rank=same ProtocolData1 PlanIntegrator };
