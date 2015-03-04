@@ -2,10 +2,24 @@ digraph Roboliq {
 	Parser [ shape="box" ];
 	Evaluator [ shape="box" ];
 
-	EvowareConfigProcessor [ shape="box" ];
-	ProtocolProcessor [ shape="box" ];
-	AssistedPlanner [ shape="box" ];
-	ProtocolMerger [ shape="box" ];
+	subgraph cluster_0 {
+		label = "Input";
+		GenericProtocol;
+		Alternatives0 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
+		EvowareConfig0 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
+
+		EvowareConfigProcessor [ shape="box" ];
+		ProtocolProcessor [ shape="box" ];
+		AssistedPlanner [ shape="box" ];
+
+		ProtocolMerger [ shape="box" ];
+
+		EvowareConfig0 -> EvowareConfigProcessor -> LabProtocolData -> ProtocolMerger;
+		GenericProtocol -> ProtocolProcessor -> GenericProtocolData -> ProtocolMerger;
+		Alternatives0 -> AssistedPlanner -> PlannedProtocolData1 -> ProtocolMerger;
+	};
+
+	CheckPoint1 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
 	ExpandCommands [
 		shape = none
 		label = <<table border="0" cellspacing="0">
@@ -13,45 +27,53 @@ digraph Roboliq {
 					<tr><td port="port2" border="1">Expand Methods</td></tr>
 				</table>>
 	]
-	LogicCompiler [ shape="box" ];
-	PartialOrderPlanner [ shape="box" ];
-	PlanChecker [ shape="box" ];
-	PlanIntegrator [ shape="box" ];
+	Alternatives1 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
+
+	CheckPoint1 -> ExpandCommands [ arrowhead="none" ];
+	CheckPoint1 -> LogicCompiler;
+
+	subgraph cluster_1 {
+		label = "Planning";
+
+		
+		LogicCompiler [ shape="box" ];
+		PartialOrderPlanner [ shape="box" ];
+		PlanChecker [ shape="box" ];
+		PlanIntegrator [ shape="box" ];
+		Alternatives2 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
+
+		LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan;
+		PartialOrderPlan -> CheckPoint2 [ arrowhead="none" ];
+
+		CheckPoint2 -> PlanChecker [ arrowhead="none" ];
+		CheckPoint2 -> PlanIntegrator;
+		PlanChecker -> Alternatives2 [ label=" missing " ];
+
+		{ rank=same ProtocolData1 PlanIntegrator };
+		{ rank=same CheckPoint2 PlanChecker Alternatives2 };
+	};
+
 	ExpandActions [ shape="box" ];
 	EvowareCompiler [ shape="box" ];
 
-	Alternatives1 [ label="PlanningAlternatives", style="dashed" ];
-	Alternatives2 [ label="PlanningAlternatives", style="dashed" ];
-	Alternatives3 [ label="PlanningAlternatives", style="dashed" ];
-	ProtocolData1 [ label="ProtocolData", style="dashed" ];
-	ProtocolData2 [ label="ProtocolData", style="dashed" ];
-	EvowareConfig2 [ label="EvowareConfig", style="dashed" ];
+	CheckPoint2 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
+	ProtocolData0 [ label="ProtocolData", style="dashed,filled", fillcolor="#ddffdd" ];
+	ProtocolData1 [ label="ProtocolData", style="dashed,filled", fillcolor="#ddffdd" ];
+	EvowareConfig1 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
 
 	JSON -> Parser -> Rjs -> Evaluator;
 
-	EvowareConfig -> EvowareConfigProcessor -> LabProtocolData -> ProtocolMerger;
-	GenericProtocol -> ProtocolProcessor -> GenericProtocolData -> ProtocolMerger;
-	PlanningAlternatives -> AssistedPlanner -> PlannedProtocolData1 -> ProtocolMerger;
 
-	ProtocolMerger -> ProtocolData -> ExpandCommands;
-	ExpandCommands -> LogicCompiler [ style="dashed" ];
-	LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan -> PlanChecker;
-	PlanChecker -> PlanIntegrator [ style="dashed" ];
+	ProtocolMerger -> ProtocolData0;
+	ProtocolData0 -> CheckPoint1 [ arrowhead="none" ];
 	PlanIntegrator ->
 	ExpandActions ->
 		InstructionList -> EvowareCompiler -> EvowareScript;
 	
-	EvowareConfig2 -> EvowareCompiler;
+	EvowareConfig1 -> EvowareCompiler;
 	ExpandCommands -> Alternatives1 [ label=" missing " ];
-	ProtocolData1 -> LogicCompiler;
-	ProtocolData2 -> PlanIntegrator;
-	PartialOrderPlanner -> Alternatives2 [ label=" missing " ];
-	PlanChecker -> Alternatives3 [ label=" missing " ];
+	ProtocolData1 -> PlanIntegrator;
 
-	{ rank=same ExpandCommands Alternatives1 };
-	{ rank=same ProtocolData1 LogicCompiler };
-	{ rank=same ProtocolData2 PlanIntegrator };
-	{ rank=same PartialOrderPlanner Alternatives2 };
-	{ rank=same PlanChecker Alternatives3 };
-	{ rank=same EvowareCompiler EvowareConfig2 };
+	{ rank=same CheckPoint1 ExpandCommands Alternatives1 };
+	{ rank=same EvowareCompiler EvowareConfig1 };
 }
