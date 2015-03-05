@@ -1,6 +1,7 @@
 digraph Roboliq {
-	Parser [ shape="box" ];
-	Evaluator [ shape="box" ];
+	//Parser [ shape="box" ];
+	//Evaluator [ shape="box" ];
+	//JSON -> Parser -> Rjs -> Evaluator;
 
 	subgraph cluster_0 {
 		label = "Input";
@@ -29,11 +30,16 @@ digraph Roboliq {
 	]
 	Alternatives1 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
 
+	ProtocolMerger -> ProtocolData0;
+	ProtocolData0 -> CheckPoint1 [ arrowhead="none" ];
 	CheckPoint1 -> ExpandCommands [ arrowhead="none" ];
+	ExpandCommands -> Alternatives1 [ label=" missing " ];
+	{ rank=same CheckPoint1 ExpandCommands Alternatives1 };
 	CheckPoint1 -> Split1;
 
+
 	subgraph cluster_1 {
-		label = "Planning";
+		label = "Action Planning";
 
 		Split1 [ shape="point" ];
 		LogicCompiler [ shape="box" ];
@@ -47,11 +53,11 @@ digraph Roboliq {
 		PartialOrderPlan -> CheckPoint2 [ arrowhead="none" ];
 
 		CheckPoint2 -> PlanChecker [ arrowhead="none" ];
+		PlanChecker -> Alternatives2 [ label=" missing " ];
 		CheckPoint2 -> PlanIntegrator;
 		Split1 -> PlanIntegrator;
-		PlanChecker -> Alternatives2 [ label=" missing " ];
 
-		{ rank=same ProtocolData1 PlanIntegrator };
+		{ rank=same Split1 LogicCompiler };
 		{ rank=same CheckPoint2 PlanChecker Alternatives2 };
 	};
 
@@ -63,19 +69,11 @@ digraph Roboliq {
 	ProtocolData1 [ label="ProtocolData", style="dashed,filled", fillcolor="#ddffdd" ];
 	EvowareConfig1 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
 
-	JSON -> Parser -> Rjs -> Evaluator;
-
-
-	ProtocolMerger -> ProtocolData0;
-	ProtocolData0 -> CheckPoint1 [ arrowhead="none" ];
-	PlanIntegrator ->
+	PlanIntegrator -> ProtocolData1 ->
 	ExpandActions ->
 		InstructionList -> EvowareCompiler -> EvowareScript;
 	
 	EvowareConfig1 -> EvowareCompiler;
-	ExpandCommands -> Alternatives1 [ label=" missing " ];
-	ProtocolData1 -> PlanIntegrator;
 
-	{ rank=same CheckPoint1 ExpandCommands Alternatives1 };
 	{ rank=same EvowareCompiler EvowareConfig1 };
 }
