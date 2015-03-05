@@ -1,7 +1,9 @@
 digraph Roboliq {
-	//Parser [ shape="box" ];
-	//Evaluator [ shape="box" ];
+	//Parser [ shape="Mrecord" ];
+	//Evaluator [ shape="Mrecord" ];
 	//JSON -> Parser -> Rjs -> Evaluator;
+
+	node [ shape="note" ];
 
 	subgraph cluster_0 {
 		label = "Input";
@@ -9,11 +11,11 @@ digraph Roboliq {
 		Alternatives0 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
 		EvowareConfig0 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
 
-		EvowareConfigProcessor [ shape="box" ];
-		ProtocolProcessor [ shape="box" ];
-		AssistedPlanner [ shape="box" ];
+		EvowareConfigProcessor [ shape="Mrecord" ];
+		ProtocolProcessor [ shape="Mrecord" ];
+		AssistedPlanner [ shape="Mrecord" ];
 
-		ProtocolMerger [ shape="box" ];
+		ProtocolMerger [ shape="Mrecord" ];
 
 		EvowareConfig0 -> EvowareConfigProcessor -> LabProtocolData -> ProtocolMerger;
 		GenericProtocol -> ProtocolProcessor -> GenericProtocolData -> ProtocolMerger;
@@ -23,30 +25,59 @@ digraph Roboliq {
 	CheckPoint1 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
 	ExpandCommands [
 		shape = none
-		label = <<table border="0" cellspacing="0">
-					<tr><td port="port1" border="1">Expand Tasks</td></tr>
-					<tr><td port="port2" border="1">Expand Methods</td></tr>
+		label = <<table border="0" cellspacing="0" cellborder="1">
+					<tr><td port="port1">Expand Tasks</td></tr>
+					<tr><td port="port2">Expand Methods</td></tr>
 				</table>>
 	]
-	Alternatives1 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
+	ProtocolData0 [ shape="record", label="{ProtocolData #1|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
 
 	ProtocolMerger -> ProtocolData0;
-	ProtocolData0 -> CheckPoint1 [ arrowhead="none" ];
-	CheckPoint1 -> ExpandCommands [ arrowhead="none" ];
-	ExpandCommands -> Alternatives1 [ label=" missing " ];
-	{ rank=same CheckPoint1 ExpandCommands Alternatives1 };
-	CheckPoint1 -> Split1;
 
+	CheckTasks [ shape="diamond", label="Tasks?" ];
+	ProtocolData0 -> CheckTasks;
+	FindMethods [ shape="Mrecord" ];
+	CheckTasks -> FindMethods [ label="incomplete" ];
+	FindMethods -> TaskAlternatives [ label="list alternative methods" ];
+	{ rank=same CheckTasks FindMethods TaskAlternatives };
+
+	CheckMethods [ shape="diamond", label="Methods?" ];
+	CheckTasks -> CheckMethods;
+	ExpandMethods [ shape="Mrecord" ];
+	CheckMethods -> ExpandMethods [ label="incomplete" ];
+	ExpandMethods -> AlternativesX [ label="expand methods to list of actions" ];
+	{ rank=same CheckMethods ExpandMethods AlternativesX };
+	
+	CheckMethods -> TaskExpander;
 
 	subgraph cluster_1 {
+		label = "Task Planning";
+
+		TaskExpander [ shape="Mrecord" ];
+		MethodExpander [ shape="Mrecord" ];
+		Alternatives1a [ shape="note", label="PlanningAlternatives", style="filled", fillcolor="#ffdddd" ];
+		Alternatives1b [ shape="note", label="PlanningAlternatives", style="filled", fillcolor="#ffdddd" ];
+
+		TaskExpander -> MethodExpander;
+		TaskExpander -> Alternatives1a [ label="missing"];
+		{ rank=same TaskExpander Alternatives1a };
+		MethodExpander -> Alternatives1b [ label="missing"];
+		{ rank=same MethodExpander Alternatives1b };
+	}
+
+	ProtocolData1 [ shape="record", label="{ProtocolData #2|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
+	MethodExpander -> ProtocolData1 -> Split1;
+
+
+	subgraph cluster_2 {
 		label = "Action Planning";
 
 		Split1 [ shape="point" ];
-		LogicCompiler [ shape="box" ];
-		PartialOrderPlanner [ shape="box" ];
-		PlanChecker [ shape="box" ];
-		PlanIntegrator [ shape="box" ];
-		Alternatives2 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
+		LogicCompiler [ shape="Mrecord" ];
+		PartialOrderPlanner [ shape="Mrecord" ];
+		PlanChecker [ shape="Mrecord" ];
+		PlanIntegrator [ shape="Mrecord" ];
+		Alternatives2 [ shape="note", label="PlanningAlternatives", style="filled", fillcolor="#ffdddd" ];
 
 		Split1 -> LogicCompiler;
 		LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan;
@@ -61,17 +92,19 @@ digraph Roboliq {
 		{ rank=same CheckPoint2 PlanChecker Alternatives2 };
 	};
 
-	ExpandActions [ shape="box" ];
-	EvowareCompiler [ shape="box" ];
+	ActionHandlers [ shape="Mrecord" ];
+	EvowareCompiler [ shape="Mrecord" ];
 
 	CheckPoint2 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
-	ProtocolData0 [ label="ProtocolData", style="dashed,filled", fillcolor="#ddffdd" ];
-	ProtocolData1 [ label="ProtocolData", style="dashed,filled", fillcolor="#ddffdd" ];
-	EvowareConfig1 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
+	ProtocolData3 [ shape="record", label="{ProtocolData #3|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
+	ProtocolData4 [ shape="record", label="{ProtocolData #4|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
 
-	PlanIntegrator -> ProtocolData1 ->
-	ExpandActions ->
-		InstructionList -> EvowareCompiler -> EvowareScript;
+	PlanIntegrator -> ProtocolData3 [ label=" add complete list of planned actions and parameters" ];
+	ProtocolData3 -> ActionHandlers;
+	ActionHandlers -> ProtocolData4;
+
+	EvowareConfig1 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
+	ProtocolData4 -> InstructionList -> EvowareCompiler -> EvowareScript;
 	
 	EvowareConfig1 -> EvowareCompiler;
 
