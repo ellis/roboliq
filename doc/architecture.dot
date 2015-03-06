@@ -5,79 +5,93 @@ digraph Roboliq {
 
 	node [ shape="note" ];
 
-	subgraph cluster_0 {
-		label = "Input";
-		GenericProtocol;
-		Alternatives0 [ label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
-		EvowareConfig0 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
+	GenericProtocol;
+	Alternatives0 [ shape="record", label="{PlanningAlternatives|Task Methods|...|...|Variables|Order|...|}", style="dashed,filled", fillcolor="#ffdddd" ];
+	EvowareConfig0 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
 
-		EvowareConfigProcessor [ shape="Mrecord" ];
-		ProtocolProcessor [ shape="Mrecord" ];
-		AssistedPlanner [ shape="Mrecord" ];
+	EvowareConfigProcessor [ shape="Mrecord" ];
+	ProtocolProcessor [ shape="Mrecord" ];
+	AssistedPlanner [ shape="Mrecord" ];
 
-		ProtocolMerger [ shape="Mrecord" ];
+	ProtocolMerger [ shape="Mrecord" ];
 
-		EvowareConfig0 -> EvowareConfigProcessor -> LabProtocolData -> ProtocolMerger;
-		GenericProtocol -> ProtocolProcessor -> GenericProtocolData -> ProtocolMerger;
-		Alternatives0 -> AssistedPlanner -> PlannedProtocolData1 -> ProtocolMerger;
-	};
+	GenericProtocol -> ProtocolProcessor -> GenericProtocolData;
+	GenericProtocolData -> ProtocolMerger [ label="1" ];
+	EvowareConfig0 -> EvowareConfigProcessor -> LabProtocolData;
+	LabProtocolData -> ProtocolMerger [ label="2" ];
+	AutomatedProtocolData -> ProtocolMerger [ label="3" ];
+	Alternatives0 -> AssistedPlanner;
+	AssistedPlanner -> AutomatedProtocolData [ dir="both" ];
+	AssistedPlanner -> UserProtocolData [ dir="both" ];
+	UserProtocolData -> ProtocolMerger [ label="4" ];
 
-	CheckPoint1 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
-	ExpandCommands [
-		shape = none
-		label = <<table border="0" cellspacing="0" cellborder="1">
-					<tr><td port="port1">Expand Tasks</td></tr>
-					<tr><td port="port2">Expand Methods</td></tr>
-				</table>>
-	]
+	GenericProtocolData -> LabProtocolData -> AutomatedProtocolData -> UserProtocolData [ style="invis" ];
+	{ rank=same GenericProtocolData LabProtocolData AutomatedProtocolData UserProtocolData };
+
 	ProtocolData0 [ shape="record", label="{ProtocolData #1|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
 
 	ProtocolMerger -> ProtocolData0;
 
-	CheckTasks [ shape="diamond", label="Tasks?" ];
+	CheckTasks [ shape="diamond", label="Tasks?", width=2 ];
 	ProtocolData0 -> CheckTasks;
 	FindMethods [ shape="Mrecord" ];
 	CheckTasks -> FindMethods [ label="incomplete" ];
+	TaskAlternatives [ style="dashed,filled", fillcolor="#ffdddd" ];
 	FindMethods -> TaskAlternatives [ label="list alternative methods" ];
 	{ rank=same CheckTasks FindMethods TaskAlternatives };
 
-	CheckMethods [ shape="diamond", label="Methods?" ];
+	CheckMethods [ shape="diamond", label="Methods?", width=2 ];
 	CheckTasks -> CheckMethods;
 	ExpandMethods [ shape="Mrecord" ];
 	CheckMethods -> ExpandMethods [ label="incomplete" ];
+	AlternativesX [ label="AutomatedProtocolData" style="dashed,filled", fillcolor="#ffdddd" ];
 	ExpandMethods -> AlternativesX [ label="expand methods to list of actions" ];
 	{ rank=same CheckMethods ExpandMethods AlternativesX };
 	
-	CheckMethods -> TaskExpander;
+	CheckPlan [ shape="diamond", label="Plan?", width=2 ];
+	CheckMethods -> CheckPlan;
+	PlanActions [ shape="Mrecord" ];
+	CheckPlan -> PlanActions [ label="incomplete" ];
+	{ rank=same CheckPlan PlanActions };
 
-	subgraph cluster_1 {
-		label = "Task Planning";
+	CheckVariables [ shape="diamond", label="Variables?", width=2 ];
+	CheckPlan -> CheckVariables;
+	FindValues [ shape="Mrecord" ];
+	CheckVariables -> FindValues [ label="incomplete" ];
+	VariableAlternatives [ style="dashed,filled", fillcolor="#ffdddd" ];
+	FindValues -> VariableAlternatives [ label="list alternative values" ];
+	{ rank=same CheckVariables FindValues VariableAlternatives };
 
-		TaskExpander [ shape="Mrecord" ];
-		MethodExpander [ shape="Mrecord" ];
-		Alternatives1a [ shape="note", label="PlanningAlternatives", style="filled", fillcolor="#ffdddd" ];
-		Alternatives1b [ shape="note", label="PlanningAlternatives", style="filled", fillcolor="#ffdddd" ];
+	CheckActions [ shape="diamond", label="Actions?", width=2 ];
+	CheckVariables -> CheckActions;
+	HandleActions [ shape="Mrecord" ];
+	CheckActions -> HandleActions [ label="incomplete" ];
+	ActionCommands [ style="dashed,filled", fillcolor="#ffdddd" ];
+	HandleActions -> ActionCommands [ label="expand actions" ];
+	{ rank=same CheckActions HandleActions ActionCommands };
 
-		TaskExpander -> MethodExpander;
-		TaskExpander -> Alternatives1a [ label="missing"];
-		{ rank=same TaskExpander Alternatives1a };
-		MethodExpander -> Alternatives1b [ label="missing"];
-		{ rank=same MethodExpander Alternatives1b };
-	}
+	EvowareCompiler [ shape="Mrecord" ];
+	CheckActions -> EvowareCompiler;
+	EvowareCompiler -> EvowareScript;
+	EvowareConfig1 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
+	EvowareConfig1 -> EvowareCompiler;
+	{ rank=same EvowareCompiler EvowareConfig1 };
 
-	ProtocolData1 [ shape="record", label="{ProtocolData #2|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
-	MethodExpander -> ProtocolData1 -> Split1;
+
 
 
 	subgraph cluster_2 {
 		label = "Action Planning";
 
+		ProtocolData1 [ shape="record", label="{ProtocolData #2|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
+		ProtocolData1 -> Split1;
 		Split1 [ shape="point" ];
 		LogicCompiler [ shape="Mrecord" ];
 		PartialOrderPlanner [ shape="Mrecord" ];
 		PlanChecker [ shape="Mrecord" ];
 		PlanIntegrator [ shape="Mrecord" ];
 		Alternatives2 [ shape="note", label="PlanningAlternatives", style="filled", fillcolor="#ffdddd" ];
+		CheckPoint2 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
 
 		Split1 -> LogicCompiler;
 		LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan;
@@ -92,21 +106,5 @@ digraph Roboliq {
 		{ rank=same CheckPoint2 PlanChecker Alternatives2 };
 	};
 
-	ActionHandlers [ shape="Mrecord" ];
-	EvowareCompiler [ shape="Mrecord" ];
-
-	CheckPoint2 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
-	ProtocolData3 [ shape="record", label="{ProtocolData #3|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
-	ProtocolData4 [ shape="record", label="{ProtocolData #4|{Logic|Commands|Settings}}", style="filled", fillcolor="#ddffdd" ];
-
 	PlanIntegrator -> ProtocolData3 [ label=" add complete list of planned actions and parameters" ];
-	ProtocolData3 -> ActionHandlers;
-	ActionHandlers -> ProtocolData4;
-
-	EvowareConfig1 [ label="EvowareConfig", style="dashed,filled", fillcolor="#ddddff" ];
-	ProtocolData4 -> InstructionList -> EvowareCompiler -> EvowareScript;
-	
-	EvowareConfig1 -> EvowareCompiler;
-
-	{ rank=same EvowareCompiler EvowareConfig1 };
 }
