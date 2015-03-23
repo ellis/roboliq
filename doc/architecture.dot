@@ -74,39 +74,32 @@ digraph Roboliq {
 	LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialPlan;
 	{ rank=same CheckPlan LogicCompiler PDDL PartialOrderPlanner PartialPlan };
 
-	CheckOrder [ shape="diamond", label="Order?", width=2 ];
-	PlanSteps [ label="Plan Steps" style="dashed,filled", fillcolor="#ffdddd" ];
-	CheckSteps -> PlanSteps [ label="incomplete" ];
-	{ rank=same CheckSteps PlanSteps };
-
-	// CONTINUE
-	PlanChecker [ shape="Mrecord" ];
+	CheckActions1 [ shape="diamond", label="Actions?", width=2 ];
+	CheckPlan -> CheckActions1;
 	PlanIntegrator [ shape="Mrecord" ];
-	Alternatives2 [ shape="note", label="PlanningAlternatives", style="dashed,filled", fillcolor="#ffdddd" ];
-	CheckPoint2 [ label="", shape="diamond", width=0.2, height=0.2, fixedsize=true ];
-
-	LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialOrderPlan;
-	PartialOrderPlan -> CheckPoint2 [ arrowhead="none" ];
-	// END OF CONTINUE
+	CheckActions1 -> PlanIntegrator [ label="incomplete" ];
+	PlannedActions [ label="Planned Actions", style="dashed,filled", fillcolor="#ffdddd" ];
+	PlanIntegrator -> PlannedActions
+	{ rank=same CheckActions1 PlanIntegrator PlannedActions };
 
 	CheckVariables [ shape="diamond", label="Variables?", width=2 ];
-	CheckPlan -> CheckVariables;
+	CheckActions1 -> CheckVariables;
 	FindValues [ shape="Mrecord" ];
 	CheckVariables -> FindValues [ label="incomplete" ];
 	VariableAlternatives [ style="dashed,filled", fillcolor="#ffdddd" ];
 	FindValues -> VariableAlternatives [ label="list alternative values" ];
 	{ rank=same CheckVariables FindValues VariableAlternatives };
 
-	CheckActions [ shape="diamond", label="Actions?", width=2 ];
-	CheckVariables -> CheckActions;
+	CheckCommands [ shape="diamond", label="Commands?", width=2 ];
+	CheckVariables -> CheckCommands;
 	HandleActions [ shape="Mrecord" ];
-	CheckActions -> HandleActions [ label="incomplete" ];
+	CheckCommands -> HandleActions [ label="incomplete" ];
 	ActionCommands [ style="dashed,filled", fillcolor="#ffdddd" ];
 	HandleActions -> ActionCommands [ label="expand actions" ];
-	{ rank=same CheckActions HandleActions ActionCommands };
+	{ rank=same CheckCommands HandleActions ActionCommands };
 
 	ExtractInstructions [ shape="Mrecord" ];
-	CheckActions -> ExtractInstructions;
+	CheckCommands -> ExtractInstructions;
 	ExtractInstructions -> InstructionList;
 
 	EvowareCompiler [ shape="Mrecord" ];
@@ -122,14 +115,6 @@ digraph Roboliq {
 
 
 
-		CheckPoint2 -> PlanChecker [ arrowhead="none" ];
-		PlanChecker -> Alternatives2 [ label=" missing " ];
-		CheckPoint2 -> PlanIntegrator;
-
-		{ rank=same CheckPoint2 PlanChecker Alternatives2 };
-
-	PlannedActions [ label="Planned Actions", style="dashed,filled", fillcolor="#ffdddd" ];
-	PlanIntegrator -> PlannedActions
 
 	ProtocolVariableAlternatives -> TaskMethods [ style="invis" ];
 }
