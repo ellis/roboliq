@@ -8,8 +8,7 @@ import roboliq.evoware.parser._
 class EvowareConfig(
 	val carrierData: EvowareCarrierData,
 	val tableData: EvowareTableData,
-	val configData: EvowareConfigData,
-	val sealerProgram_l: List[EvowareSealerProgram]
+	val configData: EvowareConfigData
 ) {
 	val idToSite_m: Map[String, CarrierGridSiteIndex] = {
 		// Get or create an ID for each site on the table
