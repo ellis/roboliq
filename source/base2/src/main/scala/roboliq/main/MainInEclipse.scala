@@ -1,4 +1,4 @@
-package roboliq.main
+/*package roboliq.main
 
 import java.io.File
 
@@ -153,4 +153,4 @@ object MainInEclipse extends App {
 	//runTemp("qa03_weight_3")
 	//runTemp("qa03_weight_4")
 	runTemp("qa05_dye_vol_range")
-}
+}*/

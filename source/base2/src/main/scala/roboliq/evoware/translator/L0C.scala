@@ -145,22 +145,20 @@ case class L0C_Spirate(
 	val mTips: Int,
 	val sLiquidClass: String,
 	val asVolumes: Seq[String],
-	val iGrid: Int,
-	val iSite: Int,
+	val siteId: CarrierGridSiteIndex,
 	val tipSpacing: Int,
 	val sPlateMask: String,
-	val site: CarrierSite,
 	val labwareModel: EvowareLabwareModel
 ) extends L0C_Command {
-	override def getSiteToLabwareModelList: List[Tuple2[CarrierSite, EvowareLabwareModel]] =
-		List(site -> labwareModel)
+	override def getSiteToLabwareModelList: List[Tuple2[CarrierGridSiteIndex, EvowareLabwareModel]] =
+		List(siteId -> labwareModel)
 
 	override def toString = {
 		val l = List(
 			mTips,
 			'"'+sLiquidClass+'"',
 			asVolumes.mkString(","),
-			iGrid, iSite,
+			siteId.gridIndex, siteId.siteIndex,
 			tipSpacing,
 			'"'+sPlateMask+'"',
 			0,

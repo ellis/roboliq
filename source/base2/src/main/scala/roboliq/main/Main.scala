@@ -1,4 +1,4 @@
-package roboliq.main
+/*package roboliq.main
 
 import java.io.File
 import java.text.SimpleDateFormat
@@ -308,4 +308,4 @@ class Runner(args: Array[String]) {
 object Main extends App {
 	args
 	new Runner(args)
-}
+}*/

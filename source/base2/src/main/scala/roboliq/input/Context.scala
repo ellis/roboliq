@@ -1,4 +1,4 @@
-package roboliq.input
+/*package roboliq.input
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
@@ -377,3 +377,4 @@ object Context {
 		} yield file
 	}
 }
+*/

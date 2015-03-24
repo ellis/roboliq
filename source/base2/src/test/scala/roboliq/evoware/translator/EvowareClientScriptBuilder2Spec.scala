@@ -1,4 +1,4 @@
-package roboliq.evoware.config
+package roboliq.evoware.translator
 
 import org.scalatest.FunSpec
 import spray.json.JsNumber
@@ -15,11 +15,18 @@ import roboliq.ai.plan.Unique
 import roboliq.ai.strips
 import roboliq.input.RjsNumber
 import roboliq.input.RjsBasicMap
+import roboliq.evoware.config.EvowareProtocolData
+import roboliq.evoware.config.EvowareSiteConfig
+import roboliq.evoware.config.EvowareTableSetupConfig
+import roboliq.evoware.config.EvowareAgentConfig
+import roboliq.evoware.config.EvowareDeviceConfig
+import roboliq.input.RjsMap
+import roboliq.input.ResultE
 
-class EvowareProtocolDataGeneratorSpec extends FunSpec {
-	import roboliq.input.ResultCWrapper._
+class EvowareClientScriptBuilder2Spec extends FunSpec {
+	import roboliq.input.ResultEWrapper._
 
-	describe("EvowareProtocolDataGenerator") {
+	describe("EvowareClientScriptBuilder2") {
 		it("") {
 			val protocolData0 = new ProtocolDetails(
 				objects = RjsBasicMap(
@@ -55,13 +62,7 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 				evowareProtocolData_? = Some(evowareProtocolData0),
 				tableSetups = Map("default"  -> evowareTableSetupConfig)
 			)
-			val data_? = EvowareProtocolDataGenerator.createProtocolData(
-				agentConfig = evowareAgentConfig,
-				table_l = List("mario.default"),
-				searchPath_l = List()
-			)
-			
-			val expected = ProtocolDetails(
+			val protocolDetails = ProtocolDetails(
 				objects = RjsBasicMap(
 					"CENTRIFUGE" -> RjsBasicMap(
 						"evowareGrid" -> RjsNumber(54,None),
@@ -99,8 +100,20 @@ class EvowareProtocolDataGeneratorSpec extends FunSpec {
 				)
 
 			)
+			val instruction = RjsMap("Instruction", Map("name" -> RjsString("Log"), "text" -> RjsString("Hello, World")))
 
-			assert(data_?.run().value == expected)
+			val cmd_l_? = for {
+				builder <- ResultE.from(EvowareClientScriptBuilder2.create(
+					agentConfig = evowareAgentConfig,
+					table_l = List("mario.default"),
+					searchPath_l = List(),
+					protocolDetails
+				))
+				_ <- builder.addInstruction("mario", instruction)
+				_ <- builder.end()
+			} yield builder.cmds.toList
+
+			assert(cmd_l_?.run().value == List(L0C_Comment("Hello, World")))
 		}
 	}
 }

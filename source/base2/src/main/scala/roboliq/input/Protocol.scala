@@ -1,4 +1,4 @@
-package roboliq.input
+/*package roboliq.input
 
 import spray.json._
 import spray.json.DefaultJsonProtocol._
@@ -1044,4 +1044,4 @@ class Protocol {
 		))
 	}
 
-}
+}*/

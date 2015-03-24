@@ -31,31 +31,51 @@ object EvowareTableParser {
 		tableFile
 	}
 
-	def parse14(configFile: EvowareCarrierData, l: List[String], lsLine: List[String]): Tuple2[EvowareTableData, List[String]] = {
+	private def parse14(
+		configFile: EvowareCarrierData,
+		l: List[String],
+		lsLine: List[String]
+	): (EvowareTableData, List[String]) = {
 		import configFile._
-		val lCarrier_? = parse14_getCarriers(mapIdToCarrier, l.init)
-		val (lTableInfo, lsLine2) = parse14_getLabwareObjects(mapNameToLabwareModel, lCarrier_?, lsLine, Nil)
+		val carrierId_l = parse14_getCarriers(l.init)
+		val lCarrier_? : List[Option[Carrier]] = carrierId_l.map(carrierId_? => carrierId_?.flatMap(carrierId => configFile.mapIdToCarrier.get(carrierId)))
+		val gridToInternalCarrierId_m: Map[Int, Int]
+			= carrierId_l.zipWithIndex.collect({case (Some(carrierId), gridIndex) => gridIndex -> carrierId}).toMap
+		val (lTableInfo, lsLine2) = parse14_getLabwareObjects(mapNameToLabwareModel, 0, lCarrier_?, lsLine, Nil)
 		val (lHotelObject, lsLine3) = parse14_getHotelObjects(mapIdToCarrier, lsLine2)
 		val (lExternalObject, lsLine4) = parse14_getExternalObjects(mapNameToCarrier, lsLine3)
 		val (mapSiteToExternalLabwareModel, lsLine5) = parse14_getExternalLabwares(mapIdToCarrier, mapNameToLabwareModel, lsLine4)
 		val (mapCarrierToGrid2, lsLine6) = parse14_getExternalCarrierGrids(lExternalObject, lsLine5)
 		
 		val mapSiteToLabel = lTableInfo.map(o => o._1 -> o._2).toMap
-		val mapSiteToLabwareModel = (
+		val siteIdExternalToLabwareModel_l: List[(CarrierGridSiteIndex, EvowareLabwareModel)] = (
+			mapSiteToExternalLabwareModel.toList.flatMap { case (CarrierSite(carrier, siteIndex), model) =>
+				mapCarrierToGrid2.get(carrier).map(gridIndex => CarrierGridSiteIndex(carrier.id, gridIndex, siteIndex) -> model)
+			}
+		)
+		val siteIdToLabwareModel_m: Map[CarrierGridSiteIndex, EvowareLabwareModel] = (
 			lTableInfo.map(o => o._1 -> o._3) ++
-			mapSiteToExternalLabwareModel
+			siteIdExternalToLabwareModel_l
 		).toMap
 		val mapCarrierToGrid1 = lCarrier_?.zipWithIndex.collect({ case (Some(o), iGrid) => o -> iGrid }).toMap
 		val mapCarrierToGrid = mapCarrierToGrid1 ++ mapCarrierToGrid2
 		
+		val carrierIdToGrids_m: Map[Int, List[Int]] = {
+			val l =
+				gridToInternalCarrierId_m.toList.map(_.swap) ++
+				mapCarrierToGrid2.toList.map({ case (carrier, gridIndex) => (carrier.id, gridIndex)})
+			l.groupBy(_._1).mapValues(_.map(_._2))
+		}
+		
 		val tableFile = new EvowareTableData(
 			configFile,
-			lCarrier_?,
+			carrierId_l,
 			lHotelObject,
 			lExternalObject,
-			mapCarrierToGrid,
+			carrierIdToGrids_m,
+			//mapCarrierToGrid,
 			mapSiteToLabel,
-			mapSiteToLabwareModel
+			siteIdToLabwareModel_m
 		)
 		
 		logger.trace("tablefile:")
@@ -63,54 +83,46 @@ object EvowareTableParser {
 		(tableFile, lsLine6)
 	}
 	
-	def parse14_getCarriers(
-		mapIdToCarrier: Map[Int, Carrier],
+	private def parse14_getCarriers(
 		l: List[String]
-	): List[Option[Carrier]] = {
+	): List[Option[Int]] = {
 		l.map(s => {
 			val id = s.toInt
 			if (id == -1) None
-			else mapIdToCarrier.get(id)
+			else Some(id)
 		}).toList
-		/*
-		for ((item, iGrid) <- l.zipWithIndex) {
-			if (item != "-1") {
-				val id = item.toInt
-				println(iGrid + ": " + map(id))
-			}
-		}*/
 	}
 	
 	def parse14_getLabwareObjects(
 		mapNameToLabwareModel: Map[String, EvowareLabwareModel],
-		//iGrid: Int,
+		gridIndex: Int,
 		lCarrier_? : List[Option[Carrier]],
 		lsLine: List[String],
-		acc: List[Tuple3[CarrierSite, String, EvowareLabwareModel]]
-	): Tuple2[List[Tuple3[CarrierSite, String, EvowareLabwareModel]], List[String]] = {
+		acc: List[Tuple3[CarrierGridSiteIndex, String, EvowareLabwareModel]]
+	): Tuple2[List[Tuple3[CarrierGridSiteIndex, String, EvowareLabwareModel]], List[String]] = {
 		lCarrier_? match {
 			case Nil => (acc, lsLine)
-			case None :: rest => parse14_getLabwareObjects(mapNameToLabwareModel, rest, lsLine.tail, acc)
+			case None :: rest => parse14_getLabwareObjects(mapNameToLabwareModel, gridIndex + 1, rest, lsLine.tail, acc)
 			case Some(carrier) :: rest =>
 				val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 				val (n1, l1) = EvowareFormat.splitSemicolons(lsLine(1))
-				// FIME: for debug only
+				/*// FIME: for debug only
 				if (l0(0).isEmpty || !(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)) {
 					logger.error("ERROR: parse14_getLabwareObjects:")
 					logger.error(carrier)
 					logger.error(lsLine.head)
 					logger.error((n0, l0, n1, l1, carrier.nSites))
 				}
-				// ENDFIX
+				// ENDFIX*/
 				assert(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)
 				//println(iGrid+": "+carrier)
 				val l = (for (iSite <- 0 until carrier.nSites) yield {
 					//println("\t"+i+": "+l0(i+1)+", "+l1(i))
 					val sName = l0(iSite+1)
 					if (sName.isEmpty()) None
-					else Some(CarrierSite(carrier, iSite), l1(iSite), mapNameToLabwareModel(sName))
+					else Some(CarrierGridSiteIndex(carrier.id, gridIndex, iSite), l1(iSite), mapNameToLabwareModel(sName))
 				}).toList.flatten
-				parse14_getLabwareObjects(mapNameToLabwareModel, rest, lsLine.drop(2), acc ++ l)
+				parse14_getLabwareObjects(mapNameToLabwareModel, gridIndex + 1, rest, lsLine.drop(2), acc ++ l)
 		}
 	}
 	
@@ -157,16 +169,16 @@ object EvowareTableParser {
 		mapIdToCarrier: Map[Int, Carrier],
 		mapNameToLabwareModel: Map[String, EvowareLabwareModel],
 		lsLine: List[String]
-	): Tuple2[Map[CarrierSite, EvowareLabwareModel], List[String]] = {
+	): (Map[CarrierSite, EvowareLabwareModel], List[String]) = {
 		val (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
 		assert(n0 == 998)
 		val nObjects = l0(0).toInt
 		val mapSiteToLabwareModel = lsLine.tail.take(nObjects).map(s => {
 			val (n, l) = EvowareFormat.splitSemicolons(s)
 			assert(n == 998)
-			val idCarrier = l(0).toInt
+			val carrierId = l(0).toInt
 			val sName = l(1)
-			val carrier = mapIdToCarrier(idCarrier)
+			val carrier = mapIdToCarrier(carrierId)
 			val labwareModel = mapNameToLabwareModel(sName)
 			CarrierSite(carrier, 0) -> labwareModel
 		}).toMap

@@ -52,6 +52,13 @@ object Atom {
 		val l = s.split(" ")
 		new Atom(l.head, l.tail)
 	}
+	
+	def find(atoms: Set[Atom], name: String, params: Iterable[Option[String]] = Nil): Set[Atom] = {
+		atoms.filter { atom =>
+			atom.name == name && atom.params.zip(params).forall({ case (p, p_?) => p_?.isEmpty || p_? == Some(p) })
+		}
+	}
+	
 	implicit def stringToAtom(s: String): Atom = parse(s)
 }
 

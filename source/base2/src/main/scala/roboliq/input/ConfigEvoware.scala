@@ -1,4 +1,4 @@
-package roboliq.input
+/*package roboliq.input
 
 import scala.collection.JavaConversions._
 import roboliq.evoware.translator.EvowareSealerProgram
@@ -1012,4 +1012,4 @@ class ConfigEvoware(
 					eb.addDeviceSpec(device, spec, specIdent)
 				}
 	*/
-}
+}*/

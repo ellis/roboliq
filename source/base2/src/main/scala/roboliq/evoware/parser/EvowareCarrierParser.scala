@@ -9,6 +9,19 @@ import ch.ethz.reactivesim.RsError
 /** An item defined in the file `Carrier.cfg` */
 sealed trait EvowareModel
 
+/**
+ * @param carrierId ID for the carrier
+ * @param gridIndex 1-based index of grid
+ * @param siteIndex 0-based index of site
+ */
+case class CarrierGridSiteIndex(carrierId: Int, gridIndex: Int, siteIndex: Int)
+
+/**
+ * @param carrierId ID for the carrier
+ * @param siteIndex 0-based index of site
+ */
+case class CarrierSiteIndex(carrierId: Int, siteIndex: Int)
+
 case class Carrier(
 	sName: String,
 	id: Int,
@@ -25,7 +38,7 @@ case class EvowareLabwareModel(
 	val nRows: Int,
 	val nCols: Int,
 	val ul: Double,
-	val sites: List[(Int, Int)]
+	val sites: List[CarrierSiteIndex]
 ) extends EvowareModel
 
 case class Vector(
@@ -197,7 +210,7 @@ object EvowareCarrierParser {
 			val idCarrier = ls(0).toInt
 			val sitemask = ls(1)
 			Utils.parseEncodedIndexes(sitemask) match {
-				case RsSuccess((_, _, site_li), _) => site_li.map(idCarrier -> _)
+				case RsSuccess((_, _, site_li), _) => site_li.map(site_i => CarrierSiteIndex(idCarrier, site_i))
 				case _ => Nil
 			}
 		})

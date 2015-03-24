@@ -8,10 +8,8 @@ import org.apache.commons.io.FilenameUtils
 import com.google.gson.Gson
 import roboliq.core._
 import roboliq.entities.ClientScriptBuilder
-import roboliq.evoware.translator.EvowareClientScriptBuilder
 import roboliq.evoware.translator.EvowareConfig
 import roboliq.input.ConfigBean
-import roboliq.input.Protocol
 import roboliq.plan.CallTree
 import spray.json.JsObject
 import spray.json.pimpString
@@ -43,7 +41,7 @@ import roboliq.input.RjsProtocol
 import roboliq.input.ProtocolDetails
 import roboliq.input.RjsAbstractMap
 import roboliq.evoware.config.EvowareAgentConfig
-import roboliq.evoware.config.EvowareProtocolDataGenerator
+import roboliq.evoware.config.EvowareProtocolDetailsGenerator
 
 case class RoboliqOpt(
 	step_l: Vector[RoboliqOptStep] = Vector(),
@@ -261,7 +259,7 @@ object RoboliqRunner {
 		for {
 			evowareAgentConfig <- RjsConverter.fromRjs[EvowareAgentConfig](m0)
 			searchPath_l <- ResultE.gets(_.searchPath_l)
-			details <- ResultE.from(EvowareProtocolDataGenerator.createProtocolData(
+			details <- ResultE.from(EvowareProtocolDetailsGenerator.createProtocolDetails(
 				agentConfig = evowareAgentConfig,
 				table_l = opt.table_l.toList,
 				searchPath_l = searchPath_l
