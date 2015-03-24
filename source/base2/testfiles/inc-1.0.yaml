@@ -1,0 +1,9 @@
+TYPE: define
+NAME: inc
+VALUE:
+  TYPE: lambda
+  EXPRESSION:
+    TYPE: call
+    NAME: add
+    INPUT:
+      numbers: [$x, 1]

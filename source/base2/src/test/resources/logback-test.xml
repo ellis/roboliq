@@ -1,0 +1,20 @@
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="info">
+    <appender-ref ref="STDOUT" />
+  </root>
+  <!--
+  <logger name="roboliq.processor.ConversionsDirect" level="trace"/>
+  <logger name="roboliq.processor.Conversions" level="trace"/>
+  <logger name="roboliq.processor.DataBase" level="trace"/>
+  <logger name="roboliq.processor.ProcessorData" level="trace"/>
+  -->
+</configuration>
