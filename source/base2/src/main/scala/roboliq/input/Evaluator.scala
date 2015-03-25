@@ -1,6 +1,5 @@
 package roboliq.input
 
-import roboliq.entities.EntityBase
 import scala.collection.mutable.HashMap
 
 class Evaluator() {

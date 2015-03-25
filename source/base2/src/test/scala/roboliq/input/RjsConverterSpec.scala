@@ -1,7 +1,6 @@
 package roboliq.input
 
 import org.scalatest.FunSpec
-import roboliq.entities.EntityBase
 import spray.json.JsNumber
 import spray.json.JsObject
 import spray.json.JsNull

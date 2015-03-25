@@ -1,7 +1,6 @@
 package roboliq.input
 
 import scala.beans.BeanProperty
-import roboliq.entities.Rel
 import roboliq.ai.strips
 import roboliq.core.RsResult
 import roboliq.ai.plan.Unique
