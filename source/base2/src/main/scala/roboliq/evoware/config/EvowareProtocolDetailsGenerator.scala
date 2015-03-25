@@ -133,6 +133,10 @@ object EvowareProtocolDetailsGenerator {
 		//devices: Map[String, EvowareDeviceConfig],
 		//transporterBlacklist: List[EvowareTransporterBlacklistConfig]
 
+		//carrierData.printCarriersById()
+		println("carrierData.mapNameToLabwareModel:")
+		carrierData.mapNameToLabwareModel.foreach(println)
+
 		// Gather list of all available labware models referenced in data0
 		//println("data0.objects.map.toList: "+data0.objects.map.toList)
 		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
@@ -149,13 +153,15 @@ object EvowareProtocolDetailsGenerator {
 					} yield modelName -> mE
 				}
 			}
+			_ = println("modelNameToEvowareModel_l: "+modelNameToEvowareModel_l)
+			_ = println("tableData.carrierIdToGrids_m: "+tableData.carrierIdToGrids_m)
 			
 			// Create map from siteId to all labware model names that can be placed on that site
 			siteIdToModelNames_m: Map[CarrierGridSiteIndex, Set[String]] = {
 				val l = for {
 					(modelName, mE) <- modelNameToEvowareModel_l
 					siteId <- mE.sites
-					grid_i <- tableData.carrierIdToGrids_m(siteId.carrierId)
+					grid_i <- tableData.carrierIdToGrids_m.get(siteId.carrierId).getOrElse(Nil)
 				} yield { CarrierGridSiteIndex(siteId.carrierId, grid_i, siteId.siteIndex) -> modelName }
 				l.groupBy(_._1).mapValues(_.map(_._2).toSet)
 			}
@@ -221,7 +227,7 @@ object EvowareProtocolDetailsGenerator {
 			// Build the devices
 			_ <- ResultC.context("devices") {
 				val carrierId_l = tableData.carrierIdToGrids_m.keys.toList
-				val carrier_l = carrierId_l.map(tableData.configFile.mapIdToCarrier)
+				val carrier_l = carrierId_l.flatMap(tableData.configFile.mapIdToCarrier.get)
 				val nameToCarrier_m = carrier_l.map(c => c.sName -> c).toMap
 				val partToCarrier_m = carrier_l.flatMap(c => c.partNo_?.map(_ -> c)).toMap
 				ResultC.foreach(evowareProtocolData.devices) { case (deviceName, deviceConfig) =>
@@ -290,7 +296,8 @@ object EvowareProtocolDetailsGenerator {
 											for {
 												carrierE <- ResultC.from(carrierData.mapNameToCarrier.get(carrierName), s"unknown carrier: $carrierName")
 												gridIndex_l <- ResultC.from(tableData.carrierIdToGrids_m.get(carrierE.id), s"carrier is missing from the given table: $carrierName")
-												_ <- ResultC.assert(gridIndex_l.size == 0, s"unable to configure device `$carrierName`, because it's present on the selected table more than once: grids ${gridIndex_l}")
+												_ <- ResultC.assert(!gridIndex_l.isEmpty, s"unable to configure device `$carrierName`, because has not been placed on the selected table")
+												_ <- ResultC.assert(gridIndex_l.size == 1, s"unable to configure device `$carrierName`, because it's present on the selected table more than once: grids ${gridIndex_l}")
 											} yield (carrierE.id, gridIndex_l.head)
 										}
 									}
