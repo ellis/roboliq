@@ -102,7 +102,7 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 			)
 			// What we actually got back!
 			// - [x] fix P1.evowareCarrier
-			// - [ ] fix missing mario.sm0
+			// - [ ] fix missing mario.sm0 (see EvowareProtocolDetailsGenerator.scala:189
 			// - [ ] fix missing mario.sm0 logic
 			ProtocolDetails(
 				RjsBasicMap(
