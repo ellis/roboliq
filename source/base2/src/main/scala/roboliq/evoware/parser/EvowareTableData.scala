@@ -38,7 +38,7 @@ class EvowareTableData(
 			externalObject_l,
 			siteIdToLabel_m.toList,
 			siteIdToLabwareModel_m.toList,
-			carrierIdToGrids_m.toList.sortBy(_._2.min).map(pair => configFile.mapIdToCarrier(pair._1) -> pair._2)
+			carrierIdToGrids_m.toList.sortBy(_._2.min).map(pair => configFile.mapIdToCarrier.get(pair._1) -> pair._2)
 		).flatten.mkString("\n")
 	}
 	

@@ -136,6 +136,11 @@ object EvowareProtocolDetailsGenerator {
 		//carrierData.printCarriersById()
 		println("carrierData.mapNameToLabwareModel:")
 		carrierData.mapNameToLabwareModel.foreach(println)
+		println()
+		
+		println("tableData:")
+		println(tableData.toDebugString)
+		println()
 
 		// Gather list of all available labware models referenced in data0
 		//println("data0.objects.map.toList: "+data0.objects.map.toList)
@@ -154,7 +159,9 @@ object EvowareProtocolDetailsGenerator {
 				}
 			}
 			_ = println("modelNameToEvowareModel_l: "+modelNameToEvowareModel_l)
+			_ = println()
 			_ = println("tableData.carrierIdToGrids_m: "+tableData.carrierIdToGrids_m)
+			_ = println()
 			
 			// Create map from siteId to all labware model names that can be placed on that site
 			siteIdToModelNames_m: Map[CarrierGridSiteIndex, Set[String]] = {
@@ -174,6 +181,9 @@ object EvowareProtocolDetailsGenerator {
 			
 			// Get map of sites we'll need plus their evoware siteId
 			siteNameToSiteId_m <- getSiteNameToSiteIdMap(evowareProtocolData, carrierData, tableData)
+			_ = println("siteNameToSiteId_m:")
+			_ = siteNameToSiteId_m.toList.sortBy(_._1).foreach(println)
+			_ = println()
 			
 			// Construct map of labware models that the sites should hold
 			siteNameToModelNames_m =
@@ -182,6 +192,9 @@ object EvowareProtocolDetailsGenerator {
 						siteName -> modelName_l
 					}
 				}
+			_ = println("siteNameToModelNames_m:")
+			_ = siteNameToModelNames_m.toList.sortBy(_._1).foreach(println)
+			_ = println()
 			
 			// Create the site models and get a map from set of labware models to corresponding site model name
 			modelNamesToSiteModelName_m = {
@@ -284,6 +297,7 @@ object EvowareProtocolDetailsGenerator {
 		ResultC.context("sites") {
 			for {
 				l <- ResultC.mapAll(evowareProtocolData.sites) { case (siteName, siteConfig) =>
+					println("(siteName, siteConfig): "+(siteName, siteConfig))
 					ResultC.context(siteName) {
 						siteConfig match {
 							case EvowareSiteConfig(Some(carrierName), None, siteIndex_?) =>
@@ -307,7 +321,13 @@ object EvowareProtocolDetailsGenerator {
 									siteName -> CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
 								}
 							case EvowareSiteConfig(None, Some(gridIndex), Some(siteIndex)) =>
-								ResultC.unit(siteName -> CarrierGridSiteIndex(-1, gridIndex, siteIndex))
+								for {
+									carrierId <- ResultC.from(tableData.carrierIdToGrids_m.find(_._2.contains(gridIndex)).map(_._1), s"site `$siteName` requires a carrier at grid $gridIndex, but no carrier has been placed at that grid on the selected table")
+									carrierE <- ResultC.from(carrierData.mapIdToCarrier.get(carrierId), "carrier with ID $carrierID is on selected table at grid $gridIndex, but it is not defined in the Carrier file")
+									_ <- ResultC.assert(siteIndex <= carrierE.nSites, "site `$siteName` has an invalid site index $siteIndex")
+								} yield {
+									siteName -> CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
+								}
 							case _ =>
 								ResultC.error("you must either supply `carrier` (and optionally `site`) OR both `grid` and `site`")
 						}

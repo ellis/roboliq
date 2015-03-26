@@ -64,11 +64,13 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 			val expected = ProtocolDetails(
 				objects = RjsBasicMap(
 					"CENTRIFUGE" -> RjsBasicMap(
+						"evowareCarrier" -> RjsNumber(65,None),
 						"evowareGrid" -> RjsNumber(54,None),
 						"evowareSite" -> RjsNumber(2,None),
 						"type" -> RjsString("Site")
 					),
 					"P1" -> RjsBasicMap(
+						"evowareCarrier" -> RjsNumber(312,None),
 						"evowareGrid" -> RjsNumber(9,None),
 						"evowareSite" -> RjsNumber(4,None),
 						"type" -> RjsString("Site")
@@ -97,7 +99,47 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 					"device-can-site mario.centrifuge CENTRIFUGE",
 					"device-can-model mario.centrifuge plateModel_384_square"
 				)
-
+			)
+			// What we actually got back!
+			// - [x] fix P1.evowareCarrier
+			// - [ ] fix missing mario.sm0
+			// - [ ] fix missing mario.sm0 logic
+			ProtocolDetails(
+				RjsBasicMap(
+					"CENTRIFUGE" -> RjsBasicMap(
+						"evowareCarrier" -> RjsNumber(65,None),
+						"evowareGrid" -> RjsNumber(54,None),
+						"evowareSite" -> RjsNumber(2,None),
+						"type" -> RjsString("Site")
+					),
+					"P1" -> RjsBasicMap(
+						"evowareCarrier" -> RjsNumber(312,None),
+						"evowareGrid" -> RjsNumber(9,None),
+						"evowareSite" -> RjsNumber(4,None),
+						"type" -> RjsString("Site")
+					),
+					"mario.centrifuge" -> RjsBasicMap(
+						"evowareName" -> RjsString("Centrifuge"),
+						"type" -> RjsString("Centrifuge")
+					),
+					"plateModel_384_square" -> RjsBasicMap(
+						"evowareName" -> RjsString("D-BSSE 384 Well Plate White"),
+						"label" -> RjsString("384 square-well white plate"),
+						"type" -> RjsString("PlateModel")
+					)
+				),
+				Map(),
+				List(),
+				Map(
+					"CENTRIFUGE" -> "Site",
+					"P1" -> "Site",
+					"mario.centrifuge" -> "Centrifuge"
+				),
+				strips.Literals.fromStrings(
+					"site-closed CENTRIFUG",
+					"agent-has-device mario mario.centrifuge",
+					"device-can-site mario.centrifuge CENTRIFUGE"
+				)
 			)
 
 			assert(details_?.run().value == expected)
