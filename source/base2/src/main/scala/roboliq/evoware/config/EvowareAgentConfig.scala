@@ -39,6 +39,9 @@ object EvowareProtocolData {
 	val empty = EvowareProtocolData(Map(), Map(), Nil, Nil)
 }
 
+/**
+ * @param site_? The user-facing site index (it starts from 1, whereas the internal site indexes start from 0)
+ */
 case class EvowareSiteConfig(
 	carrier_? : Option[String] = None,
 	grid_? : Option[Int] = None,

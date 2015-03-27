@@ -134,18 +134,18 @@ object EvowareProtocolDetailsGenerator {
 		//transporterBlacklist: List[EvowareTransporterBlacklistConfig]
 
 		//carrierData.printCarriersById()
-		println("carrierData.mapNameToLabwareModel:")
-		carrierData.mapNameToLabwareModel.foreach(println)
-		println()
+		//println("carrierData.mapNameToLabwareModel:")
+		//carrierData.mapNameToLabwareModel.foreach(println)
+		//println()
 		
-		println("tableData:")
-		println(tableData.toDebugString)
-		println()
+		//println("tableData:")
+		//println(tableData.toDebugString)
+		//println()
 
 		// Gather list of all available labware models referenced in data0
 		//println("data0.objects.map.toList: "+data0.objects.map.toList)
 		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
-		println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
+		//println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
 		
 		val builder = new ProtocolDetailsBuilder
 		//val siteIdToSiteName_m = new HashMap[(Int, Int), String]
@@ -158,10 +158,10 @@ object EvowareProtocolDetailsGenerator {
 					} yield modelName -> mE
 				}
 			}
-			_ = println("modelNameToEvowareModel_l: "+modelNameToEvowareModel_l)
-			_ = println()
-			_ = println("tableData.carrierIdToGrids_m: "+tableData.carrierIdToGrids_m)
-			_ = println()
+			//_ = println("modelNameToEvowareModel_l: "+modelNameToEvowareModel_l)
+			//_ = println()
+			//_ = println("tableData.carrierIdToGrids_m: "+tableData.carrierIdToGrids_m)
+			//_ = println()
 			
 			// Create map from siteId to all labware model names that can be placed on that site
 			siteIdToModelNames_m: Map[CarrierGridSiteIndex, Set[String]] = {
@@ -172,6 +172,9 @@ object EvowareProtocolDetailsGenerator {
 				} yield { CarrierGridSiteIndex(siteId.carrierId, grid_i, siteId.siteIndex) -> modelName }
 				l.groupBy(_._1).mapValues(_.map(_._2).toSet)
 			}
+			//_ = println("siteIdToModelNames_m:")
+			//_ = siteIdToModelNames_m.toList.sortBy(_._1.carrierId).foreach(println)
+			//_ = println()
 
 			/*// TODO: create System Liquid site, siteModel, and labware
 			val siteSystem_? = for {
@@ -181,20 +184,19 @@ object EvowareProtocolDetailsGenerator {
 			
 			// Get map of sites we'll need plus their evoware siteId
 			siteNameToSiteId_m <- getSiteNameToSiteIdMap(evowareProtocolData, carrierData, tableData)
-			_ = println("siteNameToSiteId_m:")
-			_ = siteNameToSiteId_m.toList.sortBy(_._1).foreach(println)
-			_ = println()
+			//_ = println("siteNameToSiteId_m:")
+			//_ = siteNameToSiteId_m.toList.sortBy(_._1).foreach(println)
+			//_ = println()
 			
 			// Construct map of labware models that the sites should hold
-			siteNameToModelNames_m =
-				siteNameToSiteId_m.flatMap { case (siteName, siteId) =>
-					siteIdToModelNames_m.get(siteId).map { modelName_l =>
-						siteName -> modelName_l
-					}
-				}
-			_ = println("siteNameToModelNames_m:")
-			_ = siteNameToModelNames_m.toList.sortBy(_._1).foreach(println)
-			_ = println()
+			siteNameToModelNames_m <- ResultC.mapAll(siteNameToSiteId_m)({ case (siteName, siteId) =>
+				for {
+					modelName_l <- ResultC.from(siteIdToModelNames_m.get(siteId), s"site `$siteName`: no compatible labware models found for this site")
+				} yield siteName -> modelName_l
+			}).map(_.toMap)
+			//_ = println("siteNameToModelNames_m:")
+			//_ = siteNameToModelNames_m.toList.sortBy(_._1).foreach(println)
+			//_ = println()
 			
 			// Create the site models and get a map from set of labware models to corresponding site model name
 			modelNamesToSiteModelName_m = {
@@ -317,10 +319,11 @@ object EvowareProtocolDetailsGenerator {
 									}
 								} yield {
 									val (carrierId, gridIndex) = pair
-									val siteIndex = siteIndex_?.getOrElse(1)
+									val siteIndex = siteIndex_?.getOrElse(1) - 1
 									siteName -> CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
 								}
-							case EvowareSiteConfig(None, Some(gridIndex), Some(siteIndex)) =>
+							case EvowareSiteConfig(None, Some(gridIndex), Some(siteIndex1)) =>
+								val siteIndex = siteIndex1 - 1
 								for {
 									carrierId <- ResultC.from(tableData.carrierIdToGrids_m.find(_._2.contains(gridIndex)).map(_._1), s"site `$siteName` requires a carrier at grid $gridIndex, but no carrier has been placed at that grid on the selected table")
 									carrierE <- ResultC.from(carrierData.mapIdToCarrier.get(carrierId), "carrier with ID $carrierID is on selected table at grid $gridIndex, but it is not defined in the Carrier file")

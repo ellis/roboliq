@@ -23,10 +23,10 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 		it("") {
 			val protocolData0 = new ProtocolDetails(
 				objects = RjsBasicMap(
-					"plateModel_384_square" -> RjsBasicMap(
+					"plateModel_384_square_transparent_greiner" -> RjsBasicMap(
 						"type" -> RjsString("PlateModel"),
-						"label" -> RjsString("384 square-well white plate"),
-						"evowareName" -> RjsString("D-BSSE 384 Well Plate White")
+						"label" -> RjsString("384 square-flat-well transparent Greiner"),
+						"evowareName" -> RjsString("384 Sqr Flat Trans Greiner")
 					)
 				),
 				planningInitialState = strips.Literals(Unique[strips.Literal](strips.Literal.parse("site-closed CENTRIFUGE")))
@@ -38,10 +38,10 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 				userSites = Nil
 			)
 			val evowareProtocolData1 = EvowareProtocolData(
-				sites = Map("P1" -> EvowareSiteConfig(grid_? = Some(9), site_? = Some(3))),
+				sites = Map("P3" -> EvowareSiteConfig(grid_? = Some(10), site_? = Some(4))),
 				devices = Map(),
 				transporterBlacklist = Nil,
-				userSites = List("P1")
+				userSites = List("P3")
 			)
 			val evowareTableSetupConfig = EvowareTableSetupConfig(
 				tableFile = "../testdata/bsse-mario/Template.ewt",
@@ -66,12 +66,12 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 					"CENTRIFUGE" -> RjsBasicMap(
 						"evowareCarrier" -> RjsNumber(65,None),
 						"evowareGrid" -> RjsNumber(54,None),
-						"evowareSite" -> RjsNumber(2,None),
+						"evowareSite" -> RjsNumber(1,None),
 						"type" -> RjsString("Site")
 					),
-					"P1" -> RjsBasicMap(
-						"evowareCarrier" -> RjsNumber(312,None),
-						"evowareGrid" -> RjsNumber(9,None),
+					"P3" -> RjsBasicMap(
+						"evowareCarrier" -> RjsNumber(316,None),
+						"evowareGrid" -> RjsNumber(10,None),
 						"evowareSite" -> RjsNumber(4,None),
 						"type" -> RjsString("Site")
 					),
@@ -79,25 +79,26 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 						"evowareName" -> RjsString("Centrifuge"),
 						"type" -> RjsString("Centrifuge")
 					),
-					"plateModel_384_square" -> RjsBasicMap(
-						"evowareName" -> RjsString("D-BSSE 384 Well Plate White"),
-						"label" -> RjsString("384 square-well white plate"),
+					"plateModel_384_square_transparent_greiner" -> RjsBasicMap(
+						"evowareName" -> RjsString("384 Sqr Flat Trans Greiner"),
+						"label" -> RjsString("384 square-flat-well transparent Greiner"),
 						"type" -> RjsString("PlateModel")
 					)
 				),
 				planningDomainObjects = Map(
 					"CENTRIFUGE" -> "Site",
 					"mario.sm0" -> "SiteModel",
-					"P1" -> "Site",
+					"P3" -> "Site",
 					"mario.centrifuge" -> "Centrifuge"
 				),
 				planningInitialState = strips.Literals.fromStrings(
 					"site-closed CENTRIFUGE",
-					"stackable mario.sm0 plateModel_384_square",
+					"stackable mario.sm0 plateModel_384_square_transparent_greiner",
 					"model CENTRIFUGE mario.sm0",
+					"model P3 mario.sm0",
 					"agent-has-device mario mario.centrifuge",
 					"device-can-site mario.centrifuge CENTRIFUGE",
-					"device-can-model mario.centrifuge plateModel_384_square"
+					"device-can-model mario.centrifuge plateModel_384_square_transparent_greiner"
 				)
 			)
 			// What we actually got back!
