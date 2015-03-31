@@ -2,12 +2,15 @@
 
 ## Current major refactoring
 
-- [ ] ProtocolProcessor
+- [ ] ProtocolProcessor (rename ProtocolHandler)
 - [ ] EvowareConfigProcessor
 - [ ] ProtocolDataMerger
 - [ ] include (Object, Function, Input, Result) objects in the ProtocolData for further processing
 - [ ] protocol variables
 - [ ] handle missing protocol variables
+- [ ] handle tasks
+- [ ] handle methods
+- [ ] handle planning
 
 ## Big issues
 
