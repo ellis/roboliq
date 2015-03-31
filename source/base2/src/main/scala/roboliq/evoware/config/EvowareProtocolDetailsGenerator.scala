@@ -24,7 +24,7 @@ import roboliq.ai.plan.PartialPlan
 import com.google.gson.Gson
 import roboliq.input.EvowareAgentBean
 import roboliq.input.ProtocolData
-import roboliq.input.ProtocolDetailsBuilder
+import roboliq.input.ProtocolDataBuilder
 import roboliq.evoware.parser.EvowareCarrierData
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.EvowareTableData
@@ -147,7 +147,7 @@ object EvowareProtocolDetailsGenerator {
 		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
 		//println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
 		
-		val builder = new ProtocolDetailsBuilder
+		val builder = new ProtocolDataBuilder
 		//val siteIdToSiteName_m = new HashMap[(Int, Int), String]
 		for {
 			// Find the evoware labware models
