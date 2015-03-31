@@ -1,5 +1,14 @@
 # TODOs for roboliq
 
+## Current major refactoring
+
+- [ ] ProtocolProcessor
+- [ ] EvowareConfigProcessor
+- [ ] ProtocolDataMerger
+- [ ] include (Object, Function, Input, Result) objects in the ProtocolData for further processing
+- [ ] protocol variables
+- [ ] handle missing protocol variables
+
 ## Big issues
 
 - [x] handle tubes as wells on plates

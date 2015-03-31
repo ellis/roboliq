@@ -23,7 +23,7 @@ import roboliq.ai.plan.Unique
 import roboliq.ai.plan.PartialPlan
 import com.google.gson.Gson
 import roboliq.input.EvowareAgentBean
-import roboliq.input.ProtocolDetails
+import roboliq.input.ProtocolData
 import roboliq.input.ProtocolDetailsBuilder
 import roboliq.evoware.parser.EvowareCarrierData
 import roboliq.evoware.parser.EvowareLabwareModel
@@ -101,7 +101,7 @@ object EvowareProtocolDetailsGenerator {
 		agentConfig: EvowareAgentConfig,
 		table_l: List[String],
 		searchPath_l: List[File]
-	): ResultC[ProtocolDetails] = {
+	): ResultC[ProtocolData] = {
 		val agentIdent = agentConfig.name
 		for {
 			// Load carrier file
@@ -110,8 +110,8 @@ object EvowareProtocolDetailsGenerator {
 			tableData <- loadTableData(carrierData, tableSetupConfig, searchPath_l)
 			evowareProtocolData = createEvowareProtocolData(agentConfig, carrierData, tableSetupConfig)
 			// Merge protocolData of agent and table
-			detailsA = agentConfig.protocolDetails_?.getOrElse(new ProtocolDetails())
-			detailsB = tableSetupConfig.protocolDetails_?.getOrElse(new ProtocolDetails())
+			detailsA = agentConfig.protocolDetails_?.getOrElse(new ProtocolData())
+			detailsB = tableSetupConfig.protocolDetails_?.getOrElse(new ProtocolData())
 			details0 <- detailsA merge detailsB
 			// Convert evowareProtocolData0 to ProtocolData
 			details1 <- convertEvowareProtocolData(agentIdent, details0, evowareProtocolData, carrierData, tableData)
@@ -124,11 +124,11 @@ object EvowareProtocolDetailsGenerator {
 	
 	private def convertEvowareProtocolData(
 		agentName: String,
-		data0: ProtocolDetails,
+		data0: ProtocolData,
 		evowareProtocolData: EvowareProtocolData,
 		carrierData: EvowareCarrierData,
 		tableData: EvowareTableData
-	): ResultC[ProtocolDetails] = {
+	): ResultC[ProtocolData] = {
 		//sites: Map[String, EvowareSiteConfig],
 		//devices: Map[String, EvowareDeviceConfig],
 		//transporterBlacklist: List[EvowareTransporterBlacklistConfig]

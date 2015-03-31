@@ -8,7 +8,7 @@ import spray.json.JsString
 import spray.json.JsValue
 import java.io.File
 import roboliq.utils.JsonUtils
-import roboliq.input.ProtocolDetails
+import roboliq.input.ProtocolData
 import roboliq.input.RjsMap
 import roboliq.input.RjsString
 import roboliq.ai.plan.Unique
@@ -21,7 +21,7 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 
 	describe("EvowareProtocolDetailsGenerator") {
 		it("") {
-			val protocolData0 = new ProtocolDetails(
+			val protocolData0 = new ProtocolData(
 				objects = RjsBasicMap(
 					"plateModel_384_square_transparent_greiner" -> RjsBasicMap(
 						"type" -> RjsString("PlateModel"),
@@ -61,7 +61,7 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 				searchPath_l = List()
 			)
 			
-			val expected = ProtocolDetails(
+			val expected = ProtocolData(
 				objects = RjsBasicMap(
 					"CENTRIFUGE" -> RjsBasicMap(
 						"evowareCarrier" -> RjsNumber(65,None),

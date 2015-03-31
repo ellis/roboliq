@@ -23,29 +23,6 @@ case class CommandInfo(
 	effects: strips.Literals = strips.Literals.empty
 )
 
-@RjsJsonType("protocolDetails")
-case class ProtocolDetails(
-	val objects: RjsBasicMap = RjsBasicMap(),
-	val commands: Map[String, CommandInfo] = Map(),
-	val commandOrder: List[String] = Nil,
-	val planningDomainObjects: Map[String, String] = Map(),
-	val planningInitialState: strips.Literals = strips.Literals.empty
-) {
-	def merge(that: ProtocolDetails): ResultC[ProtocolDetails] = {
-		for {
-			objects <- this.objects merge that.objects
-		} yield {
-			new ProtocolDetails(
-				objects = objects,
-				commands = this.commands ++ that.commands,
-				commandOrder = this.commandOrder ++ that.commandOrder,
-				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
-				planningInitialState = this.planningInitialState ++ that.planningInitialState
-			)
-		}
-	}
-}
-
 /*
 sealed trait CommandValidation
 case class CommandValidation_Param(name: String) extends CommandValidation
@@ -87,8 +64,8 @@ class ProtocolDetailsBuilder {
 	private val planningDomainObjects = new HashMap[String, String]
 	private val planningInitialState = new ArrayBuffer[strips.Literal]
 	
-	def get: ProtocolDetails = {
-		new ProtocolDetails(
+	def get: ProtocolData = {
+		new ProtocolData(
 			objects = RjsBasicMap(objects.toMap),
 			planningDomainObjects = planningDomainObjects.toMap,
 			planningInitialState = strips.Literals(Unique(planningInitialState.toList : _*))
@@ -185,7 +162,7 @@ case class ProtocolDataB(
 )*/
 
 class ProtocolHandler {
-	def extractDetails(protocol: RjsProtocol): ResultC[ProtocolDetails] = {
+	def extractDetails(protocol: RjsProtocol): ResultC[ProtocolData] = {
 		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
 			(i+1).toString -> rjsval
 		}
@@ -223,7 +200,7 @@ class ProtocolHandler {
 				)
 				name -> commandInfo
 			}
-			ProtocolDetails(
+			ProtocolData(
 				objects = objects,
 				commands = commandInfo_l.toMap,
 				commandOrder = commandOrder_l,
@@ -248,8 +225,8 @@ class ProtocolHandler {
 	}
 	
 	def expandCommands(
-		details0: ProtocolDetails
-	): ResultE[ProtocolDetails] = {
+		details0: ProtocolData
+	): ResultE[ProtocolData] = {
 		var state = details0.planningInitialState
 		val idToInfo0_m = new HashMap[String, CommandInfo]
 		def step(idToCommand_l: List[(String, RjsValue)]): ResultE[Map[String, CommandInfo]] = {

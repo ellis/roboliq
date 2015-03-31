@@ -79,7 +79,7 @@ class ProtocolHandlerSpec extends FunSpec {
 		}
 		
 		it("test protocol 1 with lab info") {
-			val dataALab = new ProtocolDetails(
+			val dataALab = new ProtocolData(
 				planningDomainObjects = Map("mario" -> "agent", "mario__Shaker" -> "shaker"),
 				planningInitialState = strips.Literals(Unique(
 					strips.Literal.parse("agent-has-device mario mario__Shaker"),
