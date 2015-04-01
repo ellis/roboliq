@@ -16,10 +16,10 @@ import roboliq.ai.strips
 import roboliq.input.RjsNumber
 import roboliq.input.RjsBasicMap
 
-class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
+class EvowareAgentConfigProcessorSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
 
-	describe("EvowareProtocolDetailsGenerator") {
+	describe("EvowareAgentConfigProcessor") {
 		it("") {
 			val protocolData0 = new ProtocolData(
 				objects = RjsBasicMap(
@@ -55,7 +55,7 @@ class EvowareProtocolDetailsGeneratorSpec extends FunSpec {
 				evowareProtocolData_? = Some(evowareProtocolData0),
 				tableSetups = Map("default"  -> evowareTableSetupConfig)
 			)
-			val details_? = EvowareProtocolDetailsGenerator.createProtocolDetails(
+			val details_? = EvowareAgentConfigProcessor.createProtocolDetails(
 				agentConfig = evowareAgentConfig,
 				table_l = List("mario.default"),
 				searchPath_l = List()

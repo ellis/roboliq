@@ -7,20 +7,20 @@ digraph Roboliq {
 
 	GenericProtocol;
 	Alternatives0 [ shape="record", label="{Planning Data|Variables|Task Methods|Command Expansions|Partial Plan|Plan Steps*|Plan Order|Complete Plan}", style="dashed,filled", fillcolor="#ffdddd" ];
-	EvowareConfig0 [ label="EvowareConfig", style="filled", fillcolor="#ddffff" ];
+	EvowareAgentConfig0 [ label="EvowareAgentConfig", style="filled", fillcolor="#ddffff" ];
 
-	EvowareConfigProcessor [ shape="Mrecord" ];
+	EvowareAgentConfigProcessor [ shape="Mrecord" ];
 	ProtocolProcessor [ shape="Mrecord" ];
 	AssistedPlanner [ shape="Mrecord" ];
 
 	ProtocolMerger [ shape="Mrecord" ];
 
-	{ rank=same GenericProtocol EvowareConfig0 Alternatives0};
+	{ rank=same GenericProtocol EvowareAgentConfig0 Alternatives0};
 
 	GenericProtocol [ style="filled", fillcolor="#ddffff" ];
 	GenericProtocol -> ProtocolProcessor -> GenericProtocolData;
 	GenericProtocolData -> ProtocolMerger [ label="1" ];
-	EvowareConfig0 -> EvowareConfigProcessor -> LabProtocolData;
+	EvowareAgentConfig0 -> EvowareAgentConfigProcessor -> LabProtocolData;
 	LabProtocolData -> ProtocolMerger [ label="2" ];
 	AutomatedProtocolData -> ProtocolMerger [ label="3" ];
 	Alternatives0 -> AssistedPlanner;
@@ -105,9 +105,9 @@ digraph Roboliq {
 	EvowareCompiler [ shape="Mrecord" ];
 	InstructionList -> EvowareCompiler;
 	EvowareCompiler -> EvowareScript;
-	EvowareConfig1 [ label="EvowareConfig" ];
-	EvowareConfig1 -> EvowareCompiler;
-	{ rank=same EvowareCompiler EvowareConfig1 };
+	EvowareAgentConfig1 [ label="EvowareAgentConfig" ];
+	EvowareAgentConfig1 -> EvowareCompiler;
+	{ rank=same EvowareCompiler EvowareAgentConfig1 };
 
 	CheckTasks -> CheckMethods -> CheckPlan;
 

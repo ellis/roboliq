@@ -41,7 +41,7 @@ import roboliq.evoware.parser.CarrierSiteIndex
  */
 case class SiteId(gridIndex: Int, siteIndex: Int)
 
-object EvowareProtocolDetailsGenerator {
+object EvowareAgentConfigProcessor {
 	def loadCarrierData(
 		agentConfig: EvowareAgentConfig
 	): ResultC[EvowareCarrierData] = {

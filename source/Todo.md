@@ -3,7 +3,7 @@
 ## Current major refactoring
 
 - [x] ProtocolProcessor (rename ProtocolHandler)
-- [ ] EvowareConfigProcessor
+- [x] EvowareAgentConfigProcessor (rename EvowareProtocolDetailsGenerator)
 - [ ] ProtocolDataMerger
 - [ ] include (Object, Function, Input, Result) objects in the ProtocolData for further processing
 - [ ] protocol variables
