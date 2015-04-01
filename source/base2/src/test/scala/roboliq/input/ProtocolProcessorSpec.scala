@@ -11,11 +11,11 @@ import roboliq.utils.JsonUtils
 import roboliq.ai.strips
 import roboliq.ai.plan.Unique
 
-class ProtocolHandlerSpec extends FunSpec {
+class ProtocolProcessorSpec extends FunSpec {
 	import ContextValueWrapper._
 	import ResultCWrapper._
 
-	val protocolEvaluator = new ProtocolHandler
+	val protocolEvaluator = new ProtocolProcessor
 	val data0 = ResultEData(EvaluatorState(searchPath_l = List(new File("testfiles"), new File("base/testfiles"))))
 	val evaluator = new Evaluator()
 
@@ -48,7 +48,7 @@ class ProtocolHandlerSpec extends FunSpec {
 	)
 	val details1 = protocolEvaluator.extractDetails(protocol1).run().value
 	
-	describe("ProtocolHandlerSpec") {
+	describe("ProtocolProcessorSpec") {
 		it("test protocol 1 without lab info") {
 			assert(details1.planningDomainObjects == Map(
 				"plate1" -> "plate"

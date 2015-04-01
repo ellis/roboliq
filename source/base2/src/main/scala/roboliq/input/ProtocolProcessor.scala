@@ -1,28 +1,17 @@
 package roboliq.input
 
-import spray.json.JsObject
-import spray.json.JsValue
-import scala.collection.mutable.ArrayBuffer
-import roboliq.ai.strips
-import scala.collection.mutable.HashMap
-import scala.math.Ordering.Implicits._
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
+import scala.math.Ordering.Implicits.seqDerivedOrdering
+import scala.reflect.runtime.universe
+
 import roboliq.ai.plan.Unique
+import roboliq.ai.strips
+import roboliq.ai.strips._
 import roboliq.core.ResultC
 
-/*
-case class ProtocolCommandResult(
-	command: RjsValue,
-	effects: strips.Literals = strips.Literals.empty,
-	validation_l: List[CommandValidation] = Nil
-)
-
-case class ProtocolDataB(
-	val dataA: ProtocolDataA,
-	val commandExpansions: Map[String, ProtocolCommandResult]
-)*/
-
-class ProtocolHandler {
+class ProtocolProcessor {
 	def extractDetails(protocol: RjsProtocol): ResultC[ProtocolData] = {
 		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
 			(i+1).toString -> rjsval
