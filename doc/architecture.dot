@@ -13,28 +13,28 @@ digraph Roboliq {
 	ProtocolProcessor [ shape="Mrecord" ];
 	AssistedPlanner [ shape="Mrecord" ];
 
-	ProtocolMerger [ shape="Mrecord" ];
+	ProtocolDataMerger [ shape="Mrecord", label="ProtocolData.merge(...)" ];
 
 	{ rank=same GenericProtocol EvowareAgentConfig0 Alternatives0};
 
 	GenericProtocol [ style="filled", fillcolor="#ddffff" ];
 	GenericProtocol -> ProtocolProcessor -> GenericProtocolData;
-	GenericProtocolData -> ProtocolMerger [ label="1" ];
+	GenericProtocolData -> ProtocolDataMerger [ label="1" ];
 	EvowareAgentConfig0 -> EvowareAgentConfigProcessor -> LabProtocolData;
-	LabProtocolData -> ProtocolMerger [ label="2" ];
-	AutomatedProtocolData -> ProtocolMerger [ label="3" ];
+	LabProtocolData -> ProtocolDataMerger [ label="2" ];
+	AutomatedProtocolData -> ProtocolDataMerger [ label="3" ];
 	Alternatives0 -> AssistedPlanner;
 	AssistedPlanner -> AutomatedProtocolData [ dir="both" ];
 	UserProtocolData [ style="filled", fillcolor="#ddffff" ];
 	AssistedPlanner -> UserProtocolData [ dir="both" ];
-	UserProtocolData -> ProtocolMerger [ label="4" ];
+	UserProtocolData -> ProtocolDataMerger [ label="4" ];
 
 	GenericProtocolData -> LabProtocolData -> AutomatedProtocolData -> UserProtocolData [ style="invis" ];
 	{ rank=same GenericProtocolData LabProtocolData AutomatedProtocolData UserProtocolData };
 
 	ProtocolData0 [ shape="record", label="{ProtocolData|{Logic|Commands|Settings|Planning}}" ];
 
-	ProtocolMerger -> ProtocolData0;
+	ProtocolDataMerger -> ProtocolData0;
 
 	Wrapper [ shape="point" ];
 	ProtocolData0 -> Wrapper;

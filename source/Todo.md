@@ -4,8 +4,12 @@
 
 - [x] ProtocolProcessor (rename ProtocolHandler)
 - [x] EvowareAgentConfigProcessor (rename EvowareProtocolDetailsGenerator)
-- [ ] ProtocolDataMerger
-- [ ] include (Object, Function, Input, Result) objects in the ProtocolData for further processing
+- [ ] ProtocolDataSpec: test merging
+    - [x] objects
+    - [ ] planningDomainObjects
+    - [ ] planningInitialState
+- [ ] ProtocolData: include (Object, Function, Input, Result) objects for further processing
+- [ ] ProtocolDataSpec: test merging of command expansions
 - [ ] protocol variables
 - [ ] handle missing protocol variables
 - [ ] handle tasks
