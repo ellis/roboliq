@@ -6,11 +6,12 @@ import roboliq.core.ResultC
 
 @RjsJsonType("protocolData")
 case class ProtocolData(
-	val objects: RjsBasicMap = RjsBasicMap(), 
-	val commands: Map[String, CommandInfo] = Map(), 
-	val commandOrder: List[String] = Nil, 
-	val planningDomainObjects: Map[String, String] = Map(), 
-	val planningInitialState: strips.Literals = strips.Literals.empty
+	val objects: RjsBasicMap = RjsBasicMap(),
+	val commands: Map[String, CommandInfo] = Map(),
+	val commandOrder: List[String] = Nil,
+	val planningDomainObjects: Map[String, String] = Map(),
+	val planningInitialState: strips.Literals = strips.Literals.empty,
+	val processingState: Map[String, ProcessingStateItem] = Map()
 ) {
 	def merge(that: ProtocolData): ResultC[ProtocolData] = {
 		for {
@@ -21,11 +22,48 @@ case class ProtocolData(
 				commands = this.commands ++ that.commands,
 				commandOrder = this.commandOrder ++ that.commandOrder,
 				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
-				planningInitialState = this.planningInitialState ++ that.planningInitialState
+				planningInitialState = this.planningInitialState ++ that.planningInitialState,
+				processingState = this.processingState ++ that.processingState
 			)
 		}
 	}
 }
+
+/**
+ * @param setter Identifier for where the value comes from, e.g. "user"
+ */
+case class ProcessingVariable(
+	name: String,
+	value_? : Option[RjsBasicValue],
+	setter_? : Option[String],
+	validations: List[CommandValidation] = Nil,
+	alternatives: List[RjsBasicValue]
+)
+
+/**
+ * @param value_? Name of method to use for this task
+ * @param setter_? Identifier for where the value comes from, e.g. "user", "automatic"
+ */
+case class ProcessingTask(
+	commandId: String,
+	value_? : Option[String],
+	setter_? : Option[String],
+	validations: List[CommandValidation] = Nil,
+	alternatives: List[String]
+)
+
+/**
+ * (not used for tasks -- for tasks, see ProcessingTask)
+ * @param function One of "ExpandMethod", "HandleAction"
+ */
+case class ProcessingCommand(
+	commandId: String,
+	function: String,
+	input: RjsBasicMap,
+	result: RjsBasicValue,
+	validations: List[CommandValidation] = Nil,
+	effects: strips.Literals = strips.Literals.empty
+)
 
 case class CommandValidation(
 	message: String,

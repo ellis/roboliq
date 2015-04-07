@@ -8,6 +8,7 @@
     - [x] objects
     - [ ] planningDomainObjects
     - [ ] planningInitialState
+    - [ ] processingState
 - [ ] ProtocolData: include (Object, Function, Input, Result) objects for further processing
 - [ ] ProtocolDataSpec: test merging of command expansions
 - [ ] protocol variables
