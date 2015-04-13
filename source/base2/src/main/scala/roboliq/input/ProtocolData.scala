@@ -7,11 +7,10 @@ import roboliq.core.ResultC
 @RjsJsonType("protocolData")
 case class ProtocolData(
 	val objects: RjsBasicMap = RjsBasicMap(),
-	val commands: Map[String, CommandInfo] = Map(),
-	val commandOrder: List[String] = Nil,
+	val commands: Map[String, RjsValue] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
-	val processingState: Map[String, ProcessingStateItem] = Map()
+	val processingState_? : Option[ProcessingState] = None
 ) {
 	def merge(that: ProtocolData): ResultC[ProtocolData] = {
 		for {
@@ -20,14 +19,20 @@ case class ProtocolData(
 			new ProtocolData(
 				objects = objects,
 				commands = this.commands ++ that.commands,
-				commandOrder = this.commandOrder ++ that.commandOrder,
 				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
 				planningInitialState = this.planningInitialState ++ that.planningInitialState,
-				processingState = this.processingState ++ that.processingState
+				processingState_? = that.processingState_? orElse this.processingState_?
 			)
 		}
 	}
 }
+
+case class ProcessingState(
+	variables: Map[String, ProcessingVariable],
+	tasks: Map[String, ProcessingTask],
+	commands: Map[String, ProcessingCommand],
+	plan: ProcessingPlan
+)
 
 /**
  * @param setter Identifier for where the value comes from, e.g. "user"
@@ -65,18 +70,26 @@ case class ProcessingCommand(
 	effects: strips.Literals = strips.Literals.empty
 )
 
+case class ProcessingPlan(
+	pddl_? : Option[String] = None,
+	partialPlan_? : Option[RjsBasicMap] = None,
+	partialOrder_ll : List[List[String]] = Nil,
+	completeOrder_l_? : Option[List[String]] = None
+)
+
 case class CommandValidation(
 	message: String,
 	param_? : Option[String] = None,
 	precond_? : Option[Int] = None
 )
 
+/*
 case class CommandInfo(
 	command: RjsValue,
 	successors: List[String] = Nil,
 	validations: List[CommandValidation] = Nil,
 	effects: strips.Literals = strips.Literals.empty
-)
+)*/
 
 /*
 sealed trait CommandValidation
