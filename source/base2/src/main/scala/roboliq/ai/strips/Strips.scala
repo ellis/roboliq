@@ -103,7 +103,6 @@ class Literals private (val l: Unique[Literal], val pos: Set[Atom], val neg: Set
 			!pos.contains(literal.atom)
 	}
 	
-	//def ++(that: Literals) = Literals(pos ++ that.pos, neg ++ that.neg)
 	def removePos(atom: Atom): Literals = {
 		val lit = Literal(atom, true)
 		new Literals(l - lit, pos - atom, neg)
@@ -153,7 +152,7 @@ object Literals {
 		// TODO: consider removing duplicates from l, as well as negatives for which there is a positive
 		new Literals(l, pos.toSet, neg.toSet)
 	}
-	def apply(pos: List[Atom], neg: List[Atom]): Literals = {
+	def apply(pos: Seq[Atom], neg: Seq[Atom]): Literals = {
 		val pos1 = pos.map(atom => Literal(atom, true))
 		val neg1 = neg.map(atom => Literal(atom, false))
 		// TODO: consider removing pos1 from neg1
