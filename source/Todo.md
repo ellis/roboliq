@@ -2,7 +2,7 @@
 
 ## Current major refactoring
 
-- [x] ProtocolProcessor (rename ProtocolHandler)
+- [x] ProtocolProcessor (rename from ProtocolHandler)
 - [x] EvowareAgentConfigProcessor (rename EvowareProtocolDetailsGenerator)
 - [ ] ProtocolDataSpec: test merging
     - [x] objects

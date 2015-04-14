@@ -11,8 +11,15 @@ import roboliq.ai.strips
 import roboliq.ai.strips._
 import roboliq.core.ResultC
 
-class ProtocolProcessor {
-	def extractDetails(protocol: RjsProtocol): ResultC[ProtocolData] = {
+/**
+ * ProtocolProcessor is an object with a method to extract ProtocolData from
+ * a high-level protocol description.
+ */
+object ProtocolProcessor {
+	/**
+	 * Extract ProtocolData from a high-level protocol description.
+	 */
+	def extractProtocolData(protocol: RjsProtocol): ResultC[ProtocolData] = {
 		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
 			(i+1).toString -> rjsval
 		}
@@ -40,20 +47,9 @@ class ProtocolProcessor {
 			println("objects: "+objects)
 			val (planningDomainObjects, planningInitialState) = processLabware(protocol.labwares)
 			println("planningDomainObjects: "+planningDomainObjects)
-			val commandInfo_l = command2_l.zipWithIndex.map { case ((name, command), i0) =>
-				val i = i0 + 1
-				val commandInfo = CommandInfo(
-					command = command,
-					successors = if (i < n) List(i.toString) else Nil,
-					validations = Nil,
-					effects = strips.Literals.empty
-				)
-				name -> commandInfo
-			}
 			ProtocolData(
 				objects = objects,
-				commands = commandInfo_l.toMap,
-				commandOrder = commandOrder_l,
+				commands = command2_l.toMap,
 				planningDomainObjects = planningDomainObjects,
 				planningInitialState = planningInitialState
 			)
@@ -73,7 +69,7 @@ class ProtocolProcessor {
 		}
 		(objectToType_m.toMap, strips.Literals(atom_l.toList, Nil))
 	}
-	
+	/*
 	def expandCommands(
 		details0: ProtocolData
 	): ResultE[ProtocolData] = {
@@ -337,4 +333,5 @@ class ProtocolProcessor {
 			(info_m.toMap, effectsCumulative)
 		}
 	}
+	*/
 }
