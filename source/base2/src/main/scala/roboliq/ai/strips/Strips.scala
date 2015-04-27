@@ -124,10 +124,13 @@ class Literals private (val l: Unique[Literal], val pos: Set[Atom], val neg: Set
 	}
 	
 	def ++(that: Literals): Literals = {
-		// TODO: consider removing superfluous values from l
-		//val removePos = pos intersect that.neg
-		//val removeNeg = neg intersect that.pos
-		new Literals(l ++ that.l, pos -- that.neg ++ that.pos, neg ++ that.neg -- that.pos)
+		val pos2 = pos -- that.neg ++ that.pos
+		val neg2 = neg ++ that.neg -- that.pos
+		val l2 = (l ++ that.l).filter { lit =>
+			if (lit.pos) pos2.contains(lit.atom)
+			else neg2.contains(lit.atom)
+		}
+		new Literals(l2, pos2, neg2)
 	}
 	
 	def bind(map: Map[String, String]): Literals =

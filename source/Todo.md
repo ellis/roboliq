@@ -5,7 +5,7 @@
 - [x] ProtocolProcessor (rename from ProtocolHandler)
 - [x] EvowareAgentConfigProcessor (rename EvowareProtocolDetailsGenerator)
 - [x] ProtocolData: include (Object, Function, Input, Result) objects for further processing
-- [ ] LiteralsSpec
+- [x] LiteralsSpec
 - [ ] ProtocolDataSpec: test merging
     - [x] objects
     - [x] commands
