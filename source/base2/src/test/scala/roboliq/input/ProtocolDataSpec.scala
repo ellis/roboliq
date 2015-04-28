@@ -1,6 +1,7 @@
 package roboliq.input
 
 import org.scalatest.FunSpec
+import roboliq.ai.strips
 
 class ProtocolDataSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -127,6 +128,23 @@ class ProtocolDataSpec extends FunSpec {
 					"object2" -> "type2",
 					"object3" -> "type3"
 				)
+			)
+			
+			assert(result_?.run().value == expected)
+		}
+
+		it("merge planningInitialState") {
+			val protocolDataA = ProtocolData(
+				planningInitialState = strips.Literals.fromStrings("a", "!b", "c")
+			)
+			val protocolDataB = ProtocolData(
+				planningInitialState = strips.Literals.fromStrings("!a", "b", "d")
+			)
+			
+			val result_? = protocolDataA.merge(protocolDataB)
+			
+			val expected = ProtocolData(
+				planningInitialState = strips.Literals.fromStrings("!a", "b", "c", "d")
 			)
 			
 			assert(result_?.run().value == expected)
