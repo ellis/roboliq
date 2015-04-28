@@ -1,5 +1,8 @@
 package roboliq.input
 
-class ProtocolDataProcessor {
-
+object ProtocolDataProcessor {
+	def process(protocolData: ProtocolData): ResultE[ProtocolData] = {
+		
+		???
+	}
 }

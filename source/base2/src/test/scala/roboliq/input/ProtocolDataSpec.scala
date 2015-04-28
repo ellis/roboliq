@@ -12,6 +12,55 @@ class ProtocolDataSpec extends FunSpec {
 		//val planningDomainObjects: Map[String, String] = Map(),
 		//val planningInitialState: strips.Literals = strips.Literals.empty,
 		//val processingState_? : Option[ProcessingState] = None
+		it("merge variables") {
+			val object1a = RjsBasicMap(
+				"prop1" -> RjsString("A"),
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("C")
+			)
+			val object1b = RjsBasicMap(
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("*"),
+				"prop4" -> RjsString("D")
+			)
+			val object1 = RjsBasicMap(
+				"prop1" -> RjsString("A"),
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("*"),
+				"prop4" -> RjsString("D")
+			)
+			val object2 = RjsBasicMap(
+				"prop1" -> RjsString("A")
+			)
+			val object3 = RjsBasicMap(
+				"prop2" -> RjsString("B")
+			)
+			val protocolDataA = ProtocolData(
+				variables = RjsBasicMap(
+					"object1" -> object1a,
+					"object2" -> object2
+				)
+			)
+			val protocolDataB = ProtocolData(
+				variables = RjsBasicMap(
+					"object1" -> object1b,
+					"object3" -> object3
+				)
+			)
+			
+			val result_? = protocolDataA.merge(protocolDataB)
+			
+			val expected = ProtocolData(
+				variables = RjsBasicMap(
+					"object1" -> object1,
+					"object2" -> object2,
+					"object3" -> object3
+				)
+			)
+			
+			assert(result_?.run().value == expected)
+		}
+
 		it("merge objects") {
 			val object1a = RjsBasicMap(
 				"prop1" -> RjsString("A"),

@@ -6,6 +6,7 @@ import roboliq.core.ResultC
 
 @RjsJsonType("protocolData")
 case class ProtocolData(
+	val variables: RjsBasicMap = RjsBasicMap(),
 	val objects: RjsBasicMap = RjsBasicMap(),
 	val commands: Map[String, RjsValue] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
@@ -14,9 +15,11 @@ case class ProtocolData(
 ) {
 	def merge(that: ProtocolData): ResultC[ProtocolData] = {
 		for {
+			variables <- this.variables merge that.variables
 			objects <- this.objects merge that.objects
 		} yield {
 			new ProtocolData(
+				variables = variables,
 				objects = objects,
 				commands = this.commands ++ that.commands,
 				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
