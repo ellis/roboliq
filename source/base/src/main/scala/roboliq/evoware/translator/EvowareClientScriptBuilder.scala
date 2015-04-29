@@ -513,7 +513,7 @@ class EvowareClientScriptBuilder(agentName: String, config: EvowareConfig) exten
 					}
 				case None =>
 					val filename_? = config.sealerProgram_l.find(program => program.model eq model).map(_.filename)
-					Context.from(filename_?, s"unable to find a sealer program for labware model ``")
+					Context.from(filename_?, s"unable to find a sealer program for labware model `${model.getName}`")
 			}
 			// List of site/labware mappings for those labware and sites which evoware has equivalences for
 			siteToModel_l <- Context.mapFirst(cmd.labwareToSite_l) { case (labware, site) =>

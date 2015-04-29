@@ -134,7 +134,7 @@ object MainInEclipse extends App {
 	runTemp("tania15_renaturation_53")
 	runTemp("tania15_renaturation_54")
 	runTemp("tania15_renaturation_55")*/
-	//runTemp("tania13_ph_1_balancePlate")
+	runTemp("tania13_ph_1_balancePlate")
 	//runTemp("tania13_ph_2_pipette")
 	//runTemp("tania13_ph_3_measure")
 	//runTemp("chao01_dye")
@@ -152,5 +152,5 @@ object MainInEclipse extends App {
 	//runTemp("qa03_weight_2")
 	//runTemp("qa03_weight_3")
 	//runTemp("qa03_weight_4")
-	runTemp("qa05_dye_vol_range")
+	//runTemp("qa05_dye_vol_range")
 }

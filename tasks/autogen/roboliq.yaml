@@ -20,7 +20,7 @@ evowareAgents:
         label: 384 round-well plate
         evowareName: D-BSSE 384 Well Plate White
       - name: plateModel_384_square
-        label: 384 square-well white plate
+        label: 384 square-flat-well white plate
         evowareName: D-BSSE 384 Well Plate White
       - name: plateModel_384_square_transparent_greiner
         label: 384 square-flat-well transparent Greiner
@@ -54,7 +54,7 @@ evowareAgents:
 
     tableSetups:
       default:
-        tableFile: ../testdata/bsse-mario/Template.ewt
+        tableFile: ../testdata/bsse-mario/NewLayout_Feb2015.ewt
         sites:
           CENTRIFUGE: { carrier: "Centrifuge" }
           P1: { grid: 9, site: 3 }
@@ -125,6 +125,8 @@ evowareAgents:
     - model: plateModel_96_pcr
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\4titude_PCR_red.bcf
     - model: plateModel_384_square_transparent_greiner
+      filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\Greiner_384_schwarz.bcf
+    - model: plateModel_384_square
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\Greiner_384_schwarz.bcf
     - model: plateModel_96_nunc_transparent
       filename: C:\HJBioanalytikGmbH\RoboSeal3\RoboSeal_PlateParameters\PerkinElmer_weiss.bcf
