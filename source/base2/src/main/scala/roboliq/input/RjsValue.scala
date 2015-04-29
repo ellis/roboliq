@@ -36,6 +36,7 @@ sealed abstract class RjsValue/*(val typ: RjsType.Value)*/ {
 }
 
 sealed trait RjsBasicValue extends RjsValue
+trait RjsExtendedValue extends RjsValue
 
 case class RjsBoolean(b: Boolean) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = ResultC.unit(JsBoolean(b))
@@ -719,6 +720,8 @@ val im = mirror.reflect(x)
 		a match {
 			case rjsval: RjsValue =>
 				fromValueToBasicValue(rjsval)
+			case extended: RjsExtendedValue =>
+				fromExtendedToBasicValue(extended)
 			case _ =>
 				for {
 					jsval <- toJson(a, typ)
@@ -727,7 +730,7 @@ val im = mirror.reflect(x)
 		}
 	}
 	
-	def fromValueToBasicValue(rjsval: RjsValue): ResultC[RjsBasicValue] = {
+	def fromValueToBasicValue[A : TypeTag](rjsval: RjsValue): ResultC[RjsBasicValue] = {
 		rjsval match {
 			case x: RjsBasicValue => ResultC.unit(x)
 			case _ =>
@@ -736,6 +739,17 @@ val im = mirror.reflect(x)
 					basic <- fromJson(jsval)
 				} yield basic
 		}
+	}
+	
+	def fromExtendedToBasicValue[A <: RjsExtendedValue : TypeTag](o: A): ResultC[RjsBasicValue] = {
+		// Create a RjsBasicMap.
+		// Use RjsJsonType to create `TYPE` field
+		// Get all fields annotated with RjsJsonName, and run toJson + fromJson on each field
+		val typ = ru.typeTag[A].tpe
+		for {
+			jsval <- toJson(o, typ)
+			rjsval <- fromJson(jsval)
+		} yield rjsval
 	}
 	
 	def merge(a: RjsValue, b: RjsValue): ResultC[RjsBasicValue] = {
