@@ -42,6 +42,7 @@ case class ProcessingState(
  */
 case class ProcessingVariable(
 	name: String,
+	`type`: String,
 	value_? : Option[RjsBasicValue],
 	setter_? : Option[String],
 	validations: List[CommandValidation] = Nil,
