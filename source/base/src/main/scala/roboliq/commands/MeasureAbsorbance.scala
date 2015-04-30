@@ -104,6 +104,12 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 			val bindingTransportAfter2_m = Map(
 				"?labware" -> labwareName,
 				"?model" -> modelName,
+				"?site" -> "REGRIP"
+			)
+			// Bindings for transfer to sealer
+			val bindingTransportAfter3_m = Map(
+				"?labware" -> labwareName,
+				"?model" -> modelName,
 				"?site" -> site3Name
 			)
 			// Binding for the actual measurement
@@ -125,7 +131,8 @@ class MeasureAbsorbanceActionHandler extends ActionHandler {
 				OperatorInfo(id ++ List(7), Nil, Nil, "openDeviceSite", bindingOpenClose_m, Map()),
 				OperatorInfo(id ++ List(8), Nil, Nil, "transportLabware", bindingTransportAfter1_m, Map()),
 				OperatorInfo(id ++ List(9), Nil, Nil, "closeDeviceSite", bindingOpenClose_m, Map()),
-				OperatorInfo(id ++ List(10), Nil, Nil, "ensureLabwareLocation", bindingTransportAfter2_m, Map())
+				//OperatorInfo(id ++ List(10), Nil, Nil, "ensureLabwareLocation", bindingTransportAfter2_m, Map()), // this is a hack, because a transportLabware operator can not depend on another transportLabware operator 
+				OperatorInfo(id ++ List(10), Nil, Nil, "ensureLabwareLocation", bindingTransportAfter3_m, Map())
 			)
 		}
 	}

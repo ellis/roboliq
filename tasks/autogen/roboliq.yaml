@@ -71,7 +71,7 @@ evowareAgents:
           R5: { grid: 8, site: 2 }
           R6: { grid: 8, site: 3 }
           READER: { carrier: "Infinite M200" }
-          REGRIP: { grid: 61, site: 1 }
+          REGRIP: { grid: 62, site: 1 }
           ROBOSEAL: { carrier: "RoboSeal" }
           SYSTEM: { carrier: System }
 #          T1A: { grid: 5
