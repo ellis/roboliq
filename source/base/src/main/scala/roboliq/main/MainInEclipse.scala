@@ -27,7 +27,7 @@ object MainInEclipse extends App {
 	
 	//run("test_single_carouselOpenSite_01")
 	//run("test_single_evowareTimerSleep_01")
-	run("test_single_measureAbsorbance_01")
+	//run("test_single_measureAbsorbance_01")
 	//run("test_single_openDeviceSite_02")
 	//run("test_single_pipette_01")
 	//run("test_single_pipette_02")
@@ -152,4 +152,5 @@ object MainInEclipse extends App {
 	//runTemp("qa03_weight_3")
 	//runTemp("qa03_weight_4")
 	//runTemp("qa05_dye_vol_range")
+	runTemp("tania16_ph_2_pipette")
 }
