@@ -155,6 +155,69 @@ case class RjsText(text: String) extends RjsBasicValue {
 	override def toString: String = "RjsString(\""+text+"\")"
 }
 
+case class RjsExtendedMap[A <: RjsExtendedValue](
+	map: Map[String, A],
+	typ_? : Option[String]
+) extends RjsExtendedValue with RjsAbstractMap {
+	
+	def getValueMap: Map[String, RjsValue] = map
+	def getValue(name: String): Option[RjsValue] = map.get(name)
+	
+	def toJson: ResultC[JsValue] = {
+		for {
+			l <- ResultC.map(map.toList) { case (name, value) =>
+				value.toJson.map(name -> _)
+			}
+		} yield JsObject(l.toMap)
+	}
+	
+	def get(name: String): Option[A] = map.get(name)
+	def add(name: String, value: A): RjsExtendedMap[A] = RjsExtendedMap[A](map + (name -> value), typ_?)
+	def add(map: Map[String, A]): RjsExtendedMap[A] = RjsExtendedMap[A](this.map ++ map, typ_?)
+	def add(map: RjsExtendedMap[A]): RjsExtendedMap[A] = RjsExtendedMap[A](this.map ++ map.map, typ_?)
+	def ++(that: RjsExtendedMap[A]): RjsExtendedMap[A] = this.add(that)
+	
+	def toTypedMap(typ: String): RjsExtendedMap[A] = RjsExtendedMap[A](map, Some(typ))
+	
+	/*
+	def merge(that: RjsMap): ResultC[RjsMap] = {
+		val key_l = map.keySet ++ that.map.keySet
+		for {
+			merged_l <- ResultC.map(key_l) { key =>
+				val value_? : ResultC[RjsValue] = (map.get(key), that.map.get(key)) match {
+					case (None, None) => ResultC.error(s"internal merge error on key $key") // Won't happen
+					case (Some(a), None) => ResultC.unit(a)
+					case (None, Some(b)) => ResultC.unit(b)
+					case (Some(a), Some(b)) =>
+						(a, b) match {
+							case (ma: RjsMap, mb: RjsMap) =>
+								for {
+									_ <- ResultC.check(ma.typ_? == mb.typ_?, s"Changing TYPE from ${ma.typ_?} to ${mb.typ_?}")
+									mc <- ma merge mb
+								} yield mc
+							case _ =>
+								ResultC.unit(b)
+						}
+				}
+				value_?.map(key -> _)
+			}
+		} yield RjsMap(merged_l.toMap)
+	}*/
+	
+	override def toString: String = {
+		map.toList.sortBy(_._1).map(kv => "\""+kv._1+"\" -> "+kv._2).mkString("RjsExtendedMap(", ", ", ")")
+	}
+}
+
+object RjsExtendedMap {
+	def apply[A <: RjsExtendedValue](nv_l: (String, A)*): RjsExtendedMap[A] = {
+		RjsExtendedMap[A](Map(nv_l : _*), None)
+	}
+	def apply[A <: RjsExtendedValue](typ: String, map: Map[String, A]): RjsExtendedMap[A] = {
+		RjsExtendedMap[A](map, Some(typ))
+	}
+}
+
 /*
 case class RjsTypedMap(typ: String, map: Map[String, RjsValue]) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = {
@@ -439,6 +502,11 @@ case class RjsSection(
 }
 
 object RjsValue {
+	import scala.reflect.runtime.{universe => ru}
+	import scala.reflect.runtime.universe.Type
+	import scala.reflect.runtime.universe.TypeTag
+	import scala.reflect.runtime.universe.typeOf
+
 	/**
 	 * Convert a JSON object to a basic RjsValue, one of: Boolean, List, Number, Null, Text, Format, Subst, String, Map, or TypedMap.
 	 * An error can occur if the text of a JsString is not properly formatted.
@@ -490,6 +558,14 @@ object RjsValue {
 		fromJson(jsval)
 	}
 
+	def fromObject[A : TypeTag](o: A): ResultC[RjsBasicValue] = {
+		val typ = ru.typeTag[A].tpe
+		for {
+			jsval <- toJson(o, typ)
+			rjsval <- fromJson(jsval)
+		} yield rjsval
+	}
+
 	def evaluateTypedMap(m: RjsAbstractMap): ResultE[RjsValue] = {
 		m.typ_? match {
 			case Some(typ) => evaluateTypedMap(typ, m.getValueMap)
@@ -528,11 +604,6 @@ object RjsValue {
 		}
 	}
 	
-	import scala.reflect.runtime.{universe => ru}
-	import scala.reflect.runtime.universe.Type
-	import scala.reflect.runtime.universe.TypeTag
-	import scala.reflect.runtime.universe.typeOf
-
 	def convertMapAs[A <: RjsValue : TypeTag](
 		map: Map[String, RjsValue]
 	): ResultE[A] = {
@@ -718,10 +789,12 @@ val im = mirror.reflect(x)
 		val typ = ru.typeTag[A].tpe
 		println(s"toBasicValue($a, $typ)")
 		a match {
-			case rjsval: RjsValue =>
-				fromValueToBasicValue(rjsval)
+			case basic: RjsBasicValue =>
+				ResultC.unit(basic)
 			case extended: RjsExtendedValue =>
 				fromExtendedToBasicValue(extended)
+			case rjsval: RjsValue =>
+				fromValueToBasicValue(rjsval)
 			case _ =>
 				for {
 					jsval <- toJson(a, typ)

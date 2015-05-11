@@ -2,6 +2,7 @@ package roboliq.input
 
 import scala.collection.mutable.HashMap
 
+/*
 object ProtocolDataProcessor {
 	def process(protocolData: ProtocolData): ResultE[ProtocolData] = {
 
@@ -40,3 +41,4 @@ object ProtocolDataProcessor {
 		???
 	}
 }
+*/

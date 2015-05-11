@@ -45,6 +45,17 @@ class RjsValueSpec extends FunSpec {
 				rjsval1 <- RjsValue.evaluateTypedMap(tm)
 			} yield rjsval1).run().value == action)
 		}
+		it("RjsValue.fromObject") {
+			val obj1 = RjsValueSpecCaseClass1("hello", 1)
+			val obj2 = RjsValueSpecCaseClass1("bye", 2)
+			val map1 = Map[String, RjsValueSpecCaseClass1]("obj1" -> obj1, "obj2" -> obj2)
+			
+			val rjsval1 = RjsBasicMap("a" -> RjsString("hello"), "b" -> RjsNumber(1))
+			val rjsval2 = RjsBasicMap("a" -> RjsString("bye"), "b" -> RjsNumber(2))
+			
+			assert(RjsValue.fromObject(obj1).run().value == rjsval1)
+			assert(RjsValue.fromObject(obj2).run().value == rjsval2)
+		}
 		it("rjsvalue.toJson") {
 			assert(number.toJson.run().value == jsNumber)
 			assert(string.toJson.run().value == jsString)

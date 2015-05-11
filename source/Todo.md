@@ -1,5 +1,13 @@
 # TODOs for roboliq
 
+## Current priority, but minor
+
+- [ ] create function to merge two ``Map[String, A]`` objects
+- [ ] CONTINUE: RjsValue.fromObject, check map1
+- [ ] Get rid of RjsExtendedValue?
+- [ ] RjsValueSpec: test RjsExtendedValue conversions
+- [ ] RjsValueSpec: test RjsExtendedMap
+
 ## Current major refactoring
 
 - [x] ProtocolProcessor (rename from ProtocolHandler)
@@ -11,6 +19,7 @@
     - [x] commands
     - [x] planningDomainObjects
     - [x] planningInitialState
+- [ ] ProtocolDataProcessor.process()
 - [ ] protocol variables
 - [ ] handle missing protocol variables
 - [ ] handle tasks
