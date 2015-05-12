@@ -52,9 +52,11 @@ class RjsValueSpec extends FunSpec {
 			
 			val rjsval1 = RjsBasicMap("a" -> RjsString("hello"), "b" -> RjsNumber(1))
 			val rjsval2 = RjsBasicMap("a" -> RjsString("bye"), "b" -> RjsNumber(2))
+			val rjsval3 = RjsBasicMap("obj1" -> rjsval1, "obj2" -> rjsval2)
 			
 			assert(RjsValue.fromObject(obj1).run().value == rjsval1)
 			assert(RjsValue.fromObject(obj2).run().value == rjsval2)
+			assert(RjsValue.fromObject(map1).run().value == rjsval3)
 		}
 		it("rjsvalue.toJson") {
 			assert(number.toJson.run().value == jsNumber)
