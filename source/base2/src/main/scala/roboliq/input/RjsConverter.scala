@@ -414,7 +414,7 @@ object RjsConverter {
 		} yield map.asInstanceOf[Map[String, _]]
 	}
 	
-	def yamlStringToRjsBasicValue(yaml: String): ResultC[RjsBasicValue] = {
+	/*def yamlStringToRjsBasicValue(yaml: String): ResultC[RjsBasicValue] = {
 		import spray.json._
 		val json = JsonUtils.yamlToJsonText(yaml)
 		val jsval = json.parseJson
@@ -426,5 +426,26 @@ object RjsConverter {
 			rjsval0 <- ResultE.from(yamlStringToRjsBasicValue(yaml))
 			rjsval <- fromRjs[A](rjsval0)
 		} yield rjsval
+	}*/
+
+	
+	def mergeObjectMaps[A : TypeTag](m1: Map[String, A], m2: Map[String, A]): ResultE[Map[String, A]] = {
+		val key_l = m1.keySet ++ m2.keySet
+		for {
+			merged_l <- ResultE.map(key_l) { key =>
+				(m1.get(key), m2.get(key)) match {
+					case (None, None) => ???
+					case (Some(o1), None) => ResultE.unit(key -> o1)
+					case (None, Some(o2)) => ResultE.unit(key -> o2)
+					case (Some(o1), Some(o2)) =>
+						for {
+							rjsval1 <- ResultE.from(RjsValue.fromObject(o1))
+							rjsval2 <- ResultE.from(RjsValue.fromObject(o2))
+							rjsval3 <- ResultE.from(RjsValue.merge(rjsval1, rjsval2))
+							o3 <- RjsConverter.fromRjs[A](rjsval3)
+						} yield key -> o3
+				}
+			}
+		} yield merged_l.toMap
 	}
 }

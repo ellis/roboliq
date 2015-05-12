@@ -13,6 +13,12 @@ private case class RjsConverterSpecExample(
 	c: BigDecimal
 )
 
+private case class RjsConverterSpecExample2(
+	a: String,
+	b: String,
+	c: String
+)
+
 class RjsConverterSpec extends FunSpec {
 	import ResultEWrapper._
 	
@@ -24,6 +30,7 @@ class RjsConverterSpec extends FunSpec {
 		val js12 = RjsNumber(12)
 		val jsWorld = RjsText("World")
 		val jsMap1 = RjsMap(Map("a" -> js5, "b" -> js7, "c" -> js12))
+		val jsMapMap1 = RjsMap(Map("obj1" -> jsMap1))
 		val jsList1 = RjsList(List(js5, js7, js12))
 		val jsSubstX = RjsSubst("x")
 		
@@ -56,6 +63,7 @@ class RjsConverterSpec extends FunSpec {
 		it("map") {
 			assert(fromRjs[Map[String, Int]](jsMap1).value == Map("a" -> 5, "b" -> 7, "c" -> 12))
 			assert(fromRjs[RjsConverterSpecExample](jsMap1).value == RjsConverterSpecExample(5, 7, 12))
+			assert(fromRjs[Map[String, RjsConverterSpecExample]](jsMapMap1).value == Map("obj1" -> RjsConverterSpecExample(5, 7, 12)))
 		}
 		
 		it("number") {
@@ -79,8 +87,93 @@ class RjsConverterSpec extends FunSpec {
 			assert(res.run().value == "World")
 		}
 		
-		it("RjsProtocol") {
-			assert(RjsConverter.yamlStringToRjs[RjsProtocol](YamlContent.protocol1Text).run().value == YamlContent.protocol1)
+		it("mergeObjectMaps[String]") {
+			val object1a = Map(
+				"prop1" -> "A",
+				"prop2" -> "B",
+				"prop3" -> "C"
+			)
+			val object1b = Map(
+				"prop2" -> "B",
+				"prop3" -> "*",
+				"prop4" -> "D"
+			)
+			val object1 = Map(
+				"prop1" -> "A",
+				"prop2" -> "B",
+				"prop3" -> "*",
+				"prop4" -> "D"
+			)
+			val object2 = Map(
+				"prop1" -> "A"
+			)
+			val object3 = Map(
+				"prop2" -> "B"
+			)
+			
+			assert(RjsConverter.mergeObjectMaps(object1a, object1b).run().value == object1)
+			
+			val protocolDataA = Map[String, Map[String, String]](
+				"object1" -> object1a,
+				"object2" -> object2
+			)
+			val protocolDataB = Map[String, Map[String, String]](
+				"object1" -> object1b,
+				"object3" -> object3
+			)
+			
+			val expected = Map(
+				"object1" -> object1,
+				"object2" -> object2,
+				"object3" -> object3
+			)
+
+			assert(RjsConverter.mergeObjectMaps(protocolDataA, protocolDataB).run().value == expected)
 		}
+		/*
+		it("mergeObjectMaps") {
+			val object1a = RjsConverterSpecExample2("A", "B", "C")
+			val object1b = RjsConverterSpecExample2("B", "*", "D")
+			val object1 = RjsBasicMap(
+				"prop1" -> RjsString("A"),
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("*"),
+				"prop4" -> RjsString("D")
+			)
+			val object2 = RjsBasicMap(
+				"prop1" -> RjsString("A")
+			)
+			val object3 = RjsBasicMap(
+				"prop2" -> RjsString("B")
+			)
+			val protocolDataA = ProtocolData(
+				variables = RjsBasicMap(
+					"object1" -> object1a,
+					"object2" -> object2
+				)
+			)
+			val protocolDataB = ProtocolData(
+				variables = RjsBasicMap(
+					"object1" -> object1b,
+					"object3" -> object3
+				)
+			)
+			
+			val result_? = RjsConverter.mergeObjectMaps(protocolDataB)
+			
+			val expected = ProtocolData(
+				variables = RjsBasicMap(
+					"object1" -> object1,
+					"object2" -> object2,
+					"object3" -> object3
+				)
+			)
+			
+			assert(result_?.run().value == expected)
+		}*/
+		
+		/*it("RjsProtocol") {
+			assert(RjsConverter.yamlStringToRjs[RjsProtocol](YamlContent.protocol1Text).run().value == YamlContent.protocol1)
+		}*/
 	}
 }

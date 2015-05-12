@@ -96,8 +96,49 @@ class RjsValueSpec extends FunSpec {
 		it("RjsValue.merge") {
 			val l1 = RjsList(number)
 			val l2 = RjsList(string)
-			val map1 = RjsBasicMap("a")
 			assert(RjsValue.merge(l1, l2).run().value == RjsList(number, string))
+			
+			val object1a = RjsBasicMap(
+				"prop1" -> RjsString("A"),
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("C")
+			)
+			val object1b = RjsBasicMap(
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("*"),
+				"prop4" -> RjsString("D")
+			)
+			val object1 = RjsBasicMap(
+				"prop1" -> RjsString("A"),
+				"prop2" -> RjsString("B"),
+				"prop3" -> RjsString("*"),
+				"prop4" -> RjsString("D")
+			)
+			val object2 = RjsBasicMap(
+				"prop1" -> RjsString("A")
+			)
+			val object3 = RjsBasicMap(
+				"prop2" -> RjsString("B")
+			)
+			val protocolDataA = RjsBasicMap(
+				"object1" -> object1a,
+				"object2" -> object2
+			)
+			val protocolDataB = RjsBasicMap(
+				"object1" -> object1b,
+				"object3" -> object3
+			)
+			
+			val result_? = protocolDataA.merge(protocolDataB)
+			
+			val expected = RjsBasicMap(
+				"object1" -> object1,
+				"object2" -> object2,
+				"object3" -> object3
+			)
+			
+			assert(result_?.run().value == expected)
+			
 		}
 		it("RjsValue.toBasicValue") {
 			assert(RjsValue.toBasicValue(1).run().value == RjsNumber(1))
