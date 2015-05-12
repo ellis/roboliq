@@ -14,9 +14,10 @@ private case class RjsConverterSpecExample(
 )
 
 private case class RjsConverterSpecExample2(
-	a: String,
-	b: String,
-	c: String
+	a: Option[String],
+	b: Option[String],
+	c: Option[String],
+	d: Option[String]
 )
 
 class RjsConverterSpec extends FunSpec {
@@ -87,6 +88,16 @@ class RjsConverterSpec extends FunSpec {
 			assert(res.run().value == "World")
 		}
 		
+		it("mergeObjects") {
+			assert(RjsConverter.mergeObjects("A", "B").run().value == "B")
+			//assert(RjsConverter.mergeObjects[Option[String]](Some("A"), None).run().value == Option("A"))
+			//println(RjsConverter.mergeObjects[Option[String]](Some("A"), Some(null)).run().value)
+			//assert(RjsConverter.mergeObjects[Option[String]](Some("A"), Some(null)).run().value == Option(null))
+			//assert(RjsConverter.mergeObjects[Option[String]](Some("A"), Some("B")).run().value == Some("B"))
+			assert(RjsConverter.mergeObjects(List("A", "B"), List("B", "C")).run().value == List("A", "B", "B", "C"))
+			assert(RjsConverter.mergeObjects(Set("A", "B"), Set("B", "C")).run().value == Set("A", "B", "C"))
+		}
+		
 		it("mergeObjectMaps[String]") {
 			val object1a = Map(
 				"prop1" -> "A",
@@ -130,16 +141,11 @@ class RjsConverterSpec extends FunSpec {
 
 			assert(RjsConverter.mergeObjectMaps(protocolDataA, protocolDataB).run().value == expected)
 		}
-		/*
-		it("mergeObjectMaps") {
-			val object1a = RjsConverterSpecExample2("A", "B", "C")
-			val object1b = RjsConverterSpecExample2("B", "*", "D")
-			val object1 = RjsBasicMap(
-				"prop1" -> RjsString("A"),
-				"prop2" -> RjsString("B"),
-				"prop3" -> RjsString("*"),
-				"prop4" -> RjsString("D")
-			)
+		
+		/*it("mergeObjectMaps") {
+			val object1a = RjsConverterSpecExample2(Some("A"), Some("B"), Some("C"), None)
+			val object1b = RjsConverterSpecExample2(None, Some("B"), Some("*"), Some("D"))
+			val object1 = RjsConverterSpecExample2(Some("A"), Some("B"), Some("*"), Some("D"))
 			val object2 = RjsBasicMap(
 				"prop1" -> RjsString("A")
 			)

@@ -4,7 +4,7 @@
 
 - [x] CONTINUE: RjsValue.fromObject, check map1
 - [?] create function to merge two ``Map[String, A]`` objects
-- [ ] RjsConverterSpec: test mergeObjectMaps
+- [ ] RjsConverterSpec: mergeObjects
 - [ ] Get rid of RjsExtendedValue?
 - [ ] RjsValueSpec: test RjsExtendedValue conversions
 - [ ] RjsValueSpec: test RjsExtendedMap

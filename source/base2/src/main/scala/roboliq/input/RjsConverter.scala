@@ -428,6 +428,71 @@ object RjsConverter {
 		} yield rjsval
 	}*/
 
+	def mergeObjects[A : TypeTag](o1: A, o2: A): ResultE[A] = {
+		val typ = ru.typeTag[A].tpe
+		for {
+			o <- mergeObjects(o1, o2, typ)
+			//_ <- ResultE.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
+		} yield o.asInstanceOf[A]
+	}
+
+	private def mergeObjects(o1: Any, o2: Any, typ: Type): ResultE[Any] = {
+		import scala.reflect.runtime.universe._
+
+		val mirror = runtimeMirror(this.getClass.getClassLoader)
+		
+		if (typ <:< typeOf[Option[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			val v1 = o1.asInstanceOf[Option[_]]
+			val v2 = o2.asInstanceOf[Option[_]]
+			(v1, v2) match {
+				case (None, None) => ResultE.unit(None)
+				case (_, Some(null)) => ResultE.unit(None)
+				case (None, _) => ResultE.unit(o2)
+				case (Some(null), _) => ResultE.unit(o2)
+				case (Some(_), None) => ResultE.unit(o1)
+				case (Some(x1), Some(x2)) => mergeObjects(x1, x2, typ2)
+			}
+		}
+		else if (typ <:< typeOf[List[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			val v1 = o1.asInstanceOf[List[_]]
+			val v2 = o2.asInstanceOf[List[_]]
+			val v3 = v1 ++ v2
+			ResultE.unit(v3)
+		}
+		else if (typ <:< typeOf[Set[_]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
+			val v1 = o1.asInstanceOf[Set[_]]
+			val v2 = o2.asInstanceOf[Set[_]]
+			val v3 = v1 ++ v2
+			ResultE.unit(v3)
+		}
+		else if (typ <:< typeOf[Map[String, _]]) {
+			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(1)
+			val m1 = o1.asInstanceOf[Map[String, _]]
+			val m2 = o2.asInstanceOf[Map[String, _]]
+			val key_l = m1.keySet ++ m2.keySet
+			for {
+				merged_l <- ResultE.map(key_l.toSeq) { key =>
+					(m1.get(key), m2.get(key)) match {
+						case (None, None) => ???
+						case (Some(o1), None) => ResultE.unit(key -> o1)
+						case (None, Some(o2)) => ResultE.unit(key -> o2)
+						case (Some(o1), Some(o2)) => mergeObjects(o1, o2, typ2).map(key -> _)
+					}
+				}
+			} yield merged_l.toMap
+		}
+		else {
+			for {
+				rjsval1 <- ResultE.from(RjsValue.fromObject(o1, typ))
+				rjsval2 <- ResultE.from(RjsValue.fromObject(o2, typ))
+				rjsval3 <- ResultE.from(RjsValue.merge(rjsval1, rjsval2))
+				o <- conv(rjsval3, typ)
+			} yield o
+		}
+	}
 	
 	def mergeObjectMaps[A : TypeTag](m1: Map[String, A], m2: Map[String, A]): ResultE[Map[String, A]] = {
 		val key_l = m1.keySet ++ m2.keySet

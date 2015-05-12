@@ -566,6 +566,13 @@ object RjsValue {
 		} yield rjsval
 	}
 
+	def fromObject(o: Any, typ: ru.Type): ResultC[RjsBasicValue] = {
+		for {
+			jsval <- toJson(o, typ)
+			rjsval <- fromJson(jsval)
+		} yield rjsval
+	}
+
 	def evaluateTypedMap(m: RjsAbstractMap): ResultE[RjsValue] = {
 		m.typ_? match {
 			case Some(typ) => evaluateTypedMap(typ, m.getValueMap)
@@ -733,7 +740,7 @@ val im = mirror.reflect(x)
 					(typClass2, typClass2.toType)
 				}
 			}
-			//println("Q:", typClass0, clazz, typClass2, typ2)
+			println("Q:", typClass0, clazz, typClass2, typ2)
 			
 			// Get 'TYPE' field value, if annotated
 			val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]
