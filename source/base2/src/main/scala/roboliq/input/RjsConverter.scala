@@ -9,6 +9,8 @@ import roboliq.ai.strips
 import roboliq.utils.JsonUtils
 import roboliq.core.ResultC
 
+// REFACTOR: Regarding RjsConverter/RjsConverterC, I should probably get rid of RjsConverter and perform evaluation completely separately
+// RjsConverter is like RjsConverterC, but it also does evaluation.
 object RjsConverter {
 	private val logger = Logger[this.type]
 	

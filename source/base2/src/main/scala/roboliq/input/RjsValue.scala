@@ -629,6 +629,7 @@ object RjsValue {
 		convertMapAs[A](m.map)
 	}
 	
+	// REFACTOR: Why is this here?  Can't this be done by RjsConverter?
 	def convertMap(
 		map: Map[String, RjsValue],
 		typ: Type

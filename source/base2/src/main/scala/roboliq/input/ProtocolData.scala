@@ -4,9 +4,17 @@ import roboliq.ai.strips
 import roboliq.core.ResultC
 
 
+case class ProtocolDataVariable(
+	name: String,
+	description_? : Option[String] = None,
+	type_? : Option[String] = None,
+	value_? : Option[RjsBasicValue] = None,
+	alternatives: List[RjsBasicValue] = Nil
+)
+
 @RjsJsonType("protocolData")
 case class ProtocolData(
-	val variables: RjsBasicMap = RjsBasicMap(),
+	val variables: Map[String, ProtocolDataVariable] = Map(),
 	val objects: RjsBasicMap = RjsBasicMap(),
 	val commands: Map[String, RjsValue] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
@@ -15,7 +23,7 @@ case class ProtocolData(
 ) {
 	def merge(that: ProtocolData): ResultC[ProtocolData] = {
 		for {
-			variables <- this.variables merge that.variables
+			variables <- RjsConverterC.mergeObjects(this.variables, that.variables)
 			objects <- this.objects merge that.objects
 		} yield {
 			new ProtocolData(

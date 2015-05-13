@@ -13,36 +13,30 @@ class ProtocolDataSpec extends FunSpec {
 		//val planningInitialState: strips.Literals = strips.Literals.empty,
 		//val processingState_? : Option[ProcessingState] = None
 		it("merge variables") {
-			val object1a = RjsBasicMap(
-				"prop1" -> RjsString("A"),
-				"prop2" -> RjsString("B"),
-				"prop3" -> RjsString("C")
+			val object1a = ProtocolDataVariable(
+				name = "prop1",
+				description_? = Some("description"),
+				value_? = Some(RjsNumber(1))
 			)
-			val object1b = RjsBasicMap(
-				"prop2" -> RjsString("B"),
-				"prop3" -> RjsString("*"),
-				"prop4" -> RjsString("D")
+			val object1b = ProtocolDataVariable(
+				name = "prop1",
+				value_? = Some(RjsNumber(2))
 			)
-			val object1 = RjsBasicMap(
-				"prop1" -> RjsString("A"),
-				"prop2" -> RjsString("B"),
-				"prop3" -> RjsString("*"),
-				"prop4" -> RjsString("D")
+			val object1 = ProtocolDataVariable(
+				name = "prop1",
+				description_? = Some("description"),
+				value_? = Some(RjsNumber(2))
 			)
-			val object2 = RjsBasicMap(
-				"prop1" -> RjsString("A")
-			)
-			val object3 = RjsBasicMap(
-				"prop2" -> RjsString("B")
-			)
+			val object2 = ProtocolDataVariable("prop2")
+			val object3 = ProtocolDataVariable("prop3")
 			val protocolDataA = ProtocolData(
-				variables = RjsBasicMap(
+				variables = Map(
 					"object1" -> object1a,
 					"object2" -> object2
 				)
 			)
 			val protocolDataB = ProtocolData(
-				variables = RjsBasicMap(
+				variables = Map(
 					"object1" -> object1b,
 					"object3" -> object3
 				)
@@ -51,7 +45,7 @@ class ProtocolDataSpec extends FunSpec {
 			val result_? = protocolDataA.merge(protocolDataB)
 			
 			val expected = ProtocolData(
-				variables = RjsBasicMap(
+				variables = Map(
 					"object1" -> object1,
 					"object2" -> object2,
 					"object3" -> object3
@@ -59,6 +53,8 @@ class ProtocolDataSpec extends FunSpec {
 			)
 			
 			assert(result_?.run().value == expected)
+			//ProtocolData(Map(object1 -> ProtocolDataVariable(prop1,None,None,None,List()), object2 -> ProtocolDataVariable(prop2,None,None,None,List()), object3 -> ProtocolDataVariable(prop3,None,None,None,List())),RjsBasicMap(),Map(),Map(),Literals(),None)
+			//ProtocolData(Map(object1 -> ProtocolDataVariable(prop1,Some(description),None,Some(RjsNumber(2,None)),List()), object2 -> ProtocolDataVariable(prop2,None,None,None,List()), object3 -> ProtocolDataVariable(prop3,None,None,None,List())),RjsBasicMap(),Map(),Map(),Literals(),None) (ProtocolDataSpec.scala:55)
 		}
 
 		it("merge objects") {

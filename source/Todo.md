@@ -3,8 +3,11 @@
 ## Current priority, but minor
 
 - [x] CONTINUE: RjsValue.fromObject, check map1
-- [?] create function to merge two ``Map[String, A]`` objects
-- [ ] RjsConverterSpec: mergeObjects
+- [x] create function to merge two ``Map[String, A]`` objects
+- [x] RjsConverterSpec: mergeObjects
+- [.] Create RjsConverterC
+- [ ] Create RjsConverterCSpec
+- [ ] ProtocolDataSpec: merge variables
 - [ ] Get rid of RjsExtendedValue?
 - [ ] RjsValueSpec: test RjsExtendedValue conversions
 - [ ] RjsValueSpec: test RjsExtendedMap
