@@ -451,7 +451,7 @@ object RjsConverter {
 				case (None, _) => ResultE.unit(o2)
 				case (Some(null), _) => ResultE.unit(o2)
 				case (Some(_), None) => ResultE.unit(o1)
-				case (Some(x1), Some(x2)) => mergeObjects(x1, x2, typ2)
+				case (Some(x1), Some(x2)) => mergeObjects(x1, x2, typ2).map(Option.apply)
 			}
 		}
 		else if (typ <:< typeOf[List[_]]) {
@@ -485,32 +485,18 @@ object RjsConverter {
 			} yield merged_l.toMap
 		}
 		else {
-			for {
-				rjsval1 <- ResultE.from(RjsValue.fromObject(o1, typ))
-				rjsval2 <- ResultE.from(RjsValue.fromObject(o2, typ))
-				rjsval3 <- ResultE.from(RjsValue.merge(rjsval1, rjsval2))
-				o <- conv(rjsval3, typ)
-			} yield o
-		}
-	}
-	
-	def mergeObjectMaps[A : TypeTag](m1: Map[String, A], m2: Map[String, A]): ResultE[Map[String, A]] = {
-		val key_l = m1.keySet ++ m2.keySet
-		for {
-			merged_l <- ResultE.map(key_l) { key =>
-				(m1.get(key), m2.get(key)) match {
-					case (None, None) => ???
-					case (Some(o1), None) => ResultE.unit(key -> o1)
-					case (None, Some(o2)) => ResultE.unit(key -> o2)
-					case (Some(o1), Some(o2)) =>
-						for {
-							rjsval1 <- ResultE.from(RjsValue.fromObject(o1))
-							rjsval2 <- ResultE.from(RjsValue.fromObject(o2))
-							rjsval3 <- ResultE.from(RjsValue.merge(rjsval1, rjsval2))
-							o3 <- RjsConverter.fromRjs[A](rjsval3)
-						} yield key -> o3
-				}
+			if (o2 == null)
+				ResultE.unit(null)
+			else if (o1 == null)
+				ResultE.unit(o2)
+			else {
+				for {
+					rjsval1 <- ResultE.from(RjsValue.fromObject(o1, typ))
+					rjsval2 <- ResultE.from(RjsValue.fromObject(o2, typ))
+					rjsval3 <- ResultE.from(RjsValue.merge(rjsval1, rjsval2))
+					o <- conv(rjsval3, typ)
+				} yield o
 			}
-		} yield merged_l.toMap
+		}
 	}
 }

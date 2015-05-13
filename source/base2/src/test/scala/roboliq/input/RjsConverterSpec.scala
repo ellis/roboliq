@@ -90,15 +90,12 @@ class RjsConverterSpec extends FunSpec {
 		
 		it("mergeObjects") {
 			assert(RjsConverter.mergeObjects("A", "B").run().value == "B")
-			//assert(RjsConverter.mergeObjects[Option[String]](Some("A"), None).run().value == Option("A"))
-			//println(RjsConverter.mergeObjects[Option[String]](Some("A"), Some(null)).run().value)
-			//assert(RjsConverter.mergeObjects[Option[String]](Some("A"), Some(null)).run().value == Option(null))
-			//assert(RjsConverter.mergeObjects[Option[String]](Some("A"), Some("B")).run().value == Some("B"))
+			assert(RjsConverter.mergeObjects[Option[String]](Some("A"), None).run().value == Some("A"))
+			assert(RjsConverter.mergeObjects[Option[String]](Some("A"), Some(null)).run().value == None)
+			assert(RjsConverter.mergeObjects[Option[String]](Some("A"), Some("B")).run().value == Some("B"))
 			assert(RjsConverter.mergeObjects(List("A", "B"), List("B", "C")).run().value == List("A", "B", "B", "C"))
 			assert(RjsConverter.mergeObjects(Set("A", "B"), Set("B", "C")).run().value == Set("A", "B", "C"))
-		}
-		
-		it("mergeObjectMaps[String]") {
+
 			val object1a = Map(
 				"prop1" -> "A",
 				"prop2" -> "B",
@@ -122,7 +119,7 @@ class RjsConverterSpec extends FunSpec {
 				"prop2" -> "B"
 			)
 			
-			assert(RjsConverter.mergeObjectMaps(object1a, object1b).run().value == object1)
+			assert(RjsConverter.mergeObjects(object1a, object1b).run().value == object1)
 			
 			val protocolDataA = Map[String, Map[String, String]](
 				"object1" -> object1a,
@@ -139,44 +136,8 @@ class RjsConverterSpec extends FunSpec {
 				"object3" -> object3
 			)
 
-			assert(RjsConverter.mergeObjectMaps(protocolDataA, protocolDataB).run().value == expected)
+			assert(RjsConverter.mergeObjects(protocolDataA, protocolDataB).run().value == expected)
 		}
-		
-		/*it("mergeObjectMaps") {
-			val object1a = RjsConverterSpecExample2(Some("A"), Some("B"), Some("C"), None)
-			val object1b = RjsConverterSpecExample2(None, Some("B"), Some("*"), Some("D"))
-			val object1 = RjsConverterSpecExample2(Some("A"), Some("B"), Some("*"), Some("D"))
-			val object2 = RjsBasicMap(
-				"prop1" -> RjsString("A")
-			)
-			val object3 = RjsBasicMap(
-				"prop2" -> RjsString("B")
-			)
-			val protocolDataA = ProtocolData(
-				variables = RjsBasicMap(
-					"object1" -> object1a,
-					"object2" -> object2
-				)
-			)
-			val protocolDataB = ProtocolData(
-				variables = RjsBasicMap(
-					"object1" -> object1b,
-					"object3" -> object3
-				)
-			)
-			
-			val result_? = RjsConverter.mergeObjectMaps(protocolDataB)
-			
-			val expected = ProtocolData(
-				variables = RjsBasicMap(
-					"object1" -> object1,
-					"object2" -> object2,
-					"object3" -> object3
-				)
-			)
-			
-			assert(result_?.run().value == expected)
-		}*/
 		
 		/*it("RjsProtocol") {
 			assert(RjsConverter.yamlStringToRjs[RjsProtocol](YamlContent.protocol1Text).run().value == YamlContent.protocol1)
