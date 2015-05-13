@@ -138,7 +138,11 @@ class RjsValueSpec extends FunSpec {
 			)
 			
 			assert(result_?.run().value == expected)
-			
+
+			val map1 = RjsBasicMap("description" -> RjsString("description"), "name" -> RjsString("prop1"), "value" -> RjsNumber(1,None))
+			val map2 = RjsBasicMap("name" -> RjsString("prop1"), "value" -> RjsNumber(2,None))
+			val map3 = RjsBasicMap("description" -> RjsString("description"), "name" -> RjsString("prop1"), "value" -> RjsNumber(2,None))
+			assert(RjsValue.merge(map1, map2).run().value == map3)
 		}
 		it("RjsValue.toBasicValue") {
 			assert(RjsValue.toBasicValue(1).run().value == RjsNumber(1))

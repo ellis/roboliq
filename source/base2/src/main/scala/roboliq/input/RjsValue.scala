@@ -123,6 +123,11 @@ case object RjsNull extends RjsBasicValue {
 	override def toText: String = "null"
 }
 
+case object RjsNone extends RjsBasicValue {
+	def toJson: ResultC[JsValue] = ResultC.unit(JsObject("TYPE" -> JsString("none")))
+	override def toText: String = "None"
+}
+
 case class RjsNumber(n: BigDecimal, unit: Option[String] = None) extends RjsBasicValue {
 	def toJson: ResultC[JsValue] = unit match {
 		case None => ResultC.unit(JsNumber(n))
@@ -686,6 +691,9 @@ val im = mirror.reflect(x)
 	): ResultC[JsValue] = {
 		import scala.reflect.runtime.universe._
 		println(s"toJson($x, $typ)")
+		
+		// This function isn't 
+		//assert(!(typ <:< typeOf[RjsBasicValue]))
 
 		if (typ =:= typeOf[String]) ResultC.unit(JsString(x.asInstanceOf[String]))
 		else if (typ =:= typeOf[Int]) ResultC.unit(JsNumber(x.asInstanceOf[Int]))
@@ -701,7 +709,7 @@ val im = mirror.reflect(x)
 		else if (typ <:< typeOf[Option[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			x.asInstanceOf[Option[_]] match {
-				case None => ResultC.unit(JsNull)
+				case None => RjsNone.toJson
 				case Some(x2) => toJson(x2, typ2)
 			}
 		}
@@ -785,7 +793,13 @@ val im = mirror.reflect(x)
 					}
 				}
 			} yield {
-				val map = (jsTyp_?.toList ++ field_l).toMap
+				val map0 = (jsTyp_?.toList ++ field_l)
+				val map1 = map0.map(pair => {
+					val (key0, value) = pair
+					val key = key0.replace("_$qmark", "")
+					key -> value
+				})
+				val map = map1.filter(pair => pair._2 != JsObject("TYPE" -> JsString("none"))).toMap
 				JsObject(map)
 			}
 		}
@@ -844,11 +858,15 @@ val im = mirror.reflect(x)
 					ResultC.unit(RjsList(a.list ++ b.list))
 				case _ => ResultC.unit(basic2)
 			}
-		} yield res
+		} yield {
+			println(s"RjsValue.merge($a, $b) = $res")
+			res
+		}
 	}
 	
 	def mergeMaps(m1: RjsBasicMap, m2: RjsBasicMap): ResultC[RjsBasicMap] = {
 		val key_l = m1.map.keySet ++ m2.map.keySet
+		println("A")
 		for {
 			merged_l <- ResultC.map(key_l) { key =>
 				val value_? : ResultC[RjsBasicValue] = (m1.map.get(key), m2.map.get(key)) match {
@@ -868,11 +886,12 @@ val im = mirror.reflect(x)
 				}
 				value_?.map(key -> _)
 			}
+			_ = println("B")
 		} yield RjsBasicMap(merged_l.toMap)
 	}
 	
 	def merge(value_l: Iterable[RjsValue]): ResultC[RjsBasicValue] = {
-		var a: RjsBasicValue = RjsNull
+		var a: RjsBasicValue = RjsNone
 		for {
 			_ <- ResultC.foreach(value_l) { b =>
 				for {

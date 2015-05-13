@@ -5,8 +5,9 @@
 - [x] CONTINUE: RjsValue.fromObject, check map1
 - [x] create function to merge two ``Map[String, A]`` objects
 - [x] RjsConverterSpec: mergeObjects
-- [.] Create RjsConverterC
-- [ ] Create RjsConverterCSpec
+- [x] Create RjsConverterC
+- [x] Create RjsConverterCSpec
+- [ ] RjsConverterCSpec: merge objects (case class)
 - [ ] ProtocolDataSpec: merge variables
 - [ ] Get rid of RjsExtendedValue?
 - [ ] RjsValueSpec: test RjsExtendedValue conversions

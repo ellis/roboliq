@@ -11,86 +11,73 @@ import roboliq.core.ResultC
 
 // REFACTOR: Regarding RjsConverter/RjsConverterC, I should probably get rid of RjsConverter and perform evaluation completely separately
 // RjsConverter is like RjsConverterC, but it also does evaluation.
-object RjsConverter {
+object RjsConverterC {
 	private val logger = Logger[this.type]
 	
-	def toString(rjsval: RjsValue): ResultE[String] = {
+	def toString(rjsval: RjsValue): ResultC[String] = {
 		
-		def evalAndRetry(): ResultE[String] = {
-			for {
-				rjsval2 <- ResultE.evaluate(rjsval)
-				s <- toString(rjsval2)
-			} yield s
-		}
-		
-		ResultE.context("toString") {
+		ResultC.context("toString") {
 			rjsval match {
-				case x: RjsString => ResultE.unit(x.s)
-				case x: RjsText => ResultE.unit(x.text)
-				case x: RjsFormat => evalAndRetry()
-				case x: RjsSubst => evalAndRetry()
-				case x: RjsCall => evalAndRetry()
-				case x: RjsAbstractMap if x.typ_?.isDefined =>
-					for {
-						rjsval2 <- RjsValue.evaluateTypedMap(x)
-						s <- toString(rjsval2)
-					} yield s
+				case x: RjsString => ResultC.unit(x.s)
+				case x: RjsText => ResultC.unit("\""+x.text+"\"")
+				case x: RjsFormat => ResultC.unit("f\""+x.format+"\"")
+				case x: RjsSubst => ResultC.unit("$"+x.name)
 				case _ =>
-					ResultE.error(s"cannot convert to String: $rjsval")
+					ResultC.error(s"cannot convert to String: $rjsval")
 			}
 		}
 	}
 	
-	def toInt(rjsval: RjsValue): ResultE[Int] = {
+	def toInt(rjsval: RjsValue): ResultC[Int] = {
 		toBigDecimal(rjsval).map(_.toInt)
 	}
 	
-	def toInteger(rjsval: RjsValue): ResultE[Integer] = {
+	def toInteger(rjsval: RjsValue): ResultC[Integer] = {
 		toBigDecimal(rjsval).map(_.toInt)
 	}
 	
-	def toFloat(rjsval: RjsValue): ResultE[Float] = {
+	def toFloat(rjsval: RjsValue): ResultC[Float] = {
 		toBigDecimal(rjsval).map(_.toFloat)
 	}
 	
-	def toDouble(rjsval: RjsValue): ResultE[Double] = {
+	def toDouble(rjsval: RjsValue): ResultC[Double] = {
 		toBigDecimal(rjsval).map(_.toDouble)
 	}
 	
-	def toBigDecimal(rjsval: RjsValue): ResultE[BigDecimal] = {
-		ResultE.context("toBigDecimal") {
+	def toBigDecimal(rjsval: RjsValue): ResultC[BigDecimal] = {
+		ResultC.context("toBigDecimal") {
 			rjsval match {
-				case RjsNumber(n, None) => ResultE.unit(n)
-				case RjsNumber(_, _) => ResultE.error("expected RjsNumber without units: "+rjsval.toText)
-				case _ => ResultE.error("expected RjsNumber")
+				case RjsNumber(n, None) => ResultC.unit(n)
+				case RjsNumber(_, _) => ResultC.error("expected RjsNumber without units: "+rjsval.toText)
+				case _ => ResultC.error("expected RjsNumber")
 			}
 		}
 	}
 	
-	/*def toBigDecimal(scope: Map[String, RjsValue], name: String): ResultE[BigDecimal] = {
+	/*def toBigDecimal(scope: Map[String, RjsValue], name: String): ResultC[BigDecimal] = {
 		scope.get(name) match {
-			case None => ResultE.error(s"variable `$name` missing from scope")
+			case None => ResultC.error(s"variable `$name` missing from scope")
 			case Some(rjsval) => toBigDecimal(rjsval)
 		}
 	}*/
 	
-	def toBoolean(rjsval: RjsValue): ResultE[java.lang.Boolean] = {
-		ResultE.context("toBoolean") {
+	def toBoolean(rjsval: RjsValue): ResultC[java.lang.Boolean] = {
+		ResultC.context("toBoolean") {
 			rjsval match {
-				case RjsBoolean(b) => ResultE.unit(b)
-				case RjsNumber(n, _) => ResultE.unit(n != 0)
-				case RjsString(s) => ResultE.unit(s == "true")
-				case _ => ResultE.error("expected RjsBoolean")
+				case RjsBoolean(b) => ResultC.unit(b)
+				case RjsNumber(n, _) => ResultC.unit(n != 0)
+				case RjsString(s) => ResultC.unit(s == "true")
+				case _ => ResultC.error("expected RjsBoolean")
 			}
 		}
 	}
 	
-	def toEnum[A <: Enumeration#Value : TypeTag](rjsval: RjsValue): ResultE[A] = {
+	def toEnum[A <: Enumeration#Value : TypeTag](rjsval: RjsValue): ResultC[A] = {
 		val typ = ru.typeTag[A].tpe
 		toEnum(rjsval, typ).map(_.asInstanceOf[A])
 	}
 	
-	private def toEnum(rjsval: RjsValue, typ: ru.Type): ResultE[Any] = {
+	private def toEnum(rjsval: RjsValue, typ: ru.Type): ResultC[Any] = {
 		try {
 			//val mirror = clazz_?.map(clazz => ru.runtimeMirror(clazz.getClassLoader)).getOrElse(scala.reflect.runtime.currentMirror)
 			val mirror = ru.runtimeMirror(getClass.getClassLoader)
@@ -102,32 +89,32 @@ object RjsConverter {
 			val value_l = enum.values
 			rjsval match {
 				case RjsString(s) =>
-					ResultE.from(value_l.find(_.toString == s), s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
-				case _ => ResultE.error("expected RjsString")
+					ResultC.from(value_l.find(_.toString == s), s"Value '$s' not valid for `${enumModule.name}`.  Expected one of ${value_l.mkString(", ")}.")
+				case _ => ResultC.error("expected RjsString")
 			}
 		} catch {
-			case e: Throwable => ResultE.error(s"type: $typ, rjsval: $rjsval, error: ${e.getMessage}")
+			case e: Throwable => ResultC.error(s"type: $typ, rjsval: $rjsval, error: ${e.getMessage}")
 		}
 	}
 
 	
 	def toStripsLiteral(
 		rjsval: RjsValue
-	): ResultE[strips.Literal] = {
+	): ResultC[strips.Literal] = {
 		for {
-			s <- RjsConverter.toString(rjsval)
+			s <- RjsConverterC.toString(rjsval)
 			lit <- s.split(" ").toList.filterNot(_.isEmpty) match {
 				case Nil =>
-					ResultE.error("expected a non-empty string for logical literal")
+					ResultC.error("expected a non-empty string for logical literal")
 				case l =>
 					val name0 = l.head
 					val pos = !name0.startsWith("~")
 					val name = if (pos) name0 else name0.substring(1)
 					if (name.isEmpty) {
-						ResultE.error(s"expected a non-empty name for logical literal in: $s")
+						ResultC.error(s"expected a non-empty name for logical literal in: $s")
 					}
 					else {
-						ResultE.unit(strips.Literal(strips.Atom(name, l.tail), pos))
+						ResultC.unit(strips.Literal(strips.Atom(name, l.tail), pos))
 					}
 			}
 		} yield lit
@@ -135,7 +122,7 @@ object RjsConverter {
 	
 	def toStripsLiterals(
 		rjsval: RjsValue
-	): ResultE[strips.Literals] = {
+	): ResultC[strips.Literals] = {
 		for {
 			l <- fromRjs[List[strips.Literal]](rjsval)
 		} yield strips.Literals(roboliq.ai.plan.Unique(l : _*))
@@ -143,26 +130,26 @@ object RjsConverter {
 	
 	def fromRjs[A: TypeTag](
 		rjsval: RjsValue
-	): ResultE[A] = {
+	): ResultC[A] = {
 		//println(s"fromRjson($rjsval)")
 		val typ = ru.typeTag[A].tpe
 		for {
 			o <- conv(rjsval, typ)
-			//_ <- ResultE.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
+			//_ <- ResultC.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
 		} yield o.asInstanceOf[A]
 	}
 
-	def fromRjs[A: TypeTag](map: RjsAbstractMap, field: String): ResultE[A] =
+	def fromRjs[A: TypeTag](map: RjsAbstractMap, field: String): ResultC[A] =
 		fromRjs[A](map.getValueMap, field)
 
-	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ResultE[A] = {
-		ResultE.context(field) {
+	def fromRjs[A: TypeTag](map: Map[String, RjsValue], field: String): ResultC[A] = {
+		ResultC.context(field) {
 			map.get(field) match {
 				case Some(rjsval) => fromRjs[A](rjsval)
 				case None =>
-					ResultE.orElse(
+					ResultC.orElse(
 						fromRjs[A](RjsNull),
-						ResultE.error("value required")
+						ResultC.error("value required")
 					)
 			}
 		}
@@ -172,7 +159,7 @@ object RjsConverter {
 		rjsval: RjsValue,
 		typ: Type,
 		path_? : Option[String] = None
-	): ResultE[Any] = {
+	): ResultC[Any] = {
 		println(s"conv($rjsval, $typ)")
 		import scala.reflect.runtime.universe._
 
@@ -183,8 +170,8 @@ object RjsConverter {
 		//logger.trace(s"conv(${path}, $rjsval, $typ, eb)")
 
 		val ctx = {
-			val ret: ResultE[Any] = {
-				if (typ =:= typeOf[String]) RjsConverter.toString(rjsval)
+			val ret: ResultC[Any] = {
+				if (typ =:= typeOf[String]) RjsConverterC.toString(rjsval)
 				else if (typ =:= typeOf[Int]) toInt(rjsval)
 				else if (typ =:= typeOf[Integer]) toInteger(rjsval)
 				else if (typ =:= typeOf[Float]) toFloat(rjsval)
@@ -215,60 +202,50 @@ object RjsConverter {
 				//else if (typ <:< typeOf[Substance]) toSubstance(rjsval)
 				*/
 				else if (typ =:= typeOf[RjsValue]) {
-					ResultE.unit(rjsval)
+					ResultC.unit(rjsval)
 				}
 				else if (typ <:< typeOf[RjsValue]) {
 					if (mirror.runtimeClass(typ).isInstance(rjsval)) {
-						ResultE.unit(rjsval)
+						ResultC.unit(rjsval)
 					}
 					else if (rjsval == RjsNull) {
-						if (typ =:= typeOf[RjsBasicMap]) ResultE.unit(RjsBasicMap())
-						else if (typ =:= typeOf[RjsMap]) ResultE.unit(RjsMap())
-						else if (typ =:= typeOf[RjsList]) ResultE.unit(RjsList())
-						else ResultE.error(s"Could not convert RjsNull to TYPE=$typ")
+						if (typ =:= typeOf[RjsBasicMap]) ResultC.unit(RjsBasicMap())
+						else if (typ =:= typeOf[RjsMap]) ResultC.unit(RjsMap())
+						else if (typ =:= typeOf[RjsList]) ResultC.unit(RjsList())
+						else ResultC.error(s"Could not convert RjsNull to TYPE=$typ")
 					}
 					else if (rjsval.isInstanceOf[RjsAbstractMap]) {
 						val m = rjsval.asInstanceOf[RjsAbstractMap]
 						if (typ =:= typeOf[RjsMap]) {
-							ResultE.unit(RjsMap(m.getValueMap))
+							ResultC.unit(RjsMap(m.getValueMap))
 						}
 						else if (typ =:= typeOf[RjsBasicMap]) {
 							for {
-								map <- ResultE.map(m.getValueMap.toList) { case (name, rjsval) =>
+								map <- ResultC.map(m.getValueMap.toList) { case (name, rjsval) =>
 									for {
-										basic <- ResultE.from(RjsValue.toBasicValue(rjsval))
+										basic <- RjsValue.toBasicValue(rjsval)
 									} yield name -> basic
 								}
 							} yield RjsBasicMap(map.toMap)
 						}
 						else {
-							for {
-								rjsval2 <- RjsValue.convertMap(m.getValueMap, typ)
-								_ <- ResultE.assert(mirror.runtimeClass(typ).isInstance(rjsval2), s"Could not convert to TYPE=$typ from map ${m}")
-							} yield rjsval2
-							/*
-							// As an alternative approach, consider creating a fromRjsValue companion method for those
-							// types which can be converted from others 
-							// If companion object has method 'fromRjsValue'
-							val cs = typ.typeSymbol.companionSymbol
-							cs.typeSignature.members.find(m => m.name.toString == "fromRjsValue")
-							*/
+							ResultC.error(s"Could not convert to TYPE=$typ from map ${m}")
 						}
 					}
 					else {
-						ResultE.error(s"Could not convert to TYPE=$typ from $rjsval")
+						ResultC.error(s"Could not convert to TYPE=$typ from $rjsval")
 					}
 				}
 				else if (typ <:< typeOf[Option[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
-					if (rjsval == RjsNull) ResultE.unit(None)
+					if (rjsval == RjsNull) ResultC.unit(None)
 					else conv(rjsval, typ2).map(o => Option(o))
 				}
 				else if (typ <:< typeOf[Set[_]]) {
 					val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 					rjsval match {
 						case RjsNull =>
-							ResultE.unit(Set())
+							ResultC.unit(Set())
 						case m: RjsAbstractMap =>
 							convSet(m, typ2)
 						case _ =>
@@ -286,9 +263,9 @@ object RjsConverter {
 							for {
 								res <- convMap(m, typKey, nameToType_l)
 							} yield res
-						case RjsNull => ResultE.unit(Map())
+						case RjsNull => ResultC.unit(Map())
 						case _ =>
-							ResultE.error("expected a RjsMap")
+							ResultC.error("expected a RjsMap")
 					}
 				}
 				else if (typ <:< typeOf[List[_]]) {
@@ -307,7 +284,7 @@ object RjsConverter {
 							case RjsNull =>
 								convMapString(RjsBasicMap(), nameToType_l)
 							case _ =>
-								ResultE.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
+								ResultC.error(s"unhandled type or value. type=${typ}, value=${rjsval}")
 						}
 					} yield {
 						val arg_l = nameToType_l.map(pair => nameToObj_m(pair._1))
@@ -324,7 +301,7 @@ object RjsConverter {
 		}
 		path_? match {
 			case None => ctx
-			case Some(path) => ResultE.context(path)(ctx)
+			case Some(path) => ResultC.context(path)(ctx)
 		}
 	}
 
@@ -332,23 +309,23 @@ object RjsConverter {
 	private def convList(
 		rjsval: RjsValue,
 		typ2: Type
-	): ResultE[List[Any]] = {
+	): ResultC[List[Any]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		rjsval match {
 			case RjsList(v) =>
-				ResultE.mapAll(v.zipWithIndex) { case (rjsval2, i0) =>
+				ResultC.mapAll(v.zipWithIndex) { case (rjsval2, i0) =>
 					val i = i0 + 1
 					conv(rjsval2, typ2, Some(s"[$i]"))
 				}
 			case RjsNull =>
-				ResultE.unit(Nil)
+				ResultC.unit(Nil)
 			case _ =>
-				ResultE.or(
+				ResultC.or(
 					conv(rjsval, typ2).map(List(_)),
-					ResultE.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${rjsval}")
+					ResultC.error(s"expected an array of ${typ2.typeSymbol.name.toString}.  Instead found: ${rjsval}")
 				)
 		}
 	}
@@ -356,13 +333,13 @@ object RjsConverter {
 	private def convSet(
 		m: RjsAbstractMap,
 		typ2: Type
-	): ResultE[Set[Any]] = {
+	): ResultC[Set[Any]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
 
 		// Try to convert each element of the array
-		ResultE.mapAll(m.getValueMap.toList) ({ case (id, rjsval) =>
+		ResultC.mapAll(m.getValueMap.toList) ({ case (id, rjsval) =>
 			conv(rjsval, typ2, Some(id))
 		}).map(l => Set(l : _*))
 	}
@@ -370,15 +347,15 @@ object RjsConverter {
 	private def convListToObject(
 		rjsval_l: List[RjsValue],
 		nameToType_l: List[(String, ru.Type)]
-	): ResultE[Map[String, _]] = {
-		ResultE.error("convListToObject: not yet implemented")
+	): ResultC[Map[String, _]] = {
+		ResultC.error("convListToObject: not yet implemented")
 	}
 
 	def convMap(
 		m: RjsAbstractMap,
 		typKey: Type,
 		nameToType_l: List[(String, ru.Type)]
-	): ResultE[Map[_, _]] = {
+	): ResultC[Map[_, _]] = {
 		import scala.reflect.runtime.universe._
 		
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -395,7 +372,7 @@ object RjsConverter {
 		
 		// Try to convert each element of the object
 		for {
-			val_l <- ResultE.map(nameToType_l) { case (name, typ2) =>
+			val_l <- ResultC.map(nameToType_l) { case (name, typ2) =>
 				map.get(name) match {
 					case Some(rjsval2) => conv(rjsval2, typ2, Some(name))
 					// Field is missing, so try using RjsNull
@@ -410,7 +387,7 @@ object RjsConverter {
 	def convMapString(
 		m: RjsAbstractMap,
 		nameToType_l: List[(String, ru.Type)]
-	): ResultE[Map[String, _]] = {
+	): ResultC[Map[String, _]] = {
 		for {
 			map <- convMap(m, typeOf[String], nameToType_l)
 		} yield map.asInstanceOf[Map[String, _]]
@@ -423,22 +400,22 @@ object RjsConverter {
 		RjsValue.fromJson(jsval)
 	}
 	
-	def yamlStringToRjs[A <: RjsValue : TypeTag](yaml: String): ResultE[RjsValue] = {
+	def yamlStringToRjs[A <: RjsValue : TypeTag](yaml: String): ResultC[RjsValue] = {
 		for {
-			rjsval0 <- ResultE.from(yamlStringToRjsBasicValue(yaml))
+			rjsval0 <- ResultC.from(yamlStringToRjsBasicValue(yaml))
 			rjsval <- fromRjs[A](rjsval0)
 		} yield rjsval
 	}*/
 
-	def mergeObjects[A : TypeTag](o1: A, o2: A): ResultE[A] = {
+	def mergeObjects[A : TypeTag](o1: A, o2: A): ResultC[A] = {
 		val typ = ru.typeTag[A].tpe
 		for {
 			o <- mergeObjects(o1, o2, typ)
-			//_ <- ResultE.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
+			//_ <- ResultC.assert(o.isInstanceOf[A], s"INTERNAL: mis-converted JSON: `$rjsval` to `$o`")
 		} yield o.asInstanceOf[A]
 	}
 
-	private def mergeObjects(o1: Any, o2: Any, typ: Type): ResultE[Any] = {
+	private def mergeObjects(o1: Any, o2: Any, typ: Type): ResultC[Any] = {
 		import scala.reflect.runtime.universe._
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
@@ -446,18 +423,18 @@ object RjsConverter {
 		if (typ <:< typeOf[RjsValue]) {
 			val v1 = o1.asInstanceOf[RjsValue]
 			val v2 = o2.asInstanceOf[RjsValue]
-			ResultE.from(RjsValue.merge(v1, v2))
+			RjsValue.merge(v1, v2)
 		}
 		else if (typ <:< typeOf[Option[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			val v1 = o1.asInstanceOf[Option[_]]
 			val v2 = o2.asInstanceOf[Option[_]]
 			(v1, v2) match {
-				case (None, None) => ResultE.unit(None)
-				case (_, Some(null)) => ResultE.unit(None)
-				case (None, _) => ResultE.unit(o2)
-				case (Some(null), _) => ResultE.unit(o2)
-				case (Some(_), None) => ResultE.unit(o1)
+				case (None, None) => ResultC.unit(None)
+				case (_, Some(null)) => ResultC.unit(None)
+				case (None, _) => ResultC.unit(o2)
+				case (Some(null), _) => ResultC.unit(o2)
+				case (Some(_), None) => ResultC.unit(o1)
 				case (Some(x1), Some(x2)) => mergeObjects(x1, x2, typ2).map(Option.apply)
 			}
 		}
@@ -466,14 +443,14 @@ object RjsConverter {
 			val v1 = o1.asInstanceOf[List[_]]
 			val v2 = o2.asInstanceOf[List[_]]
 			val v3 = v1 ++ v2
-			ResultE.unit(v3)
+			ResultC.unit(v3)
 		}
 		else if (typ <:< typeOf[Set[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			val v1 = o1.asInstanceOf[Set[_]]
 			val v2 = o2.asInstanceOf[Set[_]]
 			val v3 = v1 ++ v2
-			ResultE.unit(v3)
+			ResultC.unit(v3)
 		}
 		else if (typ <:< typeOf[Map[String, _]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args(1)
@@ -481,11 +458,11 @@ object RjsConverter {
 			val m2 = o2.asInstanceOf[Map[String, _]]
 			val key_l = m1.keySet ++ m2.keySet
 			for {
-				merged_l <- ResultE.map(key_l.toSeq) { key =>
+				merged_l <- ResultC.map(key_l.toSeq) { key =>
 					(m1.get(key), m2.get(key)) match {
 						case (None, None) => ???
-						case (Some(o1), None) => ResultE.unit(key -> o1)
-						case (None, Some(o2)) => ResultE.unit(key -> o2)
+						case (Some(o1), None) => ResultC.unit(key -> o1)
+						case (None, Some(o2)) => ResultC.unit(key -> o2)
 						case (Some(o1), Some(o2)) => mergeObjects(o1, o2, typ2).map(key -> _)
 					}
 				}
@@ -493,14 +470,14 @@ object RjsConverter {
 		}
 		else {
 			if (o2 == null)
-				ResultE.unit(null)
+				ResultC.unit(null)
 			else if (o1 == null)
-				ResultE.unit(o2)
+				ResultC.unit(o2)
 			else {
 				for {
-					rjsval1 <- ResultE.from(RjsValue.fromObject(o1, typ))
-					rjsval2 <- ResultE.from(RjsValue.fromObject(o2, typ))
-					rjsval3 <- ResultE.from(RjsValue.merge(rjsval1, rjsval2))
+					rjsval1 <- RjsValue.fromObject(o1, typ)
+					rjsval2 <- RjsValue.fromObject(o2, typ)
+					rjsval3 <- RjsValue.merge(rjsval1, rjsval2)
 					o <- conv(rjsval3, typ)
 				} yield o
 			}
