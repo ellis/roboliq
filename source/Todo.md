@@ -8,10 +8,7 @@
 - [x] Create RjsConverterC
 - [x] Create RjsConverterCSpec
 - [x] RjsConverterCSpec: merge objects (case class)
-- [ ] ProtocolDataSpec: merge variables
-- [ ] Get rid of RjsExtendedValue?
-- [ ] RjsValueSpec: test RjsExtendedValue conversions
-- [ ] RjsValueSpec: test RjsExtendedMap
+- [x] Get rid of RjsExtendedValue
 
 ## Current major refactoring
 
@@ -30,6 +27,7 @@
 - [ ] handle tasks
 - [ ] handle methods
 - [ ] handle planning
+- [ ] get rid of RjsConverter, and rename RjsConverterC to RjsConverter?
 
 ## Big issues
 
