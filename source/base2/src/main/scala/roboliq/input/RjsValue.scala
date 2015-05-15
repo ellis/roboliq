@@ -14,6 +14,7 @@ import roboliq.core.ResultC
 import spray.json.DefaultJsonProtocol
 import spray.json.RootJsonFormat
 import roboliq.utils.JsonUtils
+import grizzled.slf4j.Logger
 
 /*object RjsType extends Enumeration {
 	val
@@ -511,13 +512,15 @@ object RjsValue {
 	import scala.reflect.runtime.universe.Type
 	import scala.reflect.runtime.universe.TypeTag
 	import scala.reflect.runtime.universe.typeOf
+	
+	private val logger = Logger[this.type]
 
 	/**
 	 * Convert a JSON object to a basic RjsValue, one of: Boolean, List, Number, Null, Text, Format, Subst, String, Map, or TypedMap.
 	 * An error can occur if the text of a JsString is not properly formatted.
 	 */
 	def fromJson(jsval: JsValue): ResultC[RjsBasicValue] = {
-		//println(s"RjsValue.fromJson($jsval)")
+		//logger.debug(s"RjsValue.fromJson($jsval)")
 		jsval match {
 			case JsBoolean(b) =>
 				ResultC.unit(RjsBoolean(b))
@@ -572,12 +575,10 @@ object RjsValue {
 	}
 
 	def fromObject(o: Any, typ: ru.Type): ResultC[RjsBasicValue] = {
-		println(s"fromObject($o, $typ)")
+		logger.debug(s"fromObject($o, $typ)")
 		for {
 			jsval <- toJson(o, typ)
-			_ = println(s" jsval: $jsval")
 			rjsval <- fromJson(jsval)
-			_ = println(s"rjsval: $rjsval")
 		} yield rjsval
 	}
 
@@ -693,7 +694,7 @@ val im = mirror.reflect(x)
 		typ: Type
 	): ResultC[JsValue] = {
 		import scala.reflect.runtime.universe._
-		println(s"toJson($x, $typ)")
+		logger.debug(s"toJson($x, $typ)")
 		
 		// This function isn't 
 		//assert(!(typ <:< typeOf[RjsBasicValue]))
@@ -753,7 +754,7 @@ val im = mirror.reflect(x)
 					(typClass2, typClass2.toType)
 				}
 			}
-			println("Q:", typClass0, clazz, typClass2, typ2)
+			logger.debug("Q:", typClass0, clazz, typClass2, typ2)
 			
 			// Get 'TYPE' field value, if annotated
 			val typJsonTypeAnnotation = ru.typeOf[RjsJsonType]
@@ -813,7 +814,7 @@ val im = mirror.reflect(x)
 		a: A
 	): ResultC[RjsBasicValue] = {
 		val typ = ru.typeTag[A].tpe
-		println(s"toBasicValue($a, $typ)")
+		logger.debug(s"toBasicValue($a, $typ)")
 		a match {
 			case basic: RjsBasicValue =>
 				ResultC.unit(basic)
@@ -863,14 +864,13 @@ val im = mirror.reflect(x)
 				case _ => ResultC.unit(basic2)
 			}
 		} yield {
-			println(s"RjsValue.merge($a, $b) = $res")
+			logger.debug(s"RjsValue.merge($a, $b) = $res")
 			res
 		}
 	}
 	
 	def mergeMaps(m1: RjsBasicMap, m2: RjsBasicMap): ResultC[RjsBasicMap] = {
 		val key_l = m1.map.keySet ++ m2.map.keySet
-		println("A")
 		for {
 			merged_l <- ResultC.map(key_l) { key =>
 				val value_? : ResultC[RjsBasicValue] = (m1.map.get(key), m2.map.get(key)) match {
@@ -890,7 +890,6 @@ val im = mirror.reflect(x)
 				}
 				value_?.map(key -> _)
 			}
-			_ = println("B")
 		} yield RjsBasicMap(merged_l.toMap)
 	}
 	

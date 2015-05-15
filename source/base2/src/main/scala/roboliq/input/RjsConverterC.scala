@@ -160,7 +160,7 @@ object RjsConverterC {
 		typ: Type,
 		path_? : Option[String] = None
 	): ResultC[Any] = {
-		println(s"conv($rjsval, $typ)")
+		logger.debug(s"conv($rjsval, $typ)")
 		import scala.reflect.runtime.universe._
 
 		val mirror = runtimeMirror(this.getClass.getClassLoader)
