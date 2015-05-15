@@ -1,14 +1,8 @@
 # TODOs for roboliq
 
-## Current priority, but minor
+## Current priority details, but minor
 
-- [x] CONTINUE: RjsValue.fromObject, check map1
-- [x] create function to merge two ``Map[String, A]`` objects
-- [x] RjsConverterSpec: mergeObjects
-- [x] Create RjsConverterC
-- [x] Create RjsConverterCSpec
-- [x] RjsConverterCSpec: merge objects (case class)
-- [x] Get rid of RjsExtendedValue
+- [ ] ProtocolMerger to convert Protocol to ProtocolData
 
 ## Current major refactoring
 

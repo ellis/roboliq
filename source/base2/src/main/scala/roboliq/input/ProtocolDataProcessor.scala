@@ -8,10 +8,10 @@ object ProtocolDataProcessor {
 
 		val variables = new HashMap[String, ProcessingVariable]
 		
-		CONTINUE, maybe use RjsValue.toBasicValue, don't like working with maps, create case classes instead?
+		//CONTINUE, maybe use RjsValue.toBasicValue, don't like working with maps, create case classes instead?
 		
 		for {
-			_ <- ResultE.mapAll(protocolData.variables.map) { case (name, rjsval) =>
+			_ <- ResultE.mapAll(protocolData.variables) { case (name, v) =>
 				rjsval match {
 					case map: RjsBasicMap =>
 						if (map.get("value").isEmpty) {
