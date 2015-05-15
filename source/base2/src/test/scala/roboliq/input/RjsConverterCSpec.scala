@@ -15,11 +15,12 @@ private case class RjsConverterCSpecExample(
 	c: BigDecimal
 )
 
-private case class RjsConverterCSpecExample2(
-	a: Option[String],
-	b: Option[String],
-	c: Option[String],
-	d: Option[String]
+case class RjsConverterCSpecExample2(
+	name: String,
+	description_? : Option[String] = None,
+	type_? : Option[String] = None,
+	value_? : Option[RjsBasicValue] = None,
+	alternatives: List[RjsBasicValue] = Nil
 )
 
 class RjsConverterCSpec extends FunSpec {
@@ -143,16 +144,16 @@ class RjsConverterCSpec extends FunSpec {
 		}
 		
 		it("mergeObjects (case class)") {
-			val object1a = ProtocolDataVariable(
+			val object1a = RjsConverterCSpecExample2(
 				name = "prop1",
 				description_? = Some("description"),
 				value_? = Some(RjsNumber(1))
 			)
-			val object1b = ProtocolDataVariable(
+			val object1b = RjsConverterCSpecExample2(
 				name = "prop1",
 				value_? = Some(RjsNumber(2))
 			)
-			val object1 = ProtocolDataVariable(
+			val object1 = RjsConverterCSpecExample2(
 				name = "prop1",
 				description_? = Some("description"),
 				value_? = Some(RjsNumber(2))

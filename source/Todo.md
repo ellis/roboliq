@@ -7,7 +7,7 @@
 - [x] RjsConverterSpec: mergeObjects
 - [x] Create RjsConverterC
 - [x] Create RjsConverterCSpec
-- [ ] RjsConverterCSpec: merge objects (case class)
+- [x] RjsConverterCSpec: merge objects (case class)
 - [ ] ProtocolDataSpec: merge variables
 - [ ] Get rid of RjsExtendedValue?
 - [ ] RjsValueSpec: test RjsExtendedValue conversions

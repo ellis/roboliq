@@ -572,9 +572,12 @@ object RjsValue {
 	}
 
 	def fromObject(o: Any, typ: ru.Type): ResultC[RjsBasicValue] = {
+		println(s"fromObject($o, $typ)")
 		for {
 			jsval <- toJson(o, typ)
+			_ = println(s" jsval: $jsval")
 			rjsval <- fromJson(jsval)
+			_ = println(s"rjsval: $rjsval")
 		} yield rjsval
 	}
 
@@ -706,6 +709,7 @@ val im = mirror.reflect(x)
 		else if (typ =:= typeOf[strips.Literals]) ResultC.unit(JsArray(x.asInstanceOf[strips.Literals].l.toList.map(lit => JsString(lit.toString)) : _*))
 		else if (typ =:= typeOf[strips.Literal]) ResultC.unit(JsString(x.toString))
 		else if (typ <:< typeOf[Enumeration#Value]) ResultC.unit(JsString(x.toString))
+		else if (typ <:< typeOf[RjsBasicValue]) x.asInstanceOf[RjsBasicValue].toJson
 		else if (typ <:< typeOf[Option[_]]) {
 			val typ2 = typ.asInstanceOf[ru.TypeRefApi].args.head
 			x.asInstanceOf[Option[_]] match {
