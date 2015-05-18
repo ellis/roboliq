@@ -2,7 +2,6 @@ package roboliq.input
 
 
 case class ProtocolVariable(
-	name: Option[String] = None,
 	`type`: Option[String] = None,
 	description: Option[String] = None,
 	value: Option[RjsBasicValue] = None,
@@ -18,7 +17,7 @@ case class ProtocolSubstance()
 
 case class ProtocolSourceSubstance(
 	name: Option[String] = None,
-	amount: Option[String] = None
+	amount: Option[RjsNumber] = None
 )
 
 case class ProtocolSource(

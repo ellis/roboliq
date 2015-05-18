@@ -2,7 +2,7 @@
 
 ## Current priority details, but minor
 
-- [ ] ProtocolMerger to convert Protocol to ProtocolData
+- [ ] ProtocolDataObject: create it
 
 ## Current major refactoring
 

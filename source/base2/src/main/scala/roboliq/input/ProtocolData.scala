@@ -4,18 +4,9 @@ import roboliq.ai.strips
 import roboliq.core.ResultC
 
 
-case class ProtocolDataVariable(
-	name: String,
-	description_? : Option[String] = None,
-	type_? : Option[String] = None,
-	value_? : Option[RjsBasicValue] = None,
-	alternatives: List[RjsBasicValue] = Nil
-)
-
-@RjsJsonType("protocolData")
 case class ProtocolData(
 	val variables: Map[String, ProtocolDataVariable] = Map(),
-	val objects: RjsBasicMap = RjsBasicMap(),
+	val objects: Map[String, ProtocolDataObject] = Map(),
 	val commands: Map[String, RjsValue] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
@@ -24,7 +15,7 @@ case class ProtocolData(
 	def merge(that: ProtocolData): ResultC[ProtocolData] = {
 		for {
 			variables <- RjsConverterC.mergeObjects(this.variables, that.variables)
-			objects <- this.objects merge that.objects
+			objects <- RjsConverterC.mergeObjects(this.objects, that.objects)
 		} yield {
 			new ProtocolData(
 				variables = variables,
@@ -37,6 +28,18 @@ case class ProtocolData(
 		}
 	}
 }
+
+case class ProtocolDataVariable(
+	name: String,
+	description_? : Option[String] = None,
+	type_? : Option[String] = None,
+	value_? : Option[RjsBasicValue] = None,
+	alternatives: List[RjsBasicValue] = Nil
+)
+
+case class ProtocolDataObject(
+	CONTINUE
+)
 
 case class ProcessingState(
 	variables: Map[String, ProcessingVariable],
@@ -138,3 +141,79 @@ case class ProtocolDataA(
 	}
 }
 */
+
+object ProtocolData {
+/*
+ * ProtocolData:
+	val variables: Map[String, ProtocolDataVariable] = Map(),
+	val objects: RjsBasicMap = RjsBasicMap(),
+	val commands: Map[String, RjsValue] = Map(),
+	val planningDomainObjects: Map[String, String] = Map(),
+	val planningInitialState: strips.Literals = strips.Literals.empty,
+	val processingState_? : Option[ProcessingState] = None
+*/
+/*
+	Protocol:
+	variables: Map[String, ProtocolVariable],
+	labwares: Map[String, ProtocolLabware],
+	substances: Map[String, ProtocolSubstance],
+	sources: Map[String, ProtocolSource],
+	commands: List[RjsValue]
+
+description: Plasmid DNA Extraction - Miniprep (Excerpt)
+
+labware:
+  flask:
+  microfuge_tube:
+  sterile_microfuge_tube:
+
+substances:
+  medium:
+    label: "Rich medium (LB, YT, or Terrific medium) containing appropriate antibiotic"
+  sol1:
+    label: "Alkaline Lysis Solution I"
+    description: "50 mM Glucose, 25 mM Tris-HCl (pH 8.0), 10 mM EDTA (pH 8.0)"
+  sol2:
+    label: "freshly prepared Alkaline Lysis Solution II"
+    description: "0.2 N NaOH, 1% SDS (w/v)"
+  sol3:
+    label: "Alkaline Lysis Solution II"
+    description: "5 M sodium acetate, glacial acetic acid"
+  bacteria:
+    type: solid
+    label: "a single colony of transformed bacteria"
+
+sources:
+  medium:
+    well: flask(A01)
+
+steps:
+- 
+    
+*/
+	
+	def fromProtocol(protocol: Protocol): ResultC[ProtocolData] = {
+		val variables = protocol.variables.map { case (name, x) =>
+			name -> ProtocolDataVariable(name, x.description, x.`type`, x.value, x.alternatives)
+		}
+		val commands = protocol.commands.zipWithIndex.map({ case (x, i) =>
+			(i+1).toString -> x
+		}).toMap
+		for {
+			nameToLabware_l <- ResultC.mapAll(protocol.labwares.toList) { case (name, x) =>
+				RjsValue.fromObject(x).map(name -> _.asInstanceOf[RjsBasicMap].add("name", RjsString(name)))
+			}
+		} yield {
+			val objects = nameToLabware_l.toMap
+			val planningDomainObjects = nameToLabware_l.map({ case (name, x) => name -> x.g})
+			ProtocolData(
+				variables,
+				objects,
+				commands,
+				planningDomainObjects,
+				planningInitialState,
+				None
+			)
+		}
+	}
+}
