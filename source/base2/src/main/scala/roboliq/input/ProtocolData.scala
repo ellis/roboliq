@@ -6,8 +6,8 @@ import roboliq.core.ResultC
 
 case class ProtocolData(
 	val variables: Map[String, ProtocolDataVariable] = Map(),
-	val objects: Map[String, ProtocolDataObject] = Map(),
-	val commands: Map[String, RjsValue] = Map(),
+	val objects: Map[String, Material] = Map(),
+	val commands: Map[String, RjsBasicMap] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
 	val processingState_? : Option[ProcessingState] = None
@@ -35,10 +35,6 @@ case class ProtocolDataVariable(
 	type_? : Option[String] = None,
 	value_? : Option[RjsBasicValue] = None,
 	alternatives: List[RjsBasicValue] = Nil
-)
-
-case class ProtocolDataObject(
-	CONTINUE
 )
 
 case class ProcessingState(
@@ -162,25 +158,28 @@ object ProtocolData {
 
 description: Plasmid DNA Extraction - Miniprep (Excerpt)
 
-labware:
-  flask:
-  microfuge_tube:
-  sterile_microfuge_tube:
+materials:
+  flask: {type: Plate}
+  microfuge_tube: {type: Plate}
+  sterile_microfuge_tube: {type: Plate}
 
-substances:
   medium:
+    type: Liquid
     label: "Rich medium (LB, YT, or Terrific medium) containing appropriate antibiotic"
   sol1:
+    type: Liquid
     label: "Alkaline Lysis Solution I"
     description: "50 mM Glucose, 25 mM Tris-HCl (pH 8.0), 10 mM EDTA (pH 8.0)"
   sol2:
+    type: Liquid
     label: "freshly prepared Alkaline Lysis Solution II"
     description: "0.2 N NaOH, 1% SDS (w/v)"
   sol3:
+    type: Liquid
     label: "Alkaline Lysis Solution II"
     description: "5 M sodium acetate, glacial acetic acid"
   bacteria:
-    type: solid
+    type: Cells
     label: "a single colony of transformed bacteria"
 
 sources:
@@ -196,10 +195,19 @@ steps:
 		val variables = protocol.variables.map { case (name, x) =>
 			name -> ProtocolDataVariable(name, x.description, x.`type`, x.value, x.alternatives)
 		}
-		val commands = protocol.commands.zipWithIndex.map({ case (x, i) =>
-			(i+1).toString -> x
-		}).toMap
 		for {
+			materials <- ResultC.mapAll(protocol.materials.toList) { case (name, m) =>
+				for {
+					typ <- RjsConverterC.fromRjs[String](m, "type")
+					label_? <- RjsConverterC.fromRjs[Option[String]](m, "label")
+					description_? <- RjsConverterC.fromRjs[Option[String]](m, "description")
+					_ <- typ match {
+						case "Plate" => PlateMaterial(name, typ, label_?, description_?)
+					}
+				} yield {
+					
+				}
+			}
 			nameToLabware_l <- ResultC.mapAll(protocol.labwares.toList) { case (name, x) =>
 				RjsValue.fromObject(x).map(name -> _.asInstanceOf[RjsBasicMap].add("name", RjsString(name)))
 			}
@@ -207,11 +215,11 @@ steps:
 			val objects = nameToLabware_l.toMap
 			val planningDomainObjects = nameToLabware_l.map({ case (name, x) => name -> x.g})
 			ProtocolData(
-				variables,
-				objects,
-				commands,
-				planningDomainObjects,
-				planningInitialState,
+				variables = variables,
+				objects = materials,
+				commands = protocol.commands,
+				None, // planningDomainObjects,
+				None, //planningInitialState,
 				None
 			)
 		}

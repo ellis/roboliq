@@ -1,19 +1,18 @@
 package roboliq.input
 
 
+/*sealed trait ProtocolMaterial {
+	val `type`: Option[String]
+	val label: Option[String]
+	val description: Option[String]
+}*/
+
 case class ProtocolVariable(
 	`type`: Option[String] = None,
 	description: Option[String] = None,
 	value: Option[RjsBasicValue] = None,
 	alternatives: List[RjsBasicValue] = Nil
 )
-
-case class ProtocolLabware(
-	model: Option[String] = None,
-	location: Option[String] = None
-)
-
-case class ProtocolSubstance()
 
 case class ProtocolSourceSubstance(
 	name: Option[String] = None,
@@ -27,8 +26,7 @@ case class ProtocolSource(
 
 case class Protocol(
 	variables: Map[String, ProtocolVariable],
-	labwares: Map[String, ProtocolLabware],
-	substances: Map[String, ProtocolSubstance],
+	materials: Map[String, RjsBasicMap],
 	sources: Map[String, ProtocolSource],
-	commands: List[RjsValue]
+	steps: Map[String, RjsBasicMap]
 )
