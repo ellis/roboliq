@@ -6,8 +6,8 @@ import roboliq.core.ResultC
 
 case class ProtocolData(
 	val variables: Map[String, ProtocolDataVariable] = Map(),
-	val objects: Map[String, Material] = Map(),
-	val commands: Map[String, RjsBasicMap] = Map(),
+	val objects: Map[String, Material] = Map(), // REFACTOR: rename to materials
+	val commands: Map[String, RjsBasicMap] = Map(), // REFACTOR: rename to steps
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
 	val processingState_? : Option[ProcessingState] = None
@@ -187,7 +187,7 @@ sources:
     well: flask(A01)
 
 steps:
-- 
+  1:
     
 */
 	
@@ -196,27 +196,24 @@ steps:
 			name -> ProtocolDataVariable(name, x.description, x.`type`, x.value, x.alternatives)
 		}
 		for {
-			materials <- ResultC.mapAll(protocol.materials.toList) { case (name, m) =>
+			nameToMaterial_l <- ResultC.mapAll(protocol.materials.toList) { case (name, m) =>
 				for {
 					typ <- RjsConverterC.fromRjs[String](m, "type")
 					label_? <- RjsConverterC.fromRjs[Option[String]](m, "label")
 					description_? <- RjsConverterC.fromRjs[Option[String]](m, "description")
-					_ <- typ match {
-						case "Plate" => PlateMaterial(name, typ, label_?, description_?)
+					material <- typ match {
+						case "Plate" => ResultC.unit(PlateMaterial(name, typ, label_?, description_?))
+						case "Liquid" => ResultC.unit(LiquidMaterial(name, typ, label_?, description_?))
+						case _ => ResultC.error(s"Unrecognized type: `$typ`")
 					}
-				} yield {
-					
-				}
-			}
-			nameToLabware_l <- ResultC.mapAll(protocol.labwares.toList) { case (name, x) =>
-				RjsValue.fromObject(x).map(name -> _.asInstanceOf[RjsBasicMap].add("name", RjsString(name)))
+				} yield name -> material
 			}
 		} yield {
-			val objects = nameToLabware_l.toMap
-			val planningDomainObjects = nameToLabware_l.map({ case (name, x) => name -> x.g})
+			val objects = nameToMaterial_l.toMap
+			val planningDomainObjects = nameToMaterial_l.map({ case (name, x) => name -> x.`type`.toLowerCase })
 			ProtocolData(
 				variables = variables,
-				objects = materials,
+				objects = objects,
 				commands = protocol.commands,
 				None, // planningDomainObjects,
 				None, //planningInitialState,
