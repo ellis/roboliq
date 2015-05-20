@@ -2,12 +2,14 @@ package roboliq.input
 
 import roboliq.ai.strips
 import roboliq.core.ResultC
+import scala.annotation.tailrec
 
 
 case class ProtocolData(
 	val variables: Map[String, ProtocolDataVariable] = Map(),
-	val objects: Map[String, Material] = Map(), // REFACTOR: rename to materials
-	val commands: Map[String, RjsBasicMap] = Map(), // REFACTOR: rename to steps
+	val materials: Map[String, Material] = Map(),
+	val steps: Map[String, ProtocolDataStep] = Map(),
+	val labObjects: Map[String, LabObject] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
 	val processingState_? : Option[ProcessingState] = None
@@ -15,12 +17,15 @@ case class ProtocolData(
 	def merge(that: ProtocolData): ResultC[ProtocolData] = {
 		for {
 			variables <- RjsConverterC.mergeObjects(this.variables, that.variables)
-			objects <- RjsConverterC.mergeObjects(this.objects, that.objects)
+			materials <- RjsConverterC.mergeObjects(this.materials, that.materials)
+			steps <- RjsConverterC.mergeObjects(this.steps, that.steps)
+			labObjects <- RjsConverterC.mergeObjects(this.labObjects, that.labObjects)
 		} yield {
 			new ProtocolData(
 				variables = variables,
-				objects = objects,
-				commands = this.commands ++ that.commands,
+				materials = materials,
+				steps = steps,
+				labObjects = labObjects,
 				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
 				planningInitialState = this.planningInitialState ++ that.planningInitialState,
 				processingState_? = that.processingState_? orElse this.processingState_?
@@ -36,6 +41,44 @@ case class ProtocolDataVariable(
 	value_? : Option[RjsBasicValue] = None,
 	alternatives: List[RjsBasicValue] = Nil
 )
+
+class ProtocolDataStep(
+	val params: Map[String, RjsBasicValue],
+	val children: Map[String, ProtocolDataStep]
+) {
+	def getChild(ident: String): ResultC[ProtocolDataStep] = {
+		@tailrec
+		def step(l: List[String], cm: ProtocolDataStep): ResultC[ProtocolDataStep] = {
+			l match {
+				case Nil => ResultC.unit(cm)
+				case part :: l1 =>
+					cm.children.get(part) match {
+						case None => ResultC.error(s"Step not found: `$ident`")
+						case Some(cm1) => step(l1, cm1)
+					}
+			}
+		}
+		val l = ident.split(".").toList
+		step(l, this)
+	}
+}
+
+object ProtocolDataStep {
+	def from(m: RjsBasicMap): ResultC[ProtocolDataStep] = {
+		// The child steps are fields that start with digits
+		val (params, children0) = m.map.partition(x => !x._1(0).isDigit)
+		for {
+			child_l <- ResultC.mapAll(children0.toList) { case (name, v) =>
+				v match {
+					case m1: RjsBasicMap => from(m1).map(name -> _)
+					case _ => ResultC.error(s"Parameter `$name` must have a Map value, because it starts with a digit and represents a sub-step.  Instead it has this value: $v")
+				}
+			}
+		} yield {
+			new ProtocolDataStep(params, child_l.toMap)
+		}
+	}
+}
 
 case class ProcessingState(
 	variables: Map[String, ProcessingVariable],
@@ -208,17 +251,76 @@ steps:
 					}
 				} yield name -> material
 			}
+			step_l <- ResultC.mapAll(protocol.steps.toList) { case (name, m) =>
+				ProtocolDataStep.from(m).map(name -> _)
+			}
 		} yield {
-			val objects = nameToMaterial_l.toMap
+			val materials = nameToMaterial_l.toMap
 			val planningDomainObjects = nameToMaterial_l.map({ case (name, x) => name -> x.`type`.toLowerCase })
 			ProtocolData(
 				variables = variables,
-				objects = objects,
-				commands = protocol.commands,
-				None, // planningDomainObjects,
-				None, //planningInitialState,
-				None
+				materials = materials,
+				steps = step_l.toMap,
+				planningDomainObjects = planningDomainObjects.toMap,
+				planningInitialState = strips.Literals.empty, //planningInitialState,
+				processingState_? = None
 			)
 		}
 	}
+
+/*
+	/**
+	 * Extract ProtocolData from a high-level protocol description.
+	 */
+	def extractProtocolData(protocol: RjsProtocol): ResultC[ProtocolData] = {
+		val command_l = protocol.commands.zipWithIndex.map { case (rjsval, i) =>
+			(i+1).toString -> rjsval
+		}
+		val n = command_l.size
+		val commandOrderingConstraint_l =
+			(1 to n).toList.map(i => i.toString :: (if (i < n) List((i+1).toString) else Nil))
+		val commandOrder_l =
+			(1 to n).toList.map(_.toString)
+		def convMapToBasic[A <: RjsValue](map: Map[String, A]): ResultC[Map[String, RjsBasicValue]] = {
+			for {
+				l <- ResultC.map(map.toList) { case (name, rjsval) =>
+					RjsValue.fromValueToBasicValue(rjsval).map(name -> _)
+				}
+			} yield l.toMap
+		}
+		for {
+			labware_m <- convMapToBasic(protocol.labwares)
+			substance_m <- convMapToBasic(protocol.substances)
+			source_m <- convMapToBasic(protocol.sources)
+			command2_l <- ResultC.map(command_l.toList) { case (name, rjsval) =>
+				RjsValue.toBasicValue(rjsval).map(name -> _)
+			}
+		} yield {
+			val objects = RjsBasicMap(labware_m ++ substance_m ++ source_m)
+			println("objects: "+objects)
+			val (planningDomainObjects, planningInitialState) = processLabware(protocol.labwares)
+			println("planningDomainObjects: "+planningDomainObjects)
+			ProtocolData(
+				objects = objects,
+				commands = command2_l.toMap,
+				planningDomainObjects = planningDomainObjects,
+				planningInitialState = planningInitialState
+			)
+		}
+	}
+	
+	private def processLabware(
+		labware_m: Map[String, RjsProtocolLabware]
+	): (Map[String, String], strips.Literals) = {
+		val objectToType_m = new HashMap[String, String]
+		val atom_l = new ArrayBuffer[strips.Atom]
+		for ((name, plate) <- labware_m) {
+			objectToType_m += (name -> "plate")
+			atom_l += strips.Atom("labware", Seq(name))
+			plate.model_?.foreach(model => atom_l += strips.Atom("model", Seq(name, model)))
+			plate.location_?.foreach(location => atom_l += strips.Atom("location", Seq(name, location)))
+		}
+		(objectToType_m.toMap, strips.Literals(atom_l.toList, Nil))
+	}
+*/
 }

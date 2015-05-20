@@ -144,7 +144,7 @@ object EvowareAgentConfigProcessor {
 
 		// Gather list of all available labware models referenced in data0
 		//println("data0.objects.map.toList: "+data0.objects.map.toList)
-		val modelNameToEvowareName_l: List[(String, String)] = data0.objects.map.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
+		val modelNameToEvowareName_l: List[(String, String)] = data0.labObjects.toList.collect({ case (name, m: RjsAbstractMap) if m.getValue("type") == Some(RjsString("PlateModel")) && m.getValueMap.contains("evowareName") => name -> m.getValueMap("evowareName").toText })
 		//println("modelNameToEvowareName_l: "+modelNameToEvowareName_l)
 		
 		val builder = new ProtocolDataBuilder

@@ -1,4 +1,4 @@
-package roboliq.input
+/*package roboliq.input
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
@@ -335,3 +335,4 @@ object ProtocolProcessor {
 	}
 	*/
 }
+*/

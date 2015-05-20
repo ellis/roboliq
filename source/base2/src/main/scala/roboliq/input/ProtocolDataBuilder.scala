@@ -7,29 +7,33 @@ import scala.collection.mutable.HashMap
 
 
 class ProtocolDataBuilder {
-	private val objects = new HashMap[String, RjsBasicValue]
+	private val labObjects = new HashMap[String, LabObject]
 	private val planningDomainObjects = new HashMap[String, String]
 	private val planningInitialState = new ArrayBuffer[strips.Literal]
 	
 	def get: ProtocolData = {
 		new ProtocolData(
-			objects = RjsBasicMap(objects.toMap),
+			labObjects = labObjects.toMap,
 			planningDomainObjects = planningDomainObjects.toMap,
 			planningInitialState = strips.Literals(Unique(planningInitialState.toList : _*))
 		)
 	}
 	
-	def addObject(name: String, value: RjsBasicValue) {
-		objects(name) = value
+	def addObject(name: String, value: LabObject) {
+		labObjects(name) = value
+	}
+	
+	def addPlanningDomainObject(name: String, obj: LabObject) {
+		planningDomainObjects(name) = obj.`type`
 	}
 	
 	def addPlanningDomainObject(name: String, typ: String) {
 		planningDomainObjects(name) = typ
 	}
 	
-	def addPlateModel(plateModelName: String, rjsPlateModel: RjsBasicMap) {
+	def addPlateModel(plateModelName: String, rjsPlateModel: PlateModelObject) {
 		addObject(plateModelName, rjsPlateModel)
-		addPlanningDomainObject(plateModelName, rjsPlateModel.typ_?.get)
+		addPlanningDomainObject(plateModelName, rjsPlateModel)
 	}
 	
 	def addSiteModel(siteModelName: String) {
@@ -40,11 +44,9 @@ class ProtocolDataBuilder {
 		planningDomainObjects(siteName) = "Site"
 	}
 	
-	def addSite(name: String, value: RjsBasicMap) {
-		val typ = "Site"
-		val value2 = value.add("type", RjsString(typ))
-		addObject(name, value2)
-		planningDomainObjects(name) = typ
+	def addSite(name: String, value: SiteObject) {
+		addObject(name, value)
+		addPlanningDomainObject(name, value)
 	}
 	
 	/**
