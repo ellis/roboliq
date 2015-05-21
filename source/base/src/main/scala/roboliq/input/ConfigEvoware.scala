@@ -332,8 +332,10 @@ class ConfigEvoware(
 		
 		// Update EntityBase with sites and logic
 		// Update identToAgentObject map with evoware site data
-		for ((siteE, site) <- site_l) {
-			val siteIdent = site.label.get
+		for ((siteE, site0) <- site_l) {
+			val siteIdent = site0.label.get
+			// Allow for overriding the site in roboliq.yaml by checking for an already defined site here
+			val site = eb.getEntityByIdent[Site](siteIdent).getOrElse[Site](site0)
 			val siteId = (siteE.carrier.id, siteE.iSite)
 			identToAgentObject(siteIdent) = siteE
 			eb.addSite(site, siteIdent)
@@ -700,7 +702,8 @@ class ConfigEvoware(
 					for {
 						siteIdentBase <- siteExternalIdent_?.toList
 						siteInternal_i <- List.range(0, 4)
-						site = Site(gid, Some(s"${siteIdentBase}_${siteInternal_i+1}"), Some(s"internal site ${siteInternal_i+1}"))
+						siteName = s"${siteIdentBase}_${siteInternal_i+1}"
+						site = Site(gid, Some(siteName), Some(s"internal site ${siteInternal_i+1}"))
 						model_l <- siteIdToModels_m.get(siteId).toList
 					} yield {
 						//println("site: "+site)
