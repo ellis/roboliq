@@ -217,12 +217,13 @@ object EvowareAgentConfigProcessor {
 					siteId: CarrierGridSiteIndex
 				): ResultC[Unit] = {
 					// Create the site
-					val rjsSite = RjsBasicMap(
-						"evowareCarrier" -> RjsNumber(siteId.carrierId),
-						"evowareGrid" -> RjsNumber(siteId.gridIndex),
-						"evowareSite" -> RjsNumber(siteId.siteIndex + 1)
+					val site = EvowareSiteObject(
+						name = siteName,
+						evowareCarrier = siteId.carrierId,
+						evowareGrid = siteId.gridIndex,
+						evowareSite = siteId.siteIndex + 1
 					)
-					builder.addSite(siteName, rjsSite)
+					builder.addSite(siteName, site)
 			
 					// Indicate which labware models can go on the site
 					val modelName_l = siteIdToModelNames_m.getOrElse(siteId, Set())

@@ -8,14 +8,14 @@ case class PlateObject() extends LabObject {
 	val `type` = "Plate"
 }
 
-case class PlateModelObject() extends LabObject {
+class PlateModelObject extends LabObject {
 	val `type` = "PlateModel"
 }
 
-case class SiteObject() extends LabObject {
+class SiteObject extends LabObject {
 	val `type` = "Site"
 }
 
-case class SiteModelObject() extends LabObject {
+class SiteModelObject extends LabObject {
 	val `type` = "SiteModel"
 }
