@@ -531,7 +531,7 @@ class ConfigEvoware(
 					romaMatches && vectorMatches && siteMatches
 				}
 			}
-			
+
 			val agentRomaVectorToSite_m = new HashMap[(String, String, String), List[Site]]
 			for {
 				(carrierE, vector_l) <- carrierData.mapCarrierToVectors.toList
@@ -557,13 +557,37 @@ class ConfigEvoware(
 		}
 
 		val graph = {
+			val transporterGraphOverride_l = {
+				if (agentBean.transporterGraphOverrides == null)
+					Nil
+				else
+					agentBean.transporterGraphOverrides.toList
+			}
+			// If any of the nodes restrict their neighbors, list those in this map
+			val restrict_m: Map[String, Set[String]] = transporterGraphOverride_l.flatMap(tgo => {
+				if (tgo.action == "restrictNeighbors") {
+					Some(tgo.node -> tgo.neighbors.toSet)
+				}
+				else
+					None
+			}).toMap
+			def isEdgeOk(site1: Site, site2: Site): Boolean = {
+				!restrict_m.contains(site1.getName) || restrict_m(site1.getName).contains(site2.getName)
+			}
+			
 			// Populate graph from entries in agentRomaVectorToSite_m
 			import scalax.collection.Graph // or scalax.collection.mutable.Graph
 			import scalax.collection.GraphPredef._, scalax.collection.GraphEdge._
 			import scalax.collection.edge.LHyperEdge
 			val edge_l = agentRomaVectorToSite_m.toList.flatMap(pair => {
 				val (key, site_l) = pair
-				site_l.combinations(2).map(l => LkUnDiEdge(l(0), l(1))(key))
+				site_l.combinations(2).flatMap { l =>
+					val List(site1, site2) = l
+					if (isEdgeOk(site1, site2))
+						Some(LkUnDiEdge(site1, site2)(key))
+					else
+						None
+				}
 			})
 			//edge_l.take(5).foreach(println)
 			Graph[Site, LkUnDiEdge](edge_l : _*)

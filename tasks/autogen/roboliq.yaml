@@ -125,7 +125,7 @@ evowareAgents:
     - { roma: 2, vector: Narrow, site: CENTRIFUGE_2 }
     - { roma: 2, vector: Narrow, site: CENTRIFUGE_4 }
 
-    transporterPathOverrides:
+    transporterGraphOverrides:
     - { action: restrictNeighbors; node: READER, neighbors: ["REGRIP"] }
     - { action: restrictNeighbors; node: CENTRIFUGE_1, neighbors: ["REGRIP"] }
     - { action: restrictNeighbors; node: CENTRIFUGE_2, neighbors: ["REGRIP"] }

@@ -30,8 +30,10 @@ class EvowareAgentBean {
 	@BeanProperty var tips: java.util.ArrayList[TipBean] = null
 	/** Table setups for this robot */
 	@BeanProperty var tableSetups: java.util.HashMap[String, TableSetupBean] = null
-	/** Sealer programs */
+	/** Transporter blacklist to block certain RoMAs or vectors form being used with certain sites */
 	@BeanProperty var transporterBlacklist: java.util.ArrayList[TransporterBlacklistBean] = null
+	/** Modifications to transporter graph */
+	@BeanProperty var transporterGraphOverrides: java.util.ArrayList[TransporterGraphOverrrideBean] = null
 	/** Sealer programs */
 	@BeanProperty var sealerProgram: java.util.ArrayList[SealerProgramBean] = null
 }
@@ -75,6 +77,12 @@ class TransporterBlacklistBean {
 	@BeanProperty var roma: Integer = null
 	@BeanProperty var vector: String = null
 	@BeanProperty var site: String = null
+}
+
+class TransporterGraphOverrrideBean {
+	@BeanProperty var action: String = null
+	@BeanProperty var node: String = null
+	@BeanProperty var neighbors: java.util.ArrayList[String] = null
 }
 
 class SealerProgramBean {
