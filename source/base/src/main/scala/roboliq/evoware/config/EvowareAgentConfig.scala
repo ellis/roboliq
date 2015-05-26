@@ -22,7 +22,7 @@ case class EvowareAgentConfig(
 case class EvowareProtocolData(
 	sites: Map[String, EvowareSiteConfig],
 	devices: Map[String, EvowareDeviceConfig],
-	transporterBlacklist: List[EvowareTransporterBlacklistConfig],
+	transporterBlacklist: List[EvowareTransporterBlacklistConfig], // REFACTOR: I don't think this is actually used -- the processing happens directly in ConfigEvoware using TransporterBlacklistBean
 	userSites: List[String]
 ) {
 	def merge(that: EvowareProtocolData): EvowareProtocolData = {

@@ -1,0 +1,26 @@
+ROBOLIQ: v1
+TYPE: Protocol
+
+description: Example of a protocol specification
+
+materials:
+  plate:
+    type: Plate
+    label: mixing plate
+    description: the plate should have at least 5 columns
+  water:
+    type: Liquid
+    description: use doubly distilled water
+
+sources:
+  water:
+    well: plate(A01)
+
+steps:
+  1:
+    label: Add 20ul water to each well A02 thru A05
+    1:
+      command: distribute
+      source: water
+      destination: plate(A02-A05)
+      volume: 20ul

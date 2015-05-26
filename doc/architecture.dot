@@ -1,0 +1,120 @@
+digraph Roboliq {
+	//Parser [ shape="Mrecord" ];
+	//Evaluator [ shape="Mrecord" ];
+	//JSON -> Parser -> Rjs -> Evaluator;
+
+	node [ shape="note" ];
+
+	GenericProtocol;
+	Alternatives0 [ shape="record", label="{Planning Data|Variables|Task Methods|Command Expansions|Partial Plan|Plan Steps*|Plan Order|Complete Plan}", style="dashed,filled", fillcolor="#ffdddd" ];
+	EvowareAgentConfig0 [ label="EvowareAgentConfig", style="filled", fillcolor="#ddffff" ];
+
+	EvowareAgentConfigProcessor [ shape="Mrecord" ];
+	ProtocolProcessor [ shape="Mrecord" ];
+	AssistedPlanner [ shape="Mrecord" ];
+
+	ProtocolDataMerger [ shape="Mrecord", label="ProtocolData.merge(...)" ];
+
+	{ rank=same GenericProtocol EvowareAgentConfig0 Alternatives0};
+
+	GenericProtocol [ style="filled", fillcolor="#ddffff" ];
+	GenericProtocol -> ProtocolProcessor -> GenericProtocolData;
+	GenericProtocolData -> ProtocolDataMerger [ label="1" ];
+	EvowareAgentConfig0 -> EvowareAgentConfigProcessor -> LabProtocolData;
+	LabProtocolData -> ProtocolDataMerger [ label="2" ];
+	AutomatedProtocolData -> ProtocolDataMerger [ label="3" ];
+	Alternatives0 -> AssistedPlanner;
+	AssistedPlanner -> AutomatedProtocolData [ dir="both" ];
+	UserProtocolData [ style="filled", fillcolor="#ddffff" ];
+	AssistedPlanner -> UserProtocolData [ dir="both" ];
+	UserProtocolData -> ProtocolDataMerger [ label="4" ];
+
+	GenericProtocolData -> LabProtocolData -> AutomatedProtocolData -> UserProtocolData [ style="invis" ];
+	{ rank=same GenericProtocolData LabProtocolData AutomatedProtocolData UserProtocolData };
+
+	ProtocolData0 [ shape="record", label="{ProtocolData|{Logic|Commands|Settings|Planning}}" ];
+
+	ProtocolDataMerger -> ProtocolData0;
+
+	Wrapper [ shape="point" ];
+	ProtocolData0 -> Wrapper;
+	MethodLibraries [ style="filled", fillcolor="#ddffff" ];
+	ActionLibraries [ style="filled", fillcolor="#ddffff" ];
+	MethodLibraries -> Wrapper;
+	ActionLibraries -> Wrapper;
+
+	CheckProtocolVariables [ shape="diamond", label="Protocol vars?", width=2 ];
+	Wrapper -> CheckProtocolVariables;
+	FindProtocolValues [ shape="Mrecord" ];
+	CheckProtocolVariables -> FindProtocolValues [ label="incomplete" ];
+	ProtocolVariableAlternatives [ label="Variables", style="dashed,filled", fillcolor="#ffdddd" ];
+	FindProtocolValues -> ProtocolVariableAlternatives [ label="alternative values" ];
+	{ rank=same CheckProtocolVariables FindProtocolValues ProtocolVariableAlternatives };
+
+	CheckTasks [ shape="diamond", label="Tasks?", width=2 ];
+	CheckProtocolVariables -> CheckTasks;
+	FindMethods [ shape="Mrecord" ];
+	CheckTasks -> FindMethods [ label="incomplete" ];
+	TaskMethods [ label="Task Methods", style="dashed,filled", fillcolor="#ffdddd" ];
+	FindMethods -> TaskMethods [ label="list alternative methods" ];
+	{ rank=same CheckTasks FindMethods TaskMethods };
+
+	CheckMethods [ shape="diamond", label="Methods?", width=2 ];
+	ExpandMethods [ shape="Mrecord" ];
+	CheckMethods -> ExpandMethods [ label="incomplete" ];
+	AlternativesX [ label="AutomatedProtocolData" style="dashed,filled", fillcolor="#ffdddd" ];
+	ExpandMethods -> AlternativesX [ label="expand methods" ];
+	{ rank=same CheckMethods ExpandMethods AlternativesX };
+	
+	CheckPlan [ shape="diamond", label="Plan?", width=2 ];
+	LogicCompiler [ shape="Mrecord" ];
+	PartialOrderPlanner [ shape="Mrecord" ];
+	PartialPlan [ label="Partial Plan + Steps + Order" style="dashed,filled", fillcolor="#ffdddd" ];
+	CheckPlan -> LogicCompiler [ label="incomplete" ];
+	LogicCompiler -> PDDL -> PartialOrderPlanner -> PartialPlan;
+	{ rank=same CheckPlan LogicCompiler PDDL PartialOrderPlanner PartialPlan };
+
+	CheckActions1 [ shape="diamond", label="Actions?", width=2 ];
+	CheckPlan -> CheckActions1;
+	PlanIntegrator [ shape="Mrecord" ];
+	CheckActions1 -> PlanIntegrator [ label="incomplete" ];
+	PlannedActions [ label="Planned Actions", style="dashed,filled", fillcolor="#ffdddd" ];
+	PlanIntegrator -> PlannedActions
+	{ rank=same CheckActions1 PlanIntegrator PlannedActions };
+
+	CheckVariables [ shape="diamond", label="Variables?", width=2 ];
+	CheckActions1 -> CheckVariables;
+	FindValues [ shape="Mrecord" ];
+	CheckVariables -> FindValues [ label="incomplete" ];
+	VariableAlternatives [ style="dashed,filled", fillcolor="#ffdddd" ];
+	FindValues -> VariableAlternatives [ label="list alternative values" ];
+	{ rank=same CheckVariables FindValues VariableAlternatives };
+
+	CheckCommands [ shape="diamond", label="Commands?", width=2 ];
+	CheckVariables -> CheckCommands;
+	HandleActions [ shape="Mrecord" ];
+	CheckCommands -> HandleActions [ label="incomplete" ];
+	ActionCommands [ style="dashed,filled", fillcolor="#ffdddd" ];
+	HandleActions -> ActionCommands [ label="expand actions" ];
+	{ rank=same CheckCommands HandleActions ActionCommands };
+
+	ExtractInstructions [ shape="Mrecord" ];
+	CheckCommands -> ExtractInstructions;
+	ExtractInstructions -> InstructionList;
+
+	EvowareCompiler [ shape="Mrecord" ];
+	InstructionList -> EvowareCompiler;
+	EvowareCompiler -> EvowareScript;
+	EvowareAgentConfig1 [ label="EvowareAgentConfig" ];
+	EvowareAgentConfig1 -> EvowareCompiler;
+	{ rank=same EvowareCompiler EvowareAgentConfig1 };
+
+	CheckTasks -> CheckMethods -> CheckPlan;
+
+
+
+
+
+
+	ProtocolVariableAlternatives -> TaskMethods [ style="invis" ];
+}

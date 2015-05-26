@@ -21,3 +21,4 @@ lib/libjpeg.a
 lib/slf4j-nop-1.7.5.jar
 lib/libhdf.a
 lib/libjhdf.so.2.10.0
+/bin

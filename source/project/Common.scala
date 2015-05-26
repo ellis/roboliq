@@ -4,7 +4,7 @@ import sbt.Keys._
 object RoboliqSettings {
 	val buildOrganization = "bsse.ethz.ch"
 	val buildVersion      = "0.1"
-	val buildScalaVersion = "2.11.2"
+	val buildScalaVersion = "2.11.6"
 
 	import RoboliqDeps._
 

@@ -294,13 +294,19 @@ object LiquidLevelExtractor {
 	
 	// Want to output csv lines: tip,loc,row,col,z
 	def process3(filename: String) {
+		
+		// HACK: extract the original offset values from the log file instead of hardcoding them!
+		val tipToOrigin_m = Map(1 -> 1448, 2 -> 1450, 3 -> 1448, 4 -> 1451)
+
 		var bDetect = false
 		//val tw_m = new LinkedHashMap[Int, WellId]
 		//val wellData_m = new HashMap[WellId, WellData]
 		//val wellZPrev_m = new HashMap[WellId, Int]
 		val tipToDetectHeader_m = new LinkedHashMap[Int, DetectHeader]
 		val tipToDispenseHeader_m = new LinkedHashMap[Int, DispenseHeader]
-		val tipToZ_m = new LinkedHashMap[Int, Int]
+		val tipToZDetect_m = new LinkedHashMap[Int, Int]
+		val tipToZDispense_m = new LinkedHashMap[Int, Int]
+		var tipToZ_m: LinkedHashMap[Int, Int] = tipToZDetect_m
 		val wellToVolume_m = new LinkedHashMap[WellId, BigDecimal]
 		var tipCached = 0
 		var sProgram = ""
@@ -309,8 +315,8 @@ object LiquidLevelExtractor {
 		var sCmd = ""
 		var expect = Expect.None
 		
-		println(List("tip", "loc", "row", "col", "vol").mkString("\t"))
-		for (line0 <- io.Source.fromFile(filename).getLines) {
+		println(List("tip", "loc", "row", "col", "vol", "zAbs", "z").mkString("\t"))
+		for (line0 <- io.Source.fromFile(filename, "iso-8859-1").getLines) {
 			// drop first 14 chars
 			val line = line0.drop(14).trim
 			//println("0: "+line)
@@ -334,7 +340,8 @@ object LiquidLevelExtractor {
 					
 					tipToDetectHeader_m.clear()
 					tipToDispenseHeader_m.clear()
-					tipToZ_m.clear()
+					tipToZDetect_m.clear()
+					tipToZDispense_m.clear()
 					tipCached = 0
 					bDetect = false
 
@@ -384,13 +391,19 @@ object LiquidLevelExtractor {
 					val vol = vol_s.toInt
 					if (tipToDetectHeader_m.contains(tip)) {
 						val header = tipToDetectHeader_m(tip)
+						val z = (tipToZDetect_m.get(tip) orElse tipToZDispense_m.get(tip).map(_ + 10)).getOrElse(1000)
 						//println(header, vol)
 						println(List(
-									tip, header.loc, header.row, header.col, vol
-								).mkString("\t"))
+								tip, header.loc, header.row, header.col, vol, z, z - tipToOrigin_m(tip)
+							).mkString("\t"))
 					}
 					
 				case "> C5,RPZ0" if bDetect =>
+					tipToZ_m = tipToZDispense_m
+					expect = Expect.C5
+					
+				case "> C5,RVZ1" if bDetect =>
+					tipToZ_m = tipToZDetect_m
 					expect = Expect.C5
 					
 				case _ if expect == Expect.C5 =>
@@ -418,8 +431,14 @@ object LiquidLevelExtractor {
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150116--chao01_dye\EVO_20150116_141247--zlevel_top.log""")
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_121617--25_to_60ul.log""")
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150120--chao04_2nd_dispense\EVO_20150120_125817--zlevel_top.log""")
-		process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150127--chao04_2nd_dispense\EVO_20150127_111922--layer2.log""")
+		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150127--chao04_2nd_dispense\EVO_20150127_111922--layer2.log""")
 		//process3("""C:\Users\localadmin\Desktop\Ellis\bsse-lab\20150127--chao04_2nd_dispense\EVO_20150127_120611.LOG""")
+		//process3("""/home/ellisw/repo/bsse-lab/20150129--chao07_tripple/EVO_20150129_145522--A_zlevels.log""")
+		//process3("""/home/ellisw/repo/bsse-lab/20150129--chao07_tripple/EVO_20150129_150735--B.log""")
+		//process3("""/home/ellisw/repo/bsse-lab/20150129--chao07_tripple/EVO_20150129_153959--C.log""")
+		//process3("""/home/ellisw/repo/bsse-lab/20150129--chao07_tripple/EVO_20150129_161227--C_zlevels.log""")
+		//process3("""/home/ellisw/repo/bsse-lab/20150127--chao04_2nd_dispense/EVO_20150127_111922--layer2.log""")
+		process3("""/home/ellisw/repo/bsse-lab/20150127--chao04_2nd_dispense/EVO_20150127_120611--zlevels.log""")
 		//process(args(0))
 	}
 }

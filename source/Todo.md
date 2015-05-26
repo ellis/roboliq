@@ -1,5 +1,28 @@
 # TODOs for roboliq
 
+## Current priority details, but minor
+
+- [ ] ProtocolDataObject: create it
+
+## Current major refactoring
+
+- [x] ProtocolProcessor (rename from ProtocolHandler)
+- [x] EvowareAgentConfigProcessor (rename EvowareProtocolDetailsGenerator)
+- [x] ProtocolData: include (Object, Function, Input, Result) objects for further processing
+- [x] LiteralsSpec
+- [x] ProtocolDataSpec: test merging
+    - [x] objects
+    - [x] commands
+    - [x] planningDomainObjects
+    - [x] planningInitialState
+- [ ] ProtocolDataProcessor.process()
+- [ ] protocol variables
+- [ ] handle missing protocol variables
+- [ ] handle tasks
+- [ ] handle methods
+- [ ] handle planning
+- [ ] get rid of RjsConverter, and rename RjsConverterC to RjsConverter?
+
 ## Big issues
 
 - [x] handle tubes as wells on plates

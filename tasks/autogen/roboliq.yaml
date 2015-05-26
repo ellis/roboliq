@@ -84,6 +84,10 @@ evowareAgents:
         tableFile: ../testdata/bsse-mario/TemplateWithRealDownholder.ewt
         sites:
           CENTRIFUGE: { carrier: "Centrifuge" }
+          CENTRIFUGE_1: { carrier: "Centrifuge", site: 1 }
+          CENTRIFUGE_2: { carrier: "Centrifuge", site: 2 }
+          CENTRIFUGE_3: { carrier: "Centrifuge", site: 1 }
+          CENTRIFUGE_4: { carrier: "Centrifuge", site: 2 }
           DOWNHOLDER: { grid: 9, site: 1 }
           P2: { grid: 10, site: 2 }
           P3: { grid: 10, site: 4 }
@@ -120,6 +124,13 @@ evowareAgents:
     - { roma: 2, vector: Wide, site: P5PCR }
     - { roma: 2, vector: Narrow, site: CENTRIFUGE_2 }
     - { roma: 2, vector: Narrow, site: CENTRIFUGE_4 }
+
+    transporterGraphOverrides:
+    - { action: restrictNeighbors; node: READER, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors; node: CENTRIFUGE_1, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors; node: CENTRIFUGE_2, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors; node: CENTRIFUGE_3, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors; node: CENTRIFUGE_4, neighbors: ["REGRIP"] }
 
     sealerProgram:
     - model: plateModel_96_pcr
