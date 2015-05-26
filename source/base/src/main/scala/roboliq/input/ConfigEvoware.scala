@@ -332,10 +332,8 @@ class ConfigEvoware(
 		
 		// Update EntityBase with sites and logic
 		// Update identToAgentObject map with evoware site data
-		for ((siteE, site0) <- site_l) {
-			val siteIdent = site0.label.get
-			// Allow for overriding the site in roboliq.yaml by checking for an already defined site here
-			val site = eb.getEntityByIdent[Site](siteIdent).getOrElse[Site](site0)
+		for ((siteE, site) <- site_l) {
+			val siteIdent = site.label.get
 			val siteId = (siteE.carrier.id, siteE.iSite)
 			identToAgentObject(siteIdent) = siteE
 			eb.addSite(site, siteIdent)
@@ -557,12 +555,7 @@ class ConfigEvoware(
 		}
 
 		val graph = {
-			val transporterGraphOverride_l = {
-				if (agentBean.transporterGraphOverrides == null)
-					Nil
-				else
-					agentBean.transporterGraphOverrides.toList
-			}
+			val transporterGraphOverride_l = if (agentBean.transporterGraphOverrides == null) Nil else agentBean.transporterGraphOverrides.toList
 			// If any of the nodes restrict their neighbors, list those in this map
 			val restrict_m: Map[String, Set[String]] = transporterGraphOverride_l.flatMap(tgo => {
 				if (tgo.action == "restrictNeighbors") {
@@ -717,20 +710,32 @@ class ConfigEvoware(
 					carrierE: Carrier,
 					siteIdToModels_m: Map[(Int, Int), Set[LabwareModel]]
 				): List[DeviceSiteConfig] = {
-					val siteExternal_i = 0
-					val siteE = CarrierSite(carrierE, siteExternal_i)
-					val siteId = (carrierE.id, siteExternal_i)
-					val siteExternal_? = createSite(carrierE, siteExternal_i, "")
-					val siteExternalIdent_? = siteExternal_?.map(_._2.label.get)
-					
+					val siteIndexToSiteE_m = new HashMap[Int, CarrierSite]
+					val grid_i = tableData.mapCarrierToGrid(carrierE)
 					for {
-						siteIdentBase <- siteExternalIdent_?.toList
+						siteIdentBase <- findSiteIdent(tableSetupBean, carrierE.sName, grid_i, -1).toList
 						siteInternal_i <- List.range(0, 4)
 						siteName = s"${siteIdentBase}_${siteInternal_i+1}"
+						siteIndex = {
+							if (tableSetupBean.sites.contains(siteName)) {
+								val siteBean = tableSetupBean.sites(siteName)
+								if (siteBean.site == null || siteBean.site == 0) 0
+								else siteBean.site - 1
+							}
+							else 0
+						}
+						siteE = siteIndexToSiteE_m.get(siteIndex) match {
+							case Some(siteE) => siteE
+							case None =>
+								val siteE0 = CarrierSite(carrierE, siteIndex)
+								siteIndexToSiteE_m(siteIndex) = siteE0
+								siteE0
+						}
 						site = Site(gid, Some(siteName), Some(s"internal site ${siteInternal_i+1}"))
+						siteId = (siteE.carrier.id, siteIndex)
 						model_l <- siteIdToModels_m.get(siteId).toList
 					} yield {
-						//println("site: "+site)
+						println("site: "+site)
 						DeviceSiteConfig(siteE, site, model_l.toList)
 					}
 				}

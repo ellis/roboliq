@@ -57,6 +57,10 @@ evowareAgents:
         tableFile: ../testdata/bsse-mario/NewLayout_Feb2015.ewt
         sites:
           CENTRIFUGE: { carrier: "Centrifuge" }
+          CENTRIFUGE_1: { carrier: "Centrifuge", site: 1 }
+          CENTRIFUGE_2: { carrier: "Centrifuge", site: 2 }
+          CENTRIFUGE_3: { carrier: "Centrifuge", site: 1 }
+          CENTRIFUGE_4: { carrier: "Centrifuge", site: 2 }
           P1: { grid: 9, site: 3 }
           P2: { grid: 10, site: 2 }
           P3: { grid: 10, site: 4 }
@@ -113,8 +117,9 @@ evowareAgents:
 
     transporterBlacklist:
     - { site: DOWNHOLDER }
-    - { roma: 1, vector: Narrow, site: CENTRIFUGE_1 }
-    - { roma: 1, vector: Narrow, site: CENTRIFUGE_3 }
+    - { roma: 1, site: CENTRIFUGE_1 }
+    - { roma: 1, site: CENTRIFUGE_3 }
+    - { roma: 1, site: READER }
     - { roma: 2, vector: Wide, site: P1 }
     - { roma: 2, vector: Wide, site: P2 }
     - { roma: 2, vector: Wide, site: P3 }
@@ -122,15 +127,16 @@ evowareAgents:
     - { roma: 2, vector: Wide, site: P4PCR }
     - { roma: 2, vector: Wide, site: P5 }
     - { roma: 2, vector: Wide, site: P5PCR }
-    - { roma: 2, vector: Narrow, site: CENTRIFUGE_2 }
-    - { roma: 2, vector: Narrow, site: CENTRIFUGE_4 }
+    - { roma: 2, site: CENTRIFUGE_2 }
+    - { roma: 2, site: CENTRIFUGE_4 }
+    - { roma: 2, vector: Narrow, site: READER }
 
     transporterGraphOverrides:
-    - { action: restrictNeighbors; node: READER, neighbors: ["REGRIP"] }
-    - { action: restrictNeighbors; node: CENTRIFUGE_1, neighbors: ["REGRIP"] }
-    - { action: restrictNeighbors; node: CENTRIFUGE_2, neighbors: ["REGRIP"] }
-    - { action: restrictNeighbors; node: CENTRIFUGE_3, neighbors: ["REGRIP"] }
-    - { action: restrictNeighbors; node: CENTRIFUGE_4, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors, node: READER, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors, node: CENTRIFUGE_1, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors, node: CENTRIFUGE_2, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors, node: CENTRIFUGE_3, neighbors: ["REGRIP"] }
+    - { action: restrictNeighbors, node: CENTRIFUGE_4, neighbors: ["REGRIP"] }
 
     sealerProgram:
     - model: plateModel_96_pcr

@@ -153,5 +153,6 @@ object MainInEclipse extends App {
 	//runTemp("qa03_weight_4")
 	//runTemp("qa05_dye_vol_range")
 	//runTemp("tania16_ph_2_pipette")
-	runTemp("tania16_ph_3_pipette2")
+	//runTemp("tania16_ph_3_pipette2")
+	runTemp("tania17_denaturation_4_pipette_and_measure")
 }
