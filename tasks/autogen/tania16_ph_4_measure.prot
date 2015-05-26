@@ -1,0 +1,20 @@
+description: |
+  repeat pH measurements
+
+labware:
+  mixPlate2:
+    description: plate for target mixtures
+    model: plateModel_384_square
+    location: P3
+
+protocol:
+- transportLabware:
+    agent: mario
+    device: mario__transporter1
+    object: mixPlate2
+    site: REGRIP
+
+- measureAbsorbance:
+    object: mixPlate2
+    programFile: tania13_ph-temp.mdfx
+    outputFile: C:\Users\localadmin\Desktop\Ellis\tania16_ph--<YYYYMMDD_HHmmss>.xml
