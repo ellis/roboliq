@@ -3,6 +3,8 @@
 ## Current priority details, but minor
 
 - [ ] ProtocolDataObject: create it
+- [ ] try to make sure that all transports to READER and CENTRIFUGE go via REGRIP
+- [ ] continue with BioCoder tutorial [ ]
 
 ## Current major refactoring
 
