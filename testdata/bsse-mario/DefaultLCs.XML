@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--Date: 2014-07-14T14:26:37-->
+<!--Date: 2015-04-08T13:52:15-->
 <LiquidClasses>
   <LiquidClass name="DMSO free dispense" liquidName="General liquid class for most pipetting devices and tip types" default="True" customized="False">
     <Global>
@@ -21055,5 +21055,5 @@
       </SubClass>
     </SubClasses>
   </LiquidClass>
-  <Signature value="e&#x1;&amp;??????u???{??&#x1D;?????m???I?yv?" />
+  <Signature value="&quot;?9u?N??`i?d?&gt;?&#x3;&#x4;??&#x8;??H???@b??&#xB;?" />
 </LiquidClasses>

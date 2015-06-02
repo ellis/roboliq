@@ -233,9 +233,11 @@ object Pop {
 		val plan0 = x.plan
 		println()
 		println(s"${indent}SelectGoal")
+		/*
 		println(s"${indent}actions:")
 		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
 		println(s"${indent}openGoals:")
+		*/
 		// Sort the goals so that actions earlier in the ordering get handled first
 		def orderGoals(a: (Int, Int), b: (Int, Int)): Boolean = {
 			if (a._1 == b._1) a._2 < b._2
@@ -288,10 +290,14 @@ object Pop {
 			} 
 		})
 		val goal_l = goalToProviders_l.map(_._1)
+		plan0.printDebugString1(goalToProviders_l, indent)
+
+		/*
 		goalToProviders_l.foreach(pair => {
 			val (goal, provider_l) = pair
 			println(s"${indent}| ${goal} "+plan0.bindings.bind(plan0.action_l(goal._1).preconds.l(goal._2))+s" (${provider_l.length})")
 		})
+		*/
 		//println(s"${indent}assignments: ${plan0.bindings.assignment_m}")
 		//println(s"${indent}variables: ${plan0.bindings.variable_m}")
 		//println(s"${indent}toDot:")
@@ -351,10 +357,14 @@ object Pop {
 			val (threat_l, threatOther_l) = threat0_l.toList.span(pair => pair._1 == link.provider_i || pair._2 == link)
 			//val threat_l = threat0_l.toList.filter(pair => pair._1 == link.provider_i || pair._2 == link)
 			
-			println(s"${indent}  threats on link ${link} or from action")
-			threat_l.foreach(pair => println(s"${indent}  | ${pair}"))
-			println(s"${indent}  other threats")
-			threatOther_l.foreach(pair => println(s"${indent}  | ${pair}"))
+			if (!threat_l.isEmpty) {
+				println(s"${indent}  threats on link ${link} or from action")
+				threat_l.foreach(pair => println(s"${indent}  | ${pair}"))
+			}
+			if (!threatOther_l.isEmpty) {
+				println(s"${indent}  other threats")
+				threatOther_l.foreach(pair => println(s"${indent}  | ${pair}"))
+			}
 
 			threat_l.foldLeft(Right(plan0) : Either[String, PartialPlan]) { (plan_?, threat) =>
 				val (action_i, link) = threat
@@ -401,7 +411,12 @@ object Pop {
 		plan1_? match {
 			case Right(plan1) => Right(PopState_SelectGoal(plan1, x.indentLevel + 1))
 			//case Left(msg) => Right(PopState_ChooseAction(x.plan, x.goal, x.provider_l, x.indentLevel - 1))
-			case Left(msg) => Left(msg)
+			case Left(msg) =>
+				// FIXME: for debug only
+				println("FAILED TO FIND THREAT RESOLVER")
+				x.plan.printDebugString1()
+				// ENDFIX
+				Left(msg)
 		}
 	}
 

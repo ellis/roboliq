@@ -950,6 +950,76 @@ class PartialPlan private (
 		})
 		(header_l ++ actionLine_l ++ orderLine_l ++ linkLine_l).mkString("digraph partialPlan {\n\t", ";\n\t", ";\n}")
 	}
+
+	def printDebugString1(
+		goalToProviders_l: List[((Int, Int), List[(Either[Operator, Int], Map[String, String])])],
+		indent: String
+	) {
+		val plan0 = this
+		println(s"${indent}actions:")
+		(0 until plan0.action_l.size).foreach(i => println(indent+"| "+plan0.getActionText(i)))
+		println(s"${indent}openGoals:")
+		goalToProviders_l.foreach(pair => {
+			val (goal, provider_l) = pair
+			println(s"${indent}| ${goal} "+plan0.bindings.bind(plan0.action_l(goal._1).preconds.l(goal._2))+s" (${provider_l.length})")
+		})
+	}
+
+	def printDebugString1(indent: String = "") {
+		val plan0 = this
+		// Sort the goals so that actions earlier in the ordering get handled first
+		def orderGoals(a: (Int, Int), b: (Int, Int)): Boolean = {
+			if (a._1 == b._1) a._2 < b._2
+			else if (plan0.orderings.map.getOrElse(a._1, Set()).contains(b._1)) true
+			else if (plan0.orderings.map.getOrElse(b._1, Set()).contains(a._1)) false
+			else a._1 < b._1
+		}
+		val goal0_l = plan0.openGoal_l.toList.sortWith(orderGoals)
+		val goalToProviders_l = goal0_l.map(goal => {
+			val (consumer_i, precond_i) = goal
+			val provider1a_l = plan0.getExistingProviders(consumer_i, precond_i)
+			// Sort existing providers in two different ways:
+			// 1) for actions ordered before this action, choose the later actions first (the ones closest to this action)
+			// 2) for actions ordered at the same point or after this action, sort ascending by ordering
+			/*val successors_l = plan0.orderings.map.getOrElse(consumer_i, Set())
+			val provider1_l = provider1a_l.sortWith((pair1, pair2) => {
+				val (Right(action1_i), _) = pair1
+				val (Right(action2_i), _) = pair2
+				(successors_l.contains(action1_i), successors_l.contains(action2_i)) match {
+					case (true, false) => true
+					case (false, true) => false
+					case (true, true) =>
+						if (plan0.orderings.map.getOrElse(action1_i, Set()).contains(action2_i)) false
+						else if (plan0.orderings.map.getOrElse(action2_i, Set()).contains(action1_i)) true
+						else action1_i < action2_i
+					case (false, false) =>
+						if (plan0.orderings.map.getOrElse(action1_i, Set()).contains(action2_i)) true
+						else if (plan0.orderings.map.getOrElse(action2_i, Set()).contains(action1_i)) false
+						else action1_i < action2_i
+				}
+			})*/
+			val provider1_l = provider1a_l.reverse
+			val provider2_l = plan0.getNewProviders(consumer_i, precond_i)
+			(goal, provider1_l ++ provider2_l)
+		}).sortWith((pair1, pair2) => {
+			val (a, provider1_l) = pair1
+			val (b, provider2_l) = pair2
+			(provider1_l.length, provider2_l.length) match {
+				case (l1, l2) if l1 == l2 => orderGoals(a, b)
+				case (0, _) => true
+				case (_, 0) => false
+				case (1, _) => true
+				case (_, 1) => false
+				case (l1, l2) =>
+					// For open goals for a single action, sort by number of alternative solutions: 
+					if (a._1 == b._1 && l1 != l2)
+						l1 < l2
+					else
+						orderGoals(a, b)
+			} 
+		})
+		printDebugString1(goalToProviders_l, indent)
+	}
 }
 
 object PartialPlan {

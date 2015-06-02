@@ -26,7 +26,6 @@ object MainInEclipse extends App {
 	//println((for { col <- 1 to 24; row <- (0 until 16).toList.map(n => ('A' + n).asInstanceOf[Char]).grouped(2).toList.transpose.flatten } yield { f"$row$col%02d" }).mkString("+"))
 	
 	//run("test_single_carouselOpenSite_01")
-	//run("test_single_carouselOpenSite_01")
 	//run("test_single_evowareTimerSleep_01")
 	//run("test_single_measureAbsorbance_01")
 	//run("test_single_openDeviceSite_02")
@@ -152,5 +151,9 @@ object MainInEclipse extends App {
 	//runTemp("qa03_weight_2")
 	//runTemp("qa03_weight_3")
 	//runTemp("qa03_weight_4")
-	runTemp("qa05_dye_vol_range")
+	//runTemp("qa05_dye_vol_range")
+	//runTemp("tania16_ph_2_pipette")
+	//runTemp("tania16_ph_3_pipette2")
+	runTemp("tania17_denaturation_2_pipette")
+	//runTemp("tania17_denaturation_4_pipette_and_measure")
 }
