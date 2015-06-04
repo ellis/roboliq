@@ -42,6 +42,16 @@ case class ProtocolDataVariable(
 	alternatives: List[RjsBasicValue] = Nil
 )
 
+/**
+ * @param setter Identifier for where the value comes from, e.g. "user"
+ */
+case class ProtocolVariableInfo(
+	setter_? : Option[String],
+	messages: List[String],
+	alternatives: List[RjsBasicValue]
+)
+
+
 class ProtocolDataStep(
 	val params: Map[String, RjsBasicValue],
 	val children: Map[String, ProtocolDataStep]
@@ -95,7 +105,7 @@ case class ProcessingVariable(
 	`type`: String,
 	value_? : Option[RjsBasicValue],
 	setter_? : Option[String],
-	validations: List[CommandValidation] = Nil,
+	validations: List[CommandValidation],
 	alternatives: List[RjsBasicValue]
 )
 
@@ -107,7 +117,7 @@ case class ProcessingTask(
 	commandId: String,
 	value_? : Option[String],
 	setter_? : Option[String],
-	validations: List[CommandValidation] = Nil,
+	validations: List[CommandValidation],
 	alternatives: List[String]
 )
 
