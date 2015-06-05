@@ -6,9 +6,12 @@ import scala.annotation.tailrec
 
 
 case class ProtocolData(
+	// val protocol_? : Option[Protocol] CONTINUE
 	val variables: Map[String, ProtocolDataVariable] = Map(),
 	val materials: Map[String, Material] = Map(),
+	// val sources: CONTINUE
 	val steps: Map[String, ProtocolDataStep] = Map(),
+	val settings: Map[String, ProtocolDataSetting] = Map(),
 	val labObjects: Map[String, LabObject] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
@@ -19,12 +22,14 @@ case class ProtocolData(
 			variables <- RjsConverterC.mergeObjects(this.variables, that.variables)
 			materials <- RjsConverterC.mergeObjects(this.materials, that.materials)
 			steps <- RjsConverterC.mergeObjects(this.steps, that.steps)
+			settings <- RjsConverterC.mergeObjects(this.settings, that.settings)
 			labObjects <- RjsConverterC.mergeObjects(this.labObjects, that.labObjects)
 		} yield {
 			new ProtocolData(
 				variables = variables,
 				materials = materials,
 				steps = steps,
+				settings = settings,
 				labObjects = labObjects,
 				planningDomainObjects = this.planningDomainObjects ++ that.planningDomainObjects,
 				planningInitialState = this.planningInitialState ++ that.planningInitialState,
@@ -45,7 +50,7 @@ case class ProtocolDataVariable(
 /**
  * @param setter Identifier for where the value comes from, e.g. "user"
  */
-case class ProtocolVariableInfo(
+case class ProtocolDataSetting(
 	setter_? : Option[String],
 	messages: List[String],
 	alternatives: List[RjsBasicValue]

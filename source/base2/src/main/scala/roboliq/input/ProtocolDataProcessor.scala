@@ -58,39 +58,38 @@ object ProtocolDataProcessor {
 	 * - if no value and no alternatives, tell use that they must set the value
 	 * - if no value and only one alternative, set that value automatically
 	 */
-	def processVariables(protocol: Protocol): ResultE[ProtocolData] = {
-		val messages = new ArrayBuffer[ProcessorMessage]
-		for {
-			nameToProcessingVariable <- ResultE.mapAll(protocol.variables)({ case (name, o) =>
-				val typ = o.`type`.getOrElse("String")
-				for {
-					// TODO: check for known type
-					// TODO: check that value conforms to type
-					// TODO: if no value given, get list of alternatives
-					// TODO: if no value and no alternatives, tell use that they must set the value
-					// TODO: if no value and only one alternative, set that value automatically
-				}
-				o.value match {
-					case None =>
-						ResultE.unit(Some(name -> ProcessingVariable(
-							name = name,
-							`type` = o.`type`.getOrElse("String"),
-							value_? = None,
-							setter_? = None,
-							validations = List(CommandValidation(
-								message = s"you must set the value",
-								param_? = Some(name)
-							)),
-							alternatives = Nil
-						)))
-					case _ =>
-						ResultE.unit(None)
-				}
-			}).map(_.flatten.toMap)
-		} yield ()
-		
-		???
+	def processVariables(protocolData: ProtocolData): ResultE[ProtocolData] = {
+		val settings = new HashMap[String, ProtocolDataSetting]
+		for ((name, o) <- protocolData.variables) {
+			// TODO: check for known type
+			// TODO: check that value conforms to type
+			// TODO: if no value given, get list of alternatives
+			// TODO: if no value and only one alternative, set that value automatically
+			// TODO: if no value and no alternatives, tell use that they must set the value
+			
+			// Until the above TODOs are done, require that the value was set
+			if (!o.value_?.isDefined) {
+				val settingName = s"variables.$name.value"
+				settings(name) = ProtocolDataSetting(None, List("You must set the value"), Nil)
+			}
+		}
+		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
 	}
 	
-	def processMaterials()...
+	def processTasks(protocolData: ProtocolData, taskToMethods_m: Map[String, List[String]]): ResultE[ProtocolData] = {
+		val settings = new HashMap[String, ProtocolDataSetting]
+		for ((name, step) <- protocolData.steps) {
+			step.params.get("command") match {
+				case None =>
+				case Some(RjsString(commandName)) =>
+					if (taskToMethods_m.contains(commandName)) {
+						val settingName = s"steps.$name.method"
+						settings(settingName) = ProtocolDataSetting(None, Nil, taskToMethods_m(commandName).map(RjsString))
+					}
+				case Some(x) =>
+					// TODO: error
+			}
+		}
+		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
+	}
 }

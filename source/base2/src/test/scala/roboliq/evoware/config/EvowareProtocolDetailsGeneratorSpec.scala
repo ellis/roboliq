@@ -22,7 +22,7 @@ class EvowareAgentConfigProcessorSpec extends FunSpec {
 	describe("EvowareAgentConfigProcessor") {
 		it("") {
 			val protocolData0 = new ProtocolData(
-				objects = RjsBasicMap(
+				labObjects = RjsBasicMap(
 					"plateModel_384_square_transparent_greiner" -> RjsBasicMap(
 						"type" -> RjsString("PlateModel"),
 						"label" -> RjsString("384 square-flat-well transparent Greiner"),
