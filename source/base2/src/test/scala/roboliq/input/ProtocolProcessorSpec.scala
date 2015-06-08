@@ -1,4 +1,4 @@
-package roboliq.input
+/*package roboliq.input
 
 import org.scalatest.FunSpec
 import spray.json.JsNumber
@@ -129,4 +129,4 @@ class ProtocolProcessorSpec extends FunSpec {
 		}
 		*/
 	}
-}
+}*/

@@ -1,6 +1,9 @@
 package roboliq.input
 
-trait LabObject {
+import scala.language.dynamics
+
+
+trait LabObject /*extends Dynamic*/ {
 	val `type`: String
 }
 

@@ -269,11 +269,11 @@ object EvowareAgentConfigProcessor {
 								}
 							}
 						} yield {
-							val rjsDevice = RjsBasicMap(
-								"type" -> RjsString(deviceConfig.`type`),
-								"evowareName" -> RjsString(carrierE.sName)
+							val device = EvowareDeviceObject(
+								deviceConfig.`type`,
+								carrierE.sName
 							)
-							builder.addObject(deviceName, rjsDevice)
+							builder.addObject(deviceName, device)
 							builder.addPlanningDomainObject(deviceName, deviceConfig.`type`)
 							builder.appendAgentDevice(agentName, deviceName)
 							

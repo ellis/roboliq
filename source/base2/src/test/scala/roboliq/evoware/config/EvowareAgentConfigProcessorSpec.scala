@@ -22,11 +22,10 @@ class EvowareAgentConfigProcessorSpec extends FunSpec {
 	describe("EvowareAgentConfigProcessor") {
 		it("") {
 			val protocolData0 = new ProtocolData(
-				labObjects = RjsBasicMap(
-					"plateModel_384_square_transparent_greiner" -> RjsBasicMap(
-						"type" -> RjsString("PlateModel"),
-						"label" -> RjsString("384 square-flat-well transparent Greiner"),
-						"evowareName" -> RjsString("384 Sqr Flat Trans Greiner")
+				labObjects = Map(
+					"plateModel_384_square_transparent_greiner" -> PlateModelObject(
+						label = "384 square-flat-well transparent Greiner",
+						evowareName = "384 Sqr Flat Trans Greiner"
 					)
 				),
 				planningInitialState = strips.Literals(Unique[strips.Literal](strips.Literal.parse("site-closed CENTRIFUGE")))
@@ -62,14 +61,15 @@ class EvowareAgentConfigProcessorSpec extends FunSpec {
 			)
 			
 			val expected = ProtocolData(
-				objects = RjsBasicMap(
-					"CENTRIFUGE" -> RjsBasicMap(
-						"evowareCarrier" -> RjsNumber(65,None),
-						"evowareGrid" -> RjsNumber(54,None),
-						"evowareSite" -> RjsNumber(1,None),
-						"type" -> RjsString("Site")
+				labObjects = Map(
+					"CENTRIFUGE" -> EvowareSiteObject(
+						name = "Centrifuge",
+						evowareCarrier = 65,
+						evowareGrid = 54,
+						evowareSite = 1
 					),
-					"P3" -> RjsBasicMap(
+					"P3" -> EvowareSiteObject(
+						CONTINUE
 						"evowareCarrier" -> RjsNumber(316,None),
 						"evowareGrid" -> RjsNumber(10,None),
 						"evowareSite" -> RjsNumber(4,None),

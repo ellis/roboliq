@@ -1,6 +1,7 @@
 package roboliq.evoware.config
 
 import roboliq.input.SiteObject
+import roboliq.input.LabObject
 
 case class EvowareSiteObject(
 	name: String,
@@ -10,8 +11,6 @@ case class EvowareSiteObject(
 ) extends SiteObject
 
 case class EvowareDeviceObject(
-	name: String,
-	evowareCarrier: Int,
-	evowareGrid: Int,
-	evowareSite: Int
-) extends SiteObject
+	`type`: String,
+	evowareName: String
+) extends LabObject
