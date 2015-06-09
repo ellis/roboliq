@@ -47,15 +47,24 @@ class ProtocolDataProcessorSpec extends FunSpec {
 		}
 		
 		it("tasks") {
+			val method_l = List("mixByShaker")
+			val taskToMethods_m: Map[String, List[String]] = Map("mix" -> method_l)
+
 			val protocolData1a = getProtocolData("""{
 				"steps": {
 					"1": { "command": "mix" }
 				}
 			}""")
-			val method_l = List("mixByShaker")
-			val taskToMethods_m: Map[String, List[String]] = Map("mix" -> method_l)
 			val protocolData1b = ProtocolDataProcessor.processTasks(protocolData1a, taskToMethods_m).run().value
 			assert(protocolData1b.settings == Map("steps.1.method" -> ProtocolDataSetting(None, Nil, method_l.map(RjsString))))
+
+			val protocolData2a = getProtocolData("""{
+				"steps": {
+					"1": { "command": "mix", "method": "mixByShaker" }
+				}
+			}""")
+			val protocolData2b = ProtocolDataProcessor.processTasks(protocolData2a, taskToMethods_m).run().value
+			assert(protocolData2b.settings == Map())
 		}
 	}
 }
