@@ -70,7 +70,7 @@ object ProtocolDataProcessor {
 			// Until the above TODOs are done, require that the value was set
 			if (!o.value_?.isDefined) {
 				val settingName = s"variables.$name.value"
-				settings(name) = ProtocolDataSetting(None, List("You must set the value"), Nil)
+				settings(settingName) = ProtocolDataSetting(None, List("You must set the value"), Nil)
 			}
 		}
 		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
