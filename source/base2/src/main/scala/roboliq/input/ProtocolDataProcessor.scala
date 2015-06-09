@@ -79,12 +79,21 @@ object ProtocolDataProcessor {
 	def processTasks(protocolData: ProtocolData, taskToMethods_m: Map[String, List[String]]): ResultE[ProtocolData] = {
 		val settings = new HashMap[String, ProtocolDataSetting]
 		for ((name, step) <- protocolData.steps) {
+			// If this step contains a command:
 			step.params.get("command") match {
 				case None =>
 				case Some(RjsString(commandName)) =>
-					if (taskToMethods_m.contains(commandName)) {
-						val settingName = s"steps.$name.method"
-						settings(settingName) = ProtocolDataSetting(None, Nil, taskToMethods_m(commandName).map(RjsString))
+					// If the command is a task:
+					taskToMethods_m.get(commandName) match {
+						case None =>
+						case Some(method_l) =>
+							// If the task's method hasn't been specified yet:
+							step.params.get("method") match {
+								case Some(_) =>
+								case None =>
+									val settingName = s"steps.$name.method"
+									settings(settingName) = ProtocolDataSetting(None, Nil, method_l.map(RjsString))
+							}
 					}
 				case Some(x) =>
 					// TODO: error
