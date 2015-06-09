@@ -34,6 +34,7 @@ import roboliq.input.RjsBasicMap
 import roboliq.input.RjsAbstractMap
 import roboliq.evoware.parser.CarrierGridSiteIndex
 import roboliq.evoware.parser.CarrierSiteIndex
+import roboliq.input.RjsValue
 
 /**
  * @param gridIndex 1-based index of grid
@@ -224,7 +225,7 @@ object EvowareAgentConfigProcessor {
 						evowareSite = siteId.siteIndex + 1
 					)
 					builder.addSite(siteName, site)
-			
+				
 					// Indicate which labware models can go on the site
 					val modelName_l = siteIdToModelNames_m.getOrElse(siteId, Set())
 					if (!modelName_l.isEmpty) {

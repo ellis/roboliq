@@ -5,6 +5,7 @@
 - [ ] ProtocolDataObject: create it
 - [ ] try to make sure that all transports to READER and CENTRIFUGE go via REGRIP
 - [ ] continue with BioCoder tutorial [ ]
+- [ ] ProtocolDataSpec: test merging of labObjects (need to figure out the proper data structure for them, maybe FlatMap?)
 
 ## Current major refactoring
 

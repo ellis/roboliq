@@ -12,7 +12,7 @@ case class ProtocolData(
 	// val sources: CONTINUE
 	val steps: Map[String, ProtocolDataStep] = Map(),
 	val settings: Map[String, ProtocolDataSetting] = Map(),
-	val labObjects: Map[String, LabObject] = Map(),
+	val labObjects: Map[String, RjsBasicMap] = Map(),
 	val planningDomainObjects: Map[String, String] = Map(),
 	val planningInitialState: strips.Literals = strips.Literals.empty,
 	val processingState_? : Option[ProcessingState] = None

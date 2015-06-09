@@ -4,10 +4,11 @@ import roboliq.ai.plan.Unique
 import roboliq.ai.strips
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import roboliq.core.ResultC
 
 
 class ProtocolDataBuilder {
-	private val labObjects = new HashMap[String, LabObject]
+	private val labObjects = new HashMap[String, RjsBasicMap]
 	private val planningDomainObjects = new HashMap[String, String]
 	private val planningInitialState = new ArrayBuffer[strips.Literal]
 	
@@ -19,19 +20,33 @@ class ProtocolDataBuilder {
 		)
 	}
 	
-	def addObject(name: String, value: LabObject) {
+	def addObject(name: String, value: RjsBasicMap) {
 		labObjects(name) = value
 	}
 	
-	def addPlanningDomainObject(name: String, obj: LabObject) {
-		planningDomainObjects(name) = obj.`type`
+	def addObject(name: String, value: LabObject) {
+		val rjs = RjsValue.fromObject(value).run()._2.get.asInstanceOf[RjsBasicMap]
+		addObject(name, rjs)
+	}
+	
+	def addPlanningDomainObject(name: String, obj: RjsBasicMap) {
+		(
+			for {
+				typ_? <- RjsConverterC.fromRjs[Option[String]](obj, "type")
+			} yield {
+				typ_?.foreach { typ =>
+					planningDomainObjects(name) = typ
+				}
+			}
+		).run()
 	}
 	
 	def addPlanningDomainObject(name: String, typ: String) {
 		planningDomainObjects(name) = typ
 	}
 	
-	def addPlateModel(plateModelName: String, rjsPlateModel: PlateModelObject) {
+	def addPlateModel(plateModelName: String, plateModel: PlateModelObject) {
+		val rjsPlateModel = RjsValue.fromObject(plateModel).run()._2.get.asInstanceOf[RjsBasicMap]
 		addObject(plateModelName, rjsPlateModel)
 		addPlanningDomainObject(plateModelName, rjsPlateModel)
 	}
@@ -45,8 +60,9 @@ class ProtocolDataBuilder {
 	}
 	
 	def addSite(name: String, value: SiteObject) {
-		addObject(name, value)
-		addPlanningDomainObject(name, value)
+		val rjs = RjsValue.fromObject(value).run()._2.get.asInstanceOf[RjsBasicMap]
+		addObject(name, rjs)
+		addPlanningDomainObject(name, rjs)
 	}
 	
 	/**
