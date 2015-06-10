@@ -78,7 +78,18 @@ object ProtocolDataProcessor {
 	
 	def processTasks(protocolData: ProtocolData, taskToMethods_m: Map[String, List[String]]): ResultE[ProtocolData] = {
 		val settings = new HashMap[String, ProtocolDataSetting]
-		for ((name, step) <- protocolData.steps) {
+		processTasks2(Vector(), taskToMethods_m, settings, protocolData.steps)
+		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
+	}
+	
+	private def processTasks2(
+		prefix_l: Vector[String],
+		taskToMethods_m: Map[String, List[String]],
+		settings: HashMap[String, ProtocolDataSetting],
+		steps: Map[String, ProtocolDataStep]
+	) {
+		val prefix = prefix_l.mkString(".")
+		for ((name, step) <- steps) {
 			// If this step contains a command:
 			step.params.get("command") match {
 				case None =>
@@ -91,14 +102,53 @@ object ProtocolDataProcessor {
 							step.params.get("method") match {
 								case Some(_) =>
 								case None =>
-									val settingName = s"steps.$name.method"
+									val settingName = s"steps.$prefix.$name.method"
 									settings(settingName) = ProtocolDataSetting(None, Nil, method_l.map(RjsString))
 							}
 					}
 				case Some(x) =>
 					// TODO: error
 			}
+			if (!step.children.isEmpty)
+				processTasks2(prefix_l :+ name, taskToMethods_m, settings, step.children)
 		}
+	}
+	
+	def processMethods(protocolData: ProtocolData, taskToMethods_m: Map[String, List[String]]): ResultE[ProtocolData] = {
+		val settings = new HashMap[String, ProtocolDataSetting]
+		processMethods2(Vector(), taskToMethods_m, settings, protocolData.steps)
 		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
+	}
+
+	private def processMethods2(
+		prefix_l: Vector[String],
+		taskToMethods_m: Map[String, List[String]],
+		settings: HashMap[String, ProtocolDataSetting],
+		steps: Map[String, ProtocolDataStep]
+	) {
+		val prefix = prefix_l.mkString(".")
+		for ((name, step) <- steps) {
+			// If this step contains a command:
+			step.params.get("command") match {
+				case None =>
+				case Some(RjsString(commandName)) =>
+					// If the command is a task:
+					taskToMethods_m.get(commandName) match {
+						case None =>
+						case Some(method_l) =>
+							// If the task's method hasn't been specified yet:
+							step.params.get("method") match {
+								case Some(_) =>
+								case None =>
+									val settingName = s"steps.$prefix.$name.method"
+									settings(settingName) = ProtocolDataSetting(None, Nil, method_l.map(RjsString))
+							}
+					}
+				case Some(x) =>
+					// TODO: error
+			}
+			if (!step.children.isEmpty)
+				processTasks2(prefix_l :+ name, taskToMethods_m, settings, step.children)
+		}
 	}
 }

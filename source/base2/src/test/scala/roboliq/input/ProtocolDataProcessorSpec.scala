@@ -66,5 +66,13 @@ class ProtocolDataProcessorSpec extends FunSpec {
 			val protocolData2b = ProtocolDataProcessor.processTasks(protocolData2a, taskToMethods_m).run().value
 			assert(protocolData2b.settings == Map())
 		}
+		
+		it("methods") {
+			val methodExpansions_m = Map[String, String](
+				"mixByShaker" -> """{
+					"1": "CONTINUE"
+				}"""
+			)
+		}
 	}
 }
