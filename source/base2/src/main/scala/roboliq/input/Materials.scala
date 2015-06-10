@@ -9,10 +9,12 @@ sealed trait Material {
 
 case class PlateMaterial(
 	name: String,
-	`type`: String,
 	label_? : Option[String],
-	description_? : Option[String]
-) extends Material
+	description_? : Option[String],
+	model_? : Option[String]
+) extends Material {
+	val `type` = "Plate"
+}
 
 case class LiquidMaterial(
 	name: String,

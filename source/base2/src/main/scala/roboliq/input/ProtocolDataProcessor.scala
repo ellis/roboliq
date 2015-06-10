@@ -70,7 +70,26 @@ object ProtocolDataProcessor {
 			// Until the above TODOs are done, require that the value was set
 			if (!o.value_?.isDefined) {
 				val settingName = s"variables.$name.value"
-				settings(settingName) = ProtocolDataSetting(None, List("You must set the value"), Nil)
+				settings(settingName) = ProtocolDataSetting(None, List("Missing variable value"), Nil)
+			}
+		}
+		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
+	}
+	
+	def processMaterials(
+		protocolData: ProtocolData,
+		plateModelName_l: Seq[String]
+	): ResultE[ProtocolData] = {
+		val settings = new HashMap[String, ProtocolDataSetting]
+		for ((name, o) <- protocolData.materials) {
+			o match {
+				case x: PlateMaterial =>
+					// Check whether the plate's model is specified
+					if (!x.model_?.isDefined) {
+						val settingName = s"materials.$name.model"
+						settings(settingName) = ProtocolDataSetting(None, List("Missing plate model"), plateModelName_l.toList.map(RjsString))
+					}
+				case _ =>
 			}
 		}
 		ResultE.unit(protocolData.copy(settings = protocolData.settings ++ settings))
@@ -88,7 +107,6 @@ object ProtocolDataProcessor {
 		settings: HashMap[String, ProtocolDataSetting],
 		steps: Map[String, ProtocolDataStep]
 	) {
-		val prefix = prefix_l.mkString(".")
 		for ((name, step) <- steps) {
 			// If this step contains a command:
 			step.params.get("command") match {
@@ -102,7 +120,8 @@ object ProtocolDataProcessor {
 							step.params.get("method") match {
 								case Some(_) =>
 								case None =>
-									val settingName = s"steps.$prefix.$name.method"
+									val prefix = (prefix_l :+ name).mkString(".")
+									val settingName = s"steps.$prefix.method"
 									settings(settingName) = ProtocolDataSetting(None, Nil, method_l.map(RjsString))
 							}
 					}
@@ -126,7 +145,6 @@ object ProtocolDataProcessor {
 		settings: HashMap[String, ProtocolDataSetting],
 		steps: Map[String, ProtocolDataStep]
 	) {
-		val prefix = prefix_l.mkString(".")
 		for ((name, step) <- steps) {
 			// If this step contains a command:
 			step.params.get("command") match {
@@ -140,7 +158,8 @@ object ProtocolDataProcessor {
 							step.params.get("method") match {
 								case Some(_) =>
 								case None =>
-									val settingName = s"steps.$prefix.$name.method"
+									val prefix = (prefix_l :+ name).mkString(".")
+									val settingName = s"steps.$prefix.method"
 									settings(settingName) = ProtocolDataSetting(None, Nil, method_l.map(RjsString))
 							}
 					}

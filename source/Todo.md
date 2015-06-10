@@ -2,6 +2,9 @@
 
 ## Current priority details, but minor
 
+- [ ] ProtocolDataProcessor: check whether plates have models
+- [ ] ProtocolDataProcessor: expand tasks
+- [ ] ProtocolDataProcessor: expand methods
 - [ ] ProtocolDataObject: create it
 - [ ] try to make sure that all transports to READER and CENTRIFUGE go via REGRIP
 - [ ] continue with BioCoder tutorial [ ]

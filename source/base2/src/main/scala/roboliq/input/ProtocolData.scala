@@ -259,8 +259,9 @@ steps:
 					typ <- RjsConverterC.fromRjs[String](m, "type")
 					label_? <- RjsConverterC.fromRjs[Option[String]](m, "label")
 					description_? <- RjsConverterC.fromRjs[Option[String]](m, "description")
+					model_? <- RjsConverterC.fromRjs[Option[String]](m, "model")
 					material <- typ match {
-						case "Plate" => ResultC.unit(PlateMaterial(name, typ, label_?, description_?))
+						case "Plate" => ResultC.unit(PlateMaterial(name, label_?, description_?, model_?))
 						case "Liquid" => ResultC.unit(LiquidMaterial(name, typ, label_?, description_?))
 						case _ => ResultC.error(s"Unrecognized type: `$typ`")
 					}

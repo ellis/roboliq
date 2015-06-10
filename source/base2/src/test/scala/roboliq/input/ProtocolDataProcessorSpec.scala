@@ -35,7 +35,7 @@ class ProtocolDataProcessorSpec extends FunSpec {
 				}
 			}""")
 			val protocolData1b = ProtocolDataProcessor.processVariables(protocolData1a).run().value
-			assert(protocolData1b.settings == Map("variables.totalVolume.value" -> ProtocolDataSetting(None, List("You must set the value"), Nil)))
+			assert(protocolData1b.settings == Map("variables.totalVolume.value" -> ProtocolDataSetting(None, List("Missing variable value"), Nil)))
 
 			val protocolData2a = getProtocolData("""{
 				"variables": {
@@ -44,6 +44,19 @@ class ProtocolDataProcessorSpec extends FunSpec {
 			}""")
 			val protocolData2b = ProtocolDataProcessor.processVariables(protocolData2a).run().value
 			assert(protocolData2b.settings == Map())
+		}
+		
+		// TODO: process materials to make sure that plates have models
+		it("materials (plates)") {
+			val plateModelName_l = List("96 well square", "384 well round")
+
+			val protocolData1a = getProtocolData("""{
+				"materials": {
+					"plate1": { "type": "Plate" }
+				}
+			}""")
+			val protocolData1b = ProtocolDataProcessor.processMaterials(protocolData1a, plateModelName_l).run().value
+			assert(protocolData1b.settings == Map("materials.plate1.model" -> ProtocolDataSetting(None, List("Missing plate model"), plateModelName_l.toList.map(RjsString))))
 		}
 		
 		it("tasks") {
@@ -65,12 +78,16 @@ class ProtocolDataProcessorSpec extends FunSpec {
 			}""")
 			val protocolData2b = ProtocolDataProcessor.processTasks(protocolData2a, taskToMethods_m).run().value
 			assert(protocolData2b.settings == Map())
+			
+			// TODO: make sure methods are placed within the tasks now
 		}
 		
 		it("methods") {
 			val methodExpansions_m = Map[String, String](
 				"mixByShaker" -> """{
-					"1": "CONTINUE"
+					"1": {
+						"command": "shake"
+					}
 				}"""
 			)
 		}
