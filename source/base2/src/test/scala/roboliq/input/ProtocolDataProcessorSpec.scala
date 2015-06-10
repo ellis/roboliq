@@ -57,6 +57,14 @@ class ProtocolDataProcessorSpec extends FunSpec {
 			}""")
 			val protocolData1b = ProtocolDataProcessor.processMaterials(protocolData1a, plateModelName_l).run().value
 			assert(protocolData1b.settings == Map("materials.plate1.model" -> ProtocolDataSetting(None, List("Missing plate model"), plateModelName_l.toList.map(RjsString))))
+
+			val protocolData2a = getProtocolData("""{
+				"materials": {
+					"plate1": { "type": "Plate", "model": "96 well square" }
+				}
+			}""")
+			val protocolData2b = ProtocolDataProcessor.processMaterials(protocolData2a, plateModelName_l).run().value
+			assert(protocolData2b.settings == Map())
 		}
 		
 		it("tasks") {
