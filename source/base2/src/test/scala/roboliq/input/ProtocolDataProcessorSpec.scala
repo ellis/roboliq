@@ -46,7 +46,6 @@ class ProtocolDataProcessorSpec extends FunSpec {
 			assert(protocolData2b.settings == Map())
 		}
 		
-		// TODO: process materials to make sure that plates have models
 		it("materials (plates)") {
 			val plateModelName_l = List("96 well square", "384 well round")
 

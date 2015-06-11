@@ -2,7 +2,21 @@
 
 ## Current priority details, but minor
 
-- [ ] ProtocolDataProcessor: check whether plates have models
+Macro expansion:
+Which capabilities should the macro expansion have?
+The simplest form would simply substitute values into a text string.
+We could potentially support some programming constructs, such as repeats and conditionals.
+
+Task expansion:
+
+Method expansion:
+Given a set of method params, we should expand a list of instructions (or a single instruction).
+How to deal with parameters which haven't been specified yet?  And with parameters that
+should be shared between sub-commands?
+`$param`, `$$param`
+
+
+- [x] ProtocolDataProcessor: check whether plates have models
 - [ ] ProtocolDataProcessor: expand tasks
 - [ ] ProtocolDataProcessor: expand methods
 - [ ] ProtocolDataObject: create it
