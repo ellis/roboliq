@@ -9,6 +9,54 @@ We could potentially support some programming constructs, such as repeats and co
 
 Task expansion:
 
+        1:
+          command: mix
+          object: plate1
+          method: mixByShaker
+          1:
+            command: mixByShaker
+            object: plate1
+            1:
+              command: Shaker.mix
+              object: plate1
+
+Data for task/method maps:
+
+        task: mix
+        method: mixByShaker
+        params:
+          object: {{object}}
+
+Data for method -> action expansion:
+
+        methods:
+          mixByShaker: |
+            command: Shaker.shake
+            object: {{object}}
+
+        functions:
+          Shaker.shake:
+            class: roboliq.commands.shaker.ShakerShakeAction
+
+        actions:
+          Shaker.shakePlate1:
+            params:
+              - { name: agent, type: Agent }
+              - { name: device, type: Shaker }
+              - { name: program, type: Any }
+              - { name: labware1: type: Labware }
+              - { name: model1: type: Model }
+              - { name: site1: type: Site }
+            preconds:
+              - "agent-can-device ?agent ?device"
+              - "model ?plate1 ?model1"
+              - "location ?plate1 ?site1"
+              - "device-can-model ?device ?model1"
+              - "device-can-site ?device ?site1"
+            effects: {}
+            language: javascript
+            program:
+
 Method expansion:
 Given a set of method params, we should expand a list of instructions (or a single instruction).
 How to deal with parameters which haven't been specified yet?  And with parameters that
