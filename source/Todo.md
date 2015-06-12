@@ -3,29 +3,36 @@
 ## Current priority details, but minor
 
 Macro expansion:
-Which capabilities should the macro expansion have?
-The simplest form would simply substitute values into a text string.
-We could potentially support some programming constructs, such as repeats and conditionals.
+Which capabilities should the macro expansion have?  Use moustache, because it seems sufficiently capable and well-established.
 
 Task expansion:
 
         1:
-          command: mix
+          command: mix (task)
           object: plate1
           method: mixByShaker
           1:
-            command: mixByShaker
+            command: mixByShaker (method)
             object: plate1
             1:
-              command: Shaker.mix
+              command: Shaker.shake (function)
               object: plate1
+              1:
+                command: Shaker.shakePlate1 (action)
+                object: plate1
 
 Data for task/method maps:
 
         task: mix
         method: mixByShaker
-        params:
-          object: {{object}}
+        steps:
+          1:
+            command: shaker.shakePlate1
+            agent: {{agent}}
+            device: {{device}}
+            program: {{program}}
+            labware1: {{object}}
+            site1: {{site}}
 
 Data for method -> action expansion:
 
@@ -36,26 +43,50 @@ Data for method -> action expansion:
 
         functions:
           Shaker.shake:
-            class: roboliq.commands.shaker.ShakerShakeAction
-
-        actions:
-          Shaker.shakePlate1:
             params:
               - { name: agent, type: Agent }
               - { name: device, type: Shaker }
               - { name: program, type: Any }
-              - { name: labware1: type: Labware }
+              - { name: object: type: CONTINUE... }
               - { name: model1: type: Model }
               - { name: site1: type: Site }
+            class: roboliq.commands.shaker.ShakerShakeAction
+
+        whatever:
+          shaker.shakePlate:
+            # 
+        actions:
+          Shaker.shakePlate1:
+            params:
+              - { name: agent, type: Agent, mode: Plannable }
+              - { name: device, type: Shaker, mode: Plannable }
+              - { name: program, type: Any, mode: Required }
+              - { name: labware1: type: Labware, mode: Required }
+              - { name: model1: type: Model, mode: Plannable }
+              - { name: site1a: type: Site, mode: Plannable }
+              - { name: site1b: type: Site, mode: Plannable }
+              - { name: site1c: type: Site, mode: Default,  }
             preconds:
-              - "agent-can-device ?agent ?device"
-              - "model ?plate1 ?model1"
-              - "location ?plate1 ?site1"
-              - "device-can-model ?device ?model1"
-              - "device-can-site ?device ?site1"
+              - agent-can-device ?agent ?device
+              - model ?plate1 ?model1
+              - location ?plate1 ?siteA1
+              - device-can-model ?device ?model1
+              - device-can-site ?device ?siteB1
+              - site-can-model ?siteB1 ?model1
+              - site-can-model ?siteC1 ?model1
+              - ...
             effects: {}
-            language: javascript
-            program:
+            variables: {}
+            steps:
+              1: help
+
+Various layers of 'shake' command:
+
+* we could look at object and consider what exactly we need to shake.  Is it a plate, tube, or something else?  Are there multiple pieces of labware?
+* If it's a single plate, we can use shaker.shakePlate1
+* shaker.shakePlate1 will take plate1 from its initial site1 and move it to the shake site2, if necessary.  Then it run the shaker device for site2.  Afterwards, it will move the plate to site3, which by default should be site1.  Ideally, this final move action would be added to the plan as an optional action to be done any time after the shaking but before the next move action involving that plate.
+* shaker.run runs the shaker
+* after planning, the planned actions need to be expanded into lists of instructions
 
 Method expansion:
 Given a set of method params, we should expand a list of instructions (or a single instruction).
