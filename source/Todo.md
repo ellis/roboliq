@@ -3,7 +3,7 @@
 ## Current priority details, but minor
 
 Macro expansion:
-Which capabilities should the macro expansion have?  Use moustache, because it seems sufficiently capable and well-established.
+Which capabilities should the macro expansion have?  Consider moustache, because it seems sufficiently capable and well-established.
 
 Task expansion:
 
@@ -25,6 +25,8 @@ Data for task/method maps:
 
         task: mix
         method: mixByShaker
+        if: |
+          datastore('is_Plate', params.object)
         steps:
           1:
             command: shaker.shakePlate1
