@@ -58,29 +58,32 @@ Data for method -> action expansion:
           shaker.shakePlate:
             # 
         actions:
-          Shaker.shakePlate1:
+          shaker.shakePlate1:
             params:
               - { name: agent, type: Agent, mode: Plannable }
               - { name: device, type: Shaker, mode: Plannable }
               - { name: program, type: Any, mode: Required }
               - { name: labware1: type: Labware, mode: Required }
-              - { name: model1: type: Model, mode: Plannable }
-              - { name: site1a: type: Site, mode: Plannable }
+              - { name: model1: type: Model, mode: Planned }
+              - { name: site1a: type: Site, mode: Planned }
+              - { name: sm1a: type: Model, mode: Planned }
               - { name: site1b: type: Site, mode: Plannable }
-              - { name: site1c: type: Site, mode: Default,  }
+              - { name: sm1b: type: Model, mode: Planned }
+              - { name: site1c: type: Site, mode: Default, default: ?site1a }
+              - { name: sm1c: type: Model, mode: Planned }
             preconds:
               - agent-can-device ?agent ?device
-              - model ?plate1 ?model1
-              - location ?plate1 ?siteA1
+              - model ?labware1 ?model1
+              - location ?plate1 ?site1a
               - device-can-model ?device ?model1
-              - device-can-site ?device ?siteB1
-              - site-can-model ?siteB1 ?model1
-              - site-can-model ?siteC1 ?model1
-              - ...
+              - device-can-site ?device ?site1b
+              - stackable ?sm1b ?model1
+              - stackable ?sm1c ?model1
             effects: {}
             variables: {}
             steps:
-              1: help
+              1: movePlate1 ?labware1 ?site1a ?sm1a ?site2a ?sm2a
+              2: shaker.run ?agent ?
 
 Various layers of 'shake' command:
 
