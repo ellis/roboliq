@@ -1,6 +1,49 @@
 # TODOs for roboliq
 
+Four layers to our solution:
+
+* A method to transform a generic protocol into a lab-specific protocol
+* A method to automate that transformation
+* A method to transform lab-specific protocols into detailed instruction lists
+* A method to generate robot programs from detailed instruction lists
+
 ## Current priority details, but minor
+
+Three layers to our solution:
+* create Evoware program from list of instructions, initial state, and state effects between instructions (and table layout file)
+* create list of instructions (plus initial state and effects between instructions) from list of commands and robot configuration
+* check protocol for missing parameters
+* check protocol for preconditions
+* automated planning of missing parameters
+* automated planning of unfulfilled preconditions
+
+    objects:
+      plate1: { type: Plate, model: ourlab.mario_model1, location: ourlab.mario_P1 }
+      ourlab:
+        type: Namespace
+        mario: { type: EvowareRobot }
+        mario_arm1: { type: Transporter, evowareName: ROMA1 }
+        model1: { type: PlateModel, evowareName: D-BSSE 96 Well Plate }
+        P1: { type: Site, evowareGrid: 10, evowareSite: 2 }
+        P2: { type: Site, evowareGrid: 10, evowareSite: 4 }
+    steps: [
+      {command: instruction.transporter.movePlate, agent: ourlab.mario, equipment: ourlab.mario_arm1, program: Narrow, object: plate1, destination: ourlab.mario_P2},
+      {set: [plate1.location=ourlab.mario_P2]},
+      {command: instruction.transporter.movePlate, agent: ourlab.mario, equipment: ourlab.mario_arm1, program: Narrow, object: plate1, destination: ourlab.mario_P1},
+      {set: [plate1.location=ourlab.mario_P1]},
+    ]
+
+    initialState:
+      plate1: { type: Plate, model: model1, location: P1 }
+      model1: { type: PlateModel, evowareName: D-BSSE 96 Well Plate }
+      P1: { type: Site, evowareGrid: 10, evowareSite: 2 }
+      P2: { type: Site, evowareGrid: 10, evowareSite: 4 }
+    steps: [
+      {command: instruction.transporter.movePlate, object: plate1, destination: P2},
+      {state: {plate1: {location: P2}}},
+      {command: instruction.transporter.movePlate, object: plate1, destination: P1},
+      {state: {plate1: {location: P1}}}
+    ]
 
 Macro expansion:
 Which capabilities should the macro expansion have?  Consider moustache, because it seems sufficiently capable and well-established.
