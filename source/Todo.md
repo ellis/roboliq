@@ -1,5 +1,20 @@
 # TODOs for roboliq
 
+What does roboliq provide?
+
+* defines hierarchy of types, with description and properties (and javascript validation? string parsing (e.g. for volumes)?)
+* defines commands, with description, parameters, preconditions, effects
+* among those commands, defines a set of basic instructions
+* a method to validate a protocol and determine what is missing
+* a method to supply/process lab-specific configuration data
+* a method to add user-supplied values to the generic protocol
+* a method to process protocol commands: select among alternatives, javascript expansion, javascript validation, invocation of external functions (such as in scala)
+* a method to transform a list of commands into PDDL
+* a method to do assisted planning using PDDL
+* a method to extract parameter values, additional commands, and command orderings from a PDDL solution, and add them back to the protocol
+* a method to expand commands into basic instructions
+* a method to convert a list of basic instructions into a robot program
+
 Four layers to our solution:
 
 * A method to transform a generic protocol into a lab-specific protocol
@@ -7,15 +22,16 @@ Four layers to our solution:
 * A method to transform lab-specific protocols into detailed instruction lists
 * A method to generate robot programs from detailed instruction lists
 
-## Current priority details, but minor
+## Current major decisions to make about how data/processing flow
 
-Three layers to our solution:
 * create Evoware program from list of instructions, initial state, and state effects between instructions (and table layout file)
-* create list of instructions (plus initial state and effects between instructions) from list of commands and robot configuration
+* handle instructions for multiple agents (e.g. user and robot)
+* create list of instructions (plus initial state and effects between instructions) from list of commands (some for user, some for robot) and robot configuration
 * check protocol for missing parameters
 * check protocol for preconditions
 * automated planning of missing parameters
 * automated planning of unfulfilled preconditions
+* allow for automatically adding setup and takedown instructions to evoware programs, in order to inform the user where stuff is and what should be done after the script
 
     objects:
       plate1: { type: Plate, model: ourlab.mario_model1, location: ourlab.mario_P1 }
@@ -23,14 +39,14 @@ Three layers to our solution:
         type: Namespace
         mario: { type: EvowareRobot }
         mario_arm1: { type: Transporter, evowareName: ROMA1 }
+        mario_P1: { type: Site, evowareGrid: 10, evowareSite: 2 }
+        mario_P2: { type: Site, evowareGrid: 10, evowareSite: 4 }
         model1: { type: PlateModel, evowareName: D-BSSE 96 Well Plate }
-        P1: { type: Site, evowareGrid: 10, evowareSite: 2 }
-        P2: { type: Site, evowareGrid: 10, evowareSite: 4 }
     steps: [
       {command: instruction.transporter.movePlate, agent: ourlab.mario, equipment: ourlab.mario_arm1, program: Narrow, object: plate1, destination: ourlab.mario_P2},
       {set: [plate1.location=ourlab.mario_P2]},
       {command: instruction.transporter.movePlate, agent: ourlab.mario, equipment: ourlab.mario_arm1, program: Narrow, object: plate1, destination: ourlab.mario_P1},
-      {set: [plate1.location=ourlab.mario_P1]},
+      {set: [plate1.location=ourlab.mario_P1]}
     ]
 
     initialState:
