@@ -44,9 +44,9 @@ Four layers to our solution:
         model1: { type: PlateModel, evowareName: D-BSSE 96 Well Plate }
     steps: [
       {command: instruction.transporter.movePlate, agent: ourlab.mario, equipment: ourlab.mario_arm1, program: Narrow, object: plate1, destination: ourlab.mario_P2},
-      {set: [plate1.location=ourlab.mario_P2]},
+      {state: {plate1: {location: ourlab.mario_P2}}},
       {command: instruction.transporter.movePlate, agent: ourlab.mario, equipment: ourlab.mario_arm1, program: Narrow, object: plate1, destination: ourlab.mario_P1},
-      {set: [plate1.location=ourlab.mario_P1]}
+      {state: {plate1: {location: ourlab.mario_P1}}}
     ]
 
     initialState:
