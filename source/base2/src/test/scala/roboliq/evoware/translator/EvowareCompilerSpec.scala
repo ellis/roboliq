@@ -52,7 +52,7 @@ class EvowareCompilerSpec extends FunSpec {
 				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
 				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
 				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
-				val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
+				compiler = new EvowareCompiler("ourlab.mario.evoware", false)
 				token_l <- compiler.buildScript(input1)
 			} yield {
 				token_l.foreach(println)
@@ -61,7 +61,7 @@ class EvowareCompilerSpec extends FunSpec {
 			
 			//val expected = Nothing
 
-			assert(result_?.run().value == Token("nothing"))
+			assert(result_?.run().value == List(Token("nothing")))
 		}
 	}
 }

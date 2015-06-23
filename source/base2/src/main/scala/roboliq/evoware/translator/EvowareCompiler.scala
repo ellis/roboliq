@@ -76,6 +76,7 @@ class EvowareCompiler(
 		objects: JsObject,
 		step: JsObject
 	): ResultC[Option[Token]] = {
+		println(s"handleStep: $step")
 		for {
 			commandName_? <- JsConverter.fromJs[Option[String]](step, "command")
 			agentName_? <- JsConverter.fromJs[Option[String]](step, "agent")
@@ -89,11 +90,15 @@ class EvowareCompiler(
 						handleUserCommand(objects, commandName, step)
 					}
 					else {
+						println("command ignored due to agent: "+step)
 						ResultC.unit(None)
 					}
 				case (None, None, Some(set)) =>
 					???
-				case _ => ResultC.unit(None)
+				case (None, None, None) =>
+					ResultC.unit(None)
+				case _ =>
+					ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
 			}
 		} yield token_?
 	}
@@ -138,6 +143,7 @@ class EvowareCompiler(
 		objects: JsObject,
 		step: JsObject
 	): ResultC[Option[Token]] = {
+		println(s"handleTransporterMovePlate: $step")
 		for {
 			x <- JsConverter.fromJs[TransporterMovePlate](step)
 			romaIndex <- lookupAs[Int](objects, x.equipment, "evowareRoma")
@@ -172,6 +178,7 @@ class EvowareCompiler(
 				"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else (iSiteLid+1).toString)+'"',
 				s""""${plateDestSite+1}""""
 			).mkString("Transfer_Rack(", ",", ");")
+			println(s"line: $line")
 			Some(Token(line, Map((plateOrigGrid, plateOrigSite) -> plateModelName, (plateDestGrid, plateDestSite) -> plateModelName)))
 		}
 	}
