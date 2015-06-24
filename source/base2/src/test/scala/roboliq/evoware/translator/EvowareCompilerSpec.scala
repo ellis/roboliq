@@ -12,7 +12,7 @@ class EvowareCompilerSpec extends FunSpec {
 
 	val input1 = JsonUtils.yamlToJson("""
     objects:
-      plate1: { type: Plate, model: ourlab.mario_model1, location: ourlab.mario.P1 }
+      plate1: { type: Plate, model: ourlab.model1, location: ourlab.mario.P1 }
       ourlab:
         type: Namespace
         mario:
@@ -70,8 +70,8 @@ class EvowareCompilerSpec extends FunSpec {
 			//println("result: ")
 			//println(result_?.run())
 			val expected = List(Token(
-						"""Transfer_Rack("10","10",1,0,0,0,0,"","ourlab.mario_model1","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
-						Map((10,2) -> "ourlab.mario_model1", (10,4) -> "ourlab.mario_model1")
+						"""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
+						Map((10,2) -> "D-BSSE 96 Well Plate", (10,4) -> "D-BSSE 96 Well Plate")
 					))
 			assert(result_?.run().value == expected)
 		}
