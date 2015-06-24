@@ -55,8 +55,8 @@ class EvowareCompilerSpec extends FunSpec {
 				//tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
 				token_l <- compiler.buildScript(input1)
 			} yield {
-				println("success")
-				token_l.foreach(println)
+				//println("success")
+				//token_l.foreach(println)
 				token_l
 			}
 			
@@ -69,7 +69,11 @@ class EvowareCompilerSpec extends FunSpec {
 
 			//println("result: ")
 			//println(result_?.run())
-			assert(result_?.run().value == List(Token("nothing")))
+			val expected = List(Token(
+						"""Transfer_Rack("10","10",1,0,0,0,0,"","ourlab.mario_model1","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
+						Map((10,2) -> "ourlab.mario_model1", (10,4) -> "ourlab.mario_model1")
+					))
+			assert(result_?.run().value == expected)
 		}
 	}
 }

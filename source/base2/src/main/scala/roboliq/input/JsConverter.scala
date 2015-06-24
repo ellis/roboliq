@@ -156,7 +156,7 @@ object JsConverter {
 	}
 
 	def fromJs[A: TypeTag](map: JsObject, field_l: Seq[String]): ResultC[A] = {
-		println(s"fromJs(${field_l}): "+ru.typeTag[A].tpe)
+		//println(s"fromJs(${field_l}): "+ru.typeTag[A].tpe)
 		if (field_l.isEmpty) {
 			fromJs[A](map)
 		}
