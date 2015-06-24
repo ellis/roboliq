@@ -9,6 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import roboliq.input.JsConverter
 import scala.reflect.runtime.universe.TypeTag
+import roboliq.evoware.parser.CarrierNameGridSiteIndex
 
 /*
     objects:
@@ -33,7 +34,7 @@ import scala.reflect.runtime.universe.TypeTag
 case class EvowareScript(
 	index: Int,
 	line_l: Vector[String],
-	siteToNameAndModel_m: Map[(Int, Int), (String, String)]
+	siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)]
 )
 
 class EvowareCompiler(
@@ -64,7 +65,7 @@ class EvowareCompiler(
 		token_l: List[Token]
 	): List[EvowareScript] = {
 		val script_l = new ArrayBuffer[EvowareScript]()
-		val map = new HashMap[(Int, Int), (String, String)]()
+		val map = new HashMap[CarrierNameGridSiteIndex, (String, String)]()
 		var index = 1
 		var line_l = Vector[String]()
 		for (token <- token_l) {
@@ -233,8 +234,8 @@ class EvowareCompiler(
 			).mkString("Transfer_Rack(", ",", ");")
 			//println(s"line: $line")
 			val siteToNameAndModel_m = Map(
-				(plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName),
-				(plateDestGrid, plateDestSite) -> (plateDestName, plateModelName)
+				CarrierNameGridSiteIndex(plateOrigCarrierName, plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName),
+				CarrierNameGridSiteIndex(plateDestCarrierName, plateDestGrid, plateDestSite) -> (plateDestName, plateModelName)
 			)
 			Some(Token(line, siteToNameAndModel_m))
 		}

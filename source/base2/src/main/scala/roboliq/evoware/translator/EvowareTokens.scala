@@ -1,11 +1,11 @@
 package roboliq.evoware.translator
 
 import roboliq.evoware.parser.EvowareLabwareModel
-import roboliq.evoware.parser.CarrierGridSiteIndex
+import roboliq.evoware.parser.CarrierNameGridSiteIndex
 
 case class Token(
 	line: String,
-	siteToNameAndModel_m: Map[(Int, Int), (String, String)] = Map()
+	siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)] = Map()
 ) {
 	
 }

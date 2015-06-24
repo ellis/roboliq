@@ -6,6 +6,7 @@ import roboliq.evoware.config.EvowareTableSetupConfig
 import roboliq.evoware.config.EvowareAgentConfig
 import java.io.File
 import roboliq.evoware.config.EvowareAgentConfigProcessor
+import roboliq.evoware.parser.CarrierNameGridSiteIndex
 
 class EvowareCompilerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -70,9 +71,10 @@ class EvowareCompilerSpec extends FunSpec {
 
 			//println("result: ")
 			//println(result_?.run())
+			val carrierName = "some carrier"
 			val expected_token_l = List(Token(
 						"""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
-						Map((10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), (10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
+						Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
 					))
 			assert(token_l_?.run().value == expected_token_l)
 			
@@ -84,7 +86,7 @@ class EvowareCompilerSpec extends FunSpec {
 				EvowareScript(
 					1,
 					Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");"""),
-					Map((10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), (10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
+					Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
 				)
 			)
 			

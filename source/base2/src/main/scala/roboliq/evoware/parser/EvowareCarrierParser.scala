@@ -16,6 +16,8 @@ sealed trait EvowareModel
  */
 case class CarrierGridSiteIndex(carrierId: Int, gridIndex: Int, siteIndex: Int)
 
+case class CarrierNameGridSiteIndex(carrierName: String, gridIndex: Int, siteIndex: Int)
+
 /**
  * @param carrierId ID for the carrier
  * @param siteIndex 0-based index of site

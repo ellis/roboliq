@@ -73,6 +73,47 @@ class EvowareTableData(
 		l.mkString("\n")
 	}
 	
+	def toStringWithLabware(
+		siteToNameAndLabel_m: Map[CarrierNameGridSiteIndex, (String, String)]
+	): String = {
+		val siteIdToLabel_m2 = siteToNameAndLabel_m.map { case (cngsi, (label, _)) =>
+			val carrierId = configFile.mapNameToCarrier(cngsi.carrierName).id
+			val siteId = CarrierGridSiteIndex(carrierId, cngsi.gridIndex, cngsi.siteIndex)
+			siteId -> label
+		}
+		val siteIdToLabwareModel_m2 = siteToNameAndLabel_m.map { case (cngsi, (_, labwareModelName)) =>
+			val carrierId = configFile.mapNameToCarrier(cngsi.carrierName).id
+			val siteId = CarrierGridSiteIndex(carrierId, cngsi.gridIndex, cngsi.siteIndex)
+			val labwareModel = configFile.mapNameToLabwareModel(labwareModelName)
+			siteId -> labwareModel
+		}
+		val siteIdToLabel_m3 = siteIdToLabel_m ++ siteIdToLabel_m2
+		val siteIdToLabwareModel_m3 = siteIdToLabwareModel_m ++ siteIdToLabwareModel_m2
+		//println("siteIdToLabwareModel_m:")
+		//siteIdToLabwareModel_m3.foreach(println)
+		// TODO: output current date and time
+		// TODO: See whether we need to save the RES section when loading in the table
+		// TODO: do we need to save values for the 999 line when loading the table?
+		val l = List(
+				"00000000",
+				"20111117_122139 No log in       ",
+				"                                                                                                                                ",
+				"No user logged in                                                                                                               ",
+				"--{ RES }--",
+				"V;200",
+				"--{ CFG }--",
+				"999;219;32;"
+			) ++
+			toString_carriers() ++
+			toString_tableLabware(siteIdToLabel_m3, siteIdToLabwareModel_m3) ++
+			toString_hotels() ++
+			toString_externals() ++
+			toString_externalLabware(siteIdToLabwareModel_m3) ++
+			toString_externalGrids() ++
+			List("996;0;0;", "--{ RPG }--")
+		l.mkString("\n")
+	}
+	
 	private def toString_carriers(): List[String] = {
 		List("14;"+carrierIdInternal_l.map({ case None => "-1"; case Some(id) => id.toString }).mkString(";")+";")
 	}
