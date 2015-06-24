@@ -20,9 +20,9 @@ class EvowareCompilerSpec extends FunSpec {
           type: Namespace
           evoware: { type: EvowareRobot }
           arm1: { type: Transporter, evowareRoma: 0 }
-          P1: { type: Site, evowareCarrier: "some carrier", evowareGrid: 10, evowareSite: 2 }
-          P2: { type: Site, evowareCarrier: "some carrier", evowareGrid: 10, evowareSite: 4 }
-        model1: { type: PlateModel, evowareName: D-BSSE 96 Well Plate }
+          P1: { type: Site, evowareCarrier: "MP 2Pos H+P Shake", evowareGrid: 10, evowareSite: 2 }
+          P2: { type: Site, evowareCarrier: "MP 2Pos H+P Shake", evowareGrid: 10, evowareSite: 4 }
+        model1: { type: PlateModel, evowareName: Ellis Nunc F96 MicroWell }
     steps: [
       {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2}
 #      {set: {plate1: {location: ourlab.mario.P2}}},
@@ -50,10 +50,6 @@ class EvowareCompilerSpec extends FunSpec {
 			val searchPath_l: List[File] = Nil
 			val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
 			val token_l_? = for {
-				// Load carrier file
-				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
-				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
-				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
 				// Compile the script
 				token_l <- compiler.buildTokens(input1)
 			} yield {
@@ -71,26 +67,37 @@ class EvowareCompilerSpec extends FunSpec {
 
 			//println("result: ")
 			//println(result_?.run())
-			val carrierName = "some carrier"
+			val carrierName = "MP 2Pos H+P Shake"
 			val expected_token_l = List(Token(
-						"""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
-						Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
+						"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
+						Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"))
 					))
 			assert(token_l_?.run().value == expected_token_l)
 			
+			// Test generation of EvowareScript objects from tokens
 			val script_l = compiler.buildScripts(expected_token_l)
-			println("script_l:")
-			println(expected_token_l)
-			
 			val expected_script_l = List(
 				EvowareScript(
 					1,
-					Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");"""),
-					Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
+					Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");"""),
+					Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"))
 				)
 			)
 			
 			assert(script_l == expected_script_l)
+			
+			// Test generation of script content from EvowareScript objects
+			val content_l_? = for {
+				// Load carrier file
+				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
+				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
+				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
+			} yield {
+				val l = compiler.generateScriptContents(tableData, "test", script_l)
+				l.foreach(println)
+			}
+			
+			content_l_?.run()
 		}
 	}
 }

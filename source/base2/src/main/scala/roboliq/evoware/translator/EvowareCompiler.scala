@@ -10,6 +10,7 @@ import scala.collection.mutable.HashMap
 import roboliq.input.JsConverter
 import scala.reflect.runtime.universe.TypeTag
 import roboliq.evoware.parser.CarrierNameGridSiteIndex
+import roboliq.evoware.parser.EvowareTableData
 
 /*
     objects:
@@ -90,21 +91,23 @@ class EvowareCompiler(
 		script_l.toList
 	}
 
-	/*
-	def generateScripts(
-		script_l: List[EvowareScript],
-		basename: String
+	def generateScriptContents(
+		tableData: EvowareTableData,
+		basename: String,
+		script_l: List[EvowareScript]
 	): List[(String, Array[Byte])] = {
 		script_l.map { script =>
 			val filename = basename + (if (script.index <= 1) "" else f"_${script.index}%02d") + ".esc"
 			logger.debug("generateScripts: filename: "+filename)
-			filename -> generateWithHeader(script)
+			filename -> generateWithHeader(tableData, script)
 		}
 	}
 	
-	private def generateWithHeader(script: EvowareScript): Array[Byte] = {
-		val siteToLabel_m = script.siteToNameAndModel_m.map(pair => pair._1 -> pair._2._1)
-		val sHeader = config.table.toStringWithLabware(siteToLabel_m, script.siteToModel_m)
+	private def generateWithHeader(
+		tableData: EvowareTableData,
+		script: EvowareScript
+	): Array[Byte] = {
+		val sHeader = tableData.toStringWithLabware(script.siteToNameAndModel_m)
 		val sCmds = script.line_l.mkString("\n")
 		val os = new java.io.ByteArrayOutputStream()
 		writeLines(os, sHeader)
@@ -120,7 +123,6 @@ class EvowareCompiler(
 			output.write("\r\n".getBytes())
 		}
 	}
-	*/
 	
 	private def handleStep(
 		objects: JsObject,
