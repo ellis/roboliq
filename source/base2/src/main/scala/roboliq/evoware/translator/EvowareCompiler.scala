@@ -32,13 +32,13 @@ import scala.reflect.runtime.universe.TypeTag
 
 case class EvowareScript(
 	index: Int,
-	siteToModel_m: Map[(Int, Int), EvowareLabwareModel],
-	cmd_l: Vector[String]
+	line_l: Vector[String],
+	siteToModel_m: Map[(Int, Int), String]
 )
 
 case class TranslationItem(
 	token: String,
-	siteToModel_l: Map[(Int, Int), EvowareLabwareModel]
+	siteToModel_l: Map[(Int, Int), String]
 )
 
 private case class TranslationResult(
@@ -57,10 +57,10 @@ class EvowareCompiler(
 ) {
 	private val logger = Logger[this.type]
 
-	val script_l = new ArrayBuffer[EvowareScript]
+	/*val script_l = new ArrayBuffer[EvowareScript]
 	private var scriptIndex: Int = 0
 	val cmds = new ArrayBuffer[String]
-	val siteToModel_m = new HashMap[CarrierSiteIndex, EvowareLabwareModel]
+	val siteToModel_m = new HashMap[CarrierSiteIndex, EvowareLabwareModel]*/
 
 	def buildScript(
 		input: JsObject
@@ -72,6 +72,35 @@ class EvowareCompiler(
 				handleStep(objects, pair._1)
 			}).map(_.flatten)
 		} yield token_l
+	}
+	
+	def buildScripts(
+		token_l: List[Token]
+	): List[EvowareScript] = {
+		val script_l = new ArrayBuffer[EvowareScript]()
+		val map = new HashMap[(Int, Int), String]()
+		var index = 1
+		var line_l = Vector[String]()
+		for (token <- token_l) {
+			val conflict = token.siteToLabwareModel_m.exists(pair => map.get(pair._1) match {
+				case None => false
+				case Some(s) => s != pair._2
+			})
+			if (conflict) {
+				val script = new EvowareScript(index, line_l, map.toMap)
+				script_l += script
+				index += 1
+				line_l = Vector()
+				map.clear
+			}
+			line_l +:= token.line
+			map ++= token.siteToLabwareModel_m
+		}
+		if (!line_l.isEmpty) {
+			val script = new EvowareScript(index, line_l, map.toMap)
+			script_l += script
+		}
+		script_l.toList
 	}
 	
 	private def handleStep(

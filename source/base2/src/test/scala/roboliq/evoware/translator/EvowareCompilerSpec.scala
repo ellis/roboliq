@@ -48,11 +48,12 @@ class EvowareCompilerSpec extends FunSpec {
 			val table_l: List[String] = List("mario.default")
 			val searchPath_l: List[File] = Nil
 			val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
-			val result_? = for {
+			val token_l_? = for {
 				// Load carrier file
-				//carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
-				//tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
-				//tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
+				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
+				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
+				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
+				// Compile the script
 				token_l <- compiler.buildScript(input1)
 			} yield {
 				//println("success")
@@ -69,11 +70,25 @@ class EvowareCompilerSpec extends FunSpec {
 
 			//println("result: ")
 			//println(result_?.run())
-			val expected = List(Token(
+			val expected_token_l = List(Token(
 						"""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
 						Map((10,2) -> "D-BSSE 96 Well Plate", (10,4) -> "D-BSSE 96 Well Plate")
 					))
-			assert(result_?.run().value == expected)
+			assert(token_l_?.run().value == expected_token_l)
+			
+			val script_l = compiler.buildScripts(expected_token_l)
+			println("script_l:")
+			println(expected_token_l)
+			
+			val expected_script_l = List(
+				EvowareScript(
+					1,
+					Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");"""),
+					Map((10,2) -> "D-BSSE 96 Well Plate", (10,4) -> "D-BSSE 96 Well Plate")
+				)
+			)
+			
+			assert(script_l == expected_script_l)
 		}
 	}
 }
