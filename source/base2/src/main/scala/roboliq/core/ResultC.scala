@@ -159,7 +159,7 @@ object ResultC {
 						data = {
 							// If state should not be sequenced, copy the original state back into the new context data
 							if (sequenceState) data1
-							else data0
+							else data0.copy(error_r = data1.error_r ++ data0.error_r, warning_r = data1.warning_r ++ data0.warning_r)
 						}
 					}
 				}

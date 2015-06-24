@@ -156,20 +156,24 @@ object JsConverter {
 	}
 
 	def fromJs[A: TypeTag](map: JsObject, field_l: Seq[String]): ResultC[A] = {
+		println(s"fromJs(${field_l}): "+ru.typeTag[A].tpe)
 		if (field_l.isEmpty) {
 			fromJs[A](map)
 		}
 		else {
-			map.fields.get(field_l.head) match {
-				case None => ResultC.error("missing property ${field_l.head}")
-				case Some(jsobj2: JsObject) => fromJs[A](jsobj2, field_l.tail)
+			val fieldName = field_l.head
+			map.fields.get(fieldName) match {
+				case None => ResultC.error(s"missing property $fieldName")
+				case Some(jsobj2: JsObject) => ResultC.context(fieldName) { fromJs[A](jsobj2, field_l.tail) }
 				case Some(jsval2) =>
-					val rest = field_l.tail
-					if (rest.isEmpty) {
-						fromJs[A](jsval2)
-					}
-					else {
-						ResultC.error(s"value does not contain field `${field_l.head}`: $jsval2")
+					ResultC.context(fieldName) {
+						val rest = field_l.tail
+						if (rest.isEmpty) {
+							fromJs[A](jsval2)
+						}
+						else {
+							ResultC.error(s"value does not contain field `$fieldName`: $jsval2")
+						}
 					}
 			}
 		}

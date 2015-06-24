@@ -12,7 +12,7 @@ class EvowareCompilerSpec extends FunSpec {
 
 	val input1 = JsonUtils.yamlToJson("""
     objects:
-      plate1: { type: Plate, model: ourlab.mario_model1, location: ourlab.mario_P1 }
+      plate1: { type: Plate, model: ourlab.mario_model1, location: ourlab.mario.P1 }
       ourlab:
         type: Namespace
         mario:
@@ -47,20 +47,28 @@ class EvowareCompilerSpec extends FunSpec {
 			)
 			val table_l: List[String] = List("mario.default")
 			val searchPath_l: List[File] = Nil
+			val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
 			val result_? = for {
 				// Load carrier file
-				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
-				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
-				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
-				compiler = new EvowareCompiler("ourlab.mario.evoware", false)
+				//carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
+				//tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
+				//tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
 				token_l <- compiler.buildScript(input1)
 			} yield {
+				println("success")
 				token_l.foreach(println)
 				token_l
 			}
 			
+			//val test_? = roboliq.input.JsConverter.fromJs[String](input1.fields("objects").asJsObject, List("ourlab", "mario_P1", "evowareCarrier"))
+			//assert(test_?.run().value == "")
+			//val test2_? = compiler.lookupAs[String](input1.fields("objects").asJsObject, "ourlab.mario_P1", "evowareCarrier")
+			//assert(test2_?.run().value == "")
+			
 			//val expected = Nothing
 
+			//println("result: ")
+			//println(result_?.run())
 			assert(result_?.run().value == List(Token("nothing")))
 		}
 	}

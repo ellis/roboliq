@@ -68,7 +68,9 @@ class EvowareCompiler(
 		for {
 			objects <- JsConverter.fromJs[JsObject](input, "objects")
 			step_l <- JsConverter.fromJs[List[JsObject]](input, "steps")
-			token_l <- ResultC.map(step_l)(step => handleStep(objects, step)).map(_.flatten)
+			token_l <- ResultC.map(step_l.zipWithIndex)(pair => ResultC.context("step "+(pair._2+1)) {
+				handleStep(objects, pair._1)
+			}).map(_.flatten)
 		} yield token_l
 	}
 	
@@ -100,6 +102,7 @@ class EvowareCompiler(
 				case _ =>
 					ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
 			}
+			_ = println("token_?: "+token_?)
 		} yield token_?
 	}
 	
@@ -135,7 +138,8 @@ class EvowareCompiler(
 		objectName: String,
 		fieldName: String
 	): ResultC[A] = {
-		val field_l = objectName.split(".").toVector ++ fieldName.split(".").toVector
+		val field_l = (objectName+"."+fieldName).split('.').toList
+		println(s"lookupAs($objectName, $fieldName): ${field_l}")
 		JsConverter.fromJs[A](objects, field_l)
 	}
 	
@@ -146,16 +150,27 @@ class EvowareCompiler(
 		println(s"handleTransporterMovePlate: $step")
 		for {
 			x <- JsConverter.fromJs[TransporterMovePlate](step)
+			_ = println("A")
 			romaIndex <- lookupAs[Int](objects, x.equipment, "evowareRoma")
+			_ = println("B")
 			programName <- ResultC.from(x.program_?, "required `program` parameter")
+			_ = println("C")
 			plateModelName <- lookupAs[String](objects, x.`object`, "model")
+			_ = println("D")
 			plateOrigName <- lookupAs[String](objects, x.`object`, "location")
+			_ = println("E")
 			plateOrigCarrierName <- lookupAs[String](objects, plateOrigName, "evowareCarrier")
+			_ = println("F")
 			plateOrigGrid <- lookupAs[Int](objects, plateOrigName, "evowareGrid")
+			_ = println("G")
 			plateOrigSite <- lookupAs[Int](objects, plateOrigName, "evowareSite")
+			_ = println("H")
 			plateDestCarrierName <- lookupAs[String](objects, x.destination, "evowareCarrier")
+			_ = println("I")
 			plateDestGrid <- lookupAs[Int](objects, x.destination, "evowareGrid")
+			_ = println("J")
 			plateDestSite <- lookupAs[Int](objects, x.destination, "evowareSite")
+			_ = println("K")
 		} yield {
 			val bMoveBackToHome = x.evowareMoveBackToHome_? != Some(false) // 1 = move back to home position
 			val line = List(
