@@ -54,7 +54,7 @@ class EvowareCompilerSpec extends FunSpec {
 				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
 				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
 				// Compile the script
-				token_l <- compiler.buildScript(input1)
+				token_l <- compiler.buildTokens(input1)
 			} yield {
 				//println("success")
 				//token_l.foreach(println)
@@ -72,7 +72,7 @@ class EvowareCompilerSpec extends FunSpec {
 			//println(result_?.run())
 			val expected_token_l = List(Token(
 						"""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");""",
-						Map((10,2) -> "D-BSSE 96 Well Plate", (10,4) -> "D-BSSE 96 Well Plate")
+						Map((10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), (10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
 					))
 			assert(token_l_?.run().value == expected_token_l)
 			
@@ -84,7 +84,7 @@ class EvowareCompilerSpec extends FunSpec {
 				EvowareScript(
 					1,
 					Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","D-BSSE 96 Well Plate","Narrow","","","some carrier","","some carrier","3",(Not defined),"5");"""),
-					Map((10,2) -> "D-BSSE 96 Well Plate", (10,4) -> "D-BSSE 96 Well Plate")
+					Map((10,2) -> ("ourlab.mario.P1", "D-BSSE 96 Well Plate"), (10,4) -> ("ourlab.mario.P2", "D-BSSE 96 Well Plate"))
 				)
 			)
 			

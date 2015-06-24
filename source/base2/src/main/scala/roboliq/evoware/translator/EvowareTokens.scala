@@ -5,7 +5,7 @@ import roboliq.evoware.parser.CarrierGridSiteIndex
 
 case class Token(
 	line: String,
-	siteToLabwareModel_m: Map[(Int, Int), String] = Map()
+	siteToNameAndModel_m: Map[(Int, Int), (String, String)] = Map()
 ) {
 	
 }

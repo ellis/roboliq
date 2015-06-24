@@ -33,22 +33,8 @@ import scala.reflect.runtime.universe.TypeTag
 case class EvowareScript(
 	index: Int,
 	line_l: Vector[String],
-	siteToModel_m: Map[(Int, Int), String]
+	siteToNameAndModel_m: Map[(Int, Int), (String, String)]
 )
-
-case class TranslationItem(
-	token: String,
-	siteToModel_l: Map[(Int, Int), String]
-)
-
-private case class TranslationResult(
-	item_l: List[TranslationItem],
-	state1: JsObject
-)
-
-private object TranslationResult {
-	def empty(state1: JsObject) = TranslationResult(Nil, state1)
-}
 
 class EvowareCompiler(
 	agentName: String,
@@ -62,7 +48,7 @@ class EvowareCompiler(
 	val cmds = new ArrayBuffer[String]
 	val siteToModel_m = new HashMap[CarrierSiteIndex, EvowareLabwareModel]*/
 
-	def buildScript(
+	def buildTokens(
 		input: JsObject
 	): ResultC[List[Token]] = {
 		for {
@@ -78,11 +64,11 @@ class EvowareCompiler(
 		token_l: List[Token]
 	): List[EvowareScript] = {
 		val script_l = new ArrayBuffer[EvowareScript]()
-		val map = new HashMap[(Int, Int), String]()
+		val map = new HashMap[(Int, Int), (String, String)]()
 		var index = 1
 		var line_l = Vector[String]()
 		for (token <- token_l) {
-			val conflict = token.siteToLabwareModel_m.exists(pair => map.get(pair._1) match {
+			val conflict = token.siteToNameAndModel_m.exists(pair => map.get(pair._1) match {
 				case None => false
 				case Some(s) => s != pair._2
 			})
@@ -94,7 +80,7 @@ class EvowareCompiler(
 				map.clear
 			}
 			line_l +:= token.line
-			map ++= token.siteToLabwareModel_m
+			map ++= token.siteToNameAndModel_m
 		}
 		if (!line_l.isEmpty) {
 			val script = new EvowareScript(index, line_l, map.toMap)
@@ -102,6 +88,38 @@ class EvowareCompiler(
 		}
 		script_l.toList
 	}
+
+	/*
+	def generateScripts(
+		script_l: List[EvowareScript],
+		basename: String
+	): List[(String, Array[Byte])] = {
+		script_l.map { script =>
+			val filename = basename + (if (script.index <= 1) "" else f"_${script.index}%02d") + ".esc"
+			logger.debug("generateScripts: filename: "+filename)
+			filename -> generateWithHeader(script)
+		}
+	}
+	
+	private def generateWithHeader(script: EvowareScript): Array[Byte] = {
+		val siteToLabel_m = script.siteToNameAndModel_m.map(pair => pair._1 -> pair._2._1)
+		val sHeader = config.table.toStringWithLabware(siteToLabel_m, script.siteToModel_m)
+		val sCmds = script.line_l.mkString("\n")
+		val os = new java.io.ByteArrayOutputStream()
+		writeLines(os, sHeader)
+		writeLines(os, sCmds);
+		os.toByteArray()
+	}
+	
+	private def writeLines(output: java.io.OutputStream, s: String) {
+		val as = s.split("\r?\n")
+		for (sLine <- as if !s.isEmpty) {
+			val bytes = sLine.map(_.asInstanceOf[Byte]).toArray
+			output.write(bytes)
+			output.write("\r\n".getBytes())
+		}
+	}
+	*/
 	
 	private def handleStep(
 		objects: JsObject,
@@ -187,7 +205,8 @@ class EvowareCompiler(
 			plateOrigCarrierName <- lookupAs[String](objects, plateOrigName, "evowareCarrier")
 			plateOrigGrid <- lookupAs[Int](objects, plateOrigName, "evowareGrid")
 			plateOrigSite <- lookupAs[Int](objects, plateOrigName, "evowareSite")
-			plateDestCarrierName <- lookupAs[String](objects, x.destination, "evowareCarrier")
+			plateDestName = x.destination
+			plateDestCarrierName <- lookupAs[String](objects, plateDestName, "evowareCarrier")
 			plateDestGrid <- lookupAs[Int](objects, x.destination, "evowareGrid")
 			plateDestSite <- lookupAs[Int](objects, x.destination, "evowareSite")
 		} yield {
@@ -213,7 +232,11 @@ class EvowareCompiler(
 				s""""${plateDestSite+1}""""
 			).mkString("Transfer_Rack(", ",", ");")
 			//println(s"line: $line")
-			Some(Token(line, Map((plateOrigGrid, plateOrigSite) -> plateModelName, (plateDestGrid, plateDestSite) -> plateModelName)))
+			val siteToNameAndModel_m = Map(
+				(plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName),
+				(plateDestGrid, plateDestSite) -> (plateDestName, plateModelName)
+			)
+			Some(Token(line, siteToNameAndModel_m))
 		}
 	}
 }
