@@ -31,24 +31,38 @@ class EvowareCompilerSpec extends FunSpec {
     ]
 """).asJsObject
 
+	val evowareTableSetupConfig = EvowareTableSetupConfig(
+		tableFile = "../testdata/bsse-mario/Template.ewt",
+		protocolDetails_? = None,
+		evowareProtocolData_? = None
+	)
+	val evowareAgentConfig = EvowareAgentConfig(
+		name = "mario",
+		evowareDir = "../testdata/bsse-mario",
+		protocolDetails_? = None,
+		evowareProtocolData_? = None,
+		tableSetups = Map("default"  -> evowareTableSetupConfig)
+	)
+	val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
+
+	val carrierName = "MP 2Pos H+P Shake"
+	val token1_l = List(Token(
+		"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
+		Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"))
+	))
+	val script1_l = List(
+		EvowareScript(
+			1,
+			Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");"""),
+			Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"))
+		)
+	)
+	
+	// CONTINUE: add typo to input1 in model1.evowareName, and make sure a ResultC error is produced instead of an exception
+	// CONTINUE: add typo to input1 in P1.evowareCarrier, and make sure a ResultC error is produced instead of an exception
 
 	describe("EvowareCompiler") {
-		it("test compiling") {
-			val evowareTableSetupConfig = EvowareTableSetupConfig(
-				tableFile = "../testdata/bsse-mario/Template.ewt",
-				protocolDetails_? = None,
-				evowareProtocolData_? = None
-			)
-			val evowareAgentConfig = EvowareAgentConfig(
-				name = "mario",
-				evowareDir = "../testdata/bsse-mario",
-				protocolDetails_? = None,
-				evowareProtocolData_? = None,
-				tableSetups = Map("default"  -> evowareTableSetupConfig)
-			)
-			val table_l: List[String] = List("mario.default")
-			val searchPath_l: List[File] = Nil
-			val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
+		it("input1: build tokens") {
 			val token_l_? = for {
 				// Compile the script
 				token_l <- compiler.buildTokens(input1)
@@ -57,43 +71,27 @@ class EvowareCompilerSpec extends FunSpec {
 				//token_l.foreach(println)
 				token_l
 			}
-			
-			//val test_? = roboliq.input.JsConverter.fromJs[String](input1.fields("objects").asJsObject, List("ourlab", "mario_P1", "evowareCarrier"))
-			//assert(test_?.run().value == "")
-			//val test2_? = compiler.lookupAs[String](input1.fields("objects").asJsObject, "ourlab.mario_P1", "evowareCarrier")
-			//assert(test2_?.run().value == "")
-			
-			//val expected = Nothing
-
-			//println("result: ")
-			//println(result_?.run())
-			val carrierName = "MP 2Pos H+P Shake"
-			val expected_token_l = List(Token(
-						"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
-						Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"))
-					))
-			assert(token_l_?.run().value == expected_token_l)
-			
+			assert(token_l_?.run().value === token1_l)
+		}
+		
+		it("input1: build scripts") {
 			// Test generation of EvowareScript objects from tokens
-			val script_l = compiler.buildScripts(expected_token_l)
-			val expected_script_l = List(
-				EvowareScript(
-					1,
-					Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");"""),
-					Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P1", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"))
-				)
-			)
+			val script_l = compiler.buildScripts(token1_l)
 			
-			assert(script_l == expected_script_l)
-			
+			assert(script_l === script1_l)
+		}
+		
+		it("input1: generate script contents") {
 			// Test generation of script content from EvowareScript objects
+			val table_l: List[String] = List("mario.default")
+			val searchPath_l: List[File] = Nil
 			val content_l_? = for {
 				// Load carrier file
 				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
 				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
 				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
 			} yield {
-				val l = compiler.generateScriptContents(tableData, "test", script_l)
+				val l = compiler.generateScriptContents(tableData, "test", script1_l)
 				l.foreach(println)
 			}
 			
