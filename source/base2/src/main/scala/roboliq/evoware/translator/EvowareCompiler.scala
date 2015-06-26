@@ -95,7 +95,7 @@ class EvowareCompiler(
 				map.clear
 			}
 			if (!token.line.isEmpty)
-				line_l +:= token.line
+				line_l :+= token.line
 			map ++= token.siteToNameAndModel_m
 		}
 		if (!line_l.isEmpty) {
@@ -256,9 +256,9 @@ class EvowareCompiler(
 				s""""$plateOrigCarrierName"""",
 				"\"\"", //'"'+sCarrierLid+'"',
 				s""""$plateDestCarrierName"""",
-				s""""${plateOrigSite+1}"""",
-				"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else (iSiteLid+1).toString)+'"',
-				s""""${plateDestSite+1}""""
+				s""""$plateOrigSite"""",
+				"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
+				s""""$plateDestSite""""
 			).mkString("Transfer_Rack(", ",", ");")
 			//println(s"line: $line")
 			val let = JsonUtils.makeSimpleObject(x.`object`+".location", JsString(plateDestName))

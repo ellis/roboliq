@@ -29,8 +29,8 @@ class EvowareCompilerSpec extends FunSpec {
     steps:
       - {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
       - {let: {plate1: {location: ourlab.mario.P3}}}
-#      {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2},
-#      {let: {plate1: {location: ourlab.mario.P2}}}
+      - {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2}
+      - {let: {plate1: {location: ourlab.mario.P2}}}
 """).asJsObject
 
 	val evowareTableSetupConfig = EvowareTableSetupConfig(
@@ -50,7 +50,7 @@ class EvowareCompilerSpec extends FunSpec {
 	val carrierName = "MP 2Pos H+P Shake"
 	val token1_l = List(
 		Token(
-			"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
+			"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","2",(Not defined),"4");""",
 			JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P3")),
 			Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P3", "Ellis Nunc F96 MicroWell"))
 		),
@@ -58,16 +58,31 @@ class EvowareCompilerSpec extends FunSpec {
 			"",
 			JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P3")),
 			Map()
+		),
+		Token(
+			"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","4",(Not defined),"2");""",
+			JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P2")),
+			Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P3", "Ellis Nunc F96 MicroWell"))
+		),
+		Token(
+			"",
+			JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P2")),
+			Map()
 		)
 	)
 	val script1_l = List(
 		EvowareScript(
 			1,
-			Vector("""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");"""),
+			Vector(
+				"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","2",(Not defined),"4");""",
+				"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","4",(Not defined),"2");"""
+			),
 			Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P3", "Ellis Nunc F96 MicroWell"))
 		)
 	)
-	
+
+//List(EvowareScript(1,Vector(Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","4",(Not defined),"2");, Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","2",(Not defined),"4");),Map(CarrierNameGridSiteIndex(MP 2Pos H+P Shake,10,2) -> (ourlab.mario.P2,Ellis Nunc F96 MicroWell), CarrierNameGridSiteIndex(MP 2Pos H+P Shake,10,4) -> (ourlab.mario.P3,Ellis Nunc F96 MicroWell))))
+//List(EvowareScript(1,Vector(Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","2",(Not defined),"4");, Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","4",(Not defined),"2");),Map(CarrierNameGridSiteIndex(MP 2Pos H+P Shake,10,2) -> (ourlab.mario.P2,Ellis Nunc F96 MicroWell), CarrierNameGridSiteIndex(MP 2Pos H+P Shake,10,4) -> (ourlab.mario.P3,Ellis Nunc F96 MicroWell))))	
 	describe("EvowareCompiler") {
 		it("input1: build tokens") {
 			val token_l_? = for {
