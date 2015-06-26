@@ -2,8 +2,8 @@
 
 Immediate:
 
-* [ ] EvowareCompiler: process `set` steps
-* [ ] EvowareCompiler: instructions should add state changes as part of their Token output
+* [x] EvowareCompiler: instructions should add state changes as part of their Token output
+* [x] EvowareCompiler: process `let` steps
 * [ ] try EvowareCompiler input with 2 move instructions (with or without explicit state changes)
 
 What does roboliq provide?

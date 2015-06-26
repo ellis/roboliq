@@ -94,7 +94,8 @@ class EvowareCompiler(
 				line_l = Vector()
 				map.clear
 			}
-			line_l +:= token.line
+			if (!token.line.isEmpty)
+				line_l +:= token.line
 			map ++= token.siteToNameAndModel_m
 		}
 		if (!line_l.isEmpty) {

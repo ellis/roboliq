@@ -26,12 +26,11 @@ class EvowareCompilerSpec extends FunSpec {
           P2: { type: Site, evowareCarrier: "MP 2Pos H+P Shake", evowareGrid: 10, evowareSite: 2 }
           P3: { type: Site, evowareCarrier: "MP 2Pos H+P Shake", evowareGrid: 10, evowareSite: 4 }
         model1: { type: PlateModel, evowareName: Ellis Nunc F96 MicroWell }
-    steps: [
-      {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
-#      {let: {plate1: {location: ourlab.mario.P3}}},
+    steps:
+      - {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
+      - {let: {plate1: {location: ourlab.mario.P3}}}
 #      {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2},
 #      {let: {plate1: {location: ourlab.mario.P2}}}
-    ]
 """).asJsObject
 
 	val evowareTableSetupConfig = EvowareTableSetupConfig(
@@ -49,11 +48,18 @@ class EvowareCompilerSpec extends FunSpec {
 	val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
 
 	val carrierName = "MP 2Pos H+P Shake"
-	val token1_l = List(Token(
-		"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
-		JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P3")),
-		Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P3", "Ellis Nunc F96 MicroWell"))
-	))
+	val token1_l = List(
+		Token(
+			"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
+			JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P3")),
+			Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P3", "Ellis Nunc F96 MicroWell"))
+		),
+		Token(
+			"",
+			JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P3")),
+			Map()
+		)
+	)
 	val script1_l = List(
 		EvowareScript(
 			1,
