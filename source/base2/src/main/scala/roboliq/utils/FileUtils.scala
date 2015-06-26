@@ -9,6 +9,14 @@ object FileUtils {
 	def writeToFile(fileName: String, data: String) {
 		printToFile(new File(fileName))(p => p.print(data))
 	}
+	
+	def writeBytesToFile(file: java.io.File, content: Array[Byte]) {
+		// Save to file system
+		val os = new java.io.FileOutputStream(file)
+		try { os.write(content) }
+		finally { os.close() }
+	}
+
 	/*
 	def appendToFile(fileName:String, textData:String) =
 		using (new FileWriter(fileName, true)){ 

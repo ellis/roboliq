@@ -57,7 +57,7 @@ class EvowareTableData(
 		// TODO: do we need to save values for the 999 line when loading the table?
 		val l = List(
 				"00000000",
-				"20111117_122139 No log in       ",
+				"20000101_000000 No log in       ",
 				"                                                                                                                                ",
 				"No user logged in                                                                                                               ",
 				"--{ RES }--",
@@ -84,14 +84,15 @@ class EvowareTableData(
 				for {
 					carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
 				} yield {
-					val siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex)
-					siteId -> label
+					val siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex - 1)
+					val label2 = label.split('.').last
+					siteId -> label2
 				}
 			}
 			siteIdToLabwareModel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (_, labwareModelName)) =>
 				for {
 					carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
-					siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex)
+					siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex - 1)
 					labwareModel <- ResultC.from(configFile.mapNameToLabwareModel.get(labwareModelName), s"labware model `${labwareModelName}` not present in the evoware config file")
 				} yield siteId -> labwareModel
 			}
