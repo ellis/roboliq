@@ -84,7 +84,7 @@ class EvowareCompilerSpec extends FunSpec {
 			// Test generation of script content from EvowareScript objects
 			val table_l: List[String] = List("mario.default")
 			val searchPath_l: List[File] = Nil
-			val content_l_? = for {
+			val result_? = for {
 				// Load carrier file
 				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
 				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
@@ -99,9 +99,10 @@ class EvowareCompilerSpec extends FunSpec {
 					FileUtils.writeBytesToFile(file, bytes)
 					assert(FileUtils.contentEquals(file, new java.io.File(dir, "accepted.esc")))
 				}
+				()
 			}
 			
-			content_l_?.run().value
+			result_?.run().value
 		}
 	}
 }
