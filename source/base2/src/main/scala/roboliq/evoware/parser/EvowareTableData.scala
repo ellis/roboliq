@@ -92,7 +92,7 @@ class EvowareTableData(
 				for {
 					carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
 					siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex)
-					labwareModel <- ResultC.from(configFile.mapNameToLabwareModel.get(labwareModelName), s"labware model `${cngsi.carrierName}` not present in the evoware config file")
+					labwareModel <- ResultC.from(configFile.mapNameToLabwareModel.get(labwareModelName), s"labware model `${labwareModelName}` not present in the evoware config file")
 				} yield siteId -> labwareModel
 			}
 		} yield {

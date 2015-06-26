@@ -95,7 +95,7 @@ class EvowareCompilerSpec extends FunSpec {
 				l.foreach(println)
 			}
 			
-			content_l_?.run()
+			content_l_?.run().value
 		}
 	}
 }
