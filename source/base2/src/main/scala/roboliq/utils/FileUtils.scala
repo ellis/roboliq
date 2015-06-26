@@ -46,4 +46,8 @@ object FileUtils {
 		
 		RsError(s"Could not find file: $filename")
 	}
+	
+	def contentEquals(file1: java.io.File, file2: java.io.File): Boolean = {
+		org.apache.commons.io.FileUtils.contentEquals(file1, file2)
+	}
 }

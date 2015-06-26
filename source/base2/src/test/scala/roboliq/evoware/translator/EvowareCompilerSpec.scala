@@ -8,6 +8,7 @@ import java.io.File
 import roboliq.evoware.config.EvowareAgentConfigProcessor
 import roboliq.evoware.parser.CarrierNameGridSiteIndex
 import roboliq.utils.FileUtils
+import roboliq.utils.FileUtils
 
 class EvowareCompilerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -96,6 +97,7 @@ class EvowareCompilerSpec extends FunSpec {
 				for ((filename, bytes) <- content_l) {
 					val file = new java.io.File(dir, filename)
 					FileUtils.writeBytesToFile(file, bytes)
+					assert(FileUtils.contentEquals(file, new java.io.File(dir, "accepted.esc")))
 				}
 			}
 			
