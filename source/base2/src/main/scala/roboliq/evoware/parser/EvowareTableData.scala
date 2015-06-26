@@ -6,6 +6,7 @@ import ch.ethz.reactivesim.RsSuccess
 import java.io.File
 import org.apache.commons.io.FileUtils
 import scala.collection.immutable
+import roboliq.core.ResultC
 
 
 
@@ -42,10 +43,11 @@ class EvowareTableData(
 		).flatten.mkString("\n")
 	}
 	
+	/*
 	def toStringWithLabware(
 		siteIdToLabel_m2: Map[CarrierGridSiteIndex, String],
 		siteIdToLabwareModel_m2: Map[CarrierGridSiteIndex, EvowareLabwareModel]
-	): String = {
+	): ResultC[String] = {
 		val siteIdToLabel_m3 = siteIdToLabel_m ++ siteIdToLabel_m2
 		val siteIdToLabwareModel_m3 = siteIdToLabwareModel_m ++ siteIdToLabwareModel_m2
 		//println("siteIdToLabwareModel_m:")
@@ -72,46 +74,54 @@ class EvowareTableData(
 			List("996;0;0;", "--{ RPG }--")
 		l.mkString("\n")
 	}
+	*/
 	
 	def toStringWithLabware(
 		siteToNameAndLabel_m: Map[CarrierNameGridSiteIndex, (String, String)]
-	): String = {
-		val siteIdToLabel_m2 = siteToNameAndLabel_m.map { case (cngsi, (label, _)) =>
-			val carrierId = configFile.mapNameToCarrier(cngsi.carrierName).id
-			val siteId = CarrierGridSiteIndex(carrierId, cngsi.gridIndex, cngsi.siteIndex)
-			siteId -> label
+	): ResultC[String] = {
+		for {
+			siteIdToLabel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (label, _)) =>
+				for {
+					carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
+				} yield {
+					val siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex)
+					siteId -> label
+				}
+			}
+			siteIdToLabwareModel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (_, labwareModelName)) =>
+				for {
+					carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
+					siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex)
+					labwareModel <- ResultC.from(configFile.mapNameToLabwareModel.get(labwareModelName), s"labware model `${cngsi.carrierName}` not present in the evoware config file")
+				} yield siteId -> labwareModel
+			}
+		} yield {
+			val siteIdToLabel_m3 = siteIdToLabel_m ++ siteIdToLabel_m2
+			val siteIdToLabwareModel_m3 = siteIdToLabwareModel_m ++ siteIdToLabwareModel_m2
+			//println("siteIdToLabwareModel_m:")
+			//siteIdToLabwareModel_m3.foreach(println)
+			// TODO: output current date and time
+			// TODO: See whether we need to save the RES section when loading in the table
+			// TODO: do we need to save values for the 999 line when loading the table?
+			val l = List(
+					"00000000",
+					"20111117_122139 No log in       ",
+					"                                                                                                                                ",
+					"No user logged in                                                                                                               ",
+					"--{ RES }--",
+					"V;200",
+					"--{ CFG }--",
+					"999;219;32;"
+				) ++
+				toString_carriers() ++
+				toString_tableLabware(siteIdToLabel_m3, siteIdToLabwareModel_m3) ++
+				toString_hotels() ++
+				toString_externals() ++
+				toString_externalLabware(siteIdToLabwareModel_m3) ++
+				toString_externalGrids() ++
+				List("996;0;0;", "--{ RPG }--")
+			l.mkString("\n")
 		}
-		val siteIdToLabwareModel_m2 = siteToNameAndLabel_m.map { case (cngsi, (_, labwareModelName)) =>
-			val carrierId = configFile.mapNameToCarrier(cngsi.carrierName).id
-			val siteId = CarrierGridSiteIndex(carrierId, cngsi.gridIndex, cngsi.siteIndex)
-			val labwareModel = configFile.mapNameToLabwareModel(labwareModelName)
-			siteId -> labwareModel
-		}
-		val siteIdToLabel_m3 = siteIdToLabel_m ++ siteIdToLabel_m2
-		val siteIdToLabwareModel_m3 = siteIdToLabwareModel_m ++ siteIdToLabwareModel_m2
-		//println("siteIdToLabwareModel_m:")
-		//siteIdToLabwareModel_m3.foreach(println)
-		// TODO: output current date and time
-		// TODO: See whether we need to save the RES section when loading in the table
-		// TODO: do we need to save values for the 999 line when loading the table?
-		val l = List(
-				"00000000",
-				"20111117_122139 No log in       ",
-				"                                                                                                                                ",
-				"No user logged in                                                                                                               ",
-				"--{ RES }--",
-				"V;200",
-				"--{ CFG }--",
-				"999;219;32;"
-			) ++
-			toString_carriers() ++
-			toString_tableLabware(siteIdToLabel_m3, siteIdToLabwareModel_m3) ++
-			toString_hotels() ++
-			toString_externals() ++
-			toString_externalLabware(siteIdToLabwareModel_m3) ++
-			toString_externalGrids() ++
-			List("996;0;0;", "--{ RPG }--")
-		l.mkString("\n")
 	}
 	
 	private def toString_carriers(): List[String] = {

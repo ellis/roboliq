@@ -95,24 +95,29 @@ class EvowareCompiler(
 		tableData: EvowareTableData,
 		basename: String,
 		script_l: List[EvowareScript]
-	): List[(String, Array[Byte])] = {
-		script_l.map { script =>
+	): ResultC[List[(String, Array[Byte])]] = {
+		ResultC.map(script_l) { script =>
 			val filename = basename + (if (script.index <= 1) "" else f"_${script.index}%02d") + ".esc"
-			logger.debug("generateScripts: filename: "+filename)
-			filename -> generateWithHeader(tableData, script)
+			//logger.debug("generateScripts: filename: "+filename)
+			for {
+				bytes <- generateWithHeader(tableData, script)
+			} yield filename -> bytes
 		}
 	}
 	
 	private def generateWithHeader(
 		tableData: EvowareTableData,
 		script: EvowareScript
-	): Array[Byte] = {
-		val sHeader = tableData.toStringWithLabware(script.siteToNameAndModel_m)
-		val sCmds = script.line_l.mkString("\n")
-		val os = new java.io.ByteArrayOutputStream()
-		writeLines(os, sHeader)
-		writeLines(os, sCmds);
-		os.toByteArray()
+	): ResultC[Array[Byte]] = {
+		for {
+			sHeader <- tableData.toStringWithLabware(script.siteToNameAndModel_m)
+		} yield {
+			val sCmds = script.line_l.mkString("\n")
+			val os = new java.io.ByteArrayOutputStream()
+			writeLines(os, sHeader)
+			writeLines(os, sCmds);
+			os.toByteArray()
+		}
 	}
 	
 	private def writeLines(output: java.io.OutputStream, s: String) {

@@ -90,8 +90,8 @@ class EvowareCompilerSpec extends FunSpec {
 				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
 				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
 				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
+				l <- compiler.generateScriptContents(tableData, "test", script1_l)
 			} yield {
-				val l = compiler.generateScriptContents(tableData, "test", script1_l)
 				l.foreach(println)
 			}
 			
