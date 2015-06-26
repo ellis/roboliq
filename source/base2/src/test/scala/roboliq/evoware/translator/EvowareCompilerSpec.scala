@@ -9,6 +9,7 @@ import roboliq.evoware.config.EvowareAgentConfigProcessor
 import roboliq.evoware.parser.CarrierNameGridSiteIndex
 import roboliq.utils.FileUtils
 import roboliq.utils.FileUtils
+import spray.json.JsString
 
 class EvowareCompilerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -27,9 +28,9 @@ class EvowareCompilerSpec extends FunSpec {
         model1: { type: PlateModel, evowareName: Ellis Nunc F96 MicroWell }
     steps: [
       {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
-#      {set: {plate1: {location: ourlab.mario.P3}}},
+#      {let: {plate1: {location: ourlab.mario.P3}}},
 #      {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2},
-#      {set: {plate1: {location: ourlab.mario.P2}}}
+#      {let: {plate1: {location: ourlab.mario.P2}}}
     ]
 """).asJsObject
 
@@ -50,6 +51,7 @@ class EvowareCompilerSpec extends FunSpec {
 	val carrierName = "MP 2Pos H+P Shake"
 	val token1_l = List(Token(
 		"""Transfer_Rack("10","10",1,0,0,0,0,"","Ellis Nunc F96 MicroWell","Narrow","","","MP 2Pos H+P Shake","","MP 2Pos H+P Shake","3",(Not defined),"5");""",
+		JsonUtils.makeSimpleObject("plate1.location", JsString("ourlab.mario.P3")),
 		Map(CarrierNameGridSiteIndex(carrierName,10,2) -> ("ourlab.mario.P2", "Ellis Nunc F96 MicroWell"), CarrierNameGridSiteIndex(carrierName,10,4) -> ("ourlab.mario.P3", "Ellis Nunc F96 MicroWell"))
 	))
 	val script1_l = List(

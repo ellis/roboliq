@@ -1,5 +1,11 @@
 # TODOs for roboliq
 
+Immediate:
+
+* [ ] EvowareCompiler: process `set` steps
+* [ ] EvowareCompiler: instructions should add state changes as part of their Token output
+* [ ] try EvowareCompiler input with 2 move instructions (with or without explicit state changes)
+
 What does roboliq provide?
 
 * defines hierarchy of types, with description and properties (and javascript validation? string parsing (e.g. for volumes)?)

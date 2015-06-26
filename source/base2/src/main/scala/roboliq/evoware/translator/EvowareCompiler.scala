@@ -11,6 +11,8 @@ import roboliq.input.JsConverter
 import scala.reflect.runtime.universe.TypeTag
 import roboliq.evoware.parser.CarrierNameGridSiteIndex
 import roboliq.evoware.parser.EvowareTableData
+import roboliq.utils.JsonUtils
+import spray.json.JsString
 
 /*
     objects:
@@ -53,11 +55,22 @@ class EvowareCompiler(
 	def buildTokens(
 		input: JsObject
 	): ResultC[List[Token]] = {
+		var objects = JsObject()
 		for {
-			objects <- JsConverter.fromJs[JsObject](input, "objects")
+			objects0 <- JsConverter.fromJs[JsObject](input, "objects")
+			_ = objects = objects0
 			step_l <- JsConverter.fromJs[List[JsObject]](input, "steps")
 			token_l <- ResultC.map(step_l.zipWithIndex)(pair => ResultC.context("step "+(pair._2+1)) {
-				handleStep(objects, pair._1)
+				for {
+					token <- handleStep(objects, pair._1)
+					objects1 <- ResultC.context("effects") {
+						if (token.isDefined) JsonUtils.mergeMaps(objects, token.get.let)
+						else ResultC.unit(objects)
+					}
+				} yield {
+					objects = objects1
+					token
+				}
 			}).map(_.flatten)
 		} yield token_l
 	}
@@ -137,8 +150,8 @@ class EvowareCompiler(
 		for {
 			commandName_? <- JsConverter.fromJs[Option[String]](step, "command")
 			agentName_? <- JsConverter.fromJs[Option[String]](step, "agent")
-			set_? <- JsConverter.fromJs[Option[JsObject]](step, "set")
-			token_? <- (commandName_?, agentName_?, set_?) match {
+			let_? <- JsConverter.fromJs[Option[JsObject]](step, "let")
+			token_? <- (commandName_?, agentName_?, let_?) match {
 				case ((Some(commandName), Some(agentName), None)) =>
 					if (agentName == this.agentName) {
 						handleCommand(objects, commandName, agentName, step)
@@ -150,8 +163,8 @@ class EvowareCompiler(
 						println("command ignored due to agent: "+step)
 						ResultC.unit(None)
 					}
-				case (None, None, Some(set)) =>
-					???
+				case (None, None, Some(let)) =>
+					handleLet(objects, let)
 				case (None, None, None) =>
 					ResultC.unit(None)
 				case _ =>
@@ -159,6 +172,13 @@ class EvowareCompiler(
 			}
 			//_ = println("token_?: "+token_?)
 		} yield token_?
+	}
+	
+	private def handleLet(
+		objects: JsObject,
+		let: JsObject
+	): ResultC[Option[Token]] = {
+		ResultC.unit(Some(Token("", let, Map())))
 	}
 	
 	private def handleUserCommand(
@@ -240,11 +260,12 @@ class EvowareCompiler(
 				s""""${plateDestSite+1}""""
 			).mkString("Transfer_Rack(", ",", ");")
 			//println(s"line: $line")
+			val let = JsonUtils.makeSimpleObject(x.`object`+".location", JsString(plateDestName))
 			val siteToNameAndModel_m = Map(
 				CarrierNameGridSiteIndex(plateOrigCarrierName, plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName),
 				CarrierNameGridSiteIndex(plateDestCarrierName, plateDestGrid, plateDestSite) -> (plateDestName, plateModelName)
 			)
-			Some(Token(line, siteToNameAndModel_m))
+			Some(Token(line, let, siteToNameAndModel_m))
 		}
 	}
 }

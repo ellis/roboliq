@@ -79,4 +79,14 @@ object JsonUtils {
 			}
 		} yield a
 	}
+	
+	/**
+	 * Take a period-separated key and a JsValue, and create a hierarchy of JsObjects.
+	 * For example: makeSimpleObject("hi.there", JsString("Mom")) = JsObject("hi" -> JsObject("there" -> JsString("Mom")))
+	 */
+	def makeSimpleObject(key: String, value: JsValue): JsObject = {
+		val name_l = key.split('.').toVector
+		val o0 = JsObject(name_l.last -> value)
+		name_l.init.foldRight(o0) { (name, o) => JsObject(name -> o) }
+	}
 }

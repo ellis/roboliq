@@ -2,9 +2,11 @@ package roboliq.evoware.translator
 
 import roboliq.evoware.parser.EvowareLabwareModel
 import roboliq.evoware.parser.CarrierNameGridSiteIndex
+import spray.json.JsObject
 
 case class Token(
 	line: String,
+	let: JsObject,
 	siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)] = Map()
 ) {
 	
