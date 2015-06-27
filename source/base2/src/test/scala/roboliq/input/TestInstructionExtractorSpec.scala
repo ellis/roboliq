@@ -5,6 +5,11 @@ import roboliq.utils.JsonUtils
 import roboliq.utils.MiscUtils
 import spray.json.JsObject
 import spray.json.JsArray
+import spray.json.JsValue
+import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.NativeArray
+import scala.collection.immutable.ListMap
+import scala.collection.JavaConversions._
 
 class TestInstructionExtractorSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -45,5 +50,79 @@ class TestInstructionExtractorSpec extends FunSpec {
 			val output = JsObject(input1.fields  + ("steps" -> JsArray(step_l0)))
 			println(output.prettyPrint)
 		}
+		it("mmm") {
+			import org.mozilla.javascript._
+			val cx = Context.enter()
+			try {
+				cx.setLanguageVersion(Context.VERSION_ES6)
+				val scope = cx.initStandardObjects()
+				println(cx.getLanguageVersion())
+				//val result = cx.evaluateString(scope, """1+5;""", "<infile>", 0, null);
+				//val result = cx.evaluateString(scope, """var x = {"name": "bob", "age": 12}; x;""", "<infile>", 0, null);
+				val result = cx.evaluateString(scope, """var x = {"name": "bob", "age": 12}; x""", "<infile>", 0, null);
+				println(result)
+				val x = result.asInstanceOf[Scriptable]
+				println(x.get("name", x))
+				
+val s1 = """
+map = {
+	"instruction.transporter.movePlate": {
+		getEffects: function(params, objects) {
+			var effects = {};
+			effects[params.object+".location"] = params.destination;
+			return effects;
+		}
+	}
+};
+run = function() { return 4; };
+""";
+				cx.evaluateString(scope, s1, "<infile>", 0, null);
+				val f0 = scope.get("run", scope)
+				val f = f0.asInstanceOf[Function]
+				val result2 = f.call(cx, scope, scope, Array[Object]())
+				println(result2)
+				
+				val result3 = cx.evaluateString(scope, """
+						var params = {command: "instruction.transporter.movePlate", agent: "ourlab.mario.evoware", equipment: "ourlab.mario.arm1", program: "Narrow", object: "plate1", destination: "ourlab.mario.P3"};
+						var effects = map["instruction.transporter.movePlate"].getEffects(params, null);
+						effects;
+					""", "<infile>", 0, null)
+				println(result3)
+				println(toJsValue(result3))
+			} finally { Context.exit() }
+		}
+	}
+
+	private def toJsValue(input: Any): JsValue = {
+		import spray.json._
+		import org.mozilla.javascript._
+		input match {
+			case b: Boolean => JsBoolean(b)
+			case i: Int => JsNumber(i)
+			case l: Long => JsNumber(l)
+			case f: Float => JsNumber(f)
+			case d: Double => JsNumber(d)
+			case s: String => JsString(s)
+
+			case o: NativeObject => toJsObject(o)
+			case a: NativeArray => toJsArray(a)
+			case w: Wrapper => toJsValue(w.unwrap())
+
+			case u: Undefined => JsNull
+			case null => JsNull
+			case other@_ => {
+				println("Cannot convert '%s' to a JsValue. Returning None.".format(other))
+				JsNull
+			}
+		}
+	}
+	
+	private def toJsObject(nativeObject: NativeObject): JsObject = {
+		val tuples = nativeObject.entrySet.toList.map(entry => (entry.getKey.toString, toJsValue(entry.getValue)))
+		new JsObject(ListMap(tuples: _*))
+	}
+
+	private def toJsArray(nativeArray: NativeArray): JsArray = {
+		new JsArray(nativeArray.iterator().map(item => toJsValue(item)).toList)
 	}
 }
