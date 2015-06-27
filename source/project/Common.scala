@@ -40,5 +40,6 @@ object RoboliqSettings {
 		val scala_graph_core = "com.assembla.scala-incubator" %% "graph-core" % "1.9.0"
 		val saddle = "org.scala-saddle" %% "saddle-core" % "1.3.+"
 		val saddle_hdf5 = "org.scala-saddle" %% "saddle-hdf5" % "1.3.+"
+		val rhino = "org.mozilla" % "rhino" % "1.7.7"
 	}
 }

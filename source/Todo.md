@@ -2,9 +2,7 @@
 
 Immediate:
 
-* [x] EvowareCompiler: instructions should add state changes as part of their Token output
-* [x] EvowareCompiler: process `let` steps
-* [x] try EvowareCompiler input with 2 move instructions (with or without explicit state changes)
+* [ ] generate instruction list from higher-level command
 
 What does roboliq provide?
 
