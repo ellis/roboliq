@@ -1,0 +1,16 @@
+{
+  "name": "roboliq",
+  "version": "0.0.1",
+  "description": "Roboliq JavaScript library",
+  "main": "test.js",
+  "dependencies": {
+    "javascript-natural-sort": "~0.7.1",
+    "lodash": "~3.9.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ellis Whitehead",
+  "license": "GPL3"
+}
