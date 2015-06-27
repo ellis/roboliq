@@ -29,7 +29,7 @@ class TestInstructionExtractorSpec extends FunSpec {
 
 	val input1b = JsonUtils.yamlToJson("""
     objects:
-      plate1: { type: Plate, model: ourlab.model1 }
+      plate1: { type: Plate }
     steps:
       1: {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
       2: {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2}
@@ -37,7 +37,7 @@ class TestInstructionExtractorSpec extends FunSpec {
 
 	val input1c = JsonUtils.yamlToJson("""
     objects:
-      plate1: { location: ourlab.mario.P2 }
+      plate1: { model: ourlab.model1, location: ourlab.mario.P2 }
 """).asJsObject
 
 	val input1 = JsonUtils.merge(List(input1a, input1b, input1c)).run().value.asJsObject
@@ -47,7 +47,7 @@ class TestInstructionExtractorSpec extends FunSpec {
 			val step_m = input1.fields("steps").asJsObject
 			val key_l = step_m.fields.keys.toList.sortWith((s1, s2) => MiscUtils.compareNatural(s1, s2) < 0)
 			val step_l0 = key_l.map(step_m.fields)
-			val output = JsObject(input1.fields  + ("steps" -> JsArray(step_l0)))
+			val output = JsObject(input1.fields + ("steps" -> JsArray(step_l0)))
 			println(output.prettyPrint)
 		}
 		it("mmm") {
@@ -72,6 +72,26 @@ map = {
 			effects[params.object+".location"] = params.destination;
 			return effects;
 		}
+	},
+	"action.transporter.movePlate": {
+		getEffects: function(params, objects) {
+			var effects = {};
+			effects[params.object+".location"] = params.destination;
+			return {effects: effects};
+		},
+		expand: function(params, objects) {
+			var expansion = {};
+			var cmd1 = {
+				command: "instruction.transporter.movePlate",
+				agent: params.agent,
+				equipment: params.equipment,
+				program: params.program,
+				object: params.object,
+				destination: params.destination
+			};
+			expansion["1"] = cmd1;
+			return expansion;
+		}
 	}
 };
 run = function() { return 4; };
@@ -87,8 +107,27 @@ run = function() { return 4; };
 						var effects = map["instruction.transporter.movePlate"].getEffects(params, null);
 						effects;
 					""", "<infile>", 0, null)
-				println(result3)
 				println(toJsValue(result3))
+				
+				val result4 = cx.evaluateString(scope, """
+						var params = {command: "instruction.transporter.movePlate", equipment: "ourlab.mario.arm1", program: "Narrow", object: "plate1", destination: "ourlab.mario.P3"};
+						var expansion = map["action.transporter.movePlate"].expand(params, null);
+						expansion;
+					""", "<infile>", 0, null)
+				println(toJsValue(result4))
+			} finally { Context.exit() }
+		}
+		it("hhh") {
+			val step_m = input1.fields("steps").asJsObject
+			val key_l = step_m.fields.keys.toList.sortWith((s1, s2) => MiscUtils.compareNatural(s1, s2) < 0)
+			val step_l0 = key_l.map(step_m.fields)
+			val output = JsObject(input1.fields  + ("steps" -> JsArray(step_l0)))
+			println(output.prettyPrint)
+			import org.mozilla.javascript._
+			val cx = Context.enter()
+			try {
+				cx.setLanguageVersion(Context.VERSION_ES6)
+				val scope = cx.initStandardObjects()
 			} finally { Context.exit() }
 		}
 	}
