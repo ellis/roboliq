@@ -58,6 +58,63 @@ var protocol1 = {
   }
 };
 
+var protocol2 = {
+  "objects": {
+    "ourlab": {
+      "type": "Namespace",
+      "mario": {
+        "type": "Namespace",
+        "evoware": {
+          "type": "EvowareRobot"
+        },
+        "arm1": {
+          "type": "Transporter",
+          "evowareRoma": 0
+        },
+        "P2": {
+          "type": "Site",
+          "evowareCarrier": "MP 2Pos H+P Shake",
+          "evowareGrid": 10,
+          "evowareSite": 2
+        },
+        "P3": {
+          "type": "Site",
+          "evowareCarrier": "MP 2Pos H+P Shake",
+          "evowareGrid": 10,
+          "evowareSite": 4
+        }
+      },
+      "model1": {
+        "type": "PlateModel",
+        "evowareName": "Ellis Nunc F96 MicroWell"
+      }
+    },
+    "plate1": {
+      "type": "Plate",
+      "model": "ourlab.model1",
+      "location": "ourlab.mario.P2"
+    }
+  },
+  "steps": {
+    "1": {
+      "command": "action.transporter.movePlate",
+      "agent": "ourlab.mario.evoware",
+      "equipment": "ourlab.mario.arm1",
+      "program": "Narrow",
+      "object": "plate1",
+      "destination": "ourlab.mario.P3"
+    },
+    "2": {
+      "command": "action.transporter.movePlate",
+      "agent": "ourlab.mario.evoware",
+      "equipment": "ourlab.mario.arm1",
+      "program": "Narrow",
+      "object": "plate1",
+      "destination": "ourlab.mario.P2"
+    }
+  }
+};
+
 var commands = {
 	"instruction.transporter.movePlate": {
 		getEffects: function(params, objects) {
@@ -88,10 +145,6 @@ var commands = {
 	}
 };
 
-var protocol = protocol1;
-
-console.log(JSON.stringify(protocol, null, '\t'));
-
 function expandSteps(prefix, steps, objects) {
 	var keys = _(steps).keys(steps).filter(function(key) {
 		var c = key[0];
@@ -99,7 +152,7 @@ function expandSteps(prefix, steps, objects) {
 	}).value();
 	keys.sort(naturalSort);
 	console.log(keys);
-	_.forEach(keys)(function(key) {
+	_.forEach(keys, function(key) {
 		var step = steps[key];
 		if (step.hasOwnProperty("command")) {
 			if (commands.hasOwnProperty(step.command)) {
@@ -112,7 +165,7 @@ function expandSteps(prefix, steps, objects) {
 						_.merge(step, result.expansion);
 					}
 				}
-				processSteps(prefix+"."+key, step, objects);
+				expandSteps(prefix+"."+key, step, objects);
 			}
 		}
 	});
@@ -137,7 +190,8 @@ function gatherInstructions(prefix, steps, objects) {
 			}
 			if (commands.hasOwnProperty(step.command)) {
 				var command = commands[step.command];
-				gatherInstructions(prefix+"."+key, step, objects);
+				var instructions2 = gatherInstructions(prefix+"."+key, step, objects);
+				instructions = instructions.concat(instructions2);
 				var canGetEffects = command.hasOwnProperty("getEffects");
 				if (canGetEffects) {
 					var result = command.getEffects(step, objects);
@@ -154,7 +208,13 @@ function gatherInstructions(prefix, steps, objects) {
 	return instructions;
 }
 
-//expandSteps("steps", protocol.steps, protocol.objects);
+var protocol = protocol1;
+console.log(JSON.stringify(protocol, null, '\t'));
 var instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
 console.log(JSON.stringify(instructions, null, '\t'));
 
+protocol = protocol2;
+expandSteps("steps", protocol.steps, protocol.objects);
+console.log(JSON.stringify(protocol.steps, null, '\t'));
+instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
+console.log(JSON.stringify(instructions, null, '\t'));

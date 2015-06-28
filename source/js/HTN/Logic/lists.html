@@ -1,0 +1,47 @@
+<html>
+
+  <head>
+    <title>lists in a limited logic programming language</title>
+  </head>
+
+  <body bgcolor="rgba(100,100,200,1.0)">
+
+    <script type="text/javascript" src="../Utilities/utilities.js"></script>
+    <script type="text/javascript" src="llpl.js"></script>
+    <script type="text/javascript" src="lists.js"></script>
+    <script type="text/javascript">
+
+      var utils = makeUtilities();
+      var llpl = makeInterpreter(utils);
+      llpl.initializeDatabase(listRules);
+      // Define some lists
+      var abcd = {"cons": {"first": "a", "rest": {"cons": {"first": "b", "rest": {"cons": {"first": "c", "rest": {"cons": {"first": "d", "rest": "nil"}}}}}}}};
+      var abcda = {"cons": {"first": "a", "rest": {"cons": {"first": "b", "rest": {"cons": {"first": "c", "rest": {"cons": {"first": "d", "rest": {"cons": {"first": "a", "rest": "nil"}}}}}}}}}};
+      var a = {"cons": {"first": "a", "rest": "nil"}};
+      var ab = {"cons": {"first": "a", "rest": {"cons": {"first": "b", "rest": "nil"}}}};
+      var cd = {"cons": {"first": "c", "rest": {"cons": {"first": "d", "rest": "nil"}}}};
+      // Define some possible queries.
+      var q0 = {"append": {"list1": ab, "list2": "nil", "result": "?result"}};
+      var q1 = {"append": {"list1": ab, "list2": cd, "result": "?result"}};
+      var q2 = {"append": {"list1": a, "list2": cd, "result": "?result"}};
+      var q3 = {"append": {"list1": a, "list2": "nil", "result": "?result"}};
+      var q4 = {"append": {"list1": "nil", "list2": a, "result": "?result"}};
+      var q5 = {"append": {"list1": "nil", "list2": "nil", "result": "?result"}};
+      var q6 = {"append": {"list1": "?list1", "list2": "?list2", "result": a}};
+      var q7 = {"append": {"list1": ab, "list2": "?list2", "result": abcd}};
+      var q8 = {"append": {"list1": "?list1", "list2": cd, "result": abcd}};
+      var q9 = {"append": {"list1": "?list1", "list2": "?list2", "result": abcd}};
+      var q10 = {"remove": {"target": "a", "list": ab, "result": "?result"}};
+      var q11 = {"remove": {"target": "a", "list": "?list", "result": cd}};
+      var q12 = {"member": {"target": "a", "list": ab}};
+      var q13 = {"member": {"target": "x", "list": ab}};
+      var q14 = {"member": {"target": "?x", "list": abcd}};
+      var q15 = {"removeAll": {"target": "a", "list": abcda, "result": "?result"}};
+      var q16 = {"member": {"target": "a", "list": "?list"}}; // This produces an infinite loop.
+      //llpl.query(q1);
+
+    </script>
+
+  </body>
+
+</html>

@@ -1,0 +1,29 @@
+<html>
+
+  <head>
+    <title>SICP examples in a limited logic programming language</title>
+  </head>
+
+  <body bgcolor="silver">
+
+    <script type="text/javascript" src="../Utilities/utilities.js"></script>
+    <script type="text/javascript" src="llpl.js"></script>
+    <script type="text/javascript" src="sicpDB.js"></script>
+    <script type="text/javascript">
+
+      var utils = makeUtilities();
+      var llpl = makeInterpreter(utils);
+      llpl.initializeDatabase(sicpDB);
+      var p0 = {"same": {"entity1": "bob", "entity2": "?name"}};
+      var p1 = {"wheel": {"person": "?who"}};
+      var p2 = {"lives-near": {"person1": "?x", "person2": "?y"}};
+      var p3 = {"job": {"title": "?job-title"}};
+      var p4 = {"not": {"same": {"entity1": "bob", "entity2": "fred"}}};
+      var p5 = {"outranked-by": {"staff-person": "?staff-person", "boss": "?boss"}};
+//      llpl.query(p2);
+
+    </script>
+
+  </body>
+
+</html>
