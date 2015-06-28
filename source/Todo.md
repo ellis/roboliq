@@ -4,6 +4,10 @@ Immediate:
 
 * [ ] generate instruction list from higher-level command
 
+How to plan `movePlate`?
+
+
+
 What does roboliq provide?
 
 * defines hierarchy of types, with description and properties (and javascript validation? string parsing (e.g. for volumes)?)
@@ -64,6 +68,25 @@ Four layers to our solution:
       {command: instruction.transporter.movePlate, object: plate1, destination: P1},
       {state: {plate1: {location: P1}}}
     ]
+
+GraphPlan actions for movePlate:
+
+    movePlate_mario_arm1_Narrow_plate1_P1_P2
+        preconds:
+            #agent-can-equipment mario arm1
+            #transporter-can arm1 Narrow P1
+            #transporter-can arm1 Narrow P2
+            location_plate1_P1 / plate1.location == P1
+            #site-can-model_P1_model1 / P1.models -> model1
+            #site-can-model_P2_model1 / P2.models -> model1
+            !occupied_P2 / P2.occupied == false or P2.labware == []
+            or
+            !location_plate*_P2
+        effects:
+            !occupied_P1 or P1.labware -= plate1
+            occupied_P2 or P2.labware += plate1
+            !location_plate1_P1
+            location_plate1_P2 or plate1.location = P2
 
 Macro expansion:
 Which capabilities should the macro expansion have?  Consider moustache, because it seems sufficiently capable and well-established.

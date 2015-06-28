@@ -1,0 +1,34 @@
+<html>
+
+  <head>
+    <title>SHOP planning for blocks world with planned output</title>
+  </head>
+
+  <body bgcolor="pink">
+
+    <script type="text/javascript" src="../Utilities/utilities.js"></script>
+    <script type="text/javascript" src="../Logic/llpl.js"></script>
+    <script type="text/javascript" src="shop.js"></script>
+    <script type="text/javascript" src="unstackAll.js"></script>
+    <script type="text/javascript" src="planBlocksDisplay.js"></script>
+    <script type="text/javascript" src="displayBlocks.js"></script>
+    <script type="text/javascript">
+
+      var utils = makeUtilities();
+      var llpl = makeInterpreter(utils);
+      var blocks = makeBlocksWorld(utils);
+      var p = makePlanner(blocks.world,llpl,utils);
+      p.plan();
+      var statesAsAssertions = p.statesToAssertions();
+      var sp = makePlanner(discourseMethods.concat(statesAsAssertions),llpl,utils); 
+      var d = sp.plan();
+      // The following statement extracts the calculated output from the planner.
+      var discourse = utils.assertionToList(d.currentTask.makeDiscourse.discourse);
+      var display = makeDisplay(utils,discourse);
+      display.showAnimation();
+  
+    </script>
+
+  </body>
+
+</html>
