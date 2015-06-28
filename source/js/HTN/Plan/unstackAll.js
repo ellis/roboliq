@@ -1,8 +1,8 @@
 function makeBlocksWorld(utils) {
-  
-  var world = 
+
+  var world =
     [
-     
+
    ////
    //// initial state of the world
    ////
@@ -26,7 +26,7 @@ function makeBlocksWorld(utils) {
    {"on": {"above": "k", "below": "j"}},
    {"on": {"above": "l", "below": "k"}},
    {"on": {"above": "m", "below": "table"}},
-   
+
    ////
    //// Goals
    ////
@@ -50,7 +50,7 @@ function makeBlocksWorld(utils) {
 				    {"goal": {"on": {"above": "m", "below": "l"}}}])},
 
 
-   
+
    ////
    //// Tasks
    ////
@@ -60,9 +60,9 @@ function makeBlocksWorld(utils) {
    ////
    //// Actions
    ////
-  
+
    //
-   // move 
+   // move
    //
    // Primary action in the blocks world: move a block from one place to another.
    // This version has no preconditions because they are accounted for in the
@@ -134,7 +134,7 @@ function makeBlocksWorld(utils) {
 	       "subtasks": [{"assert": {"assertion": "?assertion"}},
                             {"addAssertions": "?rest"}]}},
 
-   // 
+   //
    // unstackAll
    //
    // Move all of the blocks to the table.
@@ -181,7 +181,7 @@ function makeBlocksWorld(utils) {
 	       "subtasks": {"ordered": [{"move": {"block": "?block", "from": "?from", "to": "table"}},
                                         {"unstackAll": "?rest"}]}}},
    //
-   // unstackAll / recursive case 3 / the first block is not clear and not on the table, 
+   // unstackAll / recursive case 3 / the first block is not clear and not on the table,
    //                                 so append it to the end of the list
    //
    {"method": {"description": "unstack the blocks",
@@ -191,7 +191,7 @@ function makeBlocksWorld(utils) {
                                  {"not": {"same": {"thing1": "?from", "thing2": "table"}}},
                                  {"not": {"same": {"thing1": "?rest", "thing2": "nil"}}},
                                  {"append": {"list1": "?rest",
-					     "list2": {"cons": {"first": "?block", "rest": "nil"}}, 
+					     "list2": {"cons": {"first": "?block", "rest": "nil"}},
 					     "result": "?rotatedList"}},
                                  // {"print": ["recursive case 3: not clear yet and not on the table", "?block"]}
 				 ],
@@ -203,7 +203,7 @@ function makeBlocksWorld(utils) {
    // Find those blocks which do not need to be moved.  A block does not need
    // to move if there is a goal stating it should be on the table, because
    // a method that runs before this one, unstackAll, puts all of the
-   // blocks on the table.  Those in their final positions are marked with 
+   // blocks on the table.  Those in their final positions are marked with
    // a doNotMove assertion.
    //
    // findWhichDoNotMove / base case 1 / the remaining block should not move
@@ -255,7 +255,7 @@ function makeBlocksWorld(utils) {
    // stackAll / base case 1 / the final block is already where it is suppose to be
    //
    {"method": {"description": "given a list of goals, achieve them one at a time",
-	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}}, 
+	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}},
 					      "rest": "nil"}}},
 	       "preconditions": [{"on": {"above": "?block", "below": "?to"}},
                                  // {"print": ["base case 1: final block is where it should be", "?block"]}
@@ -265,7 +265,7 @@ function makeBlocksWorld(utils) {
    // stackAll / base case 2 / the final block needs to be moved
    //
    {"method": {"description": "given a list of goals, achieve them one at a time",
-	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}}, 
+	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}},
 					      "rest": "nil"}}},
 	       "preconditions": [{"on": {"above": "?block", "below": "?currentPosition"}},
                                  {"not": {"same": {"thing1": "?to", "thing2": "?currentPosition"}}},
@@ -277,7 +277,7 @@ function makeBlocksWorld(utils) {
    // stackAll / recursive case 1 / the first goal is ready and already solved
    //
    {"method": {"description": "given a list of goals, achieve them one at a time",
-	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}}, 
+	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}},
 					      "rest": "?rest"}}},
 	       "preconditions": [{"isReady": {"goal": {"on": {"above": "?block", "below": "?to"}}}},
                                  {"on": {"above": "?block", "below": "?to"}},
@@ -290,7 +290,7 @@ function makeBlocksWorld(utils) {
    // stackAll / recursive case 2 / the first goal is ready, but unsolved, and so can be solved with a move
    //
    {"method": {"description": "given a list of goals, achieve them one at a time",
-	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}}, 
+	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}},
 					      "rest": "?rest"}}},
 	       "preconditions": [{"isReady": {"goal": {"on": {"above": "?block", "below": "?to"}}}},
                                  {"on": {"above": "?block", "below": "?currentPosition"}},
@@ -305,12 +305,12 @@ function makeBlocksWorld(utils) {
    // stackAll / recursive case 3 / the first goal is not ready and so will have to wait; it is appended to the end
    //
    {"method": {"description": "given a list of goals, achieve them one at a time",
-	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}}, 
+	       "task": {"stackAll": {"cons": {"first": {"goal": {"on": {"above": "?block", "below": "?to"}}},
 	                                      "rest": "?rest"}}},
 	       "preconditions": [{"not": {"isReady": {"goal": {"on": {"above": "?block", "below": "?to"}}}}},
                                  {"not": {"same": {"thing1": "?rest", "thing2": "nil"}}},
-                                 {"append": {"list1": "?rest", 
-					     "list2": {"cons": {"first": {"goal": {"on": {"above": "?block", 
+                                 {"append": {"list1": "?rest",
+					     "list2": {"cons": {"first": {"goal": {"on": {"above": "?block",
 											  "below": "?to"}}},
 								"rest": "nil"}},
 					     "result": "?rotatedList"}},
@@ -341,11 +341,11 @@ function makeBlocksWorld(utils) {
 		       "list2": "?list2",
 		       "result": {"cons": {"first": "?headOfList1",
 					   "rest": "?restOfResult"}}},
-	    "and": [{"append": {"list1": "?restOfList1", "list2": "?list2", 
+	    "and": [{"append": {"list1": "?restOfList1", "list2": "?list2",
 				"result": "?restOfResult"}}]}},
 
    //
-   // clear 
+   // clear
    //
    // A block is clear if there is not another block on it.
    //
@@ -362,7 +362,7 @@ function makeBlocksWorld(utils) {
    // The table should never be moved.
    //
    {"<--": {"doNotMove": {"block": "table"}}},
-    
+
    //
    // isReady
    //
@@ -371,7 +371,7 @@ function makeBlocksWorld(utils) {
    //
    {"<--": {"isReady": {"goal": {"on": {"above": "?above", "below": "table"}}},
 	    "and": [{"clear": {"block": "?above"}}]}},
-   // 
+   //
    // A goal is ready to be solved if both the origin and destination of the
    // block are clear, and if the destination does not have to be moved.
    //
@@ -379,7 +379,7 @@ function makeBlocksWorld(utils) {
 	    "and": [{"clear": {"block": "?above"}},
                     {"clear": {"block": "?below"}},
                     {"doNotMove": {"block": "?below"}}]}},
-  
+
      ];
 
   return({world : world});
