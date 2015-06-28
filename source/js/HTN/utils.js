@@ -1091,7 +1091,7 @@ function makeSearch() {
 //
 // Make public a selection of the utility methods.
 //
-module.exports = {
+var utils = {
   typeOf: typeOf,
   keys: keys,
   values: values,
@@ -1137,4 +1137,6 @@ module.exports = {
   removeElement: removeElement,
   quickSort: quickSort,
   makeSearch: makeSearch
-});
+};
+
+module.exports = utils;
