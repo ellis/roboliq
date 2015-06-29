@@ -79,7 +79,7 @@ var sealerExample0 = [
 var sealerExample = [
 	// State
 	{"isAgent": {"agent": "ourlab.mario.evoware"}},
-	{"isSealer": {"sealer": "sealer1"}},
+	{"isSealer": {"equipment": "sealer1"}},
 	{"isLabware": {"labware": "plate1"}},
 	{"isModel": {"model": "model1"}},
 	{"isModel": {"model": "siteModel1"}},
@@ -98,14 +98,6 @@ var sealerExample = [
 
 	// Actions
 	{"action": {"description": "fully specified seal command",
-		"task": {"sealPlate": {"labware": "?labware"}},
-		"preconditions": [
-			{"isPlate": {"labware": "?labware"}}
-		],
-		"deletions": [],
-		"additions": []
-	}},
-	{"action": {"description": "fully specified seal command",
 		"task": {"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site", "siteModel": "?siteModel"}},
 		"preconditions": [
 			{"isAgent": {"agent": "?agent"}},
@@ -120,7 +112,7 @@ var sealerExample = [
 	}},
 
 	// Methods
-	/*{"method": {"description": "method for sealing",
+	{"method": {"description": "method for sealing",
 		"task": {"sealPlate": {"labware": "?labware"}},
 		"preconditions": [
 			{"isAgent": {"agent": "?agent"}},
@@ -133,7 +125,7 @@ var sealerExample = [
 		"subtasks": {"ordered": [
 			{"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "program1", "labware": "?labware", "model": "?model", "site": "?site", "siteModel": "?siteModel"}}
 		]}
-	}}*/
+	}}
 	/*,
    {"method": {"description": "drop thing1 and pick up thing2",
 	       "task": {"sealPlate": {"labware": "?labware"}},
