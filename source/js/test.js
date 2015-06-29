@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
+var movePlatePlanning = require('./movePlatePlanning.js');
 
 var protocol1 = {
   "objects": {
@@ -115,6 +116,37 @@ var protocol2 = {
   }
 };
 
+function fillStateItems(name, o, stateList) {
+  //console.log("name: "+name);
+  if (o.hasOwnProperty("type")) {
+    //console.log("type: "+o.type);
+    switch (o['type']) {
+      case 'Plate':
+        stateList.push({"isLabware": {"labware": name}});
+        stateList.push({"isPlate": {"labware": name}});
+        stateList.push({"model": {"labware": name, "model": o.model}});
+        stateList.push({"location": {"labware": name, "site": o.location}});
+        break;
+    }
+  }
+
+  var prefix = _.isEmpty(name) ? "" : name+".";
+  _.forEach(o, function(value, name2) {
+    //console.log(name2, value);
+    if (_.isObject(value)) {
+      fillStateItems(prefix+name2, value, stateList);
+    }
+  });
+}
+
+/** Create state items for SHOP planning from the protocol's objects. */
+function createStateItems(objects) {
+  var stateList = [];
+  fillStateItems("", objects, stateList);
+  //console.log(JSON.stringify(stateList, null, '\t'));
+  return stateList;
+}
+
 var commands = {
 	"instruction.transporter.movePlate": {
 		getEffects: function(params, objects) {
@@ -131,6 +163,27 @@ var commands = {
 		},
 		expand: function(params, objects) {
 			var expansion = {};
+      var stateList = createStateItems(objects);
+      var movePlatePlanning = require('./movePlatePlanning.js');
+      var taskList = [];
+      if (params.hasOwnProperty("agent")) {
+        taskList.push({"movePlate-a": {"agent": params.agent, "labware": params['object'], "destination": params.destination}});
+      }
+      else {
+        taskList.push({"movePlate": {"labware": params['object'], "destination": params.destination}});
+      }
+      var tasks = {"tasks": {"ordered": taskList}};
+      var input = [].concat(movePlatePlanning.evowareConfig, movePlatePlanning.taskDefs, stateList, [tasks]);
+      console.log(JSON.stringify(input, null, '\t'));
+      var shop = require('./HTN/Plan/shop.js');
+      //var p = shop.makePlanner(sealerExample);
+      var planner = shop.makePlanner(input);
+      var plan = planner.plan();
+      console.log("state:");
+      console.log(JSON.stringify(plan.state));
+      var x = planner.ppPlan(plan);
+      CONTINUE
+      console.log(x);
 			var cmd1 = {
 				command: "instruction.transporter.movePlate",
 				agent: params.agent,
@@ -212,6 +265,8 @@ var protocol = protocol1;
 console.log(JSON.stringify(protocol, null, '\t'));
 var instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
 console.log(JSON.stringify(instructions, null, '\t'));
+
+//console.log(JSON.stringify(createStateItems(protocol2), null, '\t'));
 
 protocol = protocol2;
 expandSteps("steps", protocol.steps, protocol.objects);
