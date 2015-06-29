@@ -77,9 +77,11 @@ var moveExample = [
 	//{"isSealer": {"equipment": "ourlab.mario.sealer"}},
 	{"isTransporter": {"equipment": "ourlab.mario.roma1"}},
 	{"isLabware": {"labware": "plate1"}},
+	{"isLabware": {"labware": "plate2"}},
 	{"isModel": {"model": "model1"}},
 	{"isModel": {"model": "siteModel1"}},
 	{"isPlate": {"labware": "plate1"}},
+	{"isPlate": {"labware": "plate2"}},
 	{"isSite": {"site": "ourlab.mario.P3"}},
 	{"isSite": {"site": "ourlab.mario.SEALER"}},
 	{"isSiteModel": {"model": "siteModel1"}},
@@ -87,10 +89,12 @@ var moveExample = [
 	{"siteModel": {"site": "ourlab.mario.P3", "siteModel": "siteModel1"}},
 	{"stackable": {"below": "siteModel1", "above": "model1"}},
 	//{"agentEquipmentProgramModelSiteCanSeal": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "model1", "site": "ourlab.mario.SEALER"}},
-	{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P3"}},
-	{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.SEALER"}},
+	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P3"}},
+	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.SEALER"}},
 	{"model": {"labware": "plate1", "model": "model1"}},
+	{"model": {"labware": "plate2", "model": "model1"}},
 	{"location": {"labware": "plate1", "site": "ourlab.mario.P3"}},
+	//{"location": {"labware": "plate2", "site": "ourlab.mario.SEALER"}},
 
 	//
 	// Tasks
@@ -110,8 +114,9 @@ var moveExample = [
 			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
-			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
+			{"siteIsClear": {"site": "?destination"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
 		"deletions": [],
 		"additions": [{"plateHasSeal": {"labware": "?labware"}}]
@@ -126,8 +131,6 @@ var moveExample = [
 		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
 		"preconditions": [
 			{"location": {"labware": "?labware", "site": "?destination"}}
-			//{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}},
-			//{"model": {"labware": "?labware", "model": "?model"}}
 		],
 		"subtasks": {"ordered": [
 		]}
@@ -142,8 +145,27 @@ var moveExample = [
 			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
-			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
+			{"siteIsClear": {"site": "?destination"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
+		],
+		"subtasks": {"ordered": [
+			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		]}
+	}},
+
+	// movePlate-direct
+	{"method": {"description": "transport plate from origin to destination",
+		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+		"preconditions": [
+			{"model": {"labware": "?labware", "model": "?model"}},
+			{"location": {"labware": "?labware", "site": "?origin"}},
+			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+			{"stackable": {"below": "?destinationModel", "above": "?model"}},
+			{"siteIsClear": {"site": "?destination"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
 		"subtasks": {"ordered": [
 			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
