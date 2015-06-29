@@ -82,11 +82,13 @@ var moveExample = [
 	{"isModel": {"model": "siteModel1"}},
 	{"isPlate": {"labware": "plate1"}},
 	{"isPlate": {"labware": "plate2"}},
+	{"isSite": {"site": "ourlab.mario.P2"}},
 	{"isSite": {"site": "ourlab.mario.P3"}},
 	{"isSite": {"site": "ourlab.mario.SEALER"}},
 	{"isSiteModel": {"model": "siteModel1"}},
-	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "siteModel1"}},
+	{"siteModel": {"site": "ourlab.mario.P2", "siteModel": "siteModel1"}},
 	{"siteModel": {"site": "ourlab.mario.P3", "siteModel": "siteModel1"}},
+	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "siteModel1"}},
 	{"stackable": {"below": "siteModel1", "above": "model1"}},
 	//{"agentEquipmentProgramModelSiteCanSeal": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "model1", "site": "ourlab.mario.SEALER"}},
 	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P3"}},
@@ -95,6 +97,7 @@ var moveExample = [
 	{"model": {"labware": "plate2", "model": "model1"}},
 	{"location": {"labware": "plate1", "site": "ourlab.mario.P3"}},
 	//{"location": {"labware": "plate2", "site": "ourlab.mario.SEALER"}},
+	//{"movePlate_excludePath": {"siteA": "ourlab.mario.P3", "siteB": "ourlab.mario.SEALER"}},
 
 	//
 	// Tasks
@@ -147,7 +150,8 @@ var moveExample = [
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"not": {"movePlate_excludePath": {"origin": "?origin", "destination": "?destination"}}},
+			{"not": {"movePlate_excludePath": {"siteA": "?origin", "siteB": "?destination"}}},
+			{"not": {"movePlate_excludePath": {"siteA": "?destination", "siteB": "?origin"}}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
