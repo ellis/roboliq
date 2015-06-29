@@ -875,6 +875,8 @@ function makePlanner(spec) {
     var result = {};
     if (utils.isEmpty(initialPlan)) {
       initialize(spec);
+      console.log("initial state:");
+      console.log(initialPlan['state']);
       planSearch.makeNewSearchState(initialPlan);
     }
     result = planSearch.search(scorePlan, refinePlan, planIsASuccess);

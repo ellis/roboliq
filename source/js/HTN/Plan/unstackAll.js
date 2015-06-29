@@ -1,7 +1,4 @@
-function makeBlocksWorld(utils) {
-
-  var world =
-    [
+module.exports = [
 
    ////
    //// initial state of the world
@@ -380,8 +377,4 @@ function makeBlocksWorld(utils) {
                     {"clear": {"block": "?below"}},
                     {"doNotMove": {"block": "?below"}}]}},
 
-     ];
-
-  return({world : world});
-
-}
+];
