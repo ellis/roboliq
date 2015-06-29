@@ -110,6 +110,13 @@ var moveExample = [
 	//
 	// Actions
 	//
+	{"action": {"description": "print for debugging",
+		"task": {"print": {"text": "?agent"}},
+		"preconditions": [
+		],
+		"deletions": [],
+		"additions": []
+	}},
 	{"action": {"description": "transport plate from origin to destination",
 		"task": {"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 		"preconditions": [
@@ -119,12 +126,12 @@ var moveExample = [
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"not": {"movePlate_excludePath": {"origin": "?origin", "destination": "?destination"}}},
+			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?destination"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
-		"deletions": [],
-		"additions": [{"plateHasSeal": {"labware": "?labware"}}]
+		"deletions": [{"location": {"labware": "?labware", "site": "?origin"}}],
+		"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
 	}},
 
 	//
