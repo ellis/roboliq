@@ -115,6 +115,7 @@ var moveExample = [
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
+			{"not": {"movePlate_excludePath": {"origin": "?origin", "destination": "?destination"}}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
@@ -146,24 +147,7 @@ var moveExample = [
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
-			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
-		],
-		"subtasks": {"ordered": [
-			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-		]}
-	}},
-
-	// movePlate-direct
-	{"method": {"description": "transport plate from origin to destination",
-		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"model": {"labware": "?labware", "model": "?model"}},
-			{"location": {"labware": "?labware", "site": "?origin"}},
-			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"siteIsClear": {"site": "?destination"}},
+			{"not": {"movePlate_excludePath": {"origin": "?origin", "destination": "?destination"}}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
