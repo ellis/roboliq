@@ -30,13 +30,14 @@ var sealerExample = [
 	{"isModel": {"model": "model1"}},
 	{"isModel": {"model": "siteModel1"}},
 	{"isPlate": {"labware": "plate1"}},
-	{"isSite": {"site": "site1"}},
+	{"isSite": {"site": "ourlab.mario.P3"}},
+	{"isSite": {"site": "ourlab.mario.SEALER"}},
 	{"isSiteModel": {"model": "siteModel1"}},
-	{"siteModel": {"site": "site1", "siteModel": "siteModel1"}},
+	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "siteModel1"}},
 	{"stackable": {"below": "siteModel1", "above": "model1"}},
-	{"canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "model1", "site": "site1"}},
+	{"canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "model1", "site": "ourlab.mario.SEALER"}},
 	{"model": {"labware": "plate1", "model": "model1"}},
-	{"location": {"labware": "plate1", "site": "site1"}},
+	{"location": {"labware": "plate1", "site": "ourlab.mario.SEALER"}},
 
 	// Tasks
 	{"tasks": {"ordered": [
@@ -82,15 +83,11 @@ var sealerExample = [
    // Rules: no rules in this example
 ];
 
-console.log(JSON.stringify(sealerExample));
-//var llpl = require('./HTN/Logic/llpl.js');
-//llpl.initializeDatabase(sealerExample);
-//console.log(llpl.query({"isPlate": {"labware": "?labware"}}));
+//console.log(JSON.stringify(sealerExample, null, '\t'));
 var shop = require('./HTN/Plan/shop.js');
 var p = shop.makePlanner(sealerExample);
-console.log("state:");
-console.log(p['state']);
 var plan = p.plan();
-console.log(JSON.stringify(plan));
+console.log("state:");
+console.log(JSON.stringify(plan.state));
 var x = p.ppPlan(plan);
 console.log(x);
