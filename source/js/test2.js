@@ -48,8 +48,8 @@ var sealerExample = [
 	{"action": {"description": "fully specified seal command",
 		"task": {"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}},
 		"preconditions": [
-			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}},
 			{"model": {"labware": "?labware", "model": "?model"}},
+			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}},
 			{"location": {"labware": "?labware", "site": "?site"}}
 		],
 		"deletions": [],
@@ -60,31 +60,109 @@ var sealerExample = [
 	{"method": {"description": "method for sealing",
 		"task": {"sealPlate": {"labware": "?labware"}},
 		"preconditions": [
-			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}},
-			{"model": {"labware": "?labware", "model": "?model"}}
+			{"model": {"labware": "?labware", "model": "?model"}},
+			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}}
 		],
 		"subtasks": {"ordered": [
 			{"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}}
 		]}
 	}}
-	/*,
-   {"method": {"description": "drop thing1 and pick up thing2",
-	       "task": {"sealPlate": {"labware": "?labware"}},
-	       "preconditions": [{"have": {"agent": "?agent", "thing": "?thing1"}}],
-	       "subtasks": {"ordered": [{"drop": {"agent": "?agent", "thing": "?thing1"}},
-                                        {"pickup": {"agent": "?agent", "thing": "?thing2"}}]}}},
-   {"method": {"description": "drop thing2 and pick up thing1",
-	       "task": {"swap": {"agent": "?agent",
-				 "thing1": "?thing1",
-				 "thing2": "?thing2"}},
-	       "preconditions": [{"have": {"agent": "?agent", "thing": "?thing2"}}],
-	       "subtasks": {"ordered": [{"drop": {"agent": "?agent", "thing": "?thing2"}},
-                                        {"pickup": {"agent": "?agent", "thing": "?thing1"}}]}}},*/
-   // Rules: no rules in this example
+];
+
+var moveExample = [
+	//
+	// State
+	//
+	{"isAgent": {"agent": "ourlab.mario.evoware"}},
+	//{"isSealer": {"equipment": "ourlab.mario.sealer"}},
+	{"isTransporter": {"equipment": "ourlab.mario.roma1"}},
+	{"isLabware": {"labware": "plate1"}},
+	{"isModel": {"model": "model1"}},
+	{"isModel": {"model": "siteModel1"}},
+	{"isPlate": {"labware": "plate1"}},
+	{"isSite": {"site": "ourlab.mario.P3"}},
+	{"isSite": {"site": "ourlab.mario.SEALER"}},
+	{"isSiteModel": {"model": "siteModel1"}},
+	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "siteModel1"}},
+	{"siteModel": {"site": "ourlab.mario.P3", "siteModel": "siteModel1"}},
+	{"stackable": {"below": "siteModel1", "above": "model1"}},
+	//{"agentEquipmentProgramModelSiteCanSeal": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "model1", "site": "ourlab.mario.SEALER"}},
+	{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P3"}},
+	{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.SEALER"}},
+	{"model": {"labware": "plate1", "model": "model1"}},
+	{"location": {"labware": "plate1", "site": "ourlab.mario.P3"}},
+
+	//
+	// Tasks
+	//
+	{"tasks": {"ordered": [
+		{"movePlate": {"labware": "plate1", "destination": "ourlab.mario.SEALER"}}
+	]}},
+
+	//
+	// Actions
+	//
+	{"action": {"description": "fully specified seal command",
+		"task": {"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"preconditions": [
+			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
+			{"model": {"labware": "?labware", "model": "?model"}},
+			{"location": {"labware": "?labware", "site": "?origin"}},
+			{"stackable": {"below": "?destinationModel", "above": "?model"}},
+		],
+		"deletions": [],
+		"additions": [{"plateHasSeal": {"labware": "?labware"}}]
+	}},
+
+	//
+	// Methods
+	//
+
+	// movePlate-null
+	{"method": {"description": "method for sealing",
+		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+		"preconditions": [
+			{"location": {"labware": "?labware", "site": "?destination"}}
+			//{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}},
+			//{"model": {"labware": "?labware", "model": "?model"}}
+		],
+		"subtasks": {"ordered": [
+		]}
+	}},
+
+	// movePlate-direct
+	{"method": {"description": "method for sealing",
+		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+		"preconditions": [
+			{"model": {"labware": "?labware", "model": "?model"}},
+			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+			{"location": {"labware": "?labware", "site": "?origin"}},
+			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}}
+		],
+		"subtasks": {"ordered": [
+			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		]}
+	}},
+
+	//
+	// Rules
+	//
+
+	// same: Two things are the same if they unify.
+	{"<--": {"same": {"thing1": "?thing", "thing2": "?thing"}}},
+
+	// clear: a site is clear if no labware is on it
+	{"<--": {"siteIsClear": {"site": "?site"},
+		"and": [{"not": {"location": {"labware": "?labware", "site": "?site"}}}]}
+	}
+
 ];
 
 //console.log(JSON.stringify(sealerExample, null, '\t'));
 var shop = require('./HTN/Plan/shop.js');
+//var p = shop.makePlanner(sealerExample);
 var p = shop.makePlanner(sealerExample);
 var plan = p.plan();
 console.log("state:");
