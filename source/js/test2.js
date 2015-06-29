@@ -150,9 +150,30 @@ var moveExample = [
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"not": {"movePlate_excludePath": {"siteA": "?origin", "siteB": "?destination"}}},
-			{"not": {"movePlate_excludePath": {"siteA": "?destination", "siteB": "?origin"}}},
+			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?destination"}},
+			//{"not": {"movePlate_excludePath": {"siteA": "?origin", "siteB": "?destination"}}},
+			//{"not": {"movePlate_excludePath": {"siteA": "?destination", "siteB": "?origin"}}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
+		],
+		"subtasks": {"ordered": [
+			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		]}
+	}},
+
+	// movePlate-two
+	{"method": {"description": "transport plate from origin to destination",
+		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+		"preconditions": [
+			{"model": {"labware": "?labware", "model": "?model"}},
+			{"location": {"labware": "?labware", "site": "?origin"}},
+			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+			{"stackable": {"below": "?destinationModel", "above": "?model"}},
+			{"siteIsClear": {"site": "?destination"}},
+			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?destination"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site2"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
 		"subtasks": {"ordered": [
@@ -170,7 +191,15 @@ var moveExample = [
 	// clear: a site is clear if no labware is on it
 	{"<--": {"siteIsClear": {"site": "?site"},
 		"and": [{"not": {"location": {"labware": "?labware", "site": "?site"}}}]}
-	}
+	},
+
+	// clear: a site is clear if no labware is on it
+	{"<--": {"movePlate_pathOk": {"siteA": "?siteA", "siteB": "?siteB"},
+		"and": [
+			{"not": {"movePlate_excludePath": {"siteA": "?siteA", "siteB": "?siteB"}}},
+			{"not": {"movePlate_excludePath": {"siteA": "?siteB", "siteB": "?siteA"}}},
+		]}
+	},
 
 ];
 
