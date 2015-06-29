@@ -102,14 +102,16 @@ var moveExample = [
 	//
 	// Actions
 	//
-	{"action": {"description": "fully specified seal command",
+	{"action": {"description": "transport plate from origin to destination",
 		"task": {"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 		"preconditions": [
-			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
-			{"canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 			{"model": {"labware": "?labware", "model": "?model"}},
 			{"location": {"labware": "?labware", "site": "?origin"}},
+			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
+			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
 		"deletions": [],
 		"additions": [{"plateHasSeal": {"labware": "?labware"}}]
@@ -120,7 +122,7 @@ var moveExample = [
 	//
 
 	// movePlate-null
-	{"method": {"description": "method for sealing",
+	{"method": {"description": "transport plate from origin to destination",
 		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
 		"preconditions": [
 			{"location": {"labware": "?labware", "site": "?destination"}}
@@ -132,14 +134,16 @@ var moveExample = [
 	}},
 
 	// movePlate-direct
-	{"method": {"description": "method for sealing",
+	{"method": {"description": "transport plate from origin to destination",
 		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
 		"preconditions": [
 			{"model": {"labware": "?labware", "model": "?model"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"location": {"labware": "?labware", "site": "?origin"}},
 			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}}
+			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+			{"stackable": {"below": "?destinationModel", "above": "?model"}},
+			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+			{"agentEquipmentProgramModelSiteCanMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
 		],
 		"subtasks": {"ordered": [
 			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
@@ -163,7 +167,7 @@ var moveExample = [
 //console.log(JSON.stringify(sealerExample, null, '\t'));
 var shop = require('./HTN/Plan/shop.js');
 //var p = shop.makePlanner(sealerExample);
-var p = shop.makePlanner(sealerExample);
+var p = shop.makePlanner(moveExample);
 var plan = p.plan();
 console.log("state:");
 console.log(JSON.stringify(plan.state));
