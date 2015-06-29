@@ -91,6 +91,7 @@ var moveExample = [
 	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "siteModel1"}},
 	{"stackable": {"below": "siteModel1", "above": "model1"}},
 	//{"agentEquipmentProgramModelSiteCanSeal": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "model1", "site": "ourlab.mario.SEALER"}},
+	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P2"}},
 	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P3"}},
 	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.SEALER"}},
 	{"model": {"labware": "plate1", "model": "model1"}},
@@ -171,13 +172,18 @@ var moveExample = [
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?destination"}},
+			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?site2"}},
+			{"movePlate_pathOk": {"siteA": "?site2", "siteB": "?destination"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site2"}},
 			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
+			{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
+			{"stackable": {"below": "?site2Model", "above": "?model"}},
+			{"siteIsClear": {"site": "?site2"}},
 		],
 		"subtasks": {"ordered": [
-			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
+			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}},
 		]}
 	}},
 
