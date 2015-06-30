@@ -2,6 +2,7 @@ var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
 var movePlatePlanning = require('./movePlatePlanning.js');
 var ourlab = require('./ourlab.js');
+var roboliq = require('./roboliq.js');
 
 var protocol2 = {
   "objects": {
@@ -26,17 +27,17 @@ var protocol2 = {
 };
 _.merge(protocol2.objects, ourlab.objects);
 
+var objectToLogicConverters = _.merge({}, roboliq.objectToLogicConverters, ourlab.objectToLogicConverters);
 function fillStateItems(name, o, stateList) {
   //console.log("name: "+name);
   if (o.hasOwnProperty("type")) {
     //console.log("type: "+o.type);
-    switch (o['type']) {
-      case 'Plate':
-        stateList.push({"isLabware": {"labware": name}});
-        stateList.push({"isPlate": {"labware": name}});
-        stateList.push({"model": {"labware": name, "model": o.model}});
-        stateList.push({"location": {"labware": name, "site": o.location}});
-        break;
+    var type = o['type'];
+    if (objectToLogicConverters.hasOwnProperty(type)) {
+      var result = objectToLogicConverters[type](name, o);
+      if (result.value) {
+        _.forEach(result.value, function(value) { stateList.push(value); });
+      }
     }
   }
 

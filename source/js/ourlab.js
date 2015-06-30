@@ -31,6 +31,10 @@ module.exports = {
     },
   },
 
+  objectToLogicConverters: {
+    "EvowareRobot": function(name) { return {value: [{"isAgent": {"agent": name}}]}; }
+  },
+
   logic: [
     {"isAgent": {"agent": "ourlab.mario.evoware"}},
   	{"isTransporter": {"equipment": "ourlab.mario.roma1"}},

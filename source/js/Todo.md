@@ -3,3 +3,4 @@
 - [ ] commands.js: create file for command handlers, plan converters, and task logic (in movePlatePlanning.js)
 - [ ] put protocol JSON into separate JSON files
 - [ ] create test protocol with sealing, where plate needs to be moved to the sealer first (add a 'movePlate' command, which will be expanded in turn)
+- [ ] add warning/error handling to objectToLogicConverters
