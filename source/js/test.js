@@ -58,78 +58,7 @@ function createStateItems(objects) {
   return stateList;
 }
 
-var plannerTaskConverters = {
-  "movePlateAction": function(params, parentParams, objects) {
-    return [{
-      command: "instruction.transporter.movePlate",
-      agent: params.agent,
-      equipment: params.equipment,
-      program: params.program,
-      object: params.labware,
-      destination: params.destination
-    }];
-  },
-  "print": function() { return []; }
-}
-
-var commands = {
-	"instruction.transporter.movePlate": function(params, objects) {
-		var effects = {};
-		effects[params.object+".location"] = params.destination;
-		return {effects: effects};
-	},
-	"action.transporter.movePlate": function(params, objects) {
-    var stateList = createStateItems(objects);
-    var movePlatePlanning = require('./movePlatePlanning.js');
-    var taskList = [];
-    if (params.hasOwnProperty("agent")) {
-      taskList.push({"movePlate-a": {"agent": params.agent, "labware": params['object'], "destination": params.destination}});
-    }
-    else {
-      taskList.push({"movePlate": {"labware": params['object'], "destination": params.destination}});
-    }
-    var tasks = {"tasks": {"ordered": taskList}};
-    var input = [].concat(movePlatePlanning.evowareConfig, movePlatePlanning.taskDefs, stateList, [tasks]);
-    //console.log(JSON.stringify(input, null, '\t'));
-    var shop = require('./HTN/shop.js');
-    //var p = shop.makePlanner(sealerExample);
-    var planner = shop.makePlanner(input);
-    var plan = planner.plan();
-    //console.log("plan:");
-    //console.log(JSON.stringify(plan, null, '  '));
-    //var x = planner.ppPlan(plan);
-    //console.log(x);
-    var tasks = planner.listAndOrderTasks(plan, true);
-    //console.log("Tasks:")
-    //console.log(JSON.stringify(tasks, null, '  '));
-    var cmdList = _(tasks).map(function(task) {
-      return _(task).map(function(taskParams, taskName) {
-        return (plannerTaskConverters.hasOwnProperty(taskName))
-          ? plannerTaskConverters[taskName](taskParams, params, objects)
-          : [];
-      }).flatten().value();
-    }).flatten().value();
-    //console.log("cmdList:")
-    //console.log(JSON.stringify(cmdList, null, '  '));
-
-    // Create the expansion object
-    var expansion = {};
-    var i = 1;
-    _.forEach(cmdList, function(cmd) {
-      expansion[i.toString()] = cmd;
-      i += 1;
-    });
-
-    // Create the effets object
-    var effects = {};
-		effects[params.object+".location"] = params.destination;
-
-    return {
-      expansion: expansion,
-      effects: effects
-    };
-	}
-};
+var commandHandlers = roboliq.commandHandlers;
 
 function createSimpleObject(nameList, value) {
   if (_.isEmpty(nameList)) return null;
@@ -154,10 +83,11 @@ function expandSteps(prefix, steps, objects, effects) {
 		var step = steps[key];
     var isExpanded = step.hasOwnProperty("1");
 		if (step.hasOwnProperty("command")) {
-			if (commands.hasOwnProperty(step.command)) {
-				var handler = commands[step.command];
+			if (commandHandlers.hasOwnProperty(step.command)) {
+				var handler = commandHandlers[step.command];
 				if (!isExpanded) {
-					var result = handler(step, objects);
+          var objectLogics = ourlab.logic.concat(createStateItems(objects));
+					var result = handler(step, objects, objectLogics);
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}
@@ -194,18 +124,16 @@ function gatherInstructions(prefix, steps, objects, effects) {
 			if (step.command.indexOf("instruction.") == 0) {
 				instructions.push(step);
 			}
-			if (commands.hasOwnProperty(step.command)) {
-        var prefix2 = prefix.concat([key]);
-        var id = prefix2.join('.');
+      var prefix2 = prefix.concat([key]);
+      var id = prefix2.join('.');
 
-				var instructions2 = gatherInstructions(prefix2, step, objects, effects);
-				instructions = instructions.concat(instructions2);
+			var instructions2 = gatherInstructions(prefix2, step, objects, effects);
+			instructions = instructions.concat(instructions2);
 
-				if (effects.hasOwnProperty(id)) {
-          var item = {"let": effects[id]};
-          if (_.isEmpty(instructions) || !_.isEqual(_.last(instructions), item))
-					  instructions.push(item);
-				}
+			if (effects.hasOwnProperty(id)) {
+        var item = {"let": effects[id]};
+        if (_.isEmpty(instructions) || !_.isEqual(_.last(instructions), item))
+				  instructions.push(item);
 			}
 		}
 		else if (step.hasOwnProperty("let")) {
