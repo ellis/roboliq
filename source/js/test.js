@@ -2,63 +2,6 @@ var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
 var movePlatePlanning = require('./movePlatePlanning.js');
 
-var protocol1 = {
-  "objects": {
-    "ourlab": {
-      "type": "Namespace",
-      "mario": {
-        "type": "Namespace",
-        "evoware": {
-          "type": "EvowareRobot"
-        },
-        "arm1": {
-          "type": "Transporter",
-          "evowareRoma": 0
-        },
-        "P2": {
-          "type": "Site",
-          "evowareCarrier": "MP 2Pos H+P Shake",
-          "evowareGrid": 10,
-          "evowareSite": 2
-        },
-        "P3": {
-          "type": "Site",
-          "evowareCarrier": "MP 2Pos H+P Shake",
-          "evowareGrid": 10,
-          "evowareSite": 4
-        }
-      },
-      "model1": {
-        "type": "PlateModel",
-        "evowareName": "Ellis Nunc F96 MicroWell"
-      }
-    },
-    "plate1": {
-      "type": "Plate",
-      "model": "ourlab.model1",
-      "location": "ourlab.mario.P2"
-    }
-  },
-  "steps": {
-    "1": {
-      "command": "instruction.transporter.movePlate",
-      "agent": "ourlab.mario.evoware",
-      "equipment": "ourlab.mario.arm1",
-      "program": "Narrow",
-      "object": "plate1",
-      "destination": "ourlab.mario.P3"
-    },
-    /*"2": {
-      "command": "instruction.transporter.movePlate",
-      "agent": "ourlab.mario.evoware",
-      "equipment": "ourlab.mario.arm1",
-      "program": "Narrow",
-      "object": "plate1",
-      "destination": "ourlab.mario.P2"
-    }*/
-  }
-};
-
 var protocol2 = {
   "objects": {
     "ourlab": {
@@ -105,14 +48,11 @@ var protocol2 = {
       "object": "plate1",
       "destination": "ourlab.mario.P3"
     },
-    /*"2": {
+    "2": {
       "command": "action.transporter.movePlate",
-      "agent": "ourlab.mario.evoware",
-      "equipment": "ourlab.mario.arm1",
-      "program": "Narrow",
       "object": "plate1",
-      "destination": "ourlab.mario.P2"
-    }*/
+      "destination": "ourlab.mario.SEALER"
+    }
   }
 };
 
@@ -162,84 +102,105 @@ var plannerTaskConverters = {
 }
 
 var commands = {
-	"instruction.transporter.movePlate": {
-		getEffects: function(params, objects) {
-			var effects = {};
-			effects[params.object+".location"] = params.destination;
-			return {effects: effects};
-		}
+	"instruction.transporter.movePlate": function(params, objects) {
+		var effects = {};
+		effects[params.object+".location"] = params.destination;
+		return {effects: effects};
 	},
-	"action.transporter.movePlate": {
-		getEffects: function(params, objects) {
-			var effects = {};
-			effects[params.object+".location"] = params.destination;
-			return {effects: effects};
-		},
-		expand: function(params, objects) {
-			var expansion = {};
-      var stateList = createStateItems(objects);
-      var movePlatePlanning = require('./movePlatePlanning.js');
-      var taskList = [];
-      if (params.hasOwnProperty("agent")) {
-        taskList.push({"movePlate-a": {"agent": params.agent, "labware": params['object'], "destination": params.destination}});
-      }
-      else {
-        taskList.push({"movePlate": {"labware": params['object'], "destination": params.destination}});
-      }
-      var tasks = {"tasks": {"ordered": taskList}};
-      var input = [].concat(movePlatePlanning.evowareConfig, movePlatePlanning.taskDefs, stateList, [tasks]);
-      console.log(JSON.stringify(input, null, '\t'));
-      var shop = require('./HTN/shop.js');
-      //var p = shop.makePlanner(sealerExample);
-      var planner = shop.makePlanner(input);
-      var plan = planner.plan();
-      //console.log("plan:");
-      //console.log(JSON.stringify(plan, null, '  '));
-      //var x = planner.ppPlan(plan);
-      //console.log(x);
-      var tasks = planner.listAndOrderTasks(plan, true);
-      //console.log("Tasks:")
-      //console.log(JSON.stringify(tasks, null, '  '));
-      var cmdList = _(tasks).map(function(task) {
-        return _(task).map(function(taskParams, taskName) {
-          return (plannerTaskConverters.hasOwnProperty(taskName))
-            ? plannerTaskConverters[taskName](taskParams, params, objects)
-            : [];
-        }).flatten().value();
+	"action.transporter.movePlate": function(params, objects) {
+    var stateList = createStateItems(objects);
+    var movePlatePlanning = require('./movePlatePlanning.js');
+    var taskList = [];
+    if (params.hasOwnProperty("agent")) {
+      taskList.push({"movePlate-a": {"agent": params.agent, "labware": params['object'], "destination": params.destination}});
+    }
+    else {
+      taskList.push({"movePlate": {"labware": params['object'], "destination": params.destination}});
+    }
+    var tasks = {"tasks": {"ordered": taskList}};
+    var input = [].concat(movePlatePlanning.evowareConfig, movePlatePlanning.taskDefs, stateList, [tasks]);
+    //console.log(JSON.stringify(input, null, '\t'));
+    var shop = require('./HTN/shop.js');
+    //var p = shop.makePlanner(sealerExample);
+    var planner = shop.makePlanner(input);
+    var plan = planner.plan();
+    //console.log("plan:");
+    //console.log(JSON.stringify(plan, null, '  '));
+    //var x = planner.ppPlan(plan);
+    //console.log(x);
+    var tasks = planner.listAndOrderTasks(plan, true);
+    //console.log("Tasks:")
+    //console.log(JSON.stringify(tasks, null, '  '));
+    var cmdList = _(tasks).map(function(task) {
+      return _(task).map(function(taskParams, taskName) {
+        return (plannerTaskConverters.hasOwnProperty(taskName))
+          ? plannerTaskConverters[taskName](taskParams, params, objects)
+          : [];
       }).flatten().value();
-      //console.log("cmdList:")
-      //console.log(JSON.stringify(cmdList, null, '  '));
-      var i = 1;
-      _.forEach(cmdList, function(cmd) {
-        expansion[i.toString()] = cmd;
-        i += 1;
-      });
-			return {expansion: expansion};
-		}
+    }).flatten().value();
+    //console.log("cmdList:")
+    //console.log(JSON.stringify(cmdList, null, '  '));
+
+    // Create the expansion object
+    var expansion = {};
+    var i = 1;
+    _.forEach(cmdList, function(cmd) {
+      expansion[i.toString()] = cmd;
+      i += 1;
+    });
+
+    // Create the effets object
+    var effects = {};
+		effects[params.object+".location"] = params.destination;
+
+    return {
+      expansion: expansion,
+      effects: effects
+    };
 	}
 };
 
-function expandSteps(prefix, steps, objects) {
+function createSimpleObject(nameList, value) {
+  if (_.isEmpty(nameList)) return null;
+  else {
+    var o = {};
+    o[nameList[0]] = (nameList.length == 1)
+      ? value : createSimpleObject(_.rest(nameList), value);
+    return o;
+  }
+}
+
+function expandSteps(prefix, steps, objects, effects) {
 	var keys = _(steps).keys(steps).filter(function(key) {
 		var c = key[0];
 		return (c >= '0' && c <= '9');
 	}).value();
 	keys.sort(naturalSort);
-	console.log(keys);
+	//console.log(keys);
 	_.forEach(keys, function(key) {
+    var prefix2 = prefix.concat([key]);
+    var id = prefix2.join('.');
 		var step = steps[key];
+    var isExpanded = step.hasOwnProperty("1");
 		if (step.hasOwnProperty("command")) {
 			if (commands.hasOwnProperty(step.command)) {
-				var command = commands[step.command];
-				var canExpand = command.hasOwnProperty("expand");
-				var isExpanded = command.hasOwnProperty("1");
-				if (canExpand & !isExpanded) {
-					var result = command.expand(step, objects);
+				var handler = commands[step.command];
+				if (!isExpanded) {
+					var result = handler(step, objects);
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}
+          if (result.hasOwnProperty("effects")) {
+            console.log(result.effects);
+            effects[id] = result.effects;
+            _.forEach(result.effects, function(value, key) {
+              var nameList = key.split('.');
+              var o = createSimpleObject(nameList, value);
+              _.merge(objects, o);
+            });
+          }
 				}
-				expandSteps(prefix+"."+key, step, objects);
+				expandSteps(prefix2, step, objects, effects);
 			}
 		}
 	});
@@ -255,7 +216,7 @@ function gatherInstructions(prefix, steps, objects) {
 		return (c >= '0' && c <= '9');
 	}).value();
 	keys.sort(naturalSort);
-	console.log(keys);
+	//console.log(keys);
 	_.forEach(keys, function(key) {
 		var step = steps[key];
 		if (step.hasOwnProperty("command")) {
@@ -292,7 +253,18 @@ console.log(JSON.stringify(instructions, null, '\t'));
 //console.log(JSON.stringify(createStateItems(protocol2), null, '\t'));
 
 protocol = protocol2;
-expandSteps("steps", protocol.steps, protocol.objects);
+var objects0 = _.cloneDeep(protocol.objects);
+var effects = {};
+expandSteps([], protocol.steps, objects0, effects);
+console.log();
+console.log("Steps:")
 console.log(JSON.stringify(protocol.steps, null, '\t'));
-//instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
-//console.log(JSON.stringify(instructions, null, '\t'));
+console.log();
+console.log("Effects:")
+console.log(JSON.stringify(effects, null, '\t'));
+
+/*instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
+console.log();
+console.log("Instructions:")
+console.log(JSON.stringify(instructions, null, '\t'));
+*/
