@@ -1,38 +1,10 @@
 var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
 var movePlatePlanning = require('./movePlatePlanning.js');
+var ourlab = require('./ourlab.js');
 
 var protocol2 = {
   "objects": {
-    "ourlab": {
-      "type": "Namespace",
-      "mario": {
-        "type": "Namespace",
-        "evoware": {
-          "type": "EvowareRobot"
-        },
-        "arm1": {
-          "type": "Transporter",
-          "evowareRoma": 0
-        },
-        "P2": {
-          "type": "Site",
-          "evowareCarrier": "MP 2Pos H+P Shake",
-          "evowareGrid": 10,
-          "evowareSite": 2
-        },
-        "P3": {
-          "type": "Site",
-          "evowareCarrier": "MP 2Pos H+P Shake",
-          "evowareGrid": 10,
-          "evowareSite": 4
-        }
-      },
-      "model1": {
-        "type": "PlateModel",
-        "evowareName": "Ellis Nunc F96 MicroWell"
-      }
-    },
     "plate1": {
       "type": "Plate",
       "model": "ourlab.model1",
@@ -55,6 +27,7 @@ var protocol2 = {
     }
   }
 };
+_.merge(protocol2.objects, ourlab.objects);
 
 function fillStateItems(name, o, stateList) {
   //console.log("name: "+name);

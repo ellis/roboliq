@@ -20,7 +20,7 @@ var evowareConfig = [
 	{"movePlate_excludePath": {"siteA": "ourlab.mario.P3", "siteB": "ourlab.mario.SEALER"}},
 ];
 
-taskDefs = [
+var taskDefs = [
 	//
 	// Actions
 	//
