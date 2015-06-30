@@ -209,7 +209,7 @@ function expandSteps(prefix, steps, objects, effects) {
 /**
  * Once the protocol is fully processed, call this to generate a list of instructions to pass to the robot compilers.
  */
-function gatherInstructions(prefix, steps, objects) {
+function gatherInstructions(prefix, steps, objects, effects) {
 	var instructions = [];
 	var keys = _(steps).keys(steps).filter(function(key) {
 		var c = key[0];
@@ -224,15 +224,16 @@ function gatherInstructions(prefix, steps, objects) {
 				instructions.push(step);
 			}
 			if (commands.hasOwnProperty(step.command)) {
-				var command = commands[step.command];
-				var instructions2 = gatherInstructions(prefix+"."+key, step, objects);
+        var prefix2 = prefix.concat([key]);
+        var id = prefix2.join('.');
+
+				var instructions2 = gatherInstructions(prefix2, step, objects, effects);
 				instructions = instructions.concat(instructions2);
-				var canGetEffects = command.hasOwnProperty("getEffects");
-				if (canGetEffects) {
-					var result = command.getEffects(step, objects);
-					if (result.hasOwnProperty("effects")) {
-						instructions.push({"let": result.effects});
-					}
+
+				if (effects.hasOwnProperty(id)) {
+          var item = {"let": effects[id]};
+          if (_.isEmpty(instructions) || !_.isEqual(_.last(instructions), item))
+					  instructions.push(item);
 				}
 			}
 		}
@@ -263,8 +264,7 @@ console.log();
 console.log("Effects:")
 console.log(JSON.stringify(effects, null, '\t'));
 
-/*instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
+instructions = gatherInstructions([], protocol.steps, protocol.objects, effects);
 console.log();
 console.log("Instructions:")
 console.log(JSON.stringify(instructions, null, '\t'));
-*/
