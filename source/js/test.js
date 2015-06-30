@@ -14,9 +14,6 @@ var protocol2 = {
   "steps": {
     "1": {
       "command": "action.transporter.movePlate",
-      //"agent": "ourlab.mario.evoware",
-      //"equipment": "ourlab.mario.arm1",
-      //"program": "Narrow",
       "object": "plate1",
       "destination": "ourlab.mario.P3"
     },
