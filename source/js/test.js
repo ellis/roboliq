@@ -147,6 +147,20 @@ function createStateItems(objects) {
   return stateList;
 }
 
+var plannerTaskConverters = {
+  "movePlateAction": function(params, parentParams, objects) {
+    return [{
+      command: "instruction.transporter.movePlate",
+      agent: params.agent,
+      equipment: params.equipment,
+      program: params.program,
+      object: params.labware,
+      destination: params.destination
+    }];
+  },
+  "print": function() { return []; }
+}
+
 var commands = {
 	"instruction.transporter.movePlate": {
 		getEffects: function(params, objects) {
@@ -175,24 +189,31 @@ var commands = {
       var tasks = {"tasks": {"ordered": taskList}};
       var input = [].concat(movePlatePlanning.evowareConfig, movePlatePlanning.taskDefs, stateList, [tasks]);
       console.log(JSON.stringify(input, null, '\t'));
-      var shop = require('./HTN/Plan/shop.js');
+      var shop = require('./HTN/shop.js');
       //var p = shop.makePlanner(sealerExample);
       var planner = shop.makePlanner(input);
       var plan = planner.plan();
-      console.log("plan:");
-      console.log(JSON.stringify(plan, null, '  '));
+      //console.log("plan:");
+      //console.log(JSON.stringify(plan, null, '  '));
       //var x = planner.ppPlan(plan);
-      //CONTINUEkkk
       //console.log(x);
-			var cmd1 = {
-				command: "instruction.transporter.movePlate",
-				agent: params.agent,
-				equipment: params.equipment,
-				program: params.program,
-				object: params.object,
-				destination: params.destination
-			};
-			expansion["1"] = cmd1;
+      var tasks = planner.listAndOrderTasks(plan, true);
+      //console.log("Tasks:")
+      //console.log(JSON.stringify(tasks, null, '  '));
+      var cmdList = _(tasks).map(function(task) {
+        return _(task).map(function(taskParams, taskName) {
+          return (plannerTaskConverters.hasOwnProperty(taskName))
+            ? plannerTaskConverters[taskName](taskParams, params, objects)
+            : [];
+        }).flatten().value();
+      }).flatten().value();
+      //console.log("cmdList:")
+      //console.log(JSON.stringify(cmdList, null, '  '));
+      var i = 1;
+      _.forEach(cmdList, function(cmd) {
+        expansion[i.toString()] = cmd;
+        i += 1;
+      });
 			return {expansion: expansion};
 		}
 	}

@@ -92,7 +92,7 @@ var moveExample = [].concat(movePlatePlanning.evowareConfig, movePlatePlanning.t
 
 //console.log(JSON.stringify(sealerExample, null, '\t'));
 console.log(JSON.stringify(moveExample, null, '\t'));
-var shop = require('./HTN/Plan/shop.js');
+var shop = require('./HTN/shop.js');
 //var p = shop.makePlanner(sealerExample);
 var p = shop.makePlanner(moveExample);
 var plan = p.plan();

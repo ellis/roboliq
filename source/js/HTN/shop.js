@@ -63,8 +63,8 @@
  *
  */
 
-var utils = require('../utils.js');
-var llpl = require('../Logic/llpl.js');
+var utils = require('./utils.js');
+var llpl = require('./llpl.js');
 
 function makePlanner(spec) {
 

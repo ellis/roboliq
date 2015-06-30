@@ -24,7 +24,7 @@
  *
  */
 
-var utils = require('../utils.js');
+var utils = require('./utils.js');
 
 ////
 //// Syntax
