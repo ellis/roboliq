@@ -48,14 +48,14 @@ var protocol1 = {
       "object": "plate1",
       "destination": "ourlab.mario.P3"
     },
-    "2": {
+    /*"2": {
       "command": "instruction.transporter.movePlate",
       "agent": "ourlab.mario.evoware",
       "equipment": "ourlab.mario.arm1",
       "program": "Narrow",
       "object": "plate1",
       "destination": "ourlab.mario.P2"
-    }
+    }*/
   }
 };
 
@@ -99,20 +99,20 @@ var protocol2 = {
   "steps": {
     "1": {
       "command": "action.transporter.movePlate",
-      "agent": "ourlab.mario.evoware",
-      "equipment": "ourlab.mario.arm1",
-      "program": "Narrow",
+      //"agent": "ourlab.mario.evoware",
+      //"equipment": "ourlab.mario.arm1",
+      //"program": "Narrow",
       "object": "plate1",
       "destination": "ourlab.mario.P3"
     },
-    "2": {
+    /*"2": {
       "command": "action.transporter.movePlate",
       "agent": "ourlab.mario.evoware",
       "equipment": "ourlab.mario.arm1",
       "program": "Narrow",
       "object": "plate1",
       "destination": "ourlab.mario.P2"
-    }
+    }*/
   }
 };
 
@@ -179,11 +179,11 @@ var commands = {
       //var p = shop.makePlanner(sealerExample);
       var planner = shop.makePlanner(input);
       var plan = planner.plan();
-      console.log("state:");
-      console.log(JSON.stringify(plan.state));
-      var x = planner.ppPlan(plan);
-      CONTINUE
-      console.log(x);
+      console.log("plan:");
+      console.log(JSON.stringify(plan, null, '  '));
+      //var x = planner.ppPlan(plan);
+      //CONTINUEkkk
+      //console.log(x);
 			var cmd1 = {
 				command: "instruction.transporter.movePlate",
 				agent: params.agent,
@@ -261,15 +261,17 @@ function gatherInstructions(prefix, steps, objects) {
 	return instructions;
 }
 
+/*
 var protocol = protocol1;
 console.log(JSON.stringify(protocol, null, '\t'));
 var instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
 console.log(JSON.stringify(instructions, null, '\t'));
+*/
 
 //console.log(JSON.stringify(createStateItems(protocol2), null, '\t'));
 
 protocol = protocol2;
 expandSteps("steps", protocol.steps, protocol.objects);
 console.log(JSON.stringify(protocol.steps, null, '\t'));
-instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
-console.log(JSON.stringify(instructions, null, '\t'));
+//instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
+//console.log(JSON.stringify(instructions, null, '\t'));

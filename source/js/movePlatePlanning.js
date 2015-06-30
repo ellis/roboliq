@@ -4,19 +4,19 @@ var evowareConfig = [
 	//
 	{"isAgent": {"agent": "ourlab.mario.evoware"}},
 	{"isTransporter": {"equipment": "ourlab.mario.roma1"}},
-	{"isModel": {"model": "model1"}},
-	{"isModel": {"model": "siteModel1"}},
+	{"isModel": {"model": "ourlab.model1"}},
+	{"isModel": {"model": "ourlab.model1"}},
 	{"isSite": {"site": "ourlab.mario.P2"}},
 	{"isSite": {"site": "ourlab.mario.P3"}},
 	{"isSite": {"site": "ourlab.mario.SEALER"}},
-	{"isSiteModel": {"model": "siteModel1"}},
-	{"siteModel": {"site": "ourlab.mario.P2", "siteModel": "siteModel1"}},
-	{"siteModel": {"site": "ourlab.mario.P3", "siteModel": "siteModel1"}},
-	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "siteModel1"}},
-	{"stackable": {"below": "siteModel1", "above": "model1"}},
-	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P2"}},
-	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.P3"}},
-	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "model1", "site": "ourlab.mario.SEALER"}},
+	{"isSiteModel": {"model": "ourlab.model1"}},
+	{"siteModel": {"site": "ourlab.mario.P2", "siteModel": "ourlab.model1"}},
+	{"siteModel": {"site": "ourlab.mario.P3", "siteModel": "ourlab.model1"}},
+	{"siteModel": {"site": "ourlab.mario.SEALER", "siteModel": "ourlab.model1"}},
+	{"stackable": {"below": "ourlab.model1", "above": "ourlab.model1"}},
+	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "ourlab.model1", "site": "ourlab.mario.P2"}},
+	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "ourlab.model1", "site": "ourlab.mario.P3"}},
+	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "ourlab.model1", "site": "ourlab.mario.SEALER"}},
 	{"movePlate_excludePath": {"siteA": "ourlab.mario.P3", "siteB": "ourlab.mario.SEALER"}},
 ];
 
@@ -25,7 +25,7 @@ taskDefs = [
 	// Actions
 	//
 	{"action": {"description": "print for debugging",
-		"task": {"print": {"text": "?agent"}},
+		"task": {"print": {"text": "?text"}},
 		"preconditions": [
 		],
 		"deletions": [],
@@ -117,7 +117,7 @@ taskDefs = [
 			{"location": {"labware": "?labware", "site": "?destination"}}
 		],
 		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-null"}},
+			{"print": {"text": "movePlate-a-null"}},
 		]}
 	}},
 
