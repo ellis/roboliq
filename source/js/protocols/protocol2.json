@@ -1,0 +1,21 @@
+{
+  "objects": {
+    "plate1": {
+      "type": "Plate",
+      "model": "ourlab.model1",
+      "location": "ourlab.mario.P2"
+    }
+  },
+  "steps": {
+    "1": {
+      "command": "action.transporter.movePlate",
+      "object": "plate1",
+      "destination": "ourlab.mario.P3"
+    },
+    "2": {
+      "command": "action.transporter.movePlate",
+      "object": "plate1",
+      "destination": "ourlab.mario.SEALER"
+    }
+  }
+}

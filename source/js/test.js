@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
-var movePlatePlanning = require('./movePlatePlanning.js');
 var ourlab = require('./ourlab.js');
 var roboliq = require('./roboliq.js');
 

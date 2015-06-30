@@ -45,5 +45,6 @@ module.exports = {
   	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "ourlab.model1", "site": "ourlab.mario.P3"}},
   	{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.roma1", "program": "Narrow", "model": "ourlab.model1", "site": "ourlab.mario.SEALER"}},
   	{"movePlate_excludePath": {"siteA": "ourlab.mario.P3", "siteB": "ourlab.mario.SEALER"}},
+    {"sealer.sealPlate_canAgentEquipmentProgramModelSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.sealer", "program": "sealerProgram1", "model": "ourlab.model1", "site": "ourlab.mario.SEALER"}},
   ]
 }
