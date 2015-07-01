@@ -549,13 +549,13 @@ function query(q) {
   var results = [];
   var bindingsArray = qeval(q, [{}]);
   if (utils.isEmpty(bindingsArray)) {
-    utils.ppToConsole("No");
+    //utils.ppToConsole("No");
   } else {
     for (var i = 0; i < bindingsArray.length; i++) {
       cleanQuery = utils.copyIt(q);
       instance = utils.instantiate(cleanQuery, bindingsArray[i]);
-      utils.ppToConsole('(' + i + ')');
-      utils.ppToConsole(instance);
+      //utils.ppToConsole('(' + i + ')');
+      //utils.ppToConsole(instance);
       results.push(instance);
       // utils.ppToConsole(bindingsArray[i]);
     }

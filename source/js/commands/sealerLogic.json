@@ -1,0 +1,11 @@
+[
+  {"action": {"description": "run the sealer to seal a plate",
+    "task": {"sealer.findParams": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}},
+    "preconditions": [
+      {"model": {"labware": "?labware", "model": "?model"}},
+      {"sealer.canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}}
+    ],
+    "deletions": [],
+    "additions": [{"plateIsSealed": {"labware": "?labware"}}]
+  }},
+]

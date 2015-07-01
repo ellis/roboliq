@@ -16,12 +16,15 @@ var predicates = [
 
 var objectToPredicateConverters = {
   "Plate": function(name, object) {
-    return {value: [
+    var value = [
       {"isLabware": {"labware": name}},
       {"isPlate": {"labware": name}},
       {"model": {"labware": name, "model": object.model}},
       {"location": {"labware": name, "site": object.location}}
-    ]};
+    ];
+    if (object.sealed)
+      value.push({"plateIsSealed": {"labware": name}});
+    return {value: value};
   },
   "PlateModel": function(name, object) {
     return {value: [{"isModel": {"model": name}}]};

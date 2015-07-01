@@ -12,6 +12,9 @@ var commandHandlers = {
 		effects[params.object+".location"] = params.destination;
 		return {effects: effects};
 	},
+  /**
+   * params: [agent], object, destination
+   */
 	"action.transporter.movePlate": function(params, objects, predicates, planHandlers) {
     var transporterLogic = require('./transporterLogic.json');
     var taskList = [];
