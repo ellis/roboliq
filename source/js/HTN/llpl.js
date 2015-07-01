@@ -45,7 +45,7 @@ function druleConclusion(obj) {
   var definition = utils.values(obj)[0];
   var newObj = {};
   for (var key in definition) {
-    if ((key !== 'or') && (key !== 'and') && (key !== 'not')) {
+    if ((key !== 'or') && (key !== 'and') && (key !== 'not') && (key !== 'description')) {
       newObj[key] = definition[key];
     }
   }

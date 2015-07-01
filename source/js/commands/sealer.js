@@ -1,4 +1,4 @@
-var planTasks = [
+var planTaskStatements = [
   // Actions
   {"action": {"description": "fully specified seal command",
     "task": {"sealer.sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}},

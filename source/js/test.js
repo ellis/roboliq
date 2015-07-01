@@ -1,20 +1,39 @@
 var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
-var ourlab = require('./ourlab.js');
 var roboliq = require('./roboliq.js');
+var commands = {
+  transporter: require('./commands/transporter.js')
+};
+var ourlab = require('./ourlab.js');
 
 var protocolFilename = './protocols/protocol2.json';
-var protocol = require(protocolFilename);
-_.merge(protocol.objects, ourlab.objects);
+var protocol0 = require(protocolFilename);
 
-var objectToLogicConverters = _.merge({}, roboliq.objectToLogicConverters, ourlab.objectToLogicConverters);
+function mergeObjects(name) {
+  return _.merge({}, roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]);
+}
+function mergeArrays(name) {
+  return _.compact([].concat(roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]));
+}
+var protocol = {
+  objects: mergeObjects("objects"),
+  steps: mergeObjects("steps"),
+  effects: mergeObjects("effects"),
+  predicates: mergeArrays("predicates"),
+  taskPredicates: mergeArrays("taskPredicates"),
+  objectToPredicateConverters: mergeObjects("objectToPredicateConverters"),
+  commandHandlers: mergeObjects("commandHandlers"),
+  planHandlers: mergeObjects("planHandlers")
+};
+
+var objectToPredicateConverters = protocol.objectToPredicateConverters;
 function fillStateItems(name, o, stateList) {
   //console.log("name: "+name);
   if (o.hasOwnProperty("type")) {
     //console.log("type: "+o.type);
     var type = o['type'];
-    if (objectToLogicConverters.hasOwnProperty(type)) {
-      var result = objectToLogicConverters[type](name, o);
+    if (objectToPredicateConverters.hasOwnProperty(type)) {
+      var result = objectToPredicateConverters[type](name, o);
       if (result.value) {
         _.forEach(result.value, function(value) { stateList.push(value); });
       }
@@ -38,7 +57,7 @@ function createStateItems(objects) {
   return stateList;
 }
 
-var commandHandlers = roboliq.commandHandlers;
+var commandHandlers = protocol.commandHandlers;
 
 function createSimpleObject(nameList, value) {
   if (_.isEmpty(nameList)) return null;
@@ -66,8 +85,8 @@ function expandSteps(prefix, steps, objects, effects) {
 			if (commandHandlers.hasOwnProperty(step.command)) {
 				var handler = commandHandlers[step.command];
 				if (!isExpanded) {
-          var objectLogics = ourlab.logic.concat(createStateItems(objects));
-					var result = handler(step, objects, objectLogics);
+          var predicates = protocol.predicates.concat(createStateItems(objects));
+					var result = handler(step, objects, predicates);
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}
@@ -122,15 +141,6 @@ function gatherInstructions(prefix, steps, objects, effects) {
 	});
 	return instructions;
 }
-
-/*
-var protocol = protocol1;
-console.log(JSON.stringify(protocol, null, '\t'));
-var instructions = gatherInstructions("steps", protocol.steps, protocol.objects);
-console.log(JSON.stringify(instructions, null, '\t'));
-*/
-
-//console.log(JSON.stringify(createStateItems(protocol2), null, '\t'));
 
 var objects0 = _.cloneDeep(protocol.objects);
 var effects = {};

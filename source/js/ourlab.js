@@ -31,11 +31,11 @@ module.exports = {
     },
   },
 
-  objectToLogicConverters: {
+  objectToPredicateConverters: {
     "EvowareRobot": function(name) { return {value: [{"isAgent": {"agent": name}}]}; }
   },
 
-  logic: [
+  predicates: [
   	{"isSiteModel": {"model": "ourlab.siteModel1"}},
   	{"siteModel": {"site": "ourlab.mario.P2", "siteModel": "ourlab.siteModel1"}},
   	{"siteModel": {"site": "ourlab.mario.P3", "siteModel": "ourlab.siteModel1"}},
