@@ -3,28 +3,9 @@ var naturalSort = require('javascript-natural-sort');
 var ourlab = require('./ourlab.js');
 var roboliq = require('./roboliq.js');
 
-var protocol2 = {
-  "objects": {
-    "plate1": {
-      "type": "Plate",
-      "model": "ourlab.model1",
-      "location": "ourlab.mario.P2"
-    }
-  },
-  "steps": {
-    "1": {
-      "command": "action.transporter.movePlate",
-      "object": "plate1",
-      "destination": "ourlab.mario.P3"
-    },
-    "2": {
-      "command": "action.transporter.movePlate",
-      "object": "plate1",
-      "destination": "ourlab.mario.SEALER"
-    }
-  }
-};
-_.merge(protocol2.objects, ourlab.objects);
+var protocolFilename = './protocols/protocol2.json';
+var protocol = require(protocolFilename);
+_.merge(protocol.objects, ourlab.objects);
 
 var objectToLogicConverters = _.merge({}, roboliq.objectToLogicConverters, ourlab.objectToLogicConverters);
 function fillStateItems(name, o, stateList) {
@@ -151,7 +132,6 @@ console.log(JSON.stringify(instructions, null, '\t'));
 
 //console.log(JSON.stringify(createStateItems(protocol2), null, '\t'));
 
-protocol = protocol2;
 var objects0 = _.cloneDeep(protocol.objects);
 var effects = {};
 expandSteps([], protocol.steps, objects0, effects);
