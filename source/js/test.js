@@ -86,7 +86,7 @@ function expandSteps(prefix, steps, objects, effects) {
 				var handler = commandHandlers[step.command];
 				if (!isExpanded) {
           var predicates = protocol.predicates.concat(createStateItems(objects));
-					var result = handler(step, objects, predicates);
+					var result = handler(step, objects, predicates, protocol.planHandlers);
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}

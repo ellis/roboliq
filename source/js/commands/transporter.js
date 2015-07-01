@@ -12,7 +12,7 @@ var commandHandlers = {
 		effects[params.object+".location"] = params.destination;
 		return {effects: effects};
 	},
-	"action.transporter.movePlate": function(params, objects, predicates) {
+	"action.transporter.movePlate": function(params, objects, predicates, planHandlers) {
     var transporterLogic = require('./transporterLogic.json');
     var taskList = [];
     if (params.hasOwnProperty("agent")) {
@@ -73,11 +73,9 @@ var planHandlers = {
       object: params.labware,
       destination: params.destination
     }];
-  },
-  "print": function() { return []; }
+  }
 };
 
-var taskPredicates =
 module.exports = {
   objectToPredicateConverters: objectToPredicateConverters,
   commandHandlers: commandHandlers,

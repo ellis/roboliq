@@ -31,7 +31,12 @@ var objectToPredicateConverters = {
   },
 };
 
+var planHandlers = {
+  "trace": function() { return []; }
+};
+
 module.exports = {
   predicates: predicates,
   objectToPredicateConverters: objectToPredicateConverters,
+  planHandlers: planHandlers
 };
