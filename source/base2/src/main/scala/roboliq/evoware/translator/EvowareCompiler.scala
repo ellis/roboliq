@@ -189,7 +189,13 @@ class EvowareCompiler(
 						ResultC.unit(Nil)
 					}
 				case _ =>
-					ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
+					// If this step has an expansion, handle its children
+					if (step.fields.contains("1")) {
+						handleSteps(path, step, objects, effects)
+					}
+					else {
+						ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
+					}
 			}
 			//_ = println("token_?: "+token_?)
 		} yield {
@@ -242,7 +248,7 @@ class EvowareCompiler(
 		effects: JsObject
 	): ResultC[List[Token]] = {
 		val map = Map[String, (JsObject, JsObject) => ResultC[List[Token]]](
-			"instruction.transporter.movePlate" -> handleTransporterMovePlate
+			"transporter.instruction.movePlate" -> handleTransporterMovePlate
 		)
 		map.get(commandName) match {
 			case Some(fn) => fn(objects, step)

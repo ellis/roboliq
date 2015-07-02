@@ -29,8 +29,8 @@ class EvowareCompilerSpec extends FunSpec {
           P3: { type: Site, evowareCarrier: "MP 2Pos H+P Shake", evowareGrid: 10, evowareSite: 4 }
         model1: { type: PlateModel, evowareName: Ellis Nunc F96 MicroWell }
     steps:
-      "1": {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
-      "2": {command: instruction.transporter.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2}
+      "1": {command: transporter.instruction.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P3}
+      "2": {command: transporter.instruction.movePlate, agent: ourlab.mario.evoware, equipment: ourlab.mario.arm1, program: Narrow, object: plate1, destination: ourlab.mario.P2}
     effects:
       "1": {"plate1.location": "ourlab.mario.P3"}
       "2": {"plate1.location": "ourlab.mario.P2"}
