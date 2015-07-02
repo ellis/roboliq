@@ -2,6 +2,7 @@
 - [x] ourlab.js: remove autogenerate logic
 - [x] roboliq.js: create file for command handlers and plan converters
 - [x] put protocol JSON into separate JSON files
+- [x] refactor names of movePlate commands (use "transporter." prefix)
 - [ ] create test protocol with sealing, where plate needs to be moved to the sealer first (add a 'movePlate' command, which will be expanded in turn)
 - [ ] test.js: handle errors from commandHandler call
 - [ ] test.js: accumulate warnings from commandHandler call
@@ -9,7 +10,6 @@
 - [ ] commandHandler args: also pass paramDefaults
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] commandHandler: allow for returning of property constraints, for example: the sealPlate command could return a list of possible plate models for the given plate
-- [ ] refactor names of movePlate commands (use "transporter." prefix)
 - [ ] pass JSON and JavaScript files to load from the command line
 - [ ] consider using uppercase for special JSON fields, like TYPE, ROBOLIQ, DEFAULTS, COMMAND
 - [ ] generate instructions, pass them to Evoware compiler, checkout final script

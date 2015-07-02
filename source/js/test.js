@@ -120,7 +120,7 @@ function gatherInstructions(prefix, steps, objects, effects) {
 	_.forEach(keys, function(key) {
 		var step = steps[key];
 		if (step.hasOwnProperty("command")) {
-			if (step.command.indexOf("instruction.") == 0) {
+			if (step.command.indexOf("instruction.") >= 0) {
 				instructions.push(step);
 			}
       var prefix2 = prefix.concat([key]);
@@ -142,7 +142,6 @@ function gatherInstructions(prefix, steps, objects, effects) {
 	return instructions;
 }
 
-/*
 var objects0 = _.cloneDeep(protocol.objects);
 var effects = {};
 expandSteps([], protocol.steps, objects0, effects);
@@ -157,24 +156,3 @@ instructions = gatherInstructions([], protocol.steps, protocol.objects, effects)
 console.log();
 console.log("Instructions:")
 console.log(JSON.stringify(instructions, null, '\t'));
-*/
-var llpl = require('./HTN/llpl.js');
-var predicates = protocol.predicates.concat(createStateItems(protocol.objects));
-llpl.initializeDatabase(predicates);
-var q1 = {"sealer.canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}};
-var resultList = llpl.query(q1);
-//console.log(resultList);
-console.log(JSON.stringify(resultList, null, '  '));
-var misc = require('./misc.js');
-var acc = misc.extractValuesFromQueryResults(resultList, "sealer.canAgentEquipmentProgramModelSite");
-console.log(JSON.stringify(acc, null, '  '))
-/*
-var x = _(resultList).map(function(x) {
-  return _.map(x, function(x) {
-    return _.map(x, function(x, name) {
-      return [name, x];
-    });
-  });
-}).flatten().flatten().groupBy(function(l) { return l[0]; }).value();
-console.log(JSON.stringify(x, null, '  '));
-*/

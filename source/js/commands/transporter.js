@@ -7,7 +7,7 @@ var objectToPredicateConverters = {
 };
 
 var commandHandlers = {
-	"instruction.transporter.movePlate": function(params, objects) {
+	"transporter.instruction.movePlate": function(params, objects) {
 		var effects = {};
 		effects[params.object+".location"] = params.destination;
 		return {effects: effects};
@@ -15,7 +15,7 @@ var commandHandlers = {
   /**
    * params: [agent], object, destination
    */
-	"action.transporter.movePlate": function(params, objects, predicates, planHandlers) {
+	"transporter.action.movePlate": function(params, objects, predicates, planHandlers) {
     var transporterLogic = require('./transporterLogic.json');
     var taskList = [];
     if (params.hasOwnProperty("agent")) {
@@ -69,7 +69,7 @@ var commandHandlers = {
 var planHandlers = {
   "movePlateAction": function(params, parentParams, objects) {
     return [{
-      command: "instruction.transporter.movePlate",
+      command: "transporter.instruction.movePlate",
       agent: params.agent,
       equipment: params.equipment,
       program: params.program,
