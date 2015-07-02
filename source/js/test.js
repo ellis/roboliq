@@ -79,7 +79,13 @@ function createSimpleObject(nameList, value) {
 	}
 }
 
-function expandSteps(prefix, steps, objects, effects) {
+function expandProtocol(protocol) {
+	var objects0 = _.cloneDeep(protocol.objects);
+	_.merge(protocol, {effects: {}, cache: {}});
+	expandSteps(protocol, [], protocol.steps, objects0);
+}
+
+function expandSteps(protocol, prefix, steps, objects) {
 	var keys = _(steps).keys(steps).filter(function(key) {
 		var c = key[0];
 		return (c >= '0' && c <= '9');
@@ -97,12 +103,21 @@ function expandSteps(prefix, steps, objects, effects) {
 				if (!isExpanded) {
 					var predicates = protocol.predicates.concat(createStateItems(objects));
 					var result = handler(step, objects, predicates, protocol.planHandlers);
+					protocol.cache[id] = result;
+					if (result.hasOwnProperty("errors")) {
+						protocol.errors = _.map(result.errors, function(e) {
+							return id+": "+e.toString();
+						});
+						return false;
+					}
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}
 					if (result.hasOwnProperty("effects")) {
-						console.log(result.effects);
-						effects[id] = result.effects;
+						//console.log(result.effects);
+						// Add effects to protocol
+						protocol.effects[id] = result.effects;
+						// Update object states
 						_.forEach(result.effects, function(value, key) {
 							var nameList = key.split('.');
 							var o = createSimpleObject(nameList, value);
@@ -110,7 +125,7 @@ function expandSteps(prefix, steps, objects, effects) {
 						});
 					}
 				}
-				expandSteps(prefix2, step, objects, effects);
+				expandSteps(protocol, prefix2, step, objects);
 			}
 		}
 	});
@@ -155,17 +170,26 @@ function gatherInstructions(prefix, steps, objects, effects) {
 	return instructions;
 }
 
-var objects0 = _.cloneDeep(protocol.objects);
-var effects = {};
-expandSteps([], protocol.steps, objects0, effects);
+expandProtocol(protocol);
 console.log();
+console.log("Protocol:")
+console.log(JSON.stringify(protocol, null, '\t'));
+/*console.log();
 console.log("Steps:")
 console.log(JSON.stringify(protocol.steps, null, '\t'));
 console.log();
 console.log("Effects:")
 console.log(JSON.stringify(effects, null, '\t'));
+*/
 
-instructions = gatherInstructions([], protocol.steps, protocol.objects, effects);
-console.log();
-console.log("Instructions:")
-console.log(JSON.stringify(instructions, null, '\t'));
+if (!_.isEmpty(protocol.errors)) {
+	console.log();
+	console.log("Errors:");
+	_.forEach(protocol.errors, function(s) { console.log(s); });
+}
+else {
+	instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);
+	console.log();
+	console.log("Instructions:")
+	console.log(JSON.stringify(instructions, null, '\t'));
+}
