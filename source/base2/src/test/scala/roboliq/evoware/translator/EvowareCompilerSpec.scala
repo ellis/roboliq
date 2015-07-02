@@ -36,18 +36,6 @@ class EvowareCompilerSpec extends FunSpec {
       "2": {"plate1.location": "ourlab.mario.P2"}
 """).asJsObject
 
-	val evowareTableSetupConfig = EvowareTableSetupConfig(
-		tableFile = "../testdata/bsse-mario/Template.ewt",
-		protocolDetails_? = None,
-		evowareProtocolData_? = None
-	)
-	val evowareAgentConfig = EvowareAgentConfig(
-		name = "mario",
-		evowareDir = "../testdata/bsse-mario",
-		protocolDetails_? = None,
-		evowareProtocolData_? = None,
-		tableSetups = Map("default"  -> evowareTableSetupConfig)
-	)
 	val compiler = new EvowareCompiler("ourlab.mario.evoware", false)
 
 	val carrierName = "MP 2Pos H+P Shake"
@@ -112,7 +100,7 @@ class EvowareCompilerSpec extends FunSpec {
 			val searchPath_l: List[File] = Nil
 				// Load carrier file
 			val result_? = for {
-				carrierData <- ResultC.from(EvowareCarrierData.loadFile(new File(evowareAgentConfig.evowareDir, "Carrier.cfg").getPath))
+				carrierData <- ResultC.from(EvowareCarrierData.loadFile(new File("../testdata/bsse-mario", "Carrier.cfg").getPath))
 				filename <- ResultC.from(FileUtils.findFile("../testdata/bsse-mario/Template.ewt", searchPath_l))
 				tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, filename.getPath))
 				content_l <- compiler.generateScriptContents(tableData, "test", script1_l)
