@@ -113,8 +113,8 @@ class EvowareCompilerSpec extends FunSpec {
 				// Load carrier file
 			val result_? = for {
 				carrierData <- ResultC.from(EvowareCarrierData.loadFile(new File(evowareAgentConfig.evowareDir, "Carrier.cfg").getPath))
-				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
-				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
+				filename <- ResultC.from(FileUtils.findFile("../testdata/bsse-mario/Template.ewt", searchPath_l))
+				tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, filename.getPath))
 				content_l <- compiler.generateScriptContents(tableData, "test", script1_l)
 			} yield {
 				// Save scripts
