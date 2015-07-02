@@ -10,6 +10,8 @@ import roboliq.evoware.parser.CarrierNameGridSiteIndex
 import roboliq.utils.FileUtils
 import roboliq.utils.FileUtils
 import spray.json.JsString
+import roboliq.evoware.parser.EvowareCarrierData
+import roboliq.core.ResultC
 
 class EvowareCompilerSpec extends FunSpec {
 	import roboliq.input.ResultCWrapper._
@@ -108,9 +110,9 @@ class EvowareCompilerSpec extends FunSpec {
 			// Test generation of script content from EvowareScript objects
 			val table_l: List[String] = List("mario.default")
 			val searchPath_l: List[File] = Nil
-			val result_? = for {
 				// Load carrier file
-				carrierData <- EvowareAgentConfigProcessor.loadCarrierData(evowareAgentConfig)
+			val result_? = for {
+				carrierData <- ResultC.from(EvowareCarrierData.loadFile(new File(evowareAgentConfig.evowareDir, "Carrier.cfg").getPath))
 				tableSetupConfig <- EvowareAgentConfigProcessor.loadTableSetupConfig(evowareAgentConfig, table_l)
 				tableData <- EvowareAgentConfigProcessor.loadTableData(carrierData, tableSetupConfig, searchPath_l)
 				content_l <- compiler.generateScriptContents(tableData, "test", script1_l)
