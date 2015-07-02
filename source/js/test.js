@@ -2,8 +2,8 @@ var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
 var roboliq = require('./roboliq.js');
 var commands = {
-  sealer: require('./commands/sealer.js'),
-  transporter: require('./commands/transporter.js')
+	sealer: require('./commands/sealer.js'),
+	transporter: require('./commands/transporter.js')
 };
 var ourlab = require('./ourlab.js');
 
@@ -19,61 +19,64 @@ function mergeObjects(name) {
 		protocol0[name]
 	);
 }
+
 function mergeArrays(name) {
-  return _.compact([].concat(roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]));
+	return _.compact([].concat(roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]));
 }
 var protocol = {
-  objects: mergeObjects("objects"),
-  steps: mergeObjects("steps"),
-  effects: mergeObjects("effects"),
-  predicates: mergeArrays("predicates"),
-  taskPredicates: mergeArrays("taskPredicates"),
-  objectToPredicateConverters: mergeObjects("objectToPredicateConverters"),
-  commandHandlers: mergeObjects("commandHandlers"),
-  planHandlers: mergeObjects("planHandlers")
+	objects: mergeObjects("objects"),
+	steps: mergeObjects("steps"),
+	effects: mergeObjects("effects"),
+	predicates: mergeArrays("predicates"),
+	taskPredicates: mergeArrays("taskPredicates"),
+	objectToPredicateConverters: mergeObjects("objectToPredicateConverters"),
+	commandHandlers: mergeObjects("commandHandlers"),
+	planHandlers: mergeObjects("planHandlers")
 };
 
 var objectToPredicateConverters = protocol.objectToPredicateConverters;
-function fillStateItems(name, o, stateList) {
-  //console.log("name: "+name);
-  if (o.hasOwnProperty("type")) {
-    //console.log("type: "+o.type);
-    var type = o['type'];
-    if (objectToPredicateConverters.hasOwnProperty(type)) {
-      var result = objectToPredicateConverters[type](name, o);
-      if (result.value) {
-        _.forEach(result.value, function(value) { stateList.push(value); });
-      }
-    }
-  }
 
-  var prefix = _.isEmpty(name) ? "" : name+".";
-  _.forEach(o, function(value, name2) {
-    //console.log(name2, value);
-    if (_.isObject(value)) {
-      fillStateItems(prefix+name2, value, stateList);
-    }
-  });
+function fillStateItems(name, o, stateList) {
+	//console.log("name: "+name);
+	if (o.hasOwnProperty("type")) {
+		//console.log("type: "+o.type);
+		var type = o['type'];
+		if (objectToPredicateConverters.hasOwnProperty(type)) {
+			var result = objectToPredicateConverters[type](name, o);
+			if (result.value) {
+				_.forEach(result.value, function(value) {
+					stateList.push(value);
+				});
+			}
+		}
+	}
+
+	var prefix = _.isEmpty(name) ? "" : name + ".";
+	_.forEach(o, function(value, name2) {
+		//console.log(name2, value);
+		if (_.isObject(value)) {
+			fillStateItems(prefix + name2, value, stateList);
+		}
+	});
 }
 
 /** Create state items for SHOP planning from the protocol's objects. */
 function createStateItems(objects) {
-  var stateList = [];
-  fillStateItems("", objects, stateList);
-  //console.log(JSON.stringify(stateList, null, '\t'));
-  return stateList;
+	var stateList = [];
+	fillStateItems("", objects, stateList);
+	//console.log(JSON.stringify(stateList, null, '\t'));
+	return stateList;
 }
 
 var commandHandlers = protocol.commandHandlers;
 
 function createSimpleObject(nameList, value) {
-  if (_.isEmpty(nameList)) return null;
-  else {
-    var o = {};
-    o[nameList[0]] = (nameList.length == 1)
-      ? value : createSimpleObject(_.rest(nameList), value);
-    return o;
-  }
+	if (_.isEmpty(nameList)) return null;
+	else {
+		var o = {};
+		o[nameList[0]] = (nameList.length == 1) ? value : createSimpleObject(_.rest(nameList), value);
+		return o;
+	}
 }
 
 function expandSteps(prefix, steps, objects, effects) {
@@ -84,28 +87,28 @@ function expandSteps(prefix, steps, objects, effects) {
 	keys.sort(naturalSort);
 	//console.log(keys);
 	_.forEach(keys, function(key) {
-    var prefix2 = prefix.concat([key]);
-    var id = prefix2.join('.');
+		var prefix2 = prefix.concat([key]);
+		var id = prefix2.join('.');
 		var step = steps[key];
-    var isExpanded = step.hasOwnProperty("1");
+		var isExpanded = step.hasOwnProperty("1");
 		if (step.hasOwnProperty("command")) {
 			if (commandHandlers.hasOwnProperty(step.command)) {
 				var handler = commandHandlers[step.command];
 				if (!isExpanded) {
-          var predicates = protocol.predicates.concat(createStateItems(objects));
+					var predicates = protocol.predicates.concat(createStateItems(objects));
 					var result = handler(step, objects, predicates, protocol.planHandlers);
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}
-          if (result.hasOwnProperty("effects")) {
-            console.log(result.effects);
-            effects[id] = result.effects;
-            _.forEach(result.effects, function(value, key) {
-              var nameList = key.split('.');
-              var o = createSimpleObject(nameList, value);
-              _.merge(objects, o);
-            });
-          }
+					if (result.hasOwnProperty("effects")) {
+						console.log(result.effects);
+						effects[id] = result.effects;
+						_.forEach(result.effects, function(value, key) {
+							var nameList = key.split('.');
+							var o = createSimpleObject(nameList, value);
+							_.merge(objects, o);
+						});
+					}
 				}
 				expandSteps(prefix2, step, objects, effects);
 			}
@@ -130,20 +133,23 @@ function gatherInstructions(prefix, steps, objects, effects) {
 			if (step.command.indexOf("instruction.") >= 0) {
 				instructions.push(step);
 			}
-      var prefix2 = prefix.concat([key]);
-      var id = prefix2.join('.');
+			var prefix2 = prefix.concat([key]);
+			var id = prefix2.join('.');
 
 			var instructions2 = gatherInstructions(prefix2, step, objects, effects);
 			instructions = instructions.concat(instructions2);
 
 			if (effects.hasOwnProperty(id)) {
-        var item = {"let": effects[id]};
-        if (_.isEmpty(instructions) || !_.isEqual(_.last(instructions), item))
-				  instructions.push(item);
+				var item = {
+					"let": effects[id]
+				};
+				if (_.isEmpty(instructions) || !_.isEqual(_.last(instructions), item))
+					instructions.push(item);
 			}
-		}
-		else if (step.hasOwnProperty("let")) {
-			instructions.push({"let": step["let"]});
+		} else if (step.hasOwnProperty("let")) {
+			instructions.push({
+				"let": step["let"]
+			});
 		}
 	});
 	return instructions;
