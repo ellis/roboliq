@@ -81,7 +81,7 @@ function createSimpleObject(nameList, value) {
 
 function expandProtocol(protocol) {
 	var objects0 = _.cloneDeep(protocol.objects);
-	_.merge(protocol, {effects: {}, cache: {}});
+	_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
 	expandSteps(protocol, [], protocol.steps, objects0);
 }
 
@@ -104,11 +104,15 @@ function expandSteps(protocol, prefix, steps, objects) {
 					var predicates = protocol.predicates.concat(createStateItems(objects));
 					var result = handler(step, objects, predicates, protocol.planHandlers);
 					protocol.cache[id] = result;
-					if (result.hasOwnProperty("errors")) {
-						protocol.errors = _.map(result.errors, function(e) {
-							return id+": "+e.toString();
-						});
+					// If there were errors:
+					if (!_.isEmpty(result.errors)) {
+						protocol.errors[id] = result.errors;
+						// Abort expansion of protocol
 						return false;
+					}
+					// If there were warnings
+					if (!_.isEmpty(result.warnings)) {
+						protocol.warnings[id] = result.warnings;
 					}
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
@@ -185,9 +189,18 @@ console.log(JSON.stringify(effects, null, '\t'));
 if (!_.isEmpty(protocol.errors)) {
 	console.log();
 	console.log("Errors:");
-	_.forEach(protocol.errors, function(s) { console.log(s); });
+	_.forEach(protocol.errors, function(err, id) {
+		console.log(id+": "+err.toString());
+	});
 }
 else {
+	if (!_.isEmpty(protocol.warnings)) {
+		console.log();
+		console.log("Warnings:");
+		_.forEach(protocol.warnings, function(err, id) {
+			console.log(id+": "+err.toString());
+		});
+	}
 	instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);
 	console.log();
 	console.log("Instructions:")

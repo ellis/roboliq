@@ -5,7 +5,7 @@
 - [x] refactor names of movePlate commands (use "transporter." prefix)
 - [x] create test protocol with sealing, where plate needs to be moved to the sealer first (add a 'movePlate' command, which will be expanded in turn)
 - [x] test.js: handle errors from commandHandler call
-- [ ] test.js: accumulate warnings from commandHandler call
+- [x] test.js: accumulate warnings from commandHandler call
 - [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commandHandler args: also pass paramDefaults
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
