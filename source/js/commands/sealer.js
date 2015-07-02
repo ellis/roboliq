@@ -17,7 +17,7 @@ var commandHandlers = {
   // - [ ] raise and error if the sealer site is occupied
   // - [ ] raise error if plate's location isn't set
   // - [ ] return result of query for possible alternative settings
-	"sealer.function.sealPlate": function(params, objects, predicates, planHandlers) {
+	"sealer.action.sealPlate": function(params, objects, predicates, planHandlers) {
     var llpl = require('../HTN/llpl.js');
     llpl.initializeDatabase(predicates);
 
@@ -52,6 +52,7 @@ var commandHandlers = {
     });
     delete params2['model'];
     params2.command = "sealer.instruction.run";
+	params2.object = params.object;
 
     if (!params2.hasOwnProperty("site")) {
       return {errors: ["`site`: please provide value"]};
@@ -59,13 +60,13 @@ var commandHandlers = {
 
     var expansion = {
       "1": {
-        "command": "action.transporter.movePlate",
+        "command": "transporter.action.movePlate",
         "object": params.object,
         "destination": params2.site
       },
       "2": params2,
       "3": {
-        "command": "action.transporter.movePlate",
+        "command": "transporter.action.movePlate",
         "object": params.object,
         "destination": object.location
       },

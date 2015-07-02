@@ -2,15 +2,22 @@ var _ = require('lodash');
 var naturalSort = require('javascript-natural-sort');
 var roboliq = require('./roboliq.js');
 var commands = {
+  sealer: require('./commands/sealer.js'),
   transporter: require('./commands/transporter.js')
 };
 var ourlab = require('./ourlab.js');
 
-var protocolFilename = './protocols/protocol2.json';
+var protocolFilename = './protocols/protocol3.json';
 var protocol0 = require(protocolFilename);
 
 function mergeObjects(name) {
-  return _.merge({}, roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]);
+	return _.merge({},
+		roboliq[name],
+		commands.sealer[name],
+		commands.transporter[name],
+		ourlab[name],
+		protocol0[name]
+	);
 }
 function mergeArrays(name) {
   return _.compact([].concat(roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]));

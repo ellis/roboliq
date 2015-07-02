@@ -1,0 +1,15 @@
+{
+  "objects": {
+    "plate1": {
+      "type": "Plate",
+      "model": "ourlab.model1",
+      "location": "ourlab.mario.P2"
+    }
+  },
+  "steps": {
+    "1": {
+      "command": "sealer.action.sealPlate",
+      "object": "plate1"
+    }
+  }
+}
