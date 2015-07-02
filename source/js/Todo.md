@@ -87,3 +87,12 @@ Simplest algorithms:
 * Use each tip, rotating through them till they need to be washed
 * Group as many tips at once as possible
 * Group as many tips at once as possible, but if group splits over columns, see if we can get a longer contiguous group by restarting the grouping in the new column rather than splitting the group from the previous column
+
+# Combinatorial stuff
+
+- factor: [protein, volume]
+  values: [[gfp, 10], [gfp, 20], [gfp, 30], [yfp, 5]]
+- factor: something else
+  values: [1, 2, 3, 4]
+- "#tabfile#factor3.tab"
+- "#csvdata#protein,volume\ngfp,10\ngfp,20\ngfp,30\nyfp,5"
