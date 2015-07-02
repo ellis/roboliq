@@ -84,7 +84,6 @@ plate1(A01 to B02 block-wise)
 Simplest algorithms:
 
 * Only use one tip
-* Use as many tips as possible at once
-* Break groups if they are not contiguous, possibly washing or starting back at tip 1 or whatever
-
-
+* Use each tip, rotating through them till they need to be washed
+* Group as many tips at once as possible
+* Group as many tips at once as possible, but if group splits over columns, see if we can get a longer contiguous group by restarting the grouping in the new column rather than splitting the group from the previous column

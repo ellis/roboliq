@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
 var roboliq = require('./roboliq.js');
 var commands = {
@@ -201,8 +202,19 @@ else {
 			console.log(id+": "+err.toString());
 		});
 	}
-	instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);
+	//var instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);
+	var output = _.merge(
+		{},
+		{
+			objects: protocol.objects,
+			steps: protocol.steps,
+			effects: protocol.effects,
+			warnings: protocol.warnings,
+			errors: protocol.errors
+		}
+	);
 	console.log();
-	console.log("Instructions:")
-	console.log(JSON.stringify(instructions, null, '\t'));
+	console.log("Output:")
+	console.log(JSON.stringify(output, null, '\t'));
+	fs.writeFileSync('output.json', JSON.stringify(output, null, '\t')+"\n");
 }
