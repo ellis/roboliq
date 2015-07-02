@@ -13,6 +13,8 @@ import roboliq.evoware.parser.CarrierNameGridSiteIndex
 import roboliq.evoware.parser.EvowareTableData
 import roboliq.utils.JsonUtils
 import spray.json.JsString
+import scala.math.Ordering.Implicits.seqDerivedOrdering
+import roboliq.utils.MiscUtils
 
 /*
     objects:
@@ -42,37 +44,47 @@ case class EvowareScript(
 
 class EvowareCompiler(
 	agentName: String,
-	//config: EvowareConfig,
 	handleUserInstructions: Boolean
 ) {
 	private val logger = Logger[this.type]
 
-	/*val script_l = new ArrayBuffer[EvowareScript]
-	private var scriptIndex: Int = 0
-	val cmds = new ArrayBuffer[String]
-	val siteToModel_m = new HashMap[CarrierSiteIndex, EvowareLabwareModel]*/
-
 	def buildTokens(
 		input: JsObject
 	): ResultC[List[Token]] = {
-		var objects = JsObject()
 		for {
 			objects0 <- JsConverter.fromJs[JsObject](input, "objects")
-			_ = objects = objects0
-			step_l <- JsConverter.fromJs[List[JsObject]](input, "steps")
-			token_l <- ResultC.map(step_l.zipWithIndex)(pair => ResultC.context("step "+(pair._2+1)) {
-				for {
-					token <- handleStep(objects, pair._1)
-					objects1 <- ResultC.context("effects") {
-						if (token.isDefined) JsonUtils.mergeMaps(objects, token.get.let)
-						else ResultC.unit(objects)
-					}
-				} yield {
-					objects = objects1
-					token
-				}
-			}).map(_.flatten)
+			steps <- JsConverter.fromJs[JsObject](input, "steps")
+			effects <- JsConverter.fromJs[Option[JsObject]](input, "effects").map(_.getOrElse(JsObject()))
+			token_l <- handleSteps(Vector(), steps, objects0, effects)
 		} yield token_l
+	}
+	
+	private def handleSteps(
+		path: Vector[String],
+		steps: JsObject,
+		objects0: JsObject,
+		effects: JsObject
+	): ResultC[List[Token]] = {
+		val key_l = steps.fields.keys.toList.sortWith((s1, s2) => MiscUtils.compareNatural(s1, s2) < 0)
+		//println(s"handleSteps($path, ${key_l})")
+		var objects = objects0
+		for {
+			token_ll <- ResultC.map(key_l) { key =>
+				steps.fields(key) match {
+					case step: JsObject =>
+						for {
+							token_l <- handleStep(path :+ key, step, objects, effects)
+							objects1 <- ResultC.context("effects") {
+								token_l.foldLeft(ResultC.unit(objects)) { (acc, token) => acc.flatMap(objects => JsonUtils.mergeMaps(objects, token.let)) }
+							}
+						} yield {
+							objects = objects1
+							token_l
+						}
+					case _ => ResultC.unit(Nil)
+				}
+			}
+		} yield token_ll.flatten
 	}
 	
 	def buildScripts(
@@ -144,68 +156,104 @@ class EvowareCompiler(
 	}
 	
 	private def handleStep(
+		path: Vector[String],
+		step: JsObject,
 		objects: JsObject,
-		step: JsObject
-	): ResultC[Option[Token]] = {
-		//println(s"handleStep: $step")
+		effects: JsObject
+	): ResultC[List[Token]] = {
+		//println(s"handleStep($path, $step)")
 		for {
 			commandName_? <- JsConverter.fromJs[Option[String]](step, "command")
 			agentName_? <- JsConverter.fromJs[Option[String]](step, "agent")
 			let_? <- JsConverter.fromJs[Option[JsObject]](step, "let")
-			token_? <- (commandName_?, agentName_?, let_?) match {
+			token_l <- (commandName_?, agentName_?, let_?) match {
 				case ((Some(commandName), Some(agentName), None)) =>
 					if (agentName == this.agentName) {
-						handleCommand(objects, commandName, agentName, step)
+						handleCommand(path, step, commandName, agentName, objects, effects)
 					}
 					else if (agentName == "user" && handleUserInstructions) {
-						handleUserCommand(objects, commandName, step)
+						handleUserCommand(path, step, commandName, objects, effects)
 					}
 					else {
 						println("command ignored due to agent: "+step)
-						ResultC.unit(None)
+						ResultC.unit(Nil)
 					}
 				case (None, None, Some(let)) =>
 					handleLet(objects, let)
 				case (None, None, None) =>
-					ResultC.unit(None)
+					// If this step has an expansion, handle its children
+					if (step.fields.contains("1")) {
+						handleSteps(path, step, objects, effects)
+					}
+					else {
+						ResultC.unit(Nil)
+					}
 				case _ =>
 					ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
 			}
 			//_ = println("token_?: "+token_?)
-		} yield token_?
+		} yield {
+			val id = path.mkString(".")
+			effects.fields.get(id) match {
+				case Some(o: JsObject) =>
+					println(s"effects[$id]: $o")
+					val let = JsObject(o.fields.map(pair => {
+						val o2 = JsonUtils.makeSimpleObject(pair._1, pair._2)
+						o2.fields.head
+					}))
+					token_l ++ List(Token("", let, Map()))
+				case _ => token_l
+			}
+		}
 	}
 	
 	private def handleLet(
 		objects: JsObject,
 		let: JsObject
-	): ResultC[Option[Token]] = {
-		ResultC.unit(Some(Token("", let, Map())))
+	): ResultC[List[Token]] = {
+		ResultC.unit(List(Token("", let, Map())))
 	}
 	
 	private def handleUserCommand(
-		objects: JsObject,
+		path: Vector[String],
+		step: JsObject,
 		commandName: String,
-		step: JsObject
-	): ResultC[Option[Token]] = {
+		objects: JsObject,
+		effects: JsObject
+	): ResultC[List[Token]] = {
 		commandName match {
 			case _ =>
-				ResultC.error(s"unhandled user command: $commandName in $step")
+				// If this step has an expansion, handle its children
+				if (step.fields.contains("1")) {
+					handleSteps(path, step, objects, effects)
+				}
+				else {
+					ResultC.error(s"unhandled user command: $commandName in $step")
+				}
 		}
 	}
 	
 	private def handleCommand(
-		objects: JsObject,
+		path: Vector[String],
+		step: JsObject,
 		commandName: String,
 		agentName: String,
-		step: JsObject
-	): ResultC[Option[Token]] = {
-		val map = Map[String, (JsObject, JsObject) => ResultC[Option[Token]]](
+		objects: JsObject,
+		effects: JsObject
+	): ResultC[List[Token]] = {
+		val map = Map[String, (JsObject, JsObject) => ResultC[List[Token]]](
 			"instruction.transporter.movePlate" -> handleTransporterMovePlate
 		)
 		map.get(commandName) match {
 			case Some(fn) => fn(objects, step)
 			case None =>
-				ResultC.error(s"unknown command: $commandName in $step")
+				// If this step has an expansion, handle its children
+				if (step.fields.contains("1")) {
+					handleSteps(path, step, objects, effects)
+				}
+				else {
+					ResultC.error(s"unknown command: $commandName in $step")
+				}
 		}
 	}
 	
@@ -222,7 +270,7 @@ class EvowareCompiler(
 	private def handleTransporterMovePlate(
 		objects: JsObject,
 		step: JsObject
-	): ResultC[Option[Token]] = {
+	): ResultC[List[Token]] = {
 		//println(s"handleTransporterMovePlate: $step")
 		for {
 			x <- JsConverter.fromJs[TransporterMovePlate](step)
@@ -266,7 +314,7 @@ class EvowareCompiler(
 				CarrierNameGridSiteIndex(plateOrigCarrierName, plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName),
 				CarrierNameGridSiteIndex(plateDestCarrierName, plateDestGrid, plateDestSite) -> (plateDestName, plateModelName)
 			)
-			Some(Token(line, let, siteToNameAndModel_m))
+			List(Token(line, let, siteToNameAndModel_m))
 		}
 	}
 }
