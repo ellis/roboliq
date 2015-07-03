@@ -25,6 +25,12 @@ module.exports = {
 					"evowareCarrier": "MP 2Pos H+P Shake",
 					"evowareGrid": 10,
 					"evowareSite": 4
+				},
+				"ROBOSEAL": {
+					"type": "Site",
+					"evowareCarrier": "RoboSeal",
+					"evowareGrid": 35,
+					"evowareSite": 1
 				}
 			},
 			"model1": {
@@ -62,7 +68,7 @@ module.exports = {
 		}
 	}, {
 		"siteModel": {
-			"site": "ourlab.mario.SEALER",
+			"site": "ourlab.mario.ROBOSEAL",
 			"siteModel": "ourlab.siteModel1"
 		}
 	}, {
@@ -92,12 +98,12 @@ module.exports = {
 			"equipment": "ourlab.mario.roma1",
 			"program": "Narrow",
 			"model": "ourlab.model1",
-			"site": "ourlab.mario.SEALER"
+			"site": "ourlab.mario.ROBOSEAL"
 		}
 	}, {
 		"movePlate_excludePath": {
 			"siteA": "ourlab.mario.P3",
-			"siteB": "ourlab.mario.SEALER"
+			"siteB": "ourlab.mario.ROBOSEAL"
 		}
 	}, {
 		"sealer.canAgentEquipmentProgramModelSite": {
@@ -105,7 +111,7 @@ module.exports = {
 			"equipment": "ourlab.mario.sealer",
 			"program": "sealerProgram1",
 			"model": "ourlab.model1",
-			"site": "ourlab.mario.SEALER"
+			"site": "ourlab.mario.ROBOSEAL"
 		}
 	}, ]
 }

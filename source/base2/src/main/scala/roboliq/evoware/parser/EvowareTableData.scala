@@ -29,20 +29,28 @@ class EvowareTableData(
 		for (gridIndex <- 0 until carrierIdInternal_l.length) {
 			val carrierId_? = carrierIdInternal_l(gridIndex)
 			val hotelObject_? = hotelObject_l.find(_.gridIndex == gridIndex)
-			if (carrierId_?.isDefined || hotelObject_?.isDefined) {
+			val externalObject_? = externalObject_l.find(o => carrierIdToGrids_m.getOrElse(o.carrier.id, Nil).contains(gridIndex))
+			if (carrierId_?.isDefined || hotelObject_?.isDefined || externalObject_?.isDefined) {
 				if (carrierId_?.isDefined) {
 					val carrierId = carrierId_?.get
 					val carrier = configFile.mapIdToCarrier(carrierId)
-					println(s"Grid $gridIndex: ${carrier.sName}")
-					for (siteIndex <- 0 until carrier.nSites) {
-						val cgsi = CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
-						println(s"\tSite ${siteIndex+1}: ${siteIdToLabel_m.getOrElse(cgsi, "")}")
-					}
+					printCarrier(gridIndex, carrier)
 				}
 				if (hotelObject_?.isDefined) {
-					println(s"Grid $gridIndex: ${hotelObject_?.get}")
+					printCarrier(gridIndex, hotelObject_?.get.parent)
+				}
+				if (externalObject_?.isDefined) {
+					printCarrier(gridIndex, externalObject_?.get.carrier)
 				}
 			}
+		}
+	}
+	
+	private def printCarrier(gridIndex: Int, carrier: Carrier) {
+		println(s"Grid $gridIndex: ${carrier.sName}")
+		for (siteIndex <- 0 until carrier.nSites) {
+			val cgsi = CarrierGridSiteIndex(carrier.id, gridIndex, siteIndex)
+			println(s"\tSite ${siteIndex+1}: ${siteIdToLabel_m.getOrElse(cgsi, "")}")
 		}
 	}
 	
