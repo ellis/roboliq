@@ -11,6 +11,10 @@ module.exports = {
 					"type": "Transporter",
 					"evowareRoma": 0
 				},
+				"roma2": {
+					"type": "Transporter",
+					"evowareRoma": 1
+				},
 				"sealer": {
 					"type": "Sealer"
 				},
@@ -95,12 +99,21 @@ module.exports = {
 	}, {
 		"movePlate_canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma1",
+			"equipment": "ourlab.mario.roma2",
 			"program": "Narrow",
 			"model": "ourlab.model1",
-			"site": "ourlab.mario.ROBOSEAL"
+			"site": "ourlab.mario.P2"
 		}
 	}, {
+		}, {
+			"movePlate_canAgentEquipmentProgramModelSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.roma2",
+				"program": "Narrow",
+				"model": "ourlab.model1",
+				"site": "ourlab.mario.ROBOSEAL"
+			}
+		}, {
 		"movePlate_excludePath": {
 			"siteA": "ourlab.mario.P3",
 			"siteB": "ourlab.mario.ROBOSEAL"
