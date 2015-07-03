@@ -248,7 +248,8 @@ class EvowareCompiler(
 		effects: JsObject
 	): ResultC[List[Token]] = {
 		val map = Map[String, (JsObject, JsObject) => ResultC[List[Token]]](
-			"transporter.instruction.movePlate" -> handleTransporterMovePlate
+			"transporter.instruction.movePlate" -> handleTransporterMovePlate,
+			"sealer.instruction.run" -> handleSealerRun
 		)
 		map.get(commandName) match {
 			case Some(fn) => fn(objects, step)
@@ -271,6 +272,13 @@ class EvowareCompiler(
 		val field_l = (objectName+"."+fieldName).split('.').toList
 		//println(s"lookupAs($objectName, $fieldName): ${field_l}")
 		JsConverter.fromJs[A](objects, field_l)
+	}
+	
+	private def handleSealerRun(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		???
 	}
 	
 	private def handleTransporterMovePlate(

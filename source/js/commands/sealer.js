@@ -77,11 +77,16 @@ var commandHandlers = {
 				params2[name] = values[0];
 			}
 		});
-		delete params2['model'];
-		params2.command = "sealer.instruction.run";
-		params2.object = params.object;
 
-		if (!params2.hasOwnProperty("site")) {
+		var params3 = _.merge({}, {
+			command: "sealer.instruction.run",
+			agent: params2.agent,
+			equipment: params2.equipment,
+			program: params2.program,
+			object: params.object
+		});
+
+		if (!params2.site) {
 			return {
 				errors: ["`site`: please provide value"]
 			};
@@ -93,7 +98,7 @@ var commandHandlers = {
 				"object": params.object,
 				"destination": params2.site
 			},
-			"2": params2,
+			"2": params3,
 			"3": {
 				"command": "transporter.action.movePlate",
 				"object": params.object,
