@@ -6,7 +6,7 @@
 - [x] create test protocol with sealing, where plate needs to be moved to the sealer first (add a 'movePlate' command, which will be expanded in turn)
 - [x] test.js: handle errors from commandHandler call
 - [x] test.js: accumulate warnings from commandHandler call
-- [ ] generate instructions, pass them to Evoware compiler, checkout final script
+- [x] generate instructions, pass them to Evoware compiler, checkout final script
 - [ ] how to handle pipetting commands?
 - [ ] how to track the state of wells?
 - [ ] test.js: pass JSON and JavaScript files to load from the command line

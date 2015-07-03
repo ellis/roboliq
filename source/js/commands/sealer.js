@@ -117,23 +117,9 @@ var commandHandlers = {
 	}
 };
 
-var planHandlers = {
-	"sealer.instruction.run": function(params, parentParams, objects) {
-		return [{
-			command: "sealer.instruction.run",
-			agent: params.agent,
-			equipment: params.equipment,
-			program: params.program,
-			object: params.labware,
-			destination: params.destination
-		}];
-	},
-};
-
 module.exports = {
 	objectToPredicateConverters: objectToPredicateConverters,
-	commandHandlers: commandHandlers,
-	planHandlers: planHandlers
+	commandHandlers: commandHandlers
 };
 
 /*
