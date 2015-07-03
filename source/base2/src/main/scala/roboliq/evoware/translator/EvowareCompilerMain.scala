@@ -69,7 +69,6 @@ object EvowareCompilerMain extends App {
 					for ((filename, bytes) <- content_l) {
 						val file = new java.io.File(dir, filename)
 						FileUtils.writeBytesToFile(file, bytes)
-						assert(FileUtils.contentEquals(file, new java.io.File(dir, "output.esc")))
 					}
 					()
 				}

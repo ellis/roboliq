@@ -15,6 +15,7 @@ import roboliq.utils.JsonUtils
 import spray.json.JsString
 import scala.math.Ordering.Implicits.seqDerivedOrdering
 import roboliq.utils.MiscUtils
+import spray.json.JsBoolean
 
 /*
     objects:
@@ -202,7 +203,7 @@ class EvowareCompiler(
 			val id = path.mkString(".")
 			effects.fields.get(id) match {
 				case Some(o: JsObject) =>
-					println(s"effects[$id]: $o")
+					//println(s"effects[$id]: $o")
 					val let = JsObject(o.fields.map(pair => {
 						val o2 = JsonUtils.makeSimpleObject(pair._1, pair._2)
 						o2.fields.head
@@ -278,7 +279,22 @@ class EvowareCompiler(
 		objects: JsObject,
 		step: JsObject
 	): ResultC[List[Token]] = {
-		???
+		for {
+			x <- JsConverter.fromJs[SealerRun](step)
+			plateModelName0 <- lookupAs[String](objects, x.`object`, "model")
+			plateModelName <- lookupAs[String](objects, plateModelName0, "evowareName")
+			plateOrigName <- lookupAs[String](objects, x.`object`, "location")
+			plateOrigCarrierName <- lookupAs[String](objects, plateOrigName, "evowareCarrier")
+			plateOrigGrid <- lookupAs[Int](objects, plateOrigName, "evowareGrid")
+			plateOrigSite <- lookupAs[Int](objects, plateOrigName, "evowareSite")
+		} yield {
+			val line = createFactsLine(plateOrigCarrierName, plateOrigCarrierName+"_Seal", x.program)
+			val let = JsonUtils.makeSimpleObject(x.`object`+".sealed", JsBoolean(true))
+			val siteToNameAndModel_m = Map(
+				CarrierNameGridSiteIndex(plateOrigCarrierName, plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName)
+			)
+			List(Token(line, let, siteToNameAndModel_m))
+		}
 	}
 	
 	private def handleTransporterMovePlate(
@@ -330,5 +346,19 @@ class EvowareCompiler(
 			)
 			List(Token(line, let, siteToNameAndModel_m))
 		}
+	}
+	
+	private def createFactsLine(
+		equipment: String,
+		variableName: String,
+		value: String
+	): String = {
+		List(
+			'"'+equipment+'"',
+			'"'+variableName+'"',
+			'"'+value+'"',
+			"\"0\"",
+			"\"\""
+		).mkString("FACTS(", ",", ");")
 	}
 }

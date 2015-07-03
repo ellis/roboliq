@@ -2,7 +2,7 @@ package roboliq.evoware.translator
 
 case class SealerRun(
 	equipment: String,
-	program_? : Option[String],
+	program: String,
 	`object`: String
 )
 
