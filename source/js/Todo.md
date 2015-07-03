@@ -17,6 +17,7 @@
 
 ## Before publication, but not yet
 
+- [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string
 - [ ] llpl.js: need to add a function to create a database object, so that we can use multiple instances simultaneously
 - [ ] add warning/error handling to objectToLogicConverters
 - [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
