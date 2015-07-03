@@ -1,6 +1,8 @@
 package roboliq.evoware.parser
 
-import roboliq.core.ResultC
+import ch.ethz.reactivesim.RsResult
+import ch.ethz.reactivesim.RsError
+import ch.ethz.reactivesim.RsSuccess
 import java.io.File
 import org.apache.commons.io.FileUtils
 
@@ -130,15 +132,15 @@ class EvowareTableData(
 }
 
 object EvowareTableData {
-	def loadFile(carrierData: EvowareCarrierData, filename: String): ResultC[EvowareTableData] = {
+	def loadFile(carrierData: EvowareCarrierData, filename: String): RsResult[EvowareTableData] = {
 		//try {
 			val tableDataFile = new File(filename)
 			if (tableDataFile.exists()) {
 				val tableData = EvowareTableParser.parseFile(carrierData, filename)
-				ResultC.unit(tableData)
+				RsSuccess(tableData)
 			}
 			else {
-				ResultC.error(s"Evoware table file not found: $filename")
+				RsError(s"Evoware table file not found: $filename")
 			}
 		/*}
 		catch {

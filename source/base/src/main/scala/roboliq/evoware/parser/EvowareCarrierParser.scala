@@ -1,6 +1,9 @@
 package roboliq.evoware.parser
 
-import roboliq.core.ResultC
+import ch.ethz.reactivesim.RsResult
+import ch.ethz.reactivesim.RsSuccess
+import ch.ethz.reactivesim.RsError
+
 
 
 /** An item defined in the file `Carrier.cfg` */
@@ -75,13 +78,13 @@ object EvowareCarrierData {
 		)
 	}
 
-	def loadFile(filename: String): ResultC[EvowareCarrierData] = {
+	def loadFile(filename: String): RsResult[EvowareCarrierData] = {
 		try {
 			val models = EvowareCarrierParser.loadFile(filename)
-			ResultC.unit(apply(models))
+			RsSuccess(apply(models))
 		}
 		catch {
-			case ex: Throwable => ResultC.error(ex.getMessage)
+			case ex: Throwable => RsError(ex.getMessage)
 		}
 	}
 }
@@ -193,8 +196,10 @@ object EvowareCarrierParser {
 			val ls = s.split(";").tail // split line, but drop the "998" prefix
 			val idCarrier = ls(0).toInt
 			val sitemask = ls(1)
-			val (_, _, site_li) = Utils.parseEncodedIndexes(sitemask)
-			site_li.map(idCarrier -> _)
+			Utils.parseEncodedIndexes(sitemask) match {
+				case RsSuccess((_, _, site_li), _) => site_li.map(idCarrier -> _)
+				case _ => Nil
+			}
 		})
 		
 		(Some(EvowareLabwareModel(sName, nRows, nCols, ul, sites)), lsLine.drop(10 + nCarriers))

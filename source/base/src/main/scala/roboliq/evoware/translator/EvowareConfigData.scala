@@ -20,16 +20,16 @@ private class EvowareConfigYaml {
 }
 
 object EvowareConfigData {
-	def loadFile(filename: String): ResultC[EvowareConfigData] = {
+	def loadFile(filename: String): RqResult[EvowareConfigData] = {
 		try {
 			val fis = new FileInputStream(new File(filename))
 			val yaml = new Yaml(new Constructor(classOf[EvowareConfigYaml]))
 			val data0 = yaml.load(fis).asInstanceOf[EvowareConfigYaml]
 			val config = EvowareConfigData(data0.siteId.toMap)
-			ResultC.unit(config)
+			RqSuccess(config)
 		}
 		catch {
-			case ex: Throwable => ResultC.error(ex.getMessage)
+			case ex: Throwable => RqError(ex.getMessage)
 		}
 	}
 }
