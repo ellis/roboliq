@@ -16,7 +16,7 @@ import roboliq.core.ResultC
  */
 class EvowareTableData(
 	val configFile: EvowareCarrierData,
-	val carrierIdInternal_l: List[Option[Int]],
+	val carrierIdInternal_l: scala.collection.immutable.Vector[Option[Int]],
 	//lCarrier_? : List[Option[Carrier]],
 	val hotelObject_l: List[HotelObject],
 	val externalObject_l: List[ExternalObject],
@@ -25,13 +25,26 @@ class EvowareTableData(
 	val siteIdToLabel_m: Map[CarrierGridSiteIndex, String],
 	val siteIdToLabwareModel_m: Map[CarrierGridSiteIndex, EvowareLabwareModel]
 ) {
-	/*def print() {
-		hotelObject_l.foreach(println)
-		externalObject_l.foreach(println)
-		siteIdToLabel_m.foreach(println)
-		siteIdToLabwareModel_m.foreach(println)
-		mapCarrierToGrid.toList.sortBy(_._2).foreach(println)
-	}*/
+	def print() {
+		for (gridIndex <- 0 until carrierIdInternal_l.length) {
+			val carrierId_? = carrierIdInternal_l(gridIndex)
+			val hotelObject_? = hotelObject_l.find(_.gridIndex == gridIndex)
+			if (carrierId_?.isDefined || hotelObject_?.isDefined) {
+				if (carrierId_?.isDefined) {
+					val carrierId = carrierId_?.get
+					val carrier = configFile.mapIdToCarrier(carrierId)
+					println(s"Grid $gridIndex: ${carrier.sName}")
+					for (siteIndex <- 0 until carrier.nSites) {
+						val cgsi = CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
+						println(s"\tSite ${siteIndex+1}: ${siteIdToLabel_m.getOrElse(cgsi, "")}")
+					}
+				}
+				if (hotelObject_?.isDefined) {
+					println(s"Grid $gridIndex: ${hotelObject_?.get}")
+				}
+			}
+		}
+	}
 	
 	def toDebugString(): String = {
 		List(
@@ -133,7 +146,7 @@ class EvowareTableData(
 		siteIdToLabel_m2: Map[CarrierGridSiteIndex, String],
 		siteIdToLabwareModel_m2: Map[CarrierGridSiteIndex, EvowareLabwareModel]
 	): List[String] = {
-		carrierIdInternal_l.zipWithIndex.flatMap {
+		carrierIdInternal_l.toList.zipWithIndex.flatMap {
 			case (None, _) => List("998;0;")
 			case (Some(carrierId), gridIndex) =>
 				val carrier = configFile.mapIdToCarrier(carrierId)
@@ -158,7 +171,7 @@ class EvowareTableData(
 	}
 	
 	private def toString_hotels(): List[String] = {
-		("998;"+hotelObject_l.length+";") :: hotelObject_l.map(o => "998;"+o.parent.id+";"+o.n+";")
+		("998;"+hotelObject_l.length+";") :: hotelObject_l.map(o => "998;"+o.parent.id+";"+o.gridIndex+";")
 	}
 	
 	private def toString_externals(): List[String] = {

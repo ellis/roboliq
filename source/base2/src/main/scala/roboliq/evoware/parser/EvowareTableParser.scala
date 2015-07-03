@@ -5,7 +5,7 @@ import grizzled.slf4j.Logger
 
 case class HotelObject(
 	parent: Carrier,
-	n: Int // Value of unknown significance
+	gridIndex: Int
 )
 
 case class ExternalObject(
@@ -69,7 +69,7 @@ object EvowareTableParser {
 		
 		val tableFile = new EvowareTableData(
 			configFile,
-			carrierId_l,
+			carrierId_l.toVector,
 			lHotelObject,
 			lExternalObject,
 			carrierIdToGrids_m,
