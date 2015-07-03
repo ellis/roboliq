@@ -1,9 +1,7 @@
 package roboliq.utils
 
 import java.io.File
-import roboliq.core.RsResult
-import roboliq.core.RsSuccess
-import roboliq.core.RsError
+import roboliq.core.ResultC
 
 object FileUtils {
 	def writeToFile(fileName: String, data: String) {
@@ -33,18 +31,18 @@ object FileUtils {
 	def findFile(
 		filename: String,
 		searchPath_l: List[File]
-	): RsResult[File] = {
+	): ResultC[File] = {
 		val file0 = new File(filename)
 		if (file0.exists)
-			return RsSuccess(file0)
+			return ResultC.unit(file0)
 		
 		for (dir <- searchPath_l) {
 			val file = new File(dir, filename)
 			if (file.exists())
-				return RsSuccess(file)
+				return ResultC.unit(file)
 		}
 		
-		RsError(s"Could not find file: $filename")
+		ResultC.error(s"Could not find file: $filename")
 	}
 	
 	def contentEquals(file1: java.io.File, file2: java.io.File): Boolean = {

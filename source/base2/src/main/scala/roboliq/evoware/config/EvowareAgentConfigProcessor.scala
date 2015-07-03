@@ -46,7 +46,7 @@ object EvowareAgentConfigProcessor {
 	def loadCarrierData(
 		agentConfig: EvowareAgentConfig
 	): ResultC[EvowareCarrierData] = {
-		ResultC.from(EvowareCarrierData.loadFile(new File(agentConfig.evowareDir, "Carrier.cfg").getPath))
+		EvowareCarrierData.loadFile(new File(agentConfig.evowareDir, "Carrier.cfg").getPath)
 	}
 	
 	def loadTableSetupConfig(
@@ -58,7 +58,7 @@ object EvowareAgentConfigProcessor {
 		val tableSetup_m = agentConfig.tableSetups.toMap.map(pair => s"${agentIdent}.${pair._1}" -> pair._2)
 		for {
 			// Load carrier file
-			carrierData <- ResultC.from(EvowareCarrierData.loadFile(new File(agentConfig.evowareDir, "Carrier.cfg").getPath))
+			carrierData <- EvowareCarrierData.loadFile(new File(agentConfig.evowareDir, "Carrier.cfg").getPath)
 			// FIXME: for debug only
 			//_ = carrierData.printCarriersById
 			// ENDIF
@@ -82,8 +82,8 @@ object EvowareAgentConfigProcessor {
 		searchPath_l: List[File]
 	): ResultC[EvowareTableData] = {
 		for {
-			filename <- ResultC.from(FileUtils.findFile(tableSetupConfig.tableFile, searchPath_l))
-			tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableSetupConfig.tableFile))
+			filename <- FileUtils.findFile(tableSetupConfig.tableFile, searchPath_l)
+			tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableSetupConfig.tableFile)
 		} yield tableData
 	}
 	

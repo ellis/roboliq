@@ -96,7 +96,7 @@ object Utils {
 	 * Takes an encoding of indexes on a 2D surface (as found in the file Carrier.cfg)
 	 * and returns (row count, col count, list of indexes).
 	 */
-	def parseEncodedIndexes(encoded: String): RsResult[(Int, Int, List[Int])] = {
+	def parseEncodedIndexes(encoded: String): (Int, Int, List[Int]) = {
 		val col_n = decode(encoded.charAt(1))
 		val row_n = decode(encoded.charAt(3))
 		val s = encoded.substring(4)
@@ -106,6 +106,6 @@ object Utils {
 			val bit_l = (0 to 7).flatMap(bit_i => if ((n & (1 << bit_i)) > 0) Some(bit_i) else None)
 			bit_l.map(bit_i => c_i * 7 + bit_i)
 		})
-		RsSuccess((col_n, row_n, i_l))
+		(col_n, row_n, i_l)
 	}
 }

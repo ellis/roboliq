@@ -1,6 +1,5 @@
 package roboliq.input
 
-import roboliq.core.RsResult
 import spray.json.JsValue
 
 case class BuiltinAddParams(

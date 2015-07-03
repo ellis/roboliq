@@ -41,22 +41,22 @@ object EvowareCompilerMain extends App {
 		val result_? = (opt.carrierFile_?, opt.tableFile_?, opt.protocolFile_?) match {
 			case (Some(carrierFile), None, None) =>
 				for {
-					carrierData <- ResultC.from(EvowareCarrierData.loadFile(carrierFile.getPath))
+					carrierData <- EvowareCarrierData.loadFile(carrierFile.getPath)
 				} yield {
 					carrierData.printCarriersById
 					()
 				}
 			case (Some(carrierFile), Some(tableFile), None) =>
 				for {
-					carrierData <- ResultC.from(EvowareCarrierData.loadFile(carrierFile.getPath))
-					tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile.getPath))
+					carrierData <- EvowareCarrierData.loadFile(carrierFile.getPath)
+					tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile.getPath)
 				} yield {
 					tableData.print()
 				}
 			case (Some(carrierFile), Some(tableFile), Some(protocolFile)) =>
 				for {
-					carrierData <- ResultC.from(EvowareCarrierData.loadFile(carrierFile.getPath))
-					tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile.getPath))
+					carrierData <- EvowareCarrierData.loadFile(carrierFile.getPath)
+					tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, tableFile.getPath)
 					protocolText = org.apache.commons.io.FileUtils.readFileToString(protocolFile, "UTF-8")
 					protocol = JsonUtils.textToJson(protocolText).asJsObject
 					token_l <- compiler.buildTokens(protocol)

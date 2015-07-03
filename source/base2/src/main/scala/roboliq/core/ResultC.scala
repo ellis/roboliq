@@ -21,14 +21,6 @@ case class ResultCData(
 		copy(error_r = prefixMessage(s) :: error_r)
 	}
 	
-	def log[A](res: RsResult[A]): ResultCData = {
-		//println(s"log($res)")
-		res match {
-			case RsSuccess(_, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r)
-			case RsError(error_l, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r, error_r = error_l.reverse.map(prefixMessage) ++ this.error_r)
-		}
-	}
-	
 	def pushLabel(label: String): ResultCData = {
 		//println(s"pushLabel($label) = ${label :: context_r}")
 		copy(context_r = label :: context_r)
@@ -80,13 +72,6 @@ object ResultC {
 	def apply[A](f: ResultCData => (ResultCData, Option[A])): ResultC[A] = {
 		new ResultC[A] {
 			def run(data: ResultCData) = f(data)
-		}
-	}
-	
-	def from[A](res: RsResult[A]): ResultC[A] = {
-		ResultC { data =>
-			val data1 = data.log(res)
-			(data1, res.toOption)
 		}
 	}
 	

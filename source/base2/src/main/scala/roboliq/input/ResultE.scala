@@ -2,9 +2,6 @@ package roboliq.input
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
-import ch.ethz.reactivesim.RsError
-import ch.ethz.reactivesim.RsResult
-import ch.ethz.reactivesim.RsSuccess
 import scala.reflect.runtime.universe.TypeTag
 import java.io.File
 import org.apache.commons.io.FilenameUtils
@@ -35,14 +32,6 @@ case class ResultEData(
 	def logError(s: String): ResultEData = {
 		//println(s"logError($s): "+(prefixMessage(s) :: error_r))
 		copy(error_r = prefixMessage(s) :: error_r)
-	}
-	
-	def log[A](res: RsResult[A]): ResultEData = {
-		//println(s"log($res)")
-		res match {
-			case RsSuccess(_, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r)
-			case RsError(error_l, warning_r) => copy(warning_r = warning_r.map(prefixMessage) ++ this.warning_r, error_r = error_l.reverse.map(prefixMessage) ++ this.error_r)
-		}
 	}
 	
 	def pushLabel(label: String): ResultEData = {
@@ -112,13 +101,6 @@ object ResultE {
 		}
 	}
 	
-	def from[A](res: RsResult[A]): ResultE[A] = {
-		ResultE { data =>
-			val data1 = data.log(res)
-			(data1, res.toOption)
-		}
-	}
-	
 	def from[A](opt: Option[A], error: => String): ResultE[A] = {
 		ResultE { data =>
 			val data1 = opt match {
@@ -151,14 +133,6 @@ object ResultE {
 	
 	def gets[A](f: EvaluatorState => A): ResultE[A] =
 		ResultE { data => (data, Some(f(data.state))) }
-	
-	def getsResult[A](f: EvaluatorState => RsResult[A]): ResultE[A] = {
-		ResultE { data =>
-			val res = f(data.state)
-			val data1 = data.log(res)
-			(data1, res.toOption)
-		}
-	}
 	
 	def getsOption[A](f: EvaluatorState => Option[A], error: => String): ResultE[A] = {
 		ResultE { data =>
