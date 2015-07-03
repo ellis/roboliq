@@ -109,7 +109,7 @@ module.exports = {
 		"sealer.canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.sealer",
-			"program": "sealerProgram1",
+			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 			"model": "ourlab.model1",
 			"site": "ourlab.mario.ROBOSEAL"
 		}
