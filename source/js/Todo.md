@@ -17,8 +17,10 @@
 - [x] pipetter.instruction.pipette: create instruction, test in protocol5.json
 - [x] commands/pipetter.js: pipetter.action.pipette: method 1
 - [x] pipetter.instruction.cleanTips: create instruction, test in protocol8.json
-- [ ] commands/pipetter.js: pipetter.action.pipette: method 1 plus refresh tips
+- [x] commands/pipetter.js: pipetter.action.pipette: refresh tips (simple)
+- [ ] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
 - [ ] how to track the state of wells?
+- [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 2
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 3
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
