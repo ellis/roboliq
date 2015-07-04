@@ -16,8 +16,12 @@
 - [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
 - [x] pipetter.instruction.pipette: create instruction, test in protocol5.json
 - [x] commands/pipetter.js: pipetter.action.pipette: method 1
+- [x] pipetter.instruction.cleanTips: create instruction, test in protocol8.json
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 1 plus refresh tips
 - [ ] how to track the state of wells?
+- [ ] commands/pipetter.js: pipetter.action.pipette: method 2
+- [ ] commands/pipetter.js: pipetter.action.pipette: method 3
+- [ ] commands/pipetter.js: pipetter.action.pipette: method 4
 - [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] ourlab.js: add 'sites' and 'sealing' namespaces
@@ -120,6 +124,8 @@ Simplest algorithms:
 * Group as many tips at once as possible, but if group splits over columns, see if we can get a longer contiguous group by restarting the grouping in the new column rather than splitting the group from the previous column
 
 # Combinatorial stuff
+
+somehow distinguish between control factors, nuisance factors, blocking factors, measurable factors, unknown factors
 
 - factor: [protein, volume]
   values: [[gfp, 10], [gfp, 20], [gfp, 30], [yfp, 5]]

@@ -1,5 +1,7 @@
 package roboliq.evoware.translator
 
+import spray.json.JsValue
+
 case class PipetterItem(
 	syringe: Int,
 	well: String,
@@ -23,6 +25,27 @@ case class PipetterSpirate2(
 	equipment: String,
 	program: String,
 	items: List[PipetterItem2]
+)
+
+case class PipetterWashProgram(
+	wasteGrid: Int,
+	wasteSite: Int,
+	cleanerGrid: Int,
+	cleanerSite: Int,
+	wasteVolume: Int,
+	wasteDelay: Int,
+	cleanerVolume: Int,
+	cleanerDelay: Int,
+	airgapVolume: Int,
+	airgapSpeed: Int,
+	retractSpeed: Int,
+	fastWash: Boolean
+)
+
+case class PipetterWashTips(
+	equipment: String,
+	program: JsValue,
+	syringes: List[Int]
 )
 
 case class SealerRun(

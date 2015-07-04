@@ -8,6 +8,12 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	"pipetter.instruction.cleanTips": function(params, objects) {
+		var effects = {};
+		return {
+			effects: effects
+		};
+	},
 	"pipetter.instruction.dispense": function(params, objects) {
 		var effects = {};
 		return {
@@ -17,6 +23,78 @@ var commandHandlers = {
 	"pipetter.instruction.pipette": function(params, objects) {
 		var effects = {};
 		return {
+			effects: effects
+		};
+	},
+
+	"pipetter.action.cleanTips": function(params, objects, predicates, planHandlers) {
+		if (_.isEmpty(params.syringes))
+			return {};
+		if (!params.equipment)
+			return {errors: ["`equipment` parameter required"]};
+		if (!params.intensity)
+			return {errors: ["`intensity` parameter required"]};
+
+		var llpl = require('../HTN/llpl.js');
+		llpl.initializeDatabase(predicates);
+
+		var agent = params.agent || "?agent";
+		var equipment = params.equipment;
+		var program = params.program || "?program";
+		var intensity = params.intensity
+
+		// Check whether labwares are on sites that can be pipetted
+		var syringeToProgram_l = _.map(params.syringes, function(syringe) {
+			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
+			var tipModel = misc.getObjectsValue(objects, tipModelRef);
+			if (!tipModel) {
+				return {errors: [tipModelRef+" must be set"]};
+			}
+			var query = {
+				"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
+					"agent": agent,
+					"equipment": equipment,
+					"program": program,
+					"model": tipModel,
+					"intensity": intensity
+				}
+			};
+			//console.log("query: "+JSON.stringify(query, null, '\t'));
+			var queryResults = llpl.query(query);
+			//console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
+			if (_.isEmpty(queryResults)) {
+				throw {name: "ProcessingError", errors: ["no wash program defined for "+equipment+" with tip model "+tipModel+" and intensity "+intensity]};
+			}
+			var x = queryResults[0]["pipetter.cleanTips.canAgentEquipmentProgramModelIntensity"];
+			agent = x.agent
+			//console.log("x: "+JSON.stringify(x, null, '\t'));
+			return {syringe: syringe, program: x.program};
+		});
+
+		var expansion_l = [];
+		while (!_.isEmpty(syringeToProgram_l)) {
+			var program = syringeToProgram_l[0].program;
+			var l = _.remove(syringeToProgram_l, function(x) { return x.program === program; });
+			var syringe_l = _.map(l, 'syringe');
+			expansion_l.push({
+				command: "pipetter.instruction.cleanTips",
+				agent: agent,
+				equipment: equipment,
+				program: program,
+				syringes: syringe_l
+			});
+		}
+
+		var expansion = {};
+		_.forEach(expansion_l, function(cmd, i) {
+			expansion[(i+1).toString()] = cmd;
+		});
+
+		// Create the effects object
+		var effects = {};
+
+		return {
+			expansion: expansion,
 			effects: effects
 		};
 	},
@@ -37,7 +115,7 @@ var commandHandlers = {
 			var i = wellName.indexOf('(');
 			return (i >= 0) ? wellName.substr(0, i) : wellName;
 		}).uniq().value();
-		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, objects[name]); });
+		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(objects, name)); });
 
 		// Check whether labwares are on sites that can be pipetted
 		var query2_l = [];
@@ -103,83 +181,6 @@ var commandHandlers = {
 
 		// Create the effets object
 		var effects = {};
-
-		/*
-
-		var object = misc.getObjectsValue(objects, params.object);
-		var model = object.model || "?model";
-
-		var query = {
-			"pipetter.canAgentEquipmentSite": {
-				"agent": agent,
-				"equipment": equipment,
-				"site": site
-			}
-		};
-		var resultList = llpl.query(query);
-		if (_.isEmpty(resultList)) {
-			var query2 = {
-				"sealer.canAgentEquipmentProgramModelSite": {
-					"agent": "?agent",
-					"equipment": "?equipment",
-					"program": "?program",
-					"model": "?model",
-					"site": "?site"
-				}
-			};
-			var resultList2 = llpl.query(query);
-			if (_.isEmpty(resultList2)) {
-				return {
-					errors: ["missing sealer data (please add predicates `sealer.canAgentEquipmentProgramModelSite`)"]
-				};
-			} else {
-				return {
-					errors: ["missing sealer configuration for " + JSON.stringify(query)]
-				};
-			}
-		}
-
-		// Find any parameters which can only take one specific value
-		var params2 = {};
-		var paramValues = misc.extractValuesFromQueryResults(resultList, "sealer.canAgentEquipmentProgramModelSite");
-		_.forEach(paramValues, function(values, name) {
-			if (values.length == 1) {
-				params2[name] = values[0];
-			}
-		});
-
-		var params3 = _.merge({}, {
-			command: "sealer.instruction.run",
-			agent: params2.agent,
-			equipment: params2.equipment,
-			program: params2.program,
-			object: params.object
-		});
-
-		if (!params2.site) {
-			return {
-				errors: ["`site`: please provide value"]
-			};
-		}
-
-		var expansion = {
-			"1": {
-				"command": "transporter.action.movePlate",
-				"object": params.object,
-				"destination": params2.site
-			},
-			"2": params3,
-			"3": {
-				"command": "transporter.action.movePlate",
-				"object": params.object,
-				"destination": object.location
-			},
-		};
-
-		// Create the effets object
-		var effects = {};
-		effects[params.object + ".sealed"] = true;
-		*/
 
 		return {
 			expansion: expansion,

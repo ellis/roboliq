@@ -15,6 +15,27 @@ module.exports = {
 					"type": "Transporter",
 					"evowareRoma": 1
 				},
+				"liha": {
+					"type": "Pipetter",
+					"syringes": {
+						"1": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000"
+						},
+						"2": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000"
+						},
+						"3": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000"
+						},
+						"4": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000"
+						}
+					}
+				},
 				"sealer": {
 					"type": "Sealer"
 				},
@@ -35,6 +56,59 @@ module.exports = {
 					"evowareCarrier": "RoboSeal",
 					"evowareGrid": 35,
 					"evowareSite": 1
+				},
+				"washProgram_flush_1000": {
+					"type": "EvowareWashProgram",
+					"wasteGrid": 1,
+					"wasteSite": 2,
+					"cleanerGrid": 1,
+					"cleanerSite": 1,
+					"wasteVolume": 1,
+					"wasteDelay": 500,
+					"cleanerVolume": 1,
+					"cleanerDelay": 500,
+					"airgapVolume": 10,
+					"airgapSpeed": 70,
+					"retractSpeed": 30,
+					"fastWash": false
+				},
+				"washProgram_flush_0050": {
+					"type": "EvowareWashProgram",
+					"wasteGrid": 1,
+					"wasteSite": 2,
+					"cleanerGrid": 1,
+					"cleanerSite": 1,
+					"wasteVolume": 0.05,
+					"wasteDelay": 500,
+					"cleanerVolume": 0.05,
+					"cleanerDelay": 500,
+					"airgapVolume": 10,
+					"airgapSpeed": 70,
+					"retractSpeed": 30,
+					"fastWash": false
+				},
+				"washProgram_light_1000": {
+					"type": "EvowareWashProgram",
+					"wasteGrid": 1,
+					"wasteSite": 2,
+					"cleanerGrid": 1,
+					"cleanerSite": 1,
+					"wasteVolume": 4,
+					"wasteDelay": 500,
+					"cleanerVolume": 2,
+					"cleanerDelay": 500,
+					"airgapVolume": 10,
+					"airgapSpeed": 70,
+					"retractSpeed": 30,
+					"fastWash": false
+				},
+				"washProgram_thorough_1000": {
+					"type": "EvowareWashProgram",
+					"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_1000.esc"
+				},
+				"washProgram_thorough_0050": {
+					"type": "EvowareWashProgram",
+					"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
 				}
 			},
 			"model1": {
@@ -138,6 +212,30 @@ module.exports = {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"site": "ourlab.mario.P3"
+		}
+	}, {
+		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"program": "ourlab.mario.washProgram_flush_1000",
+			"model": "tipModel1000",
+			"intensity": "flush"
+		}
+	}, {
+		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"program": "ourlab.mario.washProgram_light_1000",
+			"model": "tipModel1000",
+			"intensity": "light"
+		}
+	}, {
+		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"program": "ourlab.mario.washProgram_thorough_1000",
+			"model": "tipModel1000",
+			"intensity": "thorough"
 		}
 	}, ]
 }

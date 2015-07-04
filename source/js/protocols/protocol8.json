@@ -1,0 +1,10 @@
+{
+	"steps": {
+		"1": {
+			"command": "pipetter.action.cleanTips",
+			"equipment": "ourlab.mario.liha",
+			"syringes": [1,2,3,4],
+			"intensity": "light"
+		}
+	}
+}

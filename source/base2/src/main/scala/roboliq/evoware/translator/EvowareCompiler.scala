@@ -72,6 +72,15 @@ class EvowareCompiler(
 ) {
 	private val logger = Logger[this.type]
 
+	// Decimal formatter for a maximum of 2 decimal places, using '.' as decimal point separator
+	private val df = {
+		val df = NumberFormat.getNumberInstance(Locale.US).asInstanceOf[DecimalFormat]
+		df.setMaximumFractionDigits(2)
+		df.setMinimumFractionDigits(0)
+		df.setGroupingUsed(false)
+		df
+	}
+
 	def buildTokens(
 		input: JsObject
 	): ResultC[List[Token]] = {
@@ -275,6 +284,7 @@ class EvowareCompiler(
 			"pipetter.instruction.aspirate" -> handlePipetterAspirate,
 			"pipetter.instruction.dispense" -> handlePipetterDispense,
 			"pipetter.instruction.pipette" -> handlePipetterPipette,
+			"pipetter.instruction.cleanTips" -> handlePipetterCleanTips,
 			"transporter.instruction.movePlate" -> handleTransporterMovePlate,
 			"sealer.instruction.run" -> handleSealerRun
 		)
@@ -289,6 +299,15 @@ class EvowareCompiler(
 					ResultC.error(s"unknown command: $commandName in $step")
 				}
 		}
+	}
+	
+	def lookupAs[A : TypeTag](
+		objects: JsObject,
+		objectName: String
+	): ResultC[A] = {
+		val field_l = objectName.split('.').toList
+		//println(s"lookupAs($objectName, $fieldName): ${field_l}")
+		JsConverter.fromJs[A](objects, field_l)
 	}
 	
 	def lookupAs[A : TypeTag](
@@ -437,12 +456,6 @@ class EvowareCompiler(
 		val well_l = tuple_l.map(_._2)
 		val volume_l = Array.fill(12)("0")
 		
-		// Decimal formatter for a maximum of 2 decimal places, using '.' as decimal point separator
-		val df = NumberFormat.getNumberInstance(Locale.US).asInstanceOf[DecimalFormat]
-		df.setMaximumFractionDigits(2);
-		df.setMinimumFractionDigits(0);
-		df.setGroupingUsed(false);
-		
 		for {
 			labwareModelInfo <- getLabwareModelInfo(objects, labwareInfo.labwareModelName0)
 			plateMask <- encodeWells(labwareModelInfo.rowCount, labwareModelInfo.colCount, well_l)
@@ -481,6 +494,62 @@ class EvowareCompiler(
 			)
 			
 			List(Token(line, JsObject(), siteToNameAndModel_m))
+		}
+	}
+	
+	private def handlePipetterCleanTips(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		
+		def handleScript(filename: String): ResultC[String] = {
+			val line = List(
+				'"'+filename+'"',
+				0
+			).mkString("Subroutine(", ",", ");")
+			ResultC.unit(line)
+		}
+		
+		def handleWashProgram(inst: PipetterWashTips, jsobj: JsObject): ResultC[String] = {
+			for {
+				program <- JsConverter.fromJs[PipetterWashProgram](jsobj)
+			} yield {
+				val syringeMask = encodeSyringes(inst.syringes)
+				val bUNKNOWN1 = false
+				val line = List(
+					syringeMask,
+					program.wasteGrid, program.wasteSite,
+					program.cleanerGrid, program.cleanerSite,
+					'"'+df.format(program.wasteVolume)+'"',
+					program.wasteDelay,
+					'"'+df.format(program.cleanerVolume)+'"',
+					program.cleanerDelay,
+					program.airgapVolume,
+					program.airgapSpeed,
+					program.retractSpeed,
+					(if (program.fastWash) 1 else 0),
+					(if (bUNKNOWN1) 1 else 0),
+					1000,
+					0
+				).mkString("Wash(", ",", ");")
+				line
+			}
+		}
+		
+		for {
+			inst <- JsConverter.fromJs[PipetterWashTips](step)
+			jsobj <- inst.program match {
+				case JsString(programName) => lookupAs[JsObject](objects, programName)
+				case program: JsObject => ResultC.unit(program)
+				case _ => ResultC.error(s"program: expected either an EvowareWashProgram; received ${inst.program}")
+			}
+			line <- jsobj.fields.get("script") match {
+				case Some(JsString(filename)) => handleScript(filename)
+				case _ => handleWashProgram(inst, jsobj)
+			}
+		} yield {
+			//val let = JsonUtils.makeSimpleObject(inst.`object`+".sealed", JsBoolean(true))
+			List(Token(line, JsObject(), Map()))
 		}
 	}
 	

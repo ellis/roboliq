@@ -148,7 +148,17 @@ function expandSteps(protocol, prefix, steps, objects) {
 				var handler = commandHandlers[step.command];
 				if (!isExpanded) {
 					var predicates = protocol.predicates.concat(createStateItems(objects));
-					var result = handler(step, objects, predicates, protocol.planHandlers);
+					var result = {};
+					try {
+						result = handler(step, objects, predicates, protocol.planHandlers);
+					} catch (e) {
+						if (e.hasOwnProperty("errors")) {
+							result = {errors: e.errors};
+						}
+						else {
+							result = {errors: e.toString()};
+						}
+					}
 					protocol.cache[id] = result;
 					// If there were errors:
 					if (!_.isEmpty(result.errors)) {
@@ -163,7 +173,7 @@ function expandSteps(protocol, prefix, steps, objects) {
 					if (result.hasOwnProperty("expansion")) {
 						_.merge(step, result.expansion);
 					}
-					if (result.hasOwnProperty("effects")) {
+					if (result.hasOwnProperty("effects") && !_.isEmpty(result.effects)) {
 						//console.log(result.effects);
 						// Add effects to protocol
 						protocol.effects[id] = result.effects;
