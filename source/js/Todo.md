@@ -15,7 +15,8 @@
 - [x] EvowareCompiler: pipetter.instruction.dispense
 - [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
 - [x] pipetter.instruction.pipette: create instruction, test in protocol5.json
-- [ ] commands/pipetter.js: pipetter.action.pipette
+- [x] commands/pipetter.js: pipetter.action.pipette: method 1
+- [ ] commands/pipetter.js: pipetter.action.pipette: method 1 plus refresh tips
 - [ ] how to track the state of wells?
 - [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
