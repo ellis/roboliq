@@ -1,0 +1,24 @@
+{
+	"objects": {
+		"plate1": {
+			"type": "Plate",
+			"model": "ourlab.model1",
+			"location": "ourlab.mario.P2"
+		},
+		"plate2": {
+			"type": "Plate",
+			"model": "ourlab.model1",
+			"location": "ourlab.mario.P3"
+		}
+	},
+	"steps": {
+		"1": {
+			"command": "pipetter.action.pipette",
+			"items": [{
+				"source": "plate1(A01)",
+				"destination": "plate2(A01)",
+				"volume": "50ul"
+			}]
+		}
+	}
+}
