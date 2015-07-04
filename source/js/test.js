@@ -2,7 +2,30 @@ var _ = require('lodash');
 var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
 
-var loadedFiles = _.uniq(['roboliq.js', 'commands/sealer.js', 'commands/transporter.js', 'ourlab.js'].concat(process.argv.splice(2)));
+var opts = require('nomnom')
+	.option('debug', {
+		abbr: 'd',
+		flag: true,
+		help: 'Print debugging info'
+	})
+	.option('output', {
+		abbr: 'o',
+		help: 'specify output filename, otherwise default is used'
+	})
+	.option('version', {
+		flag: true,
+		help: 'print version and exit',
+		callback: function() {
+			return "version 1.2.4";
+		}
+	})
+	.parse();
+
+var loadedFiles = _.uniq(['roboliq.js', 'commands/sealer.js', 'commands/transporter.js', 'ourlab.js'].concat(opts._));
+if (opts.debug) {
+	console.dir(opts);
+	console.log(loadedFiles);
+}
 var loadedContents = _.map(loadedFiles, function(filename) {
 	if (filename.indexOf("./") != 0)
 		filename = "./"+filename;
@@ -16,8 +39,7 @@ function mergeObjects(name) {
 }
 
 function mergeArrays(name) {
-	var list = _(loadedContents).map(function(c) { return c[name]; }).compact().value();
-	return _.compact(_.flatten(list));
+	return _(loadedContents).map(function(c) { return c[name]; }).flatten().compact().filter(function(x) { return !_.isEmpty(x); }).value();
 }
 
 var protocol = {
@@ -172,16 +194,18 @@ function gatherInstructions(prefix, steps, objects, effects) {
 }
 
 expandProtocol(protocol);
-console.log();
-console.log("Protocol:")
-console.log(JSON.stringify(protocol, null, '\t'));
-/*console.log();
-console.log("Steps:")
-console.log(JSON.stringify(protocol.steps, null, '\t'));
-console.log();
-console.log("Effects:")
-console.log(JSON.stringify(effects, null, '\t'));
-*/
+if (opts.debug) {
+	console.log();
+	console.log("Protocol:")
+	console.log(JSON.stringify(protocol, null, '\t'));
+	/*console.log();
+	console.log("Steps:")
+	console.log(JSON.stringify(protocol.steps, null, '\t'));
+	console.log();
+	console.log("Effects:")
+	console.log(JSON.stringify(effects, null, '\t'));
+	*/
+}
 
 if (!_.isEmpty(protocol.errors)) {
 	console.log();
@@ -209,8 +233,13 @@ else {
 			errors: protocol.errors
 		}
 	);
-	console.log();
-	console.log("Output:")
-	console.log(JSON.stringify(output, null, '\t'));
-	fs.writeFileSync('output.json', JSON.stringify(output, null, '\t')+"\n");
+	if (opts.debug) {
+		console.log();
+		console.log("Output:")
+	}
+	var outputText = JSON.stringify(output, null, '\t');
+	if (opts.debug || opts.output === '-')
+		console.log(outputText);
+	else if (opts.output && opts.output !== '-')
+		fs.writeFileSync('output.json', JSON.stringify(output, null, '\t')+"\n");
 }

@@ -8,6 +8,10 @@
 - [x] test.js: accumulate warnings from commandHandler call
 - [x] generate instructions, pass them to Evoware compiler, checkout final script
 - [x] test.js: pass JSON and JavaScript files to load from the command line
+- [ ] test.js: let user pass in filename to use for output
+- [ ] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
+- [ ] save output files for testing comparisons when code changes are made
+- [ ] test protocol4.json
 - [ ] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
 - [ ] how to handle pipetting commands?
 - [ ] how to track the state of wells?
@@ -18,6 +22,7 @@
 
 ## Before publication, but not yet
 
+- [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations
 - [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string
 - [ ] llpl.js: need to add a function to create a database object, so that we can use multiple instances simultaneously

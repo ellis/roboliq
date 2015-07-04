@@ -146,7 +146,7 @@ function initializeDatabase(rsAndAs) {
       isLoaded = true;
     }
     if (!isLoaded) {
-      utils.ppToConsole("Unrecognized form in database: " + rsAndAs[i]);
+      utils.ppToConsole("Unrecognized form in database: " + JSON.stringify(rsAndAs[i]));
     }
   }
   for (i = 0; i < assertionsList.length; i++) {

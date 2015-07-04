@@ -48,12 +48,12 @@ var commandHandlers = {
 			}
 		};
 		var input = [].concat(predicates, transporterLogic, [tasks]);
-		console.log(JSON.stringify(input, null, '\t'));
+		//console.log(JSON.stringify(input, null, '\t'));
 		var shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
-		console.log("plan:");
-		console.log(JSON.stringify(plan, null, '  '));
+		//console.log("plan:");
+		//console.log(JSON.stringify(plan, null, '  '));
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		var tasks = planner.listAndOrderTasks(plan, true);
