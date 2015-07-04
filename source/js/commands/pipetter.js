@@ -18,14 +18,15 @@ var commandHandlers = {
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
-	"sealer.action.sealPlate": function(params, objects, predicates, planHandlers) {
+	"pipetter.action.pipette": function(params, objects, predicates, planHandlers) {
 		var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(predicates);
 
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
 		var program = params.program || "?program";
-		var site = params.site || "?site";
+
+		// CONTINUE: loop through pipette items to find all labware
 
 		var object = misc.getObjectsValue(objects, params.object);
 		var model = object.model || "?model";

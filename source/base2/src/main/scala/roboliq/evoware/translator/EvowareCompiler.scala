@@ -16,9 +16,14 @@ import spray.json.JsString
 import scala.math.Ordering.Implicits.seqDerivedOrdering
 import roboliq.utils.MiscUtils
 import spray.json.JsBoolean
-import roboliq.utils.WellNameSingleParser
-import roboliq.utils.WellNameSingleParsed
-import roboliq.utils.WellNameSingleParsed
+import roboliq.parsers.WellNameSingleParsed
+import roboliq.parsers.WellNameSingleParser
+import roboliq.parsers.AmountParser
+import roboliq.parsers.Amount_Volume
+import roboliq.parsers.Amount_Variable
+import java.text.NumberFormat
+import java.util.Locale
+import java.text.DecimalFormat
 
 /*
     objects:
@@ -267,6 +272,8 @@ class EvowareCompiler(
 		effects: JsObject
 	): ResultC[List[Token]] = {
 		val map = Map[String, (JsObject, JsObject) => ResultC[List[Token]]](
+			"pipetter.instruction.aspirate" -> handlePipetterAspirate,
+			"pipetter.instruction.dispense" -> handlePipetterDispense,
 			"transporter.instruction.movePlate" -> handleTransporterMovePlate,
 			"sealer.instruction.run" -> handleSealerRun
 		)
@@ -300,6 +307,16 @@ class EvowareCompiler(
 		for {
 			inst <- JsConverter.fromJs[PipetterAspirate](step)
 			result <- handlePipetterSpirate(objects, inst.program, inst.items, "Aspirate")
+		} yield result
+	}
+	
+	private def handlePipetterDispense(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		for {
+			inst <- JsConverter.fromJs[PipetterAspirate](step)
+			result <- handlePipetterSpirate(objects, inst.program, inst.items, "Dispense")
 		} yield result
 	}
 	
@@ -377,19 +394,36 @@ class EvowareCompiler(
 		val syringe_l = tuple_l.map(_._1.syringe)
 		val syringeMask = encodeSyringes(syringe_l)
 		
-		// Create a list of volumes for each used tip, leaving the remaining values at 0
-		val volume_l = Array.fill(12)("0")
-		for (tuple <- tuple_l) {
-			val syringe = tuple._1.syringe
-			assert(syringe >= 0 && syringe < 12)
-			volume_l(syringe) = s""""${tuple._1.volume}""""
-		}
-		
 		val well_l = tuple_l.map(_._2)
+		val volume_l = Array.fill(12)("0")
+		
+		// Decimal formatter for a maximum of 2 decimal places, using '.' as decimal point separator
+		val df = NumberFormat.getNumberInstance(Locale.US).asInstanceOf[DecimalFormat]
+		df.setMaximumFractionDigits(2);
+		df.setMinimumFractionDigits(0);
+		df.setGroupingUsed(false);
 		
 		for {
 			labwareModelInfo <- getLabwareModelInfo(objects, labwareInfo.labwareModelName0)
 			plateMask <- encodeWells(labwareModelInfo.rowCount, labwareModelInfo.colCount, well_l)
+			// Create a list of volumes for each used tip, leaving the remaining values at 0
+			_ <- ResultC.foreach(tuple_l) { tuple =>
+				for {
+					amount <- AmountParser.parse(tuple._1.volume)
+					syringe = tuple._1.syringe
+					_ <- ResultC.assert(syringe >= 1 && syringe <= 12, s"invalid syringe value $syringe: must be between 1 and 12")
+					volumeString <- amount match {
+						case Amount_Volume(volume) =>
+							ResultC.unit(df.format(volume.ul))
+						case Amount_Variable(name) =>
+							ResultC.unit(name)
+						case _ =>
+							ResultC.error(s"invalid volume `${tuple._1.volume}`: expected liquid volume or evoware variable name, but got $amount")
+					}
+				} yield {
+					volume_l(syringe - 1) = s""""$volumeString""""
+				}
+			}
 		} yield {
 			val line = List(
 				syringeMask,
@@ -414,7 +448,7 @@ class EvowareCompiler(
 	 * Encode a list of syringes as an evoware bitmask
 	 */
 	protected def encodeSyringes(list: Iterable[Int]): Int =
-		list.foldLeft(0) { (sum, syringe) => sum | (1 << syringe) }
+		list.foldLeft(0) { (sum, syringe) => sum | (1 << (syringe - 1)) }
 
 	/**
 	 * Encode a list of wells on a plate as an evoware bitmask

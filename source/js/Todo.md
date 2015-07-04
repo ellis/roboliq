@@ -10,10 +10,11 @@
 - [x] test.js: pass JSON and JavaScript files to load from the command line
 - [x] test.js: let user pass in filename to use for output
 - [x] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
-- [ ] save output files in git for testing comparisons when code changes are made
-- [ ] test protocol4.json
-- [ ] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
-- [ ] how to handle pipetting commands?
+- [x] save output files in git for testing comparisons when code changes are made
+- [x] test protocol4.json
+- [x] EvowareCompiler: pipetter.instruction.dispense
+- [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
+- [ ] commands/pipetter.js: pipetter.action.pipette
 - [ ] how to track the state of wells?
 - [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
@@ -22,6 +23,7 @@
 
 ## Before publication, but not yet
 
+- [ ] figure out an implementation for variable expansion
 - [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations
 - [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string
@@ -60,6 +62,16 @@ When loading JSON/JavaScript files, we expect the following structure:
 # Misc
 
 - SHOP code from http://danm.ucsc.edu/~wsack/SoftwareArts/Code/Plan/
+
+# Variables
+
+Need to reference objects, variables, step parameters, parameters of current command, parameters of parent command
+
+* "${object}" -- `object` parameter for current command
+* "${^.object}" -- `object` parameter for parent command
+* "${1.2.object}" -- `object` parameter for step 1.2
+* "@{volume}" -- the value of `objects.volume.value`
+* "@{${object}.location}" -- the location of the object referenced by the `object` parameter for the current command
 
 # Pipetting optimization
 

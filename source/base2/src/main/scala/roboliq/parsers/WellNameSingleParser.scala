@@ -1,4 +1,4 @@
-package roboliq.utils
+package roboliq.parsers
 
 import scala.util.parsing.combinator.JavaTokenParsers
 import roboliq.core._
