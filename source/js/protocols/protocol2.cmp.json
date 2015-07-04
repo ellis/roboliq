@@ -1,0 +1,108 @@
+{
+	"objects": {
+		"ourlab": {
+			"type": "Namespace",
+			"mario": {
+				"type": "Namespace",
+				"evoware": {
+					"type": "EvowareRobot"
+				},
+				"roma1": {
+					"type": "Transporter",
+					"evowareRoma": 0
+				},
+				"roma2": {
+					"type": "Transporter",
+					"evowareRoma": 1
+				},
+				"sealer": {
+					"type": "Sealer"
+				},
+				"P2": {
+					"type": "Site",
+					"evowareCarrier": "MP 2Pos H+P Shake",
+					"evowareGrid": 10,
+					"evowareSite": 2
+				},
+				"P3": {
+					"type": "Site",
+					"evowareCarrier": "MP 2Pos H+P Shake",
+					"evowareGrid": 10,
+					"evowareSite": 4
+				},
+				"ROBOSEAL": {
+					"type": "Site",
+					"evowareCarrier": "RoboSeal",
+					"evowareGrid": 35,
+					"evowareSite": 1
+				}
+			},
+			"model1": {
+				"type": "PlateModel",
+				"rows": 8,
+				"columns": 12,
+				"evowareName": "Ellis Nunc F96 MicroWell"
+			}
+		},
+		"plate1": {
+			"type": "Plate",
+			"model": "ourlab.model1",
+			"location": "ourlab.mario.P2"
+		}
+	},
+	"steps": {
+		"1": {
+			"1": {
+				"command": "transporter.instruction.movePlate",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.roma1",
+				"program": "Narrow",
+				"object": "plate1",
+				"destination": "ourlab.mario.P3"
+			},
+			"command": "transporter.action.movePlate",
+			"object": "plate1",
+			"destination": "ourlab.mario.P3"
+		},
+		"2": {
+			"1": {
+				"command": "transporter.instruction.movePlate",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.roma1",
+				"program": "Narrow",
+				"object": "plate1",
+				"destination": "ourlab.mario.P2"
+			},
+			"2": {
+				"command": "transporter.instruction.movePlate",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.roma2",
+				"program": "Narrow",
+				"object": "plate1",
+				"destination": "ourlab.mario.ROBOSEAL"
+			},
+			"command": "transporter.action.movePlate",
+			"object": "plate1",
+			"destination": "ourlab.mario.ROBOSEAL"
+		}
+	},
+	"effects": {
+		"1": {
+			"plate1.location": "ourlab.mario.P3"
+		},
+		"2": {
+			"plate1.location": "ourlab.mario.ROBOSEAL"
+		},
+		"1.1": {
+			"plate1.location": "ourlab.mario.P3"
+		},
+		"2.1": {
+			"plate1.location": "ourlab.mario.P2"
+		},
+		"2.2": {
+			"plate1.location": "ourlab.mario.ROBOSEAL"
+		}
+	},
+	"warnings": {},
+	"errors": {}
+}

@@ -8,9 +8,9 @@
 - [x] test.js: accumulate warnings from commandHandler call
 - [x] generate instructions, pass them to Evoware compiler, checkout final script
 - [x] test.js: pass JSON and JavaScript files to load from the command line
-- [ ] test.js: let user pass in filename to use for output
-- [ ] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
-- [ ] save output files for testing comparisons when code changes are made
+- [x] test.js: let user pass in filename to use for output
+- [x] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
+- [ ] save output files in git for testing comparisons when code changes are made
 - [ ] test protocol4.json
 - [ ] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
 - [ ] how to handle pipetting commands?

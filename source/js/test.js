@@ -4,35 +4,44 @@ var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 
 var opts = require('nomnom')
-	.option('debug', {
-		abbr: 'd',
-		flag: true,
-		help: 'Print debugging info'
-	})
-	.option('output', {
-		abbr: 'o',
-		help: 'specify output filename, otherwise default is used'
-	})
-	.option('print', {
-		abbr: 'p',
-		flag: true,
-		help: 'print output'
-	})
-	.option('print-protocol', {
-		abbr: 'r',
-		flag: true,
-		help: 'print combined protocol'
-	})
-	.option('version', {
-		flag: true,
-		help: 'print version and exit',
-		callback: function() {
-			return "version 1.2.4";
-		}
+	.options({
+		infiles: {
+			position: 0,
+			help: 'input files, .json or .js',
+			list: true
+		},
+		debug: {
+			abbr: 'd',
+			flag: true,
+			help: 'Print debugging info'
+		},
+		output: {
+			abbr: 'o',
+			help: 'specify output filename or "" for standard output, otherwise default is used',
+			metavar: 'FILE'
+		},
+		print: {
+			abbr: 'p',
+			flag: true,
+			help: 'print output'
+		},
+		printProtocol: {
+			abbr: 'r',
+			full: 'print-protocol',
+			flag: true,
+			help: 'print combined protocol'
+		},
+		version: {
+			flag: true,
+			help: 'print version and exit',
+			callback: function() {
+				return "version 0.1";
+			}
+		},
 	})
 	.parse();
 
-var loadedFiles = _.uniq(['roboliq.js', 'commands/sealer.js', 'commands/transporter.js', 'ourlab.js'].concat(opts._));
+var loadedFiles = _.uniq(['roboliq.js', 'commands/sealer.js', 'commands/transporter.js', 'ourlab.js'].concat(opts.infiles));
 if (opts.debug) {
 	console.dir(opts);
 	console.log(loadedFiles);
@@ -205,7 +214,7 @@ function gatherInstructions(prefix, steps, objects, effects) {
 }
 
 expandProtocol(protocol);
-if (opts.debug || opts['print-protocol']) {
+if (opts.debug || opts.printProtocol) {
 	console.log();
 	console.log("Protocol:")
 	console.log(JSON.stringify(protocol, null, '\t'));
@@ -249,10 +258,10 @@ else {
 		console.log("Output:")
 	}
 	var outputText = JSON.stringify(output, null, '\t');
-	if (opts.debug || opts.output === '')
+	if (opts.debug || opts.output === '' || opts.print)
 		console.log(outputText);
-	else if (opts.output !== '') {
-		var inpath = _.last(opts._);
+	if (opts.output !== '') {
+		var inpath = _.last(opts.infiles);
 		var outpath = opts.output || path.join(path.dirname(inpath), path.basename(inpath, path.extname(inpath))+".out.json");
 		console.log("output written to: "+outpath);
 		fs.writeFileSync(outpath, JSON.stringify(output, null, '\t')+"\n");

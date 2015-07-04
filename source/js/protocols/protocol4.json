@@ -1,0 +1,19 @@
+{
+  "objects": {
+    "plate1": {
+      "type": "Plate",
+      "model": "ourlab.model1",
+      "location": "ourlab.mario.P2"
+    }
+  },
+  "steps": {
+    "1": {
+      "command": "pipetter.instruction.aspirate",
+      "equipment": "ourlab.mario.liha",
+      "program": "Water",
+      "items": [
+        {"syringe": 1, "well": "plate1(A01)", "volume": "20"}
+      ]
+    }
+  }
+}
