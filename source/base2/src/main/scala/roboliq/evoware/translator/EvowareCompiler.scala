@@ -16,6 +16,9 @@ import spray.json.JsString
 import scala.math.Ordering.Implicits.seqDerivedOrdering
 import roboliq.utils.MiscUtils
 import spray.json.JsBoolean
+import roboliq.utils.WellNameSingleParser
+import roboliq.utils.WellNameSingleParsed
+import roboliq.utils.WellNameSingleParsed
 
 /*
     objects:
@@ -41,6 +44,21 @@ case class EvowareScript(
 	index: Int,
 	line_l: Vector[String],
 	siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)]
+)
+
+private case class LabwareInfo(
+	labwareName: String,
+	labwareModelName0: String,
+	labwareModelName: String,
+	siteName: String,
+	cngs: CarrierNameGridSiteIndex
+)
+
+private case class LabwareModelInfo(
+	labwareModelName0: String,
+	labwareModelName: String,
+	rowCount: Int,
+	colCount: Int
 )
 
 class EvowareCompiler(
@@ -275,25 +293,170 @@ class EvowareCompiler(
 		JsConverter.fromJs[A](objects, field_l)
 	}
 	
+	private def handlePipetterAspirate(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		for {
+			inst <- JsConverter.fromJs[PipetterAspirate](step)
+			result <- handlePipetterSpirate(objects, inst.program, inst.items, "Aspirate")
+		} yield result
+	}
+	
+	private def handlePipetterSpirate(
+		objects: JsObject,
+		program: String,
+		items: List[PipetterItem],
+		func: String
+	): ResultC[List[Token]] = {
+		if (items.isEmpty) return ResultC.unit(Nil)
+		
+		for {
+			// Get WellPosition and CarrierSite for each item
+			tuple_l <- ResultC.map(items) { item =>
+				for {
+					wellPosition <- WellNameSingleParser.parse(item.well)
+					labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
+					labwareInfo <- getLabwareInfo(objects, labwareName)
+				} yield {
+					(item, wellPosition, labwareInfo)
+				}
+			}
+			token_l <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l)
+		} yield token_l
+	}
+
+	private def handlePipetterSpirateDoGroup(
+		objects: JsObject,
+		program: String,
+		func: String,
+		tuple_l: List[(PipetterItem, WellNameSingleParsed, LabwareInfo)]
+	): ResultC[List[Token]] = {
+		if (tuple_l.isEmpty) return ResultC.unit(Nil)
+		val col = tuple_l.head._2.col
+		val labwareInfo = tuple_l.head._3
+		// Get all items on the same labware and in the same column
+		val tuple_l2 = tuple_l.takeWhile(tuple => tuple._2.col == col && tuple._3 == labwareInfo)
+		val (tuple_l3, tipSpacing) = {
+			if (tuple_l2.length == 1) {
+				tuple_l.take(1) -> 1
+			}
+			// If there are multiple items, group the ones that are acceptably spaced 
+			else {
+				val syringe0 = tuple_l.head._1.syringe
+				val row0 = tuple_l.head._2.row
+				val dsyringe = tuple_l(1)._1.syringe - syringe0
+				val drow = tuple_l(1)._2.row - row0
+				// Syringes and rows should have ascending indexes, and the spacing should be 4 at most
+				if (dsyringe <= 0 || drow <= 0 || drow / dsyringe > 4) {
+					tuple_l.take(1) -> 1
+				}
+				else {
+					// Take as many items as preserve the initial deltas for syringe and row
+					tuple_l2.zipWithIndex.takeWhile({ case (tuple, index) =>
+						tuple._2.row == row0 + index * drow && tuple._1.syringe == syringe0 + index * dsyringe
+					}).map(_._1) -> drow
+				}
+			}
+		}
+		for {
+			token_l1 <- handlePipetterSpirateHandleGroup(objects, program, func, tuple_l3, labwareInfo, tipSpacing)
+			token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
+		} yield token_l1 ++ token_l2
+	}
+	
+	private def handlePipetterSpirateHandleGroup(
+		objects: JsObject,
+		program: String,
+		func: String,
+		tuple_l: List[(PipetterItem, WellNameSingleParsed, Any)],
+		labwareInfo: LabwareInfo,
+		tipSpacing: Int
+	): ResultC[List[Token]] = {
+		// Calculate syringe mask
+		val syringe_l = tuple_l.map(_._1.syringe)
+		val syringeMask = encodeSyringes(syringe_l)
+		
+		// Create a list of volumes for each used tip, leaving the remaining values at 0
+		val volume_l = Array.fill(12)("0")
+		for (tuple <- tuple_l) {
+			val syringe = tuple._1.syringe
+			assert(syringe >= 0 && syringe < 12)
+			volume_l(syringe) = s""""${tuple._1.volume}""""
+		}
+		
+		val well_l = tuple_l.map(_._2)
+		
+		for {
+			labwareModelInfo <- getLabwareModelInfo(objects, labwareInfo.labwareModelName0)
+			plateMask <- encodeWells(labwareModelInfo.rowCount, labwareModelInfo.colCount, well_l)
+		} yield {
+			val line = List(
+				syringeMask,
+				s""""$program"""",
+				volume_l.mkString(","),
+				labwareInfo.cngs.gridIndex, labwareInfo.cngs.siteIndex,
+				tipSpacing,
+				s""""$plateMask"""",
+				0,
+				0
+			).mkString(func+"(", ",", ");")
+	
+			val siteToNameAndModel_m = Map(
+				labwareInfo.cngs -> (labwareInfo.siteName, labwareInfo.labwareModelName)
+			)
+			
+			List(Token(line, JsObject(), siteToNameAndModel_m))
+		}
+	}
+	
+	/**
+	 * Encode a list of syringes as an evoware bitmask
+	 */
+	protected def encodeSyringes(list: Iterable[Int]): Int =
+		list.foldLeft(0) { (sum, syringe) => sum | (1 << syringe) }
+
+	/**
+	 * Encode a list of wells on a plate as an evoware bitmask
+	 */
+	protected def encodeWells(rows: Int, cols: Int, well_l: Traversable[WellNameSingleParsed]): ResultC[String] = {
+		//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
+		val nWellMaskChars = math.ceil(rows * cols / 7.0).asInstanceOf[Int]
+		val amWells = new Array[Int](nWellMaskChars)
+		for (well <- well_l) {
+			val index = well.row + well.col * cols
+			val iChar = index / 7;
+			val iWell1 = index % 7;
+			if (iChar >= amWells.size) {
+				return ResultC.error("INTERNAL ERROR: encodeWells: index out of bounds -- "+(rows, cols, well, index, iChar, iWell1, well_l))
+			}
+			amWells(iChar) += 1 << iWell1
+		}
+		val sWellMask = amWells.map(encode).mkString
+		val sPlateMask = f"$cols%02X$rows%02X" + sWellMask
+		ResultC.unit(sPlateMask)
+	}
+
+	/**
+	 * Encode a number as a character for evoware
+	 */
+	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
+	//private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
+	
 	private def handleSealerRun(
 		objects: JsObject,
 		step: JsObject
 	): ResultC[List[Token]] = {
 		for {
-			x <- JsConverter.fromJs[SealerRun](step)
-			plateModelName0 <- lookupAs[String](objects, x.`object`, "model")
-			plateModelName <- lookupAs[String](objects, plateModelName0, "evowareName")
-			plateOrigName <- lookupAs[String](objects, x.`object`, "location")
-			plateOrigCarrierName <- lookupAs[String](objects, plateOrigName, "evowareCarrier")
-			plateOrigGrid <- lookupAs[Int](objects, plateOrigName, "evowareGrid")
-			plateOrigSite <- lookupAs[Int](objects, plateOrigName, "evowareSite")
+			inst <- JsConverter.fromJs[SealerRun](step)
+			labwareInfo <- getLabwareInfo(objects, inst.`object`)
 		} yield {
-			val line = createFactsLine(plateOrigCarrierName, plateOrigCarrierName+"_Seal", x.program)
-			val let = JsonUtils.makeSimpleObject(x.`object`+".sealed", JsBoolean(true))
+			val line = createFactsLine(labwareInfo.cngs.carrierName, labwareInfo.cngs.carrierName+"_Seal", inst.program)
+			//val let = JsonUtils.makeSimpleObject(inst.`object`+".sealed", JsBoolean(true))
 			val siteToNameAndModel_m = Map(
-				CarrierNameGridSiteIndex(plateOrigCarrierName, plateOrigGrid, plateOrigSite) -> (plateOrigName, plateModelName)
+				labwareInfo.cngs -> (labwareInfo.siteName, labwareInfo.labwareModelName)
 			)
-			List(Token(line, let, siteToNameAndModel_m))
+			List(Token(line, JsObject(), siteToNameAndModel_m))
 		}
 	}
 	
@@ -360,5 +523,45 @@ class EvowareCompiler(
 			"\"0\"",
 			"\"\""
 		).mkString("FACTS(", ",", ");")
+	}
+	
+	private def getLabwareInfo(
+		objects: JsObject,
+		labwareName: String
+	): ResultC[LabwareInfo] = {
+		for {
+			labwareModelName0 <- lookupAs[String](objects, labwareName, "model")
+			labwareModelName <- lookupAs[String](objects, labwareModelName0, "evowareName")
+			siteName <- lookupAs[String](objects, labwareName, "location")
+			carrierName <- lookupAs[String](objects, siteName, "evowareCarrier")
+			gridIndex <- lookupAs[Int](objects, siteName, "evowareGrid")
+			siteIndex <- lookupAs[Int](objects, siteName, "evowareSite")
+		} yield {
+			LabwareInfo(
+				labwareName,
+				labwareModelName0,
+				labwareModelName,
+				siteName,
+				CarrierNameGridSiteIndex(carrierName, gridIndex, siteIndex)
+			)
+		}
+	}
+	
+	private def getLabwareModelInfo(
+		objects: JsObject,
+		labwareModelName0: String
+	): ResultC[LabwareModelInfo] = {
+		for {
+			rowCount <- lookupAs[Int](objects, labwareModelName0, "rows")
+			colCount <- lookupAs[Int](objects, labwareModelName0, "columns")
+			labwareModelName <- lookupAs[String](objects, labwareModelName0, "evowareName")
+		} yield {
+			LabwareModelInfo(
+				labwareModelName0,
+				labwareModelName,
+				rowCount,
+				colCount
+			)
+		}
 	}
 }

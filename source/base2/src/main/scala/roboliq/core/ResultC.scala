@@ -39,6 +39,8 @@ case class ResultCData(
 trait ResultC[+A] {
 	def run(data: ResultCData = ResultCData()): (ResultCData, Option[A])
 	
+	def get(data: ResultCData = ResultCData()): Option[A] = run(data)._2
+	
 	def map[B](f: A => B): ResultC[B] = {
 		ResultC { data =>
 			if (data.error_r.isEmpty) {
