@@ -24,6 +24,7 @@
  *
  */
 
+var _ = require('lodash');
 var utils = require('./utils.js');
 
 ////
@@ -386,12 +387,17 @@ function simpleQuery(queryPattern, bindingsArray) {
 // conjoin(conjunctsArray,bindingsArray): array
 //
 function conjoin(conjunctsArray, bindingsArray) {
+    //console.log("conjunctsArray: "+JSON.stringify(conjunctsArray));
+    //console.log("bindingsArray: "+JSON.stringify(bindingsArray));
   if (utils.isEmpty(conjunctsArray)) {
     return (bindingsArray);
   }
   var newBindingsArray = qeval(conjunctsArray[0], bindingsArray);
-  conjunctsArray.shift();
-  return (conjoin(conjunctsArray, newBindingsArray));
+  var newConjunctsArray = _.tail(conjunctsArray);
+  //console.log("conjunctsArray: "+JSON.stringify(conjunctsArray));
+  //console.log("bindingsArray: "+JSON.stringify(bindingsArray));
+  //console.log("newBindingsArray: "+JSON.stringify(newBindingsArray));
+  return (conjoin(newConjunctsArray, newBindingsArray));
 }
 
 //
@@ -542,7 +548,7 @@ function qeval(query, bindingsArray) {
 }
 
 //
-// query(q): outputs to console
+// query(q): return array of matches to the query
 //
 function query(q) {
   var cleanQuery, instance;

@@ -24,7 +24,11 @@
 
 ## Before publication, but not yet
 
-- [ ] figure out an implementation for variable expansion
+- [ ] figure out how to implement variable expansion/evaluation
+- [ ] figure out how to implement for-comprehensions for both commands and list
+- [ ] figure out how to randomize for-comprehensions and plain lists
+- [ ] figure out how to generate partial factorial design lists
+- [ ] figure out how to split large factorial designs over multiple plates/batches
 - [ ] consider allowing for mathematical expressions (see http://mathjs.org/)
 - [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations
@@ -36,6 +40,7 @@
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly trick will be object merging and gathering all required step parameters into a single parameters map
 - [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
 - [ ] version handling for protocols and commands
+- [ ] test.js: allow for loading YAML protocols
 
 ## After publication
 

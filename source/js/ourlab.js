@@ -107,15 +107,14 @@ module.exports = {
 			"site": "ourlab.mario.P2"
 		}
 	}, {
-		}, {
-			"movePlate_canAgentEquipmentProgramModelSite": {
-				"agent": "ourlab.mario.evoware",
-				"equipment": "ourlab.mario.roma2",
-				"program": "Narrow",
-				"model": "ourlab.model1",
-				"site": "ourlab.mario.ROBOSEAL"
-			}
-		}, {
+		"movePlate_canAgentEquipmentProgramModelSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.roma2",
+			"program": "Narrow",
+			"model": "ourlab.model1",
+			"site": "ourlab.mario.ROBOSEAL"
+		}
+	}, {
 		"movePlate_excludePath": {
 			"siteA": "ourlab.mario.P3",
 			"siteB": "ourlab.mario.ROBOSEAL"
@@ -127,6 +126,18 @@ module.exports = {
 			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 			"model": "ourlab.model1",
 			"site": "ourlab.mario.ROBOSEAL"
+		}
+	}, {
+		"pipetter.canAgentEquipmentSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"site": "ourlab.mario.P2"
+		}
+	}, {
+		"pipetter.canAgentEquipmentSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"site": "ourlab.mario.P3"
 		}
 	}, ]
 }
