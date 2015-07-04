@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
+var path = require('path');
 
 var opts = require('nomnom')
 	.option('debug', {
@@ -11,6 +12,16 @@ var opts = require('nomnom')
 	.option('output', {
 		abbr: 'o',
 		help: 'specify output filename, otherwise default is used'
+	})
+	.option('print', {
+		abbr: 'p',
+		flag: true,
+		help: 'print output'
+	})
+	.option('print-protocol', {
+		abbr: 'r',
+		flag: true,
+		help: 'print combined protocol'
 	})
 	.option('version', {
 		flag: true,
@@ -194,7 +205,7 @@ function gatherInstructions(prefix, steps, objects, effects) {
 }
 
 expandProtocol(protocol);
-if (opts.debug) {
+if (opts.debug || opts['print-protocol']) {
 	console.log();
 	console.log("Protocol:")
 	console.log(JSON.stringify(protocol, null, '\t'));
@@ -238,8 +249,12 @@ else {
 		console.log("Output:")
 	}
 	var outputText = JSON.stringify(output, null, '\t');
-	if (opts.debug || opts.output === '-')
+	if (opts.debug || opts.output === '')
 		console.log(outputText);
-	else if (opts.output && opts.output !== '-')
-		fs.writeFileSync('output.json', JSON.stringify(output, null, '\t')+"\n");
+	else if (opts.output !== '') {
+		var inpath = _.last(opts._);
+		var outpath = opts.output || path.join(path.dirname(inpath), path.basename(inpath, path.extname(inpath))+".out.json");
+		console.log("output written to: "+outpath);
+		fs.writeFileSync(outpath, JSON.stringify(output, null, '\t')+"\n");
+	}
 }
