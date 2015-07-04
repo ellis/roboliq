@@ -25,6 +25,8 @@
 
 ## Before publication, but not yet
 
+- [ ] reader command
+- [ ] mix command
 - [ ] figure out how to implement variable expansion/evaluation
 - [ ] figure out how to implement for-comprehensions for both commands and list
 - [ ] figure out how to randomize for-comprehensions and plain lists
@@ -42,6 +44,7 @@
 - [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
 - [ ] version handling for protocols and commands
 - [ ] test.js: allow for loading YAML protocols
+- [ ] centrifuge command
 
 ## After publication
 
