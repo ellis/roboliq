@@ -157,6 +157,7 @@ function expandSteps(protocol, prefix, steps, objects) {
 						}
 						else {
 							result = {errors: e.toString()};
+							throw e;
 						}
 					}
 					protocol.cache[id] = result;

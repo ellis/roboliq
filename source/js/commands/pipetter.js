@@ -104,15 +104,24 @@ var commandHandlers = {
 
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
+		var cleanBefore = params.cleanBefore || params.clean || "thorough";
+		var cleanBetween = params.cleanBetween || params.clean || "thorough";
+		var cleanBetweenSameSource = params.cleanBetweenSameSource || cleanBetween;
+		var cleanAfter = params.cleanAfter || params.clean || "thorough";
+		var tipModels = params.tipModels;
+		var syringes = params.syringes;
 
 		// Find all wells, both sources and destinations
 		var wellName_l = _(params.items).map(function (item) {
+			// TODO: allow source to refer to a set of wells, not just a single well
+			// TODO: create a function getSourceWells()
 			return [item.source, item.destination]
 		}).flatten().value();
 
 		// Find all labware
 		var labwareName_l = _(wellName_l).map(function (wellName) {
 			var i = wellName.indexOf('(');
+			// TODO: handle case where source is a source object rather than a well
 			return (i >= 0) ? wellName.substr(0, i) : wellName;
 		}).uniq().value();
 		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(objects, name)); });
@@ -133,7 +142,7 @@ var commandHandlers = {
 			var queryResults = llpl.query(query);
 			//console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
 			if (_.isEmpty(queryResults)) {
-				return {errors: [labware.name+" is at a site "+labware.location+", which hasn't been configured for pipetting; please move to a pipetting site."]}
+				throw {name: "ProcessingError", errors: [labware.name+" is at a site "+labware.location+", which hasn't been configured for pipetting; please move to a pipetting site."]};
 			}
 			query2_l.push(query);
 		});
@@ -159,25 +168,71 @@ var commandHandlers = {
 		// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
 		// TODO: pick program
-		var program = "Water";
+		var program = params.program || "Water";
 
 		// TODO: calculate when tips need to be washed
 
 		// Method 1: only use one tip
 
-		var items = _(params.items).map(function (item) {
-			return _.merge({syringe: 1}, item);
-		}).flatten().value();
+		var expansionList = [];
 
-		var expansion = {
-			"1": {
+		// Clean before
+		if (cleanBefore !== "none") {
+			expansionList.push({
+				command: "pipetter.action.cleanTips",
+				agent: agent,
+				equipment: equipment,
+				intensity: cleanBefore,
+				syringes: [1]
+			});
+		}
+
+		var syringeToSource = {};
+
+		_.forEach(params.items, function (item, i) {
+			var source = item.source;
+			var syringe = 1;
+			var isSameSource = (source === syringeToSource[syringe.toString()]);
+
+			// Clean between
+			if (i > 0) {
+				var intensity = (isSameSource) ? cleanBetweenSameSource : cleanBetween;
+				if (intensity !== "none") {
+					expansionList.push({
+						command: "pipetter.action.cleanTips",
+						agent: agent,
+						equipment: equipment,
+						intensity: cleanBetween,
+						syringes: [syringe]
+					});
+				}
+			}
+
+			// Pipette
+			expansionList.push({
 				"command": "pipetter.instruction.pipette",
 				"agent": agent,
 				"equipment": equipment,
 				"program": program,
-				"items": items
-			}
-		};
+				"items": [_.merge({syringe: syringe}, item)]
+			});
+		});
+
+		// Clean after
+		if (cleanAfter !== "none") {
+			expansionList.push({
+				command: "pipetter.action.cleanTips",
+				agent: agent,
+				equipment: equipment,
+				intensity: cleanAfter,
+				syringes: [1]
+			});
+		}
+
+		var expansion = {};
+		_.forEach(expansionList, function(cmd, i) {
+			expansion[(i+1).toString()] = cmd;
+		});
 
 		// Create the effets object
 		var effects = {};

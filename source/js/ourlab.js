@@ -20,19 +20,23 @@ module.exports = {
 					"syringes": {
 						"1": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000"
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
 						},
 						"2": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000"
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
 						},
 						"3": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000"
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
 						},
 						"4": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000"
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
 						}
 					}
 				},
