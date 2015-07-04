@@ -39,6 +39,8 @@ module.exports = {
 			},
 			"model1": {
 				"type": "PlateModel",
+				"rows": 8,
+				"columns": 12,
 				"evowareName": "Ellis Nunc F96 MicroWell"
 			}
 		},

@@ -1,29 +1,25 @@
 var _ = require('lodash');
 var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
-var roboliq = require('./roboliq.js');
-var commands = {
-	sealer: require('./commands/sealer.js'),
-	transporter: require('./commands/transporter.js')
-};
-var ourlab = require('./ourlab.js');
 
-var protocolFilename = './protocols/protocol3.json';
-var protocol0 = require(protocolFilename);
+var loadedFiles = _.uniq(['roboliq.js', 'commands/sealer.js', 'commands/transporter.js', 'ourlab.js'].concat(process.argv.splice(2)));
+var loadedContents = _.map(loadedFiles, function(filename) {
+	if (filename.indexOf("./") != 0)
+		filename = "./"+filename;
+	var content = require(filename);
+	return content;
+});
 
 function mergeObjects(name) {
-	return _.merge({},
-		roboliq[name],
-		commands.sealer[name],
-		commands.transporter[name],
-		ourlab[name],
-		protocol0[name]
-	);
+	var list = _(loadedContents).map(function(c) { return c[name]; }).compact().value();
+	return _.merge.apply(undefined, [{}].concat(list));
 }
 
 function mergeArrays(name) {
-	return _.compact([].concat(roboliq[name], commands.transporter[name], ourlab[name], protocol0[name]));
+	var list = _(loadedContents).map(function(c) { return c[name]; }).compact().value();
+	return _.compact(_.flatten(list));
 }
+
 var protocol = {
 	objects: mergeObjects("objects"),
 	steps: mergeObjects("steps"),

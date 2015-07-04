@@ -7,9 +7,10 @@
 - [x] test.js: handle errors from commandHandler call
 - [x] test.js: accumulate warnings from commandHandler call
 - [x] generate instructions, pass them to Evoware compiler, checkout final script
+- [x] test.js: pass JSON and JavaScript files to load from the command line
+- [ ] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
 - [ ] how to handle pipetting commands?
 - [ ] how to track the state of wells?
-- [ ] test.js: pass JSON and JavaScript files to load from the command line
 - [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] ourlab.js: add 'sites' and 'sealing' namespaces
@@ -17,6 +18,7 @@
 
 ## Before publication, but not yet
 
+- [ ] for 'ourlab' configuration, handle table selection, for different table configurations
 - [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string
 - [ ] llpl.js: need to add a function to create a database object, so that we can use multiple instances simultaneously
 - [ ] add warning/error handling to objectToLogicConverters
