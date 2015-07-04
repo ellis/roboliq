@@ -14,6 +14,12 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	"pipetter.instruction.pipette": function(params, objects) {
+		var effects = {};
+		return {
+			effects: effects
+		};
+	},
 	// TODO:
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
@@ -26,7 +32,10 @@ var commandHandlers = {
 		var equipment = params.equipment || "?equipment";
 		var program = params.program || "?program";
 
-		// CONTINUE: loop through pipette items to find all labware
+		params.items
+		// TODO: loop through pipette items to find all labware
+		// TODO: check whether labwares are on sites that can be pipetted; if not, try to move them to appropriate sites
+		// TODO:
 
 		var object = misc.getObjectsValue(objects, params.object);
 		var model = object.model || "?model";

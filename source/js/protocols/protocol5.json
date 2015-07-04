@@ -1,0 +1,23 @@
+{
+	"objects": {
+		"plate1": {
+			"type": "Plate",
+			"model": "ourlab.model1",
+			"location": "ourlab.mario.P2"
+		}
+	},
+	"steps": {
+		"1": {
+			"command": "pipetter.instruction.pipette",
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"program": "Water",
+			"items": [{
+				"syringe": 1,
+				"source": "plate1(A01)",
+				"destination": "plate1(B01)",
+				"volume": "30ul"
+			}]
+		}
+	}
+}

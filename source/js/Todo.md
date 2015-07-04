@@ -14,6 +14,7 @@
 - [x] test protocol4.json
 - [x] EvowareCompiler: pipetter.instruction.dispense
 - [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
+- [x] pipetter.instruction.pipette: create instruction, test in protocol5.json
 - [ ] commands/pipetter.js: pipetter.action.pipette
 - [ ] how to track the state of wells?
 - [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
@@ -24,6 +25,7 @@
 ## Before publication, but not yet
 
 - [ ] figure out an implementation for variable expansion
+- [ ] consider allowing for mathematical expressions (see http://mathjs.org/)
 - [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations
 - [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string

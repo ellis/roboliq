@@ -274,6 +274,7 @@ class EvowareCompiler(
 		val map = Map[String, (JsObject, JsObject) => ResultC[List[Token]]](
 			"pipetter.instruction.aspirate" -> handlePipetterAspirate,
 			"pipetter.instruction.dispense" -> handlePipetterDispense,
+			"pipetter.instruction.pipette" -> handlePipetterPipette,
 			"transporter.instruction.movePlate" -> handleTransporterMovePlate,
 			"sealer.instruction.run" -> handleSealerRun
 		)
@@ -305,7 +306,7 @@ class EvowareCompiler(
 		step: JsObject
 	): ResultC[List[Token]] = {
 		for {
-			inst <- JsConverter.fromJs[PipetterAspirate](step)
+			inst <- JsConverter.fromJs[PipetterSpirate](step)
 			result <- handlePipetterSpirate(objects, inst.program, inst.items, "Aspirate")
 		} yield result
 	}
@@ -315,9 +316,48 @@ class EvowareCompiler(
 		step: JsObject
 	): ResultC[List[Token]] = {
 		for {
-			inst <- JsConverter.fromJs[PipetterAspirate](step)
+			inst <- JsConverter.fromJs[PipetterSpirate](step)
 			result <- handlePipetterSpirate(objects, inst.program, inst.items, "Dispense")
 		} yield result
+	}
+	
+	private def handlePipetterPipette(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		for {
+			inst <- JsConverter.fromJs[PipetterSpirate2](step)
+			// Group items together that having increasing syringe indexes
+			item_ll = {
+				var item_ll = Vector[List[PipetterItem2]]()
+				var item_l = inst.items
+				var syringe = -1
+				while (!item_l.isEmpty) {
+					val item_l2 = item_l.takeWhile(item => {
+						if (item.syringe > syringe) {
+							syringe = item.syringe
+							true
+						}
+						else {
+							syringe = -1
+							false
+						}
+					})
+					item_ll :+= item_l
+					item_l = item_l.drop(item_l.length)
+				}
+				item_ll.toList
+			}
+			// For each group, create aspirate and dispense commands
+			token_ll <- ResultC.map(item_ll) { item_l =>
+				val asp_l = item_l.map { item => PipetterItem(item.syringe, item.source, item.volume) }
+				val dis_l = item_l.map { item => PipetterItem(item.syringe, item.destination, item.volume) }
+				for {
+					l1 <- handlePipetterSpirate(objects, inst.program, asp_l, "Aspirate")
+					l2 <- handlePipetterSpirate(objects, inst.program, dis_l, "Dispense")
+				} yield l1 ++ l2
+			}
+		} yield token_ll.flatten
 	}
 	
 	private def handlePipetterSpirate(
