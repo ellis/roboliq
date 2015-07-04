@@ -29,6 +29,7 @@
 
 ## Before publication, but not yet
 
+- [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] reader command
 - [ ] mix command
 - [ ] figure out how to implement variable expansion/evaluation

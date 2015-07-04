@@ -4,7 +4,19 @@
 			"command": "pipetter.action.cleanTips",
 			"equipment": "ourlab.mario.liha",
 			"syringes": [1,2,3,4],
+			"intensity": "flush"
+		},
+		"2": {
+			"command": "pipetter.action.cleanTips",
+			"equipment": "ourlab.mario.liha",
+			"syringes": [1,2,3,4],
 			"intensity": "light"
+		},
+		"3": {
+			"command": "pipetter.action.cleanTips",
+			"equipment": "ourlab.mario.liha",
+			"syringes": [1,2,3,4],
+			"intensity": "thorough"
 		}
 	}
 }
