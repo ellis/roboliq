@@ -3,7 +3,10 @@
 		"plate1": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P2"
+			"location": "ourlab.mario.P2",
+			"contents": {
+				"A01": ["50ul", "water"]
+			}
 		},
 		"plate2": {
 			"type": "Plate",
@@ -14,9 +17,6 @@
 			"type": "Liquid",
 			"wells": ["plate1(A01)"]
 		}
-	},
-	"contents": {
-		"plate1(A01)": ["50ul", "water"]
 	},
 	"steps": {
 		"1": {

@@ -1,5 +1,16 @@
 var _ = require('lodash');
+var math = require('mathjs');
 var misc = require('../misc.js');
+
+function extractLiquidNamesFromContents(contents) {
+	if (_.isEmpty(contents) || contents.length < 2) return [];
+	if (contents.length === 2 && _.isString(contents[1]) return [contents[1]];
+	else {
+		return _(contents).tail().map(function(contents2) {
+			return extractLiquidNamesFromContents(contents2);
+		}).flatten().value();
+	}
+}
 
 var commandHandlers = {
 	"pipetter.instruction.aspirate": function(params, objects) {
@@ -102,17 +113,18 @@ var commandHandlers = {
 		var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(data.predicates);
 
+		var items = _.cloneDeep(params.items);
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
 		var cleanBefore = params.cleanBefore || params.clean || "thorough";
 		var cleanBetween = params.cleanBetween || params.clean || "thorough";
 		var cleanBetweenSameSource = params.cleanBetweenSameSource || cleanBetween;
 		var cleanAfter = params.cleanAfter || params.clean || "thorough";
-		var tipModels = params.tipModels;
-		var syringes = params.syringes;
+		//var tipModels = params.tipModels;
+		//var syringes = params.syringes;
 
 		// Find all wells, both sources and destinations
-		var wellName_l = _(params.items).map(function (item) {
+		var wellName_l = _(items).map(function (item) {
 			// TODO: allow source to refer to a set of wells, not just a single well
 			// TODO: create a function getSourceWells()
 			return [item.source, item.destination]
@@ -167,8 +179,152 @@ var commandHandlers = {
 
 		// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
-		// TODO: pick program
-		var program = params.program || "Water";
+		// Try to find a tipModel for the given items
+		var findTipModel = function(items) {
+			var canUse1000 = true;
+			var canUse0050 = true;
+			var pos = "wet";
+			_.forEach(items, function(item) {
+				var volume = math.eval(item.volume);
+				assert.equal(volume.unit.name, 'l', "expected units to be in liters");
+				if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
+					canUse0050 = false;
+				}
+				if (math.compare(volume, math.eval("3ul")) < 0) {
+					canUse1000 = false;
+				}
+			});
+
+			if (canUse1000 || canUse0050) {
+				var syringe = (canUse1000) ? 1 : 5;
+				var tipModel = (canUse1000) ? "ourlab.mario.tipModel1000" : "ourlab.mario.tipModel0050";
+				_.forEach(items, function(item) {
+					if (!item.tipModel) item.tipModel = tipModel;
+					if (!item.syringe) item.syringe = syringe;
+				});
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+
+		// FIXME: allow for overriding tipModel via params
+
+		// Try to find tipModel, first for all items
+		if (!findTipModel(items)) {
+			// Try to find tipModel for each source
+			_.forEach(sourceToItems, function(items) {
+				if (!findTipModel(items)) {
+					// Try to find tipModel for each item for this source
+					_.forEach(items, function(item) {
+						if (!findTipModel([item])) {
+							throw {name: "ProcessingError", message: "no tip model available for item: "+JSON.stringify(item)};
+						}
+					});
+				}
+			});
+		}
+
+		// Try to find a pipettingClass for the given items
+		var findPipettingClass = function(items) {
+			// Pick liquid properties by inspecting source contents
+			var pipettingClasses = _(items).map('source').map(function(source) {
+				var pipettingClass = "Water";
+				var i = source.indexOf('(');
+				var well = null;
+				// If the source is a source name
+				if (i < 0) {
+					var wells = misc.getObjectsValue(data.objects, source+".wells");
+					if (!_.isEmpty(wells))
+						well = wells[0];
+				}
+				// Else
+				else {
+					well = source;
+				}
+
+				if (well) {
+					var labware = source.substr(0, i);
+					var wellId = source.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
+					var contents = misc.getObjectsValue(data.objects, labware+".contents."+wellId);
+					var liquids = extractLiquidNamesFromContents(contents);
+					var pipettingClasses = _(liquids).map(function(name) {
+						return misc.getObjectsValue(data.objects, name+".pipettingClass") || "Water";
+					}).uniq().value();
+					// FIXME: should pick "Water" if water-like liquids have high enough concentration
+					// Use "Water" if present
+					if (!pipettingClasses.indexOf("Water") >== 0) {
+						if (pipettingClasses.length === 1) {
+							pipettingClass = pipettingClasses[0];
+						}
+						else if (pipettingClasses.length > 1) {
+							pipettingClass = null;
+						}
+					}
+				}
+
+				return pipettingClass;
+			}).uniq().value();
+
+			if (pipettingClasses.length === 1) {
+				return pipettingClasses[0];
+			}
+			else {
+				return null;
+			}
+		}
+
+		// Pick position (wet or dry) by whether there are already contents in the destination well
+		var findPipettingPosition = function(items) {
+			// Pick liquid properties by inspecting source contents
+			var sources = _.map(items, 'source');
+			var pipettingPositions = _(items).map('destination').map(function(well) {
+				var i = well.indexOf('(');
+				var labware = source.substr(0, i);
+				var wellId = source.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
+				var contents = misc.getObjectsValue(data.objects, labware+".contents."+wellId);
+				var liquids = extractLiquidNamesFromContents(contents);
+				return _.isEmpty(liquids) ? "Dry" : "Wet";
+			}).uniq().value();
+
+			if (pipettingPositions.length === 1) {
+				return pipettingPositions[0];
+			}
+			else {
+				return null;
+			}
+		}
+
+		var assignProgram = function(items) {
+			var pipettingClass = findPipettingClass(items);
+			if (!pipettingClass) return false;
+			var pipettingPosition = findPipettingPosition(items);
+			if (!pipettingPosition) return false;
+			var tipModels = _(items).map('tipModel').uniq().value();
+			if (tipModels.length !== 1) return false;
+			var program = "Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode;
+			_.forEach(items, function(item) { item.program = program; });
+			return true;
+		}
+
+		// FIXME: allow for overriding program via params
+		// Try to find program, first for all items
+		if (!assignProgram(items)) {
+			// Try to find program for each source
+			_.forEach(sourceToItems, function(items) {
+				if (!assignProgram(items)) {
+					// Try to find program for each item for this source
+					_.forEach(items, function(item) {
+						if (!assignProgram([item])) {
+							throw {name: "ProcessingError", message: "could not automatically choose a program for item: "+JSON.stringify(item)};
+						}
+					});
+				}
+			});
+		}
+
+		// TODO: pick sources and syringes for items
 
 		// TODO: calculate when tips need to be washed
 
@@ -191,7 +347,6 @@ var commandHandlers = {
 
 		_.forEach(params.items, function (item, i) {
 			var source = item.source;
-			var syringe = 1;
 			var isSameSource = (source === syringeToSource[syringe.toString()]);
 
 			// Clean between
@@ -213,8 +368,8 @@ var commandHandlers = {
 				"command": "pipetter.instruction.pipette",
 				"agent": agent,
 				"equipment": equipment,
-				"program": program,
-				"items": [_.merge({syringe: syringe}, item)]
+				"program": item.program,
+				"items": [_.pick(_.merge({syringe: syringe}, item), ["syringe", "source", "destination", "volume"])]
 			});
 		});
 

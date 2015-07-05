@@ -21,11 +21,11 @@ function extractValuesFromQueryResults(queryResults, predicateName) {
 
 function getObjectsValue(objects, key) {
 	var l = key.split('.');
-	while (l.length > 1) {
+	while (l.length > 1 && !_.isEmpty(objects)) {
 		objects = objects[l[0]];
 		l = _.rest(l);
 	}
-	return objects[l[0]];
+	return (_.isEmpty(objects)) ? null : objects[l[0]];
 }
 
 module.exports = {
