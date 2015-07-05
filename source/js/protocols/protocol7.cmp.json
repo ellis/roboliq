@@ -157,7 +157,7 @@
 				"command": "pipetter.instruction.pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"program": "Water",
+				"program": "\"Roboliq_Water_Dry_1000\"",
 				"items": [
 					{
 						"syringe": 1,

@@ -19,8 +19,8 @@
 - [x] pipetter.instruction.cleanTips: create instruction, test in protocol8.json
 - [x] commands/pipetter.js: pipetter.action.pipette: refresh tips (simple)
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
-- [ ] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
-- [ ] how to track the state of wells?
+- [x] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
+- [ ] commands/pipetter.js: pipetter.action.pipette: output effects array for changes in well contents
 - [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 2
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 3
