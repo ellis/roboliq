@@ -372,11 +372,19 @@ class EvowareCompiler(
 				val asp_l = item_l.map { item => PipetterItem(item.syringe, item.source, item.volume) }
 				val dis_l = item_l.map { item => PipetterItem(item.syringe, item.destination, item.volume) }
 				for {
-					l1 <- handlePipetterSpirate(objects, inst.program, asp_l, "Aspirate")
-					l2 <- handlePipetterSpirate(objects, inst.program, dis_l, "Dispense")
+					l1 <- handlePipetterSpirate(objects, stripQuotes(inst.program), asp_l, "Aspirate")
+					l2 <- handlePipetterSpirate(objects, stripQuotes(inst.program), dis_l, "Dispense")
 				} yield l1 ++ l2
 			}
 		} yield token_ll.flatten
+	}
+	
+	private def stripQuotes(s: String): String = {
+		if (s.startsWith("\"") && s.endsWith("\"")) {
+			s.substring(1, s.length - 1)
+		}
+		else
+			s
 	}
 	
 	private def handlePipetterSpirate(
