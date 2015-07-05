@@ -21,13 +21,15 @@
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [x] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
 - [x] commands/pipetter.js: pipetter.instruction.pipette: output effects array for changes in well contents
-- [ ] commands/pipetter.js: pipetter.action.pipette: method 2
-- [ ] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
+- [x] commands/pipetter.js: pipetter.action.pipette: method 2
+- [x] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
+- [ ] commands/pipetter.js: pipetter.action.pipette: handle multiple possible source wells for a single item
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 3
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] ourlab.js: add 'sites' and 'sealing' namespaces
 - [ ] consider using uppercase for special JSON fields, like TYPE, ROBOLIQ, DEFAULTS, COMMAND
+- [ ] commands/pipetter.js: pipetter.action.pipette: for cleaning, sort out "begin, end, before, after" parameters
 
 ## Before publication, but not yet
 
@@ -60,6 +62,7 @@
 - [ ] commands/pipetter.js: pipetter.instruction.aspirate: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
+- [ ] JSON schema
 
 ## After publication
 

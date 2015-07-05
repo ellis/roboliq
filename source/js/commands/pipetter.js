@@ -4,6 +4,15 @@ var math = require('mathjs');
 var misc = require('../misc.js');
 var sourceParser = require('../parsers/sourceParser.js');
 
+var intensityToValue = {
+	"none": 0,
+	"flush": 1,
+	"light": 2,
+	"thorough": 3,
+	"decontaminate": 4
+};
+
+var valueToIntensity = ["none", "flush", "light", "thorough", "decontaminate"];
 
 function extractLiquidNamesFromContents(contents) {
 	if (_.isEmpty(contents) || contents.length < 2) return [];
@@ -39,7 +48,7 @@ function createEffects_pipette(params, data) {
 			//console.log("dstContents", dstContents)
 			var dstVolume = math.eval(dstContents[0]);
 			// Increase total well volume
-			dstContents[0] = math.chain(dstVolume).add(volume).done().toString();
+			dstContents[0] = math.chain(dstVolume).add(volume).done().format({precision: 14});
 			// Create new content element to add to the contents list
 			var newContents = (srcContents.length === 2 && _.isString(srcContents[1]))
 				? srcContents[1]
@@ -51,7 +60,7 @@ function createEffects_pipette(params, data) {
 
 			// Decrease volume of source
 			var srcVolume = math.eval(srcContents[0]);
-			srcContents[0] = math.chain(srcVolume).subtract(volume).done().toString();
+			srcContents[0] = math.chain(srcVolume).subtract(volume).done().format({precision: 14});
 
 			// Update effects
 			effects[srcContentsName] = srcContents;
@@ -381,7 +390,7 @@ var commandHandlers = {
 			"ourlab.mario.tipModel0050": [5, 6, 7, 8]
 		};
 		var tipModelToSyringesAvailable = {};
-		// Method 2: Use each tip, rotating through them till they need to be washed
+		// Method 2: Use each tip, rotating through them
 		_.forEach(items, function(item) {
 			var tipModel = item.tipModel;
 			if (_.isEmpty(tipModelToSyringesAvailable[tipModel])) {
@@ -395,65 +404,163 @@ var commandHandlers = {
 		});
 
 		// TODO: pick source well for items, if the source has multiple wells
+		// For now, pick the first well in a source set and ignore the others
+		_.forEach(items, function (item) {
+			var source = item.source;
+			var sourceInfo = sourceParser.parse(item.source);
+			if (sourceInfo.source) {
+				var wells = getObjectsValue(data.objects, source+".wells");
+				assert(!_.isEmpty(wells));
+				item.sourceWell = wells[0];
+			}
+			else {
+				item.sourceWell = source;
+			}
+		});
 
-		// TODO: calculate when tips need to be washed
-
-		// Method 1: only use one tip
-
-		var expansionList = [];
-
-		// Clean before
-		if (cleanBefore !== "none") {
-			expansionList.push({
-				command: "pipetter.action.cleanTips",
-				agent: agent,
-				equipment: equipment,
-				intensity: cleanBefore,
-				syringes: [1]
-			});
-		}
+		// Calculate when tips need to be washed
+		// Create pipetting commands
 
 		var syringeToSource = {};
+		// How clean is the syringe/tip currently?
+		var syringeToCleanValue = {"1": 5, "2": 5, "3": 5, "4": 5, "6": 5, "7": 5, "8": 5};
+		// What cleaning intensity is required for tip cleaning before the very first aspiration?
+		var syringeToCleanValueBegin = {};
+		// What cleaning intensity is required for the tip before aspirating?
+		var syringeToCleanValueBeforeAspirate = {};
+		var expansionList = [];
+		var program = null;
 
-		_.forEach(items, function (item, i) {
-			var source = item.source;
-			var syringe = item.syringe;
-			var isSameSource = (source === syringeToSource[syringe.toString()]);
+		// Create clean commands before pipetting this group
+		var createCleanActions = function(syringeToCleanValue) {
+			var expansionList = [];
 
-			// Clean between
-			if (i > 0) {
-				var intensity = (isSameSource) ? cleanBetweenSameSource : cleanBetween;
-				if (intensity !== "none") {
-					expansionList.push({
-						command: "pipetter.action.cleanTips",
-						agent: agent,
-						equipment: equipment,
-						intensity: cleanBetween,
-						syringes: [syringe]
-					});
+			if (_.isEmpty(syringeToCleanValue)) return [];
+			var l1000 = _.compact([
+				syringeToCleanValue[1],
+				syringeToCleanValue[2],
+				syringeToCleanValue[3],
+				syringeToCleanValue[4]
+			]);
+			var l0050 = _.compact([
+				syringeToCleanValue[5],
+				syringeToCleanValue[6],
+				syringeToCleanValue[7],
+				syringeToCleanValue[8]
+			]);
+			if (!_.isEmpty(l1000)) {
+				var value = _.max(l1000);
+				var intensity = valueToIntensity[value];
+				var syringes = [1, 2, 3, 4];
+				expansionList.push({
+					command: "pipetter.action.cleanTips",
+					agent: agent,
+					equipment: equipment,
+					intensity: intensity,
+					syringes: syringes
+				});
+				_.forEach(syringes, function(syringe) { syringeToCleanValue[syringe] = value; });
+			}
+			if (!_.isEmpty(l0050)) {
+				var value = _.max(l0050);
+				var intensity = valueToIntensity[value];
+				var syringes = [5, 6, 7, 8];
+				expansionList.push({
+					command: "pipetter.action.cleanTips",
+					agent: agent,
+					equipment: equipment,
+					intensity: intensity,
+					syringes: syringes
+				});
+				_.forEach(syringes, function(syringe) { syringeToCleanValue[syringe] = value; });
+			}
+			return expansionList;
+		}
+
+		// Method 2: Use each tip, rotating through them till they need to be washed
+		var items2 = items;
+		while (!_.isEmpty(items2)) {
+			var n = items2.length;
+			for (var i = 0; i < items2.length; i++) {
+				var item = items2[i];
+				// Make sure all items in the group use the same program
+				if (i == 0) {
+					program = item.program;
 				}
+				else if (program !== item.program) {
+					break;
+				}
+
+				var source = item.source;
+				var syringe = item.syringe;
+				var isSameSource = (source === syringeToSource[syringe]);
+
+				// Find required clean intensity
+				// FIXME: ignore isSameSource if tip has been contaminated by 'Wet' pipetting position
+				// FIXME: also take the source's and destination's "cleanBefore" and "cleanAfter" properties into account
+				var intensity = (isSameSource) ? cleanBetweenSameSource : cleanBetween;
+				var intensityValue = intensityToValue[intensity];
+
+				// If the tip needs to be cleaned before aspiration,
+				if (intensityValue > syringeToCleanValue[syringe]) {
+					n = i;
+					break;
+				}
+
+				// Update cleaning value required before first aspirate
+				if (!syringeToCleanValueBegin.hasOwnProperty(syringe)) {
+					syringeToCleanValueBegin[syringe] = intensityValue;
+				}
+				// Update cleaning value required before current aspirate
+				if (!syringeToCleanValueBeforeAspirate.hasOwnProperty(syringe) || intensityValue > syringeToCleanValueBeforeAspirate[syringe]) {
+					syringeToCleanValueBeforeAspirate[syringe] = intensityValue;
+				}
+
+				// Set the aspirated source and indicate the the tip is no longer clean
+				syringeToSource[syringe] = source;
+				syringeToCleanValue[syringe] = 0;
+				// TODO: if wet contact, indicate tip contanmination
 			}
 
+			// Select items for the pipetting instruction
+			var items3 = _.take(items2, n);
+			items2 = _.drop(items2, n);
+
+			// Add clean commands before pipetting this group, but only if it isn't the first group in the list
+			if (!_.isEmpty(expansionList)) {
+				expansionList.push.apply(expansionList, createCleanActions(syringeToCleanValueBeforeAspirate));
+			}
+
+			var items4 = _.map(items3, function(item) {
+				return {
+					syringe: item.syringe,
+					source: item.sourceWell,
+					destination: item.destination,
+					volume: item.volume
+				};
+			});
 			// Pipette
 			expansionList.push({
 				"command": "pipetter.instruction.pipette",
 				"agent": agent,
 				"equipment": equipment,
-				"program": item.program,
-				"items": [_.pick(_.merge({syringe: syringe}, item), ["syringe", "source", "destination", "volume"])]
-			});
-		});
-
-		// Clean after
-		if (cleanAfter !== "none") {
-			expansionList.push({
-				command: "pipetter.action.cleanTips",
-				agent: agent,
-				equipment: equipment,
-				intensity: cleanAfter,
-				syringes: [1]
+				"program": program,
+				"items": items4
 			});
 		}
+
+		// Clean after
+		var cleanAfterValue = intensityToValue[cleanAfter];
+		var syringeToCleanValueAfter = {};
+		_.forEach(syringeToCleanValue, function (value, syringe) {
+			if (value < cleanAfterValue)
+				syringeToCleanValueAfter[syringe] = cleanAfterValue;
+		});
+		// Add clean commands before pipetting this group
+		expansionList.push.apply(expansionList, createCleanActions(expansionList, createCleanActions(syringeToCleanValueBeforeAspirate)));
+
+		// Clean before: prepend actions to the expansion list
+		expansionList = createCleanActions(syringeToCleanValueBegin).concat(expansionList);
 
 		var expansion = {};
 		_.forEach(expansionList, function(cmd, i) {
@@ -461,6 +568,7 @@ var commandHandlers = {
 		});
 
 		// Create the effets object
+		// TODO: set final tip clean values
 		var effects = {};
 
 		return {
