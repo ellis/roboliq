@@ -150,7 +150,12 @@ function expandSteps(protocol, prefix, steps, objects) {
 					var predicates = protocol.predicates.concat(createStateItems(objects));
 					var result = {};
 					try {
-						result = handler(step, objects, predicates, protocol.planHandlers);
+						var data = {
+							objects: objects,
+							predicates: predicates,
+							planHandlers: protocol.planHandlers
+						};
+						result = handler(step, data);
 					} catch (e) {
 						if (e.hasOwnProperty("errors")) {
 							result = {errors: e.errors};

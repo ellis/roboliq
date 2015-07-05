@@ -18,13 +18,13 @@
 - [x] commands/pipetter.js: pipetter.action.pipette: method 1
 - [x] pipetter.instruction.cleanTips: create instruction, test in protocol8.json
 - [x] commands/pipetter.js: pipetter.action.pipette: refresh tips (simple)
+- [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
 - [ ] how to track the state of wells?
 - [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 2
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 3
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
-- [ ] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] ourlab.js: add 'sites' and 'sealing' namespaces
 - [ ] consider using uppercase for special JSON fields, like TYPE, ROBOLIQ, DEFAULTS, COMMAND
@@ -35,6 +35,7 @@
 - [ ] test.js: generate table for labware
 - [ ] test.js: generate table for sources (which stock goes where in what volume)
 - [ ] test.js: generate table for final well contents
+- [ ] test.js: generate table of pipetting actions for well contents by step
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] reader command
 - [ ] mix command
@@ -129,6 +130,23 @@ Simplest algorithms:
 * Use each tip, rotating through them till they need to be washed
 * Group as many tips at once as possible
 * Group as many tips at once as possible, but if group splits over columns, see if we can get a longer contiguous group by restarting the grouping in the new column rather than splitting the group from the previous column
+
+# Encoding content
+
+Several ideas for how to encode content.  Currently I prefer `plate1(C01)` below, using the arrays.
+
+        "contents": {
+            "plate1(A01)": "(water=25ul+asdf=5ul)@?-10ul",
+            "plate1(B01)": {
+                "contents": [
+                    {"contents": "water", "AMOUNT":"25ul"},
+                    {"contents": "asdf", "AMOUNT":"5ul"}
+                ],
+                "amount": "?-10ul"
+            },
+            "plate1(C01)": ["?ul-10ul", ["25ul", "water"], ["5ul", "asdf"]]
+        },
+
 
 # Combinatorial stuff
 

@@ -3,7 +3,7 @@
 		"plate1": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P2",
+			"location": "ourlab.mario.P2"
 		},
 		"plate2": {
 			"type": "Plate",
@@ -16,7 +16,7 @@
 		}
 	},
 	"contents": {
-		"plate1(A01)": "(water@25ul+asdf@5ul)@10ul",
+		"plate1(A01)": ["50ul", "water"]
 	},
 	"steps": {
 		"1": {

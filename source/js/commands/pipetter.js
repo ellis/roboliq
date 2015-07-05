@@ -27,7 +27,7 @@ var commandHandlers = {
 		};
 	},
 
-	"pipetter.action.cleanTips": function(params, objects, predicates, planHandlers) {
+	"pipetter.action.cleanTips": function(params, data) {
 		if (_.isEmpty(params.syringes))
 			return {};
 		if (!params.equipment)
@@ -36,7 +36,7 @@ var commandHandlers = {
 			return {errors: ["`intensity` parameter required"]};
 
 		var llpl = require('../HTN/llpl.js');
-		llpl.initializeDatabase(predicates);
+		llpl.initializeDatabase(data.predicates);
 
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment;
@@ -46,7 +46,7 @@ var commandHandlers = {
 		// Check whether labwares are on sites that can be pipetted
 		var syringeToProgram_l = _.map(params.syringes, function(syringe) {
 			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
-			var tipModel = misc.getObjectsValue(objects, tipModelRef);
+			var tipModel = misc.getObjectsValue(data.objects, tipModelRef);
 			if (!tipModel) {
 				return {errors: [tipModelRef+" must be set"]};
 			}
@@ -98,9 +98,9 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	"pipetter.action.pipette": function(params, objects, predicates, planHandlers) {
+	"pipetter.action.pipette": function(params, data) {
 		var llpl = require('../HTN/llpl.js');
-		llpl.initializeDatabase(predicates);
+		llpl.initializeDatabase(data.predicates);
 
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
@@ -124,7 +124,7 @@ var commandHandlers = {
 			// TODO: handle case where source is a source object rather than a well
 			return (i >= 0) ? wellName.substr(0, i) : wellName;
 		}).uniq().value();
-		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(objects, name)); });
+		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(data.objects, name)); });
 
 		// Check whether labwares are on sites that can be pipetted
 		var query2_l = [];
@@ -248,28 +248,3 @@ module.exports = {
 	//objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers
 };
-
-/*
-
-  {"method": {"description": "sealer.sealPlate-null: plate already sealed",
-    "task": {"sealer.sealPlate": {"labware": "?labware"}},
-    "preconditions": [
-      {"plateIsSealed": {"labware": "?labware"}}
-    ],
-    "subtasks": {"ordered": [
-      {"trace": {"text": "sealer.sealPlate-null"}}
-    ]}
-  }},
-
-  {"method": {"description": "method for sealing",
-    "task": {"sealer.sealPlate": {"labware": "?labware"}},
-    "preconditions": [
-      {"model": {"labware": "?labware", "model": "?model"}},
-      {"sealer.canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}}
-    ],
-    "subtasks": {"ordered": [
-      {"ensureLocation": {"labware": "?labware", "site": "?site"}},
-      {"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}}
-    ]}
-  }}
-*/

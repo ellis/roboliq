@@ -14,7 +14,7 @@ var objectToPredicateConverters = {
 };
 
 var commandHandlers = {
-	"sealer.instruction.run": function(params, objects) {
+	"sealer.instruction.run": function(params, data) {
 		var effects = {};
 		effects[params.object + ".sealed"] = true;
 		return {
@@ -25,16 +25,16 @@ var commandHandlers = {
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
-	"sealer.action.sealPlate": function(params, objects, predicates, planHandlers) {
+	"sealer.action.sealPlate": function(params, data) {
 		var llpl = require('../HTN/llpl.js');
-		llpl.initializeDatabase(predicates);
+		llpl.initializeDatabase(data.predicates);
 
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
 		var program = params.program || "?program";
 		var site = params.site || "?site";
 
-		var object = misc.getObjectsValue(objects, params.object);
+		var object = misc.getObjectsValue(data.objects, params.object);
 		var model = object.model || "?model";
 
 		var query = {

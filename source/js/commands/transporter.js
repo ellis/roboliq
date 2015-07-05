@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 var objectToPredicateConverters = {
-	"Transporter": function(name, object) {
+	"Transporter": function(name, data) {
 		return {
 			value: [{
 				"isTransporter": {
@@ -13,7 +13,7 @@ var objectToPredicateConverters = {
 };
 
 var commandHandlers = {
-	"transporter.instruction.movePlate": function(params, objects) {
+	"transporter.instruction.movePlate": function(params, data) {
 		var effects = {};
 		effects[params.object + ".location"] = params.destination;
 		return {
@@ -23,7 +23,7 @@ var commandHandlers = {
 	/**
 	 * params: [agent], object, destination
 	 */
-	"transporter.action.movePlate": function(params, objects, predicates, planHandlers) {
+	"transporter.action.movePlate": function(params, data) {
 		var transporterLogic = require('./transporterLogic.json');
 		var taskList = [];
 		if (params.hasOwnProperty("agent")) {
@@ -47,21 +47,21 @@ var commandHandlers = {
 				"ordered": taskList
 			}
 		};
-		var input = [].concat(predicates, transporterLogic, [tasks]);
+		var input = [].concat(data.predicates, transporterLogic, [tasks]);
 		//console.log(JSON.stringify(input, null, '\t'));
 		var shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
 		//console.log("plan:");
 		//console.log(JSON.stringify(plan, null, '  '));
-		//var x = planner.ppPlan(plan);
+		var x = planner.ppPlan(plan);
 		//console.log(x);
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")
 		//console.log(JSON.stringify(tasks, null, '  '));
 		var cmdList = _(tasks).map(function(task) {
 			return _(task).map(function(taskParams, taskName) {
-				return (planHandlers.hasOwnProperty(taskName)) ? planHandlers[taskName](taskParams, params, objects) : [];
+				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
 			}).flatten().value();
 		}).flatten().value();
 		//console.log("cmdList:")
@@ -87,7 +87,7 @@ var commandHandlers = {
 };
 
 var planHandlers = {
-	"movePlateAction": function(params, parentParams, objects) {
+	"movePlateAction": function(params, parentParams, data) {
 		return [{
 			command: "transporter.instruction.movePlate",
 			agent: params.agent,
