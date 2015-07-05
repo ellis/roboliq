@@ -1,10 +1,11 @@
 var _ = require('lodash');
+var assert = require('assert');
 var math = require('mathjs');
 var misc = require('../misc.js');
 
 function extractLiquidNamesFromContents(contents) {
 	if (_.isEmpty(contents) || contents.length < 2) return [];
-	if (contents.length === 2 && _.isString(contents[1]) return [contents[1]];
+	if (contents.length === 2 && _.isString(contents[1])) return [contents[1]];
 	else {
 		return _(contents).tail().map(function(contents2) {
 			return extractLiquidNamesFromContents(contents2);
@@ -254,7 +255,7 @@ var commandHandlers = {
 					}).uniq().value();
 					// FIXME: should pick "Water" if water-like liquids have high enough concentration
 					// Use "Water" if present
-					if (!pipettingClasses.indexOf("Water") >== 0) {
+					if (!pipettingClasses.indexOf("Water") >= 0) {
 						if (pipettingClasses.length === 1) {
 							pipettingClass = pipettingClasses[0];
 						}
@@ -281,8 +282,8 @@ var commandHandlers = {
 			var sources = _.map(items, 'source');
 			var pipettingPositions = _(items).map('destination').map(function(well) {
 				var i = well.indexOf('(');
-				var labware = source.substr(0, i);
-				var wellId = source.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
+				var labware = well.substr(0, i);
+				var wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
 				var contents = misc.getObjectsValue(data.objects, labware+".contents."+wellId);
 				var liquids = extractLiquidNamesFromContents(contents);
 				return _.isEmpty(liquids) ? "Dry" : "Wet";
@@ -303,7 +304,10 @@ var commandHandlers = {
 			if (!pipettingPosition) return false;
 			var tipModels = _(items).map('tipModel').uniq().value();
 			if (tipModels.length !== 1) return false;
-			var program = "Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode;
+			var tipModel = tipModels[0];
+			if (tipModel.indexOf("0050") >= 0) tipModelCode = "0050";
+			else tipModelCode = "1000";
+			var program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
 			_.forEach(items, function(item) { item.program = program; });
 			return true;
 		}
@@ -345,8 +349,9 @@ var commandHandlers = {
 
 		var syringeToSource = {};
 
-		_.forEach(params.items, function (item, i) {
+		_.forEach(items, function (item, i) {
 			var source = item.source;
+			var syringe = item.syringe;
 			var isSameSource = (source === syringeToSource[syringe.toString()]);
 
 			// Clean between
