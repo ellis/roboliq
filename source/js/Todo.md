@@ -20,7 +20,7 @@
 - [x] commands/pipetter.js: pipetter.action.pipette: refresh tips (simple)
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [x] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
-- [ ] commands/pipetter.js: pipetter.action.pipette: output effects array for changes in well contents
+- [x] commands/pipetter.js: pipetter.instruction.pipette: output effects array for changes in well contents
 - [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 2
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 3
@@ -57,6 +57,8 @@
 - [ ] version handling for protocols and commands
 - [ ] test.js: allow for loading YAML protocols
 - [ ] centrifuge command
+- [ ] commands/pipetter.js: pipetter.instruction.aspirate: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents
 
 ## After publication
 

@@ -4,6 +4,7 @@ var math = require('mathjs');
 var misc = require('../misc.js');
 var sourceParser = require('../parsers/sourceParser.js');
 
+
 function extractLiquidNamesFromContents(contents) {
 	if (_.isEmpty(contents) || contents.length < 2) return [];
 	if (contents.length === 2 && _.isString(contents[1])) return [contents[1]];
@@ -12,6 +13,53 @@ function extractLiquidNamesFromContents(contents) {
 			return extractLiquidNamesFromContents(contents2);
 		}).flatten().value();
 	}
+}
+
+function createEffects_pipette(params, data) {
+	var effects = {};
+
+	//console.log(JSON.stringify(params));
+	_.forEach(params.items, function(item) {
+		//console.log(JSON.stringify(item));
+		var volume = math.eval(item.volume);
+		var srcInfo = sourceParser.parse(item.source);
+		assert(srcInfo.wellId);
+		var dstInfo = sourceParser.parse(item.destination);
+		assert(dstInfo.wellId);
+		var srcContentsName = srcInfo.labware+".contents."+srcInfo.wellId;
+		var dstContentsName = dstInfo.labware+".contents."+dstInfo.wellId;
+		var srcContents = effects[srcContentsName] || _.cloneDeep(misc.getObjectsValue(data.objects, srcContentsName)) || ["0ul", item.source];
+		//console.log("srcContents", srcContents)
+		if (!_.isEmpty(srcContents)) {
+			// Get destination contents before the command
+			var dstContents = effects[dstContentsName] || _.cloneDeep(misc.getObjectsValue(data.objects, dstContentsName));
+			if (_.isEmpty(dstContents)) {
+				dstContents = ["0ul"];
+			}
+			//console.log("dstContents", dstContents)
+			var dstVolume = math.eval(dstContents[0]);
+			// Increase total well volume
+			dstContents[0] = math.chain(dstVolume).add(volume).done().toString();
+			// Create new content element to add to the contents list
+			var newContents = (srcContents.length === 2 && _.isString(srcContents[1]))
+				? srcContents[1]
+				: srcContents;
+			//console.log("newContents", newContents)
+			// Augment contents list
+			dstContents.push(newContents);
+			//console.log("dstContents2", dstContents)
+
+			// Decrease volume of source
+			var srcVolume = math.eval(srcContents[0]);
+			srcContents[0] = math.chain(srcVolume).subtract(volume).done().toString();
+
+			// Update effects
+			effects[srcContentsName] = srcContents;
+			effects[dstContentsName] = dstContents;
+		}
+	});
+
+	return effects;
 }
 
 var commandHandlers = {
@@ -34,51 +82,8 @@ var commandHandlers = {
 		};
 	},
 	"pipetter.instruction.pipette": function(params, data) {
-		var effects = {};
-
-		//console.log(JSON.stringify(params));
-		_.forEach(params.items, function(item) {
-			//console.log(JSON.stringify(item));
-			var volume = math.eval(item.volume);
-			var srcInfo = sourceParser.parse(item.source);
-			assert(srcInfo.wellId);
-			var dstInfo = sourceParser.parse(item.destination);
-			assert(dstInfo.wellId);
-			var srcContentsName = srcInfo.labware+".contents."+srcInfo.wellId;
-			var dstContentsName = dstInfo.labware+".contents."+dstInfo.wellId;
-			var srcContents = effects[srcContentsName] || _.cloneDeep(misc.getObjectsValue(data.objects, srcContentsName)) || ["0ul", item.source];
-			//console.log("srcContents", srcContents)
-			if (!_.isEmpty(srcContents)) {
-				// Get destination contents before the command
-				var dstContents = effects[dstContentsName] || _.cloneDeep(misc.getObjectsValue(data.objects, dstContentsName));
-				if (_.isEmpty(dstContents)) {
-					dstContents = ["0ul"];
-				}
-				//console.log("dstContents", dstContents)
-				var dstVolume = math.eval(dstContents[0]);
-				// Increase total well volume
-				dstContents[0] = math.chain(dstVolume).add(volume).done().toString();
-				// Create new content element to add to the contents list
-				var newContents = (srcContents.length === 2 && _.isString(srcContents[1]))
-					? srcContents[1]
-					: srcContents;
-				//console.log("newContents", newContents)
-				// Augment contents list
-				dstContents.push(newContents);
-				//console.log("dstContents2", dstContents)
-
-				// Decrease volume of source
-				var srcVolume = math.eval(srcContents[0]);
-				srcContents[0] = math.chain(srcVolume).subtract(volume).done().toString();
-
-				// Update effects
-				effects[srcContentsName] = srcContents;
-				effects[dstContentsName] = dstContents;
-			}
-		});
-
 		return {
-			effects: effects
+			effects: createEffects_pipette(params, data)
 		};
 	},
 
