@@ -5,7 +5,8 @@
 			"model": "ourlab.model1",
 			"location": "ourlab.mario.P2",
 			"contents": {
-				"A01": ["50ul", "water"]
+				"A01": ["50ul", "water"],
+				"A02": ["50ul", "water"]
 			}
 		},
 		"plate2": {
@@ -15,17 +16,24 @@
 		},
 		"water": {
 			"type": "Liquid",
-			"wells": ["plate1(A01)"]
+			"wells": ["plate1(A01)", "plate1(A02)"]
 		}
 	},
 	"steps": {
 		"1": {
 			"command": "pipetter.action.pipette",
-			"items": [{
-				"source": "plate1(A01)",
-				"destination": "plate2(A01)",
-				"volume": "50ul"
-			}]
+			"items": [
+				{
+					"source": "plate1(A01)",
+					"destination": "plate2(A01)",
+					"volume": "20ul"
+				},
+				{
+					"source": "plate1(A02)",
+					"destination": "plate2(A02)",
+					"volume": "20ul"
+				}
+			]
 		}
 	}
 }

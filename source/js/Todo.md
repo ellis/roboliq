@@ -21,8 +21,8 @@
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [x] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
 - [x] commands/pipetter.js: pipetter.instruction.pipette: output effects array for changes in well contents
-- [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 2
+- [ ] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 3
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
@@ -59,6 +59,7 @@
 - [ ] centrifuge command
 - [ ] commands/pipetter.js: pipetter.instruction.aspirate: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 
 ## After publication
 

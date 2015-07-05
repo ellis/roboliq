@@ -245,11 +245,9 @@ var commandHandlers = {
 			});
 
 			if (canUse1000 || canUse0050) {
-				var syringe = (canUse1000) ? 1 : 5;
 				var tipModel = (canUse1000) ? "ourlab.mario.tipModel1000" : "ourlab.mario.tipModel0050";
 				_.forEach(items, function(item) {
 					if (!item.tipModel) item.tipModel = tipModel;
-					if (!item.syringe) item.syringe = syringe;
 				});
 				return true;
 			}
@@ -376,7 +374,27 @@ var commandHandlers = {
 			});
 		}
 
-		// TODO: pick sources and syringes for items
+		// FIXME: limit syringe choices based on params
+		// TODO: Pick syringe for each item
+		var tipModelToSyringes = {
+			"ourlab.mario.tipModel1000": [1, 2, 3, 4],
+			"ourlab.mario.tipModel0050": [5, 6, 7, 8]
+		};
+		var tipModelToSyringesAvailable = {};
+		// Method 2: Use each tip, rotating through them till they need to be washed
+		_.forEach(items, function(item) {
+			var tipModel = item.tipModel;
+			if (_.isEmpty(tipModelToSyringesAvailable[tipModel])) {
+				tipModelToSyringesAvailable[tipModel] = _.clone(tipModelToSyringes[tipModel]);
+			}
+			//console.log("A", tipModel, tipModelToSyringesAvailable)
+			assert(tipModelToSyringesAvailable[tipModel].length >= 1);
+			var syringe = tipModelToSyringesAvailable[tipModel][0];
+			tipModelToSyringesAvailable[tipModel] = _.tail(tipModelToSyringesAvailable[tipModel]);
+			item.syringe = syringe;
+		});
+
+		// TODO: pick source well for items, if the source has multiple wells
 
 		// TODO: calculate when tips need to be washed
 
