@@ -31,6 +31,10 @@
 
 ## Before publication, but not yet
 
+- [ ] test.js: '-O' parameter for output directory
+- [ ] test.js: generate table for labware
+- [ ] test.js: generate table for sources (which stock goes where in what volume)
+- [ ] test.js: generate table for final well contents
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] reader command
 - [ ] mix command

@@ -1,0 +1,31 @@
+{
+	"objects": {
+		"plate1": {
+			"type": "Plate",
+			"model": "ourlab.model1",
+			"location": "ourlab.mario.P2",
+		},
+		"plate2": {
+			"type": "Plate",
+			"model": "ourlab.model1",
+			"location": "ourlab.mario.P3"
+		},
+		"water": {
+			"type": "Liquid",
+			"wells": ["plate1(A01)"]
+		}
+	},
+	"contents": {
+		"plate1(A01)": "(water@25ul+asdf@5ul)@10ul",
+	},
+	"steps": {
+		"1": {
+			"command": "pipetter.action.pipette",
+			"items": [{
+				"source": "plate1(A01)",
+				"destination": "plate2(A01)",
+				"volume": "50ul"
+			}]
+		}
+	}
+}
