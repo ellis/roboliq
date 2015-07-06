@@ -23,8 +23,8 @@
 - [x] commands/pipetter.js: pipetter.instruction.pipette: output effects array for changes in well contents
 - [x] commands/pipetter.js: pipetter.action.pipette: method 2
 - [x] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
+- [x] commands/pipetter.js: pipetter.action.pipette: method 3
 - [ ] commands/pipetter.js: pipetter.action.pipette: handle multiple possible source wells for a single item
-- [ ] commands/pipetter.js: pipetter.action.pipette: method 3
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
 - [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] ourlab.js: add 'sites' and 'sealing' namespaces
@@ -63,6 +63,7 @@
 - [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
 - [ ] JSON schema
+- [ ] how to handle trough volume, which has many virtual wells, but they all share the same common liquid: set the labware's contents, rather than the contents of the individual wells, then the effects function should handle that case appropriately.
 
 ## After publication
 
@@ -71,7 +72,6 @@
 - [ ] commands/sealer.js: figure out more sophisticated way to deal with agents for the pre/post steps; consider 'agentPreferred' parameter
 - [ ] handle lids on plates and tracking their position
 - [ ] add a default storage site for plates?  How to handle when plates are shared between robots?
-
 
 # Notes
 
@@ -130,12 +130,31 @@ plate1(4 from A01 row-wise)
 plate1(A01 to D01 column-wise)
 plate1(A01 to B02 block-wise)
 
-Simplest algorithms:
+Simplest methods/algorithms:
 
-* Only use one tip
-* Use each tip, rotating through them till they need to be washed
-* Group as many tips at once as possible
-* Group as many tips at once as possible, but if group splits over columns, see if we can get a longer contiguous group by restarting the grouping in the new column rather than splitting the group from the previous column
+1. Only use one tip
+2. Use each tip, rotating through them till they need to be washed
+3. Group as many tips at once as possible
+4. Group as many tips at once as possible, but if group splits over columns, see if we can get a longer contiguous group by restarting the grouping in the new column rather than splitting the group from the previous column
+
+Modularize the methods more:
+
+- break the items into groups that should be handled simultaneously, possible methods include:
+    - each item is its own group
+    - groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)
+    - groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns
+    - have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips
+- assign syringes by group for items without an assigned syringe
+- assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
+    - pick first one
+    - rotate through source wells in order
+    - rotate through source wells in order of max volume
+    - try a simple geometrical assignment considering whether there are more tips or wells; if that fails, use previous method
+    - same as above, but if wells > tips, try starting at first (wells - tips) wells and see which one produces the greatest minimum final volume
+- add cleaning actions between each group, at the beginning, and at the end
+
+A completely different method that would sometimes useful to manage tip differences:
+
 
 # Encoding content
 

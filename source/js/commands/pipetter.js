@@ -477,7 +477,7 @@ var commandHandlers = {
 			return expansionList;
 		}
 
-		// Method 2: Use each tip, rotating through them till they need to be washed
+		// Method 3: Group as many tips at once as possible
 		var items2 = items;
 		while (!_.isEmpty(items2)) {
 			var n = items2.length;
