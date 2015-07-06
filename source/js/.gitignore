@@ -2,3 +2,4 @@ node_modules
 Session.vim
 output.json
 *.out.json
+out

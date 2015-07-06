@@ -21,10 +21,10 @@ function getWellContents(wellName, data, effects) {
 			return effects(labwareContentsName);
 	}
 
-	var contents = misc.getObjectsValue(data.objects, wellContentsName));
+	var contents = misc.getObjectsValue(data.objects, wellContentsName);
 	if (!_.isEmpty(contents)) return contents;
 
-	contents = misc.getObjectsValue(data.objects, labwareContentsName));
+	contents = misc.getObjectsValue(data.objects, labwareContentsName);
 	return contents;
 }
 
