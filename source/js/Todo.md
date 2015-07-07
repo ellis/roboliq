@@ -32,7 +32,9 @@
 ## Before publication, but not yet
 
 - [ ] test.js: '-O' parameter for output directory
-- [ ] organize directory structure for sample protocols and generated output
+- [ ] organize directory structure for sample protocols and generated output, also with better protocol filenames
+- [ ] create more systematic tests of commands using protocols, adapt old test protocols
+- [ ] start creating unit tests
 - [ ] test.js: generate table for labware
 - [ ] test.js: generate table for sources (which stock goes where in what volume)
 - [ ] test.js: generate table for final well contents

@@ -20,6 +20,12 @@ var opts = require('nomnom')
 			help: 'specify output filename or "" for standard output, otherwise default is used',
 			metavar: 'FILE'
 		},
+		outputDir: {
+			abbr: 'O',
+			full: 'output-dir'
+			help: 'specify output directory',
+			metavar: 'DIR'
+		},
 		print: {
 			abbr: 'p',
 			flag: true,
@@ -285,7 +291,8 @@ else {
 		console.log(outputText);
 	if (opts.output !== '') {
 		var inpath = _.last(opts.infiles);
-		var outpath = opts.output || path.join(path.dirname(inpath), path.basename(inpath, path.extname(inpath))+".out.json");
+		var dir = opts.outputDir || path.dirname(inpath);
+		var outpath = opts.output || path.join(dir, path.basename(inpath, path.extname(inpath))+".out.json");
 		console.log("output written to: "+outpath);
 		fs.writeFileSync(outpath, JSON.stringify(output, null, '\t')+"\n");
 	}
