@@ -24,9 +24,8 @@
 - [x] commands/pipetter.js: pipetter.action.pipette: method 2
 - [x] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
 - [x] commands/pipetter.js: pipetter.action.pipette: method 3
-- [ ] commands/pipetter.js: pipetter.action.pipette: handle multiple possible source wells for a single item
-- [ ] commands/pipetter.js: pipetter.action.pipette: method 4
-- [ ] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
+- [x] commands/pipetter.js: pipetter.action.pipette: handle multiple possible source wells for a single item
+- [x] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [ ] ourlab.js: add 'sites' and 'sealing' namespaces
 - [ ] consider using uppercase for special JSON fields, like TYPE, ROBOLIQ, DEFAULTS, COMMAND
 - [ ] commands/pipetter.js: pipetter.action.pipette: for cleaning, sort out "begin, end, before, after" parameters
@@ -41,6 +40,7 @@
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] reader command
 - [ ] mix command
+- [ ] commands/pipetter.js: pipetter.action.pipette: method 4
 - [ ] figure out how to implement variable expansion/evaluation
 - [ ] figure out how to implement for-comprehensions for both commands and list
 - [ ] figure out how to randomize for-comprehensions and plain lists

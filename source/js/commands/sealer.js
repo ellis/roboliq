@@ -78,6 +78,21 @@ var commandHandlers = {
 			}
 		});
 
+		var alternatives = _(resultList).map(_.values).flatten().map(function(params2) {
+			var params3 = {};
+			_.forEach(['agent', 'equipment', 'program', 'site'], function(name) {
+				if (!params.hasOwnProperty(name)) params3[name] = params2[name];
+			});
+			return params3;
+		}).reject(_.isEmpty).value();
+
+		if (!params2.site) {
+			return {
+				errors: ["`site`: please provide value"],
+				alternatives: alternatives
+			};
+		}
+
 		var params3 = _.merge({}, {
 			command: "sealer.instruction.run",
 			agent: params2.agent,
@@ -85,12 +100,6 @@ var commandHandlers = {
 			program: params2.program,
 			object: params.object
 		});
-
-		if (!params2.site) {
-			return {
-				errors: ["`site`: please provide value"]
-			};
-		}
 
 		var expansion = {
 			"1": {
@@ -112,7 +121,8 @@ var commandHandlers = {
 
 		return {
 			expansion: expansion,
-			effects: effects
+			effects: effects,
+			alternatives: alternatives
 		};
 	}
 };
