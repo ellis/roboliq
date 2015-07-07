@@ -32,8 +32,8 @@
 ## Before publication, but not yet
 
 - [x] test.js: '-O' parameter for output directory
-- [ ] organize directory structure for sample protocols and generated output, also with better protocol filenames
-- [ ] test.js: allow for loading YAML protocols
+- [x] test.js: allow for loading YAML protocols
+- [ ] ourlab.js: setup labware models
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
 - [ ] start creating unit tests
 - [ ] test.js: generate table for labware

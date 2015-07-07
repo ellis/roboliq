@@ -2,6 +2,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
+var yaml = require('yamljs');
 
 var opts = require('nomnom')
 	.options({
@@ -60,9 +61,15 @@ if (opts.debug) {
 	console.log(loadedFiles);
 }
 var loadedContents = _.map(loadedFiles, function(filename) {
+	var content = null;
 	if (filename.indexOf("./") != 0)
 		filename = "./"+filename;
-	var content = require(filename);
+	if (path.extname(filename) === ".yaml") {
+		content = yaml.load(filename);
+	}
+	else {
+		content = require(filename);
+	}
 	return content;
 });
 
