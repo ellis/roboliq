@@ -361,7 +361,9 @@ var commandHandlers = {
 
 		// Pick source well for items, if the source has multiple wells
 		// Rotate through source wells in order of max volume
-		sourceMethods.sourceMethod3(group, data, effects);
+		_.forEach(groups, function(group) {
+			sourceMethods.sourceMethod3(group, data, effects);
+		});
 
 		// Calculate when tips need to be washed
 		// Create pipetting commands
@@ -448,6 +450,7 @@ var commandHandlers = {
 		var syringeToCleanAfterValue = {};
 		var doCleanBefore = false
 		_.forEach(groups, function(group) {
+			assert(group.length > 0);
 			// What cleaning intensity is required for the tip before aspirating?
 			var syringeToCleanBeforeValue = _.clone(syringeToCleanAfterValue);
 			_.forEach(group, function(item) {
@@ -502,15 +505,14 @@ var commandHandlers = {
 				"command": "pipetter.instruction.pipette",
 				"agent": agent,
 				"equipment": equipment,
-				"program": program,
+				"program": group[0].program,
 				"items": items2
 			});
-		}).flatten().value();
+		});
 
 		// cleanEnd
 		// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
-		var cleanAfterValue = intensityToValue[cleanAfter];
-		var syringeToCleanValueAfter = {};
+		var syringeToCleanEndValue = {};
 		_.forEach(syringeToCleanValue, function (value, syringe) {
 			var intensity = params.cleanEnd || params.clean || "thorough";
 			assert(intensityToValue.hasOwnProperty(intensity));
@@ -518,9 +520,9 @@ var commandHandlers = {
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 				intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);
 			if (value < intensityValue)
-				syringeToCleanValueAfter[syringe] = intensityValue;
+				syringeToCleanEndValue[syringe] = intensityValue;
 		});
-		expansionList.push.apply(expansionList, createCleanActions(expansionList, createCleanActions(syringeToCleanBeforeValue)));
+		expansionList.push.apply(expansionList, createCleanActions(syringeToCleanEndValue));
 
 		var expansion = {};
 		_.forEach(expansionList, function(cmd, i) {

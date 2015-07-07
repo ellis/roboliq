@@ -125,12 +125,29 @@
 		"plate1": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P2"
+			"location": "ourlab.mario.P2",
+			"contents": {
+				"A01": [
+					"50ul",
+					"water"
+				],
+				"A02": [
+					"50ul",
+					"water"
+				]
+			}
 		},
 		"plate2": {
 			"type": "Plate",
 			"model": "ourlab.model1",
 			"location": "ourlab.mario.P3"
+		},
+		"water": {
+			"type": "Liquid",
+			"wells": [
+				"plate1(A01)",
+				"plate1(A02)"
+			]
 		}
 	},
 	"steps": {
@@ -169,7 +186,13 @@
 						"syringe": 1,
 						"source": "plate1(A01)",
 						"destination": "plate2(A01)",
-						"volume": "50ul"
+						"volume": "20ul"
+					},
+					{
+						"syringe": 2,
+						"source": "plate1(A02)",
+						"destination": "plate2(A02)",
+						"volume": "20ul"
 					}
 				]
 			},
@@ -202,7 +225,12 @@
 				{
 					"source": "plate1(A01)",
 					"destination": "plate2(A01)",
-					"volume": "50ul"
+					"volume": "20ul"
+				},
+				{
+					"source": "plate1(A02)",
+					"destination": "plate2(A02)",
+					"volume": "20ul"
 				}
 			]
 		}
@@ -210,12 +238,20 @@
 	"effects": {
 		"1.2": {
 			"plate1.contents.A01": [
-				"-50 ul",
-				"plate1(A01)"
+				"30 ul",
+				"water"
 			],
 			"plate2.contents.A01": [
-				"50 ul",
-				"plate1(A01)"
+				"20 ul",
+				"water"
+			],
+			"plate1.contents.A02": [
+				"30 ul",
+				"water"
+			],
+			"plate2.contents.A02": [
+				"20 ul",
+				"water"
 			]
 		}
 	},

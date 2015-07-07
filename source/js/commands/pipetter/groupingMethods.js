@@ -37,29 +37,37 @@ function groupingMethod2(items, syringes, tipModelToSyringes) {
 		var program = items[0].program;
 		var syringesAvailable = _.clone(syringes);
 		var group = _.takeWhile(items, function (item) {
+			//console.log("A");
 			// Make sure we still have syringes available
 			if (syringesAvailable.length == 0) return false;
 			// Make sure all items in the group use the same program
 			if (item.program !== program) return false;
+			//console.log("B");
 
 			assert(item.tipModel);
 
 			// If tipModelToSyringes was provided
 			if (!_.isEmpty(tipModelToSyringes)) {
+				//console.log("C");
 				assert(tipModelToSyringes.hasOwnProperty(item.tipModel));
 				var syringesPossible = tipModelToSyringes[item.tipModel];
 				assert(!_.isEmpty(syringesPossible));
 				// Try to find a possible syringe that's still available
 				var l = _.intersection(syringesPossible, syringesAvailable);
 				if (_.isEmpty(l)) return false;
+				//console.log("D");
 				// Remove an arbitrary syringe from the list of available syringes
 				syringesAvailable = _.without(syringesAvailable, l[0]);
 			}
 			else {
+				//console.log("E");
 				// Remove an arbitrary syringe from the list of available syringes
 				syringesAvailable.splice(0, 1);
 			}
+
+			return true;
 		});
+		assert(group.length > 0);
 		items = _.drop(items, group.length);
 		groups.push(group);
 	}

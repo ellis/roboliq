@@ -1,5 +1,8 @@
 var _ = require('lodash');
+var assert = require('assert');
 var math = require('mathjs');
+var misc = require('../../misc.js');
+var sourceParser = require('../../parsers/sourceParser.js');
 
 var emptyVolume = math.eval('0ul');
 

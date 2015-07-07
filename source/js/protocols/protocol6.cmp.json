@@ -126,11 +126,6 @@
 			"type": "Plate",
 			"model": "ourlab.model1",
 			"location": "ourlab.mario.P2"
-		},
-		"plate2": {
-			"type": "Plate",
-			"model": "ourlab.model1",
-			"location": "ourlab.mario.P3"
 		}
 	},
 	"steps": {
@@ -142,10 +137,7 @@
 					"equipment": "ourlab.mario.liha",
 					"program": "ourlab.mario.washProgram_thorough_1000",
 					"syringes": [
-						1,
-						2,
-						3,
-						4
+						1
 					]
 				},
 				"command": "pipetter.action.cleanTips",
@@ -153,23 +145,20 @@
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
 				"syringes": [
-					1,
-					2,
-					3,
-					4
+					1
 				]
 			},
 			"2": {
 				"command": "pipetter.instruction.pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"program": "\"Roboliq_Water_Dry_1000\"",
+				"program": "Water",
 				"items": [
 					{
 						"syringe": 1,
 						"source": "plate1(A01)",
-						"destination": "plate2(A01)",
-						"volume": "50ul"
+						"destination": "plate1(B01)",
+						"volume": "40ul"
 					}
 				]
 			},
@@ -180,10 +169,7 @@
 					"equipment": "ourlab.mario.liha",
 					"program": "ourlab.mario.washProgram_thorough_1000",
 					"syringes": [
-						1,
-						2,
-						3,
-						4
+						1
 					]
 				},
 				"command": "pipetter.action.cleanTips",
@@ -191,34 +177,20 @@
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
 				"syringes": [
-					1,
-					2,
-					3,
-					4
+					1
 				]
 			},
 			"command": "pipetter.action.pipette",
 			"items": [
 				{
 					"source": "plate1(A01)",
-					"destination": "plate2(A01)",
-					"volume": "50ul"
+					"destination": "plate1(B01)",
+					"volume": "40ul"
 				}
 			]
 		}
 	},
-	"effects": {
-		"1.2": {
-			"plate1.contents.A01": [
-				"-50 ul",
-				"plate1(A01)"
-			],
-			"plate2.contents.A01": [
-				"50 ul",
-				"plate1(A01)"
-			]
-		}
-	},
+	"effects": {},
 	"warnings": {},
 	"errors": {}
 }

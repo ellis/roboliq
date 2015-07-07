@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var pipetterUtils = require('./pipetterUtils.js');
+var sourceParser = require('../../parsers/sourceParser.js');
 
 /*
 - assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
@@ -58,7 +59,7 @@ function sourceMethod3(group, data, effects) {
 	var effects = (effects) ? _.cloneDeep(effects) : {};
 
 	// Consider each source in the group separately
-	var sourceToItems = _.groupBy(item, 'source');
+	var sourceToItems = _.groupBy(group, 'source');
 	_.forEach(sourceToItems, function (items, source) {
 		_.forEach(items, function(item) {
 			var sourceInfo = sourceParser.parse(item.source);
