@@ -31,8 +31,9 @@
 
 ## Before publication, but not yet
 
-- [ ] test.js: '-O' parameter for output directory
+- [x] test.js: '-O' parameter for output directory
 - [ ] organize directory structure for sample protocols and generated output, also with better protocol filenames
+- [ ] test.js: allow for loading YAML protocols
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
 - [ ] start creating unit tests
 - [ ] test.js: generate table for labware
@@ -40,6 +41,7 @@
 - [ ] test.js: generate table for final well contents
 - [ ] test.js: generate table of pipetting actions for well contents by step
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
+- [ ] write program to generate part of ourlab.mario from the evoware config files
 - [ ] reader command
 - [ ] mix command
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
@@ -59,7 +61,6 @@
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly trick will be object merging and gathering all required step parameters into a single parameters map
 - [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
 - [ ] version handling for protocols and commands
-- [ ] test.js: allow for loading YAML protocols
 - [ ] centrifuge command
 - [ ] commands/pipetter.js: pipetter.instruction.aspirate: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents

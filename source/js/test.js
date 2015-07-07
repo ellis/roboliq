@@ -22,7 +22,7 @@ var opts = require('nomnom')
 		},
 		outputDir: {
 			abbr: 'O',
-			full: 'output-dir'
+			full: 'output-dir',
 			help: 'specify output directory',
 			metavar: 'DIR'
 		},
