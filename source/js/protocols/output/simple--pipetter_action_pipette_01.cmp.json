@@ -183,11 +183,6 @@
 			"type": "Plate",
 			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 			"location": "ourlab.mario.site.P2"
-		},
-		"plate2": {
-			"type": "Plate",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"location": "ourlab.mario.site.P3"
 		}
 	},
 	"steps": {
@@ -225,8 +220,8 @@
 					{
 						"syringe": 1,
 						"source": "plate1(A01)",
-						"destination": "plate2(A01)",
-						"volume": "50ul"
+						"destination": "plate1(A02)",
+						"volume": "20ul"
 					}
 				]
 			},
@@ -258,8 +253,8 @@
 			"items": [
 				{
 					"source": "plate1(A01)",
-					"destination": "plate2(A01)",
-					"volume": "50ul"
+					"destination": "plate1(A02)",
+					"volume": "20ul"
 				}
 			]
 		}
@@ -267,11 +262,11 @@
 	"effects": {
 		"1.2": {
 			"plate1.contents.A01": [
-				"-50 ul",
+				"-20 ul",
 				"plate1(A01)"
 			],
-			"plate2.contents.A01": [
-				"50 ul",
+			"plate1.contents.A02": [
+				"20 ul",
 				"plate1(A01)"
 			]
 		}

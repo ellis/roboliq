@@ -33,7 +33,7 @@
 
 - [x] test.js: '-O' parameter for output directory
 - [x] test.js: allow for loading YAML protocols
-- [ ] ourlab.js: setup labware models
+- [x] ourlab.js: setup labware models
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
 - [ ] start creating unit tests
 - [ ] test.js: generate table for labware

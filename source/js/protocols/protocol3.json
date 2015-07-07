@@ -2,7 +2,7 @@
   "objects": {
     "plate1": {
       "type": "Plate",
-      "model": "ourlab.model1",
+      "model": "ourlab.model.plateModel_96_square_transparent_nunc",
       "location": "ourlab.mario.site.P2"
     }
   },

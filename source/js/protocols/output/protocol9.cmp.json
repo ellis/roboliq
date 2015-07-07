@@ -121,16 +121,67 @@
 					}
 				}
 			},
-			"model1": {
-				"type": "PlateModel",
-				"rows": 8,
-				"columns": 12,
-				"evowareName": "Ellis Nunc F96 MicroWell"
+			"model": {
+				"type": "Namespace",
+				"plateModel_96_pcr": {
+					"label": "96 well PCR plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "D-BSSE 96 Well PCR Plate"
+				},
+				"plateModel_96_dwp": {
+					"label": "96 well deep-well plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "D-BSSE 96 Well DWP"
+				},
+				"plateModel_384_round": {
+					"label": "384 round-well plate",
+					"rows": 16,
+					"columns": 24,
+					"evowareName": "D-BSSE 384 Well Plate White"
+				},
+				"plateModel_384_square": {
+					"label": "384 square-flat-well white plate",
+					"rows": 16,
+					"columns": 24,
+					"evowareName": "D-BSSE 384 Well Plate White"
+				},
+				"plateModel_384_square_transparent_greiner": {
+					"label": "384 square-flat-well transparent Greiner",
+					"rows": 16,
+					"columns": 24,
+					"evowareName": "384 Sqr Flat Trans Greiner"
+				},
+				"plateModel_96_square_transparent_nunc": {
+					"label": "96 square-well transparent Nunc plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "Ellis Nunc F96 MicroWell"
+				},
+				"troughModel_100ml": {
+					"label": "Trough 100ml",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "Trough 100ml"
+				},
+				"troughModel_100ml_lowvol_tips": {
+					"label": "Trough 100ml LowVol Tips",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "Trough 100ml LowVol Tips"
+				},
+				"tubeHolderModel_1500ul": {
+					"label": "20 tube block 1.5ml",
+					"rows": 4,
+					"columns": 5,
+					"evowareName": "Block 20Pos 1.5 ml Eppendorf"
+				}
 			}
 		},
 		"plate1": {
 			"type": "Plate",
-			"model": "ourlab.model1",
+			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 			"location": "ourlab.mario.site.P2",
 			"contents": {
 				"A01": [
@@ -145,7 +196,7 @@
 		},
 		"plate2": {
 			"type": "Plate",
-			"model": "ourlab.model1",
+			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 			"location": "ourlab.mario.site.P3"
 		},
 		"water": {

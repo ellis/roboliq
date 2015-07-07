@@ -2,7 +2,7 @@
 	"objects": {
 		"plate1": {
 			"type": "Plate",
-			"model": "ourlab.model1",
+			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 			"location": "ourlab.mario.site.P2",
 			"contents": {
 				"A01": ["50ul", "water"],
@@ -11,7 +11,7 @@
 		},
 		"plate2": {
 			"type": "Plate",
-			"model": "ourlab.model1",
+			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 			"location": "ourlab.mario.site.P3"
 		},
 		"water": {
