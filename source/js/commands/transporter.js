@@ -48,14 +48,31 @@ var commandHandlers = {
 			}
 		};
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
+
+		/*// DEBUG
+		var llpl = require('../HTN/llpl.js');
+		llpl.initializeDatabase(input);
+		var query = {
+			"and": [
+				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
+				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": params.destination}}
+			]
+		};
+		var queryResults = llpl.query(query);
+		console.log("queryResults:\n"+JSON.stringify(queryResults, null, '\t'));
+		// END DEBUG*/
+
 		//console.log(JSON.stringify(input, null, '\t'));
 		var shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
 		//console.log("plan:");
 		//console.log(JSON.stringify(plan, null, '  '));
-		var x = planner.ppPlan(plan);
+		//var x = planner.ppPlan(plan);
 		//console.log(x);
+		if (_.isEmpty(plan)) {
+			return {errors: ["unable to find a transportation path"]}
+		}
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")
 		//console.log(JSON.stringify(tasks, null, '  '));

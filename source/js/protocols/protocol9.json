@@ -3,7 +3,7 @@
 		"plate1": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P2",
+			"location": "ourlab.mario.site.P2",
 			"contents": {
 				"A01": ["50ul", "water"],
 				"A02": ["50ul", "water"]
@@ -12,7 +12,7 @@
 		"plate2": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P3"
+			"location": "ourlab.mario.site.P3"
 		},
 		"water": {
 			"type": "Liquid",

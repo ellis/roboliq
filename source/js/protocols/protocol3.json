@@ -3,7 +3,7 @@
     "plate1": {
       "type": "Plate",
       "model": "ourlab.model1",
-      "location": "ourlab.mario.P2"
+      "location": "ourlab.mario.site.P2"
     }
   },
   "steps": {

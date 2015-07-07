@@ -25,14 +25,14 @@
 - [x] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
 - [x] commands/pipetter.js: pipetter.action.pipette: method 3
 - [x] commands/pipetter.js: pipetter.action.pipette: handle multiple possible source wells for a single item
+- [x] commands/pipetter.js: pipetter.action.pipette: for cleaning, sort out "begin, end, before, after" parameters
 - [x] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
-- [ ] ourlab.js: add 'sites' and 'sealing' namespaces
-- [ ] consider using uppercase for special JSON fields, like TYPE, ROBOLIQ, DEFAULTS, COMMAND
-- [ ] commands/pipetter.js: pipetter.action.pipette: for cleaning, sort out "begin, end, before, after" parameters
+- [x] ourlab.js: add 'sites' and 'washProgram' namespaces
 
 ## Before publication, but not yet
 
 - [ ] test.js: '-O' parameter for output directory
+- [ ] organize directory structure for sample protocols and generated output
 - [ ] test.js: generate table for labware
 - [ ] test.js: generate table for sources (which stock goes where in what volume)
 - [ ] test.js: generate table for final well contents

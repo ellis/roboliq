@@ -125,7 +125,7 @@
 		"plate1": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P2"
+			"location": "ourlab.mario.site.P2"
 		}
 	},
 	"steps": {
@@ -157,11 +157,11 @@
 					"equipment": "ourlab.mario.roma2",
 					"program": "Narrow",
 					"object": "plate1",
-					"destination": "ourlab.mario.P2"
+					"destination": "ourlab.mario.site.P2"
 				},
 				"command": "transporter.action.movePlate",
 				"object": "plate1",
-				"destination": "ourlab.mario.P2"
+				"destination": "ourlab.mario.site.P2"
 			},
 			"command": "sealer.action.sealPlate",
 			"object": "plate1"
@@ -181,10 +181,10 @@
 			"plate1.sealed": true
 		},
 		"1.3": {
-			"plate1.location": "ourlab.mario.P2"
+			"plate1.location": "ourlab.mario.site.P2"
 		},
 		"1.3.1": {
-			"plate1.location": "ourlab.mario.P2"
+			"plate1.location": "ourlab.mario.site.P2"
 		}
 	},
 	"warnings": {},

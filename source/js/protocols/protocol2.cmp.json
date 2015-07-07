@@ -125,7 +125,7 @@
 		"plate1": {
 			"type": "Plate",
 			"model": "ourlab.model1",
-			"location": "ourlab.mario.P2"
+			"location": "ourlab.mario.site.P2"
 		}
 	},
 	"steps": {
@@ -136,11 +136,11 @@
 				"equipment": "ourlab.mario.roma1",
 				"program": "Narrow",
 				"object": "plate1",
-				"destination": "ourlab.mario.P3"
+				"destination": "ourlab.mario.site.P3"
 			},
 			"command": "transporter.action.movePlate",
 			"object": "plate1",
-			"destination": "ourlab.mario.P3"
+			"destination": "ourlab.mario.site.P3"
 		},
 		"2": {
 			"1": {
@@ -149,7 +149,7 @@
 				"equipment": "ourlab.mario.roma1",
 				"program": "Narrow",
 				"object": "plate1",
-				"destination": "ourlab.mario.P2"
+				"destination": "ourlab.mario.site.P2"
 			},
 			"2": {
 				"command": "transporter.instruction.movePlate",
@@ -166,16 +166,16 @@
 	},
 	"effects": {
 		"1": {
-			"plate1.location": "ourlab.mario.P3"
+			"plate1.location": "ourlab.mario.site.P3"
 		},
 		"2": {
 			"plate1.location": "ourlab.mario.ROBOSEAL"
 		},
 		"1.1": {
-			"plate1.location": "ourlab.mario.P3"
+			"plate1.location": "ourlab.mario.site.P3"
 		},
 		"2.1": {
-			"plate1.location": "ourlab.mario.P2"
+			"plate1.location": "ourlab.mario.site.P2"
 		},
 		"2.2": {
 			"plate1.location": "ourlab.mario.ROBOSEAL"
