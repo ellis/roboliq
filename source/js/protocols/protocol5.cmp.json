@@ -43,76 +43,82 @@
 				"sealer": {
 					"type": "Sealer"
 				},
-				"P2": {
-					"type": "Site",
-					"evowareCarrier": "MP 2Pos H+P Shake",
-					"evowareGrid": 10,
-					"evowareSite": 2
+				"site": {
+					"type": "Namespace",
+					"P2": {
+						"type": "Site",
+						"evowareCarrier": "MP 2Pos H+P Shake",
+						"evowareGrid": 10,
+						"evowareSite": 2
+					},
+					"P3": {
+						"type": "Site",
+						"evowareCarrier": "MP 2Pos H+P Shake",
+						"evowareGrid": 10,
+						"evowareSite": 4
+					},
+					"ROBOSEAL": {
+						"type": "Site",
+						"evowareCarrier": "RoboSeal",
+						"evowareGrid": 35,
+						"evowareSite": 1
+					}
 				},
-				"P3": {
-					"type": "Site",
-					"evowareCarrier": "MP 2Pos H+P Shake",
-					"evowareGrid": 10,
-					"evowareSite": 4
-				},
-				"ROBOSEAL": {
-					"type": "Site",
-					"evowareCarrier": "RoboSeal",
-					"evowareGrid": 35,
-					"evowareSite": 1
-				},
-				"washProgram_flush_1000": {
-					"type": "EvowareWashProgram",
-					"wasteGrid": 1,
-					"wasteSite": 2,
-					"cleanerGrid": 1,
-					"cleanerSite": 1,
-					"wasteVolume": 1,
-					"wasteDelay": 500,
-					"cleanerVolume": 1,
-					"cleanerDelay": 500,
-					"airgapVolume": 10,
-					"airgapSpeed": 70,
-					"retractSpeed": 30,
-					"fastWash": false
-				},
-				"washProgram_flush_0050": {
-					"type": "EvowareWashProgram",
-					"wasteGrid": 1,
-					"wasteSite": 2,
-					"cleanerGrid": 1,
-					"cleanerSite": 1,
-					"wasteVolume": 0.05,
-					"wasteDelay": 500,
-					"cleanerVolume": 0.05,
-					"cleanerDelay": 500,
-					"airgapVolume": 10,
-					"airgapSpeed": 70,
-					"retractSpeed": 30,
-					"fastWash": false
-				},
-				"washProgram_light_1000": {
-					"type": "EvowareWashProgram",
-					"wasteGrid": 1,
-					"wasteSite": 2,
-					"cleanerGrid": 1,
-					"cleanerSite": 1,
-					"wasteVolume": 4,
-					"wasteDelay": 500,
-					"cleanerVolume": 2,
-					"cleanerDelay": 500,
-					"airgapVolume": 10,
-					"airgapSpeed": 70,
-					"retractSpeed": 30,
-					"fastWash": false
-				},
-				"washProgram_thorough_1000": {
-					"type": "EvowareWashProgram",
-					"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_1000.esc"
-				},
-				"washProgram_thorough_0050": {
-					"type": "EvowareWashProgram",
-					"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
+				"washProgram": {
+					"type": "Namespace",
+					"flush_1000": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 1,
+						"wasteSite": 2,
+						"cleanerGrid": 1,
+						"cleanerSite": 1,
+						"wasteVolume": 1,
+						"wasteDelay": 500,
+						"cleanerVolume": 1,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": false
+					},
+					"flush_0050": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 1,
+						"wasteSite": 2,
+						"cleanerGrid": 1,
+						"cleanerSite": 1,
+						"wasteVolume": 0.05,
+						"wasteDelay": 500,
+						"cleanerVolume": 0.05,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": false
+					},
+					"light_1000": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 1,
+						"wasteSite": 2,
+						"cleanerGrid": 1,
+						"cleanerSite": 1,
+						"wasteVolume": 4,
+						"wasteDelay": 500,
+						"cleanerVolume": 2,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": false
+					},
+					"thorough_1000": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_1000.esc"
+					},
+					"thorough_0050": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
+					}
 				}
 			},
 			"model1": {
@@ -144,7 +150,18 @@
 			]
 		}
 	},
-	"effects": {},
+	"effects": {
+		"1": {
+			"plate1.contents.A01": [
+				"-30 ul",
+				"plate1(A01)"
+			],
+			"plate1.contents.B01": [
+				"30 ul",
+				"plate1(A01)"
+			]
+		}
+	},
 	"warnings": {},
 	"errors": {}
 }
