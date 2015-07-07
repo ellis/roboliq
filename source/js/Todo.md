@@ -71,7 +71,8 @@
 - [ ] commandHandler args: also pass paramDefaults
 - [ ] commands/sealer.js: figure out more sophisticated way to deal with agents for the pre/post steps; consider 'agentPreferred' parameter
 - [ ] handle lids on plates and tracking their position
-- [ ] add a default storage site for plates?  How to handle when plates are shared between robots?
+- [ ] add a default storage site for plates?  How to handle when plates are shared between robots?
+- [ ] commands/pipetter.js: handle case of dispensing then later aspirating from a single well in a single pipetting command
 
 # Notes
 
@@ -154,6 +155,19 @@ Modularize the methods more:
 - add cleaning actions between each group, at the beginning, and at the end
 
 A completely different method that would sometimes useful to manage tip differences:
+
+## Cleaning tips
+
+cleanBegin: intensity of first cleaning at beginning of pipetting, before first aspiration.
+Priority: item.cleanBefore || params.cleanBegin || params.clean || source.cleanBefore || "thorough"
+
+cleanBetween: intensity of cleaning between groups.
+Priority: max(previousCleanAfter, (item.cleanBefore || params.cleanBetween || params.clean || source.cleanBefore || "thorough"))
+
+previousCleanAfter = item.cleanAfter || if (!params.cleanBetween) source.cleanAfter
+
+cleanEnd: intensity of cleaning after pipetting is done.
+Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 
 
 # Encoding content
