@@ -1,0 +1,46 @@
+description: |
+  Pipette from column 1 to column2 on on plate1
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_square_transparent_nunc
+    location: ourlab.mario.site.P3
+    contents:
+      A01: [50ul, reagent1]
+      B01: [50ul, reagent1]
+      C01: [50ul, reagent1]
+      D01: [50ul, reagent1]
+      E01: [50ul, reagent1]
+      F01: [50ul, reagent1]
+      G01: [50ul, reagent1]
+      H01: [50ul, reagent1]
+
+steps:
+  1:
+    command: pipetter.action.pipette
+    items:
+    - source: plate1(A01)
+      destination: plate1(A02)
+      volume: 20ul
+    - source: plate1(B01)
+      destination: plate1(B02)
+      volume: 20ul
+    - source: plate1(C01)
+      destination: plate1(C02)
+      volume: 20ul
+    - source: plate1(D01)
+      destination: plate1(D02)
+      volume: 20ul
+    - source: plate1(E01)
+      destination: plate1(E02)
+      volume: 20ul
+    - source: plate1(F01)
+      destination: plate1(F02)
+      volume: 20ul
+    - source: plate1(G01)
+      destination: plate1(G02)
+      volume: 20ul
+    - source: plate1(H01)
+      destination: plate1(H02)
+      volume: 20ul

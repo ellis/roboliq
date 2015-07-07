@@ -347,12 +347,13 @@ var commandHandlers = {
 		};
 		// Group the items
 		var groups = groupingMethods.groupingMethod2(items, syringesAvailable, tipModelToSyringes);
+		//console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 		// Pick syringe for each item
 		// For each group assign syringes, starting with the first available one
 		_.forEach(groups, function(group) {
-			var tipModelToSyringesAvailable = _.clone(tipModelToSyringes);
-			_.forEach(items, function(item) {
+			var tipModelToSyringesAvailable = _.cloneDeep(tipModelToSyringes);
+			_.forEach(group, function(item) {
 				var tipModel = item.tipModel;
 				assert(tipModelToSyringesAvailable[tipModel].length >= 1);
 				item.syringe = tipModelToSyringesAvailable[tipModel].splice(0, 1)[0];
