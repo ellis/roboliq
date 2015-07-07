@@ -121,11 +121,50 @@ module.exports = {
 					}
 				},
 			},
-			"model1": {
-				"type": "PlateModel",
+			"labwareModel": {
+				"plateModel_96_pcr": {
+				  "label": "96 well PCR plate",
 				"rows": 8,
 				"columns": 12,
-				"evowareName": "Ellis Nunc F96 MicroWell"
+				  "evowareName": "D-BSSE 96 Well PCR Plate"
+				},
+				"plateModel_96_dwp": {
+				  "label": "96 well deep-well plate",
+				"rows": 8,
+				"columns": 12,
+				  "evowareName": "D-BSSE 96 Well DWP"
+				},
+				"plateModel_384_round": {
+				  "label": "384 round-well plate",
+				CONTINUE
+				  "evowareName": "D-BSSE 384 Well Plate White"
+				},
+				"plateModel_384_square": {
+				  "label": "384 square-flat-well white plate",
+				  "evowareName": "D-BSSE 384 Well Plate White"
+				},
+				"plateModel_384_square_transparent_greiner": {
+				  "label": "384 square-flat-well transparent Greiner",
+				  "evowareName": "384 Sqr Flat Trans Greiner"
+				},
+				"plateModel_96_nunc_transparent": {
+				  "label": "96 square-well transparent Nunc plate",
+				"rows": 8,
+				"columns": 12,
+				  "evowareName": "Ellis Nunc F96 MicroWell"
+				},
+				"troughModel_100ml": {
+				  "label": "Trough 100ml",
+				  "evowareName": "Trough 100ml"
+				},
+				"troughModel_100ml_lowvol_tips": {
+				  "label": "Trough 100ml LowVol Tips",
+				  "evowareName": "Trough 100ml LowVol Tips"
+				},
+				"tubeHolderModel_1500ul": {
+				  "label": "20 tube block 1.5ml",
+				  "evowareName": "Block 20Pos 1.5 ml Eppendorf"
+				}
 			}
 		},
 	},
