@@ -36,7 +36,7 @@ locationClauses
   = init:(x:locationClause ws ',' ws { return x; })* last:locationClause { return init.concat([last]); }
 
 locationClause
-  = subject:locationSubject ws phrases:locationPhrases?
+  = subject:locationSubject phrases:locationPhrases?
   { return {subject: subject, phrases: phrases}; }
 
 locationSubject
@@ -57,7 +57,7 @@ integer
   = digits:[0-9]+ { return parseInt(digits.join(""), 10); }
 
 locationPhrases
-  = init:(x:locationPhrase spaces { return x; })* last:locationPhrase { return init.concat([last]); }
+  = phrases:(spaces x:locationPhrase { return x; })*
 
 locationPhrase
   = 'down' ws n:integer { return ["down", n]; }

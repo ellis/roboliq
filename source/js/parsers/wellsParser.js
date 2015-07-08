@@ -18,8 +18,11 @@ function locationRowColToText(row, col) {
 
 function parse(text, objects) {
 	var result = wellsParser0.parse(text);
+	if (!objects)
+		return result;
+
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
-	return _(result).map(function(clause) {
+	var ll = _.map(result, function(clause) {
 		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
 		if (clause.labware) {
 			var labware = misc.getObjectsValue(objects, clause.labware);
@@ -113,12 +116,15 @@ function parse(text, objects) {
 		else if (clause.source) {
 			var source = misc.getObjectsValue(objects, clause.source);
 			assert(!_.isEmpty(source.wells), "`"+clause.source+".wells` missing");
-			return source.wells;
+			return [source.wells, "poop"];
 		}
 		else {
 			assert(false);
 		}
-	}).flatten().value();
+	});
+	console.log("ll:")
+	console.log(ll);
+	return _.flatten(ll);
 }
 
 module.exports = {
