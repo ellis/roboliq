@@ -124,23 +124,28 @@ Tuple: (source, destination, volume, flags, tipModel, tip, program, pre-commands
 "#expr#wells(plate1, A01, 4)"
     A01
     A01, B01, C01, D01
-    A01, 4
-    A01, 4 columns
-    4 empty
-    4 from A01
-    4 from A01 column-wise
-    4 from A01 row-wise
-    1 from all random
-    A01 down 4
-    A01 down D01
-    A01 right 4
-    A01 right A04
-    A01 block B02
-    A01 right 1 down 1
-    all random
+
+    4 from A01 down (random) # problem is with adding 'random'
+    4 down from A01 (random) # this is clear, so that 'random' would randomize the 4 adjacent rows
+    A01 down take 4 (random)
+    4 from all (random)
+    all take 4 random
+
+    4 from A01 right
+    4 from all random
+    4 from unused
+    A01 down to D01
+    A01 block to B02
+
+    A01 down [take] 4
+    A01 down [to] D01
+    A01 right [take] 4
+    A01 right [to] A04
+    A01 block [to] B02
+    all random[(seed)]
     all random take 1
-    unused take 4
-    unused random take 4
+    all free take 4
+    all free random[(seed)] take 4
 
 Simplest methods/algorithms:
 

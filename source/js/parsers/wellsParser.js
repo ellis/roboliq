@@ -116,14 +116,14 @@ function parse(text, objects) {
 		else if (clause.source) {
 			var source = misc.getObjectsValue(objects, clause.source);
 			assert(!_.isEmpty(source.wells), "`"+clause.source+".wells` missing");
-			return [source.wells, "poop"];
+			return [source.wells];
 		}
 		else {
 			assert(false);
 		}
 	});
-	console.log("ll:")
-	console.log(ll);
+	//console.log("ll:")
+	//console.log(ll);
 	return _.flatten(ll);
 }
 
