@@ -122,17 +122,25 @@ Assigning tips to sources:
 
 Tuple: (source, destination, volume, flags, tipModel, tip, program, pre-commands, post-commands)
 "#expr#wells(plate1, A01, 4)"
-plate1(A01)
-plate1(A01, B01, C01, D01)
-plate1(A01, 4)
-plate1(A01, 4 columns)
-plate1(4)
-plate1(4 empty)
-plate1(4 from A01)
-plate1(4 from A01 column-wise)
-plate1(4 from A01 row-wise)
-plate1(A01 to D01 column-wise)
-plate1(A01 to B02 block-wise)
+    A01
+    A01, B01, C01, D01
+    A01, 4
+    A01, 4 columns
+    4 empty
+    4 from A01
+    4 from A01 column-wise
+    4 from A01 row-wise
+    1 from all random
+    A01 down 4
+    A01 down D01
+    A01 right 4
+    A01 right A04
+    A01 block B02
+    A01 right 1 down 1
+    all random
+    all random take 1
+    unused take 4
+    unused random take 4
 
 Simplest methods/algorithms:
 
@@ -200,3 +208,39 @@ somehow distinguish between control factors, nuisance factors, blocking factors,
   values: [1, 2, 3, 4]
 - "#tabfile#factor3.tab"
 - "#csvdata#protein,volume\ngfp,10\ngfp,20\ngfp,30\nyfp,5"
+
+For comprehensions
+
+type: Eval.List
+type: Eval.Wells
+
+    "1": {
+        "command": "pipetter.action.pipette",
+        "items": {
+            "type": "Eval.List",
+            "variables": [{
+                "name": ["source", "volume"],
+                "values": [["water", "10ul"], ["reagent1", "20ul"]]
+            }, {
+                "name": "destination",
+                "values": "#wells#plate1(A02 down 8)"
+            }],
+            "order": ["-volume"],
+            "template": {
+                "source": "{{source}}",
+                "destination": "{{destination}}",
+                "volume": "{{volume}}"
+            }
+        }
+    }
+
+    for:
+    - [source, volume] in [[water, 10ul], [reagent1, 20ul]]
+    - destination in plate1(A02 down 8)
+    template:
+      source: {{source}}
+      destination: {{destination}}
+      volume: {{volume}}
+
+      - {source: water, destination: plate1(A02), volume: 10ul}
+      - {source: water, destination: plate1(B02), volume: 10ul}

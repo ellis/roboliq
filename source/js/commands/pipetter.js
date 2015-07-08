@@ -6,6 +6,7 @@ var groupingMethods = require('./pipetter/groupingMethods.js');
 var pipetterUtils = require('./pipetter/pipetterUtils.js');
 var sourceMethods = require('./pipetter/sourceMethods.js');
 var sourceParser = require('../parsers/sourceParser.js');
+var wellsParser = require('../parsers/wellsParser.js');
 
 var intensityToValue = {
 	"none": 0,
@@ -136,6 +137,11 @@ var commandHandlers = {
 		//var tipModels = params.tipModels;
 		//var syringes = params.syringes;
 
+		if (params.destinations) {
+			var l = wellsParser.parse(params.destinations, data.objects);
+			console.log("params.destinations:\n"+JSON.stringify(l, null, '  '))
+		}
+
 		// Find all wells, both sources and destinations
 		var wellName_l = _(items).map(function (item) {
 			// TODO: allow source to refer to a set of wells, not just a single well
@@ -221,6 +227,8 @@ var commandHandlers = {
 		}
 
 		// FIXME: allow for overriding tipModel via params
+
+		var sourceToItems = _.groupBy(group, 'source');
 
 		// Try to find tipModel, first for all items
 		if (!findTipModel(items)) {

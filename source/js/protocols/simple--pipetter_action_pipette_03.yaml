@@ -1,0 +1,24 @@
+description: |
+  Distribute source from single well to entire column using the pipette command
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_square_transparent_nunc
+    location: ourlab.mario.site.P3
+    contents:
+      A01: [50ul, reagent1]
+      B01: [50ul, reagent1]
+      C01: [50ul, reagent1]
+      D01: [50ul, reagent1]
+      E01: [50ul, reagent1]
+      F01: [50ul, reagent1]
+      G01: [50ul, reagent1]
+      H01: [50ul, reagent1]
+
+steps:
+  1:
+    command: pipetter.action.pipette
+    sources: plate1(A01)
+    destinations: plate1(A02 down 8)
+    volumes: 20ul
