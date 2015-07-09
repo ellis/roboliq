@@ -256,8 +256,8 @@ type: Eval.Wells
 
 ## Wells
 
-    reports:
-        wells:
+    objects:
+        __WELLS__:
             plate1(A01):
                 isSource: true
                 contentsInitial:
@@ -266,12 +266,14 @@ type: Eval.Wells
                 volumeRemoved: 60ul
                 contentsFinal:
                     water: -60ul
+
+    reports:
         sources:
-            water:
+        - source: water
         sourceWells:
-            water:
-            - well: plate1(A01)
-              volume: 0ul
+        - source: water
+          well: plate1(A01)
+          volume: 0ul
         wellContentsInitial:
         - well: plate1(A01)
           volume: 0ul
