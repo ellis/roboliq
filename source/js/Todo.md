@@ -139,11 +139,12 @@ Tuple: (source, destination, volume, flags, tipModel, tip, program, pre-commands
 
     A01 down [take] 4
     A01 down [to] D01
+    A01 down block [to] B02
     A01 right [take] 4
     A01 right [to] A04
-    A01 block [to] B02
+    A01 right block [to] B02
     all random[(seed)]
-    all random take 1
+    all random[(seed)] take 1
     all free take 4
     all free random[(seed)] take 4
 

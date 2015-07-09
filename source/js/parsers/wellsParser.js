@@ -27,19 +27,18 @@ function parse(text, objects) {
 		if (clause.labware) {
 			var labware = misc.getObjectsValue(objects, clause.labware);
 			assert(labware);
+			assert(labware.model, "`"+clause.labware+".model` missing");
+			var model = misc.getObjectsValue(objects, labware.model);
+			assert(model, "`"+labware.model+"` missing");
+			assert(model.rows, "`"+labware.model+".rows` missing");
+			assert(model.columns, "`"+labware.model+".columns` missing");
 			var l = [];
 			if (clause.subject === 'all') {
-				assert(labware.model, "in order to evaluate `all` in `"+text+"`, please set `"+clause.labware+".model`");
-				var model = misc.getObjectsValue(objects, labware.model);
-				assert(model, "in order to evaluate `all` in `"+text+"`, please set `"+labware.model+"`");
-				assert(model.rows, "`"+labware.model+".rows` missing");
-				assert(model.columns, "`"+labware.model+".columns` missing");
-				for (row = 1; row <= models.rows; row++) {
-					for (col = 1; col <= models.columns; col++) {
+				for (row = 1; row <= model.rows; row++) {
+					for (col = 1; col <= model.columns; col++) {
 						l.push([row, col]);
 					}
 				}
-				return l;
 			}
 			else {
 				l.push(locationTextToRowCol(clause.subject));
@@ -48,26 +47,117 @@ function parse(text, objects) {
 				_.forEach(clause.phrases, function(phrase) {
 					switch (phrase[0]) {
 						case "down":
-							var l2 = [];
-							_.forEach(l, function(rc) {
-								for (var d = 0; d < phrase[1]; d++) {
-									l2.push([rc[0] + d, rc[1]]);
+							assert(l.length == 1, "`down` can only be used with a single well");
+							var rc0 = l[0];
+							var n = phrase[1];
+							assert(n >= 1, "`down n` must be positive: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							for (var i = 1; i < n; i++) {
+								row++;
+								if (row > model.rows) {
+									row = 1;
+									col++;
+									if (col > model.columns) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+									}
 								}
-							});
-							l = _.uniq(l2);
+								l.push([row, col])
+							}
 							break;
-						// TODO: case "down-to":
+						case "down-to":
+							assert(l.length == 1, "`down` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[1] < rc1[1] || rc0[0] <= rc1[0], "invalid target for `down`: "+text)
+							assert(rc0[1] <= rc1[1], "column of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								row++;
+								if (row > model.rows) {
+									row = 1;
+									col++;
+									if (col > model.columns) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+									}
+								}
+								l.push([row, col])
+							}
+							break;
+						case "down-block":
+							assert(l.length == 1, "`block` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[0] <= rc1[0], "row of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							assert(rc0[1] <= rc1[1], "column of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								row++;
+								if (row > rc1[0]) {
+									row = rc0[0];
+									col++;
+								}
+								l.push([row, col])
+							}
+							break;
 						case "right":
-							var l2 = [];
-							_.forEach(l, function(rc) {
-								for (var d = 0; d < phrase[1]; d++) {
-									l2.push([rc[0], rc[1] + d]);
+							assert(l.length == 1, "`right` can only be used with a single well");
+							var rc0 = l[0];
+							var n = phrase[1];
+							assert(n >= 1, "`right n` must be positive: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							for (var i = 1; i < n; i++) {
+								col++;
+								if (col > model.columns) {
+									row++;
+									col = 1;
+									if (row > model.rows) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+									}
 								}
-							});
-							l = _.uniq(l2);
+								l.push([row, col])
+							}
 							break;
-						// TODO: case "right-to":
-						// TODO: case "block-to":
+						case "right-to":
+							assert(l.length == 1, "`right` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[0] < rc1[0] || rc0[1] <= rc1[1], "invalid target for `right`: "+text)
+							assert(rc0[0] <= rc1[0], "row of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								col++;
+								if (col > model.columns) {
+									col = 1;
+									row++;
+									if (row > model.rows) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+									}
+								}
+								l.push([row, col])
+							}
+							break;
+						case "right-block":
+							assert(l.length == 1, "`block` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[0] <= rc1[0], "row of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							assert(rc0[1] <= rc1[1], "column of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								col++;
+								if (col > rc1[1]) {
+									col = rc0[1];
+									row++;
+								}
+								l.push([row, col])
+							}
+							break;
 						case "random":
 							// Initialize randomizing engine
 							var mt = random.engines.mt19937();
@@ -75,12 +165,12 @@ function parse(text, objects) {
 								mt.seed(phrase[1]);
 							}
 							else {
-								mt.autoseed();
+								mt.autoSeed();
 							}
 							// Randomize the list
 							var rest = _.clone(l);
-							random.shufle(mt, rest);
-							// Now try to not pick rows and columns too close to each other
+							random.shuffle(mt, rest);
+							// Now try to not repeated pick the sames rows or columns
 							var l2 = [];
 							var choices = [];
 							while (rest.length > 0) {
@@ -100,10 +190,12 @@ function parse(text, objects) {
 							l = l2;
 							break;
 						case "take":
-							l = _.take(l, phrase[1]);
+							var n = phrase[1];
+							assert(n >= 0);
+							l = _.take(l, n);
 							break;
 						default:
-							assert(false);
+							assert(false, "unhandled verb: "+phrase[0]);
 					}
 				});
 			}

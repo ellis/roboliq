@@ -60,11 +60,12 @@ locationPhrases
   = phrases:(spaces x:locationPhrase { return x; })*
 
 locationPhrase
-  = 'down' ws n:integer { return ["down", n]; }
-  / 'down' ws to:location { return ["down-to", to]; }
-  / 'right' ws n:integer { return ["right", n]; }
-  / 'right' ws to:location { return ["right-to", to]; }
-  / 'block' ws to:location { return ["block-to", to]; }
+  = 'down' spaces 'block' spaces ('to' spaces)? to:location { return ["down-block", to]; }
+  / 'down' spaces ('take' spaces)? n:integer { return ["down", n]; }
+  / 'down' spaces ('to' spaces)? to:location { return ["down-to", to]; }
+  / 'right' spaces 'block' spaces ('to' spaces)? to:location { return ["right-block", to]; }
+  / 'right' spaces ('take' spaces)? n:integer { return ["right", n]; }
+  / 'right' spaces ('to' spaces)? to:location { return ["right-to", to]; }
   / 'random' ws '(' ws seed:integer ws ')' { return ['random', seed]; }
   / 'random' { return ['random']; }
-  / 'take' ws n:integer { return ['take', n]; }
+  / 'take' spaces n:integer { return ['take', n]; }
