@@ -39,12 +39,13 @@
 - [x] create unit test for a pipetting protocol
 - [x] roboliq.js: generate table for labware
 - [x] roboliq.js: generate table for sourceWells (which stock goes where in what volume)
-- [ ] roboliq.js: generate table for final well contents
-- [ ] roboliq.js: generate table of pipetting actions for well contents by step
-- [ ] protocols/protocol8.json: add all cleaning intensities for all tips
+- [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files
 - [ ] reader command
 - [ ] mix command
+- [ ] roboliq.js: generate table for final well contents
+- [ ] roboliq.js: generate table of pipetting actions for well contents by step
+- [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] support creation of well groups, including random ones, and then implement 'free' verb in wellsParser
 - [ ] support creation of well groups by commands, so that the same wells can be edited future commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
