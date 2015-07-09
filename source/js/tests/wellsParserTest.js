@@ -214,7 +214,7 @@ describe('wellsParser', function() {
 			)
 			test2("p(all random(0) take 4)",
 				[{labware: 'p', subject: 'all', phrases: [['random', 0], ['take', 4]]}],
-				['p(C01)', 'p(B01)', 'p(D01)', 'p(A01)']
+				['p(F07)', 'p(D05)', 'p(C02)', 'p(G12)']
 			)
 		})
 	})

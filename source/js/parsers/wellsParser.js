@@ -170,12 +170,14 @@ function parse(text, objects) {
 							// Randomize the list
 							var rest = _.clone(l);
 							random.shuffle(mt, rest);
+							//console.log("rest:", rest);
 							// Now try to not repeated pick the sames rows or columns
 							var l2 = [];
 							var choices = [];
 							while (rest.length > 0) {
 								if (choices.length == 0)
 									choices = _.clone(rest);
+								//console.log("choices:", JSON.stringify(choices));
 								// Pick the first choice in list
 								var rc = _.pullAt(choices, 0)[0];
 								// Add it to our new list
@@ -184,7 +186,7 @@ function parse(text, objects) {
 								rest = _.without(rest, rc);
 								// Remove all items from choices with the same row or column
 								_.remove(choices, function(rc2) {
-									rc2[0] == rc[0] || rc2[1] == rc[1];
+									return (rc2[0] == rc[0] || rc2[1] == rc[1]);
 								});
 							}
 							l = l2;

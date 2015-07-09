@@ -67,5 +67,5 @@ locationPhrase
   / 'right' spaces ('take' spaces)? n:integer { return ["right", n]; }
   / 'right' spaces ('to' spaces)? to:location { return ["right-to", to]; }
   / 'random' ws '(' ws seed:integer ws ')' { return ['random', seed]; }
-  / 'random' { return ['random']; }
+  / 'random' ws '(' ws ')' { return ['random']; }
   / 'take' spaces n:integer { return ['take', n]; }

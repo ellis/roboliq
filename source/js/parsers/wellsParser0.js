@@ -1352,10 +1352,49 @@ module.exports = (function() {
                       if (peg$silentFails === 0) { peg$fail(peg$c52); }
                     }
                     if (s1 !== peg$FAILED) {
-                      peg$reportedPos = s0;
-                      s1 = peg$c54();
+                      s2 = peg$parsews();
+                      if (s2 !== peg$FAILED) {
+                        if (input.charCodeAt(peg$currPos) === 40) {
+                          s3 = peg$c8;
+                          peg$currPos++;
+                        } else {
+                          s3 = peg$FAILED;
+                          if (peg$silentFails === 0) { peg$fail(peg$c9); }
+                        }
+                        if (s3 !== peg$FAILED) {
+                          s4 = peg$parsews();
+                          if (s4 !== peg$FAILED) {
+                            if (input.charCodeAt(peg$currPos) === 41) {
+                              s5 = peg$c10;
+                              peg$currPos++;
+                            } else {
+                              s5 = peg$FAILED;
+                              if (peg$silentFails === 0) { peg$fail(peg$c11); }
+                            }
+                            if (s5 !== peg$FAILED) {
+                              peg$reportedPos = s0;
+                              s1 = peg$c54();
+                              s0 = s1;
+                            } else {
+                              peg$currPos = s0;
+                              s0 = peg$c0;
+                            }
+                          } else {
+                            peg$currPos = s0;
+                            s0 = peg$c0;
+                          }
+                        } else {
+                          peg$currPos = s0;
+                          s0 = peg$c0;
+                        }
+                      } else {
+                        peg$currPos = s0;
+                        s0 = peg$c0;
+                      }
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$c0;
                     }
-                    s0 = s1;
                     if (s0 === peg$FAILED) {
                       s0 = peg$currPos;
                       if (input.substr(peg$currPos, 4) === peg$c42) {
