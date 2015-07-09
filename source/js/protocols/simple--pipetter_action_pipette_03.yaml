@@ -7,14 +7,7 @@ objects:
     model: ourlab.model.plateModel_96_square_transparent_nunc
     location: ourlab.mario.site.P3
     contents:
-      A01: [50ul, reagent1]
-      B01: [50ul, reagent1]
-      C01: [50ul, reagent1]
-      D01: [50ul, reagent1]
-      E01: [50ul, reagent1]
-      F01: [50ul, reagent1]
-      G01: [50ul, reagent1]
-      H01: [50ul, reagent1]
+      A01: [200ul, reagent1]
 
 steps:
   1:

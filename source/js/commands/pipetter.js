@@ -131,16 +131,86 @@ var commandHandlers = {
 		var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(data.predicates);
 
-		var items = _.cloneDeep(params.items);
+		var items = (params.items) ? _.cloneDeep(params.items) : [];
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
 		//var tipModels = params.tipModels;
 		//var syringes = params.syringes;
 
-		if (params.destinations) {
-			var l = wellsParser.parse(params.destinations, data.objects);
-			console.log("params.destinations:\n"+JSON.stringify(l, null, '  '))
+		var sourcesTop = [];
+		if (params.sources) {
+			if (_.isString(params.sources))
+				sourcesTop = wellsParser.parse(params.sources, data.objects);
+			else
+				sourcesTop = params.sources;
 		}
+
+		var destinationsTop = [];
+		if (params.destinations) {
+			if (_.isString(params.destinations))
+				destinationsTop = wellsParser.parse(params.destinations, data.objects);
+			else
+				destinationsTop = params.destinations;
+			//console.log("destinationsTop:", destinationsTop)
+			//console.log(destinationsTop.length)
+		}
+
+		var volumesTop = [];
+		if (params.volumes) {
+			if (_.isString(params.volumes))
+				volumesTop = [params.volumes];
+			else
+				volumesTop = params.volumes;
+		}
+
+		// Figure out number of items
+		var itemCount = 0;
+		if (items.length > 0) itemCount = items.length;
+		else itemCount = Math.max(sourcesTop.length, destinationsTop.length, volumesTop.length);
+
+		// Populate item properties from the top properties
+		if (itemCount > 0) {
+			// Check for compatible lengths
+			if (items.length > 0) {
+				if (sourcesTop.length > 1) assert(sourcesTop.length == itemCount, "`sources` length and `items` length must be equal")
+				if (destinationsTop.length > 1) assert(destinationsTop.length == itemCount, "`destinations` length and `items` length must be equal")
+				if (volumesTop.length > 1) assert(volumesTop.length == itemCount, "`volumes` length and `items` length must be equal")
+			}
+			else {
+				if (sourcesTop.length > 1 && destinationsTop.length > 1) assert(sourcesTop.length == destinationsTop.length, "`sources` length and `destinations` length must be equal")
+				if (sourcesTop.length > 1 && volumesTop.length > 1) assert(sourcesTop.length == volumesTop.length, "`sources` length and `volumes` length must be equal")
+				if (destinationsTop.length > 1 && volumesTop.length > 1) assert(destinationsTop.length == volumesTop.length, "`destinations` length and `volumes` length must be equal")
+			}
+
+			if (items.length == 0) {
+				items = Array(itemCount);
+				for (var i = 0; i < itemCount; i++)
+					items[i] = {};
+			}
+			for (var i = 0; i < itemCount; i++) {
+				//console.log("i:", i)
+				if (!items[i].source) {
+					if (sourcesTop.length == 1)
+						items[i].source = sourcesTop[0];
+					else if (sourcesTop.length > 1)
+						items[i].source = sourcesTop[i];
+				}
+				if (!items[i].destination) {
+					//console.log("step", items[i], destinationsTop, i, destinationsTop[i])
+					if (destinationsTop.length == 1)
+						items[i].destination = destinationsTop[0];
+					else if (destinationsTop.length > 1)
+						items[i].destination = destinationsTop[i];
+				}
+				if (!items[i].volume) {
+					if (volumesTop.length == 1)
+						items[i].volume = volumesTop[0];
+					else if (volumesTop.length > 1)
+						items[i].volume = volumesTop[i];
+				}
+			}
+		}
+		//console.log(JSON.stringify(items, null, '  '))
 
 		// Find all wells, both sources and destinations
 		var wellName_l = _(items).map(function (item) {
@@ -228,7 +298,7 @@ var commandHandlers = {
 
 		// FIXME: allow for overriding tipModel via params
 
-		var sourceToItems = _.groupBy(group, 'source');
+		var sourceToItems = _.groupBy(items, 'source');
 
 		// Try to find tipModel, first for all items
 		if (!findTipModel(items)) {

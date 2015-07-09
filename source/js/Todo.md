@@ -34,8 +34,8 @@
 - [x] test.js: '-O' parameter for output directory
 - [x] test.js: allow for loading YAML protocols
 - [x] ourlab.js: setup labware models
+- [x] start creating unit tests
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
-- [ ] start creating unit tests
 - [ ] test.js: generate table for labware
 - [ ] test.js: generate table for sources (which stock goes where in what volume)
 - [ ] test.js: generate table for final well contents
@@ -44,6 +44,8 @@
 - [ ] write program to generate part of ourlab.mario from the evoware config files
 - [ ] reader command
 - [ ] mix command
+- [ ] support creation of well groups, including random ones, and then implement 'free' verb in wellsParser
+- [ ] support creation of well groups by commands, so that the same wells can be edited future commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
 - [ ] figure out how to implement variable expansion/evaluation
 - [ ] figure out how to implement for-comprehensions for both commands and list
