@@ -3,6 +3,7 @@ var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 var yaml = require('yamljs');
+var misc = require('./misc.js');
 
 function run(argv, userProtocol) {
 	var opts = require('nomnom')
@@ -146,6 +147,7 @@ function run(argv, userProtocol) {
 		var objects0 = _.cloneDeep(protocol.objects);
 		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
 		expandSteps(protocol, [], protocol.steps, objects0);
+		return objects0;
 	}
 
 	function expandSteps(protocol, prefix, steps, objects) {
@@ -253,7 +255,7 @@ function run(argv, userProtocol) {
 		return instructions;
 	}
 
-	expandProtocol(protocol);
+	var objectsFinal = expandProtocol(protocol);
 	if (opts.debug || opts.printProtocol) {
 		console.log();
 		console.log("Protocol:")
@@ -294,6 +296,19 @@ function run(argv, userProtocol) {
 				errors: protocol.errors
 			}
 		);
+
+		var labwareTable = [];
+		_.forEach(misc.getObjectsOfType(objectsFinal, ['Plate']), function(labware, name) {
+			labwareTable.push(_.merge({}, {
+				labware: name,
+				type: labware.type,
+				model: labware.model,
+				locationInitial: misc.getObjectsValue(protocol.objects, name+'.location'),
+				locationFinal: labware.location
+			}));
+		});
+		_.merge(output, {tables: {labware: labwareTable}});
+
 		if (opts.debug) {
 			console.log();
 			console.log("Output:")

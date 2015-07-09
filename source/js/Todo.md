@@ -37,10 +37,10 @@
 - [x] start creating unit tests
 - [x] setup module for processing protocols as a function
 - [x] create unit test for a pipetting protocol
-- [ ] test.js: generate table for labware
-- [ ] test.js: generate table for sources (which stock goes where in what volume)
-- [ ] test.js: generate table for final well contents
-- [ ] test.js: generate table of pipetting actions for well contents by step
+- [x] roboliq.js: generate table for labware
+- [ ] roboliq.js: generate table for sources (which stock goes where in what volume)
+- [ ] roboliq.js: generate table for final well contents
+- [ ] roboliq.js: generate table of pipetting actions for well contents by step
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] write program to generate part of ourlab.mario from the evoware config files
 - [ ] reader command
@@ -241,3 +241,56 @@ type: Eval.Wells
 
       - {source: water, destination: plate1(A02), volume: 10ul}
       - {source: water, destination: plate1(B02), volume: 10ul}
+
+# Reports
+
+## Labware
+
+    reports:
+        labware:
+        - labware: plate1
+          type: Plate
+          model: ...
+          locationInitial: P3
+          locationFinal: P3
+
+## Wells
+
+    reports:
+        wells:
+            plate1(A01):
+                isSource: true
+                contentsInitial:
+                    water: 0ul
+                volumeAdded: XXX
+                volumeRemoved: 60ul
+                contentsFinal:
+                    water: -60ul
+        sources:
+            water:
+        sourceWells:
+            water:
+            - well: plate1(A01)
+              volume: 0ul
+        wellContentsInitial:
+        - well: plate1(A01)
+          volume: 0ul
+          water: 0ul
+        wellContentsFinal:
+        - well: plate1(A01)
+          volume: -60ul
+          water: -60ul
+        - well: plate1(A02)
+          volume: 60ul
+          water: 60ul
+
+## Command Reports
+
+An example of a command report/table would be for the reader command.
+The reader will read a plate and produce an output file.  To analyze it,
+we need to know what the contents of the plate were.
+So the command should create a report of the well contents before readout.
+
+    reports:
+        step-2:
+            {}
