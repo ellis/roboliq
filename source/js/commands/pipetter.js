@@ -385,35 +385,43 @@ var commandHandlers = {
 			}
 		}
 
-		var assignProgram = function(items) {
-			var pipettingClass = findPipettingClass(items);
-			if (!pipettingClass) return false;
-			var pipettingPosition = findPipettingPosition(items);
-			if (!pipettingPosition) return false;
-			var tipModels = _(items).map('tipModel').uniq().value();
-			if (tipModels.length !== 1) return false;
-			var tipModel = tipModels[0];
-			if (tipModel.indexOf("0050") >= 0) tipModelCode = "0050";
-			else tipModelCode = "1000";
-			var program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
-			_.forEach(items, function(item) { item.program = program; });
-			return true;
-		}
-
-		// FIXME: allow for overriding program via params
-		// Try to find program, first for all items
-		if (!assignProgram(items)) {
-			// Try to find program for each source
-			_.forEach(sourceToItems, function(items) {
-				if (!assignProgram(items)) {
-					// Try to find program for each item for this source
-					_.forEach(items, function(item) {
-						if (!assignProgram([item])) {
-							throw {name: "ProcessingError", message: "could not automatically choose a program for item: "+JSON.stringify(item)};
-						}
-					});
-				}
+		// Assign programs to items
+		if (params.program) {
+			_.forEach(items, function(item) {
+				if (!item.program)
+					item.program = params.program;
 			});
+		}
+		else {
+			var assignProgram = function(items) {
+				var pipettingClass = findPipettingClass(items);
+				if (!pipettingClass) return false;
+				var pipettingPosition = findPipettingPosition(items);
+				if (!pipettingPosition) return false;
+				var tipModels = _(items).map('tipModel').uniq().value();
+				if (tipModels.length !== 1) return false;
+				var tipModel = tipModels[0];
+				if (tipModel.indexOf("0050") >= 0) tipModelCode = "0050";
+				else tipModelCode = "1000";
+				var program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
+				_.forEach(items, function(item) { item.program = program; });
+				return true;
+			}
+
+			// Try to find program, first for all items
+			if (!assignProgram(items)) {
+				// Try to find program for each source
+				_.forEach(sourceToItems, function(items) {
+					if (!assignProgram(items)) {
+						// Try to find program for each item for this source
+						_.forEach(items, function(item) {
+							if (!assignProgram([item])) {
+								throw {name: "ProcessingError", message: "could not automatically choose a program for item: "+JSON.stringify(item)};
+							}
+						});
+					}
+				});
+			}
 		}
 
 		// Limit syringe choices based on params

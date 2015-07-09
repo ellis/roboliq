@@ -1,0 +1,18 @@
+description: |
+  Distribute source from single well to entire column using the pipette command; override `program`
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_square_transparent_nunc
+    location: ourlab.mario.site.P3
+    contents:
+      A01: [200ul, reagent1]
+
+steps:
+  1:
+    command: pipetter.action.pipette
+    program: '"Roboliq_Water_Air_1000"'
+    sources: plate1(A01)
+    destinations: plate1(A02 down 8)
+    volumes: 20ul
