@@ -50,11 +50,11 @@ var opts = require('nomnom')
 
 var loadedFiles = _.uniq(
 	[
-		'roboliq.js',
+		'config/roboliq.js',
 		'commands/pipetter.js',
 		'commands/sealer.js',
 		'commands/transporter.js',
-		'ourlab.js'
+		'config/ourlab.js'
 	].concat(opts.infiles));
 if (opts.debug) {
 	console.dir(opts);

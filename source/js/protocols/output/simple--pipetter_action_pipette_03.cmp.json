@@ -1,0 +1,386 @@
+{
+	"objects": {
+		"ourlab": {
+			"type": "Namespace",
+			"mario": {
+				"type": "Namespace",
+				"evoware": {
+					"type": "EvowareRobot"
+				},
+				"roma1": {
+					"type": "Transporter",
+					"evowareRoma": 0
+				},
+				"roma2": {
+					"type": "Transporter",
+					"evowareRoma": 1
+				},
+				"liha": {
+					"type": "Pipetter",
+					"syringes": {
+						"1": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
+						},
+						"2": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
+						},
+						"3": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
+						},
+						"4": {
+							"type": "Syringe",
+							"tipModel": "tipModel1000",
+							"tipModelPermanent": "tipModel1000"
+						}
+					}
+				},
+				"sealer": {
+					"type": "Sealer"
+				},
+				"site": {
+					"type": "Namespace",
+					"P2": {
+						"type": "Site",
+						"evowareCarrier": "MP 2Pos H+P Shake",
+						"evowareGrid": 10,
+						"evowareSite": 2
+					},
+					"P3": {
+						"type": "Site",
+						"evowareCarrier": "MP 2Pos H+P Shake",
+						"evowareGrid": 10,
+						"evowareSite": 4
+					},
+					"ROBOSEAL": {
+						"type": "Site",
+						"evowareCarrier": "RoboSeal",
+						"evowareGrid": 35,
+						"evowareSite": 1
+					}
+				},
+				"washProgram": {
+					"type": "Namespace",
+					"flush_1000": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 1,
+						"wasteSite": 2,
+						"cleanerGrid": 1,
+						"cleanerSite": 1,
+						"wasteVolume": 1,
+						"wasteDelay": 500,
+						"cleanerVolume": 1,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": false
+					},
+					"flush_0050": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 1,
+						"wasteSite": 2,
+						"cleanerGrid": 1,
+						"cleanerSite": 1,
+						"wasteVolume": 0.05,
+						"wasteDelay": 500,
+						"cleanerVolume": 0.05,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": false
+					},
+					"light_1000": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 1,
+						"wasteSite": 2,
+						"cleanerGrid": 1,
+						"cleanerSite": 1,
+						"wasteVolume": 4,
+						"wasteDelay": 500,
+						"cleanerVolume": 2,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": false
+					},
+					"thorough_1000": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_1000.esc"
+					},
+					"thorough_0050": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
+					}
+				}
+			},
+			"model": {
+				"type": "Namespace",
+				"plateModel_96_pcr": {
+					"label": "96 well PCR plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "D-BSSE 96 Well PCR Plate"
+				},
+				"plateModel_96_dwp": {
+					"label": "96 well deep-well plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "D-BSSE 96 Well DWP"
+				},
+				"plateModel_384_round": {
+					"label": "384 round-well plate",
+					"rows": 16,
+					"columns": 24,
+					"evowareName": "D-BSSE 384 Well Plate White"
+				},
+				"plateModel_384_square": {
+					"label": "384 square-flat-well white plate",
+					"rows": 16,
+					"columns": 24,
+					"evowareName": "D-BSSE 384 Well Plate White"
+				},
+				"plateModel_384_square_transparent_greiner": {
+					"label": "384 square-flat-well transparent Greiner",
+					"rows": 16,
+					"columns": 24,
+					"evowareName": "384 Sqr Flat Trans Greiner"
+				},
+				"plateModel_96_square_transparent_nunc": {
+					"label": "96 square-well transparent Nunc plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "Ellis Nunc F96 MicroWell"
+				},
+				"troughModel_100ml": {
+					"label": "Trough 100ml",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "Trough 100ml"
+				},
+				"troughModel_100ml_lowvol_tips": {
+					"label": "Trough 100ml LowVol Tips",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "Trough 100ml LowVol Tips"
+				},
+				"tubeHolderModel_1500ul": {
+					"label": "20 tube block 1.5ml",
+					"rows": 4,
+					"columns": 5,
+					"evowareName": "Block 20Pos 1.5 ml Eppendorf"
+				}
+			}
+		},
+		"plate1": {
+			"type": "Plate",
+			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
+			"location": "ourlab.mario.site.P3",
+			"contents": {
+				"A01": [
+					"200ul",
+					"reagent1"
+				]
+			}
+		}
+	},
+	"steps": {
+		"1": {
+			"1": {
+				"1": {
+					"command": "pipetter.instruction.cleanTips",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "ourlab.mario.washProgram.thorough_1000",
+					"syringes": [
+						1,
+						2,
+						3,
+						4
+					]
+				},
+				"command": "pipetter.action.cleanTips",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"intensity": "thorough",
+				"syringes": [
+					1,
+					2,
+					3,
+					4
+				]
+			},
+			"2": {
+				"command": "pipetter.instruction.pipette",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Dry_1000\"",
+				"items": [
+					{
+						"syringe": 1,
+						"source": "plate1(A01)",
+						"destination": "plate1(A02)",
+						"volume": "20ul"
+					},
+					{
+						"syringe": 2,
+						"source": "plate1(A01)",
+						"destination": "plate1(B02)",
+						"volume": "20ul"
+					},
+					{
+						"syringe": 3,
+						"source": "plate1(A01)",
+						"destination": "plate1(C02)",
+						"volume": "20ul"
+					},
+					{
+						"syringe": 4,
+						"source": "plate1(A01)",
+						"destination": "plate1(D02)",
+						"volume": "20ul"
+					}
+				]
+			},
+			"3": {
+				"1": {
+					"command": "pipetter.instruction.cleanTips",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "ourlab.mario.washProgram.thorough_1000",
+					"syringes": [
+						1,
+						2,
+						3,
+						4
+					]
+				},
+				"command": "pipetter.action.cleanTips",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"intensity": "thorough",
+				"syringes": [
+					1,
+					2,
+					3,
+					4
+				]
+			},
+			"4": {
+				"command": "pipetter.instruction.pipette",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Dry_1000\"",
+				"items": [
+					{
+						"syringe": 1,
+						"source": "plate1(A01)",
+						"destination": "plate1(E02)",
+						"volume": "20ul"
+					},
+					{
+						"syringe": 2,
+						"source": "plate1(A01)",
+						"destination": "plate1(F02)",
+						"volume": "20ul"
+					},
+					{
+						"syringe": 3,
+						"source": "plate1(A01)",
+						"destination": "plate1(G02)",
+						"volume": "20ul"
+					},
+					{
+						"syringe": 4,
+						"source": "plate1(A01)",
+						"destination": "plate1(H02)",
+						"volume": "20ul"
+					}
+				]
+			},
+			"5": {
+				"1": {
+					"command": "pipetter.instruction.cleanTips",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "ourlab.mario.washProgram.thorough_1000",
+					"syringes": [
+						1,
+						2,
+						3,
+						4
+					]
+				},
+				"command": "pipetter.action.cleanTips",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"intensity": "thorough",
+				"syringes": [
+					1,
+					2,
+					3,
+					4
+				]
+			},
+			"command": "pipetter.action.pipette",
+			"sources": "plate1(A01)",
+			"destinations": "plate1(A02 down 8)",
+			"volumes": "20ul"
+		}
+	},
+	"effects": {
+		"1.2": {
+			"plate1.contents.A01": [
+				"120 ul",
+				"reagent1"
+			],
+			"plate1.contents.A02": [
+				"20 ul",
+				"reagent1"
+			],
+			"plate1.contents.B02": [
+				"20 ul",
+				"reagent1"
+			],
+			"plate1.contents.C02": [
+				"20 ul",
+				"reagent1"
+			],
+			"plate1.contents.D02": [
+				"20 ul",
+				"reagent1"
+			]
+		},
+		"1.4": {
+			"plate1.contents.A01": [
+				"40 ul",
+				"reagent1"
+			],
+			"plate1.contents.E02": [
+				"20 ul",
+				"reagent1"
+			],
+			"plate1.contents.F02": [
+				"20 ul",
+				"reagent1"
+			],
+			"plate1.contents.G02": [
+				"20 ul",
+				"reagent1"
+			],
+			"plate1.contents.H02": [
+				"20 ul",
+				"reagent1"
+			]
+		}
+	},
+	"warnings": {},
+	"errors": {}
+}
