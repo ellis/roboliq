@@ -4,6 +4,7 @@ var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 var yaml = require('yamljs');
 var misc = require('./misc.js');
+var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
 
 function run(argv, userProtocol) {
 	var opts = require('nomnom')
@@ -297,9 +298,13 @@ function run(argv, userProtocol) {
 			}
 		);
 
-		var labwareTable = [];
+		var tables = {
+			labware: [],
+			sourceWells: []
+		}
+		// Construct labware table
 		_.forEach(misc.getObjectsOfType(objectsFinal, ['Plate']), function(labware, name) {
-			labwareTable.push(_.merge({}, {
+			tables.labware.push(_.merge({}, {
 				labware: name,
 				type: labware.type,
 				model: labware.model,
@@ -307,7 +312,43 @@ function run(argv, userProtocol) {
 				locationFinal: labware.location
 			}));
 		});
-		_.merge(output, {tables: {labware: labwareTable}});
+		// Construct sourceWells table
+		var tabulateWELLSSource = function(o, id) {
+			console.log("tabulateWELLSSource", o, id)
+			if (o.isSource) {
+				/* Example:
+				- source: water
+		          well: plate1(A01)
+		          volume: 0ul
+		          volumeRemoved: 60ul
+				*/
+				var wellName = (id.indexOf(".contents.") >= 0)
+					? id.replace('.contents.', '(')+')'
+					: id.replace('.contents', '()');
+				var contents = misc.getObjectsValue(objectsFinal, id);
+				var source = (contents.length == 2 && _.isString(contents[1]))
+					? contents[1]
+					: wellName;
+				var volumeInitial = (misc.getObjectsValue(protocol.objects, id) || ["0ul"])[0];
+				var volumeFinal = contents[0];
+				tables.sourceWells.push({source: source, well: wellName, volumeInitial: volumeInitial, volumeFinal: volumeFinal, volumeRemoved: o.volumeRemoved || "0"});
+			}
+		}
+		var tabulateWELLS = function(objects, prefix) {
+			console.log("tabulateWELLS", prefix)
+			_.forEach(objects, function(x, field) {
+				if (field === 'isSource') {
+					tabulateWELLSSource(objects, prefix.join('.'));
+				}
+				else if (_.isObject(x)) {
+					tabulateWELLS(x, prefix.concat([field]));
+				}
+			});
+		}
+		tabulateWELLS(objectsFinal['__WELLS__'] || {}, []);
+
+		//
+		_.merge(output, {tables: tables});
 
 		if (opts.debug) {
 			console.log();

@@ -17,8 +17,8 @@ var emptyVolume = math.eval('0ul');
 function getWellContents(wellName, data, effects) {
 	var wellInfo = sourceParser.parse(wellName);
 	assert(wellInfo.wellId);
-	var labwareContentsName = srcInfo.labware+".contents";
-	var wellContentsName = srcInfo.labware+".contents."+srcInfo.wellId;
+	var labwareContentsName = wellInfo.labware+".contents";
+	var wellContentsName = wellInfo.labware+".contents."+wellInfo.wellId;
 	// Check for well or labware contents in effects object
 	if (!_.isEmpty(effects)) {
 		if (effects.hasOwnProperty(wellContentsName))

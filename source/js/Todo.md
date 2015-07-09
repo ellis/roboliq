@@ -38,7 +38,7 @@
 - [x] setup module for processing protocols as a function
 - [x] create unit test for a pipetting protocol
 - [x] roboliq.js: generate table for labware
-- [ ] roboliq.js: generate table for sources (which stock goes where in what volume)
+- [x] roboliq.js: generate table for sourceWells (which stock goes where in what volume)
 - [ ] roboliq.js: generate table for final well contents
 - [ ] roboliq.js: generate table of pipetting actions for well contents by step
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
@@ -273,7 +273,9 @@ type: Eval.Wells
         sourceWells:
         - source: water
           well: plate1(A01)
-          volume: 0ul
+          volumeInitial: 0ul
+          volumeFinal: -60ul
+          volumeRemoved: 60ul
         wellContentsInitial:
         - well: plate1(A01)
           volume: 0ul
