@@ -5,16 +5,25 @@ describe('wellsParser', function() {
 	var objects = {
 		p: {
 			type: "Plate",
-			model: "m"
+			model: "m96"
 		},
 		q: {
 			type: "Source",
 			wells: ["p(A12)", "p(B12)"]
 		},
-		m: {
+		r: {
+			type: "Plate",
+			model: "m384"
+		},
+		m96: {
 			type: "PlateModel",
 			rows: 8,
 			columns: 12
+		},
+		m384: {
+			type: "PlateModel",
+			rows: 16,
+			columns: 24
 		}
 	}
 	describe('parse()', function() {
@@ -70,7 +79,7 @@ describe('wellsParser', function() {
 		it('should parse `all` subjects', function() {
 			test2("p(all)",
 				[{labware: 'p', subject: 'all', phrases: []}],
-				['p(A01)', 'p(A02)', 'p(A03)', 'p(A04)', 'p(A05)', 'p(A06)', 'p(A07)', 'p(A08)', 'p(A09)', 'p(A10)', 'p(A11)', 'p(A12)', 'p(B01)', 'p(B02)', 'p(B03)', 'p(B04)', 'p(B05)', 'p(B06)', 'p(B07)', 'p(B08)', 'p(B09)', 'p(B10)', 'p(B11)', 'p(B12)', 'p(C01)', 'p(C02)', 'p(C03)', 'p(C04)', 'p(C05)', 'p(C06)', 'p(C07)', 'p(C08)', 'p(C09)', 'p(C10)', 'p(C11)', 'p(C12)', 'p(D01)', 'p(D02)', 'p(D03)', 'p(D04)', 'p(D05)', 'p(D06)', 'p(D07)', 'p(D08)', 'p(D09)', 'p(D10)', 'p(D11)', 'p(D12)', 'p(E01)', 'p(E02)', 'p(E03)', 'p(E04)', 'p(E05)', 'p(E06)', 'p(E07)', 'p(E08)', 'p(E09)', 'p(E10)', 'p(E11)', 'p(E12)', 'p(F01)', 'p(F02)', 'p(F03)', 'p(F04)', 'p(F05)', 'p(F06)', 'p(F07)', 'p(F08)', 'p(F09)', 'p(F10)', 'p(F11)', 'p(F12)', 'p(G01)', 'p(G02)', 'p(G03)', 'p(G04)', 'p(G05)', 'p(G06)', 'p(G07)', 'p(G08)', 'p(G09)', 'p(G10)', 'p(G11)', 'p(G12)', 'p(H01)', 'p(H02)', 'p(H03)', 'p(H04)', 'p(H05)', 'p(H06)', 'p(H07)', 'p(H08)', 'p(H09)', 'p(H10)', 'p(H11)', 'p(H12)']
+				["p(A01)","p(B01)","p(C01)","p(D01)","p(E01)","p(F01)","p(G01)","p(H01)","p(A02)","p(B02)","p(C02)","p(D02)","p(E02)","p(F02)","p(G02)","p(H02)","p(A03)","p(B03)","p(C03)","p(D03)","p(E03)","p(F03)","p(G03)","p(H03)","p(A04)","p(B04)","p(C04)","p(D04)","p(E04)","p(F04)","p(G04)","p(H04)","p(A05)","p(B05)","p(C05)","p(D05)","p(E05)","p(F05)","p(G05)","p(H05)","p(A06)","p(B06)","p(C06)","p(D06)","p(E06)","p(F06)","p(G06)","p(H06)","p(A07)","p(B07)","p(C07)","p(D07)","p(E07)","p(F07)","p(G07)","p(H07)","p(A08)","p(B08)","p(C08)","p(D08)","p(E08)","p(F08)","p(G08)","p(H08)","p(A09)","p(B09)","p(C09)","p(D09)","p(E09)","p(F09)","p(G09)","p(H09)","p(A10)","p(B10)","p(C10)","p(D10)","p(E10)","p(F10)","p(G10)","p(H10)","p(A11)","p(B11)","p(C11)","p(D11)","p(E11)","p(F11)","p(G11)","p(H11)","p(A12)","p(B12)","p(C12)","p(D12)","p(E12)","p(F12)","p(G12)","p(H12)"]
 			)
 		})
 		it('should parse "p(A01)+q"', function() {
@@ -214,7 +223,7 @@ describe('wellsParser', function() {
 			)
 			test2("p(all random(0) take 4)",
 				[{labware: 'p', subject: 'all', phrases: [['random', 0], ['take', 4]]}],
-				['p(F07)', 'p(D05)', 'p(C02)', 'p(G12)']
+				['p(C09)', 'p(A06)', 'p(B04)', 'p(E10)']
 			)
 		})
 		it('should parse `row-jump` phrases', function() {
@@ -225,6 +234,9 @@ describe('wellsParser', function() {
 			test2("p(A01 down block E02 row-jump(1))",
 				[{labware: 'p', subject: 'A01', phrases: [['down-block', 'E02'], ['row-jump', 1]]}],
 				['p(A01)', 'p(C01)', 'p(E01)', 'p(B01)', 'p(D01)', 'p(A02)', 'p(C02)', 'p(E02)', 'p(B02)', 'p(D02)']
+			)
+			test1("r(all row-jump(1) take 2)",
+				['r(A01)', 'r(C01)']
 			)
 		});
 	})

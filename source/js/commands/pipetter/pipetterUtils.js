@@ -22,9 +22,9 @@ function getWellContents(wellName, data, effects) {
 	// Check for well or labware contents in effects object
 	if (!_.isEmpty(effects)) {
 		if (effects.hasOwnProperty(wellContentsName))
-			return effects(wellContentsName);
+			return effects[wellContentsName];
 		if (effects.hasOwnProperty(labwareContentsName))
-			return effects(labwareContentsName);
+			return effects[labwareContentsName];
 	}
 
 	var contents = misc.findObjectsValue(data.objects, wellContentsName);
@@ -126,7 +126,7 @@ function getEffects_pipette(params, data, effects) {
 		var dstContents = (pair[0]) ? pair[0] : ["0ul"];
 		var dstContentsName = pair[1];
 
-		//console.log("dstContents", dstContents)
+		console.log("dstContents", dstContents)
 		var dstVolume = math.eval(dstContents[0]);
 		// Increase total well volume
 		dstContents[0] = math.chain(dstVolume).add(volume).done().format({precision: 14});

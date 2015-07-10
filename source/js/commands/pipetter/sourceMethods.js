@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var assert = require('assert');
+var math = require('mathjs');
 var pipetterUtils = require('./pipetterUtils.js');
-var sourceParser = require('../../parsers/sourceParser.js');
+var wellsParser = require('../../parsers/sourceParser.js');
 
 /*
 - assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
@@ -62,6 +63,7 @@ function sourceMethod3(group, data, effects) {
 	// Consider each source in the group separately
 	var sourceToItems = _.groupBy(group, 'source');
 	_.forEach(sourceToItems, function (items, source) {
+		//console.log("sourceMethod3", items, source)
 		_.forEach(items, function(item) {
 			assert(item.source);
 			if (_.isArray(item.source)) {
@@ -73,15 +75,15 @@ function sourceMethod3(group, data, effects) {
 				else {
 					var wellAndVolumes = _.map(wells, function(wellName) {
 						var volume = pipetterUtils.getWellVolume(wellName, data, effects);
-						return [well, volume.toNumber('ul')];
+						return [wellName, volume.toNumber('ul')];
 					});
 					// Sort by volume
-					math.sort(wellAndVolumes, function(a, b) { return -compare(a[1], b[1])});
+					math.sort(wellAndVolumes, function(a, b) { return -math.compare(a[1], b[1])});
 					// Pick well with greatest volume
 					var wellName = wellAndVolumes[0][0];
-					item.sourceWell = wellName;
+					item.source = wellName;
 					// Get effect of pipetting, so that source volumes are changed appropriately
-					var effect = pipetterUtils.getEffects_pipette({items: [item]});
+					var effect = pipetterUtils.getEffects_pipette({items: [item]}, data, effects);
 					_.merge(effects, effect);
 				}
 			}

@@ -13,15 +13,15 @@ steps:
     command: pipetter.action.pipette
     program: Roboliq_Water_Air_1000
     sources: ourlab.mario.systemLiquid
-    destinations: balancePlate(all row-jump(1) take 375)
+    destinations: balancePlate(all row-jump(1) take 2)
     volumes: 75ul
     cleanBetween: none
 
-  2:
-    command: sealer.action.sealPlate
-    object: balancePlate
+#  2:
+#    command: sealer.action.sealPlate
+#    object: balancePlate
 
-  3:
-    command: transporter.action.movePlate:
-    object: balancePlate
-    destination: CENTRIFUGE_4
+#  3:
+#    command: transporter.action.movePlate:
+#    object: balancePlate
+#    destination: CENTRIFUGE_4

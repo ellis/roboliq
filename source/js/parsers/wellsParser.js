@@ -18,6 +18,7 @@ function locationRowColToText(row, col) {
 }
 
 function parse(text, objects) {
+	assert(_.isString(text), "wellsParser.parseOne() expected a string, received: "+text)
 	var result;
 	try {
 		result = wellsParser0.parse(text);
@@ -39,8 +40,8 @@ function parse(text, objects) {
 			assert(model.columns, "`"+modelName+".columns` missing");
 			var l = [];
 			if (clause.subject === 'all') {
-				for (row = 1; row <= model.rows; row++) {
-					for (col = 1; col <= model.columns; col++) {
+				for (col = 1; col <= model.columns; col++) {
+					for (row = 1; row <= model.rows; row++) {
 						l.push([row, col]);
 					}
 				}
@@ -252,10 +253,12 @@ function parse(text, objects) {
 }
 
 function parseOne(text) {
+	assert(_.isString(text), "wellsParser.parseOne() expected a string, received: "+JSON.stringify(text))
 	try {
 		return wellsParser0.parse(text, {startRule: 'startOne'});
 	} catch (e) {
-		throw Error(e.toString());
+		throw e;
+		//throw Error(e.toString());
 	}
 
 }

@@ -52,6 +52,7 @@ var commandHandlers = {
 		};
 	},
 	"pipetter.instruction.pipette": function(params, data) {
+		console.log("params", JSON.stringify(params, null, '  '))
 		console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
 		return {
 			effects: createEffects_pipette(params, data)
@@ -192,13 +193,20 @@ var commandHandlers = {
 			}
 			for (var i = 0; i < itemCount; i++) {
 				//console.log("i:", i)
-				if (!items[i].source) {
+				if (items[i].source) {
+					items[i].source = wellsParser.parse(items[i].source, data.objects);
+				}
+				else {
 					if (sourcesTop.length == 1)
 						items[i].source = sourcesTop[0];
 					else if (sourcesTop.length > 1)
 						items[i].source = sourcesTop[i];
 				}
-				if (!items[i].destination) {
+
+				if (items[i].destination) {
+					items[i].destination = wellsParser.parseOne(items[i].source);
+				}
+				else {
 					//console.log("step", items[i], destinationsTop, i, destinationsTop[i])
 					if (destinationsTop.length == 1)
 						items[i].destination = destinationsTop[0];
@@ -587,7 +595,7 @@ var commandHandlers = {
 			var items2 = _.map(group, function(item) {
 				return {
 					syringe: item.syringe,
-					source: item.sourceWell,
+					source: item.source,
 					destination: item.destination,
 					volume: item.volume
 				};
