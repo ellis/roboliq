@@ -34,8 +34,8 @@ function parse(text, objects) {
 	var ll = _.map(result, function(clause) {
 		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
 		if (clause.labware) {
-			var modelName = misc.getObjectsValue(objects, clause.labware+".model");
-			var model = misc.getObjectsValue(objects, modelName);
+			var modelName = misc.getObjectsValue(clause.labware+".model", objects);
+			var model = misc.getObjectsValue(modelName, objects);
 			assert(model.rows, "`"+modelName+".rows` missing");
 			assert(model.columns, "`"+modelName+".columns` missing");
 			var l = [];
@@ -239,7 +239,7 @@ function parse(text, objects) {
 			});
 		}
 		else if (clause.source) {
-			var wells = misc.findObjectsValue(objects, clause.source+".wells");
+			var wells = misc.findObjectsValue(clause.source+".wells", objects);
 			if (wells) return [wells];
 			else return clause.source;
 		}

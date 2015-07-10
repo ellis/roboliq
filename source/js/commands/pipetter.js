@@ -78,7 +78,7 @@ var commandHandlers = {
 		// Check whether labwares are on sites that can be pipetted
 		var syringeToProgram_l = _.map(params.syringes, function(syringe) {
 			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
-			var tipModel = misc.getObjectsValue(data.objects, tipModelRef);
+			var tipModel = misc.getObjectsValue(tipModelRef, data.objects);
 			var query = {
 				"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
 					"agent": agent,
@@ -238,7 +238,7 @@ var commandHandlers = {
 			var i = wellName.indexOf('(');
 			return (i >= 0) ? wellName.substr(0, i) : wellName;
 		}).uniq().value();
-		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(data.objects, name)); });
+		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(name, data.objects)); });
 
 		// Check whether labwares are on sites that can be pipetted
 		var query2_l = [];
@@ -337,7 +337,7 @@ var commandHandlers = {
 				var well = null;
 				// If the source is a source name
 				if (i < 0) {
-					var wells = misc.findObjectsValue(data.objects, source+".wells");
+					var wells = misc.findObjectsValue(source+".wells", data.objects);
 					if (!_.isEmpty(wells))
 						well = wells[0];
 				}
@@ -349,10 +349,10 @@ var commandHandlers = {
 				if (well) {
 					var labware = source.substr(0, i);
 					var wellId = source.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-					var contents = misc.findObjectsValue(data.objects, labware+".contents."+wellId);
+					var contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
 					var liquids = extractLiquidNamesFromContents(contents);
 					var pipettingClasses = _(liquids).map(function(name) {
-						return misc.findObjectsValue(data.objects, name+".pipettingClass", "Water");
+						return misc.findObjectsValue(name+".pipettingClass", data.objects, null, "Water");
 					}).uniq().value();
 					// FIXME: should pick "Water" if water-like liquids have high enough concentration
 					// Use "Water" if present
@@ -385,7 +385,7 @@ var commandHandlers = {
 				var i = well.indexOf('(');
 				var labware = well.substr(0, i);
 				var wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-				var contents = misc.findObjectsValue(data.objects, labware+".contents."+wellId);
+				var contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
 				var liquids = extractLiquidNamesFromContents(contents);
 				return _.isEmpty(liquids) ? "Dry" : "Wet";
 			}).uniq().value();

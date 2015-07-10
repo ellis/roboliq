@@ -308,7 +308,7 @@ function run(argv, userProtocol) {
 				labware: name,
 				type: labware.type,
 				model: labware.model,
-				locationInitial: misc.getObjectsValue(protocol.objects, name+'.location'),
+				locationInitial: misc.getObjectsValue(name+'.location', protocol.objects),
 				locationFinal: labware.location
 			}));
 		});
@@ -325,11 +325,11 @@ function run(argv, userProtocol) {
 				var wellName = (id.indexOf(".contents.") >= 0)
 					? id.replace('.contents.', '(')+')'
 					: id.replace('.contents', '()');
-				var contents = misc.getObjectsValue(objectsFinal, id);
+				var contents = misc.getObjectsValue(id, objectsFinal);
 				var source = (contents.length == 2 && _.isString(contents[1]))
 					? contents[1]
 					: wellName;
-				var volumeInitial = misc.findObjectsValue(protocol.objects, id, ["0ul"])[0];
+				var volumeInitial = misc.findObjectsValue(id, protocol.objects, null, ["0ul"])[0];
 				var volumeFinal = contents[0];
 				tables.sourceWells.push({source: source, well: wellName, volumeInitial: volumeInitial, volumeFinal: volumeFinal, volumeRemoved: o.volumeRemoved || "0"});
 			}

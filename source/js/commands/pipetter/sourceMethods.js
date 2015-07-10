@@ -19,7 +19,7 @@ function sourceMethod1(group, data) {
 		var source = item.source;
 		var sourceInfo = sourceParser.parse(item.source);
 		if (sourceInfo.source) {
-			var wells = getObjectsValue(data.objects, source+".wells");
+			var wells = getObjectsValue(source+".wells", data.objects);
 			assert(!_.isEmpty(wells));
 			item.sourceWell = wells[0];
 		}
@@ -36,7 +36,7 @@ function sourceMethod2(group, data) {
 		var source = item.source;
 		var sourceInfo = sourceParser.parse(item.source);
 		if (sourceInfo.source) {
-			var wells = getObjectsValue(data.objects, source+".wells");
+			var wells = getObjectsValue(source+".wells", data.objects);
 			assert(!_.isEmpty(wells));
 			var i = (sourceToWellIndex.hasOwnProperty(source)) ? sourceToWellIndex[source] : 0;
 			item.sourceWell = wells[i];
@@ -83,8 +83,10 @@ function sourceMethod3(group, data, effects) {
 					var wellName = wellAndVolumes[0][0];
 					item.source = wellName;
 					// Get effect of pipetting, so that source volumes are changed appropriately
-					var effect = pipetterUtils.getEffects_pipette({items: [item]}, data, effects);
-					_.merge(effects, effect);
+					var effects2 = pipetterUtils.getEffects_pipette({items: [item]}, data, effects);
+					_.merge(effects, effects2);
+					//console.log("effects2", effects2)
+					//console.log("effects", effects)
 				}
 			}
 			else {

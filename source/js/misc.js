@@ -19,7 +19,12 @@ function extractValuesFromQueryResults(queryResults, predicateName) {
 	return acc;
 }
 
-function findObjectsValue(objects, key, defaultValue) {
+function findObjectsValue(key, objects, effects, defaultValue, prefix) {
+	if (effects) {
+		var id = (prefix) ? prefix+"."+key : key;
+		if (effects.hasOwnProperty(id))
+			return effects[id];
+	}
 	var l = key.split('.');
 	for (var i = 0; !_.isEmpty(objects) && i < l.length; i++) {
 		if (!objects.hasOwnProperty(l[i]))
@@ -29,14 +34,19 @@ function findObjectsValue(objects, key, defaultValue) {
 	return objects;
 }
 
-function getObjectsValue(objects, key, prefix) {
+function getObjectsValue(key, objects, effects, prefix) {
+	if (effects) {
+		var id = (prefix) ? prefix+"."+key : key;
+		if (effects.hasOwnProperty(id))
+			return effects[id];
+	}
 	var l = key.split('.');
 	for (var i = 0; !_.isEmpty(objects) && i < l.length; i++) {
 		if (!objects.hasOwnProperty(l[i])) {
 			var valueName = _.take(l, i + 1).join('.');
 			if (prefix) valueName = prefix + '.' + valueName;
 			var message = "value `"+valueName+"`: undefined";
-			console.log(message);
+			//console.log(message);
 			throw new Error(message);//{name: "ProcessingError", errors: [message]};
 		}
 		objects = objects[l[i]];

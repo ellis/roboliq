@@ -27,10 +27,10 @@ function getWellContents(wellName, data, effects) {
 			return effects[labwareContentsName];
 	}
 
-	var contents = misc.findObjectsValue(data.objects, wellContentsName);
+	var contents = misc.findObjectsValue(wellContentsName, data.objects, effects);
 	if (!_.isEmpty(contents)) return contents;
 
-	contents = misc.findObjectsValue(data.objects, labwareContentsName);
+	contents = misc.findObjectsValue(labwareContentsName, data.objects, effects);
 	return contents;
 }
 
@@ -73,7 +73,7 @@ function getContentsAndName(wellName, data, effects) {
 		labwareName = wellInfo.labware;
 		// Check for contents of well
 		var contentsName = labwareName+".contents."+wellInfo.wellId;
-		var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
+		var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
 		if (contents)
 			return [contents, contentsName];
 	}
@@ -82,7 +82,7 @@ function getContentsAndName(wellName, data, effects) {
 	//console.log("labwareName", labwareName);
 	var contentsName = labwareName+".contents";
 	//console.log("contentsName", contentsName)
-	var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
+	var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
 	if (contents)
 		return [contents, contentsName];
 
@@ -154,13 +154,14 @@ function getEffects_pipette(params, data, effects) {
 		//console.log("a", srcContentsName);
 		var nameWELL = "__WELLS__."+srcContentsName;
 		//console.log("nameWELL:", nameWELL)
-		var x = misc.findObjectsValue(data.objects, nameWELL);
+		var x = misc.findObjectsValue(nameWELL, data.objects, effects);
 		x = (x) ? _.cloneDeep(x) : {};
 		if (_.isEmpty(x)) {
 			x.isSource = true;
 			x.volumeMin = srcContents0[0];
 			x.volumeMax = srcContents0[0];
 		}
+		//console.log("max:", x.volumeMax, srcVolume1.toString())
 		x.volumeMax = math.max(math.eval(x.volumeMax), srcVolume1).format({precision: 14});
 		x.volumeMin = math.min(math.eval(x.volumeMin), srcVolume1).format({precision: 14});
 		x.volumeRemoved = (x.volumeRemoved)
