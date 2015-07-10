@@ -70,7 +70,7 @@ function sourceMethod3(group, data, effects) {
 				var wells = item.source;
 				assert(!_.isEmpty(wells));
 				if (wells.length === 1) {
-					item.sourceWell = wells[0];
+					item.source = wells[0];
 				}
 				else {
 					var wellAndVolumes = _.map(wells, function(wellName) {
@@ -88,7 +88,7 @@ function sourceMethod3(group, data, effects) {
 				}
 			}
 			else {
-				item.sourceWell = source;
+				//item.source = item.source;
 			}
 		});
 	});

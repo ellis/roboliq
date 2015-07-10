@@ -126,7 +126,7 @@ function getEffects_pipette(params, data, effects) {
 		var dstContents = (pair[0]) ? pair[0] : ["0ul"];
 		var dstContentsName = pair[1];
 
-		console.log("dstContents", dstContents)
+		//console.log("dstContents", dstContents)
 		var dstVolume = math.eval(dstContents[0]);
 		// Increase total well volume
 		dstContents[0] = math.chain(dstVolume).add(volume).done().format({precision: 14});
@@ -151,9 +151,9 @@ function getEffects_pipette(params, data, effects) {
 		effects2[dstContentsName] = dstContents;
 
 		// Update __WELLS__ effects for source
-		console.log("a", srcContentsName);
+		//console.log("a", srcContentsName);
 		var nameWELL = "__WELLS__."+srcContentsName;
-		console.log("nameWELL:", nameWELL)
+		//console.log("nameWELL:", nameWELL)
 		var x = misc.findObjectsValue(data.objects, nameWELL);
 		x = (x) ? _.cloneDeep(x) : {};
 		if (_.isEmpty(x)) {
@@ -166,7 +166,7 @@ function getEffects_pipette(params, data, effects) {
 		x.volumeRemoved = (x.volumeRemoved)
 			? math.chain(math.eval(x.volumeRemoved)).add(volume).done().format({precision: 14})
 			: volume.format({precision: 14});
-		console.log("x:\n"+JSON.stringify(x, null, '  '));
+		//console.log("x:\n"+JSON.stringify(x, null, '  '));
 		effects2[nameWELL] = x;
 	});
 

@@ -52,8 +52,8 @@ var commandHandlers = {
 		};
 	},
 	"pipetter.instruction.pipette": function(params, data) {
-		console.log("params", JSON.stringify(params, null, '  '))
-		console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
+		//console.log("params", JSON.stringify(params, null, '  '))
+		//console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
 		return {
 			effects: createEffects_pipette(params, data)
 		};
@@ -204,7 +204,7 @@ var commandHandlers = {
 				}
 
 				if (items[i].destination) {
-					items[i].destination = wellsParser.parseOne(items[i].source);
+					//items[i].destination = wellsParser.parseOne(items[i].destination);
 				}
 				else {
 					//console.log("step", items[i], destinationsTop, i, destinationsTop[i])
@@ -230,12 +230,12 @@ var commandHandlers = {
 			// TODO: create a function getSourceWells()
 			return [item.source, item.destination]
 		}).flatten().compact().value();
-		wellName_l = _.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop]));
+		wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
+		//console.log("wellName_l", JSON.stringify(wellName_l))
 
 		// Find all labware
 		var labwareName_l = _(wellName_l).map(function (wellName) {
 			var i = wellName.indexOf('(');
-			// TODO: handle case where source is a source object rather than a well
 			return (i >= 0) ? wellName.substr(0, i) : wellName;
 		}).uniq().value();
 		var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(data.objects, name)); });
