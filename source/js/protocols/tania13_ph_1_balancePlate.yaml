@@ -1,0 +1,27 @@
+description: |
+  Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
+
+objects:
+  balancePlate:
+    type: Plate
+    description: balance plate for centrifuge
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P2
+
+steps:
+  1:
+    command: pipetter.action.pipette
+    program: Roboliq_Water_Air_1000
+    sources: ourlab.mario.systemLiquid
+    destinations: balancePlate(all row-jump(1) take 375)
+    volumes: 75ul
+    cleanBetween: none
+
+  2:
+    command: sealer.action.sealPlate
+    object: balancePlate
+
+  3:
+    command: transporter.action.movePlate:
+    object: balancePlate
+    destination: CENTRIFUGE_4

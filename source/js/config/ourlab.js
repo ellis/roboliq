@@ -78,12 +78,17 @@ module.exports = {
 				},
 				"systemLiquid": {
 					"type": "Liquid",
-					"wells": ["systemLiquidLabware(A01)", "systemLiquidLabware(B01)", "systemLiquidLabware(C01)", "systemLiquidLabware(D01)"]
+					"wells": [
+						"ourlab.mario.systemLiquidLabware(A01)",
+						"ourlab.mario.systemLiquidLabware(B01)",
+						"ourlab.mario.systemLiquidLabware(C01)",
+						"ourlab.mario.systemLiquidLabware(D01)"
+					]
 				},
 				"systemLiquidLabware": {
 					"description": "dummy labware representing the system liquid source",
-					"model": "SystemLiquidLabwareModel",
-					"location": "SYSTEM",
+					"model": "ourlab.mario.SystemLiquidLabwareModel",
+					"location": "ourlab.mario.site.SYSTEM",
 					"contents": ["0ul"]
 				},
 				"washProgram": {
@@ -295,6 +300,12 @@ module.exports = {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"site": "ourlab.mario.site.P3"
+		}
+	}, {
+		"pipetter.canAgentEquipmentSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"site": "ourlab.mario.site.SYSTEM"
 		}
 	}, {
 		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {

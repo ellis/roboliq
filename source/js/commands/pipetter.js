@@ -52,6 +52,7 @@ var commandHandlers = {
 		};
 	},
 	"pipetter.instruction.pipette": function(params, data) {
+		console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
 		return {
 			effects: createEffects_pipette(params, data)
 		};
@@ -147,10 +148,12 @@ var commandHandlers = {
 
 		var destinationsTop = [];
 		if (params.destinations) {
-			if (_.isString(params.destinations))
-				destinationsTop = wellsParser.parse(params.destinations, data.objects);
-			else
-				destinationsTop = params.destinations;
+			expect.try({paramName: 'destinations'}, function () {
+				if (_.isString(params.destinations))
+					destinationsTop = wellsParser.parse(params.destinations, data.objects);
+				else
+					destinationsTop = params.destinations;
+			});
 			//console.log("destinationsTop:", destinationsTop)
 			//console.log(destinationsTop.length)
 		}
@@ -210,6 +213,7 @@ var commandHandlers = {
 				}
 			}
 		}
+		//console.log(JSON.stringify(sourcesTop, null, '  '))
 		//console.log(JSON.stringify(items, null, '  '))
 
 		// Find all wells, both sources and destinations
@@ -217,7 +221,8 @@ var commandHandlers = {
 			// TODO: allow source to refer to a set of wells, not just a single well
 			// TODO: create a function getSourceWells()
 			return [item.source, item.destination]
-		}).flatten().value();
+		}).flatten().compact().value();
+		wellName_l = _.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop]));
 
 		// Find all labware
 		var labwareName_l = _(wellName_l).map(function (wellName) {

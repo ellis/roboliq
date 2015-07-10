@@ -37,7 +37,7 @@ function getObjectsValue(objects, key, prefix) {
 			if (prefix) valueName = prefix + '.' + valueName;
 			var message = "value `"+valueName+"`: undefined";
 			console.log(message);
-			throw Error(message);//{name: "ProcessingError", errors: [message]};
+			throw new Error(message);//{name: "ProcessingError", errors: [message]};
 		}
 		objects = objects[l[i]];
 	}

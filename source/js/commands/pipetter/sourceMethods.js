@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var assert = require('assert');
 var pipetterUtils = require('./pipetterUtils.js');
 var sourceParser = require('../../parsers/sourceParser.js');
 
@@ -62,9 +63,9 @@ function sourceMethod3(group, data, effects) {
 	var sourceToItems = _.groupBy(group, 'source');
 	_.forEach(sourceToItems, function (items, source) {
 		_.forEach(items, function(item) {
-			var sourceInfo = sourceParser.parse(item.source);
-			if (sourceInfo.source) {
-				var wells = getObjectsValue(data.objects, source+".wells");
+			assert(item.source);
+			if (_.isArray(item.source)) {
+				var wells = item.source;
 				assert(!_.isEmpty(wells));
 				if (wells.length === 1) {
 					item.sourceWell = wells[0];

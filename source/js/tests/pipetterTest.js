@@ -72,7 +72,13 @@ describe('pipetter', function() {
 					"plate1.contents.A02": [
 						"20 ul",
 						"plate1(A01)"
-					]
+					],
+					'__WELLS__.plate1.contents.A01': {
+						isSource: true,
+						volumeMax: '0 l',
+						volumeMin: '-20 ul',
+						volumeRemoved: '20 ul'
+					}
 				}
 			});
 		})

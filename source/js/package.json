@@ -22,7 +22,7 @@
   },
   "scripts": {
     "test": "mocha tests/",
-    "pegjs": "pegjs parsers/sourceParser.pegjs; pegjs parsers/wellsParser0.pegjs"
+    "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs"
   },
   "author": "Ellis Whitehead",
   "license": "GPL3"

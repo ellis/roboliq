@@ -39,6 +39,8 @@
 - [x] create unit test for a pipetting protocol
 - [x] roboliq.js: generate table for labware
 - [x] roboliq.js: generate table for sourceWells (which stock goes where in what volume)
+- [ ] commands/pipetter/pipetterUtils.js: refactor functions to take 'objects' instead of 'data'
+- [ ] misc.js: getObjectsValue(), change arguments so that name is first, then 'objects' and 'effects'
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files
 - [ ] reader command

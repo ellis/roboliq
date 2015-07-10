@@ -181,7 +181,7 @@ function run(argv, userProtocol) {
 								result = {errors: e.errors};
 							}
 							else {
-								result = {errors: e.toString()};
+								result = {errors: [e.toString()]};
 								throw e;
 							}
 						}

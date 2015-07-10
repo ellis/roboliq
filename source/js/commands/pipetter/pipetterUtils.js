@@ -2,7 +2,7 @@ var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
 var misc = require('../../misc.js');
-var sourceParser = require('../../parsers/sourceParser.js');
+var wellsParser = require('../../parsers/wellsParser.js');
 
 var emptyVolume = math.eval('0ul');
 
@@ -15,7 +15,7 @@ var emptyVolume = math.eval('0ul');
  * @return {array} the contents array if found, otherwise null
  */
 function getWellContents(wellName, data, effects) {
-	var wellInfo = sourceParser.parse(wellName);
+	var wellInfo = wellsParser.parseOne(wellName);
 	assert(wellInfo.wellId);
 	var labwareContentsName = wellInfo.labware+".contents";
 	var wellContentsName = wellInfo.labware+".contents."+wellInfo.wellId;
@@ -57,20 +57,31 @@ function getWellVolume(wellName, data, effects) {
  * @param {object} effects The effects object for effects which have taken place during the command handler and aren't in the data object
 * @return {array} [content, contentName], where content will be null if not found
  */
-function getContentAndName(wellName, data, effects) {
+function getContentsAndName(wellName, data, effects) {
 	if (!effects) effects = {};
 
-	var wellInfo = sourceParser.parse(wellName);
-	assert(wellInfo.wellId);
-
-	// Check for contents of well
-	var contentsName = wellInfo.labware+".contents."+wellInfo.wellId;
-	var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
-	if (contents)
-		return [contents, contentsName];
+	//var i = wellName.indexOf('(');
+	//var wellId = if (i >= 0) {}
+	var wellInfo = wellsParser.parseOne(wellName);
+	var labwareName;
+	//console.log("wellInfo", wellInfo);
+	if (wellInfo.source) {
+		labwareName = wellInfo.source;
+	}
+	else {
+		assert(wellInfo.wellId);
+		labwareName = wellInfo.labware;
+		// Check for contents of well
+		var contentsName = labwareName+".contents."+wellInfo.wellId;
+		var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
+		if (contents)
+			return [contents, contentsName];
+	}
 
 	// Check for contents of labware
-	var contentsName = wellInfo.labware+".contents";
+	//console.log("labwareName", labwareName);
+	var contentsName = labwareName+".contents";
+	//console.log("contentsName", contentsName)
 	var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
 	if (contents)
 		return [contents, contentsName];
@@ -107,11 +118,11 @@ function getEffects_pipette(params, data, effects) {
 		//console.log(JSON.stringify(item));
 		var volume = math.eval(item.volume);
 
-		var pair = getContentAndName(item.source, data, effects);
+		var pair = getContentsAndName(item.source, data, effects);
 		var srcContents0 = (pair[0]) ? pair[0] : ["0ul", item.source];
 		var srcContentsName = pair[1];
 
-		pair = getContentAndName(item.destination, data, effects);
+		pair = getContentsAndName(item.destination, data, effects);
 		var dstContents = (pair[0]) ? pair[0] : ["0ul"];
 		var dstContentsName = pair[1];
 
@@ -140,7 +151,9 @@ function getEffects_pipette(params, data, effects) {
 		effects2[dstContentsName] = dstContents;
 
 		// Update __WELLS__ effects for source
+		console.log("a", srcContentsName);
 		var nameWELL = "__WELLS__."+srcContentsName;
+		console.log("nameWELL:", nameWELL)
 		var x = misc.findObjectsValue(data.objects, nameWELL);
 		x = (x) ? _.cloneDeep(x) : {};
 		if (_.isEmpty(x)) {
@@ -153,7 +166,7 @@ function getEffects_pipette(params, data, effects) {
 		x.volumeRemoved = (x.volumeRemoved)
 			? math.chain(math.eval(x.volumeRemoved)).add(volume).done().format({precision: 14})
 			: volume.format({precision: 14});
-
+		console.log("x:\n"+JSON.stringify(x, null, '  '));
 		effects2[nameWELL] = x;
 	});
 
@@ -161,6 +174,7 @@ function getEffects_pipette(params, data, effects) {
 }
 
 module.exports = {
+	getContentsAndName: getContentsAndName,
 	getEffects_pipette: getEffects_pipette,
 	getWellContents: getWellContents,
 	getWellVolume: getWellVolume,

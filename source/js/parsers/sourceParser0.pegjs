@@ -14,7 +14,12 @@ primary
 
 // FIXME: need to format leading zeros, but the code below won't allow for columns >99
 wellId
-  = row:[A-Z] col:column { return ""+row+(("0" + col).slice(-2)); }
+  = row:[A-Z] col:column
+    {
+      var columnText = col.toString();
+      if (columnText.length < 2) columnText = "0" + columnText;
+      return row.toString()+columnText;
+    }
 
 column "column"
   = digits:[0-9]+ { return parseInt(digits.join(""), 10); }

@@ -18,21 +18,25 @@ function locationRowColToText(row, col) {
 }
 
 function parse(text, objects) {
-	var result = wellsParser0.parse(text);
+	var result;
+	try {
+		result = wellsParser0.parse(text);
+	} catch (e) {
+		throw Error(e.toString());
+	}
 	if (!objects)
 		return result;
 
+	//console.log("text", text)
+	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
 	var ll = _.map(result, function(clause) {
 		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
 		if (clause.labware) {
-			var labware = misc.getObjectsValue(objects, clause.labware);
-			assert(labware);
-			assert(labware.model, "`"+clause.labware+".model` missing");
-			var model = misc.getObjectsValue(objects, labware.model);
-			assert(model, "`"+labware.model+"` missing");
-			assert(model.rows, "`"+labware.model+".rows` missing");
-			assert(model.columns, "`"+labware.model+".columns` missing");
+			var modelName = misc.getObjectsValue(objects, clause.labware+".model");
+			var model = misc.getObjectsValue(objects, modelName);
+			assert(model.rows, "`"+modelName+".rows` missing");
+			assert(model.columns, "`"+modelName+".columns` missing");
 			var l = [];
 			if (clause.subject === 'all') {
 				for (row = 1; row <= model.rows; row++) {
@@ -234,8 +238,9 @@ function parse(text, objects) {
 			});
 		}
 		else if (clause.source) {
-			var wells = misc.getObjectsValue(objects, clause.source+".wells");
-			return [wells];
+			var wells = misc.findObjectsValue(objects, clause.source+".wells");
+			if (wells) return [wells];
+			else return clause.source;
 		}
 		else {
 			assert(false);
@@ -246,6 +251,16 @@ function parse(text, objects) {
 	return _.flatten(ll);
 }
 
+function parseOne(text) {
+	try {
+		return wellsParser0.parse(text, {startRule: 'startOne'});
+	} catch (e) {
+		throw Error(e.toString());
+	}
+
+}
+
 module.exports = {
-	parse: parse
+	parse: parse,
+	parseOne: parseOne
 }

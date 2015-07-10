@@ -11,6 +11,10 @@
 start
   = init:(x:entity ws '+' ws { return x; })* last:entity{ return init.concat.apply([], init).concat(last); }
 
+startOne
+  = labware:ident ws '(' ws wellId:location ws ')' { return {labware:labware, wellId: wellId}; }
+  / source
+
 ws = [ \t]*
 
 spaces = [ \t]+
@@ -47,9 +51,8 @@ locationSubject
 location
   = row:[A-Z] col:integer
   {
-    var columnText = ("0" + col);
-    if (columnText.length > 2)
-      columnText = columnText.substr(1);
+    var columnText = col.toString();
+    if (columnText.length < 2) columnText = "0" + columnText;
     return row.toString()+columnText;
   }
 
