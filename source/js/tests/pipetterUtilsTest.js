@@ -26,21 +26,12 @@ describe('pipetter/pipetterUtils', function() {
 						contents: {
 							A01: contents2
 						}
-					},
-					plate3: {
-						type: "Plate",
-						model: "plateModel1",
-						contents: {
-							A01: {
-								a: contents3
-							}
-						}
 					}
 				}
 			};
 			should.deepEqual(pipetterUtils.getContentsAndName("plate1", data), [contents1, 'plate1.contents']);
-			//should.deepEqual(pipetterUtils.getContentsAndName("plate1", data), contents1);
-			//should.deepEqual(pipetterUtils.getContentsAndName("plate1", data), contents1);
+			should.deepEqual(pipetterUtils.getContentsAndName("plate1(A01)", data), [contents1, 'plate1.contents']);
+			should.deepEqual(pipetterUtils.getContentsAndName("plate2(A01)", data), [contents2, 'plate2.contents.A01']);
 		})
 	})
 })
