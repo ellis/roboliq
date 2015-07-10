@@ -62,7 +62,29 @@ module.exports = {
 						"evowareCarrier": "RoboSeal",
 						"evowareGrid": 35,
 						"evowareSite": 1
+					},
+					"SYSTEM": {
+						"type": "Site",
+						"evowareCarrier": "System",
+						"evowareGrid": -1,
+						"evowareSite": 0
 					}
+				},
+				"systemLiquidLabwareModel": {
+					"description": "dummy labware model representing the system liquid source",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "SystemLiquid"
+				},
+				"systemLiquid": {
+					"type": "Liquid",
+					"wells": ["systemLiquidLabware(A01)", "systemLiquidLabware(B01)", "systemLiquidLabware(C01)", "systemLiquidLabware(D01)"]
+				},
+				"systemLiquidLabware": {
+					"description": "dummy labware representing the system liquid source",
+					"model": "SystemLiquidLabwareModel",
+					"location": "SYSTEM",
+					"contents": ["0ul"]
 				},
 				"washProgram": {
 					"type": "Namespace",

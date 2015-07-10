@@ -69,3 +69,4 @@ locationPhrase
   / 'random' ws '(' ws seed:integer ws ')' { return ['random', seed]; }
   / 'random' ws '(' ws ')' { return ['random']; }
   / 'take' spaces n:integer { return ['take', n]; }
+  / 'row-jump' ws '(' ws n:integer ws ')' { return ['row-jump', n]; }

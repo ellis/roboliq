@@ -93,6 +93,9 @@ module.exports = (function() {
         peg$c53 = function(seed) { return ['random', seed]; },
         peg$c54 = function() { return ['random']; },
         peg$c55 = function(n) { return ['take', n]; },
+        peg$c56 = "row-jump",
+        peg$c57 = { type: "literal", value: "row-jump", description: "\"row-jump\"" },
+        peg$c58 = function(n) { return ['row-jump', n]; },
 
         peg$currPos          = 0,
         peg$reportedPos      = 0,
@@ -1423,6 +1426,72 @@ module.exports = (function() {
                       } else {
                         peg$currPos = s0;
                         s0 = peg$c0;
+                      }
+                      if (s0 === peg$FAILED) {
+                        s0 = peg$currPos;
+                        if (input.substr(peg$currPos, 8) === peg$c56) {
+                          s1 = peg$c56;
+                          peg$currPos += 8;
+                        } else {
+                          s1 = peg$FAILED;
+                          if (peg$silentFails === 0) { peg$fail(peg$c57); }
+                        }
+                        if (s1 !== peg$FAILED) {
+                          s2 = peg$parsews();
+                          if (s2 !== peg$FAILED) {
+                            if (input.charCodeAt(peg$currPos) === 40) {
+                              s3 = peg$c8;
+                              peg$currPos++;
+                            } else {
+                              s3 = peg$FAILED;
+                              if (peg$silentFails === 0) { peg$fail(peg$c9); }
+                            }
+                            if (s3 !== peg$FAILED) {
+                              s4 = peg$parsews();
+                              if (s4 !== peg$FAILED) {
+                                s5 = peg$parseinteger();
+                                if (s5 !== peg$FAILED) {
+                                  s6 = peg$parsews();
+                                  if (s6 !== peg$FAILED) {
+                                    if (input.charCodeAt(peg$currPos) === 41) {
+                                      s7 = peg$c10;
+                                      peg$currPos++;
+                                    } else {
+                                      s7 = peg$FAILED;
+                                      if (peg$silentFails === 0) { peg$fail(peg$c11); }
+                                    }
+                                    if (s7 !== peg$FAILED) {
+                                      peg$reportedPos = s0;
+                                      s1 = peg$c58(s5);
+                                      s0 = s1;
+                                    } else {
+                                      peg$currPos = s0;
+                                      s0 = peg$c0;
+                                    }
+                                  } else {
+                                    peg$currPos = s0;
+                                    s0 = peg$c0;
+                                  }
+                                } else {
+                                  peg$currPos = s0;
+                                  s0 = peg$c0;
+                                }
+                              } else {
+                                peg$currPos = s0;
+                                s0 = peg$c0;
+                              }
+                            } else {
+                              peg$currPos = s0;
+                              s0 = peg$c0;
+                            }
+                          } else {
+                            peg$currPos = s0;
+                            s0 = peg$c0;
+                          }
+                        } else {
+                          peg$currPos = s0;
+                          s0 = peg$c0;
+                        }
                       }
                     }
                   }

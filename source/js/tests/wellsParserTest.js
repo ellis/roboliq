@@ -217,5 +217,15 @@ describe('wellsParser', function() {
 				['p(F07)', 'p(D05)', 'p(C02)', 'p(G12)']
 			)
 		})
+		it('should parse `row-jump` phrases', function() {
+			test2("p(A01 down 4 row-jump(1))",
+				[{labware: 'p', subject: 'A01', phrases: [['down', 4], ['row-jump', 1]]}],
+				['p(A01)', 'p(C01)', 'p(B01)', 'p(D01)']
+			)
+			test2("p(A01 down block E02 row-jump(1))",
+				[{labware: 'p', subject: 'A01', phrases: [['down-block', 'E02'], ['row-jump', 1]]}],
+				['p(A01)', 'p(C01)', 'p(E01)', 'p(B01)', 'p(D01)', 'p(A02)', 'p(C02)', 'p(E02)', 'p(B02)', 'p(D02)']
+			)
+		});
 	})
 })

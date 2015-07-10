@@ -197,6 +197,31 @@ function parse(text, objects) {
 							assert(n >= 0);
 							l = _.take(l, n);
 							break;
+						case "row-jump":
+							// Number of rows of space to leave between rows
+							var n = phrase[1];
+							expect.truthy(null, n >= 0, "row-spacing value must be >= 0");
+							var cycleLen = n + 1;
+
+							var l2 = [];
+							while (l.length > 0) {
+								// Get consecutive rc's that are in the same col
+								var col = l[0][1];
+								var sameCol = _.takeWhile(l, function(rc) { return rc[1] == col; });
+								l = _.drop(l, sameCol.length);
+
+								//console.dir(sameCol);
+								while (sameCol.length > 0) {
+									var row = sameCol[0][0];
+									var l3 = _.remove(sameCol, function(rc) {
+										return (((rc[0] - row) % cycleLen) === 0);
+									});
+									//console.log(row, l3, sameCol);
+									l2 = l2.concat(l3);
+								}
+							}
+							l = l2;
+							break;
 						default:
 							assert(false, "unhandled verb: "+phrase[0]);
 					}
