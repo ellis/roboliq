@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+var expect = require('../expect.js');
 var misc = require('../misc.js');
 var groupingMethods = require('./pipetter/groupingMethods.js');
 var pipetterUtils = require('./pipetter/pipetterUtils.js');
@@ -76,9 +77,6 @@ var commandHandlers = {
 		var syringeToProgram_l = _.map(params.syringes, function(syringe) {
 			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
 			var tipModel = misc.getObjectsValue(data.objects, tipModelRef);
-			if (!tipModel) {
-				return {errors: [tipModelRef+" must be set"]};
-			}
 			var query = {
 				"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
 					"agent": agent,
@@ -139,10 +137,12 @@ var commandHandlers = {
 
 		var sourcesTop = [];
 		if (params.sources) {
-			if (_.isString(params.sources))
-				sourcesTop = wellsParser.parse(params.sources, data.objects);
-			else
-				sourcesTop = params.sources;
+			expect.try({paramName: 'sources'}, function () {
+				if (_.isString(params.sources))
+					sourcesTop = wellsParser.parse(params.sources, data.objects);
+				else
+					sourcesTop = params.sources;
+			});
 		}
 
 		var destinationsTop = [];
@@ -324,7 +324,7 @@ var commandHandlers = {
 				var well = null;
 				// If the source is a source name
 				if (i < 0) {
-					var wells = misc.getObjectsValue(data.objects, source+".wells");
+					var wells = misc.findObjectsValue(data.objects, source+".wells");
 					if (!_.isEmpty(wells))
 						well = wells[0];
 				}
@@ -336,10 +336,10 @@ var commandHandlers = {
 				if (well) {
 					var labware = source.substr(0, i);
 					var wellId = source.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-					var contents = misc.getObjectsValue(data.objects, labware+".contents."+wellId);
+					var contents = misc.findObjectsValue(data.objects, labware+".contents."+wellId);
 					var liquids = extractLiquidNamesFromContents(contents);
 					var pipettingClasses = _(liquids).map(function(name) {
-						return misc.getObjectsValue(data.objects, name+".pipettingClass") || "Water";
+						return misc.findObjectsValue(data.objects, name+".pipettingClass", "Water");
 					}).uniq().value();
 					// FIXME: should pick "Water" if water-like liquids have high enough concentration
 					// Use "Water" if present
@@ -372,7 +372,7 @@ var commandHandlers = {
 				var i = well.indexOf('(');
 				var labware = well.substr(0, i);
 				var wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-				var contents = misc.getObjectsValue(data.objects, labware+".contents."+wellId);
+				var contents = misc.findObjectsValue(data.objects, labware+".contents."+wellId);
 				var liquids = extractLiquidNamesFromContents(contents);
 				return _.isEmpty(liquids) ? "Dry" : "Wet";
 			}).uniq().value();

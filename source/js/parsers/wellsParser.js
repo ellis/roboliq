@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var random = require('random-js');
+var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser0 = require('./wellsParser0.js');
 
@@ -208,9 +209,8 @@ function parse(text, objects) {
 			});
 		}
 		else if (clause.source) {
-			var source = misc.getObjectsValue(objects, clause.source);
-			assert(!_.isEmpty(source.wells), "`"+clause.source+".wells` missing");
-			return [source.wells];
+			var wells = misc.getObjectsValue(objects, clause.source+".wells");
+			return [wells];
 		}
 		else {
 			assert(false);

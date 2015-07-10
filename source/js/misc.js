@@ -19,13 +19,29 @@ function extractValuesFromQueryResults(queryResults, predicateName) {
 	return acc;
 }
 
-function getObjectsValue(objects, key) {
+function findObjectsValue(objects, key, defaultValue) {
 	var l = key.split('.');
-	while (l.length > 1 && !_.isEmpty(objects)) {
-		objects = objects[l[0]];
-		l = _.rest(l);
+	for (var i = 0; !_.isEmpty(objects) && i < l.length; i++) {
+		if (!objects.hasOwnProperty(l[i]))
+			return (defaultValue) ? defaultValue : null;
+		objects = objects[l[i]];
 	}
-	return (_.isEmpty(objects)) ? null : objects[l[0]];
+	return objects;
+}
+
+function getObjectsValue(objects, key, prefix) {
+	var l = key.split('.');
+	for (var i = 0; !_.isEmpty(objects) && i < l.length; i++) {
+		if (!objects.hasOwnProperty(l[i])) {
+			var valueName = _.take(l, i + 1).join('.');
+			if (prefix) valueName = prefix + '.' + valueName;
+			var message = "value `"+valueName+"`: undefined";
+			console.log(message);
+			throw Error(message);//{name: "ProcessingError", errors: [message]};
+		}
+		objects = objects[l[i]];
+	}
+	return objects;
 }
 
 function getObjectsOfType(objects, types, prefix) {
@@ -52,5 +68,6 @@ function getObjectsOfType(objects, types, prefix) {
 module.exports = {
 	extractValuesFromQueryResults: extractValuesFromQueryResults,
 	getObjectsOfType: getObjectsOfType,
-	getObjectsValue: getObjectsValue
+	getObjectsValue: getObjectsValue,
+	findObjectsValue: findObjectsValue
 }

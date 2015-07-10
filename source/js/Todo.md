@@ -299,3 +299,9 @@ So the command should create a report of the well contents before readout.
     reports:
         step-2:
             {}
+
+# Error reporting
+
+    1.1: parameter `sources`: value `systemLiquid`: undefined
+    1.2: parameters `items`, `sources`, `destinations`: must have equal lengths
+    1.3: value `plate1.model`: undefined, please set a value

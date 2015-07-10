@@ -314,7 +314,7 @@ function run(argv, userProtocol) {
 		});
 		// Construct sourceWells table
 		var tabulateWELLSSource = function(o, id) {
-			console.log("tabulateWELLSSource", o, id)
+			//console.log("tabulateWELLSSource", o, id)
 			if (o.isSource) {
 				/* Example:
 				- source: water
@@ -329,13 +329,13 @@ function run(argv, userProtocol) {
 				var source = (contents.length == 2 && _.isString(contents[1]))
 					? contents[1]
 					: wellName;
-				var volumeInitial = (misc.getObjectsValue(protocol.objects, id) || ["0ul"])[0];
+				var volumeInitial = misc.findObjectsValue(protocol.objects, id, ["0ul"])[0];
 				var volumeFinal = contents[0];
 				tables.sourceWells.push({source: source, well: wellName, volumeInitial: volumeInitial, volumeFinal: volumeFinal, volumeRemoved: o.volumeRemoved || "0"});
 			}
 		}
 		var tabulateWELLS = function(objects, prefix) {
-			console.log("tabulateWELLS", prefix)
+			//console.log("tabulateWELLS", prefix)
 			_.forEach(objects, function(x, field) {
 				if (field === 'isSource') {
 					tabulateWELLSSource(objects, prefix.join('.'));

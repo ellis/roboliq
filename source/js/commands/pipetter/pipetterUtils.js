@@ -27,10 +27,10 @@ function getWellContents(wellName, data, effects) {
 			return effects(labwareContentsName);
 	}
 
-	var contents = misc.getObjectsValue(data.objects, wellContentsName);
+	var contents = misc.findObjectsValue(data.objects, wellContentsName);
 	if (!_.isEmpty(contents)) return contents;
 
-	contents = misc.getObjectsValue(data.objects, labwareContentsName);
+	contents = misc.findObjectsValue(data.objects, labwareContentsName);
 	return contents;
 }
 
@@ -65,13 +65,13 @@ function getContentAndName(wellName, data, effects) {
 
 	// Check for contents of well
 	var contentsName = wellInfo.labware+".contents."+wellInfo.wellId;
-	var contents = effects[contentsName] || misc.getObjectsValue(data.objects, contentsName);
+	var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
 	if (contents)
 		return [contents, contentsName];
 
 	// Check for contents of labware
 	var contentsName = wellInfo.labware+".contents";
-	var contents = effects[contentsName] || misc.getObjectsValue(data.objects, contentsName);
+	var contents = effects[contentsName] || misc.findObjectsValue(data.objects, contentsName);
 	if (contents)
 		return [contents, contentsName];
 
@@ -141,7 +141,7 @@ function getEffects_pipette(params, data, effects) {
 
 		// Update __WELLS__ effects for source
 		var nameWELL = "__WELLS__."+srcContentsName;
-		var x = misc.getObjectsValue(data.objects, nameWELL);
+		var x = misc.findObjectsValue(data.objects, nameWELL);
 		x = (x) ? _.cloneDeep(x) : {};
 		if (_.isEmpty(x)) {
 			x.isSource = true;
