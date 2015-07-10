@@ -23,8 +23,8 @@ class EvowareTableData(
 	val siteIdToLabwareModel_m: Map[CarrierGridSiteIndex, EvowareLabwareModel]
 ) {
 	def print() {
-		for (gridIndex <- 0 until carrierIdInternal_l.length) {
-			val carrierId_? = carrierIdInternal_l(gridIndex)
+		for (gridIndex <- -1 until carrierIdInternal_l.length) {
+			val carrierId_? = if (gridIndex >= 0) carrierIdInternal_l(gridIndex) else None
 			val hotelObject_? = hotelObject_l.find(_.gridIndex == gridIndex)
 			val externalObject_? = externalObject_l.find(o => carrierIdToGrids_m.getOrElse(o.carrier.id, Nil).contains(gridIndex))
 			if (carrierId_?.isDefined || hotelObject_?.isDefined || externalObject_?.isDefined) {
