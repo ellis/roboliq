@@ -12,8 +12,6 @@
     "random-js": "~1.0.4"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-jsdoc": "~0.6.7",
     "pegjs": "~0.8.0",
     "jsdoc": "~3.3.2",
     "ink-docstrap": "~0.5.2",
@@ -22,7 +20,8 @@
   },
   "scripts": {
     "test": "mocha tests/",
-    "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs"
+    "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs",
+    "jsdoc": "jsdoc -r -c jsdoc.json"
   },
   "author": "Ellis Whitehead",
   "license": "GPL3"

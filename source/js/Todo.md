@@ -90,6 +90,7 @@
 When loading JSON/JavaScript files, we expect the following structure:
 
     {
+      roboliq: string,
       objects: {},
       steps: {},
       effects: {},

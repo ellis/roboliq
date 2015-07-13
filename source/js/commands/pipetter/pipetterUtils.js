@@ -1,3 +1,8 @@
+/**
+ * A module of helper functions for the pipetter commands.
+ * @module commands/pipetter/pipetterUtils
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
