@@ -62,14 +62,14 @@ function sourceMethod3(group, data, effects) {
 
 	// Consider each source in the group separately
 	var sourceToItems = _.groupBy(group, 'source');
-	console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
+	//console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
 	_.forEach(sourceToItems, function (items) {
 		//console.log("sourceMethod3", items, source)
 		assert(items[0].source);
 		var wells = _.clone(items[0].source);
 		assert(!_.isEmpty(wells));
 		_.forEach(items, function(item) {
-			console.log("wells: ", wells);
+			//console.log("wells: ", wells);
 			if (_.isArray(wells)) {
 				if (wells.length === 1) {
 					item.source = wells[0];
