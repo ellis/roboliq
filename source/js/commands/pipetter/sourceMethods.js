@@ -62,13 +62,15 @@ function sourceMethod3(group, data, effects) {
 
 	// Consider each source in the group separately
 	var sourceToItems = _.groupBy(group, 'source');
-	_.forEach(sourceToItems, function (items, source) {
+	console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
+	_.forEach(sourceToItems, function (items) {
 		//console.log("sourceMethod3", items, source)
+		assert(items[0].source);
+		var wells = _.clone(items[0].source);
+		assert(!_.isEmpty(wells));
 		_.forEach(items, function(item) {
-			assert(item.source);
-			if (_.isArray(item.source)) {
-				var wells = item.source;
-				assert(!_.isEmpty(wells));
+			console.log("wells: ", wells);
+			if (_.isArray(wells)) {
 				if (wells.length === 1) {
 					item.source = wells[0];
 				}
@@ -82,6 +84,9 @@ function sourceMethod3(group, data, effects) {
 					// Pick well with greatest volume
 					var wellName = wellAndVolumes[0][0];
 					item.source = wellName;
+					// Move the chosen well to the back of the array
+					_.pull(wells, wellName);
+					wells.push(wellName);
 					// Get effect of pipetting, so that source volumes are changed appropriately
 					var effects2 = pipetterUtils.getEffects_pipette({items: [item]}, data, effects);
 					_.merge(effects, effects2);
