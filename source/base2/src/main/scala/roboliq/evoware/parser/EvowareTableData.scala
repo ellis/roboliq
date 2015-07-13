@@ -27,18 +27,16 @@ class EvowareTableData(
 			val carrierId_? = if (gridIndex >= 0) carrierIdInternal_l(gridIndex) else None
 			val hotelObject_? = hotelObject_l.find(_.gridIndex == gridIndex)
 			val externalObject_? = externalObject_l.find(o => carrierIdToGrids_m.getOrElse(o.carrier.id, Nil).contains(gridIndex))
-			if (carrierId_?.isDefined || hotelObject_?.isDefined || externalObject_?.isDefined) {
-				if (carrierId_?.isDefined) {
-					val carrierId = carrierId_?.get
-					val carrier = configFile.mapIdToCarrier(carrierId)
-					printCarrier(gridIndex, carrier)
-				}
-				if (hotelObject_?.isDefined) {
-					printCarrier(gridIndex, hotelObject_?.get.parent)
-				}
-				if (externalObject_?.isDefined) {
-					printCarrier(gridIndex, externalObject_?.get.carrier)
-				}
+			if (carrierId_?.isDefined) {
+				val carrierId = carrierId_?.get
+				val carrier = configFile.mapIdToCarrier(carrierId)
+				printCarrier(gridIndex, carrier)
+			}
+			if (hotelObject_?.isDefined) {
+				printCarrier(gridIndex, hotelObject_?.get.parent)
+			}
+			if (externalObject_?.isDefined) {
+				printCarrier(gridIndex, externalObject_?.get.carrier)
 			}
 		}
 	}

@@ -87,7 +87,7 @@ module.exports = {
 				},
 				"systemLiquidLabware": {
 					"description": "dummy labware representing the system liquid source",
-					"model": "ourlab.mario.SystemLiquidLabwareModel",
+					"model": "ourlab.mario.systemLiquidLabwareModel",
 					"location": "ourlab.mario.site.SYSTEM",
 					"contents": ["0ul", "systemLiquid"]
 				},

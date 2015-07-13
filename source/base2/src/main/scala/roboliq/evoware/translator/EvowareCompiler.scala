@@ -497,9 +497,11 @@ class EvowareCompiler(
 				0
 			).mkString(func+"(", ",", ");")
 	
-			val siteToNameAndModel_m = Map(
-				labwareInfo.cngs -> (labwareInfo.siteName, labwareInfo.labwareModelName)
-			)
+			val siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)] = {
+				// Don't set labware for the "System" liquid site
+				if (labwareInfo.cngs.carrierName == "System") Map()
+				else Map(labwareInfo.cngs -> (labwareInfo.siteName, labwareInfo.labwareModelName))
+			}
 			
 			List(Token(line, JsObject(), siteToNameAndModel_m))
 		}
