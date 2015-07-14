@@ -89,7 +89,7 @@ module.exports = {
 					"description": "dummy labware representing the system liquid source",
 					"model": "ourlab.mario.systemLiquidLabwareModel",
 					"location": "ourlab.mario.site.SYSTEM",
-					"contents": ["Infinity ul", "systemLiquid"]
+					"contents": ["Infinity l", "systemLiquid"]
 				},
 				"washProgram": {
 					"type": "Namespace",
@@ -245,6 +245,11 @@ module.exports = {
 			"above": "ourlab.model.plateModel_96_square_transparent_nunc"
 		}
 	}, {
+		"stackable": {
+			"below": "ourlab.siteModel1",
+			"above": "ourlab.model.plateModel_384_square"
+		}
+	}, {
 		"movePlate_canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.roma1",
@@ -273,7 +278,23 @@ module.exports = {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.roma2",
 			"program": "Narrow",
+			"model": "ourlab.model.plateModel_384_square",
+			"site": "ourlab.mario.site.P2"
+		}
+	}, {
+		"movePlate_canAgentEquipmentProgramModelSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.roma2",
+			"program": "Narrow",
 			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
+			"site": "ourlab.mario.site.ROBOSEAL"
+		}
+	}, {
+		"movePlate_canAgentEquipmentProgramModelSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.roma2",
+			"program": "Narrow",
+			"model": "ourlab.model.plateModel_384_square",
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
 	}, {
@@ -287,6 +308,14 @@ module.exports = {
 			"equipment": "ourlab.mario.sealer",
 			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
+			"site": "ourlab.mario.site.ROBOSEAL"
+		}
+	}, {
+		"sealer.canAgentEquipmentProgramModelSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.sealer",
+			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
+			"model": "ourlab.model.plateModel_384_square",
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
 	}, {

@@ -57,7 +57,7 @@ var commandHandlers = {
 					"site": "?site"
 				}
 			};
-			var resultList2 = llpl.query(query);
+			var resultList2 = llpl.query(query2);
 			if (_.isEmpty(resultList2)) {
 				return {
 					errors: ["missing sealer data (please add predicates `sealer.canAgentEquipmentProgramModelSite`)"]

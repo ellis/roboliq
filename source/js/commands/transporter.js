@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var misc = require('../misc.js');
 
 var objectToPredicateConverters = {
 	"Transporter": function(name, data) {
@@ -52,10 +53,13 @@ var commandHandlers = {
 		/*// DEBUG
 		var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(input);
+		var agentId = params.agent || "?agent";
+		var modelId = misc.findObjectsValue(params.object+".model", data.objects) || "?model";
+		var originId = misc.findObjectsValue(params.object+".location", data.objects) || "?site";
 		var query = {
 			"and": [
-				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
-				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": params.destination}}
+				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": originId}},
+				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": params.destination}}
 			]
 		};
 		var queryResults = llpl.query(query);
@@ -71,7 +75,7 @@ var commandHandlers = {
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		if (_.isEmpty(plan)) {
-			return {errors: ["unable to find a transportation path"]}
+			return {errors: ["unable to find a transportation path for `"+params.object+"` from `"+misc.findObjectsValue(params.object+".location", data.objects)+"` to `"+params.destination+"`"]}
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")

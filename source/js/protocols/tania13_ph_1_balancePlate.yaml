@@ -17,9 +17,9 @@ steps:
     volumes: 75ul
     cleanBetween: none
 
-#  2:
-#    command: sealer.action.sealPlate
-#    object: balancePlate
+  2:
+    command: sealer.action.sealPlate
+    object: balancePlate
 
 #  3:
 #    command: transporter.action.movePlate:
