@@ -89,7 +89,7 @@ module.exports = {
 					"description": "dummy labware representing the system liquid source",
 					"model": "ourlab.mario.systemLiquidLabwareModel",
 					"location": "ourlab.mario.site.SYSTEM",
-					"contents": ["0ul", "systemLiquid"]
+					"contents": ["Infinity ul", "systemLiquid"]
 				},
 				"washProgram": {
 					"type": "Namespace",

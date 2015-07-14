@@ -42,6 +42,8 @@
 - [x] commands/pipetter/pipetterUtils.js: refactor functions to take 'objects' instead of 'data'
 - [x] debug: node main.js -O protocols/output protocols/tania13_ph_1_balancePlate.yaml
 - [x] misc.js: getObjectsValue(), change arguments so that name is first, then 'objects' and 'effects'
+- [x] initialize system liquid's volume to "Infinity l"
+- [x] for uninitialized source volumes, default to "NaN l"
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files
 - [ ] reader command
@@ -59,6 +61,7 @@
 - [ ] figure out how to randomize for-comprehensions and plain lists
 - [ ] figure out how to generate partial factorial design lists
 - [ ] figure out how to split large factorial designs over multiple plates/batches
+- [ ] implement 'import' director for protocols to import other protocols
 - [ ] consider allowing for mathematical expressions (see http://mathjs.org/)
 - [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations

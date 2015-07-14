@@ -66,7 +66,7 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.effects, {
 				"1.2": {
 					"plate1.contents.A01": [
-						"-20 ul",
+						"NaN l",
 						"plate1(A01)"
 					],
 					"plate1.contents.A02": [
@@ -75,13 +75,16 @@ describe('pipetter', function() {
 					],
 					'__WELLS__.plate1.contents.A01': {
 						isSource: true,
-						volumeMax: '0 l',
-						volumeMin: '-20 ul',
+						volumeMax: 'NaN l',
+						volumeMin: 'NaN l',
 						volumeRemoved: '20 ul'
 					}
 				}
 			});
 		})
+
+
+
 
 		it('should pipette from system liquid source', function () {
 			var protocol = {
@@ -171,7 +174,7 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.effects, {
 				"1.1": {
 					"ourlab.mario.systemLiquidLabware.contents": [
-						"-40 ul",
+						"Infinity l",
 						"systemLiquid"
 					],
 					"plate1.contents.A01": [
@@ -180,8 +183,8 @@ describe('pipetter', function() {
 					],
 					"__WELLS__.ourlab.mario.systemLiquidLabware.contents": {
 						"isSource": true,
-						"volumeMin": "-40 ul",
-						"volumeMax": "0 l",
+						"volumeMin": "Infinity l",
+						"volumeMax": "Infinity l",
 						"volumeRemoved": "40 ul"
 					},
 					"plate1.contents.B01": [
@@ -199,7 +202,7 @@ describe('pipetter', function() {
 				},
 				"1.2": {
 					"ourlab.mario.systemLiquidLabware.contents": [
-						"-80 ul",
+						"Infinity l",
 						"systemLiquid"
 					],
 					"plate1.contents.E01": [
@@ -208,8 +211,8 @@ describe('pipetter', function() {
 					],
 					"__WELLS__.ourlab.mario.systemLiquidLabware.contents": {
 						"isSource": true,
-						"volumeMin": "-80 ul",
-						"volumeMax": "0 l",
+						"volumeMin": "Infinity l",
+						"volumeMax": "Infinity l",
 						"volumeRemoved": "80 ul"
 					},
 					"plate1.contents.F01": [
