@@ -88,7 +88,9 @@ function getContentsAndName(wellName, data, effects) {
 	var contentsName = labwareName+".contents";
 	//console.log("contentsName", contentsName)
 	var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
-	if (contents)
+	// If contents is an array, then we have the correct contents;
+	// Otherwise, we have a map of well contents, but no entry for the current well yet
+	if (_.isArray(contents))
 		return [contents, contentsName];
 
 	return [null, wellInfo.labware+".contents."+wellInfo.wellId];
@@ -106,7 +108,8 @@ function flattenContents(contents) {
 * @return {object} The effects caused by the pipetting command.
  */
 function getEffects_pipette(params, data, effects) {
-	var effects2 = {};
+	var effects2 = (effects) ? _.cloneDeep(effects) : {};
+	var effectsNew = {}
 
 	/*__WELLS__:
 		plate1.contents.A01:
@@ -123,13 +126,14 @@ function getEffects_pipette(params, data, effects) {
 		//console.log(JSON.stringify(item));
 		var volume = math.eval(item.volume);
 
-		var pair = getContentsAndName(item.source, data, effects);
+		var pair = getContentsAndName(item.source, data, effects2);
 		var srcContents0 = (pair[0]) ? pair[0] : ["0ul", item.source];
 		var srcContentsName = pair[1];
 
-		pair = getContentsAndName(item.destination, data, effects);
+		pair = getContentsAndName(item.destination, data, effects2);
 		var dstContents = (pair[0]) ? pair[0] : ["0ul"];
 		var dstContentsName = pair[1];
+		//console.log("check", item.destination, pair)
 
 		//console.log("dstContents", dstContents)
 		var dstVolume = math.eval(dstContents[0]);
@@ -154,12 +158,14 @@ function getEffects_pipette(params, data, effects) {
 		// Update content effects
 		effects2[srcContentsName] = srcContents;
 		effects2[dstContentsName] = dstContents;
+		effectsNew[srcContentsName] = srcContents;
+		effectsNew[dstContentsName] = dstContents;
 
 		// Update __WELLS__ effects for source
 		//console.log("a", srcContentsName);
 		var nameWELL = "__WELLS__."+srcContentsName;
 		//console.log("nameWELL:", nameWELL)
-		var x = misc.findObjectsValue(nameWELL, data.objects, effects);
+		var x = misc.findObjectsValue(nameWELL, data.objects, effects2);
 		x = (x) ? _.cloneDeep(x) : {};
 		if (_.isEmpty(x)) {
 			x.isSource = true;
@@ -174,6 +180,7 @@ function getEffects_pipette(params, data, effects) {
 			: volume.format({precision: 14});
 		//console.log("x:\n"+JSON.stringify(x, null, '  '));
 		effects2[nameWELL] = x;
+		effectsNew[nameWELL] = x;
 	});
 
 	return effects2;
