@@ -157,14 +157,18 @@ function run(argv, userProtocol) {
 			return (c >= '0' && c <= '9');
 		}).value();
 		keys.sort(naturalSort);
-		//console.log(keys);
+		//console.log("keys: ",keys);
 		_.forEach(keys, function(key) {
 			var prefix2 = prefix.concat([key]);
 			var id = prefix2.join('.');
+			//console.log("id: "+id)
 			var step = steps[key];
 			var isExpanded = step.hasOwnProperty("1");
 			if (step.hasOwnProperty("command")) {
-				if (commandHandlers.hasOwnProperty(step.command)) {
+				if (!commandHandlers.hasOwnProperty(step.command)) {
+					protocol.warnings[id] = ["unknown command: "+step.command];
+				}
+				else {
 					var handler = commandHandlers[step.command];
 					if (!isExpanded) {
 						var predicates = protocol.predicates.concat(createStateItems(objects));
