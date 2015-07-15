@@ -298,33 +298,23 @@ module.exports = {
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
 	}, {
-		"isSiteClique": {
-			"name": "ourlab.mario.siteClique1",
-			"list":
+		"transporter.canAgentEquipmentProgramSites": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.roma1",
+			"program": "Narrow",
+			"siteClique":
 				{"cons": {"first": "ourlab.mario.site.P2", "rest":
 				{"cons": {"first": "ourlab.mario.site.P3", "rest": "nil"}}}}
 		}
 	}, {
 		"transporter.canAgentEquipmentProgramSites": {
 			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma1",
+			"equipment": "ourlab.mario.roma2",
 			"program": "Narrow",
-			"siteClique": "ourlab.mario.siteClique1"
-		}
-	}, {
-		"isSiteClique": {
-			"name": "ourlab.mario.siteClique2",
-			"list":
+			"siteClique":
 				{"cons": {"first": "ourlab.mario.site.P2", "rest":
 				{"cons": {"first": "ourlab.mario.site.P3", "rest":
 				{"cons": {"first": "ourlab.mario.site.ROBOSEAL", "rest": "nil"}}}}}}
-		}
-	}, {
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Narrow",
-			"siteClique": "ourlab.mario.siteClique2"
 		}
 	}, {
 		"movePlate_excludePath": {

@@ -66,10 +66,9 @@ var commandHandlers = {
 		console.log("originId: "+originId)
 		query = {
 			"and": [
-				{"isSiteClique": {"name": "?cliqueName1", "list": "?cliqueList1"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?cliqueList1"}},
 				{"member": {"target": originId, "list": "?cliqueList1"}},
 				{"member": {"target": params.destination, "list": "?cliqueList1"}},
-				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?cliqueName1"}}
 				/*{"isSiteClique": {"name": "?name", "list": "?list"}},
 				{"member": {"target": originId, "list": "?list"}},
 				{"member": {"target": params.destination, "list": "?list"}},
