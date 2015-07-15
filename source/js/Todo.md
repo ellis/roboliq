@@ -44,8 +44,9 @@
 - [x] misc.js: getObjectsValue(), change arguments so that name is first, then 'objects' and 'effects'
 - [x] initialize system liquid's volume to "Infinity l"
 - [x] for uninitialized source volumes, default to "NaN l"
+- [ ] handle opening and closing of centrifuge during transport
 - [ ] create new scripts for old tania* scripts
-- [ ] write program to generate part of ourlab.mario from the evoware config files
+- [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] reader command
 - [ ] mix command
 - [ ] roboliq.js: generate table for final well contents

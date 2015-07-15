@@ -52,7 +52,7 @@ var commandHandlers = {
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
 		//console.log(JSON.stringify(input, null, '\t'));
 
-		/*// DEBUG
+		// DEBUG
 		var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(input);
 		var agentId = params.agent || "?agent";
@@ -71,7 +71,18 @@ var commandHandlers = {
 				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
 				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": params.destination}},
 			]
-		}
+		};
+		query = {
+			"and": [
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": params.destination}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "siteClique": "?siteClique1"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
+				//{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
+			]
+		};
 		var queryResults = llpl.query(query);
 		console.log("queryResults:\n"+JSON.stringify(queryResults, null, '\t'));
 		// END DEBUG*/

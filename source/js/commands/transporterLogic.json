@@ -71,9 +71,7 @@
 			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
 			{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
 			{"stackable": {"below": "?site2Model", "above": "?model"}},
-			{"siteIsClear": {"site": "?site2"}},
-			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?site2"}},
-			{"movePlate_pathOk": {"siteA": "?site2", "siteB": "?destination"}}
+			{"siteIsClear": {"site": "?site2"}}
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-two"}},
@@ -129,9 +127,7 @@
 			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
 			{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
 			{"stackable": {"below": "?site2Model", "above": "?model"}},
-			{"siteIsClear": {"site": "?site2"}},
-			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?site2"}},
-			{"movePlate_pathOk": {"siteA": "?site2", "siteB": "?destination"}}
+			{"siteIsClear": {"site": "?site2"}}
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-a-two"}},

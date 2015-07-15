@@ -50,7 +50,7 @@ module.exports = {
 		            "CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
 		            "CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
 		            "CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
-		            "CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
+		            "CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": false },
 					"P2": {
 						"type": "Site",
 						"evowareCarrier": "MP 2Pos H+P Shake",
@@ -62,6 +62,12 @@ module.exports = {
 						"evowareCarrier": "MP 2Pos H+P Shake",
 						"evowareGrid": 10,
 						"evowareSite": 4
+					},
+					"REGRIP": {
+						"type": "Site",
+						"evowareCarrier": "ReGrip Station",
+						"evowareGrid": 62,
+						"evowareSite": 1
 					},
 					"ROBOSEAL": {
 						"type": "Site",
@@ -232,12 +238,37 @@ module.exports = {
 		}
 	}, {
 		"siteModel": {
+			"site": "ourlab.mario.site.CENTRIFUGE_1",
+			"siteModel": "ourlab.siteModel1"
+		}
+	}, {
+		"siteModel": {
+			"site": "ourlab.mario.site.CENTRIFUGE_2",
+			"siteModel": "ourlab.siteModel1"
+		}
+	}, {
+		"siteModel": {
+			"site": "ourlab.mario.site.CENTRIFUGE_3",
+			"siteModel": "ourlab.siteModel1"
+		}
+	}, {
+		"siteModel": {
+			"site": "ourlab.mario.site.CENTRIFUGE_4",
+			"siteModel": "ourlab.siteModel1"
+		}
+	}, {
+		"siteModel": {
 			"site": "ourlab.mario.site.P2",
 			"siteModel": "ourlab.siteModel1"
 		}
 	}, {
 		"siteModel": {
 			"site": "ourlab.mario.site.P3",
+			"siteModel": "ourlab.siteModel1"
+		}
+	}, {
+		"siteModel": {
+			"site": "ourlab.mario.site.REGRIP",
 			"siteModel": "ourlab.siteModel1"
 		}
 	}, {
@@ -279,7 +310,23 @@ module.exports = {
 			"program": "Narrow",
 			"siteClique": "ourlab.mario.siteClique2"
 		}
-	}, {
+	},
+	// Centrifuge ROMA1 Narrow
+	_(["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"]).map(function(s) {
+		return [
+			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site.REGRIP"}},
+			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site."+s}},
+			{
+				"transporter.canAgentEquipmentProgramSites": {
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.roma1",
+					"program": "Narrow",
+					"siteClique": "ourlab.mario.siteClique_"+s
+				}
+			}
+		];
+	}).flatten().value(),
+	{
 		"sealer.canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.sealer",
