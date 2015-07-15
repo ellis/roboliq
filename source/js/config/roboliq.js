@@ -1,4 +1,4 @@
-//var _ = require('lodash');
+var _ = require('lodash');
 
 var predicates = [
 	//
@@ -25,6 +25,22 @@ var predicates = [
 				"not": {
 					"location": {
 						"labware": "?labware",
+						"site": "?site"
+					}
+				}
+			}]
+		}
+	},
+
+	// open: a site is open if it's not closed (FUTURE: and if it's not locked)
+	{
+		"<--": {
+			"siteIsOpen": {
+				"site": "?site"
+			},
+			"and": [{
+				"not": {
+					"siteIsClosed": {
 						"site": "?site"
 					}
 				}
@@ -82,11 +98,10 @@ var objectToPredicateConverters = {
 	},
 	"Site": function(name, object) {
 		return {
-			value: [{
-				"isSite": {
-					"model": name
-				}
-			}]
+			value: _.compact([
+				{"isSite": {"model": name}},
+				(object.closed) ? {"siteIsClosed": {"site": name}} : null,
+			])
 		};
 	},
 };

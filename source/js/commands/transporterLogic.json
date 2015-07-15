@@ -11,6 +11,8 @@
 		"preconditions": [
 			{"model": {"labware": "?labware", "model": "?model"}},
 			{"location": {"labware": "?labware", "site": "?origin"}},
+			{"siteIsOpen": {"site": "?origin"}},
+			{"siteIsOpen": {"site": "?destination"}},
 			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},

@@ -22,6 +22,6 @@ steps:
     object: balancePlate
 
   3:
-    command: transporter.action.movePlate
+#    command: transporter.action.movePlate
     object: balancePlate
     destination: CENTRIFUGE_4
