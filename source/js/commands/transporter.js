@@ -49,8 +49,9 @@ var commandHandlers = {
 			}
 		};
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
+		//console.log(JSON.stringify(input, null, '\t'));
 
-		/*// DEBUG
+		// DEBUG
 		var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(input);
 		var agentId = params.agent || "?agent";
@@ -62,6 +63,19 @@ var commandHandlers = {
 				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": params.destination}}
 			]
 		};
+		console.log("originId: "+originId)
+		query = {
+			"and": [
+				{"isSiteClique": {"name": "?cliqueName1", "list": "?cliqueList1"}},
+				{"member": {"target": originId, "list": "?cliqueList1"}},
+				{"member": {"target": params.destination, "list": "?cliqueList1"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?cliqueName1"}}
+				/*{"isSiteClique": {"name": "?name", "list": "?list"}},
+				{"member": {"target": originId, "list": "?list"}},
+				{"member": {"target": params.destination, "list": "?list"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "siteClique": "?name"}}*/
+			]
+		}
 		var queryResults = llpl.query(query);
 		console.log("queryResults:\n"+JSON.stringify(queryResults, null, '\t'));
 		// END DEBUG*/

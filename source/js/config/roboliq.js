@@ -31,6 +31,13 @@ var predicates = [
 			}]
 		}
 	},
+
+	// member of list (see HTN-orig/lists.js)
+	{"<--": {"member": {"target": "?target", "list": {"cons": {"first": "?target",
+								   "rest": "?restOfList"}}}}},
+	{"<--": {"member": {"target": "?target", "list": {"cons": {"first": "?firstOfList",
+								   "rest": "?restOfList"}}},
+		 "and": [{"member": {"target": "?target", "list": "?restOfList"}}]}},
 ];
 
 var objectToPredicateConverters = {
