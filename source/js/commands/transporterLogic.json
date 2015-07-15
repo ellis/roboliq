@@ -15,9 +15,9 @@
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
-			{"member": {"target": "?origin", "list": "?siteClique1"}},
-			{"member": {"target": "?destination", "list": "?siteClique1"}}
+			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
 		],
 		"deletions": [{"location": {"labware": "?labware", "site": "?origin"}}],
 		"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
@@ -42,9 +42,9 @@
 			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 			{"stackable": {"below": "?destinationModel", "above": "?model"}},
 			{"siteIsClear": {"site": "?destination"}},
-			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?origin"}},
-			{"movePlate_canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?destination"}},
-			{"movePlate_pathOk": {"siteA": "?origin", "siteB": "?destination"}}
+			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-one"}},

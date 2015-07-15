@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 module.exports = {
 	objects: {
 		"ourlab": {
@@ -220,7 +222,7 @@ module.exports = {
 		}
 	},
 
-	predicates: [{
+	predicates: _.flatten([{
 		"isSiteModel": {
 			"model": "ourlab.siteModel1"
 		}
@@ -249,77 +251,29 @@ module.exports = {
 			"below": "ourlab.siteModel1",
 			"above": "ourlab.model.plateModel_384_square"
 		}
-	}, {
-		"movePlate_canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma1",
-			"program": "Narrow",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"site": "ourlab.mario.site.P2"
-		}
-	}, {
-		"movePlate_canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma1",
-			"program": "Narrow",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"site": "ourlab.mario.site.P3"
-		}
-	}, {
-		"movePlate_canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Narrow",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"site": "ourlab.mario.site.P2"
-		}
-	}, {
-		"movePlate_canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Narrow",
-			"model": "ourlab.model.plateModel_384_square",
-			"site": "ourlab.mario.site.P2"
-		}
-	}, {
-		"movePlate_canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Narrow",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"site": "ourlab.mario.site.ROBOSEAL"
-		}
-	}, {
-		"movePlate_canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Narrow",
-			"model": "ourlab.model.plateModel_384_square",
-			"site": "ourlab.mario.site.ROBOSEAL"
-		}
-	}, {
+	},
+	// ROMA1 Narrow
+	_.map(["P1", "P2", "P3", "REGRIP"], function(s) {
+		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site."+s}};
+	}),
+	{
 		"transporter.canAgentEquipmentProgramSites": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.roma1",
 			"program": "Narrow",
-			"siteClique":
-				{"cons": {"first": "ourlab.mario.site.P2", "rest":
-				{"cons": {"first": "ourlab.mario.site.P3", "rest": "nil"}}}}
+			"siteClique": "ourlab.mario.siteClique1"
 		}
-	}, {
+	},
+	// ROMA2 Narrow
+	_.map(["P1", "P2", "P3", "ROBOSEAL", "REGRIP"], function(s) {
+		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique2", "site": "ourlab.mario.site."+s}};
+	}),
+	{
 		"transporter.canAgentEquipmentProgramSites": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.roma2",
 			"program": "Narrow",
-			"siteClique":
-				{"cons": {"first": "ourlab.mario.site.P2", "rest":
-				{"cons": {"first": "ourlab.mario.site.P3", "rest":
-				{"cons": {"first": "ourlab.mario.site.ROBOSEAL", "rest": "nil"}}}}}}
-		}
-	}, {
-		"movePlate_excludePath": {
-			"siteA": "ourlab.mario.site.P3",
-			"siteB": "ourlab.mario.site.ROBOSEAL"
+			"siteClique": "ourlab.mario.siteClique2"
 		}
 	}, {
 		"sealer.canAgentEquipmentProgramModelSite": {
@@ -379,5 +333,5 @@ module.exports = {
 			"model": "tipModel1000",
 			"intensity": "thorough"
 		}
-	}, ]
+	}, ])
 }
