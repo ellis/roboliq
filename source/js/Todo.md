@@ -56,6 +56,7 @@
 - [ ] support creation of well groups by commands, so that the same wells can be edited future commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
 - [ ] commands/pipetter.js: pipetter.action.pipette: method 4
+- [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changed on our robot
 - [ ] figure out how to implement variable expansion/evaluation
 - [ ] figure out how to implement for-comprehensions for both commands and list
 - [ ] figure out how to randomize for-comprehensions and plain lists
