@@ -50,7 +50,7 @@ module.exports = {
 		            "CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
 		            "CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
 		            "CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
-		            "CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": false },
+		            "CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
 					"P2": {
 						"type": "Site",
 						"evowareCarrier": "MP 2Pos H+P Shake",
@@ -384,5 +384,23 @@ module.exports = {
 			"model": "tipModel1000",
 			"intensity": "thorough"
 		}
-	}, ])
+	},
+	{"action": {"description": "generic.openSite-CENTRIFUGE_4",
+		"task": {"generic.openSite": {"agent": "?agent", "site": "?site"}},
+		"preconditions": [
+			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}
+		],
+		"subtasks": {"ordered": [
+			{"centrifuge.open": {"site": "?site"}},
+			{"centrifuge.open": {}}
+		]}
+	}},
+	{"action": {"description": "print for debugging",
+		"task": {"print": {"text": "?text"}},
+		"preconditions": [
+		],
+		"deletions": [],
+		"additions": []
+	}},
+	])
 }

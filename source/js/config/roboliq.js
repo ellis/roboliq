@@ -54,6 +54,16 @@ var predicates = [
 	{"<--": {"member": {"target": "?target", "list": {"cons": {"first": "?firstOfList",
 								   "rest": "?restOfList"}}},
 		 "and": [{"member": {"target": "?target", "list": "?restOfList"}}]}},
+
+	 {"method": {"description": "generic.openSite-null: null-operation for opening an already open site",
+ 		"task": {"generic.openSite": {"site": "?site"}},
+ 		"preconditions": [
+ 			{"siteIsOpen": {"site": "?site"}}
+ 		],
+ 		"subtasks": {"ordered": [
+ 			//{"print": {"text": "generic.openSite-null"}}
+ 		]}
+ 	}},
 ];
 
 var objectToPredicateConverters = {
