@@ -22,12 +22,6 @@ steps:
     object: balancePlate
 
   3:
-    #command: centrifuge.instruction.openSite
-    agent: ourlab.mario.evoware
-    equipment: ourlab.mario.centrifuge
-    site: ourlab.mario.site.CENTRIFUGE_4
-
-  4:
     command: transporter.action.movePlate
     object: balancePlate
     destination: ourlab.mario.site.CENTRIFUGE_4

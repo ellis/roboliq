@@ -44,7 +44,7 @@
 - [x] misc.js: getObjectsValue(), change arguments so that name is first, then 'objects' and 'effects'
 - [x] initialize system liquid's volume to "Infinity l"
 - [x] for uninitialized source volumes, default to "NaN l"
-- [ ] handle opening and closing of centrifuge during transport
+- [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] reader command
