@@ -64,10 +64,10 @@
  */
 
 var utils = require('./utils.js');
-var llpl = require('./llpl.js');
 
 function makePlanner(spec) {
 
+  var llpl = require('./llpl.js').create();
 
   ////
   //// Syntax
@@ -441,7 +441,7 @@ function makePlanner(spec) {
     plan["agenda"] = newTaskIDs.concat(plan["agenda"]);
     plan["taskIDs"] = newTaskIDs.concat(plan["taskIDs"]);
     if (!utils.isEmpty(task)) {
-      //      console.log("newTaskIDs == " + utils.pp(newTaskIDs));
+      //console.log("newTaskIDs == " + utils.pp(newTaskIDs));
       for (var i = 0; i < newTaskIDs.length; i++) {
         newTasks.push(taskInstances[newTaskIDs[i]]);
       }
@@ -507,16 +507,19 @@ function makePlanner(spec) {
   // the sought task.
   //
   function findProviders(task, plan) {
+    //console.log("findProviders("+JSON.stringify(task)+")")
     var results = [];
     var provider = {};
     var i, j, id, freshBindings, providerType;
     var possibleProviders = [];
     // Gather possible providers from the library of actions and methods.
     var possibleNewProviders = fetchActionsAndMethods(task);
+    //console.log("possibleNewProviders: "+JSON.stringify(possibleNewProviders))
     // Rename the variables in the possible providers
     for (i = 0; i < possibleNewProviders.length; i++) {
       possibleProviders.push(utils.renameVariables(utils.copyIt(possibleNewProviders[i])));
     }
+    //console.log("possibleProviders: "+JSON.stringify(possibleProviders))
     for (i = 0; i < possibleProviders.length; i++) {
       if (isAction(possibleProviders[i])) {
         providerType = "action";
@@ -524,6 +527,8 @@ function makePlanner(spec) {
         providerType = "method";
       }
       freshBindings = utils.copyIt(plan["bindings"]);
+      //console.log("freshBindings: "+JSON.stringify(freshBindings))
+      //console.log("more: "+JSON.stringify(possibleProviders[i][providerType]["task"]))
       // If the task unifies with the task attribute of the possibleProvider...
       if (utils.unifyPatterns(task, possibleProviders[i][providerType]["task"], freshBindings)) {
         // ...then push another 3-tuple on the results:
@@ -783,7 +788,7 @@ function makePlanner(spec) {
   // refinePlan(plan): array of successor plans
   //
   function refinePlan(plan) {
-    //alert("current plan: " + ppPlan(plan));
+    //console.log("current plan: " + ppPlan(plan));
     var i, j, k, l, nextPlan, providers, freshBindings, providerType, bindingsArray, freshProvider;
     var possibleSuccessors = [];
     var possibleNextTasks = nextTasks(plan["agenda"], plan);
@@ -795,7 +800,7 @@ function makePlanner(spec) {
         } else {
           providerType = "method";
         }
-        // utils.ppToConsole(providers[j]["actionOrMethod"]);
+        //utils.ppToConsole(providers[j]["actionOrMethod"]);
         freshBindings = providers[j]["bindings"];
         bindingsArray = llpl.conjoin(utils.copyIt(providers[j]["actionOrMethod"][providerType]["preconditions"]), [freshBindings]);
         for (k = 0; k < bindingsArray.length; k++) {
@@ -836,6 +841,7 @@ function makePlanner(spec) {
   // planIsASuccess(plan): boolean
   //
   function planIsASuccess(plan) {
+    //console.log("agenda: "+JSON.stringify(plan.agenda));
     if (utils.isEmpty(plan["agenda"])) {
       return (true);
     } else {

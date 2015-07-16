@@ -415,7 +415,7 @@ module.exports = {
 		"subtasks": {"ordered": [{"ourlab.mario.centrifuge.open4": {}}]}
 	}},
 	{"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
-		"task": {"ourlab.mario.centrifuge.open4": {"agent": "?agent", "equipment": "?equipment", "site": "?site"}},
+		"task": {"ourlab.mario.centrifuge.open4": {}},
 		"preconditions": [],
 		"deletions": [
 			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}

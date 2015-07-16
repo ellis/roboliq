@@ -53,7 +53,7 @@ var commandHandlers = {
 		//console.log(JSON.stringify(input, null, '\t'));
 
 		// DEBUG
-		/*var llpl = require('../HTN/llpl.js');
+		/*var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(input);
 		var agentId = params.agent || "?agent";
 		var modelId = misc.findObjectsValue(params.object+".model", data.objects) || "?model";
@@ -91,7 +91,7 @@ var commandHandlers = {
 		var shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
-		console.log("plan:\n"+JSON.stringify(plan, null, '  '));
+		//console.log("plan:\n"+JSON.stringify(plan, null, '  '));
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		if (_.isEmpty(plan)) {

@@ -67,7 +67,7 @@ var commandHandlers = {
 		if (!params.intensity)
 			return {errors: ["`intensity` parameter required"]};
 
-		var llpl = require('../HTN/llpl.js');
+		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
 		var agent = params.agent || "?agent";
@@ -128,7 +128,7 @@ var commandHandlers = {
 		};
 	},
 	"pipetter.action.pipette": function(params, data) {
-		var llpl = require('../HTN/llpl.js');
+		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
 		var items = (params.items) ? _.cloneDeep(params.items) : [];

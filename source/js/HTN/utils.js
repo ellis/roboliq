@@ -564,6 +564,7 @@ function unifyVariable(variable, pattern, bindings) {
 // Accept two objects containing variable-value bindings and try to unify them.
 //
 function unifyPairs(obj1, obj2, bindings) {
+  //console.log("unifyPairs: ", obj1, obj2)
   var sharedKeys = [];
   var key, dpair, bpair;
   for (key in obj1) {
@@ -615,19 +616,24 @@ function unifyPairs(obj1, obj2, bindings) {
 // unifyPatterns(pattern1,pattern2,bindings): boolean
 //
 function unifyPatterns(pattern1, pattern2, bindings) {
+  //console.log("a")
   if (isVariable(pattern1)) {
     return (unifyVariable(pattern1, pattern2, bindings));
   }
+  //console.log("b")
   if (isVariable(pattern2)) {
     return (unifyVariable(pattern2, pattern1, bindings));
   }
+  //console.log("c")
   if ((typeOf(pattern1) === 'string') && (typeOf(pattern2) === 'string')) {
     if (pattern1 == pattern2) {
       return (true);
     } else {
+      //console.log("failed at ", pattern1, pattern2)
       return (false);
     }
   }
+  //console.log("d")
   if ((typeOf(pattern1) === 'array') && (typeOf(pattern2) === 'array')) {
     if (pattern1.length === pattern2.length) {
       var result = true;
@@ -638,19 +644,24 @@ function unifyPatterns(pattern1, pattern2, bindings) {
       }
       return (result);
     } else {
+        //console.log("failed at ", pattern1, pattern2)
       return (false);
     }
   }
+  //console.log("e")
   if (isAssertion(pattern1) && isAssertion(pattern2)) {
     if (predicateName(pattern1) == predicateName(pattern2)) {
       return (unifyPairs(predicateArguments(pattern1), predicateArguments(pattern2), bindings));
     } else {
+        //console.log("failed at ", pattern1, pattern2)
       return (false);
     }
   }
+  //console.log("f")
   if ((typeOf(pattern1) === 'object') && (typeOf(pattern2) === 'object')) {
     return (unifyPairs(pattern1, pattern2, bindings));
   } else {
+    //console.log("failed at ", pattern1, pattern2)
     return (false);
   }
 }
@@ -1048,23 +1059,27 @@ function makeSearch() {
   // search(scorer,expander,isSuccess): search state
   //
   function search(scorer, expander, isSuccess) {
+    //console.log("\nsearch");
     var queue = allUnexpandedStates();
     if (isEmpty(queue)) {
       return ({});
     } else {
+      //console.log("queue ("+queue.length+"):")//"\n"+JSON.stringify(queue, null, '  '))
       for (var i = 0; i < queue.length; i++) {
+        //console.log(JSON.stringify(queue[i].currentTask));
         scoreSearchState(queue[i], scorer);
       }
       queue.sort(bySearchStateScore);
       /*
         var scores = "";
         for ( var j = 0; j < queue.length; j++ ) {
-        scores = scores + "for state " + queue[j]["id"] + " score = " + queue[j]["score"] + "\n";
+          scores = scores + "for state " + queue[j]["id"] + " score = " + queue[j]["score"];
         }
-        alert("calling SEARCH where the number of unexpanded states = " + queue.length + "\n" + scores);
-        var response = prompt("continue?","yes");
-        if ( response == "no" ) { return(queue[0]); }
-      */
+        //console.log("calling SEARCH where the number of unexpanded states = " + queue.length + "\n" + scores);
+        //console.log("queue[0].agenda: "+JSON.stringify(queue[0].agenda))
+        //var response = prompt("continue?","yes");
+        //if ( response == "no" ) { return(queue[0]); }
+      //*/
       if (searchSuccess(queue[0], isSuccess)) {
         return (queue[0]);
       } else {

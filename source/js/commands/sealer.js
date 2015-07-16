@@ -26,7 +26,7 @@ var commandHandlers = {
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
 	"sealer.action.sealPlate": function(params, data) {
-		var llpl = require('../HTN/llpl.js');
+		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
 		var agent = params.agent || "?agent";

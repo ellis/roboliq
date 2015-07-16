@@ -12,7 +12,7 @@
  * This is a logic programming interpreter.
  *
  * Sample usage:
- * var llpl = require('./HTN/Logic/llpl.js');
+ * var llpl = require('./HTN/llpl.js').create();
  * var sicpDB = require('./HTN/Logic/sicpDB.js');
  * llpl.initializeDatabase(sicpDB);
  *
@@ -27,6 +27,7 @@
 var _ = require('lodash');
 var utils = require('./utils.js');
 
+function create() {
 ////
 //// Syntax
 ////
@@ -574,9 +575,7 @@ function query(q) {
 // Return the methods for interacting with the
 // database and the rules.
 //
-
-
-module.exports = {
+return {
   database: database,
   initializeDatabase: initializeDatabase,
   indexAssertion: indexAssertion,
@@ -586,4 +585,10 @@ module.exports = {
   conjoin: conjoin,
   qeval: qeval,
   query: query
+};
+}
+
+
+module.exports = {
+  create: create
 };
