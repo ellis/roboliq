@@ -50,7 +50,7 @@ var commandHandlers = {
 			}
 		};
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
-		console.log(JSON.stringify(input, null, '\t'));
+		//console.log(JSON.stringify(input, null, '\t'));
 
 		// DEBUG
 		/*var llpl = require('../HTN/llpl.js');
@@ -91,8 +91,7 @@ var commandHandlers = {
 		var shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
-		//console.log("plan:");
-		//console.log(JSON.stringify(plan, null, '  '));
+		console.log("plan:\n"+JSON.stringify(plan, null, '  '));
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		if (_.isEmpty(plan)) {
