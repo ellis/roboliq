@@ -129,7 +129,7 @@ var commandHandlers = {
 };
 
 var planHandlers = {
-	"movePlateAction": function(params, parentParams, data) {
+	"transporter.instruction.movePlate": function(params, parentParams, data) {
 		return [{
 			command: "transporter.instruction.movePlate",
 			agent: params.agent,

@@ -1,13 +1,13 @@
 [
 	{"action": {"description": "print for debugging",
 		"task": {"print": {"text": "?text"}},
-		"preconditions": [
-		],
+		"preconditions": [],
 		"deletions": [],
 		"additions": []
 	}},
+
 	{"action": {"description": "transport plate from origin to destination",
-		"task": {"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"task": {"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 		"preconditions": [
 			{"model": {"labware": "?labware", "model": "?model"}},
 			{"location": {"labware": "?labware", "site": "?origin"}},
@@ -23,6 +23,60 @@
 		],
 		"deletions": [{"location": {"labware": "?labware", "site": "?origin"}}],
 		"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
+	}},
+
+	{"method": {"description": "openAndMovePlate-openNeither: neither site needs to be opened before transport",
+		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"preconditions": [
+			{"siteIsOpen": {"site": "?origin"}},
+			{"siteIsOpen": {"site": "?destination"}}
+		],
+		"subtasks": {"ordered": [
+			{"print": {"text": "openAndMovePlate-openNeither"}},
+			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+		]}
+	}},
+
+	{"method": {"description": "openAndMovePlate-openBoth: open both sites before transport, then close them",
+		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"preconditions": [
+			{"siteIsClosed": {"site": "?origin"}},
+			{"siteIsClosed": {"site": "?destination"}}
+		],
+		"subtasks": {"ordered": [
+			{"print": {"text": "openAndMovePlate-openBoth"}},
+			{"generic.openSite": {"site": "?origin"}},
+			{"generic.openSite": {"site": "?destination"}},
+			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"generic.closeSite": {"site": "?origin"}},
+			{"generic.closeSite": {"site": "?destination"}}
+		]}
+	}},
+
+	{"method": {"description": "openAndMovePlate-openOrigin: open origin before transport, then close it",
+		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"preconditions": [
+			{"siteIsClosed": {"site": "?origin"}}
+		],
+		"subtasks": {"ordered": [
+			{"print": {"text": "openAndMovePlate-openBoth"}},
+			{"generic.openSite": {"site": "?origin"}},
+			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"generic.closeSite": {"site": "?origin"}}
+		]}
+	}},
+
+	{"method": {"description": "openAndMovePlate-openDestination: open destination before transport, then close it",
+		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"preconditions": [
+			{"siteIsClosed": {"site": "?destination"}}
+		],
+		"subtasks": {"ordered": [
+			{"print": {"text": "openAndMovePlate-openBoth"}},
+			{"generic.openSite": {"site": "?destination"}},
+			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"generic.closeSite": {"site": "?destination"}}
+		]}
 	}},
 
 	{"method": {"description": "movePlate-null: transport plate from origin to destination",
@@ -50,7 +104,7 @@
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-one"}},
-			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
 		]}
 	}},
 
@@ -75,8 +129,8 @@
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-two"}},
-			{"movePlateAction": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
-			{"movePlateAction": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			{"openAndMovePlate": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
+			{"openAndMovePlate": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
 		]}
 	}},
 
@@ -106,7 +160,7 @@
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-a-one agent"}},
-			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
 		]}
 	}},
 
@@ -131,8 +185,8 @@
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "movePlate-a-two"}},
-			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
-			{"movePlateAction": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
+			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
 		]}
 	}}
 ]

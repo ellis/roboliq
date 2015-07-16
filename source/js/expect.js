@@ -35,7 +35,7 @@ function truthy(context, result, message) {
 			name: "ProcessingError",
 			errors: [message]
 		});
-		throw o;
+		throw Error(o);
 	}
 }
 
@@ -47,7 +47,16 @@ function _try(context, fn) {
 	}
 }
 
+function paramsRequired(params, names) {
+	assert(_.isObject(params));
+	assert(_.isArray(names));
+	_.forEach(names, function(name) {
+		truthy({paramName: name}, param.hasOwnProperty(name), "missing required value");
+	});
+}
+
 module.exports = {
+	paramsRequired: paramsRequired,
 	truthy: truthy,
 	try: _try
 }

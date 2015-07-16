@@ -9,7 +9,7 @@
  *
  */
 
-var listRules = 
+var listRules =
   [
    // same
    {"same": {"thing1": "?thing", "thing2": "?thing"}},
@@ -26,35 +26,35 @@ var listRules =
 		       "list2": "?list2",
 		       "result": {"cons": {"first": "?headOfList1",
 					   "rest": "?restOfResult"}}},
-	    "and": [{"append": {"list1": "?restOfList1", "list2": "?list2", 
+	    "and": [{"append": {"list1": "?restOfList1", "list2": "?list2",
 				"result": "?restOfResult"}}]}},
    // remove
-   {"<--": {"remove": {"target": "?target", 
+   {"<--": {"remove": {"target": "?target",
 		       "list": {"cons": {"first": "?target", "rest": "?result"}},
 		       "result": "?result"}}},
-   {"<--": {"remove": {"target": "?target", 
+   {"<--": {"remove": {"target": "?target",
 		       "list": {"cons": {"first": "?headOfList", "rest": "?restOfList"}},
 		       "result": {"cons": {"first": "?headOfList", "rest": "?restOfResult"}}},
 	    "and": [{"remove": {"target": "?target", "list": "?restOfList", "result": "?restOfResult"}}]}},
    // removeAll
    {"<--": {"removeAll": {"target": "?target", "list": "nil", "result": "nil"}}},
-   {"<--": {"removeAll": {"target": "?target", 
+   {"<--": {"removeAll": {"target": "?target",
 			  "list": {"cons": {"first": "?target", "rest": "?restOfList"}},
 			  "result": "?restOfResult"},
 	    "and": [{"removeAll": {"target": "?target", "list": "?restOfList", "result": "?restOfResult"}}]}},
-   {"<--": {"removeAll": {"target": "?target", 
+   {"<--": {"removeAll": {"target": "?target",
 			  "list": {"cons": {"first": "?headOfList", "rest": "?restOfList"}},
 			  "result": {"cons": {"first": "?headOfList", "rest": "?restOfResult"}}},
 	    "and": [{"not": {"same": {"thing1": "?target", "thing2": "?headOfList"}}},
                     {"removeAll": {"target": "?target", "list": "?restOfList", "result": "?restOfResult"}}]}},
    // findAll
    {"<--": {"findAll": {"target": "?target", "list": "nil", "result": "nil"}}},
-   {"<--": {"findAll": {"target": "?target", 
+   {"<--": {"findAll": {"target": "?target",
 			"list": {"cons": {"first": "?headOfList", "rest": "?restOfList"}},
 			"result": {"cons": {"first": "?headOfList", "rest": "?restOfResult"}}},
 	    "and": [{"same": {"thing1": "?target", "thing2": "?headOfList"}},
                     {"findAll": {"target": "?target", "list": "?restOfList", "result": "?restOfResult"}}]}},
-   {"<--": {"findAll": {"target": "?target", 
+   {"<--": {"findAll": {"target": "?target",
 			"list": {"cons": {"first": "?headOfList", "rest": "?restOfList"}},
 			"result": "?restOfResult"},
 	    "and": [{"not": {"same": {"thing1": "?target", "thing2": "?headOfList"}}},

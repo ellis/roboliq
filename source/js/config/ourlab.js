@@ -6,6 +6,10 @@ module.exports = {
 			"type": "Namespace",
 			"mario": {
 				"type": "Namespace",
+				"centrifuge": {
+					"type": "Centrifuge",
+					"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
+				},
 				"evoware": {
 					"type": "EvowareRobot"
 				},
@@ -158,7 +162,7 @@ module.exports = {
 						"type": "EvowareWashProgram",
 						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
 					}
-				},
+				}
 			},
 			"model": {
 				"type": "Namespace",
@@ -217,7 +221,7 @@ module.exports = {
 					"evowareName": "Block 20Pos 1.5 ml Eppendorf"
 				}
 			}
-		},
+		}
 	},
 
 	objectToPredicateConverters: {
@@ -385,22 +389,22 @@ module.exports = {
 			"intensity": "thorough"
 		}
 	},
-	{"action": {"description": "generic.openSite-CENTRIFUGE_4",
-		"task": {"generic.openSite": {"agent": "?agent", "site": "?site"}},
+	{"method": {"description": "generic.openSite-CENTRIFUGE_4",
+		"task": {"generic.openSite": {"site": "?site"}},
 		"preconditions": [
 			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}
 		],
 		"subtasks": {"ordered": [
-			{"centrifuge.open": {"site": "?site"}},
-			{"centrifuge.open": {}}
+			{"centrifuge.instruction.openSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge", "site": "?site"}}
 		]}
 	}},
-	{"action": {"description": "print for debugging",
-		"task": {"print": {"text": "?text"}},
+	{"method": {"description": "generic.openSite-CENTRIFUGE_4",
+		"task": {"generic.closeSite": {"site": "?site"}},
 		"preconditions": [
+			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}
 		],
-		"deletions": [],
-		"additions": []
-	}},
+		"subtasks": {"ordered": [
+		]}
+	}}
 	])
 }

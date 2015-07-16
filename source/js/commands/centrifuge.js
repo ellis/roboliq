@@ -1,6 +1,15 @@
 var _ = require('lodash');
 var misc = require('../misc.js');
 
+var predicates = [
+	{"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
+		"task": {"centrifuge.instruction.openSite": {"agent": "?agent", "equipment": "?equipment", "site": "?site"}},
+		"preconditions": [],
+		"deletions": [],
+		"additions": []
+	}},
+];
+
 var objectToPredicateConverters = {
 	"Sealer": function(name, object) {
 		return {
@@ -13,146 +22,51 @@ var objectToPredicateConverters = {
 	},
 };
 
+function closeAll(params, data, effects) {
+	expect.paramsRequired(params, ["equipment"]);
+	var equipmentData = misc.getObjectsValue(params.equipment, data.objects);
+	// Close equipment
+	effects[params.equipment+".open"] = false;
+	// Indicate that all internal sites are closed
+	_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = true; });
+}
+
 var commandHandlers = {
-	"sealer.instruction.run": function(params, data) {
+	"centrifuge.instruction.run": function(params, data) {
 		var effects = {};
-		effects[params.object + ".sealed"] = true;
-		return {
-			effects: effects
-		};
+		closeAll(params, data, effects);
+		return {effects: effects};
 	},
-	// TODO:
-	// - [ ] raise and error if the sealer site is occupied
-	// - [ ] raise error if plate's location isn't set
-	// - [ ] return result of query for possible alternative settings
-	"sealer.action.sealPlate": function(params, data) {
-		var llpl = require('../HTN/llpl.js');
-		llpl.initializeDatabase(data.predicates);
-
-		var agent = params.agent || "?agent";
-		var equipment = params.equipment || "?equipment";
-		var program = params.program || "?program";
-		var site = params.site || "?site";
-
-		var object = misc.getObjectsValue(params.object, data.objects);
-		var model = object.model || "?model";
-
-		var query = {
-			"sealer.canAgentEquipmentProgramModelSite": {
-				"agent": agent,
-				"equipment": equipment,
-				"program": program,
-				"model": model,
-				"site": site
-			}
-		};
-		var resultList = llpl.query(query);
-		if (_.isEmpty(resultList)) {
-			var query2 = {
-				"sealer.canAgentEquipmentProgramModelSite": {
-					"agent": "?agent",
-					"equipment": "?equipment",
-					"program": "?program",
-					"model": "?model",
-					"site": "?site"
-				}
-			};
-			var resultList2 = llpl.query(query2);
-			if (_.isEmpty(resultList2)) {
-				return {
-					errors: ["missing sealer data (please add predicates `sealer.canAgentEquipmentProgramModelSite`)"]
-				};
-			} else {
-				return {
-					errors: ["missing sealer configuration for " + JSON.stringify(query)]
-				};
-			}
-		}
-
-		// Find any parameters which can only take one specific value
-		var params2 = {};
-		var paramValues = misc.extractValuesFromQueryResults(resultList, "sealer.canAgentEquipmentProgramModelSite");
-		_.forEach(paramValues, function(values, name) {
-			if (values.length == 1) {
-				params2[name] = values[0];
-			}
-		});
-
-		var alternatives = _(resultList).map(_.values).flatten().map(function(params2) {
-			var params3 = {};
-			_.forEach(['agent', 'equipment', 'program', 'site'], function(name) {
-				if (!params.hasOwnProperty(name)) params3[name] = params2[name];
-			});
-			return params3;
-		}).reject(_.isEmpty).value();
-
-		if (!params2.site) {
-			return {
-				errors: ["`site`: please provide value"],
-				alternatives: alternatives
-			};
-		}
-
-		var params3 = _.merge({}, {
-			command: "sealer.instruction.run",
-			agent: params2.agent,
-			equipment: params2.equipment,
-			program: params2.program,
-			object: params.object
-		});
-
-		var expansion = {
-			"1": {
-				"command": "transporter.action.movePlate",
-				"object": params.object,
-				"destination": params2.site
-			},
-			"2": params3,
-			"3": {
-				"command": "transporter.action.movePlate",
-				"object": params.object,
-				"destination": object.location
-			},
-		};
-
-		// Create the effets object
+	"centrifuge.instruction.openSite": function(params, data) {
+		expect.paramsRequired(params, ["equipment", "site"]);
+		var equipmentData = misc.getObjectsValue(params.equipment, data.objects);
+		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment".sitesInternal`; `"+params.equipment".sitesInternal` = "+equipmentData.sitesInternal);
+		// Close equipment
+		effects[params.equipment+".open"] = true;
+		// Indicate that all internal sites are closed
+		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
+	},
+	"centrifuge.instruction.close": function(params, data) {
 		var effects = {};
-		effects[params.object + ".sealed"] = true;
+		closeAll(params, data);
+		return {effects: effects};
+	},
+};
 
-		return {
-			expansion: expansion,
-			effects: effects,
-			alternatives: alternatives
-		};
+var planHandlers = {
+	"centrifuge.instruction.openSite": function(params, parentParams, data) {
+		return [{
+			command: "centrifuge.instruction.openSite",
+			agent: params.agent,
+			equipment: params.equipment,
+			site: params.site
+		}];
 	}
 };
 
 module.exports = {
+	predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
-	commandHandlers: commandHandlers
+	commandHandlers: commandHandlers,
+	planHandlers: planHandlers
 };
-
-/*
-
-  {"method": {"description": "sealer.sealPlate-null: plate already sealed",
-    "task": {"sealer.sealPlate": {"labware": "?labware"}},
-    "preconditions": [
-      {"plateIsSealed": {"labware": "?labware"}}
-    ],
-    "subtasks": {"ordered": [
-      {"trace": {"text": "sealer.sealPlate-null"}}
-    ]}
-  }},
-
-  {"method": {"description": "method for sealing",
-    "task": {"sealer.sealPlate": {"labware": "?labware"}},
-    "preconditions": [
-      {"model": {"labware": "?labware", "model": "?model"}},
-      {"sealer.canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}}
-    ],
-    "subtasks": {"ordered": [
-      {"ensureLocation": {"labware": "?labware", "site": "?site"}},
-      {"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}}
-    ]}
-  }}
-*/
