@@ -59,7 +59,7 @@
 			{"siteIsClosed": {"site": "?origin"}}
 		],
 		"subtasks": {"ordered": [
-			{"print": {"text": "openAndMovePlate-openBoth"}},
+			{"print": {"text": "openAndMovePlate-openOrigin"}},
 			{"generic.openSite": {"site": "?origin"}},
 			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 			{"generic.closeSite": {"site": "?origin"}}
@@ -72,9 +72,8 @@
 			{"siteIsClosed": {"site": "?destination"}}
 		],
 		"subtasks": {"ordered": [
-			{"print": {"text": "openAndMovePlate-openBoth"}},
+			{"print": {"text": "openAndMovePlate-openDestination"}},
 			{"generic.openSite": {"site": "?destination"}},
-			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 			{"generic.closeSite": {"site": "?destination"}}
 		]}
 	}},

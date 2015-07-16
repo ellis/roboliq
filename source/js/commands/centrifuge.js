@@ -2,15 +2,6 @@ var _ = require('lodash');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
-var predicates = [
-	{"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
-		"task": {"centrifuge.instruction.openSite": {"agent": "?agent", "equipment": "?equipment", "site": "?site"}},
-		"preconditions": [],
-		"deletions": [],
-		"additions": []
-	}},
-];
-
 var objectToPredicateConverters = {
 	"Sealer": function(name, object) {
 		return {
@@ -52,12 +43,19 @@ var commandHandlers = {
 	},
 	"centrifuge.instruction.close": function(params, data) {
 		var effects = {};
-		closeAll(params, data);
+		closeAll(params, data, effects);
 		return {effects: effects};
 	},
 };
 
 var planHandlers = {
+	"centrifuge.instruction.close": function(params, parentParams, data) {
+		return [{
+			command: "centrifuge.instruction.close",
+			agent: params.agent,
+			equipment: params.equipment
+		}];
+	},
 	"centrifuge.instruction.openSite": function(params, parentParams, data) {
 		return [{
 			command: "centrifuge.instruction.openSite",
@@ -69,7 +67,7 @@ var planHandlers = {
 };
 
 module.exports = {
-	predicates: predicates,
+	//predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers,
 	planHandlers: planHandlers

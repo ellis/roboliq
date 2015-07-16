@@ -22,7 +22,7 @@ steps:
     object: balancePlate
 
   3:
-    command: centrifuge.instruction.openSite
+    #command: centrifuge.instruction.openSite
     agent: ourlab.mario.evoware
     equipment: ourlab.mario.centrifuge
     site: ourlab.mario.site.CENTRIFUGE_4

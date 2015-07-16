@@ -50,10 +50,10 @@ var commandHandlers = {
 			}
 		};
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
-		//console.log(JSON.stringify(input, null, '\t'));
+		console.log(JSON.stringify(input, null, '\t'));
 
 		// DEBUG
-		var llpl = require('../HTN/llpl.js');
+		/*var llpl = require('../HTN/llpl.js');
 		llpl.initializeDatabase(input);
 		var agentId = params.agent || "?agent";
 		var modelId = misc.findObjectsValue(params.object+".model", data.objects) || "?model";

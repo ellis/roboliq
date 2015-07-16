@@ -389,22 +389,83 @@ module.exports = {
 			"intensity": "thorough"
 		}
 	},
-	{"method": {"description": "generic.openSite-CENTRIFUGE_4",
-		"task": {"generic.openSite": {"site": "?site"}},
-		"preconditions": [
-			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}
-		],
-		"subtasks": {"ordered": [
-			{"centrifuge.instruction.openSite": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge", "site": "?site"}}
-		]}
-	}},
-	{"method": {"description": "generic.openSite-CENTRIFUGE_4",
+	{"method": {"description": "generic.closeSite-CENTRIFUGE_4",
 		"task": {"generic.closeSite": {"site": "?site"}},
 		"preconditions": [
 			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}
 		],
 		"subtasks": {"ordered": [
+			{"ourlab.mario.centrifuge.close": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge"}}
 		]}
-	}}
-	])
+	}},
+	{"action": {"description": "ourlab.mario.centrifuge.close: close the centrifuge",
+		"task": {"ourlab.mario.centrifuge.close": {"agent": "?agent", "equipment": "?equipment"}},
+		"preconditions": [],
+		"deletions": [],
+		"additions": [
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_1"}},
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_2"}},
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_3"}},
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}
+		]
+	}},
+	{"method": {"description": "generic.openSite-CENTRIFUGE_4",
+		"task": {"generic.openSite": {"site": "?site"}},
+		"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}],
+		"subtasks": {"ordered": [{"ourlab.mario.centrifuge.open4": {}}]}
+	}},
+	{"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
+		"task": {"ourlab.mario.centrifuge.open4": {"agent": "?agent", "equipment": "?equipment", "site": "?site"}},
+		"preconditions": [],
+		"deletions": [
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}
+		],
+		"additions": [
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_1"}},
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_2"}},
+			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_3"}}
+		]
+	}},
+	]),
+	planHandlers: {
+		"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
+			return [{
+				command: "centrifuge.instruction.close",
+				agent: "ourlab.mario.evoware",
+				equipment: "ourlab.mario.centrifuge"
+			}];
+		},
+		"ourlab.mario.centrifuge.open1": function(params, parentParams, data) {
+			return [{
+				command: "centrifuge.instruction.openSite",
+				agent: "ourlab.mario.evoware",
+				equipment: "ourlab.mario.centrifuge",
+				site: "ourlab.mario.site.CENTRIFUGE_1"
+			}];
+		},
+		"ourlab.mario.centrifuge.open2": function(params, parentParams, data) {
+			return [{
+				command: "centrifuge.instruction.openSite",
+				agent: "ourlab.mario.evoware",
+				equipment: "ourlab.mario.centrifuge",
+				site: "ourlab.mario.site.CENTRIFUGE_2"
+			}];
+		},
+		"ourlab.mario.centrifuge.open3": function(params, parentParams, data) {
+			return [{
+				command: "centrifuge.instruction.openSite",
+				agent: "ourlab.mario.evoware",
+				equipment: "ourlab.mario.centrifuge",
+				site: "ourlab.mario.site.CENTRIFUGE_3"
+			}];
+		},
+		"ourlab.mario.centrifuge.open4": function(params, parentParams, data) {
+			return [{
+				command: "centrifuge.instruction.openSite",
+				agent: "ourlab.mario.evoware",
+				equipment: "ourlab.mario.centrifuge",
+				site: "ourlab.mario.site.CENTRIFUGE_4"
+			}];
+		},
+	}
 }
