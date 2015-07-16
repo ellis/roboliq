@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var predicates = [
@@ -38,13 +39,16 @@ var commandHandlers = {
 		return {effects: effects};
 	},
 	"centrifuge.instruction.openSite": function(params, data) {
-		expect.paramsRequired(params, ["equipment", "site"]);
+		expect.paramsRequired(params, ["agent", "equipment", "site"]);
 		var equipmentData = misc.getObjectsValue(params.equipment, data.objects);
-		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment".sitesInternal`; `"+params.equipment".sitesInternal` = "+equipmentData.sitesInternal);
+		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
+
+		var effects = {};
 		// Close equipment
 		effects[params.equipment+".open"] = true;
 		// Indicate that all internal sites are closed
 		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
+		return {effects: effects};
 	},
 	"centrifuge.instruction.close": function(params, data) {
 		var effects = {};

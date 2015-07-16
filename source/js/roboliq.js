@@ -54,6 +54,7 @@ function run(argv, userProtocol) {
 	var loadedFiles = _.uniq(_.compact(
 		[
 			'config/roboliq.js',
+			'commands/centrifuge.js',
 			'commands/pipetter.js',
 			'commands/sealer.js',
 			'commands/transporter.js',

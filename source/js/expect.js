@@ -33,9 +33,9 @@ function truthy(context, result, message) {
 	if (!result) {
 		var o = _.merge({}, context, {
 			name: "ProcessingError",
-			errors: [message]
+			errors: [getContextPrefix(context)+message]
 		});
-		throw Error(o);
+		throw o;
 	}
 }
 
@@ -51,7 +51,7 @@ function paramsRequired(params, names) {
 	assert(_.isObject(params));
 	assert(_.isArray(names));
 	_.forEach(names, function(name) {
-		truthy({paramName: name}, param.hasOwnProperty(name), "missing required value");
+		truthy({paramName: name}, params.hasOwnProperty(name), "missing required value");
 	});
 }
 
