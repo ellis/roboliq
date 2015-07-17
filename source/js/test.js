@@ -90,6 +90,40 @@ var spec8 = {
 	]
 };
 
+/*
+- gradientSources1: [hepes_850, pipes_750, mes_710, acetate_575]
+  gradientSources2: [hepes_650, pipes_575, mes_510, acetate_375]
+  counts: [5, 5, 7, 8]
+  volume: 30ul
+*/
+
+var spec9 = {"#table": [
+    {volume: '30ul'},
+    ['source1',     'source2',     'count'],
+    ['hepes_850',   'hepes_650',   5],
+    ['pipes_750',   'pipes_575',   5],
+    ['mes_710',     'mes_510',     7],
+    ['acetate_575', 'acetate_375', 8]
+]};
+
+var spec10 = {
+	"#combinations": [
+		{source: "saltwater", volume: "40ul"},
+        {"#gradient": {"#table": [
+            {volume: '30ul'},
+            ['source1',     'source2',     'count'],
+            ['hepes_850',   'hepes_650',   5],
+            ['pipes_750',   'pipes_575',   5],
+            ['mes_710',     'mes_510',     7],
+            ['acetate_575', 'acetate_375', 8]
+        ]}},
+        {"#expand": {
+            source: ["sfGFP", "tdGFP"],
+		    volume: "5ul"
+		}}
+	]
+};
+
 function gen2(spec) {
 	console.log("gen2", spec);
     if (spec.hasOwnProperty("#combinations")) {
@@ -101,6 +135,9 @@ function gen2(spec) {
     else if (spec.hasOwnProperty("#expand")) {
 		return genExpand(spec["#expand"]);
 	}
+    else if (spec.hasOwnProperty("#table")) {
+        return genTable(spec["#table"])
+    }
 	else {
 		return spec;
 	}
@@ -168,6 +205,38 @@ function genExpand(spec) {
     return result;
 }
 
+function genTable(table) {
+    console.log("genTable:", table)
+    assert(_.isArray(table));
+
+    var list = [];
+    var names = [];
+    var defaults = {};
+    _.forEach(table, function(row) {
+        // Object are for default values that will apply to the following rows
+        if (_.isArray(row)) {
+            // First array in table is the column names
+            if (names.length === 0) {
+                names = row;
+            }
+            else {
+                assert(row.length === names.length);
+                var obj = _.clone(defaults);
+                for (var i = 0; i < names.length; i++) {
+                    obj[names[i]] = row[i];
+                }
+                list.push(obj);
+            }
+        }
+        else {
+            assert(_.isObject(row));
+            defaults = _.merge(defaults, row);
+            console.log("defaults:", defaults)
+        }
+    });
+    return list;
+}
+
 /*console.log();
 console.log(1);
 console.log(JSON.stringify(gen1(spec1, {}, 0, []), null, '  '));
@@ -196,3 +265,7 @@ console.log(JSON.stringify(gen2(spec6), null, '  '));
 console.log();
 console.log(8);
 console.log(JSON.stringify(gen2(spec8), null, '  '));
+
+console.log();
+console.log(9);
+console.log(JSON.stringify(gen2(spec9), null, '  '));
