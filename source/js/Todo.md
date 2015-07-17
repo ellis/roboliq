@@ -242,6 +242,28 @@ type: Eval.Wells
         }
     }
 
+    name: [hepes_850, hepes_650]
+    values: [[30, 0], [22.5, 7.5], [15ul, 15ul], [7.5ul, 22.5ul], [0ul, 30ul]]
+    gradient: [hepes_850, hepes_650]
+    count: 5
+
+    [{source: sfGFP}, {source: tdGFP}]
+    [{volume: 5ul}, {volume: 10ul}]
+    vs
+    [{source: sfGFP, volume: 5ul}, {source; tdGFP, volume: 10ul}]
+
+    list = {}
+    for (i = 0; i < variables.length; i++) {
+        for (j = 0; j < variables[i].elements.length; j++) {
+            variables[i].elements[j]
+        }
+    }
+
+
+    {water: 40ul, hepes_850: 30ul, hepes_650: 0ul, sfGFP: 5ul}
+    {water: 40ul, hepes_850: 30ul, hepes_650: 0ul, Q204H_N149Y: 5ul}
+    {water: 40ul, hepes_850: 22.5ul, hepes_650: 7.5ul, sfGFP: 5ul}
+
     for:
     - [source, volume] in [[water, 10ul], [reagent1, 20ul]]
     - destination in plate1(A02 down 8)

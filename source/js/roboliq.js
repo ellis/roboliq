@@ -134,8 +134,6 @@ function run(argv, userProtocol) {
 		return stateList;
 	}
 
-	var commandHandlers = protocol.commandHandlers;
-
 	function createSimpleObject(nameList, value) {
 		if (_.isEmpty(nameList)) return null;
 		else {
@@ -153,6 +151,7 @@ function run(argv, userProtocol) {
 	}
 
 	function expandSteps(protocol, prefix, steps, objects) {
+		var commandHandlers = protocol.commandHandlers;
 		var keys = _(steps).keys(steps).filter(function(key) {
 			var c = key[0];
 			return (c >= '0' && c <= '9');
