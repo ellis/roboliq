@@ -6,12 +6,12 @@ var path = require('path');
 var yaml = require('yamljs');
 
 var spec1 = [
-    [{source: "sfGFP"}, {source: "tdGFP"}],
-    [{volume: "5ul"}, {volume: "10ul"}]
+	[{source: "sfGFP"}, {source: "tdGFP"}],
+	[{volume: "5ul"}, {volume: "10ul"}]
 ];
 
 var spec2 = [
-    [{source: "sfGFP", volume: "5ul"}, {source: "tdGFP", volume: "10ul"}]
+	[{source: "sfGFP", volume: "5ul"}, {source: "tdGFP", volume: "10ul"}]
 ];
 
 function gen1(spec, obj0, index, acc) {
@@ -56,22 +56,50 @@ var spec5 = {
 };
 
 var spec6 = {
-	COMBINATORIAL_ARRAY: [
-		{source: "saltwater", volumes: "40ul"},
-		{COMBINATORIAL_MERGE: [
+	"#combinations": [
+		{source: "saltwater", volume: "40ul"},
+		{"#combinationsAndMerge": [
 			[{source: "sfGFP"}, {source: "tdGFP"}],
-			{volumes: "5ul"}
+			{volume: "5ul"}
 		]}
+	]
+};
+
+var spec7 = {
+	type: "#combinations",
+    lists: [
+		{source: "saltwater", volume: "40ul"},
+		{
+            type: "#combinations",
+            lists: [
+    			[{source: "sfGFP"}, {source: "tdGFP"}],
+    			{volume: "5ul"}
+    		],
+            map: "#merge"
+        }
+	]
+};
+
+var spec8 = {
+	"#combinations": [
+		{source: "saltwater", volume: "40ul"},
+        {"#expand": {
+            source: ["sfGFP", "tdGFP"],
+		    volume: "5ul"
+		}}
 	]
 };
 
 function gen2(spec) {
 	console.log("gen2", spec);
-	if (spec.COMBINATORIAL_MERGE) {
-		return genMerge(spec.COMBINATORIAL_MERGE);
+    if (spec.hasOwnProperty("#combinations")) {
+		return genList(spec["#combinations"]);
 	}
-	else if (spec.COMBINATORIAL_ARRAY) {
-		return genList(spec.COMBINATORIAL_ARRAY);
+	else if (spec.hasOwnProperty("#combinationsAndMerge")) {
+		return genMerge(spec["#combinationsAndMerge"]);
+	}
+    else if (spec.hasOwnProperty("#expand")) {
+		return genExpand(spec["#expand"]);
 	}
 	else {
 		return spec;
@@ -118,6 +146,28 @@ function combineLists(elem) {
 	return list;
 }
 
+function genExpand(spec) {
+    console.log("genExpand:", spec);
+    assert(_.isObject(spec));
+    var lists = _.map(spec, function(values, key) {
+        if (!_.isArray(values)) {
+            var obj1 = {};
+            obj1[key] = values;
+            return [obj1];
+        }
+        else {
+            return values.map(function(value) {
+                var obj1 = {};
+                obj1[key] = value;
+                return obj1;
+            });
+        }
+    })
+    var result = gen1(lists, {}, 0, []);
+    console.log("genExpand result:", result);
+    return result;
+}
+
 /*console.log();
 console.log(1);
 console.log(JSON.stringify(gen1(spec1, {}, 0, []), null, '  '));
@@ -142,3 +192,7 @@ console.log(JSON.stringify(gen2(spec5), null, '  '));
 console.log();
 console.log(6);
 console.log(JSON.stringify(gen2(spec6), null, '  '));
+
+console.log();
+console.log(8);
+console.log(JSON.stringify(gen2(spec8), null, '  '));
