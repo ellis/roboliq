@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var fs = require('fs');
+var math = require('mathjs');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 var yaml = require('yamljs');
@@ -125,18 +126,21 @@ var spec10 = {
 };
 
 function gen2(spec) {
-	console.log("gen2", spec);
+	//console.log("gen2", spec);
     if (spec.hasOwnProperty("#combinations")) {
-		return genList(spec["#combinations"]);
+		return genList(gen2(spec["#combinations"]));
 	}
 	else if (spec.hasOwnProperty("#combinationsAndMerge")) {
-		return genMerge(spec["#combinationsAndMerge"]);
+		return genMerge(gen2(spec["#combinationsAndMerge"]));
 	}
     else if (spec.hasOwnProperty("#expand")) {
-		return genExpand(spec["#expand"]);
+		return genExpand(gen2(spec["#expand"]));
 	}
+    else if (spec.hasOwnProperty("#gradient")) {
+        return genGradient(gen2(spec["#gradient"]));
+    }
     else if (spec.hasOwnProperty("#table")) {
-        return genTable(spec["#table"])
+        return genTable(gen2(spec["#table"]));
     }
 	else {
 		return spec;
@@ -150,30 +154,30 @@ function genMerge(merges) {
 			elem = [elem];
 		return gen2(elem);
 	});
-	console.log("genMerge lists:", lists);
+	//console.log("genMerge lists:", lists);
 	var result = gen1(lists, {}, 0, []);
-	console.log("genMerge result:", result);
+	//console.log("genMerge result:", result);
 	return result;
 }
 
 function genList(spec) {
-	console.log("genList:", spec);
+	//console.log("genList:", spec);
 	assert(_.isArray(spec));
 	var lists = _.map(spec, function(elem) { return gen2(elem); });
 	return combineLists(lists);
 }
 
 function combineLists(elem) {
-	console.log("combineLists: ", elem);
+	//console.log("combineLists: ", elem);
 	var list = [];
 	if (_.isArray(elem) && !_.isEmpty(elem)) {
 		list = elem[0];
 		if (!_.isArray(list))
 			list = [list];
 		for (var i = 1; i < elem.length; i++) {
-			console.log("list@"+i, list);
+			//console.log("list@"+i, list);
 			list = _(list).map(function(x) {
-				console.log("x", x);
+				//console.log("x", x);
 				if (!_.isArray(x))
 					x = [x];
 				return elem[i].map(function(y) { return x.concat(y); });
@@ -184,7 +188,7 @@ function combineLists(elem) {
 }
 
 function genExpand(spec) {
-    console.log("genExpand:", spec);
+    //console.log("genExpand:", spec);
     assert(_.isObject(spec));
     var lists = _.map(spec, function(values, key) {
         if (!_.isArray(values)) {
@@ -201,12 +205,49 @@ function genExpand(spec) {
         }
     })
     var result = gen1(lists, {}, 0, []);
-    console.log("genExpand result:", result);
+    //console.log("genExpand result:", result);
     return result;
 }
 
+function genGradient(data) {
+    if (!_.isArray(data))
+        data = [data];
+
+    var list = [];
+    _.forEach(data, function(data) {
+        assert(data.volume);
+        assert(data.count);
+        assert(data.count >= 2);
+        var decimals = _.isNumber(data.decimals) ? data.decimals : 2;
+        //console.log("decimals:", decimals);
+        var volumeTotal = math.round(math.eval(data.volume).toNumber('ul'), decimals);
+        // Pick volumes
+        var volumes = Array(data.count);
+        for (var i = 0; i < data.count / 2; i++) {
+            volumes[i] = math.round(volumeTotal * i / (data.count - 1), decimals);
+            volumes[data.count - i - 1] = math.round(volumeTotal - volumes[i], decimals);
+        }
+        if ((data.count % 2) === 1)
+            volumes[Math.floor(data.count / 2)] = math.round(volumeTotal / 2, decimals);
+        //console.log("volumes:", volumes);
+        // Create items
+        for (var i = 0; i < data.count; i++) {
+            var volume2 = volumes[i];
+            var volume1 = math.round(volumeTotal - volume2, decimals);
+            var l = [];
+            if (volume1 > 0)
+                l.push({source: data.source1, volume: math.unit(volume1, 'ul').format({precision: 14})});
+            if (volume2 > 0)
+                l.push({source: data.source2, volume: math.unit(volume2, 'ul').format({precision: 14})});
+            if (l.length > 0)
+                list.push(l);
+        }
+    });
+    return list;
+}
+
 function genTable(table) {
-    console.log("genTable:", table)
+    //console.log("genTable:", table)
     assert(_.isArray(table));
 
     var list = [];
@@ -231,7 +272,7 @@ function genTable(table) {
         else {
             assert(_.isObject(row));
             defaults = _.merge(defaults, row);
-            console.log("defaults:", defaults)
+            //console.log("defaults:", defaults)
         }
     });
     return list;
@@ -269,3 +310,7 @@ console.log(JSON.stringify(gen2(spec8), null, '  '));
 console.log();
 console.log(9);
 console.log(JSON.stringify(gen2(spec9), null, '  '));
+
+console.log();
+console.log(10);
+console.log(JSON.stringify(gen2(spec10), null, '  '));
