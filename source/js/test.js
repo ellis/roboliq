@@ -111,12 +111,12 @@ var spec10 = {
 	"#combinations": [
 		{source: "saltwater", volume: "40ul"},
         {"#gradient": {"#table": [
-            {volume: '30ul'},
+            {volume: '30ul', decimals: 1},
             ['source1',     'source2',     'count'],
             ['hepes_850',   'hepes_650',   5],
-            ['pipes_750',   'pipes_575',   5],
+            /*['pipes_750',   'pipes_575',   5],
             ['mes_710',     'mes_510',     7],
-            ['acetate_575', 'acetate_375', 8]
+            ['acetate_575', 'acetate_375', 8]*/
         ]}},
         {"#expand": {
             source: ["sfGFP", "tdGFP"],
@@ -125,26 +125,59 @@ var spec10 = {
 	]
 };
 
+var spec11a = {
+    "#replicate": {
+        count: 2,
+        value: [
+            {a: 1},
+            {a: 2}
+        ]
+    }
+};
+var spec11b = {
+    "#replicate": {
+        count: 2,
+        depth: 1,
+        value: [
+            {a: 1},
+            {a: 2}
+        ]
+    }
+};
+
+var spec12 = {
+	"#zipMerge": [
+		[{a: 1}, {a: 2}],
+		[{b: 1}, {b: 2}]
+	]
+};
+
+// TODO: analyze wells string (call wellsParser)
+// TODO: zipMerge to merge destinations into mix items (but error somehow if not enough destinations)
+// TODO: extractKey list of destinations from items
+// TODO: extractValue list of destinations from items
+// TODO: extract unique list of destinations, make it a well string?
+
+var genFunctions = {
+	"#combinations": genList,
+	"#combinationsAndMerge": genMerge,
+	"#expand": genExpand,
+	"#gradient": genGradient,
+	"#replicate": genReplicate,
+	"#table": genTable,
+	//"#wells": genWells,
+	"#zipMerge": genZipMerge
+}
+
 function gen2(spec) {
-	//console.log("gen2", spec);
-    if (spec.hasOwnProperty("#combinations")) {
-		return genList(gen2(spec["#combinations"]));
+	for (var key in genFunctions) {
+		if (spec.hasOwnProperty(key)) {
+			var spec2 = spec[key];
+			var spec3 = gen2(spec2);
+			return genFunctions[key](spec3);
+		}
 	}
-	else if (spec.hasOwnProperty("#combinationsAndMerge")) {
-		return genMerge(gen2(spec["#combinationsAndMerge"]));
-	}
-    else if (spec.hasOwnProperty("#expand")) {
-		return genExpand(gen2(spec["#expand"]));
-	}
-    else if (spec.hasOwnProperty("#gradient")) {
-        return genGradient(gen2(spec["#gradient"]));
-    }
-    else if (spec.hasOwnProperty("#table")) {
-        return genTable(gen2(spec["#table"]));
-    }
-	else {
-		return spec;
-	}
+	return spec;
 }
 
 function genMerge(merges) {
@@ -246,6 +279,25 @@ function genGradient(data) {
     return list;
 }
 
+function genReplicate(spec) {
+    assert(_.isObject(spec));
+    assert(_.isNumber(spec.count));
+	assert(spec.value);
+	var depth = spec.depth || 0;
+	assert(depth >= 0);
+
+	var step = function(x, count, depth) {
+		console.log("step:", x, count, depth);
+		if (_.isArray(x) && depth > 0) {
+			return _.map(x, function(y) { return step(y, count, depth - 1); });
+		}
+		else {
+			return _.flatten(_.fill(Array(count), x));
+		}
+	}
+	return step(spec.value, spec.count, depth);
+}
+
 function genTable(table) {
     //console.log("genTable:", table)
     assert(_.isArray(table));
@@ -276,6 +328,23 @@ function genTable(table) {
         }
     });
     return list;
+}
+
+function genWells(spec) {
+	assert(false);
+	// TODO: need protocol.objects for the call to wellsParser.parse(spec, objects)
+}
+
+function genZipMerge(spec) {
+	assert(_.isArray(spec));
+	if (spec.length <= 1)
+		return spec;
+	console.log('spec:', spec);
+	var zipped = _.zip.apply(null, spec);
+	console.log('zipped:', zipped);
+	var merged = _.map(zipped, function(l) { return _.merge.apply(null, [{}].concat(l)); });
+	//console.log('spec:', spec);
+	return merged;
 }
 
 /*console.log();
@@ -311,6 +380,7 @@ console.log();
 console.log(9);
 console.log(JSON.stringify(gen2(spec9), null, '  '));
 
-console.log();
-console.log(10);
-console.log(JSON.stringify(gen2(spec10), null, '  '));
+console.log(); console.log(10); console.log(JSON.stringify(gen2(spec10), null, '  '));
+console.log(); console.log("11a"); console.log(JSON.stringify(gen2(spec11a), null, '  '));
+console.log(); console.log("11b"); console.log(JSON.stringify(gen2(spec11b), null, '  '));
+console.log(); console.log(12); console.log(JSON.stringify(gen2(spec12), null, '  '));
