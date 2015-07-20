@@ -59,7 +59,7 @@ var spec5 = {
 var spec6 = {
 	"#combinations": [
 		{source: "saltwater", volume: "40ul"},
-		{"#combinationsAndMerge": [
+		{"#merge": [
 			[{source: "sfGFP"}, {source: "tdGFP"}],
 			{volume: "5ul"}
 		]}
@@ -152,6 +152,21 @@ var spec12 = {
 	]
 };
 
+var spec13a = {
+	"#merge": [
+		{a: 1},
+		{b: 2},
+		{c: 3}
+	]
+};
+var spec13b = {
+	"#merge": [
+		[{a: 0}, {a: 1}],
+		{b: 2},
+		{c: 3}
+	]
+};
+
 // TODO: analyze wells string (call wellsParser)
 // TODO: zipMerge to merge destinations into mix items (but error somehow if not enough destinations)
 // TODO: extractKey list of destinations from items
@@ -160,9 +175,9 @@ var spec12 = {
 
 var genFunctions = {
 	"#combinations": genList,
-	"#combinationsAndMerge": genMerge,
 	"#expand": genExpand,
 	"#gradient": genGradient,
+	"#merge": genMerge,
 	"#replicate": genReplicate,
 	"#table": genTable,
 	//"#wells": genWells,
@@ -170,27 +185,16 @@ var genFunctions = {
 }
 
 function gen2(spec) {
-	for (var key in genFunctions) {
-		if (spec.hasOwnProperty(key)) {
-			var spec2 = spec[key];
-			var spec3 = gen2(spec2);
-			return genFunctions[key](spec3);
+	if (_.isObject(spec)) {
+		for (var key in spec) {
+			if (genFunctions.hasOwnProperty(key)) {
+				var spec2 = spec[key];
+				var spec3 = gen2(spec2);
+				return genFunctions[key](spec3);
+			}
 		}
 	}
 	return spec;
-}
-
-function genMerge(merges) {
-	assert(_.isArray(merges));
-	var lists = _.map(merges, function(elem) {
-		if (!_.isArray(elem))
-			elem = [elem];
-		return gen2(elem);
-	});
-	//console.log("genMerge lists:", lists);
-	var result = gen1(lists, {}, 0, []);
-	//console.log("genMerge result:", result);
-	return result;
 }
 
 function genList(spec) {
@@ -279,6 +283,61 @@ function genGradient(data) {
     return list;
 }
 
+/**
+ * Merge an array of objects, or combinatorially merge an array of arrays of objects.
+ *
+ * @param  {Array} spec The array of objects or arrays of objects to merge.
+ * @return {Object|Array} The object or array resulting from combinatorial merging.
+ */
+function genMerge(spec) {
+	console.log("genMerge", spec);
+	if (_.isEmpty(spec)) return spec;
+
+	//console.log("genMerge lists:", lists);
+	var result = genMerge2(spec, {}, 0, []);
+	// If all elements were objects rather than arrays, return an object:
+	/*if (_.every(spec, _.isObject)) {
+		assert(result.length == 1);
+		result = result[0];
+	}*/
+	//console.log("genMerge result:", result);
+	return result;
+}
+
+function genMerge2(spec, obj0, index, acc) {
+	console.log("genMerge2", spec, obj0, index, acc);
+	assert(_.isArray(spec));
+
+	var list = _.map(spec, function(elem) {
+		if (!_.isArray(elem))
+			elem = [elem];
+		return gen2(elem);
+	});
+
+	if (index >= spec.length) {
+		acc.push(obj0);
+		return acc;
+	}
+
+	var elem = spec[index];
+	if (!_.isArray(elem))
+		elem = [elem];
+
+	for (var j = 0; j < elem.length; j++) {
+		var elem2 = gen2(elem[j]);
+		if (_.isArray(elem2)) {
+			genMerge2(elem2, obj1, 0, acc);
+		}
+		else {
+			assert(_.isObject(elem2));
+			var obj1 = _.merge({}, obj0, elem[j]);
+			genMerge2(list, obj1, index + 1, acc);
+		}
+	}
+
+	return acc;
+}
+
 function genReplicate(spec) {
     assert(_.isObject(spec));
     assert(_.isNumber(spec.count));
@@ -289,7 +348,10 @@ function genReplicate(spec) {
 	var step = function(x, count, depth) {
 		console.log("step:", x, count, depth);
 		if (_.isArray(x) && depth > 0) {
-			return _.map(x, function(y) { return step(y, count, depth - 1); });
+			if (depth === 1)
+				return _.flatten(_.map(x, function(y) { return step(y, count, depth - 1); }));
+			else
+				return _.map(x, function(y) { return step(y, count, depth - 1); });
 		}
 		else {
 			return _.flatten(_.fill(Array(count), x));
@@ -384,3 +446,5 @@ console.log(); console.log(10); console.log(JSON.stringify(gen2(spec10), null, '
 console.log(); console.log("11a"); console.log(JSON.stringify(gen2(spec11a), null, '  '));
 console.log(); console.log("11b"); console.log(JSON.stringify(gen2(spec11b), null, '  '));
 console.log(); console.log(12); console.log(JSON.stringify(gen2(spec12), null, '  '));
+console.log(); console.log("13a"); console.log(JSON.stringify(gen2(spec13a), null, '  '));
+console.log(); console.log("13b"); console.log(JSON.stringify(gen2(spec13b), null, '  '));
