@@ -58,7 +58,7 @@ function directive_factorialCols(spec, data) {
             });
         }
     })
-    var result = genMerge(lists, data);
+    var result = directive_merge(lists, data);
     //console.log("genFactorialCols result:", result);
     return result;
 }
@@ -107,7 +107,7 @@ function directive_gradient(data, data_) {
  * @return {Object|Array} The object or array resulting from combinatorial merging.
  */
 function directive_merge(spec, data) {
-	console.log("#merge", spec);
+	//console.log("#merge", spec);
 	if (_.isEmpty(spec)) return spec;
 
 	//console.log("genMerge lists:", lists);
@@ -122,13 +122,13 @@ function directive_merge(spec, data) {
 }
 
 function genMerge2(spec, data, obj0, index, acc) {
-	console.log("genMerge2", spec, obj0, index, acc);
+	//console.log("genMerge2", spec, obj0, index, acc);
 	assert(_.isArray(spec));
 
 	var list = _.map(spec, function(elem) {
 		if (!_.isArray(elem))
 			elem = [elem];
-		return handleDirective(elem);
+		return handleDirective(elem, data);
 	});
 
 	if (index >= spec.length) {

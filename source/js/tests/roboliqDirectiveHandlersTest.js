@@ -9,6 +9,24 @@ var data = {
 }
 describe('config/roboliqDirectiveHandlers', function() {
 
+	describe('factorialCols', function() {
+		it('should generate object lists', function() {
+			var spec = {"#factorialCols": {
+				x: ['a', 'b', 'c'],
+				n: [1, 2],
+				q: "hello"
+			}};
+			should.deepEqual(misc.handleDirective(spec, data), [
+				{x: 'a', n: 1, q: 'hello'},
+				{x: 'a', n: 2, q: 'hello'},
+				{x: 'b', n: 1, q: 'hello'},
+				{x: 'b', n: 2, q: 'hello'},
+				{x: 'c', n: 1, q: 'hello'},
+				{x: 'c', n: 2, q: 'hello'},
+			]);
+		})
+	})
+
 	describe('tableCols', function () {
 		it('should generate object lists', function () {
 			var spec = {"#tableCols": {
