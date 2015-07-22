@@ -180,8 +180,9 @@ function directive_replicate(spec) {
 function directive_tableCols(table, data) {
     //console.log("genTableCols:", table)
     assert(_.isObject(table));
+	assert(!_.isEmpty(table));
 
-	var ns1 = _.uniq(_.mapValues(table, 'length'));
+	var ns1 = _.uniq(_.map(table, function(x) { return _.isArray(x) ? x.length : 1; }));
 	var ns = _.filter(ns1, function(n) { return n > 1; });
 	assert(ns1.length > 0);
 	assert(ns.length <= 1);

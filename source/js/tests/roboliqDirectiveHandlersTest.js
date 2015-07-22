@@ -8,6 +8,22 @@ var data = {
 	objects: {}
 }
 describe('config/roboliqDirectiveHandlers', function() {
+
+	describe('tableCols', function () {
+		it('should generate object lists', function () {
+			var spec = {"#tableCols": {
+				x: ['a', 'b', 'c'],
+				n: [1, 2, 3],
+				q: "hello"
+			}};
+			should.deepEqual(misc.handleDirective(spec, data), [
+				{x: 'a', n: 1, q: 'hello'},
+				{x: 'b', n: 2, q: 'hello'},
+				{x: 'c', n: 3, q: 'hello'},
+			]);
+		})
+	})
+
 	describe('tableRows', function () {
 		it('should generate object lists', function () {
 			var spec = {"#tableRows": [
