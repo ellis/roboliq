@@ -75,9 +75,30 @@ function getObjectsOfType(objects, types, prefix) {
 	return l;
 }
 
+/**
+ * If spec is a directive, process it and return the result.
+ *
+ * @param  {Any} spec Any value.  If this is a directive, it will be an object with a single key that starts with '#'.
+ * @param  {Object} data An object with properties: directiveHandlers, objects, events.
+ * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
+ */
+function handleDirective(spec, data) {
+	if (_.isObject(spec)) {
+		for (var key in spec) {
+			if (data.directiveHandlers.hasOwnProperty(key)) {
+				var spec2 = spec[key];
+				var spec3 = handleDirective(spec2, data);
+				return data.directiveHandlers[key](spec3, data);
+			}
+		}
+	}
+	return spec;
+}
+
 module.exports = {
 	extractValuesFromQueryResults: extractValuesFromQueryResults,
 	getObjectsOfType: getObjectsOfType,
 	getObjectsValue: getObjectsValue,
+	handleDirective: handleDirective,
 	findObjectsValue: findObjectsValue
 }

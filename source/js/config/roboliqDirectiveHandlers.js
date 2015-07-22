@@ -1,178 +1,8 @@
 var _ = require('lodash');
 var assert = require('assert');
-var fs = require('fs');
 var math = require('mathjs');
-var naturalSort = require('javascript-natural-sort');
-var path = require('path');
-var yaml = require('yamljs');
-
-var spec1 = [
-	[{source: "sfGFP"}, {source: "tdGFP"}],
-	[{volume: "5ul"}, {volume: "10ul"}]
-];
-
-var spec2 = [
-	[{source: "sfGFP", volume: "5ul"}, {source: "tdGFP", volume: "10ul"}]
-];
-
-function gen1(spec, obj0, index, acc) {
-	//console.log("gen1", spec, obj0, index, acc);
-	assert(_.isArray(spec));
-	if (index >= spec.length) {
-		acc.push(obj0);
-		return acc;
-	}
-
-	var elem = spec[index];
-	//console.log("elem:", elem);
-	if (_.isArray(elem)) {
-		for (var j = 0; j < elem.length; j++) {
-			var obj1 = _.merge({}, obj0, elem[j]);
-			gen1(spec, obj1, index + 1, acc);
-		}
-	}
-
-	return acc;
-}
-
-var spec3 = {
-	objects: [{1: {source: "saltwater", volumes: "40ul"}}]
-};
-
-var spec4 = {
-	merge: [
-		{objects: [{1: {source: "saltwater", volumes: "40ul"}}]},
-		{objects: [{2: {source: "sfGFP", volumes: "5ul"}}, {2: {source: "tdGFP", volumes: "5ul"}}]}
-	]
-};
-
-var spec5 = {
-	merge: [
-		{objects: [{1: {source: "saltwater", volumes: "40ul"}}]},
-		{merge: [
-			{objects: [{2: {source: "sfGFP"}}, {2: {source: "tdGFP"}}]},
-			{objects: [{2: {volumes: "5ul"}}]}
-		]}
-	]
-};
-
-var spec6 = {
-	"#combinations": [
-		{source: "saltwater", volume: "40ul"},
-		{"#merge": [
-			[{source: "sfGFP"}, {source: "tdGFP"}],
-			{volume: "5ul"}
-		]}
-	]
-};
-
-var spec7 = {
-	type: "#combinations",
-    lists: [
-		{source: "saltwater", volume: "40ul"},
-		{
-            type: "#combinations",
-            lists: [
-    			[{source: "sfGFP"}, {source: "tdGFP"}],
-    			{volume: "5ul"}
-    		],
-            map: "#merge"
-        }
-	]
-};
-
-var spec8 = {
-	"#combinations": [
-		{source: "saltwater", volume: "40ul"},
-        {"#factorialCols": {
-            source: ["sfGFP", "tdGFP"],
-		    volume: "5ul"
-		}}
-	]
-};
-
-/*
-- gradientSources1: [hepes_850, pipes_750, mes_710, acetate_575]
-  gradientSources2: [hepes_650, pipes_575, mes_510, acetate_375]
-  counts: [5, 5, 7, 8]
-  volume: 30ul
-*/
-
-var spec9 = {"#tableRows": [
-    {volume: '30ul'},
-    ['source1',     'source2',     'count'],
-    ['hepes_850',   'hepes_650',   5],
-    ['pipes_750',   'pipes_575',   5],
-    ['mes_710',     'mes_510',     7],
-    ['acetate_575', 'acetate_375', 8]
-]};
-
-var spec10 = {
-	"#combinations": [
-		{source: "saltwater", volume: "40ul"},
-        {"#gradient": {"#tableRows": [
-            {volume: '30ul', decimals: 1},
-            ['source1',     'source2',     'count'],
-            ['hepes_850',   'hepes_650',   5],
-            /*['pipes_750',   'pipes_575',   5],
-            ['mes_710',     'mes_510',     7],
-            ['acetate_575', 'acetate_375', 8]*/
-        ]}},
-        {"#factorialCols": {
-            source: ["sfGFP", "tdGFP"],
-		    volume: "5ul"
-		}}
-	]
-};
-
-var spec11a = {
-    "#replicate": {
-        count: 2,
-        value: [
-            {a: 1},
-            {a: 2}
-        ]
-    }
-};
-var spec11b = {
-    "#replicate": {
-        count: 2,
-        depth: 1,
-        value: [
-            {a: 1},
-            {a: 2}
-        ]
-    }
-};
-
-var spec12 = {
-	"#zipMerge": [
-		[{a: 1}, {a: 2}],
-		[{b: 1}, {b: 2}]
-	]
-};
-
-var spec13a = {
-	"#merge": [
-		{a: 1},
-		{b: 2},
-		{c: 3}
-	]
-};
-var spec13b = {
-	"#merge": [
-		[{a: 0}, {a: 1}],
-		{b: 2},
-		{c: 3}
-	]
-};
-
-var spec13b = {
-	"#tableCols": {
-		a: [1, 2, 3],
-		b: ['a', 'b', 'c']
-	}
-};
+var misc = require('../misc.js');
+var wellsParser = require('../parsers/wellsParser.js');
 
 // TODO: analyze wells string (call wellsParser)
 // TODO: zipMerge to merge destinations into mix items (but error somehow if not enough destinations)
@@ -180,35 +10,14 @@ var spec13b = {
 // TODO: extractValue list of destinations from items
 // TODO: extract unique list of destinations, make it a well string?
 
-var genFunctions = {
-	"#combinations": genList,
-	"#factorialCols": genFactorialCols,
-	"#gradient": genGradient,
-	"#merge": genMerge,
-	"#replicate": genReplicate,
-	"#tableCols": genTableCols,
-	"#tableRows": genTableRows,
-	//"#wells": genWells,
-	"#zipMerge": genZipMerge
+function handleDirective(spec, data) {
+	return misc.handleDirective(spec, data);
 }
 
-function gen2(spec) {
-	if (_.isObject(spec)) {
-		for (var key in spec) {
-			if (genFunctions.hasOwnProperty(key)) {
-				var spec2 = spec[key];
-				var spec3 = gen2(spec2);
-				return genFunctions[key](spec3);
-			}
-		}
-	}
-	return spec;
-}
-
-function genList(spec) {
+function directive_factorialArrays(spec, data) {
 	//console.log("genList:", spec);
 	assert(_.isArray(spec));
-	var lists = _.map(spec, function(elem) { return gen2(elem); });
+	var lists = _.map(spec, function(elem) { return handleDirective(elem, data); });
 	return combineLists(lists);
 }
 
@@ -232,7 +41,7 @@ function combineLists(elem) {
 	return list;
 }
 
-function genFactorialCols(spec) {
+function directive_factorialCols(spec, data) {
     //console.log("genFactorialCols:", spec);
     assert(_.isObject(spec));
     var lists = _.map(spec, function(values, key) {
@@ -249,12 +58,12 @@ function genFactorialCols(spec) {
             });
         }
     })
-    var result = gen1(lists, {}, 0, []);
+    var result = genMerge(lists, data);
     //console.log("genFactorialCols result:", result);
     return result;
 }
 
-function genGradient(data) {
+function directive_gradient(data, data_) {
     if (!_.isArray(data))
         data = [data];
 
@@ -297,12 +106,12 @@ function genGradient(data) {
  * @param  {Array} spec The array of objects or arrays of objects to merge.
  * @return {Object|Array} The object or array resulting from combinatorial merging.
  */
-function genMerge(spec) {
-	console.log("genMerge", spec);
+function directive_merge(spec, data) {
+	console.log("#merge", spec);
 	if (_.isEmpty(spec)) return spec;
 
 	//console.log("genMerge lists:", lists);
-	var result = genMerge2(spec, {}, 0, []);
+	var result = genMerge2(spec, data, {}, 0, []);
 	// If all elements were objects rather than arrays, return an object:
 	/*if (_.every(spec, _.isObject)) {
 		assert(result.length == 1);
@@ -312,14 +121,14 @@ function genMerge(spec) {
 	return result;
 }
 
-function genMerge2(spec, obj0, index, acc) {
+function genMerge2(spec, data, obj0, index, acc) {
 	console.log("genMerge2", spec, obj0, index, acc);
 	assert(_.isArray(spec));
 
 	var list = _.map(spec, function(elem) {
 		if (!_.isArray(elem))
 			elem = [elem];
-		return gen2(elem);
+		return handleDirective(elem);
 	});
 
 	if (index >= spec.length) {
@@ -332,21 +141,21 @@ function genMerge2(spec, obj0, index, acc) {
 		elem = [elem];
 
 	for (var j = 0; j < elem.length; j++) {
-		var elem2 = gen2(elem[j]);
+		var elem2 = handleDirective(elem[j], data);
 		if (_.isArray(elem2)) {
-			genMerge2(elem2, obj1, 0, acc);
+			genMerge2(elem2, data, obj1, 0, acc);
 		}
 		else {
 			assert(_.isObject(elem2));
 			var obj1 = _.merge({}, obj0, elem[j]);
-			genMerge2(list, obj1, index + 1, acc);
+			genMerge2(list, data, obj1, index + 1, acc);
 		}
 	}
 
 	return acc;
 }
 
-function genReplicate(spec) {
+function directive_replicate(spec) {
     assert(_.isObject(spec));
     assert(_.isNumber(spec.count));
 	assert(spec.value);
@@ -368,7 +177,7 @@ function genReplicate(spec) {
 	return step(spec.value, spec.count, depth);
 }
 
-function genTableCols(table) {
+function directive_tableCols(table, data) {
     //console.log("genTableCols:", table)
     assert(_.isObject(table));
 
@@ -387,7 +196,7 @@ function genTableCols(table) {
     return list;
 }
 
-function genTableRows(table) {
+function directive_tableRows(table, data) {
     //console.log("genTableRows:", table)
     assert(_.isArray(table));
 
@@ -419,59 +228,30 @@ function genTableRows(table) {
     return list;
 }
 
-function genWells(spec) {
-	assert(false);
-	// TODO: need protocol.objects for the call to wellsParser.parse(spec, objects)
+function directive_wells(spec, data) {
+	return wellsParser.parse(spec, data.objects);
 }
 
-function genZipMerge(spec) {
+function directive_zipMerge(spec, data) {
 	assert(_.isArray(spec));
 	if (spec.length <= 1)
 		return spec;
-	console.log('spec:', spec);
+	//console.log('spec:', spec);
 	var zipped = _.zip.apply(null, spec);
-	console.log('zipped:', zipped);
+	//console.log('zipped:', zipped);
 	var merged = _.map(zipped, function(l) { return _.merge.apply(null, [{}].concat(l)); });
 	//console.log('spec:', spec);
 	return merged;
 }
 
-/*console.log();
-console.log(1);
-console.log(JSON.stringify(gen1(spec1, {}, 0, []), null, '  '));
-
-console.log();
-console.log(2);
-console.log(JSON.stringify(gen1(spec2, {}, 0, []), null, '  '));
-
-console.log();
-console.log(3);
-console.log(JSON.stringify(gen2(spec3), null, '  '));
-
-console.log();
-console.log(4);
-console.log(JSON.stringify(gen2(spec4), null, '  '));
-
-console.log();
-console.log(5);
-console.log(JSON.stringify(gen2(spec5), null, '  '));
-*/
-
-console.log();
-console.log(6);
-console.log(JSON.stringify(gen2(spec6), null, '  '));
-
-console.log();
-console.log(8);
-console.log(JSON.stringify(gen2(spec8), null, '  '));
-
-console.log();
-console.log(9);
-console.log(JSON.stringify(gen2(spec9), null, '  '));
-
-console.log(); console.log(10); console.log(JSON.stringify(gen2(spec10), null, '  '));
-console.log(); console.log("11a"); console.log(JSON.stringify(gen2(spec11a), null, '  '));
-console.log(); console.log("11b"); console.log(JSON.stringify(gen2(spec11b), null, '  '));
-console.log(); console.log(12); console.log(JSON.stringify(gen2(spec12), null, '  '));
-console.log(); console.log("13a"); console.log(JSON.stringify(gen2(spec13a), null, '  '));
-console.log(); console.log("13b"); console.log(JSON.stringify(gen2(spec13b), null, '  '));
+module.exports = {
+	"#factorialArrays": directive_factorialArrays,
+	"#factorialCols": directive_factorialCols,
+	"#gradient": directive_gradient,
+	"#merge": directive_merge,
+	"#replicate": directive_replicate,
+	"#tableCols": directive_tableCols,
+	"#tableRows": directive_tableRows,
+	//"#wells": genWells,
+	"#zipMerge": directive_zipMerge
+};

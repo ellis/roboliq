@@ -125,5 +125,6 @@ var planHandlers = {
 module.exports = {
 	predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
-	planHandlers: planHandlers
+	planHandlers: planHandlers,
+	directiveHandlers: require('./roboliqDirectiveHandlers.js'),
 };
