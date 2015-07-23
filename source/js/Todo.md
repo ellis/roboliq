@@ -212,7 +212,8 @@ Several ideas for how to encode content.  Currently I prefer `plate1(C01)` below
 * tableCols: property names as property names, values in array
 * factorialCols: property names as property names, values in array
 * factorialArrays: combinatorial combination of an element from each input array
-* merge: factorial merge
+* merge
+* factorialMerge: factorial merge
 * replicate
 
 somehow distinguish between control factors, nuisance factors, blocking factors, measurable factors, unknown factors

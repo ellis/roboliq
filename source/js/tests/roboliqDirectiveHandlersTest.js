@@ -10,7 +10,7 @@ var data = {
 
 describe('config/roboliqDirectiveHandlers', function() {
 
-	describe('factorialArrays', function() {
+	describe('#factorialArrays', function() {
 		it('should generate object lists', function() {
 			var spec = {"#factorialArrays": [
 				{source: 1},
@@ -26,7 +26,7 @@ describe('config/roboliqDirectiveHandlers', function() {
 		});
 	});
 
-	describe('factorialCols', function() {
+	describe('#factorialCols', function() {
 		it('should generate object lists', function() {
 			var spec = {"#factorialCols": {
 				x: ['a', 'b', 'c'],
@@ -44,7 +44,20 @@ describe('config/roboliqDirectiveHandlers', function() {
 		});
 	});
 
-	describe('tableCols', function () {
+	describe('#merge', function() {
+		it('should generate object lists', function() {
+			var spec = {"#merge": [
+				{a: 'a', b: 1, c: 'hello'},
+				{x: 'b', b: 2, q: 'hello'},
+				{x: 'c', n: 3},
+			]};
+			should.deepEqual(misc.handleDirective(spec, data),
+				{a: 'a', b: 2, c: 'hello', x: 'c', q: 'hello', n: 3}
+			);
+		});
+	});
+
+	describe('#tableCols', function () {
 		it('should generate object lists', function () {
 			var spec = {"#tableCols": {
 				x: ['a', 'b', 'c'],
@@ -59,7 +72,7 @@ describe('config/roboliqDirectiveHandlers', function() {
 		});
 	});
 
-	describe('tableRows', function () {
+	describe('#tableRows', function () {
 		it('should generate object lists', function () {
 			var spec = {"#tableRows": [
 				{x: 'X', y: 'Y'},

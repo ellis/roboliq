@@ -58,7 +58,7 @@ function directive_factorialCols(spec, data) {
             });
         }
     })
-    var result = directive_merge(lists, data);
+    var result = directive_factorialMerge(lists, data);
     //console.log("genFactorialCols result:", result);
     return result;
 }
@@ -100,13 +100,19 @@ function directive_gradient(data, data_) {
     return list;
 }
 
+function directive_merge(spec, data) {
+	assert(_.isArray(spec));
+	list = _.map(spec, function(x) { return handleDirective(x, data); });
+	return _.merge.apply(null, [{}].concat(list));
+}
+
 /**
  * Merge an array of objects, or combinatorially merge an array of arrays of objects.
  *
  * @param  {Array} spec The array of objects or arrays of objects to merge.
  * @return {Object|Array} The object or array resulting from combinatorial merging.
  */
-function directive_merge(spec, data) {
+function directive_factorialMerge(spec, data) {
 	//console.log("#merge", spec);
 	if (_.isEmpty(spec)) return spec;
 
@@ -248,6 +254,7 @@ function directive_zipMerge(spec, data) {
 module.exports = {
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
+	"#factorialMerge": directive_factorialMerge,
 	"#gradient": directive_gradient,
 	"#merge": directive_merge,
 	"#replicate": directive_replicate,
