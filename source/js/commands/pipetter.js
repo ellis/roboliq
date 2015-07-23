@@ -646,9 +646,9 @@ var commandHandlers = {
 	"pipetter.action.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, data) {
 		expect.paramsRequired(params, ["mixtures", "destinations"]);
-		expect.truthy({paramName: 'mixtures'}, _.isArray(param.mixtures), "array required");
-		var destinations = expect.destinationWells({paramName: 'destinations'}, params.destinations);
-		expect.truthy({}, destinations.length >= mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
+		expect.truthy({paramName: 'mixtures'}, _.isArray(params.mixtures), "array required");
+		var destinations = expect.destinationWells({paramName: 'destinations'}, params.destinations, data);
+		expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
 
 		var params2 = _.omit(params, ['mixtures', 'destinations']);
 		params2.items = [];
@@ -658,7 +658,12 @@ var commandHandlers = {
 				params2.items.push(_.merge({}, subitem, {destination: pair[1]}));
 			});
 		});
-		return pipette(params2, data);
+		params2.command = "pipetter.action.pipette";
+		return {
+			expansion: {
+				"1": params2
+			}
+		};
 	},
 };
 

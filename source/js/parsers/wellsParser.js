@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var random = require('random-js');
-var expect = require('../expect.js');
+var expect = require('../expectCore.js');
 var misc = require('../misc.js');
 var wellsParser0 = require('./wellsParser0.js');
 

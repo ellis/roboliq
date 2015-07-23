@@ -1,5 +1,6 @@
-var roboliq = require('../roboliq.js')
+var _ = require('lodash');
 var should = require('should');
+var roboliq = require('../roboliq.js')
 
 describe('pipetter', function() {
 	describe('pipetter.action.pipette', function () {
@@ -230,5 +231,55 @@ describe('pipetter', function() {
 				}
 			});
 		})
-	})
-})
+	});
+
+
+
+	describe('pipetter.pipetteMixtures', function () {
+		it("should pipette mixtures to destination wells", function() {
+			var protocol = {
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+							B01: ['100ul', 'source2']
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+					source2: {
+						type: 'Liquid',
+						wells: 'plate1(B01)'
+					},
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipetteMixtures",
+						clean: 'none',
+						mixtures: [
+							[{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '10ul'}],
+							[{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '20ul'}],
+						],
+						destinations: "plate1(A02 down to D02)"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
+				command: "pipetter.action.pipette",
+				clean: 'none',
+				items: [
+					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},
+					{source: 'source2', volume: '10ul', destination: 'plate1(A02)'},
+					{source: 'source1', volume: '10ul', destination: 'plate1(B02)'},
+					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
+				]
+			});
+		});
+	});
+});
