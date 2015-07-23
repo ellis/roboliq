@@ -34,7 +34,7 @@ var commandHandlers = {
 		var program = params.program || "?program";
 		var site = params.site || "?site";
 
-		var object = misc.getObjectsValue(params.object, data.objects);
+		var object = expect.objectsValue({}, params.object, data.objects);
 		var model = object.model || "?model";
 
 		var query = {

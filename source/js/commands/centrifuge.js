@@ -16,7 +16,7 @@ var objectToPredicateConverters = {
 
 function closeAll(params, data, effects) {
 	expect.paramsRequired(params, ["equipment"]);
-	var equipmentData = misc.getObjectsValue(params.equipment, data.objects);
+	var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
 	// Close equipment
 	effects[params.equipment+".open"] = false;
 	// Indicate that all internal sites are closed
@@ -31,7 +31,7 @@ var commandHandlers = {
 	},
 	"centrifuge.instruction.openSite": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "site"]);
-		var equipmentData = misc.getObjectsValue(params.equipment, data.objects);
+		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
 		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
 
 		var effects = {};

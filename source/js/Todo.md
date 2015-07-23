@@ -46,7 +46,7 @@
 - [x] for uninitialized source volumes, default to "NaN l"
 - [x] handle opening and closing of centrifuge during transport
 - [x] roboliq.js: handle directives
-- [ ] misc.js: use `_.get`
+- [x] misc.js: use `_.get`
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')

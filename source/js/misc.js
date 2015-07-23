@@ -28,6 +28,7 @@ function findObjectsValue(key, objects, effects, defaultValue, prefix) {
 	return _.get(objects, key, defaultValue);
 }
 
+// NOTE: This is basically a copy of expect.objectsValue
 function getObjectsValue(key, objects, effects, prefix) {
 	if (effects) {
 		var id = (prefix) ? prefix+"."+key : key;

@@ -143,7 +143,7 @@ function pipette(params, data) {
 		var i = wellName.indexOf('(');
 		return (i >= 0) ? wellName.substr(0, i) : wellName;
 	}).uniq().value();
-	var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, misc.getObjectsValue(name, data.objects)); });
+	var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
 
 	// Check whether labwares are on sites that can be pipetted
 	var query2_l = [];
@@ -594,7 +594,7 @@ var commandHandlers = {
 		// Check whether labwares are on sites that can be pipetted
 		var syringeToProgram_l = _.map(params.syringes, function(syringe) {
 			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
-			var tipModel = misc.getObjectsValue(tipModelRef, data.objects);
+			var tipModel = expect.objectsValue({}, tipModelRef, data.objects);
 			var query = {
 				"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
 					"agent": agent,

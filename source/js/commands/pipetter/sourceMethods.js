@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+var expect = require('../../expect.js');
 var pipetterUtils = require('./pipetterUtils.js');
 var wellsParser = require('../../parsers/sourceParser.js');
 
@@ -19,7 +20,7 @@ function sourceMethod1(group, data) {
 		var source = item.source;
 		var sourceInfo = sourceParser.parse(item.source);
 		if (sourceInfo.source) {
-			var wells = getObjectsValue(source+".wells", data.objects);
+			var wells = expect.objectsValue({}, source+".wells", data.objects);
 			assert(!_.isEmpty(wells));
 			item.sourceWell = wells[0];
 		}

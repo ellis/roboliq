@@ -9,6 +9,7 @@ function objectsValue(context, key, objects, effects, prefix) {
 	if (_.isUndefined(value)) {
 		expect.throw(context, "missing value.");
 	}
+	return value;
 }
 
 function wells(context, value, data) {

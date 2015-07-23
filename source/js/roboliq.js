@@ -1,8 +1,10 @@
 var _ = require('lodash');
+var assert = require('assert');
 var fs = require('fs');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 var yaml = require('yamljs');
+var expect = require('./expect.js');
 var misc = require('./misc.js');
 var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
 
@@ -328,7 +330,7 @@ function run(argv, userProtocol) {
 				labware: name,
 				type: labware.type,
 				model: labware.model,
-				locationInitial: misc.getObjectsValue(name+'.location', protocol.objects),
+				locationInitial: expect.objectsValue({}, name+'.location', protocol.objects),
 				locationFinal: labware.location
 			}));
 		});
@@ -345,7 +347,7 @@ function run(argv, userProtocol) {
 				var wellName = (id.indexOf(".contents.") >= 0)
 					? id.replace('.contents.', '(')+')'
 					: id.replace('.contents', '()');
-				var contents = misc.getObjectsValue(id, objectsFinal);
+				var contents = expect.objectsValue({}, id, objectsFinal);
 				var source = (contents.length == 2 && _.isString(contents[1]))
 					? contents[1]
 					: wellName;
