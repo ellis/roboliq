@@ -400,7 +400,7 @@ function pipette(params, data) {
 			if (value > 0) {
 				var intensity = valueToIntensity[value];
 				expansionList.push({
-					command: "pipetter.action.cleanTips",
+					command: "pipetter.cleanTips",
 					agent: agent,
 					equipment: equipment,
 					intensity: intensity,
@@ -575,7 +575,7 @@ var commandHandlers = {
 		};
 	},
 
-	"pipetter.action.cleanTips": function(params, data) {
+	"pipetter.cleanTips": function(params, data) {
 		if (_.isEmpty(params.syringes))
 			return {};
 		if (!params.equipment)
@@ -643,7 +643,7 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	"pipetter.action.pipette": pipette,
+	"pipetter.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, data) {
 		expect.paramsRequired(params, ["mixtures", "destinations"]);
 		expect.truthy({paramName: 'mixtures'}, _.isArray(params.mixtures), "array required");
@@ -658,7 +658,7 @@ var commandHandlers = {
 				params2.items.push(_.merge({}, subitem, {destination: pair[1]}));
 			});
 		});
-		params2.command = "pipetter.action.pipette";
+		params2.command = "pipetter.pipette";
 		return {
 			expansion: {
 				"1": params2

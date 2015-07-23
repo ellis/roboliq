@@ -13,7 +13,7 @@
 	},
 	"steps": {
 		"1": {
-			"command": "pipetter.action.pipette",
+			"command": "pipetter.pipette",
 			"items": [{
 				"source": "plate1(A01)",
 				"destination": "plate2(A01)",

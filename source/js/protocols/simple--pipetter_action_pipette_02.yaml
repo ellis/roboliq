@@ -18,7 +18,7 @@ objects:
 
 steps:
   1:
-    command: pipetter.action.pipette
+    command: pipetter.pipette
     items:
     - source: plate1(A01)
       destination: plate1(A02)

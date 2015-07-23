@@ -15,17 +15,17 @@
 - [x] EvowareCompiler: pipetter.instruction.dispense
 - [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
 - [x] pipetter.instruction.pipette: create instruction, test in protocol5.json
-- [x] commands/pipetter.js: pipetter.action.pipette: method 1
+- [x] commands/pipetter.js: pipetter.pipette: method 1
 - [x] pipetter.instruction.cleanTips: create instruction, test in protocol8.json
-- [x] commands/pipetter.js: pipetter.action.pipette: refresh tips (simple)
+- [x] commands/pipetter.js: pipetter.pipette: refresh tips (simple)
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
-- [x] commands/pipetter.js: pipetter.action.pipette: choose the default liquid class intelligently
+- [x] commands/pipetter.js: pipetter.pipette: choose the default liquid class intelligently
 - [x] commands/pipetter.js: pipetter.instruction.pipette: output effects array for changes in well contents
-- [x] commands/pipetter.js: pipetter.action.pipette: method 2
-- [x] commands/pipetter.js: pipetter.action.pipette: clean 4 tips at a time
-- [x] commands/pipetter.js: pipetter.action.pipette: method 3
-- [x] commands/pipetter.js: pipetter.action.pipette: handle multiple possible source wells for a single item
-- [x] commands/pipetter.js: pipetter.action.pipette: for cleaning, sort out "begin, end, before, after" parameters
+- [x] commands/pipetter.js: pipetter.pipette: method 2
+- [x] commands/pipetter.js: pipetter.pipette: clean 4 tips at a time
+- [x] commands/pipetter.js: pipetter.pipette: method 3
+- [x] commands/pipetter.js: pipetter.pipette: handle multiple possible source wells for a single item
+- [x] commands/pipetter.js: pipetter.pipette: for cleaning, sort out "begin, end, before, after" parameters
 - [x] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [x] ourlab.js: add 'sites' and 'washProgram' namespaces
 
@@ -54,12 +54,12 @@
 - [ ] mix command
 - [ ] roboliq.js: generate table for final well contents
 - [ ] roboliq.js: generate table of pipetting actions for well contents by step
-- [ ] consider renaming `pipetter.action.pipette => pipetter.pipette` and `pipetter.instruction.pipette => pipetter._pipette`
+- [ ] consider renaming `pipetter.pipette => pipetter.pipette` and `pipetter.instruction.pipette => pipetter._pipette`
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] support creation of well groups, including random ones, and then implement 'free' verb in wellsParser
 - [ ] support creation of well groups by commands, so that the same wells can be edited future commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
-- [ ] commands/pipetter.js: pipetter.action.pipette: method 4
+- [ ] commands/pipetter.js: pipetter.pipette: method 4
 - [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changed on our robot
 - [ ] figure out how to implement variable expansion/evaluation
 - [ ] figure out how to implement for-comprehensions for both commands and list
@@ -81,7 +81,7 @@
 - [ ] centrifuge command
 - [ ] commands/pipetter.js: pipetter.instruction.aspirate: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents
-- [ ] commands/pipetter.js: pipetter.action.pipette: refresh tips (advanced)
+- [ ] commands/pipetter.js: pipetter.pipette: refresh tips (advanced)
 - [ ] JSON schema
 - [ ] how to handle trough volume, which has many virtual wells, but they all share the same common liquid: set the labware's contents, rather than the contents of the individual wells, then the effects function should handle that case appropriately.
 
@@ -234,7 +234,7 @@ type: Eval.List
 type: Eval.Wells
 
     "1": {
-        "command": "pipetter.action.pipette",
+        "command": "pipetter.pipette",
         "items": {
             "type": "Eval.List",
             "variables": [{

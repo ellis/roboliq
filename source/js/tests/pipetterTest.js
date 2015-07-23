@@ -3,7 +3,7 @@ var should = require('should');
 var roboliq = require('../roboliq.js')
 
 describe('pipetter', function() {
-	describe('pipetter.action.pipette', function () {
+	describe('pipetter.pipette', function () {
 
 		it('should pipette between two wells on plate1 without specify well contents', function () {
 			var protocol = {
@@ -16,7 +16,7 @@ describe('pipetter', function() {
 				},
 				steps: {
 					"1": {
-						command: "pipetter.action.pipette",
+						command: "pipetter.pipette",
 						items: [{
 							source: "plate1(A01)",
 							destination: "plate1(A02)",
@@ -98,7 +98,7 @@ describe('pipetter', function() {
 				},
 				steps: {
 					"1": {
-						command: "pipetter.action.pipette",
+						command: "pipetter.pipette",
 						sources: "ourlab.mario.systemLiquid",
 						destinations: "plate1(A01 down 8)",
 						volumes: "10ul",
@@ -271,7 +271,7 @@ describe('pipetter', function() {
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
-				command: "pipetter.action.pipette",
+				command: "pipetter.pipette",
 				clean: 'none',
 				items: [
 					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},

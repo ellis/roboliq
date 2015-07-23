@@ -11,7 +11,7 @@ objects:
 
 steps:
   1:
-    command: pipetter.action.pipette
+    command: pipetter.pipette
     program: '"Roboliq_Water_Air_1000"'
     sources: plate1(A01)
     destinations: plate1(A02 down 8)

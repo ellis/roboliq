@@ -206,7 +206,7 @@
 						4
 					]
 				},
-				"command": "pipetter.action.cleanTips",
+				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
@@ -262,7 +262,7 @@
 						4
 					]
 				},
-				"command": "pipetter.action.cleanTips",
+				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
@@ -318,7 +318,7 @@
 						4
 					]
 				},
-				"command": "pipetter.action.cleanTips",
+				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
@@ -329,7 +329,7 @@
 					4
 				]
 			},
-			"command": "pipetter.action.pipette",
+			"command": "pipetter.pipette",
 			"sources": "plate1(A01)",
 			"destinations": "plate1(A02 down 8)",
 			"volumes": "20ul"

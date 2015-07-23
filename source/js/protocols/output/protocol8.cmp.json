@@ -194,7 +194,7 @@
 					4
 				]
 			},
-			"command": "pipetter.action.cleanTips",
+			"command": "pipetter.cleanTips",
 			"equipment": "ourlab.mario.liha",
 			"syringes": [
 				1,
@@ -217,7 +217,7 @@
 					4
 				]
 			},
-			"command": "pipetter.action.cleanTips",
+			"command": "pipetter.cleanTips",
 			"equipment": "ourlab.mario.liha",
 			"syringes": [
 				1,
@@ -240,7 +240,7 @@
 					4
 				]
 			},
-			"command": "pipetter.action.cleanTips",
+			"command": "pipetter.cleanTips",
 			"equipment": "ourlab.mario.liha",
 			"syringes": [
 				1,

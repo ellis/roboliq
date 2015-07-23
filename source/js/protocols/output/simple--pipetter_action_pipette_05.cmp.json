@@ -257,7 +257,7 @@
 					}
 				]
 			},
-			"command": "pipetter.action.pipette",
+			"command": "pipetter.pipette",
 			"sources": "plate1(A01)",
 			"destinations": "plate1(A02 down 8)",
 			"volumes": "20ul",

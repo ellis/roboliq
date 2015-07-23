@@ -10,7 +10,7 @@ objects:
 
 steps:
   1:
-    command: pipetter.action.pipette
+    command: pipetter.pipette
     program: Roboliq_Water_Air_1000
     sources: ourlab.mario.systemLiquid
     destinations: balancePlate(all row-jump(1) take 2)

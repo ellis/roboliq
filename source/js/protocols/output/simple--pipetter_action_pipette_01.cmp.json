@@ -200,7 +200,7 @@
 						4
 					]
 				},
-				"command": "pipetter.action.cleanTips",
+				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
@@ -238,7 +238,7 @@
 						4
 					]
 				},
-				"command": "pipetter.action.cleanTips",
+				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"intensity": "thorough",
@@ -249,7 +249,7 @@
 					4
 				]
 			},
-			"command": "pipetter.action.pipette",
+			"command": "pipetter.pipette",
 			"items": [
 				{
 					"source": "plate1(A01)",
