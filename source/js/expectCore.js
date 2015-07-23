@@ -5,7 +5,7 @@ function getContextPrefix(context) {
 	if (_.isEmpty(context)) return "";
 	else if (_.isString(context.paramName)) return "parameter `"+context.paramName+"`: ";
 	else if (_.isArray(context.paramName)) return "parameters `"+context.paramName.join('`, `')+"`: ";
-	else if (_.isString(context.valueName)) return "value `"+value+"`: ";
+	else if (_.isString(context.valueName)) return "value `"+context.valueName+"`: ";
 	else return "";
 }
 
@@ -47,7 +47,7 @@ function _throw(context, errors) {
 	errors = _.isArray(errors) ? errors : [errors];
 	var o = _.merge({}, context, {
 		name: "ProcessingError",
-		errors: [getContextPrefix(context)+message]
+		errors: _.map(errors, function(error) { return getContextPrefix(context)+error; })
 	});
 	throw o;
 }

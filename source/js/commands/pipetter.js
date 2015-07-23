@@ -161,7 +161,7 @@ function pipette(params, data) {
 		var queryResults = llpl.query(query);
 		//console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
 		if (_.isEmpty(queryResults)) {
-			throw {name: "ProcessingError", errors: [labware.name+" is at a site "+labware.location+", which hasn't been configured for pipetting; please move to a pipetting site."]};
+			throw {name: "ProcessingError", errors: [labware.name+" is at site "+labware.location+", which hasn't been configured for pipetting; please move it to a pipetting site."]};
 		}
 		query2_l.push(query);
 	});

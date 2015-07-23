@@ -1,84 +1,85 @@
 description: |
   Tania's Assam protocol for testing a range of pHs
 
-labware:
+objects:
   tubes1:
+    type: Plate
     description: GFP eppendorf tubes
     model: tubeHolderModel_1500ul
     location: T3
   trough1:
+    type: Plate
     description: trough for water/glycerol/salt mix
     model: troughModel_100ml
     location: R6
   sourcePlate1:
+    type: Plate
     description: buffer plate
     model: plateModel_96_dwp
     location: P2
   mixPlate:
-    model: plateModel_384_square
+    type: Plate
+    model: ourlab.model.plateModel_384_square
     location: P3
-
 # Reagents used in this protocol
-# reagent_name: wells [contaminants=dna|cells] [viscosity=...] [sterilize=none|light|thorough|decontaminate] [pipettePolicy=...]
-source:
-- name: saltwater
-  well: trough1(C01|F01)
-
-# buffers
-- name: hepes_850
-  well: sourcePlate1(A01|D01)
-- name: hepes_650
-  well: sourcePlate1(A02|D02)
-- name: pipes_775
-  well: sourcePlate1(A03|D03)
-- name: pipes_575
-  well: sourcePlate1(A04|D04)
-- name: mes_710
-  well: sourcePlate1(A05|D05)
-- name: mes_510
-  well: sourcePlate1(A06|D06)
-- name: acetate_575
-  well: sourcePlate1(A07|D07)
-- name: acetate_375
-  well: sourcePlate1(A08|D08)
-
-# GFPs
-- name: sfGFP
-  description: wild type
-  well: tubes1(A01)
-- name: Q204H_N149Y
-  description: double mutant
-  well: tubes1(A02)
-- name: tdGFP
-  description: fusion of double mutant
-  well: tubes1(A03)
-- name: N149Y
-  description: single mutant
-  well: tubes1(A04)
-- name: Q204H
-  description: single mutant
-  well: tubes1(A05)
+  saltwater:
+    type: Liquid
+    wells: trough1(C01 down to F01)
+  hepes_850:
+    type: Liquid
+    wells: sourcePlate1(A01 down to D01)
+  hepes_650:
+    type: Liquid
+    wells: sourcePlate1(A02 down to D02)
+  pipes_775:
+    type: Liquid
+    wells: sourcePlate1(A03 down to D03)
+  pipes_575:
+    type: Liquid
+    wells: sourcePlate1(A04 down to D04)
+  mes_710:
+    type: Liquid
+    wells: sourcePlate1(A05 down to D05)
+  mes_510:
+    type: Liquid
+    wells: sourcePlate1(A06 down to D06)
+  acetate_575:
+    type: Liquid
+    wells: sourcePlate1(A07 down to D07)
+  acetate_375:
+    type: Liquid
+    wells: sourcePlate1(A08 down to D08)
+  # GFPs
+  sfGFP: {type: Liquid, description: wild type, wells: tubes1(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells: tubes1(A02)}
+  tdGFP: {type: Liquid, description: fusion of double mutant, wells: tubes1(A03)}
+  N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
+  Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
 
 steps:
   1:
-    command: pipetter.titrate
-    allOf:
+    command: pipetter.pipetteMixtures
+    mixtures:
+      "#factorialArrays":
       - sources: saltwater
         volumes: 40ul
+      - "#gradient":
+          "#tableRows":
+          - {volume: 30ul, decimals: 1}
+          - ['source1',     'source2',     'count']
+          - ['hepes_850',   'hepes_650',   5]
+          - ['pipes_775',   'pipes_575',   5]
+          - ['mes_710',     'mes_510',     7]
+          - ['acetate_575', 'acetate_375', 8]
+      - "#factorialCols":
+            source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+            volume: "5ul"
+            clean: thorough
+            cleanBetweenSameSource: flush
+            program: Roboliq_Water_Wet_1000_mix3x50ul
 
-      - gradientSources1: [hepes_850, pipes_750, mes_710, acetate_575]
-        gradientSources2: [hepes_650, pipes_575, mes_510, acetate_375]
-        counts: [5, 5, 7, 8]
-        volume: 30ul
-
-      - sources: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-        volumes: 5ul
-        clean: thorough
-        cleanBetweenSameSource: flush
-        program: Roboliq_Water_Wet_1000_mix3x50ul
-
-    destination: mixPlate(all row-jump(1))
     replicates: 3
+    destinations: mixPlate(all row-jump(1))
     clean: flush
     cleanBegin: thorough
     cleanBetweenSameSource: none

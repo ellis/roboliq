@@ -7,7 +7,8 @@ var wellsParser = require('./parsers/wellsParser.js');
 function objectsValue(context, key, objects, effects, prefix) {
 	var value = misc.findObjectsValue(key, objects, effects, undefined, prefix);
 	if (_.isUndefined(value)) {
-		expect.throw(context, "missing value.");
+		var id = (prefix) ? prefix+"."+key : key;
+		expect.throw(_.defaults({valueName: id}, context), "missing value.");
 	}
 	return value;
 }
