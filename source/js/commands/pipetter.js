@@ -34,24 +34,28 @@ var createEffects_pipette = pipetterUtils.getEffects_pipette;
 
 var commandHandlers = {
 	"pipetter.instruction.aspirate": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
 	"pipetter.instruction.cleanTips": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
 	"pipetter.instruction.dispense": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
 	"pipetter.instruction.pipette": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		//console.log("params", JSON.stringify(params, null, '  '))
 		//console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
 		return {
@@ -637,7 +641,17 @@ var commandHandlers = {
 			expansion: expansion,
 			effects: effects
 		};
-	}
+	},
+	"pipetter.pipetteMixtures": function(params, data) {
+		expect.paramsRequired(params, ["mixtures", "destinations"]);
+		var equipmentData = misc.getObjectsValue(params.equipment, data.objects);
+		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
+
+		var effects = {};
+		return {
+			effects: effects
+		};
+	},
 };
 
 module.exports = {

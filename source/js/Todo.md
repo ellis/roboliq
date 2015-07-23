@@ -45,7 +45,7 @@
 - [x] initialize system liquid's volume to "Infinity l"
 - [x] for uninitialized source volumes, default to "NaN l"
 - [x] handle opening and closing of centrifuge during transport
-- [ ] roboliq.js: handle directives
+- [x] roboliq.js: handle directives
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
