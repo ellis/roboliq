@@ -43,7 +43,7 @@ function combineLists(elem) {
 
 function directive_factorialCols(spec, data) {
     //console.log("genFactorialCols:", spec);
-    assert(_.isObject(spec));
+    assert(_.isPlainObject(spec));
     var lists = _.map(spec, function(values, key) {
         if (!_.isArray(values)) {
             var obj1 = {};
@@ -119,7 +119,7 @@ function directive_factorialMerge(spec, data) {
 	//console.log("genMerge lists:", lists);
 	var result = genMerge2(spec, data, {}, 0, []);
 	// If all elements were objects rather than arrays, return an object:
-	/*if (_.every(spec, _.isObject)) {
+	/*if (_.every(spec, _.isPlainObject)) {
 		assert(result.length == 1);
 		result = result[0];
 	}*/
@@ -152,7 +152,7 @@ function genMerge2(spec, data, obj0, index, acc) {
 			genMerge2(elem2, data, obj1, 0, acc);
 		}
 		else {
-			assert(_.isObject(elem2));
+			assert(_.isPlainObject(elem2));
 			var obj1 = _.merge({}, obj0, elem[j]);
 			genMerge2(list, data, obj1, index + 1, acc);
 		}
@@ -162,14 +162,14 @@ function genMerge2(spec, data, obj0, index, acc) {
 }
 
 function directive_replicate(spec) {
-    assert(_.isObject(spec));
+    assert(_.isPlainObject(spec));
     assert(_.isNumber(spec.count));
 	assert(spec.value);
 	var depth = spec.depth || 0;
 	assert(depth >= 0);
 
 	var step = function(x, count, depth) {
-		console.log("step:", x, count, depth);
+		//console.log("step:", x, count, depth);
 		if (_.isArray(x) && depth > 0) {
 			if (depth === 1)
 				return _.flatten(_.map(x, function(y) { return step(y, count, depth - 1); }));
@@ -185,7 +185,7 @@ function directive_replicate(spec) {
 
 function directive_tableCols(table, data) {
     //console.log("genTableCols:", table)
-    assert(_.isObject(table));
+    assert(_.isPlainObject(table));
 	assert(!_.isEmpty(table));
 
 	var ns1 = _.uniq(_.map(table, function(x) { return _.isArray(x) ? x.length : 1; }));
@@ -227,7 +227,7 @@ function directive_tableRows(table, data) {
             }
         }
         else {
-            assert(_.isObject(row));
+            assert(_.isPlainObject(row));
             defaults = _.merge(defaults, row);
             //console.log("defaults:", defaults)
         }

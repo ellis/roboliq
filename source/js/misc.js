@@ -66,7 +66,7 @@ function getObjectsOfType(objects, types, prefix) {
 			l[id] = o;
 		}
 		_.forEach(o, function(o2, name2) {
-			if (_.isObject(o2)) {
+			if (_.isPlainObject(o2)) {
 				var prefix2 = prefix1.concat([name2]);
 				_.merge(l, getObjectsOfType(o2, types, prefix2));
 			}
@@ -83,7 +83,7 @@ function getObjectsOfType(objects, types, prefix) {
  * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
  */
 function handleDirective(spec, data) {
-	if (_.isObject(spec)) {
+	if (_.isPlainObject(spec)) {
 		for (var key in spec) {
 			if (data.directiveHandlers.hasOwnProperty(key)) {
 				var spec2 = spec[key];
@@ -95,10 +95,28 @@ function handleDirective(spec, data) {
 	return spec;
 }
 
+/**
+ * Recurses into object properties and replaces them with the result of handleDirective.
+ *
+ * @param  {Any} spec Any value.  If this is a directive, it will be an object with a single key that starts with '#'.
+ * @param  {Object} data An object with properties: directiveHandlers, objects, events.
+ * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
+ */
+function handleDirectiveDeep(spec, data) {
+	spec = handleDirective(spec, data);
+	if (_.isPlainObject(spec)) {
+		spec = _.mapValues(spec, function(value) {
+			return handleDirectiveDeep(value, data);
+		});
+	}
+	return spec;
+}
+
 module.exports = {
 	extractValuesFromQueryResults: extractValuesFromQueryResults,
 	getObjectsOfType: getObjectsOfType,
 	getObjectsValue: getObjectsValue,
 	handleDirective: handleDirective,
+	handleDirectiveDeep: handleDirectiveDeep,
 	findObjectsValue: findObjectsValue
 }

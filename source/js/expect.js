@@ -48,7 +48,7 @@ function _try(context, fn) {
 }
 
 function paramsRequired(params, names) {
-	assert(_.isObject(params));
+	assert(_.isPlainObject(params));
 	assert(_.isArray(names));
 	_.forEach(names, function(name) {
 		truthy({paramName: name}, params.hasOwnProperty(name), "missing required value");

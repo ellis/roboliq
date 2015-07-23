@@ -193,7 +193,7 @@ var genFunctions = {
 }
 
 function gen2(spec) {
-	if (_.isObject(spec)) {
+	if (_.isPlainObject(spec)) {
 		for (var key in spec) {
 			if (genFunctions.hasOwnProperty(key)) {
 				var spec2 = spec[key];
@@ -234,7 +234,7 @@ function combineLists(elem) {
 
 function genFactorialCols(spec) {
     //console.log("genFactorialCols:", spec);
-    assert(_.isObject(spec));
+    assert(_.isPlainObject(spec));
     var lists = _.map(spec, function(values, key) {
         if (!_.isArray(values)) {
             var obj1 = {};
@@ -304,7 +304,7 @@ function genMerge(spec) {
 	//console.log("genMerge lists:", lists);
 	var result = genMerge2(spec, {}, 0, []);
 	// If all elements were objects rather than arrays, return an object:
-	/*if (_.every(spec, _.isObject)) {
+	/*if (_.every(spec, _.isPlainObject)) {
 		assert(result.length == 1);
 		result = result[0];
 	}*/
@@ -337,7 +337,7 @@ function genMerge2(spec, obj0, index, acc) {
 			genMerge2(elem2, obj1, 0, acc);
 		}
 		else {
-			assert(_.isObject(elem2));
+			assert(_.isPlainObject(elem2));
 			var obj1 = _.merge({}, obj0, elem[j]);
 			genMerge2(list, obj1, index + 1, acc);
 		}
@@ -347,7 +347,7 @@ function genMerge2(spec, obj0, index, acc) {
 }
 
 function genReplicate(spec) {
-    assert(_.isObject(spec));
+    assert(_.isPlainObject(spec));
     assert(_.isNumber(spec.count));
 	assert(spec.value);
 	var depth = spec.depth || 0;
@@ -370,7 +370,7 @@ function genReplicate(spec) {
 
 function genTableCols(table) {
     //console.log("genTableCols:", table)
-    assert(_.isObject(table));
+    assert(_.isPlainObject(table));
 
 	var ns1 = _.uniq(_.mapValues(table, 'length'));
 	var ns = _.filter(ns1, function(n) { return n > 1; });
@@ -411,7 +411,7 @@ function genTableRows(table) {
             }
         }
         else {
-            assert(_.isObject(row));
+            assert(_.isPlainObject(row));
             defaults = _.merge(defaults, row);
             //console.log("defaults:", defaults)
         }

@@ -51,7 +51,11 @@ function run(argv, userProtocol) {
 		})
 		.parse(argv);
 
-	var loadedFiles = _.uniq(_.compact(
+	if (opts.debug) {
+		console.log("opts:", opts);
+	}
+
+	var urls = _.uniq(_.compact(
 		[
 			'config/roboliq.js',
 			'commands/centrifuge.js',
@@ -59,46 +63,58 @@ function run(argv, userProtocol) {
 			'commands/sealer.js',
 			'commands/transporter.js',
 			'config/ourlab.js'
-		].concat(opts.infiles)));
+		].concat(opts.infiles)
+	));
 	if (opts.debug) {
-		console.dir(opts);
-		console.log(loadedFiles);
+		console.log("urls:", urls);
 	}
-	var loadedContents = _.map(loadedFiles, function(filename) {
+
+	function loadProtocolUrl(url) {
 		var content = null;
-		if (filename.indexOf("./") != 0)
-			filename = "./"+filename;
-		if (path.extname(filename) === ".yaml") {
-			content = yaml.load(filename);
+		if (url.indexOf("./") != 0)
+			url = "./"+url;
+		if (path.extname(url) === ".yaml") {
+			content = yaml.load(url);
 		}
 		else {
-			content = require(filename);
+			content = require(url);
 		}
 		return content;
-	});
-	if (userProtocol) {
-		loadedContents.push(userProtocol);
 	}
 
-	function mergeObjects(name) {
-		var list = _(loadedContents).map(function(c) { return c[name]; }).compact().value();
-		return _.merge.apply(undefined, [{}].concat(list));
+	function mergeProtocols(a, b) {
+		//console.log("a.predicates:", a.predicates);
+		//console.log("b.predicates:", b.predicates);
+		var c = misc.handleDirectiveDeep(b, a);
+		//console.log("c.predicates:", c.predicates);
+		var d = _.merge({}, a, c);
+		//console.log("d.predicates:", d.predicates);
+		d.predicates = a.predicates.concat(c.predicates || []);
+		return d;
 	}
 
-	function mergeArrays(name) {
-		return _(loadedContents).map(function(c) { return c[name]; }).flatten().compact().filter(function(x) { return !_.isEmpty(x); }).value();
+	function mergeProtocolUrls(urls) {
+		var protocol = {
+			objects: {},
+			steps: {},
+			effects: {},
+			predicates: [],
+			directiveHandlers: {},
+			objectToPredicateConverters: {},
+			commandHandlers: {},
+			planHandlers: {},
+		};
+		_.forEach(urls, function(url) {
+			var protocol2 = loadProtocolUrl(url);
+			protocol = mergeProtocols(protocol, protocol2)
+		});
+		if (userProtocol) {
+			protocol = mergeProtocols(protocol, userProtocol);
+		}
+		return protocol;
 	}
 
-	var protocol = {
-		objects: mergeObjects("objects"),
-		steps: mergeObjects("steps"),
-		effects: mergeObjects("effects"),
-		predicates: mergeArrays("predicates"),
-		taskPredicates: mergeArrays("taskPredicates"),
-		objectToPredicateConverters: mergeObjects("objectToPredicateConverters"),
-		commandHandlers: mergeObjects("commandHandlers"),
-		planHandlers: mergeObjects("planHandlers")
-	};
+	var protocol = mergeProtocolUrls(urls);
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
 
@@ -120,7 +136,7 @@ function run(argv, userProtocol) {
 		var prefix = _.isEmpty(name) ? "" : name + ".";
 		_.forEach(o, function(value, name2) {
 			//console.log(name2, value);
-			if (_.isObject(value)) {
+			if (_.isPlainObject(value)) {
 				fillStateItems(prefix + name2, value, stateList);
 			}
 		});
@@ -344,7 +360,7 @@ function run(argv, userProtocol) {
 				if (field === 'isSource') {
 					tabulateWELLSSource(objects, prefix.join('.'));
 				}
-				else if (_.isObject(x)) {
+				else if (_.isPlainObject(x)) {
 					tabulateWELLS(x, prefix.concat([field]));
 				}
 			});
