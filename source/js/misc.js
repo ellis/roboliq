@@ -25,13 +25,7 @@ function findObjectsValue(key, objects, effects, defaultValue, prefix) {
 		if (effects.hasOwnProperty(id))
 			return effects[id];
 	}
-	var l = key.split('.');
-	for (var i = 0; !_.isEmpty(objects) && i < l.length; i++) {
-		if (!objects.hasOwnProperty(l[i]))
-			return (defaultValue) ? defaultValue : null;
-		objects = objects[l[i]];
-	}
-	return objects;
+	return _.get(objects, key, defaultValue);
 }
 
 function getObjectsValue(key, objects, effects, prefix) {

@@ -23,7 +23,7 @@ function handleError(context, e) {
 	}
 	else {
 		e.name = "ProcessingError";
-		e.errors = prefix+e.toString();
+		e.errors = [prefix+e.toString()];
 		throw e;
 	}
 }
@@ -31,11 +31,7 @@ function handleError(context, e) {
 function truthy(context, result, message) {
 	assert(message, "you must provide a `message` value");
 	if (!result) {
-		var o = _.merge({}, context, {
-			name: "ProcessingError",
-			errors: [getContextPrefix(context)+message]
-		});
-		throw o;
+		_throw(context, message);
 	}
 }
 
@@ -45,6 +41,15 @@ function _try(context, fn) {
 	} catch (e) {
 		handleError(context, e);
 	}
+}
+
+function _throw(context, errors) {
+	errors = _.isArray(errors) ? errors : [errors];
+	var o = _.merge({}, context, {
+		name: "ProcessingError",
+		errors: [getContextPrefix(context)+message]
+	});
+	throw o;
 }
 
 function paramsRequired(params, names) {
@@ -57,6 +62,7 @@ function paramsRequired(params, names) {
 
 module.exports = {
 	paramsRequired: paramsRequired,
+	throw: _throw,
 	truthy: truthy,
 	try: _try
 }
