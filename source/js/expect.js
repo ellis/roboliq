@@ -55,8 +55,20 @@ function paramsRequired(params, names) {
 	});
 }
 
+function wells(context, value) {
+	var destinations = expect.try(context, function () {
+		if (_.isString(params.sources))
+			return wellsParser.parse(params.destinations, data.objects);
+		else
+			return params.destinations;
+	});
+	return destinations;
+}
+
 module.exports = {
+	destinationWells: wells,
 	paramsRequired: paramsRequired,
+	sourceWells: wells,
 	truthy: truthy,
 	try: _try
 }
