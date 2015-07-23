@@ -56,47 +56,69 @@ describe('config/roboliqDirectiveHandlers', function() {
 		]);
 	});
 
-	describe('#merge', function() {
-		it('should generate object lists', function() {
-			var spec = {"#merge": [
-				{a: 'a', b: 1, c: 'hello'},
-				{x: 'b', b: 2, q: 'hello'},
-				{x: 'c', n: 3},
-			]};
-			should.deepEqual(misc.handleDirective(spec, data),
-				{a: 'a', b: 2, c: 'hello', x: 'c', q: 'hello', n: 3}
-			);
-		});
+	it('should handle #merge', function() {
+		var spec = {"#merge": [
+			{a: 'a', b: 1, c: 'hello'},
+			{x: 'b', b: 2, q: 'hello'},
+			{x: 'c', n: 3},
+		]};
+		should.deepEqual(misc.handleDirective(spec, data),
+			{a: 'a', b: 2, c: 'hello', x: 'c', q: 'hello', n: 3}
+		);
 	});
 
-	describe('#tableCols', function () {
-		it('should generate object lists', function () {
-			var spec = {"#tableCols": {
-				x: ['a', 'b', 'c'],
-				n: [1, 2, 3],
-				q: "hello"
-			}};
-			should.deepEqual(misc.handleDirective(spec, data), [
-				{x: 'a', n: 1, q: 'hello'},
-				{x: 'b', n: 2, q: 'hello'},
-				{x: 'c', n: 3, q: 'hello'},
-			]);
-		});
+	it('should handle #replicate', function() {
+		var spec1 = {
+		    "#replicate": {
+		        count: 2,
+		        value: [
+		            {a: 1},
+		            {a: 2}
+		        ]
+		    }
+		};
+		should.deepEqual(misc.handleDirective(spec1, data),
+			[{a: 1}, {a: 2}, {a: 1}, {a: 2}]
+		);
+		var spec2 = {
+		    "#replicate": {
+		        count: 2,
+		        depth: 1,
+		        value: [
+		            {a: 1},
+		            {a: 2}
+		        ]
+		    }
+		};
+		should.deepEqual(misc.handleDirective(spec2, data),
+			[{a: 1}, {a: 1}, {a: 2}, {a: 2}]
+		);
 	});
 
-	describe('#tableRows', function () {
-		it('should generate object lists', function () {
-			var spec = {"#tableRows": [
-				{x: 'X', y: 'Y'},
-				['A', 'B', 'C'],
-				['a', 'b', 1],
-				{y: 'Z'},
-				['c', 'd', 2],
-			]};
-			should.deepEqual(misc.handleDirective(spec, data), [
-				{x: 'X', y: 'Y', A: 'a', B: 'b', C: 1},
-				{x: 'X', y: 'Z', A: 'c', B: 'd', C: 2},
-			]);
-		});
+	it('should handle #tableCols', function () {
+		var spec = {"#tableCols": {
+			x: ['a', 'b', 'c'],
+			n: [1, 2, 3],
+			q: "hello"
+		}};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			{x: 'a', n: 1, q: 'hello'},
+			{x: 'b', n: 2, q: 'hello'},
+			{x: 'c', n: 3, q: 'hello'},
+		]);
+	});
+
+	it('should handle #tableRows', function () {
+		var spec = {"#tableRows": [
+			{x: 'X', y: 'Y'},
+			['A', 'B', 'C'],
+			['a', 'b', 1],
+			{y: 'Z'},
+			['c', 'd', 2],
+		]};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			{x: 'X', y: 'Y', A: 'a', B: 'b', C: 1},
+			{x: 'X', y: 'Z', A: 'c', B: 'd', C: 2},
+		]);
 	});
 });
