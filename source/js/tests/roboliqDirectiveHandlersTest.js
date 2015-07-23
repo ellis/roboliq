@@ -10,38 +10,50 @@ var data = {
 
 describe('config/roboliqDirectiveHandlers', function() {
 
-	describe('#factorialArrays', function() {
-		it('should generate object lists', function() {
-			var spec = {"#factorialArrays": [
-				{source: 1},
-				[{source: 2}, {source: 3}],
-				[{source: 4}, {source: 5}]
-			]};
-			should.deepEqual(misc.handleDirective(spec, data), [
-				[{source: 1}, {source: 2}, {source: 4}],
-				[{source: 1}, {source: 2}, {source: 5}],
-				[{source: 1}, {source: 3}, {source: 4}],
-				[{source: 1}, {source: 3}, {source: 5}],
-			]);
-		});
+	it('should handle #factorialArrays', function() {
+		var spec = {"#factorialArrays": [
+			{source: 1},
+			[{source: 2}, {source: 3}],
+			[{source: 4}, {source: 5}]
+		]};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			[{source: 1}, {source: 2}, {source: 4}],
+			[{source: 1}, {source: 2}, {source: 5}],
+			[{source: 1}, {source: 3}, {source: 4}],
+			[{source: 1}, {source: 3}, {source: 5}],
+		]);
 	});
 
-	describe('#factorialCols', function() {
-		it('should generate object lists', function() {
-			var spec = {"#factorialCols": {
-				x: ['a', 'b', 'c'],
-				n: [1, 2],
-				q: "hello"
-			}};
-			should.deepEqual(misc.handleDirective(spec, data), [
-				{x: 'a', n: 1, q: 'hello'},
-				{x: 'a', n: 2, q: 'hello'},
-				{x: 'b', n: 1, q: 'hello'},
-				{x: 'b', n: 2, q: 'hello'},
-				{x: 'c', n: 1, q: 'hello'},
-				{x: 'c', n: 2, q: 'hello'},
-			]);
-		});
+	it('should handle #factorialCols', function() {
+		var spec = {"#factorialCols": {
+			x: ['a', 'b', 'c'],
+			n: [1, 2],
+			q: "hello"
+		}};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			{x: 'a', n: 1, q: 'hello'},
+			{x: 'a', n: 2, q: 'hello'},
+			{x: 'b', n: 1, q: 'hello'},
+			{x: 'b', n: 2, q: 'hello'},
+			{x: 'c', n: 1, q: 'hello'},
+			{x: 'c', n: 2, q: 'hello'},
+		]);
+	});
+
+	it('should handle #factorialMerge', function() {
+		var spec = {"#factorialMerge": [
+			[{x: 'a'}, {x: 'b'}, {x: 'c'}],
+			[{n: 1}, {n: 2}],
+			{q: "hello"}
+		]};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			{x: 'a', n: 1, q: 'hello'},
+			{x: 'a', n: 2, q: 'hello'},
+			{x: 'b', n: 1, q: 'hello'},
+			{x: 'b', n: 2, q: 'hello'},
+			{x: 'c', n: 1, q: 'hello'},
+			{x: 'c', n: 2, q: 'hello'},
+		]);
 	});
 
 	describe('#merge', function() {
