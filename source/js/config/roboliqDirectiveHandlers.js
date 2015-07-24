@@ -1,6 +1,8 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+var mustache = require('mustache');
+var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser = require('../parsers/wellsParser.js');
 
@@ -43,8 +45,14 @@ function combineLists(elem) {
 
 function directive_factorialCols(spec, data) {
     //console.log("genFactorialCols:", spec);
-    assert(_.isPlainObject(spec));
-    var lists = _.map(spec, function(values, key) {
+    assert(_.isPlainObject(spec) || _.isArray(spec));
+	var variables = (_.isPlainObject(spec))
+		? _.pairs(spec)
+		: _(spec).map(_.pairs).flatten().value();
+
+    var lists = _.map(variables, function(pair) {
+		var key = pair[0];
+		var values = pair[1];
         if (!_.isArray(values)) {
             var obj1 = {};
             obj1[key] = values;
@@ -161,6 +169,49 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
+function directive_factorialTemplate(spec, data) {
+	expect.paramsRequired(spec, ['variables', 'template']);
+	var views = directive_factorialCols(spec.variables, data);
+	//console.log("views:", views);
+	return _.map(views, function(view) {
+		//var rendered = mustache.render(spec.template, view);
+		var rendered = renderTemplate(spec.template, view, data);
+		//console.log("rendered:", rendered);
+		return rendered;
+	});
+}
+
+function renderTemplate(template, scope, data) {
+	//console.log("renderTemplate:", template)
+	if (_.isString(template)) {
+		return renderTemplateString(template, scope, data);
+	}
+	else if (_.isArray(template)) {
+		return _.map(template, function(x) { return renderTemplate(x, scope, data); });
+	}
+	else if (_.isPlainObject(template)) {
+		return _.mapValues(template, function(x) { return renderTemplate(x, scope, data); });
+	}
+	else {
+		return template;
+	}
+}
+
+function renderTemplateString(s, scope, data) {
+	//console.log("renderTemplateString:", s)
+	assert(_.isString(s));
+	if (_.startsWith(s, "${") && _.endsWith(s, "}")) {
+		var name = s.substr(2, s.length - 3);
+		return scope[name];
+	}
+	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
+		return JSON.parse(mustache.render(s, scope));
+	}
+	else {
+		return mustache.render(s, scope);
+	}
+}
+
 function directive_replicate(spec) {
     assert(_.isPlainObject(spec));
     assert(_.isNumber(spec.count));
@@ -255,6 +306,7 @@ module.exports = {
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
 	"#factorialMerge": directive_factorialMerge,
+	"#factorialTemplate": directive_factorialTemplate,
 	"#gradient": directive_gradient,
 	"#merge": directive_merge,
 	"#replicate": directive_replicate,

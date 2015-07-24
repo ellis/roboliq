@@ -38,6 +38,19 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{x: 'c', n: 1, q: 'hello'},
 			{x: 'c', n: 2, q: 'hello'},
 		]);
+		var spec2 = {"#factorialCols": [
+			{x: ['a', 'b', 'c']},
+			{n: [1, 2]},
+			{q: "hello"}
+		]};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			{x: 'a', n: 1, q: 'hello'},
+			{x: 'a', n: 2, q: 'hello'},
+			{x: 'b', n: 1, q: 'hello'},
+			{x: 'b', n: 2, q: 'hello'},
+			{x: 'c', n: 1, q: 'hello'},
+			{x: 'c', n: 2, q: 'hello'},
+		]);
 	});
 
 	it('should handle #factorialMerge', function() {
@@ -53,6 +66,25 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{x: 'b', n: 2, q: 'hello'},
 			{x: 'c', n: 1, q: 'hello'},
 			{x: 'c', n: 2, q: 'hello'},
+		]);
+	});
+
+	it('should handle #factorialTemplate', function() {
+		var spec = {"#factorialTemplate": {
+			variables: [
+				{x: ['a', 'b', 'c']},
+				{n: [1, 2]},
+				{q: "hello"}
+			],
+			template: {"x2": "${x}", "n2": "${n}", "q2": "${q}"}
+		}};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			{x2: 'a', n2: 1, q2: 'hello'},
+			{x2: 'a', n2: 2, q2: 'hello'},
+			{x2: 'b', n2: 1, q2: 'hello'},
+			{x2: 'b', n2: 2, q2: 'hello'},
+			{x2: 'c', n2: 1, q2: 'hello'},
+			{x2: 'c', n2: 2, q2: 'hello'},
 		]);
 	});
 

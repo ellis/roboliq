@@ -16,11 +16,11 @@ objects:
     type: Plate
     description: buffer plate
     model: plateModel_96_dwp
-    location: P2
+    location: ourlab.mario.site.P2
   mixPlate:
     type: Plate
     model: ourlab.model.plateModel_384_square
-    location: P3
+    location: ourlab.mario.site.P3
 # Reagents used in this protocol
   saltwater:
     type: Liquid
