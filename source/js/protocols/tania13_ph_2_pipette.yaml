@@ -12,6 +12,7 @@ objects:
     description: trough for water/glycerol/salt mix
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
+    contents: [Infinity l, saltwater]
   sourcePlate1:
     type: Plate
     description: buffer plate

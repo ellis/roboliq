@@ -237,6 +237,12 @@ describe('pipetter', function() {
 		it('should pipette from a multi-well source', function () {
 			var protocol = {
 				objects: {
+					trough1: {
+						type: "Plate",
+						model: "ourlab.model.troughModel_100ml",
+						location: "ourlab.mario.site.R6",
+						contents: ['Infinity l', 'saltwater']
+					},
 					plate1: {
 						type: "Plate",
 						model: "ourlab.model.plateModel_96_square_transparent_nunc",
@@ -244,7 +250,7 @@ describe('pipetter', function() {
 					},
 					source1: {
 						type: "Liquid",
-						wells: "plate1(A01 down to H01)"
+						wells: "trough1(A01 down to H01)"
 					}
 				},
 				steps: {
@@ -266,25 +272,25 @@ describe('pipetter', function() {
 				"items": [
 					{
 						"syringe": 1,
-						"source": "plate1(A01)",
+						"source": "trough1(A01)",
 						"destination": "plate1(A02)",
 						"volume": "20ul"
 					},
 					{
 						"syringe": 2,
-						"source": "plate1(B01)",
+						"source": "trough1(B01)",
 						"destination": "plate1(B02)",
 						"volume": "20ul"
 					},
 					{
 						"syringe": 3,
-						"source": "plate1(C01)",
+						"source": "trough1(C01)",
 						"destination": "plate1(C02)",
 						"volume": "20ul"
 					},
 					{
 						"syringe": 4,
-						"source": "plate1(D01)",
+						"source": "trough1(D01)",
 						"destination": "plate1(D02)",
 						"volume": "20ul"
 					},
