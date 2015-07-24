@@ -104,6 +104,11 @@ function handleDirectiveDeep(spec, data) {
 			return handleDirectiveDeep(value, data);
 		});
 	}
+	else if (_.isArray(spec)) {
+		spec = _.map(spec, function(value) {
+			return handleDirectiveDeep(value, data);
+		});
+	}
 	return spec;
 }
 

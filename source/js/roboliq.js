@@ -7,6 +7,7 @@ var yaml = require('yamljs');
 var expect = require('./expect.js');
 var misc = require('./misc.js');
 var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
+var wellsParser = require('./parsers/wellsParser.js');
 
 function run(argv, userProtocol) {
 	var opts = require('nomnom')
@@ -105,6 +106,7 @@ function run(argv, userProtocol) {
 			objectToPredicateConverters: {},
 			commandHandlers: {},
 			planHandlers: {},
+			errors: {},
 		};
 		_.forEach(urls, function(url) {
 			var protocol2 = loadProtocolUrl(url);
@@ -116,7 +118,25 @@ function run(argv, userProtocol) {
 		return protocol;
 	}
 
+	// Post-processing of protocol
+	function postProcessProtocol(protocol) {
+		// Make sure predicates is a flat list
+		protocol.predicates = _.flattenDeep(protocol.predicates);
+		var liquids = misc.getObjectsOfType(protocol.objects, 'Liquid');
+		_.forEach(liquids, function(liquid, name) {
+			if (_.isString(liquid.wells)) {
+				try {
+					liquid.wells = wellsParser.parse(liquid.wells, protocol.objects);
+				} catch (e) {
+					protocol.errors[name+".wells"] = [e.toString()];
+					//console.log(e.toString());
+				}
+			}
+		})
+	}
+
 	var protocol = mergeProtocolUrls(urls);
+	postProcessProtocol(protocol);
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
 
@@ -204,7 +224,7 @@ function run(argv, userProtocol) {
 							}
 							else {
 								result = {errors: [e.toString()]};
-								throw e;
+								//throw e;
 							}
 						}
 						protocol.cache[id] = result;
@@ -278,7 +298,10 @@ function run(argv, userProtocol) {
 		return instructions;
 	}
 
-	var objectsFinal = expandProtocol(protocol);
+	var objectsFinal = protocol.objects;
+	if (_.isEmpty(protocol.errors)) {
+		expandProtocol(protocol);
+	}
 	if (opts.debug || opts.printProtocol) {
 		console.log();
 		console.log("Protocol:")
@@ -292,6 +315,7 @@ function run(argv, userProtocol) {
 		*/
 	}
 
+	var output = undefined;
 	if (!_.isEmpty(protocol.errors)) {
 		console.log();
 		console.log("Errors:");
@@ -379,6 +403,7 @@ function run(argv, userProtocol) {
 		var outputText = JSON.stringify(output, null, '\t');
 		if (opts.debug || opts.print)
 			console.log(outputText);
+
 		if (opts.output !== '') {
 			var inpath = _.last(opts.infiles);
 			var dir = opts.outputDir || path.dirname(inpath);

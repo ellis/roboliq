@@ -5,17 +5,17 @@ objects:
   tubes1:
     type: Plate
     description: GFP eppendorf tubes
-    model: tubeHolderModel_1500ul
-    location: T3
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
   trough1:
     type: Plate
     description: trough for water/glycerol/salt mix
-    model: troughModel_100ml
-    location: R6
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
   sourcePlate1:
     type: Plate
     description: buffer plate
-    model: plateModel_96_dwp
+    model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P2
   mixPlate:
     type: Plate
@@ -61,24 +61,26 @@ steps:
     command: pipetter.pipetteMixtures
     mixtures:
       "#factorialArrays":
-      - sources: saltwater
-        volumes: 40ul
+      - source: saltwater
+        volume: 40ul
       - "#gradient":
           "#tableRows":
           - {volume: 30ul, decimals: 1}
           - ['source1',     'source2',     'count']
           - ['hepes_850',   'hepes_650',   5]
-          - ['pipes_775',   'pipes_575',   5]
-          - ['mes_710',     'mes_510',     7]
-          - ['acetate_575', 'acetate_375', 8]
+#          - ['pipes_775',   'pipes_575',   5]
+#          - ['mes_710',     'mes_510',     7]
+#          - ['acetate_575', 'acetate_375', 8]
       - "#factorialCols":
-            source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+#            source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+            source: [sfGFP]
             volume: "5ul"
             clean: thorough
             cleanBetweenSameSource: flush
             program: Roboliq_Water_Wet_1000_mix3x50ul
 
-    replicates: 3
+#    replicates: 3
+    replicates: 1
     destinations: mixPlate(all row-jump(1))
     clean: flush
     cleanBegin: thorough

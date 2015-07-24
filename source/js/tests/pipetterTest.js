@@ -235,6 +235,69 @@ describe('pipetter', function() {
 
 
 
+	it('should pipette from a source with multiple wells', function () {
+		var protocol = {
+			objects: {
+				plate1: {
+					type: "Plate",
+					model: "ourlab.model.plateModel_96_square_transparent_nunc",
+					location: "ourlab.mario.site.P2"
+				},
+				source1: {
+					type: "Liquid",
+					wells: "plate1(A01 down to H01)"
+				}
+			},
+			steps: {
+				"1": {
+					command: "pipetter.pipette",
+					clean: "none",
+					items: [{
+						source: "source1",
+						destination: "plate1(A02 down to D02)",
+						volume: "20ul"
+					}]
+				}
+			}
+		};
+		var result = roboliq.run(["-o", ""], protocol);
+		should.deepEqual(result.output.steps[1][1], {
+			"command": "pipetter.instruction.pipette",
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha",
+			"program": "\"Roboliq_Water_Dry_1000\"",
+			"items": [
+				{
+					"syringe": 1,
+					"source": "plate1(A01)",
+					"destination": "plate1(A02)",
+					"volume": "20ul"
+				},
+				{
+					"syringe": 2,
+					"source": "plate1(B01)",
+					"destination": "plate1(B02)",
+					"volume": "20ul"
+				},
+				{
+					"syringe": 3,
+					"source": "plate1(C01)",
+					"destination": "plate1(C02)",
+					"volume": "20ul"
+				},
+				{
+					"syringe": 4,
+					"source": "plate1(D01)",
+					"destination": "plate1(D02)",
+					"volume": "20ul"
+				},
+			]
+		});
+	})
+
+
+
+
 	describe('pipetter.pipetteMixtures', function () {
 		it("should pipette mixtures to destination wells", function() {
 			var protocol = {

@@ -219,6 +219,17 @@ Several ideas for how to encode content.  Currently I prefer `plate1(C01)` below
 * factorialMerge: factorial merging of array of arrays of objects (like ``factorialArrays >> map merge``)
 * replicate
 
+    #factorialTemplate:
+        variables:
+        - a: [1, 2, 3]
+        - b: [3, 4, 5]
+        - c: {name: "bob"}
+        template:
+            hello: "'{{a}}'",
+            n: {{b}}
+            c: ${c}
+
+
 somehow distinguish between control factors, nuisance factors, blocking factors, measurable factors, unknown factors
 
 - factor: [protein, volume]

@@ -67,6 +67,12 @@ module.exports = {
 						"evowareGrid": 10,
 						"evowareSite": 4
 					},
+					R1: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 1 },
+		            R2: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 2 },
+		            R3: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 3 },
+		            R4: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 1 },
+		            R5: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 2 },
+		            R6: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
 					"REGRIP": {
 						"type": "Site",
 						"evowareCarrier": "ReGrip Station",
@@ -84,7 +90,8 @@ module.exports = {
 						"evowareCarrier": "System",
 						"evowareGrid": -1,
 						"evowareSite": 0
-					}
+					},
+					T3: { type: "Site", evowareCarrier: "Block 20Pos", evowareGrid: 16, evowareSite: 1 },
 				},
 				"systemLiquidLabwareModel": {
 					"description": "dummy labware model representing the system liquid source",
@@ -346,13 +353,16 @@ module.exports = {
 			"model": "ourlab.model.plateModel_384_square",
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
-	}, {
-		"pipetter.canAgentEquipmentSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha",
-			"site": "ourlab.mario.site.P2"
+	}, {"#factorialTemplate": {
+		variables: {site: ["P2", "P3", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+		template: {
+			"pipetter.canAgentEquipmentSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"site": "ourlab.mario.site.{{site}}"
+			}
 		}
-	}, {
+	}}, {
 		"pipetter.canAgentEquipmentSite": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
