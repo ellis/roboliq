@@ -65,7 +65,7 @@ function sourceMethod3(group, data, effects) {
 	var sourceToItems = _.groupBy(group, 'source');
 	//console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
 	_.forEach(sourceToItems, function (items) {
-		//console.log("sourceMethod3", items, source)
+		//console.log("sourceMethod3", items)
 		assert(items[0].source);
 		var wells = _.clone(items[0].source);
 		assert(!_.isEmpty(wells));
@@ -85,6 +85,7 @@ function sourceMethod3(group, data, effects) {
 					// Pick well with greatest volume
 					var wellName = wellAndVolumes[0][0];
 					item.source = wellName;
+					//console.log("well chosen:", wellName);
 					// Move the chosen well to the back of the array
 					_.pull(wells, wellName);
 					wells.push(wellName);

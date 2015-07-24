@@ -100,6 +100,9 @@ function pipette(params, data) {
 			//console.log("i:", i)
 			if (items[i].source) {
 				items[i].source = wellsParser.parse(items[i].source, data.objects);
+				if (_.isArray(items[i].source))
+					items[i].source = _.flatten(items[i].source);
+				//console.log("items["+i+"].source:", items[i].source)
 			}
 			else {
 				if (sourcesTop.length == 1)
@@ -109,7 +112,9 @@ function pipette(params, data) {
 			}
 
 			if (items[i].destination) {
-				//items[i].destination = wellsParser.parseOne(items[i].destination);
+				expect.try({paramName: "items["+i+"].destination"}, function() {
+					wellsParser.parseOne(items[i].destination);
+				});
 			}
 			else {
 				//console.log("step", items[i], destinationsTop, i, destinationsTop[i])

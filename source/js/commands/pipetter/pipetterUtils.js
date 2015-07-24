@@ -10,7 +10,7 @@ var misc = require('../../misc.js');
 var wellsParser = require('../../parsers/wellsParser.js');
 
 var emptyVolume = math.unit(0, 'ul');
-var unknownVolume = math.unit(math.NaN, 'l');
+var unknownVolume = emptyVolume; // math.unit(math.NaN, 'l');
 
 /**
  * Tries to find the contents array for the given well.
@@ -128,7 +128,7 @@ function getEffects_pipette(params, data, effects) {
 		var volume = math.eval(item.volume);
 
 		var pair = getContentsAndName(item.source, data, effects2);
-		var srcContents0 = (pair[0]) ? pair[0] : ["NaN l", item.source];
+		var srcContents0 = (pair[0]) ? pair[0] : ["0 l", item.source];
 		var srcContentsName = pair[1];
 
 		pair = getContentsAndName(item.destination, data, effects2);
