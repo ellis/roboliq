@@ -38,19 +38,6 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{x: 'c', n: 1, q: 'hello'},
 			{x: 'c', n: 2, q: 'hello'},
 		]);
-		var spec2 = {"#factorialCols": [
-			{x: ['a', 'b', 'c']},
-			{n: [1, 2]},
-			{q: "hello"}
-		]};
-		should.deepEqual(misc.handleDirective(spec, data), [
-			{x: 'a', n: 1, q: 'hello'},
-			{x: 'a', n: 2, q: 'hello'},
-			{x: 'b', n: 1, q: 'hello'},
-			{x: 'b', n: 2, q: 'hello'},
-			{x: 'c', n: 1, q: 'hello'},
-			{x: 'c', n: 2, q: 'hello'},
-		]);
 	});
 
 	it('should handle #factorialMerge', function() {
@@ -69,22 +56,72 @@ describe('config/roboliqDirectiveHandlers', function() {
 		]);
 	});
 
-	it('should handle #factorialTemplate', function() {
-		var spec = {"#factorialTemplate": {
-			variables: [
+	it('should handle #for', function() {
+		// Equivalent to #factorialArrays
+		var spec1 = {"#for": {
+			factors: [
+				{a: {source: 1}},
+				{b: [{source: 2}, {source: 3}]},
+				{c: [{source: 4}, {source: 5}]}
+			],
+			output: ["${a}", "${b}", "${c}"]
+		}};
+		should.deepEqual(misc.handleDirective(spec1, data), [
+			[{source: 1}, {source: 2}, {source: 4}],
+			[{source: 1}, {source: 2}, {source: 5}],
+			[{source: 1}, {source: 3}, {source: 4}],
+			[{source: 1}, {source: 3}, {source: 5}],
+		]);
+		// Equivalent to #factorialCols
+		var spec2 = {"#for": {
+			factors: [
 				{x: ['a', 'b', 'c']},
 				{n: [1, 2]},
 				{q: "hello"}
 			],
-			template: {"x2": "${x}", "n2": "${n}", "q2": "${q}"}
+			output: {x2: "${x}", n2: "${n}", q2: "${q}"}
 		}};
-		should.deepEqual(misc.handleDirective(spec, data), [
+		should.deepEqual(misc.handleDirective(spec2, data), [
 			{x2: 'a', n2: 1, q2: 'hello'},
 			{x2: 'a', n2: 2, q2: 'hello'},
 			{x2: 'b', n2: 1, q2: 'hello'},
 			{x2: 'b', n2: 2, q2: 'hello'},
 			{x2: 'c', n2: 1, q2: 'hello'},
 			{x2: 'c', n2: 2, q2: 'hello'},
+		]);
+		// Use object syntax for 'variables' instead of an array
+		var spec3 = {"#for": {
+			factors: {
+				x: ['a', 'b', 'c'],
+				n: [1, 2],
+				q: "hello"
+			},
+			output: {x2: "${x}", n2: "${n}", q2: "${q}"}
+		}};
+		should.deepEqual(misc.handleDirective(spec3, data), [
+			{x2: 'a', n2: 1, q2: 'hello'},
+			{x2: 'a', n2: 2, q2: 'hello'},
+			{x2: 'b', n2: 1, q2: 'hello'},
+			{x2: 'b', n2: 2, q2: 'hello'},
+			{x2: 'c', n2: 1, q2: 'hello'},
+			{x2: 'c', n2: 2, q2: 'hello'},
+		]);
+		// Equivalent to #factorialMerge
+		var spec4 = {"#for": {
+			factors: {
+				a: [{x: 'a'}, {x: 'b'}, {x: 'c'}],
+				b: [{n: 1}, {n: 2}],
+				c: {q: "hello"}
+			},
+			output: {"#merge": ["${a}", "${b}", "${c}"]}
+		}};
+		should.deepEqual(misc.handleDirective(spec4, data), [
+			{x: 'a', n: 1, q: 'hello'},
+			{x: 'a', n: 2, q: 'hello'},
+			{x: 'b', n: 1, q: 'hello'},
+			{x: 'b', n: 2, q: 'hello'},
+			{x: 'c', n: 1, q: 'hello'},
+			{x: 'c', n: 2, q: 'hello'},
 		]);
 	});
 

@@ -16,6 +16,50 @@ function handleDirective(spec, data) {
 	return misc.handleDirective(spec, data);
 }
 
+function directive_for(spec, data) {
+	expect.paramsRequired(spec, ['factors', 'output']);
+	var views = directive_factorialCols(spec.factors, data);
+	//console.log("views:", views);
+	return _.map(views, function(view) {
+		var rendered = renderTemplate(spec.output, view, data);
+		//console.log("rendered:", rendered);
+		var rendered2 = misc.handleDirectiveDeep(rendered, data);
+		//console.log("rendered2:", rendered2);
+		return rendered2;
+	});
+}
+
+function renderTemplate(template, scope, data) {
+	//console.log("renderTemplate:", template)
+	if (_.isString(template)) {
+		return renderTemplateString(template, scope, data);
+	}
+	else if (_.isArray(template)) {
+		return _.map(template, function(x) { return renderTemplate(x, scope, data); });
+	}
+	else if (_.isPlainObject(template)) {
+		return _.mapValues(template, function(x) { return renderTemplate(x, scope, data); });
+	}
+	else {
+		return template;
+	}
+}
+
+function renderTemplateString(s, scope, data) {
+	//console.log("renderTemplateString:", s)
+	assert(_.isString(s));
+	if (_.startsWith(s, "${") && _.endsWith(s, "}")) {
+		var name = s.substr(2, s.length - 3);
+		return scope[name];
+	}
+	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
+		return JSON.parse(mustache.render(s, scope));
+	}
+	else {
+		return mustache.render(s, scope);
+	}
+}
+
 function directive_factorialArrays(spec, data) {
 	//console.log("genList:", spec);
 	assert(_.isArray(spec));
@@ -169,49 +213,6 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
-function directive_factorialTemplate(spec, data) {
-	expect.paramsRequired(spec, ['variables', 'template']);
-	var views = directive_factorialCols(spec.variables, data);
-	//console.log("views:", views);
-	return _.map(views, function(view) {
-		//var rendered = mustache.render(spec.template, view);
-		var rendered = renderTemplate(spec.template, view, data);
-		//console.log("rendered:", rendered);
-		return rendered;
-	});
-}
-
-function renderTemplate(template, scope, data) {
-	//console.log("renderTemplate:", template)
-	if (_.isString(template)) {
-		return renderTemplateString(template, scope, data);
-	}
-	else if (_.isArray(template)) {
-		return _.map(template, function(x) { return renderTemplate(x, scope, data); });
-	}
-	else if (_.isPlainObject(template)) {
-		return _.mapValues(template, function(x) { return renderTemplate(x, scope, data); });
-	}
-	else {
-		return template;
-	}
-}
-
-function renderTemplateString(s, scope, data) {
-	//console.log("renderTemplateString:", s)
-	assert(_.isString(s));
-	if (_.startsWith(s, "${") && _.endsWith(s, "}")) {
-		var name = s.substr(2, s.length - 3);
-		return scope[name];
-	}
-	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
-		return JSON.parse(mustache.render(s, scope));
-	}
-	else {
-		return mustache.render(s, scope);
-	}
-}
-
 function directive_replicate(spec) {
     assert(_.isPlainObject(spec));
     assert(_.isNumber(spec.count));
@@ -306,7 +307,7 @@ module.exports = {
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
 	"#factorialMerge": directive_factorialMerge,
-	"#factorialTemplate": directive_factorialTemplate,
+	"#for": directive_for,
 	"#gradient": directive_gradient,
 	"#merge": directive_merge,
 	"#replicate": directive_replicate,

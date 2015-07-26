@@ -47,9 +47,12 @@
 - [x] handle opening and closing of centrifuge during transport
 - [x] roboliq.js: handle directives
 - [x] misc.js: use `_.get`
+- [x] #for: create directive that can handle all the other factorial directives
+- [ ] change #factorial* to #for*
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
+- [ ] move source code to 'src' subdir
 - [ ] reader command
 - [ ] mix command
 - [ ] roboliq.js: generate table for final well contents
@@ -213,6 +216,7 @@ Several ideas for how to encode content.  Currently I prefer `plate1(C01)` below
 
 * tableRows: property names given as row of column names, values as remaining rows, defaults as objects
 * tableCols: property names as property names, values in array
+* for: for comprehension with keys: factors (array), replicates (integer), order (function), output (value), flatten (boolean or 'deep')
 * factorialCols: property names as property names, values in array
 * factorialArrays: combinatorial combination of an element from each input array
 * merge: merge an array of objects

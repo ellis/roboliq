@@ -353,9 +353,9 @@ module.exports = {
 			"model": "ourlab.model.plateModel_384_square",
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
-	}, {"#factorialTemplate": {
-		variables: {site: ["P2", "P3", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
-		template: {
+	}, {"#for": {
+		factors: {site: ["P2", "P3", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+		output: {
 			"pipetter.canAgentEquipmentSite": {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
