@@ -656,14 +656,39 @@ var commandHandlers = {
 		var destinations = expect.destinationWells({paramName: 'destinations'}, params.destinations, data);
 		expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
 
-		var params2 = _.omit(params, ['mixtures', 'destinations']);
-		params2.items = [];
-		_.forEach(_.zip(params.mixtures, destinations), function(pair) {
-			var subitems = pair[0];
-			_.forEach(subitems, function(subitem) {
-				params2.items.push(_.merge({}, subitem, {destination: pair[1]}));
+		var params2 = _.omit(params, ['mixtures', 'destinations', 'order']);
+		// Put 'index' on all non-null mixture subitems
+		var mixtures = _.cloneDeep(params.mixtures);
+		_.forEach(mixtures, function(mixture) {
+			_.forEach(mixture, function(subitem, index) {
+				if (!_.isEmpty(subitem))
+					subitem.index = index;
 			});
 		});
+		mixtures = _.compact(mixtures);
+		//console.log("mixtures:", mixtures);
+
+		params2.items = [];
+		_.forEach(_.zip(mixtures, destinations), function(pair) {
+			var subitems = pair[0];
+			_.forEach(_.compact(subitems), function(subitem, index) {
+				params2.items.push(_.merge({index: index}, subitem, {destination: pair[1]}));
+			});
+		});
+		var order = params.order || ["index"];
+		if (!_.isArray(order)) order = [order];
+		var ordering = _.map(order, function(what) {
+			switch (what) {
+				case 'index': return 'index';
+				case 'destination': return function(item) { destinations.indexOf(item.destination); };
+				default: assert(false, "unknown `order` criterion: "+what);
+			}
+		});
+		//console.log("A:", params2.items)
+		params2.items = _.sortByAll.apply(null, [params2.items, ordering]);
+		//console.log("B:", params2.items)
+		params2.items = _.map(params2.items, function(item) { return _.omit(item, 'index'); });
+		//console.log("C:", params2.items)
 		params2.command = "pipetter.pipette";
 		return {
 			expansion: {

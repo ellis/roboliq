@@ -342,6 +342,19 @@ describe('pipetter', function() {
 				clean: 'none',
 				items: [
 					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},
+					{source: 'source1', volume: '10ul', destination: 'plate1(B02)'},
+					{source: 'source2', volume: '10ul', destination: 'plate1(A02)'},
+					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
+				]
+			});
+
+			protocol.steps["1"].order = "destination";
+			result = roboliq.run(["-o", ""], protocol);
+			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
+				command: "pipetter.pipette",
+				clean: 'none',
+				items: [
+					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},
 					{source: 'source2', volume: '10ul', destination: 'plate1(A02)'},
 					{source: 'source1', volume: '10ul', destination: 'plate1(B02)'},
 					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},

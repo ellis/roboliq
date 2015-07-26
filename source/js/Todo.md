@@ -48,6 +48,7 @@
 - [x] roboliq.js: handle directives
 - [x] misc.js: use `_.get`
 - [x] #for: create directive that can handle all the other factorial directives
+- [x] commands/pipetter.js: pipetter.pipetteMixtures: allow for sorting items by index, destination (default to index)
 - [ ] change #factorial* to #for*
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
@@ -64,6 +65,7 @@
 - [ ] create more systematic tests of commands using protocols, adapt old test protocols
 - [ ] commands/pipetter.js: pipetter.pipette: method 4
 - [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changed on our robot
+- [ ] commands/pipetter.js: pipetter.pipetteMixtures: allow for ordering items by source and volume
 - [ ] figure out how to implement variable expansion/evaluation
 - [ ] figure out how to implement for-comprehensions for both commands and list
 - [ ] figure out how to randomize for-comprehensions and plain lists

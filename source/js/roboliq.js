@@ -44,6 +44,11 @@ function run(argv, userProtocol) {
 				flag: true,
 				help: 'print combined protocol'
 			},
+			throw: {
+				abbr: 'T',
+				flag: true,
+				help: 'throw error when errors encountered during processing (in order to get a backtrace)'
+			},
 			version: {
 				flag: true,
 				help: 'print version and exit',
@@ -224,8 +229,9 @@ function run(argv, userProtocol) {
 							}
 							else {
 								result = {errors: [e.toString()]};
-								//throw e;
 							}
+							if (opts.throw)
+								throw e;
 						}
 						protocol.cache[id] = result;
 						// If there were errors:

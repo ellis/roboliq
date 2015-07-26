@@ -141,12 +141,10 @@ function directive_gradient(data, data_) {
             var volume2 = volumes[i];
             var volume1 = math.round(volumeTotal - volume2, decimals);
             var l = [];
-            if (volume1 > 0)
-                l.push({source: data.source1, volume: math.unit(volume1, 'ul').format({precision: 14})});
-            if (volume2 > 0)
-                l.push({source: data.source2, volume: math.unit(volume2, 'ul').format({precision: 14})});
-            if (l.length > 0)
-                list.push(l);
+            l.push((volume1 > 0) ? {source: data.source1, volume: math.unit(volume1, 'ul').format({precision: 14})} : null);
+        	l.push((volume2 > 0) ? {source: data.source2, volume: math.unit(volume2, 'ul').format({precision: 14})} : null);
+            //if (l.length > 0)
+            list.push(l);
         }
     });
     return list;
