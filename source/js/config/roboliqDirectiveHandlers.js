@@ -16,6 +16,11 @@ function handleDirective(spec, data) {
 	return misc.handleDirective(spec, data);
 }
 
+function directive_destinationWells(spec, data) {
+	expect.truthy({}, _.isString(spec), "#destinationWells: expected string, received "+spec);
+	return directive_wells(spec, data);
+}
+
 function directive_for(spec, data) {
 	expect.paramsRequired(spec, ['factors', 'output']);
 	var views = directive_factorialCols(spec.factors, data);
@@ -211,6 +216,14 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
+function directive_mixtureList(spec, data) {
+	var l = directive_factorialArrays(spec.items, data);
+	if (spec.replicates && spec.replicates > 1) {
+		l = directive_replicate({count: spec.replicates, value: l}, data);
+	}
+	return l;
+}
+
 function directive_replicate(spec) {
     assert(_.isPlainObject(spec));
     assert(_.isNumber(spec.count));
@@ -302,12 +315,14 @@ function directive_zipMerge(spec, data) {
 }
 
 module.exports = {
+	"#destinationWells": directive_destinationWells,
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
 	"#factorialMerge": directive_factorialMerge,
 	"#for": directive_for,
 	"#gradient": directive_gradient,
 	"#merge": directive_merge,
+	"#mixtureList": directive_mixtureList,
 	"#replicate": directive_replicate,
 	"#tableCols": directive_tableCols,
 	"#tableRows": directive_tableRows,

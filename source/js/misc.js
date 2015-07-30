@@ -87,6 +87,17 @@ function handleDirective(spec, data) {
 			}
 		}
 	}
+	else if (_.isString(spec) && _.startsWith(spec, "#")) {
+		var hash2 = spec.indexOf('#', 1);
+		if (hash2 > 0) {
+			key = spec.substr(0, hash2);
+			if (data.directiveHandlers.hasOwnProperty(key)) {
+				var spec2 = spec.substr(hash2 + 1);
+				var spec3 = handleDirective(spec2, data);
+				return data.directiveHandlers[key](spec3, data);
+			}
+		}
+	}
 	return spec;
 }
 

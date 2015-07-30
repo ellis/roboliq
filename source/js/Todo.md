@@ -49,7 +49,10 @@
 - [x] misc.js: use `_.get`
 - [x] #for: create directive that can handle all the other factorial directives
 - [x] commands/pipetter.js: pipetter.pipetteMixtures: allow for sorting items by index, destination (default to index)
-- [ ] change #factorial* to #for*
+- [.] `#mixtureList`
+- [.] "#destinationWells#mixPlate(all row-jump(1))"
+- [ ] "#length#mixtures"
+- [ ] `#replaceLabware`
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
