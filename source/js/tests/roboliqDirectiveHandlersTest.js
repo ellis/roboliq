@@ -1,5 +1,6 @@
-var roboliq = require('../roboliq.js')
+var _ = require('lodash');
 var should = require('should');
+var roboliq = require('../roboliq.js')
 var directiveHandlers = require('../config/roboliqDirectiveHandlers.js');
 var misc = require('../misc.js');
 
@@ -177,6 +178,21 @@ describe('config/roboliqDirectiveHandlers', function() {
 			}
 		};
 		should.deepEqual(misc.handleDirective(spec, data), [
+			"plate2(A01)", "plate2(B01)", "plate2(C01)", "plate2(D01)"
+		]);
+		
+		var data2 = _.cloneDeep(data);
+		data2.objects.wells = {
+			type: "Variable",
+			value: ["plate1(A01)", "plate1(B01)", "plate1(C01)", "plate1(D01)"]
+		};
+		var spec = {
+			"#replaceLabware": {
+				list: "wells",
+				new: "plate2"
+			}
+		};
+		should.deepEqual(misc.handleDirective(spec, data2), [
 			"plate2(A01)", "plate2(B01)", "plate2(C01)", "plate2(D01)"
 		]);
 	});

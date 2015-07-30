@@ -49,6 +49,23 @@ function getObjectsValue(key, objects, effects, prefix) {
 	return objects;
 }
 
+function getVariableValue(spec, objects, effects, prefix) {
+	if (_.isString(spec)) {
+		if (_.startsWith(spec, '"'))
+			return spec;
+		var found = findObjectsValue(spec, objects, effects);
+		if (!_.isUndefined(found)) {
+			if (found.type === "Variable") {
+				return found.value;
+			}
+			else {
+				return found;
+			}
+		}
+	}
+	return spec;
+}
+
 function getObjectsOfType(objects, types, prefix) {
 	if (_.isString(types)) types = [types];
 	if (!prefix) prefix = [];
@@ -127,6 +144,7 @@ module.exports = {
 	extractValuesFromQueryResults: extractValuesFromQueryResults,
 	getObjectsOfType: getObjectsOfType,
 	getObjectsValue: getObjectsValue,
+	getVariableValue: getVariableValue,
 	handleDirective: handleDirective,
 	handleDirectiveDeep: handleDirectiveDeep,
 	findObjectsValue: findObjectsValue

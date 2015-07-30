@@ -241,9 +241,10 @@ function directive_mixtureList(spec, data) {
 
 function directive_replaceLabware(spec, data) {
 	expect.paramsRequired(spec, ['list', 'new']);
-	assert(_.isArray(spec.list));
+	var list = misc.getVariableValue(spec.list, data.objects);
+	assert(_.isArray(list));
 	assert(_.isString(spec.new));
-	var l1 = _.flatten(_.map(spec.list, function(s) {
+	var l1 = _.flatten(_.map(list, function(s) {
 		var l2 = wellsParser.parse(s);
 		return _.map(l2, function(x) {
 			//console.log("s:", s, "x:", x);
