@@ -28,6 +28,10 @@ function parse(text, objects) {
 	if (!objects)
 		return result;
 
+	return processParserResult(result, objects, text);
+}
+
+function processParserResult(result, objects, text) {
 	//console.log("text", text)
 	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
@@ -265,5 +269,6 @@ function parseOne(text) {
 
 module.exports = {
 	parse: parse,
-	parseOne: parseOne
+	parseOne: parseOne,
+	processParserResult: processParserResult
 }

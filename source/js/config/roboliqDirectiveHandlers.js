@@ -155,12 +155,6 @@ function directive_gradient(data, data_) {
     return list;
 }
 
-function directive_merge(spec, data) {
-	assert(_.isArray(spec));
-	list = _.map(spec, function(x) { return handleDirective(x, data); });
-	return _.merge.apply(null, [{}].concat(list));
-}
-
 /**
  * Merge an array of objects, or combinatorially merge an array of arrays of objects.
  *
@@ -216,12 +210,46 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
+function directive_length(spec, data) {
+	if (_.isArray(spec))
+		return spec.length;
+	else if (_.isString(spec)) {
+		var value = misc.getObjectsValue(spec, data.objects)
+		expect.truthy({}, _.isArray(value), '#length expected an array, received: '+spec);
+		return value.length;
+	}
+	else {
+		expect.truthy({}, false, '#length expected an array, received: '+spec);
+	}
+}
+
+function directive_merge(spec, data) {
+	assert(_.isArray(spec));
+	list = _.map(spec, function(x) { return handleDirective(x, data); });
+	return _.merge.apply(null, [{}].concat(list));
+}
+
 function directive_mixtureList(spec, data) {
 	var l = directive_factorialArrays(spec.items, data);
 	if (spec.replicates && spec.replicates > 1) {
 		l = directive_replicate({count: spec.replicates, value: l}, data);
 	}
 	return l;
+}
+
+function directive_replaceLabware(spec, data) {
+	expect.paramsRequired(spec, ['list', 'new']);
+	assert(_.isArray(spec.list));
+	assert(_.isString(spec.new));
+	var l1 = _.map(spec.list, function(s) {
+		var x = wellsParser.parse(s);
+		if (x.labware === spec.new) {
+			x.labware = spec.new;
+		}
+		return x;
+	});
+	var l2 = wellsParser.processParserResult(l1, data.objects);
+	return l2;
 }
 
 function directive_replicate(spec) {
@@ -321,8 +349,10 @@ module.exports = {
 	"#factorialMerge": directive_factorialMerge,
 	"#for": directive_for,
 	"#gradient": directive_gradient,
+	"#length": directive_length,
 	"#merge": directive_merge,
 	"#mixtureList": directive_mixtureList,
+	"#replaceLabware": directive_replaceLabware,
 	"#replicate": directive_replicate,
 	"#tableCols": directive_tableCols,
 	"#tableRows": directive_tableRows,

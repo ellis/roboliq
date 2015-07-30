@@ -51,8 +51,8 @@
 - [x] commands/pipetter.js: pipetter.pipetteMixtures: allow for sorting items by index, destination (default to index)
 - [.] `#mixtureList`
 - [.] "#destinationWells#mixPlate(all row-jump(1))"
-- [ ] "#length#mixtures"
-- [ ] `#replaceLabware`
+- [.] "#length#mixtures"
+- [.] `#replaceLabware`
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
