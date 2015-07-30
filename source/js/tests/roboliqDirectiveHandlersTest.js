@@ -6,6 +6,15 @@ var misc = require('../misc.js');
 var data = {
 	directiveHandlers: directiveHandlers,
 	objects: {
+		plateModel1: {
+			type: "PlateModel",
+			rows: 8,
+			columns: 12
+		},
+		plate1: {
+			type: "Plate",
+			model: "plateModel1"
+		},
 		list1: {
 			type: "Variable",
 			value: [1, 2, 3]
@@ -14,6 +23,13 @@ var data = {
 };
 
 describe('config/roboliqDirectiveHandlers', function() {
+
+	it('should handle #destinationWells', function() {
+		var spec = "#destinationWells#plate1(A01 down to D01)";
+		should.deepEqual(misc.handleDirective(spec, data), [
+			"plate1(A01)", "plate1(B01)", "plate1(C01)", "plate1(D01)"
+		]);
+	});
 
 	it('should handle #factorialArrays', function() {
 		var spec = {"#factorialArrays": [

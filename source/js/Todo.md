@@ -50,7 +50,7 @@
 - [x] #for: create directive that can handle all the other factorial directives
 - [x] commands/pipetter.js: pipetter.pipetteMixtures: allow for sorting items by index, destination (default to index)
 - [.] `#mixtureList`
-- [.] "#destinationWells#mixPlate(all row-jump(1))"
+- [x] "#destinationWells#mixPlate(all row-jump(1))"
 - [x] "#length#mixtures"
 - [.] `#replaceLabware`
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
