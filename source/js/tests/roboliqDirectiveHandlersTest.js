@@ -5,7 +5,12 @@ var misc = require('../misc.js');
 
 var data = {
 	directiveHandlers: directiveHandlers,
-	objects: {}
+	objects: {
+		list1: {
+			type: "Variable",
+			value: [1, 2, 3]
+		}
+	}
 };
 
 describe('config/roboliqDirectiveHandlers', function() {
@@ -123,6 +128,14 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{x: 'c', n: 1, q: 'hello'},
 			{x: 'c', n: 2, q: 'hello'},
 		]);
+	});
+
+	it('should handle #length', function() {
+		var spec = {"#length": [1,2,3]};
+		should.deepEqual(misc.handleDirective(spec, data), 3);
+
+		var spec = {"#length": "list1"};
+		should.deepEqual(misc.handleDirective(spec, data), 3);
 	});
 
 	it('should handle #merge', function() {

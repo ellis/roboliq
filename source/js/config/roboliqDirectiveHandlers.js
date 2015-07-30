@@ -215,6 +215,8 @@ function directive_length(spec, data) {
 		return spec.length;
 	else if (_.isString(spec)) {
 		var value = misc.getObjectsValue(spec, data.objects)
+		 if (_.isPlainObject(value) && value.hasOwnProperty('value'))
+			value = value.value;
 		expect.truthy({}, _.isArray(value), '#length expected an array, received: '+spec);
 		return value.length;
 	}
