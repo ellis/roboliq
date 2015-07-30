@@ -15,6 +15,10 @@ var data = {
 			type: "Plate",
 			model: "plateModel1"
 		},
+		plate2: {
+			type: "Plate",
+			model: "plateModel1"
+		},
 		list1: {
 			type: "Variable",
 			value: [1, 2, 3]
@@ -165,28 +169,40 @@ describe('config/roboliqDirectiveHandlers', function() {
 		);
 	});
 
+	it('should handle #replaceLabware', function() {
+		var spec = {
+			"#replaceLabware": {
+				list: ["plate1(A01)", "plate1(B01)", "plate1(C01)", "plate1(D01)"],
+				new: "plate2"
+			}
+		};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			"plate2(A01)", "plate2(B01)", "plate2(C01)", "plate2(D01)"
+		]);
+	});
+
 	it('should handle #replicate', function() {
 		var spec1 = {
-		    "#replicate": {
-		        count: 2,
-		        value: [
-		            {a: 1},
-		            {a: 2}
-		        ]
-		    }
+			"#replicate": {
+				count: 2,
+				value: [
+					{a: 1},
+					{a: 2}
+				]
+			}
 		};
 		should.deepEqual(misc.handleDirective(spec1, data),
 			[{a: 1}, {a: 2}, {a: 1}, {a: 2}]
 		);
 		var spec2 = {
-		    "#replicate": {
-		        count: 2,
-		        depth: 1,
-		        value: [
-		            {a: 1},
-		            {a: 2}
-		        ]
-		    }
+			"#replicate": {
+				count: 2,
+				depth: 1,
+				value: [
+					{a: 1},
+					{a: 2}
+				]
+			}
 		};
 		should.deepEqual(misc.handleDirective(spec2, data),
 			[{a: 1}, {a: 1}, {a: 2}, {a: 2}]

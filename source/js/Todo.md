@@ -52,7 +52,7 @@
 - [.] `#mixtureList`
 - [x] "#destinationWells#mixPlate(all row-jump(1))"
 - [x] "#length#mixtures"
-- [.] `#replaceLabware`
+- [x] `#replaceLabware`
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
 - [ ] create new scripts for old tania* scripts
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')

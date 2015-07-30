@@ -243,13 +243,17 @@ function directive_replaceLabware(spec, data) {
 	expect.paramsRequired(spec, ['list', 'new']);
 	assert(_.isArray(spec.list));
 	assert(_.isString(spec.new));
-	var l1 = _.map(spec.list, function(s) {
-		var x = wellsParser.parse(s);
-		if (x.labware === spec.new) {
-			x.labware = spec.new;
-		}
-		return x;
-	});
+	var l1 = _.flatten(_.map(spec.list, function(s) {
+		var l2 = wellsParser.parse(s);
+		return _.map(l2, function(x) {
+			//console.log("s:", s, "x:", x);
+			//console.log(x.hasOwnProperty('labware'), !spec.old, x.labware === spec.old);
+			if (x.hasOwnProperty('labware') && (!spec.old || x.labware === spec.old)) {
+				x.labware = spec.new;
+			}
+			return x;
+		});
+	}));
 	var l2 = wellsParser.processParserResult(l1, data.objects);
 	return l2;
 }
