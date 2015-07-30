@@ -82,6 +82,26 @@ describe('config/roboliqDirectiveHandlers', function() {
 		]);
 	});
 
+	it('should handle #factorialMixture', function() {
+		var spec = {"#factorialMixture": {
+			replicates: 2,
+			items: [
+				[{a: 1}, {a: 2}],
+				{a: [3, 4]}
+			]
+		}};
+		should.deepEqual(misc.handleDirective(spec, data), [
+			[{a: 1}, {a: 3}],
+			[{a: 1}, {a: 4}],
+			[{a: 2}, {a: 3}],
+			[{a: 2}, {a: 4}],
+			[{a: 1}, {a: 3}],
+			[{a: 1}, {a: 4}],
+			[{a: 2}, {a: 3}],
+			[{a: 2}, {a: 4}]
+		]);
+	});
+
 	it('should handle #for', function() {
 		// Equivalent to #factorialArrays
 		var spec1 = {"#for": {
@@ -180,7 +200,7 @@ describe('config/roboliqDirectiveHandlers', function() {
 		should.deepEqual(misc.handleDirective(spec, data), [
 			"plate2(A01)", "plate2(B01)", "plate2(C01)", "plate2(D01)"
 		]);
-		
+
 		var data2 = _.cloneDeep(data);
 		data2.objects.wells = {
 			type: "Variable",

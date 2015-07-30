@@ -210,6 +210,30 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
+function directive_factorialMixture(spec, data) {
+	// Get mixutre items
+	var items;
+	if (_.isArray(spec))
+		items = spec;
+	else {
+		expect.paramsRequired(spec, ['items']);
+		items = misc.getVariableValue(spec.items, data.objects);
+	}
+
+	assert(_.isArray(items));
+	var items2 = _.map(items, function(item) {
+		return (_.isPlainObject(item))
+			? directive_factorialCols(item, data)
+			: item;
+	});
+	var combined = combineLists(items2);
+
+	if (spec.replicates && spec.replicates > 1) {
+		combined = directive_replicate({count: spec.replicates, value: combined}, data);
+	}
+	return combined;
+}
+
 function directive_length(spec, data) {
 	if (_.isArray(spec))
 		return spec.length;
@@ -229,14 +253,6 @@ function directive_merge(spec, data) {
 	assert(_.isArray(spec));
 	list = _.map(spec, function(x) { return handleDirective(x, data); });
 	return _.merge.apply(null, [{}].concat(list));
-}
-
-function directive_mixtureList(spec, data) {
-	var l = directive_factorialArrays(spec.items, data);
-	if (spec.replicates && spec.replicates > 1) {
-		l = directive_replicate({count: spec.replicates, value: l}, data);
-	}
-	return l;
 }
 
 function directive_replaceLabware(spec, data) {
@@ -354,11 +370,11 @@ module.exports = {
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
 	"#factorialMerge": directive_factorialMerge,
+	"#factorialMixture": directive_factorialMixture,
 	"#for": directive_for,
 	"#gradient": directive_gradient,
 	"#length": directive_length,
 	"#merge": directive_merge,
-	"#mixtureList": directive_mixtureList,
 	"#replaceLabware": directive_replaceLabware,
 	"#replicate": directive_replicate,
 	"#tableCols": directive_tableCols,
