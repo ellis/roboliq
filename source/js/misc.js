@@ -126,18 +126,51 @@ function handleDirective(spec, data) {
  * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
  */
 function handleDirectiveDeep(spec, data) {
-	spec = handleDirective(spec, data);
-	if (_.isPlainObject(spec)) {
-		spec = _.mapValues(spec, function(value) {
-			return handleDirectiveDeep(value, data);
+	return transformDeep(spec, function(spec) { return handleDirective(spec, data); });
+}
+
+/**
+ * Recurses into object properties and maps them to the result of fn.
+ *
+ * @param  {Any} x Any value.
+ * @param  {Function} fn A function that returns a transformed value.
+ * @return {Any} Return the transformed object.
+ */
+function transformDeep(x, fn) {
+	x = fn(x);
+	if (_.isPlainObject(x)) {
+		x = _.mapValues(x, function(value) {
+			return transformDeep(value, fn);
 		});
 	}
-	else if (_.isArray(spec)) {
-		spec = _.map(spec, function(value) {
-			return handleDirectiveDeep(value, data);
+	else if (_.isArray(x)) {
+		x = _.map(x, function(value) {
+			return transformDeep(value, fn);
 		});
 	}
-	return spec;
+	return x;
+}
+
+/**
+* Recurses into object properties and replaces them with the result of fn.
+* 'x' will be mutated.
+*
+ * @param  {Any} x Any value.
+ * @param  {Function} fn A function that returns a transformed value.
+ * @return nothing
+ */
+function mutateDeep(x, fn) {
+	if (_.isPlainObject(x)) {
+		for (var key in x) {
+			x[key] = mutateDeep(fn(x[key]), fn);
+		}
+	}
+	else if (_.isArray(x)) {
+		for (var i in x) {
+			x[i] = mutateDeep(fn(x[i]), fn);
+		}
+	}
+	return x;
 }
 
 module.exports = {
@@ -147,5 +180,7 @@ module.exports = {
 	getVariableValue: getVariableValue,
 	handleDirective: handleDirective,
 	handleDirectiveDeep: handleDirectiveDeep,
-	findObjectsValue: findObjectsValue
+	findObjectsValue: findObjectsValue,
+	mutateDeep: mutateDeep,
+	transformDeep: transformDeep,
 }

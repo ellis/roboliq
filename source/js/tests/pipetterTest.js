@@ -5,7 +5,7 @@ var roboliq = require('../roboliq.js')
 describe('pipetter', function() {
 	describe('pipetter.pipette', function () {
 
-		it('should pipette between two wells on plate1 without specify well contents', function () {
+		it('should pipette between two wells on plate1 without specifying well contents', function () {
 			var protocol = {
 				objects: {
 					plate1: {

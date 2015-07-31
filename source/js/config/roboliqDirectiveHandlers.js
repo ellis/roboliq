@@ -176,6 +176,17 @@ function directive_factorialMerge(spec, data) {
 	return result;
 }
 
+/**
+ * Helper function for factorial merging of arrays of objects.
+ * For example, the first element of the first array is merged with the first element of the second array,
+ * added to the `acc` list, then the first element of the first array is merged with the second element of the second array, and so on.
+ * @param  {array} spec  array of objects, may be nested arbitrarily deep, i.e. array of arrays of objects
+ * @param  {object} data  [description]
+ * @param  {object} obj0  accumulated result of the current merge, will be added to `acc` once the end of the `spec` list is reached
+ * @param  {[type]} index index of current item in `spec`
+ * @param  {[type]} acc   accumulated list of merged objects
+ * @return {array of merged} Returns a factorial list of merged objects.
+ */
 function genMerge2(spec, data, obj0, index, acc) {
 	//console.log("genMerge2", spec, obj0, index, acc);
 	assert(_.isArray(spec));
@@ -197,10 +208,11 @@ function genMerge2(spec, data, obj0, index, acc) {
 
 	for (var j = 0; j < elem.length; j++) {
 		var elem2 = handleDirective(elem[j], data);
+		//console.log("elem2:", elem2)
 		if (_.isArray(elem2)) {
 			genMerge2(elem2, data, obj1, 0, acc);
 		}
-		else {
+		else if (elem2 !== null) {
 			assert(_.isPlainObject(elem2));
 			var obj1 = _.merge({}, obj0, elem[j]);
 			genMerge2(list, data, obj1, index + 1, acc);
@@ -210,7 +222,7 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
-function directive_factorialMixture(spec, data) {
+function directive_factorialMixtures(spec, data) {
 	// Get mixutre items
 	var items;
 	if (_.isArray(spec))
@@ -370,7 +382,7 @@ module.exports = {
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
 	"#factorialMerge": directive_factorialMerge,
-	"#factorialMixture": directive_factorialMixture,
+	"#factorialMixtures": directive_factorialMixtures,
 	"#for": directive_for,
 	"#gradient": directive_gradient,
 	"#length": directive_length,

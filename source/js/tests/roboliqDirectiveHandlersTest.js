@@ -82,8 +82,8 @@ describe('config/roboliqDirectiveHandlers', function() {
 		]);
 	});
 
-	it('should handle #factorialMixture', function() {
-		var spec = {"#factorialMixture": {
+	it('should handle #factorialMixtures', function() {
+		var spec = {"#factorialMixtures": {
 			replicates: 2,
 			items: [
 				[{a: 1}, {a: 2}],

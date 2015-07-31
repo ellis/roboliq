@@ -93,12 +93,19 @@ function run(argv, userProtocol) {
 	function mergeProtocols(a, b) {
 		//console.log("a.predicates:", a.predicates);
 		//console.log("b.predicates:", b.predicates);
-		var c = misc.handleDirectiveDeep(b, a);
-		//console.log("c.predicates:", c.predicates);
-		var d = _.merge({}, a, c);
-		//console.log("d.predicates:", d.predicates);
-		d.predicates = a.predicates.concat(c.predicates || []);
-		return d;
+		var c = _.merge({}, a, b);
+		c.predicates = b.predicates;
+		// Handle directives for objects first
+		misc.mutateDeep(c.objects, function(x) { return misc.handleDirective(x, c); });
+		// Handle directives other properties
+		for (key in c) {
+			if (key !== 'objects' & key !== 'directiveHandlers') {
+				misc.mutateDeep(c[key], function(x) { return misc.handleDirective(x, c); });
+			}
+		}
+		c.predicates = a.predicates.concat(c.predicates || []);
+		//console.log("c:", c);
+		return c;
 	}
 
 	function mergeProtocolUrls(urls) {
