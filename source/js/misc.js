@@ -41,6 +41,7 @@ function getObjectsValue(key, objects, effects, prefix) {
 			var valueName = _.take(l, i + 1).join('.');
 			if (prefix) valueName = prefix + '.' + valueName;
 			var message = "value `"+valueName+"`: undefined";
+			//console.log("objects:", objects)
 			//console.log(message);
 			throw new Error(message);//{name: "ProcessingError", errors: [message]};
 		}
