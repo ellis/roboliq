@@ -1,0 +1,103 @@
+description: |
+  Tania's Assam protocol for testing a range of pHs
+
+objects:
+  tubes1:
+    type: Plate
+    description: GFP eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  trough1:
+    type: Plate
+    description: trough for water/glycerol/salt mix
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, saltwater]
+  sourcePlate1:
+    type: Plate
+    description: buffer plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.mario.site.P2
+  mixPlate:
+    type: Plate
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P3
+# Reagents used in this protocol
+  saltwater:
+    type: Liquid
+    wells: trough1(C01 down to F01)
+  hepes_850:
+    type: Liquid
+    wells: sourcePlate1(A01 down to D01)
+  hepes_650:
+    type: Liquid
+    wells: sourcePlate1(A02 down to D02)
+  pipes_775:
+    type: Liquid
+    wells: sourcePlate1(A03 down to D03)
+  pipes_575:
+    type: Liquid
+    wells: sourcePlate1(A04 down to D04)
+  mes_710:
+    type: Liquid
+    wells: sourcePlate1(A05 down to D05)
+  mes_510:
+    type: Liquid
+    wells: sourcePlate1(A06 down to D06)
+  acetate_575:
+    type: Liquid
+    wells: sourcePlate1(A07 down to D07)
+  acetate_375:
+    type: Liquid
+    wells: sourcePlate1(A08 down to D08)
+  # GFPs
+  sfGFP: {type: Liquid, description: wild type, wells: tubes1(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells: tubes1(A02)}
+  tdGFP: {type: Liquid, description: fusion of double mutant, wells: tubes1(A03)}
+  N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
+  Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
+
+  mixtures:
+    type: Variable
+    value:
+      "#factorialMixtures":
+        replicates: 3
+        items:
+        - source: saltwater
+          volume: 40ul
+        - "#gradient":
+            "#tableRows":
+            - {volume: 30ul, decimals: 1}
+            - ['source1',     'source2',     'count']
+            - ['hepes_850',   'hepes_650',   5]
+            - ['pipes_775',   'pipes_575',   5]
+            - ['mes_710',     'mes_510',     7]
+            - ['acetate_575', 'acetate_375', 8]
+        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+          volume: "5ul"
+          clean: thorough
+          cleanBetweenSameSource: flush
+          program: Roboliq_Water_Wet_1000_mix3x50ul
+  mixtureWells:
+    type: Variable
+    value:
+      "#take":
+        list: "#destinationWells#mixPlate(all row-jump(1))"
+        count: "#length#mixtures"
+#  balanceWells:
+#    type: Variable
+#    value:
+#      "#replaceLabware":
+#        list: mixtureWells
+#        new: "balancePlate"
+
+steps:
+  1:
+    command: pipetter.pipetteMixtures
+    mixtures: mixtures
+#    replicates: 3
+    destinations: mixtureWells
+    clean: flush
+    cleanBegin: thorough
+    cleanBetweenSameSource: none
+    cleanEnd: thorough
