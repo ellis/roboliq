@@ -652,13 +652,19 @@ var commandHandlers = {
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, data) {
 		expect.paramsRequired(params, ["mixtures", "destinations"]);
-		expect.truthy({paramName: 'mixtures'}, _.isArray(params.mixtures), "array required");
-		var destinations = expect.destinationWells({paramName: 'destinations'}, params.destinations, data);
+		var mixtures = misc.getVariableValue(params.mixtures, data.objects);
+		//console.log("params:", params);
+		//console.log("data.objects.mixtures:", data.objects.mixtures);
+		//console.log("mixtures:", mixtures);
+		expect.truthy({paramName: 'mixtures'}, _.isArray(mixtures), "array required");
+		//console.log("A:", misc.getVariableValue(params.destinations, data.objects))
+		//console.log("data.objects.mixtureWells:", data.objects.mixtureWells);
+		var destinations = expect.destinationWells({paramName: 'destinations'}, misc.getVariableValue(params.destinations, data.objects), data);
+		//console.log("destinations:", destinations);
 		expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
 
 		var params2 = _.omit(params, ['mixtures', 'destinations', 'order']);
 		// Put 'index' on all non-null mixture subitems
-		var mixtures = _.cloneDeep(params.mixtures);
 		_.forEach(mixtures, function(mixture) {
 			_.forEach(mixture, function(subitem, index) {
 				if (!_.isEmpty(subitem))

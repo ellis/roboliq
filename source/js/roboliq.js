@@ -93,17 +93,23 @@ function run(argv, userProtocol) {
 	function mergeProtocols(a, b) {
 		//console.log("a.predicates:", a.predicates);
 		//console.log("b.predicates:", b.predicates);
-		var c = _.merge({}, a, b);
-		c.predicates = b.predicates;
+		var data = {
+			objects: {},
+			directiveHandlers: _.merge({}, a.directiveHandlers, b.directiveHandlers)
+		}
 		// Handle directives for objects first
-		misc.mutateDeep(c.objects, function(x) { return misc.handleDirective(x, c); });
+		misc.mutateDeep(b.objects, function(x) {
+			data.objects = _.merge({}, a.objects, b.objects);
+			return misc.handleDirective(x, data);
+		});
 		// Handle directives other properties
-		for (key in c) {
+		for (key in b) {
 			if (key !== 'objects' & key !== 'directiveHandlers') {
-				misc.mutateDeep(c[key], function(x) { return misc.handleDirective(x, c); });
+				misc.mutateDeep(b[key], function(x) { return misc.handleDirective(x, data); });
 			}
 		}
-		c.predicates = a.predicates.concat(c.predicates || []);
+		var c = _.merge({}, a, b);
+		c.predicates = a.predicates.concat(b.predicates || []);
 		//console.log("c:", c);
 		return c;
 	}
@@ -237,8 +243,11 @@ function run(argv, userProtocol) {
 							else {
 								result = {errors: [e.toString()]};
 							}
-							if (opts.throw)
+							if (opts.throw) {
+								if (_.isPlainObject(e))
+									console.log("e:\n"+JSON.stringify(e));
 								throw e;
+							}
 						}
 						protocol.cache[id] = result;
 						// If there were errors:

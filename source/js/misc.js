@@ -97,10 +97,15 @@ function getObjectsOfType(objects, types, prefix) {
 function handleDirective(spec, data) {
 	if (_.isPlainObject(spec)) {
 		for (var key in spec) {
-			if (data.directiveHandlers.hasOwnProperty(key)) {
-				var spec2 = spec[key];
-				var spec3 = handleDirective(spec2, data);
-				return data.directiveHandlers[key](spec3, data);
+			if (_.startsWith(key, "#")) {
+				if (data.directiveHandlers.hasOwnProperty(key)) {
+					var spec2 = spec[key];
+					var spec3 = handleDirective(spec2, data);
+					return data.directiveHandlers[key](spec3, data);
+				}
+				else {
+					throw Error("unknown directive: "+key);
+				}
 			}
 		}
 	}
@@ -112,6 +117,9 @@ function handleDirective(spec, data) {
 				var spec2 = spec.substr(hash2 + 1);
 				var spec3 = handleDirective(spec2, data);
 				return data.directiveHandlers[key](spec3, data);
+			}
+			else {
+				throw Error("unknown directive: "+spec);
 			}
 		}
 	}
@@ -137,7 +145,6 @@ function handleDirectiveDeep(spec, data) {
  * @return {Any} Return the transformed object.
  */
 function transformDeep(x, fn) {
-	x = fn(x);
 	if (_.isPlainObject(x)) {
 		x = _.mapValues(x, function(value) {
 			return transformDeep(value, fn);
@@ -148,6 +155,7 @@ function transformDeep(x, fn) {
 			return transformDeep(value, fn);
 		});
 	}
+	x = fn(x);
 	return x;
 }
 
@@ -160,17 +168,19 @@ function transformDeep(x, fn) {
  * @return nothing
  */
 function mutateDeep(x, fn) {
+	//console.log("x:", x)
 	if (_.isPlainObject(x)) {
 		for (var key in x) {
-			x[key] = mutateDeep(fn(x[key]), fn);
+			//console.log("key:", key)
+			x[key] = mutateDeep(x[key], fn);
 		}
 	}
 	else if (_.isArray(x)) {
 		for (var i in x) {
-			x[i] = mutateDeep(fn(x[i]), fn);
+			x[i] = mutateDeep(x[i], fn);
 		}
 	}
-	return x;
+	return fn(x);
 }
 
 module.exports = {

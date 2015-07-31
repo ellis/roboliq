@@ -271,4 +271,12 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{x: 'X', y: 'Z', A: 'c', B: 'd', C: 2},
 		]);
 	});
+
+	it('should handle #take', function () {
+		var spec = {"#take": {
+			list: [1, 2, 3],
+			count: 2
+		}};
+		should.deepEqual(misc.handleDirective(spec, data), [1, 2]);
+	});
 });

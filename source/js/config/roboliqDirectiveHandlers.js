@@ -270,6 +270,7 @@ function directive_merge(spec, data) {
 function directive_replaceLabware(spec, data) {
 	expect.paramsRequired(spec, ['list', 'new']);
 	var list = misc.getVariableValue(spec.list, data.objects);
+	//if (!_.isArray(list)) console.log("list:", list)
 	assert(_.isArray(list));
 	assert(_.isString(spec.new));
 	var l1 = _.flatten(_.map(list, function(s) {
@@ -361,6 +362,14 @@ function directive_tableRows(table, data) {
     return list;
 }
 
+function directive_take(spec, data) {
+	//console.log("#take:", spec);
+	expect.paramsRequired(spec, ['list', 'count']);
+	var list = misc.getVariableValue(spec.list, data.objects);
+	var count = misc.getVariableValue(spec.count, data.objects);
+	return _.take(list, count);
+}
+
 function directive_wells(spec, data) {
 	return wellsParser.parse(spec, data.objects);
 }
@@ -391,6 +400,7 @@ module.exports = {
 	"#replicate": directive_replicate,
 	"#tableCols": directive_tableCols,
 	"#tableRows": directive_tableRows,
+	"#take": directive_take,
 	//"#wells": genWells,
 	"#zipMerge": directive_zipMerge
 };
