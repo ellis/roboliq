@@ -49,15 +49,19 @@
 - [x] misc.js: use `_.get`
 - [x] #for: create directive that can handle all the other factorial directives
 - [x] commands/pipetter.js: pipetter.pipetteMixtures: allow for sorting items by index, destination (default to index)
-- [.] `#mixtureList`
+- [x] `#mixtureList`
 - [x] "#destinationWells#mixPlate(all row-jump(1))"
 - [x] "#length#mixtures"
 - [x] `#replaceLabware`
+- [x] create new script for old tania13_ph_2_pipette
+- [x] command: repeat
+- [ ] command: timer
+- [ ] command: centrifuge run
+- [ ] command: reader
 - [ ] handle opening and closing of centrifuge during transport (write unit test)
-- [ ] create new scripts for old tania* scripts
+- [ ] create new scripts for old tania13_ph_3_measure
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] move source code to 'src' subdir
-- [ ] reader command
 - [ ] mix command
 - [ ] roboliq.js: generate table for final well contents
 - [ ] roboliq.js: generate table of pipetting actions for well contents by step
@@ -92,9 +96,12 @@
 - [ ] commands/pipetter.js: pipetter.pipette: refresh tips (advanced)
 - [ ] JSON schema
 - [ ] how to handle trough volume, which has many virtual wells, but they all share the same common liquid: set the labware's contents, rather than the contents of the individual wells, then the effects function should handle that case appropriately.
+- [ ] handle "comment"s in steps
 
 ## After publication
 
+- [ ] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
+- [ ] roboliq.js: allow for specifying the step range to compile for
 - [ ] commandHandler: allow for returning of property constraints, for example: the sealPlate command could return a list of possible plate models for the given plate
 - [ ] commandHandler args: also pass paramDefaults
 - [ ] commands/sealer.js: figure out more sophisticated way to deal with agents for the pre/post steps; consider 'agentPreferred' parameter

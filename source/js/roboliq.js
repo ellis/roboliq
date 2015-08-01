@@ -69,6 +69,7 @@ function run(argv, userProtocol) {
 			'commands/centrifuge.js',
 			'commands/pipetter.js',
 			'commands/sealer.js',
+			'commands/system.js',
 			'commands/transporter.js',
 			'config/ourlab.js'
 		].concat(opts.infiles)
