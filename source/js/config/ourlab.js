@@ -114,6 +114,10 @@ module.exports = {
 					"location": "ourlab.mario.site.SYSTEM",
 					"contents": ["Infinity l", "systemLiquid"]
 				},
+				"timer1": {
+					"type": "Timer",
+					"evowareId": 1
+				},
 				"washProgram": {
 					"type": "Namespace",
 					"flush_1000": {
@@ -397,6 +401,12 @@ module.exports = {
 			"program": "ourlab.mario.washProgram.thorough_1000",
 			"model": "tipModel1000",
 			"intensity": "thorough"
+		}
+	},
+	{
+		"timer.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.timer1",
 		}
 	},
 	{"method": {"description": "generic.closeSite-CENTRIFUGE_4",

@@ -49,6 +49,12 @@ function run(argv, userProtocol) {
 				flag: true,
 				help: 'throw error when errors encountered during processing (in order to get a backtrace)'
 			},
+			noOurlab: {
+				abbr: '0',
+				full: 'no-ourlab',
+				flag: true,
+				help: "don't automatically load config/ourlab.js"
+			},
 			version: {
 				flag: true,
 				help: 'print version and exit',
@@ -64,15 +70,16 @@ function run(argv, userProtocol) {
 	}
 
 	var urls = _.uniq(_.compact(
-		[
+		_.compact([
 			'config/roboliq.js',
 			'commands/centrifuge.js',
 			'commands/pipetter.js',
 			'commands/sealer.js',
 			'commands/system.js',
+			'commands/timer.js',
 			'commands/transporter.js',
-			'config/ourlab.js'
-		].concat(opts.infiles)
+			(opts.noOurlab) ? null : 'config/ourlab.js'
+		]).concat(opts.infiles)
 	));
 	if (opts.debug) {
 		console.log("urls:", urls);

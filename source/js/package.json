@@ -5,6 +5,7 @@
   "main": "test.js",
   "dependencies": {
     "javascript-natural-sort": "~0.7.1",
+    "jmespath": "^0.12.0",
     "lodash": "~3.9.3",
     "mathjs": "~1.7.0",
     "mustache": "^2.1.3",

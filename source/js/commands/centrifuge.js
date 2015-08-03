@@ -3,10 +3,10 @@ var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var objectToPredicateConverters = {
-	"Sealer": function(name, object) {
+	"Centrifuge": function(name, object) {
 		return {
 			value: [{
-				"isSealer": {
+				"isCentrifuge": {
 					"equipment": name
 				}
 			}]
