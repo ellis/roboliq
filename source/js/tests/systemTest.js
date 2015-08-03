@@ -11,7 +11,7 @@ describe('system', function() {
 					"1": {
 						command: "system.repeat",
 						count: 2,
-						body: {comment: "empty"}
+						steps: {comment: "empty"}
 					}
 				}
 			};
@@ -19,7 +19,7 @@ describe('system', function() {
 			should.deepEqual(result.output.steps[1], {
 				command: "system.repeat",
 				count: 2,
-				body: {comment: "empty"},
+				steps: {comment: "empty"},
 				1: {comment: "empty"},
 				2: {comment: "empty"}
 			});
@@ -29,7 +29,7 @@ describe('system', function() {
 					"1": {
 						command: "system.repeat",
 						count: 2,
-						body: {
+						steps: {
 							1: {comment: "empty"}
 						}
 					}
@@ -39,7 +39,7 @@ describe('system', function() {
 			should.deepEqual(result.output.steps[1], {
 				command: "system.repeat",
 				count: 2,
-				body: {
+				steps: {
 					1: {comment: "empty"}
 				},
 				1: {1: {comment: "empty"}},
