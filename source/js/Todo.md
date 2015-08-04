@@ -56,7 +56,6 @@
 - [x] create new script for old tania13_ph_2_pipette
 - [x] command: repeat
 - [x] command: timer
-- [ ] command: timer.wait
 - [ ] command: centrifuge run
 - [ ] command: centrifuge.centrifuge2
 - [ ] command: reader

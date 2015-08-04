@@ -302,6 +302,15 @@ module.exports = {
 			"above": "ourlab.model.plateModel_384_square"
 		}
 	},
+	_.map(["ourlab.model.plateModel_384_square"], function(model) {
+		return {"centrifuge.canAgentEquipmentModelSite1Site2": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.centrifuge",
+			"model": model,
+			"site1": "ourlab.mario.site.CENTRIFUGE_2",
+			"site1": "ourlab.mario.site.CENTRIFUGE_4"
+		}};
+	}),
 	// ROMA1 Narrow
 	_.map(["P1", "P2", "P3", "REGRIP"], function(s) {
 		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site."+s}};

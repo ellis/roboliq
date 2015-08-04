@@ -13,12 +13,10 @@ steps:
     object: mixPlate
     destination: ourlab.mario.site.CENTRIFUGE_2
   2:
-    description: Measurement loop
+    description: Measurement loop; Each cycle of the loop lasts 4 hours
     command: system.repeat
     count: 2
     steps:
-      1:
-        description: Each cycle of the loop lasts 4 hours
         command: timer.doAndWait
         duration: 14400 # 4hr
         steps:
@@ -30,7 +28,7 @@ steps:
               duration: 120 # 2min
               temperature: 25
           4:
-            command: absorbanceReader.run
+            command: absorbanceReader.measureAbsorbance
             object: mixPlate
             programFile: tania13_ph-temp.mdfx
             outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
