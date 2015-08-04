@@ -52,6 +52,15 @@ function findAgentEquipmentAlternatives(params, data, running) {
 }
 
 var commandHandlers = {
+	"timer.instruction.sleep": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment", "duration"]);
+		var effects = {};
+		if (params.stop)
+			effects[params.equipment + ".running"] = false;
+		return {
+			effects: effects
+		};
+	},
 	"timer.instruction.start": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		var effects = {};
@@ -71,7 +80,7 @@ var commandHandlers = {
 	"timer.instruction.wait": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "till", "stop"]);
 		var effects = {};
-		if (params.stop !== false)
+		if (params.stop)
 			effects[params.equipment + ".running"] = false;
 		return {
 			effects: effects
@@ -96,9 +105,11 @@ var commandHandlers = {
 			},
 			2: steps,
 			3: {
-				command: "timer.instruction.stop",
+				command: "timer.instruction.wait",
 				agent: agent,
-				equipment: equipment
+				equipment: equipment,
+				till: duration,
+				stop: true
 			},
 		};
 
@@ -106,6 +117,35 @@ var commandHandlers = {
 			expansion: expansion
 		};
 
+	},
+	"timer.sleep": function(params, data) {
+		expect.paramsRequired(params, ["duration"]);
+		//var duration = misc.getNumberParameter(params, data, "duration");
+
+		var alternatives = findAgentEquipmentAlternatives(params, data, false);
+		if (alternatives.errors) return altenatives;
+
+		var params2 = _.merge(
+			{
+				command: "timer.instruction.sleep",
+				duration: params.duration
+			},
+			alternatives[0]
+		);
+
+		var expansion = {
+			"1": params2
+		};
+
+		// Create the effets object
+		var effects = {};
+		//effects[params2.equipment + ".running"] = true;
+
+		return {
+			expansion: expansion,
+			effects: effects,
+			alternatives: alternatives
+		};
 	},
 	"timer.start": function(params, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);

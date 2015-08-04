@@ -21,6 +21,26 @@ describe('timer', function() {
 		]
 	};
 
+	describe('timer.sleep', function () {
+		it('should emit a timer sleep instruction', function () {
+			var protocol = _.merge({}, protocol0, {
+				steps: {
+					1: {
+						command: "timer.sleep",
+						duration: 10
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T", "-0"], protocol);
+			should.deepEqual(result.output.steps[1][1], {
+				command: "timer.instruction.sleep",
+				agent: "robot1",
+				equipment: "timer1",
+				duration: 10
+			});
+		});
+	});
+
 	describe('timer.start', function () {
 		it('should emit a timer start instruction', function () {
 			var protocol = _.merge({}, protocol0, {
@@ -61,7 +81,7 @@ describe('timer', function() {
 	});
 
 	describe('timer.doAndWait', function () {
-		it('should emit a timer stop instruction', function () {
+		it('should start a time, perform sub-steps, then wait', function () {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
@@ -83,9 +103,11 @@ describe('timer', function() {
 				},
 				2: {comment: "do something"},
 				3: {
-					command: "timer.instruction.stop",
+					command: "timer.instruction.wait",
 					agent: "robot1",
-					equipment: "timer1"
+					equipment: "timer1",
+					till: 10,
+					stop: true
 				},
 			});
 		});
