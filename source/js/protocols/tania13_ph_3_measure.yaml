@@ -1,0 +1,47 @@
+description: |
+  repeat pH measurements
+
+objects:
+  mixPlate:
+    type: Plate
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P3
+
+steps:
+  1:
+    command: transpoerter.movePlate
+    object: mixPlate
+    destination: ourlab.mario.site.CENTRIFUGE_2
+  2:
+    description: Measurement loop
+    command: system.repeat
+    count: 2
+    steps:
+      1:
+        description: Each cycle of the loop lasts 4 hours
+        command: timer.doAndWait
+        duration: 14400 # 4hr
+        steps:
+          2:
+            description: Remove precipitation from seal
+            command: centrifuge.instruction.run
+            program:
+              rpm: 3000
+              duration: 120 # 2min
+              temperature: 25
+          4:
+            command: absorbanceReader.run
+            object: mixPlate
+            programFile: tania13_ph-temp.mdfx
+            outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+          5:
+            command: transporter.movePlate
+            object: mixPlate
+            destination: ourlab.mario.site.CENTRIFUGE_2
+          6:
+            description: Incubate at 25C
+            command: centrifuge.instruction.run
+            program:
+              rpm: 3000
+              duration: 1 # must set a duration of at least 1s
+              temperature: 25
