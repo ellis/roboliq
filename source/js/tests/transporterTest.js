@@ -202,5 +202,41 @@ describe('transporter', function() {
 				}
 			);
 		});
+
+		/*it('should handle previously buggy plate move operation #1', function () {
+			var protocol = _.merge({}, protocol0, {
+				steps: {
+					"1": {
+						"command": "centrifuge.instruction.openSite",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_2"
+					},
+					"2": {
+						"command": "transporter.action.movePlate",
+						"object": "plate2",
+						"destination": "ourlab.mario.site.CENTRIFUGE_2"
+					},
+					"3": {
+						"command": "centrifuge.instruction.openSite",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+					"4": {
+						"command": "transporter.action.movePlate",
+						"object": "plate2",
+						"destination": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			console.log("effects:\n"+JSON.stringify(result.output.effects, null, '\t'))
+			should.deepEqual(result.output.steps[4],
+				{}
+			);
+		});*/
+
 	});
 });

@@ -132,7 +132,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.action.movePlate",
-					"object": params.object2,
+					"object": params.object1,
 					"destination": params2.site1
 				}
 			],

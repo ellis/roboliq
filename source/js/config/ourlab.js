@@ -446,8 +446,6 @@ module.exports = {
 		}};
 	}),
 	_.map([1,2,3,4], function(n) {
-		var task = {};
-		task["ourlab.mario.centrifuge.open"+n] = {};
 		return {"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
 			"task": _.zipObject([["ourlab.mario.centrifuge.open"+n, {}]]),
 			"preconditions": [],
