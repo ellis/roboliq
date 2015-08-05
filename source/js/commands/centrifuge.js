@@ -32,15 +32,26 @@ var commandHandlers = {
 		closeAll(params, data, effects);
 		return {effects: effects};
 	},
+	/*"centrifuge.instruction.open": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment"]);
+		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
+		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
+
+		// Open equipment
+		var effects = _.zipObject([
+			[params.equipment+".open", true]
+		]);
+		return {effects: effects};
+	},*/
 	"centrifuge.instruction.openSite": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "site"]);
 		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
 		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
 
 		var effects = {};
-		// Close equipment
+		// Open equipment
 		effects[params.equipment+".open"] = true;
-		// Indicate that all internal sites are closed
+		// Indicate that the given site is open and the other internal sites are closed
 		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
 		return {effects: effects};
 	},
@@ -100,7 +111,7 @@ var commandHandlers = {
 
 		// Find any parameters which can only take one specific value
 		var params2 = alternatives[0];
-		console.log("alternatives[0]:\n"+JSON.stringify(params2))
+		//console.log("alternatives[0]:\n"+JSON.stringify(params2))
 
 		var destination1 =
 			_.isUndefined(params.destinationAfter1) ? object1.location
@@ -111,34 +122,74 @@ var commandHandlers = {
 			: (params.destinationAfter2 === null) ? params2.site2
 			: params.destinationAfter2;
 
-		var expansion = {
-			"1": {
-				"command": "transporter.action.movePlate",
-				"object": params.object1,
-				"destination": params2.site1
-			},
-			"2": {
-				"command": "transporter.action.movePlate",
-				"object": params.object2,
-				"destination": params2.site2
-			},
-			"3": {
+		var expansion = [
+			(object1.location === params2.site1) ? null : [
+				{
+					command: "centrifuge.instruction.openSite",
+					agent: params2.agent,
+					equipment: params2.equipment,
+					site: params2.site1
+				},
+				{
+					"command": "transporter.action.movePlate",
+					"object": params.object2,
+					"destination": params2.site1
+				}
+			],
+			(object2.location === params2.site2) ? null : [
+				{
+					command: "centrifuge.instruction.openSite",
+					agent: params2.agent,
+					equipment: params2.equipment,
+					site: params2.site2
+				},
+				{
+					"command": "transporter.action.movePlate",
+					"object": params.object2,
+					"destination": params2.site2
+				}
+			],
+			{
 				command: "centrifuge.instruction.run",
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params.program
 			},
-			"4": {
-				"command": "transporter.action.movePlate",
-				"object": params.object1,
-				"destination": destination1
+			// Move object1 back
+			(destination1 === params2.site1) ? null : [
+				{
+					command: "centrifuge.instruction.openSite",
+					agent: params2.agent,
+					equipment: params2.equipment,
+					site: params2.site1
+				},
+				{
+					"command": "transporter.action.movePlate",
+					"object": params.object1,
+					"destination": destination1
+				}
+			],
+			// Move object2 back
+			(destination2 === params2.site2) ? null : [
+				{
+					command: "centrifuge.instruction.openSite",
+					agent: params2.agent,
+					equipment: params2.equipment,
+					site: params2.site2
+				},
+				{
+					"command": "transporter.action.movePlate",
+					"object": params.object2,
+					"destination": destination2
+				}
+			],
+			// Close the centrifuge
+			{
+				command: "centrifuge.instruction.close",
+				agent: params2.agent,
+				equipment: params2.equipment
 			},
-			"5": {
-				"command": "transporter.action.movePlate",
-				"object": params.object2,
-				"destination": destination2
-			},
-		};
+		];
 
 		// Create the effets object
 		var effects = {};

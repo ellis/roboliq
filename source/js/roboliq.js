@@ -269,6 +269,12 @@ function run(argv, userProtocol) {
 							protocol.warnings[id] = result.warnings;
 						}
 						if (result.hasOwnProperty("expansion")) {
+							if (_.isArray(result.expansion)) {
+								//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
+								var l = _.compact(_.flattenDeep(result.expansion));
+								result.expansion = _.zipObject(_.range(1, l.length + 1), l);
+								//console.log("expansion:\n"+JSON.stringify(result.expansion, null, '  '))
+							}
 							_.merge(step, result.expansion);
 						}
 						if (result.hasOwnProperty("effects") && !_.isEmpty(result.effects)) {
