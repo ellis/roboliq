@@ -49,10 +49,10 @@ function run(argv, userProtocol) {
 				flag: true,
 				help: 'throw error when errors encountered during processing (in order to get a backtrace)'
 			},
-			noOurlab: {
-				abbr: '0',
-				full: 'no-ourlab',
+			ourlab: {
+				full: 'ourlab',
 				flag: true,
+				default: true,
 				help: "don't automatically load config/ourlab.js"
 			},
 			version: {
@@ -78,7 +78,7 @@ function run(argv, userProtocol) {
 			'commands/system.js',
 			'commands/timer.js',
 			'commands/transporter.js',
-			(opts.noOurlab) ? null : 'config/ourlab.js'
+			(opts.ourlab) ? 'config/ourlab.js' : null
 		]).concat(opts.infiles)
 	));
 	if (opts.debug) {
@@ -135,6 +135,7 @@ function run(argv, userProtocol) {
 			errors: {},
 		};
 		_.forEach(urls, function(url) {
+			//console.log("url: "+url)
 			var protocol2 = loadProtocolUrl(url);
 			protocol = mergeProtocols(protocol, protocol2)
 		});

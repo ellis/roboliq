@@ -26,9 +26,9 @@ var commandHandlers = {
 	/**
 	 * params: [agent], object, destination
 	 */
-	"transporter.action.movePlate": function(params, data) {
+	"transporter.movePlate": function(params, data) {
 		expect.paramsRequired(params, ["object", "destination"]);
-		//console.log("transporter.action.movePlate("+JSON.stringify(params)+")")
+		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		var transporterLogic = require('./transporterLogic.json');
 		var taskList = [];
 		if (params.hasOwnProperty("agent")) {

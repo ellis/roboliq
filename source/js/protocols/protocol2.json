@@ -8,12 +8,12 @@
   },
   "steps": {
     "1": {
-      "command": "transporter.action.movePlate",
+      "command": "transporter.movePlate",
       "object": "plate1",
       "destination": "ourlab.mario.site.P3"
     },
     "2": {
-      "command": "transporter.action.movePlate",
+      "command": "transporter.movePlate",
       "object": "plate1",
       "destination": "ourlab.mario.site.ROBOSEAL"
     }

@@ -6,10 +6,14 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_384_square
     location: ourlab.mario.site.P3
+  mixPlate:
+    type: Plate
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.CENTRIFUGE_4
 
 steps:
   1:
-    command: transpoerter.movePlate
+    command: transporter.movePlate
     object: mixPlate
     destination: ourlab.mario.site.CENTRIFUGE_2
   2:
@@ -22,13 +26,15 @@ steps:
         steps:
           2:
             description: Remove precipitation from seal
-            command: centrifuge.instruction.run
+            command: centrifuge.centrifuge2
+            object1: mixPlate
+            object2: balancePlate
             program:
               rpm: 3000
               duration: 120 # 2min
               temperature: 25
           4:
-            command: absorbanceReader.measureAbsorbance
+            #command: absorbanceReader.measureAbsorbance
             object: mixPlate
             programFile: tania13_ph-temp.mdfx
             outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml

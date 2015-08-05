@@ -35,7 +35,7 @@ describe('centrifgue', function() {
 				}
 			});
 			var result = roboliq.run(["-o", "", "-T"], protocol);
-			console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1],
 				{
 					"1": {
@@ -61,7 +61,7 @@ describe('centrifgue', function() {
 							"object": "plate1",
 							"destination": "ourlab.mario.site.CENTRIFUGE_2"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate1",
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
@@ -88,7 +88,7 @@ describe('centrifgue', function() {
 							"object": "plate2",
 							"destination": "ourlab.mario.site.CENTRIFUGE_4"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					},
@@ -125,7 +125,7 @@ describe('centrifgue', function() {
 							"object": "plate1",
 							"destination": "ourlab.mario.site.P2"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate1",
 						"destination": "ourlab.mario.site.P2"
 					},
@@ -152,7 +152,7 @@ describe('centrifgue', function() {
 							"object": "plate2",
 							"destination": "ourlab.mario.site.P3"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.P3"
 					},

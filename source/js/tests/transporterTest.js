@@ -23,7 +23,7 @@ describe('transporter', function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					}
@@ -59,7 +59,7 @@ describe('transporter', function() {
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.centrifuge"
 				},
-				"command": "transporter.action.movePlate",
+				"command": "transporter.movePlate",
 				"object": "plate2",
 				"destination": "ourlab.mario.site.CENTRIFUGE_4"
 			});
@@ -75,7 +75,7 @@ describe('transporter', function() {
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					2: {
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					}
@@ -108,7 +108,7 @@ describe('transporter', function() {
 							"object": "plate2",
 							"destination": "ourlab.mario.site.CENTRIFUGE_4"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					}
@@ -120,12 +120,12 @@ describe('transporter', function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate1",
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					2: {
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					}
@@ -163,7 +163,7 @@ describe('transporter', function() {
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate1",
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
@@ -195,7 +195,7 @@ describe('transporter', function() {
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge"
 						},
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					}
@@ -213,7 +213,7 @@ describe('transporter', function() {
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					"2": {
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
@@ -224,7 +224,7 @@ describe('transporter', function() {
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					"4": {
-						"command": "transporter.action.movePlate",
+						"command": "transporter.movePlate",
 						"object": "plate2",
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					},

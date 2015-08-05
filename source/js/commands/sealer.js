@@ -103,13 +103,13 @@ var commandHandlers = {
 
 		var expansion = {
 			"1": {
-				"command": "transporter.action.movePlate",
+				"command": "transporter.movePlate",
 				"object": params.object,
 				"destination": params2.site
 			},
 			"2": params3,
 			"3": {
-				"command": "transporter.action.movePlate",
+				"command": "transporter.movePlate",
 				"object": params.object,
 				"destination": object.location
 			},

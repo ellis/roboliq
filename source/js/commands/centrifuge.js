@@ -131,7 +131,7 @@ var commandHandlers = {
 					site: params2.site1
 				},
 				{
-					"command": "transporter.action.movePlate",
+					"command": "transporter.movePlate",
 					"object": params.object1,
 					"destination": params2.site1
 				}
@@ -144,7 +144,7 @@ var commandHandlers = {
 					site: params2.site2
 				},
 				{
-					"command": "transporter.action.movePlate",
+					"command": "transporter.movePlate",
 					"object": params.object2,
 					"destination": params2.site2
 				}
@@ -164,7 +164,7 @@ var commandHandlers = {
 					site: params2.site1
 				},
 				{
-					"command": "transporter.action.movePlate",
+					"command": "transporter.movePlate",
 					"object": params.object1,
 					"destination": destination1
 				}
@@ -178,7 +178,7 @@ var commandHandlers = {
 					site: params2.site2
 				},
 				{
-					"command": "transporter.action.movePlate",
+					"command": "transporter.movePlate",
 					"object": params.object2,
 					"destination": destination2
 				}

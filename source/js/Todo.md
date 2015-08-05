@@ -56,8 +56,8 @@
 - [x] create new script for old tania13_ph_2_pipette
 - [x] command: repeat
 - [x] command: timer
-- [ ] command: centrifuge run
-- [ ] command: centrifuge.centrifuge2
+- [x] command: centrifuge run
+- [x] command: centrifuge.centrifuge2
 - [ ] command: reader
 - [ ] generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] handle opening and closing of centrifuge during transport (write unit test)

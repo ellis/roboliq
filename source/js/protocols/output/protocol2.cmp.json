@@ -195,7 +195,7 @@
 				"object": "plate1",
 				"destination": "ourlab.mario.site.P3"
 			},
-			"command": "transporter.action.movePlate",
+			"command": "transporter.movePlate",
 			"object": "plate1",
 			"destination": "ourlab.mario.site.P3"
 		},
@@ -216,7 +216,7 @@
 				"object": "plate1",
 				"destination": "ourlab.mario.site.ROBOSEAL"
 			},
-			"command": "transporter.action.movePlate",
+			"command": "transporter.movePlate",
 			"object": "plate1",
 			"destination": "ourlab.mario.site.ROBOSEAL"
 		}

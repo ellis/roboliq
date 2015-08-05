@@ -22,6 +22,6 @@ steps:
     object: balancePlate
 
   3:
-    command: transporter.action.movePlate
+    command: transporter.movePlate
     object: balancePlate
     destination: ourlab.mario.site.CENTRIFUGE_4
