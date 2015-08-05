@@ -19,7 +19,7 @@ function get(params, data, name, defaultValue) {
 
 function getObjectParameter(params, data, name, defaultValue) {
 	var value = get(params, data, name, defaultValue);
-	expect.truthy({paramName: name}, _.isNumber(value), "expected an objet, received: "+JSON.stringify(value));
+	expect.truthy({paramName: name}, _.isPlainObject(value), "expected an object, received: "+JSON.stringify(value));
 	return value;
 }
 

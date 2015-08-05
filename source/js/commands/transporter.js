@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var objectToPredicateConverters = {
@@ -15,6 +16,7 @@ var objectToPredicateConverters = {
 
 var commandHandlers = {
 	"transporter.instruction.movePlate": function(params, data) {
+		expect.paramsRequired(params, ["agent", "equipment", "object", "destination"]);
 		var effects = {};
 		effects[params.object + ".location"] = params.destination;
 		return {
@@ -25,6 +27,7 @@ var commandHandlers = {
 	 * params: [agent], object, destination
 	 */
 	"transporter.action.movePlate": function(params, data) {
+		expect.paramsRequired(params, ["object", "destination"]);
 		//console.log("transporter.action.movePlate("+JSON.stringify(params)+")")
 		var transporterLogic = require('./transporterLogic.json');
 		var taskList = [];

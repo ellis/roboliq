@@ -62,7 +62,7 @@ var commandHandlers = {
 
 		var object1 = commandHelper.getObjectParameter(params, data, 'object1');
 		var object2 = commandHelper.getObjectParameter(params, data, 'object2');
-		if (object1.model != objec2.model)
+		if (object1.model != object2.model)
 			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
 
 		var query0 = {
@@ -71,7 +71,7 @@ var commandHandlers = {
 				"equipment": "?equipment",
 				"model": "?model",
 				"site1": "?site1",
-				"site1": "?site2"
+				"site2": "?site2"
 			}
 		};
 		var query = _.merge({}, query0,
@@ -80,7 +80,7 @@ var commandHandlers = {
 				"equipment": params.equipment,
 				"model": object1.model,
 				"site1": params.site1,
-				"site1": params.site2
+				"site2": params.site2
 			}}
 		);
 		var resultList = llpl.query(query);
@@ -100,6 +100,7 @@ var commandHandlers = {
 
 		// Find any parameters which can only take one specific value
 		var params2 = alternatives[0];
+		console.log("alternatives[0]:\n"+JSON.stringify(params2))
 
 		var destination1 =
 			_.isUndefined(params.destinationAfter1) ? object1.location

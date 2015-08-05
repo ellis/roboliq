@@ -20,17 +20,22 @@ describe('centrifgue', function() {
 
 	describe('centrifuge.centrifuge2', function () {
 		it('should put two plates in the centrifuge, run, then move the plates back', function () {
-			/*
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
-						command: "timer.doAndWait",
-						duration: 10,
-						steps: {comment: "do something"}
+						command: "centrifuge.centrifuge2",
+						object1: "plate1",
+						object2: "plate2",
+						program: {
+							rpm: 3000,
+							duration: 120,
+							temperature: 25
+						}
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "-0"], protocol);
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1], {
 				command: "timer.doAndWait",
 				duration: 10,
@@ -49,7 +54,6 @@ describe('centrifgue', function() {
 					stop: true
 				},
 			});
-			*/
 		});
 	});
 });

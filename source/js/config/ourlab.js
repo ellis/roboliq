@@ -308,7 +308,7 @@ module.exports = {
 			"equipment": "ourlab.mario.centrifuge",
 			"model": model,
 			"site1": "ourlab.mario.site.CENTRIFUGE_2",
-			"site1": "ourlab.mario.site.CENTRIFUGE_4"
+			"site2": "ourlab.mario.site.CENTRIFUGE_4"
 		}};
 	}),
 	// ROMA1 Narrow
@@ -418,15 +418,17 @@ module.exports = {
 			"equipment": "ourlab.mario.timer1",
 		}
 	},
-	{"method": {"description": "generic.closeSite-CENTRIFUGE_4",
-		"task": {"generic.closeSite": {"site": "?site"}},
-		"preconditions": [
-			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}
-		],
-		"subtasks": {"ordered": [
-			{"ourlab.mario.centrifuge.close": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge"}}
-		]}
-	}},
+	_.map([1,2,3,4], function(n) {
+		return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
+			"task": {"generic.closeSite": {"site": "?site"}},
+			"preconditions": [
+				{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}
+			],
+			"subtasks": {"ordered": [
+				{"ourlab.mario.centrifuge.close": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge"}}
+			]}
+		}}
+	}),
 	{"action": {"description": "ourlab.mario.centrifuge.close: close the centrifuge",
 		"task": {"ourlab.mario.centrifuge.close": {"agent": "?agent", "equipment": "?equipment"}},
 		"preconditions": [],
@@ -438,23 +440,27 @@ module.exports = {
 			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}
 		]
 	}},
-	{"method": {"description": "generic.openSite-CENTRIFUGE_4",
-		"task": {"generic.openSite": {"site": "?site"}},
-		"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_4"}}],
-		"subtasks": {"ordered": [{"ourlab.mario.centrifuge.open4": {}}]}
-	}},
-	{"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
-		"task": {"ourlab.mario.centrifuge.open4": {}},
-		"preconditions": [],
-		"deletions": [
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}
-		],
-		"additions": [
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_1"}},
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_2"}},
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_3"}}
-		]
-	}},
+	_.map([1,2,3,4], function(n) {
+		return {"method": {"description": "generic.openSite-CENTRIFUGE_"+n,
+			"task": {"generic.openSite": {"site": "?site"}},
+			"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}],
+			"subtasks": {"ordered": [_.zipObject([["ourlab.mario.centrifuge.open"+n, {}]])]}
+		}};
+	}),
+	_.map([1,2,3,4], function(n) {
+		var task = {};
+		task["ourlab.mario.centrifuge.open"+n] = {};
+		return {"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
+			"task": _.zipObject([["ourlab.mario.centrifuge.open"+n, {}]]),
+			"preconditions": [],
+			"deletions": [
+				{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_"+n}}
+			],
+			"additions": _.map(_.without([1,2,3,4], n), function(n2) {
+				return {"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_"+n2}};
+			})
+		}};
+	}),
 	]),
 	planHandlers: {
 		"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
