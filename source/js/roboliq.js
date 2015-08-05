@@ -211,10 +211,11 @@ function run(argv, userProtocol) {
 	function expandProtocol(protocol) {
 		var objects0 = _.cloneDeep(protocol.objects);
 		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
-		expandSteps(protocol, [], protocol.steps, objects0);
+		expandStep(protocol, [], protocol.steps, objects0);
 		return objects0;
 	}
 
+	/*
 	function expandSteps(protocol, prefix, steps, objects) {
 		var commandHandlers = protocol.commandHandlers;
 		var keys = _(steps).keys(steps).filter(function(key) {
@@ -228,14 +229,14 @@ function run(argv, userProtocol) {
 			var id = prefix2.join('.');
 			//console.log("id: "+id)
 			var step = steps[key];
-			var isExpanded = step.hasOwnProperty("1");
 			if (step.hasOwnProperty("command")) {
 				if (!commandHandlers.hasOwnProperty(step.command)) {
 					protocol.warnings[id] = ["unknown command: "+step.command];
 				}
 				else {
 					var handler = commandHandlers[step.command];
-					if (!isExpanded) {
+					var expand = true
+					if (!expand) {
 						var predicates = protocol.predicates.concat(createStateItems(objects));
 						var result = {};
 						try {
@@ -290,9 +291,89 @@ function run(argv, userProtocol) {
 							});
 						}
 					}
-					expandSteps(protocol, prefix2, step, objects);
 				}
 			}
+			expandSteps(protocol, prefix2, step, objects);
+		});
+	}*/
+
+	function expandStep(protocol, prefix, step, objects) {
+		//console.log("expandStep: "+prefix+JSON.stringify(step))
+		var commandHandlers = protocol.commandHandlers;
+		var id = prefix.join('.');
+
+		if (step.hasOwnProperty("command")) {
+			if (!commandHandlers.hasOwnProperty(step.command)) {
+				protocol.warnings[id] = ["unknown command: "+step.command];
+			}
+			else {
+				var handler = commandHandlers[step.command];
+				var expand = true
+				if (expand) {
+					var predicates = protocol.predicates.concat(createStateItems(objects));
+					var result = {};
+					try {
+						var data = {
+							objects: objects,
+							predicates: predicates,
+							planHandlers: protocol.planHandlers
+						};
+						result = handler(step, data);
+					} catch (e) {
+						if (e.hasOwnProperty("errors")) {
+							result = {errors: e.errors};
+						}
+						else {
+							result = {errors: [e.toString()]};
+						}
+						if (opts.throw) {
+							if (_.isPlainObject(e))
+								console.log("e:\n"+JSON.stringify(e));
+							throw e;
+						}
+					}
+					protocol.cache[id] = result;
+					// If there were errors:
+					if (!_.isEmpty(result.errors)) {
+						protocol.errors[id] = result.errors;
+						// Abort expansion of protocol
+						return false;
+					}
+					// If there were warnings
+					if (!_.isEmpty(result.warnings)) {
+						protocol.warnings[id] = result.warnings;
+					}
+					if (result.hasOwnProperty("expansion")) {
+						if (_.isArray(result.expansion)) {
+							//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
+							var l = _.compact(_.flattenDeep(result.expansion));
+							result.expansion = _.zipObject(_.range(1, l.length + 1), l);
+							//console.log("expansion:\n"+JSON.stringify(result.expansion, null, '  '))
+						}
+						_.merge(step, result.expansion);
+					}
+					if (result.hasOwnProperty("effects") && !_.isEmpty(result.effects)) {
+						//console.log(result.effects);
+						// Add effects to protocol
+						protocol.effects[id] = result.effects;
+						// Update object states
+						_.forEach(result.effects, function(value, key) {
+							var nameList = key.split('.');
+							var o = createSimpleObject(nameList, value);
+							_.merge(objects, o);
+						});
+					}
+				}
+			}
+		}
+
+		var keys = _.filter(_.keys(step), function(key) {
+			var c = key[0];
+			return (c >= '0' && c <= '9');
+		});
+		keys.sort(naturalSort);
+		_.forEach(keys, function(key) {
+			expandStep(protocol, prefix.concat(key), step[key], objects);
 		});
 	}
 

@@ -24,8 +24,8 @@ steps:
         command: timer.doAndWait
         duration: 14400 # 4hr
         steps:
-          2:
-            description: Remove precipitation from seal
+          1:
+            description: Remove condensation from seal
             command: centrifuge.centrifuge2
             object1: mixPlate
             object2: balancePlate
@@ -33,16 +33,16 @@ steps:
               rpm: 3000
               duration: 120 # 2min
               temperature: 25
-          4:
+          2:
             #command: absorbanceReader.measureAbsorbance
             object: mixPlate
             programFile: tania13_ph-temp.mdfx
             outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
-          5:
+          3:
             command: transporter.movePlate
             object: mixPlate
             destination: ourlab.mario.site.CENTRIFUGE_2
-          6:
+          4:
             description: Incubate at 25C
             command: centrifuge.instruction.run
             program:
