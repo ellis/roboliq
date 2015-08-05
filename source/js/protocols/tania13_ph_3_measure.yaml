@@ -6,7 +6,7 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_384_square
     location: ourlab.mario.site.P3
-  mixPlate:
+  balancePlate:
     type: Plate
     model: ourlab.model.plateModel_384_square
     location: ourlab.mario.site.CENTRIFUGE_4
@@ -34,17 +34,17 @@ steps:
               duration: 120 # 2min
               temperature: 25
           2:
-            #command: absorbanceReader.measureAbsorbance
+            command: fluorescenceReader.measureFluorescence
             object: mixPlate
             programFile: tania13_ph-temp.mdfx
             outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
-          3:
-            command: transporter.movePlate
-            object: mixPlate
-            destination: ourlab.mario.site.CENTRIFUGE_2
           4:
             description: Incubate at 25C
-            command: centrifuge.instruction.run
+            command: centrifuge.centrifuge2
+            object1: mixPlate
+            object2: balancePlate
+            destinationAfter1: null
+            destinationAfter2: null
             program:
               rpm: 3000
               duration: 1 # must set a duration of at least 1s

@@ -184,7 +184,7 @@ var commandHandlers = {
 				}
 			],
 			// Close the centrifuge
-			{
+			(destination1 === params2.site1 && destination2 === params2.site2) ? null : {
 				command: "centrifuge.instruction.close",
 				agent: params2.agent,
 				equipment: params2.equipment
