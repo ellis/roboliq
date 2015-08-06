@@ -5,12 +5,13 @@ var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var commandHandlers = {
-	"generic.measureFluorescence": function(params, data) {
+	"fluorescenceReader.measureFluorescence": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",
 			equipment: "name?",
-			object: "Object",
 			program: "Object",
+			object: "Object",
+			site: "name?",
 			destinationAfter: "name?"
 		});
 		var location0 = expect.objectsValue({paramName: "object"}, parsed.object.valueName+".location", data.objects);
@@ -44,8 +45,6 @@ var commandHandlers = {
 };
 
 module.exports = {
-	//predicates: predicates,
-	objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers,
 	planHandlers: planHandlers
 };

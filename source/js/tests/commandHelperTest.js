@@ -25,7 +25,7 @@ describe('commandHelper', function() {
 			};
 			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
-				objectName: {value: "plate1"},
+				objectName: {valueName: "plate1"},
 				object: {valueName: "plate1", value: {type: "Plate", location: "P1"}},
 				count: {valueName: "number1", value: 1}
 			});

@@ -92,7 +92,7 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 			var value = params[name];
 			if (_.isUndefined(value))
 				value = defaultValue;
-			return (_.isUndefined(value)) ? undefined : {value: value};
+			return (_.isUndefined(value)) ? undefined : {valueName: value};
 		case "Any": return getNameAndValue(params, data, name, defaultValue);
 		case "Number": return getNameAndNumber(params, data, name, defaultValue);
 		case "Object": return getNameAndObject(params, data, name, defaultValue);
