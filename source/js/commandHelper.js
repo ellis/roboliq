@@ -59,6 +59,7 @@ function getNameAndNumber(params, data, paramName, defaultValue) {
 	return x;
 }
 
+// REFACTOR: remove
 function get(params, data, name, defaultValue) {
 	// If there's no default value, require the variable's presence
 	if (_.isUndefined(defaultValue))
@@ -74,12 +75,14 @@ function get(params, data, name, defaultValue) {
 	return value2;
 }
 
+// REFACTOR: remove
 function getObjectParameter(params, data, name, defaultValue) {
 	var value = get(params, data, name, defaultValue);
 	expect.truthy({paramName: name}, _.isPlainObject(value), "expected an object, received: "+JSON.stringify(value));
 	return value;
 }
 
+// REFACTOR: remove
 function getNumberParameter(params, data, name, defaultValue) {
 	var value = get(params, data, name, defaultValue);
 	expect.truthy({paramName: name}, _.isNumber(value), "expected a number, received: "+JSON.stringify(value));
@@ -133,9 +136,44 @@ function parseParams(params, data, specs) {
 	})));
 }
 
+/**
+ * Query the logic database with the given predicates and return an extracted values from the query result.
+ * @param  {Object} data         Command data
+ * @param  {Array} predicates    Array of llpl predicates
+ * @param  {String} queryExtract A jmespath query string to extract values of interest from the llpl result list
+ * @return {Array}               Array of objects holding valid values
+ */
+function queryLogic(data, predicates, queryExtract) {
+	var llpl = require('./HTN/llpl.js').create();
+	llpl.initializeDatabase(data.predicates);
+
+	var query = {"and": predicates};
+	var resultList = llpl.query(query);
+
+	if (_.isEmpty(resultList)) {
+		var predicates2 = [];
+		_.forEach(predicates, function(p, index) {
+			var p2 = _.mapValues(p, function(value, name) { return "?"+name; });
+			predicates2.push(p2);
+			var query2 = {"and": predicates2};
+			var resultList2 = llpl.query(query);
+			expect.truthy(!_.isEmpty(resultList2), "logical query found no result for predicate "+(index+1)+" in: "+query);
+		});
+	}
+
+	if (queryExtract) {
+		var alternatives = jmespath.search(resultList, queryExtract);
+		return alternatives;
+	}
+	else {
+		return resultList;
+	}
+}
+
 module.exports = {
 	getParameter: get,
 	getObjectParameter: getObjectParameter,
 	getNumberParameter: getNumberParameter,
-	parseParams: parseParams
+	parseParams: parseParams,
+	queryLogic: queryLogic
 }

@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var objectToPredicateConverters = {
@@ -115,7 +116,7 @@ var commandHandlers = {
 			},
 		};
 
-		// Create the effets object
+		// Create the effects object
 		var effects = {};
 		effects[params.object + ".sealed"] = true;
 
