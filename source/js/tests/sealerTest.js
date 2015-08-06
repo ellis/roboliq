@@ -14,7 +14,7 @@ describe('commands/sealer', function() {
 	};
 
 	describe('sealer.action.sealPlate', function () {
-		it('should put two plates in the centrifuge, run, then move the plates back', function () {
+		it('should move plate to sealer, seal, then move plate back to original location', function () {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {

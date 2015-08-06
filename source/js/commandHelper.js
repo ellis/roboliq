@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var expect = require('./expect.js');
+var jmespath = require('jmespath');
 var misc = require('./misc.js');
 
 /**
@@ -128,12 +129,48 @@ function parseParams(params, data, specs) {
 		var x = getTypedNameAndValue(type, params, data, paramName, defaultValue);
 		if (_.isUndefined(x)) {
 			expect.truthy({paramName: paramName}, optional, "missing value for required parameter");
-			return undefined;
+			x = {};
 		}
-		else {
-			return [paramName, x];
-		}
+		return [paramName, x];
 	})));
+}
+
+function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
+	if (!parsed.hasOwnProperty(paramName)) {
+		expect.truthy({paramName: paramName}, !_.isUndefined(defaultValue), "missing parameter value");
+		return defaultValue;
+	}
+	var x = parsed[paramName];
+
+	if (x.hasOwnProperty('value')) {
+		var value = _.get(x.value, propertyName, defaultValue);
+		var valueName = (x.valueName) ? x.valueName+"."+propertyName : paramName+"/"+propertyName;
+		expect.truthy({valueName: valueName}, !_.isUndefined(value), "missing value");
+		return value;
+	}
+	else {
+		var valueName = x.valueName+"."+propertyName;
+		var value = g(data, valueName);
+		if (_.isUndefined(value))
+			value = defaultValue;
+		expect.truthy({valueName: valueName}, !_.isUndefined(value), "missing value");
+		return value;
+	}
+}
+
+function fixPredicateUndefines(predicate) {
+	if (_.isArray(predicate)) {
+		_.forEach(predicate, function(p) { fixPredicateUndefines(p); });
+	}
+	else if (_.isPlainObject(predicate)) {
+		_.forEach(predicate, function(value, name) {
+			if (_.isUndefined(value))
+				predicate[name] = "?"+name;
+			else if (_.isPlainObject(value)) {
+				fixPredicateUndefines(value);
+			}
+		})
+	}
 }
 
 /**
@@ -147,8 +184,10 @@ function queryLogic(data, predicates, queryExtract) {
 	var llpl = require('./HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
+	fixPredicateUndefines(predicates);
 	var query = {"and": predicates};
 	var resultList = llpl.query(query);
+	//console.log("resultList:\n"+JSON.stringify(resultList, null, '  '));
 
 	if (_.isEmpty(resultList)) {
 		var predicates2 = [];
@@ -174,6 +213,7 @@ module.exports = {
 	getParameter: get,
 	getObjectParameter: getObjectParameter,
 	getNumberParameter: getNumberParameter,
+	getParsedValue: getParsedValue,
 	parseParams: parseParams,
 	queryLogic: queryLogic
 }

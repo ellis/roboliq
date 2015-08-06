@@ -234,7 +234,8 @@ function run(argv, userProtocol) {
 						var data = {
 							objects: objects,
 							predicates: predicates,
-							planHandlers: protocol.planHandlers
+							planHandlers: protocol.planHandlers,
+							accesses: []
 						};
 						result = handler(step, data);
 					} catch (e) {
