@@ -41,6 +41,8 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
+		var destinationAfter = (_.isUndefined(parsed.destinationAfter.valueName)) ? location0 : parsed.destinationAfter.valueName;
+
 		var predicates = [
 			{"sealer.canAgentEquipmentProgramModelSite": {
 				"agent": parsed.agent.valueName,
@@ -59,22 +61,22 @@ var commandHandlers = {
 			agent: params2.agent,
 			equipment: params2.equipment,
 			program: params2.program,
-			object: params.object
+			object: parsed.object.valueName
 		});
 
-		var expansion = {
-			"1": {
+		var expansion = [
+			(params2.site === location0) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.object.valueName,
 				"destination": params2.site
 			},
-			"2": params3,
-			"3": {
+			params3,
+			(destinationAfter === null) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.object.valueName,
 				"destination": location0
 			},
-		};
+		];
 
 		// Create the effects object
 		var effects = {};

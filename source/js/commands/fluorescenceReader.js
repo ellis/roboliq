@@ -18,7 +18,7 @@ var commandHandlers = {
 
 		// TODO: find site using logic (see sealer)
 
-		var destinationAfter = (_.isUndefined(parsed.destinationAfter.value)) ? location0 : parsed.destinationAfter.value;
+		var destinationAfter = (_.isUndefined(parsed.destinationAfter.valueName)) ? location0 : parsed.destinationAfter.valueName;
 
 		var expansion = [
 			(site === location0) ? null : {
@@ -32,7 +32,7 @@ var commandHandlers = {
 				equipment: equipment,
 				program: program
 			},
-			(!destinationAfter) ? null : {
+			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",
 				object: object,
 				destination: destinationAfter
