@@ -28,9 +28,6 @@
 - [x] commands/pipetter.js: pipetter.pipette: for cleaning, sort out "begin, end, before, after" parameters
 - [x] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
 - [x] ourlab.js: add 'sites' and 'washProgram' namespaces
-
-## Before publication, but not yet
-
 - [x] test.js: '-O' parameter for output directory
 - [x] test.js: allow for loading YAML protocols
 - [x] ourlab.js: setup labware models
@@ -59,6 +56,9 @@
 - [x] command: centrifuge run
 - [x] command: centrifuge.centrifuge2
 - [x] handle opening and closing of centrifuge during transport (write unit test)
+
+## Before publication
+
 - [ ] command: reader
 - [ ] generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] create new script for old tania13_ph_3_measure
@@ -80,7 +80,7 @@
 - [ ] figure out how to randomize for-comprehensions and plain lists
 - [ ] figure out how to generate partial factorial design lists
 - [ ] figure out how to split large factorial designs over multiple plates/batches
-- [ ] implement 'import' keyword for protocols to import other protocols
+- [ ] implement 'import' or 'requires' keyword for protocols to import other protocols
 - [ ] consider allowing for mathematical expressions (see http://mathjs.org/)
 - [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations
@@ -134,6 +134,12 @@ When loading JSON/JavaScript files, we expect the following structure:
 # Variables
 
 Need to reference objects, variables, step parameters, parameters of current command, parameters of parent command
+
+* `${volume}` -- the value of variable, e.g. `objects.volume.value`
+* `${plate1.location}`
+* `${__root__.objects.}`
+
+or ...
 
 * "${object}" -- `object` parameter for current command
 * "${^.object}" -- `object` parameter for parent command
