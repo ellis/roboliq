@@ -196,7 +196,7 @@ function queryLogic(data, predicates, queryExtract) {
 			predicates2.push(p2);
 			var query2 = {"and": predicates2};
 			var resultList2 = llpl.query(query);
-			expect.truthy(!_.isEmpty(resultList2), "logical query found no result for predicate "+(index+1)+" in: "+query);
+			expect.truthy({}, !_.isEmpty(resultList2), "logical query found no result for predicate "+(index+1)+" in: "+JSON.stringify(query));
 		});
 	}
 

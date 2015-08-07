@@ -5,7 +5,7 @@ var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var commandHandlers = {
-	"fluorescenceReader.measureFluorescence": function(params, data) {
+	"fluorescenceReader.measurePlate": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",
 			equipment: "name?",
@@ -34,7 +34,7 @@ var commandHandlers = {
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
 		var expansion = [
-			(site === location0) ? null : {
+			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
 				object: parsed.object.valueName,
 				destination: params2.site

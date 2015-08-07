@@ -13,6 +13,9 @@ module.exports = {
 				"evoware": {
 					"type": "EvowareRobot"
 				},
+				"reader": {
+					"type": "Reader",
+				},
 				"roma1": {
 					"type": "Transporter",
 					"evowareRoma": 0
@@ -51,10 +54,10 @@ module.exports = {
 				},
 				"site": {
 					"type": "Namespace",
-		            "CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
-		            "CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
-		            "CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
-		            "CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
+					"CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
+					"CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
+					"CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
+					"CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
 					"P2": {
 						"type": "Site",
 						"evowareCarrier": "MP 2Pos H+P Shake",
@@ -68,11 +71,12 @@ module.exports = {
 						"evowareSite": 4
 					},
 					R1: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 1 },
-		            R2: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 2 },
-		            R3: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 3 },
-		            R4: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 1 },
-		            R5: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 2 },
-		            R6: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
+					R2: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 2 },
+					R3: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 3 },
+					R4: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 1 },
+					R5: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 2 },
+					R6: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
+					READER: { type: "Site", evowareCarrier: "Infinite M200", evowareGrid: 61, evowareSite: 1 },
 					"REGRIP": {
 						"type": "Site",
 						"evowareCarrier": "ReGrip Station",
@@ -350,6 +354,17 @@ module.exports = {
 			}
 		];
 	}).flatten().value(),
+	{"#for": {
+		factors: {model: ["plateModel_384_square"]},
+		output: {
+			"fluorescenceReader.canAgentEquipmentModelSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.reader",
+				"model": "ourlab.model.{{model}}",
+				"site": "ourlab.mario.site.READER"
+			}
+		}
+	}},
 	{
 		"sealer.canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.mario.evoware",
@@ -358,7 +373,8 @@ module.exports = {
 			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
-	}, {
+	},
+	{
 		"sealer.canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.sealer",
@@ -366,7 +382,8 @@ module.exports = {
 			"model": "ourlab.model.plateModel_384_square",
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
-	}, {"#for": {
+	},
+	{"#for": {
 		factors: {site: ["P2", "P3", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
 		output: {
 			"pipetter.canAgentEquipmentSite": {
@@ -375,7 +392,8 @@ module.exports = {
 				"site": "ourlab.mario.site.{{site}}"
 			}
 		}
-	}}, {
+	}},
+	{
 		"pipetter.canAgentEquipmentSite": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
