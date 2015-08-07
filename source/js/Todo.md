@@ -12,15 +12,15 @@
 - [x] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
 - [x] save output files in git for testing comparisons when code changes are made
 - [x] test protocol4.json
-- [x] EvowareCompiler: pipetter.instruction.dispense
+- [x] EvowareCompiler: pipetter._dispense
 - [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
-- [x] pipetter.instruction.pipette: create instruction, test in protocol5.json
+- [x] pipetter._pipette: create instruction, test in protocol5.json
 - [x] commands/pipetter.js: pipetter.pipette: method 1
-- [x] pipetter.instruction.cleanTips: create instruction, test in protocol8.json
+- [x] pipetter._cleanTips: create instruction, test in protocol8.json
 - [x] commands/pipetter.js: pipetter.pipette: refresh tips (simple)
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [x] commands/pipetter.js: pipetter.pipette: choose the default liquid class intelligently
-- [x] commands/pipetter.js: pipetter.instruction.pipette: output effects array for changes in well contents
+- [x] commands/pipetter.js: pipetter._pipette: output effects array for changes in well contents
 - [x] commands/pipetter.js: pipetter.pipette: method 2
 - [x] commands/pipetter.js: pipetter.pipette: clean 4 tips at a time
 - [x] commands/pipetter.js: pipetter.pipette: method 3
@@ -59,8 +59,9 @@
 
 ## Before publication
 
+- [x] commands/fluorescenceReader.js: update based on sealer code
+- [x] consider renaming `pipetter.instruction.pipette => pipetter._pipette`
 - [ ] set READER.closed = true
-- [ ] commands/fluorescenceReader.js: update based on sealer code
 - [ ] compile to evoware all instructions for tania13_* protocols
 - [ ] consider using commands/equipment.js and commands/generic.js
 - [ ] generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
@@ -70,7 +71,6 @@
 - [ ] mix command
 - [ ] roboliq.js: generate table for final well contents
 - [ ] roboliq.js: generate table of pipetting actions for well contents by step
-- [ ] consider renaming `pipetter.instruction.pipette => pipetter._pipette`
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] support creation of well groups, including random ones, and then implement 'free' verb in wellsParser
 - [ ] support creation of well groups by commands, so that the same wells can be edited future commands; pass in a well group name to the generating command, and have it populate that well group as an effect
@@ -96,8 +96,8 @@
 - [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
 - [ ] version handling for protocols and commands
 - [ ] centrifuge command
-- [ ] commands/pipetter.js: pipetter.instruction.aspirate: output effects array for changes in well and tip contents
-- [ ] commands/pipetter.js: pipetter.instruction.dispense: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: pipetter._aspirate: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: pipetter._dispense: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: pipetter.pipette: refresh tips (advanced)
 - [ ] JSON schema
 - [ ] how to handle trough volume, which has many virtual wells, but they all share the same common liquid: set the labware's contents, rather than the contents of the individual wells, then the effects function should handle that case appropriately.

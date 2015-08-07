@@ -40,7 +40,7 @@ var commandHandlers = {
 				destination: params2.site
 			},
 			{
-				command: "fluorescenceReader.instruction.run",
+				command: "fluorescenceReader._run",
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: parsed.program.value,

@@ -26,13 +26,13 @@ function closeAll(params, data, effects) {
 }
 
 var commandHandlers = {
-	"centrifuge.instruction.run": function(params, data) {
+	"centrifuge._run": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		closeAll(params, data, effects);
 		return {effects: effects};
 	},
-	/*"centrifuge.instruction.open": function(params, data) {
+	/*"centrifuge._open": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
 		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
@@ -43,7 +43,7 @@ var commandHandlers = {
 		]);
 		return {effects: effects};
 	},*/
-	"centrifuge.instruction.openSite": function(params, data) {
+	"centrifuge._openSite": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "site"]);
 		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
 		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
@@ -55,7 +55,7 @@ var commandHandlers = {
 		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
 		return {effects: effects};
 	},
-	"centrifuge.instruction.close": function(params, data) {
+	"centrifuge._close": function(params, data) {
 		var effects = {};
 		closeAll(params, data, effects);
 		return {effects: effects};
@@ -125,7 +125,7 @@ var commandHandlers = {
 		var expansion = [
 			(object1.location === params2.site1) ? null : [
 				{
-					command: "centrifuge.instruction.openSite",
+					command: "centrifuge._openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site1
@@ -138,7 +138,7 @@ var commandHandlers = {
 			],
 			(object2.location === params2.site2) ? null : [
 				{
-					command: "centrifuge.instruction.openSite",
+					command: "centrifuge._openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site2
@@ -150,7 +150,7 @@ var commandHandlers = {
 				}
 			],
 			{
-				command: "centrifuge.instruction.run",
+				command: "centrifuge._run",
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params.program
@@ -158,7 +158,7 @@ var commandHandlers = {
 			// Move object1 back
 			(destination1 === params2.site1) ? null : [
 				{
-					command: "centrifuge.instruction.openSite",
+					command: "centrifuge._openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site1
@@ -172,7 +172,7 @@ var commandHandlers = {
 			// Move object2 back
 			(destination2 === params2.site2) ? null : [
 				{
-					command: "centrifuge.instruction.openSite",
+					command: "centrifuge._openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site2
@@ -185,7 +185,7 @@ var commandHandlers = {
 			],
 			// Close the centrifuge
 			(destination1 === params2.site1 && destination2 === params2.site2) ? null : {
-				command: "centrifuge.instruction.close",
+				command: "centrifuge._close",
 				agent: params2.agent,
 				equipment: params2.equipment
 			},
@@ -203,16 +203,16 @@ var commandHandlers = {
 };
 
 var planHandlers = {
-	"centrifuge.instruction.close": function(params, parentParams, data) {
+	"centrifuge._close": function(params, parentParams, data) {
 		return [{
-			command: "centrifuge.instruction.close",
+			command: "centrifuge._close",
 			agent: params.agent,
 			equipment: params.equipment
 		}];
 	},
-	"centrifuge.instruction.openSite": function(params, parentParams, data) {
+	"centrifuge._openSite": function(params, parentParams, data) {
 		return [{
-			command: "centrifuge.instruction.openSite",
+			command: "centrifuge._openSite",
 			agent: params.agent,
 			equipment: params.equipment,
 			site: params.site

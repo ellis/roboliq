@@ -33,7 +33,7 @@ describe('transporter', function() {
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1], {
 				"1": {
-					"command": "transporter.instruction.movePlate",
+					"command": "transporter._movePlate",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.roma1",
 					"program": "Narrow",
@@ -41,13 +41,13 @@ describe('transporter', function() {
 					"destination": "ourlab.mario.site.REGRIP"
 				},
 				"2": {
-					"command": "centrifuge.instruction.openSite",
+					"command": "centrifuge._openSite",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.centrifuge",
 					"site": "ourlab.mario.site.CENTRIFUGE_4"
 				},
 				"3": {
-					"command": "transporter.instruction.movePlate",
+					"command": "transporter._movePlate",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.roma1",
 					"program": "Narrow",
@@ -55,7 +55,7 @@ describe('transporter', function() {
 					"destination": "ourlab.mario.site.CENTRIFUGE_4"
 				},
 				"4": {
-					"command": "centrifuge.instruction.close",
+					"command": "centrifuge._close",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.centrifuge"
 				},
@@ -69,7 +69,7 @@ describe('transporter', function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
@@ -86,14 +86,14 @@ describe('transporter', function() {
 			should.deepEqual(result.output.steps,
 				{
 					"1": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					"2": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -101,7 +101,7 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -137,7 +137,7 @@ describe('transporter', function() {
 				{
 					"1": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -145,13 +145,13 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "centrifuge.instruction.openSite",
+							"command": "centrifuge._openSite",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge",
 							"site": "ourlab.mario.site.CENTRIFUGE_2"
 						},
 						"3": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -159,7 +159,7 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.CENTRIFUGE_2"
 						},
 						"4": {
-							"command": "centrifuge.instruction.close",
+							"command": "centrifuge._close",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge"
 						},
@@ -169,7 +169,7 @@ describe('transporter', function() {
 					},
 					"2": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -177,13 +177,13 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "centrifuge.instruction.openSite",
+							"command": "centrifuge._openSite",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge",
 							"site": "ourlab.mario.site.CENTRIFUGE_4"
 						},
 						"3": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -191,7 +191,7 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.CENTRIFUGE_4"
 						},
 						"4": {
-							"command": "centrifuge.instruction.close",
+							"command": "centrifuge._close",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge"
 						},
@@ -207,7 +207,7 @@ describe('transporter', function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					"1": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
@@ -218,7 +218,7 @@ describe('transporter', function() {
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					"3": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"

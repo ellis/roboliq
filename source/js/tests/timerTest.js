@@ -33,7 +33,7 @@ describe('timer', function() {
 			});
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
 			should.deepEqual(result.output.steps[1][1], {
-				command: "timer.instruction.sleep",
+				command: "timer._sleep",
 				agent: "robot1",
 				equipment: "timer1",
 				duration: 10
@@ -52,7 +52,7 @@ describe('timer', function() {
 			});
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
 			should.deepEqual(result.output.steps[1][1], {
-				command: "timer.instruction.start",
+				command: "timer._start",
 				agent: "robot1",
 				equipment: "timer1"
 			});
@@ -73,7 +73,7 @@ describe('timer', function() {
 			]);
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
 			should.deepEqual(result.output.steps[1][1], {
-				command: "timer.instruction.stop",
+				command: "timer._stop",
 				agent: "robot1",
 				equipment: "timer2"
 			});
@@ -97,13 +97,13 @@ describe('timer', function() {
 				duration: 10,
 				steps: {comment: "do something"},
 				1: {
-					command: "timer.instruction.start",
+					command: "timer._start",
 					agent: "robot1",
 					equipment: "timer1"
 				},
 				2: {comment: "do something"},
 				3: {
-					command: "timer.instruction.wait",
+					command: "timer._wait",
 					agent: "robot1",
 					equipment: "timer1",
 					till: 10,

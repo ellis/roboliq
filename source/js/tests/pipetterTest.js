@@ -27,7 +27,7 @@ describe('pipetter', function() {
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(result.output.steps[1][1][1], {
-				"command": "pipetter.instruction.cleanTips",
+				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",
@@ -39,7 +39,7 @@ describe('pipetter', function() {
 				]
 			});
 			should.deepEqual(result.output.steps[1][2], {
-				"command": "pipetter.instruction.pipette",
+				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "\"Roboliq_Water_Dry_1000\"",
@@ -53,7 +53,7 @@ describe('pipetter', function() {
 				]
 			});
 			should.deepEqual(result.output.steps[1][3][1], {
-				"command": "pipetter.instruction.cleanTips",
+				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",
@@ -109,7 +109,7 @@ describe('pipetter', function() {
 			var result = roboliq.run(["-o", ""], protocol);
 			//console.log(JSON.stringify(result, null, '\t'));
 			should.deepEqual(result.output.steps[1][1], {
-				"command": "pipetter.instruction.pipette",
+				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "\"Roboliq_Water_Dry_1000\"",
@@ -141,7 +141,7 @@ describe('pipetter', function() {
 				]
 			});
 			should.deepEqual(result.output.steps[1][2], {
-				"command": "pipetter.instruction.pipette",
+				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "\"Roboliq_Water_Dry_1000\"",
@@ -265,7 +265,7 @@ describe('pipetter', function() {
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(result.output.steps[1][1], {
-				"command": "pipetter.instruction.pipette",
+				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "\"Roboliq_Water_Dry_1000\"",

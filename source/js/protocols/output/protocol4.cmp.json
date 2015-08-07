@@ -187,7 +187,7 @@
 	},
 	"steps": {
 		"1": {
-			"command": "pipetter.instruction.aspirate",
+			"command": "pipetter._aspirate",
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"program": "Water",
@@ -200,7 +200,7 @@
 			]
 		},
 		"2": {
-			"command": "pipetter.instruction.dispense",
+			"command": "pipetter._dispense",
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"program": "Water",

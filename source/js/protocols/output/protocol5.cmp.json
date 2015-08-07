@@ -187,7 +187,7 @@
 	},
 	"steps": {
 		"1": {
-			"command": "pipetter.instruction.pipette",
+			"command": "pipetter._pipette",
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"program": "Water",

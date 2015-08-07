@@ -484,7 +484,7 @@ module.exports = {
 		}};
 	}),
 	_.map([1,2,3,4], function(n) {
-		return {"action": {"description": "centrifuge.instruction.openSite: open an internal site on the centrifuge",
+		return {"action": {"description": "centrifuge._openSite: open an internal site on the centrifuge",
 			"task": _.zipObject([["ourlab.mario.centrifuge.open"+n, {}]]),
 			"preconditions": [],
 			"deletions": [
@@ -499,14 +499,14 @@ module.exports = {
 	planHandlers: {
 		"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge.instruction.close",
+				command: "centrifuge._close",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge"
 			}];
 		},
 		"ourlab.mario.centrifuge.open1": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge.instruction.openSite",
+				command: "centrifuge._openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_1"
@@ -514,7 +514,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open2": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge.instruction.openSite",
+				command: "centrifuge._openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_2"
@@ -522,7 +522,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open3": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge.instruction.openSite",
+				command: "centrifuge._openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_3"
@@ -530,7 +530,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open4": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge.instruction.openSite",
+				command: "centrifuge._openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_4"

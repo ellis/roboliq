@@ -513,7 +513,7 @@ function pipette(params, data) {
 		});
 		// Pipette
 		expansionList.push({
-			"command": "pipetter.instruction.pipette",
+			"command": "pipetter._pipette",
 			"agent": agent,
 			"equipment": equipment,
 			"program": group[0].program,
@@ -551,28 +551,28 @@ function pipette(params, data) {
 }
 
 var commandHandlers = {
-	"pipetter.instruction.aspirate": function(params, data) {
+	"pipetter._aspirate": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
-	"pipetter.instruction.cleanTips": function(params, data) {
+	"pipetter._cleanTips": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
-	"pipetter.instruction.dispense": function(params, data) {
+	"pipetter._dispense": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
-	"pipetter.instruction.pipette": function(params, data) {
+	"pipetter._pipette": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		//console.log("params", JSON.stringify(params, null, '  '))
 		//console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
@@ -628,7 +628,7 @@ var commandHandlers = {
 			var l = _.remove(syringeToProgram_l, function(x) { return x.program === program; });
 			var syringe_l = _.map(l, 'syringe');
 			expansion_l.push({
-				command: "pipetter.instruction.cleanTips",
+				command: "pipetter._cleanTips",
 				agent: agent,
 				equipment: equipment,
 				program: program,

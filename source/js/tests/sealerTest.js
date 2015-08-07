@@ -30,7 +30,7 @@ describe('commands/sealer', function() {
 					"1": {
 						"1": {
 							"1": {
-								"command": "transporter.instruction.movePlate",
+								"command": "transporter._movePlate",
 								"agent": "ourlab.mario.evoware",
 								"equipment": "ourlab.mario.roma2",
 								"program": "Narrow",
@@ -42,7 +42,7 @@ describe('commands/sealer', function() {
 							"destination": "ourlab.mario.site.ROBOSEAL"
 						},
 						"2": {
-							"command": "sealer.instruction.run",
+							"command": "sealer._run",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.sealer",
 							"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
@@ -50,7 +50,7 @@ describe('commands/sealer', function() {
 						},
 						"3": {
 							"1": {
-								"command": "transporter.instruction.movePlate",
+								"command": "transporter._movePlate",
 								"agent": "ourlab.mario.evoware",
 								"equipment": "ourlab.mario.roma2",
 								"program": "Narrow",

@@ -34,9 +34,10 @@ steps:
               duration: 120 # 2min
               temperature: 25
           2:
-            command: fluorescenceReader.measureFluorescence
+            command: fluorescenceReader.measurePlate
             object: mixPlate
-            programFile: tania13_ph-temp.mdfx
+            program:
+                programFile: tania13_ph-temp.mdfx
             outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
           4:
             description: Incubate at 25C

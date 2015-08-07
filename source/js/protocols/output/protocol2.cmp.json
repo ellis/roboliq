@@ -188,7 +188,7 @@
 	"steps": {
 		"1": {
 			"1": {
-				"command": "transporter.instruction.movePlate",
+				"command": "transporter._movePlate",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.roma1",
 				"program": "Narrow",
@@ -201,7 +201,7 @@
 		},
 		"2": {
 			"1": {
-				"command": "transporter.instruction.movePlate",
+				"command": "transporter._movePlate",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.roma1",
 				"program": "Narrow",
@@ -209,7 +209,7 @@
 				"destination": "ourlab.mario.site.P2"
 			},
 			"2": {
-				"command": "transporter.instruction.movePlate",
+				"command": "transporter._movePlate",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.roma2",
 				"program": "Narrow",

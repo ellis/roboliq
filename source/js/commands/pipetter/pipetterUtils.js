@@ -103,7 +103,7 @@ function flattenContents(contents) {
 
 /**
  * Get an object representing the effects of pipetting.
- * @param {object} params The parameters for the pipetter.instruction.pipette command.
+ * @param {object} params The parameters for the pipetter._pipette command.
  * @param {object} data The data object passed to command handlers.
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
 * @return {object} The effects caused by the pipetting command.

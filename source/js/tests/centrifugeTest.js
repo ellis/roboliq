@@ -39,14 +39,14 @@ describe('centrifgue', function() {
 			should.deepEqual(result.output.steps[1],
 				{
 					"1": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					"2": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -54,7 +54,7 @@ describe('centrifgue', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -66,14 +66,14 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					"3": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					"4": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -81,7 +81,7 @@ describe('centrifgue', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -93,7 +93,7 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					"5": {
-						"command": "centrifuge.instruction.run",
+						"command": "centrifuge._run",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"program": {
@@ -103,14 +103,14 @@ describe('centrifgue', function() {
 						}
 					},
 					"6": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					"7": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -118,7 +118,7 @@ describe('centrifgue', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -130,14 +130,14 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.P2"
 					},
 					"8": {
-						"command": "centrifuge.instruction.openSite",
+						"command": "centrifuge._openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					"9": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -145,7 +145,7 @@ describe('centrifgue', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -157,7 +157,7 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.P3"
 					},
 					"10": {
-						"command": "centrifuge.instruction.close",
+						"command": "centrifuge._close",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge"
 					},

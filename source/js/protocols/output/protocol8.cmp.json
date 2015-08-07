@@ -183,7 +183,7 @@
 	"steps": {
 		"1": {
 			"1": {
-				"command": "pipetter.instruction.cleanTips",
+				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.flush_1000",
@@ -206,7 +206,7 @@
 		},
 		"2": {
 			"1": {
-				"command": "pipetter.instruction.cleanTips",
+				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.light_1000",
@@ -229,7 +229,7 @@
 		},
 		"3": {
 			"1": {
-				"command": "pipetter.instruction.cleanTips",
+				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",

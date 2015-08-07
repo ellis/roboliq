@@ -52,7 +52,7 @@ function findAgentEquipmentAlternatives(params, data, running) {
 }
 
 var commandHandlers = {
-	"timer.instruction.sleep": function(params, data) {
+	"timer._sleep": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "duration"]);
 		var effects = {};
 		if (params.stop)
@@ -61,7 +61,7 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	"timer.instruction.start": function(params, data) {
+	"timer._start": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		var effects = {};
 		effects[params.equipment + ".running"] = true;
@@ -69,7 +69,7 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	"timer.instruction.stop": function(params, data) {
+	"timer._stop": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		var effects = {};
 		effects[params.equipment + ".running"] = false;
@@ -77,7 +77,7 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	"timer.instruction.wait": function(params, data) {
+	"timer._wait": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "till", "stop"]);
 		var effects = {};
 		if (params.stop)
@@ -99,13 +99,13 @@ var commandHandlers = {
 
 		var expansion = {
 			1: {
-				command: "timer.instruction.start",
+				command: "timer._start",
 				agent: agent,
 				equipment: equipment
 			},
 			2: steps,
 			3: {
-				command: "timer.instruction.wait",
+				command: "timer._wait",
 				agent: agent,
 				equipment: equipment,
 				till: duration,
@@ -127,7 +127,7 @@ var commandHandlers = {
 
 		var params2 = _.merge(
 			{
-				command: "timer.instruction.sleep",
+				command: "timer._sleep",
 				duration: params.duration
 			},
 			alternatives[0]
@@ -153,7 +153,7 @@ var commandHandlers = {
 
 		var params2 = _.merge(
 			{
-				command: "timer.instruction.start"
+				command: "timer._start"
 			},
 			alternatives[0]
 		);
@@ -181,7 +181,7 @@ var commandHandlers = {
 
 		var params2 = _.merge(
 			{
-				command: "timer.instruction.stop"
+				command: "timer._stop"
 			},
 			alternatives[0]
 		);

@@ -189,7 +189,7 @@
 		"1": {
 			"1": {
 				"1": {
-					"command": "transporter.instruction.movePlate",
+					"command": "transporter._movePlate",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.roma2",
 					"program": "Narrow",
@@ -201,7 +201,7 @@
 				"destination": "ourlab.mario.site.ROBOSEAL"
 			},
 			"2": {
-				"command": "sealer.instruction.run",
+				"command": "sealer._run",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.sealer",
 				"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
@@ -209,7 +209,7 @@
 			},
 			"3": {
 				"1": {
-					"command": "transporter.instruction.movePlate",
+					"command": "transporter._movePlate",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.roma2",
 					"program": "Narrow",

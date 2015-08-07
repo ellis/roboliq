@@ -194,7 +194,7 @@
 	"steps": {
 		"1": {
 			"1": {
-				"command": "pipetter.instruction.pipette",
+				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "\"Roboliq_Water_Dry_1000\"",
@@ -226,7 +226,7 @@
 				]
 			},
 			"2": {
-				"command": "pipetter.instruction.pipette",
+				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "\"Roboliq_Water_Dry_1000\"",

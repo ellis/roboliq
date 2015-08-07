@@ -15,7 +15,7 @@ var objectToPredicateConverters = {
 };
 
 var commandHandlers = {
-	"transporter.instruction.movePlate": function(params, data) {
+	"transporter._movePlate": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "object", "destination"]);
 		var effects = {};
 		effects[params.object + ".location"] = params.destination;
@@ -131,9 +131,9 @@ var commandHandlers = {
 };
 
 var planHandlers = {
-	"transporter.instruction.movePlate": function(params, parentParams, data) {
+	"transporter._movePlate": function(params, parentParams, data) {
 		return [{
-			command: "transporter.instruction.movePlate",
+			command: "transporter._movePlate",
 			agent: params.agent,
 			equipment: params.equipment,
 			program: params.program,

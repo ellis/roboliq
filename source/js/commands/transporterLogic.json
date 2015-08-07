@@ -7,7 +7,7 @@
 	}},
 
 	{"action": {"description": "transport plate from origin to destination",
-		"task": {"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"task": {"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 		"preconditions": [
 			{"model": {"labware": "?labware", "model": "?model"}},
 			{"location": {"labware": "?labware", "site": "?origin"}},
@@ -33,7 +33,7 @@
 		],
 		"subtasks": {"ordered": [
 			{"print": {"text": "openAndMovePlate-openNeither"}},
-			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
 		]}
 	}},
 
@@ -47,7 +47,7 @@
 			{"print": {"text": "openAndMovePlate-openBoth"}},
 			{"generic.openSite": {"site": "?origin"}},
 			{"generic.openSite": {"site": "?destination"}},
-			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 			{"generic.closeSite": {"site": "?origin"}},
 			{"generic.closeSite": {"site": "?destination"}}
 		]}
@@ -61,7 +61,7 @@
 		"subtasks": {"ordered": [
 			{"print": {"text": "openAndMovePlate-openOrigin"}},
 			{"generic.openSite": {"site": "?origin"}},
-			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 			{"generic.closeSite": {"site": "?origin"}}
 		]}
 	}},
@@ -74,7 +74,7 @@
 		"subtasks": {"ordered": [
 			{"print": {"text": "openAndMovePlate-openDestination"}},
 			{"generic.openSite": {"site": "?destination"}},
-			{"transporter.instruction.movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 			{"generic.closeSite": {"site": "?destination"}}
 		]}
 	}},

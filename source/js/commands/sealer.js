@@ -16,7 +16,7 @@ var objectToPredicateConverters = {
 };
 
 var commandHandlers = {
-	"sealer.instruction.run": function(params, data) {
+	"sealer._run": function(params, data) {
 		var effects = {};
 		effects[params.object + ".sealed"] = true;
 		return {
@@ -63,7 +63,7 @@ var commandHandlers = {
 				"destination": params2.site
 			},
 			{
-				command: "sealer.instruction.run",
+				command: "sealer._run",
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params2.program,

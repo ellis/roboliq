@@ -33,7 +33,7 @@ describe('commands/fluorescenceReader', function() {
 				{
 					"1": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
@@ -41,7 +41,7 @@ describe('commands/fluorescenceReader', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma2",
 							"program": "Wide",
@@ -53,7 +53,7 @@ describe('commands/fluorescenceReader', function() {
 						"destination": "ourlab.mario.site.READER"
 					},
 					"2": {
-						"command": "fluorescenceReader.instruction.run",
+						"command": "fluorescenceReader._run",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.reader",
 						"program": {
@@ -63,7 +63,7 @@ describe('commands/fluorescenceReader', function() {
 					},
 					"3": {
 						"1": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma2",
 							"program": "Wide",
@@ -71,7 +71,7 @@ describe('commands/fluorescenceReader', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "transporter.instruction.movePlate",
+							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.roma1",
 							"program": "Narrow",
