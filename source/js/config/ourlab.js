@@ -76,7 +76,7 @@ module.exports = {
 					R4: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 1 },
 					R5: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 2 },
 					R6: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
-					READER: { type: "Site", evowareCarrier: "Infinite M200", evowareGrid: 61, evowareSite: 1, closed: false },
+					READER: { type: "Site", evowareCarrier: "Infinite M200", evowareGrid: 61, evowareSite: 1, closed: true },
 					"REGRIP": {
 						"type": "Site",
 						"evowareCarrier": "ReGrip Station",
@@ -500,25 +500,19 @@ module.exports = {
 	{"method": {"description": "generic.openSite-READER",
 		"task": {"generic.openSite": {"site": "?site"}},
 		"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.READER"}}],
-		"subtasks": {"ordered": {"ourlab.mario.reader.open": {}}}
+		"subtasks": {"ordered": [{"ourlab.mario.reader.open": {}}]}
 	}},
-	{"action": {"description": "open the internal site on the reader",
+	{"action": {"description": "ourlab.mario.reader.open: open the reader",
 		"task": {"ourlab.mario.reader.open": {}},
 		"preconditions": [],
-		"deletions": [
-			{"siteIsClosed": {"site": "ourlab.mario.site.READER"}}
-		],
+		"deletions": [{"siteIsClosed": {"site": "ourlab.mario.site.READER"}}],
 		"additions": []
 	}},
 	// Close READER
 	{"method": {"description": "generic.closeSite-READER",
 		"task": {"generic.closeSite": {"site": "?site"}},
-		"preconditions": [
-			{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.READER"}}
-		],
-		"subtasks": {"ordered": [
-			{"ourlab.mario.reader.close": {}}
-		]}
+		"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.READER"}}],
+		"subtasks": {"ordered": [{"ourlab.mario.reader.close": {}}]}
 	}},
 	{"action": {"description": "ourlab.mario.reader.close: close the reader",
 		"task": {"ourlab.mario.reader.close": {}},
