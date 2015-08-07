@@ -76,7 +76,7 @@ module.exports = {
 					R4: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 1 },
 					R5: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 2 },
 					R6: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
-					READER: { type: "Site", evowareCarrier: "Infinite M200", evowareGrid: 61, evowareSite: 1 },
+					READER: { type: "Site", evowareCarrier: "Infinite M200", evowareGrid: 61, evowareSite: 1/*, closed: true*/ },
 					"REGRIP": {
 						"type": "Site",
 						"evowareCarrier": "ReGrip Station",
@@ -287,6 +287,11 @@ module.exports = {
 		}
 	}, {
 		"siteModel": {
+			"site": "ourlab.mario.site.READER",
+			"siteModel": "ourlab.siteModel1"
+		}
+	}, {
+		"siteModel": {
 			"site": "ourlab.mario.site.REGRIP",
 			"siteModel": "ourlab.siteModel1"
 		}
@@ -349,6 +354,21 @@ module.exports = {
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.roma1",
 					"program": "Narrow",
+					"siteClique": "ourlab.mario.siteClique_"+s
+				}
+			}
+		];
+	}).flatten().value(),
+	// READER ROMA2 Wide
+	_(["READER"]).map(function(s) {
+		return [
+			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site.REGRIP"}},
+			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site."+s}},
+			{
+				"transporter.canAgentEquipmentProgramSites": {
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.roma2",
+					"program": "Wide",
 					"siteClique": "ourlab.mario.siteClique_"+s
 				}
 			}

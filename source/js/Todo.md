@@ -59,7 +59,10 @@
 
 ## Before publication
 
+- [ ] set READER.closed = true
 - [ ] commands/fluorescenceReader.js: update based on sealer code
+- [ ] compile to evoware all instructions for tania13_* protocols
+- [ ] consider using commands/equipment.js and commands/generic.js
 - [ ] generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] create new script for old tania13_ph_3_measure
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
