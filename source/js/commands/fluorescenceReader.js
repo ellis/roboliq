@@ -5,6 +5,9 @@ var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var commandHandlers = {
+	"fluorescenceReader._run": function(params, data) {
+		return {};
+	},
 	"fluorescenceReader.measurePlate": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",

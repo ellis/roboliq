@@ -28,6 +28,9 @@ describe('commands/fluorescenceReader', function() {
 				}
 			});
 			var result = roboliq.run(["-o", "", "-T"], protocol);
+			//console.log("result:\n"+JSON.stringify(result, null, '\t'))
+			should.deepEqual(result.protocol.errors, {});
+			should.deepEqual(result.protocol.warnings, {});
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1],
 				{

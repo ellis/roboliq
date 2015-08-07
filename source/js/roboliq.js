@@ -311,7 +311,7 @@ function run(argv, userProtocol) {
 		_.forEach(keys, function(key) {
 			var step = steps[key];
 			if (step.hasOwnProperty("command")) {
-				if (step.command.indexOf("instruction.") >= 0) {
+				if (step.command.indexOf("._") >= 0) {
 					instructions.push(step);
 				}
 				var prefix2 = prefix.concat([key]);
