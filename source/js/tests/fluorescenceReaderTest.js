@@ -29,45 +29,65 @@ describe('commands/fluorescenceReader', function() {
 			});
 			var result = roboliq.run(["-o", "", "-T"], protocol);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
-			should.deepEqual(result.output.steps,
+			should.deepEqual(result.output.steps[1],
 				{
 					"1": {
 						"1": {
-							"1": {
-								"command": "transporter.instruction.movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma2",
-								"program": "Narrow",
-								"object": "plate1",
-								"destination": "ourlab.mario.site.ROBOSEAL"
-							},
-							"command": "transporter.movePlate",
+							"command": "transporter.instruction.movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
 							"object": "plate1",
-							"destination": "ourlab.mario.site.ROBOSEAL"
+							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "sealer.instruction.run",
+							"command": "transporter.instruction.movePlate",
 							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.sealer",
-							"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
-							"object": "plate1"
+							"equipment": "ourlab.mario.roma2",
+							"program": "Wide",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.READER"
 						},
-						"3": {
-							"1": {
-								"command": "transporter.instruction.movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma2",
-								"program": "Narrow",
-								"object": "plate1",
-								"destination": "ourlab.mario.site.P2"
-							},
-							"command": "transporter.movePlate",
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.READER"
+					},
+					"2": {
+						"command": "fluorescenceReader.instruction.run",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.reader",
+						"program": {
+							"programFile": "tania13_ph-temp.mdfx"
+						},
+						"object": "plate1"
+					},
+					"3": {
+						"1": {
+							"command": "transporter.instruction.movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma2",
+							"program": "Wide",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.REGRIP"
+						},
+						"2": {
+							"command": "transporter.instruction.movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
 							"object": "plate1",
 							"destination": "ourlab.mario.site.P2"
 						},
-						"command": "sealer.action.sealPlate",
-						"object": "plate1"
-					}
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.P2"
+					},
+					"command": "fluorescenceReader.measurePlate",
+					"object": "plate1",
+					"program": {
+						"programFile": "tania13_ph-temp.mdfx"
+					},
+					"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 				}
 			);
 		});
