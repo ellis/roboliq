@@ -15,6 +15,7 @@ module.exports = {
 				},
 				"reader": {
 					"type": "Reader",
+					"sitesInternal": ["ourlab.mario.site.READER"]
 				},
 				"roma1": {
 					"type": "Transporter",

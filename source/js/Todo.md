@@ -61,9 +61,11 @@
 
 - [x] commands/fluorescenceReader.js: update based on sealer code
 - [x] consider renaming `pipetter.instruction.pipette => pipetter._pipette`
-- [ ] set READER.closed = true
+- [x] set READER.closed = true
 - [ ] compile to evoware all instructions for tania13_* protocols
+- [ ] replace `centrifuge._close` with `equipment._close`
 - [ ] consider using commands/equipment.js and commands/generic.js
+- [ ] change Equipment.open => Equipment.closed, with appropriate modifications
 - [ ] generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] create new script for old tania13_ph_3_measure
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')

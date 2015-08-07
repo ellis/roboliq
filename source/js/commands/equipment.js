@@ -35,15 +35,19 @@ var commandHandlers = {
 		return {effects: _.zipObject([[params.equipment+".open", true]])};
 	},
 	"equipment._openSite": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "site"]);
-		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
-		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
+		var parsed = commandHelper.parseParams(params, data, {
+			agent: "name?",
+			equipment: "name?",
+			site: "name?"
+		});
+		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+		expect.truthy({paramName: "site"}, sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+sitesInternal);
 
 		var effects = {};
 		// Open equipment
-		effects[params.equipment+".open"] = true;
+		effects[parsed.equipment.valueName+".open"] = true;
 		// Indicate that the given site is open and the other internal sites are closed
-		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
+		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
 		return {effects: effects};
 	},
 	"equipment._close": function(params, data) {

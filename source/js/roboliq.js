@@ -72,13 +72,16 @@ function run(argv, userProtocol) {
 	var urls = _.uniq(_.compact(
 		_.compact([
 			'config/roboliq.js',
+			'commands/system.js',
+			// Equipment
+			'commands/equipment.js',
 			'commands/centrifuge.js',
 			'commands/fluorescenceReader.js',
 			'commands/pipetter.js',
 			'commands/sealer.js',
-			'commands/system.js',
 			'commands/timer.js',
 			'commands/transporter.js',
+			// Lab
 			(opts.ourlab) ? 'config/ourlab.js' : null
 		]).concat(opts.infiles)
 	));
