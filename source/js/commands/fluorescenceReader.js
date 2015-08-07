@@ -10,31 +10,45 @@ var commandHandlers = {
 			agent: "name?",
 			equipment: "name?",
 			program: "Object",
-			object: "Object",
+			object: "name",
 			site: "name?",
 			destinationAfter: "name?"
 		});
-		var location0 = expect.objectsValue({paramName: "object"}, parsed.object.valueName+".location", data.objects);
+		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
+		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
 		// TODO: find site using logic (see sealer)
 
 		var destinationAfter = (_.isUndefined(parsed.destinationAfter.valueName)) ? location0 : parsed.destinationAfter.valueName;
 
+		var predicates = [
+			{"fluorescenceReader.canAgentEquipmentModelSite": {
+				"agent": parsed.agent.valueName,
+				"equipment": parsed.equipment.valueName,
+				"model": model,
+				"site": parsed.site.valueName
+			}}
+		];
+		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."fluorescenceReader.canAgentEquipmentModelSite"');
+		var params2 = alternatives[0];
+		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
+
 		var expansion = [
 			(site === location0) ? null : {
 				command: "transporter.movePlate",
 				object: parsed.object.valueName,
-				destination: site
+				destination: params2.site
 			},
 			{
-				command: "fluorescenceReader.run",
-				agent: agent,
-				equipment: equipment,
-				program: program
+				command: "fluorescenceReader.instruction.run",
+				agent: params2.agent,
+				equipment: params2.equipment,
+				program: parsed.program.value,
+				object: parsed.object.valueName
 			},
 			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",
-				object: object,
+				object: parsed.object.valueName,
 				destination: destinationAfter
 			}
 		];
@@ -45,6 +59,5 @@ var commandHandlers = {
 };
 
 module.exports = {
-	commandHandlers: commandHandlers,
-	planHandlers: planHandlers
+	commandHandlers: commandHandlers
 };

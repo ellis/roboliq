@@ -56,21 +56,19 @@ var commandHandlers = {
 		var params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
-		var params3 = _.merge({}, {
-			command: "sealer.instruction.run",
-			agent: params2.agent,
-			equipment: params2.equipment,
-			program: params2.program,
-			object: parsed.object.valueName
-		});
-
 		var expansion = [
 			(params2.site === location0) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.object.valueName,
 				"destination": params2.site
 			},
-			params3,
+			{
+				command: "sealer.instruction.run",
+				agent: params2.agent,
+				equipment: params2.equipment,
+				program: params2.program,
+				object: parsed.object.valueName
+			},
 			(destinationAfter === null) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.object.valueName,

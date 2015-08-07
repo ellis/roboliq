@@ -73,6 +73,7 @@ function run(argv, userProtocol) {
 		_.compact([
 			'config/roboliq.js',
 			'commands/centrifuge.js',
+			'commands/fluorescenceReader.js',
 			'commands/pipetter.js',
 			'commands/sealer.js',
 			'commands/system.js',
