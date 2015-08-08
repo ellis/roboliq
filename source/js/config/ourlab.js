@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var commandHelper = require('../commandHelper.js');
+var expect = require('../expect.js');
 
 module.exports = {
 	objects: {
@@ -9,7 +10,8 @@ module.exports = {
 				"type": "Namespace",
 				"centrifuge": {
 					"type": "Centrifuge",
-					"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
+					"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"],
+					"evowareCarrier": "Centrifuge"
 				},
 				"evoware": {
 					"type": "EvowareRobot"
@@ -57,10 +59,10 @@ module.exports = {
 				},
 				"site": {
 					"type": "Namespace",
-					"CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
-					"CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
-					"CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 1, "closed": true },
-					"CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "site": 2, "closed": true },
+					"CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 1, "closed": true },
+					"CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 2, "closed": true },
+					"CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 1, "closed": true },
+					"CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 2, "closed": true },
 					"P2": {
 						"type": "Site",
 						"evowareCarrier": "MP 2Pos H+P Shake",
@@ -529,6 +531,36 @@ module.exports = {
 	]),
 
 	commandHandlers: {
+		// Centrifuge
+		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				agent: "name",
+				equipment: "name",
+				site: "name"
+			});
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
+			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
+			return {
+				expansion: [
+					{
+						command: "evoware._facts",
+						agent: parsed.agent.valueName,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_MoveToPos",
+						factsValue: (siteIndex+1).toString()
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.agent.valueName,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_Open"
+					},
+				]
+			};
+		},
+		// Reader
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				agent: "name",
@@ -545,6 +577,7 @@ module.exports = {
 				}]
 			};
 		},
+		// Sealer
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				agent: "name",
@@ -556,7 +589,6 @@ module.exports = {
 				expansion: [{
 					command: "evoware._facts",
 					agent: parsed.agent.valueName,
-					equipment: parsed.agent.valueName,
 					factsEquipment: carrier,
 					factsVariable: carrier+"_Seal",
 					factsValue: parsed.program.valueName
@@ -577,7 +609,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open1": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge._openSite",
+				command: "equipment.openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_1"
@@ -585,7 +617,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open2": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge._openSite",
+				command: "equipment.openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_2"
@@ -593,7 +625,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open3": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge._openSite",
+				command: "equipment.openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_3"
@@ -601,7 +633,7 @@ module.exports = {
 		},
 		"ourlab.mario.centrifuge.open4": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge._openSite",
+				command: "equipment.openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge",
 				site: "ourlab.mario.site.CENTRIFUGE_4"
@@ -616,7 +648,7 @@ module.exports = {
 		},
 		"ourlab.mario.reader.open": function(params, parentParams, data) {
 			return [{
-				command: "equipment._openSite",
+				command: "equipment.openSite",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.reader",
 				site: "ourlab.mario.site.READER"

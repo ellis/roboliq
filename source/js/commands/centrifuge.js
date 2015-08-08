@@ -125,7 +125,7 @@ var commandHandlers = {
 		var expansion = [
 			(object1.location === params2.site1) ? null : [
 				{
-					command: "centrifuge._openSite",
+					command: "equipment.openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site1
@@ -138,7 +138,7 @@ var commandHandlers = {
 			],
 			(object2.location === params2.site2) ? null : [
 				{
-					command: "centrifuge._openSite",
+					command: "equipment.openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site2
@@ -158,7 +158,7 @@ var commandHandlers = {
 			// Move object1 back
 			(destination1 === params2.site1) ? null : [
 				{
-					command: "centrifuge._openSite",
+					command: "equipment.openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site1
@@ -172,7 +172,7 @@ var commandHandlers = {
 			// Move object2 back
 			(destination2 === params2.site2) ? null : [
 				{
-					command: "centrifuge._openSite",
+					command: "equipment.openSite",
 					agent: params2.agent,
 					equipment: params2.equipment,
 					site: params2.site2

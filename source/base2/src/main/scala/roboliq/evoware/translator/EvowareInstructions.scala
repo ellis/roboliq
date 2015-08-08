@@ -5,7 +5,7 @@ import spray.json.JsValue
 case class EvowareFacts(
 	factsEquipment: String,
 	factsVariable: String,
-	factsValue: String
+	factsValue_? : Option[String]
 )
 
 case class PipetterItem(
