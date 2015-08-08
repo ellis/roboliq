@@ -31,7 +31,7 @@ describe('commands/fluorescenceReader', function() {
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'))
 			should.deepEqual(result.protocol.errors, {});
 			should.deepEqual(result.protocol.warnings, {});
-			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			//console.log("result:\n"+JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1],
 				{
 					"1": {
@@ -44,7 +44,19 @@ describe('commands/fluorescenceReader', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "equipment._openSite",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Infinite M200",
+									"factsVariable": "Infinite M200_Open"
+								},
+								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.reader",
+								"site": "ourlab.mario.site.READER"
+							},
+							"command": "equipment.openSite",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.reader",
 							"site": "ourlab.mario.site.READER"
@@ -58,7 +70,18 @@ describe('commands/fluorescenceReader', function() {
 							"destination": "ourlab.mario.site.READER"
 						},
 						"4": {
-							"command": "equipment._close",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Infinite M200",
+									"factsVariable": "Infinite M200_Close"
+								},
+								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.reader",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.reader"
+							},
+							"command": "equipment.close",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.reader"
 						},
@@ -77,7 +100,19 @@ describe('commands/fluorescenceReader', function() {
 					},
 					"3": {
 						"1": {
-							"command": "equipment._openSite",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Infinite M200",
+									"factsVariable": "Infinite M200_Open"
+								},
+								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.reader",
+								"site": "ourlab.mario.site.READER"
+							},
+							"command": "equipment.openSite",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.reader",
 							"site": "ourlab.mario.site.READER"
@@ -91,7 +126,18 @@ describe('commands/fluorescenceReader', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"3": {
-							"command": "equipment._close",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Infinite M200",
+									"factsVariable": "Infinite M200_Close"
+								},
+								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.reader",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.reader"
+							},
+							"command": "equipment.close",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.reader"
 						},

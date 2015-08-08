@@ -2,7 +2,7 @@ var _ = require('lodash');
 var should = require('should');
 var roboliq = require('../roboliq.js')
 
-describe('centrifgue', function() {
+describe('commands/centrifgue', function() {
 	var protocol0 = {
 		objects: {
 			plate1: {
@@ -39,7 +39,26 @@ describe('centrifgue', function() {
 			should.deepEqual(result.output.steps[1],
 				{
 					"1": {
-						"command": "centrifuge._openSite",
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "2"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_2"
+						},
+						"command": "equipment.openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
@@ -66,7 +85,26 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.CENTRIFUGE_2"
 					},
 					"3": {
-						"command": "centrifuge._openSite",
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "4"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_4"
+						},
+						"command": "equipment.openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
@@ -103,7 +141,26 @@ describe('centrifgue', function() {
 						}
 					},
 					"6": {
-						"command": "centrifuge._openSite",
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "2"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_2"
+						},
+						"command": "equipment.openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
@@ -130,7 +187,26 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.P2"
 					},
 					"8": {
-						"command": "centrifuge._openSite",
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "4"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_4"
+						},
+						"command": "equipment.openSite",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
@@ -157,7 +233,18 @@ describe('centrifgue', function() {
 						"destination": "ourlab.mario.site.P3"
 					},
 					"10": {
-						"command": "centrifuge._close",
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Close"
+							},
+							"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge"
+						},
+						"command": "equipment.close",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge"
 					},

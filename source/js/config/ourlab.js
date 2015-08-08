@@ -32,7 +32,8 @@ module.exports = {
 				},
 				"reader": {
 					"type": "Reader",
-					"sitesInternal": ["ourlab.mario.site.READER"]
+					"sitesInternal": ["ourlab.mario.site.READER"],
+					"evowareCarrier": "Infinite M200"
 				},
 				"roma1": {
 					"type": "Transporter",
@@ -581,6 +582,25 @@ module.exports = {
 			};
 		},
 		// Reader
+		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+			return {expansion: [makeEvowareFacts2(params, data, "Close")]};
+		},
+		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+			return {expansion: [makeEvowareFacts2(params, data, "Open")]};
+		},
+		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				agent: "name",
+				equipment: "name",
+				site: "name"
+			});
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
+			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
+
+			return {expansion: [makeEvowareFacts2(params, data, "Open")]};
+		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				agent: "name",
