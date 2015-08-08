@@ -241,7 +241,7 @@ function run(argv, userProtocol) {
 							planHandlers: protocol.planHandlers,
 							accesses: []
 						};
-						result = handler(step, data);
+						result = handler(step, data) || {};
 					} catch (e) {
 						if (e.hasOwnProperty("errors")) {
 							result = {errors: e.errors};

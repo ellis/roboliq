@@ -281,12 +281,13 @@ class EvowareCompiler(
 		effects: JsObject
 	): ResultC[List[Token]] = {
 		val map = Map[String, (JsObject, JsObject) => ResultC[List[Token]]](
-			"pipetter.instruction.aspirate" -> handlePipetterAspirate,
-			"pipetter.instruction.dispense" -> handlePipetterDispense,
-			"pipetter.instruction.pipette" -> handlePipetterPipette,
-			"pipetter.instruction.cleanTips" -> handlePipetterCleanTips,
-			"transporter.instruction.movePlate" -> handleTransporterMovePlate,
-			"sealer.instruction.run" -> handleSealerRun
+			"evoware._facts" -> handleFacts,
+			"pipetter._aspirate" -> handlePipetterAspirate,
+			"pipetter._dispense" -> handlePipetterDispense,
+			"pipetter._pipette" -> handlePipetterPipette,
+			"pipetter._cleanTips" -> handlePipetterCleanTips,
+			"transporter._movePlate" -> handleTransporterMovePlate,
+			"sealer._run" -> handleSealerRun
 		)
 		map.get(commandName) match {
 			case Some(fn) => fn(objects, step)
@@ -320,6 +321,18 @@ class EvowareCompiler(
 		JsConverter.fromJs[A](objects, field_l)
 	}
 	
+	private def handleFacts(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		for {
+			inst <- JsConverter.fromJs[EvowareFacts](step)
+		} yield {
+			val line = createFactsLine(inst.factsEquipment, inst.factsVariable, inst.factsValue)
+			List(Token(line))
+		}
+	}
+
 	private def handlePipetterAspirate(
 		objects: JsObject,
 		step: JsObject

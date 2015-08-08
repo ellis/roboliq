@@ -2,6 +2,12 @@ package roboliq.evoware.translator
 
 import spray.json.JsValue
 
+case class EvowareFacts(
+	factsEquipment: String,
+	factsVariable: String,
+	factsValue: String
+)
+
 case class PipetterItem(
 	syringe: Int,
 	well: String,

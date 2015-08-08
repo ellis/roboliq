@@ -98,9 +98,9 @@
 - [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
 - [ ] version handling for protocols and commands
 - [ ] centrifuge command
-- [ ] commands/pipetter.js: pipetter._aspirate: output effects array for changes in well and tip contents
-- [ ] commands/pipetter.js: pipetter._dispense: output effects array for changes in well and tip contents
-- [ ] commands/pipetter.js: pipetter.pipette: refresh tips (advanced)
+- [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: `pipetter.pipette`: refresh tips (advanced)
 - [ ] JSON schema
 - [ ] how to handle trough volume, which has many virtual wells, but they all share the same common liquid: set the labware's contents, rather than the contents of the individual wells, then the effects function should handle that case appropriately.
 - [ ] handle "comment"s in steps
@@ -325,6 +325,20 @@ type: Eval.Wells
 
       - {source: water, destination: plate1(A02), volume: 10ul}
       - {source: water, destination: plate1(B02), volume: 10ul}
+
+# Equipment command conversion
+
+    command: equipment.open
+    agent: ourlab.mario.evoware
+    equipment: ourlab.mario.reader
+
+    command: equipment.open
+    agent: ourlab.mario.evoware
+    equipment: ourlab.mario.reader
+    handler: function(params, data)
+
+    command: equipment.open|ourlab.mario.evoware|ourlab.mario.reader
+    handler: function(params, data)
 
 # Reports
 

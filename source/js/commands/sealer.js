@@ -63,7 +63,7 @@ var commandHandlers = {
 				"destination": params2.site
 			},
 			{
-				command: "sealer._run",
+				command: "equipment.run|"+params2.agent+"|"+params2.equipment,
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params2.program,

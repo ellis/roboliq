@@ -6,7 +6,7 @@ import spray.json.JsObject
 
 case class Token(
 	line: String,
-	let: JsObject,
+	let: JsObject = JsObject(),
 	siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)] = Map()
 ) {
 	

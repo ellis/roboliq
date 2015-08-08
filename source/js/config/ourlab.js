@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var commandHelper = require('../commandHelper.js');
 
 module.exports = {
 	objects: {
@@ -51,7 +52,8 @@ module.exports = {
 					}
 				},
 				"sealer": {
-					"type": "Sealer"
+					"type": "Sealer",
+					"evowareCarrier": "RoboSeal"
 				},
 				"site": {
 					"type": "Namespace",
@@ -525,6 +527,46 @@ module.exports = {
 	}},
 
 	]),
+
+	commandHandlers: {
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				agent: "name",
+				equipment: "name",
+				program: "name"
+			});
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			return {
+				expansion: [{
+					command: "evoware._facts",
+					agent: parsed.agent.valueName,
+					equipment: parsed.agent.valueName,
+					value: parsed.program.valueName
+				}]
+			};
+		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				agent: "name",
+				equipment: "name",
+				program: "name"
+			});
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			return {
+				expansion: [{
+					command: "evoware._facts",
+					agent: parsed.agent.valueName,
+					equipment: parsed.agent.valueName,
+					factsEquipment: carrier,
+					factsVariable: carrier+"_Seal",
+					factsValue: parsed.program.valueName
+				}],
+				effects: _.zipObject([[params.object + ".sealed", true]])
+			};
+		},
+		"evoware._facts": function() {}
+	},
+
 	planHandlers: {
 		"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
 			return [{
