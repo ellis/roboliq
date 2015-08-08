@@ -42,7 +42,14 @@ describe('commands/sealer', function() {
 							"destination": "ourlab.mario.site.ROBOSEAL"
 						},
 						"2": {
-							"command": "sealer._run",
+							"1": {
+								"agent": "ourlab.mario.evoware",
+								"command": "evoware._facts",
+								"factsEquipment": "RoboSeal",
+								"factsValue": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
+								"factsVariable": "RoboSeal_Seal"
+							},
+							"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.sealer",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.sealer",
 							"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
