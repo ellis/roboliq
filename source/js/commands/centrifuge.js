@@ -185,7 +185,7 @@ var commandHandlers = {
 			],
 			// Close the centrifuge
 			(destination1 === params2.site1 && destination2 === params2.site2) ? null : {
-				command: "centrifuge._close",
+				command: "equipment.close",
 				agent: params2.agent,
 				equipment: params2.equipment
 			},
@@ -202,17 +202,18 @@ var commandHandlers = {
 	}
 };
 
+// REFACTORS: are these required anywhere?
 var planHandlers = {
 	"centrifuge._close": function(params, parentParams, data) {
 		return [{
-			command: "centrifuge._close",
+			command: "equipment.close",
 			agent: params.agent,
 			equipment: params.equipment
 		}];
 	},
 	"centrifuge._openSite": function(params, parentParams, data) {
 		return [{
-			command: "centrifuge._openSite",
+			command: "equipment.openSite",
 			agent: params.agent,
 			equipment: params.equipment,
 			site: params.site

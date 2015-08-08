@@ -532,6 +532,40 @@ module.exports = {
 
 	commandHandlers: {
 		// Centrifuge
+		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				agent: "name",
+				equipment: "name"
+			});
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			return {
+				expansion: [
+					{
+						command: "evoware._facts",
+						agent: parsed.agent.valueName,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_Close"
+					},
+				]
+			};
+		},
+		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				agent: "name",
+				equipment: "name"
+			});
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			return {
+				expansion: [
+					{
+						command: "evoware._facts",
+						agent: parsed.agent.valueName,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_Open"
+					},
+				]
+			};
+		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				agent: "name",
@@ -593,7 +627,7 @@ module.exports = {
 					factsVariable: carrier+"_Seal",
 					factsValue: parsed.program.valueName
 				}],
-				effects: _.zipObject([[params.object + ".sealed", true]])
+				//effects: _.zipObject([[params.object + ".sealed", true]])
 			};
 		},
 		"evoware._facts": function() {}
@@ -602,7 +636,7 @@ module.exports = {
 	planHandlers: {
 		"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
 			return [{
-				command: "centrifuge._close",
+				command: "equipment.close",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.centrifuge"
 			}];
@@ -641,7 +675,7 @@ module.exports = {
 		},
 		"ourlab.mario.reader.close": function(params, parentParams, data) {
 			return [{
-				command: "equipment._close",
+				command: "equipment.close",
 				agent: "ourlab.mario.evoware",
 				equipment: "ourlab.mario.reader"
 			}];

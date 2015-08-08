@@ -30,9 +30,22 @@ var commandHandlers = {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		return {};
 	},
-	"equipment._open": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment"]);
-		return {effects: _.zipObject([[params.equipment+".open", true]])};
+	"equipment.open": function(params, data) {
+		var parsed = commandHelper.parseParams(params, data, {
+			agent: "name",
+			equipment: "name"
+		});
+
+		var expansion = [{
+			command: "equipment.open|"+parsed.agent.valueName+"|"+parsed.equipment.valueName,
+			agent: parsed.agent.valueName,
+			equipment: parsed.equipment.valueName
+		}];
+
+		return {
+			expansion: expansion,
+			effects: _.zipObject([[params.equipment+".open", true]])
+		};
 	},
 	"equipment.openSite": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
@@ -61,29 +74,43 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	"equipment._close": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment"]);
-		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
+	"equipment.close": function(params, data) {
+		var parsed = commandHelper.parseParams(params, data, {
+			agent: "name",
+			equipment: "name"
+		});
+		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+
+		var expansion = [{
+			command: "equipment.close|"+parsed.agent.valueName+"|"+parsed.equipment.valueName,
+			agent: parsed.agent.valueName,
+			equipment: parsed.equipment.valueName
+		}];
+
 		var effects = {};
 		// Close equipment
-		effects[params.equipment+".open"] = false;
-		// All internal sites are closed
-		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = true; });
-		return {effects: effects};
+		effects[parsed.equipment.valueName+".open"] = false;
+		// Indicate that the internal sites are closed
+		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = true; });
+
+		return {
+			expansion: expansion,
+			effects: effects
+		};
 	},
 };
 
 var planHandlers = {
 	"equipment._close": function(params, parentParams, data) {
 		return [{
-			command: "equipment._close",
+			command: "equipment.close",
 			agent: params.agent,
 			equipment: params.equipment
 		}];
 	},
 	"equipment._openSite": function(params, parentParams, data) {
 		return [{
-			command: "equipment._openSite",
+			command: "equipment.openSite",
 			agent: params.agent,
 			equipment: params.equipment,
 			site: params.site
