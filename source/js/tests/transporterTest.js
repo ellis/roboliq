@@ -41,7 +41,26 @@ describe('transporter', function() {
 					"destination": "ourlab.mario.site.REGRIP"
 				},
 				"2": {
-					"command": "centrifuge._openSite",
+					"1": {
+						"1": {
+							"agent": "ourlab.mario.evoware",
+							"command": "evoware._facts",
+							"factsEquipment": "Centrifuge",
+							"factsValue": "4",
+							"factsVariable": "Centrifuge_MoveToPos"
+						},
+						"2": {
+							"agent": "ourlab.mario.evoware",
+							"command": "evoware._facts",
+							"factsEquipment": "Centrifuge",
+							"factsVariable": "Centrifuge_Open"
+						},
+						"agent": "ourlab.mario.evoware",
+						"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+					"command": "equipment.openSite",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.centrifuge",
 					"site": "ourlab.mario.site.CENTRIFUGE_4"
@@ -55,7 +74,18 @@ describe('transporter', function() {
 					"destination": "ourlab.mario.site.CENTRIFUGE_4"
 				},
 				"4": {
-					"command": "centrifuge._close",
+					"1": {
+						"1": {
+							"agent": "ourlab.mario.evoware",
+							"command": "evoware._facts",
+							"factsEquipment": "Centrifuge",
+							"factsVariable": "Centrifuge_Close"
+						},
+						"agent": "ourlab.mario.evoware",
+						"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
+						"equipment": "ourlab.mario.centrifuge"
+					},
+					"command": "equipment.close",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.centrifuge"
 				},
@@ -145,7 +175,26 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "centrifuge._openSite",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Centrifuge",
+									"factsVariable": "Centrifuge_MoveToPos",
+									"factsValue": "2"
+								},
+								"2": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Centrifuge",
+									"factsVariable": "Centrifuge_Open"
+								},
+								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.centrifuge",
+								"site": "ourlab.mario.site.CENTRIFUGE_2"
+							},
+							"command": "equipment.openSite",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge",
 							"site": "ourlab.mario.site.CENTRIFUGE_2"
@@ -159,7 +208,18 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.CENTRIFUGE_2"
 						},
 						"4": {
-							"command": "centrifuge._close",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Centrifuge",
+									"factsVariable": "Centrifuge_Close"
+								},
+								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.centrifuge"
+							},
+							"command": "equipment.close",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge"
 						},
@@ -177,7 +237,26 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.REGRIP"
 						},
 						"2": {
-							"command": "centrifuge._openSite",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Centrifuge",
+									"factsVariable": "Centrifuge_MoveToPos",
+									"factsValue": "4"
+								},
+								"2": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Centrifuge",
+									"factsVariable": "Centrifuge_Open"
+								},
+								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.centrifuge",
+								"site": "ourlab.mario.site.CENTRIFUGE_4"
+							},
+							"command": "equipment.openSite",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge",
 							"site": "ourlab.mario.site.CENTRIFUGE_4"
@@ -191,7 +270,18 @@ describe('transporter', function() {
 							"destination": "ourlab.mario.site.CENTRIFUGE_4"
 						},
 						"4": {
-							"command": "centrifuge._close",
+							"1": {
+								"1": {
+									"command": "evoware._facts",
+									"agent": "ourlab.mario.evoware",
+									"factsEquipment": "Centrifuge",
+									"factsVariable": "Centrifuge_Close"
+								},
+								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.centrifuge"
+							},
+							"command": "equipment.close",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.centrifuge"
 						},

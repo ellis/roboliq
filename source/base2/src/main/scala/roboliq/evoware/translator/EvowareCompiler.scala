@@ -286,8 +286,7 @@ class EvowareCompiler(
 			"pipetter._dispense" -> handlePipetterDispense,
 			"pipetter._pipette" -> handlePipetterPipette,
 			"pipetter._cleanTips" -> handlePipetterCleanTips,
-			"transporter._movePlate" -> handleTransporterMovePlate,
-			"sealer._run" -> handleSealerRun
+			"transporter._movePlate" -> handleTransporterMovePlate
 		)
 		map.get(commandName) match {
 			case Some(fn) => fn(objects, step)
@@ -608,23 +607,6 @@ class EvowareCompiler(
 	 */
 	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
 	//private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
-	
-	private def handleSealerRun(
-		objects: JsObject,
-		step: JsObject
-	): ResultC[List[Token]] = {
-		for {
-			inst <- JsConverter.fromJs[SealerRun](step)
-			labwareInfo <- getLabwareInfo(objects, inst.`object`)
-		} yield {
-			val line = createFactsLine(labwareInfo.cngs.carrierName, labwareInfo.cngs.carrierName+"_Seal", inst.program)
-			//val let = JsonUtils.makeSimpleObject(inst.`object`+".sealed", JsBoolean(true))
-			val siteToNameAndModel_m = Map(
-				labwareInfo.cngs -> (labwareInfo.siteName, labwareInfo.labwareModelName)
-			)
-			List(Token(line, JsObject(), siteToNameAndModel_m))
-		}
-	}
 	
 	private def handleTransporterMovePlate(
 		objects: JsObject,

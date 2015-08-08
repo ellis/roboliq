@@ -2,6 +2,20 @@ var _ = require('lodash');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 
+function makeEvowareFacts2(params, data, variable) {
+	var parsed = commandHelper.parseParams(params, data, {
+		agent: "name",
+		equipment: "name"
+	});
+	var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+	return {
+		command: "evoware._facts",
+		agent: parsed.agent.valueName,
+		factsEquipment: carrier,
+		factsVariable: carrier+"_"+variable
+	};
+}
+
 module.exports = {
 	objects: {
 		"ourlab": {
@@ -533,38 +547,10 @@ module.exports = {
 	commandHandlers: {
 		// Centrifuge
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				agent: "name",
-				equipment: "name"
-			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
-			return {
-				expansion: [
-					{
-						command: "evoware._facts",
-						agent: parsed.agent.valueName,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_Close"
-					},
-				]
-			};
+			return {expansion: [makeEvowareFacts2(params, data, "Close")]};
 		},
 		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				agent: "name",
-				equipment: "name"
-			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
-			return {
-				expansion: [
-					{
-						command: "evoware._facts",
-						agent: parsed.agent.valueName,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_Open"
-					},
-				]
-			};
+			return {expansion: [makeEvowareFacts2(params, data, "Open")]};
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {

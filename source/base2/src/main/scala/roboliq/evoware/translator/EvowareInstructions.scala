@@ -54,12 +54,6 @@ case class PipetterWashTips(
 	syringes: List[Int]
 )
 
-case class SealerRun(
-	equipment: String,
-	program: String,
-	`object`: String
-)
-
 case class TransporterMovePlate(
 	equipment: String,
 	program_? : Option[String],

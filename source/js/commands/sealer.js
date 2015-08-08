@@ -16,13 +16,6 @@ var objectToPredicateConverters = {
 };
 
 var commandHandlers = {
-	"sealer._run": function(params, data) {
-		var effects = {};
-		effects[params.object + ".sealed"] = true;
-		return {
-			effects: effects
-		};
-	},
 	// TODO:
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
