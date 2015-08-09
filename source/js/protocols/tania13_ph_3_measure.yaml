@@ -39,7 +39,7 @@ steps:
             program:
                 programFile: ./tania13_ph-temp.mdfx
             outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
-          4:
+          3:
             description: Incubate at 25C
             command: centrifuge.centrifuge2
             object1: mixPlate

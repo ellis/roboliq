@@ -286,6 +286,7 @@ class EvowareCompiler(
 			"pipetter._pipette" -> handlePipetterPipette,
 			"pipetter._cleanTips" -> handlePipetterCleanTips,
 			"timer._start" -> handleTimerStart,
+			"timer._wait" -> handleTimerWait,
 			"transporter._movePlate" -> handleTransporterMovePlate
 		)
 		map.get(commandName) match {
@@ -613,6 +614,23 @@ class EvowareCompiler(
 			val line = List(
 				'"'+id.toString+'"'
 			).mkString("StartTimer(", ",", ");")
+			List(Token(line))
+		}
+	}
+	
+	private def handleTimerWait(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		for {
+			equipment <- JsConverter.fromJs[String](step, "equipment")
+			till <- JsConverter.fromJs[Int](step, "till")
+			id <- lookupAs[Int](objects, equipment, "evowareId")
+		} yield {
+			val line = List(
+				'"'+id.toString+'"',
+				'"'+till.toString+'"'
+			).mkString("WaitTimer(", ",", ");")
 			List(Token(line))
 		}
 	}
