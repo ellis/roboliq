@@ -101,6 +101,11 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 		case "Any": return getNameAndValue(params, data, name, defaultValue);
 		case "Number": return getNameAndNumber(params, data, name, defaultValue);
 		case "Object": return getNameAndObject(params, data, name, defaultValue);
+		case "File":
+			var filename = params[name];
+			var filedata = data.files[filename];
+			expect.truthy({paramName: name, valueName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
+			return {valueName: filename, value: filedata};
 	}
 	return undefined;
 }

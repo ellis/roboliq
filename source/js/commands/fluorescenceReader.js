@@ -5,22 +5,18 @@ var expect = require('../expect.js');
 var misc = require('../misc.js');
 
 var commandHandlers = {
-	"fluorescenceReader._run": function(params, data) {
-		return {};
-	},
 	"fluorescenceReader.measurePlate": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",
 			equipment: "name?",
 			program: "Object",
+			outputFile: "name",
 			object: "name",
 			site: "name?",
 			destinationAfter: "name?"
 		});
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
-
-		// TODO: find site using logic (see sealer)
 
 		var destinationAfter = (_.isUndefined(parsed.destinationAfter.valueName)) ? location0 : parsed.destinationAfter.valueName;
 
@@ -35,7 +31,8 @@ var commandHandlers = {
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."fluorescenceReader.canAgentEquipmentModelSite"');
 		var params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
-
+		//console.log("parsed.outputFile: "+JSON.stringify(parsed.outputFile));
+		
 		var expansion = [
 			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
@@ -43,11 +40,11 @@ var commandHandlers = {
 				destination: params2.site
 			},
 			{
-				command: "fluorescenceReader._run",
+				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: parsed.program.value,
-				object: parsed.object.valueName
+				outputFile: parsed.outputFile.valueName
 			},
 			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",

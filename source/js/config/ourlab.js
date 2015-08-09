@@ -628,19 +628,24 @@ module.exports = {
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
-				agent: "name",
-				equipment: "name",
-				program: "name"
+				program: "Object",
+				outputFile: "name"
 			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
-			return {
-				expansion: [{
-					command: "evoware._facts",
-					agent: parsed.agent.valueName,
-					equipment: parsed.agent.valueName,
-					value: parsed.program.valueName
-				}]
-			};
+			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
+				programFile: {type: "File"}
+			});
+			var content = parsedProgram.programFile.value.toString('utf8');
+			var start_i = content.indexOf("<TecanFile");
+			var programData = content.substring(start_i).
+				replace(/[\r\n]/g, "").
+				replace(/&/g, "&amp;"). // "&amp;" is probably not needed, since I didn't find it in the XML files
+				replace(/=/g, "&equal;").
+				replace(/"/g, "&quote;").
+				replace(/~/, "&tilde;").
+				replace(/>[ \t]+/g, "><");
+			// Token
+			var value = parsed.outputFile.valueName + "|" + programData;
+			return {expansion: [makeEvowareFacts(params, data, "Measure", value)]};
 		},
 		// Sealer
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, data) {

@@ -102,7 +102,15 @@ function run(argv, userProtocol) {
 		return content;
 	}
 
-	function mergeProtocols(a, b) {
+	/**
+	 * Merge protocols A & B, returning a new protocol.
+	 *
+	 * @param  {Object} a   protocol representing the result of all previous mergeProtocols
+	 * @param  {Object} b   newly loaded protocol to merge into previous protocols
+	 * @param  {String} url URL of the newly loaded protocol
+	 * @return {Object}     result of merging protocol B into A.
+	 */
+	function mergeProtocols(a, b, url) {
 		//console.log("a.predicates:", a.predicates);
 		//console.log("b.predicates:", b.predicates);
 		var data = {
@@ -120,6 +128,27 @@ function run(argv, userProtocol) {
 				misc.mutateDeep(b[key], function(x) { return misc.handleDirective(x, data); });
 			}
 		}
+		// Handle file nodes, resolve path relative to current directory, add to "files" key of protocol
+		misc.mutateDeep(b, function(x) {
+			//console.log("x: "+x)
+			// Return filename relative to current directory
+			if (_.isString(x) && _.startsWith(x, ".")) {
+				var filename = "./" + path.join(path.dirname(url), x);
+				// If the file hasn't been loaded yet:
+				if (!a.files.hasOwnProperty(filename)) {
+					var filedata = fs.readFileSync(filename);
+					if (!b.files)
+						b.files = {};
+					b.files[filename] = filedata;
+					//console.log("filename: "+filename);
+				}
+				return filename;
+			}
+			else {
+				return x;
+			}
+		});
+
 		var c = _.merge({}, a, b);
 		c.predicates = a.predicates.concat(b.predicates || []);
 		//console.log("c:", c);
@@ -136,12 +165,13 @@ function run(argv, userProtocol) {
 			objectToPredicateConverters: {},
 			commandHandlers: {},
 			planHandlers: {},
+			files: {},
 			errors: {},
 		};
 		_.forEach(urls, function(url) {
 			//console.log("url: "+url)
 			var protocol2 = loadProtocolUrl(url);
-			protocol = mergeProtocols(protocol, protocol2)
+			protocol = mergeProtocols(protocol, protocol2, url);
 		});
 		if (userProtocol) {
 			protocol = mergeProtocols(protocol, userProtocol);
@@ -239,7 +269,8 @@ function run(argv, userProtocol) {
 							objects: objects,
 							predicates: predicates,
 							planHandlers: protocol.planHandlers,
-							accesses: []
+							accesses: [],
+							files: protocol.files
 						};
 						result = handler(step, data) || {};
 					} catch (e) {
