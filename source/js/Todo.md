@@ -100,13 +100,12 @@
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly trick will be object merging and gathering all required step parameters into a single parameters map
 - [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
 - [ ] version handling for protocols and commands
-- [ ] centrifuge command
 - [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in well and tip contents
 - [ ] commands/pipetter.js: `pipetter.pipette`: refresh tips (advanced)
 - [ ] JSON schema
-- [ ] how to handle trough volume, which has many virtual wells, but they all share the same common liquid: set the labware's contents, rather than the contents of the individual wells, then the effects function should handle that case appropriately.
 - [ ] handle "comment"s in steps
+- [ ] timer.doAndWait: should stop the timer once the loops are over
 
 ## After publication
 
@@ -139,21 +138,21 @@ When loading JSON/JavaScript files, we expect the following structure:
 
 - SHOP code from http://danm.ucsc.edu/~wsack/SoftwareArts/Code/Plan/
 
-# Variables
+# Variable references
 
 Need to reference objects, variables, step parameters, parameters of current command, parameters of parent command
 
+* `${plate1}` -- an entire object
+* `${plate1.location}` -- the value of an object's property
 * `${volume}` -- the value of variable, e.g. `objects.volume.value`
-* `${plate1.location}`
-* `${__root__.objects.}`
 
-or ...
+Still need figure out how to reference parameter values, here are some ideas:
 
-* "${object}" -- `object` parameter for current command
-* "${^.object}" -- `object` parameter for parent command
-* "${1.2.object}" -- `object` parameter for step 1.2
-* "@{volume}" -- the value of `objects.volume.value`
-* "@{${object}.location}" -- the location of the object referenced by the `object` parameter for the current command
+* "^object" -- `object` parameter for current command
+* "^^object" -- `object` parameter for parent command
+* "^^{2.object}" -- `object` parameter for second sub-step of the parent command
+* "${^object.location}" -- the location of the object referenced by the `object` parameter for the current command
+* "${^{object}.location}" -- the location of the object referenced by the `object` parameter for the current command
 
 # Pipetting optimization
 
