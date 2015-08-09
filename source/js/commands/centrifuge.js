@@ -26,40 +26,6 @@ function closeAll(params, data, effects) {
 }
 
 var commandHandlers = {
-	"centrifuge._run": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "program"]);
-		var effects = {};
-		closeAll(params, data, effects);
-		return {effects: effects};
-	},
-	/*"centrifuge._open": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment"]);
-		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
-		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
-
-		// Open equipment
-		var effects = _.zipObject([
-			[params.equipment+".open", true]
-		]);
-		return {effects: effects};
-	},*/
-	"centrifuge._openSite": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "site"]);
-		var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
-		expect.truthy({paramName: "site"}, equipmentData.sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+equipmentData.sitesInternal);
-
-		var effects = {};
-		// Open equipment
-		effects[params.equipment+".open"] = true;
-		// Indicate that the given site is open and the other internal sites are closed
-		_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
-		return {effects: effects};
-	},
-	"centrifuge._close": function(params, data) {
-		var effects = {};
-		closeAll(params, data, effects);
-		return {effects: effects};
-	},
 	// TODO:
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
@@ -150,7 +116,7 @@ var commandHandlers = {
 				}
 			],
 			{
-				command: "centrifuge._run",
+				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params.program

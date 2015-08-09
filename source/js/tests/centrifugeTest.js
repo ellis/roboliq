@@ -131,7 +131,14 @@ describe('commands/centrifgue', function() {
 						"destination": "ourlab.mario.site.CENTRIFUGE_4"
 					},
 					"5": {
-						"command": "centrifuge._run",
+						"1": {
+							"agent": "ourlab.mario.evoware",
+							"command": "evoware._facts",
+							"factsEquipment": "Centrifuge",
+							"factsValue": "3000,120,9,9,25",
+							"factsVariable": "Centrifuge_Execute1"
+						},
+						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.centrifuge",
 						"program": {

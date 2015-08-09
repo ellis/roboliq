@@ -4,3 +4,4 @@ output.json
 *.out.json
 out
 protocols/*.prot
+npm-debug.log

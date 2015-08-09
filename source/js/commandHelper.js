@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var assert = require('assert');
 var expect = require('./expect.js');
 var jmespath = require('jmespath');
 var misc = require('./misc.js');
@@ -121,7 +122,9 @@ function parseParams(params, data, specs) {
 		}
 
 		var optional = _.endsWith(type, "?");
-		type = (optional) ? type.substr(0, type.length - 1) : info;
+		type = (optional) ? type.substr(0, type.length - 1) : type;
+		optional |= !_.isUndefined(defaultValue);
+
 		// If not optional, require the variable's presence:
 		if (!optional)
 			expect.paramsRequired(params, [paramName]);

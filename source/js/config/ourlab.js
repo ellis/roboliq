@@ -601,7 +601,7 @@ module.exports = {
 				parsedProgram.duration.value,
 				parsedProgram.spinUpTime.value,
 				parsedProgram.spinDownTime.value,
-				parsedProgram.duration.value
+				parsedProgram.temperature.value
 			];
 			var value = list.join(",");
 			return {expansion: [makeEvowareFacts(params, data, "Execute1", value)]};

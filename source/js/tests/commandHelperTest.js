@@ -33,6 +33,26 @@ describe('commandHelper', function() {
 			should.deepEqual(data.accesses, ["plate1", "number1.type", "number1.value"]);
 		});
 
+		it('should work with defaults', function() {
+			var data = {
+				objects: {},
+				accesses: []
+			};
+			var params = {
+				number1: 1
+			};
+			var specs = {
+				number1: {type: "Number", default: -1},
+				number2: {type: "Number", default: 2}
+			};
+			var parsed = commandHelper.parseParams(params, data, specs);
+			should.deepEqual(parsed, {
+				number1: {value: 1},
+				number2: {value: 2}
+			});
+			should.deepEqual(data.accesses, []);
+		});
+
 		it('should work for a previous bug', function() {
 			var data = {
 				objects: {
