@@ -508,7 +508,7 @@ module.exports = {
 		}};
 	}),
 	_.map([1,2,3,4], function(n) {
-		return {"action": {"description": "centrifuge._openSite: open an internal site on the centrifuge",
+		return {"action": {"description": "ourlab.mario.centrifuge.open: open an internal site on the centrifuge",
 			"task": _.zipObject([["ourlab.mario.centrifuge.open"+n, {}]]),
 			"preconditions": [],
 			"deletions": [
