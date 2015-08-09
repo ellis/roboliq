@@ -168,28 +168,8 @@ var commandHandlers = {
 	}
 };
 
-// REFACTORS: are these required anywhere?
-var planHandlers = {
-	"centrifuge._close": function(params, parentParams, data) {
-		return [{
-			command: "equipment.close",
-			agent: params.agent,
-			equipment: params.equipment
-		}];
-	},
-	"centrifuge._openSite": function(params, parentParams, data) {
-		return [{
-			command: "equipment.openSite",
-			agent: params.agent,
-			equipment: params.equipment,
-			site: params.site
-		}];
-	}
-};
-
 module.exports = {
 	//predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
-	commandHandlers: commandHandlers,
-	planHandlers: planHandlers
+	commandHandlers: commandHandlers
 };
