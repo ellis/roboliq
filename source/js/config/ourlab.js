@@ -2,18 +2,22 @@ var _ = require('lodash');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 
-function makeEvowareFacts2(params, data, variable) {
+function makeEvowareFacts(params, data, variable, value) {
 	var parsed = commandHelper.parseParams(params, data, {
 		agent: "name",
 		equipment: "name"
 	});
 	var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
-	return {
+	var result2 = {
 		command: "evoware._facts",
 		agent: parsed.agent.valueName,
 		factsEquipment: carrier,
 		factsVariable: carrier+"_"+variable
 	};
+	var value2 = value;
+	if (_.isFunction(value))
+		value2 = value(parsed, data);
+	return _.merge(result2, {factsValue: value2});
 }
 
 module.exports = {
@@ -548,10 +552,10 @@ module.exports = {
 	commandHandlers: {
 		// Centrifuge
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
-			return {expansion: [makeEvowareFacts2(params, data, "Close")]};
+			return {expansion: [makeEvowareFacts(params, data, "Close")]};
 		},
 		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
-			return {expansion: [makeEvowareFacts2(params, data, "Open")]};
+			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
@@ -581,12 +585,33 @@ module.exports = {
 				]
 			};
 		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+			var parsed = commandHelper.parseParams(params, data, {
+				program: "Object"
+			});
+			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
+				rpm: {type: "Number", default: 3000},
+				duration: {type: "Number", default: 30},
+				spinUpTime: {type: "Number", default: 9},
+				spinDownTime: {type: "Number", default: 9},
+				temperature: {type: "Number", default: 25}
+			});
+			var list = [
+				parsedProgram.rpm.value,
+				parsedProgram.duration.value,
+				parsedProgram.spinUpTime.value,
+				parsedProgram.spinDownTime.value,
+				parsedProgram.duration.value
+			];
+			var value = list.join(",");
+			return {expansion: [makeEvowareFacts(params, data, "Execute1", value)]};
+		},
 		// Reader
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
-			return {expansion: [makeEvowareFacts2(params, data, "Close")]};
+			return {expansion: [makeEvowareFacts(params, data, "Close")]};
 		},
 		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
-			return {expansion: [makeEvowareFacts2(params, data, "Open")]};
+			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
@@ -599,7 +624,7 @@ module.exports = {
 			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
 
-			return {expansion: [makeEvowareFacts2(params, data, "Open")]};
+			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
 			var parsed = commandHelper.parseParams(params, data, {
