@@ -88,36 +88,8 @@ class EvowareCompiler(
 			objects0 <- JsConverter.fromJs[JsObject](input, "objects")
 			steps <- JsConverter.fromJs[JsObject](input, "steps")
 			effects <- JsConverter.fromJs[Option[JsObject]](input, "effects").map(_.getOrElse(JsObject()))
-			token_l <- handleSteps(Vector(), steps, objects0, effects)
+			token_l <- handleStep(Vector(), steps, objects0, effects)
 		} yield token_l
-	}
-	
-	private def handleSteps(
-		path: Vector[String],
-		steps: JsObject,
-		objects0: JsObject,
-		effects: JsObject
-	): ResultC[List[Token]] = {
-		val key_l = steps.fields.keys.toList.sortWith((s1, s2) => MiscUtils.compareNatural(s1, s2) < 0)
-		//println(s"handleSteps($path, ${key_l})")
-		var objects = objects0
-		for {
-			token_ll <- ResultC.map(key_l) { key =>
-				steps.fields(key) match {
-					case step: JsObject =>
-						for {
-							token_l <- handleStep(path :+ key, step, objects, effects)
-							objects1 <- ResultC.context("effects") {
-								token_l.foldLeft(ResultC.unit(objects)) { (acc, token) => acc.flatMap(objects => JsonUtils.mergeMaps(objects, token.let)) }
-							}
-						} yield {
-							objects = objects1
-							token_l
-						}
-					case _ => ResultC.unit(Nil)
-				}
-			}
-		} yield token_ll.flatten
 	}
 	
 	def buildScripts(
@@ -188,51 +160,55 @@ class EvowareCompiler(
 		}
 	}
 	
+	/**
+	 * If the step has a description, add a Comment token
+	 * If the step has sub-steps, handle them
+	 * Else if the step has a command for this agent, handle it
+	 */
 	private def handleStep(
 		path: Vector[String],
 		step: JsObject,
 		objects: JsObject,
 		effects: JsObject
 	): ResultC[List[Token]] = {
+		val substep_l = step.fields.keys.toList
+				.filter(key => key.isEmpty || key(0).isDigit) // Keys that start with digits (or is empty)
+				.sortWith((s1, s2) => MiscUtils.compareNatural(s1, s2) < 0) // Natural sort order
 		//println(s"handleStep($path, $step)")
 		for {
+			description_? <- JsConverter.fromJs[Option[String]](step, "description")
 			commandName_? <- JsConverter.fromJs[Option[String]](step, "command")
 			agentName_? <- JsConverter.fromJs[Option[String]](step, "agent")
-			let_? <- JsConverter.fromJs[Option[JsObject]](step, "let")
-			token_l <- (commandName_?, agentName_?, let_?) match {
-				case ((Some(commandName), Some(agentName), None)) =>
-					if (agentName == this.agentName) {
-						handleCommand(path, step, commandName, agentName, objects, effects)
+			
+			// Handle command substeps or command
+			token_l <- {
+				if (!substep_l.isEmpty) {
+					handleSteps(path, step, substep_l, objects, effects)
+				}
+				else {
+					(commandName_?, agentName_?) match {
+						case ((Some(commandName), Some(agentName))) =>
+							if (agentName == this.agentName) {
+								handleCommand(path, step, commandName, agentName, objects, effects)
+							}
+							else if (agentName == "user" && handleUserInstructions) {
+								handleUserCommand(path, step, commandName, objects, effects)
+							}
+							else {
+								println("command ignored due to agent: "+step)
+								ResultC.unit(Nil)
+							}
+						case (None, None) =>
+							ResultC.unit(Nil)
+						case _ =>
+							ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
 					}
-					else if (agentName == "user" && handleUserInstructions) {
-						handleUserCommand(path, step, commandName, objects, effects)
-					}
-					else {
-						println("command ignored due to agent: "+step)
-						ResultC.unit(Nil)
-					}
-				case (None, None, Some(let)) =>
-					handleLet(objects, let)
-				case (None, None, None) =>
-					// If this step has an expansion, handle its children
-					if (step.fields.contains("1")) {
-						handleSteps(path, step, objects, effects)
-					}
-					else {
-						ResultC.unit(Nil)
-					}
-				case _ =>
-					// If this step has an expansion, handle its children
-					if (step.fields.contains("1")) {
-						handleSteps(path, step, objects, effects)
-					}
-					else {
-						ResultC.error(s"don't know how to handle command=${commandName_?}, agent=${agentName_?}")
-					}
+				}
 			}
 			//_ = println("token_?: "+token_?)
 		} yield {
 			val id = path.mkString(".")
+			val comment_l = description_?.map(s => Token(createCommentLine(id + ":" + s))).toList
 			effects.fields.get(id) match {
 				case Some(o: JsObject) =>
 					//println(s"effects[$id]: $o")
@@ -240,18 +216,47 @@ class EvowareCompiler(
 						val o2 = JsonUtils.makeSimpleObject(pair._1, pair._2)
 						o2.fields.head
 					}))
-					token_l ++ List(Token("", let, Map()))
-				case _ => token_l
+					comment_l ++ token_l ++ List(Token("", let, Map()))
+				case _ => comment_l ++ token_l
 			}
 		}
 	}
 	
+	private def handleSteps(
+		path: Vector[String],
+		steps: JsObject,
+		substep_l: List[String],
+		objects0: JsObject,
+		effects: JsObject
+	): ResultC[List[Token]] = {
+		//println(s"handleSteps($path, ${key_l})")
+		var objects = objects0
+		for {
+			token_ll <- ResultC.map(substep_l) { key =>
+				steps.fields(key) match {
+					case step: JsObject =>
+						for {
+							token_l <- handleStep(path :+ key, step, objects, effects)
+							objects1 <- ResultC.context("effects") {
+								token_l.foldLeft(ResultC.unit(objects)) { (acc, token) => acc.flatMap(objects => JsonUtils.mergeMaps(objects, token.let)) }
+							}
+						} yield {
+							objects = objects1
+							token_l
+						}
+					case _ => ResultC.unit(Nil)
+				}
+			}
+		} yield token_ll.flatten
+	}
+	
+	/*
 	private def handleLet(
 		objects: JsObject,
 		let: JsObject
 	): ResultC[List[Token]] = {
 		ResultC.unit(List(Token("", let, Map())))
-	}
+	}*/
 	
 	private def handleUserCommand(
 		path: Vector[String],
@@ -262,13 +267,7 @@ class EvowareCompiler(
 	): ResultC[List[Token]] = {
 		commandName match {
 			case _ =>
-				// If this step has an expansion, handle its children
-				if (step.fields.contains("1")) {
-					handleSteps(path, step, objects, effects)
-				}
-				else {
-					ResultC.error(s"unhandled user command: $commandName in $step")
-				}
+				ResultC.error(s"unhandled user command: $commandName in $step")
 		}
 	}
 	
@@ -286,18 +285,13 @@ class EvowareCompiler(
 			"pipetter._dispense" -> handlePipetterDispense,
 			"pipetter._pipette" -> handlePipetterPipette,
 			"pipetter._cleanTips" -> handlePipetterCleanTips,
+			"timer._start" -> handleTimerStart,
 			"transporter._movePlate" -> handleTransporterMovePlate
 		)
 		map.get(commandName) match {
 			case Some(fn) => fn(objects, step)
 			case None =>
-				// If this step has an expansion, handle its children
-				if (step.fields.contains("1")) {
-					handleSteps(path, step, objects, effects)
-				}
-				else {
-					ResultC.error(s"unknown command: $commandName in $step")
-				}
+				ResultC.error(s"unknown command: $commandName in $step")
 		}
 	}
 	
@@ -608,6 +602,36 @@ class EvowareCompiler(
 	private def encode(n: Int): Char = ('0' + n).asInstanceOf[Char]
 	//private def hex(n: Int): Char = Integer.toString(n, 16).toUpperCase.apply(0)
 	
+	private def handleTimerStart(
+		objects: JsObject,
+		step: JsObject
+	): ResultC[List[Token]] = {
+		for {
+			equipment <- JsConverter.fromJs[String](step, "equipment")
+			id <- lookupAs[Int](objects, equipment, "evowareId")
+		} yield {
+			val line = List(
+				'"'+id.toString+'"'
+			).mkString("StartTimer(", ",", ");")
+			List(Token(line))
+		}
+	}
+
+	/*
+case class L0C_WaitTimer(
+	id: Int,
+	nSeconds: Int
+) extends L0C_Command {
+	override def toString = {
+		List(
+			'"'+id.toString+'"',
+			'"'+nSeconds.toString+'"'
+		).mkString("WaitTimer(", ",", ");")
+	}
+}
+		
+	}*/
+	
 	private def handleTransporterMovePlate(
 		objects: JsObject,
 		step: JsObject
@@ -657,6 +681,14 @@ class EvowareCompiler(
 			)
 			List(Token(line, let, siteToNameAndModel_m))
 		}
+	}
+	
+	private def createCommentLine(
+		s: String
+	): String = {
+		List(
+			'"'+s+'"'
+		).mkString("Comment(", ",", ");")
 	}
 	
 	private def createFactsLine(
