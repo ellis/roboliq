@@ -12,15 +12,15 @@
 - [x] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
 - [x] save output files in git for testing comparisons when code changes are made
 - [x] test protocol4.json
-- [x] EvowareCompiler: pipetter._dispense
+- [x] EvowareCompiler: `pipetter._dispense`
 - [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
-- [x] pipetter._pipette: create instruction, test in protocol5.json
+- [x] `pipetter._pipette`: create instruction, test in protocol5.json
 - [x] commands/pipetter.js: pipetter.pipette: method 1
-- [x] pipetter._cleanTips: create instruction, test in protocol8.json
+- [x] `pipetter._cleanTips`: create instruction, test in protocol8.json
 - [x] commands/pipetter.js: pipetter.pipette: refresh tips (simple)
 - [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
 - [x] commands/pipetter.js: pipetter.pipette: choose the default liquid class intelligently
-- [x] commands/pipetter.js: pipetter._pipette: output effects array for changes in well contents
+- [x] commands/pipetter.js: `pipetter._pipette`: output effects array for changes in well contents
 - [x] commands/pipetter.js: pipetter.pipette: method 2
 - [x] commands/pipetter.js: pipetter.pipette: clean 4 tips at a time
 - [x] commands/pipetter.js: pipetter.pipette: method 3
@@ -62,12 +62,15 @@
 - [x] commands/fluorescenceReader.js: update based on sealer code
 - [x] consider renaming `pipetter.instruction.pipette => pipetter._pipette`
 - [x] set READER.closed = true
-- [ ] compile to evoware all instructions for tania13_* protocols
-- [ ] replace `centrifuge._close` with `equipment._close`
-- [ ] consider using commands/equipment.js and commands/generic.js
-- [ ] change Equipment.open => Equipment.closed, with appropriate modifications
-- [ ] generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
-- [ ] create new script for old tania13_ph_3_measure
+- [x] replace `centrifuge._close` with `equipment._close`
+- [x] consider using commands/equipment.js
+- [x] change Equipment.open => Equipment.closed, with appropriate modifications
+- [x] create new script for old tania13_ph_3_measure
+- [x] compile to evoware all instructions for tania13_1 protocol
+- [x] compile to evoware all instructions for tania13_2b protocol
+- [ ] compile to evoware all instructions for tania13_3 protocol
+- [ ] consider using commands/generic.js
+- [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] move source code to 'src' subdir
 - [ ] mix command

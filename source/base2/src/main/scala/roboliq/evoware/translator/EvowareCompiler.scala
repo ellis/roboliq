@@ -589,7 +589,7 @@ class EvowareCompiler(
 		val nWellMaskChars = math.ceil(rows * cols / 7.0).asInstanceOf[Int]
 		val amWells = new Array[Int](nWellMaskChars)
 		for (well <- well_l) {
-			val index = well.row + well.col * cols
+			val index = well.row + well.col * rows
 			val iChar = index / 7;
 			val iWell1 = index % 7;
 			if (iChar >= amWells.size) {
