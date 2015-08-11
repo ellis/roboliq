@@ -73,8 +73,6 @@
 - [x] figure out how to implement variable expansion
 - [x] support creation of well groups, including random ones
 - [x] handle "description"s in steps
-- [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in well and tip contents
-- [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in well and tip contents
 - [ ] roboliq.js: generate table for final well contents
 - [ ] implement 'import' or 'requires' keyword for protocols to import other protocols
 - [ ] test the creation of custom functions in a user's protocol
@@ -102,6 +100,8 @@
 
 ## After submission
 
+- [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in tip contents
+- [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in tip contents
 - [ ] mix command
 - [ ] roboliq.js: generate table of pipetting actions for well contents by step
 - [ ] timer.doAndWait: should stop the timer once the loops are over

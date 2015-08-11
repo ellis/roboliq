@@ -26,6 +26,8 @@ describe('pipetter', function() {
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.steps[1][1][1], {
 				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
@@ -82,6 +84,24 @@ describe('pipetter', function() {
 					}
 				}
 			});
+			should.deepEqual(result.output.tables.labware, [
+				{
+					labware: 'plate1',
+					locationFinal: 'ourlab.mario.site.P2',
+					locationInitial: 'ourlab.mario.site.P2',
+					model: 'ourlab.model.plateModel_96_square_transparent_nunc',
+					type: 'Plate'
+				}
+			]);
+			should.deepEqual(result.output.tables.sourceWells, [
+				{
+					source: 'plate1(A01)',
+					volumeFinal: '-20 ul',
+					volumeInitial: '0ul',
+					volumeRemoved: '20 ul',
+					well: 'plate1(A01)'
+				}
+			]);
 		})
 
 

@@ -372,7 +372,7 @@ function run(argv, userProtocol) {
 
 	var objectsFinal = protocol.objects;
 	if (_.isEmpty(protocol.errors)) {
-		expandProtocol(protocol);
+		objectsFinal = expandProtocol(protocol);
 	}
 	if (opts.debug || opts.printProtocol) {
 		console.log();
@@ -451,7 +451,7 @@ function run(argv, userProtocol) {
 				var volumeFinal = contents[0];
 				tables.sourceWells.push({source: source, well: wellName, volumeInitial: volumeInitial, volumeFinal: volumeFinal, volumeRemoved: o.volumeRemoved || "0"});
 			}
-		}
+		};
 		var tabulateWELLS = function(objects, prefix) {
 			//console.log("tabulateWELLS", prefix)
 			_.forEach(objects, function(x, field) {
@@ -462,7 +462,7 @@ function run(argv, userProtocol) {
 					tabulateWELLS(x, prefix.concat([field]));
 				}
 			});
-		}
+		};
 		tabulateWELLS(objectsFinal['__WELLS__'] || {}, []);
 
 		//
