@@ -57,7 +57,7 @@
 - [x] command: centrifuge.centrifuge2
 - [x] handle opening and closing of centrifuge during transport (write unit test)
 
-## Before publication
+## Before submission
 
 - [x] commands/fluorescenceReader.js: update based on sealer code
 - [x] consider renaming `pipetter.instruction.pipette => pipetter._pipette`
@@ -70,46 +70,49 @@
 - [x] compile to evoware all instructions for tania13_2b protocol
 - [x] compile to evoware all instructions for tania13_3 protocol
 - [x] equipment.run for reader: we probably need to use a different ID rather than the carrierName
+- [x] figure out how to implement variable expansion
+- [x] support creation of well groups, including random ones
+- [x] handle "description"s in steps
+- [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in well and tip contents
+- [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in well and tip contents
+- [ ] roboliq.js: generate table for final well contents
+- [ ] implement 'import' or 'requires' keyword for protocols to import other protocols
+- [ ] test the creation of custom functions in a user's protocol
+- [ ] version handling for protocols and commands
+- [ ] UI to display protocol
+- [ ] UI to interactively customize protocol
+- [ ] UI to create protocol
 - [ ] consider using commands/generic.js
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] move source code to 'src' subdir
-- [ ] mix command
-- [ ] roboliq.js: generate table for final well contents
-- [ ] roboliq.js: generate table of pipetting actions for well contents by step
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
-- [ ] support creation of well groups, including random ones, and then implement 'free' verb in wellsParser
-- [ ] support creation of well groups by commands, so that the same wells can be edited future commands; pass in a well group name to the generating command, and have it populate that well group as an effect
-- [ ] create more systematic tests of commands using protocols, adapt old test protocols
+- [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] commands/pipetter.js: pipetter.pipette: method 4
-- [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changed on our robot
-- [ ] commands/pipetter.js: pipetter.pipetteMixtures: allow for ordering items by source and volume
-- [ ] figure out how to implement variable expansion/evaluation
-- [ ] figure out how to implement for-comprehensions for both commands and list
-- [ ] figure out how to randomize for-comprehensions and plain lists
-- [ ] figure out how to generate partial factorial design lists
-- [ ] figure out how to split large factorial designs over multiple plates/batches
-- [ ] implement 'import' or 'requires' keyword for protocols to import other protocols
-- [ ] consider allowing for mathematical expressions (see http://mathjs.org/)
-- [ ] consider saving the commandline arguments in the protocol output; also adding program versions or something?
-- [ ] for 'ourlab' configuration, handle table selection, for different table configurations
-- [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string
-- [ ] llpl.js: need to add a function to create a database object, so that we can use multiple instances simultaneously
-- [ ] add warning/error handling to objectToLogicConverters
+- [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changes on our robot
+- [ ] consider saving the commandline arguments in the protocol output; also adding program version info
+- [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line
 - [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
-- [ ] test the creation of custom functions in a user's protocol
-- [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly trick will be object merging and gathering all required step parameters into a single parameters map
-- [ ] commands/sealer.js: figure out how to let the biologist handle commands that aren't setup for the lab yet
-- [ ] version handling for protocols and commands
-- [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in well and tip contents
-- [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in well and tip contents
+- [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly tricky will be object merging and gathering all required step parameters into a single parameters map
+- [ ] figure out how to pass undefined commands onto the biologist to handle
 - [ ] commands/pipetter.js: `pipetter.pipette`: refresh tips (advanced)
 - [ ] JSON schema
-- [ ] handle "comment"s in steps
+- [ ] documentation
+- [ ] upload to a public repository
+
+## After submission
+
+- [ ] mix command
+- [ ] roboliq.js: generate table of pipetting actions for well contents by step
 - [ ] timer.doAndWait: should stop the timer once the loops are over
-
-## After publication
-
+- [ ] consider whether to do typechecking of all parameters automatically -- in this case, the "program" parameter to movePlate, for example, would either need to be an object reference or an explicit string, but not a name which doesn't resolve to an object, as is the case currently
+- [ ] add warning/error handling to objectToLogicConverters
+- [ ] llpl.js: need to add a function to create a database object, so that we can use multiple instances simultaneously
+- [ ] commands/pipetter.js: pipetter.pipetteMixtures: allow for ordering items by source and volume
+- [ ] consider allowing for mathematical expressions (see http://mathjs.org/)
+- [ ] wellsParser: implement 'free' verb for empty and unreserved wells
+- [ ] figure out how to generate partial factorial design lists
+- [ ] figure out how to split large factorial designs over multiple plates/batches
 - [ ] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
 - [ ] roboliq.js: allow for specifying the step range to compile for
 - [ ] commandHandler: allow for returning of property constraints, for example: the sealPlate command could return a list of possible plate models for the given plate
