@@ -69,6 +69,7 @@
 - [x] compile to evoware all instructions for tania13_1 protocol
 - [x] compile to evoware all instructions for tania13_2b protocol
 - [x] compile to evoware all instructions for tania13_3 protocol
+- [x] equipment.run for reader: we probably need to use a different ID rather than the carrierName
 - [ ] consider using commands/generic.js
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')

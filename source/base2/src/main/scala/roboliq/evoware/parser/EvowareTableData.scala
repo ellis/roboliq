@@ -42,7 +42,7 @@ class EvowareTableData(
 	}
 	
 	private def printCarrier(gridIndex: Int, carrier: Carrier) {
-		println(s"Grid $gridIndex: ${carrier.sName}")
+		println(s"Grid $gridIndex: ${carrier.sName}${carrier.deviceName_?.map(" ("+_+")").getOrElse("")}")
 		for (siteIndex <- 0 until carrier.nSites) {
 			val cgsi = CarrierGridSiteIndex(carrier.id, gridIndex, siteIndex)
 			println(s"\tSite ${siteIndex+1}: ${siteIdToLabel_m.getOrElse(cgsi, "")}")

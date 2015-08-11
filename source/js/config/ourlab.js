@@ -7,7 +7,7 @@ function makeEvowareFacts(params, data, variable, value) {
 		agent: "name",
 		equipment: "name"
 	});
-	var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+	var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	var result2 = {
 		command: "evoware._facts",
 		agent: parsed.agent.valueName,
@@ -29,7 +29,7 @@ module.exports = {
 				"centrifuge": {
 					"type": "Centrifuge",
 					"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"],
-					"evowareCarrier": "Centrifuge"
+					"evowareId": "Centrifuge"
 				},
 				"evoware": {
 					"type": "EvowareRobot"
@@ -37,7 +37,7 @@ module.exports = {
 				"reader": {
 					"type": "Reader",
 					"sitesInternal": ["ourlab.mario.site.READER"],
-					"evowareCarrier": "Infinite M200"
+					"evowareId": "ReaderNETwork"
 				},
 				"roma1": {
 					"type": "Transporter",
@@ -74,7 +74,7 @@ module.exports = {
 				},
 				"sealer": {
 					"type": "Sealer",
-					"evowareCarrier": "RoboSeal"
+					"evowareId": "RoboSeal"
 				},
 				"site": {
 					"type": "Namespace",
@@ -563,7 +563,7 @@ module.exports = {
 				equipment: "name",
 				site: "name"
 			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
@@ -619,7 +619,7 @@ module.exports = {
 				equipment: "name",
 				site: "name"
 			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
@@ -642,7 +642,7 @@ module.exports = {
 				replace(/=/g, "&equal;").
 				replace(/"/g, "&quote;").
 				replace(/~/, "&tilde;").
-				replace(/>[ \t]+/g, "><");
+				replace(/>[ \t]+</g, "><");
 			// Token
 			var value = parsed.outputFile.valueName + "|" + programData;
 			return {expansion: [makeEvowareFacts(params, data, "Measure", value)]};
@@ -654,7 +654,7 @@ module.exports = {
 				equipment: "name",
 				program: "name"
 			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareCarrier");
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			return {
 				expansion: [{
 					command: "evoware._facts",
