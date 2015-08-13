@@ -73,7 +73,7 @@
 - [x] figure out how to implement variable expansion
 - [x] support creation of well groups, including random ones
 - [x] handle "description"s in steps
-- [ ] roboliq.js: generate table for final well contents
+- [x] roboliq.js: generate table for final well contents
 - [ ] implement 'import' or 'requires' keyword for protocols to import other protocols
 - [ ] test the creation of custom functions in a user's protocol
 - [ ] version handling for protocols and commands
