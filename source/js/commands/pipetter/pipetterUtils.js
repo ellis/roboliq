@@ -103,6 +103,7 @@ function getContentsAndName(wellName, data, effects) {
  * @return {Object} map of substance name to the volume or amount of that substance in the well
  */
 function flattenContents(contents) {
+	console.log("flattenContents:", contents);
 	assert(_.isArray(contents));
 	// The first element always holds the volume in the well.
 	// If the array has exactly one element, the volume should be 0l.

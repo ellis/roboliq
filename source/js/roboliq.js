@@ -468,27 +468,23 @@ function run(argv, userProtocol) {
 		tabulateWELLS(objectsFinal['__WELLS__'] || {}, []);
 		// Construct wellContentsFinal table
 		var tabulateWellContents = function(contents, labwareName, wellName) {
+			console.log("tabulateWellContents:", contents, labwareName, wellName);
 			if (_.isArray(contents)) {
-				
+				var map = pipetterUtils.flattenContents(contents);
+				var wellName2 = (wellName) ? labwareName+"("+wellName+")" : labwareName;
+				tables.wellContentsFinal.push(_.merge({well: wellName2}, map));
 			}
 			else if (_.isPlainObject(contents)) {
 				_.forEach(contents, function(contents2, name2) {
-					var wellName2 = _.compact(wellName, name2).join('.');
+					var wellName2 = _.compact([wellName, name2]).join('.');
 					tabulateWellContents(contents2, labwareName, wellName2);
 				})
 			}
 		};
 		_.forEach(labwares, function(labware, name) {
 			if (labware.contents) {
-
+				tabulateWellContents(labware.contents, name);
 			}
-			tables.labware.push(_.merge({}, {
-				labware: name,
-				type: labware.type,
-				model: labware.model,
-				locationInitial: expect.objectsValue({}, name+'.location', protocol.objects),
-				locationFinal: labware.location
-			}));
 		});
 
 		//

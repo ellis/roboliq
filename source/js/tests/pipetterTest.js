@@ -102,6 +102,16 @@ describe('pipetter', function() {
 					well: 'plate1(A01)'
 				}
 			]);
+			should.deepEqual(result.output.tables.wellContentsFinal, [
+				{
+					well: 'plate1(A01)',
+					'plate1(A01)': '-20 ul'
+				},
+				{
+					well: 'plate1(A02)',
+					'plate1(A01)': '20 ul'
+				},
+			]);
 		})
 
 
