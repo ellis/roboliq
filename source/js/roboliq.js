@@ -468,7 +468,7 @@ function run(argv, userProtocol) {
 		tabulateWELLS(objectsFinal['__WELLS__'] || {}, []);
 		// Construct wellContentsFinal table
 		var tabulateWellContents = function(contents, labwareName, wellName) {
-			console.log("tabulateWellContents:", contents, labwareName, wellName);
+			//console.log("tabulateWellContents:", contents, labwareName, wellName);
 			if (_.isArray(contents)) {
 				var map = pipetterUtils.flattenContents(contents);
 				var wellName2 = (wellName) ? labwareName+"("+wellName+")" : labwareName;

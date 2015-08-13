@@ -103,7 +103,7 @@ function getContentsAndName(wellName, data, effects) {
  * @return {Object} map of substance name to the volume or amount of that substance in the well
  */
 function flattenContents(contents) {
-	console.log("flattenContents:", contents);
+	//console.log("flattenContents:", contents);
 	assert(_.isArray(contents));
 	// The first element always holds the volume in the well.
 	// If the array has exactly one element, the volume should be 0l.
@@ -167,19 +167,22 @@ function getEffects_pipette(params, data, effects) {
 
 		pair = getContentsAndName(item.destination, data, effects2);
 		var dstContents = (pair[0]) ? pair[0] : ["0ul"];
+		if (dstContents.length === 2) {
+			dstContents = [dstContents[0], dstContents];
+		}
 		var dstContentsName = pair[1];
 		//console.log("check", item.destination, pair)
 
 		//console.log("dstContents", dstContents)
 		var dstVolume = math.eval(dstContents[0]);
 		// Increase total well volume
-		dstContents[0] = math.chain(dstVolume).add(volume).done().format({precision: 14});
+		dstContents[0] = math.add(dstVolume, volume).format({precision: 14});
 		// Create new content element to add to the contents list
 
 		var srcContents = _.cloneDeep(srcContents0);
-		var newContents = (srcContents.length === 2 && _.isString(srcContents[1]))
+		var newContents = (dstContents.length <= 1 && srcContents.length === 2 && _.isString(srcContents[1]))
 			? srcContents[1]
-			: srcContents;
+			: [volume.format({precision: 14}), srcContents[1]];
 		//console.log("newContents", newContents)
 		// Augment contents list
 		dstContents.push(newContents);
