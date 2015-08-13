@@ -97,8 +97,41 @@ function getContentsAndName(wellName, data, effects) {
 	return [null, wellInfo.labware+".contents."+wellInfo.wellId];
 }
 
+/**
+ * Convert the contents array encoding to a map of substances to amounts
+ * @param  {Array} contents The well contents array
+ * @return {Object} map of substance name to the volume or amount of that substance in the well
+ */
 function flattenContents(contents) {
-
+	assert(_.isArray(contents));
+	// The first element always holds the volume in the well.
+	// If the array has exactly one element, the volume should be 0l.
+	if (contents.length <= 1) {
+		return {};
+	}
+	// If the array has exactly two elements, the second element is the name of the substance.
+	else if (contents.length == 2) {
+		assert(_.isString(contents[1]));
+		var volume = math.eval(contents[0]).format({precision: 14});
+		return _.zipObject([[contents[1], volume]]);
+	}
+	// If the array has more than two elements, each element after the volume has the same
+	// structure as the top array and they represent the mixture originally dispensed in the well.
+	else {
+		var maps = _.map(_.rest(contents), function(contents) { return _.mapValues(flattenContents(contents), function(value) { return math.eval(value); }); });
+		//console.log("maps: "+JSON.stringify(maps));
+		var merger = function(a, b) { return (_.isUndefined(a)) ? b : math.add(a, b); };
+		var mergeArgs = _.flatten([{}, maps, merger]);
+		//console.log("mergeArgs: "+mergeArgs);
+		var merged = _.merge.apply(_, mergeArgs);
+		//console.log("merged: "+JSON.stringify(merged));
+		var total = math.eval(contents[0]);
+		var subTotal = _.reduce(merged, function(total, n) { return math.add(total, n); }, emptyVolume);
+		//console.log("total: "+total);
+		//console.log("subTotal: "+subTotal);
+		var factor = math.divide(total.toNumber("l"), subTotal.toNumber("l"));
+		return _.mapValues(merged, function(v) { return math.multiply(v, factor).format({precision: 14}); });
+	}
 }
 
 /**
@@ -192,6 +225,7 @@ module.exports = {
 	getEffects_pipette: getEffects_pipette,
 	getWellContents: getWellContents,
 	getWellVolume: getWellVolume,
+	flattenContents: flattenContents,
 	emptyVolume: emptyVolume,
 	unknownVolume: emptyVolume,
 }

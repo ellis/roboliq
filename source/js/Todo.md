@@ -226,21 +226,19 @@ cleanEnd: intensity of cleaning after pipetting is done.
 Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 
 
-# Encoding content
+# Encoding well content
 
-Several ideas for how to encode content.  Currently I prefer `plate1(C01)` below, using the arrays.
+Well contents are encoded as an array.
+The first element always holds the volume in the well.
+If the array has exactly one element, the volume should be 0l.
+If the array has exactly two elements, the second element is the name of the substance.
+If the array has more than two elements, each element after the volume has the same
+structure as the top array and they represent the mixture originally dispensed in the well.
 
-        "contents": {
-            "plate1(A01)": "(water=25ul+asdf=5ul)@?-10ul",
-            "plate1(B01)": {
-                "contents": [
-                    {"contents": "water", "AMOUNT":"25ul"},
-                    {"contents": "asdf", "AMOUNT":"5ul"}
-                ],
-                "amount": "?-10ul"
-            },
-            "plate1(C01)": ["?ul-10ul", ["25ul", "water"], ["5ul", "asdf"]]
-        },
+        objects:
+            plate1:
+                contents:
+                    A01: ["30ul", ["25ul", "water"], ["5ul", "reagent1"]]
 
 
 # Combinatorial stuff

@@ -32,6 +32,25 @@ describe('pipetter/pipetterUtils', function() {
 			should.deepEqual(pipetterUtils.getContentsAndName("plate1", data), [contents1, 'plate1.contents']);
 			should.deepEqual(pipetterUtils.getContentsAndName("plate1(A01)", data), [contents1, 'plate1.contents']);
 			should.deepEqual(pipetterUtils.getContentsAndName("plate2(A01)", data), [contents2, 'plate2.contents.A01']);
-		})
-	})
-})
+		});
+	});
+
+	describe("flattenContents", function() {
+		it("should flatten []", function() {
+			should.deepEqual(pipetterUtils.flattenContents([]), {});
+		});
+		it("should flatten [0l]", function() {
+			should.deepEqual(pipetterUtils.flattenContents(["0l"]), {});
+		});
+		it("should flatten [10ul, reagent1]", function() {
+			should.deepEqual(pipetterUtils.flattenContents(['10ul', 'reagent1']), {reagent1: '10 ul'});
+		});
+		it("should flatten [30ul, [10ul, reagent1], [20ul, reagent2]]", function() {
+			var contents = ['30ul', ['10ul', 'reagent1'], ['20ul', 'reagent2']];
+			should.deepEqual(pipetterUtils.flattenContents(contents), {
+				reagent1: '10 ul',
+				reagent2: '20 ul'
+			});
+		});
+	});
+});

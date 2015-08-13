@@ -418,10 +418,12 @@ function run(argv, userProtocol) {
 
 		var tables = {
 			labware: [],
-			sourceWells: []
+			sourceWells: [],
+			wellContentsFinal: []
 		}
 		// Construct labware table
-		_.forEach(misc.getObjectsOfType(objectsFinal, ['Plate']), function(labware, name) {
+		var labwares = misc.getObjectsOfType(objectsFinal, ['Plate', 'Tube'])
+		_.forEach(labwares, function(labware, name) {
 			tables.labware.push(_.merge({}, {
 				labware: name,
 				type: labware.type,
@@ -464,6 +466,30 @@ function run(argv, userProtocol) {
 			});
 		};
 		tabulateWELLS(objectsFinal['__WELLS__'] || {}, []);
+		// Construct wellContentsFinal table
+		var tabulateWellContents = function(contents, labwareName, wellName) {
+			if (_.isArray(contents)) {
+				
+			}
+			else if (_.isPlainObject(contents)) {
+				_.forEach(contents, function(contents2, name2) {
+					var wellName2 = _.compact(wellName, name2).join('.');
+					tabulateWellContents(contents2, labwareName, wellName2);
+				})
+			}
+		};
+		_.forEach(labwares, function(labware, name) {
+			if (labware.contents) {
+
+			}
+			tables.labware.push(_.merge({}, {
+				labware: name,
+				type: labware.type,
+				model: labware.model,
+				locationInitial: expect.objectsValue({}, name+'.location', protocol.objects),
+				locationFinal: labware.location
+			}));
+		});
 
 		//
 		_.merge(output, {tables: tables});
