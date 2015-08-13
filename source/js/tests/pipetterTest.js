@@ -390,6 +390,15 @@ describe('pipetter', function() {
 					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
 				]
 			});
+			//console.log(JSON.stringify(result.output.tables.wellContentsFinal, null, '\t'));
+			should.deepEqual(result.output.tables.wellContentsFinal,
+				[
+					{"well": "plate1(A01)", "source1": "80 ul"},
+					{"well": "plate1(B01)", "source2": "70 ul"},
+					{"well": "plate1(A02)", "source1": "10 ul", "source2": "10 ul"},
+					{"well": "plate1(B02)", "source1": "10 ul", "source2": "20 ul"}
+				]
+			)
 		});
 	});
 });
