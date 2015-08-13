@@ -52,5 +52,19 @@ describe('pipetter/pipetterUtils', function() {
 				reagent2: '20 ul'
 			});
 		});
+		it("should flatten [30ul, [20ul, reagent1], [40ul, reagent1]]", function() {
+			var contents = ['30ul', ['20ul', 'reagent1'], ['40ul', 'reagent1']];
+			should.deepEqual(pipetterUtils.flattenContents(contents), {
+				reagent1: '30 ul'
+			});
+		});
+		it("should flatten [30ul, [10ul, reagent1], [20ul, [10ul, reagent1], [10ul, reagent2], [20ul, water]]]", function() {
+			var contents = ['30ul', ['10ul', 'reagent1'], ['20ul', ['10ul', 'reagent1'], ['10ul', 'reagent2'], ['20ul', 'water']]];
+			should.deepEqual(pipetterUtils.flattenContents(contents), {
+				reagent1: '15 ul',
+				reagent2: '5 ul',
+				water: '10 ul'
+			});
+		});
 	});
 });
