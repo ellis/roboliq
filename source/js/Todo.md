@@ -95,7 +95,8 @@
 - [ ] figure out how to pass undefined commands onto the biologist to handle
 - [ ] commands/pipetter.js: `pipetter.pipette`: refresh tips (advanced)
 - [ ] JSON schema
-- [ ] documentation
+- [ ] documentation for the avaiable commands and their parameters
+- [ ] code documentation
 - [ ] upload to a public repository
 
 ## After submission
@@ -141,6 +142,18 @@ When loading JSON/JavaScript files, we expect the following structure:
 # Misc
 
 - SHOP code from http://danm.ucsc.edu/~wsack/SoftwareArts/Code/Plan/
+
+# Loading process
+
+* Get a list of filenames as protocols, an optional protocol on the command line, and optionally a list of filename/filedata pairs.
+* Add the optional filename/filedata pairs to the file cache
+* Load the content of each filename and add to file cache
+* Construct a protocol list consisting of the default files to always load, protocol files passed in args, and protocol passed in arg
+* For each protocol:
+    * load its imports individually, merge the protocol into its imports
+    * pre-process directives and urls
+    * merge into previous protocol
+
 
 # Variable references
 

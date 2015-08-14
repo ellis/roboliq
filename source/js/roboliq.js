@@ -9,6 +9,140 @@ var misc = require('./misc.js');
 var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
 var wellsParser = require('./parsers/wellsParser.js');
 
+
+var protocolEmpty = {
+	objects: {},
+	steps: {},
+	effects: {},
+	predicates: [],
+	directiveHandlers: {},
+	objectToPredicateConverters: {},
+	commandHandlers: {},
+	planHandlers: {},
+	files: {},
+	errors: {},
+};
+
+function loadUrlContent(url, filecache) {
+	url = "./" + path.join(url);
+	if (filecache.hasOwnProperty(url))
+		return filecache[url];
+	else if (path.extname(url) === ".yaml")
+		return yaml.load(url);
+	else
+		return require(url);
+}
+
+/**
+ * Pre-process a protocol: handle imports, directives, and file nodes
+ * @param  {Object} a   Previously loaded protocol data
+ * @param  {Object} b   The protocol to pre-process
+ * @param  {String} url (optional) The url of the protocol
+ * @return {Object}
+ */
+function loadProtocol(a, b, url, filecache) {
+	// Handle imports
+	var imported = _.cloneDeep(protocolEmpty);
+	if (b.imports) {
+		var urls = _.map(_.flatten([b.imports]), function(imp) {
+			return "./" + path.join(path.dirname(url), imp);
+		});
+		var protocols2 = _.map(urls, function(url2) {
+			var protocol2 = loadUrlContent(url2, filecache);
+			return loadProtocol(protocolEmpty, protocol2, url2, filecache);
+		});
+		imported = mergeProtocolList(protocols2);
+	}
+
+	var data = {
+		objects: {},
+		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
+	};
+	// Handle directives for objects first
+	misc.mutateDeep(b.objects, function(x) {
+		data.objects = _.merge({}, a.objects, imported.objects, b.objects);
+		return misc.handleDirective(x, data);
+	});
+	// Handle directives other properties
+	for (key in b) {
+		if (key !== 'objects' & key !== 'directiveHandlers') {
+			misc.mutateDeep(b[key], function(x) { return misc.handleDirective(x, data); });
+		}
+	}
+
+	// Handle file nodes, resolve path relative to current directory, add to "files" key of protocol
+	misc.mutateDeep(b, function(x) {
+		//console.log("x: "+x)
+		// Return filename relative to current directory
+		if (_.isString(x) && _.startsWith(x, ".")) {
+			var filename = "./" + path.join(path.dirname(url), x);
+			// If the file hasn't been loaded yet:
+			if (!a.files.hasOwnProperty(filename)) {
+				var filedata = fs.readFileSync(filename);
+				if (!b.files)
+					b.files = {};
+				b.files[filename] = filedata;
+				//console.log("filename: "+filename);
+			}
+			return filename;
+		}
+		else {
+			return x;
+		}
+	});
+
+	// Merge in the imports
+	return mergeProtocols(imported, b);
+}
+
+/**
+ * Merge protocols A & B, returning a new protocol.
+ *
+ * @param  {Object} a   protocol representing the result of all previous mergeProtocols
+ * @param  {Object} b   newly loaded protocol to merge into previous protocols
+ * @return {Object}     result of merging protocol B into A.
+ */
+function mergeProtocols(a, b) {
+	//console.log("a.predicates:", a.predicates);
+	//console.log("b.predicates:", b.predicates);
+
+	var c = _.merge({}, a, b);
+	c.predicates = a.predicates.concat(b.predicates || []);
+	//console.log("c:", c);
+	return c;
+}
+
+function mergeProtocolList(protocols) {
+	var protocol = _.cloneDeep(protocolEmpty);
+	_.forEach(protocols, function(b) {
+		protocol = mergeProtocols(protocol, b);
+	});
+	return protocol;
+}
+
+/**
+ * Post-process protocol: flatten predicate list, parse wells strings for Liquid objects.
+ *
+ * Mutates the passed protocol.
+ *
+ * @param  {Object} protocol A protocol.
+ */
+function postProcessProtocol(protocol) {
+	// Make sure predicates is a flat list
+	protocol.predicates = _.flattenDeep(protocol.predicates);
+	var liquids = misc.getObjectsOfType(protocol.objects, 'Liquid');
+	_.forEach(liquids, function(liquid, name) {
+		if (_.isString(liquid.wells)) {
+			try {
+				liquid.wells = wellsParser.parse(liquid.wells, protocol.objects);
+			} catch (e) {
+				protocol.errors[name+".wells"] = [e.toString()];
+				//console.log(e.toString());
+			}
+		}
+	})
+}
+
 function run(argv, userProtocol) {
 	var opts = require('nomnom')
 		.options({
@@ -21,6 +155,16 @@ function run(argv, userProtocol) {
 				abbr: 'd',
 				flag: true,
 				help: 'Print debugging info'
+			},
+			fileData: {
+				full: 'file-data',
+				help: "Supply filedata on the command line in the form of 'filename,filedata'"
+			},
+			ourlab: {
+				full: 'ourlab',
+				flag: true,
+				default: true,
+				help: "don't automatically load config/ourlab.js"
 			},
 			output: {
 				abbr: 'o',
@@ -49,12 +193,6 @@ function run(argv, userProtocol) {
 				flag: true,
 				help: 'throw error when errors encountered during processing (in order to get a backtrace)'
 			},
-			ourlab: {
-				full: 'ourlab',
-				flag: true,
-				default: true,
-				help: "don't automatically load config/ourlab.js"
-			},
 			version: {
 				flag: true,
 				help: 'print version and exit',
@@ -67,6 +205,15 @@ function run(argv, userProtocol) {
 
 	if (opts.debug) {
 		console.log("opts:", opts);
+	}
+
+	var filecache = {};
+	if (opts.fileData) {
+		var i = opts.fileData.indexOf(',');
+		assert(i > 0);
+		var name = "./" + path.join(opts.fileData.substr(0, i));
+		var data = opts.fileData.substr(i + 1);
+		filecache[name] = data;
 	}
 
 	var urls = _.uniq(_.compact(
@@ -89,114 +236,25 @@ function run(argv, userProtocol) {
 		console.log("urls:", urls);
 	}
 
-	function loadProtocolUrl(url) {
-		var content = null;
-		if (url.indexOf("./") != 0)
-			url = "./"+url;
-		if (path.extname(url) === ".yaml") {
-			content = yaml.load(url);
-		}
-		else {
-			content = require(url);
-		}
-		return content;
-	}
+	// Load all the protocols in unprocessed form
+	var urlToProtocol_l = _.map(urls, function(url) {
+		return [url, loadUrlContent(url, filecache)];
+	});
+	if (userProtocol)
+		urlToProtocol_l.push([undefined, userProtocol]);
 
-	/**
-	 * Merge protocols A & B, returning a new protocol.
-	 *
-	 * @param  {Object} a   protocol representing the result of all previous mergeProtocols
-	 * @param  {Object} b   newly loaded protocol to merge into previous protocols
-	 * @param  {String} url URL of the newly loaded protocol
-	 * @return {Object}     result of merging protocol B into A.
-	 */
-	function mergeProtocols(a, b, url) {
-		//console.log("a.predicates:", a.predicates);
-		//console.log("b.predicates:", b.predicates);
-		var data = {
-			objects: {},
-			directiveHandlers: _.merge({}, a.directiveHandlers, b.directiveHandlers)
-		}
-		// Handle directives for objects first
-		misc.mutateDeep(b.objects, function(x) {
-			data.objects = _.merge({}, a.objects, b.objects);
-			return misc.handleDirective(x, data);
-		});
-		// Handle directives other properties
-		for (key in b) {
-			if (key !== 'objects' & key !== 'directiveHandlers') {
-				misc.mutateDeep(b[key], function(x) { return misc.handleDirective(x, data); });
-			}
-		}
-		// Handle file nodes, resolve path relative to current directory, add to "files" key of protocol
-		misc.mutateDeep(b, function(x) {
-			//console.log("x: "+x)
-			// Return filename relative to current directory
-			if (_.isString(x) && _.startsWith(x, ".")) {
-				var filename = "./" + path.join(path.dirname(url), x);
-				// If the file hasn't been loaded yet:
-				if (!a.files.hasOwnProperty(filename)) {
-					var filedata = fs.readFileSync(filename);
-					if (!b.files)
-						b.files = {};
-					b.files[filename] = filedata;
-					//console.log("filename: "+filename);
-				}
-				return filename;
-			}
-			else {
-				return x;
-			}
-		});
+	// Load
+	var protocol = _.reduce(
+		urlToProtocol_l,
+		function(protocol, pair) {
+			var url = pair[0];
+			var raw = pair[1];
+			var b = loadProtocol(protocol, raw, url, filecache);
+			return mergeProtocols(protocol, b);
+		},
+		protocolEmpty
+	);
 
-		var c = _.merge({}, a, b);
-		c.predicates = a.predicates.concat(b.predicates || []);
-		//console.log("c:", c);
-		return c;
-	}
-
-	function mergeProtocolUrls(urls) {
-		var protocol = {
-			objects: {},
-			steps: {},
-			effects: {},
-			predicates: [],
-			directiveHandlers: {},
-			objectToPredicateConverters: {},
-			commandHandlers: {},
-			planHandlers: {},
-			files: {},
-			errors: {},
-		};
-		_.forEach(urls, function(url) {
-			//console.log("url: "+url)
-			var protocol2 = loadProtocolUrl(url);
-			protocol = mergeProtocols(protocol, protocol2, url);
-		});
-		if (userProtocol) {
-			protocol = mergeProtocols(protocol, userProtocol);
-		}
-		return protocol;
-	}
-
-	// Post-processing of protocol
-	function postProcessProtocol(protocol) {
-		// Make sure predicates is a flat list
-		protocol.predicates = _.flattenDeep(protocol.predicates);
-		var liquids = misc.getObjectsOfType(protocol.objects, 'Liquid');
-		_.forEach(liquids, function(liquid, name) {
-			if (_.isString(liquid.wells)) {
-				try {
-					liquid.wells = wellsParser.parse(liquid.wells, protocol.objects);
-				} catch (e) {
-					protocol.errors[name+".wells"] = [e.toString()];
-					//console.log(e.toString());
-				}
-			}
-		})
-	}
-
-	var protocol = mergeProtocolUrls(urls);
 	postProcessProtocol(protocol);
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
