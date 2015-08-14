@@ -158,7 +158,13 @@ function run(argv, userProtocol) {
 			},
 			fileData: {
 				full: 'file-data',
-				help: "Supply filedata on the command line in the form of 'filename,filedata'"
+				list: true,
+				help: "Supply filedata on the command line in the form of 'filename:filedata'"
+			},
+			fileJson: {
+				full: 'file-json',
+				list: true,
+				help: "Supply a JSON file on the command line in the form of 'filename:filedata'"
 			},
 			ourlab: {
 				full: 'ourlab',
@@ -208,13 +214,23 @@ function run(argv, userProtocol) {
 	}
 
 	var filecache = {};
-	if (opts.fileData) {
-		var i = opts.fileData.indexOf(',');
+	function splitInlineFile(s) {
+		var i = s.indexOf(':');
 		assert(i > 0);
-		var name = "./" + path.join(opts.fileData.substr(0, i));
-		var data = opts.fileData.substr(i + 1);
-		filecache[name] = data;
+		var name = "./" + path.join(s.substr(0, i));
+		var data = s.substr(i + 1);
+		return [name, data];
 	}
+	_.forEach(opts.fileData, function(s) {
+		var pair = splitInlineFile(s);
+		var data = pair[1];
+		filecache[pair[0]] = data;
+	});
+	_.forEach(opts.fileJson, function(s) {
+		var pair = splitInlineFile(s);
+		var data = JSON.parse(pair[1]);
+		filecache[pair[0]] = data;
+	});
 
 	var urls = _.uniq(_.compact(
 		_.compact([

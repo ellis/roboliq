@@ -54,5 +54,34 @@ describe('roboliq', function() {
 				['plate2(A01)', 'plate2(B01)']
 			);
 		});
+
+		it("should handle imports", function() {
+			var protocol1 = {
+				objects: {
+					plateModel1: {
+						type: "PlateModel",
+						rows: 8,
+						columns: 12
+					},
+					plate1: {
+						type: "Plate",
+						location: "ourlab.mario.site.P2"
+					}
+				}
+			};
+			var protocol2 = {
+				objects: {
+					plate1: {
+						model: "plateModel1"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", "", "--file-json", "./protocol1.json:"+JSON.stringify(protocol1)], protocol2);
+			should.deepEqual(result.output.objects.plate1, {
+				type: "Plate",
+				location: "ourlab.mario.site.P2",
+				model: "plateModel1"
+			});
+		});
 	});
 });
