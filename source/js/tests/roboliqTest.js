@@ -70,6 +70,7 @@ describe('roboliq', function() {
 				}
 			};
 			var protocol2 = {
+				imports: ["./protocol1.json"],
 				objects: {
 					plate1: {
 						model: "plateModel1"

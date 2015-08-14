@@ -54,6 +54,10 @@ function loadProtocol(a, b, url, filecache) {
 		imported = mergeProtocolList(protocols2);
 	}
 
+	if (_.isPlainObject(b.files) && !_.isEmpty(b.files)) {
+		_.merge(filecache, b.files)
+	}
+
 	var data = {
 		objects: {},
 		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
@@ -77,11 +81,9 @@ function loadProtocol(a, b, url, filecache) {
 		if (_.isString(x) && _.startsWith(x, ".")) {
 			var filename = "./" + path.join(path.dirname(url), x);
 			// If the file hasn't been loaded yet:
-			if (!a.files.hasOwnProperty(filename)) {
+			if (!filecache.hasOwnProperty(filename)) {
 				var filedata = fs.readFileSync(filename);
-				if (!b.files)
-					b.files = {};
-				b.files[filename] = filedata;
+				filecache[filename] = filedata;
 				//console.log("filename: "+filename);
 			}
 			return filename;
@@ -229,6 +231,7 @@ function run(argv, userProtocol) {
 	_.forEach(opts.fileJson, function(s) {
 		var pair = splitInlineFile(s);
 		var data = JSON.parse(pair[1]);
+		//console.log("fileJson:", s, data);
 		filecache[pair[0]] = data;
 	});
 
@@ -344,7 +347,7 @@ function run(argv, userProtocol) {
 							predicates: predicates,
 							planHandlers: protocol.planHandlers,
 							accesses: [],
-							files: protocol.files
+							files: filecache
 						};
 						result = handler(step, data) || {};
 					} catch (e) {
