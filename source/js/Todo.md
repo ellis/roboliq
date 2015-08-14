@@ -77,32 +77,35 @@
 - [x] implement 'import' keyword for protocols to import other protocols
 - [x] roboliq.js: should be able to pass multiple --file-data args
 - [x] test the creation of custom functions in a user's protocol using a template object
-- [ ] test the creation of custom functions in a user's protocol as a javascript function
-- [ ] version handling for protocols and commands
+- [ ] commands/roboliq.js: import command handlers
+- [ ] commands/ourlab.js: import commands/roboliq.js
+- [ ] change imports to require a version number
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
-- [ ] consider using commands/generic.js
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] move source code to 'src' subdir
-- [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect
-- [ ] commands/pipetter.js: pipetter.pipette: method 4
-- [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changes on our robot
-- [ ] consider saving the commandline arguments in the protocol output; also adding program version info
-- [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line
-- [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
+- [ ] add program version info to the protocol output
+- [ ] add commandline arguments to the protocol output
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly tricky will be object merging and gathering all required step parameters into a single parameters map
-- [ ] figure out how to pass undefined commands onto the biologist to handle
-- [ ] commands/pipetter.js: `pipetter.pipette`: refresh tips (advanced)
+- [ ] figure out how to pass commands without handlers onto the biologist
 - [ ] JSON schema
 - [ ] documentation for the avaiable commands and their parameters
 - [ ] code documentation
 - [ ] upload to a public repository
+- [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
 
 ## After submission
 
+- [ ] protocols/protocol8.json: add all cleaning intensities for all tips
+- [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line
+- [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changes on our robot
+- [ ] commands/pipetter.js: pipetter.pipette: method 4
+- [ ] commands/pipetter.js: `pipetter.pipette`: refresh tips (advanced)
+- [ ] change imports to allow for passing parameters, such as table name?
+- [ ] create test for the usage of custom command handlers in a user's protocol
 - [ ] commands/pipetter.js: `pipetter._aspirate`: output effects array for changes in tip contents
 - [ ] commands/pipetter.js: `pipetter._dispense`: output effects array for changes in tip contents
 - [ ] mix command
