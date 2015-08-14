@@ -76,7 +76,7 @@
 - [x] roboliq.js: generate table for final well contents
 - [x] implement 'import' keyword for protocols to import other protocols
 - [x] roboliq.js: should be able to pass multiple --file-data args
-- [ ] test the creation of custom functions in a user's protocol as a form of steps
+- [x] test the creation of custom functions in a user's protocol using a template object
 - [ ] test the creation of custom functions in a user's protocol as a javascript function
 - [ ] version handling for protocols and commands
 - [ ] UI to display protocol

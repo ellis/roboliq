@@ -1,4 +1,6 @@
 var _ = require('lodash');
+var assert = require('assert');
+var mustache = require('mustache');
 
 /**
  * queryResults: value returned from llpl.query()
@@ -184,6 +186,37 @@ function mutateDeep(x, fn) {
 	return fn(x);
 }
 
+function renderTemplate(template, scope, data) {
+	//console.log("renderTemplate:", template)
+	if (_.isString(template)) {
+		return renderTemplateString(template, scope, data);
+	}
+	else if (_.isArray(template)) {
+		return _.map(template, function(x) { return renderTemplate(x, scope, data); });
+	}
+	else if (_.isPlainObject(template)) {
+		return _.mapValues(template, function(x) { return renderTemplate(x, scope, data); });
+	}
+	else {
+		return template;
+	}
+}
+
+function renderTemplateString(s, scope, data) {
+	//console.log("renderTemplateString:", s)
+	assert(_.isString(s));
+	if (_.startsWith(s, "${") && _.endsWith(s, "}")) {
+		var name = s.substr(2, s.length - 3);
+		return scope[name];
+	}
+	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
+		return JSON.parse(mustache.render(s, scope));
+	}
+	else {
+		return mustache.render(s, scope);
+	}
+}
+
 module.exports = {
 	extractValuesFromQueryResults: extractValuesFromQueryResults,
 	getObjectsOfType: getObjectsOfType,
@@ -194,4 +227,5 @@ module.exports = {
 	findObjectsValue: findObjectsValue,
 	mutateDeep: mutateDeep,
 	transformDeep: transformDeep,
+	renderTemplate: renderTemplate
 }

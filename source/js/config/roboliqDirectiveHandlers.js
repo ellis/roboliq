@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
-var mustache = require('mustache');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser = require('../parsers/wellsParser.js');
@@ -26,43 +25,12 @@ function directive_for(spec, data) {
 	var views = directive_factorialCols(spec.factors, data);
 	//console.log("views:", views);
 	return _.map(views, function(view) {
-		var rendered = renderTemplate(spec.output, view, data);
+		var rendered = misc.renderTemplate(spec.output, view, data);
 		//console.log("rendered:", rendered);
 		var rendered2 = misc.handleDirectiveDeep(rendered, data);
 		//console.log("rendered2:", rendered2);
 		return rendered2;
 	});
-}
-
-function renderTemplate(template, scope, data) {
-	//console.log("renderTemplate:", template)
-	if (_.isString(template)) {
-		return renderTemplateString(template, scope, data);
-	}
-	else if (_.isArray(template)) {
-		return _.map(template, function(x) { return renderTemplate(x, scope, data); });
-	}
-	else if (_.isPlainObject(template)) {
-		return _.mapValues(template, function(x) { return renderTemplate(x, scope, data); });
-	}
-	else {
-		return template;
-	}
-}
-
-function renderTemplateString(s, scope, data) {
-	//console.log("renderTemplateString:", s)
-	assert(_.isString(s));
-	if (_.startsWith(s, "${") && _.endsWith(s, "}")) {
-		var name = s.substr(2, s.length - 3);
-		return scope[name];
-	}
-	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
-		return JSON.parse(mustache.render(s, scope));
-	}
-	else {
-		return mustache.render(s, scope);
-	}
 }
 
 function directive_factorialArrays(spec, data) {
