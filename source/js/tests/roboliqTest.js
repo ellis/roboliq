@@ -7,6 +7,7 @@ describe('roboliq', function() {
 
 		it('should handle directives in objects correctly', function () {
 			var protocol = {
+				roboliq: "v1",
 				objects: {
 					plateModel1: {
 						type: "PlateModel",
@@ -47,6 +48,9 @@ describe('roboliq', function() {
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.objects.mixtureWells.value,
 				['plate1(A01)', 'plate1(B01)']
 			);
@@ -57,6 +61,7 @@ describe('roboliq', function() {
 
 		it("should handle imports", function() {
 			var protocol1 = {
+				roboliq: "v1",
 				objects: {
 					plateModel1: {
 						type: "PlateModel",
@@ -70,6 +75,7 @@ describe('roboliq', function() {
 				}
 			};
 			var protocol2 = {
+				roboliq: "v1",
 				imports: ["./protocol1.json"],
 				objects: {
 					plate1: {
@@ -78,6 +84,8 @@ describe('roboliq', function() {
 				}
 			};
 			var result = roboliq.run(["-o", "", "--file-json", "./protocol1.json:"+JSON.stringify(protocol1)], protocol2);
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.objects.plate1, {
 				type: "Plate",
 				location: "ourlab.mario.site.P2",

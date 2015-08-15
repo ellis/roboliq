@@ -4,6 +4,7 @@ var roboliq = require('../roboliq.js')
 
 describe('commands/centrifgue', function() {
 	var protocol0 = {
+		roboliq: "v1",
 		objects: {
 			plate1: {
 				type: "Plate",
@@ -21,6 +22,7 @@ describe('commands/centrifgue', function() {
 	describe('centrifuge.centrifuge2', function () {
 		it('should put two plates in the centrifuge, run, then move the plates back', function () {
 			var protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
 				steps: {
 					1: {
 						command: "centrifuge.centrifuge2",

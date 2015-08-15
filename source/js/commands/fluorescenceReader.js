@@ -32,7 +32,7 @@ var commandHandlers = {
 		var params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 		//console.log("parsed.outputFile: "+JSON.stringify(parsed.outputFile));
-		
+
 		var expansion = [
 			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
@@ -59,5 +59,6 @@ var commandHandlers = {
 };
 
 module.exports = {
+	roboliq: "v1",
 	commandHandlers: commandHandlers
 };

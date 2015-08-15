@@ -35,5 +35,6 @@ var commandHandlers = {
 };
 
 module.exports = {
+	roboliq: "v1",
 	commandHandlers: commandHandlers
 };

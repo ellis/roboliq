@@ -4,6 +4,7 @@ var roboliq = require('../roboliq.js')
 
 describe('timer', function() {
 	var protocol0 = {
+		roboliq: "v1",
 		objects: {
 			robot1: {
 				type: "Agent"

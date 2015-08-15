@@ -82,31 +82,7 @@ var commandHandlers = {
 };
 
 module.exports = {
+	roboliq: "v1",
 	objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers
 };
-
-/*
-
-  {"method": {"description": "sealer.sealPlate-null: plate already sealed",
-    "task": {"sealer.sealPlate": {"labware": "?labware"}},
-    "preconditions": [
-      {"plateIsSealed": {"labware": "?labware"}}
-    ],
-    "subtasks": {"ordered": [
-      {"trace": {"text": "sealer.sealPlate-null"}}
-    ]}
-  }},
-
-  {"method": {"description": "method for sealing",
-    "task": {"sealer.sealPlate": {"labware": "?labware"}},
-    "preconditions": [
-      {"model": {"labware": "?labware", "model": "?model"}},
-      {"sealer.canAgentEquipmentProgramModelSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "model": "?model", "site": "?site"}}
-    ],
-    "subtasks": {"ordered": [
-      {"ensureLocation": {"labware": "?labware", "site": "?site"}},
-      {"sealAction": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "site": "?site"}}
-    ]}
-  }}
-*/

@@ -6,6 +6,7 @@ describe('system', function() {
 	describe("system.call", function() {
 		it("should handle template objects", function() {
 			var protocol = {
+				roboliq: "v1",
 				objects: {
 					mySteps1: {
 						type: "Template",
@@ -41,6 +42,7 @@ describe('system', function() {
 
 		it('should repeat `body`, `count` times', function () {
 			var protocol = {
+				roboliq: "v1",
 				steps: {
 					"1": {
 						command: "system.repeat",
@@ -59,6 +61,7 @@ describe('system', function() {
 			});
 
 			var protocol = {
+				roboliq: "v1",
 				steps: {
 					"1": {
 						command: "system.repeat",

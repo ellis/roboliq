@@ -21,6 +21,7 @@ function makeEvowareFacts(params, data, variable, value) {
 }
 
 module.exports = {
+	roboliq: "v1",
 	imports: ["roboliq.js"],
 	objects: {
 		"ourlab": {

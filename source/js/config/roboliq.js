@@ -123,6 +123,7 @@ var planHandlers = {
 };
 
 module.exports = {
+	roboliq: "v1",
 	imports: [
 		'../commands/system.js',
 		// Equipment

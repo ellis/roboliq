@@ -7,6 +7,7 @@ describe('pipetter', function() {
 
 		it('should pipette between two wells on plate1 without specifying well contents', function () {
 			var protocol = {
+				roboliq: "v1",
 				objects: {
 					plate1: {
 						type: "Plate",
@@ -119,6 +120,7 @@ describe('pipetter', function() {
 
 		it('should pipette from system liquid source', function () {
 			var protocol = {
+				roboliq: "v1",
 				objects: {
 					plate1: {
 						type: "Plate",
@@ -266,6 +268,7 @@ describe('pipetter', function() {
 
 		it('should pipette from a multi-well source', function () {
 			var protocol = {
+				roboliq: "v1",
 				objects: {
 					trough1: {
 						type: "Plate",
@@ -335,6 +338,7 @@ describe('pipetter', function() {
 	describe('pipetter.pipetteMixtures', function () {
 		it("should pipette mixtures to destination wells", function() {
 			var protocol = {
+				roboliq: "v1",
 				objects: {
 					plate1: {
 						type: "Plate",

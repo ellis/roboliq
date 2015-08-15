@@ -108,6 +108,12 @@ function loadUrlContent(url, filecache) {
  * @return {Object}
  */
 function loadProtocol(a, b, url, filecache) {
+	// Require 'roboliq' property
+	if (!b.roboliq) {
+		console.log(JSON.stringify(b));
+		return {errors: ["'roboliq' property must be specified with targetted version number for protocol at URL "+url]};
+	}
+
 	//console.log("loadProtocol:", url);
 	//if (url.indexOf("roboliq") > 0)
 	//	console.log(JSON.stringify(b))
@@ -508,7 +514,7 @@ function run(argv, userProtocol) {
 		_.forEach(protocol.errors, function(err, id) {
 			console.log(id+": "+err.toString());
 		});
-		return {protocol: protocol};
+		return {protocol: protocol, output: _.merge({}, {errors: protocol.errors, warnings: protocol.warnings})};
 	}
 	else {
 		if (!_.isEmpty(protocol.warnings)) {

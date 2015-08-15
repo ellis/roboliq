@@ -4,6 +4,7 @@ var roboliq = require('../roboliq.js')
 
 describe('commands/sealer', function() {
 	var protocol0 = {
+		roboliq: "v1",
 		objects: {
 			plate1: {
 				type: "Plate",

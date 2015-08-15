@@ -203,6 +203,7 @@ var commandHandlers = {
 };
 
 module.exports = {
+	roboliq: "v1",
 	objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers
 };
