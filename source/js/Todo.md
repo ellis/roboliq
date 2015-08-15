@@ -80,7 +80,7 @@
 - [x] commands/roboliq.js: import command handlers
 - [x] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
 - [x] commands/ourlab.js: import commands/roboliq.js
-- [ ] require 'roboliq' field for protocols
+- [x] require 'roboliq' field for protocols
 - [ ] change imports to require a version number
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol

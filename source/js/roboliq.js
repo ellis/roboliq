@@ -109,10 +109,7 @@ function loadUrlContent(url, filecache) {
  */
 function loadProtocol(a, b, url, filecache) {
 	// Require 'roboliq' property
-	if (!b.roboliq) {
-		console.log(JSON.stringify(b));
-		return {errors: ["'roboliq' property must be specified with targetted version number for protocol at URL "+url]};
-	}
+	expect.truthy({}, b.roboliq, "'roboliq' property must be specified with targetted version number for protocol at URL "+url);
 
 	//console.log("loadProtocol:", url);
 	//if (url.indexOf("roboliq") > 0)
