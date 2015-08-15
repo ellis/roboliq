@@ -79,7 +79,7 @@
 - [x] test the creation of custom functions in a user's protocol using a template object
 - [x] commands/roboliq.js: import command handlers
 - [x] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
-- [ ] commands/ourlab.js: import commands/roboliq.js
+- [x] commands/ourlab.js: import commands/roboliq.js
 - [ ] require 'roboliq' field for protocols
 - [ ] change imports to require a version number
 - [ ] UI to display protocol
