@@ -9,6 +9,68 @@ var misc = require('./misc.js');
 var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
 var wellsParser = require('./parsers/wellsParser.js');
 
+var nomnom = require('nomnom').options({
+	infiles: {
+		position: 0,
+		help: 'input files, .json or .js',
+		list: true
+	},
+	debug: {
+		abbr: 'd',
+		flag: true,
+		help: 'Print debugging info'
+	},
+	fileData: {
+		full: 'file-data',
+		list: true,
+		help: "Supply filedata on the command line in the form of 'filename:filedata'"
+	},
+	fileJson: {
+		full: 'file-json',
+		list: true,
+		help: "Supply a JSON file on the command line in the form of 'filename:filedata'"
+	},
+	ourlab: {
+		full: 'ourlab',
+		flag: true,
+		default: true,
+		help: "don't automatically load config/ourlab.js"
+	},
+	output: {
+		abbr: 'o',
+		help: 'specify output filename or "" for standard output, otherwise default is used',
+		metavar: 'FILE'
+	},
+	outputDir: {
+		abbr: 'O',
+		full: 'output-dir',
+		help: 'specify output directory',
+		metavar: 'DIR'
+	},
+	print: {
+		abbr: 'p',
+		flag: true,
+		help: 'print output'
+	},
+	printProtocol: {
+		abbr: 'r',
+		full: 'print-protocol',
+		flag: true,
+		help: 'print combined protocol'
+	},
+	throw: {
+		abbr: 'T',
+		flag: true,
+		help: 'throw error when errors encountered during processing (in order to get a backtrace)'
+	},
+	version: {
+		flag: true,
+		help: 'print version and exit',
+		callback: function() {
+			return "version 0.1";
+		}
+	},
+});
 
 var protocolEmpty = {
 	objects: {},
@@ -21,10 +83,15 @@ var protocolEmpty = {
 	planHandlers: {},
 	files: {},
 	errors: {},
+	warnings: {}
 };
 
 function loadUrlContent(url, filecache) {
-	url = "./" + path.join(url);
+	url = path.join(url);
+	if (!path.isAbsolute(url))
+		url = "./" + url;
+	//console.log("in cache:", filecache.hasOwnProperty(url))
+	//console.log("absolute:", path.resolve(url))
 	if (filecache.hasOwnProperty(url))
 		return filecache[url];
 	else if (path.extname(url) === ".yaml")
@@ -41,13 +108,18 @@ function loadUrlContent(url, filecache) {
  * @return {Object}
  */
 function loadProtocol(a, b, url, filecache) {
+	//console.log("loadProtocol:", url);
+	//if (url.indexOf("roboliq") > 0)
+	//	console.log(JSON.stringify(b))
 	// Handle imports
 	var imported = _.cloneDeep(protocolEmpty);
 	if (b.imports) {
 		var urls = _.map(_.flatten([b.imports]), function(imp) {
+			//console.log("paths:", path.dirname(url), imp, path.join(path.dirname(url), imp))
 			return "./" + path.join(path.dirname(url), imp);
 		});
 		var protocols2 = _.map(urls, function(url2) {
+			//console.log("url:", url2)
 			var protocol2 = loadUrlContent(url2, filecache);
 			return loadProtocol(protocolEmpty, protocol2, url2, filecache);
 		});
@@ -58,24 +130,59 @@ function loadProtocol(a, b, url, filecache) {
 		_.merge(filecache, b.files)
 	}
 
+	var c = _.cloneDeep(_.pick(b,
+		'objects',
+		'steps',
+		'effects',
+		'predicates',
+		'directiveHandlers',
+		'objectToPredicateConverters',
+		'commandHandlers',
+		'planHandlers',
+		'files',
+		'errors',
+		'warnings'
+	));
 	var data = {
-		objects: {},
+		objects: _.merge({}, a.objects, imported.objects, c.objects),
 		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
 	};
+
 	// Handle directives for objects first
-	misc.mutateDeep(b.objects, function(x) {
-		data.objects = _.merge({}, a.objects, imported.objects, b.objects);
-		return misc.handleDirective(x, data);
-	});
-	// Handle directives other properties
-	for (key in b) {
-		if (key !== 'objects' & key !== 'directiveHandlers') {
-			misc.mutateDeep(b[key], function(x) { return misc.handleDirective(x, data); });
+	// This is more complicated than for the properties, because objects may have directives which reference other objects.
+	function mutateObjects(x, path) {
+		if (_.isPlainObject(x)) {
+			for (var key in x) {
+				var value1 = x[key];
+				if (_.isArray(value1)) {
+					x[key] = _.map(value1, function(x2) { return misc.handleDirective(x2, data); });
+				}
+				else {
+					x[key] = mutateObjects(value1, path.concat([key]));
+				}
+			}
 		}
+		var x2 = misc.handleDirective(x, data);
+		_.set(data.objects, path.join('.'), x2);
+		return x2;
 	}
+	mutateObjects(c.objects, []);
+	
+	// Handle directives for other properties
+	var l = [
+		'steps',
+		'effects',
+		'predicates',
+		'files',
+		'errors',
+		'warnings'
+	];
+	_.forEach(l, function(key) {
+		misc.mutateDeep(c[key], function(x) { return misc.handleDirective(x, data); });
+	});
 
 	// Handle file nodes, resolve path relative to current directory, add to "files" key of protocol
-	misc.mutateDeep(b, function(x) {
+	misc.mutateDeep(c, function(x) {
 		//console.log("x: "+x)
 		// Return filename relative to current directory
 		if (_.isString(x) && _.startsWith(x, ".")) {
@@ -94,7 +201,11 @@ function loadProtocol(a, b, url, filecache) {
 	});
 
 	// Merge in the imports
-	return mergeProtocols(imported, b);
+	var d = mergeProtocols(imported, c);
+	//if (url.indexOf("roboliq") > 0)
+	//	console.log(JSON.stringify(b))
+
+	return d;
 }
 
 /**
@@ -146,70 +257,7 @@ function postProcessProtocol(protocol) {
 }
 
 function run(argv, userProtocol) {
-	var opts = require('nomnom')
-		.options({
-			infiles: {
-				position: 0,
-				help: 'input files, .json or .js',
-				list: true
-			},
-			debug: {
-				abbr: 'd',
-				flag: true,
-				help: 'Print debugging info'
-			},
-			fileData: {
-				full: 'file-data',
-				list: true,
-				help: "Supply filedata on the command line in the form of 'filename:filedata'"
-			},
-			fileJson: {
-				full: 'file-json',
-				list: true,
-				help: "Supply a JSON file on the command line in the form of 'filename:filedata'"
-			},
-			ourlab: {
-				full: 'ourlab',
-				flag: true,
-				default: true,
-				help: "don't automatically load config/ourlab.js"
-			},
-			output: {
-				abbr: 'o',
-				help: 'specify output filename or "" for standard output, otherwise default is used',
-				metavar: 'FILE'
-			},
-			outputDir: {
-				abbr: 'O',
-				full: 'output-dir',
-				help: 'specify output directory',
-				metavar: 'DIR'
-			},
-			print: {
-				abbr: 'p',
-				flag: true,
-				help: 'print output'
-			},
-			printProtocol: {
-				abbr: 'r',
-				full: 'print-protocol',
-				flag: true,
-				help: 'print combined protocol'
-			},
-			throw: {
-				abbr: 'T',
-				flag: true,
-				help: 'throw error when errors encountered during processing (in order to get a backtrace)'
-			},
-			version: {
-				flag: true,
-				help: 'print version and exit',
-				callback: function() {
-					return "version 0.1";
-				}
-			},
-		})
-		.parse(argv);
+	var opts = nomnom.parse(argv);
 
 	if (opts.debug) {
 		console.log("opts:", opts);
@@ -238,7 +286,7 @@ function run(argv, userProtocol) {
 	var urls = _.uniq(_.compact(
 		_.compact([
 			'config/roboliq.js',
-			'commands/system.js',
+			/*'commands/system.js',
 			// Equipment
 			'commands/equipment.js',
 			'commands/centrifuge.js',
@@ -246,7 +294,7 @@ function run(argv, userProtocol) {
 			'commands/pipetter.js',
 			'commands/sealer.js',
 			'commands/timer.js',
-			'commands/transporter.js',
+			'commands/transporter.js',*/
 			// Lab
 			(opts.ourlab) ? 'config/ourlab.js' : null
 		]).concat(opts.infiles)

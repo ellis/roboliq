@@ -77,8 +77,10 @@
 - [x] implement 'import' keyword for protocols to import other protocols
 - [x] roboliq.js: should be able to pass multiple --file-data args
 - [x] test the creation of custom functions in a user's protocol using a template object
-- [ ] commands/roboliq.js: import command handlers
+- [x] commands/roboliq.js: import command handlers
+- [x] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
 - [ ] commands/ourlab.js: import commands/roboliq.js
+- [ ] require 'roboliq' field for protocols
 - [ ] change imports to require a version number
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
@@ -119,7 +121,6 @@
 - [ ] wellsParser: implement 'free' verb for empty and unreserved wells
 - [ ] figure out how to generate partial factorial design lists
 - [ ] figure out how to split large factorial designs over multiple plates/batches
-- [ ] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
 - [ ] roboliq.js: allow for specifying the step range to compile for
 - [ ] commandHandler: allow for returning of property constraints, for example: the sealPlate command could return a list of possible plate models for the given plate
 - [ ] commandHandler args: also pass paramDefaults
@@ -127,6 +128,7 @@
 - [ ] handle lids on plates and tracking their position
 - [ ] add a default storage site for plates?  How to handle when plates are shared between robots?
 - [ ] commands/pipetter.js: handle case of dispensing then later aspirating from a single well in a single pipetting command
+- [ ] consider allowing for scopes to commands, rather than just globals objects and command params; may need to make data.objects an array.
 
 # Notes
 

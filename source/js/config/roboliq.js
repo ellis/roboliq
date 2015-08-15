@@ -123,6 +123,17 @@ var planHandlers = {
 };
 
 module.exports = {
+	imports: [
+		'../commands/system.js',
+		// Equipment
+		'../commands/equipment.js',
+		'../commands/centrifuge.js',
+		'../commands/fluorescenceReader.js',
+		'../commands/pipetter.js',
+		'../commands/sealer.js',
+		'../commands/timer.js',
+		'../commands/transporter.js',
+	],
 	predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
 	planHandlers: planHandlers,
