@@ -20,7 +20,7 @@ var commandHandlers = {
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
-	"sealer.action.sealPlate": function(params, data) {
+	"sealer.sealPlate": function(params, data) {
 		//console.log("params:\n"+JSON.stringify(params, null, '  '))
 		var parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",

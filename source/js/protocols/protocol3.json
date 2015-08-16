@@ -8,7 +8,7 @@
   },
   "steps": {
     "1": {
-      "command": "sealer.action.sealPlate",
+      "command": "sealer.sealPlate",
       "object": "plate1"
     }
   }

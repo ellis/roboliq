@@ -62,7 +62,7 @@ describe('commandHelper', function() {
 				accesses: []
 			};
 			var params = {
-				"command": "sealer.action.sealPlate",
+				"command": "sealer.sealPlate",
 				"object": "plate1"
 			};
 			var specs = {

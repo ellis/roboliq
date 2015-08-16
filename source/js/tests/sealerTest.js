@@ -14,12 +14,12 @@ describe('commands/sealer', function() {
 		}
 	};
 
-	describe('sealer.action.sealPlate', function () {
+	describe('sealer.sealPlate', function () {
 		it('should move plate to sealer, seal, then move plate back to original location', function () {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
-						command: "sealer.action.sealPlate",
+						command: "sealer.sealPlate",
 						object: "plate1",
 					}
 				}
@@ -69,7 +69,7 @@ describe('commands/sealer', function() {
 							"object": "plate1",
 							"destination": "ourlab.mario.site.P2"
 						},
-						"command": "sealer.action.sealPlate",
+						"command": "sealer.sealPlate",
 						"object": "plate1"
 					}
 				}

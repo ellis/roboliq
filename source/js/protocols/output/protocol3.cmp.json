@@ -220,7 +220,7 @@
 				"object": "plate1",
 				"destination": "ourlab.mario.site.P2"
 			},
-			"command": "sealer.action.sealPlate",
+			"command": "sealer.sealPlate",
 			"object": "plate1"
 		}
 	},
