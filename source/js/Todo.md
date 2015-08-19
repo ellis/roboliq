@@ -82,6 +82,7 @@
 - [x] commands/ourlab.js: import commands/roboliq.js
 - [x] require 'roboliq' field for protocols
 - [ ] add 'roboliq' version to output
+- [ ] implement `tania*` scripts for denaturation and renaturation
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
