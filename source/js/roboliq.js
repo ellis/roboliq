@@ -86,9 +86,15 @@ var protocolEmpty = {
 	warnings: {}
 };
 
+// REFACTOR: If nodejs version >= 0.12, then use path.isAbsolute instead
+function isAbsolute(p) {
+	return path.normalize(p + '/') === path.normalize(path.resolve(p) + '/');
+}
+
 function loadUrlContent(url, filecache) {
 	url = path.join(url);
-	if (!path.isAbsolute(url))
+	//if (!path.isAbsolute(url))
+	if (!isAbsolute(url))
 		url = "./" + url;
 	//console.log("in cache:", filecache.hasOwnProperty(url))
 	//console.log("absolute:", path.resolve(url))
