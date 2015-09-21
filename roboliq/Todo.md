@@ -1,88 +1,9 @@
-- [x] test.js: fillStateItems(): add more handling for objects in ourlab.js
-- [x] ourlab.js: remove autogenerate logic
-- [x] roboliq.js: create file for command handlers and plan converters
-- [x] put protocol JSON into separate JSON files
-- [x] refactor names of movePlate commands (use "transporter." prefix)
-- [x] create test protocol with sealing, where plate needs to be moved to the sealer first (add a 'movePlate' command, which will be expanded in turn)
-- [x] test.js: handle errors from commandHandler call
-- [x] test.js: accumulate warnings from commandHandler call
-- [x] generate instructions, pass them to Evoware compiler, checkout final script
-- [x] test.js: pass JSON and JavaScript files to load from the command line
-- [x] test.js: let user pass in filename to use for output
-- [x] test.js: default to output name having same name as protocol, but with "out.json" extension (e.g. protocol3.out.json)
-- [x] save output files in git for testing comparisons when code changes are made
-- [x] test protocol4.json
-- [x] EvowareCompiler: `pipetter._dispense`
-- [x] EvowareCompiler: parse volumes (e.g. with units such as 'ul')
-- [x] `pipetter._pipette`: create instruction, test in protocol5.json
-- [x] commands/pipetter.js: pipetter.pipette: method 1
-- [x] `pipetter._cleanTips`: create instruction, test in protocol8.json
-- [x] commands/pipetter.js: pipetter.pipette: refresh tips (simple)
-- [x] commandHandler args: should probably create a single object to pass in to ease adaptation of call parameters
-- [x] commands/pipetter.js: pipetter.pipette: choose the default liquid class intelligently
-- [x] commands/pipetter.js: `pipetter._pipette`: output effects array for changes in well contents
-- [x] commands/pipetter.js: pipetter.pipette: method 2
-- [x] commands/pipetter.js: pipetter.pipette: clean 4 tips at a time
-- [x] commands/pipetter.js: pipetter.pipette: method 3
-- [x] commands/pipetter.js: pipetter.pipette: handle multiple possible source wells for a single item
-- [x] commands/pipetter.js: pipetter.pipette: for cleaning, sort out "begin, end, before, after" parameters
-- [x] commandHandler: also allow for returning alternative parameter values, either for individual parameters or groups of parameters
-- [x] ourlab.js: add 'sites' and 'washProgram' namespaces
-- [x] test.js: '-O' parameter for output directory
-- [x] test.js: allow for loading YAML protocols
-- [x] ourlab.js: setup labware models
-- [x] start creating unit tests
-- [x] setup module for processing protocols as a function
-- [x] create unit test for a pipetting protocol
-- [x] roboliq.js: generate table for labware
-- [x] roboliq.js: generate table for sourceWells (which stock goes where in what volume)
-- [x] commands/pipetter/pipetterUtils.js: refactor functions to take 'objects' instead of 'data'
-- [x] debug: node main.js -O protocols/output protocols/tania13_ph_1_balancePlate.yaml
-- [x] misc.js: getObjectsValue(), change arguments so that name is first, then 'objects' and 'effects'
-- [x] initialize system liquid's volume to "Infinity l"
-- [x] for uninitialized source volumes, default to "NaN l"
-- [x] handle opening and closing of centrifuge during transport
-- [x] roboliq.js: handle directives
-- [x] misc.js: use `_.get`
-- [x] #for: create directive that can handle all the other factorial directives
-- [x] commands/pipetter.js: pipetter.pipetteMixtures: allow for sorting items by index, destination (default to index)
-- [x] `#mixtureList`
-- [x] "#destinationWells#mixPlate(all row-jump(1))"
-- [x] "#length#mixtures"
-- [x] `#replaceLabware`
-- [x] create new script for old tania13_ph_2_pipette
-- [x] command: repeat
-- [x] command: timer
-- [x] command: centrifuge run
-- [x] command: centrifuge.centrifuge2
-- [x] handle opening and closing of centrifuge during transport (write unit test)
-
 ## Before submission
 
-- [x] commands/fluorescenceReader.js: update based on sealer code
-- [x] consider renaming `pipetter.instruction.pipette => pipetter._pipette`
-- [x] set READER.closed = true
-- [x] replace `centrifuge._close` with `equipment._close`
-- [x] consider using commands/equipment.js
-- [x] change Equipment.open => Equipment.closed, with appropriate modifications
-- [x] create new script for old tania13_ph_3_measure
-- [x] compile to evoware all instructions for tania13_1 protocol
-- [x] compile to evoware all instructions for tania13_2b protocol
-- [x] compile to evoware all instructions for tania13_3 protocol
-- [x] equipment.run for reader: we probably need to use a different ID rather than the carrierName
-- [x] figure out how to implement variable expansion
-- [x] support creation of well groups, including random ones
-- [x] handle "description"s in steps
-- [x] roboliq.js: generate table for final well contents
-- [x] implement 'import' keyword for protocols to import other protocols
-- [x] roboliq.js: should be able to pass multiple --file-data args
-- [x] test the creation of custom functions in a user's protocol using a template object
-- [x] commands/roboliq.js: import command handlers
-- [x] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
-- [x] commands/ourlab.js: import commands/roboliq.js
-- [x] require 'roboliq' field for protocols
-- [x] move source code to 'src' subdir
-- [ ] add 'roboliq' version to output
+- [?] add 'roboliq' version to output
+- [ ] get running of protocols from command line to work again, and document it
+- [ ] main.js: show help if nothing is passed on the command line
+- [ ] main.js: fix `--ourlab` help description
 - [ ] implement `tania*` scripts for denaturation and renaturation
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
@@ -274,6 +195,7 @@ structure as the top array and they represent the mixture originally dispensed i
 * factorialMerge: factorial merging of array of arrays of objects (like ``factorialArrays >> map merge``)
 * replicate
 
+```
     #factorialTemplate:
         variables:
         - a: [1, 2, 3]
@@ -283,7 +205,7 @@ structure as the top array and they represent the mixture originally dispensed i
             hello: "'{{a}}'",
             n: {{b}}
             c: ${c}
-
+```
 
 somehow distinguish between control factors, nuisance factors, blocking factors, measurable factors, unknown factors
 

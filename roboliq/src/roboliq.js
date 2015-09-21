@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var fs = require('fs');
+var jsonfile = require('jsonfile');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 var yaml = require('yamljs');
@@ -8,6 +9,8 @@ var expect = require('./expect.js');
 var misc = require('./misc.js');
 var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
 var wellsParser = require('./parsers/wellsParser.js');
+
+var version = "v0.1";
 
 var nomnom = require('nomnom').options({
 	infiles: {
@@ -67,7 +70,7 @@ var nomnom = require('nomnom').options({
 		flag: true,
 		help: 'print version and exit',
 		callback: function() {
-			return "version 0.1";
+			return "version "+version;
 		}
 	},
 });
@@ -102,6 +105,8 @@ function loadUrlContent(url, filecache) {
 		return filecache[url];
 	else if (path.extname(url) === ".yaml")
 		return yaml.load(url);
+	else if (path.extname(url) === ".json")
+		return jsonfile.readFileSync(url);
 	else
 		return require(url);
 }
@@ -531,6 +536,7 @@ function run(argv, userProtocol) {
 		var output = _.merge(
 			{},
 			{
+				roboliq: version,
 				objects: protocol.objects,
 				steps: protocol.steps,
 				effects: protocol.effects,
