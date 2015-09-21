@@ -81,6 +81,7 @@
 - [x] optimize mergeProtocols by optimizing how directives are handled in objects -- currently all the merging is slowing things down significantly
 - [x] commands/ourlab.js: import commands/roboliq.js
 - [x] require 'roboliq' field for protocols
+- [x] move source code to 'src' subdir
 - [ ] add 'roboliq' version to output
 - [ ] implement `tania*` scripts for denaturation and renaturation
 - [ ] UI to display protocol
@@ -88,7 +89,6 @@
 - [ ] UI to create protocol
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
-- [ ] move source code to 'src' subdir
 - [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] add program version info to the protocol output
 - [ ] add commandline arguments to the protocol output
