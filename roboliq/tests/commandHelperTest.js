@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var should = require('should');
-var commandHelper = require('../commandHelper.js')
+var commandHelper = require('../src/commandHelper.js')
 
 describe('commandHelper', function() {
 	describe('commandHelper.parseParams', function() {

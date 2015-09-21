@@ -1,8 +1,8 @@
 var _ = require('lodash');
 var should = require('should');
-var roboliq = require('../roboliq.js')
-var directiveHandlers = require('../config/roboliqDirectiveHandlers.js');
-var misc = require('../misc.js');
+var roboliq = require('../src/roboliq.js')
+var directiveHandlers = require('../src/config/roboliqDirectiveHandlers.js');
+var misc = require('../src/misc.js');
 
 var data = {
 	directiveHandlers: directiveHandlers,

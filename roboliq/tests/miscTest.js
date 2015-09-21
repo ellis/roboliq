@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var should = require('should');
-var misc = require('../misc.js')
+var misc = require('../src/misc.js')
 
 describe('misc', function() {
 	describe('misc.mutateDeep', function () {

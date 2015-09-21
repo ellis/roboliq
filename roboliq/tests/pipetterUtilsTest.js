@@ -1,6 +1,6 @@
-var roboliq = require('../roboliq.js')
+var roboliq = require('../src/roboliq.js')
 var should = require('should');
-var pipetterUtils = require('../commands/pipetter/pipetterUtils.js');
+var pipetterUtils = require('../src/commands/pipetter/pipetterUtils.js');
 
 describe('pipetter/pipetterUtils', function() {
 	describe('getContentsAndName', function () {

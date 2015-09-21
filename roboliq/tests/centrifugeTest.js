@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var should = require('should');
-var roboliq = require('../roboliq.js')
+var roboliq = require('../src/roboliq.js')
 
 describe('commands/centrifgue', function() {
 	var protocol0 = {

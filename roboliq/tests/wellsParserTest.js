@@ -1,5 +1,5 @@
 var should = require('should');
-var wellsParser = require('../parsers/wellsParser.js');
+var wellsParser = require('../src/parsers/wellsParser.js');
 
 describe('wellsParser', function() {
 	var objects = {
