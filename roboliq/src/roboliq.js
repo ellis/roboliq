@@ -10,7 +10,7 @@ var misc = require('./misc.js');
 var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
 var wellsParser = require('./parsers/wellsParser.js');
 
-var version = "v0.1";
+var version = "v1";
 
 var nomnom = require('nomnom').options({
 	infiles: {

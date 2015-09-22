@@ -1,4 +1,5 @@
 {
+	"roboliq": "v1",
 	"steps": {
 		"1": {
 			"command": "pipetter.cleanTips",
