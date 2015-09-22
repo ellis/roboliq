@@ -151,9 +151,9 @@ function directive_factorialMerge(spec, data) {
  * @param  {array} spec  array of objects, may be nested arbitrarily deep, i.e. array of arrays of objects
  * @param  {object} data  [description]
  * @param  {object} obj0  accumulated result of the current merge, will be added to `acc` once the end of the `spec` list is reached
- * @param  {[type]} index index of current item in `spec`
- * @param  {[type]} acc   accumulated list of merged objects
- * @return {array of merged} Returns a factorial list of merged objects.
+ * @param  {number} index index of current item in `spec`
+ * @param  {array} acc   accumulated list of merged objects
+ * @return {array} Returns a factorial list of merged objects.
  */
 function genMerge2(spec, data, obj0, index, acc) {
 	//console.log("genMerge2", spec, obj0, index, acc);

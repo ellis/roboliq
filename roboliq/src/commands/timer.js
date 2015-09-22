@@ -1,3 +1,9 @@
+/**
+ * Timer commands module.
+ * @module commands/timer
+ * @return {Protocol}
+ */
+
 var _ = require('lodash');
 var jmespath = require('jmespath');
 var commandHelper = require('../commandHelper.js');
@@ -51,7 +57,22 @@ function findAgentEquipmentAlternatives(params, data, running) {
 	return alternatives;
 }
 
+/**
+ * Namespace for the ``timer`` commands.
+ * @namespace
+ * @name timer
+ */
 var commandHandlers = {
+	/**
+	 * Instruction to sleep.
+	 * @memberof timer
+	 * @name _sleep
+	 * @function
+	 * @param {string} params.agent Agent identifier
+	 * @param {string} params.equipment Equipment identifier
+	 * @param {number} params.duration Number of seconds to sleep
+	 * @return {CommandHandlerResult} effects that the timer isn't running
+	 */
 	"timer._sleep": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "duration"]);
 		var effects = {};
@@ -61,6 +82,14 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	/**
+	 * Instruction to start a timer.
+	 * @name _start
+	 * @function
+	 * @param {string} params.agent Agent identifier
+	 * @param {string} params.equipment Equipment identifier
+	 * @return {object} effects that the timer is running
+	 */
 	"timer._start": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		var effects = {};
@@ -69,6 +98,14 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	/**
+	 * Instruction to stop a timer.
+	 * @name _stop
+	 * @function
+	 * @param {string} params.agent Agent identifier
+	 * @param {string} params.equipment Equipment identifier
+	 * @return {object} effects that the timer is not running
+	 */
 	"timer._stop": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
 		var effects = {};
@@ -202,8 +239,37 @@ var commandHandlers = {
 	},
 };
 
+/**
+ * @type {Protocol}
+ */
 module.exports = {
+	/** Targeted version of Roboliq. */
 	roboliq: "v1",
+	/** Create predicates for objects of type = "Timer". */
 	objectToPredicateConverters: objectToPredicateConverters,
-	commandHandlers: commandHandlers
+	/**
+	 * Timer command handlers.
+	 * @namespace commandHandlers
+	 */
+	commandHandlers: {
+		/**
+		 * Instruction to sleep.
+		 * @memberof commandHandlers
+		 * @name _sleep
+		 * @function
+		 * @param {string} params.agent Agent identifier
+		 * @param {string} params.equipment Equipment identifier
+		 * @param {number} params.duration Number of seconds to sleep
+		 * @return {CommandHandlerResult} effects that the timer isn't running
+		 */
+		"timer._sleep": function(params, data) {
+			expect.paramsRequired(params, ["agent", "equipment", "duration"]);
+			var effects = {};
+			if (params.stop)
+				effects[params.equipment + ".running"] = false;
+			return {
+				effects: effects
+			};
+		},
+	}
 };

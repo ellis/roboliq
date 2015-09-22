@@ -1,3 +1,29 @@
+/**
+ * Protocol object
+ * @typedef {Object} Protocol
+ * @property {Object} objects
+ * @property {Object} steps
+ * @property {Object} effects
+ * @property {Array} predicates
+ * @property {Object} directiveHandlers
+ * @property {Object} objectToPredicateConverters
+ * @property {Object} commandHandlers
+ * @property {Object} planHandlers
+ * @property {Object} files
+ * @property {Object} errors
+ * @property {Object} warnings
+ */
+
+/**
+ * Command handler result
+ * @typedef {Object} CommandHandlerResult
+ * @property {Array} errors - array of error strings
+ * @property {Array} warnings - array of warning strings
+ * @property {Object|Array} expansion - an array or map of sub-steps
+ * @property {Object} effects - a map of object property effects
+ * @property {Object} alternatives - ???
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var fs = require('fs');
