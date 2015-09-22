@@ -1,14 +1,15 @@
 var _ = require('lodash');
 var fs = require('fs');
+var path = require('path');
 
-var mdfxTemplate = undefined;
+var mdfxTemplate = _.template(fs.readFileSync(path.join(__dirname, "tania15_renaturation.mdfx.template")).toString());
 
 function getWellName0(row, col) {
 	return String.fromCharCode("A".charCodeAt(0)-1+row) + ('0'+col).slice(-2);
 }
 
 function getWellNames0(rowCol_l) {
-	return _.map(rowCol_l, function(rowCol) { return getWellName0(rowCol.row, rowCol.col) }).join("+");
+	return _.map(rowCol_l, function(rowCol) { return getWellName0(rowCol.row, rowCol.col) }).join(",");
 }
 
 function getWellName(row, col) {
@@ -21,8 +22,6 @@ function getMdfxWells(rowCol_l) {
 		return s+":"+s;
 	}).join("|");
 }
-
-mdfxTemplate = _.template(fs.readFileSync("tania15_renaturation.mdfx.template").toString());
 
 function template(row, col, bufferSource, gfpSource) {
 	var mixWell = "mixPlate("+getWellName0(row, col)+")",
@@ -37,32 +36,33 @@ function template(row, col, bufferSource, gfpSource) {
 			],
 			destination: mixWell
 		} },
-		{ "evoware.timer.sleep": { agent: "mario", "id": 1, "duration": 420 } },
+		{ command: "timer.sleep", duration: 420 },
 		{ pipette: { source: mixWell, destination: renaturationWell, amount: "7ul", pipettePolicy: "Roboliq_Water_Dry_1000" } },
 		{ transportLabware: { device: "mario__transporter2", object: "mixPlate", site: "REGRIP" } },
-		{ measureAbsorbance: {
+		{
+			command: "fluorescenceReader.measurePlate",
 			object: "mixPlate",
-			programData: programData,
+			program: { programData: programData },
 			outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania15_renaturation--<YYYMMDD_HHmmss>.xml'
-		} },
-		{ transportLabware: { device: "mario__transporter2", object: "mixPlate", site: "P2" } }
+		},
+		{ command: "transporter.movePlate", object: "mixPlate", destination: "ourlab.mario.site.P2" }
 	];
 }
 
-var protocolContents = {
-	labware: {
-		buffer1Labware: { model: "troughModel_100ml", location: "R5" },
-		mixPlate:  { model: "plateModel_384_square", location: "P2" }
+var protocol = {
+	roboliq: "v1",
+	description: "renaturation experiments",
+	objects: {
+		buffer1Labware: { type: "Plate", model: "ourlab.model.troughModel_100ml", location: "ourlab.mario.site.R5" },
+		mixPlate: { type: "Plate", model: "ourlab.model.plateModel_384_square", location: "ourlab.mario.site.P2" },
+		buffer1: { type: "Liquid", wells: "buffer1Labware(C01 down to F01)" },
+		sfGFP: { type: "Liquid", wells: "mixPlate(P01)" },
+		Q204H_N149Y: { type: "Liquid", wells: "mixPlate(P02)" },
+		tdGFP: { type: "Liquid", wells: "mixPlate(P03)" },
+		N149Y: { type: "Liquid", wells: "mixPlate(P04)" },
+		Q204H: { type: "Liquid", wells: "mixPlate(P05)" }
 	},
-	source: [
-		{ name: "buffer1", well: "buffer1Labware(C01|F01)" },
-		{ name: "sfGFP", well: "mixPlate(P01)" },
-		{ name: "Q204H_N149Y", well: "mixPlate(P02)" },
-		{ name: "tdGFP", well: "mixPlate(P03)" },
-		{ name: "N149Y", well: "mixPlate(P04)" },
-		{ name: "Q204H", well: "mixPlate(P05)" }
-	],
-	protocol: []
+	steps: []
 };
 
 function generateProtocol(bufferSource, col, gfpIndex) {

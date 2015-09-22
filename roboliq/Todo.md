@@ -6,6 +6,7 @@
 - [x] main.js: fix `--ourlab` help description
 - [ ] implement `tania*` scripts for denaturation and renaturation
     * node protocols/tania15_renaturation.js, use `__dirname`
+- [ ] roboliq.js: accept .js infiles
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
