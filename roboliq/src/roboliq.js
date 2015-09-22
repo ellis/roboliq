@@ -267,11 +267,72 @@ function postProcessProtocol(protocol) {
 				//console.log(e.toString());
 			}
 		}
-	})
+	});
 }
 
 function run(argv, userProtocol) {
 	var opts = nomnom.parse(argv);
+
+	var result = undefined;
+	try {
+		result = _run(opts, userProtocol);
+	} catch (e) {
+		if (e.hasOwnProperty("errors")) {
+			result = {
+				output: {
+					errors: {
+						'': e.errors
+					}
+				}
+			};
+		}
+		else {
+			console.log(JSON.stringify(e));
+		}
+	}
+
+	if (result && result.output) {
+		if (!_.isEmpty(result.output.errors)) {
+			console.log();
+			console.log("Errors:");
+			_.forEach(result.output.errors, function(err, id) {
+				if (id)
+					console.log(id+": "+err.toString());
+				else
+					console.log(err.toString());
+			});
+		}
+
+		if (!_.isEmpty(result.output.warnings)) {
+			console.log();
+			console.log("Warnings:");
+			_.forEach(result.output.warnings, function(err, id) {
+				if (id)
+					console.log(id+": "+err.toString());
+				else
+					console.log(err.toString());
+			});
+		}
+
+		if (opts.debug) {
+			console.log();
+			console.log("Output:");
+		}
+		var outputText = JSON.stringify(result.output, null, '\t');
+		if (opts.debug || opts.print)
+			console.log(outputText);
+
+		if (opts.output !== '') {
+			var inpath = _.last(opts.infiles);
+			var dir = opts.outputDir || path.dirname(inpath);
+			var outpath = opts.output || path.join(dir, path.basename(inpath, path.extname(inpath))+".out.json");
+			console.log("output written to: "+outpath);
+			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
+		}
+	}
+}
+
+function _run(opts, userProtocol) {
 
 	if (opts.debug) {
 		console.log("opts:", opts);
@@ -324,6 +385,9 @@ function run(argv, userProtocol) {
 		},
 		protocolEmpty
 	);
+	/*if (opts.debug) {
+		console.log(protocol);
+	}*/
 
 	postProcessProtocol(protocol);
 
@@ -504,7 +568,7 @@ function run(argv, userProtocol) {
 	}
 	if (opts.debug || opts.printProtocol) {
 		console.log();
-		console.log("Protocol:")
+		console.log("Protocol:");
 		console.log(JSON.stringify(protocol, null, '\t'));
 		/*console.log();
 		console.log("Steps:")
@@ -515,23 +579,10 @@ function run(argv, userProtocol) {
 		*/
 	}
 
-	var output = undefined;
 	if (!_.isEmpty(protocol.errors)) {
-		console.log();
-		console.log("Errors:");
-		_.forEach(protocol.errors, function(err, id) {
-			console.log(id+": "+err.toString());
-		});
-		return {protocol: protocol, output: _.merge({}, {errors: protocol.errors, warnings: protocol.warnings})};
+		return {protocol: protocol, output: _.pick(protocol, 'errors', 'warnings')};
 	}
 	else {
-		if (!_.isEmpty(protocol.warnings)) {
-			console.log();
-			console.log("Warnings:");
-			_.forEach(protocol.warnings, function(err, id) {
-				console.log(id+": "+err.toString());
-			});
-		}
 		//var instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);
 		var output = _.merge(
 			{},
@@ -549,9 +600,9 @@ function run(argv, userProtocol) {
 			labware: [],
 			sourceWells: [],
 			wellContentsFinal: []
-		}
+		};
 		// Construct labware table
-		var labwares = misc.getObjectsOfType(objectsFinal, ['Plate', 'Tube'])
+		var labwares = misc.getObjectsOfType(objectsFinal, ['Plate', 'Tube']);
 		_.forEach(labwares, function(labware, name) {
 			tables.labware.push(_.merge({}, {
 				labware: name,
@@ -607,7 +658,7 @@ function run(argv, userProtocol) {
 				_.forEach(contents, function(contents2, name2) {
 					var wellName2 = _.compact([wellName, name2]).join('.');
 					tabulateWellContents(contents2, labwareName, wellName2);
-				})
+				});
 			}
 		};
 		_.forEach(labwares, function(labware, name) {
@@ -618,22 +669,6 @@ function run(argv, userProtocol) {
 
 		//
 		_.merge(output, {tables: tables});
-
-		if (opts.debug) {
-			console.log();
-			console.log("Output:")
-		}
-		var outputText = JSON.stringify(output, null, '\t');
-		if (opts.debug || opts.print)
-			console.log(outputText);
-
-		if (opts.output !== '') {
-			var inpath = _.last(opts.infiles);
-			var dir = opts.outputDir || path.dirname(inpath);
-			var outpath = opts.output || path.join(dir, path.basename(inpath, path.extname(inpath))+".out.json");
-			console.log("output written to: "+outpath);
-			fs.writeFileSync(outpath, JSON.stringify(output, null, '\t')+"\n");
-		}
 
 		return {protocol: protocol, output: output};
 	}
