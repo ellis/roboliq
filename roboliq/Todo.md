@@ -5,6 +5,7 @@
 - [x] main.js: show help if nothing is passed on the command line
 - [x] main.js: fix `--ourlab` help description
 - [ ] implement `tania*` scripts for denaturation and renaturation
+    * node protocols/tania15_renaturation.js, use `__dirname`
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
