@@ -37,7 +37,7 @@ var nomnom = require('nomnom').options({
 		full: 'ourlab',
 		flag: true,
 		default: true,
-		help: "don't automatically load config/ourlab.js"
+		help: "automatically load config/ourlab.js"
 	},
 	output: {
 		abbr: 'o',
@@ -272,6 +272,10 @@ function postProcessProtocol(protocol) {
 
 function run(argv, userProtocol) {
 	var opts = nomnom.parse(argv);
+	if (_.isEmpty(opts.infiles) && !userProtocol) {
+		console.log(nomnom.getUsage());
+		process.exit(0);
+	}
 
 	var result = undefined;
 	try {

@@ -2,8 +2,8 @@
 
 - [x] add 'roboliq' version to output
 - [x] get running of protocols from command line to work again, and document it
-- [ ] main.js: show help if nothing is passed on the command line
-- [ ] main.js: fix `--ourlab` help description
+- [x] main.js: show help if nothing is passed on the command line
+- [x] main.js: fix `--ourlab` help description
 - [ ] implement `tania*` scripts for denaturation and renaturation
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
