@@ -1,7 +1,24 @@
+/**
+ * Namespace for the ``transporter`` commands.
+ * @namespace transporter
+ * @version v1
+ */
+
+/**
+ * Transporter commands module.
+ * @module commands/transporter
+ * @return {Protocol}
+ * @version v1
+ */
+
 var _ = require('lodash');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
+/**
+ * Create predicates for objects of type = "Transporter"
+ * @static
+ */
 var objectToPredicateConverters = {
 	"Transporter": function(name, data) {
 		return {
@@ -14,7 +31,24 @@ var objectToPredicateConverters = {
 	},
 };
 
+/**
+ * Handlers for {@link transporter} commands.
+ * @static
+ */
 var commandHandlers = {
+	/**
+	 * Transport a plate to a destination.
+	 *
+	 * Handler should return `effects` with the plate's new location.
+	 *
+	 * @typedef _movePlate
+	 * @memberof transporter
+	 * @property {string} command - "transporter._movePlate"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
+	 * @property {string} object - Plate identifier
+	 * @property {string} destination - Location identifier
+	 */
 	"transporter._movePlate": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "object", "destination"]);
 		var effects = {};
@@ -24,7 +58,14 @@ var commandHandlers = {
 		};
 	},
 	/**
-	 * params: [agent], object, destination
+	 * Transport a plate to a destination.
+	 *
+	 * @typedef movePlate
+	 * @memberof transporter
+	 * @property {string} command - "transporter.movePlate"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} object - Plate identifier
+	 * @property {string} destination - Location identifier
 	 */
 	"transporter.movePlate": function(params, data) {
 		expect.paramsRequired(params, ["object", "destination"]);
@@ -130,6 +171,11 @@ var commandHandlers = {
 	}
 };
 
+/**
+ * Plan handler to allow other modules to use `transporter._movePlate` as a
+ * planning action.
+ * @static
+ */
 var planHandlers = {
 	"transporter._movePlate": function(params, parentParams, data) {
 		return [{

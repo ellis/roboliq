@@ -3,7 +3,6 @@
  * @namespace timer
  * @version v1
  */
-var timer = {};
 
 /**
  * Timer commands module.

@@ -365,6 +365,8 @@ function run(argv, userProtocol) {
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 		}
 	}
+
+	return result;
 }
 
 function _run(opts, userProtocol) {
