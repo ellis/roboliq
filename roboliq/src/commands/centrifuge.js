@@ -1,9 +1,26 @@
+/**
+ * Namespace for the ``centrifuge`` commands.
+ * @namespace centrifuge
+ * @version v1
+ */
+
+/**
+ * Centrifuge commands module.
+ * @module commands/centrifuge
+ * @return {Protocol}
+ * @version v1
+ */
+
 var _ = require('lodash');
 var jmespath = require('jmespath');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
+/**
+ * Create predicates for objects of type = "Centrifuge"
+ * @static
+ */
 var objectToPredicateConverters = {
 	"Centrifuge": function(name, object) {
 		return {
@@ -25,11 +42,26 @@ function closeAll(params, data, effects) {
 	_.forEach(equipmentData.sitesInternal, function(site) { effects[site+".closed"] = true; });
 }
 
+/**
+ * Handlers for {@link centrifuge} commands.
+ * @static
+ */
 var commandHandlers = {
-	// TODO:
-	// - [ ] raise and error if the sealer site is occupied
-	// - [ ] raise error if plate's location isn't set
-	// - [ ] return result of query for possible alternative settings
+	/**
+	 * Centrifuge using two plates.
+	 *
+	 * @typedef centrifuge2
+	 * @memberof centrifuge
+	 * @property {string} command - "centrifuge.centrifuge2"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 * @property {string} object1 - Plate identifier
+	 * @property {string} object2 - Plate identifier
+	 * @property {string} [site1] - Location identifier for the centrifugation site of object1
+	 * @property {string} [site2] - Location identifier for the centrifugation site of object2
+	 * @property {string} [destinationAfter1] - Location identifier for where object1 should be placed after centrifugation
+	 * @property {string} [destinationAfter2] - Location identifier for where object2 should be placed after centrifugation
+	 */
 	"centrifuge.centrifuge2": function(params, data) {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
@@ -157,12 +189,8 @@ var commandHandlers = {
 			},
 		];
 
-		// Create the effets object
-		var effects = {};
-
 		return {
 			expansion: expansion,
-			effects: effects,
 			alternatives: alternatives
 		};
 	}
@@ -170,7 +198,6 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	//predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers
 };
