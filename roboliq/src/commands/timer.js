@@ -1,4 +1,3 @@
-
 /**
  * Namespace for the ``timer`` commands.
  * @namespace timer
@@ -18,6 +17,10 @@ var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
+/**
+ * Create predicates for objects of type = "Timer"
+ * @static
+ */
 var objectToPredicateConverters = {
 	"Timer": function(name, object) {
 		return {
@@ -65,26 +68,22 @@ function findAgentEquipmentAlternatives(params, data, running) {
 	return alternatives;
 }
 
+/**
+ * Handlers for {@link timer} commands.
+ * @static
+ */
 var commandHandlers = {
 	/**
-	 * Parameters for timer._sleep
+	 * Sleep for a given duration using a specific timer.
 	 *
-	 * effects that the timer isn't running
+	 * Handler should return `effects` that the timer is not running.
 	 *
 	 * @typedef _sleep
-	 * @memberOf timer
-	 * @alias timer._sleep
+	 * @memberof timer
 	 * @property {string} command - "timer._sleep"
 	 * @property {string} agent - Agent identifier
 	 * @property {string} equipment - Equipment identifier
 	 * @property {number} duration - Number of seconds to sleep
-	 */
-	/**
-	 * Instruction to sleep.
-	 * @param {string} params.agent Agent identifier
-	 * @param {string} params.equipment Equipment identifier
-	 * @param {number} params.duration Number of seconds to sleep
-	 * @return {CommandHandlerResult} effects that the timer isn't running
 	 */
 	"timer._sleep": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "duration"]);
@@ -96,12 +95,15 @@ var commandHandlers = {
 		};
 	},
 	/**
-	 * Instruction to start a timer.
-	 * @name _start
-	 * @function
-	 * @param {string} params.agent Agent identifier
-	 * @param {string} params.equipment Equipment identifier
-	 * @return {object} effects that the timer is running
+	 * Start the given timer.
+	 *
+	 * Handler should return `effects` that the timer is running.
+	 *
+	 * @typedef _start
+	 * @memberof timer
+	 * @property {string} command - "timer._start"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
 	 */
 	"timer._start": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
@@ -112,12 +114,15 @@ var commandHandlers = {
 		};
 	},
 	/**
-	 * Instruction to stop a timer.
-	 * @name _stop
-	 * @function
-	 * @param {string} params.agent Agent identifier
-	 * @param {string} params.equipment Equipment identifier
-	 * @return {object} effects that the timer is not running
+	 * Stop the given timer.
+	 *
+	 * Handler should return `effects` that the timer is not running.
+	 *
+	 * @typedef _stop
+	 * @memberof timer
+	 * @property {string} command - "timer._stop"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
 	 */
 	"timer._stop": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment"]);
@@ -127,8 +132,24 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	/**
+	 * Wait until the given timer has reacher the given elapsed time.
+	 *
+	 * Handler should:
+	 * - expect that the timer (identified by the `equipment` parameter) is running
+	 * - return `effects` that the timer is not running
+	 *
+	 * @typedef _wait
+	 * @memberof timer
+	 * @property {string} command - "timer._wait"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
+	 * @property {number} till - Number of seconds to wait till from the time the timer was started
+	 * @property {boolean} stop - Whether to stop the timer after waiting, or let it continue
+	 */
 	"timer._wait": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "till", "stop"]);
+		// TODO: assert that timer is running
 		var effects = {};
 		if (params.stop)
 			effects[params.equipment + ".running"] = false;
@@ -136,6 +157,18 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	/**
+	 * A control construct to perform the given sub-steps and then wait
+	 * until a certain amount of time has elapsed since the beginning of this command.
+	 *
+	 * @typedef doAndWait
+	 * @memberof timer
+	 * @property {string} command - "timer.doAndWait"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 * @property {number} duration - Number of seconds this command should last
+	 * @property {Array|Object} steps - Sub-steps to perform
+	 */
 	"timer.doAndWait": function(params, data) {
 		expect.paramsRequired(params, ['duration', 'steps']);
 		var duration = commandHelper.getNumberParameter(params, data, 'duration');
@@ -168,6 +201,16 @@ var commandHandlers = {
 		};
 
 	},
+	/**
+	 * Sleep for a given duration.
+	 *
+	 * @typedef sleep
+	 * @memberof timer
+	 * @property {string} command - "timer.sleep"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 * @property {number} duration - Number of seconds to sleep
+	 */
 	"timer.sleep": function(params, data) {
 		expect.paramsRequired(params, ["duration"]);
 		//var duration = misc.getNumberParameter(params, data, "duration");
@@ -197,6 +240,15 @@ var commandHandlers = {
 			alternatives: alternatives
 		};
 	},
+	/**
+	 * Start a timer.
+	 *
+	 * @typedef start
+	 * @memberof timer
+	 * @property {string} command - "timer.start"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 */
 	"timer.start": function(params, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
 		if (alternatives.errors) return altenatives;
@@ -222,6 +274,15 @@ var commandHandlers = {
 			alternatives: alternatives
 		};
 	},
+	/**
+	 * Stop a running timer.
+	 *
+	 * @typedef stop
+	 * @memberof timer
+	 * @property {string} command - "timer.stop"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 */
 	"timer.stop": function(params, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, true);
 		if (alternatives.errors) return alternatives;
@@ -256,9 +317,7 @@ var commandHandlers = {
  * @type {Protocol}
  */
 module.exports = {
-	/** Targeted version of Roboliq. */
 	roboliq: "v1",
-	/** Create predicates for objects of type = "Timer". */
 	objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers
 };

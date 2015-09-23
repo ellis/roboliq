@@ -1,3 +1,8 @@
+/**
+ * Roboliq's default configuration.
+ * @module config/roboliq
+ */
+
 var _ = require('lodash');
 
 var predicates = [

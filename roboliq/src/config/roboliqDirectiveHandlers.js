@@ -1,3 +1,8 @@
+/**
+ * Roboliq's default directives.
+ * @module config/roboliqDirectiveHandlers
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');

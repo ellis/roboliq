@@ -1,5 +1,10 @@
 /**
- * Protocol object
+ * Roboliq's top module with functions for processing protocols.
+ * @module roboliq
+ */
+
+/**
+ * Protocol specification.
  * @typedef {Object} Protocol
  * @property {Object} objects
  * @property {Object} steps
@@ -15,7 +20,7 @@
  */
 
 /**
- * Command handler result
+ * Command handler result.
  * @typedef {Object} CommandHandlerResult
  * @property {Array} errors - array of error strings
  * @property {Array} warnings - array of warning strings
