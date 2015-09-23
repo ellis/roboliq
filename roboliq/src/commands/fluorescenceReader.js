@@ -1,10 +1,37 @@
+/**
+ * Namespace for the ``fluorescenceReader`` commands.
+ * @namespace fluorescenceReader
+ * @version v1
+ */
+
+/**
+ * Fluorescence Reader commands module.
+ * @module commands/fluorescenceReader
+ * @return {Protocol}
+ * @version v1
+ */
+
 var _ = require('lodash');
 var jmespath = require('jmespath');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
+/**
+ * Handlers for {@link fluorescenceReader} commands.
+ * @static
+ */
 var commandHandlers = {
+	/**
+	 * Measure the fluorescence of a plate.
+	 *
+	 * @typedef measurePlate
+	 * @memberof fluorescenceReader
+	 * @property {string} command - "fluorescenceReader.measurePlate"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 * CONTINUE
+	 */
 	"fluorescenceReader.measurePlate": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",

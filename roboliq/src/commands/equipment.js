@@ -10,6 +10,7 @@
  * @return {Protocol}
  * @version v1
  */
+
 var _ = require('lodash');
 var jmespath = require('jmespath');
 var commandHelper = require('../commandHelper.js');
