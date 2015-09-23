@@ -1,3 +1,11 @@
+
+/**
+ * Namespace for the ``timer`` commands.
+ * @namespace timer
+ * @version v1
+ */
+var timer = {};
+
 /**
  * Timer commands module.
  * @module commands/timer
@@ -57,17 +65,22 @@ function findAgentEquipmentAlternatives(params, data, running) {
 	return alternatives;
 }
 
-/**
- * Namespace for the ``timer`` commands.
- * @namespace
- * @name timer
- */
 var commandHandlers = {
 	/**
+	 * Parameters for timer._sleep
+	 *
+	 * effects that the timer isn't running
+	 *
+	 * @typedef _sleep
+	 * @memberOf timer
+	 * @alias timer._sleep
+	 * @property {string} command - "timer._sleep"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
+	 * @property {number} duration - Number of seconds to sleep
+	 */
+	/**
 	 * Instruction to sleep.
-	 * @memberof timer
-	 * @name _sleep
-	 * @function
 	 * @param {string} params.agent Agent identifier
 	 * @param {string} params.equipment Equipment identifier
 	 * @param {number} params.duration Number of seconds to sleep
@@ -247,29 +260,5 @@ module.exports = {
 	roboliq: "v1",
 	/** Create predicates for objects of type = "Timer". */
 	objectToPredicateConverters: objectToPredicateConverters,
-	/**
-	 * Timer command handlers.
-	 * @namespace commandHandlers
-	 */
-	commandHandlers: {
-		/**
-		 * Instruction to sleep.
-		 * @memberof commandHandlers
-		 * @name _sleep
-		 * @function
-		 * @param {string} params.agent Agent identifier
-		 * @param {string} params.equipment Equipment identifier
-		 * @param {number} params.duration Number of seconds to sleep
-		 * @return {CommandHandlerResult} effects that the timer isn't running
-		 */
-		"timer._sleep": function(params, data) {
-			expect.paramsRequired(params, ["agent", "equipment", "duration"]);
-			var effects = {};
-			if (params.stop)
-				effects[params.equipment + ".running"] = false;
-			return {
-				effects: effects
-			};
-		},
-	}
+	commandHandlers: commandHandlers
 };

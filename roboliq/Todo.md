@@ -4,6 +4,7 @@
 - [x] get running of protocols from command line to work again, and document it
 - [x] main.js: show help if nothing is passed on the command line
 - [x] main.js: fix `--ourlab` help description
+- [ ] make sure tests run again
 - [ ] implement `tania*` scripts for denaturation and renaturation
     * node protocols/tania15_renaturation.js, use `__dirname`
 - [ ] roboliq.js: accept .js infiles
