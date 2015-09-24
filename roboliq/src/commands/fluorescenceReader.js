@@ -30,7 +30,11 @@ var commandHandlers = {
 	 * @property {string} command - "fluorescenceReader.measurePlate"
 	 * @property {string} [agent] - Agent identifier
 	 * @property {string} [equipment] - Equipment identifier
-	 * CONTINUE
+	 * @property {Object} program - Program object for measurement
+	 * @property {string} outputFile - Filename for output
+	 * @property {string} object - Plate identifier
+	 * @property {string} [site] - Site identifier in reader
+	 * @property {string} [destinationAfter] - Site to move the plate to after measurement
 	 */
 	"fluorescenceReader.measurePlate": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
