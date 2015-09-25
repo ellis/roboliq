@@ -100,9 +100,9 @@ class EvowareCompilerSpec extends FunSpec {
 			val searchPath_l: List[File] = Nil
 				// Load carrier file
 			val result_? = for {
-				carrierData <- ResultC.from(EvowareCarrierData.loadFile(new File("../testdata/bsse-mario", "Carrier.cfg").getPath))
-				filename <- ResultC.from(FileUtils.findFile("../testdata/bsse-mario/Template.ewt", searchPath_l))
-				tableData <- ResultC.from(roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, filename.getPath))
+				carrierData <- EvowareCarrierData.loadFile(new File("../testdata/bsse-mario", "Carrier.cfg").getPath)
+				filename <- FileUtils.findFile("../testdata/bsse-mario/Template.ewt", searchPath_l)
+				tableData <- roboliq.evoware.parser.EvowareTableData.loadFile(carrierData, filename.getPath)
 				content_l <- compiler.generateScriptContents(tableData, "test", script1_l)
 			} yield {
 				// Save scripts

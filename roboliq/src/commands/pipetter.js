@@ -1,3 +1,16 @@
+/**
+ * Namespace for the ``pipetter`` commands.
+ * @namespace pipetter
+ * @version v1
+ */
+
+/**
+ * Pipetter commands module.
+ * @module commands/pipetter
+ * @return {Protocol}
+ * @version v1
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
@@ -550,7 +563,24 @@ function pipette(params, data) {
 	};
 }
 
+/**
+ * Handlers for {@link pipetter} commands.
+ * @static
+ */
 var commandHandlers = {
+	/**
+	 * Transport a plate to a destination.
+	 *
+	 * Handler should return `effects` with the plate's new location.
+	 *
+	 * @typedef _aspirate
+	 * @memberof pipetter
+	 * @property {string} command - "pipetter._aspirate"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
+	 * @property {Object} program - Program identifier
+	 * @property {Object[]} items - Data about what should be pipetted where
+	 */
 	"pipetter._aspirate": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
@@ -572,6 +602,17 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	/*
+	"items": [
+		{
+			"syringe": 1,
+			"source": "plate1(A01)",
+			"destination": "plate1(A02)",
+			"volume": "20ul"
+		}
+	]
+	CONTINUE
+	 */
 	"pipetter._pipette": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		//console.log("params", JSON.stringify(params, null, '  '))
@@ -706,6 +747,5 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	//objectToPredicateConverters: objectToPredicateConverters,
 	commandHandlers: commandHandlers
 };
