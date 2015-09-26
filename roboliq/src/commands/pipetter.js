@@ -45,6 +45,27 @@ function extractLiquidNamesFromContents(contents) {
 // REFACTOR: remove this variable
 var createEffects_pipette = pipetterUtils.getEffects_pipette;
 
+/**
+ * Parameters for pipette items.
+ *
+ * @typedef PipetteItem
+ * @memberof pipetter
+ * @property {string|integer} [syringe] - Syringe identifier
+ * @property {string} [source] - Source specifier
+ * @property {string} [destination] - Destination specifier
+ * @property {string} [volume] - Volume specifier
+ */
+/**
+ * Pipette liquids from sources to destinations.
+ *
+ * @typedef pipette
+ * @memberof pipetter
+ * @property {string} command - "pipetter.pipette"
+ * @property {string} [agent] - Agent identifier
+ * @property {string} [equipment] - Equipment identifier
+ * @property {Object} [program] - Program identifier
+ * @property {_PipetteItem[]} items - Data about what should be pipetted where
+ */
 function pipette(params, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
@@ -569,9 +590,7 @@ function pipette(params, data) {
  */
 var commandHandlers = {
 	/**
-	 * Transport a plate to a destination.
-	 *
-	 * Handler should return `effects` with the plate's new location.
+	 * Aspirate liquids from sources.
 	 *
 	 * @typedef _aspirate
 	 * @memberof pipetter
@@ -588,6 +607,17 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
+	/**
+	 * Clean the pipetter tips.
+	 *
+	 * @typedef _cleanTips
+	 * @memberof pipetter
+	 * @property {string} command - "pipetter._cleanTips"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
+	 * @property {Object} program - Program identifier
+	 * @property {Object[]} items - Data about which tips to clean and with what intensity
+	 */
 	"pipetter._cleanTips": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
 		var effects = {};
@@ -602,16 +632,26 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	/*
-	"items": [
-		{
-			"syringe": 1,
-			"source": "plate1(A01)",
-			"destination": "plate1(A02)",
-			"volume": "20ul"
-		}
-	]
-	CONTINUE
+	/**
+	 * Parameters for low-level pipette items.
+	 *
+	 * @typedef _PipetteItem
+	 * @memberof pipetter
+	 * @property {string|integer} syringe - Syringe identifier
+	 * @property {string} source - Source specifier
+	 * @property {string} destination - Destination specifier
+	 * @property {string} volume - Volume specifier
+	 */
+	/**
+	 * Pipette liquids from sources to destinations.
+	 *
+	 * @typedef _pipette
+	 * @memberof pipetter
+	 * @property {string} command - "pipetter._pipette"
+	 * @property {string} agent - Agent identifier
+	 * @property {string} equipment - Equipment identifier
+	 * @property {Object} program - Program identifier
+	 * @property {_PipetteItem[]} items - Data about what should be pipetted where
 	 */
 	"pipetter._pipette": function(params, data) {
 		expect.paramsRequired(params, ["agent", "equipment", "program"]);
