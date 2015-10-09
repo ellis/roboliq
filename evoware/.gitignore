@@ -14,3 +14,5 @@ sbt-launch.jar
 .settings
 log-*
 sbt
+.cache-main
+.cache-tests

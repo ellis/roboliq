@@ -7,6 +7,13 @@ lazy val root =
 		.settings(roboliqSettings: _*)
 		.settings(assemblySettings: _*)
 
+lazy val evoware = project
+	.settings(roboliqSettings: _*)
+	.settings(assemblySettings: _*)
+	.settings(libraryDependencies ++= Seq(RoboliqDeps.scalatest, RoboliqDeps.scopt, RoboliqDeps.json_gson, RoboliqDeps.scala_graph_core, RoboliqDeps.rhino))
+	.settings(initialCommands in console := """import scalaz._, Scalaz._, roboliq.core._""")
+	.settings(mainClass in assembly := Some("roboliq.main.Main"))
+
 //lazy val reactivesim = project.in(file("extern/reactive-sim/core"))
 
 lazy val base = project
