@@ -1105,7 +1105,7 @@ object PartialPlan {
   (:goal (and (location plateA siteA)))
 )
 """
-	
+	/*
 	def main(args: Array[String]) {
 		val res = for {
 			domain <- roboliq.ai.plan.PddlParser.parseDomain(domainText).right
@@ -1161,5 +1161,5 @@ object PartialPlan {
 			case Left(msg) => println("ERROR: "+msg)
 			case _ =>
 		}
-	}
+	}*/
 }
