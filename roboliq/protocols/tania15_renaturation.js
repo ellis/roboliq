@@ -29,16 +29,30 @@ function template(row, col, bufferSource, gfpSource) {
 	    renaturationWell = "mixPlate("+getWellName0(row, renaturationCol)+")",
 	    programData = mdfxTemplate({wells: getMdfxWells([{row: row, col: renaturationCol}])});
 	return [
-		{ pipette: {
-			steps: [
-				{ s: bufferSource, a: "85.5ul", clean: "thorough", pipettePolicy: "Roboliq_Water_Dry_1000" },
-				{ s: gfpSource, a: "4.5ul", clean: "thorough", cleanBefore: "none", pipettePolicy: "Roboliq_Water_Wet_1000_mix3x50ul" }
+		{
+			command: 'pipetter.pipette',
+			items: [
+				{ source: bufferSource, volume: "85.5ul", clean: "thorough", pipettePolicy: "Roboliq_Water_Dry_1000" },
+				{ source: gfpSource, volume: "4.5ul", clean: "thorough", cleanBefore: "none", pipettePolicy: "Roboliq_Water_Wet_1000_mix3x50ul" }
 			],
-			destination: mixWell
-		} },
-		{ command: "timer.sleep", duration: 420 },
-		{ pipette: { source: mixWell, destination: renaturationWell, amount: "7ul", pipettePolicy: "Roboliq_Water_Dry_1000" } },
-		{ transportLabware: { device: "mario__transporter2", object: "mixPlate", site: "REGRIP" } },
+			destinations: mixWell
+		},
+		{
+			command: "timer.sleep",
+			duration: 420
+		},
+		{
+			command: 'pipetter.pipette',
+			sources: mixWell,
+			destinations: renaturationWell,
+			volumes: "7ul",
+			pipettePolicy: "Roboliq_Water_Dry_1000"
+		},
+		{
+			command: 'transporter.movePlate',
+			object: "mixPlate",
+			site: "REGRIP"
+		},
 		{
 			command: "fluorescenceReader.measurePlate",
 			object: "mixPlate",
@@ -62,7 +76,7 @@ var protocol = {
 		N149Y: { type: "Liquid", wells: "mixPlate(P04)" },
 		Q204H: { type: "Liquid", wells: "mixPlate(P05)" }
 	},
-	steps: []
+	steps: {}
 };
 
 function generateProtocol(bufferSource, col, gfpIndex) {
@@ -79,18 +93,21 @@ function generateProtocol(bufferSource, col, gfpIndex) {
 		rowCol_l.push({row: row, col: col});
 	//}
 	var l = _.flatten(ll);
-	protocolContents.protocol = protocolContents.protocol.concat(l);
+	l.forEach(function(step) {
+		protocol.steps[_.keys(protocol.steps).length + 1] = step;
+	});
 
 	// Indicate that the mixWells will be used as sources
-	protocolContents.source = protocolContents.source.concat([{
+	// FIXME: re-add this? -- ellis 2015-10-09
+	/*protocolContents.source = protocolContents.source.concat([{
 		name: "mix{{WELL}}",
-		well: "mixPlate("+getWellNames0(rowCol_l)+")"
-	}]);
+		wells: "mixPlate("+getWellNames0(rowCol_l)+")"
+	}]);*/
 }
 
 for (var col = 1; col <= 5; col++) {
 	for (var gfp = 1; gfp <= 5; gfp++) {
 		generateProtocol("buffer1", col, gfp);
-		console.log(JSON.stringify(protocolContents, null, '\t'));
+		console.log(JSON.stringify(protocol, null, '\t'));
 	}
 }

@@ -5,9 +5,12 @@
 - [x] main.js: show help if nothing is passed on the command line
 - [x] main.js: fix `--ourlab` help description
 - [x] make sure tests run again
-- [ ] make sure that the scala program runs again
+- [x] make sure that the scala program runs again
 - [ ] implement `tania*` scripts for denaturation and renaturation
-    * node protocols/tania15_renaturation.js, use `__dirname`
+    * [x] node protocols/tania15_renaturation.js, use `__dirname`
+	* [ ] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
+	* [ ] merge protocols together rather than appending them!
+	* [ ] there may be a problem with the non-standard characters in the XML file?
 - [ ] roboliq.js: accept .js infiles
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
