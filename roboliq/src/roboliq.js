@@ -29,6 +29,24 @@
  * @property {Object} alternatives - ???
  */
 
+/**
+ * Well contents.
+ *
+ * Well contents are encoded as an array.
+ * The first element always holds the volume in the well.
+ * If the array has exactly one element, the volume should be 0l.
+ * If the array has exactly two elements, the second element is the name of the substance.
+ * If the array has more than two elements, each element after the volume has the same
+ * structure as the top array and they represent the mixture originally dispensed in the well.
+ *
+ *          objects:
+ *              plate1:
+ *                  contents:
+ *                      A01: ["30ul", ["25ul", "water"], ["5ul", "reagent1"]]
+
+ * @typedef {array} WellContents
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var fs = require('fs');
@@ -293,6 +311,12 @@ function postProcessProtocol(protocol) {
 		if (_.isString(liquid.wells)) {
 			try {
 				liquid.wells = wellsParser.parse(liquid.wells, protocol.objects);
+				_.forEach(liquid.wells, function(well) {
+					var pair = pipetterUtils.getContentsAndName(well, protocol);
+					assert(!pair[0], "well already has contents defined: "+well+" "+pair[0]);
+					var path = pair[1];
+					_.set(protocol.objects, path, ['Infinity l', name]);
+				});
 			} catch (e) {
 				protocol.errors[name+".wells"] = [e.toString()];
 				//console.log(e.toString());
@@ -312,6 +336,9 @@ function run(argv, userProtocol) {
 	try {
 		result = _run(opts, userProtocol);
 	} catch (e) {
+		console.log(JSON.stringify(e));
+		console.log(e.message);
+		console.log(e.stack);
 		if (e.hasOwnProperty("errors")) {
 			result = {
 				output: {
@@ -685,7 +712,7 @@ function _run(opts, userProtocol) {
 		tabulateWELLS(objectsFinal['__WELLS__'] || {}, []);
 		// Construct wellContentsFinal table
 		var tabulateWellContents = function(contents, labwareName, wellName) {
-			//console.log("tabulateWellContents:", contents, labwareName, wellName);
+			//console.log("tabulateWellContents:", JSON.stringify(contents), labwareName, wellName);
 			if (_.isArray(contents)) {
 				var map = pipetterUtils.flattenContents(contents);
 				var wellName2 = (wellName) ? labwareName+"("+wellName+")" : labwareName;

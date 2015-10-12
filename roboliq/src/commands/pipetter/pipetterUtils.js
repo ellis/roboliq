@@ -12,6 +12,30 @@ var wellsParser = require('../../parsers/wellsParser.js');
 var emptyVolume = math.unit(0, 'ul');
 var unknownVolume = emptyVolume; // math.unit(math.NaN, 'l');
 
+function checkContents(contents) {
+	if (_.isUndefined(contents) || contents.length == 0) {
+		// ok
+	}
+	else {
+		var volume = math.eval(contents[0]);
+		if (contents.length == 1) {
+			assert(false, volume.toNumber('l') === 0, "when the contents array has only one element, that element must be 0: "+JSON.stringify(contents));
+		}
+		else if (contents.length == 2) {
+			assert(_.isString(contents[1]), "second element of contents should be a string: "+JSON.stringify(contents));
+		}
+		else {
+			for (var i = 1; i < contents.length; i++) {
+				//try {
+					checkContents(contents[i]);
+				//} catch (e) {
+				//
+				//}
+			}
+		}
+	}
+}
+
 /**
  * Tries to find the contents array for the given well.
  *
@@ -37,6 +61,7 @@ function getWellContents(wellName, data, effects) {
 	if (!_.isEmpty(contents)) return contents;
 
 	contents = misc.findObjectsValue(labwareContentsName, data.objects, effects);
+	checkContents(contents);
 	return contents;
 }
 
@@ -99,8 +124,8 @@ function getContentsAndName(wellName, data, effects) {
 
 /**
  * Convert the contents array encoding to a map of substances to amounts
- * @param  {Array} contents The well contents array
- * @return {Object} map of substance name to the volume or amount of that substance in the well
+ * @param  {array} contents The well contents array
+ * @return {object} map of substance name to the volume or amount of that substance in the well
  */
 function flattenContents(contents) {
 	//console.log("flattenContents:", contents);
@@ -112,7 +137,7 @@ function flattenContents(contents) {
 	}
 	// If the array has exactly two elements, the second element is the name of the substance.
 	else if (contents.length == 2) {
-		assert(_.isString(contents[1]));
+		assert(_.isString(contents[1]), "second element of contents should be a string: "+JSON.stringify(contents));
 		var volume = math.eval(contents[0]).format({precision: 14});
 		return _.zipObject([[contents[1], volume]]);
 	}
@@ -140,7 +165,7 @@ function flattenContents(contents) {
  * @param {object} params The parameters for the pipetter._pipette command.
  * @param {object} data The data object passed to command handlers.
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
-* @return {object} The effects caused by the pipetting command.
+ * @return {object} The effects caused by the pipetting command.
  */
 function getEffects_pipette(params, data, effects) {
 	var effects2 = (effects) ? _.cloneDeep(effects) : {};
@@ -160,33 +185,31 @@ function getEffects_pipette(params, data, effects) {
 	_.forEach(params.items, function(item) {
 		//console.log(JSON.stringify(item));
 		var volume = math.eval(item.volume);
+		var volumeText = volume.format({precision: 14});
 
 		var pair = getContentsAndName(item.source, data, effects2);
-		var srcContents0 = (pair[0]) ? pair[0] : ["0 l", item.source];
+		//console.log("src contents", item.source, pair[0])
+		var srcContents0 = (pair[0]) ? pair[0] : ["Infinity l", item.source];
+		//console.log("srcContents0", srcContents0);
+		var srcContents = _.cloneDeep(srcContents0);
 		var srcContentsName = pair[1];
 
 		pair = getContentsAndName(item.destination, data, effects2);
-		var dstContents = (pair[0]) ? pair[0] : ["0ul"];
-		if (dstContents.length === 2) {
-			dstContents = [dstContents[0], dstContents];
-		}
+		//console.log("dst contents", item.destination, pair[0])
 		var dstContentsName = pair[1];
-		//console.log("check", item.destination, pair)
-
-		//console.log("dstContents", dstContents)
-		var dstVolume = math.eval(dstContents[0]);
-		// Increase total well volume
-		dstContents[0] = math.add(dstVolume, volume).format({precision: 14});
-		// Create new content element to add to the contents list
-
-		var srcContents = _.cloneDeep(srcContents0);
-		var newContents = (dstContents.length <= 1 && srcContents.length === 2 && _.isString(srcContents[1]))
-			? srcContents[1]
-			: [volume.format({precision: 14}), srcContents[1]];
-		//console.log("newContents", newContents)
-		// Augment contents list
-		dstContents.push(newContents);
-		//console.log("dstContents2", dstContents)
+		var dstContents0 = (pair[0]) ? pair[0] : ["0 l"];
+		var dstContents;
+		// If the destination is empty:
+		if (!pair[0] || pair[0].length <= 1) {
+			dstContents = [volumeText].concat(_.rest(srcContents0));
+		}
+		// Otherwise add source to destination contents
+		else {
+			var dstVolume = math.eval(dstContents0[0]);
+			var totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
+			dstContents = [totalVolumeText, dstContents0, [volumeText].concat(_.rest(srcContents0))];
+		}
+		//console.log("dstContents", dstContents);
 
 		// Decrease volume of source
 		var srcVolume0 = math.eval(srcContents[0]);
@@ -219,6 +242,7 @@ function getEffects_pipette(params, data, effects) {
 		//console.log("x:\n"+JSON.stringify(x, null, '  '));
 		effects2[nameWELL] = x;
 		effectsNew[nameWELL] = x;
+		//console.log();
 	});
 
 	return effects2;

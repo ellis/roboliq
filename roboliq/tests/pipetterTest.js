@@ -274,7 +274,7 @@ describe('pipetter', function() {
 						type: "Plate",
 						model: "ourlab.model.troughModel_100ml",
 						location: "ourlab.mario.site.R6",
-						contents: ['Infinity l', 'saltwater']
+						//contents: ['Infinity l', 'saltwater']
 					},
 					plate1: {
 						type: "Plate",

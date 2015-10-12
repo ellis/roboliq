@@ -634,10 +634,27 @@ module.exports = {
 				outputFile: "name"
 			});
 			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
-				programFile: {type: "File"}
+				programFile: "File?",
+				programData: "Any?",
+				//program: "Any?"
 			});
-			var content = parsedProgram.programFile.value.toString('utf8');
+			var hasProgramFile = (parsedProgram.programFile.value) ? 1 : 0;
+			var hasProgramData = (parsedProgram.programData.value) ? 1 : 0;
+			//console.log(parsedProgram);
+			expect.truthy({}, hasProgramFile + hasProgramData != 0, "either `programFile` or `programData` must be specified.");
+			expect.truthy({}, hasProgramFile + hasProgramData != 2, "only one of `programFile` or `programData` may be specified.");
+			var content;
+			if (hasProgramData)
+				content = parsedProgram.programData.value.toString('utf8');
+			else if (hasProgramFile) {
+				content = parsedProgram.programFile.value.toString('utf8');
+			}
+			else if (parsedProgram.programData) {
+				content = parsedProgram.programData
+			}
 			var start_i = content.indexOf("<TecanFile");
+			if (start_i < 0)
+				start_i = 0;
 			var programData = content.substring(start_i).
 				replace(/[\r\n]/g, "").
 				replace(/&/g, "&amp;"). // "&amp;" is probably not needed, since I didn't find it in the XML files

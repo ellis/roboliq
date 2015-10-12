@@ -6,6 +6,12 @@
 - [x] main.js: fix `--ourlab` help description
 - [x] make sure tests run again
 - [x] make sure that the scala program runs again
+- [ ] BUG: track down bad construction of WellContents
+- [ ] babel-ify for ES6 features
+- [ ] create WellContents.js with functions from pipetterUtils.js
+	- [ ] create a function for adding contents, take code from pipetterUtils/getEffects_pipette
+	- [ ] refactor pipetterUtils/getEffects_pipette using WellContents.js
+- [ ] write test for construction of well contents to test for the bug above
 - [ ] implement `tania*` scripts for denaturation and renaturation
     * [x] node protocols/tania15_renaturation.js, use `__dirname`
 	* [ ] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
@@ -174,21 +180,6 @@ previousCleanAfter = item.cleanAfter || if (!params.cleanBetween) source.cleanAf
 
 cleanEnd: intensity of cleaning after pipetting is done.
 Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
-
-
-# Encoding well content
-
-Well contents are encoded as an array.
-The first element always holds the volume in the well.
-If the array has exactly one element, the volume should be 0l.
-If the array has exactly two elements, the second element is the name of the substance.
-If the array has more than two elements, each element after the volume has the same
-structure as the top array and they represent the mixture originally dispensed in the well.
-
-        objects:
-            plate1:
-                contents:
-                    A01: ["30ul", ["25ul", "water"], ["5ul", "reagent1"]]
 
 
 # Combinatorial stuff
