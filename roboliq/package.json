@@ -4,6 +4,7 @@
   "description": "Roboliq JavaScript library",
   "main": "test.js",
   "dependencies": {
+    "babel": "^5.8.23",
     "javascript-natural-sort": "~0.7.1",
     "jmespath": "^0.12.0",
     "jsonfile": "^2.2.2",
@@ -22,7 +23,7 @@
     "should": "~7.0.1"
   },
   "scripts": {
-    "test": "mocha tests/",
+    "test": "mocha --compilers js:babel/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc.json"
   },
