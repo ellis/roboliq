@@ -51,7 +51,7 @@ function template(row, col, bufferSource, gfpSource) {
 		{
 			command: 'transporter.movePlate',
 			object: "mixPlate",
-			site: "REGRIP"
+			destination: "ourlab.mario.site.REGRIP"
 		},
 		{
 			command: "fluorescenceReader.measurePlate",
@@ -108,6 +108,6 @@ function generateProtocol(bufferSource, col, gfpIndex) {
 for (var col = 1; col <= 5; col++) {
 	for (var gfp = 1; gfp <= 5; gfp++) {
 		generateProtocol("buffer1", col, gfp);
-		console.log(JSON.stringify(protocol, null, '\t'));
 	}
 }
+console.log(JSON.stringify(protocol, null, '\t'));
