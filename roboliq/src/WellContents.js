@@ -3,23 +3,24 @@
  * @module commands/pipetter/pipetterUtils
  */
 
-var _ = require('lodash');
+import _ from 'lodash';
 var assert = require('assert');
 var math = require('mathjs');
-var misc = require('../../misc.js');
-var wellsParser = require('../../parsers/wellsParser.js');
+var misc = require('./misc.js');
+var wellsParser = require('./parsers/wellsParser.js');
 
-var emptyVolume = math.unit(0, 'ul');
-var unknownVolume = emptyVolume; // math.unit(math.NaN, 'l');
+export const emptyVolume = math.unit(0, 'ul');
+export const unknownVolume = emptyVolume; // math.unit(math.NaN, 'l');
 
-function checkContents(contents) {
+export function checkContents(contents) {
 	if (_.isUndefined(contents) || contents.length == 0) {
 		// ok
 	}
 	else {
 		var volume = math.eval(contents[0]);
 		if (contents.length == 1) {
-			assert(false, volume.toNumber('l') === 0, "when the contents array has only one element, that element must be 0: "+JSON.stringify(contents));
+			// FIXME: remove 'false, ' from here!
+			assert.equal(volume.toNumber('l'), 0, "when the contents array has only one element, that element must be 0: "+JSON.stringify(contents));
 		}
 		else if (contents.length == 2) {
 			assert(_.isString(contents[1]), "second element of contents should be a string: "+JSON.stringify(contents));
@@ -44,7 +45,7 @@ function checkContents(contents) {
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {array} the contents array if found, otherwise null
  */
-function getWellContents(wellName, data, effects) {
+export function getWellContents(wellName, data, effects) {
 	var wellInfo = wellsParser.parseOne(wellName);
 	assert(wellInfo.wellId);
 	var labwareContentsName = wellInfo.labware+".contents";
@@ -72,7 +73,7 @@ function getWellContents(wellName, data, effects) {
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {array} the volume if found, otherwise 0ul
  */
-function getWellVolume(wellName, data, effects) {
+export function getWellVolume(wellName, data, effects) {
 	var contents = getWellContents(wellName, data, effects);
 	if (!_.isEmpty(contents)) {
 		var volume = math.eval(contents[0]);
@@ -88,7 +89,7 @@ function getWellVolume(wellName, data, effects) {
  * @param {object} effects The effects object for effects which have taken place during the command handler and aren't in the data object
 * @return {array} [content, contentName], where content will be null if not found
  */
-function getContentsAndName(wellName, data, effects) {
+export function getContentsAndName(wellName, data, effects) {
 	if (!effects) effects = {};
 
 	//var i = wellName.indexOf('(');
@@ -127,7 +128,7 @@ function getContentsAndName(wellName, data, effects) {
  * @param  {array} contents The well contents array
  * @return {object} map of substance name to the volume or amount of that substance in the well
  */
-function flattenContents(contents) {
+export function flattenContents(contents) {
 	//console.log("flattenContents:", contents);
 	assert(_.isArray(contents));
 	// The first element always holds the volume in the well.
@@ -161,99 +162,43 @@ function flattenContents(contents) {
 }
 
 /**
- * Get an object representing the effects of pipetting.
- * @param {object} params The parameters for the pipetter._pipette command.
- * @param {object} data The data object passed to command handlers.
- * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
- * @return {object} The effects caused by the pipetting command.
+ * Add source contents to destination contents at the given volume.
+ * @param {array} srcContents - current contents of the source well
+ * @param {array} dstContents - current contents of the destination well
+ * @param {string} volume - a string representing the volume to transfer
+ * @return {array} an array whose first element is the new source contents and whose second element is the new destination contents.
  */
-function getEffects_pipette(params, data, effects) {
-	var effects2 = (effects) ? _.cloneDeep(effects) : {};
-	var effectsNew = {}
+export function transferContents(srcContents, dstContents, volume) {
+	assert(_.isArray(srcContents));
+	assert(_.isString(volume));
+	checkContents(srcContents);
 
-	/*__WELLS__:
-		plate1.contents.A01:
-			isSource: true
-			contentsInitial:
-				water: 0ul
-			volumeAdded: XXX
-			volumeRemoved: 60ul
-			contentsFinal:
-				water: -60ul
-				*/
-	//console.log(JSON.stringify(params));
-	_.forEach(params.items, function(item) {
-		//console.log(JSON.stringify(item));
-		var volume = math.eval(item.volume);
-		var volumeText = volume.format({precision: 14});
+	volume = math.eval(volume);
+	const volumeText = volume.format({precision: 14});
 
-		var pair = getContentsAndName(item.source, data, effects2);
-		//console.log("src contents", item.source, pair[0])
-		var srcContents0 = (pair[0]) ? pair[0] : ["Infinity l", item.source];
-		//console.log("srcContents0", srcContents0);
-		var srcContents = _.cloneDeep(srcContents0);
-		var srcContentsName = pair[1];
+	//console.log({dstContents})
+	if (_.isUndefined(dstContents) || _.isEmpty(dstContents) || !_.isArray(dstContents))
+		dstContents = [];
+	//console.log({dstContents})
+	checkContents(dstContents);
 
-		pair = getContentsAndName(item.destination, data, effects2);
-		//console.log("dst contents", item.destination, pair[0])
-		var dstContentsName = pair[1];
-		var dstContents0 = (pair[0]) ? pair[0] : ["0 l"];
-		var dstContents;
-		// If the destination is empty:
-		if (!pair[0] || pair[0].length <= 1) {
-			dstContents = [volumeText].concat(_.rest(srcContents0));
-		}
-		// Otherwise add source to destination contents
-		else {
-			var dstVolume = math.eval(dstContents0[0]);
-			var totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
-			dstContents = [totalVolumeText, dstContents0, [volumeText].concat(_.rest(srcContents0))];
-		}
-		//console.log("dstContents", dstContents);
+	let dstContents2;
+	// If the destination is empty:
+	if (dstContents.length <= 1) {
+		dstContents2 = [volumeText].concat(_.rest(srcContents));
+	}
+	// Otherwise add source to destination contents
+	else {
+		const dstVolume = math.eval(dstContents[0]);
+		const totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
+		dstContents2 = [totalVolumeText, dstContents, [volumeText].concat(_.rest(srcContents))];
+	}
+	//console.log("dstContents", dstContents);
 
-		// Decrease volume of source
-		var srcVolume0 = math.eval(srcContents[0]);
-		var srcVolume1 = math.chain(srcVolume0).subtract(volume).done();
-		srcContents[0] = srcVolume1.format({precision: 14});
+	// Decrease volume of source
+	const srcVolume0 = math.eval(srcContents[0]);
+	const srcVolume1 = math.chain(srcVolume0).subtract(volume).done();
+	const srcContents2 = [srcVolume1.format({precision: 14})].concat(_.rest(srcContents));
 
-		// Update content effects
-		effects2[srcContentsName] = srcContents;
-		effects2[dstContentsName] = dstContents;
-		effectsNew[srcContentsName] = srcContents;
-		effectsNew[dstContentsName] = dstContents;
-
-		// Update __WELLS__ effects for source
-		//console.log("a", srcContentsName);
-		var nameWELL = "__WELLS__."+srcContentsName;
-		//console.log("nameWELL:", nameWELL)
-		var x = misc.findObjectsValue(nameWELL, data.objects, effects2);
-		x = (x) ? _.cloneDeep(x) : {};
-		if (_.isEmpty(x)) {
-			x.isSource = true;
-			x.volumeMin = srcContents0[0];
-			x.volumeMax = srcContents0[0];
-		}
-		//console.log("max:", x.volumeMax, srcVolume1.toString())
-		x.volumeMax = math.max(math.eval(x.volumeMax), srcVolume1).format({precision: 14});
-		x.volumeMin = math.min(math.eval(x.volumeMin), srcVolume1).format({precision: 14});
-		x.volumeRemoved = (x.volumeRemoved)
-			? math.chain(math.eval(x.volumeRemoved)).add(volume).done().format({precision: 14})
-			: volume.format({precision: 14});
-		//console.log("x:\n"+JSON.stringify(x, null, '  '));
-		effects2[nameWELL] = x;
-		effectsNew[nameWELL] = x;
-		//console.log();
-	});
-
-	return effectsNew;
-}
-
-module.exports = {
-	getContentsAndName: getContentsAndName,
-	getEffects_pipette: getEffects_pipette,
-	getWellContents: getWellContents,
-	getWellVolume: getWellVolume,
-	flattenContents: flattenContents,
-	emptyVolume: emptyVolume,
-	unknownVolume: emptyVolume,
+	return [srcContents2, dstContents2];
 }
