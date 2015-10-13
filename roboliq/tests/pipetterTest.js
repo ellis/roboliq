@@ -82,6 +82,12 @@ describe('pipetter', function() {
 						volumeMax: 'Infinity l',
 						volumeMin: 'Infinity l',
 						volumeRemoved: '20 ul'
+					},
+					'__WELLS__.plate1.contents.A02': {
+						isSource: false,
+						volumeMax: '20 ul',
+						volumeMin: '0 l',
+						volumeAdded: '20 ul'
 					}
 				}
 			});
@@ -220,18 +226,42 @@ describe('pipetter', function() {
 						"volumeMax": "Infinity l",
 						"volumeRemoved": "40 ul"
 					},
+					"__WELLS__.plate1.contents.A01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
 					"plate1.contents.B01": [
 						"10 ul",
 						"systemLiquid"
 					],
+					"__WELLS__.plate1.contents.B01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
 					"plate1.contents.C01": [
 						"10 ul",
 						"systemLiquid"
 					],
+					"__WELLS__.plate1.contents.C01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
 					"plate1.contents.D01": [
 						"10 ul",
 						"systemLiquid"
-					]
+					],
+					"__WELLS__.plate1.contents.D01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					}
 				},
 				"1.2": {
 					"ourlab.mario.systemLiquidLabware.contents": [
@@ -248,18 +278,42 @@ describe('pipetter', function() {
 						"volumeMax": "Infinity l",
 						"volumeRemoved": "80 ul"
 					},
+					"__WELLS__.plate1.contents.E01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
 					"plate1.contents.F01": [
 						"10 ul",
 						"systemLiquid"
 					],
+					"__WELLS__.plate1.contents.F01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
 					"plate1.contents.G01": [
 						"10 ul",
 						"systemLiquid"
 					],
+					"__WELLS__.plate1.contents.G01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
 					"plate1.contents.H01": [
 						"10 ul",
 						"systemLiquid"
-					]
+					],
+					"__WELLS__.plate1.contents.H01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					}
 				}
 			});
 		})

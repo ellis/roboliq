@@ -16,17 +16,17 @@
     "yamljs": "~0.2.3"
   },
   "devDependencies": {
-    "pegjs": "~0.8.0",
-    "jsdoc": "~3.3.2",
     "ink-docstrap": "~0.5.2",
+    "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "mocha": "~2.2.5",
+    "pegjs": "~0.8.0",
     "should": "~7.0.1"
   },
   "scripts": {
     "test": "mocha --compilers js:babel/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs",
-    "jsdoc": "jsdoc -r -c jsdoc.json"
+    "jsdoc": "jsdoc -r -c jsdoc.json --readme README.md"
   },
   "author": "Ellis Whitehead",
-  "license": "GPL3"
+  "license": "GPL-3.0"
 }

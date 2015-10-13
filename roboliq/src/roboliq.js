@@ -56,7 +56,7 @@ var path = require('path');
 var yaml = require('yamljs');
 var expect = require('./expect.js');
 var misc = require('./misc.js');
-var pipetterUtils = require('./commands/pipetter/pipetterUtils.js');
+import * as WellContents from './WellContents.js';
 var wellsParser = require('./parsers/wellsParser.js');
 
 var version = "v1";
@@ -312,7 +312,7 @@ function postProcessProtocol(protocol) {
 			try {
 				liquid.wells = wellsParser.parse(liquid.wells, protocol.objects);
 				_.forEach(liquid.wells, function(well) {
-					var pair = pipetterUtils.getContentsAndName(well, protocol);
+					var pair = WellContents.getContentsAndName(well, protocol);
 					// If well already has contents:
 					if (pair[0]) {
 						assert(_.isEqual(_.rest(pair[0]), [name]), "well "+well+" already contains different contents: "+JSON.stringify(pair[0]));
@@ -540,7 +540,7 @@ function _run(opts, userProtocol) {
 							result = {errors: e.errors};
 						}
 						else {
-							result = {errors: [e.toString()]};
+							result = {errors: _.compact([e.toString(), e.stack])};
 						}
 						if (opts.throw) {
 							if (_.isPlainObject(e))
@@ -720,7 +720,7 @@ function _run(opts, userProtocol) {
 		var tabulateWellContents = function(contents, labwareName, wellName) {
 			//console.log("tabulateWellContents:", JSON.stringify(contents), labwareName, wellName);
 			if (_.isArray(contents)) {
-				var map = pipetterUtils.flattenContents(contents);
+				var map = WellContents.flattenContents(contents);
 				var wellName2 = (wellName) ? labwareName+"("+wellName+")" : labwareName;
 				tables.wellContentsFinal.push(_.merge({well: wellName2}, map));
 			}

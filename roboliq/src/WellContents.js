@@ -1,6 +1,6 @@
 /**
- * A module of helper functions for the pipetter commands.
- * @module commands/pipetter/pipetterUtils
+ * A module of functions for querying and manipulating well contents.
+ * @module WellContents
  */
 
 import _ from 'lodash';
@@ -43,7 +43,7 @@ export function checkContents(contents) {
  * @param {string} wellName name of the well
  * @param {object} data the data object passed to command handlers
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
- * @return {array} the contents array if found, otherwise null
+ * @return {WellContents} the contents array if found, otherwise null
  */
 export function getWellContents(wellName, data, effects) {
 	var wellInfo = wellsParser.parseOne(wellName);

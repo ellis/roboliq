@@ -4,6 +4,7 @@ var math = require('mathjs');
 var expect = require('../../expect.js');
 var pipetterUtils = require('./pipetterUtils.js');
 var wellsParser = require('../../parsers/sourceParser.js');
+var WellContents = require('../../WellContents.js');
 
 /*
 - assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
@@ -77,7 +78,7 @@ function sourceMethod3(group, data, effects) {
 				}
 				else {
 					var wellAndVolumes = _.map(wells, function(wellName) {
-						var volume = pipetterUtils.getWellVolume(wellName, data, effects);
+						var volume = WellContents.getWellVolume(wellName, data, effects);
 						return [wellName, volume.toNumber('ul')];
 					});
 					// Sort by volume

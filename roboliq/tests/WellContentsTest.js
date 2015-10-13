@@ -3,8 +3,73 @@ import assert from 'assert';
 import * as WellContents from '../src/WellContents.js';
 
 describe('WellContents', function() {
+	describe('getContentsAndName', function () {
+
+		it('assert find well contents', function () {
+			var contents1 = ["1ul", "reagent1"];
+			var contents2 = ["2ul", "reagent2"];
+			var contents3 = ["3ul", "reagent3"];
+			var data = {
+				objects: {
+					plateModel1: {
+						rows: 8,
+						columen: 12
+					},
+					plate1: {
+						type: "Plate",
+						model: "plateModel1",
+						contents: contents1
+					},
+					plate2: {
+						type: "Plate",
+						model: "plateModel1",
+						contents: {
+							A01: contents2
+						}
+					}
+				}
+			};
+			assert.deepEqual(WellContents.getContentsAndName("plate1", data), [contents1, 'plate1.contents']);
+			assert.deepEqual(WellContents.getContentsAndName("plate1(A01)", data), [contents1, 'plate1.contents']);
+			assert.deepEqual(WellContents.getContentsAndName("plate2(A01)", data), [contents2, 'plate2.contents.A01']);
+		});
+	});
+
+	describe("flattenContents", function() {
+		it("assert flatten []", function() {
+			assert.deepEqual(WellContents.flattenContents([]), {});
+		});
+		it("assert flatten [0l]", function() {
+			assert.deepEqual(WellContents.flattenContents(["0l"]), {});
+		});
+		it("assert flatten [10ul, reagent1]", function() {
+			assert.deepEqual(WellContents.flattenContents(['10ul', 'reagent1']), {reagent1: '10 ul'});
+		});
+		it("assert flatten [30ul, [10ul, reagent1], [20ul, reagent2]]", function() {
+			var contents = ['30ul', ['10ul', 'reagent1'], ['20ul', 'reagent2']];
+			assert.deepEqual(WellContents.flattenContents(contents), {
+				reagent1: '10 ul',
+				reagent2: '20 ul'
+			});
+		});
+		it("assert flatten [30ul, [20ul, reagent1], [40ul, reagent1]]", function() {
+			var contents = ['30ul', ['20ul', 'reagent1'], ['40ul', 'reagent1']];
+			assert.deepEqual(WellContents.flattenContents(contents), {
+				reagent1: '30 ul'
+			});
+		});
+		it("assert flatten [30ul, [10ul, reagent1], [20ul, [10ul, reagent1], [10ul, reagent2], [20ul, water]]]", function() {
+			var contents = ['30ul', ['10ul', 'reagent1'], ['20ul', ['10ul', 'reagent1'], ['10ul', 'reagent2'], ['20ul', 'water']]];
+			assert.deepEqual(WellContents.flattenContents(contents), {
+				reagent1: '15 ul',
+				reagent2: '5 ul',
+				water: '10 ul'
+			});
+		});
+	});
+
 	describe('transferContents', function () {
-		it('should transfer contents between wells', function () {
+		it('assert transfer contents between wells', function () {
 			assert.deepEqual(
 				WellContents.transferContents(['100 ul', 'source1'], undefined, '20 ul'),
 				[['80 ul', 'source1'], ['20 ul', 'source1']]
