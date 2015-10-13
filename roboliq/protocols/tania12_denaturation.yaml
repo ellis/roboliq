@@ -1,0 +1,148 @@
+description: |
+  Denaturation protocol using Guanidine hydrochloride
+
+  1. Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4.
+  2. Create mixtures
+  3. Measure fluorescence
+
+  Mixtures:
+    5ul GFP
+    0 - 70ul denaturant
+    fill to 75ul with buffer (25mM Tris, pH = 7.5)
+
+objects:
+  balancePlate:
+    type: Plate
+    description: balance plate for centrifuge
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P2
+
+  bufferSource:
+    type: Plate
+    description: trough for water/glycerol/salt mix
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+  denaturantSource:
+    description: denaturant trough (Guanidine hydrochloride)
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+  gfpSource:
+    type: Plate
+    description: GFP eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  mixPlate:
+    type: Plate
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P3
+
+  buffer:
+    type: Liquid
+    wells: bufferSource(C01 down to F01)
+  denaturant:
+    type: Liquid
+    wells: denaturantSource(C01 down to F01)
+
+  sfGFP: {type: Liquid, description: wild type, wells: tubes1(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells: tubes1(A02)}
+  tdGFP: {type: Liquid, description: fusion of double mutant, wells: tubes1(A03)}
+  N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
+  Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
+
+  CONTINUE:
+    - oneOf:
+      # First buffer, then urea
+      - allOf:
+        - source: buffer
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Dry_1000
+        - source: urea
+          amount: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 27.5ul, 30ul, 32.35ul, 35ul]
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Wet_1000
+      # First urea, then water
+      - allOf:
+        - source: urea
+          amount: [37.5ul, 40ul, 42.5ul, 45ul, 47.5ul, 50ul, 52.5ul, 55ul, 57.5ul, 60ul, 62.5ul, 65ul, 70ul]
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Dry_1000
+        - source: buffer
+          cleanBetween: none
+          pipettePolicy: Roboliq_Water_Wet_1000
+
+    - oneOf:
+      - { source: sfGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: Q204H_N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: tdGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+      - { source: Q204H, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
+  mixtures:
+    type: Variable
+    value:
+      "#factorialMixtures":
+        replicates: 3
+        items:
+        - source: saltwater
+          volume: 40ul
+        - "#gradient":
+            "#tableRows":
+            - {volume: 30ul, decimals: 1}
+            - ['source1',     'source2',     'count']
+            - ['hepes_850',   'hepes_650',   5]
+            - ['pipes_775',   'pipes_575',   5]
+            - ['mes_710',     'mes_510',     7]
+            - ['acetate_575', 'acetate_375', 8]
+        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+          volume: "5ul"
+          clean: thorough
+          cleanBetweenSameSource: flush
+          program: Roboliq_Water_Wet_1000_mix3x50ul
+
+  mixtureWells:
+    type: Variable
+    value:
+      "#take":
+        list: "#destinationWells#mixPlate(all row-jump(1))"
+        count: "#length#mixtures"
+
+steps:
+  1:
+    description: Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
+
+    1:
+      command: pipetter.pipette
+      program: Roboliq_Water_Air_1000
+      sources: ourlab.mario.systemLiquid
+      destinations: balancePlate(all row-jump(1) take 2)
+      volumes: 75ul
+      cleanBetween: none
+
+    2:
+      command: sealer.sealPlate
+      object: balancePlate
+
+    3:
+      command: transporter.movePlate
+      object: balancePlate
+      destination: ourlab.mario.site.CENTRIFUGE_4
+
+  2:
+    description: |
+      Denaturation protocol using Guanidine hydrochloride
+
+      Mixtures:
+        5ul GFP
+        0 - 70ul denaturant
+        fill to 75ul with buffer (25mM Tris, pH = 7.5)
+    1:
+      command: pipetter.pipetteMixtures
+      mixtures: mixtures
+  #    replicates: 3
+      destinations: mixtureWells
+      clean: flush
+      cleanBegin: thorough
+      cleanBetweenSameSource: none
+      cleanEnd: thorough
+    2:
+      command: sealer.sealPlate
+      object: mixPlate
