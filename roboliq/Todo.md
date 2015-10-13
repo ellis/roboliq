@@ -9,10 +9,10 @@
 - [x] BUG: track down bad construction of WellContents
 - [x] babel-ify for ES6 features
 - [x] write test for construction of well contents during mixing
-- [ ] create WellContents.js with functions from pipetterUtils.js
+- [x] create WellContents.js with functions from pipetterUtils.js
 	- [x] create a function for adding contents, take code from pipetterUtils/getEffects_pipette
-	- [ ] refactor pipetterUtils/getEffects_pipette using WellContents.js
-- [ ] change WellContents.unknownVolume to infinity, and retest
+	- [x] refactor pipetterUtils/getEffects_pipette using WellContents.js
+- [x] change WellContents.unknownVolume to infinity, and retest
 - [ ] implement `tania15` scripts for renaturation
     * [x] node protocols/tania15_renaturation.js, use `__dirname`
 	* [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)

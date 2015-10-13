@@ -10,7 +10,7 @@ var misc = require('./misc.js');
 var wellsParser = require('./parsers/wellsParser.js');
 
 export const emptyVolume = math.unit(0, 'ul');
-export const unknownVolume = emptyVolume; // math.unit(math.NaN, 'l');
+export const unknownVolume = math.eval('Infinity l');
 
 export function checkContents(contents) {
 	if (_.isUndefined(contents) || contents.length == 0) {
