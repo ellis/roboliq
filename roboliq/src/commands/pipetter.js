@@ -359,8 +359,9 @@ function pipette(params, data) {
 			var tipModels = _(items).map('tipModel').uniq().value();
 			if (tipModels.length !== 1) return false;
 			var tipModel = tipModels[0];
-			if (tipModel.indexOf("0050") >= 0) tipModelCode = "0050";
-			else tipModelCode = "1000";
+			var tipModelCode = (tipModel.indexOf("0050") >= 0)
+				? tipModelCode = "0050"
+				: tipModelCode = "1000";
 			var program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
 			_.forEach(items, function(item) { item.program = program; });
 			return true;

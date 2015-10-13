@@ -236,7 +236,7 @@ function directive_length(spec, data) {
 
 function directive_merge(spec, data) {
 	assert(_.isArray(spec));
-	list = _.map(spec, function(x) { return handleDirective(x, data); });
+	var list = _.map(spec, function(x) { return handleDirective(x, data); });
 	return _.merge.apply(null, [{}].concat(list));
 }
 

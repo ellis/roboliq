@@ -6,7 +6,7 @@
 - [x] main.js: fix `--ourlab` help description
 - [x] make sure tests run again
 - [x] make sure that the scala program runs again
-- [ ] BUG: track down bad construction of WellContents
+- [x] BUG: track down bad construction of WellContents
 - [ ] babel-ify for ES6 features
 - [ ] create WellContents.js with functions from pipetterUtils.js
 	- [ ] create a function for adding contents, take code from pipetterUtils/getEffects_pipette

@@ -313,12 +313,18 @@ function postProcessProtocol(protocol) {
 				liquid.wells = wellsParser.parse(liquid.wells, protocol.objects);
 				_.forEach(liquid.wells, function(well) {
 					var pair = pipetterUtils.getContentsAndName(well, protocol);
-					assert(!pair[0], "well already has contents defined: "+well+" "+pair[0]);
-					var path = pair[1];
-					_.set(protocol.objects, path, ['Infinity l', name]);
+					// If well already has contents:
+					if (pair[0]) {
+						assert(_.isEqual(_.rest(pair[0]), [name]), "well "+well+" already contains different contents: "+JSON.stringify(pair[0]));
+						// Don't need to set contents, leave as is with the given volume.
+					}
+					else {
+						var path = pair[1];
+						_.set(protocol.objects, path, ['Infinity l', name]);
+					}
 				});
 			} catch (e) {
-				protocol.errors[name+".wells"] = [e.toString()];
+				protocol.errors[name+".wells"] = [e.toString(), e.stack];
 				//console.log(e.toString());
 			}
 		}
