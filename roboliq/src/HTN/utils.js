@@ -297,7 +297,7 @@ function renameVars(x, id) {
     return (x);
   }
   if (typeOf(x) === 'object') {
-    for (key in x) {
+    for (var key in x) {
       x[key] = renameVars(x[key], id);
     }
     return (x);

@@ -70,7 +70,7 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.effects, {
 				"1.2": {
 					"plate1.contents.A01": [
-						"-20 ul",
+						"Infinity l",
 						"plate1(A01)"
 					],
 					"plate1.contents.A02": [
@@ -79,8 +79,8 @@ describe('pipetter', function() {
 					],
 					'__WELLS__.plate1.contents.A01': {
 						isSource: true,
-						volumeMax: '0 l',
-						volumeMin: '-20 ul',
+						volumeMax: 'Infinity l',
+						volumeMin: 'Infinity l',
 						volumeRemoved: '20 ul'
 					}
 				}
@@ -97,7 +97,7 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.tables.sourceWells, [
 				{
 					source: 'plate1(A01)',
-					volumeFinal: '-20 ul',
+					volumeFinal: 'Infinity l',
 					volumeInitial: '0ul',
 					volumeRemoved: '20 ul',
 					well: 'plate1(A01)'
@@ -106,7 +106,7 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.tables.wellContentsFinal, [
 				{
 					well: 'plate1(A01)',
-					'plate1(A01)': '-20 ul'
+					'plate1(A01)': 'Infinity l'
 				},
 				{
 					well: 'plate1(A02)',

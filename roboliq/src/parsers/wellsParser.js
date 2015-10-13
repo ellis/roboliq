@@ -44,8 +44,8 @@ function processParserResult(result, objects, text) {
 			assert(model.columns, "`"+modelName+".columns` missing");
 			var l = [];
 			if (clause.subject === 'all') {
-				for (col = 1; col <= model.columns; col++) {
-					for (row = 1; row <= model.rows; row++) {
+				for (var col = 1; col <= model.columns; col++) {
+					for (var row = 1; row <= model.rows; row++) {
 						l.push([row, col]);
 					}
 				}

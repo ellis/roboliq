@@ -60,7 +60,7 @@ function druleConclusion(obj) {
 function druleBody(obj) {
   var definition = utils.values(obj)[0];
   var newObj = {};
-  for (key in definition) {
+  for (var key in definition) {
     if ((key === 'or') || (key === 'and') || (key === 'not')) {
       newObj[key] = definition[key];
     }
