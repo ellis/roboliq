@@ -82,35 +82,49 @@ describe('timer', function() {
 	});
 
 	describe('timer.doAndWait', function () {
-		it('should start a time, perform sub-steps, then wait', function () {
-			var protocol = _.merge({}, protocol0, {
-				steps: {
-					1: {
-						command: "timer.doAndWait",
-						duration: 10,
-						steps: {comment: "do something"}
-					}
-				}
-			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
-			should.deepEqual(result.output.steps[1], {
-				command: "timer.doAndWait",
-				duration: 10,
-				steps: {comment: "do something"},
+		var protocol1 = {
+			steps: {
 				1: {
-					command: "timer._start",
-					agent: "robot1",
-					equipment: "timer1"
-				},
-				2: {comment: "do something"},
-				3: {
-					command: "timer._wait",
-					agent: "robot1",
-					equipment: "timer1",
-					till: 10,
-					stop: true
-				},
-			});
+					command: "timer.doAndWait",
+					duration: 1800,
+					steps: {comment: "do something"}
+				}
+			}
+		};
+		var expected1 = {
+			command: "timer.doAndWait",
+			duration: 1800,
+			steps: {comment: "do something"},
+			1: {
+				command: "timer._start",
+				agent: "robot1",
+				equipment: "timer1"
+			},
+			2: {comment: "do something"},
+			3: {
+				command: "timer._wait",
+				agent: "robot1",
+				equipment: "timer1",
+				till: 1800,
+				stop: true
+			},
+		};
+
+		it('should start a time, perform sub-steps, then wait', function () {
+			var protocol = _.merge({}, protocol0, protocol1);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			should.deepEqual(result.output.steps[1], expected1);
+		});
+		it('should support different time units', function () {
+			var protocol2 = _.merge({}, protocol0, protocol1, {steps: {1: {duration: "0.5h"}}});
+			var expected2 = _.merge({}, expected1, {duration: "0.5h"});
+			var result2 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol2);
+			should.deepEqual(result2.output.steps[1], expected2);
+
+			var protocol3 = _.merge({}, protocol0, protocol1, {steps: {1: {duration: "30minutes"}}});
+			var expected3 = _.merge({}, expected1, {duration: "30minutes"});
+			var result3 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol3);
+			should.deepEqual(result3.output.steps[1], expected3);
 		});
 	});
 });
