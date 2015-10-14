@@ -2,6 +2,7 @@ var _ = require('lodash');
 var assert = require('assert');
 var expect = require('./expect.js');
 var jmespath = require('jmespath');
+var math = require('mathjs');
 var misc = require('./misc.js');
 
 /**
@@ -61,6 +62,31 @@ function getNameAndNumber(params, data, paramName, defaultValue) {
 	return x;
 }
 
+function getNameAndVolume(params, data, paramName, defaultValue) {
+	var x = getNameAndValue(params, data, paramName, defaultValue);
+	if (_.isNumber(x.value)) {
+		x.value = math.unit(x.value, 'l');
+	}
+	else if (_.isString(x.value)) {
+		x.value = math.eval(x.value);
+	}
+	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x.value), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
+	return x;
+}
+
+function getNameAndTime(params, data, paramName, defaultValue) {
+	var x0 = getNameAndValue(params, data, paramName, defaultValue);
+	var x = _.clone(x0);
+	if (_.isNumber(x.value)) {
+		x.value = math.unit(x.value, 's');
+	}
+	else if (_.isString(x.value)) {
+		x.value = math.eval(x.value);
+	}
+	expect.truthy({paramName: paramName}, math.unit('s').equalBase(x.value), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
+	return x;
+}
+
 // REFACTOR: remove
 function get(params, data, name, defaultValue) {
 	// If there's no default value, require the variable's presence
@@ -101,6 +127,8 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 		case "Any": return getNameAndValue(params, data, name, defaultValue);
 		case "Number": return getNameAndNumber(params, data, name, defaultValue);
 		case "Object": return getNameAndObject(params, data, name, defaultValue);
+		case "Time": return getNameAndTime(params, data, name, defaultValue);
+		case "Volume": return getNameAndVolume(params, data, name, defaultValue);
 		case "File":
 			var filename = params[name];
 			var filedata = data.files[filename];

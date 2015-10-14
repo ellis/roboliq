@@ -169,9 +169,10 @@ var commandHandlers = {
 	 * @property {Array|Object} steps - Sub-steps to perform
 	 */
 	"timer.doAndWait": function(params, data) {
-		expect.paramsRequired(params, ['duration', 'steps']);
-		var duration = commandHelper.getNumberParameter(params, data, 'duration');
-		var steps = params.steps;
+		var parsed = commandHelper.parseParams(params, data, {
+			duration: "Time",
+			steps: "Object"
+		});
 
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
 		if (alternatives.errors) return altenatives;
@@ -185,12 +186,12 @@ var commandHandlers = {
 				agent: agent,
 				equipment: equipment
 			},
-			2: steps,
+			2: parsed.steps.value,
 			3: {
 				command: "timer._wait",
 				agent: agent,
 				equipment: equipment,
-				till: duration,
+				till: parsed.duration.value.toNumber('s'),
 				stop: true
 			},
 		};
@@ -211,8 +212,9 @@ var commandHandlers = {
 	 * @property {number} duration - Number of seconds to sleep
 	 */
 	"timer.sleep": function(params, data) {
-		expect.paramsRequired(params, ["duration"]);
-		//var duration = misc.getNumberParameter(params, data, "duration");
+		var parsed = commandHelper.parseParams(params, data, {
+			duration: "Time"
+		});
 
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
 		if (alternatives.errors) return altenatives;
@@ -220,7 +222,7 @@ var commandHandlers = {
 		var params2 = _.merge(
 			{
 				command: "timer._sleep",
-				duration: params.duration
+				duration: parsed.duration.value.toNumber('s')
 			},
 			alternatives[0]
 		);
