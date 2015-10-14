@@ -59,4 +59,3 @@ protocol:
     agent: mario
     id: 1
     till: 3600 # 60min
-

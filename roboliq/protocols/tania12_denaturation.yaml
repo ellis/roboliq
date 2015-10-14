@@ -49,9 +49,36 @@ objects:
   N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
   Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
 
-  CONTINUE:
-    - oneOf:
-      # First buffer, then urea
+  mixtures:
+    type: Variable
+    value:
+      "#factorialMixtures":
+        replicates: 3
+        map: '[*].reverse(@).sort_by(@, &volume).reverse(@)'
+        items:
+        - source: buffer
+          cleanBetweenSameSource: none
+        - source: denaturant
+          volume: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 27.5ul, 30ul, 32.5ul, 35ul, 37.5ul, 40ul, 42.5ul, 45ul, 47.5ul, 50ul, 52.5ul, 55ul, 57.5ul, 60ul, 62.5ul, 65ul, 70ul]
+          cleanBetweenSameSource: none
+        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+          volume: "5ul"
+          clean: thorough
+          cleanBetweenSameSource: flush
+          program: Roboliq_Water_Wet_1000_mix3x50ul
+        -
+          - source: buffer
+            cleanBetween: none
+            pipettePolicy: Roboliq_Water_Dry_1000
+          - source: denaturant
+            amount: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 27.5ul, 30ul, 32.35ul, 35ul]
+            cleanBetween: none
+            pipettePolicy: Roboliq_Water_Wet_1000
+
+buffer, denaturant
+70ul, 0ul
+65ul, 5ul
+60ul, 10ul
       - allOf:
         - source: buffer
           cleanBetween: none
@@ -70,33 +97,6 @@ objects:
           cleanBetween: none
           pipettePolicy: Roboliq_Water_Wet_1000
 
-    - oneOf:
-      - { source: sfGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      - { source: Q204H_N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      - { source: tdGFP, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      - { source: N149Y, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-      - { source: Q204H, amount: 5ul, cleanBegin: none, cleanBetween: flush, cleanEnd: thorough, pipettePolicy: Roboliq_Water_Wet_1000_mix3x50ul }
-  mixtures:
-    type: Variable
-    value:
-      "#factorialMixtures":
-        replicates: 3
-        items:
-        - source: saltwater
-          volume: 40ul
-        - "#gradient":
-            "#tableRows":
-            - {volume: 30ul, decimals: 1}
-            - ['source1',     'source2',     'count']
-            - ['hepes_850',   'hepes_650',   5]
-            - ['pipes_775',   'pipes_575',   5]
-            - ['mes_710',     'mes_510',     7]
-            - ['acetate_575', 'acetate_375', 8]
-        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-          volume: "5ul"
-          clean: thorough
-          cleanBetweenSameSource: flush
-          program: Roboliq_Water_Wet_1000_mix3x50ul
 
   mixtureWells:
     type: Variable

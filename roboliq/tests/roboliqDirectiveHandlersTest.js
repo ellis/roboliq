@@ -83,14 +83,14 @@ describe('config/roboliqDirectiveHandlers', function() {
 	});
 
 	it('should handle #factorialMixtures', function() {
-		var spec = {"#factorialMixtures": {
+		var spec1 = {"#factorialMixtures": {
 			replicates: 2,
 			items: [
 				[{a: 1}, {a: 2}],
 				{a: [3, 4]}
 			]
 		}};
-		should.deepEqual(misc.handleDirective(spec, data), [
+		should.deepEqual(misc.handleDirective(spec1, data), [
 			[{a: 1}, {a: 3}],
 			[{a: 1}, {a: 4}],
 			[{a: 2}, {a: 3}],
@@ -99,6 +99,23 @@ describe('config/roboliqDirectiveHandlers', function() {
 			[{a: 1}, {a: 4}],
 			[{a: 2}, {a: 3}],
 			[{a: 2}, {a: 4}]
+		]);
+
+		var spec1 = {"#factorialMixtures": {
+			replicates: 1,
+			items: [
+				[
+					[{a: 1}, {b: 1}]
+					[{b: 2}, {a: 2}]
+				],
+				{c: [3, 4]}
+			]
+		}};
+		should.deepEqual(misc.handleDirective(spec1, data), [
+			[{a: 1}, {b: 1}, {c: 3}],
+			[{a: 1}, {b: 1}, {c: 4}],
+			[{b: 2}, {a: 2}, {c: 3}],
+			[{b: 2}, {a: 2}, {c: 4}],
 		]);
 	});
 

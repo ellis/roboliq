@@ -195,6 +195,8 @@ function genMerge2(spec, data, obj0, index, acc) {
 	return acc;
 }
 
+//function expandArrays
+
 function directive_factorialMixtures(spec, data) {
 	// Get mixutre items
 	var items;
