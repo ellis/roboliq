@@ -579,12 +579,19 @@ function _run(opts, userProtocol) {
 						//console.log(result.effects);
 						// Add effects to protocol
 						protocol.effects[id] = result.effects;
+						console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
 						// Update object states
 						_.forEach(result.effects, function(value, key) {
 							var nameList = key.split('.');
 							var o = createSimpleObject(nameList, value);
+							console.log(JSON.stringify(o));
+							CONTINUE: make sure arrays get overwritten
 							_.merge(objects, o);
 						});
+
+						// FIXME: for debug only
+						console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
+						// ENDFIX
 					}
 				}
 			}
