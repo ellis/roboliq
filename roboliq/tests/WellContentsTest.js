@@ -100,7 +100,11 @@ describe('WellContents', function() {
 			);
 			assert.deepEqual(
 				WellContents.transferContents(["Infinity l", "hepes_650"], ["62.5 ul", ["40 ul", "saltwater"], ["22.5 ul", "hepes_850"]], "7.5ul"),
-				[["Infinity l", "hepes_650"], ["70 ul", ["40 ul", "saltwater"], ["22.5 ul", "hepes_850"], ["7.5 ul", "hepes_850"]]]
+				[["Infinity l", "hepes_650"], ["70 ul", ["40 ul", "saltwater"], ["22.5 ul", "hepes_850"], ["7.5 ul", "hepes_650"]]]
+			);
+			assert.deepEqual(
+				WellContents.transferContents(["Infinity l", "c"], ["50 ul", ["50 ul", "a"], ["50 ul", "b"]], "10ul"),
+				[["Infinity l", "c"], ["60 ul", ["50 ul", ["50 ul", "a"], ["50 ul", "b"]], ["10 ul", "c"]]]
 			);
 		});
 	});

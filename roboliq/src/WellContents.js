@@ -195,28 +195,28 @@ export function transferContents(srcContents, dstContents, volume) {
 	//console.log({dstContents})
 	checkContents(dstContents);
 
-	CONTINUE: handle cases where srcContents.length == 2 vs > 2:
 	const srcContentsToAppend = [volumeText].concat(_.rest(srcContents));
 	let dstContents2;
 	// If the destination is empty:
 	if (dstContents.length <= 1) {
 		dstContents2 = srcContentsToAppend;
 	}
-	// If the destination currently only contains one substance:
-	else if (dstContents.length === 2) {
-		dstContents2 = [totalVolumeText, dstContents, srcContentsToAppend];
-	}
-	// Otherwise add source to destination contents
 	else {
 		const dstVolume = math.eval(dstContents[0]);
-		const dstSumOfComponents = math.sum(_.map(_.rest(dstContents), l => math.eval(l[0])));
-		if (math.equal(dstVolume, dstSumOfComponents)) {
-			dstContents2 = _.flatten([totalVolumeTest, _.rest(dstContents), [srcContentsToAppend]]);
+		const totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
+		// If the destination currently only contains one substance:
+		if (dstContents.length === 2) {
+			dstContents2 = [totalVolumeText, dstContents, srcContentsToAppend];
 		}
+		// Otherwise add source to destination contents
 		else {
-			const totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
-			const srcContentsToAppend2 = (srcContentens.length == 2) ?
-			dstContents2 = [totalVolumeText, dstContents, [volumeText].concat(_.rest(srcContents))];
+			const dstSumOfComponents = math.sum(_.map(_.rest(dstContents), l => math.eval(l[0])));
+			if (math.equal(dstVolume, dstSumOfComponents)) {
+				dstContents2 = _.flatten([totalVolumeText, _.rest(dstContents), [srcContentsToAppend]]);
+			}
+			else {
+				dstContents2 = _.flatten([totalVolumeText, [dstContents], [srcContentsToAppend]]);
+			}
 		}
 	}
 	//console.log("dstContents", dstContents);
