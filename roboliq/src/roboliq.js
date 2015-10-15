@@ -110,6 +110,10 @@ var nomnom = require('nomnom').options({
 		flag: true,
 		help: 'print combined protocol'
 	},
+	progress: {
+		flag: true,
+		help: 'print progress indicator while processing the protocol'
+	},
 	throw: {
 		abbr: 'T',
 		flag: true,
@@ -515,6 +519,9 @@ function _run(opts, userProtocol) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
+		if (opts.progress) {
+			console.log("step "+id);
+		}
 
 		if (step.hasOwnProperty("command")) {
 			if (!commandHandlers.hasOwnProperty(step.command)) {

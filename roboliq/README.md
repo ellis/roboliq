@@ -14,7 +14,8 @@ npm install
 To run a protocol:
 
 ```{sh}
-node src/main.js ${PROTOCOL}
+./node_modules/.bin/babel-node -- src/main.js --help
+./node_modules/.bin/babel-node -- src/main.js [options] ${PROTOCOL}
 ```
 
 # Development
@@ -29,4 +30,10 @@ To generate the documentation:
 
 ```{sh}
 npm run jsdoc
+```
+
+To update the parser for well locations:
+
+```{sh}
+npm run pegjs
 ```

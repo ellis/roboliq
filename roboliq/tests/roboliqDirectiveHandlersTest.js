@@ -100,7 +100,7 @@ describe('config/roboliqDirectiveHandlers', function() {
 			[{a: 2}, {a: 3}],
 			[{a: 2}, {a: 4}]
 		]);
-
+		/*
 		var spec1 = {"#factorialMixtures": {
 			replicates: 1,
 			items: [
@@ -117,6 +117,7 @@ describe('config/roboliqDirectiveHandlers', function() {
 			[{b: 2}, {a: 2}, {c: 3}],
 			[{b: 2}, {a: 2}, {c: 4}],
 		]);
+		*/
 	});
 
 	it('should handle #for', function() {

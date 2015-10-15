@@ -403,7 +403,7 @@
 	"effects": {
 		"1.2": {
 			"plate1.contents.A01": [
-				"-50 ul",
+				"Infinity l",
 				"plate1(A01)"
 			],
 			"plate2.contents.A01": [
@@ -412,9 +412,15 @@
 			],
 			"__WELLS__.plate1.contents.A01": {
 				"isSource": true,
-				"volumeMin": "-50 ul",
-				"volumeMax": "0 l",
+				"volumeMin": "Infinity l",
+				"volumeMax": "Infinity l",
 				"volumeRemoved": "50 ul"
+			},
+			"__WELLS__.plate2.contents.A01": {
+				"isSource": false,
+				"volumeMin": "0 l",
+				"volumeMax": "50 ul",
+				"volumeAdded": "50 ul"
 			}
 		}
 	},
@@ -442,14 +448,14 @@
 				"source": "plate1(A01)",
 				"well": "plate1(A01)",
 				"volumeInitial": "0ul",
-				"volumeFinal": "-50 ul",
+				"volumeFinal": "Infinity l",
 				"volumeRemoved": "50 ul"
 			}
 		],
 		"wellContentsFinal": [
 			{
 				"well": "plate1(A01)",
-				"plate1(A01)": "-50 ul"
+				"plate1(A01)": "Infinity l"
 			},
 			{
 				"well": "plate2(A01)",

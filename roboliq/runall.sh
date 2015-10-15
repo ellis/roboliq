@@ -1,4 +1,4 @@
-for file in protocols/protocol*.json; do
+for file in protocols/protocol*.json protocols/*.yaml; do
   rm -f protocols/output/$(basename $file .json).out.json
-  node src/main.js -O protocols/output $file
+  ./node_modules/.bin/babel-node src/main.js -O protocols/output $file
 done

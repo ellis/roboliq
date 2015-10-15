@@ -1,3 +1,5 @@
+roboliq: v1
+
 description: |
   Denaturation protocol using Guanidine hydrochloride
 
@@ -19,11 +21,11 @@ objects:
 
   bufferSource:
     type: Plate
-    description: trough for water/glycerol/salt mix
+    description: labware for buffer
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
   denaturantSource:
-    description: denaturant trough (Guanidine hydrochloride)
+    description: labware for denaturant
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R5
   gfpSource:
@@ -33,28 +35,31 @@ objects:
     location: ourlab.mario.site.T3
   mixPlate:
     type: Plate
+    description: labware for denatured GFP experiments
     model: ourlab.model.plateModel_384_square
     location: ourlab.mario.site.P3
 
   buffer:
     type: Liquid
+    description: water/glycerol/salt mix
     wells: bufferSource(C01 down to F01)
   denaturant:
     type: Liquid
+    description: denaturant (Guanidine hydrochloride)
     wells: denaturantSource(C01 down to F01)
 
-  sfGFP: {type: Liquid, description: wild type, wells: tubes1(A01)}
-  Q204H_N149Y: {type: Liquid, description: double mutant, wells: tubes1(A02)}
-  tdGFP: {type: Liquid, description: fusion of double mutant, wells: tubes1(A03)}
-  N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
-  Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
+  sfGFP: {type: Liquid, description: wild type, wells: gfpSource(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells: gfpSource(A02)}
+  tdGFP: {type: Liquid, description: fusion of double mutant, wells: gfpSource(A03)}
+  N149Y: {type: Liquid, description: single mutant, wells: gfpSource(A04)}
+  Q204H: {type: Liquid, description: single mutant, wells: gfpSource(A05)}
 
   mixtures:
     type: Variable
     value:
-      "#factorialMixtures":
+      "#pipetteMixtures":
         replicates: 3
-        map: '[*].reverse(@).sort_by(@, &volume).reverse(@)'
+        volume: 75ul
         items:
         - source: buffer
           cleanBetweenSameSource: none
@@ -62,41 +67,16 @@ objects:
           volume: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 27.5ul, 30ul, 32.5ul, 35ul, 37.5ul, 40ul, 42.5ul, 45ul, 47.5ul, 50ul, 52.5ul, 55ul, 57.5ul, 60ul, 62.5ul, 65ul, 70ul]
           cleanBetweenSameSource: none
         - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-          volume: "5ul"
+          volume: 5ul
           clean: thorough
           cleanBetweenSameSource: flush
           program: Roboliq_Water_Wet_1000_mix3x50ul
-        -
-          - source: buffer
-            cleanBetween: none
-            pipettePolicy: Roboliq_Water_Dry_1000
-          - source: denaturant
-            amount: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 27.5ul, 30ul, 32.35ul, 35ul]
-            cleanBetween: none
-            pipettePolicy: Roboliq_Water_Wet_1000
-
-buffer, denaturant
-70ul, 0ul
-65ul, 5ul
-60ul, 10ul
-      - allOf:
-        - source: buffer
-          cleanBetween: none
-          pipettePolicy: Roboliq_Water_Dry_1000
-        - source: urea
-          amount: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 27.5ul, 30ul, 32.35ul, 35ul]
-          cleanBetween: none
-          pipettePolicy: Roboliq_Water_Wet_1000
-      # First urea, then water
-      - allOf:
-        - source: urea
-          amount: [37.5ul, 40ul, 42.5ul, 45ul, 47.5ul, 50ul, 52.5ul, 55ul, 57.5ul, 60ul, 62.5ul, 65ul, 70ul]
-          cleanBetween: none
-          pipettePolicy: Roboliq_Water_Dry_1000
-        - source: buffer
-          cleanBetween: none
-          pipettePolicy: Roboliq_Water_Wet_1000
-
+        transformations:
+        - name: shuffle
+          seed: 1234
+        transformationsPerWell:
+        - name: sortByVolumeMax
+          count: 2
 
   mixtureWells:
     type: Variable
@@ -113,7 +93,10 @@ steps:
       command: pipetter.pipette
       program: Roboliq_Water_Air_1000
       sources: ourlab.mario.systemLiquid
-      destinations: balancePlate(all row-jump(1) take 2)
+      destinations:
+        "#take":
+          list: "#destinationWells#balancePlate(all row-jump(1))"
+          count: "#length#mixtures"
       volumes: 75ul
       cleanBetween: none
 
@@ -122,9 +105,8 @@ steps:
       object: balancePlate
 
     3:
-      command: transporter.movePlate
-      object: balancePlate
-      destination: ourlab.mario.site.CENTRIFUGE_4
+      command: centrifuge.insertPlates2
+      object2: balancePlate
 
   2:
     description: |
@@ -137,7 +119,6 @@ steps:
     1:
       command: pipetter.pipetteMixtures
       mixtures: mixtures
-  #    replicates: 3
       destinations: mixtureWells
       clean: flush
       cleanBegin: thorough
@@ -153,7 +134,7 @@ steps:
     count: 2
     steps:
         command: timer.doAndWait
-        duration: 14400 # 4hr
+        duration: "1 hour"
         steps:
           1:
             description: Remove condensation from seal
@@ -162,16 +143,17 @@ steps:
             object2: balancePlate
             program:
               rpm: 3000
-              duration: 120 # 2min
+              duration: "2 minutes"
               temperature: 25
           2:
             command: fluorescenceReader.measurePlate
             object: mixPlate
             program:
-                programFile: ./tania13_ph-temp.mdfx
-            outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+              programFile: ./tania12_denaturation.mdfx
+            outputFile: C:\Users\localadmin\Desktop\Ellis\tania12_denaturation--<YYYYMMDD_HHmmss>.xml
           3:
             description: Incubate at 25C
+            comment: For our centrifuge to work as an incubator, we need to set a spin duration greater than 0.
             command: centrifuge.centrifuge2
             object1: mixPlate
             object2: balancePlate
@@ -179,54 +161,5 @@ steps:
             destinationAfter2: null
             program:
               rpm: 3000
-              duration: 1 # must set a duration of at least 1s
+              duration: 1
               temperature: 25
-
-protocol:
-- evoware.timer.start:
-    agent: mario
-    id: 1
-
-- measureAbsorbance:
-    object: mixPlate
-    programFile: tania12_denaturation.mdfx
-    outputFile: C:\Users\localadmin\Desktop\Ellis\tania12--<YYYYMMDD_HHmmss>.xml
-
-- transportLabware:
-    device: mario__transporter1
-    object: mixPlate
-    site: CENTRIFUGE_2
-
-- evoware.centrifuge.run:
-    device: mario__Centrifuge
-    program:
-      rpm: 3000
-      duration: 1 # must set a duration of at least 1s
-      temperature: 25
-
-- evoware.timer.wait:
-    agent: mario
-    id: 1
-    till: 3300 # 55min
-
-- evoware.centrifuge.run:
-    device: mario__Centrifuge
-    program:
-      rpm: 3000
-      duration: 120 # 2min
-      temperature: 25
-
-- evoware.timer.wait:
-    agent: mario
-    id: 1
-    till: 3540 # 59min
-
-- transportLabware:
-    device: mario__transporter1
-    object: mixPlate
-    site: REGRIP
-
-- evoware.timer.wait:
-    agent: mario
-    id: 1
-    till: 3600 # 60min

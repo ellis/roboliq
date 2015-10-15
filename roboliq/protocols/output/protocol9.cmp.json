@@ -444,6 +444,12 @@
 				"volumeMax": "50 ul",
 				"volumeRemoved": "20 ul"
 			},
+			"__WELLS__.plate2.contents.A01": {
+				"isSource": false,
+				"volumeMin": "0 l",
+				"volumeMax": "20 ul",
+				"volumeAdded": "20 ul"
+			},
 			"plate1.contents.A02": [
 				"30 ul",
 				"water"
@@ -457,6 +463,12 @@
 				"volumeMin": "30 ul",
 				"volumeMax": "50 ul",
 				"volumeRemoved": "20 ul"
+			},
+			"__WELLS__.plate2.contents.A02": {
+				"isSource": false,
+				"volumeMin": "0 l",
+				"volumeMax": "20 ul",
+				"volumeAdded": "20 ul"
 			}
 		}
 	},

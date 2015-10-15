@@ -13,10 +13,17 @@ export const emptyVolume = math.unit(0, 'ul');
 export const unknownVolume = math.eval('Infinity l');
 
 export function checkContents(contents) {
-	if (_.isUndefined(contents) || contents.length == 0) {
+	if (_.isUndefined(contents)) {
+		// ok
+	}
+	else if (!_.isArray(contents)) {
+		assert(false, "expected well contents to be represented by an array: "+JSON.stringify(contents));
+	}
+	else if (contents.length == 0) {
 		// ok
 	}
 	else {
+		console.log(contents)
 		var volume = math.eval(contents[0]);
 		if (contents.length == 1) {
 			// FIXME: remove 'false, ' from here!
@@ -90,6 +97,7 @@ export function getWellVolume(wellName, data, effects) {
 * @return {array} [content, contentName], where content will be null if not found
  */
 export function getContentsAndName(wellName, data, effects) {
+	console.log("getContentsAndName", wellName)
 	if (!effects) effects = {};
 
 	//var i = wellName.indexOf('(');
@@ -105,7 +113,9 @@ export function getContentsAndName(wellName, data, effects) {
 		labwareName = wellInfo.labware;
 		// Check for contents of well
 		var contentsName = labwareName+".contents."+wellInfo.wellId;
+		console.log("contentsName", contentsName, effects[contentsName], _.get(data.objects, contentsName))
 		var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
+		checkContents(contents);
 		if (contents)
 			return [contents, contentsName];
 	}
@@ -117,8 +127,10 @@ export function getContentsAndName(wellName, data, effects) {
 	var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
 	// If contents is an array, then we have the correct contents;
 	// Otherwise, we have a map of well contents, but no entry for the current well yet
-	if (_.isArray(contents))
+	if (_.isArray(contents)) {
+		checkContents(contents);
 		return [contents, contentsName];
+	}
 
 	return [null, wellInfo.labware+".contents."+wellInfo.wellId];
 }
@@ -129,6 +141,7 @@ export function getContentsAndName(wellName, data, effects) {
  * @return {object} map of substance name to the volume or amount of that substance in the well
  */
 export function flattenContents(contents) {
+	checkContents(contents);
 	//console.log("flattenContents:", contents);
 	assert(_.isArray(contents));
 	// The first element always holds the volume in the well.
@@ -182,16 +195,29 @@ export function transferContents(srcContents, dstContents, volume) {
 	//console.log({dstContents})
 	checkContents(dstContents);
 
+	CONTINUE: handle cases where srcContents.length == 2 vs > 2:
+	const srcContentsToAppend = [volumeText].concat(_.rest(srcContents));
 	let dstContents2;
 	// If the destination is empty:
 	if (dstContents.length <= 1) {
-		dstContents2 = [volumeText].concat(_.rest(srcContents));
+		dstContents2 = srcContentsToAppend;
+	}
+	// If the destination currently only contains one substance:
+	else if (dstContents.length === 2) {
+		dstContents2 = [totalVolumeText, dstContents, srcContentsToAppend];
 	}
 	// Otherwise add source to destination contents
 	else {
 		const dstVolume = math.eval(dstContents[0]);
-		const totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
-		dstContents2 = [totalVolumeText, dstContents, [volumeText].concat(_.rest(srcContents))];
+		const dstSumOfComponents = math.sum(_.map(_.rest(dstContents), l => math.eval(l[0])));
+		if (math.equal(dstVolume, dstSumOfComponents)) {
+			dstContents2 = _.flatten([totalVolumeTest, _.rest(dstContents), [srcContentsToAppend]]);
+		}
+		else {
+			const totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
+			const srcContentsToAppend2 = (srcContentens.length == 2) ?
+			dstContents2 = [totalVolumeText, dstContents, [volumeText].concat(_.rest(srcContents))];
+		}
 	}
 	//console.log("dstContents", dstContents);
 
@@ -199,6 +225,9 @@ export function transferContents(srcContents, dstContents, volume) {
 	const srcVolume0 = math.eval(srcContents[0]);
 	const srcVolume1 = math.chain(srcVolume0).subtract(volume).done();
 	const srcContents2 = [srcVolume1.format({precision: 14})].concat(_.rest(srcContents));
+
+	checkContents(srcContents2);
+	checkContents(dstContents2);
 
 	return [srcContents2, dstContents2];
 }

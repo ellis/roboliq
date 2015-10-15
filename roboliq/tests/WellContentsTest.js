@@ -94,6 +94,14 @@ describe('WellContents', function() {
 				WellContents.transferContents(['100 ul', ['50 ul', 'a'], ['50 ul', 'b']], ['10 ul', 'c'], '20 ul'),
 				[['80 ul', ['50 ul', 'a'], ['50 ul', 'b']], ['30 ul', ['10 ul', 'c'], ['20 ul', ['50 ul', 'a'], ['50 ul', 'b']]]]
 			);
+			assert.deepEqual(
+				WellContents.transferContents(["Infinity l", "hepes_850"], ["40 ul", "saltwater"], "30ul"),
+				[["Infinity l", "hepes_850"], ["70 ul", ["40 ul", "saltwater"], ["30 ul", "hepes_850"]]]
+			);
+			assert.deepEqual(
+				WellContents.transferContents(["Infinity l", "hepes_650"], ["62.5 ul", ["40 ul", "saltwater"], ["22.5 ul", "hepes_850"]], "7.5ul"),
+				[["Infinity l", "hepes_650"], ["70 ul", ["40 ul", "saltwater"], ["22.5 ul", "hepes_850"], ["7.5 ul", "hepes_850"]]]
+			);
 		});
 	});
 });

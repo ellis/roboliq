@@ -16,13 +16,14 @@
 - [ ] implement `tania12` scripts for denaturation
 	- [ ] create single protocol for all of the steps that used to be separated
 	- [ ] add option to only process certain steps
-	- [ ] when user specified steps to proces but no output name, name the output file according to the steps processed
+	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
+	- [ ] try to compile for evoware
 - [ ] implement `tania15` scripts for renaturation
-    * [x] node protocols/tania15_renaturation.js, use `__dirname`
-	* [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
-	* [x] merge protocols together rather than appending them!
-	* [ ] there may be a problem with the non-standard characters in the XML file?
-	* [ ] try to compile for evoware
+    - [x] node protocols/tania15_renaturation.js, use `__dirname`
+	- [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
+	- [x] merge protocols together rather than appending them!
+	- [ ] there may be a problem with the non-standard characters in the XML file?
+	- [ ] try to compile for evoware
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
