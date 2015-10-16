@@ -269,4 +269,250 @@ describe('commands/centrifgue', function() {
 			);
 		});
 	});
+
+	describe('centrifuge.insertPlates2', function () {
+		it('should put plate1 in the centrifuge', function () {
+			var protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "centrifuge.insertPlates2",
+						object1: "plate1"
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.steps[1],
+				{
+					"1": {
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "2"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_2"
+						},
+						"command": "equipment.openSite",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_2"
+					},
+					"2": {
+						"1": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.REGRIP"
+						},
+						"2": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.CENTRIFUGE_2"
+						},
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.CENTRIFUGE_2"
+					},
+					"command": "centrifuge.insertPlates2",
+					"object1": "plate1"
+				}
+			);
+		});
+		it('should put plate2 in the centrifuge', function () {
+			var protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "centrifuge.insertPlates2",
+						object2: "plate2"
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.steps[1],
+				{
+					"1": {
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "4"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_4"
+						},
+						"command": "equipment.openSite",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+					"2": {
+						"1": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate2",
+							"destination": "ourlab.mario.site.REGRIP"
+						},
+						"2": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate2",
+							"destination": "ourlab.mario.site.CENTRIFUGE_4"
+						},
+						"command": "transporter.movePlate",
+						"object": "plate2",
+						"destination": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+					"command": "centrifuge.insertPlates2",
+					"object2": "plate2"
+				}
+			);
+		});
+		it('should put both plates in the centrifuge', function () {
+			var protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "centrifuge.insertPlates2",
+						object1: "plate1",
+						object2: "plate2"
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.steps[1],
+				{
+					"1": {
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "2"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_2"
+						},
+						"command": "equipment.openSite",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_2"
+					},
+					"2": {
+						"1": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.REGRIP"
+						},
+						"2": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.CENTRIFUGE_2"
+						},
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.CENTRIFUGE_2"
+					},
+					"3": {
+						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_MoveToPos",
+								"factsValue": "4"
+							},
+							"2": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Open"
+							},
+							"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge",
+							"site": "ourlab.mario.site.CENTRIFUGE_4"
+						},
+						"command": "equipment.openSite",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge",
+						"site": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+					"4": {
+						"1": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate2",
+							"destination": "ourlab.mario.site.REGRIP"
+						},
+						"2": {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate2",
+							"destination": "ourlab.mario.site.CENTRIFUGE_4"
+						},
+						"command": "transporter.movePlate",
+						"object": "plate2",
+						"destination": "ourlab.mario.site.CENTRIFUGE_4"
+					},
+					"command": "centrifuge.insertPlates2",
+					"object1": "plate1",
+					"object2": "plate2"
+				}
+			);
+		});
+	});
 });
