@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var math = require('mathjs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 
@@ -593,17 +594,18 @@ module.exports = {
 			});
 			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
 				rpm: {type: "Number", default: 3000},
-				duration: {type: "Number", default: 30},
-				spinUpTime: {type: "Number", default: 9},
-				spinDownTime: {type: "Number", default: 9},
+				duration: {type: "Time", default: math.unit(30, 's')},
+				spinUpTime: {type: "Time", default: math.unit(9, 's')},
+				spinDownTime: {type: "Time", default: math.unit(9, 's')},
 				temperature: {type: "Number", default: 25}
 			});
+			//console.log(parsedProgram);
 			var list = [
-				parsedProgram.rpm.value,
-				parsedProgram.duration.value,
-				parsedProgram.spinUpTime.value,
-				parsedProgram.spinDownTime.value,
-				parsedProgram.temperature.value
+				math.round(parsedProgram.rpm.value),
+				math.round(parsedProgram.duration.value.toNumber('s')),
+				math.round(parsedProgram.spinUpTime.value.toNumber('s')),
+				math.round(parsedProgram.spinDownTime.value.toNumber('s')),
+				math.round(parsedProgram.temperature.value)
 			];
 			var value = list.join(",");
 			return {expansion: [makeEvowareFacts(params, data, "Execute1", value)]};
