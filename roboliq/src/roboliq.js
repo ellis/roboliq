@@ -585,8 +585,7 @@ function _run(opts, userProtocol) {
 							var nameList = key.split('.');
 							var o = createSimpleObject(nameList, value);
 							console.log(JSON.stringify(o));
-							CONTINUE: make sure arrays get overwritten
-							_.merge(objects, o);
+							_.merge(objects, o,  function(a, b) { if (lo.isArray(b)) return b; });
 						});
 
 						// FIXME: for debug only
