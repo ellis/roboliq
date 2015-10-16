@@ -14,8 +14,10 @@
 	- [x] refactor pipetterUtils/getEffects_pipette using WellContents.js
 - [x] change WellContents.unknownVolume to infinity, and retest
 - [ ] implement `tania12` scripts for denaturation
-	- [ ] create single protocol for all of the steps that used to be separated
-	- [ ] add option to only process certain steps
+	- [x] create single protocol for all of the steps that used to be separated
+	- [ ] create `#pipetteMixtures` directive
+	- [ ] create `centrifuge.insertPlates2` command
+	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] try to compile for evoware
 - [ ] implement `tania15` scripts for renaturation
@@ -24,6 +26,17 @@
 	- [x] merge protocols together rather than appending them!
 	- [ ] there may be a problem with the non-standard characters in the XML file?
 	- [ ] try to compile for evoware
+- [ ] split `tania*` protocols into portable vs lab data
+- [ ] augment protocol design:
+ 	- [ ] specify factors
+	- [ ] choose combinations of factor levels (e.g. full-factorial)
+	- [ ] possibly partition blocks of the combinations
+	- [ ] construct mixtures, if relevant
+	- [ ] assign mixtures to wells (probably with randomization)
+	- [ ] specify pipetting details, such as order of sources, and parameters by source
+	- [ ] allow factor values to alter program flow (i.e., heating vs not heating)
+- [ ] for object of type `Variable`, process a `calculate` property as an alternative to setting the value to a directive.
+- [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol

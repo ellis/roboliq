@@ -208,6 +208,35 @@ describe('config/roboliqDirectiveHandlers', function() {
 		);
 	});
 
+	it('it should handle #pipetteMixtures', function() {
+		var spec = {
+			"#pipetteMixtures": {
+				replicates: 1,
+				volume: '25ul',
+				items: [
+					{source: "buffer"},
+					{source: "denaturant", volume: ['0ul', '10ul', '20ul']},
+					{source: ['gfp', 'yfp'], volume: '5ul'}
+				],
+				transformations: [
+					//{name: "shuffle", seed: 1234}
+				],
+				transformationsPerWell: [
+					{name: "sortByVolumeMax", count: 2}
+				]
+			}
+		};
+
+		should.deepEqual(misc.handleDirective(spec, data), [
+			[{source: "buffer", volume: "20 ul"}, {source: "denaturant", volume: '0ul'}, {source: "gfp", volume: "5ul"}],
+			[{source: "buffer", volume: "20 ul"}, {source: "denaturant", volume: '0ul'}, {source: "yfp", volume: "5ul"}],
+			[{source: "buffer", volume: "10 ul"}, {source: "denaturant", volume: '10ul'}, {source: "gfp", volume: "5ul"}],
+			[{source: "buffer", volume: "10 ul"}, {source: "denaturant", volume: '10ul'}, {source: "yfp", volume: "5ul"}],
+			[{source: "denaturant", volume: '20ul'}, {source: "buffer", volume: "0 l"}, {source: "gfp", volume: "5ul"}],
+			[{source: "denaturant", volume: '20ul'}, {source: "buffer", volume: "0 l"}, {source: "yfp", volume: "5ul"}],
+		]);
+	});
+
 	it('should handle #replaceLabware', function() {
 		var spec = {
 			"#replaceLabware": {

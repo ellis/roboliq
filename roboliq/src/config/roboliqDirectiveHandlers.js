@@ -6,6 +6,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+var random = require('random-js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser = require('../parsers/wellsParser.js');
@@ -242,6 +243,97 @@ function directive_merge(spec, data) {
 	return _.merge.apply(null, [{}].concat(list));
 }
 
+function directive_pipetteMixtures(spec, data) {
+	// Get mixutre items
+	var items;
+	if (_.isArray(spec))
+		items = spec;
+	else {
+		expect.paramsRequired(spec, ['items']);
+		items = misc.getVariableValue(spec.items, data.objects);
+	}
+
+	assert(_.isArray(items));
+	var items2 = _.map(items, function(item) {
+		return (_.isPlainObject(item))
+			? directive_factorialCols(item, data)
+			: item;
+	});
+	var combined = combineLists(items2);
+
+	if (spec.replicates && spec.replicates > 1) {
+		combined = directive_replicate({count: spec.replicates, value: combined}, data);
+	}
+
+	//console.log(1)
+	//console.log(JSON.stringify(combined, null, '\t'))
+
+	// Check and set volumes
+	const volumePerMixture = (spec.volume)
+		? math.eval(spec.volume) : undefined;
+	//console.log({volumePerMixture})
+	combined.forEach(l => {
+		let volumeTotal = math.unit(0, 'l');
+		let missingVolumeIndex = -1;
+		// Find total volume of components and whether any components are missing the volume parameter
+		_.forEach(l, (x, i) => {
+			//console.log({x, i, and: x.hasOwnProperty('volume')})
+			if (!x.hasOwnProperty('volume')) {
+				assert(volumePerMixture, "missing volume parameter: "+JSON.stringify(x));
+				assert(missingVolumeIndex < 0, "only one mixture element may omit the volume parameter: "+JSON.stringify(l));
+				missingVolumeIndex = i;
+				//console.log({missingVolumeIndex})
+			}
+			else {
+				volumeTotal = math.add(volumeTotal, math.eval(x.volume));
+			}
+		});
+		// If one of the components needs to have its volume set:
+		if (missingVolumeIndex >= 0) {
+			assert(volumePerMixture);
+			l[missingVolumeIndex] = _.merge({}, l[missingVolumeIndex], {
+				volume: math.subtract(volumePerMixture, volumeTotal).format({precision: 14})
+			});
+		}
+		else if (!_.isUndefined(volumePerMixture)) {
+			if (!math.equal(volumePerMixture, volumeTotal))
+				console.log("WARNING: volume in mixture should sum to "+volumePerMixture.format({precision: 14})+": "+JSON.stringify(l));
+		}
+	});
+
+	//console.log(2)
+	//console.log(JSON.stringify(combined, null, '\t'))
+
+	_.forEach(spec.transformations || [], t => {
+		if (t.name === 'shuffle') {
+			var mt = random.engines.mt19937();
+			assert(_.isNumber(t.seed), "`shuffle` requires a numeric `seed` paramter");
+			mt.seed(t.seed);
+			random.shuffle(mt, combined);
+		}
+	});
+
+	//console.log(3)
+	//console.log(JSON.stringify(combined, null, '\t'))
+
+	_.forEach(spec.transformationsPerWell || [], t => {
+		if (t.name === 'sortByVolumeMax') {
+			combined = _.map(combined, l => {
+				const offset = 0;
+				const count = t.count || l.length - offset;
+				return _.take(l, offset)
+					.concat(_.sortBy(_.take(l, count), x => -math.eval(x.volume).toNumber('l')))
+					.concat(_.drop(l, offset + count));
+			});
+		}
+	});
+
+	//console.log(4)
+	//console.log(JSON.stringify(combined, null, '\t'))
+
+	return combined;
+}
+
 function directive_replaceLabware(spec, data) {
 	expect.paramsRequired(spec, ['list', 'new']);
 	var list = misc.getVariableValue(spec.list, data.objects);
@@ -371,6 +463,7 @@ module.exports = {
 	"#gradient": directive_gradient,
 	"#length": directive_length,
 	"#merge": directive_merge,
+	"#pipetteMixtures": directive_pipetteMixtures,
 	"#replaceLabware": directive_replaceLabware,
 	"#replicate": directive_replicate,
 	"#tableCols": directive_tableCols,
