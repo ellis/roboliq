@@ -38,13 +38,13 @@ export function getEffects_pipette(params, data, effects) {
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
 		if (_.isEmpty(srcContents0))
 			srcContents0 = ["Infinity l", item.source];
-		console.log("srcContents0", srcContents0, srcContentsName);
+		//console.log("srcContents0", srcContents0, srcContentsName);
 
 		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
-		console.log("dst contents", dstContents0, dstContentsName);
+		//console.log("dst contents", dstContents0, dstContentsName);
 
 		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume);
-		console.log({srcContents1, dstContents1});
+		//console.log({srcContents1, dstContents1});
 
 		// Update content effects
 		effects2[srcContentsName] = srcContents1;
@@ -100,7 +100,7 @@ export function getEffects_pipette(params, data, effects) {
 		}
 	});
 
-	console.log("effectsNew:\n"+JSON.stringify(effectsNew));
+	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
 
 	return effectsNew;
 }
