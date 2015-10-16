@@ -581,13 +581,7 @@ function _run(opts, userProtocol) {
 						protocol.effects[id] = result.effects;
 						console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
 						// Update object states
-						_.forEach(result.effects, function(value, key) {
-							var nameList = key.split('.');
-							var o = createSimpleObject(nameList, value);
-							console.log(JSON.stringify(o));
-							_.merge(objects, o,  function(a, b) { if (lo.isArray(b)) return b; });
-						});
-
+						_.forEach(result.effects, (value, key) => _.set(objects, key, value));
 						// FIXME: for debug only
 						console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
 						// ENDFIX
