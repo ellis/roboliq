@@ -193,6 +193,118 @@ var commandHandlers = {
 			expansion: expansion,
 			alternatives: alternatives
 		};
+	},
+	/**
+	 * Insert up to two plates into the centrifuge.
+	 *
+	 * @typedef insertPlates2
+	 * @memberof centrifuge
+	 * @property {string} command - "centrifuge.insertPlates2"
+	 * @property {string} [agent] - Agent identifier
+	 * @property {string} [equipment] - Equipment identifier
+	 * @property {string} [object1] - Plate identifier
+	 * @property {string} [object2] - Plate identifier
+	 * @property {string} [site1] - Location identifier for the centrifugation site of object1
+	 * @property {string} [site2] - Location identifier for the centrifugation site of object2
+	 */
+	"centrifuge.insertPlates2": function(params, data) {
+		var llpl = require('../HTN/llpl.js').create();
+		llpl.initializeDatabase(data.predicates);
+
+		var parsed = commandHelper.parseParams(params, data, {
+			agent: "name?",
+			equipment: "name?",
+			object1: "Object?",
+			object2: "Object?",
+			site1: "name?",
+			site2: "name?"
+		});
+
+		if (!parsed.object1 && !parsed.object2) {
+			// do nothing
+			return {};
+		}
+
+		var agent = parsed.agent.name || "?agent";
+		var equipment = parsed.equipment.name || "?equipment";
+		var object1 = parsed.object1.value;
+		var object2 = parsed.object2.value;
+
+		if (object1 && object2 && object1.model !== object2.model)
+			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
+		const model = (object1) ? object1.model : object2.model;
+		expect.truthy({}, model, "object1 or object2 must have a `model` value");
+
+		var query0 = {
+			"centrifuge.canAgentEquipmentModelSite1Site2": {
+				"agent": "?agent",
+				"equipment": "?equipment",
+				"model": "?model",
+				"site1": "?site1",
+				"site2": "?site2"
+			}
+		};
+		var query = _.merge({}, query0,
+			{"centrifuge.canAgentEquipmentModelSite1Site2": {
+				"agent": parsed.agent.valueName,
+				"equipment": parsed.equipment.valueName,
+				"model": model,
+				"site1": parsed.site1.valueName,
+				"site2": parsed.site2.valueName
+			}}
+		);
+		var resultList = llpl.query(query);
+		var alternatives = jmespath.search(resultList, '[]."centrifuge.canAgentEquipmentModelSite1Site2"');
+		if (_.isEmpty(resultList)) {
+			var resultList2 = llpl.query(query0);
+			if (_.isEmpty(resultList2)) {
+				return {
+					errors: ["missing equipment data (please add predicates `centrifuge.canAgentEquipmentModelSite1Site`)"]
+				};
+			} else {
+				return {
+					errors: ["missing equipment configuration for " + JSON.stringify(query)]
+				};
+			}
+		}
+
+		// Find any parameters which can only take one specific value
+		var params2 = alternatives[0];
+		//console.log("alternatives[0]:\n"+JSON.stringify(params2))
+
+		var expansion = [
+			(!object1 || object1.location === params2.site1) ? null : [
+				{
+					command: "equipment.openSite",
+					agent: params2.agent,
+					equipment: params2.equipment,
+					site: params2.site1
+				},
+				{
+					"command": "transporter.movePlate",
+					"object": params.object1,
+					"destination": params2.site1
+				}
+			],
+			(!object2 || object2.location === params2.site2) ? null : [
+				{
+					command: "equipment.openSite",
+					agent: params2.agent,
+					equipment: params2.equipment,
+					site: params2.site2
+				},
+				{
+					"command": "transporter.movePlate",
+					"object": params.object2,
+					"destination": params2.site2
+				}
+			],
+		];
+
+		return {
+			expansion: expansion,
+			alternatives: alternatives
+		};
 	}
 };
 

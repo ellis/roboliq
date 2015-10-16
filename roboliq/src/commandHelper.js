@@ -47,12 +47,14 @@ function getNameAndValue(params, data, paramName, defaultValue) {
 
 function getNameAndObject(params, data, paramName, defaultValue) {
 	var x = getNameAndValue(params, data, paramName, defaultValue);
-	var value = x.value;
-	if (_.isString(value) && !_.isEmpty(value) && !_.startsWith(value, '"')) {
-		x.valueName = value;
-		x.value = g(data, x.valueName);
+	if (x) {
+		var value = x.value;
+		if (_.isString(value) && !_.isEmpty(value) && !_.startsWith(value, '"')) {
+			x.valueName = value;
+			x.value = g(data, x.valueName);
+		}
+		expect.truthy({paramName: paramName}, _.isPlainObject(x.value), "expected an object, received: "+JSON.stringify(x.value));
 	}
-	expect.truthy({paramName: paramName}, _.isPlainObject(x.value), "expected an object, received: "+JSON.stringify(x.value));
 	return x;
 }
 
@@ -142,6 +144,16 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 	return undefined;
 }
 
+/**
+ * Parse command parameters.
+ *
+ * @param  {object} params - the parameters passed to the command
+ * @param  {object} data - protocol data
+ * @param  {object} specs - description of the expected parameters
+ * @return {object} and objects whose keys are the expected parameters and whose
+ *  values are `{valueName: ..., value: ...}` objects, or `undefined` if the paramter
+ *  is optional and not presents in `params`..
+ */
 function parseParams(params, data, specs) {
 	return _.zipObject(_.compact(_.map(specs, function(info, paramName) {
 		var type = undefined;

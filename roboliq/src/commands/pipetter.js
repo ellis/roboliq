@@ -258,6 +258,9 @@ function pipette(params, data) {
 
 	var sourceToItems = _.groupBy(items, 'source');
 
+	const itemsAll = items;
+	items = _.filter(items, item => math.eval(item.volume).toNumber('l') > 0);
+
 	// Try to find tipModel, first for all items
 	if (!findTipModel(items)) {
 		// Try to find tipModel for each source

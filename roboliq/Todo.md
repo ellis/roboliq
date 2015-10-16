@@ -15,8 +15,8 @@
 - [x] change WellContents.unknownVolume to infinity, and retest
 - [ ] implement `tania12` scripts for denaturation
 	- [x] create single protocol for all of the steps that used to be separated
-	- [ ] create `#pipetteMixtures` directive
-	- [ ] create `centrifuge.insertPlates2` command
+	- [x] create `#pipetteMixtures` directive
+	- [x] create `centrifuge.insertPlates2` command
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] try to compile for evoware
