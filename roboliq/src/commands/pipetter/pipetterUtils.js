@@ -65,13 +65,14 @@ export function getEffects_pipette(params, data, effects) {
 				volumeMin: srcContents0[0],
 				volumeMax: srcContents0[0]
 			};
-			const well1 = _.merge(well0, {
+			const well1 = _.merge({}, well0, {
 				volumeMax: math.max(math.eval(well0.volumeMax), volume1).format({precision: 14}),
 				volumeMin: math.min(math.eval(well0.volumeMin), volume1).format({precision: 14}),
 				volumeRemoved: (well0.volumeRemoved)
 					? math.chain(math.eval(well0.volumeRemoved)).add(volume).done().format({precision: 14})
 					: volume.format({precision: 14})
 			});
+			//console.log({well0, well1});
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			effects2[nameWELL] = well1;
 			effectsNew[nameWELL] = well1;
