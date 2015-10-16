@@ -23,7 +23,7 @@ export function checkContents(contents) {
 		// ok
 	}
 	else {
-		console.log(contents)
+		//console.log(contents)
 		var volume = math.eval(contents[0]);
 		if (contents.length == 1) {
 			// FIXME: remove 'false, ' from here!
@@ -97,7 +97,7 @@ export function getWellVolume(wellName, data, effects) {
 * @return {array} [content, contentName], where content will be null if not found
  */
 export function getContentsAndName(wellName, data, effects) {
-	console.log("getContentsAndName", wellName)
+	//console.log("getContentsAndName", wellName)
 	if (!effects) effects = {};
 
 	//var i = wellName.indexOf('(');
@@ -113,7 +113,7 @@ export function getContentsAndName(wellName, data, effects) {
 		labwareName = wellInfo.labware;
 		// Check for contents of well
 		var contentsName = labwareName+".contents."+wellInfo.wellId;
-		console.log("contentsName", contentsName, effects[contentsName], _.get(data.objects, contentsName))
+		//console.log("contentsName", contentsName, effects[contentsName], _.get(data.objects, contentsName))
 		var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
 		checkContents(contents);
 		if (contents)

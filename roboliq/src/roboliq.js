@@ -579,12 +579,10 @@ function _run(opts, userProtocol) {
 						//console.log(result.effects);
 						// Add effects to protocol
 						protocol.effects[id] = result.effects;
-						console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
+						//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
 						// Update object states
 						_.forEach(result.effects, (value, key) => _.set(objects, key, value));
-						// FIXME: for debug only
-						console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
-						// ENDFIX
+						//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
 					}
 				}
 			}
