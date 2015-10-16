@@ -296,8 +296,11 @@ function directive_pipetteMixtures(spec, data) {
 			});
 		}
 		else if (!_.isUndefined(volumePerMixture)) {
-			if (!math.equal(volumePerMixture, volumeTotal))
-				console.log("WARNING: volume in mixture should sum to "+volumePerMixture.format({precision: 14})+": "+JSON.stringify(l));
+			const t1 = volumePerMixture.format({precision: 14});
+			const t2 = volumeTotal.format({precision: 14});
+			if (t1 !== t2) {
+				console.log("WARNING: volume in mixture should sum to "+t1+" rather than "+t2+": "+JSON.stringify(l));
+			}
 		}
 	});
 
