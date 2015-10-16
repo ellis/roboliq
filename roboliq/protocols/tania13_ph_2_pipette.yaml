@@ -59,32 +59,46 @@ objects:
   N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
   Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
 
+  mixtures:
+    type: Variable
+    value:
+      "#factorialMixtures":
+        replicates: 3
+        items:
+        - source: saltwater
+          volume: 40ul
+        - "#gradient":
+            "#tableRows":
+            - {volume: 30ul, decimals: 1}
+            - ['source1',     'source2',     'count']
+            - ['hepes_850',   'hepes_650',   5]
+            - ['pipes_775',   'pipes_575',   5]
+            - ['mes_710',     'mes_510',     7]
+            - ['acetate_575', 'acetate_375', 8]
+        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+          volume: "5ul"
+          clean: thorough
+          cleanBetweenSameSource: flush
+          program: Roboliq_Water_Wet_1000_mix3x50ul
+  mixtureWells:
+    type: Variable
+    value:
+      "#take":
+        list: "#destinationWells#mixPlate(all row-jump(1))"
+        count: "#length#mixtures"
+#  balanceWells:
+#    type: Variable
+#    value:
+#      "#replaceLabware":
+#        list: mixtureWells
+#        new: "balancePlate"
+
 steps:
   1:
     command: pipetter.pipetteMixtures
-    mixtures:
-      "#factorialArrays":
-      - source: saltwater
-        volume: 40ul
-      - "#gradient":
-          "#tableRows":
-          - {volume: 30ul, decimals: 1}
-          - ['source1',     'source2',     'count']
-          - ['hepes_850',   'hepes_650',   5]
-#          - ['pipes_775',   'pipes_575',   5]
-#          - ['mes_710',     'mes_510',     7]
-#          - ['acetate_575', 'acetate_375', 8]
-      - "#factorialCols":
-#            source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-            source: [sfGFP]
-            volume: "5ul"
-            clean: thorough
-            cleanBetweenSameSource: flush
-            program: Roboliq_Water_Wet_1000_mix3x50ul
-
+    mixtures: mixtures
 #    replicates: 3
-    replicates: 1
-    destinations: mixPlate(all row-jump(1))
+    destinations: mixtureWells
     clean: flush
     cleanBegin: thorough
     cleanBetweenSameSource: none

@@ -1,9 +1,17 @@
 roboliq: v1
 
 description: |
-  Tania's Assam protocol for testing a range of pHs
+  1. Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
+  2. Tania's Assam protocol for testing a range of pHs
+  3. repeat pH measurements
 
 objects:
+  balancePlate:
+    type: Plate
+    description: balance plate for centrifuge
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P2
+
   tubes1:
     type: Plate
     description: GFP eppendorf tubes
@@ -86,15 +94,25 @@ objects:
       "#take":
         list: "#destinationWells#mixPlate(all row-jump(1))"
         count: "#length#mixtures"
-#  balanceWells:
-#    type: Variable
-#    value:
-#      "#replaceLabware":
-#        list: mixtureWells
-#        new: "balancePlate"
-
 steps:
   1:
+    command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
+    sources: ourlab.mario.systemLiquid
+    destinations: balancePlate(all row-jump(1) take 2)
+    volumes: 75ul
+    cleanBetween: none
+
+  2:
+    command: sealer.sealPlate
+    object: balancePlate
+
+  3:
+    command: transporter.movePlate
+    object: balancePlate
+    destination: ourlab.mario.site.CENTRIFUGE_4
+
+  4:
     command: pipetter.pipetteMixtures
     mixtures: mixtures
 #    replicates: 3
@@ -103,3 +121,42 @@ steps:
     cleanBegin: thorough
     cleanBetweenSameSource: none
     cleanEnd: thorough
+
+  5:
+    command: transporter.movePlate
+    object: mixPlate
+    destination: ourlab.mario.site.CENTRIFUGE_2
+  6:
+    description: Measurement loop; Each cycle of the loop lasts 4 hours
+    command: system.repeat
+    count: 2
+    steps:
+        command: timer.doAndWait
+        duration: 14400 # 4hr
+        steps:
+          1:
+            description: Remove condensation from seal
+            command: centrifuge.centrifuge2
+            object1: mixPlate
+            object2: balancePlate
+            program:
+              rpm: 3000
+              duration: 120 # 2min
+              temperature: 25
+          2:
+            command: fluorescenceReader.measurePlate
+            object: mixPlate
+            program:
+                programFile: ./tania13_ph-temp.mdfx
+            outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+          3:
+            description: Incubate at 25C
+            command: centrifuge.centrifuge2
+            object1: mixPlate
+            object2: balancePlate
+            destinationAfter1: null
+            destinationAfter2: null
+            program:
+              rpm: 3000
+              duration: 1 # must set a duration of at least 1s
+              temperature: 25
