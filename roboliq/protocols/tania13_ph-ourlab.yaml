@@ -1,0 +1,162 @@
+roboliq: v1
+
+description: |
+  1. Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
+  2. Tania's Assam protocol for testing a range of pHs
+  3. repeat pH measurements
+
+objects:
+  balancePlate:
+    type: Plate
+    description: balance plate for centrifuge
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P4
+
+  tubes1:
+    type: Plate
+    description: GFP eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  trough1:
+    type: Plate
+    description: trough for water/glycerol/salt mix
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, saltwater]
+  sourcePlate1:
+    type: Plate
+    description: buffer plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.mario.site.P2
+  mixPlate:
+    type: Plate
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P3
+# Reagents used in this protocol
+  saltwater:
+    type: Liquid
+    wells: trough1(C01 down to F01)
+  hepes_850:
+    type: Liquid
+    wells: sourcePlate1(A01 down to D01)
+  hepes_650:
+    type: Liquid
+    wells: sourcePlate1(A02 down to D02)
+  pipes_775:
+    type: Liquid
+    wells: sourcePlate1(A03 down to D03)
+  pipes_575:
+    type: Liquid
+    wells: sourcePlate1(A04 down to D04)
+  mes_710:
+    type: Liquid
+    wells: sourcePlate1(A05 down to D05)
+  mes_510:
+    type: Liquid
+    wells: sourcePlate1(A06 down to D06)
+  acetate_575:
+    type: Liquid
+    wells: sourcePlate1(A07 down to D07)
+  acetate_375:
+    type: Liquid
+    wells: sourcePlate1(A08 down to D08)
+  # GFPs
+  sfGFP: {type: Liquid, description: wild type, wells: tubes1(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells: tubes1(A02)}
+  tdGFP: {type: Liquid, description: fusion of double mutant, wells: tubes1(A03)}
+  N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
+  Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
+
+  mixtures:
+    type: Variable
+    value:
+      "#factorialMixtures":
+        replicates: 3
+        items:
+        - source: saltwater
+          volume: 40ul
+        - "#gradient":
+            "#tableRows":
+            - {volume: 30ul, decimals: 1}
+            - ['source1',     'source2',     'count']
+            - ['hepes_850',   'hepes_650',   5]
+            - ['pipes_775',   'pipes_575',   5]
+            - ['mes_710',     'mes_510',     7]
+            - ['acetate_575', 'acetate_375', 8]
+        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+          volume: "5ul"
+          clean: thorough
+          cleanBetweenSameSource: flush
+          program: Roboliq_Water_Wet_1000_mix3x50ul
+  mixtureWells:
+    type: Variable
+    value:
+      "#take":
+        list: "#destinationWells#mixPlate(all row-jump(1))"
+        count: "#length#mixtures"
+steps:
+  1:
+    command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
+    sources: ourlab.mario.systemLiquid
+    destinations: balancePlate(all row-jump(1) take 2)
+    volumes: 75ul
+    cleanBetween: none
+
+  2:
+    command: sealer.sealPlate
+    object: balancePlate
+
+  3:
+    command: transporter.movePlate
+    object: balancePlate
+    destination: ourlab.mario.site.CENTRIFUGE_4
+
+  4:
+    command: pipetter.pipetteMixtures
+    mixtures: mixtures
+    destinations: mixtureWells
+    clean: flush
+    cleanBegin: thorough
+    cleanBetweenSameSource: none
+    cleanEnd: thorough
+
+  5:
+    command: transporter.movePlate
+    object: mixPlate
+    destination: ourlab.mario.site.CENTRIFUGE_2
+
+  6:
+    description: Measurement loop; Each cycle of the loop lasts 4 hours
+    command: system.repeat
+    count: 2
+    steps:
+        command: timer.doAndWait
+        duration: 14400 # 4hr
+        steps:
+          1:
+            description: Remove condensation from seal
+            command: centrifuge.centrifuge2
+            object1: mixPlate
+            object2: balancePlate
+            program:
+              rpm: 3000
+              duration: 120 # 2min
+              temperature: 25
+          2:
+            command: fluorescenceReader.measurePlate
+            object: mixPlate
+            program:
+                programFile: ./tania13_ph-temp.mdfx
+            outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+          3:
+            description: Incubate at 25C
+            command: centrifuge.centrifuge2
+            object1: mixPlate
+            object2: balancePlate
+            destinationAfter1: null
+            destinationAfter2: null
+            program:
+              rpm: 3000
+              duration: 1 # must set a duration of at least 1s
+              temperature: 25
