@@ -210,7 +210,14 @@ function renderTemplateString(s, scope, data) {
 		return scope[name];
 	}
 	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
-		return JSON.parse(mustache.render(s, scope));
+		const s2 = mustache.render(s, scope);
+		try {
+			return JSON.parse(s2);
+		}
+		catch (e) {
+
+		}
+		return s2;
 	}
 	else {
 		return mustache.render(s, scope);

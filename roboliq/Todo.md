@@ -23,8 +23,8 @@
 	- [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
 	- [x] merge protocols together rather than appending them!
 - [ ] split `tania*` protocols into portable vs lab data
-	- [ ] tania13_ph
-		./node_modules/.bin/babel-node -- src/main.js protocols/tania13_ph.yaml
+	- [ ] tania13_ph: make combined protocol, at first lab-specific
+	- [ ] tania13_ph: split combined protocol into portable and lab-specific parts
 	- [ ] tania12_denaturation
 	- [ ] tania15_renaturation
 - [ ] augment protocol design:

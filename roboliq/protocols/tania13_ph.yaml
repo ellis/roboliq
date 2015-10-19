@@ -10,7 +10,7 @@ objects:
     type: Plate
     description: balance plate for centrifuge
     model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P2
+    location: ourlab.mario.site.P4
 
   tubes1:
     type: Plate
@@ -115,7 +115,6 @@ steps:
   4:
     command: pipetter.pipetteMixtures
     mixtures: mixtures
-#    replicates: 3
     destinations: mixtureWells
     clean: flush
     cleanBegin: thorough
@@ -126,6 +125,7 @@ steps:
     command: transporter.movePlate
     object: mixPlate
     destination: ourlab.mario.site.CENTRIFUGE_2
+
   6:
     description: Measurement loop; Each cycle of the loop lasts 4 hours
     command: system.repeat
