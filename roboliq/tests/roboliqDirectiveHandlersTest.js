@@ -326,4 +326,25 @@ describe('config/roboliqDirectiveHandlers', function() {
 		}};
 		should.deepEqual(misc.handleDirective(spec, data), [1, 2]);
 	});
+
+	it('should handle overrides', function () {
+		const spec1 = {"#take": {
+			list: [1, 2, 3],
+			count: 2,
+			override: "hello"
+		}};
+		should.deepEqual(misc.handleDirective(spec1, data), "hello");
+
+		var spec2 = {"#tableCols": {
+			x: ['a', 'b', 'c'],
+			n: [1, 2, 3],
+			q: "hello",
+			override: [{}, {q: 'bye'}]
+		}};
+		should.deepEqual(misc.handleDirective(spec2, data), [
+			{x: 'a', n: 1, q: 'hello'},
+			{x: 'b', n: 2, q: 'bye'},
+			{x: 'c', n: 3, q: 'hello'},
+		]);
+	});
 });

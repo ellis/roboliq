@@ -22,9 +22,9 @@
     - [x] node protocols/tania15_renaturation.js, use `__dirname`
 	- [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
 	- [x] merge protocols together rather than appending them!
-- [ ] change directive handling to accommodate merging of lab-specific protocol
+- [x] change directive handling to accommodate merging of lab-specific protocol
 	- [x] object variables should have directives parsed before parsing steps, not immediately after loading
-	- [?] directives can have an 'override' property, whose value gets merged into the result of the directive
+	- [x] directives can have an 'override' property, whose value gets merged into the result of the directive
 	- [x] directives in steps are processed as they are encountered
 	- [x] directives in command parameters are processed before being passed to the command handler
 - [ ] split `tania*` protocols into portable vs lab data

@@ -104,12 +104,18 @@ function handleDirective(spec, data) {
 			const key = keys[0];
 			if (data.directiveHandlers.hasOwnProperty(key)) {
 				var spec2 = spec[key];
-				var spec3 = handleDirective(spec2, data);
-				const result = data.directiveHandlers[key](spec3, data);
-				if (spec.override) {
-					_.merge(result, spec.override);
+				var spec3 = (_.isPlainObject(spec2))
+					? _.omit(spec2, 'override')
+					: spec2;
+				const result = {
+					x: data.directiveHandlers[key](spec3, data)
+				};
+				if (spec2.hasOwnProperty('override')) {
+					//console.log({result0: result.x})
+					_.merge(result, {x: spec2.override});
+					//console.log({result1: result.x})
 				}
-				return result;
+				return result.x;
 			}
 			else {
 				throw Error("unknown directive: "+key);
@@ -124,7 +130,7 @@ function handleDirective(spec, data) {
 				var spec2 = spec.substr(hash2 + 1);
 				var spec3 = handleDirective(spec2, data);
 				const result = data.directiveHandlers[key](spec3, data);
-				if (spec.override) {
+				if (spec.hasOwnProperty('override')) {
 					_.merge(result, spec.override);
 				}
 				return result;
