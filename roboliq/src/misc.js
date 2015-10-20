@@ -139,34 +139,49 @@ function handleDirective(spec, data) {
 
 /**
  * Recurses into object properties and replaces them with the result of handleDirective.
+ * It will, however, skip properties named 'steps'.
  *
  * @param  {Any} spec Any value.  If this is a directive, it will be an object with a single key that starts with '#'.
  * @param  {Object} data An object with properties: directiveHandlers, objects, events.
  * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
  */
-function handleDirectiveDeep(spec, data) {
-	return transformDeep(spec, function(spec) { return handleDirective(spec, data); });
+function handleDirectiveDeep(x, data) {
+	//return mapDeep(spec, function(spec) { return handleDirective(spec, data); });
+	if (_.isPlainObject(x)) {
+		x = _.mapValues(x, function(value, key) {
+			return (key === 'steps')
+				? value
+				: handleDirectiveDeep(value, data);
+		});
+	}
+	else if (_.isArray(x)) {
+		x = _.map(x, function(value, i) {
+			return handleDirectiveDeep(value, data);
+		});
+	}
+	x = handleDirective(x, data);
+	return x;
 }
 
 /**
  * Recurses into object properties and maps them to the result of fn.
  *
  * @param  {Any} x Any value.
- * @param  {Function} fn A function that returns a transformed value.
- * @return {Any} Return the transformed object.
+ * @param  {Function} fn A function (x, key, path) that returns a mapped value.
+ * @return {Any} Return the deeply mapped object.
  */
-function transformDeep(x, fn) {
+function mapDeep(x, fn, key, path = []) {
 	if (_.isPlainObject(x)) {
-		x = _.mapValues(x, function(value) {
-			return transformDeep(value, fn);
+		x = _.mapValues(x, function(value, key) {
+			return mapDeep(value, fn, key, path.concat(key));
 		});
 	}
 	else if (_.isArray(x)) {
-		x = _.map(x, function(value) {
-			return transformDeep(value, fn);
+		x = _.map(x, function(value, i) {
+			return mapDeep(value, fn, i, path.concat(i));
 		});
 	}
-	x = fn(x);
+	x = fn(x, key, path);
 	return x;
 }
 
@@ -241,6 +256,6 @@ module.exports = {
 	handleDirectiveDeep: handleDirectiveDeep,
 	findObjectsValue: findObjectsValue,
 	mutateDeep: mutateDeep,
-	transformDeep: transformDeep,
+	mapDeep,
 	renderTemplate: renderTemplate
 }

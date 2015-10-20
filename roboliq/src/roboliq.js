@@ -215,14 +215,9 @@ function loadProtocol(a, b, url, filecache) {
 		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
 	};
 
-	// Handle directives for other properties
+	// Handle directives for other predicates
 	var l = [
-		'steps',
-		'effects',
 		'predicates',
-		'files',
-		'errors',
-		'warnings'
 	];
 	_.forEach(l, function(key) {
 		misc.mutateDeep(c[key], function(x) { return misc.handleDirective(x, data); });
@@ -329,7 +324,7 @@ function postProcessProtocol_variables(protocol) {
 			for (var key in x) {
 				var value1 = x[key];
 				if (_.isArray(value1)) {
-					x[key] = _.map(value1, function(x2) { return misc.handleDirective(x2, protocol); });
+					x[key] = _.map(value1, function(x2) { return misc.handleDirectiveDeep(x2, protocol); });
 				}
 				else {
 					x[key] = expandDirectives(value1);
@@ -538,12 +533,15 @@ function _run(opts, userProtocol) {
 			console.log("step "+id);
 		}
 
-		if (step.hasOwnProperty("command")) {
-			if (!commandHandlers.hasOwnProperty(step.command)) {
-				protocol.warnings[id] = ["unknown command: "+step.command];
+		const params = misc.handleDirectiveDeep(step, protocol);
+		//console.log({step, params})
+		const commandName = params.command;
+		if (commandName) {
+			const handler = commandHandlers[commandName];
+			if (!handler) {
+				protocol.warnings[id] = ["unknown command: "+params.command];
 			}
 			else {
-				var handler = commandHandlers[step.command];
 				var expand = true
 				if (expand) {
 					var predicates = protocol.predicates.concat(createStateItems(objects));
@@ -556,7 +554,7 @@ function _run(opts, userProtocol) {
 							accesses: [],
 							files: filecache
 						};
-						result = handler(step, data) || {};
+						result = handler(params, data) || {};
 					} catch (e) {
 						if (e.hasOwnProperty("errors")) {
 							result = {errors: e.errors};

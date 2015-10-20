@@ -59,6 +59,30 @@ describe('roboliq', function() {
 			);
 		});
 
+		it("should handle directives in steps (#1)", () => {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					list1: {
+						type: 'Variable',
+						value: [1,2,3]
+					},
+				},
+				steps: {
+					1: {
+						command: "timer.sleep",
+						duration: "#length#list1"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.warnings, {});
+			should.deepEqual(result.output.steps[1].duration, "#length#list1");
+			should.deepEqual(result.output.steps[1][1].duration, 3);
+		});
+
 		it("should handle imports", function() {
 			var protocol1 = {
 				roboliq: "v1",
