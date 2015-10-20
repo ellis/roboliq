@@ -215,26 +215,6 @@ function loadProtocol(a, b, url, filecache) {
 		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
 	};
 
-	// Handle directives for objects first
-	// This is more complicated than for the properties, because objects may have directives which reference other objects.
-	function mutateObjects(x, path) {
-		if (_.isPlainObject(x)) {
-			for (var key in x) {
-				var value1 = x[key];
-				if (_.isArray(value1)) {
-					x[key] = _.map(value1, function(x2) { return misc.handleDirective(x2, data); });
-				}
-				else {
-					x[key] = mutateObjects(value1, path.concat([key]));
-				}
-			}
-		}
-		var x2 = misc.handleDirective(x, data);
-		_.set(data.objects, path.join('.'), x2);
-		return x2;
-	}
-	mutateObjects(c.objects, []);
-
 	// Handle directives for other properties
 	var l = [
 		'steps',
@@ -310,6 +290,13 @@ function mergeProtocolList(protocols) {
 function postProcessProtocol(protocol) {
 	// Make sure predicates is a flat list
 	protocol.predicates = _.flattenDeep(protocol.predicates);
+
+	// Calculate values for variables
+	postProcessProtocol_variables(protocol);
+
+	// For all liquids, if they specify source wells, make sure the source well
+	// has a reference to the liquid in its contents (the contents will be added
+	// if necessary).
 	var liquids = misc.getObjectsOfType(protocol.objects, 'Liquid');
 	_.forEach(liquids, function(liquid, name) {
 		if (_.isString(liquid.wells)) {
@@ -331,6 +318,34 @@ function postProcessProtocol(protocol) {
 				protocol.errors[name+".wells"] = [e.toString(), e.stack];
 				//console.log(e.toString());
 			}
+		}
+	});
+}
+
+function postProcessProtocol_variables(protocol) {
+	// Recursively expand all directives
+	function expandDirectives(x) {
+		if (_.isPlainObject(x)) {
+			for (var key in x) {
+				var value1 = x[key];
+				if (_.isArray(value1)) {
+					x[key] = _.map(value1, function(x2) { return misc.handleDirective(x2, protocol); });
+				}
+				else {
+					x[key] = expandDirectives(value1);
+				}
+			}
+		}
+		var x2 = misc.handleDirective(x, protocol);
+		return x2;
+	}
+
+	_.forEach(protocol.objects, (obj, key) => {
+		// If this is a variable with a 'calculate' property
+		if (obj.type === 'Variable' && obj.calculate) {
+			const calculate = _.cloneDeep(obj.calculate);
+			const value = expandDirectives(calculate);
+			obj.value = value;
 		}
 	});
 }

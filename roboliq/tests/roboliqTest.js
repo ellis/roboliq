@@ -33,14 +33,14 @@ describe('roboliq', function() {
 					},
 					mixtureWells: {
 						type: 'Variable',
-						value: {"#take": {
+						calculate: {"#take": {
 							list: "#destinationWells#plate1(all)",
 							count: "#length#mixtures"
 						}}
 					},
 					balanceWells: {
 						type: 'Variable',
-						value: {"#replaceLabware": {
+						calculate: {"#replaceLabware": {
 							list: 'mixtureWells',
 							new: 'plate2'
 						}}
