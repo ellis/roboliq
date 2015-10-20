@@ -12,6 +12,7 @@ objects:
 
   mixPlate:
     type: Plate
+
   # Reagents used in this protocol
   saltwater: {type: Liquid}
   hepes_850: {type: Liquid}
@@ -31,9 +32,8 @@ objects:
 
   mixtures:
     type: Variable
-    calculate:
-    CONTINUE: figuring out how to merge this data with the lab-specific protocol...
-      "#factorialMixtures":
+    value:
+      "#createPipetteMixtures":
         replicates: 3
         items:
         - source: saltwater
@@ -51,17 +51,21 @@ objects:
           clean: thorough
           cleanBetweenSameSource: flush
           program: Roboliq_Water_Wet_1000_mix3x50ul
+
   mixtureWells:
     type: Variable
     value:
-      "#take":
-        list: "#destinationWells#mixPlate(all row-jump(1))"
-        count: "#length#mixtures"
+      "#createWellAssignment":
+        list: mixtures
+        wells: mixPlate(all row-jump(1))
 
 steps:
   1:
     command: pipetter.pipette
-    destinations: balancePlate(all row-jump(1) take 2)
+    destinations:
+      "#createWellAssignment":
+        list: mixtures
+        wells: balancePlate(all row-jump(1))
     volumes: 75ul
 
   2:
@@ -82,9 +86,8 @@ steps:
     cleanEnd: thorough
 
   5:
-    command: transporter.movePlate
-    object: mixPlate
-    destination: ourlab.mario.site.CENTRIFUGE_2
+    command: centrifuge.insertPlates2
+    object1: mixPlate
 
   6:
     description: Measurement loop; Each cycle of the loop lasts 4 hours
@@ -92,7 +95,7 @@ steps:
     count: 2
     steps:
         command: timer.doAndWait
-        duration: 14400 # 4hr
+        duration: "4 hours"
         steps:
           1:
             description: Remove condensation from seal
@@ -101,7 +104,7 @@ steps:
             object2: balancePlate
             program:
               rpm: 3000
-              duration: 120 # 2min
+              duration: "2 minutes"
               temperature: 25
           2:
             command: fluorescenceReader.measurePlate

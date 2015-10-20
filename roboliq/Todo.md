@@ -18,10 +18,15 @@
 	- [x] create `#pipetteMixtures` directive
 	- [x] create `centrifuge.insertPlates2` command
 	- [x] try to compile for evoware
-- [ ] implement `tania15` scripts for renaturation
+- [x] implement `tania15` scripts for renaturation
     - [x] node protocols/tania15_renaturation.js, use `__dirname`
 	- [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
 	- [x] merge protocols together rather than appending them!
+- [ ] change directive handling to accommodate merging of lab-specific protocol
+	- [ ] object variables should have directives parsed before parsing steps, not immediately after loading
+	- [ ] directives can have an 'override' property, whose value gets merged into the result of the directive
+	- [ ] directives in steps are processed as they are encountered
+	- [ ] directives in command parameters are processed before being passed to the command handler
 - [ ] split `tania*` protocols into portable vs lab data
 	- [x] tania13_ph: make combined protocol, at first lab-specific
 	- [ ] tania13_ph: split combined protocol into portable and lab-specific parts
