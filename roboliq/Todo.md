@@ -24,7 +24,7 @@
 	- [x] merge protocols together rather than appending them!
 - [ ] change directive handling to accommodate merging of lab-specific protocol
 	- [ ] object variables should have directives parsed before parsing steps, not immediately after loading
-	- [ ] directives can have an 'override' property, whose value gets merged into the result of the directive
+	- [?] directives can have an 'override' property, whose value gets merged into the result of the directive
 	- [ ] directives in steps are processed as they are encountered
 	- [ ] directives in command parameters are processed before being passed to the command handler
 - [ ] split `tania*` protocols into portable vs lab data

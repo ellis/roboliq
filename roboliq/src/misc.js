@@ -99,16 +99,20 @@ function getObjectsOfType(objects, types, prefix) {
  */
 function handleDirective(spec, data) {
 	if (_.isPlainObject(spec)) {
-		for (var key in spec) {
-			if (_.startsWith(key, "#")) {
-				if (data.directiveHandlers.hasOwnProperty(key)) {
-					var spec2 = spec[key];
-					var spec3 = handleDirective(spec2, data);
-					return data.directiveHandlers[key](spec3, data);
+		const keys = _.keys(spec);
+		if (keys.length === 1 && _.startsWith(keys[0], "#"))
+			const key = keys[0];
+			if (data.directiveHandlers.hasOwnProperty(key)) {
+				var spec2 = spec[key];
+				var spec3 = handleDirective(spec2, data);
+				const result = data.directiveHandlers[key](spec3, data);
+				if (spec.override) {
+					_.merge(result, spec.override);
 				}
-				else {
-					throw Error("unknown directive: "+key);
-				}
+				return result;
+			}
+			else {
+				throw Error("unknown directive: "+key);
 			}
 		}
 	}
@@ -119,7 +123,11 @@ function handleDirective(spec, data) {
 			if (data.directiveHandlers.hasOwnProperty(key)) {
 				var spec2 = spec.substr(hash2 + 1);
 				var spec3 = handleDirective(spec2, data);
-				return data.directiveHandlers[key](spec3, data);
+				const result = data.directiveHandlers[key](spec3, data);
+				if (spec.override) {
+					_.merge(result, spec.override);
+				}
+				return result;
 			}
 			else {
 				throw Error("unknown directive: "+spec);

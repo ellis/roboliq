@@ -52,7 +52,7 @@ objects:
 
   mixtures:
     type: Variable
-    value:
+    calculate:
       "#createPipetteMixtures":
         replicates: 3
         items:

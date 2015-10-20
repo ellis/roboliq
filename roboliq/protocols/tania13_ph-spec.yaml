@@ -54,7 +54,7 @@ objects:
 
   mixtureWells:
     type: Variable
-    value:
+    calculate:
       "#createWellAssignment":
         list: mixtures
         wells: mixPlate(all row-jump(1))
