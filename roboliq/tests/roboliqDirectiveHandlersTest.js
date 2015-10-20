@@ -208,9 +208,9 @@ describe('config/roboliqDirectiveHandlers', function() {
 		);
 	});
 
-	it('it should handle #pipetteMixtures', function() {
+	it('it should handle #createPipetteMixtureList', function() {
 		var spec = {
-			"#pipetteMixtures": {
+			"#createPipetteMixtureList": {
 				replicates: 1,
 				volume: '25ul',
 				items: [

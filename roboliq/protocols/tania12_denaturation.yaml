@@ -56,8 +56,8 @@ objects:
 
   mixtures:
     type: Variable
-    value:
-      "#pipetteMixtures":
+    calculate:
+      "#createPipetteMixtureList":
         replicates: 3
         volume: 75ul
         items:

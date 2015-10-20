@@ -32,8 +32,8 @@ objects:
 
   mixtures:
     type: Variable
-    value:
-      "#createPipetteMixtures":
+    calculate:
+      "#createPipetteMixtureList":
         replicates: 3
         items:
         - source: saltwater
@@ -55,7 +55,7 @@ objects:
   mixtureWells:
     type: Variable
     calculate:
-      "#createWellAssignment":
+      "#createWellAssignments":
         list: mixtures
         wells: mixPlate(all row-jump(1))
 
@@ -63,9 +63,9 @@ steps:
   1:
     command: pipetter.pipette
     destinations:
-      "#createWellAssignment":
-        list: mixtures
-        wells: balancePlate(all row-jump(1))
+      "#replaceLabware":
+        list: mixtureWells
+        new: "balancePlate"
     volumes: 75ul
 
   2:

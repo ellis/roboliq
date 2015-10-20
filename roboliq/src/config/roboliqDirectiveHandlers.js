@@ -457,6 +457,7 @@ function directive_zipMerge(spec, data) {
 }
 
 module.exports = {
+	"#createPipetteMixtureList": directive_pipetteMixtures,
 	"#destinationWells": directive_destinationWells,
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,
@@ -466,7 +467,6 @@ module.exports = {
 	"#gradient": directive_gradient,
 	"#length": directive_length,
 	"#merge": directive_merge,
-	"#pipetteMixtures": directive_pipetteMixtures,
 	"#replaceLabware": directive_replaceLabware,
 	"#replicate": directive_replicate,
 	"#tableCols": directive_tableCols,
